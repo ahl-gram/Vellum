@@ -280,6 +280,34 @@ test("CT7b the Explorer passes the REAL turn flag into the gate, so the pure ref
   assert.ok(draw.indexOf("lc.hideCard();") < draw.indexOf("glass.rebase();"), "and it is dropped before the rebase, so nothing reads it in between");
 });
 
+test("CT8 the road to the Portfolio carries the Explorer's WHOLE address, not the table key alone (#634 ruling 3, 2026-09-19)", () => {
+  const src = readFileSync(resolve(REPO, "src/site/explorer/chart-drawer.ts"), "utf8");
+  const at = src.indexOf("deps.road.addEventListener");
+  assert.notEqual(at, -1, "the road's own handler is gone, so this guard would be reading the whole file");
+  const handler = src.slice(at, src.indexOf("});", at));
+  assert.match(handler, /tableHash\(window\.location\.hash/, "the road hands the Portfolio the sheets and nothing else, so the press back lands the reader on the seed of the day instead of the chart they gathered from");
+  assert.doesNotMatch(handler, /#\$\{TABLE_KEY\}=/, "the key-only form is back; it is what #634 defect 1 measured losing the world");
+  assert.match(handler, /emitTable\(items\)/, "and the sheets it carries are still the table's own, in the one grammar");
+});
+
+test("CT9 the table is written to the device when the reader CHANGES it and re-seated on a cached return, which are the only two roads #634 leaves (ruled 2026-09-19)", () => {
+  const app = readFileSync(resolve(REPO, "src/site/explorer/app.ts"), "utf8");
+  const onChange = app.slice(app.indexOf("onChange:"), app.indexOf("\n", app.indexOf("onChange:")));
+  assert.match(onChange, /writeStoredTable\(store, laid\)/, "a lay or a take no longer reaches the device, so the gathering exists only in the address again and the Back button loses it");
+  // Two restore sites by design, the boot and the cached return, so each is anchored on its own input rather than on whichever comes first in the file.
+  const sites = [...app.matchAll(/chartTable\.restore\(/g)].map((m) => m.index);
+  assert.equal(sites.length, 2, "the Explorer seats the table in some number of places other than the two #634 leaves, and this guard is then reading one of them at random");
+  const bootAt = app.indexOf("chartTable.restore(tableOnArrival");
+  assert.notEqual(bootAt, -1, "the boot no longer asks the ruled precedence, so either a link stops winning or a Back stops being told from an arrival");
+  const boot = app.slice(bootAt, app.indexOf("\n", bootAt));
+  assert.match(boot, /tableOnArrival\(hashed\.table, readStoredTable\(store\), navigationTypeNow\(\)\)/, "the boot's precedence is asked with something other than this page's address, this device and this navigation's own type");
+  const show = app.slice(app.indexOf('addEventListener("pageshow"'), app.indexOf("\n});", app.indexOf('addEventListener("pageshow"')));
+  assert.ok(show.length > 40, "the pageshow listener is gone, and with it the ONLY road into a page the browser served from its cache: no boot code runs there at all");
+  assert.match(show, /if \(!e\.persisted\) return;/, "the listener acts on a fresh load as well as a cached one, so it fights the boot's own precedence instead of being the restore's only reader");
+  assert.match(show, /chartTable\.restore\(held\)/, "the listener reads the device and never re-seats the drawer with it");
+  assert.match(show, /syncHash\(\)/, "and it leaves the address disagreeing with the drawer it just changed");
+});
+
 test("CT5 a prospect refused as a duplicate is refused in its OWN noun, and the survey line stays byte-identical (#522; e2e CD and announce.test pin the survey wording)", () => {
   assert.equal(refusalLine("already"), "this survey is already on the table", "the survey line is unchanged");
   assert.equal(refusalLine("already", "survey"), "this survey is already on the table");

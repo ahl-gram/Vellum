@@ -157,6 +157,17 @@ make an unqualified rule false. Read the surface, not just the rule.
   applying it, so the settle it triggers redrafts over the same base world. The grammar itself is
   pure in `src/site/explorer/address.ts`: two keys at once are ignored whole, and a forwarded hash is
   passed verbatim and never re-serialized.
+- **The Chart Table has TWO homes, and which one speaks depends on how the reader got here.** The
+  address decides an ARRIVAL and the device decides a RETURN (#634, 2026-09-19, superseding #401's
+  ruling that the address was its only memory). A link, a bookmark, a typed address and a reload all
+  take the table the address names, so a folio someone shares reproduces exactly; a Back or Forward
+  takes the table this device holds, because the address in a history entry is a snapshot taken
+  before the reader gathered more. The rule is pure in `src/site/shared/table-store.ts`, and the two
+  roads back need two instruments, which is the part no reasoning supplies: a cached page runs NO
+  boot code and is reachable only through `pageshow` with `persisted`, while a re-created one reads
+  `back_forward` from its own navigation entry. A page that shows the table writes it to the device
+  when the reader CHANGES it, never on arrival, so opening someone's folio does not erase what this
+  browser was gathering. One device holds one table: two tabs gathering at once is last writer wins.
 - **Backface rules target the CLIP BOX, not the transformed mount**, whose overflow and default
   transform style flatten it. A backface bleed is invisible to an end-state assertion.
 

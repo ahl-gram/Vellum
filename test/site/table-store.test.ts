@@ -1,0 +1,117 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { readStoredTable, writeStoredTable, tableOnArrival, navigationType, TABLE_STORE_KEY } from "../../src/site/shared/table-store.ts";
+import { emitTable, parseTable, type SurveyItem, type TableItem } from "../../src/site/shared/table-address.ts";
+
+// The Chart Table's second home (#634, ruled 2026-09-18 and 2026-09-19): the address decides an ARRIVAL and the device decides a RETURN. The store is injected rather than reached for, the way firstArrival/markArrival take theirs in src/site/home/ceremony.ts, so the precedence is provable here instead of only in a browser.
+const survey = (lx: number): SurveyItem => ({
+  kind: "survey", seed: 42, overrides: {}, rung: 2, lx, ly: 3,
+  style: "antique", legend: true, arms: false, beasts: false, theme: null,
+});
+const fill = (n: number): TableItem[] => Array.from({ length: n }, (_, i) => survey(i));
+
+/** Records what was ASKED of it, not only what it ends up holding: removing a key and storing an empty string leave the same bytes behind and mean different things to the next arrival. */
+class FakeStore {
+  readonly calls: string[] = [];
+  held: Record<string, string>;
+  constructor(held: Record<string, string> = {}) {
+    this.held = held;
+  }
+  getItem(key: string): string | null {
+    this.calls.push(`get ${key}`);
+    return Object.prototype.hasOwnProperty.call(this.held, key) ? (this.held[key] as string) : null;
+  }
+  setItem(key: string, value: string): void {
+    this.calls.push(`set ${key}`);
+    this.held[key] = value;
+  }
+  removeItem(key: string): void {
+    this.calls.push(`remove ${key}`);
+    delete this.held[key];
+  }
+  clear(): void {
+    this.held = {};
+  }
+  key(): string | null {
+    return null;
+  }
+  get length(): number {
+    return Object.keys(this.held).length;
+  }
+}
+const asStorage = (fake: FakeStore): (() => Storage) => () => fake as unknown as Storage;
+
+const shut: () => Storage = () => {
+  throw new Error("storage is disabled in this browsing mode");
+};
+
+test("TS1 a link beats what this device holds: arriving with a table key means THAT table (#634's stated constraint)", () => {
+  const carried = fill(2);
+  const chosen = tableOnArrival(carried, fill(3), "navigate");
+  assert.equal(emitTable(chosen), emitTable(carried));
+  assert.equal(chosen.length, 2, "three stored sheets did not win over the two the address named");
+});
+
+test("TS2 arriving with NO table key at all is the case that reads the device (#634)", () => {
+  const stored = fill(3);
+  assert.equal(emitTable(tableOnArrival(null, stored, "navigate")), emitTable(stored));
+});
+
+test("TS3 a table key that is present but EMPTY is a bare table, and never consults the device (#634: parseTable's null/[] split IS the rule)", () => {
+  // The witness that keeps this from being a restatement of TS2: the two inputs differ only in null against [], which is exactly what parseTable returns for an absent against a present-but-empty key.
+  assert.equal(parseTable("#seed=42"), null);
+  assert.deepEqual(parseTable("#seed=42&table="), []);
+  assert.deepEqual(tableOnArrival([], fill(3), "navigate"), []);
+});
+
+test("TS4 a BACK or FORWARD arrival takes the device's table over the stale address it landed on (#634 ruling 1, 2026-09-19)", () => {
+  const stored = fill(2);
+  const chosen = tableOnArrival(fill(1), stored, "back_forward");
+  assert.equal(emitTable(chosen), emitTable(stored));
+  assert.equal(chosen.length, 2, "the entry's own one-sheet snapshot won over the two the device holds");
+});
+
+test("TS5 a back arrival with NOTHING on the device still takes the address it landed on (#634)", () => {
+  const carried = fill(1);
+  assert.equal(emitTable(tableOnArrival(carried, null, "back_forward")), emitTable(carried));
+});
+
+test("TS6 a RELOAD is an arrival and not a traversal, so the address wins (#634 ruling 1: a link, a bookmark, a typed address and a reload all take the address)", () => {
+  const carried = fill(1);
+  assert.equal(emitTable(tableOnArrival(carried, fill(2), "reload")), emitTable(carried));
+});
+
+test("TS7 emptying the table REMOVES the key rather than storing an empty one, or the next arrival hands it back (#634)", () => {
+  const fake = new FakeStore();
+  writeStoredTable(asStorage(fake), fill(2));
+  assert.equal(readStoredTable(asStorage(fake))?.length, 2);
+  writeStoredTable(asStorage(fake), []);
+  assert.ok(fake.calls.includes(`remove ${TABLE_STORE_KEY}`), `an empty table was stored rather than removed: ${fake.calls.join(", ")}`);
+  assert.equal(readStoredTable(asStorage(fake)), null, "an emptied table reads back as a table, so a keyless arrival would resurrect it");
+  // The whole point of the removal: what a keyless arrival then does.
+  assert.deepEqual(tableOnArrival(null, readStoredTable(asStorage(fake)), "navigate"), []);
+});
+
+test("TS8 the device holds the table in the ONE grammar, byte for byte (#634)", () => {
+  const fake = new FakeStore();
+  const items = [...fill(2), { kind: "prospect", seed: 42, overrides: {}, style: "antique", index: 3, year: 1059 } as TableItem];
+  writeStoredTable(asStorage(fake), items);
+  assert.equal(emitTable(readStoredTable(asStorage(fake)) ?? []), emitTable(items));
+});
+
+test("TS9 a store that refuses to answer leaves the page working (#634, the private-mode path src/site/home/ceremony.ts already keeps)", () => {
+  assert.doesNotThrow(() => writeStoredTable(shut, fill(2)));
+  assert.equal(readStoredTable(shut), null, "an unreadable store must read as 'the address decides', never throw into the boot");
+});
+
+test("TS10 a corrupt stored value reads as a bare table rather than throwing (#634)", () => {
+  const fake = new FakeStore({ [TABLE_STORE_KEY]: "nonsense" });
+  assert.deepEqual(readStoredTable(asStorage(fake)), []);
+});
+
+test("TS11 the navigation type is read from the browser's own entry, and defaults to an arrival when there is none (#634)", () => {
+  assert.equal(navigationType(() => [{ type: "back_forward" }]), "back_forward");
+  assert.equal(navigationType(() => [{ type: "reload" }]), "reload");
+  assert.equal(navigationType(() => []), "navigate", "a browser that reports no navigation entry must fall back to the address, never to the device");
+  assert.equal(navigationType(() => { throw new Error("no performance entries here"); }), "navigate");
+});

@@ -157,15 +157,29 @@ function readItem(chunk: string): TableItem | null {
   return null;
 }
 
-/** The items a hash carries, or null when it carries no table at all (which the hosts read differently from an empty one). */
-export function parseTable(hash: string): ReadonlyArray<TableItem> | null {
-  const raw = new URLSearchParams(hash.startsWith("#") ? hash.slice(1) : hash).get(TABLE_KEY);
-  if (raw === null) return null;
+/** The key's value as items, for a host that holds the value alone rather than a whole address. */
+export function parseTableValue(raw: string): ReadonlyArray<TableItem> {
   return raw
     .split(ITEMS)
     .map(readItem)
     .filter((item): item is TableItem => item !== null)
     .slice(0, TABLE_CAP);
+}
+
+/** The items a hash carries, or null when it carries no table at all (which the hosts read differently from an empty one). */
+export function parseTable(hash: string): ReadonlyArray<TableItem> | null {
+  const raw = new URLSearchParams(hash.startsWith("#") ? hash.slice(1) : hash).get(TABLE_KEY);
+  return raw === null ? null : parseTableValue(raw);
+}
+
+const keptKeys = (hash: string, drop: RegExp): string[] =>
+  (hash.startsWith("#") ? hash.slice(1) : hash).split("&").filter((kv) => kv !== "" && !drop.test(kv));
+
+/** One address with its table key replaced, keeping every other key verbatim and in place. #522: the Prospect page files onto the table and STAYS (ruled 2026-09-17), so its own address carries the gathering; #634: the Explorer's road to the Portfolio carries its whole address the same way, so the press back returns the reader's world and not only their sheets. An empty table writes no key at all, the rule `emitTableKey` in ../explorer/address.ts already keeps. */
+export function tableHash(hash: string, table: string): string {
+  const keys = keptKeys(hash, new RegExp(`^${TABLE_KEY}(=|$)`));
+  const all = table === "" ? keys : [...keys, `${TABLE_KEY}=${table}`];
+  return all.length === 0 ? "" : "#" + all.join("&");
 }
 
 const worldFields = (overrides: TableOverrides): string[] => [

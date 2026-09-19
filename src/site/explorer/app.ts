@@ -6,7 +6,8 @@ import { sliderToLand, updateLandReadout, syncAutoSlider } from "./sea-level.ts"
 import { sliderToCoast, updateCoastReadout, parkCoastDefault } from "./coast-warp.ts";
 import { startArrival } from "./draw-ceremony.ts";
 import { readHash, writeHash } from "./hash-sync.ts";
-import { type TableItem, type TableOverrides } from "../shared/table-address.ts";
+import { emitTable, type TableItem, type TableOverrides } from "../shared/table-address.ts";
+import { navigationTypeNow, readStoredTable, tableOnArrival, writeStoredTable } from "../shared/table-store.ts";
 import { bindChartDrawer, makeDogEar, surveyItemFrom, refusalLine, thumbJobFor, thumbNames, layPressFace, filingAt, LAY_ON_CARD, type FilingSheet } from "./chart-drawer.ts";
 import { bindTableLeaf } from "./table-leaf.ts";
 import { forwardTarget, prospectTarget } from "./address.ts";
@@ -111,6 +112,8 @@ const announce = makeAnnouncer({
   cancel: (timer) => { window.clearTimeout(timer); },
 });
 
+const store = (): Storage => localStorage;
+
 const chartTable = bindChartDrawer({
   root: chartDrawer, tab: chartDrawerTab, shut: chartDrawerShut, count: chartDrawerCount,
   cuttings, full: chartDrawerFull, road: tableRoad,
@@ -123,7 +126,18 @@ const chartTable = bindChartDrawer({
     if (!res) return null;
     return { url: URL.createObjectURL(new Blob([res.svg], { type: "image/svg+xml" })), title: thumbNames(res).title };
   },
-  onChange: () => { syncHash(); relabelEar(); lc.relabelLay(); },
+  onChange: (laid) => { writeStoredTable(store, laid); syncHash(); relabelEar(); lc.relabelLay(); },
+});
+
+// The one road no boot code can see: a page served from the browser's back/forward cache runs none at all, so the drawer would go on showing the snapshot it froze before the reader gathered more (#634, measured 2026-09-19).
+window.addEventListener("pageshow", (e) => {
+  if (!e.persisted) return;
+  const held = readStoredTable(store) ?? [];
+  if (emitTable(held) === emitTable(chartTable.state())) return;
+  chartTable.restore(held);
+  syncHash();
+  relabelEar();
+  lc.relabelLay();
 });
 // #165/#169/#192: the ONE hash writer, every trigger funnels through here; #321: the box IS the flag and the Explorer never authors year=.
 function syncHash(): void {
@@ -319,7 +333,7 @@ if (fwd) {
   if (hashed.land) touched.land = true;
   if (hashed.coast) touched.coast = true;
   pendingCamera = hashed.camera;
-  chartTable.restore(hashed.table ?? []);
+  chartTable.restore(tableOnArrival(hashed.table, readStoredTable(store), navigationTypeNow()));
   if (hashed.live) agesChk.checked = true;
   draw();
 }

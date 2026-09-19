@@ -70,3 +70,18 @@ test("PFR3 every gathered sheet drafts, so nothing in the page skips a sheet by 
   const kindExits = (app.match(/\n\s*if \([^)]*\bkind\b[^)]*\)\s*(return|continue)\b/g) ?? []).map((s) => s.trim());
   assert.deepEqual(kindExits, [], "a kind-gated early return or continue anywhere in the page holds one sheet kind out of the pile, which is the reserved place #521 ruling 3 kept and this sub closes");
 });
+
+test("PFR4 the Portfolio's road home is built from the address it is SHOWING, and a folio the address does not name is the device's (#634, ruled 2026-09-19)", () => {
+  // Asserted against the ID and not the anchor text, because test/site/astro-scaffold.test.ts pins the AUTHORED href
+  // literally and this page keeps it: the rewrite is a runtime one, which is the Prospect and Ribbon pattern.
+  const road = at("pf-explorer");
+  const hrefAt = app.indexOf("href", road);
+  assert.ok(hrefAt > road, "nothing assigns the road's href after it is looked up, so the press back is the Astro literal and loses the whole gathering (#634 defect 1)");
+  const line = app.slice(road, app.indexOf("\n", hrefAt));
+  assert.match(line, /tableHash\(location\.hash/, "the road home no longer carries the address this page was handed, so a reader who presses it loses the chart they gathered from");
+  assert.match(line, /explorer/, "and it still goes to the Explorer");
+  const arrival = at("tableOnArrival(");
+  const call = app.slice(arrival, app.indexOf(")", app.indexOf("navigationTypeNow", arrival)));
+  assert.match(call, /parseTable\(location\.hash\)/, "the address is no longer the first word on what this folio holds, which is what keeps a shared link reproducing exactly");
+  assert.match(call, /readStoredTable/, "and a Portfolio whose address names no folio no longer falls back to the device, so the Print Room's own road here reaches a bare pile (#634 ruling 4)");
+});

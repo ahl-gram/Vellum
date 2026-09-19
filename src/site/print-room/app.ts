@@ -6,6 +6,7 @@ import { POSTER_PRESETS, CHART_PRESET, clampPosterWidth, posterFilename, posterP
 import { rasterizeSvg } from "../lib/rasterize.ts";
 import { initBoundAtlas, clearBoundAtlas, enableBind, sheetAspect, type PosterBasis } from "./bound-atlas.ts";
 import { bindPrintRoom, matterAspect, showMatter, showPlate, showProof, writeFolio, type RoomFurniture } from "./seats.ts";
+import { TABLE_KEY } from "../shared/table-address.ts";
 import type { MapType } from "../../terrain/heightfield.ts";
 import type { ClimateBand } from "../../climate/climate.ts";
 import type { StyleName } from "../../render/style.ts";
@@ -46,6 +47,7 @@ const status = $("pr-status");
 const preview = $("pr-preview");
 const warning = $("pr-warning");
 const road = $<HTMLAnchorElement>("pr-explorer");
+const folioRoad = document.getElementById("pr-portfolio") as HTMLAnchorElement | null;
 const furniture: RoomFurniture = {
   stage: document.querySelector<HTMLElement>(".stage")!,
   sheet: $("sheet"),
@@ -77,7 +79,8 @@ const carried: {
   beasts: boolean;
   land: number | null;
   coast: number | null;
-} = { type: "", band: "", theme: "", legend: true, arms: false, beasts: false, land: null, coast: null };
+  table: string | null;
+} = { type: "", band: "", theme: "", legend: true, arms: false, beasts: false, land: null, coast: null, table: null };
 
 let drawGen = 0;
 // True from a draw's synchronous start until its own settle: pairs with `ordering` so the order surface stays closed for the whole round-trip.
@@ -132,6 +135,8 @@ function applyHash(): void {
     const w = Number(coast) / 100;
     if (Number.isFinite(w)) carried.coast = Math.min(1, Math.max(0, w));
   }
+  // #634: the Explorer's gold road here carries its whole address, this page's own table key included, and every draw rewrites that address. Carrying it is what keeps a gathering alive through a visit to the Print Room, in the reader's hands and in a link they share.
+  carried.table = p.get(TABLE_KEY);
 }
 
 function writeHash(seed: number, style: string): void {
@@ -146,8 +151,10 @@ function writeHash(seed: number, style: string): void {
   p.set("beasts", carried.beasts ? "1" : "0");
   if (carried.land != null) p.set("land", String(Math.round(carried.land * 1000)));
   if (carried.coast != null) p.set("coast", String(Math.round(carried.coast * 100)));
+  if (carried.table !== null) p.set(TABLE_KEY, carried.table);
   history.replaceState(null, "", "#" + p.toString());
   road.href = "../explorer/#" + p.toString();
+  if (folioRoad) folioRoad.href = "./portfolio/" + (carried.table === null ? "" : `#${TABLE_KEY}=${carried.table}`);
 }
 
 function draw(): void {
