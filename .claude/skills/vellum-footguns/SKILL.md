@@ -149,7 +149,9 @@ Scars: #366, #368, #454, #474, #501, #520, #526, #529, #533, #535, #536, #537, #
     `Page.captureScreenshot`'s `clip` is in DOCUMENT coordinates, so a viewport rect fed to it on a
     scrolled page photographs empty margin rather than the thing you meant, and a uniformly coloured
     crop is the tell; `sampleRow` in `scripts/e2e/pixel-support.mjs` adds the scroll for you (plate
-    read on PR #501, ruling 6 of the 2026-09-03 sitting on #454, fixed in PR #510).
+    read on PR #501, ruling 6 of the 2026-09-03 sitting on Issue #454, fixed in PR #510). A
+    NEGATIVE origin is the other way a clip lies, and `specs/settle-doctrine.md`'s environment
+    section carries what comes back and what to clamp.
 14. **Where the window you need is unreachable by a naturally written check, reach it deliberately.**
     Block the page's own main thread, queue a marker behind the code's own hop, or dispatch from
     inside a `MutationObserver` callback, which lands in a gap a wall clock cannot hit. Say at the
