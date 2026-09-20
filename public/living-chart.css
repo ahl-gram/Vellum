@@ -60,6 +60,8 @@
   background: var(--control-cream); border-top: 1px solid var(--line-faint); }
 #place-card.pinned .pc-inner { animation-duration: var(--unfurl); }
 #place-card.pinned.pc-scrolls .pc-inner { pointer-events: auto; }
+/* The tab stop's ring is drawn INSIDE the card, on the card's own cream, because the card floats over a live chart rather than a fixed panel: drawn outside it inherited whatever the chart is under it and measured 1.02:1 there. */
+#place-card .pc-inner:focus-visible { outline: 2px solid var(--ink-dark); outline-offset: -2px; }
 .pc-name { display: block; font-size: 1rem; letter-spacing: 0.02em; }
 .pc-rank { display: block; font-style: italic; color: var(--ink-brown); font-size: 0.82rem;
   letter-spacing: 0.06em; text-transform: uppercase; margin-top: 0.1rem; }
