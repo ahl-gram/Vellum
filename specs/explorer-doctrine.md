@@ -248,12 +248,26 @@ image. A future surface inherits the Explorer's rule the moment its chart is inl
   on the next timer tick, so an unguarded end or interrupt handler clears state the newer transition
   just set. Guard with a monotonic generation counter, the `drawGen` idiom in
   `src/site/prospect/app.ts`.
-- **A place card's width comes from the side it is anchored on**, not from a maximum width, so the
-  engine publishes the anchor fractions and the SHEET owns the anchor side. **The flip stays pure and
+- **A place card takes a DEFINITE width, never the room left beside its mark**, so the engine
+  publishes the anchor fractions and the SHEET owns both the anchor side and the width. Shrink-to-fit
+  is the shape to refuse: a flipped card got `nx * boxWidth`, so a card near an edge was narrow and
+  therefore tall, and the taller it was the further past the box it hung. **The flip stays pure and
   the clamp is the host's seam**: the side is chosen from chart space, and a shown card is measured
-  and nudged back inside a host-injected box, which a host without one omits. A card larger than the
-  box keeps its LEADING edge, because clamping fits a card and does not shrink one. The pure half is
+  and nudged back inside a host-injected box, which a host without one omits. The pure half is
   `clampOffset` in `src/render/place-card.ts`.
+- **A card is CAPPED to that box, and what does not fit scrolls inside it.** `clampIntoView` in
+  `src/site/living-chart/place-overlay.ts` publishes the box's height as `--pc-maxh` before it
+  measures, and the sheet caps the card's inner box against it. Three things that cap has to get
+  right, none of which a unit test can see. It multiplies by `--zoom-k`, because the card is scaled
+  by `1/k` and a CSS height of `H*k` is what renders as `H`. It sets `box-sizing: border-box`, or
+  `max-height` caps the content box and the card stands over the box by its own padding and border.
+  And it restores `pointer-events` on a PINNED card only: restored on every card, the card lands over
+  its own mark, takes the pointer, and the unpinned card hides itself on the mark's `mouseleave`.
+- **A card that scrolls stops touch and wheel reaching the camera.** d3-zoom is bound on the host's
+  viewport, an ancestor of the card carrying `touch-action: none`, so without a `touch-action` of its
+  own AND `stopPropagation` on `touchstart`, `touchmove` and `wheel`, the gesture is the camera's and
+  the card never scrolls. The harness cannot see a `touch-action` line at all, so a green run there
+  says only that the camera no longer swallows the gesture; a real device is the evidence.
 - **A place link is world-sheet only.** A region inset renumbers its places and its smallest tier has
   no world index, so an inset card is deliberately linkless. Why an inset renumbers is
   `specs/region-and-voyage.md`'s.

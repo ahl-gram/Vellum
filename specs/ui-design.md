@@ -270,6 +270,10 @@ makes iOS Safari zoom the page on focus.
 **The ruled phone width is 390.** 320 is checked, and its squeezes are accepted and recorded rather
 than designed for. A deviation that is knowingly shipped is recorded with its measurement, not left
 silent, because an unrecorded one reads to the next session as a defect and gets "fixed" back.
+**A panel that quotes generated prose is held to BOTH widths, because generated prose has no length
+and a panel sized for the copy you measured overflows on the next seed**: give it a definite width
+and cap it to the box it stands in, rather than letting it shrink to the room beside whatever it
+points at.
 
 ## Gesture
 
