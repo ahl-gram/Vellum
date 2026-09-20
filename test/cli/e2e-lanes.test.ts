@@ -49,7 +49,7 @@ const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   "zoom-gestures": 3.1,
   "home": 99.5, // re-measured 2026-08-25, local run: Subs 3-4a tripled the suite since the 2026-08-14 3.1s
   "landfall": 23.3, // measured 2026-08-25, local single-suite run
-  "cards": 2.9,
+  "cards": 5.0, // re-measured 2026-09-20 with #633's P19, P19b and P restore, for 47 checks. Three local single-suite runs read 4.6, 4.5 and 4.5 against the 2.9s of the 44-check suite, so 5.0 is the worst case plus about 9%. The added time is the group re-booting the page twice at phone metrics and sweeping every place of seed 4294967295 at both widths; the sweep itself is one evaluate per width, because a card's own height is its layout box and does not move under the unfurl. It goes in lane A, whose seconds RAISE the share denominator, so lane B falls from 59.685% to 59.436% and its headroom grows from 3.95s to 7.10s
   "motion": 2.4,
   "room-ink": 2.4,
   "fallback": 2.2,
