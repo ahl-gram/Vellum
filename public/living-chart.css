@@ -57,9 +57,9 @@
 }
 #place-card.flip-v .pc-inner { transform-origin: bottom center; }
 /* #633: the sign rides the CARD and never the inner, because the inner is the scroll container and a pseudo-element on it would scroll away with the text it is there to cover. */
-#place-card.pc-more::after { content: ""; position: absolute; left: 1px; right: 1px; bottom: 1px; height: 1.7rem;
+#place-card.pc-more::after { content: ""; position: absolute; left: 1px; right: 1px; bottom: 1px; height: 0.6rem;
   border-radius: 0 0 4px 4px; pointer-events: none;
-  background: linear-gradient(to bottom, rgb(from var(--control-cream) r g b / 0), var(--control-cream)); }
+  background: var(--control-cream); border-top: 1px solid var(--line-faint); }
 #place-card.pinned .pc-inner { animation-duration: var(--unfurl); }
 #place-card.pinned.pc-scrolls .pc-inner { pointer-events: auto; }
 .pc-name { display: block; font-size: 1rem; letter-spacing: 0.02em; }
