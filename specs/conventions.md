@@ -49,9 +49,9 @@ ledgers are the words.
 
 **A sitting held at the workflow's STOP is not a round, and owes no archive.** Where
 `specs/development-workflow.md` step 6 renders candidates so a fix can be ruled from pictures rather
-than from prose, the stills live in `out/` and go with the session; the written ruling is what
-survives (Alex, 2026-09-19). Nothing visual survives such a sitting, so the fidelity rule below has
-no archived still to hold a build to, and the ruling's words carry it alone.
+than from prose, the stills go with the session (Alex, 2026-09-19); that step says where they live
+while it lasts. Nothing visual survives such a sitting, so the fidelity rule below has no archived
+still to hold a build to, and the ruling's words carry it alone.
 
 Things a design round owes that the steps above do not cover:
 

@@ -90,19 +90,21 @@ that shows it.
 **The candidate build is a throwaway spike, and it is not step 8.** Rendering a direction takes code
 and step 3 has already said the plan carries none, so the carve-out is drawn narrow: the spike's only
 output is the stills, and the ruled direction is built test-first from step 8 like anything else. A
-candidate kept because it already works is an implementation that skipped its failing test. **Take
-step 7's worktree first when a sitting is owed**, since the spike is code. Commit it before
-dispatching `vellum-plate-reader` over it, which step 14 requires of every dispatch, and discard it
-only once the stills are where Alex will look: `out/` is gitignored, so nothing else holds them.
+candidate kept because it already works is an implementation that skipped its failing test. **The
+spike is never committed**, which keeps step 9's push-at-the-first-commit default off a throwaway and
+leaves nothing to force push away. It is the one dispatch that does not take step 14's commit first:
+that rule guards against an agent moving the tree under you, and `vellum-plate-reader` may not move
+one and reads the WORKING tree anyway, since its plumbing builds and serves `dist/`.
 
 **Arms that coexist in one spike are cheaper to read.** `vellum-plate-reader` writes only into `out/`
 and never edits source, so it cannot switch the tree itself: a spike that exposes every arm at once,
 behind a flag, a query parameter or separate mock pages, is read by a single run. Where the arms
 cannot coexist, whoever dispatches it re-renders between them and says so in the menu.
 
-**A dispatched lane's `out/` is inside its worktree, which is not where Alex looks.** The lane reports
-absolute paths and the dispatcher copies the stills into the main checkout's `out/` before putting
-the menu, the same way it holds the menu itself.
+**`out/` inside a worktree is not where Alex looks.** Any session standing in one copies the stills
+to the MAIN checkout's `out/` before putting the menu; a dispatched lane cannot reach outside its own
+tree, so it reports absolute paths and its dispatcher copies them, the same way it holds the menu
+itself. Copy before the spike goes, because `out/` is gitignored and nothing else holds them.
 
 **7. Worktree, then rename the branch**, before the first commit, or the PR carries the harness's
 name instead of yours. The rest of the worktree rules, including why the branch needs renaming at
@@ -189,7 +191,9 @@ takes, including the one for a PR that has an issue and deliberately leaves it o
 **14. Run `vellum-pr-skeptic`, dispatched COLD.** The prompt is the PR number or branch name and
 NOTHING else: no summary, no claims about tests, no rationale. Make no edits while it runs.
 
-**Commit anything in progress before you dispatch it**, and before any dispatched review agent. It runs
+**Commit anything in progress before you dispatch it**, and before any dispatched review agent, with
+the single exception of a step 6 spike under `vellum-plate-reader`, which reads the working tree by
+building it and may not move it. It runs
 in the directory you launched it from, which is your worktree, and on 2026-09-11 this one checked a PR
 head out in two live ones (#573). No dispatched review agent may move or restore the tree it was
 dispatched from. `vellum-pr-skeptic` goes further and runs NOTHING in it, suites included, because a
