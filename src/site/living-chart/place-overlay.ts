@@ -152,6 +152,11 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     if (placeOverlay) paintLay(placeOverlay.currentIdx);
   }
 
+  // The sign is toggled from the ONE predicate "is anything still below", so the initial state and every scroll read the same thing: at rest scrollTop is 0 and it reduces to the overflow.
+  function markMore(el: HTMLElement, inner: HTMLElement): void {
+    el.classList.toggle("pc-more", inner.scrollHeight - inner.scrollTop - inner.clientHeight > 1);
+  }
+
   function clampIntoView(el: HTMLElement): void {
     if (!clampBox) return;
     el.style.setProperty("--pc-dx", "0px");
@@ -162,6 +167,8 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     const { dx, dy } = clampOffset(el.getBoundingClientRect(), box);
     el.style.setProperty("--pc-dx", `${dx}px`);
     el.style.setProperty("--pc-dy", `${dy}px`);
+    const inner = el.querySelector(".pc-inner");
+    if (inner) markMore(el, inner as HTMLElement);
   }
 
   function hidePlaceCard(): void {
@@ -199,6 +206,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     inner.className = "pc-inner";
     // #633: d3-zoom is bound on the host's viewport, an ANCESTOR of the card carrying touch-action: none, so without this a drag or a wheel over the card reaches the camera and the card never scrolls; measured with a CDP touch pan, which cannot see a touch-action line at all and still read scrollTop 0 to 0. Whether a real thumb scrolls it is UNVERIFIABLE in this harness.
     for (const ev of ["touchstart", "touchmove", "wheel"]) inner.addEventListener(ev, (e) => e.stopPropagation(), { passive: true });
+    inner.addEventListener("scroll", () => markMore(card, inner), { passive: true });
     card.appendChild(inner);
     // Both card actions are world-sheet only: a region manifest renumbers its places (#242), so an inset's index names a different settlement.
     const onWorldSheet = !(opts && opts.box);

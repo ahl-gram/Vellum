@@ -59,6 +59,10 @@
 #place-card.flip-v .pc-inner { transform-origin: bottom center; }
 /* #633: pointer-events comes back only on a PINNED card. Restored on every card it made 8 of 26 places at 390 unreadable: the card lands over its own mark, takes the pointer, the mark's mouseleave fires and the unpinned card hides itself. A pinned card does not hide on mouseleave, so it is the only state that can hold a scroll. */
 #place-card.pinned .pc-inner { pointer-events: auto; }
+/* #633: the sign rides the CARD and never the inner, because the inner is the scroll container and a pseudo-element on it would scroll away with the text it is there to cover. */
+#place-card.pc-more::after { content: ""; position: absolute; left: 1px; right: 1px; bottom: 1px; height: 1.7rem;
+  border-radius: 0 0 4px 4px; pointer-events: none;
+  background: linear-gradient(to bottom, rgb(from var(--control-cream) r g b / 0), var(--control-cream)); }
 #place-card.pinned .pc-inner { animation-duration: var(--unfurl); }
 .pc-name { display: block; font-size: 1rem; letter-spacing: 0.02em; }
 .pc-rank { display: block; font-style: italic; color: var(--ink-brown); font-size: 0.82rem;
