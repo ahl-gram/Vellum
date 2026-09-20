@@ -48,7 +48,7 @@
   border-bottom: 1px solid var(--line-faint); padding-bottom: 0.5rem; }
 .rf-log-sig:empty { display: none; }
 
-/* The strip flows at every width with no breakpoint, bounded by construction (14 chronicle events at most, 19 to 24 voyage legs, about 35 rows), and the slip it rides in is what scrolls. */
+/* The strip flows at every width with no breakpoint, so the reading never differs by viewport width; bounded by construction (14 chronicle events at most, 19 to 24 voyage legs, about 35 rows), and the slip it rides in is what scrolls. */
 .rf-log-strip { list-style: none; margin: 0; padding: 0; }
 .rf-log-strip li { display: flex; gap: 0.9rem; padding: 0.25rem 0;
   border-bottom: 1px solid var(--line-faint); opacity: 0.4;

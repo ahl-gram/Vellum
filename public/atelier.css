@@ -135,7 +135,7 @@ body.chart-room header.chrome { --pool-top: -4rem; --pool-left: -4rem; }
 body.chart-room .corner.bl { --pool-bottom: -4rem; --pool-left: -4rem; }
 body.chart-room .strip { --pool-bottom: -4rem; --pool-left: -4rem; --pool-right: -4rem; }
 
-/* The legend row's footing is home's .lf-legend panel (public/index.css: 0.5rem 1.1rem 0.6rem insets, chart ink 0.85 to 0.72 top to bottom), drawn as a ::before at the padding's insets so the row's box, which the seat and the fit read, never changes (a real padding wrapped the Explorer's roads, `BR2` in `scripts/e2e/suite-broadside.mjs`); the :not(.in-slip) scope is on the painting rule because a docked row goes position:static and its ::before would span the slip. */
+/* The legend row's footing is home's .lf-legend panel (public/index.css: its 0.5rem 1.1rem 0.6rem padding, chart ink 0.85 to 0.72 top to bottom), drawn as a ::before at the padding's insets so the row's box, which the seat and the fit read, never changes (a real padding wrapped the Explorer's roads, `BR2` in `scripts/e2e/suite-broadside.mjs`); the :not(.in-slip) scope is on the painting rule because a docked row goes position:static and its ::before would span the slip. */
 body:has(#map-viewport.zoomed) .legend:not(.in-slip)::before, body.chart-room:not(:has(.stage)) .legend:not(.in-slip)::before { content: ""; position: absolute; inset: -0.5rem -1.1rem -0.6rem; z-index: -1; pointer-events: none;
   background: linear-gradient(to bottom, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.72)); }
 @media screen {
