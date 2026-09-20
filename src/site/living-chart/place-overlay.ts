@@ -154,6 +154,8 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
 
   // The sign is toggled from the ONE predicate "is anything still below", so the initial state and every scroll read the same thing: at rest scrollTop is 0 and it reduces to the overflow.
   function markMore(el: HTMLElement, inner: HTMLElement): void {
+    // Two marks, not one: pc-scrolls is whether the card has a tail AT ALL, which is what may take the pointer from the camera, and pc-more is whether any of it is still below, which is what the sign says. They part company the moment the reader reaches the end.
+    el.classList.toggle("pc-scrolls", inner.scrollHeight - inner.clientHeight > 1);
     el.classList.toggle("pc-more", inner.scrollHeight - inner.scrollTop - inner.clientHeight > 1);
   }
 
@@ -205,7 +207,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     const inner = document.createElement("div");
     inner.className = "pc-inner";
     // #633: d3-zoom is bound on the host's viewport, an ANCESTOR of the card carrying touch-action: none, so without this a drag or a wheel over the card reaches the camera and the card never scrolls; measured with a CDP touch pan, which cannot see a touch-action line at all and still read scrollTop 0 to 0. Whether a real thumb scrolls it is UNVERIFIABLE in this harness.
-    for (const ev of ["touchstart", "touchmove", "wheel"]) inner.addEventListener(ev, (e) => e.stopPropagation(), { passive: true });
+    for (const ev of ["touchstart", "touchmove", "wheel"]) inner.addEventListener(ev, (e) => { if (inner.scrollHeight - inner.clientHeight > 1) e.stopPropagation(); }, { passive: true });
     inner.addEventListener("scroll", () => markMore(card, inner), { passive: true });
     card.appendChild(inner);
     // Both card actions are world-sheet only: a region manifest renumbers its places (#242), so an inset's index names a different settlement.

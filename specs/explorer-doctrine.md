@@ -254,16 +254,23 @@ image. A future surface inherits the Explorer's rule the moment its chart is inl
   therefore tall, and the taller it was the further past the box it hung. **The flip stays pure and
   the clamp is the host's seam**: the side is chosen from chart space, and a shown card is measured
   and nudged back inside a host-injected box, which a host without one omits. The pure half is
-  `clampOffset` in `src/render/place-card.ts`.
+  `clampOffset` in `src/render/place-card.ts`, and it still keeps a card's LEADING edge wherever it
+  cannot fit one: on the horizontal axis always, since nothing caps a card's width against the box,
+  and on the vertical axis for a host that injects no box at all. Clamping fits a card; the cap below
+  is what shrinks one.
 - **A card is CAPPED to that box, and what does not fit scrolls inside it.** `clampIntoView` in
   `src/site/living-chart/place-overlay.ts` publishes the box's height as `--pc-maxh` before it
   measures, and the sheet caps the card's inner box against it. Three things that cap has to get
-  right, none of which a unit test can see. It multiplies by `--zoom-k`, because the card is scaled
-  by `1/k` and a CSS height of `H*k` is what renders as `H`. It sets `box-sizing: border-box`, or
+  right, none of which a unit test can see. **It takes the box's height RAW and never scales it by
+  `--zoom-k`**: the card's counter-scale cancels the mount's own `scale(k)`, so the card's net scale
+  is 1 and a CSS pixel on it is already a screen pixel. Multiplying reads as right and is this
+  defect coming back, the cap k times looser at every depth. It sets `box-sizing: border-box`, or
   `max-height` caps the content box and the card stands over the box by its own padding and border.
-  And it restores `pointer-events` on a PINNED card only: restored on every card, the card lands over
-  its own mark, takes the pointer, and the unpinned card hides itself on the mark's `mouseleave`.
-- **A card that scrolls stops touch and wheel reaching the camera.** d3-zoom is bound on the host's
+  And it restores `pointer-events` on a card that is BOTH pinned and actually scrolling: unpinned,
+  the card lands over its own mark, takes the pointer and hides itself on that mark's `mouseleave`;
+  pinned with nothing to scroll, it is a dead zone for the wheel, the pan and the pinch over the
+  chart it covers, which is the bound Issue #633 recorded as NOT broken.
+- **A card with a tail to scroll stops touch and wheel reaching the camera, and one without does not.** d3-zoom is bound on the host's
   viewport, an ancestor of the card carrying `touch-action: none`, so without a `touch-action` of its
   own AND `stopPropagation` on `touchstart`, `touchmove` and `wheel`, the gesture is the camera's and
   the card never scrolls. The harness cannot see a `touch-action` line at all, so a green run there

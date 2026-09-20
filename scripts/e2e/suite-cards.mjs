@@ -1,9 +1,12 @@
 // Living Chart story-card overlay e2e (P1-P15, #53).
 import { makeStep } from "./step-support.mjs";
+import { makeSettle } from "./settle-support.mjs";
+import { sampleRow, luminance } from "./pixel-support.mjs";
 
 export async function run(ctx) {
-  const { evaluate, send, check, shoot, sleep, waitSettled, waitReady, axDescription, serverState, setMobileViewport, clearMobile, consoleErrors, http4xx, PORT } = ctx;
+  const { evaluate, send, check, shoot, sleep, wheel, waitSettled, waitReady, axDescription, serverState, setMobileViewport, clearMobile, consoleErrors, http4xx, PORT } = ctx;
   const step = makeStep(ctx);
+  const settle = makeSettle(ctx);
   await step("P setup", async () => {
     await evaluate(`(()=>{
       document.getElementById("seed").value="42";
@@ -216,6 +219,8 @@ export async function run(ctx) {
 
   // #633: a card taller than its box cannot be fitted by any offset, so the bound IS the principle and the sweep only confirms it. The 0.5px tolerance is for the sub-pixel residual of a cap published in CSS pixels from a fractional rect; it cannot hide a real regression, whose smallest measured instance is 8.61px (seed 5 at 390 on main, 2026-09-19).
   const OVER_BOX_TOLERANCE = 0.5;
+  // Swept 2026-09-20 over the 9 capped cards of the four sitting seeds at 320: the fade lifts the foot row between 7.8 and 25.9 above the same card's own text, and an UNFADED card reads -9.9, so 4.0 sits below the worst case with headroom and 14 points above the unfaded reading. A floor of 12, picked before the sweep, would have failed on Laihoanui.
+  const FADE_LIFT_FLOOR = 4.0;
   // Seed 4294967295 is the WITNESS that makes this bite: its Kralgov card measured 150.95px past a 247.02px box at 320 and 61.27px past a 301.05px box at 390 on main at 18bacfd. Every place is measured, not that one card, because the defect is a class and a copy change that promotes a different place to the worst would leave a single-card guard green.
   const NARROW_SEED = 4294967295;
   // Focus rather than a pointer, deliberately: focus reaches EVERY mark, including the ones a neighbour's 26px hit covers at rest, and showPlaceCard composes the same card on both paths. Whether a pointer can reach a mark is a different question with its own issue.
@@ -258,8 +263,9 @@ export async function run(ctx) {
     const missed = d.rows.filter((r) => !r.shown || r.got !== r.want);
     const worst = d.rows.filter((r) => r.shown).sort((a, b) => b.over - a.over)[0];
     return {
-      ok: d.rows.length > 1 && missed.length === 0 && !!worst && worst.over <= OVER_BOX_TOLERANCE,
-      detail: JSON.stringify({ width, box: `${d.boxW}x${d.boxH}`, places: d.rows.length, missed: missed.map((r) => r.want), worst }),
+      // The count is the seed's OWN place count, never "more than one": a sweep decimated to two hits still satisfies a > 1 gate, both survivors match by name, and the run reports green with the shrunken number sitting in a payload nobody reads. The guard-prover reached exactly that on 2026-09-20.
+      ok: d.rows.length === pm.count && missed.length === 0 && !!worst && worst.over <= OVER_BOX_TOLERANCE,
+      detail: JSON.stringify({ width, box: `${d.boxW}x${d.boxH}`, places: d.rows.length, of: pm.count, missed: missed.map((r) => r.want), worst }),
     };
   };
 
@@ -268,6 +274,90 @@ export async function run(ctx) {
     check("P19 at the ruled phone width no place card is taller than the chart box it is clamped into (#633)", at390.ok, at390.detail);
     const at320 = verdict(await sweepAt(320), 320);
     check("P19b and the same holds at 320, where two cards in three were over the box before this (#633)", at320.ok, at320.detail);
+  });
+
+  // #633: these stand on the 320 page P19b left, where the cap bites. They are the half P19 and P19b cannot see: those two read the card's own rect, and a rect is blind to whether the overflow scrolls, whether the card answers a pointer, and whether anything is painted to say the card goes on.
+  await step("P20 to P23", async () => {
+    const at = await evaluate(`(() => {
+      const hit = [...document.querySelectorAll(".place-overlay .place-hit")].find((e) => (e.getAttribute("aria-label") || "").split(", ")[0] === "Kralgov");
+      if (!hit) return { error: "no Kralgov" };
+      const inner = document.querySelector("#place-card .pc-inner");
+      const restPe = inner ? getComputedStyle(inner).pointerEvents : null;
+      const b = hit.getBoundingClientRect();
+      return { restPe, x: Math.round(b.x + b.width / 2), y: Math.round(b.y + b.height / 2) };
+    })()`);
+    if (at.error) throw new Error(`P20 ${at.error}`);
+    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: at.x, y: at.y });
+    await send("Input.dispatchMouseEvent", { type: "mousePressed", x: at.x, y: at.y, button: "left", clickCount: 1 });
+    await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: at.x, y: at.y, button: "left", clickCount: 1 });
+    const open = await settle(
+      `(() => { const c = document.getElementById("place-card"); if (!c || c.hidden) return null; const i = c.querySelector(".pc-inner"); const r = c.getBoundingClientRect(); const cs = getComputedStyle(i);
+        return { name: (c.querySelector(".pc-name") || {}).textContent, pinned: c.classList.contains("pinned"), more: c.classList.contains("pc-more"),
+          pe: cs.pointerEvents, over: +(i.scrollHeight - i.clientHeight).toFixed(2), top: +r.top.toFixed(2), bottom: +r.bottom.toFixed(2), left: +r.left.toFixed(2), right: +r.right.toFixed(2), w: +r.width.toFixed(2), h: +r.height.toFixed(2) }; })()`,
+      (d, last) => !!d && d.name === "Kralgov" && d.pinned && !!last && last.name === "Kralgov" && d.h === last.h && d.pe === last.pe,
+      "P20 Kralgov pinned at 320",
+    );
+    check("P20 the pinned card restores pointer events so it can hold a scroll, and an unpinned one does NOT, or the card takes the pointer from its own mark (#633)",
+      at.restPe === "none" && open.pe === "auto", JSON.stringify({ unpinned: at.restPe, pinned: open.pe }));
+    check("P21 the capped card carries the mark that says it continues, and it has something left to show (#633)",
+      open.more === true && open.over > 1, JSON.stringify({ more: open.more, hiddenTail: open.over }));
+
+    // A rect cannot see paint, so the fade is read as pixels: the foot row against this same card's own mid-height row, which carries text on every build and is the control.
+    const foot = await sampleRow(send, Math.round(open.left), Math.round(open.bottom) - 6, Math.round(open.right - open.left));
+    const mid = await sampleRow(send, Math.round(open.left), Math.round(open.top + open.h / 2), Math.round(open.right - open.left));
+    const median = (px) => { const l = px.map(luminance).sort((a, b) => a - b); return +l[Math.floor(l.length / 2)].toFixed(1); };
+    const lift = +(median(foot) - median(mid)).toFixed(1);
+    check("P22 the fade actually PAINTS: the card's foot reads lighter than its own text (#633)",
+      lift >= FADE_LIFT_FLOOR, JSON.stringify({ lift, floor: FADE_LIFT_FLOOR, foot: median(foot), mid: median(mid) }));
+
+    // P23 is the check the cold review on PR #642 had to find by hand: the cap was multiplied by --zoom-k, every guard here swept at rest, and the card stood 45.38px past the box the moment a wheel touched the chart.
+    const bare = await evaluate(`(() => { const c = document.getElementById("place-card").getBoundingClientRect(); const v = document.getElementById("map-viewport").getBoundingClientRect(); return { x: Math.round(v.left + 20), y: Math.round(c.top > v.top + 48 ? v.top + 20 : v.bottom - 20), k: window.__vellumZoomState().k }; })()`);
+    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: bare.x, y: bare.y });
+    await sleep(120);
+    await wheel(bare.x, bare.y, -240);
+    const deep = await settle(
+      `(() => { const c = document.getElementById("place-card"); if (!c || c.hidden) return null; const v = document.getElementById("map-viewport").getBoundingClientRect(); const r = c.getBoundingClientRect();
+        return { k: window.__vellumZoomState().k, w: +r.width.toFixed(2), h: +r.height.toFixed(2), boxH: +v.height.toFixed(2), over: +(r.height - v.height).toFixed(2) }; })()`,
+      (d, last) => !!d && d.k > 1.05 && !!last && d.k === last.k && d.h === last.h,
+      "P23 the camera coming to rest above k=1",
+    );
+    // The card is a fixed 16rem, so its rendered width is the control that says which way the scales compose: unchanged means the counter-scale cancels the mount and the cap must be raw.
+    check("P23 the cap still holds once the reader zooms, and the card's own width proves the scales cancel (#633)",
+      deep.k > 1.05 && deep.w === open.w && deep.over <= OVER_BOX_TOLERANCE,
+      JSON.stringify({ kBefore: bare.k, kAfter: deep.k, widthAtRest: open.w, widthDeep: deep.w, box: deep.boxH, card: deep.h, over: deep.over }));
+
+    await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}))`);
+    await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
+  });
+
+  // #633: the other half of the cold review's second finding. A pinned card that has nothing to scroll must NOT eat the camera, and at the ruled phone width that is EVERY card, over roughly half the chart.
+  await step("P24", async () => {
+    await setMobileViewport(390, 844);
+    await send("Page.navigate", { url: "about:blank" });
+    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/#seed=${NARROW_SEED}&style=antique` });
+    if (!(await waitReady())) throw new Error("P24 the explorer never drew at 390");
+    const at = await evaluate(`(() => { const h = [...document.querySelectorAll(".place-overlay .place-hit")].find((e) => (e.getAttribute("aria-label") || "").split(", ")[0] === "Kralgov"); const b = h.getBoundingClientRect(); return { x: Math.round(b.x + b.width / 2), y: Math.round(b.y + b.height / 2) }; })()`);
+    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: at.x, y: at.y });
+    await send("Input.dispatchMouseEvent", { type: "mousePressed", x: at.x, y: at.y, button: "left", clickCount: 1 });
+    await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: at.x, y: at.y, button: "left", clickCount: 1 });
+    const card = await settle(
+      `(() => { const c = document.getElementById("place-card"); if (!c || c.hidden) return null; const i = c.querySelector(".pc-inner"); const r = c.getBoundingClientRect();
+        return { name: (c.querySelector(".pc-name") || {}).textContent, pinned: c.classList.contains("pinned"), scrolls: c.classList.contains("pc-scrolls"),
+          tail: +(i.scrollHeight - i.clientHeight).toFixed(2), pe: getComputedStyle(i).pointerEvents, k: window.__vellumZoomState().k,
+          x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2), h: +r.height.toFixed(2) }; })()`,
+      (d, last) => !!d && d.name === "Kralgov" && d.pinned && !!last && d.h === last.h,
+      "P24 Kralgov pinned at 390",
+    );
+    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: card.x, y: card.y });
+    await sleep(120);
+    await wheel(card.x, card.y, -240);
+    await sleep(600);
+    const after = await evaluate(`window.__vellumZoomState().k`);
+    check("P24 a pinned card with nothing to scroll does NOT swallow the camera under it (#633)",
+      card.tail <= 1 && card.scrolls === false && card.pe === "none" && after > card.k + 0.05,
+      JSON.stringify({ tail: card.tail, scrolls: card.scrolls, pointerEvents: card.pe, kBefore: card.k, kAfterWheelOverCard: after }));
+    await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}))`);
+    await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
   });
 
   await step("P restore", async () => {
