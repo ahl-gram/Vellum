@@ -276,10 +276,22 @@ export async function run(ctx) {
       leafTabBoxes: [...document.querySelectorAll(".slip-head .sheet-tabs button")].filter((b) => b.getBoundingClientRect().height > 0.5).length,
     };
   })()`;
-  await step("CD9, CD11, CD12, CD22", async () => {
+
+  // Its own one-shot payload rather than three more fields on SURFACES: that one is polled by four settles here and read again by the CD13 and CD18 steps, and riding it measured 1.73s on this suite against a 0.7s run-to-run spread (2026-09-19, three runs each side).
+  const SEATS = `(() => {
+    const leaf = document.getElementById("table-leaf");
+    const dock = document.querySelector(".slip .legend-dock");
+    return {
+      tableLeafDisplay: leaf ? getComputedStyle(leaf).display : null,
+      tableLeafH: leaf ? +leaf.getBoundingClientRect().height.toFixed(2) : null,
+      legendDockDisplay: dock ? getComputedStyle(dock).display : null,
+    };
+  })()`;
+  await step("CD9, CD11, CD12, CD22, CD43", async () => {
     await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
     await go(`${DRESS}&table=${SIX}`);
     const beforeOpen = await evaluate(SURFACES);
+    const seats = await evaluate(SEATS);
     await evaluate(`document.getElementById("chart-drawer-tab").click()`);
     const withOpen = await settle(SURFACES, both(drawerUp, slipTravelled(beforeOpen)), "chart-drawer-tab-open");
     await evaluate(`document.getElementById("chart-drawer-shut").click()`);
@@ -303,6 +315,11 @@ export async function run(ctx) {
       "CD22 at 1280 the sheet's head carries NO leaf tabs: they are the phone's way into the table, .sheet-tabs was dressed only inside the 900px block, and the Broadside is open here, so a folded sheet cannot be what is hiding them (#547, and the desktop arm CD14/CD15/CD16 never had)",
       !beforeOpen.folded && beforeOpen.leafTabsDisplay === "none" && beforeOpen.leafTabBoxes === 0,
       JSON.stringify({ folded: beforeOpen.folded, display: beforeOpen.leafTabsDisplay, boxes: beforeOpen.leafTabBoxes, slipW: beforeOpen.slipW }),
+    );
+    check(
+      "CD43 at 1280 neither the phone's table leaf nor the legend dock is drawn: both are rendered at every width and dressed only inside the 900px block, so each stood as a block element no rule reached (#583, the mirror of CD22). The computed display is the BITING read and the height beside it is corroboration only, because the leaf is empty here with its cuttings in the shut drawer and so measures zero either way; the Broadside is read open in the same snapshot, so a folded sheet cannot be what is hiding them",
+      !beforeOpen.folded && seats.tableLeafDisplay === "none" && seats.legendDockDisplay === "none" && seats.tableLeafH === 0,
+      JSON.stringify({ folded: beforeOpen.folded, leaf: seats.tableLeafDisplay, leafH: seats.tableLeafH, dock: seats.legendDockDisplay }),
     );
     check(
       "CD11 shutting the Chart Table gives the Broadside back to the reader who had it, and leaves it folded for the reader who did not",
