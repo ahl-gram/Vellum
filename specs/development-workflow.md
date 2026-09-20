@@ -80,9 +80,8 @@ Alex to picture it and then holds him to what he pictured, which is how a ruling
 something nobody measured. Render the candidates instead, through `vellum-plate-reader`, whose own
 definition carries the zooms, at the viewports and on the seeds the defect was measured at, or on the
 ones the decision turns on where nothing measured it. `specs/conventions.md` "How a design decision
-is made" governs the sitting itself and what becomes of the stills afterwards. It does NOT govern how
-many arms a sitting draws: its "one to four directions" bounds a design round, and a sitting here
-draws what the honest answers need. **Where the decision changes an appearance that already ships, today's behavior is
+is made" governs the sitting itself, how many directions are drawn and what becomes of the stills
+afterwards. **Where the decision changes an appearance that already ships, today's behavior is
 rendered beside the candidates as a control**, because a candidate with nothing beside it reads as
 better than it is; a decision about a surface that does not exist yet has nothing to control against
 and renders its candidates alone. The stills go in `out/` and each option in the menu names the file
