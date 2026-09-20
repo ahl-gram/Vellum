@@ -23,7 +23,7 @@ import {
 import type { E2eSuiteName } from "../../src/cli/e2e-suites.ts";
 import { E2E_PORT_VAR, E2E_DPORT_VAR, e2eOutSubdir } from "../../src/cli/e2e-ports.ts";
 
-// Seconds per suite, from the runner's own per-suite wall clock on a 16-core Mac. Every entry was refreshed 2026-09-20 at #637 from two local runs of each lane with the roster as it stands, the higher reading taken (both readings at the entry, one lane run at a time); refresh from that same output when the split is revisited. CI scales lane A's seconds about 2.4x and lane B's about 1.95x (home is wait-bound, the render-heavy suites are not), so a rebalance is SIZED from the CI lane logs' per-suite wall clock and this table decides only the 0.6 bound below.
+// Seconds per suite, from the runner's own per-suite wall clock on a 16-core Mac. Every entry was refreshed 2026-09-20 at #637 from two local runs of each lane with the roster as it stands, the higher reading taken (both readings at the entry, one lane run at a time); refresh from that same output when the split is revisited. These seconds reach CI unevenly, about 2.0x on lane A and 1.8x on lane B against this table and per suite from 1.1x (home, wait-bound) to 3.3x (render), measured 2026-09-20 on main run 35518105601, so a rebalance is SIZED from the CI lane logs' per-suite wall clock and this table decides only the 0.6 bound below.
 const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   "home": 104.2, // 2026-09-20: 104.1, 104.2
   "chart-drawer": 63.0, // 2026-09-20: 62.7, 63.0; CD23's 8.45s of SAY_HOLD_MS + SAY_FADE_MS is a floor no machine can undercut, so the principle bounds it from below and the runs set the budget above
@@ -60,6 +60,17 @@ const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
 
 const laneSeconds = (suites: readonly E2eSuiteName[]) =>
   suites.reduce((sum, name) => sum + MEASURED_SECONDS[name], 0);
+
+const BALANCE_CAP = 0.6;
+// Seconds added to a lane raise the total too, so `(L + x) / (T + x) <= cap` solves to `x <= (cap * T - L) / (1 - cap)`, positive when the lane has room and negative by exactly the seconds it must shed (#637; at 0.6 and two lanes it is the `1.5A - B` the #635 review derived).
+const laneHeadroom = (seconds: number, total: number) => (BALANCE_CAP * total - seconds) / (1 - BALANCE_CAP);
+const balanceLine = (name: string, seconds: number, total: number): string => {
+  const headroom = laneHeadroom(seconds, total);
+  const room = headroom >= 0
+    ? `${headroom.toFixed(1)}s of room under the ${BALANCE_CAP} cap`
+    : `${(-headroom).toFixed(1)}s past the ${BALANCE_CAP} cap, so it must shed at least that`;
+  return `lane ${name} is ${((seconds / total) * 100).toFixed(1)}% of measured serial cost (${seconds.toFixed(1)}s of ${total.toFixed(1)}s, ${room}), so that shard alone sets the wall clock while the other idles`;
+};
 
 const result = (over: Partial<LaneResult> & { name: string }): LaneResult => ({
   code: 0,
@@ -245,15 +256,28 @@ test("the split is balanced against measured cost, not check counts", () => {
   const total = laneSeconds(E2E_SUITE_ORDER);
   for (const lane of E2E_LANES) {
     const seconds = laneSeconds(lane.suites);
-    const share = seconds / total;
-    // Seconds added to a lane raise the total too, so `(L + x) / (T + x) <= 0.6` solves to `x <= 1.5T - 2.5L`, the seconds this lane can still take (#637; at two lanes it is the `1.5A - B` the #635 review derived).
-    const headroom = 1.5 * total - 2.5 * seconds;
     // Since #623 put one job on each runner the wall clock IS max(A, B), so an unbalanced pair wastes the parallelism it was split for and balance matters more here than it did inside one job, not less (Alex, 2026-09-14).
-    assert.ok(
-      share <= 0.6,
-      `lane ${lane.name} is ${(share * 100).toFixed(1)}% of measured serial cost (${seconds.toFixed(1)}s of ${total.toFixed(1)}s, ${headroom.toFixed(1)}s over the 0.6 cap), so that shard alone sets the wall clock while the other idles`,
-    );
+    assert.ok(seconds / total <= BALANCE_CAP, balanceLine(lane.name, seconds, total));
   }
+});
+
+test("the balance message names the seconds a lane must shed, as a positive number that lands it exactly on the cap", () => {
+  // Constructed, not read from the table: a lane at 420s of 686.4s is over the cap, which the precondition below pins so the shed branch is the one under test.
+  const [seconds, total] = [420, 686.4];
+  assert.ok(seconds / total > BALANCE_CAP, "the fixture is under the cap, so the message's shed branch never runs");
+  const shed = -laneHeadroom(seconds, total);
+  assert.ok(shed > 0, `a lane over the cap reports ${shed}s of headroom instead of seconds to shed`);
+  // The cap itself is the pin: shedding exactly that many seconds lands the lane on the cap, which a swapped coefficient or a sign slip cannot satisfy.
+  assert.ok(Math.abs((seconds - shed) / (total - shed) - BALANCE_CAP) < 1e-9, `shedding ${shed}s lands at ${(seconds - shed) / (total - shed)}, not on the cap`);
+  const red = balanceLine("Q", seconds, total);
+  assert.match(red, new RegExp(`${shed.toFixed(1)}s past the ${BALANCE_CAP} cap`), "the red message does not name the seconds to shed");
+  assert.doesNotMatch(red, /-\d/, "the red message carries a negative number, which reads as room where there is none");
+  // The other state, its own pin: under the cap the same helper names room, and adding exactly that much lands on the cap too.
+  const [under, underTotal] = [302.2, 568.6];
+  const room = laneHeadroom(under, underTotal);
+  assert.ok(room > 0, "a lane under the cap reports no room");
+  assert.ok(Math.abs((under + room) / (underTotal + room) - BALANCE_CAP) < 1e-9, `adding ${room}s lands at ${(under + room) / (underTotal + room)}, not on the cap`);
+  assert.match(balanceLine("Q", under, underTotal), new RegExp(`${room.toFixed(1)}s of room under the ${BALANCE_CAP} cap`), "the green-shaped message does not name the room");
 });
 
 test("a lane failing fails the run and the line says which lane", () => {
