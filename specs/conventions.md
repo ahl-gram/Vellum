@@ -19,9 +19,9 @@ whose binding statement is the rulebook's and which this file's last section say
 Every significant piece of Vellum's look has gone through the same six steps, and skipping to the
 middle has hurt the project before.
 
-1. **Mockups, drawn from real content.** One direction where the round ratifies a single mockup as
-   the spec, and otherwise as many as the decision has honest answers. Built from real engine output
-   at the seed the sitting will look at, never lorem or a sketch.
+1. **Mockups, drawn from real content.** Draw one direction where a mockup is ratified as the spec
+   rather than chosen between, and otherwise one per honest answer the decision has. Build them from
+   real engine output at the seed the sitting will look at, never lorem or a sketch.
 2. **A sitting.** Alex looks at the rendered stills and rules. The rulings are recorded the same day
    as a dated comment on the issue.
 3. **Provisional.** A ruling about how something *feels* is provisional the moment it is made,
