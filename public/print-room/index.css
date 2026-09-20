@@ -45,7 +45,7 @@
 .matter-page td.name .former { display: block; white-space: normal; font-weight: 400; font-size: 0.86em; color: var(--ink-brown); text-transform: none; letter-spacing: normal; }
 .matter-page td.note { font-style: italic; color: var(--ink-brown); }
 
-/* The style picker's width stays this room's, scoped to wide sheets: an unscoped 25rem beat the kit's 12.5rem phone clamp and the corner never wrapped. */
+/* The style picker keeps 7.4rem at every width (the kit's would leave "topographic" 4.6rem of box beside the chevron); the room's 25rem folio is scoped to wide sheets because unscoped it beat the kit's 12.5rem phone clamp and the corner never wrapped. */
 @media (min-width: 901px) { .folio-room { max-width: 25rem; } }
 .folio-controls input.control { width: 5.6rem; }
 .folio-controls select.control { width: 7.4rem; }

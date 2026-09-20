@@ -126,7 +126,7 @@ body:has(.slip.folded) .legend { left: 50%; }
 .slip-tab.shown { opacity: 1; visibility: visible; pointer-events: auto; transition: opacity 0.25s 0.2s, visibility 0s; }
 button.slip-tab.shown:is(:hover, :focus-visible, :active) { box-shadow: none; background: var(--ink-dark); color: var(--parchment-bright); }
 
-/* Zoomed, the sheet spills under the chrome and parchment on paper reads 1.1:1, so the cluster, the corners and the strip stand on a blurred pool while the Glass is zoomed and carry none at rest. */
+/* Zoomed, the sheet spills under the chrome and parchment on paper reads 1.1:1, so the cluster, the corners and the strip stand on a blurred pool while the Glass is zoomed and carry none at rest (`RH9b` in `scripts/e2e/suite-runninghead.mjs`). */
 body:has(#map-viewport.zoomed) :is(header.chrome, .corner.bl, .strip)::before, body.chart-room:not(:has(.stage)) :is(header.chrome, .corner.bl)::before { content: ""; position: absolute; z-index: -1; pointer-events: none;
   inset: var(--pool-top, -1.3rem) var(--pool-right, -1.6rem) var(--pool-bottom, -1.3rem) var(--pool-left, -1.6rem);
   background: rgb(from var(--chart-ink) r g b / 0.92); filter: blur(16px); }

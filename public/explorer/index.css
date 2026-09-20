@@ -1,5 +1,5 @@
 /* The Explorer: a chart room. The furniture is atelier.css's; this sheet keeps the stage's own layout, the Glass's clip, the region inset, the turn and the verso. */
-/* The Broadside's five-column ledger needs the wider slip; the kit's is 22rem. */
+/* The Broadside's five-column ledger needs the wider slip, a deviation from the kit's 22rem. */
 :root { --slip-w: 24rem; }
 
 body.chart-room .stage { display: flex; align-items: center; justify-content: center; box-sizing: border-box;
