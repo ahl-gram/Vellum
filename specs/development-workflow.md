@@ -77,28 +77,28 @@ rulings on the issue at step 12 exactly as a session would record its own.
 
 **When the ruling is an appearance, the menu carries stills.** A direction described in prose asks
 Alex to picture it and then holds him to what he pictured, which is how a ruling gets made on
-something nobody measured. Render the candidates instead, through `vellum-plate-reader`, at full
-scale and 1:1 crop, at the viewports and on the seeds the defect was measured at, or on the ones the
-decision turns on where nothing measured it. `specs/conventions.md` "How a design decision is made"
-governs the sitting itself, the count of directions included. **Where the decision changes an
-appearance that already ships, today's behavior is rendered beside the candidates as a control**,
-because a candidate with nothing beside it reads as better than it is; a decision about a surface
-that does not exist yet has nothing to control against and renders its candidates alone. The stills
-go in `out/` and each option in the menu names the file that shows it. They are NOT archived under
-`design/`: a STOP sitting rules a fix rather than a round, so the pictures go with the session and
-the written ruling is what survives (Alex, 2026-09-19).
+something nobody measured. Render the candidates instead, through `vellum-plate-reader`, whose own
+definition carries the zooms, at the viewports and on the seeds the defect was measured at, or on the
+ones the decision turns on where nothing measured it. `specs/conventions.md` "How a design decision
+is made" governs the sitting itself, the count of directions and what becomes of the stills
+afterwards. **Where the decision changes an appearance that already ships, today's behavior is
+rendered beside the candidates as a control**, because a candidate with nothing beside it reads as
+better than it is; a decision about a surface that does not exist yet has nothing to control against
+and renders its candidates alone. The stills go in `out/` and each option in the menu names the file
+that shows it.
 
 **The candidate build is a throwaway spike, and it is not step 8.** Rendering a direction takes code
 and step 3 has already said the plan carries none, so the carve-out is drawn narrow: the spike's only
-output is the stills, it is discarded rather than carried forward, and the ruled direction is built
-test-first from step 8 like anything else. A candidate kept because it already works is an
-implementation that skipped its failing test. **Take step 7's worktree early to hold the spike**,
-because it is code and code is not written in the main checkout.
+output is the stills, and the ruled direction is built test-first from step 8 like anything else. A
+candidate kept because it already works is an implementation that skipped its failing test. **Take
+step 7's worktree first when a sitting is owed**, since the spike is code. Commit it before
+dispatching `vellum-plate-reader` over it, which step 14 requires of every dispatch, and discard it
+only once the stills are where Alex will look: `out/` is gitignored, so nothing else holds them.
 
-**One spike shows every arm at once.** `vellum-plate-reader` writes only into `out/` and never edits
-source, so it cannot switch the tree between candidate A, candidate B and the control. The spike
-therefore exposes them together, behind a query parameter, a flag or separate mock pages, and a
-single run reads them all.
+**Arms that coexist in one spike are cheaper to read.** `vellum-plate-reader` writes only into `out/`
+and never edits source, so it cannot switch the tree itself: a spike that exposes every arm at once,
+behind a flag, a query parameter or separate mock pages, is read by a single run. Where the arms
+cannot coexist, whoever dispatches it re-renders between them and says so in the menu.
 
 **A dispatched lane's `out/` is inside its worktree, which is not where Alex looks.** The lane reports
 absolute paths and the dispatcher copies the stills into the main checkout's `out/` before putting
@@ -196,9 +196,9 @@ dispatched from. `vellum-pr-skeptic` goes further and runs NOTHING in it, suites
 suite run there deletes the generated assets under `public/` (Alex, 2026-09-12); both it and
 `vellum-guard-prover` build their sandbox with `scripts/agent-sandbox.ts` rather than a recipe of
 their own (#575). The other three keep their documented work in the dispatch tree, `vellum-plate-reader`'s
-`out/` samples included, because a review agent may not write outside the tree it was given. That is
-where Alex looks when the dispatch tree is the main checkout; when it is a lane's worktree, whoever
-dispatched the lane copies the samples across, as step 6 says of a step 6 sitting.
+`out/` samples included, because its own boundary writes only into `out/` and the other two hold no
+write tool at all. That is where Alex looks when the dispatch tree is the main checkout; when it is a
+lane's worktree, whoever dispatched the lane copies the samples across, as step 6 says.
 
 **An agent whose own DEFINITION this pull request changes cannot be trusted to review the change.**
 On PR #576 the cold skeptic reported that its loaded instructions were the pre-PR version while its

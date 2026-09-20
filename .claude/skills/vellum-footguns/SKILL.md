@@ -175,10 +175,10 @@ This is the checklist; the reasons are not copied here.
 4. **Re-grounding a surface owes a contrast sweep of everything standing on it**: rest, hover,
    focus-visible, disabled, marks, roads. A defect that painted over a surface hid how the rest of it
    read.
-5. **Presentation work owes `vellum-plate-reader`**: on the pushed branch at workflow step 11, and
-   again BEFORE the ruling at step 6 whenever the decision Alex is being asked to make is an
-   appearance, where no branch exists yet. Its record goes in the PR as a comment before the body
-   claims it exists.
+5. **Presentation work owes `vellum-plate-reader` TWICE**: over the throwaway spike at workflow step
+   6, whenever the decision Alex is being asked to make is an appearance, and again on the pushed
+   branch at step 11, over what was built. The step 11 record goes in the PR as a comment before the
+   body claims it exists; the step 6 one goes in the menu, since no PR exists yet.
 6. **A feel decision gets rendered variants before a ruling**, the contract for which is
    `specs/development-workflow.md` step 6: the candidates, the control arm, and where the stills go.
    The ruling stays provisional until Alex has used the branch live. Pin correctness now, let
