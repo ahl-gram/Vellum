@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import type { Linter } from "eslint";
 import lintConfig from "../../eslint.config.ts";
@@ -13,6 +13,13 @@ const LINT_SCRIPT = "eslint --flag unstable_native_nodejs_ts_config --max-warnin
 
 const blocks: readonly Linter.Config[] = lintConfig;
 const conjunctsOf = (entry: string | string[]): string[] => (Array.isArray(entry) ? entry : [entry]);
+const RULED_ROOTS = LINT_SCOPE.map((g) => {
+  const m = g.match(/^([^*]+\/)\*\*\/\*(\.\w+)$/);
+  assert.ok(m, `ruled glob ${g} is not of the root/**/*.ext shape this guard derives its roots from`);
+  return { root: m[1]!, ext: m[2]! };
+});
+const isNamedFile = (g: string): boolean =>
+  !/[*?[{]/.test(g) && RULED_ROOTS.some(({ root, ext }) => g.startsWith(root) && g.endsWith(ext));
 
 const ciJob = (id: string): string => {
   const lines = src(".github/workflows/ci.yml").split("\n");
@@ -45,7 +52,14 @@ test("the lint config is bounded to the ruled scope, covers all of it, and narro
         `config block ${name} negates ${JSON.stringify(entry)}, which unlints files the same way ignores does`,
       );
       const anchors = conjuncts.filter((g) => LINT_SCOPE.includes(g));
-      assert.ok(anchors.length > 0, `config block ${name} matches ${JSON.stringify(entry)}, which no ruled glob bounds`);
+      const named = conjuncts.filter(isNamedFile);
+      assert.ok(
+        anchors.length > 0 || named.length > 0,
+        `config block ${name} matches ${JSON.stringify(entry)}, which is neither a ruled glob nor a file named under a ruled root with its ruled extension`,
+      );
+      for (const file of named) {
+        assert.ok(existsSync(join(ROOT, file)), `config block ${name} names ${file}, which does not exist, so its exemption is stale`);
+      }
       for (const glob of anchors) covered.add(glob);
     }
   }
