@@ -33,7 +33,7 @@ export default defineConfig(
     files: ["scripts/**/*.mjs"],
     extends: [js.configs.recommended],
     languageOptions: { globals: globals.node },
-    // Off because red on main when the tool landed; Issue #648 is the ledger, and this block has no type information, so only the core rules reach these files.
+    // Off because red on main when the tool landed; Issue #648 is the ledger and each family pull request turns its rules on with the violations fixed or exempted by name.
     rules: {
       "no-empty": "off",
       "no-unused-vars": "off",
