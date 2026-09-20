@@ -70,7 +70,6 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
 
   function fillCardInner(inner: HTMLElement, card: PlaceCard, place: PlaceMark): void {
     inner.replaceChildren();
-    // The scroll offset is the CONTAINER's, not the content's, so replacing the children leaves it where the last card was read to and the browser only clamps it to the new content: a card switched to from a scrolled one opened with its own name above the fold, measured at scrollTop 29 of a 29px tail.
     inner.scrollTop = 0;
     const name = document.createElement("strong");
     name.className = "pc-name";
@@ -133,6 +132,8 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     void inner.offsetWidth;
     inner.style.animation = "";
     clampIntoView(el);
+    settleSign(el, inner);
+    inner.tabIndex = el.classList.contains("pc-scrolls") && el.classList.contains("pinned") ? 0 : -1;
     placeOverlay.currentIdx = idx;
   }
 
@@ -155,8 +156,22 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
   }
 
   function markMore(el: HTMLElement, inner: HTMLElement): void {
-    el.classList.toggle("pc-scrolls", inner.scrollHeight - inner.clientHeight > 1);
+    const scrolls = inner.scrollHeight - inner.clientHeight > 1;
+    el.classList.toggle("pc-scrolls", scrolls);
     el.classList.toggle("pc-more", inner.scrollHeight - inner.scrollTop - inner.clientHeight > 1);
+    // A scroll container is not keyboard operable without a tab stop of its own, and the tail this cap hides was fully visible before it: the arrow keys reach it only once the card itself can hold focus.
+    inner.tabIndex = scrolls && el.classList.contains("pinned") ? 0 : -1;
+  }
+
+  // The sign paints only on a card that has ARRIVED. It rides #place-card, which no animation touches, so without this it is at full strength from the first frame of the unfurl while the card's own inner is still at opacity 0 and 149px higher, which is a cream bar with a hairline sitting on the chart.
+  function settleSign(el: HTMLElement, inner: HTMLElement): void {
+    el.classList.remove("pc-settled");
+    // A host without the Web Animations API has nothing to wait for, so the sign is there at once rather than never: the engine may not assume an API its hosts are not required to have.
+    const running = typeof inner.getAnimations === "function" ? inner.getAnimations() : [];
+    if (!running.length) { el.classList.add("pc-settled"); return; }
+    for (const a of running) {
+      a.finished.then(() => { if (!el.hidden && inner.getAnimations().every((x) => x.playState === "finished")) el.classList.add("pc-settled"); }).catch(() => {});
+    }
   }
 
   function clampIntoView(el: HTMLElement): void {

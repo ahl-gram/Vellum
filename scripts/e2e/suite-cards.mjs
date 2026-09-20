@@ -217,7 +217,6 @@ export async function run(ctx) {
   await shoot("explorer-place-card.png");
   await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}))`);
 
-  // #633: a card taller than its box cannot be fitted by any offset, so the bound IS the principle and the sweep only confirms it. The 0.5px tolerance is for the sub-pixel residual of a cap published in CSS pixels from a fractional rect; it cannot hide a real regression, whose smallest measured instance is 8.61px (seed 5 at 390 on main, 2026-09-19).
   // #633: a card taller than its box cannot be fitted by any offset, so the bound IS the principle. Swept 2026-09-19: the smallest real overage measured is 8.61px, so 0.5px is the sub-pixel residual of a cap published from a fractional rect and cannot hide one.
   const OVER_BOX_TOLERANCE = 0.5;
   // Swept 2026-09-20 over the 10 capped cards of the four sitting seeds at 320 (out/633-fade-sweep.mjs): the foot rule lifts the foot row between 12.6 and 44.0 above the same card's own text, and this same build with the rule deleted reads -2.8, so 8.0 sits 4.6 below the worst case and 10.8 above that control.
@@ -277,8 +276,7 @@ export async function run(ctx) {
     check("P19b and the same holds at 320, where two cards in three were over the box before this (#633)", at320.ok, at320.detail);
   });
 
-  // #633: these stand on the 320 page P19b left, where the cap bites. They are the half P19 and P19b cannot see: those two read the card's own rect, and a rect is blind to whether the overflow scrolls, whether the card answers a pointer, and whether anything is painted to say the card goes on.
-  await step("P20 to P26", async () => {
+  await step("P20 to P27", async () => {
     // The unpinned arm reads a card that is SHOWN: a hidden one reports its host's pointer-events by inheritance and would pass whatever this rule said.
     const at = await evaluate(`(() => {
       const hit = [...document.querySelectorAll(".place-overlay .place-hit")].find((e) => (e.getAttribute("aria-label") || "").split(", ")[0] === "Kralgov");
@@ -298,8 +296,8 @@ export async function run(ctx) {
     const open = await settle(
       `(() => { const c = document.getElementById("place-card"); if (!c || c.hidden) return null; const i = c.querySelector(".pc-inner"); const r = c.getBoundingClientRect(); const cs = getComputedStyle(i);
         return { name: (c.querySelector(".pc-name") || {}).textContent, pinned: c.classList.contains("pinned"), more: c.classList.contains("pc-more"),
-          pe: cs.pointerEvents, over: +(i.scrollHeight - i.clientHeight).toFixed(2), top: +r.top.toFixed(2), bottom: +r.bottom.toFixed(2), left: +r.left.toFixed(2), right: +r.right.toFixed(2), w: +r.width.toFixed(2), h: +r.height.toFixed(2) }; })()`,
-      (d, last) => !!d && d.name === "Kralgov" && d.pinned && !!last && last.name === "Kralgov" && d.h === last.h && d.pe === last.pe,
+          pe: cs.pointerEvents, settled: c.classList.contains("pc-settled"), over: +(i.scrollHeight - i.clientHeight).toFixed(2), top: +r.top.toFixed(2), bottom: +r.bottom.toFixed(2), left: +r.left.toFixed(2), right: +r.right.toFixed(2), w: +r.width.toFixed(2), h: +r.height.toFixed(2) }; })()`,
+      (d, last) => !!d && d.name === "Kralgov" && d.pinned && d.settled && !!last && last.name === "Kralgov" && d.h === last.h && d.pe === last.pe,
       "P20 Kralgov pinned at 320",
     );
     check("P20 a SHOWN unpinned card does not take the pointer and a pinned scrolling one does, or the card takes it from its own mark (#633)",
@@ -316,7 +314,6 @@ export async function run(ctx) {
     check("P22 the foot rule actually PAINTS: the card's foot reads lighter than its own text (#633)",
       lift >= FOOT_LIFT_FLOOR, JSON.stringify({ lift, floor: FOOT_LIFT_FLOOR, foot: median(foot), mid: median(mid) }));
 
-    // P26 is P24's positive half: P24 proves a card with NO tail releases the gesture, and a guard that only proves the negative is half a guard.
     const beforeWheel = await evaluate(`(() => { const i = document.querySelector("#place-card .pc-inner"); return { scrollTop: +i.scrollTop.toFixed(2), k: window.__vellumZoomState().k }; })()`);
     const onCard = { x: Math.round(open.left + (open.right - open.left) / 2), y: Math.round(open.top + open.h / 2) };
     await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: onCard.x, y: onCard.y });
@@ -327,6 +324,18 @@ export async function run(ctx) {
     check("P26 a pinned card that HAS a tail holds the wheel and scrolls it, and the camera under it stays put (#633)",
       afterWheel.scrollTop > beforeWheel.scrollTop + 1 && afterWheel.k === beforeWheel.k,
       JSON.stringify({ before: beforeWheel, after: afterWheel }));
+    await evaluate(`(() => { const i = document.querySelector("#place-card .pc-inner"); i.scrollTop = 0; })()`);
+    await sleep(200);
+
+    const kb = await evaluate(`(() => { const i = document.querySelector("#place-card .pc-inner"); i.focus(); return { tabIndex: i.tabIndex, focused: document.activeElement === i, scrollTop: +i.scrollTop.toFixed(2) }; })()`);
+    // PageDown, not ArrowDown: measured 2026-09-20, an arrow key does not scroll a focused scroll container in this build while PageDown does, and the cold review measured all three leaving scrollTop at 0 before the tab stop existed.
+    await send("Input.dispatchKeyEvent", { type: "rawKeyDown", windowsVirtualKeyCode: 34, nativeVirtualKeyCode: 34, code: "PageDown", key: "PageDown" });
+    await send("Input.dispatchKeyEvent", { type: "keyUp", windowsVirtualKeyCode: 34, nativeVirtualKeyCode: 34, code: "PageDown", key: "PageDown" });
+    await sleep(400);
+    const kbAfter = await evaluate(`+document.querySelector("#place-card .pc-inner").scrollTop.toFixed(2)`);
+    check("P27 a reader with no pointer can reach the tail the cap hides: the card takes a tab stop and PageDown scrolls it (#633)",
+      kb.tabIndex === 0 && kb.focused === true && kbAfter > kb.scrollTop + 1,
+      JSON.stringify({ ...kb, afterPageDown: kbAfter }));
     await evaluate(`(() => { const i = document.querySelector("#place-card .pc-inner"); i.scrollTop = 0; })()`);
     await sleep(200);
 
@@ -363,7 +372,6 @@ export async function run(ctx) {
     await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
   });
 
-  // #633: the other half of the cold review's second finding. A pinned card that has nothing to scroll must NOT eat the camera, and at the ruled phone width that is EVERY card, over roughly half the chart.
   await step("P24", async () => {
     await setMobileViewport(390, 844);
     await send("Page.navigate", { url: "about:blank" });
