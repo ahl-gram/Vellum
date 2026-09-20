@@ -37,7 +37,7 @@ const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   "region-detail": 14.7, // 2026-09-20: 14.6, 14.7
   "render": 13.7, // 2026-09-20: 13.3, 13.7
   "cluster": 9.8, // 2026-09-20: 9.8, 9.7
-  "cards": 9.7, // 2026-09-20: 9.7, 9.7; this suite's own count, not the render plus cards tally the runner forces whenever cards is selected, which is the 54 the cold review's round 4 on PR #642 caught
+  "cards": 9.7, // 2026-09-20: 9.7, 9.7; this suite's own line, not the render plus cards tally the runner forces whenever cards is selected alone
   "room-voyage-route": 9.0, // 2026-09-20: 9.0, 8.7
   "glass-ceremony": 8.7, // 2026-09-20: 8.7, 8.7
   "specimen": 7.9, // 2026-09-20: 7.9, 7.9
@@ -262,26 +262,24 @@ test("the split is balanced against measured cost, not check counts", () => {
 });
 
 test("the balance message names the seconds a lane must shed, as a positive number that lands it exactly on the cap", () => {
-  // Constructed, not read from the table: a lane at 420s of 686.4s is over the cap, which the precondition below pins so the shed branch is the one under test.
   const [seconds, total] = [420, 686.4];
   assert.ok(seconds / total > BALANCE_CAP, "the fixture is under the cap, so the message's shed branch never runs");
   const shed = -laneHeadroom(seconds, total);
   assert.ok(shed > 0, `a lane over the cap reports ${shed}s of headroom instead of seconds to shed`);
-  // The cap itself is the pin: shedding exactly that many seconds lands the lane on the cap, which a swapped coefficient or a sign slip cannot satisfy.
   assert.ok(Math.abs((seconds - shed) / (total - shed) - BALANCE_CAP) < 1e-9, `shedding ${shed}s lands at ${(seconds - shed) / (total - shed)}, not on the cap`);
   const red = balanceLine("Q", seconds, total);
-  assert.match(red, new RegExp(`${shed.toFixed(1)}s past the ${BALANCE_CAP} cap`), "the red message does not name the seconds to shed");
+  assert.ok(red.startsWith("lane Q is "), "the red message does not name the lane");
+  assert.ok(red.includes(`${shed.toFixed(1)}s past the ${BALANCE_CAP} cap`), "the red message does not name the seconds to shed");
   assert.doesNotMatch(red, /-\d/, "the red message carries a negative number, which reads as room where there is none");
-  // The share clause is pinned too: the prover's round on f1b07c5 found `* 1000` passing with the seconds clause alone under test.
-  assert.match(red, /\b61\.2% of measured serial cost/, "the red message does not name the share as a percentage");
-  // The other state, its own pin: under the cap the same helper names room, and adding exactly that much lands on the cap too.
+  // The prover's round on f1b07c5 found `* 1000` passing with the seconds clause alone under test, and its round on 27150ab found the parenthetical's order and the lane name free.
+  assert.ok(red.includes("61.2% of measured serial cost (420.0s of 686.4s, "), "the red message does not name the share, then the lane's seconds before the total");
   const [under, underTotal] = [302.2, 568.6];
   const room = laneHeadroom(under, underTotal);
   assert.ok(room > 0, "a lane under the cap reports no room");
   assert.ok(Math.abs((under + room) / (underTotal + room) - BALANCE_CAP) < 1e-9, `adding ${room}s lands at ${(under + room) / (underTotal + room)}, not on the cap`);
   const green = balanceLine("Q", under, underTotal);
-  assert.match(green, new RegExp(`${room.toFixed(1)}s of room under the ${BALANCE_CAP} cap`), "the green-shaped message does not name the room");
-  assert.match(green, /\b53\.1% of measured serial cost/, "the green-shaped message does not name the share as a percentage");
+  assert.ok(green.includes(`${room.toFixed(1)}s of room under the ${BALANCE_CAP} cap`), "the green-shaped message does not name the room");
+  assert.ok(green.includes("53.1% of measured serial cost (302.2s of 568.6s, "), "the green-shaped message does not name the share, then the lane's seconds before the total");
 });
 
 test("a lane failing fails the run and the line says which lane", () => {
