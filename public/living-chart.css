@@ -45,7 +45,6 @@
 #place-card.flip-h.flip-v { transform-origin: 100% 0;
   transform: scale(calc(1 / var(--zoom-k, 1)))
     translate(calc(-10px + var(--pc-dx, 0px)), calc(-100% - 10px + var(--pc-dy, 0px))); }
-/* #633: box-sizing is border-box because max-height caps the CONTENT box by default, which left the worst card 21.19px over, exactly its 19.2px padding plus its 2px border. The cap takes --pc-maxh RAW and must never be scaled by --zoom-k: the card's counter-scale only cancels the mount's own scale(k), so its net scale is 1 and a CSS pixel here is already a screen pixel. Measured 2026-09-20, the card renders 256px wide at k=1 and at k=1.3947 alike; multiplied, the cap read 344.52px against a 247.02px box and the card stood 45.38px past it, which is this issue's own defect restored by a wheel. */
 .pc-inner {
   box-sizing: border-box; max-height: var(--pc-maxh, 100vh);
   overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; touch-action: pan-y;
@@ -62,7 +61,6 @@
   border-radius: 0 0 4px 4px; pointer-events: none;
   background: linear-gradient(to bottom, rgb(from var(--control-cream) r g b / 0), var(--control-cream)); }
 #place-card.pinned .pc-inner { animation-duration: var(--unfurl); }
-/* #633: the live area is the narrowest it can be and still hold a scroll. Pinned, because an unpinned card that takes the pointer hides itself on its own mark's mouseleave, measured at 8 of 26 places at 390. AND scrolling, because a pinned card with nothing to scroll would be a dead zone for the wheel, the pan and the pinch over about half the chart, which is the bound Issue #633 itself recorded as not broken. */
 #place-card.pinned.pc-scrolls .pc-inner { pointer-events: auto; }
 .pc-name { display: block; font-size: 1rem; letter-spacing: 0.02em; }
 .pc-rank { display: block; font-style: italic; color: var(--ink-brown); font-size: 0.82rem;

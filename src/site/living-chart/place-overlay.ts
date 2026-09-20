@@ -70,6 +70,8 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
 
   function fillCardInner(inner: HTMLElement, card: PlaceCard, place: PlaceMark): void {
     inner.replaceChildren();
+    // The scroll offset is the CONTAINER's, not the content's, so replacing the children leaves it where the last card was read to and the browser only clamps it to the new content: a card switched to from a scrolled one opened with its own name above the fold, measured at scrollTop 29 of a 29px tail.
+    inner.scrollTop = 0;
     const name = document.createElement("strong");
     name.className = "pc-name";
     name.textContent = card.name;
@@ -152,9 +154,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     if (placeOverlay) paintLay(placeOverlay.currentIdx);
   }
 
-  // The sign is toggled from the ONE predicate "is anything still below", so the initial state and every scroll read the same thing: at rest scrollTop is 0 and it reduces to the overflow.
   function markMore(el: HTMLElement, inner: HTMLElement): void {
-    // Two marks, not one: pc-scrolls is whether the card has a tail AT ALL, which is what may take the pointer from the camera, and pc-more is whether any of it is still below, which is what the sign says. They part company the moment the reader reaches the end.
     el.classList.toggle("pc-scrolls", inner.scrollHeight - inner.clientHeight > 1);
     el.classList.toggle("pc-more", inner.scrollHeight - inner.scrollTop - inner.clientHeight > 1);
   }

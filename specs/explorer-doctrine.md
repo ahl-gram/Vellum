@@ -270,7 +270,8 @@ image. A future surface inherits the Explorer's rule the moment its chart is inl
   the card lands over its own mark, takes the pointer and hides itself on that mark's `mouseleave`;
   pinned with nothing to scroll, it is a dead zone for the wheel, the pan and the pinch over the
   chart it covers, which is the bound Issue #633 recorded as NOT broken.
-- **A card with a tail to scroll stops touch and wheel reaching the camera, and one without does not.** d3-zoom is bound on the host's
+- **A card with a tail to scroll stops touch and wheel reaching the camera, and one without does
+not.** d3-zoom is bound on the host's
   viewport, an ancestor of the card carrying `touch-action: none`, so without a `touch-action` of its
   own AND `stopPropagation` on `touchstart`, `touchmove` and `wheel`, the gesture is the camera's and
   the card never scrolls. The harness cannot see a `touch-action` line at all, so a green run there

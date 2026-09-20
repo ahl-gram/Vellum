@@ -218,11 +218,13 @@ export async function run(ctx) {
   await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}))`);
 
   // #633: a card taller than its box cannot be fitted by any offset, so the bound IS the principle and the sweep only confirms it. The 0.5px tolerance is for the sub-pixel residual of a cap published in CSS pixels from a fractional rect; it cannot hide a real regression, whose smallest measured instance is 8.61px (seed 5 at 390 on main, 2026-09-19).
+  // #633: a card taller than its box cannot be fitted by any offset, so the bound IS the principle. Swept 2026-09-19: the smallest real overage measured is 8.61px, so 0.5px is the sub-pixel residual of a cap published from a fractional rect and cannot hide one.
   const OVER_BOX_TOLERANCE = 0.5;
   // Swept 2026-09-20 over the 9 capped cards of the four sitting seeds at 320: the fade lifts the foot row between 7.8 and 25.9 above the same card's own text, and an UNFADED card reads -9.9, so 4.0 sits below the worst case with headroom and 14 points above the unfaded reading. A floor of 12, picked before the sweep, would have failed on Laihoanui.
   const FADE_LIFT_FLOOR = 4.0;
   // Seed 4294967295 is the WITNESS that makes this bite: its Kralgov card measured 150.95px past a 247.02px box at 320 and 61.27px past a 301.05px box at 390 on main at 18bacfd. Every place is measured, not that one card, because the defect is a class and a copy change that promotes a different place to the worst would leave a single-card guard green.
   const NARROW_SEED = 4294967295;
+  const narrowCount = await evaluate(`window.__vellumRunInline({kind:"draw",seed:${NARROW_SEED},overrides:{},render:{style:"antique",widthPx:1500,legend:true}}).manifest.places.length`);
   // Focus rather than a pointer, deliberately: focus reaches EVERY mark, including the ones a neighbour's 26px hit covers at rest, and showPlaceCard composes the same card on both paths. Whether a pointer can reach a mark is a different question with its own issue.
   const SWEEP = `(() => {
     const vp = document.getElementById("map-viewport");
@@ -263,9 +265,8 @@ export async function run(ctx) {
     const missed = d.rows.filter((r) => !r.shown || r.got !== r.want);
     const worst = d.rows.filter((r) => r.shown).sort((a, b) => b.over - a.over)[0];
     return {
-      // The count is the seed's OWN place count, never "more than one": a sweep decimated to two hits still satisfies a > 1 gate, both survivors match by name, and the run reports green with the shrunken number sitting in a payload nobody reads. The guard-prover reached exactly that on 2026-09-20.
-      ok: d.rows.length === pm.count && missed.length === 0 && !!worst && worst.over <= OVER_BOX_TOLERANCE,
-      detail: JSON.stringify({ width, box: `${d.boxW}x${d.boxH}`, places: d.rows.length, of: pm.count, missed: missed.map((r) => r.want), worst }),
+      ok: d.rows.length === narrowCount && missed.length === 0 && !!worst && worst.over <= OVER_BOX_TOLERANCE,
+      detail: JSON.stringify({ width, box: `${d.boxW}x${d.boxH}`, places: d.rows.length, of: narrowCount, missed: missed.map((r) => r.want), worst }),
     };
   };
 
@@ -277,7 +278,7 @@ export async function run(ctx) {
   });
 
   // #633: these stand on the 320 page P19b left, where the cap bites. They are the half P19 and P19b cannot see: those two read the card's own rect, and a rect is blind to whether the overflow scrolls, whether the card answers a pointer, and whether anything is painted to say the card goes on.
-  await step("P20 to P23", async () => {
+  await step("P20 to P25", async () => {
     const at = await evaluate(`(() => {
       const hit = [...document.querySelectorAll(".place-overlay .place-hit")].find((e) => (e.getAttribute("aria-label") || "").split(", ")[0] === "Kralgov");
       if (!hit) return { error: "no Kralgov" };
@@ -310,7 +311,6 @@ export async function run(ctx) {
     check("P22 the fade actually PAINTS: the card's foot reads lighter than its own text (#633)",
       lift >= FADE_LIFT_FLOOR, JSON.stringify({ lift, floor: FADE_LIFT_FLOOR, foot: median(foot), mid: median(mid) }));
 
-    // P23 is the check the cold review on PR #642 had to find by hand: the cap was multiplied by --zoom-k, every guard here swept at rest, and the card stood 45.38px past the box the moment a wheel touched the chart.
     const bare = await evaluate(`(() => { const c = document.getElementById("place-card").getBoundingClientRect(); const v = document.getElementById("map-viewport").getBoundingClientRect(); return { x: Math.round(v.left + 20), y: Math.round(c.top > v.top + 48 ? v.top + 20 : v.bottom - 20), k: window.__vellumZoomState().k }; })()`);
     await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: bare.x, y: bare.y });
     await sleep(120);
@@ -325,6 +325,20 @@ export async function run(ctx) {
     check("P23 the cap still holds once the reader zooms, and the card's own width proves the scales cancel (#633)",
       deep.k > 1.05 && deep.w === open.w && deep.over <= OVER_BOX_TOLERANCE,
       JSON.stringify({ kBefore: bare.k, kAfter: deep.k, widthAtRest: open.w, widthDeep: deep.w, box: deep.boxH, card: deep.h, over: deep.over }));
+
+    // P25: the scroll offset belongs to the CONTAINER, so a card switched to from a scrolled one opened at the old offset with its own name above the fold. Switched by focus, because a pinned card's body can cover the next mark and a click would never reach it.
+    await evaluate(`(() => { const i = document.querySelector("#place-card .pc-inner"); i.scrollTop = i.scrollHeight; })()`);
+    // The gesture goes in its OWN call: inside a polled expression the second poll clicks the same mark again and toggles the card shut, which is how the first version of this check timed out on a null read.
+    await evaluate(`(() => { const h = [...document.querySelectorAll(".place-overlay .place-hit")].find((e) => (e.getAttribute("aria-label") || "").split(", ")[0] === "Skenitsa"); if (h) { h.focus(); h.click(); } })()`);
+    const switched = await settle(
+      `(() => { const c = document.getElementById("place-card"); if (!c || c.hidden) return null; const i = c.querySelector(".pc-inner"); const n = c.querySelector(".pc-name");
+        const ir = i.getBoundingClientRect(), nr = n.getBoundingClientRect();
+        return { name: n.textContent, scrollTop: +i.scrollTop.toFixed(2), nameBelowTop: +(nr.top - ir.top).toFixed(2), h: +c.getBoundingClientRect().height.toFixed(2) }; })()`,
+      (d, last) => !!d && !!last && d.h === last.h && d.scrollTop === last.scrollTop,
+      "P25 the card after a switch from a scrolled one",
+    );
+    check("P25 a card switched to from a scrolled one opens at its own top, with its name below the fold and not above it (#633)",
+      switched.scrollTop === 0 && switched.nameBelowTop >= 0, JSON.stringify(switched));
 
     await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}))`);
     await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);

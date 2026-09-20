@@ -163,6 +163,5 @@ test("#633 the mark retires when the reader reaches the end, from the SAME predi
   withScroll(inner, 360, 299, 61);
   inner.fire("scroll");
 
-  // 360 - 61 - 299 is 0: nothing is left below, so a sign that stayed would be telling the reader to keep going at the end of the card.
   assert.equal(card.classList.contains("pc-more"), false);
 });
