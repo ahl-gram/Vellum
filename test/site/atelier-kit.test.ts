@@ -135,3 +135,22 @@ test("AK7c the narrow folio panel carries BOTH painting arms (#531): a media que
   assert.match(rule![2]!, /inset:\s*-0\.7rem -0\.7rem -0\.75rem/);
   assert.match(read("public/index.css"), /\.lf-seed \{[^}]*padding:\s*0\.7rem 0\.7rem 0\.75rem/, "and it still mirrors home's seed box at narrow");
 });
+
+test("AK9 the legend dock stands down while it is EMPTY, so the rooms that render it carry no unruled box at the widths the legend is not docked at, and the rule is the KIT's because the dock is furniture every one of them renders (#583)", () => {
+  const dockPages = pages.filter((p) => read(p).includes('class="legend-dock"'));
+  assert.ok(dockPages.length > 2, `the sweep found ${dockPages.length} pages rendering the dock, so it is reading a class and not one page`);
+  for (const p of dockPages) {
+    assert.match(
+      read(p),
+      /<div class="legend-dock"(?: id="legend-dock")?><\/div>/,
+      `${p} authors the dock EMPTY, which is the condition the kit's rule keys on: author anything inside it and the dock stands at every width again`,
+    );
+  }
+  const kit = read("public/atelier.css").replace(/\/\*[\s\S]*?\*\//g, "");
+  assert.match(kit, /\.legend-dock:empty \{ display: none; \}/, "the kit stands the empty dock down");
+  assert.deepEqual(
+    [...kit.matchAll(/\.legend-dock\s*\{([^}]*)\}/g)].filter((m) => /display\s*:/.test(m[1]!)).map((m) => m[0]),
+    [],
+    "and NEVER a bare .legend-dock display rule: the dock receives the WHOLE legend at narrow on every page above, so a stand-down that cannot see the contents takes the roads out off the phone on all of them",
+  );
+});
