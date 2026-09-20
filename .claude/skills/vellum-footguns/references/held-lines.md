@@ -55,6 +55,8 @@ Noted 2026-09-16, overtaken before the move: the rule itself is written in `.cla
 - No CLI screenshot beside a live harness session. Earns its line when: a capture spoiled by a concurrent session.
 - Never measure during the unfurl; freeze a frame with the animations API. `specs/ui-design.md` already makes reduced motion the control for a timing question, so this needs an incident that control cannot settle.
 
+Noted 2026-09-20, overtaken: the wait itself now lives in `specs/settle-doctrine.md`, The environment, the bullet opening "A sleep past an animation's nominal duration still lands mid-animation", which carries the fact and the poll shape; Gate 2 item 6 stays the imperative. The incident that moved it, the plate read on PR #642, is one the reduced-motion control would have settled, since `public/motion.css` collapses that animation under it too, so this row records that it did not earn a gate line (Alex, 2026-09-20).
+
 ## Gate 3: before writing CSS or moving layout
 
 - A cascade fix verified inside a hidden subtree proves nothing about the painted case. Earns its line when: the cold skeptic catches one.
@@ -82,7 +84,7 @@ The date-flake clause, that a hunt-suite red not reproducing locally is a date f
 
 ## Closed out here, no promotion owed
 
-Already written where they are read: the label-parsing helper and the nonexistent-browser fixture (Gate 1's degenerate-fixture line); the bestiary fixture drift (its own test); gitlinked worktrees (`.gitignore`); a rect read mid-transition (`src/site/shared/room-seats.ts`); a colour compared by channel and emulated-media overrides (a comment at each site, plus `specs/settle-doctrine.md`'s same-run control); the oracle's metric and caption (`design/oracle/`); a clip inside the viewport (harness default); the harness window height (Issue #607). No cause ever recorded: the camera check that establishes its own state and blurs first. Retired or falsified: the mask byte-compare, the ANSI grep count, two shipped capture rows.
+Already written where they are read: the label-parsing helper and the nonexistent-browser fixture (Gate 1's degenerate-fixture line); the bestiary fixture drift (its own test); gitlinked worktrees (`.gitignore`); a rect read mid-transition (`src/site/shared/room-seats.ts`); a colour compared by channel and emulated-media overrides (a comment at each site, plus `specs/settle-doctrine.md`'s same-run control); the oracle's metric and caption (`design/oracle/`); a clip inside the viewport (harness default); the harness window height (Issue #607); the wait on the unfurl (`specs/settle-doctrine.md`, The environment). No cause ever recorded: the camera check that establishes its own state and blurs first. Retired or falsified: the mask byte-compare, the ANSI grep count, two shipped capture rows.
 
 Noted 2026-09-16, overtaken before the move: the harness window height now lives in `specs/settle-doctrine.md`, The environment, the bullet opening "The harness ASKS for a window far taller than a screen", via PR #620 (merged 2026-09-14).
 
