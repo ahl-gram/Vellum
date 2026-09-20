@@ -142,34 +142,36 @@ section points there rather than restating it.
   another, and no cause is asserted here for why two shots differ: nothing in this repo measures one.
   The imperative is Gate 2's "run the probe's control in the same run".
 - **A sleep past an animation's nominal duration still lands mid-animation.** The place card's
-  unfurl is `paperUnfurl` in `public/motion.css`, a `rotateX` roll graded `--unfurl-quick` (400ms)
-  on a shown card and `--unfurl` (650ms) on a pinned one, and `showPlaceCard` in
-  `src/site/living-chart/place-overlay.ts` restarts it on every show, which `mouseenter`, `focus`
-  and `click` each trigger, so a gesture sequence starts the roll more than once and a clock started
-  at the first show is not started at the last restart; on a throttled runner the roll's wall length
-  is main-thread bound besides (the CD7b rows in
-  `.claude/skills/vellum-footguns/references/flake-record.md`). A rect or a frame read mid-roll is
-  foreshortened, and every number taken from it is plausible and wrong. Wait on the animation's own
-  state, never on the clock: poll `getAnimations()` on the animated element until the list is
-  NON-EMPTY and every entry's `playState` is `"finished"`, the shape `atRest` in
-  `src/cli/e2e-slide.ts` carries, because `[].every()` is true and an element with no animation at
-  all reports finished; take the rect only once that poll has resolved. Under
-  `prefers-reduced-motion` (the media block in `public/motion.css`) every animation collapses to
-  near zero and the same poll resolves at once, which is what keeps that arm the control
-  `specs/ui-design.md` makes it. Gate 2 item 6 carries the typing-moment half.
+  unfurl is `paperUnfurl` in `public/motion.css`, a `rotateX` roll that the `.pc-inner` rules in
+  `public/living-chart.css` grade `--unfurl-quick` (400ms) on a shown card and `--unfurl` (650ms)
+  on a pinned one, and `showPlaceCard` in `src/site/living-chart/place-overlay.ts` restarts it on
+  every show, which `mouseenter`, `focus` and `click` each trigger, so a gesture sequence starts
+  the roll more than once and a clock started at the first show is not started at the last restart;
+  and on a throttled runner the wait before the class change that starts a roll even commits is
+  main-thread bound (the CD7b rows in `.claude/skills/vellum-footguns/references/flake-record.md`),
+  so a sleep sized to the animation is a bet on the runner besides. A rect or a frame read mid-roll
+  is foreshortened, and every number taken from it is plausible and wrong. Wait on the animation's
+  own state, never on the clock: poll `getAnimations()` on the element that CARRIES the animation,
+  `.pc-inner` and not `#place-card`, until the list is NON-EMPTY and every entry's `playState` is
+  `"finished"`, the shape `atRest` in `src/cli/e2e-slide.ts` carries, because `[].every()` is true
+  and an element with no animation at all reports finished; a parent box reports none while its
+  child rolls, so a bare poll there resolves at once and a guarded one never does, and
+  `{ subtree: true }` from the box is the other way to reach the child. Take the rect only once
+  that poll has resolved. Under `prefers-reduced-motion` (the media block in `public/motion.css`)
+  every animation collapses to near zero and the same poll resolves at once, which is what keeps
+  that arm the control `specs/ui-design.md` makes it. Gate 2 item 6 carries the typing-moment half.
 - **A clip with a negative `x` is neither clamped nor refused: `Page.captureScreenshot` hands back a
   frame of the clip's SIZE taken from the viewport's top-left corner, the requested `y` lost with
   it.** On an unscrolled page that corner is the page header, which is the frame a card at the left
-  edge yields once a probe pads its rect (`Math.floor(rect.left) - 3` is the shape that did it). A
-  negative `y` is honoured as an offset, with the rows above the document white, so the two axes do
-  not fail alike and a symmetric expectation is what keeps the `x` case silent. Nothing in the
-  harness guards it: `shoot` in `scripts/e2e/harness.mjs` passes its clip straight through, and
-  `sampleRow` in `scripts/e2e/pixel-support.mjs` adds the scroll and clamps nothing. Clamp a
-  computed origin at zero before the call, and read a frame that shows the header or the nav as this
-  before reading it as the thing you meant. The DOM is not where the negative came from: `axisNudge`
-  in `src/render/place-card.ts` never pushes a card past its box, so a card at `left: 0` is the
-  clamp working, and a negative origin is the probe's own arithmetic on the rect. Gate 2 item 13
-  carries the typing-moment half, and this is its second instance.
+  edge yields once a probe pads its rect (a pad subtracted from a `left` of 0). A negative `y` is
+  honoured as an offset, with the rows above the document white, so the two axes do not fail alike
+  and a symmetric expectation is what keeps the `x` case silent. Nothing in the harness guards it:
+  `shoot` in `scripts/e2e/harness.mjs` passes its clip straight through, and `sampleRow` in
+  `scripts/e2e/pixel-support.mjs` adds the scroll and clamps nothing. Clamp a computed origin at
+  zero before the call, and read a frame that shows the header or the nav as this before reading it
+  as the thing you meant. A card at `left: 0` is the clamp working (`axisNudge` in
+  `src/render/place-card.ts` never pushes a card's near edge past its box), so a negative origin is
+  the probe's own arithmetic on the rect and not the DOM's. Gate 2 item 13 points here.
 - **The headless window has a minimum width clamp.** A window asked for narrower than the clamp lays
   out at the clamp and the capture is cropped, which reads as an overflow bug that is not there. The
   route to a true narrow viewport is device-metric emulation, wrapped as `setMobileViewport` and
