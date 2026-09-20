@@ -1,4 +1,4 @@
-/* Three self-hosted roles for the site chrome only (display, flourish, body; licences in /fonts/OFL.txt); the charts' own lettering stays the Iowan serif of `fontFamily` in `src/render/style.ts`, part of the byte-determinism contract, so touching it owes a regen. */
+/* Three self-hosted roles for the site chrome only (display, flourish, body; licences in /fonts/OFL.txt); the charts' own lettering is each style's `fontFamily` in `src/render/style.ts`, part of the byte-determinism contract, so touching it owes a regen. */
 
 @font-face {
   font-family: 'IM Fell English SC';

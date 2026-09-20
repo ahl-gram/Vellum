@@ -46,7 +46,7 @@
   font-size: 8.5px; letter-spacing: 0.08em; color: var(--chart-ink); white-space: nowrap;
   text-shadow: 0 0 4px var(--chart-paper), 0 0 8px var(--chart-paper);
 }
-/* Home seats the kit's Glass with literal offsets, not the chrome vars, which src/layouts/BaseLayout.astro narrows under 720px while home's camera never moved; what the kit's corner sets beyond dress is stood down here, and test/site/kit-scope.test.ts pins that list. */
+/* Home seats the kit's Glass with literal offsets, not the chrome vars, which src/layouts/BaseLayout.astro narrows under 720px while home's camera never moved; what the kit's corner sets beyond dress is stood down here, and `stoodDown` in `test/site/kit-scope.test.ts` pins that list. */
 #lf-controls { display: none; position: absolute; right: 1.6rem; bottom: 1.4rem; z-index: auto; animation: none; pointer-events: auto; }
 #lf-controls.on { display: flex; }
 #lf-controls button:focus-visible { outline-color: var(--ink-dark); }

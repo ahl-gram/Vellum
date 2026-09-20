@@ -8,7 +8,7 @@
   --unfurl-quick: 400ms;
   --ink-draw: 1200ms;
   --ink-dry: 1200ms;
-  --turn: 900ms;          /* the sheet turn, read by src/site/explorer/sheet-turn.ts */
+  --turn: 900ms;          /* the sheet turn, read by `turnTiming` in `src/site/explorer/sheet-turn.ts` */
   --verso-turn: 1200ms;   /* the verso flip, slower than a re-dress on purpose */
 
   /* The redraft grade is shorter than the once-per-draw arrival because a redraft fires on every settle; the dry waits stagger names by tier, past the inset's 200ms crossfade. */
@@ -17,7 +17,7 @@
   --redraft-dry-wait: 260ms;
   --redraft-dry-wait-village: 500ms;
   --redraft-dry-wait-hamlet: 740ms;
-  --glide: 300ms;         /* the zoom glide, read per glide by glideMs in src/site/explorer/glass.ts and the rooms' seats, bypassed under reduced motion */
+  --glide: 300ms;         /* the zoom glide, read per glide by `glideMs` in `src/site/explorer/glass.ts` and the rooms' seats, bypassed under reduced motion */
 
   --ease-paper: cubic-bezier(0.22, 0.61, 0.36, 1);
   --ease-unfurl: cubic-bezier(0.66, 0, 0.2, 1.03);
@@ -70,7 +70,7 @@
   to   { opacity: 0; transform: scale(1); }
 }
 
-/* .place-hit and .lf-station stay excluded: each is a button on its own load-bearing transform (the hit target, `P2` in `scripts/e2e/suite-cards.mjs` and its P2c pair; home's counter-scaled station anchor), which the house lift would replace and the house transition would lag a beat behind every zoom. */
+/* .place-hit and .lf-station stay excluded: each is a button on its own load-bearing transform (the hit target, `P2c` in `scripts/e2e/suite-cards.mjs`; home's counter-scaled station anchor), which the house lift would replace and the house transition would lag a beat behind every zoom. */
 button:not(.lf-station):not(.place-hit),
 .actions a,
 .action-link {

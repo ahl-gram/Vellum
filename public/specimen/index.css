@@ -1,4 +1,4 @@
-/* The Specimen Book: a chart room whose sheet is the Gallery's first plate. The furniture is atelier.css's; this sheet seats the plate alone and names no kit class with a dress (test/site/kit-scope.test.ts reads it like every page sheet). */
+/* The Specimen Book: a chart room whose sheet is the Gallery's first plate. The furniture is atelier.css's; this sheet seats the plate alone and names no kit class with a dress (`offendersIn` in `test/site/kit-scope.test.ts` reads it like every page sheet). */
 
 .stage { display: flex; align-items: center; justify-content: center; box-sizing: border-box;
   padding: var(--reserve-top, 8rem) var(--reserve-right, 0px) var(--reserve-bottom, 8rem) 0; }

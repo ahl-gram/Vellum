@@ -10,7 +10,7 @@
   background: transparent; border: 0; border-radius: 0; padding: 0;
   pointer-events: auto; cursor: pointer;
 }
-/* The ring rides ::after (the scrub dot is ::before) so the .place-hit element keeps its zero-transition reset (`P2` in `scripts/e2e/suite-cards.mjs` and its P2c pair) and idle parity holds. */
+/* The ring rides ::after (the scrub dot is ::before) so the .place-hit element keeps its zero-transition reset (`P2c` in `scripts/e2e/suite-cards.mjs`) and idle parity holds. */
 .place-hit::after {
   content: ""; position: absolute; inset: 0; margin: auto;
   width: 20px; height: 20px; border-radius: 50%; box-sizing: border-box;
@@ -34,7 +34,7 @@
 }
 /* id plus attribute beats the id-only rule above, so [hidden] really hides. */
 #place-card[hidden] { display: none; }
-/* A flipped card is anchored on the side it flips toward, so shrink-to-fit measures the room it will occupy: anchored on the mark's side, a town at nx 0.72 got a 97px ribbon 478px tall inside a 266px chart. */
+/* A flipped card is anchored on the side it flips toward, so shrink-to-fit measures the room it will occupy: anchored on the mark's side, a town at nx 0.72 got a column as wide as the 28% gap it was flipping away from, a 97px ribbon 478px tall inside a 266px chart. */
 #place-card.flip-h { left: auto; right: calc(100% - var(--pc-nx, 0) * 100%);
   transform-origin: 100% 0;
   transform: scale(calc(1 / var(--zoom-k, 1)))

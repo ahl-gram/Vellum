@@ -1,4 +1,4 @@
-/* The house style: the type roles, control idiom and shared slips, linked on every page before the page's own sheet, so this sheet owns the voice and a page keeps the last word on layout; test/site/house-style.test.ts pins the values. */
+/* The house style: the type roles, control idiom and shared slips, linked on every page before the page's own sheet, so this sheet owns the voice and a page keeps the last word on layout; `ruleOf` in `test/site/house-style.test.ts` pins the values. */
 
 .intro {
   font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
