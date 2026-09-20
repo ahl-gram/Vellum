@@ -53,7 +53,6 @@ Noted 2026-09-16, overtaken before the move: the rule itself is written in `.cla
 - A scroll fixture is fragile at both ends: a helper that scrolls first dissolves it, and a CDP space key scrolls only with text alongside. Earns its line when: a CI red.
 - Drive a value the field accepts: an input whose pattern refuses garbage never reaches submit. Earns its line when: a check found to measure nothing.
 - No CLI screenshot beside a live harness session. Earns its line when: a capture spoiled by a concurrent session.
-- Never measure during the unfurl; freeze a frame with the animations API. `specs/ui-design.md` already makes reduced motion the control for a timing question, so this needs an incident that control cannot settle.
 
 ## Gate 3: before writing CSS or moving layout
 
@@ -85,6 +84,8 @@ The date-flake clause, that a hunt-suite red not reproducing locally is a date f
 Already written where they are read: the label-parsing helper and the nonexistent-browser fixture (Gate 1's degenerate-fixture line); the bestiary fixture drift (its own test); gitlinked worktrees (`.gitignore`); a rect read mid-transition (`src/site/shared/room-seats.ts`); a colour compared by channel and emulated-media overrides (a comment at each site, plus `specs/settle-doctrine.md`'s same-run control); the oracle's metric and caption (`design/oracle/`); a clip inside the viewport (harness default); the harness window height (Issue #607). No cause ever recorded: the camera check that establishes its own state and blurs first. Retired or falsified: the mask byte-compare, the ANSI grep count, two shipped capture rows.
 
 Noted 2026-09-16, overtaken before the move: the harness window height now lives in `specs/settle-doctrine.md`, The environment, the bullet opening "The harness ASKS for a window far taller than a screen", via PR #620 (merged 2026-09-14).
+
+Noted 2026-09-20, overtaken: the unfurl line under Gate 2 (never measure during the unfurl; freeze a frame with the animations API) now lives in `specs/settle-doctrine.md`, The environment, the bullet opening "A sleep past an animation's nominal duration still lands mid-animation". The incident that moved it, the plate read on PR #642, is one the reduced-motion control would have settled, since `public/motion.css` collapses that animation under it too, so the line did not earn a gate of its own; the spec carries the fact and the poll shape, and Gate 2 item 6 stays the imperative (Alex, 2026-09-20).
 
 ## From Issue #611's comment of 2026-09-14
 
