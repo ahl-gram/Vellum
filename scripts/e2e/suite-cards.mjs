@@ -220,7 +220,7 @@ export async function run(ctx) {
   // #633: a card taller than its box cannot be fitted by any offset, so the bound IS the principle and the sweep only confirms it. The 0.5px tolerance is for the sub-pixel residual of a cap published in CSS pixels from a fractional rect; it cannot hide a real regression, whose smallest measured instance is 8.61px (seed 5 at 390 on main, 2026-09-19).
   // #633: a card taller than its box cannot be fitted by any offset, so the bound IS the principle. Swept 2026-09-19: the smallest real overage measured is 8.61px, so 0.5px is the sub-pixel residual of a cap published from a fractional rect and cannot hide one.
   const OVER_BOX_TOLERANCE = 0.5;
-  // Swept 2026-09-20 over the 9 capped cards of the four sitting seeds at 320: the fade lifts the foot row between 7.8 and 25.9 above the same card's own text, and an UNFADED card reads -9.9, so 4.0 sits below the worst case with headroom and 14 points above the unfaded reading. A floor of 12, picked before the sweep, would have failed on Laihoanui.
+  // Swept 2026-09-20 over the 9 capped cards of the four sitting seeds at 320 (out/633-fade-sweep.mjs): the fade lifts the foot row between 7.8 and 25.9 above the same card's own text, and this same build with the fade rule deleted reads -2.8, so 4.0 sits below the worst case and 6.8 above that control. A floor of 12, picked before the sweep, would have failed on Laihoanui at 7.8.
   const FADE_LIFT_FLOOR = 4.0;
   // Seed 4294967295 is the WITNESS that makes this bite: its Kralgov card measured 150.95px past a 247.02px box at 320 and 61.27px past a 301.05px box at 390 on main at 18bacfd. Every place is measured, not that one card, because the defect is a class and a copy change that promotes a different place to the worst would leave a single-card guard green.
   const NARROW_SEED = 4294967295;
@@ -278,14 +278,18 @@ export async function run(ctx) {
   });
 
   // #633: these stand on the 320 page P19b left, where the cap bites. They are the half P19 and P19b cannot see: those two read the card's own rect, and a rect is blind to whether the overflow scrolls, whether the card answers a pointer, and whether anything is painted to say the card goes on.
-  await step("P20 to P25", async () => {
+  await step("P20 to P26", async () => {
+    // The unpinned arm reads a card that is SHOWN: a hidden one reports its host's pointer-events by inheritance and would pass whatever this rule said.
     const at = await evaluate(`(() => {
       const hit = [...document.querySelectorAll(".place-overlay .place-hit")].find((e) => (e.getAttribute("aria-label") || "").split(", ")[0] === "Kralgov");
       if (!hit) return { error: "no Kralgov" };
-      const inner = document.querySelector("#place-card .pc-inner");
-      const restPe = inner ? getComputedStyle(inner).pointerEvents : null;
+      hit.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+      const card = document.getElementById("place-card");
+      const inner = card && card.querySelector(".pc-inner");
       const b = hit.getBoundingClientRect();
-      return { restPe, x: Math.round(b.x + b.width / 2), y: Math.round(b.y + b.height / 2) };
+      return { shownUnpinned: !!card && !card.hidden && !card.classList.contains("pinned"),
+        restPe: inner ? getComputedStyle(inner).pointerEvents : null,
+        x: Math.round(b.x + b.width / 2), y: Math.round(b.y + b.height / 2) };
     })()`);
     if (at.error) throw new Error(`P20 ${at.error}`);
     await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: at.x, y: at.y });
@@ -298,8 +302,9 @@ export async function run(ctx) {
       (d, last) => !!d && d.name === "Kralgov" && d.pinned && !!last && last.name === "Kralgov" && d.h === last.h && d.pe === last.pe,
       "P20 Kralgov pinned at 320",
     );
-    check("P20 the pinned card restores pointer events so it can hold a scroll, and an unpinned one does NOT, or the card takes the pointer from its own mark (#633)",
-      at.restPe === "none" && open.pe === "auto", JSON.stringify({ unpinned: at.restPe, pinned: open.pe }));
+    check("P20 a SHOWN unpinned card does not take the pointer and a pinned scrolling one does, or the card takes it from its own mark (#633)",
+      at.shownUnpinned === true && at.restPe === "none" && open.pe === "auto",
+      JSON.stringify({ shownUnpinned: at.shownUnpinned, unpinned: at.restPe, pinned: open.pe }));
     check("P21 the capped card carries the mark that says it continues, and it has something left to show (#633)",
       open.more === true && open.over > 1, JSON.stringify({ more: open.more, hiddenTail: open.over }));
 
@@ -310,6 +315,20 @@ export async function run(ctx) {
     const lift = +(median(foot) - median(mid)).toFixed(1);
     check("P22 the fade actually PAINTS: the card's foot reads lighter than its own text (#633)",
       lift >= FADE_LIFT_FLOOR, JSON.stringify({ lift, floor: FADE_LIFT_FLOOR, foot: median(foot), mid: median(mid) }));
+
+    // P26 is P24's positive half: P24 proves a card with NO tail releases the gesture, and a guard that only proves the negative is half a guard.
+    const beforeWheel = await evaluate(`(() => { const i = document.querySelector("#place-card .pc-inner"); return { scrollTop: +i.scrollTop.toFixed(2), k: window.__vellumZoomState().k }; })()`);
+    const onCard = { x: Math.round(open.left + (open.right - open.left) / 2), y: Math.round(open.top + open.h / 2) };
+    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: onCard.x, y: onCard.y });
+    await sleep(120);
+    await wheel(onCard.x, onCard.y, 240);
+    await sleep(600);
+    const afterWheel = await evaluate(`(() => { const i = document.querySelector("#place-card .pc-inner"); return { scrollTop: +i.scrollTop.toFixed(2), k: window.__vellumZoomState().k }; })()`);
+    check("P26 a pinned card that HAS a tail holds the wheel and scrolls it, and the camera under it stays put (#633)",
+      afterWheel.scrollTop > beforeWheel.scrollTop + 1 && afterWheel.k === beforeWheel.k,
+      JSON.stringify({ before: beforeWheel, after: afterWheel }));
+    await evaluate(`(() => { const i = document.querySelector("#place-card .pc-inner"); i.scrollTop = 0; })()`);
+    await sleep(200);
 
     const bare = await evaluate(`(() => { const c = document.getElementById("place-card").getBoundingClientRect(); const v = document.getElementById("map-viewport").getBoundingClientRect(); return { x: Math.round(v.left + 20), y: Math.round(c.top > v.top + 48 ? v.top + 20 : v.bottom - 20), k: window.__vellumZoomState().k }; })()`);
     await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: bare.x, y: bare.y });

@@ -155,6 +155,16 @@ test("#633 a card that fits is NOT marked, or every card wears the sign and it s
   assert.equal(card.classList.contains("pc-more"), false);
 });
 
+test("#633 a sliver under the threshold is not a tail: half a pixel of scroll is noise, not more", async () => {
+  const { card, hits, inner } = await overlayOver(() => CHART);
+  withScroll(inner, 300.5, 300);
+
+  shownWith(card, hits[0]!, { left: 80, top: 20, right: 254, bottom: 320.5 });
+
+  assert.equal(card.classList.contains("pc-more"), false);
+  assert.equal(card.classList.contains("pc-scrolls"), false);
+});
+
 test("#633 the mark retires when the reader reaches the end, from the SAME predicate the show used", async () => {
   const { card, hits, inner } = await overlayOver(() => CHART);
   withScroll(inner, 360, 299);
