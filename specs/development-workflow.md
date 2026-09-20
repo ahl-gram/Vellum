@@ -75,6 +75,37 @@ to Alex in `AskUserQuestion` and relays his rulings back. The STOP is the same; 
 menu changes, because a subagent's question does not reach Alex. The implementer records the relayed
 rulings on the issue at step 12 exactly as a session would record its own.
 
+**When the ruling is an appearance, the menu carries stills.** A direction described in prose asks
+Alex to picture it and then holds him to what he pictured, which is how a ruling gets made on
+something nobody measured. Render the candidates instead, through `vellum-plate-reader`, whose own
+definition carries the zooms, at the viewports and on the seeds the defect was measured at, or on the
+ones the decision turns on where nothing measured it. `specs/conventions.md` "How a design decision
+is made" governs the sitting itself, the count of directions and what becomes of the stills
+afterwards. **Where the decision changes an appearance that already ships, today's behavior is
+rendered beside the candidates as a control**, because a candidate with nothing beside it reads as
+better than it is; a decision about a surface that does not exist yet has nothing to control against
+and renders its candidates alone. The stills go in `out/` and each option in the menu names the file
+that shows it.
+
+**The candidate build is a throwaway spike, and it is not step 8.** Rendering a direction takes code
+and step 3 has already said the plan carries none, so the carve-out is drawn narrow: the spike's only
+output is the stills, and the ruled direction is built test-first from step 8 like anything else. A
+candidate kept because it already works is an implementation that skipped its failing test. **The
+spike is never committed**, which keeps step 9's push-at-the-first-commit default off a throwaway and
+leaves nothing to force push away. It is the one dispatch that does not take step 14's commit first:
+that rule guards against an agent moving the tree under you, and `vellum-plate-reader` may not move
+one and reads the WORKING tree anyway, since its plumbing builds and serves `dist/`.
+
+**Arms that coexist in one spike are cheaper to read.** `vellum-plate-reader` writes only into `out/`
+and never edits source, so it cannot switch the tree itself: a spike that exposes every arm at once,
+behind a flag, a query parameter or separate mock pages, is read by a single run. Where the arms
+cannot coexist, whoever dispatches it re-renders between them and says so in the menu.
+
+**`out/` inside a worktree is not where Alex looks.** Any session standing in one copies the stills
+to the MAIN checkout's `out/` before putting the menu; a dispatched lane cannot reach outside its own
+tree, so it reports absolute paths and its dispatcher copies them, the same way it holds the menu
+itself. Copy before the spike goes, because `out/` is gitignored and nothing else holds them.
+
 **7. Worktree, then rename the branch**, before the first commit, or the PR carries the harness's
 name instead of yours. The rest of the worktree rules, including why the branch needs renaming at
 all, are `CLAUDE.md`'s Worktrees section. A `vellum-implementer` lane already stands in a harness
@@ -129,8 +160,9 @@ only the branch's CI cannot see it.
 guard, and step 8's commits have to exist first: it mutates in its own detached worktree at the DISPATCH
 tree's HEAD (built by `scripts/agent-sandbox.ts`, #575), so anything uncommitted is simply not in
 the tree it proves, and its ledger names the sha it proved. `vellum-plate-reader` when the
-deliverable is an appearance. Zero red from the prover is a hole, not a pass, and a guard proved
-unable to bite is deleted rather than shipped.
+deliverable is an appearance, and again here when step 6's menu was ruled from stills, since those
+measured a spike and this run measures what was built. Zero red from the prover is a hole, not a
+pass, and a guard proved unable to bite is deleted rather than shipped.
 
 **12. Record every call the issue did not rule on, as a dated comment on the issue, before the PR
 is opened.** Not before the push: with step 9 the first push comes early, so the deadline that
@@ -159,14 +191,18 @@ takes, including the one for a PR that has an issue and deliberately leaves it o
 **14. Run `vellum-pr-skeptic`, dispatched COLD.** The prompt is the PR number or branch name and
 NOTHING else: no summary, no claims about tests, no rationale. Make no edits while it runs.
 
-**Commit anything in progress before you dispatch it**, and before any dispatched review agent. It runs
+**Commit anything in progress before you dispatch it**, and before any dispatched review agent, with
+the single exception of a step 6 spike under `vellum-plate-reader`, which reads the working tree by
+building it and may not move it. It runs
 in the directory you launched it from, which is your worktree, and on 2026-09-11 this one checked a PR
 head out in two live ones (#573). No dispatched review agent may move or restore the tree it was
 dispatched from. `vellum-pr-skeptic` goes further and runs NOTHING in it, suites included, because a
 suite run there deletes the generated assets under `public/` (Alex, 2026-09-12); both it and
 `vellum-guard-prover` build their sandbox with `scripts/agent-sandbox.ts` rather than a recipe of
 their own (#575). The other three keep their documented work in the dispatch tree, `vellum-plate-reader`'s
-`out/` samples included, since that is where Alex looks for them.
+`out/` samples included, because its own boundary writes only into `out/` and the other two hold no
+write tool at all. That is where Alex looks when the dispatch tree is the main checkout; when it is a
+lane's worktree, whoever dispatched the lane copies the samples across, as step 6 says.
 
 **An agent whose own DEFINITION this pull request changes cannot be trusted to review the change.**
 On PR #576 the cold skeptic reported that its loaded instructions were the pre-PR version while its

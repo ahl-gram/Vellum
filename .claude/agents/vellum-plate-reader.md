@@ -1,6 +1,6 @@
 ---
 name: vellum-plate-reader
-description: Renders the actual artifact (a chart, a page, an Explorer state, a motion sequence) at real viewports through CDP and MEASURES it, for work whose acceptance is about appearance, layout, motion, or legibility. Use before opening a PR on any presentation sub, and whenever a claim is about how something looks or reads rather than what the DOM contains.
+description: Renders the actual artifact (a chart, a page, an Explorer state, a motion sequence) at real viewports through CDP and MEASURES it, for work whose acceptance is about appearance, layout, motion, or legibility. Use before opening a PR on any presentation sub, over a throwaway spike at workflow step 6 when Alex is to rule an appearance from stills, and whenever a claim is about how something looks or reads rather than what the DOM contains.
 tools: Bash, Read, Write, Glob, Grep
 model: sonnet[1m]
 effort: xhigh
@@ -58,6 +58,8 @@ Write only into `out/`. Never edit source, tests, or committed charts. If you be
 
 Lead with what you measured and what it says, then the file list. For every acceptance criterion you were asked about, give one of: MET with the number that proves it, NOT MET with the number that disproves it, or NOT OBSERVABLE with the reason. If a criterion is a glance property, say which full-scale render you judged it from.
 
-Name every file you wrote, with its path under `out/`, so Alex can open it. That list is half the deliverable.
+**A step 6 sitting has no acceptance criteria yet**, because Alex has not ruled: the deliverable there is a COMPARISON. Report each arm against the control on the same measurements, say which arm wins each and by how much, and name what each arm costs the reader. Do not recommend one; the ruling is his. The spike you render is uncommitted by design, so build and serve the working tree as usual and do not ask for a commit.
+
+Name every file you wrote, with its path under `out/`, so Alex can open it. Give ABSOLUTE paths when you are dispatched inside a worktree, since its `out/` is not the one he opens. That list is half the deliverable.
 
 No em-dashes in anything you write.

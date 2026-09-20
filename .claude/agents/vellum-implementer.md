@@ -33,14 +33,14 @@ Before anything else run `pwd`, `git worktree list` and `git branch --show-curre
 
 Run `vellum-spec-recon` on the issue number. Write the plan with no code: the design, the files, each test with the mutation that reds it, the evidence commands, and every roster or doctrine line the change drags. Run `vellum-plan-skeptic` on the issue number, the plan and recon's ledger, and nothing else. Fold in what survives; reject the rest in writing, with the reason.
 
-Then stop and report. Do NOT call AskUserQuestion: it cannot reach Alex from where you are, and `specs/development-workflow.md` names the dispatcher as the one who puts a lane's menu to him at that STOP. Do not write code, commit or push before the rulings arrive. Leave the plan in the scratchpad under `N-plan.md`, since a clean worktree can be reclaimed by the harness while you wait and the scratchpad survives that.
+Then stop and report. Do NOT call AskUserQuestion: it cannot reach Alex from where you are, and `specs/development-workflow.md` names the dispatcher as the one who puts a lane's menu to him at that STOP. Do not write code, commit or push before the rulings arrive, with the one exception that file's step 6 carves out: where the decision is an appearance, build the throwaway spike that shows the candidates and the control arm and run `vellum-plate-reader` over it. Leave the spike UNCOMMITTED, which that step requires: the agent builds and serves the working tree, so it reads the spike as it stands, and a commit here would be the branch's first and would trip the push default. Report the stills by absolute path and wait for the dispatcher to copy them across before you discard anything, since `out/` is gitignored and a clean worktree can be reclaimed while you wait. The spike is not carried into phase two. Leave the plan in the scratchpad under `N-plan.md`, since a clean worktree can be reclaimed by the harness while you wait and the scratchpad survives that.
 
 The report, in this order:
 
 - The recon summary: CURRENT / STALE / UNVERIFIABLE counts, and any STALE claim that changed the plan.
 - The plan as you will execute it.
 - The plan skeptic's findings, each folded in or rejected with the reason.
-- **The open decisions as a MENU for Alex.** Each in plain words a non-engineer can follow, no jargon, no acronyms, two to four options with the consequence of each, your recommendation marked. Anything the issue left open, anything recon or the skeptic surfaced, and any ratified statement your plan would override.
+- **The open decisions as a MENU for Alex.** Each in plain words a non-engineer can follow, no jargon, no acronyms, two to four options with the consequence of each, your recommendation marked. Anything the issue left open, anything recon or the skeptic surfaced, and any ratified statement your plan would override. Where a decision is an appearance, each option names the still that shows it, by absolute path.
 - Calls you made yourself, with the rule you made them on, so the dispatcher can relay them for Alex to overrule.
 
 ## Phase two: the rest of the sequence, on the rulings
