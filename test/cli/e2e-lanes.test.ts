@@ -49,7 +49,7 @@ const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   "zoom-gestures": 3.1,
   "home": 99.5, // re-measured 2026-08-25, local run: Subs 3-4a tripled the suite since the 2026-08-14 3.1s
   "landfall": 23.3, // measured 2026-08-25, local single-suite run
-  "cards": 2.9,
+  "cards": 10.2, // re-measured 2026-09-20 with #633's nine checks, P19 to P27, for the 33 this suite itself prints: five local single-suite runs read 9.1 every time against the 2.9 the suite carried before, so 10.2 is the worst case plus about 12%. The 54 an earlier version of this line quoted is the render plus cards tally the runner forces whenever cards is selected, not this suite's own count, and the cold review's round 4 on PR #642 caught it
   "motion": 2.4,
   "room-ink": 2.4,
   "fallback": 2.2,

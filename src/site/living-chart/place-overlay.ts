@@ -70,6 +70,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
 
   function fillCardInner(inner: HTMLElement, card: PlaceCard, place: PlaceMark): void {
     inner.replaceChildren();
+    inner.scrollTop = 0;
     const name = document.createElement("strong");
     name.className = "pc-name";
     name.textContent = card.name;
@@ -131,6 +132,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     void inner.offsetWidth;
     inner.style.animation = "";
     clampIntoView(el);
+    inner.tabIndex = el.classList.contains("pc-scrolls") && el.classList.contains("pinned") ? 0 : -1;
     placeOverlay.currentIdx = idx;
   }
 
@@ -152,15 +154,25 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     if (placeOverlay) paintLay(placeOverlay.currentIdx);
   }
 
+  function markScroll(el: HTMLElement, inner: HTMLElement): void {
+    const scrolls = inner.scrollHeight - inner.clientHeight > 1;
+    el.classList.toggle("pc-scrolls", scrolls);
+    // A scroll container is not keyboard operable without a tab stop of its own, and the tail this cap hides was fully visible before it: a reader with no pointer reaches it only once the card itself can hold focus.
+    inner.tabIndex = scrolls && el.classList.contains("pinned") ? 0 : -1;
+  }
+
   function clampIntoView(el: HTMLElement): void {
     if (!clampBox) return;
     el.style.setProperty("--pc-dx", "0px");
     el.style.setProperty("--pc-dy", "0px");
     const box = clampBox();
     if (!box) return;
+    el.style.setProperty("--pc-maxh", `${box.bottom - box.top}px`);
     const { dx, dy } = clampOffset(el.getBoundingClientRect(), box);
     el.style.setProperty("--pc-dx", `${dx}px`);
     el.style.setProperty("--pc-dy", `${dy}px`);
+    const inner = el.querySelector(".pc-inner");
+    if (inner) markScroll(el, inner as HTMLElement);
   }
 
   function hidePlaceCard(): void {
@@ -196,6 +208,8 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     card.hidden = true;
     const inner = document.createElement("div");
     inner.className = "pc-inner";
+    // #633: d3-zoom is bound on the host's viewport, an ANCESTOR of the card carrying touch-action: none, so without this a drag or a wheel over the card reaches the camera and the card never scrolls; measured with a CDP touch pan, which cannot see a touch-action line at all and still read scrollTop 0 to 0. Whether a real thumb scrolls it is UNVERIFIABLE in this harness.
+    for (const ev of ["touchstart", "touchmove", "wheel"]) inner.addEventListener(ev, (e) => { if (inner.scrollHeight - inner.clientHeight > 1) e.stopPropagation(); }, { passive: true });
     card.appendChild(inner);
     // Both card actions are world-sheet only: a region manifest renumbers its places (#242), so an inset's index names a different settlement.
     const onWorldSheet = !(opts && opts.box);

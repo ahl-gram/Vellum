@@ -24,7 +24,7 @@ async function overlayOver(clampBox: (() => typeof CHART | null) | null) {
   // The shim answers "nothing here" to every query by design and must not grow into a selector engine, so this one lookup is stated, the same way the rects below are.
   const inner = walk(card).find((n) => n.classList.contains("pc-inner"))!;
   card.querySelector = ((sel: string) => (sel === ".pc-inner" ? inner : null)) as El["querySelector"];
-  return { card, hits, overlay };
+  return { card, hits, overlay, inner };
 }
 
 const published = (card: El) => ({
@@ -130,4 +130,36 @@ test("#387/#388 the host's box reaches the card through createLivingChart, not o
 
   // The engine spreads the box in conditionally, and dropping that one line costs every real host its clamp.
   assert.deepEqual(shownWith(card, hit, { left: 80, top: 200, right: 254, bottom: 390 }), { dx: "0px", dy: "-124px" });
+});
+
+// #633: the shim does no layout, so the inner's scroll geometry is stated here the way every rect in this file is.
+const withScroll = (inner: El, scrollHeight: number, clientHeight: number, scrollTop = 0) => {
+  Object.assign(inner as unknown as Record<string, number>, { scrollHeight, clientHeight, scrollTop });
+};
+
+test("#633 a card whose tail does not fit is marked as scrolling, which is what opens its live area and its tab stop", async () => {
+  const { card, hits, inner } = await overlayOver(() => CHART);
+  withScroll(inner, 360, 299);
+
+  shownWith(card, hits[0]!, { left: 80, top: 20, right: 254, bottom: 319 });
+
+  assert.equal(card.classList.contains("pc-scrolls"), true);
+});
+
+test("#633 a card that fits is NOT marked, or every card takes the pointer from the chart under it", async () => {
+  const { card, hits, inner } = await overlayOver(() => CHART);
+  withScroll(inner, 200, 200);
+
+  shownWith(card, hits[0]!, { left: 80, top: 20, right: 254, bottom: 220 });
+
+  assert.equal(card.classList.contains("pc-scrolls"), false);
+});
+
+test("#633 a sliver under the threshold is not a tail: half a pixel of scroll is noise, not more", async () => {
+  const { card, hits, inner } = await overlayOver(() => CHART);
+  withScroll(inner, 300.5, 300);
+
+  shownWith(card, hits[0]!, { left: 80, top: 20, right: 254, bottom: 320.5 });
+
+  assert.equal(card.classList.contains("pc-scrolls"), false);
 });

@@ -1,9 +1,11 @@
 // Living Chart story-card overlay e2e (P1-P15, #53).
 import { makeStep } from "./step-support.mjs";
+import { makeSettle } from "./settle-support.mjs";
 
 export async function run(ctx) {
-  const { evaluate, send, check, shoot, sleep, waitSettled, waitReady, axDescription, serverState, consoleErrors, http4xx, PORT } = ctx;
+  const { evaluate, send, check, shoot, sleep, wheel, waitSettled, waitReady, axDescription, serverState, setMobileViewport, clearMobile, consoleErrors, http4xx, PORT } = ctx;
   const step = makeStep(ctx);
+  const settle = makeSettle(ctx);
   await step("P setup", async () => {
     await evaluate(`(()=>{
       document.getElementById("seed").value="42";
@@ -214,4 +216,186 @@ export async function run(ctx) {
   await shoot("explorer-place-card.png");
   await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}))`);
 
+  // #633: a card taller than its box cannot be fitted by any offset, so the bound IS the principle. Swept 2026-09-19: the smallest real overage measured is 8.61px, so 0.5px is the sub-pixel residual of a cap published from a fractional rect and cannot hide one.
+  const OVER_BOX_TOLERANCE = 0.5;
+  // Seed 4294967295 is the WITNESS that makes this bite: its Kralgov card measured 150.95px past a 247.02px box at 320 and 61.27px past a 301.05px box at 390 on main at 18bacfd. Every place is measured, not that one card, because the defect is a class and a copy change that promotes a different place to the worst would leave a single-card guard green.
+  const NARROW_SEED = 4294967295;
+  const narrowCount = await evaluate(`window.__vellumRunInline({kind:"draw",seed:${NARROW_SEED},overrides:{},render:{style:"antique",widthPx:1500,legend:true}}).manifest.places.length`);
+  // Focus rather than a pointer, deliberately: focus reaches EVERY mark, including the ones a neighbour's 26px hit covers at rest, and showPlaceCard composes the same card on both paths. Whether a pointer can reach a mark is a different question with its own issue.
+  const SWEEP = `(() => {
+    const vp = document.getElementById("map-viewport");
+    if (!vp) return { error: "no map-viewport" };
+    const v = vp.getBoundingClientRect();
+    const rows = [];
+    for (const h of document.querySelectorAll(".place-overlay .place-hit")) {
+      const want = (h.getAttribute("aria-label") || "").split(", ")[0];
+      h.focus();
+      const card = document.getElementById("place-card");
+      if (!card || card.hidden) { rows.push({ want, shown: false }); continue; }
+      const got = (card.querySelector(".pc-name") || {}).textContent;
+      const c = card.getBoundingClientRect();
+      rows.push({ want, got, shown: true, h: +c.height.toFixed(2), over: +(c.height - v.height).toFixed(2) });
+    }
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    return { boxW: +v.width.toFixed(2), boxH: +v.height.toFixed(2), rows };
+  })()`;
+  const sweepAt = async (width) => {
+    await setMobileViewport(width, 844);
+    // The metrics override has to be in effect BEFORE the boot navigate, and this suite otherwise never navigates at all, so the group re-boots through about:blank rather than resizing the page it inherited.
+    await send("Page.navigate", { url: "about:blank" });
+    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/#seed=${NARROW_SEED}&style=antique` });
+    if (!(await waitReady())) throw new Error(`P19 the explorer never drew at ${width}`);
+    // The card's height is set by wrapped text, so a face still swapping in measures a different card.
+    let fonts = null;
+    for (let i = 0; i < 100; i++) {
+      fonts = await evaluate(`document.fonts ? document.fonts.status : "no-fonts-api"`);
+      if (fonts !== "loading") break;
+      await sleep(50);
+    }
+    if (fonts === "loading") throw new Error(`P19 the faces never finished loading at ${width}`);
+    const d = await evaluate(SWEEP);
+    if (!d || d.error) throw new Error(`P19 the sweep found no chart box at ${width}: ${JSON.stringify(d)}`);
+    return d;
+  };
+  const verdict = (d, width) => {
+    const missed = d.rows.filter((r) => !r.shown || r.got !== r.want);
+    const worst = d.rows.filter((r) => r.shown).sort((a, b) => b.over - a.over)[0];
+    return {
+      ok: d.rows.length === narrowCount && missed.length === 0 && !!worst && worst.over <= OVER_BOX_TOLERANCE,
+      detail: JSON.stringify({ width, box: `${d.boxW}x${d.boxH}`, places: d.rows.length, of: narrowCount, missed: missed.map((r) => r.want), worst }),
+    };
+  };
+
+  await step("P19, P19b", async () => {
+    const at390 = verdict(await sweepAt(390), 390);
+    check("P19 at the ruled phone width no place card is taller than the chart box it is clamped into (#633)", at390.ok, at390.detail);
+    const at320 = verdict(await sweepAt(320), 320);
+    check("P19b and the same holds at 320, where two cards in three were over the box before this (#633)", at320.ok, at320.detail);
+  });
+
+  await step("P20 to P27", async () => {
+    // The unpinned arm reads a card that is SHOWN: a hidden one reports its host's pointer-events by inheritance and would pass whatever this rule said.
+    const at = await evaluate(`(() => {
+      const hit = [...document.querySelectorAll(".place-overlay .place-hit")].find((e) => (e.getAttribute("aria-label") || "").split(", ")[0] === "Kralgov");
+      if (!hit) return { error: "no Kralgov" };
+      hit.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
+      const card = document.getElementById("place-card");
+      const inner = card && card.querySelector(".pc-inner");
+      const b = hit.getBoundingClientRect();
+      return { shownUnpinned: !!card && !card.hidden && !card.classList.contains("pinned"),
+        restPe: inner ? getComputedStyle(inner).pointerEvents : null,
+        x: Math.round(b.x + b.width / 2), y: Math.round(b.y + b.height / 2) };
+    })()`);
+    if (at.error) throw new Error(`P20 ${at.error}`);
+    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: at.x, y: at.y });
+    await send("Input.dispatchMouseEvent", { type: "mousePressed", x: at.x, y: at.y, button: "left", clickCount: 1 });
+    await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: at.x, y: at.y, button: "left", clickCount: 1 });
+    const open = await settle(
+      `(() => { const c = document.getElementById("place-card"); if (!c || c.hidden) return null; const i = c.querySelector(".pc-inner"); const r = c.getBoundingClientRect(); const cs = getComputedStyle(i);
+        return { name: (c.querySelector(".pc-name") || {}).textContent, pinned: c.classList.contains("pinned"), scrolls: c.classList.contains("pc-scrolls"),
+          arrived: typeof i.getAnimations === "function" && i.getAnimations().every((a) => a.playState === "finished"),
+          pe: cs.pointerEvents, over: +(i.scrollHeight - i.clientHeight).toFixed(2), top: +r.top.toFixed(2), bottom: +r.bottom.toFixed(2), left: +r.left.toFixed(2), right: +r.right.toFixed(2), w: +r.width.toFixed(2), h: +r.height.toFixed(2) }; })()`,
+      (d, last) => !!d && d.name === "Kralgov" && d.pinned && d.arrived && !!last && last.name === "Kralgov" && d.h === last.h && d.pe === last.pe,
+      "P20 Kralgov pinned at 320",
+    );
+    check("P20 a SHOWN unpinned card does not take the pointer and a pinned scrolling one does, or the card takes it from its own mark (#633)",
+      at.shownUnpinned === true && at.restPe === "none" && open.pe === "auto",
+      JSON.stringify({ shownUnpinned: at.shownUnpinned, unpinned: at.restPe, pinned: open.pe }));
+    check("P21 the capped card has a tail to reach, which is what the scroll, the tab stop and the wheel below are for (#633)",
+      open.scrolls === true && open.over > 1, JSON.stringify({ scrolls: open.scrolls, hiddenTail: open.over }));
+
+    const beforeWheel = await evaluate(`(() => { const i = document.querySelector("#place-card .pc-inner"); return { scrollTop: +i.scrollTop.toFixed(2), k: window.__vellumZoomState().k }; })()`);
+    const onCard = { x: Math.round(open.left + (open.right - open.left) / 2), y: Math.round(open.top + open.h / 2) };
+    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: onCard.x, y: onCard.y });
+    await sleep(120);
+    await wheel(onCard.x, onCard.y, 240);
+    await sleep(600);
+    const afterWheel = await evaluate(`(() => { const i = document.querySelector("#place-card .pc-inner"); return { scrollTop: +i.scrollTop.toFixed(2), k: window.__vellumZoomState().k }; })()`);
+    check("P26 a pinned card that HAS a tail holds the wheel and scrolls it, and the camera under it stays put (#633)",
+      afterWheel.scrollTop > beforeWheel.scrollTop + 1 && afterWheel.k === beforeWheel.k,
+      JSON.stringify({ before: beforeWheel, after: afterWheel }));
+    await evaluate(`(() => { const i = document.querySelector("#place-card .pc-inner"); i.scrollTop = 0; })()`);
+    await sleep(200);
+
+    const kb = await evaluate(`(() => { const i = document.querySelector("#place-card .pc-inner"); i.focus(); return { tabIndex: i.tabIndex, focused: document.activeElement === i, scrollTop: +i.scrollTop.toFixed(2), scrolls: document.getElementById("place-card").classList.contains("pc-scrolls"), pinned: document.getElementById("place-card").classList.contains("pinned") }; })()`);
+    // PageDown, not ArrowDown: measured 2026-09-20, an arrow key does not scroll a focused scroll container in this build while PageDown does, and the cold review measured all three leaving scrollTop at 0 before the tab stop existed.
+    await send("Input.dispatchKeyEvent", { type: "rawKeyDown", windowsVirtualKeyCode: 34, nativeVirtualKeyCode: 34, code: "PageDown", key: "PageDown" });
+    await send("Input.dispatchKeyEvent", { type: "keyUp", windowsVirtualKeyCode: 34, nativeVirtualKeyCode: 34, code: "PageDown", key: "PageDown" });
+    await sleep(400);
+    const kbAfter = await evaluate(`+document.querySelector("#place-card .pc-inner").scrollTop.toFixed(2)`);
+    check("P27 a reader with no pointer can reach the tail the cap hides: the card takes a tab stop and PageDown scrolls it (#633)",
+      kb.tabIndex === 0 && kb.focused === true && kbAfter > kb.scrollTop + 1,
+      JSON.stringify({ ...kb, afterPageDown: kbAfter }));
+    await evaluate(`(() => { const i = document.querySelector("#place-card .pc-inner"); i.scrollTop = 0; })()`);
+    await sleep(200);
+
+    const bare = await evaluate(`(() => { const c = document.getElementById("place-card").getBoundingClientRect(); const v = document.getElementById("map-viewport").getBoundingClientRect(); return { x: Math.round(v.left + 20), y: Math.round(c.top > v.top + 48 ? v.top + 20 : v.bottom - 20), k: window.__vellumZoomState().k }; })()`);
+    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: bare.x, y: bare.y });
+    await sleep(120);
+    await wheel(bare.x, bare.y, -240);
+    const deep = await settle(
+      `(() => { const c = document.getElementById("place-card"); if (!c || c.hidden) return null; const v = document.getElementById("map-viewport").getBoundingClientRect(); const r = c.getBoundingClientRect();
+        return { k: window.__vellumZoomState().k, w: +r.width.toFixed(2), h: +r.height.toFixed(2), boxH: +v.height.toFixed(2), over: +(r.height - v.height).toFixed(2) }; })()`,
+      (d, last) => !!d && d.k > 1.05 && !!last && d.k === last.k && d.h === last.h,
+      "P23 the camera coming to rest above k=1",
+    );
+    // The card is a fixed 16rem, so its rendered width is the control that says which way the scales compose: unchanged means the counter-scale cancels the mount and the cap must be raw.
+    check("P23 the cap still holds once the reader zooms, and the card's own width proves the scales cancel (#633)",
+      deep.k > 1.05 && deep.w === open.w && deep.over <= OVER_BOX_TOLERANCE,
+      JSON.stringify({ kBefore: bare.k, kAfter: deep.k, widthAtRest: open.w, widthDeep: deep.w, box: deep.boxH, card: deep.h, over: deep.over }));
+
+    // P25: the scroll offset belongs to the CONTAINER, so a card switched to from a scrolled one opened at the old offset with its own name above the fold. Switched by focus, because a pinned card's body can cover the next mark and a click would never reach it.
+    await evaluate(`(() => { const i = document.querySelector("#place-card .pc-inner"); i.scrollTop = i.scrollHeight; })()`);
+    // The gesture goes in its OWN call: inside a polled expression the second poll clicks the same mark again and toggles the card shut, which is how the first version of this check timed out on a null read.
+    await evaluate(`(() => { const h = [...document.querySelectorAll(".place-overlay .place-hit")].find((e) => (e.getAttribute("aria-label") || "").split(", ")[0] === "Skenitsa"); if (h) { h.focus(); h.click(); } })()`);
+    const switched = await settle(
+      `(() => { const c = document.getElementById("place-card"); if (!c || c.hidden) return null; const i = c.querySelector(".pc-inner"); const n = c.querySelector(".pc-name");
+        const ir = i.getBoundingClientRect(), nr = n.getBoundingClientRect();
+        return { name: n.textContent, scrollTop: +i.scrollTop.toFixed(2), nameBelowTop: +(nr.top - ir.top).toFixed(2), h: +c.getBoundingClientRect().height.toFixed(2) }; })()`,
+      (d, last) => !!d && !!last && d.h === last.h && d.scrollTop === last.scrollTop,
+      "P25 the card after a switch from a scrolled one",
+    );
+    check("P25 a card switched to from a scrolled one opens at its own top, with its name below the fold and not above it (#633)",
+      switched.scrollTop === 0 && switched.nameBelowTop >= 0, JSON.stringify(switched));
+
+    await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}))`);
+    await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
+  });
+
+  await step("P24", async () => {
+    await setMobileViewport(390, 844);
+    await send("Page.navigate", { url: "about:blank" });
+    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/#seed=${NARROW_SEED}&style=antique` });
+    if (!(await waitReady())) throw new Error("P24 the explorer never drew at 390");
+    const at = await evaluate(`(() => { const h = [...document.querySelectorAll(".place-overlay .place-hit")].find((e) => (e.getAttribute("aria-label") || "").split(", ")[0] === "Kralgov"); const b = h.getBoundingClientRect(); return { x: Math.round(b.x + b.width / 2), y: Math.round(b.y + b.height / 2) }; })()`);
+    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: at.x, y: at.y });
+    await send("Input.dispatchMouseEvent", { type: "mousePressed", x: at.x, y: at.y, button: "left", clickCount: 1 });
+    await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: at.x, y: at.y, button: "left", clickCount: 1 });
+    const card = await settle(
+      `(() => { const c = document.getElementById("place-card"); if (!c || c.hidden) return null; const i = c.querySelector(".pc-inner"); const r = c.getBoundingClientRect();
+        return { name: (c.querySelector(".pc-name") || {}).textContent, pinned: c.classList.contains("pinned"), scrolls: c.classList.contains("pc-scrolls"),
+          tail: +(i.scrollHeight - i.clientHeight).toFixed(2), pe: getComputedStyle(i).pointerEvents, k: window.__vellumZoomState().k,
+          x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2), h: +r.height.toFixed(2) }; })()`,
+      (d, last) => !!d && d.name === "Kralgov" && d.pinned && !!last && d.h === last.h,
+      "P24 Kralgov pinned at 390",
+    );
+    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: card.x, y: card.y });
+    await sleep(120);
+    await wheel(card.x, card.y, -240);
+    await sleep(600);
+    const after = await evaluate(`window.__vellumZoomState().k`);
+    check("P24 a pinned card with nothing to scroll does NOT swallow the camera under it (#633)",
+      card.tail <= 1 && card.scrolls === false && card.pe === "none" && after > card.k + 0.05,
+      JSON.stringify({ tail: card.tail, scrolls: card.scrolls, pointerEvents: card.pe, kBefore: card.k, kAfterWheelOverCard: after }));
+    await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}))`);
+    await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
+  });
+
+  await step("P restore", async () => {
+    // settle-doctrine clause 14: the next suite starts on whatever page is current, and the runner's viewport reset is the ERROR path only.
+    await clearMobile();
+    await send("Page.navigate", { url: "about:blank" });
+    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/` });
+    if (!(await waitReady())) throw new Error("P restore the explorer never drew again");
+  });
 }
