@@ -46,7 +46,7 @@
     translate(calc(-10px + var(--pc-dx, 0px)), calc(-100% - 10px + var(--pc-dy, 0px))); }
 .pc-inner {
   box-sizing: border-box; max-height: var(--pc-maxh, none);
-  overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; touch-action: pan-y;
+  overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y;
   background: var(--control-cream); color: var(--ink-dark);
   border: 1px solid var(--ink-dark); border-radius: 4px;
   box-shadow: 0 8px 22px rgb(from var(--chart-ink) r g b / 0.28);
