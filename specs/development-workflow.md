@@ -77,20 +77,28 @@ rulings on the issue at step 12 exactly as a session would record its own.
 
 **When the ruling is an appearance, the menu carries stills.** A direction described in prose asks
 Alex to picture it and then holds him to what he pictured, which is how a ruling gets made on
-something nobody measured. Render the candidates instead: two to four directions through
-`vellum-plate-reader`, at the viewports and on the seeds the issue measured, full scale and 1:1 crop.
-**Today's shipped behavior is rendered beside them as a control**, by the same instrument in the same
-run, because a fix to an existing appearance is ruled against what it replaces and a candidate with
-nothing beside it reads as better than it is. The stills go in `out/`, and each option in the menu
-names the file that shows it. `specs/conventions.md` "How a design decision is made" governs the
-sitting itself; what this step fixes is WHEN the rendering happens, which is here, before the STOP,
-rather than at step 11.
+something nobody measured. Render the candidates instead, through `vellum-plate-reader`, at full
+scale and 1:1 crop, at the viewports and on the seeds the defect was measured at, or on the ones the
+decision turns on where nothing measured it. `specs/conventions.md` "How a design decision is made"
+governs the sitting itself, the count of directions included. **Where the decision changes an
+appearance that already ships, today's behavior is rendered beside the candidates as a control**,
+because a candidate with nothing beside it reads as better than it is; a decision about a surface
+that does not exist yet has nothing to control against and renders its candidates alone. The stills
+go in `out/` and each option in the menu names the file that shows it. They are NOT archived under
+`design/`: a STOP sitting rules a fix rather than a round, so the pictures go with the session and
+the written ruling is what survives (Alex, 2026-09-19).
 
-**The candidate build is a throwaway spike, and it is not step 8.** Rendering a direction takes code,
-which is the one thing this STOP forbids, so the carve-out is drawn narrow: the spike's only output
-is the stills, it is discarded rather than carried forward, and the ruled direction is built
+**The candidate build is a throwaway spike, and it is not step 8.** Rendering a direction takes code
+and step 3 has already said the plan carries none, so the carve-out is drawn narrow: the spike's only
+output is the stills, it is discarded rather than carried forward, and the ruled direction is built
 test-first from step 8 like anything else. A candidate kept because it already works is an
-implementation that skipped its failing test.
+implementation that skipped its failing test. **Take step 7's worktree early to hold the spike**,
+because it is code and code is not written in the main checkout.
+
+**One spike shows every arm at once.** `vellum-plate-reader` writes only into `out/` and never edits
+source, so it cannot switch the tree between candidate A, candidate B and the control. The spike
+therefore exposes them together, behind a query parameter, a flag or separate mock pages, and a
+single run reads them all.
 
 **A dispatched lane's `out/` is inside its worktree, which is not where Alex looks.** The lane reports
 absolute paths and the dispatcher copies the stills into the main checkout's `out/` before putting
@@ -188,7 +196,9 @@ dispatched from. `vellum-pr-skeptic` goes further and runs NOTHING in it, suites
 suite run there deletes the generated assets under `public/` (Alex, 2026-09-12); both it and
 `vellum-guard-prover` build their sandbox with `scripts/agent-sandbox.ts` rather than a recipe of
 their own (#575). The other three keep their documented work in the dispatch tree, `vellum-plate-reader`'s
-`out/` samples included, since that is where Alex looks for them.
+`out/` samples included, because a review agent may not write outside the tree it was given. That is
+where Alex looks when the dispatch tree is the main checkout; when it is a lane's worktree, whoever
+dispatched the lane copies the samples across, as step 6 says of a step 6 sitting.
 
 **An agent whose own DEFINITION this pull request changes cannot be trusted to review the change.**
 On PR #576 the cold skeptic reported that its loaded instructions were the pre-PR version while its
