@@ -1,6 +1,6 @@
-/* The Chart Table's drawer (#520 Sub 2 of #401, ruled at the #518 sitting, direction D): shut at rest behind a tab on the right edge; open, it slides up over the foot of the stage while the chart keeps its fit, and the gathered sheets lie loose on the walnut as cuttings with paper labels. `chart-drawer` throughout and never `drawer`: src/site/shell/drawer.ts is the site's phone nav (#520 ruling 2). */
+/* The Chart Table's drawer: shut behind a tab on the right edge, open over the foot of the stage, the gathered sheets as cuttings with paper labels. `chart-drawer` throughout and never `drawer`: `bindDrawer` in `src/site/shell/drawer.ts` is the site's phone nav. */
 
-/* Seated at 74% where the Broadside's own tab sits at 50% (atelier.css), so the two never share the edge when the Broadside is folded. Placed by translate and rotate, not transform: the house lift on a button writes transform and would otherwise replace the tab's seat. */
+/* Seated from the bottom where the Broadside's tab (.slip-tab in atelier.css) is centred, so the two never share the edge; turned by the rotate property, not transform, which the house button lift writes. */
 .chart-drawer-tab {
   position: fixed; right: 0; bottom: 1.5rem; rotate: 180deg; z-index: 19;
   writing-mode: vertical-rl; width: var(--chart-drawer-tab-w); box-sizing: border-box; max-height: 11rem; overflow: hidden; padding: 0.9rem 0.45rem; cursor: pointer; appearance: none; border-radius: 0;
@@ -26,7 +26,7 @@ button.chart-drawer-tab:is(:hover, :focus-visible) { background: var(--ink-dark)
 
 body:has(.chart-drawer.open) .slip-tab { display: none; }
 
-/* An open Broadside holds the camera 26rem clear of the edge, so the tab never meets it; folded, the camera comes home to --chrome-x where the tab is already standing, and the tab's z-19 over the corner's z-10 left each zoom press answering a real pointer over 44% of its face (#543, Alex 2026-09-08). The camera stands inboard of the tab whenever the Broadside is folded, INCLUDING while the drawer is open and the tab is hidden: a seat that moved with the drawer would be one more thing jumping as it opens, which is the complaint #543 was filed about. Not below 901, where the tab is stood down and atelier.css's own narrow seat rules. */
+/* Folded, the camera comes home to --chrome-x where the tab stands at z 19 over the corner's z 10, leaving each zoom press a real pointer over 44% of its face; so the camera stands inboard of the tab whenever the Broadside is folded, drawer open or not (a seat that moved with the drawer would be one more thing jumping as it opens), and not below 901px, where the tab is stood down and atelier.css's narrow seat rules. */
 @media (min-width: 901px) {
   body:has(.slip.folded) .corner.br.zoomery { right: calc(var(--chrome-x) + var(--chart-drawer-tab-w) + 0.6rem); }
 }
@@ -56,15 +56,15 @@ body:has(.chart-drawer.open) .slip-tab { display: none; }
 .chart-drawer-road .full { font-variant-caps: small-caps; font-size: 0.78rem; letter-spacing: 0.06em; color: var(--parchment); }
 .chart-drawer-road .legend-btn:disabled { opacity: 0.45; cursor: default; box-shadow: none; transform: none; }
 
-/* Two vertical tabs on one edge: the Broadside's is centred and this one is seated from the bottom, so on a short window they close on each other. Measured 2026-09-07 at 1280 wide with the Broadside folded: they touched at 500px tall before this block and clear by 27px after it; the gap crosses zero just under 440, so the edge carries both down to about 445 and no further. */
+/* Two vertical tabs on one edge close on each other on a short window: at 1280 wide with the Broadside folded they touched at 500px tall before this block and clear by 27px after it; the gap crosses zero just under 440px, so the edge carries both down to about 445px and no further. */
 @media (max-height: 640px) {
   .chart-drawer-tab { max-height: 8.5rem; font-size: 0.62rem; letter-spacing: 0.1em; padding: 0.6rem 0.35rem; }
 }
 
-/* The dog-ear carries no element of its own inside: suite-region-detail reads the survey as [...querySelectorAll("#map .region-inset svg")].pop(), so anything with an svg in it would become that element. */
+/* No element inside the dog-ear: `LAST_INSET` in `scripts/e2e/suite-region-detail.mjs` reads the survey as the last "#map .region-inset svg", so any svg in here would become that element. */
 .dog-ear {
   position: absolute; top: 0; right: 0; padding: 0; border: 0; cursor: pointer;
-  /* Restored because .region-inset is pointer-events: none (explorer/index.css); without this the handle is reachable by keyboard alone and a real click lands on the chart underneath. */
+  /* Restored: .region-inset is pointer-events: none (explorer/index.css), and without this a real click lands on the chart underneath. */
   pointer-events: auto;
   width: calc(3.4rem / var(--zoom-k, 1)); height: calc(3.4rem / var(--zoom-k, 1));
   appearance: none; border-radius: 0; z-index: 3;
@@ -76,7 +76,6 @@ body:has(.chart-drawer.open) .slip-tab { display: none; }
 .dog-ear:is(:hover, :focus-visible) { width: calc(4.1rem / var(--zoom-k, 1)); height: calc(4.1rem / var(--zoom-k, 1)); }
 .dog-ear:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: -2px; }
 
-/* The two adjacent lines design/chart-table/mock.css carried at 155 and 156 and the #540 port dropped, the tabs restored by #547 and the leaf by #583. */
 .sheet-tabs { display: none; }
 .table-leaf { display: none; }
 

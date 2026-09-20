@@ -1,4 +1,4 @@
-/* #463 (Landfall Sub 8): the Reading Room is a chart room on the #462 pattern. The room furniture is /atelier.css's, the frame's own dress /reading-frame.css's and the engine's /living-chart.css's; this sheet seats the frame's parts: the chart in the stage, the instrument on the bottom strip, the journal in the slip. */
+/* The Reading Room: a chart room. The furniture is atelier.css's, the frame's dress reading-frame.css's and the engine's living-chart.css's; this sheet seats the chart in the stage, the instrument on the bottom strip and the journal in the slip. */
 
 .stage { display: flex; align-items: center; justify-content: center; box-sizing: border-box;
   padding: var(--reserve-top, 8rem) var(--reserve-right, 0px) var(--reserve-bottom, 8rem) 0; }
@@ -10,7 +10,7 @@
 .stage .warning { position: absolute; left: 50%; top: calc(50% + 2.8rem); transform: translateX(-50%); max-width: 30rem; z-index: 2; margin: 0; }
 .stage .warning[hidden] { display: none; }
 
-/* Without these mount-scoped rules the #127 arrival ceremony never plays AND startArrival's inline stroke-dasharray is never cleaned off the live coastline. */
+/* Without these mount-scoped rules the arrival ceremony never plays and the inline stroke-dasharray `startArrival` in `src/site/explorer/draw-ceremony.ts` writes is never cleaned off the live coastline. */
 .rf-chart svg.arriving { animation: paperSettle var(--paper-settle) var(--ease-paper) both; }
 .rf-chart svg.arriving #layer-land path {
   animation: inkDraw var(--ink-draw) var(--ease-paper) both,
@@ -27,9 +27,9 @@
   background: linear-gradient(to top, rgb(from var(--chart-ink) r g b / 0.9), rgb(from var(--chart-ink) r g b / 0.6) 60%, transparent);
   animation: ink-in 0.5s 0.18s ease-out both; }
 .scale-well { position: relative; flex: 1 1 8rem; min-width: 0; display: flex; flex-direction: column; margin-top: 0.15rem; }
-/* flex: none, because the well is a column: the row rule's 8rem basis would become the bar's HEIGHT (measured 151px strips, e2e RR34). */
+/* flex: none, because the well is a column: the row rule's 8rem basis would become the bar's height (151px strips, `RR34` in `scripts/e2e/suite-reading-room.mjs`). */
 .scale-well .rf-range { flex: none; width: 100%; }
-/* Inset by the thumb's radius (the 16px thumb, living-chart.css; ages.ts's detentEscapeU(width - 16)), so u=0 and u=1 stand under the thumb's centre at its ends. */
+/* Inset by the thumb's radius: the 16px thumb in living-chart.css and `detentEscapeU` in `src/site/living-chart/ages.ts` at width - 16, so u=0 and u=1 stand under the thumb's centre at its ends. */
 .scale { position: relative; height: 1.3rem; margin: 0 8px; }
 .tick { position: absolute; top: 0; width: 1px; height: 6px; background: var(--line-tan); transform: translateX(-0.5px); }
 .tick.day { background: var(--parchment); }
@@ -44,7 +44,7 @@
 
 .rr-prospect { margin: 0.7rem 0 0.9rem; }
 .rr-prospect a { display: block; }
-/* #442 the plate UNFURLS rather than snapping in: the sheet drops open from its top edge, the house paperUnfurl gesture at the plate's own scale. The fill stays BACKWARDS and the resting keyframe releases the transform, or the final frame would pin at animation-cascade priority and silently kill the hover lift below (measured 2026-08-22, the #402 control probe). */
+/* The fill stays backwards and the resting keyframe releases the transform, or the final frame would pin at animation-cascade priority and silently kill the hover lift below. */
 .rr-prospect img { width: 100%; height: auto; display: block;
   transform-origin: top center;
   border: 1px solid var(--line-tan);
@@ -78,5 +78,5 @@
   .rf-chart svg[data-vellum-style] { height: auto; }
 }
 
-/* #493, ruled 2026-09-02: under reduced motion the engine's Play is a still frame (ages.ts), so there is no pace to choose. The room's rule, not the frame's: reading-frame.css carries no reduced-motion block of its own (motion.css owns the collapse). */
+/* Under reduced motion the engine's Play is a still frame (`prefersReduce` in `src/site/living-chart/ages.ts`), so there is no pace to choose; the room's rule, since reading-frame.css carries no reduced-motion block and motion.css owns the collapse. */
 @media (prefers-reduced-motion: reduce) { .rf-instrument .rf-pace { display: none; } }

@@ -1,4 +1,4 @@
-/* Home (#461 ruling 1): full bleed, the head cluster the shell's. */
+/* Home: the landfall stage full bleed, the head cluster the shell's. */
 .underhood {
   font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
   font-style: italic; color: var(--ink-brown); font-size: 0.92rem;
@@ -13,7 +13,7 @@
 }
 .landfall .stage.dragging { cursor: grabbing; }
 .landfall .stage:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: 2px; }
-/* No-JS containment is by construction against the sheet's definite box, never a viewport formula (the 106vh form cropped, #456 finding 2); abspos+margin:auto because a percentage max-height dies inside an auto grid track. */
+/* No-JS containment is against the sheet's definite box, never a viewport formula (106vh cropped); abspos and margin auto because a percentage max-height dies inside an auto grid track. */
 .landfall .sheet { position: relative; width: 100%; height: 100%; }
 .lf-chart { position: absolute; inset: 0; margin: auto; max-width: 100%; max-height: 100%; width: auto; height: auto; user-select: none; -webkit-user-drag: none; }
 .landfall .stage.cam .sheet {
@@ -46,7 +46,7 @@
   font-size: 8.5px; letter-spacing: 0.08em; color: var(--chart-ink); white-space: nowrap;
   text-shadow: 0 0 4px var(--chart-paper), 0 0 8px var(--chart-paper);
 }
-/* #505: the camera is the kit's Glass; home seats it (placement is the page's). Literal offsets, not the chrome vars: BaseLayout narrows those under 900px and home's camera never moved there. What the kit's corner sets beyond dress is stood down here, and kit-scope.test.ts pins that list. */
+/* Home seats the kit's Glass with literal offsets, not the chrome vars, which src/layouts/BaseLayout.astro narrows under 720px while home's camera never moved; what the kit's corner sets beyond dress is stood down here, and `stoodDown` in `test/site/kit-scope.test.ts` pins that list. */
 #lf-controls { display: none; position: absolute; right: 1.6rem; bottom: 1.4rem; z-index: auto; animation: none; pointer-events: auto; }
 #lf-controls.on { display: flex; }
 #lf-controls button:focus-visible { outline-color: var(--ink-dark); }
@@ -77,7 +77,7 @@
   content: ""; position: absolute; inset: 3px;
   background: var(--parchment); border-radius: 50%;
 }
-/* On home the cluster rides the page (#472, Alex's 2026-08-28 call): the chart and its chrome scroll away together, so nothing fixed can ever collide with the shelf; e2e L1i pins the ride, RH9 pins the wash to home alone. body-child specificity because the layout's inline global sheet renders AFTER the page css. */
+/* On home the cluster rides the page, so the chart and its chrome scroll away together and nothing fixed collides with the shelf (`L1i` in `scripts/e2e/suite-landfall.mjs` reads the ride, `RH9b` in `scripts/e2e/suite-runninghead.mjs` the wash); body-child specificity because the layout's inline global sheet renders after the page css. */
 body > header.chrome { position: absolute; }
 header.chrome::before {
   content: ""; position: absolute; inset: -4rem -2.2rem -1.8rem -4rem; z-index: -1; pointer-events: none;
@@ -133,7 +133,7 @@ header.chrome::before {
   transform: translate(-50%, -50%) scale(var(--inv, 1));
   appearance: none; border: 0; background: none; font: inherit; cursor: pointer;
 }
-/* Real hardware reads the TOUCHED element's touch-action, so a control defaulting to auto lets the browser claim a gesture starting there; CDP emulation cannot see this line (control-run 2026-08-25, #475), it is pinned only by the phone pass at the gate. */
+/* Real hardware reads the touched element's touch-action, so a control defaulting to auto lets the browser claim a gesture starting there; CDP emulation cannot see this line, only a phone pass can. */
 .lf-station, .lf-legend-btn, #lf-controls button { touch-action: pan-y; }
 .lf-station-glyph {
   position: absolute; inset: 0; margin: auto;
@@ -192,7 +192,7 @@ header.chrome::before {
 }
 .lf-legend {
   display: none; position: absolute; left: 50%; bottom: 0.9rem;
-  /* max-content: the shrink-to-fit at left 50% capped the row at half the stage and wrapped the Gallery entry into the Reading Room slip (plate-reader, this sub). */
+  /* max-content: the shrink-to-fit at left 50% capped the row at half the stage and wrapped the Gallery entry into the Reading Room slip. */
   width: max-content; max-width: calc(100% - 2rem);
   transform: translateX(-50%); text-align: center; z-index: 2;
   padding: 0.5rem 1.1rem 0.6rem;
@@ -228,12 +228,12 @@ header.chrome::before {
   color: var(--parchment);
 }
 .lf-card {
-  /* Above the corner chrome's 4, as the mockup layers its slip over its chrome (stage.css: chrome 10, slip 20); the seed form covered the open slip's close button at z 3. */
+  /* Above the corner chrome's z 4: the seed form covered the open slip's close button at z 3. */
   position: absolute; z-index: 5;
-  /* Centered by abspos + margin auto, never translateY(-50%): the open tween writes the card's transform. border-box is the mockup's own global reset, which the site shell lacks. right 4rem keeps the slip clear of the zoom-controls column on short viewports. */
+  /* Centred by abspos and margin auto, never translateY(-50%), since the open tween writes the card's transform; border-box because the shell has no global reset; right 4rem keeps the slip clear of the zoom-controls column on short viewports. */
   box-sizing: border-box;
   right: 4rem; top: 0; bottom: 0; margin: auto 0; height: fit-content;
-  /* Desktop only: the narrow block lifts the cap, where the % would resolve against the viewport instead of .landfall and the clip would land on the sheet's Enter door. */
+  /* Desktop only: the narrow block lifts the cap, where the % would resolve against the viewport instead of .landfall and clip the sheet's Enter door. */
   max-height: calc(100% - 2rem); overflow: hidden;
   width: min(22rem, calc(100% - 8rem));
   background: var(--parchment-panel);
@@ -267,7 +267,7 @@ header.chrome::before {
 .lf-card-where {
   font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif);
   font-variant-caps: small-caps;
-  /* ink-brown, not the mockup's ink-faded: 13px small caps measured 3.93:1 on the panel, under the 4.5:1 small-text floor (plate-reader, this sub). */
+  /* ink-brown, not ink-faded: 13px small caps read 3.93:1 on the panel, under the 4.5:1 floor. */
   font-size: 0.82rem; letter-spacing: 0.08em; color: var(--ink-brown);
   border-bottom: 1px solid var(--line-faint);
   padding-bottom: 0.55rem; margin: 0.25rem 0 0;
@@ -281,7 +281,7 @@ header.chrome::before {
   font-size: 0.88rem; letter-spacing: 0.14em;
   color: var(--chart-paper); background: var(--ink-dark);
   border: 1px solid var(--chart-ink);
-  /* 0.85rem, not the mockup's 0.45rem: the 44px touch-target ruling (#460, 2026-08-25) is a stated deviation. */
+  /* 0.85rem, not the mockup's 0.45rem: the 44px touch target. */
   padding: 0.85rem 1rem;
   text-decoration: none;
   transition: background 0.2s ease;
@@ -350,7 +350,7 @@ header.chrome::before {
   body > header.chrome { max-width: calc(100vw - 15rem); }
   .seed-controls .control { width: 4.6rem; }
   .lf-legend, .landfall .stage.cam .lf-legend { display: none; }
-  /* The mockup's bottom sheet is FIXED to the viewport: inside the boxed stage the sheet was taller than the stage itself and buried the chart whole (skeptic finding 1). z-index stays under the veil's 50. */
+  /* The bottom sheet is fixed to the viewport: inside the boxed stage it was taller than the stage and buried the chart; z-index stays under the veil's 50. */
   .lf-card {
     position: fixed; right: 0; left: 0; top: auto; bottom: 0; margin: 0;
     width: 100%; outline-offset: -8px; z-index: 40;
@@ -374,7 +374,7 @@ header.chrome::before {
 @media (max-width: 340px) {
   .chrome .wordmark { font-size: 1.3rem; }
 }
-/* Print is paper (#454 open decision 4): the layout hides the chrome and the drawer with it, but :checked is state and paper widths match the narrow query, so the open state's scrim and the faded panel need their own stand-down. */
+/* Print hides the chrome and the drawer with it, but :checked is state and paper widths match the narrow query, so the open state's scrim and the faded panel need their own stand-down. */
 @media print {
   body:has(.rooms-reveal:checked) .landfall::before { content: none; }
   body:has(.rooms-reveal:checked) .lf-seed { opacity: 1; }
@@ -389,7 +389,7 @@ header.chrome::before {
   animation: lf-doors-reveal 0s linear 10s forwards;
 }
 .landfall .stage:not(.cam) ~ .lf-card .lf-card-close { display: none; }
-/* The no-JS doors' plain nav still wore the light-era ink after #461 inverted the ground: measured 1.06:1 at the #472 plate pass. */
+/* The no-JS doors' nav on the inverted ground: the old ink read 1.06:1. */
 .lf-noscript-rooms { color: var(--parchment); }
 .lf-noscript-rooms a { color: var(--parchment-bright); }
 @keyframes lf-doors-reveal {

@@ -1,4 +1,4 @@
-/* The Atelier Kit (#487): the room furniture the Sub 7 mockups standardized (design/sub7-chart-rooms/shared.css, doc.css), lifted here at its second use during #462 and #463 and worn as markup classes; page css keeps layout only (#324's rule). Linked by BaseLayout after house.css and before the page sheets, so a page keeps the last word. */
+/* The Atelier Kit: the chart rooms' shared furniture (stage, corners, folio, slip, legend, Glass, vignettes, index, contents) worn as markup classes; linked after house.css and before the page sheet, so a page keeps layout and the last word. */
 
 :root { --slip-w: 22rem; }
 
@@ -9,7 +9,7 @@ body.chart-room .fog { z-index: 3; }
 @keyframes fog-drift-a { from { transform: translate(-4%, 2%); } to { transform: translate(5%, -3%); } }
 @keyframes fog-drift-b { from { transform: translate(3%, -2%); } to { transform: translate(-5%, 3%); } }
 
-/* The chart room's stage (#462 ruling 1): the viewport, the chart fitted inside it to what the chrome leaves; the page css seats its own sheet and transform target in it. Scoped to the chart room: home's landfall stage wears the same class (skeptic on PR #491: the unscoped landing scaled #lf-stage 1.004 under the camera and CI went red). */
+/* Scoped to body.chart-room: home's landfall stage wears the same .stage class. */
 html:has(body.chart-room), body.chart-room { height: 100%; overflow: hidden; }
 body.chart-room .stage { position: fixed; inset: 0; z-index: 1; overflow: hidden; }
 body.chart-room .stage .status { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); margin: 0; padding: 0.3rem 0.9rem;
@@ -33,11 +33,11 @@ body.chart-room .stage .status a { color: var(--parchment-bright); }
 .folio-room { max-width: 19rem; }
 .folio-room .room-name { font-size: 1.32rem; letter-spacing: 0.14em; line-height: 1.2; color: var(--parchment-bright); }
 .folio-room .room-tagline { font-size: 0.92rem; line-height: normal; color: var(--parchment); margin: 0.1rem 0 0; }
-/* parchment, not the mockup's line-tan and ink-faded: line-tan measured 4.03:1 on the deep at #461, under the 4.5 floor for small text, and ink-faded is darker still. */
+/* parchment, not line-tan: line-tan reads 4.03:1 on the deep, under the 4.5:1 floor for small text, and ink-faded is darker still. */
 .folio-room .dateline { margin: 0.55rem 0 0; font-variant-caps: small-caps; font-size: 0.85rem; letter-spacing: 0.08em; color: var(--parchment); }
 .folio-room .gloss { margin: 0.4rem 0 0; font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.76rem; color: var(--parchment); }
 .folio-controls { display: flex; gap: 0.5rem; justify-content: flex-end; margin: 0.55rem 0 0; }
-/* The corner's dark dress over the house control idiom; 16px floor because a smaller input font makes iOS Safari zoom the page on focus (home's seed input). */
+/* 16px floor: a smaller input font makes iOS Safari zoom the page on focus. */
 .folio-controls .control { width: 7.4rem; min-width: 0; font-size: 16px; color: var(--parchment-bright);
   background: rgb(from var(--chart-ink) r g b / 0.45); border: 1px solid var(--line-tan); border-radius: 0;
   padding: 0.32rem 0.6rem; text-align: center; font-variant-numeric: tabular-nums; }
@@ -66,22 +66,22 @@ body.chart-room .stage .status a { color: var(--parchment-bright); }
 body:has(.slip.folded) .corner.br.zoomery { right: var(--chrome-x); }
 .zoom-btn { width: 2.2rem; height: 2.2rem; font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif); font-size: 1.1rem; line-height: 1;
   color: var(--parchment); background: rgb(from var(--chart-ink) r g b / 0.5); border: 1px solid var(--line-tan); cursor: pointer; transition: background 0.2s ease, color 0.2s ease; }
-/* Four classes deep on purpose: the house sheets dress every button, and their hover wash outranks a plain .zoom-btn:hover. */
+/* Four classes deep: the house button hover wash is (0,3,1) and outranks a plain .zoom-btn:hover. */
 .zoomery.corner .zoom-btn:hover, .zoomery.corner .zoom-btn:focus-visible { background: var(--ink-dark); color: var(--parchment-bright); }
 
 .legend { position: fixed; left: calc((100% - var(--slip-w) - 2rem) / 2); bottom: var(--chrome-y); transform: translateX(-50%); z-index: 10; text-align: center;
   transition: left 0.32s cubic-bezier(0.2, 0.7, 0.3, 1); }
 body:has(.slip.folded) .legend { left: 50%; }
-/* parchment, not the mockup's ink-faded: 13px italic measured 2.78:1 on the deep (plate read 2026-08-29), the RH9a miss again. */
+/* parchment, not ink-faded: 13px italic reads 2.78:1 on the deep, under the 4.5:1 floor. */
 .legend-head { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.82rem; color: var(--parchment); margin: 0 0 0.45rem; }
 .legend-row { display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap; }
-/* A road out is an <a>; a press on the sheet itself (the Explorer's Turn) is a <button> in the same dress, so the button's house skin is overwritten property by property. CAUTION: this display declaration makes the hidden ATTRIBUTE inert on these (an author display beats the UA [hidden] rule), so el.hidden = true silently no-ops; hide via style.display (the #270 guard-prover's find). */
+/* A road out is an <a> and the Explorer's Turn a <button> in the same dress, overwritten property by property; this display makes the hidden attribute inert (an author display beats the UA [hidden] rule), so hide one via style.display. */
 .legend-btn { display: block; appearance: none; cursor: pointer; text-decoration: none; font: inherit; line-height: 1.45; color: inherit;
   background: rgb(from var(--chart-ink) r g b / 0.5); border: 1px solid var(--line-tan); border-radius: 0;
   padding: 0.4rem 0.9rem 0.35rem; text-align: center; transition: background 0.2s ease, transform var(--paper-quick) var(--ease-paper); }
-/* Four classes deep on purpose: the house button hover wash is (0,3,1). */
+/* Four classes deep: the house button hover wash is (0,3,1). */
 .legend .legend-row .legend-btn:hover, .legend .legend-row .legend-btn:focus-visible { background: var(--ink-dark); transform: translateY(var(--raise)); }
-/* #525: the cream ring is for a row standing on its own dark footing; a DOCKED row stands on the sheet's parchment, where cream reads 1.0:1, so it falls back to the house's ink-dark ring. Anything whose contrast leans on the footing is scoped with the footing. */
+/* The cream ring is for a row on its own dark footing; docked on the sheet's parchment cream reads 1.0:1, so a docked row keeps the house ink-dark ring. */
 .legend:not(.in-slip) .legend-row .legend-btn:focus-visible { outline-color: var(--parchment-bright); }
 .legend-btn .verb { display: block; font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.78rem; color: var(--parchment); }
 .legend-btn .room { display: block; font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); font-size: 0.86rem; letter-spacing: 0.12em; color: var(--parchment); }
@@ -106,7 +106,7 @@ body:has(.slip.folded) .legend { left: 50%; }
 .slip-foot { flex: none; padding: 0.8rem 1.6rem 1rem; border-top: 1px solid var(--line-faint); }
 .slip .card-verb { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.92rem; color: var(--ink-brown); margin: 0; }
 .slip .card-title { font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); font-weight: 400; font-size: 1.45rem; letter-spacing: 0.06em; line-height: 1.2; margin: 0.1rem 0 0; }
-/* ink-brown, not the mockup's ink-faded: 13px small caps measured 3.93:1 on the panel at #458 (home's card, the same dress). */
+/* ink-brown, not ink-faded: 13px small caps read 3.93:1 on the panel, under the 4.5:1 floor (the same dress as home's card). */
 .slip .card-where { font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif); font-variant-caps: small-caps; font-size: 0.82rem; letter-spacing: 0.08em; color: var(--ink-brown);
   border-bottom: 1px solid var(--line-faint); padding-bottom: 0.55rem; margin: 0.25rem 0 0; }
 .slip .intro { text-align: left; font-size: 0.95rem; line-height: 1.5; margin: 0.7rem 0 0; }
@@ -115,9 +115,9 @@ body:has(.slip.folded) .legend { left: 50%; }
 .slip-handle { display: none; }
 .slip-fold { position: absolute; right: 0.5rem; top: 0.45rem; appearance: none; border: 0; border-radius: 0; background: none; cursor: pointer;
   font-size: 1.05rem; line-height: 1; color: var(--ink-faded); padding: 0.2rem 0.4rem; }
-/* Four classes deep on purpose: the house sheets dress every button, and their hover wash outranks a plain .slip-fold:hover. */
+/* Four classes deep: the house button hover wash is (0,3,1) and outranks a plain .slip-fold:hover. */
 .slip .slip-head .slip-fold:hover, .slip .slip-head .slip-fold:focus-visible { color: var(--ink-dark); background: none; }
-/* Placed by the individual translate and rotate properties, not transform: the house lift on a button (motion.css) writes transform, and would otherwise replace the tab's seat. */
+/* Seated by the translate and rotate properties, not transform: the house button lift in motion.css writes transform and would replace the seat. */
 .slip-tab { position: fixed; right: 0; top: 50%; translate: 0 -50%; rotate: 180deg; z-index: 19;
   writing-mode: vertical-rl; padding: 0.9rem 0.45rem; cursor: pointer; appearance: none; border-radius: 0;
   font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); font-size: 0.72rem; letter-spacing: 0.16em; color: var(--parchment);
@@ -126,16 +126,16 @@ body:has(.slip.folded) .legend { left: 50%; }
 .slip-tab.shown { opacity: 1; visibility: visible; pointer-events: auto; transition: opacity 0.25s 0.2s, visibility 0s; }
 button.slip-tab.shown:is(:hover, :focus-visible, :active) { box-shadow: none; background: var(--ink-dark); color: var(--parchment-bright); }
 
-/* Magnified, the sheet spills under the chrome (the mockup's look) and parchment on paper measured 1.1:1 (plate read 2026-08-29): while the Glass is zoomed the cluster, the corners and the legend row stand on home's pool, the #480 blurred box that follows its cluster. At rest they stand on the deep and carry none (RH9b). */
+/* Zoomed, the sheet spills under the chrome and parchment on paper reads 1.1:1, so the cluster, the corners and the strip stand on a blurred pool while the Glass is zoomed and carry none at rest (`RH9b` in `scripts/e2e/suite-runninghead.mjs`). */
 body:has(#map-viewport.zoomed) :is(header.chrome, .corner.bl, .strip)::before, body.chart-room:not(:has(.stage)) :is(header.chrome, .corner.bl)::before { content: ""; position: absolute; z-index: -1; pointer-events: none;
   inset: var(--pool-top, -1.3rem) var(--pool-right, -1.6rem) var(--pool-bottom, -1.3rem) var(--pool-left, -1.6rem);
   background: rgb(from var(--chart-ink) r g b / 0.92); filter: blur(16px); }
-/* A piece's edge-facing sides run 4rem out, home's own inset (public/index.css), so the blur's fade lies past the viewport edge and no chart bleeds through at a corner (Alex's 2026-09-03 call on the Explorer's top-left; measured 97 against a 60 interior at the edge). The Glass carries no pool: its presses stand on the chart with their own half-ink fill, as home's do; the room folio takes home's seed box instead (below); both the same call, each beside home's. */
+/* Edge-facing sides run 4rem out, matching home's inset in public/index.css, so the blur's fade lies past the viewport edge and no chart bleeds through at a corner (measured 97 at the edge against a 60 interior); the Glass carries no pool, its presses stand on their own half-ink fill. */
 body.chart-room header.chrome { --pool-top: -4rem; --pool-left: -4rem; }
 body.chart-room .corner.bl { --pool-bottom: -4rem; --pool-left: -4rem; }
 body.chart-room .strip { --pool-bottom: -4rem; --pool-left: -4rem; --pool-right: -4rem; }
 
-/* The legend row's footing is home's own (public/index.css .lf-legend, its 0.5rem 1.1rem 0.6rem padding; Alex's 2026-09-03 call from the Specimen Book beside home): the seed box's crisp panel (chart ink 0.85 to 0.72, top to bottom; the fade left at the 2026-09-03 sitting, ruling 23), not the blurred pool. Drawn as the row's own ::before at the padding's insets, so the row's box, which the seat and the fit read, never changes (a real padding wrapped the Explorer's roads, e2e BR2); it paints under the same conditions the pool does. #525: the scope is on the PAINTING rule because a docked row goes position:static, so its ::before resolves against the fixed slip and its insets span the whole sheet. */
+/* The legend row's footing is home's .lf-legend panel (public/index.css: its 0.5rem 1.1rem 0.6rem padding, chart ink 0.85 to 0.72 top to bottom), drawn as a ::before at the padding's insets so the row's box, which the seat and the fit read, never changes (a real padding wrapped the Explorer's roads, `BR2` in `scripts/e2e/suite-broadside.mjs`); the :not(.in-slip) scope is on the painting rule because a docked row goes position:static and its ::before would span the slip. */
 body:has(#map-viewport.zoomed) .legend:not(.in-slip)::before, body.chart-room:not(:has(.stage)) .legend:not(.in-slip)::before { content: ""; position: absolute; inset: -0.5rem -1.1rem -0.6rem; z-index: -1; pointer-events: none;
   background: linear-gradient(to bottom, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.72)); }
 @media screen {
@@ -152,7 +152,7 @@ body.chart-room .stage { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3,
 .index .sec { display: block; font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); font-size: 0.8rem; letter-spacing: 0.1em; color: var(--ink-dark); text-decoration: none; }
 .index > li.inked .sec { text-decoration: underline; text-underline-offset: 0.3em; text-decoration-thickness: 1px; text-decoration-color: var(--line-tan); }
 .index .sec:hover { color: var(--ink-press); }
-/* ink-brown, not the mockup's ink-faded: 11.5px small caps measured 3.93:1 on the panel (plate read 2026-08-29), the #458 card-where miss again. */
+/* ink-brown, not ink-faded: 11.5px small caps read 3.93:1 on the panel, under the 4.5:1 floor. */
 .index .count { font-variant-caps: small-caps; font-size: 0.72rem; letter-spacing: 0.06em; color: var(--ink-brown); float: right; }
 .index .entries { margin: 0.2rem 0 0; padding: 0; list-style: none; font-size: 0.8rem; line-height: 1.45; }
 .index .entries li { padding: 0.1rem 0 0.1rem 0.6rem; border-left: 2px solid transparent; }
@@ -193,19 +193,19 @@ body.chart-room .stage { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3,
   .legend.in-slip { display: block; position: static; transform: none; margin-top: 0.9rem; animation: none; max-width: none !important; }
   .legend.in-slip .legend-head { display: none; }
   .legend.in-slip .legend-btn { background: var(--ink-dark); }
-  /* #532 (Alex, 2026-09-07): the cream fill stays, but on the sheet's parchment it reads 1.09:1 and the tan hairline 2.00:1; docked, the hairline takes ink-brown, 5.64:1 on the sheet and 5.20:1 against the fill. */
+  /* Docked on the sheet's parchment the tan hairline reads 2.00:1 (the cream fill, 1.09:1, stays), so it takes ink-brown: 5.64:1 on the sheet, 5.20:1 against the fill. */
   .legend.in-slip .legend-btn.gold { background: var(--control-gold); border-color: var(--ink-brown); }
-  /* #525: a docked row stands on parchment, where the disabled wash (a 0.5 ink over a 0.45 element) reads 1.5:1 and the button all but disappears. Docked, it takes a SOLID faded ink instead, so it reads the same whatever is behind it: 3.93:1 as a box against the sheet, a clear step down from the enabled 9.46:1. */
+  /* Docked on parchment the disabled wash (0.5 ink over a 0.45 element) reads 1.5:1, so a docked disabled press takes a solid faded ink: 3.93:1 as a box against the sheet, under the enabled 9.46:1. */
   .legend.in-slip .legend-row .legend-btn:disabled { background: var(--ink-faded); opacity: 1; }
   .slip-tab { display: none; }
   .slip { right: 0; left: 0; top: auto; bottom: 0; width: 100%; max-height: 72vh; outline-offset: -8px; transition: none; }
   .slip.folded { opacity: 1; visibility: visible; transform: none; }
   .slip:not(.open) .slip-body, .slip:not(.open) .slip-foot { display: none; }
   .slip-head { padding: calc(0.75rem + 3px + 0.55rem) 1.3rem 0.5rem; }
-  /* The handle is a real button covering the head (a keyboard needs a toggle too, PR #488 finding 3); four classes deep against the house button dress, and no lift: it is invisible. */
+  /* The handle is a real button covering the head (a keyboard needs a toggle); four classes deep against the house button dress and no lift, since it is invisible. */
   .slip-handle { display: block; position: absolute; inset: 0; z-index: 1; appearance: none; border: 0; border-radius: 0; background: none; padding: 0; cursor: pointer; }
   .slip .slip-head .slip-handle:is(:hover, :focus-visible, :active) { background: none; transform: none; box-shadow: none; }
-  /* Pinned to the head's top, not centred in the button (a button centres its content, which put the bar on the title line; plate read 2026-09-03 on the Specimen Book). The head's top padding reserves its room. */
+  /* Pinned to the head's top, not centred: a button centres its content, which put the bar on the title line; the head's top padding reserves its room. */
   .slip-handle::before { content: ""; position: absolute; top: 0.75rem; left: 50%; translate: -50% 0; width: 2.6rem; height: 3px; background: var(--line-tan); border-radius: 2px; }
   .slip.open .slip-handle::before { background: var(--ink-faded); }
   .slip .card-title { font-size: 1.15rem; }

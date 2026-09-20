@@ -1,4 +1,4 @@
-/* #463 (Landfall Sub 8, 4/4): the Prospect is a chart room on the #462 pattern, ruled on #494 (2026-08-30): the engraving full-bleed at the plate's own aspect, the year as the room's one control, the engraver's note on the slip, the Ribbon as a road out. The room furniture is /atelier.css's; this sheet seats the plate in the fitted sheet and dresses the note. */
+/* The Prospect: a chart room. The furniture is atelier.css's; this sheet seats the plate in the fitted sheet and dresses the note. */
 
 .stage { display: flex; align-items: center; justify-content: center; box-sizing: border-box;
   padding: var(--reserve-top, 8rem) var(--reserve-right, 0px) var(--reserve-bottom, 8rem) 0; }
@@ -22,12 +22,11 @@
 .era { margin: 1rem 0 0; font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif); font-variant-caps: small-caps; letter-spacing: 0.08em; font-size: 0.82rem; color: var(--ink-brown); }
 .era-gloss { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.85rem; color: var(--ink-brown); line-height: 1.45; margin: 0.2rem 0 0; text-align: left; }
 
-/* #522, ruled 2026-09-17 (seat C): the page's own capture point onto the Chart Table, seated on the engraver's note where the room's desk actions belong rather than in the roads out, which go somewhere. */
 .pp-file { display: flex; flex-direction: column; align-items: flex-start; gap: 0.25rem; margin: 0.9rem 0 0; }
 .pp-lay { font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); letter-spacing: 0.05em; font-size: 0.86rem;
   padding: 0.3rem 0.7rem; text-align: left; color: var(--ink-dark); background: var(--control-gold);
   border: 1px solid var(--line-tan); border-radius: 4px; }
-/* house.css's `button:not(.lf-station):not(.place-hit):hover` is (0,3,1) and would flash this press bright cream, losing the gold the sitting ruled; the slip's own id carries the hold to (1,2,0). */
+/* public/house.css's `button:not(.lf-station):not(.place-hit):hover` is (0,3,1) and would flash this press cream; the slip's own id carries the hold to (1,2,0). */
 #note .pp-lay:hover, #note .pp-lay:focus-visible { background: var(--control-gold); border-color: var(--ink-brown); }
 /* Dims by ground and never by opacity, for the measured reason written once at `.pc-lay.dim` in public/living-chart.css. */
 .pp-lay.dim { background: var(--control-cream); border-color: var(--line-faint); }

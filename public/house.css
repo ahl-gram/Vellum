@@ -1,4 +1,4 @@
-/* The house style (#324): the ratified type roles, control idiom and shared slips, linked by BaseLayout on every page BEFORE extraCss and the page's own index.css, so this sheet owns the voice and a page keeps the last word on layout; the specs are the 2026-07-30 ledger comment on #324 and test/site/house-style.test.ts pins them, so a change here is a re-ratification, not a refactor. */
+/* The house style: the type roles, control idiom and shared slips, linked on every page before the page's own sheet, so this sheet owns the voice and a page keeps the last word on layout; `ruleOf` in `test/site/house-style.test.ts` pins the values. */
 
 .intro {
   font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
@@ -24,7 +24,7 @@
   text-align: center;
 }
 
-/* Two archivist tiers: the inline label whispers beside its controls, the standing head presides over a section; CHART No's 0.3em stays the one ratified wide exception (print-room css). */
+/* Two archivist tiers: the inline label beside its controls, the standing head over a section; the print room's CHART No keeps its own 0.3em. */
 .archivist-label {
   font-size: 0.72rem;
   letter-spacing: 0.1em;
@@ -51,7 +51,7 @@ input[type="number"], select, button, input.control {
   padding: 0.4rem 0.6rem;
 }
 button { cursor: pointer; }
-/* .lf-station excluded like .place-hit: the wash painted the station button's square bright around its diamond glyph (#458). */
+/* .lf-station excluded like .place-hit: the wash painted the station button's square bright around its diamond glyph. */
 button:not(.lf-station):not(.place-hit):hover { background: var(--parchment-bright); }
 button.primary {
   background: var(--ink-dark);
