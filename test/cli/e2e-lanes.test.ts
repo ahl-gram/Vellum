@@ -23,39 +23,39 @@ import {
 import type { E2eSuiteName } from "../../src/cli/e2e-suites.ts";
 import { E2E_PORT_VAR, E2E_DPORT_VAR, e2eOutSubdir } from "../../src/cli/e2e-ports.ts";
 
-// Seconds per suite, from the runner's own timing table on a 16-core Mac (undated entries measured 2026-08-14); refresh from that same output when the split is revisited.
+// Seconds per suite, from the runner's own per-suite wall clock on a 16-core Mac. Every entry was refreshed 2026-09-20 at #637 from two local runs of each lane with the roster as it stands, the higher reading taken (both readings at the entry, one lane run at a time); refresh from that same output when the split is revisited. CI scales lane A's seconds about 2.4x and lane B's about 1.95x (home is wait-bound, the render-heavy suites are not), so a rebalance is SIZED from the CI lane logs' per-suite wall clock and this table decides only the 0.6 bound below.
 const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
-  "survey": 51.4,
-  "zoom": 45.8,
-  "reading-room": 27.1,
-  "room-instrument": 22.0,
-  "print-room": 24.8, // measured 2026-09-11, local single-suite run: PR35 and its two page-box resizes (#565) since the 2026-08-14 21.9s
-  "room-address": 19.3,
-  "render": 13.0,
-  "room-voyage-route": 9.0,
-  "glass-ceremony": 8.1,
-  "prospect": 5.2, // measured 2026-08-15, local single-suite run
-  "ribbon": 1.9, // measured 2026-08-20, local single-suite run
-  "verso": 7.1,
-  "turn": 6.5,
-  "runninghead": 6.6, // measured 2026-09-11, three local single-suite runs at 4.9, 5.1 and 6.6 with RH10d and RH10e added (#565, a Letter resize and a settle on an already-open Gallery); the highest taken, a lane budget erring upward
-  "cluster": 4.7, // measured 2026-08-28, local single-suite run
-  "chart-drawer": 66.0, // re-measured 2026-09-19 with #634's seven checks, CD36 to CD42, for 46 total. The sweep: four runs at 45 checks read 61.4, 61.5, 61.7 and 61.4, and the 46-check shape that shipped at PR #635 read 61.6, so 66.0 is the worst case plus about 7%. The 45-check runs are named as what they are rather than attributed to the shipped shape, which an earlier version of this line did and the cold review's round 3 on PR #635 caught. It leaves lane B at 59.685% against the 0.6 this file reds at. The bound is NOT the total held fixed, which is the arithmetic that gives a wrong 1.5s and the cold review on PR #635 caught: seconds added to a lane-B suite raise the denominator too, so `share <= 0.6` on `B/(A+B)` solves to `B <= 1.5 * A`, which is 303.45 against lane B's 299.50. Three point nine five seconds of headroom, and the next addition to this lane rebalances the lanes rather than raising a number. The six runs at 58.7 to 60.3 were the 44-check suite before the cold review on PR #635 added CD41, and one run at 67.9 is excluded and named: it is the same 45 checks with CD41 leaving by the Prospect page, whose plate render bought the check nothing and cost the lane 6.5s, so it goes out by the FAQ instead. Lane B's headroom is what bounds this from above, not the sweep, and the cap is 69.95 by the `B <= 1.5 * A` solve below. A fifth run that read 88.1 is excluded and named: a 30s readiness wait timed out in it, the check has since been rewritten and the failure carries a row in the flake record. CD23's 8.45s of SAY_HOLD_MS + SAY_FADE_MS is still a floor no machine can undercut, so the PRINCIPLE bounds it from below and the sweep sets the budget above. #583 took it to 47 with CD43 and did NOT move this number, which is a measurement and not an assumption: CD43 reads its own one-shot payload, timed at 0.192ms per suite run (200 calls in 38.4ms, 2026-09-19), so it is four orders below the run-to-run spread. The shape that rode SURFACES instead was rejected on its own measurement, 62.5/61.8/62.0 before against 63.1/63.4/65.0 after, a 1.73s mean delta against a 0.7s spread, because that payload is polled by four settles here and read again by the CD13 and CD18 steps. The history: 54.0 was the 39-check suite at #631, 45.7 the 23-check one at #547, 6.9 the 11-check one at #520
-  "room-drawer": 7.3, // measured 2026-08-28, local single-suite run
-  "document-rooms": 6.0, // measured 2026-08-29, local run
-  "broadside": 3.8,
-  "hunt": 3.4,
-  "room-voyage": 3.3,
-  "zoom-gestures": 3.1,
-  "home": 99.5, // re-measured 2026-08-25, local run: Subs 3-4a tripled the suite since the 2026-08-14 3.1s
-  "landfall": 23.3, // measured 2026-08-25, local single-suite run
-  "cards": 10.2, // re-measured 2026-09-20 with #633's nine checks, P19 to P27, for the 33 this suite itself prints: five local single-suite runs read 9.1 every time against the 2.9 the suite carried before, so 10.2 is the worst case plus about 12%. The 54 an earlier version of this line quoted is the render plus cards tally the runner forces whenever cards is selected, not this suite's own count, and the cold review's round 4 on PR #642 caught it
-  "motion": 2.4,
-  "room-ink": 2.4,
-  "fallback": 2.2,
-  "region-detail": 15.4, // measured 2026-08-23, local run
-  "specimen": 8.3, // measured 2026-09-11, local single-suite run: SB9d's scripts-off navigate and its re-boot, over the 7.2 to 7.5 three runs read that day with SB9c alone (SB8b to SB8e and SB9b were the 2026-09-10 7.3)
-  "health": 0.0,
+  "home": 104.2, // 2026-09-20: 104.1, 104.2
+  "chart-drawer": 63.0, // 2026-09-20: 62.7, 63.0; CD23's 8.45s of SAY_HOLD_MS + SAY_FADE_MS is a floor no machine can undercut, so the principle bounds it from below and the runs set the budget above
+  "landfall": 54.8, // 2026-09-20: 54.8, 54.5
+  "survey": 52.3, // 2026-09-20: 52.3, 50.8
+  "zoom": 48.8, // 2026-09-20: 48.2, 48.8
+  "reading-room": 36.3, // 2026-09-20: 36.3, 35.8
+  "print-room": 25.0, // 2026-09-20: 25.0, 24.1
+  "room-instrument": 24.7, // 2026-09-20: 24.7, 24.5
+  "room-address": 20.0, // 2026-09-20: 20.0, 19.5; three single-suite runs the same day read 19.9, 19.9 and 19.8
+  "region-detail": 14.7, // 2026-09-20: 14.6, 14.7
+  "render": 13.7, // 2026-09-20: 13.3, 13.7
+  "cluster": 9.8, // 2026-09-20: 9.8, 9.7
+  "cards": 9.7, // 2026-09-20: 9.7, 9.7; this suite's own count, not the render plus cards tally the runner forces whenever cards is selected, which is the 54 the cold review's round 4 on PR #642 caught
+  "room-voyage-route": 9.0, // 2026-09-20: 9.0, 8.7
+  "glass-ceremony": 8.7, // 2026-09-20: 8.7, 8.7
+  "specimen": 7.9, // 2026-09-20: 7.9, 7.9
+  "verso": 7.0, // 2026-09-20: 7.0, 7.0
+  "broadside": 7.0, // 2026-09-20: 7.0, 7.0
+  "room-drawer": 6.7, // 2026-09-20: 6.7, 6.7
+  "turn": 6.5, // 2026-09-20: 6.3, 6.5
+  "prospect": 6.5, // 2026-09-20: 6.5, 6.3
+  "document-rooms": 5.5, // 2026-09-20: 5.5, 5.5
+  "runninghead": 5.3, // 2026-09-20: 5.3, 5.1
+  "hunt": 3.6, // 2026-09-20: 3.6, 3.5
+  "zoom-gestures": 3.5, // 2026-09-20: 3.5, 3.4
+  "ribbon": 3.4, // 2026-09-20: 3.4, 3.3
+  "room-voyage": 3.4, // 2026-09-20: 3.4, 3.3
+  "room-ink": 2.7, // 2026-09-20: 2.7, 2.4
+  "fallback": 2.5, // 2026-09-20: 2.4, 2.5
+  "motion": 2.4, // 2026-09-20: 2.4, 2.4
+  "health": 0.0, // 2026-09-20: 0.0, 0.0
 };
 
 const laneSeconds = (suites: readonly E2eSuiteName[]) =>
