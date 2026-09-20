@@ -1,7 +1,6 @@
 // Living Chart story-card overlay e2e (P1-P15, #53).
 import { makeStep } from "./step-support.mjs";
 import { makeSettle } from "./settle-support.mjs";
-import { sampleRow, luminance } from "./pixel-support.mjs";
 
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, wheel, waitSettled, waitReady, axDescription, serverState, setMobileViewport, clearMobile, consoleErrors, http4xx, PORT } = ctx;
@@ -219,8 +218,6 @@ export async function run(ctx) {
 
   // #633: a card taller than its box cannot be fitted by any offset, so the bound IS the principle. Swept 2026-09-19: the smallest real overage measured is 8.61px, so 0.5px is the sub-pixel residual of a cap published from a fractional rect and cannot hide one.
   const OVER_BOX_TOLERANCE = 0.5;
-  // Swept 2026-09-20 over the 10 capped cards of the four sitting seeds at 320 (out/633-fade-sweep.mjs): the foot rule lifts the foot row between 12.6 and 44.0 above the same card's own text, and this same build with the rule deleted reads -2.8, so 8.0 sits 4.6 below the worst case and 10.8 above that control.
-  const FOOT_LIFT_FLOOR = 8.0;
   // Seed 4294967295 is the WITNESS that makes this bite: its Kralgov card measured 150.95px past a 247.02px box at 320 and 61.27px past a 301.05px box at 390 on main at 18bacfd. Every place is measured, not that one card, because the defect is a class and a copy change that promotes a different place to the worst would leave a single-card guard green.
   const NARROW_SEED = 4294967295;
   const narrowCount = await evaluate(`window.__vellumRunInline({kind:"draw",seed:${NARROW_SEED},overrides:{},render:{style:"antique",widthPx:1500,legend:true}}).manifest.places.length`);
@@ -295,24 +292,17 @@ export async function run(ctx) {
     await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: at.x, y: at.y, button: "left", clickCount: 1 });
     const open = await settle(
       `(() => { const c = document.getElementById("place-card"); if (!c || c.hidden) return null; const i = c.querySelector(".pc-inner"); const r = c.getBoundingClientRect(); const cs = getComputedStyle(i);
-        return { name: (c.querySelector(".pc-name") || {}).textContent, pinned: c.classList.contains("pinned"), more: c.classList.contains("pc-more"),
-          pe: cs.pointerEvents, settled: c.classList.contains("pc-settled"), over: +(i.scrollHeight - i.clientHeight).toFixed(2), top: +r.top.toFixed(2), bottom: +r.bottom.toFixed(2), left: +r.left.toFixed(2), right: +r.right.toFixed(2), w: +r.width.toFixed(2), h: +r.height.toFixed(2) }; })()`,
-      (d, last) => !!d && d.name === "Kralgov" && d.pinned && d.settled && !!last && last.name === "Kralgov" && d.h === last.h && d.pe === last.pe,
+        return { name: (c.querySelector(".pc-name") || {}).textContent, pinned: c.classList.contains("pinned"), scrolls: c.classList.contains("pc-scrolls"),
+          arrived: typeof i.getAnimations === "function" && i.getAnimations().every((a) => a.playState === "finished"),
+          tabIndex: i.tabIndex, pe: cs.pointerEvents, over: +(i.scrollHeight - i.clientHeight).toFixed(2), top: +r.top.toFixed(2), bottom: +r.bottom.toFixed(2), left: +r.left.toFixed(2), right: +r.right.toFixed(2), w: +r.width.toFixed(2), h: +r.height.toFixed(2) }; })()`,
+      (d, last) => !!d && d.name === "Kralgov" && d.pinned && d.arrived && !!last && last.name === "Kralgov" && d.h === last.h && d.pe === last.pe,
       "P20 Kralgov pinned at 320",
     );
     check("P20 a SHOWN unpinned card does not take the pointer and a pinned scrolling one does, or the card takes it from its own mark (#633)",
       at.shownUnpinned === true && at.restPe === "none" && open.pe === "auto",
       JSON.stringify({ shownUnpinned: at.shownUnpinned, unpinned: at.restPe, pinned: open.pe }));
-    check("P21 the capped card carries the mark that says it continues, and it has something left to show (#633)",
-      open.more === true && open.over > 1, JSON.stringify({ more: open.more, hiddenTail: open.over }));
-
-    // A rect cannot see paint, so the sign is read as pixels: the foot row against this same card's own mid-height row, which carries text on every build and is the control.
-    const foot = await sampleRow(send, Math.round(open.left), Math.round(open.bottom) - 6, Math.round(open.right - open.left));
-    const mid = await sampleRow(send, Math.round(open.left), Math.round(open.top + open.h / 2), Math.round(open.right - open.left));
-    const median = (px) => { const l = px.map(luminance).sort((a, b) => a - b); return +l[Math.floor(l.length / 2)].toFixed(1); };
-    const lift = +(median(foot) - median(mid)).toFixed(1);
-    check("P22 the foot rule actually PAINTS: the card's foot reads lighter than its own text (#633)",
-      lift >= FOOT_LIFT_FLOOR, JSON.stringify({ lift, floor: FOOT_LIFT_FLOOR, foot: median(foot), mid: median(mid) }));
+    check("P21 the capped card has a tail to reach, which is what the scroll, the tab stop and the wheel below are for (#633)",
+      open.scrolls === true && open.over > 1, JSON.stringify({ scrolls: open.scrolls, hiddenTail: open.over }));
 
     const beforeWheel = await evaluate(`(() => { const i = document.querySelector("#place-card .pc-inner"); return { scrollTop: +i.scrollTop.toFixed(2), k: window.__vellumZoomState().k }; })()`);
     const onCard = { x: Math.round(open.left + (open.right - open.left) / 2), y: Math.round(open.top + open.h / 2) };
@@ -327,7 +317,7 @@ export async function run(ctx) {
     await evaluate(`(() => { const i = document.querySelector("#place-card .pc-inner"); i.scrollTop = 0; })()`);
     await sleep(200);
 
-    const kb = await evaluate(`(() => { const i = document.querySelector("#place-card .pc-inner"); i.focus(); return { tabIndex: i.tabIndex, focused: document.activeElement === i, scrollTop: +i.scrollTop.toFixed(2) }; })()`);
+    const kb = await evaluate(`(() => { const i = document.querySelector("#place-card .pc-inner"); i.focus(); return { tabIndex: i.tabIndex, focused: document.activeElement === i, scrollTop: +i.scrollTop.toFixed(2), scrolls: document.getElementById("place-card").classList.contains("pc-scrolls"), pinned: document.getElementById("place-card").classList.contains("pinned") }; })()`);
     // PageDown, not ArrowDown: measured 2026-09-20, an arrow key does not scroll a focused scroll container in this build while PageDown does, and the cold review measured all three leaving scrollTop at 0 before the tab stop existed.
     await send("Input.dispatchKeyEvent", { type: "rawKeyDown", windowsVirtualKeyCode: 34, nativeVirtualKeyCode: 34, code: "PageDown", key: "PageDown" });
     await send("Input.dispatchKeyEvent", { type: "keyUp", windowsVirtualKeyCode: 34, nativeVirtualKeyCode: 34, code: "PageDown", key: "PageDown" });

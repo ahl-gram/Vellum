@@ -132,7 +132,6 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     void inner.offsetWidth;
     inner.style.animation = "";
     clampIntoView(el);
-    settleSign(el, inner);
     inner.tabIndex = el.classList.contains("pc-scrolls") && el.classList.contains("pinned") ? 0 : -1;
     placeOverlay.currentIdx = idx;
   }
@@ -155,23 +154,11 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     if (placeOverlay) paintLay(placeOverlay.currentIdx);
   }
 
-  function markMore(el: HTMLElement, inner: HTMLElement): void {
+  function markScroll(el: HTMLElement, inner: HTMLElement): void {
     const scrolls = inner.scrollHeight - inner.clientHeight > 1;
     el.classList.toggle("pc-scrolls", scrolls);
-    el.classList.toggle("pc-more", inner.scrollHeight - inner.scrollTop - inner.clientHeight > 1);
-    // A scroll container is not keyboard operable without a tab stop of its own, and the tail this cap hides was fully visible before it: the arrow keys reach it only once the card itself can hold focus.
+    // A scroll container is not keyboard operable without a tab stop of its own, and the tail this cap hides was fully visible before it: a reader with no pointer reaches it only once the card itself can hold focus.
     inner.tabIndex = scrolls && el.classList.contains("pinned") ? 0 : -1;
-  }
-
-  // The sign paints only on a card that has ARRIVED. It rides #place-card, which no animation touches, so without this it is at full strength from the first frame of the unfurl while the card's own inner is still at opacity 0 and 149px higher, which is a cream bar with a hairline sitting on the chart.
-  function settleSign(el: HTMLElement, inner: HTMLElement): void {
-    el.classList.remove("pc-settled");
-    // A host without the Web Animations API has nothing to wait for, so the sign is there at once rather than never: the engine may not assume an API its hosts are not required to have.
-    const running = typeof inner.getAnimations === "function" ? inner.getAnimations() : [];
-    if (!running.length) { el.classList.add("pc-settled"); return; }
-    for (const a of running) {
-      a.finished.then(() => { if (!el.hidden && inner.getAnimations().every((x) => x.playState === "finished")) el.classList.add("pc-settled"); }).catch(() => {});
-    }
   }
 
   function clampIntoView(el: HTMLElement): void {
@@ -185,7 +172,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     el.style.setProperty("--pc-dx", `${dx}px`);
     el.style.setProperty("--pc-dy", `${dy}px`);
     const inner = el.querySelector(".pc-inner");
-    if (inner) markMore(el, inner as HTMLElement);
+    if (inner) markScroll(el, inner as HTMLElement);
   }
 
   function hidePlaceCard(): void {
@@ -223,7 +210,6 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     inner.className = "pc-inner";
     // #633: d3-zoom is bound on the host's viewport, an ANCESTOR of the card carrying touch-action: none, so without this a drag or a wheel over the card reaches the camera and the card never scrolls; measured with a CDP touch pan, which cannot see a touch-action line at all and still read scrollTop 0 to 0. Whether a real thumb scrolls it is UNVERIFIABLE in this harness.
     for (const ev of ["touchstart", "touchmove", "wheel"]) inner.addEventListener(ev, (e) => { if (inner.scrollHeight - inner.clientHeight > 1) e.stopPropagation(); }, { passive: true });
-    inner.addEventListener("scroll", () => markMore(card, inner), { passive: true });
     card.appendChild(inner);
     // Both card actions are world-sheet only: a region manifest renumbers its places (#242), so an inset's index names a different settlement.
     const onWorldSheet = !(opts && opts.box);

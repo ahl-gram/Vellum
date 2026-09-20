@@ -137,22 +137,22 @@ const withScroll = (inner: El, scrollHeight: number, clientHeight: number, scrol
   Object.assign(inner as unknown as Record<string, number>, { scrollHeight, clientHeight, scrollTop });
 };
 
-test("#633 a card whose tail does not fit is marked, so the sheet can say there is more", async () => {
+test("#633 a card whose tail does not fit is marked as scrolling, which is what opens its live area and its tab stop", async () => {
   const { card, hits, inner } = await overlayOver(() => CHART);
   withScroll(inner, 360, 299);
 
   shownWith(card, hits[0]!, { left: 80, top: 20, right: 254, bottom: 319 });
 
-  assert.equal(card.classList.contains("pc-more"), true);
+  assert.equal(card.classList.contains("pc-scrolls"), true);
 });
 
-test("#633 a card that fits is NOT marked, or every card wears the sign and it says nothing", async () => {
+test("#633 a card that fits is NOT marked, or every card takes the pointer from the chart under it", async () => {
   const { card, hits, inner } = await overlayOver(() => CHART);
   withScroll(inner, 200, 200);
 
   shownWith(card, hits[0]!, { left: 80, top: 20, right: 254, bottom: 220 });
 
-  assert.equal(card.classList.contains("pc-more"), false);
+  assert.equal(card.classList.contains("pc-scrolls"), false);
 });
 
 test("#633 a sliver under the threshold is not a tail: half a pixel of scroll is noise, not more", async () => {
@@ -161,17 +161,5 @@ test("#633 a sliver under the threshold is not a tail: half a pixel of scroll is
 
   shownWith(card, hits[0]!, { left: 80, top: 20, right: 254, bottom: 320.5 });
 
-  assert.equal(card.classList.contains("pc-more"), false);
   assert.equal(card.classList.contains("pc-scrolls"), false);
-});
-
-test("#633 the mark retires when the reader reaches the end, from the SAME predicate the show used", async () => {
-  const { card, hits, inner } = await overlayOver(() => CHART);
-  withScroll(inner, 360, 299);
-  shownWith(card, hits[0]!, { left: 80, top: 20, right: 254, bottom: 319 });
-
-  withScroll(inner, 360, 299, 61);
-  inner.fire("scroll");
-
-  assert.equal(card.classList.contains("pc-more"), false);
 });

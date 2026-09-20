@@ -49,7 +49,7 @@ const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   "zoom-gestures": 3.1,
   "home": 99.5, // re-measured 2026-08-25, local run: Subs 3-4a tripled the suite since the 2026-08-14 3.1s
   "landfall": 23.3, // measured 2026-08-25, local single-suite run
-  "cards": 10.2, // re-measured 2026-09-20 with #633's P19 to P27 and P restore, for 55 checks: three local single-suite runs read 9.2, 9.1 and 9.1 against the 2.9 of the 44-check suite, so 10.2 is the worst case plus about 11%
+  "cards": 10.2, // re-measured 2026-09-20 with #633's P19 to P27 and P restore, for 54 checks: three local single-suite runs read 9.1, 9.1 and 9.1 against the 2.9 of the 44-check suite, so 10.2 is the worst case plus about 12%
   "motion": 2.4,
   "room-ink": 2.4,
   "fallback": 2.2,

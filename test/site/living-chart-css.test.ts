@@ -32,7 +32,6 @@ const ENGINE_RULES = [
   ".place-hit::after",
   "#place-card {",
   "#place-card[hidden]",
-  "#place-card.pc-settled.pc-more::after",
   "#place-card.pinned.pc-scrolls .pc-inner",
   "#place-card.flip-h",
   "#place-card.flip-v",

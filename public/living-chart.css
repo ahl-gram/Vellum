@@ -55,9 +55,6 @@
   animation: paperUnfurl var(--unfurl-quick) var(--ease-unfurl) both;
 }
 #place-card.flip-v .pc-inner { transform-origin: bottom center; }
-#place-card.pc-settled.pc-more::after { content: ""; position: absolute; left: 1px; right: 1px; bottom: 1px; height: 0.6rem;
-  border-radius: 0 0 4px 4px; pointer-events: none;
-  background: var(--control-cream); border-top: 1px solid var(--line-faint); }
 #place-card.pinned .pc-inner { animation-duration: var(--unfurl); }
 #place-card.pinned.pc-scrolls .pc-inner { pointer-events: auto; }
 /* The tab stop's ring is drawn INSIDE the card, on the card's own cream, because the card floats over a live chart rather than a fixed panel: drawn outside it inherited whatever the chart is under it and measured 1.02:1 there. */
