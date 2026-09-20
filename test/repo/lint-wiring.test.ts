@@ -52,10 +52,11 @@ test("npm run lint is the native-loader ESLint over the four roots, with a warni
   assert.equal(pkg.scripts["lint"], LINT_SCRIPT);
 });
 
-test("ci.yml's check-and-test job runs the lint as a step of its own, so a red lint fails the pull request", () => {
+// The step is matched at the file's own step indent (a six-space dash, an eight-space run) and as exactly those two lines, the way test/repo/e2e-tiers.test.ts keys its timeout and matrix anchors: a run line planted deeper (under a with: map, which Actions ignores and which the prover planted on this guard's first round, Issue #648) or a step carrying an if: or continue-on-error: reds here, and so does a step written in flow style, which is a false red and never a miss.
+test("ci.yml's check-and-test job runs the lint as a real step of exactly two lines, so a red lint fails the pull request", () => {
   assert.match(
     ciJob("check-and-test"),
-    /^\s*run: npm run lint\s*$/m,
-    "the check-and-test job does not run npm run lint, or runs it with its failure swallowed",
+    /^ {6}- name: Lint\n {8}run: npm run lint\n(?= {6}- |\n|$)/m,
+    "the check-and-test job has no Lint step of the shape `- name: Lint` / `run: npm run lint` at the step indent, so either the lint never runs, runs with its failure swallowed, or runs only as text somewhere Actions ignores",
   );
 });
