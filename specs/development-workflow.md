@@ -75,6 +75,27 @@ to Alex in `AskUserQuestion` and relays his rulings back. The STOP is the same; 
 menu changes, because a subagent's question does not reach Alex. The implementer records the relayed
 rulings on the issue at step 12 exactly as a session would record its own.
 
+**When the ruling is an appearance, the menu carries stills.** A direction described in prose asks
+Alex to picture it and then holds him to what he pictured, which is how a ruling gets made on
+something nobody measured. Render the candidates instead: two to four directions through
+`vellum-plate-reader`, at the viewports and on the seeds the issue measured, full scale and 1:1 crop.
+**Today's shipped behavior is rendered beside them as a control**, by the same instrument in the same
+run, because a fix to an existing appearance is ruled against what it replaces and a candidate with
+nothing beside it reads as better than it is. The stills go in `out/`, and each option in the menu
+names the file that shows it. `specs/conventions.md` "How a design decision is made" governs the
+sitting itself; what this step fixes is WHEN the rendering happens, which is here, before the STOP,
+rather than at step 11.
+
+**The candidate build is a throwaway spike, and it is not step 8.** Rendering a direction takes code,
+which is the one thing this STOP forbids, so the carve-out is drawn narrow: the spike's only output
+is the stills, it is discarded rather than carried forward, and the ruled direction is built
+test-first from step 8 like anything else. A candidate kept because it already works is an
+implementation that skipped its failing test.
+
+**A dispatched lane's `out/` is inside its worktree, which is not where Alex looks.** The lane reports
+absolute paths and the dispatcher copies the stills into the main checkout's `out/` before putting
+the menu, the same way it holds the menu itself.
+
 **7. Worktree, then rename the branch**, before the first commit, or the PR carries the harness's
 name instead of yours. The rest of the worktree rules, including why the branch needs renaming at
 all, are `CLAUDE.md`'s Worktrees section. A `vellum-implementer` lane already stands in a harness
@@ -129,8 +150,9 @@ only the branch's CI cannot see it.
 guard, and step 8's commits have to exist first: it mutates in its own detached worktree at the DISPATCH
 tree's HEAD (built by `scripts/agent-sandbox.ts`, #575), so anything uncommitted is simply not in
 the tree it proves, and its ledger names the sha it proved. `vellum-plate-reader` when the
-deliverable is an appearance. Zero red from the prover is a hole, not a pass, and a guard proved
-unable to bite is deleted rather than shipped.
+deliverable is an appearance, and again here when step 6's menu was ruled from stills, since those
+measured a spike and this run measures what was built. Zero red from the prover is a hole, not a
+pass, and a guard proved unable to bite is deleted rather than shipped.
 
 **12. Record every call the issue did not rule on, as a dated comment on the issue, before the PR
 is opened.** Not before the push: with step 9 the first push comes early, so the deadline that
