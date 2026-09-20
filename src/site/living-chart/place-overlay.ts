@@ -158,6 +158,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     el.style.setProperty("--pc-dy", "0px");
     const box = clampBox();
     if (!box) return;
+    el.style.setProperty("--pc-maxh", `${box.bottom - box.top}px`);
     const { dx, dy } = clampOffset(el.getBoundingClientRect(), box);
     el.style.setProperty("--pc-dx", `${dx}px`);
     el.style.setProperty("--pc-dy", `${dy}px`);
@@ -196,6 +197,8 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     card.hidden = true;
     const inner = document.createElement("div");
     inner.className = "pc-inner";
+    // #633: d3-zoom is bound on the host's viewport, an ANCESTOR of the card carrying touch-action: none, so without this a drag or a wheel over the card reaches the camera and the card never scrolls; measured with a CDP touch pan, which cannot see a touch-action line at all and still read scrollTop 0 to 0. Whether a real thumb scrolls it is UNVERIFIABLE in this harness.
+    for (const ev of ["touchstart", "touchmove", "wheel"]) inner.addEventListener(ev, (e) => e.stopPropagation(), { passive: true });
     card.appendChild(inner);
     // Both card actions are world-sheet only: a region manifest renumbers its places (#242), so an inset's index names a different settlement.
     const onWorldSheet = !(opts && opts.box);

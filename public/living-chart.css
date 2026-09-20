@@ -25,8 +25,9 @@
 }
 /* #387/#388: the clamp rides INSIDE the counter-scaled translate. The mount carries the Glass's own scale(k), so a nudge placed ahead of scale(1/k) composes as k times itself, which no unit test can catch because it is exactly right at k=1. */
 /* #164: --zoom-k is published on THIS card element, never the mount (that would re-rasterize the baked labels every frame and jiggle); the origin sits on whichever corner the card is ANCHORED by, which #124 moved to the right edge for the flipped variants, so the gap at the mark holds a constant screen distance at every depth. */
+/* #633: a DEFINITE width, not only a cap. Shrink-to-fit gave a flipped card only the room between its mark and the chart's edge (nx * boxWidth), so a card near an edge was narrow and therefore tall: 196.67px wide and 362.31px tall inside a 301.05px box at 390. A definite width overflows its containing block instead, and the clamp below nudges it back inside. At 1280 every card already had more room than 16rem, so the desktop measures identically. */
 #place-card {
-  position: absolute; z-index: 5; max-width: 16rem; pointer-events: none;
+  position: absolute; z-index: 5; width: 16rem; max-width: 16rem; pointer-events: none;
   left: calc(var(--pc-nx, 0) * 100%); top: calc(var(--pc-ny, 0) * 100%);
   transform-origin: 0 0;
   transform: scale(calc(1 / var(--zoom-k, 1)))
@@ -44,7 +45,10 @@
 #place-card.flip-h.flip-v { transform-origin: 100% 0;
   transform: scale(calc(1 / var(--zoom-k, 1)))
     translate(calc(-10px + var(--pc-dx, 0px)), calc(-100% - 10px + var(--pc-dy, 0px))); }
+/* #633: box-sizing is border-box because max-height caps the CONTENT box by default, which left the worst card 21.19px over, exactly its 19.2px padding plus its 2px border. The cap is multiplied by --zoom-k because the card is scaled by 1/k, so a CSS height of H*k renders as H on screen. */
 .pc-inner {
+  box-sizing: border-box; max-height: calc(var(--pc-maxh, 100vh) * var(--zoom-k, 1));
+  overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; touch-action: pan-y;
   background: var(--control-cream); color: var(--ink-dark);
   border: 1px solid var(--ink-dark); border-radius: 4px;
   box-shadow: 0 8px 22px rgb(from var(--chart-ink) r g b / 0.28);
@@ -53,6 +57,8 @@
   animation: paperUnfurl var(--unfurl-quick) var(--ease-unfurl) both;
 }
 #place-card.flip-v .pc-inner { transform-origin: bottom center; }
+/* #633: pointer-events comes back only on a PINNED card. Restored on every card it made 8 of 26 places at 390 unreadable: the card lands over its own mark, takes the pointer, the mark's mouseleave fires and the unpinned card hides itself. A pinned card does not hide on mouseleave, so it is the only state that can hold a scroll. */
+#place-card.pinned .pc-inner { pointer-events: auto; }
 #place-card.pinned .pc-inner { animation-duration: var(--unfurl); }
 .pc-name { display: block; font-size: 1rem; letter-spacing: 0.02em; }
 .pc-rank { display: block; font-style: italic; color: var(--ink-brown); font-size: 0.82rem;

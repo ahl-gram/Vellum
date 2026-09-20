@@ -2,7 +2,7 @@
 import { makeStep } from "./step-support.mjs";
 
 export async function run(ctx) {
-  const { evaluate, send, check, shoot, sleep, waitSettled, waitReady, axDescription, serverState, consoleErrors, http4xx, PORT } = ctx;
+  const { evaluate, send, check, shoot, sleep, waitSettled, waitReady, axDescription, serverState, setMobileViewport, clearMobile, consoleErrors, http4xx, PORT } = ctx;
   const step = makeStep(ctx);
   await step("P setup", async () => {
     await evaluate(`(()=>{
@@ -214,4 +214,67 @@ export async function run(ctx) {
   await shoot("explorer-place-card.png");
   await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}))`);
 
+  // #633: a card taller than its box cannot be fitted by any offset, so the bound IS the principle and the sweep only confirms it. The 0.5px tolerance is for the sub-pixel residual of a cap published in CSS pixels from a fractional rect; it cannot hide a real regression, whose smallest measured instance is 8.61px (seed 5 at 390 on main, 2026-09-19).
+  const OVER_BOX_TOLERANCE = 0.5;
+  // Seed 4294967295 is the WITNESS that makes this bite: its Kralgov card measured 150.95px past a 247.02px box at 320 and 61.27px past a 301.05px box at 390 on main at 18bacfd. Every place is measured, not that one card, because the defect is a class and a copy change that promotes a different place to the worst would leave a single-card guard green.
+  const NARROW_SEED = 4294967295;
+  // Focus rather than a pointer, deliberately: focus reaches EVERY mark, including the ones a neighbour's 26px hit covers at rest, and showPlaceCard composes the same card on both paths. Whether a pointer can reach a mark is a different question with its own issue.
+  const SWEEP = `(() => {
+    const vp = document.getElementById("map-viewport");
+    if (!vp) return { error: "no map-viewport" };
+    const v = vp.getBoundingClientRect();
+    const rows = [];
+    for (const h of document.querySelectorAll(".place-overlay .place-hit")) {
+      const want = (h.getAttribute("aria-label") || "").split(", ")[0];
+      h.focus();
+      const card = document.getElementById("place-card");
+      if (!card || card.hidden) { rows.push({ want, shown: false }); continue; }
+      const got = (card.querySelector(".pc-name") || {}).textContent;
+      const c = card.getBoundingClientRect();
+      rows.push({ want, got, shown: true, h: +c.height.toFixed(2), over: +(c.height - v.height).toFixed(2) });
+    }
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    return { boxW: +v.width.toFixed(2), boxH: +v.height.toFixed(2), rows };
+  })()`;
+  const sweepAt = async (width) => {
+    await setMobileViewport(width, 844);
+    // The metrics override has to be in effect BEFORE the boot navigate, and this suite otherwise never navigates at all, so the group re-boots through about:blank rather than resizing the page it inherited.
+    await send("Page.navigate", { url: "about:blank" });
+    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/#seed=${NARROW_SEED}&style=antique` });
+    if (!(await waitReady())) throw new Error(`P19 the explorer never drew at ${width}`);
+    // The card's height is set by wrapped text, so a face still swapping in measures a different card.
+    let fonts = null;
+    for (let i = 0; i < 100; i++) {
+      fonts = await evaluate(`document.fonts ? document.fonts.status : "no-fonts-api"`);
+      if (fonts !== "loading") break;
+      await sleep(50);
+    }
+    if (fonts === "loading") throw new Error(`P19 the faces never finished loading at ${width}`);
+    const d = await evaluate(SWEEP);
+    if (!d || d.error) throw new Error(`P19 the sweep found no chart box at ${width}: ${JSON.stringify(d)}`);
+    return d;
+  };
+  const verdict = (d, width) => {
+    const missed = d.rows.filter((r) => !r.shown || r.got !== r.want);
+    const worst = d.rows.filter((r) => r.shown).sort((a, b) => b.over - a.over)[0];
+    return {
+      ok: d.rows.length > 1 && missed.length === 0 && !!worst && worst.over <= OVER_BOX_TOLERANCE,
+      detail: JSON.stringify({ width, box: `${d.boxW}x${d.boxH}`, places: d.rows.length, missed: missed.map((r) => r.want), worst }),
+    };
+  };
+
+  await step("P19, P19b", async () => {
+    const at390 = verdict(await sweepAt(390), 390);
+    check("P19 at the ruled phone width no place card is taller than the chart box it is clamped into (#633)", at390.ok, at390.detail);
+    const at320 = verdict(await sweepAt(320), 320);
+    check("P19b and the same holds at 320, where two cards in three were over the box before this (#633)", at320.ok, at320.detail);
+  });
+
+  await step("P restore", async () => {
+    // settle-doctrine clause 14: the next suite starts on whatever page is current, and the runner's viewport reset is the ERROR path only.
+    await clearMobile();
+    await send("Page.navigate", { url: "about:blank" });
+    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/` });
+    if (!(await waitReady())) throw new Error("P restore the explorer never drew again");
+  });
 }
