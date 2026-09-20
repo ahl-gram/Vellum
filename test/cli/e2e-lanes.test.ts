@@ -272,12 +272,16 @@ test("the balance message names the seconds a lane must shed, as a positive numb
   const red = balanceLine("Q", seconds, total);
   assert.match(red, new RegExp(`${shed.toFixed(1)}s past the ${BALANCE_CAP} cap`), "the red message does not name the seconds to shed");
   assert.doesNotMatch(red, /-\d/, "the red message carries a negative number, which reads as room where there is none");
+  // The share clause is pinned too: the prover's round on f1b07c5 found `* 1000` passing with the seconds clause alone under test.
+  assert.match(red, /\b61\.2% of measured serial cost/, "the red message does not name the share as a percentage");
   // The other state, its own pin: under the cap the same helper names room, and adding exactly that much lands on the cap too.
   const [under, underTotal] = [302.2, 568.6];
   const room = laneHeadroom(under, underTotal);
   assert.ok(room > 0, "a lane under the cap reports no room");
   assert.ok(Math.abs((under + room) / (underTotal + room) - BALANCE_CAP) < 1e-9, `adding ${room}s lands at ${(under + room) / (underTotal + room)}, not on the cap`);
-  assert.match(balanceLine("Q", under, underTotal), new RegExp(`${room.toFixed(1)}s of room under the ${BALANCE_CAP} cap`), "the green-shaped message does not name the room");
+  const green = balanceLine("Q", under, underTotal);
+  assert.match(green, new RegExp(`${room.toFixed(1)}s of room under the ${BALANCE_CAP} cap`), "the green-shaped message does not name the room");
+  assert.match(green, /\b53\.1% of measured serial cost/, "the green-shaped message does not name the share as a percentage");
 });
 
 test("a lane failing fails the run and the line says which lane", () => {
