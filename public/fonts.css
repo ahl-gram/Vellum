@@ -1,4 +1,4 @@
-/* The Punchcutter's Case (#228): three self-hosted roles (display IM Fell English SC, flourish IM Fell English italic, body EB Garamond; licenses in /fonts/OFL.txt). SCOPE is site chrome only: the charts' own SVG lettering stays the Iowan serif in src/render/style.ts, part of the byte-determinism contract, so touching it owes a regen. */
+/* Three self-hosted roles for the site chrome only (display, flourish, body; licences in /fonts/OFL.txt); the charts' own lettering stays the Iowan serif of `fontFamily` in `src/render/style.ts`, part of the byte-determinism contract, so touching it owes a regen. */
 
 @font-face {
   font-family: 'IM Fell English SC';
@@ -48,7 +48,7 @@
   src: url('/fonts/eb-garamond-latin-700-normal.woff2') format('woff2');
 }
 
-/* Pages repeat the serif stack inline as each var()'s fallback on purpose: the generated atlas download links no fonts.css, so with these vars undefined it still falls back to the serif rather than an unstyled default. */
+/* Pages repeat the serif stack inline as each var()'s fallback on purpose: the generated atlas download links no fonts.css, so with these vars undefined it still falls back to the serif. */
 :root {
   --font-serif-fallback: 'Iowan Old Style', 'Palatino', Georgia, serif;
   --font-display: 'IM Fell English SC', var(--font-serif-fallback);

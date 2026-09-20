@@ -1,4 +1,4 @@
-/* Paper & Ink, the shared motion desk (#126, epic #125): one motion language for every page linking /motion.css; styles the LIVE DOM only, so the determinism contract (SVG strings, committed files, goldens) is untouched. */
+/* The shared motion desk: one motion language for every page linking /motion.css, on the live DOM only, so the determinism contract (SVG strings, committed files, goldens) is untouched. */
 
 :root {
   --paper-quick: 180ms;
@@ -8,16 +8,16 @@
   --unfurl-quick: 400ms;
   --ink-draw: 1200ms;
   --ink-dry: 1200ms;
-  --turn: 900ms;          /* the sheet turn (#131); read by sheet-turn.js's WAAPI */
-  --verso-turn: 1200ms;   /* the ceremonial flip (#116); slower than a re-dress on purpose */
+  --turn: 900ms;          /* the sheet turn, read by src/site/explorer/sheet-turn.ts */
+  --verso-turn: 1200ms;   /* the verso flip, slower than a re-dress on purpose */
 
-  /* #170 redraft grade: deliberately SHORTER than the once-per-draw arrival because a redraft fires on every settle; the dry waits stagger names by tier, past the inset's 200ms crossfade. */
+  /* The redraft grade is shorter than the once-per-draw arrival because a redraft fires on every settle; the dry waits stagger names by tier, past the inset's 200ms crossfade. */
   --redraft-draw: 600ms;
   --redraft-dry: 450ms;
   --redraft-dry-wait: 260ms;
   --redraft-dry-wait-village: 500ms;
   --redraft-dry-wait-hamlet: 740ms;
-  --glide: 300ms;         /* #170 zoom glide; read lazily by app.js, bypassed under reduced motion */
+  --glide: 300ms;         /* the zoom glide, read per glide by glideMs in src/site/explorer/glass.ts and the rooms' seats, bypassed under reduced motion */
 
   --ease-paper: cubic-bezier(0.22, 0.61, 0.36, 1);
   --ease-unfurl: cubic-bezier(0.66, 0, 0.2, 1.03);
@@ -70,7 +70,7 @@
   to   { opacity: 0; transform: scale(1); }
 }
 
-/* .place-hit and .lf-station MUST stay excluded: each is a <button> on its own load-bearing transform (the place card's hit target, e2e P2/P2c; the home stage's counter-scaled station anchor, #458), so the house lift would replace that transform and the house transition would lag the counter-scale a beat behind every zoom. */
+/* .place-hit and .lf-station stay excluded: each is a button on its own load-bearing transform (the hit target, `P2` in `scripts/e2e/suite-cards.mjs` and its P2c pair; home's counter-scaled station anchor), which the house lift would replace and the house transition would lag a beat behind every zoom. */
 button:not(.lf-station):not(.place-hit),
 .actions a,
 .action-link {
@@ -109,7 +109,7 @@ button:not(.lf-station):not(.place-hit):active,
 }
 .plate:active { transform: translateY(-1px) rotate(0deg); }
 
-/* Keyed on .wordmark, not h1 (#288): on a room page the wordmark is a <p> and the h1 holds no link, so an h1-keyed rule would select nothing and the gesture would vanish silently; home's wordmark stays still via the :has scope (the room name stands in main since #461, and :has reads the whole body, so the scope survives the move). Focus-visible joined at #461 addendum 1. */
+/* Keyed on .wordmark, not h1: on a room page the wordmark is a <p> and the h1 holds no link, so an h1-keyed rule would select nothing; home's wordmark stays still through the :has scope, which reads the whole body wherever the room name stands. */
 .wordmark a {
   display: inline-block;
   transition: transform var(--paper) var(--ease-paper);
@@ -118,7 +118,7 @@ body:has(.room-name) .wordmark a:hover,
 body:has(.room-name) .wordmark a:focus-visible { transform: translateY(var(--raise)) rotate(-0.6deg); }
 body:has(.room-name) .wordmark a:active { transform: translateY(0); }
 
-/* #130 folio: cross-document view transitions; their pseudo-elements live on their own tree, out of reach of the universal * reduced-motion collapse, so the nested @view-transition {navigation:none} below is what turns the folio off. */
+/* Cross-document view transitions' pseudo-elements live on their own tree, out of reach of the universal reduced-motion collapse, so the nested @view-transition { navigation: none } below is what turns the folio off. */
 @view-transition { navigation: auto; }
 
 ::view-transition-old(root) { animation: folioLeave var(--paper) var(--ease-paper) both; }
