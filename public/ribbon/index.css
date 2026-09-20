@@ -1,4 +1,4 @@
-/* #463 (Landfall Sub 8, 4/4): the Wayfarer's Ribbon is a chart room on the #462 pattern, ruled on #494 (2026-08-30): the scroll full-bleed at its own aspect, the journey row as the corner's control, the itinerary league by league on the slip, the prospect of the road's end as a road out. The room furniture is /atelier.css's; this sheet seats the scroll in the fitted sheet, the journey in the corner and the phone sheet, and dresses the itinerary. */
+/* The Wayfarer's Ribbon: a chart room. The furniture is atelier.css's; this sheet seats the scroll in the fitted sheet, the journey in the corner and the phone sheet, and dresses the itinerary. */
 
 .stage { display: flex; align-items: center; justify-content: center; box-sizing: border-box;
   padding: var(--reserve-top, 8rem) var(--reserve-right, 0px) var(--reserve-bottom, 8rem) 0; }

@@ -1,4 +1,4 @@
-/* #463 (Landfall Sub 8): the Print Room is a chart room on the #462 pattern. The room furniture is /atelier.css's; this sheet seats the proof and a turned plate in the fitted sheet, the atlas on the slip, the poster plates on the legend row, and the hidden document for paper. */
+/* The Print Room: a chart room. The furniture is atelier.css's; this sheet seats the proof and a turned plate in the fitted sheet, the atlas on the slip, the poster plates on the legend row, and the hidden document for paper. */
 
 .stage { display: flex; align-items: center; justify-content: center; box-sizing: border-box;
   padding: var(--reserve-top, 8rem) var(--reserve-right, 0px) var(--reserve-bottom, 8rem) 0; }
@@ -45,7 +45,7 @@
 .matter-page td.name .former { display: block; white-space: normal; font-weight: 400; font-size: 0.86em; color: var(--ink-brown); text-transform: none; letter-spacing: normal; }
 .matter-page td.note { font-style: italic; color: var(--ink-brown); }
 
-/* The style picker's width stays this room's at every width (the kit's phone clamp would leave "topographic" 4.6rem of box beside the chevron), scoped to wide sheets: an unscoped 25rem beat the kit's 12.5rem phone clamp and the corner never wrapped (plate read 2026-08-30). */
+/* The style picker's width stays this room's, scoped to wide sheets: an unscoped 25rem beat the kit's 12.5rem phone clamp and the corner never wrapped. */
 @media (min-width: 901px) { .folio-room { max-width: 25rem; } }
 .folio-controls input.control { width: 5.6rem; }
 .folio-controls select.control { width: 7.4rem; }
@@ -86,7 +86,7 @@ body.has-atlas .slip .intro { display: none; }
 .legend-head select option { color: var(--ink-dark); background: var(--parchment-panel); }
 .legend-note { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.74rem; line-height: 1.4; color: var(--parchment); margin: 0 auto 0.5rem; max-width: 46rem; }
 .legend-btn .verb.dim { font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif); font-variant-caps: small-caps; font-style: normal; letter-spacing: 0.06em; font-variant-numeric: tabular-nums; }
-/* The poster order reports under the row, so a phone (where the chart's folio stands down) reads it in the docked legend; min-height keeps the row from jumping when the line empties. */
+/* The poster order reports under the row, so a phone reads it in the docked legend; min-height keeps the row from jumping when the line empties. */
 .legend-status { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.78rem; color: var(--parchment); margin: 0.45rem 0 0; min-height: 1.2em; }
 
 @media screen { #pr-atlas { display: none; } #pr-atlas .print-only { display: none; } }
@@ -98,9 +98,9 @@ body.has-atlas .slip .intro { display: none; }
 #pr-atlas .atlas-head .chartno { letter-spacing: 0.3em; font-size: 0.8rem; color: var(--ink-faded); margin: 0.5rem 0 0; }
 
 @media (max-width: 900px) {
-  /* The mockup's phone corner, except the style picker STAYS (ruled 2026-08-30 on #463: no feature lost at any width; the mockup hid it unruled): the row wraps, seed, then style, then Pull a proof. */
+  /* The style picker stays on a phone (the mockup hid it; no feature is lost at any width): the row wraps, seed, then style, then Pull a proof. */
   .folio-controls { flex-wrap: wrap; }
-  /* Docked in the sheet the head stays (the mockup shows it): it carries the Pressed-as choice, which the kit's hidden head would take with it; the select takes the house dress on the panel's parchment; the note stands down. */
+  /* Docked in the sheet the head stays: it carries the Pressed-as choice, which the kit's hidden head would take with it; the select takes the house dress on the panel's parchment; the note stands down. */
   .legend.in-slip .legend-head { display: block; }
   .legend.in-slip .pressed { color: var(--ink-brown); }
   .legend.in-slip .legend-status { display: block; color: var(--ink-brown); }
@@ -121,10 +121,10 @@ body.has-atlas .slip .intro { display: none; }
   body.has-atlas .corner.folio-room { display: none !important; }
   body.has-atlas #pr-atlas { display: block; max-width: none; margin: 0; }
   body.has-atlas #pr-atlas .print-only { display: block; }
-  /* Block layout so each plate figure can own a page (grid + fragmentation is unreliable). */
+  /* Block layout so each plate figure can own a page: grid plus fragmentation is unreliable. */
   body.has-atlas #pr-atlas .styles,
   body.has-atlas #pr-atlas .themes { display: block; }
-  /* Every plate figure owns a page; opacity:1 is belt-and-suspenders so no below-fold plate can ever print blank. */
+  /* Every plate figure owns a page; opacity 1 so no below-fold plate can print blank. */
   body.has-atlas #pr-atlas figure:not(.banner) { break-inside: avoid; break-after: page; opacity: 1; }
   body.has-atlas #pr-atlas figure:not(.banner) img { box-shadow: none; }
   @page { margin: 1.5cm; }

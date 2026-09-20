@@ -1,12 +1,12 @@
-/* Sub 7 (#462): Today is the first chart room. The chart IS the room, full bleed on the deep under the head cluster with no band and no footer (rulings 7 and 9); the room's folio top right, the Daily Hunt on the slip, the chart's own folio bottom left, the roads out as the legend row, the Glass at the chart's corner. The room furniture (the stage, the corners, the slip, the legend, the Glass, the vignettes) is /atelier.css's since #463; this sheet keeps the hunt and the stage's own layout. */
+/* Today: the first chart room, the chart full bleed under the head cluster. The furniture is atelier.css's; this sheet keeps the hunt and the stage's own layout. */
 body { line-height: 1.45; }
 
 #map-viewport { position: absolute; inset: 0; cursor: grab; }
 #map-viewport:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: -3px; }
-/* #167 Glass: overflow clips only while .zoomed so the idle stage stays as laid out; touch-action:none via .zoomable is REQUIRED, d3-zoom does not set it and native pan/pinch would preempt the gesture. */
+/* overflow clips only while .zoomed so the idle stage stays as laid out; touch-action none via .zoomable is required, d3-zoom does not set it and native pan and pinch would preempt the gesture. */
 #map-viewport.zoomed { overflow: hidden; }
 #map-viewport.zoomable { touch-action: none; }
-/* transform-origin 0 0 matches d3-zoom's screen-space math; the reserves (room.ts measures them off the chrome) are padding on the transform target, so the fitted sheet centres in what the chrome leaves and d3's clamp still covers the stage. */
+/* transform-origin 0 0 matches d3-zoom's screen-space math; the reserves (`fitRoom` in `src/site/shared/room.ts` measures them off the chrome) are padding on the transform target, so the fitted sheet centres in what the chrome leaves and d3's clamp still covers the stage. */
 #map { position: absolute; inset: 0; transform-origin: 0 0; box-sizing: border-box;
   display: flex; align-items: center; justify-content: center;
   padding: var(--reserve-top, 8rem) var(--reserve-right, 0px) var(--reserve-bottom, 8rem) 0; }
@@ -28,7 +28,7 @@ body { line-height: 1.45; }
 .reveal p { margin: 0; font-style: italic; color: var(--ink-dark); }
 .reveal.unfurl { transform-origin: top center; animation: paperUnfurl var(--unfurl) var(--ease-unfurl) both; }
 .hunt-actions { display: flex; gap: 0.7rem; align-items: center; justify-content: center; flex-wrap: wrap; margin-top: 0.9rem; }
-/* No fill on purpose: a forwards fill would pin the transform and block the shared button hover lift (the #146 forwards-fill gotcha). */
+/* No fill on purpose: a forwards fill would pin the transform and block the shared button hover lift. */
 #share.rise { animation: shareRise var(--paper-settle) var(--ease-paper); }
 @keyframes shareRise {
   from { opacity: 0; transform: translateY(8px); }
@@ -44,7 +44,7 @@ body { line-height: 1.45; }
 }
 #sheet svg.arriving #layer-waterlines { animation: dryingInk var(--ink-dry) var(--ease-paper) 300ms both; }
 .drying { animation: dryingInk var(--ink-dry) var(--ease-paper) var(--dry-delay, 0ms) both; }
-/* .stamp is added only on a LIVE solve; a solved-day reload places the star without it so the animation never replays (#129), and --pos keeps the centering under the entry keyframe's scale+rotate. */
+/* .stamp is added only on a live solve; a solved-day reload places the star without it so the animation never replays, and --pos keeps the centring under the entry keyframe's scale and rotate. */
 .hunt-star { position: absolute; --pos: translate(-50%, -50%); transform: var(--pos);
   color: var(--iron-red); font-size: 1.7rem; line-height: 1; pointer-events: none;
   text-shadow: 0 0 4px var(--parchment-bright), 0 1px 2px rgb(from var(--chart-ink) r g b / 0.5); }
@@ -53,7 +53,7 @@ body { line-height: 1.45; }
   from { opacity: 0; transform: var(--pos) scale(0.2) rotate(-40deg); }
   to { opacity: 1; transform: var(--pos) scale(1) rotate(0); }
 }
-/* Soundings are pointer-transparent (a lingering dot must never eat the next click) and self-remove on animationend; centered by margin, not transform, so the ripple's own scale keeps the transform to itself. */
+/* Soundings are pointer-transparent (a lingering dot must never eat the next click) and self-remove on animationend; centred by margin, not transform, so the ripple's own scale keeps the transform to itself. */
 .sounding-ring, .sounding-dot { position: absolute; pointer-events: none; }
 .sounding-ring { width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%; border: 2px solid var(--iron-red);
   animation: inkRipple 700ms var(--ease-paper) both; }

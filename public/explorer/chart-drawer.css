@@ -1,4 +1,4 @@
-/* The Chart Table's drawer: shut at rest behind a tab on the right edge; open, it slides up over the foot of the stage while the chart keeps its fit, and the gathered sheets lie as cuttings with paper labels. `chart-drawer` throughout and never `drawer`: `bindDrawer` in `src/site/shell/drawer.ts` is the site's phone nav. */
+/* The Chart Table's drawer: shut behind a tab on the right edge, open over the foot of the stage, the gathered sheets as cuttings with paper labels. `chart-drawer` throughout and never `drawer`: `bindDrawer` in `src/site/shell/drawer.ts` is the site's phone nav. */
 
 /* Seated from the bottom where the Broadside's tab (.slip-tab in atelier.css) is centred, so the two never share the edge; turned by the rotate property, not transform, which the house button lift writes. */
 .chart-drawer-tab {

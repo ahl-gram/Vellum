@@ -30,7 +30,7 @@ h2 {
 body.room main { margin: 0 calc(var(--slip-w) + 2.4rem) 0 0; position: relative; transition: margin-right 0.5s cubic-bezier(0.2, 0.7, 0.3, 1); }
 body.room:has(.slip.folded) main { margin-right: 0; }
 body.room .sheet { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3, 1) both, sheet-settle 0.55s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
-/* The broadside (#461 ruling 4) beside a slip: 22rem columns, the ruled deviation from 26rem; two columns at 1280 open and folded alike (the mockup's own still, re-ruled 2026-08-29), three from about 1350px wide. */
+/* 22rem columns, a ruled deviation from the mockup's 26rem: two columns at 1280 open and folded alike, three from about 1350px. */
 .columns { column-width: 22rem; column-gap: 3.4rem; column-rule: 1px solid var(--line-faint); }
 h2 { column-span: all; font-size: 1.25rem; letter-spacing: 0.09em; border-bottom: 1px solid var(--line-tan);
   padding-bottom: 0.3rem; margin: 2.4rem 0 1.1rem; scroll-margin-top: calc(var(--band-h) + 1rem); }
