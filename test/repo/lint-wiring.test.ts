@@ -79,6 +79,11 @@ const severityOf = (rule: unknown): unknown => (Array.isArray(rule) ? rule[0] : 
 test("through ESLint itself, one witness file per ruled glob resolves to rules that reach it, and the root config resolves to none", async () => {
   assert.deepEqual(Object.keys(WITNESSES).sort(), LINT_SCOPE, "every ruled glob needs a witness file here");
   const eslint = new ESLint({ cwd: ROOT, flags: ["unstable_native_nodejs_ts_config"] });
+  assert.equal(
+    await eslint.findConfigFile("src/cli/main.ts"),
+    join(ROOT, "eslint.config.ts"),
+    "ESLint resolves a different config file than the one this guard imports; a .js, .mjs or .cjs config at the root shadows the .ts one",
+  );
   for (const [glob, file] of Object.entries(WITNESSES)) {
     assert.ok(existsSync(join(ROOT, file)), `${file}, the witness for ${glob}, does not exist`);
     assert.equal(await eslint.isPathIgnored(file), false, `${file} is ignored, so ${glob} reaches nothing`);
