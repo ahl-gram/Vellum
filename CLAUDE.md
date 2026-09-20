@@ -243,9 +243,11 @@ the sandbox for both review agents that build one, so the depth lives in one pla
 ## Write visual samples to out/
 
 Any chart, diagnostic overlay, before/after image or other visual artifact you write to the filesystem
-goes in **`out/`** (the CLI's default output location; gitignored). That is where Alex looks: name the
-files in your reply so they are easy to open, and do not scatter samples in `/tmp`, the scratchpad or
-anywhere else he will not find. **For a presentation sub, run `vellum-plate-reader` before the PR**:
+goes in **`out/`** (the CLI's default output location; gitignored). That is where Alex looks, in the
+MAIN checkout: name the files in your reply so they are easy to open, and do not scatter samples in
+`/tmp`, the scratchpad or anywhere else he will not find. A dispatched lane's own `out/` is inside
+its worktree and he never opens it, so a lane reports absolute paths and whoever dispatched it copies
+them across, per `specs/development-workflow.md` step 6. **For a presentation sub, run `vellum-plate-reader` before the PR**:
 structural tests cannot see layout, and #219's sideways scroll at 320px is what got through when one
 was trusted to. It renders through CDP and returns MEASUREMENTS plus named files in `out/`, at both
 full scale and 1:1 crop, since glance properties only exist at full scale.

@@ -76,8 +76,9 @@ body:has(.chart-drawer.open) .slip-tab { display: none; }
 .dog-ear:is(:hover, :focus-visible) { width: calc(4.1rem / var(--zoom-k, 1)); height: calc(4.1rem / var(--zoom-k, 1)); }
 .dog-ear:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: -2px; }
 
-/* The line design/chart-table/mock.css carried and the #540 port dropped (#547). */
+/* The two adjacent lines design/chart-table/mock.css carried at 155 and 156 and the #540 port dropped, the tabs restored by #547 and the leaf by #583. */
 .sheet-tabs { display: none; }
+.table-leaf { display: none; }
 
 @media (max-width: 900px) {
   .chart-drawer, .chart-drawer.open, .chart-drawer-tab { display: none; }
@@ -88,7 +89,7 @@ body:has(.chart-drawer.open) .slip-tab { display: none; }
   .slip .slip-head .sheet-tabs button:is(:hover, :focus-visible) { transform: none; box-shadow: none; }
 
   body.leaf-table .slip .card-where, body.leaf-table .slip-body .broadside { display: none; }
-  body:not(.leaf-table) .table-leaf { display: none; }
+  body.leaf-table .table-leaf { display: block; }
   .table-leaf .cuttings { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem 0.9rem; padding: 0.9rem 0 0.4rem; max-width: none; }
   .table-leaf .cuttings li { rotate: 0deg; margin: 0; flex: none; }
   .table-leaf .cuttings .label { position: static; rotate: 0deg; max-width: none; box-shadow: none; border: 0; background: none; padding: 0.25rem 0 0; font-size: 0.74rem; }
