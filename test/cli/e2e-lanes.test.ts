@@ -244,11 +244,14 @@ test("an ambient suite selection is refused, since the lanes ARE the selection",
 test("the split is balanced against measured cost, not check counts", () => {
   const total = laneSeconds(E2E_SUITE_ORDER);
   for (const lane of E2E_LANES) {
-    const share = laneSeconds(lane.suites) / total;
+    const seconds = laneSeconds(lane.suites);
+    const share = seconds / total;
+    // Seconds added to a lane raise the total too, so `(L + x) / (T + x) <= 0.6` solves to `x <= 1.5T - 2.5L`, the seconds this lane can still take (#637; at two lanes it is the `1.5A - B` the #635 review derived).
+    const headroom = 1.5 * total - 2.5 * seconds;
     // Since #623 put one job on each runner the wall clock IS max(A, B), so an unbalanced pair wastes the parallelism it was split for and balance matters more here than it did inside one job, not less (Alex, 2026-09-14).
     assert.ok(
       share <= 0.6,
-      `lane ${lane.name} is ${(share * 100).toFixed(1)}% of measured serial cost, so that shard alone sets the wall clock while the other idles`,
+      `lane ${lane.name} is ${(share * 100).toFixed(1)}% of measured serial cost (${seconds.toFixed(1)}s of ${total.toFixed(1)}s, ${headroom.toFixed(1)}s over the 0.6 cap), so that shard alone sets the wall clock while the other idles`,
     );
   }
 });

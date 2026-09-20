@@ -27,6 +27,8 @@ export const E2E_LANES: readonly E2eLane[] = [
       "print-room",
       "landfall",
       "survey",
+      // Moved from lane B at #637, sized from the CI lane logs' own per-suite wall clock (main runs 35518105601, 35486671870 and 35489161890 read it at 43.7, 43.4 and 35.2s against a lane gap of 86, 85 and 10s) rather than from MEASURED_SECONDS, whose Mac seconds scale about 2.4x to CI on this lane and 1.95x on lane B and so over-weight B; it boots its own page through about:blank (room.goto), so it inherits nothing from whatever ran before it.
+      "room-address",
       // Moved from lane B at #522, when the drawer suite's re-measured budget took B to 60.2% and the balance assertion below reds at 0.6. It is appended at the END of this lane, which is after `health`, so the prefix that suite certifies is unchanged, and it boots its own page through about:blank, so it inherits nothing from whatever ran before it.
       "specimen",
     ],
@@ -45,7 +47,6 @@ export const E2E_LANES: readonly E2eLane[] = [
       "room-ink",
       "room-voyage",
       "room-voyage-route",
-      "room-address",
       "runninghead",
       "cluster",
       "room-drawer",

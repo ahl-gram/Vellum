@@ -9,6 +9,9 @@ export async function run(ctx) {
   const errBase = consoleErrors.length;
   const httpBase = http4xx.length;
 
+  // #637 (Alex, 2026-09-20): RA5 reds under a leaked prefers-reduced-motion (a Play then parks at once and writes year=present into the hash), and in lane A the pair upstream that can leak it sits inside survey's step("SV2n"), whose catch ends that suite green-shaped with the runner's rescue never firing (#616's class); measured 2026-09-20 with a probe that ran this suite clean (8/8) and then under a leaked reduce (7/8, RA5), so the suite clears the features itself before its first boot rather than depending on its predecessor.
+  await send("Emulation.setEmulatedMedia", { features: [] });
+
   await room.goto("#seed=42&style=antique");
   const sm = await evaluate(`(()=>{
     const r=window.__vellumRunInline({kind:"draw",seed:42,overrides:{},render:{style:"antique",widthPx:1500,legend:true}});
