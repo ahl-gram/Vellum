@@ -206,3 +206,21 @@ test("PRR11 the way to the Portfolio stands in the Bound Atlas slip and not in t
   const row = between('class="legend-row"', "</nav>");
   assert.doesNotMatch(row, /portfolio/, "the legend row keeps the ruled shape: the poster sizes, then the one gold road back to the Explorer");
 });
+
+test("PRR-table the Print Room carries a gathering THROUGH rather than dropping it: the Explorer's gold road here hands over the whole address, table key and all (#634, ruled 2026-09-19)", () => {
+  // The road in is live and gold today, which the issue got wrong and a recon caught: draw() in the Explorer calls
+  // syncHash() and builds orderLink.href from that same hash on the very next line. Before this, every draw here
+  // rebuilt the address from a vocabulary with no table in it and the gathering died on the first proof.
+  assert.match(app, /carried\.table = p\.get\(TABLE_KEY\)/, "the incoming table is no longer read, so a reader who presses Take to The Print Room loses the whole gathering on this page's first draw");
+  const writer = app.slice(app.indexOf("function writeHash("), app.indexOf("\n}", app.indexOf("function writeHash(")));
+  assert.ok(writer.length > 100, "writeHash was not found, so the assertions below read an empty slice");
+  assert.match(writer, /if \(carried\.table !== null\) p\.set\(TABLE_KEY, carried\.table\)/, "the one address writer here drops the table again, and it runs on EVERY draw including the boot one");
+  assert.match(writer, /road\.href = "\.\.\/explorer\/#" \+ p\.toString\(\)/, "and the road back is no longer built from that same address, so the two can disagree");
+  // The same whole address the road back to the Explorer is built from, and for the same reason: handing the folio page the sheets alone sends the reader's press BACK from it to the seed of the day, which is #634 defect 1 one room over (the cold review on PR #635).
+  assert.match(writer, /folioRoad\.href = "\.\/portfolio\/#" \+ p\.toString\(\)/, "the road on to The Portfolio carries less than this page's own address, so the gathering or the world is dropped on the way");
+  assert.equal((app.match(/folioRoad\.href\s*=/g) ?? []).length, 1, "the folio road is written in more than one place, and the last write is the one the reader presses");
+  // The BINDING, checked against the page rather than restated here: the script can look up an id this page does not author, `folioRoad` is then null, and the `if (folioRoad)` guard swallows every write in silence with the assertions above all green (guard-prover round 3). The id is read out of the script and looked for in the markup, so the two cannot drift apart in either direction.
+  const bind = app.match(/const folioRoad = document\.getElementById\("([^"]+)"\)/);
+  assert.ok(bind, "the folio road is no longer looked up by id at all, so this check has nothing to compare against the page");
+  assert.match(page, new RegExp(`<a id="${bind[1]}"`), `the script binds the folio road to id ${JSON.stringify(bind[1])} and this page authors no such anchor, so the road is bound to null and every href write is swallowed`);
+});

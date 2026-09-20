@@ -3,9 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-// #521 Sub 3: the three guards the cold review on PR #546 found missing on the Portfolio. This is not the room's
-// full test (the kit sweep, the css, the folio lines): it is the inline-fallback notice every other worker-driven
-// room carries, the slip's where-line in the bare state, and what the two sheet presses actually stand down on.
+// #521 Sub 3: the three guards the cold review on PR #546 found missing on the Portfolio. This is not the room's full test (the kit sweep, the css, the folio lines): it is the inline-fallback notice every other worker-driven room carries, the slip's where-line in the bare state, and what the two sheet presses actually stand down on.
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 const page = read("src/pages/print-room/portfolio/index.astro");
@@ -51,11 +49,7 @@ test("PFR3 every gathered sheet drafts, so nothing in the page skips a sheet by 
   const from = at("const draft = async");
   const loop = app.slice(from, app.indexOf("\n};", from));
   assert.ok(loop.length > 100, "the drafting loop was not found, so the assertions below read an empty slice");
-  // Not a word list. The first version of this enumerated two spellings of the comparison and the guard-prover walked
-  // straight past it with a third; the second version caught the loop's own legitimate type narrowing. So the skips are
-  // ENUMERATED instead: after this sub there is exactly one reason to skip a sheet, and it is not the sheet's kind.
-  // Named blind spot, with its direction: a skip hoisted into a variable first (`const k = sheet.item.kind;`) reads as no
-  // skip at all here, which costs a miss and never a false red. What the loop CANNOT do unread is guard on the item.
+  // Not a word list. The first version of this enumerated two spellings of the comparison and the guard-prover walked straight past it with a third; the second version caught the loop's own legitimate type narrowing. So the skips are ENUMERATED instead: after this sub there is exactly one reason to skip a sheet, and it is not the sheet's kind. Named blind spot, with its direction: a skip hoisted into a variable first (`const k = sheet.item.kind;`) reads as no skip at all here, which costs a miss and never a false red. What the loop CANNOT do unread is guard on the item.
   const skips = (loop.match(/\n\s*if \([^)]*\)\s*(continue|return)[;\s]/g) ?? []).map((s) => s.trim());
   assert.deepEqual(
     skips,
@@ -69,4 +63,24 @@ test("PFR3 every gathered sheet drafts, so nothing in the page skips a sheet by 
   // untouched by this, because none of them returns on it.
   const kindExits = (app.match(/\n\s*if \([^)]*\bkind\b[^)]*\)\s*(return|continue)\b/g) ?? []).map((s) => s.trim());
   assert.deepEqual(kindExits, [], "a kind-gated early return or continue anywhere in the page holds one sheet kind out of the pile, which is the reserved place #521 ruling 3 kept and this sub closes");
+});
+
+test("PFR4 the Portfolio's road home is built from the address it is SHOWING, and a folio the address does not name is the device's (#634, ruled 2026-09-19)", () => {
+  // Asserted against the ID and not the anchor text, because test/site/astro-scaffold.test.ts pins the AUTHORED href
+  // literally and this page keeps it: the rewrite is a runtime one, which is the Prospect and Ribbon pattern.
+  const road = at("pf-explorer");
+  const hrefAt = app.indexOf("href", road);
+  assert.ok(hrefAt > road, "nothing assigns the road's href after it is looked up, so the press back is the Astro literal and loses the whole gathering (#634 defect 1)");
+  // Both calls are anchored WHOLE rather than by their tokens. The guard-prover's round 1 on this branch put the address and the device the wrong way round as arguments and put "" in place of the sheets, and two unordered assert.match calls passed both mutations while the ruled precedence was inverted and the gathering dropped.
+  const line = app.slice(road, app.indexOf("\n", hrefAt));
+  assert.match(line, /roadHome\.href = "\.\.\/\.\.\/explorer\/" \+ tableHash\(location\.hash, emitTable\(items\)\)/, "the road home is no longer this page's own address plus the sheets it is showing, so a reader who presses it loses the chart they gathered from, the sheets, or both");
+  // COUNTED, because an anchored slice ends where it ends: a second assignment just past this line overwrites the first with the bare fallback and every regex above still passes (guard-prover round 2).
+  assert.equal((app.match(/roadHome\.href\s*=/g) ?? []).length, 1, "the road home is written in more than one place, and the last write is the one the reader presses");
+  // The shared binding, which table-store.test.ts drives against the real global (guard-prover round 3).
+  assert.match(app, /import \{ deviceStorage as store,[^}]*\} from "\.\.\/shared\/table-store\.ts";/, "this page names its own device instead of taking the one the store module exports and tests, so it can be wired to nothing with every assertion here green");
+  const arrival = at("folioOnArrival(");
+  const call = app.slice(arrival, app.indexOf("\n", arrival));
+  assert.match(call, /folioOnArrival\(parseTable\(location\.hash\), readStoredTable\(store\)\)/, "this folio's contents no longer come from the address FIRST and the device second (#634 rulings 1 and 4): swapped, a shared link stops reproducing exactly; dropped, the Print Room's own road here reaches a bare pile");
+  // The ABSENCE is the claim: this page's address IS its content, so it takes the precedence WITHOUT the traversal term. The message says what the term would do here and not what a cached Back does, which is a separate thing this page has no arm for at all (the cold review's round 3 on PR #635 caught the first wording claiming more than it could).
+  assert.doesNotMatch(app, /tableOnArrival\(|navigationTypeNow\(/, "the folio page took the gathering surfaces' rule, whose traversal term would hand a reader arriving at a shared folio by Back or Forward their OWN table in place of the folio the address names");
 });

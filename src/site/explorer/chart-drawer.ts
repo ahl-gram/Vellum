@@ -1,5 +1,5 @@
 // The Chart Table's state (#520 Sub 2 of #401): what the drawer draws and what the Explorer's address carries are the same array, so this half is pure and holds no DOM. `chart-drawer`, never `drawer`: src/site/shell/drawer.ts is the site's phone nav (#520 ruling 2).
-import { TABLE_CAP, TABLE_KEY, emitTable, prospectItemFrom, tableWindow, type TableItem, type SurveyItem, type ProspectItem, type Rung, type TableOverrides } from "../shared/table-address.ts";
+import { TABLE_CAP, emitTable, prospectItemFrom, tableHash, tableWindow, type TableItem, type SurveyItem, type ProspectItem, type Rung, type TableOverrides } from "../shared/table-address.ts";
 import { LOD_BANDS, type LodBand } from "../../world/lod.ts";
 import { plateDressFor, prospectTitle } from "./prospect-job.ts";
 import type { SlipFold } from "../shared/slip.ts";
@@ -77,6 +77,11 @@ export function takeOffTable(items: ReadonlyArray<TableItem>, seat: number): Rea
 
 export function roomOnTable(items: ReadonlyArray<TableItem>): number {
   return Math.max(0, TABLE_CAP - items.length);
+}
+
+export function sheetsThatLeft(before: ReadonlyArray<TableItem>, after: ReadonlyArray<TableItem>): ReadonlyArray<TableItem> {
+  const staying = new Set(after.map((item) => emitTable([item])));
+  return before.filter((item) => !staying.has(emitTable([item])));
 }
 
 // The address carries the seat and the dress but not the drawn TITLE, which the worker derives from (world, window), so a recovered sheet is named from what the address does state: the chart number IS the seed (cartouche.ts), which names the world exactly even before its survey is drawn again.
@@ -159,7 +164,7 @@ export interface ChartDrawerDeps {
   readonly full: HTMLElement;
   readonly road: HTMLButtonElement;
   readonly say: (line: string) => void;
-  /** Persist: the table lives in the address and nowhere else (#401, no browser storage). */
+  /** Persist: the address and the device both, since #634 (2026-09-19) gave the table a second home; the host owns which. */
   readonly onChange: (items: ReadonlyArray<TableItem>) => void;
   /** Draw one recovered sheet's thumbnail, deferred to the first opening (ruled 2026-09-07). */
   readonly drawThumb?: (item: TableItem) => Promise<{ url: string; title: string } | null>;
@@ -175,6 +180,7 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
   const art = new Map<string, string>();
   const names = new Map<string, string>();
   let drawing = false;
+  let refill = false;
   let broadsideWasOpen = false;
 
   const keyOf = (item: TableItem): string => emitTable([item]);
@@ -235,14 +241,21 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
   };
 
   const fill = async (): Promise<void> => {
-    if (drawing || !deps.drawThumb) return;
+    if (!deps.drawThumb) return;
+    if (drawing) { refill = true; return; }
     drawing = true;
     try {
-      for (const item of items) {
-        if (art.has(keyOf(item))) continue;
-        const drawn = await deps.drawThumb(item);
-        if (drawn) { art.set(keyOf(item), drawn.url); names.set(keyOf(item), drawn.title); render(); }
-      }
+      do {
+        refill = false;
+        for (const item of items) {
+          if (art.has(keyOf(item))) continue;
+          const drawn = await deps.drawThumb(item);
+          if (!drawn) continue;
+          // The sheet may have LEFT while its picture was drawing, a window only a re-seat mid-draw opens, and its url is then filed under a key no cutting carries so nothing would ever revoke it.
+          if (!items.some((live) => keyOf(live) === keyOf(item))) { URL.revokeObjectURL(drawn.url); continue; }
+          art.set(keyOf(item), drawn.url); names.set(keyOf(item), drawn.title); render();
+        }
+      } while (refill);
     } finally {
       drawing = false;
     }
@@ -278,7 +291,7 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
   deps.shut.addEventListener("click", () => setOpen(false, true));
   deps.road.addEventListener("click", () => {
     if (items.length === 0) return;
-    window.location.href = `${deps.folioHref ?? "../print-room/portfolio/"}#${TABLE_KEY}=${emitTable(items)}`;
+    window.location.href = `${deps.folioHref ?? "../print-room/portfolio/"}${tableHash(window.location.hash, emitTable(items))}`;
   });
 
   return {
@@ -301,8 +314,10 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
       // The gate is byte equality on the emitted item, so it does NOT catch one prospect spelled two ways: `k-p...style-nautical` and `...style-antique` at one seat draw the same plate (plateDressFor sends both to antique) yet seat twice and spend two of the six. Both DOORS normalise through prospectItemFrom, so only a hand-typed or hand-edited link reaches it; closing it here would rewrite the address the reader shared, which is Alex's call and not a one-liner (#631's cold review, residue).
       let kept: ReadonlyArray<TableItem> = [];
       for (const item of next) kept = layOnTable(kept, item).items;
+      for (const gone of sheetsThatLeft(items, kept)) forget(gone);
       items = kept;
       render();
+      if (deps.root.classList.contains("open")) void fill();
     },
     state: (): ReadonlyArray<TableItem> => items,
     isFull: (): boolean => roomOnTable(items) === 0,

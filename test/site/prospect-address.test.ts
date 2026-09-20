@@ -1,6 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { parseProspectAddress, chartTarget, parseYear, ribbonTarget, tableHash, yearHash } from "../../src/site/prospect/address.ts";
+import { parseProspectAddress, chartTarget, parseYear, ribbonTarget, yearHash } from "../../src/site/prospect/address.ts";
+// #634 moved tableHash to the table's own grammar, since the Explorer's road to the Portfolio now builds its address the same way the Prospect page builds its own.
+import { tableHash } from "../../src/site/shared/table-address.ts";
 
 test("parseProspectAddress reads the Explorer's world keys plus i and year", () => {
   const a = parseProspectAddress("#seed=42&style=ink&type=citystate&band=polar&land=350&coast=55&i=3&year=814");

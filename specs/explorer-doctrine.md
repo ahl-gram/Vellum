@@ -157,6 +157,37 @@ make an unqualified rule false. Read the surface, not just the rule.
   applying it, so the settle it triggers redrafts over the same base world. The grammar itself is
   pure in `src/site/explorer/address.ts`: two keys at once are ignored whole, and a forwarded hash is
   passed verbatim and never re-serialized.
+- **The Chart Table has TWO homes, and which one speaks depends on how the reader got here.** The
+  address decides an ARRIVAL and the device decides a RETURN (#634, 2026-09-19, superseding #401's
+  ruling that the address was its only memory). A link, a bookmark, a typed address and a reload all
+  take the table the address names, so a folio someone shares reproduces exactly; a Back or Forward
+  takes the table this device holds **when it holds one**, because the address in a history entry is
+  a snapshot taken before the reader gathered more. That qualifier is load bearing and not a detail:
+  a device holding nothing, because storage is blocked or because the reader arrived on someone
+  else's link, leaves the address it landed on still speaking, and a restore that reads the device
+  unqualified empties the table by the very gesture meant to keep it. **The traversal takes the
+  device WHOSEVER folio the entry is carrying**, which narrows "a shared folio shows exactly as sent
+  until the reader touches it" to an arrival by link and not to a traversal into that page (ruled
+  2026-09-19 against the alternative, which was to let the address win whenever it named sheets the
+  device does not hold). The cost is chosen and not overlooked: stepping forward into a page carrying
+  someone else's folio replaces it with the reader's own sheets and rewrites that page's address, so
+  the sender's link leaves that tab and cannot be recovered there. The two rulings collide in that
+  one cell and only one of them can be obeyed; **do not quietly restore the other on finding this
+  surprising**, because it is pinned deliberately (`TS15` in `test/site/table-store.test.ts` and
+  `CD42`, whose fixture is a folio holding none of the sheets this device does). **A page whose
+  address IS its content takes no traversal term at all**: the Portfolio shows the folio its address names, else
+  what the device holds. It has no restore arm either, so a cached Back into it shows the pile the
+  reader left, which is the folio they were looking at; the one cell where that differs from a fresh
+  open is a Portfolio whose address named NO folio, where a fresh open re-reads a device that has
+  changed since and the cached return does not. Measured rather than reasoned, and stated because an
+  earlier draft of this sentence claimed the two agree and the cold review's round 3 on PR #635
+  measured that they do not. The
+  rule is pure in `src/site/shared/table-store.ts`, and the two
+  roads back need two instruments, which is the part no reasoning supplies: a cached page runs NO
+  boot code and is reachable only through `pageshow` with `persisted`, while a re-created one reads
+  `back_forward` from its own navigation entry. A page that shows the table writes it to the device
+  when the reader CHANGES it, never on arrival, so opening someone's folio does not erase what this
+  browser was gathering. One device holds one table: two tabs gathering at once is last writer wins.
 - **Backface rules target the CLIP BOX, not the transformed mount**, whose overflow and default
   transform style flatten it. A backface bleed is invisible to an end-state assertion.
 

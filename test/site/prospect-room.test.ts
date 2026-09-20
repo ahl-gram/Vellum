@@ -146,7 +146,13 @@ test("PR-lay the page's filing press sits ON the engraver's note and not among t
   assert.match(handler, /ribbonLink\.href = ribbonTarget\(/, "and so does the road to the Ribbon: each href is built once per draw, so a road left unrefreshed carries the table as it stood BEFORE this filing");
   // The boot table, likewise unread until a mutation removed the gate and shipped green.
   const prologue = app.slice(app.indexOf("const addr = parseProspectAddress"), app.indexOf("function filedItem"));
-  assert.match(prologue, /let table[^;]*layOnTable\(/, "the page's boot table skips the dedupe gate restore() runs, so a shared link carrying one sheet twice leaves this page's tally and cap disagreeing with the Explorer's over one address");
+  // #634 gave the boot table a second source, so the gate moved one hop into `seated` and is asserted in two steps rather than one: that the boot table is built by it, and that it IS the gate.
+  assert.match(prologue, /let table[^;]*=\s*seated\(/, "the page's boot table skips the dedupe gate restore() runs, so a shared link carrying one sheet twice leaves this page's tally and cap disagreeing with the Explorer's over one address");
+  const seated = prologue.slice(prologue.indexOf("const seated ="), prologue.indexOf(";", prologue.indexOf("const seated =")));
+  // The gate's ANSWER, not a call to it: the prover's round 1 discarded the return inside this reduce and appended
+  // unconditionally, which keeps the token and defeats the dedupe and the cap exactly as deleting it would.
+  assert.match(seated, /\(kept, item\) => layOnTable\(kept, item\)\.items/, "the boot table's own builder calls the dedupe gate and throws its answer away, which is the same defect one hop further out");
+  assert.match(prologue, /tableOnArrival\(parseTable\(location\.hash\), readStoredTable\(store\), navigationTypeNow\(\)\)/, "the page's boot table no longer asks the ruled precedence (#634, 2026-09-19), so this page and the Explorer can disagree about the same gathering");
   assert.doesNotMatch(app, /"Lay (this|the) prospect on the table"/, "and writes no second copy of the wording");
   assert.match(css, /\.pp-lay\.dim\s*\{[^}]*background:\s*var\(--control-cream\)/, "the refusing face dims by losing the featured gold, keeping its ink at full strength");
   assert.doesNotMatch(css, /\.pp-lay\.dim\s*\{[^}]*opacity/, "and never by opacity, which fails the measured contrast floor");
@@ -169,4 +175,24 @@ test("PR-lay the page's filing press sits ON the engraver's note and not among t
   assert.equal(file.length, 1);
   assert.match(file[0], /display:\s*flex/, "the press and its tally stack as a column, which is what the ruled variant showed");
   assert.doesNotMatch(app, /layPress\.disabled/, "and it is never disabled: that drops it out of the tab order");
+});
+
+test("PR-table this page keeps the table's SECOND home too, on both roads the Explorer keeps it on (#634, ruled 2026-09-19)", () => {
+  // The whole of this check exists because the wiring is DUPLICATED at two hosts and only the Explorer's half was guarded: the guard-prover's round 2 deleted this page's device write, and then its entire pageshow listener, with every other test in the set green. That is #634's own defect recurring one level down, in the tests. `store` is the SHARED binding, which table-store.test.ts drives against the real global (guard-prover round 3).
+  assert.match(app, /import \{ deviceStorage as store,[^}]*\} from "\.\.\/shared\/table-store\.ts";/, "this page names its own device instead of taking the one the store module exports and tests, so it can be wired to nothing with every assertion here green");
+  const from = app.indexOf('layPress.addEventListener("click"');
+  assert.notEqual(from, -1, "the filing press has no handler, so this guard reads the whole file");
+  const handler = app.slice(from, app.indexOf("\n});", from));
+  assert.match(handler, /writeStoredTable\(store, table\)/, "a sheet filed here never reaches the device, so the Explorer's own Back button loses it, which is the defect #634 was filed for");
+  assert.ok(handler.indexOf("writeStoredTable") < handler.indexOf("history.replaceState"), "the device is written after the address, which is a second order to keep in step for no reason");
+  const showAt = app.indexOf('window.addEventListener("pageshow"');
+  assert.notEqual(showAt, -1, "this page has no pageshow listener, and a page served from the browser's cache runs NO boot code, so nothing at all would bring its table up to date");
+  const show = app.slice(showAt, app.indexOf("\n});", showAt));
+  assert.match(show, /if \(!e\.persisted\) return;/, "the listener acts on a fresh load as well as a cached one, so it fights the boot's own precedence instead of being the restore's only reader");
+  // The SHARED rule, for the reason the Explorer's own guard gives: the first version of this pinned the rule with its qualifier dropped (the cold review on PR #635).
+  assert.match(show, /const held = seated\(tableOnArrival\(parseTable\(location\.hash\), readStoredTable\(store\), TRAVERSAL\)\);/, "the cached return re-seats this page from something other than the ruled precedence, or through something other than the gate every other seat here goes through");
+  assert.match(show, /if \(emitTable\(held\) === emitTable\(table\)\) return;/, "the no-op skip is gone or inverted, and inverted it does nothing exactly when the device and this page disagree");
+  assert.match(show, /table = held;/, "the listener reads the device and never keeps what it read");
+  assert.match(show, /history\.replaceState\(null, "", tableHash\(location\.hash, emitTable\(table\)\)\)/, "and it leaves this page's own address disagreeing with the table it just took");
+  assert.match(show, /paintLay\(\)/, "and the press's own face is left saying what was true before the return");
 });

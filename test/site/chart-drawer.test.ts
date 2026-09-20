@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { layOnTable, takeOffTable, roomOnTable, countLine, tabLine, refusalLine, subOf, thumbJobFor, thumbNames, layPressFace, filingAt, LAY_ON_CARD, LAY_ON_PAGE } from "../../src/site/explorer/chart-drawer.ts";
+import { layOnTable, takeOffTable, roomOnTable, countLine, tabLine, refusalLine, subOf, thumbJobFor, thumbNames, layPressFace, filingAt, sheetsThatLeft, LAY_ON_CARD, LAY_ON_PAGE } from "../../src/site/explorer/chart-drawer.ts";
 import { TABLE_CAP, TABLE_KEY, emitTable, type ProspectItem, type SurveyItem, type TableItem } from "../../src/site/shared/table-address.ts";
 import { emitTableKey } from "../../src/site/explorer/address.ts";
 
@@ -278,6 +278,82 @@ test("CT7b the Explorer passes the REAL turn flag into the gate, so the pure ref
   const draw = app.slice(at2, app.indexOf("\n}", at2));
   assert.match(draw, /lc\.hideCard\(\);/, "a pinned card outlives the chart it names, and its hit targets then point at the OUTGOING world's places for the length of the turn");
   assert.ok(draw.indexOf("lc.hideCard();") < draw.indexOf("glass.rebase();"), "and it is dropped before the rebase, so nothing reads it in between");
+});
+
+test("CT8 the road to the Portfolio carries the Explorer's WHOLE address, not the table key alone (#634 ruling 3, 2026-09-19)", () => {
+  const src = readFileSync(resolve(REPO, "src/site/explorer/chart-drawer.ts"), "utf8");
+  const at = src.indexOf("deps.road.addEventListener");
+  assert.notEqual(at, -1, "the road's own handler is gone, so this guard would be reading the whole file");
+  const handler = src.slice(at, src.indexOf("});", at));
+  // The ASSIGNMENT is anchored, not the tokens: the guard-prover's round 1 left the whole-address expression standing as a dead local and navigated with `deps.folioHref` alone, and a token-wise guard passed that with the road broken.
+  assert.match(
+    handler,
+    /window\.location\.href = `\$\{deps\.folioHref[^`]*\$\{tableHash\(window\.location\.hash, emitTable\(items\)\)\}`;/,
+    "the road no longer NAVIGATES to this page's own address plus the table: computing it and going somewhere else is the same defect as never computing it, and it is what #634 measured losing the world",
+  );
+  assert.doesNotMatch(handler, /#\$\{TABLE_KEY\}=/, "the key-only form is back; it is what #634 defect 1 measured losing the world");
+  // The fallback literal sits inside the wildcard above, so it needs its own pin: dropped to "../print-room/portfolio" it resolves one directory up and the road reaches the Print Room's own page (guard-prover round 2).
+  assert.match(handler, /deps\.folioHref \?\? "\.\.\/print-room\/portfolio\/"/, "the road's fallback destination changed, and a relative path without its trailing slash resolves somewhere else entirely");
+});
+
+test("CT9 the table is written to the device when the reader CHANGES it and re-seated on a cached return, which are the only two roads #634 leaves (ruled 2026-09-19)", () => {
+  const app = readFileSync(resolve(REPO, "src/site/explorer/app.ts"), "utf8");
+  // `store` is the SHARED binding, not one this file rolled for itself: table-store.test.ts drives that binding against the real global, which is what makes every `readStoredTable(store)` below mean something a test has seen (guard-prover round 3).
+  assert.match(app, /import \{ deviceStorage as store,[^}]*\} from "\.\.\/shared\/table-store\.ts";/, "this page names its own device instead of taking the one the store module exports and tests, so it can be wired to nothing with every assertion here green");
+  const onChange = app.slice(app.indexOf("onChange:"), app.indexOf("\n", app.indexOf("onChange:")));
+  assert.match(onChange, /writeStoredTable\(store, laid\)/, "a lay or a take no longer reaches the device, so the gathering exists only in the address again and the Back button loses it");
+  // Two restore sites by design, the boot and the cached return, so each is anchored on its own input rather than on whichever comes first in the file.
+  const sites = [...app.matchAll(/chartTable\.restore\(/g)].map((m) => m.index);
+  assert.equal(sites.length, 2, "the Explorer seats the table in some number of places other than the two #634 leaves, and this guard is then reading one of them at random");
+  const bootAt = app.indexOf("chartTable.restore(tableOnArrival");
+  assert.notEqual(bootAt, -1, "the boot no longer asks the ruled precedence, so either a link stops winning or a Back stops being told from an arrival");
+  const boot = app.slice(bootAt, app.indexOf("\n", bootAt));
+  assert.match(boot, /tableOnArrival\(hashed\.table, readStoredTable\(store\), navigationTypeNow\(\)\)/, "the boot's precedence is asked with something other than this page's address, this device and this navigation's own type");
+  const show = app.slice(app.indexOf('addEventListener("pageshow"'), app.indexOf("\n});", app.indexOf('addEventListener("pageshow"')));
+  assert.ok(show.length > 40, "the pageshow listener is gone, and with it the ONLY road into a page the browser served from its cache: no boot code runs there at all");
+  assert.match(show, /if \(!e\.persisted\) return;/, "the listener acts on a fresh load as well as a cached one, so it fights the boot's own precedence instead of being the restore's only reader");
+  // What `held` is BUILT FROM, not only what happens to it: the prover's round 1 set it to the drawer's own current state, which re-seats the drawer with what it already holds and reads as a restore while restoring nothing. The SHARED rule and not a hand-rolled one. The first version of this guard pinned `readStoredTable(store) ?? []`, which is the rule with its qualifier dropped: a device holding nothing then emptied the drawer on the very gesture meant to keep it, and this assertion cemented the defect (the cold review on PR #635).
+  assert.match(show, /const held = tableOnArrival\(parseTable\(location\.hash\), readStoredTable\(store\), TRAVERSAL\);/, "the cached return re-seats the drawer from something other than the ruled precedence, and a hand-rolled one drops the qualifier that keeps a reader with nothing stored from losing their table");
+  // The skip is pinned BY ITS OPERATOR: inverting it reads as a harmless optimisation and skips precisely when a restore is owed, which is the feature inverted with nothing else in the file changed (guard-prover round 2).
+  assert.match(show, /if \(emitTable\(held\) === emitTable\(chartTable\.state\(\)\)\) return;/, "the no-op skip on a cached return is gone or inverted, and inverted it does nothing exactly when the device and the drawer disagree");
+  assert.match(show, /chartTable\.restore\(held\)/, "and it never re-seats the drawer with what it read");
+  assert.match(show, /syncHash\(\)/, "and it leaves the address disagreeing with the drawer it just changed");
+});
+
+test("CT10 a re-seat that lands mid-draw asks for ANOTHER pass, and a sheet that leaves takes its picture with it (#634, the two behaviours restore() gained when it stopped running once at boot)", () => {
+  const src = readFileSync(resolve(REPO, "src/site/explorer/chart-drawer.ts"), "utf8");
+  const fill = src.slice(src.indexOf("const fill = async"), src.indexOf("\n  };", src.indexOf("const fill = async")));
+  assert.ok(fill.length > 60, "the fill was not found, so the assertions below read an empty slice");
+  assert.match(fill, /if \(drawing\) \{ refill = true; return; \}/, "a re-seat that lands while a thumbnail is in flight is DROPPED again, and its sheets keep a drawing frame until the reader shuts the drawer and opens it, which is the whole reason the flag exists");
+  assert.match(fill, /do \{[\s\S]*\} while \(refill\)/, "and the flag is set but never acted on, which is the same thing one step later");
+  // The other half of that window, which nothing claimed until the cold review's round 3: the sheet can LEAVE while its picture is being drawn, and the url then lands under a key no cutting carries, so nothing ever revokes it.
+  assert.match(fill, /if \(!items\.some\(\(live\) => keyOf\(live\) === keyOf\(item\)\)\) \{ URL\.revokeObjectURL\(drawn\.url\); continue; \}/, "a picture that finishes drawing for a sheet that already left is filed rather than revoked, which leaks one blob url per departed sheet per re-seat mid-draw");
+  const restore = src.slice(src.indexOf("restore(next:"), src.indexOf("\n    },", src.indexOf("restore(next:")));
+  assert.ok(restore.length > 60, "restore was not found, so the assertions below read an empty slice");
+  assert.match(restore, /for \(const gone of sheetsThatLeft\(items, kept\)\) forget\(gone\);/, "a sheet that leaves on a cached return keeps its blob url, and this path now runs on every return rather than once at boot, so they accumulate one per re-seat");
+  // The set it is built from is the hazard, so it is BEHAVIOUR here and not a regex: built from the outgoing table it answers "nothing left" for every re-seat, and the line's text is identical.
+  const before = [survey(1), survey(2), survey(3)];
+  assert.deepEqual(sheetsThatLeft(before, [survey(1), survey(3)]).map((i) => emitTable([i])), [emitTable([survey(2)])], "the middle sheet left and was not named, so its picture is never revoked");
+  assert.deepEqual(sheetsThatLeft(before, before), [], "nothing left, so nothing is forgotten and a redraw does not churn the urls it already made");
+  assert.deepEqual(sheetsThatLeft(before, []).length, 3, "an emptied table drops every picture");
+  assert.deepEqual(sheetsThatLeft([], before), [], "and an arrival into a bare drawer forgets nothing");
+  assert.match(restore, /if \(deps\.root\.classList\.contains\("open"\)\) void fill\(\);/, "a drawer standing OPEN when the table is re-seated never draws what arrived");
+});
+
+test("CT11 EVERY road out that carries this page's address is rebuilt by the one hash writer, never by the draw (#634, the cold review's round 3 on PR #635)", () => {
+  // Guarded as a CLASS, and derived rather than restated: the roads are read out of the file. Laying a sheet, taking
+  // one off and a cached return all move the address WITHOUT drawing, so a road rebuilt in draw() hands on the table as
+  // it stood at the last draw. Measured doing exactly that: a reader who took their only sheet off still pressed a road
+  // carrying it, and the Print Room, which since this branch carries the table through, passed it on to the folio.
+  const app = readFileSync(resolve(REPO, "src/site/explorer/app.ts"), "utf8");
+  const at = app.indexOf("function syncHash()");
+  assert.notEqual(at, -1, "the one hash writer is gone, so this guard has nothing to check the roads against");
+  const sync = app.slice(at, app.indexOf("\n}", at));
+  const roads = [...app.matchAll(/^\s*(?:if \([^)]*\) )?(\w+)\.href = [^\n]*location\.hash[^\n]*$/gm)].map((m) => m[1]);
+  assert.ok(roads.length >= 2, `this scan found ${roads.length} address-carrying roads in app.ts and the page has at least the Reading Room's and the Print Room's, so it is reading the wrong shape`);
+  for (const road of new Set(roads)) {
+    assert.match(sync, new RegExp(`\\b${road}\\.href = `), `${road} carries this page's address but is not rebuilt when the address changes, so it points at the table as it stood at the last draw`);
+  }
 });
 
 test("CT5 a prospect refused as a duplicate is refused in its OWN noun, and the survey line stays byte-identical (#522; e2e CD and announce.test pin the survey wording)", () => {
