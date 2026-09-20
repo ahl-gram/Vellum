@@ -251,11 +251,12 @@ precisely, because a token that falls outside it looks identical at the point of
   strips types from `src/*.ts` on demand, which is how a suite computes an expected value in-browser
   and dodges cross-engine float drift. It is e2e only; the deploy artifact carries none of it, and a
   test that proves the artifact carries none of it exists.
-- **CI is parallel jobs on the same triggers**, one running the typecheck and the unit suite, and one
-  per browser lane, each of which builds `dist/` and runs that single lane on a runner of its own. A
-  pull request therefore waits for the LONGEST job, not the sum, and the repeated install and build
-  are the price of that. Every shard rebuilds rather than downloading a shared artifact, and prints a
-  hash of its own `dist/` so a disagreement between two shards is visible instead of silent.
+- **CI is parallel jobs on the same triggers**, one running the typecheck, the lint and the unit
+  suite, and one per browser lane, each of which builds `dist/` and runs that single lane on a runner
+  of its own. A pull request therefore waits for the LONGEST job, not the sum, and the repeated
+  install and build are the price of that. Every shard rebuilds rather than downloading a shared
+  artifact, and prints a hash of its own `dist/` so a disagreement between two shards is visible
+  instead of silent.
 - **Required checks are matched by JOB NAME, and that roster lives outside the tree.** Renaming a job
   in the workflow looks cosmetic and blocks EVERY merge, because the required context never reports
   again until branch protection is updated to match; ADDING a job that ought to be required is the
