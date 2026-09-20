@@ -294,7 +294,7 @@ export async function run(ctx) {
       `(() => { const c = document.getElementById("place-card"); if (!c || c.hidden) return null; const i = c.querySelector(".pc-inner"); const r = c.getBoundingClientRect(); const cs = getComputedStyle(i);
         return { name: (c.querySelector(".pc-name") || {}).textContent, pinned: c.classList.contains("pinned"), scrolls: c.classList.contains("pc-scrolls"),
           arrived: typeof i.getAnimations === "function" && i.getAnimations().every((a) => a.playState === "finished"),
-          tabIndex: i.tabIndex, pe: cs.pointerEvents, over: +(i.scrollHeight - i.clientHeight).toFixed(2), top: +r.top.toFixed(2), bottom: +r.bottom.toFixed(2), left: +r.left.toFixed(2), right: +r.right.toFixed(2), w: +r.width.toFixed(2), h: +r.height.toFixed(2) }; })()`,
+          pe: cs.pointerEvents, over: +(i.scrollHeight - i.clientHeight).toFixed(2), top: +r.top.toFixed(2), bottom: +r.bottom.toFixed(2), left: +r.left.toFixed(2), right: +r.right.toFixed(2), w: +r.width.toFixed(2), h: +r.height.toFixed(2) }; })()`,
       (d, last) => !!d && d.name === "Kralgov" && d.pinned && d.arrived && !!last && last.name === "Kralgov" && d.h === last.h && d.pe === last.pe,
       "P20 Kralgov pinned at 320",
     );

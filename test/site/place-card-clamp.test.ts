@@ -132,7 +132,7 @@ test("#387/#388 the host's box reaches the card through createLivingChart, not o
   assert.deepEqual(shownWith(card, hit, { left: 80, top: 200, right: 254, bottom: 390 }), { dx: "0px", dy: "-124px" });
 });
 
-// #633: the cap hides the tail of a long card, and the sign that says so is dressed in CSS, which no unit test can see. What IS testable is the one predicate the dress keys on, and these pin it: the shim does no layout, so the inner's scroll geometry is stated the way every rect in this file is.
+// #633: the shim does no layout, so the inner's scroll geometry is stated here the way every rect in this file is.
 const withScroll = (inner: El, scrollHeight: number, clientHeight: number, scrollTop = 0) => {
   Object.assign(inner as unknown as Record<string, number>, { scrollHeight, clientHeight, scrollTop });
 };
