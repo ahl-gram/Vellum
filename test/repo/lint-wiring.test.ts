@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import type { Linter } from "eslint";
+import { ESLint, type Linter } from "eslint";
 import lintConfig from "../../eslint.config.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
@@ -66,12 +66,42 @@ test("the lint config is bounded to the ruled scope, covers all of it, and narro
   assert.deepEqual([...covered].sort(), LINT_SCOPE, "the lint scope and Issue #648's ruled scope differ");
 });
 
+const WITNESSES: Record<string, string> = {
+  "scripts/**/*.mjs": "scripts/e2e/harness.mjs",
+  "scripts/**/*.ts": "scripts/build-app-bundles.ts",
+  "src/**/*.ts": "src/cli/main.ts",
+  "test-support/**/*.ts": "test-support/element-shim.ts",
+  "test/**/*.ts": "test/repo/lint-wiring.test.ts",
+};
+type Resolved = { rules?: Record<string, unknown>; languageOptions?: { parser?: { meta?: { name?: string } } }; linterOptions?: { reportUnusedDisableDirectives?: unknown } };
+const severityOf = (rule: unknown): unknown => (Array.isArray(rule) ? rule[0] : rule);
+
+test("through ESLint itself, one witness file per ruled glob resolves to rules that reach it, and the root config resolves to none", async () => {
+  assert.deepEqual(Object.keys(WITNESSES).sort(), LINT_SCOPE, "every ruled glob needs a witness file here");
+  const eslint = new ESLint({ cwd: ROOT, flags: ["unstable_native_nodejs_ts_config"] });
+  for (const [glob, file] of Object.entries(WITNESSES)) {
+    assert.ok(existsSync(join(ROOT, file)), `${file}, the witness for ${glob}, does not exist`);
+    assert.equal(await eslint.isPathIgnored(file), false, `${file} is ignored, so ${glob} reaches nothing`);
+    const config = (await eslint.calculateConfigForFile(file)) as Resolved;
+    const on = (rule: string): unknown => severityOf(config.rules?.[rule]);
+    const typed = glob.endsWith(".ts");
+    assert.equal(config.languageOptions?.parser?.meta?.name, typed ? "typescript-eslint/parser" : undefined, `${file} resolves to the wrong parser`);
+    assert.equal(on("@typescript-eslint/no-misused-promises"), typed ? 2 : undefined, `${file}: the roster rule this PR ticks does not resolve at error`);
+    assert.equal(on("@typescript-eslint/no-explicit-any"), typed ? 2 : undefined, `${file}: the rule the one exemption in the tree stands against is not on`);
+    assert.equal(on("no-undef"), typed ? 0 : 2, `${file}: the core layer is missing or the TypeScript override layer was not applied`);
+    assert.equal(on("no-debugger"), 2, `${file}: the core recommended rules do not reach it`);
+    const report = config.linterOptions?.reportUnusedDisableDirectives;
+    assert.ok([1, 2, "warn", "error"].includes(report as never), `${file}: an unused disable directive is not reported (${String(report)}), so a stale exemption is silent`);
+  }
+  assert.equal(await eslint.isPathIgnored("eslint.config.ts"), true, "the root config lints itself, so the scope leaked past the ruled roots");
+});
+
 test("npm run lint is the native-loader ESLint over the four roots, with a warning counted as red", () => {
   const pkg = JSON.parse(src("package.json")) as { scripts: Record<string, string> };
   assert.equal(pkg.scripts["lint"], LINT_SCRIPT);
 });
 
-// The step is matched at the file's own step indent (a six-space dash, an eight-space run) and as exactly those two lines, the way test/repo/e2e-tiers.test.ts keys its timeout and matrix anchors: a run line planted deeper (under a with: map, which Actions ignores and which the prover planted on this guard's first round, Issue #648) or a step carrying an if: or continue-on-error: reds here, and so does a step written in flow style, which is a false red and never a miss. The one miss it has is a JOB-level if: on check-and-test, which skips Typecheck and Test the same way and which no guard reads; the per-job sweep in test/repo/e2e-tiers.test.ts is its home if it is ever closed.
+// Matched at the file's own step indent the way test/repo/e2e-tiers.test.ts keys its anchors, so a run line planted deeper (under a with: map, which Actions ignores) reds; a step written in flow style reds too, a false red and never a miss. The one miss is a JOB-level if: on check-and-test, which skips Typecheck and Test the same way and which no guard reads; the per-job sweep in test/repo/e2e-tiers.test.ts is its home if it is ever closed.
 test("ci.yml's check-and-test job runs the lint as a real step of exactly two lines, so a red lint fails the pull request", () => {
   assert.match(
     ciJob("check-and-test"),
