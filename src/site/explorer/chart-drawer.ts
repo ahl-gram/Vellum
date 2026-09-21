@@ -186,6 +186,51 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
 
   const keyOf = (item: TableItem): string => emitTable([item]);
   const titleOf = (item: TableItem): string => names.get(keyOf(item)) ?? placeholderTitle(item);
+  const onScreen = (): boolean => deps.cuttings.getBoundingClientRect().width > 0;
+
+  interface Row { readonly li: HTMLLIElement; readonly label: HTMLElement; readonly title: HTMLElement; readonly off: HTMLButtonElement }
+  const rows = new Map<string, Row>();
+  let landing: string | null = null;
+
+  const pictureOf = (item: TableItem): HTMLElement => {
+    const url = art.get(keyOf(item));
+    if (url) {
+      const img = document.createElement("img");
+      img.src = url;
+      img.alt = "";
+      return img;
+    }
+    const frame = document.createElement("span");
+    frame.className = "awaited";
+    frame.textContent = "drawing…";
+    return frame;
+  };
+
+  const cutting = (item: TableItem, seat: number): Row => {
+    const li = document.createElement("li");
+    li.className = item.kind === "prospect" ? "prospect" : "";
+    li.style.setProperty("--tilt", `${((seat % 3) - 1) * 1.6}deg`);
+    const label = document.createElement("span");
+    label.className = "label";
+    const b = document.createElement("b");
+    b.textContent = titleOf(item);
+    const i = document.createElement("i");
+    i.textContent = subOf(item);
+    label.append(b, i);
+    const off = document.createElement("button");
+    off.type = "button";
+    off.className = "off";
+    off.setAttribute("aria-label", `Take ${titleOf(item)} off the table`);
+    off.textContent = "×";
+    off.addEventListener("click", () => take(seat));
+    li.append(pictureOf(item), label, off);
+    return { li, label, title: b, off };
+  };
+
+  const settle = (li: HTMLElement): void => {
+    li.classList.add("landing");
+    li.addEventListener("animationend", (e) => { if (e.target === li) li.classList.remove("landing"); });
+  };
 
   const render = (): void => {
     deps.count.textContent = countLine(items);
@@ -193,39 +238,27 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
     deps.tab.textContent = tabLine(items);
     deps.relabelLeaf?.(items.length);
     deps.full.hidden = roomOnTable(items) > 0;
+    deps.cuttings.classList.remove("jolt");
+    rows.clear();
     deps.cuttings.replaceChildren(...items.map((item, seat) => {
-      const li = document.createElement("li");
-      li.className = item.kind === "prospect" ? "prospect" : "";
-      li.style.setProperty("--tilt", `${((seat % 3) - 1) * 1.6}deg`);
-      const url = art.get(keyOf(item));
-      if (url) {
-        const img = document.createElement("img");
-        img.src = url;
-        img.alt = "";
-        li.append(img);
-      } else {
-        const frame = document.createElement("span");
-        frame.className = "awaited";
-        frame.textContent = "drawing…";
-        li.append(frame);
-      }
-      const label = document.createElement("span");
-      label.className = "label";
-      const b = document.createElement("b");
-      b.textContent = titleOf(item);
-      const i = document.createElement("i");
-      i.textContent = subOf(item);
-      label.append(b, i);
-      const off = document.createElement("button");
-      off.type = "button";
-      off.className = "off";
-      off.setAttribute("aria-label", `Take ${titleOf(item)} off the table`);
-      off.textContent = "×";
-      off.addEventListener("click", () => take(seat));
-      li.append(label, off);
-      return li;
+      const row = cutting(item, seat);
+      rows.set(keyOf(item), row);
+      if (landing === keyOf(item)) settle(row.li);
+      return row.li;
     }));
+    landing = null;
   };
+
+  const patchArt = (item: TableItem): void => {
+    const row = rows.get(keyOf(item));
+    if (!row) { render(); return; }
+    row.li.replaceChildren(pictureOf(item), row.label, row.off);
+    row.title.textContent = titleOf(item);
+    row.off.setAttribute("aria-label", `Take ${titleOf(item)} off the table`);
+  };
+
+  const jolt = (): void => { if (onScreen()) deps.cuttings.classList.add("jolt"); };
+  deps.cuttings.addEventListener("animationend", (e) => { if (e.target === deps.cuttings) deps.cuttings.classList.remove("jolt"); });
 
   const forget = (item: TableItem): void => {
     const k = keyOf(item);
@@ -254,7 +287,7 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
           if (!drawn) continue;
           // The sheet may have LEFT while its picture was drawing, a window only a re-seat mid-draw opens, and its url is then filed under a key no cutting carries so nothing would ever revoke it.
           if (!items.some((live) => keyOf(live) === keyOf(item))) { URL.revokeObjectURL(drawn.url); continue; }
-          art.set(keyOf(item), drawn.url); names.set(keyOf(item), drawn.title); render();
+          art.set(keyOf(item), drawn.url); names.set(keyOf(item), drawn.title); patchArt(item);
         }
       } while (refill); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     } finally {
@@ -296,20 +329,33 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
   });
 
   return {
-    lay(item: TableItem, svg: string | null, title?: string): boolean {
+    /** A drag hands over the ghost's url as `ready` and the cutting adopts it, so a carry mints one url and not two. */
+    lay(item: TableItem, svg: string | null, title?: string, ready?: { readonly url: string }): boolean {
       const laid = layOnTable(items, item);
       if (laid.refused) {
         deps.say(refusalLine(laid.reason ?? "full", item.kind));
         setOpen(true);
+        if (laid.reason === "full") jolt();
         return false;
       }
-      if (svg) art.set(keyOf(item), URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" })));
+      if (ready) art.set(keyOf(item), ready.url);
+      else if (svg) art.set(keyOf(item), URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" })));
       if (title) names.set(keyOf(item), title);
+      landing = keyOf(item);
       commit(laid.items);
       setOpen(true);
+      // Checked AFTER the open, not before: from a shut drawer the cutting is built display:none and the open in the same tick is what starts its settle; a list still off screen here is the phone's docked leaf, where a queued ceremony would replay when the leaf is next shown.
+      if (!onScreen()) rows.get(keyOf(item))?.li.classList.remove("landing");
       deps.say(`${titleOf(item)} lies on the table · ${countLine(laid.items)}`);
       return true;
     },
+    /** Opens the drawer for a carry and hands back what puts it as it was; a drawer already open is left open by both. */
+    reveal(): () => void {
+      const wasOpen = deps.root.classList.contains("open");
+      if (!wasOpen) setOpen(true);
+      return () => { if (!wasOpen) setOpen(false); };
+    },
+    receiving(over: boolean): void { deps.root.classList.toggle("receiving", over); },
     restore(next: ReadonlyArray<TableItem>): void {
       // Through the same gate a filing takes: a hand-typed or shared link can carry one sheet twice, and parseTable does not dedupe. Two twins would also share ONE blob url, keyed by the item, so removing either would revoke the survivor's picture.
       // The gate is byte equality on the emitted item, so it does NOT catch one prospect spelled two ways: `k-p...style-nautical` and `...style-antique` at one seat draw the same plate (plateDressFor sends both to antique) yet seat twice and spend two of the six. Both DOORS normalise through prospectItemFrom, so only a hand-typed or hand-edited link reaches it; closing it here would rewrite the address the reader shared, which is Alex's call and not a one-liner (#631's cold review, residue).

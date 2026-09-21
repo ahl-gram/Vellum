@@ -99,6 +99,7 @@ export class El {
   }
   querySelector(): El | null { return null; }
   querySelectorAll(): El[] { return []; }
+  focus(): void {}
   remove(): void {
     const p = this.parentNode;
     if (!p) return;
