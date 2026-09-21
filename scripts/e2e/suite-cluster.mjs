@@ -1,5 +1,5 @@
 // The head cluster on home (CL1-CL7, #480 Landfall Sub 6b): the wash sized to the cluster, the stage's lettering opted out of selection, and the phone drawer; every geometry MEASURED against the rendered page, since the #480 screenshots were all things source-scan tests could not see.
-import { makeStage, readCam, atLandfall } from "./home-support.mjs";
+import { makeStage, makeMouse, readCam, atLandfall } from "./home-support.mjs";
 import { sampleRow, luminance } from "./pixel-support.mjs";
 import { makeSettle } from "./settle-support.mjs";
 import { makeStep } from "./step-support.mjs";
@@ -72,12 +72,7 @@ export async function run(ctx) {
     JSON.stringify({ cam: !!cam, wash, alpha }),
   );
 
-  const dragAcross = async (from, dx, dy) => {
-    await send("Input.dispatchMouseEvent", { type: "mousePressed", x: from.x, y: from.y, button: "left", buttons: 1, clickCount: 1 });
-    for (let i = 1; i <= 8; i++) await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: from.x + (dx * i) / 8, y: from.y + (dy * i) / 8, button: "left", buttons: 1 });
-    await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: from.x + dx, y: from.y + dy, button: "left", clickCount: 1 });
-    await sleep(150);
-  };
+  const { dragAcross } = makeMouse(ctx);
   // The rect is read only once the camera is at landfall (CI once pressed on the wordmark from a stale rect), and the press point must hit-test into the stage (the name slip itself is pointer-events: none, so the press lands on the sheet beneath it, which is the baseline's own path): a drag that begins outside the stage proves nothing about it.
   let settled = null;
   for (let i = 0; i < 80 && !atLandfall(settled); i++) { settled = await evaluate(readCam); if (!atLandfall(settled)) await sleep(75); }

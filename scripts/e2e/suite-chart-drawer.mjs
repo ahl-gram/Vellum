@@ -2,7 +2,7 @@
 // The Chart Table's drawer (#520 Sub 2 of #401, direction D ruled at the #518 sitting): the dog-ear on the committed survey, the drawer it fills, the cap, and since #634 the table's two homes, the address deciding an arrival and the device a return. `chart-drawer` and never `drawer`: suite-room-drawer is the site's phone nav (#520 ruling 2).
 import { makeSettle } from "./settle-support.mjs";
 import { makeStep } from "./step-support.mjs";
-import { makeStage } from "./home-support.mjs";
+import { makeStage, makeMouse } from "./home-support.mjs";
 import { slideRested, foldRested } from "../../src/cli/e2e-slide.ts";
 import { SAY_HOLD_MS } from "../../src/site/shared/announce.ts";
 // Imported and never restated: a key spelled twice is a clear that silently stops clearing the day the app's own key moves.
@@ -55,7 +55,7 @@ const READ = `(() => {
 
 // eslint-disable-next-line max-lines-per-function
 export async function run(ctx) {
-  const { evaluate, send, check, shoot, sleep, setMobileViewport, clearMobile, touch, PORT } = ctx;
+  const { evaluate, send, check, shoot, sleep, setMobileViewport, clearMobile, touch, touchPan, PORT } = ctx;
   const settle = makeSettle(ctx);
   // A group that only navigates needs no step: go()'s bounded loop returns rather than throwing.
   const step = makeStep(ctx);
@@ -181,6 +181,135 @@ export async function run(ctx) {
     );
   });
 
+
+  // Issue #523 Sub 5: the desktop drag, the settle and the jolt, ruled 2026-09-21. The camera is d3's {x, y, k} and every Broadside fold schedules a room layout 340ms later that re-seats x/y (FOLD_SETTLE_MS in src/site/shared/slip.ts), so every drag check below holds the FOLD constant across its two reads (the Broadside already folded before the press), takes each read at REST (two reads 50ms apart agreeing, with no ghost and no settle in flight), and compares k exactly with x and y inside half a pixel: a no-change refit is a float round trip through the camera bridge, a d3 pan is the carry's own delta in the hundreds of px, and k alone (CD2c's read) cannot tell a pan at all.
+  const { press, moveTo, release } = makeMouse(ctx);
+  const CARRY = `(() => {
+    const g = document.querySelector(".sheet-ghost");
+    const d = document.getElementById("chart-drawer");
+    const li = document.querySelector("#cuttings li.landing");
+    const cut = document.getElementById("cuttings");
+    const cam = window.__vellumZoomState ? window.__vellumZoomState() : null;
+    return {
+      ghost: g ? { tag: g.tagName, src: g.src.slice(0, 5), pos: getComputedStyle(g).position, pe: getComputedStyle(g).pointerEvents, translate: g.style.translate, w: g.offsetWidth, rotate: getComputedStyle(g).rotate, z: getComputedStyle(g).zIndex, inMap: !!g.closest("#map") } : null,
+      drag: document.body.classList.contains("sheet-drag"),
+      open: d.classList.contains("open"), receiving: d.classList.contains("receiving"),
+      folded: document.querySelector(".slip").classList.contains("folded"),
+      cuttings: document.querySelectorAll("#cuttings li").length,
+      landing: !!li, landingRuns: li ? li.getAnimations().filter((a) => a.playState === "running").length : 0,
+      jolt: cut.classList.contains("jolt"), joltRuns: cut.classList.contains("jolt") ? cut.getAnimations().filter((a) => a.playState === "running").length : 0,
+      sel: String(getSelection()).length,
+      cursor: (() => { const e = document.elementFromPoint(640, 300); return e ? getComputedStyle(e).cursor : null; })(),
+      cam: cam ? { x: +cam.x.toFixed(3), y: +cam.y.toFixed(3), k: cam.k } : null,
+      hashTable: new URLSearchParams(location.hash.slice(1)).get("table"),
+      status: (document.getElementById("status") || {}).textContent || "",
+      innerH: window.innerHeight,
+    };
+  })()`;
+  const sameCam = (a, b) => !!a && !!b && a.k === b.k && Math.abs(a.x - b.x) < 0.5 && Math.abs(a.y - b.y) < 0.5;
+  const atRest = (d, last) => !!last && !d.ghost && !d.landing && sameCam(d.cam, last.cam) && d.cuttings === last.cuttings;
+  const earPoint = () => evaluate(`(() => { const e = document.querySelector("#map .region-inset .dog-ear"); if (!e) return null; const b = e.getBoundingClientRect(); return { x: Math.round(b.x + b.width * 0.72), y: Math.round(b.y + b.height * 0.28) }; })()`);
+  // The band's own centre: the drawer's seat is its height from the foot of the viewport (bandOf in src/site/explorer/table-drag.ts), so a release here is inside it at any viewport height.
+  const bandPoint = () => evaluate(`({ x: 640, y: window.innerHeight - 120 })`);
+  // The settle's declared duration, read the CD23 way: the class is put on a scratch cutting with transitions suppressed, the cascade's answer is read, and the class comes off again.
+  const DURATION = `(() => { const li = document.querySelector("#cuttings li"); if (!li) return null; li.classList.add("landing"); const v = getComputedStyle(li).animationDuration; li.classList.remove("landing"); return v; })()`;
+  /** A carry from the ear to `to`, read mid-carry before the release; hands back the mid-carry read and the release point. */
+  const carry = async (to) => {
+    const from = await earPoint();
+    if (!from) throw new Error("no dog-ear to carry from");
+    await press(from.x, from.y);
+    await moveTo(from, to);
+    await sleep(120);
+    const mid = await evaluate(CARRY);
+    return { from, to, mid };
+  };
+  /** Polls to rest while remembering whether the class was ever seen with its animation running: the settle is 340ms and the poll is 50ms, so a settle that plays is seen and a settle that never plays is not. */
+  const restSeeing = async (label, flag) => {
+    let saw = false;
+    const d = await settle(CARRY, (x, last) => { if (x[flag] > 0) saw = true; return atRest(x, last); }, label);
+    return { ...d, saw };
+  };
+
+  // The slip at rest with the drawer shut and the Broadside folded: the fold's own transition has ended and the room layout it schedules has had its 340ms.
+  const FOLDREST = `(() => { const s = document.querySelector(".slip"); return { folded: s.classList.contains("folded"), open: document.getElementById("chart-drawer").classList.contains("open"), slipX: +s.getBoundingClientRect().x.toFixed(2), anims: s.getAnimations().map((a) => a.playState) }; })()`;
+  const shutAndFold = async (label) => {
+    await evaluate(`document.getElementById("chart-drawer-shut").click()`);
+    await sleep(400);
+    await evaluate(`(() => { const s = document.querySelector(".slip"); if (!s.classList.contains("folded")) document.querySelector(".slip-fold").click(); })()`);
+    // A finished transition stays in getAnimations() (the shape src/cli/e2e-slide.ts reads), and a slip that was folded already has none: rest is every entry finished and the edge still across two reads.
+    await settle(FOLDREST, (d, last) => d.folded && !d.open && d.anims.every((s) => s === "finished") && !!last && d.slipX === last.slipX, label);
+    await sleep(400);
+  };
+
+  await step("CD44", async () => {
+    // The sheet on the table IS the one the ear offers (CD2 laid it, CD3 refused it as already), so it comes off first; the drawer is shut so the carry is what opens it, and the Broadside is folded and at rest so the camera read is about the carry and not about a fold.
+    await evaluate(`document.querySelector("#cuttings .off").click()`);
+    await shutAndFold("chart-drawer-carry-folded");
+    const before = await settle(CARRY, atRest, "chart-drawer-carry-rest");
+    const target = await bandPoint();
+    const { mid, to } = await carry(target);
+    await release(to.x, to.y);
+    const landed = await restSeeing("chart-drawer-carried", "landingRuns");
+    const duration = await evaluate(DURATION);
+    check(
+      "CD44 a REAL mouse carry from the dog-ear into the drawer's band files the survey: mid-carry the ghost is the thumbnail as a fixed blob img at pointer-events none, seated on body and never inside #map, hanging from the corner the reader took it by (its inline translate puts the pointer GRIP_INSET_PX inside its top-right corner, read from the seat and not from the rect, which is a rotated box's bounding box), the body carries the drag state with the cursor grabbing and nothing selected, and the drawer, SHUT at the press, opened with the drop cue as the sheet entered the band (D4); on release the cutting lands with its settle seen running and then retired, the address carries the table, the line is said, the ghost and the drag state are gone, and the camera is at rest where it was, which is the pan the ear's stopped mousedown keeps from d3 (Issue #523, ruled 2026-09-21)",
+      before.cuttings === 0 && before.folded && !before.open &&
+        !!mid.ghost && mid.ghost.tag === "IMG" && mid.ghost.src === "blob:" && mid.ghost.pos === "fixed" && mid.ghost.pe === "none" && !mid.ghost.inMap &&
+        Math.abs(parseFloat(mid.ghost.translate) + mid.ghost.w - 10 - to.x) <= 1 && Math.abs(parseFloat(mid.ghost.translate.split(" ")[1]) + 10 - to.y) <= 1 &&
+        mid.ghost.rotate === "-6deg" && mid.ghost.z === "30" &&
+        mid.drag && mid.cursor === "grabbing" && mid.sel === 0 && mid.open && mid.receiving &&
+        landed.cuttings === 1 && landed.saw && !landed.landing && !landed.ghost && !landed.drag && !landed.receiving &&
+        typeof landed.hashTable === "string" && landed.hashTable.startsWith("k-s.seed-42") && /lies on the table/.test(landed.status) &&
+        sameCam(before.cam, landed.cam) && landed.folded && duration === "0.34s",
+      JSON.stringify({ before: { cuttings: before.cuttings, folded: before.folded, open: before.open, cam: before.cam }, mid, to, landed: { cuttings: landed.cuttings, saw: landed.saw, landing: landed.landing, ghost: landed.ghost, drag: landed.drag, hashTable: landed.hashTable, status: landed.status, cam: landed.cam, folded: landed.folded }, duration }),
+    );
+  });
+
+  await step("CD45", async () => {
+    await evaluate(`document.querySelector("#cuttings .off").click()`);
+    await shutAndFold("chart-drawer-snap-folded");
+    const before = await settle(CARRY, atRest, "chart-drawer-carry-shut-rest");
+    const { from, mid, to } = await carry({ x: 640, y: 300 });
+    await release(to.x, to.y);
+    const snapped = await settle(CARRY, atRest, "chart-drawer-snapped");
+    // A jiggle released back ON the ear: the click that follows a drag is swallowed, or the sheet the reader put back would be filed by the release.
+    await press(from.x, from.y);
+    await moveTo(from, { x: from.x - 10, y: from.y + 10 }, 4);
+    await moveTo({ x: from.x - 10, y: from.y + 10 }, from, 4);
+    await release(from.x, from.y);
+    const jiggled = await settle(CARRY, atRest, "chart-drawer-jiggled");
+    // Then a PLAIN click on the ear files: the swallow is scoped to one gesture and does not eat the next honest click.
+    await clickAt(from.x, from.y);
+    const clicked = await settle(CARRY, (d, last) => d.cuttings === 1 && atRest(d, last), "chart-drawer-plain-click");
+    await evaluate(`document.querySelector("#cuttings .off").click()`);
+    await shutAndFold("chart-drawer-after-snap-folded");
+    check(
+      "CD45 a carry released over the chart files nothing: the ghost rode the pointer with the drawer still SHUT (D4: it opens only as the sheet enters the band), then snapped back and is gone, the table is bare and the address carries no key, the drawer is back as it was and the camera is at rest where it was; a jiggle released back on the ear files nothing either, since the click that follows a drag is swallowed; and a plain click straight after still files, so the swallow is scoped to its own gesture and never eats the next honest click (Issue #523, ruled 2026-09-21)",
+      before.cuttings === 0 && !before.open && before.folded &&
+        !!mid.ghost && mid.drag && !mid.open && !mid.receiving &&
+        snapped.cuttings === 0 && !snapped.ghost && !snapped.drag && !snapped.open && snapped.hashTable === null && sameCam(before.cam, snapped.cam) &&
+        jiggled.cuttings === 0 && !jiggled.ghost && !jiggled.open && sameCam(before.cam, jiggled.cam) &&
+        clicked.cuttings === 1 && clicked.open,
+      JSON.stringify({ before: { cuttings: before.cuttings, open: before.open, folded: before.folded, cam: before.cam }, mid: { ghost: !!mid.ghost, drag: mid.drag, open: mid.open, receiving: mid.receiving }, snapped: { cuttings: snapped.cuttings, ghost: snapped.ghost, drag: snapped.drag, open: snapped.open, hashTable: snapped.hashTable, cam: snapped.cam }, jiggled: { cuttings: jiggled.cuttings, ghost: jiggled.ghost, open: jiggled.open, cam: jiggled.cam }, clicked: { cuttings: clicked.cuttings, open: clicked.open } }),
+    );
+  });
+
+  await step("CD46", async () => {
+    await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
+    const reduced = await evaluate(`matchMedia("(prefers-reduced-motion: reduce)").matches`);
+    const target = await bandPoint();
+    const { to } = await carry(target);
+    await release(to.x, to.y);
+    const landed = await settle(CARRY, (d, last) => d.cuttings === 1 && atRest(d, last), "chart-drawer-reduced-landed");
+    const duration = await evaluate(DURATION);
+    await send("Emulation.setEmulatedMedia", { features: [] });
+    check(
+      "CD46 under reduced motion a carry still files and the settle collapses to an instant place: the cutting lands, its class retires, and the settle's declared duration reads the blanket's near-zero against CD44's 0.34s in the same run, which is the same-run control that makes the emulation a measurement (Issue #523; motion.css's blanket)",
+      reduced === true && landed.cuttings === 1 && !landed.landing && !landed.ghost && duration === "1e-05s",
+      JSON.stringify({ reduced, cuttings: landed.cuttings, landing: landed.landing, ghost: landed.ghost, duration }),
+    );
+  });
+
   await step("CD4", async () => {
     if (!laid) throw new Error("CD2 never laid a sheet, so this reload has no table to restore");
     const carried = laid.hashTable;
@@ -231,6 +360,22 @@ export async function run(ctx) {
       "CD7c the drawer's slide is pinned at the 0.32s the settle above waits out, so a regression that leaves the reader looking at an empty band for three seconds cannot sit inside a generous budget and pass (#578)",
       refused.slideMs === "0.32s",
       JSON.stringify({ slideMs: refused.slideMs, anims: refused.drawerAnims }),
+    );
+  });
+
+  await step("CD47", async () => {
+    // The drawer is open and the Broadside folded from CD7's refusal, so the fold is constant across the carry.
+    const before = await settle(CARRY, atRest, "chart-drawer-cap-rest");
+    const target = await bandPoint();
+    const { mid, to } = await carry(target);
+    await release(to.x, to.y);
+    const refusedCarry = await restSeeing("chart-drawer-cap-carried", "joltRuns");
+    check(
+      "CD47 a carry dropped on a FULL table is refused the way a click is: the six stay six, the cap's line is said, the sheets on the table jolt (seen running, then retired; D3 ruled 2026-09-21) while the drawer itself stays put, the ghost snaps back and is gone rather than stranded on the refusal, and the camera is at rest where it was (Issue #523)",
+      before.cuttings === 6 && before.open && before.folded && !!mid.ghost && mid.receiving &&
+        refusedCarry.cuttings === 6 && refusedCarry.status === "the table is full: six sheets lie on it" && refusedCarry.saw && !refusedCarry.jolt &&
+        !refusedCarry.ghost && !refusedCarry.drag && refusedCarry.open && sameCam(before.cam, refusedCarry.cam),
+      JSON.stringify({ before: { cuttings: before.cuttings, open: before.open, folded: before.folded, cam: before.cam }, mid: { ghost: !!mid.ghost, receiving: mid.receiving }, after: { cuttings: refusedCarry.cuttings, status: refusedCarry.status, saw: refusedCarry.saw, jolt: refusedCarry.jolt, ghost: refusedCarry.ghost, drag: refusedCarry.drag, open: refusedCarry.open, cam: refusedCarry.cam } }),
     );
   });
 
@@ -494,9 +639,38 @@ export async function run(ctx) {
     const phoneDrawer = await evaluate(`getComputedStyle(document.getElementById("chart-drawer")).display`);
     const phoneShut = await evaluate(`(() => { const b = document.getElementById("chart-drawer-shut"); const r = b.getBoundingClientRect(); if (r.width < 1) return "no-box"; const h = document.elementFromPoint(Math.round(r.x + r.width / 2), Math.round(r.y + r.height / 2)); return h === b || b.contains(h) ? "reachable" : "eclipsed"; })()`);
     check(
-      "CD6 at 390 the desktop drawer never paints, not even after a real tap on the dog-ear: the handle is the phone's own door into the table and it opens the drawer with no width term, so the stand-down has to cover the OPEN state and not just the resting one (#540)",
-      !!phoneEar && !phoneArmed.open && phoneDrawer === "none" && phone.scrollW === phone.innerW && !phone.tabShown,
-      JSON.stringify({ tapped: phoneEar, drawerDisplay: phoneDrawer, open: phone.open, shutPress: phoneShut, scrollW: phone.scrollW, innerW: phone.innerW }),
+      "CD6 at 390 the desktop drawer never paints, not even after a real tap on the dog-ear, and the tap FILES the sheet: the handle is the phone's own door into the table and it opens the drawer with no width term, so the stand-down has to cover the OPEN state and not just the resting one (#540; the filing half strengthened at Issue #523, whose drag must leave the tap the door it is)",
+      !!phoneEar && !phoneArmed.open && phoneDrawer === "none" && phone.scrollW === phone.innerW && !phone.tabShown && phoneArmed.cuttings === 0 && phone.cuttings === 1,
+      JSON.stringify({ tapped: phoneEar, drawerDisplay: phoneDrawer, open: phone.open, shutPress: phoneShut, scrollW: phone.scrollW, innerW: phone.innerW, cuttings: [phoneArmed.cuttings, phone.cuttings] }),
+    );
+
+    // CD48 (Issue #523 build item 4), in this order: the handle's touch drag first, the pan control LAST, since a pan at DEEP can recommit the inset and rebuild the ear, and nothing after it here reads the ear.
+    const earNow = await evaluate(`(() => { const e = document.querySelector("#map .region-inset .dog-ear"); if (!e) return null; const b = e.getBoundingClientRect(); return { x: Math.round(b.x + b.width * 0.72), y: Math.round(b.y + b.height * 0.28) }; })()`);
+    const camBefore = await evaluate(`window.__vellumZoomState()`);
+    let ghostSeen = false;
+    if (earNow) {
+      await touch("touchStart", [{ x: earNow.x, y: earNow.y, id: 0 }]);
+      for (let i = 1; i <= 4; i++) {
+        await touch("touchMove", [{ x: earNow.x - 30 * i, y: earNow.y + 40 * i, id: 0 }]);
+        if (await evaluate(`!!document.querySelector(".sheet-ghost")`)) ghostSeen = true;
+      }
+      await touch("touchEnd", []);
+    }
+    await sleep(500);
+    const afterHandle = await evaluate(`({ cam: window.__vellumZoomState(), ghost: !!document.querySelector(".sheet-ghost"), drag: document.body.classList.contains("sheet-drag"), cuttings: document.querySelectorAll("#cuttings li").length })`);
+    // The control arm: a touch that begins BESIDE the handle, on the chart, still pans. The start point is hit-tested away from the ear and any place hit, so the camera is what answers it.
+    const panFrom = await evaluate(`(() => { const inset = document.querySelector("#map .region-inset"); const b = inset ? inset.getBoundingClientRect() : null; if (!b) return null;
+      for (const [fx, fy] of [[0.15, 0.85], [0.3, 0.7], [0.5, 0.5], [0.2, 0.3]]) { const x = Math.round(b.x + b.width * fx), y = Math.round(b.y + b.height * fy); const h = document.elementFromPoint(x, y); if (h && !h.closest(".dog-ear") && !h.closest(".place-hit") && h.closest("#map-viewport")) return { x, y, on: h.tagName }; }
+      return null; })()`);
+    if (panFrom) await touchPan(panFrom.x, panFrom.y, panFrom.x + 80, panFrom.y + 60);
+    await sleep(500);
+    const afterPan = await evaluate(`window.__vellumZoomState()`);
+    check(
+      "CD48 at 390 a touch that begins on the handle neither pans nor zooms the map and never raises a ghost (touch never drags, Issue #401 ruling 6), while a touch that begins beside it on the chart still pans, the control that proves the camera was listening: the first is the ear's stopped touchstart, the second is d3 bound under touch emulation that was active BEFORE the navigate (Issue #523 build item 4)",
+      !!earNow && !!camBefore && camBefore.k === afterHandle.cam.k && camBefore.x === afterHandle.cam.x && camBefore.y === afterHandle.cam.y &&
+        !ghostSeen && !afterHandle.ghost && !afterHandle.drag && afterHandle.cuttings === 1 &&
+        !!panFrom && (afterPan.x !== camBefore.x || afterPan.y !== camBefore.y),
+      JSON.stringify({ ear: earNow, camBefore, afterHandle, ghostSeen, panFrom, afterPan }),
     );
   });
 
