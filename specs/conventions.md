@@ -133,8 +133,9 @@ a file outside this repo at its real home under `~`. The test is the list of wha
 one numbering sequence here and interleave, so a bare number does not say which kind of thing it
 points at. It governs replies, pull request bodies, issue comments, commit message bodies, and prose
 anywhere in the repo: these specs, `CLAUDE.md`, and the files under `.claude/agents/` and
-`.claude/skills/`. The word may be lowercase where the sentence wants it; what it may not be is
-absent. **It never governs a form a tool parses, or one that already carries the
+`.claude/skills/`, and the comments in the sheets under `public/`, where `npm run lint` enforces it
+(`vellum/css-comment-issue-form` in `scripts/lint/css-comment-form.ts`). The word may be lowercase
+where the sentence wants it; what it may not be is absent. **It never governs a form a tool parses, or one that already carries the
 word**: a commit SUBJECT keeps the house's leading `#N`, a closing reference stays `Closes #N`
 exactly (a word between the keyword and the number closes nothing, `vellum-footguns` Gate 5 item 5),
 a pull request body's title line keeps `#N`, and a field label such as the template's `Issue: #N`

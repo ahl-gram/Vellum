@@ -15,6 +15,7 @@ const INSET = 0.02; // region.ts's own open-window inset
 const ATLAS_SIZE = 0.38; // `windowAround` in `src/atlas/compose.ts`
 
 /** Does the band-scaled snap radius rescue anything the old radius-1 scan dropped? Bare field only: that is what ships today, so a nonzero answer is a change to sheets Alex can already see. */
+// eslint-disable-next-line max-lines-per-function
 function counterfactual(): void {
   type Row = { onWater: number; rescued: number; lostAnyway: number; radius: number };
   const tally = new Map<string, Row>();
@@ -71,7 +72,7 @@ function counterfactual(): void {
       }
     }
     const capital = world.settlements.find((s) => s.kind === "capital") ?? world.settlements[0];
-    if (capital === undefined) continue;
+    if (capital === undefined) continue; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     const far = world.settlements.reduce((a, b) =>
       Math.hypot(b.x - capital.x, b.y - capital.y) > Math.hypot(a.x - capital.x, a.y - capital.y) ? b : a,
     );

@@ -31,11 +31,12 @@ export interface VoyageDeps {
 }
 
 function prefersReduce(): boolean {
-  return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 }
 
 const fmt = (p: Pt) => `${p.x},${p.y}`;
 
+// eslint-disable-next-line max-lines-per-function
 export function createVoyage(deps: VoyageDeps) {
   const { mapEl, statusEl, logPanel, restingTrackSink } = deps;
   const sessions = createSessionBuilder({

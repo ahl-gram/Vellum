@@ -146,7 +146,7 @@ export async function runSelected(
   let streak: E2eSuiteName[] = [];
   for (const name of names) {
     const run = suites[name];
-    if (!run) throw new Error(`the runner has no suite named ${name}`);
+    if (!run) throw new Error(`the runner has no suite named ${name}`); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     const skippedBefore = skippedGroups ? skippedGroups().length : 0;
     const started = now();
     let stoppedEarly = false;
@@ -165,6 +165,7 @@ export async function runSelected(
             `more often than ${streak.length} separate defects do, and every suite after this one ` +
             `would wait out its full budget before failing too. Read the named reds above first; ` +
             `they are checks, not infrastructure. The last was ${name}: ${errorText(err)}`,
+          { cause: err },
         );
       }
       stoppedEarly = true;

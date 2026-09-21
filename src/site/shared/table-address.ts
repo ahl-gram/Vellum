@@ -87,7 +87,7 @@ const seal = (raw: string | undefined): Field<boolean> =>
 
 const regionBand = (rung: number): LodBand | null => {
   const band = LOD_BANDS[rung];
-  return band && band.isRegion ? band : null;
+  return band && band.isRegion ? band : null; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 };
 
 const latticeStep = (band: LodBand): number => band.sizeUV / LATTICE_DIVISIONS;

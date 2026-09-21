@@ -2,6 +2,8 @@ import { defineConfig } from "eslint/config";
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";
 import globals from "globals";
+import css from "@eslint/css";
+import vellum from "./scripts/lint/css-comment-form.ts";
 
 // Every rule set off below was red on main when the tool landed; Issue #648 is the ledger, and each family pull request turns its rules on with the violations fixed or exempted by name.
 export default defineConfig(
@@ -10,23 +12,25 @@ export default defineConfig(
     extends: [js.configs.recommended, tseslint.configs.recommendedTypeChecked],
     languageOptions: { parserOptions: { projectService: true, tsconfigRootDir: import.meta.dirname } },
     rules: {
+      "max-depth": ["error", 4],
+      "max-lines": ["error", 400],
+      "max-lines-per-function": ["error", 50],
       "no-empty": "off",
-      "no-regex-spaces": "off",
-      "preserve-caught-error": "off",
-      "@typescript-eslint/no-floating-promises": "off",
-      "@typescript-eslint/no-implied-eval": "off",
+      "no-param-reassign": ["error", { props: false }],
+      "@typescript-eslint/no-floating-promises": [
+        "error",
+        { allowForKnownSafeCalls: [{ from: "package", package: "node:test", name: ["test", "suite"] }] },
+      ],
+      "@typescript-eslint/no-unnecessary-condition": "error",
       "@typescript-eslint/no-unnecessary-type-assertion": "off",
       "@typescript-eslint/no-unsafe-argument": "off",
       "@typescript-eslint/no-unsafe-assignment": "off",
       "@typescript-eslint/no-unsafe-call": "off",
       "@typescript-eslint/no-unsafe-member-access": "off",
-      "@typescript-eslint/no-unsafe-return": "off",
-      "@typescript-eslint/no-unused-expressions": "off",
       "@typescript-eslint/no-unused-vars": "off",
-      "@typescript-eslint/prefer-promise-reject-errors": "off",
+      "@typescript-eslint/prefer-readonly": "error",
       "@typescript-eslint/require-await": "off",
-      "@typescript-eslint/restrict-template-expressions": "off",
-      "@typescript-eslint/unbound-method": "off",
+      "@typescript-eslint/switch-exhaustiveness-check": "error",
     },
   },
   {
@@ -36,7 +40,22 @@ export default defineConfig(
     rules: {
       "no-empty": "off",
       "no-unused-vars": "off",
-      "no-useless-assignment": "off",
+      "max-depth": ["error", 4],
+      "max-lines": ["error", 400],
+      "max-lines-per-function": ["error", 50],
+      "no-param-reassign": ["error", { props: false }],
+      "prefer-const": "error",
+    },
+  },
+  {
+    files: ["public/**/*.css"],
+    plugins: { css, vellum },
+    language: "css/css",
+    languageOptions: { tolerant: true },
+    rules: {
+      "vellum/css-comment-issue-form": "error",
+      "vellum/css-comment-no-em-dash": "error",
+      "vellum/css-comment-one-line": "error",
     },
   },
 );

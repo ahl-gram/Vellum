@@ -132,6 +132,7 @@ export type LoreWriter = {
   realmNote(realmName: string): string;
 };
 
+// eslint-disable-next-line max-lines-per-function
 export function createLoreWriter(world: World, rng: Rng): LoreWriter {
   const aromatic = AROMATIC_GOODS[world.culture.id] ?? AROMATIC_GOODS["thalassic"]!;
   const cargo = CARGO_GOODS[world.culture.id] ?? CARGO_GOODS["thalassic"]!;

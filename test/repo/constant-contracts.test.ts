@@ -29,7 +29,7 @@ test("RDP_EPSILON is pinned absolutely, so an epsilon bump is a conscious change
 });
 
 test("COAST_EMBARK_MAX stays strictly below INLAND_STUB_CELLS", () => {
-  assert.ok(COAST_EMBARK_MAX < INLAND_STUB_CELLS);
+  assert.ok(COAST_EMBARK_MAX < INLAND_STUB_CELLS); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 });
 
 test("the backdrop lattice lands a foreground sample exactly on a backdrop stride", () => {

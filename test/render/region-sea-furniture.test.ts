@@ -101,8 +101,8 @@ function collectPoints(node: SvgNode | null): Array<{ px: number; py: number }> 
   if (!node) return out;
   const walk = (n: SvgNode): void => {
     const a = n.attrs;
-    if (a.cx !== undefined && a.cy !== undefined) out.push({ px: Number(a.cx), py: Number(a.cy) });
-    if (a.x !== undefined && a.y !== undefined && n.tag === "text")
+    if (a.cx !== undefined && a.cy !== undefined) out.push({ px: Number(a.cx), py: Number(a.cy) }); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    if (a.x !== undefined && a.y !== undefined && n.tag === "text") // eslint-disable-line @typescript-eslint/no-unnecessary-condition
       out.push({ px: Number(a.x), py: Number(a.y) });
     if (typeof a.d === "string") {
       const m = /M(-?[\d.]+) (-?[\d.]+)/.exec(a.d);

@@ -151,5 +151,5 @@ test("the itinerary lists only what the scroll drew: every row's caption words s
     }
   }
   const dropped = undrawn[0]!;
-  assert.ok(dropped.kind === "crossing" && dropped.name !== null && !text.includes(dropped.name.toUpperCase()), `premise: the scroll does not print the dropped crossing's river, ${String(dropped.name)}`);
+  assert.ok(dropped.kind === "crossing" && dropped.name !== null && !text.includes(dropped.name.toUpperCase()), `premise: the scroll does not print the dropped crossing's river, ${String(dropped.name)}`); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 });

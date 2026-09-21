@@ -4,6 +4,7 @@ import type { RenderCtx } from "../context.ts";
 import type { CompassPlan } from "./compass.ts";
 import type { CartouchePlan } from "./cartouche.ts";
 
+// eslint-disable-next-line max-lines-per-function
 export function seaDecorLayer(
   ctx: RenderCtx,
   cartouche: CartouchePlan,

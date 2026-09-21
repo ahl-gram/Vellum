@@ -49,9 +49,10 @@ function biomeAt(world: World, x: number, y: number): BiomeName {
 }
 
 /** World sheets only: a region world carries no realm labels, arms, or chronicle, so a region-sourced input would silently degrade; region insets must resolve those through the parent world. */
+// eslint-disable-next-line max-lines-per-function
 export function buildProspectInput(world: World, index: number): ProspectInput {
   const s = world.settlements[index];
-  if (s === undefined) {
+  if (s === undefined) { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     throw new RangeError(
       `settlement index ${index} out of range 0..${world.settlements.length - 1}`,
     );

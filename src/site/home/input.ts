@@ -11,6 +11,7 @@ export type StageInputHandlers = {
 };
 
 // Touch policy (#455): one finger scrolls the page (touch-action: pan-y), two fingers drive the map, any mouse button pans.
+// eslint-disable-next-line max-lines-per-function
 export function bindStageInput(stage: HTMLElement, on: StageInputHandlers): void {
   const pointers = new Map<number, { x: number; y: number }>();
   let last: { x: number; y: number } | null = null;

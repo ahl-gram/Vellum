@@ -125,6 +125,7 @@ test("PPR7 the css: the sheet fitted to what the chrome leaves, the plate as the
   assert.match(print[1], /#pp-plate\s*\{[^}]*position:\s*static;[^}]*height:\s*auto/, "at its own proportion");
 });
 
+// eslint-disable-next-line max-lines-per-function
 test("PR-lay the page's filing press sits ON the engraver's note and not among the roads out, and its authored face is the ONE constant the script paints with (#522, seat C ruled 2026-09-17)", () => {
   const slip = between('<Slip id="note"', "</Slip>");
   assert.match(slip, /<button id="pp-lay" class="pp-lay" type="button">/, "the press stands inside the note, where the room's desk actions belong");

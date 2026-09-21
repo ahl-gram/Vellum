@@ -57,6 +57,7 @@ type LostMass = {
   readonly regionCellsInWindow: number;
 };
 
+// eslint-disable-next-line max-lines-per-function
 function tally(
   world: World,
   field: Field,
@@ -145,6 +146,7 @@ for (const seed of SEEDS) {
           ["before", buildOldField(spec, oldCache)],
           ["after", buildChainedField(spec, newCache)],
         ];
+        // eslint-disable-next-line max-depth
         for (const [key, f] of arms) {
           const t = tally(world, f, win, worldIds, worldSizes, lost, seed, idx, key);
           const acc = row[key];

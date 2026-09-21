@@ -18,6 +18,7 @@ export interface DatedLogSnapshot {
   readonly attribution: string;
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function createDatedLog(opts: DatedLogOpts) {
   const panel = document.createElement("div");
   panel.className = "rf-log";
@@ -65,7 +66,7 @@ export function createDatedLog(opts: DatedLogOpts) {
     return {
       rows: rows.length,
       inked: rows.filter((r) => r.classList.contains("inked")).length,
-      attribution: sig.textContent ?? "",
+      attribution: sig.textContent ?? "", // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     };
   }
 

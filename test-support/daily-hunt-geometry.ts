@@ -180,7 +180,7 @@ export function nearestAnchor(
 ): { name: string; dist: number; idx: number } | null {
   const seats = new Set(world.realms.seats);
   const from = world.settlements[exceptIdx];
-  if (!from) return null;
+  if (!from) return null; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   let best: { name: string; dist: number; idx: number } | null = null;
   world.settlements.forEach((s, idx) => {
     if (idx === exceptIdx) return;

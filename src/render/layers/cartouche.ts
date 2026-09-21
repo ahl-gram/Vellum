@@ -54,6 +54,7 @@ export function planCartouche(ctx: RenderCtx): CartouchePlan {
         const i = gx + gy * w;
         if (i >= 0 && i < data.length) {
           n++;
+          // eslint-disable-next-line max-depth
           if ((data[i] as number) > world.seaLevel) land++;
         }
       }
@@ -72,6 +73,7 @@ export function planCartouche(ctx: RenderCtx): CartouchePlan {
   };
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function cartoucheLayer(ctx: RenderCtx, plan: CartouchePlan): SvgNode {
   const { style, world, proj } = ctx;
   const k = proj.widthPx / 1500;

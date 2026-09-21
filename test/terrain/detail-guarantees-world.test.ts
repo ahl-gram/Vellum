@@ -120,9 +120,12 @@ test("monotone floor: parent land never sinks in the adjusted child, and the gua
       for (const cx of LATTICE) {
         const wc = caseFor(seed, cx, cy);
         for (let i = 0; i < CW * CH; i++) {
+          // eslint-disable-next-line max-depth
           if (!parentLandAt(wc, i)) continue;
+          // eslint-disable-next-line max-depth
           if (!((wc.surface.data[i] as number) > wc.sea)) continue;
           parentLandCells++;
+          // eslint-disable-next-line max-depth
           if ((wc.fine.data[i] as number) <= wc.sea) drownedNoFloor++;
           assert.ok(
             (wc.adjusted.data[i] as number) > wc.sea,
@@ -232,7 +235,7 @@ test("saddle census: the seed-42 world chart's three hairline picture-fuses, dra
       assert.ok(!pairs.includes(le), `saddle ${f.x},${f.y}: the drawn coast cut off a land corner, so it no longer bridges`);
     }
     const cornerSizes = [p1, p2].map(([gx, gy]) => sizes[ids[gx + gy * 320] as number] as number);
-    assert.ok(Math.min(...cornerSizes) <= 3, `saddle ${f.x},${f.y}: expected an islet-bump, got sizes ${cornerSizes}`);
+    assert.ok(Math.min(...cornerSizes) <= 3, `saddle ${f.x},${f.y}: expected an islet-bump, got sizes ${cornerSizes.join(",")}`);
   }
 });
 
@@ -249,6 +252,7 @@ test("saddle census: hairline picture-fuses in adjusted band-3 windows stay with
           const [p1, p2] = f.landCorners;
           const i1 = p1[0] + p1[1] * CW;
           const i2 = p2[0] + p2[1] * CW;
+          // eslint-disable-next-line max-depth
           if (parentLandAt(wc, i1) && parentLandAt(wc, i2)) bothParent++;
         }
       }

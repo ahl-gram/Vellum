@@ -46,7 +46,7 @@ test("reachPlacements offers several spread candidates along a long river", () =
   assert.ok(places.length >= 2, `expected multiple candidates, got ${places.length}`);
   assert.deepEqual(places[0], straightestReach(pts, 40));
   const xs = places.map((p) => p.x);
-  assert.ok(Math.max(...xs) - Math.min(...xs) >= 40, `candidates should spread, got ${xs}`);
+  assert.ok(Math.max(...xs) - Math.min(...xs) >= 40, `candidates should spread, got ${xs.join(",")}`);
 });
 
 test("reachPlacements returns [] for a degenerate river and one reach for a short one", () => {

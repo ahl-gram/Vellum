@@ -56,6 +56,7 @@ function fmt(n: number): string {
   return `${n.toFixed(0)}`.padStart(6);
 }
 
+// eslint-disable-next-line max-lines-per-function
 function main(): void {
   console.log(`region draw cost, best of ${REPEATS}, ms; centre (${CX}, ${CY})`);
   console.log("");

@@ -56,7 +56,7 @@ test("ages years are integers: a between-years bar position rounds", () => {
   const u = SEAM_U + 0.30037 * (1 - SEAM_U);
   const pos = posAt(u, RANGE);
   assert.equal(pos.chamber, "ages");
-  if (pos.chamber === "ages") assert.equal(pos.year, Math.round(RANGE.min + 0.30037 * 800));
+  if (pos.chamber === "ages") assert.equal(pos.year, Math.round(RANGE.min + 0.30037 * 800)); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 });
 
 test("posAt clamps the bar position into [0,1]", () => {
@@ -132,8 +132,9 @@ test("a degenerate range's one year IS the park: Play opens the whole story", ()
 
 const ESC = 0.04; // the behavioral tests' explicit band; the live band is per-drag (detentEscapeU)
 
-const stepAll = (drag: DetentDrag, samples: ReadonlyArray<number>) => {
+const stepAll = (start: DetentDrag, samples: ReadonlyArray<number>) => {
   let u = NaN;
+  let drag = start;
   for (const s of samples) ({ u, drag } = detentStep(drag, s, ESC));
   return { u, drag };
 };

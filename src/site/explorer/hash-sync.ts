@@ -19,6 +19,7 @@ export interface Controls {
 }
 
 /** Apply a bookmarked hash to the controls; only keys present and valid apply. Returns which slider gates the link touched, the #165 camera if carried (restored by the conductor after the first chart lands), and the #192 live address; absent params mean home, still, disarmed. */
+// eslint-disable-next-line max-lines-per-function
 export function readHash(controls: Controls): {
   land: boolean;
   coast: boolean;

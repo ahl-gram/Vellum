@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 // The Chart Table's drawer (#520 Sub 2 of #401, direction D ruled at the #518 sitting): the dog-ear on the committed survey, the drawer it fills, the cap, and since #634 the table's two homes, the address deciding an arrival and the device a return. `chart-drawer` and never `drawer`: suite-room-drawer is the site's phone nav (#520 ruling 2).
 import { makeSettle } from "./settle-support.mjs";
 import { makeStep } from "./step-support.mjs";
@@ -52,6 +53,7 @@ const READ = `(() => {
   };
 })()`;
 
+// eslint-disable-next-line max-lines-per-function
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, setMobileViewport, clearMobile, touch, PORT } = ctx;
   const settle = makeSettle(ctx);
@@ -287,6 +289,7 @@ export async function run(ctx) {
       legendDockDisplay: dock ? getComputedStyle(dock).display : null,
     };
   })()`;
+  // eslint-disable-next-line max-lines-per-function
   await step("CD9, CD11, CD12, CD22, CD43", async () => {
     await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
     await go(`${DRESS}&table=${SIX}`);
@@ -663,6 +666,7 @@ export async function run(ctx) {
   });
 
   // The page's own capture point (seat C, ruled 2026-09-17): it files and STAYS, and the year is part of a sheet's identity.
+  // eslint-disable-next-line max-lines-per-function
   await step("CD28, CD29, CD34, CD35, CD31", async () => {
     await forget();
     await send("Page.navigate", { url: "about:blank" });
@@ -686,7 +690,7 @@ export async function run(ctx) {
     const opened = await evaluate(`(() => { const s = document.getElementById("note"); if (s && !s.classList.contains("open")) s.querySelector(".slip-handle").click(); return true; })()`);
     // The slip's fold is a transition, and CD28 derives a real pointer target from this press's rect: a fixed sleep either
     // measures a box still moving or waits longer than it needs. Poll it to REST instead, and throw naming the last read.
-    let pp = await settle(PP, (d, last) => !!d.press && d.press.shown && !!last && !!last.press && d.press.centre && last.press.centre &&
+    const pp = await settle(PP, (d, last) => !!d.press && d.press.shown && !!last && !!last.press && d.press.centre && last.press.centre &&
       d.press.centre.x === last.press.centre.x && d.press.centre.y === last.press.centre.y, "prospect-note-open");
     check(
       "CD28 the Prospect page's press sits on the engraver's note where the room's desk actions belong, answers a real pointer, and does NOT join the roads out, which go somewhere (ruled 2026-09-17, seat C)",

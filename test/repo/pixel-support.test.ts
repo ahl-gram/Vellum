@@ -41,7 +41,7 @@ test("sampleRow never falls back to the viewport clip: a scroll read that throws
       shot = true;
       return { data: PNG_1x1 };
     };
-    await assert.rejects(() => sampleRow(send, 40, 60, 1), /could not read the page's scroll/, JSON.stringify(answer));
+    await assert.rejects(async () => { await sampleRow(send, 40, 60, 1); }, /could not read the page's scroll/, JSON.stringify(answer));
     assert.equal(shot, false, "no screenshot is taken on a failed scroll read");
   }
 });

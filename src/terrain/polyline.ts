@@ -70,7 +70,7 @@ export function chaikinSmoothPinned(
     const dedup: Point[] = [];
     for (const a of next) {
       const b = dedup[dedup.length - 1];
-      if (!b || a[0] !== b[0] || a[1] !== b[1]) dedup.push(a);
+      if (!b || a[0] !== b[0] || a[1] !== b[1]) dedup.push(a); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     }
     if (dedup.length > 1) {
       const f = dedup[0] as Point;

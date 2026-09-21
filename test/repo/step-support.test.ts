@@ -40,7 +40,7 @@ test("a step whose browser is GONE rethrows instead of recording a red, so the s
   const { results, check } = recorder();
   const step = makeStep({ check, alive: async () => false });
   await assert.rejects(
-    () => step("CD4", async () => { throw new Error("eval exception: the socket closed"); }),
+    async () => { await step("CD4", async () => { throw new Error("eval exception: the socket closed"); }); },
     /the socket closed/,
     "a dead browser was recorded as this check's own failure, so a broken machine reads as a product regression",
   );

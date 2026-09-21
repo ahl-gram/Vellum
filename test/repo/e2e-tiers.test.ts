@@ -195,7 +195,7 @@ test("the runner actually uses the selection, the timings and the outcome rule i
   // The runner needs a browser, so behavior is tested in e2e-suites.test.ts and only the CALL sites are pinned here, against the CODE and never the raw file: a line commented out in place leaves its literal behind and satisfies a raw match, which beat this test's .catch assertion and its formatSuiteTimings one when the prover tried it (2026-09-10).
   assert.match(RUNNER_CODE, /runSelected\(SELECTED, SUITES, ctx, \{/, "the runner does not run the SELECTED suites");
   // The hooks are optional in runSelected, since a caller without them keeps the old rethrow; a runner without them is the #534 defect back, and no unit test of runSelected can see that.
-  const hooks = RUNNER_CODE.match(/runSelected\(SELECTED, SUITES, ctx, \{([\s\S]*?)\n  \}\);/);
+  const hooks = RUNNER_CODE.match(/runSelected\(SELECTED, SUITES, ctx, \{([\s\S]*?)\n {2}\}\);/);
   assert.ok(hooks, "the runSelected call's argument block was not found, so the two assertions below would read an empty string");
   assert.match(hooks[1], /onSuiteError:/, "the runner passes no per-suite handler, so one suite giving up kills the whole lane again (#534)");
   assert.match(hooks[1], /alive: ctx\.alive/, "the runner passes no liveness probe, so a browser that died mid-lane is reported as a lane full of product failures (#534)");
@@ -207,7 +207,7 @@ test("the runner actually uses the selection, the timings and the outcome rule i
   // The call site alone is not the behavior: computing `certified` and never printing it passes every assertion above.
   assert.match(RUNNER_CODE, /certified\.length > 0/, "the runner computes the certified list and never reads it, so no suite is reported as certified at all (#534)");
   // The breaker's own exit is a HARNESS ERROR, so the door it leaves by must print the score, or it does the thing it exists to prevent.
-  const onError = RUNNER_CODE.match(/\.catch\(\(e\) => \{([\s\S]*?)\n  \}\);/);
+  const onError = RUNNER_CODE.match(/\.catch\(\(e\) => \{([\s\S]*?)\n {2}\}\);/);
   assert.ok(onError, "the runner's error path was not found, so the assertion below would read an empty string");
   assert.match(onError[1], /runOutcome\(results\)/, "the harness-error path prints no tally, so a run that dies mid-lane reports none of the checks that did run (#534)");
   assert.match(RUNNER_CODE, /runOutcome\(results\)/, "the runner does not use the outcome rule, so 0/0 can pass again");

@@ -52,6 +52,7 @@ export type DressOptions = {
 };
 
 /** Exhaustive on purpose: a new foreground kind without a dress breaks the build here, not silently on a blank plate. */
+// eslint-disable-next-line max-lines-per-function
 export function foregroundNodes(c: DressContext, e: ForegroundElement): SvgNode[] {
   switch (e.kind) {
     case "fieldRows":
@@ -146,6 +147,7 @@ function parchmentOverlay(suffix: string): SvgNode[] {
   ];
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function renderProspect(
   g: ProspectGeometry,
   style: MapStyle,

@@ -1,6 +1,8 @@
+/* eslint-disable max-lines */
 // Print Room e2e (PRL, PR0-PR29, PRC, PRB, PRW; #133/#134/#135/#136/#137/#212/#217): the shell and inline fallback, the poster plates, the PNG rasterizer and the bound atlas; hand-authored like its sibling suites and self-contained (navigates itself, carries scoped no-4xx and console-error deltas).
 import { dropExpectedCancellations } from "./console-support.mjs";
 
+// eslint-disable-next-line max-lines-per-function
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, serverState, consoleErrors, http4xx, PORT } = ctx;
 
@@ -380,7 +382,7 @@ export async function run(ctx) {
   );
 
   // The 20000-char floor is what separates a real bound atlas from the tiny PDF a blank sheet or a print-blank plate yields; paper fidelity itself stays a manual pass.
-  let pdf = null;
+  let pdf;
   try { pdf = await send("Page.printToPDF", { printBackground: true }); } catch (e) { pdf = null; }
   check(
     "PR22 browser Save-as-PDF yields a well-formed, non-empty bound atlas",

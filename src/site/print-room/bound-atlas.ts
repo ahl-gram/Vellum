@@ -60,7 +60,7 @@ const atlasDiv = $("pr-atlas") as HTMLElement;
 const status = $("pr-bound-status") as HTMLElement;
 const contents = $("pr-contents") as HTMLElement;
 const stamp = $("pr-stamp") as HTMLElement;
-const STAMP_UNBOUND = stamp.textContent ?? "";
+const STAMP_UNBOUND = stamp.textContent ?? ""; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 
 interface Bound {
   readonly plate: PlateRef;

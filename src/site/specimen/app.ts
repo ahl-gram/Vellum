@@ -23,7 +23,7 @@ const slip = document.querySelector<HTMLElement>(".slip")!;
 const plate = $<HTMLImageElement>("sb-plate");
 const stateSel = $<HTMLSelectElement>("sb-state");
 const pill = $("sb-status");
-const PILL_TEXT = pill.textContent ?? "";
+const PILL_TEXT = pill.textContent ?? ""; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 
 const zoom = createZoomController({
   viewportEl: viewport,
@@ -64,4 +64,4 @@ $("sb-report").addEventListener("click", () => {
   pill.textContent = empty ? PILL_TEXT : "";
   $("sb-report").textContent = empty ? "Empty the pill" : "Fill the pill";
 });
-window.__vellumSpecimenState = () => ({ state: stateSel.value, folded: folded(), zoomed: viewport.classList.contains("zoomed"), pill: pill.textContent ?? "" });
+window.__vellumSpecimenState = () => ({ state: stateSel.value, folded: folded(), zoomed: viewport.classList.contains("zoomed"), pill: pill.textContent ?? "" }); // eslint-disable-line @typescript-eslint/no-unnecessary-condition

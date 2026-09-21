@@ -51,6 +51,7 @@ export function terrainGlyphsPresent(ctx: RenderCtx): TerrainGlyphs {
   return { hill, marsh, dune };
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function glyphsLayer(ctx: RenderCtx): SvgNode | null {
   const { style, world, proj, elevSpan, rng } = ctx;
   if (!style.glyphs) return null;

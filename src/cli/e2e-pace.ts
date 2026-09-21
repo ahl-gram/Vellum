@@ -97,10 +97,10 @@ export function readPaceSweep(samples: readonly PaceSample[], opts: PaceSweepOpt
   }
 
   const last = samples[samples.length - 1];
-  const parked = !last || last.year >= opts.range.max;
+  const parked = !last || last.year >= opts.range.max; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   const first = legs[0];
   const lastLeg = legs[legs.length - 1];
-  const ratio = first && lastLeg ? lastLeg.rate / first.rate : NaN;
+  const ratio = first && lastLeg ? lastLeg.rate / first.rate : NaN; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   const ok = legs.every((l) => l.ok) && backward === 0 && jump <= jumpAllowed && !parked;
   const detail = JSON.stringify({
     legs: legs.map((l) => ({ pace: l.pace, n: l.n, rate: Number(l.rate.toFixed(4)), expected: Number(l.expected.toFixed(4)), devPct: Number((l.dev * 100).toFixed(1)) })),

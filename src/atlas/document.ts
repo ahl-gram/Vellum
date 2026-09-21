@@ -175,6 +175,7 @@ function plateFigure(
 }
 
 /** `plateSrc` decides how a plate is embedded: a filename (CLI, anchor:true) or a data URI (download, anchor:false); `motion` links /fonts.css and /motion.css and wears the screen dress, the offline download omits all three and relies on the CSS fallbacks above. */
+// eslint-disable-next-line max-lines-per-function
 export function atlasDocument(
   data: AtlasDocumentData,
   plateSrc: (plate: AtlasPlate, section: PlateSection) => string,

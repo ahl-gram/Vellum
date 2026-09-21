@@ -101,7 +101,7 @@ function randomSeed(): number {
 function refreshOrderControls(): void {
   const platesReady = posterBasis != null && !drawing && !ordering;
   for (const b of plateButtons) b.disabled = !platesReady;
-  if (formatSel) formatSel.disabled = drawing;
+  if (formatSel) formatSel.disabled = drawing; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 }
 
 function applyHash(): void {
@@ -234,6 +234,7 @@ function selectedFormat(): string {
   return el ? el.value : "svg";
 }
 
+// eslint-disable-next-line max-lines-per-function
 function orderPoster(key: string): void {
   const preset = presetByKey.get(key);
   // The plates are disabled during a draw, so a real click cannot land mid-redraw, but a programmatic call must not press the stale, about-to-change posterBasis either.

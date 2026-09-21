@@ -135,7 +135,7 @@ test("pinned chaikin holds pinned corners sharp while free corners round (#223)"
 test("pinned chaikin with everything pinned is the ring itself (#223)", () => {
   const square: Pt[] = [[0, 0], [4, 0], [4, 4], [0, 4]];
   const out = chaikinSmoothPinned(square, 3, () => true);
-  for (const c of square) assert.ok(has(out, c), `pinned vertex ${c} must survive`);
+  for (const c of square) assert.ok(has(out, c), `pinned vertex ${c[0]},${c[1]} must survive`);
   assert.ok(out.length <= square.length + 1, "all-pinned ring gains no cut points");
 });
 

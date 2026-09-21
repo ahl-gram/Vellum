@@ -8,8 +8,8 @@ import lintConfig from "../../eslint.config.ts";
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const src = (p: string) => readFileSync(join(ROOT, p), "utf8");
 
-const LINT_SCOPE = ["scripts/**/*.mjs", "scripts/**/*.ts", "src/**/*.ts", "test-support/**/*.ts", "test/**/*.ts"];
-const LINT_SCRIPT = "eslint --flag unstable_native_nodejs_ts_config --max-warnings 0 src scripts test test-support";
+const LINT_SCOPE = ["public/**/*.css", "scripts/**/*.mjs", "scripts/**/*.ts", "src/**/*.ts", "test-support/**/*.ts", "test/**/*.ts"];
+const LINT_SCRIPT = "eslint --flag unstable_native_nodejs_ts_config --max-warnings 0 src scripts test test-support \"public/**/*.css\"";
 
 const blocks: readonly Linter.Config[] = lintConfig;
 const conjunctsOf = (entry: string | string[]): string[] => (Array.isArray(entry) ? entry : [entry]);
@@ -60,6 +60,13 @@ test("the lint config is bounded to the ruled scope, covers all of it, and narro
       for (const file of named) {
         assert.ok(existsSync(join(ROOT, file)), `config block ${name} names ${file}, which does not exist, so its exemption is stale`);
       }
+      if (named.length > 0) {
+        assert.match(
+          block.name ?? "",
+          /Issue #\d+/,
+          `config block ${name} exempts ${JSON.stringify(named)} by file name with no name citing the ruling that admitted it; a named-file block carries a name such as "Issue #648: ..." so that an anonymous config-level exemption reds (Alex, 2026-09-20)`,
+        );
+      }
       for (const glob of anchors) covered.add(glob);
     }
   }
@@ -67,14 +74,76 @@ test("the lint config is bounded to the ruled scope, covers all of it, and narro
 });
 
 const WITNESSES: Record<string, string> = {
+  "public/**/*.css": "public/house.css",
   "scripts/**/*.mjs": "scripts/e2e/harness.mjs",
   "scripts/**/*.ts": "scripts/build-app-bundles.ts",
   "src/**/*.ts": "src/cli/main.ts",
   "test-support/**/*.ts": "test-support/element-shim.ts",
   "test/**/*.ts": "test/repo/lint-wiring.test.ts",
 };
-type Resolved = { rules?: Record<string, unknown>; languageOptions?: { parser?: { meta?: { name?: string } } }; linterOptions?: { reportUnusedDisableDirectives?: unknown } };
+type Resolved = { rules?: Record<string, unknown>; language?: { defaultLanguageOptions?: unknown }; languageOptions?: { parser?: { meta?: { name?: string } }; tolerant?: unknown }; linterOptions?: { reportUnusedDisableDirectives?: unknown } };
 const severityOf = (rule: unknown): unknown => (Array.isArray(rule) ? rule[0] : rule);
+
+const NODE_TEST_ALLOWANCE = [{ from: "package", package: "node:test", name: ["test", "suite"] }];
+const CORRECTNESS_TS_ONLY = [
+  "@typescript-eslint/switch-exhaustiveness-check",
+  "@typescript-eslint/no-unnecessary-condition",
+  "@typescript-eslint/unbound-method",
+  "@typescript-eslint/no-unsafe-return",
+  "@typescript-eslint/restrict-template-expressions",
+  "@typescript-eslint/no-unused-expressions",
+  "@typescript-eslint/prefer-promise-reject-errors",
+  "@typescript-eslint/no-implied-eval",
+];
+const CORRECTNESS_BOTH = ["no-regex-spaces", "preserve-caught-error", "no-useless-assignment"];
+
+function pinCorrectness(file: string, typed: boolean, rules: Record<string, unknown>): void {
+  assert.deepEqual(
+    rules["@typescript-eslint/no-floating-promises"],
+    typed ? [2, { allowForKnownSafeCalls: NODE_TEST_ALLOWANCE }] : undefined,
+    `${file}: no-floating-promises does not resolve at error with exactly the node:test allowance (Correctness, Issue #648)`,
+  );
+  for (const rule of ["@typescript-eslint/switch-exhaustiveness-check", "@typescript-eslint/no-unnecessary-condition"]) {
+    assert.deepEqual(rules[rule], typed ? [2] : undefined, `${file}: ${rule} does not resolve at error with no options (Correctness, Issue #648)`);
+  }
+  for (const rule of CORRECTNESS_TS_ONLY) {
+    assert.equal(severityOf(rules[rule]), typed ? 2 : undefined, `${file}: ${rule} does not resolve at error (Correctness, Issue #648)`);
+  }
+  for (const rule of CORRECTNESS_BOTH) {
+    assert.equal(severityOf(rules[rule]), 2, `${file}: ${rule} does not resolve at error in both blocks (Correctness, Issue #648)`);
+  }
+}
+
+const CSS_FORM_RULES = ["vellum/css-comment-one-line", "vellum/css-comment-no-em-dash", "vellum/css-comment-issue-form"];
+
+function pinJavaScript(file: string, typed: boolean, config: Resolved, rules: Record<string, unknown>): void {
+  const on = (rule: string): unknown => severityOf(rules[rule]);
+  assert.equal(config.languageOptions?.parser?.meta?.name, typed ? "typescript-eslint/parser" : undefined, `${file} resolves to the wrong parser`);
+  assert.equal(on("@typescript-eslint/no-misused-promises"), typed ? 2 : undefined, `${file}: the roster rule this PR ticks does not resolve at error`);
+  assert.equal(on("@typescript-eslint/no-explicit-any"), typed ? 2 : undefined, `${file}: the rule the one exemption in the tree stands against is not on`);
+  assert.equal(on("no-undef"), typed ? 0 : 2, `${file}: the core layer is missing or the TypeScript override layer was not applied`);
+  assert.equal(on("no-debugger"), 2, `${file}: the core recommended rules do not reach it`);
+  assert.equal(on("prefer-const"), 2, `${file}: prefer-const does not resolve at error (Immutability, Issue #648)`);
+  assert.deepEqual(rules["no-param-reassign"], [2, { props: false }], `${file}: no-param-reassign does not resolve as rebinding-only at error (Alex, 2026-09-20, Issue #648)`);
+  assert.equal(on("@typescript-eslint/prefer-readonly"), typed ? 2 : undefined, `${file}: prefer-readonly does not resolve at error (Immutability, Issue #648)`);
+  assert.deepEqual(rules["max-lines"], [2, 400], `${file}: max-lines does not resolve at error with the ruled physical-line ceiling (Size, Issue #648)`);
+  assert.deepEqual(rules["max-lines-per-function"], [2, 50], `${file}: max-lines-per-function does not resolve at error with the ruled ceiling (Size, Issue #648)`);
+  assert.deepEqual(rules["max-depth"], [2, 4], `${file}: max-depth does not resolve at error with the ruled depth (Size, Issue #648)`);
+  pinCorrectness(file, typed, rules);
+  for (const rule of CSS_FORM_RULES) {
+    assert.equal(rules[rule], undefined, `${file}: ${rule} is a rule for the sheets and must not resolve on a script (CSS form, Issue #648)`);
+  }
+}
+
+function pinCss(file: string, config: Resolved, rules: Record<string, unknown>): void {
+  assert.equal(config.languageOptions?.parser, undefined, `${file} resolves a JavaScript parser instead of the CSS language`);
+  assert.deepEqual(config.language?.defaultLanguageOptions, { tolerant: false }, `${file} does not resolve to @eslint/css's language (CSS form, Issue #648)`);
+  assert.equal(config.languageOptions?.tolerant, true, `${file}: the sheets parse strict, so a syntax css-tree does not know reds the lint; the family ruled tolerant (Alex's delegation, 2026-09-21, Issue #648)`);
+  for (const rule of CSS_FORM_RULES) {
+    assert.deepEqual(rules[rule], [2], `${file}: ${rule} does not resolve at error with no options (CSS form, Issue #648)`);
+  }
+  assert.deepEqual(Object.keys(rules).filter((r) => severityOf(rules[r]) !== 0).sort(), [...CSS_FORM_RULES].sort(), `${file}: a rule other than the three form rules reaches the sheets (CSS form, Issue #648)`);
+}
 
 test("through ESLint itself, one witness file per ruled glob resolves to rules that reach it, and the root config resolves to none", async () => {
   assert.deepEqual(Object.keys(WITNESSES).sort(), LINT_SCOPE, "every ruled glob needs a witness file here");
@@ -88,13 +157,10 @@ test("through ESLint itself, one witness file per ruled glob resolves to rules t
     assert.ok(existsSync(join(ROOT, file)), `${file}, the witness for ${glob}, does not exist`);
     assert.equal(await eslint.isPathIgnored(file), false, `${file} is ignored, so ${glob} reaches nothing`);
     const config = (await eslint.calculateConfigForFile(file)) as Resolved;
-    const on = (rule: string): unknown => severityOf(config.rules?.[rule]);
-    const typed = glob.endsWith(".ts");
-    assert.equal(config.languageOptions?.parser?.meta?.name, typed ? "typescript-eslint/parser" : undefined, `${file} resolves to the wrong parser`);
-    assert.equal(on("@typescript-eslint/no-misused-promises"), typed ? 2 : undefined, `${file}: the roster rule this PR ticks does not resolve at error`);
-    assert.equal(on("@typescript-eslint/no-explicit-any"), typed ? 2 : undefined, `${file}: the rule the one exemption in the tree stands against is not on`);
-    assert.equal(on("no-undef"), typed ? 0 : 2, `${file}: the core layer is missing or the TypeScript override layer was not applied`);
-    assert.equal(on("no-debugger"), 2, `${file}: the core recommended rules do not reach it`);
+    const rules = config.rules;
+    assert.ok(rules, `${file} resolves to no rules at all`);
+    if (glob.endsWith(".css")) pinCss(file, config, rules);
+    else pinJavaScript(file, glob.endsWith(".ts"), config, rules);
     const report = config.linterOptions?.reportUnusedDisableDirectives;
     assert.ok([1, 2, "warn", "error"].includes(report as never), `${file}: an unused disable directive is not reported (${String(report)}), so a stale exemption is silent`);
   }

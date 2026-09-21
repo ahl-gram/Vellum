@@ -24,7 +24,7 @@ const voyageStub = {
 /** The engine under a hand-turned clock: performance.now reads `clock`, and one rAF callback waits for tick(). */
 function sweep() {
   const g = globalThis as Record<string, unknown>;
-  const saved = { raf: g.requestAnimationFrame, caf: g.cancelAnimationFrame, win: g.window, now: performance.now };
+  const saved = { raf: g.requestAnimationFrame, caf: g.cancelAnimationFrame, win: g.window, now: performance.now.bind(performance) };
   let clock = 0;
   let frame: ((now: number) => void) | null = null;
   g.requestAnimationFrame = (fn: (now: number) => void) => { frame = fn; return 1; };
@@ -39,7 +39,7 @@ function sweep() {
   const at = (t: number) => { clock = t; };
   const tick = (t: number) => { clock = t; const f = frame; frame = null; f?.(t); };
   const restore = () => {
-    g.requestAnimationFrame = saved.raf; g.cancelAnimationFrame = saved.caf; g.window = saved.win; performance.now = saved.now as typeof performance.now;
+    g.requestAnimationFrame = saved.raf; g.cancelAnimationFrame = saved.caf; g.window = saved.win; performance.now = saved.now;
   };
   return { ages, at, tick, restore, year: () => ages.agesState()?.year ?? -1 };
 }

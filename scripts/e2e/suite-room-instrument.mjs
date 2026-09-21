@@ -3,6 +3,7 @@ import { makeRoom, makeBar, scrubFacts, scopedHealth } from "./room-support.mjs"
 import { HOST_HOOK_NAMES } from "../../src/site/shared/host-hooks.ts";
 import { readPaceSweep, PACE_LEG_MS } from "../../src/cli/e2e-pace.ts";
 
+// eslint-disable-next-line max-lines-per-function
 export async function run(ctx) {
   const { evaluate, check, sleep } = ctx;
   const room = makeRoom(ctx);

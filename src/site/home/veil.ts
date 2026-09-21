@@ -58,6 +58,7 @@ export type CeremonyOptions = {
   readonly random?: () => number;
 };
 
+// eslint-disable-next-line max-lines-per-function
 export function playCeremony(opts: CeremonyOptions): void {
   const { doc } = opts;
   const veil = acquireVeil(doc);

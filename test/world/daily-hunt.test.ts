@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
@@ -103,7 +104,9 @@ test("the quarry is a real, non-seat village (the broad uniform-glyph pool)", ()
   }
 });
 
+// eslint-disable-next-line max-lines-per-function
 test("every emitted clue re-verifies true against independent raw geometry", () => {
+  // eslint-disable-next-line max-lines-per-function
   SWEEP.forEach((world, wi) => {
     const q = mustQuarry(world);
     const { x, y } = q.settlement;
@@ -404,6 +407,7 @@ test("the survey leads with the axis the quarry is furthest off-center on", () =
   assert.equal(clues[1]!.subject, "north");
 });
 
+// eslint-disable-next-line max-lines-per-function
 test("the leading compass line is never the strictly less decisive axis (#333's class)", () => {
   const w = 320;
   const h = 240;
@@ -602,7 +606,7 @@ test("classifyClick returns a hit when the click lands in the quarry's cell", ()
 test("classifyClick names the settlement nearest the click on a miss", () => {
   const fb = classifyClick(clickWorld, clickQuarry, { x: 12, y: 12 });
   assert.equal(fb.kind, "miss");
-  if (fb.kind === "miss") {
+  if (fb.kind === "miss") { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     assert.equal(fb.pickedIdx, 2);
     assert.equal(fb.pickedName, "Farhold");
   }
@@ -611,7 +615,7 @@ test("classifyClick names the settlement nearest the click on a miss", () => {
 test("classifyClick heat reflects the click's distance, not the nearest town's", () => {
   const fb = classifyClick(clickWorld, clickQuarry, { x: 50, y: 95 });
   assert.equal(fb.kind, "miss");
-  if (fb.kind === "miss") {
+  if (fb.kind === "miss") { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     assert.equal(fb.pickedName, "Cluster", "still names the town the click selected");
     assert.notEqual(fb.band, "hot", "a far click does not read Hot just because it snapped to a near town");
     assert.equal(fb.band, "cool");
@@ -621,7 +625,7 @@ test("classifyClick heat reflects the click's distance, not the nearest town's",
 test("classifyClick reports the click's own distance to the quarry on a miss (#327)", () => {
   const fb = classifyClick(clickWorld, clickQuarry, { x: 12, y: 12 });
   assert.equal(fb.kind, "miss");
-  if (fb.kind === "miss") {
+  if (fb.kind === "miss") { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     assert.equal(fb.dist, Math.hypot(12 - 50, 12 - 50), "dist is the click-to-quarry grid distance");
   }
 });

@@ -1,6 +1,7 @@
 import { el, type SvgNode } from "../svg.ts";
 import type { RenderCtx } from "../context.ts";
 
+// eslint-disable-next-line max-lines-per-function
 export function frameLayer(ctx: RenderCtx): SvgNode {
   const { proj, style } = ctx;
   const m = proj.margin;

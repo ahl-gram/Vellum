@@ -9,7 +9,7 @@ import { El, installShim } from "../../test-support/element-shim.ts";
 test("the seam stands at the midpoint, the first day at the left end, the last day just short of the seam", () => {
   const t = scaleTicks({ days: { first: 1, last: 44 }, years: { min: 435, max: 876 } });
   const seam = t.find((k) => k.kind === "seam");
-  assert.ok(seam && seam.u === SEAM_U && SEAM_U === 0.5, "the seam is the bar's own SEAM_U (ages-track.ts), the midpoint");
+  assert.ok(seam && seam.u === SEAM_U && SEAM_U === 0.5, "the seam is the bar's own SEAM_U (ages-track.ts), the midpoint"); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   const days = t.filter((k) => k.kind === "day");
   assert.deepEqual(days.map((d) => d.label), ["day 1", "day 44"]);
   assert.equal(days[0].u, 0);
@@ -35,7 +35,7 @@ test("a century crowding the present or the seam keeps its tick and drops its la
   const nearSeam = scaleTicks({ days: null, years: { min: 199, max: 876 } });
   const two = nearSeam.filter((k) => k.kind === "year").find((k) => Math.abs(k.u - (0.5 + 0.5 * (200 - 199) / (876 - 199))) < 1e-9);
   assert.ok(two && two.label === undefined, "200 stands 0.0007u right of the star, so its label goes");
-  assert.ok(LABEL_GAP_U > 0.02 && LABEL_GAP_U < 0.06, "the gap is a label's width plus a breath on a 1440 scale");
+  assert.ok(LABEL_GAP_U > 0.02 && LABEL_GAP_U < 0.06, "the gap is a label's width plus a breath on a 1440 scale"); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 });
 
 test("a world with no survey marks no days, and a one-year span still yields the present", () => {

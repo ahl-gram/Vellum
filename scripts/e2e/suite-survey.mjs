@@ -1,9 +1,11 @@
+/* eslint-disable max-lines */
 // Survey Ink e2e (SV1-SV11, #321): the static Explorer's survey surface; self-contained like its sibling suites (navigates itself, carries scoped no-4xx and console-error deltas).
 import { makeRoom } from "./room-support.mjs";
 import { dropExpectedCancellations } from "./console-support.mjs";
 
 import { makeStep } from "./step-support.mjs";
 
+// eslint-disable-next-line max-lines-per-function
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, waitSettled, waitReady, waitTurned, armTurnWatch, consoleErrors, http4xx, PORT } = ctx;
 
@@ -75,6 +77,7 @@ export async function run(ctx) {
       JSON.stringify(sv1),
     );
   });
+  // eslint-disable-next-line max-lines-per-function
   await step("SV2 to SV2c", async () => {
 
     // #373: the frame clock runs across the FIRST arm, the only uncached one; every later arm takes the held order and would pass this blind.
@@ -323,6 +326,7 @@ export async function run(ctx) {
       JSON.stringify(sv2j),
     );
   });
+  // eslint-disable-next-line max-lines-per-function
   await step("SV2p", async () => {
 
     await goto("#seed=7&style=antique&survey", "survey-draw-beat-base");

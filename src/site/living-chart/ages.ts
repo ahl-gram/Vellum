@@ -56,9 +56,10 @@ export interface AgesDeps {
 }
 
 function prefersReduce(): boolean {
-  return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function createAges(deps: AgesDeps) {
   const { panel, playBtn, range: rangeEl, readout: readoutEl, strip: stripEl, onPark, onAgesTold, overlay, chronicle, voyage } = deps;
 

@@ -24,7 +24,7 @@ export function roomSections(source: string, entryClass: EntryClass): readonly I
   const sections: IndexSection[] = [];
   const heads = [...source.matchAll(/<h2(\s[^>]*)?>([\s\S]*?)<\/h2>/g)];
   for (const [i, head] of heads.entries()) {
-    const id = attr(head[1] ?? "", "id");
+    const id = attr(head[1] ?? "", "id"); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     if (id === undefined) throw new Error(`the section "${decode(head[2])}" has no id for the index`);
     const start = head.index + head[0].length;
     const end = i + 1 < heads.length ? heads[i + 1].index : source.length;

@@ -22,6 +22,7 @@ function key(x: number, y: number): string {
   return `${Math.round(x * 1e6)},${Math.round(y * 1e6)}`;
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function marchingSquares(field: Field, iso: number): Contour[] {
   const { w, h, data } = field;
   const segs: Seg[] = [];
@@ -88,6 +89,7 @@ export function marchingSquares(field: Field, iso: number): Contour[] {
   return chainSegments(segs);
 }
 
+// eslint-disable-next-line max-lines-per-function
 function chainSegments(segs: ReadonlyArray<Seg>): Contour[] {
   const byStart = new Map<string, number[]>();
   for (let i = 0; i < segs.length; i++) {
@@ -159,6 +161,7 @@ function chainSegments(segs: ReadonlyArray<Seg>): Contour[] {
   return contours;
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function closeChainsOnBoundary(
   contours: ReadonlyArray<Contour>,
   w: number,

@@ -49,7 +49,7 @@ export function textNodes(svg: string): LabelNode[] {
       y: y + dy,
       fontSize,
       letterSpacing,
-      anchor: (anchorRaw as "start" | "middle" | "end") ?? "start",
+      anchor: (anchorRaw as "start" | "middle" | "end") ?? "start", // eslint-disable-line @typescript-eslint/no-unnecessary-condition
       // Rotate origin is the text's own (x, y); tspan dy shifts the baseline inside that frame, never the pivot.
       rotate: r ? { deg: Number(r[1]), ox: Number(r[2]), oy: Number(r[3]) } : null,
     });

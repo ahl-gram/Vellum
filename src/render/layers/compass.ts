@@ -16,6 +16,7 @@ export type CompassPlan = {
 // 10 hops of clearing: the landR rose reaches ~7.5 cells on its cardinal petals, and 8 left the tip grazing a town dot.
 const LAND_MIN_OPEN = 10;
 
+// eslint-disable-next-line max-lines-per-function
 export function planCompass(
   ctx: RenderCtx,
   cartouche: CartouchePlan,
@@ -108,6 +109,7 @@ function landOpenness(world: World): Float64Array {
   });
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function compassLayer(ctx: RenderCtx, plan: CompassPlan): SvgNode {
   const { style, proj } = ctx;
   const k = proj.widthPx / 1500;

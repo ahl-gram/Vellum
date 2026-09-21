@@ -30,6 +30,7 @@ function randomSeed(): number {
   return Math.floor(Math.random() * 0xffffffff);
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function wireControls(deps: ControlsDeps): void {
   const { seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, beastsChk, landSlider, coastSlider, touched, draw } = deps;
 

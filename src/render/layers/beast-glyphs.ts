@@ -128,6 +128,7 @@ function whale(x: number, y: number, k: number, style: MapStyle): SvgNode[] {
   ];
 }
 
+// eslint-disable-next-line max-lines-per-function
 function kraken(x: number, y: number, k: number, style: MapStyle): SvgNode[] {
   const s = SCALE.kraken * k;
   const stroke = inkStroke(style, k, 1.3);
