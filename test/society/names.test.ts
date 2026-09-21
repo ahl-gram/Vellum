@@ -87,6 +87,7 @@ test("no two bare bases within a world are near-duplicates (edit distance >= 2)"
       for (let i = 0; i < bases.length; i++) {
         for (let j = i + 1; j < bases.length; j++) {
           // Roman-numeral fallbacks ("kara ii") are exempt: the numeral disambiguates a genuinely tight namespace.
+          // eslint-disable-next-line max-depth
           if (/ [ivx]+$/.test(bases[i]!) || / [ivx]+$/.test(bases[j]!)) continue;
           assert.ok(
             levenshtein(bases[i]!, bases[j]!) >= 2,

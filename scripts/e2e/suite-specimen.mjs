@@ -51,6 +51,7 @@ const NOSCRIPT_READ = `(() => {
   return { present: true, ...box(n), text: n.textContent.trim().length, pill: p ? box(p) : null };
 })()`;
 
+// eslint-disable-next-line max-lines-per-function
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, PORT } = ctx;
   const settle = makeSettle(ctx);

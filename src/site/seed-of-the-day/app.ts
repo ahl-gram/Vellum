@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 // Seed-of-the-day controller: today's UTC date is the seed, so a purely static page shows a fresh world each day, rendered inline on the main thread. The Daily Hunt is a deterministic click-to-find puzzle over that already-generated world.
 import { defaultRecipe, generateWorld } from "../../world/generate.ts";
 import { renderMap } from "../../render/map-renderer.ts";
@@ -215,6 +216,7 @@ function setHuntStatus(text: string): void {
   stickyShown = show;
 }
 
+// eslint-disable-next-line max-lines-per-function
 function setupHunt(world: World): void {
   const hunt = $("hunt");
   const svg = $("sheet").querySelector("svg");

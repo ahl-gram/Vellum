@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
@@ -103,7 +104,9 @@ test("the quarry is a real, non-seat village (the broad uniform-glyph pool)", ()
   }
 });
 
+// eslint-disable-next-line max-lines-per-function
 test("every emitted clue re-verifies true against independent raw geometry", () => {
+  // eslint-disable-next-line max-lines-per-function
   SWEEP.forEach((world, wi) => {
     const q = mustQuarry(world);
     const { x, y } = q.settlement;
@@ -404,6 +407,7 @@ test("the survey leads with the axis the quarry is furthest off-center on", () =
   assert.equal(clues[1]!.subject, "north");
 });
 
+// eslint-disable-next-line max-lines-per-function
 test("the leading compass line is never the strictly less decisive axis (#333's class)", () => {
   const w = 320;
   const h = 240;

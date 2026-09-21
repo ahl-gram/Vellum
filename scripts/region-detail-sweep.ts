@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { defaultRecipe, generateWorld } from "../src/world/generate.ts";
@@ -146,6 +147,7 @@ function chebyshevToSea(region: World, x: number, y: number, limit: number): num
   return -1;
 }
 
+// eslint-disable-next-line max-lines-per-function
 function measure(
   world: World,
   band: LodBand,
@@ -230,6 +232,7 @@ function measure(
         if (rid >= 0) {
           worldMassesAlive.add(wid);
           let s = coveredBy.get(rid);
+          // eslint-disable-next-line max-depth
           if (s === undefined) {
             s = new Set();
             coveredBy.set(rid, s);

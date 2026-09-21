@@ -61,6 +61,7 @@ test("legLength: deterministic across two prepared routers", () => {
   }
 });
 
+// eslint-disable-next-line max-lines-per-function
 test("water span (#181): sea legs carry the span, coastal stubs stay short, and the pond-decoy port is the isle's one genuine inland handoff", () => {
   const router = prepareVoyageRouter(isle.sites, isle.s);
   const plan = reorderPlanByTravel(isle.plan, router.legLength);

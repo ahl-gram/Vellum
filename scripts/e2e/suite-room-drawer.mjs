@@ -35,6 +35,7 @@ const offLeft = (nav) => nav.visibility === "hidden" && nav.rect !== null && nav
 const atOpen = (d) => !!d.nav && d.nav.visibility === "visible" && d.nav.rect !== null && d.nav.rect.x === 0;
 const atClosed = (d) => !!d.nav && offLeft(d.nav);
 
+// eslint-disable-next-line max-lines-per-function
 export async function run(ctx) {
   const { evaluate, send, check, sleep, setMobileViewport, clearMobile, touch, waitReady, PORT } = ctx;
   const settle = makeSettle(ctx);

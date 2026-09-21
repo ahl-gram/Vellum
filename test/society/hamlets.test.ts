@@ -253,6 +253,7 @@ test("label pressure drops hamlet labels first and never force-places them (#171
   }
 });
 
+// eslint-disable-next-line max-lines-per-function
 test("region sheets set settlement labels larger; world sheets keep their type (readability)", () => {
   const win = richWindow();
   const region = generateRegionWorld(world, {

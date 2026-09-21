@@ -18,6 +18,7 @@ const ctx = self as unknown as {
   postMessage(msg: WorkerResponse): void;
 };
 
+// eslint-disable-next-line max-lines-per-function
 ctx.onmessage = (e) => {
   const msg = e.data;
   try {

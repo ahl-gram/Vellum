@@ -1,6 +1,7 @@
 // Explorer render core e2e (R): worker active, worker/inline byte-parity, the committed-chart ULP check, the thematic layer, coast warp, Tide Wheel and arms toggle.
 import { makeStep } from "./step-support.mjs";
 
+// eslint-disable-next-line max-lines-per-function
 export async function run(ctx) {
   const { evaluate, check, shoot, waitSettled, waitReady } = ctx;
   // R0 through R4, R13d and R14 are deliberately not stepped: they drive the engine directly, with no wait to give up.

@@ -336,6 +336,7 @@ async function launchBrowser(browser, DPORT) {
 }
 
 // results/consoleErrors/http4xx/skippedGroups are pushed to BY REFERENCE (the ws handler, check and makeStep close over them) so the runner's trailing tally sees them.
+// eslint-disable-next-line max-lines-per-function
 export async function start({ browser, SITE, OUT, PORT, DPORT, PAGE, results, consoleErrors, http4xx, skippedGroups }) {
   OUT_DIR = OUT;
   await mkdir(OUT, { recursive: true });

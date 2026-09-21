@@ -34,6 +34,7 @@ export function isMajorRiver(r: River): boolean {
   return r.endsInOcean && r.points.length >= 14 && mouthAcc > 0;
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function extractRivers(
   elev: Field,
   flow: FlowResult,

@@ -231,6 +231,7 @@ function armRoom(res: DrawResult, forSeed: number, rest: AgesPos | undefined): v
   syncHash();
 }
 
+// eslint-disable-next-line max-lines-per-function
 function draw(): void {
   const myGen = ++drawGen;
   // Every draw is a fresh ARRIVAL, so the plate goes back to bare until this world is asked for one. Held, because a draw that FAILS leaves the previous world on screen and its plate state must come back with it.

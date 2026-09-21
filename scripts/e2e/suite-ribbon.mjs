@@ -2,6 +2,7 @@
 import { makeStep } from "./step-support.mjs";
 import { dropExpectedCancellations } from "./console-support.mjs";
 
+// eslint-disable-next-line max-lines-per-function
 export async function run(ctx) {
   const { evaluate, send, check, sleep, setMobileViewport, clearMobile, consoleErrors, http4xx, PORT } = ctx;
   const errBase = consoleErrors.length;
@@ -35,6 +36,7 @@ export async function run(ctx) {
   const svgOf = () => evaluate(`fetch(document.getElementById("rb-plate").src).then(r=>r.text())`, true);
 
   let svg1 = null;
+  // eslint-disable-next-line max-lines-per-function
   await step("RB1 to RB5e", async () => {
     await send("Page.navigate", { url: page("#seed=42") });
     const first = await opened("seed 42");

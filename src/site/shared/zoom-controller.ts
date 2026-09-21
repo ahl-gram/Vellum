@@ -69,6 +69,7 @@ export interface ZoomController {
 // d3-zoom stashes the live transform on the element itself as `__zoom`; typed so getState/rebase read and write it through one cast.
 type ZoomStoredElement = HTMLElement & { __zoom?: ZoomTransform };
 
+// eslint-disable-next-line max-lines-per-function
 export function createZoomController({
   viewportEl,
   targetEl,

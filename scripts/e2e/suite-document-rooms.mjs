@@ -34,6 +34,7 @@ const READ = `(() => {
   };
 })()`;
 
+// eslint-disable-next-line max-lines-per-function
 export async function run(ctx) {
   const { evaluate, send, check, sleep, setMobileViewport, clearMobile, touch, waitReady, PORT } = ctx;
   const settle = makeSettle(ctx);

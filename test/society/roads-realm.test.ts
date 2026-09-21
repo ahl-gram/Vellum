@@ -194,6 +194,7 @@ test("#309: no road shadows another; a royal trunk rides its home web out of tow
         let run = 0;
         let best = 0;
         for (const p of w.roads[a]!.points) {
+          // eslint-disable-next-line max-depth
           if (!cellSets[b]!.has(p.x + p.y * W) && near(cellSets[b]!, p.x, p.y)) {
             run++;
             best = Math.max(best, run);

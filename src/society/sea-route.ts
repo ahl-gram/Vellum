@@ -2,6 +2,7 @@ import { NEIGHBORS_4, type Field } from "../core/grid.ts";
 import type { Settlement } from "./sites.ts";
 
 /** Reads a frozen snapshot of the post-flood labels, so attachment order can never chain an islet onto an already-attached islet; the flood must stay a true FIFO BFS to reach the NEAREST realm by sea (the DFS-stack floods elsewhere would not). */
+// eslint-disable-next-line max-lines-per-function
 export function attachSeatlessLandmasses(
   labels: Int16Array,
   landmassIds: Int32Array,

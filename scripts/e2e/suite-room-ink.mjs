@@ -1,6 +1,7 @@
 // Room ink-in e2e (RS18-RS22, #320 Sub 3, porting S20-S26); split from suite-room-instrument.mjs to stay inside the 400-line file rule: that suite carries the reveal and the clock, this one the ceremony and the press.
 import { makeRoom, makeBar, scrubFacts, scopedHealth, CHART_SVG } from "./room-support.mjs";
 
+// eslint-disable-next-line max-lines-per-function
 export async function run(ctx) {
   const { evaluate, check } = ctx;
   const room = makeRoom(ctx);

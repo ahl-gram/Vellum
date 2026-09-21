@@ -3,6 +3,7 @@ import { chaikinSmooth, closedIsoRings } from "../../terrain/contours.ts";
 import { el, pathFrom, type SvgNode } from "../svg.ts";
 import type { RenderCtx } from "../context.ts";
 
+// eslint-disable-next-line max-lines-per-function
 export function oceanLayer(ctx: RenderCtx): SvgNode {
   const { proj, style, world } = ctx;
   const m = proj.margin;

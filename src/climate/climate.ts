@@ -30,6 +30,7 @@ const LAPSE = 0.85;
 const TEMP_SEED_SALT = 0x1b873593;
 const MOIST_SEED_SALT = 0xcc9e2d51;
 
+// eslint-disable-next-line max-lines-per-function
 export function computeClimate(
   elev: Field,
   seaLevel: number,

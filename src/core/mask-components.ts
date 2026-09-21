@@ -20,12 +20,16 @@ export function labelComponents(
       const y = (i / w) | 0;
       for (let dy = -1; dy <= 1; dy++) {
         for (let dx = -1; dx <= 1; dx++) {
+          // eslint-disable-next-line max-depth
           if (dx === 0 && dy === 0) continue;
+          // eslint-disable-next-line max-depth
           if (connectivity === 4 && dx !== 0 && dy !== 0) continue;
           const nx = x + dx;
           const ny = y + dy;
+          // eslint-disable-next-line max-depth
           if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;
           const ni = nx + ny * w;
+          // eslint-disable-next-line max-depth
           if (mask[ni] !== 1 || ids[ni] !== -1) continue;
           ids[ni] = id;
           stack.push(ni);

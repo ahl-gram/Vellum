@@ -63,6 +63,7 @@ function makeLayPress(host: LayProspectHost): HTMLButtonElement {
   return press;
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function createPlaceOverlay(deps: PlaceOverlayDeps) {
   const { mapEl, isSuppressed, prospectHref, layProspect, clampBox } = deps;
 
@@ -183,6 +184,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
   }
 
   // opts.box positions the overlay over a region inset's rect so the region manifest's own nx/ny fractions land on the inset's drawn glyphs; the card lives inside the overlay so its % anchor resolves against the same box.
+  // eslint-disable-next-line max-lines-per-function
   function buildPlaceOverlay(manifest: PlaceManifest, opts?: BuildPlaceOverlayOpts): void {
     if (!manifest || !manifest.places) return;
     const preserveName =

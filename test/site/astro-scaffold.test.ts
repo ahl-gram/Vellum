@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { test, before } from "node:test";
 import assert from "node:assert/strict";
 import { readFile, readdir, rm } from "node:fs/promises";
@@ -477,6 +478,7 @@ test("a page whose markup carries the survey sheet passes desk open (#461, the i
   }
 });
 
+// eslint-disable-next-line max-lines-per-function
 test("the head cluster: wordmark, the atelier tagline, then the rooms nav, fixed on the deep (#461 ruling 1)", () => {
   // Astro entity-encodes text expressions: & and apostrophes arrive escaped.
   const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/'/g, "&#39;");

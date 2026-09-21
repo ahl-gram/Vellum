@@ -18,6 +18,7 @@ export interface DatedLogSnapshot {
   readonly attribution: string;
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function createDatedLog(opts: DatedLogOpts) {
   const panel = document.createElement("div");
   panel.className = "rf-log";

@@ -103,6 +103,7 @@ test("before the founding the caption names the ground and drops the year line",
   assert.equal(c.epithet, "the ground where Testholm will rise · An. 1040");
 });
 
+// eslint-disable-next-line max-lines-per-function
 test("the key indexes only drawn features, by rank then west to east, at most four", () => {
   const harborCapital = composeProspect(
     makeInput({ kind: "capital", harbor: true, foreground: bandOf(["beach", FOREGROUND_SAMPLES]) }),

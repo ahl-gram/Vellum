@@ -41,6 +41,7 @@ const clear = (s) => s.seed !== null && Number.isFinite(s.inkRight) && s.inkRigh
 const glyphRun = (label) => `(() => { const a = [...document.querySelectorAll("header.chrome nav.rooms a, header.chrome nav.rooms [aria-current]")].find((e) => e.textContent === ${JSON.stringify(label)}); if (!a) return null; const r = new Range(); r.selectNodeContents(a); const b = r.getBoundingClientRect(); return { x: b.x, y: b.y, w: b.width, h: b.height }; })()`;
 const brightest = (strip) => Math.max(...strip.map(luminance));
 
+// eslint-disable-next-line max-lines-per-function
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, setMobileViewport, clearMobile, touch, waitReady, PORT } = ctx;
   const settle = makeSettle(ctx);

@@ -24,6 +24,7 @@ interface GlassDeps {
   buttons: { zoomIn: HTMLElement; zoomOut: HTMLElement; reset: HTMLElement; cluster: HTMLElement };
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function createGlass(deps: GlassDeps) {
   const { mapViewport, mapDiv, buttons } = deps;
 

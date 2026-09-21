@@ -28,11 +28,13 @@ export function cancelTurn(): void {
 }
 
 /** Turn the sheet, re-dressing #map when the leaf lands. Resolves ONLY on a real landing (the caller then rebuilds the overlay); a superseding cancelTurn() aborts it and the promise stays pending forever. It NEVER rejects: an unbuildable 3D scaffold degrades to an instant swap and resolves, so the caller needs no .catch. */
+// eslint-disable-next-line max-lines-per-function
 export function runTurn(
   { sheetEl, innerEl, mapEl, newSvg, durationMs, easing }:
   { sheetEl: HTMLElement; innerEl: HTMLElement; mapEl: HTMLElement; newSvg: string; durationMs: number; easing: string },
 ): Promise<void> {
   cancelTurn();
+  // eslint-disable-next-line max-lines-per-function
   return new Promise<void>((resolve) => {
     let blobUrl = "";
     let back: HTMLDivElement | null = null;

@@ -88,6 +88,7 @@ function chevron(
   });
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function currentsLayer(
   ctx: RenderCtx,
   cartouche: CartouchePlan,

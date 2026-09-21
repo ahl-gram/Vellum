@@ -65,6 +65,7 @@ export function realmAdjacency(
 const dist2 = (a: Centroid, b: Centroid): number =>
   (a.x - b.x) ** 2 + (a.y - b.y) ** 2;
 
+// eslint-disable-next-line max-lines-per-function
 export function assignRealmTints(
   centroids: readonly Centroid[],
   adjacency: readonly ReadonlySet<number>[],
@@ -120,6 +121,7 @@ export function assignRealmTints(
       for (let c = 0; c < p; c++) {
         let sep = Infinity;
         for (let m = 0; m < n; m++) {
+          // eslint-disable-next-line max-depth
           if (m === r || color[m] !== c) continue;
           sep = Math.min(sep, dist2(centroids[r]!, centroids[m]!));
         }

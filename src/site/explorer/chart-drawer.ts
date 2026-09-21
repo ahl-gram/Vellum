@@ -174,6 +174,7 @@ export interface ChartDrawerDeps {
   readonly folioHref?: string;
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function bindChartDrawer(deps: ChartDrawerDeps) {
   let items: ReadonlyArray<TableItem> = [];
   // Blob urls are revoked when their cutting leaves, and never churned per redraw: the key is the item's own emitted spelling, so a redraw reuses the url it already made.

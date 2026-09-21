@@ -1,7 +1,9 @@
+/* eslint-disable max-lines */
 // Living Chart story-card overlay e2e (P1-P15, #53).
 import { makeStep } from "./step-support.mjs";
 import { makeSettle } from "./settle-support.mjs";
 
+// eslint-disable-next-line max-lines-per-function
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, wheel, waitSettled, waitReady, axDescription, serverState, setMobileViewport, clearMobile, consoleErrors, http4xx, PORT } = ctx;
   const step = makeStep(ctx);
@@ -273,6 +275,7 @@ export async function run(ctx) {
     check("P19b and the same holds at 320, where two cards in three were over the box before this (#633)", at320.ok, at320.detail);
   });
 
+  // eslint-disable-next-line max-lines-per-function
   await step("P20 to P27", async () => {
     // The unpinned arm reads a card that is SHOWN: a hidden one reports its host's pointer-events by inheritance and would pass whatever this rule said.
     const at = await evaluate(`(() => {

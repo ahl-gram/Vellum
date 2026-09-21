@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { Survey, SurveyRoad } from "../../src/render/survey.ts";
@@ -247,6 +248,7 @@ test("every real leg is deterministic across two independent routings", () => {
   assert.deepEqual(a, b);
 });
 
+// eslint-disable-next-line max-lines-per-function
 test("a simplified leg never strays past the tolerance from terrain of its own kind", () => {
   // Vertices are on-terrain by construction (RDP only removes vertices), so the question is the chords. BOUND = RDP_EPSILON + 0.5 (a cell-boundary point is half a cell from either centre); measured worst case over seeds 1..40: 1.000 road, 0.902 sea.
   const BOUND = RDP_EPSILON + 0.5;
