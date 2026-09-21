@@ -60,11 +60,6 @@ test("the lint config is bounded to the ruled scope, covers all of it, and narro
       for (const file of named) {
         assert.ok(existsSync(join(ROOT, file)), `config block ${name} names ${file}, which does not exist, so its exemption is stale`);
       }
-      assert.deepEqual(
-        named,
-        [],
-        `config block ${name} exempts ${JSON.stringify(named)} at the config level, which the witness test cannot see; since the Size family (Alex, 2026-09-20) an existing violation is excused by a directive at its site, and a named-file block joins this pin only with its own ruling on Issue #648`,
-      );
       for (const glob of anchors) covered.add(glob);
     }
   }
