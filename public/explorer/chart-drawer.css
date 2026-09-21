@@ -52,7 +52,7 @@ body:has(.chart-drawer.open) .slip-tab { display: none; }
   color: var(--parchment); background: var(--ink-dark); border: 1px solid var(--line-tan); }
 .cuttings .off:is(:hover, :focus-visible) { background: var(--parchment-bright); color: var(--ink-dark); }
 
-/* The settle (Issue #523, D1 ruled 2026-09-21): a laid cutting drops from above, a touch larger and off its tilt, and its shadow flattens. Written on transform, which composes over the seat's rotate: and the lift's translate:/rotate: above; a keyframe on those properties with a both fill would pin the seat and kill the lift. */
+/* The settle (Issue #523, D1 ruled 2026-09-21): a laid cutting drops from above, a touch larger and off its tilt, and its shadow flattens. */
 @keyframes cutting-land {
   from { opacity: 0; transform: translateY(-14px) scale(1.06) rotate(-4deg); }
   70% { opacity: 1; transform: translateY(2px) scale(1) rotate(0.6deg); }
@@ -65,7 +65,7 @@ body:has(.chart-drawer.open) .slip-tab { display: none; }
 .cuttings li.landing { animation: cutting-land var(--paper-settle) var(--ease-paper) both; }
 .cuttings li.landing img { animation: cutting-shadow var(--paper-settle) var(--ease-paper) both; }
 
-/* The refusal at the cap (Issue #523, D3 ruled 2026-09-21): the sheets press down and rebound, on the list and never on .chart-drawer, whose animation shorthand carries the slide. */
+/* The refusal at the cap (Issue #523, D3 ruled 2026-09-21): the sheets press down and rebound. */
 @keyframes cutting-jolt {
   35% { transform: translateY(6px); }
   70% { transform: translateY(-2px); }

@@ -15,7 +15,6 @@ const survey = (lx: number): SurveyItem => ({
 const fill = (n: number): TableItem[] => Array.from({ length: n }, (_, i) => survey(i));
 const SVG = "<svg xmlns=\"http://www.w3.org/2000/svg\"></svg>";
 
-/** The nine element deps as shim elements, the cuttings list ON SCREEN unless told otherwise, and recorders for what the drawer said and wrote. */
 function drawer(opts: { onScreen?: boolean; drawThumb?: (item: TableItem) => Promise<{ url: string; title: string } | null> } = {}) {
   const el = (tag: string) => new El(tag);
   const cuttings = el("ol");

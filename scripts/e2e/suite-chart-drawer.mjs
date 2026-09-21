@@ -213,7 +213,6 @@ export async function run(ctx) {
   const bandPoint = () => evaluate(`({ x: 640, y: window.innerHeight - 120 })`);
   // The settle's declared duration, read the CD23 way: the class is put on a scratch cutting with transitions suppressed, the cascade's answer is read, and the class comes off again.
   const DURATION = `(() => { const li = document.querySelector("#cuttings li"); if (!li) return null; li.classList.add("landing"); const v = getComputedStyle(li).animationDuration; li.classList.remove("landing"); return v; })()`;
-  /** A carry from the ear to `to`, read mid-carry before the release; hands back the mid-carry read and the release point. */
   const carry = async (to) => {
     const from = await earPoint();
     if (!from) throw new Error("no dog-ear to carry from");
@@ -272,13 +271,11 @@ export async function run(ctx) {
     const { from, mid, to } = await carry({ x: 640, y: 300 });
     await release(to.x, to.y);
     const snapped = await settle(CARRY, atRest, "chart-drawer-snapped");
-    // A jiggle released back ON the ear: the click that follows a drag is swallowed, or the sheet the reader put back would be filed by the release.
     await press(from.x, from.y);
     await moveTo(from, { x: from.x - 10, y: from.y + 10 }, 4);
     await moveTo({ x: from.x - 10, y: from.y + 10 }, from, 4);
     await release(from.x, from.y);
     const jiggled = await settle(CARRY, atRest, "chart-drawer-jiggled");
-    // Then a PLAIN click on the ear files: the swallow is scoped to one gesture and does not eat the next honest click.
     await clickAt(from.x, from.y);
     const clicked = await settle(CARRY, (d, last) => d.cuttings === 1 && atRest(d, last), "chart-drawer-plain-click");
     await evaluate(`document.querySelector("#cuttings .off").click()`);
@@ -629,7 +626,7 @@ export async function run(ctx) {
 
   // CD6 (#540 Sub 2a): the desktop drawer must never paint at 390, and the check has to try the door that opens it: `lay()` calls setOpen(true) with no width term, and `.chart-drawer.open` (0,2,0) beat the stand-down's (0,1,0), so once .open landed the drawer displayed at 390 over a reader who could not shut it.
   await setMobileViewport(390, 844);
-  await step("CD6", async () => {
+  await step("CD6, CD48", async () => {
     await go(`${DRESS}&${DEEP}`);
     const phoneArmed = await settle(READ, atInset, "chart-drawer-phone-inset", DRAWN);
     const phoneEar = await evaluate(`(() => { const e = document.querySelector("#map .region-inset .dog-ear"); if (!e) return null; const b = e.getBoundingClientRect(); return { x: Math.round(b.x + b.width * 0.72), y: Math.round(b.y + b.height * 0.28) }; })()`);
@@ -658,7 +655,6 @@ export async function run(ctx) {
     }
     await sleep(500);
     const afterHandle = await evaluate(`({ cam: window.__vellumZoomState(), ghost: !!document.querySelector(".sheet-ghost"), drag: document.body.classList.contains("sheet-drag"), cuttings: document.querySelectorAll("#cuttings li").length })`);
-    // The control arm: a touch that begins BESIDE the handle, on the chart, still pans. The start point is hit-tested away from the ear and any place hit, so the camera is what answers it.
     const panFrom = await evaluate(`(() => { const inset = document.querySelector("#map .region-inset"); const b = inset ? inset.getBoundingClientRect() : null; if (!b) return null;
       for (const [fx, fy] of [[0.15, 0.85], [0.3, 0.7], [0.5, 0.5], [0.2, 0.3]]) { const x = Math.round(b.x + b.width * fx), y = Math.round(b.y + b.height * fy); const h = document.elementFromPoint(x, y); if (h && !h.closest(".dog-ear") && !h.closest(".place-hit") && h.closest("#map-viewport")) return { x, y, on: h.tagName }; }
       return null; })()`);

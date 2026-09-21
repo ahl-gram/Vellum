@@ -329,7 +329,6 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
   });
 
   return {
-    /** A drag hands over the ghost's url as `ready` and the cutting adopts it, so a carry mints one url and not two. */
     lay(item: TableItem, svg: string | null, title?: string, ready?: { readonly url: string }): boolean {
       const laid = layOnTable(items, item);
       if (laid.refused) {
@@ -349,7 +348,6 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
       deps.say(`${titleOf(item)} lies on the table · ${countLine(laid.items)}`);
       return true;
     },
-    /** Opens the drawer for a carry and hands back what puts it as it was; a drawer already open is left open by both. */
     reveal(): () => void {
       const wasOpen = deps.root.classList.contains("open");
       if (!wasOpen) setOpen(true);

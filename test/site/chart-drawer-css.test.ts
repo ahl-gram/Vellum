@@ -75,7 +75,6 @@ test("the Chart Table's sheet stands the phone's TABLE LEAF down outside the pho
 
 // The ceremony (Issue #523 Sub 5): the settle and the jolt are class-scoped keyframes that compose over the cutting's seat, never hover rules and never on the drawer root. The resolved reads are e2e CD44 to CD47; these are the fast lane, blind to the cascade.
 
-/** The body of one `@keyframes NAME { ... }` block, brace-matched, or null. */
 const keyframesOf = (css: string, name: string): string | null => {
   const at = css.indexOf(`@keyframes ${name}`);
   if (at === -1) return null;
@@ -83,7 +82,6 @@ const keyframesOf = (css: string, name: string): string | null => {
   return close === -1 ? null : css.slice(css.indexOf("{", at) + 1, close);
 };
 
-/** Each `selector { body }` at the top level of the sheet and inside its media blocks, flat, the way the tip sweep reads it. */
 const rulesOf = (css: string): ReadonlyArray<readonly [string, string]> =>
   [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((m) => [m[1]!.trim().replace(/\s+/g, " "), m[2]!] as const);
 
