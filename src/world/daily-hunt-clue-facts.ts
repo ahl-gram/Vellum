@@ -52,6 +52,7 @@ export type ClueFacts = {
   readonly pool: ReadonlyArray<PoolEntry>;
 };
 
+// eslint-disable-next-line max-lines-per-function
 export function buildClueFacts(
   world: World,
   quarry: Quarry,

@@ -5,6 +5,7 @@ import { chaikinSmooth, marchingSquares } from "../../terrain/contours.ts";
 import { el, pathFrom, type SvgNode } from "../svg.ts";
 import type { RenderCtx } from "../context.ts";
 
+// eslint-disable-next-line max-lines-per-function
 export function realmTintsLayer(ctx: RenderCtx): SvgNode | null {
   const { world, proj, style } = ctx;
   const { labels, seats } = world.realms;
@@ -59,6 +60,7 @@ export function realmTintsLayer(ctx: RenderCtx): SvgNode | null {
 }
 
 
+// eslint-disable-next-line max-lines-per-function
 export function realmBordersLayer(ctx: RenderCtx): SvgNode | null {
   const { world, proj, style } = ctx;
   const { labels, seats } = world.realms;

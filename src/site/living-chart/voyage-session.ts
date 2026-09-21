@@ -62,6 +62,7 @@ export interface SessionBuilderDeps {
   tourOrder?: TourOrderSource;
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function createSessionBuilder(deps: SessionBuilderDeps) {
   const { mapEl, logPanel, tourOrder } = deps;
 
@@ -88,6 +89,7 @@ export function createSessionBuilder(deps: SessionBuilderDeps) {
     return ordered;
   }
 
+  // eslint-disable-next-line max-lines-per-function
   function build(
     manifest: PlaceManifest | null,
     survey: Survey | null,

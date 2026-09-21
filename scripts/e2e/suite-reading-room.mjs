@@ -1,7 +1,9 @@
+/* eslint-disable max-lines */
 // Reading Room e2e (RR0-RR34; #221 plus #318 colophon dice, #418 pre-arm window, #402 prospect stage and #442 the sticky strip): self-contained (navigates itself, scoped no-4xx and console-error delta); there is deliberately NO Explorer entry point (decision 3 on #221), so checks navigate with constructed hashes, and arrival is AT REST on every path.
 import { seedForDate } from "../../src/world/seed-of-the-day.ts";
 import { dropExpectedCancellations } from "./console-support.mjs";
 
+// eslint-disable-next-line max-lines-per-function
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, serverState, consoleErrors, http4xx, PORT } = ctx;
 

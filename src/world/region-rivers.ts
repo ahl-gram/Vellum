@@ -111,6 +111,7 @@ export function extendMouthToWater(
 }
 
 /** A cropped window loses upstream drainage, and NO threshold exponent restores it (missing area, not miscalibration): so extract at a density-scaled absolute threshold, and lay the parent's major rivers in as the authoritative through-network. */
+// eslint-disable-next-line max-lines-per-function
 export function anchorRegionRivers(
   world: World,
   window: UvWindow,
@@ -150,6 +151,7 @@ export function anchorRegionRivers(
         for (let dx = -SHADOW_RADIUS; dx <= SHADOW_RADIUS; dx++) {
           const nx = cx + dx;
           const ny = cy + dy;
+          // eslint-disable-next-line max-depth
           if (nx >= 0 && nx < gridW && ny >= 0 && ny < gridH) shadow.add(nx + ny * gridW);
         }
       }

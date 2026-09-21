@@ -4,6 +4,7 @@ import { dropExpectedCancellations } from "./console-support.mjs";
 
 import { makeStep } from "./step-support.mjs";
 
+// eslint-disable-next-line max-lines-per-function
 export async function run(ctx) {
   const { evaluate, send, check, sleep, waitSettled, waitReady, touch, setMobileViewport, clearMobile, consoleErrors, http4xx, PORT } = ctx;
 
@@ -36,6 +37,7 @@ export async function run(ctx) {
     throw new Error("gotoPlain timeout " + label);
   };
 
+  // eslint-disable-next-line max-lines-per-function
   await step("BR1 to BR1c", async () => {
     await goto(EXP + "#seed=42&style=antique", "broadside-base");
     const br1 = await evaluate(`(()=>{

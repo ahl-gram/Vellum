@@ -98,6 +98,9 @@ test("through ESLint itself, one witness file per ruled glob resolves to rules t
     assert.equal(on("prefer-const"), 2, `${file}: prefer-const does not resolve at error (Immutability, Issue #648)`);
     assert.deepEqual(config.rules?.["no-param-reassign"], [2, { props: false }], `${file}: no-param-reassign does not resolve as rebinding-only at error (Alex, 2026-09-20, Issue #648)`);
     assert.equal(on("@typescript-eslint/prefer-readonly"), typed ? 2 : undefined, `${file}: prefer-readonly does not resolve at error (Immutability, Issue #648)`);
+    assert.deepEqual(config.rules?.["max-lines"], [2, 400], `${file}: max-lines does not resolve at error with the ruled physical-line ceiling (Size, Issue #648)`);
+    assert.deepEqual(config.rules?.["max-lines-per-function"], [2, 50], `${file}: max-lines-per-function does not resolve at error with the ruled ceiling (Size, Issue #648)`);
+    assert.deepEqual(config.rules?.["max-depth"], [2, 4], `${file}: max-depth does not resolve at error with the ruled depth (Size, Issue #648)`);
     const report = config.linterOptions?.reportUnusedDisableDirectives;
     assert.ok([1, 2, "warn", "error"].includes(report as never), `${file}: an unused disable directive is not reported (${String(report)}), so a stale exemption is silent`);
   }

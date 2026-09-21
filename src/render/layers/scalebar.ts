@@ -23,6 +23,7 @@ export function planScalebar(ctx: RenderCtx): ScalebarPlan {
   };
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function scalebarLayer(ctx: RenderCtx, plan: ScalebarPlan): SvgNode {
   const { style, proj, world } = ctx;
   const k = proj.widthPx / 1500;

@@ -185,6 +185,7 @@ function writeFolio(res: { title: string; subtitle: string }, seed: number): voi
 }
 
 // opts.quiet suppresses the arrival ceremony, used only by the sea-level drag's throttled mid-drag redraws.
+// eslint-disable-next-line max-lines-per-function
 function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
   const quiet = !!(opts && opts.quiet);
   const isTurn = !!(opts && opts.turn);
@@ -224,6 +225,7 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
     overrides,
     render: { style, widthPx: 1500, legend, arms, beasts, theme: theme || undefined },
   })
+    // eslint-disable-next-line max-lines-per-function
     .then((res) => {
       if (myGen !== drawGen) return;
       drawing = false;

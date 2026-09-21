@@ -81,6 +81,7 @@ function scatter(
   return Array.from({ length: count }, (_, i) => make(rng, i));
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function composeLandDressing(
   treatment: Treatment,
   kind: ProspectKind,
@@ -210,6 +211,7 @@ export function riverWater(ground: Ground): Water {
   return { kind: "river", y0: ground.base + 10, y1: ground.base + 38 };
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function composeSeaFront(
   kind: ProspectKind,
   ruined: boolean,

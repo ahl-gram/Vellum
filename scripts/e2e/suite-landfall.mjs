@@ -1,7 +1,9 @@
+/* eslint-disable max-lines */
 // Landfall hardening e2e (#460, second suite by ratification 2026-08-25): the wheel consumed-vs-released contract at both zoom clamps (L1), the six panel arms from the superseding 2026-08-24T18:53 spec plus the sixth-arm clearance (L2-L7), the Enter links as 44px touch targets (L8), touch two-finger-drives vs one-finger-page-scroll under one emulation set (L9), and the seed form's no-JS GET fallback with its bare-visit control (L10-L11). Every gesture is REAL dispatched input; suite-home's plumbing arrives via home-support.mjs.
 import { readCam, atLandfall, readXform, buttonPoint, makeStage } from "./home-support.mjs";
 import { scopedHealth } from "./room-support.mjs";
 
+// eslint-disable-next-line max-lines-per-function
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, wheel, touch, pinch, setMobileViewport, clearMobile, PORT } = ctx;
   const { pressKey, clickAt, settleHome } = makeStage(ctx);
@@ -404,6 +406,7 @@ export async function run(ctx) {
   await pressKey("Escape", "Escape", 27);
   await sleep(500);
 
+  // eslint-disable-next-line max-lines-per-function
   const measureEnters = async (label) => {
     const boxes = [];
     let swallowed = null;
@@ -417,18 +420,21 @@ export async function run(ctx) {
           await pressKey("Escape", "Escape", 27);
           for (let i = 0; i < 80; i++) {
             const anyOpen = await evaluate(`[...document.querySelectorAll(".lf-card")].some((c) => !c.hidden)`);
+            // eslint-disable-next-line max-depth
             if (anyOpen === false) break;
             await sleep(75);
           }
           for (let i = 0; i < 20; i++) {
             await evaluate(`window.scrollTo(0, 0)`);
             await sleep(75);
+            // eslint-disable-next-line max-depth
             if ((await scrollY()) === 0) break;
           }
           const homePt = await evaluate(buttonPoint("#zoom-reset"));
           if (homePt !== null) await clickAt(Math.round(homePt.x), Math.round(homePt.y));
           let reachable = false;
           for (let i = 0; i < 80; i++) {
+            // eslint-disable-next-line max-depth
             try {
               reachable = await evaluate(`(() => {
                 const btn = document.querySelector('.lf-station[data-station="${id}"]');
@@ -439,6 +445,7 @@ export async function run(ctx) {
                 return hit === btn || btn.contains(hit);
               })()`);
             } catch {}
+            // eslint-disable-next-line max-depth
             if (reachable === true) break;
             await sleep(75);
           }

@@ -23,6 +23,7 @@ function reachTurn(
 }
 
 /** Ordered by preference; element 0 is the reach straightestReach always returned, so a river whose best spot is free keeps its exact placement. */
+// eslint-disable-next-line max-lines-per-function
 export function reachPlacements(
   pts: ReadonlyArray<readonly [number, number]>,
   targetLen: number,

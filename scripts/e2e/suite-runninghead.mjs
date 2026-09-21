@@ -92,6 +92,7 @@ const boundAtlasEmitsAtlasHead = () => {
   return !!header && /<h1>/.test(header[0]);
 };
 
+// eslint-disable-next-line max-lines-per-function
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, waitReady, consoleErrors, http4xx, PORT } = ctx;
   const errBase = consoleErrors.length;

@@ -23,6 +23,7 @@ export interface ChronicleDeps {
   overlay: { data(): OverlayData | null; hideCard(): void };
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function createChronicle(deps: ChronicleDeps) {
   const { mapEl, overlay } = deps;
 

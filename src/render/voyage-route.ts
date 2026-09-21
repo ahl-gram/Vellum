@@ -54,6 +54,7 @@ export type VoyageRouter = {
   readonly legLength: (fromIdx: number, toIdx: number) => number;
 };
 
+// eslint-disable-next-line max-lines-per-function
 export function prepareVoyageRouter(sites: ReadonlyArray<Site>, survey: Survey): VoyageRouter {
   const { gridW: w, gridH: h, land } = survey;
   const byIdx = new Map(sites.map((s) => [s.idx, s]));

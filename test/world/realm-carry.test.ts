@@ -143,8 +143,10 @@ test("the sea floor holds everywhere: a grown shore cell sits inside its realm's
         for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {
           const nx = x + dx;
           const ny = y + dy;
+          // eslint-disable-next-line max-depth
           if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;
           const j = nx + ny * w;
+          // eslint-disable-next-line max-depth
           if (!isSea(j) && grown[j] === grown[i]) touchesOwnLand = true;
         }
         if (!touchesOwnLand) continue;
@@ -228,6 +230,7 @@ const borderWindow = (world: World, band: number) => {
   return null; // island realms: no land border exists, so there is no border window to sweep
 };
 
+// eslint-disable-next-line max-lines-per-function
 const collarSweep = (seed: number, name: string, window: NonNullable<ReturnType<typeof borderWindow>>) => {
   const world = worldFor(seed);
   const gridW = 320;

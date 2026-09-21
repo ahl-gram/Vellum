@@ -90,6 +90,7 @@ const BASE_FBM_OCTAVES = 6;
 export const MAX_DETAIL = OCTAVE_OFFSETS.length - BASE_FBM_OCTAVES;
 
 /** Elevation is a pure function of world-space (u, v) and the seed, so a finer grid over the same recipe samples the identical landscape. */
+// eslint-disable-next-line max-lines-per-function
 export function buildHeightfield(params: TerrainParams): Field {
   const { seed, gridW, gridH, mapType } = params;
   const shape = SHAPES[mapType];

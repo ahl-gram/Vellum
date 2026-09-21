@@ -51,6 +51,7 @@ function dominantTree(ctx: RenderCtx): string | null {
   return best >= 0 ? (FOREST[best] as { sym: string }).sym : null;
 }
 
+// eslint-disable-next-line max-lines-per-function
 function buildRows(ctx: RenderCtx): { rows: Row[]; note: string } {
   const { style, world, theme } = ctx;
   const rows: Row[] = [];

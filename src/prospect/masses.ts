@@ -80,6 +80,7 @@ function packRow(
   return row.map((b) => ({ ...b, x: b.x + shift }));
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function composeTownscape(
   kind: ProspectKind,
   score: number,

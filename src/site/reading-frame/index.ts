@@ -10,6 +10,7 @@ export interface ReadingFrameOpts {
   readonly onAgesTold?: (told: ToldEntry | null) => void;
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function createReadingFrame(mount: HTMLElement, opts: ReadingFrameOpts = {}) {
   const root = document.createElement("div");
   root.className = "rf";

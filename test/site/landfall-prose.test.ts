@@ -70,6 +70,7 @@ test("every pip's at-sea dress is earned from the terrain, not asserted by hand 
   }
 });
 
+// eslint-disable-next-line max-lines-per-function
 test("the panel is a card slip carrying the prose, hidden in the HTML so it stays indexable (#459)", () => {
   const panelAt = astro.indexOf('id="lf-card-how"');
   assert.ok(panelAt >= 0, "the panel mounts");

@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
@@ -145,6 +146,7 @@ test("region biomes are continuous with the world via the parent elevSpan (AC #1
   );
 });
 
+// eslint-disable-next-line max-lines-per-function
 test("region rivers match the world's major-river set at the window boundary (AC #162)", () => {
   // A river-rich seed (27 at production grid) and a window centred on a major river's midsection so rivers cross its edges.
   const riverWorld = generateWorld(defaultRecipe(27, { gridW: 320, gridH: 240 }));
@@ -228,6 +230,7 @@ test("region rivers are not inked twice: no extracted river shadows a projected 
       for (let dy = -2; dy <= 2; dy++) {
         for (let dx = -2; dx <= 2; dx++) {
           const nx = cx + dx, ny = cy + dy;
+          // eslint-disable-next-line max-depth
           if (nx >= 0 && nx < gridW && ny >= 0 && ny < gridH) shadow.add(nx + ny * gridW);
         }
       }
@@ -251,6 +254,7 @@ test("region rivers are not inked twice: no extracted river shadows a projected 
   assert.ok(extractedRivers > 0, "the window also carries genuinely new extracted detail");
 });
 
+// eslint-disable-next-line max-lines-per-function
 test("only the deepest band grows hamlets; they never seat a realm or take a road (#171)", () => {
   // anchor on the settlement whose deepest window carries the most hamlets
   let best: { win: ReturnType<typeof windowAround>; n: number } | null = null;

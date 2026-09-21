@@ -23,6 +23,7 @@ interface WorldPlates {
   readonly cache: Map<string, Promise<BoundPlate>>;
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function createProspectStage(opts: ProspectStageOpts = {}) {
   const toUrl =
     opts.toUrl ?? ((svg: string) => URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" })));

@@ -49,6 +49,7 @@ type Candidate = {
   onRiver: boolean;
 };
 
+// eslint-disable-next-line max-lines-per-function
 export function placeSettlements(
   elev: Field,
   seaLevel: number,

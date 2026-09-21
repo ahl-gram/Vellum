@@ -29,6 +29,7 @@ export function regionDetailLevel(spec: RegionSpec): number {
   return spec.detail === true ? detailForWindow(spec.window) : 0;
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function generateRegionWorld(world: World, spec: RegionSpec): World {
   const { recipe } = world;
   const { window, gridW, gridH } = spec;

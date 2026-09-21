@@ -215,6 +215,7 @@ function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function createNamer(rng: Rng, culture: Culture): Namer {
   const used = new Set<string>();
   const usedBases: string[] = [];

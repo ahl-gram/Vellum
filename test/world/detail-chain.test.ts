@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -162,6 +163,7 @@ test("band 0 of the chain IS the world field, so the chain anchors on the golden
   assertSameField(chained.data, world.data, "the chain's band 0 diverged from buildHeightfield's world field");
 });
 
+// eslint-disable-next-line max-lines-per-function
 test("two zoom routes to the same window produce a byte-identical field (#398)", () => {
   // Same environment, so this comparison is exact by design; the float-drift rule bans byte comparison ACROSS environments only.
   const target = { cx: 0.53, cy: 0.42, k: 8 };
