@@ -158,7 +158,7 @@ function chunksFor(candidate: Candidate): string[] {
   }
   const tail = spelled[spelled.length - 1];
   const base =
-    spelled.length > 1 && tail !== undefined && !NUCLEUS_LETTER.test(tail)
+    spelled.length > 1 && tail !== undefined && !NUCLEUS_LETTER.test(tail) // eslint-disable-line @typescript-eslint/no-unnecessary-condition
       ? [...spelled.slice(0, -2), `${spelled[spelled.length - 2]}${tail}`]
       : spelled;
   return candidate.suffix ? [...base, candidate.suffix] : base;
@@ -186,7 +186,7 @@ export function segmentName(name: string, cultureId: string): Segmentation | nul
 
 export function glossName(name: string, cultureId: string): NameGloss | null {
   const lexicon = PHILOLOGY_LEXICON[cultureId];
-  if (!lexicon) return null;
+  if (!lexicon) return null; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   const seg = segmentName(name, cultureId);
   if (!seg) return null;
   const roots: RootGloss[] = [];

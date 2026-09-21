@@ -56,7 +56,7 @@ test("ages years are integers: a between-years bar position rounds", () => {
   const u = SEAM_U + 0.30037 * (1 - SEAM_U);
   const pos = posAt(u, RANGE);
   assert.equal(pos.chamber, "ages");
-  if (pos.chamber === "ages") assert.equal(pos.year, Math.round(RANGE.min + 0.30037 * 800));
+  if (pos.chamber === "ages") assert.equal(pos.year, Math.round(RANGE.min + 0.30037 * 800)); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 });
 
 test("posAt clamps the bar position into [0,1]", () => {

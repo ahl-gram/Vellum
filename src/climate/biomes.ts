@@ -27,7 +27,7 @@ const NAMES: BiomeName[] = Object.keys(BIOMES) as BiomeName[];
 
 export function biomeName(id: number): BiomeName {
   const name = NAMES[id];
-  if (name === undefined) throw new RangeError(`unknown biome id ${id}`);
+  if (name === undefined) throw new RangeError(`unknown biome id ${id}`); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   return name;
 }
 

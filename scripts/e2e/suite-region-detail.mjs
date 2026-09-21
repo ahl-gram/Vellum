@@ -1,6 +1,7 @@
 // The Glass sees it e2e (RD, #400): every check reads the COMMITTED inset the user is looking at, never a job result standing in for it; byte comparisons are same-environment only (one page, one JS engine), the only kind lod.ts's byte-identity contract can be checked by, since a cross-environment SVG compare is barred project-wide.
 import { makeStep } from "./step-support.mjs";
 
+// eslint-disable-next-line max-lines-per-function
 export async function run(ctx) {
   const { evaluate, check, shoot, sleep, waitSettled, waitReady, PORT } = ctx;
   // RD1, RD2 and the ladder are deliberately not stepped: waitRedraft and waitInset return their last read rather than throwing, and their checks already guard on it.

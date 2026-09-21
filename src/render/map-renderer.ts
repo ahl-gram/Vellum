@@ -76,6 +76,7 @@ function describeChart(
   return `${lead} of ${world.title.title}, ${article} ${noun} in a ${world.recipe.band} climate.`;
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function renderMap(world: World, opts: RenderOptions = {}): string {
   const style = STYLES[opts.style ?? "antique"];
   const description = describeChart(world, style.name, opts.theme);

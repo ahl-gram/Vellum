@@ -71,7 +71,7 @@ test("#79 each seatless island attaches whole to exactly one realm", () => {
     assert.equal(
       realms.size,
       1,
-      `seatless island lm#${lm} (${sizes[lm]} cells) is split across realms ${[...realms]}`,
+      `seatless island lm#${lm} (${sizes[lm]} cells) is split across realms ${[...realms].join(",")}`,
     );
   }
 });

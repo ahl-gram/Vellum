@@ -16,6 +16,7 @@ export function journalText(text: string): string {
   return text.replace(/^Year \d+\. /, "");
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function createVoyageLogPanel(host: VoyageLogHost) {
   function buildLogPanel(
     logPorts: ReadonlyArray<VoyageLogPort>,

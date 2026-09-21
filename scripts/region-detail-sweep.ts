@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { defaultRecipe, generateWorld } from "../src/world/generate.ts";
@@ -119,7 +120,7 @@ function riversEndingOnLand(
   const bad: number[] = [];
   rivers.forEach((river, i) => {
     const last = river.points[river.points.length - 1];
-    if (last === undefined) return;
+    if (last === undefined) return; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     const x = Math.round(last.x);
     const y = Math.round(last.y);
     if (x <= tol || y <= tol || x >= w - 1 - tol || y >= h - 1 - tol) return;
@@ -146,6 +147,7 @@ function chebyshevToSea(region: World, x: number, y: number, limit: number): num
   return -1;
 }
 
+// eslint-disable-next-line max-lines-per-function
 function measure(
   world: World,
   band: LodBand,
@@ -168,7 +170,7 @@ function measure(
   const expected = expectedProjections(world, window);
   const worldSeats = world.realms.seats.filter((si) => {
     const s = world.settlements[si];
-    if (s === undefined) return false;
+    if (s === undefined) return false; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     const du = window.u1 - window.u0;
     const dv = window.v1 - window.v0;
     const u = s.x / (world.recipe.gridW - 1);
@@ -230,6 +232,7 @@ function measure(
         if (rid >= 0) {
           worldMassesAlive.add(wid);
           let s = coveredBy.get(rid);
+          // eslint-disable-next-line max-depth
           if (s === undefined) {
             s = new Set();
             coveredBy.set(rid, s);

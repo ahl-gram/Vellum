@@ -18,6 +18,7 @@ export type ComposeOptions = { readonly era?: "standing" | "before-founding" };
 
 const SERPENT_ODDS = 1 / 12;
 
+// eslint-disable-next-line max-lines-per-function
 export function composeProspect(
   input: ProspectInput,
   opts: ComposeOptions = {},

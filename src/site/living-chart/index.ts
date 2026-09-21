@@ -40,6 +40,7 @@ export interface LivingChartHost {
   tourOrder?: TourOrderSource;
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function createLivingChart(host: LivingChartHost) {
   // The one #53<->#54 coupling pair crosses here as late-bound closures, so neither module imports the other.
   const overlay = createPlaceOverlay({

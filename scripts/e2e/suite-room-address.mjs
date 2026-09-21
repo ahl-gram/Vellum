@@ -2,6 +2,7 @@
 import { makeRoom } from "./room-support.mjs";
 import { dropExpectedCancellations } from "./console-support.mjs";
 
+// eslint-disable-next-line max-lines-per-function
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, consoleErrors, http4xx } = ctx;
   const room = makeRoom(ctx);

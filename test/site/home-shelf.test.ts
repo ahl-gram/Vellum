@@ -94,7 +94,7 @@ test("nothing home loads locks the document's scroll (#472 retired the #461 body
   for (const [name, cssText] of sources) {
     for (const rule of flatten(cssText).split("}")) {
       const [selector, decls] = rule.split("{");
-      if (decls === undefined || !/(^|[^-\w])(body|html|:root)(?![-\w])/.test(selector)) continue;
+      if (decls === undefined || !/(^|[^-\w])(body|html|:root)(?![-\w])/.test(selector)) continue; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
       assert.ok(
         !/overflow(?:-[xy])?\s*:\s*(?:hidden|clip)/.test(decls),
         `${name} locks scroll at the document level: ${rule.trim().slice(0, 80)}`,

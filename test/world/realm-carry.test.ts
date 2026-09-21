@@ -143,8 +143,10 @@ test("the sea floor holds everywhere: a grown shore cell sits inside its realm's
         for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {
           const nx = x + dx;
           const ny = y + dy;
+          // eslint-disable-next-line max-depth
           if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;
           const j = nx + ny * w;
+          // eslint-disable-next-line max-depth
           if (!isSea(j) && grown[j] === grown[i]) touchesOwnLand = true;
         }
         if (!touchesOwnLand) continue;
@@ -177,9 +179,9 @@ test("generateRegionWorld carries labels, names, rings and the parent label fiel
     "the region should carry the parent's realm names",
   );
   assert.ok(region.region?.realmRings && region.region.realmRings.length > 0, "the region should carry mapped realm rings");
-  assert.ok(region.region?.realmBorders, "the region should carry the parent's border chains");
-  assert.ok(region.region?.parentRealmLabels, "the region should carry the parent's label field for tint assignment");
-  assert.equal(region.region?.worldGridH, world.recipe.gridH, "the parent grid height rides beside worldGridW");
+  assert.ok(region.region?.realmBorders, "the region should carry the parent's border chains"); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+  assert.ok(region.region?.parentRealmLabels, "the region should carry the parent's label field for tint assignment"); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+  assert.equal(region.region?.worldGridH, world.recipe.gridH, "the parent grid height rides beside worldGridW"); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 });
 
 /** Even-odd scanline rasterization of one realm's rings onto the region grid. */
@@ -228,6 +230,7 @@ const borderWindow = (world: World, band: number) => {
   return null; // island realms: no land border exists, so there is no border window to sweep
 };
 
+// eslint-disable-next-line max-lines-per-function
 const collarSweep = (seed: number, name: string, window: NonNullable<ReturnType<typeof borderWindow>>) => {
   const world = worldFor(seed);
   const gridW = 320;

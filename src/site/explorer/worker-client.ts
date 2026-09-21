@@ -137,7 +137,7 @@ const pending = new Map<number, PendingJob>();
 
 function onJobMessage(e: MessageEvent<WorkerResponse>): void {
   const d = e.data;
-  if (!d || d.id == null) return;
+  if (!d || d.id == null) return; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   const p = pending.get(d.id);
   if (!p) return;
   pending.delete(d.id);
@@ -224,7 +224,7 @@ export function runJob(msg: RenderJob): Promise<JobResult> {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       try { resolve(runInline(msg)); }
-      catch (err) { reject(err); }
+      catch (err) { reject(err instanceof Error ? err : new Error(String(err))); }
     }, 0);
   });
 }
@@ -252,7 +252,7 @@ function connect(): Promise<Worker | null> {
     const timer = setTimeout(fail, 4000);
     w.onerror = fail;
     w.onmessage = (e: MessageEvent<WorkerResponse>) => {
-      if (settled || !e.data || !e.data.ready) return;
+      if (settled || !e.data || !e.data.ready) return; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
       settled = true;
       clearTimeout(timer);
       w.onmessage = onJobMessage;

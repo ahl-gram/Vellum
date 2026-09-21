@@ -67,7 +67,7 @@ test("some settlement names carry a culture suffix", () => {
 // Independent full Levenshtein (not the implementation's early-exit check), so the test cannot share a bug with the screen it guards.
 function levenshtein(a: string, b: string): number {
   const m = a.length, n = b.length;
-  const dp = Array.from({ length: m + 1 }, (_, i) => [i, ...Array(n).fill(0)]);
+  const dp = Array.from({ length: m + 1 }, (_, i) => [i, ...Array<number>(n).fill(0)]);
   for (let j = 0; j <= n; j++) dp[0]![j] = j;
   for (let i = 1; i <= m; i++) {
     for (let j = 1; j <= n; j++) {
@@ -87,6 +87,7 @@ test("no two bare bases within a world are near-duplicates (edit distance >= 2)"
       for (let i = 0; i < bases.length; i++) {
         for (let j = i + 1; j < bases.length; j++) {
           // Roman-numeral fallbacks ("kara ii") are exempt: the numeral disambiguates a genuinely tight namespace.
+          // eslint-disable-next-line max-depth
           if (/ [ivx]+$/.test(bases[i]!) || / [ivx]+$/.test(bases[j]!)) continue;
           assert.ok(
             levenshtein(bases[i]!, bases[j]!) >= 2,

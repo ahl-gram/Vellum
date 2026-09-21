@@ -66,6 +66,7 @@ export function eventSeat(layout: RibbonLayout, dist: number): { sx: number; sy:
   return strip === null ? null : stripPos(strip, dist);
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function layoutRibbon(input: RibbonInput): RibbonLayout {
   const total = input.totalCells;
   const n = Math.min(7, Math.max(3, Math.ceil(input.totalLeagues / LEAGUES_PER_STRIP)));

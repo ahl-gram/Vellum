@@ -14,6 +14,7 @@ const CENTRE_WINDOW = { u0: 0.4, v0: 0.4, u1: 0.6, v1: 0.6 } as const;
 
 type CellPin = readonly [number, number, number];
 
+// eslint-disable-next-line max-lines-per-function
 test("detail 0 reproduces the plain field byte for byte (#396)", () => {
   // The absolute pins are the non-circular half of the oracle (comparing the new path with itself cannot see the default path drift): constants measured against main at f83f1b8 with max |diff| = 0 old-vs-new; tolerance 1e-9 clears ~1e-13 cross-platform libm drift.
   const cases: ReadonlyArray<{ params: TerrainParams; pins: readonly CellPin[] }> = [

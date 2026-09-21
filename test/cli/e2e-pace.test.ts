@@ -73,7 +73,7 @@ test("a pace off by an eighth still fails, so the tolerance is not a hiding plac
   const s = sweep([{ pace: 1, gaps: evenGaps(48, 16.7) }, { pace: 3.5, gaps: evenGaps(48, 16.7) }]);
   const r = readPaceSweep(s.map((x) => (x.pace === 3.5 ? { ...x, pace: 4 } : x)), CLEAN);
   assert.equal(r.ok, false, r.detail);
-  assert.ok(PACE_RATE_TOLERANCE < 0.125);
+  assert.ok(PACE_RATE_TOLERANCE < 0.125); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 });
 
 test("a press that jumps the story fails as a jump: the clock re-anchored to the wrong begin (#493)", () => {

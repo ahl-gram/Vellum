@@ -1,6 +1,7 @@
 // Room voyage-route e2e (RV1-RV12, #320 Sub 3): W17-W28 re-hosted on the Reading Room, the only host that can still run them. RV4 is the ONLY numeric guard on MAX_TILT anywhere (a 24 -> 30 mutation leaves every unit test green and reds only RV4); RV3/RV9/RV10 guard showMark's #181 wiring, which has no unit coverage.
 import { makeRoom, scopedHealth } from "./room-support.mjs";
 
+// eslint-disable-next-line max-lines-per-function
 export async function run(ctx) {
   const { evaluate, check, shoot, send, PORT } = ctx;
   const room = makeRoom(ctx);

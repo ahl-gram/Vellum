@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -137,8 +138,8 @@ test("a bar-less host BUILDS the place overlay over the baked chart (#319)", asy
   assert.equal(first.dataset.idx, "0", "the hit carries its manifest index");
   assert.match(first.getAttribute("aria-label") ?? "", /\w/, "the hit is labelled for assistive tech");
   assert.equal(first.getAttribute("aria-describedby"), "place-card", "and described by the one card");
-  assert.match(first.style.left ?? "", /%$/, "positioned by fraction, so it aligns at any width");
-  assert.match(first.style.top ?? "", /%$/);
+  assert.match(first.style.left ?? "", /%$/, "positioned by fraction, so it aligns at any width"); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+  assert.match(first.style.top ?? "", /%$/); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   assert.deepEqual(
     [...new Set(first.listeners)].sort(),
     ["blur", "click", "focus", "mouseenter", "mouseleave"],

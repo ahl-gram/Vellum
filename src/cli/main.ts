@@ -90,6 +90,7 @@ async function writeOut(path: string, content: string): Promise<void> {
   await writeFile(path, content, "utf8");
 }
 
+// eslint-disable-next-line max-lines-per-function
 export async function main(argv: string[]): Promise<void> {
   const command = argv[0];
   const { values } = parseArgs({

@@ -103,6 +103,7 @@ test("before the founding the caption names the ground and drops the year line",
   assert.equal(c.epithet, "the ground where Testholm will rise · An. 1040");
 });
 
+// eslint-disable-next-line max-lines-per-function
 test("the key indexes only drawn features, by rank then west to east, at most four", () => {
   const harborCapital = composeProspect(
     makeInput({ kind: "capital", harbor: true, foreground: bandOf(["beach", FOREGROUND_SAMPLES]) }),
@@ -176,7 +177,7 @@ test("the key indexes only drawn features, by rank then west to east, at most fo
     ],
   };
   const [west, east] = plateKey(twoQuays);
-  assert.ok(west && east && west.x < east.x, "same rank letters west to east");
+  assert.ok(west && east && west.x < east.x, "same rank letters west to east"); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 
   assert.deepEqual(plateKey(composeProspect(makeInput({ kind: "hamlet" }))), []);
 });

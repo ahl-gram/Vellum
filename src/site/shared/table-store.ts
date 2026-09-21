@@ -26,7 +26,7 @@ export function writeStoredTable(getStorage: () => Storage, items: ReadonlyArray
 export function navigationType(getEntries: () => ReadonlyArray<{ readonly type?: string }>): string {
   try {
     const entry = getEntries()[0];
-    return entry && typeof entry.type === "string" && entry.type !== "" ? entry.type : "navigate";
+    return entry && typeof entry.type === "string" && entry.type !== "" ? entry.type : "navigate"; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   } catch {
     return "navigate";
   }

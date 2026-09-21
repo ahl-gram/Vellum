@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 // Seed-of-the-day controller: today's UTC date is the seed, so a purely static page shows a fresh world each day, rendered inline on the main thread. The Daily Hunt is a deterministic click-to-find puzzle over that already-generated world.
 import { defaultRecipe, generateWorld } from "../../world/generate.ts";
 import { renderMap } from "../../render/map-renderer.ts";
@@ -51,7 +52,7 @@ const ROADS: Record<string, string> = {
 };
 for (const a of document.querySelectorAll<HTMLAnchorElement>("a[data-road]")) {
   const href = ROADS[a.dataset.road ?? ""];
-  if (href !== undefined) a.href = href;
+  if (href !== undefined) a.href = href; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 }
 
 // The SAME shared zoom controller as the Explorer, bound to the STABLE #map-viewport (never wiped by the deferred render) with its live transform landing on #map.
@@ -106,7 +107,7 @@ setTimeout(() => {
 
     const capital =
       world.settlements.find((s) => s.kind === "capital") ?? world.settlements[0];
-    if (capital) {
+    if (capital) { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
       const lore = createLoreWriter(world, createRng(seed).fork("seed-of-the-day"));
       dryIn($("folio-note"), "400ms");
       $("folio-note").textContent = capitalBlurb(capital, lore.settlementNote(capital));
@@ -159,7 +160,7 @@ type HuntStore = { solved?: number; streak?: number };
 
 function readStore(): HuntStore {
   try {
-    return JSON.parse(localStorage.getItem(STORE_KEY) || "{}") || {};
+    return (JSON.parse(localStorage.getItem(STORE_KEY) || "{}") as HuntStore | null) || {};
   } catch {
     return {};
   }
@@ -205,7 +206,7 @@ function setHuntStatus(text: string): void {
   line.textContent = text;
   if (text.length > 0) restart(line, "wet"); // visual-only ink-dry blur
   const sticky = $("hunt-sticky");
-  if (!sticky) return;
+  if (!sticky) return; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   const show = text.length > 0;
   sticky.textContent = text;
   sticky.classList.toggle("active", show);
@@ -215,10 +216,11 @@ function setHuntStatus(text: string): void {
   stickyShown = show;
 }
 
+// eslint-disable-next-line max-lines-per-function
 function setupHunt(world: World): void {
   const hunt = $("hunt");
   const svg = $("sheet").querySelector("svg");
-  if (!hunt || !svg) return;
+  if (!hunt || !svg) return; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 
   const proj = createProjection(world.elev.w, world.elev.h, 1500, MARGIN);
   const quarry = chooseQuarry(world, { exclude: legendExclusions(world, svg, proj) });
@@ -387,9 +389,9 @@ function setupHunt(world: World): void {
     const name = quarry.settlement.name;
     const soundings = `${guesses} ${guesses === 1 ? "sounding" : "soundings"}`;
     const text = `Vellum Daily Hunt: I took ${name} in ${soundings}. Seed ${seed}. Can you beat it? ${location.href}`;
-    if (navigator.share) {
+    if (navigator.share) { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
       navigator.share({ title: "Vellum Daily Hunt", text }).catch(() => {});
-    } else if (navigator.clipboard) {
+    } else if (navigator.clipboard) { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
       navigator.clipboard
         .writeText(text)
         .then(() => {

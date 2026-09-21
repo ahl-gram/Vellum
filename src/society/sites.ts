@@ -49,6 +49,7 @@ type Candidate = {
   onRiver: boolean;
 };
 
+// eslint-disable-next-line max-lines-per-function
 export function placeSettlements(
   elev: Field,
   seaLevel: number,
@@ -123,7 +124,7 @@ export function placeSettlements(
 
   const capital =
     candidates.find((c) => c.harbor || c.onRiver) ?? candidates[0];
-  if (!capital) return [];
+  if (!capital) return []; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   placed.push({ ...capital, kind: "capital" });
 
   for (const c of candidates) {

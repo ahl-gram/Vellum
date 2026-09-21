@@ -23,6 +23,7 @@ export interface ChronicleDeps {
   overlay: { data(): OverlayData | null; hideCard(): void };
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function createChronicle(deps: ChronicleDeps) {
   const { mapEl, overlay } = deps;
 
@@ -55,7 +56,7 @@ export function createChronicle(deps: ChronicleDeps) {
 
   function applyScrub(): void {
     const data = overlay.data();
-    if (!data || !data.places || !data.places.length) return;
+    if (!data || !data.places || !data.places.length) return; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     overlay.hideCard();
     const { places, events, presentYear } = data;
     const overlayEl = mapEl.querySelector(".place-overlay");

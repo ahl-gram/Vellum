@@ -79,6 +79,7 @@ function stripUndefined<T extends object>(obj: T): Partial<T> {
   return out as Partial<T>;
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function generateWorld(recipe: WorldRecipe): World {
   const { seed, gridW, gridH, mapType } = recipe;
   const rng = createRng(seed);

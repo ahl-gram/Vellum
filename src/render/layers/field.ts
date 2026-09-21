@@ -145,6 +145,7 @@ export const THEMES: Record<ThemeName, ThemeSpec> = {
   population: POPULATION,
 };
 
+// eslint-disable-next-line max-lines-per-function
 export function fieldLayer(ctx: RenderCtx): SvgNode | null {
   if (!ctx.theme) return null;
   const theme = THEMES[ctx.theme];

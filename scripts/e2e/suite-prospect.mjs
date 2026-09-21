@@ -2,6 +2,7 @@
 import { makeStep } from "./step-support.mjs";
 import { dropExpectedCancellations } from "./console-support.mjs";
 
+// eslint-disable-next-line max-lines-per-function
 export async function run(ctx) {
   const { evaluate, send, check, sleep, consoleErrors, http4xx, PORT } = ctx;
   // PB1, PB1b, PB7c, PB10 and PB11 are deliberately not stepped: their own bounded loops return rather than throwing, and their checks already guard on it.
@@ -72,6 +73,7 @@ export async function run(ctx) {
   const svgOf = () => evaluate(`fetch(document.getElementById("pp-plate").src).then(r=>r.text())`, true);
 
   let first = null;
+  // eslint-disable-next-line max-lines-per-function
   await step("PB2 to PB5", async () => {
     await send("Page.navigate", { url: page(href && href.includes("#") ? href.slice(href.indexOf("#")) : "#seed=42&i=0") });
     const cap = await opened("the card's own link");

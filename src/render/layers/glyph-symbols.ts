@@ -1,6 +1,7 @@
 import { el, type SvgNode } from "../svg.ts";
 import type { MapStyle } from "../style.ts";
 
+// eslint-disable-next-line max-lines-per-function
 export function glyphSymbolDefs(style: MapStyle): SvgNode[] {
   const ink = style.ink;
   const paper = style.land;

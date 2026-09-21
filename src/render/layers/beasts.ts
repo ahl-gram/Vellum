@@ -8,6 +8,7 @@ import { beastExtents, beastGlyph } from "./beast-glyphs.ts";
 
 type Spot = { readonly x: number; readonly y: number; readonly d: number };
 
+// eslint-disable-next-line max-lines-per-function
 export function beastsLayer(
   ctx: RenderCtx,
   cartouche: CartouchePlan,
@@ -41,6 +42,7 @@ export function beastsLayer(
 
   const nodes: SvgNode[] = [];
 
+  // eslint-disable-next-line max-lines-per-function
   world.beasts.forEach((beast, i) => {
     const ext = beastExtents(beast.kind, k);
     const home: Spot = {

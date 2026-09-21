@@ -33,7 +33,7 @@ export function landPathD(svg: string, land: string): string[] {
   const out: string[] = [];
   for (const m of svg.matchAll(/<path\b[^>]*>/g)) {
     const a = attrsOf(m[0]!);
-    if (a.fill === land && a.d !== undefined) out.push(a.d);
+    if (a.fill === land && a.d !== undefined) out.push(a.d); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   }
   return out.sort();
 }

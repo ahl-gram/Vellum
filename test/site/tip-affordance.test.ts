@@ -297,6 +297,7 @@ test("the authored roster is exactly the css-bearing sources under src/ (#360)",
 const fingerprintsOf = (source: string): string[] =>
   CSS_FINGERPRINTS.filter(([, matches]) => matches(withoutComments(source))).map(([name]) => name);
 
+// eslint-disable-next-line max-lines-per-function
 test("the css-source scan sees css, and sees the defects it polices (#360)", () => {
   assert.deepEqual(
     fingerprintsOf(".toc a { font-family: serif; }"),

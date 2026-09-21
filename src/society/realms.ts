@@ -61,6 +61,7 @@ export function partitionRealms(
   return { labels, seats };
 }
 
+// eslint-disable-next-line max-lines-per-function
 function selectSeats(
   settlements: ReadonlyArray<Settlement>,
   sizes: ReadonlyArray<number>,
@@ -175,6 +176,7 @@ function topSettlementOnLandmass(
   return best;
 }
 
+// eslint-disable-next-line max-lines-per-function
 function floodRealms(
   labels: Int16Array,
   elev: Field,

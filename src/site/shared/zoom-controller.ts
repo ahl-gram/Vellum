@@ -69,6 +69,7 @@ export interface ZoomController {
 // d3-zoom stashes the live transform on the element itself as `__zoom`; typed so getState/rebase read and write it through one cast.
 type ZoomStoredElement = HTMLElement & { __zoom?: ZoomTransform };
 
+// eslint-disable-next-line max-lines-per-function
 export function createZoomController({
   viewportEl,
   targetEl,
@@ -154,7 +155,7 @@ export function createZoomController({
     sel()
       .transition()
       .duration(glideMsNow())
-      .call(behavior.scaleTo, k)
+      .call((s, k2) => behavior.scaleTo(s, k2), k)
       .on("end interrupt", () => {
         if (myGlide === glideSeq) glideTargetK = null;
       });
@@ -182,7 +183,7 @@ export function createZoomController({
     },
     reset() {
       clearSettle();
-      sel().call(behavior.transform, zoomIdentity);
+      sel().call((s, t) => behavior.transform(s, t), zoomIdentity);
       apply(zoomIdentity);
     },
     /** Adopt the current sheet as a fresh home, no transition: the chart under the camera was replaced. */
@@ -196,7 +197,7 @@ export function createZoomController({
     /** Programmatically zoom to a proposed transform, clamped like a live gesture. */
     zoomTo(next: ZoomState) {
       const c = constrainZoom({ x: next.x, y: next.y, k: next.k }, viewportExtent(), scaleExtent);
-      sel().call(behavior.transform, zoomIdentity.translate(c.x, c.y).scale(c.k));
+      sel().call((s, t) => behavior.transform(s, t), zoomIdentity.translate(c.x, c.y).scale(c.k));
     },
     refit(next: ZoomState) {
       const c = constrainZoom({ x: next.x, y: next.y, k: next.k }, viewportExtent(), scaleExtent);
@@ -211,7 +212,7 @@ export function createZoomController({
     /** Magnify by `factor` about the viewport centre as a d3 transition through the same zoom pipeline; reduced motion collapses to the instant scaleBy. */
     glideBy(factor: number) {
       if (prefersReduced()) {
-        sel().call(behavior.scaleBy, factor);
+        sel().call((s, f) => behavior.scaleBy(s, f), factor);
         return;
       }
       const base = glideTargetK != null ? glideTargetK : getState().k;
@@ -222,7 +223,7 @@ export function createZoomController({
       clearSettle();
       glideTargetK = null;
       if (prefersReduced()) {
-        sel().call(behavior.transform, zoomIdentity);
+        sel().call((s, t) => behavior.transform(s, t), zoomIdentity);
         apply(zoomIdentity);
         if (onDone) onDone();
         return;
@@ -230,7 +231,7 @@ export function createZoomController({
       sel()
         .transition()
         .duration(glideMsNow())
-        .call(behavior.transform, zoomIdentity)
+        .call((s, t) => behavior.transform(s, t), zoomIdentity)
         .on("end", () => {
           if (onDone) onDone();
         });
@@ -238,7 +239,7 @@ export function createZoomController({
     /** d3's translateBy works in the pre-scale frame (it adds k*arg to the screen translate), so divide by k to pan in screen px. */
     panBy(dxScreen: number, dyScreen: number) {
       const k = getState().k;
-      sel().call(behavior.translateBy, dxScreen / k, dyScreen / k);
+      sel().call((s, dx, dy) => behavior.translateBy(s, dx, dy), dxScreen / k, dyScreen / k);
     },
     getState,
   };

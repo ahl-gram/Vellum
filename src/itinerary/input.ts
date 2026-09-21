@@ -56,10 +56,11 @@ function directionAt(chain: ReadonlyArray<number>, w: number, k: number): { x: n
   return { x: dx / len, y: dy / len };
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function buildRibbonInput(world: World, fromIdx: number, toIdx: number): RibbonInput | null {
   const from = world.settlements[fromIdx];
   const to = world.settlements[toIdx];
-  if (!from || !to) return null;
+  if (!from || !to) return null; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   const mask = roadMask(world);
   const chain = roadWalk(world, mask, fromIdx, toIdx);
   if (!chain || chain.length < 4) return null;
