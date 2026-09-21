@@ -686,7 +686,7 @@ export async function run(ctx) {
     const opened = await evaluate(`(() => { const s = document.getElementById("note"); if (s && !s.classList.contains("open")) s.querySelector(".slip-handle").click(); return true; })()`);
     // The slip's fold is a transition, and CD28 derives a real pointer target from this press's rect: a fixed sleep either
     // measures a box still moving or waits longer than it needs. Poll it to REST instead, and throw naming the last read.
-    let pp = await settle(PP, (d, last) => !!d.press && d.press.shown && !!last && !!last.press && d.press.centre && last.press.centre &&
+    const pp = await settle(PP, (d, last) => !!d.press && d.press.shown && !!last && !!last.press && d.press.centre && last.press.centre &&
       d.press.centre.x === last.press.centre.x && d.press.centre.y === last.press.centre.y, "prospect-note-open");
     check(
       "CD28 the Prospect page's press sits on the engraver's note where the room's desk actions belong, answers a real pointer, and does NOT join the roads out, which go somewhere (ruled 2026-09-17, seat C)",

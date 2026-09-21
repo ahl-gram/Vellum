@@ -19,7 +19,8 @@ export function hashString(s: string): number {
   return h >>> 0;
 }
 
-function fmix32(h: number): number {
+function fmix32(x: number): number {
+  let h = x;
   h ^= h >>> 16;
   h = Math.imul(h, 0x85ebca6b);
   h ^= h >>> 13;

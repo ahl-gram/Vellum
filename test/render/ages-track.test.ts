@@ -132,8 +132,9 @@ test("a degenerate range's one year IS the park: Play opens the whole story", ()
 
 const ESC = 0.04; // the behavioral tests' explicit band; the live band is per-drag (detentEscapeU)
 
-const stepAll = (drag: DetentDrag, samples: ReadonlyArray<number>) => {
+const stepAll = (start: DetentDrag, samples: ReadonlyArray<number>) => {
   let u = NaN;
+  let drag = start;
   for (const s of samples) ({ u, drag } = detentStep(drag, s, ESC));
   return { u, drag };
 };
