@@ -10,6 +10,7 @@ import { emitTable, parseTable, type TableItem, type TableOverrides } from "../s
 import { deviceStorage as store, navigationTypeNow, readStoredTable, tableOnArrival, writeStoredTable, TRAVERSAL } from "../shared/table-store.ts";
 import { bindChartDrawer, makeDogEar, surveyItemFrom, refusalLine, thumbJobFor, thumbNames, layPressFace, filingAt, LAY_ON_CARD, type FilingSheet } from "./chart-drawer.ts";
 import { bindTableLeaf } from "./table-leaf.ts";
+import { bindTableDrag, bandOf, lengthPx } from "./table-drag.ts";
 import { forwardTarget, prospectTarget } from "./address.ts";
 import { createGlass } from "./glass.ts";
 import { wireControls } from "./controls.ts";
@@ -56,6 +57,11 @@ let drawing = false;
 function prefersReduce(): boolean {
   return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 }
+const narrow = window.matchMedia("(max-width: 900px)");
+const token = (name: string): string => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+const tokenMs = (name: string, fallback: number): number => { const v = parseFloat(token(name)); return Number.isFinite(v) ? v : fallback; };
+// The drawer's band is its LAYOUT seat, readable while it is shut and display:none, never its painted rect, which is all zeros shut and mid-slide while open.
+const drawerHeightPx = (): number => lengthPx(getComputedStyle(chartDrawer).getPropertyValue("--chart-drawer-h"), parseFloat(getComputedStyle(document.documentElement).fontSize));
 
 const tourOrder = createTourOrder({ runJob });
 
@@ -161,9 +167,21 @@ const glass = createGlass({
   decorateInset: (el: HTMLElement) => {
     const committed = glass.committedSurvey();
     const item = committed ? surveyItemFrom(committed) : null;
-    if (!item) return;
-    el.appendChild(makeDogEar(earLabel(item), glass.cameraNow().k,
-      () => { chartTable.lay(item, committed?.svg ?? null, committed?.title); }));
+    if (!item || !committed) return;
+    const ear = makeDogEar(earLabel(item), glass.cameraNow().k, () => { chartTable.lay(item, committed.svg, committed.title); });
+    el.appendChild(ear);
+    bindTableDrag({
+      handle: ear,
+      canDrag: () => !narrow.matches,
+      ghostUrl: () => URL.createObjectURL(new Blob([committed.svg], { type: "image/svg+xml" })),
+      band: () => bandOf(drawerHeightPx(), window.innerHeight),
+      reveal: () => chartTable.reveal(),
+      receiving: (over) => { chartTable.receiving(over); },
+      file: (url) => chartTable.lay(item, committed.svg, committed.title, { url }),
+      prefersReduce,
+      settleMs: () => tokenMs("--paper-settle", 340),
+      settleEase: () => token("--ease-paper") || "ease-out",
+    });
   },
   buttons: { zoomIn: $("zoom-in"), zoomOut: $("zoom-out"), reset: $("zoom-reset"), cluster: $("zoom-controls") },
 });
@@ -173,7 +191,7 @@ const room = bindRoom({ frame: stageEl, sheet: sheetEl, camera: { hold: () => gl
 const leaf = bindTableLeaf({
   leaf: tableLeaf, cuttings, count: chartDrawerCount, road: tableRoadBand, dock: legendDock,
   broadsideTab: leafBroadsideTab, tableTab: leafTableTab, slip: broadsideSlip,
-  narrow: window.matchMedia("(max-width: 900px)"),
+  narrow,
   onLayout: () => room.layout(),
 });
 

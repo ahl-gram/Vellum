@@ -52,6 +52,7 @@ Rows for what a visitor meets: the pages, the charts as shown, the cards, the dr
 - PR #635 (2026-09-20, low): The Portfolio gets no restore arm on a cached Back, a behaviour choice made in review and easy to reverse. Searched: A disclosed call awaiting live use. Searched "restore arm", "Portfolio"+"Back"+"cached", "bfcache"+"Portfolio": none.
 - PR #642 (2026-09-20, medium): The threshold scrollHeight - clientHeight > 1 is written twice (markScroll and the touch/wheel listener); divergence gives pointer-events without stopPropagation or the reverse. Searched: "scrollHeight - clientHeight", "markScroll", "threshold"+"twice" (unrelated hits): none.
 - PR #642 (2026-09-20, low): At 320 the card sits flush to the screen edge (right border at x=320.00), a second cue that can read as clipped. Searched: "flush", "screen edge", "x=320": none.
+- PR #663 (2026-09-21, medium): `#cuttings` reads `scrollWidth > clientWidth` at 1280x800 with six sheets laid (not at 1520x872), a flex row with no `overflow-x` declared; the six read fully visible in the plate read's frame, so tight rather than broken, and pre-existing (the row's rules are Sub 2's). Searched: "cuttings"+"overflow", "cuttings"+"scrollWidth", errata (PR #571's row is the img's box-sizing, not this): none.
 
 ## Ruled and left
 

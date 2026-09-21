@@ -59,3 +59,20 @@ export const makeStage = (ctx) => {
 
   return { pressKey, clickAt, settleHome };
 };
+
+// Real mouse input as the primitives a drag is made of, lifted at second use (Issue #523): suite-cluster's dragAcross was the first, and the Chart Table's carry needs the press and the moves apart from the release so it can read the ghost mid-carry. The moves carry button and buttons DELIBERATELY: Chromium ignores a move whose button is none for a held drag.
+export const makeMouse = (ctx) => {
+  const { send, sleep } = ctx;
+  const press = (x, y) => send("Input.dispatchMouseEvent", { type: "mousePressed", x, y, button: "left", buttons: 1, clickCount: 1 });
+  const moveTo = async (from, to, steps = 8) => {
+    for (let i = 1; i <= steps; i++) await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: from.x + ((to.x - from.x) * i) / steps, y: from.y + ((to.y - from.y) * i) / steps, button: "left", buttons: 1 });
+  };
+  const release = (x, y) => send("Input.dispatchMouseEvent", { type: "mouseReleased", x, y, button: "left", clickCount: 1 });
+  const dragAcross = async (from, dx, dy) => {
+    await press(from.x, from.y);
+    await moveTo(from, { x: from.x + dx, y: from.y + dy });
+    await release(from.x + dx, from.y + dy);
+    await sleep(150);
+  };
+  return { press, moveTo, release, dragAcross };
+};

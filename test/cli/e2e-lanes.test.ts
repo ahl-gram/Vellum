@@ -23,10 +23,10 @@ import {
 import type { E2eSuiteName } from "../../src/cli/e2e-suites.ts";
 import { E2E_PORT_VAR, E2E_DPORT_VAR, e2eOutSubdir } from "../../src/cli/e2e-ports.ts";
 
-// Seconds per suite, from the runner's own per-suite wall clock on a 16-core Mac. Every entry was refreshed 2026-09-20 at #637 from two local runs of each lane with the roster as it stands, the higher reading taken (both readings at the entry, one lane run at a time); refresh from that same output when the split is revisited. These seconds reach CI unevenly, about 2.0x on lane A and 1.8x on lane B against this table and per suite from 1.1x (home, wait-bound) to 3.3x (render), measured 2026-09-20 on main run 35518105601, so a rebalance is SIZED from the CI lane logs' per-suite wall clock and this table decides only the 0.6 bound below.
+// Seconds per suite, from the runner's own per-suite wall clock on a 16-core Mac. Every entry was refreshed 2026-09-20 at #637 from two local runs of each lane with the roster as it stands, the higher reading taken (chart-drawer re-measured the same way on 2026-09-21 at Issue #523) (both readings at the entry, one lane run at a time); refresh from that same output when the split is revisited. These seconds reach CI unevenly, about 2.0x on lane A and 1.8x on lane B against this table and per suite from 1.1x (home, wait-bound) to 3.3x (render), measured 2026-09-20 on main run 35518105601, so a rebalance is SIZED from the CI lane logs' per-suite wall clock and this table decides only the 0.6 bound below.
 const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   "home": 104.2, // 2026-09-20: 104.1, 104.2
-  "chart-drawer": 63.0, // 2026-09-20: 62.7, 63.0; CD23's 8.45s of SAY_HOLD_MS + SAY_FADE_MS is a floor no machine can undercut, so the principle bounds it from below and the runs set the budget above
+  "chart-drawer": 73.3, // 2026-09-21: 72.7, 73.3, two lane B runs at Issue #523 with CD44 to CD48 in (63.0 on 2026-09-20 before them); CD23's 8.45s of SAY_HOLD_MS + SAY_FADE_MS is a floor no machine can undercut, so the principle bounds it from below and the runs set the budget above
   "landfall": 54.8, // 2026-09-20: 54.8, 54.5
   "survey": 52.3, // 2026-09-20: 52.3, 50.8
   "zoom": 48.8, // 2026-09-20: 48.2, 48.8

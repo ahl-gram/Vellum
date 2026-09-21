@@ -39,6 +39,8 @@ export class El {
   getBoundingClientRect() {
     return { ...this.rect, width: this.rect.right - this.rect.left, height: this.rect.bottom - this.rect.top };
   }
+  get offsetWidth(): number { return this.rect.right - this.rect.left; }
+  get offsetHeight(): number { return this.rect.bottom - this.rect.top; }
 
   /** No bubbling: nothing under test depends on it. */
   fire(type: string, e?: unknown): void {
@@ -97,8 +99,13 @@ export class El {
     this.listeners.push(type);
     if (handler) this.handlers.set(type, [...(this.handlers.get(type) ?? []), handler]);
   }
+  removeEventListener(type: string, handler: (e?: unknown) => void): void {
+    this.handlers.set(type, (this.handlers.get(type) ?? []).filter((h) => h !== handler));
+  }
   querySelector(): El | null { return null; }
   querySelectorAll(): El[] { return []; }
+  focused = false;
+  focus(): void { this.focused = true; }
   remove(): void {
     const p = this.parentNode;
     if (!p) return;

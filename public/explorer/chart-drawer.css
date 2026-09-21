@@ -11,7 +11,7 @@
 body:has(.chart-drawer.open) .chart-drawer-tab { display: none; }
 button.chart-drawer-tab:is(:hover, :focus-visible) { background: var(--ink-dark); color: var(--parchment-bright); box-shadow: none; transform: none; }
 
-:root { --chart-drawer-h: 15.5rem; --chart-drawer-head: 12.5rem; --chart-drawer-gap: 1.6rem; --chart-drawer-tab-w: 2.8rem; }
+:root { --chart-drawer-h: 15.5rem; --chart-drawer-head: 12.5rem; --chart-drawer-gap: 1.6rem; --chart-drawer-tab-w: 2.8rem; --cutting-shadow: 0 8px 22px rgb(from var(--chart-ink) r g b / 0.55); }
 
 .chart-drawer {
   display: none; position: fixed; left: 0; right: 0; bottom: 0; z-index: 18;
@@ -40,7 +40,7 @@ body:has(.chart-drawer.open) .slip-tab { display: none; }
 .cuttings li { position: relative; flex: 0 1 10.6rem; min-width: 0; rotate: var(--tilt, 0deg); margin-right: -0.5rem; transition: rotate 0.2s var(--ease-paper), translate 0.2s var(--ease-paper); }
 .cuttings li:is(:hover, :focus-within) { rotate: 0deg; translate: 0 -4px; z-index: 2; }
 .cuttings li.prospect { flex-basis: 9.4rem; }
-.cuttings img { display: block; width: 100%; height: auto; border: 1px solid var(--line-tan); background: var(--chart-paper); box-shadow: 0 8px 22px rgb(from var(--chart-ink) r g b / 0.55); }
+.cuttings img { display: block; width: 100%; height: auto; border: 1px solid var(--line-tan); background: var(--chart-paper); box-shadow: var(--cutting-shadow); }
 .cuttings .awaited { display: grid; place-items: center; aspect-ratio: 420 / 310; border: 1px dashed var(--line-tan); background: var(--chart-paper); color: var(--ink-brown); font-family: var(--font-flourish); font-style: italic; font-size: 0.72rem; }
 .cuttings .label { position: absolute; left: 0.5rem; bottom: -0.85rem; max-width: calc(100% - 1rem); rotate: -1.2deg;
   background: var(--parchment-panel); border: 1px solid var(--line-tan); box-shadow: 0 3px 8px rgb(from var(--chart-ink) r g b / 0.35);
@@ -51,6 +51,35 @@ body:has(.chart-drawer.open) .slip-tab { display: none; }
   display: grid; place-items: center; padding: 0; line-height: 1; font-size: 0.9rem;
   color: var(--parchment); background: var(--ink-dark); border: 1px solid var(--line-tan); }
 .cuttings .off:is(:hover, :focus-visible) { background: var(--parchment-bright); color: var(--ink-dark); }
+
+/* The settle (Issue #523, D1 ruled 2026-09-21): a laid cutting drops from above, a touch larger and off its tilt, and its shadow flattens. */
+@keyframes cutting-land {
+  from { opacity: 0; transform: translateY(-14px) scale(1.06) rotate(-4deg); }
+  70% { opacity: 1; transform: translateY(2px) scale(1) rotate(0.6deg); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes cutting-shadow {
+  from { box-shadow: 0 22px 40px rgb(from var(--chart-ink) r g b / 0.7); }
+  to { box-shadow: var(--cutting-shadow); }
+}
+.cuttings li.landing { animation: cutting-land var(--paper-settle) var(--ease-paper) both; }
+.cuttings li.landing img { animation: cutting-shadow var(--paper-settle) var(--ease-paper) both; }
+
+/* The refusal at the cap (Issue #523, D3 ruled 2026-09-21): the sheets press down and rebound. */
+@keyframes cutting-jolt {
+  35% { transform: translateY(6px); }
+  70% { transform: translateY(-2px); }
+  to { transform: none; }
+}
+.cuttings.jolt { animation: cutting-jolt 0.3s var(--ease-paper) both; }
+
+/* The carried sheet (Issue #523, D2 ruled 2026-09-21): on body and never inside #map, whose transform would re-anchor a fixed box. */
+.sheet-ghost { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none; width: 10.6rem; rotate: -6deg; transform-origin: top right;
+  border: 1px solid var(--line-tan); background: var(--chart-paper); box-shadow: 0 22px 44px rgb(from var(--chart-ink) r g b / 0.6); }
+body.sheet-drag { user-select: none; -webkit-user-select: none; }
+/* The :is() takes the id's specificity, so the carry's cursor beats #map-viewport's grab without !important. */
+body.sheet-drag :is(#map-viewport, *) { cursor: grabbing; }
+.chart-drawer.receiving { border-top-color: var(--parchment-bright); }
 
 .chart-drawer-road { flex: none; display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-end; gap: 0.5rem; padding-bottom: 0.3rem; }
 .chart-drawer-road .full { font-variant-caps: small-caps; font-size: 0.78rem; letter-spacing: 0.06em; color: var(--parchment); }
