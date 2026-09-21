@@ -74,8 +74,13 @@ test("TD9 the drawer is revealed as the carry ENTERS the band and put back on a 
   d.move(640, 680);
   assert.equal(d.calls.reveal, 1, "entering the band opens it");
   assert.deepEqual(d.calls.receiving.slice(-2), [false, true], "with the drop cue");
+  d.move(660, 700);
+  assert.equal(d.calls.reveal, 1, "a second move still inside the band does not reveal again (the prover's round 2 hole)");
   d.move(640, 300);
   assert.equal(d.calls.reveal, 1, "backing out does not open it twice");
+  d.move(640, 690);
+  assert.equal(d.calls.reveal, 1, "nor does re-entering the band: one reveal per carry, and one restore to match");
+  d.move(640, 300);
   d.up(640, 300);
   assert.equal(d.calls.restore, 1, "a snap puts it back");
   assert.equal(d.calls.file.length, 0);
