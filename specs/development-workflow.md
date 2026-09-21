@@ -215,8 +215,10 @@ cause. Proving the new definition takes effect is not asked for here: no session
 definition it loaded, so the check would be unfalsifiable the moment it was written down.
 
 **15. Fix, re-prove, repeat, at most three rounds.** A guard you change is a guard the prover has
-not seen, so it goes back through step 11. Residue that will not be fixed is named in the PR body
-with the reason.
+not seen, so it goes back through step 11. A finding that will not be fixed in this pull request
+is filed as an issue or added to `errata/` as a row in the same diff, with the reason, and the PR
+body names which; a finding left as prose in the body alone is itself a finding. The shape of a row
+and how one leaves are `errata/README.md`.
 
 **An integration pull request takes no review commits.** When a long-lived epic branch finally
 merges to main, every commit on it has already run this whole sequence on its own sub, and new

@@ -225,9 +225,12 @@ Scars: #49, #101, #203, #255, #408, #486, #491, #492, #507, #508, #524, #528, #5
    base is a feature branch, so the keyword goes on the last PR to land and is re-checked after the
    retarget (PR #408).
 6. `grep -n '—'` over the body and the diff returns nothing.
-7. **A sibling defect found on the way is filed, not folded.** The exceptions: an accessibility
-   failure this PR itself caused, and an orchestrated batch whose dispatcher has relayed Alex's
-   ruling to fold for that batch (ruled 2026-09-14, #591).
+7. **A finding this PR does not fix is FILED or added to `errata/`, never left as prose in the
+   body.** A sibling defect found on the way is filed, or joins the ledger as one row (the PR, the
+   finding, what was searched; `errata/README.md` has the shape), not folded; grep `errata/` and
+   the open issues for it first. The exceptions that fold: an accessibility failure this PR itself
+   caused, and an orchestrated batch whose dispatcher has relayed Alex's ruling to fold for that
+   batch (ruled 2026-09-14, Issue #591).
 8. **Any call you made that the issue did not rule on gets a dated issue comment before the PR is
    opened.** The branch goes up at the first commit, so the review is the deadline that matters, not
    the push. The skeptic diffs against the newest ratified statement. A recon that falsifies an
@@ -250,7 +253,8 @@ Scars: #49, #101, #203, #255, #408, #486, #491, #492, #507, #508, #524, #528, #5
    there, the higher one DOES bring its branch current with `git merge origin/main` and take the
    stated position, which is what resolved #593 against #596 with both already open.
 10. Then `vellum-pr-skeptic`, dispatched COLD (the PR number and nothing else), with no edits under it
-    while it runs; three rounds at most, residue named in the body. **Commit before you dispatch it**,
+    while it runs; three rounds at most, and a finding not fixed is filed or an `errata/` row
+    (item 7), never body prose. **Commit before you dispatch it**,
     and before any review agent: it runs in the directory you launched it from, and a suite run there
     DELETES the generated assets under `public/`, which neither `git status` nor `git status --ignored`
     reports (#573). `.github/PULL_REQUEST_TEMPLATE.md` is the shape, and the hook refuses a body that skips one of its sections.
