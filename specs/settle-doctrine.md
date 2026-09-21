@@ -1,10 +1,17 @@
 # The settle doctrine for e2e
 
-Ratified by Alex across #526 (RS30) and #529 (three rounds), landed in PRs #527, #533 and #536,
-and re-learned on the session's own new suites in #535, #537, #542 and #545. Written here because
-it lives only in issue comments. Clause 4's split between a readiness wait and a measurement poll,
-clauses 13 and 14, and "The environment" below came in with #589 under epic #585, which moved them
-out of a private file and into the repo; Alex ruled the split in that session.
+**A settle is the wait until the thing a check is about to measure has come to rest**, so the
+reading is of its final state and not of a frame in flight. It is a poll, never a sleep:
+`makeSettle` in `scripts/e2e/settle-support.mjs` reads a value repeatedly and hands each read to a
+predicate beside the previous one, the check proceeds only when consecutive reads agree the thing
+has arrived, and a poll that runs out of tries throws with its last read rather than handing back a
+value still in flight. A fixed sleep measures the runner, not the page, and is the flake this file
+exists to end. The word is the product's own: the Surveyor's Glass redrafts when the camera settles
+(`onSettle` in `src/site/explorer/lod-controller.ts`), and the harness waits for the same rest
+before it reads.
+
+The clauses below say how a settle is written. "The environment" says what the harness and the
+headless browser actually do, so a green run can be believed.
 
 1. **The defect is the statistic, not the threshold.** A bound that fits one machine breaks on the
    next. Before widening a number, ask what the check is measuring; RS30 measured wall-clock
