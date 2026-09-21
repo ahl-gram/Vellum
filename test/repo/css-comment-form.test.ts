@@ -33,6 +33,8 @@ const PLANT = [
   "/* Issue#18 */",
   "/* the colour #123456 */",
   "/* a reissue #19 is not an Issue */",
+  "/* nor are reissues #20 */",
+  "/* nor is a shopr #21 a PR: the word must stand alone before the number */",
   '.c { content: "/* #99 */"; }',
   "/* a wider one, Chrome 137 */",
 ].join("\n");
@@ -45,6 +47,8 @@ test("the three form rules red on exactly the planted lines and nowhere else", a
     [ISSUE_FORM, 14],
     [ISSUE_FORM, 15],
     [ISSUE_FORM, 16],
+    [ISSUE_FORM, 17],
+    [ISSUE_FORM, 18],
   ]);
 });
 
