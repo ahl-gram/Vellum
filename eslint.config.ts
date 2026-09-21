@@ -2,6 +2,8 @@ import { defineConfig } from "eslint/config";
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";
 import globals from "globals";
+import css from "@eslint/css";
+import vellum from "./scripts/lint/css-comment-form.ts";
 
 // Every rule set off below was red on main when the tool landed; Issue #648 is the ledger, and each family pull request turns its rules on with the violations fixed or exempted by name.
 export default defineConfig(
@@ -43,6 +45,17 @@ export default defineConfig(
       "max-lines-per-function": ["error", 50],
       "no-param-reassign": ["error", { props: false }],
       "prefer-const": "error",
+    },
+  },
+  {
+    files: ["public/**/*.css"],
+    plugins: { css, vellum },
+    language: "css/css",
+    languageOptions: { tolerant: true },
+    rules: {
+      "vellum/css-comment-issue-form": "error",
+      "vellum/css-comment-no-em-dash": "error",
+      "vellum/css-comment-one-line": "error",
     },
   },
 );

@@ -21,7 +21,7 @@
     "test:e2e": "node scripts/e2e-explorer.mjs",
     "test:e2e:lanes": "node scripts/e2e-lanes.mjs",
     "check": "tsc --noEmit",
-    "lint": "eslint --flag unstable_native_nodejs_ts_config --max-warnings 0 src scripts test test-support"
+    "lint": "eslint --flag unstable_native_nodejs_ts_config --max-warnings 0 src scripts test test-support \"public/**/*.css\""
   },
   "dependencies": {
     "d3-selection": "^3.0.0",
@@ -30,6 +30,7 @@
     "gsap": "^3.15.0"
   },
   "devDependencies": {
+    "@eslint/css": "^2.0.0",
     "@eslint/js": "^10.0.1",
     "@types/d3-selection": "^3.0.11",
     "@types/d3-transition": "^3.0.9",
