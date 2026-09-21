@@ -117,7 +117,7 @@ scar:
 - **Archive the finalized plan before the first commit.** Copy the plan exactly as step 6 left it
   to `plans/<N>-plan.md` at the repo root, `N` the issue's number, and commit it with the
   implementation. It is a record of what was planned and is never edited afterwards: a plan that
-  changes at review is a residue line in the PR body naming the difference, not a rewritten file.
+  changes at review is named in the PR body with the difference, not a rewritten file.
   `plans/` is an archive on `design/`'s pattern, content only, and sits outside the roots
   `test/repo/prose-paths.test.ts` walks on purpose, so a plan may name the paths it is about to
   change and a later refactor does not red the history. A change with no issue has no plan step

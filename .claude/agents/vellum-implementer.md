@@ -47,7 +47,7 @@ The report, in this order:
 
 The dispatcher sends Alex's rulings. If your worktree is gone, do not rebuild it yourself: the main checkout is off limits to you and the harness refuses the command. Report it in one line and stop; the dispatcher rebuilds a tree and you resume from the plan in the scratchpad. Otherwise:
 
-- Before the first commit, copy the finalized plan from the scratchpad to `plans/<N>-plan.md` at the repo root, `N` your issue's number, and commit it with the implementation (workflow step 8). It is never edited afterwards; a plan that changes at review is a residue line in the PR body.
+- Before the first commit, copy the finalized plan from the scratchpad to `plans/<N>-plan.md` at the repo root, `N` your issue's number, and commit it with the implementation (workflow step 8). It is never edited afterwards; a plan that changes at review is named in the PR body with the difference.
 - The failing test first, red on the assertion you care about: stub the feature with the right shape and the wrong behavior. A "cannot find module" red proves nothing.
 - Commit and push at the first commit. Commit before every dispatch of a review agent.
 - Verify with named commands: `npm run check`, `npm test` (then `npm run astro:generate`), the e2e suites the change touches, and the evidence run for the acceptance. A claim you cannot run down is marked UNVERIFIABLE, in that word.
