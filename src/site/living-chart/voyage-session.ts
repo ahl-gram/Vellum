@@ -97,7 +97,7 @@ export function createSessionBuilder(deps: SessionBuilderDeps) {
     subtitle: string,
     quiet = false,
   ): Session | null {
-    if (!manifest || !manifest.places || !survey) return null;
+    if (!manifest || !manifest.places || !survey) return null; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     const straight = buildVoyagePlan(manifest.places, manifest.presentYear);
     if (!straight.ports.length) return null;
 

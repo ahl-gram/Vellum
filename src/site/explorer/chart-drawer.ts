@@ -256,7 +256,7 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
           if (!items.some((live) => keyOf(live) === keyOf(item))) { URL.revokeObjectURL(drawn.url); continue; }
           art.set(keyOf(item), drawn.url); names.set(keyOf(item), drawn.title); render();
         }
-      } while (refill);
+      } while (refill); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     } finally {
       drawing = false;
     }
@@ -282,8 +282,8 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
     const next = takeOffTable(items, seat);
     if (next === items) return;
     // Read the name BEFORE forget() drops it, or the announcement falls back to the chart number while the label beside it still said the drawn title.
-    const said = going ? titleOf(going) : null;
-    if (going) forget(going);
+    const said = going ? titleOf(going) : null; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    if (going) forget(going); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     commit(next);
     deps.say(said ? `${said} is off the table · ${countLine(next)}` : countLine(next));
   };

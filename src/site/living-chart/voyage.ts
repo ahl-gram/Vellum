@@ -31,7 +31,7 @@ export interface VoyageDeps {
 }
 
 function prefersReduce(): boolean {
-  return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 }
 
 const fmt = (p: Pt) => `${p.x},${p.y}`;

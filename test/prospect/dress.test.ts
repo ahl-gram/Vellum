@@ -140,7 +140,7 @@ test("the sea band wears the style's water tokens", () => {
   const ink = prospectSvg(g, STYLES.ink);
   const inkRects = [...ink.matchAll(/<rect\b[^>]*>/g)]
     .map((m) => attrsOf(m[0]!))
-    .filter((a) => a.fill === STYLES.ink.ocean && a.height !== undefined);
+    .filter((a) => a.fill === STYLES.ink.ocean && a.height !== undefined); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   const oceanSheet = inkRects.filter((a) => a.y === f(g.water!.y0));
   assert.equal(oceanSheet.length, 0, "ink paints no ocean sheet");
   assert.ok(ink.includes(`stroke="${STYLES.ink.coastStroke}"`), "ink keeps the coast stroke");

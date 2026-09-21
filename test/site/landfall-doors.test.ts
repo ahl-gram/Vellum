@@ -21,7 +21,7 @@ function stageCloseIndex(src: string): number {
   const start = src.lastIndexOf("<div", classAt);
   let depth = 0;
   for (const m of src.matchAll(/<(\/?)div\b/g)) {
-    if (m.index === undefined || m.index < start) continue;
+    if (m.index === undefined || m.index < start) continue; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     depth += m[1] === "/" ? -1 : 1;
     if (depth === 0) return m.index;
   }
@@ -58,7 +58,7 @@ test("the reveal's to-frame restores exactly what the base zeroed, and the dead 
   for (const decl of ["visibility: visible", "max-height: 100rem", "margin-top: 2rem", "padding: 1.5rem 1.6rem 1.4rem", "border-width: 1px", "outline-width: 3px"]) {
     assert.ok(to[1].includes(decl), `the to-frame restores ${decl}`);
   }
-  const narrow = css.match(/@media \(max-width: 900px\) \{\s*@keyframes lf-doors-reveal \{([\s\S]*?)\n  \}/);
+  const narrow = css.match(/@media \(max-width: 900px\) \{\s*@keyframes lf-doors-reveal \{([\s\S]*?)\n {2}\}/);
   assert.ok(
     narrow && narrow[1].includes("padding: 1.2rem 1.3rem 1.1rem") && narrow[1].includes("visibility: visible"),
     "the narrow override redefines the keyframes AFTER the base (a definition before it in file order never wins), so revealed doors under 900px wear the narrow padding",

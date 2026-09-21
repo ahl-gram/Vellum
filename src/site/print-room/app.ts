@@ -101,7 +101,7 @@ function randomSeed(): number {
 function refreshOrderControls(): void {
   const platesReady = posterBasis != null && !drawing && !ordering;
   for (const b of plateButtons) b.disabled = !platesReady;
-  if (formatSel) formatSel.disabled = drawing;
+  if (formatSel) formatSel.disabled = drawing; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 }
 
 function applyHash(): void {

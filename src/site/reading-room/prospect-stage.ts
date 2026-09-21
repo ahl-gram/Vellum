@@ -81,7 +81,7 @@ export function createProspectStage(opts: ProspectStageOpts = {}) {
   /** The host calls this once the instrument is armed, so the fetches queue off the settle path. */
   function prefetch(specs: ReadonlyArray<PlateSpec>): void {
     if (world === null) return;
-    for (const s of specs) plateFor(world, s);
+    for (const s of specs) plateFor(world, s); // eslint-disable-line @typescript-eslint/no-floating-promises
   }
 
   function show(spec: PlateSpec | null): void {

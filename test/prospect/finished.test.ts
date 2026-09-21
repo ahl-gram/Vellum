@@ -177,7 +177,7 @@ test("the key indexes only drawn features, by rank then west to east, at most fo
     ],
   };
   const [west, east] = plateKey(twoQuays);
-  assert.ok(west && east && west.x < east.x, "same rank letters west to east");
+  assert.ok(west && east && west.x < east.x, "same rank letters west to east"); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 
   assert.deepEqual(plateKey(composeProspect(makeInput({ kind: "hamlet" }))), []);
 });

@@ -257,7 +257,7 @@ export async function run(ctx) {
 
   // The boot hook never arrives with scripting off, so the poll waits on the notice itself rather than on goto()'s state read; the restore is a finally because a throw between here and it would hand the next suite a browser with no JavaScript, which runSelected keeps running into.
   let noJsScreen = null;
-  let noJsPrint = null;
+  let noJsPrint;
   try {
     await send("Emulation.setScriptExecutionDisabled", { value: true });
     await send("Page.navigate", { url: "about:blank" });

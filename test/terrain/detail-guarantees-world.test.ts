@@ -235,7 +235,7 @@ test("saddle census: the seed-42 world chart's three hairline picture-fuses, dra
       assert.ok(!pairs.includes(le), `saddle ${f.x},${f.y}: the drawn coast cut off a land corner, so it no longer bridges`);
     }
     const cornerSizes = [p1, p2].map(([gx, gy]) => sizes[ids[gx + gy * 320] as number] as number);
-    assert.ok(Math.min(...cornerSizes) <= 3, `saddle ${f.x},${f.y}: expected an islet-bump, got sizes ${cornerSizes}`);
+    assert.ok(Math.min(...cornerSizes) <= 3, `saddle ${f.x},${f.y}: expected an islet-bump, got sizes ${cornerSizes.join(",")}`);
   }
 });
 

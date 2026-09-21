@@ -42,7 +42,7 @@ export const makeStage = (ctx) => {
   const settleHome = async () => {
     await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
     for (let i = 0; i < 60; i++) {
-      let up = null;
+      let up;
       try { up = await evaluate(`!!document.getElementById("lf-veil") || !document.querySelector(".lf-stations .lf-station")`); } catch { up = true; }
       if (!up) break;
       await pressKey("Escape", "Escape", 27);

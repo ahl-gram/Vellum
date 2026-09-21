@@ -74,7 +74,7 @@ ctx.onmessage = (e) => {
     } else if (msg.kind === "ribbon") {
       const { world } = worldFor(msg.seed, msg.overrides);
       ctx.postMessage({ id: msg.id, ok: true, ...ribbonResultFor(world, msg) });
-    } else if (msg.kind === "tour") {
+    } else if (msg.kind === "tour") { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
       ctx.postMessage({ id: msg.id, ok: true, order: tourOrderFor(msg) });
     }
   } catch (err) {

@@ -205,7 +205,7 @@ test("the slips' positioning box is the stage's (#459 skeptic round 2 finding 6;
   let divDepth = 0;
   let stageClose = -1;
   for (const m of section.matchAll(/<(\/?)div\b/g)) {
-    if (m.index === undefined || m.index < stageOpen) continue;
+    if (m.index === undefined || m.index < stageOpen) continue; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     divDepth += m[1] === "/" ? -1 : 1;
     if (divDepth === 0) {
       stageClose = m.index;
@@ -233,7 +233,7 @@ test("the slips' positioning box is the stage's (#459 skeptic round 2 finding 6;
   const card = css.match(/\.lf-card \{([^}]*)\}/);
   assert.ok(card && /position:\s*absolute/.test(card[1]), "the slips float out of flow for the same reason (the failed-bundle reveal is the one pinned exception, and it holds only while nothing JS-dependent is on screen)");
   assert.ok(
-    card && card[1].includes("max-height: calc(100% - 2rem)") && card[1].includes("overflow: hidden"),
+    card && card[1].includes("max-height: calc(100% - 2rem)") && card[1].includes("overflow: hidden"), // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     "the desktop cap replaces the containment the stage's own overflow used to give an over-tall slip: without it a slip escapes the stage box (plate control: 3000px of injected content clamps to landfall minus 2rem with the Enter door still reachable); the narrow block lifts it, pinned in landfall-doors",
   );
 });

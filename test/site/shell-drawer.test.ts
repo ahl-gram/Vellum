@@ -24,11 +24,11 @@ const listener = () => {
 const fixture = (checked: boolean, closesOnScroll = true) => {
   const doc = listener();
   const revealEvents = listener();
-  const reveal = { checked, addEventListener: revealEvents.on.addEventListener };
+  const reveal = { checked, addEventListener: revealEvents.on.addEventListener.bind(revealEvents.on) };
   const scrim = {};
   const inert = [{ inert: false }, { inert: false }];
   const narrowEvents = listener();
-  const narrow = { matches: true, addEventListener: narrowEvents.on.addEventListener };
+  const narrow = { matches: true, addEventListener: narrowEvents.on.addEventListener.bind(narrowEvents.on) };
   bindDrawer(reveal, doc.on, { scrim, inert, narrow, closesOnScroll });
   return { reveal, doc, revealEvents, scrim, inert, narrow, narrowEvents };
 };

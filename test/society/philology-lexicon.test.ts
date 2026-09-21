@@ -15,7 +15,7 @@ const inventories = (id: string) => {
 };
 
 test("every culture in CULTURES has a tongue in the lexicon", () => {
-  const missing = CULTURES.filter((c) => !PHILOLOGY_LEXICON[c.id]).map((c) => c.id);
+  const missing = CULTURES.filter((c) => !PHILOLOGY_LEXICON[c.id]).map((c) => c.id); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   assert.deepEqual(missing, [], `these cultures speak an unglossed tongue: ${missing.join(", ")}`);
   assert.equal(Object.keys(PHILOLOGY_LEXICON).length, CULTURES.length);
 });
@@ -24,7 +24,7 @@ test("every root in every CULTURES inventory has an entry (#124 acceptance)", ()
   const holes: string[] = [];
   for (const culture of CULTURES) {
     const lex = PHILOLOGY_LEXICON[culture.id];
-    if (!lex) continue;
+    if (!lex) continue; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     const inv = inventories(culture.id);
     for (const root of inv.onsets) if (!lex.onsets[root]) holes.push(`${culture.id} onset ${root}`);
     for (const root of inv.codas) if (!lex.codas[root]) holes.push(`${culture.id} coda -${root}`);
@@ -37,7 +37,7 @@ test("the lexicon glosses nothing the grammar cannot produce, so a typo cannot h
   const strays: string[] = [];
   for (const culture of CULTURES) {
     const lex = PHILOLOGY_LEXICON[culture.id];
-    if (!lex) continue;
+    if (!lex) continue; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     const inv = inventories(culture.id);
     for (const root of Object.keys(lex.onsets)) if (!inv.onsets.includes(root)) strays.push(`${culture.id} onset ${root}`);
     for (const root of Object.keys(lex.codas)) if (!inv.codas.includes(root)) strays.push(`${culture.id} coda -${root}`);

@@ -179,9 +179,9 @@ test("generateRegionWorld carries labels, names, rings and the parent label fiel
     "the region should carry the parent's realm names",
   );
   assert.ok(region.region?.realmRings && region.region.realmRings.length > 0, "the region should carry mapped realm rings");
-  assert.ok(region.region?.realmBorders, "the region should carry the parent's border chains");
-  assert.ok(region.region?.parentRealmLabels, "the region should carry the parent's label field for tint assignment");
-  assert.equal(region.region?.worldGridH, world.recipe.gridH, "the parent grid height rides beside worldGridW");
+  assert.ok(region.region?.realmBorders, "the region should carry the parent's border chains"); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+  assert.ok(region.region?.parentRealmLabels, "the region should carry the parent's label field for tint assignment"); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+  assert.equal(region.region?.worldGridH, world.recipe.gridH, "the parent grid height rides beside worldGridW"); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 });
 
 /** Even-odd scanline rasterization of one realm's rings onto the region grid. */

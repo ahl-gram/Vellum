@@ -146,7 +146,7 @@ test("listing returns its rows in a stable sorted order", () => {
 
 const cli = (args: string[], cwd: string): { status: number; out: string; err: string } => {
   const r = spawnSync(process.execPath, [SCRIPT, ...args], { cwd, encoding: "utf8", timeout: BOUND_MS });
-  return { status: r.status ?? -1, out: r.stdout ?? "", err: r.stderr ?? "" };
+  return { status: r.status ?? -1, out: r.stdout ?? "", err: r.stderr ?? "" }; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 };
 
 test("the CLI prints the sandbox path alone on stdout, so WT=$(...) captures a usable path", () => {

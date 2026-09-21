@@ -106,7 +106,7 @@ function decorNodes(c: DressContext, strip: StripLayout, rng: Rng): SvgNode[] {
   for (let i = 0; i < strip.samples.length; i += DECOR_STRIDE) {
     const smp = strip.samples[i];
     const pt = strip.pts[i];
-    if (!smp || !pt) continue;
+    if (!smp || !pt) continue; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     if (pt.sy < strip.y0 + 26 || pt.sy > strip.y0 + strip.h - 12) continue;
     for (const side of [-1, 1] as const) {
       const rel = side < 0 ? smp.relL : smp.relR;

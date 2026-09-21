@@ -189,10 +189,10 @@ test("the walnut deep: one declaration, the vignette over the lit walnut, consum
   assert.equal(css.split("--the-deep:").length - 1, 1, "--the-deep is declared exactly once");
   const before = css.match(/body::before\s*\{([\s\S]*?)\}/);
   assert.ok(before && /background:\s*var\(--the-deep\)/.test(before[1]), "the fixed ground layer consumes var(--the-deep)");
-  assert.ok(before && /position:\s*fixed/.test(before[1]), "the ground layer is fixed (iOS treats background-attachment: fixed as scroll)");
+  assert.ok(before && /position:\s*fixed/.test(before[1]), "the ground layer is fixed (iOS treats background-attachment: fixed as scroll)"); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   const band = css.match(/\.band::before\s*\{([\s\S]*?)\}/);
   assert.ok(band && /background:\s*var\(--the-deep\)/.test(band[1]), "the band clips the SAME deep, via the token");
-  assert.ok(band && /clip-path:\s*inset\(0 0 calc\(100% - var\(--band-h\)\) 0\)/.test(band[1]), "the band is the deep clipped to --band-h, so the reserved ground cannot misalign");
+  assert.ok(band && /clip-path:\s*inset\(0 0 calc\(100% - var\(--band-h\)\) 0\)/.test(band[1]), "the band is the deep clipped to --band-h, so the reserved ground cannot misalign"); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   const daylight = css.search(/rgb\(255 250 235/);
   assert.equal(daylight, -1, "the light wash retired with the ground (#461 ruling 2)");
 });

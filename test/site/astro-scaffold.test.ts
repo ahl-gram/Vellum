@@ -387,17 +387,17 @@ test("the canonical nav renders the typed items flat, root-absolute, one aria-cu
       ),
     ];
     assert.deepEqual(
-      parts.map((m) => decode(m[2] ?? m[3])),
+      parts.map((m) => decode(m[2] ?? m[3])), // eslint-disable-line @typescript-eslint/no-unnecessary-condition
       NAV_ITEMS.map((i) => i.label),
       `${p.route} nav renders every item in NAV_ITEMS order`,
     );
     for (const m of parts) {
-      if (m[2] !== undefined) {
+      if (m[2] !== undefined) { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
         const item = NAV_ITEMS.find((i) => i.label === decode(m[2]));
         assert.equal(m[1], item?.href, `${p.route} nav link ${m[2]} uses the root-absolute href`);
       }
     }
-    const currents = parts.filter((m) => m[3] !== undefined);
+    const currents = parts.filter((m) => m[3] !== undefined); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     assert.deepEqual(
       currents.map((m) => decode(m[3])),
       p.current ? [p.current] : [],
