@@ -11,6 +11,7 @@ export default defineConfig(
     languageOptions: { parserOptions: { projectService: true, tsconfigRootDir: import.meta.dirname } },
     rules: {
       "no-empty": "off",
+      "no-param-reassign": ["error", { props: false }],
       "no-regex-spaces": "off",
       "preserve-caught-error": "off",
       "@typescript-eslint/no-floating-promises": "off",
@@ -24,6 +25,7 @@ export default defineConfig(
       "@typescript-eslint/no-unused-expressions": "off",
       "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/prefer-promise-reject-errors": "off",
+      "@typescript-eslint/prefer-readonly": "error",
       "@typescript-eslint/require-await": "off",
       "@typescript-eslint/restrict-template-expressions": "off",
       "@typescript-eslint/unbound-method": "off",
@@ -37,6 +39,8 @@ export default defineConfig(
       "no-empty": "off",
       "no-unused-vars": "off",
       "no-useless-assignment": "off",
+      "no-param-reassign": ["error", { props: false }],
+      "prefer-const": "error",
     },
   },
 );
