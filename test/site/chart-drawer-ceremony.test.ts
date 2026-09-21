@@ -52,6 +52,15 @@ test("CT12b a restore marks nothing: a reload, a Back or a shared link lands its
   assert.equal(lis(cuttings).some(landing), false);
 });
 
+test("CT12c the mark is consumed by the render that plays it: a lay followed by a restore that still holds that sheet re-seats it STILL, since a mark surviving its render would settle the sheet again on the cached return (the guard-prover's hole, 2026-09-21)", () => {
+  const { table, cuttings } = drawer();
+  table.lay(survey(1), SVG, "one");
+  assert.equal(landing(lis(cuttings)[0]!), true, "the lay settles");
+  table.restore([survey(1), survey(2)]);
+  assert.equal(lis(cuttings).length, 2);
+  assert.equal(lis(cuttings).some(landing), false, "the restore re-seats the same sheet without a settle");
+});
+
 test("CT13 the settle retires on the cutting's OWN animation end and not on its picture's: the img's shadow keyframe ending first must not cut the sheet's settle short", () => {
   const { table, cuttings } = drawer();
   table.lay(survey(1), SVG, "one");
