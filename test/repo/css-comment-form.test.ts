@@ -32,6 +32,7 @@ const PLANT = [
   "/* Issues #17 */",
   "/* Issue#18 */",
   "/* the colour #123456 */",
+  "/* a reissue #19 is not an Issue */",
   '.c { content: "/* #99 */"; }',
   "/* a wider one, Chrome 137 */",
 ].join("\n");
@@ -43,6 +44,7 @@ test("the three form rules red on exactly the planted lines and nowhere else", a
     [ISSUE_FORM, 8],
     [ISSUE_FORM, 14],
     [ISSUE_FORM, 15],
+    [ISSUE_FORM, 16],
   ]);
 });
 
