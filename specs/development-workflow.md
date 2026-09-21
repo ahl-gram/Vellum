@@ -117,7 +117,7 @@ scar:
 - **Archive the finalized plan before the first commit.** Copy the plan exactly as step 6 left it
   to `plans/<N>-plan.md` at the repo root, `N` the issue's number, and commit it with the
   implementation. It is a record of what was planned and is never edited afterwards: a plan that
-  changes at review is a residue line in the PR body naming the difference, not a rewritten file.
+  changes at review is named in the PR body with the difference, not a rewritten file.
   `plans/` is an archive on `design/`'s pattern, content only, and sits outside the roots
   `test/repo/prose-paths.test.ts` walks on purpose, so a plan may name the paths it is about to
   change and a later refactor does not red the history. A change with no issue has no plan step
@@ -224,8 +224,10 @@ cause. Proving the new definition takes effect is not asked for here: no session
 definition it loaded, so the check would be unfalsifiable the moment it was written down.
 
 **15. Fix, re-prove, repeat, at most three rounds.** A guard you change is a guard the prover has
-not seen, so it goes back through step 11. Residue that will not be fixed is named in the PR body
-with the reason.
+not seen, so it goes back through step 11. A finding that will not be fixed in this pull request
+is filed as an issue or added to `errata/` as a row in the same diff, with the reason, and the PR
+body names which; a finding left as prose in the body alone is itself a finding. The shape of a row
+and how one leaves are `errata/README.md`.
 
 **An integration pull request takes no review commits.** When a long-lived epic branch finally
 merges to main, every commit on it has already run this whole sequence on its own sub, and new
