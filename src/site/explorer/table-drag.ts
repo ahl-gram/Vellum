@@ -27,7 +27,6 @@ export function bandOf(drawerHeight: number, viewportHeight: number): Band | nul
 }
 
 
-/** A CSS length token in px: rem scaled by the root font size, px as is, anything else NaN. */
 export function lengthPx(token: string, remPx: number): number {
   const t = token.trim();
   if (/^-?\d*\.?\d+rem$/.test(t)) return parseFloat(t) * remPx;
@@ -37,7 +36,6 @@ export function lengthPx(token: string, remPx: number): number {
 
 export interface TableDragDeps {
   readonly handle: HTMLButtonElement;
-  /** False where no drawer can show (the 900px stand-down), and then a press is only ever the click. */
   readonly canDrag: () => boolean;
   readonly ghostUrl: () => string;
   readonly band: () => Band | null;
@@ -95,6 +93,7 @@ function moveCarry(deps: TableDragDeps, c: Carry, at: Point): void {
 export function bindTableDrag(deps: TableDragDeps): void {
   let carry: Carry | null = null;
   let dragged = false;
+  let owed: EventListener | null = null;
   const bound: Array<readonly [EventTarget, string, EventListener]> = [];
   const listen = (target: EventTarget, type: string, fn: EventListener): void => { target.addEventListener(type, fn); bound.push([target, type, fn]); };
   const unlisten = (): void => {
@@ -102,14 +101,15 @@ export function bindTableDrag(deps: TableDragDeps): void {
     document.body.classList.remove("sheet-drag");
     deps.receiving(false);
   };
+  const swallowThisRelease = (): void => { dragged = true; setTimeout(() => { dragged = false; }, 0); };
+  const dropOwed = (): void => { if (owed) document.removeEventListener("pointerup", owed); owed = null; };
   const finish = (at: Point | null): void => {
     const c = carry;
     carry = null;
     unlisten();
     if (!c?.ghost || !c.url) return;
-    // The click this release fires, if any, arrives before the task ends; a keyboard activation later is an honest click and is never swallowed.
-    dragged = true;
-    setTimeout(() => { dragged = false; }, 0);
+    if (at) swallowThisRelease();
+    else { owed = () => { dropOwed(); swallowThisRelease(); }; document.addEventListener("pointerup", owed); }
     const filed = at !== null && dropOutcome(at, deps.band()) === "file";
     if (filed && deps.file(c.url)) { c.ghost.remove(); return; }
     snapBack(deps, c.ghost, c.url);
@@ -117,6 +117,7 @@ export function bindTableDrag(deps: TableDragDeps): void {
   };
   const onMove = (e: PointerEvent): void => { if (carry) moveCarry(deps, carry, { x: e.clientX, y: e.clientY }); };
   deps.handle.addEventListener("pointerdown", (e) => {
+    dropOwed();
     if (carry || !grabbable(e) || !deps.canDrag()) return;
     carry = { start: { x: e.clientX, y: e.clientY }, ghost: null, url: null, restore: null };
     listen(document, "pointermove", onMove as EventListener);

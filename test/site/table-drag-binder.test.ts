@@ -134,3 +134,38 @@ test("TD12 the drawer's height token is read by its unit, so a band computed fro
   assert.equal(Number.isNaN(lengthPx("calc(100vh - 2rem)", 16)), true, "a length this reader cannot resolve is NaN, which bandOf reads as no band");
   assert.equal(Number.isNaN(lengthPx("", 16)), true);
 });
+
+test("TD13 a snap-back with motion flies to the ear's corner, and an ear that has left the page by then fades where it is rather than flying to an all-zero rect (the lane's call 6)", async () => {
+  const frames: unknown[][] = [];
+  (El.prototype as unknown as { animate: (f: unknown[]) => { finished: Promise<void> } }).animate = (f) => { frames.push(f); return { finished: Promise.resolve() }; };
+  try {
+    const d = bound({ reduce: false });
+    d.press(700, 130); d.move(640, 300); d.up(640, 300);
+    assert.equal(frames.length, 1, "with motion the snap-back is an animation");
+    assert.ok("translate" in (frames[0]![1] as object), "flying to the ear's seat");
+    assert.match(String((frames[0]![1] as { translate: string }).translate), /^\d+(\.\d+)?px/, "a real destination");
+    (d.handle as unknown as { isConnected: boolean }).isConnected = false;
+    d.press(700, 130); d.move(640, 300); d.up(640, 300);
+    assert.equal(frames.length, 2);
+    assert.equal("translate" in (frames[1]![1] as object), false, "a detached ear gets a fade in place, no flight");
+    await Promise.resolve();
+    assert.equal(d.ghost(), null, "and the ghost is gone once the animation finishes");
+  } finally {
+    delete (El.prototype as unknown as { animate?: unknown }).animate;
+  }
+});
+
+test("TD14 a cancelled carry (Escape, a lost window, a cancelled pointer) still swallows the click of ITS eventual release on the ear, and a fresh press afterwards drops that pending swallow so an honest click files (the cold review's finding 3 on PR #663)", async () => {
+  const d = bound();
+  d.press(700, 130); d.move(706, 136); fireDoc("keydown", { key: "Escape" });
+  assert.equal(d.ghost(), null, "Escape ended the carry");
+  await nextTick();
+  d.up(700, 130);
+  assert.equal(d.click().stopped, true, "the release the reader still owes fires a click on the ear, and it is swallowed");
+  await nextTick();
+  assert.equal(d.click().stopped, false, "once");
+  d.press(700, 130); d.move(706, 136); for (const fn of [...(winListeners.get("blur") ?? [])]) fn({});
+  await nextTick();
+  d.press(700, 130); d.up(700, 130);
+  assert.equal(d.click().stopped, false, "a release that never reached the page (the window was lost) leaves no swallow for the next honest press and click");
+});

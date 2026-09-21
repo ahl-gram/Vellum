@@ -258,6 +258,12 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
   };
 
   const jolt = (): void => { if (onScreen()) deps.cuttings.classList.add("jolt"); };
+  // A drawer that was shut is still sliding up when the refusal lands, so the dip waits for the slide's own end; a drawer not on screen at all (the phone) never slides and gets no dip.
+  const joltWhenStill = (wasOpen: boolean): void => {
+    if (wasOpen) { jolt(); return; }
+    if (deps.root.getBoundingClientRect().width === 0) return;
+    deps.root.addEventListener("animationend", (e) => { if (e.target === deps.root) jolt(); }, { once: true });
+  };
   deps.cuttings.addEventListener("animationend", (e) => { if (e.target === deps.cuttings) deps.cuttings.classList.remove("jolt"); });
 
   const forget = (item: TableItem): void => {
@@ -333,8 +339,9 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
       const laid = layOnTable(items, item);
       if (laid.refused) {
         deps.say(refusalLine(laid.reason ?? "full", item.kind));
+        const wasOpen = deps.root.classList.contains("open");
         setOpen(true);
-        if (laid.reason === "full") jolt();
+        if (laid.reason === "full") joltWhenStill(wasOpen);
         return false;
       }
       if (ready) art.set(keyOf(item), ready.url);

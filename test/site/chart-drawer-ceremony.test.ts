@@ -19,10 +19,12 @@ function drawer(opts: { onScreen?: boolean; drawThumb?: (item: TableItem) => Pro
   const el = (tag: string) => new El(tag);
   const cuttings = el("ol");
   cuttings.rect = opts.onScreen === false ? { left: 0, top: 0, right: 0, bottom: 0 } : { left: 251, top: 567, right: 1077, bottom: 785 };
+  const root = el("div");
+  root.rect = opts.onScreen === false ? { left: 0, top: 0, right: 0, bottom: 0 } : { left: 0, top: 552, right: 1280, bottom: 800 };
   const said: string[] = [];
   const changes: number[] = [];
   const deps = {
-    root: el("div"), tab: el("button"), shut: el("button"), count: el("p"), cuttings, full: el("p"), road: el("button"),
+    root, tab: el("button"), shut: el("button"), count: el("p"), cuttings, full: el("p"), road: el("button"),
     say: (line: string) => { said.push(line); },
     onChange: (items: ReadonlyArray<TableItem>) => { changes.push(items.length); },
     ...(opts.drawThumb ? { drawThumb: opts.drawThumb } : {}),
@@ -86,6 +88,7 @@ test("CT13b a ceremony plays only where the sheets are on screen: a lay into a l
 test("CT14 a refusal at the cap jolts the sheets on the table, a duplicate does not, and the next render takes the jolt off", () => {
   const { table, cuttings, said } = drawer();
   table.restore(fill(TABLE_CAP));
+  table.reveal();
   assert.equal(table.lay(survey(99), SVG, "seventh"), false, "the cap refuses");
   assert.equal(cuttings.classList.contains("jolt"), true, "the table reacts");
   assert.match(said.at(-1) ?? "", /the table is full/);
@@ -106,6 +109,22 @@ test("CT14b the jolt, like the settle, is dropped rather than queued when the sh
   table.restore(fill(TABLE_CAP));
   table.lay(survey(99), SVG, "seventh");
   assert.equal(cuttings.classList.contains("jolt"), false);
+});
+
+test("CT14c a refusal at the cap from a SHUT drawer plays the dip once the drawer's own slide has ended, not under it, while a refusal with the drawer already open dips at once (D3: the drawer itself does not move; the cold review's finding 4 on PR #663)", () => {
+  const shut = drawer();
+  shut.table.restore(fill(TABLE_CAP));
+  assert.equal(shut.deps.root.classList.contains("open"), false, "shut before the refusal");
+  shut.table.lay(survey(99), SVG, "seventh");
+  assert.equal(shut.deps.root.classList.contains("open"), true, "the refusal opens the drawer, which starts its slide");
+  assert.equal(shut.cuttings.classList.contains("jolt"), false, "the sheets do not dip while the drawer is still rising");
+  shut.deps.root.fire("animationend", { target: shut.deps.root });
+  assert.equal(shut.cuttings.classList.contains("jolt"), true, "they dip once the drawer has arrived");
+  const open = drawer();
+  open.table.restore(fill(TABLE_CAP));
+  open.table.reveal();
+  open.table.lay(survey(99), SVG, "seventh");
+  assert.equal(open.cuttings.classList.contains("jolt"), true, "an open drawer dips at once");
 });
 
 test("CT15 a lay handed a ready url (the drag's ghost) adopts it and mints none; a lay handed only the svg mints one", () => {

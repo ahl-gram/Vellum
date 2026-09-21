@@ -39,6 +39,8 @@ export class El {
   getBoundingClientRect() {
     return { ...this.rect, width: this.rect.right - this.rect.left, height: this.rect.bottom - this.rect.top };
   }
+  get offsetWidth(): number { return this.rect.right - this.rect.left; }
+  get offsetHeight(): number { return this.rect.bottom - this.rect.top; }
 
   /** No bubbling: nothing under test depends on it. */
   fire(type: string, e?: unknown): void {
