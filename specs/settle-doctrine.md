@@ -166,7 +166,15 @@ section points there rather than restating it.
   `{ subtree: true }` from the box is the other way to reach the child. Take the rect only once
   that poll has resolved. Under `prefers-reduced-motion` (the media block in `public/motion.css`)
   every animation collapses to near zero and the same poll resolves at once, which is what keeps
-  that arm the control `specs/ui-design.md` makes it. Gate 2 item 6 carries the typing-moment half.
+  that arm the control `specs/ui-design.md` makes it. Near zero is not zero: the blanket's `0.01ms`
+  still runs the animation for a frame, so a read taken at +0 after the class change that starts it
+  shows the `from` keyframe (the flight's start shadow, the landing class still set) and rest
+  arrives a frame or two later, tens of milliseconds of real time in this harness (40 to 70ms in one
+  trace, Issue #523's spike, seed 42 at 1280x800, 2026-09-21); the poll on the animation's own
+  state is what resolves it under reduced motion too, never the clock or the +0 read. The collapsed
+  duration comes back from computed style spelled `1e-05s`, not `0.00001s`, so a check reads it as
+  a number (`parseFloat(duration) < 0.01` in CD46, `scripts/e2e/suite-chart-drawer.mjs`) and never
+  compares the string. Gate 2 item 6 carries the typing-moment half.
 - **A clip with a negative `x` is neither clamped nor refused: `Page.captureScreenshot` hands back a
   frame of the clip's SIZE taken from the viewport's top-left corner, the requested `y` lost with
   it.** On an unscrolled page that corner is the page header, which is the frame a card at the left
