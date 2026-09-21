@@ -99,6 +99,9 @@ export class El {
     this.listeners.push(type);
     if (handler) this.handlers.set(type, [...(this.handlers.get(type) ?? []), handler]);
   }
+  removeEventListener(type: string, handler: (e?: unknown) => void): void {
+    this.handlers.set(type, (this.handlers.get(type) ?? []).filter((h) => h !== handler));
+  }
   querySelector(): El | null { return null; }
   querySelectorAll(): El[] { return []; }
   focused = false;

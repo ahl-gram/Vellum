@@ -73,7 +73,7 @@ body:has(.chart-drawer.open) .slip-tab { display: none; }
 }
 .cuttings.jolt { animation: cutting-jolt 0.3s var(--ease-paper) both; }
 
-/* The carried sheet (Issue #523, D2 ruled 2026-09-21): the thumbnail hangs from the corner the reader took it by, on body and never inside #map, whose transform would re-anchor a fixed box; z 30 clears the Broadside's 20. */
+/* The carried sheet (Issue #523, D2 ruled 2026-09-21): on body and never inside #map, whose transform would re-anchor a fixed box. */
 .sheet-ghost { position: fixed; left: 0; top: 0; z-index: 30; pointer-events: none; width: 10.6rem; rotate: -6deg; transform-origin: top right;
   border: 1px solid var(--line-tan); background: var(--chart-paper); box-shadow: 0 22px 44px rgb(from var(--chart-ink) r g b / 0.6); }
 body.sheet-drag { user-select: none; -webkit-user-select: none; }

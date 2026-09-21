@@ -26,7 +26,6 @@ const nextTick = () => new Promise((r) => setTimeout(r, 0));
 const MOUSE = { pointerType: "mouse", button: 0, isPrimary: true };
 const BAND = { top: 552 };
 
-/** A bound handle over recorders for every dep, the drawer's band at 552 and reduced motion ON so a snap-back ends synchronously. */
 function bound(opts: { file?: boolean; band?: { top: number } | null; canDrag?: boolean; reduce?: boolean } = {}) {
   const handle = new El("button") as unknown as HTMLButtonElement & El;
   handle.rect = { left: 660, top: 115, right: 715, bottom: 170 };
@@ -48,7 +47,6 @@ function bound(opts: { file?: boolean; band?: { top: number } | null; canDrag?: 
   const press = (x: number, y: number) => handle.fire("pointerdown", { ...MOUSE, clientX: x, clientY: y });
   const move = (x: number, y: number) => fireDoc("pointermove", { clientX: x, clientY: y });
   const up = (x: number, y: number) => fireDoc("pointerup", { clientX: x, clientY: y });
-  /** A click as the handle's capture listener sees it; `stopped` is what the swallow does. */
   const click = () => { const e = { stopped: false, prevented: false, stopImmediatePropagation() { this.stopped = true; }, preventDefault() { this.prevented = true; } }; handle.fire("click", e); return e; };
   return { handle, calls, ghost, press, move, up, click, revoked };
 }
@@ -108,6 +106,7 @@ test("TD10 one url per carry: a filing adopts it and every other end revokes it,
   assert.equal(d.revoked.at(-1), "blob:ghost-4", "losing the window revokes");
   d.press(700, 130); d.move(640, 300); fireDoc("keydown", { key: "Escape" });
   assert.equal(d.revoked.at(-1), "blob:ghost-5", "Escape revokes");
+  assert.deepEqual(d.calls.receiving.slice(-3), [false, false, false], "and each cancelled end took the drop cue off the drawer (the prover named this unswept)");
   assert.equal(d.ghost(), null, "and no ghost is left on the body");
   assert.equal((docListeners.get("pointermove") ?? []).length, 0, "and no document listener outlives its carry");
 });
@@ -133,6 +132,7 @@ test("TD12 the drawer's height token is read by its unit, so a band computed fro
   assert.equal(lengthPx("  15.5rem ", 20), 310, "the root font size scales a rem");
   assert.equal(Number.isNaN(lengthPx("calc(100vh - 2rem)", 16)), true, "a length this reader cannot resolve is NaN, which bandOf reads as no band");
   assert.equal(Number.isNaN(lengthPx("", 16)), true);
+  for (const other of ["50%", "20vh", "2em", "248"]) assert.equal(Number.isNaN(lengthPx(other, 16)), true, `${other} is not a unit this reader resolves, so it is no band rather than a wrong one`);
 });
 
 test("TD13 a snap-back with motion flies to the ear's corner, and an ear that has left the page by then fades where it is rather than flying to an all-zero rect (the lane's call 6)", async () => {

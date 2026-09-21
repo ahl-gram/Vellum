@@ -67,7 +67,6 @@ function snapBack(deps: TableDragDeps, g: HTMLImageElement, u: string): void {
   const done = (): void => { g.remove(); URL.revokeObjectURL(u); };
   const ms = deps.prefersReduce() ? 0 : deps.settleMs();
   if (ms === 0) { done(); return; }
-  // A detached ear (a wheel mid-carry recommitted the inset) has an all-zero rect, and a flight there is the bug; the ghost then fades where it is.
   const rect = deps.handle.isConnected ? deps.handle.getBoundingClientRect() : null;
   const to = rect ? ghostSeat({ x: rect.right, y: rect.top }, g.offsetWidth) : null;
   const frames = to

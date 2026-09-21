@@ -127,6 +127,28 @@ test("CT14c a refusal at the cap from a SHUT drawer plays the dip once the drawe
   assert.equal(open.cuttings.classList.contains("jolt"), true, "an open drawer dips at once");
 });
 
+test("CT14d a shut inside a ceremony clears it rather than leaving it armed: display:none cancels an animation with no end event, so a settle or a dip caught by the shut press, and a dip armed on a slide the shut cancelled, would all replay on the next plain open (the cold review's round 3 finding 2 on PR #663)", () => {
+  const { table, cuttings, deps } = drawer();
+  table.lay(survey(1), SVG, "one");
+  assert.equal(landing(lis(cuttings)[0]!), true, "settling");
+  deps.shut.fire("click");
+  assert.equal(landing(lis(cuttings)[0]!), false, "a shut mid-settle takes the mark off, since no end event will");
+  deps.tab.fire("click");
+  assert.equal(lis(cuttings).some(landing), false, "and the next open replays nothing");
+  table.restore(fill(TABLE_CAP));
+  deps.shut.fire("click");
+  table.lay(survey(99), SVG, "seventh");
+  assert.equal(deps.root.classList.contains("open"), true, "a refusal from shut opens the drawer and arms the dip on its slide");
+  deps.shut.fire("click");
+  deps.tab.fire("click");
+  deps.root.fire("animationend", { target: deps.root });
+  assert.equal(cuttings.classList.contains("jolt"), false, "a shut inside that slide dropped the armed dip, so the next plain open's slide end dips nothing");
+  table.lay(survey(99), SVG, "seventh");
+  assert.equal(cuttings.classList.contains("jolt"), true, "dipping");
+  deps.shut.fire("click");
+  assert.equal(cuttings.classList.contains("jolt"), false, "a shut mid-dip takes the jolt off too");
+});
+
 test("CT15 a lay handed a ready url (the drag's ghost) adopts it and mints none; a lay handed only the svg mints one", () => {
   const minted: string[] = [];
   const real = URL.createObjectURL.bind(URL);

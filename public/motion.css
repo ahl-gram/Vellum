@@ -3,7 +3,7 @@
 :root {
   --paper-quick: 180ms;
   --paper: 260ms;
-  --paper-settle: 340ms;
+  --paper-settle: 340ms;  /* also the ghost snap-back, read as a number by `tokenMs` in `src/site/explorer/app.ts`, so the unit stays ms */
   --unfurl: 650ms;
   --unfurl-quick: 400ms;
   --ink-draw: 1200ms;
@@ -19,7 +19,7 @@
   --redraft-dry-wait-hamlet: 740ms;
   --glide: 300ms;         /* the zoom glide, read per glide by `glideMs` in `src/site/explorer/glass.ts` and the rooms' seats, bypassed under reduced motion */
 
-  --ease-paper: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-paper: cubic-bezier(0.22, 0.61, 0.36, 1);  /* also the ghost snap-back, read as text by `token` in `src/site/explorer/app.ts` */
   --ease-unfurl: cubic-bezier(0.66, 0, 0.2, 1.03);
   --ease-turn: cubic-bezier(0.62, 0, 0.34, 1);
 

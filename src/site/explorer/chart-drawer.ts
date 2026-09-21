@@ -258,11 +258,19 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
   };
 
   const jolt = (): void => { if (onScreen()) deps.cuttings.classList.add("jolt"); };
-  // A drawer that was shut is still sliding up when the refusal lands, so the dip waits for the slide's own end; a drawer not on screen at all (the phone) never slides and gets no dip.
+  let armedJolt: ((e: AnimationEvent) => void) | null = null;
+  const disarmJolt = (): void => { if (armedJolt) deps.root.removeEventListener("animationend", armedJolt); armedJolt = null; };
   const joltWhenStill = (wasOpen: boolean): void => {
     if (wasOpen) { jolt(); return; }
     if (deps.root.getBoundingClientRect().width === 0) return;
-    deps.root.addEventListener("animationend", (e) => { if (e.target === deps.root) jolt(); }, { once: true });
+    armedJolt = (e) => { if (e.target !== deps.root) return; disarmJolt(); jolt(); };
+    deps.root.addEventListener("animationend", armedJolt);
+  };
+  // A shut mid-ceremony sets display:none, which cancels an animation with no end event; what the end would have cleared is cleared here instead.
+  const clearCeremonies = (): void => {
+    for (const row of rows.values()) row.li.classList.remove("landing");
+    deps.cuttings.classList.remove("jolt");
+    disarmJolt();
   };
   deps.cuttings.addEventListener("animationend", (e) => { if (e.target === deps.cuttings) deps.cuttings.classList.remove("jolt"); });
 
@@ -309,6 +317,7 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
       if (open || broadsideWasOpen) broadside?.setFolded(open);
     }
     deps.root.classList.toggle("open", open);
+    if (!open) clearCeremonies();
     // Both presses hide themselves: the tab is display:none while open and the shut press goes with the drawer, so focus would fall to <body> and a keyboard reader would be returned to the top of the document twice per visit. Each hands focus to the control that replaces it. aria-expanded rides the SHUT press too, since the tab carrying it is the one being hidden.
     deps.tab.setAttribute("aria-expanded", String(open));
     deps.shut.setAttribute("aria-expanded", String(open));
