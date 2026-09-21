@@ -111,8 +111,17 @@ name instead of yours. The rest of the worktree rules, including why the branch 
 all, are `CLAUDE.md`'s Worktrees section. A `vellum-implementer` lane already stands in a harness
 worktree when it starts, and its definition carries the rename.
 
-**8. Implement.** Four things the word hides, each of which has its own scar:
+**8. Implement.** Five things the word hides, the first a record and the rest each with its own
+scar:
 
+- **Archive the finalized plan before the first commit.** Copy the plan exactly as step 6 left it
+  to `plans/<N>-plan.md` at the repo root, `N` the issue's number, and commit it with the
+  implementation. It is a record of what was planned and is never edited afterwards: a plan that
+  changes at review is a residue line in the PR body naming the difference, not a rewritten file.
+  `plans/` is an archive on `design/`'s pattern, content only, and sits outside the roots
+  `test/repo/prose-paths.test.ts` walks on purpose, so a plan may name the paths it is about to
+  change and a later refactor does not red the history. A change with no issue has no plan step
+  and writes nothing here.
 - **The failing test first**, red on the assertion you care about and not on a missing module. Stub
   the feature with the right shape and the wrong behavior, watch the assertion fail, then implement.
   A "cannot find module" red proves nothing.
