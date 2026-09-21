@@ -308,7 +308,7 @@ function nearCandidate(world: World, quarry: Quarry): ClueCandidate | null {
     const d = Math.hypot(a.x - from.x, a.y - from.y);
     if (best === null || d < best.dist) best = { name: a.name, x: a.x, y: a.y, dist: d };
   });
-  if (best === null) return null;
+  if (best === null) return null; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   const anchor = best as { name: string; x: number; y: number; dist: number };
   const leagues = LEAGUE_LADDER.find((b) => anchor.dist <= b * CELLS_PER_LEAGUE);
   if (leagues === undefined) return null;

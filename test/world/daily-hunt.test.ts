@@ -606,7 +606,7 @@ test("classifyClick returns a hit when the click lands in the quarry's cell", ()
 test("classifyClick names the settlement nearest the click on a miss", () => {
   const fb = classifyClick(clickWorld, clickQuarry, { x: 12, y: 12 });
   assert.equal(fb.kind, "miss");
-  if (fb.kind === "miss") {
+  if (fb.kind === "miss") { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     assert.equal(fb.pickedIdx, 2);
     assert.equal(fb.pickedName, "Farhold");
   }
@@ -615,7 +615,7 @@ test("classifyClick names the settlement nearest the click on a miss", () => {
 test("classifyClick heat reflects the click's distance, not the nearest town's", () => {
   const fb = classifyClick(clickWorld, clickQuarry, { x: 50, y: 95 });
   assert.equal(fb.kind, "miss");
-  if (fb.kind === "miss") {
+  if (fb.kind === "miss") { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     assert.equal(fb.pickedName, "Cluster", "still names the town the click selected");
     assert.notEqual(fb.band, "hot", "a far click does not read Hot just because it snapped to a near town");
     assert.equal(fb.band, "cool");
@@ -625,7 +625,7 @@ test("classifyClick heat reflects the click's distance, not the nearest town's",
 test("classifyClick reports the click's own distance to the quarry on a miss (#327)", () => {
   const fb = classifyClick(clickWorld, clickQuarry, { x: 12, y: 12 });
   assert.equal(fb.kind, "miss");
-  if (fb.kind === "miss") {
+  if (fb.kind === "miss") { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     assert.equal(fb.dist, Math.hypot(12 - 50, 12 - 50), "dist is the click-to-quarry grid distance");
   }
 });

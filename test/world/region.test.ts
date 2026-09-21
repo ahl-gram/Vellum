@@ -192,8 +192,11 @@ test("region rivers match the world's major-river set at the window boundary (AC
         (u - win.u0) / du < edgeFrac || (win.u1 - u) / du < edgeFrac ||
         (v - win.v0) / dv < edgeFrac || (win.v1 - v) / dv < edgeFrac;
       const hit = nearRegion(gx, gy);
-      if (edge) hit ? bHit++ : bMiss++;
-      else hit ? iHit++ : iMiss++;
+      if (edge) {
+        if (hit) bHit++;
+        else bMiss++;
+      } else if (hit) iHit++;
+      else iMiss++;
     }
   }
   const interior = iHit / Math.max(1, iHit + iMiss);

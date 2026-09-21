@@ -94,7 +94,7 @@ export function extendMouthToWater(
   maxSteps: number,
 ): ReadonlyArray<RiverPoint> {
   const last = points[points.length - 1];
-  if (last === undefined) return points;
+  if (last === undefined) return points; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   const w = elev.w;
   let cell = Math.round(last.x) + Math.round(last.y) * w;
   if ((elev.data[cell] as number) <= seaLevel) return points;

@@ -54,7 +54,7 @@ let drawGen = 0;
 let drawing = false;
 
 function prefersReduce(): boolean {
-  return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 }
 
 const tourOrder = createTourOrder({ runJob });
@@ -143,7 +143,7 @@ function syncHash(): void {
     agesChk.checked ? { kind: "survey" } : null, chartTable.state());
   journalLink.href = "/reading-room/" + (location.hash || "");
   // Rebuilt HERE and not in draw(): laying, taking and a cached return all move the address without drawing anything, and a road left behind hands on the table as it stood at the last draw (measured resurrecting a sheet the reader had taken off, the cold review's round 3 on PR #635).
-  if (orderLink) orderLink.href = "../print-room/" + (location.hash || "");
+  if (orderLink) orderLink.href = "../print-room/" + (location.hash || ""); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 }
 
 const glass = createGlass({
@@ -244,7 +244,7 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
       const deferArm = deferLandingArm(quiet, flipped);
       if (shouldTurn({ isTurn, reduceMotion: prefersReduce(), usesWorker: usesWorker(), hasChart: hadChart, flipped })) {
         const t = turnTiming();
-        runTurn({ sheetEl, innerEl, mapEl: mapDiv, newSvg: res.svg, durationMs: t.ms, easing: t.ease }).then(() => {
+        runTurn({ sheetEl, innerEl, mapEl: mapDiv, newSvg: res.svg, durationMs: t.ms, easing: t.ease }).then(() => { // eslint-disable-line @typescript-eslint/no-floating-promises
           if (myGen !== drawGen) return;
           lc.buildPlaceOverlay(res.manifest);
           lastSheet = { seed, overrides, style, presentYear: res.manifest.presentYear };

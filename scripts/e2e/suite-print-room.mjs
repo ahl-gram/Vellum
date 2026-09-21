@@ -382,7 +382,7 @@ export async function run(ctx) {
   );
 
   // The 20000-char floor is what separates a real bound atlas from the tiny PDF a blank sheet or a print-blank plate yields; paper fidelity itself stays a manual pass.
-  let pdf = null;
+  let pdf;
   try { pdf = await send("Page.printToPDF", { printBackground: true }); } catch (e) { pdf = null; }
   check(
     "PR22 browser Save-as-PDF yields a well-formed, non-empty bound atlas",

@@ -109,7 +109,7 @@ export function createLodController(deps: Deps) {
       for (const g of worldSvg.querySelectorAll<SVGElement>("g.settlement[data-idx]")) {
         if (!g.querySelector("text")) continue;
         const place = world.manifest.places[Number(g.dataset.idx)];
-        if (place) names.add(place.name);
+        if (place) names.add(place.name); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
       }
     }
     const oldSvg = inset ? inset.el.querySelector("svg") : null;

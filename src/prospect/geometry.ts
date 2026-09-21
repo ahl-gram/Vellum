@@ -120,7 +120,7 @@ function mergeIntervals(spans: Interval[]): Interval[] {
   const out: Interval[] = [];
   for (const s of sorted) {
     const last = out[out.length - 1];
-    if (last && s.x0 <= last.x1 + EPS) {
+    if (last && s.x0 <= last.x1 + EPS) { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
       out[out.length - 1] = { x0: last.x0, x1: Math.max(last.x1, s.x1) };
     } else {
       out.push(s);

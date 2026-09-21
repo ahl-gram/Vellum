@@ -105,7 +105,7 @@ function bannersHtml(world: World, style: StyleName): string {
     const named = world.names.realms[realmId];
     if (named) return named;
     const seatIdx = world.realms.seats[realmId];
-    const seat = seatIdx !== undefined ? world.settlements[seatIdx] : undefined;
+    const seat = seatIdx !== undefined ? world.settlements[seatIdx] : undefined; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     return seat ? `Arms of ${seat.name}` : `Realm ${realmId + 1}`;
   };
   const banners = world.arms

@@ -67,7 +67,7 @@ test("some settlement names carry a culture suffix", () => {
 // Independent full Levenshtein (not the implementation's early-exit check), so the test cannot share a bug with the screen it guards.
 function levenshtein(a: string, b: string): number {
   const m = a.length, n = b.length;
-  const dp = Array.from({ length: m + 1 }, (_, i) => [i, ...Array(n).fill(0)]);
+  const dp = Array.from({ length: m + 1 }, (_, i) => [i, ...Array<number>(n).fill(0)]);
   for (let j = 0; j <= n; j++) dp[0]![j] = j;
   for (let i = 1; i <= m; i++) {
     for (let j = 1; j <= n; j++) {

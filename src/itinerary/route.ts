@@ -20,7 +20,7 @@ export function roadWalk(
   const w = world.elev.w;
   const from = world.settlements[fromIdx];
   const to = world.settlements[toIdx];
-  if (!from || !to || fromIdx === toIdx) return null;
+  if (!from || !to || fromIdx === toIdx) return null; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   const goal = to.x + to.y * w;
   return bfsPath(
     w,
@@ -35,7 +35,7 @@ export function roadReachable(world: World, mask: Uint8Array, fromIdx: number): 
   const w = world.elev.w;
   const h = world.elev.h;
   const from = world.settlements[fromIdx];
-  if (!from) return [];
+  if (!from) return []; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   const seen = new Uint8Array(w * h);
   const queue: number[] = [from.x + from.y * w];
   seen[queue[0] as number] = 1;

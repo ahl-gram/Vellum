@@ -184,7 +184,7 @@ test("decideSettle: zoom-in from the world enters a region at the quantized wind
     currentBand: 0,
   });
   assert.equal(d.action, "region");
-  if (d.action !== "region") return;
+  if (d.action !== "region") return; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   assert.equal(d.band, 1, "k=2 is band 1");
   assert.deepEqual(d.window, lodWindowFor(0.5, 0.5, 0.5), "quantized window centred on the camera");
 });
@@ -207,7 +207,7 @@ test("decideSettle: zooming in past the next boundary redrafts the next finer ba
     currentBand: 1,
   });
   assert.equal(d.action, "region");
-  if (d.action !== "region") return;
+  if (d.action !== "region") return; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   assert.equal(d.band, 2);
   assert.deepEqual(d.window, lodWindowFor(0.5, 0.5, 0.25));
 });
@@ -222,7 +222,7 @@ test("decideSettle: panning to a new quantized window inside the band redrafts",
     currentBand: 1,
   });
   assert.equal(d.action, "region", "a new window in the same band still redrafts");
-  if (d.action !== "region") return;
+  if (d.action !== "region") return; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   assert.equal(d.band, 1);
   assert.notDeepEqual(d.window, win, "the window moved");
   assert.deepEqual(d.window, lodWindowFor(q.cx, q.cy, 0.5), "the quantized panned window");
@@ -247,7 +247,7 @@ test("decideSettle: a partial zoom-out steps down ONE region band (band-by-band,
     currentBand: 3,
   });
   assert.equal(d.action, "region", "an intermediate zoom-out redrafts, it does not revert to world");
-  if (d.action !== "region") return;
+  if (d.action !== "region") return; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   assert.equal(d.band, 2, "band 3 steps to band 2, not straight to band 0");
   assert.deepEqual(d.window, lodWindowFor(0.5, 0.5, 0.25));
 });

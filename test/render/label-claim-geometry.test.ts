@@ -5,7 +5,7 @@ import { createLabelArena } from "../../src/render/context.ts";
 
 
 test("the caps factor is wider than mixed case, and lives in exactly one place", () => {
-  assert.ok(WIDTH_FACTOR.caps > WIDTH_FACTOR.mixed, "capitals are the wider glyphs");
+  assert.ok(WIDTH_FACTOR.caps > WIDTH_FACTOR.mixed, "capitals are the wider glyphs"); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   assert.equal(WIDTH_FACTOR.mixed, 0.56, "the historical mixed-case factor is unchanged");
 });
 

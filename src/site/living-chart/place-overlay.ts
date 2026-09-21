@@ -116,7 +116,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
   function showPlaceCard(idx: number): void {
     if (!placeOverlay || isSuppressed()) return; // the hover card is suppressed while scrubbing
     const place = placeOverlay.places[idx];
-    if (!place) return;
+    if (!place) return; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     const card = composePlaceCard(place, placeOverlay.events, placeOverlay.cultureId);
     const el = placeOverlay.card;
     const inner = el.querySelector(".pc-inner") as HTMLElement;
@@ -186,7 +186,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
   // opts.box positions the overlay over a region inset's rect so the region manifest's own nx/ny fractions land on the inset's drawn glyphs; the card lives inside the overlay so its % anchor resolves against the same box.
   // eslint-disable-next-line max-lines-per-function
   function buildPlaceOverlay(manifest: PlaceManifest, opts?: BuildPlaceOverlayOpts): void {
-    if (!manifest || !manifest.places) return;
+    if (!manifest || !manifest.places) return; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     const preserveName =
       opts && opts.preservePinByName && placeOverlay && placeOverlay.pinned && placeOverlay.pinnedIdx >= 0
         ? ((placeOverlay.places[placeOverlay.pinnedIdx] || {}) as Partial<PlaceMark>).name
@@ -270,7 +270,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
   function onDocClick(e: MouseEvent): void {
     if (!placeOverlay || placeOverlay.card.hidden) return;
     const t = e.target as Element | null;
-    if (t && t.closest && (t.closest(".place-hit") || t.closest("#place-card"))) return;
+    if (t && t.closest && (t.closest(".place-hit") || t.closest("#place-card"))) return; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     hidePlaceCard();
   }
 
