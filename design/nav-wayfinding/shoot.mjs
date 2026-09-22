@@ -26,7 +26,11 @@ for (const job of jobs) {
   if (script) { await send('Runtime.evaluate', { expression: script, awaitPromise: true }); await sleep(600); }
   const r = await send('Page.captureScreenshot', { format: 'png' });
   writeFileSync(out, Buffer.from(r.data, 'base64'));
-  const probe = await send('Runtime.evaluate', { expression: probeExpr || `(()=>{try{return JSON.stringify({cw: document.documentElement.clientWidth, sw: document.documentElement.scrollWidth, sheet: (document.getElementById('sheet')||document.querySelector('.sheet')).getBoundingClientRect().toJSON()})}catch(e){return String(e)}})()`, returnByValue: true });
+  const expression = probeExpr || `(()=>{try{return JSON.stringify({cw: document.documentElement.clientWidth, sw: document.documentElement.scrollWidth, sheet: (document.getElementById('sheet')||document.querySelector('.sheet')).getBoundingClientRect().toJSON()})}catch(e){return String(e)}})()`;
+  let probe = await send('Runtime.evaluate', { expression, returnByValue: true });
+  // One retry: on a 168 job run the last two rows came back undefined and nothing else did, which is a browser
+  // degrading near teardown rather than a probe that cannot work. A silent undefined is the failure to avoid.
+  if (probe.result.value === undefined) { await sleep(600); probe = await send('Runtime.evaluate', { expression, returnByValue: true }); }
   console.log(out, probe.result.value);
 }
 ws.close(); brave.kill();

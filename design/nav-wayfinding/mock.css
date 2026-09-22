@@ -55,7 +55,10 @@ header.chrome .atelier-press { pointer-events: auto; }
 .trail a { color: var(--parchment); text-decoration: none; }
 .trail a:hover, .trail a:focus-visible { color: var(--parchment-bright); }
 /* Two selectors, one appearance: which end carries the page mark is an ARIA question, not a visual one. */
-.trail [aria-current="page"], .trail .here { color: var(--parchment-bright); }
+.trail [aria-current="page"], .trail .here {
+  color: var(--parchment-bright);
+  text-decoration: underline; text-underline-offset: 0.4em; text-decoration-thickness: 1px;
+}
 .trail .way { margin: 0 0.45em; color: var(--parchment); font-size: 0.78rem; vertical-align: -0.04em; }
 .also {
   font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
@@ -65,7 +68,9 @@ header.chrome .atelier-press { pointer-events: auto; }
 .also a { color: var(--parchment); text-decoration-color: rgb(from var(--parchment) r g b / 0.45); text-underline-offset: 0.25em; }
 
 /* Keyed to what the cluster CARRIES, never to a direction's name (keyed by name this missed D-over-C and it fell past the band), at ONE height sized to the tallest case. */
-body.room:has(.rank, .trail, .atelier-press) { --band-h: 10.6rem; padding-top: 10.8rem; }
+/* Scoped to rooms that actually RENDER a band: a chart room renders none, so raising --band-h there drew no band
+   and only pushed the phone drawer's cap down by 67px of empty ground. */
+body.room:has(.band):has(.rank, .trail, .atelier-press) { --band-h: 10.6rem; padding-top: 10.8rem; }
 
 /* ---- D: the chart of the atelier --------------------------------------------------------------- */
 
@@ -77,6 +82,9 @@ body.room:has(.rank, .trail, .atelier-press) { --band-h: 10.6rem; padding-top: 1
 }
 .atelier-press::before { content: "✦ "; opacity: 0.8; }
 .atelier-press:hover, .atelier-press:focus-visible { color: var(--parchment-bright); }
+/* The chrome recolours its focus ring for anchors only (header.chrome a:focus-visible); this is the first button
+   the house has seated here, so without this it took the house ink ring, which reads 1.11:1 on the deep. */
+header.chrome .atelier-press:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: 4px; }
 
 /* border-box like the house's own fixed `.slip`: on a content box the padding and border landed outside the min() and the panel hung 8.4px off the edge at 320 and 390. */
 .atelier {
@@ -108,6 +116,8 @@ body.room:has(.rank, .trail, .atelier-press) { --band-h: 10.6rem; padding-top: 1
 .atelier .here .pip { fill: var(--parchment-bright); }
 .atelier .here text { fill: var(--parchment-bright); }
 .atelier .halo { fill: none; stroke: var(--parchment-bright); stroke-width: 1; opacity: 0.55; }
+.atelier .landing .pip { fill: none; stroke: var(--parchment); stroke-width: 1.4; }
+.atelier .landing text { font-style: italic; }
 .atelier .you path { stroke: var(--parchment-bright); stroke-width: 1; }
 .atelier .you text {
   font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
@@ -137,7 +147,11 @@ body.room:has(.rank, .trail, .atelier-press) { --band-h: 10.6rem; padding-top: 1
   .atelier .cartouche { font-size: 19px; }
   .atelier .road { stroke-width: 1.8; }
   .atelier .road.track { stroke-dasharray: 7 6; stroke-width: 2.2; }
-  .atelier .pip { r: 6; }
+  /* r is a CSS geometry property and outranks the SVG attribute, so ONE value here flattens the ranks. */
+  .atelier .capital .pip { r: 8; }
+  .atelier .landing .pip { r: 7.2; }
+  .atelier .town .pip, .atelier .isle .pip { r: 6; }
+  .atelier .village .pip { r: 4.6; }
 }
 
 @media (max-width: 900px) {
@@ -150,7 +164,18 @@ body.room:has(.rank, .trail, .atelier-press) { --band-h: 10.6rem; padding-top: 1
      with the panel put away, so the rule takes the whole under-cluster group: while the drawer is open it IS the
      nav, and nothing the cluster carries sits over its doors. In the build this widens the SHELL's selector
      rather than adding a second rule beside it. */
-  body:has(.rooms-reveal:checked) :is(.rank, .trail, .also, .atelier-press, .atelier) { display: none; }
+  /* The drawer owns the cluster, so nothing the cluster carries sits over its doors. But the trail RIDES INTO the
+     drawer rather than going away with the rest (Alex, 2026-09-22): hiding it meant that opening the nav to ask
+     where you are was the one gesture that removed the answer. It is seated in the cap the doors already sticky
+     under, and the cap grows to make room, so it sits above them and over nothing. */
+  body:has(.rooms-reveal:checked) :is(.rank, .atelier-press, .atelier) { display: none; }
+  body:has(.rooms-reveal:checked) :is(.trail, .also) {
+    position: fixed; z-index: 46; left: var(--chrome-x); margin: 0;
+    width: calc(min(16rem, 100vw) - 2 * var(--chrome-x));
+  }
+  body:has(.rooms-reveal:checked) .trail { top: calc(var(--band-h) + 0.6rem); }
+  body:has(.rooms-reveal:checked) .also { top: calc(var(--band-h) + 1.75rem); }
+  body:has(.rooms-reveal:checked) .chrome .rooms::before { height: calc(var(--band-h) + 3.1rem); }
   .rank, .trail { margin-left: 0; }
   .rank::before { display: none; }
 }

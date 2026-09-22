@@ -50,7 +50,13 @@ const PROBE = `(() => {
     gapFolio: folio && nav && !drawerOpen ? +(folio.x - nav.right).toFixed(1) : null,
     gapSeed: seed && nav && !drawerOpen ? +(seed.x - nav.right).toFixed(1) : null,
     bandBottom: bandBottom === null ? null : +bandBottom.toFixed(1),
-    pastBand: bandBottom === null ? null : +(clusterInk - bandBottom).toFixed(1),
+    // Null while the drawer is open, and the reason rather than the suppression: the trail rides INSIDE the
+    // drawer there, which is an opaque panel of its own, so "past the band" stops meaning "on bare ground".
+    // Measured rather than assumed: the trail's rect sits wholly inside the drawer's, whose background is set.
+    // No pipe characters anywhere in this probe, logical-or included, because shoot.mjs splits its job string on
+    // that character: one here cuts the expression in half and the row comes back undefined. This very comment
+    // used to contain three of them and broke all 168 rows.
+    pastBand: bandBottom === null ? null : (drawerOpen ? null : +(clusterInk - bandBottom).toFixed(1)),
     // A third instrument, beside the other two: rects and overflow both said the drawer was fine while five of
     // its seven doors were under the chart panel and could not be pressed. Only a hit-test sees a stacking
     // context, so every door is asked what is actually on top of it.
@@ -65,6 +71,12 @@ const PROBE = `(() => {
 // Below 900 the nav folds into a drawer a native checkbox reveals, so every phone still is shot twice: shut,
 // which is what the room looks like, and open, which is the only state where the doors can be judged at all.
 const OPEN = 'document.querySelector(".rooms-reveal").checked = true';
+
+// A comment asking for no pipe characters is not enforcement: the comment that asked for it contained three and
+// broke every row in the sweep, silently, because a split job just yields undefined. This refuses to run instead.
+if (PROBE.includes(String.fromCharCode(124))) {
+  throw new Error('the probe contains a pipe character, which shoot.mjs splits its job string on: every row would come back undefined');
+}
 
 const jobs = [];
 for (const [page, dirs] of PAGES) {
@@ -84,10 +96,20 @@ if (shot.status !== 0) { process.stderr.write(shot.stderr ?? ''); process.exit(s
 
 // The measurements are kept beside the stills as the round's own record, so a later reader does not have to
 // re-run a browser to know what was measured.
-const rows = (shot.stdout ?? '').trim().split('\n').map((line) => {
+const parsed = (shot.stdout ?? '').trim().split('\n').map((line) => {
   const [file, ...rest] = line.split(' ');
-  return { still: file.split('/').pop(), ...JSON.parse(rest.join(' ')) };
+  const body = rest.join(' ');
+  const still = file.split('/').pop();
+  if (body === 'undefined' || body === '') return { still, failed: true };
+  try { return { still, ...JSON.parse(body) }; } catch { return { still, failed: true }; }
 });
+const failed = parsed.filter((r) => r.failed);
+if (failed.length) {
+  console.error(`the probe returned nothing for ${failed.length} row(s): ${failed.map((r) => r.still).join(', ')}`);
+  console.error('a sweep that could not measure every row has not measured any of them; measurements.json is NOT written');
+  process.exit(1);
+}
+const rows = parsed;
 writeFileSync(new URL('measurements.json', import.meta.url), `${JSON.stringify(rows, null, 1)}\n`);
 
 // The ARCHIVE is a chosen set, not the whole sweep: every direction at the width that decides it, the phone with

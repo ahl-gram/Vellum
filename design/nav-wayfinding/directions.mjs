@@ -110,6 +110,9 @@ const directionD = withChart(directionB);
 const directionDC = withChart(directionC);
 
 const PLACES = {
+  // Vellum itself, at sea off the south west: the front door is where you arrive from, not a room on the island.
+  // Without it the chart had no pin on home, which is the one page whose reader most needs the site's shape.
+  '/': { x: 74, y: 340, rank: 'landing', name: 'Vellum' },
   '/explorer/': { x: 300, y: 196, rank: 'capital', name: 'The Explorer' },
   '/prospect/': { x: 214, y: 148, rank: 'town', name: 'The Prospect' },
   '/ribbon/': { x: 140, y: 214, rank: 'town', name: "The Ribbon" },
@@ -123,6 +126,7 @@ const PLACES = {
 };
 
 const ROADS = [
+  ['/', '/explorer/'],
   ['/explorer/', '/prospect/'], ['/prospect/', '/ribbon/'], ['/explorer/', '/explorer/portfolio/'],
   ['/explorer/', '/print-room/'], ['/explorer/', '/reading-room/'], ['/print-room/', '/glossary/'],
   ['/reading-room/', '/faq/'],
@@ -140,9 +144,10 @@ function atelierChart(at) {
   };
   const place = ([href, p]) => {
     const here = href === at;
+    const r = { capital: 5.5, landing: 5, town: 4, isle: 4, village: 3 }[p.rank] ?? 4;
     return `<g class="place ${p.rank}${here ? ' here' : ''}">`
       + (here ? `<circle class="halo" cx="${p.x}" cy="${p.y}" r="16"/>` : '')
-      + `<circle class="pip" cx="${p.x}" cy="${p.y}" r="${p.rank === 'capital' ? 5.5 : p.rank === 'village' ? 3 : 4}"/>`
+      + `<circle class="pip" cx="${p.x}" cy="${p.y}" r="${r}"/>`
       + `<text x="${p.x}" y="${p.y - 11}">${esc(p.name)}</text></g>`;
   };
   const youAre = PLACES[at]

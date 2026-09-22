@@ -77,7 +77,8 @@ nothing at all on a room with no children, which is eight of the twelve pages, a
 to `faq-control-1280` for that reason.
 
 **C, the trail.** One quiet line carrying the path, `Vellum › The Explorer › The Prospect`, every segment
-clickable, with the alias stated in words underneath. It is what the literature recommends over a multilayer
+clickable but the last, which is the page you are standing on and is not somewhere you can go; with the alias
+stated in words underneath. It is what the literature recommends over a multilayer
 local nav for pages deep in the space, and it says something in every ROOM, which B does not: B renders nothing
 on a room with no children, which is eight of the twelve built pages. **It says nothing on home**, because home
 is the root and has no seat in the tree, so a trail there would read "Vellum" and nothing else. On the ruled
@@ -117,7 +118,8 @@ direction has to buy.
 
 ## What was measured, not guessed
 
-`measurements.json` holds every rendered rect; `stills.mjs` takes them. The headline: **only A collides.**
+`measurements.json` holds the four rects the directions add (rank, trail, press, chart) plus the derived
+scalars every claim below rests on; `stills.mjs` takes them. The headline: **only A collides.**
 
 | still | what collides | by how much |
 |---|---|---|
@@ -202,8 +204,12 @@ the ones that changed what the archive shows.
 - **The trail put a second `aria-current="page"` on every top-level room**, against the ratified one-span pin.
   The rule is now: the nav carries the mark when the page is in the nav, the trail carries it when the page is
   not. That is exactly the five pages that had no mark at all, so the rule that fixes the defect also answers the
-  question this epic was filed over. Verified across all 24 mock pages: every direction carries exactly one, and
-  the only page carrying none is `prospect-control`, which is today's nav and is the defect itself.
+  question this epic was filed over. Verified across all 24 mock pages: every direction carries exactly one on
+  every page that is IN the tree, and the pages carrying none are the eight home mocks plus `prospect-control`.
+  Home carries none by design, because the wordmark is its own mark and the trail would read "Vellum" alone;
+  `prospect-control` carries none because it is today's nav and is the defect itself. The new rule reaches three
+  of the five unmarked pages rather than all five: the Specimen is deliberately outside the tree and home is the
+  root.
 - **Every direction is now drawn on every page.** The first pass drew B and C on two pages and D-over-B on two
   others while claiming all three, so the losing candidate was never measured against the band at all.
 - Two numbers in the band paragraph came from a retired draft and appear in none of the measurements; corrected
@@ -250,3 +256,55 @@ filed again, since Issue #638 is already the epic's sub for the head cluster's b
 computed colour, `rgb(239,230,207)`. The distinction between them is carried by a 1.6px size step and by the
 separator glyph alone. It reads as a path in the crops, but it is a thin distinction and it is the first thing to
 look at in live use.
+
+## Round 2 of the cold review, and what Alex ruled from it
+
+Round 2 returned four blocking findings. Two were his to rule and were put to him rather than fixed quietly.
+
+**Ruled: the chart of the atelier IS the listing** (Alex, 2026-09-22). Ruling 1 said all three rooms are listed;
+the ruled direction's top line carries seven items, the same as today, and only the rejected flat line lists the
+three. His reading: the chart shows every page, and when it is open it shows enough to know where you are, which
+is what the listing was for. **The consequence worth carrying forward**: the epic's sub order ships the trail
+first and the chart last, so under this reading nothing is listed until the epic's final sub. That is a
+sequencing question for the epic, recorded on Issue #667 rather than resolved here.
+
+**Ruled: the trail rides into the drawer.** Fix round 2 had hidden the whole under-cluster group while the drawer
+was open, which repaired the door hit-test by removing the wayfinding: on a phone, opening the nav to ask where
+you are was the one gesture that took the answer away, measured as a cluster identical to the control's. The
+trail and its alias line now sit in the drawer's cap above the doors, the cap grows to make room, and all 48
+drawer-open rows still have every door reachable.
+
+**Ruled: the repairs stand.** Seven of the ten named spec stills were re-shot after the ruling, by the two fix
+rounds. Two changes were defect repairs and one was the drawer behaviour above; Alex accepted them rather than
+re-ruling from the current pixels. Recorded here because the fidelity rule makes a ruling a ruling on exactly
+what the picture showed.
+
+**Fixed, from the same round:**
+
+- **Home is now a place on the chart.** It had none, so the one page whose reader most needs the site's shape got
+  no pin, which is visible in the screenshots Alex sent. It is drawn at sea off the south west as a ring rather
+  than a filled pip, because the front door is where you arrive from rather than a room on the island, with the
+  road to the Explorer its seed form actually posts to.
+- **The chart press had an invisible focus ring.** It is the first `button` the house has seated in
+  `header.chrome`, and the chrome's ring recolour is scoped to anchors, so it fell through to the house ink:
+  measured 1.11:1 on the deep against the chrome's own 9.38:1. It now takes the chrome's ring.
+- **The chart's ranks collapsed below 620px.** `r` is a CSS geometry property and outranks the SVG attribute, so
+  the single value the legibility fix set flattened capital, town and village into one size inside a named spec
+  still. Set per rank instead.
+- **The band override was raising `--band-h` on chart rooms**, which render no band, pushing the phone drawer's
+  cap down by 67px of empty ground. Scoped to rooms that actually render one.
+- `pastBand` is null while the drawer is open, with the reason at the line: the trail rides inside the drawer
+  there, which is an opaque panel of its own, so the measurement stops meaning what it means elsewhere.
+
+**Named, not fixed, and owed to a later sub:**
+
+- **There is no Explorer mock.** The Explorer is the parent of all three rooms under the ruled tree and the one
+  room this round did not draw. Recorded on Issue #638's comment as well.
+- `home-d-1280` and `home-d-c-1280` are byte-identical, and so are the 901 pair: on home, B renders no rank and C
+  renders no trail, so both directions reduce to the press. Two of the named spec stills therefore cannot tell
+  the ruled direction from the one it beat.
+- The trail names the FAQ "Questions & Answers" two lines under a nav that names it "Q & A". The house carries
+  both names deliberately; stacking them in one corner is new and is left as drawn.
+- At 901 and above the trail and the nav resolve to the same computed colour, so the distinction between the two
+  lines is carried by a 1.6px size step and the separator glyph alone. It reads as a path in the 3x crops, but it
+  is thin, and it is the first thing to watch in live use.

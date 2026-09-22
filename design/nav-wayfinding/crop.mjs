@@ -40,6 +40,9 @@ const RECT = `(() => {
   return JSON.stringify({ x: x + scrollX - 10, y: y + scrollY - 10, width: right - x + 20, height: bottom - y + 20 });
 })()`;
 
+// try/finally, because a throw anywhere below used to skip the kill and leak a headless browser per failed run:
+// thirty were found alive hours later, and a starved machine stalls a run nobody touched rather than failing it.
+try {
 for (const job of jobs) {
   const [url, w, h, mobile, scale, out] = job.split('|');
   await send('Emulation.setDeviceMetricsOverride', { width: +w, height: +h, deviceScaleFactor: 1, mobile: mobile === '1' });
@@ -50,4 +53,6 @@ for (const job of jobs) {
   writeFileSync(out, Buffer.from(shot.data, 'base64'));
   console.log(out, JSON.stringify(box));
 }
-ws.close(); brave.kill();
+} finally {
+  ws.close(); brave.kill();
+}
