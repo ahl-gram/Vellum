@@ -75,7 +75,7 @@ function faq(dir) {
 }
 
 const PAGES = [
-  ['prospect', prospect, ['control', 'a', 'b', 'c', 'd', 'd-shut']],
+  ['prospect', prospect, ['control', 'a', 'b', 'c', 'd', 'd-shut', 'd-c', 'd-c-shut']],
   ['home', home, ['control', 'a', 'd']],
   ['faq', faq, ['control', 'a', 'b', 'c']],
 ];

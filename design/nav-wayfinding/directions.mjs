@@ -93,16 +93,20 @@ function directionC(at) {
   return { nav: top, under: `<nav class="trail" aria-label="Where you are">${trail}</nav>${also}` };
 }
 
-// D: the chart of the atelier, laid OVER B. The site's own shape drawn in the house idiom, the rooms as places,
-// the real roads as roads, the alias as a dashed track, and a pin where you stand. Never instead of a
-// conventional nav: B is underneath it, so pulling the chart leaves a complete answer standing.
-function directionD(at) {
-  const b = directionB(at);
+// D: the chart of the atelier, laid over a conventional layer. The site's own shape drawn in the house idiom,
+// the rooms as places, the real roads as roads, the alias as a dashed track, and a pin where you stand. NEVER
+// instead of a conventional nav: whichever layer is underneath it stays a complete answer on its own, so pulling
+// the chart later costs nothing. The layer is a parameter because the pairing is a real choice: over B the chart
+// repeats what the rank already says (siblings) and over C it supplies exactly what the trail lacks.
+const withChart = (layer) => (at) => {
+  const base = layer(at);
   return {
-    nav: b.nav,
-    under: `${b.under}<button class="atelier-press" type="button" aria-expanded="true" aria-controls="atelier">the chart of the atelier</button>${atelierChart(at)}`,
+    nav: base.nav,
+    under: `${base.under}<button class="atelier-press" type="button" aria-expanded="true" aria-controls="atelier">the chart of the atelier</button>${atelierChart(at)}`,
   };
-}
+};
+const directionD = withChart(directionB);
+const directionDC = withChart(directionC);
 
 const PLACES = {
   '/explorer/': { x: 300, y: 196, rank: 'capital', name: 'The Explorer' },
@@ -169,11 +173,22 @@ function directionDShut(at) {
   return { nav: d.nav, under: d.under.replace(/<div class="atelier"[\s\S]*$/, '').replace('aria-expanded="true"', 'aria-expanded="false"') };
 }
 
-export const DIRECTIONS = { a: directionA, b: directionB, c: directionC, d: directionD, 'd-shut': directionDShut };
+const directionDCShut = (at) => {
+  const d = directionDC(at);
+  return { nav: d.nav, under: d.under.replace(/<div class="atelier"[\s\S]*$/, '').replace('aria-expanded="true"', 'aria-expanded="false"') };
+};
+
+export const DIRECTIONS = {
+  a: directionA, b: directionB, c: directionC,
+  d: directionD, 'd-shut': directionDShut,
+  'd-c': directionDC, 'd-c-shut': directionDCShut,
+};
 export const TITLES = {
   a: 'A · the flat line, grown',
   b: 'B · parent and child, a second rank',
   c: 'C · the trail',
   d: 'D · the chart of the atelier, over B',
-  'd-shut': 'D · the same room with the chart put away',
+  'd-shut': 'D over B, the chart put away',
+  'd-c': 'D · the chart of the atelier, over C',
+  'd-c-shut': 'D over C, the chart put away',
 };

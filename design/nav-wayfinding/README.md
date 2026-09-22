@@ -71,6 +71,29 @@ failed; home's own Landfall stage is the mitigation and the precedent, carrying 
 legend row underneath it. Pull the chart and a complete nav is still standing. `prospect-d-shut-*` is the state
 the room spends most of its time in, which is the one a direction is usually not judged on.
 
+**D is drawn over BOTH conventional layers**, because which one it sits on is a real choice and not a detail.
+Over B the chart repeats what the rank already says, since both answer "where else can I go". Over C the two
+halves are complementary: the trail says where you are in words and the chart says it in space, and the chart
+supplies the siblings that C's own weakness is not showing. `directions.mjs` composes it as `withChart(layer)`
+for that reason. The cost is vertical: at 1280 on the Prospect the cluster's ink ends at 140.3 for D over B and
+158.2 for D over C, against 101.8 today.
+
+## What each direction costs the corner
+
+Every direction but A keeps the top line at seven items, so the clearance to whatever is anchored opposite is
+today's at every width (448.1 at 1280, 69.1 at 901). They pay downward instead, and this is the trade:
+
+| direction | cluster ink ends at | versus today |
+|---|---|---|
+| today, and A | 101.8 | the baseline (A pays sideways instead, and collides) |
+| B, the rank | 120.6 | +19 |
+| C, the trail | 138.5 | +37 |
+| D over B | 140.3 | +39 |
+| D over C | 158.2 | +56 |
+
+On a chart room that number is how much chart the corner covers; on a document room it is how much band the
+direction has to buy.
+
 ## What was measured, not guessed
 
 `measurements.json` holds every rendered rect; `stills.mjs` takes them. The headline: **only A collides.**

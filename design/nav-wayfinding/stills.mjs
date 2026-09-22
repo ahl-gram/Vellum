@@ -16,7 +16,7 @@ mkdirSync(full, { recursive: true });
 const WIDTHS = [[320, 640, 1], [390, 844, 1], [901, 800, 0], [1024, 800, 0], [1280, 800, 0]];
 
 const PAGES = [
-  ['prospect', ['control', 'a', 'b', 'c', 'd', 'd-shut']],
+  ['prospect', ['control', 'a', 'b', 'c', 'd', 'd-shut', 'd-c', 'd-c-shut']],
   ['home', ['control', 'a', 'd']],
   ['faq', ['control', 'a', 'b', 'c']],
 ];
@@ -81,10 +81,10 @@ writeFileSync(new URL('measurements.json', import.meta.url), `${JSON.stringify(r
 // the drawer open, and the 3x crops where the type is actually legible. The full-colour originals stay in out/
 // and only these are quantized into the round, which is the sub7 and chart-table convention.
 const KEEP = [
-  ...['control', 'a', 'b', 'c', 'd', 'd-shut'].flatMap((d) => [`prospect-${d}-1280`, `prospect-${d}-901`, `prospect-${d}-390-open`]),
+  ...['control', 'a', 'b', 'c', 'd', 'd-shut', 'd-c', 'd-c-shut'].flatMap((d) => [`prospect-${d}-1280`, `prospect-${d}-901`, `prospect-${d}-390-open`]),
   ...['control', 'a', 'd'].flatMap((d) => [`home-${d}-1280`, `home-${d}-901`]),
   ...['control', 'a', 'b', 'c'].map((d) => `faq-${d}-1280`),
-  'crop-a', 'crop-b', 'crop-c', 'crop-d-shut',
+  'crop-a', 'crop-b', 'crop-c', 'crop-d-shut', 'crop-d-c-shut',
 ];
 const stills = new URL('stills/', import.meta.url);
 mkdirSync(stills, { recursive: true });
