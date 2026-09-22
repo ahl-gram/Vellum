@@ -80,9 +80,14 @@ header.chrome .atelier-press { pointer-events: auto; }
 /* A document room renders the band and a chart room does not, so only there does an added line need more ground
    under it. The direction is drawn as it would really ship, which means it BUYS that ground and the README
    records the cost rather than letting the still hide it.
-   The ground is bought only where the line is actually DRAWN: B renders no rank on a room with no children, so
-   an unconditional override would buy it band it never uses and the still would misreport B's cost. */
-body.room[data-dir="b"]:has(.rank), body.room[data-dir="c"]:has(.trail) { --band-h: 9.6rem; padding-top: 9.8rem; }
+   The ground is bought from what the cluster actually CARRIES, never from the direction's name: keyed to the
+   name, this rule missed D-over-C entirely and the ruled direction fell 22px past the band's bottom edge on the
+   document room at every width, with the still showing faded ink on bare chart. Keyed to the content it cannot
+   miss a combination nobody thought of.
+   ONE height, sized to the tallest thing the cluster can carry, rather than a per-direction height: a band that
+   changes depth from room to room is a worse answer than a band that is always the same, and the extra ground a
+   shorter cluster leaves unused costs nothing. */
+body.room:has(.rank, .trail, .atelier-press) { --band-h: 10.6rem; padding-top: 10.8rem; }
 
 /* ---- D: the chart of the atelier --------------------------------------------------------------- */
 

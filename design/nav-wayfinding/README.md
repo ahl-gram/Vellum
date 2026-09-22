@@ -5,8 +5,26 @@ engine output, for the sitting that rules what the top navigation becomes. Prece
 (Issue #454), the room mockups (Issue #462 and Issue #494, `design/sub7-chart-rooms/`), the Chart Table mockups
 (Issue #518, `design/chart-table/`), the ribbon mockups (Issue #511, `design/ribbon-limner/`).
 
-**The rulings will be a dated comment on Issue #513.** Until that comment exists this round is unruled and
-nothing here is a spec.
+**The rulings are the dated comment on Issue #513 (2026-09-22).**
+
+## Ruled 2026-09-22
+
+**D over C: the trail, with the chart of the atelier laid over it.** The spec is these stills:
+`prospect-d-c-1280`, `prospect-d-c-shut-1280`, `prospect-d-c-901`, `prospect-d-c-320`,
+`prospect-d-c-390-open`, `home-d-c-1280`, `home-d-c-901`, `faq-d-c-1280`, `faq-d-c-shut-1280`,
+and `crop-d-c-shut` for the type. The house rule since Landfall applies: be faithful to them, deviate only
+where something genuinely clashes with Vellum's look and feel, and say why in the pull request.
+
+A, B and C-without-the-chart were passed on and stay here as the record of what was not chosen. B is not
+discarded as an idea so much as absorbed: the chart shows siblings, which is what B was for, and it shows them
+for every room at once rather than only inside a family that has children.
+
+**A defect the ruling itself surfaced, fixed here.** The band override was keyed to the direction's NAME, so it
+never covered D-over-C and the ruled direction fell 22px past the band's bottom edge on the document room at
+every width, showing faded ink on bare chart. It is now keyed to what the cluster CARRIES
+(`body.room:has(.rank, .trail, .atelier-press)`), at ONE height sized to the tallest case, so no combination
+nobody thought of can slip past it, and the band no longer changes depth from room to room. The ruled direction
+clears the band by 26.3px.
 
 ## Why this round exists
 

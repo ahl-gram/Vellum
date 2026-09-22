@@ -76,8 +76,8 @@ function faq(dir) {
 
 const PAGES = [
   ['prospect', prospect, ['control', 'a', 'b', 'c', 'd', 'd-shut', 'd-c', 'd-c-shut']],
-  ['home', home, ['control', 'a', 'd']],
-  ['faq', faq, ['control', 'a', 'b', 'c']],
+  ['home', home, ['control', 'a', 'd', 'd-c', 'd-c-shut']],
+  ['faq', faq, ['control', 'a', 'b', 'c', 'd-c', 'd-c-shut']],
 ];
 
 for (const [name, make, dirs] of PAGES) {
