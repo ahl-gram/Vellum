@@ -166,18 +166,20 @@ section points there rather than restating it.
   `{ subtree: true }` from the box is the other way to reach the child. Take the rect only once
   that poll has resolved. Under `prefers-reduced-motion` (the media block in `public/motion.css`)
   every animation collapses to near zero, and near zero is not zero: a read taken at +0 after the
-  class change that starts one finds the animation pending at its `from` keyframe (the flight's
-  start shadow painted, the landing class still set), and rest arrives with the next rendered
-  frame, tens of milliseconds of real time in this harness, so the reduced-motion arm waits on a
+  class change that starts one finds the animation pending at its `from` keyframe with the class
+  still set, and rest arrives with the next rendered frame, so the reduced-motion arm waits on a
   rest signal too, never on the clock or the +0 read, which is what keeps that arm the control
   `specs/ui-design.md` makes it. Which signal depends on who retires the animation: where the page
   removes the class on `animationend` (the Chart Table's landing, `settle` in
   `src/site/explorer/chart-drawer.ts`) the removal CANCELS the animation and empties
   `getAnimations()`, so the guarded poll above can never see `finished` there, and the rest
-  signal is the class's absence, the shape CD46's `atRest` in `scripts/e2e/suite-chart-drawer.mjs`
-  reads. And this harness is Chromium only (`findBrowser` in `src/cli/raster.ts`), whose computed
-  style spells the blanket's `0.01ms` as `1e-05s`, so a check reads the duration as a number
-  (CD46) and never compares the string. Gate 2 item 6 carries the typing-moment half.
+  signal is the class's absence AFTER it was seen present, since the same page also removes that
+  class on a shut and on an off-screen list, and an absence with no witness reads a settle that
+  never played as rest; `restSeeing` in `scripts/e2e/suite-chart-drawer.mjs` is the shape, the
+  poll counting the class or the running animation on the way to `atRest`. And this harness is
+  Chromium only (it drives the browser over the debug port, `scripts/e2e/harness.mjs`), whose
+  computed style spells the blanket's `0.01ms` as `1e-05s`, so a check reads the duration as a
+  number (CD46) and never compares the string. Gate 2 item 6 carries the typing-moment half.
 - **A clip with a negative `x` is neither clamped nor refused: `Page.captureScreenshot` hands back a
   frame of the clip's SIZE taken from the viewport's top-left corner, the requested `y` lost with
   it.** On an unscrolled page that corner is the page header, which is the frame a card at the left
