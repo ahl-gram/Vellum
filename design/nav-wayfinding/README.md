@@ -210,3 +210,43 @@ the ones that changed what the archive shows.
   above. The archive is the spec, so a wrong number in it is a wrong spec.
 - The stills are now byte-reproducible: ImageMagick's date chunks are excluded, so a regen with identical pixels
   no longer differs in bytes.
+
+## The plate read, 2026-09-22, and what it cost
+
+`specs/conventions.md` says a round's mock pages get the plate-reader, because the mocks are the only place a
+ruling is made from pixels nobody measured. The first pass of this round argued its way out of that and PR #666's
+body claimed it was not owed. It was owed, and running it found three things no rect could see.
+
+- **The drawer and the chart could be open at once, and the chart took five of the seven doors out of the
+  hit-test.** Not merely out of sight: `document.elementFromPoint` on each door's own middle resolved to the
+  panel, so at 390 only two of seven doors could be pressed. It was already visible in a committed spec still and
+  nobody saw it, because rects and overflow cannot see a stacking context. The shell already rules this class one
+  line away, hiding `[popover]:popover-open` while the drawer is open; the panel was not a popover so it never
+  joined. The press did the same to one door on home at 320 with the panel put away, so the rule now takes the
+  whole under-cluster group: **while the drawer is open it IS the nav, and nothing the cluster carries sits over
+  its doors.** `stills.mjs` carries `doorsReachable` as a third instrument, beside the other two rather than in
+  place of them; 48 drawer-open rows, every door reachable.
+- **At 320 the chart's own labels were illegible whatever ink they carried.** Everything inside an SVG scales
+  with the SVG, so 9.5-unit labels rendered at 4.17px and pixel-sampled contrast collapsed to 1.45:1 against a
+  specified ink of 10.39:1. The dash pattern went sub-pixel at the same width and read as a fainter line rather
+  than a dashed one. Sizes and strokes below 620px are now stated so that they RENDER legibly once the scale is
+  applied. This is a failure mode the round's earlier contrast fix did not cover: correct ink is not sufficient
+  once the art it sits in is scaled below about 5px.
+- **The panel was speced against the deep and never against what it sits on.** At 0.93 opacity the plate's own
+  title cartouche ghosted through it on the Prospect, and two paragraphs of body prose read straight through it
+  on the FAQ. It is now 0.985.
+
+**Measured, and left as it is:** with the chart open the corner covers 80.0% of the plate at 320, 48.8% at 390,
+57.1% at 901 and 31.2% at 1280. With the chart put away, which is the state the room spends most of its time in,
+it covers 0% at 320, 390 and 901 and 2.3% at 1280. That is the cost of the direction rather than a defect in it,
+and `prospect-d-c-shut-*` is the state to judge it by.
+
+**Found on the CONTROL, so present on main today and not caused by anything here:** at 320 the Prospect's tagline
+runs under the room folio's year control, x 16 to 172.5 against a control group starting at x 114.2, a 58.3px
+collision that clips "cartography". Recorded on Issue #638 as a second instance of that issue's class rather than
+filed again, since Issue #638 is already the epic's sub for the head cluster's budget at 320.
+
+**Still marginal, and named rather than fixed:** at 901 and above the trail and the nav resolve to the SAME
+computed colour, `rgb(239,230,207)`. The distinction between them is carried by a 1.6px size step and by the
+separator glyph alone. It reads as a path in the crops, but it is a thin distinction and it is the first thing to
+look at in live use.

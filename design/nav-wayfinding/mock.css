@@ -84,7 +84,8 @@ body.room:has(.rank, .trail, .atelier-press) { --band-h: 10.6rem; padding-top: 1
   position: fixed; left: var(--chrome-x); top: 11.6rem; z-index: 44;
   width: min(34rem, calc(100vw - 2 * var(--chrome-x)));
   padding: 0.6rem 0.7rem 0.4rem;
-  background: rgb(from var(--chart-ink) r g b / 0.93);
+  /* Near-opaque: at 0.93 the plate's own title cartouche and the FAQ's body prose both read straight through the panel. */
+  background: rgb(from var(--chart-ink) r g b / 0.985);
   border: 1px solid rgb(from var(--line-tan) r g b / 0.45);
   box-shadow: 0 18px 40px rgb(from var(--chart-ink) r g b / 0.55);
   pointer-events: auto;
@@ -123,10 +124,33 @@ body.room:has(.rank, .trail, .atelier-press) { --band-h: 10.6rem; padding-top: 1
   font-style: italic; font-size: 0.62rem; color: var(--parchment); margin: 0.3rem 0 0; text-align: right;
 }
 
+/* Everything inside the chart scales with the chart, so at a narrow width the labels and the dash pattern shrink
+   below legibility no matter what ink they carry: measured 4.17px and 1.45:1 at 320. The sizes are therefore
+   stated in viewBox units that RENDER at a readable size once the scale is applied, rather than in units that
+   look right in the source. */
+@media (max-width: 620px) {
+  .atelier text { font-size: 17px; }
+  .atelier .village text { font-size: 15.5px; }
+  .atelier .isle text { font-size: 16px; }
+  .atelier .you text { font-size: 16px; }
+  .atelier .rose text { font-size: 14px; }
+  .atelier .cartouche { font-size: 19px; }
+  .atelier .road { stroke-width: 1.8; }
+  .atelier .road.track { stroke-dasharray: 7 6; stroke-width: 2.2; }
+  .atelier .pip { r: 6; }
+}
+
 @media (max-width: 900px) {
   /* The nav flies off as the drawer below 900 and anything seated after it stays in the cluster, which is the
      property that makes this seat worth having: the rank, the trail and the press survive the fold. */
   .atelier { top: 9.4rem; }
+  /* The drawer wins. The shell already rules this class one line away, hiding `[popover]:popover-open` while the
+     drawer is open; the panel is not a popover so it never joined, and it covered five of the seven doors and
+     took them out of the hit-test, not merely out of sight. The PRESS did the same to one door on home at 320 even
+     with the panel put away, so the rule takes the whole under-cluster group: while the drawer is open it IS the
+     nav, and nothing the cluster carries sits over its doors. In the build this widens the SHELL's selector
+     rather than adding a second rule beside it. */
+  body:has(.rooms-reveal:checked) :is(.rank, .trail, .also, .atelier-press, .atelier) { display: none; }
   .rank, .trail { margin-left: 0; }
   .rank::before { display: none; }
 }

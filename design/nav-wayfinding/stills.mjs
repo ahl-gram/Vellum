@@ -51,6 +51,13 @@ const PROBE = `(() => {
     gapSeed: seed && nav && !drawerOpen ? +(seed.x - nav.right).toFixed(1) : null,
     bandBottom: bandBottom === null ? null : +bandBottom.toFixed(1),
     pastBand: bandBottom === null ? null : +(clusterInk - bandBottom).toFixed(1),
+    // A third instrument, beside the other two: rects and overflow both said the drawer was fine while five of
+    // its seven doors were under the chart panel and could not be pressed. Only a hit-test sees a stacking
+    // context, so every door is asked what is actually on top of it.
+    doorsReachable: [...document.querySelectorAll('header.chrome nav.rooms a, header.chrome nav.rooms [aria-current]')]
+      .filter((a) => { const b = a.getBoundingClientRect(); return b.width > 0 && b.height > 0; })
+      .map((a) => { const b = a.getBoundingClientRect(); return document.elementFromPoint(b.x + Math.min(20, b.width / 2), b.y + b.height / 2) === a; })
+      .filter(Boolean).length,
     rank, trail, press, atelier,
   });
 })()`;
