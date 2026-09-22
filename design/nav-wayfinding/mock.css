@@ -4,26 +4,15 @@
 
 /* ---- common to every direction ---------------------------------------------------------------- */
 
-/* The bundle sizes the sheet at the fit by writing an INLINE width and height, which is the only thing that beats
-   `#sheet { width: 0; height: 0 }` in page-prospect.css (an id, 1-0-0, over any class rule this sheet could
-   write). So the mock writes the same inline style in build.mjs rather than escalating a selector here, and the
-   plate simply fills it. Mock convenience, nothing proposed for main. */
+/* Seated inline in build.mjs, since `#sheet { width: 0; height: 0 }` is an id rule no class here could outrank; mock convenience, nothing proposed for main. */
 #pp-plate { position: absolute; inset: 0; width: 100%; height: 100%; }
 
-/* The cluster is pointer-events: none with a TWO-ITEM allowlist (`header.chrome a` and `.rooms-reveal`).
-   Anything new that must be pressable joins it or it is dead on arrival and no test would see it: this is the
-   Issue #520 class, where a green check sat over a control nobody could press. D's press is the first new
-   member the house has needed, and the README prices it as a real cost rather than a mock convenience. */
+/* The cluster is pointer-events: none with a two-item allowlist, so a new press joins it or it is unclickable and nothing reds (the Issue #520 class). */
 header.chrome .atelier-press { pointer-events: auto; }
 
 /* ---- B: the second rank ------------------------------------------------------------------------ */
 
-/* Local navigation must never outrank the line above it, so the rank is smaller and inset. The inset is what
-   says "inside", without a glyph that would need its own meaning.
-   The rank is quieter by SIZE and letterspacing, never by a dimmer ink. `--ink-faded` on the deep is below the
-   4.5:1 floor for small text (ui-design records line-tan at 4.03:1 and ink-faded darker still), and the live nav
-   already shows the right division: the container's ink colours the separators, the LINKS are parchment. A first
-   draft of this sheet took its quietness from colour and the still showed Q & A and The Glossary barely there. */
+/* Quieter by SIZE, never by a dimmer ink: --ink-faded on the deep is under the 4.5:1 floor for small text, so the container's ink colours only the separators. */
 .rank {
   font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
   font-size: 0.66rem; letter-spacing: 0.13em; color: var(--ink-faded);
@@ -57,18 +46,16 @@ header.chrome .atelier-press { pointer-events: auto; }
 
 /* ---- C: the trail ------------------------------------------------------------------------------ */
 
-/* The trail has to read as a PATH, not as a second nav line. At the nav's own size and face it read as a peer
-   of the list above it (measured at 3x on the first crop), so it is set a step smaller and the way-marks are
-   given their full weight: the dots above separate PEERS, the chevrons here separate STAGES, and that contrast
-   is the only thing carrying the difference. */
+/* A step smaller than the nav with the way-marks at full weight: the dots above separate peers, the chevrons here separate stages. */
 .trail {
   font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
-  font-size: 0.62rem; letter-spacing: 0.1em; color: var(--ink-faded);
+  font-size: 0.62rem; letter-spacing: 0.1em;
   margin: 0.36rem 0 0;
 }
 .trail a { color: var(--parchment); text-decoration: none; }
 .trail a:hover, .trail a:focus-visible { color: var(--parchment-bright); }
-.trail [aria-current="page"] { color: var(--parchment-bright); }
+/* Two selectors, one appearance: which end carries the page mark is an ARIA question, not a visual one. */
+.trail [aria-current="page"], .trail .here { color: var(--parchment-bright); }
 .trail .way { margin: 0 0.45em; color: var(--parchment); font-size: 0.78rem; vertical-align: -0.04em; }
 .also {
   font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
@@ -77,16 +64,7 @@ header.chrome .atelier-press { pointer-events: auto; }
 }
 .also a { color: var(--parchment); text-decoration-color: rgb(from var(--parchment) r g b / 0.45); text-underline-offset: 0.25em; }
 
-/* A document room renders the band and a chart room does not, so only there does an added line need more ground
-   under it. The direction is drawn as it would really ship, which means it BUYS that ground and the README
-   records the cost rather than letting the still hide it.
-   The ground is bought from what the cluster actually CARRIES, never from the direction's name: keyed to the
-   name, this rule missed D-over-C entirely and the ruled direction fell 22px past the band's bottom edge on the
-   document room at every width, with the still showing faded ink on bare chart. Keyed to the content it cannot
-   miss a combination nobody thought of.
-   ONE height, sized to the tallest thing the cluster can carry, rather than a per-direction height: a band that
-   changes depth from room to room is a worse answer than a band that is always the same, and the extra ground a
-   shorter cluster leaves unused costs nothing. */
+/* Keyed to what the cluster CARRIES, never to a direction's name (keyed by name this missed D-over-C and it fell past the band), at ONE height sized to the tallest case. */
 body.room:has(.rank, .trail, .atelier-press) { --band-h: 10.6rem; padding-top: 10.8rem; }
 
 /* ---- D: the chart of the atelier --------------------------------------------------------------- */
@@ -100,7 +78,9 @@ body.room:has(.rank, .trail, .atelier-press) { --band-h: 10.6rem; padding-top: 1
 .atelier-press::before { content: "✦ "; opacity: 0.8; }
 .atelier-press:hover, .atelier-press:focus-visible { color: var(--parchment-bright); }
 
+/* border-box like the house's own fixed `.slip`: on a content box the padding and border landed outside the min() and the panel hung 8.4px off the edge at 320 and 390. */
 .atelier {
+  box-sizing: border-box;
   position: fixed; left: var(--chrome-x); top: 11.6rem; z-index: 44;
   width: min(34rem, calc(100vw - 2 * var(--chrome-x)));
   padding: 0.6rem 0.7rem 0.4rem;

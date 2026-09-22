@@ -38,9 +38,6 @@ function dress(html, dir, at) {
   return out;
 }
 
-// The stage carries committed seed-42 output (the same chart the home page hangs on), because this round rules
-// the cluster and the plate is its ground. The chart folio's own lines are STAND-INS: they are written by the
-// bundle at draw time and no bundle runs here, which is stated in the README rather than hidden.
 function prospect(dir) {
   let h = read('dist/prospect/index.html');
   h = repoint(h, 'page-prospect.css');
@@ -49,8 +46,7 @@ function prospect(dir) {
     '<div class="sheet" id="sheet" style="width:min(72vw,760px);height:auto;aspect-ratio:520/384">');
   h = h.replace('<img id="pp-plate" class="plate" alt="" hidden>',
     '<img id="pp-plate" class="plate" src="prospect-42-laukuwelua.svg" alt="The prospect of Laukuwelua, antique, seed 42">');
-  // The chart folio's lines are written by the bundle at draw time and no bundle runs in a mock, so they are
-  // transcribed here to match the plate above them exactly rather than invented.
+  // Stand-ins: the bundle writes these at draw time and no bundle runs here; transcribed to match the plate above.
   h = h.replace('<p class="folio-title" id="folio-title"></p>',
     '<p class="folio-title" id="folio-title">The Prospect of Laukuwelua · Chart № 42</p>');
   h = h.replace('<p class="folio-sub" id="folio-sub"></p>',
@@ -74,11 +70,10 @@ function faq(dir) {
   return dress(repoint(read('dist/faq/index.html'), 'page-faq.css'), dir, '/faq/');
 }
 
-const PAGES = [
-  ['prospect', prospect, ['control', 'a', 'b', 'c', 'd', 'd-shut', 'd-c', 'd-c-shut']],
-  ['home', home, ['control', 'a', 'd', 'd-c', 'd-c-shut']],
-  ['faq', faq, ['control', 'a', 'b', 'c', 'd-c', 'd-c-shut']],
-];
+// Every direction on every page. The round's first pass drew B and C on two pages and D-over-B on two others,
+// while the README claimed all three, and the losing candidate was never measured against the band at all.
+const DIRS = ['control', 'a', 'b', 'c', 'd', 'd-shut', 'd-c', 'd-c-shut'];
+const PAGES = [['prospect', prospect, DIRS], ['home', home, DIRS], ['faq', faq, DIRS]];
 
 for (const [name, make, dirs] of PAGES) {
   for (const dir of dirs) writeFileSync(new URL(`${name}-${dir}.html`, here), make(dir));

@@ -78,8 +78,11 @@ to `faq-control-1280` for that reason.
 
 **C, the trail.** One quiet line carrying the path, `Vellum › The Explorer › The Prospect`, every segment
 clickable, with the alias stated in words underneath. It is what the literature recommends over a multilayer
-local nav for pages deep in the space, and unlike B it says something on every page. Its weakness is that it
-shows no siblings: it tells you where you are without telling you where else you could go from here.
+local nav for pages deep in the space, and it says something in every ROOM, which B does not: B renders nothing
+on a room with no children, which is eight of the twelve built pages. **It says nothing on home**, because home
+is the root and has no seat in the tree, so a trail there would read "Vellum" and nothing else. On the ruled
+direction that leaves home carrying the chart press alone, which `home-d-c-1280` shows. Its other weakness is
+that it shows no siblings: it tells you where you are without telling you where else you could go from here.
 
 **D, the chart of the atelier, laid over B.** The site's own shape drawn in the house idiom: the rooms are
 places, the real roads are roads, the alias is a dashed track, and a pin says where you are standing. It is the
@@ -124,8 +127,10 @@ direction has to buy.
 | `faq-a-901` | the nav runs into the room folio | 86px |
 
 B, C and D keep the top line at seven items, so their gap to the furniture opposite is identical to today's at
-every width. They pay vertically instead, and on the band page they buy the ground they need: the cluster's ink
-ends at 121.3 inside a band taken to 153.6, against today's 101.8 inside 121.6.
+every width. They pay vertically instead, and on the band page the ones that draw a line buy the ground for it.
+Measured at 1280 on the FAQ: today and B both end at 101.8 inside a band of 121.6, C at 123.6 inside 169.6, and
+the ruled direction at 143.3 inside 169.6, clearing by 26.3. **B is identical to the control there**, because it
+renders nothing on a room with no children, which is the same weakness its own paragraph names.
 
 **Nothing scrolls sideways at any width, 320 included.** The rank, the trail and the press all survive the 900px
 fold, because they sit in the cluster rather than in the nav, and the nav is what flies off as the drawer.
@@ -149,6 +154,9 @@ fold, because they sit in the cluster rather than in the nav, and the nav is wha
 - **Stand-in:** the chart folio's three lines, which the bundle writes at draw time and no bundle runs in a mock.
   They are transcribed to match the plate above them rather than invented.
 - **Mock-only, nothing proposed for main:** the inline sheet fit, and `#pp-plate` filling it.
+- **`shell.css` is archived but LINKED BY NOTHING.** The built pages carry the shell as an inlined `<style>`
+  block, which `repoint()` leaves alone, so the mocks already wear it. The file is kept as the record of what the
+  shell was at `1e1a3c4`, not as part of the mocks' cascade; do not read it as one.
 - **A mock inherits the live kit's defects unless it says otherwise.** This one neutralises none. Issue #638, the
   open and unruled crowding at 320 where the Explorer's tagline sits under the seed pill, is live in these pages
   and Alex ruled on 2026-09-22 to leave it alone for now; the 320 stills therefore show it.
@@ -170,10 +178,35 @@ That is a page-roster change, not a stylesheet. **D is an epic, not a sub.**
 ```
 npm run build                              # the mocks are built FROM dist/
 node design/nav-wayfinding/lift.mjs        # refresh the kit copy (writes lifted.txt)
-node design/nav-wayfinding/build.mjs       # write the twelve mock pages
+node design/nav-wayfinding/build.mjs       # write the mock pages, every direction on every page
 node design/nav-wayfinding/stills.mjs      # shoot, measure, archive
 node design/nav-wayfinding/crop.mjs '<url>|1280|800|0|3|<out>.png'   # a 3x crop of the cluster
 ```
 
 Full-colour originals land in `out/513-nav/` and are not committed; `stills/` holds the chosen set quantized to
 256 colours, which is the convention `design/chart-table/` set.
+
+## The fix round, 2026-09-22
+
+The cold skeptic on PR #666 returned three blocking findings and nine smaller ones. All were accepted; these are
+the ones that changed what the archive shows.
+
+- **The chart panel hung 8.4px off the right edge at 320 and 390, on 20 rows, two of them named spec stills.**
+  `.atelier` was a content box, so the padding and border landed outside the viewport calculation in its
+  `min()`. It now sets `box-sizing: border-box`, like the house's own fixed panel `.slip`.
+- **The round's own sideways check could not see it.** A `position: fixed` element never reaches
+  `documentElement.scrollWidth`, which is exactly what that check reads, so it reported clean on all 20 rows.
+  `stills.mjs` now carries `fixedOverhang` BESIDE it rather than in place of it, measuring every fixed element's
+  right edge against the viewport. It names one intentional exclusion, the fog layers, which are deliberately
+  larger than the viewport. It is empty on all 168 rows.
+- **The trail put a second `aria-current="page"` on every top-level room**, against the ratified one-span pin.
+  The rule is now: the nav carries the mark when the page is in the nav, the trail carries it when the page is
+  not. That is exactly the five pages that had no mark at all, so the rule that fixes the defect also answers the
+  question this epic was filed over. Verified across all 24 mock pages: every direction carries exactly one, and
+  the only page carrying none is `prospect-control`, which is today's nav and is the defect itself.
+- **Every direction is now drawn on every page.** The first pass drew B and C on two pages and D-over-B on two
+  others while claiming all three, so the losing candidate was never measured against the band at all.
+- Two numbers in the band paragraph came from a retired draft and appear in none of the measurements; corrected
+  above. The archive is the spec, so a wrong number in it is a wrong spec.
+- The stills are now byte-reproducible: ImageMagick's date chunks are excluded, so a regen with identical pixels
+  no longer differs in bytes.

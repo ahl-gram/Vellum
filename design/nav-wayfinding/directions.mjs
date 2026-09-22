@@ -77,14 +77,19 @@ function directionB(at) {
 }
 
 // C: the trail. One line at any depth, every segment clickable, and the alias stated in words rather than drawn.
+//
+// EXACTLY ONE aria-current per page (#461 ruling 1): the nav carries it when the page is in the nav, the trail when it is not, which is the five pages that had none.
 function directionC(at) {
   const seat = seatOf(at);
+  const inNav = TREE.some((t) => t.href === at);
   const top = dotted(TREE.map((t) => entry(t, t.href === at ? 'here' : '')));
   if (!seat) return { nav: top, under: '' };
   const crumbs = [{ label: 'Vellum', href: '/' }, seat.top, ...(seat.child ? [seat.child] : [])];
-  const trail = crumbs.map((c, i) => i === crumbs.length - 1
-    ? `<span aria-current="page">${esc(ROOM_NAME[c.href] ?? c.label)}</span>`
-    : `<a href="${c.href}">${esc(ROOM_NAME[c.href] ?? c.label)}</a>`)
+  const trail = crumbs.map((c, i) => {
+    const name = esc(ROOM_NAME[c.href] ?? c.label);
+    if (i < crumbs.length - 1) return `<a href="${c.href}">${name}</a>`;
+    return inNav ? `<span class="here">${name}</span>` : `<span aria-current="page">${name}</span>`;
+  })
     .join('<span class="way" aria-hidden="true">›</span>');
   const alsoFrom = TREE.filter((t) => (t.children ?? []).some((c) => c.alias && c.href === at));
   const also = alsoFrom.length
@@ -93,11 +98,7 @@ function directionC(at) {
   return { nav: top, under: `<nav class="trail" aria-label="Where you are">${trail}</nav>${also}` };
 }
 
-// D: the chart of the atelier, laid over a conventional layer. The site's own shape drawn in the house idiom,
-// the rooms as places, the real roads as roads, the alias as a dashed track, and a pin where you stand. NEVER
-// instead of a conventional nav: whichever layer is underneath it stays a complete answer on its own, so pulling
-// the chart later costs nothing. The layer is a parameter because the pairing is a real choice: over B the chart
-// repeats what the rank already says (siblings) and over C it supplies exactly what the trail lacks.
+// D: the chart of the atelier over a conventional layer, never instead of one. The layer is a parameter because the pairing is a real choice; the README argues it.
 const withChart = (layer) => (at) => {
   const base = layer(at);
   return {
