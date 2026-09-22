@@ -1,0 +1,139 @@
+/* The shared motion desk: one motion language for every page linking /motion.css, on the live DOM only, so the determinism contract (SVG strings, committed files, goldens) is untouched. */
+
+:root {
+  --paper-quick: 180ms;
+  --paper: 260ms;
+  --paper-settle: 340ms;  /* also the ghost snap-back, read as a number by `tokenMs` in `src/site/explorer/app.ts`, so the unit stays ms */
+  --unfurl: 650ms;
+  --unfurl-quick: 400ms;
+  --ink-draw: 1200ms;
+  --ink-dry: 1200ms;
+  --turn: 900ms;          /* the sheet turn, read by `turnTiming` in `src/site/explorer/sheet-turn.ts` */
+  --verso-turn: 1200ms;   /* the verso flip, slower than a re-dress on purpose */
+
+  /* The redraft grade is shorter than the once-per-draw arrival because a redraft fires on every settle; the dry waits stagger names by tier, past the inset's 200ms crossfade. */
+  --redraft-draw: 600ms;
+  --redraft-dry: 450ms;
+  --redraft-dry-wait: 260ms;
+  --redraft-dry-wait-village: 500ms;
+  --redraft-dry-wait-hamlet: 740ms;
+  --glide: 300ms;         /* the zoom glide, read per glide by `glideMs` in `src/site/explorer/glass.ts` and the rooms' seats, bypassed under reduced motion */
+
+  --ease-paper: cubic-bezier(0.22, 0.61, 0.36, 1);  /* also the ghost snap-back, read as text by `token` in `src/site/explorer/app.ts` */
+  --ease-unfurl: cubic-bezier(0.66, 0, 0.2, 1.03);
+  --ease-turn: cubic-bezier(0.62, 0, 0.34, 1);
+
+  --raise: -2px;
+  --press: 1px;
+  --raise-shadow: 0 6px 16px rgb(from var(--chart-ink) r g b / 0.2);
+  --press-shadow: 0 1px 3px rgb(from var(--chart-ink) r g b / 0.14);
+}
+
+@keyframes paperSettle {
+  from { opacity: 0; transform: translateY(16px) rotate(0.9deg); }
+  70%  { opacity: 1; transform: translateY(-2px) rotate(-0.15deg); }
+  to   { opacity: 1; transform: translateY(0) rotate(0); }
+}
+
+/* The consumer sets --draw-len and a matching stroke-dasharray inline, then removes both on animationend to restore the pristine stroke. */
+@keyframes inkDraw {
+  from { stroke-dashoffset: var(--draw-len, 0); }
+  to   { stroke-dashoffset: 0; }
+}
+
+@keyframes washDry {
+  from { fill-opacity: 0; }
+  to   { fill-opacity: 1; }
+}
+
+@keyframes inkStamp {
+  from { opacity: 0; transform: scale(1.35); }
+  60%  { opacity: 1; }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Self-perspective lives in the transform so a consumer needs no ancestor perspective; the consumer sets transform-origin to the anchored edge and pairs with --ease-unfurl. */
+@keyframes paperUnfurl {
+  from { opacity: 0; transform: perspective(900px) rotateX(-62deg); }
+  72%  { opacity: 1; transform: perspective(900px) rotateX(7deg); }
+  to   { opacity: 1; transform: perspective(900px) rotateX(0); }
+}
+
+@keyframes dryingInk {
+  from { opacity: 0; }
+  45%  { opacity: 0.85; }
+  to   { opacity: 1; }
+}
+
+@keyframes inkRipple {
+  from { opacity: 0.55; transform: scale(0.2); }
+  to   { opacity: 0; transform: scale(1); }
+}
+
+/* .place-hit and .lf-station stay excluded: each is a button on its own load-bearing transform (the hit target, `P2c` in `scripts/e2e/suite-cards.mjs`; home's counter-scaled station anchor), which the house lift would replace and the house transition would lag a beat behind every zoom. */
+button:not(.lf-station):not(.place-hit),
+.actions a,
+.action-link {
+  transition: transform var(--paper-quick) var(--ease-paper),
+              box-shadow var(--paper-quick) var(--ease-paper);
+}
+button:not(.lf-station):not(.place-hit):hover,
+.actions a:hover,
+.action-link:hover {
+  transform: translateY(var(--raise));
+  box-shadow: var(--raise-shadow);
+}
+button:not(.lf-station):not(.place-hit):active,
+.actions a:active,
+.action-link:active {
+  transform: translateY(var(--press));
+  box-shadow: var(--press-shadow);
+}
+.rooms a {
+  display: inline-block;
+  vertical-align: top;
+  text-decoration: none;
+  transition: color 0.2s ease, transform var(--paper-quick) var(--ease-paper);
+}
+.rooms a:hover,
+.rooms a:focus-visible { transform: translateY(var(--raise)); }
+.rooms a:active        { transform: translateY(0); }
+
+.plate {
+  transition: transform var(--paper) var(--ease-paper),
+              box-shadow var(--paper) var(--ease-paper);
+}
+.plate:hover {
+  transform: translateY(-5px) rotate(-0.6deg);
+  box-shadow: 0 20px 44px rgb(from var(--chart-ink) r g b / 0.28);
+}
+.plate:active { transform: translateY(-1px) rotate(0deg); }
+
+/* Keyed on .wordmark, not h1: on a room page the wordmark is a <p> and the h1 holds no link, so an h1-keyed rule would select nothing; home's wordmark stays still through the :has scope, which reads the whole body wherever the room name stands. */
+.wordmark a {
+  display: inline-block;
+  transition: transform var(--paper) var(--ease-paper);
+}
+body:has(.room-name) .wordmark a:hover,
+body:has(.room-name) .wordmark a:focus-visible { transform: translateY(var(--raise)) rotate(-0.6deg); }
+body:has(.room-name) .wordmark a:active { transform: translateY(0); }
+
+/* Cross-document view transitions' pseudo-elements live on their own tree, out of reach of the universal reduced-motion collapse, so the nested @view-transition { navigation: none } below is what turns the folio off. */
+@view-transition { navigation: auto; }
+
+::view-transition-old(root) { animation: folioLeave var(--paper) var(--ease-paper) both; }
+::view-transition-new(root) { animation: folioArrive var(--paper) var(--ease-paper) both; }
+@keyframes folioLeave  { to   { opacity: 0; transform: translateY(-6px); } }
+@keyframes folioArrive { from { opacity: 0; transform: translateY(6px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0s !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
+  }
+  @view-transition { navigation: none; }
+}

@@ -1,0 +1,147 @@
+/* The round's OWN dress: only the shapes that do not exist on main yet. Everything else on these pages is the
+   lifted kit, untouched, so a still shows the real cascade. Where this sheet has to neutralise a live defect to
+   show the intended dress, it says so at the line and the defect is named in the README. */
+
+/* ---- common to every direction ---------------------------------------------------------------- */
+
+/* The bundle sizes the sheet at the fit by writing an INLINE width and height, which is the only thing that beats
+   `#sheet { width: 0; height: 0 }` in page-prospect.css (an id, 1-0-0, over any class rule this sheet could
+   write). So the mock writes the same inline style in build.mjs rather than escalating a selector here, and the
+   plate simply fills it. Mock convenience, nothing proposed for main. */
+#pp-plate { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+/* The cluster is pointer-events: none with a TWO-ITEM allowlist (`header.chrome a` and `.rooms-reveal`).
+   Anything new that must be pressable joins it or it is dead on arrival and no test would see it: this is the
+   Issue #520 class, where a green check sat over a control nobody could press. D's press is the first new
+   member the house has needed, and the README prices it as a real cost rather than a mock convenience. */
+header.chrome .atelier-press { pointer-events: auto; }
+
+/* ---- B: the second rank ------------------------------------------------------------------------ */
+
+/* Local navigation must never outrank the line above it, so the rank is smaller and inset. The inset is what
+   says "inside", without a glyph that would need its own meaning.
+   The rank is quieter by SIZE and letterspacing, never by a dimmer ink. `--ink-faded` on the deep is below the
+   4.5:1 floor for small text (ui-design records line-tan at 4.03:1 and ink-faded darker still), and the live nav
+   already shows the right division: the container's ink colours the separators, the LINKS are parchment. A first
+   draft of this sheet took its quietness from colour and the still showed Q & A and The Glossary barely there. */
+.rank {
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-size: 0.66rem; letter-spacing: 0.13em; color: var(--ink-faded);
+  margin: 0.3rem 0 0 0.9rem;
+}
+.rank a { color: var(--parchment); text-decoration: none; }
+.rank a:hover, .rank a:focus-visible { color: var(--parchment-bright); }
+.rank [aria-current="page"] {
+  display: inline-block; vertical-align: top; color: var(--parchment-bright);
+  text-decoration: underline; text-underline-offset: 0.4em; text-decoration-thickness: 1px;
+}
+.rank .sep { margin: 0 0.3em; opacity: 0.55; }
+/* The rank hangs off the room above it, so a hairline stem reads as descent rather than as a second list. */
+.rank::before {
+  content: ""; display: inline-block; vertical-align: middle;
+  width: 0.55rem; height: 1px; margin: 0 0.45em 0.15em -0.9rem;
+  background: var(--ink-faded); opacity: 0.7;
+}
+
+/* The ancestor you are inside, on the top line: present but not the page. Never colour alone. */
+.rooms a.up {
+  color: var(--parchment-bright);
+  text-decoration: underline dotted; text-underline-offset: 0.45em; text-decoration-thickness: 1px;
+}
+/* The room that carries this page as an ALIAS. Fainter than the ancestor, and a different stroke, because the
+   ratified pin allows exactly one aria-current span and this is deliberately not it. */
+.rooms a.alias {
+  text-decoration: underline dashed; text-underline-offset: 0.45em; text-decoration-thickness: 1px;
+  text-decoration-color: var(--ink-faded);
+}
+
+/* ---- C: the trail ------------------------------------------------------------------------------ */
+
+/* The trail has to read as a PATH, not as a second nav line. At the nav's own size and face it read as a peer
+   of the list above it (measured at 3x on the first crop), so it is set a step smaller and the way-marks are
+   given their full weight: the dots above separate PEERS, the chevrons here separate STAGES, and that contrast
+   is the only thing carrying the difference. */
+.trail {
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-size: 0.62rem; letter-spacing: 0.1em; color: var(--ink-faded);
+  margin: 0.36rem 0 0;
+}
+.trail a { color: var(--parchment); text-decoration: none; }
+.trail a:hover, .trail a:focus-visible { color: var(--parchment-bright); }
+.trail [aria-current="page"] { color: var(--parchment-bright); }
+.trail .way { margin: 0 0.45em; color: var(--parchment); font-size: 0.78rem; vertical-align: -0.04em; }
+.also {
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic; font-size: 0.62rem; color: var(--parchment);
+  margin: 0.12rem 0 0;
+}
+.also a { color: var(--parchment); text-decoration-color: rgb(from var(--parchment) r g b / 0.45); text-underline-offset: 0.25em; }
+
+/* A document room renders the band and a chart room does not, so only there does an added line need more ground
+   under it. The direction is drawn as it would really ship, which means it BUYS that ground and the README
+   records the cost rather than letting the still hide it.
+   The ground is bought only where the line is actually DRAWN: B renders no rank on a room with no children, so
+   an unconditional override would buy it band it never uses and the still would misreport B's cost. */
+body.room[data-dir="b"]:has(.rank), body.room[data-dir="c"]:has(.trail) { --band-h: 9.6rem; padding-top: 9.8rem; }
+
+/* ---- D: the chart of the atelier --------------------------------------------------------------- */
+
+.atelier-press {
+  display: block; margin: 0.42rem 0 0;
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-size: 0.62rem; letter-spacing: 0.14em;
+  color: var(--parchment); background: none; border: 0; padding: 0; cursor: pointer;
+}
+.atelier-press::before { content: "✦ "; opacity: 0.8; }
+.atelier-press:hover, .atelier-press:focus-visible { color: var(--parchment-bright); }
+
+.atelier {
+  position: fixed; left: var(--chrome-x); top: 11.6rem; z-index: 44;
+  width: min(34rem, calc(100vw - 2 * var(--chrome-x)));
+  padding: 0.6rem 0.7rem 0.4rem;
+  background: rgb(from var(--chart-ink) r g b / 0.93);
+  border: 1px solid rgb(from var(--line-tan) r g b / 0.45);
+  box-shadow: 0 18px 40px rgb(from var(--chart-ink) r g b / 0.55);
+  pointer-events: auto;
+}
+.atelier svg { display: block; width: 100%; height: auto; }
+.atelier .land { fill: rgb(from var(--parchment) r g b / 0.10); stroke: var(--line-tan); stroke-width: 1.1; }
+/* The ring is the engraver's second stroke outside the coast, the same idiom the charts use for a shoreline. */
+.atelier .sea-ring { fill: none; stroke: rgb(from var(--line-tan) r g b / 0.35); stroke-width: 5; }
+.atelier .road { fill: none; stroke: rgb(from var(--parchment) r g b / 0.45); stroke-width: 1; }
+.atelier .road.track { stroke-dasharray: 3 4; stroke: rgb(from var(--parchment) r g b / 0.3); }
+.atelier text {
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-size: 11px; letter-spacing: 0.06em; text-anchor: middle; fill: var(--parchment);
+}
+.atelier .village text { font-size: 9.5px; fill: var(--parchment); }
+.atelier .isle text { font-size: 10px; fill: var(--parchment); }
+.atelier .pip { fill: var(--parchment); }
+.atelier .capital .pip { fill: var(--parchment-bright); }
+.atelier .village .pip { fill: var(--parchment); }
+.atelier .here .pip { fill: var(--parchment-bright); }
+.atelier .here text { fill: var(--parchment-bright); }
+.atelier .halo { fill: none; stroke: var(--parchment-bright); stroke-width: 1; opacity: 0.55; }
+.atelier .you path { stroke: var(--parchment-bright); stroke-width: 1; }
+.atelier .you text {
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic; font-size: 10.5px; fill: var(--parchment-bright); letter-spacing: 0.04em;
+}
+.atelier .rose circle { fill: none; stroke: rgb(from var(--line-tan) r g b / 0.5); }
+.atelier .rose path { fill: rgb(from var(--parchment) r g b / 0.55); }
+.atelier .rose text { font-size: 9px; fill: var(--parchment); }
+.atelier .cartouche {
+  text-anchor: start; font-size: 13px; letter-spacing: 0.12em; fill: var(--parchment);
+}
+.atelier-key {
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic; font-size: 0.62rem; color: var(--parchment); margin: 0.3rem 0 0; text-align: right;
+}
+
+@media (max-width: 900px) {
+  /* The nav flies off as the drawer below 900 and anything seated after it stays in the cluster, which is the
+     property that makes this seat worth having: the rank, the trail and the press survive the fold. */
+  .atelier { top: 9.4rem; }
+  .rank, .trail { margin-left: 0; }
+  .rank::before { display: none; }
+}
