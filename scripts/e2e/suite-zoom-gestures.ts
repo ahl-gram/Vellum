@@ -1,21 +1,22 @@
 // Glass gestures e2e (#166): suite-zoom's behaviour re-proven through REAL CDP input (mouse wheel, touch, device metrics); runs right after suite-zoom and restores its clean desktop home before suite-cards. d3-zoom binds its touch listeners ONLY when the page BOOTS as a touch device (defaultTouchable reads navigator.maxTouchPoints at attach time), so the touch block enables emulation and then RELOADS. NEVER dispatch a real touch while touch emulation is off (it wedges Chrome's touch input pipeline for the WHOLE session; a real mouse wheel is safe, only touch poisons), and NEVER change the emulation config after a real touch (later touches route to native page pinch-zoom and a clear+reload does NOT recover it), so ALL touch checks run under ONE phone-metric emulation set enabled once and left alone.
 import { makeStep } from "./step-support.ts";
+import type { SuiteContext } from "./types.ts";
 
 // eslint-disable-next-line max-lines-per-function
-export async function run(ctx) {
+export async function run(ctx: SuiteContext): Promise<void> {
   const { evaluate, send, check, shoot, sleep, waitReady, waitSettled, wheel, pinch, touchPan, setMobileViewport, clearMobile, PORT } = ctx;
   // ZG1 and ZG1b are deliberately not stepped: nothing in them throws, the wheel and the state read both return.
   const step = makeStep(ctx);
 
-  async function reloadHome(label) {
+  async function reloadHome(label: string): Promise<void> {
     await send("Page.navigate", { url: "about:blank" });
     await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/#seed=42&style=antique` });
     await waitReady();
     await evaluate(`window.__vellumSetRedraftEnabled(false)`);
     await waitSettled(label);
   }
-  const vpRect = () => evaluate(`(()=>{const v=document.getElementById("map-viewport");const r=v.getBoundingClientRect();return{L:r.left,T:r.top,W:v.clientWidth,H:v.clientHeight};})()`);
-  const state = () => evaluate(`window.__vellumZoomState()`);
+  const vpRect = () => evaluate<{ L: number; T: number; W: number; H: number }>(`(()=>{const v=document.getElementById("map-viewport");const r=v.getBoundingClientRect();return{L:r.left,T:r.top,W:v.clientWidth,H:v.clientHeight};})()`);
+  const state = () => evaluate<{ k: number; x: number; y: number }>(`window.__vellumZoomState()`);
 
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
   let r = await vpRect();
@@ -43,8 +44,8 @@ export async function run(ctx) {
   await setMobileViewport(390, 780);
   await step("ZG2, ZG3, ZG4", async () => {
     await reloadHome("gesture-mobile-boot");
-    const touchAction = await evaluate(`getComputedStyle(document.getElementById("map-viewport")).touchAction`);
-    const scaleAtBoot = await evaluate(`visualViewport.scale`);
+    const touchAction = await evaluate<string>(`getComputedStyle(document.getElementById("map-viewport")).touchAction`);
+    const scaleAtBoot = await evaluate<number>(`visualViewport.scale`);
     const scrollToMap = () => evaluate(`document.getElementById("map-viewport").scrollIntoView({block:"center"})`);
     await scrollToMap();
     await sleep(60);
@@ -75,12 +76,12 @@ export async function run(ctx) {
     await scrollToMap();
     await sleep(60);
     r = await vpRect();
-    cx = Math.round(r.L + r.W * 0.5), cy = Math.round(r.T + r.H * 0.5);
-    const scrollBefore = await evaluate(`window.scrollY`);
+    cx = Math.round(r.L + r.W * 0.5), cy = Math.round(r.T + r.H * 0.5); // eslint-disable-line @typescript-eslint/no-unused-expressions
+    const scrollBefore = await evaluate<number>(`window.scrollY`);
     await pinch(cx, cy, 70, 180);
     await sleep(100);
     const zg4 = await state();
-    const page = await evaluate(`({scrolled:(window.scrollY - ${scrollBefore}), vs:visualViewport.scale})`);
+    const page = await evaluate<{ scrolled: number; vs: number }>(`({scrolled:(window.scrollY - ${scrollBefore}), vs:visualViewport.scale})`);
     check(
       "ZG4 a pinch under mobile viewport zooms the map without page pinch-zoom (AC2 touch-action wiring)",
       touchAction === "none" && Math.abs(scaleAtBoot - 1) < 0.01 && zg4.k > 1.3 && Math.abs(page.vs - 1) < 0.01,

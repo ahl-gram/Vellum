@@ -70,7 +70,7 @@
   to   { opacity: 0; transform: scale(1); }
 }
 
-/* .place-hit and .lf-station stay excluded: each is a button on its own load-bearing transform (the hit target, `P2c` in `scripts/e2e/suite-cards.mjs`; home's counter-scaled station anchor), which the house lift would replace and the house transition would lag a beat behind every zoom. */
+/* .place-hit and .lf-station stay excluded: each is a button on its own load-bearing transform (the hit target, `P2c` in `scripts/e2e/suite-cards.ts`; home's counter-scaled station anchor), which the house lift would replace and the house transition would lag a beat behind every zoom. */
 button:not(.lf-station):not(.place-hit),
 .actions a,
 .action-link {

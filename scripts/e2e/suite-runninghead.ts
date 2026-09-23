@@ -109,7 +109,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
     await send("Page.navigate", { url: `http://127.0.0.1:${PORT}${route}` });
     for (let i = 0; i < 200; i++) {
       let ok: unknown = null;
-      try { ok = await evaluate(`document.readyState === "complete" && !!document.querySelector(".wordmark")`); } catch {}
+      try { ok = await evaluate<boolean>(`document.readyState === "complete" && !!document.querySelector(".wordmark")`); } catch {}
       if (ok) break;
       await sleep(75);
       if (i === 199) return false;

@@ -22,7 +22,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   };
   const waitInked = async (label: string): Promise<void> => {
     for (let i = 0; i < 120; i++) {
-      if (await evaluate(`!!document.querySelector("#map .voyage-overlay .voyage-track")`)) return;
+      if (await evaluate<boolean>(`!!document.querySelector("#map .voyage-overlay .voyage-track")`)) return;
       await sleep(50);
     }
     throw new Error("waitInked timeout " + label);
@@ -31,7 +31,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
     await send("Page.navigate", { url: "about:blank" });
     await send("Page.navigate", { url });
     for (let i = 0; i < 100; i++) {
-      if (await evaluate(`document.readyState === "complete"`)) return;
+      if (await evaluate<boolean>(`document.readyState === "complete"`)) return;
       await sleep(50);
     }
     throw new Error("gotoPlain timeout " + label);
@@ -170,15 +170,15 @@ export async function run(ctx: SuiteContext): Promise<void> {
     const r=m.getBoundingClientRect();return{x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2)};})()`);
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: rect.x, y: rect.y });
   await sleep(80);
-  const overOpen = await evaluate(`document.getElementById("note-coast-warp").matches(":popover-open")`);
+  const overOpen = await evaluate<boolean>(`document.getElementById("note-coast-warp").matches(":popover-open")`);
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 4, y: 4 });
   await sleep(80);
-  const awayClosed = await evaluate(`!document.getElementById("note-coast-warp").matches(":popover-open")`);
+  const awayClosed = await evaluate<boolean>(`!document.getElementById("note-coast-warp").matches(":popover-open")`);
   check("BR5 the note shows under a real hover and hides when the pointer leaves", overOpen && awayClosed, JSON.stringify({ overOpen, awayClosed }));
 
   // REAL CDP taps fire the full compat sequence a synthetic .click() skips (which once hid an off-by-one here); device metrics + touch emulation is what actually flips the hover/pointer media in this browser, setEmulatedMedia's feature overrides are a no-op.
   await setMobileViewport(390, 700);
-  const emulated = await evaluate(`window.matchMedia("(hover: none)").matches`);
+  const emulated = await evaluate<boolean>(`window.matchMedia("(hover: none)").matches`);
   await sleep(120);
   await evaluate(`(()=>{const h=document.querySelector("#broadside .slip-handle");if(h&&!document.getElementById("broadside").classList.contains("open"))h.click();})()`);
   await sleep(120);

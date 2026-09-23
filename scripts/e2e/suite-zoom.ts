@@ -1,17 +1,18 @@
 /* eslint-disable max-lines */
 // Surveyor's Glass e2e (Z): pan/zoom on the Explorer chart via the shared d3-zoom controller, plus the settle-to-region redraft (Z17+). Resolved matrices are asserted on purpose: getComputedStyle returns "none" for a rejected value, so the assertion doubles as proof the px-suffixed transform is valid CSS (d3's own toString() is not).
 import { makeStep } from "./step-support.ts";
+import type { SuiteContext } from "./types.ts";
 
 // eslint-disable-next-line max-lines-per-function
-export async function run(ctx) {
+export async function run(ctx: SuiteContext): Promise<void> {
   const { evaluate, send, check, shoot, sleep, waitSettled, waitReady, waitTurned, PORT } = ctx;
   // The geometric checks between the steps below are deliberately not stepped: they read the camera and the CSSOM, with nothing to wait on.
   const step = makeStep(ctx);
 
   // Fixed sleeps only outlasted the #300 deferred ink because a CDP evaluate sent mid-build queues behind the blocked main thread; wait for the ink itself.
-  const waitInked = async (label) => {
+  const waitInked = async (label: string): Promise<void> => {
     for (let i = 0; i < 120; i++) {
-      if (await evaluate(`!!document.querySelector("#map .voyage-overlay .voyage-track")`)) return;
+      if (await evaluate<boolean>(`!!document.querySelector("#map .voyage-overlay .voyage-track")`)) return;
       await sleep(50);
     }
     throw new Error("waitInked timeout " + label);
@@ -25,7 +26,8 @@ export async function run(ctx) {
     await shoot("explorer-zoom-k1.png");
   });
 
-  const z1 = await evaluate(`(()=>{window.__vellumZoomTo({k:3,x:-20,y:-15});const s=window.__vellumZoomState();const m=document.getElementById("map");const cs=getComputedStyle(m);return{s,matrix:cs.transform,origin:cs.transformOrigin,zoomed:document.getElementById("map-viewport").classList.contains("zoomed")};})()`);
+  type Cam = { k: number; x: number; y: number };
+  const z1 = await evaluate<{ s: Cam; matrix: string; origin: string; zoomed: boolean }>(`(()=>{window.__vellumZoomTo({k:3,x:-20,y:-15});const s=window.__vellumZoomState();const m=document.getElementById("map");const cs=getComputedStyle(m);return{s,matrix:cs.transform,origin:cs.transformOrigin,zoomed:document.getElementById("map-viewport").classList.contains("zoomed")};})()`);
   check(
     "Z1 zoomTo lands the expected transform on #map (matrix + top-left origin, .zoomed, getState reads it)",
     z1.matrix === "matrix(3, 0, 0, 3, -20, -15)" && z1.origin === "0px 0px" &&
@@ -33,7 +35,7 @@ export async function run(ctx) {
     JSON.stringify(z1),
   );
 
-  const z2 = await evaluate(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:99,x:-99999,y:-99999});const s=window.__vellumZoomState();return{s,ex:-(7*W),ey:-(7*H),W,H};})()`);
+  const z2 = await evaluate<{ s: Cam; ex: number; ey: number; W: number; H: number }>(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:99,x:-99999,y:-99999});const s=window.__vellumZoomState();return{s,ex:-(7*W),ey:-(7*H),W,H};})()`);
   check(
     "Z2 clamps at the max extent (k->8, pan pinned to the far edge so the sheet still covers the viewport)",
     z2.s.k === 8 && Math.abs(z2.s.x - z2.ex) < 0.5 && Math.abs(z2.s.y - z2.ey) < 0.5,
@@ -44,21 +46,21 @@ export async function run(ctx) {
   await evaluate(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:4,x:-(3*W)/2,y:-(3*H)/2});})()`);
   await shoot("explorer-zoom-k4.png");
 
-  const z3 = await evaluate(`(()=>{window.__vellumZoomTo({k:0.1,x:500,y:500});const s=window.__vellumZoomState();const m=document.getElementById("map");return{s,matrix:getComputedStyle(m).transform,inline:m.style.transform,zoomed:document.getElementById("map-viewport").classList.contains("zoomed")};})()`);
+  const z3 = await evaluate<{ s: Cam; matrix: string; inline: string; zoomed: boolean }>(`(()=>{window.__vellumZoomTo({k:0.1,x:500,y:500});const s=window.__vellumZoomState();const m=document.getElementById("map");return{s,matrix:getComputedStyle(m).transform,inline:m.style.transform,zoomed:document.getElementById("map-viewport").classList.contains("zoomed")};})()`);
   check(
     "Z3 clamps at the min extent (k->1, pan->home; idle DOM restored: transform none, no .zoomed)",
     z3.s.k === 1 && z3.s.x === 0 && z3.s.y === 0 && z3.matrix === "none" && z3.inline === "" && z3.zoomed === false,
     JSON.stringify(z3),
   );
 
-  const z4 = await evaluate(`(()=>{window.__vellumZoomTo({k:2,x:-10,y:-10});const a=window.__vellumZoomState();window.__vellumZoomTo(a);const b=window.__vellumZoomState();return{a,b};})()`);
+  const z4 = await evaluate<{ a: Cam; b: Cam }>(`(()=>{window.__vellumZoomTo({k:2,x:-10,y:-10});const a=window.__vellumZoomState();window.__vellumZoomTo(a);const b=window.__vellumZoomState();return{a,b};})()`);
   check(
     "Z4 getState round-trips an in-bounds transform (k=2, x=-10, y=-10)",
     z4.a.k === 2 && z4.a.x === -10 && z4.a.y === -10 && z4.b.k === z4.a.k && z4.b.x === z4.a.x && z4.b.y === z4.a.y,
     JSON.stringify(z4),
   );
 
-  const z6 = await evaluate(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:2,x:-W/2,y:-H/2});const vr=vp.getBoundingClientRect();const cx=vr.left+vr.width/2,cy=vr.top+vr.height/2;const hits=[...document.querySelectorAll("#map .place-hit")];let best=null,bd=Infinity;for(const h of hits){const r=h.getBoundingClientRect();if(r.width===0)continue;const d=Math.hypot(r.left+r.width/2-cx,r.top+r.height/2-cy);if(d<bd){bd=d;best=h;}}if(!best)return{ok:false};best.click();const card=document.getElementById("place-card");const m=document.getElementById("map");return{ok:true,shown:!card.hidden,pinned:card.classList.contains("pinned"),scaled:getComputedStyle(m).transform.startsWith("matrix(2, 0, 0, 2,")};})()`);
+  const z6 = await evaluate<{ ok: false } | { ok: true; shown: boolean; pinned: boolean; scaled: boolean }>(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:2,x:-W/2,y:-H/2});const vr=vp.getBoundingClientRect();const cx=vr.left+vr.width/2,cy=vr.top+vr.height/2;const hits=[...document.querySelectorAll("#map .place-hit")];let best=null,bd=Infinity;for(const h of hits){const r=h.getBoundingClientRect();if(r.width===0)continue;const d=Math.hypot(r.left+r.width/2-cx,r.top+r.height/2-cy);if(d<bd){bd=d;best=h;}}if(!best)return{ok:false};best.click();const card=document.getElementById("place-card");const m=document.getElementById("map");return{ok:true,shown:!card.hidden,pinned:card.classList.contains("pinned"),scaled:getComputedStyle(m).transform.startsWith("matrix(2, 0, 0, 2,")};})()`);
   check(
     "Z6 a card pinned while zoomed shows over the scaled chart (AC2: pinned card rides its mark)",
     z6.ok && z6.shown && z6.pinned && z6.scaled,
@@ -68,7 +70,7 @@ export async function run(ctx) {
   await shoot("explorer-zoom-card.png");
   await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape"}))`);
 
-  const z8 = await evaluate(`(()=>{
+  const z8 = await evaluate<{ ok: false } | { ok: true; w1: number; w8: number; cardK1: string; cardK8: string; mapK8: string }>(`(()=>{
     const vp=document.getElementById("map-viewport");
     window.__vellumZoomTo({k:1,x:0,y:0});
     const vr=vp.getBoundingClientRect();const cx=vr.left+vr.width/2,cy=vr.top+vr.height/2;
@@ -98,7 +100,7 @@ export async function run(ctx) {
   await shoot("explorer-zoom-card-k8.png");
   await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape"}))`);
 
-  const z8b = await evaluate(`(()=>{
+  const z8b = await evaluate<{ ok: false; x?: undefined; y?: undefined } | { ok: true; x: number; y: number; hitW: number; overlayK: string | null; mapK: string }>(`(()=>{
     const vp=document.getElementById("map-viewport");
     window.__vellumZoomTo({k:1,x:0,y:0});
     const vr=vp.getBoundingClientRect();const cx=vr.left+vr.width/2,cy=vr.top+vr.height/2;
@@ -117,9 +119,10 @@ export async function run(ctx) {
   })()`);
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: z8b.x ?? 0, y: z8b.y ?? 0 });
   // Poll, never sleep: opacity below has NO tolerance, and #381's second lane stretched this 180ms grow-in past a fixed 400ms once in eight runs (o=0.906, still climbing).
-  const ringScale = (r) => parseFloat(((r.t || "").match(/matrix\(([-\d.]+)/) || [])[1] ?? "NaN");
-  const ringAtRest = (r) => r.hover && parseFloat(r.o) === 1 && Math.abs(ringScale(r) - 1) <= 0.02;
-  const readRing = () => evaluate(`(()=>{
+  type Ring = { hover: false; t?: undefined; o?: undefined } | { hover: true; t: string; o: string };
+  const ringScale = (r: Ring) => parseFloat(((r.t || "").match(/matrix\(([-\d.]+)/) || [])[1] ?? "NaN"); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+  const ringAtRest = (r: Ring) => r.hover && parseFloat(r.o) === 1 && Math.abs(ringScale(r) - 1) <= 0.02;
+  const readRing = () => evaluate<Ring>(`(()=>{
     const h=document.querySelector("#map .place-hit:hover");
     if(!h)return{hover:false};
     const s=getComputedStyle(h,"::after");
@@ -140,7 +143,7 @@ export async function run(ctx) {
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 5, y: 5 });
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
 
-  const z9 = await evaluate(`(async()=>{
+  const z9 = await evaluate<{ afterIn: number; afterOut: number; beforePanX: number; afterPanX: number; home: Cam }>(`(async()=>{
     const vp=document.getElementById("map-viewport");
     window.__vellumZoomTo({k:1,x:0,y:0});
     vp.focus();
@@ -163,7 +166,7 @@ export async function run(ctx) {
     JSON.stringify(z9),
   );
 
-  const z10 = await evaluate(`(async()=>{
+  const z10 = await evaluate<{ inK: number; in2: number; outK: number; home: Cam }>(`(async()=>{
     const st=()=>window.__vellumZoomState();
     const settleK=async(t)=>{for(let i=0;i<100;i++){if(Math.abs(st().k-t)<1e-6)return st().k;await new Promise(r=>setTimeout(r,40));}return st().k;};
     window.__vellumZoomTo({k:1,x:0,y:0});
@@ -184,7 +187,7 @@ export async function run(ctx) {
 
   await evaluate(`(()=>{window.__vellumZoomTo({k:1,x:0,y:0});document.getElementById("zoom-in").dispatchEvent(new MouseEvent("dblclick",{bubbles:true,cancelable:true,view:window}));})()`);
   await sleep(350); // let any leaked d3 dblclick-zoom animation finish
-  const z10b = await evaluate(`window.__vellumZoomState()`);
+  const z10b = await evaluate<Cam>(`window.__vellumZoomState()`);
   check(
     "Z10b a double-click on a zoom button does not leak into d3's dblclick-zoom (no lurch/pan)",
     z10b.k === 1 && z10b.x === 0 && z10b.y === 0,
@@ -195,7 +198,7 @@ export async function run(ctx) {
     for (const style of ["topographic", "ink", "nautical"]) {
       await evaluate(`(()=>{window.__vellumZoomTo({k:1,x:0,y:0});const s=document.getElementById("style");s.value=${JSON.stringify(style)};s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
       await waitTurned("zoom-style-" + style);
-      const zs = await evaluate(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:3,x:-W,y:-H});const m=document.getElementById("map");return{matrix:getComputedStyle(m).transform,zoomed:vp.classList.contains("zoomed"),touch:getComputedStyle(vp).touchAction,hits:document.querySelectorAll("#map .place-hit").length};})()`);
+      const zs = await evaluate<{ matrix: string; zoomed: boolean; touch: string; hits: number }>(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:3,x:-W,y:-H});const m=document.getElementById("map");return{matrix:getComputedStyle(m).transform,zoomed:vp.classList.contains("zoomed"),touch:getComputedStyle(vp).touchAction,hits:document.querySelectorAll("#map .place-hit").length};})()`);
       check(
         "Z11 " + style + " pans/zooms identically (AC1: matrix lands, .zoomed, touch-action:none, marks present)",
         zs.matrix.startsWith("matrix(3, 0, 0, 3,") && zs.zoomed === true && zs.touch === "none" && zs.hits > 0,
@@ -210,7 +213,7 @@ export async function run(ctx) {
 
     await evaluate(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:2,x:-0.2*W,y:-0.3*H});})()`);
     // Poll the 250ms settle debounce: the assertion below is strict string equality, and a deferred timer under #381's second lane can land after any fixed wait.
-    const readZ12 = () => evaluate(`(()=>{const p=new URLSearchParams(location.hash.slice(1));return{cx:p.get("cx"),cy:p.get("cy"),k:p.get("k")};})()`);
+    const readZ12 = () => evaluate<{ cx: string | null; cy: string | null; k: string | null }>(`(()=>{const p=new URLSearchParams(location.hash.slice(1));return{cx:p.get("cx"),cy:p.get("cy"),k:p.get("k")};})()`);
     let z12 = await readZ12();
     for (let i = 0; i < 60 && z12.k !== "2.0000"; i++) {
       await sleep(50);
@@ -226,7 +229,7 @@ export async function run(ctx) {
   await evaluate(`window.__vellumZoomTo({k:3,x:-40,y:-30})`);
   await evaluate(`document.getElementById("verso-turn").click()`);
   await sleep(1300); // let the 1.2s flip land
-  const z5 = await evaluate(`(()=>{const sh=document.getElementById("sheet");const st=window.__vellumZoomState();const p=new URLSearchParams(location.hash.slice(1));return{versoed:sh.classList.contains("versoed"),ghost:!!document.querySelector("#verso .verso-ghost"),vis:getComputedStyle(document.getElementById("verso")).visibility,k:st.k,x:st.x,y:st.y,cx:p.get("cx")};})()`);
+  const z5 = await evaluate<{ versoed: boolean; ghost: boolean; vis: string; k: number; x: number; y: number; cx: string | null }>(`(()=>{const sh=document.getElementById("sheet");const st=window.__vellumZoomState();const p=new URLSearchParams(location.hash.slice(1));return{versoed:sh.classList.contains("versoed"),ghost:!!document.querySelector("#verso .verso-ghost"),vis:getComputedStyle(document.getElementById("verso")).visibility,k:st.k,x:st.x,y:st.y,cx:p.get("cx")};})()`);
   check(
     "Z5 the verso flip snaps the camera home first, then flips (AC4 reset-on-verso; cx/cy/k cleared)",
     z5.versoed && z5.ghost && z5.vis === "visible" && z5.k === 1 && z5.x === 0 && z5.y === 0 && z5.cx === null,
@@ -238,14 +241,14 @@ export async function run(ctx) {
 
   await step("Z14a", async () => {
     await evaluate(`window.__vellumZoomTo({k:3,x:-60,y:-40})`);
-    const r14a = await evaluate(`(()=>{document.getElementById("draw").click();return window.__vellumZoomState().k;})()`);
+    const r14a = await evaluate<number>(`(()=>{document.getElementById("draw").click();return window.__vellumZoomState().k;})()`);
     await waitSettled("reset-on-draw");
     check("Z14a reset-on-draw: Draw snaps the camera home first (AC4)", r14a === 1, String(r14a));
   });
 
   await step("Z14b", async () => {
     await evaluate(`window.__vellumZoomTo({k:3,x:-60,y:-40})`);
-    const r14b = await evaluate(`(()=>{const s=document.getElementById("style");s.value="ink";s.dispatchEvent(new Event("change",{bubbles:true}));return window.__vellumZoomState().k;})()`);
+    const r14b = await evaluate<number>(`(()=>{const s=document.getElementById("style");s.value="ink";s.dispatchEvent(new Event("change",{bubbles:true}));return window.__vellumZoomState().k;})()`);
     await waitTurned("reset-on-turn");
     check("Z14b reset-on-style-turn: a style change homes the camera before the turn (AC4)", r14b === 1, String(r14b));
     await evaluate(`(()=>{const s=document.getElementById("style");s.value="antique";s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
@@ -253,7 +256,7 @@ export async function run(ctx) {
   });
 
   await evaluate(`window.__vellumZoomTo({k:3,x:-60,y:-40})`);
-  const r14c = await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));const st=window.__vellumZoomState();const p=new URLSearchParams(location.hash.slice(1));return{k:st.k,cx:p.get("cx"),cy:p.get("cy"),kp:p.get("k")};})()`);
+  const r14c = await evaluate<{ k: number; cx: string | null; cy: string | null; kp: string | null }>(`(()=>{const c=document.getElementById("ages");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));const st=window.__vellumZoomState();const p=new URLSearchParams(location.hash.slice(1));return{k:st.k,cx:p.get("cx"),cy:p.get("cy"),kp:p.get("k")};})()`);
   check(
     "Z14c reset-on-arming: entering the ages instrument homes the camera AND drops cx/cy/k from the hash (AC4)",
     r14c.k === 1 && r14c.cx === null && r14c.cy === null && r14c.kp === null,
@@ -263,8 +266,8 @@ export async function run(ctx) {
 
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
-  const rmOn = await evaluate(`matchMedia("(prefers-reduced-motion: reduce)").matches`);
-  const zr = await evaluate(`(()=>{const vp=document.getElementById("map-viewport");const r=vp.getBoundingClientRect();const cx=r.left+r.width/2,cy=r.top+r.height/2;vp.dispatchEvent(new MouseEvent("dblclick",{bubbles:true,cancelable:true,view:window,clientX:cx,clientY:cy}));return window.__vellumZoomState().k;})()`);
+  const rmOn = await evaluate<boolean>(`matchMedia("(prefers-reduced-motion: reduce)").matches`);
+  const zr = await evaluate<number>(`(()=>{const vp=document.getElementById("map-viewport");const r=vp.getBoundingClientRect();const cx=r.left+r.width/2,cy=r.top+r.height/2;vp.dispatchEvent(new MouseEvent("dblclick",{bubbles:true,cancelable:true,view:window,clientX:cx,clientY:cy}));return window.__vellumZoomState().k;})()`);
   check(
     "Zrm reduced motion collapses the double-click zoom to instant (AC5: lands at k=2 in one turn)",
     rmOn === true && zr === 2,
@@ -274,10 +277,10 @@ export async function run(ctx) {
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
 
   await step("Z7", async () => {
-    const z7a = await evaluate(`getComputedStyle(document.getElementById("map-viewport")).touchAction`);
+    const z7a = await evaluate<string>(`getComputedStyle(document.getElementById("map-viewport")).touchAction`);
     await evaluate(`(()=>{const s=document.getElementById("style");s.value="nautical";s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
     await waitTurned("zoom-touch-nautical");
-    const z7b = await evaluate(`getComputedStyle(document.getElementById("map-viewport")).touchAction`);
+    const z7b = await evaluate<string>(`getComputedStyle(document.getElementById("map-viewport")).touchAction`);
     check(
       "Z7 touch-action:none holds on every style now that all four zoom (AC1 touch; Sub 3 revert superseded)",
       z7a === "none" && z7b === "none",
@@ -292,7 +295,7 @@ export async function run(ctx) {
     await evaluate(`window.__vellumSetRedraftEnabled(false)`); // #169: a fresh page defaults ON; keep the geometric block clean before the deep-link settle fires
     await waitSettled("zoom-deeplink-load");
     await sleep(80);
-    const z13 = await evaluate(`(()=>{const s=window.__vellumZoomState();const vp=document.getElementById("map-viewport");return{k:s.k,x:s.x,W:vp.clientWidth};})()`);
+    const z13 = await evaluate<{ k: number; x: number; W: number }>(`(()=>{const s=window.__vellumZoomState();const vp=document.getElementById("map-viewport");return{k:s.k,x:s.x,W:vp.clientWidth};})()`);
     check(
       "Z13 a deep link #cx&cy&k restores the framing on load (AC3 load: k=4 and centre)",
       z13.k === 4 && Math.abs(z13.x - (-1.5 * z13.W)) < 1.5,
@@ -302,26 +305,26 @@ export async function run(ctx) {
   });
 
   // #463: the chart room fits the sheet to the viewport, so a resize refits the box the camera is clamped against; the room holds the FRAMING (cx/cy/k) across the refit, never the raw transform, or a resize walks the camera and the settle re-drafts a different region (the G7 class, found by the harness's own screenshot resize).
-  const sheetBefore = await evaluate(`document.getElementById("sheet").getBoundingClientRect().width`);
+  const sheetBefore = await evaluate<number>(`document.getElementById("sheet").getBoundingClientRect().width`);
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 600, deviceScaleFactor: 1, mobile: false });
   await sleep(400); // past the resize layout and the 250ms settle debounce
-  const z13b = await evaluate(`(()=>{const p=new URLSearchParams(location.hash.slice(1));const s=window.__vellumZoomState();return{cx:p.get("cx"),cy:p.get("cy"),k:p.get("k"),sk:s.k,sheet:document.getElementById("sheet").getBoundingClientRect().width};})()`);
+  const z13b = await evaluate<{ cx: string | null; cy: string | null; k: string | null; sk: number; sheet: number }>(`(()=>{const p=new URLSearchParams(location.hash.slice(1));const s=window.__vellumZoomState();return{cx:p.get("cx"),cy:p.get("cy"),k:p.get("k"),sk:s.k,sheet:document.getElementById("sheet").getBoundingClientRect().width};})()`);
   await send("Emulation.clearDeviceMetricsOverride");
   await sleep(400);
-  const z13c = await evaluate(`(()=>{const p=new URLSearchParams(location.hash.slice(1));return{cx:p.get("cx"),cy:p.get("cy"),k:p.get("k"),sheet:document.getElementById("sheet").getBoundingClientRect().width};})()`);
+  const z13c = await evaluate<{ cx: string | null; cy: string | null; k: string | null; sheet: number }>(`(()=>{const p=new URLSearchParams(location.hash.slice(1));return{cx:p.get("cx"),cy:p.get("cy"),k:p.get("k"),sheet:document.getElementById("sheet").getBoundingClientRect().width};})()`);
   await evaluate(`document.querySelector("#broadside .slip-fold").click()`);
   await sleep(700); // the fold's 340ms settle, then the layout and the 250ms settle debounce
-  const z13d = await evaluate(`(()=>{const p=new URLSearchParams(location.hash.slice(1));return{cx:p.get("cx"),cy:p.get("cy"),k:p.get("k"),sheet:document.getElementById("sheet").getBoundingClientRect().width,folded:document.getElementById("broadside").classList.contains("folded")};})()`);
+  const z13d = await evaluate<{ cx: string | null; cy: string | null; k: string | null; sheet: number; folded: boolean }>(`(()=>{const p=new URLSearchParams(location.hash.slice(1));return{cx:p.get("cx"),cy:p.get("cy"),k:p.get("k"),sheet:document.getElementById("sheet").getBoundingClientRect().width,folded:document.getElementById("broadside").classList.contains("folded")};})()`);
   await evaluate(`document.querySelector(".slip-tab").click()`);
   await sleep(700);
-  const z13e = await evaluate(`(()=>{const p=new URLSearchParams(location.hash.slice(1));return{cx:p.get("cx"),cy:p.get("cy"),k:p.get("k"),sheet:document.getElementById("sheet").getBoundingClientRect().width,folded:document.getElementById("broadside").classList.contains("folded")};})()`);
+  const z13e = await evaluate<{ cx: string | null; cy: string | null; k: string | null; sheet: number; folded: boolean }>(`(()=>{const p=new URLSearchParams(location.hash.slice(1));return{cx:p.get("cx"),cy:p.get("cy"),k:p.get("k"),sheet:document.getElementById("sheet").getBoundingClientRect().width,folded:document.getElementById("broadside").classList.contains("folded")};})()`);
   // A refit is camera-side-effect-free: no settle, so no hash write (skeptic on PR #491: the fonts.ready refit before the boot wrote an empty seed and CI's bare visit landed on seed 0). The seed input is the tell: a hash write would carry its new value.
   await evaluate(`document.getElementById("seed").value = "777"`);
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 600, deviceScaleFactor: 1, mobile: false });
   await sleep(500);
   await send("Emulation.clearDeviceMetricsOverride");
   await sleep(500);
-  const z13f = await evaluate(`(()=>{const p=new URLSearchParams(location.hash.slice(1));document.getElementById("seed").value="42";return{seed:p.get("seed"),k:p.get("k")};})()`);
+  const z13f = await evaluate<{ seed: string | null; k: string | null }>(`(()=>{const p=new URLSearchParams(location.hash.slice(1));document.getElementById("seed").value="42";return{seed:p.get("seed"),k:p.get("k")};})()`);
   check(
     "Z13d a refit writes no hash: the seed input changed under a resize and the address kept the drawn seed and its camera (#463)",
     z13f.seed === "42" && z13f.k === "4.0000",
@@ -342,7 +345,7 @@ export async function run(ctx) {
   );
 
   // The crop is proven by projected-settlement COUNT: integer counts are immune to the cross-engine float drift that bars an SVG byte compare here.
-  const z15 = await evaluate(
+  const z15 = await evaluate<{ ok: boolean; hasSvg: boolean; stamped: boolean; regionSheet: boolean; windowEcho: boolean; bandEcho: boolean; parsed: boolean; manifestOk: boolean; isCrop: boolean; places: number; worldPlaces: number }>(
     `(async()=>{const win={u0:0.375,v0:0.375,u1:0.625,v1:0.625};` +
       `const r=await window.__vellumRunJob({kind:"region",seed:42,overrides:{},window:win,band:2,gridW:320,gridH:240,title:"Survey",render:{style:"antique",widthPx:1500,legend:true}});` +
       `const w=await window.__vellumRunJob({kind:"draw",seed:42,overrides:{},render:{style:"antique",widthPx:1500,legend:true}});` +
@@ -361,7 +364,7 @@ export async function run(ctx) {
     JSON.stringify(z15),
   );
 
-  const z16 = await evaluate(
+  const z16 = await evaluate<{ aOk: boolean; bOk: boolean; aCached: boolean; bCached: boolean; sameSvg: boolean; ta: number; tb: number }>(
     `(async()=>{await window.__vellumRunJob({kind:"draw",seed:117,overrides:{},render:{style:"antique",widthPx:1500}});` +
       `const win={u0:0.375,v0:0.375,u1:0.625,v1:0.625};` +
       `const mk=()=>({kind:"region",seed:918273,overrides:{},window:win,band:2,gridW:320,gridH:240,title:"Survey",render:{style:"antique",widthPx:1500}});` +
@@ -377,18 +380,18 @@ export async function run(ctx) {
 
   await evaluate(`window.__vellumSetRedraftEnabled(true)`);
 
-  const rgn = () => evaluate(`window.__vellumRegion()`);
+  const rgn = () => evaluate<{ band: number; redrafts: number; committed: boolean; title: string | null; window: unknown }>(`window.__vellumRegion()`);
   const goHome = async () => { await evaluate(`document.getElementById("zoom-reset").click()`); await sleep(40); };
-  const enterAt = (k, cu, cv) =>
+  const enterAt = (k: number, cu: number, cv: number) =>
     evaluate(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:${k},x:W/2-(${cu})*${k}*W,y:H/2-(${cv})*${k}*H});})()`);
-  const waitRedraft = async (prev) => {
+  const waitRedraft = async (prev: number) => {
     // 15s, not the old 4s: #400 made a cold band-3 draw cost 1084ms measured locally and a CI runner is several times slower, so 4s returned BEFORE the redraft landed and every band downstream read one step off; long enough for the draw, short enough that a real hang still fails rather than hanging the lane.
     for (let i = 0; i < 375; i++) { const s = await rgn(); if (s.redrafts > prev) return s; await sleep(40); }
     return await rgn();
   };
-  const captionMs = () => evaluate(`(()=>{const m=(document.getElementById("caption").textContent||"").match(/drawn in (\\d+)ms/);return m?+m[1]:-1;})()`);
+  const captionMs = () => evaluate<number>(`(()=>{const m=(document.getElementById("caption").textContent||"").match(/drawn in (\\d+)ms/);return m?+m[1]:-1;})()`);
   const insetView = () =>
-    evaluate(
+    evaluate<{ worldMounted: boolean; insets: number; stamped: boolean; insetLeft: number; insetW: number; hits: number; zx: number; zy: number; zk: number; caption: string }>(
       `(()=>{const world=document.querySelector("#map > svg");const inset=document.querySelector("#map .region-inset");` +
         `const isvg=inset?inset.querySelector("svg"):null;const z=window.__vellumZoomState();` +
         `return{worldMounted:!!world&&!world.hasAttribute("data-vellum-region-u0"),insets:document.querySelectorAll("#map .region-inset").length,` +
@@ -409,7 +412,7 @@ export async function run(ctx) {
   const atCommit = await insetView();
   let view17 = atCommit;
   for (let i = 0; i < 50 && view17.insets !== 1; i++) { await sleep(40); view17 = await insetView(); }
-  const W17 = await evaluate(`document.getElementById("map-viewport").clientWidth`);
+  const W17 = await evaluate<number>(`document.getElementById("map-viewport").clientWidth`);
   check(
     "Z17 a settle redrafts one finer survey as an inset; the camera does not move at the commit (AC1)",
     s17.band === 1 && s17.committed === true && /^The Environs of .+/.test(s17.title || "") &&
@@ -435,8 +438,8 @@ export async function run(ctx) {
   const same18 = await rgn();
   await enterAt(2, 0.42, 0.42);
   const new18 = await waitRedraft(same18.redrafts);
-  const pan18 = await evaluate(`window.__vellumZoomState()`);
-  const W18 = await evaluate(`document.getElementById("map-viewport").clientWidth`);
+  const pan18 = await evaluate<Cam>(`window.__vellumZoomState()`);
+  const W18 = await evaluate<number>(`document.getElementById("map-viewport").clientWidth`);
   const pannedTo = -0.34 * W18; // x = W/2 - 0.42*2*W
   check(
     "Z18 pan works at a committed band and re-drafts only on a new quantized window (AC2 + review quirk 1)",
@@ -469,7 +472,7 @@ export async function run(ctx) {
   await goHome(); // bumps regionGen mid-flight; the job's commit must be dropped
   await sleep(1200); // the worker resolved long since; assert the result went nowhere
   const after19b = await rgn();
-  const insets19b = await evaluate(`document.querySelectorAll("#map .region-inset").length`);
+  const insets19b = await evaluate<number>(`document.querySelectorAll("#map .region-inset").length`);
   check(
     "Z19b a home while a redraft is in flight drops the resolved job (the regionGen supersession guard)",
     after19b.redrafts === before19b && after19b.band === 0 && after19b.committed === false && insets19b === 0,
@@ -485,7 +488,7 @@ export async function run(ctx) {
   let world20 = reg20;
   for (let i = 0; i < 100; i++) { world20 = await rgn(); if (world20.band === 0) break; await sleep(40); }
   let gone20 = -1; // the inset teardown trails the revert by the fade; poll it to zero
-  for (let i = 0; i < 50; i++) { gone20 = await evaluate(`document.querySelectorAll("#map .region-inset").length`); if (gone20 === 0) break; await sleep(40); }
+  for (let i = 0; i < 50; i++) { gone20 = await evaluate<number>(`document.querySelectorAll("#map .region-inset").length`); if (gone20 === 0) break; await sleep(40); }
   const worldView = await insetView();
   check(
     "Z20 a zoom-out drops the inset over the always-present world sheet (committed state reverts, camera un-snapped)",
@@ -499,7 +502,7 @@ export async function run(ctx) {
   const beforeRm = (await rgn()).redrafts;
   await enterAt(2, 0.5, 0.5);
   const rm = await waitRedraft(beforeRm);
-  const rmView = await evaluate(
+  const rmView = await evaluate<{ count: number; opaque: boolean }>(
     `(()=>{const ins=[...document.querySelectorAll("#map .region-inset")];` +
       `return{count:ins.length,opaque:ins.length===1&&ins[0].classList.contains("in")};})()`,
   );
@@ -531,7 +534,7 @@ export async function run(ctx) {
     await waitRedraft(before20d);
     await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
     await waitInked("z20d-survey-ink"); // #300: the ink lands a beat after the tick, so wait for it rather than sleeping
-    const chron = await evaluate(
+    const chron = await evaluate<{ band: number; committed: boolean; noStamp: boolean; insets: number; trackShown: boolean }>(
       `(()=>{const s=window.__vellumRegion();const svg=document.querySelector("#map > svg");` +
         `return{band:s.band,committed:s.committed,noStamp:!!svg&&!svg.hasAttribute("data-vellum-region-u0"),` +
         `insets:document.querySelectorAll("#map .region-inset").length,trackShown:!!document.querySelector("#map .voyage-overlay .voyage-track")};})()`,
@@ -548,7 +551,7 @@ export async function run(ctx) {
   const before20e = (await rgn()).redrafts;
   await enterAt(2, 0.5, 0.5);
   const e20e1 = await waitRedraft(before20e);
-  const pinnedName = await evaluate(`(()=>{
+  const pinnedName = await evaluate<string | null>(`(()=>{
     const hits=[...document.querySelectorAll("#map .place-hit")];
     if(!hits.length) return null;
     const vp=document.getElementById("map-viewport").getBoundingClientRect();
@@ -562,7 +565,7 @@ export async function run(ctx) {
   await enterAt(3.6, 0.5, 0.5); // past the 1/2 up-cross: the next finer band, same centre
   await waitRedraft(e20e1.redrafts);
   await sleep(80);
-  const kept = await evaluate(
+  const kept = await evaluate<{ hidden: boolean; name: string | null; zoomK: string }>(
     `(()=>{const card=document.getElementById("place-card");const nm=card.querySelector(".pc-name");` +
       `return{hidden:card.hidden,name:nm?nm.textContent:null,zoomK:card.style.getPropertyValue("--zoom-k")};})()`,
   );
@@ -595,7 +598,7 @@ export async function run(ctx) {
     const reg20g = await waitRedraft(before20g);
     await evaluate(`(()=>{const v=document.getElementById("ages");v.checked=true;v.dispatchEvent(new Event("change",{bubbles:true}));})()`);
     await waitInked("z20g-survey-ink"); // #300: as Z20d, the ink is a beat behind the tick
-    const von = await evaluate(
+    const von = await evaluate<{ band: number; committed: boolean; insets: number; track: boolean; k: number }>(
       `(()=>{const s=window.__vellumRegion();return{band:s.band,committed:s.committed,` +
         `insets:document.querySelectorAll("#map .region-inset").length,track:!!document.querySelector("#map .voyage-overlay"),` +
         `k:window.__vellumZoomState().k};})()`,
@@ -613,7 +616,7 @@ export async function run(ctx) {
   });
 
   await goHome();
-  const target21 = await evaluate(
+  const target21 = await evaluate<{ cx: number; cy: number; n: number }>(
     `(async()=>{const {defaultRecipe,generateWorld}=await import("/explorer/engine/world/generate.js");` +
       `const {hamletCandidates}=await import("/explorer/engine/society/hamlets.js");` +
       `const {quantizeCenter,lodWindowFor,LOD_BANDS}=await import("/explorer/engine/world/lod.js");` +
@@ -635,7 +638,7 @@ export async function run(ctx) {
   let view21 = await insetView();
   for (let i = 0; i < 50 && view21.insets !== 1; i++) { await sleep(40); view21 = await insetView(); }
   await shoot("explorer-hamlets-band3.png");
-  const dom21 = await evaluate(
+  const dom21 = await evaluate<{ err?: "no inset"; hamlets?: number; expected?: number; ordered?: boolean; outside?: number; namesMatch?: boolean }>(
     `(async()=>{const isvg=document.querySelector("#map .region-inset svg");if(!isvg)return{err:"no inset"};` +
       `const win={u0:+isvg.getAttribute("data-vellum-region-u0"),v0:+isvg.getAttribute("data-vellum-region-v0"),` +
       `u1:+isvg.getAttribute("data-vellum-region-u1"),v1:+isvg.getAttribute("data-vellum-region-v1")};` +
@@ -656,6 +659,7 @@ export async function run(ctx) {
   );
   check(
     "Z21 hamlets: the deepest band grows the smallest tier, engine count/name parity over the stamped window, tier order held",
+    // @ts-expect-error the count is missing when no inset was mounted, and undefined >= 3 reads false, so Z21 reds by name
     deep21.band === 3 && dom21.hamlets >= 3 && dom21.hamlets === dom21.expected &&
       dom21.namesMatch && dom21.ordered && dom21.outside === 0,
     `band=${deep21.band} dom=${dom21.hamlets} engine=${dom21.expected} ordered=${dom21.ordered} ` +
@@ -666,7 +670,7 @@ export async function run(ctx) {
   const step21 = await waitRedraft(deep21.redrafts);
   let view21b = await insetView();
   for (let i = 0; i < 50 && view21b.insets !== 1; i++) { await sleep(40); view21b = await insetView(); }
-  const shallow21 = await evaluate(
+  const shallow21 = await evaluate<number>(
     `(()=>{const isvg=document.querySelector("#map .region-inset svg");` +
       `return isvg?isvg.querySelectorAll('g.settlement[data-tier="hamlet"]').length:-1;})()`,
   );
