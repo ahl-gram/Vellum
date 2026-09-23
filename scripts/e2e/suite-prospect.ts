@@ -1,9 +1,12 @@
 // Prospect e2e (the PB checks, #242; the chart room since #463 part 4/4): the Explorer card's way in, the room's plate on the fitted sheet, the engraver's note on the slip, the year control engraving in place and writing the address, the roads out, the two-dress fallback, year-awareness, and same-address byte determinism; self-contained like its sibling suites (navigates itself, carries scoped no-4xx and console-error deltas).
 import { makeStep } from "./step-support.ts";
 import { dropExpectedCancellations } from "./console-support.ts";
+import type { Payload, SuiteContext } from "./types.ts";
+
+type Prospect = { seed: number; index: number; year: number; presentYear: number; name: string; dress: string; era: string; keyRows: number; roads: boolean; svgLength: number; blob: boolean; shown: boolean; status: string | null; title: string | null; sub: string | null; pressed: string | null; chart: string | null; ribbon: string | null; ribbonVerb: string | null; ribbonShown: boolean; yearField: string; eraLine: string | null; noteTitle: string | null; where: string | null; note: string | null; keyLis: number; keyHeadHidden: boolean; hash: string };
 
 // eslint-disable-next-line max-lines-per-function
-export async function run(ctx) {
+export async function run(ctx: SuiteContext): Promise<void> {
   const { evaluate, send, check, sleep, consoleErrors, http4xx, PORT } = ctx;
   // PB1, PB1b, PB7c, PB10 and PB11 are deliberately not stepped: their own bounded loops return rather than throwing, and their checks already guard on it.
   const step = makeStep(ctx);
@@ -12,15 +15,15 @@ export async function run(ctx) {
   let exReady = false;
   for (let i = 0; i < 200; i++) {
     let ok = null;
-    try { ok = await evaluate(`typeof window.__vellumUsesWorker==="function" && !!document.querySelector("#map svg") && document.getElementById("status").textContent===""`); } catch {}
+    try { ok = await evaluate<boolean>(`typeof window.__vellumUsesWorker==="function" && !!document.querySelector("#map svg") && document.getElementById("status").textContent===""`); } catch {}
     if (ok) { exReady = true; break; }
     await sleep(75);
   }
-  let href = null;
+  let href: string | null = null;
   if (exReady) {
     await evaluate(`document.querySelector('.place-hit[data-idx="0"]').click()`);
     for (let i = 0; i < 40; i++) {
-      try { href = await evaluate(`(()=>{const a=document.querySelector('#place-card .pc-prospect');return a?a.getAttribute('href'):null;})()`); } catch {}
+      try { href = await evaluate<string | null>(`(()=>{const a=document.querySelector('#place-card .pc-prospect');return a?a.getAttribute('href'):null;})()`); } catch {}
       if (href) break;
       await sleep(50);
     }
@@ -35,7 +38,7 @@ export async function run(ctx) {
   if (exReady) {
     await evaluate(`document.querySelector('.place-hit[data-idx="1"]').click()`);
     for (let i = 0; i < 40; i++) {
-      try { href1 = await evaluate(`(()=>{const a=document.querySelector('#place-card .pc-prospect');return a?a.getAttribute('href'):null;})()`); } catch {}
+      try { href1 = await evaluate<string | null>(`(()=>{const a=document.querySelector('#place-card .pc-prospect');return a?a.getAttribute('href'):null;})()`); } catch {}
       if (href1 && /&i=1$/.test(href1)) break;
       await sleep(50);
     }
@@ -46,22 +49,22 @@ export async function run(ctx) {
   const errBase = consoleErrors.length;
   const httpBase = http4xx.length;
 
-  const page = (hash) => `http://127.0.0.1:${PORT}/prospect/${hash}`;
+  const page = (hash: string) => `http://127.0.0.1:${PORT}/prospect/${hash}`;
   // The page reads its address ONCE at boot (the year control re-engraves the same place), and a hash-to-hash Page.navigate on one path is a SAME-DOCUMENT navigation that never re-boots it, so every fresh address must arrive through a real cross-path hop (the Print Room precedent).
-  const goto = async (hash) => {
+  const goto = async (hash: string) => {
     await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/faq/` });
     // Poll for the hop COMMITTING, never a fixed sleep: until the prospect DOM is gone, a poll below could read the OLD document's settled state.
     for (let i = 0; i < 100; i++) {
       let away = null;
-      try { away = await evaluate(`!document.getElementById("pp-plate")`); } catch {}
+      try { away = await evaluate<boolean>(`!document.getElementById("pp-plate")`); } catch {}
       if (away) break;
       await sleep(50);
     }
     await send("Page.navigate", { url: page(hash) });
   };
-  const STATE = `(()=>{const st=window.__vellumProspectState&&window.__vellumProspectState();const img=document.getElementById("pp-plate");if(!st)return null;const q=(sel)=>{const el=document.querySelector(sel);return el?el.textContent:null;};const a=(id)=>document.getElementById(id).getAttribute("href");return{seed:st.seed,index:st.index,year:st.year,presentYear:st.presentYear,name:st.name,dress:st.dress,era:st.era,keyRows:st.keyRows,roads:st.roads,svgLength:st.svgLength,blob:!!(img&&img.src&&img.src.startsWith("blob:")),shown:!!img&&!img.hidden,status:q("#pp-status"),title:q("#folio-title"),sub:q("#folio-sub"),pressed:q("#pp-pressed"),chart:a("pp-chart-link"),ribbon:a("pp-ribbon-link"),ribbonVerb:q("#pp-ribbon-verb"),ribbonShown:getComputedStyle(document.getElementById("pp-ribbon-link")).display!=="none",yearField:document.getElementById("pp-year").value,eraLine:q("#pp-era"),noteTitle:q("#note-title"),where:q("#note .card-where"),note:q("#pp-note"),keyLis:document.querySelectorAll("#pp-key li").length,keyHeadHidden:getComputedStyle(document.getElementById("pp-key-head")).display==="none",hash:location.hash};})()`;
+  const STATE: Payload<Prospect | null> = `(()=>{const st=window.__vellumProspectState&&window.__vellumProspectState();const img=document.getElementById("pp-plate");if(!st)return null;const q=(sel)=>{const el=document.querySelector(sel);return el?el.textContent:null;};const a=(id)=>document.getElementById(id).getAttribute("href");return{seed:st.seed,index:st.index,year:st.year,presentYear:st.presentYear,name:st.name,dress:st.dress,era:st.era,keyRows:st.keyRows,roads:st.roads,svgLength:st.svgLength,blob:!!(img&&img.src&&img.src.startsWith("blob:")),shown:!!img&&!img.hidden,status:q("#pp-status"),title:q("#folio-title"),sub:q("#folio-sub"),pressed:q("#pp-pressed"),chart:a("pp-chart-link"),ribbon:a("pp-ribbon-link"),ribbonVerb:q("#pp-ribbon-verb"),ribbonShown:getComputedStyle(document.getElementById("pp-ribbon-link")).display!=="none",yearField:document.getElementById("pp-year").value,eraLine:q("#pp-era"),noteTitle:q("#note-title"),where:q("#note .card-where"),note:q("#pp-note"),keyLis:document.querySelectorAll("#pp-key li").length,keyHeadHidden:getComputedStyle(document.getElementById("pp-key-head")).display==="none",hash:location.hash};})()`;
   const state = () => evaluate(STATE);
-  const opened = async (label) => {
+  const opened = async (label: string) => {
     for (let i = 0; i < 200; i++) {
       let s = null;
       try { s = await state(); } catch {}
@@ -70,9 +73,9 @@ export async function run(ctx) {
     }
     throw new Error("prospect page never drew: " + label);
   };
-  const svgOf = () => evaluate(`fetch(document.getElementById("pp-plate").src).then(r=>r.text())`, true);
+  const svgOf = () => evaluate<string>(`fetch(document.getElementById("pp-plate").src).then(r=>r.text())`, true);
 
-  let first = null;
+  let first: string | null = null;
   // eslint-disable-next-line max-lines-per-function
   await step("PB2 to PB5", async () => {
     await send("Page.navigate", { url: page(href && href.includes("#") ? href.slice(href.indexOf("#")) : "#seed=42&i=0") });
@@ -84,21 +87,44 @@ export async function run(ctx) {
     );
     check(
       "PB3 the chart's folio names the place, the chart and its world",
-      /^The Prospect of Laukuwelua · Chart № 42$/.test(cap.title) && /The Isle of Rahai/.test(cap.sub) && /^pressed in \d+ms · antique$/.test(cap.pressed),
+      // @ts-expect-error a folio line the page never filled reads null, and a pattern test reads null as the text "null", so PB3 reads false and reds by name
+      /^The Prospect of Laukuwelua · Chart № 42$/.test(cap.title) && /The Isle of Rahai/.test(
+        // @ts-expect-error a folio line the page never filled reads null, and a pattern test reads null as the text "null", so PB3 reads false and reds by name
+        cap.sub) && /^pressed in \d+ms · antique$/.test(
+        // @ts-expect-error a folio line the page never filled reads null, and a pattern test reads null as the text "null", so PB3 reads false and reds by name
+        cap.pressed),
       JSON.stringify({ title: cap.title, sub: cap.sub, pressed: cap.pressed }),
     );
-    check("PB3b the folio names what the place was once called (#49)", /once called Haitani/.test(cap.sub), cap.sub);
+    // @ts-expect-error a folio line the page never filled reads null, and a pattern test reads null as the text "null", so PB3b reads false and reds by name
+    check("PB3b the folio names what the place was once called (#49)", /once called Haitani/.test(cap.sub),
+      // @ts-expect-error the same null handed to check as its detail prints the verdict with no detail, and the test before it has already failed PB3b
+      cap.sub);
     check(
       "PB3c the engraver's note is filled: the place as the slip's title, its epithet and founding, Today's card's note for the town, the plate's lettered key, the era line (#494 ruling 4)",
-      cap.noteTitle === "Laukuwelua" && /^chief port of .+ · founded An\. \d+$/.test(cap.where) && cap.note.length > 20 && cap.keyLis === cap.keyRows && cap.keyRows > 0 && !cap.keyHeadHidden && /^Standing · An\. \d+$/.test(cap.eraLine),
+      // @ts-expect-error a slip line the page never filled reads null, and a pattern test reads null as the text "null", so PB3c reads false and reds by name
+      cap.noteTitle === "Laukuwelua" && /^chief port of .+ · founded An\. \d+$/.test(cap.where) &&
+        // @ts-expect-error a note the page never filled reads null, which throws here inside the step, and the step reds "PB2 to PB5" by name
+        cap.note.length > 20 && cap.keyLis === cap.keyRows && cap.keyRows > 0 && !cap.keyHeadHidden && /^Standing · An\. \d+$/.test(
+        // @ts-expect-error an era line the page never filled reads null, and a pattern test reads null as the text "null", so PB3c reads false and reds by name
+        cap.eraLine),
+      // @ts-expect-error a note the page never filled reads null, which throws here inside the step, and the step reds "PB2 to PB5" by name
       JSON.stringify({ noteTitle: cap.noteTitle, where: cap.where, noteLen: cap.note.length, keyLis: cap.keyLis, keyRows: cap.keyRows, eraLine: cap.eraLine }),
     );
     check(
       "PB3d the roads out: the Explorer keeps the world's keys and sheds the page's own; the Ribbon takes the same world with this town as its departure (#494 ruling 3)",
-      cap.chart.startsWith("/explorer/#seed=42") && !/(^|&)i=/.test(cap.chart.slice(cap.chart.indexOf("#") + 1)) && cap.ribbon === "/ribbon/#" + cap.chart.slice("/explorer/#".length) + "&a=0" && /^Take the road from Laukuwelua in$/.test(cap.ribbonVerb) && cap.roads === true && cap.ribbonShown,
+      // @ts-expect-error an Explorer road the page never addressed reads null, which throws here inside the step, and the step reds "PB2 to PB5" by name
+      cap.chart.startsWith("/explorer/#seed=42") && !/(^|&)i=/.test(
+        // @ts-expect-error an Explorer road the page never addressed reads null, which throws here inside the step, and the step reds "PB2 to PB5" by name
+        cap.chart.slice(
+        // @ts-expect-error an Explorer road the page never addressed reads null, which throws here inside the step, and the step reds "PB2 to PB5" by name
+        cap.chart.indexOf("#") + 1)) && cap.ribbon === "/ribbon/#" +
+        // @ts-expect-error an Explorer road the page never addressed reads null, which throws here inside the step, and the step reds "PB2 to PB5" by name
+        cap.chart.slice("/explorer/#".length) + "&a=0" && /^Take the road from Laukuwelua in$/.test(
+        // @ts-expect-error a Ribbon verb the page never filled reads null, and a pattern test reads null as the text "null", so PB3d reads false and reds by name
+        cap.ribbonVerb) && cap.roads === true && cap.ribbonShown,
       JSON.stringify({ chart: cap.chart, ribbon: cap.ribbon, verb: cap.ribbonVerb, roads: cap.roads, shown: cap.ribbonShown }),
     );
-    const room = await evaluate(`(()=>{const s=document.getElementById("sheet").getBoundingClientRect();const p=document.getElementById("pp-plate").getBoundingClientRect();return{chartRoom:document.body.classList.contains("chart-room"),footer:!!document.querySelector("footer"),band:!!document.querySelector(".band"),w:s.width,h:s.height,pw:p.width,ph:p.height,aspect:s.width/s.height};})()`);
+    const room = await evaluate<{ chartRoom: boolean; footer: boolean; band: boolean; w: number; h: number; pw: number; ph: number; aspect: number }>(`(()=>{const s=document.getElementById("sheet").getBoundingClientRect();const p=document.getElementById("pp-plate").getBoundingClientRect();return{chartRoom:document.body.classList.contains("chart-room"),footer:!!document.querySelector("footer"),band:!!document.querySelector(".band"),w:s.width,h:s.height,pw:p.width,ph:p.height,aspect:s.width/s.height};})()`);
     check(
       "PB3e the room: chart-room body, no band, no footer, the sheet fitted at the plate's own 520:384 and the plate filling it",
       room.chartRoom && !room.footer && !room.band && room.w > 200 && Math.abs(room.aspect - 520 / 384) < 0.01 && Math.abs(room.pw - room.w) < 1 && Math.abs(room.ph - room.h) < 1,
@@ -107,7 +133,7 @@ export async function run(ctx) {
     await evaluate(`(()=>{const vp=document.getElementById("map-viewport");vp.focus();vp.dispatchEvent(new KeyboardEvent("keydown",{key:"+",bubbles:true}));})()`);
     let leaned = null;
     for (let i = 0; i < 60; i++) {
-      try { leaned = await evaluate(`(()=>{const vp=document.getElementById("map-viewport");const t=getComputedStyle(document.getElementById("map")).transform;const m=/matrix\\(([^,]+),/.exec(t);return{zoomed:vp.classList.contains("zoomed"),k:m?Number(m[1]):1};})()`); } catch {}
+      try { leaned = await evaluate<{ zoomed: boolean; k: number }>(`(()=>{const vp=document.getElementById("map-viewport");const t=getComputedStyle(document.getElementById("map")).transform;const m=/matrix\\(([^,]+),/.exec(t);return{zoomed:vp.classList.contains("zoomed"),k:m?Number(m[1]):1};})()`); } catch {}
       if (leaned && leaned.zoomed && leaned.k > 1.3) break;
       await sleep(50);
     }
@@ -115,11 +141,11 @@ export async function run(ctx) {
     await evaluate(`document.getElementById("map-viewport").dispatchEvent(new KeyboardEvent("keydown",{key:"0",bubbles:true}))`);
     for (let i = 0; i < 60; i++) {
       let home = null;
-      try { home = await evaluate(`!document.getElementById("map-viewport").classList.contains("zoomed")`); } catch {}
+      try { home = await evaluate<boolean>(`!document.getElementById("map-viewport").classList.contains("zoomed")`); } catch {}
       if (home) break;
       await sleep(50);
     }
-    check("PB4 the render worker serves the page (no silent inline fallback)", await evaluate(`window.__vellumProspectUsesWorker() === true`));
+    check("PB4 the render worker serves the page (no silent inline fallback)", await evaluate<boolean>(`window.__vellumProspectUsesWorker() === true`));
 
     first = await svgOf();
     check(
@@ -150,7 +176,10 @@ export async function run(ctx) {
     );
     check(
       "PB7b a viewed year reads in the year control and the era line, the bare ground has no key, and the Explorer link sheds the page's own keys",
-      early.yearField === "300" && early.eraLine === "Before the founding · An. 300" && early.era === "before-founding" && early.keyRows === 0 && early.keyHeadHidden && /will rise · An\. 300$/.test(early.where) && !/founded/.test(early.where) && early.chart === "/explorer/#seed=42",
+      // @ts-expect-error a slip line the page never filled reads null, and a pattern test reads null as the text "null", so PB7b reads false and reds by name
+      early.yearField === "300" && early.eraLine === "Before the founding · An. 300" && early.era === "before-founding" && early.keyRows === 0 && early.keyHeadHidden && /will rise · An\. 300$/.test(early.where) && !/founded/.test(
+        // @ts-expect-error the same null reads as the text "null", which this negated test passes, but the clause before it has already read false for it, so PB7b still reds by name
+        early.where) && early.chart === "/explorer/#seed=42",
       JSON.stringify({ yearField: early.yearField, eraLine: early.eraLine, keyRows: early.keyRows, keyHeadHidden: early.keyHeadHidden, where: early.where, chart: early.chart }),
     );
 
@@ -169,7 +198,7 @@ export async function run(ctx) {
       JSON.stringify(engraved && { year: engraved.year, era: engraved.era, keyRows: engraved.keyRows, hash: engraved.hash, same: reEngraved === standing }),
     );
     // Garbage is refused IN PLACE by the control's own digits pattern (home's seed-input precedent): the browser never fires submit.
-    const garbage = await evaluate(`(()=>{const y=document.getElementById("pp-year");y.value="abc";const valid=y.checkValidity();document.getElementById("pp-year-form").requestSubmit();return valid;})()`);
+    const garbage = await evaluate<boolean>(`(()=>{const y=document.getElementById("pp-year");y.value="abc";const valid=y.checkValidity();document.getElementById("pp-year-form").requestSubmit();return valid;})()`);
     await sleep(300);
     const refused = await state();
     await evaluate(`(()=>{document.getElementById("pp-year").value="";document.getElementById("pp-year-form").requestSubmit();})()`);
@@ -177,6 +206,7 @@ export async function run(ctx) {
     const emptied = await state();
     check(
       "PB7d a year that is not a year is refused: garbage fails the control's pattern and nothing is re-engraved; an emptied field returns to the plate's year",
+      // @ts-expect-error the PB7c poll leaves engraved null when the re-engrave never landed, which PB7c has already failed; a null throws here inside the step, and the step reds "PB7 to PB7d" by name
       garbage === false && !!refused && refused.year === early.presentYear && refused.status === "" && refused.svgLength === engraved.svgLength && !!emptied && emptied.yearField === String(early.presentYear) && emptied.year === early.presentYear,
       JSON.stringify({ garbageValid: garbage, refused: refused && { yearField: refused.yearField, year: refused.year }, emptied: emptied && { yearField: emptied.yearField, year: emptied.year } }),
     );

@@ -1,20 +1,25 @@
 /* eslint-disable max-lines */
 // Print Room e2e (PRL, PR0-PR29, PRC, PRB, PRW; #133/#134/#135/#136/#137/#212/#217): the shell and inline fallback, the poster plates, the PNG rasterizer and the bound atlas; hand-authored like its sibling suites and self-contained (navigates itself, carries scoped no-4xx and console-error deltas).
 import { dropExpectedCancellations } from "./console-support.ts";
+import type { Payload, SuiteContext } from "./types.ts";
+
+type Matter = { ratio: number; aspect: number; pageHidden: boolean; turnedHidden: boolean; proofHidden: boolean; on: string | undefined; here: string | undefined; line: string; head: string; places: number; measureEmpty: boolean; scrollY: number; fits: number; innerW: number; noX: boolean; label: string | null };
+type AtlasFit = { scrollW: number; clientW: number; plates: number; maxRight: number; atlasPadL: string };
+type Warning = { disp: string; pos: string; w: number; hidden: boolean };
 
 // eslint-disable-next-line max-lines-per-function
-export async function run(ctx) {
+export async function run(ctx: SuiteContext): Promise<void> {
   const { evaluate, send, check, shoot, sleep, serverState, consoleErrors, http4xx, PORT } = ctx;
 
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/#seed=42&style=antique&legend=1` });
   let exReady = false;
   for (let i = 0; i < 200; i++) {
     let ok = null;
-    try { ok = await evaluate(`typeof window.__vellumUsesWorker==="function" && !!document.querySelector("#map svg") && document.getElementById("status").textContent===""`); } catch {}
+    try { ok = await evaluate<boolean>(`typeof window.__vellumUsesWorker==="function" && !!document.querySelector("#map svg") && document.getElementById("status").textContent===""`); } catch {}
     if (ok) { exReady = true; break; }
     await sleep(75);
   }
-  const orderHref = exReady ? await evaluate(`(()=>{const a=document.getElementById("order-plates");return a?a.getAttribute("href"):null;})()`) : null;
+  const orderHref = exReady ? await evaluate<string | null>(`(()=>{const a=document.getElementById("order-plates");return a?a.getAttribute("href"):null;})()`) : null;
   check(
     "PRL Explorer 'Take to the Print Room' link carries the world on screen",
     !!orderHref && /^\.\.\/print-room\/#/.test(orderHref) && /seed=42/.test(orderHref),
@@ -33,24 +38,24 @@ export async function run(ctx) {
   let booted = false;
   for (let i = 0; i < 200; i++) {
     let ok = null;
-    try { ok = await evaluate(`typeof window.__vellumPrintRoomUsesWorker === "function"`); } catch {}
+    try { ok = await evaluate<boolean>(`typeof window.__vellumPrintRoomUsesWorker === "function"`); } catch {}
     if (ok) { booted = true; break; }
     await sleep(75);
   }
   check("PR0 print-room page booted (worker hook present)", booted);
-  check("PR1 print-room render worker active (no silent cross-directory fallback)", await evaluate(`window.__vellumPrintRoomUsesWorker() === true`));
+  check("PR1 print-room render worker active (no silent cross-directory fallback)", await evaluate<boolean>(`window.__vellumPrintRoomUsesWorker() === true`));
 
   let previewed = false;
   for (let i = 0; i < 120; i++) {
     let s = null;
-    try { s = await evaluate(`({svg:!!document.querySelector("#pr-preview svg"),status:(document.getElementById("pr-status")||{}).textContent})`); } catch {}
+    try { s = await evaluate<{ svg: boolean; status: string | undefined }>(`({svg:!!document.querySelector("#pr-preview svg"),status:(document.getElementById("pr-status")||{}).textContent})`); } catch {}
     if (s && s.svg && s.status === "") { previewed = true; break; }
     await sleep(50);
   }
   check("PR2 deep-link renders a proof into the preview (off-thread)", previewed);
 
   // "The Isle of Rahai" is seed 42's golden title (test/world/golden-seed42.test.ts), so PR3 witnesses the deep-linked world's identity rather than merely that a render happened.
-  const st = await evaluate(`(()=>{const s=window.__vellumPrintRoomState();return{seed:s.seed,title:s.title,svg:!!document.querySelector("#pr-preview svg")};})()`);
+  const st = await evaluate<{ seed: number; title: string; svg: boolean }>(`(()=>{const s=window.__vellumPrintRoomState();return{seed:s.seed,title:s.title,svg:!!document.querySelector("#pr-preview svg")};})()`);
   check(
     "PR3 the proof is the deep-linked world (seed 42 == 'The Isle of Rahai')",
     st.svg && st.seed === 42 && st.title === "The Isle of Rahai",
@@ -61,16 +66,16 @@ export async function run(ctx) {
   let manual = null;
   for (let i = 0; i < 120; i++) {
     let s = null;
-    try { s = await evaluate(`(()=>{const st=window.__vellumPrintRoomState();return{seed:st.seed,title:st.title,svg:!!document.querySelector("#pr-preview svg"),status:document.getElementById("pr-status").textContent};})()`); } catch {}
+    try { s = await evaluate<{ seed: number; title: string; svg: boolean; status: string }>(`(()=>{const st=window.__vellumPrintRoomState();return{seed:st.seed,title:st.title,svg:!!document.querySelector("#pr-preview svg"),status:document.getElementById("pr-status").textContent};})()`); } catch {}
     if (s && s.svg && s.status === "" && s.seed === 100) { manual = s; break; }
     await sleep(50);
   }
   check("PR4 manual seed entry pulls a fresh proof", !!manual && manual.seed === 100 && manual.title !== st.title, JSON.stringify(manual));
 
-  const hash = await evaluate(`location.hash`);
+  const hash = await evaluate<string>(`location.hash`);
   check("PR5 a manual draw round-trips the world into the hash", /(^|&|#)seed=100(&|$)/.test(hash) && /style=antique/.test(hash), hash);
 
-  const roadHref = await evaluate(`(()=>{const a=document.getElementById("pr-explorer");return a?a.getAttribute("href"):null;})()`);
+  const roadHref = await evaluate<string | null>(`(()=>{const a=document.getElementById("pr-explorer");return a?a.getAttribute("href"):null;})()`);
   check(
     "PR30 the road back to the Explorer carries the world on the desk (the legend row's gold road, ruled 2026-08-30)",
     !!roadHref && /^\.\.\/explorer\/#/.test(roadHref) && /seed=100/.test(roadHref) && /style=antique/.test(roadHref),
@@ -81,7 +86,7 @@ export async function run(ctx) {
   let carried = null;
   for (let i = 0; i < 160; i++) {
     let s = null;
-    try { s = await evaluate(`({svg:!!document.querySelector("#pr-preview svg"),status:(document.getElementById("pr-status")||{}).textContent,hash:location.hash})`); } catch {}
+    try { s = await evaluate<{ svg: boolean; status: string | undefined; hash: string }>(`({svg:!!document.querySelector("#pr-preview svg"),status:(document.getElementById("pr-status")||{}).textContent,hash:location.hash})`); } catch {}
     if (s && s.svg && s.status === "") { carried = s; break; }
     await sleep(50);
   }
@@ -100,7 +105,7 @@ export async function run(ctx) {
   for (let i = 0; i < 160; i++) {
     let s = null;
     try {
-      s = await evaluate(`(async()=>{const {seedForDate}=await import("/explorer/engine/world/seed-of-the-day.js");return{svg:!!document.querySelector("#pr-preview svg"),status:(document.getElementById("pr-status")||{}).textContent,seed:document.getElementById("pr-seed").value,expected:String(seedForDate(new Date()))};})()`, true);
+      s = await evaluate<{ svg: boolean; status: string | undefined; seed: string; expected: string }>(`(async()=>{const {seedForDate}=await import("/explorer/engine/world/seed-of-the-day.js");return{svg:!!document.querySelector("#pr-preview svg"),status:(document.getElementById("pr-status")||{}).textContent,seed:document.getElementById("pr-seed").value,expected:String(seedForDate(new Date()))};})()`, true);
     } catch {}
     if (s && s.svg && s.status === "") { bare = s; break; }
     await sleep(50);
@@ -115,23 +120,23 @@ export async function run(ctx) {
   let plateReady = null;
   for (let i = 0; i < 160; i++) {
     let s = null;
-    try { s = await evaluate(`(()=>{const st=window.__vellumPrintRoomState();const g=document.querySelector('[data-poster="grand"]');return{seed:st.seed,status:document.getElementById("pr-status").textContent,disabled:g?g.disabled:true};})()`); } catch {}
+    try { s = await evaluate<{ seed: number; status: string; disabled: boolean }>(`(()=>{const st=window.__vellumPrintRoomState();const g=document.querySelector('[data-poster="grand"]');return{seed:st.seed,status:document.getElementById("pr-status").textContent,disabled:g?g.disabled:true};})()`); } catch {}
     if (s && s.seed === 42 && s.status === "" && s.disabled === false) { plateReady = s; break; }
     await sleep(50);
   }
   check("PR10 plate buttons enable once a proof is on the desk", !!plateReady, JSON.stringify(plateReady));
 
-  const clamp = await evaluate(`(()=>{const f=window.__vellumClampPosterWidth;return{hi:f(999999),lo:f(1),grand:f(4200)};})()`);
+  const clamp = await evaluate<{ hi: number; lo: number; grand: number }>(`(()=>{const f=window.__vellumClampPosterWidth;return{hi:f(999999),lo:f(1),grand:f(4200)};})()`);
   check("PR11 clampPosterWidth bounds any width to the [2400, 4200] envelope", clamp.hi === 4200 && clamp.lo === 2400 && clamp.grand === 4200, JSON.stringify(clamp));
 
-  const accepted = await evaluate(`(()=>{window.__vellumLastPoster=undefined;const g=document.querySelector('[data-poster="grand"]');g.click();return{disabled:g.disabled,status:document.getElementById("pr-poster-status").textContent};})()`);
+  const accepted = await evaluate<{ disabled: boolean; status: string }>(`(()=>{window.__vellumLastPoster=undefined;const g=document.querySelector('[data-poster="grand"]');g.click();return{disabled:g.disabled,status:document.getElementById("pr-poster-status").textContent};})()`);
   check("PR12 ordering a plate disables the counter and rolls the press", accepted.disabled === true && /press is rolling/i.test(accepted.status), JSON.stringify(accepted));
 
   let poster = null;
   for (let i = 0; i < 220; i++) {
     let s = null;
     try {
-      s = await evaluate(`(()=>{const p=window.__vellumLastPoster;const g=document.querySelector('[data-poster="grand"]');const svgs=[...document.querySelectorAll("svg")].map(el=>Number(el.getAttribute("width"))||0);return{has:!!p,filename:p&&p.filename,width:p&&p.width,seed:p&&p.seed,hasWidthAttr:!!(p&&p.svg.includes('width="4200"')),hasRecipeAttr:!!(p&&p.svg.includes('data-vellum-seed="42"')),reenabled:g?!g.disabled:false,status:document.getElementById("pr-poster-status").textContent,maxDom:svgs.length?Math.max(...svgs):0,preview:!!document.querySelector("#pr-preview svg")};})()`);
+      s = await evaluate<{ has: boolean; filename: string | undefined; width: number | undefined; seed: number | undefined; hasWidthAttr: boolean; hasRecipeAttr: boolean; reenabled: boolean; status: string; maxDom: number; preview: boolean }>(`(()=>{const p=window.__vellumLastPoster;const g=document.querySelector('[data-poster="grand"]');const svgs=[...document.querySelectorAll("svg")].map(el=>Number(el.getAttribute("width"))||0);return{has:!!p,filename:p&&p.filename,width:p&&p.width,seed:p&&p.seed,hasWidthAttr:!!(p&&p.svg.includes('width="4200"')),hasRecipeAttr:!!(p&&p.svg.includes('data-vellum-seed="42"')),reenabled:g?!g.disabled:false,status:document.getElementById("pr-poster-status").textContent,maxDom:svgs.length?Math.max(...svgs):0,preview:!!document.querySelector("#pr-preview svg")};})()`);
     } catch {}
     if (s && s.has) { poster = s; break; }
     await sleep(50);
@@ -152,14 +157,14 @@ export async function run(ctx) {
     poster ? `maxDomSvgWidth=${poster.maxDom}` : "no poster",
   );
 
-  const rt = await evaluate(`(async()=>{const {recipeFromSvg}=await import("/explorer/engine/render/recipe-meta.js");const p=window.__vellumLastPoster;const r=p?recipeFromSvg(p.svg):null;return r?{seed:r.recipe.seed,style:r.style}:null;})()`, true);
+  const rt = await evaluate<{ seed: number; style: string } | null>(`(async()=>{const {recipeFromSvg}=await import("/explorer/engine/render/recipe-meta.js");const p=window.__vellumLastPoster;const r=p?recipeFromSvg(p.svg):null;return r?{seed:r.recipe.seed,style:r.style}:null;})()`, true);
   check("PR15 recipeFromSvg round-trips the poster (seed 42, antique)", !!rt && rt.seed === 42 && rt.style === "antique", JSON.stringify(rt));
 
   await evaluate(`(()=>{window.__vellumLastPoster=undefined;document.querySelector('[data-poster="desk"]').click();})()`);
   let desk = null;
   for (let i = 0; i < 200; i++) {
     let s = null;
-    try { s = await evaluate(`(()=>{const p=window.__vellumLastPoster;return p?{filename:p.filename,width:p.width,hasWidthAttr:p.svg.includes('width="2400"')}:null;})()`); } catch {}
+    try { s = await evaluate<{ filename: string; width: number; hasWidthAttr: boolean } | null>(`(()=>{const p=window.__vellumLastPoster;return p?{filename:p.filename,width:p.width,hasWidthAttr:p.svg.includes('width="2400"')}:null;})()`); } catch {}
     if (s) { desk = s; break; }
     await sleep(50);
   }
@@ -174,7 +179,7 @@ export async function run(ctx) {
   for (let i = 0; i < 220; i++) {
     let s = null;
     try {
-      s = await evaluate(`(()=>{const p=window.__vellumLastPoster;return p?{width:p.width,seed:p.seed,filename:p.filename,hasWidthAttr:p.svg.includes('width="1500"'),hasRecipeAttr:p.svg.includes('data-vellum-seed="42"'),pngFired:window.__vellumLastPng!==undefined,status:document.getElementById("pr-poster-status").textContent}:null;})()`);
+      s = await evaluate<{ width: number; seed: number; filename: string; hasWidthAttr: boolean; hasRecipeAttr: boolean; pngFired: boolean; status: string } | null>(`(()=>{const p=window.__vellumLastPoster;return p?{width:p.width,seed:p.seed,filename:p.filename,hasWidthAttr:p.svg.includes('width="1500"'),hasRecipeAttr:p.svg.includes('data-vellum-seed="42"'),pngFired:window.__vellumLastPng!==undefined,status:document.getElementById("pr-poster-status").textContent}:null;})()`);
     } catch {}
     if (s) { chartPull = s; break; }
     await sleep(50);
@@ -189,21 +194,21 @@ export async function run(ctx) {
   );
 
   // A dispatched change event is what clears the line: the programmatic value writes in orderPng below fire no change event, so this check cannot disturb them.
-  const dismissed = await evaluate(
+  const dismissed = await evaluate<{ before: string; after: string; plateOpen: boolean }>(
     `(()=>{const f=document.getElementById("pr-format");const before=document.getElementById("pr-poster-status").textContent;f.value="svg";f.dispatchEvent(new Event("change"));return{before,after:document.getElementById("pr-poster-status").textContent,plateOpen:!document.querySelector('[data-poster="chart"]').disabled};})()`,
   );
   check(
     "PR29 changing the Pressed-as format dismisses the stale poster status line",
-    !!dismissed && dismissed.before.length > 0 && dismissed.after === "" && dismissed.plateOpen === true,
+    !!dismissed && dismissed.before.length > 0 && dismissed.after === "" && dismissed.plateOpen === true, // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     JSON.stringify(dismissed),
   );
 
-  async function orderPng(format, plate) {
+  async function orderPng(format: string, plate: string) {
     await evaluate(`(()=>{window.__vellumLastPng=undefined;document.getElementById("pr-format").value="${format}";document.querySelector('[data-poster="${plate}"]').click();})()`);
     let png = null;
     for (let i = 0; i < 300; i++) {
       let s = null;
-      try { s = await evaluate(`(()=>{const p=window.__vellumLastPng;return p?{type:p.type,size:p.size,width:p.width,height:p.height,scale:p.scale,clamped:p.clamped,filename:p.filename,status:document.getElementById("pr-poster-status").textContent}:null;})()`); } catch {}
+      try { s = await evaluate<{ type: string; size: number; width: number; height: number; scale: number; clamped: boolean; filename: string; status: string } | null>(`(()=>{const p=window.__vellumLastPng;return p?{type:p.type,size:p.size,width:p.width,height:p.height,scale:p.scale,clamped:p.clamped,filename:p.filename,status:document.getElementById("pr-poster-status").textContent}:null;})()`); } catch {}
       if (s) { png = s; break; }
       await sleep(50);
     }
@@ -238,7 +243,7 @@ export async function run(ctx) {
   let bindReady = false;
   for (let i = 0; i < 160; i++) {
     let ok = null;
-    try { ok = await evaluate(`(()=>{const st=window.__vellumPrintRoomState();const b=document.getElementById("pr-bind");return st.seed===42&&document.getElementById("pr-status").textContent===""&&b&&!b.disabled;})()`); } catch {}
+    try { ok = await evaluate<boolean | null>(`(()=>{const st=window.__vellumPrintRoomState();const b=document.getElementById("pr-bind");return st.seed===42&&document.getElementById("pr-status").textContent===""&&b&&!b.disabled;})()`); } catch {}
     if (ok) { bindReady = true; break; }
     await sleep(50);
   }
@@ -249,7 +254,7 @@ export async function run(ctx) {
   for (let i = 0; i < 300; i++) {
     let s = null;
     try {
-      s = await evaluate(`(()=>{const b=window.__vellumBoundAtlas;if(!b)return null;const imgs=[...document.querySelectorAll("#pr-atlas img")];const hero=document.querySelector("#pr-atlas .hero-plate");return{seed:b.seed,title:b.title,figs:b.figures,plates:document.querySelectorAll("#pr-atlas figure:not(.banner)").length,print:!document.getElementById("pr-print").disabled,dl:!document.getElementById("pr-download").disabled,hide:!document.getElementById("pr-hide").disabled,hasAtlas:document.body.classList.contains("has-atlas"),imgs:imgs.length,loaded:imgs.length>0&&imgs.every(im=>im.complete&&im.naturalWidth>0),heroHiddenOnScreen:hero?getComputedStyle(hero).display==="none":false,heads:[...document.querySelectorAll("#pr-atlas h2")].map(h=>h.textContent),prospectPlate:[...document.querySelectorAll("#pr-atlas figcaption")].some(f=>f.textContent.startsWith("The Prospect of ")),atlasHidden:getComputedStyle(document.getElementById("pr-atlas")).display==="none",turned:(()=>{const t=document.getElementById("pr-turned");return !t.hidden&&/^blob:/.test(t.src);})(),proofHidden:document.getElementById("pr-preview").hidden,thumbs:document.querySelectorAll("#pr-contents .plates figure").length,inked:(document.querySelector("#pr-contents li.on .turn.here")||{dataset:{}}).dataset.plate||null,plateLine:document.getElementById("pr-plate-line").textContent,stamp:document.getElementById("pr-stamp").textContent};})()`);
+      s = await evaluate<{ seed: number; title: string; figs: number; plates: number; print: boolean; dl: boolean; hide: boolean; hasAtlas: boolean; imgs: number; loaded: boolean; heroHiddenOnScreen: boolean; heads: string[]; prospectPlate: boolean; atlasHidden: boolean; turned: boolean; proofHidden: boolean; thumbs: number; inked: string | null; plateLine: string; stamp: string } | null>(`(()=>{const b=window.__vellumBoundAtlas;if(!b)return null;const imgs=[...document.querySelectorAll("#pr-atlas img")];const hero=document.querySelector("#pr-atlas .hero-plate");return{seed:b.seed,title:b.title,figs:b.figures,plates:document.querySelectorAll("#pr-atlas figure:not(.banner)").length,print:!document.getElementById("pr-print").disabled,dl:!document.getElementById("pr-download").disabled,hide:!document.getElementById("pr-hide").disabled,hasAtlas:document.body.classList.contains("has-atlas"),imgs:imgs.length,loaded:imgs.length>0&&imgs.every(im=>im.complete&&im.naturalWidth>0),heroHiddenOnScreen:hero?getComputedStyle(hero).display==="none":false,heads:[...document.querySelectorAll("#pr-atlas h2")].map(h=>h.textContent),prospectPlate:[...document.querySelectorAll("#pr-atlas figcaption")].some(f=>f.textContent.startsWith("The Prospect of ")),atlasHidden:getComputedStyle(document.getElementById("pr-atlas")).display==="none",turned:(()=>{const t=document.getElementById("pr-turned");return !t.hidden&&/^blob:/.test(t.src);})(),proofHidden:document.getElementById("pr-preview").hidden,thumbs:document.querySelectorAll("#pr-contents .plates figure").length,inked:(document.querySelector("#pr-contents li.on .turn.here")||{dataset:{}}).dataset.plate||null,plateLine:document.getElementById("pr-plate-line").textContent,stamp:document.getElementById("pr-stamp").textContent};})()`);
     } catch {}
     if (s && s.loaded) { bound = s; break; }
     await sleep(50);
@@ -273,28 +278,28 @@ export async function run(ctx) {
     JSON.stringify(bound && { heads: bound.heads, prospectPlate: bound.prospectPlate }),
   );
 
-  const turned = await evaluate(`(()=>{const b=document.querySelector('#pr-contents .plates figure[data-plate="prospect-capital"] .thumb');if(!b)return null;b.click();const s=document.getElementById("sheet").getBoundingClientRect();const t=document.getElementById("pr-turned");return{ratio:s.width/s.height,src:t.src.slice(0,5),hidden:t.hidden,on:(document.querySelector("#pr-contents li.on .cr-num")||{}).textContent,here:(document.querySelector("#pr-contents .plates figure.here")||{dataset:{}}).dataset.plate,line:document.getElementById("pr-plate-line").textContent,proofHidden:document.getElementById("pr-preview").hidden};})()`);
+  const turned = await evaluate<{ ratio: number; src: string; hidden: boolean; on: string | undefined; here: string | undefined; line: string; proofHidden: boolean } | null>(`(()=>{const b=document.querySelector('#pr-contents .plates figure[data-plate="prospect-capital"] .thumb');if(!b)return null;b.click();const s=document.getElementById("sheet").getBoundingClientRect();const t=document.getElementById("pr-turned");return{ratio:s.width/s.height,src:t.src.slice(0,5),hidden:t.hidden,on:(document.querySelector("#pr-contents li.on .cr-num")||{}).textContent,here:(document.querySelector("#pr-contents .plates figure.here")||{dataset:{}}).dataset.plate,line:document.getElementById("pr-plate-line").textContent,proofHidden:document.getElementById("pr-preview").hidden};})()`);
   check(
     "PR31 a thumbnail turns the sheet: the prospect plate takes it at its own 520x384 aspect, its row and thumbnail inked (the #494 ruling; the fit cannot read an <img>'s viewBox)",
     !!turned && Math.abs(turned.ratio - 520 / 384) < 0.01 && turned.src === "blob:" && turned.hidden === false && turned.proofHidden === true &&
       turned.on === "viii" && turned.here === "prospect-capital" && /^plate viii of the bound atlas · the prospect of /.test(turned.line),
     JSON.stringify(turned),
   );
-  const back = await evaluate(`(()=>{const b=document.querySelector('#pr-contents .turn[data-plate="theme-vegetation"]');if(!b)return null;b.click();const s=document.getElementById("sheet").getBoundingClientRect();return{ratio:s.width/s.height,here:(document.querySelector("#pr-contents .turn.here")||{dataset:{}}).dataset.plate,line:document.getElementById("pr-plate-line").textContent,zoomed:document.getElementById("map-viewport").classList.contains("zoomed"),scrollY:window.scrollY};})()`);
+  const back = await evaluate<{ ratio: number; here: string | undefined; line: string; zoomed: boolean; scrollY: number } | null>(`(()=>{const b=document.querySelector('#pr-contents .turn[data-plate="theme-vegetation"]');if(!b)return null;b.click();const s=document.getElementById("sheet").getBoundingClientRect();return{ratio:s.width/s.height,here:(document.querySelector("#pr-contents .turn.here")||{dataset:{}}).dataset.plate,line:document.getElementById("pr-plate-line").textContent,zoomed:document.getElementById("map-viewport").classList.contains("zoomed"),scrollY:window.scrollY};})()`);
   check(
     "PR31b an entry turns too: the vegetation survey at the chart's aspect, the camera at rest, the page unscrolled",
     !!back && Math.abs(back.ratio - 1500 / 1157.931) < 0.01 && back.here === "theme-vegetation" && /^plate iii of the bound atlas · a thematic survey of vegetation$/.test(back.line) && back.zoomed === false && back.scrollY === 0,
     JSON.stringify(back),
   );
 
-  const second = await evaluate(`(()=>{const b=document.querySelector('#pr-contents .turn[data-plate="theme-climate"]');if(!b)return null;b.click();return{on:(document.querySelector("#pr-contents li.on .cr-num")||{}).textContent,here:(document.querySelector("#pr-contents .turn.here")||{dataset:{}}).dataset.plate,line:document.getElementById("pr-plate-line").textContent};})()`);
+  const second = await evaluate<{ on: string | undefined; here: string | undefined; line: string } | null>(`(()=>{const b=document.querySelector('#pr-contents .turn[data-plate="theme-climate"]');if(!b)return null;b.click();return{on:(document.querySelector("#pr-contents li.on .cr-num")||{}).textContent,here:(document.querySelector("#pr-contents .turn.here")||{dataset:{}}).dataset.plate,line:document.getElementById("pr-plate-line").textContent};})()`);
   check(
     "PR31c a later survey turns under its OWN numeral (#465 ruling 7): temperature is row iv and the folio's line says so, never the first survey's iii",
     !!second && second.on === "iv" && second.here === "theme-climate" && second.line === "plate iv of the bound atlas · a thematic survey of temperature",
     JSON.stringify(second),
   );
 
-  const MATTER_STATE = `(()=>{const s=document.getElementById("sheet").getBoundingClientRect();const page=document.getElementById("pr-page");const inner=document.getElementById("pr-page-inner");return{ratio:s.width/s.height,aspect:Number(page.dataset.aspect),pageHidden:page.hidden,turnedHidden:document.getElementById("pr-turned").hidden,proofHidden:document.getElementById("pr-preview").hidden,on:(document.querySelector("#pr-contents li.on .cr-num")||{}).textContent,here:(document.querySelector("#pr-contents .turn.here")||{dataset:{}}).dataset.plate,line:document.getElementById("pr-plate-line").textContent,head:(inner.querySelector(".page-head")||{textContent:""}).textContent,places:inner.querySelectorAll("tbody tr").length,measureEmpty:document.getElementById("pr-page-measure").children.length===0,scrollY:window.scrollY,fits:page.getBoundingClientRect().bottom-inner.getBoundingClientRect().bottom,innerW:Math.abs(inner.getBoundingClientRect().width-page.clientWidth),noX:document.documentElement.scrollWidth<=document.documentElement.clientWidth,label:document.getElementById("map-viewport").getAttribute("aria-label")};})()`;
+  const MATTER_STATE: Payload<Matter> = `(()=>{const s=document.getElementById("sheet").getBoundingClientRect();const page=document.getElementById("pr-page");const inner=document.getElementById("pr-page-inner");return{ratio:s.width/s.height,aspect:Number(page.dataset.aspect),pageHidden:page.hidden,turnedHidden:document.getElementById("pr-turned").hidden,proofHidden:document.getElementById("pr-preview").hidden,on:(document.querySelector("#pr-contents li.on .cr-num")||{}).textContent,here:(document.querySelector("#pr-contents .turn.here")||{dataset:{}}).dataset.plate,line:document.getElementById("pr-plate-line").textContent,head:(inner.querySelector(".page-head")||{textContent:""}).textContent,places:inner.querySelectorAll("tbody tr").length,measureEmpty:document.getElementById("pr-page-measure").children.length===0,scrollY:window.scrollY,fits:page.getBoundingClientRect().bottom-inner.getBoundingClientRect().bottom,innerW:Math.abs(inner.getBoundingClientRect().width-page.clientWidth),noX:document.documentElement.scrollWidth<=document.documentElement.clientWidth,label:document.getElementById("map-viewport").getAttribute("aria-label")};})()`;
   await evaluate(`(()=>{const b=document.querySelector('#pr-contents .turn[data-plate="gazetteer"]');if(b)b.click();})()`);
   let matter = null;
   for (let i = 0; i < 40; i++) {
@@ -312,13 +317,14 @@ export async function run(ctx) {
       matter.on === "xi" && matter.here === "gazetteer" && /^plate xi of the bound atlas · the gazetteer$/.test(matter.line) &&
       /^VELLUM · THE BOUND ATLAS OF The Isle of Rahai · CHART № 42$/.test(matter.head) &&
       matter.places > 0 && matter.measureEmpty === true && matter.scrollY === 0 &&
+      // @ts-expect-error a viewport with no aria-label reads null, and a pattern test reads null as the text "null", so PR33 reads false and reds by name
       matter.fits >= -0.5 && matter.fits <= 2 && matter.innerW < 1 && matter.noX === true && /^A page of the bound atlas: The gazetteer\./.test(matter.label),
     JSON.stringify(matter),
   );
 
   await shoot("print-room-backmatter.png");
 
-  const banners = await evaluate(`(()=>{const b=document.querySelector('#pr-contents .turn[data-plate="banners"]');if(!b)return null;b.click();const inner=document.getElementById("pr-page-inner");return{on:(document.querySelector("#pr-contents li.on .cr-num")||{}).textContent,line:document.getElementById("pr-plate-line").textContent,arms:inner.querySelectorAll(".banner").length,counted:(document.querySelector('#pr-contents li.on .n')||{textContent:""}).textContent};})()`);
+  const banners = await evaluate<{ on: string | undefined; line: string; arms: number; counted: string } | null>(`(()=>{const b=document.querySelector('#pr-contents .turn[data-plate="banners"]');if(!b)return null;b.click();const inner=document.getElementById("pr-page-inner");return{on:(document.querySelector("#pr-contents li.on .cr-num")||{}).textContent,line:document.getElementById("pr-plate-line").textContent,arms:inner.querySelectorAll(".banner").length,counted:(document.querySelector('#pr-contents li.on .n')||{textContent:""}).textContent};})()`);
   check(
     "PR33b the banners turn too: the page carries every realm's arms and its row's count agrees",
     !!banners && banners.on === "ix" && /^plate ix of the bound atlas · the banners of every realm$/.test(banners.line) &&
@@ -329,14 +335,15 @@ export async function run(ctx) {
   await evaluate(`document.getElementById("zoom-in").click()`);
   let leaned = false;
   for (let i = 0; i < 60; i++) {
-    if (await evaluate(`document.getElementById("map-viewport").classList.contains("zoomed")`)) { leaned = true; break; }
+    if (await evaluate<boolean>(`document.getElementById("map-viewport").classList.contains("zoomed")`)) { leaned = true; break; }
     await sleep(50);
   }
-  const unleaned = await evaluate(`(()=>{const b=document.querySelector('#pr-contents .plates figure[data-plate="theme-vegetation"] .thumb');if(!b)return null;b.click();const s=document.getElementById("sheet").getBoundingClientRect();return{zoomed:document.getElementById("map-viewport").classList.contains("zoomed"),pageHidden:document.getElementById("pr-page").hidden,turnedHidden:document.getElementById("pr-turned").hidden,ratio:s.width/s.height,label:document.getElementById("map-viewport").getAttribute("aria-label")};})()`);
+  const unleaned = await evaluate<{ zoomed: boolean; pageHidden: boolean; turnedHidden: boolean; ratio: number; label: string | null } | null>(`(()=>{const b=document.querySelector('#pr-contents .plates figure[data-plate="theme-vegetation"] .thumb');if(!b)return null;b.click();const s=document.getElementById("sheet").getBoundingClientRect();return{zoomed:document.getElementById("map-viewport").classList.contains("zoomed"),pageHidden:document.getElementById("pr-page").hidden,turnedHidden:document.getElementById("pr-turned").hidden,ratio:s.width/s.height,label:document.getElementById("map-viewport").getAttribute("aria-label")};})()`);
   check(
     "PR34 a turn while leaned rests the camera and puts the page away: zoom in on the gazetteer, turn to the vegetation survey, the sheet back at the chart's aspect and k=1",
     leaned === true && !!unleaned && unleaned.zoomed === false && unleaned.pageHidden === true &&
       unleaned.turnedHidden === false && Math.abs(unleaned.ratio - 1500 / 1157.931) < 0.01 &&
+      // @ts-expect-error a viewport with no aria-label reads null, and a pattern test reads null as the text "null", so PR34 reads false and reds by name
       /^The proof\./.test(unleaned.label),
     JSON.stringify({ leaned, unleaned }),
   );
@@ -345,7 +352,7 @@ export async function run(ctx) {
 
 
   await send("Emulation.setEmulatedMedia", { media: "print" });
-  const printView = await evaluate(`(()=>{const disp=(sel)=>{const el=document.querySelector(sel);return el?getComputedStyle(el).display:"absent";};const f=document.querySelector("#pr-atlas figure:not(.banner)");return{stage:disp(".stage"),slip:disp(".slip"),legend:disp(".legend"),folioRoom:disp(".corner.folio-room"),glass:disp(".zoomery"),atlas:disp("#pr-atlas"),hero:disp("#pr-atlas .hero-plate"),breakAfter:f?getComputedStyle(f).breakAfter:"absent"};})()`);
+  const printView = await evaluate<{ stage: string; slip: string; legend: string; folioRoom: string; glass: string; atlas: string; hero: string; breakAfter: string }>(`(()=>{const disp=(sel)=>{const el=document.querySelector(sel);return el?getComputedStyle(el).display:"absent";};const f=document.querySelector("#pr-atlas figure:not(.banner)");return{stage:disp(".stage"),slip:disp(".slip"),legend:disp(".legend"),folioRoom:disp(".corner.folio-room"),glass:disp(".zoomery"),atlas:disp("#pr-atlas"),hero:disp("#pr-atlas .hero-plate"),breakAfter:f?getComputedStyle(f).breakAfter:"absent"};})()`);
   check(
     "PR21 bound, print is the atlas: the stage, the slip, the legend row, the Glass and the room's name print as nothing, the document and its hero print, one plate per page (ruled 2026-08-30)",
     printView.stage === "none" && printView.slip === "none" && printView.legend === "none" && printView.folioRoom === "none" && printView.glass === "none" &&
@@ -353,13 +360,13 @@ export async function run(ctx) {
     JSON.stringify(printView),
   );
 
-  const ATLAS_FIT = `(()=>{const d=document.documentElement;const a=document.querySelector("#pr-atlas");const i=[...document.querySelectorAll("#pr-atlas figure img")];
+  const ATLAS_FIT: Payload<AtlasFit> = `(()=>{const d=document.documentElement;const a=document.querySelector("#pr-atlas");const i=[...document.querySelectorAll("#pr-atlas figure img")];
     return{scrollW:d.scrollWidth,clientW:d.clientWidth,plates:i.length,maxRight:i.length?Math.round(Math.max(...i.map((el)=>el.getBoundingClientRect().right))):-1,atlasPadL:a?getComputedStyle(a).paddingLeft:"absent"};})()`;
-  const atlasFitAt = async (want) => {
+  const atlasFitAt = async (want: number) => {
     let read = null;
     for (let i = 0; i < 40; i++) {
       read = await evaluate(ATLAS_FIT);
-      if (read && read.clientW === want) return read;
+      if (read && read.clientW === want) return read; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
       await sleep(50);
     }
     return read;
@@ -383,7 +390,7 @@ export async function run(ctx) {
 
   // The 20000-char floor is what separates a real bound atlas from the tiny PDF a blank sheet or a print-blank plate yields; paper fidelity itself stays a manual pass.
   let pdf;
-  try { pdf = await send("Page.printToPDF", { printBackground: true }); } catch (e) { pdf = null; }
+  try { pdf = await send<{ data: string }>("Page.printToPDF", { printBackground: true }); } catch (e) { pdf = null; }
   check(
     "PR22 browser Save-as-PDF yields a well-formed, non-empty bound atlas",
     !!pdf && typeof pdf.data === "string" && pdf.data.length > 20000,
@@ -396,7 +403,7 @@ export async function run(ctx) {
   let dl = null;
   for (let i = 0; i < 200; i++) {
     let s = null;
-    try { s = await evaluate(`window.__vellumLastAtlasDownload || null`); } catch {}
+    try { s = await evaluate<{ filename: string; size: number; dataUris: number; hasBlobUrl: boolean; hasExternalCss: boolean; title: string } | null>(`window.__vellumLastAtlasDownload || null`); } catch {}
     if (s) { dl = s; break; }
     await sleep(50);
   }
@@ -407,11 +414,11 @@ export async function run(ctx) {
     JSON.stringify(dl),
   );
 
-  const midDraw = await evaluate(`(()=>{const s=document.getElementById("pr-seed");s.value="2024";document.getElementById("pr-draw").click();return{bind:document.getElementById("pr-bind").disabled,print:document.getElementById("pr-print").disabled,atlasEmpty:document.getElementById("pr-atlas").children.length===0,hasAtlas:document.body.classList.contains("has-atlas")};})()`);
+  const midDraw = await evaluate<{ bind: boolean; print: boolean; atlasEmpty: boolean; hasAtlas: boolean }>(`(()=>{const s=document.getElementById("pr-seed");s.value="2024";document.getElementById("pr-draw").click();return{bind:document.getElementById("pr-bind").disabled,print:document.getElementById("pr-print").disabled,atlasEmpty:document.getElementById("pr-atlas").children.length===0,hasAtlas:document.body.classList.contains("has-atlas")};})()`);
   let reenabled = null;
   for (let i = 0; i < 160; i++) {
     let s = null;
-    try { s = await evaluate(`(()=>{const st=window.__vellumPrintRoomState();return{seed:st.seed,status:document.getElementById("pr-status").textContent,bind:document.getElementById("pr-bind").disabled};})()`); } catch {}
+    try { s = await evaluate<{ seed: number; status: string; bind: boolean }>(`(()=>{const st=window.__vellumPrintRoomState();return{seed:st.seed,status:document.getElementById("pr-status").textContent,bind:document.getElementById("pr-bind").disabled};})()`); } catch {}
     if (s && s.seed === 2024 && s.status === "" && s.bind === false) { reenabled = s; break; }
     await sleep(50);
   }
@@ -423,16 +430,16 @@ export async function run(ctx) {
   );
 
   // The interleaving here is deterministic, not lucky: the Print Room shares ONE FIFO render worker with no job cancellation, so the bind posted first always settles first, ahead of the redraw queued behind it. PR27 rests on the same property.
-  const btd = await evaluate(`(()=>{document.getElementById("pr-bind").click();const s=document.getElementById("pr-seed");s.value="909";document.getElementById("pr-draw").click();return{bindDisabled:document.getElementById("pr-bind").disabled,atlasEmpty:document.getElementById("pr-atlas").children.length===0};})()`);
+  const btd = await evaluate<{ bindDisabled: boolean; atlasEmpty: boolean }>(`(()=>{document.getElementById("pr-bind").click();const s=document.getElementById("pr-seed");s.value="909";document.getElementById("pr-draw").click();return{bindDisabled:document.getElementById("pr-bind").disabled,atlasEmpty:document.getElementById("pr-atlas").children.length===0};})()`);
   let btdSettled = null;
   for (let i = 0; i < 200; i++) {
     let s = null;
-    try { s = await evaluate(`(()=>{const st=window.__vellumPrintRoomState();return{seed:st.seed,status:document.getElementById("pr-status").textContent,bind:document.getElementById("pr-bind").disabled};})()`); } catch {}
+    try { s = await evaluate<{ seed: number; status: string; bind: boolean }>(`(()=>{const st=window.__vellumPrintRoomState();return{seed:st.seed,status:document.getElementById("pr-status").textContent,bind:document.getElementById("pr-bind").disabled};})()`); } catch {}
     if (s && s.seed === 909 && s.status === "" && s.bind === false) { btdSettled = s; break; }
     await sleep(50);
   }
   await sleep(250); // let any (wrongly) surviving stale bind inject before asserting emptiness
-  const btdAtlas = await evaluate(`(()=>({figs:document.querySelectorAll("#pr-atlas figure").length,hasAtlas:document.body.classList.contains("has-atlas")}))()`);
+  const btdAtlas = await evaluate<{ figs: number; hasAtlas: boolean }>(`(()=>({figs:document.querySelectorAll("#pr-atlas figure").length,hasAtlas:document.body.classList.contains("has-atlas")}))()`);
   check(
     "PR24b an in-flight bind is dropped when a redraw supersedes it (no stale-world atlas)",
     btd.bindDisabled === true && btd.atlasEmpty === true && !!btdSettled &&
@@ -445,16 +452,16 @@ export async function run(ctx) {
   let boundOnce = false;
   for (let i = 0; i < 300; i++) {
     let ok = null;
-    try { ok = await evaluate(`(()=>{const imgs=[...document.querySelectorAll("#pr-contents .plates img")];return !!window.__vellumBoundAtlas && imgs.length>0 && imgs.every(im=>im.complete&&im.naturalWidth>0) && !document.getElementById("pr-bind").disabled;})()`); } catch {}
+    try { ok = await evaluate<boolean>(`(()=>{const imgs=[...document.querySelectorAll("#pr-contents .plates img")];return !!window.__vellumBoundAtlas && imgs.length>0 && imgs.every(im=>im.complete&&im.naturalWidth>0) && !document.getElementById("pr-bind").disabled;})()`); } catch {}
     if (ok) { boundOnce = true; break; }
     await sleep(50);
   }
-  const midRebind = await evaluate(`(()=>{document.getElementById("pr-bind").click();const b=document.querySelector('#pr-contents .plates figure[data-plate="theme-climate"] .thumb');if(!b)return null;b.click();const t=document.getElementById("pr-turned");return{binding:document.getElementById("pr-bind").disabled,here:(document.querySelector("#pr-contents .plates figure.here")||{dataset:{}}).dataset.plate,src:t.src.slice(0,5),stillBound:document.body.classList.contains("has-atlas")};})()`);
+  const midRebind = await evaluate<{ binding: boolean; here: string | undefined; src: string; stillBound: boolean } | null>(`(()=>{document.getElementById("pr-bind").click();const b=document.querySelector('#pr-contents .plates figure[data-plate="theme-climate"] .thumb');if(!b)return null;b.click();const t=document.getElementById("pr-turned");return{binding:document.getElementById("pr-bind").disabled,here:(document.querySelector("#pr-contents .plates figure.here")||{dataset:{}}).dataset.plate,src:t.src.slice(0,5),stillBound:document.body.classList.contains("has-atlas")};})()`);
   // Poll for the DECODED state, not for Bind's re-enable: the blobs decode after the binding lands, and a loaded CI lane read them mid-decode at the first sample (PR #500's run at 91da0e7). A value that never settles fails on the last sample.
   let rebound = null;
   for (let i = 0; i < 300; i++) {
     let s = null;
-    try { s = await evaluate(`(()=>{if(document.getElementById("pr-bind").disabled)return null;const imgs=[...document.querySelectorAll("#pr-contents .plates img")];const t=document.getElementById("pr-turned");return{imgs:imgs.length,loaded:imgs.length>0&&imgs.every(im=>im.complete&&im.naturalWidth>0),turnedLoaded:!t.hidden&&t.complete&&t.naturalWidth>0,here:(document.querySelector("#pr-contents .plates figure.here")||{dataset:{}}).dataset.plate,print:!document.getElementById("pr-print").disabled};})()`); } catch {}
+    try { s = await evaluate<{ imgs: number; loaded: boolean; turnedLoaded: boolean; here: string | undefined; print: boolean } | null>(`(()=>{if(document.getElementById("pr-bind").disabled)return null;const imgs=[...document.querySelectorAll("#pr-contents .plates img")];const t=document.getElementById("pr-turned");return{imgs:imgs.length,loaded:imgs.length>0&&imgs.every(im=>im.complete&&im.naturalWidth>0),turnedLoaded:!t.hidden&&t.complete&&t.naturalWidth>0,here:(document.querySelector("#pr-contents .plates figure.here")||{dataset:{}}).dataset.plate,print:!document.getElementById("pr-print").disabled};})()`); } catch {}
     if (s) rebound = s;
     if (s && s.loaded && s.turnedLoaded) break;
     await sleep(50);
@@ -469,28 +476,29 @@ export async function run(ctx) {
   let reboundForHide = false;
   for (let i = 0; i < 260; i++) {
     let ok = null;
-    try { ok = await evaluate(`(()=>{const imgs=[...document.querySelectorAll("#pr-atlas img")];return !!window.__vellumBoundAtlas && imgs.length>0 && imgs.every(im=>im.complete) && !document.getElementById("pr-hide").disabled;})()`); } catch {}
+    try { ok = await evaluate<boolean>(`(()=>{const imgs=[...document.querySelectorAll("#pr-atlas img")];return !!window.__vellumBoundAtlas && imgs.length>0 && imgs.every(im=>im.complete) && !document.getElementById("pr-hide").disabled;})()`); } catch {}
     if (ok) { reboundForHide = true; break; }
     await sleep(50);
   }
-  const hidden = await evaluate(`(()=>{document.getElementById("pr-hide").click();return{atlasEmpty:document.getElementById("pr-atlas").children.length===0,hasAtlas:document.body.classList.contains("has-atlas"),bindEnabled:!document.getElementById("pr-bind").disabled,printDisabled:document.getElementById("pr-print").disabled,hideDisabled:document.getElementById("pr-hide").disabled,proofBack:!document.getElementById("pr-preview").hidden&&document.getElementById("pr-turned").hidden,pageAway:document.getElementById("pr-page").hidden,label:document.getElementById("map-viewport").getAttribute("aria-label"),thumbs:document.querySelectorAll("#pr-contents .plates").length,plateLine:document.getElementById("pr-plate-line").textContent};})()`);
+  const hidden = await evaluate<{ atlasEmpty: boolean; hasAtlas: boolean; bindEnabled: boolean; printDisabled: boolean; hideDisabled: boolean; proofBack: boolean; pageAway: boolean; label: string | null; thumbs: number; plateLine: string }>(`(()=>{document.getElementById("pr-hide").click();return{atlasEmpty:document.getElementById("pr-atlas").children.length===0,hasAtlas:document.body.classList.contains("has-atlas"),bindEnabled:!document.getElementById("pr-bind").disabled,printDisabled:document.getElementById("pr-print").disabled,hideDisabled:document.getElementById("pr-hide").disabled,proofBack:!document.getElementById("pr-preview").hidden&&document.getElementById("pr-turned").hidden,pageAway:document.getElementById("pr-page").hidden,label:document.getElementById("map-viewport").getAttribute("aria-label"),thumbs:document.querySelectorAll("#pr-contents .plates").length,plateLine:document.getElementById("pr-plate-line").textContent};})()`);
   check(
     "PR25 Hide dismisses the bound atlas and re-enables Bind: the proof back on the sheet, the contents unbound, the plate line cleared",
     reboundForHide && hidden.atlasEmpty === true && hidden.hasAtlas === false &&
       hidden.bindEnabled === true && hidden.printDisabled === true && hidden.hideDisabled === true &&
+      // @ts-expect-error a viewport with no aria-label reads null, and a pattern test reads null as the text "null", so PR25 reads false and reds by name
       hidden.proofBack === true && hidden.pageAway === true && /^The proof\./.test(hidden.label) && hidden.thumbs === 0 && hidden.plateLine === "",
     JSON.stringify({ reboundForHide, hidden }),
   );
 
   await send("Emulation.setEmulatedMedia", { media: "print" });
-  const printProof = await evaluate(`(()=>{const cs=(sel)=>getComputedStyle(document.querySelector(sel));return{stage:cs(".stage").display,stagePos:cs(".stage").position,map:cs("#map").transform,svg:!!document.querySelector("#pr-preview svg"),atlasEmpty:document.getElementById("pr-atlas").children.length===0,slip:cs(".slip").display};})()`);
+  const printProof = await evaluate<{ stage: string; stagePos: string; map: string; svg: boolean; atlasEmpty: boolean; slip: string }>(`(()=>{const cs=(sel)=>getComputedStyle(document.querySelector(sel));return{stage:cs(".stage").display,stagePos:cs(".stage").position,map:cs("#map").transform,svg:!!document.querySelector("#pr-preview svg"),atlasEmpty:document.getElementById("pr-atlas").children.length===0,slip:cs(".slip").display};})()`);
   check(
     "PR21b unbound, print is the proof: the stage prints in flow, unzoomed, the slip as nothing, the document empty (ruled 2026-08-30)",
     printProof.stage !== "none" && printProof.stagePos === "static" && printProof.map === "none" && printProof.svg === true && printProof.atlasEmpty === true && printProof.slip === "none",
     JSON.stringify(printProof),
   );
   // The warning is hidden until the worker fails, so the check unhides it the way app.ts does (warning.hidden = false) and puts the attribute back; reading it while hidden would assert the attribute's own display: none and prove nothing.
-  const warnRead = `(()=>{const w=document.getElementById("pr-warning");if(!w)return null;const b=w.getBoundingClientRect();return{disp:getComputedStyle(w).display,pos:getComputedStyle(w).position,w:Math.round(b.width*100)/100,hidden:w.hidden};})()`;
+  const warnRead: Payload<Warning | null> = `(()=>{const w=document.getElementById("pr-warning");if(!w)return null;const b=w.getBoundingClientRect();return{disp:getComputedStyle(w).display,pos:getComputedStyle(w).position,w:Math.round(b.width*100)/100,hidden:w.hidden};})()`;
   await evaluate(`(()=>{document.getElementById("pr-warning").hidden=false;return true;})()`);
   await send("Emulation.setEmulatedMedia", { media: "" });
   const warnScreen = await evaluate(warnRead);
@@ -505,7 +513,7 @@ export async function run(ctx) {
   );
   // Paper lays out under the 900px query (test/site/room.test.ts pins the taking-back).
   await send("Emulation.setDeviceMetricsOverride", { width: 816, height: 1056, deviceScaleFactor: 1, mobile: false });
-  const paper = await evaluate(`(()=>{const cs=(sel)=>getComputedStyle(document.querySelector(sel));return{w:window.innerWidth,tagline:cs(".folio-room .room-tagline").display,name:cs(".folio-room .room-name").display,nameSize:cs(".folio-room .room-name").fontSize,folioMax:cs(".corner.folio-room").maxWidth,stagePos:cs(".stage").position,corner:cs(".corner.bl").display};})()`);
+  const paper = await evaluate<{ w: number; tagline: string; name: string; nameSize: string; folioMax: string; stagePos: string; corner: string }>(`(()=>{const cs=(sel)=>getComputedStyle(document.querySelector(sel));return{w:window.innerWidth,tagline:cs(".folio-room .room-tagline").display,name:cs(".folio-room .room-name").display,nameSize:cs(".folio-room .room-name").fontSize,folioMax:cs(".corner.folio-room").maxWidth,stagePos:cs(".stage").position,corner:cs(".corner.bl").display};})()`);
   check(
     "PR21c at paper width (816px, print media) the room's name and tagline print at their own size and the corner is unclamped; the chart's folio prints as nothing",
     paper.w === 816 && paper.tagline === "block" && paper.name === "block" && paper.nameSize === "21.12px" && paper.folioMax === "none" && paper.stagePos === "static" && paper.corner === "none",
@@ -515,24 +523,24 @@ export async function run(ctx) {
   await send("Emulation.setEmulatedMedia", { media: "" });
 
   await send("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 3, mobile: true });
-  const phone390 = await evaluate(`(()=>{const cs=(s)=>getComputedStyle(document.querySelector(s));const style=document.getElementById("pr-style");const shown=cs("#pr-style").display!=="none";const glassClosed=cs(".zoomery").display;document.querySelector(".slip-handle").click();const glassOpen=cs(".zoomery").display;const r=style.getBoundingClientRect();const hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);const hitOk=hit===style||style.contains(hit);document.querySelector(".slip-handle").click();return{shown,glassClosed,glassOpen,hitOk,glassBack:cs(".zoomery").display};})()`);
+  const phone390 = await evaluate<{ shown: boolean; glassClosed: string; glassOpen: string; hitOk: boolean; glassBack: string }>(`(()=>{const cs=(s)=>getComputedStyle(document.querySelector(s));const style=document.getElementById("pr-style");const shown=cs("#pr-style").display!=="none";const glassClosed=cs(".zoomery").display;document.querySelector(".slip-handle").click();const glassOpen=cs(".zoomery").display;const r=style.getBoundingClientRect();const hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);const hitOk=hit===style||style.contains(hit);document.querySelector(".slip-handle").click();return{shown,glassClosed,glassOpen,hitOk,glassBack:cs(".zoomery").display};})()`);
   check(
     "PR32 at 390 the style picker shows and takes its own tap; the Glass stands down while the sheet is open and returns when it folds (ruled 2026-08-30; skeptic round 2's stolen-tap collision)",
-    !!phone390 && phone390.shown === true && phone390.glassClosed === "flex" && phone390.glassOpen === "none" && phone390.hitOk === true && phone390.glassBack === "flex",
+    !!phone390 && phone390.shown === true && phone390.glassClosed === "flex" && phone390.glassOpen === "none" && phone390.hitOk === true && phone390.glassBack === "flex", // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     JSON.stringify(phone390),
   );
 
   await evaluate(`document.getElementById("pr-bind").click()`);
   let phoneBound = false;
   for (let i = 0; i < 300; i++) {
-    if (await evaluate(`document.body.classList.contains("has-atlas")`)) { phoneBound = true; break; }
+    if (await evaluate<boolean>(`document.body.classList.contains("has-atlas")`)) { phoneBound = true; break; }
     await sleep(50);
   }
   await evaluate(`(()=>{const b=document.querySelector('#pr-contents .turn[data-plate="gazetteer"]');if(b)b.click();})()`);
   let phonePage = null;
   for (let i = 0; i < 40; i++) {
     let m = null;
-    try { m = await evaluate(`(()=>{const s=document.getElementById("sheet").getBoundingClientRect();const head=document.querySelector("header.chrome").getBoundingClientRect();const slip=document.querySelector(".slip").getBoundingClientRect();const page=document.getElementById("pr-page");const inner=document.getElementById("pr-page-inner");return{ratio:s.width/s.height,aspect:Number(page.dataset.aspect),w:s.width,top:s.top,bottom:s.bottom,headBottom:head.bottom,slipTop:slip.top,pageUp:!page.hidden,fits:page.getBoundingClientRect().bottom-inner.getBoundingClientRect().bottom,innerW:Math.abs(inner.getBoundingClientRect().width-page.clientWidth),noX:document.documentElement.scrollWidth<=document.documentElement.clientWidth};})()`); } catch {}
+    try { m = await evaluate<{ ratio: number; aspect: number; w: number; top: number; bottom: number; headBottom: number; slipTop: number; pageUp: boolean; fits: number; innerW: number; noX: boolean }>(`(()=>{const s=document.getElementById("sheet").getBoundingClientRect();const head=document.querySelector("header.chrome").getBoundingClientRect();const slip=document.querySelector(".slip").getBoundingClientRect();const page=document.getElementById("pr-page");const inner=document.getElementById("pr-page-inner");return{ratio:s.width/s.height,aspect:Number(page.dataset.aspect),w:s.width,top:s.top,bottom:s.bottom,headBottom:head.bottom,slipTop:slip.top,pageUp:!page.hidden,fits:page.getBoundingClientRect().bottom-inner.getBoundingClientRect().bottom,innerW:Math.abs(inner.getBoundingClientRect().width-page.clientWidth),noX:document.documentElement.scrollWidth<=document.documentElement.clientWidth};})()`); } catch {}
     phonePage = m;
     if (m && m.fits >= -0.5 && m.fits <= 2) break;
     await sleep(50);
@@ -552,15 +560,15 @@ export async function run(ctx) {
   let orderReady = false;
   for (let i = 0; i < 160; i++) {
     let ok = null;
-    try { ok = await evaluate(`(()=>{const g=document.querySelector('[data-poster="grand"]');const f=document.getElementById("pr-format");return !!document.querySelector("#pr-preview svg")&&document.getElementById("pr-status").textContent===""&&!!g&&!g.disabled&&!!f&&!f.disabled;})()`); } catch {}
+    try { ok = await evaluate<boolean>(`(()=>{const g=document.querySelector('[data-poster="grand"]');const f=document.getElementById("pr-format");return !!document.querySelector("#pr-preview svg")&&document.getElementById("pr-status").textContent===""&&!!g&&!g.disabled&&!!f&&!f.disabled;})()`); } catch {}
     if (ok) { orderReady = true; break; }
     await sleep(50);
   }
-  const midPoster = await evaluate(`(()=>{const s=document.getElementById("pr-seed");s.value="777";document.getElementById("pr-draw").click();const plates=[...document.querySelectorAll("[data-poster]")];const f=document.getElementById("pr-format");return{platesDisabled:plates.length>0&&plates.every((b)=>b.disabled),format:f?f.disabled:null,status:document.getElementById("pr-status").textContent};})()`);
+  const midPoster = await evaluate<{ platesDisabled: boolean; format: boolean | null; status: string }>(`(()=>{const s=document.getElementById("pr-seed");s.value="777";document.getElementById("pr-draw").click();const plates=[...document.querySelectorAll("[data-poster]")];const f=document.getElementById("pr-format");return{platesDisabled:plates.length>0&&plates.every((b)=>b.disabled),format:f?f.disabled:null,status:document.getElementById("pr-status").textContent};})()`);
   let orderReenabled = null;
   for (let i = 0; i < 160; i++) {
     let s = null;
-    try { s = await evaluate(`(()=>{const st=window.__vellumPrintRoomState();const g=document.querySelector('[data-poster="grand"]');const f=document.getElementById("pr-format");return{seed:st.seed,status:document.getElementById("pr-status").textContent,plate:g?g.disabled:true,format:f?f.disabled:true};})()`); } catch {}
+    try { s = await evaluate<{ seed: number; status: string; plate: boolean; format: boolean }>(`(()=>{const st=window.__vellumPrintRoomState();const g=document.querySelector('[data-poster="grand"]');const f=document.getElementById("pr-format");return{seed:st.seed,status:document.getElementById("pr-status").textContent,plate:g?g.disabled:true,format:f?f.disabled:true};})()`); } catch {}
     if (s && s.seed === 777 && s.status === "" && s.plate === false && s.format === false) { orderReenabled = s; break; }
     await sleep(50);
   }
@@ -573,17 +581,17 @@ export async function run(ctx) {
   let pr27Ready = false;
   for (let i = 0; i < 160; i++) {
     let ok = null;
-    try { ok = await evaluate(`(()=>{const g=document.querySelector('[data-poster="grand"]');const f=document.getElementById("pr-format");return !!document.querySelector("#pr-preview svg")&&document.getElementById("pr-status").textContent===""&&!!g&&!g.disabled&&!!f&&!f.disabled;})()`); } catch {}
+    try { ok = await evaluate<boolean>(`(()=>{const g=document.querySelector('[data-poster="grand"]');const f=document.getElementById("pr-format");return !!document.querySelector("#pr-preview svg")&&document.getElementById("pr-status").textContent===""&&!!g&&!g.disabled&&!!f&&!f.disabled;})()`); } catch {}
     if (ok) { pr27Ready = true; break; }
     await sleep(50);
   }
-  const pr27Start = await evaluate(`(()=>{document.getElementById("pr-format").value="svg";window.__vellumLastPoster=undefined;document.querySelector('[data-poster="desk"]').click();const s=document.getElementById("pr-seed");s.value="888";document.getElementById("pr-draw").click();const plates=[...document.querySelectorAll("[data-poster]")];return{platesDisabled:plates.every((b)=>b.disabled),status:document.getElementById("pr-status").textContent};})()`);
+  const pr27Start = await evaluate<{ platesDisabled: boolean; status: string }>(`(()=>{document.getElementById("pr-format").value="svg";window.__vellumLastPoster=undefined;document.querySelector('[data-poster="desk"]').click();const s=document.getElementById("pr-seed");s.value="888";document.getElementById("pr-draw").click();const plates=[...document.querySelectorAll("[data-poster]")];return{platesDisabled:plates.every((b)=>b.disabled),status:document.getElementById("pr-status").textContent};})()`);
   let pr27Violated = false;
   let pr27OrderInDraw = false;
   let pr27Settled = null;
   for (let i = 0; i < 400; i++) {
     let s = null;
-    try { s = await evaluate(`(()=>{const st=window.__vellumPrintRoomState();const plates=[...document.querySelectorAll("[data-poster]")];return{seed:st.seed,status:document.getElementById("pr-status").textContent,anyEnabled:plates.some((b)=>!b.disabled),orderDone:!!window.__vellumLastPoster};})()`); } catch {}
+    try { s = await evaluate<{ seed: number; status: string; anyEnabled: boolean; orderDone: boolean }>(`(()=>{const st=window.__vellumPrintRoomState();const plates=[...document.querySelectorAll("[data-poster]")];return{seed:st.seed,status:document.getElementById("pr-status").textContent,anyEnabled:plates.some((b)=>!b.disabled),orderDone:!!window.__vellumLastPoster};})()`); } catch {}
     if (s) {
       const drawing = s.status === "Pulling a proof…";
       if (drawing && s.orderDone) pr27OrderInDraw = true;
@@ -614,7 +622,7 @@ export async function run(ctx) {
     for (let i = 0; i < 220; i++) {
       let s = null;
       try {
-        s = await evaluate(`(()=>{const uw=typeof window.__vellumPrintRoomUsesWorker==="function"?window.__vellumPrintRoomUsesWorker():null;const w=document.getElementById("pr-warning");return{uw,warn:!!(w&&!w.hidden),svg:!!document.querySelector("#pr-preview svg"),status:(document.getElementById("pr-status")||{}).textContent};})()`);
+        s = await evaluate<{ uw: boolean | null; warn: boolean; svg: boolean; status: string | undefined }>(`(()=>{const uw=typeof window.__vellumPrintRoomUsesWorker==="function"?window.__vellumPrintRoomUsesWorker():null;const w=document.getElementById("pr-warning");return{uw,warn:!!(w&&!w.hidden),svg:!!document.querySelector("#pr-preview svg"),status:(document.getElementById("pr-status")||{}).textContent};})()`);
       } catch {}
       if (s && s.uw === false && s.svg && s.status === "") { fb = s; break; }
       await sleep(75);
@@ -631,11 +639,11 @@ export async function run(ctx) {
   let exWarp = false;
   for (let i = 0; i < 200; i++) {
     let ok = null;
-    try { ok = await evaluate(`typeof window.__vellumUsesWorker==="function" && !!document.querySelector("#map svg") && document.getElementById("status").textContent===""`); } catch {}
+    try { ok = await evaluate<boolean>(`typeof window.__vellumUsesWorker==="function" && !!document.querySelector("#map svg") && document.getElementById("status").textContent===""`); } catch {}
     if (ok) { exWarp = true; break; }
     await sleep(75);
   }
-  const warpHref = exWarp ? await evaluate(`(()=>{const a=document.getElementById("order-plates");return a?a.getAttribute("href"):null;})()`) : null;
+  const warpHref = exWarp ? await evaluate<string | null>(`(()=>{const a=document.getElementById("order-plates");return a?a.getAttribute("href"):null;})()`) : null;
   check(
     "PRW Explorer 'Take to the Print Room' href carries the coast warp (coast=90)",
     !!warpHref && /coast=90/.test(warpHref) && /seed=42/.test(warpHref),
@@ -647,7 +655,7 @@ export async function run(ctx) {
   for (let i = 0; i < 200; i++) {
     let s = null;
     try {
-      s = await evaluate(`(()=>{if(typeof window.__vellumPrintRoomState!=="function")return null;const st=window.__vellumPrintRoomState();const svg=document.querySelector("#pr-preview svg");return{seed:st.seed,svg:!!svg,status:(document.getElementById("pr-status")||{}).textContent,hash:location.hash,stamp:svg?svg.getAttribute("data-vellum-coast-warp"):null};})()`);
+      s = await evaluate<{ seed: number; svg: boolean; status: string | undefined; hash: string; stamp: string | null } | null>(`(()=>{if(typeof window.__vellumPrintRoomState!=="function")return null;const st=window.__vellumPrintRoomState();const svg=document.querySelector("#pr-preview svg");return{seed:st.seed,svg:!!svg,status:(document.getElementById("pr-status")||{}).textContent,hash:location.hash,stamp:svg?svg.getAttribute("data-vellum-coast-warp"):null};})()`);
     } catch {}
     if (s && s.svg && s.status === "" && s.seed === 42) { warpProof = s; break; }
     await sleep(50);
