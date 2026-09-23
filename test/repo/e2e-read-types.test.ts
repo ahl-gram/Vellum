@@ -94,25 +94,28 @@ function e2eProgram(extra: ReadonlyMap<string, string> = new Map()): ts.Program 
   return ts.createProgram({ rootNames: [...e2eSourcePaths(REPO), ...extra.keys()], options: config.options, host });
 }
 
-// The three calls a shape can be stated on, found by what they are rather than by line: the context's Evaluate, the harness's own evaluate, and the settle makeSettle returns.
-function knownReaders(program: ts.Program): readonly ts.Node[] {
+function knownDeclarations(program: ts.Program): { readers: readonly ts.Node[]; senders: readonly ts.Node[] } {
   const statements = (file: string): readonly ts.Statement[] => {
     const sf = program.getSourceFile(join(REPO, "scripts", "e2e", file));
     assert.ok(sf, `scripts/e2e/${file} is not in the program`);
     return sf.statements;
   };
-  const evaluateType = statements("types.ts").find((s): s is ts.TypeAliasDeclaration => ts.isTypeAliasDeclaration(s) && s.name.text === "Evaluate")?.type;
-  const harnessEvaluate = statements("harness.ts").find((s): s is ts.FunctionDeclaration => ts.isFunctionDeclaration(s) && s.name?.text === "evaluate");
-  const makeSettleFn = statements("settle-support.ts").find((s): s is ts.FunctionDeclaration => ts.isFunctionDeclaration(s) && s.name?.text === "makeSettle");
-  const settleArrow = makeSettleFn?.body?.statements.find(ts.isReturnStatement)?.expression;
+  const aliased = (file: string, name: string) => statements(file).find((s): s is ts.TypeAliasDeclaration => ts.isTypeAliasDeclaration(s) && s.name.text === name)?.type;
+  const declared = (file: string, name: string) => statements(file).find((s): s is ts.FunctionDeclaration => ts.isFunctionDeclaration(s) && s.name?.text === name);
+  const evaluateType = aliased("types.ts", "Evaluate");
+  const harnessEvaluate = declared("harness.ts", "evaluate");
+  const settleArrow = declared("settle-support.ts", "makeSettle")?.body?.statements.find(ts.isReturnStatement)?.expression;
+  const sendType = aliased("types.ts", "Send");
+  const harnessSend = declared("harness.ts", "send");
   assert.ok(evaluateType && ts.isFunctionTypeNode(evaluateType), "types.ts no longer declares Evaluate as a function type, so this scan knows no context read");
   assert.ok(harnessEvaluate, "harness.ts no longer declares its own evaluate, so this scan knows no harness read");
   assert.ok(settleArrow && ts.isArrowFunction(settleArrow), "makeSettle no longer returns an arrow, so this scan knows no settle");
-  return [evaluateType, harnessEvaluate, settleArrow];
+  assert.ok(sendType && ts.isFunctionTypeNode(sendType) && harnessSend, "types.ts's Send or the harness's send moved, so this scan would read every send as a helper");
+  return { readers: [evaluateType, harnessEvaluate, settleArrow], senders: [sendType, harnessSend] };
 }
 
 const bare = (checker: ts.TypeChecker, t: ts.Type): boolean =>
-  (t.flags & (ts.TypeFlags.Any | ts.TypeFlags.Unknown)) !== 0 ||
+  (t.flags & (ts.TypeFlags.Any | ts.TypeFlags.Unknown | ts.TypeFlags.Never)) !== 0 ||
   ((t.flags & (ts.TypeFlags.Object | ts.TypeFlags.NonPrimitive)) !== 0 && checker.getPropertiesOfType(t).length === 0 && checker.getIndexInfosOfType(t).length === 0 && t.getCallSignatures().length === 0);
 const unshaped = (checker: ts.TypeChecker, t: ts.Type | undefined): boolean =>
   t === undefined || (t.isUnion() ? t.types : [t]).some((m) => bare(checker, m));
@@ -126,22 +129,25 @@ const calleeName = (call: ts.CallExpression): string =>
 
 function shapeScan(program: ts.Program, paths: readonly string[]): { perReader: number[]; findings: string[] } {
   const checker = program.getTypeChecker();
-  const known = knownReaders(program);
-  const perReader = known.map(() => 0);
+  const { readers, senders } = knownDeclarations(program);
+  const tree = new Set([...e2eSourcePaths(REPO), ...paths].map((p) => resolve(p)));
+  const perReader = readers.map(() => 0);
   const findings: string[] = [];
   const judge = (call: ts.CallExpression, where: string): void => {
     const declaration = checker.getResolvedSignature(call)?.getDeclaration();
-    const which = declaration ? known.indexOf(declaration) : -1;
+    const which = declaration ? readers.indexOf(declaration) : -1;
     const name = calleeName(call);
-    if (which === -1 && !READ_NAMES.has(name)) return;
+    const named = READ_NAMES.has(name);
+    const helper = declaration !== undefined && tree.has(resolve(declaration.getSourceFile().fileName)) && name !== "send" && !senders.includes(declaration);
+    if (which === -1 && !named && !helper) return;
     if (which !== -1) perReader[which] += 1;
-    if (which === -1 && (declaration?.typeParameters?.length ?? 0) > 0) {
+    if (which === -1 && named && (declaration?.typeParameters?.length ?? 0) > 0) {
       findings.push(`${where}: ${name} takes a shape through a declaration this scan does not know`);
       return;
     }
     const kept = keptValue(call);
     if (!kept) return;
-    const castAtBoundary = which === -1 && ts.isAsExpression(kept.parent);
+    const castAtBoundary = which === -1 && named && ts.isAsExpression(kept.parent);
     const value = castAtBoundary ? checker.getTypeAtLocation(kept.parent) : checker.getAwaitedType(checker.getTypeAtLocation(call));
     if (unshaped(checker, value)) findings.push(`${where}: ${name || "a read"} keeps ${value ? checker.typeToString(value) : "a type the checker cannot await"}`);
   };
@@ -166,6 +172,9 @@ const SHAPE_FIXTURE = [
   "const ev = evaluate;",
   'const TYPED = "1" as Payload<{ n: number }>;',
   'const PLAIN = "1";',
+  "type Awaits = { then(f: (v: Awaits) => void): void };",
+  "const read = <T>(p: Payload<T>) => evaluate(p);",
+  "const erased = (): Promise<unknown> => evaluate<boolean>(`1`);",
   "export async function reads(): Promise<unknown[]> {",
   "  await evaluate(`x()`);",
   "  void evaluate(`x()`);",
@@ -185,7 +194,13 @@ const SHAPE_FIXTURE = [
   "  const chained = evaluate(`1`).then(() => 1); // flagged",
   "  if (await evaluate(`1`)) return []; // flagged",
   "  const castInstead = await evaluate(`1`) as number; // flagged",
-  "  return [stated, named, nothing, settledStated, kept, plainNamed, anyShape, unknownShape, emptyOrNull, settled, aliased, viaContext, wrapper, chained, castInstead];",
+  "  const statedThrough = await read<number>(`1`);",
+  "  const answer = await ctx.send(`Page.getLayoutMetrics`);",
+  "  const laundered = await read(`1`); // flagged",
+  "  const erasedKept = await erased(); // flagged",
+  "  const nothingAtAll = await evaluate<never>(`1`); // flagged",
+  "  const selfAwaiting = await evaluate<Awaits>(`1`); // flagged",
+  "  return [stated, named, nothing, settledStated, kept, plainNamed, anyShape, unknownShape, emptyOrNull, settled, aliased, viaContext, wrapper, chained, castInstead, statedThrough, answer, laundered, erasedKept, nothingAtAll, selfAwaiting];",
   "}",
   "export async function plainForm(evaluate: (expression: string) => Promise<unknown>): Promise<unknown[]> {",
   "  const cast = await evaluate(`1`) as number;",
@@ -201,21 +216,21 @@ const SHAPE_FIXTURE = [
   "}",
 ];
 
-test("the shape scan passes a read that states its shape or discards its value, and reports every kept read whose shape is unknown, any or empty, whether reached by name, alias, context, wrapper, chain or condition, and a cast in place of a type argument", () => {
+test("the shape scan passes a read that states its shape or discards its value, and reports every kept read whose shape is unknown, any or empty, whether reached by name, alias, context, wrapper, chain or condition, a cast in place of a type argument, a helper that launders or erases the shape, or a shape of never or of a type that awaits itself", () => {
   const path = join(REPO, "scripts", "e2e", "__shape-fixture__.ts");
   assert.equal(existsSync(path), false, "the fixture's name is a real file, so the scan below would read the disk instead");
   const { findings } = shapeScan(e2eProgram(new Map([[path, SHAPE_FIXTURE.join("\n")]])), [path]);
   const flagged = SHAPE_FIXTURE.flatMap((line, i) => (line.endsWith("// flagged") ? [`${relative(REPO, path)}:${i + 1}`] : []));
-  assert.equal(flagged.length, 14);
+  assert.equal(flagged.length, 18);
   assert.deepEqual(findings.map((f) => f.slice(0, f.indexOf(": "))), flagged, findings.join("\n"));
 });
 
-test("every evaluate and settle in the e2e tree whose value is kept states its shape, through a type argument or a typed Payload (Alex's ruling of 2026-09-23 on Issue #653)", () => {
+test("every evaluate and settle in the e2e tree whose value is kept states its shape, through a type argument or a typed Payload, and so does every helper declared in the tree that hands one on (Alex's ruling of 2026-09-23 on Issue #653)", () => {
   const { perReader, findings } = shapeScan(e2eProgram(), e2eSourcePaths(REPO));
   assert.ok(perReader.every((n) => n > 0), `the scan reached the context's Evaluate, the harness's evaluate and the settle ${perReader.join(", ")} times, so one of them is not the declaration the tree calls`);
   assert.deepEqual(
     findings,
     [],
-    "a read that keeps its value states the shape its payload returns, <undefined> for one that returns nothing. BLIND SPOTS, declared: a stated shape is never checked against its payload (the checker cannot read the page's JavaScript), and send is not a read here (the ruling names evaluate and settle), both erring toward passing; a callee that takes no type argument and is not named evaluate or settle is not read at all, erring toward passing, while one so named may state its shape only by a cast at the boundary (settle-support's plain evaluate, whose T its settle's caller states); a value counts as discarded only as a statement or the operand of void, erring toward failing",
+    "a read that keeps its value states the shape its payload returns, <undefined> for one that returns nothing. BLIND SPOTS, declared, all erring toward passing: a stated shape is never checked against its payload (the checker cannot read the page's JavaScript); a shape is judged at its top level only, so a field, element or index typed unknown or any passes; send is not a read (the ruling names evaluate and settle); and a reader handed on as a value (.call, .apply, .bind, or passed to a function declared outside the e2e tree) is not read where it is finally called. Two choices err toward failing: a value counts as discarded only as a statement or the operand of void, and a kept unknown from any helper declared in the tree fails, a send wrapper's included. A callee named evaluate or settle that takes no type argument may state its shape by a cast at the boundary (settle-support's plain evaluate, whose T its settle's caller states)",
   );
 });
