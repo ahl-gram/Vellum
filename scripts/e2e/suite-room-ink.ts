@@ -63,7 +63,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   );
 
   if (sm.ruinIdx >= 0) {
-    // @ts-expect-error the ruin's fall year is null only when the world has no ruin, where ruinIdx is -1 and the branch above never reaches this line; a null here would read as 0 and scrub to year -1
+    // @ts-expect-error the ruin's fall year is null only when the world has no ruin, where ruinIdx is -1 and the branch above never reaches this line; a null here would read as 0, and setYear would clamp the -1 to the year after the earliest
     await setYear(sm.ruinYear - 1);
     const rs21 = await evaluate<Found | { found: true; hasMark: true; ink: string | null; disp: string; name: string; dur: string }>(`(()=>{
       const s=document.querySelector(".rf-range");const ax=window.__vellumAgesState();s.value=String(Number(s.max)/2+(${sm.ruinYear}-ax.min));s.dispatchEvent(new Event("input",{bubbles:true}));
