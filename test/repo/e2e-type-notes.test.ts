@@ -15,27 +15,28 @@ const ASSIGNS = new Set([2322, 2345]);
 const ON_EMPTY_OBJECT = /on type '\{\}'/;
 
 const ARITHMETIC = new Set([2362, 2363]);
+const MATCH_ARRAYS = new Set(["RegExpMatchArray", "RegExpExecArray"]);
 
 type Source = { readonly path: string; readonly text: string };
-type Covered = { readonly column: number; readonly code: number; readonly text: string; readonly stringOperand: boolean };
+type Covered = { readonly column: number; readonly code: number; readonly text: string; readonly matchGroup: boolean };
 type Finding = { readonly at: string; readonly diagnostics: readonly string[] };
 
 const e2eSources = (): Source[] => e2eSourcePaths(REPO).map((path) => ({ path, text: readFileSync(path, "utf8") }));
 
 const nullish = (c: Covered): boolean =>
   NULLISH.has(c.code) || (ASSIGNS.has(c.code) && /\b(null|undefined)\b/.test(c.text)) || (c.code === 2339 && ON_EMPTY_OBJECT.test(c.text));
-const coerced = (covered: readonly Covered[]): boolean => covered.length === 1 && ARITHMETIC.has(covered[0]!.code) && covered[0]!.stringOperand;
+const coerced = (covered: readonly Covered[]): boolean => covered.length === 1 && ARITHMETIC.has(covered[0]!.code) && covered[0]!.matchGroup;
 const offends = (covered: readonly Covered[]): boolean =>
   new Set(covered.map((c) => c.column)).size !== 1 || !(covered.every(nullish) || coerced(covered));
 
-const operandIsString = (checker: ts.TypeChecker, sf: ts.SourceFile, start: number, length: number): boolean => {
+const operandIsMatchGroup = (checker: ts.TypeChecker, sf: ts.SourceFile, start: number, length: number): boolean => {
   let found: ts.Node | undefined;
   const visit = (node: ts.Node): void => {
     if (node.getStart(sf) === start && node.getEnd() === start + length) found = node;
     if (node.getStart(sf) <= start && node.getEnd() >= start + length) ts.forEachChild(node, visit);
   };
   visit(sf);
-  return found !== undefined && (checker.getTypeAtLocation(found).flags & ts.TypeFlags.StringLike) !== 0;
+  return found !== undefined && ts.isElementAccessExpression(found) && MATCH_ARRAYS.has(checker.getTypeAtLocation(found.expression).getSymbol()?.name ?? "") && (checker.getTypeAtLocation(found).flags & ts.TypeFlags.StringLike) !== 0;
 };
 
 function compile(sources: readonly Source[]): ts.Program {
@@ -65,8 +66,8 @@ function noteFindings(sources: readonly Source[]): { notes: number; findings: Fi
     for (const d of [...program.getSyntacticDiagnostics(sf), ...program.getSemanticDiagnostics(sf)]) {
       if (d.start === undefined) continue;
       const { line, character } = sf.getLineAndCharacterOfPosition(d.start);
-      const stringOperand = ARITHMETIC.has(d.code) && operandIsString(program.getTypeChecker(), sf, d.start, d.length ?? 0);
-      byLine.set(line, [...(byLine.get(line) ?? []), { column: character, code: d.code, text: ts.flattenDiagnosticMessageText(d.messageText, " "), stringOperand }]);
+      const matchGroup = ARITHMETIC.has(d.code) && operandIsMatchGroup(program.getTypeChecker(), sf, d.start, d.length ?? 0);
+      byLine.set(line, [...(byLine.get(line) ?? []), { column: character, code: d.code, text: ts.flattenDiagnosticMessageText(d.messageText, " "), matchGroup }]);
     }
     lines.forEach((line, i) => {
       if (!NOTE.test(line)) {
@@ -126,15 +127,19 @@ const NOTE_FIXTURE = [
   "export const sixteen = q.label * 255;",
   "// @ts-expect-error a coerced operand entangled with a second diagnostic at the same start",
   "export const seventeen = takesText(group[1] * 255);",
+  "// @ts-expect-error a match group on the right of the operator, reported as TS2363",
+  "export const eighteen = 255 * group[1];",
+  "// @ts-expect-error a string field of a stated shape multiplied, which is not the match group the arm admits",
+  "export const nineteen = w.label * 255;",
 ];
 
-test("the note scanner passes one null objection per note and reports a second uncertain value, a misspelling beside or in place of the null read, a wrong type that shares its start, a note with nothing under it, and a stray suppression, while a string coerced by arithmetic passes only as the one objection under its note", () => {
+test("the note scanner passes one null objection per note and reports a second uncertain value, a misspelling beside or in place of the null read, a wrong type that shares its start, a note with nothing under it, and a stray suppression, while a regex match group coerced by arithmetic passes only as the one objection under its note, and a string field so coerced reds", () => {
   const path = join(REPO, "scripts", "e2e", "__note-fixture__.ts");
   assert.equal(existsSync(path), false, "the fixture's name is a real file, so the scan below would read the disk instead");
   const text = NOTE_FIXTURE.join("\n");
   const { notes, findings } = noteFindings([{ path, text }]);
-  assert.equal(notes, 16);
-  assert.deepEqual(findings.map((f) => f.at).sort(), [10, 12, 18, 20, 22, 24, 26, 30, 37, 39, 41, 43].map((n) => `${path}:${n}`).sort());
+  assert.equal(notes, 18);
+  assert.deepEqual(findings.map((f) => f.at).sort(), [10, 12, 18, 20, 22, 24, 26, 30, 37, 39, 41, 43, 47].map((n) => `${path}:${n}`).sort());
 });
 
 test("the scan reads every TypeScript file under scripts/e2e at any depth and the e2e scripts beside it, and nothing else", () => {
@@ -154,12 +159,12 @@ test("the scan reads every TypeScript file under scripts/e2e at any depth and th
   }
 });
 
-test("every ruled note in the e2e tree covers one uncertain expression and nothing but its null objection, so a typo or a wrong type beside or in place of the nullable read cannot hide under it (Alex's ruling of 2026-09-23 on Issue #653)", () => {
+test("every ruled note in the e2e tree covers one uncertain expression and nothing but its null objection or a coerced regex match group, so a typo or a wrong type beside or in place of it cannot hide under the note (Alex's ruling of 2026-09-23 on Issue #653)", () => {
   const { notes, findings } = noteFindings(e2eSources());
   assert.ok(notes > 0, "the scan read no note at all, so it is looking at the wrong tree");
   assert.deepEqual(
     findings.map((f) => `${f.at}: ${f.diagnostics.join(" | ")}`),
     [],
-    "a note must cover one uncertain expression and nothing but its null objection, or a string operand arithmetic coerces, alone: break the line so each has its own noted line and the rest of the expression is checked. BLIND SPOTS, declared, all three erring toward passing: a member read off a value typed {} (a caught unknown narrowed by a truthiness guard), where a misspelled member and a real one report alike; and an assignability error whose message names null or undefined anywhere, so a wrong type that also mentions an optional field passes as a null objection; and a value that is a string by mistake, multiplied, which passes as a coerced match group",
+    "a note must cover one uncertain expression and nothing but its null objection, or a regex match group that arithmetic coerces, alone: break the line so each has its own noted line and the rest of the expression is checked. BLIND SPOTS, declared, all three erring toward passing: a member read off a value typed {} (a caught unknown narrowed by a truthiness guard), where a misspelled member and a real one report alike; and an assignability error whose message names null or undefined anywhere, so a wrong type that also mentions an optional field passes as a null objection; and a regex match group under any arithmetic or bitwise operator, on either side or in a compound assignment, which passes whether or not its text is a number",
   );
 });
