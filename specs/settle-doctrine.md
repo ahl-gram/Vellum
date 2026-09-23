@@ -225,7 +225,7 @@ section points there rather than restating it.
   scroll never reaches its own fixture, because the late section it meant to bring up to the reading
   line was on screen the whole time, so it passes having exercised nothing. A suite that depends on
   scrolling sizes its OWN viewport with `Emulation.setDeviceMetricsOverride`, at whatever its
-  fixture needs and with the reason at the line; `scripts/e2e/suite-document-rooms.mjs` and
+  fixture needs and with the reason at the line; `scripts/e2e/suite-document-rooms.ts` and
   `scripts/e2e/suite-reading-room.ts` both do, at different sizes, which is why the rule is size
   your own fixture and not any one figure. It is the raw call rather than `setMobileViewport`
   because that wrapper sets `mobile: true`, which changes layout semantics as well as size. **This

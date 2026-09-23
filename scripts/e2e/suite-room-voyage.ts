@@ -1,8 +1,9 @@
 // Room voyage e2e (RW1-RW13, #320 Sub 3): the W-suite core re-hosted on the Reading Room; W7 and W8 deliberately did not port (the room is always armed, and its counter draw parks at the present, pinned by RR22).
 import { makeRoom, scopedHealth } from "./room-support.ts";
+import type { SuiteContext } from "./types.ts";
 
 // eslint-disable-next-line max-lines-per-function
-export async function run(ctx) {
+export async function run(ctx: SuiteContext): Promise<void> {
   const { evaluate, send, check, shoot, sleep } = ctx;
   const room = makeRoom(ctx);
   const gate = scopedHealth(ctx);
@@ -10,13 +11,13 @@ export async function run(ctx) {
   const booted = await room.goto("#seed=42&style=antique&legend=1");
   check("RW0 the room boots armed and settled", booted);
 
-  const vm = await evaluate(`(()=>{
+  const vm = await evaluate<{ capitalIdx: number; count: number }>(`(()=>{
     const r=window.__vellumRunInline({kind:"draw",seed:42,overrides:{},render:{style:"antique",widthPx:1500,legend:true}});
     const capital=r.manifest.places.find((p)=>p.kind==="capital");
     return {capitalIdx:capital?capital.idx:-1,count:r.manifest.places.length};
   })()`);
 
-  const rw1 = await evaluate(`(()=>{
+  const rw1 = await evaluate<{ hasOverlay: boolean; ports: number; firstIdx: number; chamber: string; year: number | null; max: number; annals: number; annalsInked: number }>(`(()=>{
     const ov=document.querySelector(".rf-chart .voyage-overlay");
     const plan=window.__vellumVoyagePlan();
     const a=window.__vellumAgesState();
@@ -33,7 +34,7 @@ export async function run(ctx) {
     JSON.stringify(rw1) + ` capital=${vm.capitalIdx}`,
   );
 
-  const rw2 = await evaluate(`(()=>{
+  const rw2 = await evaluate<{ heads: number; headAfterPrologue: boolean; strict: boolean; firstDays: string[]; proDc: boolean; annDc: boolean }>(`(()=>{
     const lis=[...document.querySelectorAll(".rf-log-strip li")];
     const heads=lis.filter((li)=>li.classList.contains("annals-head"));
     const headIdx=lis.indexOf(heads[0]);
@@ -51,7 +52,7 @@ export async function run(ctx) {
     JSON.stringify(rw2),
   );
 
-  const rw3 = await evaluate(`(()=>{
+  const rw3 = await evaluate<{ chamber: string; t: number | null; readout: string; overlayVisible: boolean; annalsInked: number }>(`(()=>{
     const s=document.querySelector(".rf-range");
     s.value=String(Number(s.max)/2);
     s.dispatchEvent(new Event("input",{bubbles:true}));
@@ -69,7 +70,7 @@ export async function run(ctx) {
     JSON.stringify(rw3),
   );
 
-  const plan = await evaluate(`(()=>{const p=window.__vellumVoyagePlan();return{ports:p.ports.map((x)=>({idx:x.idx,logLine:x.logLine})),legs:p.legs.length};})()`);
+  const plan = await evaluate<{ ports: { idx: number; logLine: string }[]; legs: number }>(`(()=>{const p=window.__vellumVoyagePlan();return{ports:p.ports.map((x)=>({idx:x.idx,logLine:x.logLine})),legs:p.legs.length};})()`);
   // #275: legs === ports and the LAST leg is the one home, so legs-1 lands on the final distinct port and stepping to legs itself is the homecoming (t=1).
   const lastPort = plan.legs - 1;
   const homeStep = plan.legs;
@@ -78,8 +79,8 @@ export async function run(ctx) {
 
   // #120: the mark is a ship on sea legs and a rider on road legs; reading .voyage-ship unconditionally throws on the ~94% of legs that ride.
   const markFn = `const mark=()=>{const s=document.querySelector(".rf-chart .voyage-ship");const r=document.querySelector(".rf-chart .voyage-rider");return (s&&s.getAttribute("display")!=="none")?s:r;};`;
-  const stepTo = (n) =>
-    evaluate(`(()=>{${markFn}window.__vellumVoyageStepTo(${n});const m=mark();const t=m?m.getAttribute("transform"):"";const glyph=m?m.getAttribute("class"):"";const raw=document.querySelector(".voyage-track").getAttribute("points").trim().split(" ");const log=window.__vellumVoyageLog();return{status:document.querySelector(".rf-status").textContent,tf:t,glyph,pts:raw.length,first:raw[0],last:raw[raw.length-1],logged:log?log.logged:-1,rows:log?log.rows:-1,visible:!!(log&&log.visible),lastText:log&&log.logged>0?log.entries[log.logged-1].text:""};})()`);
+  const stepTo = (n: number) =>
+    evaluate<{ status: string; tf: string | null; glyph: string | null; pts: number; first: string; last: string; logged: number; rows: number; visible: boolean; lastText: string }>(`(()=>{${markFn}window.__vellumVoyageStepTo(${n});const m=mark();const t=m?m.getAttribute("transform"):"";const glyph=m?m.getAttribute("class"):"";const raw=document.querySelector(".voyage-track").getAttribute("points").trim().split(" ");const log=window.__vellumVoyageLog();return{status:document.querySelector(".rf-status").textContent,tf:t,glyph,pts:raw.length,first:raw[0],last:raw[raw.length-1],logged:log?log.logged:-1,rows:log?log.rows:-1,visible:!!(log&&log.visible),lastText:log&&log.logged>0?log.entries[log.logged-1].text:""};})()`);
 
   const s0 = await stepTo(0);
   check(
@@ -120,7 +121,7 @@ export async function run(ctx) {
   );
   await shoot("reading-room-voyage.png");
 
-  const rw9 = await evaluate(`(()=>{
+  const rw9 = await evaluate<{ chart: boolean; trackInChart: boolean; trackInOverlay: boolean }>(`(()=>{
     const chart=document.querySelector(".rf-chart svg:not(.voyage-overlay)");
     const overlay=document.querySelector(".rf-chart .voyage-overlay");
     return{chart:!!chart,trackInChart:chart?!!chart.querySelector(".voyage-track"):false,
@@ -129,8 +130,8 @@ export async function run(ctx) {
   check("RW9 the track is a sibling overlay, never inside the baked chart", rw9.chart && !rw9.trackInChart && rw9.trackInOverlay, JSON.stringify(rw9));
 
   const glyphCount = `const shown=[...document.querySelectorAll(".rf-chart #layer-settlements g.settlement")].filter((g)=>g.style.display!=="none").length;`;
-  const presentShown = await evaluate(`(()=>{${glyphCount}return shown;})()`);
-  const rw10 = await evaluate(`(()=>{
+  const presentShown = await evaluate<number>(`(()=>{${glyphCount}return shown;})()`);
+  const rw10 = await evaluate<{ chamber: string; year: number | null; min: number; readout: string; overlayHidden: boolean; shown: number; panelShown: boolean }>(`(()=>{
     const s=document.querySelector(".rf-range");
     s.value=String(Number(s.max)/2);
     s.dispatchEvent(new Event("input",{bubbles:true}));
@@ -151,7 +152,7 @@ export async function run(ctx) {
     JSON.stringify(rw10) + ` present=${presentShown}`,
   );
 
-  const rw11 = await evaluate(`(()=>{
+  const rw11 = await evaluate<{ chamber: string; t: number | null; readout: string; overlayVisible: boolean; shown: number }>(`(()=>{
     const s=document.querySelector(".rf-range");
     s.value=String(Number(s.max)/2);
     s.dispatchEvent(new Event("input",{bubbles:true}));
@@ -170,16 +171,16 @@ export async function run(ctx) {
 
   // The moves carry button:"left" DELIBERATELY: Chromium's native slider drag ignores a move whose button is "none", so the thumb would never follow and the detent would have nothing to hold.
   await evaluate(`(()=>{document.querySelector(".rf-range").scrollIntoView({block:"center"});})()`);
-  const bar = await evaluate(`(()=>{const s=document.querySelector(".rf-range");const r=s.getBoundingClientRect();return{x:r.x,y:r.y,w:r.width,h:r.height};})()`);
+  const bar = await evaluate<{ x: number; y: number; w: number; h: number }>(`(()=>{const s=document.querySelector(".rf-range");const r=s.getBoundingClientRect();return{x:r.x,y:r.y,w:r.width,h:r.height};})()`);
   const TH = 16; // the .ages-range thumb width (living-chart.css)
-  const xAt = (u) => Math.round(bar.x + TH / 2 + u * (bar.w - TH));
+  const xAt = (u: number) => Math.round(bar.x + TH / 2 + u * (bar.w - TH));
   const yMid = Math.round(bar.y + bar.h / 2);
   await send("Input.dispatchMouseEvent", { type: "mousePressed", x: xAt(0.4), y: yMid, button: "left", buttons: 1, clickCount: 1 });
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: xAt(0.52), y: yMid, button: "left", buttons: 1 });
-  const held = await evaluate(`(()=>{const a=window.__vellumAgesState();return{u:a.u,held:a.held,chamber:a.chamber,readout:document.querySelector(".rf-year").textContent};})()`);
+  const held = await evaluate<{ u: number; held: boolean; chamber: string; readout: string }>(`(()=>{const a=window.__vellumAgesState();return{u:a.u,held:a.held,chamber:a.chamber,readout:document.querySelector(".rf-year").textContent};})()`);
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: xAt(0.6), y: yMid, button: "left", buttons: 1 });
   await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: xAt(0.6), y: yMid, button: "left", buttons: 0, clickCount: 1 });
-  const escaped = await evaluate(`(()=>{const a=window.__vellumAgesState();return{u:a.u,held:a.held,chamber:a.chamber};})()`);
+  const escaped = await evaluate<{ u: number; held: boolean; chamber: string }>(`(()=>{const a=window.__vellumAgesState();return{u:a.u,held:a.held,chamber:a.chamber};})()`);
   check(
     "RW12 the hard detent: a drag holds at the seam inside the band and releases past it",
     held.held === true && held.u === 0.5 && held.chamber === "survey" && held.readout === "the survey" &&
@@ -195,7 +196,7 @@ export async function run(ctx) {
   })()`);
   let sawSurveyPlaying = false, crossed = null;
   for (let i = 0; i < 60; i++) {
-    const st = await evaluate(`(()=>{const a=window.__vellumAgesState();return{chamber:a.chamber,playing:a.playing,lbl:document.querySelector(".rf-play").textContent};})()`);
+    const st = await evaluate<{ chamber: string; playing: boolean; lbl: string }>(`(()=>{const a=window.__vellumAgesState();return{chamber:a.chamber,playing:a.playing,lbl:document.querySelector(".rf-play").textContent};})()`);
     if (st.chamber === "survey" && st.playing) sawSurveyPlaying = true;
     if (st.chamber === "ages") { crossed = st; break; }
     await sleep(100);

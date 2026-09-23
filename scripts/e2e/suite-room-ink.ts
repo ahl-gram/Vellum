@@ -1,8 +1,11 @@
-// Room ink-in e2e (RS18-RS22, #320 Sub 3, porting S20-S26); split from suite-room-instrument.mjs to stay inside the 400-line file rule: that suite carries the reveal and the clock, this one the ceremony and the press.
+// Room ink-in e2e (RS18-RS22, #320 Sub 3, porting S20-S26); split from suite-room-instrument.ts to stay inside the 400-line file rule: that suite carries the reveal and the clock, this one the ceremony and the press.
 import { makeRoom, makeBar, scrubFacts, scopedHealth, CHART_SVG } from "./room-support.ts";
+import type { SuiteContext } from "./types.ts";
+
+type Found = { found: false } | { found: true; hasMark: false };
 
 // eslint-disable-next-line max-lines-per-function
-export async function run(ctx) {
+export async function run(ctx: SuiteContext): Promise<void> {
   const { evaluate, check } = ctx;
   const room = makeRoom(ctx);
   const { setYear } = makeBar(ctx);
@@ -12,14 +15,14 @@ export async function run(ctx) {
   const sm = await scrubFacts(evaluate, 42);
 
   await setYear(sm.present);
-  const inkedCount = () => evaluate(`document.querySelectorAll('.rf-chart #layer-settlements g.settlement[data-ink]').length`);
+  const inkedCount = () => evaluate<number>(`document.querySelectorAll('.rf-chart #layer-settlements g.settlement[data-ink]').length`);
 
   const rs18 = await inkedCount();
   check("RS18 the park is silent: every glyph is up and none carries an ink grade (#155)", rs18 === 0, `${rs18} groups inked at the park`);
 
   if (sm.lateIdx >= 0) {
     await setYear(sm.lateFounded - 1);
-    const rs19 = await evaluate(`(()=>{
+    const rs19 = await evaluate<Found | { found: true; hasMark: true; ink: string | null; disp: string; name: string; dur: string; box: string; wantX: number; wantY: number; gotX: number; gotY: number; others: number }>(`(()=>{
       const s=document.querySelector(".rf-range");const ax=window.__vellumAgesState();s.value=String(Number(s.max)/2+(${sm.lateFounded}-ax.min));s.dispatchEvent(new Event("input",{bubbles:true}));
       const g=document.querySelector('.rf-chart #layer-settlements g.settlement[data-idx="${sm.lateIdx}"]');
       if(!g)return{found:false};
@@ -45,7 +48,7 @@ export async function run(ctx) {
   }
 
   await setYear(sm.minFounded);
-  const rs20 = await evaluate(`(()=>{
+  const rs20 = await evaluate<{ inked: number; labelled: false } | { inked: number; labelled: true; name: string; dur: string; delay: string }>(`(()=>{
     const s=document.querySelector(".rf-range");const ax=window.__vellumAgesState();s.value=String(Number(s.max)/2+(${sm.present}-ax.min));s.dispatchEvent(new Event("input",{bubbles:true}));
     const inked=[...document.querySelectorAll('.rf-chart #layer-settlements g.settlement[data-ink]')];
     const withLabel=inked.find((g)=>g.querySelector(":scope > text"));
@@ -60,8 +63,9 @@ export async function run(ctx) {
   );
 
   if (sm.ruinIdx >= 0) {
+    // @ts-expect-error the ruin's fall year is null only when the world has no ruin, where ruinIdx is -1 and the branch above never reaches this line; a null here would read as 0 and scrub to year -1
     await setYear(sm.ruinYear - 1);
-    const rs21 = await evaluate(`(()=>{
+    const rs21 = await evaluate<Found | { found: true; hasMark: true; ink: string | null; disp: string; name: string; dur: string }>(`(()=>{
       const s=document.querySelector(".rf-range");const ax=window.__vellumAgesState();s.value=String(Number(s.max)/2+(${sm.ruinYear}-ax.min));s.dispatchEvent(new Event("input",{bubbles:true}));
       const g=document.querySelector('.rf-chart #layer-settlements g.settlement[data-idx="${sm.ruinIdx}"]');
       if(!g)return{found:false};
@@ -83,7 +87,7 @@ export async function run(ctx) {
 
   // Ground truth via the chart's own getScreenCTM, never a .place-hit box (the overlay is sized to the mount while the chart renders a few px wider, and the press would scale that ~1.2px offset into a phantom error); the sub-pixel tolerance is deliberate, the defect this guards is 1.03px at k=1.
   await setYear(sm.minFounded);
-  const rs22 = await evaluate(`(()=>{
+  const rs22 = await evaluate<{ groups: number; measured: number; castles: number; worst: number; worstAt: string }>(`(()=>{
     const s=document.querySelector(".rf-range");const ax=window.__vellumAgesState();s.value=String(Number(s.max)/2+(${sm.present}-ax.min));s.dispatchEvent(new Event("input",{bubbles:true}));
     const man=window.__vellumRunInline({kind:"draw",seed:42,overrides:{},render:{style:"antique",widthPx:1500,legend:true}}).manifest;
     const pt=new Map(man.places.map((p)=>[String(p.idx),p]));

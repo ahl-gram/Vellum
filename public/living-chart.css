@@ -94,7 +94,7 @@
   font-style: italic; color: var(--ink-tale); }
 
 .place-overlay.scrub .place-hit { pointer-events: none; cursor: default; }
-/* Animations ride the children, never the group, whose box spans halo, glyph and label; the origin is per-element data written inline by `applyScrub` in `src/site/living-chart/chronicle.ts` because a profile glyph stands on its point while a plan glyph centres on it (`RS22` in `scripts/e2e/suite-room-ink.mjs` reads the town point staying fixed). */
+/* Animations ride the children, never the group, whose box spans halo, glyph and label; the origin is per-element data written inline by `applyScrub` in `src/site/living-chart/chronicle.ts` because a profile glyph stands on its point while a plan glyph centres on it (`RS22` in `scripts/e2e/suite-room-ink.ts` reads the town point staying fixed). */
 .living-chart g.settlement[data-ink="founding"] > :not(text) {
   animation: inkStamp var(--paper) var(--ease-paper) both;
 }

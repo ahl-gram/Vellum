@@ -61,8 +61,8 @@ test("the 24 Mpx budget clears every poster at x1 and clamps exactly Wall and Gr
 });
 
 test("the e2e RV4 tilt ceiling tracks MAX_TILT", () => {
-  const m = src("scripts/e2e/suite-room-voyage-route.mjs").match(/maxTilt <= ([\d.]+)/);
-  assert.ok(m, "RV4 ceiling not found in suite-room-voyage-route.mjs");
+  const m = src("scripts/e2e/suite-room-voyage-route.ts").match(/maxTilt <= ([\d.]+)/);
+  assert.ok(m, "RV4 ceiling not found in suite-room-voyage-route.ts");
   const ceiling = Number(m[1]);
   assert.ok(ceiling > MAX_TILT && ceiling - MAX_TILT < 0.001, `ceiling ${ceiling}, MAX_TILT ${MAX_TILT}`);
 });

@@ -4,9 +4,10 @@ import { makeRoom } from "./room-support.ts";
 import { dropExpectedCancellations } from "./console-support.ts";
 
 import { makeStep } from "./step-support.ts";
+import type { SuiteContext } from "./types.ts";
 
 // eslint-disable-next-line max-lines-per-function
-export async function run(ctx) {
+export async function run(ctx: SuiteContext): Promise<void> {
   const { evaluate, send, check, shoot, sleep, waitSettled, waitReady, waitTurned, armTurnWatch, consoleErrors, http4xx, PORT } = ctx;
 
   const EXP = `http://127.0.0.1:${PORT}/explorer/`;
@@ -17,16 +18,16 @@ export async function run(ctx) {
   const step = makeStep(ctx);
 
   // A navigate differing only in the hash is same-document and never re-runs the boot, so bounce through about:blank first (the suite-zoom Z13 idiom).
-  const goto = async (hash, label) => {
+  const goto = async (hash: string, label: string) => {
     await send("Page.navigate", { url: "about:blank" });
     await send("Page.navigate", { url: EXP + hash });
     await waitReady();
     await waitSettled(label);
   };
 
-  const waitInked = async (label) => {
+  const waitInked = async (label: string) => {
     for (let i = 0; i < 120; i++) {
-      const n = await evaluate(`(()=>{const t=document.querySelector("#map .voyage-overlay .voyage-track");
+      const n = await evaluate<number>(`(()=>{const t=document.querySelector("#map .voyage-overlay .voyage-track");
         return t?(t.getAttribute("points")||"").trim().split(/\\s+/).length:0;})()`);
       if (n > 10) return n;
       await sleep(50);
@@ -35,18 +36,18 @@ export async function run(ctx) {
   };
 
   // A marker registered on the same rAF-then-task hop the arm uses queues behind it, so absence checks need no sleep a slow CI runner could outlast.
-  const waitBeat = async (label) => {
+  const waitBeat = async (label: string) => {
     for (let i = 0; i < 200; i++) {
-      if (await evaluate(`window.__beat === true`)) return;
+      if (await evaluate<boolean>(`window.__beat === true`)) return;
       await sleep(25);
     }
     throw new Error("waitBeat timeout " + label);
   };
 
-  const setBox = (on) => evaluate(`(()=>{const c=document.getElementById("ages");
+  const setBox = (on: boolean) => evaluate<undefined>(`(()=>{const c=document.getElementById("ages");
     c.checked=${on};c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
 
-  const tick = (on, into) => evaluate(`(()=>{
+  const tick = (on: boolean, into: string) => evaluate<{ checked: boolean; handlerMs: number; inked: boolean; overlays: number; hash: string; status: string; href: string | null }>(`(()=>{
     const c=document.getElementById("ages");window.${into}=null;const t0=performance.now();
     c.checked=${on};c.dispatchEvent(new Event("change",{bubbles:true}));
     const handlerMs=performance.now()-t0;
@@ -59,7 +60,7 @@ export async function run(ctx) {
 
   await step("SV1", async () => {
     await goto("#seed=42&style=antique", "survey-base");
-    const sv1 = await evaluate(`(()=>{
+    const sv1 = await evaluate<{ gone: boolean; checked: boolean; track: boolean; journalShown: boolean; journalHref: string | null; hash: string; label: string; status: string }>(`(()=>{
       const ids=["scrubber","scrub-play","scrub-range","scrub-year","scrub-sig","chronicle-strip","journal-line"];
       const j=document.getElementById("journal-link");
       return{gone:ids.every((id)=>!document.getElementById(id)),
@@ -88,8 +89,8 @@ export async function run(ctx) {
     const sv2 = await tick(true, "__armMs");
     const sv2Vertices = await waitInked("survey-first-arm");
     const firstInkMs = Date.now() - inkT0;
-    const sv2q = await evaluate(`(()=>{window.__gapStop=true;return{gap:window.__gap};})()`);
-    const sv2After = await evaluate(`({status:document.getElementById("status").textContent,
+    const sv2q = await evaluate<{ gap: number }>(`(()=>{window.__gapStop=true;return{gap:window.__gap};})()`);
+    const sv2After = await evaluate<{ status: string; hash: string; overlays: number; href: string | null; ms: number | null }>(`({status:document.getElementById("status").textContent,
       hash:location.hash,overlays:document.querySelectorAll("#map .voyage-overlay").length,
       href:document.getElementById("journal-link").getAttribute("href"),ms:window.__armMs})`);
     check(
@@ -110,13 +111,13 @@ export async function run(ctx) {
     await shoot("explorer-survey-inked.png");
 
     // Same document, same draw: a byte compare of the points strings is legitimate here (never across environments).
-    const p0 = await evaluate(`document.querySelector("#map .voyage-overlay .voyage-track").getAttribute("points")`);
+    const p0 = await evaluate<string | null>(`document.querySelector("#map .voyage-overlay .voyage-track").getAttribute("points")`);
     await sleep(400);
-    const sv2b = await evaluate(`(()=>{
+    const sv2b = await evaluate<{ anims: number }>(`(()=>{
       const ov=document.querySelector("#map .voyage-overlay");
       return{anims:ov&&ov.getAnimations?ov.getAnimations({subtree:true}).length:-1};
     })()`);
-    const p1 = await evaluate(`document.querySelector("#map .voyage-overlay .voyage-track").getAttribute("points")`);
+    const p1 = await evaluate<string | null>(`document.querySelector("#map .voyage-overlay .voyage-track").getAttribute("points")`);
     check(
       "SV2b the inked track is a rest: geometry frozen over 400ms, no animation runs on the overlay",
       p0 === p1 && sv2b.anims === 0,
@@ -129,7 +130,7 @@ export async function run(ctx) {
     await tick(true, "__armMs2");
     await waitInked("survey-rearm");
     const reInkMs = Date.now() - reInkT0;
-    const sv2c = await evaluate(`({first:window.__armMs,again:window.__armMs2})`);
+    const sv2c = await evaluate<{ first: number | null; again: number | null }>(`({first:window.__armMs,again:window.__armMs2})`);
     check(
       "SV2c re-arming the same world is effectively instant: the travel matrix cache still holds (#300/#373)",
       reInkMs < firstInkMs / 2,
@@ -144,7 +145,7 @@ export async function run(ctx) {
       c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));
       requestAnimationFrame(()=>setTimeout(()=>{window.__beat=true;},0));})()`);
     await waitBeat("survey-cancelled-beat");
-    const sv2dOff = await evaluate(`({overlays:document.querySelectorAll("#map .voyage-overlay").length,
+    const sv2dOff = await evaluate<{ overlays: number; checked: boolean; hash: string; status: string }>(`({overlays:document.querySelectorAll("#map .voyage-overlay").length,
       checked:document.getElementById("ages").checked,hash:location.hash,
       status:document.getElementById("status").textContent})`);
     await evaluate(`(()=>{const c=document.getElementById("ages");
@@ -153,7 +154,7 @@ export async function run(ctx) {
       c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
     await waitInked("survey-retick");
     await sleep(300); // let any superseded arm that was going to fire, fire
-    const sv2dOn = await evaluate(`({overlays:document.querySelectorAll("#map .voyage-overlay").length,
+    const sv2dOn = await evaluate<{ overlays: number; checked: boolean; hash: string; status: string }>(`({overlays:document.querySelectorAll("#map .voyage-overlay").length,
       checked:document.getElementById("ages").checked,hash:location.hash,
       status:document.getElementById("status").textContent})`);
     check(
@@ -176,7 +177,7 @@ export async function run(ctx) {
     await waitInked("survey-inflight-ink");
     await evaluate(`(()=>{window.__beat=false;requestAnimationFrame(()=>setTimeout(()=>{window.__beat=true;},0));})()`);
     await waitBeat("survey-inflight-beat");
-    const sv2e = await evaluate(`({overlays:document.querySelectorAll("#map .voyage-overlay").length,
+    const sv2e = await evaluate<{ overlays: number; checked: boolean; hash: string; status: string; vertices: number }>(`({overlays:document.querySelectorAll("#map .voyage-overlay").length,
       checked:document.getElementById("ages").checked,hash:location.hash,
       status:document.getElementById("status").textContent,
       vertices:(()=>{const t=document.querySelector("#map .voyage-overlay .voyage-track");
@@ -189,7 +190,7 @@ export async function run(ctx) {
     );
   });
   await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
-  const sv2f = await evaluate(`({overlays:document.querySelectorAll("#map .voyage-overlay").length,
+  const sv2f = await evaluate<{ overlays: number; hash: string; status: string }>(`({overlays:document.querySelectorAll("#map .voyage-overlay").length,
     hash:location.hash,status:document.getElementById("status").textContent})`);
   check(
     "SV2f unticking after that leaves the sheet truly bare, no stranded track (#300)",
@@ -201,7 +202,7 @@ export async function run(ctx) {
     await goto("#seed=42&style=antique", "survey-double-arm-base");
     await setBox(true);
     const firstArm = await waitInked("survey-double-arm-first");
-    const before = await evaluate(`(()=>{const m=document.getElementById("map");
+    const before = await evaluate<number>(`(()=>{const m=document.getElementById("map");
       const d=document.createElementNS("http://www.w3.org/2000/svg","svg");
       d.setAttribute("class","voyage-overlay");d.setAttribute("aria-hidden","true");
       m.appendChild(d);
@@ -212,7 +213,7 @@ export async function run(ctx) {
       c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));
       requestAnimationFrame(()=>setTimeout(()=>{window.__beat=true;},0));})()`);
     await waitBeat("survey-double-arm-beat");
-    const sv2g = await evaluate(`({overlays:document.querySelectorAll("#map .voyage-overlay").length,
+    const sv2g = await evaluate<{ overlays: number; tracks: number; stale: number; checked: boolean; hash: string; status: string; vertices: number }>(`({overlays:document.querySelectorAll("#map .voyage-overlay").length,
       tracks:document.querySelectorAll("#map .voyage-overlay .voyage-track").length,
       stale:document.querySelectorAll("#map .voyage-overlay[data-before-arm]").length,
       checked:document.getElementById("ages").checked,hash:location.hash,
@@ -235,9 +236,9 @@ export async function run(ctx) {
       const d=document.createElementNS("http://www.w3.org/2000/svg","svg");
       d.setAttribute("class","voyage-overlay");d.setAttribute("aria-hidden","true");
       m.appendChild(d);})()`);
-    const planted = await evaluate(`document.querySelectorAll("#map .voyage-overlay").length`);
+    const planted = await evaluate<number>(`document.querySelectorAll("#map .voyage-overlay").length`);
     await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
-    const sv2h = await evaluate(`({overlays:document.querySelectorAll("#map .voyage-overlay").length,
+    const sv2h = await evaluate<{ overlays: number; hash: string; status: string }>(`({overlays:document.querySelectorAll("#map .voyage-overlay").length,
       hash:location.hash,status:document.getElementById("status").textContent})`);
     check(
       "SV2h unticking a sheet that holds two overlays clears EVERY one, not just the first (#364)",
@@ -262,7 +263,7 @@ export async function run(ctx) {
     await waitInked("survey-settle-owns-arm-ink");
     await evaluate(`(()=>{window.__beat=false;requestAnimationFrame(()=>setTimeout(()=>{window.__beat=true;},0));})()`);
     await waitBeat("survey-settle-owns-arm-beat");
-    const sv2i = await evaluate(`(()=>{const ov=document.querySelector("#map .voyage-overlay");
+    const sv2i = await evaluate<{ builds: number; seq: string | null; overlays: number; checked: boolean; hash: string; status: string; vertices: number }>(`(()=>{const ov=document.querySelector("#map .voyage-overlay");
       const r={builds:window.__armSeq,seq:ov?ov.getAttribute("data-arm-seq"):null,
         overlays:document.querySelectorAll("#map .voyage-overlay").length,
         checked:document.getElementById("ages").checked,hash:location.hash,
@@ -307,7 +308,7 @@ export async function run(ctx) {
     await waitTurned("survey-turn-owns-arm-turn");
     await evaluate(`(()=>{window.__beat=false;requestAnimationFrame(()=>setTimeout(()=>{window.__beat=true;},0));})()`);
     await waitBeat("survey-turn-owns-arm-beat");
-    const sv2j = await evaluate(`(()=>{const ov=document.querySelector("#map .voyage-overlay");
+    const sv2j = await evaluate<{ builds: number; seq: string | null; ticked: boolean; turned: boolean; overlays: number; style: string | null; checked: boolean; hash: string; status: string; vertices: number }>(`(()=>{const ov=document.querySelector("#map .voyage-overlay");
       const chart=document.querySelector("#map svg:not(.voyage-overlay)");
       const r={builds:window.__armSeq,seq:ov?ov.getAttribute("data-arm-seq"):null,
         ticked:window.__tickedAtLanding,turned:window.__turned,
@@ -350,7 +351,7 @@ export async function run(ctx) {
     await evaluate(`(()=>{document.getElementById("seed").value="42";document.getElementById("draw").click();})()`);
     await waitSettled("survey-draw-beat-settle");
     await waitInked("survey-draw-beat-ink");
-    const sv2p = await evaluate(`(()=>{window.__mo.disconnect();cancelAnimationFrame(window.__land.raf);
+    const sv2p = await evaluate<{ batches: { chart: boolean; overlay: boolean; frames: number; verso: boolean }[]; chartBatch: number; inkBatch: number; chartAlone: boolean; dashSteps: number; dashSeen: number; frames: number; gap: number; framesBetween: number; versoAtSwap: boolean | null; facesAgree: boolean; overlays: number; vertices: number; status: string; hash: string }>(`(()=>{window.__mo.disconnect();cancelAnimationFrame(window.__land.raf);
       const b=window.__land.batches;const c=b.findIndex((x)=>x.chart);const i=b.findIndex((x)=>x.overlay);
       const recto=document.querySelector("#map .voyage-overlay .voyage-track");
       const back=document.querySelector("#verso .verso-track");
@@ -387,7 +388,7 @@ export async function run(ctx) {
 
     await goto("#seed=7&style=antique&survey", "survey-dropped-arm-base");
     await waitInked("survey-dropped-arm-base-ink");
-    const trackA = await evaluate(`document.querySelector("#map .voyage-overlay .voyage-track").getAttribute("points")`);
+    const trackA = await evaluate<string | null>(`document.querySelector("#map .voyage-overlay .voyage-track").getAttribute("points")`);
     await evaluate(`(()=>{window.__fired=false;
       window.__mo2=new MutationObserver((recs)=>{if(window.__fired)return;let chart=false;
         for(const r of recs)for(const n of r.addedNodes){if(n.nodeType!==1)continue;
@@ -398,17 +399,17 @@ export async function run(ctx) {
     await evaluate(`(()=>{document.getElementById("seed").value="42";document.getElementById("draw").click();})()`);
     let turningSeen = false;
     for (let i = 0; i < 300; i++) {
-      if (await evaluate(`!!document.querySelector(".sheet.turning")`)) { turningSeen = true; break; }
+      if (await evaluate<boolean>(`!!document.querySelector(".sheet.turning")`)) { turningSeen = true; break; }
       await sleep(20);
     }
-    const sv2m = await evaluate(`(()=>{window.__mo2.disconnect();
+    const sv2m = await evaluate<{ fired: boolean; turning: boolean; versoPoints: string | null; status: string }>(`(()=>{window.__mo2.disconnect();
       const back=document.querySelector("#verso .verso-track");
       return{fired:window.__fired,turning:!!document.querySelector(".sheet.turning"),
         versoPoints:back?back.getAttribute("points"):"",
         status:document.getElementById("status").textContent};})()`);
     await waitTurned("survey-dropped-arm-turn");
     await waitInked("survey-dropped-arm-ink");
-    const sv2mAfter = await evaluate(`(()=>{
+    const sv2mAfter = await evaluate<{ overlays: number; facesAgree: boolean; style: string | null; status: string }>(`(()=>{
       const recto=document.querySelector("#map .voyage-overlay .voyage-track");
       const back=document.querySelector("#verso .verso-track");
       return{overlays:document.querySelectorAll("#map .voyage-overlay").length,
@@ -430,7 +431,7 @@ export async function run(ctx) {
     await waitInked("survey-flipped-base-ink");
     await evaluate(`document.getElementById("verso-turn").click()`);
     await sleep(1500); // the ceremonial flip transition (--verso-turn 1200ms)
-    const flippedTrackA = await evaluate(`(()=>{const b=document.querySelector("#verso .verso-track");
+    const flippedTrackA = await evaluate<string | null>(`(()=>{const b=document.querySelector("#verso .verso-track");
       return b?b.getAttribute("points"):"";})()`);
     await evaluate(`(()=>{window.__flip={batches:[]};
       window.__mo3=new MutationObserver((recs)=>{let chart=false;
@@ -446,7 +447,7 @@ export async function run(ctx) {
     await evaluate(`(()=>{document.getElementById("seed").value="42";document.getElementById("draw").click();})()`);
     await waitSettled("survey-flipped-settle");
     await waitInked("survey-flipped-ink");
-    const sv2o = await evaluate(`(()=>{window.__mo3.disconnect();
+    const sv2o = await evaluate<{ atSwap: { back: string | null; recto: string | null; versoed: boolean } | null; batches: number; settledAgree: boolean; versoed: boolean; status: string }>(`(()=>{window.__mo3.disconnect();
       const b=window.__flip.batches[0]||null;
       const back=document.querySelector("#verso .verso-track");
       const recto=document.querySelector("#map .voyage-overlay .voyage-track");
@@ -470,7 +471,7 @@ export async function run(ctx) {
 
     await goto("#seed=42&style=antique&survey", "survey-restore-for-sv3");
     await waitInked("survey-sv3-ink");
-    const sv3 = await evaluate(`(()=>{
+    const sv3 = await evaluate<{ track: boolean; hash: string; href: string | null; status: string }>(`(()=>{
       const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));
       return{track:!!document.querySelector("#map .voyage-overlay"),hash:location.hash,
         href:document.getElementById("journal-link").getAttribute("href"),
@@ -488,7 +489,7 @@ export async function run(ctx) {
     await goto("#seed=42&style=antique&survey", "survey-restore");
     // waitSettled keys on #status, which the settle clears BEFORE the deferred arm (#366): wait for the ink, never read in the settle's shadow.
     await waitInked("survey-restore-ink");
-    const sv4 = await evaluate(`(()=>{
+    const sv4 = await evaluate<{ checked: boolean; vertices: number; overlays: number; hash: string; status: string; href: string | null }>(`(()=>{
       const t=document.querySelector("#map .voyage-overlay .voyage-track");
       return{checked:document.getElementById("ages").checked,
         vertices:t?(t.getAttribute("points")||"").trim().split(/\\s+/).length:0,
@@ -511,13 +512,13 @@ export async function run(ctx) {
   let landed = false;
   for (let i = 0; i < 200; i++) {
     let p = null;
-    try { p = await evaluate(`location.pathname`); } catch {}
+    try { p = await evaluate<string>(`location.pathname`); } catch {}
     if (p === "/reading-room/") { landed = true; break; }
     await sleep(50);
   }
   const roomUp = landed && (await room.boot()) && (await room.settled());
   const sv5 = roomUp
-    ? await evaluate(`(()=>{const a=window.__vellumReadingRoomAges();
+    ? await evaluate<{ hash: boolean; chamber: string; year: number | null; seed: number }>(`(()=>{const a=window.__vellumReadingRoomAges();
         return{hash:location.hash.startsWith("#seed=42&style=antique&legend=1&arms=0"),
           chamber:a?a.chamber:"",year:a?a.year:-1,
           seed:window.__vellumReadingRoomState().seed};})()`)
@@ -534,11 +535,11 @@ export async function run(ctx) {
   let landedB = false;
   for (let i = 0; i < 200; i++) {
     let p = null;
-    try { p = await evaluate(`location.pathname`); } catch {}
+    try { p = await evaluate<string>(`location.pathname`); } catch {}
     if (p === "/reading-room/") { landedB = true; break; }
     await sleep(50);
   }
-  const hashB = landedB ? await evaluate(`location.hash`) : "";
+  const hashB = landedB ? await evaluate<string>(`location.hash`) : "";
   check(
     "SV5b the forward carries the hash verbatim: recipe, tide, and camera riders all intact",
     landedB && hashB === richHash,
@@ -547,7 +548,7 @@ export async function run(ctx) {
   await step("SV5c", async () => {
 
     await goto("#seed=42&style=antique&year=abc", "survey-badyear");
-    const sv5c = await evaluate(`({path:location.pathname,checked:document.getElementById("ages").checked,svg:!!document.querySelector("#map svg")})`);
+    const sv5c = await evaluate<{ path: string; checked: boolean; svg: boolean }>(`({path:location.pathname,checked:document.getElementById("ages").checked,svg:!!document.querySelector("#map svg")})`);
     check(
       "SV5c a malformed year stays in the Explorer, ignored, and the chart draws",
       sv5c.path === "/explorer/" && !sv5c.checked && sv5c.svg,
@@ -558,7 +559,7 @@ export async function run(ctx) {
     await goto("#seed=42&style=antique&survey&year=1030", "survey-bothkeys");
     await evaluate(`(()=>{window.__beat=false;requestAnimationFrame(()=>setTimeout(()=>{window.__beat=true;},0));})()`);
     await waitBeat("survey-bothkeys-beat");
-    const sv5d = await evaluate(`({path:location.pathname,checked:document.getElementById("ages").checked,track:!!document.querySelector("#map .voyage-overlay")})`);
+    const sv5d = await evaluate<{ path: string; checked: boolean; track: boolean }>(`({path:location.pathname,checked:document.getElementById("ages").checked,track:!!document.querySelector("#map .voyage-overlay")})`);
     check(
       "SV5d the both-keys set stays in the Explorer and arms nothing (ignored whole)",
       sv5d.path === "/explorer/" && !sv5d.checked && !sv5d.track,
@@ -571,7 +572,7 @@ export async function run(ctx) {
     await waitInked("survey-verso-ink");
     await evaluate(`document.getElementById("verso-turn").click()`);
     await sleep(1500); // the ceremonial flip transition (--verso-turn 1200ms)
-    const sv6 = await evaluate(`(()=>{
+    const sv6 = await evaluate<{ flipped: boolean; match: boolean; status: string }>(`(()=>{
       const recto=document.querySelector("#map .voyage-overlay .voyage-track");
       const back=document.querySelector("#verso .verso-track");
       return{flipped:document.getElementById("sheet").classList.contains("versoed"),
@@ -587,11 +588,11 @@ export async function run(ctx) {
   await evaluate(`document.getElementById("verso-turn").click()`);
   await sleep(1500);
 
-  const sv7href = await evaluate(`document.getElementById("journal-link").getAttribute("href")`);
+  const sv7href = await evaluate<string | null>(`document.getElementById("journal-link").getAttribute("href")`);
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}${sv7href}` });
   const sv7up = (await room.boot()) && (await room.settled());
   const sv7 = sv7up
-    ? await evaluate(`(()=>{const a=window.__vellumReadingRoomAges();
+    ? await evaluate<{ seed: number; chamber: string; t: number | null }>(`(()=>{const a=window.__vellumReadingRoomAges();
         return{seed:window.__vellumReadingRoomState().seed,chamber:a?a.chamber:"",t:a?a.t:-1};})()`)
     : { seed: -1, chamber: "", t: -1 };
   check(
@@ -602,7 +603,7 @@ export async function run(ctx) {
   await step("SV9", async () => {
 
     await goto("#seed=42&style=antique", "survey-seams");
-    const sv9 = await evaluate(`({
+    const sv9 = await evaluate<{ stepTo: string; paintAt: string; plan: string; log: string; geom: string; ages: string; inline: string }>(`({
       stepTo:typeof window.__vellumVoyageStepTo,paintAt:typeof window.__vellumVoyagePaintAt,
       plan:typeof window.__vellumVoyagePlan,log:typeof window.__vellumVoyageLog,
       geom:typeof window.__vellumVoyageLegGeometry,ages:typeof window.__vellumAgesState,
@@ -631,7 +632,7 @@ export async function run(ctx) {
     await evaluate(`(()=>{const s=document.getElementById("style");s.value="ink";s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
     await waitTurned("survey-style-turn");
     await waitInked("survey-turn-rearm");
-    const sv10 = await evaluate(`(()=>{window.__mo.disconnect();cancelAnimationFrame(window.__land.raf);
+    const sv10 = await evaluate<{ turned: boolean; style: string | null; vertices: number; overlays: number; batches: { chart: boolean; overlay: boolean; frames: number }[]; chartBatch: number; inkBatch: number; chartAlone: boolean; framesBetween: number; hash: string; status: string }>(`(()=>{window.__mo.disconnect();cancelAnimationFrame(window.__land.raf);
       const svg=document.querySelector("#map svg:not(.voyage-overlay)");
       const t=document.querySelector("#map .voyage-overlay .voyage-track");
       const b=window.__land.batches;const c=b.findIndex((x)=>x.chart);const i=b.findIndex((x)=>x.overlay);
@@ -675,7 +676,7 @@ export async function run(ctx) {
     await evaluate(`(()=>{const s=document.getElementById("style");s.value="ink";s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
     await waitSettled("survey-reduce-settle");
     await waitInked("survey-reduce-rearm");
-    const sv2n = await evaluate(`(()=>{window.__mo.disconnect();cancelAnimationFrame(window.__land.raf);
+    const sv2n = await evaluate<{ reduce: boolean; turned: boolean; style: string | null; chartAlone: boolean; inkAfter: boolean; framesBetween: number; anims: number; overlays: number; status: string }>(`(()=>{window.__mo.disconnect();cancelAnimationFrame(window.__land.raf);
       const b=window.__land.batches;const c=b.findIndex((x)=>x.chart);const i=b.findIndex((x)=>x.overlay);
       const ov=document.querySelector("#map .voyage-overlay");
       const svg=document.querySelector("#map svg:not(.voyage-overlay)");
@@ -695,8 +696,8 @@ export async function run(ctx) {
     );
   });
 
-  const sv8 = await evaluate(`location.hash.includes("year=")`);
-  check("SV8 the Explorer's writer never emitted year= across every path this suite drove", sv8 === false, `hash=${await evaluate(`location.hash`)}`);
+  const sv8 = await evaluate<boolean>(`location.hash.includes("year=")`);
+  check("SV8 the Explorer's writer never emitted year= across every path this suite drove", sv8 === false, `hash=${await evaluate<string>(`location.hash`)}`);
 
   const errDelta = dropExpectedCancellations(consoleErrors.slice(errBase));
   check(
