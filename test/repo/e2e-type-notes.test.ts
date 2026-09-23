@@ -1,9 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, relative, resolve } from "node:path";
 import ts from "typescript";
+import { e2eSourcePaths } from "../../test-support/e2e-source.ts";
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const NOTE = /^\s*\/\/ @ts-expect-error \S/;
@@ -17,13 +18,6 @@ type Source = { readonly path: string; readonly text: string };
 type Covered = { readonly column: number; readonly code: number; readonly text: string };
 type Finding = { readonly at: string; readonly diagnostics: readonly string[] };
 
-const e2eSourcePaths = (root: string): string[] => {
-  const dir = join(root, "scripts", "e2e");
-  return [
-    ...readdirSync(dir, { recursive: true, encoding: "utf8" }).filter((f) => f.endsWith(".ts")).map((f) => join(dir, f)),
-    ...readdirSync(join(root, "scripts")).filter((f) => /^e2e-[\w-]+\.ts$/.test(f)).map((f) => join(root, "scripts", f)),
-  ];
-};
 const e2eSources = (): Source[] => e2eSourcePaths(REPO).map((path) => ({ path, text: readFileSync(path, "utf8") }));
 
 const nullish = (c: Covered): boolean =>

@@ -200,7 +200,7 @@ async function evaluate<T = unknown>(expression: Payload<T>, awaitPromise = fals
 // 5s is 100x the headroom a settle leaves: it polls evaluate every 50ms right up to the moment it throws, so a page that just failed a wait has been answering within 50ms. The direction it errs is toward calling a WEDGED page dead, which is the exit 2 such a page already produced.
 const ALIVE_TIMEOUT_MS = 5000;
 function alive(): Promise<boolean> {
-  const answered = evaluate("1").then(() => true, () => false);
+  const answered = evaluate<number>("1").then(() => true, () => false);
   const gaveUp = new Promise<boolean>((resolve) => setTimeout(() => resolve(false), ALIVE_TIMEOUT_MS).unref());
   return Promise.race([answered, gaveUp]);
 }
@@ -227,7 +227,7 @@ async function waitSettled(label = ""): Promise<void> {
 }
 async function waitReady(): Promise<boolean> {
   for (let i = 0; i < 200; i++) {
-    if (await evaluate(`typeof window.__vellumUsesWorker==="function" && !!document.querySelector("#map svg") && document.getElementById("status").textContent===""`)) return true;
+    if (await evaluate<boolean>(`typeof window.__vellumUsesWorker==="function" && !!document.querySelector("#map svg") && document.getElementById("status").textContent===""`)) return true;
     await sleep(75);
   }
   return false;
@@ -235,13 +235,13 @@ async function waitReady(): Promise<boolean> {
 // A turn clears "Drafting..." immediately, so waitSettled resolves MID-turn; waitTurned waits for the leaf to LAND, and armTurnWatch records whether .sheet ever carried .turning (a real 3D turn vs an instant swap).
 async function waitTurned(label = ""): Promise<void> {
   for (let i = 0; i < 240; i++) {
-    if (await evaluate(`(()=>{const s=document.getElementById("status").textContent;const t=document.querySelector(".sheet.turning");return s==="" && !t && !!document.querySelector("#map svg");})()`)) return;
+    if (await evaluate<boolean>(`(()=>{const s=document.getElementById("status").textContent;const t=document.querySelector(".sheet.turning");return s==="" && !t && !!document.querySelector("#map svg");})()`)) return;
     await sleep(50);
   }
   throw new Error("waitTurned timeout " + label);
 }
 function armTurnWatch(): Promise<unknown> {
-  return evaluate(`(()=>{window.__turned=false;if(window.__turnMo)window.__turnMo.disconnect();window.__turnMo=new MutationObserver(()=>{if(document.querySelector(".sheet.turning"))window.__turned=true;});window.__turnMo.observe(document.getElementById("sheet"),{subtree:true,attributes:true,attributeFilter:["class"]});return true;})()`);
+  return evaluate<boolean>(`(()=>{window.__turned=false;if(window.__turnMo)window.__turnMo.disconnect();window.__turnMo=new MutationObserver(()=>{if(document.querySelector(".sheet.turning"))window.__turned=true;});window.__turnMo.observe(document.getElementById("sheet"),{subtree:true,attributes:true,attributeFilter:["class"]});return true;})()`);
 }
 
 // Real browser input, not synthetic DOM events. d3-zoom binds touch listeners only if navigator.maxTouchPoints is truthy at bind time, so setTouch()/setMobileViewport() must be in effect BEFORE the navigate that boots the page.

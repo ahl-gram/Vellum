@@ -46,7 +46,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
     await reloadHome("gesture-mobile-boot");
     const touchAction = await evaluate<string>(`getComputedStyle(document.getElementById("map-viewport")).touchAction`);
     const scaleAtBoot = await evaluate<number>(`visualViewport.scale`);
-    const scrollToMap = () => evaluate(`document.getElementById("map-viewport").scrollIntoView({block:"center"})`);
+    const scrollToMap = () => evaluate<undefined>(`document.getElementById("map-viewport").scrollIntoView({block:"center"})`);
     await scrollToMap();
     await sleep(60);
 

@@ -383,7 +383,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const rgn = () => evaluate<{ band: number; redrafts: number; committed: boolean; title: string | null; window: unknown }>(`window.__vellumRegion()`);
   const goHome = async () => { await evaluate(`document.getElementById("zoom-reset").click()`); await sleep(40); };
   const enterAt = (k: number, cu: number, cv: number) =>
-    evaluate(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:${k},x:W/2-(${cu})*${k}*W,y:H/2-(${cv})*${k}*H});})()`);
+    evaluate<undefined>(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:${k},x:W/2-(${cu})*${k}*W,y:H/2-(${cv})*${k}*H});})()`);
   const waitRedraft = async (prev: number) => {
     // 15s, not the old 4s: #400 made a cold band-3 draw cost 1084ms measured locally and a CI runner is several times slower, so 4s returned BEFORE the redraft landed and every band downstream read one step off; long enough for the draw, short enough that a real hang still fails rather than hanging the lane.
     for (let i = 0; i < 375; i++) { const s = await rgn(); if (s.redrafts > prev) return s; await sleep(40); }

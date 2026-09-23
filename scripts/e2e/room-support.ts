@@ -10,7 +10,7 @@ export const makeRoom = (ctx: Pick<SuiteContext, "evaluate" | "send" | "sleep" |
   const boot = async (): Promise<boolean> => {
     for (let i = 0; i < 200; i++) {
       let ok: unknown = null;
-      try { ok = await evaluate(`typeof window.__vellumReadingRoomUsesWorker === "function"`); } catch {}
+      try { ok = await evaluate<boolean>(`typeof window.__vellumReadingRoomUsesWorker === "function"`); } catch {}
       if (ok) return true;
       await sleep(75);
     }
@@ -62,7 +62,7 @@ export const makeBar = (ctx: Pick<SuiteContext, "evaluate">) => {
     stopSweepSamples: () =>
       evaluate<{ t: number; year: number; pace: number }[]>(`(()=>{window.__sweep.stop=true;return window.__sweep.s;})()`),
     playLabel: () => evaluate<string>(`document.querySelector(".rf-play").textContent`),
-    clickPlay: () => evaluate(`document.querySelector(".rf-play").click()`),
+    clickPlay: () => evaluate<undefined>(`document.querySelector(".rf-play").click()`),
   };
 };
 
