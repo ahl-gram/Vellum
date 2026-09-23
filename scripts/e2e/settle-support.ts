@@ -3,7 +3,7 @@ import type { Payload } from "./types.ts";
 
 export function makeSettle({ evaluate, sleep }: { evaluate: (expression: string, awaitPromise?: boolean) => Promise<unknown>; sleep: (ms: number) => Promise<unknown> }) {
   // THROWS rather than returning the last read: a poll that falls through to the read reintroduces the same flake silently, which one mutation run proved, an unsatisfiable predicate burned the whole budget and the check still passed. The last read rides in the message so the failure keeps the payload a red check would have printed.
-  return async <T>(read: Payload<T>, settled: (d: NonNullable<T>, last: T | null) => boolean, label: string, tries = 120): Promise<NoInfer<NonNullable<T>>> => {
+  return async <T>(read: Payload<T>, settled: (d: NoInfer<NonNullable<T>>, last: NoInfer<T> | null) => boolean, label: string, tries = 120): Promise<NoInfer<NonNullable<T>>> => {
     let last: T | null = null;
     for (let i = 0; i < tries; i++) {
       const d = await evaluate(read) as T;

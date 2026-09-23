@@ -9,7 +9,7 @@ is ever removed.
 ## What it does
 
 - **Injects a gate once per session**, reading the text from `SKILL.md` so the skill stays the single
-  source: Gate 1 on `test/**/*.test.ts`; Gate 2 on `scripts/**/*.mjs` and `out/**/*.mjs`, and on `.ts` under `scripts/e2e/`, `out/` and the `scripts/e2e-*` runners (never all of `scripts/**/*.ts`, since the first matching route wins and Gate 6 owns the render scripts); Gate 3 on
+  source: Gate 1 on `test/**/*.test.ts`; Gate 2 on `scripts/**/*.mjs` and `out/**/*.mjs`, and on `.ts` under `scripts/e2e/`, `out/` and `scripts/e2e-*` (the port-proof tool, and the two runners once they move; never all of `scripts/**/*.ts`, since the first matching route wins and Gate 6 owns the render scripts); Gate 3 on
   `*.css` and `*.astro`; Gate 4 on a Write that creates a new file under `src/pages/`, `src/site/`,
   `scripts/e2e/suite-*` or `public/*.css`; Gate 5 on `git push` and `gh pr create` / `gh pr edit`;
   Gate 6 on the renderer, `generateWorld`'s transitive closure, the committed artifacts and the

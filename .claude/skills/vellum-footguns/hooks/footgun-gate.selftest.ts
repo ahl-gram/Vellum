@@ -232,7 +232,6 @@ const FIXTURES: Fixture[] = [
   ["e2e regex literal outside backticks gets gate 2", edit("Write", "scripts/e2e/suite-x.mjs", "const a = s.match(/\\s+/);"), "context", "## Gate 2"],
   ["e2e .click() warns", edit("Edit", "scripts/e2e/suite-x.mjs", "el.click();"), "context", "pointer-events"],
   ["e2e .ts single-escaped class denied", edit("Write", "scripts/e2e/suite-x.ts", "const R = `(() => 'a b'.split(/\\s+/))()`;"), "deny", "backtick"],
-  // A JavaScript parse reads `<T>(` as the start of a JSX element and swallows every later template into its text, so these two red if the scan stops parsing as TypeScript.
   ["a template after a generic arrow in a .ts file denied", edit("Write", "scripts/e2e/suite-x.ts", "const id = <T>(x: T): T => x;\nconst R = `(() => 'a b'.split(/\\s+/))()`;"), "deny", "backtick"],
   ["a template after an angle-bracket assertion denied", edit("Write", "out/probe-x.ts", "const P = <string>`s.split(/\\s+/)`;"), "deny", "backtick"],
   ["a single escape in a non-e2e scripts .ts denied", edit("Write", "scripts/lint/x.ts", "const P = `s.split(/\\d/)`;"), "deny", "backtick"],

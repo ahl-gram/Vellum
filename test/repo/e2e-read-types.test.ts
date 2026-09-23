@@ -22,6 +22,13 @@ const typedReadFixtures = async (evaluate: Evaluate): Promise<void> => {
 };
 void typedReadFixtures;
 
+const settledReadFixtures = async (settle: ReturnType<typeof makeSettle>): Promise<void> => {
+  // @ts-expect-error a settle's predicate cannot supply the shape its read never stated
+  const r = await settle(`({ open: true })`, (d: { open: boolean; count: number }) => d.open, "open");
+  void r;
+};
+void settledReadFixtures;
+
 const reading = (reads: unknown[]) => {
   const asked: string[] = [];
   const slept: number[] = [];
