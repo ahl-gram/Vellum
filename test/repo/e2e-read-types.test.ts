@@ -170,6 +170,7 @@ const SHAPE_FIXTURE = [
   "const { evaluate } = ctx;",
   "const settle = makeSettle(ctx);",
   "const ev = evaluate;",
+  "const { evaluate: renamed, send: post } = ctx;",
   'const TYPED = "1" as Payload<{ n: number }>;',
   'const PLAIN = "1";',
   "type Awaits = { then(f: (v: Awaits) => void): void };",
@@ -198,9 +199,15 @@ const SHAPE_FIXTURE = [
   "  const answer = await ctx.send(`Page.getLayoutMetrics`);",
   "  const laundered = await read(`1`); // flagged",
   "  const erasedKept = await erased(); // flagged",
+  "  const erasedCast = await erased() as { n: number }; // flagged",
   "  const nothingAtAll = await evaluate<never>(`1`); // flagged",
   "  const selfAwaiting = await evaluate<Awaits>(`1`); // flagged",
-  "  return [stated, named, nothing, settledStated, kept, plainNamed, anyShape, unknownShape, emptyOrNull, settled, aliased, viaContext, wrapper, chained, castInstead, statedThrough, answer, laundered, erasedKept, nothingAtAll, selfAwaiting];",
+  "  const renamedKept = await renamed(`1`); // flagged",
+  "  const posted = await post(`Page.getLayoutMetrics`);",
+  "  return [stated, named, nothing, settledStated, kept, plainNamed, anyShape, unknownShape, emptyOrNull, settled, aliased, viaContext, wrapper, chained, castInstead, statedThrough, answer, laundered, erasedKept, erasedCast, nothingAtAll, selfAwaiting, renamedKept, posted];",
+  "}",
+  "export async function relay(send: (method: string) => Promise<unknown>): Promise<unknown> {",
+  "  return await send(`Page.getLayoutMetrics`);",
   "}",
   "export async function plainForm(evaluate: (expression: string) => Promise<unknown>): Promise<unknown[]> {",
   "  const cast = await evaluate(`1`) as number;",
@@ -221,7 +228,7 @@ test("the shape scan passes a read that states its shape or discards its value, 
   assert.equal(existsSync(path), false, "the fixture's name is a real file, so the scan below would read the disk instead");
   const { findings } = shapeScan(e2eProgram(new Map([[path, SHAPE_FIXTURE.join("\n")]])), [path]);
   const flagged = SHAPE_FIXTURE.flatMap((line, i) => (line.endsWith("// flagged") ? [`${relative(REPO, path)}:${i + 1}`] : []));
-  assert.equal(flagged.length, 18);
+  assert.equal(flagged.length, 20);
   assert.deepEqual(findings.map((f) => f.slice(0, f.indexOf(": "))), flagged, findings.join("\n"));
 });
 
