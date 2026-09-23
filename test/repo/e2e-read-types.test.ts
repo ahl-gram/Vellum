@@ -79,7 +79,6 @@ test("a settle that runs out of tries THROWS with its label and its last read, a
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const READ_NAMES = new Set(["evaluate", "settle"]);
-const NULLISH = ts.TypeFlags.Null | ts.TypeFlags.Undefined;
 
 function e2eProgram(extra: ReadonlyMap<string, string> = new Map()): ts.Program {
   const config = ts.getParsedCommandLineOfConfigFile(join(REPO, "tsconfig.json"), {}, { ...ts.sys, onUnRecoverableConfigFileDiagnostic: () => undefined });
@@ -116,7 +115,7 @@ const bare = (checker: ts.TypeChecker, t: ts.Type): boolean =>
   (t.flags & (ts.TypeFlags.Any | ts.TypeFlags.Unknown)) !== 0 ||
   ((t.flags & (ts.TypeFlags.Object | ts.TypeFlags.NonPrimitive)) !== 0 && checker.getPropertiesOfType(t).length === 0 && checker.getIndexInfosOfType(t).length === 0 && t.getCallSignatures().length === 0);
 const unshaped = (checker: ts.TypeChecker, t: ts.Type | undefined): boolean =>
-  t === undefined || (t.isUnion() ? t.types : [t]).filter((m) => (m.flags & NULLISH) === 0).some((m) => bare(checker, m));
+  t === undefined || (t.isUnion() ? t.types : [t]).some((m) => bare(checker, m));
 const keptValue = (call: ts.CallExpression): ts.Expression | undefined => {
   let n: ts.Expression = call;
   while (ts.isAwaitExpression(n.parent) || ts.isParenthesizedExpression(n.parent)) n = n.parent;
