@@ -5,8 +5,8 @@ import { stripTypeScriptTypes } from "node:module";
 import { dirname, join, resolve } from "node:path";
 import ts from "typescript";
 
-export type RuntimeEdit = { readonly line: number; readonly before: string; readonly after: string };
-export type PortComparison = {
+type RuntimeEdit = { readonly line: number; readonly before: string; readonly after: string };
+type PortComparison = {
   readonly tokens: readonly [number, number];
   readonly literals: readonly [number, number];
   readonly literalDiffs: number;
