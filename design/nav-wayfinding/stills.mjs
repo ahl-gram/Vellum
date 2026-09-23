@@ -26,7 +26,9 @@ const PROBE = `(() => {
   const nav = r('header.chrome nav.rooms'), cluster = r('header.chrome');
   const folio = r('.folio-room'), seed = r('.lf-seed'), band = r('.band');
   const rank = r('.rank'), trail = r('.trail'), press = r('.atelier-press'), atelier = r('.atelier');
-  const drawerOpen = getComputedStyle(document.querySelector('header.chrome nav.rooms')).position === 'absolute';
+  const navFolded = getComputedStyle(document.querySelector('header.chrome nav.rooms')).position === 'absolute';
+  const reveal = document.querySelector('.rooms-reveal');
+  const drawerOpen = !!reveal && reveal.checked;
   const doors = [...document.querySelectorAll('header.chrome nav.rooms a, header.chrome nav.rooms [aria-current]')].length;
   // --band-h is read off the BAND, not off the root: a direction that buys itself more ground sets it on body,
   // and the root would hand back the untouched 7.6rem and report the arm as safe when it is not.
@@ -46,9 +48,9 @@ const PROBE = `(() => {
       // past the edges so no seam shows), so they are the one named exclusion rather than a finding every run.
       // Anything else that appears here is a real overhang: the list is otherwise empty on all 168 rows.
       .filter((x) => x.over > 0.5 && !x.sel.startsWith('div.fog')),
-    doors, drawerOpen, navRight: nav ? nav.right : null, clusterInk: +clusterInk.toFixed(1),
-    gapFolio: folio && nav && !drawerOpen ? +(folio.x - nav.right).toFixed(1) : null,
-    gapSeed: seed && nav && !drawerOpen ? +(seed.x - nav.right).toFixed(1) : null,
+    doors, navFolded, drawerOpen, navRight: nav ? nav.right : null, clusterInk: +clusterInk.toFixed(1),
+    gapFolio: folio && nav && !navFolded ? +(folio.x - nav.right).toFixed(1) : null,
+    gapSeed: seed && nav && !navFolded ? +(seed.x - nav.right).toFixed(1) : null,
     bandBottom: bandBottom === null ? null : +bandBottom.toFixed(1),
     // Null while the drawer is open, and the reason rather than the suppression: the trail rides INSIDE the
     // drawer there, which is an opaque panel of its own, so "past the band" stops meaning "on bare ground".
@@ -64,6 +66,20 @@ const PROBE = `(() => {
       .filter((a) => { const b = a.getBoundingClientRect(); return b.width > 0 && b.height > 0; })
       .map((a) => { const b = a.getBoundingClientRect(); return document.elementFromPoint(b.x + Math.min(20, b.width / 2), b.y + b.height / 2) === a; })
       .filter(Boolean).length,
+    // The chart's labels scale with the chart while the geometry separating them does not, so sizing them up for
+    // legibility at a narrow width trades one defect for another. Four instances got through three rounds of
+    // review because a rect check cannot see a text collision and a still only shows the page it was taken of.
+    labelOverlaps: (() => {
+      const boxes = [...document.querySelectorAll('.atelier text')]
+        .map((e) => { const b = e.getBoundingClientRect(); return { t: e.textContent.trim(), x: b.x, y: b.y, r: b.right, b: b.bottom, w: b.width }; })
+        .filter((b) => b.w > 0);
+      const hits = [];
+      for (let i = 0; i < boxes.length; i++) for (let j = i + 1; j < boxes.length; j++) {
+        const a = boxes[i], c = boxes[j];
+        if (Math.min(a.r, c.r) - Math.max(a.x, c.x) > 0.5 && Math.min(a.b, c.b) - Math.max(a.y, c.y) > 0.5) hits.push(a.t + ' / ' + c.t);
+      }
+      return hits;
+    })(),
     rank, trail, press, atelier,
   });
 })()`;
@@ -83,14 +99,14 @@ for (const [page, dirs] of PAGES) {
   for (const dir of dirs) {
     for (const [w, h, mobile] of WIDTHS) {
       const name = `${page}-${dir}-${w}`;
-      jobs.push([`file://${here}${page}-${dir}.html`, w, h, mobile, fileURLToPath(new URL(`${name}.png`, full)), '', PROBE].join('|'));
+      jobs.push([`file://${here}${page}-${dir}.html`, w, h, mobile, fileURLToPath(new URL(`${name}.png`, full)), ''].join('|'));
       if (w <= 900) {
-        jobs.push([`file://${here}${page}-${dir}.html`, w, h, mobile, fileURLToPath(new URL(`${name}-open.png`, full)), OPEN, PROBE].join('|'));
+        jobs.push([`file://${here}${page}-${dir}.html`, w, h, mobile, fileURLToPath(new URL(`${name}-open.png`, full)), OPEN].join('|'));
       }
     }
   }
 }
-const shot = spawnSync('node', [`${here}shoot.mjs`, ...jobs], { encoding: 'utf8' });
+const shot = spawnSync('node', [`${here}shoot.mjs`, ...jobs], { encoding: 'utf8', env: { ...process.env, VELLUM_PROBE: PROBE } });
 process.stdout.write(shot.stdout ?? '');
 if (shot.status !== 0) { process.stderr.write(shot.stderr ?? ''); process.exit(shot.status ?? 1); }
 

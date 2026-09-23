@@ -4,7 +4,10 @@ import { writeFileSync, mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 const BRAVE = '/Applications/Brave Browser.app/Contents/MacOS/Brave Browser';
-const [,, ...jobs] = process.argv; // each job: url|w|h|mobile(0/1)|out
+const [,, ...jobs] = process.argv; // each job: url|w|h|mobile(0/1)|out|script|probe
+// The probe may travel in VELLUM_PROBE instead of inside every job: repeated per job it grew argv 168 times over
+// and the spawn died with a stack overflow that said nothing about the page.
+const ENV_PROBE = process.env.VELLUM_PROBE || '';
 const port = 9333 + Math.floor(Math.random() * 500);
 const dir = mkdtempSync(join(tmpdir(), 'mock-shoot-'));
 const brave = spawn(BRAVE, ['--headless=new', `--remote-debugging-port=${port}`, `--user-data-dir=${dir}`, '--disable-gpu', '--hide-scrollbars', '--no-first-run', 'about:blank'], { stdio: 'ignore' });
@@ -16,8 +19,16 @@ const ws = new WebSocket(target.webSocketDebuggerUrl);
 await new Promise((res, rej) => { ws.onopen = res; ws.onerror = rej; });
 let id = 0; const waiters = new Map();
 ws.onmessage = (ev) => { const m = JSON.parse(ev.data); if (m.id && waiters.has(m.id)) { waiters.get(m.id)(m); waiters.delete(m.id); } };
-const send = (method, params = {}) => new Promise((res, rej) => { const i = ++id; waiters.set(i, (m) => m.error ? rej(new Error(JSON.stringify(m.error))) : res(m.result)); ws.send(JSON.stringify({ id: i, method, params })); });
+const send = (method, params = {}) => new Promise((res, rej) => {
+  const i = ++id;
+  // A dead browser never answers, and without this the run hangs on an unsettled await: node exits 13 and names
+  // no row. 45s is well past the slowest call here (a full page screenshot) and well short of a wedged session.
+  const timer = setTimeout(() => { waiters.delete(i); rej(new Error(`CDP ${method} did not answer in 45s`)); }, 45000);
+  waiters.set(i, (m) => { clearTimeout(timer); return m.error ? rej(new Error(JSON.stringify(m.error))) : res(m.result); });
+  ws.send(JSON.stringify({ id: i, method, params }));
+});
 await send('Page.enable'); await send('Runtime.enable');
+try {
 for (const job of jobs) {
   const [url, w, h, mobile, out, script, probeExpr] = job.split('|');
   await send('Emulation.setDeviceMetricsOverride', { width: +w, height: +h, deviceScaleFactor: 1, mobile: mobile === '1' });
@@ -26,11 +37,13 @@ for (const job of jobs) {
   if (script) { await send('Runtime.evaluate', { expression: script, awaitPromise: true }); await sleep(600); }
   const r = await send('Page.captureScreenshot', { format: 'png' });
   writeFileSync(out, Buffer.from(r.data, 'base64'));
-  const expression = probeExpr || `(()=>{try{return JSON.stringify({cw: document.documentElement.clientWidth, sw: document.documentElement.scrollWidth, sheet: (document.getElementById('sheet')||document.querySelector('.sheet')).getBoundingClientRect().toJSON()})}catch(e){return String(e)}})()`;
+  const expression = probeExpr || ENV_PROBE || `(()=>{try{return JSON.stringify({cw: document.documentElement.clientWidth, sw: document.documentElement.scrollWidth, sheet: (document.getElementById('sheet')||document.querySelector('.sheet')).getBoundingClientRect().toJSON()})}catch(e){return String(e)}})()`;
   let probe = await send('Runtime.evaluate', { expression, returnByValue: true });
   // One retry: on a 168 job run the last two rows came back undefined and nothing else did, which is a browser
   // degrading near teardown rather than a probe that cannot work. A silent undefined is the failure to avoid.
   if (probe.result.value === undefined) { await sleep(600); probe = await send('Runtime.evaluate', { expression, returnByValue: true }); }
   console.log(out, probe.result.value);
 }
-ws.close(); brave.kill();
+} finally {
+  ws.close(); brave.kill();
+}

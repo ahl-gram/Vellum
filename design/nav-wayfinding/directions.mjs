@@ -1,7 +1,7 @@
 // The four directions, drawn against the tree Alex ruled on 2026-09-22: the Explorer parents the Prospect, the
 // Ribbon and the Portfolio, the Portfolio's address moves under /explorer/ to agree with that, and the Reading
 // Room carries the Prospect a second time as an ALIAS. The alias is the thing every direction has to answer,
-// because two entries then point at one route and the ratified pin is one aria-current span (#461 ruling 1).
+// because two entries then point at one route and the ratified pin is one aria-current span (Issue #461 ruling 1).
 
 export const TREE = [
   { label: 'Today', href: '/seed-of-the-day/' },
@@ -78,7 +78,7 @@ function directionB(at) {
 
 // C: the trail. One line at any depth, every segment clickable, and the alias stated in words rather than drawn.
 //
-// EXACTLY ONE aria-current per page (#461 ruling 1): the nav carries it when the page is in the nav, the trail when it is not, which is the five pages that had none.
+// EXACTLY ONE aria-current per page (Issue #461 ruling 1): the nav carries it when the page is in the nav, the trail when it is not, which is the five pages that had none.
 function directionC(at) {
   const seat = seatOf(at);
   const inNav = TREE.some((t) => t.href === at);
@@ -112,16 +112,16 @@ const directionDC = withChart(directionC);
 const PLACES = {
   // Vellum itself, at sea off the south west: the front door is where you arrive from, not a room on the island.
   // Without it the chart had no pin on home, which is the one page whose reader most needs the site's shape.
-  '/': { x: 74, y: 340, rank: 'landing', name: 'Vellum' },
+  '/': { x: 62, y: 286, rank: 'landing', name: 'Vellum' },
   '/explorer/': { x: 300, y: 196, rank: 'capital', name: 'The Explorer' },
   '/prospect/': { x: 214, y: 148, rank: 'town', name: 'The Prospect' },
-  '/ribbon/': { x: 140, y: 214, rank: 'town', name: "The Ribbon" },
+  '/ribbon/': { x: 126, y: 236, rank: 'town', name: "The Ribbon" },
   '/explorer/portfolio/': { x: 368, y: 136, rank: 'town', name: 'The Portfolio' },
-  '/reading-room/': { x: 262, y: 288, rank: 'town', name: 'The Reading Room' },
+  '/reading-room/': { x: 272, y: 274, rank: 'town', name: 'The Reading Room' },
   '/print-room/': { x: 418, y: 232, rank: 'town', name: 'The Print Room' },
   '/seed-of-the-day/': { x: 486, y: 96, rank: 'isle', name: 'Today' },
   '/gallery/': { x: 500, y: 320, rank: 'isle', name: 'The Gallery' },
-  '/faq/': { x: 176, y: 306, rank: 'village', name: 'Q & A' },
+  '/faq/': { x: 158, y: 330, rank: 'village', name: 'Q & A' },
   '/glossary/': { x: 352, y: 336, rank: 'village', name: 'The Glossary' },
 };
 
@@ -151,8 +151,8 @@ function atelierChart(at) {
       + `<text x="${p.x}" y="${p.y - 11}">${esc(p.name)}</text></g>`;
   };
   const youAre = PLACES[at]
-    ? `<g class="you"><path d="M${PLACES[at].x} ${PLACES[at].y - 30} L${PLACES[at].x} ${PLACES[at].y - 19}"/>`
-      + `<text x="${PLACES[at].x}" y="${PLACES[at].y - 34}">you are here</text></g>`
+    ? `<g class="you"><path d="M${PLACES[at].x} ${PLACES[at].y + 19} L${PLACES[at].x} ${PLACES[at].y + 29}"/>`
+      + `<text x="${PLACES[at].x}" y="${PLACES[at].y + 42}">you are here</text></g>`
     : '';
   return `<div class="atelier" id="atelier">
 <svg viewBox="0 0 600 420" role="img" aria-label="A chart of the atelier, with a pin at the room you are in">
@@ -166,7 +166,7 @@ function atelierChart(at) {
     <circle r="15"/><path d="M0 -15 L3.4 -3.4 L15 0 L3.4 3.4 L0 15 L-3.4 3.4 L-15 0 L-3.4 -3.4 Z"/>
     <text y="-19">N</text>
   </g>
-  <text class="cartouche" x="86" y="392">A Chart of the Atelier</text>
+  <text class="cartouche" x="86" y="408">A Chart of the Atelier</text>
 </svg>
 <p class="atelier-key">the dashed track is a second way in, not a second home</p>
 </div>`;

@@ -177,13 +177,19 @@ That is a page-roster change, not a stylesheet. **D is an epic, not a sub.**
 
 ## How to rebuild
 
+The crops come BEFORE the archive step, because `stills.mjs` copies them into `stills/` and cannot make them.
+Run in this order, from the repo root:
+
 ```
 npm run build                              # the mocks are built FROM dist/
 node design/nav-wayfinding/lift.mjs        # refresh the kit copy (writes lifted.txt)
 node design/nav-wayfinding/build.mjs       # write the mock pages, every direction on every page
-node design/nav-wayfinding/stills.mjs      # shoot, measure, archive
-node design/nav-wayfinding/crop.mjs '<url>|1280|800|0|3|<out>.png'   # a 3x crop of the cluster
+node design/nav-wayfinding/crops.mjs       # the five 3x cluster crops, into out/513-nav/
+node design/nav-wayfinding/stills.mjs      # shoot, measure, archive (copies the crops in)
 ```
+
+`crops.mjs` records the five invocations the archive's crops were actually made with, so they are reproducible
+rather than described. `crop.mjs` is the driver it calls, and takes `url|w|h|mobile|scale|out` jobs directly.
 
 Full-colour originals land in `out/513-nav/` and are not committed; `stills/` holds the chosen set quantized to
 256 colours, which is the convention `design/chart-table/` set.
@@ -242,9 +248,11 @@ body claimed it was not owed. It was owed, and running it found three things no 
   title cartouche ghosted through it on the Prospect, and two paragraphs of body prose read straight through it
   on the FAQ. It is now 0.985.
 
-**Measured, and left as it is:** with the chart open the corner covers 80.0% of the plate at 320, 48.8% at 390,
-57.1% at 901 and 31.2% at 1280. With the chart put away, which is the state the room spends most of its time in,
-it covers 0% at 320, 390 and 901 and 2.3% at 1280. That is the cost of the direction rather than a defect in it,
+**Measured by `vellum-plate-reader`, not by this round's own sweep, and left as it is:** with the chart open the
+corner covers 80.0% of the plate at 320, 48.8% at 390, 57.1% at 901 and 31.2% at 1280. With the chart put away,
+which is the state the room spends most of its time in, it covers 0% at 320, 390 and 901 and 2.3% at 1280. Those
+five figures need the plate's own rect, which `measurements.json` does not carry, so they are not re-derivable
+from the archive; recorded as an `errata/prose.md` row. That is the cost of the direction rather than a defect in it,
 and `prospect-d-c-shut-*` is the state to judge it by.
 
 **Found on the CONTROL, so present on main today and not caused by anything here:** at 320 the Prospect's tagline
@@ -300,11 +308,52 @@ what the picture showed.
 
 - **There is no Explorer mock.** The Explorer is the parent of all three rooms under the ruled tree and the one
   room this round did not draw. Recorded on Issue #638's comment as well.
-- `home-d-1280` and `home-d-c-1280` are byte-identical, and so are the 901 pair: on home, B renders no rank and C
-  renders no trail, so both directions reduce to the press. Two of the named spec stills therefore cannot tell
-  the ruled direction from the one it beat.
+- **Thirteen of the 58 archived stills are byte-duplicates of another, in six groups**, and three of the named
+  spec stills are among them. On home, B renders no rank and C renders no trail, so `home-b`, `home-c` and
+  `home-control` coincide at 1280 and at 901, and `home-d-shut` coincides with `home-d-c-shut` at both. On a
+  drawer-open phone row the chart is hidden, so `prospect-d-c-390-open` coincides with `prospect-c-390-open` and
+  `prospect-d-c-shut-390-open`. They are honest renderings rather than mistakes, but the consequence is that the
+  archive holds no picture of the chart on a phone for home or the FAQ, because their only phone stills have the
+  drawer open. Recorded as an `errata/prose.md` row.
 - The trail names the FAQ "Questions & Answers" two lines under a nav that names it "Q & A". The house carries
   both names deliberately; stacking them in one corner is new and is left as drawn.
 - At 901 and above the trail and the nav resolve to the same computed colour, so the distinction between the two
   lines is carried by a 1.6px size step and the separator glyph alone. It reads as a path in the 3x crops, but it
   is thin, and it is the first thing to watch in live use.
+
+## Round 3 of the cold review
+
+Round 3 returned five blocking findings. All were accepted.
+
+**The chart's labels collided at the ruled phone width, and no archived still could show it.** The sub-620
+legibility fix enlarged the labels inside a fixed `viewBox`, so they grew relative to the geometry that separates
+them: "you are here" ran into "The Reading Room" on the FAQ at 320 and 390 and into "Vellum" on home at 390. The
+Prospect did not collide, and the Prospect is the only one of the three whose phone still shows the chart. Fixed
+by moving the crowded places apart, hanging the pin BELOW its pip rather than above it into whatever label sits
+north of the place, and reducing the boost. **Measured to zero overlaps on all three pages at 320, 390, 576, 901
+and 1280**, where before there were two on the FAQ at four widths.
+
+**A 45px band of viewport rendered the chart at full width with 70% oversized labels.** The panel is
+`min(34rem, 100vw - 2 * var(--chrome-x))` and `--chrome-x` is 1rem below 720, so it stops shrinking at viewport
+576 while the media query kept boosting to 620: an identical 544px chart carried 18px labels at 620 and 12px at
+621. The breakpoint is now 575, which is where the panel actually stops shrinking. The round's sweep widths are
+320, 390, 901, 1024 and 1280, so nothing between 391 and 900 had ever been shot.
+
+**A fourth instrument, and the reason the first three could not see this.** `labelOverlaps` measures every pair
+of label boxes in the chart on every row. A rect check cannot see a text collision, and a still only shows the
+page it was taken of; four instances got through three rounds of review between them. It joins `sideways`,
+`fixedOverhang` and `doorsReachable` beside them rather than replacing any.
+
+**`drawerOpen` was measuring the wrong thing** on 48 of 168 rows: it read the nav's `position` and so meant "the
+nav is FOLDED", which is true on all 96 phone rows and not only the 48 with the drawer open. It now reads the
+reveal checkbox, and `navFolded` is recorded separately, since the two are different questions and the clearance
+fields want the folded one.
+
+**Nine findings the round does not fix now have rows** in `errata/site.md`, `errata/guards.md` and
+`errata/prose.md`, which is the exit the house requires; a finding left as prose in a pull request body is itself
+a finding. The largest of them is that `doorsReachable` is a bare count asserted against nothing, which differs
+from `doors` on 75 of 168 rows for three benign and previously unstated reasons.
+
+**The sheet was brought into line with the house's one-line CSS comment rule** and lint-checked by staging a copy
+under `public/`, since no repo guard walks `design/` and the build sub will lift these rules into a sheet where
+that guard reds.

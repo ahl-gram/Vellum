@@ -25,7 +25,11 @@ await new Promise((res, rej) => { ws.onopen = res; ws.onerror = rej; });
 let id = 0; const waiters = new Map();
 ws.onmessage = (ev) => { const m = JSON.parse(ev.data); if (m.id && waiters.has(m.id)) { waiters.get(m.id)(m); waiters.delete(m.id); } };
 const send = (method, params = {}) => new Promise((res, rej) => {
-  const i = ++id; waiters.set(i, (m) => (m.error ? rej(new Error(JSON.stringify(m.error))) : res(m.result)));
+  const i = ++id;
+  // A dead browser never answers, and without this the run hangs on an unsettled await: node exits 13 and names
+  // no row. 45s is well past the slowest call here (a full page screenshot) and well short of a wedged session.
+  const timer = setTimeout(() => { waiters.delete(i); rej(new Error(`CDP ${method} did not answer in 45s`)); }, 45000);
+  waiters.set(i, (m) => { clearTimeout(timer); return m.error ? rej(new Error(JSON.stringify(m.error))) : res(m.result); });
   ws.send(JSON.stringify({ id: i, method, params }));
 });
 await send('Page.enable'); await send('Runtime.enable');

@@ -4,6 +4,9 @@ Rows for the specs, the code comments, the agent definitions, the page copy. The
 
 ## Open
 
+- PR #666 (2026-09-22, high): Thirteen of the 58 archived stills are byte-duplicates of another, in six groups, because on home several directions reduce to the same rendering and on a drawer-open phone row the chart is hidden; three of the groups touch stills the ruling names as the spec. Left by the author: the duplicates are honest renderings rather than mistakes, and the README now discloses them. Searched errata for "stills", "duplicate": none.
+- PR #666 (2026-09-22, medium): The chart-coverage percentages the round quotes come from a vellum-plate-reader run relayed in chat and are not derivable from the archive, since measurements.json carries no plate rect. Left by the author: re-deriving them wants a fifth instrument. Searched errata for "plate rect", "coverage": none.
+
 - PR #277 (2026-07-24, medium): The #status summary still counts 24 ports while the log renders 25 rows including the homecoming; kept, with the wording left to Alex Searched: 'homecoming' (Issue #275, Issue #312, Issue #320 only, none about the summary wording), 'ports set down', 'round trip'. No ruling recorded. PR #352 later retired the Explorer's completion summary ('No live sweep means no completion (...)
 - PR #291 (2026-07-25, low): A whitespace-padded seed paste is refused by the pattern rather than trimmed; accepted as graceful Searched: 'whitespace' (only Issue #278/#391 on sentence normalization), 'trim', 'seed input'. No issue; the seed form later moved into the corner chrome under Landfall (Issue #470).
 - PR #311 (2026-07-29, low): The detent's escape threshold DETENT_ESCAPE_PX = 28 (capped at 15% of the bar) is a measured feel knob left for Alex to veto Searched: 'detent', 'DETENT_ESCAPE' (only Issue #647's comment sweep and Issue #321's wiring removal). The constant still reads 28 in src/render/ages-track.ts; no post-use re-review issue exists.

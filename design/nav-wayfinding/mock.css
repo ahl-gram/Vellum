@@ -1,6 +1,4 @@
-/* The round's OWN dress: only the shapes that do not exist on main yet. Everything else on these pages is the
-   lifted kit, untouched, so a still shows the real cascade. Where this sheet has to neutralise a live defect to
-   show the intended dress, it says so at the line and the defect is named in the README. */
+/* The round's OWN dress: only the shapes that do not exist on main yet. Everything else on these pages is the lifted kit, untouched, so a still shows the real cascade. Where this sheet has to neutralise a live defect to show the intended dress, it says so at the line and the defect is named in the README. */
 
 /* ---- common to every direction ---------------------------------------------------------------- */
 
@@ -37,8 +35,7 @@ header.chrome .atelier-press { pointer-events: auto; }
   color: var(--parchment-bright);
   text-decoration: underline dotted; text-underline-offset: 0.45em; text-decoration-thickness: 1px;
 }
-/* The room that carries this page as an ALIAS. Fainter than the ancestor, and a different stroke, because the
-   ratified pin allows exactly one aria-current span and this is deliberately not it. */
+/* The room that carries this page as an ALIAS. Fainter than the ancestor, and a different stroke, because the ratified pin allows exactly one aria-current span and this is deliberately not it. */
 .rooms a.alias {
   text-decoration: underline dashed; text-underline-offset: 0.45em; text-decoration-thickness: 1px;
   text-decoration-color: var(--ink-faded);
@@ -68,8 +65,7 @@ header.chrome .atelier-press { pointer-events: auto; }
 .also a { color: var(--parchment); text-decoration-color: rgb(from var(--parchment) r g b / 0.45); text-underline-offset: 0.25em; }
 
 /* Keyed to what the cluster CARRIES, never to a direction's name (keyed by name this missed D-over-C and it fell past the band), at ONE height sized to the tallest case. */
-/* Scoped to rooms that actually RENDER a band: a chart room renders none, so raising --band-h there drew no band
-   and only pushed the phone drawer's cap down by 67px of empty ground. */
+/* Scoped to rooms that actually RENDER a band: a chart room renders none, so raising --band-h there drew no band and only pushed the phone drawer's cap down by 67px of empty ground. */
 body.room:has(.band):has(.rank, .trail, .atelier-press) { --band-h: 10.6rem; padding-top: 10.8rem; }
 
 /* ---- D: the chart of the atelier --------------------------------------------------------------- */
@@ -82,8 +78,7 @@ body.room:has(.band):has(.rank, .trail, .atelier-press) { --band-h: 10.6rem; pad
 }
 .atelier-press::before { content: "✦ "; opacity: 0.8; }
 .atelier-press:hover, .atelier-press:focus-visible { color: var(--parchment-bright); }
-/* The chrome recolours its focus ring for anchors only (header.chrome a:focus-visible); this is the first button
-   the house has seated here, so without this it took the house ink ring, which reads 1.11:1 on the deep. */
+/* The chrome recolours its focus ring for anchors only (header.chrome a:focus-visible); this is the first button the house has seated here, so without this it took the house ink ring, which reads 1.11:1 on the deep. */
 header.chrome .atelier-press:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: 4px; }
 
 /* border-box like the house's own fixed `.slip`: on a content box the padding and border landed outside the min() and the panel hung 8.4px off the edge at 320 and 390. */
@@ -134,17 +129,15 @@ header.chrome .atelier-press:focus-visible { outline: 2px solid var(--parchment-
   font-style: italic; font-size: 0.62rem; color: var(--parchment); margin: 0.3rem 0 0; text-align: right;
 }
 
-/* Everything inside the chart scales with the chart, so at a narrow width the labels and the dash pattern shrink
-   below legibility no matter what ink they carry: measured 4.17px and 1.45:1 at 320. The sizes are therefore
-   stated in viewBox units that RENDER at a readable size once the scale is applied, rather than in units that
-   look right in the source. */
-@media (max-width: 620px) {
-  .atelier text { font-size: 17px; }
-  .atelier .village text { font-size: 15.5px; }
-  .atelier .isle text { font-size: 16px; }
-  .atelier .you text { font-size: 16px; }
-  .atelier .rose text { font-size: 14px; }
-  .atelier .cartouche { font-size: 19px; }
+/* Everything inside the chart scales with the chart, so at a narrow width the labels and the dash pattern shrink below legibility no matter what ink they carry: measured 4.17px and 1.45:1 at 320. The sizes are therefore stated in viewBox units that RENDER at a readable size once the scale is applied, rather than in units that look right in the source. */
+/* 575, not a round number: the panel is `min(34rem, 100vw - 2 * var(--chrome-x))` and --chrome-x is 1rem below 720, so it stops shrinking at viewport 576. A breakpoint above that gave a full width chart 70% oversized labels from 576 to 620 and snapped back at 621, measured. Below 576 the whole chart scales, so its text has to be stated in units that RENDER legibly once the scale is applied. */
+@media (max-width: 575px) {
+  .atelier text { font-size: 15px; }
+  .atelier .village text { font-size: 13.5px; }
+  .atelier .isle text { font-size: 14px; }
+  .atelier .you text { font-size: 14px; }
+  .atelier .rose text { font-size: 12.5px; }
+  .atelier .cartouche { font-size: 17px; }
   .atelier .road { stroke-width: 1.8; }
   .atelier .road.track { stroke-dasharray: 7 6; stroke-width: 2.2; }
   /* r is a CSS geometry property and outranks the SVG attribute, so ONE value here flattens the ranks. */
@@ -155,19 +148,10 @@ header.chrome .atelier-press:focus-visible { outline: 2px solid var(--parchment-
 }
 
 @media (max-width: 900px) {
-  /* The nav flies off as the drawer below 900 and anything seated after it stays in the cluster, which is the
-     property that makes this seat worth having: the rank, the trail and the press survive the fold. */
+  /* The nav flies off as the drawer below 900 and anything seated after it stays in the cluster, which is the property that makes this seat worth having: the rank, the trail and the press survive the fold. */
   .atelier { top: 9.4rem; }
-  /* The drawer wins. The shell already rules this class one line away, hiding `[popover]:popover-open` while the
-     drawer is open; the panel is not a popover so it never joined, and it covered five of the seven doors and
-     took them out of the hit-test, not merely out of sight. The PRESS did the same to one door on home at 320 even
-     with the panel put away, so the rule takes the whole under-cluster group: while the drawer is open it IS the
-     nav, and nothing the cluster carries sits over its doors. In the build this widens the SHELL's selector
-     rather than adding a second rule beside it. */
-  /* The drawer owns the cluster, so nothing the cluster carries sits over its doors. But the trail RIDES INTO the
-     drawer rather than going away with the rest (Alex, 2026-09-22): hiding it meant that opening the nav to ask
-     where you are was the one gesture that removed the answer. It is seated in the cap the doors already sticky
-     under, and the cap grows to make room, so it sits above them and over nothing. */
+  /* The drawer wins. The shell already rules this class one line away, hiding `[popover]:popover-open` while the drawer is open; the panel is not a popover so it never joined, and it covered five of the seven doors and took them out of the hit-test, not merely out of sight. The PRESS did the same to one door on home at 320 even with the panel put away, so the rule takes the whole under-cluster group: while the drawer is open it IS the nav, and nothing the cluster carries sits over its doors. In the build this widens the SHELL's selector rather than adding a second rule beside it. */
+  /* The drawer owns the cluster, so nothing the cluster carries sits over its doors. But the trail RIDES INTO the drawer rather than going away with the rest (Alex, 2026-09-22): hiding it meant that opening the nav to ask where you are was the one gesture that removed the answer. It is seated in the cap the doors already sticky under, and the cap grows to make room, so it sits above them and over nothing. */
   body:has(.rooms-reveal:checked) :is(.rank, .atelier-press, .atelier) { display: none; }
   body:has(.rooms-reveal:checked) :is(.trail, .also) {
     position: fixed; z-index: 46; left: var(--chrome-x); margin: 0;
