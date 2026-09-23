@@ -2,30 +2,34 @@
 // Landfall hardening e2e (#460, second suite by ratification 2026-08-25): the wheel consumed-vs-released contract at both zoom clamps (L1), the six panel arms from the superseding 2026-08-24T18:53 spec plus the sixth-arm clearance (L2-L7), the Enter links as 44px touch targets (L8), touch two-finger-drives vs one-finger-page-scroll under one emulation set (L9), and the seed form's no-JS GET fallback with its bare-visit control (L10-L11). Every gesture is REAL dispatched input; suite-home's plumbing arrives via home-support.ts.
 import { readCam, atLandfall, readXform, buttonPoint, makeStage } from "./home-support.ts";
 import { scopedHealth } from "./room-support.ts";
+import type { Cam } from "./home-support.ts";
+import type { Payload, Point, SuiteContext } from "./types.ts";
+
+type Headroom = { cx: number; cy: number; w: number; h: number };
 
 // eslint-disable-next-line max-lines-per-function
-export async function run(ctx) {
+export async function run(ctx: SuiteContext): Promise<void> {
   const { evaluate, send, check, shoot, sleep, wheel, touch, pinch, setMobileViewport, clearMobile, PORT } = ctx;
   const { pressKey, clickAt, settleHome } = makeStage(ctx);
   const gate = scopedHealth(ctx);
 
   // e.defaultPrevented read at the window AFTER the stage's own listener ran, so the log records exactly what input.ts decided; passive, so the probe cannot itself consume.
   const armWheelLog = () =>
-    evaluate(`(window.__lfWheel = [], window.addEventListener("wheel", (e) => window.__lfWheel.push(e.defaultPrevented), { passive: true }), true)`);
-  const lastWheel = () => evaluate(`window.__lfWheel[window.__lfWheel.length - 1] ?? null`);
+    evaluate<boolean>(`(window.__lfWheel = [], window.addEventListener("wheel", (e) => window.__lfWheel.push(e.defaultPrevented), { passive: true }), true)`);
+  const lastWheel = () => evaluate<boolean | null>(`window.__lfWheel[window.__lfWheel.length - 1] ?? null`);
   const camNow = () => evaluate(readCam);
   const camScale = async () => { const c = await camNow(); return c === null ? null : c.scale; };
-  const scrollY = () => evaluate(`window.scrollY`);
+  const scrollY = () => evaluate<number>(`window.scrollY`);
   // Every element probe returns null instead of throwing, and every dispatch is gated on it: an unguarded deref here turns a product regression into a HARNESS ERROR that prints zero checks (skeptic round 1, proven against an empty site dir), which the lane driver reserves for the browser never coming up.
-  const centerOf = (selector) => evaluate(`(() => {
+  const centerOf = (selector: string) => evaluate<Point | null>(`(() => {
     const el = document.querySelector('${selector}');
     if (!el) return null;
     const r = el.getBoundingClientRect();
     return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) };
   })()`);
-  const wheelAt = async (p, dy) => { if (p !== null) await wheel(p.x, p.y, dy); };
+  const wheelAt = async (p: Point | null, dy: number) => { if (p !== null) await wheel(p.x, p.y, dy); };
 
-  const stagePoint = `(() => { const s = document.getElementById("lf-stage"); if (!s) return null; const r = s.getBoundingClientRect(); return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) }; })()`;
+  const stagePoint: Payload<Point | null> = `(() => { const s = document.getElementById("lf-stage"); if (!s) return null; const r = s.getBoundingClientRect(); return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) }; })()`;
 
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   const settled1 = await settleHome();
@@ -37,6 +41,7 @@ export async function run(ctx) {
   const mid = { prevented: await lastWheel(), cam: await camNow() };
   check(
     "L1a mid-range a real wheel is consumed: the zoom steps and the event is defaultPrevented",
+    // @ts-expect-error atLandfall has already read false for a null settle, so a null never reaches here
     atLandfall(settled1) && mid.prevented === true && mid.cam !== null && mid.cam.scale > settled1.scale * 1.05,
     JSON.stringify({ settled1, mid }),
   );
@@ -55,6 +60,7 @@ export async function run(ctx) {
   const atMax = { prevented: await lastWheel(), cam: await camNow(), y: await scrollY() };
   check(
     "L1b at the close-in clamp (scale 7) a further wheel-in is released: no zoom step, not defaultPrevented, and the page holds (nothing above to scroll to)",
+    // @ts-expect-error a null camera means the stage vanished between two reads of one page; a null throws here, outside any step, and the runner reds the whole suite as stopped early
     sat !== null && Math.abs(sat.scale - 7) < 1e-6 && atMax.prevented === false && Math.abs(atMax.cam.scale - 7) < 1e-6 && atMax.y === 0,
     JSON.stringify({ sat, atMax }),
   );
@@ -97,10 +103,11 @@ export async function run(ctx) {
     const y = await scrollY();
     if (y > 0) { atMin = { prevented: await lastWheel(), cam: await camNow(), y }; break; }
   }
-  const bodyLocked1d = await evaluate(`getComputedStyle(document.body).overflow`);
+  const bodyLocked1d = await evaluate<string>(`getComputedStyle(document.body).overflow`);
   check(
     "L1d at the stand-off clamp (0.65 of fit) a fresh wheel-out is released to the page: the wheel is not prevented, the camera holds, and the shelf scrolls into view (#472; the #461 body lock is retired)",
     floor !== null && Math.abs(floor.scale - floor.fit * 0.65) < 1e-6 && yBefore === 0 && atMin !== null
+      // @ts-expect-error a null camera means the stage vanished between two reads of one page; a null throws here, outside any step, and the runner reds the whole suite as stopped early
       && atMin.prevented === false && Math.abs(atMin.cam.scale - floor.scale) < 1e-9 && atMin.y > 0
       && bodyLocked1d !== "hidden",
     JSON.stringify({ floor, yBefore, atMin, bodyLocked1d }),
@@ -117,8 +124,8 @@ export async function run(ctx) {
     await wheelAt(pt, 4000);
     await wheelAt(pt, 480);
     await sleep(250);
-    const log = await evaluate(`window.__lfW2`);
-    if (log !== null && log.length === 2 && log[1].t - log[0].t < 280) {
+    const log = await evaluate<{ p: boolean; t: number }[]>(`window.__lfW2`);
+    if (log !== null && log.length === 2 && log[1].t - log[0].t < 280) { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
       usedUp = { log, y: await scrollY(), cam: await camNow() };
     }
   }
@@ -129,7 +136,7 @@ export async function run(ctx) {
     JSON.stringify({ usedUp }),
   );
 
-  const readHint = () => evaluate(`(() => {
+  const readHint = () => evaluate<{ op: string; stood: boolean } | null>(`(() => {
     const m = document.querySelector(".lf-more");
     const s = document.getElementById("lf-stage");
     if (!m || !s) return null;
@@ -182,7 +189,7 @@ export async function run(ctx) {
   for (let i = 0; i < 25; i++) {
     await sleep(100);
     const y = await scrollY();
-    const open = await evaluate(`(() => { const c = document.getElementById("lf-card-gallery"); return c ? !c.hidden : null; })()`);
+    const open = await evaluate<boolean | null>(`(() => { const c = document.getElementById("lf-card-gallery"); return c ? !c.hidden : null; })()`);
     if (y === 0 && open === true) { surfacedCard = { y, open }; break; }
   }
   await pressKey("Escape", "Escape", 27);
@@ -217,6 +224,7 @@ export async function run(ctx) {
     "L1f over the scrolled page a wheel-up scrolls the page and never zooms; back at the top, a fresh wheel-up is the camera's again",
     // Drift-sized stillness (2%, L9a's), not 1%: the idle drift breathes the scale +-1.5% and the reads straddle a wheel-scroll poll of up to 2s, while a wheel step is 21%; lane A's length moved this fixture against the 9s idle delay again at #463 (CI red twice, green locally).
     yMid > 0 && backUp !== null && backUp.prevented === false && midCamBefore !== null
+      // @ts-expect-error a null camera means the stage vanished between two reads of one page; a null throws here, outside any step, and the runner reds the whole suite as stopped early
       && Math.abs(backUp.cam.scale / midCamBefore.scale - 1) < 0.02 && backUp.y < yMid
       && topCamBefore !== null && topZoom !== null && topZoom.scale > topCamBefore.scale * 1.05,
     JSON.stringify({ yMid, backUp, topCamBefore, topZoom }),
@@ -226,13 +234,13 @@ export async function run(ctx) {
   await evaluate(`document.getElementById("lf-stage")?.focus()`);
   const keyCamBefore = await camNow();
   // text: " " is what makes CDP's keyDown char-producing; without it the browser never runs Space's native scroll default. The navigation keys carry only their codes.
-  const pressNav = async (key, code, vk, text) => {
+  const pressNav = async (key: string, code: string, vk: number, text?: string) => {
     await send("Input.dispatchKeyEvent", { type: "keyDown", key, code, windowsVirtualKeyCode: vk, ...(text === undefined ? {} : { text }) });
     await send("Input.dispatchKeyEvent", { type: "keyUp", key, code, windowsVirtualKeyCode: vk });
   };
-  const keyRuns = [];
+  const keyRuns: { label: string; y0: number; y: number; ok: boolean }[] = [];
   // Every down-key starts from the top or it can find itself already parked on the page floor (End certified nothing from y=610, round 5).
-  const keyScroll = async (label, setupY, fire, moved) => {
+  const keyScroll = async (label: string, setupY: number, fire: () => Promise<void>, moved: (y: number, y0: number) => boolean) => {
     for (let i = 0; i < 20; i++) {
       await evaluate(`window.scrollTo(0, ${setupY})`);
       await sleep(100);
@@ -248,7 +256,7 @@ export async function run(ctx) {
     }
     keyRuns.push({ label, y0, y: await scrollY(), ok: false });
   };
-  const down = (y, y0) => y > y0;
+  const down = (y: number, y0: number) => y > y0;
   await keyScroll("Space", 0, () => pressNav(" ", "Space", 32, " "), down);
   await keyScroll("PageDown", 0, () => pressNav("PageDown", "PageDown", 34), down);
   await keyScroll("End", 0, () => pressNav("End", "End", 35), down);
@@ -296,7 +304,7 @@ export async function run(ctx) {
 
   await evaluate(`window.scrollTo(0, document.body.scrollHeight)`);
   await sleep(300);
-  const cluster = await evaluate(`(() => {
+  const cluster = await evaluate<{ pos: string; washPos: string; bottom: number } | null>(`(() => {
     const h = document.querySelector("header.chrome");
     if (!h) return null;
     return { pos: getComputedStyle(h).position, washPos: getComputedStyle(h, "::before").position, bottom: h.getBoundingClientRect().bottom };
@@ -315,7 +323,7 @@ export async function run(ctx) {
   let how = null;
   for (let i = 0; i < 80; i++) {
     try {
-      how = await evaluate(`(() => {
+      how = await evaluate<{ open: boolean; focused: boolean; scrollTop: number; max: number } | null>(`(() => {
         const card = document.getElementById("lf-card-how");
         const scroller = card ? card.querySelector(".lf-card-scroll") : null;
         if (!card || !scroller) return null;
@@ -343,7 +351,7 @@ export async function run(ctx) {
   const y5 = await scrollY();
   await pressKey("ArrowDown", "ArrowDown", 40);
   await sleep(200);
-  const arrowed = await evaluate(`document.querySelector("#lf-card-how .lf-card-scroll")?.scrollTop ?? null`);
+  const arrowed = await evaluate<number | null>(`document.querySelector("#lf-card-how .lf-card-scroll")?.scrollTop ?? null`);
   check(
     "L5b ArrowDown scrolls the prose at once, the page unmoved",
     how !== null && arrowed !== null && arrowed > how.scrollTop && (await scrollY()) === y5,
@@ -351,13 +359,13 @@ export async function run(ctx) {
   );
 
   const proseBox = await centerOf("#lf-card-how .lf-card-scroll");
-  const closeBox0 = await evaluate(`(() => { const el = document.querySelector("#lf-card-how .lf-card-close"); if (!el) return null; const r = el.getBoundingClientRect(); return [r.x, r.y, r.width, r.height]; })()`);
+  const closeBox0 = await evaluate<number[] | null>(`(() => { const el = document.querySelector("#lf-card-how .lf-card-close"); if (!el) return null; const r = el.getBoundingClientRect(); return [r.x, r.y, r.width, r.height]; })()`);
   const scale2a = await camScale();
   let prose = null;
   for (let i = 0; i < 30 && proseBox !== null; i++) {
     await wheelAt(proseBox, 240);
     await sleep(90);
-    prose = await evaluate(`(() => { const s = document.querySelector("#lf-card-how .lf-card-scroll"); if (!s) return null; return { top: s.scrollTop, max: s.scrollHeight - s.clientHeight }; })()`);
+    prose = await evaluate<{ top: number; max: number } | null>(`(() => { const s = document.querySelector("#lf-card-how .lf-card-scroll"); if (!s) return null; return { top: s.scrollTop, max: s.scrollHeight - s.clientHeight }; })()`);
     if (prose === null || prose.top >= prose.max - 0.5) break;
   }
   const after2 = { scale: await camScale(), y: await scrollY() };
@@ -368,7 +376,7 @@ export async function run(ctx) {
     JSON.stringify({ prose, scale2a, after2 }),
   );
 
-  const closeBox1 = await evaluate(`(() => { const el = document.querySelector("#lf-card-how .lf-card-close"); if (!el) return null; const r = el.getBoundingClientRect(); return [r.x, r.y, r.width, r.height]; })()`);
+  const closeBox1 = await evaluate<number[] | null>(`(() => { const el = document.querySelector("#lf-card-how .lf-card-close"); if (!el) return null; const r = el.getBoundingClientRect(); return [r.x, r.y, r.width, r.height]; })()`);
   check(
     "L6 (arm 5) the head never scrolls away: the close button's box is unchanged after the prose reaches its end, overscroll contained",
     closeBox0 !== null && closeBox1 !== null && JSON.stringify(closeBox0) === JSON.stringify(closeBox1) && (await scrollY()) === y5,
@@ -386,7 +394,7 @@ export async function run(ctx) {
     JSON.stringify({ scale3a, after3 }),
   );
 
-  const clear6 = await evaluate(`(() => {
+  const clear6 = await evaluate<{ anchorX: number; cardLeft: number; innerWidth: number } | null>(`(() => {
     const btn = document.querySelector('.lf-station[data-station="how"]');
     const stage = document.getElementById("lf-stage");
     const sheet = document.getElementById("lf-sheet");
@@ -407,7 +415,7 @@ export async function run(ctx) {
   await sleep(500);
 
   // eslint-disable-next-line max-lines-per-function
-  const measureEnters = async (label) => {
+  const measureEnters = async (label: string) => {
     const boxes = [];
     let swallowed = null;
     for (const id of ["atlas", "explorer", "reading-room", "gallery"]) {
@@ -419,7 +427,7 @@ export async function run(ctx) {
         if (label === "narrow") {
           await pressKey("Escape", "Escape", 27);
           for (let i = 0; i < 80; i++) {
-            const anyOpen = await evaluate(`[...document.querySelectorAll(".lf-card")].some((c) => !c.hidden)`);
+            const anyOpen = await evaluate<boolean>(`[...document.querySelectorAll(".lf-card")].some((c) => !c.hidden)`);
             // eslint-disable-next-line max-depth
             if (anyOpen === false) break;
             await sleep(75);
@@ -436,7 +444,7 @@ export async function run(ctx) {
           for (let i = 0; i < 80; i++) {
             // eslint-disable-next-line max-depth
             try {
-              reachable = await evaluate(`(() => {
+              reachable = await evaluate<boolean>(`(() => {
                 const btn = document.querySelector('.lf-station[data-station="${id}"]');
                 if (!btn) return false;
                 const r = btn.getBoundingClientRect();
@@ -457,14 +465,14 @@ export async function run(ctx) {
         if (chipPt !== null) await clickAt(Math.round(chipPt.x), Math.round(chipPt.y));
         for (let i = 0; i < 80; i++) {
           try {
-            open = await evaluate(`(() => { const c = document.getElementById("lf-card-${id}"); if (!c || c.hidden) return false; const cs = getComputedStyle(c); return cs.visibility !== "hidden" && Number(cs.opacity) > 0.95; })()`);
+            open = await evaluate<boolean>(`(() => { const c = document.getElementById("lf-card-${id}"); if (!c || c.hidden) return false; const cs = getComputedStyle(c); return cs.visibility !== "hidden" && Number(cs.opacity) > 0.95; })()`);
           } catch {}
           if (open === true) break;
           await sleep(75);
         }
       }
       await sleep(400);
-      const box = await evaluate(`(() => { const a = document.querySelector("#lf-card-${id} .lf-card-enter"); if (!a) return null; const r = a.getBoundingClientRect(); return { id: "${id}", open: ${open}, w: r.width, h: r.height }; })()`);
+      const box = await evaluate<{ id: string; open: boolean; w: number; h: number } | null>(`(() => { const a = document.querySelector("#lf-card-${id} .lf-card-enter"); if (!a) return null; const r = a.getBoundingClientRect(); return { id: "${id}", open: ${open}, w: r.width, h: r.height }; })()`);
       boxes.push(box);
       if (id === "atlas" && label === "desktop") {
         const cardPt = await centerOf("#lf-card-atlas .lf-card-prose");
@@ -502,7 +510,7 @@ export async function run(ctx) {
   let narrow6 = null;
   for (let i = 0; i < 80; i++) {
     try {
-      narrow6 = await evaluate(`(() => {
+      narrow6 = await evaluate<{ anchorY: number; sheetTop: number; innerWidth: number } | null>(`(() => {
         const card = document.getElementById("lf-card-how");
         const btn = document.querySelector('.lf-station[data-station="how"]');
         const stage = document.getElementById("lf-stage");
@@ -537,12 +545,12 @@ export async function run(ctx) {
 
   const stagePt9 = await evaluate(stagePoint);
   // Drift-sized stillness: on slow CI the fixture has crossed IDLE_DELAY_MS by here and the ambient ±1.5% drift moved the camera 3e-6 between reads (PR #482 CI); a one-finger pan that drove the map would move it 60px.
-  const stillCam = (a, b) =>
+  const stillCam = (a: Cam | null, b: Cam | null) =>
     a !== null && b !== null && Math.abs(b.scale - a.scale) < a.scale * 0.02 && Math.abs(b.x - a.x) < 8 && Math.abs(b.y - a.y) < 8;
-  const touchAction9 = await evaluate(`(() => { const s = document.getElementById("lf-stage"); return s ? getComputedStyle(s).touchAction : null; })()`);
+  const touchAction9 = await evaluate<string | null>(`(() => { const s = document.getElementById("lf-stage"); return s ? getComputedStyle(s).touchAction : null; })()`);
   // The drag heads INTO clamp headroom (+x,+y): the original (-x,-y) gesture aimed at the corner the camera was already parked on, so stillness held with every gate deleted (guard-prover round 2).
-  const bodyLocked390 = await evaluate(`getComputedStyle(document.body).overflow`);
-  const belowFold390 = await evaluate(`document.scrollingElement.scrollHeight - window.innerHeight`);
+  const bodyLocked390 = await evaluate<string>(`getComputedStyle(document.body).overflow`);
+  const belowFold390 = await evaluate<number>(`document.scrollingElement.scrollHeight - window.innerHeight`);
   const oneBefore = await camNow();
   if (stagePt9 !== null) {
     await touch("touchStart", [{ x: stagePt9.x, y: stagePt9.y, id: 0 }]);
@@ -576,7 +584,7 @@ export async function run(ctx) {
   );
 
   // L9c-L9g: the real two-finger contract (#475). Every pan read pins its fixture's clamp headroom first: the old L9c went green off a clamp-parked fixture (PR #474 skeptic finding 3), so an unproven fixture is the bug these arms exist to never repeat.
-  const headroom = () => evaluate(`(() => {
+  const headroom = () => evaluate<Headroom | null>(`(() => {
     const stage = document.getElementById("lf-stage");
     const sheet = document.getElementById("lf-sheet");
     if (!stage || !sheet) return null;
@@ -584,9 +592,9 @@ export async function run(ctx) {
     const m = new DOMMatrixReadOnly(getComputedStyle(sheet).transform);
     return { cx: m.e + (1500 * m.a) / 2, cy: m.f + (1157.931 * m.a) / 2, w: r.width, h: r.height };
   })()`);
-  const roomy = (hr) => hr !== null && hr.cx > 50 && hr.cx < hr.w - 50 && hr.cy > 50 && hr.cy < hr.h - 50;
+  const roomy = (hr: Headroom | null) => hr !== null && hr.cx > 50 && hr.cx < hr.w - 50 && hr.cy > 50 && hr.cy < hr.h - 50;
   // Ruling 3 on #475: at a limit the arm picks the drag direction FROM measured headroom and proves the room exists, instead of assuming an unparked centre.
-  const roomDir = (hr) => {
+  const roomDir = (hr: Headroom | null) => {
     if (hr === null) return null;
     const sx = hr.w - hr.cx >= hr.cx ? 1 : -1;
     const sy = hr.h - hr.cy >= hr.cy ? 1 : -1;
@@ -594,7 +602,7 @@ export async function run(ctx) {
     const roomY = sy > 0 ? hr.h - hr.cy : hr.cy;
     return roomX > 100 && roomY > 60 ? { sx, sy } : null;
   };
-  const twoFingerDrag = async (p, sx = 1, sy = 1) => {
+  const twoFingerDrag = async (p: Point, sx = 1, sy = 1) => {
     await touch("touchStart", [{ x: p.x - 40, y: p.y, id: 0 }, { x: p.x + 40, y: p.y, id: 1 }]);
     await touch("touchMove", [{ x: p.x - 40 + sx * 40, y: p.y + sy * 30, id: 0 }, { x: p.x + 40 + sx * 40, y: p.y + sy * 30, id: 1 }]);
     await touch("touchEnd", []);
@@ -608,7 +616,7 @@ export async function run(ctx) {
 
   await recenter();
   const room9c = await headroom();
-  const startClear9c = stagePt9 === null ? null : await evaluate(`(() => {
+  const startClear9c = stagePt9 === null ? null : await evaluate<boolean>(`(() => {
     const hit = (x, y) => document.elementFromPoint(x, y)?.closest("button, a, input, select") ?? null;
     return hit(${stagePt9.x - 40}, ${stagePt9.y}) === null && hit(${stagePt9.x + 40}, ${stagePt9.y}) === null;
   })()`);
@@ -652,9 +660,9 @@ export async function run(ctx) {
   })()`);
   const maxBefore = await camNow();
   if (stagePt9 !== null && dir9d !== null) await twoFingerDrag(stagePt9, dir9d.sx, dir9d.sy);
-  const minScale9d = await evaluate(`(window.__lfScaleObs?.disconnect(), window.__lfMinScale)`);
+  const minScale9d = await evaluate<number | undefined>(`(window.__lfScaleObs?.disconnect(), window.__lfMinScale)`);
   // A drag at the clamp writes the transform at least once (the pan half alone), so zero observed writes means the instrument never engaged, not a quiet gesture (guard-prover round 3).
-  const writes9d = await evaluate(`window.__lfScaleWrites`);
+  const writes9d = await evaluate<number>(`window.__lfScaleWrites`);
   const maxAfter = await camNow();
   check(
     "L9d at the close-in clamp a two-finger drag still pans into PROVEN headroom, signed, and never collapses the zoom EVEN MID-GESTURE (PR #474 measured scale 7 falling to 4.53 here; a dip that saturates back by gesture end hides from before/after reads)",
@@ -721,7 +729,7 @@ export async function run(ctx) {
   }
   await sleep(300);
   const onPipAfter = await camNow();
-  const cardStayed = await evaluate(`(() => { const c = document.getElementById("lf-card-how"); return c !== null && c.hidden; })()`);
+  const cardStayed = await evaluate<boolean>(`(() => { const c = document.getElementById("lf-card-how"); return c !== null && c.hidden; })()`);
   check(
     "L9f a two-finger gesture that begins on a pip still drives the map, and the drag never reads as a tap (the slip stays shut)",
     pipPt9 !== null && roomy(room9f) && onPipBefore !== null && onPipAfter !== null
@@ -737,7 +745,7 @@ export async function run(ctx) {
   let tapped = false;
   for (let i = 0; i < 60; i++) {
     try {
-      tapped = await evaluate(`(() => { const c = document.getElementById("lf-card-how"); if (!c || c.hidden) return false; const cs = getComputedStyle(c); return cs.visibility !== "hidden" && Number(cs.opacity) > 0.95; })()`);
+      tapped = await evaluate<boolean>(`(() => { const c = document.getElementById("lf-card-how"); if (!c || c.hidden) return false; const cs = getComputedStyle(c); return cs.visibility !== "hidden" && Number(cs.opacity) > 0.95; })()`);
     } catch {}
     if (tapped === true) break;
     await sleep(75);
@@ -777,7 +785,7 @@ export async function run(ctx) {
   let formReady = false;
   for (let i = 0; i < 120; i++) {
     try {
-      formReady = await evaluate(`(() => {
+      formReady = await evaluate<boolean>(`(() => {
         const i2 = document.getElementById("seed-input");
         if (!i2) return false;
         const r = i2.getBoundingClientRect();
@@ -797,7 +805,7 @@ export async function run(ctx) {
   let nojs = null;
   for (let i = 0; i < 120 && drawPt !== null; i++) {
     try {
-      nojs = await evaluate(`({ path: location.pathname, search: location.search, hash: location.hash, h1: document.querySelector("h1")?.textContent ?? null })`);
+      nojs = await evaluate<{ path: string; search: string; hash: string; h1: string | null }>(`({ path: location.pathname, search: location.search, hash: location.hash, h1: document.querySelector("h1")?.textContent ?? null })`);
       // The break must demand everything the check asserts: navigation COMMITS before the document parses, so a path-only break snapshots h1 null on a slow machine (CI 2026-08-25, locally unreproducible).
       if (nojs.path === "/explorer/" && (nojs.h1 ?? "").includes("Explorer")) break;
     } catch {}
@@ -814,7 +822,7 @@ export async function run(ctx) {
     for (let i = 0; i < 200; i++) {
       let s = null;
       try {
-        s = await evaluate(`(() => {
+        s = await evaluate<string | null>(`(() => {
           const svg = document.querySelector("#map svg");
           const status = document.getElementById("status");
           const seed = document.getElementById("seed");
@@ -833,7 +841,7 @@ export async function run(ctx) {
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/?seed=777` });
   const querySeed = await seedShown();
-  const queryKept = await evaluate(`location.search`);
+  const queryKept = await evaluate<string>(`location.search`);
   check(
     "L11 with scripts on the Explorer ignores the query and degrades to today's world: the ?seed=777 visit draws the same seed the bare visit does",
     bareSeed !== null && querySeed === bareSeed && queryKept === "?seed=777",

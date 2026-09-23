@@ -3,7 +3,7 @@
 // The camera's state measured against the same stage box and constants it uses; the landfall breakpoint reads the VIEWPORT, as the mockup's v.w < 900 does (skeptic finding 1 on PR #467: the stage box is narrower than the viewport, so keying on it fired the narrow framing up to 947px).
 import type { Payload, Point, SuiteContext } from "./types.ts";
 
-type Cam = { veil: boolean; lifting: boolean; status: string | null; scale: number; x: number; y: number; fit: number; expected: number };
+export type Cam = { veil: boolean; lifting: boolean; status: string | null; scale: number; x: number; y: number; fit: number; expected: number };
 
 export const readCam: Payload<Cam | null> = `(() => {
   const stage = document.getElementById("lf-stage");

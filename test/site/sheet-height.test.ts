@@ -51,8 +51,8 @@ test("the sheet-width literals match the manifest's build width in every home ca
   for (const path of [
     "public/index.css",
     "scripts/e2e/home-support.ts",
-    "scripts/e2e/suite-home.mjs",
-    "scripts/e2e/suite-landfall.mjs",
+    "scripts/e2e/suite-home.ts",
+    "scripts/e2e/suite-landfall.ts",
   ]) {
     assert.ok(wRe.test(read(path)), `no width literal ${w} found in ${path}: it drifted or was re-derived`);
   }
