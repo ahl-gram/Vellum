@@ -36,7 +36,7 @@ const operandIsMatchGroup = (checker: ts.TypeChecker, sf: ts.SourceFile, start: 
     if (node.getStart(sf) <= start && node.getEnd() >= start + length) ts.forEachChild(node, visit);
   };
   visit(sf);
-  return found !== undefined && ts.isElementAccessExpression(found) && MATCH_ARRAYS.has(checker.getTypeAtLocation(found.expression).getSymbol()?.name ?? "") && (checker.getTypeAtLocation(found).flags & ts.TypeFlags.StringLike) !== 0;
+  return found !== undefined && ts.isElementAccessExpression(found) && MATCH_ARRAYS.has(checker.getTypeAtLocation(found.expression).getSymbol()?.name ?? "");
 };
 
 function compile(sources: readonly Source[]): ts.Program {
@@ -131,6 +131,9 @@ const NOTE_FIXTURE = [
   "export const eighteen = 255 * group[1];",
   "// @ts-expect-error a string field of a stated shape multiplied, which is not the match group the arm admits",
   "export const nineteen = w.label * 255;",
+  "declare const list: string[];",
+  "// @ts-expect-error an element of a plain string array, which is not a match array",
+  "export const twenty = list[0] * 255;",
 ];
 
 test("the note scanner passes one null objection per note and reports a second uncertain value, a misspelling beside or in place of the null read, a wrong type that shares its start, a note with nothing under it, and a stray suppression, while a regex match group coerced by arithmetic passes only as the one objection under its note, and a string field so coerced reds", () => {
@@ -138,8 +141,8 @@ test("the note scanner passes one null objection per note and reports a second u
   assert.equal(existsSync(path), false, "the fixture's name is a real file, so the scan below would read the disk instead");
   const text = NOTE_FIXTURE.join("\n");
   const { notes, findings } = noteFindings([{ path, text }]);
-  assert.equal(notes, 18);
-  assert.deepEqual(findings.map((f) => f.at).sort(), [10, 12, 18, 20, 22, 24, 26, 30, 37, 39, 41, 43, 47].map((n) => `${path}:${n}`).sort());
+  assert.equal(notes, 19);
+  assert.deepEqual(findings.map((f) => f.at).sort(), [10, 12, 18, 20, 22, 24, 26, 30, 37, 39, 41, 43, 47, 50].map((n) => `${path}:${n}`).sort());
 });
 
 test("the scan reads every TypeScript file under scripts/e2e at any depth and the e2e scripts beside it, and nothing else", () => {
