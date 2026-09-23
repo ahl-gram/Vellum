@@ -897,7 +897,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
     // The same town at a second year: the year IS part of the sheet's identity, which is the case that won "press and stay".
     // The form is submitted synthetically because the claim here is about the FILING, not about the year control, whose own gesture PB6 already drives.
     await evaluate(`(() => { const y = document.getElementById("pp-year"); y.value = String(Math.max(1, Number(y.value) - 300)); document.getElementById("pp-year-form").dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })); })()`);
-    // @ts-expect-error the state is null only on a Prospect page that never drew, which the boot loop above waits for; a null throws here, inside the step, which reds CD28, CD29, CD34, CD35, CD31 by name
+    // @ts-expect-error the state is null only on a Prospect page that never drew, which the boot loop above waits for; while the poll reads no year the s !== null test before it reads false and the loop runs out its tries, and once it reads a year a null state throws here, inside the step, which reds CD28, CD29, CD34, CD35, CD31 by name
     for (let i = 0; i < 300; i++) { await sleep(100); const s = await evaluate<number | null>(`(() => { const st = window.__vellumProspectState(); return st ? st.year : null; })()`); if (s !== null && s !== one.state.year) break; }
     let two = await evaluate(PP);
     if (two.press && two.press.centre) await clickAt(two.press.centre.x, two.press.centre.y);
