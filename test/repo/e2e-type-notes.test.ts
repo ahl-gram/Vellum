@@ -1,7 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { dirname, join, relative, resolve } from "node:path";
 import ts from "typescript";
 
 const REPO = resolve(import.meta.dirname, "..", "..");
@@ -16,14 +17,14 @@ type Source = { readonly path: string; readonly text: string };
 type Covered = { readonly column: number; readonly code: number; readonly text: string };
 type Finding = { readonly at: string; readonly diagnostics: readonly string[] };
 
-const e2eSources = (): Source[] => {
-  const dir = join(REPO, "scripts", "e2e");
-  const paths = [
+const e2eSourcePaths = (root: string): string[] => {
+  const dir = join(root, "scripts", "e2e");
+  return [
     ...readdirSync(dir, { recursive: true, encoding: "utf8" }).filter((f) => f.endsWith(".ts")).map((f) => join(dir, f)),
-    ...readdirSync(join(REPO, "scripts")).filter((f) => /^e2e-[\w-]+\.ts$/.test(f)).map((f) => join(REPO, "scripts", f)),
+    ...readdirSync(join(root, "scripts")).filter((f) => /^e2e-[\w-]+\.ts$/.test(f)).map((f) => join(root, "scripts", f)),
   ];
-  return paths.map((path) => ({ path, text: readFileSync(path, "utf8") }));
 };
+const e2eSources = (): Source[] => e2eSourcePaths(REPO).map((path) => ({ path, text: readFileSync(path, "utf8") }));
 
 const nullish = (c: Covered): boolean =>
   NULLISH.has(c.code) || (ASSIGNS.has(c.code) && /\b(null|undefined)\b/.test(c.text)) || (c.code === 2339 && ON_EMPTY_OBJECT.test(c.text));
@@ -111,6 +112,23 @@ test("the note scanner passes one null objection per note and reports a second u
   const { notes, findings } = noteFindings([{ path, text }]);
   assert.equal(notes, 11);
   assert.deepEqual(findings.map((f) => f.at).sort(), [10, 12, 18, 20, 22, 24, 26, 30].map((n) => `${path}:${n}`).sort());
+});
+
+test("the scan reads every TypeScript file under scripts/e2e at any depth and the e2e scripts beside it, and nothing else", () => {
+  const root = mkdtempSync(join(tmpdir(), "vellum-e2e-notes-"));
+  try {
+    const plant = (rel: string): void => {
+      mkdirSync(dirname(join(root, rel)), { recursive: true });
+      writeFileSync(join(root, rel), "");
+    };
+    ["scripts/e2e/top.ts", "scripts/e2e/split/nested.ts", "scripts/e2e-beside.ts", "scripts/e2e/left.mjs", "scripts/other.ts"].forEach(plant);
+    assert.deepEqual(
+      e2eSourcePaths(root).map((p) => relative(root, p)).sort(),
+      ["scripts/e2e/top.ts", "scripts/e2e/split/nested.ts", "scripts/e2e-beside.ts"].sort(),
+    );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
 });
 
 test("every ruled note in the e2e tree covers one uncertain expression and nothing but its null objection, so a typo or a wrong type beside or in place of the nullable read cannot hide under it (Alex's ruling of 2026-09-23 on Issue #653)", () => {
