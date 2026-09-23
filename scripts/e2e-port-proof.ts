@@ -75,8 +75,8 @@ const renameOf = (a: Leaf, b: Leaf, existsAsTs: (specifier: string) => boolean):
 const differences = (a: readonly string[], b: readonly string[]): number =>
   Array.from({ length: Math.max(a.length, b.length) }, (_, i) => (a[i] === b[i] ? 0 : 1)).reduce<number>((s, d) => s + d, 0);
 
-export function compareSources(before: string, after: string, afterIsTs: boolean, existsAsTs: (specifier: string) => boolean): PortComparison {
-  const sa = parse(before);
+export function compareSources(before: string, after: string, afterIsTs: boolean, existsAsTs: (specifier: string) => boolean, beforeIsTs = false): PortComparison {
+  const sa = parse(beforeIsTs ? stripTypeScriptTypes(before, { mode: "strip" }) : before);
   const sb = parse(afterIsTs ? stripTypeScriptTypes(after, { mode: "strip" }) : after);
   const a = leaves(sa);
   const b = leaves(sb);
@@ -137,7 +137,7 @@ function main(base: string): number {
       continue;
     }
     const existsAsTs = (specifier: string): boolean => existsSync(resolve(ROOT, dirname(now), specifier));
-    const got = compareSources(git(["show", `${base}:${basePath}`]), readFileSync(join(ROOT, now), "utf8"), now.endsWith(".ts"), existsAsTs);
+    const got = compareSources(git(["show", `${base}:${basePath}`]), readFileSync(join(ROOT, now), "utf8"), now.endsWith(".ts"), existsAsTs, basePath.endsWith(".ts"));
     for (const k of ["literals", "payloads", "tokens"] as const) for (const i of [0, 1] as const) totals[k][i] += got[k][i];
     totals.literalDiffs += got.literalDiffs;
     totals.payloadDiffs += got.payloadDiffs;

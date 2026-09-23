@@ -117,7 +117,7 @@ body.chart-room .stage { display: flex; align-items: center; justify-content: ce
 
 .legend-row a.fn { color: var(--line-tan); align-self: flex-start; margin-left: -0.45rem; }
 .legend-row a.fn:hover, .legend-row a.fn:focus-visible { color: var(--parchment-bright); }
-/* Docked on the sheet's parchment line-tan reads 2.00:1 and the cream 1.10:1 (`BR6c` in `scripts/e2e/suite-broadside.mjs` reads the resolved colour). */
+/* Docked on the sheet's parchment line-tan reads 2.00:1 and the cream 1.10:1 (`BR6c` in `scripts/e2e/suite-broadside.ts` reads the resolved colour). */
 .legend.in-slip .legend-row a.fn { color: var(--ink-brown); }
 .legend.in-slip .legend-row a.fn:hover, .legend.in-slip .legend-row a.fn:focus-visible { color: var(--ink-dark); }
 

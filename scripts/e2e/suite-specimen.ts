@@ -3,14 +3,18 @@ import { scopedHealth } from "./room-support.ts";
 import { luminance, sampleRow } from "./pixel-support.ts";
 import { makeSettle } from "./settle-support.ts";
 import { makeStep } from "./step-support.ts";
+import type { Payload, SuiteContext } from "./types.ts";
 
 const PAGE = "/specimen/";
 const CHART_ASPECT = 1500 / 1157.931;
 const INK_BROWN = "rgb(107, 90, 64)";
 const CONTROL_GOLD = "rgb(240, 227, 189)";
-const atFolded = (from) => (d, p) => d.slipVis === "hidden" && d.tabVis === "visible" && d.legend.x !== from.legend.x && !!p && d.legend.x === p.legend.x && d.glass.right === p.glass.right;
+type Box = { x: number; y: number; w: number; h: number; right: number; bottom: number } | null;
+type Specimen = { st: { state: string; folded: boolean; zoomed: boolean; pill: string } | null; innerW: number; innerH: number; rem: number; chromeX: number; plateLoaded: boolean; plateAspect: number | null; sheet: Box; map: Box; slip: Box; slipVis: string | null; slipDisp: string | null; slipPos: string | null; slipBody: string | null; tabVis: string | null; tabDisp: string | null; folio: Box; chartFolio: Box; chartFolioDisp: string | null; folioRoomPos: string | null; chartFolioText: number | null; glass: Box; glassDisp: string | null; glassOverFolio: [number, number] | null; legend: Box; legendDisp: string | null; legendGround: string | null; legendGroundOn: string | null; legendInSlip: boolean; legendDocked: boolean; folioInset: string[] | null; pool: string | null; poolChrome: string | null; poolGlass: string | null; folioPanel: string | null; folioFilter: string | null; pillDisp: string | null; pillText: string | null; pill: Box; folioLines: boolean[]; crNum: string | null; inked: string | null; unInked: string | null; gold: string | null; disabled: string | null; missDisp: string | null; handleExpanded: string | null; sheetH: string; fog: string | null; vignette: string | null; noX: boolean };
+// @ts-expect-error the legend row, the Glass and the booted page are read as present; a null one throws inside SB4's step, which reds SB4 by name
+const atFolded = (from: Specimen) => (d: Specimen, p: Specimen | null): boolean => d.slipVis === "hidden" && d.tabVis === "visible" && d.legend.x !== from.legend.x && !!p && d.legend.x === p.legend.x && d.glass.right === p.glass.right;
 
-const READ = `(() => {
+const READ: Payload<Specimen> = `(() => {
   const r = (sel) => { const e = document.querySelector(sel); if (!e) return null; const b = e.getBoundingClientRect(); return { x: b.x, y: b.y, w: b.width, h: b.height, right: b.right, bottom: b.bottom }; };
   const cs = (sel, prop, pseudo) => { const e = document.querySelector(sel); return e ? getComputedStyle(e, pseudo || null)[prop] : null; };
   const legend = document.querySelector(".legend");
@@ -43,7 +47,7 @@ const READ = `(() => {
   };
 })()`;
 
-const NOSCRIPT_READ = `(() => {
+const NOSCRIPT_READ: Payload<{ present: false; pill: { disp: string; w: number } | null } | { present: true; disp: string; w: number; text: number; pill: { disp: string; w: number } | null }> = `(() => {
   const n = document.querySelector(".stage noscript .status");
   const p = document.getElementById("sb-status");
   const box = (e) => { const b = e.getBoundingClientRect(); return { disp: getComputedStyle(e).display, w: Math.round(b.width * 100) / 100 }; };
@@ -52,21 +56,21 @@ const NOSCRIPT_READ = `(() => {
 })()`;
 
 // eslint-disable-next-line max-lines-per-function
-export async function run(ctx) {
+export async function run(ctx: SuiteContext): Promise<void> {
   const { evaluate, send, check, shoot, sleep, PORT } = ctx;
   const settle = makeSettle(ctx);
   // SB4 is the one group here that waits on a transition, so it is the one that is stepped (#534).
   const step = makeStep(ctx);
   const gate = scopedHealth(ctx);
   const read = () => evaluate(READ);
-  const setState = (s) => evaluate(`(()=>{const sel=document.getElementById("sb-state");sel.value=${JSON.stringify(s)};sel.dispatchEvent(new Event("change",{bubbles:true}));return sel.value;})()`);
+  const setState = (s: string) => evaluate(`(()=>{const sel=document.getElementById("sb-state");sel.value=${JSON.stringify(s)};sel.dispatchEvent(new Event("change",{bubbles:true}));return sel.value;})()`);
 
   // Bounce through about:blank (the Z13 idiom): a navigate to the tab's current URL is a no-op.
-  const goto = async () => {
+  const goto = async (): Promise<Specimen | null> => {
     await send("Page.navigate", { url: "about:blank" });
     await send("Page.navigate", { url: `http://127.0.0.1:${PORT}${PAGE}` });
     for (let i = 0; i < 200; i++) {
-      let s = null;
+      let s: Specimen | null = null;
       try { s = await read(); } catch {}
       if (s && s.st && s.plateLoaded && s.sheet && s.sheet.w > 0) { await sleep(800); return read(); }
       await sleep(50);
@@ -79,13 +83,17 @@ export async function run(ctx) {
   const rest = await goto();
   check(
     "SB1 the Specimen Book boots as a chart room: the conductor answers, the Gallery's plate is on the sheet, the sheet is fitted at the PLATE's own aspect (read off the img, not the kit's fallback)",
+    // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
     !!rest && rest.st.state === "rest" && rest.plateLoaded && Math.abs(rest.sheet.w / rest.sheet.h - rest.plateAspect) < 0.003 && Math.abs(rest.plateAspect - CHART_ASPECT) > 0.0001 && rest.noX,
     JSON.stringify(rest && { st: rest.st, plate: rest.plateLoaded, plateAspect: rest.plateAspect, sheet: rest.sheet }),
   );
   check(
     "SB2 at rest, at 1280: the slip hangs below the room's folio at the right edge, the Glass stands clear of it, the legend row sits between the chart folio and the Glass, the tab is hidden, the pill shows, the chart folio's four lines are written, no pool",
+    // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
     !!rest && rest.slip.y > rest.folio.bottom && Math.abs(rest.innerW - rest.slip.right - 2 * rest.rem) < 1 && rest.slipVis === "visible" &&
+      // @ts-expect-error the boxes read here throw when null, outside any step, and the runner reds the whole suite as stopped early; a null chartFolioText does not: null + 32 - 1 is 31, so that clause reads TRUE without measuring, a defect the port found and leaves (errata/guards.md)
       rest.glass.right < rest.slip.x && rest.legend.x >= rest.chartFolioText + 32 - 1 && rest.legend.right < rest.glass.x && rest.legendDisp !== "none" &&
+      // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
       rest.tabVis === "hidden" && rest.pillDisp !== "none" && rest.pillText.length > 0 && rest.folioLines.length === 4 && rest.folioLines.every(Boolean) &&
       rest.pool === "none" && rest.poolChrome === "none",
     JSON.stringify(rest && { slip: rest.slip, folio: rest.folio, glass: rest.glass, legend: rest.legend, chartFolioText: rest.chartFolioText, tab: rest.tabVis, pill: rest.pillDisp, lines: rest.folioLines, pool: rest.pool }),
@@ -99,12 +107,16 @@ export async function run(ctx) {
 
   await step("SB4", async () => {
     await setState("folded");
+    // @ts-expect-error the legend row, the Glass and the booted page are read as present; a null one throws inside SB4's step, which reds SB4 by name
     const folded = await settle(READ, atFolded(rest), "specimen-folded");
     check(
       "SB4 folded, through the slip's own fold: the slip is gone and its tab shown, the Glass moves out to the chrome's inset, the legend row re-centres rightward",
-      !!folded && folded.st.folded && folded.slipVis === "hidden" && folded.tabVis === "visible" &&
+      // @ts-expect-error the legend row, the Glass and the booted page are read as present; a null one throws inside SB4's step, which reds SB4 by name
+      !!folded && folded.st.folded && folded.slipVis === "hidden" && folded.tabVis === "visible" && // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+        // @ts-expect-error the legend row, the Glass and the booted page are read as present; a null one throws inside SB4's step, which reds SB4 by name
         Math.abs(folded.innerW - folded.glass.right - folded.chromeX * folded.rem) < 2 && folded.legend.x > rest.legend.x,
-      JSON.stringify(folded && { st: folded.st, slip: folded.slipVis, tab: folded.tabVis, glass: folded.glass, legendX: [rest && rest.legend.x, folded.legend.x] }),
+      // @ts-expect-error the legend row, the Glass and the booted page are read as present; a null one throws inside SB4's step, which reds SB4 by name
+      JSON.stringify(folded && { st: folded.st, slip: folded.slipVis, tab: folded.tabVis, glass: folded.glass, legendX: [rest && rest.legend.x, folded.legend.x] }), // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     );
   });
 
@@ -113,61 +125,73 @@ export async function run(ctx) {
   const leaned = await read();
   check(
     "SB5 leaned, through the Glass's own controller: the slip is back from its tab, the gesture box is zoomed, the sheet spills under the top and the left corners (the slip holds the right), and the corners and the cluster stand on the pool",
-    !!leaned && leaned.st.zoomed && !leaned.st.folded && leaned.slipVis === "visible" && leaned.pool === '""' && leaned.poolChrome === '""' &&
+    // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
+    !!leaned && leaned.st.zoomed && !leaned.st.folded && leaned.slipVis === "visible" && leaned.pool === '""' && leaned.poolChrome === '""' && // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+      // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
       leaned.map.x < 0 && leaned.map.y < 0 && leaned.map.bottom > 800,
-    JSON.stringify(leaned && { st: leaned.st, slip: leaned.slipVis, pool: leaned.pool, poolChrome: leaned.poolChrome, map: leaned.map }),
+    JSON.stringify(leaned && { st: leaned.st, slip: leaned.slipVis, pool: leaned.pool, poolChrome: leaned.poolChrome, map: leaned.map }), // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   );
   // The pool must reach past the viewport edge, or its blur fades right on the edge and the chart bleeds through at the corner (Alex's 2026-09-03 call on the Explorer's top-left; home runs its pool 4rem out). Sampled, since no computed style sees a blurred edge.
-  const brightest = async (x, y) => Math.round(Math.max(...(await sampleRow(send, x, y, 8)).map(luminance)));
+  const brightest = async (x: number, y: number) => Math.round(Math.max(...(await sampleRow(send, x, y, 8)).map(luminance)));
   // The MEDIAN of a wide run: the defect is a full-area wash, so the median moves with it, while a max passes on one bright press sitting under the sample and a min fails on one hairline crossing it.
-  const groundOf = async (x, y) => { const l = (await sampleRow(send, x, y, 16)).map(luminance).sort((a, b) => a - b); return Math.round(l[Math.floor(l.length / 2)]); };
+  const groundOf = async (x: number, y: number) => { const l = (await sampleRow(send, x, y, 16)).map(luminance).sort((a, b) => a - b); return Math.round(l[Math.floor(l.length / 2)]); };
   const interior = await brightest(200, 24);
-  const corners = [];
+  const corners: { name: string; max: number }[] = [];
   // The edges the spilled chart reaches under a pooled piece: the two left corners; the right side is the slip's, the legend row carries home's footing (SB5c) and the Glass no pool at all (SB5d).
-  for (const [x, y, name] of [[0, 2, "top-left"], [0, 797, "bottom-left"]]) corners.push({ name, max: await brightest(x, y) });
+  for (const [x, y, name] of [[0, 2, "top-left"], [0, 797, "bottom-left"]] as const) corners.push({ name, max: await brightest(x, y) });
   check(
     "SB5b leaned, every viewport edge under a pooled piece is as dark as the pool's interior: no chart paper bleeds through the pool's fade at the edge (eight edge pixels at each place within 15 of the cluster's interior, which the old inset failed at 97 against 60)",
     corners.every((c) => c.max <= interior + 15),
     JSON.stringify({ interior, corners }),
   );
+  // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
   const underGlass = await brightest(Math.round(leaned.glass.x) + 2, 797);
   check(
     "SB5d leaned, the Glass stands bare on the chart as home's does: no pool behind its presses, and the chart shows through beside them (the edge just below the Glass reads well above the pooled interior)",
-    !!leaned && leaned.poolGlass === "none" && underGlass > interior + 30,
+    !!leaned && leaned.poolGlass === "none" && underGlass > interior + 30, // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     JSON.stringify({ poolGlass: leaned.poolGlass, underGlass, interior }),
   );
   // Just below the row's box, inside the footing's 0.6rem foot band: the row's own centre is the gold road (227).
+  // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
   const panelLeft = Math.round(leaned.folio.x - 0.9 * leaned.rem), panelY = Math.round(leaned.folio.y + leaned.folio.h / 2);
   const panelIn = await brightest(panelLeft + 3, panelY), panelOut = await brightest(panelLeft - 11, panelY);
   check(
     "SB5e leaned, the room folio stands on home's seed box: a crisp panel (a top-to-bottom gradient, no blur) whose left edge is a step against the chart, the pixels 3px inside dark and 11px outside bright",
-    !!leaned && /^linear-gradient\((?!to top)/.test(leaned.folioPanel) && leaned.folioFilter === "none" && panelOut - panelIn > 60 && rest.pool === "none",
+    // @ts-expect-error the booted page is read as present (goto() returns null only when SB1 has already failed, and a null throws here, outside any step, so the runner reds the whole suite as stopped early), and a null panel string reads false and fails the check
+    !!leaned && /^linear-gradient\((?!to top)/.test(leaned.folioPanel) && leaned.folioFilter === "none" && panelOut - panelIn > 60 && rest.pool === "none", // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    // @ts-expect-error the booted page and its boxes are read as present, and goto() returns null only when SB1 has already failed; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
     JSON.stringify({ panel: leaned.folioPanel.slice(0, 44), filter: leaned.folioFilter, panelIn, panelOut, rest: rest.pool }),
   );
+  // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
   const footing = await brightest(Math.round(leaned.legend.x + leaned.legend.w / 2) - 4, Math.round(leaned.legend.bottom) + 3);
   check(
     "SB5c leaned, the legend row stands on home's footing, the seed box's crisp panel (a top-to-bottom gradient, no fade) drawn as the row's own ::before, not the blurred pool: the panel resolves, its foot band reads dark over the chart, and at rest the row carried no ground (the fade left at the 2026-09-03 sitting, ruling 23)",
-    !!leaned && leaned.legendGroundOn === '""' && /^linear-gradient\((?!to top)/.test(leaned.legendGround) && footing < 120 && rest.legendGroundOn === "none",
+    // @ts-expect-error the booted page is read as present (goto() returns null only when SB1 has already failed, and a null throws here, outside any step, so the runner reds the whole suite as stopped early), and a null panel string reads false and fails the check
+    !!leaned && leaned.legendGroundOn === '""' && /^linear-gradient\((?!to top)/.test(leaned.legendGround) && footing < 120 && rest.legendGroundOn === "none", // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    // @ts-expect-error the booted page and its boxes are read as present, and goto() returns null only when SB1 has already failed; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
     JSON.stringify({ leaned: leaned.legendGround.slice(0, 40), footing, rest: rest.legendGroundOn }),
   );
 
   await setState("rest");
   await sleep(700);
   const back = await read();
-  const emptied = await evaluate(`(()=>{document.getElementById("sb-report").click();const p=document.getElementById("sb-status");return{text:p.textContent,disp:getComputedStyle(p).display,btn:document.getElementById("sb-report").textContent};})()`);
-  const refilled = await evaluate(`(()=>{document.getElementById("sb-report").click();const p=document.getElementById("sb-status");return{text:p.textContent,disp:getComputedStyle(p).display};})()`);
+  const emptied = await evaluate<{ text: string; disp: string; btn: string }>(`(()=>{document.getElementById("sb-report").click();const p=document.getElementById("sb-status");return{text:p.textContent,disp:getComputedStyle(p).display,btn:document.getElementById("sb-report").textContent};})()`);
+  const refilled = await evaluate<{ text: string; disp: string }>(`(()=>{document.getElementById("sb-report").click();const p=document.getElementById("sb-status");return{text:p.textContent,disp:getComputedStyle(p).display};})()`);
   check(
     "SB6 at rest again the camera is home and the pool gone; the foot's press empties the status pill (which then hides, :empty) and fills it back",
-    !!back && !back.st.zoomed && back.pool === "none" && emptied.text === "" && emptied.disp === "none" && /Fill/.test(emptied.btn) && refilled.text.length > 0 && refilled.disp !== "none",
-    JSON.stringify({ back: back && { st: back.st, pool: back.pool }, emptied, refilled }),
+    // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
+    !!back && !back.st.zoomed && back.pool === "none" && emptied.text === "" && emptied.disp === "none" && /Fill/.test(emptied.btn) && refilled.text.length > 0 && refilled.disp !== "none", // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    JSON.stringify({ back: back && { st: back.st, pool: back.pool }, emptied, refilled }), // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   );
 
   await send("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
   const phone = await goto();
   check(
     "SB7 at a true 390 the slip is the bottom sheet, collapsed to its head: fixed, full width, on the floor, its body hidden; the tab and the chart folio stand down, the legend row is docked in the slip, the Glass seats above the sheet, no sideways scroll",
+    // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
     !!phone && phone.slipPos === "fixed" && phone.slip.x === 0 && phone.slip.w === 390 && Math.abs(phone.slip.bottom - 844) < 1 && phone.slipBody === "none" &&
       phone.tabDisp === "none" && phone.chartFolioDisp === "none" && phone.legendInSlip && phone.legendDocked &&
+      // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
       phone.glass.bottom < phone.slip.y && phone.sheetH !== "" && phone.noX,
     JSON.stringify(phone && { slip: phone.slip, pos: phone.slipPos, body: phone.slipBody, tab: phone.tabDisp, chartFolio: phone.chartFolioDisp, docked: [phone.legendInSlip, phone.legendDocked], glass: phone.glass, sheetH: phone.sheetH, noX: phone.noX }),
   );
@@ -178,8 +202,9 @@ export async function run(ctx) {
   const open = await read();
   check(
     "SB8 the handle opens the sheet: its body shows, the handle reports expanded, the docked legend row is in it, and the Glass stands down while the sheet is open (the kit's rule since the 2026-09-03 sitting, ruling 1; above the sheet it climbed into the corner's row, 35x85 at 390)",
-    !!open && open.st && open.slipBody !== "none" && open.handleExpanded === "true" && open.legendDocked && open.slip.y < phone.slip.y && open.glassDisp === "none" && open.glassOverFolio === null && open.noX,
-    JSON.stringify(open && { body: open.slipBody, expanded: open.handleExpanded, slip: open.slip, glass: open.glass, glassOverFolio: open.glassOverFolio }),
+    // @ts-expect-error the booted page and its boxes are read as present, and goto() returns null only when SB1 has already failed; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
+    !!open && open.st && open.slipBody !== "none" && open.handleExpanded === "true" && open.legendDocked && open.slip.y < phone.slip.y && open.glassDisp === "none" && open.glassOverFolio === null && open.noX, // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    JSON.stringify(open && { body: open.slipBody, expanded: open.handleExpanded, slip: open.slip, glass: open.glass, glassOverFolio: open.glassOverFolio }), // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   );
   await shoot("specimen-390-open.png", { x: 0, y: 0, width: 390, height: 844, scale: 1 });
 
@@ -187,36 +212,37 @@ export async function run(ctx) {
   await setState("leaned");
   await sleep(900);
   const leanedOpen = await read();
+  // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
   const slipGround = await groundOf(20, Math.round(leanedOpen.slip.y) + 120);
   check(
     "SB8b zoomed with the sheet open, the docked row carries NO footing: the row is still in the slip, the camera still leaned, and the sheet's ground reads parchment where the pool used to paint (#525; SB5c is the control that the sampler reads the pool dark where it legitimately paints)",
-    !!leanedOpen && leanedOpen.st && leanedOpen.st.zoomed && leanedOpen.legendInSlip && leanedOpen.legendDocked &&
+    !!leanedOpen && leanedOpen.st && leanedOpen.st.zoomed && leanedOpen.legendInSlip && leanedOpen.legendDocked && // eslint-disable-line @typescript-eslint/no-unnecessary-condition
       leanedOpen.slipBody !== "none" && leanedOpen.legendGroundOn === "none" && slipGround > 200,
     JSON.stringify({ zoomed: leanedOpen.st && leanedOpen.st.zoomed, docked: [leanedOpen.legendInSlip, leanedOpen.legendDocked], groundOn: leanedOpen.legendGroundOn, slipGround, slip: leanedOpen.slip }),
   );
   await shoot("specimen-390-open-leaned.png", { x: 0, y: 0, width: 390, height: 844, scale: 1 });
   // #531: the RESOLVED inset. The narrow value sat in the stylesheet for four days and inert, so a text match passes on the broken code.
-  const px531 = (rem, v) => `${Math.round(v * rem * 100) / 100}px`;
+  const px531 = (rem: number, v: number) => `${Math.round(v * rem * 100) / 100}px`;
   const insetNarrow = [-0.7, -0.7, -0.75, -0.7].map((v) => px531(leanedOpen.rem, v));
   const insetWide = [-0.7, -0.9, -0.8, -0.9].map((v) => px531(leaned.rem, v));
-  const same = (a, b) => !!a && !!b && a.length === b.length && a.every((v, i) => v === b[i]);
+  const same = (a: string[] | null, b: string[] | null) => !!a && !!b && a.length === b.length && a.every((v, i) => v === b[i]);
   check(
     "SB8e the folio's panel takes the NARROW insets at 390 and home's base padding at 1280 (#531): the override is carried on BOTH painting arms, since a media query adds no specificity and the rule that gives the pseudo its inset outranks a bare .corner.tr::before at every width; the value mirrors home's seed box at each width (.lf-seed, public/index.css)",
     same(leanedOpen.folioInset, insetNarrow) && same(leaned.folioInset, insetWide),
     JSON.stringify({ rem: leanedOpen.rem, at390: leanedOpen.folioInset, want390: insetNarrow, at1280: leaned.folioInset, want1280: insetWide }),
   );
   await send("Emulation.setFocusEmulationEnabled", { enabled: true });
-  const ring = await evaluate(`(()=>{const b=document.querySelector(".legend.in-slip .legend-row .legend-btn");if(!b)return null;b.focus();
+  const ring = await evaluate<{ color: string; offset: string; inkDark: string; bright: string; focused: boolean } | null>(`(()=>{const b=document.querySelector(".legend.in-slip .legend-row .legend-btn");if(!b)return null;b.focus();
     const cs=getComputedStyle(b);const root=getComputedStyle(document.documentElement);
     return{color:cs.outlineColor,offset:cs.outlineOffset,inkDark:root.getPropertyValue("--ink-dark").trim(),bright:root.getPropertyValue("--parchment-bright").trim(),focused:document.activeElement===b};})()`);
-  const asRgb = (hex) => { const h = hex.replace("#", ""); return `rgb(${parseInt(h.slice(0, 2), 16)}, ${parseInt(h.slice(2, 4), 16)}, ${parseInt(h.slice(4, 6), 16)})`; };
+  const asRgb = (hex: string) => { const h = hex.replace("#", ""); return `rgb(${parseInt(h.slice(0, 2), 16)}, ${parseInt(h.slice(2, 4), 16)}, ${parseInt(h.slice(4, 6), 16)})`; };
   check(
     "SB8c the docked row's focus ring is the house's ink-dark, not the cream one meant for a row standing on its own footing: the ring is drawn OUTSIDE the button, onto the sheet's parchment, where cream reads about 1:1 (#525)",
     !!ring && ring.focused && ring.color === asRgb(ring.inkDark) && ring.color !== asRgb(ring.bright),
     JSON.stringify(ring),
   );
   await send("Emulation.setFocusEmulationEnabled", { enabled: false });
-  const off = await evaluate(`(()=>{const b=document.querySelector(".legend.in-slip .legend-row .legend-btn:disabled");if(!b)return null;
+  const off = await evaluate<{ bg: string; opacity: string; faded: string } | null>(`(()=>{const b=document.querySelector(".legend.in-slip .legend-row .legend-btn:disabled");if(!b)return null;
     const cs=getComputedStyle(b);const root=getComputedStyle(document.documentElement);
     return{bg:cs.backgroundColor,opacity:cs.opacity,faded:root.getPropertyValue("--ink-faded").trim()};})()`);
   const fadedRgb = off && `rgb(${[1, 3, 5].map((i) => parseInt(off.faded.replace("#", "").slice(i - 1, i + 1), 16)).join(", ")})`;
@@ -232,8 +258,8 @@ export async function run(ctx) {
   const leanedBack = await read();
   check(
     "SB9b leaned and then printed, the room folio's panel stands down (#538): the zoomed class survives the print sheet, so the arm still matches on paper (read under print) while the corner is static and in flow, where the panel's absolute box resolved against the whole page; the same read under screen paints it before and after, the same-run control that the emulation took; and with the panel gone the printed page carries no sideways overflow",
-    !!leanedScreen && !!leanedScreen.st && leanedScreen.st.zoomed && leanedScreen.pool === '""' && !!leanedPrint && !!leanedPrint.st && leanedPrint.st.zoomed && leanedPrint.folioRoomPos === "static" && leanedPrint.pool === "none" && leanedPrint.noX && !!leanedBack && leanedBack.pool === '""',
-    JSON.stringify({ before: leanedScreen && leanedScreen.pool, printedZoomed: leanedPrint && leanedPrint.st && leanedPrint.st.zoomed, folio: leanedPrint && leanedPrint.folioRoomPos, printed: leanedPrint && leanedPrint.pool, after: leanedBack && leanedBack.pool, noX: leanedPrint && leanedPrint.noX }),
+    !!leanedScreen && !!leanedScreen.st && leanedScreen.st.zoomed && leanedScreen.pool === '""' && !!leanedPrint && !!leanedPrint.st && leanedPrint.st.zoomed && leanedPrint.folioRoomPos === "static" && leanedPrint.pool === "none" && leanedPrint.noX && !!leanedBack && leanedBack.pool === '""', // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    JSON.stringify({ before: leanedScreen && leanedScreen.pool, printedZoomed: leanedPrint && leanedPrint.st && leanedPrint.st.zoomed, folio: leanedPrint && leanedPrint.folioRoomPos, printed: leanedPrint && leanedPrint.pool, after: leanedBack && leanedBack.pool, noX: leanedPrint && leanedPrint.noX }), // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   );
   await setState("rest");
   await sleep(400);
@@ -243,27 +269,28 @@ export async function run(ctx) {
   const printed = await read();
   check(
     "SB9 print is paper: the fog, the vignettes, the slip, the legend and the Glass print as nothing; the room's folio prints in flow",
-    !!printed && printed.fog === "none" && printed.vignette === "none" && printed.slipDisp === "none" && printed.legendDisp === "none" && printed.glassDisp === "none" && printed.folioRoomPos === "static",
-    JSON.stringify(printed && { fog: printed.fog, vignette: printed.vignette, slip: printed.slipDisp, legend: printed.legendDisp, glass: printed.glassDisp, folio: printed.folioRoomPos }),
+    !!printed && printed.fog === "none" && printed.vignette === "none" && printed.slipDisp === "none" && printed.legendDisp === "none" && printed.glassDisp === "none" && printed.folioRoomPos === "static", // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    JSON.stringify(printed && { fog: printed.fog, vignette: printed.vignette, slip: printed.slipDisp, legend: printed.legendDisp, glass: printed.glassDisp, folio: printed.folioRoomPos }), // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   );
   check(
     "SB9c the status pill prints as nothing (#566, ruled 2026-09-11): on screen the Book's pill stands filled over the chart, the same-run control, and on paper it is gone, box and all, where its absolute seat resolved against the page box and laid a grey slab on it, 2.6:1 below the chart at this width and about 3.0:1 across the chart itself at letter width; the width is read beside the display because a visibility stand-down would leave the box reserved; the Book is the only room whose pill carries text at rest, so it is the only witness here that is not vacuous, and the scripts-off notice the same arm covers cannot be reached with scripting on (test/site/room.test.ts pins the arm's scope)",
-    !!restScreen && restScreen.pillDisp !== "none" && !!restScreen.pill && restScreen.pill.w > 0 && !!restScreen.pillText && restScreen.pillText.trim().length > 0 &&
-      !!printed && printed.pillDisp === "none" && !!printed.pill && printed.pill.w === 0,
-    JSON.stringify({ screen: restScreen && { disp: restScreen.pillDisp, w: restScreen.pill && restScreen.pill.w, text: restScreen.pillText && restScreen.pillText.trim().length }, print: printed && { disp: printed.pillDisp, w: printed.pill && printed.pill.w } }),
+    !!restScreen && restScreen.pillDisp !== "none" && !!restScreen.pill && restScreen.pill.w > 0 && !!restScreen.pillText && restScreen.pillText.trim().length > 0 && // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+      !!printed && printed.pillDisp === "none" && !!printed.pill && printed.pill.w === 0, // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    JSON.stringify({ screen: restScreen && { disp: restScreen.pillDisp, w: restScreen.pill && restScreen.pill.w, text: restScreen.pillText && restScreen.pillText.trim().length }, print: printed && { disp: printed.pillDisp, w: printed.pill && printed.pill.w } }), // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   );
   await send("Emulation.setEmulatedMedia", { media: "" });
   await send("Emulation.clearDeviceMetricsOverride");
 
   // The boot hook never arrives with scripting off, so the poll waits on the notice itself rather than on goto()'s state read; the restore is a finally because a throw between here and it would hand the next suite a browser with no JavaScript, which runSelected keeps running into.
-  let noJsScreen = null;
-  let noJsPrint;
+  type Notice = { present: false; pill: { disp: string; w: number } | null } | { present: true; disp: string; w: number; text: number; pill: { disp: string; w: number } | null };
+  let noJsScreen: Notice | null = null;
+  let noJsPrint: Notice | undefined;
   try {
     await send("Emulation.setScriptExecutionDisabled", { value: true });
     await send("Page.navigate", { url: "about:blank" });
     await send("Page.navigate", { url: `http://127.0.0.1:${PORT}${PAGE}` });
     for (let i = 0; i < 200; i++) {
-      let s = null;
+      let s: Notice | null = null;
       try { s = await evaluate(NOSCRIPT_READ); } catch {}
       if (s && s.present && s.w > 0) { noJsScreen = s; break; }
       await sleep(50);
@@ -276,8 +303,8 @@ export async function run(ctx) {
   }
   check(
     "SB9d with SCRIPT EXECUTION DISABLED, the other half of #566's ruling: the scripts-off notice is in the DOM at all only here, and on paper it goes with the pill, both of them gone, box and all; on screen in the same state both stand filled, which is the control that says scripting really was off and the notice really rendered",
-    !!noJsScreen && noJsScreen.present && noJsScreen.disp !== "none" && noJsScreen.w > 0 && noJsScreen.text > 0 && !!noJsScreen.pill && noJsScreen.pill.w > 0 &&
-      !!noJsPrint && noJsPrint.present && noJsPrint.disp === "none" && noJsPrint.w === 0 && !!noJsPrint.pill && noJsPrint.pill.disp === "none" && noJsPrint.pill.w === 0,
+    !!noJsScreen && noJsScreen.present && noJsScreen.disp !== "none" && noJsScreen.w > 0 && noJsScreen.text > 0 && !!noJsScreen.pill && noJsScreen.pill.w > 0 && // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+      !!noJsPrint && noJsPrint.present && noJsPrint.disp === "none" && noJsPrint.w === 0 && !!noJsPrint.pill && noJsPrint.pill.disp === "none" && noJsPrint.pill.w === 0, // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     JSON.stringify({ screen: noJsScreen, print: noJsPrint }),
   );
   await goto();

@@ -144,7 +144,7 @@ section points there rather than restating it.
   claim about PAINT goes through the one-row pixel strip, because no hit test and no computed style
   can see paint (`sampleRow` and `luminance` in `scripts/e2e/pixel-support.ts`). A claim about an
   EMULATED condition carries a read of the other condition taken in the same run, which is what the
-  print checks in `scripts/e2e/suite-specimen.mjs` call the same-run control. A byte comparison of
+  print checks in `scripts/e2e/suite-specimen.ts` call the same-run control. A byte comparison of
   renders from two environments is never the check. No suite compares one screenshot against
   another, and no cause is asserted here for why two shots differ: nothing in this repo measures one.
   The imperative is Gate 2's "run the probe's control in the same run".
@@ -216,7 +216,7 @@ section points there rather than restating it.
 - **The harness ASKS for a window far taller than a screen**, `--window-size=1280,2400` in
   `scripts/e2e/harness.ts`. What it lays out at is a different question, for the reason the width
   bullet above gives, and no CHECK in this repo asserts the answer: the nearest instrument is the
-  `innerHeight` carried in `legendRoom` in `scripts/e2e/suite-broadside.mjs`, which is captured and
+  `innerHeight` carried in `legendRoom` in `scripts/e2e/suite-broadside.ts`, which is captured and
   printed on failure but never asserted. `scripts/e2e/suite-reading-room.mjs` does reason from
   the requested figure in a comment at its own override, which is a suite explaining its choice and
   not a measurement of the effective height. So the height is stated here as the REQUEST and no
