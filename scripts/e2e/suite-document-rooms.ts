@@ -2,13 +2,30 @@
 import { scopedHealth } from "./room-support.ts";
 import { makeSettle } from "./settle-support.ts";
 import { makeStep } from "./step-support.ts";
+import type { Payload, SuiteContext } from "./types.ts";
 
 const FAQ = "/faq/";
 const GLOSSARY = "/glossary/";
-const atFolded = (from) => (d, p) => d.slipVisibility === "hidden" && d.tabVisibility === "visible" && d.main.right !== from.main.right && !!p && d.main.right === p.main.right;
-const atUnfolded = (from) => (d, p) => d.slipVisibility === "visible" && d.tabVisibility === "hidden" && d.main.right !== from.main.right && !!p && d.main.right === p.main.right;
+type Box = { x: number; y: number; w: number; h: number; right: number; bottom: number } | null;
+type Index = { innerW: number; innerH: number; scrollW: number; scrollY: number; h2s: string[]; entries: number; rows: (string | undefined)[]; rowEntries: number[]; inked: (string | undefined)[]; now: (string | undefined)[]; slip: Box; slipPosition: string | null; slipVisibility: string | null; folded: boolean; open: boolean; bodyDisplay: string | null; tab: Box; tabVisibility: string | null; folio: Box; h1: Box; main: Box; sheet: Box; count: string | undefined; toc: boolean; columns: string };
+// @ts-expect-error a main the page never seated reads null, which throws inside IX3's settle, and the step reds IX3 by name
+const atFolded = (from: Index) => (d: Index, p: Index | null): boolean => d.slipVisibility === "hidden" && d.tabVisibility === "visible" && d.main.right !==
+  // @ts-expect-error a main the page never seated reads null, which throws inside IX3's settle, and the step reds IX3 by name
+  from.main.right && !!p &&
+  // @ts-expect-error a main the page never seated reads null, which throws inside IX3's settle, and the step reds IX3 by name
+  d.main.right ===
+  // @ts-expect-error a main the page never seated reads null, which throws inside IX3's settle, and the step reds IX3 by name
+  p.main.right;
+// @ts-expect-error a main the page never seated reads null, which throws inside IX3's settle, and the step reds IX3 by name
+const atUnfolded = (from: Index) => (d: Index, p: Index | null): boolean => d.slipVisibility === "visible" && d.tabVisibility === "hidden" && d.main.right !==
+  // @ts-expect-error a main the page never seated reads null, which throws inside IX3's settle, and the step reds IX3 by name
+  from.main.right && !!p &&
+  // @ts-expect-error a main the page never seated reads null, which throws inside IX3's settle, and the step reds IX3 by name
+  d.main.right ===
+  // @ts-expect-error a main the page never seated reads null, which throws inside IX3's settle, and the step reds IX3 by name
+  p.main.right;
 
-const READ = `(() => {
+const READ: Payload<Index> = `(() => {
   const r = (sel) => { const e = document.querySelector(sel); if (!e) return null; const b = e.getBoundingClientRect(); return { x: b.x, y: b.y, w: b.width, h: b.height, right: b.right, bottom: b.bottom }; };
   const slip = document.getElementById("index");
   const cs = slip ? getComputedStyle(slip) : null;
@@ -35,7 +52,7 @@ const READ = `(() => {
 })()`;
 
 // eslint-disable-next-line max-lines-per-function
-export async function run(ctx) {
+export async function run(ctx: SuiteContext): Promise<void> {
   const { evaluate, send, check, sleep, setMobileViewport, clearMobile, touch, waitReady, PORT } = ctx;
   const settle = makeSettle(ctx);
   // IX3 is the one group here that waits on a transition, so it is the one that is stepped (#534).
@@ -43,17 +60,17 @@ export async function run(ctx) {
   const gate = scopedHealth(ctx);
 
   // A room's readiness is its own shell (waitReady keys on the Explorer's members); the index script runs at parse, so the slip's inline top is the boot signal.
-  const goto = async (path) => {
+  const goto = async (path: string) => {
     await send("Page.navigate", { url: "about:blank" });
     await send("Page.navigate", { url: `http://127.0.0.1:${PORT}${path}` });
     for (let i = 0; i < 200; i++) {
-      const up = await evaluate(`document.readyState === "complete" && !!document.getElementById("index")`).catch(() => false);
+      const up = await evaluate<boolean>(`document.readyState === "complete" && !!document.getElementById("index")`).catch(() => false);
       if (up) break;
       await sleep(25);
     }
     await sleep(300);
   };
-  const tapAt = async (x, y) => {
+  const tapAt = async (x: number, y: number) => {
     await touch("touchStart", [{ x: Math.round(x), y: Math.round(y) }]);
     await touch("touchEnd", []);
     await sleep(450);
@@ -66,15 +83,19 @@ export async function run(ctx) {
   check(
     "IX1 the Q & A stands its name top right and its index open beside the sheet: every h2 a row with its questions, the count line the page's own tally, the slip hung under the folio, the sheet ending short of the slip's column, no TOC left on the sheet, 22rem columns (#462 rulings 1, 3, 6)",
     faq.h1 !== null && faq.folio !== null && faq.h1.right <= faq.innerW && faq.h1.y < 60 &&
+      // @ts-expect-error a missing index reads its position as null too, and the clause before has already read false for that, so a null never reaches here
       faq.slipPosition === "fixed" && !faq.folded && faq.slip.y >= faq.folio.bottom + 10 &&
       JSON.stringify(faq.rows) === JSON.stringify(faq.h2s) && faq.rowEntries.reduce((a, b) => a + b, 0) === faq.entries &&
       faq.count === `${faq.entries} questions in ${faq.h2s.length} sections` &&
-      faq.sheet.right <= faq.slip.x - 8 && !faq.toc && faq.columns === "352px" && faq.scrollW <= faq.innerW,
+      // @ts-expect-error a sheet the page never seated reads null, which throws here, outside any step, and the runner reds the whole suite as stopped early
+      faq.sheet.right <=
+        // @ts-expect-error a missing index reads its position as null too, and the clause before has already read false for that, so a null never reaches here
+        faq.slip.x - 8 && !faq.toc && faq.columns === "352px" && faq.scrollW <= faq.innerW,
     `h1 ${JSON.stringify(faq.h1)}, slip ${faq.slipPosition} y=${faq.slip && faq.slip.y.toFixed(1)} folio bottom=${faq.folio && faq.folio.bottom.toFixed(1)}, rows ${faq.rows.length}/${faq.h2s.length}, entries ${faq.rowEntries.join("+")}=${faq.entries}, count "${faq.count}", sheet right ${faq.sheet && faq.sheet.right.toFixed(1)} vs slip x ${faq.slip && faq.slip.x.toFixed(1)}, toc ${faq.toc}, columns ${faq.columns}, scrollW ${faq.scrollW}/${faq.innerW}`,
   );
 
   const target = faq.h2s[2];
-  const firstEntryOf = await evaluate(`(() => { const h = document.getElementById(${JSON.stringify(target)}); let e = h.nextElementSibling; while (e && !e.matches(".q[id], .term[id]")) e = e.nextElementSibling; return e ? e.id : null; })()`);
+  const firstEntryOf = await evaluate<string | null>(`(() => { const h = document.getElementById(${JSON.stringify(target)}); let e = h.nextElementSibling; while (e && !e.matches(".q[id], .term[id]")) e = e.nextElementSibling; return e ? e.id : null; })()`);
   await evaluate(`document.getElementById(${JSON.stringify(target)}).scrollIntoView()`);
   await sleep(250);
   const atHead = await evaluate(READ);
@@ -95,10 +116,30 @@ export async function run(ctx) {
     const back = await settle(READ, atUnfolded(folded), "index-unfolded");
     check(
       "IX3 folding the index hands the sheet the width in one settle and stands the bookmark tab on the right edge; the tab brings the index back and the sheet shrinks the same way (#462 ruling 2, Alex's own wording)",
+      // @ts-expect-error a missing tab reads its visibility as null too, which the settle's predicate and the clause before have already refused, so a null never reaches here
       folded.folded && folded.slipVisibility === "hidden" && folded.tabVisibility === "visible" && folded.tab.right >= folded.innerW - 1 &&
-        folded.main.right > faq.main.right + 200 && folded.sheet.right > faq.sheet.right + 200 &&
-        !back.folded && back.slipVisibility === "visible" && back.tabVisibility === "hidden" && Math.abs(back.main.right - faq.main.right) < 1,
-      `folded: slip ${folded.slipVisibility} tab ${folded.tabVisibility} right=${folded.tab && folded.tab.right}, main right ${faq.main.right.toFixed(1)} -> ${folded.main.right.toFixed(1)} -> ${back.main.right.toFixed(1)}, sheet right ${faq.sheet.right.toFixed(1)} -> ${folded.sheet.right.toFixed(1)}`,
+        // @ts-expect-error the settle returned this read only after its predicate read main, and a null there throws inside the settle, so a null never reaches here
+        folded.main.right >
+          // @ts-expect-error the first settle's predicate read this main already, and a null there throws inside the settle, so a null never reaches here
+          faq.main.right + 200 &&
+          // @ts-expect-error a sheet the page never seated reads null, which throws here inside the step, and the step reds IX3 by name
+          folded.sheet.right >
+          // @ts-expect-error a null sheet on the first read has already thrown at IX1, outside any step, so a null never reaches here
+          faq.sheet.right + 200 &&
+        // @ts-expect-error the settle returned this read only after its predicate read main, and a null there throws inside the settle, so a null never reaches here
+        !back.folded && back.slipVisibility === "visible" && back.tabVisibility === "hidden" && Math.abs(back.main.right -
+          // @ts-expect-error the first settle's predicate read this main already, and a null there throws inside the settle, so a null never reaches here
+          faq.main.right) < 1,
+      // @ts-expect-error the first settle's predicate read this main already, and a null there throws inside the settle, so a null never reaches here
+      `folded: slip ${folded.slipVisibility} tab ${folded.tabVisibility} right=${folded.tab && folded.tab.right}, main right ${faq.main.right.toFixed(1)} -> ${
+        // @ts-expect-error the settle returned this read only after its predicate read main, and a null there throws inside the settle, so a null never reaches here
+        folded.main.right.toFixed(1)} -> ${
+        // @ts-expect-error the settle returned this read only after its predicate read main, and a null there throws inside the settle, so a null never reaches here
+        back.main.right.toFixed(1)}, sheet right ${
+        // @ts-expect-error a null sheet on the first read has already thrown at IX1, outside any step, so a null never reaches here
+        faq.sheet.right.toFixed(1)} -> ${
+        // @ts-expect-error a null sheet on this read has already thrown in the condition above, inside the step
+        folded.sheet.right.toFixed(1)}`,
     );
   });
 
@@ -107,7 +148,7 @@ export async function run(ctx) {
   await evaluate(`document.querySelector(".find input").focus()`);
   await send("Input.insertText", { text: "glass" });
   await sleep(150);
-  const found = await evaluate(`(() => {
+  const found = await evaluate<{ hits: string[]; shown: number; total: number; empty: number; rows: number; defsMatch: number }>(`(() => {
     const links = [...document.querySelectorAll("#index .terms a")];
     const hits = links.filter((a) => a.classList.contains("hit"));
     const shown = links.filter((a) => getComputedStyle(a).display !== "none");
@@ -118,7 +159,7 @@ export async function run(ctx) {
   })()`);
   await evaluate(`(() => { const i = document.querySelector(".find input"); i.value = ""; i.dispatchEvent(new Event("input", { bubbles: true })); })()`);
   await sleep(100);
-  const cleared = await evaluate(`(() => { const links = [...document.querySelectorAll("#index .terms a")]; return { shown: links.filter((a) => getComputedStyle(a).display !== "none").length, total: links.length, hits: links.filter((a) => a.classList.contains("hit")).length, empty: [...document.querySelectorAll("#index .index > li")].filter((li) => getComputedStyle(li).display === "none").length }; })()`);
+  const cleared = await evaluate<{ shown: number; total: number; hits: number; empty: number }>(`(() => { const links = [...document.querySelectorAll("#index .terms a")]; return { shown: links.filter((a) => getComputedStyle(a).display !== "none").length, total: links.length, hits: links.filter((a) => a.classList.contains("hit")).length, empty: [...document.querySelectorAll("#index .index > li")].filter((li) => getComputedStyle(li).display === "none").length }; })()`);
   check(
     "IX4 the Glossary's find box narrows the index to the term NAMES typed (every shown term carries the query, sections with none fold away, and definitions that merely mention it do not count), and clearing it restores the whole index (#462 ruling 4)",
     glossary.count === `${glossary.entries} terms in ${glossary.h2s.length} sections` &&
@@ -131,17 +172,24 @@ export async function run(ctx) {
   await setMobileViewport(390, 844);
   await goto(FAQ);
   const phone = await evaluate(READ);
+  // @ts-expect-error a slip the phone never seated reads null, which throws here, outside any step, and the runner reds the whole suite as stopped early
   await tapAt(phone.innerW / 2, phone.slip.y + 40);
   const opened = await evaluate(READ);
-  const entry = await evaluate(`(() => { const a = document.querySelector("#index .entries li:nth-child(2) a"); const r = a.getBoundingClientRect(); return { href: a.getAttribute("href"), x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`);
+  const entry = await evaluate<{ href: string | null; x: number; y: number }>(`(() => { const a = document.querySelector("#index .entries li:nth-child(2) a"); const r = a.getBoundingClientRect(); return { href: a.getAttribute("href"), x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`);
   await tapAt(entry.x, entry.y);
   await sleep(400);
   const jumped = await evaluate(READ);
-  const landed = await evaluate(`(() => { const t = document.querySelector(${JSON.stringify(entry.href)}); const r = t.getBoundingClientRect(); return { top: r.top, hash: location.hash }; })()`);
+  const landed = await evaluate<{ top: number; hash: string }>(`(() => { const t = document.querySelector(${JSON.stringify(entry.href)}); const r = t.getBoundingClientRect(); return { top: r.top, hash: location.hash }; })()`);
   check(
     "IX5 at 390 the index is the bottom sheet collapsed to its head at the foot of the viewport; a tap on the head opens it, a tap on a question jumps to it below the band and closes the sheet again (#462 ruling 2, the phone half)",
-    phone.slipPosition === "fixed" && Math.abs(phone.slip.bottom - phone.innerH) < 1 && !phone.open && phone.bodyDisplay === "none" && phone.slip.h < 140 &&
-      opened.open && opened.bodyDisplay !== "none" && opened.slip.h > phone.slip.h + 100 &&
+    // @ts-expect-error a null slip has already thrown at the tap above, outside any step, so a null never reaches here
+    phone.slipPosition === "fixed" && Math.abs(phone.slip.bottom - phone.innerH) < 1 && !phone.open && phone.bodyDisplay === "none" &&
+      // @ts-expect-error a null slip has already thrown at the tap above, outside any step, so a null never reaches here
+      phone.slip.h < 140 &&
+      // @ts-expect-error a missing index reads open as false, and the clause before has already read false for that, so a null never reaches here
+      opened.open && opened.bodyDisplay !== "none" && opened.slip.h >
+        // @ts-expect-error a null slip has already thrown at the tap above, outside any step, so a null never reaches here
+        phone.slip.h + 100 &&
       !jumped.open && landed.hash === entry.href && landed.top >= 90 && landed.top < 200 && jumped.scrollW <= jumped.innerW,
     `collapsed: bottom ${phone.slip && phone.slip.bottom} of ${phone.innerH}, h ${phone.slip && phone.slip.h.toFixed(1)}, body ${phone.bodyDisplay}; opened: ${opened.open} h ${opened.slip && opened.slip.h.toFixed(1)}; after the tap: open=${jumped.open}, hash ${landed.hash} vs ${entry.href}, target top ${landed.top.toFixed(1)}, scrollW ${jumped.scrollW}/${jumped.innerW}`,
   );
@@ -149,7 +197,7 @@ export async function run(ctx) {
   await send("Emulation.setScriptExecutionDisabled", { value: true });
   await goto(GLOSSARY);
   const noJs = await evaluate(READ);
-  const noJsLink = await evaluate(`(() => { const a = document.querySelector("#index .terms a"); return { href: a.getAttribute("href"), target: !!document.querySelector(a.getAttribute("href")) }; })()`);
+  const noJsLink = await evaluate<{ href: string | null; target: boolean }>(`(() => { const a = document.querySelector("#index .terms a"); return { href: a.getAttribute("href"), target: !!document.querySelector(a.getAttribute("href")) }; })()`);
   await send("Emulation.setScriptExecutionDisabled", { value: false });
   check(
     "IX6 with SCRIPT EXECUTION DISABLED the index still stands, every section and term server-rendered with a real anchor, and NO row is inked: the ink is the control, since the binder alone sets it and every other term here is equally true with scripts on (#462 ruling 1, the no-JS floor)",

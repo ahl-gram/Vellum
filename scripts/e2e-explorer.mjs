@@ -30,19 +30,19 @@ import { run as runProspect } from "./e2e/suite-prospect.ts";
 import { run as runRibbon } from "./e2e/suite-ribbon.ts";
 import { run as runHome } from "./e2e/suite-home.mjs";
 import { run as runLandfall } from "./e2e/suite-landfall.mjs";
-import { run as runSurvey } from "./e2e/suite-survey.mjs";
+import { run as runSurvey } from "./e2e/suite-survey.ts";
 import { run as runBroadside } from "./e2e/suite-broadside.ts";
 import { run as runReadingRoom } from "./e2e/suite-reading-room.ts";
-import { run as runRoomInstrument } from "./e2e/suite-room-instrument.mjs";
-import { run as runRoomInk } from "./e2e/suite-room-ink.mjs";
-import { run as runRoomVoyage } from "./e2e/suite-room-voyage.mjs";
-import { run as runRoomAddress } from "./e2e/suite-room-address.mjs";
-import { run as runRoomVoyageRoute } from "./e2e/suite-room-voyage-route.mjs";
+import { run as runRoomInstrument } from "./e2e/suite-room-instrument.ts";
+import { run as runRoomInk } from "./e2e/suite-room-ink.ts";
+import { run as runRoomVoyage } from "./e2e/suite-room-voyage.ts";
+import { run as runRoomAddress } from "./e2e/suite-room-address.ts";
+import { run as runRoomVoyageRoute } from "./e2e/suite-room-voyage-route.ts";
 import { run as runRunningHead } from "./e2e/suite-runninghead.ts";
 import { run as runCluster } from "./e2e/suite-cluster.mjs";
 import { run as runChartDrawer } from "./e2e/suite-chart-drawer.mjs";
-import { run as runRoomDrawer } from "./e2e/suite-room-drawer.mjs";
-import { run as runDocumentRooms } from "./e2e/suite-document-rooms.mjs";
+import { run as runRoomDrawer } from "./e2e/suite-room-drawer.ts";
+import { run as runDocumentRooms } from "./e2e/suite-document-rooms.ts";
 import { run as runRegionDetail } from "./e2e/suite-region-detail.ts";
 import { run as runSpecimen } from "./e2e/suite-specimen.ts";
 
@@ -142,7 +142,7 @@ async function main() {
         false,
         err && err.message ? err.message : String(err),
       );
-      // clearMobile() is a trailing statement in the phone suites, not a finally (suite-cluster.mjs, suite-room-drawer.mjs, suite-chart-drawer.mjs), so a suite that stops at 390x844 hands every later suite in the lane a phone viewport and a cascade of reds that are not defects.
+      // clearMobile() is a trailing statement in the phone suites, not a finally (suite-cluster.mjs, suite-room-drawer.ts, suite-chart-drawer.mjs), so a suite that stops at 390x844 hands every later suite in the lane a phone viewport and a cascade of reds that are not defects.
       // Bounded, because a browser that dies AFTER the liveness probe leaves this send pending forever: the harness settles a waiter only on the matching reply, so an unbounded reset here is a lane that stalls with nothing to read rather than one that fails.
       await Promise.race([
         ctx.clearMobile().catch(() => {}),

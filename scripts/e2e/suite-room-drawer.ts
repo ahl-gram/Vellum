@@ -2,11 +2,16 @@
 import { scopedHealth } from "./room-support.ts";
 import { makeSettle } from "./settle-support.ts";
 import { makeStep } from "./step-support.ts";
+import type { Payload, SuiteContext } from "./types.ts";
 
 const DOCUMENT_ROOM = "/faq/";
 const APP_ROOM = "/explorer/";
+type Rect = { x: number; y: number; w: number; h: number; right: number; bottom: number };
+type Door = { t: string; x: number; y: number; h: number; bottom: number; current: boolean; display: string; offset: string; tappable: boolean };
+type Nav = { rect: Rect; visibility: string; position: string };
+type Drawer = { innerW: number; innerH: number; scrollW: number; scrollY: number; bandH: number; chromePosition: string; chromeZ: string; checked: boolean; burger: Rect; burgerDisplay: string; burgerReachable: boolean; cluster: Rect; nav: Nav; scrim: { position: string; top: string; z: string; content: string; background: string }; mainInert: boolean; footerInert: boolean | null; chromeInert: boolean; hitMidPage: string | null; doors: Door[] };
 
-const READ = `(() => {
+const READ: Payload<Drawer> = `(() => {
   const r = (sel) => { const e = document.querySelector(sel); if (!e) return null; const b = e.getBoundingClientRect(); return { x: b.x, y: b.y, w: b.width, h: b.height, right: b.right, bottom: b.bottom }; };
   const nav = document.querySelector("header.chrome nav.rooms");
   const cs = getComputedStyle(nav);
@@ -30,37 +35,37 @@ const READ = `(() => {
     doors: [...nav.querySelectorAll("a, [aria-current]")].map((a) => { const d = a.getBoundingClientRect(); const hit = document.elementFromPoint(d.x + 20, d.y + d.height / 2); return { t: a.textContent, x: d.x, y: d.y, h: d.height, bottom: d.bottom, current: a.hasAttribute("aria-current"), display: getComputedStyle(a).display, offset: getComputedStyle(a).textUnderlineOffset, tappable: hit === a }; }) };
 })()`;
 
-const stacked = (doors) => doors.length > 1 && doors.every((d, i) => i === 0 || (d.y >= doors[i - 1].bottom - 0.5 && Math.abs(d.x - doors[0].x) < 0.5));
-const offLeft = (nav) => nav.visibility === "hidden" && nav.rect !== null && nav.rect.right <= 0.5;
-const atOpen = (d) => !!d.nav && d.nav.visibility === "visible" && d.nav.rect !== null && d.nav.rect.x === 0;
-const atClosed = (d) => !!d.nav && offLeft(d.nav);
+const stacked = (doors: Door[]) => doors.length > 1 && doors.every((d, i) => i === 0 || (d.y >= doors[i - 1].bottom - 0.5 && Math.abs(d.x - doors[0].x) < 0.5));
+const offLeft = (nav: Nav) => nav.visibility === "hidden" && nav.rect !== null && nav.rect.right <= 0.5; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+const atOpen = (d: Drawer) => !!d.nav && d.nav.visibility === "visible" && d.nav.rect !== null && d.nav.rect.x === 0; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+const atClosed = (d: Drawer) => !!d.nav && offLeft(d.nav); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 
 // eslint-disable-next-line max-lines-per-function
-export async function run(ctx) {
+export async function run(ctx: SuiteContext): Promise<void> {
   const { evaluate, send, check, sleep, setMobileViewport, clearMobile, touch, waitReady, PORT } = ctx;
   const settle = makeSettle(ctx);
   const step = makeStep(ctx);
   const gate = scopedHealth(ctx);
 
   // waitReady() keys on the Explorer's own members, which no room renders, so awaiting it here spends the full 15s budget and returns false: a room's readiness is its own shell (the siblings navigate to rooms bare for the same reason). waitReady is kept for the final /explorer/ restore, where it means something.
-  const goto = async (path) => {
+  const goto = async (path: string) => {
     await send("Page.navigate", { url: "about:blank" });
     await send("Page.navigate", { url: `http://127.0.0.1:${PORT}${path}` });
     for (let i = 0; i < 200; i++) {
-      const up = await evaluate(`document.readyState === "complete" && !!document.querySelector(".rooms-reveal") && !!document.querySelector("header.chrome nav.rooms")`).catch(() => false);
+      const up = await evaluate<boolean>(`document.readyState === "complete" && !!document.querySelector(".rooms-reveal") && !!document.querySelector("header.chrome nav.rooms")`).catch(() => false);
       if (up) break;
       await sleep(25);
     }
     await sleep(250);
   };
   // A REAL tap, never burger.click(): the checkbox is the no-JS path and a synthetic click would not prove the target is reachable.
-  const tapBurger = async (settled, label) => {
-    const b = await evaluate(`(() => { const r = document.querySelector(".rooms-reveal").getBoundingClientRect(); return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) }; })()`);
+  const tapBurger = async (settled: (d: Drawer) => boolean, label: string) => {
+    const b = await evaluate<{ x: number; y: number }>(`(() => { const r = document.querySelector(".rooms-reveal").getBoundingClientRect(); return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) }; })()`);
     await touch("touchStart", [{ x: b.x, y: b.y }]);
     await touch("touchEnd", []);
     await settle(READ, settled, label);
   };
-  const tapAt = async (x, y, settled, label) => {
+  const tapAt = async (x: number, y: number, settled: (d: Drawer) => boolean, label: string) => {
     await touch("touchStart", [{ x, y }]);
     await touch("touchEnd", []);
     await settle(READ, settled, label);
@@ -73,7 +78,7 @@ export async function run(ctx) {
     "DR1 at 390 a document room's nav is folded into the drawer: it waits invisible off the left edge, the burger stands in the cluster and is reachable, the cluster ends inside the reserved band, and nothing scrolls sideways (#483)",
     offLeft(closed.nav) && closed.burgerDisplay !== "none" && closed.burgerReachable &&
       closed.cluster.bottom <= closed.bandH && closed.scrollW <= closed.innerW,
-    `nav ${closed.nav.visibility} right=${closed.nav.rect && closed.nav.rect.right.toFixed(1)}, burger ${closed.burgerDisplay} reachable=${closed.burgerReachable}, cluster bottom ${closed.cluster.bottom.toFixed(1)} vs band ${closed.bandH.toFixed(1)}, scrollW ${closed.scrollW}/${closed.innerW}`,
+    `nav ${closed.nav.visibility} right=${closed.nav.rect && closed.nav.rect.right.toFixed(1)}, burger ${closed.burgerDisplay} reachable=${closed.burgerReachable}, cluster bottom ${closed.cluster.bottom.toFixed(1)} vs band ${closed.bandH.toFixed(1)}, scrollW ${closed.scrollW}/${closed.innerW}`, // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   );
 
   await step("DR2, DR3", async () => {
@@ -149,7 +154,7 @@ export async function run(ctx) {
     await goto(DOCUMENT_ROOM);
     await tapBurger(atOpen, "land");
     const land = await evaluate(READ);
-    const scrolledDoor = await evaluate(`(() => {
+    const scrolledDoor = await evaluate<{ pageScrollY: number; lastReached: boolean; navScrolled: boolean }>(`(() => {
       const nav = document.querySelector("header.chrome nav.rooms");
       nav.scrollTop = nav.scrollHeight;
       const doors = [...nav.querySelectorAll("a, [aria-current]")];

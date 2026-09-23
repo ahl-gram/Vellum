@@ -1,8 +1,9 @@
 // Room voyage-route e2e (RV1-RV12, #320 Sub 3): W17-W28 re-hosted on the Reading Room, the only host that can still run them. RV4 is the ONLY numeric guard on MAX_TILT anywhere (a 24 -> 30 mutation leaves every unit test green and reds only RV4); RV3/RV9/RV10 guard showMark's #181 wiring, which has no unit coverage.
 import { makeRoom, scopedHealth } from "./room-support.ts";
+import type { SuiteContext } from "./types.ts";
 
 // eslint-disable-next-line max-lines-per-function
-export async function run(ctx) {
+export async function run(ctx: SuiteContext): Promise<void> {
   const { evaluate, check, shoot, send, PORT } = ctx;
   const room = makeRoom(ctx);
   const gate = scopedHealth(ctx);
@@ -22,7 +23,7 @@ export async function run(ctx) {
     grab();})()`);
   const based = booted && (await room.settled());
   const armMs = Date.now() - armT0;
-  const rv0a = await evaluate(`(()=>{window.__gapStop=true;return{gap:window.__gap};})()`);
+  const rv0a = await evaluate<{ gap: number }>(`(()=>{window.__gapStop=true;return{gap:window.__gap};})()`);
   check("RV0 the room lands on the routed world at the survey rest", based);
   check(
     "RV0a the main thread keeps painting right through the room's arm: the travel matrix is off it (#418)",
@@ -31,7 +32,7 @@ export async function run(ctx) {
     JSON.stringify({ ...rv0a, armMs, share: +(rv0a.gap / armMs).toFixed(3) }),
   );
 
-  const rv0b = await evaluate(`(()=>{
+  const rv0b = await evaluate<{ ports: number[]; refined: number[]; held: boolean; frozen: boolean }>(`(()=>{
     const ports=window.__vellumVoyagePlan().ports.map((p)=>p.idx);
     const r=window.__vellumRunInline({kind:"draw",seed:526413615,overrides:{},render:{style:"antique",widthPx:1500,legend:true}});
     const sites=r.manifest.places.map((p)=>({idx:p.idx,x:p.gx,y:p.gy}));
@@ -46,7 +47,7 @@ export async function run(ctx) {
     JSON.stringify({ frozen: rv0b.frozen, held: rv0b.held, ports: rv0b.ports.slice(0, 6), refined: rv0b.refined.slice(0, 6) }),
   );
 
-  const rv1 = await evaluate(`(()=>{
+  const rv1 = await evaluate<{ legs: number; modes: Record<string, number>; bad: number }>(`(()=>{
     const plan=window.__vellumVoyagePlan();
     const modes={};
     for(const l of plan.legs) modes[l.mode]=(modes[l.mode]||0)+1;
@@ -59,7 +60,7 @@ export async function run(ctx) {
     JSON.stringify(rv1),
   );
 
-  const rv2 = await evaluate(`(()=>{
+  const rv2 = await evaluate<{ pts: number; ports: number }>(`(()=>{
     window.__vellumVoyageStepTo(999);
     const plan=window.__vellumVoyagePlan();
     const pts=document.querySelector(".rf-chart .voyage-track").getAttribute("points").trim().split(" ").length;
@@ -67,7 +68,7 @@ export async function run(ctx) {
   })()`);
   check("RV2 the resting track is a multi-point routed path, not a port-to-port lerp", rv2.pts > rv2.ports, JSON.stringify(rv2));
 
-  const rv3 = await evaluate(`(()=>{
+  const rv3 = await evaluate<{ seaLeg: number; roadLeg: number; onSea: string; onRoad: string }>(`(()=>{
     const legs=window.__vellumVoyagePlan().legs;
     const seaLeg=legs.findIndex((l)=>l.mode==="sea");
     const roadLeg=legs.findIndex((l)=>l.mode==="road");
@@ -87,7 +88,7 @@ export async function run(ctx) {
   );
 
   // Samples come from voyagePaintAt (stepTo lands only ON ports, never mid-leg where the tilt varies); the anti-flicker leg is selected by the metric ASSERTED, never by index, which once left this passing on a tie.
-  const rv45 = await evaluate(`(()=>{
+  const rv45 = await evaluate<{ maxTilt: number; flips: number; naiveFlips: number; legIdx: number; worstNaive: number }>(`(()=>{
     const plan=window.__vellumVoyagePlan();
     const mark=()=>{const s=document.querySelector(".rf-chart .voyage-ship");const r=document.querySelector(".rf-chart .voyage-rider");return (s&&s.getAttribute("display")!=="none")?s:r;};
     const read=(t)=>{
@@ -126,7 +127,7 @@ export async function run(ctx) {
     JSON.stringify(rv45),
   );
 
-  const rv6 = await evaluate(`(()=>{
+  const rv6 = await evaluate<{ inChart: boolean; inOverlay: boolean; shipInOverlay: boolean; riderInOverlay: boolean }>(`(()=>{
     const chart=document.querySelector(".rf-chart svg:not(.voyage-overlay)");
     return{
       inChart:!!chart.querySelector(".voyage-track,.voyage-ship,.voyage-rider"),
@@ -141,7 +142,7 @@ export async function run(ctx) {
     JSON.stringify(rv6),
   );
 
-  const rv7 = await evaluate(`(()=>{
+  const rv7 = await evaluate<{ visible: boolean; entries: number; logged: number; rows: number; ports: number; legs: number; sig: string; attribution: string; opensDeparture: boolean; closesHome: boolean; homeIdx: number; capitalIdx: number }>(`(()=>{
     window.__vellumVoyageStepTo(999);
     const plan=window.__vellumVoyagePlan();
     const log=window.__vellumVoyageLog();
@@ -166,7 +167,7 @@ export async function run(ctx) {
     JSON.stringify({ ...rv7, attribution: rv7.attribution.slice(0, 24) }),
   );
 
-  const rv8 = await evaluate(`(()=>{
+  const rv8 = await evaluate<{ seaLeg: number; roadLeg: number; seaEntry: string; roadEntry: string }>(`(()=>{
     const plan=window.__vellumVoyagePlan();
     const log=window.__vellumVoyageLog();
     const inbound=plan.legs.slice(0,-1);
@@ -182,7 +183,7 @@ export async function run(ctx) {
     JSON.stringify(rv8),
   );
 
-  const rv9 = await evaluate(`(()=>{
+  const rv9 = await evaluate<{ panelOutsideChart: boolean; matches: boolean | null; status: string; summary: string }>(`(()=>{
     const log=window.__vellumVoyageLog();
     const first=document.querySelector(".rf-log-strip li.prologue");
     const domText=first?first.querySelector(".cr-text").textContent:"";
@@ -201,7 +202,7 @@ export async function run(ctx) {
     JSON.stringify(rv9),
   );
 
-  const rv10 = await evaluate(`(()=>{
+  const rv10 = await evaluate<{ seaLegs: number; missing: number; badOrder: number; landSpans: number; fatStub: number; handoffs: number; hi: number; onWater: string; onStub: string; entry: string }>(`(()=>{
     const legs=window.__vellumVoyageLegGeometry();
     const sea=legs.filter((l)=>l.mode==="sea");
     const missing=sea.filter((l)=>!l.water).length;
@@ -242,7 +243,7 @@ export async function run(ctx) {
 
   // Seed 39 carries the worst measured handoffs (a 26-cell embark stub and a 48-cell landfall stub, back to back), proving the swap in BOTH directions.
   await room.goto("#seed=39&style=antique&legend=1&survey");
-  const rv11 = await evaluate(`(()=>{
+  const rv11 = await evaluate<{ handoffs: 0; embFrom?: undefined; landTo?: undefined; ridesToShore?: undefined; sails?: undefined; ridesFromLandfall?: undefined; narrated?: undefined } | { handoffs: number; embFrom: number; landTo: number; ridesToShore: string; sails: string; ridesFromLandfall: string; narrated: boolean }>(`(()=>{
     const legs=window.__vellumVoyageLegGeometry();
     const n=legs.length;
     const hs=legs.map((l,i)=>({l,i})).filter((x)=>x.l.inlandHandoff);
@@ -274,7 +275,7 @@ export async function run(ctx) {
 
   // Seed 430445745 puts ports on THREE landmasses; before #309 only the capital's shore had roads and 17 of its 24 legs degraded to straight chords. #298's walk-the-land guard now lives on a synthetic fixture in voyage-route.test.ts.
   await room.goto("#seed=430445745&style=antique&legend=1&survey");
-  const rv12 = await evaluate(`(()=>{
+  const rv12 = await evaluate<{ legs: number; road: number; sea: number; straight: number }>(`(()=>{
     const legs=window.__vellumVoyageLegGeometry();
     const modes={};
     for(const l of legs) modes[l.mode]=(modes[l.mode]||0)+1;
