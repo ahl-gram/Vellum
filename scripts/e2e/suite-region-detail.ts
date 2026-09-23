@@ -13,7 +13,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
 
   const rgn = () => evaluate<{ redrafts: number; band: number }>(`window.__vellumRegion()`);
   const enterAt = (k: number, cu: number, cv: number) =>
-    evaluate(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:${k},x:W/2-(${cu})*${k}*W,y:H/2-(${cv})*${k}*H});})()`);
+    evaluate<undefined>(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:${k},x:W/2-(${cu})*${k}*W,y:H/2-(${cv})*${k}*H});})()`);
   const waitRedraft = async (prev: number) => {
     for (let i = 0; i < 375; i++) { const s = await rgn(); if (s.redrafts > prev) return s; await sleep(40); }
     return await rgn();

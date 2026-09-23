@@ -1,30 +1,34 @@
 // Ribbon e2e (the RB checks; the chart room since #463 part 4/4): the strip-chart page boots from the shared worker, defaults to the capital's farthest road, the itinerary fills the slip and a row leans the Glass, a picked journey redraws in place and writes the address and the roads out, the phone docks the journey into the sheet, and the same address presses byte-identical scrolls; self-contained like its sibling suites (navigates itself, carries scoped no-4xx and console-error deltas).
 import { makeStep } from "./step-support.ts";
 import { dropExpectedCancellations } from "./console-support.ts";
+import type { Payload, SuiteContext } from "./types.ts";
+
+type Ribbon = { seed: number; from: number; to: number; leagues: number; dress: string; stRows: number; blob: boolean; shown: boolean; status: string | null; title: string | null; sub: string | null; unrolled: string | null; chart: string | null; prospect: string | null; prospectVerb: string | null; slipTitle: string | null; where: string | null; rows: number; toName: string | null; fromOptions: number[]; prospectShown: boolean; hash: string };
+type Row = { cls: string; num: string | undefined; strong: string | null; em: string | null; button: boolean };
 
 // eslint-disable-next-line max-lines-per-function
-export async function run(ctx) {
+export async function run(ctx: SuiteContext): Promise<void> {
   const { evaluate, send, check, sleep, setMobileViewport, clearMobile, consoleErrors, http4xx, PORT } = ctx;
   const errBase = consoleErrors.length;
   const httpBase = http4xx.length;
   // RB6, RB6b, RB9 and RB10 are deliberately not stepped: their own bounded loops return rather than throwing, and their checks already guard on it.
   const step = makeStep(ctx);
 
-  const page = (hash) => `http://127.0.0.1:${PORT}/ribbon/${hash}`;
+  const page = (hash: string) => `http://127.0.0.1:${PORT}/ribbon/${hash}`;
   // A hash-to-hash Page.navigate on one path is a SAME-DOCUMENT navigation that never re-boots the page, so every fresh address arrives through a real cross-path hop (the prospect suite's precedent).
-  const goto = async (hash) => {
+  const goto = async (hash: string) => {
     await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/faq/` });
     for (let i = 0; i < 100; i++) {
       let away = null;
-      try { away = await evaluate(`!document.getElementById("rb-plate")`); } catch {}
+      try { away = await evaluate<boolean>(`!document.getElementById("rb-plate")`); } catch {}
       if (away) break;
       await sleep(50);
     }
     await send("Page.navigate", { url: page(hash) });
   };
-  const STATE = `(()=>{const st=window.__vellumRibbonState&&window.__vellumRibbonState();const img=document.getElementById("rb-plate");if(!st)return null;const q=(sel)=>{const el=document.querySelector(sel);return el?el.textContent:null;};const a=(id)=>document.getElementById(id).getAttribute("href");const to=document.getElementById("rb-to");return{seed:st.seed,from:st.from,to:st.to,leagues:st.leagues,dress:st.dress,stRows:st.rows,blob:!!(img&&img.src&&img.src.startsWith("blob:")),shown:!!img&&!img.hidden,status:q("#rb-status"),title:q("#folio-title"),sub:q("#folio-sub"),unrolled:q("#rb-unrolled"),chart:a("rb-chart-link"),prospect:a("rb-prospect-link"),prospectVerb:q("#rb-prospect-verb"),slipTitle:q("#itinerary-title"),where:q("#itinerary .card-where"),rows:document.querySelectorAll("#rb-itinerary li").length,toName:to.selectedOptions[0]?to.selectedOptions[0].textContent:null,fromOptions:[...document.getElementById("rb-from").options].map((o)=>Number(o.value)),prospectShown:getComputedStyle(document.getElementById("rb-prospect-link")).display!=="none",hash:location.hash};})()`;
+  const STATE: Payload<Ribbon | null> = `(()=>{const st=window.__vellumRibbonState&&window.__vellumRibbonState();const img=document.getElementById("rb-plate");if(!st)return null;const q=(sel)=>{const el=document.querySelector(sel);return el?el.textContent:null;};const a=(id)=>document.getElementById(id).getAttribute("href");const to=document.getElementById("rb-to");return{seed:st.seed,from:st.from,to:st.to,leagues:st.leagues,dress:st.dress,stRows:st.rows,blob:!!(img&&img.src&&img.src.startsWith("blob:")),shown:!!img&&!img.hidden,status:q("#rb-status"),title:q("#folio-title"),sub:q("#folio-sub"),unrolled:q("#rb-unrolled"),chart:a("rb-chart-link"),prospect:a("rb-prospect-link"),prospectVerb:q("#rb-prospect-verb"),slipTitle:q("#itinerary-title"),where:q("#itinerary .card-where"),rows:document.querySelectorAll("#rb-itinerary li").length,toName:to.selectedOptions[0]?to.selectedOptions[0].textContent:null,fromOptions:[...document.getElementById("rb-from").options].map((o)=>Number(o.value)),prospectShown:getComputedStyle(document.getElementById("rb-prospect-link")).display!=="none",hash:location.hash};})()`;
   const state = () => evaluate(STATE);
-  const opened = async (label) => {
+  const opened = async (label: string) => {
     for (let i = 0; i < 200; i++) {
       let s = null;
       try { s = await state(); } catch {}
@@ -33,9 +37,9 @@ export async function run(ctx) {
     }
     throw new Error("ribbon page never drew: " + label);
   };
-  const svgOf = () => evaluate(`fetch(document.getElementById("rb-plate").src).then(r=>r.text())`, true);
+  const svgOf = () => evaluate<string>(`fetch(document.getElementById("rb-plate").src).then(r=>r.text())`, true);
 
-  let svg1 = null;
+  let svg1: string | null = null;
   // eslint-disable-next-line max-lines-per-function
   await step("RB1 to RB5e", async () => {
     await send("Page.navigate", { url: page("#seed=42") });
@@ -45,10 +49,15 @@ export async function run(ctx) {
       first.seed === 42 && first.from === 0 && first.leagues > 0 && first.shown,
       JSON.stringify({ from: first.from, to: first.to, leagues: first.leagues }),
     );
-    check("RB2 the render worker serves the page (no silent inline fallback)", await evaluate(`window.__vellumRibbonUsesWorker() === true`));
+    check("RB2 the render worker serves the page (no silent inline fallback)", await evaluate<boolean>(`window.__vellumRibbonUsesWorker() === true`));
     check(
       "RB3 the chart's folio names the journey, its world, its length and its dress",
-      /^Laukuwelua to .+ · Chart № 42$/.test(first.title) && /^The Isle of Rahai · the road as the wayfarers' chain measured it, An\. \d+$/.test(first.sub) && /^unrolled in \d+ms · \d+ leagues · antique$/.test(first.unrolled),
+      // @ts-expect-error a folio line the page never filled reads null, and a pattern test reads null as the text "null", so RB3 reads false and reds by name
+      /^Laukuwelua to .+ · Chart № 42$/.test(first.title) && /^The Isle of Rahai · the road as the wayfarers' chain measured it, An\. \d+$/.test(
+        // @ts-expect-error a folio line the page never filled reads null, and a pattern test reads null as the text "null", so RB3 reads false and reds by name
+        first.sub) && /^unrolled in \d+ms · \d+ leagues · antique$/.test(
+        // @ts-expect-error a folio line the page never filled reads null, and a pattern test reads null as the text "null", so RB3 reads false and reds by name
+        first.unrolled),
       JSON.stringify({ title: first.title, sub: first.sub, unrolled: first.unrolled }),
     );
     check(
@@ -62,9 +71,10 @@ export async function run(ctx) {
       typeof svg1 === "string" && svg1.includes("An itinerary strip chart of the road from Laukuwelua"),
       String(svg1).slice(0, 120),
     );
-    const rows = await evaluate(`(()=>{const lis=[...document.querySelectorAll("#rb-itinerary li")];const read=(li)=>({cls:li.className,num:(li.querySelector(".cr-num")||{}).textContent,strong:(li.querySelector("strong")||{}).textContent||null,em:(li.querySelector("em")||{}).textContent||null,button:!!li.querySelector("button.lean")});return{first:lis.length?read(lis[0]):null,last:lis.length?read(lis[lis.length-1]):null,buttons:lis.every((li)=>!!li.querySelector("button.lean"))};})()`);
+    const rows = await evaluate<{ first: Row | null; last: Row | null; buttons: boolean }>(`(()=>{const lis=[...document.querySelectorAll("#rb-itinerary li")];const read=(li)=>({cls:li.className,num:(li.querySelector(".cr-num")||{}).textContent,strong:(li.querySelector("strong")||{}).textContent||null,em:(li.querySelector("em")||{}).textContent||null,button:!!li.querySelector("button.lean")});return{first:lis.length?read(lis[0]):null,last:lis.length?read(lis[lis.length-1]):null,buttons:lis.every((li)=>!!li.querySelector("button.lean"))};})()`);
     check(
       "RB5b the itinerary fills the slip: one row per event, the departure first as the capital at 0 leagues, the arrival last, every row a lean button; the slip's head names the journey",
+      // @ts-expect-error a slip line the page never filled reads null, and a pattern test reads null as the text "null", so RB5b reads false and reds by name
       first.rows === first.stRows && first.rows >= 4 && rows.first && rows.first.cls === "waypoint" && rows.first.num === "0" && rows.first.strong === "Laukuwelua" && rows.first.em === "the capital" && rows.last && rows.last.cls === "waypoint" && rows.last.strong === first.toName && rows.buttons && first.slipTitle === `Laukuwelua to ${first.toName}` && /^\d+ leagues · in .+ · An\. \d+$/.test(first.where),
       JSON.stringify({ rows: first.rows, stRows: first.stRows, first: rows.first, last: rows.last, slipTitle: first.slipTitle, where: first.where, toName: first.toName }),
     );
@@ -76,7 +86,7 @@ export async function run(ctx) {
     await evaluate(`document.querySelectorAll("#rb-itinerary li .lean")[2].click()`);
     let leaned = null;
     for (let i = 0; i < 60; i++) {
-      try { leaned = await evaluate(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;const t=getComputedStyle(document.getElementById("map")).transform;const m=/matrix\\(([^,]+),[^,]+,[^,]+,[^,]+,([^,]+),([^)]+)\\)/.exec(t);const k=m?Number(m[1]):1,x=m?Number(m[2]):0,y=m?Number(m[3]):0;const lis=[...document.querySelectorAll("#rb-itinerary li")];const on=lis.findIndex((li)=>li.classList.contains("on"));const row=lis[2];return{zoomed:vp.classList.contains("zoomed"),k,on,cx:(W/2-x)/(k*W),cy:(H/2-y)/(k*H),nx:Number(row.dataset.nx),ny:Number(row.dataset.ny)};})()`); } catch {}
+      try { leaned = await evaluate<{ zoomed: boolean; k: number; on: number; cx: number; cy: number; nx: number; ny: number }>(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;const t=getComputedStyle(document.getElementById("map")).transform;const m=/matrix\\(([^,]+),[^,]+,[^,]+,[^,]+,([^,]+),([^)]+)\\)/.exec(t);const k=m?Number(m[1]):1,x=m?Number(m[2]):0,y=m?Number(m[3]):0;const lis=[...document.querySelectorAll("#rb-itinerary li")];const on=lis.findIndex((li)=>li.classList.contains("on"));const row=lis[2];return{zoomed:vp.classList.contains("zoomed"),k,on,cx:(W/2-x)/(k*W),cy:(H/2-y)/(k*H),nx:Number(row.dataset.nx),ny:Number(row.dataset.ny)};})()`); } catch {}
       if (leaned && leaned.zoomed && Math.abs(leaned.k - 2.6) < 0.02) break;
       await sleep(50);
     }
@@ -88,7 +98,7 @@ export async function run(ctx) {
     await evaluate(`document.getElementById("map-viewport").dispatchEvent(new KeyboardEvent("keydown",{key:"0",bubbles:true}))`);
     for (let i = 0; i < 60; i++) {
       let home = null;
-      try { home = await evaluate(`!document.getElementById("map-viewport").classList.contains("zoomed")`); } catch {}
+      try { home = await evaluate<boolean>(`!document.getElementById("map-viewport").classList.contains("zoomed")`); } catch {}
       if (home) break;
       await sleep(50);
     }
@@ -99,7 +109,7 @@ export async function run(ctx) {
     );
   });
 
-  const picked = await evaluate(`(()=>{const sel=document.getElementById("rb-to");const cur=sel.value;const opt=[...sel.options].find(o=>o.value!==cur);if(!opt)return null;sel.value=opt.value;sel.dispatchEvent(new Event("change"));return Number(opt.value);})()`);
+  const picked = await evaluate<number | null>(`(()=>{const sel=document.getElementById("rb-to");const cur=sel.value;const opt=[...sel.options].find(o=>o.value!==cur);if(!opt)return null;sel.value=opt.value;sel.dispatchEvent(new Event("change"));return Number(opt.value);})()`);
   let redrawn = null;
   for (let i = 0; i < 200; i++) {
     let s = null;
@@ -109,7 +119,7 @@ export async function run(ctx) {
   }
   check(
     "RB6 a picked destination redraws in place and writes the address",
-    redrawn !== null && new RegExp(`(^|&)b=${picked}(&|$)`).test(String(redrawn && redrawn.hash).slice(1)),
+    redrawn !== null && new RegExp(`(^|&)b=${picked}(&|$)`).test(String(redrawn && redrawn.hash).slice(1)), // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     JSON.stringify({ picked, redrawn: redrawn && { to: redrawn.to, hash: redrawn.hash } }),
   );
   check(
@@ -135,7 +145,7 @@ export async function run(ctx) {
   await step("RB8b", async () => {
     await goto("#seed=42");
     await opened("the phone");
-    const phone = await evaluate(`(()=>{const j=document.getElementById("rb-journey");const swap=document.getElementById("rb-swap");return{journeyIn:j.parentElement.className,inSlip:j.classList.contains("in-slip"),swapIn:swap.parentElement.className,froms:document.querySelectorAll("#rb-from").length,tos:document.querySelectorAll("#rb-to").length,legendIn:document.querySelector(".legend").parentElement.className,sheetW:document.getElementById("sheet").getBoundingClientRect().width,vw:window.innerWidth};})()`);
+    const phone = await evaluate<{ journeyIn: string; inSlip: boolean; swapIn: string; froms: number; tos: number; legendIn: string; sheetW: number; vw: number }>(`(()=>{const j=document.getElementById("rb-journey");const swap=document.getElementById("rb-swap");return{journeyIn:j.parentElement.className,inSlip:j.classList.contains("in-slip"),swapIn:swap.parentElement.className,froms:document.querySelectorAll("#rb-from").length,tos:document.querySelectorAll("#rb-to").length,legendIn:document.querySelector(".legend").parentElement.className,sheetW:document.getElementById("sheet").getBoundingClientRect().width,vw:window.innerWidth};})()`);
     check(
       "RB8b on a phone the journey docks into the sheet as one group (its ids single), Turn about stays in the corner, the legend docks too, and the landscape scroll takes the viewport's width",
       phone.journeyIn === "journey-dock" && phone.inSlip && /folio-controls/.test(phone.swapIn) && phone.froms === 1 && phone.tos === 1 && phone.legendIn === "legend-dock" && Math.abs(phone.sheetW - phone.vw) < 1,
@@ -147,7 +157,7 @@ export async function run(ctx) {
   await step("RB8c", async () => {
     await goto("#seed=42");
     await opened("the wide sheet again");
-    const wide = await evaluate(`(()=>{const j=document.getElementById("rb-journey");return{journeyIn:j.parentElement.className,inSlip:j.classList.contains("in-slip")};})()`);
+    const wide = await evaluate<{ journeyIn: string; inSlip: boolean }>(`(()=>{const j=document.getElementById("rb-journey");return{journeyIn:j.parentElement.className,inSlip:j.classList.contains("in-slip")};})()`);
     check("RB8c back on a wide sheet the journey stands in the corner again", /folio-controls/.test(wide.journeyIn) && !wide.inSlip, JSON.stringify(wide));
   });
 

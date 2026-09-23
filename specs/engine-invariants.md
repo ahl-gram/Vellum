@@ -191,7 +191,7 @@ The closing of coasts against the window boundary is not in that file. It is `cl
 guarantees that walk provides.** A surface wanting a different clue population changes the candidate
 pool, not the output.
 
-The e2e halves are `H11` and `H12` in `scripts/e2e/suite-hunt.mjs`.
+The e2e halves are `H11` and `H12` in `scripts/e2e/suite-hunt.ts`.
 
 ## Engine outputs a consuming surface must respect
 

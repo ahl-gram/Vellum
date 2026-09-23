@@ -1,8 +1,16 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { stripTypeScriptTypes } from "node:module";
 import { join, resolve } from "node:path";
 
 const REPO = resolve(import.meta.dirname, "..");
+
+export const e2eSourcePaths = (root: string): string[] => {
+  const dir = join(root, "scripts", "e2e");
+  return [
+    ...readdirSync(dir, { recursive: true, encoding: "utf8" }).filter((f) => f.endsWith(".ts")).map((f) => join(dir, f)),
+    ...readdirSync(join(root, "scripts")).filter((f) => /^e2e-[\w-]+\.ts$/.test(f)).map((f) => join(root, "scripts", f)),
+  ];
+};
 
 export const readE2eSource = (path: string): string => {
   const text = readFileSync(path, "utf8");

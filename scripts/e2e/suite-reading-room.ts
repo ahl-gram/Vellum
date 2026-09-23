@@ -2,15 +2,21 @@
 // Reading Room e2e (RR0-RR34; #221 plus #318 colophon dice, #418 pre-arm window, #402 prospect stage and #442 the sticky strip): self-contained (navigates itself, scoped no-4xx and console-error delta); there is deliberately NO Explorer entry point (decision 3 on #221), so checks navigate with constructed hashes, and arrival is AT REST on every path.
 import { seedForDate } from "../../src/world/seed-of-the-day.ts";
 import { dropExpectedCancellations } from "./console-support.ts";
+import type { Payload, SuiteContext } from "./types.ts";
+
+type Ages = { chamber: string; year: number | null };
+type AgesRead = { ages: Ages | null; play: string | null; panelHidden: boolean | null; hash: string };
+type Stage = { hidden: boolean; src: string | null; alt: string | null; href: string | null; inSlip: boolean; aboveLog: boolean; belowBar: boolean };
+type Strip = { position: string; top: number; bottom: number; h: number; toldAbove: boolean | null; toldHidden: boolean; toldDisplay: string; gutter: string | undefined; text: string | undefined };
 
 // eslint-disable-next-line max-lines-per-function
-export async function run(ctx) {
+export async function run(ctx: SuiteContext): Promise<void> {
   const { evaluate, send, check, shoot, sleep, serverState, consoleErrors, http4xx, PORT } = ctx;
 
   const boot = async () => {
     for (let i = 0; i < 200; i++) {
       let ok = null;
-      try { ok = await evaluate(`typeof window.__vellumReadingRoomUsesWorker === "function"`); } catch {}
+      try { ok = await evaluate<boolean>(`typeof window.__vellumReadingRoomUsesWorker === "function"`); } catch {}
       if (ok) return true;
       await sleep(75);
     }
@@ -20,16 +26,16 @@ export async function run(ctx) {
   const settled = async () => {
     for (let i = 0; i < 300; i++) {
       let s = null;
-      try { s = await evaluate(`({svg:!!document.querySelector(".rf-chart svg"),status:(document.querySelector(".rf-status")||{}).textContent})`); } catch {}
+      try { s = await evaluate<{ svg: boolean; status: string | undefined }>(`({svg:!!document.querySelector(".rf-chart svg"),status:(document.querySelector(".rf-status")||{}).textContent})`); } catch {}
       if (s && s.svg && s.status === "") return true;
       await sleep(50);
     }
     return false;
   };
-  const agesRead = `(()=>{const a=window.__vellumReadingRoomAges();const p=document.querySelector(".rf-play");const panel=document.querySelector(".rf-ages");return{ages:a,play:p?p.textContent:null,panelHidden:panel?panel.hidden:null,hash:location.hash};})()`;
+  const agesRead: Payload<AgesRead> = `(()=>{const a=window.__vellumReadingRoomAges();const p=document.querySelector(".rf-play");const panel=document.querySelector(".rf-ages");return{ages:a,play:p?p.textContent:null,panelHidden:panel?panel.hidden:null,hash:location.hash};})()`;
   // #402 the prospect stage: href read raw (getAttribute), src as the browser's absolute blob URL. Placement ruled 2026-08-22: inside the panel, below the sticky strip (#442 wrapped the bar in one), above the journal.
-  const stageRead = `(()=>{const f=document.querySelector(".rr-prospect");if(!f)return null;const img=f.querySelector("img");const a=f.querySelector("a");const panel=document.querySelector(".rf-ages");const prev=f.previousElementSibling;const next=f.nextElementSibling;return{hidden:f.hidden,src:img?String(img.src||""):null,alt:img?img.alt:null,href:a?a.getAttribute("href"):null,inSlip:!!f.closest("#journal .journal-dock"),aboveLog:!!(next&&next.classList.contains("rf-log")),belowBar:!!(panel&&panel.contains(f)&&prev&&prev.classList.contains("rf-instrument-strip")&&next&&next.classList.contains("rf-log"))};})()`;
-  const plateShown = async (hrefTail) => {
+  const stageRead: Payload<Stage | null> = `(()=>{const f=document.querySelector(".rr-prospect");if(!f)return null;const img=f.querySelector("img");const a=f.querySelector("a");const panel=document.querySelector(".rf-ages");const prev=f.previousElementSibling;const next=f.nextElementSibling;return{hidden:f.hidden,src:img?String(img.src||""):null,alt:img?img.alt:null,href:a?a.getAttribute("href"):null,inSlip:!!f.closest("#journal .journal-dock"),aboveLog:!!(next&&next.classList.contains("rf-log")),belowBar:!!(panel&&panel.contains(f)&&prev&&prev.classList.contains("rf-instrument-strip")&&next&&next.classList.contains("rf-log"))};})()`;
+  const plateShown = async (hrefTail?: string) => {
     for (let i = 0; i < 160; i++) {
       let s = null;
       try { s = await evaluate(stageRead); } catch {}
@@ -52,23 +58,23 @@ export async function run(ctx) {
     return null;
   };
   // The strip (#442; fixed along the bottom since #463): the frame's wrapper inside it stacks the told row ABOVE the bar.
-  const stripRead = `(()=>{const w=document.querySelector(".rf-instrument-strip");const s=w&&w.closest(".strip");const t=document.querySelector(".rf-told");const b=document.querySelector(".rf-instrument");if(!s||!t||!b)return null;const cs=getComputedStyle(s);const r=s.getBoundingClientRect();const tr=t.getBoundingClientRect();const br=b.getBoundingClientRect();return{position:cs.position,top:Math.round(r.top),bottom:Math.round(innerHeight-r.bottom),h:s.offsetHeight,toldAbove:t.hidden||getComputedStyle(t).display==="none"?null:tr.bottom<=br.top+1,toldHidden:t.hidden,toldDisplay:getComputedStyle(t).display,gutter:(t.querySelector(".cr-year")||{}).textContent,text:(t.querySelector(".cr-text")||{}).textContent};})()`
+  const stripRead: Payload<Strip | null> = `(()=>{const w=document.querySelector(".rf-instrument-strip");const s=w&&w.closest(".strip");const t=document.querySelector(".rf-told");const b=document.querySelector(".rf-instrument");if(!s||!t||!b)return null;const cs=getComputedStyle(s);const r=s.getBoundingClientRect();const tr=t.getBoundingClientRect();const br=b.getBoundingClientRect();return{position:cs.position,top:Math.round(r.top),bottom:Math.round(innerHeight-r.bottom),h:s.offsetHeight,toldAbove:t.hidden||getComputedStyle(t).display==="none"?null:tr.bottom<=br.top+1,toldHidden:t.hidden,toldDisplay:getComputedStyle(t).display,gutter:(t.querySelector(".cr-year")||{}).textContent,text:(t.querySelector(".cr-text")||{}).textContent};})()`
 
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/reading-room/#seed=42&style=antique&legend=1` });
   const rrErrBase = consoleErrors.length;
   const rrHttpBase = http4xx.length;
   check("RR0 reading-room page booted (worker hook present)", await boot());
-  check("RR1 render worker active (no silent cross-directory fallback)", await evaluate(`window.__vellumReadingRoomUsesWorker() === true`));
+  check("RR1 render worker active (no silent cross-directory fallback)", await evaluate<boolean>(`window.__vellumReadingRoomUsesWorker() === true`));
   check("RR2 the deep-linked chart renders into the frame and settles", await settled());
   let inked = false;
   for (let i = 0; i < 120; i++) {
     let ok = null;
-    try { ok = await evaluate(`[...document.querySelectorAll(".rf-chart #layer-land path")].every((p)=>!p.style.strokeDasharray) && !!document.querySelector(".rf-chart #layer-land path")`); } catch {}
+    try { ok = await evaluate<boolean>(`[...document.querySelectorAll(".rf-chart #layer-land path")].every((p)=>!p.style.strokeDasharray) && !!document.querySelector(".rf-chart #layer-land path")`); } catch {}
     if (ok) { inked = true; break; }
     await sleep(50);
   }
   check("RR2b the arrival ceremony plays and clears its inline coast dasharray (no residue)", inked);
-  const st = await evaluate(`(()=>{const s=window.__vellumReadingRoomState();return{seed:s.seed,title:s.title};})()`);
+  const st = await evaluate<{ seed: number; title: string }>(`(()=>{const s=window.__vellumReadingRoomState();return{seed:s.seed,title:s.title};})()`);
   check("RR3 the world is the deep-linked one (seed 42 == 'The Isle of Rahai')", st.seed === 42 && st.title === "The Isle of Rahai", JSON.stringify(st));
   const rest = await evaluate(agesRead);
   check(
@@ -79,15 +85,15 @@ export async function run(ctx) {
   );
 
   // #463 (skeptic on PR #492, round 3): the scale and the folio are DRAWN from the world, not merely present in the markup.
-  const drawn = await evaluate(`(()=>{const sc=document.querySelector(".scale");const t=(sel)=>(document.querySelector(sel)||{}).textContent||"";const lbl=[...sc.querySelectorAll(".tick .lbl")].map((l)=>l.textContent);return{days:sc.querySelectorAll(".tick.day").length,years:sc.querySelectorAll(".tick.year").length,seam:sc.querySelectorAll(".seam").length,labels:lbl,folioTitle:t("#folio-title"),folioSub:t("#folio-sub")};})()`);
+  const drawn = await evaluate<{ days: number; years: number; seam: number; labels: string[]; folioTitle: string; folioSub: string }>(`(()=>{const sc=document.querySelector(".scale");const t=(sel)=>(document.querySelector(sel)||{}).textContent||"";const lbl=[...sc.querySelectorAll(".tick .lbl")].map((l)=>l.textContent);return{days:sc.querySelectorAll(".tick.day").length,years:sc.querySelectorAll(".tick.year").length,seam:sc.querySelectorAll(".seam").length,labels:lbl,folioTitle:t("#folio-title"),folioSub:t("#folio-sub")};})()`);
   check(
     "RR4b the strip's scale is drawn from the world (two day ticks, the star, the centuries and the present) and the chart folio carries the world's name and survey line (#463)",
-    !!drawn && drawn.days === 2 && drawn.seam === 1 && drawn.years >= 2 && drawn.labels.includes("day 1") && drawn.labels.some((l) => /^\d{3,4}$/.test(l)) &&
+    !!drawn && drawn.days === 2 && drawn.seam === 1 && drawn.years >= 2 && drawn.labels.includes("day 1") && drawn.labels.some((l) => /^\d{3,4}$/.test(l)) && // eslint-disable-line @typescript-eslint/no-unnecessary-condition
       drawn.labels.length === new Set(drawn.labels).size && /Chart № 42/.test(drawn.folioTitle) && drawn.folioSub.length > 20,
     JSON.stringify(drawn),
   );
 
-  const journal = await evaluate(`(()=>{const rows=[...document.querySelectorAll(".rf-log-strip li")];const entries=rows.filter(r=>!r.classList.contains("annals-head"));return{rows:rows.length,entries:entries.length,inked:entries.filter(r=>r.classList.contains("inked")).length};})()`);
+  const journal = await evaluate<{ rows: number; entries: number; inked: number }>(`(()=>{const rows=[...document.querySelectorAll(".rf-log-strip li")];const entries=rows.filter(r=>!r.classList.contains("annals-head"));return{rows:rows.length,entries:entries.length,inked:entries.filter(r=>r.classList.contains("inked")).length};})()`);
   check(
     "RR5 the journal is fully told at the present park (all entries inked)",
     journal.entries > 0 && journal.inked === journal.entries,
@@ -103,7 +109,7 @@ export async function run(ctx) {
   );
 
   const strip = await evaluate(stripRead);
-  const lastAnnal = await evaluate(`(()=>{const rows=[...document.querySelectorAll(".rf-log-strip li")].filter(r=>!r.classList.contains("annals-head")&&r.classList.contains("inked"));const li=rows[rows.length-1];return li?{year:li.querySelector(".cr-year").textContent,text:li.querySelector(".cr-text").textContent}:null;})()`);
+  const lastAnnal = await evaluate<{ year: string; text: string } | null>(`(()=>{const rows=[...document.querySelectorAll(".rf-log-strip li")].filter(r=>!r.classList.contains("annals-head")&&r.classList.contains("inked"));const li=rows[rows.length-1];return li?{year:li.querySelector(".cr-year").textContent,text:li.querySelector(".cr-text").textContent}:null;})()`);
   check(
     "RR30 the bottom strip carries the annal being told above the bar, mirroring the journal's own row (#442; fixed at the bottom since #463)",
     !!strip && strip.position === "fixed" && strip.toldHidden === false && strip.toldAbove === true &&
@@ -115,14 +121,14 @@ export async function run(ctx) {
   await send("Emulation.setDeviceMetricsOverride", { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
   await sleep(200);
   const deskRest = await evaluate(stripRead);
-  const room = await evaluate(`(()=>{const s=document.querySelector(".rf-chart svg[data-vellum-style]");const r=s?s.getBoundingClientRect():{width:0,height:0,top:0,bottom:0};const b=document.getElementById("sheet").getBoundingClientRect();const strip=document.querySelector(".strip").getBoundingClientRect();const tr=document.querySelector(".corner.tr").getBoundingClientRect();return{page:document.documentElement.scrollHeight,vh:window.innerHeight,chartW:Math.round(r.width),chartH:Math.round(r.height),ratio:r.width?r.height/r.width:0,fillsSheet:Math.abs(r.width-b.width)<1&&Math.abs(r.height-b.height)<1,topClear:Math.round(r.top-tr.bottom),bottomClear:Math.round(strip.top-r.bottom)};})()`);
+  const room = await evaluate<{ page: number; vh: number; chartW: number; chartH: number; ratio: number; fillsSheet: boolean; topClear: number; bottomClear: number }>(`(()=>{const s=document.querySelector(".rf-chart svg[data-vellum-style]");const r=s?s.getBoundingClientRect():{width:0,height:0,top:0,bottom:0};const b=document.getElementById("sheet").getBoundingClientRect();const strip=document.querySelector(".strip").getBoundingClientRect();const tr=document.querySelector(".corner.tr").getBoundingClientRect();return{page:document.documentElement.scrollHeight,vh:window.innerHeight,chartW:Math.round(r.width),chartH:Math.round(r.height),ratio:r.width?r.height/r.width:0,fillsSheet:Math.abs(r.width-b.width)<1&&Math.abs(r.height-b.height)<1,topClear:Math.round(r.top-tr.bottom),bottomClear:Math.round(strip.top-r.bottom)};})()`);
   await evaluate(`(()=>{window.scrollTo(0,document.documentElement.scrollHeight);return null;})()`);
   await sleep(200);
   const afterScroll = await evaluate(stripRead);
   check(
     "RR31 at 1440x900 the strip stands on the viewport's bottom edge and a chart room has no page scroll to leave it by (#463, ruling 6)",
     !!afterScroll && afterScroll.bottom === 0 && afterScroll.position === "fixed" &&
-      !!room && room.page <= room.vh,
+      !!room && room.page <= room.vh, // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     JSON.stringify({ rest: deskRest, stuck: afterScroll, room }),
   );
   // The strip's height is pinned against measured constants (plate-reader 2026-08-23, seed 42, worst-case row in BOTH halves: 1440 -> 100, 900 -> 100 chronicle / 126 survey, 768 and 700 -> 126, the live row dropped at 40rem so 640 and 560 -> 59, 390 -> 98 where the bar itself wraps; re-measured 2026-08-29 for the bottom strip and pinned with headroom). The ruling budgeted ~104 at 1440x900; between 640 and 900 the told row takes a second line and the strip runs to 126, flagged on the PR as a miss rather than smoothed over.
@@ -158,17 +164,23 @@ export async function run(ctx) {
   check(
     `RR37 and it stays within the ${WIDE_WORST}px envelope across the widths: the told row stands at 1024 and drops at 900 and below (#462 ruling 6, the phone rule is inclusive at 900)`,
     byWidth.length === 3 &&
-      byWidth.every((r) => r.h > 0 && r.h <= WIDE_WORST) &&
+      // @ts-expect-error a width whose strip was never seated reads its height as null, and null > 0 is false, so RR37 reads false and reds by name
+      byWidth.every((r) => r.h > 0 &&
+        // @ts-expect-error the same null reads as 0 here, which passes this bound, but the clause before it has already read false for it, so RR37 still reds by name
+        r.h <= WIDE_WORST) &&
       byWidth[0].told === "flex" && byWidth[1].told === "none" && byWidth[2].told === "none" &&
       // The witness, same half: the survey row wrapped at 1024 must cost more than it did on one line at 1440, or the envelope bounds nothing.
-      byWidth[0].h > deskSurvey.h,
+      // @ts-expect-error a width whose strip was never seated reads its height as null, which the every clause above has already read false for, so RR37 reds by name before this clause runs
+      byWidth[0].h >
+        // @ts-expect-error a strip the governing width never seated leaves deskSurvey null, which RR35 has already failed; a null throws here, outside any step, and the runner reds the whole suite as stopped early
+        deskSurvey.h,
     JSON.stringify({ byWidth, envelope: WIDE_WORST, budget: GOVERNING_BUDGET }),
   );
   // The chart does not shrink: pinned as the COLUMN plus the source aspect rather than a height constant, because the rect is the border box and the chart's 1px hairline puts it 2px above the ruling's 1100x849 (measured 2026-08-23 at 1440x900: 1100x851); a rule that shrank, cropped or scaled the chart moves one of these two, the hairline moves neither.
   const SOURCE_RATIO = 1158 / 1500;
   check(
     "RR36 the chart fills its fitted sheet at its source aspect and clears the folio above and the strip below by room.ts's 14px (#442; the chart room's fit since #463)",
-    !!room && room.fillsSheet && room.topClear >= 14 && room.bottomClear >= 14 &&
+    !!room && room.fillsSheet && room.topClear >= 14 && room.bottomClear >= 14 && // eslint-disable-line @typescript-eslint/no-unnecessary-condition
       Math.abs(room.ratio - SOURCE_RATIO) < 0.005,
     JSON.stringify({ ...room, sourceRatio: SOURCE_RATIO }),
   );
@@ -229,7 +241,7 @@ export async function run(ctx) {
     JSON.stringify(plate650),
   );
 
-  const scrubbed = await evaluate(`(()=>{const r=document.querySelector(".rf-range");r.value=r.min;r.dispatchEvent(new Event("input",{bubbles:true}));r.dispatchEvent(new Event("change",{bubbles:true}));const a=window.__vellumReadingRoomAges();return{chamber:a&&a.chamber,hash:location.hash};})()`);
+  const scrubbed = await evaluate<{ chamber: string | null; hash: string }>(`(()=>{const r=document.querySelector(".rf-range");r.value=r.min;r.dispatchEvent(new Event("input",{bubbles:true}));r.dispatchEvent(new Event("change",{bubbles:true}));const a=window.__vellumReadingRoomAges();return{chamber:a&&a.chamber,hash:location.hash};})()`);
   check(
     "RR8 a manual scrub to the survey half re-serializes the address on release",
     scrubbed.chamber === "survey" && /(^|#|&)survey(&|$)/.test(scrubbed.hash) && !/year=/.test(scrubbed.hash),
@@ -255,7 +267,7 @@ export async function run(ctx) {
     for (let i = 0; i < 160; i++) {
       let s = null;
       try {
-        s = await evaluate(`(()=>{const st=window.__vellumReadingRoomState();return{svg:!!document.querySelector(".rf-chart svg"),status:(document.querySelector(".rf-status")||{}).textContent,seed:st.seed};})()`);
+        s = await evaluate<{ svg: boolean; status: string | undefined; seed: number }>(`(()=>{const st=window.__vellumReadingRoomState();return{svg:!!document.querySelector(".rf-chart svg"),status:(document.querySelector(".rf-status")||{}).textContent,seed:st.seed};})()`);
       } catch {}
       if (s && s.svg && s.status === "") { bare = s; break; }
       await sleep(50);
@@ -268,7 +280,7 @@ export async function run(ctx) {
     JSON.stringify({ ...bare, todayBefore, todayAfter }),
   );
 
-  const colo = await evaluate(`(()=>{const c=document.querySelector(".rr-colophon");if(!c)return null;const panel=document.querySelector(".rf-ages");return{input:!!c.querySelector("input[type=number]"),dice:!!c.querySelector(".rr-dice"),read:!!c.querySelector(".rr-read"),inPanel:panel?panel.contains(c):null,inFolio:!!c.closest(".corner.tr"),shown:!c.hidden&&getComputedStyle(c).display!=="none"};})()`);
+  const colo = await evaluate<{ input: boolean; dice: boolean; read: boolean; inPanel: boolean | null; inFolio: boolean; shown: boolean } | null>(`(()=>{const c=document.querySelector(".rr-colophon");if(!c)return null;const panel=document.querySelector(".rf-ages");return{input:!!c.querySelector("input[type=number]"),dice:!!c.querySelector(".rr-dice"),read:!!c.querySelector(".rr-read"),inPanel:panel?panel.contains(c):null,inFolio:!!c.closest(".corner.tr"),shown:!c.hidden&&getComputedStyle(c).display!=="none"};})()`);
   check(
     "RR16 the colophon dice is the room's one control, top right in the folio: input, dice, Read, outside the panel, visible (#318, re-seated by #462 ruling 2)",
     !!colo && colo.input && colo.dice && colo.read && colo.inPanel === false && colo.inFolio && colo.shown,
@@ -280,7 +292,7 @@ export async function run(ctx) {
   for (let i = 0; i < 300; i++) {
     let s = null;
     try {
-      s = await evaluate(`(()=>{const st=window.__vellumReadingRoomState();return{seed:st.seed,title:st.title,status:(document.querySelector(".rf-status")||{}).textContent,svg:!!document.querySelector(".rf-chart svg")};})()`);
+      s = await evaluate<{ seed: number; title: string; status: string | undefined; svg: boolean }>(`(()=>{const st=window.__vellumReadingRoomState();return{seed:st.seed,title:st.title,status:(document.querySelector(".rf-status")||{}).textContent,svg:!!document.querySelector(".rf-chart svg")};})()`);
     } catch {}
     if (s && s.svg && s.status === "" && s.seed === 42 && s.title === "The Isle of Rahai") { counter = s; break; }
     await sleep(50);
@@ -289,7 +301,7 @@ export async function run(ctx) {
   let reInked = false;
   for (let i = 0; i < 120; i++) {
     let ok = null;
-    try { ok = await evaluate(`[...document.querySelectorAll(".rf-chart #layer-land path")].every((p)=>!p.style.strokeDasharray) && !!document.querySelector(".rf-chart #layer-land path")`); } catch {}
+    try { ok = await evaluate<boolean>(`[...document.querySelectorAll(".rf-chart #layer-land path")].every((p)=>!p.style.strokeDasharray) && !!document.querySelector(".rf-chart #layer-land path")`); } catch {}
     if (ok) { reInked = true; break; }
     await sleep(50);
   }
@@ -311,7 +323,7 @@ export async function run(ctx) {
   await evaluate(`(()=>{const p=document.querySelector(".rf-play");if(p.textContent==="Pause")p.click();const r=document.querySelector(".rf-range");r.value=r.max;r.dispatchEvent(new Event("input",{bubbles:true}));r.dispatchEvent(new Event("change",{bubbles:true}));return null;})()`);
   await sleep(150);
 
-  const after = await evaluate(`(()=>{const a=window.__vellumReadingRoomAges();const p=document.querySelector(".rf-play");const panel=document.querySelector(".rf-ages");const rows=[...document.querySelectorAll(".rf-log-strip li")];const entries=rows.filter(r=>!r.classList.contains("annals-head"));return{ages:a,play:p?p.textContent:null,panelHidden:panel?panel.hidden:null,hash:location.hash,entries:entries.length,inked:entries.filter(r=>r.classList.contains("inked")).length};})()`);
+  const after = await evaluate<{ ages: Ages | null; play: string | null; panelHidden: boolean | null; hash: string; entries: number; inked: number }>(`(()=>{const a=window.__vellumReadingRoomAges();const p=document.querySelector(".rf-play");const panel=document.querySelector(".rf-ages");const rows=[...document.querySelectorAll(".rf-log-strip li")];const entries=rows.filter(r=>!r.classList.contains("annals-head"));return{ages:a,play:p?p.textContent:null,panelHidden:panel?panel.hidden:null,hash:location.hash,entries:entries.length,inked:entries.filter(r=>r.classList.contains("inked")).length};})()`);
   check(
     "RR18 the counter draw re-serializes the address to the new world's present park (seed=42, year=N)",
     !!after.ages && after.ages.chamber === "ages" && after.play === "Play" && after.panelHidden === false &&
@@ -331,14 +343,14 @@ export async function run(ctx) {
   for (let i = 0; i < 300; i++) {
     let s = null;
     try {
-      s = await evaluate(`(()=>{const st=window.__vellumReadingRoomState();return{seed:st.seed,title:st.title,status:(document.querySelector(".rf-status")||{}).textContent};})()`);
+      s = await evaluate<{ seed: number; title: string; status: string | undefined }>(`(()=>{const st=window.__vellumReadingRoomState();return{seed:st.seed,title:st.title,status:(document.querySelector(".rf-status")||{}).textContent};})()`);
     } catch {}
     if (s && s.title && s.title !== "The Isle of Rahai") sawForeign = true;
     if (s && s.status === "" && s.seed === 42 && s.title === "The Isle of Rahai") { raced = s; break; }
     await sleep(50);
   }
   await sleep(2000);
-  const held = await evaluate(`(()=>{const st=window.__vellumReadingRoomState();return{seed:st.seed,title:st.title,hash:location.hash};})()`);
+  const held = await evaluate<{ seed: number; title: string; hash: string }>(`(()=>{const st=window.__vellumReadingRoomState();return{seed:st.seed,title:st.title,hash:location.hash};})()`);
   check(
     "RR20 a superseded draw can never land over a newer one: the stale settle is dropped, the latest holds",
     !!raced && !sawForeign && held.seed === 42 && held.title === "The Isle of Rahai" && /(^|#|&)seed=42(&|$)/.test(held.hash),
@@ -350,7 +362,7 @@ export async function run(ctx) {
   for (let i = 0; i < 300; i++) {
     let s = null;
     try {
-      s = await evaluate(`(()=>{const st=window.__vellumReadingRoomState();const v=document.querySelector(".rr-colophon input").value;return{seed:st.seed,input:v,title:st.title,status:(document.querySelector(".rf-status")||{}).textContent,hash:location.hash};})()`);
+      s = await evaluate<{ seed: number; input: string; title: string; status: string | undefined; hash: string }>(`(()=>{const st=window.__vellumReadingRoomState();const v=document.querySelector(".rr-colophon input").value;return{seed:st.seed,input:v,title:st.title,status:(document.querySelector(".rf-status")||{}).textContent,hash:location.hash};})()`);
     } catch {}
     if (s && s.status === "" && s.seed !== 42 && String(s.seed) === s.input) { rolled = s; break; }
     await sleep(50);
@@ -362,13 +374,13 @@ export async function run(ctx) {
   );
   await evaluate(`(()=>{document.querySelector(".rf-play").click();})()`);
   await sleep(350);
-  const midPlay = await evaluate(`(()=>{const p=document.querySelector(".rf-play");return{label:p.textContent};})()`);
+  const midPlay = await evaluate<{ label: string }>(`(()=>{const p=document.querySelector(".rf-play");return{label:p.textContent};})()`);
   await evaluate(`(()=>{const c=document.querySelector(".rr-colophon");c.querySelector("input").value="42";c.querySelector(".rr-read").click();})()`);
   let interrupted = null;
   for (let i = 0; i < 300; i++) {
     let s = null;
     try {
-      s = await evaluate(`(()=>{const st=window.__vellumReadingRoomState();const a=window.__vellumReadingRoomAges();const p=document.querySelector(".rf-play");const rows=[...document.querySelectorAll(".rf-log-strip li")].filter(r=>!r.classList.contains("annals-head"));return{seed:st.seed,title:st.title,status:(document.querySelector(".rf-status")||{}).textContent,chamber:a&&a.chamber,play:p.textContent,entries:rows.length,inked:rows.filter(r=>r.classList.contains("inked")).length};})()`);
+      s = await evaluate<{ seed: number; title: string; status: string | undefined; chamber: string | null; play: string; entries: number; inked: number }>(`(()=>{const st=window.__vellumReadingRoomState();const a=window.__vellumReadingRoomAges();const p=document.querySelector(".rf-play");const rows=[...document.querySelectorAll(".rf-log-strip li")].filter(r=>!r.classList.contains("annals-head"));return{seed:st.seed,title:st.title,status:(document.querySelector(".rf-status")||{}).textContent,chamber:a&&a.chamber,play:p.textContent,entries:rows.length,inked:rows.filter(r=>r.classList.contains("inked")).length};})()`);
     } catch {}
     if (s && s.status === "" && s.seed === 42 && s.title === "The Isle of Rahai" && s.play === "Play") { interrupted = s; break; }
     await sleep(50);
@@ -385,12 +397,12 @@ export async function run(ctx) {
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/reading-room/#seed=7&year=850` });
   check("RR23a the deep-linked boot draft is underway", await boot());
-  const pre = await evaluate(`(()=>{const st=(document.querySelector(".rf-status")||{}).textContent;const c=document.querySelector(".rr-colophon");c.querySelector("input").value="42";c.querySelector(".rr-read").click();return{preStatus:st};})()`);
+  const pre = await evaluate<{ preStatus: string | undefined }>(`(()=>{const st=(document.querySelector(".rf-status")||{}).textContent;const c=document.querySelector(".rr-colophon");c.querySelector("input").value="42";c.querySelector(".rr-read").click();return{preStatus:st};})()`);
   let usurped = null;
   for (let i = 0; i < 300; i++) {
     let s = null;
     try {
-      s = await evaluate(`(()=>{const st=window.__vellumReadingRoomState();const a=window.__vellumReadingRoomAges();return{seed:st.seed,title:st.title,status:(document.querySelector(".rf-status")||{}).textContent,ages:a,hash:location.hash};})()`);
+      s = await evaluate<{ seed: number; title: string; status: string | undefined; ages: Ages | null; hash: string }>(`(()=>{const st=window.__vellumReadingRoomState();const a=window.__vellumReadingRoomAges();return{seed:st.seed,title:st.title,status:(document.querySelector(".rf-status")||{}).textContent,ages:a,hash:location.hash};})()`);
     } catch {}
     if (s && s.status === "" && s.seed === 42 && s.title === "The Isle of Rahai") { usurped = s; break; }
     await sleep(50);
@@ -410,7 +422,7 @@ export async function run(ctx) {
   let unarmed = null;
   for (let i = 0; i < 400; i++) {
     try {
-      unarmed = await evaluate(`(()=>{const svg=!!document.querySelector(".rf-chart svg");
+      unarmed = await evaluate<{ panelHidden: boolean } | null>(`(()=>{const svg=!!document.querySelector(".rf-chart svg");
         const st=(document.querySelector(".rf-status")||{}).textContent;
         const a=window.__vellumReadingRoomAges?window.__vellumReadingRoomAges():undefined;
         return svg&&st!==""&&a===null?{panelHidden:document.querySelector(".rf-ages").hidden}:null;})()`);
@@ -418,7 +430,7 @@ export async function run(ctx) {
     if (unarmed) break;
     await sleep(25);
   }
-  const poked = await evaluate(`(()=>{
+  const poked = await evaluate<{ before: Ages | null; after: Ages | null; play: string }>(`(()=>{
     const before=window.__vellumReadingRoomAges();
     document.querySelector(".rf-play").click();
     const r=document.querySelector(".rf-range");
@@ -441,12 +453,12 @@ export async function run(ctx) {
   );
 
   // #418: on a COUNTER read the arm waits too, and the previous world's instrument must not outlive the chart it belonged to. clearAges runs in the task that swaps the chart, never with the deferred arm; held back with the arm, this window would show the OLD world's panel armed over the NEW world's chart, where a scrub filters these glyphs by that world's years and a release writes that year into this world's address.
-  const rr25Before = await evaluate(`window.__vellumReadingRoomState().title`);
+  const rr25Before = await evaluate<string>(`window.__vellumReadingRoomState().title`);
   await evaluate(`(()=>{const c=document.querySelector(".rr-colophon");c.querySelector("input").value="526413615";c.querySelector(".rr-read").click();})()`);
   let rr25Window = null;
   for (let i = 0; i < 400; i++) {
     try {
-      rr25Window = await evaluate(`(()=>{const st=window.__vellumReadingRoomState();
+      rr25Window = await evaluate<{ title: string; seed: number; ages: Ages | null; panelHidden: boolean | null; tracks: number } | null>(`(()=>{const st=window.__vellumReadingRoomState();
         const status=(document.querySelector(".rf-status")||{}).textContent;
         if(st.title===${JSON.stringify(rr25Before)}||status==="")return null;
         const p=document.querySelector(".rf-ages");
@@ -470,7 +482,7 @@ export async function run(ctx) {
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
   let card = null;
   for (let i = 0; i < 120; i++) {
-    try { card = await evaluate(`(()=>{const a=document.getElementById("lf-card-reading-room");if(!a)return null;const v=a.querySelector(".lf-card-verb");const e=a.querySelector(".lf-card-enter");return{verb:v?v.textContent:null,enter:e?e.getAttribute("href"):null};})()`); } catch {}
+    try { card = await evaluate<{ verb: string | null; enter: string | null } | null>(`(()=>{const a=document.getElementById("lf-card-reading-room");if(!a)return null;const v=a.querySelector(".lf-card-verb");const e=a.querySelector(".lf-card-enter");return{verb:v?v.textContent:null,enter:e?e.getAttribute("href"):null};})()`); } catch {}
     if (card) break;
     await sleep(50);
   }
@@ -479,7 +491,7 @@ export async function run(ctx) {
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/seed-of-the-day/` });
   let watch = null;
   for (let i = 0; i < 160; i++) {
-    try { watch = await evaluate(`(()=>{const a=document.querySelector('a[data-road="reading-room"]');return a&&/#seed=\\d+/.test(a.getAttribute("href"))?{href:a.getAttribute("href")}:null;})()`); } catch {}
+    try { watch = await evaluate<{ href: string } | null>(`(()=>{const a=document.querySelector('a[data-road="reading-room"]');return a&&/#seed=\\d+/.test(a.getAttribute("href"))?{href:a.getAttribute("href")}:null;})()`); } catch {}
     if (watch) break;
     await sleep(50);
   }
@@ -499,7 +511,7 @@ export async function run(ctx) {
   let glassOff = 0, glassSamples = 0, preArm = 0;
   for (let i = 0; i < 160; i++) {
     let s = null;
-    try { s = await evaluate(`(()=>{const g=document.querySelector(".corner.br.zoomery");const a=typeof window.__vellumReadingRoomAges==="function"?window.__vellumReadingRoomAges():null;if(!g)return null;const r=g.getBoundingClientRect();return{armed:!!a,bottom:r.bottom,top:r.top,vh:innerHeight,sheetH:getComputedStyle(document.body).getPropertyValue("--sheet-h")};})()`); } catch {}
+    try { s = await evaluate<{ armed: boolean; bottom: number; top: number; vh: number; sheetH: string } | null>(`(()=>{const g=document.querySelector(".corner.br.zoomery");const a=typeof window.__vellumReadingRoomAges==="function"?window.__vellumReadingRoomAges():null;if(!g)return null;const r=g.getBoundingClientRect();return{armed:!!a,bottom:r.bottom,top:r.top,vh:innerHeight,sheetH:getComputedStyle(document.body).getPropertyValue("--sheet-h")};})()`); } catch {}
     if (s) { glassSamples++; if (!s.armed) preArm++; if (s.bottom > s.vh + 1 || s.top < 0 || parseFloat(s.sheetH || "0") > s.vh) glassOff++; if (s.armed) break; }
     await sleep(50);
   }
@@ -511,16 +523,16 @@ export async function run(ctx) {
     glassSamples > 0 && preArm > 0 && glassOff === 0,
     JSON.stringify({ glassSamples, preArm, glassOff }),
   );
-  const mobile = await evaluate(`({w:document.body.scrollWidth,vw:window.innerWidth})`);
+  const mobile = await evaluate<{ w: number; vw: number }>(`({w:document.body.scrollWidth,vw:window.innerWidth})`);
   // #442 ruled 2026-08-23: on a phone the CONTROLS stick and the live row does not, so the strip stays the bar's own height; read after the same dwell, at the same viewport.
   const mobileStrip = await evaluate(stripRead);
   // #462 ruling 6's phone half: the scale loses its LABELS, not its star.
-  const mobileScale = await evaluate(`(()=>{const sc=document.querySelector(".scale");const lbl=[...sc.querySelectorAll(".tick .lbl")];const seam=sc.querySelector(".seam");return{labelsHidden:lbl.length>0&&lbl.every((l)=>getComputedStyle(l).display==="none"),seamShown:!!seam&&seam.getBoundingClientRect().width>0};})()`);
+  const mobileScale = await evaluate<{ labelsHidden: boolean; seamShown: boolean }>(`(()=>{const sc=document.querySelector(".scale");const lbl=[...sc.querySelectorAll(".tick .lbl")];const seam=sc.querySelector(".seam");return{labelsHidden:lbl.length>0&&lbl.every((l)=>getComputedStyle(l).display==="none"),seamShown:!!seam&&seam.getBoundingClientRect().width>0};})()`);
   await evaluate(`(()=>{window.scrollTo(0,900);return null;})()`);
   await sleep(120);
   const mobileStuck = await evaluate(stripRead);
   await evaluate(`(()=>{window.scrollTo(0,0);return null;})()`);
-  const mobilePace = await evaluate(`(()=>{const g=document.querySelector(".rf-instrument .rf-pace");return g?getComputedStyle(g).display:"(no-el)";})()`);
+  const mobilePace = await evaluate<string>(`(()=>{const g=document.querySelector(".rf-instrument .rf-pace");return g?getComputedStyle(g).display:"(no-el)";})()`);
   await shoot("reading-room-390.png");
   await ctx.clearMobile();
   check("RR38 at 390px the pace group drops (#493; the mockup's phone rule, strip-scoped)", mobilePace === "none", JSON.stringify({ mobilePace }));
@@ -540,7 +552,7 @@ export async function run(ctx) {
   );
 
   // #124: the room builds the same overlay the Explorer does, so it LOOKS like it should card; it does not, since the ages chamber is armed on every draw and the overlay is permanently .scrub with every hit inert. Pinned because reading the call site alone says the opposite.
-  const rrCard = await evaluate(`(()=>{
+  const rrCard = await evaluate<{ hits: number; card: boolean; scrub?: undefined; pe?: undefined; hidden?: undefined } | { hits: number; card: true; scrub: boolean; pe: string; hidden: boolean }>(`(()=>{
     const hits=[...document.querySelectorAll(".place-hit")];
     const card=document.getElementById("place-card");
     if(!hits.length||!card) return {hits:hits.length,card:!!card};
@@ -569,7 +581,7 @@ export async function run(ctx) {
     for (let i = 0; i < 220; i++) {
       let s = null;
       try {
-        s = await evaluate(`(()=>{const uw=typeof window.__vellumReadingRoomUsesWorker==="function"?window.__vellumReadingRoomUsesWorker():null;const w=document.getElementById("rr-warning");return{uw,warn:!!(w&&!w.hidden),svg:!!document.querySelector(".rf-chart svg"),status:(document.querySelector(".rf-status")||{}).textContent};})()`);
+        s = await evaluate<{ uw: boolean | null; warn: boolean; svg: boolean; status: string | undefined }>(`(()=>{const uw=typeof window.__vellumReadingRoomUsesWorker==="function"?window.__vellumReadingRoomUsesWorker():null;const w=document.getElementById("rr-warning");return{uw,warn:!!(w&&!w.hidden),svg:!!document.querySelector(".rf-chart svg"),status:(document.querySelector(".rf-status")||{}).textContent};})()`);
       } catch {}
       // The gate deliberately omits s.svg: RR15 asserts it, and requiring it here would make RR15 true by construction.
       if (s && s.uw === false && s.status === "") { fb = s; break; }

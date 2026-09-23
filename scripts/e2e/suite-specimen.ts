@@ -73,7 +73,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const step = makeStep(ctx);
   const gate = scopedHealth(ctx);
   const read = () => evaluate(READ);
-  const setState = (s: string) => evaluate(`(()=>{const sel=document.getElementById("sb-state");sel.value=${JSON.stringify(s)};sel.dispatchEvent(new Event("change",{bubbles:true}));return sel.value;})()`);
+  const setState = (s: string) => evaluate<string>(`(()=>{const sel=document.getElementById("sb-state");sel.value=${JSON.stringify(s)};sel.dispatchEvent(new Event("change",{bubbles:true}));return sel.value;})()`);
 
   // Bounce through about:blank (the Z13 idiom): a navigate to the tab's current URL is a no-op.
   const goto = async (): Promise<Specimen | null> => {
