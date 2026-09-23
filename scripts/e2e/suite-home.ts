@@ -1,10 +1,14 @@
 /* eslint-disable max-lines */
 // The floating seed chrome (H0-H6, #289 semantics relanded at #470), the ceremony (H7-H13, #457), the failed-bundle doors (H13c, #470), and the stations, cards, and idle drift (H14-H17, #458): the homepage frame at desktop and a real 390px viewport, the corner form, the seed form's real promise (the chart number in the baked cartouche IS the seed, so the drawn SVG identifies its world), the veil's arrival, skips in both phases, sitting memory, reduced-motion and narrow-viewport stories, and the station flights driven by REAL dispatched input; deltas scoped per flow, plumbing shared via home-support.ts (#460).
 import { readCam, atLandfall, readXform, buttonPoint, makeStage } from "./home-support.ts";
+import type { Cam } from "./home-support.ts";
 import { dropExpectedCancellations } from "./console-support.ts";
+import type { Payload, SuiteContext } from "./types.ts";
+
+type Seat = { pos: string; z: string; right: number; bottom: number; pe: string; anim: string; top: number; vw: number };
 
 // eslint-disable-next-line max-lines-per-function
-export async function run(ctx) {
+export async function run(ctx: SuiteContext): Promise<void> {
   const { evaluate, send, check, shoot, sleep, setMobileViewport, clearMobile, consoleErrors, http4xx, PORT } = ctx;
 
   const { pressKey, clickAt, settleHome } = makeStage(ctx);
@@ -16,7 +20,7 @@ export async function run(ctx) {
   let ready = false;
   for (let i = 0; i < 100; i++) {
     let ok = null;
-    try { ok = await evaluate(`document.readyState === "complete" && !!document.getElementById("seed-form")`); } catch {}
+    try { ok = await evaluate<boolean>(`document.readyState === "complete" && !!document.getElementById("seed-form")`); } catch {}
     if (ok) { ready = true; break; }
     await sleep(75);
   }
@@ -28,20 +32,25 @@ export async function run(ctx) {
       await pressKey("Escape", "Escape", 27);
       await sleep(150);
       let up = true;
-      try { up = await evaluate(`!!document.getElementById("lf-veil")`); } catch {}
+      try { up = await evaluate<boolean>(`!!document.getElementById("lf-veil")`); } catch {}
       if (!up) break;
     }
   }
 
   // Gold compared NUMERICALLY: Chromium serializes var() colors as rgb()/color(srgb ...), so the channels, not the spelling, are under test (#324).
-  const controlGold = (bg) => {
+  const controlGold = (bg: string | null) => {
     if (!bg) return false;
     let m = bg.match(/^rgb\((\d+), (\d+), (\d+)\)$/);
     if (m) return +m[1] === 240 && +m[2] === 227 && +m[3] === 189;
     m = bg.match(/^color\(srgb ([0-9.]+) ([0-9.]+) ([0-9.]+)\)$/);
-    return !!m && Math.round(m[1] * 255) === 240 && Math.round(m[2] * 255) === 227 && Math.round(m[3] * 255) === 189;
+    // @ts-expect-error a match group is a string, which the multiplication coerces to a number, as it does at run time
+    return !!m && Math.round(m[1] * 255) === 240 && Math.round(
+      // @ts-expect-error a match group is a string, which the multiplication coerces to a number, as it does at run time
+      m[2] * 255) === 227 && Math.round(
+      // @ts-expect-error a match group is a string, which the multiplication coerces to a number, as it does at run time
+      m[3] * 255) === 189;
   };
-  const frame = ready ? await evaluate(`(() => {
+  const frame = ready ? await evaluate<{ pos: string; right: number; top: number; inside: boolean; gold: string | null; doorsHidden: boolean } | null>(`(() => {
     const form = document.getElementById("seed-form");
     const stage = document.getElementById("lf-stage");
     if (!form || !stage) return null;
@@ -64,7 +73,7 @@ export async function run(ctx) {
     JSON.stringify(frame),
   );
 
-  const hero = ready ? await evaluate(`(() => {
+  const hero = ready ? await evaluate<{ hook: string | null; seed: string | null; lineStyle: string | null }>(`(() => {
     const hook = document.querySelector(".lf-seed .seed-hook");
     const input = document.getElementById("seed-input");
     const line = document.querySelector(".lf-seed .seed-gloss");
@@ -73,7 +82,10 @@ export async function run(ctx) {
   })()`) : null;
   check(
     "H2 the hook reads as ratified, the seed input is prefilled 42, the gloss is italic",
-    !!hero && /Give Vellum a number\./.test(hero.hook) && /It gives you back a world\./.test(hero.hook) && hero.seed === "42" && hero.lineStyle === "italic",
+    // @ts-expect-error a hook the page never seated reads null, and a pattern test reads null as the text "null", so H2 reads false and reds by name
+    !!hero && /Give Vellum a number\./.test(hero.hook) && /It gives you back a world\./.test(
+      // @ts-expect-error the same hook, which the pattern test before has already read false for if it is null
+      hero.hook) && hero.seed === "42" && hero.lineStyle === "italic",
     JSON.stringify(hero),
   );
   await shoot("home-seed-chrome.png");
@@ -83,11 +95,11 @@ export async function run(ctx) {
   let mobileReady = false;
   for (let i = 0; i < 100; i++) {
     let ok = null;
-    try { ok = await evaluate(`document.readyState === "complete" && !!document.getElementById("seed-form")`); } catch {}
+    try { ok = await evaluate<boolean>(`document.readyState === "complete" && !!document.getElementById("seed-form")`); } catch {}
     if (ok) { mobileReady = true; break; }
     await sleep(75);
   }
-  const mobile = mobileReady ? await evaluate(`(() => {
+  const mobile = mobileReady ? await evaluate<{ innerWidth: number; scrollW: number; inViewport: boolean; glossShown: string; inputInsidePanel: boolean; drawItLines: number } | null>(`(() => {
     const form = document.getElementById("seed-form");
     const gloss = document.querySelector(".lf-seed .seed-gloss");
     const input = document.getElementById("seed-input");
@@ -114,7 +126,7 @@ export async function run(ctx) {
   ready = false;
   for (let i = 0; i < 100; i++) {
     let ok = null;
-    try { ok = await evaluate(`document.readyState === "complete" && !!document.getElementById("seed-form")`); } catch {}
+    try { ok = await evaluate<boolean>(`document.readyState === "complete" && !!document.getElementById("seed-form")`); } catch {}
     if (ok) { ready = true; break; }
     await sleep(75);
   }
@@ -131,9 +143,9 @@ export async function run(ctx) {
   let drew = false;
   for (let i = 0; i < 200; i++) {
     try {
-      landed = await evaluate(`location.pathname + location.search + location.hash`);
+      landed = await evaluate<string>(`location.pathname + location.search + location.hash`);
       if (/^\/explorer\/#(.*&)?seed=777(&|$)/.test(landed)) {
-        drew = await evaluate(`(() => {
+        drew = await evaluate<boolean>(`(() => {
           const svg = document.querySelector("#map svg");
           const status = document.getElementById("status");
           return !!svg && !!status && status.textContent === "" && svg.textContent.includes("CHART № 777");
@@ -154,7 +166,7 @@ export async function run(ctx) {
   let backHome = false;
   for (let i = 0; i < 100; i++) {
     let ok = null;
-    try { ok = await evaluate(`document.readyState === "complete" && !!document.getElementById("seed-form")`); } catch {}
+    try { ok = await evaluate<boolean>(`document.readyState === "complete" && !!document.getElementById("seed-form")`); } catch {}
     if (ok) { backHome = true; break; }
     await sleep(75);
   }
@@ -162,15 +174,15 @@ export async function run(ctx) {
   let refused = null;
   if (backHome) {
     try {
-      refused = await evaluate(`(() => {
+      refused = await evaluate<{ flagged: boolean }>(`(() => {
         const i = document.getElementById("seed-input");
         i.value = "not a seed";
         document.querySelector("#seed-form button").click();
         return { flagged: !i.validity.valid };
       })()`);
       await sleep(600);
-      const stayed = await evaluate(`location.pathname === "/" && !!document.getElementById("seed-form")`);
-      refused = refused ? { ...refused, stayed } : null;
+      const stayed = await evaluate<boolean>(`location.pathname === "/" && !!document.getElementById("seed-form")`);
+      refused = refused ? { ...refused, stayed } : null; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     } catch { refused = null; }
   }
   check(
@@ -189,7 +201,7 @@ export async function run(ctx) {
     } catch {}
     for (let i = 0; i < 100; i++) {
       try {
-        degraded = await evaluate(`location.pathname + location.search + location.hash`);
+        degraded = await evaluate<string>(`location.pathname + location.search + location.hash`);
         if (degraded.startsWith("/explorer/")) break;
       } catch {}
       await sleep(75);
@@ -216,7 +228,7 @@ export async function run(ctx) {
   let veiled = null;
   for (let i = 0; i < 100; i++) {
     try {
-      veiled = await evaluate(`(() => {
+      veiled = await evaluate<{ status: string | null; rose: boolean; wordmark: string | null } | null>(`(() => {
         const v = document.getElementById("lf-veil");
         if (!v) return null;
         return {
@@ -252,7 +264,7 @@ export async function run(ctx) {
   // H8's teeth: before the key the camera provably sits at the wide anchorage (0.78 of fit), so the jump to the landfall scale can only come from the skip's land(0). The poll waits for the ANCHORAGE, not merely the veil: the pre-paint veil stands before the module boots, and a key in that window has no skip listener to hit (CI caught exactly that).
   await evaluate(`sessionStorage.clear()`);
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
-  const anchored = (s) => s !== null && s.veil && Math.abs(s.scale - s.fit * 0.78) < 1e-3;
+  const anchored = (s: Cam | null) => s !== null && s.veil && Math.abs(s.scale - s.fit * 0.78) < 1e-3;
   let before8 = null;
   for (let i = 0; i < 150; i++) {
     try { before8 = await evaluate(readCam); } catch {}
@@ -338,7 +350,7 @@ export async function run(ctx) {
   let narrow12 = null;
   for (let i = 0; i < 100; i++) {
     try {
-      narrow12 = await evaluate(`(() => {
+      narrow12 = await evaluate<{ w: number; h: number; x: number; y: number; corners: boolean; innerWidth: number; scrollW: number } | null>(`(() => {
         const v = document.getElementById("lf-veil");
         if (!v) return null;
         const r = v.getBoundingClientRect();
@@ -374,11 +386,14 @@ export async function run(ctx) {
   }
   check(
     "H12b the narrow skip lands at the narrow landfall framing (1.6 of fit under a 900px viewport)",
-    anchored(armed12) && atLandfall(narrowLand) && narrowLand.expected < narrowLand.fit * 1.65,
+    // @ts-expect-error atLandfall has already read false for a null camera, so a null never reaches here
+    anchored(armed12) && atLandfall(narrowLand) && narrowLand.expected <
+      // @ts-expect-error atLandfall has already read false for a null camera, so a null never reaches here
+      narrowLand.fit * 1.65,
     JSON.stringify({ armed12, narrowLand }),
   );
-  const camSeat = () => evaluate(`(() => { const c = document.getElementById("lf-controls"); const s = document.getElementById("lf-stage"); if (!c || !s || !c.classList.contains("on")) return null; const r = c.getBoundingClientRect(), sr = s.getBoundingClientRect(); const cs = getComputedStyle(c); return { pos: cs.position, z: cs.zIndex, right: sr.right - r.right, bottom: sr.bottom - r.bottom, pe: cs.pointerEvents, anim: cs.animationName, top: r.top, vw: innerWidth }; })()`);
-  const seatOk = (s) => !!s && s.pos === "absolute" && s.z === "auto" && s.anim === "none" && s.pe === "auto" && Math.abs(s.right - 25.6) < 0.6 && Math.abs(s.bottom - 22.4) < 0.6;
+  const camSeat = () => evaluate<Seat | null>(`(() => { const c = document.getElementById("lf-controls"); const s = document.getElementById("lf-stage"); if (!c || !s || !c.classList.contains("on")) return null; const r = c.getBoundingClientRect(), sr = s.getBoundingClientRect(); const cs = getComputedStyle(c); return { pos: cs.position, z: cs.zIndex, right: sr.right - r.right, bottom: sr.bottom - r.bottom, pe: cs.pointerEvents, anim: cs.animationName, top: r.top, vw: innerWidth }; })()`);
+  const seatOk = (s: Seat | null) => !!s && s.pos === "absolute" && s.z === "auto" && s.anim === "none" && s.pe === "auto" && Math.abs(s.right - 25.6) < 0.6 && Math.abs(s.bottom - 22.4) < 0.6;
   const seat390 = await camSeat();
   await clearMobile();
   await send("Page.navigate", { url: "about:blank" });
@@ -387,11 +402,16 @@ export async function run(ctx) {
   for (let i = 0; i < 120; i++) { try { seatWide = await camSeat(); } catch {} if (seatWide) break; await sleep(50); }
   await evaluate(`window.scrollTo(0, 600)`);
   await sleep(80);
-  const camScrolled = await evaluate(`(() => { const r = document.getElementById("lf-controls").getBoundingClientRect(); return { top: r.top, y: scrollY }; })()`);
+  const camScrolled = await evaluate<{ top: number; y: number }>(`(() => { const r = document.getElementById("lf-controls").getBoundingClientRect(); return { top: r.top, y: scrollY }; })()`);
   await evaluate(`window.scrollTo(0, 0)`);
   check(
     "H18 the camera's seat is home's own (#505): absolute in the stage, 1.6rem from its right edge and 1.4rem up at the wide sheet and at 390, no depth, no ink-in, the container taking the pointer, and it scrolls away with the stage",
-    seatOk(seatWide) && seatOk(seat390) && seatWide.vw >= 1024 && seat390.vw === 390 && !!camScrolled && camScrolled.y > 0 && Math.abs((seatWide.top - camScrolled.top) - camScrolled.y) < 2,
+    // @ts-expect-error seatOk has already read false for a null seat, so a null never reaches here
+    seatOk(seatWide) && seatOk(seat390) && seatWide.vw >= 1024 &&
+      // @ts-expect-error seatOk has already read false for a null seat, so a null never reaches here
+      seat390.vw === 390 && !!camScrolled && camScrolled.y > 0 && Math.abs(( // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+      // @ts-expect-error seatOk has already read false for a null seat, so a null never reaches here
+      seatWide.top - camScrolled.top) - camScrolled.y) < 2,
     JSON.stringify({ seatWide, seat390, camScrolled }),
   );
 
@@ -411,7 +431,7 @@ export async function run(ctx) {
   let preModule = null;
   for (let i = 0; i < 100; i++) {
     try {
-      preModule = await evaluate(`(() => {
+      preModule = await evaluate<{ veil: boolean; adopted: boolean; seedForm: boolean; doorsYet: boolean } | null>(`(() => {
         const v = document.getElementById("lf-veil");
         if (!v) return null;
         return { veil: true, adopted: v.dataset.adopted !== undefined, seedForm: !!document.getElementById("seed-form"),
@@ -428,7 +448,7 @@ export async function run(ctx) {
   );
   let released = null;
   for (let i = 0; i < 200; i++) {
-    try { released = await evaluate(`({ veil: !!document.getElementById("lf-veil"), seedForm: !!document.getElementById("seed-form") })`); } catch {}
+    try { released = await evaluate<{ veil: boolean; seedForm: boolean }>(`({ veil: !!document.getElementById("lf-veil"), seedForm: !!document.getElementById("seed-form") })`); } catch {}
     if (released !== null && !released.veil) break;
     await sleep(100);
   }
@@ -441,7 +461,7 @@ export async function run(ctx) {
   let doors = null;
   for (let i = 0; i < 80; i++) {
     try {
-      doors = await evaluate(`(() => {
+      doors = await evaluate<{ shown: boolean[]; hrefs: (string | null)[]; closesHidden: boolean; howHidden: boolean; scrollW: number; innerWidth: number } | null>(`(() => {
         const ids = ["explorer", "reading-room", "atlas", "gallery"];
         const cards = ids.map((id) => document.getElementById("lf-card-" + id));
         if (cards.some((c) => c === null)) return null;
@@ -472,7 +492,7 @@ export async function run(ctx) {
   await shoot("home-failed-bundle-doors.png");
 
   // Reduced motion crosses the doors both ways (#470 skeptic round 1: motion.css's prm blanket zeroed the 10s delay, so prm visitors got the failure doors on every HEALTHY load); both halves matter, since a display:none card still computes visibility:visible and a pre-reveal card is display:block with visibility:hidden.
-  const doorShown = `(() => { const c = document.getElementById("lf-card-explorer"); return c !== null && c.offsetParent !== null && getComputedStyle(c).visibility === "visible"; })()`;
+  const doorShown: Payload<boolean> = `(() => { const c = document.getElementById("lf-card-explorer"); return c !== null && c.offsetParent !== null && getComputedStyle(c).visibility === "visible"; })()`;
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
   await send("Network.setBlockedURLs", { urls: ["*app.bundle.js*"] });
   await evaluate(`sessionStorage.clear()`);
@@ -502,7 +522,7 @@ export async function run(ctx) {
   let afterCam = 0;
   for (let i = 0; i < 120; i++) {
     try {
-      const s = await evaluate(`({ old: window.__h13d === 1, ready: !!document.getElementById("seed-form"), door: ${doorShown}, cam: !!document.querySelector("#lf-stage.cam") })`);
+      const s = await evaluate<{ old: boolean; ready: boolean; door: boolean; cam: boolean }>(`({ old: window.__h13d === 1, ready: !!document.getElementById("seed-form"), door: ${doorShown}, cam: !!document.querySelector("#lf-stage.cam") })`);
       if (fresh) {
         if (s.door) prmFlash = true;
         if (s.cam) prmCam = true;
@@ -527,7 +547,7 @@ export async function run(ctx) {
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
   for (let i = 0; i < 90; i++) {
     try {
-      nojs = await evaluate(`(() => {
+      nojs = await evaluate<{ navShown: boolean; howShown: boolean; door: boolean } | null>(`(() => {
         const nav = document.querySelector(".lf-noscript-rooms");
         const how = document.getElementById("lf-card-how");
         if (nav === null || how === null) return null;
@@ -555,7 +575,7 @@ export async function run(ctx) {
   let visited = null;
   for (let i = 0; i < 80; i++) {
     try {
-      visited = await evaluate(`(() => {
+      visited = await evaluate<{ scale: number; fit: number; anchorX: number; anchorY: number; stageW: number; stageH: number; open: boolean; contained: boolean; anchorClear: boolean; enterReach: boolean; closeReach: boolean; controlsReach: boolean; title: string | null; enter: string | null; arms: number } | null>(`(() => {
         const stage = document.getElementById("lf-stage");
         const sheet = document.getElementById("lf-sheet");
         const btn = document.querySelector('.lf-station[data-station="atlas"]');
@@ -605,14 +625,14 @@ export async function run(ctx) {
   await pressKey("Escape", "Escape", 27);
   let closed14 = null;
   for (let i = 0; i < 30; i++) {
-    try { closed14 = await evaluate(`document.getElementById("lf-card-atlas").hidden`); } catch {}
+    try { closed14 = await evaluate<boolean>(`document.getElementById("lf-card-atlas").hidden`); } catch {}
     if (closed14 === true) break;
     await sleep(75);
   }
   check("H14b a real Escape sets the slip aside", closed14 === true, `hidden=${closed14}`);
 
   // The house button lift must never reach a station (its anchor transform IS its position and counter-scale): a real hover once shifted the pip 17px and shrank it to the raw camera scale.
-  const pipBox = `(() => {
+  const pipBox: Payload<{ cx: number; cy: number; w: number; glyphW: number; btnBg: string }> = `(() => {
     const btn = document.querySelector('.lf-station[data-station="atlas"]');
     const b = btn.getBoundingClientRect();
     const g = btn.querySelector(".lf-station-glyph").getBoundingClientRect();
@@ -634,7 +654,7 @@ export async function run(ctx) {
   await sleep(450);
   check(
     "H14d a real hover keeps the pip on its anchor at its size, its button square unpainted, while the glyph grows the mockup's quarter",
-    pipRest !== null && pipHover !== null
+    pipRest !== null && pipHover !== null // eslint-disable-line @typescript-eslint/no-unnecessary-condition
       && Math.abs(pipHover.cx - pipRest.cx) < 0.5 && Math.abs(pipHover.cy - pipRest.cy) < 0.5
       && Math.abs(pipHover.w - pipRest.w) < 0.5 && Math.abs(pipRest.w - 34) < 0.5
       && Math.abs(pipHover.glyphW / pipRest.glyphW - 1.25) < 0.02
@@ -647,7 +667,7 @@ export async function run(ctx) {
   let legendCard = null;
   for (let i = 0; i < 80; i++) {
     try {
-      legendCard = await evaluate(`(() => {
+      legendCard = await evaluate<{ open: boolean; title: string | null } | null>(`(() => {
         const card = document.getElementById("lf-card-reading-room");
         if (!card) return null;
         const cs = getComputedStyle(card);
@@ -670,7 +690,7 @@ export async function run(ctx) {
   const drift1 = await evaluate(readXform);
   await sleep(900);
   const drift2 = await evaluate(readXform);
-  const clampHeld = await evaluate(`(() => {
+  const clampHeld = await evaluate<boolean>(`(() => {
     const stage = document.getElementById("lf-stage");
     const sheet = document.getElementById("lf-sheet");
     const r = stage.getBoundingClientRect();
@@ -685,7 +705,7 @@ export async function run(ctx) {
     JSON.stringify({ drift1, drift2, clampHeld }),
   );
 
-  const stagePt = await evaluate(`(() => { const r = document.getElementById("lf-stage").getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`);
+  const stagePt = await evaluate<{ x: number; y: number }>(`(() => { const r = document.getElementById("lf-stage").getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`);
   await send("Input.dispatchMouseEvent", { type: "mouseWheel", x: Math.round(stagePt.x), y: Math.round(stagePt.y), deltaX: 0, deltaY: -120 });
   await sleep(400);
   const still1 = await evaluate(readXform);
@@ -744,7 +764,7 @@ export async function run(ctx) {
   let opened16 = false;
   for (let i = 0; i < 80; i++) {
     try {
-      opened16 = await evaluate(`(() => {
+      opened16 = await evaluate<boolean>(`(() => {
         const card = document.getElementById("lf-card-atlas");
         if (!card || card.hidden) return false;
         const cs = getComputedStyle(card);
@@ -758,7 +778,7 @@ export async function run(ctx) {
   await sleep(700);
   let sheet16 = null;
   try {
-    sheet16 = await evaluate(`(() => {
+    sheet16 = await evaluate<{ open: boolean; slipUp: boolean; inViewport: boolean; cardRect: number[]; anchorClear: boolean; closeReach: boolean; scrollW: number } | null>(`(() => {
       const stage = document.getElementById("lf-stage");
       const sheet = document.getElementById("lf-sheet");
       const btn = document.querySelector('.lf-station[data-station="atlas"]');
@@ -795,14 +815,14 @@ export async function run(ctx) {
   // The card must be fully CLOSED before the hit-tests below, or a mid-close sheet intercepts them on a slow CI runner (the poll-break class): poll hidden, never a timed sleep.
   for (let i = 0; i < 80; i++) {
     let anyOpen = true;
-    try { anyOpen = await evaluate(`[...document.querySelectorAll(".lf-card")].some((c) => !c.hidden)`); } catch {}
+    try { anyOpen = await evaluate<boolean>(`[...document.querySelectorAll(".lf-card")].some((c) => !c.hidden)`); } catch {}
     if (anyOpen === false) break;
     await sleep(75);
   }
   // Round-3 plate finding: the unconditional .landfall .stage.cam .lf-legend show-rule (0,4,0) beat the media-scoped hide (0,1,0), so scripts-on phones kept the legend AND it sat on two of the three camera buttons. Resolved computed styles only, the #288 lesson.
   let doors16c = null;
   try {
-    doors16c = await evaluate(`(() => {
+    doors16c = await evaluate<{ cam: boolean; legendDisplay: string | null; hits: boolean[] }>(`(() => {
       const legend = document.querySelector(".lf-legend");
       const cam = !!document.querySelector(".stage.cam");
       const hits = [...document.querySelectorAll("#lf-controls button")].map((b) => {
