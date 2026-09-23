@@ -8,21 +8,21 @@ const FAQ = "/faq/";
 const GLOSSARY = "/glossary/";
 type Box = { x: number; y: number; w: number; h: number; right: number; bottom: number } | null;
 type Index = { innerW: number; innerH: number; scrollW: number; scrollY: number; h2s: string[]; entries: number; rows: (string | undefined)[]; rowEntries: number[]; inked: (string | undefined)[]; now: (string | undefined)[]; slip: Box; slipPosition: string | null; slipVisibility: string | null; folded: boolean; open: boolean; bodyDisplay: string | null; tab: Box; tabVisibility: string | null; folio: Box; h1: Box; main: Box; sheet: Box; count: string | undefined; toc: boolean; columns: string };
-// @ts-expect-error a box the page never seated reads null, which throws inside IX3's settle, and the step reds IX3 by name
+// @ts-expect-error a main the page never seated reads null, which throws inside IX3's settle, and the step reds IX3 by name
 const atFolded = (from: Index) => (d: Index, p: Index | null): boolean => d.slipVisibility === "hidden" && d.tabVisibility === "visible" && d.main.right !==
-  // @ts-expect-error a box the page never seated reads null, which throws inside IX3's settle, and the step reds IX3 by name
+  // @ts-expect-error a main the page never seated reads null, which throws inside IX3's settle, and the step reds IX3 by name
   from.main.right && !!p &&
-  // @ts-expect-error a box the page never seated reads null, which throws inside IX3's settle, and the step reds IX3 by name
+  // @ts-expect-error a main the page never seated reads null, which throws inside IX3's settle, and the step reds IX3 by name
   d.main.right ===
-  // @ts-expect-error a box the page never seated reads null, which throws inside IX3's settle, and the step reds IX3 by name
+  // @ts-expect-error a main the page never seated reads null, which throws inside IX3's settle, and the step reds IX3 by name
   p.main.right;
-// @ts-expect-error a box the page never seated reads null, which throws inside IX3's settle, and the step reds IX3 by name
+// @ts-expect-error a main the page never seated reads null, which throws inside IX3's settle, and the step reds IX3 by name
 const atUnfolded = (from: Index) => (d: Index, p: Index | null): boolean => d.slipVisibility === "visible" && d.tabVisibility === "hidden" && d.main.right !==
-  // @ts-expect-error a box the page never seated reads null, which throws inside IX3's settle, and the step reds IX3 by name
+  // @ts-expect-error a main the page never seated reads null, which throws inside IX3's settle, and the step reds IX3 by name
   from.main.right && !!p &&
-  // @ts-expect-error a box the page never seated reads null, which throws inside IX3's settle, and the step reds IX3 by name
+  // @ts-expect-error a main the page never seated reads null, which throws inside IX3's settle, and the step reds IX3 by name
   d.main.right ===
-  // @ts-expect-error a box the page never seated reads null, which throws inside IX3's settle, and the step reds IX3 by name
+  // @ts-expect-error a main the page never seated reads null, which throws inside IX3's settle, and the step reds IX3 by name
   p.main.right;
 
 const READ: Payload<Index> = `(() => {
@@ -83,13 +83,13 @@ export async function run(ctx: SuiteContext): Promise<void> {
   check(
     "IX1 the Q & A stands its name top right and its index open beside the sheet: every h2 a row with its questions, the count line the page's own tally, the slip hung under the folio, the sheet ending short of the slip's column, no TOC left on the sheet, 22rem columns (#462 rulings 1, 3, 6)",
     faq.h1 !== null && faq.folio !== null && faq.h1.right <= faq.innerW && faq.h1.y < 60 &&
-      // @ts-expect-error an index or a sheet the page never seated reads null, which throws here, outside any step, and the runner reds the whole suite as stopped early
+      // @ts-expect-error a missing index reads its position as null too, and the clause before has already read false for that, so a null never reaches here
       faq.slipPosition === "fixed" && !faq.folded && faq.slip.y >= faq.folio.bottom + 10 &&
       JSON.stringify(faq.rows) === JSON.stringify(faq.h2s) && faq.rowEntries.reduce((a, b) => a + b, 0) === faq.entries &&
       faq.count === `${faq.entries} questions in ${faq.h2s.length} sections` &&
-      // @ts-expect-error an index or a sheet the page never seated reads null, which throws here, outside any step, and the runner reds the whole suite as stopped early
+      // @ts-expect-error a sheet the page never seated reads null, which throws here, outside any step, and the runner reds the whole suite as stopped early
       faq.sheet.right <=
-        // @ts-expect-error an index or a sheet the page never seated reads null, which throws here, outside any step, and the runner reds the whole suite as stopped early
+        // @ts-expect-error a missing index reads its position as null too, and the clause before has already read false for that, so a null never reaches here
         faq.slip.x - 8 && !faq.toc && faq.columns === "352px" && faq.scrollW <= faq.innerW,
     `h1 ${JSON.stringify(faq.h1)}, slip ${faq.slipPosition} y=${faq.slip && faq.slip.y.toFixed(1)} folio bottom=${faq.folio && faq.folio.bottom.toFixed(1)}, rows ${faq.rows.length}/${faq.h2s.length}, entries ${faq.rowEntries.join("+")}=${faq.entries}, count "${faq.count}", sheet right ${faq.sheet && faq.sheet.right.toFixed(1)} vs slip x ${faq.slip && faq.slip.x.toFixed(1)}, toc ${faq.toc}, columns ${faq.columns}, scrollW ${faq.scrollW}/${faq.innerW}`,
   );
@@ -116,29 +116,29 @@ export async function run(ctx: SuiteContext): Promise<void> {
     const back = await settle(READ, atUnfolded(folded), "index-unfolded");
     check(
       "IX3 folding the index hands the sheet the width in one settle and stands the bookmark tab on the right edge; the tab brings the index back and the sheet shrinks the same way (#462 ruling 2, Alex's own wording)",
-      // @ts-expect-error a box the page never seated reads null, which throws here inside the step, and the step reds IX3 by name
+      // @ts-expect-error a missing tab reads its visibility as null too, which the settle's predicate and the clause before have already refused, so a null never reaches here
       folded.folded && folded.slipVisibility === "hidden" && folded.tabVisibility === "visible" && folded.tab.right >= folded.innerW - 1 &&
-        // @ts-expect-error a box the page never seated reads null, which throws here inside the step, and the step reds IX3 by name
+        // @ts-expect-error the settle returned this read only after its predicate read main, and a null there throws inside the settle, so a null never reaches here
         folded.main.right >
-          // @ts-expect-error a box the page never seated reads null, which throws here inside the step, and the step reds IX3 by name
+          // @ts-expect-error the first settle's predicate read this main already, and a null there throws inside the settle, so a null never reaches here
           faq.main.right + 200 &&
-          // @ts-expect-error a box the page never seated reads null, which throws here inside the step, and the step reds IX3 by name
+          // @ts-expect-error a sheet the page never seated reads null, which throws here inside the step, and the step reds IX3 by name
           folded.sheet.right >
-          // @ts-expect-error a box the page never seated reads null, which throws here inside the step, and the step reds IX3 by name
+          // @ts-expect-error a null sheet on the first read has already thrown at IX1, outside any step, so a null never reaches here
           faq.sheet.right + 200 &&
-        // @ts-expect-error a box the page never seated reads null, which throws here inside the step, and the step reds IX3 by name
+        // @ts-expect-error the settle returned this read only after its predicate read main, and a null there throws inside the settle, so a null never reaches here
         !back.folded && back.slipVisibility === "visible" && back.tabVisibility === "hidden" && Math.abs(back.main.right -
-          // @ts-expect-error a box the page never seated reads null, which throws here inside the step, and the step reds IX3 by name
+          // @ts-expect-error the first settle's predicate read this main already, and a null there throws inside the settle, so a null never reaches here
           faq.main.right) < 1,
-      // @ts-expect-error a box the page never seated reads null, which throws here inside the step, and the step reds IX3 by name
+      // @ts-expect-error the first settle's predicate read this main already, and a null there throws inside the settle, so a null never reaches here
       `folded: slip ${folded.slipVisibility} tab ${folded.tabVisibility} right=${folded.tab && folded.tab.right}, main right ${faq.main.right.toFixed(1)} -> ${
-        // @ts-expect-error a box the page never seated reads null, which throws here inside the step, and the step reds IX3 by name
+        // @ts-expect-error the settle returned this read only after its predicate read main, and a null there throws inside the settle, so a null never reaches here
         folded.main.right.toFixed(1)} -> ${
-        // @ts-expect-error a box the page never seated reads null, which throws here inside the step, and the step reds IX3 by name
+        // @ts-expect-error the settle returned this read only after its predicate read main, and a null there throws inside the settle, so a null never reaches here
         back.main.right.toFixed(1)}, sheet right ${
-        // @ts-expect-error a box the page never seated reads null, which throws here inside the step, and the step reds IX3 by name
+        // @ts-expect-error a null sheet on the first read has already thrown at IX1, outside any step, so a null never reaches here
         faq.sheet.right.toFixed(1)} -> ${
-        // @ts-expect-error a box the page never seated reads null, which throws here inside the step, and the step reds IX3 by name
+        // @ts-expect-error a null sheet on this read has already thrown in the condition above, inside the step
         folded.sheet.right.toFixed(1)}`,
     );
   });
@@ -182,13 +182,13 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const landed = await evaluate<{ top: number; hash: string }>(`(() => { const t = document.querySelector(${JSON.stringify(entry.href)}); const r = t.getBoundingClientRect(); return { top: r.top, hash: location.hash }; })()`);
   check(
     "IX5 at 390 the index is the bottom sheet collapsed to its head at the foot of the viewport; a tap on the head opens it, a tap on a question jumps to it below the band and closes the sheet again (#462 ruling 2, the phone half)",
-    // @ts-expect-error a slip the phone never seated reads null, which throws here, outside any step, and the runner reds the whole suite as stopped early
+    // @ts-expect-error a null slip has already thrown at the tap above, outside any step, so a null never reaches here
     phone.slipPosition === "fixed" && Math.abs(phone.slip.bottom - phone.innerH) < 1 && !phone.open && phone.bodyDisplay === "none" &&
-      // @ts-expect-error a slip the phone never seated reads null, which throws here, outside any step, and the runner reds the whole suite as stopped early
+      // @ts-expect-error a null slip has already thrown at the tap above, outside any step, so a null never reaches here
       phone.slip.h < 140 &&
-      // @ts-expect-error a slip the phone never seated reads null, which throws here, outside any step, and the runner reds the whole suite as stopped early
+      // @ts-expect-error a missing index reads open as false, and the clause before has already read false for that, so a null never reaches here
       opened.open && opened.bodyDisplay !== "none" && opened.slip.h >
-        // @ts-expect-error a slip the phone never seated reads null, which throws here, outside any step, and the runner reds the whole suite as stopped early
+        // @ts-expect-error a null slip has already thrown at the tap above, outside any step, so a null never reaches here
         phone.slip.h + 100 &&
       !jumped.open && landed.hash === entry.href && landed.top >= 90 && landed.top < 200 && jumped.scrollW <= jumped.innerW,
     `collapsed: bottom ${phone.slip && phone.slip.bottom} of ${phone.innerH}, h ${phone.slip && phone.slip.h.toFixed(1)}, body ${phone.bodyDisplay}; opened: ${opened.open} h ${opened.slip && opened.slip.h.toFixed(1)}; after the tap: open=${jumped.open}, hash ${landed.hash} vs ${entry.href}, target top ${landed.top.toFixed(1)}, scrollW ${jumped.scrollW}/${jumped.innerW}`,

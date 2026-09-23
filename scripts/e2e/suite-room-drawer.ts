@@ -6,10 +6,10 @@ import type { Payload, SuiteContext } from "./types.ts";
 
 const DOCUMENT_ROOM = "/faq/";
 const APP_ROOM = "/explorer/";
-type Box = { x: number; y: number; w: number; h: number; right: number; bottom: number } | null;
+type Rect = { x: number; y: number; w: number; h: number; right: number; bottom: number };
 type Door = { t: string; x: number; y: number; h: number; bottom: number; current: boolean; display: string; offset: string; tappable: boolean };
-type Nav = { rect: Box; visibility: string; position: string };
-type Drawer = { innerW: number; innerH: number; scrollW: number; scrollY: number; bandH: number; chromePosition: string; chromeZ: string; checked: boolean; burger: Box; burgerDisplay: string; burgerReachable: boolean; cluster: Box; nav: Nav; scrim: { position: string; top: string; z: string; content: string; background: string }; mainInert: boolean; footerInert: boolean | null; chromeInert: boolean; hitMidPage: string | null; doors: Door[] };
+type Nav = { rect: Rect; visibility: string; position: string };
+type Drawer = { innerW: number; innerH: number; scrollW: number; scrollY: number; bandH: number; chromePosition: string; chromeZ: string; checked: boolean; burger: Rect; burgerDisplay: string; burgerReachable: boolean; cluster: Rect; nav: Nav; scrim: { position: string; top: string; z: string; content: string; background: string }; mainInert: boolean; footerInert: boolean | null; chromeInert: boolean; hitMidPage: string | null; doors: Door[] };
 
 const READ: Payload<Drawer> = `(() => {
   const r = (sel) => { const e = document.querySelector(sel); if (!e) return null; const b = e.getBoundingClientRect(); return { x: b.x, y: b.y, w: b.width, h: b.height, right: b.right, bottom: b.bottom }; };
@@ -36,7 +36,7 @@ const READ: Payload<Drawer> = `(() => {
 })()`;
 
 const stacked = (doors: Door[]) => doors.length > 1 && doors.every((d, i) => i === 0 || (d.y >= doors[i - 1].bottom - 0.5 && Math.abs(d.x - doors[0].x) < 0.5));
-const offLeft = (nav: Nav) => nav.visibility === "hidden" && nav.rect !== null && nav.rect.right <= 0.5;
+const offLeft = (nav: Nav) => nav.visibility === "hidden" && nav.rect !== null && nav.rect.right <= 0.5; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 const atOpen = (d: Drawer) => !!d.nav && d.nav.visibility === "visible" && d.nav.rect !== null && d.nav.rect.x === 0; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 const atClosed = (d: Drawer) => !!d.nav && offLeft(d.nav); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 
@@ -77,10 +77,8 @@ export async function run(ctx: SuiteContext): Promise<void> {
   check(
     "DR1 at 390 a document room's nav is folded into the drawer: it waits invisible off the left edge, the burger stands in the cluster and is reachable, the cluster ends inside the reserved band, and nothing scrolls sideways (#483)",
     offLeft(closed.nav) && closed.burgerDisplay !== "none" && closed.burgerReachable &&
-      // @ts-expect-error a cluster the page never seated reads null, which throws here, outside any step, and the runner reds the whole suite as stopped early
       closed.cluster.bottom <= closed.bandH && closed.scrollW <= closed.innerW,
-    // @ts-expect-error a cluster the page never seated reads null, which throws here, outside any step, and the runner reds the whole suite as stopped early
-    `nav ${closed.nav.visibility} right=${closed.nav.rect && closed.nav.rect.right.toFixed(1)}, burger ${closed.burgerDisplay} reachable=${closed.burgerReachable}, cluster bottom ${closed.cluster.bottom.toFixed(1)} vs band ${closed.bandH.toFixed(1)}, scrollW ${closed.scrollW}/${closed.innerW}`,
+    `nav ${closed.nav.visibility} right=${closed.nav.rect && closed.nav.rect.right.toFixed(1)}, burger ${closed.burgerDisplay} reachable=${closed.burgerReachable}, cluster bottom ${closed.cluster.bottom.toFixed(1)} vs band ${closed.bandH.toFixed(1)}, scrollW ${closed.scrollW}/${closed.innerW}`, // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   );
 
   await step("DR2, DR3", async () => {
@@ -132,23 +130,10 @@ export async function run(ctx: SuiteContext): Promise<void> {
     check(
       "DR5 a real swipe with a room's drawer open scrolls the page beneath it while the drawer, its burger and its scrim stay exactly where they were and the drawer stays OPEN: nothing rides away, so a room needs no scroll-to-close the way home does (#483, ruling item 2)",
       beforeSwipe.checked && afterSwipe.checked && afterSwipe.scrollY > beforeSwipe.scrollY &&
-        // @ts-expect-error a drawer the page never seated reads null, which throws here inside the step, and the step reds DR5 by name
-        Math.abs(afterSwipe.nav.rect.y -
-          // @ts-expect-error a drawer the page never seated reads null, which throws here inside the step, and the step reds DR5 by name
-          beforeSwipe.nav.rect.y) < 1 &&
-        // @ts-expect-error a burger the page never seated reads null, which throws here inside the step, and the step reds DR5 by name
-        Math.abs(afterSwipe.burger.y -
-          // @ts-expect-error a burger the page never seated reads null, which throws here inside the step, and the step reds DR5 by name
-          beforeSwipe.burger.y) < 1 &&
+        Math.abs(afterSwipe.nav.rect.y - beforeSwipe.nav.rect.y) < 1 &&
+        Math.abs(afterSwipe.burger.y - beforeSwipe.burger.y) < 1 &&
         afterSwipe.hitMidPage === "BODY.room" && afterSwipe.mainInert,
-      // @ts-expect-error a drawer the page never seated reads null, which throws here inside the step, and the step reds DR5 by name
-      `scrollY ${beforeSwipe.scrollY} to ${afterSwipe.scrollY}, drawer y ${beforeSwipe.nav.rect.y.toFixed(1)} to ${
-        // @ts-expect-error a drawer the page never seated reads null, which throws here inside the step, and the step reds DR5 by name
-        afterSwipe.nav.rect.y.toFixed(1)}, burger y ${
-        // @ts-expect-error a burger the page never seated reads null, which throws here inside the step, and the step reds DR5 by name
-        beforeSwipe.burger.y.toFixed(1)} to ${
-        // @ts-expect-error a burger the page never seated reads null, which throws here inside the step, and the step reds DR5 by name
-        afterSwipe.burger.y.toFixed(1)}, still open=${afterSwipe.checked}, page point hits ${afterSwipe.hitMidPage}`,
+      `scrollY ${beforeSwipe.scrollY} to ${afterSwipe.scrollY}, drawer y ${beforeSwipe.nav.rect.y.toFixed(1)} to ${afterSwipe.nav.rect.y.toFixed(1)}, burger y ${beforeSwipe.burger.y.toFixed(1)} to ${afterSwipe.burger.y.toFixed(1)}, still open=${afterSwipe.checked}, page point hits ${afterSwipe.hitMidPage}`,
     );
   });
 
