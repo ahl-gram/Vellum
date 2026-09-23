@@ -1,0 +1,487 @@
+/* Home: the landfall stage full bleed, the head cluster the shell's. */
+.underhood {
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic; color: var(--ink-brown); font-size: 0.92rem;
+  line-height: 1.6; margin-top: 0.5rem; }
+.underhood a { color: var(--ink-brown); }
+.landfall { margin: 0; position: relative; }
+.landfall .stage {
+  position: relative; height: 100vh; height: 100dvh;
+  overflow: hidden; cursor: grab; touch-action: pan-y;
+  display: grid; place-items: center;
+  user-select: none; -webkit-user-select: none;
+}
+.landfall .stage.dragging { cursor: grabbing; }
+.landfall .stage:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: 2px; }
+/* No-JS containment is against the sheet's definite box, never a viewport formula (106vh cropped); abspos and margin auto because a percentage max-height dies inside an auto grid track. */
+.landfall .sheet { position: relative; width: 100%; height: 100%; }
+.lf-chart { position: absolute; inset: 0; margin: auto; max-width: 100%; max-height: 100%; width: auto; height: auto; user-select: none; -webkit-user-drag: none; }
+.landfall .stage.cam .sheet {
+  display: block;
+  position: absolute; left: 0; top: 0;
+  width: 1500px; height: 1157.931px;
+  transform-origin: 0 0; will-change: transform;
+  box-shadow: var(--stage-shadow);
+}
+.landfall .stage.cam .lf-chart { position: static; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; }
+.lf-marks { position: absolute; inset: 0; }
+.lf-dot {
+  position: absolute; width: 7px; height: 7px;
+  transform: translate(-50%, -50%) scale(var(--inv, 1));
+  opacity: 0; transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+.landfall .stage.close-in .lf-dot { opacity: 1; }
+.lf-pip {
+  position: absolute; inset: 0;
+  border: 1px solid var(--chart-ink); border-radius: 50%;
+  background: rgb(from var(--parchment-bright) r g b / 0.85);
+  box-shadow: 0 1px 3px rgb(from var(--chart-ink) r g b / 0.4);
+}
+.lf-dot.ruined .lf-pip { background: transparent; border-style: dashed; }
+.lf-dot.capital .lf-pip { border-width: 2px; }
+.lf-name {
+  position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: 2px;
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-size: 8.5px; letter-spacing: 0.08em; color: var(--chart-ink); white-space: nowrap;
+  text-shadow: 0 0 4px var(--chart-paper), 0 0 8px var(--chart-paper);
+}
+/* Home seats the kit's Glass with literal offsets, not the chrome vars, which src/layouts/BaseLayout.astro narrows under 720px while home's camera never moved; what the kit's corner sets beyond dress is stood down here, and `stoodDown` in `test/site/kit-scope.test.ts` pins that list. */
+#lf-controls { display: none; position: absolute; right: 1.6rem; bottom: 1.4rem; z-index: auto; animation: none; pointer-events: auto; }
+#lf-controls.on { display: flex; }
+#lf-controls button:focus-visible { outline-color: var(--ink-dark); }
+.lf-coords {
+  display: none; position: absolute; left: 1.6rem; bottom: 1.4rem; margin: 0;
+  font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-variant-caps: small-caps; letter-spacing: 0.06em;
+  font-size: 0.85rem; color: var(--line-tan);
+}
+.lf-coords.on { display: block; }
+.lf-more {
+  position: absolute; left: 50%; bottom: 6rem; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 0.55rem;
+  margin: 0; padding: 0.2rem 0.7rem;
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic; font-size: 0.88rem; color: var(--parchment);
+  opacity: 0; transition: opacity 0.45s ease;
+  pointer-events: none;
+}
+.landfall .stage.cam.stood-off .lf-more { opacity: 1; }
+.lf-more-pulse { position: relative; width: 9px; height: 9px; }
+.lf-more-pulse::before {
+  content: ""; position: absolute; inset: 0;
+  border: 1px solid var(--parchment); border-radius: 50%;
+  animation: lf-station-pulse 3.2s ease-out infinite;
+}
+.lf-more-pulse::after {
+  content: ""; position: absolute; inset: 3px;
+  background: var(--parchment); border-radius: 50%;
+}
+/* On home the cluster rides the page, so the chart and its chrome scroll away together and nothing fixed collides with the shelf (`L1i` in `scripts/e2e/suite-landfall.mjs` reads the ride, `RH9b` in `scripts/e2e/suite-runninghead.mjs` the wash); body-child specificity because the layout's inline global sheet renders after the page css. */
+body > header.chrome { position: absolute; }
+header.chrome::before {
+  content: ""; position: absolute; inset: -4rem -2.2rem -1.8rem -4rem; z-index: -1; pointer-events: none;
+  background: rgb(from var(--chart-ink) r g b / 0.86);
+  filter: blur(22px);
+}
+.lf-seed {
+  position: absolute; right: 1.6rem; top: 1.4rem; z-index: 4;
+  margin: 0; max-width: 17rem; text-align: right;
+  padding: 0.7rem 0.9rem 0.8rem;
+  background: linear-gradient(to bottom, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.72));
+  pointer-events: none;
+}
+.seed-hook {
+  display: block;
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic;
+  font-size: 1.02rem; line-height: 1.45; color: var(--parchment);
+}
+.seed-controls { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 0.55rem; pointer-events: auto; }
+.lf-seed .control {
+  width: 6.2rem; min-width: 0;
+  /* 16px floor: a smaller input font makes iOS Safari zoom the page on focus */
+  font-size: 16px;
+  color: var(--parchment-bright);
+  background: rgb(from var(--chart-ink) r g b / 0.45);
+  border: 1px solid var(--line-tan);
+  padding: 0.32rem 0.6rem;
+  text-align: center;
+}
+.lf-seed .control:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: 1px; }
+.lf-seed .primary {
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-size: 0.82rem; letter-spacing: 0.14em;
+  color: var(--ink-dark);
+  background: var(--control-gold);
+  border: 1px solid var(--line-tan);
+  padding: 0.32rem 0.9rem;
+  white-space: nowrap;
+}
+.lf-seed .primary:hover, .lf-seed .primary:focus-visible { background: var(--parchment-bright); }
+.seed-gloss {
+  margin: 0.4rem 0 0;
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic;
+  font-size: 0.76rem; color: var(--parchment);
+}
+
+.lf-stations { display: none; position: absolute; inset: 0; }
+.landfall .stage.cam .lf-stations { display: block; }
+.lf-station {
+  position: absolute; width: 34px; height: 34px; padding: 0;
+  transform: translate(-50%, -50%) scale(var(--inv, 1));
+  appearance: none; border: 0; background: none; font: inherit; cursor: pointer;
+}
+/* Real hardware reads the touched element's touch-action, so a control defaulting to auto lets the browser claim a gesture starting there; CDP emulation cannot see this line, only a phone pass can. */
+.lf-station, .lf-legend-btn, #lf-controls button { touch-action: pan-y; }
+.lf-station-glyph {
+  position: absolute; inset: 0; margin: auto;
+  width: 15px; height: 15px;
+  background: var(--ink-dark);
+  border: 1.5px solid var(--chart-paper);
+  outline: 1px solid var(--ink-dark);
+  transform: rotate(45deg);
+  box-shadow: 0 2px 6px rgb(from var(--chart-ink) r g b / 0.5);
+  transition: background 0.25s ease, transform 0.25s ease;
+}
+.lf-station-slip {
+  position: absolute; top: calc(50% + 13px); left: 50%;
+  transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  pointer-events: none;
+}
+.lf-station-name {
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-size: 13px; letter-spacing: 0.1em;
+  color: var(--chart-ink);
+  background: rgb(from var(--chart-paper) r g b / 0.88);
+  border: 1px solid var(--line-tan);
+  padding: 2px 8px 1px;
+  box-shadow: 0 1px 4px rgb(from var(--chart-ink) r g b / 0.3);
+  white-space: nowrap;
+}
+.lf-station-verb {
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic;
+  font-size: 10.5px; color: var(--ink-brown);
+  background: rgb(from var(--chart-paper) r g b / 0.75);
+  padding: 0 6px; white-space: nowrap;
+}
+.lf-station:hover .lf-station-glyph, .lf-station:focus-visible .lf-station-glyph {
+  background: var(--parchment-bright); transform: rotate(45deg) scale(1.25);
+}
+.lf-station:hover .lf-station-name, .lf-station:focus-visible .lf-station-name {
+  background: var(--parchment-bright);
+}
+.lf-station.at-sea .lf-station-glyph { border-radius: 50%; transform: none; }
+.lf-station.at-sea:hover .lf-station-glyph, .lf-station.at-sea:focus-visible .lf-station-glyph {
+  transform: scale(1.25);
+}
+.lf-pulse {
+  position: absolute; inset: 0; margin: auto;
+  width: 15px; height: 15px;
+  border: 1px solid var(--ink-dark); transform: rotate(45deg);
+  animation: lf-station-pulse 3.2s ease-out infinite;
+  pointer-events: none;
+}
+.lf-station.at-sea .lf-pulse { border-radius: 50%; transform: none; }
+@keyframes lf-station-pulse {
+  0% { opacity: 0.7; scale: 1; }
+  70%, 100% { opacity: 0; scale: 2.6; }
+}
+.lf-legend {
+  display: none; position: absolute; left: 50%; bottom: 0.9rem;
+  /* max-content: the shrink-to-fit at left 50% capped the row at half the stage and wrapped the Gallery entry into the Reading Room slip. */
+  width: max-content; max-width: calc(100% - 2rem);
+  transform: translateX(-50%); text-align: center; z-index: 2;
+  padding: 0.5rem 1.1rem 0.6rem;
+  background: linear-gradient(to bottom, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.72));
+  pointer-events: none;
+}
+.landfall .stage.cam .lf-legend { display: block; }
+.lf-legend-head {
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic;
+  font-size: 0.82rem; color: var(--parchment); margin: 0 0 0.45rem;
+}
+.lf-legend-row { display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap; }
+.lf-legend-btn {
+  appearance: none; cursor: pointer; pointer-events: auto;
+  background: rgb(from var(--chart-ink) r g b / 0.5);
+  border: 1px solid var(--line-tan);
+  padding: 0.4rem 0.9rem 0.35rem;
+  text-align: center;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.lf-legend-btn:hover, .lf-legend-btn:focus-visible { background: var(--ink-dark); }
+.lf-legend-verb {
+  display: block;
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic;
+  font-size: 0.78rem; color: var(--parchment);
+}
+.lf-legend-room {
+  display: block;
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-size: 0.86rem; letter-spacing: 0.12em;
+  color: var(--parchment);
+}
+.lf-card {
+  /* Above the corner chrome's z 4: the seed form covered the open slip's close button at z 3. */
+  position: absolute; z-index: 5;
+  /* Centred by abspos and margin auto, never translateY(-50%), since the open tween writes the card's transform; border-box because the shell has no global reset; right 4rem keeps the slip clear of the zoom-controls column on short viewports. */
+  box-sizing: border-box;
+  right: 4rem; top: 0; bottom: 0; margin: auto 0; height: fit-content;
+  /* Desktop only: the narrow block lifts the cap, where the % would resolve against the viewport instead of .landfall and clip the sheet's Enter door. */
+  max-height: calc(100% - 2rem); overflow: hidden;
+  width: min(22rem, calc(100% - 8rem));
+  background: var(--parchment-panel);
+  color: var(--ink-dark);
+  border: 1px solid var(--line-tan);
+  outline: 3px double var(--line-faint);
+  outline-offset: 6px;
+  box-shadow: var(--sheet-shadow);
+  padding: 1.5rem 1.6rem 1.4rem;
+}
+.lf-card[hidden] { display: none; }
+.lf-card-close {
+  position: absolute; right: 0.5rem; top: 0.4rem;
+  appearance: none; border: 0; background: none; cursor: pointer;
+  font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-size: 1.1rem; color: var(--ink-faded);
+  padding: 0.2rem 0.4rem;
+}
+.lf-card-close:hover { color: var(--ink-dark); }
+.lf-card-verb {
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic;
+  font-size: 0.92rem; color: var(--ink-brown); margin: 0;
+}
+.lf-card-title {
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-weight: 400;
+  font-size: 1.6rem; letter-spacing: 0.06em; line-height: 1.2;
+  margin: 0.1rem 0 0; border: 0; padding: 0;
+}
+.lf-card-where {
+  font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-variant-caps: small-caps;
+  /* ink-brown, not ink-faded: 13px small caps read 3.93:1 on the panel, under the 4.5:1 floor. */
+  font-size: 0.82rem; letter-spacing: 0.08em; color: var(--ink-brown);
+  border-bottom: 1px solid var(--line-faint);
+  padding-bottom: 0.55rem; margin: 0.25rem 0 0;
+}
+.lf-card-prose { font-size: 1rem; line-height: 1.6; margin: 0.7rem 0 0; }
+.lf-card-arms { display: flex; gap: 0.7rem; justify-content: center; margin-top: 0.8rem; }
+.lf-card-arms img { width: 52px; height: auto; }
+.lf-card-enter {
+  display: inline-block; vertical-align: top; margin-top: 1rem;
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-size: 0.88rem; letter-spacing: 0.14em;
+  color: var(--chart-paper); background: var(--ink-dark);
+  border: 1px solid var(--chart-ink);
+  /* 0.85rem, not the mockup's 0.45rem: the 44px touch target. */
+  padding: 0.85rem 1rem;
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+.lf-card-enter:hover, .lf-card-enter:focus-visible { background: var(--chart-ink); }
+
+.lf-card-how {
+  max-height: calc(100% - 3rem);
+  display: flex; flex-direction: column;
+}
+.lf-card-scroll { overflow-y: auto; overscroll-behavior: contain; min-height: 0; }
+.lf-card-how .how { font-size: 0.95rem; line-height: 1.55; margin: 0.8rem 0 0; }
+.lf-card-how .underhood { margin: 0.8rem 0 0; }
+.notice-stamp {
+  position: absolute; left: 2rem; top: 46%; z-index: 2;
+  transform: rotate(-5deg);
+  border: 1px solid rgb(from var(--line-tan) r g b / 0.5);
+  outline: 3px double rgb(from var(--line-tan) r g b / 0.35);
+  outline-offset: 4px;
+  padding: 0.7rem 1rem;
+  opacity: 0.5;
+  pointer-events: none;
+  max-width: 15rem;
+}
+.stamp-head {
+  margin: 0;
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-size: 0.72rem; letter-spacing: 0.28em;
+  color: var(--line-tan);
+}
+.stamp-body {
+  margin: 0.35rem 0 0;
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic;
+  font-size: 0.8rem; color: var(--ink-faded); line-height: 1.5;
+}
+.lf-shelf { max-width: 72rem; margin: 0 auto; padding: 4.5rem 2rem 5.5rem; text-align: center; }
+.lf-shelf-head {
+  margin: 0;
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-weight: 400;
+  font-size: 1.65rem; letter-spacing: 0.14em;
+  color: var(--parchment-bright);
+}
+.lf-shelf-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; margin-top: 2.4rem; }
+.lf-shelf-grid figure { margin: 0; }
+.lf-shelf-grid a { display: block; }
+.lf-shelf-grid .plate {
+  display: block; width: 100%; height: auto;
+  box-shadow: var(--stage-shadow);
+}
+.lf-shelf-grid figcaption {
+  margin-top: 0.9rem;
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic;
+  font-size: 0.92rem; color: var(--parchment);
+}
+
+@media (max-width: 900px) {
+  body:has(.rooms-reveal:checked) .lf-seed { opacity: 0; pointer-events: none; }
+  .lf-seed { transition: opacity 0.32s ease; }
+  body:has(.rooms-reveal:checked) .landfall::before {
+    content: ""; position: absolute; inset: 0; z-index: 41; pointer-events: auto;
+    background: rgb(from var(--chart-ink) r g b / 0.45);
+  }
+  body > header.chrome { max-width: calc(100vw - 15rem); }
+  .seed-controls .control { width: 4.6rem; }
+  .lf-legend, .landfall .stage.cam .lf-legend { display: none; }
+  /* The bottom sheet is fixed to the viewport: inside the boxed stage it was taller than the stage and buried the chart; z-index stays under the veil's 50. */
+  .lf-card {
+    position: fixed; right: 0; left: 0; top: auto; bottom: 0; margin: 0;
+    width: 100%; outline-offset: -8px; z-index: 40;
+    padding: 1.2rem 1.3rem 1.1rem;
+    max-height: none; overflow: visible;
+  }
+  .lf-card-arms img { width: 42px; }
+  .lf-card-how { max-height: 45vh; }
+  .lf-coords.on { display: none; }
+  .notice-stamp { display: none; }
+  .lf-seed { right: 1rem; top: 0.9rem; max-width: 12rem; padding: 0.7rem 0.7rem 0.75rem; }
+  .seed-controls { gap: 0.35rem; }
+  .lf-seed .control { padding: 0.32rem 0.45rem; }
+  .lf-seed .primary { padding: 0.32rem 0.7rem; }
+  .seed-hook { font-size: 0.85rem; }
+  .seed-gloss { display: none; }
+  .lf-shelf { padding: 3rem 1.2rem 3.5rem; }
+  .lf-shelf-grid { grid-template-columns: 1fr; gap: 2.6rem; }
+  .lf-more { bottom: 1.2rem; }
+}
+@media (max-width: 340px) {
+  .chrome .wordmark { font-size: 1.3rem; }
+}
+/* Print hides the chrome and the drawer with it, but :checked is state and paper widths match the narrow query, so the open state's scrim and the faded panel need their own stand-down. */
+@media print {
+  body:has(.rooms-reveal:checked) .landfall::before { content: none; }
+  body:has(.rooms-reveal:checked) .lf-seed { opacity: 1; }
+}
+
+.landfall .stage:not(.cam) ~ .lf-card:not(.lf-card-how)[hidden] {
+  display: block; position: static;
+  width: auto; max-width: 46rem; height: auto;
+  margin: 0 auto;
+  visibility: hidden; overflow: hidden;
+  max-height: 0; padding: 0; border-width: 0; outline-width: 0;
+  animation: lf-doors-reveal 0s linear 10s forwards;
+}
+.landfall .stage:not(.cam) ~ .lf-card .lf-card-close { display: none; }
+/* The no-JS doors' nav on the inverted ground: the old ink read 1.06:1. */
+.lf-noscript-rooms { color: var(--parchment); }
+.lf-noscript-rooms a { color: var(--parchment-bright); }
+@keyframes lf-doors-reveal {
+  to {
+    visibility: visible;
+    max-height: 100rem;
+    margin-top: 2rem;
+    padding: 1.5rem 1.6rem 1.4rem;
+    border-width: 1px;
+    outline-width: 3px;
+  }
+}
+@media (max-width: 900px) {
+  @keyframes lf-doors-reveal {
+    to {
+      visibility: visible;
+      max-height: 100rem;
+      margin-top: 2rem;
+      padding: 1.2rem 1.3rem 1.1rem;
+      border-width: 1px;
+      outline-width: 3px;
+    }
+  }
+}
+
+.veil {
+  position: fixed; inset: 0; z-index: 50;
+  display: flex; align-items: center; justify-content: center;
+  background:
+    radial-gradient(90% 80% at 50% 40%, color-mix(in srgb, var(--ink-dark) 90%, var(--parchment) 10%) 0%, var(--ink-dark) 55%, var(--chart-ink) 100%);
+}
+.veil-inner { text-align: center; }
+.veil-wordmark {
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-size: clamp(3rem, 8vw, 4.6rem);
+  letter-spacing: 0.14em;
+  color: var(--parchment-bright);
+  line-height: 1.1;
+  margin: 0;
+}
+.veil-tagline {
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic;
+  font-size: 1.05rem; color: var(--line-tan);
+  margin: 0.3rem 0 0;
+}
+.veil-rose { width: 132px; height: 132px; margin: 2rem auto 1.5rem; display: block; }
+.veil-rose .rose-ring {
+  fill: none; stroke: var(--line-tan); stroke-width: 1;
+  stroke-dasharray: 277; stroke-dashoffset: 277;
+  animation: rose-draw 1.6s ease-out forwards;
+}
+.veil-rose .rose-ring.inner {
+  stroke-dasharray: 214; stroke-dashoffset: 214;
+  stroke-width: 0.6;
+  animation: rose-draw 1.6s 0.25s ease-out forwards;
+}
+.veil-rose .rose-rays path {
+  stroke: var(--line-tan); stroke-width: 0.6; opacity: 0;
+  animation: rose-fade 0.8s 1.1s ease-out forwards;
+}
+.veil-rose .rose-needle {
+  fill: var(--parchment); opacity: 0;
+  transform-origin: 60px 60px;
+  animation: needle-settle 1.4s 1.3s cubic-bezier(.2,1.4,.4,1) forwards;
+}
+.veil-rose .rose-pin { fill: var(--line-tan); }
+@keyframes rose-draw { to { stroke-dashoffset: 0; } }
+@keyframes rose-fade { to { opacity: 0.75; } }
+@keyframes needle-settle {
+  0% { opacity: 0; transform: rotate(-160deg); }
+  60% { opacity: 1; }
+  100% { opacity: 1; transform: rotate(16deg); }
+}
+.veil-status {
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-size: 0.78rem; letter-spacing: 0.3em;
+  color: var(--line-tan);
+  text-transform: lowercase;
+  margin: 0;
+}
+.veil.lifting { animation: veil-lift 1.1s ease-in forwards; }
+@keyframes veil-lift {
+  to { opacity: 0; transform: scale(1.06); visibility: hidden; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .landfall .stage:not(.cam) ~ .lf-card:not(.lf-card-how)[hidden] { animation: lf-doors-reveal 0s linear 10s forwards !important; }
+  .lf-dot { transition: none; }
+  .lf-pulse { animation: none; opacity: 0; }
+  .lf-station-glyph, .lf-legend-btn, .lf-card-enter { transition: none; }
+  .veil-rose .rose-ring, .veil-rose .rose-ring.inner { animation: none; stroke-dashoffset: 0; }
+  .veil-rose .rose-rays path { animation: none; opacity: 0.75; }
+  .veil-rose .rose-needle { animation: none; opacity: 1; transform: rotate(16deg); }
+  .veil.lifting { animation: veil-lift 0.2s ease-out forwards; }
+}

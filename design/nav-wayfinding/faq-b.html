@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Questions &amp; Answers · Vellum</title>
+<meta name="description" content="How Vellum works: seeds, determinism, terrain and rivers, climate and styles, and how to make and reproduce your own maps.">
+
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Vellum">
+<meta property="og:url" content="https://www.vellumworlds.com/faq/">
+<meta property="og:title" content="Questions and Answers · Vellum">
+<meta property="og:description" content="How Vellum works: seeds, determinism, terrain and rivers, climate and styles, and how to make and reproduce your own maps.">
+<meta property="og:image" content="https://www.vellumworlds.com/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The Vellum wordmark and a compass rose on a dark walnut ground, with the chart of seed 42 faint behind.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Questions and Answers · Vellum">
+<meta name="twitter:description" content="How Vellum works: seeds, determinism, terrain and rivers, climate and styles, and how to make and reproduce your own maps.">
+<meta name="twitter:image" content="https://www.vellumworlds.com/og.png">
+<meta name="twitter:image:alt" content="The Vellum wordmark and a compass rose on a dark walnut ground, with the chart of seed 42 faint behind.">
+<style>:root{--ink-dark:#4a3826;--ink-brown:#6b5a40;--ink-faded:#857257;--line-tan:#b9a77f;--parchment:#efe6cf;--parchment-panel:#f4ecd8;--parchment-bright:#fff7e4;--parchment-deep:#e6d9b8;--line-faint:#cdbd97;--sheet-shadow:0 12px 34px rgb(from var(--chart-ink) r g b / .4);--stage-shadow:0 18px 60px rgb(from var(--chart-ink) r g b / .55);--ink-annals:#3f3122;--ink-surveyor:#7a5f38;--ink-surveyor-faded:#99855f;--control-cream:#f8f1e0;--ink-press:#5d4831;--control-gold:#f0e3bd;--control-gold-lit:#f7edcd;--ink-tale:#54452f;--iron-red:#7a1f12;--chart-paper:#f2e8cf;--chart-ink:#3d2f1f;--the-deep:radial-gradient(120% 90% at 50% 30%, rgb(from var(--ink-dark) r g b / 0) 40%, rgb(from var(--chart-ink) r g b / .55) 100%), radial-gradient(80% 70% at 30% 20%, color-mix(in srgb, var(--ink-dark) 90%, var(--parchment) 10%) 0%, var(--ink-dark) 55%, var(--chart-ink) 100%);--band-h:7.6rem;--chrome-x:1.6rem;--chrome-y:1.4rem;color-scheme:light}body{background:var(--chart-ink);color:var(--ink-dark);font-family:var(--font-body,"Iowan Old Style", "Palatino", Georgia, serif);margin:0}body:before{content:"";z-index:-1;background:var(--the-deep);background-color:var(--chart-ink);position:fixed;inset:0}main{margin-inline:auto}.wordmark,.room-name,.rooms,footer{font-family:var(--font-display,"Iowan Old Style", "Palatino", Georgia, serif)}header.chrome{left:var(--chrome-x);top:var(--chrome-y);z-index:10;text-align:left;pointer-events:none;line-height:normal;position:fixed}header.chrome a,header.chrome .rooms-reveal{pointer-events:auto}.rooms-reveal{display:none}.wordmark{letter-spacing:.12em;margin:0;font-size:2.1rem;font-weight:400;line-height:1.15}.wordmark a{color:var(--parchment-bright);text-decoration:none}.tagline{font-family:var(--font-flourish,"Iowan Old Style", "Palatino", Georgia, serif);color:var(--parchment);margin:0;font-size:.92rem;font-style:italic}.rooms{letter-spacing:.14em;color:var(--ink-faded);margin:.55rem 0 0;font-size:.72rem}.rooms .sep{opacity:.7;margin:0 .35em}.rooms a{color:var(--parchment);text-decoration:none}.rooms a:hover,.rooms a:focus-visible{color:var(--parchment-bright)}header.chrome a:focus-visible,footer a:focus-visible{outline-color:var(--parchment-bright)}.rooms [aria-current=page]{vertical-align:top;color:var(--parchment-bright);text-underline-offset:.45em;text-decoration:underline 1px;display:inline-block}.band{z-index:9;pointer-events:none;position:fixed;inset:0}.band:before{content:"";background:var(--the-deep);background-color:var(--chart-ink);clip-path:inset(0 0 calc(100% - var(--band-h)) 0);position:absolute;inset:0}.band:after{content:"";left:0;right:0;top:var(--band-h);background:linear-gradient(rgb(from var(--chart-ink) r g b / .45), transparent);height:14px;position:absolute}.room-name{letter-spacing:.14em;margin:0;font-size:1.65rem;font-weight:400}.room-tagline{font-family:var(--font-flourish,"Iowan Old Style", "Palatino", Georgia, serif);color:var(--ink-brown);margin:0;font-style:italic}body.room{padding:8.4rem 2.2rem 1.6rem}body.room.chart-room{padding:0}main.desk-panel{background:var(--parchment);border:1px solid var(--line-tan);box-shadow:var(--sheet-shadow);padding:1.8rem clamp(1.25rem,3vw,2.75rem) 2.75rem}@keyframes sheet-land{0%{opacity:0;transform:translateY(10px)scale(1.004)}}@keyframes ink-in{0%{opacity:0}}body.room main.desk-panel{animation:.55s cubic-bezier(.2,.7,.3,1) both sheet-land}body.room header.chrome,body.room footer{animation:.5s ease-out .18s both ink-in}footer{text-align:center;letter-spacing:.22em;color:var(--line-tan);margin:0;padding:1.4rem 0 1.8rem;font-size:.72rem;line-height:normal}footer a{color:inherit}@media (width<=720px){:root{--band-h:6.4rem;--chrome-x:1rem;--chrome-y:.9rem}.wordmark{font-size:1.5rem}.tagline{font-size:.78rem}body.room{padding:7rem 1rem 1.2rem}body.room.chart-room{padding:0}}@media (width<=900px){.chrome .rooms{left:calc(-1 * var(--chrome-x));top:calc(-1 * var(--chrome-y));box-sizing:border-box;width:min(16rem,100vw);height:100dvh;padding:0 1.5rem 2rem var(--chrome-x);overscroll-behavior:contain;background:var(--chart-ink);border-right:1px solid rgb(from var(--line-tan) r g b / .3);box-shadow:0 0 40px rgb(from var(--chart-ink) r g b / .6);visibility:hidden;z-index:-1;margin:0;transition:transform .32s cubic-bezier(.2,.7,.3,1),visibility 0s linear .32s;display:block;position:absolute;overflow-y:auto;transform:translate(-100%)}.chrome .rooms:before{content:"";z-index:1;height:calc(var(--band-h) + 1rem);background:var(--chart-ink);display:block;position:sticky;top:0}.rooms-reveal:checked~.rooms{visibility:visible;pointer-events:auto;transition:transform .32s cubic-bezier(.2,.7,.3,1),visibility;transform:none}.chrome .rooms .sep{display:none}.chrome .rooms a,.chrome .rooms [aria-current=page]{letter-spacing:.16em;padding:.85rem 0;font-size:.95rem;display:block}body:has(.rooms-reveal:checked)>header.chrome{z-index:45}.rooms-reveal{vertical-align:top;appearance:none;cursor:pointer;background:repeating-linear-gradient(var(--parchment) 0, var(--parchment) 2px, transparent 2px, transparent 7px);border:0;width:1.7rem;height:1rem;margin:.6rem 0 0;padding:0;display:inline-block}.rooms-reveal:checked{background:repeating-linear-gradient(var(--parchment-bright) 0, var(--parchment-bright) 2px, transparent 2px, transparent 7px)}.rooms-reveal:focus-visible{outline:2px solid var(--parchment-bright);outline-offset:4px}body.room:has(.rooms-reveal:checked):after{content:"";inset:var(--band-h) 0 0;z-index:41;pointer-events:auto;background:rgb(from var(--chart-ink) r g b / .45);position:fixed}body.room:has(.rooms-reveal:checked) [popover]:popover-open{display:none}}@media print{.band,header.chrome{display:none}body.room:has(.rooms-reveal:checked):after{content:none}body{background:0 0}body:before{display:none}body.room{padding:0}main.desk-panel{box-shadow:none;background:0 0;border:none}}
+</style><link rel="stylesheet" href="fonts.css">
+<link rel="stylesheet" href="motion.css">
+<link rel="stylesheet" href="house.css">
+<link rel="stylesheet" href="atelier.css">
+<link rel="stylesheet" href="page-faq.css">
+<link rel="stylesheet" href="mock.css">
+</head>
+<body data-dir="b" class="room">
+<div class="band" aria-hidden="true"></div>
+<header class="chrome">
+  <p class="wordmark"><a href="/">Vellum</a></p>
+  <p class="tagline">an atelier of imaginary cartography</p>
+  <input type="checkbox" class="rooms-reveal" aria-label="Reveal the rooms nav">
+  <nav class="rooms" aria-label="The rooms">
+<a href="/seed-of-the-day/">Today</a><span class="sep" aria-hidden="true">·</span><a href="/explorer/">Explorer</a><span class="sep" aria-hidden="true">·</span><a href="/reading-room/">Reading Room</a><span class="sep" aria-hidden="true">·</span><a href="/print-room/">Print Room</a><span class="sep" aria-hidden="true">·</span><a href="/gallery/">Gallery</a><span class="sep" aria-hidden="true">·</span><span aria-current="page">Q &amp; A</span><span class="sep" aria-hidden="true">·</span><a href="/glossary/">Glossary</a>
+</nav>
+
+  
+</header>
+<main>
+
+
+<div class="fog a" aria-hidden="true"></div><div class="fog b" aria-hidden="true"></div>
+<div class="chrome corner tr folio-room">
+  <h1 class="room-name">Questions &amp; Answers</h1>
+  <p class="room-tagline">how the worlds are made</p>
+  
+  <p class="dateline">28 questions in 5 sections</p>
+
+</div>
+<aside class="slip" id="index" aria-labelledby="index-title">
+  <div class="slip-head">
+    <button class="slip-handle" type="button" aria-expanded="false" aria-controls="index" aria-label="Open On this page"></button>
+    <button class="slip-fold" type="button" aria-label="Fold the index away">&times;</button>
+    <p class="card-verb">Find your way</p>
+    <h2 class="card-title" id="index-title">On this page</h2>
+    <p class="card-where">the section you are reading is inked</p>
+    
+  </div>
+  <div class="slip-body">
+  <ol class="index">
+    <li data-sec="about">
+        <a class="sec" href="#about">About Vellum<span class="count">6</span></a>
+        <ol class="entries"><li data-for="what-is-vellum"><a href="#what-is-vellum">What is Vellum?</a></li><li data-for="is-this-ai-image-generation"><a href="#is-this-ai-image-generation">Is this AI image generation?</a></li><li data-for="what-is-a-seed"><a href="#what-is-a-seed">What is a &quot;seed&quot;?</a></li><li data-for="do-i-need-to-install-anything-to-try-it"><a href="#do-i-need-to-install-anything-to-try-it">Do I need to install anything to try it?</a></li><li data-for="can-i-use-the-maps-i-make"><a href="#can-i-use-the-maps-i-make">Can I use the maps I make?</a></li><li data-for="why-vellum"><a href="#why-vellum">Why &quot;Vellum&quot;?</a></li></ol>
+      </li><li data-sec="how">
+        <a class="sec" href="#how">How a world is built<span class="count">6</span></a>
+        <ol class="entries"><li data-for="how-is-the-land-shaped"><a href="#how-is-the-land-shaped">How is the land shaped?</a></li><li data-for="how-do-the-rivers-and-lakes-form"><a href="#how-do-the-rivers-and-lakes-form">How do the rivers and lakes form?</a></li><li data-for="where-do-the-towns-roads-and-borders-come-from"><a href="#where-do-the-towns-roads-and-borders-come-from">Where do the towns, roads, and borders come from?</a></li><li data-for="do-the-settlements-have-a-history"><a href="#do-the-settlements-have-a-history">Do the settlements have a history?</a></li><li data-for="where-do-the-coats-of-arms-come-from"><a href="#where-do-the-coats-of-arms-come-from">Where do the coats of arms come from?</a></li><li data-for="is-every-map-really-repeatable"><a href="#is-every-map-really-repeatable">Is every map really repeatable?</a></li></ol>
+      </li><li data-sec="names">
+        <a class="sec" href="#names">Names &amp; invented languages<span class="count">4</span></a>
+        <ol class="entries"><li data-for="where-do-the-names-come-from"><a href="#where-do-the-names-come-from">Where do the names come from?</a></li><li data-for="how-does-the-name-grammar-work"><a href="#how-does-the-name-grammar-work">How does the name &quot;grammar&quot; work?</a></li><li data-for="what-are-the-ten-cultures"><a href="#what-are-the-ten-cultures">What are the ten cultures?</a></li><li data-for="do-these-names-fill-the-gazetteer-too"><a href="#do-these-names-fill-the-gazetteer-too">Do these names fill the gazetteer too?</a></li></ol>
+      </li><li data-sec="climate">
+        <a class="sec" href="#climate">Climate, styles &amp; map types<span class="count">6</span></a>
+        <ol class="entries"><li data-for="how-does-climate-change-the-look"><a href="#how-does-climate-change-the-look">How does climate change the look?</a></li><li data-for="so-is-a-polar-map-white"><a href="#so-is-a-polar-map-white">So is a polar map white?</a></li><li data-for="what-are-the-four-styles"><a href="#what-are-the-four-styles">What are the four styles?</a></li><li data-for="how-do-i-read-the-symbols-and-labels"><a href="#how-do-i-read-the-symbols-and-labels">How do I read the symbols and labels?</a></li><li data-for="what-do-the-colors-on-an-antique-chart-mean"><a href="#what-do-the-colors-on-an-antique-chart-mean">What do the colors on an antique chart mean?</a></li><li data-for="what-are-the-map-types"><a href="#what-are-the-map-types">What are the map types?</a></li></ol>
+      </li><li data-sec="making">
+        <a class="sec" href="#making">Making &amp; reproducing maps<span class="count">6</span></a>
+        <ol class="entries"><li data-for="how-do-i-make-a-map-on-my-own-machine"><a href="#how-do-i-make-a-map-on-my-own-machine">How do I make a map on my own machine?</a></li><li data-for="i-found-a-map-i-love-how-do-i-get-it-back"><a href="#i-found-a-map-i-love-how-do-i-get-it-back">I found a map I love. How do I get it back?</a></li><li data-for="can-i-make-a-high-resolution-print"><a href="#can-i-make-a-high-resolution-print">Can I make a high-resolution print?</a></li><li data-for="what-is-the-seed-of-the-day"><a href="#what-is-the-seed-of-the-day">What is the Seed of the Day?</a></li><li data-for="what-is-the-atlas"><a href="#what-is-the-atlas">What is the atlas?</a></li><li data-for="what-is-the-gallery"><a href="#what-is-the-gallery">What is the gallery?</a></li></ol>
+      </li>
+  </ol>
+</div>
+  
+</aside>
+<button class="slip-tab" type="button" aria-controls="index">On this page</button>
+<div class="sheet">
+<div class="columns">
+<h2 id="about">About Vellum</h2>
+
+<p class="q" id="what-is-vellum">What is Vellum?</p>
+<p class="a">Vellum is a procedural cartography engine. Give it a number, a
+"seed," and it invents an entire world (terrain, rivers, forests, towns, and
+their names) and draws it as an old-fashioned atlas chart.</p>
+
+<p class="q" id="is-this-ai-image-generation">Is this AI image generation?</p>
+<p class="a">No. There is no machine learning or image model involved. Vellum
+follows a fixed set of rules (layered noise, a water-flow simulation, and name
+grammars), so it draws crisp, infinitely scalable SVG maps, and the same seed
+always produces exactly the same one.</p>
+
+<p class="q" id="what-is-a-seed">What is a "seed"?</p>
+<p class="a">A seed is a number that serves as a world's identity. Seed 42 always
+draws the same island; change the number for a different world. It is printed
+in every chart's margin, so you can always find your way back to a map you
+liked.</p>
+
+<p class="q" id="do-i-need-to-install-anything-to-try-it">Do I need to install anything to try it?</p>
+<p class="a">No. The <a href="../explorer/">Explorer</a> runs the whole engine
+in your browser. Type a seed and draw; nothing is uploaded. To generate files
+on your own machine, clone the repo (see the
+<a href="https://github.com/ahl-gram/Vellum#readme">README</a>).</p>
+
+<p class="q" id="can-i-use-the-maps-i-make">Can I use the maps I make?</p>
+<p class="a">Yes, freely. Maps you generate with Vellum are yours to use for
+anything, including commercial work, with no restrictions and no attribution
+required (they are dedicated to the public domain). The Vellum source code
+itself is released under the MIT license, so you are welcome to build on the
+engine too.</p>
+
+<p class="q" id="why-vellum">Why "Vellum"?</p>
+<p class="a">Vellum is the prepared animal skin that real medieval maps and
+manuscripts were drawn on, a fitting surface for charts of places that were
+never real.</p>
+
+<h2 id="how">How a world is built</h2>
+
+<p class="q" id="how-is-the-land-shaped">How is the land shaped?</p>
+<p class="a">Layered "noise" produces a field of elevations. A sea level is then
+chosen so that the intended fraction of the map is land, and everything above
+the waterline becomes the coastline, hills, and mountains.</p>
+
+<p class="q" id="how-do-the-rivers-and-lakes-form">How do the rivers and lakes form?</p>
+<p class="a">Vellum simulates water. Rainfall runs downhill along the steepest
+path, and the algorithm guarantees every drop can reach the sea, so rivers
+always connect and flow the right way, widening toward their mouths. Where
+water collects below sea level inland, you get a lake.</p>
+
+<p class="q" id="where-do-the-towns-roads-and-borders-come-from">Where do the towns, roads, and borders come from?</p>
+<p class="a">Towns are scored by good harbors, river mouths, and flat, fertile
+land. Roads are the cheapest paths between them, and they reuse one another, so
+shared trunk roads emerge naturally. Realms are formed by giving each capital
+the land nearest to it, with borders that prefer to follow rivers and
+ridgelines.</p>
+
+<p class="q" id="do-the-settlements-have-a-history">Do the settlements have a history?</p>
+<p class="a">Yes. After the world is built, Vellum simulates a rough history:
+towns receive founding dates, and some villages fall into ruin before the survey
+is drawn. Ruins appear on the map as a broken-tower glyph with a dimmed label.
+The atlas adds a Chronicle section, a dated record of founding events and
+collapses, and the gazetteer notes cite dates where relevant
+(<em>"founded in the year 312; fell to ruin by 581"</em>).</p>
+
+<p class="q" id="where-do-the-coats-of-arms-come-from">Where do the coats of arms come from?</p>
+<p class="a">Every realm is given its own coat of arms, generated from the same
+seed and obeying the heraldic rule of tincture: no colour on colour, no metal on
+metal. The three banners on the homepage are the arms of the Isle of Rahai's
+realms.</p>
+
+<p class="q" id="is-every-map-really-repeatable">Is every map really repeatable?</p>
+<p class="a">Yes. Every random choice descends from the seed, so the same seed
+with the same options always draws an identical map.</p>
+
+<h2 id="names">Names &amp; invented languages</h2>
+
+<p class="q" id="where-do-the-names-come-from">Where do the names come from?</p>
+<p class="a">Every world picks one of ten invented cultures, each with its own
+sound, and uses it for everything: towns, rivers, peaks, seas, and realms.
+Because a single map keeps to one culture, its names share a family resemblance,
+the way place names within one country do. Nothing is taken from a real word
+list; every name is built from scratch.</p>
+
+<p class="q" id="how-does-the-name-grammar-work">How does the name "grammar" work?</p>
+<p class="a">In two steps. First Vellum builds a bare stem by stringing together a
+culture's sound pieces: beginnings like "mar" or "dr," vowels like "a" or "ai,"
+and endings like "nd" or "mor," following that culture's syllable patterns. Then
+it wraps the stem in a template to fit the feature, for example "The Sea of
+___," "Mount ___," or a town ending such as "haven." A few tidy-up rules keep
+each name short and pronounceable, and no two names on one map repeat.</p>
+
+<p class="q" id="what-are-the-ten-cultures">What are the ten cultures?</p>
+<p class="a">Each is a different sound-world, loosely echoing a real one: a soft
+seafaring tongue, a hard northern one, a desert tongue rich in "sh" and "kh," an
+airy woodland one, an open island one heavy with vowels, a harsh mountain one
+full of clusters, a spare tongue of open syllables and river mouths, a birchwood
+one of "-grad" and "-ov," a stone-temple one of "-tlan" and "-pec," and a steppe
+tongue of khans and kurgans. The chart's title page even credits an invented
+surveyor whose name comes from the same culture.</p>
+
+<p class="q" id="do-these-names-fill-the-gazetteer-too">Do these names fill the gazetteer too?</p>
+<p class="a">Yes. The gazetteer, the atlas's directory of every town, lists them
+by these same invented names, grouped by realm, with a line or two of travelers'
+notes written in the same spirit. The labels on the map and the entries in the
+gazetteer come from one and the same source.</p>
+
+<h2 id="climate">Climate, styles &amp; map types</h2>
+
+<p class="q" id="how-does-climate-change-the-look">How does climate change the look?</p>
+<p class="a">Climate sets temperature, which sets the biomes, and biomes change
+the map's <em>symbols</em>, not its base color. A polar world shows pine woods
+and open tundra, with the snow line low on the hills. A tropical world shows
+palms, deserts marked with dunes, and snow only on the highest peaks. Temperate
+sits between, with broadleaf woods. The coastline of a given seed is identical
+in every climate.</p>
+
+<p class="q" id="so-is-a-polar-map-white">So is a polar map white?</p>
+<p class="a">No, and that surprises people. The land is the same parchment (or
+elevation tint) in every climate; "cold" shows through the tree types, the
+beaches, the snow line, and the gazetteer's notes, not a change of palette.</p>
+
+<p class="q" id="what-are-the-four-styles">What are the four styles?</p>
+<p class="a"><em>Antique</em>: parchment, hatched mountains, sea monsters.
+<em>Topographic</em>: elevation tints and contour lines.
+<em>Ink</em>: pen-and-ink monochrome.
+<em>Nautical</em>: a sea chart with depth soundings, prevailing-wind arrows, and
+ocean-current streamlines.
+(The nautical style draws no land symbols, so climate is most muted there.)</p>
+
+<p class="q" id="how-do-i-read-the-symbols-and-labels">How do I read the symbols and labels?</p>
+<p class="a">Most charts carry a small key in one corner that names the symbols
+actually on that map: the settlement marks, the terrain glyphs, rivers, and on
+sea charts the depth soundings and wind arrows. The lettering is a code too. Bold
+capitals mark a capital city, plain type a town or village, faded spaced capitals
+name a realm, and italics name water (seas, rivers, and lakes) and forests. Every atlas page carries a key, and you can turn one on for any chart you
+draw in the Explorer or generate locally.</p>
+
+<p class="q" id="what-do-the-colors-on-an-antique-chart-mean">What do the colors on an antique chart mean?</p>
+<p class="a">Less than you might expect, because an antique chart shows most
+things by drawing rather than by color. The land is a single even parchment, the
+same cream at every elevation and in every climate; mountains are drawn as brown
+hatched ranges and forests as little tree marks, not painted on. The sea is a
+pale sage green, ringed by slightly darker "waterlines" that echo each coast in
+the old engraved manner. A dark brown line is the shoreline, thin blue lines are
+rivers, and faint brown lines are roads. The one place color really carries
+meaning is the soft washes of red, green, gold, blue, and mauve: each marks a
+realm, one tint apiece, so you can tell neighboring territories apart. Those are
+political regions, not terrain, so a single-realm island shows almost none while
+a continent of several realms shows them clearly. (Topographic charts are the
+exception: there the land color itself maps to elevation.)</p>
+
+<p class="q" id="what-are-the-map-types">What are the map types?</p>
+<p class="a"><em>Island</em> (one landmass), <em>archipelago</em> (scattered
+isles), <em>continent</em> (a large landmass), and <em>city-state</em> (one
+dominant free city and its hinterland). Leave it unset and the seed chooses.</p>
+
+<h2 id="making">Making &amp; reproducing maps</h2>
+
+<p class="q" id="how-do-i-make-a-map-on-my-own-machine">How do I make a map on my own machine?</p>
+<p class="a">Download the source from
+<a href="https://github.com/ahl-gram/Vellum">GitHub</a> and follow the
+setup instructions in the
+<a href="https://github.com/ahl-gram/Vellum#readme">README</a>. Charts are
+generated as SVG files you can open in any browser.</p>
+
+<p class="q" id="i-found-a-map-i-love-how-do-i-get-it-back">I found a map I love. How do I get it back?</p>
+<p class="a">Note its seed (printed in the margin) and enter it again. One catch:
+if you chose a specific type, climate, or land amount, those aren't saved on the
+chart itself, so you'll need to set them the same way again alongside the seed.</p>
+
+<p class="q" id="can-i-make-a-high-resolution-print">Can I make a high-resolution print?</p>
+<p class="a">Yes. The <a href="../print-room/">Print Room</a> renders any seed at
+poster size (up to about 14 inches at 300 dpi) and downloads it as an SVG or PNG,
+ready to print as wall art. No install needed: it all runs in your browser.</p>
+
+<p class="q" id="what-is-the-seed-of-the-day">What is the Seed of the Day?</p>
+<p class="a">The <a href="../seed-of-the-day/">Seed of the Day</a> page draws a
+new world each day automatically. The seed is today's date in UTC read as a
+number (for example, June 22 2026 becomes seed 20260622), so everyone in the
+world sees the same chart on the same day. No reload needed: the page renders
+fresh in your browser each time you visit.</p>
+
+<p class="q" id="what-is-the-atlas">What is the atlas?</p>
+<p class="a">The atlas binds one world into a small book: the chart in several
+styles, four thematic data plates (vegetation, temperature, rainfall, and
+population), two regional close-ups that zoom in on busy areas, a coat-of-arms
+plate for every realm, a Chronicle of the world's founding events and ruins, and
+a gazetteer of every town with travelers' notes. Explore a seed in the
+<a href="../explorer/">Explorer</a>, then take it to the
+<a href="../print-room/">Print Room</a> to bind the atlas, print it to PDF, or
+download it as a single file.</p>
+
+<p class="q" id="what-is-the-gallery">What is the gallery?</p>
+<p class="a">The <a href="../gallery/">gallery</a> is a contact sheet of many
+worlds at once, useful for browsing seeds until one catches your eye.</p>
+</div>
+</div>
+
+
+</main>
+<footer>
+  Vellum · an atelier of imaginary cartography
+</footer>
+
+</body>
+</html>

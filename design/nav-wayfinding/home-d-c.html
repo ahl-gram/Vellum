@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vellum · an atelier of imaginary cartography</title>
+<meta name="description" content="Procedurally generated fantasy atlases: deterministic worlds drawn as antique, topographic, ink, and nautical SVG charts.">
+
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Vellum">
+<meta property="og:url" content="https://www.vellumworlds.com/">
+<meta property="og:title" content="Vellum · an atelier of imaginary cartography">
+<meta property="og:description" content="Procedurally generated fantasy atlases: deterministic worlds drawn as antique, topographic, ink, and nautical SVG charts.">
+<meta property="og:image" content="https://www.vellumworlds.com/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The Vellum wordmark and a compass rose on a dark walnut ground, with the chart of seed 42 faint behind.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Vellum · an atelier of imaginary cartography">
+<meta name="twitter:description" content="Procedurally generated fantasy atlases: deterministic worlds drawn as antique, topographic, ink, and nautical SVG charts.">
+<meta name="twitter:image" content="https://www.vellumworlds.com/og.png">
+<meta name="twitter:image:alt" content="The Vellum wordmark and a compass rose on a dark walnut ground, with the chart of seed 42 faint behind.">
+<style>:root{--ink-dark:#4a3826;--ink-brown:#6b5a40;--ink-faded:#857257;--line-tan:#b9a77f;--parchment:#efe6cf;--parchment-panel:#f4ecd8;--parchment-bright:#fff7e4;--parchment-deep:#e6d9b8;--line-faint:#cdbd97;--sheet-shadow:0 12px 34px rgb(from var(--chart-ink) r g b / .4);--stage-shadow:0 18px 60px rgb(from var(--chart-ink) r g b / .55);--ink-annals:#3f3122;--ink-surveyor:#7a5f38;--ink-surveyor-faded:#99855f;--control-cream:#f8f1e0;--ink-press:#5d4831;--control-gold:#f0e3bd;--control-gold-lit:#f7edcd;--ink-tale:#54452f;--iron-red:#7a1f12;--chart-paper:#f2e8cf;--chart-ink:#3d2f1f;--the-deep:radial-gradient(120% 90% at 50% 30%, rgb(from var(--ink-dark) r g b / 0) 40%, rgb(from var(--chart-ink) r g b / .55) 100%), radial-gradient(80% 70% at 30% 20%, color-mix(in srgb, var(--ink-dark) 90%, var(--parchment) 10%) 0%, var(--ink-dark) 55%, var(--chart-ink) 100%);--band-h:7.6rem;--chrome-x:1.6rem;--chrome-y:1.4rem;color-scheme:light}body{background:var(--chart-ink);color:var(--ink-dark);font-family:var(--font-body,"Iowan Old Style", "Palatino", Georgia, serif);margin:0}body:before{content:"";z-index:-1;background:var(--the-deep);background-color:var(--chart-ink);position:fixed;inset:0}main{margin-inline:auto}.wordmark,.room-name,.rooms,footer{font-family:var(--font-display,"Iowan Old Style", "Palatino", Georgia, serif)}header.chrome{left:var(--chrome-x);top:var(--chrome-y);z-index:10;text-align:left;pointer-events:none;line-height:normal;position:fixed}header.chrome a,header.chrome .rooms-reveal{pointer-events:auto}.rooms-reveal{display:none}.wordmark{letter-spacing:.12em;margin:0;font-size:2.1rem;font-weight:400;line-height:1.15}.wordmark a{color:var(--parchment-bright);text-decoration:none}.tagline{font-family:var(--font-flourish,"Iowan Old Style", "Palatino", Georgia, serif);color:var(--parchment);margin:0;font-size:.92rem;font-style:italic}.rooms{letter-spacing:.14em;color:var(--ink-faded);margin:.55rem 0 0;font-size:.72rem}.rooms .sep{opacity:.7;margin:0 .35em}.rooms a{color:var(--parchment);text-decoration:none}.rooms a:hover,.rooms a:focus-visible{color:var(--parchment-bright)}header.chrome a:focus-visible,footer a:focus-visible{outline-color:var(--parchment-bright)}.rooms [aria-current=page]{vertical-align:top;color:var(--parchment-bright);text-underline-offset:.45em;text-decoration:underline 1px;display:inline-block}.band{z-index:9;pointer-events:none;position:fixed;inset:0}.band:before{content:"";background:var(--the-deep);background-color:var(--chart-ink);clip-path:inset(0 0 calc(100% - var(--band-h)) 0);position:absolute;inset:0}.band:after{content:"";left:0;right:0;top:var(--band-h);background:linear-gradient(rgb(from var(--chart-ink) r g b / .45), transparent);height:14px;position:absolute}.room-name{letter-spacing:.14em;margin:0;font-size:1.65rem;font-weight:400}.room-tagline{font-family:var(--font-flourish,"Iowan Old Style", "Palatino", Georgia, serif);color:var(--ink-brown);margin:0;font-style:italic}body.room{padding:8.4rem 2.2rem 1.6rem}body.room.chart-room{padding:0}main.desk-panel{background:var(--parchment);border:1px solid var(--line-tan);box-shadow:var(--sheet-shadow);padding:1.8rem clamp(1.25rem,3vw,2.75rem) 2.75rem}@keyframes sheet-land{0%{opacity:0;transform:translateY(10px)scale(1.004)}}@keyframes ink-in{0%{opacity:0}}body.room main.desk-panel{animation:.55s cubic-bezier(.2,.7,.3,1) both sheet-land}body.room header.chrome,body.room footer{animation:.5s ease-out .18s both ink-in}footer{text-align:center;letter-spacing:.22em;color:var(--line-tan);margin:0;padding:1.4rem 0 1.8rem;font-size:.72rem;line-height:normal}footer a{color:inherit}@media (width<=720px){:root{--band-h:6.4rem;--chrome-x:1rem;--chrome-y:.9rem}.wordmark{font-size:1.5rem}.tagline{font-size:.78rem}body.room{padding:7rem 1rem 1.2rem}body.room.chart-room{padding:0}}@media (width<=900px){.chrome .rooms{left:calc(-1 * var(--chrome-x));top:calc(-1 * var(--chrome-y));box-sizing:border-box;width:min(16rem,100vw);height:100dvh;padding:0 1.5rem 2rem var(--chrome-x);overscroll-behavior:contain;background:var(--chart-ink);border-right:1px solid rgb(from var(--line-tan) r g b / .3);box-shadow:0 0 40px rgb(from var(--chart-ink) r g b / .6);visibility:hidden;z-index:-1;margin:0;transition:transform .32s cubic-bezier(.2,.7,.3,1),visibility 0s linear .32s;display:block;position:absolute;overflow-y:auto;transform:translate(-100%)}.chrome .rooms:before{content:"";z-index:1;height:calc(var(--band-h) + 1rem);background:var(--chart-ink);display:block;position:sticky;top:0}.rooms-reveal:checked~.rooms{visibility:visible;pointer-events:auto;transition:transform .32s cubic-bezier(.2,.7,.3,1),visibility;transform:none}.chrome .rooms .sep{display:none}.chrome .rooms a,.chrome .rooms [aria-current=page]{letter-spacing:.16em;padding:.85rem 0;font-size:.95rem;display:block}body:has(.rooms-reveal:checked)>header.chrome{z-index:45}.rooms-reveal{vertical-align:top;appearance:none;cursor:pointer;background:repeating-linear-gradient(var(--parchment) 0, var(--parchment) 2px, transparent 2px, transparent 7px);border:0;width:1.7rem;height:1rem;margin:.6rem 0 0;padding:0;display:inline-block}.rooms-reveal:checked{background:repeating-linear-gradient(var(--parchment-bright) 0, var(--parchment-bright) 2px, transparent 2px, transparent 7px)}.rooms-reveal:focus-visible{outline:2px solid var(--parchment-bright);outline-offset:4px}body.room:has(.rooms-reveal:checked):after{content:"";inset:var(--band-h) 0 0;z-index:41;pointer-events:auto;background:rgb(from var(--chart-ink) r g b / .45);position:fixed}body.room:has(.rooms-reveal:checked) [popover]:popover-open{display:none}}@media print{.band,header.chrome{display:none}body.room:has(.rooms-reveal:checked):after{content:none}body{background:0 0}body:before{display:none}body.room{padding:0}main.desk-panel{box-shadow:none;background:0 0;border:none}}
+</style><link rel="stylesheet" href="fonts.css">
+<link rel="stylesheet" href="motion.css">
+<link rel="stylesheet" href="house.css">
+<link rel="stylesheet" href="atelier.css">
+<link rel="stylesheet" href="page-home.css">
+<link rel="stylesheet" href="mock.css">
+</head>
+<body data-dir="d-c">
+
+<header class="chrome">
+  <h1 class="wordmark"><a href="/">Vellum</a></h1>
+  <p class="tagline">an atelier of imaginary cartography</p>
+  <input type="checkbox" class="rooms-reveal" aria-label="Reveal the rooms nav">
+  <nav class="rooms" aria-label="The rooms">
+<a href="/seed-of-the-day/">Today</a><span class="sep" aria-hidden="true">·</span><a href="/explorer/">Explorer</a><span class="sep" aria-hidden="true">·</span><a href="/reading-room/">Reading Room</a><span class="sep" aria-hidden="true">·</span><a href="/print-room/">Print Room</a><span class="sep" aria-hidden="true">·</span><a href="/gallery/">Gallery</a><span class="sep" aria-hidden="true">·</span><a href="/faq/">Q &amp; A</a><span class="sep" aria-hidden="true">·</span><a href="/glossary/">Glossary</a>
+</nav>
+<button class="atelier-press" type="button" aria-expanded="true" aria-controls="atelier">the chart of the atelier</button><div class="atelier" id="atelier">
+<svg viewBox="0 0 600 420" role="img" aria-label="A chart of the atelier, with a pin at the room you are in">
+  <path class="sea-ring" d="M74 196 C 70 150 108 108 156 96 C 196 86 222 104 256 92 C 296 78 330 86 356 74 C 392 58 430 78 438 112 C 444 140 424 158 436 180 C 452 208 470 218 466 248 C 462 284 430 300 396 300 C 366 300 356 320 330 342 C 300 368 250 372 214 356 C 178 340 170 316 140 304 C 100 288 78 244 74 196 Z"/>
+  <path class="land" d="M74 196 C 70 150 108 108 156 96 C 196 86 222 104 256 92 C 296 78 330 86 356 74 C 392 58 430 78 438 112 C 444 140 424 158 436 180 C 452 208 470 218 466 248 C 462 284 430 300 396 300 C 366 300 356 320 330 342 C 300 368 250 372 214 356 C 178 340 170 316 140 304 C 100 288 78 244 74 196 Z"/>
+  <path class="road" d="M62 286 Q 193 231 300 196"/>
+  <path class="road" d="M300 196 Q 269 162 214 148"/>
+  <path class="road" d="M214 148 Q 182 182 126 236"/>
+  <path class="road" d="M300 196 Q 346 156 368 136"/>
+  <path class="road" d="M300 196 Q 371 204 418 232"/>
+  <path class="road" d="M300 196 Q 298 225 272 274"/>
+  <path class="road" d="M418 232 Q 397 274 352 336"/>
+  <path class="road" d="M272 274 Q 227 292 158 330"/>
+  <path class="road track" d="M272 274 Q 255 201 214 148"/>
+  <g class="place landing here"><circle class="halo" cx="62" cy="286" r="16"/><circle class="pip" cx="62" cy="286" r="5"/><text x="62" y="275">Vellum</text></g>
+  <g class="place capital"><circle class="pip" cx="300" cy="196" r="5.5"/><text x="300" y="185">The Explorer</text></g>
+  <g class="place town"><circle class="pip" cx="214" cy="148" r="4"/><text x="214" y="137">The Prospect</text></g>
+  <g class="place town"><circle class="pip" cx="126" cy="236" r="4"/><text x="126" y="225">The Ribbon</text></g>
+  <g class="place town"><circle class="pip" cx="368" cy="136" r="4"/><text x="368" y="125">The Portfolio</text></g>
+  <g class="place town"><circle class="pip" cx="272" cy="274" r="4"/><text x="272" y="263">The Reading Room</text></g>
+  <g class="place town"><circle class="pip" cx="418" cy="232" r="4"/><text x="418" y="221">The Print Room</text></g>
+  <g class="place isle"><circle class="pip" cx="486" cy="96" r="4"/><text x="486" y="85">Today</text></g>
+  <g class="place isle"><circle class="pip" cx="500" cy="320" r="4"/><text x="500" y="309">The Gallery</text></g>
+  <g class="place village"><circle class="pip" cx="158" cy="330" r="3"/><text x="158" y="319">Q &amp; A</text></g>
+  <g class="place village"><circle class="pip" cx="352" cy="336" r="3"/><text x="352" y="325">The Glossary</text></g>
+  <g class="you"><path d="M62 305 L62 315"/><text x="62" y="328">you are here</text></g>
+  <g class="rose" transform="translate(538 380)">
+    <circle r="15"/><path d="M0 -15 L3.4 -3.4 L15 0 L3.4 3.4 L0 15 L-3.4 3.4 L-15 0 L-3.4 -3.4 Z"/>
+    <text y="-19">N</text>
+  </g>
+  <text class="cartouche" x="86" y="408">A Chart of the Atelier</text>
+</svg>
+<p class="atelier-key">the dashed track is a second way in, not a second home</p>
+</div>
+  
+</header>
+<main>
+
+
+<section class="landfall" aria-label="The chart of The Isle of Rahai, pannable and zoomable">
+  <div class="stage" id="lf-stage" tabindex="0" aria-label="Pan and zoom the chart: drag, scroll, or keys plus, minus, and zero" data-capital-name="Laukuwelua" data-capital-nx="0.5099770114942529" data-capital-ny="0.4095294818344252">
+    <div class="sheet" id="lf-sheet">
+      <img class="lf-chart" src="chart-42-antique.svg" width="1500" height="1158" alt="The Isle of Rahai, antique chart, seed 42" loading="eager" draggable="false">
+      <div class="lf-marks" aria-hidden="true">
+        <div class="lf-dot" style="left:42.16%;top:68.65%">
+            <span class="lf-pip"></span>
+            <span class="lf-name">Paukilua</span>
+          </div><div class="lf-dot" style="left:73.23%;top:38.37%">
+            <span class="lf-pip"></span>
+            <span class="lf-name">Naukoa</span>
+          </div><div class="lf-dot" style="left:29.05%;top:46.86%">
+            <span class="lf-pip"></span>
+            <span class="lf-name">Nailo</span>
+          </div><div class="lf-dot" style="left:56.41%;top:43.91%">
+            <span class="lf-pip"></span>
+            <span class="lf-name">Loatunui</span>
+          </div><div class="lf-dot" style="left:52.42%;top:65.69%">
+            <span class="lf-pip"></span>
+            <span class="lf-name">Noloatatani</span>
+          </div><div class="lf-dot" style="left:57.27%;top:73.08%">
+            <span class="lf-pip"></span>
+            <span class="lf-name">Toatauhe</span>
+          </div><div class="lf-dot" style="left:64.40%;top:27.66%">
+            <span class="lf-pip"></span>
+            <span class="lf-name">Waun</span>
+          </div><div class="lf-dot" style="left:58.12%;top:42.80%">
+            <span class="lf-pip"></span>
+            <span class="lf-name">Lokai</span>
+          </div><div class="lf-dot" style="left:31.33%;top:67.17%">
+            <span class="lf-pip"></span>
+            <span class="lf-name">Rauhelunui</span>
+          </div><div class="lf-dot" style="left:51.57%;top:18.43%">
+            <span class="lf-pip"></span>
+            <span class="lf-name">Kai</span>
+          </div><div class="lf-dot" style="left:46.15%;top:29.14%">
+            <span class="lf-pip"></span>
+            <span class="lf-name">Pong</span>
+          </div><div class="lf-dot" style="left:43.02%;top:50.55%">
+            <span class="lf-pip"></span>
+            <span class="lf-name">Nanawotani</span>
+          </div><div class="lf-dot" style="left:23.92%;top:38.00%">
+            <span class="lf-pip"></span>
+            <span class="lf-name">Poalo</span>
+          </div><div class="lf-dot" style="left:70.95%;top:28.40%">
+            <span class="lf-pip"></span>
+            <span class="lf-name">Pelo</span>
+          </div><div class="lf-dot" style="left:71.81%;top:65.32%">
+            <span class="lf-pip"></span>
+            <span class="lf-name">Won</span>
+          </div><div class="lf-dot" style="left:30.76%;top:25.44%">
+            <span class="lf-pip"></span>
+            <span class="lf-name">Nurunui</span>
+          </div><div class="lf-dot ruined" style="left:74.37%;top:29.14%">
+            <span class="lf-pip"></span>
+            <span class="lf-name">Laihoanui (ruined)</span>
+          </div><div class="lf-dot" style="left:42.45%;top:15.47%">
+            <span class="lf-pip"></span>
+            <span class="lf-name">Kehenainui</span>
+          </div><div class="lf-dot" style="left:56.98%;top:18.80%">
+            <span class="lf-pip"></span>
+            <span class="lf-name">Pale</span>
+          </div><div class="lf-dot ruined" style="left:77.22%;top:58.68%">
+            <span class="lf-pip"></span>
+            <span class="lf-name">Homaitani (ruined)</span>
+          </div><div class="lf-dot" style="left:53.56%;top:40.21%">
+            <span class="lf-pip"></span>
+            <span class="lf-name">Wuwatau</span>
+          </div><div class="lf-dot" style="left:10.23%;top:42.06%">
+            <span class="lf-pip"></span>
+            <span class="lf-name">Tewetulua</span>
+          </div><div class="lf-dot" style="left:43.87%;top:40.95%">
+            <span class="lf-pip"></span>
+            <span class="lf-name">Haireno</span>
+          </div>
+      </div>
+      <div class="lf-stations">
+        <button type="button" class="lf-station" style="left:51.00%;top:40.95%" data-station="explorer" data-nx="0.5099770114942529" data-ny="0.4095294818344252" aria-label="The Explorer. Make one.">
+            <span class="lf-pulse" aria-hidden="true"></span>
+            <span class="lf-station-glyph" aria-hidden="true"></span>
+            <span class="lf-station-slip" aria-hidden="true">
+              <span class="lf-station-name">The Explorer</span>
+              <span class="lf-station-verb">Make one</span>
+            </span>
+          </button><button type="button" class="lf-station" style="left:55.27%;top:69.39%" data-station="reading-room" data-nx="0.552735632183908" data-ny="0.6938653960690887" aria-label="The Reading Room. Watch one.">
+            <span class="lf-pulse" aria-hidden="true"></span>
+            <span class="lf-station-glyph" aria-hidden="true"></span>
+            <span class="lf-station-slip" aria-hidden="true">
+              <span class="lf-station-name">The Reading Room</span>
+              <span class="lf-station-verb">Watch one</span>
+            </span>
+          </button><button type="button" class="lf-station" style="left:31.04%;top:59.05%" data-station="atlas" data-nx="0.3104367816091954" data-ny="0.5904705181655747" aria-label="The Atlas of Rahai. Read one.">
+            <span class="lf-pulse" aria-hidden="true"></span>
+            <span class="lf-station-glyph" aria-hidden="true"></span>
+            <span class="lf-station-slip" aria-hidden="true">
+              <span class="lf-station-name">The Atlas of Rahai</span>
+              <span class="lf-station-verb">Read one</span>
+            </span>
+          </button><button type="button" class="lf-station at-sea" style="left:79.00%;top:73.00%" data-station="gallery" data-nx="0.79" data-ny="0.73" aria-label="A Gallery of Worlds. Browse many.">
+            <span class="lf-pulse" aria-hidden="true"></span>
+            <span class="lf-station-glyph" aria-hidden="true"></span>
+            <span class="lf-station-slip" aria-hidden="true">
+              <span class="lf-station-name">A Gallery of Worlds</span>
+              <span class="lf-station-verb">Browse many</span>
+            </span>
+          </button><button type="button" class="lf-station at-sea" style="left:78.47%;top:17.79%" data-station="how" data-nx="0.7847" data-ny="0.1779" aria-label="How It Works. See how.">
+            <span class="lf-pulse" aria-hidden="true"></span>
+            <span class="lf-station-glyph" aria-hidden="true"></span>
+            <span class="lf-station-slip" aria-hidden="true">
+              <span class="lf-station-name">How It Works</span>
+              <span class="lf-station-verb">See how</span>
+            </span>
+          </button>
+      </div>
+    </div>
+    <aside class="notice-stamp" aria-hidden="true">
+      <p class="stamp-head">Notice to Mariners</p>
+      <p class="stamp-body">No feature on this chart exists.<br>Soundings are imaginary.</p>
+    </aside>
+    <div class="chrome corner br zoomery" id="lf-controls" role="group" aria-label="Camera">
+  <button id="zoom-in" class="zoom-btn" type="button" data-zoom="in" aria-label="Draw nearer">+</button>
+  <button id="zoom-out" class="zoom-btn" type="button" data-zoom="out" aria-label="Stand off">&minus;</button>
+  <button id="zoom-reset" class="zoom-btn" type="button" data-zoom="fit" aria-label="The whole sheet">&#8962;</button>
+</div>
+    <p class="lf-coords" id="lf-coords" aria-hidden="true"></p>
+    <p class="lf-more" aria-hidden="true"><span class="lf-more-pulse"></span>scroll on for more</p>
+    <nav class="lf-legend" id="lf-legend" aria-label="Modes of encounter">
+      <p class="lf-legend-head">Every seed is a world entire · choose your first encounter</p>
+      <div class="lf-legend-row">
+        <button type="button" class="lf-legend-btn" data-station="explorer">
+            <span class="lf-legend-verb">Make one</span>
+            <span class="lf-legend-room">The Explorer</span>
+          </button><button type="button" class="lf-legend-btn" data-station="reading-room">
+            <span class="lf-legend-verb">Watch one</span>
+            <span class="lf-legend-room">The Reading Room</span>
+          </button><button type="button" class="lf-legend-btn" data-station="atlas">
+            <span class="lf-legend-verb">Read one</span>
+            <span class="lf-legend-room">The Atlas</span>
+          </button><button type="button" class="lf-legend-btn" data-station="gallery">
+            <span class="lf-legend-verb">Browse many</span>
+            <span class="lf-legend-room">A Gallery of Worlds</span>
+          </button>
+      </div>
+    </nav>
+  </div>
+  <form id="seed-form" class="lf-seed" action="explorer/" method="get" aria-label="Draw a world by its seed">
+    <p class="seed-hook">Give Vellum a number.<br>It gives you back a world.</p>
+    <div class="seed-controls">
+      <input id="seed-input" class="control" name="seed" inputmode="numeric" pattern="[0-9]*" title="digits only" value="42" aria-label="Seed">
+      <button type="submit" class="primary">Draw it</button>
+    </div>
+    <p class="seed-gloss">every chart is reproducible from the number in its margin</p>
+  </form>
+  <aside class="lf-card" id="lf-card-explorer" hidden tabindex="-1" aria-label="About this room">
+      <button type="button" class="lf-card-close" aria-label="Set the slip aside">&times;</button>
+      <p class="lf-card-verb">Make one</p>
+      <h3 class="lf-card-title">The Explorer</h3>
+      <p class="lf-card-where">at Laukuwelua, the capital</p>
+      <p class="lf-card-prose">Draw your own: type a seed, pick a style and climate, and the world is drafted live in your browser. Nothing is uploaded.</p>
+      
+      <a class="lf-card-enter" href="explorer/">Enter the room →</a>
+    </aside><aside class="lf-card" id="lf-card-reading-room" hidden tabindex="-1" aria-label="About this room">
+      <button type="button" class="lf-card-close" aria-label="Set the slip aside">&times;</button>
+      <p class="lf-card-verb">Watch one</p>
+      <h3 class="lf-card-title">The Reading Room</h3>
+      <p class="lf-card-where">off Lamahai, on the southern shore</p>
+      <p class="lf-card-prose">Sit with a world and watch it happen: the founding voyage sails its survey, then the years turn and settlements rise, prosper, and fall to ruin.</p>
+      
+      <a class="lf-card-enter" href="reading-room/">Enter the room →</a>
+    </aside><aside class="lf-card" id="lf-card-atlas" hidden tabindex="-1" aria-label="About this room">
+      <button type="button" class="lf-card-close" aria-label="Set the slip aside">&times;</button>
+      <p class="lf-card-verb">Read one</p>
+      <h3 class="lf-card-title">The Atlas of Rahai</h3>
+      <p class="lf-card-where">at Weki, a seat of the west</p>
+      <p class="lf-card-prose">A bound volume: the world chart in three styles, two regional close-up surveys of the same terrain, and a gazetteer of every settlement with travelers&#39; notes.</p>
+      <div class="lf-card-arms">
+          <img loading="lazy" src="charts/arms-42-0.svg" alt="Arms of The Chiefdom of Rekekoa">
+          <img loading="lazy" src="charts/arms-42-1.svg" alt="Arms of The Hauwaiwa Atolls">
+          <img loading="lazy" src="charts/arms-42-2.svg" alt="Arms of The Ratoa Atolls">
+        </div>
+      <a class="lf-card-enter" href="atlas/">Enter the room →</a>
+    </aside><aside class="lf-card" id="lf-card-gallery" hidden tabindex="-1" aria-label="About this room">
+      <button type="button" class="lf-card-close" aria-label="Set the slip aside">&times;</button>
+      <p class="lf-card-verb">Browse many</p>
+      <h3 class="lf-card-title">A Gallery of Worlds</h3>
+      <p class="lf-card-where">in open water, beyond the survey</p>
+      <p class="lf-card-prose">Twelve worlds from twelve seeds: archipelagos, islands, and continents, each with its own name, realms, and coastline.</p>
+      
+      <a class="lf-card-enter" href="gallery/">Enter the room →</a>
+    </aside>
+  <aside class="lf-card lf-card-how" id="lf-card-how" hidden tabindex="-1" aria-label="How Vellum works">
+    <button type="button" class="lf-card-close" aria-label="Set the slip aside">&times;</button>
+    <p class="lf-card-verb">See how</p>
+    <h3 class="lf-card-title">How It Works</h3>
+    <p class="lf-card-where">at the title cartouche</p>
+    <div class="lf-card-scroll" tabindex="0" role="region" aria-label="How It Works, the full text">
+      <p class="how">Vellum surveys worlds that don't exist and drafts them as atlas
+      charts. Give it a number, called a <em>seed</em>, and it builds an entire world
+      from scratch.</p>
+      <p class="how">First it raises land out of noise: noise layered at several
+      scales, then pushed and pulled out of shape so the features wander and swirl
+      instead of repeating in a regular pattern. That distortion is what gives
+      coastlines their ragged, believable look instead of round, featureless blobs.
+      Next it runs water downhill until every river finds its way to the sea.
+      A simple climate of temperature and rainfall decides where forests, deserts, and
+      tundra grow.</p>
+      <p class="how">Towns settle where any founder would, near sheltered harbors,
+      river mouths, and good soil, and roads thread between them by the easiest route,
+      sharing corridors. Borders follow the lay of the land, tracing ridgelines and
+      rivers, and carve it into quarrelsome realms. Place names are drawn from ten
+      invented languages, one per culture.</p>
+      <p class="how">Then Vellum sits down at the drafting table and draws the maps:
+      parchment texture, hatched mountain ranges, a compass rose, a sea serpent, a
+      title cartouche. All of it is reproducible: the same seed always draws exactly
+      the same world, identical SVG, right down to the last coastline.</p>
+      <p class="underhood">Under the hood: a zero-dependency TypeScript engine, using
+      domain-warped <a href="https://en.wikipedia.org/wiki/Perlin_noise">gradient
+      noise</a> for terrain, <a href="https://arxiv.org/abs/1511.04463">priority-flood</a>
+      hydrology so every river drains to the sea, a
+      <a href="https://en.wikipedia.org/wiki/Biome">Whittaker-style climate model</a>,
+      <a href="https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm">Dijkstra
+      least-cost roads</a>, and a single seed feeding fork-labeled random streams for
+      full <a href="https://en.wikipedia.org/wiki/Random_seed">reproducibility</a>.</p>
+      <p class="how">Draw your own: read the
+      <a href="https://github.com/ahl-gram/Vellum#readme">README</a>.</p>
+    </div>
+  </aside>
+  </section>
+
+<section class="lf-shelf" aria-labelledby="lf-shelf-head">
+  <h2 class="lf-shelf-head" id="lf-shelf-head">One World, Many Charts</h2>
+  <div class="lf-shelf-grid">
+    <figure><a href="charts/chart-42-topographic.svg"><img loading="lazy" fetchpriority="low" src="charts/chart-42-topographic.svg" alt="Topographic style" class="plate" width="1500" height="1158"></a>
+      <figcaption>Topographic survey</figcaption></figure>
+    <figure><a href="charts/chart-42-ink.svg"><img loading="lazy" fetchpriority="low" src="charts/chart-42-ink.svg" alt="Pen and ink style" class="plate" width="1500" height="1158"></a>
+      <figcaption>Pen &amp; ink</figcaption></figure>
+    <figure><a href="charts/chart-42-nautical.svg"><img loading="lazy" fetchpriority="low" src="charts/chart-42-nautical.svg" alt="Nautical style" class="plate" width="1500" height="1158"></a>
+      <figcaption>Nautical chart, with fathom soundings</figcaption></figure>
+  </div>
+</section>
+
+</main>
+<footer>
+  Vellum · an atelier of imaginary cartography
+</footer>
+
+</body>
+</html>

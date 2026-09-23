@@ -1,0 +1,165 @@
+/* The round's OWN dress: only the shapes that do not exist on main yet. Everything else on these pages is the lifted kit, untouched, so a still shows the real cascade. Where this sheet has to neutralise a live defect to show the intended dress, it says so at the line and the defect is named in the README. */
+
+/* ---- common to every direction ---------------------------------------------------------------- */
+
+/* Seated inline in build.mjs, since `#sheet { width: 0; height: 0 }` is an id rule no class here could outrank; mock convenience, nothing proposed for main. */
+#pp-plate { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+/* The cluster is pointer-events: none with a two-item allowlist, so a new press joins it or it is unclickable and nothing reds (the Issue #520 class). */
+header.chrome .atelier-press { pointer-events: auto; }
+
+/* ---- B: the second rank ------------------------------------------------------------------------ */
+
+/* Quieter by SIZE, never by a dimmer ink: --ink-faded on the deep is under the 4.5:1 floor for small text, so the container's ink colours only the separators. */
+.rank {
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-size: 0.66rem; letter-spacing: 0.13em; color: var(--ink-faded);
+  margin: 0.3rem 0 0 0.9rem;
+}
+.rank a { color: var(--parchment); text-decoration: none; }
+.rank a:hover, .rank a:focus-visible { color: var(--parchment-bright); }
+.rank [aria-current="page"] {
+  display: inline-block; vertical-align: top; color: var(--parchment-bright);
+  text-decoration: underline; text-underline-offset: 0.4em; text-decoration-thickness: 1px;
+}
+.rank .sep { margin: 0 0.3em; opacity: 0.55; }
+/* The rank hangs off the room above it, so a hairline stem reads as descent rather than as a second list. */
+.rank::before {
+  content: ""; display: inline-block; vertical-align: middle;
+  width: 0.55rem; height: 1px; margin: 0 0.45em 0.15em -0.9rem;
+  background: var(--ink-faded); opacity: 0.7;
+}
+
+/* The ancestor you are inside, on the top line: present but not the page. Never colour alone. */
+.rooms a.up {
+  color: var(--parchment-bright);
+  text-decoration: underline dotted; text-underline-offset: 0.45em; text-decoration-thickness: 1px;
+}
+/* The room that carries this page as an ALIAS. Fainter than the ancestor, and a different stroke, because the ratified pin allows exactly one aria-current span and this is deliberately not it. */
+.rooms a.alias {
+  text-decoration: underline dashed; text-underline-offset: 0.45em; text-decoration-thickness: 1px;
+  text-decoration-color: var(--ink-faded);
+}
+
+/* ---- C: the trail ------------------------------------------------------------------------------ */
+
+/* A step smaller than the nav with the way-marks at full weight: the dots above separate peers, the chevrons here separate stages. */
+.trail {
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-size: 0.62rem; letter-spacing: 0.1em;
+  margin: 0.36rem 0 0;
+}
+.trail a { color: var(--parchment); text-decoration: none; }
+.trail a:hover, .trail a:focus-visible { color: var(--parchment-bright); }
+/* Two selectors, one appearance: which end carries the page mark is an ARIA question, not a visual one. */
+.trail [aria-current="page"], .trail .here {
+  color: var(--parchment-bright);
+  text-decoration: underline; text-underline-offset: 0.4em; text-decoration-thickness: 1px;
+}
+.trail .way { margin: 0 0.45em; color: var(--parchment); font-size: 0.78rem; vertical-align: -0.04em; }
+.also {
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic; font-size: 0.62rem; color: var(--parchment);
+  margin: 0.12rem 0 0;
+}
+.also a { color: var(--parchment); text-decoration-color: rgb(from var(--parchment) r g b / 0.45); text-underline-offset: 0.25em; }
+
+/* Keyed to what the cluster CARRIES, never to a direction's name (keyed by name this missed D-over-C and it fell past the band), at ONE height sized to the tallest case. */
+/* Scoped to rooms that actually RENDER a band: a chart room renders none, so raising --band-h there drew no band and only pushed the phone drawer's cap down by 67px of empty ground. */
+body.room:has(.band):has(.rank, .trail, .atelier-press) { --band-h: 10.6rem; padding-top: 10.8rem; }
+
+/* ---- D: the chart of the atelier --------------------------------------------------------------- */
+
+.atelier-press {
+  display: block; margin: 0.42rem 0 0;
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-size: 0.62rem; letter-spacing: 0.14em;
+  color: var(--parchment); background: none; border: 0; padding: 0; cursor: pointer;
+}
+.atelier-press::before { content: "✦ "; opacity: 0.8; }
+.atelier-press:hover, .atelier-press:focus-visible { color: var(--parchment-bright); }
+/* The chrome recolours its focus ring for anchors only (header.chrome a:focus-visible); this is the first button the house has seated here, so without this it took the house ink ring, which reads 1.11:1 on the deep. */
+header.chrome .atelier-press:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: 4px; }
+
+/* border-box like the house's own fixed `.slip`: on a content box the padding and border landed outside the min() and the panel hung 8.4px off the edge at 320 and 390. */
+.atelier {
+  box-sizing: border-box;
+  position: fixed; left: var(--chrome-x); top: 11.6rem; z-index: 44;
+  width: min(34rem, calc(100vw - 2 * var(--chrome-x)));
+  padding: 0.6rem 0.7rem 0.4rem;
+  /* Near-opaque: at 0.93 the plate's own title cartouche and the FAQ's body prose both read straight through the panel. */
+  background: rgb(from var(--chart-ink) r g b / 0.985);
+  border: 1px solid rgb(from var(--line-tan) r g b / 0.45);
+  box-shadow: 0 18px 40px rgb(from var(--chart-ink) r g b / 0.55);
+  pointer-events: auto;
+}
+.atelier svg { display: block; width: 100%; height: auto; }
+.atelier .land { fill: rgb(from var(--parchment) r g b / 0.10); stroke: var(--line-tan); stroke-width: 1.1; }
+/* The ring is the engraver's second stroke outside the coast, the same idiom the charts use for a shoreline. */
+.atelier .sea-ring { fill: none; stroke: rgb(from var(--line-tan) r g b / 0.35); stroke-width: 5; }
+.atelier .road { fill: none; stroke: rgb(from var(--parchment) r g b / 0.45); stroke-width: 1; }
+.atelier .road.track { stroke-dasharray: 3 4; stroke: rgb(from var(--parchment) r g b / 0.3); }
+.atelier text {
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-size: 11px; letter-spacing: 0.06em; text-anchor: middle; fill: var(--parchment);
+}
+.atelier .village text { font-size: 9.5px; fill: var(--parchment); }
+.atelier .isle text { font-size: 10px; fill: var(--parchment); }
+.atelier .pip { fill: var(--parchment); }
+.atelier .capital .pip { fill: var(--parchment-bright); }
+.atelier .village .pip { fill: var(--parchment); }
+.atelier .here .pip { fill: var(--parchment-bright); }
+.atelier .here text { fill: var(--parchment-bright); }
+.atelier .halo { fill: none; stroke: var(--parchment-bright); stroke-width: 1; opacity: 0.55; }
+.atelier .landing .pip { fill: none; stroke: var(--parchment); stroke-width: 1.4; }
+.atelier .landing text { font-style: italic; }
+.atelier .you path { stroke: var(--parchment-bright); stroke-width: 1; }
+.atelier .you text {
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic; font-size: 10.5px; fill: var(--parchment-bright); letter-spacing: 0.04em;
+}
+.atelier .rose circle { fill: none; stroke: rgb(from var(--line-tan) r g b / 0.5); }
+.atelier .rose path { fill: rgb(from var(--parchment) r g b / 0.55); }
+.atelier .rose text { font-size: 9px; fill: var(--parchment); }
+.atelier .cartouche {
+  text-anchor: start; font-size: 13px; letter-spacing: 0.12em; fill: var(--parchment);
+}
+.atelier-key {
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic; font-size: 0.62rem; color: var(--parchment); margin: 0.3rem 0 0; text-align: right;
+}
+
+/* Everything inside the chart scales with the chart, so at a narrow width the labels and the dash pattern shrink below legibility no matter what ink they carry: measured 4.17px and 1.45:1 at 320. The sizes are therefore stated in viewBox units that RENDER at a readable size once the scale is applied, rather than in units that look right in the source. */
+/* 575, not a round number: the panel is `min(34rem, 100vw - 2 * var(--chrome-x))` and --chrome-x is 1rem below 720, so it stops shrinking at viewport 576. A breakpoint above that gave a full width chart 70% oversized labels from 576 to 620 and snapped back at 621, measured. Below 576 the whole chart scales, so its text has to be stated in units that RENDER legibly once the scale is applied. */
+@media (max-width: 575px) {
+  .atelier text { font-size: 15px; }
+  .atelier .village text { font-size: 13.5px; }
+  .atelier .isle text { font-size: 14px; }
+  .atelier .you text { font-size: 14px; }
+  .atelier .rose text { font-size: 12.5px; }
+  .atelier .cartouche { font-size: 17px; }
+  .atelier .road { stroke-width: 1.8; }
+  .atelier .road.track { stroke-dasharray: 7 6; stroke-width: 2.2; }
+  /* r is a CSS geometry property and outranks the SVG attribute, so ONE value here flattens the ranks. */
+  .atelier .capital .pip { r: 8; }
+  .atelier .landing .pip { r: 7.2; }
+  .atelier .town .pip, .atelier .isle .pip { r: 6; }
+  .atelier .village .pip { r: 4.6; }
+}
+
+@media (max-width: 900px) {
+  /* The nav flies off as the drawer below 900 and anything seated after it stays in the cluster, which is the property that makes this seat worth having: the rank, the trail and the press survive the fold. */
+  .atelier { top: 9.4rem; }
+  /* The drawer wins. The shell already rules this class one line away, hiding `[popover]:popover-open` while the drawer is open; the panel is not a popover so it never joined, and it covered five of the seven doors and took them out of the hit-test, not merely out of sight. The PRESS did the same to one door on home at 320 even with the panel put away, so the rule takes the whole under-cluster group: while the drawer is open it IS the nav, and nothing the cluster carries sits over its doors. In the build this widens the SHELL's selector rather than adding a second rule beside it. */
+  /* The drawer owns the cluster, so nothing the cluster carries sits over its doors. But the trail RIDES INTO the drawer rather than going away with the rest (Alex, 2026-09-22): hiding it meant that opening the nav to ask where you are was the one gesture that removed the answer. It is seated in the cap the doors already sticky under, and the cap grows to make room, so it sits above them and over nothing. */
+  body:has(.rooms-reveal:checked) :is(.rank, .atelier-press, .atelier) { display: none; }
+  body:has(.rooms-reveal:checked) :is(.trail, .also) {
+    position: fixed; z-index: 46; left: var(--chrome-x); margin: 0;
+    width: calc(min(16rem, 100vw) - 2 * var(--chrome-x));
+  }
+  body:has(.rooms-reveal:checked) .trail { top: calc(var(--band-h) + 0.6rem); }
+  body:has(.rooms-reveal:checked) .also { top: calc(var(--band-h) + 1.75rem); }
+  body:has(.rooms-reveal:checked) .chrome .rooms::before { height: calc(var(--band-h) + 3.1rem); }
+  .rank, .trail { margin-left: 0; }
+  .rank::before { display: none; }
+}

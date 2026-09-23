@@ -1,0 +1,168 @@
+/* LIFTED from src/layouts/BaseLayout.astro's <style is:global> block. Do not edit here. */
+
+:root {
+  --ink-dark: #4a3826;         /* dark walnut ink: borders, buttons, prose, emphasis */
+  --ink-brown: #6b5a40;        /* flourish brown: taglines, captions, asides */
+  --ink-faded: #857257;        /* faded ink: nav, footer, small labels */
+  --line-tan: #b9a77f;         /* pale tan hairline: rules and frame borders */
+  --parchment: #efe6cf;        /* the sheet ground */
+  --parchment-panel: #f4ecd8;  /* raised panels, cards, and pinned slips */
+  --parchment-bright: #fff7e4; /* the lit cream: hovers and the reveal */
+  --parchment-deep: #e6d9b8;   /* the pressed tan: code chips */
+  --line-faint: #cdbd97;       /* the softer hairline, a shade lighter than --line-tan */
+  /* The ONE depth a chart rests at; anything laid OVER a chart inside the mount opts out (public/living-chart.css). */
+  --sheet-shadow: 0 12px 34px rgb(from var(--chart-ink) r g b / 0.4);
+  --stage-shadow: 0 18px 60px rgb(from var(--chart-ink) r g b / 0.55);
+  --ink-annals: #3f3122;       /* the chronicler's iron-gall: journal entries */
+  --ink-surveyor: #7a5f38;     /* the surveyor's walnut italic: journal prologue */
+  --ink-surveyor-faded: #99855f; /* the surveyor's unbolded gutter days */
+  --control-cream: #f8f1e0;    /* the control idiom's cream fill */
+  --ink-press: #5d4831;        /* the dark primary pressed (hover) */
+  --control-gold: #f0e3bd;     /* the featured action-link's parchment gold */
+  --control-gold-lit: #f7edcd; /* the gold, lit on hover */
+  --ink-tale: #54452f;         /* the tale/note ink: place-card tales, atlas notes */
+  --iron-red: #7a1f12;         /* the site's ink red (hunt star, statuses) */
+  --chart-paper: #f2e8cf;      /* the antique chart's paper: primary lettering, cartouche ground */
+  --chart-ink: #3d2f1f;        /* the chart's lettering ink: every site shadow */
+  --the-deep:
+    radial-gradient(120% 90% at 50% 30%, rgb(from var(--ink-dark) r g b / 0) 40%, rgb(from var(--chart-ink) r g b / 0.55) 100%),
+    radial-gradient(80% 70% at 30% 20%, color-mix(in srgb, var(--ink-dark) 90%, var(--parchment) 10%) 0%, var(--ink-dark) 55%, var(--chart-ink) 100%);
+  /* The reserved walnut band the head cluster stands on (#461 ruling 5): the sheet scrolls beneath the band, never beneath bare lettering. */
+  --band-h: 7.6rem;
+  --chrome-x: 1.6rem; --chrome-y: 1.4rem;
+}
+/* The layout's inline style renders AFTER the page css link, so an equal-specificity page rule silently loses: page deviations need higher specificity. A palette inversion, not a dark mode: form controls stay light. */
+:root { color-scheme: light; }
+body {
+  margin: 0;
+  background: var(--chart-ink); color: var(--ink-dark);
+  font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif);
+}
+/* A fixed full-viewport layer, not background-attachment: iOS treats fixed attachment as scroll. */
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: -1;
+  background: var(--the-deep);
+  background-color: var(--chart-ink);
+}
+main { margin-inline: auto; }
+.wordmark, .room-name, .rooms, footer {
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
+}
+/* The head cluster pins its own leading: page css sets body line-height for READING and the cluster must not inherit that inflation. */
+header.chrome {
+  position: fixed; left: var(--chrome-x); top: var(--chrome-y); z-index: 10;
+  line-height: normal; text-align: left;
+  pointer-events: none;
+}
+header.chrome a, header.chrome .rooms-reveal { pointer-events: auto; }
+.rooms-reveal { display: none; }
+.wordmark { font-size: 2.1rem; letter-spacing: 0.12em; line-height: 1.15; font-weight: 400; margin: 0; }
+.wordmark a { color: var(--parchment-bright); text-decoration: none; }
+.tagline {
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic; font-size: 0.92rem; color: var(--parchment); margin: 0;
+}
+.rooms { font-size: 0.72rem; letter-spacing: 0.14em; color: var(--ink-faded); margin: 0.55rem 0 0; }
+.rooms .sep { margin: 0 0.35em; opacity: 0.7; }
+.rooms a { color: var(--parchment); text-decoration: none; }
+.rooms a:hover, .rooms a:focus-visible { color: var(--parchment-bright); }
+header.chrome a:focus-visible, footer a:focus-visible { outline-color: var(--parchment-bright); }
+.rooms [aria-current="page"] { display: inline-block; vertical-align: top; color: var(--parchment-bright);
+  text-decoration: underline; text-underline-offset: 0.45em; text-decoration-thickness: 1px; }
+.band { position: fixed; inset: 0; z-index: 9; pointer-events: none; }
+.band::before {
+  content: ""; position: absolute; inset: 0;
+  background: var(--the-deep);
+  background-color: var(--chart-ink);
+  clip-path: inset(0 0 calc(100% - var(--band-h)) 0);
+}
+.band::after {
+  content: ""; position: absolute; left: 0; right: 0; top: var(--band-h); height: 14px;
+  background: linear-gradient(rgb(from var(--chart-ink) r g b / 0.45), transparent);
+}
+.room-name { font-size: 1.65rem; font-weight: 400; letter-spacing: 0.14em; margin: 0; }
+.room-tagline {
+  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  font-style: italic; color: var(--ink-brown); margin: 0;
+}
+/* The rooms stand clear of the band; a chart room has no band to clear. */
+body.room { padding: 8.4rem 2.2rem 1.6rem; }
+body.room.chart-room { padding: 0; }
+/* The interim desk panel: a room not yet dressed for the deep wears it so nothing ships ink-on-walnut; desk="open" stops the class rendering, so the rule retires itself room by room. */
+main.desk-panel {
+  background: var(--parchment);
+  border: 1px solid var(--line-tan);
+  box-shadow: var(--sheet-shadow);
+  padding: 1.8rem clamp(1.25rem, 3vw, 2.75rem) 2.75rem;
+}
+/* The landing ceremony (#461 ruling 6): the sheet settles onto the desk and the chrome inks in just after, on every arrival; motion.css's reduced-motion blanket collapses both to an instant swap. */
+@keyframes sheet-land {
+  from { opacity: 0; transform: translateY(10px) scale(1.004); }
+}
+@keyframes ink-in { from { opacity: 0; } }
+/* The settle rides the desk panel, never main: a transform on main would re-anchor the fixed furniture it hosts (the folio, the slip) for the length of the animation. */
+body.room main.desk-panel { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
+body.room header.chrome, body.room footer { animation: ink-in 0.5s 0.18s ease-out both; }
+footer {
+  text-align: center; font-size: 0.72rem; letter-spacing: 0.22em; color: var(--line-tan);
+  padding: 1.4rem 0 1.8rem; margin: 0; line-height: normal;
+}
+footer a { color: inherit; }
+@media (max-width: 720px) {
+  :root { --band-h: 6.4rem; --chrome-x: 1rem; --chrome-y: 0.9rem; }
+  .wordmark { font-size: 1.5rem; }
+  .tagline { font-size: 0.78rem; }
+  body.room { padding: 7rem 1rem 1.2rem; }
+  body.room.chart-room { padding: 0; }
+}
+/* The phone doors: the nav folds into a drawer a native checkbox burger reveals, with no bundle, so the doors survive scripts off; src/site/shell/app.ts adds the manners on top. */
+@media (max-width: 900px) {
+  .chrome .rooms {
+    display: block; position: absolute; left: calc(-1 * var(--chrome-x)); top: calc(-1 * var(--chrome-y));
+    box-sizing: border-box; width: min(16rem, 100vw); height: 100vh; height: 100dvh;
+    margin: 0; padding: 0 1.5rem 2rem var(--chrome-x);
+    overflow-y: auto; overscroll-behavior: contain;
+    background: var(--chart-ink);
+    border-right: 1px solid rgb(from var(--line-tan) r g b / 0.3);
+    box-shadow: 0 0 40px rgb(from var(--chart-ink) r g b / 0.6);
+    transform: translateX(-100%); visibility: hidden;
+    transition: transform 0.32s cubic-bezier(0.2, 0.7, 0.3, 1), visibility 0s linear 0.32s;
+    z-index: -1;
+  }
+  .chrome .rooms::before {
+    content: ""; display: block; position: sticky; top: 0; z-index: 1;
+    height: calc(var(--band-h) + 1rem);
+    background: var(--chart-ink);
+  }
+  .rooms-reveal:checked ~ .rooms {
+    transform: none; visibility: visible; pointer-events: auto;
+    transition: transform 0.32s cubic-bezier(0.2, 0.7, 0.3, 1), visibility 0s;
+  }
+  .chrome .rooms .sep { display: none; }
+  .chrome .rooms a, .chrome .rooms [aria-current="page"] {
+    display: block; padding: 0.85rem 0;
+    font-size: 0.95rem; letter-spacing: 0.16em;
+  }
+  body:has(.rooms-reveal:checked) > header.chrome { z-index: 45; }
+  .rooms-reveal {
+    display: inline-block; vertical-align: top; appearance: none; -webkit-appearance: none;
+    width: 1.7rem; height: 1rem; margin: 0.6rem 0 0; padding: 0; border: 0;
+    cursor: pointer;
+    background: repeating-linear-gradient(var(--parchment) 0, var(--parchment) 2px, transparent 2px, transparent 7px);
+  }
+  .rooms-reveal:checked { background: repeating-linear-gradient(var(--parchment-bright) 0, var(--parchment-bright) 2px, transparent 2px, transparent 7px); }
+  .rooms-reveal:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: 4px; }
+  body.room:has(.rooms-reveal:checked)::after {
+    content: ""; position: fixed; inset: var(--band-h) 0 0; z-index: 41; pointer-events: auto;
+    background: rgb(from var(--chart-ink) r g b / 0.45);
+  }
+  body.room:has(.rooms-reveal:checked) [popover]:popover-open { display: none; }
+}
+@media print {
+  .band, header.chrome { display: none; }
+  body.room:has(.rooms-reveal:checked)::after { content: none; }
+  body { background: none; }
+  body::before { display: none; }
+  body.room { padding: 0; }
+  main.desk-panel { background: none; border: none; box-shadow: none; }
+}
