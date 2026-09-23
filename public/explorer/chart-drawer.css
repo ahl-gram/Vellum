@@ -90,7 +90,7 @@ body.sheet-drag :is(#map-viewport, *) { cursor: grabbing; }
   .chart-drawer-tab { max-height: 8.5rem; font-size: 0.62rem; letter-spacing: 0.1em; padding: 0.6rem 0.35rem; }
 }
 
-/* No element inside the dog-ear: `LAST_INSET` in `scripts/e2e/suite-region-detail.mjs` reads the survey as the last "#map .region-inset svg", so any svg in here would become that element. */
+/* No element inside the dog-ear: `LAST_INSET` in `scripts/e2e/suite-region-detail.ts` reads the survey as the last "#map .region-inset svg", so any svg in here would become that element. */
 .dog-ear {
   position: absolute; top: 0; right: 0; padding: 0; border: 0; cursor: pointer;
   /* Restored: .region-inset is pointer-events: none (explorer/index.css), and without this a real click lands on the chart underneath. */

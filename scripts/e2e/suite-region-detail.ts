@@ -1,8 +1,9 @@
 // The Glass sees it e2e (RD, #400): every check reads the COMMITTED inset the user is looking at, never a job result standing in for it; byte comparisons are same-environment only (one page, one JS engine), the only kind lod.ts's byte-identity contract can be checked by, since a cross-environment SVG compare is barred project-wide.
 import { makeStep } from "./step-support.ts";
+import type { SuiteContext } from "./types.ts";
 
 // eslint-disable-next-line max-lines-per-function
-export async function run(ctx) {
+export async function run(ctx: SuiteContext): Promise<void> {
   const { evaluate, check, shoot, sleep, waitSettled, waitReady, PORT } = ctx;
   // RD1, RD2 and the ladder are deliberately not stepped: waitRedraft and waitInset return their last read rather than throwing, and their checks already guard on it.
   const step = makeStep(ctx);
@@ -10,10 +11,10 @@ export async function run(ctx) {
   const SEED = 2; // an archipelago seed: seed 42 is an island map with no straits, so it hides coastline defects (#376)
   const LINK = `http://127.0.0.1:${PORT}/explorer/#seed=${SEED}&style=antique&legend=1&arms=0&beasts=0&cx=0.5625&cy=0.4375&k=8`;
 
-  const rgn = () => evaluate(`window.__vellumRegion()`);
-  const enterAt = (k, cu, cv) =>
+  const rgn = () => evaluate<{ redrafts: number; band: number }>(`window.__vellumRegion()`);
+  const enterAt = (k: number, cu: number, cv: number) =>
     evaluate(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:${k},x:W/2-(${cu})*${k}*W,y:H/2-(${cv})*${k}*H});})()`);
-  const waitRedraft = async (prev) => {
+  const waitRedraft = async (prev: number) => {
     for (let i = 0; i < 375; i++) { const s = await rgn(); if (s.redrafts > prev) return s; await sleep(40); }
     return await rgn();
   };
@@ -25,8 +26,9 @@ export async function run(ctx) {
   };
   // A region sheet is ~500KB, far past what a CDP evaluate should carry back, so the digest is computed IN the page (both sides of every compare hashed by the same engine); the LAST inset, never the first, because during a crossing the outgoing sheet is still mounted and a plain querySelector reads the one on its way off screen.
   const LAST_INSET = `[...document.querySelectorAll("#map .region-inset svg")].pop()`;
+  type Inset = { digest: string; detail: string | null; u0: number; v0: number; u1: number; v1: number };
   const insetDigest = () =>
-    evaluate(
+    evaluate<Inset | null>(
       `(()=>{const s=${LAST_INSET};if(!s)return null;const x=s.outerHTML;` +
         `let h=2166136261;for(let i=0;i<x.length;i++){h^=x.charCodeAt(i);h=Math.imul(h,16777619);}` +
         `return{digest:(h>>>0).toString(16)+"/"+x.length,detail:s.getAttribute("data-vellum-region-detail"),` +
@@ -34,7 +36,7 @@ export async function run(ctx) {
         `u1:+s.getAttribute("data-vellum-region-u1"),v1:+s.getAttribute("data-vellum-region-v1")};})()`,
     );
   const captionMs = () =>
-    evaluate(`(()=>{const m=(document.getElementById("caption").textContent||"").match(/drawn in (\\d+)ms/);return m?+m[1]:-1;})()`);
+    evaluate<number>(`(()=>{const m=(document.getElementById("caption").textContent||"").match(/drawn in (\\d+)ms/);return m?+m[1]:-1;})()`);
 
   await step("RD setup", async () => {
     await evaluate(
@@ -47,7 +49,7 @@ export async function run(ctx) {
     await evaluate(`window.__vellumSetRedraftEnabled(true)`);
   });
 
-  const worldSheet = await evaluate(
+  const worldSheet = await evaluate<{ present: boolean; stamped: boolean }>(
     `(()=>{const s=document.querySelector("#map > svg");return{present:!!s,stamped:!!s&&s.hasAttribute("data-vellum-region-detail")};})()`,
   );
   check(
@@ -56,7 +58,7 @@ export async function run(ctx) {
     JSON.stringify(worldSheet),
   );
 
-  const ladder = [];
+  const ladder: ({ band: number; reported: number; ms: number } & Partial<Inset>)[] = [];
   let redrafts = (await rgn()).redrafts;
   for (const [band, k] of [[1, 2], [2, 4], [3, 8]]) {
     await enterAt(k, 0.5625, 0.4375);
@@ -76,7 +78,7 @@ export async function run(ctx) {
   const deepest = ladder[ladder.length - 1];
 
   // RD2 is measured on the sheet the page is SHOWING: shore LENGTH alone rises when a coast turns into a staircase (#376), so the drawn ring count carries the claim and length only corroborates it; both arms are rendered by this page's own engine and counted the same way as the live coast.
-  const gained = await evaluate(
+  const gained = await evaluate<{ drawn: number; bare: number; detail: number; bareLen: number; detailLen: number }>(
     `(async()=>{const win={u0:${deepest.u0},v0:${deepest.v0},u1:${deepest.u1},v1:${deepest.v1}};` +
       `const {defaultRecipe,generateWorld}=await import("./engine/world/generate.js");` +
       `const {generateRegionWorld,regionTitle}=await import("./engine/world/region.js");` +
@@ -128,6 +130,7 @@ export async function run(ctx) {
     const panMs = await captionMs();
     check(
       "RD4 a pan at the deepest band commits its own detailed survey (cost reported, not asserted: it is machine-bound)",
+      // @ts-expect-error direct is null only when the direct descent committed no inset, which RD3 has just redded; the read throws inside the step, which reds RD3, RD4 by name
       panned.band === 3 && neighbour !== null && neighbour.detail === "3" && neighbour.digest !== direct.digest,
       `first descent ${directMs}ms, pan ${panMs}ms, ladder ${ladder.map((r) => r.ms).join("/")}ms`,
     );

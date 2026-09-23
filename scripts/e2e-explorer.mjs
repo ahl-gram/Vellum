@@ -14,16 +14,16 @@ import {
   E2E_SUITE_ORDER,
 } from "../src/cli/e2e-suites.ts";
 import { start, cleanup } from "./e2e/harness.ts";
-import { run as runRender } from "./e2e/suite-render.mjs";
-import { run as runMotion } from "./e2e/suite-motion.mjs";
-import { run as runTurn } from "./e2e/suite-turn.mjs";
-import { run as runVerso } from "./e2e/suite-verso.mjs";
-import { run as runZoom } from "./e2e/suite-zoom.mjs";
-import { run as runZoomGestures } from "./e2e/suite-zoom-gestures.mjs";
-import { run as runGlassCeremony } from "./e2e/suite-glass-ceremony.mjs";
-import { run as runCards } from "./e2e/suite-cards.mjs";
+import { run as runRender } from "./e2e/suite-render.ts";
+import { run as runMotion } from "./e2e/suite-motion.ts";
+import { run as runTurn } from "./e2e/suite-turn.ts";
+import { run as runVerso } from "./e2e/suite-verso.ts";
+import { run as runZoom } from "./e2e/suite-zoom.ts";
+import { run as runZoomGestures } from "./e2e/suite-zoom-gestures.ts";
+import { run as runGlassCeremony } from "./e2e/suite-glass-ceremony.ts";
+import { run as runCards } from "./e2e/suite-cards.ts";
 import { run as runHealth } from "./e2e/suite-health.mjs";
-import { run as runFallback } from "./e2e/suite-fallback.mjs";
+import { run as runFallback } from "./e2e/suite-fallback.ts";
 import { run as runHunt } from "./e2e/suite-hunt.mjs";
 import { run as runPrintRoom } from "./e2e/suite-print-room.mjs";
 import { run as runProspect } from "./e2e/suite-prospect.mjs";
@@ -43,7 +43,7 @@ import { run as runCluster } from "./e2e/suite-cluster.mjs";
 import { run as runChartDrawer } from "./e2e/suite-chart-drawer.mjs";
 import { run as runRoomDrawer } from "./e2e/suite-room-drawer.mjs";
 import { run as runDocumentRooms } from "./e2e/suite-document-rooms.mjs";
-import { run as runRegionDetail } from "./e2e/suite-region-detail.mjs";
+import { run as runRegionDetail } from "./e2e/suite-region-detail.ts";
 import { run as runSpecimen } from "./e2e/suite-specimen.ts";
 
 const HERE = fileURLToPath(new URL(".", import.meta.url));

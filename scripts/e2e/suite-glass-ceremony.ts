@@ -1,8 +1,9 @@
 // Glass ceremony e2e (G, #170): the antique voice on the zoom cluster, the voiced glide, and the redraft ink-in; asserts the PLUMBING (classes, tokens, inline dash props, aria) while the choreography is eyeballed via out/ screenshots. Ground truth at seed 42 (2026-07-19 scan): the world sheet labels 25 of 26 settlements, the band-1 window at (0.5, 0.5) newly labels exactly Lokai, and the k=3.6 hop to band 2 reveals no new name.
 import { makeStep } from "./step-support.ts";
+import type { SuiteContext } from "./types.ts";
 
 // eslint-disable-next-line max-lines-per-function
-export async function run(ctx) {
+export async function run(ctx: SuiteContext): Promise<void> {
   const { evaluate, send, check, shoot, sleep, waitSettled } = ctx;
   const step = makeStep(ctx);
 
@@ -13,8 +14,8 @@ export async function run(ctx) {
     await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
   });
 
-  const st = () => evaluate(`window.__vellumZoomState()`);
-  const settleK = async (target) => {
+  const st = () => evaluate<{ k: number; x: number; y: number }>(`window.__vellumZoomState()`);
+  const settleK = async (target: number) => {
     for (let i = 0; i < 100; i++) {
       const s = await st();
       if (Math.abs(s.k - target) < 1e-6) return s;
@@ -30,16 +31,17 @@ export async function run(ctx) {
     }
     return await st();
   };
-  const rgn = () => evaluate(`window.__vellumRegion()`);
-  const enterAt = (k, cu, cv) =>
+  const rgn = () => evaluate<{ band: number; redrafts: number; committed: boolean; title: string | null }>(`window.__vellumRegion()`);
+  const enterAt = (k: number, cu: number, cv: number) =>
     evaluate(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:${k},x:W/2-(${cu})*${k}*W,y:H/2-(${cv})*${k}*H});})()`);
-  const waitRedraft = async (prev, wantBand) => {
-    // 15s, not 4s (the same note in suite-zoom.mjs): #400's detailed draw outran the old budget on CI and G6 read band 2. The waiter also demands the band its caller asserts: a stale in-flight survey (G8's glide debounce) can commit FIRST and increment redrafts at the wrong band (CI 2026-08-25).
+  const waitRedraft = async (prev: number, wantBand: number) => {
+    // 15s, not 4s (the same note in suite-zoom.ts): #400's detailed draw outran the old budget on CI and G6 read band 2. The waiter also demands the band its caller asserts: a stale in-flight survey (G8's glide debounce) can commit FIRST and increment redrafts at the wrong band (CI 2026-08-25).
     for (let i = 0; i < 375; i++) { const s = await rgn(); if (s.redrafts > prev && s.band === wantBand) return s; await sleep(40); }
     return await rgn();
   };
 
-  const g1 = await evaluate(`(()=>{const grp=document.getElementById("zoom-controls");const btn=(id)=>{const b=document.getElementById(id);return{title:b.getAttribute("title"),aria:b.getAttribute("aria-label"),svg:!!b.querySelector("svg"),text:(b.textContent||"").trim()};};const zin=document.getElementById("zoom-in");return{grpAria:grp.getAttribute("aria-label"),order:[...grp.querySelectorAll("button")].map((b)=>b.id).join(","),zin:btn("zoom-in"),zout:btn("zoom-out"),zreset:btn("zoom-reset"),keys:!!grp.querySelector(".zoom-keys"),radius:getComputedStyle(zin).borderRadius,size:zin.getBoundingClientRect().width};})()`);
+  type Btn = { title: string | null; aria: string | null; svg: boolean; text: string };
+  const g1 = await evaluate<{ grpAria: string | null; order: string; zin: Btn; zout: Btn; zreset: Btn; keys: boolean; radius: string; size: number }>(`(()=>{const grp=document.getElementById("zoom-controls");const btn=(id)=>{const b=document.getElementById(id);return{title:b.getAttribute("title"),aria:b.getAttribute("aria-label"),svg:!!b.querySelector("svg"),text:(b.textContent||"").trim()};};const zin=document.getElementById("zoom-in");return{grpAria:grp.getAttribute("aria-label"),order:[...grp.querySelectorAll("button")].map((b)=>b.id).join(","),zin:btn("zoom-in"),zout:btn("zoom-out"),zreset:btn("zoom-reset"),keys:!!grp.querySelector(".zoom-keys"),radius:getComputedStyle(zin).borderRadius,size:zin.getBoundingClientRect().width};})()`);
   check(
     "G1 the cluster is home's camera (#505, ruled 2026-09-02): Camera; in, out, the whole sheet as text glyphs in home's voice; no tooltips, no engraved glyphs, no keys slip; the house's rounding at 2.2rem",
     g1.grpAria === "Camera" && g1.order === "zoom-in,zoom-out,zoom-reset" &&
@@ -50,7 +52,7 @@ export async function run(ctx) {
     JSON.stringify(g1),
   );
 
-  const g2aNow = await evaluate(`(()=>{document.getElementById("zoom-in").click();return window.__vellumZoomState().k;})()`);
+  const g2aNow = await evaluate<number>(`(()=>{document.getElementById("zoom-in").click();return window.__vellumZoomState().k;})()`);
   const g2aEnd = await settleK(1.4);
   check(
     "G2a a zoom button glides: mid-flight short of the step, settles exactly at 1.4 (#170 voiced glide)",
@@ -89,19 +91,22 @@ export async function run(ctx) {
   const g2cHome = await settleHome();
   let g2cHash = null;
   for (let i = 0; i < 50; i++) {
-    g2cHash = await evaluate(`(()=>{const p=new URLSearchParams(location.hash.slice(1));return{cx:p.get("cx"),k:p.get("k")};})()`);
+    g2cHash = await evaluate<{ cx: string | null; k: string | null }>(`(()=>{const p=new URLSearchParams(location.hash.slice(1));return{cx:p.get("cx"),k:p.get("k")};})()`);
     if (g2cHash.cx === null && g2cHash.k === null) break;
     await sleep(40);
   }
   check(
     "G2c the keys glide too; 0 glides home and the hash drops cx/cy/k at the landing (#170)",
     Math.abs(g2cIn.k - 1.4) < 1e-6 && g2cHome.k === 1 && g2cHome.x === 0 && g2cHome.y === 0 &&
-      g2cHash.cx === null && g2cHash.k === null,
+      // @ts-expect-error the poll above always runs, so the hash read is never null here; the checker cannot count its passes
+      g2cHash.cx === null &&
+      // @ts-expect-error the same hash read, for its k
+      g2cHash.k === null,
     `in=${g2cIn.k} home=${JSON.stringify(g2cHome)} hash=${JSON.stringify(g2cHash)}`,
   );
 
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
-  const g3 = await evaluate(`(()=>{
+  const g3 = await evaluate<{ stepK: number; home: { k: number; x: number; y: number }; cx: string | null }>(`(()=>{
     window.__vellumZoomTo({k:1,x:0,y:0});
     document.getElementById("zoom-in").click();
     const stepK=window.__vellumZoomState().k;
@@ -123,7 +128,7 @@ export async function run(ctx) {
   const before4 = (await rgn()).redrafts;
   await enterAt(2, 0.5, 0.5);
   const s4 = await waitRedraft(before4, 1);
-  const g4 = await evaluate(`(()=>{
+  const g4 = await evaluate<{ svg: false } | { svg: true; redrafting: boolean; dashed: boolean; drawLen: boolean; dryCount: number; dryNames: string[]; dryAllNew: boolean; dryTiers: string[]; persistingCount: number; persistingStill: boolean }>(`(()=>{
     const worldTexts=new Set([...document.querySelectorAll("#map > svg g.settlement text")].map(t=>t.textContent));
     const inset=document.querySelector("#map .region-inset");
     const svg=inset?inset.querySelector("svg"):null;
@@ -151,7 +156,7 @@ export async function run(ctx) {
   await sleep(600); // into the village wait: the newly revealed name is mid-dry
   await shoot("explorer-sub9-redraft-dryin.png");
 
-  const g4b = await evaluate(`(async()=>{
+  const g4b = await evaluate<{ dash: string; drawLen: string; running: number }>(`(async()=>{
     const svg=document.querySelector("#map .region-inset svg");
     await Promise.all(svg.getAnimations({subtree:true}).map(a=>a.finished.catch(()=>{})));
     const coast=svg.querySelector("#layer-land path");
@@ -165,7 +170,7 @@ export async function run(ctx) {
   );
   await shoot("explorer-sub9-redraft-rested.png");
 
-  const g5 = await evaluate(`(()=>{
+  const g5 = await evaluate<{ draw: number; dry: number; town: number; village: number; villageRule: boolean }>(`(()=>{
     const cs=getComputedStyle(document.documentElement);
     const ms=(v)=>{const s=(v||"").trim();return s.endsWith("ms")?parseFloat(s):s.endsWith("s")?parseFloat(s)*1000:NaN;};
     const draw=ms(cs.getPropertyValue("--redraft-draw"));
@@ -191,7 +196,7 @@ export async function run(ctx) {
   const before7 = (await rgn()).redrafts;
   await enterAt(3.6, 0.5, 0.5);
   const s7 = await waitRedraft(before7, 2);
-  const g7 = await evaluate(`(()=>{
+  const g7 = await evaluate<{ svg: false } | { svg: true; redrafting: boolean; dry: number }>(`(()=>{
     const insets=[...document.querySelectorAll("#map .region-inset")];
     const svg=insets.length?insets[insets.length-1].querySelector("svg"):null;
     if(!svg)return{svg:false};
@@ -208,14 +213,23 @@ export async function run(ctx) {
   const g8cam = await settleHome();
   let g8 = null;
   for (let i = 0; i < 50; i++) {
-    g8 = await evaluate(`(()=>{const s=window.__vellumRegion();const p=new URLSearchParams(location.hash.slice(1));return{band:s.band,committed:s.committed,insets:document.querySelectorAll("#map .region-inset").length,hits:document.querySelectorAll("#map .place-hit").length,cx:p.get("cx")};})()`);
+    g8 = await evaluate<{ band: number; committed: boolean; insets: number; hits: number; cx: string | null }>(`(()=>{const s=window.__vellumRegion();const p=new URLSearchParams(location.hash.slice(1));return{band:s.band,committed:s.committed,insets:document.querySelectorAll("#map .region-inset").length,hits:document.querySelectorAll("#map .place-hit").length,cx:p.get("cx")};})()`);
     if (g8.insets === 0 && g8.cx === null) break;
     await sleep(40);
   }
   check(
     "G8 the whole sheet returns on one press: glide home, inset faded off, hash clean, world overlay back (#170; home's voice since #505)",
-    g8cam.k === 1 && g8cam.x === 0 && g8cam.y === 0 && g8.band === 0 && g8.committed === false &&
-      g8.insets === 0 && g8.hits > 0 && g8.cx === null,
+    g8cam.k === 1 && g8cam.x === 0 && g8cam.y === 0 &&
+      // @ts-expect-error the poll above always runs, so the region read is never null here; the checker cannot count its passes
+      g8.band === 0 &&
+      // @ts-expect-error the same region read, for its committed flag
+      g8.committed === false &&
+      // @ts-expect-error the same region read, for its inset count
+      g8.insets === 0 &&
+      // @ts-expect-error the same region read, for its place hits
+      g8.hits > 0 &&
+      // @ts-expect-error the same region read, for its hash centre
+      g8.cx === null,
     `cam=${JSON.stringify(g8cam)} ${JSON.stringify(g8)}`,
   );
 
@@ -230,7 +244,7 @@ export async function run(ctx) {
   const before6 = (await rgn()).redrafts;
   await enterAt(2, 0.5, 0.5);
   const s6 = await waitRedraft(before6, 1);
-  const g6 = await evaluate(`(()=>{
+  const g6 = await evaluate<{ svg: false } | { svg: true; redrafting: boolean; dashed: boolean; dry: number; hits: number }>(`(()=>{
     const svg=document.querySelector("#map .region-inset svg");
     if(!svg)return{svg:false};
     const coast=svg.querySelector("#layer-land path");

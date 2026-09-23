@@ -96,9 +96,9 @@ test("the two worker-bearing surfaces assert the worker is live AND that it degr
     assert.ok(SMOKE_SUITES.includes(suite), `smoke must keep ${suite} for worker/fallback coverage`);
   }
   const assertsWorkerLive = (file: string) => /__vellum\w*UsesWorker(\(\))?\s*===?\s*true/.test(src(file));
-  assert.ok(assertsWorkerLive("scripts/e2e/suite-render.mjs"), "render no longer asserts the worker is live");
+  assert.ok(assertsWorkerLive("scripts/e2e/suite-render.ts"), "render no longer asserts the worker is live");
   assert.ok(assertsWorkerLive("scripts/e2e/suite-reading-room.mjs"), "reading-room no longer asserts the worker is live");
-  for (const file of ["scripts/e2e/suite-fallback.mjs", "scripts/e2e/suite-reading-room.mjs"]) {
+  for (const file of ["scripts/e2e/suite-fallback.ts", "scripts/e2e/suite-reading-room.mjs"]) {
     assert.match(src(file), /serverState\.blockWorker = true/, `${file} no longer exercises the 404 fallback`);
   }
 });

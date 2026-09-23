@@ -10,7 +10,7 @@
   background: transparent; border: 0; border-radius: 0; padding: 0;
   pointer-events: auto; cursor: pointer;
 }
-/* The ring rides ::after (the scrub dot is ::before) so the .place-hit element keeps its zero-transition reset (`P2c` in `scripts/e2e/suite-cards.mjs`) and idle parity holds. */
+/* The ring rides ::after (the scrub dot is ::before) so the .place-hit element keeps its zero-transition reset (`P2c` in `scripts/e2e/suite-cards.ts`) and idle parity holds. */
 .place-hit::after {
   content: ""; position: absolute; inset: 0; margin: auto;
   width: 20px; height: 20px; border-radius: 50%; box-sizing: border-box;

@@ -1,7 +1,8 @@
 // Inline-fallback e2e (B): the worker bundle is served 404 (faithfully simulating file://, a 404, or a CSP block) and the page must degrade to the inline engine; no working-tree mutation, restored in finally.
 import { makeStep } from "./step-support.ts";
+import type { SuiteContext } from "./types.ts";
 
-export async function run(ctx) {
+export async function run(ctx: SuiteContext): Promise<void> {
   const { evaluate, send, check, shoot, sleep, waitSettled, waitReady, axDescription, serverState, consoleErrors, http4xx, PORT } = ctx;
   // B1 and B2 are deliberately not stepped: their own poll returns rather than throwing, and their checks already guard on it.
   const step = makeStep(ctx);
@@ -16,7 +17,7 @@ export async function run(ctx) {
     for (let i = 0; i < 220; i++) {
       let s = null;
       try {
-        s = await evaluate(`({pre:typeof window.__preReload!=="undefined",uw:typeof window.__vellumUsesWorker==="function",map:!!document.querySelector("#map svg"),status:(document.getElementById("status")||{}).textContent})`);
+        s = await evaluate<{ pre: boolean; uw: boolean; map: boolean; status: string | undefined }>(`({pre:typeof window.__preReload!=="undefined",uw:typeof window.__vellumUsesWorker==="function",map:!!document.querySelector("#map svg"),status:(document.getElementById("status")||{}).textContent})`);
       } catch {}
       if (s && !s.pre && s.uw && s.map && s.status === "") { fresh = true; break; }
       await sleep(75);
@@ -27,7 +28,7 @@ export async function run(ctx) {
       await evaluate(`(()=>{document.getElementById("seed").value="42";document.getElementById("theme").value="";document.getElementById("draw").click();})()`);
       await waitSettled("fallback-draw");
       // #199 retired the inline Bind button, so the atlas job is driven through runJob, which routes to the inline engine here (the worker is 404'd), exactly the path this suite exists to prove.
-      const fb = await evaluate(
+      const fb = await evaluate<{ hero: boolean; draughtings: number; themes: number; gaz: number }>(
         `(async()=>{const a=(await window.__vellumRunJob({kind:"atlas",seed:42,overrides:{},width:1500})).atlas;` +
           `return{hero:!!(a.hero&&a.hero.svg),draughtings:a.draughtings.length,themes:a.themes.length,gaz:a.gazetteerHtml.length};})()`,
         true,
