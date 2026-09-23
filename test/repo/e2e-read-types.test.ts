@@ -185,7 +185,8 @@ const SHAPE_FIXTURE = [
   "  const wrapper = () => evaluate(`x()`); // flagged",
   "  const chained = evaluate(`1`).then(() => 1); // flagged",
   "  if (await evaluate(`1`)) return []; // flagged",
-  "  return [stated, named, nothing, settledStated, kept, plainNamed, anyShape, unknownShape, emptyOrNull, settled, aliased, viaContext, wrapper, chained];",
+  "  const castInstead = await evaluate(`1`) as number; // flagged",
+  "  return [stated, named, nothing, settledStated, kept, plainNamed, anyShape, unknownShape, emptyOrNull, settled, aliased, viaContext, wrapper, chained, castInstead];",
   "}",
   "export async function plainForm(evaluate: (expression: string) => Promise<unknown>): Promise<unknown[]> {",
   "  const cast = await evaluate(`1`) as number;",
@@ -201,12 +202,12 @@ const SHAPE_FIXTURE = [
   "}",
 ];
 
-test("the shape scan passes a read that states its shape or discards its value, and reports every kept read whose shape is unknown, any or empty, whether reached by name, alias, context, wrapper, chain or condition", () => {
+test("the shape scan passes a read that states its shape or discards its value, and reports every kept read whose shape is unknown, any or empty, whether reached by name, alias, context, wrapper, chain or condition, and a cast in place of a type argument", () => {
   const path = join(REPO, "scripts", "e2e", "__shape-fixture__.ts");
   assert.equal(existsSync(path), false, "the fixture's name is a real file, so the scan below would read the disk instead");
   const { findings } = shapeScan(e2eProgram(new Map([[path, SHAPE_FIXTURE.join("\n")]])), [path]);
   const flagged = SHAPE_FIXTURE.flatMap((line, i) => (line.endsWith("// flagged") ? [`${relative(REPO, path)}:${i + 1}`] : []));
-  assert.equal(flagged.length, 13);
+  assert.equal(flagged.length, 14);
   assert.deepEqual(findings.map((f) => f.slice(0, f.indexOf(": "))), flagged, findings.join("\n"));
 });
 
