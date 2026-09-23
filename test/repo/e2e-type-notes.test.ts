@@ -79,6 +79,7 @@ test("the note scanner passes one uncertain expression per note and reports a se
   const text = [
     "declare const r: { a: number; box: { x: number } | null } | null;",
     "declare let e: unknown;",
+    "declare const s: { box: { x: number } | null };",
     "// @ts-expect-error one null read",
     "export const one = r.a;",
     "// @ts-expect-error a null read and a misspelled field beside it",
@@ -91,10 +92,14 @@ test("the note scanner passes one uncertain expression per note and reports a se
     "export const five = e && e.message;",
     "// @ts-ignore a suppression that never reds",
     "export const six = r.a;",
+    "// @ts-expect-error two null reads at two columns, and no misspelling",
+    "export const seven = r.a + r.a;",
+    "// @ts-expect-error a misspelled member on a value that is never null, so the misspelling is all the line reports",
+    "export const eight = s.bx.x;",
   ].join("\n");
   const { notes, findings } = noteFindings([{ path, text }]);
-  assert.equal(notes, 5);
-  assert.deepEqual(findings.map((f) => f.at).sort(), [`${path}:13`, `${path}:5`, `${path}:7`]);
+  assert.equal(notes, 7);
+  assert.deepEqual(findings.map((f) => f.at).sort(), [`${path}:14`, `${path}:16`, `${path}:18`, `${path}:6`, `${path}:8`]);
 });
 
 test("every ruled note in the e2e tree covers one uncertain expression and no misspelled name, so a typo beside or in place of a nullable read cannot hide under it (Alex's ruling of 2026-09-23 on Issue #653)", () => {
