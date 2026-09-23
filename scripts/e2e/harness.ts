@@ -1,4 +1,3 @@
-/* eslint-disable max-lines */
 // e2e harness: the static file server, headless-browser launch, CDP client, and the poll/evaluate/screenshot helpers every suite shares; cleanup() is module-level so the runner can tear down even if start() throws partway.
 import { spawn } from "node:child_process";
 import { createServer } from "node:http";
@@ -387,12 +386,10 @@ export async function start({ browser, SITE, OUT, PORT, DPORT, PAGE, results, co
   // Treat the headless page as focused so element.focus() fires real events and :focus-visible applies; without this the keyboard-focus card path silently no-ops under --headless. Best-effort: older builds may not support it.
   try { await send("Emulation.setFocusEmulationEnabled", { enabled: true }); } catch {}
   await send("Page.navigate", { url: PAGE });
-
   const check = (name: string, ok: unknown, detail = ""): void => {
     results.push({ name, ok: !!ok });
     console.log(`${ok ? "PASS" : "FAIL"}  ${name}${detail ? "  — " + detail : ""}`);
   };
-
   return {
     evaluate, send, check, shoot, sleep, alive,
     waitSettled, waitReady, waitTurned, armTurnWatch, axDescription,

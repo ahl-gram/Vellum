@@ -7,8 +7,9 @@ import ts from "typescript";
 const REPO = resolve(import.meta.dirname, "..", "..");
 const NOTE = /^\s*\/\/ @ts-expect-error \S/;
 const SUPPRESSION = /@ts-(expect-error|ignore|nocheck)\b/;
-// A name or a member the checker cannot find: the codes a misspelling produces. On a value typed `{}` (an `unknown` a truthiness guard has narrowed; a bare `unknown` reports TS18046 instead) there is no member to misspell, so there the code is the note's own objection.
-const MISSING = new Set([2304, 2339, 2551, 2552, 2724]);
+const NULLISH = new Set([18046, 18047, 18048, 18049, 2531, 2532, 2533]);
+const ASSIGNS = new Set([2322, 2345]);
+// A bare `unknown` reports TS18046; only one a truthiness guard has narrowed to `{}` reports a member read as TS2339.
 const ON_EMPTY_OBJECT = /on type '\{\}'/;
 
 type Source = { readonly path: string; readonly text: string };
@@ -18,17 +19,15 @@ type Finding = { readonly at: string; readonly diagnostics: readonly string[] };
 const e2eSources = (): Source[] => {
   const dir = join(REPO, "scripts", "e2e");
   const paths = [
-    ...readdirSync(dir).filter((f) => f.endsWith(".ts")).map((f) => join(dir, f)),
+    ...readdirSync(dir, { recursive: true, encoding: "utf8" }).filter((f) => f.endsWith(".ts")).map((f) => join(dir, f)),
     ...readdirSync(join(REPO, "scripts")).filter((f) => /^e2e-[\w-]+\.ts$/.test(f)).map((f) => join(REPO, "scripts", f)),
   ];
   return paths.map((path) => ({ path, text: readFileSync(path, "utf8") }));
 };
 
-// One uncertain expression per note: whatever the line reports starts at one column (a chain like `a.b.c` whose `a` and `a.b` may both be null reports twice there), and none of it is a name or member the checker cannot find.
-const offends = (covered: readonly Covered[]): boolean =>
-  covered.length === 0 ||
-  new Set(covered.map((c) => c.column)).size !== 1 ||
-  covered.some((c) => MISSING.has(c.code) && !ON_EMPTY_OBJECT.test(c.text));
+const nullish = (c: Covered): boolean =>
+  NULLISH.has(c.code) || (ASSIGNS.has(c.code) && /\b(null|undefined)\b/.test(c.text)) || (c.code === 2339 && ON_EMPTY_OBJECT.test(c.text));
+const offends = (covered: readonly Covered[]): boolean => new Set(covered.map((c) => c.column)).size !== 1 || !covered.every(nullish);
 
 function compile(sources: readonly Source[]): ts.Program {
   const blanked = new Map(sources.map(({ path, text }) => [path, text.split("\n").map((line) => (NOTE.test(line) ? line.replace("@ts-expect-error", "@note") : line)).join("\n")]));
@@ -45,7 +44,6 @@ function compile(sources: readonly Source[]): ts.Program {
   return ts.createProgram({ rootNames: [...blanked.keys()], options: config.options, host });
 }
 
-// Each note's directive is blanked in place, so every line keeps its number and a note at line n owns what the checker then reports at n + 1.
 function noteFindings(sources: readonly Source[]): { notes: number; findings: Finding[] } {
   const program = compile(sources);
   const findings: Finding[] = [];
@@ -73,13 +71,17 @@ function noteFindings(sources: readonly Source[]): { notes: number; findings: Fi
   return { notes, findings };
 }
 
-test("the note scanner passes one uncertain expression per note and reports a second one, a misspelled member, and a stray suppression", () => {
+test("the note scanner passes one null objection per note and reports a second uncertain value, a misspelling beside or in place of the null read, a wrong type that shares its start, a note with nothing under it, and a stray suppression", () => {
   const path = join(REPO, "scripts", "e2e", "__note-fixture__.ts");
   assert.equal(existsSync(path), false, "the fixture's name is a real file, so the scan below would read the disk instead");
   const text = [
     "declare const r: { a: number; box: { x: number } | null } | null;",
     "declare let e: unknown;",
     "declare const s: { box: { x: number } | null };",
+    "declare const q: { n: number; label: string; word: string | null } | null;",
+    "declare const w: { label: string };",
+    "declare function takesNum(n: number): number;",
+    "declare function takesText(t: string): string;",
     "// @ts-expect-error one null read",
     "export const one = r.a;",
     "// @ts-expect-error a null read and a misspelled field beside it",
@@ -96,18 +98,27 @@ test("the note scanner passes one uncertain expression per note and reports a se
     "export const seven = r.a + r.a;",
     "// @ts-expect-error a misspelled member on a value that is never null, so the misspelling is all the line reports",
     "export const eight = s.bx.x;",
+    "// @ts-expect-error a null read whose sibling field has the wrong type, reported at the same start",
+    "export const nine = q.n > w.label;",
+    "// @ts-expect-error a wrong-typed argument that happens to start with the null read",
+    "export const ten = takesNum(q.label);",
+    "// @ts-expect-error a null string handed to a string parameter, whose only objection is the null",
+    "export const eleven = takesText(q.word);",
+    "// @ts-expect-error a note whose next line is a comment, so the directive walks past it to the code below",
+    "// an ordinary comment",
+    "export const twelve = q.n + q.n;",
   ].join("\n");
   const { notes, findings } = noteFindings([{ path, text }]);
-  assert.equal(notes, 7);
-  assert.deepEqual(findings.map((f) => f.at).sort(), [`${path}:14`, `${path}:16`, `${path}:18`, `${path}:6`, `${path}:8`]);
+  assert.equal(notes, 11);
+  assert.deepEqual(findings.map((f) => f.at).sort(), [10, 12, 18, 20, 22, 24, 26, 30].map((n) => `${path}:${n}`).sort());
 });
 
-test("every ruled note in the e2e tree covers one uncertain expression and no misspelled name, so a typo beside or in place of a nullable read cannot hide under it (Alex's ruling of 2026-09-23 on Issue #653)", () => {
+test("every ruled note in the e2e tree covers one uncertain expression and nothing but its null objection, so a typo or a wrong type beside or in place of the nullable read cannot hide under it (Alex's ruling of 2026-09-23 on Issue #653)", () => {
   const { notes, findings } = noteFindings(e2eSources());
   assert.ok(notes > 0, "the scan read no note at all, so it is looking at the wrong tree");
   assert.deepEqual(
     findings.map((f) => `${f.at}: ${f.diagnostics.join(" | ")}`),
     [],
-    "a note must cover one uncertain expression: break the line so each has its own noted line and the rest of the expression is checked",
+    "a note must cover one uncertain expression and nothing but its null objection: break the line so each has its own noted line and the rest of the expression is checked. BLIND SPOTS, declared, both erring toward passing: a member read off a value typed {} (a caught unknown narrowed by a truthiness guard), where a misspelled member and a real one report alike; and an assignability error whose message names null or undefined anywhere, so a wrong type that also mentions an optional field passes as a null objection",
   );
 });

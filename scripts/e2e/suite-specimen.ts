@@ -99,9 +99,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
       rest.sheet.w /
       // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
       rest.sheet.h -
-      // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
+      // @ts-expect-error a null plateAspect reads as 0 in the arithmetic and does not throw: this clause then reads false, which reds SB1 by name
       rest.plateAspect) < 0.003 && Math.abs(
-      // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
+      // @ts-expect-error a null plateAspect reads as 0 and does not throw: this clause then reads TRUE without measuring, but the clause above reads false for the same null, so SB1 still reds
       rest.plateAspect - CHART_ASPECT) > 0.0001 && rest.noX,
     JSON.stringify(rest && { st: rest.st, plate: rest.plateLoaded, plateAspect: rest.plateAspect, sheet: rest.sheet }),
   );
@@ -164,9 +164,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
   check(
     "SB5 leaned, through the Glass's own controller: the slip is back from its tab, the gesture box is zoomed, the sheet spills under the top and the left corners (the slip holds the right), and the corners and the cluster stand on the pool",
     // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
-    !!leaned && leaned.st.zoomed && ! // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    !!leaned && leaned.st.zoomed && // eslint-disable-line @typescript-eslint/no-unnecessary-condition
       // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
-      leaned.st.folded && leaned.slipVis === "visible" && leaned.pool === '""' && leaned.poolChrome === '""' &&
+      !leaned.st.folded && leaned.slipVis === "visible" && leaned.pool === '""' && leaned.poolChrome === '""' &&
       // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
       leaned.map.x < 0 &&
         // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
@@ -205,9 +205,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const panelIn = await brightest(panelLeft + 3, panelY), panelOut = await brightest(panelLeft - 11, panelY);
   check(
     "SB5e leaned, the room folio stands on home's seed box: a crisp panel (a top-to-bottom gradient, no blur) whose left edge is a step against the chart, the pixels 3px inside dark and 11px outside bright",
-    // @ts-expect-error the booted page is read as present (goto() returns null only when SB1 has already failed, and a null throws here, outside any step, so the runner reds the whole suite as stopped early), and a null panel string reads false and fails the check
+    // @ts-expect-error a null panel string reaches the pattern as "null" and reads false, which fails the check by name
     !!leaned && /^linear-gradient\((?!to top)/.test(leaned.folioPanel) && leaned.folioFilter === "none" && panelOut - panelIn > 60 && // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-      // @ts-expect-error the booted page is read as present (goto() returns null only when SB1 has already failed, and a null throws here, outside any step, so the runner reds the whole suite as stopped early), and a null panel string reads false and fails the check
+      // @ts-expect-error the booted page is read as present (goto() returns null only when SB1 has already failed); a null throws here, outside any step, and the runner reds the whole suite as stopped early
       rest.pool === "none",
     // @ts-expect-error the booted page and its boxes are read as present, and goto() returns null only when SB1 has already failed; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
     JSON.stringify({ panel: leaned.folioPanel.slice(0, 44), filter: leaned.folioFilter, panelIn, panelOut, rest:
@@ -222,9 +222,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
     leaned.legend.bottom) + 3);
   check(
     "SB5c leaned, the legend row stands on home's footing, the seed box's crisp panel (a top-to-bottom gradient, no fade) drawn as the row's own ::before, not the blurred pool: the panel resolves, its foot band reads dark over the chart, and at rest the row carried no ground (the fade left at the 2026-09-03 sitting, ruling 23)",
-    // @ts-expect-error the booted page is read as present (goto() returns null only when SB1 has already failed, and a null throws here, outside any step, so the runner reds the whole suite as stopped early), and a null panel string reads false and fails the check
+    // @ts-expect-error a null ground string reaches the pattern as "null" and reads false, which fails the check by name
     !!leaned && leaned.legendGroundOn === '""' && /^linear-gradient\((?!to top)/.test(leaned.legendGround) && footing < 120 && // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-      // @ts-expect-error the booted page is read as present (goto() returns null only when SB1 has already failed, and a null throws here, outside any step, so the runner reds the whole suite as stopped early), and a null panel string reads false and fails the check
+      // @ts-expect-error the booted page is read as present (goto() returns null only when SB1 has already failed); a null throws here, outside any step, and the runner reds the whole suite as stopped early
       rest.legendGroundOn === "none",
     // @ts-expect-error the booted page and its boxes are read as present, and goto() returns null only when SB1 has already failed; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
     JSON.stringify({ leaned: leaned.legendGround.slice(0, 40), footing, rest:
