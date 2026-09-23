@@ -124,6 +124,8 @@ const NOTE_FIXTURE = [
   "export const fifteen = group[1] * w.labl;",
   "// @ts-expect-error a null read and a string multiplied at the one start, two objections under one note",
   "export const sixteen = q.label * 255;",
+  "// @ts-expect-error a coerced operand entangled with a second diagnostic at the same start",
+  "export const seventeen = takesText(group[1] * 255);",
 ];
 
 test("the note scanner passes one null objection per note and reports a second uncertain value, a misspelling beside or in place of the null read, a wrong type that shares its start, a note with nothing under it, and a stray suppression, while a string coerced by arithmetic passes only as the one objection under its note", () => {
@@ -131,8 +133,8 @@ test("the note scanner passes one null objection per note and reports a second u
   assert.equal(existsSync(path), false, "the fixture's name is a real file, so the scan below would read the disk instead");
   const text = NOTE_FIXTURE.join("\n");
   const { notes, findings } = noteFindings([{ path, text }]);
-  assert.equal(notes, 15);
-  assert.deepEqual(findings.map((f) => f.at).sort(), [10, 12, 18, 20, 22, 24, 26, 30, 37, 39, 41].map((n) => `${path}:${n}`).sort());
+  assert.equal(notes, 16);
+  assert.deepEqual(findings.map((f) => f.at).sort(), [10, 12, 18, 20, 22, 24, 26, 30, 37, 39, 41, 43].map((n) => `${path}:${n}`).sort());
 });
 
 test("the scan reads every TypeScript file under scripts/e2e at any depth and the e2e scripts beside it, and nothing else", () => {
