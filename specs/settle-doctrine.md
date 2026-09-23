@@ -71,7 +71,7 @@ headless browser actually do, so a green run can be believed.
    `pageshow` with `persisted`, so a check that drives Back and reads the drawer is reading the
    device's table and not the address's. `specs/explorer-doctrine.md` carries the rule; a suite that
    wants a bare arrival clears `vellum.table.v1` before it navigates, which is what
-   `scripts/e2e/suite-chart-drawer.mjs` does in its own `go`. Reach a new address by
+   `scripts/e2e/suite-chart-drawer.ts` does in its own `go`. Reach a new address by
    re-bootstrapping through `about:blank` and then the target, then poll for the boot committing:
    that is what `goto` does in `scripts/e2e/room-support.ts`, and a fixed sleep in its place is the
    flake.
@@ -175,7 +175,7 @@ section points there rather than restating it.
   `getAnimations()`, so the guarded poll above can never see `finished` there, and the rest
   signal is the class's absence AFTER it was seen present, since the same page also removes that
   class on a shut and on an off-screen list, and an absence with no witness reads a settle that
-  never played as rest; `restSeeing` in `scripts/e2e/suite-chart-drawer.mjs` is the shape, the
+  never played as rest; `restSeeing` in `scripts/e2e/suite-chart-drawer.ts` is the shape, the
   poll counting the class or the running animation on the way to `atRest`. And this harness is
   Chromium only (it drives the browser over the debug port, `scripts/e2e/harness.ts`), whose
   computed style spells the blanket's `0.01ms` as `1e-05s`, so a check reads the duration as a

@@ -78,7 +78,7 @@ test("a panel still travelling under something that is not an animation is not r
 
 const fold = (pos: number, anims: readonly string[]): MotionRead => ({ pos, size: 384, anims });
 
-// The slip UNFOLDED, which is where every fold gesture in suite-chart-drawer.mjs starts.
+// The slip UNFOLDED, which is where every fold gesture in suite-chart-drawer.ts starts.
 const UNFOLDED = fold(864, ["finished"]);
 // The instant after the gesture: the folded class is already on, the transition has not moved the panel.
 const FOLD_T0 = fold(864, ["running", "running", "finished"]);

@@ -39,8 +39,8 @@ import { run as runRoomVoyage } from "./e2e/suite-room-voyage.ts";
 import { run as runRoomAddress } from "./e2e/suite-room-address.ts";
 import { run as runRoomVoyageRoute } from "./e2e/suite-room-voyage-route.ts";
 import { run as runRunningHead } from "./e2e/suite-runninghead.ts";
-import { run as runCluster } from "./e2e/suite-cluster.mjs";
-import { run as runChartDrawer } from "./e2e/suite-chart-drawer.mjs";
+import { run as runCluster } from "./e2e/suite-cluster.ts";
+import { run as runChartDrawer } from "./e2e/suite-chart-drawer.ts";
 import { run as runRoomDrawer } from "./e2e/suite-room-drawer.ts";
 import { run as runDocumentRooms } from "./e2e/suite-document-rooms.ts";
 import { run as runRegionDetail } from "./e2e/suite-region-detail.ts";
@@ -142,7 +142,7 @@ async function main() {
         false,
         err && err.message ? err.message : String(err),
       );
-      // clearMobile() is a trailing statement in the phone suites, not a finally (suite-cluster.mjs, suite-room-drawer.ts, suite-chart-drawer.mjs), so a suite that stops at 390x844 hands every later suite in the lane a phone viewport and a cascade of reds that are not defects.
+      // clearMobile() is a trailing statement in the phone suites, not a finally (suite-cluster.ts, suite-room-drawer.ts, suite-chart-drawer.ts), so a suite that stops at 390x844 hands every later suite in the lane a phone viewport and a cascade of reds that are not defects.
       // Bounded, because a browser that dies AFTER the liveness probe leaves this send pending forever: the harness settles a waiter only on the matching reply, so an unbounded reset here is a lane that stalls with nothing to read rather than one that fails.
       await Promise.race([
         ctx.clearMobile().catch(() => {}),
