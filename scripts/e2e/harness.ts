@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 // e2e harness: the static file server, headless-browser launch, CDP client, and the poll/evaluate/screenshot helpers every suite shares; cleanup() is module-level so the runner can tear down even if start() throws partway.
 import { spawn } from "node:child_process";
 import { createServer } from "node:http";
@@ -359,8 +360,10 @@ export async function start({ browser, SITE, OUT, PORT, DPORT, PAGE, results, co
     if (m.id && waiters.has(m.id)) {
       const w = waiters.get(m.id);
       waiters.delete(m.id);
-      // @ts-expect-error has() on the line above proved the waiter present, which get() cannot carry
-      m.error ? w.reject(new Error(JSON.stringify(m.error))) : w.resolve(m.result); // eslint-disable-line @typescript-eslint/no-unused-expressions
+      // @ts-expect-error has() in the enclosing if proved the waiter present, which get() cannot carry
+      m.error ? w.reject(new Error(JSON.stringify(m.error))) : // eslint-disable-line @typescript-eslint/no-unused-expressions
+        // @ts-expect-error has() in the enclosing if proved the waiter present, which get() cannot carry
+        w.resolve(m.result);
       return;
     }
     if (m.method === "Runtime.exceptionThrown") {

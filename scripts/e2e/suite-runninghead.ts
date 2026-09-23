@@ -80,7 +80,9 @@ const HEAD_READ: Payload<string> = `(() => {
 })()`;
 
 // @ts-expect-error an absent member reads undefined, and NaN < 0.01 is false, which is the red the checks want
-const near = (got: number | undefined, want: number | undefined): boolean => Math.abs(got - want) < 0.01;
+const near = (got: number | undefined, want: number | undefined): boolean => Math.abs(got -
+  // @ts-expect-error an absent member reads undefined, and NaN < 0.01 is false, which is the red the checks want
+  want) < 0.01;
 const matches = (m: Member | undefined, want: Want): boolean => {
   if (want === null) return m === null;
   if (!m) return false;
@@ -279,7 +281,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
   for (let i = 0; i < 100 && galleryUp; i++) {
     scrolled = JSON.parse(await evaluate<string>(`(() => { const sh = document.documentElement.scrollHeight; window.scrollTo(0, Math.min(1200, sh - innerHeight)); const imgs = [...document.querySelectorAll(".grid img")]; const b = imgs.map((el) => el.getBoundingClientRect()).find((r) => r.top > 100 && r.bottom < innerHeight - 20 && r.width > 100); return JSON.stringify({ sh, y: scrollY, plate: b ? { x: Math.round(b.x + b.width / 2), y: Math.round(b.y + b.height / 2) } : null, loaded: imgs.length > 0 && imgs.every((el) => el.complete && el.naturalWidth > 0) }); })()`));
     // @ts-expect-error the payload stringifies an object and never null, which a parse typed any cannot tell the checker
-    if (scrolled.plate && scrolled.loaded) break;
+    if (scrolled.plate &&
+      // @ts-expect-error the payload stringifies an object and never null, which a parse typed any cannot tell the checker
+      scrolled.loaded) break;
     await sleep(100);
   }
   await sleep(300);
