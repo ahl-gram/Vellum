@@ -99,7 +99,7 @@ Scars: #49, #124, #270, #275, #295, #320, #353, #358, #360, #363, #380, #383, #3
 Scars: #366, #368, #454, #474, #501, #520, #526, #529, #533, #535, #536, #537, #540, #542, #545, #546.
 
 1. **A gesture check drives the gesture.** Press and release with the suites' `clickAt` (`makeStage`
-   in `scripts/e2e/home-support.mjs`) and the harness's touch helpers, at coordinates read from the
+   in `scripts/e2e/home-support.ts`) and the harness's touch helpers, at coordinates read from the
    element's own rect. `element.click()` ignores `pointer-events`
    and every element painted over the target; use it only for wiring, with the reason at the check.
    A multi-touch gesture can hand back the artifact you hoped to see: with no touch-pan path, two
@@ -114,7 +114,8 @@ Scars: #366, #368, #454, #474, #501, #520, #526, #529, #533, #535, #536, #537, #
    else lands there. Sample a ground with the MEDIAN of a run, never a max (one bright control passes
    it) or a min (one hairline fails it). Give the sample a control that legitimately paints.
 5. **A regex inside a CDP `evaluate` template literal loses its backslashes.** Write `\\s`, or build
-   the payload with `String.raw`. It never throws: `/\s+/` arrives as `/s+/` and splits on the letter.
+   the payload with `String.raw`. It never throws: `/\s+/` arrives as `/s+/` and splits on the letter. The hook refuses the
+   single-escaped form in every `.ts` and `.mjs` under `scripts/` and `out/`.
 6. **No blind sleeps.** A settle polls to rest, requires the geometry to have LEFT where it began
    (stillness at the start looks like stillness at the end), and never carries the check's own claim.
    **A readiness wait THROWS on timeout; a measurement poll keeps reading and asserts on its LAST
@@ -148,7 +149,7 @@ Scars: #366, #368, #454, #474, #501, #520, #526, #529, #533, #535, #536, #537, #
 13. **A capture is a measurement, and it fails by handing back a plausible picture.**
     `Page.captureScreenshot`'s `clip` is in DOCUMENT coordinates, so a viewport rect fed to it on a
     scrolled page photographs empty margin rather than the thing you meant, and a uniformly coloured
-    crop is the tell; `sampleRow` in `scripts/e2e/pixel-support.mjs` adds the scroll for you (plate
+    crop is the tell; `sampleRow` in `scripts/e2e/pixel-support.ts` adds the scroll for you (plate
     read on PR #501, ruling 6 of the 2026-09-03 sitting on Issue #454, fixed in PR #510). A
     NEGATIVE origin is the other way a clip lies, and `specs/settle-doctrine.md`'s environment
     section carries what comes back and what to clamp.
@@ -306,7 +307,7 @@ The hook in `hooks/`, wired in `.claude/settings.json`, refuses the mechanical o
 
 - A bare mutation of the stash stack (`git stash`, `pop`, `clear`, `apply` or `drop` without a ref): it is shared across every worktree. `git stash push -m ... -- <paths>`, `apply <sha>`, or a WIP commit.
 - `perl -pi` with a non-ASCII replacement: it re-encodes every existing non-ASCII byte in the file. Use node or a heredoc, then grep for `Â`.
-- A single-escaped `\s`, `\d`, `\w`, `\b` inside a backtick string in `scripts/e2e/`.
+- A single-escaped `\s`, `\d`, `\w`, `\b` inside a backtick string in a `.ts` or `.mjs` file under `scripts/` or `out/`.
 - A PR body with an em-dash, or with "not close #N" / "does not fix #N".
 - A PR body that skips one of `.github/PULL_REQUEST_TEMPLATE.md`'s `## ` sections. Presence is the check, not content: a section with nothing to report says so and stays.
 - A negative claim built from `head`, `tail`, `--limit`, or a jq slice. Count against the true total or query the item.

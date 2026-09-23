@@ -247,7 +247,7 @@ precisely, because a token that falls outside it looks identical at the point of
   serves the surfaces' canonical trailing-slash URLs in dev, because the dev public middleware serves
   exact file paths only. Removing it looks harmless and 404s every working page in dev, while build
   and preview are untouched.
-- **The e2e harness serves the engine by type-stripping the real source.** `scripts/e2e/harness.mjs`
+- **The e2e harness serves the engine by type-stripping the real source.** `scripts/e2e/harness.ts`
   strips types from `src/*.ts` on demand, which is how a suite computes an expected value in-browser
   and dodges cross-engine float drift. It is e2e only; the deploy artifact carries none of it, and a
   test that proves the artifact carries none of it exists.

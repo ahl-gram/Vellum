@@ -1,7 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-// The helper is one of the grandfathered e2e .mjs files, which tsconfig does not cover; a non-literal specifier keeps tsc out of it.
-const { makeStep } = await import(`${"../../scripts/e2e"}/step-support.mjs`);
+import { makeStep } from "../../scripts/e2e/step-support.ts";
 
 type Recorded = readonly [string, boolean, string];
 

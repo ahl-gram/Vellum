@@ -2,7 +2,7 @@
 
 **A settle is the wait until the thing a check is about to measure has come to rest**, so the
 reading is of its final state and not of a frame in flight. It is a poll, never a sleep:
-`makeSettle` in `scripts/e2e/settle-support.mjs` reads a value repeatedly and hands each read to a
+`makeSettle` in `scripts/e2e/settle-support.ts` reads a value repeatedly and hands each read to a
 predicate beside the previous one, the check proceeds only when consecutive reads agree the thing
 has arrived, and a poll that runs out of tries throws with its last read rather than handing back a
 value still in flight. A fixed sleep measures the runner, not the page, and is the flake this file
@@ -23,7 +23,7 @@ headless browser actually do, so a green run can be believed.
    on returns nothing useful when it gives up, so returning its last read hands the check a stale
    snapshot that passes: it throws. A poll that is GATHERING a measurement keeps reading until the
    value settles and asserts on the last sample, never on the first, because the first sample that is
-   merely non-null is whatever was still in flight. `makeSettle` in `scripts/e2e/settle-support.mjs`
+   merely non-null is whatever was still in flight. `makeSettle` in `scripts/e2e/settle-support.ts`
    is both at once, and is the shape to copy: it hands the previous sample to the predicate as
    `settled(d, last)`, and it throws with that last read as the payload. **Judging the last sample is
    not the same as RETURNING it**: a poll that runs out of tries and falls through to its last read
@@ -33,7 +33,7 @@ headless browser actually do, so a green run can be believed.
    readiness wait in the wrong shape, so its caller asserts on the answer; a discarded false burns
    the whole budget and passes having tested nothing. What #534 changed is where the throw lands.
    Wrap the gestures, waits and checks that make up one numbered check in
-   `step("CL5", async () => ...)` (`makeStep` in `scripts/e2e/step-support.mjs`), and a timeout
+   `step("CL5", async () => ...)` (`makeStep` in `scripts/e2e/step-support.ts`), and a timeout
    fails THAT check by its own code, with the wait's label and last read as the payload, while the
    groups after it still run. A throw outside every step is contained one level up by `runSelected`,
    which records it as that suite's own red and runs the rest of the lane. Only a browser that has
@@ -52,7 +52,7 @@ headless browser actually do, so a green run can be believed.
 8. **`waitSettled` proves the draw, not ambient stillness.** Wait on the draft counter or the
    commit the gesture requested, and let stale in-flight commits pass by. **What it keys on**: an
    empty `#status`, `#verso-turn` not disabled, and an `#map svg` present (`waitSettled` in
-   `scripts/e2e/harness.mjs`, whose comment at the line says why that control carries the draw
+   `scripts/e2e/harness.ts`, whose comment at the line says why that control carries the draw
    lifecycle). The two ways a new draw path breaks it are opposite. A path that never disables the
    control does not hang: it resolves at once on the draw before, which is a silent pass. A path
    that fails to re-enable it on BOTH the resolve and the catch hangs every suite that waits on it.
@@ -73,7 +73,7 @@ headless browser actually do, so a green run can be believed.
    wants a bare arrival clears `vellum.table.v1` before it navigates, which is what
    `scripts/e2e/suite-chart-drawer.mjs` does in its own `go`. Reach a new address by
    re-bootstrapping through `about:blank` and then the target, then poll for the boot committing:
-   that is what `goto` does in `scripts/e2e/room-support.mjs`, and a fixed sleep in its place is the
+   that is what `goto` does in `scripts/e2e/room-support.ts`, and a fixed sleep in its place is the
    flake.
 10. **Region-job settles scale with the runner.** 20s on CI where 6s passes locally; derive the
     factor from a measured worst case and date it at the constant.
@@ -114,7 +114,7 @@ an imperative for it already exists at the moment of typing, that is a `vellum-f
 section points there rather than restating it.
 
 - **Focus is emulated for the whole run, best-effort.** The harness asks for focus emulation once at
-  start up (`Emulation.setFocusEmulationEnabled` in `scripts/e2e/harness.mjs`), inside a `try`/`catch`
+  start up (`Emulation.setFocusEmulationEnabled` in `scripts/e2e/harness.ts`), inside a `try`/`catch`
   because a browser build may not support it. Without it `element.focus()` fires no real events and
   `:focus-visible` never applies, and nothing throws: the focus path silently does nothing. A suite
   needs no call of its own unless it turned the emulation off, and a build that ignores the request
@@ -137,12 +137,12 @@ section points there rather than restating it.
   `src/cli/e2e-ports.ts` reads `VELLUM_E2E_PORT` and `VELLUM_E2E_DPORT`, which is what lets two local
   lanes run at once, and a bad value THROWS rather than falling back, because a silent fallback puts
   both lanes back on one port. The run does not bind the debug port, it CONNECTS to it, so
-  `assertDebugPortFree` in `scripts/e2e/harness.mjs` preflights it once ABOVE the launch retry loop:
+  `assertDebugPortFree` in `scripts/e2e/harness.ts` preflights it once ABOVE the launch retry loop:
   a killed attempt does not release its port synchronously, so a per-attempt preflight would report
   this run's own dying browser as the stray.
 - **A visual claim is carried by a control taken in the same run, never by a byte comparison.** A
   claim about PAINT goes through the one-row pixel strip, because no hit test and no computed style
-  can see paint (`sampleRow` and `luminance` in `scripts/e2e/pixel-support.mjs`). A claim about an
+  can see paint (`sampleRow` and `luminance` in `scripts/e2e/pixel-support.ts`). A claim about an
   EMULATED condition carries a read of the other condition taken in the same run, which is what the
   print checks in `scripts/e2e/suite-specimen.mjs` call the same-run control. A byte comparison of
   renders from two environments is never the check. No suite compares one screenshot against
@@ -177,7 +177,7 @@ section points there rather than restating it.
   class on a shut and on an off-screen list, and an absence with no witness reads a settle that
   never played as rest; `restSeeing` in `scripts/e2e/suite-chart-drawer.mjs` is the shape, the
   poll counting the class or the running animation on the way to `atRest`. And this harness is
-  Chromium only (it drives the browser over the debug port, `scripts/e2e/harness.mjs`), whose
+  Chromium only (it drives the browser over the debug port, `scripts/e2e/harness.ts`), whose
   computed style spells the blanket's `0.01ms` as `1e-05s`, so a check reads the duration as a
   number (CD46) and never compares the string. Gate 2 item 6 carries the typing-moment half.
 - **A clip with a negative `x` is neither clamped nor refused: `Page.captureScreenshot` hands back a
@@ -186,8 +186,8 @@ section points there rather than restating it.
   edge yields once a probe pads its rect (a pad subtracted from a `left` of 0). A negative `y` is
   honoured as an offset, with the rows above the document white, so the two axes do not fail alike
   and a symmetric expectation is what keeps the `x` case silent. Nothing in the harness guards it:
-  `shoot` in `scripts/e2e/harness.mjs` passes its clip straight through, and `sampleRow` in
-  `scripts/e2e/pixel-support.mjs` adds the scroll and clamps nothing. Clamp a computed origin at
+  `shoot` in `scripts/e2e/harness.ts` passes its clip straight through, and `sampleRow` in
+  `scripts/e2e/pixel-support.ts` adds the scroll and clamps nothing. Clamp a computed origin at
   zero before the call, and read a frame that shows the header or the nav as this before reading it
   as the thing you meant. A card at `left: 0` is the clamp working (`axisNudge` in
   `src/render/place-card.ts` never pushes a card's near edge past its box), so a negative origin is
@@ -195,11 +195,11 @@ section points there rather than restating it.
 - **The headless window has a minimum width clamp.** A window asked for narrower than the clamp lays
   out at the clamp and the capture is cropped, which reads as an overflow bug that is not there. The
   route to a true narrow viewport is device-metric emulation, wrapped as `setMobileViewport` and
-  `clearMobile` in `scripts/e2e/harness.mjs`. The figure is not written down here because no command
+  `clearMobile` in `scripts/e2e/harness.ts`. The figure is not written down here because no command
   in this repo demonstrates it. Gate 3 already carries the typing-moment half, that a window size
   does not set the layout viewport.
 - **A run deletes its own browser profile only if it is allowed to finish.** Each local run mints a
-  throwaway profile under `tmpdir()` (`mkdtemp` in `scripts/e2e/harness.mjs`) and `cleanup()` removes
+  throwaway profile under `tmpdir()` (`mkdtemp` in `scripts/e2e/harness.ts`) and `cleanup()` removes
   it with `rmSync` rather than the promise `rm`, which is not a style choice: `cleanup()` is
   synchronous and every caller exits immediately after it, so an unawaited promise there never runs
   and no run ever deletes anything. An ad-hoc script driving the harness owes the same discipline,
@@ -214,7 +214,7 @@ section points there rather than restating it.
   `find /var/folders/*/T -maxdepth 1 -name 'vellum-e2e-*' -type d -mmin +30 -print0 | xargs -0 rm -rf`,
   whose age filter is what keeps it from deleting the profile of the run you are watching.
 - **The harness ASKS for a window far taller than a screen**, `--window-size=1280,2400` in
-  `scripts/e2e/harness.mjs`. What it lays out at is a different question, for the reason the width
+  `scripts/e2e/harness.ts`. What it lays out at is a different question, for the reason the width
   bullet above gives, and no CHECK in this repo asserts the answer: the nearest instrument is the
   `innerHeight` carried in `legendRoom` in `scripts/e2e/suite-broadside.mjs`, which is captured and
   printed on failure but never asserted. `scripts/e2e/suite-reading-room.mjs` does reason from

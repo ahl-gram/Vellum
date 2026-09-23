@@ -1,16 +1,17 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync, existsSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { E2E_SUITE_ORDER, SMOKE_SUITES, E2E_SUITES_VAR } from "../../src/cli/e2e-suites.ts";
 import type { E2eSuiteName } from "../../src/cli/e2e-suites.ts";
 import { E2E_LANES } from "../../src/cli/e2e-lanes.ts";
 import { BUNDLE_ENTRIES } from "../../scripts/build-app-bundles.ts";
+import { e2eSuitePath, readE2eSource } from "../../test-support/e2e-source.ts";
 
 // The runner is a .mjs script and ci.yml is YAML, neither importable here, so both are read as source.
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
-const src = (p: string) => readFileSync(join(ROOT, p), "utf8");
+const src = (p: string) => readE2eSource(join(ROOT, p));
 const RUNNER = src("scripts/e2e-explorer.mjs");
 const CI = src(".github/workflows/ci.yml");
 // A source scan reads the CODE, not the file: commenting a line out in place leaves its literal behind, and a raw match cannot tell the two apart. Blind spots, both of which cost a false red rather than a miss: a `//` inside a string literal reads as a comment, and a /* */ block is not seen at all.
@@ -45,7 +46,7 @@ test("E2E_SUITE_ORDER is exactly the runner's SUITES map, in the same order", ()
 
 test("each suite name maps to the run function imported from its own file", () => {
   const aliasFor = new Map(
-    [...RUNNER_CODE.matchAll(/import \{ run as (\w+) \} from "\.\/e2e\/suite-([\w-]+)\.mjs"/g)].map((m) => [m[2], m[1]]),
+    [...RUNNER_CODE.matchAll(/import \{ run as (\w+) \} from "\.\/e2e\/suite-([\w-]+)\.(?:mjs|ts)"/g)].map((m) => [m[2], m[1]]),
   );
   const block = RUNNER_CODE.match(/const SUITES = \{([\s\S]*?)\n\};/);
   if (!block) throw new Error("the runner's SUITES map was not found");
@@ -59,9 +60,9 @@ test("each suite name maps to the run function imported from its own file", () =
 
 test("every named suite has a suite file the runner imports", () => {
   for (const name of E2E_SUITE_ORDER) {
-    const file = `scripts/e2e/suite-${name}.mjs`;
+    const file = e2eSuitePath(name);
     assert.ok(existsSync(join(ROOT, file)), `${name} has no ${file}`);
-    assert.match(RUNNER_CODE, new RegExp(`from "\\./e2e/suite-${name}\\.mjs"`), `${name} is not imported`);
+    assert.match(RUNNER_CODE, new RegExp(`from "\\./e2e/suite-${name}\\.(?:mjs|ts)"`), `${name} is not imported`);
   }
 });
 
@@ -251,7 +252,7 @@ const STEPPED_GROUPS: Readonly<Record<string, readonly string[]>> = {
   "specimen": ["SB4"],
 };
 
-const SUITE_FILES = E2E_SUITE_ORDER.map((name) => [name, `scripts/e2e/suite-${name}.mjs`] as const);
+const SUITE_FILES = E2E_SUITE_ORDER.map((name) => [name, e2eSuitePath(name)] as const);
 
 // A block is [open, close] by line index, read off the house's own two shapes; a shape this cannot read is skipped, which the block-count anchor below turns into a red rather than a silent pass.
 const blocksOf = (lines: readonly string[], open: RegExp, closer: (indent: string) => RegExp) => {
@@ -268,10 +269,10 @@ const blocksOf = (lines: readonly string[], open: RegExp, closer: (indent: strin
 };
 // `}).finally(scriptsBackOn);` closes a step too (suite-room-drawer's DR8).
 const stepBlocks = (lines: readonly string[]) =>
-  blocksOf(lines, /^(\s*)await step\("([^"]+)", async \(\) => \{$/, (indent) => new RegExp(`^${indent}\\}\\)(\\.\\w+\\([^)]*\\))?;$`));
+  blocksOf(lines, /^(\s*)await step\("([^"]+)", async\s*\(\)\s*=> \{$/, (indent) => new RegExp(`^${indent}\\}\\)(\\.\\w+\\([^)]*\\))?;$`));
 const helperBlocks = (lines: readonly string[]) => [
-  ...blocksOf(lines, /^(\s*)const (\w+) = async \([^)]*\) => \{$/, (indent) => new RegExp(`^${indent}\\};$`)),
-  ...blocksOf(lines, /^(\s*)async function (\w+)\([^)]*\) \{$/, (indent) => new RegExp(`^${indent}\\}$`)),
+  ...blocksOf(lines, /^(\s*)const (\w+)\s*= async\s*\([^)]*\)\s*=> \{$/, (indent) => new RegExp(`^${indent}\\};$`)),
+  ...blocksOf(lines, /^(\s*)async function (\w+)\s*\([^)]*\)\s*\{$/, (indent) => new RegExp(`^${indent}\\}$`)),
 ];
 
 // The waits a suite gets from outside itself. Everything else that throws is DERIVED below rather than listed, so a new local wait cannot escape by not joining a roster.
@@ -284,7 +285,7 @@ const throwingWaitsIn = (lines: readonly string[], helpers: ReturnType<typeof he
     grew = false;
     for (const h of helpers) {
       if (set.has(h.name)) continue;
-      if (![...set].some((n) => new RegExp(`await ${n}\\(`).test(bodyOf(lines, h)))) continue;
+      if (![...set].some((n) => new RegExp(`await ${n}\\s*\\(`).test(bodyOf(lines, h)))) continue;
       set.add(h.name);
       grew = true;
     }
@@ -294,13 +295,13 @@ const throwingWaitsIn = (lines: readonly string[], helpers: ReturnType<typeof he
 const waitCallSites = (lines: readonly string[], throwing: ReadonlySet<string>) => {
   const out: Array<{ at: number; name: string }> = [];
   for (let i = 0; i < lines.length; i++) {
-    for (const name of throwing) if (new RegExp(`await ${name}\\(`).test(lines[i]!)) out.push({ at: i, name });
+    for (const name of throwing) if (new RegExp(`await ${name}\\s*\\(`).test(lines[i]!)) out.push({ at: i, name });
   }
   return out;
 };
 
 test("the harness hands out exactly the two throwing waits the scan below seeds from, so a third one cannot arrive unread", () => {
-  const harness = src("scripts/e2e/harness.mjs").split("\n");
+  const harness = src("scripts/e2e/harness.ts").split("\n");
   const found = harness
     .map((line, i) => ({ line, i }))
     .filter(({ line }) => /^async function wait\w+\(/.test(line))
@@ -326,7 +327,7 @@ test("every suite with a wait that THROWS is named in the step roster, so one wa
 });
 
 test("a suite that builds a step is named in the roster, so adopting one without joining cannot pass unread", () => {
-  const adopters = SUITE_FILES.filter(([, file]) => /from "\.\/step-support\.mjs"/.test(src(file))).map(([name]) => name);
+  const adopters = SUITE_FILES.filter(([, file]) => /from "\.\/step-support\.ts"/.test(src(file))).map(([name]) => name);
   assert.ok(adopters.length > 0, "no suite imports step-support at all, so the assertion below would read an empty list");
   assert.deepEqual(
     adopters.filter((name) => !(name in STEPPED_GROUPS)),
@@ -338,7 +339,7 @@ test("a suite that builds a step is named in the roster, so adopting one without
 // The guard the roster cannot be: STEPPED_GROUPS pins the step NAMES, and a wait moved out of its step keeps every one of them. Blind spot, named because a scanner cannot enumerate its own: this reads an `await waitSettled(` inside a comment or a string literal as a call site, which costs a false red and never a miss.
 test("every call of a wait that throws is INSIDE a step, in every suite that steps (#560)", () => {
   for (const [suite, groups] of Object.entries(STEPPED_GROUPS)) {
-    const lines = src(`scripts/e2e/suite-${suite}.mjs`).split("\n");
+    const lines = src(e2eSuitePath(suite)).split("\n");
     const steps = stepBlocks(lines);
     assert.equal(steps.length, groups.length, `suite-${suite}: this scan read ${steps.length} step blocks against ${groups.length} in the roster, so the ranges below cover the wrong part of the file`);
     const helpers = helperBlocks(lines);
@@ -350,14 +351,14 @@ test("every call of a wait that throws is INSIDE a step, in every suite that ste
     for (const site of sites) {
       assert.ok(
         inside(steps, site.at) || inside(throwingHelpers, site.at),
-        `scripts/e2e/suite-${suite}.mjs:${site.at + 1} calls ${site.name} outside every step, so a timeout there fails the SUITE rather than the numbered check, and the checks after it never run (#560)`,
+        `${e2eSuitePath(suite)}:${site.at + 1} calls ${site.name} outside every step, so a timeout there fails the SUITE rather than the numbered check, and the checks after it never run (#560)`,
       );
     }
     for (let i = 0; i < lines.length; i++) {
       if (!/\bthrow new Error\(/.test(lines[i]!) || inside(steps, i)) continue;
       assert.ok(
         inside(throwingHelpers, i),
-        `scripts/e2e/suite-${suite}.mjs:${i + 1} throws outside every step and outside every wait this scan knows, so the sweep above is reading an incomplete list of that suite's waits`,
+        `${e2eSuitePath(suite)}:${i + 1} throws outside every step and outside every wait this scan knows, so the sweep above is reading an incomplete list of that suite's waits`,
       );
     }
   }
@@ -365,8 +366,8 @@ test("every call of a wait that throws is INSIDE a step, in every suite that ste
 
 test("every check group that waits is still inside its own step, by name (#534)", () => {
   for (const [suite, groups] of Object.entries(STEPPED_GROUPS)) {
-    const file = src(`scripts/e2e/suite-${suite}.mjs`);
-    assert.match(file, /from "\.\/step-support\.mjs"/, `suite-${suite} no longer imports step-support`);
+    const file = src(e2eSuitePath(suite));
+    assert.match(file, /from "\.\/step-support\.ts"/, `suite-${suite} no longer imports step-support`);
     assert.match(file, /const step = makeStep\(ctx\)/, `suite-${suite} no longer builds a step, so a wait that gives up there takes the suite with it again`);
     const stepped = [...file.matchAll(/await step\("([^"]+)"/g)].map((m) => m[1]);
     assert.deepEqual(

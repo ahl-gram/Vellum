@@ -1,14 +1,15 @@
 // Shared helpers for the Reading-Room-hosted suites (#320); suite-reading-room.mjs deliberately keeps its own copies (the double-coverage premise), and the room's settle is NOT the shared waitSettled, which keys on the Explorer's #verso-turn.
 import { dropExpectedCancellations } from "./console-support.ts";
+import type { Evaluate, SuiteContext } from "./types.ts";
 
 export const CHART_SVG = ".rf-chart svg:not(.voyage-overlay)";
 
-export const makeRoom = (ctx) => {
+export const makeRoom = (ctx: Pick<SuiteContext, "evaluate" | "send" | "sleep" | "PORT">) => {
   const { evaluate, send, sleep, PORT } = ctx;
 
-  const boot = async () => {
+  const boot = async (): Promise<boolean> => {
     for (let i = 0; i < 200; i++) {
-      let ok = null;
+      let ok: unknown = null;
       try { ok = await evaluate(`typeof window.__vellumReadingRoomUsesWorker === "function"`); } catch {}
       if (ok) return true;
       await sleep(75);
@@ -17,10 +18,10 @@ export const makeRoom = (ctx) => {
   };
 
   // #418: the status line still clears at the ARM, so this still means "armed and at rest"; the budget widens to 15s because the arm now waits out an off-thread travel order, and a worker that stops answering spends ROOM_TOUR_TIMEOUT_MS (6s) before the inline fallback arms anyway.
-  const settled = async () => {
+  const settled = async (): Promise<boolean> => {
     for (let i = 0; i < 300; i++) {
-      let s = null;
-      try { s = await evaluate(`({svg:!!document.querySelector(".rf-chart svg"),status:(document.querySelector(".rf-status")||{}).textContent})`); } catch {}
+      let s: { svg: boolean; status?: string } | null = null;
+      try { s = await evaluate<{ svg: boolean; status?: string }>(`({svg:!!document.querySelector(".rf-chart svg"),status:(document.querySelector(".rf-status")||{}).textContent})`); } catch {}
       if (s && s.svg && s.status === "") return true;
       await sleep(50);
     }
@@ -28,7 +29,7 @@ export const makeRoom = (ctx) => {
   };
 
   // Re-bootstrap through about:blank (the Z13 idiom): a hash-only navigate is same-document, and the room reads its hash once at boot with no hashchange listener.
-  const goto = async (hash) => {
+  const goto = async (hash: string): Promise<boolean> => {
     await send("Page.navigate", { url: "about:blank" });
     await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/reading-room/${hash}` });
     const booted = await boot();
@@ -39,34 +40,34 @@ export const makeRoom = (ctx) => {
 };
 
 // Same #220 domain as the Explorer ([0, 2*span], seam at the midpoint, a year at barMax/2 + (year - min)); the earliest year is the one position the seam already owns, so setYear clamps to min+1.
-export const makeBar = (ctx) => {
+export const makeBar = (ctx: Pick<SuiteContext, "evaluate">) => {
   const { evaluate } = ctx;
   return {
-    setYear: (y) =>
-      evaluate(`(()=>{const s=document.querySelector(".rf-range");const a=window.__vellumAgesState();const yy=Math.max(${y},a.min+1);s.value=String(Number(s.max)/2+(yy-a.min));s.dispatchEvent(new Event("input",{bubbles:true}));return window.__vellumAgesState().year;})()`),
-    yearNow: () => evaluate(`window.__vellumAgesState().year`),
-    groupVis: (idx) =>
-      evaluate(`(()=>{const g=document.querySelector('.rf-chart #layer-settlements g.settlement[data-idx="${idx}"]');return g?(getComputedStyle(g).display==="none"?"hidden":"shown"):"(no-el)";})()`),
+    setYear: (y: number) =>
+      evaluate<number | null>(`(()=>{const s=document.querySelector(".rf-range");const a=window.__vellumAgesState();const yy=Math.max(${y},a.min+1);s.value=String(Number(s.max)/2+(yy-a.min));s.dispatchEvent(new Event("input",{bubbles:true}));return window.__vellumAgesState().year;})()`),
+    yearNow: () => evaluate<number | null>(`window.__vellumAgesState().year`),
+    groupVis: (idx: number) =>
+      evaluate<string>(`(()=>{const g=document.querySelector('.rf-chart #layer-settlements g.settlement[data-idx="${idx}"]');return g?(getComputedStyle(g).display==="none"?"hidden":"shown"):"(no-el)";})()`),
     roadsDisp: () =>
-      evaluate(`(()=>{const r=document.querySelector('.rf-chart #layer-roads');return r?getComputedStyle(r).display:"(no-el)";})()`),
+      evaluate<string>(`(()=>{const r=document.querySelector('.rf-chart #layer-roads');return r?getComputedStyle(r).display:"(no-el)";})()`),
     visibleGroups: () =>
-      evaluate(`[...document.querySelectorAll('.rf-chart #layer-settlements g.settlement')].filter((g)=>getComputedStyle(g).display!=="none").length`),
+      evaluate<number>(`[...document.querySelectorAll('.rf-chart #layer-settlements g.settlement')].filter((g)=>getComputedStyle(g).display!=="none").length`),
     // #526: the sweep's own frame clock. The year is read synchronously inside the rAF callback so every sample carries the SAME pairing lag, which a rate fit cancels as an offset; a year read on a wall-clock timer instead carries a frame of quantization at each end, and that is what made the old RS30 read 2.76 to 4.31 on unchanged code.
     startSweepSamples: () =>
-      evaluate(`(()=>{window.__sweep={s:[],stop:false};
+      evaluate<boolean>(`(()=>{window.__sweep={s:[],stop:false};
         const step=(t)=>{const a=window.__vellumAgesState();
           if(a&&a.year!==null)window.__sweep.s.push({t,year:a.year,pace:a.pace});
           if(!window.__sweep.stop)requestAnimationFrame(step);};
         requestAnimationFrame(step);return true;})()`),
     stopSweepSamples: () =>
-      evaluate(`(()=>{window.__sweep.stop=true;return window.__sweep.s;})()`),
-    playLabel: () => evaluate(`document.querySelector(".rf-play").textContent`),
+      evaluate<{ t: number; year: number; pace: number }[]>(`(()=>{window.__sweep.stop=true;return window.__sweep.s;})()`),
+    playLabel: () => evaluate<string>(`document.querySelector(".rf-play").textContent`),
     clickPlay: () => evaluate(`document.querySelector(".rf-play").click()`),
   };
 };
 
-export const scrubFacts = (evaluate, seed) =>
-  evaluate(`(()=>{
+export const scrubFacts = (evaluate: Evaluate, seed: number) =>
+  evaluate<{ count: number; present: number; minFounded: number; earlyIdx: number; earlyFounded: number; lateIdx: number; lateFounded: number; lateNx: number; lateNy: number; ruinIdx: number; ruinYear: number | null; ruinFounded: number | null }>(`(()=>{
     const r=window.__vellumRunInline({kind:"draw",seed:${seed},overrides:{},render:{style:"antique",widthPx:1500,legend:true}});
     const places=r.manifest.places,events=r.manifest.events,present=r.manifest.presentYear;
     const minFounded=Math.min(...places.map((p)=>p.founded));
@@ -84,12 +85,12 @@ export const scrubFacts = (evaluate, seed) =>
   })()`);
 
 /** Suite-scoped console-error + 4xx delta: every suite after the health checkpoint must carry its own, or it drives the page with nothing watching for a thrown exception. Call at the top, gate.check(label) at the bottom. */
-export const scopedHealth = (ctx) => {
+export const scopedHealth = (ctx: Pick<SuiteContext, "check" | "consoleErrors" | "http4xx">) => {
   const { check, consoleErrors, http4xx } = ctx;
   const errBase = consoleErrors.length;
   const httpBase = http4xx.length;
   return {
-    check: (label) => {
+    check: (label: string): void => {
       const errDelta = dropExpectedCancellations(consoleErrors.slice(errBase));
       const httpDelta = http4xx.slice(httpBase).filter((u) => !/favicon/i.test(u));
       check(

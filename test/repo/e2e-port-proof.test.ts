@@ -29,7 +29,7 @@ test("a file unchanged but for the moved import's specifier is a rename and noth
   assert.equal(got.literalDiffs, 0);
   assert.equal(got.tokens[0], got.tokens[1]);
   assert.ok(got.tokens[0] > 60, `read only ${got.tokens[0]} tokens, so the fixture is not being parsed`);
-  assert.equal(got.literals[0], 8, "the fixture's literals were not all counted: two specifier and name strings, the check name, three template parts, the detail template's two parts, and the regex");
+  assert.equal(got.literals[0], 7, "the fixture's literals were not all counted: the specifier, the runner name, the evaluate template, the check name, the regex, and the detail template's head and tail");
 });
 
 test("types, casts, non-null assertions, type arguments, type-only imports and comments are invisible", () => {

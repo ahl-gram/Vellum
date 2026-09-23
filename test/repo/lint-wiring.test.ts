@@ -75,7 +75,7 @@ test("the lint config is bounded to the ruled scope, covers all of it, and narro
 
 const WITNESSES: Record<string, string> = {
   "public/**/*.css": "public/house.css",
-  "scripts/**/*.mjs": "scripts/e2e/harness.mjs",
+  "scripts/**/*.mjs": "scripts/e2e-explorer.mjs",
   "scripts/**/*.ts": "scripts/build-app-bundles.ts",
   "src/**/*.ts": "src/cli/main.ts",
   "test-support/**/*.ts": "test-support/element-shim.ts",

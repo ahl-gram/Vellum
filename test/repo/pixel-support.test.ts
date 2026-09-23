@@ -1,7 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-// The helper is one of the grandfathered e2e .mjs files, which tsconfig does not cover; a non-literal specifier keeps tsc out of it.
-const { sampleRow } = await import(`${"../../scripts/e2e"}/pixel-support.mjs`);
+import { sampleRow } from "../../scripts/e2e/pixel-support.ts";
 
 // A 1x1 8-bit RGBA PNG, enough for the decoder.
 const PNG_1x1 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==";

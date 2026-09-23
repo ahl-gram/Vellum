@@ -9,9 +9,10 @@ import { stripTypeScriptTypes } from "node:module";
 import { dirname, join, resolve, sep, extname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { tmpdir } from "node:os";
+import type { BrowserProcess, Clip, Payload, StartOptions, SuiteContext, TouchPoint } from "./types.ts";
 import { E2E_PORT_VAR, debugPortConflictMessage } from "../../src/cli/e2e-ports.ts";
 
-const MIME = {
+const MIME: Record<string, string | undefined> = {
   ".html": "text/html; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
   ".mjs": "text/javascript; charset=utf-8",
@@ -23,8 +24,8 @@ const MIME = {
   ".woff2": "font/woff2",
 };
 
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-const httpGet = (url) =>
+const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
+const httpGet = (url: string): Promise<string> =>
   new Promise((resolve, reject) => {
     http
       .get(url, (res) => {
@@ -42,7 +43,7 @@ const BLOCKED_WORKERS = new Set(["/explorer/worker.bundle.js"]);
 // In-page oracle: suites import engine modules IN THE BROWSER (same JS engine, no cross-engine float drift); since #260 the harness answers /explorer/engine/*.js by type-stripping src/*.ts on demand and rewriting .ts specifiers. e2e-only serving.
 const SRC_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "src");
 const ENGINE_MODULE = /^\/explorer\/engine\/(.+)\.js$/;
-function serveEngineModule(pathname, res) {
+function serveEngineModule(pathname: string, res: import("node:http").ServerResponse): boolean | Promise<boolean> {
   const m = pathname.match(ENGINE_MODULE);
   if (!m) return false;
   const tsPath = resolve(SRC_DIR, `${m[1]}.ts`);
@@ -60,9 +61,10 @@ function serveEngineModule(pathname, res) {
   });
 }
 
-function startServer(SITE, PORT) {
-  const server = createServer(async (req, res) => {
+function startServer(SITE: string, PORT: number): Promise<import("node:http").Server> {
+  const server = createServer(async (req, res) => { // eslint-disable-line @typescript-eslint/no-misused-promises
     try {
+      // @ts-expect-error a server-side request always carries its url, which Node types as possibly undefined
       const url = new URL(req.url, "http://127.0.0.1");
       let pathname = decodeURIComponent(url.pathname);
       if (serverState.blockWorker && BLOCKED_WORKERS.has(pathname)) {
@@ -88,7 +90,7 @@ function startServer(SITE, PORT) {
     }
   });
   return new Promise((res, rej) => {
-    server.on("error", (err) =>
+    server.on("error", (err: NodeJS.ErrnoException) =>
       rej(
         err.code === "EADDRINUSE"
           ? new Error(
@@ -103,10 +105,10 @@ function startServer(SITE, PORT) {
 }
 
 // #339: getPageTarget attaches to whatever answers /json, so an orphaned browser holding the port would be adopted in SILENCE; a plain TCP connect also catches a non-browser squatter.
-function probeDebugPort(DPORT, timeoutMs = 300) {
+function probeDebugPort(DPORT: number, timeoutMs = 300): Promise<boolean> {
   return new Promise((res) => {
     const socket = net.connect({ host: "127.0.0.1", port: DPORT });
-    const settle = (listening) => {
+    const settle = (listening: boolean) => {
       socket.destroy();
       res(listening);
     };
@@ -116,9 +118,9 @@ function probeDebugPort(DPORT, timeoutMs = 300) {
   });
 }
 
-async function debugPortIdentity(DPORT, timeoutMs = 1000) {
+async function debugPortIdentity(DPORT: number, timeoutMs = 1000): Promise<string | undefined> {
   try {
-    const body = await new Promise((res, rej) => {
+    const body = await new Promise<string>((res, rej) => {
       const req = http.get(`http://127.0.0.1:${DPORT}/json/version`, { timeout: timeoutMs }, (r) => {
         let d = "";
         r.on("data", (c) => (d += c));
@@ -127,24 +129,24 @@ async function debugPortIdentity(DPORT, timeoutMs = 1000) {
       req.on("timeout", () => req.destroy(new Error("timeout")));
       req.on("error", rej);
     });
-    return JSON.parse(body).Browser || undefined;
+    return JSON.parse(body).Browser || undefined; // eslint-disable-line @typescript-eslint/no-unsafe-return
   } catch {
     return undefined;
   }
 }
 
-async function assertDebugPortFree(DPORT) {
+async function assertDebugPortFree(DPORT: number): Promise<void> {
   const listening = await probeDebugPort(DPORT);
   const identity = listening ? await debugPortIdentity(DPORT) : undefined;
   const conflict = debugPortConflictMessage(DPORT, { listening, identity });
   if (conflict) throw new Error(conflict);
 }
 
-let server, brave, ws, userDataDir;
+let server: import("node:http").Server | undefined, brave: BrowserProcess | undefined, ws: WebSocket | undefined, userDataDir: string | undefined;
 let browserOut = "";
-let browserExit = null;
+let browserExit: { code: number | null; signal: NodeJS.Signals | null } | null = null;
 let OUT_DIR = "";
-export function cleanup() {
+export function cleanup(): void {
   try { ws?.close(); } catch {}
   try { brave?.kill("SIGKILL"); } catch {}
   try { server?.close(); } catch {}
@@ -154,16 +156,18 @@ export function cleanup() {
   try { if (userDataDir) rmSync(userDataDir, { recursive: true, force: true }); } catch {}
 }
 
-async function getPageTarget(DPORT) {
+async function getPageTarget(DPORT: number): Promise<{ webSocketDebuggerUrl: string }> {
   let lastErr = "";
   for (let i = 0; i < 160; i++) {
     if (browserExit) break;
     try {
-      const list = JSON.parse(await httpGet(`http://127.0.0.1:${DPORT}/json`));
+      const list: { type: string; webSocketDebuggerUrl?: string }[] = JSON.parse(await httpGet(`http://127.0.0.1:${DPORT}/json`));
       const page = list.find((t) => t.type === "page" && t.webSocketDebuggerUrl);
+      // @ts-expect-error find() cannot narrow the url the predicate just proved present
       if (page) return page;
       lastErr = `/json had ${list.length} targets, none a page`;
     } catch (e) {
+      // @ts-expect-error a caught value is unknown to the checker; the || falls back to the value itself when it carries no message
       lastErr = String(e.message || e);
     }
     await sleep(125);
@@ -176,16 +180,17 @@ async function getPageTarget(DPORT) {
 }
 
 let nextId = 1;
-const waiters = new Map();
-function send(method, params = {}) {
+const waiters = new Map<number, { resolve(value: unknown): void; reject(reason: Error): void }>();
+function send<T = unknown>(method: string, params: Record<string, unknown> = {}): Promise<T> {
   const id = nextId++;
   return new Promise((resolve, reject) => {
     waiters.set(id, { resolve, reject });
+    // @ts-expect-error start() opens the socket before any send, which the checker cannot see across functions
     ws.send(JSON.stringify({ id, method, params }));
   });
 }
-async function evaluate(expression, awaitPromise = false) {
-  const r = await send("Runtime.evaluate", { expression, awaitPromise, returnByValue: true });
+async function evaluate<T = unknown>(expression: Payload<T>, awaitPromise = false): Promise<NoInfer<T>> {
+  const r = await send<{ result: { value: T }; exceptionDetails?: { text: string; exception?: { description?: string } } }>("Runtime.evaluate", { expression, awaitPromise, returnByValue: true });
   if (r.exceptionDetails) {
     throw new Error("eval exception: " + (r.exceptionDetails.exception?.description || r.exceptionDetails.text));
   }
@@ -194,25 +199,25 @@ async function evaluate(expression, awaitPromise = false) {
 
 // 5s is 100x the headroom a settle leaves: it polls evaluate every 50ms right up to the moment it throws, so a page that just failed a wait has been answering within 50ms. The direction it errs is toward calling a WEDGED page dead, which is the exit 2 such a page already produced.
 const ALIVE_TIMEOUT_MS = 5000;
-function alive() {
+function alive(): Promise<boolean> {
   const answered = evaluate("1").then(() => true, () => false);
-  const gaveUp = new Promise((resolve) => setTimeout(() => resolve(false), ALIVE_TIMEOUT_MS).unref());
+  const gaveUp = new Promise<boolean>((resolve) => setTimeout(() => resolve(false), ALIVE_TIMEOUT_MS).unref());
   return Promise.race([answered, gaveUp]);
 }
 
-async function axDescription(selector) {
-  const doc = await send("DOM.getDocument", { depth: -1 });
-  const { nodeId } = await send("DOM.querySelector", { nodeId: doc.root.nodeId, selector });
+async function axDescription(selector: string): Promise<string | null> {
+  const doc = await send<{ root: { nodeId: number } }>("DOM.getDocument", { depth: -1 });
+  const { nodeId } = await send<{ nodeId: number }>("DOM.querySelector", { nodeId: doc.root.nodeId, selector });
   if (!nodeId) return null;
-  const ax = await send("Accessibility.getPartialAXTree", { nodeId, fetchRelatives: false });
+  const ax = await send<{ nodes: { role?: { value: string }; description?: { value: string } }[] }>("Accessibility.getPartialAXTree", { nodeId, fetchRelatives: false });
   const node = ax.nodes.find((n) => n.role && n.role.value === "button");
   return node && node.description ? node.description.value : null;
 }
 
-async function waitSettled(label = "") {
+async function waitSettled(label = ""): Promise<void> {
   for (let i = 0; i < 200; i++) {
     // The settle probe keys on #verso-turn's disabled flag (#199: it has the exact draw lifecycle the retired #bind button had).
-    const s = await evaluate(
+    const s = await evaluate<{ status: string; dis: boolean; map: boolean }>(
       `({status:document.getElementById("status").textContent,dis:document.getElementById("verso-turn").disabled,map:!!document.querySelector("#map svg")})`,
     );
     if (s.status === "" && s.dis === false && s.map) return;
@@ -220,7 +225,7 @@ async function waitSettled(label = "") {
   }
   throw new Error("waitSettled timeout " + label);
 }
-async function waitReady() {
+async function waitReady(): Promise<boolean> {
   for (let i = 0; i < 200; i++) {
     if (await evaluate(`typeof window.__vellumUsesWorker==="function" && !!document.querySelector("#map svg") && document.getElementById("status").textContent===""`)) return true;
     await sleep(75);
@@ -228,62 +233,62 @@ async function waitReady() {
   return false;
 }
 // A turn clears "Drafting..." immediately, so waitSettled resolves MID-turn; waitTurned waits for the leaf to LAND, and armTurnWatch records whether .sheet ever carried .turning (a real 3D turn vs an instant swap).
-async function waitTurned(label = "") {
+async function waitTurned(label = ""): Promise<void> {
   for (let i = 0; i < 240; i++) {
     if (await evaluate(`(()=>{const s=document.getElementById("status").textContent;const t=document.querySelector(".sheet.turning");return s==="" && !t && !!document.querySelector("#map svg");})()`)) return;
     await sleep(50);
   }
   throw new Error("waitTurned timeout " + label);
 }
-function armTurnWatch() {
+function armTurnWatch(): Promise<unknown> {
   return evaluate(`(()=>{window.__turned=false;if(window.__turnMo)window.__turnMo.disconnect();window.__turnMo=new MutationObserver(()=>{if(document.querySelector(".sheet.turning"))window.__turned=true;});window.__turnMo.observe(document.getElementById("sheet"),{subtree:true,attributes:true,attributeFilter:["class"]});return true;})()`);
 }
 
 // Real browser input, not synthetic DOM events. d3-zoom binds touch listeners only if navigator.maxTouchPoints is truthy at bind time, so setTouch()/setMobileViewport() must be in effect BEFORE the navigate that boots the page.
 
 // Negative deltaY zooms IN (d3's wheelDelta is -deltaY * 0.002 at deltaMode 0), matching a user scrolling up.
-function wheel(x, y, deltaY, deltaX = 0) {
+function wheel(x: number, y: number, deltaY: number, deltaX = 0): Promise<unknown> {
   return send("Input.dispatchMouseEvent", { type: "mouseWheel", x, y, deltaX, deltaY });
 }
 
 // Per CDP, touchStart/touchMove carry the currently-down points and touchEnd/touchCancel MUST pass [] (CDP diffs against the prior event to end every active point).
-function touch(type, points) {
+function touch(type: string, points: readonly TouchPoint[]): Promise<unknown> {
   return send("Input.dispatchTouchEvent", { type, touchPoints: points });
 }
 
 // d3 pans by the screen delta; at k=1 the constrain snaps it home, so the caller must be zoomed first.
-async function touchPan(x0, y0, x1, y1) {
+async function touchPan(x0: number, y0: number, x1: number, y1: number): Promise<void> {
   await touch("touchStart", [{ x: x0, y: y0, id: 0 }]);
   await touch("touchMove", [{ x: x1, y: y1, id: 0 }]);
   await touch("touchEnd", []);
 }
 
 // One move suffices: d3 sets k to k_old * (to/from) about the centroid, scaling against the touchstart spread rather than incrementally.
-async function pinch(cx, cy, from, to) {
+async function pinch(cx: number, cy: number, from: number, to: number): Promise<void> {
   const s = from / 2, e = to / 2;
   await touch("touchStart", [{ x: cx - s, y: cy, id: 0 }, { x: cx + s, y: cy, id: 1 }]);
   await touch("touchMove", [{ x: cx - e, y: cy, id: 0 }, { x: cx + e, y: cy, id: 1 }]);
   await touch("touchEnd", []);
 }
 
-function setTouch(enabled, maxTouchPoints = 5) {
+function setTouch(enabled: boolean, maxTouchPoints = 5): Promise<unknown> {
   return send("Emulation.setTouchEmulationEnabled", { enabled, maxTouchPoints });
 }
 
-async function setMobileViewport(width, height) {
+async function setMobileViewport(width: number, height: number): Promise<void> {
   await send("Emulation.setDeviceMetricsOverride", { width, height, deviceScaleFactor: 1, mobile: true });
   await setTouch(true);
 }
 
-async function clearMobile() {
+async function clearMobile(): Promise<void> {
   await send("Emulation.clearDeviceMetricsOverride");
   await setTouch(false);
 }
 
 // The default clip is the harness's 1280 width down the whole document, captured beyond the viewport; a suite that passes its own clip is shot INSIDE the viewport, because captureBeyondViewport drops a chart room's left-anchored fixed furniture (the chart folio, the legend row) from the frame (measured 2026-09-03 on /specimen/ at 1280x800: AE 505 between the two modes at the same instant, the right-anchored corners and the slip untouched).
-async function shoot(file, clip) {
-  const h = await evaluate(`Math.min(16000, Math.ceil(document.body.scrollHeight))`);
-  const r = await send("Page.captureScreenshot", {
+async function shoot(file: string, clip?: Clip): Promise<void> {
+  const h = await evaluate<number>(`Math.min(16000, Math.ceil(document.body.scrollHeight))`);
+  const r = await send<{ data: string }>("Page.captureScreenshot", {
     format: "png",
     captureBeyondViewport: clip === undefined,
     clip: clip ?? { x: 0, y: 0, width: 1280, height: h, scale: 1 },
@@ -293,11 +298,11 @@ async function shoot(file, clip) {
 }
 
 // A cold Chrome on CI intermittently comes up but never binds the debugging port (a transient dbus/crashpad hiccup; the process stays alive), so retry with a fresh profile; a genuine break still fails after the last attempt with the captured output.
-async function launchBrowser(browser, DPORT) {
+async function launchBrowser(browser: string, DPORT: number): Promise<{ webSocketDebuggerUrl: string }> {
   // Preflight once, ABOVE the retry loop: a SIGKILLed attempt does not release the port synchronously, so a per-attempt preflight would report our own dying browser as the stray.
   await assertDebugPortFree(DPORT);
   const MAX_ATTEMPTS = 3;
-  let lastErr;
+  let lastErr: unknown;
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     browserExit = null;
     browserOut = "";
@@ -337,14 +342,16 @@ async function launchBrowser(browser, DPORT) {
 
 // results/consoleErrors/http4xx/skippedGroups are pushed to BY REFERENCE (the ws handler, check and makeStep close over them) so the runner's trailing tally sees them.
 // eslint-disable-next-line max-lines-per-function
-export async function start({ browser, SITE, OUT, PORT, DPORT, PAGE, results, consoleErrors, http4xx, skippedGroups }) {
+export async function start({ browser, SITE, OUT, PORT, DPORT, PAGE, results, consoleErrors, http4xx, skippedGroups }: StartOptions): Promise<SuiteContext> {
   OUT_DIR = OUT;
   await mkdir(OUT, { recursive: true });
   server = await startServer(SITE, PORT);
   const target = await launchBrowser(browser, DPORT);
   ws = new WebSocket(target.webSocketDebuggerUrl);
   await new Promise((res, rej) => {
+    // @ts-expect-error the socket was opened two lines up, which the checker forgets inside a closure over a module variable
     ws.addEventListener("open", res, { once: true });
+    // @ts-expect-error the same socket, the same closure
     ws.addEventListener("error", rej, { once: true });
   });
   ws.addEventListener("message", (ev) => {
@@ -352,13 +359,14 @@ export async function start({ browser, SITE, OUT, PORT, DPORT, PAGE, results, co
     if (m.id && waiters.has(m.id)) {
       const w = waiters.get(m.id);
       waiters.delete(m.id);
-      m.error ? w.reject(new Error(JSON.stringify(m.error))) : w.resolve(m.result);
+      // @ts-expect-error has() on the line above proved the waiter present, which get() cannot carry
+      m.error ? w.reject(new Error(JSON.stringify(m.error))) : w.resolve(m.result); // eslint-disable-line @typescript-eslint/no-unused-expressions
       return;
     }
     if (m.method === "Runtime.exceptionThrown") {
       consoleErrors.push("EXCEPTION: " + (m.params.exceptionDetails?.exception?.description || m.params.exceptionDetails?.text));
     } else if (m.method === "Runtime.consoleAPICalled" && m.params.type === "error") {
-      consoleErrors.push("console.error: " + JSON.stringify(m.params.args.map((a) => a.value)));
+      consoleErrors.push("console.error: " + JSON.stringify(m.params.args.map((a: { value: unknown }) => a.value)));
     } else if (m.method === "Log.entryAdded" && m.params.entry.level === "error") {
       const t = m.params.entry.text || "";
       if (!/favicon/i.test(t) && !/Failed to load resource/i.test(t)) consoleErrors.push("log.error: " + t);
@@ -377,7 +385,7 @@ export async function start({ browser, SITE, OUT, PORT, DPORT, PAGE, results, co
   try { await send("Emulation.setFocusEmulationEnabled", { enabled: true }); } catch {}
   await send("Page.navigate", { url: PAGE });
 
-  const check = (name, ok, detail = "") => {
+  const check = (name: string, ok: unknown, detail = ""): void => {
     results.push({ name, ok: !!ok });
     console.log(`${ok ? "PASS" : "FAIL"}  ${name}${detail ? "  — " + detail : ""}`);
   };
