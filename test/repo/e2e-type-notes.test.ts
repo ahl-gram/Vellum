@@ -7,9 +7,9 @@ import ts from "typescript";
 const REPO = resolve(import.meta.dirname, "..", "..");
 const NOTE = /^\s*\/\/ @ts-expect-error \S/;
 const SUPPRESSION = /@ts-(expect-error|ignore|nocheck)\b/;
-// A name or a member the checker cannot find: the codes a misspelling produces. On a value typed `{}` or `unknown` there is no member to misspell, so there the code is the note's own objection.
+// A name or a member the checker cannot find: the codes a misspelling produces. On a value typed `{}` (an `unknown` a truthiness guard has narrowed; a bare `unknown` reports TS18046 instead) there is no member to misspell, so there the code is the note's own objection.
 const MISSING = new Set([2304, 2339, 2551, 2552, 2724]);
-const ON_UNKNOWN = /on type '(\{\}|unknown)'/;
+const ON_EMPTY_OBJECT = /on type '\{\}'/;
 
 type Source = { readonly path: string; readonly text: string };
 type Covered = { readonly column: number; readonly code: number; readonly text: string };
@@ -28,7 +28,7 @@ const e2eSources = (): Source[] => {
 const offends = (covered: readonly Covered[]): boolean =>
   covered.length === 0 ||
   new Set(covered.map((c) => c.column)).size !== 1 ||
-  covered.some((c) => MISSING.has(c.code) && !ON_UNKNOWN.test(c.text));
+  covered.some((c) => MISSING.has(c.code) && !ON_EMPTY_OBJECT.test(c.text));
 
 function compile(sources: readonly Source[]): ts.Program {
   const blanked = new Map(sources.map(({ path, text }) => [path, text.split("\n").map((line) => (NOTE.test(line) ? line.replace("@ts-expect-error", "@note") : line)).join("\n")]));
