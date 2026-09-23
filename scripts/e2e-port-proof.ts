@@ -66,6 +66,23 @@ function payloads(sf: ts.SourceFile): string[] {
   return out;
 }
 
+function shape(sf: ts.SourceFile): { key: string; line: number }[] {
+  const out: { key: string; line: number }[] = [];
+  const walk = (node: ts.Node, depth: number): void => {
+    out.push({ key: `${depth}:${ts.SyntaxKind[node.kind]}`, line: sf.getLineAndCharacterOfPosition(node.getStart(sf)).line + 1 });
+    ts.forEachChild(node, (kid) => walk(kid, depth + 1));
+  };
+  walk(sf, 0);
+  return out;
+}
+
+const treeEdit = (sa: ts.SourceFile, sb: ts.SourceFile): RuntimeEdit | null => {
+  const a = shape(sa);
+  const b = shape(sb);
+  const at = Array.from({ length: Math.max(a.length, b.length) }, (_, i) => i).find((i) => a.at(i)?.key !== b.at(i)?.key);
+  return at === undefined ? null : { line: b.at(at)?.line ?? a.at(at)?.line ?? 0, before: `syntax ${a.at(at)?.key ?? "(none)"}`, after: `syntax ${b.at(at)?.key ?? "(none)"}` };
+};
+
 const renameOf = (a: Leaf, b: Leaf, existsAsTs: (specifier: string) => boolean): string | null => {
   if (!a.specifier || !b.specifier || !a.text.endsWith('.mjs"')) return null;
   const moved = a.text.replace(/\.mjs"$/, '.ts"');
@@ -96,6 +113,8 @@ export function compareSources(before: string, after: string, afterIsTs: boolean
     edits.push({ line: y?.line ?? x?.line ?? 0, before: x?.text ?? "(none)", after: y?.text ?? "(none)" });
     if (a.length !== b.length) break;
   }
+  const tree = edits.length === 0 ? treeEdit(sa, sb) : null;
+  if (tree) edits.push(tree);
   const literalTexts = (list: readonly Leaf[], skip: ReadonlySet<number>) => list.flatMap((l, i) => (LITERALS.has(l.kind) && !skip.has(i) ? [l.text] : []));
   const la = literalTexts(a, renamed);
   const lb = literalTexts(b, renamed);

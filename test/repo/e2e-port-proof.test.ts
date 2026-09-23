@@ -91,6 +91,15 @@ test("a base that is already TypeScript is compared as the JavaScript it runs, s
   assert.equal(got.payloads[0], 1);
 });
 
+test("a line break that changes the syntax tree with the same tokens is an edit, and one that does not is invisible", () => {
+  const before = "function f(a, b) {\n  return a && b.c;\n}";
+  const asi = compareSources(before, "function f(a, b) {\n  return\n    a && b.c;\n}", false, movedToTs);
+  assert.equal(asi.tokens[0], asi.tokens[1], "the fixture should keep every token and change only the tree");
+  assert.ok(asi.edits.length > 0, "a return split from its value (a semicolon inserted, the value never returned) was not reported");
+  const reflow = compareSources(before, "function f(a, b) {\n  return a &&\n    b.c;\n}", false, movedToTs);
+  assert.deepEqual(reflow.edits, []);
+});
+
 test("a reordered statement is an edit", () => {
   const lines = BASE.split("\n");
   const reordered = [lines[0], lines[1], lines[2], lines[3], lines[5], lines[4], lines[6], lines[7]].join("\n");

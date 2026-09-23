@@ -359,8 +359,10 @@ export async function start({ browser, SITE, OUT, PORT, DPORT, PAGE, results, co
     if (m.id && waiters.has(m.id)) {
       const w = waiters.get(m.id);
       waiters.delete(m.id);
-      // @ts-expect-error has() on the line above proved the waiter present, which get() cannot carry
-      m.error ? w.reject(new Error(JSON.stringify(m.error))) : w.resolve(m.result); // eslint-disable-line @typescript-eslint/no-unused-expressions
+      // @ts-expect-error has() in the enclosing if proved the waiter present, which get() cannot carry
+      m.error ? w.reject(new Error(JSON.stringify(m.error))) : // eslint-disable-line @typescript-eslint/no-unused-expressions
+        // @ts-expect-error has() in the enclosing if proved the waiter present, which get() cannot carry
+        w.resolve(m.result);
       return;
     }
     if (m.method === "Runtime.exceptionThrown") {
@@ -384,12 +386,10 @@ export async function start({ browser, SITE, OUT, PORT, DPORT, PAGE, results, co
   // Treat the headless page as focused so element.focus() fires real events and :focus-visible applies; without this the keyboard-focus card path silently no-ops under --headless. Best-effort: older builds may not support it.
   try { await send("Emulation.setFocusEmulationEnabled", { enabled: true }); } catch {}
   await send("Page.navigate", { url: PAGE });
-
   const check = (name: string, ok: unknown, detail = ""): void => {
     results.push({ name, ok: !!ok });
     console.log(`${ok ? "PASS" : "FAIL"}  ${name}${detail ? "  — " + detail : ""}`);
   };
-
   return {
     evaluate, send, check, shoot, sleep, alive,
     waitSettled, waitReady, waitTurned, armTurnWatch, axDescription,

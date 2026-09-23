@@ -75,9 +75,17 @@ export async function run(ctx: SuiteContext): Promise<void> {
       const range=document.createRange();let text=0;for(const p of document.querySelectorAll(".corner.bl p")){if(!p.textContent)continue;range.selectNodeContents(p);text=Math.max(text,range.getBoundingClientRect().right);}
       return{lg,bl,sl,gl,sh,folioText:Math.round(text),w:innerWidth,h:innerHeight};})()`;
     // @ts-expect-error the slip, the Glass, the sheet and the folio are read as present; a missing one throws inside the step, which reds it by name
-    const legendClear = (m: Room): boolean => !!m.lg && m.lg.l >= m.folioText + 16 && m.lg.r <= m.sl.l - 8 && m.lg.r <= m.gl.l - 8 &&
-      // @ts-expect-error the same four boxes, on the rest of the expression
-      m.sh.r <= m.gl.l - 8 && m.sh.b <= Math.min(m.bl.t, m.lg.t) - 8;
+    const legendClear = (m: Room): boolean => !!m.lg && m.lg.l >= m.folioText + 16 && m.lg.r <= m.sl.l - 8 && m.lg.r <=
+      // @ts-expect-error the slip, the Glass, the sheet and the folio are read as present; a missing one throws inside the step, which reds it by name
+      m.gl.l - 8 &&
+      // @ts-expect-error the slip, the Glass, the sheet and the folio are read as present; a missing one throws inside the step, which reds it by name
+      m.sh.r <=
+        // @ts-expect-error the slip, the Glass, the sheet and the folio are read as present; a missing one throws inside the step, which reds it by name
+        m.gl.l - 8 &&
+        // @ts-expect-error the slip, the Glass, the sheet and the folio are read as present; a missing one throws inside the step, which reds it by name
+        m.sh.b <= Math.min(
+        // @ts-expect-error the slip, the Glass, the sheet and the folio are read as present; a missing one throws inside the step, which reds it by name
+        m.bl.t, m.lg.t) - 8;
     await sleep(400); // the row's left transitions 0.32s to its measured seat; a read mid-flight is the old seat
     const at1280 = await evaluate(legendRoom);
     await send("Emulation.setDeviceMetricsOverride", { width: 1680, height: 900, deviceScaleFactor: 1, mobile: false });

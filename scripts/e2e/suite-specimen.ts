@@ -12,7 +12,17 @@ const CONTROL_GOLD = "rgb(240, 227, 189)";
 type Box = { x: number; y: number; w: number; h: number; right: number; bottom: number } | null;
 type Specimen = { st: { state: string; folded: boolean; zoomed: boolean; pill: string } | null; innerW: number; innerH: number; rem: number; chromeX: number; plateLoaded: boolean; plateAspect: number | null; sheet: Box; map: Box; slip: Box; slipVis: string | null; slipDisp: string | null; slipPos: string | null; slipBody: string | null; tabVis: string | null; tabDisp: string | null; folio: Box; chartFolio: Box; chartFolioDisp: string | null; folioRoomPos: string | null; chartFolioText: number | null; glass: Box; glassDisp: string | null; glassOverFolio: [number, number] | null; legend: Box; legendDisp: string | null; legendGround: string | null; legendGroundOn: string | null; legendInSlip: boolean; legendDocked: boolean; folioInset: string[] | null; pool: string | null; poolChrome: string | null; poolGlass: string | null; folioPanel: string | null; folioFilter: string | null; pillDisp: string | null; pillText: string | null; pill: Box; folioLines: boolean[]; crNum: string | null; inked: string | null; unInked: string | null; gold: string | null; disabled: string | null; missDisp: string | null; handleExpanded: string | null; sheetH: string; fog: string | null; vignette: string | null; noX: boolean };
 // @ts-expect-error the legend row, the Glass and the booted page are read as present; a null one throws inside SB4's step, which reds SB4 by name
-const atFolded = (from: Specimen) => (d: Specimen, p: Specimen | null): boolean => d.slipVis === "hidden" && d.tabVis === "visible" && d.legend.x !== from.legend.x && !!p && d.legend.x === p.legend.x && d.glass.right === p.glass.right;
+const atFolded = (from: Specimen) => (d: Specimen, p: Specimen | null): boolean => d.slipVis === "hidden" && d.tabVis === "visible" && d.legend.x !==
+  // @ts-expect-error the legend row, the Glass and the booted page are read as present; a null one throws inside SB4's step, which reds SB4 by name
+  from.legend.x && !!p &&
+  // @ts-expect-error the legend row, the Glass and the booted page are read as present; a null one throws inside SB4's step, which reds SB4 by name
+  d.legend.x ===
+  // @ts-expect-error the legend row, the Glass and the booted page are read as present; a null one throws inside SB4's step, which reds SB4 by name
+  p.legend.x &&
+  // @ts-expect-error the legend row, the Glass and the booted page are read as present; a null one throws inside SB4's step, which reds SB4 by name
+  d.glass.right ===
+  // @ts-expect-error the legend row, the Glass and the booted page are read as present; a null one throws inside SB4's step, which reds SB4 by name
+  p.glass.right;
 
 const READ: Payload<Specimen> = `(() => {
   const r = (sel) => { const e = document.querySelector(sel); if (!e) return null; const b = e.getBoundingClientRect(); return { x: b.x, y: b.y, w: b.width, h: b.height, right: b.right, bottom: b.bottom }; };
@@ -84,15 +94,37 @@ export async function run(ctx: SuiteContext): Promise<void> {
   check(
     "SB1 the Specimen Book boots as a chart room: the conductor answers, the Gallery's plate is on the sheet, the sheet is fitted at the PLATE's own aspect (read off the img, not the kit's fallback)",
     // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
-    !!rest && rest.st.state === "rest" && rest.plateLoaded && Math.abs(rest.sheet.w / rest.sheet.h - rest.plateAspect) < 0.003 && Math.abs(rest.plateAspect - CHART_ASPECT) > 0.0001 && rest.noX,
+    !!rest && rest.st.state === "rest" && rest.plateLoaded && Math.abs(
+      // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
+      rest.sheet.w /
+      // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
+      rest.sheet.h -
+      // @ts-expect-error a null plateAspect reads as 0 in the arithmetic and does not throw: this clause then reads false, which reds SB1 by name
+      rest.plateAspect) < 0.003 && Math.abs(
+      // @ts-expect-error a null plateAspect reads as 0 and does not throw: this clause then reads TRUE without measuring, but the clause above reads false for the same null, so SB1 still reds
+      rest.plateAspect - CHART_ASPECT) > 0.0001 && rest.noX,
     JSON.stringify(rest && { st: rest.st, plate: rest.plateLoaded, plateAspect: rest.plateAspect, sheet: rest.sheet }),
   );
   check(
     "SB2 at rest, at 1280: the slip hangs below the room's folio at the right edge, the Glass stands clear of it, the legend row sits between the chart folio and the Glass, the tab is hidden, the pill shows, the chart folio's four lines are written, no pool",
     // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
-    !!rest && rest.slip.y > rest.folio.bottom && Math.abs(rest.innerW - rest.slip.right - 2 * rest.rem) < 1 && rest.slipVis === "visible" &&
-      // @ts-expect-error the boxes read here throw when null, outside any step, and the runner reds the whole suite as stopped early; a null chartFolioText does not: null + 32 - 1 is 31, so that clause reads TRUE without measuring, a defect the port found and leaves (errata/guards.md)
-      rest.glass.right < rest.slip.x && rest.legend.x >= rest.chartFolioText + 32 - 1 && rest.legend.right < rest.glass.x && rest.legendDisp !== "none" &&
+    !!rest && rest.slip.y >
+      // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
+      rest.folio.bottom && Math.abs(rest.innerW -
+      // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
+      rest.slip.right - 2 * rest.rem) < 1 && rest.slipVis === "visible" &&
+      // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
+      rest.glass.right <
+        // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
+        rest.slip.x &&
+        // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
+        rest.legend.x >=
+        // @ts-expect-error a null chartFolioText does not throw: null + 32 - 1 is 31, so this clause reads TRUE without measuring, a defect the port found and leaves (errata/guards.md)
+        rest.chartFolioText + 32 - 1 &&
+        // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
+        rest.legend.right <
+        // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
+        rest.glass.x && rest.legendDisp !== "none" &&
       // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
       rest.tabVis === "hidden" && rest.pillDisp !== "none" && rest.pillText.length > 0 && rest.folioLines.length === 4 && rest.folioLines.every(Boolean) &&
       rest.pool === "none" && rest.poolChrome === "none",
@@ -114,9 +146,15 @@ export async function run(ctx: SuiteContext): Promise<void> {
       // @ts-expect-error the legend row, the Glass and the booted page are read as present; a null one throws inside SB4's step, which reds SB4 by name
       !!folded && folded.st.folded && folded.slipVis === "hidden" && folded.tabVis === "visible" && // eslint-disable-line @typescript-eslint/no-unnecessary-condition
         // @ts-expect-error the legend row, the Glass and the booted page are read as present; a null one throws inside SB4's step, which reds SB4 by name
-        Math.abs(folded.innerW - folded.glass.right - folded.chromeX * folded.rem) < 2 && folded.legend.x > rest.legend.x,
+        Math.abs(folded.innerW - folded.glass.right - folded.chromeX * folded.rem) < 2 &&
+          // @ts-expect-error the legend row, the Glass and the booted page are read as present; a null one throws inside SB4's step, which reds SB4 by name
+          folded.legend.x >
+          // @ts-expect-error the legend row, the Glass and the booted page are read as present; a null one throws inside SB4's step, which reds SB4 by name
+          rest.legend.x,
       // @ts-expect-error the legend row, the Glass and the booted page are read as present; a null one throws inside SB4's step, which reds SB4 by name
-      JSON.stringify(folded && { st: folded.st, slip: folded.slipVis, tab: folded.tabVis, glass: folded.glass, legendX: [rest && rest.legend.x, folded.legend.x] }), // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+      JSON.stringify(folded && { st: folded.st, slip: folded.slipVis, tab: folded.tabVis, glass: folded.glass, legendX: [rest && rest.legend.x, // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+        // @ts-expect-error the legend row, the Glass and the booted page are read as present; a null one throws inside SB4's step, which reds SB4 by name
+        folded.legend.x] }),
     );
   });
 
@@ -126,9 +164,15 @@ export async function run(ctx: SuiteContext): Promise<void> {
   check(
     "SB5 leaned, through the Glass's own controller: the slip is back from its tab, the gesture box is zoomed, the sheet spills under the top and the left corners (the slip holds the right), and the corners and the cluster stand on the pool",
     // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
-    !!leaned && leaned.st.zoomed && !leaned.st.folded && leaned.slipVis === "visible" && leaned.pool === '""' && leaned.poolChrome === '""' && // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    !!leaned && leaned.st.zoomed && // eslint-disable-line @typescript-eslint/no-unnecessary-condition
       // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
-      leaned.map.x < 0 && leaned.map.y < 0 && leaned.map.bottom > 800,
+      !leaned.st.folded && leaned.slipVis === "visible" && leaned.pool === '""' && leaned.poolChrome === '""' &&
+      // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
+      leaned.map.x < 0 &&
+        // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
+        leaned.map.y < 0 &&
+        // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
+        leaned.map.bottom > 800,
     JSON.stringify(leaned && { st: leaned.st, slip: leaned.slipVis, pool: leaned.pool, poolChrome: leaned.poolChrome, map: leaned.map }), // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   );
   // The pool must reach past the viewport edge, or its blur fades right on the edge and the chart bleeds through at the corner (Alex's 2026-09-03 call on the Explorer's top-left; home runs its pool 4rem out). Sampled, since no computed style sees a blurred edge.
@@ -153,23 +197,39 @@ export async function run(ctx: SuiteContext): Promise<void> {
   );
   // Just below the row's box, inside the footing's 0.6rem foot band: the row's own centre is the gold road (227).
   // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
-  const panelLeft = Math.round(leaned.folio.x - 0.9 * leaned.rem), panelY = Math.round(leaned.folio.y + leaned.folio.h / 2);
+  const panelLeft = Math.round(leaned.folio.x - 0.9 * leaned.rem), panelY = Math.round(
+    // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
+    leaned.folio.y +
+    // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
+    leaned.folio.h / 2);
   const panelIn = await brightest(panelLeft + 3, panelY), panelOut = await brightest(panelLeft - 11, panelY);
   check(
     "SB5e leaned, the room folio stands on home's seed box: a crisp panel (a top-to-bottom gradient, no blur) whose left edge is a step against the chart, the pixels 3px inside dark and 11px outside bright",
-    // @ts-expect-error the booted page is read as present (goto() returns null only when SB1 has already failed, and a null throws here, outside any step, so the runner reds the whole suite as stopped early), and a null panel string reads false and fails the check
-    !!leaned && /^linear-gradient\((?!to top)/.test(leaned.folioPanel) && leaned.folioFilter === "none" && panelOut - panelIn > 60 && rest.pool === "none", // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    // @ts-expect-error a null panel string reaches the pattern as "null" and reads false, which fails the check by name
+    !!leaned && /^linear-gradient\((?!to top)/.test(leaned.folioPanel) && leaned.folioFilter === "none" && panelOut - panelIn > 60 && // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+      // @ts-expect-error the booted page is read as present (goto() returns null only when SB1 has already failed); a null throws here, outside any step, and the runner reds the whole suite as stopped early
+      rest.pool === "none",
     // @ts-expect-error the booted page and its boxes are read as present, and goto() returns null only when SB1 has already failed; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
-    JSON.stringify({ panel: leaned.folioPanel.slice(0, 44), filter: leaned.folioFilter, panelIn, panelOut, rest: rest.pool }),
+    JSON.stringify({ panel: leaned.folioPanel.slice(0, 44), filter: leaned.folioFilter, panelIn, panelOut, rest:
+      // @ts-expect-error the booted page and its boxes are read as present, and goto() returns null only when SB1 has already failed; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
+      rest.pool }),
   );
   // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
-  const footing = await brightest(Math.round(leaned.legend.x + leaned.legend.w / 2) - 4, Math.round(leaned.legend.bottom) + 3);
+  const footing = await brightest(Math.round(leaned.legend.x +
+    // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
+    leaned.legend.w / 2) - 4, Math.round(
+    // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
+    leaned.legend.bottom) + 3);
   check(
     "SB5c leaned, the legend row stands on home's footing, the seed box's crisp panel (a top-to-bottom gradient, no fade) drawn as the row's own ::before, not the blurred pool: the panel resolves, its foot band reads dark over the chart, and at rest the row carried no ground (the fade left at the 2026-09-03 sitting, ruling 23)",
-    // @ts-expect-error the booted page is read as present (goto() returns null only when SB1 has already failed, and a null throws here, outside any step, so the runner reds the whole suite as stopped early), and a null panel string reads false and fails the check
-    !!leaned && leaned.legendGroundOn === '""' && /^linear-gradient\((?!to top)/.test(leaned.legendGround) && footing < 120 && rest.legendGroundOn === "none", // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    // @ts-expect-error a null ground string reaches the pattern as "null" and reads false, which fails the check by name
+    !!leaned && leaned.legendGroundOn === '""' && /^linear-gradient\((?!to top)/.test(leaned.legendGround) && footing < 120 && // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+      // @ts-expect-error the booted page is read as present (goto() returns null only when SB1 has already failed); a null throws here, outside any step, and the runner reds the whole suite as stopped early
+      rest.legendGroundOn === "none",
     // @ts-expect-error the booted page and its boxes are read as present, and goto() returns null only when SB1 has already failed; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
-    JSON.stringify({ leaned: leaned.legendGround.slice(0, 40), footing, rest: rest.legendGroundOn }),
+    JSON.stringify({ leaned: leaned.legendGround.slice(0, 40), footing, rest:
+      // @ts-expect-error the booted page and its boxes are read as present, and goto() returns null only when SB1 has already failed; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
+      rest.legendGroundOn }),
   );
 
   await setState("rest");
@@ -189,10 +249,16 @@ export async function run(ctx: SuiteContext): Promise<void> {
   check(
     "SB7 at a true 390 the slip is the bottom sheet, collapsed to its head: fixed, full width, on the floor, its body hidden; the tab and the chart folio stand down, the legend row is docked in the slip, the Glass seats above the sheet, no sideways scroll",
     // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
-    !!phone && phone.slipPos === "fixed" && phone.slip.x === 0 && phone.slip.w === 390 && Math.abs(phone.slip.bottom - 844) < 1 && phone.slipBody === "none" &&
+    !!phone && phone.slipPos === "fixed" && phone.slip.x === 0 &&
+      // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
+      phone.slip.w === 390 && Math.abs(
+      // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
+      phone.slip.bottom - 844) < 1 && phone.slipBody === "none" &&
       phone.tabDisp === "none" && phone.chartFolioDisp === "none" && phone.legendInSlip && phone.legendDocked &&
       // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
-      phone.glass.bottom < phone.slip.y && phone.sheetH !== "" && phone.noX,
+      phone.glass.bottom <
+        // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
+        phone.slip.y && phone.sheetH !== "" && phone.noX,
     JSON.stringify(phone && { slip: phone.slip, pos: phone.slipPos, body: phone.slipBody, tab: phone.tabDisp, chartFolio: phone.chartFolioDisp, docked: [phone.legendInSlip, phone.legendDocked], glass: phone.glass, sheetH: phone.sheetH, noX: phone.noX }),
   );
   await shoot("specimen-390.png", { x: 0, y: 0, width: 390, height: 844, scale: 1 });
@@ -203,7 +269,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
   check(
     "SB8 the handle opens the sheet: its body shows, the handle reports expanded, the docked legend row is in it, and the Glass stands down while the sheet is open (the kit's rule since the 2026-09-03 sitting, ruling 1; above the sheet it climbed into the corner's row, 35x85 at 390)",
     // @ts-expect-error the booted page and its boxes are read as present, and goto() returns null only when SB1 has already failed; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
-    !!open && open.st && open.slipBody !== "none" && open.handleExpanded === "true" && open.legendDocked && open.slip.y < phone.slip.y && open.glassDisp === "none" && open.glassOverFolio === null && open.noX, // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    !!open && open.st && open.slipBody !== "none" && open.handleExpanded === "true" && open.legendDocked && open.slip.y < // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+      // @ts-expect-error the booted page and its boxes are read as present, and goto() returns null only when SB1 has already failed; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
+      phone.slip.y && open.glassDisp === "none" && open.glassOverFolio === null && open.noX,
     JSON.stringify(open && { body: open.slipBody, expanded: open.handleExpanded, slip: open.slip, glass: open.glass, glassOverFolio: open.glassOverFolio }), // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   );
   await shoot("specimen-390-open.png", { x: 0, y: 0, width: 390, height: 844, scale: 1 });
