@@ -77,6 +77,12 @@ test("a specifier to a module that does not exist as .ts is an edit, even when i
   assert.deepEqual(got.renames, []);
 });
 
+test("a .mjs to .ts swap in a string that is not an import is an edit even when a .ts module by that name exists", () => {
+  const got = compareSources(BASE, BASE.replace('"e2e-explorer.mjs"', '"e2e-explorer.ts"'), true, () => true);
+  assert.equal(got.edits.length, 1);
+  assert.deepEqual(got.renames, []);
+});
+
 test("a reordered statement is an edit", () => {
   const lines = BASE.split("\n");
   const reordered = [lines[0], lines[1], lines[2], lines[3], lines[5], lines[4], lines[6], lines[7]].join("\n");
