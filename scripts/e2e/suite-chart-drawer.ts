@@ -100,7 +100,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   // @ts-expect-error the settle hands its predicate a read only once it is truthy, so asSlide(d) is never null here
   const drawerUp = (d: Slides, last: Slides | null) => slideRested(asSlide(d), asSlide(last));
   const asFold = (d: Folds | null) => (d ? { pos: d.slipX, size: d.slipW, anims: d.slipAnims } : null);
-  // @ts-expect-error the settle hands its predicate a read only once it is truthy, so asFold(d) is never null here
+  // @ts-expect-error the settle hands its predicate a read only once it is truthy, so asFold(d) is never null here; the checker reports only a call's first bad argument, so asFold(from) below, a SURFACES read that is never null either, is reported the day this one is fixed
   const slipTravelled = (from: Folds) => (d: Folds, last: Folds | null) => foldRested(asFold(d), asFold(last),
     asFold(from));
   const both = (a: Rested, b: Rested) => (d: Surfaces, last: Surfaces | null) => a(d, last) && b(d, last);
@@ -897,7 +897,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
     // The same town at a second year: the year IS part of the sheet's identity, which is the case that won "press and stay".
     // The form is submitted synthetically because the claim here is about the FILING, not about the year control, whose own gesture PB6 already drives.
     await evaluate(`(() => { const y = document.getElementById("pp-year"); y.value = String(Math.max(1, Number(y.value) - 300)); document.getElementById("pp-year-form").dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })); })()`);
-    // @ts-expect-error the state is null only on a Prospect page that never drew, which the boot loop above waits out; a null throws here, inside the step, which reds CD28, CD29, CD34, CD35, CD31 by name
+    // @ts-expect-error the state is null only on a Prospect page that never drew, which the boot loop above waits for; a null throws here, inside the step, which reds CD28, CD29, CD34, CD35, CD31 by name
     for (let i = 0; i < 300; i++) { await sleep(100); const s = await evaluate<number | null>(`(() => { const st = window.__vellumProspectState(); return st ? st.year : null; })()`); if (s !== null && s !== one.state.year) break; }
     let two = await evaluate(PP);
     if (two.press && two.press.centre) await clickAt(two.press.centre.x, two.press.centre.y);
@@ -945,7 +945,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
     );
     // Home through chartTarget, the way the page offers: the Explorer restores the table with both sheets on it.
     await send("Page.navigate", { url: "about:blank" });
-    // @ts-expect-error a note link with no href reads null, which CD29 has already read false for; a null throws here, inside the step, which reds CD28, CD29, CD34, CD35, CD31 by name
+    // @ts-expect-error a chart link with no href reads null, which CD29 has already read false for; a null throws here, inside the step, which reds CD28, CD29, CD34, CD35, CD31 by name
     await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/${two.chartHref.slice(
       // @ts-expect-error the same null link, which the slice before it has already thrown on
       two.chartHref.indexOf("#"))}` });
