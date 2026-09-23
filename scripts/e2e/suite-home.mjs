@@ -1,7 +1,7 @@
 /* eslint-disable max-lines */
-// The floating seed chrome (H0-H6, #289 semantics relanded at #470), the ceremony (H7-H13, #457), the failed-bundle doors (H13c, #470), and the stations, cards, and idle drift (H14-H17, #458): the homepage frame at desktop and a real 390px viewport, the corner form, the seed form's real promise (the chart number in the baked cartouche IS the seed, so the drawn SVG identifies its world), the veil's arrival, skips in both phases, sitting memory, reduced-motion and narrow-viewport stories, and the station flights driven by REAL dispatched input; deltas scoped per flow, plumbing shared via home-support.mjs (#460).
-import { readCam, atLandfall, readXform, buttonPoint, makeStage } from "./home-support.mjs";
-import { dropExpectedCancellations } from "./console-support.mjs";
+// The floating seed chrome (H0-H6, #289 semantics relanded at #470), the ceremony (H7-H13, #457), the failed-bundle doors (H13c, #470), and the stations, cards, and idle drift (H14-H17, #458): the homepage frame at desktop and a real 390px viewport, the corner form, the seed form's real promise (the chart number in the baked cartouche IS the seed, so the drawn SVG identifies its world), the veil's arrival, skips in both phases, sitting memory, reduced-motion and narrow-viewport stories, and the station flights driven by REAL dispatched input; deltas scoped per flow, plumbing shared via home-support.ts (#460).
+import { readCam, atLandfall, readXform, buttonPoint, makeStage } from "./home-support.ts";
+import { dropExpectedCancellations } from "./console-support.ts";
 
 // eslint-disable-next-line max-lines-per-function
 export async function run(ctx) {

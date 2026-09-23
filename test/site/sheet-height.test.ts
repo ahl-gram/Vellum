@@ -25,7 +25,7 @@ test("the sheet-height literals match their derivation across every carrier (#47
     "public/index.css",
     "src/site/home/camera.ts",
     ...readdirSync(resolve(REPO, "scripts/e2e"))
-      .filter((f) => f.endsWith(".mjs"))
+      .filter((f) => /\.(mjs|ts)$/.test(f))
       .map((f) => `scripts/e2e/${f}`),
   ];
   // Anchored to the derivation's integer part, so a re-derived height reds the witness below instead of matching nothing; a literal carried OUTSIDE these roots escapes (false negative only).
@@ -38,7 +38,7 @@ test("the sheet-height literals match their derivation across every carrier (#47
       assert.ok(Math.abs(hit - derived) < TOL, `${path} carries ${hit}, off the derivation ${derived}`);
     }
   }
-  for (const witness of ["public/index.css", "src/site/home/camera.ts", "scripts/e2e/home-support.mjs"]) {
+  for (const witness of ["public/index.css", "src/site/home/camera.ts", "scripts/e2e/home-support.ts"]) {
     assert.ok(found.has(witness), `the sweep no longer bites: no height literal found in ${witness}`);
   }
 });
@@ -50,7 +50,7 @@ test("the sheet-width literals match the manifest's build width in every home ca
   const wRe = new RegExp(String.raw`\b${w}(?![\d.])`);
   for (const path of [
     "public/index.css",
-    "scripts/e2e/home-support.mjs",
+    "scripts/e2e/home-support.ts",
     "scripts/e2e/suite-home.mjs",
     "scripts/e2e/suite-landfall.mjs",
   ]) {

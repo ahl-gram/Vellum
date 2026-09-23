@@ -1,8 +1,8 @@
 // The head cluster on home (CL1-CL7, #480 Landfall Sub 6b): the wash sized to the cluster, the stage's lettering opted out of selection, and the phone drawer; every geometry MEASURED against the rendered page, since the #480 screenshots were all things source-scan tests could not see.
-import { makeStage, makeMouse, readCam, atLandfall } from "./home-support.mjs";
-import { sampleRow, luminance } from "./pixel-support.mjs";
-import { makeSettle } from "./settle-support.mjs";
-import { makeStep } from "./step-support.mjs";
+import { makeStage, makeMouse, readCam, atLandfall } from "./home-support.ts";
+import { sampleRow, luminance } from "./pixel-support.ts";
+import { makeSettle } from "./settle-support.ts";
+import { makeStep } from "./step-support.ts";
 
 const REM = 16;
 const rectOf = (sel) => `(() => { const e = document.querySelector(${JSON.stringify(sel)}); if (!e) return null; const r = e.getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height, right: r.right, bottom: r.bottom }; })()`;

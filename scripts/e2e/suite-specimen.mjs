@@ -1,8 +1,8 @@
 // The Specimen Book (#487 item 4, cut at #465 ruling 6): every kit piece at its seat, in every state, on one page; MEASURED at 1280x800 and a true 390x844, and shot at both as the closing review's pair (specimen-1280.png, specimen-390.png, specimen-390-open.png, specimen-390-open-leaned.png in the e2e out dir). Every state is reached through the kit's own binders (the fold, the tab, the handle, the Glass), never by planting a class.
-import { scopedHealth } from "./room-support.mjs";
-import { luminance, sampleRow } from "./pixel-support.mjs";
-import { makeSettle } from "./settle-support.mjs";
-import { makeStep } from "./step-support.mjs";
+import { scopedHealth } from "./room-support.ts";
+import { luminance, sampleRow } from "./pixel-support.ts";
+import { makeSettle } from "./settle-support.ts";
+import { makeStep } from "./step-support.ts";
 
 const PAGE = "/specimen/";
 const CHART_ASPECT = 1500 / 1157.931;

@@ -11,5 +11,5 @@ export const OUR_OWN_REASONS = [
   "Duplicate view-transition-name",
 ];
 
-export const dropExpectedCancellations = (errs) =>
+export const dropExpectedCancellations = (errs: readonly string[]): string[] =>
   errs.filter((e) => !(CANCELLATION_PREFIXES.some((p) => e.includes(p)) && !OUR_OWN_REASONS.some((r) => e.includes(r))));

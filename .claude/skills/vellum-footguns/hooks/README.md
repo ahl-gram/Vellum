@@ -9,7 +9,7 @@ is ever removed.
 ## What it does
 
 - **Injects a gate once per session**, reading the text from `SKILL.md` so the skill stays the single
-  source: Gate 1 on `test/**/*.test.ts`; Gate 2 on `scripts/**/*.mjs` and `out/**/*.mjs`; Gate 3 on
+  source: Gate 1 on `test/**/*.test.ts`; Gate 2 on `scripts/**/*.mjs` and `out/**/*.mjs`, and on `.ts` under `scripts/e2e/`, `out/` and `scripts/e2e-*` (the port-proof tool, and the two runners once they move; never all of `scripts/**/*.ts`, since the first matching route wins and Gate 6 owns the render scripts); Gate 3 on
   `*.css` and `*.astro`; Gate 4 on a Write that creates a new file under `src/pages/`, `src/site/`,
   `scripts/e2e/suite-*` or `public/*.css`; Gate 5 on `git push` and `gh pr create` / `gh pr edit`;
   Gate 6 on the renderer, `generateWorld`'s transitive closure, the committed artifacts and the
@@ -51,10 +51,11 @@ is ever removed.
     from the SEGMENT only, never the raw command, so that reading an issue and then commenting on it
     in one call is not refused. Pull requests are covered on Alex's ruling of 2026-09-14, which
     widened #607's filed scope;
-  - a Write, Edit or MultiEdit into `scripts/**/*.mjs` or `out/**/*.mjs`, or a shell redirect or
-    heredoc into one, whose template literal contains a single-escaped `\s \S \d \D \w \W \b \B` or
-    `\.`. Template literals are found with the TypeScript parser (`ts.createSourceFile`), never a
-    hand-rolled lexer, so a stray backtick in a regex or a string does not swallow the code after it,
+  - a Write, Edit or MultiEdit into `scripts/**/*.mjs`, `scripts/**/*.ts`, `out/**/*.mjs` or
+    `out/**/*.ts`, or a shell redirect or heredoc into one, whose template literal contains a single-escaped `\s \S \d \D \w \W \b \B` or
+    `\.`. Template literals are found with the TypeScript parser (`ts.createSourceFile`, parsing
+    every fragment as TypeScript, since a JavaScript parse reads a generic arrow's `<T>(` as JSX and
+    swallows every template after it), never a hand-rolled lexer, so a stray backtick in a regex or a string does not swallow the code after it,
     and a `String.raw` tag is skipped because it is the remedy;
   - `gh pr create` / `gh pr edit` / `gh pr comment` / `gh issue create` / `gh issue edit` /
     `gh issue comment` whose body carries an em-dash, and a PR body (create or edit) carrying a

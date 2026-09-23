@@ -1,17 +1,17 @@
 // A rendered-pixel strip for suites whose claim is about PAINT (opacity, a glyph showing through), which no hit-test or computed style can see; one row of a Page.captureScreenshot clip, decoded here with node:zlib so the harness takes no image dependency.
 import { inflateSync } from "node:zlib";
 
-const paeth = (a, b, c) => {
+const paeth = (a: number, b: number, c: number): number => {
   const p = a + b - c;
   const pa = Math.abs(p - a), pb = Math.abs(p - b), pc = Math.abs(p - c);
   return pa <= pb && pa <= pc ? a : pb <= pc ? b : c;
 };
 
 // The first row of a PNG, unfiltered against an all-zero row above (there is none).
-export function decodeFirstRow(png) {
+export function decodeFirstRow(png: Buffer): [number, number, number][] {
   let at = 8;
   let width = 0, channels = 0, depth = 0;
-  const idat = [];
+  const idat: Buffer[] = [];
   while (at < png.length) {
     const len = png.readUInt32BE(at);
     const type = png.toString("ascii", at + 4, at + 8);
@@ -19,6 +19,7 @@ export function decodeFirstRow(png) {
     if (type === "IHDR") {
       width = data.readUInt32BE(0);
       depth = data[8];
+      // @ts-expect-error a PNG colour type outside the four keys reads undefined, which the depth-and-channels check below refuses
       channels = { 0: 1, 2: 3, 4: 2, 6: 4 }[data[9]];
     } else if (type === "IDAT") idat.push(data);
     else if (type === "IEND") break;
@@ -34,19 +35,19 @@ export function decodeFirstRow(png) {
     else if (filter === 3) row[i] = (row[i] + (left >> 1)) & 0xff;
     else if (filter === 4) row[i] = (row[i] + paeth(left, 0, 0)) & 0xff;
   }
-  const px = (i, k) => row[i * channels + (channels >= 3 ? k : 0)];
-  return Array.from({ length: width }, (_, i) => [px(i, 0), px(i, 1), px(i, 2)]);
+  const px = (i: number, k: number): number => row[i * channels + (channels >= 3 ? k : 0)];
+  return Array.from({ length: width }, (_, i): [number, number, number] => [px(i, 0), px(i, 1), px(i, 2)]);
 }
 
 // The clip the browser wants is the page's, not the viewport's, so the scroll is added here (a scrolled page read blank frames until the 2026-09-03 sitting, ruling 6).
-export async function sampleRow(send, x, y, width) {
-  const s = await send("Runtime.evaluate", { expression: "[window.scrollX, window.scrollY]", returnByValue: true });
-  const v = s && s.result ? s.result.value : undefined;
-  if (s && s.exceptionDetails) throw new Error(`sampleRow could not read the page's scroll: ${s.exceptionDetails.text || "exception"}`);
+export async function sampleRow(send: (method: string, params?: Record<string, unknown>) => Promise<unknown>, x: number, y: number, width: number): Promise<[number, number, number][]> {
+  const s = await send("Runtime.evaluate", { expression: "[window.scrollX, window.scrollY]", returnByValue: true }) as { result?: { value?: unknown }; exceptionDetails?: { text?: string } };
+  const v = s && s.result ? s.result.value : undefined; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+  if (s && s.exceptionDetails) throw new Error(`sampleRow could not read the page's scroll: ${s.exceptionDetails.text || "exception"}`); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   if (!Array.isArray(v) || v.length !== 2 || !v.every(Number.isFinite)) throw new Error(`sampleRow could not read the page's scroll: ${JSON.stringify(v)}`);
   const [sx, sy] = v;
-  const r = await send("Page.captureScreenshot", { format: "png", clip: { x: x + sx, y: y + sy, width, height: 1, scale: 1 } });
+  const r = await send("Page.captureScreenshot", { format: "png", clip: { x: x + sx, y: y + sy, width, height: 1, scale: 1 } }) as { data: string };
   return decodeFirstRow(Buffer.from(r.data, "base64"));
 }
 
-export const luminance = ([r, g, b]) => 0.2126 * r + 0.7152 * g + 0.0722 * b;
+export const luminance = ([r, g, b]: readonly [number, number, number]): number => 0.2126 * r + 0.7152 * g + 0.0722 * b;

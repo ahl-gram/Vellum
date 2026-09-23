@@ -1,5 +1,5 @@
 // Motion e2e (D the #127 arrival ceremony, F the #130 folio view-transition declarations): hand-authored like its sibling suites, run by the e2e harness rather than the test runner.
-import { makeStep } from "./step-support.mjs";
+import { makeStep } from "./step-support.ts";
 
 export async function run(ctx) {
   const { evaluate, check, sleep, waitSettled } = ctx;

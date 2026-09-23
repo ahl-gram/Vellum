@@ -27,13 +27,13 @@ const TEMPLATE = resolve(HERE, "..", "..", "..", "..", ".github", "PULL_REQUEST_
 
 const EDIT_GATES: [string, RegExp, string][] = [
   ["guard", /(^|\/)test\/.*\.test\.ts$/, "Gate 1"],
-  ["e2e", /(^|\/)(scripts|out)\/.*\.mjs$/, "Gate 2"],
+  ["e2e", /(^|\/)((scripts|out)\/.*\.mjs|(scripts\/e2e\/.*|scripts\/e2e-[\w-]+|out\/.*)\.ts)$/, "Gate 2"],
   ["css", /\.(css|astro)$/, "Gate 3"],
   ["render", /(^|\/)(src\/(render|world|society|core|noise|terrain|climate|hydrology)\/|src\/(atlas\/palette|cli\/raster)\.ts$|public\/(charts\/|og\.png$|favicon\.svg$|apple-touch-icon\.png$)|scripts\/(hero-charts|regen-hero-charts|build-og|build-icons|glyph-outline)\.ts$)/, "Gate 6"], // derived by walking imports, not guessed: src/render, generateWorld's seven-dir closure, the committed artifacts, and every module their writers reach
 ];
 const ROSTER_NEW_FILE = /(^|\/)(src\/pages\/|src\/site\/|scripts\/e2e\/suite-|public\/[^/]+\.css$)/;
-const BROWSER_SCRIPT = /(^|\/)(scripts|out)\/.*\.mjs$/;
-const REDIRECT_INTO_SCRIPT = /(>>?|\btee\b)\s*["']?\S*(scripts|out)\/\S*\.mjs/;
+const BROWSER_SCRIPT = /(^|\/)(scripts|out)\/.*\.(mjs|ts)$/;
+const REDIRECT_INTO_SCRIPT = /(>>?|\btee\b)\s*["']?\S*(scripts|out)\/\S*\.(mjs|ts)/;
 const SILENT_ESCAPE = /(?<!\\)\\[sSdDwWbB.]/;
 const NOISY_ESCAPE = /(?<!\\)\\[()[\]{}+*?|^/]/;
 const QUOTED = /'[^']*'|"(?:[^"\\]|\\.)*"/g;
@@ -138,7 +138,7 @@ const templateRawTexts = async (text: string): Promise<string[] | null> => {
     if (literal && tagOf(n) !== "String.raw") raws.push(n.rawText ?? "");
     ts.forEachChild(n, walk);
   };
-  walk(ts.createSourceFile("fragment.mjs", text, ts.ScriptTarget.Latest, true, ts.ScriptKind.JS));
+  walk(ts.createSourceFile("fragment.ts", text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS));
   return raws;
 };
 

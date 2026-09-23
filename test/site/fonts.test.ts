@@ -127,7 +127,7 @@ test("the gallery page css defers the sub's voice to the house intro role (#324)
 });
 
 test("the e2e harness serves .woff2 with a real font MIME (no false-positive fallback)", async () => {
-  const text = await readText("scripts/e2e/harness.mjs");
+  const text = await readText("scripts/e2e/harness.ts");
   assert.match(text, /["']\.woff2["']\s*:\s*["']font\/woff2/, "the harness MIME map should serve .woff2 as font/woff2");
 });
 

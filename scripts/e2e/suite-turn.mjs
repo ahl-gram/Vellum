@@ -1,5 +1,5 @@
 // Sheet turn e2e (T, #131): a STYLE change turns the sheet and the same world lands re-dressed; a new world settles and never turns. e2e cannot SEE the 3D turn, so these assert end states plus armTurnWatch's .turning record (engaged vs instant swap).
-import { makeStep } from "./step-support.mjs";
+import { makeStep } from "./step-support.ts";
 
 // eslint-disable-next-line max-lines-per-function
 export async function run(ctx) {

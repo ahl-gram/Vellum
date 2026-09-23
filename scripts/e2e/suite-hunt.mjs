@@ -1,5 +1,5 @@
 // Daily Hunt e2e (H1-H12, HD, HG) on the seed-of-the-day page.
-import { dropExpectedCancellations } from "./console-support.mjs";
+import { dropExpectedCancellations } from "./console-support.ts";
 // eslint-disable-next-line max-lines-per-function
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, waitSettled, waitReady, axDescription, serverState, consoleErrors, http4xx, PORT } = ctx;

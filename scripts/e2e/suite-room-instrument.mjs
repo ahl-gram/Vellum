@@ -1,5 +1,5 @@
 // Room instrument e2e (RS*, #320 Sub 3): the S-suite's live-animation coverage re-hosted against .rf-* selectors and the room's own hooks; the Explorer-hosted S* originals stay green beside these until Sub 4 retires them by name.
-import { makeRoom, makeBar, scrubFacts, scopedHealth } from "./room-support.mjs";
+import { makeRoom, makeBar, scrubFacts, scopedHealth } from "./room-support.ts";
 import { HOST_HOOK_NAMES } from "../../src/site/shared/host-hooks.ts";
 import { readPaceSweep, PACE_LEG_MS } from "../../src/cli/e2e-pace.ts";
 

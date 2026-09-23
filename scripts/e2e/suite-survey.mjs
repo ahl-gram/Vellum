@@ -1,9 +1,9 @@
 /* eslint-disable max-lines */
 // Survey Ink e2e (SV1-SV11, #321): the static Explorer's survey surface; self-contained like its sibling suites (navigates itself, carries scoped no-4xx and console-error deltas).
-import { makeRoom } from "./room-support.mjs";
-import { dropExpectedCancellations } from "./console-support.mjs";
+import { makeRoom } from "./room-support.ts";
+import { dropExpectedCancellations } from "./console-support.ts";
 
-import { makeStep } from "./step-support.mjs";
+import { makeStep } from "./step-support.ts";
 
 // eslint-disable-next-line max-lines-per-function
 export async function run(ctx) {

@@ -40,9 +40,9 @@ Falsifiable checks this project's history hands you:
 
 ## Plumbing
 
-Do not hand-roll a CDP client. `start()` in `scripts/e2e/harness.mjs` returns the whole driver surface, evaluate and shoot through to the touch, viewport and settle helpers; its `return {...}` is the list, so read it there rather than from a copy.
+Do not hand-roll a CDP client. `start()` in `scripts/e2e/harness.ts` returns the whole driver surface, evaluate and shoot through to the touch, viewport and settle helpers; its `return {...}` is the list, so read it there rather than from a copy.
 
-`out/324-audit-shoot.mjs` is a working template for a multi-page shot driver built on it. Others worth cribbing: `out/shoot-shell.mjs`, `out/220-shoot-live.mjs`, `out/probe-runninghead.mjs`.
+`out/324-audit-shoot.mjs` is a working template for a multi-page shot driver built on it. Others worth cribbing: `out/shoot-shell.mjs`, `out/220-shoot-live.mjs`, `out/probe-runninghead.mjs`. They predate the harness's move to TypeScript and import it as harness.mjs, so a copy imports `scripts/e2e/harness.ts` instead.
 
 The site must be built first: `npm run build`, then serve `dist/`. App surfaces (Explorer, Print Room, Seed of the Day, Reading Room) need their worker draw to land before you shoot, so wait on a settle signal rather than a fixed sleep where one exists.
 

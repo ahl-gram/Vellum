@@ -1,11 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync, readdirSync } from "node:fs";
+import { readdirSync } from "node:fs";
 import { join, resolve } from "node:path";
-// The helper is one of the grandfathered e2e .mjs files, which tsconfig does not cover; a non-literal specifier keeps tsc out of it.
-const { CANCELLATION_PREFIXES, OUR_OWN_REASONS, dropExpectedCancellations } = await import(
-  `${"../../scripts/e2e"}/console-support.mjs`
-);
+import { CANCELLATION_PREFIXES, OUR_OWN_REASONS, dropExpectedCancellations } from "../../scripts/e2e/console-support.ts";
+import { readE2eSource } from "../../test-support/e2e-source.ts";
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const E2E = resolve(REPO, "scripts", "e2e");
@@ -90,36 +88,36 @@ test("order and multiplicity survive, so a check's payload still reads as what h
 });
 
 test("no suite carries a cancellation opening of its own: one roster, swept from the module's own exported data (#613)", () => {
-  const files = readdirSync(E2E).filter((f) => f.endsWith(".mjs"));
-  assert.ok(files.length > 20, `read only ${files.length} .mjs files under scripts/e2e; this sweep is looking at the wrong tree`);
-  const src = (f: string) => readFileSync(join(E2E, f), "utf8");
+  const files = readdirSync(E2E).filter((f) => /\.(mjs|ts)$/.test(f));
+  assert.ok(files.length > 20, `read only ${files.length} .mjs and .ts files under scripts/e2e; this sweep is looking at the wrong tree`);
+  const src = (f: string) => readE2eSource(join(E2E, f));
   assert.ok(CANCELLATION_PREFIXES.length > 0, "the exported roster is empty, so the sweep below would read nothing");
   for (const prefix of CANCELLATION_PREFIXES) {
-    assert.ok(src("console-support.mjs").includes(prefix), `console-support.mjs does not carry ${prefix}, so this sweep cannot bite`);
-    const offenders = files.filter((f) => f !== "console-support.mjs" && src(f).includes(prefix));
+    assert.ok(src("console-support.ts").includes(prefix), `console-support.ts does not carry ${prefix}, so this sweep cannot bite`);
+    const offenders = files.filter((f) => f !== "console-support.ts" && src(f).includes(prefix));
     assert.deepEqual(
       offenders,
       [],
       `${offenders.join(", ")} spell a cancellation opening inline instead of calling the shared drop, which is how one file goes stale while the rest are fixed (#613). BLIND SPOT, and it has occupants: this cannot see a suite that takes a console delta and filters nothing, which five did before #613; that failure is LOUD (a red check the first time the message lands there) where a stale inline copy is silent`,
     );
   }
-  const adopters = files.filter((f) => src(f).includes('from "./console-support.mjs"'));
+  const adopters = files.filter((f) => src(f).includes('from "./console-support.ts"'));
   assert.ok(adopters.length > 0, "no file imports console-support at all, so the sweep above is reading an empty claim");
   // The at-least-one adopter check above is satisfied by any other file, which is what left this gap (prover round 1).
   const uncited = files.filter(
-    (f) => f !== "console-support.mjs" && src(f).includes("dropExpectedCancellations(") && !src(f).includes('from "./console-support.mjs"'),
+    (f) => f !== "console-support.ts" && src(f).includes("dropExpectedCancellations(") && !src(f).includes('from "./console-support.ts"'),
   );
   assert.deepEqual(uncited, [], `${uncited.join(", ")} call the shared drop without the house import spelling; a genuinely missing import is a ReferenceError the first time that check runs, and an unusual spelling reds here too, which is the safe direction`);
 });
 
 test("every read of the console accumulator goes through the shared drop, so a call site cannot quietly stop filtering (cold skeptic on PR #619)", () => {
-  // harness.mjs FILLS the accumulator and is the one file that reads it for something other than a check.
-  const files = readdirSync(E2E).filter((f) => f.endsWith(".mjs") && f !== "console-support.mjs" && f !== "harness.mjs");
-  assert.ok(files.length > 20, `read only ${files.length} .mjs files; this sweep is looking at the wrong tree`);
+  // harness.ts FILLS the accumulator and is the one file that reads it for something other than a check.
+  const files = readdirSync(E2E).filter((f) => /\.(mjs|ts)$/.test(f) && f !== "console-support.ts" && f !== "harness.ts");
+  assert.ok(files.length > 20, `read only ${files.length} .mjs and .ts files; this sweep is looking at the wrong tree`);
   const offenders: string[] = [];
   let reads = 0;
   for (const f of files) {
-    readFileSync(join(E2E, f), "utf8").split("\n").forEach((raw, i) => {
+    readE2eSource(join(E2E, f)).split("\n").forEach((raw, i) => {
       const line = raw.trim();
       if (!line.includes("consoleErrors") || line.startsWith("//")) return;
       if (line.startsWith("const {") || /=\s*consoleErrors\.length;?$/.test(line)) return;
@@ -131,6 +129,6 @@ test("every read of the console accumulator goes through the shared drop, so a c
   assert.deepEqual(
     offenders,
     [],
-    `${offenders.join(", ")} read the console accumulator without passing it through the shared drop, so that check silently stopped filtering. BLIND SPOTS, declared, and the third was found by mutation rather than by reasoning (prover round 3): it reads scripts/e2e/*.mjs only, so scripts/e2e-explorer.mjs and scripts/e2e-lanes.mjs are outside it, both clean today and neither taking a delta; it reads one LINE, so a read split across lines escapes; and a check built from TWO separately excluded base captures plus a comparison line that never names the accumulator escapes it whole, since every line it could see is legitimately excluded. It errs the other way on a comment that merely mentions the accumulator, which is the direction a scanner here is owed`,
+    `${offenders.join(", ")} read the console accumulator without passing it through the shared drop, so that check silently stopped filtering. BLIND SPOTS, declared, and the third was found by mutation rather than by reasoning (prover round 3): it reads the .mjs and .ts files under scripts/e2e/ only, types stripped, so scripts/e2e-explorer.mjs and scripts/e2e-lanes.mjs are outside it, both clean today and neither taking a delta; it reads one LINE, so a read split across lines escapes; and a check built from TWO separately excluded base captures plus a comparison line that never names the accumulator escapes it whole, since every line it could see is legitimately excluded. It errs the other way on a comment that merely mentions the accumulator, which is the direction a scanner here is owed`,
   );
 });

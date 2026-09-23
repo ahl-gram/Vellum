@@ -1,5 +1,5 @@
 // Glass gestures e2e (#166): suite-zoom's behaviour re-proven through REAL CDP input (mouse wheel, touch, device metrics); runs right after suite-zoom and restores its clean desktop home before suite-cards. d3-zoom binds its touch listeners ONLY when the page BOOTS as a touch device (defaultTouchable reads navigator.maxTouchPoints at attach time), so the touch block enables emulation and then RELOADS. NEVER dispatch a real touch while touch emulation is off (it wedges Chrome's touch input pipeline for the WHOLE session; a real mouse wheel is safe, only touch poisons), and NEVER change the emulation config after a real touch (later touches route to native page pinch-zoom and a clear+reload does NOT recover it), so ALL touch checks run under ONE phone-metric emulation set enabled once and left alone.
-import { makeStep } from "./step-support.mjs";
+import { makeStep } from "./step-support.ts";
 
 // eslint-disable-next-line max-lines-per-function
 export async function run(ctx) {

@@ -1,6 +1,6 @@
 // Ribbon e2e (the RB checks; the chart room since #463 part 4/4): the strip-chart page boots from the shared worker, defaults to the capital's farthest road, the itinerary fills the slip and a row leans the Glass, a picked journey redraws in place and writes the address and the roads out, the phone docks the journey into the sheet, and the same address presses byte-identical scrolls; self-contained like its sibling suites (navigates itself, carries scoped no-4xx and console-error deltas).
-import { makeStep } from "./step-support.mjs";
-import { dropExpectedCancellations } from "./console-support.mjs";
+import { makeStep } from "./step-support.ts";
+import { dropExpectedCancellations } from "./console-support.ts";
 
 // eslint-disable-next-line max-lines-per-function
 export async function run(ctx) {
