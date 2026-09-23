@@ -7,13 +7,30 @@ import { slideRested, foldRested } from "../../src/cli/e2e-slide.ts";
 import { SAY_HOLD_MS } from "../../src/site/shared/announce.ts";
 // Imported and never restated: a key spelled twice is a clear that silently stops clearing the day the app's own key moves.
 import { TABLE_STORE_KEY } from "../../src/site/shared/table-store.ts";
+import type { Payload, Point, SuiteContext } from "./types.ts";
+
+type Rect = { x: number; y: number; w: number; h: number; right: number; bottom: number };
+type Read = { open: boolean; tabText: string | null; tabShown: boolean; count: string | null; cuttings: number; imgs: number; frames: number; titles: string[]; decoded: boolean[]; offs: number; offsReachable: number; offRects: { y: number; h: number }[]; lowestOff: number | null; minOffH: number; drawerAnims: string[]; slideMs: string | null; innerH: number; fullShown: boolean; roadDisabled: boolean; ear: { label: string | null; rect: Rect } | null; insetRect: Rect | null; insetSvgs: number; lastSvgIsSurvey: boolean; status: string; statusFadeMs: string | null; hashTable: string | null; rawHash: string; path: string; scrollW: number; innerW: number };
+type Cam = { x: number; y: number; k: number };
+type Ghost = { tag: string; src: string; pos: string; pe: string; translate: string; w: number; rotate: string; z: string; inMap: boolean };
+type Carry = { ghost: Ghost | null; drag: boolean; open: boolean; receiving: boolean; folded: boolean; cuttings: number; landing: boolean; landingRuns: number; jolt: boolean; joltRuns: number; sel: number; cursor: string | null; cam: Cam | null; hashTable: string | null; status: string; innerH: number };
+type Surfaces = { open: boolean; folded: boolean; tabShown: boolean; lifted: string[]; seats: Record<string, number>; slipX: number; slipW: number; slipAnims: string[]; lowestOff: number | null; minOffH: number; drawerAnims: string[]; innerH: number; leafTabsDisplay: string | null; leafTabBoxes: number };
+type Slides = Pick<Read, "lowestOff" | "minOffH" | "drawerAnims" | "innerH">;
+type Folds = Pick<Surfaces, "slipX" | "slipW" | "slipAnims">;
+type Rested = (d: Surfaces, last: Surfaces | null) => boolean;
+type Edge = { folded: boolean; tabShown: boolean; overlap: number; buttons: number[] };
+type Leaf = { tabs: { text: string; selected: string | null; press: string | null }[]; leafTabsDisplay: string | null; leafShown: boolean; formShown: boolean; cuttingsInLeaf: boolean; cuttingsShown: boolean; cuttings: number; columns: number; countText: string | null; roadInSlip: boolean; roadPress: string | null; otherRoads: number };
+type Card = { hits: number; shown: boolean; name: string | null; press: { text: string; dim: boolean; idx?: string; box: { x: number; y: number; w: number; h: number }; hit: string; disabled: boolean } | null; link: { hit: string; inActs: boolean } | null; actsRow: number; pressInActs: boolean; cuttings: number; prospects: number; titles: string[]; subs: string[]; imgs: number; decoded: boolean[]; frames: number; hashTable: string | null; seedBox: string | null; scrollW: number; innerW: number };
+type Pp = { state: { year: number } | null; press: { text: string; dim: boolean; shown: boolean; centre: Point | null; hit: string; disabled: boolean } | null; count: string | null; inNote: boolean; roads: number; chartHref: string | null; hashTable: string | null };
+type Stored = { stored: string | null };
+type Back = Read & Stored & { marker: string | null; navType: string | null };
 
 const SEED = 42;
 // A camera settled deep enough to commit a band-3 inset, the same descent suite-region-detail drives.
 const DEEP = "cx=0.5625&cy=0.4375&k=8";
 const DRESS = `seed=${SEED}&style=antique&legend=1&arms=0&beasts=0`;
 
-const READ = `(() => {
+const READ: Payload<Read> = `(() => {
   const r = (sel) => { const e = document.querySelector(sel); if (!e) return null; const b = e.getBoundingClientRect(); return { x: b.x, y: b.y, w: b.width, h: b.height, right: b.right, bottom: b.bottom }; };
   const drawer = document.getElementById("chart-drawer");
   const ear = document.querySelector("#map .region-inset .dog-ear");
@@ -54,7 +71,7 @@ const READ = `(() => {
 })()`;
 
 // eslint-disable-next-line max-lines-per-function
-export async function run(ctx) {
+export async function run(ctx: SuiteContext): Promise<void> {
   const { evaluate, send, check, shoot, sleep, setMobileViewport, clearMobile, touch, touchPan, PORT } = ctx;
   const settle = makeSettle(ctx);
   // A group that only navigates needs no step: go()'s bounded loop returns rather than throwing.
@@ -64,26 +81,29 @@ export async function run(ctx) {
   // A settle that waits on a REGION JOB is not waiting on a transition: the worker draws a whole survey, which is real work that scales with the runner. The default 120 tries is 6s, sized on a laptop, and CI ran this lane 2.7x slower than local on the run that timed out. 400 tries is 20s, the same order as TOUR_TIMEOUT_MS, which is itself sized at roughly 10x the slowest matrix measured on CI.
   const DRAWN = 400;
   const clickEar = async () => {
-    const r = await evaluate(`(() => { const e = document.querySelector("#map .region-inset .dog-ear"); if (!e) return null; const b = e.getBoundingClientRect(); return { x: Math.round(b.x + b.width * 0.72), y: Math.round(b.y + b.height * 0.28) }; })()`);
+    const r = await evaluate<Point | null>(`(() => { const e = document.querySelector("#map .region-inset .dog-ear"); if (!e) return null; const b = e.getBoundingClientRect(); return { x: Math.round(b.x + b.width * 0.72), y: Math.round(b.y + b.height * 0.28) }; })()`);
     if (r) await clickAt(r.x, r.y);
     return r;
   };
   // Since #634 the table has a second home on the DEVICE, and this suite fills it on nearly every group: every arrival below that carries no table key would otherwise inherit whatever the group before it laid, which is a bleed inside one suite and not only across a lane. So an arrival is bare unless it says otherwise, and the four checks that are ABOUT the device seed it themselves. about:blank has no storage of its own, so the clear rides on the site's origin.
   const forget = async () => { try { await evaluate(`localStorage.removeItem(${JSON.stringify(TABLE_STORE_KEY)})`); } catch {} };
-  const go = async (hash) => {
+  const go = async (hash: string) => {
     await forget();
     await send("Page.navigate", { url: "about:blank" });
     await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/#${hash}` });
-    for (let i = 0; i < 200; i++) { await sleep(150); if (await evaluate(`!!document.querySelector("#map svg") && !!document.getElementById("chart-drawer")`)) break; }
+    for (let i = 0; i < 200; i++) { await sleep(150); if (await evaluate<boolean>(`!!document.querySelector("#map svg") && !!document.getElementById("chart-drawer")`)) break; }
     await sleep(400);
   };
-  const atInset = (d) => !!d.ear && d.insetSvgs === 1;
+  const atInset = (d: Read) => !!d.ear && d.insetSvgs === 1;
   // No buttons at all reports pos at the viewport edge, not 0: 0 is inside the fold and would leave `size` alone rejecting a shut drawer.
-  const asSlide = (d) => (d ? { pos: d.lowestOff === null ? d.innerH : d.lowestOff, size: d.minOffH, anims: d.drawerAnims, viewportH: d.innerH } : null);
-  const drawerUp = (d, last) => slideRested(asSlide(d), asSlide(last));
-  const asFold = (d) => (d ? { pos: d.slipX, size: d.slipW, anims: d.slipAnims } : null);
-  const slipTravelled = (from) => (d, last) => foldRested(asFold(d), asFold(last), asFold(from));
-  const both = (a, b) => (d, last) => a(d, last) && b(d, last);
+  const asSlide = (d: Slides | null) => (d ? { pos: d.lowestOff === null ? d.innerH : d.lowestOff, size: d.minOffH, anims: d.drawerAnims, viewportH: d.innerH } : null);
+  // @ts-expect-error the settle hands its predicate a read only once it is truthy, so asSlide(d) is never null here
+  const drawerUp = (d: Slides, last: Slides | null) => slideRested(asSlide(d), asSlide(last));
+  const asFold = (d: Folds | null) => (d ? { pos: d.slipX, size: d.slipW, anims: d.slipAnims } : null);
+  // @ts-expect-error the settle hands its predicate a read only once it is truthy, so asFold(d) is never null here; the checker reports only a call's first bad argument, so asFold(from) below, a SURFACES read that is never null either, is reported the day this one is fixed
+  const slipTravelled = (from: Folds) => (d: Folds, last: Folds | null) => foldRested(asFold(d), asFold(last),
+    asFold(from));
+  const both = (a: Rested, b: Rested) => (d: Surfaces, last: Surfaces | null) => a(d, last) && b(d, last);
 
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
 
@@ -109,7 +129,7 @@ export async function run(ctx) {
   });
 
   // The one read that crosses a step: CD4 reloads the address CD2 wrote, so if CD2 never laid a sheet, CD4 fails as CD4 rather than passing against a table nobody filled.
-  let laid = null;
+  let laid: Read | null = null;
   await step("CD2, CD2b, CD2c", async () => {
     const earAt = await clickEar();
     laid = await settle(READ, (d) => d.open && d.cuttings === 1, "chart-drawer-laid");
@@ -125,12 +145,12 @@ export async function run(ctx) {
 
     check(
       "CD2b the handle answers a REAL pointer: the inset box is pointer-events: none, so the corner must restore it or the survey files for a synthetic click and for nobody else (#520 goal: with a click or a tap, everywhere)",
-      !!earAt && (await evaluate(`(() => { const e = document.querySelector("#map .region-inset .dog-ear"); if (!e) return "no-ear"; const b = e.getBoundingClientRect(); const hit = document.elementFromPoint(Math.round(b.x + b.width * 0.72), Math.round(b.y + b.height * 0.28)); return hit === e ? "ear" : (hit ? hit.tagName + "." + String(hit.className.baseVal ?? hit.className).split(" ")[0] : "none"); })()`)) === "ear",
+      !!earAt && (await evaluate<string>(`(() => { const e = document.querySelector("#map .region-inset .dog-ear"); if (!e) return "no-ear"; const b = e.getBoundingClientRect(); const hit = document.elementFromPoint(Math.round(b.x + b.width * 0.72), Math.round(b.y + b.height * 0.28)); return hit === e ? "ear" : (hit ? hit.tagName + "." + String(hit.className.baseVal ?? hit.className).split(" ")[0] : "none"); })()`)) === "ear",
       JSON.stringify({ clickedAt: earAt }),
     );
 
-    const beforeDbl = await evaluate(`(() => ({ k: window.__vellumZoomState().k, band: window.__vellumRegion ? window.__vellumRegion().band : null }))()`);
-    const dblAt = await evaluate(`(() => { const e = document.querySelector("#map .region-inset .dog-ear"); if (!e) return null; const b = e.getBoundingClientRect(); return { x: Math.round(b.x + b.width * 0.72), y: Math.round(b.y + b.height * 0.28) }; })()`);
+    const beforeDbl = await evaluate<{ k: number; band: number | null }>(`(() => ({ k: window.__vellumZoomState().k, band: window.__vellumRegion ? window.__vellumRegion().band : null }))()`);
+    const dblAt = await evaluate<Point | null>(`(() => { const e = document.querySelector("#map .region-inset .dog-ear"); if (!e) return null; const b = e.getBoundingClientRect(); return { x: Math.round(b.x + b.width * 0.72), y: Math.round(b.y + b.height * 0.28) }; })()`);
     if (dblAt) {
       for (const clickCount of [1, 2]) {
         await send("Input.dispatchMouseEvent", { type: "mousePressed", x: dblAt.x, y: dblAt.y, button: "left", clickCount });
@@ -138,7 +158,7 @@ export async function run(ctx) {
       }
     }
     await sleep(900);
-    const afterDbl = await evaluate(`(() => ({ k: window.__vellumZoomState().k, band: window.__vellumRegion ? window.__vellumRegion().band : null }))()`);
+    const afterDbl = await evaluate<{ k: number; band: number | null }>(`(() => ({ k: window.__vellumZoomState().k, band: window.__vellumRegion ? window.__vellumRegion().band : null }))()`);
     check(
       "CD2c a rapid double click on the handle does not become d3's double-click-to-zoom, the same rule Z10b pins for the zoom cluster (#520 build item 2)",
       !!dblAt && afterDbl.k === beforeDbl.k && afterDbl.band === beforeDbl.band,
@@ -157,7 +177,7 @@ export async function run(ctx) {
     const saidAt = Date.now();
     const said = await evaluate(READ);
     // The rule's resolved answer, not the app's timing: the class is put on with the transition suppressed inline, so the value read is the one the CASCADE gives and a later arm re-raising opacity cannot hide behind the JS clearing the text anyway (skeptic on PR #584).
-    const fadeProbe = await evaluate(`(() => { const s = document.getElementById("status"); const was = s.style.transition; s.style.transition = "none"; const rest = getComputedStyle(s).opacity; s.classList.add("fading"); const faded = getComputedStyle(s).opacity; s.classList.remove("fading"); s.style.transition = was; return { rest, faded }; })()`);
+    const fadeProbe = await evaluate<{ rest: string; faded: string }>(`(() => { const s = document.getElementById("status"); const was = s.style.transition; s.style.transition = "none"; const rest = getComputedStyle(s).opacity; s.classList.add("fading"); const faded = getComputedStyle(s).opacity; s.classList.remove("fading"); s.style.transition = was; return { rest, faded }; })()`);
     const gone = await settle(READ, (d) => d.status === "", "chart-drawer-said-gone", SAID_GONE);
     const waited = Date.now() - saidAt;
     check(
@@ -184,7 +204,7 @@ export async function run(ctx) {
 
   // Issue #523 Sub 5: the desktop drag, the settle and the jolt, ruled 2026-09-21. The camera is d3's {x, y, k} and every Broadside fold schedules a room layout 340ms later that re-seats x/y (FOLD_SETTLE_MS in src/site/shared/slip.ts), so every drag check below holds the FOLD constant across its two reads (the Broadside already folded before the press), takes each read at REST (two reads 50ms apart agreeing, with no ghost and no settle in flight), and compares k exactly with x and y inside half a pixel: a no-change refit is a float round trip through the camera bridge, a d3 pan is the carry's own delta in the hundreds of px, and k alone (CD2c's read) cannot tell a pan at all.
   const { press, moveTo, release } = makeMouse(ctx);
-  const CARRY = `(() => {
+  const CARRY: Payload<Carry> = `(() => {
     const g = document.querySelector(".sheet-ghost");
     const d = document.getElementById("chart-drawer");
     const li = document.querySelector("#cuttings li.landing");
@@ -206,14 +226,14 @@ export async function run(ctx) {
       innerH: window.innerHeight,
     };
   })()`;
-  const sameCam = (a, b) => !!a && !!b && a.k === b.k && Math.abs(a.x - b.x) < 0.5 && Math.abs(a.y - b.y) < 0.5;
-  const atRest = (d, last) => !!last && !d.ghost && !d.landing && sameCam(d.cam, last.cam) && d.cuttings === last.cuttings;
-  const earPoint = () => evaluate(`(() => { const e = document.querySelector("#map .region-inset .dog-ear"); if (!e) return null; const b = e.getBoundingClientRect(); return { x: Math.round(b.x + b.width * 0.72), y: Math.round(b.y + b.height * 0.28) }; })()`);
+  const sameCam = (a: Cam | null, b: Cam | null) => !!a && !!b && a.k === b.k && Math.abs(a.x - b.x) < 0.5 && Math.abs(a.y - b.y) < 0.5;
+  const atRest = (d: Carry, last: Carry | null) => !!last && !d.ghost && !d.landing && sameCam(d.cam, last.cam) && d.cuttings === last.cuttings;
+  const earPoint = () => evaluate<Point | null>(`(() => { const e = document.querySelector("#map .region-inset .dog-ear"); if (!e) return null; const b = e.getBoundingClientRect(); return { x: Math.round(b.x + b.width * 0.72), y: Math.round(b.y + b.height * 0.28) }; })()`);
   // The band's own centre: the drawer's seat is its height from the foot of the viewport (bandOf in src/site/explorer/table-drag.ts), so a release here is inside it at any viewport height.
-  const bandPoint = () => evaluate(`({ x: 640, y: window.innerHeight - 120 })`);
+  const bandPoint = () => evaluate<Point>(`({ x: 640, y: window.innerHeight - 120 })`);
   // The settle's declared duration, read the CD23 way: the class is put on a scratch cutting with transitions suppressed, the cascade's answer is read, and the class comes off again.
-  const DURATION = `(() => { const li = document.querySelector("#cuttings li"); if (!li) return null; li.classList.add("landing"); const v = getComputedStyle(li).animationDuration; li.classList.remove("landing"); return v; })()`;
-  const carry = async (to) => {
+  const DURATION: Payload<string | null> = `(() => { const li = document.querySelector("#cuttings li"); if (!li) return null; li.classList.add("landing"); const v = getComputedStyle(li).animationDuration; li.classList.remove("landing"); return v; })()`;
+  const carry = async (to: Point) => {
     const from = await earPoint();
     if (!from) throw new Error("no dog-ear to carry from");
     await press(from.x, from.y);
@@ -223,15 +243,15 @@ export async function run(ctx) {
     return { from, to, mid };
   };
   /** Polls to rest while remembering whether the class was ever seen with its animation running: the settle is 340ms and the poll is 50ms, so a settle that plays is seen and a settle that never plays is not. */
-  const restSeeing = async (label, flag) => {
+  const restSeeing = async (label: string, flag: "landingRuns" | "joltRuns") => {
     let saw = false;
     const d = await settle(CARRY, (x, last) => { if (x[flag] > 0) saw = true; return atRest(x, last); }, label);
     return { ...d, saw };
   };
 
   // The slip at rest with the drawer shut and the Broadside folded: the fold's own transition has ended and the room layout it schedules has had its 340ms.
-  const FOLDREST = `(() => { const s = document.querySelector(".slip"); return { folded: s.classList.contains("folded"), open: document.getElementById("chart-drawer").classList.contains("open"), slipX: +s.getBoundingClientRect().x.toFixed(2), anims: s.getAnimations().map((a) => a.playState) }; })()`;
-  const shutAndFold = async (label) => {
+  const FOLDREST: Payload<{ folded: boolean; open: boolean; slipX: number; anims: string[] }> = `(() => { const s = document.querySelector(".slip"); return { folded: s.classList.contains("folded"), open: document.getElementById("chart-drawer").classList.contains("open"), slipX: +s.getBoundingClientRect().x.toFixed(2), anims: s.getAnimations().map((a) => a.playState) }; })()`;
+  const shutAndFold = async (label: string) => {
     await evaluate(`document.getElementById("chart-drawer-shut").click()`);
     await sleep(400);
     await evaluate(`(() => { const s = document.querySelector(".slip"); if (!s.classList.contains("folded")) document.querySelector(".slip-fold").click(); })()`);
@@ -259,6 +279,7 @@ export async function run(ctx) {
         mid.drag && mid.cursor === "grabbing" && mid.sel === 0 && mid.open && mid.receiving &&
         landed.cuttings === 1 && landed.saw && !landed.landing && !landed.ghost && !landed.drag && !landed.receiving &&
         typeof landed.hashTable === "string" && landed.hashTable.startsWith("k-s.seed-42") && /lies on the table/.test(landed.status) &&
+        // @ts-expect-error the duration reads null only with no cutting on the table, and parseFloat(null) is NaN, which reads this comparison false and reds the check by name
         sameCam(before.cam, landed.cam) && landed.folded && parseFloat(duration) === 0.34,
       JSON.stringify({ before: { cuttings: before.cuttings, folded: before.folded, open: before.open, cam: before.cam }, mid, to, landed: { cuttings: landed.cuttings, saw: landed.saw, landing: landed.landing, ghost: landed.ghost, drag: landed.drag, hashTable: landed.hashTable, status: landed.status, cam: landed.cam, folded: landed.folded }, duration }),
     );
@@ -293,7 +314,7 @@ export async function run(ctx) {
 
   await step("CD46", async () => {
     await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
-    const reduced = await evaluate(`matchMedia("(prefers-reduced-motion: reduce)").matches`);
+    const reduced = await evaluate<boolean>(`matchMedia("(prefers-reduced-motion: reduce)").matches`);
     const target = await bandPoint();
     const { to } = await carry(target);
     await release(to.x, to.y);
@@ -302,6 +323,7 @@ export async function run(ctx) {
     await send("Emulation.setEmulatedMedia", { features: [] });
     check(
       "CD46 under reduced motion a carry still files and the settle collapses to an instant place: the cutting lands, its class retires, and the settle's declared duration reads the blanket's near-zero against CD44's 0.34s in the same run, which is the same-run control that makes the emulation a measurement (Issue #523; motion.css's blanket)",
+      // @ts-expect-error the duration reads null only with no cutting on the table, and parseFloat(null) is NaN, which reads this comparison false and reds the check by name
       reduced === true && landed.cuttings === 1 && !landed.landing && !landed.ghost && parseFloat(duration) < 0.01,
       JSON.stringify({ reduced, cuttings: landed.cuttings, landing: landed.landing, ghost: landed.ghost, duration }),
     );
@@ -387,7 +409,7 @@ export async function run(ctx) {
   });
 
   // CD9 / CD11 / CD12 (#543, Alex 2026-09-08): the Broadside and the Chart Table are never open together and nothing is lifted onto the chart, because covering the caption and the roads out while leaving the side panel standing made no sense to the reader.
-  const SURFACES = `(() => {
+  const SURFACES: Payload<Surfaces> = `(() => {
     const slip = document.querySelector(".slip");
     const tab = document.querySelector(".slip-tab");
     const sheet = document.querySelector("#map svg").getBoundingClientRect();
@@ -422,7 +444,7 @@ export async function run(ctx) {
   })()`;
 
   // Its own one-shot payload rather than three more fields on SURFACES: that one is polled by four settles here and read again by the CD13 and CD18 steps, and riding it measured 1.73s on this suite against a 0.7s run-to-run spread (2026-09-19, three runs each side).
-  const SEATS = `(() => {
+  const SEATS: Payload<{ tableLeafDisplay: string | null; tableLeafH: number | null; legendDockDisplay: string | null }> = `(() => {
     const leaf = document.getElementById("table-leaf");
     const dock = document.querySelector(".slip .legend-dock");
     return {
@@ -488,7 +510,7 @@ export async function run(ctx) {
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
 
   // CD13 (#543): folded, the camera comes home to --chrome-x where the tab already stands, and the tab's z-19 over the corner's z-10 wins the pointer, so this is a reachability check.
-  const EDGE = `(() => {
+  const EDGE: Payload<Edge> = `(() => {
     const tab = document.getElementById("chart-drawer-tab");
     const zoom = document.querySelector(".corner.br.zoomery");
     const tb = tab.getBoundingClientRect(), zb = zoom.getBoundingClientRect();
@@ -509,7 +531,7 @@ export async function run(ctx) {
       overlap: +overlap.toFixed(0),
       buttons: [...zoom.querySelectorAll(".zoom-btn")].map((b) => reach(b)) };
   })()`;
-  const edge = {};
+  const edge: Record<string, Edge> = {};
   await step("CD13", async () => {
     for (const [w, h] of [[1520, 872], [1280, 800], [901, 800]]) {
       await send("Emulation.setDeviceMetricsOverride", { width: w, height: h, deviceScaleFactor: 1, mobile: false });
@@ -536,28 +558,28 @@ export async function run(ctx) {
     const beforeRoad = await evaluate(SURFACES);
     await evaluate(`document.getElementById("chart-drawer-tab").click()`);
     await settle(SURFACES, both(drawerUp, slipTravelled(beforeRoad)), "chart-drawer-road-open");
-    const roadOn = await evaluate(`(() => { const b = document.getElementById("table-road"); return { disabled: b.disabled, stamp: (document.getElementById("table-road-stamp") || {}).textContent || null }; })()`);
+    const roadOn = await evaluate<{ disabled: boolean; stamp: string | null }>(`(() => { const b = document.getElementById("table-road"); return { disabled: b.disabled, stamp: (document.getElementById("table-road-stamp") || {}).textContent || null }; })()`);
     check(
       "CD18 with sheets on the table the road to the Portfolio turns on: #520 shipped it disabled with the stamp saying the portfolio is not yet bound, and this sub is what binds it (#521)",
       roadOn.disabled === false,
       JSON.stringify(roadOn),
     );
   });
-  const roadBefore = await evaluate(`document.getElementById("table-road").disabled`);
-  const roadAt = await evaluate(`(() => { const b = document.getElementById("table-road"); const r = b.getBoundingClientRect();
+  const roadBefore = await evaluate<boolean>(`document.getElementById("table-road").disabled`);
+  const roadAt = await evaluate<{ x: number; y: number; reachable: boolean }>(`(() => { const b = document.getElementById("table-road"); const r = b.getBoundingClientRect();
     const x = Math.round(r.x + r.width / 2), y = Math.round(r.y + r.height / 2);
     const h = document.elementFromPoint(x, y);
     return { x, y, reachable: h === b || b.contains(h) }; })()`);
-  if (roadAt) await clickAt(roadAt.x, roadAt.y);
-  for (let i = 0; i < 200; i++) { await sleep(100); if (await evaluate(`location.pathname.indexOf("/portfolio/") !== -1`)) break; }
-  const arrived = await evaluate(`({ path: location.pathname, table: new URLSearchParams(location.hash.slice(1)).get("table") })`);
+  if (roadAt) await clickAt(roadAt.x, roadAt.y); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+  for (let i = 0; i < 200; i++) { await sleep(100); if (await evaluate<boolean>(`location.pathname.indexOf("/portfolio/") !== -1`)) break; }
+  const arrived = await evaluate<{ path: string; table: string | null }>(`({ path: location.pathname, table: new URLSearchParams(location.hash.slice(1)).get("table") })`);
   check(
     "CD18b the road answers a REAL press and carries the WHOLE gathering in the Portfolio's own address, which is the epic's core insight: the folio is a link, so the page it lands on can draft the same six sheets for anyone",
     arrived.path.indexOf("/print-room/portfolio/") !== -1 && typeof arrived.table === "string" && arrived.table.split("_").length === 6 &&
-      !!roadAt && roadAt.reachable,
+      !!roadAt && roadAt.reachable, // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     JSON.stringify({ ...arrived, roadBefore, roadAt }),
   );
-  const PF = `(() => { const s = window.__vellumPortfolio ? window.__vellumPortfolio() : null; return s ? { ...s,
+  const PF: Payload<{ items: number; drawn: number; rows: number; groups: number; heads: string[]; onStage: boolean; folio: string | null; bound: string | null } | null> = `(() => { const s = window.__vellumPortfolio ? window.__vellumPortfolio() : null; return s ? { ...s,
     rows: document.querySelectorAll("#pf-contents .row").length,
     groups: document.querySelectorAll("#pf-contents .group-head").length,
     heads: [...document.querySelectorAll("#pf-contents .group-head span:first-child")].map((e) => e.textContent),
@@ -575,9 +597,9 @@ export async function run(ctx) {
     JSON.stringify(pf),
   );
   // CD24 (#547 ruling 4, Alex 2026-09-13): the Portfolio's "is on top" was the Explorer's defect on a second page, so one shared announcer and ONE kit rule take both lines away. Named blind spot, with its direction: this does not wait the hold out, so it does not watch THIS line go. The going is the shared module (test/site/announce.test.ts) and CD23's resolved read; a second eight-second wait is what the lane's measured budget cannot buy, and the PR body carries it as residue.
-  const pfNext = await evaluate(`(() => { const b = document.getElementById("pf-next"); if (!b) return null; b.scrollIntoView({ block: "center" }); const r = b.getBoundingClientRect(); if (r.width < 1) return null; const x = Math.round(r.x + r.width / 2), y = Math.round(r.y + r.height / 2); const h = document.elementFromPoint(x, y); return { x, y, reachable: h === b || b.contains(h) }; })()`);
+  const pfNext = await evaluate<{ x: number; y: number; reachable: boolean } | null>(`(() => { const b = document.getElementById("pf-next"); if (!b) return null; b.scrollIntoView({ block: "center" }); const r = b.getBoundingClientRect(); if (r.width < 1) return null; const x = Math.round(r.x + r.width / 2), y = Math.round(r.y + r.height / 2); const h = document.elementFromPoint(x, y); return { x, y, reachable: h === b || b.contains(h) }; })()`);
   if (pfNext) await clickAt(pfNext.x, pfNext.y);
-  const PF_SAID = `(() => { const s = document.getElementById("pf-status"); if (!s) return null; const was = s.style.transition; s.style.transition = "none"; const rest = getComputedStyle(s).opacity; s.classList.add("fading"); const faded = getComputedStyle(s).opacity; s.classList.remove("fading"); s.style.transition = was; return { line: s.textContent || "", fadeMs: getComputedStyle(s).transitionDuration, rest, faded }; })()`;
+  const PF_SAID: Payload<{ line: string; fadeMs: string; rest: string; faded: string } | null> = `(() => { const s = document.getElementById("pf-status"); if (!s) return null; const was = s.style.transition; s.style.transition = "none"; const rest = getComputedStyle(s).opacity; s.classList.add("fading"); const faded = getComputedStyle(s).opacity; s.classList.remove("fading"); s.style.transition = was; return { line: s.textContent || "", fadeMs: getComputedStyle(s).transitionDuration, rest, faded }; })()`;
   // A bounded poll and not a settle, so a Portfolio that never announces fails CD24 by name rather than throwing outside every step the way its four siblings here already run unstepped. 40 tries is 2s: bringUp says synchronously inside the click handler's own task, so the first or second read has it (measured 2026-09-13, every local run read it on the first).
   let pfSaid = await evaluate(PF_SAID);
   for (let i = 0; i < 40 && (!pfSaid || pfSaid.line === ""); i++) { await sleep(50); pfSaid = await evaluate(PF_SAID); }
@@ -591,9 +613,9 @@ export async function run(ctx) {
   await forget();
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/print-room/portfolio/` });
-  for (let i = 0; i < 200; i++) { await sleep(100); if (await evaluate(`!!window.__vellumPortfolio`)) break; }
+  for (let i = 0; i < 200; i++) { await sleep(100); if (await evaluate<boolean>(`!!window.__vellumPortfolio`)) break; }
   await sleep(400);
-  const empty = await evaluate(`(() => ({ bound: (document.getElementById("pf-bound") || {}).textContent || null,
+  const empty = await evaluate<{ bound: string | null; where: string | null; explorer: boolean; next: boolean; download: boolean }>(`(() => ({ bound: (document.getElementById("pf-bound") || {}).textContent || null,
     where: (document.querySelector("#portfolio .card-where") || {}).textContent || null,
     // The RECT of all three, never .hidden: atelier.css sets an author display on .legend-btn, which beats the UA [hidden] rule, so el.hidden = true silently no-ops and a check on that property is a check on its own input (#270's guard-prover find).
     // The road takes the same measure as the two presses because it is the same script decision: its mere presence is an Astro literal the page script never touches, and could not go red however the stand-down was written.
@@ -609,14 +631,14 @@ export async function run(ctx) {
   // CD21 (#521): the Portfolio is a chart room, so the kit renders its Glass and the stage's label promises the keys.
   // Both halves are the claim. d3-zoom does NOT set touch-action, so a bound controller with no `touch-action: none`
   // is still dead to a real thumb: the browser's native pan takes the gesture first (#164).
-  const glass = await evaluate(`(() => {
+  const glass = await evaluate<{ zoomable: boolean; touch: string; before: string }>(`(() => {
     const v = document.getElementById("map-viewport");
     const before = document.getElementById("map").style.transform;
     document.querySelector('[data-zoom="in"]').click();
     return { zoomable: v.classList.contains("zoomable"), touch: getComputedStyle(v).touchAction, before };
   })()`);
   await sleep(700);
-  const glassAfter = await evaluate(`document.getElementById("map").style.transform`);
+  const glassAfter = await evaluate<string>(`document.getElementById("map").style.transform`);
   check(
     "CD21 the Portfolio's Glass is bound AND reachable by a thumb: a zoom press moves the camera, and the viewport takes touch-action none, without which d3 never sees the gesture and three corner presses are decoration (#164, #521)",
     glass.zoomable && glass.touch === "none" && glassAfter !== glass.before && glassAfter !== "",
@@ -629,12 +651,12 @@ export async function run(ctx) {
   await step("CD6, CD48", async () => {
     await go(`${DRESS}&${DEEP}`);
     const phoneArmed = await settle(READ, atInset, "chart-drawer-phone-inset", DRAWN);
-    const phoneEar = await evaluate(`(() => { const e = document.querySelector("#map .region-inset .dog-ear"); if (!e) return null; const b = e.getBoundingClientRect(); return { x: Math.round(b.x + b.width * 0.72), y: Math.round(b.y + b.height * 0.28) }; })()`);
+    const phoneEar = await evaluate<Point | null>(`(() => { const e = document.querySelector("#map .region-inset .dog-ear"); if (!e) return null; const b = e.getBoundingClientRect(); return { x: Math.round(b.x + b.width * 0.72), y: Math.round(b.y + b.height * 0.28) }; })()`);
     if (phoneEar) { await touch("touchStart", [{ x: phoneEar.x, y: phoneEar.y, id: 0 }]); await touch("touchEnd", []); }
     await sleep(1600);
     const phone = await evaluate(READ);
-    const phoneDrawer = await evaluate(`getComputedStyle(document.getElementById("chart-drawer")).display`);
-    const phoneShut = await evaluate(`(() => { const b = document.getElementById("chart-drawer-shut"); const r = b.getBoundingClientRect(); if (r.width < 1) return "no-box"; const h = document.elementFromPoint(Math.round(r.x + r.width / 2), Math.round(r.y + r.height / 2)); return h === b || b.contains(h) ? "reachable" : "eclipsed"; })()`);
+    const phoneDrawer = await evaluate<string>(`getComputedStyle(document.getElementById("chart-drawer")).display`);
+    const phoneShut = await evaluate<string>(`(() => { const b = document.getElementById("chart-drawer-shut"); const r = b.getBoundingClientRect(); if (r.width < 1) return "no-box"; const h = document.elementFromPoint(Math.round(r.x + r.width / 2), Math.round(r.y + r.height / 2)); return h === b || b.contains(h) ? "reachable" : "eclipsed"; })()`);
     check(
       "CD6 at 390 the desktop drawer never paints, not even after a real tap on the dog-ear, and the tap FILES the sheet: the handle is the phone's own door into the table and it opens the drawer with no width term, so the stand-down has to cover the OPEN state and not just the resting one (#540; the filing half strengthened at Issue #523, whose drag must leave the tap the door it is)",
       !!phoneEar && !phoneArmed.open && phoneDrawer === "none" && phone.scrollW === phone.innerW && !phone.tabShown && phoneArmed.cuttings === 0 && phone.cuttings === 1,
@@ -642,35 +664,35 @@ export async function run(ctx) {
     );
 
     // CD48 (Issue #523 build item 4), in this order: the handle's touch drag first, the pan control LAST, since a pan at DEEP can recommit the inset and rebuild the ear, and nothing after it here reads the ear.
-    const earNow = await evaluate(`(() => { const e = document.querySelector("#map .region-inset .dog-ear"); if (!e) return null; const b = e.getBoundingClientRect(); return { x: Math.round(b.x + b.width * 0.72), y: Math.round(b.y + b.height * 0.28) }; })()`);
-    const camBefore = await evaluate(`window.__vellumZoomState()`);
+    const earNow = await evaluate<Point | null>(`(() => { const e = document.querySelector("#map .region-inset .dog-ear"); if (!e) return null; const b = e.getBoundingClientRect(); return { x: Math.round(b.x + b.width * 0.72), y: Math.round(b.y + b.height * 0.28) }; })()`);
+    const camBefore = await evaluate<Cam>(`window.__vellumZoomState()`);
     let ghostSeen = false;
     if (earNow) {
       await touch("touchStart", [{ x: earNow.x, y: earNow.y, id: 0 }]);
       for (let i = 1; i <= 4; i++) {
         await touch("touchMove", [{ x: earNow.x - 30 * i, y: earNow.y + 40 * i, id: 0 }]);
-        if (await evaluate(`!!document.querySelector(".sheet-ghost")`)) ghostSeen = true;
+        if (await evaluate<boolean>(`!!document.querySelector(".sheet-ghost")`)) ghostSeen = true;
       }
       await touch("touchEnd", []);
     }
     await sleep(500);
-    const afterHandle = await evaluate(`({ cam: window.__vellumZoomState(), ghost: !!document.querySelector(".sheet-ghost"), drag: document.body.classList.contains("sheet-drag"), cuttings: document.querySelectorAll("#cuttings li").length })`);
-    const panFrom = await evaluate(`(() => { const inset = document.querySelector("#map .region-inset"); const b = inset ? inset.getBoundingClientRect() : null; if (!b) return null;
+    const afterHandle = await evaluate<{ cam: Cam; ghost: boolean; drag: boolean; cuttings: number }>(`({ cam: window.__vellumZoomState(), ghost: !!document.querySelector(".sheet-ghost"), drag: document.body.classList.contains("sheet-drag"), cuttings: document.querySelectorAll("#cuttings li").length })`);
+    const panFrom = await evaluate<{ x: number; y: number; on: string } | null>(`(() => { const inset = document.querySelector("#map .region-inset"); const b = inset ? inset.getBoundingClientRect() : null; if (!b) return null;
       for (const [fx, fy] of [[0.15, 0.85], [0.3, 0.7], [0.5, 0.5], [0.2, 0.3]]) { const x = Math.round(b.x + b.width * fx), y = Math.round(b.y + b.height * fy); const h = document.elementFromPoint(x, y); if (h && !h.closest(".dog-ear") && !h.closest(".place-hit") && h.closest("#map-viewport")) return { x, y, on: h.tagName }; }
       return null; })()`);
     if (panFrom) await touchPan(panFrom.x, panFrom.y, panFrom.x + 80, panFrom.y + 60);
     await sleep(500);
-    const afterPan = await evaluate(`window.__vellumZoomState()`);
+    const afterPan = await evaluate<Cam>(`window.__vellumZoomState()`);
     check(
       "CD48 at 390 a touch that begins on the handle neither pans nor zooms the map and never raises a ghost (touch never drags, Issue #401 ruling 6), while a touch that begins beside it on the chart still pans, the control that proves the camera was listening: the first is the ear's stopped touchstart, the second is d3 bound under touch emulation that was active BEFORE the navigate (Issue #523 build item 4)",
-      !!earNow && !!camBefore && camBefore.k === afterHandle.cam.k && camBefore.x === afterHandle.cam.x && camBefore.y === afterHandle.cam.y &&
+      !!earNow && !!camBefore && camBefore.k === afterHandle.cam.k && camBefore.x === afterHandle.cam.x && camBefore.y === afterHandle.cam.y && // eslint-disable-line @typescript-eslint/no-unnecessary-condition
         !ghostSeen && !afterHandle.ghost && !afterHandle.drag && afterHandle.cuttings === 1 &&
         !!panFrom && (afterPan.x !== camBefore.x || afterPan.y !== camBefore.y),
       JSON.stringify({ ear: earNow, camBefore, afterHandle, ghostSeen, panFrom, afterPan }),
     );
   });
 
-  const LEAF = `(() => {
+  const LEAF: Payload<Leaf> = `(() => {
     const tabs = [...document.querySelectorAll(".slip-head .sheet-tabs button")];
     const name = (e) => (e ? (e.id ? "#" + e.id : "." + String(e.className || e.tagName).trim().split(/\\s+/).join(".")) : null);
     const press = (b) => { const r = b.getBoundingClientRect(); if (r.width < 1 || r.height < 1) return "no-box";
@@ -704,7 +726,7 @@ export async function run(ctx) {
   await evaluate(`document.querySelector(".slip-handle").click()`);
   await sleep(500);
   const leafShut = await evaluate(LEAF);
-  const tableTab = await evaluate(`(() => { const b = [...document.querySelectorAll(".slip-head .sheet-tabs button")].find((x) => /table/i.test(x.textContent || "")); if (!b) return null; const r = b.getBoundingClientRect(); return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) }; })()`);
+  const tableTab = await evaluate<Point | null>(`(() => { const b = [...document.querySelectorAll(".slip-head .sheet-tabs button")].find((x) => /table/i.test(x.textContent || "")); if (!b) return null; const r = b.getBoundingClientRect(); return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) }; })()`);
   if (tableTab) { await touch("touchStart", [{ x: tableTab.x, y: tableTab.y, id: 0 }]); await touch("touchEnd", []); }
   check(
     "CD14 the sheet's head carries the two leaf tabs and BOTH answer a real thumb: at narrow .slip-handle is inset:0 over the whole head, so a tab authored there is dead unless it takes its own layer (mock.css 230), and a tab nobody can press is the #520 dog-ear again. The row DRESSED as a row (#547): CD22 reads display none at 1280, and a stand-down written after the phone block would win everywhere and red here",
@@ -727,7 +749,7 @@ export async function run(ctx) {
       JSON.stringify({ inSlip: leafOpen.roadInSlip, press: leafOpen.roadPress, others: leafOpen.otherRoads }),
     );
   });
-  const broadsideTab = await evaluate(`(() => { const b = [...document.querySelectorAll(".slip-head .sheet-tabs button")].find((x) => /broadside/i.test(x.textContent || "")); if (!b) return null; const r = b.getBoundingClientRect(); return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) }; })()`);
+  const broadsideTab = await evaluate<Point | null>(`(() => { const b = [...document.querySelectorAll(".slip-head .sheet-tabs button")].find((x) => /broadside/i.test(x.textContent || "")); if (!b) return null; const r = b.getBoundingClientRect(); return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) }; })()`);
   if (broadsideTab) { await touch("touchStart", [{ x: broadsideTab.x, y: broadsideTab.y, id: 0 }]); await touch("touchEnd", []); }
   await sleep(700);
   const backToForm = await evaluate(LEAF);
@@ -740,7 +762,7 @@ export async function run(ctx) {
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
 
   // #522 Sub 4: the two capture points for a prospect, and the mixed folio they make.
-  const CARD = `(() => {
+  const CARD: Payload<Card> = `(() => {
     const press = document.querySelector("#place-card .pc-lay");
     const link = document.querySelector("#place-card .pc-prospect");
     const acts = document.querySelector("#place-card .pc-acts");
@@ -770,13 +792,13 @@ export async function run(ctx) {
 
   // A card is pinned by a REAL press on its hit target, and at a NONZERO index, because a filing that always names place 0
   // passes every shape check (#428's own hard-coded-index trap, and PB1b's).
-  const pinCard = async (at) => {
-    const r = await evaluate(`(() => { const h = document.querySelector('.place-overlay .place-hit[data-idx="${at}"]'); if (!h) return null; const b = h.getBoundingClientRect(); return { x: Math.round(b.x + b.width / 2), y: Math.round(b.y + b.height / 2) }; })()`);
+  const pinCard = async (at: number) => {
+    const r = await evaluate<Point | null>(`(() => { const h = document.querySelector('.place-overlay .place-hit[data-idx="${at}"]'); if (!h) return null; const b = h.getBoundingClientRect(); return { x: Math.round(b.x + b.width / 2), y: Math.round(b.y + b.height / 2) }; })()`);
     if (r) await clickAt(r.x, r.y);
     await sleep(250);
     return r;
   };
-  const pressCard = async (d) => { if (d && d.press && d.press.box) await clickAt(d.press.box.x, d.press.box.y); await sleep(250); };
+  const pressCard = async (d: Card) => { if (d && d.press && d.press.box) await clickAt(d.press.box.x, d.press.box.y); await sleep(250); }; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 
   await step("CD25, CD26, CD30", async () => {
     await go(DRESS);
@@ -841,8 +863,8 @@ export async function run(ctx) {
     await forget();
     await send("Page.navigate", { url: "about:blank" });
     await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/prospect/#seed=42&i=3` });
-    for (let i = 0; i < 300; i++) { await sleep(100); if (await evaluate(`!!(window.__vellumProspectState && window.__vellumProspectState())`)) break; }
-    const PP = `(() => {
+    for (let i = 0; i < 300; i++) { await sleep(100); if (await evaluate<boolean>(`!!(window.__vellumProspectState && window.__vellumProspectState())`)) break; }
+    const PP: Payload<Pp> = `(() => {
       const p = document.getElementById("pp-lay");
       const b = p ? p.getBoundingClientRect() : null;
       const centre = b && b.width > 1 ? { x: Math.round(b.x + b.width / 2), y: Math.round(b.y + b.height / 2) } : null;
@@ -857,9 +879,10 @@ export async function run(ctx) {
         hashTable: new URLSearchParams(location.hash.slice(1)).get("table"),
       };
     })()`;
-    const opened = await evaluate(`(() => { const s = document.getElementById("note"); if (s && !s.classList.contains("open")) s.querySelector(".slip-handle").click(); return true; })()`);
+    const opened = await evaluate<boolean>(`(() => { const s = document.getElementById("note"); if (s && !s.classList.contains("open")) s.querySelector(".slip-handle").click(); return true; })()`);
     // The slip's fold is a transition, and CD28 derives a real pointer target from this press's rect: a fixed sleep either
     // measures a box still moving or waits longer than it needs. Poll it to REST instead, and throw naming the last read.
+    // @ts-expect-error the predicate reads null rather than false while either press has no centre, and the settle treats a null as it treats false and keeps polling
     const pp = await settle(PP, (d, last) => !!d.press && d.press.shown && !!last && !!last.press && d.press.centre && last.press.centre &&
       d.press.centre.x === last.press.centre.x && d.press.centre.y === last.press.centre.y, "prospect-note-open");
     check(
@@ -874,7 +897,8 @@ export async function run(ctx) {
     // The same town at a second year: the year IS part of the sheet's identity, which is the case that won "press and stay".
     // The form is submitted synthetically because the claim here is about the FILING, not about the year control, whose own gesture PB6 already drives.
     await evaluate(`(() => { const y = document.getElementById("pp-year"); y.value = String(Math.max(1, Number(y.value) - 300)); document.getElementById("pp-year-form").dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })); })()`);
-    for (let i = 0; i < 300; i++) { await sleep(100); const s = await evaluate(`(() => { const st = window.__vellumProspectState(); return st ? st.year : null; })()`); if (s !== null && s !== one.state.year) break; }
+    // @ts-expect-error the state is null only on a Prospect page that never drew, which the boot loop above waits for; while the poll reads no year the s !== null test before it reads false and the loop runs out its tries, and once it reads a year a null state throws here, inside the step, which reds CD28, CD29, CD34, CD35, CD31 by name
+    for (let i = 0; i < 300; i++) { await sleep(100); const s = await evaluate<number | null>(`(() => { const st = window.__vellumProspectState(); return st ? st.year : null; })()`); if (s !== null && s !== one.state.year) break; }
     let two = await evaluate(PP);
     if (two.press && two.press.centre) await clickAt(two.press.centre.x, two.press.centre.y);
     two = await settle(PP, (d) => typeof d.hashTable === "string" && d.hashTable.split("_").length === 2, "prospect-filed-two");
@@ -900,8 +924,9 @@ export async function run(ctx) {
     await forget();
     await send("Page.navigate", { url: "about:blank" });
     await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/prospect/#seed=42&i=3&table=${SIX}` });
-    for (let i = 0; i < 300; i++) { await sleep(100); if (await evaluate(`!!(window.__vellumProspectState && window.__vellumProspectState())`)) break; }
+    for (let i = 0; i < 300; i++) { await sleep(100); if (await evaluate<boolean>(`!!(window.__vellumProspectState && window.__vellumProspectState())`)) break; }
     await evaluate(`(() => { const s = document.getElementById("note"); if (s && !s.classList.contains("open")) s.querySelector(".slip-handle").click(); })()`);
+    // @ts-expect-error the predicate reads null rather than false while either press has no centre, and the settle treats a null as it treats false and keeps polling
     const atCapPage = await settle(PP, (d, last) => !!d.press && d.press.shown && !!last && !!last.press && d.press.centre && last.press.centre &&
       d.press.centre.x === last.press.centre.x && d.press.centre.y === last.press.centre.y, "prospect-note-open-full");
     if (atCapPage.press && atCapPage.press.centre) await clickAt(atCapPage.press.centre.x, atCapPage.press.centre.y);
@@ -920,8 +945,11 @@ export async function run(ctx) {
     );
     // Home through chartTarget, the way the page offers: the Explorer restores the table with both sheets on it.
     await send("Page.navigate", { url: "about:blank" });
-    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/${two.chartHref.slice(two.chartHref.indexOf("#"))}` });
-    for (let i = 0; i < 200; i++) { await sleep(150); if (await evaluate(`!!document.querySelector("#map svg") && !!document.getElementById("chart-drawer")`)) break; }
+    // @ts-expect-error a chart link with no href reads null, which CD29 has already read false for; a null throws here, inside the step, which reds CD28, CD29, CD34, CD35, CD31 by name
+    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/${two.chartHref.slice(
+      // @ts-expect-error the same null link, which the slice before it has already thrown on
+      two.chartHref.indexOf("#"))}` });
+    for (let i = 0; i < 200; i++) { await sleep(150); if (await evaluate<boolean>(`!!document.querySelector("#map svg") && !!document.getElementById("chart-drawer")`)) break; }
     const home = await settle(CARD, (d) => d.cuttings === 2, "chart-drawer-round-trip");
     check(
       "CD31 the round trip closes: what the Prospect page filed comes home through chartTarget and the Explorer restores BOTH sheets, which is the epic's core insight working across a real cross-path navigation",
@@ -940,8 +968,8 @@ export async function run(ctx) {
     ].join("_");
     await send("Page.navigate", { url: "about:blank" });
     await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/print-room/portfolio/#table=${MIXED}` });
-    for (let i = 0; i < 200; i++) { await sleep(100); if (await evaluate(`!!window.__vellumPortfolio`)) break; }
-    const PFM = `(() => { const s = window.__vellumPortfolio ? window.__vellumPortfolio() : null; return s ? { ...s,
+    for (let i = 0; i < 200; i++) { await sleep(100); if (await evaluate<boolean>(`!!window.__vellumPortfolio`)) break; }
+    const PFM: Payload<{ items: number; drawn: number; rows: number; thumbs: number; awaited: number; bands: string[]; titles: string[]; downloads: number; bound: string | null } | null> = `(() => { const s = window.__vellumPortfolio ? window.__vellumPortfolio() : null; return s ? { ...s,
       rows: document.querySelectorAll("#pf-contents .row").length,
       thumbs: document.querySelectorAll("#pf-contents .thumb img").length,
       awaited: document.querySelectorAll("#pf-contents .thumb.awaited").length,
@@ -973,7 +1001,7 @@ export async function run(ctx) {
     await pinCard(1);
     const narrow = await settle(CARD, (d) => d.shown && !!d.press, "chart-drawer-card-press-390");
     await pressCard(narrow);
-    const said = await settle(
+    const said = await settle<Card & { leafTab: string | null; status: string }>(
       `(() => ({ ...${CARD}, leafTab: (() => { const b = document.getElementById("leaf-table"); return b ? b.textContent : null; })(), status: (document.getElementById("status") || {}).textContent || "" }))()`,
       (d) => d.cuttings === 1,
       "chart-drawer-filed-390",
@@ -981,7 +1009,10 @@ export async function run(ctx) {
     );
     check(
       "CD33 at the ruled phone width BOTH card actions answer a real thumb, the card does not scroll the page sideways, and a successful press is ANSWERED where a phone reader can see it: the drawer is stood down at narrow, so the leaf tab's tally and the status pill are the whole of the feedback and a press that changed neither would read as nothing happening",
-      narrow.press.hit === "self" && narrow.link.hit === "self" &&
+      // @ts-expect-error the settle's predicate has already required a press, so a null never reaches here
+      narrow.press.hit === "self" &&
+        // @ts-expect-error a card with no prospect link reads null, which throws here, inside CD33's step, and the step reds CD33 by name
+        narrow.link.hit === "self" &&
         said.scrollW === said.innerW && said.cuttings === 1 && said.prospects === 1 &&
         /^The Table · 1$/.test(said.leafTab || "") && /lies on the table/.test(said.status || ""),
       JSON.stringify({ press: narrow.press, link: narrow.link, scrollW: said.scrollW, innerW: said.innerW, leafTab: said.leafTab, status: said.status, cuttings: said.cuttings }),
@@ -993,7 +1024,7 @@ export async function run(ctx) {
   // #634: the table's second home, and the four roads the two homes exist for. ONE and TWO are addresses rather than gestures because every check below is about WHERE the table came from, not about the handle that filed it.
   const ONE = "k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-2.lx-17.ly-13";
   const TWO = `${ONE}_k-p.seed-42.style-antique.i-0.year-1059`;
-  const STORE = `(() => { try { return localStorage.getItem(${JSON.stringify(TABLE_STORE_KEY)}); } catch { return "THREW"; } })()`;
+  const STORE: Payload<string | null> = `(() => { try { return localStorage.getItem(${JSON.stringify(TABLE_STORE_KEY)}); } catch { return "THREW"; } })()`;
   // Two shapes on purpose (specs/settle-doctrine.md clause 4). Where arriving is a PRECONDITION the wait throws;
   // where arriving is the CHECK's own claim it keeps reading and hands back its last read, and the caller asserts
   // on that, so a press that navigated nowhere reds by naming the page it is still standing on.
@@ -1001,7 +1032,7 @@ export async function run(ctx) {
     let last = null;
     for (let i = 0; i < 200; i++) {
       await sleep(150);
-      last = await evaluate(`(() => ({ href: location.href, svg: !!document.querySelector("#map svg"), drawer: !!document.getElementById("chart-drawer") }))()`);
+      last = await evaluate<{ href: string; svg: boolean; drawer: boolean }>(`(() => ({ href: location.href, svg: !!document.querySelector("#map svg"), drawer: !!document.getElementById("chart-drawer") }))()`);
       if (last.svg && last.drawer) return { ...last, reached: true };
     }
     return { ...(last ?? { href: null, svg: false, drawer: false }), reached: false };
@@ -1017,20 +1048,21 @@ export async function run(ctx) {
     await sleep(400);
   };
   // A measurement poll, not a readiness wait (specs/settle-doctrine.md clause 4), and deliberately NOT keyed on the number the check is about (clause 6): it reads until the count stops moving and hands back its LAST read, which the caller asserts on. The first version of CD37 and CD38 put `cuttings === 2` in the settle instead, and the mutations that were supposed to prove them killed the predicate, so the checks' own booleans were never evaluated at all (the cold review on PR #635).
-  const restedAtExplorer = async () => {
+  const restedAtExplorer = async (): Promise<Back> => {
     let last = null;
     let same = 0;
     for (let i = 0; i < DRAWN; i++) {
-      const d = await evaluate(`(() => ({ ...${READ}, marker: window.__cd634 || null, navType: (performance.getEntriesByType("navigation")[0] || {}).type || null, stored: ${STORE} }))()`);
+      const d = await evaluate<Back>(`(() => ({ ...${READ}, marker: window.__cd634 || null, navType: (performance.getEntriesByType("navigation")[0] || {}).type || null, stored: ${STORE} }))()`);
       same = last && d.path === last.path && d.cuttings === last.cuttings ? same + 1 : 0;
       last = d;
       if (last.path === "/explorer/" && same >= 2) return last;
       await sleep(50);
     }
+    // @ts-expect-error the loop runs DRAWN times and sets last on every pass, so it is never null when the loop ends
     return last;
   };
-  const pressById = async (id) => {
-    const at = await evaluate(`(() => { const e = document.getElementById(${JSON.stringify(id)}); if (!e) return null; e.scrollIntoView({ block: "center" }); const b = e.getBoundingClientRect(); if (b.width < 1) return null; const c = { x: Math.round(b.x + b.width / 2), y: Math.round(b.y + b.height / 2) }; return { ...c, hit: document.elementFromPoint(c.x, c.y) === e || e.contains(document.elementFromPoint(c.x, c.y)) }; })()`);
+  const pressById = async (id: string) => {
+    const at = await evaluate<{ x: number; y: number; hit: boolean } | null>(`(() => { const e = document.getElementById(${JSON.stringify(id)}); if (!e) return null; e.scrollIntoView({ block: "center" }); const b = e.getBoundingClientRect(); if (b.width < 1) return null; const c = { x: Math.round(b.x + b.width / 2), y: Math.round(b.y + b.height / 2) }; return { ...c, hit: document.elementFromPoint(c.x, c.y) === e || e.contains(document.elementFromPoint(c.x, c.y)) }; })()`);
     if (!at) throw new Error(`${id} has no box to press`);
     await clickAt(at.x, at.y);
     return at;
@@ -1040,16 +1072,16 @@ export async function run(ctx) {
     await go(`${DRESS}&table=${ONE}`);
     await openDrawer();
     const road = await pressById("table-road");
-    for (let i = 0; i < 200; i++) { await sleep(100); if (await evaluate(`!!window.__vellumPortfolio`)) break; }
+    for (let i = 0; i < 200; i++) { await sleep(100); if (await evaluate<boolean>(`!!window.__vellumPortfolio`)) break; }
     // Wait out the folio's own drafting before pressing home. The press is not racing it, but the worker drawing a
     // region sheet is real work on this machine, and on 2026-09-19 the arrival at the other end of this press took
     // longer than its 30s poll exactly once, with nothing else in the suite slow (flake-record.md carries the row).
     // Pressing from a finished page removes the contention rather than widening a budget against it.
-    for (let i = 0; i < DRAWN; i++) { await sleep(50); const s = await evaluate(`(() => { const p = window.__vellumPortfolio ? window.__vellumPortfolio() : null; return p ? p.drawn : -1; })()`); if (s >= 1) break; }
+    for (let i = 0; i < DRAWN; i++) { await sleep(50); const s = await evaluate<number>(`(() => { const p = window.__vellumPortfolio ? window.__vellumPortfolio() : null; return p ? p.drawn : -1; })()`); if (s >= 1) break; }
     // The HREF is the measurement, taken before the press: once the table has a second home, pressing a bare
     // ../../explorer/ ALSO lands on a populated drawer, so a check that only counted cuttings afterwards would pass
     // for the wrong reason forever. What the address carries is the only thing that reaches a reader on another device.
-    const home = await evaluate(`(() => { const a = document.getElementById("pf-explorer"); return a ? { href: a.getAttribute("href"), hash: location.hash } : null; })()`);
+    const home = await evaluate<{ href: string | null; hash: string } | null>(`(() => { const a = document.getElementById("pf-explorer"); return a ? { href: a.getAttribute("href"), hash: location.hash } : null; })()`);
     const back = await pressById("pf-explorer");
     const arrived = await reachedExplorer();
     const landed = arrived.reached ? await evaluate(READ) : { cuttings: -1, rawHash: "", hashTable: null };
@@ -1069,11 +1101,11 @@ export async function run(ctx) {
     // marker alive and runs no boot code at all, which is the road no load-time rule can reach.
     await evaluate(`window.__cd634 = "warm"`);
     await evaluate(`location.href = "/prospect/" + location.hash + "&i=0"`);
-    for (let i = 0; i < 300; i++) { await sleep(100); if (await evaluate(`!!(window.__vellumProspectState && window.__vellumProspectState())`)) break; }
+    for (let i = 0; i < 300; i++) { await sleep(100); if (await evaluate<boolean>(`!!(window.__vellumProspectState && window.__vellumProspectState())`)) break; }
     await evaluate(`(() => { const s = document.getElementById("note"); if (s && !s.classList.contains("open")) s.querySelector(".slip-handle").click(); })()`);
     await sleep(400);
     const lay = await pressById("pp-lay");
-    const filed = await settle(
+    const filed = await settle<{ table: string | null; stored: string | null }>(
       `(() => ({ table: new URLSearchParams(location.hash.slice(1)).get("table"), stored: ${STORE} }))()`,
       (d) => typeof d.table === "string" && d.table.split("_").length === 2,
       "prospect-filed-for-back",
@@ -1096,11 +1128,11 @@ export async function run(ctx) {
     // quietly measuring CD37 a second time.
     await evaluate(`(() => { window.__cd634 = "cold"; window.addEventListener("unload", () => {}); })()`);
     await evaluate(`location.href = "/prospect/" + location.hash + "&i=0"`);
-    for (let i = 0; i < 300; i++) { await sleep(100); if (await evaluate(`!!(window.__vellumProspectState && window.__vellumProspectState())`)) break; }
+    for (let i = 0; i < 300; i++) { await sleep(100); if (await evaluate<boolean>(`!!(window.__vellumProspectState && window.__vellumProspectState())`)) break; }
     await evaluate(`(() => { const s = document.getElementById("note"); if (s && !s.classList.contains("open")) s.querySelector(".slip-handle").click(); })()`);
     await sleep(400);
     await pressById("pp-lay");
-    await settle(
+    await settle<{ table: string | null }>(
       `(() => ({ table: new URLSearchParams(location.hash.slice(1)).get("table") }))()`,
       (d) => typeof d.table === "string" && d.table.split("_").length === 2,
       "prospect-filed-for-cold-back",
@@ -1122,7 +1154,7 @@ export async function run(ctx) {
     await send("Page.navigate", { url: "about:blank" });
     await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/#${DRESS}&table=${ONE}` });
     await atExplorer();
-    const arrived = await settle(
+    const arrived = await settle<Read & Stored>(
       `(() => ({ ...${READ}, stored: ${STORE} }))()`,
       (d) => d.cuttings > 0,
       "chart-drawer-link-beats-device",
@@ -1139,7 +1171,7 @@ export async function run(ctx) {
     await go(`${DRESS}&table=${ONE}`);
     await openDrawer();
     await evaluate(`document.querySelector("#cuttings .off").click()`);
-    const emptied = await settle(
+    const emptied = await settle<Read & Stored>(
       `(() => ({ ...${READ}, stored: ${STORE} }))()`,
       (d) => d.cuttings === 0,
       "chart-drawer-emptied",
@@ -1149,7 +1181,7 @@ export async function run(ctx) {
     await send("Page.navigate", { url: "about:blank" });
     await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/${emptied.rawHash}` });
     await atExplorer();
-    const still = await evaluate(`(() => ({ ...${READ}, stored: ${STORE} }))()`);
+    const still = await evaluate<Read & Stored>(`(() => ({ ...${READ}, stored: ${STORE} }))()`);
     check(
       "CD40 emptying the table STICKS: taking the last sheet off removes the device's key rather than storing an empty one, so the address that carries no table and the device that holds none agree, and a reload comes back bare instead of resurrecting the sheet (#634)",
       emptied.cuttings === 0 && emptied.hashTable === null && emptied.stored === null &&
@@ -1162,11 +1194,11 @@ export async function run(ctx) {
     // The road the first draft of this fix BROKE, and which nothing here could reach: every other Back check files a sheet on the Prospect page first, so the device is never empty at a restore. A reader whose storage is blocked, and anyone who opened a folio someone shared with them, comes back to exactly this: sheets in the address, none on the device. The first draft emptied the drawer and then wrote an address with no table key at all, losing them from both homes in one gesture (the cold review on PR #635).
     await go(`${DRESS}&table=${ONE}`);
     await evaluate(`window.__cd634 = "bare"`);
-    const before = await evaluate(`(() => ({ ...${READ}, stored: ${STORE} }))()`);
+    const before = await evaluate<Read & Stored>(`(() => ({ ...${READ}, stored: ${STORE} }))()`);
     // Any same-origin page away and back makes the entry: the claim is about the RESTORE, and the Prospect page's own
     // plate render would buy nothing here and cost the lane its remaining budget. The FAQ is the cheapest door out.
     await evaluate(`location.href = "/faq/"`);
-    for (let i = 0; i < 200; i++) { await sleep(50); if (await evaluate(`location.pathname === "/faq/" && document.readyState === "complete"`)) break; }
+    for (let i = 0; i < 200; i++) { await sleep(50); if (await evaluate<boolean>(`location.pathname === "/faq/" && document.readyState === "complete"`)) break; }
     await evaluate(`history.back()`);
     const home = await restedAtExplorer();
     check(
@@ -1186,7 +1218,7 @@ export async function run(ctx) {
     const OTHERS = ["k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-1.lx-4.ly-4", "k-p.seed-42.style-antique.i-3.year-1059"].join("_");
     await evaluate(`localStorage.setItem(${JSON.stringify(TABLE_STORE_KEY)}, ${JSON.stringify(OTHERS)})`);
     await evaluate(`location.href = "/faq/"`);
-    for (let i = 0; i < 200; i++) { await sleep(50); if (await evaluate(`location.pathname === "/faq/" && document.readyState === "complete"`)) break; }
+    for (let i = 0; i < 200; i++) { await sleep(50); if (await evaluate<boolean>(`location.pathname === "/faq/" && document.readyState === "complete"`)) break; }
     await evaluate(`history.back()`);
     const theirs = await restedAtExplorer();
     check(
