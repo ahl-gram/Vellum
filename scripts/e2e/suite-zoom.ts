@@ -12,7 +12,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   // Fixed sleeps only outlasted the #300 deferred ink because a CDP evaluate sent mid-build queues behind the blocked main thread; wait for the ink itself.
   const waitInked = async (label: string): Promise<void> => {
     for (let i = 0; i < 120; i++) {
-      if (await evaluate(`!!document.querySelector("#map .voyage-overlay .voyage-track")`)) return;
+      if (await evaluate<boolean>(`!!document.querySelector("#map .voyage-overlay .voyage-track")`)) return;
       await sleep(50);
     }
     throw new Error("waitInked timeout " + label);
@@ -241,14 +241,14 @@ export async function run(ctx: SuiteContext): Promise<void> {
 
   await step("Z14a", async () => {
     await evaluate(`window.__vellumZoomTo({k:3,x:-60,y:-40})`);
-    const r14a = await evaluate(`(()=>{document.getElementById("draw").click();return window.__vellumZoomState().k;})()`);
+    const r14a = await evaluate<number>(`(()=>{document.getElementById("draw").click();return window.__vellumZoomState().k;})()`);
     await waitSettled("reset-on-draw");
     check("Z14a reset-on-draw: Draw snaps the camera home first (AC4)", r14a === 1, String(r14a));
   });
 
   await step("Z14b", async () => {
     await evaluate(`window.__vellumZoomTo({k:3,x:-60,y:-40})`);
-    const r14b = await evaluate(`(()=>{const s=document.getElementById("style");s.value="ink";s.dispatchEvent(new Event("change",{bubbles:true}));return window.__vellumZoomState().k;})()`);
+    const r14b = await evaluate<number>(`(()=>{const s=document.getElementById("style");s.value="ink";s.dispatchEvent(new Event("change",{bubbles:true}));return window.__vellumZoomState().k;})()`);
     await waitTurned("reset-on-turn");
     check("Z14b reset-on-style-turn: a style change homes the camera before the turn (AC4)", r14b === 1, String(r14b));
     await evaluate(`(()=>{const s=document.getElementById("style");s.value="antique";s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
@@ -266,8 +266,8 @@ export async function run(ctx: SuiteContext): Promise<void> {
 
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
-  const rmOn = await evaluate(`matchMedia("(prefers-reduced-motion: reduce)").matches`);
-  const zr = await evaluate(`(()=>{const vp=document.getElementById("map-viewport");const r=vp.getBoundingClientRect();const cx=r.left+r.width/2,cy=r.top+r.height/2;vp.dispatchEvent(new MouseEvent("dblclick",{bubbles:true,cancelable:true,view:window,clientX:cx,clientY:cy}));return window.__vellumZoomState().k;})()`);
+  const rmOn = await evaluate<boolean>(`matchMedia("(prefers-reduced-motion: reduce)").matches`);
+  const zr = await evaluate<number>(`(()=>{const vp=document.getElementById("map-viewport");const r=vp.getBoundingClientRect();const cx=r.left+r.width/2,cy=r.top+r.height/2;vp.dispatchEvent(new MouseEvent("dblclick",{bubbles:true,cancelable:true,view:window,clientX:cx,clientY:cy}));return window.__vellumZoomState().k;})()`);
   check(
     "Zrm reduced motion collapses the double-click zoom to instant (AC5: lands at k=2 in one turn)",
     rmOn === true && zr === 2,
@@ -277,10 +277,10 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
 
   await step("Z7", async () => {
-    const z7a = await evaluate(`getComputedStyle(document.getElementById("map-viewport")).touchAction`);
+    const z7a = await evaluate<string>(`getComputedStyle(document.getElementById("map-viewport")).touchAction`);
     await evaluate(`(()=>{const s=document.getElementById("style");s.value="nautical";s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
     await waitTurned("zoom-touch-nautical");
-    const z7b = await evaluate(`getComputedStyle(document.getElementById("map-viewport")).touchAction`);
+    const z7b = await evaluate<string>(`getComputedStyle(document.getElementById("map-viewport")).touchAction`);
     check(
       "Z7 touch-action:none holds on every style now that all four zoom (AC1 touch; Sub 3 revert superseded)",
       z7a === "none" && z7b === "none",

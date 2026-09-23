@@ -23,7 +23,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
       await sleep(75);
     }
     check("B1 fallback: page still renders without the worker", fresh);
-    check("B2 fallback: __vellumUsesWorker()===false (inline path taken)", await evaluate(`window.__vellumUsesWorker()===false`));
+    check("B2 fallback: __vellumUsesWorker()===false (inline path taken)", await evaluate<boolean>(`window.__vellumUsesWorker()===false`));
     await step("B3", async () => {
       await evaluate(`(()=>{document.getElementById("seed").value="42";document.getElementById("theme").value="";document.getElementById("draw").click();})()`);
       await waitSettled("fallback-draw");

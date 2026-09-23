@@ -66,7 +66,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
     await waitSettled("g6-base");
     await evaluate(`(()=>{const s=document.getElementById("style");s.value="ink";s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
     let g6live = false;
-    for (let i = 0; i < 80; i++) { if (await evaluate(`!!document.querySelector(".sheet.turning")`)) { g6live = true; break; } await sleep(25); }
+    for (let i = 0; i < 80; i++) { if (await evaluate<boolean>(`!!document.querySelector(".sheet.turning")`)) { g6live = true; break; } await sleep(25); }
     const g6 = await evaluate<{ wasLive: boolean; turningAfter: boolean; back: number }>(`(()=>{
       const wasLive=!!document.querySelector(".sheet.turning");
       document.getElementById("seed").value="200";document.getElementById("draw").click(); // a settle supersedes the LIVE turn

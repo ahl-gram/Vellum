@@ -20,7 +20,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   };
   const waitInset = async () => {
     for (let i = 0; i < 375; i++) {
-      if (await evaluate(`document.querySelectorAll("#map .region-inset").length === 1`)) return;
+      if (await evaluate<boolean>(`document.querySelectorAll("#map .region-inset").length === 1`)) return;
       await sleep(40);
     }
   };

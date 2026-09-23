@@ -16,12 +16,12 @@ export async function run(ctx: SuiteContext): Promise<void> {
   });
 
   const waitFlip3dGone = async (label: string): Promise<void> => {
-    for (let i = 0; i < 50; i++) { if (await evaluate(`!document.querySelector(".sheet.flip3d")`)) return; await sleep(60); }
+    for (let i = 0; i < 50; i++) { if (await evaluate<boolean>(`!document.querySelector(".sheet.flip3d")`)) return; await sleep(60); }
     throw new Error("waitFlip3dGone timeout " + label);
   };
   // A settle under the flipped sheet updates the HIDDEN recto: poll a chart attribute rather than waitSettled, which watches the visible recto.
   const waitRectoAttr = async (attr: string, val: string, label: string): Promise<void> => {
-    for (let i = 0; i < 120; i++) { if (await evaluate(`document.querySelector("#map svg") && document.querySelector("#map svg").getAttribute("${attr}")==="${val}"`)) return; await sleep(50); }
+    for (let i = 0; i < 120; i++) { if (await evaluate<boolean>(`document.querySelector("#map svg") && document.querySelector("#map svg").getAttribute("${attr}")==="${val}"`)) return; await sleep(50); }
     throw new Error("waitRectoAttr timeout " + label);
   };
 
@@ -44,7 +44,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await shoot("explorer-verso.png");
 
   await step("V2", async () => {
-    const ghostSrcBefore = await evaluate(`document.querySelector("#verso .verso-ghost").src`);
+    const ghostSrcBefore = await evaluate<string>(`document.querySelector("#verso .verso-ghost").src`);
     await evaluate(`(()=>{document.getElementById("seed").value="100";document.getElementById("draw").click();})()`);
     await waitRectoAttr("data-vellum-seed", "100", "verso-rebuild-seed");
     await sleep(60);
@@ -54,7 +54,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
 
   await step("V3", async () => {
     await armTurnWatch();
-    const ghostSrcV3 = await evaluate(`document.querySelector("#verso .verso-ghost").src`);
+    const ghostSrcV3 = await evaluate<string>(`document.querySelector("#verso .verso-ghost").src`);
     await evaluate(`(()=>{const s=document.getElementById("style");s.value="ink";s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
     await waitRectoAttr("data-vellum-style", "ink", "verso-restyle");
     await sleep(80); // __turned is sticky: a (wrong) turn would already have flagged it
@@ -63,7 +63,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   });
 
   await evaluate(`document.getElementById("verso-turn").click()`);
-  const v4immediate = await evaluate(`document.getElementById("sheet").classList.contains("versoed")`);
+  const v4immediate = await evaluate<boolean>(`document.getElementById("sheet").classList.contains("versoed")`);
   check("V4 clicking Turn again leaves the verso immediately (.versoed dropped)", v4immediate === false);
   await step("V4b", async () => {
     await waitFlip3dGone("verso-flip-back");
@@ -77,7 +77,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
     await waitSettled("v5-base");
     await evaluate(`(()=>{const s=document.getElementById("style");s.value="ink";s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
     let v5live = false;
-    for (let i = 0; i < 80; i++) { if (await evaluate(`!!document.querySelector(".sheet.turning")`)) { v5live = true; break; } await sleep(25); }
+    for (let i = 0; i < 80; i++) { if (await evaluate<boolean>(`!!document.querySelector(".sheet.turning")`)) { v5live = true; break; } await sleep(25); }
     const v5mid = await evaluate<{ versoed: boolean; flip3d: boolean }>(`(()=>{document.getElementById("verso-turn").click();const sh=document.getElementById("sheet");return{versoed:sh.classList.contains("versoed"),flip3d:sh.classList.contains("flip3d")};})()`);
     check("V5 a flip attempt during a LIVE style-turn is ignored (the turn owns the sheet)", v5live && v5mid.versoed === false && v5mid.flip3d === false, JSON.stringify({ v5live, ...v5mid }));
     await waitTurned("v5-turn-lands");

@@ -13,7 +13,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
     true,
   );
   check("R0b bare Explorer visit lands on today's seed-of-the-day", r0b.seed === r0b.expected, JSON.stringify(r0b));
-  check("R1 worker active (no silent fallback)", await evaluate(`window.__vellumUsesWorker()===true`));
+  check("R1 worker active (no silent fallback)", await evaluate<boolean>(`window.__vellumUsesWorker()===true`));
 
   // The survey land mask is compared byte-wise, never JSON.stringify (a Uint8Array stringifies to an object literal with one key per cell); integer compares are immune to the transcendental drift that forces R4's tolerance.
   const a2 = await evaluate<{ svg: boolean; title: boolean; sub: boolean; mt: boolean; band: boolean; man: boolean; srv: boolean; places: number; len: number; cells: number; land: number; roads: number; gx: number }>(
@@ -52,11 +52,11 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("R8", async () => {
     await evaluate(`(()=>{const s=document.getElementById("seed");s.value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="vegetation";document.getElementById("draw").click();})()`);
     await waitSettled("draw-theme");
-    check("R8 worker renders a thematic (field) layer", await evaluate(`document.querySelector("#map svg").outerHTML.includes("layer-field")`));
+    check("R8 worker renders a thematic (field) layer", await evaluate<boolean>(`document.querySelector("#map svg").outerHTML.includes("layer-field")`));
     await shoot("explorer-worker-theme.png");
   });
 
-  const landPresent = await evaluate(`!!document.getElementById("land")`);
+  const landPresent = await evaluate<boolean>(`!!document.getElementById("land")`);
   if (!landPresent) {
     check("R11 sea-level slider present", false, "#land control missing");
   } else {
@@ -94,7 +94,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
     });
   }
 
-  const armsPresent = await evaluate(`!!document.getElementById("arms")`);
+  const armsPresent = await evaluate<boolean>(`!!document.getElementById("arms")`);
   if (!armsPresent) {
     check("R12 arms checkbox present", false, "#arms control missing");
   } else {
@@ -120,7 +120,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
     });
   }
 
-  const beastsPresent = await evaluate(`!!document.getElementById("beasts")`);
+  const beastsPresent = await evaluate<boolean>(`!!document.getElementById("beasts")`);
   if (!beastsPresent) {
     check("R15 beasts checkbox present", false, "#beasts control missing");
   } else {
@@ -147,7 +147,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
     });
   }
 
-  const coastPresent = await evaluate(`!!document.getElementById("coast")`);
+  const coastPresent = await evaluate<boolean>(`!!document.getElementById("coast")`);
   if (!coastPresent) {
     check("R13 coast slider present", false, "#coast control missing");
   } else {
