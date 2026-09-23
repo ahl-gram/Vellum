@@ -1,11 +1,11 @@
 // Broadside e2e (BR1-BR8, #270): the regrouped controls, seals, journal button, and footnote apparatus on the built running page (the unit pins in test/site/broadside.test.ts hold the SOURCE to this shape); self-contained with scoped deltas.
 import { luminance, sampleRow } from "./pixel-support.ts";
 import { dropExpectedCancellations } from "./console-support.ts";
-
+import type { Payload, Point, SuiteContext } from "./types.ts";
 import { makeStep } from "./step-support.ts";
 
 // eslint-disable-next-line max-lines-per-function
-export async function run(ctx) {
+export async function run(ctx: SuiteContext): Promise<void> {
   const { evaluate, send, check, sleep, waitSettled, waitReady, touch, setMobileViewport, clearMobile, consoleErrors, http4xx, PORT } = ctx;
 
   // BR3 through BR6, BR6b to BR6d and BR8 are deliberately not stepped: the reads and gestures in them return rather than throwing, and their checks already guard on it.
@@ -14,20 +14,20 @@ export async function run(ctx) {
   const errBase = consoleErrors.length;
   const httpBase = http4xx.length;
 
-  const goto = async (url, label) => {
+  const goto = async (url: string, label: string): Promise<void> => {
     await send("Page.navigate", { url: "about:blank" });
     await send("Page.navigate", { url });
     await waitReady();
     await waitSettled(label);
   };
-  const waitInked = async (label) => {
+  const waitInked = async (label: string): Promise<void> => {
     for (let i = 0; i < 120; i++) {
       if (await evaluate(`!!document.querySelector("#map .voyage-overlay .voyage-track")`)) return;
       await sleep(50);
     }
     throw new Error("waitInked timeout " + label);
   };
-  const gotoPlain = async (url, label) => {
+  const gotoPlain = async (url: string, label: string): Promise<void> => {
     await send("Page.navigate", { url: "about:blank" });
     await send("Page.navigate", { url });
     for (let i = 0; i < 100; i++) {
@@ -40,7 +40,7 @@ export async function run(ctx) {
   // eslint-disable-next-line max-lines-per-function
   await step("BR1 to BR1c", async () => {
     await goto(EXP + "#seed=42&style=antique", "broadside-base");
-    const br1 = await evaluate(`(()=>{
+    const br1 = await evaluate<{ wrong: string[]; heads: (string | null)[] }>(`(()=>{
       const groupOf=(id)=>{const el=document.getElementById(id);const g=el&&el.closest('[role="group"]');
         return g?(g.getAttribute("aria-labelledby")||g.getAttribute("aria-label")):null;};
       const want={seed:"The seed",random:"The seed",draw:"The seed",type:"grp-land",band:"grp-land",land:"grp-land",coast:"grp-land",
@@ -56,7 +56,7 @@ export async function run(ctx) {
       JSON.stringify(br1),
     );
 
-    const br1b = await evaluate(`(()=>{
+    const br1b = await evaluate<{ lLeft: number; cLeft: number; lRight: number; cRight: number }>(`(()=>{
       const l=document.getElementById("land").getBoundingClientRect();
       const c=document.getElementById("coast").getBoundingClientRect();
       return{lLeft:Math.round(l.left*10)/10,cLeft:Math.round(c.left*10)/10,
@@ -68,11 +68,15 @@ export async function run(ctx) {
       JSON.stringify(br1b),
     );
 
-    const legendRoom = `(()=>{const r=(sel)=>{const el=document.querySelector(sel);if(!el)return null;const b=el.getBoundingClientRect();return{l:Math.round(b.left*10)/10,r:Math.round(b.right*10)/10,t:Math.round(b.top),b:Math.round(b.bottom),w:Math.round(b.width)};};
+    type Box = { l: number; r: number; t: number; b: number; w: number } | null;
+    type Room = { lg: Box; bl: Box; sl: Box; gl: Box; sh: Box; folioText: number; w: number; h: number };
+    const legendRoom: Payload<Room> = `(()=>{const r=(sel)=>{const el=document.querySelector(sel);if(!el)return null;const b=el.getBoundingClientRect();return{l:Math.round(b.left*10)/10,r:Math.round(b.right*10)/10,t:Math.round(b.top),b:Math.round(b.bottom),w:Math.round(b.width)};};
       const lg=r(".legend"),bl=r(".corner.bl"),sl=r("#broadside"),gl=r(".corner.br"),sh=r("#sheet");
       const range=document.createRange();let text=0;for(const p of document.querySelectorAll(".corner.bl p")){if(!p.textContent)continue;range.selectNodeContents(p);text=Math.max(text,range.getBoundingClientRect().right);}
       return{lg,bl,sl,gl,sh,folioText:Math.round(text),w:innerWidth,h:innerHeight};})()`;
-    const legendClear = (m) => !!m.lg && m.lg.l >= m.folioText + 16 && m.lg.r <= m.sl.l - 8 && m.lg.r <= m.gl.l - 8 &&
+    // @ts-expect-error the slip, the Glass, the sheet and the folio are read as present; a missing one throws inside the step, which reds it by name
+    const legendClear = (m: Room): boolean => !!m.lg && m.lg.l >= m.folioText + 16 && m.lg.r <= m.sl.l - 8 && m.lg.r <= m.gl.l - 8 &&
+      // @ts-expect-error the same four boxes, on the rest of the expression
       m.sh.r <= m.gl.l - 8 && m.sh.b <= Math.min(m.bl.t, m.lg.t) - 8;
     await sleep(400); // the row's left transitions 0.32s to its measured seat; a read mid-flight is the old seat
     const at1280 = await evaluate(legendRoom);
@@ -94,15 +98,15 @@ export async function run(ctx) {
   await step("BR2", async () => {
     // Tick, wait-for-ink, and untick are three separate turns (#300): inside ONE evaluate the yield cancels the arm before it builds, so `during` would be measured on a never-armed sheet.
     const at = `((el)=>({shown:el.getClientRects().length>0,top:Math.round(el.getBoundingClientRect().top)}))`;
-    const before = await evaluate(`(()=>{
+    const before = await evaluate<{ j: { shown: boolean; top: number }; o: { shown: boolean; top: number }; cls: boolean }>(`(()=>{
       const j=document.getElementById("journal-link"),o=document.getElementById("order-plates");const at=${at};
       return{j:at(j),o:at(o),cls:j.className===o.className&&j.classList.contains("legend-btn")};
     })()`);
     await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
     await waitInked("br2-survey-ink");
-    const during = await evaluate(`(()=>{const at=${at};return at(document.getElementById("journal-link"));})()`);
+    const during = await evaluate<{ shown: boolean; top: number }>(`(()=>{const at=${at};return at(document.getElementById("journal-link"));})()`);
     await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
-    const after = await evaluate(`(()=>{const at=${at};return at(document.getElementById("journal-link"));})()`);
+    const after = await evaluate<{ shown: boolean; top: number }>(`(()=>{const at=${at};return at(document.getElementById("journal-link"));})()`);
     const br2 = { before, during, after, sameRow: before.j.top === before.o.top };
     check(
       "BR2 the journal button is the print link's steady gold peer: same row, standing through tick and untick",
@@ -112,7 +116,7 @@ export async function run(ctx) {
     );
   });
 
-  const br3 = await evaluate(`(()=>{
+  const br3 = await evaluate<{ off: { mark: string; bg: string }; on: { mark: string; bg: string; checked: boolean; hash: string }; back: { mark: string; bg: string; checked: boolean }; isSeal: boolean; type: string }>(`(()=>{
     const box=document.getElementById("ages");const lbl=box.closest("label");
     const face=()=>({mark:getComputedStyle(lbl,"::before").content,bg:getComputedStyle(lbl).backgroundColor});
     const off=face();
@@ -131,7 +135,7 @@ export async function run(ctx) {
     JSON.stringify(br3),
   );
 
-  const br4a = await evaluate(`(()=>{
+  const br4a = await evaluate<{ wired: boolean; open: boolean; closed: boolean; reopened: boolean }>(`(()=>{
     const mark=document.querySelector('a.fn[data-note="note-seeds-choice"]');
     const note=document.getElementById("note-seeds-choice");
     const wired=mark.getAttribute("aria-describedby")==="note-seeds-choice"&&note.getAttribute("role")==="tooltip";
@@ -144,7 +148,7 @@ export async function run(ctx) {
   })()`);
   await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
   await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
-  const br4b = await evaluate(`(()=>{
+  const br4b = await evaluate<{ escClosed: boolean; focusHeld: boolean }>(`(()=>{
     const note=document.getElementById("note-seeds-choice");
     return{escClosed:!note.matches(":popover-open"),focusHeld:document.activeElement===document.querySelector('a.fn[data-note="note-seeds-choice"]')};
   })()`);
@@ -154,7 +158,7 @@ export async function run(ctx) {
     JSON.stringify({ br4a, br4b }),
   );
 
-  const rect = await evaluate(`(()=>{const m=document.querySelector('a.fn[data-note="note-coast-warp"]');
+  const rect = await evaluate<Point>(`(()=>{const m=document.querySelector('a.fn[data-note="note-coast-warp"]');
     const r=m.getBoundingClientRect();return{x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2)};})()`);
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: rect.x, y: rect.y });
   await sleep(80);
@@ -171,8 +175,8 @@ export async function run(ctx) {
   await evaluate(`(()=>{const h=document.querySelector("#broadside .slip-handle");if(h&&!document.getElementById("broadside").classList.contains("open"))h.click();})()`);
   await sleep(120);
   // The post-tap sleep lets a pending anchor navigation COMMIT before a fresh evaluate reads the path: a same-evaluate read cannot see it (the guard-prover proved a dropped preventDefault survived that shape).
-  const tapAt = async () => {
-    const p = await evaluate(`(()=>{const m=document.querySelector('a.fn[data-note="note-survey"]');
+  const tapAt = async (): Promise<boolean> => {
+    const p = await evaluate<Point | null>(`(()=>{const m=document.querySelector('a.fn[data-note="note-survey"]');
       if(!m)return null;
       m.scrollIntoView({block:"center"});const r=m.getBoundingClientRect();
       return{x:Math.round(r.left+r.width/2),y:Math.round(r.top+r.height/2)};})()`);
@@ -182,10 +186,10 @@ export async function run(ctx) {
     await sleep(500); // past the tap-dismiss window, and past any pending navigation's commit
     return true;
   };
-  const probe = () => evaluate(`(()=>{const n=document.getElementById("note-survey");
+  const probe = () => evaluate<{ stayed: boolean; open: boolean; hasLink: boolean }>(`(()=>{const n=document.getElementById("note-survey");
     return{stayed:location.pathname==="/explorer/",open:!!n&&n.matches(":popover-open"),
       hasLink:!!document.querySelector('#note-survey a[href="/glossary/#survey"]')};})()`);
-  const br6a = await evaluate(`(()=>{const dock=document.querySelector("#broadside .legend.in-slip");const ids=["verso-turn","order-plates","journal-link"].map((id)=>{const el=document.getElementById(id);return{id,inSheet:!!(dock&&dock.contains(el)),shown:!!el&&el.getClientRects().length>0};});return{docked:!!dock,onStage:!!document.querySelector("main > .legend"),ids};})()`);
+  const br6a = await evaluate<{ docked: boolean; onStage: boolean; ids: { id: string; inSheet: boolean; shown: boolean }[] }>(`(()=>{const dock=document.querySelector("#broadside .legend.in-slip");const ids=["verso-turn","order-plates","journal-link"].map((id)=>{const el=document.getElementById(id);return{id,inSheet:!!(dock&&dock.contains(el)),shown:!!el&&el.getClientRects().length>0};});return{docked:!!dock,onStage:!!document.querySelector("main > .legend"),ids};})()`);
   check(
     "BR6a on a phone the Press docks inside the opened Broadside: Turn and both roads in the sheet and hit-testable, none left on the stage",
     br6a.docked && !br6a.onStage && br6a.ids.every((i) => i.inSheet && i.shown),
@@ -210,7 +214,7 @@ export async function run(ctx) {
     await evaluate(`(()=>{const h=document.querySelector("#broadside .slip-handle");if(h&&!document.getElementById("broadside").classList.contains("open"))h.click();})()`);
     await sleep(400);
   });
-  const br6b = await evaluate(`(()=>{const l=document.querySelector("#broadside .legend.in-slip");const s=document.getElementById("broadside");
+  const br6b = await evaluate<{ docked: boolean; open: boolean; zoomed: boolean; groundOn: string | null; slipY: number | null; rowY: number | null }>(`(()=>{const l=document.querySelector("#broadside .legend.in-slip");const s=document.getElementById("broadside");
     if(l)l.scrollIntoView({block:"center"});
     const b=s?s.getBoundingClientRect():null;
     return{docked:!!l,open:!!s&&s.classList.contains("open"),
@@ -222,13 +226,13 @@ export async function run(ctx) {
   const lums = br6b.rowY === null ? null : (await sampleRow(send, 20, br6b.rowY, 16)).map(luminance).sort((a, b) => a - b);
   const br6bGround = lums === null ? null : Math.round(lums[Math.floor(lums.length / 2)]);
   // #532: the mark's contrast is a COMPUTED-STYLE claim and can only be read as one. The declaration that fails here is PRESENT in the stylesheet and simply loses the cascade, so a text match over the CSS passes on the broken code. The three states go through CSS.forcePseudoState, and each asserts its own resolved COLOUR: a floor alone passes when the hover arm is deleted and hover falls back to the resting ink, which still clears it (skeptic on PR #535).
-  const doc532 = await send("DOM.getDocument", { depth: 1 });
+  const doc532 = await send<{ root: { nodeId: number } }>("DOM.getDocument", { depth: 1 });
   await send("CSS.enable");
-  const fnNode = (await send("DOM.querySelector", { nodeId: doc532.root.nodeId, selector: "#broadside .legend.in-slip .legend-row a.fn" })).nodeId;
-  const readMark = async (states) => {
+  const fnNode = (await send<{ nodeId: number }>("DOM.querySelector", { nodeId: doc532.root.nodeId, selector: "#broadside .legend.in-slip .legend-row a.fn" })).nodeId;
+  const readMark = async (states: string[]) => {
     if (!fnNode) return null;
     await send("CSS.forcePseudoState", { nodeId: fnNode, forcedPseudoClasses: states });
-    return evaluate(`(()=>{const m=document.querySelector("#broadside .legend.in-slip .legend-row a.fn");if(!m)return null;
+    return evaluate<{ color: string; ground: string; ratio: number } | null>(`(()=>{const m=document.querySelector("#broadside .legend.in-slip .legend-row a.fn");if(!m)return null;
       const lin=(c)=>{c/=255;return c<=0.03928?c/12.92:Math.pow((c+0.055)/1.055,2.4);};
       const parse=(s)=>s.slice(s.indexOf("(")+1,s.lastIndexOf(")")).split(",").map(parseFloat);
       const lum=(p)=>0.2126*lin(p[0])+0.7152*lin(p[1])+0.0722*lin(p[2]);
@@ -243,7 +247,7 @@ export async function run(ctx) {
   await readMark([]);
   await send("CSS.disable");
   // #532 (Alex's call, 2026-09-07): the docked gold road keeps its cream fill, which is what marks it as the road OUT, and its hairline takes ink so the button's box reads against the sheet. Two-sided: the fill must STILL be the gold, so "make it dark like its siblings" fails this as surely as leaving the tan hairline does.
-  const goldBox = await evaluate(`(()=>{const b=document.querySelector("#broadside .legend.in-slip .legend-row .legend-btn.gold");if(!b)return null;
+  const goldBox = await evaluate<{ fill: string; edge: string; ground: string; edgeOnGround: number; edgeOnFill: number; fillOnGround: number; width: string } | null>(`(()=>{const b=document.querySelector("#broadside .legend.in-slip .legend-row .legend-btn.gold");if(!b)return null;
     const lin=(c)=>{c/=255;return c<=0.03928?c/12.92:Math.pow((c+0.055)/1.055,2.4);};
     const parse=(s)=>s.slice(s.indexOf("(")+1,s.lastIndexOf(")")).split(",").map(parseFloat);
     const lum=(p)=>0.2126*lin(p[0])+0.7152*lin(p[1])+0.0722*lin(p[2]);
@@ -262,9 +266,9 @@ export async function run(ctx) {
   const SHEET = "rgb(244, 236, 216)";
   await clearMobile();
   // The other side of the same claim: undocked the row still paints its own dark footing, where line-tan is what reads, so the repair has to be a DOCKED arm. Without this, changing the base rule globally passes the three reads above and quietly breaks the floating mark.
-  const readFloat = `(()=>{const m=document.querySelector(".legend:not(.in-slip) .legend-row a.fn");
+  const readFloat: Payload<{ color: string; footing: string } | null> = `(()=>{const m=document.querySelector(".legend:not(.in-slip) .legend-row a.fn");
     return m?{color:getComputedStyle(m).color,footing:getComputedStyle(m.closest(".legend"),"::before").content}:null;})()`;
-  let fnFloat = null;
+  let fnFloat: { color: string; footing: string } | null = null;
   // The undocked read waits for the resize-driven relayout to seat the row back on the stage; a blind sleep here is #529's CL4 shape and would go red for reasons unrelated to colour.
   for (let i = 0; i < 100; i++) {
     fnFloat = await evaluate(readFloat);
@@ -273,6 +277,7 @@ export async function run(ctx) {
   }
   check(
     "BR6b on a phone with a committed survey's camera, the opened Broadside carries NO footing behind its docked Press: the sheet's ground reads parchment where the pool used to paint (#525)",
+    // @ts-expect-error a ground that could not be sampled is null, and null > 200 is false, which is the red the check wants
     br6b.docked && br6b.open && br6b.zoomed && br6b.groundOn === "none" && br6bGround > 200,
     JSON.stringify({ ...br6b, ground: br6bGround }),
   );
@@ -296,7 +301,7 @@ export async function run(ctx) {
 
   await step("BR7", async () => {
     await gotoPlain(`http://127.0.0.1:${PORT}/glossary/`, "broadside-glossary");
-    const br7 = await evaluate(`(()=>{
+    const br7 = await evaluate<{ missing: string[]; head: string | null; indexed: boolean }>(`(()=>{
       const ids=["seeds-choice","coast-warp","survey","verso"].map((id)=>[id,!!document.getElementById(id)]);
       const section=document.getElementById("drafting-table");
       const indexed=!!document.querySelector('#index .index a.sec[href="#drafting-table"]');

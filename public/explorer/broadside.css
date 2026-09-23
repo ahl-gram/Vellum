@@ -9,7 +9,7 @@
   margin: 0.1rem 0 0.55rem;
 }
 
-/* Five columns: label, endpoint word, track, endpoint word, readout. Ordinary controls span the last four (.l-ctl); slider rows sit on the grid itself so both tracks share the one track column and land twin-length (`BR1b` in `scripts/e2e/suite-broadside.mjs`). */
+/* Five columns: label, endpoint word, track, endpoint word, readout. Ordinary controls span the last four (.l-ctl); slider rows sit on the grid itself so both tracks share the one track column and land twin-length (`BR1b` in `scripts/e2e/suite-broadside.ts`). */
 .broadside .ledger { display: grid; grid-template-columns: auto auto 1fr auto auto;
   gap: 0.5rem 0.6rem; align-items: center; }
 .broadside .l-label { grid-column: 1; text-align: right; white-space: nowrap; }

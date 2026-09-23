@@ -77,7 +77,7 @@
   content: ""; position: absolute; inset: 3px;
   background: var(--parchment); border-radius: 50%;
 }
-/* On home the cluster rides the page, so the chart and its chrome scroll away together and nothing fixed collides with the shelf (`L1i` in `scripts/e2e/suite-landfall.mjs` reads the ride, `RH9b` in `scripts/e2e/suite-runninghead.mjs` the wash); body-child specificity because the layout's inline global sheet renders after the page css. */
+/* On home the cluster rides the page, so the chart and its chrome scroll away together and nothing fixed collides with the shelf (`L1i` in `scripts/e2e/suite-landfall.mjs` reads the ride, `RH9b` in `scripts/e2e/suite-runninghead.ts` the wash); body-child specificity because the layout's inline global sheet renders after the page css. */
 body > header.chrome { position: absolute; }
 header.chrome::before {
   content: ""; position: absolute; inset: -4rem -2.2rem -1.8rem -4rem; z-index: -1; pointer-events: none;

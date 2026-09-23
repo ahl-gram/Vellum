@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { resolve } from "node:path";
 import { luminance, sampleRow } from "./pixel-support.ts";
 import { dropExpectedCancellations } from "./console-support.ts";
+import type { Payload, Point, SuiteContext } from "./types.ts";
 
 // LITERAL on purpose: home is not a nav item, /ribbon/ and /prospect/ are shelled rooms outside the nav, /atlas/ is generated and carries no shell, and a page dropping out of the nav must not silently drop out of this guard.
 const SHELLED = ["/", "/explorer/", "/print-room/", "/reading-room/", "/gallery/", "/faq/", "/glossary/", "/seed-of-the-day/", "/prospect/", "/ribbon/", "/specimen/"];
@@ -40,14 +41,17 @@ const FOLIO_HEAD = {
   roomTagline: { tag: "P", weight: "400", size: 14.72, tracking: null, face: FLOURISH_FACE },
 };
 const CHART_HEAD = { ...FOLIO_HEAD, footer: null };
-const expectedHead = (route) =>
+const expectedHead = (route: string) =>
   route === "/" ? HOME_HEAD : CHART.includes(route) ? CHART_HEAD : FOLIO.includes(route) ? FOLIO_HEAD : ROOM_HEAD;
-const MEMBERS = ["wordmark", "tagline", "rooms", "roomName", "roomTagline", "footer"];
+const MEMBERS = ["wordmark", "tagline", "rooms", "roomName", "roomTagline", "footer"] as const;
 // The second addendum on #461: the cluster pins its OWN leading (wordmark 1.15, the rest normal) and never inherits the page's reading 1.6; the room head pins 1.6 and never inherits an app page's normal. Both polarities are asserted per page in RH5.
-const CLUSTER_NORMAL = ["tagline", "rooms", "footer"];
-const HEAD_LEADED = ["roomName", "roomTagline"];
+const CLUSTER_NORMAL = ["tagline", "rooms", "footer"] as const;
+const HEAD_LEADED = ["roomName", "roomTagline"] as const;
+type Member = { tag: string; weight: string; size: number; family: string; tracking: string; lineHeight: string; ratio: number; position: string; color: string } | null;
+type Head = { chromeWash: { content: string; backgroundColor: string; filter: string } | null; chromePosition: string | null; chromeBottom: number | null; bandClip: string | null; h1s: { classes: string[]; inHeader: boolean; inMain: boolean }[]; bodyLineHeight: string } & Record<(typeof MEMBERS)[number], Member>;
+type Want = { tag: string; weight: string; size: number; tracking: number | null; face: RegExp } | null;
 
-const HEAD_READ = `(() => {
+const HEAD_READ: Payload<string> = `(() => {
   const read = (sel) => {
     const el = document.querySelector(sel);
     if (!el) return null;
@@ -75,8 +79,9 @@ const HEAD_READ = `(() => {
   });
 })()`;
 
-const near = (got, want) => Math.abs(got - want) < 0.01;
-const matches = (m, want) => {
+// @ts-expect-error an absent member reads undefined, and NaN < 0.01 is false, which is the red the checks want
+const near = (got: number | undefined, want: number | undefined): boolean => Math.abs(got - want) < 0.01;
+const matches = (m: Member | undefined, want: Want): boolean => {
   if (want === null) return m === null;
   if (!m) return false;
   return m.tag === want.tag && m.weight === want.weight && near(m.size, want.size) &&
@@ -93,15 +98,15 @@ const boundAtlasEmitsAtlasHead = () => {
 };
 
 // eslint-disable-next-line max-lines-per-function
-export async function run(ctx) {
+export async function run(ctx: SuiteContext): Promise<void> {
   const { evaluate, send, check, shoot, sleep, waitReady, consoleErrors, http4xx, PORT } = ctx;
   const errBase = consoleErrors.length;
   const httpBase = http4xx.length;
 
-  const visit = async (route) => {
+  const visit = async (route: string): Promise<boolean> => {
     await send("Page.navigate", { url: `http://127.0.0.1:${PORT}${route}` });
     for (let i = 0; i < 200; i++) {
-      let ok = null;
+      let ok: unknown = null;
       try { ok = await evaluate(`document.readyState === "complete" && !!document.querySelector(".wordmark")`); } catch {}
       if (ok) break;
       await sleep(75);
@@ -114,14 +119,14 @@ export async function run(ctx) {
       await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
       await sleep(150);
       let up = true;
-      try { up = await evaluate(`!!document.getElementById("lf-veil")`); } catch {}
+      try { up = await evaluate<boolean>(`!!document.getElementById("lf-veil")`); } catch {}
       if (!up) break;
     }
     return true;
   };
 
-  const heads = {};
-  const unreachable = [];
+  const heads: Record<string, Head | undefined> = {};
+  const unreachable: string[] = [];
   for (const route of SHELLED) {
     if (!(await visit(route))) { unreachable.push(route); continue; }
     heads[route] = JSON.parse(await evaluate(HEAD_READ));
@@ -129,7 +134,7 @@ export async function run(ctx) {
     if (route === PROSE) await shoot("running-head-room.png");
   }
 
-  const bad = (pred) => SHELLED.filter((r) => !heads[r] || !pred(heads[r], r));
+  const bad = (pred: (h: Head, r: string) => boolean) => SHELLED.filter((r) => !heads[r] || !pred(heads[r], r));
 
   const manyH1 = bad((h, r) => h.h1s.length === 1 && (r === "/" ? h.h1s[0].inHeader : h.h1s[0].inMain));
   check(
@@ -147,7 +152,7 @@ export async function run(ctx) {
     wrongH1.map((r) => `${r}: ${JSON.stringify(heads[r]?.h1s)}`).join(" | ") || `home=wordmark, ${SHELLED.length - 1} rooms=room-name`,
   );
 
-  const offenders = [];
+  const offenders: string[] = [];
   let pinned = 0;
   for (const route of SHELLED) {
     const h = heads[route];
@@ -194,7 +199,7 @@ export async function run(ctx) {
   const misleaded = SHELLED.flatMap((r) => {
     const h = heads[r];
     if (!h) return [`${r}: unreachable`];
-    const out = [];
+    const out: string[] = [];
     if (!h.wordmark || Math.abs(h.wordmark.ratio - 1.15) > 0.005) out.push(`${r} wordmark ratio ${h.wordmark?.ratio}`);
     for (const m of CLUSTER_NORMAL) {
       if (expectedHead(r)[m] === null) continue;
@@ -226,9 +231,9 @@ export async function run(ctx) {
 
   // .print-only is display:none on screen so no screenshot can reach this, but computed style resolves through display:none; a probe showed a bare h1 in the same container resolves to the BODY face, so the assertion discriminates.
   const producerShape = boundAtlasEmitsAtlasHead();
-  let atlas = null;
+  let atlas: { family: string; size: number; hidden: boolean } | null = null;
   if (await visit("/print-room/")) {
-    atlas = JSON.parse(await evaluate(`(() => {
+    atlas = JSON.parse(await evaluate<string>(`(() => {
       const d = document.getElementById("pr-atlas");
       if (!d) return JSON.stringify(null);
       d.innerHTML = '<header class="atlas-head print-only">' +
@@ -254,7 +259,7 @@ export async function run(ctx) {
     dimTaglines.map((r) => `${r} tagline ${heads[r]?.tagline?.color}`).join(" | ") || `tagline parchment x${SHELLED.length}`,
   );
 
-  const poolAlpha = (color) => Number((String(color).match(/\/\s*([\d.]+)\)/) || String(color).match(/rgba\([^)]*,\s*([\d.]+)\)/) || [])[1] ?? "0");
+  const poolAlpha = (color: string) => Number((String(color).match(/\/\s*([\d.]+)\)/) || String(color).match(/rgba\([^)]*,\s*([\d.]+)\)/) || [])[1] ?? "0"); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   // #464: the Gallery joins home, the two pages whose content scrolls or rides under the cluster (a pale plate measured the tagline at 2.26:1 without the pool).
   const POOLED = ["/", "/gallery/"];
   const washWrong = bad((h, r) =>
@@ -270,9 +275,10 @@ export async function run(ctx) {
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   await send("Page.navigate", { url: "about:blank" });
   const galleryUp = await visit("/gallery/");
-  let scrolled = null;
+  let scrolled: { sh: number; y: number; plate: Point | null; loaded: boolean } | null = null;
   for (let i = 0; i < 100 && galleryUp; i++) {
-    scrolled = JSON.parse(await evaluate(`(() => { const sh = document.documentElement.scrollHeight; window.scrollTo(0, Math.min(1200, sh - innerHeight)); const imgs = [...document.querySelectorAll(".grid img")]; const b = imgs.map((el) => el.getBoundingClientRect()).find((r) => r.top > 100 && r.bottom < innerHeight - 20 && r.width > 100); return JSON.stringify({ sh, y: scrollY, plate: b ? { x: Math.round(b.x + b.width / 2), y: Math.round(b.y + b.height / 2) } : null, loaded: imgs.length > 0 && imgs.every((el) => el.complete && el.naturalWidth > 0) }); })()`));
+    scrolled = JSON.parse(await evaluate<string>(`(() => { const sh = document.documentElement.scrollHeight; window.scrollTo(0, Math.min(1200, sh - innerHeight)); const imgs = [...document.querySelectorAll(".grid img")]; const b = imgs.map((el) => el.getBoundingClientRect()).find((r) => r.top > 100 && r.bottom < innerHeight - 20 && r.width > 100); return JSON.stringify({ sh, y: scrollY, plate: b ? { x: Math.round(b.x + b.width / 2), y: Math.round(b.y + b.height / 2) } : null, loaded: imgs.length > 0 && imgs.every((el) => el.complete && el.naturalWidth > 0) }); })()`));
+    // @ts-expect-error the payload stringifies an object and never null, which a parse typed any cannot tell the checker
     if (scrolled.plate && scrolled.loaded) break;
     await sleep(100);
   }
@@ -291,7 +297,7 @@ export async function run(ctx) {
   // The Z13 bounce: /gallery/ is already loaded, and visit()'s probe (readyState complete plus a .wordmark) is satisfied by the STALE document, so a same-URL navigate can return before the new one commits.
   await send("Page.navigate", { url: "about:blank" });
   const galleryNarrow = await visit("/gallery/");
-  const gFolio = galleryNarrow ? await evaluate(`(()=>{const e=document.querySelector(".corner.tr");if(!e)return null;const c=getComputedStyle(e,"::before");
+  const gFolio = galleryNarrow ? await evaluate<{ content: string; inset: string[]; rem: number } | null>(`(()=>{const e=document.querySelector(".corner.tr");if(!e)return null;const c=getComputedStyle(e,"::before");
     return{content:c.content,inset:[c.top,c.right,c.bottom,c.left],rem:parseFloat(getComputedStyle(document.documentElement).fontSize)};})()`) : null;
   const gWant = gFolio ? [-0.7, -0.7, -0.75, -0.7].map((v) => `${Math.round(v * gFolio.rem * 100) / 100}px`) : null;
   check(
@@ -300,17 +306,18 @@ export async function run(ctx) {
     JSON.stringify({ ...gFolio, want: gWant }),
   );
   await send("Emulation.setEmulatedMedia", { media: "print" });
-  const gPrint = galleryNarrow ? await evaluate(`(()=>{const e=document.querySelector(".corner.tr");if(!e)return null;const c=getComputedStyle(e,"::before");
+  const gPrint = galleryNarrow ? await evaluate<{ content: string; folioPos: string; armed: boolean } | null>(`(()=>{const e=document.querySelector(".corner.tr");if(!e)return null;const c=getComputedStyle(e,"::before");
     return{content:c.content,folioPos:getComputedStyle(e).position,armed:document.body.classList.contains("chart-room")&&!document.querySelector(".stage")};})()`) : null;
-  const FIT_READ = `(()=>{const d=document.documentElement;const m=document.querySelector("main");const imgs=[...document.querySelectorAll(".grid img")];
+  type Fit = { scrollW: number; clientW: number; plates: number; maxRight: number; mainPadL: string };
+  const FIT_READ: Payload<Fit> = `(()=>{const d=document.documentElement;const m=document.querySelector("main");const imgs=[...document.querySelectorAll(".grid img")];
     return{scrollW:d.scrollWidth,clientW:d.clientWidth,plates:imgs.length,maxRight:imgs.length?Math.round(Math.max(...imgs.map((el)=>el.getBoundingClientRect().right))):-1,mainPadL:m?getComputedStyle(m).paddingLeft:"absent"};})()`;
   // The poll breaks on the resize landing, never on the geometry the check asserts, and on exhaustion hands its last read to the check so a viewport that never resized reds RH10e by name instead of taking the suite.
-  const fitAt = async (want) => {
+  const fitAt = async (want: number): Promise<Fit | null> => {
     if (!galleryNarrow) return null;
-    let read = null;
+    let read: Fit | null = null;
     for (let i = 0; i < 40; i++) {
       read = await evaluate(FIT_READ);
-      if (read && read.clientW === want) return read;
+      if (read && read.clientW === want) return read; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
       await sleep(50);
     }
     return read;

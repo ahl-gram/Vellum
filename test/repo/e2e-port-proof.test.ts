@@ -83,6 +83,14 @@ test("a .mjs to .ts swap in a string that is not an import is an edit even when 
   assert.deepEqual(got.renames, []);
 });
 
+test("a base that is already TypeScript is compared as the JavaScript it runs, so a typed module unchanged since an earlier port reads identical", () => {
+  const typed = 'import type { SuiteContext } from "./types.ts";\nexport async function run(ctx: SuiteContext): Promise<void> {\n  const r = await ctx.evaluate<{ x: number }>(`({ x: 1 })`);\n  ctx.check("X1", r.x === 1);\n}';
+  const got = compareSources(typed, typed, true, movedToTs, true);
+  assert.deepEqual(got.edits, [], JSON.stringify(got.edits));
+  assert.equal(got.tokens[0], got.tokens[1]);
+  assert.equal(got.payloads[0], 1);
+});
+
 test("a reordered statement is an edit", () => {
   const lines = BASE.split("\n");
   const reordered = [lines[0], lines[1], lines[2], lines[3], lines[5], lines[4], lines[6], lines[7]].join("\n");
