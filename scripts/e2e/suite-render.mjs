@@ -1,5 +1,5 @@
 // Explorer render core e2e (R): worker active, worker/inline byte-parity, the committed-chart ULP check, the thematic layer, coast warp, Tide Wheel and arms toggle.
-import { makeStep } from "./step-support.mjs";
+import { makeStep } from "./step-support.ts";
 
 // eslint-disable-next-line max-lines-per-function
 export async function run(ctx) {

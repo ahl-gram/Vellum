@@ -1,5 +1,5 @@
 // Health checkpoint e2e (N1/N2) over the whole worker run so far; reads the shared consoleErrors/http4xx accumulators.
-import { dropExpectedCancellations } from "./console-support.mjs";
+import { dropExpectedCancellations } from "./console-support.ts";
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, waitSettled, waitReady, axDescription, serverState, consoleErrors, http4xx, PORT } = ctx;
   const errs = dropExpectedCancellations(consoleErrors);

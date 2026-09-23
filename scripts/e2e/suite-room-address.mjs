@@ -1,6 +1,6 @@
 // Room address e2e (RA1-RA8, #320 Sub 3): the #192 A-suite's year-restore checks re-hosted; the Explorer-hosted A* originals stay green beside them.
-import { makeRoom } from "./room-support.mjs";
-import { dropExpectedCancellations } from "./console-support.mjs";
+import { makeRoom } from "./room-support.ts";
+import { dropExpectedCancellations } from "./console-support.ts";
 
 // eslint-disable-next-line max-lines-per-function
 export async function run(ctx) {

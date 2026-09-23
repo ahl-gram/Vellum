@@ -1,6 +1,6 @@
 /* eslint-disable max-lines */
 // Surveyor's Glass e2e (Z): pan/zoom on the Explorer chart via the shared d3-zoom controller, plus the settle-to-region redraft (Z17+). Resolved matrices are asserted on purpose: getComputedStyle returns "none" for a rejected value, so the assertion doubles as proof the px-suffixed transform is valid CSS (d3's own toString() is not).
-import { makeStep } from "./step-support.mjs";
+import { makeStep } from "./step-support.ts";
 
 // eslint-disable-next-line max-lines-per-function
 export async function run(ctx) {

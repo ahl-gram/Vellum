@@ -1,5 +1,5 @@
 // Inline-fallback e2e (B): the worker bundle is served 404 (faithfully simulating file://, a 404, or a CSP block) and the page must degrade to the inline engine; no working-tree mutation, restored in finally.
-import { makeStep } from "./step-support.mjs";
+import { makeStep } from "./step-support.ts";
 
 export async function run(ctx) {
   const { evaluate, send, check, shoot, sleep, waitSettled, waitReady, axDescription, serverState, consoleErrors, http4xx, PORT } = ctx;

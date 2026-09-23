@@ -13,7 +13,7 @@ import {
   suitesNotWhole,
   E2E_SUITE_ORDER,
 } from "../src/cli/e2e-suites.ts";
-import { start, cleanup } from "./e2e/harness.mjs";
+import { start, cleanup } from "./e2e/harness.ts";
 import { run as runRender } from "./e2e/suite-render.mjs";
 import { run as runMotion } from "./e2e/suite-motion.mjs";
 import { run as runTurn } from "./e2e/suite-turn.mjs";

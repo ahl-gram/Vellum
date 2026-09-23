@@ -1,5 +1,5 @@
 // Verso e2e (V, #116): the sheet flip to its back face and the key turn-vs-flip shared-transform races (both drive #sheet-inner's rotateY, never together); e2e cannot SEE the 3D flip, so these assert end states, class toggles, and the docket text.
-import { makeStep } from "./step-support.mjs";
+import { makeStep } from "./step-support.ts";
 
 // eslint-disable-next-line max-lines-per-function
 export async function run(ctx) {

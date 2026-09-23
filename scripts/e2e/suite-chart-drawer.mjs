@@ -1,8 +1,8 @@
 /* eslint-disable max-lines */
 // The Chart Table's drawer (#520 Sub 2 of #401, direction D ruled at the #518 sitting): the dog-ear on the committed survey, the drawer it fills, the cap, and since #634 the table's two homes, the address deciding an arrival and the device a return. `chart-drawer` and never `drawer`: suite-room-drawer is the site's phone nav (#520 ruling 2).
-import { makeSettle } from "./settle-support.mjs";
-import { makeStep } from "./step-support.mjs";
-import { makeStage, makeMouse } from "./home-support.mjs";
+import { makeSettle } from "./settle-support.ts";
+import { makeStep } from "./step-support.ts";
+import { makeStage, makeMouse } from "./home-support.ts";
 import { slideRested, foldRested } from "../../src/cli/e2e-slide.ts";
 import { SAY_HOLD_MS } from "../../src/site/shared/announce.ts";
 // Imported and never restated: a key spelled twice is a clear that silently stops clearing the day the app's own key moves.

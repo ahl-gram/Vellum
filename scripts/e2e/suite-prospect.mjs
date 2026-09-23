@@ -1,6 +1,6 @@
 // Prospect e2e (the PB checks, #242; the chart room since #463 part 4/4): the Explorer card's way in, the room's plate on the fitted sheet, the engraver's note on the slip, the year control engraving in place and writing the address, the roads out, the two-dress fallback, year-awareness, and same-address byte determinism; self-contained like its sibling suites (navigates itself, carries scoped no-4xx and console-error deltas).
-import { makeStep } from "./step-support.mjs";
-import { dropExpectedCancellations } from "./console-support.mjs";
+import { makeStep } from "./step-support.ts";
+import { dropExpectedCancellations } from "./console-support.ts";
 
 // eslint-disable-next-line max-lines-per-function
 export async function run(ctx) {

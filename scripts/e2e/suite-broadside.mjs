@@ -1,8 +1,8 @@
 // Broadside e2e (BR1-BR8, #270): the regrouped controls, seals, journal button, and footnote apparatus on the built running page (the unit pins in test/site/broadside.test.ts hold the SOURCE to this shape); self-contained with scoped deltas.
-import { luminance, sampleRow } from "./pixel-support.mjs";
-import { dropExpectedCancellations } from "./console-support.mjs";
+import { luminance, sampleRow } from "./pixel-support.ts";
+import { dropExpectedCancellations } from "./console-support.ts";
 
-import { makeStep } from "./step-support.mjs";
+import { makeStep } from "./step-support.ts";
 
 // eslint-disable-next-line max-lines-per-function
 export async function run(ctx) {

@@ -4,7 +4,7 @@ import { writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { findBrowser } from "../../src/cli/raster.ts";
-import { start, cleanup } from "../../scripts/e2e/harness.mjs";
+import { start, cleanup } from "../../scripts/e2e/harness.ts";
 
 const DIR = fileURLToPath(new URL(".", import.meta.url)).replace(/\/$/, "");
 const PORT = 8811, DPORT = 9311;

@@ -1,7 +1,7 @@
 /* eslint-disable max-lines */
 // Living Chart story-card overlay e2e (P1-P15, #53).
-import { makeStep } from "./step-support.mjs";
-import { makeSettle } from "./settle-support.mjs";
+import { makeStep } from "./step-support.ts";
+import { makeSettle } from "./settle-support.ts";
 
 // eslint-disable-next-line max-lines-per-function
 export async function run(ctx) {

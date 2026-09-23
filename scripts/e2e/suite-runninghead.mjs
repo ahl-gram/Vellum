@@ -2,8 +2,8 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { resolve } from "node:path";
-import { luminance, sampleRow } from "./pixel-support.mjs";
-import { dropExpectedCancellations } from "./console-support.mjs";
+import { luminance, sampleRow } from "./pixel-support.ts";
+import { dropExpectedCancellations } from "./console-support.ts";
 
 // LITERAL on purpose: home is not a nav item, /ribbon/ and /prospect/ are shelled rooms outside the nav, /atlas/ is generated and carries no shell, and a page dropping out of the nav must not silently drop out of this guard.
 const SHELLED = ["/", "/explorer/", "/print-room/", "/reading-room/", "/gallery/", "/faq/", "/glossary/", "/seed-of-the-day/", "/prospect/", "/ribbon/", "/specimen/"];
