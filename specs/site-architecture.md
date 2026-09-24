@@ -60,7 +60,7 @@ symbol and path so the reader goes and looks.
   `BUNDLE_ENTRIES` in `scripts/build-app-bundles.ts`; `GENERATED_SUBTREES` in
   `scripts/clean-public-generated.ts`; `ROUTE_ENTRIES` and `DISCOVERY_ROUTES` in
   `scripts/generate-discovery.ts`. A new suite additionally joins `E2E_SUITE_ORDER`
-  (`src/cli/e2e-suites.ts`), the runner's `SUITES` map (`scripts/e2e-explorer.mjs`), `E2E_LANES`
+  (`src/cli/e2e-suites.ts`), the runner's `SUITES` map (`scripts/e2e-explorer.ts`), `E2E_LANES`
   (`src/cli/e2e-lanes.ts`), `MEASURED_SECONDS` (`test/cli/e2e-lanes.test.ts`) and the containment
   sweep in `test/repo/e2e-tiers.test.ts`. A new LANE joins two more: `ci.yml`'s job matrix, where
   `test/repo/e2e-tiers.test.ts` reds if the matrix and `E2E_LANES` disagree, and `main`'s required

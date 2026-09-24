@@ -1,7 +1,6 @@
 import { defineConfig } from "eslint/config";
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";
-import globals from "globals";
 import css from "@eslint/css";
 import vellum from "./scripts/lint/css-comment-form.ts";
 
@@ -31,20 +30,6 @@ export default defineConfig(
       "@typescript-eslint/prefer-readonly": "error",
       "@typescript-eslint/require-await": "off",
       "@typescript-eslint/switch-exhaustiveness-check": "error",
-    },
-  },
-  {
-    files: ["scripts/**/*.mjs"],
-    extends: [js.configs.recommended],
-    languageOptions: { globals: globals.node },
-    rules: {
-      "no-empty": "off",
-      "no-unused-vars": "off",
-      "max-depth": ["error", 4],
-      "max-lines": ["error", 400],
-      "max-lines-per-function": ["error", 50],
-      "no-param-reassign": ["error", { props: false }],
-      "prefer-const": "error",
     },
   },
   {

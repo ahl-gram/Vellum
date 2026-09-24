@@ -93,7 +93,7 @@ headless browser actually do, so a green run can be believed.
     starts on whatever page is current, so the last navigation waits for readiness instead of
     returning mid-boot, or a suite that reads the page it expects without navigating of its own goes
     red in lane order and green alone. The VIEWPORT is the runner's job, not the suite's:
-    `onSuiteError` in `scripts/e2e-explorer.mjs` races the mobile-emulation reset against a timeout
+    `onSuiteError` in `scripts/e2e-explorer.ts` races the mobile-emulation reset against a timeout
     on the error path, and the race is bounded precisely because a browser that dies after the
     liveness probe would leave that send pending forever, which is the one path where the next suite
     does inherit a phone viewport. Depend on the suite, not on the rescue. **Attribute a lane-order
@@ -119,7 +119,7 @@ section points there rather than restating it.
   `:focus-visible` never applies, and nothing throws: the focus path silently does nothing. A suite
   needs no call of its own unless it turned the emulation off, and a build that ignores the request
   degrades to exactly that silent no-op.
-- **The harness serves the BUILT site.** `scripts/e2e-explorer.mjs` serves `dist/`, with
+- **The harness serves the BUILT site.** `scripts/e2e-explorer.ts` serves `dist/`, with
   `VELLUM_SITE_DIR` as the override, and `dist/` does not exist in a fresh checkout. A change under
   `public/` is invisible to every suite until the build runs again. Two causes put a run on a stale
   build and this file ranks neither: that one, and an orphaned browser still holding the debug port,

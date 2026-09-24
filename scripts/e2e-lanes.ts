@@ -1,4 +1,4 @@
-// e2e lane driver (npm run test:e2e:lanes): spawns one e2e-explorer per SELECTED lane on its own port, streams the outputs line-prefixed, and fails if any selected lane does. No argument runs every lane, which is the local full run; `--lane A` runs exactly one, which is what each CI job does since #623 put one lane on each runner. .mjs because scripts/ is outside tsconfig's include, so a .ts here would be unchecked; every decision it makes lives in the unit-tested src/cli/e2e-lanes.ts.
+// e2e lane driver (npm run test:e2e:lanes): spawns one e2e-explorer per SELECTED lane on its own port, streams the outputs line-prefixed, and fails if any selected lane does. No argument runs every lane, which is the local full run; `--lane A` runs exactly one, which is what each CI job does since #623 put one lane on each runner. Every decision it makes lives in the unit-tested src/cli/e2e-lanes.ts.
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { join } from "node:path";
@@ -13,14 +13,17 @@ import {
   resolveLaneSelection,
   splitLaneChunk,
 } from "../src/cli/e2e-lanes.ts";
+import type { E2eLane, LaneResult, LaneTally } from "../src/cli/e2e-lanes.ts";
+import type { Readable } from "node:stream";
 
 const HERE = fileURLToPath(new URL(".", import.meta.url));
-const RUNNER = join(HERE, "e2e-explorer.mjs");
+const RUNNER = join(HERE, "e2e-explorer.ts");
 
 let SELECTED;
 try {
   SELECTED = resolveLaneSelection(process.argv.slice(2));
 } catch (err) {
+  // @ts-expect-error a caught value is unknown to the checker; resolveLaneSelection throws only an Error, whose message this prints
   console.error(`FAIL: ${err.message}`);
   process.exit(1);
 }
@@ -46,10 +49,10 @@ if (!findBrowser()) {
   process.exit(0);
 }
 
-function streamLines(stream, prefix, sink, onLine) {
+function streamLines(stream: Readable, prefix: string, sink: (line: string) => void, onLine: (line: string) => void): void {
   let rest = "";
   stream.setEncoding("utf8");
-  const emit = (line) => {
+  const emit = (line: string) => {
     onLine(line);
     sink(`${prefix} ${line}`);
   };
@@ -63,7 +66,7 @@ function streamLines(stream, prefix, sink, onLine) {
   });
 }
 
-function runLane(lane) {
+function runLane(lane: E2eLane): Promise<LaneResult> {
   return new Promise((settle) => {
     const started = performance.now();
     const child = spawn(process.execPath, [RUNNER], {
@@ -71,8 +74,8 @@ function runLane(lane) {
       stdio: ["ignore", "pipe", "pipe"],
     });
     let skipped = false;
-    let tally = null;
-    const readLine = (line) => {
+    let tally: LaneTally | null = null;
+    const readLine = (line: string) => {
       if (laneLineIsSkip(line)) skipped = true;
       tally = laneCheckTally(line) ?? tally;
     };
@@ -80,7 +83,7 @@ function runLane(lane) {
     streamLines(child.stdout, prefix, (l) => console.log(l), readLine);
     streamLines(child.stderr, prefix, (l) => console.error(l), readLine);
     // A null code is a signal or a failed spawn, so the lane reported no outcome at all: harness failure (2), not failed check (1).
-    const done = (code) => settle({ name: lane.name, code: code ?? 2, ms: performance.now() - started, skipped, tally });
+    const done = (code: number | null) => settle({ name: lane.name, code: code ?? 2, ms: performance.now() - started, skipped, tally });
     child.on("error", (err) => {
       console.error(`${prefix} FAIL: lane could not start: ${err.message}`);
       done(2);

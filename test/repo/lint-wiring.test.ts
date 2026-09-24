@@ -8,7 +8,7 @@ import lintConfig from "../../eslint.config.ts";
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const src = (p: string) => readFileSync(join(ROOT, p), "utf8");
 
-const LINT_SCOPE = ["public/**/*.css", "scripts/**/*.mjs", "scripts/**/*.ts", "src/**/*.ts", "test-support/**/*.ts", "test/**/*.ts"];
+const LINT_SCOPE = ["public/**/*.css", "scripts/**/*.ts", "src/**/*.ts", "test-support/**/*.ts", "test/**/*.ts"];
 const LINT_SCRIPT = "eslint --flag unstable_native_nodejs_ts_config --max-warnings 0 src scripts test test-support \"public/**/*.css\"";
 
 const blocks: readonly Linter.Config[] = lintConfig;
@@ -75,7 +75,6 @@ test("the lint config is bounded to the ruled scope, covers all of it, and narro
 
 const WITNESSES: Record<string, string> = {
   "public/**/*.css": "public/house.css",
-  "scripts/**/*.mjs": "scripts/e2e-explorer.mjs",
   "scripts/**/*.ts": "scripts/build-app-bundles.ts",
   "src/**/*.ts": "src/cli/main.ts",
   "test-support/**/*.ts": "test-support/element-shim.ts",
