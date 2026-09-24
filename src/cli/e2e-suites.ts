@@ -113,7 +113,7 @@ export interface E2eOutcome {
   readonly line: string;
 }
 
-export type E2eSuiteRunners = Readonly<Record<string, (ctx: unknown) => Promise<unknown>>>;
+export type E2eSuiteRunners<C = unknown> = Readonly<Record<string, (ctx: C) => Promise<unknown>>>;
 
 export interface E2eSuiteTiming {
   readonly name: E2eSuiteName;
@@ -134,10 +134,10 @@ const ABORTED_STREAK_LIMIT = 3;
 
 const errorText = (err: unknown): string => (err instanceof Error ? err.message : String(err));
 
-export async function runSelected(
+export async function runSelected<C>(
   names: readonly E2eSuiteName[],
-  suites: E2eSuiteRunners,
-  ctx: unknown,
+  suites: E2eSuiteRunners<C>,
+  ctx: C,
   hooks: E2eRunHooks = {},
 ): Promise<readonly E2eSuiteTiming[]> {
   const now = hooks.now ?? (() => performance.now());

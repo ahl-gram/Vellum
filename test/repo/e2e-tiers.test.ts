@@ -8,11 +8,11 @@ import { E2E_LANES } from "../../src/cli/e2e-lanes.ts";
 import { BUNDLE_ENTRIES } from "../../scripts/build-app-bundles.ts";
 import { e2eSuitePath, readE2eSource } from "../../test-support/e2e-source.ts";
 
-// The runner is a .mjs script and ci.yml is YAML, neither importable here, so both are read as source.
+// The runner starts a browser the moment it is imported and ci.yml is YAML, so both are read as source.
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const src = (p: string) => readE2eSource(join(ROOT, p));
-const RUNNER = src("scripts/e2e-explorer.mjs");
+const RUNNER = src("scripts/e2e-explorer.ts");
 const CI = src(".github/workflows/ci.yml");
 // A source scan reads the CODE, not the file: commenting a line out in place leaves its literal behind, and a raw match cannot tell the two apart. Blind spots, both of which cost a false red rather than a miss: a `//` inside a string literal reads as a comment, and a /* */ block is not seen at all.
 const uncommented = (source: string) => source.split("\n").filter((line) => !line.trim().startsWith("//")).join("\n");
@@ -46,7 +46,7 @@ test("E2E_SUITE_ORDER is exactly the runner's SUITES map, in the same order", ()
 
 test("each suite name maps to the run function imported from its own file", () => {
   const aliasFor = new Map(
-    [...RUNNER_CODE.matchAll(/import \{ run as (\w+) \} from "\.\/e2e\/suite-([\w-]+)\.(?:mjs|ts)"/g)].map((m) => [m[2], m[1]]),
+    [...RUNNER_CODE.matchAll(/import \{ run as (\w+) \} from "\.\/e2e\/suite-([\w-]+)\.ts"/g)].map((m) => [m[2], m[1]]),
   );
   const block = RUNNER_CODE.match(/const SUITES = \{([\s\S]*?)\n\};/);
   if (!block) throw new Error("the runner's SUITES map was not found");
@@ -62,7 +62,7 @@ test("every named suite has a suite file the runner imports", () => {
   for (const name of E2E_SUITE_ORDER) {
     const file = e2eSuitePath(name);
     assert.ok(existsSync(join(ROOT, file)), `${name} has no ${file}`);
-    assert.match(RUNNER_CODE, new RegExp(`from "\\./e2e/suite-${name}\\.(?:mjs|ts)"`), `${name} is not imported`);
+    assert.match(RUNNER_CODE, new RegExp(`from "\\./e2e/suite-${name}\\.ts"`), `${name} is not imported`);
   }
 });
 
@@ -379,7 +379,7 @@ test("every check group that waits is still inside its own step, by name (#534)"
 });
 
 test("the lane driver spawns the runner itself and refuses an ambient selection", () => {
-  const DRIVER = uncommented(src("scripts/e2e-lanes.mjs"));
+  const DRIVER = uncommented(src("scripts/e2e-lanes.ts"));
   assert.match(DRIVER, /spawn\(process\.execPath, \[RUNNER\]/, "a lane must spawn the runner directly, so its exit code survives");
   assert.match(DRIVER, /ambientSelectionRefusal\(process\.env\)/, "the driver no longer refuses a narrowing selection");
   assert.match(DRIVER, /laneOutcome\(results, SELECTED\)/, "the driver does not aggregate the lanes it was asked to run, so one could fail unnoticed");
@@ -396,5 +396,5 @@ test("the lane driver spawns the runner itself and refuses an ambient selection"
   );
   assert.match(DRIVER, /browserlessAction\(process\.env, Boolean\(process\.stdout\.isTTY\)\)/, "the driver no longer decides the browserless policy against its own TTY");
   const pkg = JSON.parse(src("package.json")) as { scripts: Record<string, string> };
-  assert.equal(pkg.scripts["test:e2e:lanes"], "node scripts/e2e-lanes.mjs");
+  assert.equal(pkg.scripts["test:e2e:lanes"], "node scripts/e2e-lanes.ts");
 });

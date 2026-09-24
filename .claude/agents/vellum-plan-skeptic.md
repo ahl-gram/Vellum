@@ -51,7 +51,7 @@ Check every one the plan touches, and flag the ones it does not mention but will
 - **Determinism.** All randomness flows from the seeded rng and its named forks. A plan that introduces `Math.random`, `Date.now`, a locale-dependent format or an iteration-order-dependent value into engine or render output is BLOCKING.
 - **Goldens and regens.** A render change that can move a label or a path owes a regen, and a regen lands ALONE. A plan that bundles one into a feature is BLOCKING. The drift guard is circular right after a regen, so it is never the evidence.
 - **Test first.** The plan should say which test fails first and on what assertion. "Write tests" as a step is not a plan.
-- **One language, one pipeline.** New code is TypeScript under `src/`. A new `.js` outside `src/` needs a stated reason; the e2e harness and suites in `scripts/e2e/` are the grandfathered corner.
+- **One language, one pipeline.** New code is TypeScript under `src/`, and no JavaScript file is tracked outside `design/`: `npm run lint` refuses one (Issue #653 ruling D), and `design/` is the single exemption. A plan that adds one outside `design/` plans a red lint.
 - **The rules files.** `.claude/rules/` binds: immutability, files under 400 lines, functions under 50, no hardcoded secrets or PII.
 - **Comments are the exception, not the rule.** A plan proposing to explain itself in prose at each site is proposing findings for the next reviewer.
 

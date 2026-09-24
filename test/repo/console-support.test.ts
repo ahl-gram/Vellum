@@ -88,8 +88,8 @@ test("order and multiplicity survive, so a check's payload still reads as what h
 });
 
 test("no suite carries a cancellation opening of its own: one roster, swept from the module's own exported data (#613)", () => {
-  const files = readdirSync(E2E).filter((f) => /\.(mjs|ts)$/.test(f));
-  assert.ok(files.length > 20, `read only ${files.length} .mjs and .ts files under scripts/e2e; this sweep is looking at the wrong tree`);
+  const files = readdirSync(E2E).filter((f) => /\.ts$/.test(f));
+  assert.ok(files.length > 20, `read only ${files.length} .ts files under scripts/e2e; this sweep is looking at the wrong tree`);
   const src = (f: string) => readE2eSource(join(E2E, f));
   assert.ok(CANCELLATION_PREFIXES.length > 0, "the exported roster is empty, so the sweep below would read nothing");
   for (const prefix of CANCELLATION_PREFIXES) {
@@ -112,8 +112,8 @@ test("no suite carries a cancellation opening of its own: one roster, swept from
 
 test("every read of the console accumulator goes through the shared drop, so a call site cannot quietly stop filtering (cold skeptic on PR #619)", () => {
   // harness.ts FILLS the accumulator and is the one file that reads it for something other than a check.
-  const files = readdirSync(E2E).filter((f) => /\.(mjs|ts)$/.test(f) && f !== "console-support.ts" && f !== "harness.ts");
-  assert.ok(files.length > 20, `read only ${files.length} .mjs and .ts files; this sweep is looking at the wrong tree`);
+  const files = readdirSync(E2E).filter((f) => /\.ts$/.test(f) && f !== "console-support.ts" && f !== "harness.ts");
+  assert.ok(files.length > 20, `read only ${files.length} .ts files; this sweep is looking at the wrong tree`);
   const offenders: string[] = [];
   let reads = 0;
   for (const f of files) {
@@ -129,6 +129,6 @@ test("every read of the console accumulator goes through the shared drop, so a c
   assert.deepEqual(
     offenders,
     [],
-    `${offenders.join(", ")} read the console accumulator without passing it through the shared drop, so that check silently stopped filtering. BLIND SPOTS, declared, and the third was found by mutation rather than by reasoning (prover round 3): it reads the .mjs and .ts files under scripts/e2e/ only, types stripped, so scripts/e2e-explorer.mjs and scripts/e2e-lanes.mjs are outside it, both clean today and neither taking a delta; it reads one LINE, so a read split across lines escapes; and a check built from TWO separately excluded base captures plus a comparison line that never names the accumulator escapes it whole, since every line it could see is legitimately excluded. It errs the other way on a comment that merely mentions the accumulator, which is the direction a scanner here is owed`,
+    `${offenders.join(", ")} read the console accumulator without passing it through the shared drop, so that check silently stopped filtering. BLIND SPOTS, declared, and the third was found by mutation rather than by reasoning (prover round 3): it reads the .ts files under scripts/e2e/ only, types stripped, so scripts/e2e-explorer.ts and scripts/e2e-lanes.ts are outside it, both clean today and neither taking a delta; it reads one LINE, so a read split across lines escapes; and a check built from TWO separately excluded base captures plus a comparison line that never names the accumulator escapes it whole, since every line it could see is legitimately excluded. It errs the other way on a comment that merely mentions the accumulator, which is the direction a scanner here is owed`,
   );
 });

@@ -18,10 +18,10 @@
     "astro:preview": "astro preview",
     "build": "npm run astro:generate && astro build",
     "test": "node --test",
-    "test:e2e": "node scripts/e2e-explorer.mjs",
-    "test:e2e:lanes": "node scripts/e2e-lanes.mjs",
+    "test:e2e": "node scripts/e2e-explorer.ts",
+    "test:e2e:lanes": "node scripts/e2e-lanes.ts",
     "check": "tsc --noEmit",
-    "lint": "eslint --flag unstable_native_nodejs_ts_config --max-warnings 0 src scripts test test-support \"public/**/*.css\""
+    "lint": "eslint --flag unstable_native_nodejs_ts_config --max-warnings 0 ."
   },
   "dependencies": {
     "d3-selection": "^3.0.0",

@@ -25,7 +25,7 @@ test("the sheet-height literals match their derivation across every carrier (#47
     "public/index.css",
     "src/site/home/camera.ts",
     ...readdirSync(resolve(REPO, "scripts/e2e"))
-      .filter((f) => /\.(mjs|ts)$/.test(f))
+      .filter((f) => /\.ts$/.test(f))
       .map((f) => `scripts/e2e/${f}`),
   ];
   // Anchored to the derivation's integer part, so a re-derived height reds the witness below instead of matching nothing; a literal carried OUTSIDE these roots escapes (false negative only).

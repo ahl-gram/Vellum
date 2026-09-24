@@ -367,7 +367,7 @@ test("a lane's output is split into whole lines, across chunk boundaries and at 
 test("the skip line the driver watches for is the one the runner actually prints", () => {
   // Read as source: a machine with a browser never takes this path, and a reworded SKIP would silently turn an empty run green.
   const runner = readFileSync(
-    join(import.meta.dirname, "..", "..", "scripts", "e2e-explorer.mjs"),
+    join(import.meta.dirname, "..", "..", "scripts", "e2e-explorer.ts"),
     "utf8",
   );
   const printed = runner.match(/"(SKIP:[^"]*)"/);

@@ -1,12 +1,28 @@
-import { defineConfig } from "eslint/config";
+import { defineConfig, includeIgnoreFile } from "eslint/config";
+import { fileURLToPath } from "node:url";
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";
-import globals from "globals";
 import css from "@eslint/css";
 import vellum from "./scripts/lint/css-comment-form.ts";
 
 // Every rule set off below was red on main when the tool landed; Issue #648 is the ledger, and each family pull request turns its rules on with the violations fixed or exempted by name.
 export default defineConfig(
+  includeIgnoreFile(fileURLToPath(new URL(".gitignore", import.meta.url)), "the .gitignore: build output, generated trees and scratch"),
+  {
+    name: "Issue #653 ruling D: no JavaScript source anywhere",
+    files: ["**/*.cjs", "**/*.js", "**/*.jsx", "**/*.mjs"],
+    languageOptions: { parserOptions: { ecmaFeatures: { jsx: true } } },
+    linterOptions: { noInlineConfig: true },
+    rules: {
+      "no-restricted-syntax": ["error", { selector: "Program", message: "JavaScript is not written here: the house is TypeScript (CLAUDE.md, One language, one pipeline), and design/ is the one archive whose round tools keep their JavaScript (Issue #653 ruling D)." }],
+    },
+  },
+  {
+    name: "Issue #653 ruling D: design/ archives its round tools as they ran",
+    files: ["design/**/*.cjs", "design/**/*.js", "design/**/*.jsx", "design/**/*.mjs"],
+    linterOptions: { noInlineConfig: false, reportUnusedDisableDirectives: "off" },
+    rules: { "no-restricted-syntax": "off" },
+  },
   {
     files: ["src/**/*.ts", "scripts/**/*.ts", "test/**/*.ts", "test-support/**/*.ts"],
     extends: [js.configs.recommended, tseslint.configs.recommendedTypeChecked],
@@ -31,20 +47,6 @@ export default defineConfig(
       "@typescript-eslint/prefer-readonly": "error",
       "@typescript-eslint/require-await": "off",
       "@typescript-eslint/switch-exhaustiveness-check": "error",
-    },
-  },
-  {
-    files: ["scripts/**/*.mjs"],
-    extends: [js.configs.recommended],
-    languageOptions: { globals: globals.node },
-    rules: {
-      "no-empty": "off",
-      "no-unused-vars": "off",
-      "max-depth": ["error", 4],
-      "max-lines": ["error", 400],
-      "max-lines-per-function": ["error", 50],
-      "no-param-reassign": ["error", { props: false }],
-      "prefer-const": "error",
     },
   },
   {

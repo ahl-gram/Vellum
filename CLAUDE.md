@@ -91,11 +91,11 @@ requirement it is not. If a dependency is the right tool, propose it plainly and
 
 New code is **TypeScript under `src/`**, covered by `npm run check`, and reaches the browser only
 through the existing build (the Vite press bundles `src/site/` + engine; Node runs the
-engine/CLI/scripts natively). Do NOT add `.js` files outside `src/`: `public/` is static assets only
-(goldens, fonts, CSS, the icons), and a hand-authored script anywhere else needs a very good, stated
-reason, recorded in the issue or in a comment at the file head. The grandfathered corner is the e2e
-harness and suites (`scripts/e2e/*.mjs`); new suites may match their siblings, and that convention
-extends nowhere else.
+engine/CLI/scripts natively). **No JavaScript file is tracked outside `design/`** (`.js`, `.mjs`,
+`.cjs`, `.jsx`), and `npm run lint` is what enforces it: the blocks named for Issue #653's ruling D in
+`eslint.config.ts` refuse every such file the `.gitignore` does not ignore, whatever inline directive
+it carries. `design/`, an archive whose round tools keep the JavaScript they ran as, is the single
+exemption. `public/` is static assets only (goldens, fonts, CSS, the icons).
 
 ## Measure before you assert
 

@@ -45,6 +45,8 @@ import { run as runRoomDrawer } from "./e2e/suite-room-drawer.ts";
 import { run as runDocumentRooms } from "./e2e/suite-document-rooms.ts";
 import { run as runRegionDetail } from "./e2e/suite-region-detail.ts";
 import { run as runSpecimen } from "./e2e/suite-specimen.ts";
+import type { StartOptions } from "./e2e/types.ts";
+import type { E2eSuiteTiming } from "../src/cli/e2e-suites.ts";
 
 const HERE = fileURLToPath(new URL(".", import.meta.url));
 const REPO = resolve(HERE, "..");
@@ -56,10 +58,11 @@ const OUT = join(REPO, "out", e2eOutSubdir(PORT));
 const PAGE = `http://127.0.0.1:${PORT}/explorer/`;
 const { names: SELECTED, tier: TIER } = fatalOnThrow(() => resolveSuiteSelection(process.env));
 
-function fatalOnThrow(fn) {
+function fatalOnThrow<T>(fn: () => T): T {
   try {
     return fn();
   } catch (err) {
+    // @ts-expect-error a caught value is unknown to the checker; the two resolvers this wraps throw only an Error, whose message it prints
     console.error(`FAIL: ${err.message}`);
     process.exit(1);
   }
@@ -83,10 +86,10 @@ if (!browser) {
   process.exit(0);
 }
 
-const results = [];
-const consoleErrors = [];
-const http4xx = [];
-const skippedGroups = [];
+const results: StartOptions["results"] = [];
+const consoleErrors: string[] = [];
+const http4xx: string[] = [];
+const skippedGroups: string[] = [];
 
 // Key order IS the run order, and it is load-bearing: render asserts the pristine bare-visit boot, and the health checkpoint (N1/N2) asserts accumulated console/network state from everything before it. A selection is filtered to this order, never run in the order it was requested.
 const SUITES = {
@@ -123,13 +126,14 @@ const SUITES = {
   "specimen": runSpecimen,
 };
 
-const missing = E2E_SUITE_ORDER.filter((name) => !SUITES[name]);
+const missing = E2E_SUITE_ORDER.filter((name) => !SUITES[name]); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 if (missing.length > 0) {
   console.error(`FAIL: E2E_SUITE_ORDER names suites this runner cannot run: ${missing.join(", ")}`);
   process.exit(1);
 }
 
 async function main() {
+  // @ts-expect-error main runs only after the browser test above, which exits the process when no browser is found, and a hoisted function keeps none of that narrowing, so browser is never null here
   const ctx = await start({ browser, SITE, OUT, PORT, DPORT, PAGE, results, consoleErrors, http4xx, skippedGroups });
   return runSelected(SELECTED, SUITES, ctx, {
     alive: ctx.alive,
@@ -140,7 +144,10 @@ async function main() {
       ctx.check(
         `${name} stopped early, so the checks after this one in that suite never ran (#534)`,
         false,
-        err && err.message ? err.message : String(err),
+        // @ts-expect-error a caught value is unknown to the checker; the && guard reads a message only from a value that has one
+        err && err.message ?
+          // @ts-expect-error the same caught value, read for its message once the guard has passed
+          err.message : String(err),
       );
       // clearMobile() is a trailing statement in the phone suites, not a finally (suite-cluster.ts, suite-room-drawer.ts, suite-chart-drawer.ts), so a suite that stops at 390x844 hands every later suite in the lane a phone viewport and a cascade of reds that are not defects.
       // Bounded, because a browser that dies AFTER the liveness probe leaves this send pending forever: the harness settles a waiter only on the matching reply, so an unbounded reset here is a lane that stalls with nothing to read rather than one that fails.
@@ -165,7 +172,7 @@ main()
           `The checks after the failure in each never ran, so this run proves less than a whole one.`,
       );
     }
-    const partial = timings.filter((t) => !t.aborted && t.skipped !== undefined && t.skipped.length > 0);
+    const partial = timings.filter((t): t is E2eSuiteTiming & { readonly skipped: readonly string[] } => !t.aborted && t.skipped !== undefined && t.skipped.length > 0);
     if (partial.length > 0) {
       console.log(
         `\n${partial.length} suite${partial.length > 1 ? "s" : ""} skipped a check group: ` +

@@ -67,8 +67,10 @@ const walk = (dir: string): string[] =>
     return statSync(path).isDirectory() ? walk(path) : path.endsWith(".css") ? [path] : [];
   });
 
-test("every sheet under public/ satisfies the three form rules", async () => {
-  const sheets = walk(join(ROOT, "public"));
+test("every sheet under public/ that the lint reads satisfies the three form rules", async () => {
+  const onDisk = walk(join(ROOT, "public"));
+  const unread = await Promise.all(onDisk.map((path) => eslint.isPathIgnored(path)));
+  const sheets = onDisk.filter((_, i) => !unread[i]);
   assert.ok(sheets.length >= 19, `the population is ${sheets.length} sheets; the tracked set is 19`);
   const results = await eslint.lintFiles(sheets);
   const offenders = results.flatMap((r) => r.messages.map((m) => `${r.filePath.slice(ROOT.length + 1)}:${m.line} ${m.ruleId ?? "fatal"}`));
