@@ -12,6 +12,7 @@ export default defineConfig(
     name: "Issue #653 ruling D: no JavaScript source anywhere",
     files: ["**/*.cjs", "**/*.js", "**/*.jsx", "**/*.mjs"],
     languageOptions: { parserOptions: { ecmaFeatures: { jsx: true } } },
+    linterOptions: { noInlineConfig: true },
     rules: {
       "no-restricted-syntax": ["error", { selector: "Program", message: "JavaScript is not written here: the house is TypeScript (CLAUDE.md, One language, one pipeline), and design/ is the one archive whose round tools keep their JavaScript (Issue #653 ruling D)." }],
     },
@@ -19,6 +20,7 @@ export default defineConfig(
   {
     name: "Issue #653 ruling D: design/ archives its round tools as they ran",
     files: ["design/**/*.cjs", "design/**/*.js", "design/**/*.jsx", "design/**/*.mjs"],
+    linterOptions: { noInlineConfig: false, reportUnusedDisableDirectives: "off" },
     rules: { "no-restricted-syntax": "off" },
   },
   {

@@ -42,10 +42,26 @@ const designExemption = (block: Linter.Config): readonly string[] => {
   if (designed.length === 0) return designed;
   assert.match(name, /Issue #653/, `config block ${name} exempts design/ with no name citing the ruling that admitted it (Issue #653 ruling D)`);
   assert.deepEqual(block.files, DESIGN_EXEMPT, `config block ${name} exempts design/ alongside something else`);
-  assert.deepEqual(Object.keys(block).sort(), ["files", "name", "rules"], `config block ${name} does more than turn the one rule off for design/`);
+  assert.deepEqual(Object.keys(block).sort(), ["files", "linterOptions", "name", "rules"], `config block ${name} does more than turn the one rule off for design/`);
   assert.deepEqual(block.rules, { "no-restricted-syntax": "off" }, `config block ${name} turns off more, or other, than the JavaScript refusal for design/ (Issue #653 ruling D)`);
+  assert.deepEqual(block.linterOptions, { noInlineConfig: false, reportUnusedDisableDirectives: "off" }, `config block ${name} does not give design/ back its own inline directives, so a round tool carrying one reds the lint`);
   return designed;
 };
+
+const REFUSAL = "Issue #653 ruling D: no JavaScript source anywhere";
+const DESIGN = "Issue #653 ruling D: design/ archives its round tools as they ran";
+const relaxes = (block: Linter.Config): boolean => Object.hasOwn(block.rules ?? {}, "no-restricted-syntax") || Object.hasOwn(block.linterOptions ?? {}, "noInlineConfig");
+
+test("no block but the refusal and the design/ exemption can relax the JavaScript refusal, and the refusal admits no inline directive (Issue #653 ruling D)", () => {
+  assert.deepEqual(blocks.filter(relaxes).map((b) => b.name), [REFUSAL, DESIGN], "a block other than the refusal and the design/ exemption sets no-restricted-syntax or noInlineConfig, so it can relax the refusal for whatever it matches; ruling D names design/ as the single exemption");
+  const refusal = blocks.find((b) => b.name === REFUSAL);
+  assert.ok(refusal, `no block is named ${REFUSAL}, so this guard is reading the wrong config`);
+  assert.deepEqual(refusal.files, REFUSED, "the refusal does not reach exactly the four JavaScript extensions");
+  assert.deepEqual(refusal.linterOptions, { noInlineConfig: true }, "the refusal honours inline directives, so one comment line in a JavaScript file silences it");
+  assert.deepEqual(Object.keys(refusal.rules ?? {}), ["no-restricted-syntax"], "the refusal block carries a rule besides the refusal");
+  const [severity, option] = refusal.rules?.["no-restricted-syntax"] as [string, { selector: string }];
+  assert.deepEqual([severity, option.selector], ["error", "Program"], "the refusal does not report every program at error");
+});
 
 test("the lint config is bounded to the ruled scope, covers all of it, and narrows it nowhere", () => {
   assert.ok(blocks.length > 0, "the config exports no blocks, so this guard is reading the wrong thing");
@@ -191,21 +207,30 @@ const JS_ADMITTED = ["design/x.mjs", "design/round/x.js", "design/x.cjs", "desig
 const JS_UNREAD = ["out/x.mjs", "out/probe/x.js", "dist/x.js", "public/explorer/app.bundle.js", "public/atlas/x.js", ".claude/worktrees/w/scripts/x.mjs", "node_modules/x/index.js"];
 const sourceFor = (path: string): string =>
   path.endsWith(".jsx") ? "export const A = () => <b>x</b>;\n" : path.endsWith(".cjs") ? "module.exports = 1;\n" : "export const a = 1;\n";
+const DIRECTIVES = [
+  "/* eslint-disable */\n",
+  "/* eslint-disable no-restricted-syntax */\n",
+  "/* eslint no-restricted-syntax: off */\n",
+  "// eslint-disable-next-line no-restricted-syntax\n",
+  "export const b = 2; // eslint-disable-line no-restricted-syntax\n",
+];
 
-test("through ESLint itself, a JavaScript file anywhere outside design/ is refused, one inside design/ is not, and nothing gitignored is read (Issue #653 ruling D)", async () => {
+test("through ESLint itself, a JavaScript file anywhere outside design/ is refused, even under an inline directive, one inside design/ is not, and nothing gitignored is read (Issue #653 ruling D)", async () => {
   const eslint = new ESLint({ cwd: ROOT, flags: ["unstable_native_nodejs_ts_config"] });
-  const verdict = async (path: string): Promise<string> => {
+  const verdict = async (path: string, lead = ""): Promise<string> => {
     if (await eslint.isPathIgnored(path)) return "unread";
-    const [result] = await eslint.lintText(sourceFor(path), { filePath: join(ROOT, path) });
-    const messages = result.messages;
-    return messages.length === 0 ? "admitted" : messages.map((m) => `${m.ruleId ?? "parse"}: ${m.message}`).join(" | ");
+    const [result] = await eslint.lintText(lead + sourceFor(path), { filePath: join(ROOT, path) });
+    const refused = result.messages.some((m) => m.ruleId === "no-restricted-syntax" && m.severity === 2 && m.message.startsWith("JavaScript is not written here"));
+    return refused ? "refused" : result.messages.length === 0 ? "admitted" : result.messages.map((m) => `${m.ruleId ?? "parse"}: ${m.message}`).join(" | ");
   };
-  for (const path of JS_REFUSED) {
-    assert.match(await verdict(path), /^no-restricted-syntax: JavaScript is not written here/, `${path} is not refused, so a JavaScript file there would lint green`);
+  for (const path of JS_REFUSED) assert.equal(await verdict(path), "refused", `${path} is not refused, so a JavaScript file there would lint green`);
+  for (const lead of DIRECTIVES) {
+    assert.equal(await verdict("src/x.mjs", lead), "refused", `a file opening ${JSON.stringify(lead)} escapes the refusal, so one comment line admits JavaScript anywhere`);
+    assert.equal(await verdict("design/round/x.mjs", lead), "admitted", `a design/ file opening ${JSON.stringify(lead)} is not admitted, though design/ is the one exemption ruling D names`);
   }
   for (const path of JS_ADMITTED) assert.equal(await verdict(path), "admitted", `${path} is not admitted, though design/ is the one exemption ruling D names`);
   for (const path of JS_UNREAD) {
-    assert.equal(await verdict(path), "unread", `${path} is read, so gitignored build output or scratch trips the JavaScript refusal. BLIND SPOTS, declared: the unread set is whatever the root .gitignore ignores, so a JavaScript file git TRACKS despite a matching pattern (force-added; git ls-files -ci --exclude-standard lists them, none today) is never read and passes, erring toward passing; a nested .gitignore and .git/info/exclude are not read, so a file only they ignore is refused, erring toward refusing, as is an untracked file no ignore file covers; and a file that does not parse is refused by its parse error rather than by this rule's message`);
+    assert.equal(await verdict(path), "unread", `${path} is read, so gitignored build output or scratch trips the JavaScript refusal. BLIND SPOTS, declared: the unread set is whatever the root .gitignore ignores, so a JavaScript file git TRACKS despite a matching pattern (force-added; git ls-files -ci --exclude-standard lists them, none today) is never read and passes, erring toward passing; a nested .gitignore and .git/info/exclude are not read, so a file only they ignore is refused, erring toward refusing, as is an untracked file no ignore file covers; an upper-case extension (X.JS) matches no JavaScript glob and is never read, erring toward passing; a processor on a later block that hands ESLint no program would pass, erring toward passing, with none in the config; and a file that does not parse is refused by its parse error rather than by this rule's message`);
   }
 });
 
