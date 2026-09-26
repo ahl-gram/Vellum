@@ -14,7 +14,6 @@ function cardOf(nodes: El[]): { card: El; inner: El } {
   const inner = walk(card).find((n) => n.classList.contains("pc-inner"))!;
   card.querySelector = ((sel: string) => (sel === ".pc-inner" ? inner : null)) as El["querySelector"];
   const unstated = card.getBoundingClientRect.bind(card);
-  // Measured THROUGH the published nudge, the way a browser does: a shim that ignores it cannot see a card measured against the previous card's offset.
   card.getBoundingClientRect = () => {
     const base = stated.get(card);
     if (!base) return unstated();

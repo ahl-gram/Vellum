@@ -113,7 +113,6 @@ function nearestFirst(path: ReadonlyArray<number>, d: TourDistance): number[] {
   return seq;
 }
 
-/** twoOpt on a distance oracle. */
 function twoOptOnDistances(path: ReadonlyArray<number>, d: TourDistance): number[] {
   const t = [...path];
   const n = t.length;
