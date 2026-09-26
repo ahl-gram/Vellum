@@ -194,7 +194,7 @@ test("does not mutate the survey or the legs (immutability rule)", () => {
   const s = survey(["====", "#..#"]);
   const landBefore = Uint8Array.from(s.land);
   const legs = [leg(0, 1)];
-  const legsBefore = JSON.parse(JSON.stringify(legs));
+  const legsBefore = JSON.parse(JSON.stringify(legs)) as typeof legs;
   routeVoyage(legs, [site(0, 0, 0), site(1, 3, 0)], s);
   assert.deepEqual(Array.from(s.land), Array.from(landBefore));
   assert.deepEqual(legs, legsBefore);

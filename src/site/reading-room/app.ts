@@ -296,7 +296,7 @@ function draw(): void {
         },
       });
     })
-    .catch((err) => {
+    .catch((err: Error) => {
       if (myGen !== drawGen) return;
       // The previous world is still on screen: converge the module state back onto it, or the next park would serialize the failed seed into a shareable wrong address.
       seed = shownSeed;

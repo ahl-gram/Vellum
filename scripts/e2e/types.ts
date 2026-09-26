@@ -54,3 +54,12 @@ export type SuiteContext = {
 };
 
 export type BrowserProcess = ChildProcessByStdio<null, Readable, Readable>;
+
+// The last member stands for every event the harness does not branch on; its method is a sentinel because "any string but these four" is not a type the checker can state.
+export type CdpMessage =
+  | { id: number; method?: undefined; error?: unknown; result?: unknown }
+  | { id?: undefined; method: "Runtime.exceptionThrown"; params: { exceptionDetails?: { exception?: { description?: string }; text?: string } } }
+  | { id?: undefined; method: "Runtime.consoleAPICalled"; params: { type: string; args: { value: unknown }[] } }
+  | { id?: undefined; method: "Log.entryAdded"; params: { entry: { level: string; text?: string } } }
+  | { id?: undefined; method: "Network.responseReceived"; params: { response: { status: number; url: string } } }
+  | { id?: undefined; method: "(another event)" };

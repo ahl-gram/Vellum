@@ -42,7 +42,7 @@ test("a world carries at least one former name, and not everything is renamed", 
 // worldNameSet folds former names in (the hamlet reservation), so the current-name set is built without them: the point is that a former name is a DIFFERENT word from everything the chart prints today.
 const currentNames = (w: World): Set<string> =>
   nameSetOf(
-    w.settlements.map(({ formerName: _drop, ...s }) => s),
+    w.settlements.map((s) => ({ ...s, formerName: undefined })),
     w.names,
   );
 

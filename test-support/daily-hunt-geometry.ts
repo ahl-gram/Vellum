@@ -206,7 +206,6 @@ export function clueHoldsAt(
   world: World,
   clue: Clue,
   s: { x: number; y: number; harbor: boolean; onRiver: boolean },
-  idx: number,
 ): boolean {
   switch (clue.kind) {
     case "framing":

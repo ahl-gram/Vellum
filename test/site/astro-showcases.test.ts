@@ -27,7 +27,7 @@ test("the generated showcases are gitignored in public/", () => {
 
 test("build-site.ts is retired; charts:regen and the showcase step replace it", () => {
   assert.ok(!existsSync(root("scripts/build-site.ts")), "build-site.ts should be deleted (decision D)");
-  const pkg = JSON.parse(readFileSync(root("package.json"), "utf8"));
+  const pkg = JSON.parse(readFileSync(root("package.json"), "utf8")) as { scripts: Record<string, string> };
   assert.equal(pkg.scripts["site"], undefined, "npm run site is retired");
   assert.equal(
     pkg.scripts["astro:generate"],

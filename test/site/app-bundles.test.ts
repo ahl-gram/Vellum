@@ -80,7 +80,7 @@ test("public/ holds no committed source: the raw app JS and the .d.ts twins reti
 
 test("the tsc engine emit retired: no browser tsconfig, astro:generate is clean-bundle-showcases (#260)", () => {
   assert.ok(!existsSync(resolve(REPO, "tsconfig.browser.json")), "tsconfig.browser.json retires with the emit");
-  const pkg = JSON.parse(read("package.json"));
+  const pkg = JSON.parse(read("package.json")) as { scripts: Record<string, string> };
   assert.equal(
     pkg.scripts["astro:generate"],
     "node scripts/clean-public-generated.ts && node scripts/build-app-bundles.ts && node scripts/generate-showcases.ts && node scripts/generate-discovery.ts",
@@ -89,7 +89,7 @@ test("the tsc engine emit retired: no browser tsconfig, astro:generate is clean-
 });
 
 test("one bundler: vite is the devDep, esbuild is gone (#208)", () => {
-  const pkg = JSON.parse(read("package.json"));
+  const pkg = JSON.parse(read("package.json")) as { devDependencies: Record<string, string>; dependencies: Record<string, string> };
   assert.ok(pkg.devDependencies.vite, "vite must be an explicit devDependency (the press imports it)");
   assert.equal(pkg.devDependencies.esbuild, undefined, "esbuild retires with the fold");
   assert.equal(pkg.dependencies.esbuild, undefined, "esbuild must not hide in dependencies either");

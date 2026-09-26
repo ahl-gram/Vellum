@@ -76,7 +76,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
     await scrollToMap();
     await sleep(60);
     r = await vpRect();
-    cx = Math.round(r.L + r.W * 0.5), cy = Math.round(r.T + r.H * 0.5); // eslint-disable-line @typescript-eslint/no-unused-expressions
+    cx = Math.round(r.L + r.W * 0.5); cy = Math.round(r.T + r.H * 0.5);
     const scrollBefore = await evaluate<number>(`window.scrollY`);
     await pinch(cx, cy, 70, 180);
     await sleep(100);

@@ -155,7 +155,7 @@ export function createZoomController({
     sel()
       .transition()
       .duration(glideMsNow())
-      .call((s, k2) => behavior.scaleTo(s, k2), k)
+      .call((s, k2: number) => behavior.scaleTo(s, k2), k)
       .on("end interrupt", () => {
         if (myGlide === glideSeq) glideTargetK = null;
       });
@@ -231,7 +231,7 @@ export function createZoomController({
       sel()
         .transition()
         .duration(glideMsNow())
-        .call((s, t) => behavior.transform(s, t), zoomIdentity)
+        .call((s, t: ZoomTransform) => behavior.transform(s, t), zoomIdentity)
         .on("end", () => {
           if (onDone) onDone();
         });

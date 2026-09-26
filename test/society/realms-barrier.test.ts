@@ -23,11 +23,6 @@ function diagBarrier(w: number, h: number): Uint8Array {
   return b;
 }
 const at = (labels: Int16Array, x: number, y: number, w: number) => labels[x + y * w] as number;
-function counts(labels: Int16Array): Map<number, number> {
-  const m = new Map<number, number>();
-  for (const v of labels) if ((v as number) >= 0) m.set(v as number, (m.get(v as number) ?? 0) + 1);
-  return m;
-}
 
 test("#140 a major-river barrier is the frontier: it walls a realm off from land it would otherwise win", () => {
   const W = 60, H = 20, ROW = 10;

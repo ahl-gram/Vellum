@@ -390,7 +390,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
 
   // The 20000-char floor is what separates a real bound atlas from the tiny PDF a blank sheet or a print-blank plate yields; paper fidelity itself stays a manual pass.
   let pdf;
-  try { pdf = await send<{ data: string }>("Page.printToPDF", { printBackground: true }); } catch (e) { pdf = null; }
+  try { pdf = await send<{ data: string }>("Page.printToPDF", { printBackground: true }); } catch { pdf = null; }
   check(
     "PR22 browser Save-as-PDF yields a well-formed, non-empty bound atlas",
     !!pdf && typeof pdf.data === "string" && pdf.data.length > 20000,

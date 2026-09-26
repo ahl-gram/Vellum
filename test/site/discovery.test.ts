@@ -131,7 +131,7 @@ test("the real origin comes from astro.config.ts, so a domain move updates all t
 });
 
 test("astro:generate ends by generating the discovery files into public/", () => {
-  const pkg = JSON.parse(readFileSync(root("package.json"), "utf8"));
+  const pkg = JSON.parse(readFileSync(root("package.json"), "utf8")) as { scripts: Record<string, string> };
   assert.ok(
     pkg.scripts["astro:generate"].includes("node scripts/generate-discovery.ts"),
     "astro:generate must run the discovery step or dist/ has no sitemap",

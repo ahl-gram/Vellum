@@ -164,7 +164,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
 
   await step("PB7 to PB7d", async () => {
     await goto("#seed=42&i=1");
-    const present = await opened("the standing town");
+    await opened("the standing town");
     const standing = await svgOf();
     await goto("#seed=42&i=1&year=300");
     const early = await opened("the year 300");

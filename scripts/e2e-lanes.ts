@@ -56,7 +56,7 @@ function streamLines(stream: Readable, prefix: string, sink: (line: string) => v
     onLine(line);
     sink(`${prefix} ${line}`);
   };
-  stream.on("data", (chunk) => {
+  stream.on("data", (chunk: string) => {
     const split = splitLaneChunk(rest, chunk);
     rest = split.rest;
     for (const line of split.lines) emit(line);

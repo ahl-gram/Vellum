@@ -2,7 +2,7 @@
 import { dropExpectedCancellations } from "./console-support.ts";
 import type { SuiteContext } from "./types.ts";
 export async function run(ctx: SuiteContext): Promise<void> {
-  const { evaluate, send, check, shoot, sleep, waitSettled, waitReady, axDescription, serverState, consoleErrors, http4xx, PORT } = ctx;
+  const { check, consoleErrors, http4xx } = ctx;
   const errs = dropExpectedCancellations(consoleErrors);
   check("N1 no JS exceptions or console errors", errs.length === 0, errs.join(" | ") || "clean");
   const bad4xx = http4xx.filter((u) => !/favicon/i.test(u));

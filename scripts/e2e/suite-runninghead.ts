@@ -131,7 +131,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const unreachable: string[] = [];
   for (const route of SHELLED) {
     if (!(await visit(route))) { unreachable.push(route); continue; }
-    heads[route] = JSON.parse(await evaluate(HEAD_READ));
+    heads[route] = JSON.parse(await evaluate(HEAD_READ)) as Head;
     if (route === "/") await shoot("running-head-home.png");
     if (route === PROSE) await shoot("running-head-room.png");
   }
@@ -233,7 +233,8 @@ export async function run(ctx: SuiteContext): Promise<void> {
 
   // .print-only is display:none on screen so no screenshot can reach this, but computed style resolves through display:none; a probe showed a bare h1 in the same container resolves to the BODY face, so the assertion discriminates.
   const producerShape = boundAtlasEmitsAtlasHead();
-  let atlas: { family: string; size: number; hidden: boolean } | null = null;
+  type AtlasRead = { family: string; size: number; hidden: boolean } | null;
+  let atlas: AtlasRead = null;
   if (await visit("/print-room/")) {
     atlas = JSON.parse(await evaluate<string>(`(() => {
       const d = document.getElementById("pr-atlas");
@@ -244,7 +245,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
       const cs = getComputedStyle(h1);
       return JSON.stringify({ family: cs.fontFamily, size: parseFloat(cs.fontSize),
         hidden: getComputedStyle(h1.parentElement).display === "none" });
-    })()`));
+    })()`)) as AtlasRead;
   }
   check(
     "RH7 the Print Room's bound-atlas title resolves to the display face (unreachable by any screenshot), and the producer still emits that markup",
@@ -277,13 +278,11 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   await send("Page.navigate", { url: "about:blank" });
   const galleryUp = await visit("/gallery/");
-  let scrolled: { sh: number; y: number; plate: Point | null; loaded: boolean } | null = null;
+  type GalleryRead = { sh: number; y: number; plate: Point | null; loaded: boolean };
+  let scrolled: GalleryRead | null = null;
   for (let i = 0; i < 100 && galleryUp; i++) {
-    scrolled = JSON.parse(await evaluate<string>(`(() => { const sh = document.documentElement.scrollHeight; window.scrollTo(0, Math.min(1200, sh - innerHeight)); const imgs = [...document.querySelectorAll(".grid img")]; const b = imgs.map((el) => el.getBoundingClientRect()).find((r) => r.top > 100 && r.bottom < innerHeight - 20 && r.width > 100); return JSON.stringify({ sh, y: scrollY, plate: b ? { x: Math.round(b.x + b.width / 2), y: Math.round(b.y + b.height / 2) } : null, loaded: imgs.length > 0 && imgs.every((el) => el.complete && el.naturalWidth > 0) }); })()`));
-    // @ts-expect-error the payload stringifies an object and never null, which a parse typed any cannot tell the checker
-    if (scrolled.plate &&
-      // @ts-expect-error the payload stringifies an object and never null, which a parse typed any cannot tell the checker
-      scrolled.loaded) break;
+    scrolled = JSON.parse(await evaluate<string>(`(() => { const sh = document.documentElement.scrollHeight; window.scrollTo(0, Math.min(1200, sh - innerHeight)); const imgs = [...document.querySelectorAll(".grid img")]; const b = imgs.map((el) => el.getBoundingClientRect()).find((r) => r.top > 100 && r.bottom < innerHeight - 20 && r.width > 100); return JSON.stringify({ sh, y: scrollY, plate: b ? { x: Math.round(b.x + b.width / 2), y: Math.round(b.y + b.height / 2) } : null, loaded: imgs.length > 0 && imgs.every((el) => el.complete && el.naturalWidth > 0) }); })()`)) as GalleryRead;
+    if (scrolled.plate && scrolled.loaded) break;
     await sleep(100);
   }
   await sleep(300);

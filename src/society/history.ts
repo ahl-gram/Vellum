@@ -74,7 +74,6 @@ function makeCycler(rng: Rng, pool: readonly string[]): () => string {
 // eslint-disable-next-line max-lines-per-function
 export function simulateHistory(input: HistoryInput, rng: Rng): HistoryResult {
   const { settlements, seats, realmNames, presentYear } = input;
-  const n = settlements.length;
 
   const span = Math.min(900, Math.max(150, Math.round(presentYear * 0.7)));
   const epochStart = presentYear - span;

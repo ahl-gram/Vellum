@@ -1,4 +1,4 @@
-import { E2E_SUITE_ORDER, E2E_SUITES_VAR } from "./e2e-suites.ts";
+import { E2E_SUITES_VAR } from "./e2e-suites.ts";
 import type { E2eSuiteName, E2eSuiteEnv, E2eOutcome } from "./e2e-suites.ts";
 import { DEFAULT_E2E_PORT, DEFAULT_E2E_DPORT, E2E_PORT_VAR, E2E_DPORT_VAR } from "./e2e-ports.ts";
 

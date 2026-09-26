@@ -141,13 +141,11 @@ async function main() {
     onSuiteError: async (name, err) => {
       // The WHOLE error, not just its message: a mid-suite TypeError's stack is what HARNESS ERROR used to print, and a report that drops it would be worse reading than the crash it replaces.
       console.error(`  ${name} stopped early:`, err);
+      const e = err as { message?: string } | null | undefined;
       ctx.check(
         `${name} stopped early, so the checks after this one in that suite never ran (#534)`,
         false,
-        // @ts-expect-error a caught value is unknown to the checker; the && guard reads a message only from a value that has one
-        err && err.message ?
-          // @ts-expect-error the same caught value, read for its message once the guard has passed
-          err.message : String(err),
+        e && e.message ? e.message : String(err),
       );
       // clearMobile() is a trailing statement in the phone suites, not a finally (suite-cluster.ts, suite-room-drawer.ts, suite-chart-drawer.ts), so a suite that stops at 390x844 hands every later suite in the lane a phone viewport and a cascade of reds that are not defects.
       // Bounded, because a browser that dies AFTER the liveness probe leaves this send pending forever: the harness settles a waiter only on the matching reply, so an unbounded reset here is a lane that stalls with nothing to read rather than one that fails.

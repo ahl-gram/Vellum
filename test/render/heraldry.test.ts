@@ -133,8 +133,8 @@ test("armsPlacements covers every realm: labelled realms keep their anchor, unla
   };
   const proj = { px: (x: number) => x + 1, py: (y: number) => y + 2 };
   const anchors = [{ realm: 1, cx: 111, cy: 222, halfW: 9, halfH: 8 }]; // only realm 1 labelled
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const out = armsPlacements(world as any, anchors as any, proj as any, 1);
+  type Args = Parameters<typeof armsPlacements>;
+  const out = armsPlacements(world as unknown as Args[0], anchors, proj as unknown as Args[2], 1);
   assert.equal(out.length, 3, "every realm gets a placement, not just labelled ones");
   assert.deepEqual(out.map((p) => p.realm), [0, 1, 2]);
   assert.equal(out.find((p) => p.realm === 1)!.cx, 111, "labelled realm keeps its label anchor");

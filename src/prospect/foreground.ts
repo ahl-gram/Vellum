@@ -2,7 +2,6 @@ import type { Rng } from "../core/rng.ts";
 import type { ProspectKind } from "./input.ts";
 import type { BiomeName } from "../climate/biomes.ts";
 import {
-  BASE_GROUND,
   SHORE_DROP,
   VIEW_X0,
   VIEW_X1,

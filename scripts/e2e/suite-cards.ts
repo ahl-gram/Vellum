@@ -6,7 +6,7 @@ import type { Payload, Point, SuiteContext } from "./types.ts";
 
 // eslint-disable-next-line max-lines-per-function
 export async function run(ctx: SuiteContext): Promise<void> {
-  const { evaluate, send, check, shoot, sleep, wheel, waitSettled, waitReady, axDescription, serverState, setMobileViewport, clearMobile, consoleErrors, http4xx, PORT } = ctx;
+  const { evaluate, send, check, shoot, sleep, wheel, waitSettled, waitReady, axDescription, setMobileViewport, clearMobile, PORT } = ctx;
   const step = makeStep(ctx);
   const settle = makeSettle(ctx);
   await step("P setup", async () => {

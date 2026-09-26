@@ -6,7 +6,7 @@ type Frac = { fx: number; fy: number };
 type Zoom = { k: number; x: number; y: number };
 // eslint-disable-next-line max-lines-per-function
 export async function run(ctx: SuiteContext): Promise<void> {
-  const { evaluate, send, check, shoot, sleep, waitSettled, waitReady, axDescription, serverState, consoleErrors, http4xx, PORT } = ctx;
+  const { evaluate, send, check, shoot, sleep, consoleErrors, PORT } = ctx;
   // Click targets are derived from the browser's OWN world via dynamic import, immune to any node-side date assumption; this is the only coverage of the click -> projection-inversion -> nearest-settlement snap.
   const huntErrBase = consoleErrors.length;
   const HUNT_PAGE = `http://127.0.0.1:${PORT}/seed-of-the-day/`;

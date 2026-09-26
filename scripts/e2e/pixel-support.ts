@@ -45,7 +45,7 @@ export async function sampleRow(send: (method: string, params?: Record<string, u
   const v = s && s.result ? s.result.value : undefined; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   if (s && s.exceptionDetails) throw new Error(`sampleRow could not read the page's scroll: ${s.exceptionDetails.text || "exception"}`); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   if (!Array.isArray(v) || v.length !== 2 || !v.every(Number.isFinite)) throw new Error(`sampleRow could not read the page's scroll: ${JSON.stringify(v)}`);
-  const [sx, sy] = v;
+  const [sx, sy] = v as [number, number];
   const r = await send("Page.captureScreenshot", { format: "png", clip: { x: x + sx, y: y + sy, width, height: 1, scale: 1 } }) as { data: string };
   return decodeFirstRow(Buffer.from(r.data, "base64"));
 }

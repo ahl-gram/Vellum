@@ -7,7 +7,6 @@ import { deviceStorage as store, navigationTypeNow, readStoredTable, tableOnArri
 import { parseProspectAddress, chartTarget, parseYear, ribbonTarget, yearHash } from "./address.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import { bindProspectRoom, showPlate, writeFolio, writeNote, type RoomFurniture } from "./seats.ts";
-import type { WorldRecipe } from "../../world/types.ts";
 
 declare global {
   interface Window {

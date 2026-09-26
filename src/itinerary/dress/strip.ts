@@ -1,5 +1,5 @@
 import { el, type SvgNode } from "../../render/svg.ts";
-import { r1, stroke, type DressContext } from "../../prospect/dress/context.ts";
+import { r1, type DressContext } from "../../prospect/dress/context.ts";
 import { treeRound, treePine, treePalm, marshTuft, dune, waveFlourish } from "../../prospect/dress/glyphs.ts";
 import { BIOMES } from "../../climate/biomes.ts";
 import { CELLS_PER_LEAGUE } from "../../render/layers/scalebar.ts";

@@ -286,8 +286,8 @@ test("each day's DELIVERED clues narrow the field to <= 3 villages, or nothing u
     const gates = gatesFor(world, q, SWEEP_SVGS[wi]!);
     const clues = buildClues(world, q, gates);
     const pool = quarryPoolMirror(world);
-    const remaining = pool.filter(({ s, idx }) =>
-      clues.every((c) => clueHoldsAt(world, c, s, idx)),
+    const remaining = pool.filter(({ s }) =>
+      clues.every((c) => clueHoldsAt(world, c, s)),
     );
     assert.ok(
       remaining.some(({ idx }) => idx === q.idx),
@@ -311,7 +311,7 @@ test("each day's DELIVERED clues narrow the field to <= 3 villages, or nothing u
         subject: cand.subject,
         leagues: cand.leagues,
       } as Clue;
-      const filtered = remaining.filter(({ s, idx }) => clueHoldsAt(world, clueLike, s, idx));
+      const filtered = remaining.filter(({ s }) => clueHoldsAt(world, clueLike, s));
       assert.equal(
         filtered.length,
         remaining.length,

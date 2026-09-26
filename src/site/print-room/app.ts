@@ -196,7 +196,7 @@ function draw(): void {
       refreshOrderControls(); // the new world is on the desk: re-open the counter (unless an order still holds it)
       enableBind();
     })
-    .catch((err) => {
+    .catch((err: Error) => {
       if (myGen !== drawGen) return;
       drawing = false;
       status.textContent = "The press jammed: " + err.message;
@@ -291,7 +291,7 @@ function orderPoster(key: string): void {
         ? `${preset.label} plate pressed at reduced resolution to fit this browser: ${filename}`
         : `${preset.label} plate pressed: ${filename}`;
     })
-    .catch((err) => {
+    .catch((err: Error) => {
       if (myGen !== posterGen) return;
       posterStatus.textContent = "The press jammed: " + err.message;
     })

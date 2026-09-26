@@ -216,7 +216,7 @@ function bindAtlas(): void {
       turnTo(res.atlas.hero.key);
       window.__vellumBoundAtlas = { seed: res.atlas.seed, title: res.atlas.title, figures: atlasDiv.querySelectorAll("figure").length };
     })
-    .catch((err) => {
+    .catch((err: Error) => {
       if (myGen !== bindGen) return;
       status.textContent = "The bindery faltered: " + err.message;
       if (lastAtlas !== null) setDeliveryEnabled(true);

@@ -6,7 +6,7 @@ import { sliderToLand, updateLandReadout, syncAutoSlider } from "./sea-level.ts"
 import { sliderToCoast, updateCoastReadout, parkCoastDefault } from "./coast-warp.ts";
 import { startArrival } from "./draw-ceremony.ts";
 import { readHash, writeHash } from "./hash-sync.ts";
-import { emitTable, parseTable, type TableItem, type TableOverrides } from "../shared/table-address.ts";
+import { emitTable, parseTable, type TableItem } from "../shared/table-address.ts";
 import { deviceStorage as store, navigationTypeNow, readStoredTable, tableOnArrival, writeStoredTable, TRAVERSAL } from "../shared/table-store.ts";
 import { bindChartDrawer, makeDogEar, surveyItemFrom, refusalLine, thumbJobFor, thumbNames, layPressFace, filingAt, LAY_ON_CARD, type FilingSheet } from "./chart-drawer.ts";
 import { bindTableLeaf } from "./table-leaf.ts";
@@ -38,7 +38,6 @@ import {
 } from "./elements.ts";
 
 let lastSvg = "";
-let lastTitle = "";
 let lastSubtitle = "";
 let lastSeed = 0;
 let lastManifest: PlaceManifest | null = null;
@@ -249,7 +248,6 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
       drawing = false;
       versoBtn.disabled = false;
       lastSvg = res.svg;
-      lastTitle = res.title;
       lastSubtitle = res.subtitle;
       lastSeed = seed;
       lastManifest = res.manifest;
@@ -262,7 +260,7 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
       const deferArm = deferLandingArm(quiet, flipped);
       if (shouldTurn({ isTurn, reduceMotion: prefersReduce(), usesWorker: usesWorker(), hasChart: hadChart, flipped })) {
         const t = turnTiming();
-        runTurn({ sheetEl, innerEl, mapEl: mapDiv, newSvg: res.svg, durationMs: t.ms, easing: t.ease }).then(() => { // eslint-disable-line @typescript-eslint/no-floating-promises
+        void runTurn({ sheetEl, innerEl, mapEl: mapDiv, newSvg: res.svg, durationMs: t.ms, easing: t.ease }).then(() => {
           if (myGen !== drawGen) return;
           lc.buildPlaceOverlay(res.manifest);
           lastSheet = { seed, overrides, style, presentYear: res.manifest.presentYear };
@@ -298,7 +296,7 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
         if (!armPaintsVerso) lc.syncRestingTrack();
       }
     })
-    .catch((err) => {
+    .catch((err: Error) => {
       if (myGen !== drawGen) return;
       drawing = false;
       versoBtn.disabled = false;

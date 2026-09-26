@@ -1,7 +1,6 @@
 // The Portfolio's period voice (#521 Sub 3 of #401), pure and DOM-free so the wording is unit-testable
 // the way the Chart Table's countLine is. Ruled 2026-09-08: direction C's picture with direction A's
 // words, so nothing here says "sheaf".
-import type { TableGroup } from "../shared/table-address.ts";
 
 const NUMERALS = ["i", "ii", "iii", "iv", "v", "vi"] as const;
 

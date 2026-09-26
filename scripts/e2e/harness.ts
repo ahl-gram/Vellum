@@ -9,7 +9,7 @@ import { stripTypeScriptTypes } from "node:module";
 import { dirname, join, resolve, sep, extname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { tmpdir } from "node:os";
-import type { BrowserProcess, Clip, Payload, StartOptions, SuiteContext, TouchPoint } from "./types.ts";
+import type { BrowserProcess, CdpMessage, Clip, Payload, StartOptions, SuiteContext, TouchPoint } from "./types.ts";
 import { E2E_PORT_VAR, debugPortConflictMessage } from "../../src/cli/e2e-ports.ts";
 
 const MIME: Record<string, string | undefined> = {
@@ -62,7 +62,7 @@ function serveEngineModule(pathname: string, res: import("node:http").ServerResp
 }
 
 function startServer(SITE: string, PORT: number): Promise<import("node:http").Server> {
-  const server = createServer(async (req, res) => { // eslint-disable-line @typescript-eslint/no-misused-promises
+  const server = createServer((req, res) => { void (async () => {
     try {
       // @ts-expect-error a server-side request always carries its url, which Node types as possibly undefined
       const url = new URL(req.url, "http://127.0.0.1");
@@ -88,7 +88,7 @@ function startServer(SITE: string, PORT: number): Promise<import("node:http").Se
     } catch (err) {
       res.writeHead(500).end(String(err));
     }
-  });
+  })(); });
   return new Promise((res, rej) => {
     server.on("error", (err: NodeJS.ErrnoException) =>
       rej(
@@ -129,7 +129,7 @@ async function debugPortIdentity(DPORT: number, timeoutMs = 1000): Promise<strin
       req.on("timeout", () => req.destroy(new Error("timeout")));
       req.on("error", rej);
     });
-    return JSON.parse(body).Browser || undefined; // eslint-disable-line @typescript-eslint/no-unsafe-return
+    return (JSON.parse(body) as { Browser?: string }).Browser || undefined;
   } catch {
     return undefined;
   }
@@ -161,7 +161,7 @@ async function getPageTarget(DPORT: number): Promise<{ webSocketDebuggerUrl: str
   for (let i = 0; i < 160; i++) {
     if (browserExit) break;
     try {
-      const list: { type: string; webSocketDebuggerUrl?: string }[] = JSON.parse(await httpGet(`http://127.0.0.1:${DPORT}/json`));
+      const list = JSON.parse(await httpGet(`http://127.0.0.1:${DPORT}/json`)) as { type: string; webSocketDebuggerUrl?: string }[];
       const page = list.find((t) => t.type === "page" && t.webSocketDebuggerUrl);
       // @ts-expect-error find() cannot narrow the url the predicate just proved present
       if (page) return page;
@@ -355,14 +355,14 @@ export async function start({ browser, SITE, OUT, PORT, DPORT, PAGE, results, co
     ws.addEventListener("error", rej, { once: true });
   });
   ws.addEventListener("message", (ev) => {
-    const m = JSON.parse(ev.data);
+    const m = JSON.parse(ev.data as string) as CdpMessage;
     if (m.id && waiters.has(m.id)) {
       const w = waiters.get(m.id);
       waiters.delete(m.id);
       // @ts-expect-error has() in the enclosing if proved the waiter present, which get() cannot carry
-      m.error ? w.reject(new Error(JSON.stringify(m.error))) : // eslint-disable-line @typescript-eslint/no-unused-expressions
-        // @ts-expect-error has() in the enclosing if proved the waiter present, which get() cannot carry
-        w.resolve(m.result);
+      if (m.error) w.reject(new Error(JSON.stringify(m.error)));
+      // @ts-expect-error has() in the enclosing if proved the waiter present, which get() cannot carry
+      else w.resolve(m.result);
       return;
     }
     if (m.method === "Runtime.exceptionThrown") {

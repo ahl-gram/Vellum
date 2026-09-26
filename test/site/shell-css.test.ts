@@ -273,20 +273,8 @@ const rulesIn = (css: string): ReadonlyArray<{ selector: string; body: string }>
   [...css.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}]+)\{([^{}]*)\}/g)]
     .map((m) => ({ selector: m[1].trim(), body: m[2] }));
 
-/** a,b,c counted as one number; a selector LIST takes its strongest arm. */
-const specificity = (sel: string): number =>
-  Math.max(...sel.split(",").map((one) => {
-    const ids = (one.match(/#[\w-]+/g) || []).length;
-    const classes = (one.match(/[.:[][\w-]+/g) || []).length;
-    const elements = (one.replace(/[#.:[][\w-]+/g, "").match(/\b[a-z]+\b/g) || []).length;
-    return ids * 10000 + classes * 100 + elements;
-  }));
-
 const findRule = (css: string, selector: string) =>
   rulesIn(css).find((r) => r.selector === selector);
-
-const optOutsFor = (css: string, cls: string) =>
-  rulesIn(css).filter((r) => r.selector.split(",").some((s) => s.trim().endsWith(cls)));
 
 /** The attribute the renderer stamps on a chart and nothing else carries: it tells a mount's chart apart from the engine's overlays. */
 const CHART_MARKER = "[data-vellum-style]";
