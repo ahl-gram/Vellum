@@ -237,14 +237,16 @@ test("only typescript-eslint's recommended-type-checked block sets a rule Issue 
 
 test("no block sets a rule off but typescript-eslint's own two layers and ruling D's design/ block, so the house config takes no rule back once Issue #654 has turned each on", () => {
   const PRESET_LAYERS = ["typescript-eslint/eslint-recommended", "typescript-eslint/recommended-type-checked"];
+  const shortName = (b: Linter.Config): string => (b.name ?? "").replace(/^.* > /, "");
+  for (const layer of PRESET_LAYERS) assert.equal(blocks.filter((b) => shortName(b) === layer).length, 1, `${layer} names more or fewer than one block, so a house block named like it would pass unread`);
   const isOff = (v: unknown): boolean => v === "off" || v === 0 || (Array.isArray(v) && (v[0] === "off" || v[0] === 0));
   const offs = blocks
-    .filter((b) => !PRESET_LAYERS.includes((b.name ?? "").replace(/^.* > /, "")))
+    .filter((b) => !PRESET_LAYERS.includes(shortName(b)))
     .flatMap((b) => Object.entries(b.rules ?? {}).filter(([, v]) => isOff(v)).map(([rule]) => `${b.name ?? "(unnamed)"}: ${rule}`));
   assert.deepEqual(
     offs,
     ["Issue #653 ruling D: design/ archives its round tools as they ran: no-restricted-syntax"],
-    "a block of the house config sets a rule off, which takes it back for every file the block matches whether or not a pin names the rule",
+    "a block of the house config sets a rule off, which takes it back for every file the block matches whether or not a pin names the rule. BLIND SPOTS, declared, both erring toward passing: a rule left at error but weakened by its options, which the witness test pins in full only for TURNED_ON, the size rules, no-empty, no-param-reassign and no-floating-promises; and a rule typescript-eslint's own two layers set off, which an upgrade could change unread",
   );
 });
 
