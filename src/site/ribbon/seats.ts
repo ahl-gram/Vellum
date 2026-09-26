@@ -36,23 +36,23 @@ export interface Sheet {
   readonly lean: (nx: number, ny: number) => void;
 }
 
-export function bindRibbonRoom(f: RoomFurniture): Sheet {
+export function bindRibbonRoom(roomEls: RoomFurniture): Sheet {
   const zoom = createZoomController({
-    viewportEl: f.viewport,
-    targetEl: f.map,
+    viewportEl: roomEls.viewport,
+    targetEl: roomEls.map,
     scaleExtent: [1, 8],
     glideMs: () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--glide")),
   });
   zoom.attach();
-  bindGlassKeys(f.viewport, zoom);
-  const box = () => ({ W: f.viewport.clientWidth || 1, H: f.viewport.clientHeight || 1 });
+  bindGlassKeys(roomEls.viewport, zoom);
+  const box = () => ({ W: roomEls.viewport.clientWidth || 1, H: roomEls.viewport.clientHeight || 1 });
   // Seated BEFORE bindRoom registers its own listener on the same query, so on a live 900px crossing the journey docks first and the kit's layout then measures the corner it left (listeners fire in registration order).
   const narrow = window.matchMedia(NARROW);
-  const home = { legend: f.journey, dock: f.journeyDock, stage: f.corner, next: f.swap };
+  const home = { legend: roomEls.journey, dock: roomEls.journeyDock, stage: roomEls.corner, next: roomEls.swap };
   const seatJourney = () => dockLegend<HTMLElement>(home, legendSeat({ narrow: narrow.matches, hasSlip: true }));
   seatJourney();
   narrow.addEventListener("change", seatJourney);
-  const room = bindRoom({ frame: f.stage, sheet: f.sheet, aspect: () => RIBBON_W / RIBBON_H, camera: {
+  const room = bindRoom({ frame: roomEls.stage, sheet: roomEls.sheet, aspect: () => RIBBON_W / RIBBON_H, camera: {
     hold: () => { const { W, H } = box(); return cameraFromTransform(zoom.getState(), W, H); },
     restore: (cam) => { const { W, H } = box(); zoom.refit(transformFromCamera(cam, W, H)); },
   } });
@@ -65,16 +65,16 @@ export function bindRibbonRoom(f: RoomFurniture): Sheet {
 
 type Facts = Omit<RibbonPlateData, "svg" | "options" | "reachable">;
 
-export function showPlate(f: RoomFurniture, res: Pick<Facts, "fromName" | "toName">, seed: number, url: string): void {
-  f.plate.src = url;
-  f.plate.alt = `The road from ${res.fromName} to ${res.toName}, chart ${seed}`;
-  f.plate.hidden = false;
+export function showPlate(roomEls: RoomFurniture, res: Pick<Facts, "fromName" | "toName">, seed: number, url: string): void {
+  roomEls.plate.src = url;
+  roomEls.plate.alt = `The road from ${res.fromName} to ${res.toName}, chart ${seed}`;
+  roomEls.plate.hidden = false;
 }
 
-export function writeFolio(f: RoomFurniture, res: Facts, seed: number, dress: PlateDress, ms: number): void {
-  f.folioTitle.textContent = `${res.fromName} to ${res.toName} · Chart № ${seed}`;
-  f.folioSub.textContent = `${res.title} · the road as the wayfarers' chain measured it, An. ${res.year}`;
-  f.unrolled.textContent = `unrolled in ${ms}ms · ${Math.round(res.leagues)} leagues · ${dress}`;
+export function writeFolio(roomEls: RoomFurniture, res: Facts, seed: number, dress: PlateDress, ms: number): void {
+  roomEls.folioTitle.textContent = `${res.fromName} to ${res.toName} · Chart № ${seed}`;
+  roomEls.folioSub.textContent = `${res.title} · the road as the wayfarers' chain measured it, An. ${res.year}`;
+  roomEls.unrolled.textContent = `unrolled in ${ms}ms · ${Math.round(res.leagues)} leagues · ${dress}`;
 }
 
 const inline = (tag: "strong" | "em", text: string): HTMLElement => {
@@ -102,12 +102,12 @@ function rowNode(r: RibbonRow, onLean: (row: RibbonRow, li: HTMLLIElement) => vo
   return li;
 }
 
-export function writeItinerary(f: RoomFurniture, res: Facts, onLean: (row: RibbonRow, li: HTMLLIElement) => void): void {
-  f.slipTitle.textContent = `${res.fromName} to ${res.toName}`;
-  f.slipWhere.textContent = `${Math.round(res.leagues)} leagues · in ${res.realm ?? res.title} · An. ${res.year}`;
-  f.itinerary.replaceChildren(...res.events.map((r) => rowNode(r, onLean)));
+export function writeItinerary(roomEls: RoomFurniture, res: Facts, onLean: (row: RibbonRow, li: HTMLLIElement) => void): void {
+  roomEls.slipTitle.textContent = `${res.fromName} to ${res.toName}`;
+  roomEls.slipWhere.textContent = `${Math.round(res.leagues)} leagues · in ${res.realm ?? res.title} · An. ${res.year}`;
+  roomEls.itinerary.replaceChildren(...res.events.map((r) => rowNode(r, onLean)));
 }
 
-export function markLeaned(f: RoomFurniture, li: HTMLLIElement | null): void {
-  for (const el of f.itinerary.children) el.classList.toggle("on", el === li);
+export function markLeaned(roomEls: RoomFurniture, li: HTMLLIElement | null): void {
+  for (const el of roomEls.itinerary.children) el.classList.toggle("on", el === li);
 }

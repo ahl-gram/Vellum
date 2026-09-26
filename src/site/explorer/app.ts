@@ -111,8 +111,7 @@ const relabelEar = (): void => {
   ear.title = label;
 };
 
-const announce = makeAnnouncer({
-  pill: status,
+const announce = makeAnnouncer(status, {
   after: (run, ms) => window.setTimeout(run, ms),
   cancel: (timer) => { window.clearTimeout(timer); },
 });
@@ -120,6 +119,7 @@ const announce = makeAnnouncer({
 const chartTable = bindChartDrawer({
   root: chartDrawer, tab: chartDrawerTab, shut: chartDrawerShut, count: chartDrawerCount,
   cuttings, full: chartDrawerFull, road: tableRoad,
+}, {
   broadside: () => room.broadside,
   relabelLeaf: (count) => leaf.relabel(count),
   folioHref: "../print-room/portfolio/",
@@ -190,6 +190,7 @@ const room = bindRoom({ frame: stageEl, sheet: sheetEl, camera: { hold: () => gl
 const leaf = bindTableLeaf({
   leaf: tableLeaf, cuttings, count: chartDrawerCount, road: tableRoadBand, dock: legendDock,
   broadsideTab: leafBroadsideTab, tableTab: leafTableTab, slip: broadsideSlip,
+}, {
   narrow,
   onLayout: () => room.layout(),
 });

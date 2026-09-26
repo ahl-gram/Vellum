@@ -160,7 +160,7 @@ test("PRR9 the back matter is the sheet's third face (#497, seat p): seats.ts tu
   const plate = seats.slice(seats.indexOf("export function showPlate"), seats.indexOf("export function showMatter"));
   for (const [name, src] of [["showProof", proof], ["showPlate", plate]] as const) {
     assert.match(src, /\.page\.hidden = true/, `${name} puts the page away`);
-    assert.match(src, /restoreLabel\(f\)/, `${name} restores the gesture box's own label`);
+    assert.match(src, /restoreLabel\(roomEls\)/, `${name} restores the gesture box's own label`);
   }
   assert.match(seats, /A page of the bound atlas: \$\{matter\.title\}/, "the page face names itself to the gesture box (the proof's label is stale for a table)");
   assert.match(app, /matterAspect\(furniture\) \?\? sheetAspect\(\)/, "the room's aspect asks the page first, then the turned plate");

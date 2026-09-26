@@ -42,7 +42,7 @@ const clock = () => {
 const fixture = () => {
   const pill = fakePill();
   const timers = clock();
-  const say = makeAnnouncer({ pill, after: timers.after, cancel: timers.cancel });
+  const say = makeAnnouncer(pill, { after: timers.after, cancel: timers.cancel });
   return { pill, timers, say };
 };
 
@@ -142,7 +142,7 @@ test("every room that announces on a status pill announces through the one annou
   for (const [path, pill] of pages) {
     const flat = readFileSync(resolve(REPO, path), "utf8").replace(/\s+/g, " ");
     assert.match(flat, /from "\.\.\/shared\/announce\.ts"/, `${path} does not reach the shared announcer at all`);
-    const built = flat.match(new RegExp(`const (\\w+) = makeAnnouncer\\(\\{ pill: ${pill},`));
+    const built = flat.match(new RegExp(`const (\\w+) = makeAnnouncer\\(${pill}, \\{`));
     assert.ok(built, `${path} imports the announcer and builds nothing over its pill, so its announcements never leave the chart`);
     assert.ok(
       built[1] === "say" || new RegExp(`say: ${built[1]}\\b`).test(flat),

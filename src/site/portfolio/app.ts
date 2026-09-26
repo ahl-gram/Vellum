@@ -46,8 +46,7 @@ let top = 0;
 
 const drawnCount = (): number => sheets.filter((s) => s.svg !== null).length;
 
-const say = makeAnnouncer({
-  pill: status,
+const say = makeAnnouncer(status, {
   after: (run, ms) => window.setTimeout(run, ms),
   cancel: (timer) => { window.clearTimeout(timer); },
 });

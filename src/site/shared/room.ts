@@ -66,7 +66,7 @@ interface FitParts {
   readonly glassL: number | null;
 }
 
-function fitRoom({ frame, sheet, aspect, phone, slipRect, slipW, glassL }: FitParts): void {
+function fitRoom({ frame, sheet: sheetEl, aspect, phone, slipRect, slipW, glassL }: FitParts): void {
   const fit = fitStage({
     view: { w: window.innerWidth, h: window.innerHeight },
     aspect,
@@ -80,8 +80,8 @@ function fitRoom({ frame, sheet, aspect, phone, slipRect, slipW, glassL }: FitPa
   frame.style.setProperty("--reserve-top", `${fit.reserve.top}px`);
   frame.style.setProperty("--reserve-right", `${fit.reserve.right}px`);
   frame.style.setProperty("--reserve-bottom", `${fit.reserve.bottom}px`);
-  sheet.style.width = `${fit.sheet.w}px`;
-  sheet.style.height = `${fit.sheet.h}px`;
+  sheetEl.style.width = `${fit.sheet.w}px`;
+  sheetEl.style.height = `${fit.sheet.h}px`;
   if (phone && slipRect !== null) document.body.style.setProperty("--sheet-h", `${window.innerHeight - slipRect.top}px`);
   else document.body.style.removeProperty("--sheet-h");
 }

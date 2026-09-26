@@ -23,14 +23,14 @@ function drawer(opts: { onScreen?: boolean; drawThumb?: (item: TableItem) => Pro
   root.rect = opts.onScreen === false ? { left: 0, top: 0, right: 0, bottom: 0 } : { left: 0, top: 552, right: 1280, bottom: 800 };
   const said: string[] = [];
   const changes: number[] = [];
+  const els = { root, tab: el("button"), shut: el("button"), count: el("p"), cuttings, full: el("p"), road: el("button") };
   const deps = {
-    root, tab: el("button"), shut: el("button"), count: el("p"), cuttings, full: el("p"), road: el("button"),
     say: (line: string) => { said.push(line); },
     onChange: (items: ReadonlyArray<TableItem>) => { changes.push(items.length); },
     ...(opts.drawThumb ? { drawThumb: opts.drawThumb } : {}),
   };
-  const table = bindChartDrawer(deps as unknown as Parameters<typeof bindChartDrawer>[0]);
-  return { table, deps, said, changes, cuttings };
+  const table = bindChartDrawer(els as unknown as Parameters<typeof bindChartDrawer>[0], deps);
+  return { table, els, said, changes, cuttings };
 }
 const lis = (cuttings: El): El[] => cuttings.children;
 const landing = (li: El): boolean => li.classList.contains("landing");
@@ -114,11 +114,11 @@ test("CT14b the jolt, like the settle, is dropped rather than queued when the sh
 test("CT14c a refusal at the cap from a SHUT drawer plays the dip once the drawer's own slide has ended, not under it, while a refusal with the drawer already open dips at once (D3: the drawer itself does not move; the cold review's finding 4 on PR #663)", () => {
   const shut = drawer();
   shut.table.restore(fill(TABLE_CAP));
-  assert.equal(shut.deps.root.classList.contains("open"), false, "shut before the refusal");
+  assert.equal(shut.els.root.classList.contains("open"), false, "shut before the refusal");
   shut.table.lay(survey(99), SVG, "seventh");
-  assert.equal(shut.deps.root.classList.contains("open"), true, "the refusal opens the drawer, which starts its slide");
+  assert.equal(shut.els.root.classList.contains("open"), true, "the refusal opens the drawer, which starts its slide");
   assert.equal(shut.cuttings.classList.contains("jolt"), false, "the sheets do not dip while the drawer is still rising");
-  shut.deps.root.fire("animationend", { target: shut.deps.root });
+  shut.els.root.fire("animationend", { target: shut.els.root });
   assert.equal(shut.cuttings.classList.contains("jolt"), true, "they dip once the drawer has arrived");
   const open = drawer();
   open.table.restore(fill(TABLE_CAP));
@@ -128,24 +128,24 @@ test("CT14c a refusal at the cap from a SHUT drawer plays the dip once the drawe
 });
 
 test("CT14d a shut inside a ceremony clears it rather than leaving it armed: display:none cancels an animation with no end event, so a settle or a dip caught by the shut press, and a dip armed on a slide the shut cancelled, would all replay on the next plain open (the cold review's round 3 finding 2 on PR #663)", () => {
-  const { table, cuttings, deps } = drawer();
+  const { table, cuttings, els } = drawer();
   table.lay(survey(1), SVG, "one");
   assert.equal(landing(lis(cuttings)[0]!), true, "settling");
-  deps.shut.fire("click");
+  els.shut.fire("click");
   assert.equal(landing(lis(cuttings)[0]!), false, "a shut mid-settle takes the mark off, since no end event will");
-  deps.tab.fire("click");
+  els.tab.fire("click");
   assert.equal(lis(cuttings).some(landing), false, "and the next open replays nothing");
   table.restore(fill(TABLE_CAP));
-  deps.shut.fire("click");
+  els.shut.fire("click");
   table.lay(survey(99), SVG, "seventh");
-  assert.equal(deps.root.classList.contains("open"), true, "a refusal from shut opens the drawer and arms the dip on its slide");
-  deps.shut.fire("click");
-  deps.tab.fire("click");
-  deps.root.fire("animationend", { target: deps.root });
+  assert.equal(els.root.classList.contains("open"), true, "a refusal from shut opens the drawer and arms the dip on its slide");
+  els.shut.fire("click");
+  els.tab.fire("click");
+  els.root.fire("animationend", { target: els.root });
   assert.equal(cuttings.classList.contains("jolt"), false, "a shut inside that slide dropped the armed dip, so the next plain open's slide end dips nothing");
   table.lay(survey(99), SVG, "seventh");
   assert.equal(cuttings.classList.contains("jolt"), true, "dipping");
-  deps.shut.fire("click");
+  els.shut.fire("click");
   assert.equal(cuttings.classList.contains("jolt"), false, "a shut mid-dip takes the jolt off too");
 });
 
@@ -167,27 +167,27 @@ test("CT15 a lay handed a ready url (the drag's ghost) adopts it and mints none;
 });
 
 test("CT16 reveal() opens a shut drawer and hands back the function that shuts it again; on a drawer already open it hands back a no-op", () => {
-  const { table, deps } = drawer();
-  assert.equal(deps.root.classList.contains("open"), false);
+  const { table, els } = drawer();
+  assert.equal(els.root.classList.contains("open"), false);
   const back = table.reveal();
-  assert.equal(deps.root.classList.contains("open"), true, "the carry sees the table");
+  assert.equal(els.root.classList.contains("open"), true, "the carry sees the table");
   back();
-  assert.equal(deps.root.classList.contains("open"), false, "a snap-back puts the drawer back as it was");
+  assert.equal(els.root.classList.contains("open"), false, "a snap-back puts the drawer back as it was");
   table.lay(survey(1), SVG, "one");
-  assert.equal(deps.root.classList.contains("open"), true, "a filing leaves it open (Issue #520, the filing gesture)");
+  assert.equal(els.root.classList.contains("open"), true, "a filing leaves it open (Issue #520, the filing gesture)");
   const noop = table.reveal();
   noop();
-  assert.equal(deps.root.classList.contains("open"), true, "a drawer that was open before the grab stays open after a snap-back");
+  assert.equal(els.root.classList.contains("open"), true, "a drawer that was open before the grab stays open after a snap-back");
 });
 
 test("CT17 a thumbnail arriving for a recovered sheet is patched into its cutting in place: the li keeps its identity, the reserved frame becomes the picture, and the title follows; a settle in flight is not rebuilt out from under it", async () => {
   let resolveThumb: (v: { url: string; title: string } | null) => void = () => {};
   const drawThumb = () => new Promise<{ url: string; title: string } | null>((r) => { resolveThumb = r; });
-  const { table, cuttings, deps } = drawer({ drawThumb });
+  const { table, cuttings, els } = drawer({ drawThumb });
   table.restore([survey(1)]);
   const before = lis(cuttings)[0]!;
   assert.ok(before.children.some((c) => c.classList.contains("awaited")), "a recovered sheet holds a reserved frame");
-  deps.tab.fire("click");
+  els.tab.fire("click");
   await Promise.resolve();
   resolveThumb({ url: "blob:drawn", title: "The Environs of Somewhere" });
   await new Promise((r) => setTimeout(r, 0));

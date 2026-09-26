@@ -139,8 +139,8 @@ test("atlasDocument (data-URI mode): self-contained, with no anchors in the FILE
 });
 
 // Exactly the browser surface PLATE_LINK_SCRIPT touches: not a DOM and deliberately not a selector engine; the script's own selector is checked against the real markup separately, and every assertion below reads nodes the script itself rewired.
+const parents = new WeakMap<StubNode, StubNode>();
 class StubNode {
-  parentNode: StubNode | null = null;
   children: StubNode[] = [];
   src = "";
   href = "";
@@ -148,14 +148,15 @@ class StubNode {
   rel = "";
   tag: string;
   constructor(tag: string) { this.tag = tag; }
+  get parentNode(): StubNode | null { return parents.get(this) ?? null; }
   insertBefore(node: StubNode, ref: StubNode): void {
-    node.parentNode = this;
+    parents.set(node, this);
     this.children.splice(this.children.indexOf(ref), 0, node);
   }
   appendChild(node: StubNode): void {
     const from = node.parentNode?.children;
     if (from) from.splice(from.indexOf(node), 1);
-    node.parentNode = this;
+    parents.set(node, this);
     this.children.push(node);
   }
 }

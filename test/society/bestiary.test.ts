@@ -72,20 +72,16 @@ type SyntheticSea = { oceanDist: Float64Array; mask: Uint8Array };
 const GRID_W = 120;
 const GRID_H = 100;
 
-function shallowSea(): SyntheticSea {
-  return {
-    oceanDist: new Float64Array(GRID_W * GRID_H).fill(2),
-    mask: new Uint8Array(GRID_W * GRID_H).fill(1),
-  };
-}
-
-function paintDeep(sea: SyntheticSea, x0: number, x1: number, y0: number, y1: number, isLake: boolean): void {
+function seaWithDeep(x0: number, x1: number, y0: number, y1: number, isLake: boolean): SyntheticSea {
+  const oceanDist = new Float64Array(GRID_W * GRID_H).fill(2);
+  const mask = new Uint8Array(GRID_W * GRID_H).fill(1);
   for (let y = y0; y <= y1; y++) {
     for (let x = x0; x <= x1; x++) {
-      sea.oceanDist[x + y * GRID_W] = 20;
-      if (isLake) sea.mask[x + y * GRID_W] = 0;
+      oceanDist[x + y * GRID_W] = 20;
+      if (isLake) mask[x + y * GRID_W] = 0;
     }
   }
+  return { oceanDist, mask };
 }
 
 function conjureOn(sea: SyntheticSea) {
@@ -105,14 +101,12 @@ function conjureOn(sea: SyntheticSea) {
 }
 
 test("a world whose only deep water is a lake conjures nothing", () => {
-  const sea = shallowSea();
-  paintDeep(sea, 70, 90, 45, 65, true);
+  const sea = seaWithDeep(70, 90, 45, 65, true);
   assert.equal(conjureOn(sea).length, 0, "a beast rose from a lake or the shallows");
 });
 
 test("a true-sea deep pocket conjures exactly one beast, and it haunts the pocket", () => {
-  const sea = shallowSea();
-  paintDeep(sea, 30, 45, 30, 45, false);
+  const sea = seaWithDeep(30, 45, 30, 45, false);
   const beasts = conjureOn(sea);
   assert.equal(beasts.length, 1);
   const b = beasts[0]!;

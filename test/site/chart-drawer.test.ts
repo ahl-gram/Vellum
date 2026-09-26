@@ -282,7 +282,7 @@ test("CT7b the Explorer passes the REAL turn flag into the gate, so the pure ref
 
 test("CT8 the road to the Portfolio carries the Explorer's WHOLE address, not the table key alone (#634 ruling 3, 2026-09-19)", () => {
   const src = readFileSync(resolve(REPO, "src/site/explorer/chart-drawer.ts"), "utf8");
-  const at = src.indexOf("deps.road.addEventListener");
+  const at = src.indexOf("drawerEls.road.addEventListener");
   assert.notEqual(at, -1, "the road's own handler is gone, so this guard would be reading the whole file");
   const handler = src.slice(at, src.indexOf("});", at));
   // The ASSIGNMENT is anchored, not the tokens: the guard-prover's round 1 left the whole-address expression standing as a dead local and navigated with `deps.folioHref` alone, and a token-wise guard passed that with the road broken.
@@ -337,7 +337,7 @@ test("CT10 a re-seat that lands mid-draw asks for ANOTHER pass, and a sheet that
   assert.deepEqual(sheetsThatLeft(before, before), [], "nothing left, so nothing is forgotten and a redraw does not churn the urls it already made");
   assert.deepEqual(sheetsThatLeft(before, []).length, 3, "an emptied table drops every picture");
   assert.deepEqual(sheetsThatLeft([], before), [], "and an arrival into a bare drawer forgets nothing");
-  assert.match(restore, /if \(deps\.root\.classList\.contains\("open"\)\) void fill\(\);/, "a drawer standing OPEN when the table is re-seated never draws what arrived");
+  assert.match(restore, /if \(drawerEls\.root\.classList\.contains\("open"\)\) void fill\(\);/, "a drawer standing OPEN when the table is re-seated never draws what arrived");
 });
 
 test("CT11 EVERY road out that carries this page's address is rebuilt by the one hash writer, never by the draw (#634, the cold review's round 3 on PR #635)", () => {

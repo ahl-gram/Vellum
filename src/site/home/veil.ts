@@ -40,12 +40,12 @@ function acquireVeil(doc: Document): { root: HTMLElement; status: Element | null
   return { root, status: root.querySelector(".veil-status") };
 }
 
-function startSounding(status: Element | null, roll: () => number): () => void {
+function startSounding(statusEl: Element | null, roll: () => number): () => void {
   let fathoms = 0;
   const ticker = setInterval(() => {
-    if (fathoms < TARGET_FATHOMS && status !== null) {
+    if (fathoms < TARGET_FATHOMS && statusEl !== null) {
       fathoms = nextSounding(fathoms, roll());
-      status.textContent = soundingLabel(fathoms);
+      statusEl.textContent = soundingLabel(fathoms);
     }
   }, SOUNDING_TICK_MS);
   return () => clearInterval(ticker);
