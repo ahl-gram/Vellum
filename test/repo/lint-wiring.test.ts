@@ -17,6 +17,7 @@ const LINT_SCRIPT = "eslint --flag unstable_native_nodejs_ts_config --max-warnin
 const GITIGNORED = includeIgnoreFile(join(ROOT, ".gitignore")).ignores;
 
 const blocks: readonly Linter.Config[] = lintConfig;
+const shortName = (b: Linter.Config): string => (b.name ?? "(unnamed)").replace(/^.* > /, "");
 const conjunctsOf = (entry: string | string[]): string[] => (Array.isArray(entry) ? entry : [entry]);
 const RULED_ROOTS = LINT_SCOPE.map((g) => {
   const m = g.match(/^((?:[^*]+\/)?)\*\*\/\*(\.\w+)$/);
@@ -218,7 +219,6 @@ test("through ESLint itself, one witness file per ruled glob resolves to rules t
 
 test("only typescript-eslint's recommended-type-checked block sets a rule Issue #654 turned on, each at error, and it reaches all four TypeScript roots unnarrowed with no ignores, so no block can take one back by setting it or by narrowing the preset", () => {
   const PRESET = "typescript-eslint/recommended-type-checked";
-  const shortName = (b: Linter.Config): string => (b.name ?? "(unnamed)").replace(/^.* > /, "");
   const setters = blocks.flatMap((b) => TURNED_ON.filter((rule) => Object.hasOwn(b.rules ?? {}, rule)).map((rule) => `${shortName(b)}: ${rule} = ${JSON.stringify(b.rules?.[rule])}`));
   assert.deepEqual(
     setters,
@@ -237,7 +237,6 @@ test("only typescript-eslint's recommended-type-checked block sets a rule Issue 
 
 test("no block sets a rule off but typescript-eslint's own two layers and ruling D's design/ block, so the house config takes no rule back once Issue #654 has turned each on", () => {
   const PRESET_LAYERS = ["typescript-eslint/eslint-recommended", "typescript-eslint/recommended-type-checked"];
-  const shortName = (b: Linter.Config): string => (b.name ?? "").replace(/^.* > /, "");
   for (const layer of PRESET_LAYERS) assert.equal(blocks.filter((b) => shortName(b) === layer).length, 1, `${layer} names more or fewer than one block, so a house block named like it would pass unread`);
   const isOff = (v: unknown): boolean => v === "off" || v === 0 || (Array.isArray(v) && (v[0] === "off" || v[0] === 0));
   const offs = blocks
@@ -246,7 +245,7 @@ test("no block sets a rule off but typescript-eslint's own two layers and ruling
   assert.deepEqual(
     offs,
     ["Issue #653 ruling D: design/ archives its round tools as they ran: no-restricted-syntax"],
-    "a block of the house config sets a rule off, which takes it back for every file the block matches whether or not a pin names the rule. BLIND SPOTS, declared, both erring toward passing: a rule left at error but weakened by its options, which the witness test pins in full only for TURNED_ON, the size rules, no-empty, no-param-reassign and no-floating-promises; and a rule typescript-eslint's own two layers set off, which an upgrade could change unread",
+    "a block of the house config sets a rule off, which takes it back for every file the block matches whether or not a pin names the rule. BLIND SPOTS, declared, both erring toward passing: a rule left at error but weakened by its options, which only the setters tests for TURNED_ON and no-empty see in every block, while the witness test pins the size rules, no-param-reassign, no-floating-promises, no-unnecessary-condition and switch-exhaustiveness-check only at the witness files, so a block over a subtree with no witness in it weakens them unread; and a rule typescript-eslint's own two layers set off, which an upgrade could change unread",
   );
 });
 
