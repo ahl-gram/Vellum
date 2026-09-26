@@ -195,10 +195,11 @@ export function createLodController(deps: Deps) {
         const ms = (performance.now() - t0).toFixed(0);
         commitInset(band, window, seat, res, ms);
       })
-      .catch((err) => {
+      .catch((err: unknown) => {
         if (myGen !== regionGen) return;
         hidePencil();
-        (deps.setError ?? setCaption)("The cartographer spilled the ink: " + (err && err.message ? err.message : String(err)));
+        const e = err as { message?: string } | null | undefined;
+        (deps.setError ?? setCaption)("The cartographer spilled the ink: " + (e && e.message ? e.message : String(err)));
       });
   }
 

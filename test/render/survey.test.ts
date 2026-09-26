@@ -15,7 +15,7 @@ test("land is 1 strictly ABOVE sea level, 0 at or below it", () => {
 });
 
 test("carries the grid dimensions", () => {
-  const s = buildSurvey(field(4, 2, new Array(8).fill(1)), 0, []);
+  const s = buildSurvey(field(4, 2, new Array<number>(8).fill(1)), 0, []);
   assert.equal(s.gridW, 4);
   assert.equal(s.gridH, 2);
 });

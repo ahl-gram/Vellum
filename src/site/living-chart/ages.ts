@@ -24,7 +24,6 @@ import { DEFAULT_PACE, anchorAt, repaced, storyAt, type Pace, type SweepAnchor }
 import type { Chronicle } from "./chronicle.ts";
 import type { Voyage } from "./voyage.ts";
 import type { OverlayData } from "./place-overlay.ts";
-import type { HistoricalEvent } from "../../society/history.ts";
 import type { PlaceManifest } from "../../render/place-manifest.ts";
 import type { Survey } from "../../render/survey.ts";
 import { toldAnnal, type ToldEntry } from "./told.ts";

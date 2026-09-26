@@ -3,7 +3,7 @@ import { makeStep } from "./step-support.ts";
 import type { SuiteContext } from "./types.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
-  const { evaluate, send, check, shoot, sleep, waitSettled, waitReady, axDescription, serverState, consoleErrors, http4xx, PORT } = ctx;
+  const { evaluate, send, check, sleep, waitSettled, serverState } = ctx;
   // B1 and B2 are deliberately not stepped: their own poll returns rather than throwing, and their checks already guard on it.
   const step = makeStep(ctx);
   try {

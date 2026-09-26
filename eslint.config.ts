@@ -5,7 +5,7 @@ import tseslint from "typescript-eslint";
 import css from "@eslint/css";
 import vellum from "./scripts/lint/css-comment-form.ts";
 
-// Every rule set off below was red on main when the tool landed; Issue #648 is the ledger, and each family pull request turns its rules on with the violations fixed or exempted by name.
+// Every rule set off below was red on main when the tool landed; Issue #654 is the ledger that turns each one on, its violations fixed or ruled into scope.
 export default defineConfig(
   includeIgnoreFile(fileURLToPath(new URL(".gitignore", import.meta.url)), "the .gitignore: build output, generated trees and scratch"),
   {
@@ -39,11 +39,6 @@ export default defineConfig(
       ],
       "@typescript-eslint/no-unnecessary-condition": "error",
       "@typescript-eslint/no-unnecessary-type-assertion": "off",
-      "@typescript-eslint/no-unsafe-argument": "off",
-      "@typescript-eslint/no-unsafe-assignment": "off",
-      "@typescript-eslint/no-unsafe-call": "off",
-      "@typescript-eslint/no-unsafe-member-access": "off",
-      "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/prefer-readonly": "error",
       "@typescript-eslint/require-await": "off",
       "@typescript-eslint/switch-exhaustiveness-check": "error",

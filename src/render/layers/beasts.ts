@@ -3,7 +3,6 @@ import { spacedTextBox, type Box } from "../geometry.ts";
 import type { RenderCtx } from "../context.ts";
 import type { CartouchePlan } from "./cartouche.ts";
 import type { CompassPlan } from "./compass.ts";
-import type { SeaBeast } from "../../society/bestiary.ts";
 import { beastExtents, beastGlyph } from "./beast-glyphs.ts";
 
 type Spot = { readonly x: number; readonly y: number; readonly d: number };

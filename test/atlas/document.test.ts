@@ -178,7 +178,7 @@ async function runPlateScript(html: string, plates: number) {
   };
   const fetchStub = async (src: string) => ({ blob: async () => ({ src }) });
   const urlStub = { createObjectURL: (b: { src: string }) => `blob:vellum/${b.src.slice(-6)}` };
-  new Function("document", "fetch", "URL", "console", body[1])(doc, fetchStub, urlStub, { warn() {} }); // eslint-disable-line @typescript-eslint/no-implied-eval
+  (new Function("document", "fetch", "URL", "console", body[1]) as (...args: unknown[]) => void)(doc, fetchStub, urlStub, { warn() {} }); // eslint-disable-line @typescript-eslint/no-implied-eval
   await new Promise((r) => setTimeout(r, 0));
   return { imgs, queried };
 }

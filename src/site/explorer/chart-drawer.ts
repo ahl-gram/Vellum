@@ -3,7 +3,6 @@ import { TABLE_CAP, emitTable, prospectItemFrom, tableHash, tableWindow, type Ta
 import { LOD_BANDS, type LodBand } from "../../world/lod.ts";
 import { plateDressFor, prospectTitle } from "./prospect-job.ts";
 import type { SlipFold } from "../shared/slip.ts";
-import type { UvWindow } from "../../terrain/heightfield.ts";
 import type { WorldRecipe } from "../../world/types.ts";
 import type { RenderOptions } from "../../render/map-renderer.ts";
 import type { StyleName } from "../../render/style.ts";

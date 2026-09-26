@@ -150,12 +150,22 @@ function pinCorrectness(file: string, typed: boolean, rules: Record<string, unkn
 }
 
 const CSS_FORM_RULES = ["vellum/css-comment-one-line", "vellum/css-comment-no-em-dash", "vellum/css-comment-issue-form"];
+const TURNED_ON = [
+  "@typescript-eslint/no-unsafe-argument",
+  "@typescript-eslint/no-unsafe-assignment",
+  "@typescript-eslint/no-unsafe-call",
+  "@typescript-eslint/no-unsafe-member-access",
+  "@typescript-eslint/no-unused-vars",
+];
 
 function pinJavaScript(file: string, typed: boolean, config: Resolved, rules: Record<string, unknown>): void {
   const on = (rule: string): unknown => severityOf(rules[rule]);
   assert.equal(config.languageOptions?.parser?.meta?.name, typed ? "typescript-eslint/parser" : undefined, `${file} resolves to the wrong parser`);
   assert.equal(on("@typescript-eslint/no-misused-promises"), typed ? 2 : undefined, `${file}: the roster rule this PR ticks does not resolve at error`);
-  assert.equal(on("@typescript-eslint/no-explicit-any"), typed ? 2 : undefined, `${file}: the rule the one exemption in the tree stands against is not on`);
+  assert.equal(on("@typescript-eslint/no-explicit-any"), typed ? 2 : undefined, `${file}: no-explicit-any does not resolve at error`);
+  for (const rule of TURNED_ON) {
+    assert.deepEqual(rules[rule], typed ? [2] : undefined, `${file}: ${rule} does not resolve at error with no options; the config set it off while its violations stood, and Issue #654 turned it on with them fixed`);
+  }
   assert.equal(on("no-undef"), typed ? 0 : 2, `${file}: the core layer is missing or the TypeScript override layer was not applied`);
   assert.equal(on("no-debugger"), 2, `${file}: the core recommended rules do not reach it`);
   assert.equal(on("prefer-const"), 2, `${file}: prefer-const does not resolve at error (Immutability, Issue #648)`);
@@ -200,6 +210,25 @@ test("through ESLint itself, one witness file per ruled glob resolves to rules t
     assert.ok([1, 2, "warn", "error"].includes(report as never), `${file}: an unused disable directive is not reported (${String(report)}), so a stale exemption is silent`);
   }
   assert.equal(await eslint.isPathIgnored("eslint.config.ts"), true, "the root config lints itself, so the scope leaked past the ruled roots");
+});
+
+test("only typescript-eslint's recommended-type-checked block sets a rule Issue #654 turned on, each at error, and it reaches all four TypeScript roots unnarrowed with no ignores, so no block can take one back by setting it or by narrowing the preset", () => {
+  const PRESET = "typescript-eslint/recommended-type-checked";
+  const shortName = (b: Linter.Config): string => (b.name ?? "(unnamed)").replace(/^.* > /, "");
+  const setters = blocks.flatMap((b) => TURNED_ON.filter((rule) => Object.hasOwn(b.rules ?? {}, rule)).map((rule) => `${shortName(b)}: ${rule} = ${JSON.stringify(b.rules?.[rule])}`));
+  assert.deepEqual(
+    setters,
+    TURNED_ON.map((rule) => `${PRESET}: ${rule} = "error"`),
+    "a block other than the preset sets one of these rules, and a block can turn a rule off for every file it matches (a subtree, or one named file) while the witnesses still resolve at error",
+  );
+  const preset = blocks.filter((b) => shortName(b) === PRESET);
+  assert.equal(preset.length, 1, `${preset.length} blocks are ${PRESET}, so this guard is reading the wrong config`);
+  assert.deepEqual(
+    [...(preset[0]!.files ?? [])].sort(),
+    LINT_SCOPE.filter((g) => g.endsWith(".ts")),
+    "the preset that sets these rules does not reach exactly the four TypeScript roots: the block that extends it has changed its own files, and a narrowing (a conjunct such as src/**/*.ts with src/cli/**) takes the rules back for everything it dropped",
+  );
+  assert.equal(preset[0]!.ignores, undefined, "the preset carries an ignores key, which takes the rules back for whatever it excludes while its files still name the four roots");
 });
 
 const JS_REFUSED = ["x.js", "src/x.js", "scripts/x.mjs", "scripts/e2e/x.mjs", "test/x.cjs", "test-support/x.js", "public/x.js", ".claude/x.mjs", "x.jsx", "src/site/x.jsx"];

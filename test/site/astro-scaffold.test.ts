@@ -873,7 +873,7 @@ test("the charts and arms the home page embeds all resolve in public/charts", ()
 });
 
 test("the deploy build IS the Astro build (Sub 5 cutover, #206)", async () => {
-  const pkg = JSON.parse(await readFile(root("package.json"), "utf8"));
+  const pkg = JSON.parse(await readFile(root("package.json"), "utf8")) as { scripts: Record<string, string>; engines?: { node?: string } };
   assert.equal(pkg.scripts.site, undefined, "npm run site stays retired");
   assert.equal(
     pkg.scripts.build,

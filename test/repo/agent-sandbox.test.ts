@@ -308,7 +308,7 @@ test("sandboxes lists an orphaned sandbox directory that neither snapshot nor wo
     mkdirSync(join(main, ".claude", "worktrees", "guard-orphan"), { recursive: true });
     assert.doesNotMatch(git(["worktree", "list"], main), /guard-orphan/, "the fixture orphan is registered, so this asserts nothing about the gap");
     assert.ok(sandboxes(linked).includes("guard-orphan"), "an unregistered sandbox directory is invisible to the residue proof, so a bare prune's aftermath would pass as clean");
-    const wt = create("guard-listed", undefined, linked);
+    create("guard-listed", undefined, linked);
     try {
       assert.ok(sandboxes(linked).includes("guard-listed"));
     } finally {
