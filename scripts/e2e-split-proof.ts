@@ -328,7 +328,7 @@ function main(base: string): number {
     console.log(`${v.same ? "same" : "DIFF"}  ${k}: ${f.before.length} -> ${f.after.length} files`);
     for (const line of v.lines) console.log(`      ${line}`);
   }
-  console.log(`\n${families.size} families against ${base}: ${differ} differ in a statement, its order, the step it runs under, a function body, a constant, a type note or a condition marker`);
+  console.log(`\n${families.size} families against ${base}: ${differ} differ in a statement, its order, the step it runs under, what a group is handed or hands back, a function body, a constant, an import, a type note or a condition marker`);
   return differ === 0 ? 0 : 1;
 }
 
