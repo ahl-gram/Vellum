@@ -91,6 +91,16 @@ test("the legend names the iso lines on the climate and moisture plates only", (
   assert.doesNotMatch(renderMap(w, { legend: true }), /Isohyet|Isotherm/);
 });
 
+test("a themed legend keys its theme alone: each style's own row stays off it, though the same style unthemed carries it", () => {
+  const STYLE_ROW: Record<StyleName, string> = { nautical: ">Depth, fathoms<", antique: ">Mountains<", ink: ">Mountains<", topographic: ">Low to high ground<" };
+  for (const [style, row] of Object.entries(STYLE_ROW) as [StyleName, string][]) {
+    assert.ok(renderMap(world, { style, legend: true }).includes(row), `${style}: the unthemed legend lost ${row}, so the themed checks below would pass without looking`);
+    for (const theme of ["vegetation", "climate", "moisture", "population"] as const) {
+      assert.ok(!renderMap(world, { style, theme, legend: true }).includes(row), `${style} under the ${theme} theme keys the style's ${row} row beside the theme's own`);
+    }
+  }
+});
+
 test("the key lists roads by rank, and only when present", () => {
   assert.ok(world.roads.some((r) => r.rank === "trunk"), "fixture should have trunk roads");
   assert.ok(world.roads.some((r) => r.rank === "lane"), "fixture should have lane roads");
