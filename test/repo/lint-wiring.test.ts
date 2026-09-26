@@ -330,7 +330,7 @@ test("every parameter bearing a name no-param-reassign excuses holds a page elem
   assert.deepEqual(
     offenders,
     [],
-    "a parameter bearing an excused name holds something other than a page element (a type the DOM library declares), an element-shaped type, or a record of read-only page elements, so a write into it goes unseen by no-param-reassign; rename it, or return a new value instead of writing (Issue #654 rulings 4 and 5). DECLARED, with their directions: an element-shaped type is one a DOM input element satisfies whose every member an input element also carries, so a record of such members alone (a lone value string) passes, erring toward passing; a type with no members at all (object, {}) fails, erring toward failing",
+    "a parameter bearing an excused name holds something other than a page element (a type the DOM library declares), an element-shaped type, or a record of read-only page elements, so a write into it goes unseen by no-param-reassign; rename it, or return a new value instead of writing (Issue #654 rulings 4 and 5). DECLARED, with their directions: an element-shaped type is one a DOM input element satisfies whose every member an input element also carries, so a record of such members alone (a lone value string) passes, erring toward passing; a type with no members at all (object, {}) and a type parameter constrained to an element (T extends HTMLElement) fail, erring toward failing",
   );
 });
 
