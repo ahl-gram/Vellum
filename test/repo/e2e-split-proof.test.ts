@@ -225,3 +225,31 @@ test("an import bound to a different module or a different export reads as a dif
   assert.equal(compareFamilies(files(before), files(run, part)).same, true);
   assert.equal(compareFamilies(files(before), files(run, swapped(part, "../settle-support.ts", "./settle-support.ts"))).same, false);
 });
+
+test("a function only the split declares is read through at every call, so one that stands in for a context member reads as a difference", () => {
+  const kit = swapped(SPLIT_GROUPS, "  return { ...base, go };", "  const settle = (script, pred, label, budget) => base.settle(script, pred, label, budget * 10);\n  return { ...base, go, settle };");
+  assert.equal(split(SPLIT_RUN, kit).same, false);
+  const noWait = swapped(SPLIT_GROUPS, "export async function m2Lays({ evaluate, waitSettled }) {", "async function waitSettled(label) {\n}\nexport async function m2Lays({ evaluate }) {");
+  assert.equal(split(SPLIT_RUN, noWait).same, false);
+});
+
+test("a function declared twice in the split is a difference, whichever copy a call would reach", () => {
+  const start = SPLIT_GROUPS.indexOf("export async function m1Draws(");
+  const end = SPLIT_GROUPS.indexOf("export async function m2Lays(");
+  assert.ok(start >= 0 && end > start, "the fixture no longer carries m1Draws before m2Lays");
+  const faithful = SPLIT_GROUPS.slice(start, end);
+  assert.equal(verdict([SPLIT_RUN, swapped(SPLIT_GROUPS, "g.n === 1, JSON", "g.n === 2, JSON"), faithful]).same, false);
+});
+
+test("a let, a var or a container may not move, even with a literal initializer", () => {
+  const before = ["export async function run(ctx) {", "  const { evaluate } = ctx;", "  let tries = 0;", "  const seen = [];", "  const poll = async () => {", "    tries++;", "    seen.push(tries);", "    await evaluate(`1`);", "  };", "  await poll();", "  await poll();", "}"].join("\n");
+  const inner = swapped(swapped(before, "  const poll = async () => {\n", "  const poll = async () => {\n    let tries = 0;\n"), "  let tries = 0;\n  const seen", "  const seen");
+  assert.equal(compareFamilies(files(before), files(inner)).same, false);
+  const seenInside = swapped(swapped(before, "  const poll = async () => {\n", "  const poll = async () => {\n    const seen = [];\n"), "  const seen = [];\n  const poll", "  const poll");
+  assert.equal(compareFamilies(files(before), files(seenInside)).same, false);
+});
+
+test("an async function the split made, called without await where the base awaited its body, is a difference", () => {
+  assert.equal(split(swapped(SPLIT_RUN, "  await desktop(k);", "  desktop(k);"), SPLIT_GROUPS).same, false);
+  assert.equal(split(swapped(SPLIT_RUN, "laid = await m2Lays(k);", "laid = m2Lays(k);"), SPLIT_GROUPS).same, false);
+});
