@@ -237,7 +237,7 @@ test("label pressure drops hamlet labels first and never force-places them (#171
   const groups = marks.map((m, i) => ({
     tier: m[1] as string,
     labeled: layer
-      .slice((m.index) + m[0].length, i + 1 < marks.length ? marks[i + 1]!.index : undefined)
+      .slice(m.index + m[0].length, i + 1 < marks.length ? marks[i + 1]!.index : undefined)
       .includes("<text"),
   }));
 
@@ -270,7 +270,7 @@ test("region sheets set settlement labels larger; world sheets keep their type (
   const labeled: Array<{ tier: keyof typeof FONT_SIZE; fs: number }> = [];
   marks.forEach((m, i) => {
     const body = layer.slice(
-      (m.index) + m[0].length,
+      m.index + m[0].length,
       i + 1 < marks.length ? marks[i + 1]!.index : undefined,
     );
     const fs = body.match(/<text[^>]*font-size="([\d.]+)"/);

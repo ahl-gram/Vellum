@@ -15,7 +15,7 @@ async function overlayOver(clampBox: (() => typeof CHART | null) | null) {
   const overlay = createPlaceOverlay({
     mapEl: mapEl as unknown as HTMLElement,
     isSuppressed: () => false,
-    ...(clampBox ? { clampBox: clampBox } : {}),
+    ...(clampBox ? { clampBox } : {}),
   });
   overlay.buildPlaceOverlay(manifest);
   const nodes = walk(mapEl);

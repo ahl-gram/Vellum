@@ -86,7 +86,7 @@ export function computeFlow(
   for (const i of landOrder) {
     acc[i] = (acc[i] as number) + (rain ? (rain[i] as number) : 1);
     const d = dir[i] as number;
-    if (d >= 0) acc[d] = (acc[d] as number) + (acc[i]);
+    if (d >= 0) acc[d] = (acc[d] as number) + acc[i];
   }
 
   return { fill, dir, acc };

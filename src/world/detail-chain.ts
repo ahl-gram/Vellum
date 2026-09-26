@@ -123,7 +123,7 @@ export function maxOfSurfaces(surfaces: ReadonlyArray<Field>, w: number, h: numb
 /** An ancestor is a canonical thing, so it draws at its own band's grid and siblings share it whatever grid the target asked for. */
 function gridForWindow(win: UvWindow): { readonly gridW: number; readonly gridH: number } {
   const size = win.u1 - win.u0;
-  const band = LOD_BANDS.find((b) => Math.abs(b.sizeUV - size) < 1e-9) ?? (LOD_BANDS[0]!);
+  const band = LOD_BANDS.find((b) => Math.abs(b.sizeUV - size) < 1e-9) ?? LOD_BANDS[0]!;
   return { gridW: band.gridW, gridH: band.gridH };
 }
 

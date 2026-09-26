@@ -152,10 +152,10 @@ function pinCorrectness(file: string, typed: boolean, rules: Record<string, unkn
 
 const CSS_FORM_RULES = ["vellum/css-comment-one-line", "vellum/css-comment-no-em-dash", "vellum/css-comment-issue-form"];
 const TURNED_ON = [
+  "@typescript-eslint/no-unnecessary-type-assertion",
   "@typescript-eslint/no-unsafe-argument",
   "@typescript-eslint/no-unsafe-assignment",
   "@typescript-eslint/no-unsafe-call",
-  "@typescript-eslint/no-unnecessary-type-assertion",
   "@typescript-eslint/no-unsafe-member-access",
   "@typescript-eslint/no-unused-vars",
   "@typescript-eslint/require-await",

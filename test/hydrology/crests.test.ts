@@ -57,7 +57,7 @@ test("#141 mountainCrests on a real island: the gate drops below-median divides,
   const crest = mountainCrests(f, flow, sea);
   const divides = watershedDivides(computeBasins(f, flow, sea), gw, gh, 0.03);
 
-  const land = [...f.data].filter((v) => (v) > sea);
+  const land = [...f.data].filter((v) => v > sea);
   const median = quantile(land, 0.5);
   let crestCount = 0, divideCount = 0;
   for (let i = 0; i < f.data.length; i++) {

@@ -152,7 +152,7 @@ test("CT14d a shut inside a ceremony clears it rather than leaving it armed: dis
 test("CT15 a lay handed a ready url (the drag's ghost) adopts it and mints none; a lay handed only the svg mints one", () => {
   const minted: string[] = [];
   const real = URL.createObjectURL.bind(URL);
-  URL.createObjectURL = ((blob: Blob) => { const u = `blob:minted-${minted.length}`; minted.push(u); void blob; return u; });
+  URL.createObjectURL = (blob: Blob) => { const u = `blob:minted-${minted.length}`; minted.push(u); void blob; return u; };
   try {
     const { table, cuttings } = drawer();
     assert.equal(table.lay(survey(1), SVG, "one", { url: "blob:ghost" }), true);
