@@ -6,6 +6,27 @@ import { realWorld } from "../../test-support/living-chart-hosts.ts";
 // #387/#388: clampOffset's arithmetic is pinned in test/render/place-card.test.ts; this file pins the half that is not arithmetic, that showing a card MEASURES it and publishes the nudge. The shim does no layout, so every rect here is stated rather than computed.
 
 const CHART = { left: 0, top: 0, right: 342, bottom: 266 };
+const stated = new WeakMap<El, typeof CHART>();
+
+function cardOf(nodes: El[]): { card: El; inner: El } {
+  const card = nodes.find((n) => n.getAttribute("id") === "place-card")!;
+  // The shim answers "nothing here" to every query by design and must not grow into a selector engine, so this one lookup is stated, the same way the rects below are.
+  const inner = walk(card).find((n) => n.classList.contains("pc-inner"))!;
+  card.querySelector = ((sel: string) => (sel === ".pc-inner" ? inner : null)) as El["querySelector"];
+  const unstated = card.getBoundingClientRect.bind(card);
+  // Measured THROUGH the published nudge, the way a browser does: a shim that ignores it cannot see a card measured against the previous card's offset.
+  card.getBoundingClientRect = () => {
+    const base = stated.get(card);
+    if (!base) return unstated();
+    const dx = parseFloat(card.style.getPropertyValue("--pc-dx")) || 0;
+    const dy = parseFloat(card.style.getPropertyValue("--pc-dy")) || 0;
+    return {
+      left: base.left + dx, right: base.right + dx, top: base.top + dy, bottom: base.bottom + dy,
+      width: base.right - base.left, height: base.bottom - base.top,
+    };
+  };
+  return { card, inner };
+}
 
 async function overlayOver(clampBox: (() => typeof CHART | null) | null) {
   const { manifest } = await realWorld(); // installs the shim
@@ -19,11 +40,8 @@ async function overlayOver(clampBox: (() => typeof CHART | null) | null) {
   });
   overlay.buildPlaceOverlay(manifest);
   const nodes = walk(mapEl);
-  const card = nodes.find((n) => n.getAttribute("id") === "place-card")!;
+  const { card, inner } = cardOf(nodes);
   const hits = nodes.filter((n) => n.classList.contains("place-hit"));
-  // The shim answers "nothing here" to every query by design and must not grow into a selector engine, so this one lookup is stated, the same way the rects below are.
-  const inner = walk(card).find((n) => n.classList.contains("pc-inner"))!;
-  card.querySelector = ((sel: string) => (sel === ".pc-inner" ? inner : null)) as El["querySelector"];
   return { card, hits, overlay, inner };
 }
 
@@ -33,15 +51,7 @@ const published = (card: El) => ({
 });
 
 const shownWith = (card: El, hit: El, base: typeof CHART) => {
-  // Measured THROUGH the published nudge, the way a browser does: a shim that ignores it cannot see a card measured against the previous card's offset.
-  card.getBoundingClientRect = () => {
-    const dx = parseFloat(card.style.getPropertyValue("--pc-dx")) || 0;
-    const dy = parseFloat(card.style.getPropertyValue("--pc-dy")) || 0;
-    return {
-      left: base.left + dx, right: base.right + dx, top: base.top + dy, bottom: base.bottom + dy,
-      width: base.right - base.left, height: base.bottom - base.top,
-    };
-  };
+  stated.set(card, base);
   hit.fire("focus");
   return published(card);
 };
@@ -123,9 +133,7 @@ test("#387/#388 the host's box reaches the card through createLivingChart, not o
   lc.buildPlaceOverlay(manifest);
 
   const nodes = walk(mapEl);
-  const card = nodes.find((n) => n.getAttribute("id") === "place-card")!;
-  const inner = walk(card).find((n) => n.classList.contains("pc-inner"))!;
-  card.querySelector = ((sel: string) => (sel === ".pc-inner" ? inner : null)) as El["querySelector"];
+  const { card } = cardOf(nodes);
   const hit = nodes.find((n) => n.classList.contains("place-hit"))!;
 
   // The engine spreads the box in conditionally, and dropping that one line costs every real host its clamp.

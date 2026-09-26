@@ -89,7 +89,7 @@ export function refineTour(path: ReadonlyArray<number>, d: TourDistance): number
     return c + d(t[t.length - 1]!, t[0]!);
   };
   const orient = (t: number[]) => orientCycle(t, (i) => i, d);
-  const fromGiven = orient(twoOptOnDistances([...path], d));
+  const fromGiven = orient(twoOptOnDistances(path, d));
   const fromNearest = orient(twoOptOnDistances(nearestFirst(path, d), d));
   return cost(fromNearest) < cost(fromGiven) - EPS ? fromNearest : fromGiven;
 }
@@ -113,8 +113,9 @@ function nearestFirst(path: ReadonlyArray<number>, d: TourDistance): number[] {
   return seq;
 }
 
-/** twoOpt on a distance oracle; mutates and returns the passed-in scratch copy. */
-function twoOptOnDistances(t: number[], d: TourDistance): number[] {
+/** twoOpt on a distance oracle. */
+function twoOptOnDistances(path: ReadonlyArray<number>, d: TourDistance): number[] {
+  const t = [...path];
   const n = t.length;
   if (n < 4) return t;
   let improved = true;

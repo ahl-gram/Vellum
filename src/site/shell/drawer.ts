@@ -21,27 +21,27 @@ export interface DrawerHost {
   readonly closesOnScroll: boolean;
 }
 
-export function bindDrawer(reveal: Reveal, doc: Listens, host: DrawerHost): void {
+export function bindDrawer(revealEl: Reveal, doc: Listens, host: DrawerHost): void {
   const apply = () => {
-    for (const el of host.inert) el.inert = reveal.checked;
+    for (const el of host.inert) el.inert = revealEl.checked;
   };
   const close = () => {
-    reveal.checked = false;
+    revealEl.checked = false;
     apply();
   };
-  reveal.addEventListener("change", apply);
+  revealEl.addEventListener("change", apply);
   doc.addEventListener("keydown", (e) => {
-    if ((e as KeyboardEvent).key === "Escape" && reveal.checked) close();
+    if ((e as KeyboardEvent).key === "Escape" && revealEl.checked) close();
   });
   doc.addEventListener("click", (e) => {
-    if (reveal.checked && e.target === host.scrim) close();
+    if (revealEl.checked && e.target === host.scrim) close();
   });
   host.narrow.addEventListener("change", () => {
-    if (!host.narrow.matches && reveal.checked) close();
+    if (!host.narrow.matches && revealEl.checked) close();
   });
   if (host.closesOnScroll) {
     doc.addEventListener("scroll", () => {
-      if (reveal.checked) close();
+      if (revealEl.checked) close();
     });
   }
 }

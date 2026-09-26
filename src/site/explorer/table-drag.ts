@@ -47,7 +47,7 @@ export interface TableDragDeps {
   readonly settleEase: () => string;
 }
 
-interface Carry { readonly start: Point; ghost: HTMLImageElement | null; url: string | null; restore: (() => void) | null }
+interface Carry { readonly start: Point; readonly ghost: HTMLImageElement | null; readonly url: string | null; readonly restore: (() => void) | null }
 
 function makeGhost(url: string): HTMLImageElement {
   const ghost = document.createElement("img");
@@ -58,9 +58,9 @@ function makeGhost(url: string): HTMLImageElement {
   return ghost;
 }
 
-function seat(ghost: HTMLImageElement, at: Point): void {
-  const s = ghostSeat(at, ghost.offsetWidth);
-  ghost.style.translate = `${s.x}px ${s.y}px`;
+function seat(ghostEl: HTMLImageElement, at: Point): void {
+  const s = ghostSeat(at, ghostEl.offsetWidth);
+  ghostEl.style.translate = `${s.x}px ${s.y}px`;
 }
 
 function snapBack(deps: TableDragDeps, g: HTMLImageElement, u: string): void {
@@ -75,17 +75,21 @@ function snapBack(deps: TableDragDeps, g: HTMLImageElement, u: string): void {
   g.animate(frames, { duration: ms, easing: deps.settleEase(), fill: "forwards" }).finished.then(done, done);
 }
 
-function moveCarry(deps: TableDragDeps, c: Carry, at: Point): void {
-  if (!c.ghost) {
+function moveCarry(deps: TableDragDeps, c: Carry, at: Point, keep: (next: Carry) => void): void {
+  let ghost = c.ghost;
+  let now = c;
+  if (!ghost) {
     if (!beganDrag(c.start, at)) return;
-    c.url = deps.ghostUrl();
-    c.ghost = makeGhost(c.url);
-    document.body.append(c.ghost);
+    const url = deps.ghostUrl();
+    ghost = makeGhost(url);
+    now = { ...c, ghost, url };
+    keep(now);
+    document.body.append(ghost);
     document.body.classList.add("sheet-drag");
   }
-  seat(c.ghost, at);
+  seat(ghost, at);
   const over = dropOutcome(at, deps.band()) === "file";
-  if (over && !c.restore) c.restore = deps.reveal();
+  if (over && !now.restore) keep({ ...now, restore: deps.reveal() });
   deps.receiving(over);
 }
 
@@ -114,7 +118,7 @@ export function bindTableDrag(deps: TableDragDeps): void {
     snapBack(deps, c.ghost, c.url);
     if (!filed) c.restore?.();
   };
-  const onMove = (e: PointerEvent): void => { if (carry) moveCarry(deps, carry, { x: e.clientX, y: e.clientY }); };
+  const onMove = (e: PointerEvent): void => { if (carry) moveCarry(deps, carry, { x: e.clientX, y: e.clientY }, (next) => { carry = next; }); };
   deps.handle.addEventListener("pointerdown", (e) => {
     dropOwed();
     if (carry || !grabbable(e) || !deps.canDrag()) return;

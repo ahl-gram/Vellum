@@ -10,14 +10,13 @@ export interface AnnouncePill {
 }
 
 export interface AnnounceDeps<T> {
-  readonly pill: AnnouncePill;
   readonly after: (run: () => void, ms: number) => T;
   readonly cancel: (timer: T) => void;
   readonly holdMs?: number;
   readonly fadeMs?: number;
 }
 
-export function makeAnnouncer<T>(deps: AnnounceDeps<T>): (line: string) => void {
+export function makeAnnouncer<T>(pillEl: AnnouncePill, deps: AnnounceDeps<T>): (line: string) => void {
   const hold = deps.holdMs ?? SAY_HOLD_MS;
   const fade = deps.fadeMs ?? SAY_FADE_MS;
   let booked: T | null = null;
@@ -27,17 +26,17 @@ export function makeAnnouncer<T>(deps: AnnounceDeps<T>): (line: string) => void 
   };
   return (line: string): void => {
     unbook();
-    deps.pill.classList.remove(FADING);
-    deps.pill.textContent = line;
+    pillEl.classList.remove(FADING);
+    pillEl.textContent = line;
     if (line === "") return;
     booked = deps.after(() => {
       booked = null;
-      if (deps.pill.textContent !== line) return;
-      deps.pill.classList.add(FADING);
+      if (pillEl.textContent !== line) return;
+      pillEl.classList.add(FADING);
       booked = deps.after(() => {
         booked = null;
-        if (deps.pill.textContent === line) deps.pill.textContent = "";
-        deps.pill.classList.remove(FADING);
+        if (pillEl.textContent === line) pillEl.textContent = "";
+        pillEl.classList.remove(FADING);
       }, fade);
     }, hold);
   };

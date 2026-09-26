@@ -129,7 +129,8 @@ function decorNodes(c: DressContext, strip: StripLayout, rng: Rng): SvgNode[] {
   return nodes;
 }
 
-type CaptionTrack = { left: number; right: number };
+type CaptionTrack = { readonly left: number; readonly right: number };
+type CaptionsLaid = { readonly nodes: ReadonlyArray<SvgNode>; readonly track: CaptionTrack };
 type CaptionLine = { text: string; caps?: boolean; size?: number };
 
 function wrapLine(text: string): string[] {
@@ -152,16 +153,15 @@ function captionNodes(
   sy: number,
   side: -1 | 1,
   spec: ReadonlyArray<CaptionLine>,
-  track: CaptionTrack,
-): SvgNode[] {
+  laid: CaptionsLaid,
+): CaptionsLaid {
   const lines = spec.flatMap((l) =>
     wrapLine(l.text).map((text) => ({ text, caps: l.caps === true, size: l.size ?? 8.2 })),
   );
   const need = lines.reduce((a, l) => a + l.size + 1.2, 0);
   const key = side < 0 ? "left" : "right";
-  let y = Math.min(sy + 2.6, track[key] - need);
+  let y = Math.min(sy + 2.6, laid.track[key] - need);
   y = Math.max(y, strip.y0 + 22);
-  track[key] = y - 4;
   const anchorX = side < 0 ? sx - 10 : sx + 10;
   const out: SvgNode[] = [];
   let dy = 0;
@@ -180,7 +180,7 @@ function captionNodes(
       }, [line.caps ? line.text.toUpperCase() : line.text]),
     );
   }
-  return out;
+  return { nodes: [...laid.nodes, ...out], track: { ...laid.track, [key]: y - 4 } };
 }
 
 function riverBand(c: DressContext, strip: StripLayout, sy: number, tiltDeg: number): SvgNode {
@@ -199,8 +199,7 @@ function riverBand(c: DressContext, strip: StripLayout, sy: number, tiltDeg: num
 
 function eventNodes(c: DressContext, input: RibbonInput, strip: StripLayout, rng: Rng): SvgNode[] {
   const nodes: SvgNode[] = [];
-  const captions: SvgNode[] = [];
-  const track: CaptionTrack = { left: strip.y0 + strip.h, right: strip.y0 + strip.h };
+  let laid: CaptionsLaid = { nodes: [], track: { left: strip.y0 + strip.h, right: strip.y0 + strip.h } };
   for (const e of input.events) {
     if (e.dist < strip.d0 || e.dist >= strip.d1) continue;
     const p = stripPos(strip, e.dist);
@@ -212,7 +211,7 @@ function eventNodes(c: DressContext, input: RibbonInput, strip: StripLayout, rng
         const lines: CaptionLine[] = e.endpoint
           ? [{ text: caption, caps: true, size: 10.5 }]
           : [{ text: caption, caps: true, size: 8.6 }, { text: tierTag(e.tier), size: 7.6 }];
-        captions.push(...captionNodes(c, strip, p.sx, p.sy, freeSide, lines, track));
+        laid = captionNodes(c, strip, p.sx, p.sy, freeSide, lines, laid);
         break;
       }
       case "crossing": {
@@ -220,7 +219,7 @@ function eventNodes(c: DressContext, input: RibbonInput, strip: StripLayout, rng
         nodes.push(riverBand(c, strip, p.sy, tilt));
         const deg = roadAngleDeg(strip, e.dist);
         nodes.push(e.major || e.name !== null ? bridgeMark(c, p.sx, p.sy, deg) : fordMark(c, p.sx, p.sy, deg));
-        captions.push(...captionNodes(c, strip, p.sx, p.sy - 8, freeSide, [{ text: caption }], track));
+        laid = captionNodes(c, strip, p.sx, p.sy - 8, freeSide, [{ text: caption }], laid);
         break;
       }
       case "branch": {
@@ -234,17 +233,17 @@ function eventNodes(c: DressContext, input: RibbonInput, strip: StripLayout, rng
           "stroke-dasharray": "0.2 3",
           "stroke-linecap": "round",
         }));
-        captions.push(...captionNodes(c, strip, endX, endY, e.side, [{ text: caption }], track));
+        laid = captionNodes(c, strip, endX, endY, e.side, [{ text: caption }], laid);
         break;
       }
       case "summit": {
         nodes.push(mountainProfile(c, p.sx + freeSide * 27, p.sy + 4, 1.05));
-        captions.push(...captionNodes(c, strip, p.sx, p.sy - 10, (freeSide * -1) as -1 | 1, [{ text: caption }], track));
+        laid = captionNodes(c, strip, p.sx, p.sy - 10, (freeSide * -1) as -1 | 1, [{ text: caption }], laid);
         break;
       }
     }
   }
-  return [...nodes, ...captions];
+  return [...nodes, ...laid.nodes];
 }
 
 function continuation(c: DressContext, strip: StripLayout, isLast: boolean): SvgNode[] {

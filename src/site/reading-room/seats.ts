@@ -22,43 +22,43 @@ export interface RoomFurniture {
 }
 
 // The frame's root stays where it is, the arrival ceremony's host (RS26).
-export function seatFrame(frame: ReadingFrame, plate: ProspectStage, f: RoomFurniture): void {
-  f.viewport.appendChild(frame.host.mapEl);
-  f.stage.appendChild(frame.host.statusEl);
+export function seatFrame(frame: ReadingFrame, plate: ProspectStage, roomEls: RoomFurniture): void {
+  roomEls.viewport.appendChild(frame.host.mapEl);
+  roomEls.stage.appendChild(frame.host.statusEl);
   const well = document.createElement("div");
   well.className = "scale-well";
   frame.host.scrubber.range.replaceWith(well);
-  well.append(frame.host.scrubber.range, f.scale);
-  f.strip.appendChild(frame.strip);
-  f.journalDock.append(plate.root, frame.log.panel);
-  frame.host.scrubber.panel.append(f.strip, f.slip, f.tab);
+  well.append(frame.host.scrubber.range, roomEls.scale);
+  roomEls.strip.appendChild(frame.strip);
+  roomEls.journalDock.append(plate.root, frame.log.panel);
+  frame.host.scrubber.panel.append(roomEls.strip, roomEls.slip, roomEls.tab);
 }
 
 // The Glass, geometric only (no card to counter-scale: every hit is inert here), the kit's keys, and the room's fit; the strip's height seats the chart folio and the Glass above it (--strip-h) and bounds the fit, holding its last value while the panel is down.
-export function bindReadingRoom(frame: ReadingFrame, f: RoomFurniture): { readonly room: Room; readonly rebase: () => void } {
+export function bindReadingRoom(frame: ReadingFrame, roomEls: RoomFurniture): { readonly room: Room; readonly rebase: () => void } {
   const zoom = createZoomController({
-    viewportEl: f.viewport,
+    viewportEl: roomEls.viewport,
     targetEl: frame.host.mapEl,
     scaleExtent: [1, 8],
     glideMs: () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--glide")),
   });
   zoom.attach();
-  bindGlassKeys(f.viewport, zoom);
-  const room = bindRoom({ frame: f.stage, sheet: f.sheet, camera: { hold: () => zoom.getState(), restore: (state) => zoom.refit(state) } });
+  bindGlassKeys(roomEls.viewport, zoom);
+  const room = bindRoom({ frame: roomEls.stage, sheet: roomEls.sheet, camera: { hold: () => zoom.getState(), restore: (state) => zoom.refit(state) } });
   let stripH = 0;
   new ResizeObserver(() => {
-    const h = f.strip.offsetHeight;
+    const h = roomEls.strip.offsetHeight;
     if (h === 0 || h === stripH) return;
     stripH = h;
     document.body.style.setProperty("--strip-h", `${h}px`);
     room.layout();
-  }).observe(f.strip);
+  }).observe(roomEls.strip);
   return { room, rebase: () => zoom.rebase() };
 }
 
-export function writeFolio(f: RoomFurniture, res: DrawResult, forSeed: number): void {
-  f.folioTitle.textContent = `${res.title} · Chart № ${forSeed}`;
-  f.folioSub.textContent = res.subtitle;
+export function writeFolio(roomEls: RoomFurniture, res: DrawResult, forSeed: number): void {
+  roomEls.folioTitle.textContent = `${res.title} · Chart № ${forSeed}`;
+  roomEls.folioSub.textContent = res.subtitle;
 }
 
 // Drawn once the instrument is armed, since the days come from the travel order.

@@ -154,7 +154,7 @@ export function makeDogEar(label: string, k: number, onLay: () => void): HTMLBut
   return b;
 }
 
-export interface ChartDrawerDeps {
+export interface ChartDrawerEls {
   readonly root: HTMLElement;
   readonly tab: HTMLButtonElement;
   readonly shut: HTMLButtonElement;
@@ -162,6 +162,9 @@ export interface ChartDrawerDeps {
   readonly cuttings: HTMLElement;
   readonly full: HTMLElement;
   readonly road: HTMLButtonElement;
+}
+
+export interface ChartDrawerDeps {
   readonly say: (line: string) => void;
   /** Persist: the address and the device both, since #634 (2026-09-19) gave the table a second home; the host owns which. */
   readonly onChange: (items: ReadonlyArray<TableItem>) => void;
@@ -174,7 +177,7 @@ export interface ChartDrawerDeps {
 }
 
 // eslint-disable-next-line max-lines-per-function
-export function bindChartDrawer(deps: ChartDrawerDeps) {
+export function bindChartDrawer(drawerEls: ChartDrawerEls, deps: ChartDrawerDeps) {
   let items: ReadonlyArray<TableItem> = [];
   // Blob urls are revoked when their cutting leaves, and never churned per redraw: the key is the item's own emitted spelling, so a redraw reuses the url it already made.
   const art = new Map<string, string>();
@@ -185,7 +188,7 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
 
   const keyOf = (item: TableItem): string => emitTable([item]);
   const titleOf = (item: TableItem): string => names.get(keyOf(item)) ?? placeholderTitle(item);
-  const onScreen = (): boolean => deps.cuttings.getBoundingClientRect().width > 0;
+  const onScreen = (): boolean => drawerEls.cuttings.getBoundingClientRect().width > 0;
 
   interface Row { readonly li: HTMLLIElement; readonly label: HTMLElement; readonly title: HTMLElement; readonly off: HTMLButtonElement }
   const rows = new Map<string, Row>();
@@ -232,14 +235,14 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
   };
 
   const render = (): void => {
-    deps.count.textContent = countLine(items);
-    deps.road.disabled = items.length === 0;
-    deps.tab.textContent = tabLine(items);
+    drawerEls.count.textContent = countLine(items);
+    drawerEls.road.disabled = items.length === 0;
+    drawerEls.tab.textContent = tabLine(items);
     deps.relabelLeaf?.(items.length);
-    deps.full.hidden = roomOnTable(items) > 0;
-    deps.cuttings.classList.remove("jolt");
+    drawerEls.full.hidden = roomOnTable(items) > 0;
+    drawerEls.cuttings.classList.remove("jolt");
     rows.clear();
-    deps.cuttings.replaceChildren(...items.map((item, seat) => {
+    drawerEls.cuttings.replaceChildren(...items.map((item, seat) => {
       const row = cutting(item, seat);
       rows.set(keyOf(item), row);
       if (landing === keyOf(item)) settle(row.li);
@@ -256,22 +259,22 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
     row.off.setAttribute("aria-label", `Take ${titleOf(item)} off the table`);
   };
 
-  const jolt = (): void => { if (onScreen()) deps.cuttings.classList.add("jolt"); };
+  const jolt = (): void => { if (onScreen()) drawerEls.cuttings.classList.add("jolt"); };
   let armedJolt: ((e: AnimationEvent) => void) | null = null;
-  const disarmJolt = (): void => { if (armedJolt) deps.root.removeEventListener("animationend", armedJolt); armedJolt = null; };
+  const disarmJolt = (): void => { if (armedJolt) drawerEls.root.removeEventListener("animationend", armedJolt); armedJolt = null; };
   const joltWhenStill = (wasOpen: boolean): void => {
     if (wasOpen) { jolt(); return; }
-    if (deps.root.getBoundingClientRect().width === 0) return;
-    armedJolt = (e) => { if (e.target !== deps.root) return; disarmJolt(); jolt(); };
-    deps.root.addEventListener("animationend", armedJolt);
+    if (drawerEls.root.getBoundingClientRect().width === 0) return;
+    armedJolt = (e) => { if (e.target !== drawerEls.root) return; disarmJolt(); jolt(); };
+    drawerEls.root.addEventListener("animationend", armedJolt);
   };
   // A shut mid-ceremony sets display:none, which cancels an animation with no end event; what the end would have cleared is cleared here instead.
   const clearCeremonies = (): void => {
     for (const row of rows.values()) row.li.classList.remove("landing");
-    deps.cuttings.classList.remove("jolt");
+    drawerEls.cuttings.classList.remove("jolt");
     disarmJolt();
   };
-  deps.cuttings.addEventListener("animationend", (e) => { if (e.target === deps.cuttings) deps.cuttings.classList.remove("jolt"); });
+  drawerEls.cuttings.addEventListener("animationend", (e) => { if (e.target === drawerEls.cuttings) drawerEls.cuttings.classList.remove("jolt"); });
 
   const forget = (item: TableItem): void => {
     const k = keyOf(item);
@@ -310,17 +313,17 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
 
   const setOpen = (open: boolean, moveFocus = false): void => {
     // Ruled 2026-09-08 (#543): the drawer and the Broadside never stand open together; the reader who had the Broadside open gets it back when the table shuts, the one who folded it keeps it folded.
-    if (open !== deps.root.classList.contains("open")) {
+    if (open !== drawerEls.root.classList.contains("open")) {
       const broadside = deps.broadside?.() ?? null;
       if (open) broadsideWasOpen = broadside !== null && !broadside.folded();
       if (open || broadsideWasOpen) broadside?.setFolded(open);
     }
-    deps.root.classList.toggle("open", open);
+    drawerEls.root.classList.toggle("open", open);
     if (!open) clearCeremonies();
     // Both presses hide themselves: the tab is display:none while open and the shut press goes with the drawer, so focus would fall to <body> and a keyboard reader would be returned to the top of the document twice per visit. Each hands focus to the control that replaces it. aria-expanded rides the SHUT press too, since the tab carrying it is the one being hidden.
-    deps.tab.setAttribute("aria-expanded", String(open));
-    deps.shut.setAttribute("aria-expanded", String(open));
-    if (moveFocus) (open ? deps.shut : deps.tab).focus();
+    drawerEls.tab.setAttribute("aria-expanded", String(open));
+    drawerEls.shut.setAttribute("aria-expanded", String(open));
+    if (moveFocus) (open ? drawerEls.shut : drawerEls.tab).focus();
     if (open) void fill();
   };
 
@@ -335,9 +338,9 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
     deps.say(said ? `${said} is off the table · ${countLine(next)}` : countLine(next));
   };
 
-  deps.tab.addEventListener("click", () => setOpen(true, true));
-  deps.shut.addEventListener("click", () => setOpen(false, true));
-  deps.road.addEventListener("click", () => {
+  drawerEls.tab.addEventListener("click", () => setOpen(true, true));
+  drawerEls.shut.addEventListener("click", () => setOpen(false, true));
+  drawerEls.road.addEventListener("click", () => {
     if (items.length === 0) return;
     window.location.href = `${deps.folioHref ?? "../print-room/portfolio/"}${tableHash(window.location.hash, emitTable(items))}`;
   });
@@ -347,7 +350,7 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
       const laid = layOnTable(items, item);
       if (laid.refused) {
         deps.say(refusalLine(laid.reason ?? "full", item.kind));
-        const wasOpen = deps.root.classList.contains("open");
+        const wasOpen = drawerEls.root.classList.contains("open");
         setOpen(true);
         if (laid.reason === "full") joltWhenStill(wasOpen);
         return false;
@@ -364,11 +367,11 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
       return true;
     },
     reveal(): () => void {
-      const wasOpen = deps.root.classList.contains("open");
+      const wasOpen = drawerEls.root.classList.contains("open");
       if (!wasOpen) setOpen(true);
       return () => { if (!wasOpen) setOpen(false); };
     },
-    receiving(over: boolean): void { deps.root.classList.toggle("receiving", over); },
+    receiving(over: boolean): void { drawerEls.root.classList.toggle("receiving", over); },
     restore(next: ReadonlyArray<TableItem>): void {
       // Through the same gate a filing takes: a hand-typed or shared link can carry one sheet twice, and parseTable does not dedupe. Two twins would also share ONE blob url, keyed by the item, so removing either would revoke the survivor's picture.
       // The gate is byte equality on the emitted item, so it does NOT catch one prospect spelled two ways: `k-p...style-nautical` and `...style-antique` at one seat draw the same plate (plateDressFor sends both to antique) yet seat twice and spend two of the six. Both DOORS normalise through prospectItemFrom, so only a hand-typed or hand-edited link reaches it; closing it here would rewrite the address the reader shared, which is Alex's call and not a one-liner (#631's cold review, residue).
@@ -377,7 +380,7 @@ export function bindChartDrawer(deps: ChartDrawerDeps) {
       for (const gone of sheetsThatLeft(items, kept)) forget(gone);
       items = kept;
       render();
-      if (deps.root.classList.contains("open")) void fill();
+      if (drawerEls.root.classList.contains("open")) void fill();
     },
     state: (): ReadonlyArray<TableItem> => items,
     isFull: (): boolean => roomOnTable(items) === 0,

@@ -31,17 +31,17 @@ export interface Sheet {
   readonly rebase: () => void;
 }
 
-export function bindProspectRoom(f: RoomFurniture): Sheet {
+export function bindProspectRoom(roomEls: RoomFurniture): Sheet {
   const zoom = createZoomController({
-    viewportEl: f.viewport,
-    targetEl: f.map,
+    viewportEl: roomEls.viewport,
+    targetEl: roomEls.map,
     scaleExtent: [1, 8],
     glideMs: () => parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--glide")),
   });
   zoom.attach();
-  bindGlassKeys(f.viewport, zoom);
-  const box = () => ({ W: f.viewport.clientWidth || 1, H: f.viewport.clientHeight || 1 });
-  const room = bindRoom({ frame: f.stage, sheet: f.sheet, aspect: () => PLATE_W / PLATE_H, camera: {
+  bindGlassKeys(roomEls.viewport, zoom);
+  const box = () => ({ W: roomEls.viewport.clientWidth || 1, H: roomEls.viewport.clientHeight || 1 });
+  const room = bindRoom({ frame: roomEls.stage, sheet: roomEls.sheet, aspect: () => PLATE_W / PLATE_H, camera: {
     hold: () => { const { W, H } = box(); return cameraFromTransform(zoom.getState(), W, H); },
     restore: (cam) => { const { W, H } = box(); zoom.refit(transformFromCamera(cam, W, H)); },
   } });
@@ -50,16 +50,16 @@ export function bindProspectRoom(f: RoomFurniture): Sheet {
 
 type Facts = Omit<ProspectPlateResult, "svg">;
 
-export function showPlate(f: RoomFurniture, res: Pick<Facts, "name">, seed: number, url: string): void {
-  f.plate.src = url;
-  f.plate.alt = `The prospect of ${res.name}, chart ${seed}`;
-  f.plate.hidden = false;
+export function showPlate(roomEls: RoomFurniture, res: Pick<Facts, "name">, seed: number, url: string): void {
+  roomEls.plate.src = url;
+  roomEls.plate.alt = `The prospect of ${res.name}, chart ${seed}`;
+  roomEls.plate.hidden = false;
 }
 
-export function writeFolio(f: RoomFurniture, res: Facts, seed: number, dress: PlateDress, ms: number): void {
-  f.folioTitle.textContent = `${prospectTitle(res.name)} · Chart № ${seed}`;
-  f.folioSub.textContent = subLine(res);
-  f.pressed.textContent = `pressed in ${ms}ms · ${dress}`;
+export function writeFolio(roomEls: RoomFurniture, res: Facts, seed: number, dress: PlateDress, ms: number): void {
+  roomEls.folioTitle.textContent = `${prospectTitle(res.name)} · Chart № ${seed}`;
+  roomEls.folioSub.textContent = subLine(res);
+  roomEls.pressed.textContent = `pressed in ${ms}ms · ${dress}`;
 }
 
 const row = (num: string, text: string): HTMLLIElement => {
@@ -68,11 +68,11 @@ const row = (num: string, text: string): HTMLLIElement => {
   return li;
 };
 
-export function writeNote(f: RoomFurniture, res: Facts): void {
-  f.noteTitle.textContent = res.name;
-  f.noteWhere.textContent = whereLine(res);
-  f.noteProse.textContent = res.note;
-  f.key.replaceChildren(...res.key.map((k) => row(k.letter, k.label)));
-  f.keyHead.hidden = res.key.length === 0;
-  f.era.textContent = eraLine(res);
+export function writeNote(roomEls: RoomFurniture, res: Facts): void {
+  roomEls.noteTitle.textContent = res.name;
+  roomEls.noteWhere.textContent = whereLine(res);
+  roomEls.noteProse.textContent = res.note;
+  roomEls.key.replaceChildren(...res.key.map((k) => row(k.letter, k.label)));
+  roomEls.keyHead.hidden = res.key.length === 0;
+  roomEls.era.textContent = eraLine(res);
 }

@@ -69,9 +69,9 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
 
   let placeOverlay: PlaceOverlayState | null = null;
 
-  function fillCardInner(inner: HTMLElement, card: PlaceCard, place: PlaceMark): void {
-    inner.replaceChildren();
-    inner.scrollTop = 0;
+  function fillCardInner(innerEl: HTMLElement, card: PlaceCard, place: PlaceMark): void {
+    innerEl.replaceChildren();
+    innerEl.scrollTop = 0;
     const name = document.createElement("strong");
     name.className = "pc-name";
     name.textContent = card.name;
@@ -81,12 +81,12 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     const founded = document.createElement("span");
     founded.className = "pc-founded";
     founded.textContent = card.foundedLine;
-    inner.append(name, rank, founded);
+    innerEl.append(name, rank, founded);
     if (card.formerLine) {
       const former = document.createElement("span");
       former.className = "pc-former";
       former.textContent = card.formerLine;
-      inner.append(former);
+      innerEl.append(former);
     }
     const acts = placeOverlay!.acts;
     if (acts) {
@@ -96,13 +96,13 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
       }
       if (placeOverlay!.layPress) acts.append(placeOverlay!.layPress);
       paintLay(place.idx);
-      inner.append(acts);
+      innerEl.append(acts);
     }
     if (card.tale) {
       const tale = document.createElement("p");
       tale.className = "pc-tale";
       tale.textContent = card.tale;
-      inner.append(tale);
+      innerEl.append(tale);
     }
     const tongue = document.createElement("p");
     tongue.className = "pc-tongue";
@@ -110,7 +110,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     const derivation = document.createElement("p");
     derivation.className = "pc-roots";
     derivation.textContent = card.derivationLine;
-    inner.append(tongue, derivation);
+    innerEl.append(tongue, derivation);
   }
 
   function showPlaceCard(idx: number): void {
@@ -155,11 +155,11 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     if (placeOverlay) paintLay(placeOverlay.currentIdx);
   }
 
-  function markScroll(el: HTMLElement, inner: HTMLElement): void {
-    const scrolls = inner.scrollHeight - inner.clientHeight > 1;
+  function markScroll(el: HTMLElement, innerEl: HTMLElement): void {
+    const scrolls = innerEl.scrollHeight - innerEl.clientHeight > 1;
     el.classList.toggle("pc-scrolls", scrolls);
     // A scroll container is not keyboard operable without a tab stop of its own, and the tail this cap hides was fully visible before it: a reader with no pointer reaches it only once the card itself can hold focus.
-    inner.tabIndex = scrolls && el.classList.contains("pinned") ? 0 : -1;
+    innerEl.tabIndex = scrolls && el.classList.contains("pinned") ? 0 : -1;
   }
 
   function clampIntoView(el: HTMLElement): void {

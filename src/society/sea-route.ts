@@ -4,17 +4,17 @@ import type { Settlement } from "./sites.ts";
 /** Reads a frozen snapshot of the post-flood labels, so attachment order can never chain an islet onto an already-attached islet; the flood must stay a true FIFO BFS to reach the NEAREST realm by sea (the DFS-stack floods elsewhere would not). */
 // eslint-disable-next-line max-lines-per-function
 export function attachSeatlessLandmasses(
-  labels: Int16Array,
+  frozen: Int16Array,
   landmassIds: Int32Array,
   landmassCount: number,
   elev: Field,
   seaLevel: number,
   seats: ReadonlyArray<number>,
   settlements: ReadonlyArray<Settlement>,
-): void {
+): Int16Array {
   const { w, h, data } = elev;
   const n = w * h;
-  const frozen = Int16Array.from(labels);
+  const labels = Int16Array.from(frozen);
 
   const cellsByLm: number[][] = Array.from({ length: landmassCount }, () => []);
   for (let i = 0; i < n; i++) {
@@ -79,6 +79,7 @@ export function attachSeatlessLandmasses(
     if (target < 0) target = euclideanNearestSeat(cells, seats, settlements, w);
     for (const c of cells) labels[c] = target;
   }
+  return labels;
 }
 
 function euclideanNearestSeat(
