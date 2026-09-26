@@ -235,6 +235,19 @@ test("only typescript-eslint's recommended-type-checked block sets a rule Issue 
   assert.equal(preset[0]!.ignores, undefined, "the preset carries an ignores key, which takes the rules back for whatever it excludes while its files still name the four roots");
 });
 
+test("no block sets a rule off but typescript-eslint's own two layers and ruling D's design/ block, so the house config takes no rule back once Issue #654 has turned each on", () => {
+  const PRESET_LAYERS = ["typescript-eslint/eslint-recommended", "typescript-eslint/recommended-type-checked"];
+  const isOff = (v: unknown): boolean => v === "off" || v === 0 || (Array.isArray(v) && (v[0] === "off" || v[0] === 0));
+  const offs = blocks
+    .filter((b) => !PRESET_LAYERS.includes((b.name ?? "").replace(/^.* > /, "")))
+    .flatMap((b) => Object.entries(b.rules ?? {}).filter(([, v]) => isOff(v)).map(([rule]) => `${b.name ?? "(unnamed)"}: ${rule}`));
+  assert.deepEqual(
+    offs,
+    ["Issue #653 ruling D: design/ archives its round tools as they ran: no-restricted-syntax"],
+    "a block of the house config sets a rule off, which takes it back for every file the block matches whether or not a pin names the rule",
+  );
+});
+
 test("only the core recommended layer and the TypeScript block set no-empty, the second with the empty catch Alex ruled in, so no block can take it back for a subtree or a named file (Issue #654 ruling 9)", () => {
   const setters = blocks.filter((b) => Object.hasOwn(b.rules ?? {}, "no-empty")).map((b) => `${(b.name ?? "(unnamed)").replace(/^.* > /, "")}: ${JSON.stringify(b.rules?.["no-empty"])}`);
   assert.deepEqual(
