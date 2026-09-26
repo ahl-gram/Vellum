@@ -194,8 +194,10 @@ test("a suite's family is its suite file and its own folder, never a sibling who
 
 test("a group handed a different value than its parameter names reads as a difference: a wrong name, a literal, or two arguments swapped", () => {
   assert.equal(split(swapped(SPLIT_RUN, "() => m3Stays(k, laid));", "() => m3Stays(k, null));"), SPLIT_GROUPS).same, false);
-  const other = swapped(swapped(SPLIT_RUN, "() => m3Stays(k, laid));", "() => m3Stays(k, early));"), "  let laid = null;", "  let laid = null;\n  let early = null;");
-  assert.equal(split(other, SPLIT_GROUPS).same, false);
+  assert.equal(split(swapped(SPLIT_RUN, "() => m3Stays(k, laid));", "() => m3Stays(k, settle));"), SPLIT_GROUPS).same, false);
+  assert.equal(split(swapped(SPLIT_RUN, "() => m3Stays(k, laid));", "() => m3Stays(k, { laid: null }));"), SPLIT_GROUPS).same, false);
+  assert.equal(split(swapped(SPLIT_RUN, "() => m3Stays(k, laid));", "async () => { await m3Stays(k, laid, go(\"x\")); });"), SPLIT_GROUPS).same, false);
+  assert.equal(split(swapped(SPLIT_RUN, "await desktop(k);", "await desktop(null);"), SPLIT_GROUPS).same, false);
   const before = ["export async function start({ consoleErrors, http4xx }) {", "  ws.addEventListener(\"message\", (ev) => {", "    consoleErrors.push(ev.a);", "    http4xx.push(ev.b);", "  });", "}"].join("\n");
   const after = (args: string) => [`function onMessage(ev, consoleErrors, http4xx) {`, "  consoleErrors.push(ev.a);", "  http4xx.push(ev.b);", "}", "export async function start({ consoleErrors, http4xx }) {", `  ws.addEventListener("message", (ev) => onMessage(${args}));`, "}"].join("\n");
   assert.equal(compareFamilies(files(before), files(after("ev, consoleErrors, http4xx"))).same, true);
