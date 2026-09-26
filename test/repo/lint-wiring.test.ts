@@ -314,7 +314,7 @@ test("every parameter bearing a name no-param-reassign excuses holds a page elem
     const own = checker.getNonNullableType(t);
     const members = own.getProperties();
     const elementShaped = checker.isTypeAssignableTo(input, own) && members.every((m) => input.getProperty(m.name) !== undefined);
-    return isElement(own) || (members.length > 0 && (elementShaped || members.every((m) => readonlyMember(m) && isElement(checker.getTypeOfSymbol(m)))));
+    return isElement(own) || (members.length > 0 && checker.getIndexInfosOfType(own).length === 0 && (elementShaped || members.every((m) => readonlyMember(m) && isElement(checker.getTypeOfSymbol(m)))));
   };
   const borne = new Set<string>();
   const offenders: string[] = [];
