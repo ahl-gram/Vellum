@@ -262,23 +262,16 @@ test("only the core recommended layer and the TypeScript block set no-empty, the
 
 test("only the TypeScript block sets no-param-reassign, with property writes on and exactly the ruled names excused, so no block can narrow it for a subtree or a named file (Issue #654 rulings 4 and 5)", () => {
   const setters = blocks.filter((b) => Object.hasOwn(b.rules ?? {}, "no-param-reassign")).map((b) => `${shortName(b)}: ${JSON.stringify(b.rules?.["no-param-reassign"])}`);
-  assert.deepEqual(
-    setters,
-    [`(unnamed): ${JSON.stringify(["error", PARAM_REASSIGN])}`],
-    "a block other than the TypeScript block sets no-param-reassign, or that block's options are not the ruled ones, and a block over a subtree or one named file can take property writes back off or excuse another name there while every witness still resolves the ruled options",
-  );
+  assert.deepEqual(setters, [`(unnamed): ${JSON.stringify(["error", PARAM_REASSIGN])}`], "a block other than the TypeScript block sets no-param-reassign, or that block's options are not the ruled ones, and a block over a subtree or one named file can take property writes back off or excuse another name there while every witness still resolves the ruled options");
 });
 
 const LINT_TS_ROOTS = ["scripts", "src", "test", "test-support"];
 const tsUnder = (dir: string): string[] =>
   readdirSync(join(ROOT, dir), { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? tsUnder(join(dir, e.name)) : e.name.endsWith(".ts") ? [join(ROOT, dir, e.name)] : []));
 const bindingNames = (b: ts.BindingName): ts.Identifier[] => (ts.isIdentifier(b) ? [b] : b.elements.flatMap((e) => (ts.isOmittedExpression(e) ? [] : bindingNames(e.name))));
-function parameterBindings(sf: ts.SourceFile, names: ReadonlySet<string>): ts.Identifier[] {
+function parameterBindings(sf: ts.SourceFile, names?: ReadonlySet<string>): ts.Identifier[] {
   const out: ts.Identifier[] = [];
-  const visit = (n: ts.Node): void => {
-    if (ts.isParameter(n)) out.push(...bindingNames(n.name).filter((id) => names.has(id.text)));
-    ts.forEachChild(n, visit);
-  };
+  const visit = (n: ts.Node): void => { if (ts.isParameter(n)) out.push(...bindingNames(n.name).filter((id) => !names || names.has(id.text))); ts.forEachChild(n, visit); };
   visit(sf);
   return out;
 }
@@ -290,32 +283,46 @@ async function excusedNames(): Promise<Set<string>> {
   return new Set(option?.ignorePropertyModificationsFor ?? []);
 }
 
-test("every parameter bearing a name no-param-reassign excuses holds a page element, and every excused name is borne, so the excuse reaches no state record (Alex, 2026-09-26, Issue #654 rulings 4 and 5)", async () => {
-  const excused = await excusedNames();
-  assert.ok(excused.size > 0, "no-param-reassign excuses no parameter name, so this guard has nothing to check; ruling 5 excuses the page-element parameters by name");
-  const hitFiles = LINT_TS_ROOTS.flatMap(tsUnder).filter((f) => parameterBindings(ts.createSourceFile(f, readFileSync(f, "utf8"), ts.ScriptTarget.Latest, true), excused).length > 0);
+const ARM_WITNESSES = join(ROOT, "test/repo/names-guard-witnesses.virtual.ts");
+const ARM_WITNESS_SOURCE = "export function witnesses(element: HTMLElement | null, inputShaped: { value: string }, readonlyRecord: { readonly a: HTMLElement }, stateRecord: { n: number }, optionalMember: { id: string; n?: number }, withState: HTMLElement & { n: number }, indexed: { readonly a: HTMLElement; [k: string]: HTMLElement }, mutableRecord: { a: HTMLElement }, memberless: object): void {}\n";
+
+function compileWithWitnesses(roots: readonly string[]): ts.Program {
   const config = ts.getParsedCommandLineOfConfigFile(join(ROOT, "tsconfig.json"), {}, { ...ts.sys, onUnRecoverableConfigFileDiagnostic: () => undefined });
-  assert.ok(config && hitFiles.length > 0, "tsconfig.json did not parse, or no parameter bears an excused name");
-  const program = ts.createProgram({ rootNames: hitFiles, options: config.options });
+  assert.ok(config, "tsconfig.json did not parse");
+  const host = ts.createCompilerHost(config.options);
+  const read = host.getSourceFile.bind(host);
+  host.getSourceFile = (name, version, ...rest) => (resolve(name) === ARM_WITNESSES ? ts.createSourceFile(name, ARM_WITNESS_SOURCE, version, true) : read(name, version, ...rest));
+  const exists = host.fileExists.bind(host);
+  host.fileExists = (name) => resolve(name) === ARM_WITNESSES || exists(name);
+  return ts.createProgram({ rootNames: [...roots, ARM_WITNESSES], options: config.options, host });
+}
+
+function pageElementTest(program: ts.Program): (t: ts.Type) => boolean {
   const checker = program.getTypeChecker();
-  const dom = (name: string): ts.Type => {
-    const found = checker.getSymbolsInScope(program.getSourceFile(hitFiles[0]!)!, ts.SymbolFlags.Interface).find((s) => s.name === name);
-    assert.ok(found, `the DOM library declares no ${name}, so this guard cannot tell an element from anything else`);
-    return checker.getDeclaredTypeOfSymbol(found);
-  };
+  const inScope = checker.getSymbolsInScope(program.getSourceFile(ARM_WITNESSES)!, ts.SymbolFlags.Interface);
+  const dom = (name: string): ts.Type => checker.getDeclaredTypeOfSymbol(inScope.find((s) => s.name === name) ?? assert.fail(`the DOM library declares no ${name}, so this guard cannot tell an element from anything else`));
   const [element, input] = [dom("Element"), dom("HTMLInputElement")];
   const fromDom = (p: ts.Type): boolean => checker.isTypeAssignableTo(p, element) && (p.getSymbol()?.declarations ?? []).some((d) => program.isSourceFileDefaultLibrary(d.getSourceFile()));
-  const isElement = (t: ts.Type): boolean => {
-    const own = checker.getNonNullableType(t);
-    return (own.isUnion() ? own.types : [own]).every(fromDom);
-  };
+  const isElement = (t: ts.Type): boolean => { const own = checker.getNonNullableType(t); return (own.isUnion() ? own.types : [own]).every(fromDom); };
   const readonlyMember = (m: ts.Symbol): boolean => (m.declarations ?? []).length > 0 && (m.declarations ?? []).every((d) => (ts.getCombinedModifierFlags(d) & ts.ModifierFlags.Readonly) !== 0);
-  const holdsElements = (t: ts.Type): boolean => {
+  return (t) => {
     const own = checker.getNonNullableType(t);
     const members = own.getProperties();
     const elementShaped = checker.isTypeAssignableTo(input, own) && members.every((m) => input.getProperty(m.name) !== undefined);
     return isElement(own) || (members.length > 0 && checker.getIndexInfosOfType(own).length === 0 && (elementShaped || members.every((m) => readonlyMember(m) && isElement(checker.getTypeOfSymbol(m)))));
   };
+}
+
+test("every parameter bearing a name no-param-reassign excuses holds a page element, and every excused name is borne, so the excuse reaches no state record (Alex, 2026-09-26, Issue #654 rulings 4 and 5)", async () => {
+  const excused = await excusedNames();
+  assert.ok(excused.size > 0, "no-param-reassign excuses no parameter name, so this guard has nothing to check; ruling 5 excuses the page-element parameters by name");
+  const hitFiles = LINT_TS_ROOTS.flatMap(tsUnder).filter((f) => parameterBindings(ts.createSourceFile(f, readFileSync(f, "utf8"), ts.ScriptTarget.Latest, true), excused).length > 0);
+  assert.ok(hitFiles.length > 0, "no parameter bears an excused name");
+  const program = compileWithWitnesses(hitFiles);
+  const checker = program.getTypeChecker();
+  const holdsElements = pageElementTest(program);
+  const admitted = parameterBindings(program.getSourceFile(ARM_WITNESSES)!).filter((id) => holdsElements(checker.getTypeAtLocation(id))).map((id) => id.text);
+  assert.deepEqual(admitted, ["element", "inputShaped", "readonlyRecord"], "the guard's arms no longer admit exactly an element, an input-shaped type and a record of read-only elements among its witnesses: an arm stopped refusing what it must, or began refusing what it must admit");
   const borne = new Set<string>();
   const offenders: string[] = [];
   for (const file of hitFiles) {
@@ -327,11 +334,7 @@ test("every parameter bearing a name no-param-reassign excuses holds a page elem
     }
   }
   assert.deepEqual([...excused].filter((n) => !borne.has(n)), [], "no-param-reassign excuses a name no parameter bears, an excuse left behind after its parameter was renamed away");
-  assert.deepEqual(
-    offenders,
-    [],
-    "a parameter bearing an excused name holds something other than a page element (a type the DOM library declares), an element-shaped type, or a record of read-only page elements, so a write into it goes unseen by no-param-reassign; rename it, or return a new value instead of writing (Issue #654 rulings 4 and 5). DECLARED, with their directions: an element-shaped type is one a DOM input element satisfies whose every member an input element also carries, so any record made only of such members ({ value: string }, { hidden: boolean }, { width: number; height: number }) passes, erring toward passing, an errata/guards.md row; a type with no members at all (object, {}) and a type parameter constrained to an element (T extends HTMLElement) fail, erring toward failing",
-  );
+  assert.deepEqual(offenders, [], "a parameter bearing an excused name holds something other than a page element (a type the DOM library declares), an element-shaped type, or a record of read-only page elements, so a write into it goes unseen by no-param-reassign; rename it, or return a new value instead of writing (Issue #654 rulings 4 and 5). DECLARED, with their directions: an element-shaped type is one a DOM input element satisfies whose every member an input element also carries, so any record made only of such members ({ value: string }, { hidden: boolean }, { width: number; height: number }) passes, erring toward passing, an errata/guards.md row; a type with no members at all (object, {}) and a type parameter constrained to an element (T extends HTMLElement) fail, erring toward failing");
 });
 
 const JS_REFUSED = ["x.js", "src/x.js", "scripts/x.mjs", "scripts/e2e/x.mjs", "test/x.cjs", "test-support/x.js", "public/x.js", ".claude/x.mjs", "x.jsx", "src/site/x.jsx"];
