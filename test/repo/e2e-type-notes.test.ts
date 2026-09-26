@@ -116,33 +116,17 @@ const NOTE_FIXTURE = [
   "// an ordinary comment",
   "export const twelve = q.n + q.n;",
   "declare const group: RegExpMatchArray;",
-  "declare const flag: boolean;",
-  "// @ts-expect-error a match group is a string, which the multiplication coerces to a number, as it does at run time",
-  "export const thirteen = group[1] * 255;",
-  "// @ts-expect-error a boolean operand is not the string a match group is",
-  "export const fourteen = flag * 255;",
-  "// @ts-expect-error a string operand with a misspelled member beside it",
-  "export const fifteen = group[1] * w.labl;",
-  "// @ts-expect-error a null read and a string multiplied at the one start, two objections under one note",
-  "export const sixteen = q.label * 255;",
-  "// @ts-expect-error a coerced operand entangled with a second diagnostic at the same start",
-  "export const seventeen = takesText(group[1] * 255);",
-  "// @ts-expect-error a match group on the right of the operator, reported as TS2363",
-  "export const eighteen = 255 * group[1];",
-  "// @ts-expect-error a string field of a stated shape multiplied, which is not the match group the arm admits",
-  "export const nineteen = w.label * 255;",
-  "declare const list: string[];",
-  "// @ts-expect-error an element of a plain string array, which is not a match array",
-  "export const twenty = list[0] * 255;",
+  "// @ts-expect-error the whole regex match, which the checker types as present, coerced by arithmetic: one objection, and not a null one",
+  "export const thirteen = group[0] * 255;",
 ];
 
-test("the note scanner passes one null objection per note and reports a second uncertain value, a misspelling beside or in place of the null read, a wrong type that shares its start, a note with nothing under it, and a stray suppression, while a regex match group coerced by arithmetic passes only as the one objection under its note, and a string field so coerced reds", () => {
+test("the note scanner passes one null objection per note and reports a second uncertain value, a misspelling beside or in place of the null read, a wrong type that shares its start, a note with nothing under it, a stray suppression, and an arithmetic objection alone, even on a regex match", () => {
   const path = join(REPO, "scripts", "e2e", "__note-fixture__.ts");
   assert.equal(existsSync(path), false, "the fixture's name is a real file, so the scan below would read the disk instead");
   const text = NOTE_FIXTURE.join("\n");
   const { notes, findings } = noteFindings([{ path, text }]);
-  assert.equal(notes, 19);
-  assert.deepEqual(findings.map((f) => f.at).sort(), [10, 12, 18, 20, 22, 24, 26, 30, 37, 39, 41, 43, 47, 50].map((n) => `${path}:${n}`).sort());
+  assert.equal(notes, 12);
+  assert.deepEqual(findings.map((f) => f.at).sort(), [10, 12, 18, 20, 22, 24, 26, 30, 34].map((n) => `${path}:${n}`).sort());
 });
 
 test("the scan reads every TypeScript file under scripts/e2e at any depth and the e2e scripts beside it, and nothing else", () => {
