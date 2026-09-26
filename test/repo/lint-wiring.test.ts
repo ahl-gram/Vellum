@@ -304,12 +304,17 @@ test("every parameter bearing a name no-param-reassign excuses holds a page elem
     return checker.getDeclaredTypeOfSymbol(found);
   };
   const [element, input] = [dom("Element"), dom("HTMLInputElement")];
-  const isElement = (t: ts.Type): boolean => checker.isTypeAssignableTo(checker.getNonNullableType(t), element);
+  const fromDom = (p: ts.Type): boolean => checker.isTypeAssignableTo(p, element) && (p.getSymbol()?.declarations ?? []).some((d) => program.isSourceFileDefaultLibrary(d.getSourceFile()));
+  const isElement = (t: ts.Type): boolean => {
+    const own = checker.getNonNullableType(t);
+    return (own.isUnion() ? own.types : [own]).every(fromDom);
+  };
   const readonlyMember = (m: ts.Symbol): boolean => (m.declarations ?? []).length > 0 && (m.declarations ?? []).every((d) => (ts.getCombinedModifierFlags(d) & ts.ModifierFlags.Readonly) !== 0);
   const holdsElements = (t: ts.Type): boolean => {
     const own = checker.getNonNullableType(t);
     const members = own.getProperties();
-    return isElement(own) || (members.length > 0 && (checker.isTypeAssignableTo(input, own) || members.every((m) => readonlyMember(m) && isElement(checker.getTypeOfSymbol(m)))));
+    const elementShaped = checker.isTypeAssignableTo(input, own) && members.every((m) => input.getProperty(m.name) !== undefined);
+    return isElement(own) || (members.length > 0 && (elementShaped || members.every((m) => readonlyMember(m) && isElement(checker.getTypeOfSymbol(m)))));
   };
   const borne = new Set<string>();
   const offenders: string[] = [];
@@ -325,7 +330,7 @@ test("every parameter bearing a name no-param-reassign excuses holds a page elem
   assert.deepEqual(
     offenders,
     [],
-    "a parameter bearing an excused name holds something other than a page element or a record of read-only page elements, so a write into it goes unseen by no-param-reassign; rename it, or return a new value instead of writing (Issue #654 rulings 4 and 5). DECLARED, with their directions: an element-shaped type is any type a DOM input element satisfies, so a record whose every member is one an element also carries (a lone hidden flag) passes, erring toward passing; a type with no members at all (object, {}) fails, erring toward failing",
+    "a parameter bearing an excused name holds something other than a page element (a type the DOM library declares), an element-shaped type, or a record of read-only page elements, so a write into it goes unseen by no-param-reassign; rename it, or return a new value instead of writing (Issue #654 rulings 4 and 5). DECLARED, with their directions: an element-shaped type is one a DOM input element satisfies whose every member an input element also carries, so a record of such members alone (a lone value string) passes, erring toward passing; a type with no members at all (object, {}) fails, erring toward failing",
   );
 });
 
