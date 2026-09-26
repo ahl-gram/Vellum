@@ -153,6 +153,21 @@ test("a declaration that reads the clock may not move, while a literal constant 
   assert.equal(compareFamilies([before], [clockMoved]).same, false);
 });
 
+test("a declaration that only reads a value the run later changes may not move, though it makes no call", () => {
+  const before = ["export async function run(ctx) {", "  const { evaluate } = ctx;", "  let n = await evaluate(`1`);", "  const first = n;", "  n = await evaluate(`2`);", "}"].join("\n");
+  const moved = ["export async function run(ctx) {", "  const { evaluate } = ctx;", "  let n = await evaluate(`1`);", "  n = await evaluate(`2`);", "  const first = n;", "}"].join("\n");
+  assert.equal(compareFamilies([before], [moved]).same, false);
+});
+
+test("a module's top-level statement that is not a literal constant is compared, in the suite file or in a part", () => {
+  const before = ["const SRC = resolve(HERE, \"src\");", "export async function run(ctx) {", "  await ctx.evaluate(SRC);", "}"].join("\n");
+  const changed = swapped(before, "resolve(HERE, \"src\")", "resolve(HERE, \"lib\")");
+  assert.equal(compareFamilies([before], [changed]).same, false);
+  const [head, ...rest] = before.split("\n");
+  assert.equal(compareFamilies([before], [rest.join("\n"), head ?? ""]).same, true);
+  assert.equal(compareFamilies([before], [rest.join("\n"), swapped(head ?? "", "\"src\"", "\"lib\"")]).same, false);
+});
+
 test("a listener whose body moved into a named function reads the same, the harness's own shape", () => {
   const before = ["export async function start({ consoleErrors }) {", "  ws.addEventListener(\"message\", (ev) => {", "    const m = JSON.parse(ev.data);", "    if (m.error) consoleErrors.push(m.error);", "  });", "}"].join("\n");
   const after = ["function onMessage(ev, consoleErrors) {", "  const m = JSON.parse(ev.data);", "  if (m.error) consoleErrors.push(m.error);", "}", "export async function start({ consoleErrors }) {", "  ws.addEventListener(\"message\", (ev) => onMessage(ev, consoleErrors));", "}"].join("\n");
