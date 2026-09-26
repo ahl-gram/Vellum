@@ -60,7 +60,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
 
   const ladder: ({ band: number; reported: number; ms: number } & Partial<Inset>)[] = [];
   let redrafts = (await rgn()).redrafts;
-  for (const [band, k] of [[1, 2], [2, 4], [3, 8]]) {
+  for (const [band, k] of [[1, 2], [2, 4], [3, 8]] as const) {
     await enterAt(k, 0.5625, 0.4375);
     const settled = await waitRedraft(redrafts);
     await waitInset();
@@ -75,7 +75,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
     JSON.stringify(ladder.map((r) => ({ band: r.reported, detail: r.detail, ms: r.ms }))),
   );
 
-  const deepest = ladder[ladder.length - 1];
+  const deepest = ladder[ladder.length - 1]!;
 
   // RD2 is measured on the sheet the page is SHOWING: shore LENGTH alone rises when a coast turns into a staircase (#376), so the drawn ring count carries the claim and length only corroborates it; both arms are rendered by this page's own engine and counted the same way as the live coast.
   const gained = await evaluate<{ drawn: number; bare: number; detail: number; bareLen: number; detailLen: number }>(
@@ -148,7 +148,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
     }
     check(
       "RD5 a shared link round-trips to a byte-identical detailed draw across a cold reload (#400 AC2)",
-      linked[0] !== null && linked[1] !== null && linked[0].digest === linked[1].digest && linked[0].detail === "3",
+      linked[0] !== null && linked[1] !== null && linked[0]!.digest === linked[1]!.digest && linked[0]!.detail === "3",
       JSON.stringify(linked),
     );
     await shoot("explorer-region-detail-shared-link.png");

@@ -21,8 +21,8 @@ export function constrainZoom(
   extent: ReadonlyArray<ReadonlyArray<number>>,
   scaleExtent: ReadonlyArray<number>,
 ): ZoomState {
-  const k = Math.max(scaleExtent[0], Math.min(scaleExtent[1], t.k));
-  const [[x0, y0], [x1, y1]] = extent;
+  const k = Math.max(scaleExtent[0]!, Math.min(scaleExtent[1]!, t.k));
+  const [[x0, y0], [x1, y1]] = extent as readonly [readonly [number, number], readonly [number, number]];
   const invX0 = (x0 - t.x) / k - x0;
   const invX1 = (x1 - t.x) / k - x1;
   const invY0 = (y0 - t.y) / k - y0;
@@ -38,7 +38,7 @@ export function nextGlideTarget(
   factor: number,
   scaleExtent: ReadonlyArray<number>,
 ): number {
-  return Math.max(scaleExtent[0], Math.min(scaleExtent[1], baseK * factor));
+  return Math.max(scaleExtent[0]!, Math.min(scaleExtent[1]!, baseK * factor));
 }
 
 export interface ZoomControllerOptions {

@@ -54,7 +54,7 @@ export function createVoyageLogPanel(host: VoyageLogHost) {
 
   /** Brighten rows [0, arrived), dim the rest. Idempotent and order-independent, so stepping backward un-brightens correctly. */
   function revealLog(rows: HTMLLIElement[], arrived: number): void {
-    for (let i = 0; i < rows.length; i++) rows[i].classList.toggle("inked", i < arrived);
+    for (let i = 0; i < rows.length; i++) rows[i]!.classList.toggle("inked", i < arrived);
   }
 
   /** Hide and empty the panel. It lives outside the chart mount, so nothing else clears it. */

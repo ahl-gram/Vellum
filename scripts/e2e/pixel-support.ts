@@ -18,9 +18,9 @@ export function decodeFirstRow(png: Buffer): [number, number, number][] {
     const data = png.subarray(at + 8, at + 8 + len);
     if (type === "IHDR") {
       width = data.readUInt32BE(0);
-      depth = data[8];
+      depth = data[8]!;
       // @ts-expect-error a PNG colour type outside the four keys reads undefined, which the depth-and-channels check below refuses
-      channels = { 0: 1, 2: 3, 4: 2, 6: 4 }[data[9]];
+      channels = { 0: 1, 2: 3, 4: 2, 6: 4 }[data[9]!];
     } else if (type === "IDAT") idat.push(data);
     else if (type === "IEND") break;
     at += 12 + len;
@@ -30,12 +30,12 @@ export function decodeFirstRow(png: Buffer): [number, number, number][] {
   const filter = raw[0];
   const row = Buffer.from(raw.subarray(1, 1 + width * channels));
   for (let i = 0; i < row.length; i++) {
-    const left = i >= channels ? row[i - channels] : 0;
-    if (filter === 1) row[i] = (row[i] + left) & 0xff;
-    else if (filter === 3) row[i] = (row[i] + (left >> 1)) & 0xff;
-    else if (filter === 4) row[i] = (row[i] + paeth(left, 0, 0)) & 0xff;
+    const left = i >= channels ? row[i - channels]! : 0;
+    if (filter === 1) row[i] = (row[i]! + left) & 0xff;
+    else if (filter === 3) row[i] = (row[i]! + (left >> 1)) & 0xff;
+    else if (filter === 4) row[i] = (row[i]! + paeth(left, 0, 0)) & 0xff;
   }
-  const px = (i: number, k: number): number => row[i * channels + (channels >= 3 ? k : 0)];
+  const px = (i: number, k: number): number => row[i * channels + (channels >= 3 ? k : 0)]!;
   return Array.from({ length: width }, (_, i): [number, number, number] => [px(i, 0), px(i, 1), px(i, 2)]);
 }
 

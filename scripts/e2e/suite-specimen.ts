@@ -178,7 +178,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   // The pool must reach past the viewport edge, or its blur fades right on the edge and the chart bleeds through at the corner (Alex's 2026-09-03 call on the Explorer's top-left; home runs its pool 4rem out). Sampled, since no computed style sees a blurred edge.
   const brightest = async (x: number, y: number) => Math.round(Math.max(...(await sampleRow(send, x, y, 8)).map(luminance)));
   // The MEDIAN of a wide run: the defect is a full-area wash, so the median moves with it, while a max passes on one bright press sitting under the sample and a min fails on one hairline crossing it.
-  const groundOf = async (x: number, y: number) => { const l = (await sampleRow(send, x, y, 16)).map(luminance).sort((a, b) => a - b); return Math.round(l[Math.floor(l.length / 2)]); };
+  const groundOf = async (x: number, y: number) => { const l = (await sampleRow(send, x, y, 16)).map(luminance).sort((a, b) => a - b); return Math.round(l[Math.floor(l.length / 2)]!); };
   const interior = await brightest(200, 24);
   const corners: { name: string; max: number }[] = [];
   // The edges the spilled chart reaches under a pooled piece: the two left corners; the right side is the slip's, the legend row carries home's footing (SB5c) and the Glass no pool at all (SB5d).

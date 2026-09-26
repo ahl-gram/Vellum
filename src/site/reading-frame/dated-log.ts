@@ -53,7 +53,7 @@ export function createDatedLog(opts: DatedLogOpts) {
   }
 
   function reveal(arrived: number): void {
-    for (let i = 0; i < rows.length; i++) rows[i].classList.toggle("inked", i < arrived);
+    for (let i = 0; i < rows.length; i++) rows[i]!.classList.toggle("inked", i < arrived);
   }
 
   function clear(): void {

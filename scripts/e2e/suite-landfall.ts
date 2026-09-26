@@ -125,13 +125,13 @@ export async function run(ctx: SuiteContext): Promise<void> {
     await wheelAt(pt, 480);
     await sleep(250);
     const log = await evaluate<{ p: boolean; t: number }[]>(`window.__lfW2`);
-    if (log !== null && log.length === 2 && log[1].t - log[0].t < 280) { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    if (log !== null && log.length === 2 && log[1]!.t - log[0]!.t < 280) { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
       usedUp = { log, y: await scrollY(), cam: await camNow() };
     }
   }
   check(
     "L1e the flick that reaches the outer clamp is absorbed: a clamp-parked wheel in the same stream, inside the absorb window, stays consumed and the page holds (#472, 2026-08-28 ruling)",
-    usedUp !== null && usedUp.log[0].p === true && usedUp.log[1].p === true && usedUp.y === 0
+    usedUp !== null && usedUp.log[0]!.p === true && usedUp.log[1]!.p === true && usedUp.y === 0
       && floor !== null && usedUp.cam !== null && Math.abs(usedUp.cam.scale - floor.scale) < 1e-9,
     JSON.stringify({ usedUp }),
   );

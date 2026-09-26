@@ -35,7 +35,7 @@ const READ: Payload<Drawer> = `(() => {
     doors: [...nav.querySelectorAll("a, [aria-current]")].map((a) => { const d = a.getBoundingClientRect(); const hit = document.elementFromPoint(d.x + 20, d.y + d.height / 2); return { t: a.textContent, x: d.x, y: d.y, h: d.height, bottom: d.bottom, current: a.hasAttribute("aria-current"), display: getComputedStyle(a).display, offset: getComputedStyle(a).textUnderlineOffset, tappable: hit === a }; }) };
 })()`;
 
-const stacked = (doors: Door[]) => doors.length > 1 && doors.every((d, i) => i === 0 || (d.y >= doors[i - 1].bottom - 0.5 && Math.abs(d.x - doors[0].x) < 0.5));
+const stacked = (doors: Door[]) => doors.length > 1 && doors.every((d, i) => i === 0 || (d.y >= doors[i - 1]!.bottom - 0.5 && Math.abs(d.x - doors[0]!.x) < 0.5));
 const offLeft = (nav: Nav) => nav.visibility === "hidden" && nav.rect !== null && nav.rect.right <= 0.5; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 const atOpen = (d: Drawer) => !!d.nav && d.nav.visibility === "visible" && d.nav.rect !== null && d.nav.rect.x === 0; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 const atClosed = (d: Drawer) => !!d.nav && offLeft(d.nav); // eslint-disable-line @typescript-eslint/no-unnecessary-condition

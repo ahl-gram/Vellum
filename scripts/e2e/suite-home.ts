@@ -41,14 +41,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const controlGold = (bg: string | null) => {
     if (!bg) return false;
     let m = bg.match(/^rgb\((\d+), (\d+), (\d+)\)$/);
-    if (m) return +m[1] === 240 && +m[2] === 227 && +m[3] === 189;
+    if (m) return +m[1]! === 240 && +m[2]! === 227 && +m[3]! === 189;
     m = bg.match(/^color\(srgb ([0-9.]+) ([0-9.]+) ([0-9.]+)\)$/);
-    // @ts-expect-error a match group is a string, which the multiplication coerces to a number, as it does at run time
-    return !!m && Math.round(m[1] * 255) === 240 && Math.round(
-      // @ts-expect-error a match group is a string, which the multiplication coerces to a number, as it does at run time
-      m[2] * 255) === 227 && Math.round(
-      // @ts-expect-error a match group is a string, which the multiplication coerces to a number, as it does at run time
-      m[3] * 255) === 189;
+    return !!m && Math.round(+m[1]! * 255) === 240 && Math.round(+m[2]! * 255) === 227 && Math.round(+m[3]! * 255) === 189;
   };
   const frame = ready ? await evaluate<{ pos: string; right: number; top: number; inside: boolean; gold: string | null; doorsHidden: boolean } | null>(`(() => {
     const form = document.getElementById("seed-form");

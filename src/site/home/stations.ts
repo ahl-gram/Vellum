@@ -43,7 +43,7 @@ function station(
   at: { readonly nx: number; readonly ny: number },
   extra: Partial<Pick<Station, "legendName" | "arms" | "sea">> = {},
 ): Station {
-  return { id, name, legendName: name, verb, where, href, prose: PROSE[id], arms: false, sea: false, nx: at.nx, ny: at.ny, ...extra };
+  return { id, name, legendName: name, verb, where, href, prose: PROSE[id]!, arms: false, sea: false, nx: at.nx, ny: at.ny, ...extra };
 }
 
 export function homeStations(): ReadonlyArray<Station> {

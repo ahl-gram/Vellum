@@ -126,8 +126,8 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const g = d.slice(d.indexOf("data-vellum-dispatch"));
   const stations = (d.match(/data-dispatch-station/g) || []).length;
   const st1 = g.match(/data-dispatch-station[^>]*?cx="([-\d.]+)"[^>]*?cy="([-\d.]+)"/);
-  const cx = st1 ? parseFloat(st1[1]) : NaN;
-  const cy = st1 ? parseFloat(st1[2]) : NaN;
+  const cx = st1 ? parseFloat(st1[1]!) : NaN;
+  const cy = st1 ? parseFloat(st1[2]!) : NaN;
   const gridOk = Math.abs(cx - tgt.miss.fx * tgt.wpx) < 5 && Math.abs(cy - tgt.miss.fy * tgt.hpx) < 5;
   check(
     "HD2 the dispatch clones the chart, plots the grid-projected route + star, captions the tally, inline-styled (#123)",

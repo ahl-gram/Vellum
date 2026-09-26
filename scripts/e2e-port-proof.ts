@@ -58,7 +58,7 @@ function payloads(sf: ts.SourceFile): string[] {
     if (ts.isCallExpression(node) && node.arguments.length > 0) {
       const callee = node.expression;
       const name = ts.isIdentifier(callee) ? callee.text : ts.isPropertyAccessExpression(callee) ? callee.name.text : "";
-      if (name === "evaluate") out.push(node.arguments[0].getText(sf));
+      if (name === "evaluate") out.push(node.arguments[0]!.getText(sf));
     }
     ts.forEachChild(node, walk);
   };
@@ -157,7 +157,7 @@ function main(base: string): number {
     }
     const existsAsTs = (specifier: string): boolean => existsSync(resolve(ROOT, dirname(now), specifier));
     const got = compareSources(git(["show", `${base}:${basePath}`]), readFileSync(join(ROOT, now), "utf8"), now.endsWith(".ts"), existsAsTs, basePath.endsWith(".ts"));
-    for (const k of ["literals", "payloads", "tokens"] as const) for (const i of [0, 1] as const) totals[k][i] += got[k][i];
+    for (const k of ["literals", "payloads", "tokens"] as const) for (const i of [0, 1] as const) totals[k][i]! += got[k][i];
     totals.literalDiffs += got.literalDiffs;
     totals.payloadDiffs += got.payloadDiffs;
     totals.renames += got.renames.length;

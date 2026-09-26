@@ -13,7 +13,8 @@ export type StageInputHandlers = {
 // Touch policy (#455): one finger scrolls the page (touch-action: pan-y), two fingers drive the map, any mouse button pans.
 // eslint-disable-next-line max-lines-per-function
 export function bindStageInput(stage: HTMLElement, on: StageInputHandlers): void {
-  const pointers = new Map<number, { x: number; y: number }>();
+  type Point = { x: number; y: number };
+  const pointers = new Map<number, Point>();
   let last: { x: number; y: number } | null = null;
   let pinchStart = 0;
   let mid: { x: number; y: number } | null = null;
@@ -28,7 +29,7 @@ export function bindStageInput(stage: HTMLElement, on: StageInputHandlers): void
     e.target instanceof Element && e.target.closest("button, a, input, select") !== null;
 
   const anchor = () => {
-    const [a, b] = [...pointers.values()];
+    const [a, b] = [...pointers.values()] as [Point, Point];
     pinchStart = Math.hypot(a.x - b.x, a.y - b.y);
     mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
   };
@@ -51,7 +52,7 @@ export function bindStageInput(stage: HTMLElement, on: StageInputHandlers): void
   const step = () => {
     frame = 0;
     if (pointers.size !== 2 || mid === null) return;
-    const [a, b] = [...pointers.values()];
+    const [a, b] = [...pointers.values()] as [Point, Point];
     const d = Math.hypot(a.x - b.x, a.y - b.y);
     const m = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
     on.pan(m.x - mid.x, m.y - mid.y);

@@ -274,7 +274,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
       "CD44 a REAL mouse carry from the dog-ear into the drawer's band files the survey: mid-carry the ghost is the thumbnail as a fixed blob img at pointer-events none, seated on body and never inside #map, hanging from the corner the reader took it by (its inline translate puts the pointer GRIP_INSET_PX inside its top-right corner, read from the seat and not from the rect, which is a rotated box's bounding box), the body carries the drag state with the cursor grabbing and nothing selected, and the drawer, SHUT at the press, opened with the drop cue as the sheet entered the band (D4); on release the cutting lands with its settle seen running and then retired, the address carries the table, the line is said, the ghost and the drag state are gone, and the camera is at rest where it was, which is the pan the ear's stopped mousedown keeps from d3 (Issue #523, ruled 2026-09-21)",
       before.cuttings === 0 && before.folded && !before.open &&
         !!mid.ghost && mid.ghost.tag === "IMG" && mid.ghost.src === "blob:" && mid.ghost.pos === "fixed" && mid.ghost.pe === "none" && !mid.ghost.inMap &&
-        Math.abs(parseFloat(mid.ghost.translate) + mid.ghost.w - 10 - to.x) <= 1 && Math.abs(parseFloat(mid.ghost.translate.split(" ")[1]) + 10 - to.y) <= 1 &&
+        Math.abs(parseFloat(mid.ghost.translate) + mid.ghost.w - 10 - to.x) <= 1 && Math.abs(parseFloat(mid.ghost.translate.split(" ")[1]!) + 10 - to.y) <= 1 &&
         mid.ghost.rotate === "-6deg" && mid.ghost.z === "30" &&
         mid.drag && mid.cursor === "grabbing" && mid.sel === 0 && mid.open && mid.receiving &&
         landed.cuttings === 1 && landed.saw && !landed.landing && !landed.ghost && !landed.drag && !landed.receiving &&
@@ -503,7 +503,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
     const names = Object.keys(seatsShut);
     check(
       "CD12 opening the drawer does not move the chart's furniture: the caption and the roads out keep the seat they had and the drawer covers them, rather than being lifted onto the sheet where they cannot be read (#543 Fault 1, ruled 2026-09-08)",
-      names.length === 2 && names.every((k) => Math.abs(seatsOpen[k] - seatsShut[k]) < 1) && withOpen.lifted.length === 0,
+      names.length === 2 && names.every((k) => Math.abs(seatsOpen[k]! - seatsShut[k]!) < 1) && withOpen.lifted.length === 0,
       JSON.stringify({ shut: seatsShut, open: seatsOpen, lifted: withOpen.lifted }),
     );
   });
@@ -544,7 +544,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
     const edges = Object.keys(edge);
     check(
       "CD13 with the Broadside folded the drawer's tab does not stand on the camera: the tab is z-19 over the corner's z-10, so an overlap is not untidiness, it is the + and the home press answering the tab instead (#543, Alex 2026-09-08)",
-      edges.length === 3 && edges.every((k) => edge[k].folded && edge[k].tabShown && edge[k].overlap === 0 && edge[k].buttons.length === 3 && edge[k].buttons.every((r) => r === 100)),
+      edges.length === 3 && edges.every((k) => edge[k]!.folded && edge[k]!.tabShown && edge[k]!.overlap === 0 && edge[k]!.buttons.length === 3 && edge[k]!.buttons.every((r) => r === 100)),
       JSON.stringify(edge),
     );
   });
@@ -731,7 +731,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   check(
     "CD14 the sheet's head carries the two leaf tabs and BOTH answer a real thumb: at narrow .slip-handle is inset:0 over the whole head, so a tab authored there is dead unless it takes its own layer (mock.css 230), and a tab nobody can press is the #520 dog-ear again. The row DRESSED as a row (#547): CD22 reads display none at 1280, and a stand-down written after the phone block would win everywhere and red here",
     leafShut.tabs.length === 2 && leafShut.tabs.every((t) => t.press === "self") &&
-      /broadside/i.test(leafShut.tabs[0].text) && /^the table( · \d+)?$/i.test(leafShut.tabs[1].text) &&
+      /broadside/i.test(leafShut.tabs[0]!.text) && /^the table( · \d+)?$/i.test(leafShut.tabs[1]!.text) &&
       leafShut.leafTabsDisplay === "flex",
     JSON.stringify({ tabs: leafShut.tabs, display: leafShut.leafTabsDisplay }),
   );
@@ -755,7 +755,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const backToForm = await evaluate(LEAF);
   check(
     "CD16 the leaf turns back: pressing The Broadside returns the form and puts the table away, so the reader is never one-way into either leaf",
-    backToForm.tabs.length === 2 && backToForm.formShown && !backToForm.leafShown && backToForm.tabs[0].selected === "true" && backToForm.tabs[1].selected === "false",
+    backToForm.tabs.length === 2 && backToForm.formShown && !backToForm.leafShown && backToForm.tabs[0]!.selected === "true" && backToForm.tabs[1]!.selected === "false",
     JSON.stringify({ form: backToForm.formShown, leaf: backToForm.leafShown, selected: backToForm.tabs.map((t) => t.selected) }),
   );
   await clearMobile();
@@ -933,7 +933,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
     // A refusal changes nothing, so there is no state to poll TO, and a settle here proves nothing: it returns on its FIRST satisfying read and this predicate is already true when the press is answered, so it read once and waited 0ms. What is real for "nothing happened" is a DWELL, held past the moment a wrongly accepted filing would have written the hash.
     const dwell = [];
     for (let i = 0; i < 8; i++) { dwell.push(await evaluate(PP)); await sleep(50); }
-    const stillFull = dwell[dwell.length - 1];
+    const stillFull = dwell[dwell.length - 1]!;
     const heldSix = dwell.every((d) => typeof d.hashTable === "string" && d.hashTable.split("_").length === 6);
     check(
       "CD35 at the cap the page's press wears the FULL refusal, stays pressable, and lays nothing: the page inherits the table's six from the address it was handed, which is the cap #522 says applies here too",
