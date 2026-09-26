@@ -212,12 +212,21 @@ test("through ESLint itself, one witness file per ruled glob resolves to rules t
   assert.equal(await eslint.isPathIgnored("eslint.config.ts"), true, "the root config lints itself, so the scope leaked past the ruled roots");
 });
 
-test("only typescript-eslint's recommended-type-checked block sets a rule Issue #654 turned on, each at error, so no block can take one back for a subtree or a named file", () => {
-  const setters = blocks.flatMap((b) => TURNED_ON.filter((rule) => Object.hasOwn(b.rules ?? {}, rule)).map((rule) => `${(b.name ?? "(unnamed)").replace(/^UserConfig\[\d+\] > /, "")}: ${rule} = ${JSON.stringify(b.rules?.[rule])}`));
+test("only typescript-eslint's recommended-type-checked block sets a rule Issue #654 turned on, each at error, and it reaches all four TypeScript roots unnarrowed, so no block can take one back for a subtree or a named file", () => {
+  const PRESET = "typescript-eslint/recommended-type-checked";
+  const shortName = (b: Linter.Config): string => (b.name ?? "(unnamed)").replace(/^.* > /, "");
+  const setters = blocks.flatMap((b) => TURNED_ON.filter((rule) => Object.hasOwn(b.rules ?? {}, rule)).map((rule) => `${shortName(b)}: ${rule} = ${JSON.stringify(b.rules?.[rule])}`));
   assert.deepEqual(
     setters,
-    TURNED_ON.map((rule) => `typescript-eslint/recommended-type-checked: ${rule} = "error"`),
+    TURNED_ON.map((rule) => `${PRESET}: ${rule} = "error"`),
     "a block other than the preset sets one of these rules, and a block can turn a rule off for every file it matches (a subtree, or one named file) while the witnesses still resolve at error",
+  );
+  const preset = blocks.filter((b) => shortName(b) === PRESET);
+  assert.equal(preset.length, 1, `${preset.length} blocks are ${PRESET}, so this guard is reading the wrong config`);
+  assert.deepEqual(
+    [...(preset[0]!.files ?? [])].sort(),
+    LINT_SCOPE.filter((g) => g.endsWith(".ts")),
+    "the preset that sets these rules reaches less than the four TypeScript roots, so the block that extends it has narrowed its own files (a conjunct such as src/**/*.ts with src/cli/**) and takes the rules back for everything it dropped",
   );
 });
 
