@@ -15,7 +15,7 @@ async function overlayOver(clampBox: (() => typeof CHART | null) | null) {
   const overlay = createPlaceOverlay({
     mapEl: mapEl as unknown as HTMLElement,
     isSuppressed: () => false,
-    ...(clampBox ? { clampBox: clampBox as unknown as () => typeof CHART } : {}),
+    ...(clampBox ? { clampBox: clampBox } : {}),
   });
   overlay.buildPlaceOverlay(manifest);
   const nodes = walk(mapEl);
@@ -118,7 +118,7 @@ test("#387/#388 the host's box reaches the card through createLivingChart, not o
   const lc = createLivingChart({
     mapEl: mapEl as unknown as HTMLElement,
     statusEl: new El("p") as unknown as HTMLElement,
-    clampBox: () => CHART as unknown as ReturnType<NonNullable<Parameters<typeof createLivingChart>[0]["clampBox"]>>,
+    clampBox: () => CHART,
   });
   lc.buildPlaceOverlay(manifest);
 

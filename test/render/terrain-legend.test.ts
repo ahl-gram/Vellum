@@ -71,7 +71,7 @@ test("the antique key lists Hills and Marsh when the map carries them", () => {
   for (const name of ["antique", "ink"] as const) {
     const plan = planLegend(glyphCtx(world, name), []);
     assert.ok(plan, `expected a ${name} legend`);
-    const labels = plan!.rows.map((r) => r.label);
+    const labels = plan.rows.map((r) => r.label);
     assert.ok(labels.includes("Mountains"), `${name}: still lists Mountains`);
     assert.ok(labels.includes("Hills"), `${name}: lists Hills`);
     assert.ok(labels.includes("Marsh"), `${name}: lists Marsh`);

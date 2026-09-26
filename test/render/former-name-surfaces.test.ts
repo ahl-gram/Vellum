@@ -31,7 +31,7 @@ test("the card states the former name plainly, with no hedge", () => {
     const card = composePlaceCard(mark, world.history.events, world.culture.id);
     assert.equal(card.formerLine, `Once called ${mark.formerName}.`);
     assert.ok(
-      !/venture|grammars|lexicographers|swear|disputed/i.test(card.formerLine as string),
+      !/venture|grammars|lexicographers|swear|disputed/i.test(card.formerLine),
       "the former-name line hedges; ruling 4 says the annalist records and does not guess",
     );
   }

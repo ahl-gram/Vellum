@@ -86,7 +86,7 @@ test("the frame mounts and hands the engine a complete host (#219, the first non
   ] as const) {
     assert.ok(node instanceof El, `the host supplies a real element for ${name}`);
     assert.ok(
-      walk(frame.root as unknown as El).includes(node as unknown as El),
+      walk(frame.root as unknown as El).includes(node),
       `${name} is part of the frame's own tree, not a detached stub`,
     );
   }

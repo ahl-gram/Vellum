@@ -196,7 +196,7 @@ test("every emitted clue re-verifies true against independent raw geometry", () 
             `quotes a round leagues bound (${clue.leagues})`,
           );
           assert.ok(
-            anchor.dist <= clue.leagues! * MIRROR_CELLS_PER_LEAGUE + 1e-9,
+            anchor.dist <= clue.leagues * MIRROR_CELLS_PER_LEAGUE + 1e-9,
             `the quoted bound truly contains the quarry (${anchor.dist})`,
           );
           break;
@@ -560,7 +560,7 @@ test("chooseQuarry falls back to the full pool when exclusion would empty it", (
   const all = new Set(world.settlements.map((_, i) => i));
   const q = chooseQuarry(world, { exclude: all });
   assert.ok(q, "a target still exists even if every settlement is under the legend");
-  assert.equal(q!.idx, chooseQuarry(world)!.idx, "the fallback pool is the unconstrained one");
+  assert.equal(q.idx, chooseQuarry(world)!.idx, "the fallback pool is the unconstrained one");
 });
 
 test("chooseQuarry is deterministic for a given exclusion set", () => {

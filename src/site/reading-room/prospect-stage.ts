@@ -34,7 +34,7 @@ export function createProspectStage(opts: ProspectStageOpts = {}) {
   root.hidden = true;
   const link = document.createElement("a");
   link.className = "rr-prospect-link";
-  const img = document.createElement("img") as HTMLImageElement;
+  const img = document.createElement("img");
   img.className = "rr-prospect-plate";
   link.appendChild(img);
   root.appendChild(link);

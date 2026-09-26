@@ -27,7 +27,7 @@ test("computeClimate honors an explicit elevSpan (region temperature continuity,
     "a larger elevSpan lifts high-elevation temperature toward the world value",
   );
   assert.equal(
-    world.temperature.data[lo] as number,
+    world.temperature.data[lo],
     local.temperature.data[lo] as number,
     "at the shoreline the lapse term is zero, so elevSpan changes nothing",
   );

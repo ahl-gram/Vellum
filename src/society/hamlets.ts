@@ -78,7 +78,7 @@ export function hamletCandidates(world: World, window: UvWindow): HamletCandidat
   const root = createRng(seed);
 
   let worldMax = -Infinity;
-  for (const v of data) worldMax = Math.max(worldMax, v as number);
+  for (const v of data) worldMax = Math.max(worldMax, v);
   const span = Math.max(1e-9, worldMax - world.seaLevel);
 
   const stepU = HAMLET_LATTICE_WORLD_CELLS / (gridW - 1);

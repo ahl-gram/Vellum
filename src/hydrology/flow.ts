@@ -51,7 +51,7 @@ export function computeFlow(
       if (visited[ni]) continue;
       visited[ni] = 1;
       fill[ni] = Math.max(data[ni] as number, (fill[i] as number) + EPS);
-      heap.push(ni, fill[ni] as number);
+      heap.push(ni, fill[ni]);
     }
   }
 
@@ -86,7 +86,7 @@ export function computeFlow(
   for (const i of landOrder) {
     acc[i] = (acc[i] as number) + (rain ? (rain[i] as number) : 1);
     const d = dir[i] as number;
-    if (d >= 0) acc[d] = (acc[d] as number) + (acc[i] as number);
+    if (d >= 0) acc[d] = (acc[d] as number) + (acc[i]);
   }
 
   return { fill, dir, acc };

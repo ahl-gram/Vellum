@@ -34,10 +34,10 @@ test("classifyBiomes honors an explicit elevSpan (region snow-band continuity, #
   };
   const tall = 3 + 0 * w;
   // local span = 1.0 - 0.2 = 0.8 -> rel of the peak = 1.0 -> snow
-  assert.equal(classifyBiomes(elev, sea, climate)[tall] as number, BIOMES.snow);
+  assert.equal(classifyBiomes(elev, sea, climate)[tall], BIOMES.snow);
   // the parent world's span (4.0) shrinks rel to 0.2 -> a temperate band, no snow
   assert.notEqual(
-    classifyBiomes(elev, sea, climate, 4.0)[tall] as number,
+    classifyBiomes(elev, sea, climate, 4.0)[tall],
     BIOMES.snow,
     "under the world span the region's tallest hill is not falsely snowbound",
   );

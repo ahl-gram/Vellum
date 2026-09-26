@@ -114,9 +114,9 @@ test("score modulates density within a kind", () => {
 test("a harbor town fronts the sea: quay, masts, ship", () => {
   const g = composeProspect(makeInput({ kind: "town", harbor: true }));
   assert.ok(g.water, "harbor composes water");
-  assert.equal(g.water!.kind, "sea");
-  assert.equal(g.water!.y0, BASE_GROUND + SHORE_DROP);
-  assert.equal(g.water!.y1, WATER_BOTTOM);
+  assert.equal(g.water.kind, "sea");
+  assert.equal(g.water.y0, BASE_GROUND + SHORE_DROP);
+  assert.equal(g.water.y1, WATER_BOTTOM);
 
   // The articulate quay face (#237 GO condition 9): steps, arcade, bollards.
   const quay = one(g, "quay");
@@ -130,7 +130,7 @@ test("a harbor town fronts the sea: quay, masts, ship", () => {
   assert.equal(masts.masts.length, 4, "a town moors four masts");
   for (const m of masts.masts) {
     assert.ok(m.x > quay.x1, "masts moor past the quay");
-    assert.ok(m.hullY > g.water!.y0, "hulls sit on the water");
+    assert.ok(m.hullY > g.water.y0, "hulls sit on the water");
     assert.ok(m.mastH > 0);
   }
   one(g, "ship");
@@ -161,7 +161,7 @@ test("a river town stands on the bank and anchors its bridge", () => {
   const g = composeProspect(makeInput({ kind: "town", onRiver: true }));
   assert.equal(g.ground.base, BASE_GROUND - RIVER_BANK_DROP, "river towns stand on the bank");
   assert.ok(g.water, "river composes water");
-  assert.equal(g.water!.kind, "river");
+  assert.equal(g.water.kind, "river");
 
   const bridge = one(g, "bridge");
   assert.equal(bridge.arches, 3);
@@ -260,8 +260,8 @@ test("high ground composes the seat hill and the backdrop ridge", () => {
   // #237 GO condition 5: a mountain seat stands on a filled hill mass.
   assert.ok(seat.ground.rise > 0, "the seat hill rises");
   assert.ok(seat.ridge !== null, "terrain behind the site draws the ridge");
-  assert.equal(seat.ridge!.length, BACKDROP_SAMPLES, "the ridge is the transect polyline");
-  const ys = seat.ridge!.map((p) => p.y);
+  assert.equal(seat.ridge.length, BACKDROP_SAMPLES, "the ridge is the transect polyline");
+  const ys = seat.ridge.map((p) => p.y);
   assert.ok(Math.min(...ys) < BASE_GROUND - 35, "the ridge climbs behind the town");
 });
 

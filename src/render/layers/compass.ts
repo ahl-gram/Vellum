@@ -94,7 +94,7 @@ function landOpenness(world: World): Float64Array {
   const { w, h, data } = world.elev;
   const sea = world.seaLevel;
   let maxEl = -Infinity;
-  for (const v of data) maxEl = Math.max(maxEl, v as number);
+  for (const v of data) maxEl = Math.max(maxEl, v);
   const highGround = sea + (maxEl - sea) * 0.55;
   const settlement = new Uint8Array(w * h);
   for (const s of world.settlements) {

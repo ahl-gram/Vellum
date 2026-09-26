@@ -152,12 +152,12 @@ test("CT14d a shut inside a ceremony clears it rather than leaving it armed: dis
 test("CT15 a lay handed a ready url (the drag's ghost) adopts it and mints none; a lay handed only the svg mints one", () => {
   const minted: string[] = [];
   const real = URL.createObjectURL.bind(URL);
-  URL.createObjectURL = ((blob: Blob) => { const u = `blob:minted-${minted.length}`; minted.push(u); void blob; return u; }) as typeof URL.createObjectURL;
+  URL.createObjectURL = ((blob: Blob) => { const u = `blob:minted-${minted.length}`; minted.push(u); void blob; return u; });
   try {
     const { table, cuttings } = drawer();
     assert.equal(table.lay(survey(1), SVG, "one", { url: "blob:ghost" }), true);
     assert.equal(minted.length, 0, "the ghost's url IS the cutting's; a second url per drag is the leak the issue names");
-    const img = lis(cuttings)[0]!.children.find((c) => c.tagName === "IMG") as (El & { src?: string }) | undefined;
+    const img = lis(cuttings)[0]!.children.find((c): c is El & { src?: string } => c.tagName === "IMG");
     assert.equal(img?.src, "blob:ghost");
     assert.equal(table.lay(survey(2), SVG, "two"), true);
     assert.equal(minted.length, 1, "the click path still mints its own");
@@ -194,7 +194,7 @@ test("CT17 a thumbnail arriving for a recovered sheet is patched into its cuttin
   const after = lis(cuttings)[0]!;
   assert.equal(after, before, "the same element: a rebuild would end any settle playing on it");
   assert.equal(after.children.some((c) => c.classList.contains("awaited")), false, "the frame is gone");
-  const img = after.children.find((c) => c.tagName === "IMG") as (El & { src?: string }) | undefined;
+  const img = after.children.find((c): c is El & { src?: string } => c.tagName === "IMG");
   assert.equal(img?.src, "blob:drawn", "and the picture stands in its place");
   const title = after.children.find((c) => c.classList.contains("label"))?.children.find((c) => c.tagName === "B");
   assert.equal(title?.textContent, "The Environs of Somewhere", "named from the drawn title, no longer the chart number");

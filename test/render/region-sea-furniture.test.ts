@@ -125,18 +125,18 @@ test("#251: on a lake-dominated region the compass rose sits on land, shrunk, ne
   const ctx = ctxFor(lakePlate, "antique");
   const { compass } = planFurniture(ctx);
   assert.ok(compass, "the rose should fall back to land, not vanish");
-  const c = cellAt(lakePlate, compass!.cx, compass!.cy);
+  const c = cellAt(lakePlate, compass.cx, compass.cy);
   assert.ok(isLand(lakePlate, c.i), `rose should be on land, but region (${c.gx},${c.gy}) is not land`);
-  assert.ok(compass!.r < FULL_R, `land rose should be shrunk (r=${compass!.r} should be < ${FULL_R})`);
+  assert.ok(compass.r < FULL_R, `land rose should be shrunk (r=${compass.r} should be < ${FULL_R})`);
 });
 
 test("#251: on a coastal region the compass rose stays on genuine sea at full size", () => {
   const ctx = ctxFor(coastPlate, "antique");
   const { compass } = planFurniture(ctx);
   assert.ok(compass, "a coastal window has open sea for the rose");
-  const c = cellAt(coastPlate, compass!.cx, compass!.cy);
+  const c = cellAt(coastPlate, compass.cx, compass.cy);
   assert.ok(isGenuineSea(coastPlate, c.i), `rose should be on genuine sea at region (${c.gx},${c.gy})`);
-  assert.equal(compass!.r, FULL_R, "the sea rose keeps its full radius");
+  assert.equal(compass.r, FULL_R, "the sea rose keeps its full radius");
 });
 
 test("#251: a region plate renders identically across regeneration (land pick is deterministic)", () => {
@@ -179,5 +179,5 @@ test("#251 guard: the world sheet compass is unchanged (sea, full size, no seaGa
   const ctx = ctxFor(world, "antique");
   const { compass } = planFurniture(ctx);
   assert.ok(compass, "seed 42 world has open sea for a rose");
-  assert.equal(compass!.r, FULL_R, "world rose keeps full radius");
+  assert.equal(compass.r, FULL_R, "world rose keeps full radius");
 });

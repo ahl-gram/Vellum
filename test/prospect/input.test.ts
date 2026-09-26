@@ -158,7 +158,7 @@ test("chronicle facts flow through and stay year-agnostic", () => {
         if (event) {
           datedRuinsSeen++;
           assert.equal(p.ruinedYear, event.year, `seed ${seed} index ${i}`);
-          assert.ok(p.ruinedYear! >= p.founded, "ruin postdates founding");
+          assert.ok(p.ruinedYear >= p.founded, "ruin postdates founding");
         } else {
           assert.equal(p.ruinedYear, null, "undated ruin carries null");
         }

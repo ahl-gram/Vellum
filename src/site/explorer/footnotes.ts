@@ -52,7 +52,7 @@ export function wireFootnotes(): void {
     // The closing half of a tap never reaches the click handler as "open": the tap's own pointer-down light-dismisses an auto popover first. Record that close SYNCHRONOUSLY (beforetoggle; the toggle event is queued async and lands after the click), so a click on its heels reads as the close it was, instead of re-showing.
     let closedAt = 0;
     note.addEventListener("beforetoggle", (ev) => {
-      if ((ev as ToggleEvent).newState === "closed") closedAt = performance.now();
+      if ((ev).newState === "closed") closedAt = performance.now();
     });
     mark.addEventListener("click", (e) => {
       if (!touchPrimary()) return;

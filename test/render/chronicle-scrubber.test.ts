@@ -210,8 +210,8 @@ test("integration: seed 42 marks, range, and sweep are internally consistent", (
 
   const ruin = marks.find((mk) => mk.ruinYear !== null);
   assert.ok(ruin, "seed 42 has a ruin with a resolvable abandonment year");
-  assert.equal(placeStateAt(ruin!, ruin!.founded), "living");
-  assert.equal(placeStateAt(ruin!, ruin!.ruinYear!), "ruin");
+  assert.equal(placeStateAt(ruin, ruin.founded), "living");
+  assert.equal(placeStateAt(ruin, ruin.ruinYear!), "ruin");
 
   assert.equal(sweepYearAt(range, 0), range.min);
   assert.equal(sweepYearAt(range, SWEEP_MS), range.max);

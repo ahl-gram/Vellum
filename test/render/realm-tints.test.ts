@@ -115,7 +115,7 @@ test("realmTintIndices engages the assignment beyond the base palette", () => {
   // 6 column-block realms in a row on antique (7 tints): each borders its neighbours, so consecutive realms must differ.
   const w = 12, h = 1, count = 6;
   const labels = new Int16Array(w);
-  for (let x = 0; x < w; x++) labels[x] = Math.floor(x / 2) as number;
+  for (let x = 0; x < w; x++) labels[x] = Math.floor(x / 2);
   const out = realmTintIndices(labels, w, h, count, STYLES.antique);
   assert.equal(out.length, 6);
   assert.ok(out.every((c) => c >= 0 && c < STYLES.antique.realmTints.length));
