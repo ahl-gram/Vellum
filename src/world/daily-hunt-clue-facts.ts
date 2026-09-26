@@ -302,14 +302,14 @@ function nearCandidate(world: World, quarry: Quarry): ClueCandidate | null {
   const seats = new Set(world.realms.seats);
   const from = quarry.settlement;
   let best: { name: string; x: number; y: number; dist: number } | null = null;
-  world.settlements.forEach((a, idx) => {
-    if (idx === quarry.idx) return;
-    if (a.kind !== "capital" && a.kind !== "town" && !seats.has(idx)) return;
+  for (const [idx, a] of world.settlements.entries()) {
+    if (idx === quarry.idx) continue;
+    if (a.kind !== "capital" && a.kind !== "town" && !seats.has(idx)) continue;
     const d = Math.hypot(a.x - from.x, a.y - from.y);
     if (best === null || d < best.dist) best = { name: a.name, x: a.x, y: a.y, dist: d };
-  });
-  if (best === null) return null; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-  const anchor = best as { name: string; x: number; y: number; dist: number };
+  }
+  if (best === null) return null;
+  const anchor = best;
   const leagues = LEAGUE_LADDER.find((b) => anchor.dist <= b * CELLS_PER_LEAGUE);
   if (leagues === undefined) return null;
   return {

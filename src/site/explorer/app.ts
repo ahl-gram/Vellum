@@ -54,7 +54,7 @@ let drawGen = 0;
 let drawing = false;
 
 function prefersReduce(): boolean {
-  return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 const narrow = window.matchMedia("(max-width: 900px)");
 const token = (name: string): string => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -148,7 +148,7 @@ function syncHash(): void {
     agesChk.checked ? { kind: "survey" } : null, chartTable.state());
   journalLink.href = "/reading-room/" + (location.hash || "");
   // Rebuilt HERE and not in draw(): laying, taking and a cached return all move the address without drawing anything, and a road left behind hands on the table as it stood at the last draw (measured resurrecting a sheet the reader had taken off, the cold review's round 3 on PR #635).
-  if (orderLink) orderLink.href = "../print-room/" + (location.hash || ""); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+  orderLink.href = "../print-room/" + (location.hash || "");
 }
 
 const glass = createGlass({

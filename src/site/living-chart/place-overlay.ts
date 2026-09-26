@@ -186,7 +186,6 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
   // opts.box positions the overlay over a region inset's rect so the region manifest's own nx/ny fractions land on the inset's drawn glyphs; the card lives inside the overlay so its % anchor resolves against the same box.
   // eslint-disable-next-line max-lines-per-function
   function buildPlaceOverlay(manifest: PlaceManifest, opts?: BuildPlaceOverlayOpts): void {
-    if (!manifest || !manifest.places) return; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     const preserveName =
       opts && opts.preservePinByName && placeOverlay && placeOverlay.pinned && placeOverlay.pinnedIdx >= 0
         ? ((placeOverlay.places[placeOverlay.pinnedIdx] || {}) as Partial<PlaceMark>).name

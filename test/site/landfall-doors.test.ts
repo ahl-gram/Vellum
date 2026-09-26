@@ -21,7 +21,7 @@ function stageCloseIndex(src: string): number {
   const start = src.lastIndexOf("<div", classAt);
   let depth = 0;
   for (const m of src.matchAll(/<(\/?)div\b/g)) {
-    if (m.index === undefined || m.index < start) continue; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    if (m.index < start) continue;
     depth += m[1] === "/" ? -1 : 1;
     if (depth === 0) return m.index;
   }

@@ -133,6 +133,6 @@ export function bindRoom<Held>(parts: RoomParts<Held>): Room {
   }
   window.addEventListener("resize", layout);
   narrowQuery.addEventListener("change", layout);
-  void document.fonts?.ready.then(layout); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+  void document.fonts.ready.then(layout);
   return { layout, broadside };
 }
