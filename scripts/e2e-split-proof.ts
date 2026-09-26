@@ -2,10 +2,11 @@
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { stripTypeScriptTypes } from "node:module";
-import { join, resolve, sep } from "node:path";
+import { join, posix, resolve, sep } from "node:path";
 import ts from "typescript";
 
 export type Verdict = { readonly same: boolean; readonly lines: readonly string[] };
+export type FamilyFile = { readonly path: string; readonly text: string };
 type Fn = ts.FunctionDeclaration | ts.ArrowFunction | ts.FunctionExpression;
 type Flat = { sequence: string[]; helpers: Map<string, string[]>; constants: string[]; module: string[] };
 type Family = { readonly sfs: readonly ts.SourceFile[]; readonly fns: ReadonlyMap<string, Fn>; readonly inline: ReadonlySet<string> };
@@ -35,10 +36,38 @@ function functionsOf(sfs: readonly ts.SourceFile[]): Map<string, Fn> {
 }
 
 const unwrap = (e: ts.Expression): ts.Expression => (ts.isAwaitExpression(e) || ts.isParenthesizedExpression(e) ? unwrap(e.expression) : e);
-const calleeOf = (e: ts.Expression): string | null => {
-  const call = unwrap(e);
-  return ts.isCallExpression(call) && ts.isIdentifier(call.expression) ? call.expression.text : null;
+const tokens = (n: ts.Node): string => {
+  const kids = n.getChildren();
+  if (kids.length === 0) return DROPPED.has(n.kind) ? "" : n.getText();
+  return kids.map(tokens).filter((x) => x !== "").join(" ");
 };
+const isNameBag = (e: ts.Node): boolean =>
+  ts.isObjectLiteralExpression(e) && e.properties.every((p) => ts.isShorthandPropertyAssignment(p) || (ts.isSpreadAssignment(p) && ts.isIdentifier(p.expression)));
+
+const bindsByName = (args: readonly ts.Expression[], fn: Fn): boolean =>
+  args.length === fn.parameters.length && fn.parameters.every((p, i) => {
+    const a = args[i];
+    if (!a || p.initializer || p.dotDotDotToken) return false;
+    if (ts.isIdentifier(p.name)) return (ts.isIdentifier(a) && a.text === p.name.text) || isNameBag(a);
+    const shorthand = ts.isObjectBindingPattern(p.name) && p.name.elements.every((el) => !el.propertyName && !el.initializer && !el.dotDotDotToken && ts.isIdentifier(el.name));
+    return shorthand && (ts.isIdentifier(a) || isNameBag(a));
+  });
+
+const handsBack = (fn: Fn, target: ts.Node | undefined): boolean => {
+  if (target === undefined) return true;
+  const statements = fn.body && ts.isBlock(fn.body) ? fn.body.statements : [];
+  const last = statements.at(-1);
+  if (!last || !ts.isReturnStatement(last) || !last.expression || trailing(statements).length === statements.length) return false;
+  return tokens(last.expression) === tokens(target) || (ts.isIdentifier(target) && isNameBag(last.expression));
+};
+
+// The function the split made that a call hands its whole work to, when its arguments and its result pass by name alone; any other call reads as written.
+function throughCall(e: ts.Expression | undefined, target: ts.Node | undefined, fam: Family): Fn | undefined {
+  const call = e ? unwrap(e) : undefined;
+  if (!call || !ts.isCallExpression(call) || !ts.isIdentifier(call.expression) || !fam.inline.has(call.expression.text)) return undefined;
+  const fn = fam.fns.get(call.expression.text);
+  return fn && bindsByName(call.arguments, fn) && handsBack(fn, target) ? fn : undefined;
+}
 
 const isConstant = (e: ts.Expression | undefined): boolean => {
   if (e === undefined) return true;
@@ -59,8 +88,7 @@ function printer(fam: Family): { text: (n: ts.Node, elide: boolean, blocks: ts.B
       blocks.push(n);
       return "{…}";
     }
-    const callee = ts.isArrowFunction(n) && !ts.isBlock(n.body) ? calleeOf(n.body) : null;
-    const target = callee !== null && fam.inline.has(callee) ? fam.fns.get(callee) : undefined;
+    const target = ts.isArrowFunction(n) && !ts.isBlock(n.body) ? throughCall(n.body, undefined, fam) : undefined;
     const kids = n.getChildren();
     if (kids.length === 0) return DROPPED.has(n.kind) ? "" : n.getText();
     const parts = kids.map((k) => (target && ts.isArrowFunction(n) && k === n.body ? body(target) : text(k, elide && (ts.isStatement(k) || ts.isCatchClause(k) || ts.isBlock(k)), blocks)));
@@ -96,11 +124,12 @@ const stepOf = (s: ts.Statement): { label: string; chain: string[]; cb: ts.Expre
 };
 
 function inlinedCall(s: ts.Statement, fam: Family): Fn | undefined {
-  let e: ts.Expression | undefined;
-  if (ts.isExpressionStatement(s)) e = ts.isBinaryExpression(s.expression) && s.expression.operatorToken.kind === ts.SyntaxKind.EqualsToken ? s.expression.right : s.expression;
-  if (ts.isVariableStatement(s) && s.declarationList.declarations.length === 1) e = s.declarationList.declarations[0]?.initializer;
-  const name = e ? calleeOf(e) : null;
-  return name !== null && fam.inline.has(name) ? fam.fns.get(name) : undefined;
+  if (ts.isExpressionStatement(s)) {
+    const x = s.expression;
+    return ts.isBinaryExpression(x) && x.operatorToken.kind === ts.SyntaxKind.EqualsToken ? throughCall(x.right, x.left, fam) : throughCall(x, undefined, fam);
+  }
+  const only = ts.isVariableStatement(s) && s.declarationList.declarations.length === 1 ? s.declarationList.declarations[0] : undefined;
+  return only ? throughCall(only.initializer, only.name, fam) : undefined;
 }
 
 type Walker = { readonly fam: Family; readonly flat: Flat; readonly text: (n: ts.Node, elide: boolean, blocks: ts.Block[]) => string; walk: (statements: readonly ts.Statement[], stack: ReadonlySet<Fn>) => void };
@@ -136,8 +165,7 @@ function callback(w: Walker, cb: ts.Expression, stack: ReadonlySet<Fn>): void {
     w.walk(cb.body.statements, stack);
     return;
   }
-  const name = calleeOf(cb.body);
-  const target = name !== null && w.fam.inline.has(name) ? w.fam.fns.get(name) : undefined;
+  const target = throughCall(cb.body, undefined, w.fam);
   if (target?.body && ts.isBlock(target.body) && !stack.has(target)) w.walk(trailing(target.body.statements), new Set([...stack, target]));
   else w.flat.sequence.push(w.text(cb.body, false, []));
 }
@@ -212,13 +240,37 @@ function helperLines(a: ReadonlyMap<string, string[]>, b: ReadonlyMap<string, st
   });
 }
 
+function imports(files: readonly FamilyFile[]): string[] {
+  const own = new Set(files.map((x) => posix.normalize(x.path)));
+  const out = new Set<string>();
+  for (const { path, text } of files) {
+    for (const s of parse(text).statements) {
+      if (!ts.isImportDeclaration(s) || !ts.isStringLiteral(s.moduleSpecifier)) continue;
+      const spec = s.moduleSpecifier.text;
+      const from = spec.startsWith(".") ? posix.normalize(posix.join(posix.dirname(path), spec)) : spec;
+      if (own.has(from)) continue;
+      const clause = s.importClause;
+      const named = clause?.namedBindings;
+      const bound = [
+        ...(clause?.name ? [`${clause.name.text} = default`] : []),
+        ...(named && ts.isNamespaceImport(named) ? [`${named.name.text} = *`] : []),
+        ...(named && ts.isNamedImports(named) ? named.elements.map((el) => `${el.name.text} = ${(el.propertyName ?? el.name).getText()}`) : []),
+      ];
+      for (const b of bound.length > 0 ? bound : ["(for its effect)"]) out.add(`${b} from ${from}`);
+    }
+  }
+  return [...out].sort();
+}
+
 const markers = (texts: readonly string[]): [number, number] => [
   texts.reduce((s, t) => s + t.split("\n").filter((l) => NOTE.test(l)).length, 0),
   texts.reduce((s, t) => s + t.split(CONDITION).length - 1, 0),
 ];
 
-// Blind spots, each with its direction: a function the split made that is called anywhere but as a statement, an assignment or a declaration (or as a callback's whole body) is not inlined, so the statement reads as changed, a false red; two functions sharing a name in one family are one to the inliner, the later winning, a false red; module top level is compared as a multiset, since an e2e module's top level only declares and its order across files is the import order, so a module statement moved within the top level is a miss; and a literal constant declared at a function body's top level may move anywhere, since it has no effect, so a constant moved between two steps is a miss.
-export function compareFamilies(before: readonly string[], after: readonly string[]): Verdict {
+// Blind spots, each with its direction: a function the split made is read through only where it is called as a statement, an assignment, a declaration or a callback's whole body, with each argument the same name as its parameter or a bag of spreads and shorthand names, and its result handed back to the same name or pattern its caller binds; any other call reads as changed, a false red; a shorthand destructure is dropped whatever object it reads, and a bag of spreads passes whatever it spreads, so reading a name from the wrong one of two objects that both carry it is a miss (the objects read that way are the context and kits that spread it); a `return` inside a read-through body is compared as text, so one that left `run` at the base and leaves a group function at the head is a miss (no suite's `run` returns early today); imports are compared as a set of (name, export, module) outside the family, so a duplicated import is not counted; two functions sharing a name in one family are one to the inliner, the later winning, a false red; module top level is compared as a multiset, since an e2e module's top level only declares and its order across files is the import order, so a module statement moved within the top level is a miss; and a literal constant declared at a function body's top level may move anywhere, since it has no effect, so a constant moved between two steps is a miss.
+export function compareFamilies(beforeFiles: readonly FamilyFile[], afterFiles: readonly FamilyFile[]): Verdict {
+  const before = beforeFiles.map((x) => x.text);
+  const after = afterFiles.map((x) => x.text);
   const baseNames = declared(before);
   const inline = new Set([...declared(after)].filter((n) => !baseNames.has(n)));
   const a = flattenFamily(before, new Set());
@@ -234,6 +286,8 @@ export function compareFamilies(before: readonly string[], after: readonly strin
     ...surplus(b.module, a.module).map((c) => `module statement added: ${short(c)}`),
     ...(na === nb ? [] : [`type notes ${na} -> ${nb}`]),
     ...(ca === cb ? [] : [`condition markers ${ca} -> ${cb}`]),
+    ...surplus(imports(beforeFiles), imports(afterFiles)).map((x) => `import gone: ${x}`),
+    ...surplus(imports(afterFiles), imports(beforeFiles)).map((x) => `import added: ${x}`),
   ];
   return { same: lines.length === 0, lines };
 }
@@ -259,10 +313,10 @@ function main(base: string): number {
   const basePaths = git(["ls-tree", "-r", "--name-only", base, "--", "scripts"]).split("\n").filter(inTree).sort();
   const now = headPaths();
   if (basePaths.length < 30 || now.length < 30) throw new Error(`read ${basePaths.length} files at ${base} and ${now.length} in the tree, so this is not the e2e tree`);
-  const families = new Map<string, { before: string[]; after: string[] }>();
+  const families = new Map<string, { before: FamilyFile[]; after: FamilyFile[] }>();
   const family = (k: string) => families.get(k) ?? families.set(k, { before: [], after: [] }).get(k)!;
-  for (const p of basePaths) family(familyOf(p)).before.push(git(["show", `${base}:${p}`]));
-  for (const p of now) family(familyOf(p)).after.push(readFileSync(join(ROOT, p), "utf8"));
+  for (const p of basePaths) family(familyOf(p)).before.push({ path: p, text: git(["show", `${base}:${p}`]) });
+  for (const p of now) family(familyOf(p)).after.push({ path: p, text: readFileSync(join(ROOT, p), "utf8") });
   let differ = 0;
   for (const [k, f] of [...families].sort(([x], [y]) => x.localeCompare(y))) {
     if (f.before.length === 0) {

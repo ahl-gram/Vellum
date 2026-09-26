@@ -1,6 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { compareFamilies, familyOf } from "../../scripts/e2e-split-proof.ts";
+import type { FamilyFile } from "../../scripts/e2e-split-proof.ts";
+
+const files = (...texts: string[]): FamilyFile[] => texts.map((text, i) => ({ path: i === 0 ? "scripts/e2e/suite-map.ts" : `scripts/e2e/map/part${i}.ts`, text }));
 
 const BASE = [
   "import { makeStep } from \"./step-support.ts\";",
@@ -36,7 +39,7 @@ const BASE = [
 
 const SPLIT_RUN = [
   "import { makeStep } from \"./step-support.ts\";",
-  "import { mapKit, m1Draws, m2Lays, m3Stays, desktop } from \"./map/groups.ts\";",
+  "import { mapKit, m1Draws, m2Lays, m3Stays, desktop } from \"./map/part1.ts\";",
   "export async function run(ctx) {",
   "  const settle = makeSettle(ctx);",
   "  const step = makeStep(ctx);",
@@ -82,7 +85,7 @@ const SPLIT_GROUPS = [
   "}",
 ].join("\n");
 
-const verdict = (after: readonly string[]) => compareFamilies([BASE], after);
+const verdict = (after: readonly string[]) => compareFamilies(files(BASE), files(...after));
 const split = (runText: string, groupsText: string) => verdict([runText, groupsText]);
 const swapped = (text: string, from: string, to: string): string => {
   assert.ok(text.includes(from), `the fixture no longer carries ${from}, so this case would compare the unchanged text`);
@@ -141,38 +144,38 @@ test("in a suite with no step at all, two groups called in the other order are a
   const groups = ["async function h1({ check, evaluate }) {", "  await evaluate(`1`);", "  check(\"H1 one\", true);", "}", "async function h2({ check, evaluate }) {", "  await evaluate(`2`);", "  check(\"H2 two\", true);", "}"].join("\n");
   const inOrder = `export async function run(ctx) {\n  await h1(ctx);\n  await h2(ctx);\n}\n${groups}`;
   const swappedOrder = `export async function run(ctx) {\n  await h2(ctx);\n  await h1(ctx);\n}\n${groups}`;
-  assert.equal(compareFamilies([before], [inOrder]).same, true);
-  assert.equal(compareFamilies([before], [swappedOrder]).same, false);
+  assert.equal(compareFamilies(files(before), files(inOrder)).same, true);
+  assert.equal(compareFamilies(files(before), files(swappedOrder)).same, false);
 });
 
 test("a declaration that reads the clock may not move, while a literal constant may", () => {
   const before = ["export async function run(ctx) {", "  const { evaluate } = ctx;", "  const LIMIT = 5;", "  await evaluate(`1`);", "  const t0 = performance.now();", "  await evaluate(`2`);", "}"].join("\n");
   const hoisted = ["const LIMIT = 5;", "export async function run(ctx) {", "  const { evaluate } = ctx;", "  await evaluate(`1`);", "  const t0 = performance.now();", "  await evaluate(`2`);", "}"].join("\n");
   const clockMoved = ["export async function run(ctx) {", "  const { evaluate } = ctx;", "  const LIMIT = 5;", "  const t0 = performance.now();", "  await evaluate(`1`);", "  await evaluate(`2`);", "}"].join("\n");
-  assert.equal(compareFamilies([before], [hoisted]).same, true);
-  assert.equal(compareFamilies([before], [clockMoved]).same, false);
+  assert.equal(compareFamilies(files(before), files(hoisted)).same, true);
+  assert.equal(compareFamilies(files(before), files(clockMoved)).same, false);
 });
 
 test("a declaration that only reads a value the run later changes may not move, though it makes no call", () => {
   const before = ["export async function run(ctx) {", "  const { evaluate } = ctx;", "  let n = await evaluate(`1`);", "  const first = n;", "  n = await evaluate(`2`);", "}"].join("\n");
   const moved = ["export async function run(ctx) {", "  const { evaluate } = ctx;", "  let n = await evaluate(`1`);", "  n = await evaluate(`2`);", "  const first = n;", "}"].join("\n");
-  assert.equal(compareFamilies([before], [moved]).same, false);
+  assert.equal(compareFamilies(files(before), files(moved)).same, false);
 });
 
 test("a module's top-level statement that is not a literal constant is compared, in the suite file or in a part", () => {
   const before = ["const SRC = resolve(HERE, \"src\");", "export async function run(ctx) {", "  await ctx.evaluate(SRC);", "}"].join("\n");
   const changed = swapped(before, "resolve(HERE, \"src\")", "resolve(HERE, \"lib\")");
-  assert.equal(compareFamilies([before], [changed]).same, false);
+  assert.equal(compareFamilies(files(before), files(changed)).same, false);
   const [head, ...rest] = before.split("\n");
-  assert.equal(compareFamilies([before], [rest.join("\n"), head ?? ""]).same, true);
-  assert.equal(compareFamilies([before], [rest.join("\n"), swapped(head ?? "", "\"src\"", "\"lib\"")]).same, false);
+  assert.equal(compareFamilies(files(before), files(rest.join("\n"), head ?? "")).same, true);
+  assert.equal(compareFamilies(files(before), files(rest.join("\n"), swapped(head ?? "", "\"src\"", "\"lib\""))).same, false);
 });
 
 test("a listener whose body moved into a named function reads the same, the harness's own shape", () => {
   const before = ["export async function start({ consoleErrors }) {", "  ws.addEventListener(\"message\", (ev) => {", "    const m = JSON.parse(ev.data);", "    if (m.error) consoleErrors.push(m.error);", "  });", "}"].join("\n");
   const after = ["function onMessage(ev, consoleErrors) {", "  const m = JSON.parse(ev.data);", "  if (m.error) consoleErrors.push(m.error);", "}", "export async function start({ consoleErrors }) {", "  ws.addEventListener(\"message\", (ev) => onMessage(ev, consoleErrors));", "}"].join("\n");
-  assert.equal(compareFamilies([before], [after]).same, true);
-  assert.equal(compareFamilies([before], [swapped(after, "if (m.error)", "if (!m.error)")]).same, false);
+  assert.equal(compareFamilies(files(before), files(after)).same, true);
+  assert.equal(compareFamilies(files(before), files(swapped(after, "if (m.error)", "if (!m.error)"))).same, false);
 });
 
 test("a type note or a condition marker gained or lost is a difference", () => {
@@ -187,4 +190,36 @@ test("a suite's family is its suite file and its own folder, never a sibling who
   assert.equal(familyOf("scripts/e2e/zoom-gestures/checks.ts"), "zoom-gestures");
   assert.equal(familyOf("scripts/e2e/site-server.ts"), familyOf("scripts/e2e/harness.ts"));
   assert.equal(familyOf("scripts/e2e/room-support.ts"), "scripts/e2e/room-support.ts");
+});
+
+test("a group handed a different value than its parameter names reads as a difference: a wrong name, a literal, or two arguments swapped", () => {
+  assert.equal(split(swapped(SPLIT_RUN, "() => m3Stays(k, laid));", "() => m3Stays(k, null));"), SPLIT_GROUPS).same, false);
+  const other = swapped(swapped(SPLIT_RUN, "() => m3Stays(k, laid));", "() => m3Stays(k, early));"), "  let laid = null;", "  let laid = null;\n  let early = null;");
+  assert.equal(split(other, SPLIT_GROUPS).same, false);
+  const before = ["export async function start({ consoleErrors, http4xx }) {", "  ws.addEventListener(\"message\", (ev) => {", "    consoleErrors.push(ev.a);", "    http4xx.push(ev.b);", "  });", "}"].join("\n");
+  const after = (args: string) => [`function onMessage(ev, consoleErrors, http4xx) {`, "  consoleErrors.push(ev.a);", "  http4xx.push(ev.b);", "}", "export async function start({ consoleErrors, http4xx }) {", `  ws.addEventListener("message", (ev) => onMessage(${args}));`, "}"].join("\n");
+  assert.equal(compareFamilies(files(before), files(after("ev, consoleErrors, http4xx"))).same, true);
+  assert.equal(compareFamilies(files(before), files(after("ev, http4xx, consoleErrors"))).same, false);
+  assert.equal(compareFamilies(files(before), files(after("ev, [], http4xx"))).same, false);
+});
+
+test("a group that hands back a different value than the name its caller binds reads as a difference", () => {
+  assert.equal(inGroups("  return laid;\n}", "  return null;\n}").same, false);
+  const before = ["export async function run(ctx) {", "  const { evaluate, check } = ctx;", "  const wide = await evaluate(`1`);", "  const tall = await evaluate(`2`);", "  check(\"B2 wider\", wide > tall);", "}"].join("\n");
+  const after = (ret: string) => ["export async function run(ctx) {", "  const { check } = ctx;", "  const [wide, tall] = await b1Reads(ctx);", "  check(\"B2 wider\", wide > tall);", "}", "async function b1Reads({ evaluate }) {", "  const wide = await evaluate(`1`);", "  const tall = await evaluate(`2`);", `  return ${ret};`, "}"].join("\n");
+  assert.equal(compareFamilies(files(before), files(after("[wide, tall]"))).same, true);
+  assert.equal(compareFamilies(files(before), files(after("[tall, wide]"))).same, false);
+  assert.equal(compareFamilies(files(before), files(after("[1500, 900]"))).same, false);
+});
+
+test("an import bound to a different module or a different export reads as a difference, and one moved into a part file does not", () => {
+  const before = ["import { settleFast as settle } from \"./settle-support.ts\";", "export async function run(ctx) {", "  await settle(ctx);", "}"].join("\n");
+  const aliased = swapped(before, "settleFast as settle", "settleSlow as settle");
+  const moved = swapped(before, "./settle-support.ts", "./other-support.ts");
+  assert.equal(compareFamilies(files(before), files(aliased)).same, false);
+  assert.equal(compareFamilies(files(before), files(moved)).same, false);
+  const run = ["import { go } from \"./map/part1.ts\";", "export async function run(ctx) {", "  await go(ctx);", "}"].join("\n");
+  const part = ["import { settleFast as settle } from \"../settle-support.ts\";", "export async function go(ctx) {", "  await settle(ctx);", "}"].join("\n");
+  assert.equal(compareFamilies(files(before), files(run, part)).same, true);
+  assert.equal(compareFamilies(files(before), files(run, swapped(part, "../settle-support.ts", "./settle-support.ts"))).same, false);
 });
