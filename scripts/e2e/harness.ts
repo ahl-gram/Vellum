@@ -1,28 +1,14 @@
-// e2e harness: the static file server, headless-browser launch, CDP client, and the poll/evaluate/screenshot helpers every suite shares; cleanup() is module-level so the runner can tear down even if start() throws partway.
+// e2e harness: headless-browser launch, CDP client, and the poll/evaluate/screenshot helpers every suite shares; cleanup() is module-level so the runner can tear down even if start() throws partway.
 import { spawn } from "node:child_process";
-import { createServer } from "node:http";
 import http from "node:http";
 import net from "node:net";
-import { readFile, mkdir, mkdtemp, rm } from "node:fs/promises";
-import { existsSync, rmSync, writeFileSync } from "node:fs";
-import { stripTypeScriptTypes } from "node:module";
-import { dirname, join, resolve, sep, extname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { mkdir, mkdtemp, rm } from "node:fs/promises";
+import { rmSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { tmpdir } from "node:os";
 import type { BrowserProcess, CdpMessage, Clip, Payload, StartOptions, SuiteContext, TouchPoint } from "./types.ts";
-import { E2E_PORT_VAR, debugPortConflictMessage } from "../../src/cli/e2e-ports.ts";
-
-const MIME: Record<string, string | undefined> = {
-  ".html": "text/html; charset=utf-8",
-  ".js": "text/javascript; charset=utf-8",
-  ".mjs": "text/javascript; charset=utf-8",
-  ".css": "text/css; charset=utf-8",
-  ".svg": "image/svg+xml",
-  ".json": "application/json; charset=utf-8",
-  ".png": "image/png",
-  ".ico": "image/x-icon",
-  ".woff2": "font/woff2",
-};
+import { debugPortConflictMessage } from "../../src/cli/e2e-ports.ts";
+import { serverState, startServer } from "./site-server.ts";
 
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
 const httpGet = (url: string): Promise<string> =>
@@ -35,74 +21,6 @@ const httpGet = (url: string): Promise<string> =>
       })
       .on("error", reject);
   });
-
-// blockWorker 404s the ONE shared Vite-emitted worker chunk (since the #208 fold both pages spawn it), so the inline fallback is exercised without mutating the working tree.
-const serverState = { blockWorker: false };
-const BLOCKED_WORKERS = new Set(["/explorer/worker.bundle.js"]);
-
-// In-page oracle: suites import engine modules IN THE BROWSER (same JS engine, no cross-engine float drift); since #260 the harness answers /explorer/engine/*.js by type-stripping src/*.ts on demand and rewriting .ts specifiers. e2e-only serving.
-const SRC_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "src");
-const ENGINE_MODULE = /^\/explorer\/engine\/(.+)\.js$/;
-function serveEngineModule(pathname: string, res: import("node:http").ServerResponse): boolean | Promise<boolean> {
-  const m = pathname.match(ENGINE_MODULE);
-  if (!m) return false;
-  const tsPath = resolve(SRC_DIR, `${m[1]}.ts`);
-  if (!tsPath.startsWith(SRC_DIR + sep) || !existsSync(tsPath)) {
-    res.writeHead(404).end("no such engine module");
-    return true;
-  }
-  return readFile(tsPath, "utf8").then((source) => {
-    const js = stripTypeScriptTypes(source, { mode: "strip" }).replace(
-      /(["'])(\.\.?\/[^"']+)\.ts\1/g,
-      "$1$2.js$1",
-    );
-    res.writeHead(200, { "content-type": MIME[".js"] }).end(js);
-    return true;
-  });
-}
-
-function startServer(SITE: string, PORT: number): Promise<import("node:http").Server> {
-  const server = createServer((req, res) => { void (async () => {
-    try {
-      // @ts-expect-error a server-side request always carries its url, which Node types as possibly undefined
-      const url = new URL(req.url, "http://127.0.0.1");
-      let pathname = decodeURIComponent(url.pathname);
-      if (serverState.blockWorker && BLOCKED_WORKERS.has(pathname)) {
-        res.writeHead(404).end("worker blocked for fallback test");
-        return;
-      }
-      if (await serveEngineModule(pathname, res)) return;
-      if (pathname.endsWith("/")) pathname += "index.html";
-      const filePath = resolve(SITE, "." + pathname);
-      if (filePath !== SITE && !filePath.startsWith(SITE + sep)) {
-        res.writeHead(403).end("forbidden");
-        return;
-      }
-      if (!existsSync(filePath)) {
-        res.writeHead(404).end("not found");
-        return;
-      }
-      const body = await readFile(filePath);
-      res.writeHead(200, { "content-type": MIME[extname(filePath)] ?? "application/octet-stream" });
-      res.end(body);
-    } catch (err) {
-      res.writeHead(500).end(String(err));
-    }
-  })(); });
-  return new Promise((res, rej) => {
-    server.on("error", (err: NodeJS.ErrnoException) =>
-      rej(
-        err.code === "EADDRINUSE"
-          ? new Error(
-              `port ${PORT} is already in use, so this run cannot serve the site. ` +
-                `Another e2e run or dev server likely holds it; set ${E2E_PORT_VAR}=<free port> to run beside it.`,
-            )
-          : err,
-      ),
-    );
-    server.listen(PORT, "127.0.0.1", () => res(server));
-  });
-}
 
 // #339: getPageTarget attaches to whatever answers /json, so an orphaned browser holding the port would be adopted in SILENCE; a plain TCP connect also catches a non-browser squatter.
 function probeDebugPort(DPORT: number, timeoutMs = 300): Promise<boolean> {
@@ -340,8 +258,30 @@ async function launchBrowser(browser: string, DPORT: number): Promise<{ webSocke
   throw lastErr;
 }
 
-// results/consoleErrors/http4xx/skippedGroups are pushed to BY REFERENCE (the ws handler, check and makeStep close over them) so the runner's trailing tally sees them.
-// eslint-disable-next-line max-lines-per-function
+function onCdpMessage(ev: MessageEvent, consoleErrors: string[], http4xx: string[]): void {
+  const m = JSON.parse(ev.data as string) as CdpMessage;
+  if (m.id && waiters.has(m.id)) {
+    const w = waiters.get(m.id);
+    waiters.delete(m.id);
+    // @ts-expect-error has() in the enclosing if proved the waiter present, which get() cannot carry
+    if (m.error) w.reject(new Error(JSON.stringify(m.error)));
+    // @ts-expect-error has() in the enclosing if proved the waiter present, which get() cannot carry
+    else w.resolve(m.result);
+    return;
+  }
+  if (m.method === "Runtime.exceptionThrown") {
+    consoleErrors.push("EXCEPTION: " + (m.params.exceptionDetails?.exception?.description || m.params.exceptionDetails?.text));
+  } else if (m.method === "Runtime.consoleAPICalled" && m.params.type === "error") {
+    consoleErrors.push("console.error: " + JSON.stringify(m.params.args.map((a: { value: unknown }) => a.value)));
+  } else if (m.method === "Log.entryAdded" && m.params.entry.level === "error") {
+    const t = m.params.entry.text || "";
+    if (!/favicon/i.test(t) && !/Failed to load resource/i.test(t)) consoleErrors.push("log.error: " + t);
+  } else if (m.method === "Network.responseReceived" && m.params.response.status >= 400) {
+    http4xx.push(`${m.params.response.status} ${m.params.response.url}`);
+  }
+}
+
+// results/consoleErrors/http4xx/skippedGroups are pushed to BY REFERENCE (the ws handler, check and makeStep hold them) so the runner's trailing tally sees them.
 export async function start({ browser, SITE, OUT, PORT, DPORT, PAGE, results, consoleErrors, http4xx, skippedGroups }: StartOptions): Promise<SuiteContext> {
   OUT_DIR = OUT;
   await mkdir(OUT, { recursive: true });
@@ -354,28 +294,7 @@ export async function start({ browser, SITE, OUT, PORT, DPORT, PAGE, results, co
     // @ts-expect-error the same socket, the same closure
     ws.addEventListener("error", rej, { once: true });
   });
-  ws.addEventListener("message", (ev) => {
-    const m = JSON.parse(ev.data as string) as CdpMessage;
-    if (m.id && waiters.has(m.id)) {
-      const w = waiters.get(m.id);
-      waiters.delete(m.id);
-      // @ts-expect-error has() in the enclosing if proved the waiter present, which get() cannot carry
-      if (m.error) w.reject(new Error(JSON.stringify(m.error)));
-      // @ts-expect-error has() in the enclosing if proved the waiter present, which get() cannot carry
-      else w.resolve(m.result);
-      return;
-    }
-    if (m.method === "Runtime.exceptionThrown") {
-      consoleErrors.push("EXCEPTION: " + (m.params.exceptionDetails?.exception?.description || m.params.exceptionDetails?.text));
-    } else if (m.method === "Runtime.consoleAPICalled" && m.params.type === "error") {
-      consoleErrors.push("console.error: " + JSON.stringify(m.params.args.map((a: { value: unknown }) => a.value)));
-    } else if (m.method === "Log.entryAdded" && m.params.entry.level === "error") {
-      const t = m.params.entry.text || "";
-      if (!/favicon/i.test(t) && !/Failed to load resource/i.test(t)) consoleErrors.push("log.error: " + t);
-    } else if (m.method === "Network.responseReceived" && m.params.response.status >= 400) {
-      http4xx.push(`${m.params.response.status} ${m.params.response.url}`);
-    }
-  });
+  ws.addEventListener("message", (ev) => onCdpMessage(ev, consoleErrors, http4xx));
 
   await send("Page.enable");
   await send("Runtime.enable");

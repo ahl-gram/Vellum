@@ -1,12 +1,13 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { E2E_SUITE_ORDER, SMOKE_SUITES, E2E_SUITES_VAR } from "../../src/cli/e2e-suites.ts";
 import type { E2eSuiteName } from "../../src/cli/e2e-suites.ts";
 import { E2E_LANES } from "../../src/cli/e2e-lanes.ts";
 import { BUNDLE_ENTRIES } from "../../scripts/build-app-bundles.ts";
-import { e2eSuitePath, readE2eSource } from "../../test-support/e2e-source.ts";
+import { e2eSuiteFamily, e2eSuitePath, readE2eSource } from "../../test-support/e2e-source.ts";
+import { containment, CTX_THROWING_WAITS } from "../../test-support/e2e-containment.ts";
 
 // The runner starts a browser the moment it is imported and ci.yml is YAML, so both are read as source.
 
@@ -95,11 +96,12 @@ test("the two worker-bearing surfaces assert the worker is live AND that it degr
   for (const suite of ["render", "fallback", "reading-room"] as const) {
     assert.ok(SMOKE_SUITES.includes(suite), `smoke must keep ${suite} for worker/fallback coverage`);
   }
-  const assertsWorkerLive = (file: string) => /__vellum\w*UsesWorker(\(\))?\s*===?\s*true/.test(src(file));
-  assert.ok(assertsWorkerLive("scripts/e2e/suite-render.ts"), "render no longer asserts the worker is live");
-  assert.ok(assertsWorkerLive("scripts/e2e/suite-reading-room.ts"), "reading-room no longer asserts the worker is live");
-  for (const file of ["scripts/e2e/suite-fallback.ts", "scripts/e2e/suite-reading-room.ts"]) {
-    assert.match(src(file), /serverState\.blockWorker = true/, `${file} no longer exercises the 404 fallback`);
+  const family = (name: string) => e2eSuiteFamily(ROOT, name).map(src).join("\n");
+  const assertsWorkerLive = (name: string) => /__vellum\w*UsesWorker(\(\))?\s*===?\s*true/.test(family(name));
+  assert.ok(assertsWorkerLive("render"), "render no longer asserts the worker is live");
+  assert.ok(assertsWorkerLive("reading-room"), "reading-room no longer asserts the worker is live");
+  for (const name of ["fallback", "reading-room"]) {
+    assert.match(family(name), /serverState\.blockWorker = true/, `suite-${name} no longer exercises the 404 fallback`);
   }
 });
 
@@ -253,52 +255,7 @@ const STEPPED_GROUPS: Readonly<Record<string, readonly string[]>> = {
 };
 
 const SUITE_FILES = E2E_SUITE_ORDER.map((name) => [name, e2eSuitePath(name)] as const);
-
-// A block is [open, close] by line index, read off the house's own two shapes; a shape this cannot read is skipped, which the block-count anchor below turns into a red rather than a silent pass.
-const blocksOf = (lines: readonly string[], open: RegExp, closer: (indent: string) => RegExp) => {
-  const out: Array<{ name: string; from: number; to: number }> = [];
-  for (let i = 0; i < lines.length; i++) {
-    const m = lines[i]!.match(open);
-    if (!m) continue;
-    const close = closer(m[1]!);
-    let j = i + 1;
-    while (j < lines.length && !close.test(lines[j]!)) j++;
-    if (j < lines.length) out.push({ name: m[2]!, from: i, to: j });
-  }
-  return out;
-};
-// `}).finally(scriptsBackOn);` closes a step too (suite-room-drawer's DR8).
-const stepBlocks = (lines: readonly string[]) =>
-  blocksOf(lines, /^(\s*)await step\("([^"]+)", async\s*\(\)\s*=> \{$/, (indent) => new RegExp(`^${indent}\\}\\)(\\.\\w+\\([^)]*\\))?;$`));
-const helperBlocks = (lines: readonly string[]) => [
-  ...blocksOf(lines, /^(\s*)const (\w+)\s*= async\s*\([^)]*\)\s*=> \{$/, (indent) => new RegExp(`^${indent}\\};$`)),
-  ...blocksOf(lines, /^(\s*)async function (\w+)\s*\([^)]*\)\s*\{$/, (indent) => new RegExp(`^${indent}\\}$`)),
-];
-
-// The waits a suite gets from outside itself. Everything else that throws is DERIVED below rather than listed, so a new local wait cannot escape by not joining a roster.
-const CTX_THROWING_WAITS = ["waitSettled", "waitTurned", "settle"];
-const bodyOf = (lines: readonly string[], b: { from: number; to: number }) => lines.slice(b.from + 1, b.to).join("\n");
-const throwingWaitsIn = (lines: readonly string[], helpers: ReturnType<typeof helperBlocks>) => {
-  const set = new Set(CTX_THROWING_WAITS);
-  for (const h of helpers) if (/\bthrow new Error\(/.test(bodyOf(lines, h))) set.add(h.name);
-  for (let grew = true; grew; ) {
-    grew = false;
-    for (const h of helpers) {
-      if (set.has(h.name)) continue;
-      if (![...set].some((n) => new RegExp(`await ${n}\\s*\\(`).test(bodyOf(lines, h)))) continue;
-      set.add(h.name);
-      grew = true;
-    }
-  }
-  return set;
-};
-const waitCallSites = (lines: readonly string[], throwing: ReadonlySet<string>) => {
-  const out: Array<{ at: number; name: string }> = [];
-  for (let i = 0; i < lines.length; i++) {
-    for (const name of throwing) if (new RegExp(`await ${name}\\s*\\(`).test(lines[i]!)) out.push({ at: i, name });
-  }
-  return out;
-};
+const familyOf = (name: string) => e2eSuiteFamily(ROOT, name).map((path) => ({ path, text: readFileSync(join(ROOT, path), "utf8") }));
 
 test("the harness hands out exactly the two throwing waits the scan below seeds from, so a third one cannot arrive unread", () => {
   const harness = src("scripts/e2e/harness.ts").split("\n");
@@ -307,23 +264,19 @@ test("the harness hands out exactly the two throwing waits the scan below seeds 
     .filter(({ line }) => /^async function wait\w+\(/.test(line))
     .filter(({ i }) => harness.slice(i, i + 12).some((l) => /throw new Error\("wait/.test(l)))
     .map(({ line }) => line.replace(/^async function (wait\w+)\(.*$/, "$1"));
-  assert.deepEqual(found, ["waitSettled", "waitTurned"], "the harness's throwing waits are not the two CTX_THROWING_WAITS seeds this file's scan starts from");
+  assert.deepEqual(found, CTX_THROWING_WAITS.filter((w) => w !== "settle"), "the harness's throwing waits are not the two CTX_THROWING_WAITS seeds this file's scan starts from");
 });
 
-// Membership only: that a rostered suite still BUILDS its steps is the next test's deepEqual, and that every wait sits inside one is the sweep below it. The prover's 2026-09-11 finding is why this title says "is named in the roster" rather than "steps its groups".
-test("every suite with a wait that THROWS is named in the step roster, so one wait giving up cannot take the whole suite (#560)", () => {
+test("every suite with a wait that THROWS is named in the step roster, and every rostered suite has one (#560)", () => {
   const unstepped: string[] = [];
-  for (const [name, file] of SUITE_FILES) {
-    const lines = src(file).split("\n");
-    const throwing = throwingWaitsIn(lines, helperBlocks(lines));
-    if (waitCallSites(lines, throwing).length === 0) continue;
-    if (!(name in STEPPED_GROUPS)) unstepped.push(name);
+  const idle: string[] = [];
+  for (const name of E2E_SUITE_ORDER) {
+    const throwing = containment(familyOf(name)).throwingCalls > 0;
+    if (throwing && !(name in STEPPED_GROUPS)) unstepped.push(name);
+    if (!throwing && name in STEPPED_GROUPS) idle.push(name);
   }
-  assert.deepEqual(
-    unstepped,
-    [],
-    `these suites call a wait that throws and step nothing, so a wait that gives up there records the SUITE as red, loses every check after it, and three such suites in a row trip the streak breaker into a HARNESS ERROR (#560)`,
-  );
+  assert.deepEqual(unstepped, [], "these suites call a wait that throws and step nothing, so a wait that gives up there records the SUITE as red, loses every check after it, and three such suites in a row trip the streak breaker into a HARNESS ERROR (#560)");
+  assert.deepEqual(idle, [], "these suites are in the roster but the scan found no throwing call in their family at all, so it proves nothing there");
 });
 
 test("a suite that builds a step is named in the roster, so adopting one without joining cannot pass unread", () => {
@@ -336,31 +289,13 @@ test("a suite that builds a step is named in the roster, so adopting one without
   );
 });
 
-// The guard the roster cannot be: STEPPED_GROUPS pins the step NAMES, and a wait moved out of its step keeps every one of them. Blind spot, named because a scanner cannot enumerate its own: this reads an `await waitSettled(` inside a comment or a string literal as a call site, which costs a false red and never a miss.
-test("every call of a wait that throws is INSIDE a step, in every suite that steps (#560)", () => {
-  for (const [suite, groups] of Object.entries(STEPPED_GROUPS)) {
-    const lines = src(e2eSuitePath(suite)).split("\n");
-    const steps = stepBlocks(lines);
-    assert.equal(steps.length, groups.length, `suite-${suite}: this scan read ${steps.length} step blocks against ${groups.length} in the roster, so the ranges below cover the wrong part of the file`);
-    const helpers = helperBlocks(lines);
-    const throwing = throwingWaitsIn(lines, helpers);
-    const sites = waitCallSites(lines, throwing);
-    assert.ok(sites.length > 0, `suite-${suite} is in the roster but this scan found no throwing wait in it at all, so it proves nothing there`);
-    const inside = (ranges: ReadonlyArray<{ from: number; to: number }>, at: number) => ranges.some((r) => at > r.from && at < r.to);
-    const throwingHelpers = helpers.filter((h) => throwing.has(h.name));
-    for (const site of sites) {
-      assert.ok(
-        inside(steps, site.at) || inside(throwingHelpers, site.at),
-        `${e2eSuitePath(suite)}:${site.at + 1} calls ${site.name} outside every step, so a timeout there fails the SUITE rather than the numbered check, and the checks after it never run (#560)`,
-      );
-    }
-    for (let i = 0; i < lines.length; i++) {
-      if (!/\bthrow new Error\(/.test(lines[i]!) || inside(steps, i)) continue;
-      assert.ok(
-        inside(throwingHelpers, i),
-        `${e2eSuitePath(suite)}:${i + 1} throws outside every step and outside every wait this scan knows, so the sweep above is reading an incomplete list of that suite's waits`,
-      );
-    }
+// The guard the roster cannot be: STEPPED_GROUPS pins the step NAMES, and a wait moved out of its step keeps every one of them. The scan and its blind spots are `containment` in `test-support/e2e-containment.ts`.
+test("every call of a wait that throws is INSIDE a step, across each suite's file and folder (#560)", () => {
+  for (const name of E2E_SUITE_ORDER) {
+    const got = containment(familyOf(name));
+    const groups = STEPPED_GROUPS[name] ?? [];
+    assert.equal(got.steps.length, groups.length, `suite-${name}: the scan read ${got.steps.length} step calls against ${groups.length} in the roster, so it is reading the wrong files`);
+    assert.deepEqual(got.breaches, [], `suite-${name} calls a thrower or throws outside every step, so a timeout there fails the SUITE rather than the numbered check, and the checks after it never run (#560)`);
   }
 });
 
