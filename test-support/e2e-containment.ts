@@ -1,6 +1,5 @@
 import ts from "typescript";
 
-// The two the harness hands out, pinned against it by e2e-tiers, and the settle every suite builds from settle-support.
 export const CTX_THROWING_WAITS: readonly string[] = ["waitSettled", "waitTurned", "settle"];
 
 export type FamilyFile = { readonly path: string; readonly text: string };
@@ -30,19 +29,19 @@ const functionName = (n: ts.Node): string | null => {
   return null;
 };
 
-const isRun = (n: ts.Node): boolean =>
-  ts.isFunctionDeclaration(n) && n.name?.text === "run" && (ts.getModifiers(n) ?? []).some((m) => m.kind === ts.SyntaxKind.ExportKeyword);
+const isRun = (n: ts.Node): boolean => functionName(n) === "run";
 
 const calleeName = (call: ts.CallExpression): string | null => {
   const c = call.expression;
   if (ts.isIdentifier(c)) return c.text;
   if (ts.isPropertyAccessExpression(c)) return c.name.text;
+  if (ts.isElementAccessExpression(c) && ts.isStringLiteralLike(c.argumentExpression)) return c.argumentExpression.text;
   return null;
 };
 
 function ownNodes(region: ts.Node, visit: (n: ts.Node) => void): void {
   const walk = (n: ts.Node): void => {
-    if (n !== region && (stepLabel(n) !== null || functionName(n) !== null || isRun(n))) return;
+    if (n !== region && (stepLabel(n) !== null || functionName(n) !== null)) return;
     visit(n);
     ts.forEachChild(n, walk);
   };
@@ -103,7 +102,7 @@ function breachesIn(roots: readonly Region[], throwing: ReadonlySet<string>): Br
   return breaches;
 }
 
-// Blind spots, each with its direction: a function reached through an alias, `.call` or `.bind`, or passed as a value (to `.finally`, `.then`, a callback), is not read as called, a miss; two functions sharing a name in one family are read as one, and a factory's returned anonymous function as part of the factory, each a false red; a step reached by any name but `step` is not a step, a false red; a thrower in a shared support module is not seeded, a miss (the PR #572 errata row).
+// Blind spots, each with its direction: a function reached through an alias, a computed key, `.call` or `.bind`, or passed as a value (to `.finally`, `.then`, a callback), is not read as called, a miss; two functions sharing a name in one family are read as one, and a factory's returned anonymous function as part of the factory, each a false red; a step reached by any name but `step` is not a step, a false red; a thrower in a shared support module is not seeded, a miss (the PR #572 errata row).
 export function containment(files: readonly FamilyFile[]): Containment {
   const parsed: Parsed[] = files.map(({ path, text }) => ({ path, sf: ts.createSourceFile(path, text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS) }));
   const { named, roots, steps } = survey(parsed);

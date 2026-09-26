@@ -158,6 +158,13 @@ test("a wait at a module's top level runs outside every step, in the suite file 
   ), top]), ["waitSettled", "waitTurned"]);
 });
 
+test("run is the root however it is declared, and a wait reached through a string key is read", () => {
+  const body = ["  const step = makeStep(ctx);", "  await waitSettled(\"early\");", "  await step(\"R1\", async () => { await waitSettled(\"r1\"); });"];
+  assert.deepEqual(names(one("export const run = async (ctx) => {", ...body, "};")), ["waitSettled"]);
+  assert.deepEqual(names(one("async function run(ctx) {", ...body, "}", "export { run };")), ["waitSettled"]);
+  assert.deepEqual(names(one("export async function run(ctx) {", "  const step = makeStep(ctx);", "  await ctx[\"waitSettled\"](\"x\");", "}")), ["waitSettled"]);
+});
+
 test("a suite's family is its suite file and every TypeScript file in its own folder at any depth, and never a sibling whose name it prefixes", () => {
   const root = mkdtempSync(join(tmpdir(), "vellum-e2e-family-"));
   try {

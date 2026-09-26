@@ -289,7 +289,7 @@ test("a suite that builds a step is named in the roster, so adopting one without
   );
 });
 
-// The guard the roster cannot be: STEPPED_GROUPS pins the step NAMES, and a wait moved out of its step keeps every one of them. The scan and its blind spots are `containment` in `test-support/e2e-containment.ts`.
+// The guard the roster cannot be: STEPPED_GROUPS pins the step NAMES, and a wait moved out of its step keeps every one of them.
 test("every call of a wait that throws is INSIDE a step, across each suite's file and folder (#560)", () => {
   for (const name of E2E_SUITE_ORDER) {
     const got = containment(familyOf(name));
