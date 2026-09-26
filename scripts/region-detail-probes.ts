@@ -7,6 +7,7 @@ import { hamletCandidates } from "../src/society/hamlets.ts";
 import { windowAround } from "../src/world/region.ts";
 import { FULL_WINDOW, LOD_BANDS, lodWindowFor, type LodBand } from "../src/world/lod.ts";
 import type { World } from "../src/world/types.ts";
+import { bandWindows } from "./region-detail-windows.ts";
 
 /** The two follow-up isolations behind #399's PR and its comment on #443. Committed rather than left in a worktree's out/, because #376's prototype numbers and #443's probes both died with their scratchpads and had to be re-earned. `npm run check` does not cover scripts/; type-check by hand against tsconfig's options if you edit this. */
 
@@ -21,13 +22,7 @@ function sweepWindows(count: CountWindow): void {
     const world = generateWorld(defaultRecipe(seed));
     for (const idx of [1, 2, 3]) {
       const band = LOD_BANDS[idx] as LodBand;
-      const n = Math.round(1 / band.sizeUV);
-      for (let iy = 0; iy < n; iy++) {
-        for (let ix = 0; ix < n; ix++) {
-          const window = lodWindowFor((ix + 0.5) * band.sizeUV, (iy + 0.5) * band.sizeUV, band.sizeUV);
-          count(world, `band ${idx}`, window, band.gridW, band.gridH);
-        }
-      }
+      for (const window of bandWindows(band)) count(world, `band ${idx}`, window, band.gridW, band.gridH);
     }
     const capital = world.settlements.find((s) => s.kind === "capital") ?? world.settlements[0];
     if (capital === undefined) continue;

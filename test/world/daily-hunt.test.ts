@@ -458,9 +458,8 @@ function villageAt(x: number, y: number): Quarry {
 
 test("the leading compass line is never the strictly less decisive axis (#333's class)", () => {
   const flat = flatWorld(320, 240);
-  const at = villageAt;
   const leadFor = (x: number, y: number): string =>
-    buildClues(flat, at(x, y)).filter((c) => c.kind === "ew" || c.kind === "ns")[0]!.kind;
+    buildClues(flat, villageAt(x, y)).filter((c) => c.kind === "ew" || c.kind === "ns")[0]!.kind;
 
   assert.equal(leadFor(208, 28), "ns", "0.15 east against 0.38 north: north leads");
   assert.equal(leadFor(300, 100), "ew", "0.44 east against 0.08 south: east leads");

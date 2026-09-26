@@ -111,6 +111,7 @@ function fusedCells(wc: WindowCase, field: Field): number {
   return parentFusion(field, wc.partition, wc.sea).strayCells;
 }
 
+// The floor covers a cell where the parent's OWN cell is land AND its interpolated surface still stands above the waterline; where only the interpolation rises, the parent charts water and the child may draw water.
 function floorCounts(wc: WindowCase, seed: number, cx: number, cy: number): { parentLandCells: number; drownedNoFloor: number } {
   let drownedNoFloor = 0;
   let parentLandCells = 0;
@@ -127,7 +128,6 @@ function floorCounts(wc: WindowCase, seed: number, cx: number, cy: number): { pa
   return { parentLandCells, drownedNoFloor };
 }
 
-// The floor covers a cell where the parent's OWN cell is land AND its interpolated surface still stands above the waterline; where only the interpolation rises, the parent charts water and the child may draw water.
 test("monotone floor: parent land never sinks in the adjusted child, and the guard is not vacuous (#397, narrowed by #443)", () => {
   for (const seed of SWEEP_SEEDS) {
     let drownedNoFloor = 0;

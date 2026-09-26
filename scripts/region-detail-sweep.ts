@@ -1,24 +1,13 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { defaultRecipe, generateWorld } from "../src/world/generate.ts";
-import { LOD_BANDS, lodWindowFor, type LodBand } from "../src/world/lod.ts";
-import type { UvWindow } from "../src/terrain/heightfield.ts";
+import { LOD_BANDS, type LodBand } from "../src/world/lod.ts";
 import { measure, type RiverFailure, type WindowResult } from "./region-detail-sweep-measure.ts";
+import { bandWindows } from "./region-detail-windows.ts";
 
 /** The measurement half of #399. Every claim in that sub's acceptance is a number this script prints, for both arms (bare heightfield and chained detail) so a difference can be attributed. Not in `npm test`: a chained band-3 region costs ~1.1s and the whole sweep runs minutes. */
 
 const SEEDS = [42, 7, 2, 15, 23];
-
-function bandWindows(band: LodBand): UvWindow[] {
-  const n = Math.round(1 / band.sizeUV);
-  const out: UvWindow[] = [];
-  for (let iy = 0; iy < n; iy++) {
-    for (let ix = 0; ix < n; ix++) {
-      out.push(lodWindowFor((ix + 0.5) * band.sizeUV, (iy + 0.5) * band.sizeUV, band.sizeUV));
-    }
-  }
-  return out;
-}
 
 const sum = (rows: ReadonlyArray<WindowResult>, pick: (r: WindowResult) => number): number =>
   rows.reduce((a, r) => a + pick(r), 0);
@@ -85,7 +74,9 @@ async function main(): Promise<void> {
       const windows = bandWindows(band);
       for (const window of windows) {
         for (const detail of [false, true]) {
-          rows.push(measure(world, band, window, detail, failures));
+          const measured = measure(world, band, window, detail);
+          rows.push(measured.row);
+          failures.push(...measured.failures);
         }
       }
       console.error(`seed ${seed} band ${idx}: ${windows.length} windows done`);

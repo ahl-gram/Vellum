@@ -11,8 +11,9 @@ import {
   maxOfSurfaces,
   type ChainSpec,
 } from "../src/world/detail-chain.ts";
-import { LOD_BANDS, lodWindowFor, type LodBand } from "../src/world/lod.ts";
+import { LOD_BANDS, type LodBand } from "../src/world/lod.ts";
 import type { World } from "../src/world/types.ts";
+import { bandWindows } from "./region-detail-windows.ts";
 
 /** #443's measurement half: the world chart's OWN partition across three arms, so the anti-merge claim and the vanishing-landmass census reproduce from one command. Committed, not left in out/, because this epic has lost its evidence twice. `before` rebuilds what #397 and #398 shipped, an UNGATED bilinear floor rejected against that same blurred max, so no revert is needed. Costs minutes; the unit-scale claims are in test/world/detail-chain-world.test.ts. */
 
@@ -42,17 +43,6 @@ function buildOldField(spec: ChainSpec, cache: Map<string, Field>): Field {
     out = rejectBridges(coarse, coarse, floorToParent(bare, coarse), spec.seaLevel);
   }
   cache.set(key, out);
-  return out;
-}
-
-function bandWindows(band: LodBand): UvWindow[] {
-  const n = Math.round(1 / band.sizeUV);
-  const out: UvWindow[] = [];
-  for (let iy = 0; iy < n; iy++) {
-    for (let ix = 0; ix < n; ix++) {
-      out.push(lodWindowFor((ix + 0.5) * band.sizeUV, (iy + 0.5) * band.sizeUV, band.sizeUV));
-    }
-  }
   return out;
 }
 

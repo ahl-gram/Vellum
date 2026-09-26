@@ -300,8 +300,7 @@ export function measure(
   band: LodBand,
   window: UvWindow,
   detail: boolean,
-  failures: RiverFailure[],
-): WindowResult {
+): { readonly row: WindowResult; readonly failures: ReadonlyArray<RiverFailure> } {
   const region = regionFor(world, band, window, detail);
   const placed = region.settlements.filter((s) => s.kind !== "hamlet");
   const hamlets = region.settlements.filter((s) => s.kind === "hamlet");
@@ -311,8 +310,7 @@ export function measure(
   const masses = massCoverage(world, region, window, band.gridW, band.gridH);
   const land = landTally(world, region, window, band.gridW, band.gridH);
   const badRivers = riversEndingOnLand(region, region.rivers, landSnapRadius(band.gridW, window, world.recipe.gridW) + 1);
-  failures.push(...riverFailures(world, region, band, window, badRivers));
-  return {
+  const row: WindowResult = {
     seed: world.recipe.seed,
     band: band.index,
     window,
@@ -344,4 +342,5 @@ export function measure(
     worldMassesInWindow: masses.inWindow,
     regionMaxElev: region.elev.data.reduce<number>((a, v) => Math.max(a, v), -Infinity),
   };
+  return { row, failures: riverFailures(world, region, band, window, badRivers) };
 }
