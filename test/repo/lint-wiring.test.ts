@@ -284,7 +284,7 @@ async function excusedNames(): Promise<Set<string>> {
 }
 
 const ARM_WITNESSES = join(ROOT, "test/repo/names-guard-witnesses.virtual.ts");
-const ARM_WITNESS_SOURCE = "export function witnesses(element: HTMLElement | null, inputShaped: { value: string }, readonlyRecord: { readonly a: HTMLElement }, stateRecord: { n: number }, optionalMember: { id: string; n?: number }, withState: HTMLElement & { n: number }, indexed: { readonly a: HTMLElement; [k: string]: HTMLElement }, mutableRecord: { a: HTMLElement }, memberless: object): void {}\n";
+const ARM_WITNESS_SOURCE = "export function witnesses(element: HTMLElement | null, inputShaped: { value: string }, readonlyRecord: { readonly a: HTMLElement }, nullableRecord: { readonly a: HTMLElement | null }, stateRecord: { n: number }, optionalMember: { id: string; n?: number }, withState: HTMLElement & { n: number }, indexed: { readonly a: HTMLElement; [k: string]: HTMLElement }, mutableRecord: { a: HTMLElement }, memberless: object): void {}\n";
 
 function compileWithWitnesses(roots: readonly string[]): ts.Program {
   const config = ts.getParsedCommandLineOfConfigFile(join(ROOT, "tsconfig.json"), {}, { ...ts.sys, onUnRecoverableConfigFileDiagnostic: () => undefined });
@@ -322,7 +322,7 @@ test("every parameter bearing a name no-param-reassign excuses holds a page elem
   const checker = program.getTypeChecker();
   const holdsElements = pageElementTest(program);
   const admitted = parameterBindings(program.getSourceFile(ARM_WITNESSES)!).filter((id) => holdsElements(checker.getTypeAtLocation(id))).map((id) => id.text);
-  assert.deepEqual(admitted, ["element", "inputShaped", "readonlyRecord"], "the guard's arms no longer admit exactly an element, an input-shaped type and a record of read-only elements among its witnesses: an arm stopped refusing what it must, or began refusing what it must admit");
+  assert.deepEqual(admitted, ["element", "inputShaped", "readonlyRecord", "nullableRecord"], "the guard's arms no longer admit exactly an element, an input-shaped type and a record of read-only elements among its witnesses: an arm stopped refusing what it must, or began refusing what it must admit");
   const borne = new Set<string>();
   const offenders: string[] = [];
   for (const file of hitFiles) {
