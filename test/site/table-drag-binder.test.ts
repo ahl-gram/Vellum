@@ -26,7 +26,7 @@ const nextTick = () => new Promise((r) => setTimeout(r, 0));
 const MOUSE = { pointerType: "mouse", button: 0, isPrimary: true };
 const BAND = { top: 552 };
 
-function bound(opts: { file?: boolean; band?: { top: number } | null; canDrag?: boolean; reduce?: boolean } = {}) {
+function bound(opts: { file?: boolean; band?: { top: number } | null; canDrag?: boolean; reduce?: boolean; onReveal?: () => void } = {}) {
   const handle = new El("button") as unknown as HTMLButtonElement & El;
   handle.rect = { left: 660, top: 115, right: 715, bottom: 170 };
   (handle as unknown as { isConnected: boolean }).isConnected = true;
@@ -36,7 +36,7 @@ function bound(opts: { file?: boolean; band?: { top: number } | null; canDrag?: 
     canDrag: () => opts.canDrag ?? true,
     ghostUrl: () => `blob:ghost-${++calls.minted}`,
     band: () => (opts.band === undefined ? BAND : opts.band),
-    reveal: () => { calls.reveal++; return () => { calls.restore++; }; },
+    reveal: () => { calls.reveal++; opts.onReveal?.(); return () => { calls.restore++; }; },
     receiving: (over) => { calls.receiving.push(over); },
     file: (url) => { calls.file.push(url); return opts.file ?? true; },
     prefersReduce: () => opts.reduce ?? true,
@@ -168,4 +168,15 @@ test("TD14 a cancelled carry (Escape, a lost window, a cancelled pointer) still 
   await nextTick();
   d.press(700, 130); d.up(700, 130);
   assert.equal(d.click().stopped, false, "a release that never reached the page (the window was lost) leaves no swallow for the next honest press and click");
+});
+
+test("TD15 a carry ended from inside its own move (the reveal it calls firing Escape) stays ended, so the next press begins a carry of its own (the cold review's round 3 finding 1 on PR #694)", async () => {
+  const d = bound({ onReveal: () => fireDoc("keydown", { key: "Escape" }) });
+  d.press(700, 130); d.move(640, 680);
+  assert.equal(d.calls.minted, 1, "the first carry lifted its ghost and entered the band");
+  assert.equal(d.ghost(), null, "Escape inside the reveal ended it");
+  await nextTick();
+  d.press(700, 130); d.move(640, 300);
+  assert.equal(d.calls.minted, 2, "the next press begins a new carry with a ghost of its own, where a carry brought back after its end refuses every later press");
+  fireDoc("keydown", { key: "Escape" });
 });
