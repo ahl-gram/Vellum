@@ -31,7 +31,7 @@ const folioLines = (): string[][] => {
 test("PRR1 the Print Room is a chart room: chartRoom on the layout, the RoomFolio in place of the RoomHead, the order desk retired", () => {
   const open = page.match(/<BaseLayout([\s\S]*?)>/);
   assert.ok(open, "the page renders through BaseLayout");
-  assert.match(open[1], /\bchartRoom\b/, "the Print Room passes chartRoom (no band, no footer)");
+  assert.match(open[1]!, /\bchartRoom\b/, "the Print Room passes chartRoom (no band, no footer)");
   assert.ok(page.includes("<RoomFolio room={room} tagline={tagline}>"), "the room's name stands in the folio corner");
   assert.ok(!page.includes("<RoomHead"), "the RoomHead on the sheet retires with the conversion");
   for (const gone of ['class="order-desk"', 'class="counter"', 'class="intro">This is', 'class="offering']) {
@@ -142,13 +142,13 @@ test("PRR7 the css: the sheet fitted to what the chrome leaves, the hidden docum
   assert.ok(!/max-width:\s*1000px/.test(css) && !css.includes(".order-desk") && !css.includes(".offering"), "the desk's column and cards are gone: the chart is the room");
   const print = css.match(/@media print\s*\{([\s\S]*)\}\s*$/);
   assert.ok(print, "the page css ends with its print stand-down");
-  assert.match(print[1], /\.stage\s*\{[^}]*position:\s*static/, "unbound, the proof prints in flow");
-  assert.match(print[1], /#map\s*\{[^}]*transform:\s*none\s*!important/, "unzoomed");
-  assert.match(print[1], /body\.has-atlas \.stage\s*\{[^}]*display:\s*none\s*!important/, "bound, the stage prints as nothing");
-  assert.match(print[1], /body\.has-atlas #pr-atlas\s*\{[^}]*display:\s*block/, "and the document prints");
-  assert.match(print[1], /body\.has-atlas \.corner\.folio-room\s*\{[^}]*display:\s*none\s*!important/, "the atlas's own head leads, not the room's name");
-  assert.match(print[1], /break-after:\s*page/, "one plate per page");
-  assert.doesNotMatch(print[1], /> header|\.room-head|> footer|\.order-desk|\.counter/, "no rule targets furniture a chart room no longer has");
+  assert.match(print[1]!, /\.stage\s*\{[^}]*position:\s*static/, "unbound, the proof prints in flow");
+  assert.match(print[1]!, /#map\s*\{[^}]*transform:\s*none\s*!important/, "unzoomed");
+  assert.match(print[1]!, /body\.has-atlas \.stage\s*\{[^}]*display:\s*none\s*!important/, "bound, the stage prints as nothing");
+  assert.match(print[1]!, /body\.has-atlas #pr-atlas\s*\{[^}]*display:\s*block/, "and the document prints");
+  assert.match(print[1]!, /body\.has-atlas \.corner\.folio-room\s*\{[^}]*display:\s*none\s*!important/, "the atlas's own head leads, not the room's name");
+  assert.match(print[1]!, /break-after:\s*page/, "one plate per page");
+  assert.doesNotMatch(print[1]!, /> header|\.room-head|> footer|\.order-desk|\.counter/, "no rule targets furniture a chart room no longer has");
 });
 
 test("PRR9 the back matter is the sheet's third face (#497, seat p): seats.ts turns and measures the page, the other faces put it away, app.ts asks the page for the aspect first, bound-atlas routes the matter keys", () => {
@@ -172,19 +172,19 @@ test("PRR9 the back matter is the sheet's third face (#497, seat p): seats.ts tu
 test("PRR10 the page's dress: the inner lays out once at the measure's own 900px/16px reference and scales as a unit, the measure box laid out but invisible and out of flow", () => {
   const inner = css.match(/#pr-page \.page-inner\s*\{([^}]*)\}/);
   assert.ok(inner, "the inner has its rule");
-  assert.match(inner[1], /width:\s*900px/, "the inner is the measure box's own layout");
-  assert.match(inner[1], /font-size:\s*16px/, "at the measure's base, so the measured height is the displayed geometry (re-laying out at the sheet's font drifted 19px of line rounding at 390)");
-  assert.match(inner[1], /transform-origin:\s*0 0/, "scaled from the corner");
+  assert.match(inner[1]!, /width:\s*900px/, "the inner is the measure box's own layout");
+  assert.match(inner[1]!, /font-size:\s*16px/, "at the measure's base, so the measured height is the displayed geometry (re-laying out at the sheet's font drifted 19px of line rounding at 390)");
+  assert.match(inner[1]!, /transform-origin:\s*0 0/, "scaled from the corner");
   assert.match(seats, /new ResizeObserver\(/, "seats.ts tracks the page's fitted size");
   assert.match(seats, /clientWidth \/ PAGE_MEASURE_WIDTH/, "and scales the inner by the one reference width");
   const measure = css.match(/#pr-page-measure\s*\{([^}]*)\}/);
   assert.ok(measure, "the measure box has its seat");
-  assert.match(measure[1], /width:\s*900px/);
-  assert.match(measure[1], /font-size:\s*16px/);
-  assert.match(measure[1], /visibility:\s*hidden/, "invisible but laid out; display:none would measure nothing");
-  assert.doesNotMatch(measure[1], /display:\s*none/);
-  assert.match(measure[1], /position:\s*absolute/, "the 900px box is out of flow, or a phone scrolls sideways (#219's class)");
-  assert.match(measure[1], /left:\s*-\d+px/, "and off screen");
+  assert.match(measure[1]!, /width:\s*900px/);
+  assert.match(measure[1]!, /font-size:\s*16px/);
+  assert.match(measure[1]!, /visibility:\s*hidden/, "invisible but laid out; display:none would measure nothing");
+  assert.doesNotMatch(measure[1]!, /display:\s*none/);
+  assert.match(measure[1]!, /position:\s*absolute/, "the 900px box is out of flow, or a phone scrolls sideways (#219's class)");
+  assert.match(measure[1]!, /left:\s*-\d+px/, "and off screen");
   assert.match(css, /\.matter-page\s*\{[^}]*box-sizing:\s*border-box/, "the shared dress carries the page's own padding, so the measure includes it");
   assert.match(css, /#pr-page\[hidden\]\s*\{[^}]*display:\s*none/, "the hidden page face is gone, like its siblings");
   assert.match(css, /#pr-page\s*\{[^}]*overflow:\s*hidden/, "the page clips its own slack");

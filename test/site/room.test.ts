@@ -77,7 +77,7 @@ test("the room folio's panel is painted screen-only (#538): on paper the corner 
   const REPO = resolve(import.meta.dirname, "..", "..");
   const strip = (p: string) => readFileSync(resolve(REPO, p), "utf8").replace(/"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|\/\*[\s\S]*?\*\//g, (m) => (m.startsWith("/*") ? "" : m));
   // The sweep errs toward flagging: any tr or folio-room word in a content-giving before or after selector, any case, any spelling; the wrap's window is its own brace-matched close, and a brace inside a string can only close it early or never, so the window is never too wide; a quoted string passes the comment stripper whole, so a "/*" in a content value hides nothing. What it cannot see, named: native nesting (no sheet uses it) and a selector reaching the folio by a shared class or by structure; RH10c and SB9b read the resolved content.
-  const paints = (css: string) => [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].filter(([, sel, decls]) => /:{1,2}(before|after)/i.test(sel) && /\b(tr|folio-room)\b/i.test(sel) && /content\s*:/i.test(decls));
+  const paints = (css: string) => [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].filter(([, sel, decls]) => /:{1,2}(before|after)/i.test(sel!) && /\b(tr|folio-room)\b/i.test(sel!) && /content\s*:/i.test(decls!));
   const css = strip("public/atelier.css");
   const screen = css.indexOf("@media screen {");
   const closeOf = (open: number) => { let depth = 0; for (let i = open; i < css.length; i++) { if (css[i] === "{") depth++; else if (css[i] === "}" && --depth === 0) return i; } return -1; };
@@ -86,10 +86,10 @@ test("the room folio's panel is painted screen-only (#538): on paper the corner 
   assert.match(css.slice(screen, close), /\.corner\.tr::before[^{]*\{[^}]*content\s*:\s*""/i, "the painting rule that gives the folio panel its content sits inside it");
   const kit = paints(css);
   assert.ok(kit.length >= 1, "at least one rule gives the folio's pseudo content");
-  for (const m of kit) assert.ok(m.index > screen && m.index < close, `a rule giving the folio's pseudo content sits outside the screen-only wrap: ${m[1].trim().slice(0, 80)}`);
+  for (const m of kit) assert.ok(m.index > screen && m.index < close, `a rule giving the folio's pseudo content sits outside the screen-only wrap: ${m[1]!.trim().slice(0, 80)}`);
   const sheets = [...globSync("public/**/*.css", { cwd: REPO }), ...globSync("src/**/*.astro", { cwd: REPO }), ...globSync("src/cli/*.ts", { cwd: REPO })].filter((p) => p !== "public/atelier.css").sort();
   assert.ok(sheets.includes("src/cli/gallery.ts") && sheets.includes("src/layouts/BaseLayout.astro"), "the sweep reaches the generated Gallery sheet and the layout's style block");
-  for (const p of sheets) assert.deepEqual(paints(strip(p)).map((m) => m[1].trim().slice(0, 80)), [], `${p} paints the folio's pseudo itself; the panel belongs to the kit`);
+  for (const p of sheets) assert.deepEqual(paints(strip(p)).map((m) => m[1]!.trim().slice(0, 80)), [], `${p} paints the folio's pseudo itself; the panel belongs to the kit`);
 });
 
 test("the kit's print block stands the stage's message boxes down (#566, ruled 2026-09-11): the status pill with its scripts-off notice, and the render-worker warning that stands on the notice's own seat, each scoped to the stage so no other status or warning goes with them", () => {
@@ -101,8 +101,8 @@ test("the kit's print block stands the stage's message boxes down (#566, ruled 2
   assert.ok(close > open, "the print block's own brace-matched close, so a block appended after it can never widen the window");
   // This pin is the fast lane and it reads TEXT, so it is blind to anything the cascade decides: a later rule re-showing the pill (in this block, in a second print block, or in a page sheet) passes here and reds e2e SB9c, which reads the resolved value and is the guard (measured 2026-09-11 against a display: block !important arm appended after this one: SB9c red at disp block, w 195). It errs toward flagging where it does read: \bstatus\b also matches .legend-status. SB9c, SB9d and PR21d are the resolved reads for the pill, the scripts-off notice and the warning.
   const stood = [...css.slice(open, close).matchAll(/([^{}]+)\{([^{}]*)\}/g)]
-    .filter(([, , decls]) => /display\s*:\s*none/i.test(decls))
-    .flatMap(([, sel]) => sel.split(",").map((arm) => arm.trim()).filter((arm) => /\b(status|warning)\b/i.test(arm)));
+    .filter(([, , decls]) => /display\s*:\s*none/i.test(decls!))
+    .flatMap(([, sel]) => sel!.split(",").map((arm) => arm.trim()).filter((arm) => /\b(status|warning)\b/i.test(arm)));
   const subjectOf = (arm: string): string => (arm.split(/\s+/).filter(Boolean).at(-1) ?? "").toLowerCase();
   for (const box of [".status", ".warning"]) assert.ok(stood.some((arm) => subjectOf(arm) === box), `the print block stands the stage's ${box} down`);
   for (const arm of stood) {
@@ -117,14 +117,14 @@ test("the kit gives the stage's status pill its fade, keyed to the class so ever
   const css = readFileSync(resolve(import.meta.dirname, "..", "..", "public/atelier.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
   const base = css.match(/body\.chart-room \.stage \.status\s*\{([^}]*)\}/);
   assert.ok(base, "the kit dresses the stage's pill");
-  assert.match(base[1], /transition:\s*opacity\s+0\.45s/, "the pill carries the fade's own duration, the one src/site/shared/announce.ts waits out before it clears the text");
+  assert.match(base[1]!, /transition:\s*opacity\s+0\.45s/, "the pill carries the fade's own duration, the one src/site/shared/announce.ts waits out before it clears the text");
   // Every arm, keyed on the bare class: `.status.fading` as the anchor misses `#pf-status.fading`, the one spelling that leaves a page's announcement standing (skeptic round 2 on PR #584).
   const fades = [...css.matchAll(/([^{}]*\.fading[^{}]*)\{([^}]*)\}/g)];
   assert.ok(fades.length > 0, "and the kit carries the arm the announcer turns on");
   for (const fade of fades) {
-    assert.match(fade[2], /opacity:\s*0/, `which is what fading means: ${fade[1].trim()}`);
-    assert.match(fade[1], /body\.chart-room \.stage\b/, `scoped to a chart room's stage like every other rule on this pill: ${fade[1].trim()}`);
-    assert.doesNotMatch(fade[1], /#/, `keyed to the class and never to one page's id, or that page's pill never fades: ${fade[1].trim()}`);
+    assert.match(fade[2]!, /opacity:\s*0/, `which is what fading means: ${fade[1]!.trim()}`);
+    assert.match(fade[1]!, /body\.chart-room \.stage\b/, `scoped to a chart room's stage like every other rule on this pill: ${fade[1]!.trim()}`);
+    assert.doesNotMatch(fade[1]!, /#/, `keyed to the class and never to one page's id, or that page's pill never fades: ${fade[1]!.trim()}`);
   }
 });
 

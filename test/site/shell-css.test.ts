@@ -62,7 +62,7 @@ const RETIRED_INKS = ["#3d2f1f", "#5a4326"] as const;
 const layoutStyle = () => {
   const m = read("src/layouts/BaseLayout.astro").match(/<style is:global>([\s\S]*?)<\/style>/);
   assert.ok(m, "BaseLayout.astro should carry the global shell <style>");
-  return m[1];
+  return m[1]!;
 };
 
 test("BaseLayout declares the four palette tokens at their ratified values (#263)", () => {
@@ -159,7 +159,7 @@ test("drift guard: every var() consumed without a fallback is declared (#263)", 
     paletteRootCss(),
   ];
   for (const text of declarationSources) {
-    for (const m of text.matchAll(/(--[a-zA-Z0-9-]+)\s*:/g)) declared.add(m[1]);
+    for (const m of text.matchAll(/(--[a-zA-Z0-9-]+)\s*:/g)) declared.add(m[1]!);
   }
 
   const consumers: Array<[string, string]> = [
@@ -171,7 +171,7 @@ test("drift guard: every var() consumed without a fallback is declared (#263)", 
   ];
   for (const [name, text] of consumers) {
     for (const m of text.matchAll(/var\(\s*(--[a-zA-Z0-9-]+)\s*\)/g)) {
-      assert.ok(declared.has(m[1]), `${name} consumes ${m[1]} but nothing the page loads declares it`);
+      assert.ok(declared.has(m[1]!), `${name} consumes ${m[1]} but nothing the page loads declares it`);
     }
   }
 });
@@ -181,18 +181,18 @@ test("the walnut deep: one declaration, the vignette over the lit walnut, consum
   const css = layoutStyle();
   const deep = css.match(/--the-deep:\s*([\s\S]*?);/);
   assert.ok(deep, "the layout style should declare --the-deep once");
-  const vignette = deep[1].search(/radial-gradient\(120% 90% at 50% 30%,\s*rgb\(from var\(--ink-dark\) r g b \/ 0\)/);
-  const walnut = deep[1].search(/radial-gradient\(80% 70% at 30% 20%,\s*color-mix\(in srgb, var\(--ink-dark\) 90%, var\(--parchment\) 10%\) 0%,\s*var\(--ink-dark\) 55%,\s*var\(--chart-ink\) 100%\)/);
+  const vignette = deep[1]!.search(/radial-gradient\(120% 90% at 50% 30%,\s*rgb\(from var\(--ink-dark\) r g b \/ 0\)/);
+  const walnut = deep[1]!.search(/radial-gradient\(80% 70% at 30% 20%,\s*color-mix\(in srgb, var\(--ink-dark\) 90%, var\(--parchment\) 10%\) 0%,\s*var\(--ink-dark\) 55%,\s*var\(--chart-ink\) 100%\)/);
   assert.ok(vignette > -1, "the deep's darkening vignette is present");
   assert.ok(walnut > -1, "the deep's lit-walnut radial is present, token-derived (no raw #55402a)");
   assert.ok(vignette < walnut, "the vignette paints above the walnut");
   assert.equal(css.split("--the-deep:").length - 1, 1, "--the-deep is declared exactly once");
   const before = css.match(/body::before\s*\{([\s\S]*?)\}/);
-  assert.ok(before && /background:\s*var\(--the-deep\)/.test(before[1]), "the fixed ground layer consumes var(--the-deep)");
-  assert.ok(before && /position:\s*fixed/.test(before[1]), "the ground layer is fixed (iOS treats background-attachment: fixed as scroll)"); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+  assert.ok(before && /background:\s*var\(--the-deep\)/.test(before[1]!), "the fixed ground layer consumes var(--the-deep)");
+  assert.ok(before && /position:\s*fixed/.test(before[1]!), "the ground layer is fixed (iOS treats background-attachment: fixed as scroll)"); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   const band = css.match(/\.band::before\s*\{([\s\S]*?)\}/);
-  assert.ok(band && /background:\s*var\(--the-deep\)/.test(band[1]), "the band clips the SAME deep, via the token");
-  assert.ok(band && /clip-path:\s*inset\(0 0 calc\(100% - var\(--band-h\)\) 0\)/.test(band[1]), "the band is the deep clipped to --band-h, so the reserved ground cannot misalign"); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+  assert.ok(band && /background:\s*var\(--the-deep\)/.test(band[1]!), "the band clips the SAME deep, via the token");
+  assert.ok(band && /clip-path:\s*inset\(0 0 calc\(100% - var\(--band-h\)\) 0\)/.test(band[1]!), "the band is the deep clipped to --band-h, so the reserved ground cannot misalign"); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   const daylight = css.search(/rgb\(255 250 235/);
   assert.equal(daylight, -1, "the light wash retired with the ground (#461 ruling 2)");
 });
@@ -202,28 +202,28 @@ test("the interim desk panel: an unconverted room's main stands on parchment, no
   const css = layoutStyle();
   const panel = css.match(/main\.desk-panel\s*\{([\s\S]*?)\}/);
   assert.ok(panel, "the layout style should carry main.desk-panel");
-  assert.match(panel[1], /background:\s*var\(--parchment\)/, "the panel is the parchment the page css was tuned on");
-  assert.match(panel[1], /box-shadow:\s*var\(--sheet-shadow\)/, "the panel rests at the house depth");
+  assert.match(panel[1]!, /background:\s*var\(--parchment\)/, "the panel is the parchment the page css was tuned on");
+  assert.match(panel[1]!, /box-shadow:\s*var\(--sheet-shadow\)/, "the panel rests at the house depth");
 });
 
 test("the chrome passes the hand through: drags over the fixed cluster reach the chart, links stay live (#461, skeptic finding 2)", () => {
   // The defect measured on home: a 485x79 dead drag zone under the cluster. The mockup's idiom (stage.css) is the fix: pointer-events none on the container, auto on the interactive children.
   const css = layoutStyle();
   const chrome = css.match(/header\.chrome\s*\{([\s\S]*?)\}/);
-  assert.ok(chrome && /pointer-events:\s*none/.test(chrome[1]), "the chrome container passes pointer events through");
+  assert.ok(chrome && /pointer-events:\s*none/.test(chrome[1]!), "the chrome container passes pointer events through");
   assert.match(css, /header\.chrome a,\s*header\.chrome \.rooms-reveal\s*\{[^}]*pointer-events:\s*auto/, "the links and the phone reveal take the hand back");
 });
 
 test("print is paper all the way down: the dark ground resets with the chrome it carried (#454 open decision 4, skeptic finding 5)", () => {
   const print = layoutStyle().match(/@media print\s*\{([\s\S]*?)\n\}/);
   assert.ok(print, "the layout style carries the print block");
-  assert.match(print[1], /body\s*\{[^}]*background:\s*none/, "the body's walnut ground must not print (near-black pages with background graphics on)");
+  assert.match(print[1]!, /body\s*\{[^}]*background:\s*none/, "the body's walnut ground must not print (near-black pages with background graphics on)");
 });
 
 test("the deep's focus ring: the chrome on the walnut brightens the ring, paper keeps ink-dark (#324 decision 6, re-ratified at #461)", () => {
   const ring = layoutStyle().match(/header\.chrome a:focus-visible,\s*footer a:focus-visible\s*\{([\s\S]*?)\}/);
   assert.ok(ring, "the layout style should carry the deep-chrome focus override");
-  assert.match(ring[1], /outline-color:\s*var\(--parchment-bright\)/, "the ring on the deep is parchment-bright (#455's precedent for controls on the walnut)");
+  assert.match(ring[1]!, /outline-color:\s*var\(--parchment-bright\)/, "the ring on the deep is parchment-bright (#455's precedent for controls on the walnut)");
 });
 
 // The sheet's lift is ONE token (#367), ratified at 0.4 (2026-08-12): two coincident 0.2 shadows measured as a single 0.385.
@@ -269,7 +269,7 @@ test("the stage shadow is declared once and consumed as a var: the chart-room de
 
 const rulesIn = (css: string): ReadonlyArray<{ selector: string; body: string }> =>
   [...css.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}]+)\{([^{}]*)\}/g)]
-    .map((m) => ({ selector: m[1].trim(), body: m[2] }));
+    .map((m) => ({ selector: m[1]!.trim(), body: m[2]! }));
 
 const findRule = (css: string, selector: string) =>
   rulesIn(css).find((r) => r.selector === selector);
@@ -371,10 +371,10 @@ test("the plate dress rests flat and tips on hover (#130, the consumer is now pr
   const css = read("public/motion.css");
   const base = css.match(/\.plate\s*\{([^}]*)\}/);
   assert.ok(base, ".plate base rule exists in motion.css");
-  assert.ok(!/rotate\(/.test(base[1]), ".plate rests flat (no resting rotate)");
+  assert.ok(!/rotate\(/.test(base[1]!), ".plate rests flat (no resting rotate)");
   const hover = css.match(/\.plate:hover\s*\{([^}]*)\}/);
   assert.ok(
-    hover && /rotate\(/.test(hover[1]) && /translateY\(/.test(hover[1]),
+    hover && /rotate\(/.test(hover[1]!) && /translateY\(/.test(hover[1]!),
     ".plate tips (rotate) and lifts (translateY) under the hand",
   );
 });
@@ -385,7 +385,7 @@ test("the wordmark tips under the hand on room pages, and stays still on home (#
   const hover = css.match(/body:has\(\.room-name\) \.wordmark a:hover,\s*body:has\(\.room-name\) \.wordmark a:focus-visible\s*\{([^}]*)\}/);
   assert.ok(hover, "the room-scoped wordmark hover rule should exist in motion.css");
   assert.ok(
-    /rotate\(/.test(hover[1]) && /translateY\(/.test(hover[1]),
+    /rotate\(/.test(hover[1]!) && /translateY\(/.test(hover[1]!),
     "the wordmark should tip (rotate) and lift (translateY) under the hand",
   );
   assert.ok(
@@ -435,7 +435,7 @@ test("no hover or active rule states a lift as a px literal: the raise is a toke
     for (const { selector, body } of rulesIn(css)) {
       if (!/:hover|:active/.test(selector)) continue;
       for (const m of body.matchAll(/translateY\(([^)]*)\)/g)) {
-        const arg = m[1].trim();
+        const arg = m[1]!.trim();
         if (arg === "0" || arg.startsWith("var(")) continue;
         const sanctioned = selector
           .split(",")

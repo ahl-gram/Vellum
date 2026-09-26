@@ -81,7 +81,7 @@ export function stripStamps(png: Uint8Array): Buffer {
 export function stampPng(png: Uint8Array, stamp: string): Buffer {
   const bare = stripStamps(png);
   const [ihdr] = chunks(bare);
-  if (ihdr?.type !== "IHDR") throw new Error("PNG does not open with IHDR"); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+  if (ihdr?.type !== "IHDR") throw new Error("PNG does not open with IHDR");
   const text = chunk("tEXt", Buffer.concat([Buffer.from(OG_STAMP_KEYWORD, "latin1"), Buffer.from([0]), Buffer.from(stamp, "latin1")]));
   return Buffer.concat([bare.subarray(0, ihdr.end), text, bare.subarray(ihdr.end)]);
 }

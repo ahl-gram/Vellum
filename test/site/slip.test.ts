@@ -59,8 +59,8 @@ test("a fold relays the room's layout only after the transition has settled", ()
   f.fold.fire("click");
   assert.equal(f.layouts.length, 0, "nothing measured mid-transition (the slip is still where it was)");
   assert.equal(f.pending.length, 1);
-  assert.equal(f.pending[0].ms, FOLD_SETTLE_MS, "the wait is the sheet's transition plus a beat");
-  f.pending[0].run();
+  assert.equal(f.pending[0]!.ms, FOLD_SETTLE_MS, "the wait is the sheet's transition plus a beat");
+  f.pending[0]!.run();
   assert.equal(f.layouts.length, 1, "then the room re-measures once");
 });
 

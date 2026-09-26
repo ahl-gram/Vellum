@@ -56,7 +56,7 @@ test("the ratified tile geometry and the mark's name, as literals (a changed val
 test("the tile is one rounded rect in the walnut deep with the tan keyline, standing inside the viewBox", () => {
   const rects = tags(buildFavicon(SQUARE), "rect");
   assert.equal(rects.length, 1, "the favicon has the tile and no other rect");
-  const [tile] = rects;
+  const [tile] = rects as [string];
   assert.equal(attr(tile, "fill"), WALNUT);
   assert.equal(attr(tile, "stroke"), TAN);
   assert.ok(num(tile, "rx") > 0, "the corners are rounded");
@@ -75,7 +75,7 @@ test("the letter is the outline verbatim, filled parchment, its hairline the sam
   const svg = buildFavicon(SQUARE);
   const paths = tags(svg, "path");
   assert.equal(paths.length, 1);
-  const [letter] = paths;
+  const [letter] = paths as [string];
   assert.equal(attr(letter, "d"), SQUARE.path);
   assert.equal(attr(letter, "fill"), PARCHMENT);
   assert.equal(attr(letter, "stroke"), PARCHMENT);
@@ -96,13 +96,13 @@ test("the glyph bbox is scaled to the ratified width and centred in the tile, fo
   const inner = PUNCHCUTTER_TILE.keyline;
   assert.ok(left > inner && right < 32 - inner && top > inner && bottom < 32 - inner, "the letter clears the keyline");
 
-  const [letter] = tags(buildFavicon(SQUARE), "path");
+  const [letter] = tags(buildFavicon(SQUARE), "path") as [string];
   assert.equal(attr(letter, "transform"), `translate(${p.tx} ${p.ty}) scale(${p.scale} -${p.scale})`);
 });
 
 test("the hairline is drawn in font units so it scales with the letter to the ratified tile width", () => {
   const p = letterPlacement(SQUARE, PUNCHCUTTER_TILE);
-  const [letter] = tags(buildFavicon(SQUARE), "path");
+  const [letter] = tags(buildFavicon(SQUARE), "path") as [string];
   const drawn = num(letter, "stroke-width") * p.scale;
   assert.ok(Math.abs(drawn - PUNCHCUTTER_TILE.hairline) < 1e-3, `stroke-width times scale is the hairline to its 3-decimal rounding: ${drawn}`);
   assert.equal(attr(letter, "stroke-linejoin"), "round");
@@ -126,7 +126,7 @@ test("the root names the mark for assistive tech", () => {
 test("the touch icon is the favicon's markup on a full-bleed walnut ground, the root resized", () => {
   const favicon = buildFavicon(SQUARE);
   const touch = buildTouchIcon(SQUARE);
-  const [ground, ...rest] = tags(touch, "rect");
+  const [ground, ...rest] = tags(touch, "rect") as [string, ...string[]];
   assert.equal(rest.length, 1, "the ground plus the tile");
   assert.equal(attr(ground, "width"), "32");
   assert.equal(attr(ground, "height"), "32");
@@ -172,7 +172,7 @@ test("public/apple-touch-icon.png is the committed SVG's mark: walnut corners, t
   assert.equal(png.width, TOUCH_ICON_SIZE);
   assert.equal(png.height, TOUCH_ICON_SIZE);
   const last = TOUCH_ICON_SIZE - 1;
-  for (const [x, y] of [[0, 0], [last, 0], [0, last], [last, last]]) {
+  for (const [x, y] of [[0, 0], [last, 0], [0, last], [last, last]] as const) {
     assert.equal(hexOf(png.pixel(x, y)), WALNUT, `corner (${x}, ${y}) is the full-bleed ground`);
   }
   const counts = new Map<string, number>();

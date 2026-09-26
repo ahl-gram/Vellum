@@ -35,7 +35,7 @@ function mediaBodies(sheet: string, query: string): string {
 const rule = (sheet: string, selector: string): string => {
   const m = sheet.match(new RegExp(`(?:^|[}\\n])\\s*${selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*\\{([^}]*)\\}`));
   assert.ok(m, `a rule for ${selector} exists`);
-  return m[1];
+  return m[1]!;
 };
 
 const narrow = mediaBodies(css, "(max-width: 900px)");
@@ -52,7 +52,7 @@ test("the cluster's wash is a soft pool sized by the cluster, not the 46rem slab
   assert.doesNotMatch(wash, /radial-gradient|46rem|17rem|width:|height:/, "no fixed-size gradient box remains");
   const inset = wash.match(/inset:\s*(-?[\d.]+)rem\s+(-?[\d.]+)rem\s+(-?[\d.]+)rem\s+(-?[\d.]+)rem/);
   assert.ok(inset, "the wash is an inset around the cluster, so it follows the lettering");
-  const [top, right, bottom, left] = inset.slice(1).map(Number);
+  const [top, right, bottom, left] = inset.slice(1).map(Number) as [number, number, number, number];
   assert.ok(top <= -3 && left <= -3, `the top and left bleed off the viewport edge (top ${top}rem, left ${left}rem)`);
   assert.ok(right >= -3 && right <= -1.5 && bottom >= -3 && bottom <= -1.5, `the right and bottom reach 1.5 to 3rem past the lettering (right ${right}rem, bottom ${bottom}rem)`);
   assert.match(wash, /filter:\s*blur\((1[6-9]|2[0-8])px\)/, "the edge is a 16 to 28px blur, no clipped edge to see");

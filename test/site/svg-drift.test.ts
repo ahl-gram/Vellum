@@ -34,7 +34,7 @@ test("a coordinate move beyond tolerance is reported as drift with its magnitude
   assert.equal(d.overTol, 1, "one number moved past tolerance");
   assert.equal(d.total, 2, "both numeric tokens (1157.93 and 0) are counted");
   assert.ok(Math.abs(d.maxAbs - 100) < 1e-9, `expected a 100px delta, got ${d.maxAbs}`);
-  assert.ok(d.examples[0]?.includes("1157.93") && d.examples[0]?.includes("1257.93"));
+  assert.ok(d.examples[0]?.includes("1157.93") && d.examples[0].includes("1257.93"));
 });
 
 test("a structural (non-numeric) change is reported as a structure diff at the divergence point", () => {

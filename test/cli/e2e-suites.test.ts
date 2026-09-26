@@ -39,7 +39,7 @@ test("the full and smoke keywords resolve to their tiers", () => {
 test("an explicit list is returned in canonical runner order, never request order", () => {
   const rank = (n: string) => E2E_SUITE_ORDER.indexOf(n as never);
   for (let i = 0; i < E2E_SUITE_ORDER.length - 1; i++) {
-    const [a, b] = [E2E_SUITE_ORDER[i], E2E_SUITE_ORDER[i + 1]];
+    const [a, b] = [E2E_SUITE_ORDER[i]!, E2E_SUITE_ORDER[i + 1]!];
     const { names } = resolveSuiteSelection({ [E2E_SUITES_VAR]: `${b},${a}` });
     // Membership can legitimately grow, so assert rank ordering rather than an exact pair.
     assert.deepEqual(names.map(rank), names.map(rank).slice().sort((x, y) => x - y), `${b},${a} out of order`);
@@ -125,7 +125,7 @@ test("a run that executed no checks fails instead of reporting ALL PASS (0/0)", 
 test("runSelected times each suite it ran, in the order it ran them", () => {
   const clock = [0, 5, 5, 12, 12, 13];
   let tick = 0;
-  const now = () => clock[tick++];
+  const now = () => clock[tick++]!;
   const suites = Object.fromEntries(E2E_SUITE_ORDER.map((n) => [n, async () => {}]));
   return (async () => {
     const timings = await runSelected(["render", "health", "hunt"], suites, {}, { now });
@@ -262,14 +262,14 @@ test("the timing table ranks suites by cost and totals them, so a split can be m
     { name: "survey", ms: 3000 },
     { name: "health", ms: 0 },
   ]);
-  assert.match(lines[0], /4\.0s/, "the header must total the run");
+  assert.match(lines[0]!, /4\.0s/, "the header must total the run");
   assert.deepEqual(
     lines.slice(1).map((l) => l.trim().split(/\s+/)[0]),
     ["survey", "render", "health"],
     "the table must rank by cost, since the point is to find the expensive suites",
   );
-  assert.match(lines[1], /3\.0s/);
-  assert.match(lines[1], /75\.0%/, "the share of the run is what a split is reasoned from");
+  assert.match(lines[1]!, /3\.0s/);
+  assert.match(lines[1]!, /75\.0%/, "the share of the run is what a split is reasoned from");
   assert.deepEqual(formatSuiteTimings([]), [], "nothing ran, so there is nothing to rank");
   assert.doesNotThrow(() => formatSuiteTimings([{ name: "health", ms: 0 }]), "a zero-cost run must not divide by zero");
 });

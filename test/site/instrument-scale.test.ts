@@ -12,8 +12,8 @@ test("the seam stands at the midpoint, the first day at the left end, the last d
   assert.ok(seam && seam.u === SEAM_U && SEAM_U === 0.5, "the seam is the bar's own SEAM_U (ages-track.ts), the midpoint"); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   const days = t.filter((k) => k.kind === "day");
   assert.deepEqual(days.map((d) => d.label), ["day 1", "day 44"]);
-  assert.equal(days[0].u, 0);
-  assert.equal(days[1].u, SEAM_U, "the last day stands where the bar puts it: on the seam (uFor clamps the survey half to SEAM_U)");
+  assert.equal(days[0]!.u, 0);
+  assert.equal(days[1]!.u, SEAM_U, "the last day stands where the bar puts it: on the seam (uFor clamps the survey half to SEAM_U)");
 });
 
 test("the years are the centuries between, plus the present at the right end, linear in the ages half", () => {
@@ -30,7 +30,7 @@ test("a century crowding the present or the seam keeps its tick and drops its la
   const nearPresent = scaleTicks({ days: null, years: { min: 435, max: 901 } });
   const nine = nearPresent.filter((k) => k.kind === "year" && Math.abs(k.u - (0.5 + 0.5 * (900 - 435) / (901 - 435))) < 1e-9);
   assert.equal(nine.length, 1, "the 900 tick stands");
-  assert.equal(nine[0].label, undefined, "but unlabelled: 901 is 0.001u away");
+  assert.equal(nine[0]!.label, undefined, "but unlabelled: 901 is 0.001u away");
   assert.deepEqual(nearPresent.filter((k) => k.label !== undefined && k.kind === "year").map((k) => k.label), ["500", "600", "700", "800", "901"]);
   const nearSeam = scaleTicks({ days: null, years: { min: 199, max: 876 } });
   const two = nearSeam.filter((k) => k.kind === "year").find((k) => Math.abs(k.u - (0.5 + 0.5 * (200 - 199) / (876 - 199))) < 1e-9);
@@ -54,8 +54,8 @@ test("renderScale lays the ticks with their hooks: first and last days, the seam
   const byClass = (c: string) => kids.filter((k: El) => k.classes.has(c));
   assert.deepEqual(byClass("day").map((k: El) => [k.style.left, k.classes.has("first"), k.classes.has("last")]), [["0.000%", true, false], ["50.000%", false, true]], "the first day hugs the left end, the last day stands on the seam and wears .last");
   assert.equal(byClass("seam").length, 1, "one star at the seam");
-  assert.equal(byClass("seam")[0].style.left, "50.000%");
+  assert.equal(byClass("seam")[0]!.style.left, "50.000%");
   const years = byClass("year");
-  assert.ok(years.length >= 2 && years[years.length - 1].classes.has("last") && years[years.length - 1].style.left === "100.000%", "the present stands at the right end and wears .last");
+  assert.ok(years.length >= 2 && years[years.length - 1]!.classes.has("last") && years[years.length - 1]!.style.left === "100.000%", "the present stands at the right end and wears .last");
   assert.ok(years.slice(0, -1).every((k: El) => !k.classes.has("last")), "no century wears .last");
 });

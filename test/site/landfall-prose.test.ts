@@ -26,7 +26,7 @@ test("the How It Works pip moors at the title cartouche, chart only, never the l
   const svg = read("public/charts/chart-42-antique.svg");
   const frame = svg.match(/id="layer-cartouche"><rect x="([\d.]+)" y="([\d.]+)" width="([\d.]+)" height="([\d.]+)"/);
   assert.ok(frame, "chart 42 carries its cartouche frame; a regen that moves it re-anchors the pip");
-  const [x, y, w, h] = frame.slice(1).map(Number);
+  const [x, y, w, h] = frame.slice(1).map(Number) as [number, number, number, number];
   assert.ok(Math.abs(how.nx - (x + w / 2) / SHEET.w) < 0.002, "the pip rides the cartouche frame's bottom-center");
   assert.ok(Math.abs(how.ny - (y + h) / SHEET.h) < 0.002, "the pip hangs from the frame's lower rule");
 
@@ -102,18 +102,18 @@ test("the panel is a card slip carrying the prose, hidden in the HTML so it stay
 
   const rule = css.match(/\.lf-card-how \{([^}]*)\}/);
   assert.ok(rule, ".lf-card-how sizes the long prose");
-  assert.match(rule[1], /max-height/, "the slip caps its height against the stage");
+  assert.match(rule[1]!, /max-height/, "the slip caps its height against the stage");
   assert.ok(
-    !rule[1].includes("width"),
+    !rule[1]!.includes("width"),
     "the panel keeps the slips' 22rem width: the station flight's framing clears the anchor only at that width (skeptic round 3: a 30rem panel covered the cartouche from 901 to 1034px)",
   );
   const scroll = css.match(/\.lf-card-scroll \{([^}]*)\}/);
   assert.ok(scroll, ".lf-card-scroll dresses the scroll region");
-  assert.match(scroll[1], /overflow-y:\s*auto/, "the prose scrolls inside the slip, never burying the stage");
-  assert.match(scroll[1], /overscroll-behavior:\s*contain/, "an exhausted scroll never chains to the page under the slip");
+  assert.match(scroll[1]!, /overflow-y:\s*auto/, "the prose scrolls inside the slip, never burying the stage");
+  assert.match(scroll[1]!, /overscroll-behavior:\s*contain/, "an exhausted scroll never chains to the page under the slip");
 
   const narrowBlock = css.match(/@media \(max-width: 900px\) \{([\s\S]*?)\n\}/);
-  const narrowHow = narrowBlock && narrowBlock[1].match(/\.lf-card-how\s*\{[^}]*max-height:\s*([\d.]+vh)/);
+  const narrowHow = narrowBlock && narrowBlock[1]!.match(/\.lf-card-how\s*\{[^}]*max-height:\s*([\d.]+vh)/);
   assert.ok(narrowHow, "the narrow bottom sheet caps its own height inside the media query");
   assert.equal(
     narrowHow[1],
@@ -219,7 +219,7 @@ test("the slips' positioning box is the stage's (#459 skeptic round 2 finding 6;
   for (const m of after.matchAll(/<(\/?)(div|aside|form|nav|noscript|section|figure)\b/g)) {
     if (m[1] === "/") depth--;
     else {
-      if (depth === 0) siblings.push(m[2]);
+      if (depth === 0) siblings.push(m[2]!);
       depth++;
     }
   }
@@ -229,11 +229,11 @@ test("the slips' positioning box is the stage's (#459 skeptic round 2 finding 6;
     "after the stage: the floating seed form, the mapped station slips, the how panel, and the noscript doors, nothing else; the slips' top:0/bottom:0/max-height resolve against .landfall, which coincides with the stage only while nothing else FLOWS in the section",
   );
   const seed = css.match(/\.lf-seed \{([^}]*)\}/);
-  assert.ok(seed && /position:\s*absolute/.test(seed[1]), "the seed form floats out of flow, so it never stretches .landfall past the stage");
+  assert.ok(seed && /position:\s*absolute/.test(seed[1]!), "the seed form floats out of flow, so it never stretches .landfall past the stage");
   const card = css.match(/\.lf-card \{([^}]*)\}/);
-  assert.ok(card && /position:\s*absolute/.test(card[1]), "the slips float out of flow for the same reason (the failed-bundle reveal is the one pinned exception, and it holds only while nothing JS-dependent is on screen)");
+  assert.ok(card && /position:\s*absolute/.test(card[1]!), "the slips float out of flow for the same reason (the failed-bundle reveal is the one pinned exception, and it holds only while nothing JS-dependent is on screen)");
   assert.ok(
-    card && card[1].includes("max-height: calc(100% - 2rem)") && card[1].includes("overflow: hidden"), // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    card && card[1]!.includes("max-height: calc(100% - 2rem)") && card[1]!.includes("overflow: hidden"), // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     "the desktop cap replaces the containment the stage's own overflow used to give an over-tall slip: without it a slip escapes the stage box (plate control: 3000px of injected content clamps to landfall minus 2rem with the Enter door still reachable); the narrow block lifts it, pinned in landfall-doors",
   );
 });
@@ -241,26 +241,26 @@ test("the slips' positioning box is the stage's (#459 skeptic round 2 finding 6;
 test("the corner chrome passes clicks through and keeps its text on its own ground (#470 plate-reader findings)", () => {
   const seed = css.match(/\.lf-seed \{([^}]*)\}/);
   assert.ok(seed, ".lf-seed dresses in index.css");
-  assert.match(seed[1], /pointer-events:\s*none/, "the chrome's text and wash pass clicks through: at 390px the corner covered the how pip's entire 34px hit box and the pip has no legend fallback (measured 2026-08-24, all 5 sample points)");
+  assert.match(seed[1]!, /pointer-events:\s*none/, "the chrome's text and wash pass clicks through: at 390px the corner covered the how pip's entire 34px hit box and the pip has no legend fallback (measured 2026-08-24, all 5 sample points)");
   const controls = css.match(/\.seed-controls \{([^}]*)\}/);
-  assert.ok(controls && /pointer-events:\s*auto/.test(controls[1]), "the seed input and Draw it take their clicks back, the legend's exact pattern");
+  assert.ok(controls && /pointer-events:\s*auto/.test(controls[1]!), "the seed input and Draw it take their clicks back, the legend's exact pattern");
   assert.match(
-    seed[1],
+    seed[1]!,
     /background: linear-gradient\(to bottom, rgb\(from var\(--chart-ink\) r g b \/ 0\.85\), rgb\(from var\(--chart-ink\) r g b \/ 0\.72\)\);/,
     "the wash is pinned whole, both alphas: past a fade-to-transparent the gloss measured 1.46:1 over bare chart, and under ~0.7 ink no permitted text color clears the 4.5:1 small-text floor (plate-reader 2026-08-24)",
   );
   const gloss = css.match(/\.seed-gloss \{([^}]*)\}/);
-  assert.ok(gloss && /color:\s*var\(--parchment\)/.test(gloss[1]), "the gloss wears parchment, not the mockup's ink-faded: 3.72:1 on --parchment, 4.33:1 even on --parchment-bright, so ink-faded cannot clear the floor on ANY ground this design permits (the #459 lf-card-where precedent)");
+  assert.ok(gloss && /color:\s*var\(--parchment\)/.test(gloss[1]!), "the gloss wears parchment, not the mockup's ink-faded: 3.72:1 on --parchment, 4.33:1 even on --parchment-bright, so ink-faded cannot clear the floor on ANY ground this design permits (the #459 lf-card-where precedent)");
   const hook = css.match(/\.seed-hook \{([^}]*)\}/);
-  assert.ok(hook && /color:\s*var\(--parchment\)/.test(hook[1]), "the hook keeps parchment on the wash (measured 5.66:1)");
+  assert.ok(hook && /color:\s*var\(--parchment\)/.test(hook[1]!), "the hook keeps parchment on the wash (measured 5.66:1)");
   const primary = css.match(/\.lf-seed \.primary \{([^}]*)\}/);
   assert.ok(
-    primary && /white-space:\s*nowrap/.test(primary[1]),
+    primary && /white-space:\s*nowrap/.test(primary[1]!),
     "Draw it never wraps: inside the 12rem narrow corner the flex fit broke the phrase across two lines, and nowrap makes the input the flex member that yields (skeptic round 2, visible in the 390 plates)",
   );
   const control = css.match(/\.lf-seed \.control \{([^}]*)\}/);
   assert.ok(
-    control && /min-width:\s*0/.test(control[1]),
+    control && /min-width:\s*0/.test(control[1]!),
     "and the input CAN yield: flex refuses to shrink an input below its default min-width, so with nowrap alone the row overflowed the panel's left edge by 9.67px at 390 and painted the input over raw map (plate round 3); e2e H3 measures the containment live",
   );
 });
@@ -282,30 +282,30 @@ test("the Notice to Mariners is the mockup's stamp on the deep, and only the sta
 
   const rule = css.match(/\.notice-stamp \{([^}]*)\}/);
   assert.ok(rule, ".notice-stamp dresses in index.css");
-  assert.match(rule[1], /rotate\(-5deg\)/, "the stamp tilts as the mockup stamps it");
-  assert.match(rule[1], /3px double/, "the stamp wears the mockup's double rule");
-  assert.match(rule[1], /pointer-events:\s*none/, "the stamp is decoration, never a control");
+  assert.match(rule[1]!, /rotate\(-5deg\)/, "the stamp tilts as the mockup stamps it");
+  assert.match(rule[1]!, /3px double/, "the stamp wears the mockup's double rule");
+  assert.match(rule[1]!, /pointer-events:\s*none/, "the stamp is decoration, never a control");
   // The voice the #324 re-ratification comment names (2026-08-24): the mockup's own, not archivist-head.
   const head = css.match(/\.stamp-head \{([^}]*)\}/);
   assert.ok(head, ".stamp-head dresses in index.css");
-  assert.match(head[1], /font-size:\s*0\.72rem/, "the head keeps the mockup's 0.72rem");
-  assert.match(head[1], /letter-spacing:\s*0\.28em/, "and its 0.28em tracking");
-  assert.match(head[1], /color:\s*var\(--line-tan\)/, "and line-tan on the deep");
-  assert.ok(!head[1].includes("text-transform"), "title case as written: no transform, the mockup has none");
+  assert.match(head[1]!, /font-size:\s*0\.72rem/, "the head keeps the mockup's 0.72rem");
+  assert.match(head[1]!, /letter-spacing:\s*0\.28em/, "and its 0.28em tracking");
+  assert.match(head[1]!, /color:\s*var\(--line-tan\)/, "and line-tan on the deep");
+  assert.ok(!head[1]!.includes("text-transform"), "title case as written: no transform, the mockup has none");
   const body = css.match(/\.stamp-body \{([^}]*)\}/);
-  assert.ok(body && /font-style:\s*italic/.test(body[1]) && /var\(--ink-faded\)/.test(body[1]), "the body keeps the mockup's flourish italic in ink-faded");
+  assert.ok(body && /font-style:\s*italic/.test(body[1]!) && /var\(--ink-faded\)/.test(body[1]!), "the body keeps the mockup's flourish italic in ink-faded");
   const narrow = css.match(/@media \(max-width: 900px\) \{([\s\S]*?)\n\}/);
   assert.ok(
-    narrow && /\.notice-stamp[^{]*\{[^}]*display:\s*none/.test(narrow[1]),
+    narrow && /\.notice-stamp[^{]*\{[^}]*display:\s*none/.test(narrow[1]!),
     "the narrow sheet stands the stamp down, as the mockup does",
   );
 });
 
 test("the legend row's ground and faces: the seed box's crisp panel under it, parchment on the head and the verb (the 2026-09-03 sitting, rulings 11, 23 and 24 on #454)", () => {
   const legendRow = css.match(/\.lf-legend \{([^}]*)\}/);
-  assert.ok(legendRow && legendRow[1].includes("background: linear-gradient(to bottom, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.72));"), "the legend row stands on the seed box's crisp panel, not the fade: the head line at the fade's clear top measured 1.0:1 in ink-faded and 1.76:1 in parchment over the chart, 6.04:1 on the panel (plate read 2026-09-03; the sitting's ruling 23 on #454)");
+  assert.ok(legendRow && legendRow[1]!.includes("background: linear-gradient(to bottom, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.72));"), "the legend row stands on the seed box's crisp panel, not the fade: the head line at the fade's clear top measured 1.0:1 in ink-faded and 1.76:1 in parchment over the chart, 6.04:1 on the panel (plate read 2026-09-03; the sitting's ruling 23 on #454)");
   const legendVerb = css.match(/\.lf-legend-verb \{([^}]*)\}/);
-  assert.ok(legendVerb && /color:\s*var\(--parchment\)/.test(legendVerb[1]), "the verb line wears parchment: line-tan at 12.48px measured 4.09:1 on the panel, the dateline's own reason (the sitting's ruling 24 on #454)");
+  assert.ok(legendVerb && /color:\s*var\(--parchment\)/.test(legendVerb[1]!), "the verb line wears parchment: line-tan at 12.48px measured 4.09:1 on the panel, the dateline's own reason (the sitting's ruling 24 on #454)");
   const legendHead = css.match(/\.lf-legend-head \{([^}]*)\}/);
-  assert.ok(legendHead && /color:\s*var\(--parchment\)/.test(legendHead[1]), "the legend's head line wears parchment, the one face with the rooms' legend-head: ink-faded measured 2.78:1 on the deep (plate read 2026-08-29; the sitting's ruling 11, 2026-09-03 on #454)");
+  assert.ok(legendHead && /color:\s*var\(--parchment\)/.test(legendHead[1]!), "the legend's head line wears parchment, the one face with the rooms' legend-head: ink-faded measured 2.78:1 on the deep (plate read 2026-08-29; the sitting's ruling 11, 2026-09-03 on #454)");
 });

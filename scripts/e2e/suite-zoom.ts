@@ -120,7 +120,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: z8b.x ?? 0, y: z8b.y ?? 0 });
   // Poll, never sleep: opacity below has NO tolerance, and #381's second lane stretched this 180ms grow-in past a fixed 400ms once in eight runs (o=0.906, still climbing).
   type Ring = { hover: false; t?: undefined; o?: undefined } | { hover: true; t: string; o: string };
-  const ringScale = (r: Ring) => parseFloat(((r.t || "").match(/matrix\(([-\d.]+)/) || [])[1] ?? "NaN"); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+  const ringScale = (r: Ring) => parseFloat(((r.t || "").match(/matrix\(([-\d.]+)/) || [])[1] ?? "NaN");
   const ringAtRest = (r: Ring) => r.hover && parseFloat(r.o) === 1 && Math.abs(ringScale(r) - 1) <= 0.02;
   const readRing = () => evaluate<Ring>(`(()=>{
     const h=document.querySelector("#map .place-hit:hover");

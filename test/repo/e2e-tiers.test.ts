@@ -37,7 +37,7 @@ const ciJobBlocks = (): ReadonlyArray<{ id: string; lines: readonly string[] }> 
 const runnerSuiteKeys = (): string[] => {
   const block = RUNNER_CODE.match(/const SUITES = \{([\s\S]*?)\n\};/);
   assert.ok(block, "the runner's SUITES map was not found; this guard is reading the wrong shape");
-  return [...block[1].matchAll(/^\s*"([\w-]+)":/gm)].map((m) => m[1]);
+  return [...block[1]!.matchAll(/^\s*"([\w-]+)":/gm)].map((m) => m[1]!);
 };
 
 test("E2E_SUITE_ORDER is exactly the runner's SUITES map, in the same order", () => {
@@ -50,7 +50,7 @@ test("each suite name maps to the run function imported from its own file", () =
   );
   const block = RUNNER_CODE.match(/const SUITES = \{([\s\S]*?)\n\};/);
   if (!block) throw new Error("the runner's SUITES map was not found");
-  const body = block[1];
+  const body = block[1]!;
   for (const name of E2E_SUITE_ORDER) {
     const wired = body.match(new RegExp(`"${name}":\\s*(\\w+)`));
     if (!wired) throw new Error(`${name} has no SUITES entry`);
@@ -150,7 +150,7 @@ test("ci.yml runs one job per lane, and its matrix is exactly E2E_LANES", () => 
   const body = ciUncommented(lane.lines);
   const matrix = body.match(/^ {8}lane: \[([^\]]*)\]$/m);
   assert.ok(matrix, "the lane matrix was not found in ci.yml's e2e job, so the roster comparison below would read nothing");
-  const named = matrix[1].split(",").map((s) => s.trim().replace(/^"|"$/g, "")).filter((s) => s !== "");
+  const named = matrix[1]!.split(",").map((s) => s.trim().replace(/^"|"$/g, "")).filter((s) => s !== "");
   assert.deepEqual(
     named,
     E2E_LANES.map((l) => l.name),
@@ -198,9 +198,9 @@ test("the runner actually uses the selection, the timings and the outcome rule i
   // The hooks are optional in runSelected, since a caller without them keeps the old rethrow; a runner without them is the #534 defect back, and no unit test of runSelected can see that.
   const hooks = RUNNER_CODE.match(/runSelected\(SELECTED, SUITES, ctx, \{([\s\S]*?)\n {2}\}\);/);
   assert.ok(hooks, "the runSelected call's argument block was not found, so the two assertions below would read an empty string");
-  assert.match(hooks[1], /onSuiteError:/, "the runner passes no per-suite handler, so one suite giving up kills the whole lane again (#534)");
-  assert.match(hooks[1], /alive: ctx\.alive/, "the runner passes no liveness probe, so a browser that died mid-lane is reported as a lane full of product failures (#534)");
-  assert.match(hooks[1], /skippedGroups: \(\) => skippedGroups/, "the runner reads no skipped-group sink, so a suite that skipped a check group is indistinguishable from a whole one (#560)");
+  assert.match(hooks[1]!, /onSuiteError:/, "the runner passes no per-suite handler, so one suite giving up kills the whole lane again (#534)");
+  assert.match(hooks[1]!, /alive: ctx\.alive/, "the runner passes no liveness probe, so a browser that died mid-lane is reported as a lane full of product failures (#534)");
+  assert.match(hooks[1]!, /skippedGroups: \(\) => skippedGroups/, "the runner reads no skipped-group sink, so a suite that skipped a check group is indistinguishable from a whole one (#560)");
   assert.match(RUNNER_CODE, /suitesCertifiedByHealth\(SELECTED, incomplete\)/, "the runner certifies suites that stopped early, a clean bill the run never earned (#534)");
   // Both halves, or the rename narrows this to "some second argument is passed": the list has to be the one that counts a skipped group too.
   assert.match(RUNNER_CODE, /const incomplete = suitesNotWhole\(timings\)/, "the runner builds its own incomplete list, so a suite that skipped a check group is still certified (#560)");
@@ -210,7 +210,7 @@ test("the runner actually uses the selection, the timings and the outcome rule i
   // The breaker's own exit is a HARNESS ERROR, so the door it leaves by must print the score, or it does the thing it exists to prevent.
   const onError = RUNNER_CODE.match(/\.catch\(\(e\) => \{([\s\S]*?)\n {2}\}\);/);
   assert.ok(onError, "the runner's error path was not found, so the assertion below would read an empty string");
-  assert.match(onError[1], /runOutcome\(results\)/, "the harness-error path prints no tally, so a run that dies mid-lane reports none of the checks that did run (#534)");
+  assert.match(onError[1]!, /runOutcome\(results\)/, "the harness-error path prints no tally, so a run that dies mid-lane reports none of the checks that did run (#534)");
   assert.match(RUNNER_CODE, /runOutcome\(results\)/, "the runner does not use the outcome rule, so 0/0 can pass again");
   assert.match(RUNNER_CODE, /join\(REPO, "out", e2eOutSubdir\(PORT\)\)/, "the runner's out dir no longer follows the port");
   assert.match(

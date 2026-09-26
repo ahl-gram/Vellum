@@ -24,8 +24,8 @@ const between = (from: string, to: string): string => {
 test("GR1 the Gallery is a chart room: chartRoom on the layout, the RoomFolio in place of the RoomHead, the intro line retired, no script", () => {
   const open = page.match(/<BaseLayout([\s\S]*?)>/);
   assert.ok(open, "the page renders through BaseLayout");
-  assert.match(open[1], /\bchartRoom\b/, "the Gallery passes chartRoom (no band, no footer)");
-  assert.ok(!open[1].includes("desk="), "the interim desk retires with the conversion");
+  assert.match(open[1]!, /\bchartRoom\b/, "the Gallery passes chartRoom (no band, no footer)");
+  assert.ok(!open[1]!.includes("desk="), "the interim desk retires with the conversion");
   assert.ok(page.includes("<RoomFolio room={room} tagline={tagline}>"), "the room's name stands in the folio corner");
   assert.ok(!page.includes("<RoomHead"), "the RoomHead on the sheet retires with the conversion");
   assert.ok(!page.includes('class="sub intro"'), "the intro line retires; its fact moves to the dateline");
@@ -103,8 +103,8 @@ test("GR6 the css: twelve sheets at the house depth on the deep, captions letter
   assert.doesNotMatch(css, /(^|\n)\s*\.(legend-btn|legend-row|legend-head|folio-room|room-name|dateline|fog|vignette|corner)\b[^{]*\{/, "the page css does not re-dress the kit (#302)");
   const print = css.match(/@media print\s*\{([\s\S]*)\}\s*$/);
   assert.ok(print, "the page css ends with its print stand-down");
-  assert.match(print[1], /figure img\s*\{[^}]*box-shadow:\s*none/, "print is paper: no depth");
-  assert.match(print[1], /figcaption\s*\{[^}]*color:\s*var\(--ink-dark\)/, "captions print in ink");
+  assert.match(print[1]!, /figure img\s*\{[^}]*box-shadow:\s*none/, "print is paper: no depth");
+  assert.match(print[1]!, /figcaption\s*\{[^}]*color:\s*var\(--ink-dark\)/, "captions print in ink");
 });
 
 test("GR7 a plate prints inside its page: every full-width bordered box in the sheet counts its border inside its width, since at print main's padding goes and the page box is the container (#565, measured 392 on 390 at 390x844 and 818 on 816 at Letter)", () => {

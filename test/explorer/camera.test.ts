@@ -43,7 +43,7 @@ test("a camera round-trips through a transform and back, independent of viewport
     [1000, 800],
     [1500, 1125], // the Explorer draws at widthPx 1500
     [375, 640], // a phone
-  ]) {
+  ] as const) {
     const t = transformFromCamera(cam, W, H);
     const back = cameraFromTransform(t, W, H);
     assert.ok(Math.abs(back.cx - cam.cx) < 1e-12, `cx ${W}x${H}: ${back.cx}`);

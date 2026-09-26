@@ -4,6 +4,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { ESLint, type Linter } from "eslint";
 import { includeIgnoreFile } from "eslint/config";
+import ts from "typescript";
 import lintConfig from "../../eslint.config.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
@@ -260,8 +261,8 @@ test("through ESLint itself, a JavaScript file anywhere outside design/ is refus
   const verdict = async (path: string, lead = ""): Promise<string> => {
     if (await eslint.isPathIgnored(path)) return "unread";
     const [result] = await eslint.lintText(lead + sourceFor(path), { filePath: join(ROOT, path) });
-    const refused = result.messages.some((m) => m.ruleId === "no-restricted-syntax" && m.severity === 2 && m.message.startsWith("JavaScript is not written here"));
-    return refused ? "refused" : result.messages.length === 0 ? "admitted" : result.messages.map((m) => `${m.ruleId ?? "parse"}: ${m.message}`).join(" | ");
+    const refused = result!.messages.some((m) => m.ruleId === "no-restricted-syntax" && m.severity === 2 && m.message.startsWith("JavaScript is not written here"));
+    return refused ? "refused" : result!.messages.length === 0 ? "admitted" : result!.messages.map((m) => `${m.ruleId ?? "parse"}: ${m.message}`).join(" | ");
   };
   for (const path of JS_REFUSED) assert.equal(await verdict(path), "refused", `${path} is not refused, so a JavaScript file there would lint green`);
   for (const lead of DIRECTIVES) {
@@ -277,6 +278,19 @@ test("through ESLint itself, a JavaScript file anywhere outside design/ is refus
 test("npm run lint is the native-loader ESLint over the whole tree, with a warning counted as red", () => {
   const pkg = JSON.parse(src("package.json")) as { scripts: Record<string, string> };
   assert.equal(pkg.scripts["lint"], LINT_SCRIPT);
+});
+
+test("npm run check is tsc over tsconfig.json, which turns on noUncheckedIndexedAccess, and ci.yml's check-and-test job runs it as a real step, so an element read is typed as possibly missing on every pull request (Issue #654 ruling 1)", () => {
+  const pkg = JSON.parse(src("package.json")) as { scripts: Record<string, string> };
+  assert.equal(pkg.scripts["check"], "tsc --noEmit");
+  const config = ts.getParsedCommandLineOfConfigFile(join(ROOT, "tsconfig.json"), {}, { ...ts.sys, onUnRecoverableConfigFileDiagnostic: () => undefined });
+  assert.ok(config, "tsconfig.json did not parse");
+  assert.equal(config.options.noUncheckedIndexedAccess, true);
+  assert.match(
+    ciJob("check-and-test"),
+    /^ {6}- name: Typecheck\n {8}run: npm run check\n(?= {6}- |\n|$)/m,
+    "the check-and-test job has no Typecheck step of the shape `- name: Typecheck` / `run: npm run check` at the step indent, so the flag is set and no pull request is held to it",
+  );
 });
 
 // Matched at the file's own step indent the way test/repo/e2e-tiers.test.ts keys its anchors, so a run line planted deeper (under a with: map, which Actions ignores) reds; a step written in flow style reds too, a false red and never a miss. The one miss is a JOB-level if: on check-and-test, which skips Typecheck and Test the same way and which no guard reads; the per-job sweep in test/repo/e2e-tiers.test.ts is its home if it is ever closed.

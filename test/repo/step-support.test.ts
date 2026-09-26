@@ -26,9 +26,9 @@ test("a wait that gives up inside a step fails THAT check by name with the paylo
   assert.deepEqual(ran, ["CL5", "CL8"], "one wait giving up took the rest of the suite with it, which is the defect");
   const failed = results.filter((r) => !r[1]);
   assert.equal(failed.length, 1, "the wait that gave up did not land as exactly one red check");
-  assert.match(failed[0][0], /^CL5\b/, "the red is not named for the check that was being proved, so the reader still cannot tell which claim broke");
-  assert.match(failed[0][2], /afterEscape/, "the red dropped the wait's label");
-  assert.match(failed[0][2], /"visibility":"hidden"/, "the red dropped the last read, which is the payload a named check would have printed");
+  assert.match(failed[0]![0], /^CL5\b/, "the red is not named for the check that was being proved, so the reader still cannot tell which claim broke");
+  assert.match(failed[0]![2], /afterEscape/, "the red dropped the wait's label");
+  assert.match(failed[0]![2], /"visibility":"hidden"/, "the red dropped the last read, which is the payload a named check would have printed");
   assert.deepEqual(
     results.map((r) => r[1]),
     [true, false, true],

@@ -129,8 +129,8 @@ const hoverTipsIn = (css: string): string[] => {
   const bare = css.replace(/\/\*[\s\S]*?\*\//g, "");
   const tips: string[] = [];
   for (const m of bare.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
-    const selector = m[1].trim().replace(/\s+/g, " ");
-    if (selector.includes(":hover") && /rotate\(/.test(m[2])) tips.push(selector);
+    const selector = m[1]!.trim().replace(/\s+/g, " ");
+    if (selector.includes(":hover") && /rotate\(/.test(m[2]!)) tips.push(selector);
   }
   return tips;
 };
@@ -181,10 +181,10 @@ const settled = (css: string, selector: string): Readonly<Record<string, string>
   const bare = css.replace(/\/\*[\s\S]*?\*\//g, "");
   const out: Record<string, string> = {};
   for (const m of bare.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
-    if (!selectorsIn(m[1]).includes(selector)) continue;
-    for (const declaration of m[2].split(";")) {
+    if (!selectorsIn(m[1]!).includes(selector)) continue;
+    for (const declaration of m[2]!.split(";")) {
       const [prop, ...value] = declaration.split(":");
-      if (value.length) out[prop.trim()] = value.join(":").trim();
+      if (value.length) out[prop!.trim()] = value.join(":").trim();
     }
   }
   return out;
@@ -204,7 +204,7 @@ const inlineBlocksIn = (css: string): string[] => {
   const bare = css.replace(/\/\*[\s\S]*?\*\//g, "");
   const found = new Set<string>();
   for (const m of bare.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
-    for (const selector of selectorsIn(m[1])) {
+    for (const selector of selectorsIn(m[1]!)) {
       if (subjectOf(selector).replace(/\[[^\]]*\]/g, "").includes(":")) continue;
       if (settled(css, selector)["display"] === "inline-block") found.add(selector);
     }

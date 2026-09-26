@@ -48,7 +48,7 @@ function textTag(svg: string, content: string): string {
   const escaped = content.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const hits = [...svg.matchAll(new RegExp(`<text\\b[^>]*>${escaped}</text>`, "g"))];
   assert.equal(hits.length, 1, `exactly one <text> reads "${content}"`);
-  return hits[0][0];
+  return hits[0]![0];
 }
 
 function nestedSvgTag(svg: string, marker: string): string {
@@ -84,7 +84,7 @@ function luminance(hex: string): number {
 }
 
 function contrast(a: string, b: string): number {
-  const [hi, lo] = [luminance(a), luminance(b)].sort((p, q) => q - p);
+  const [hi, lo] = [luminance(a), luminance(b)].sort((p, q) => q - p) as [number, number];
   return (hi + 0.05) / (lo + 0.05);
 }
 
@@ -113,7 +113,7 @@ test("the ground is the veil's walnut deep, painted first, its hexes the site pa
   assert.ok(!card.includes(`<rect width="1200" height="630" fill="${token("parchment")}"`), "the parchment sheet is no longer the ground");
   const gradient = /<radialGradient\b[^>]*id="veil-deep"[^>]*>([\s\S]*?)<\/radialGradient>/.exec(card);
   assert.ok(gradient, "the deep is a radial gradient");
-  const stops = [...gradient[1].matchAll(/stop-color="([^"]+)"/g)].map((m) => m[1]);
+  const stops = [...gradient[1]!.matchAll(/stop-color="([^"]+)"/g)].map((m) => m[1]);
   assert.deepEqual(stops, [mix(token("ink-dark"), token("parchment"), 0.9), token("ink-dark"), token("chart-ink")]);
 });
 
@@ -159,7 +159,7 @@ test("the rose is the veil's own markup, once, settled: rings drawn, rays faded 
   assert.equal(attr(open, "viewBox"), "0 0 120 120");
   assert.equal(num(open, "x") + num(open, "width") / 2, 600, "the rose is centred");
   const tagline = textTag(card, OG_TAGLINE);
-  const hook = textTag(card, OG_HOOK_LINES[0]);
+  const hook = textTag(card, OG_HOOK_LINES[0]!);
   assert.ok(num(open, "y") > num(tagline, "y"), "the rose is below the tagline");
   assert.ok(num(open, "y") + num(open, "height") < num(hook, "y"), "the rose is above the hook");
 });
@@ -193,7 +193,7 @@ test("the foot line is the homepage hook, as written, in spaced small caps, brok
     assert.equal(attr(tag, "font-family"), SC_FACE, "the hook wears the SC face alone");
     assert.equal(attr(tag, "letter-spacing"), (num(tag, "font-size") * 0.3).toFixed(2), "spaced: the veil-status 0.3em, two decimals");
   }
-  assert.ok(num(lines[1], "y") > num(lines[0], "y"), "the second line sits below the first");
+  assert.ok(num(lines[1]!, "y") > num(lines[0]!, "y"), "the second line sits below the first");
 });
 
 test("the ratified sizes and inks (#490 round 2): wordmark 100 parchment-bright, tagline 50 parchment, hook 48 parchment, rose 132", () => {
@@ -254,7 +254,7 @@ test("the two Fell faces travel inside the card as data: @font-face rules, no Ga
   const embedded = buildOgCard(chart, { fontCss: css });
   const style = /<style>([\s\S]*?)<\/style>/.exec(embedded);
   assert.ok(style, "the font css sits in a <style>");
-  assert.equal((style[1].match(/@font-face/g) ?? []).length, 2);
+  assert.equal((style[1]!.match(/@font-face/g) ?? []).length, 2);
   assert.ok(embedded.indexOf("<style>") < embedded.indexOf("<text"), "the faces are declared before any lettering");
   assert.ok(!card.includes("<style"), "no fontCss, no <style>: the builder stays string in, string out");
 });

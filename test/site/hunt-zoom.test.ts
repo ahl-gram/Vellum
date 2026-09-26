@@ -44,13 +44,13 @@ test("HZ3 app.js exposes the deterministic zoom hooks the e2e drives (#167)", ()
 test("HZ4 the Hunt stays a FIXED world: no LOD, no region worker (#161 boundary)", () => {
   const js = read("src/site/seed-of-the-day/app.ts");
   // Inspect the ACTUAL import specifiers, not prose: comments are free to name these paths.
-  const importPaths = [...js.matchAll(/from\s+"([^"]+)"/g)].map((m) => m[1]);
+  const importPaths = [...js.matchAll(/from\s+"([^"]+)"/g)].map((m) => m[1]!);
   for (const p of importPaths) {
     assert.doesNotMatch(p, /lod|region|worker/i, `the Hunt must not import a semantic-redraft path (${p})`);
   }
   const opts = js.match(/createZoomController\(\{([\s\S]*?)\}\)/);
   assert.ok(opts, "app.js should construct the controller with an options literal");
-  assert.doesNotMatch(opts[1], /onSettle|onApply/, "the Hunt controller is geometric-only (no redraft/counter-scale hooks)");
+  assert.doesNotMatch(opts[1]!, /onSettle|onApply/, "the Hunt controller is geometric-only (no redraft/counter-scale hooks)");
 });
 
 test("HZ5 index.css gives #map-viewport the clip + touch-action wiring and #map a top-left pivot (#167)", () => {

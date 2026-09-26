@@ -23,7 +23,7 @@ for (const page of PAGES) {
       ["the raised shadow", /box-shadow:/],
       ["the panel paper", /background:\s*var\(--parchment-panel\)/],
     ] as const) {
-      assert.ok(re.test(sheet[1]), `${page.css} sheet keeps ${what}`);
+      assert.ok(re.test(sheet[1]!), `${page.css} sheet keeps ${what}`);
     }
     assert.ok(
       /\.sheet::before/.test(css) && /\.sheet::after/.test(css),

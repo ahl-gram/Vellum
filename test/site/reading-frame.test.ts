@@ -275,7 +275,7 @@ test("the frame imports nothing from the Explorer (#219 acceptance)", () => {
     const src = read(`src/site/reading-frame/${f}`);
     for (const m of src.matchAll(/from\s+"([^"]+)"/g)) {
       assert.doesNotMatch(
-        m[1],
+        m[1]!,
         /explorer\//,
         `${f} imports ${m[1]}; the frame must be mountable by a page that is not the Explorer`,
       );
@@ -300,7 +300,7 @@ test("the log component renders the chronicle's row shape in the shared idiom (#
   ]);
   const strip = log.strip as unknown as El;
   assert.equal(strip.children.length, 2, "one row per event");
-  assert.deepEqual(shape(strip.children[0]), {
+  assert.deepEqual(shape(strip.children[0]!), {
     tag: "LI",
     parts: [
       { tag: "SPAN", cls: "cr-year", text: "214" },

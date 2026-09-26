@@ -29,7 +29,7 @@ const folioLines = (): string[][] => {
 test("PPR1 the Prospect is a chart room: chartRoom on the layout, the RoomFolio in place of the RoomHead, the figure and its caption retired", () => {
   const open = page.match(/<BaseLayout([\s\S]*?)>/);
   assert.ok(open, "the page renders through BaseLayout");
-  assert.match(open[1], /\bchartRoom\b/, "the Prospect passes chartRoom (no band, no footer)");
+  assert.match(open[1]!, /\bchartRoom\b/, "the Prospect passes chartRoom (no band, no footer)");
   assert.ok(page.includes("<RoomFolio room={room} tagline={tagline}>"), "the room's name stands in the folio corner");
   assert.ok(!page.includes("<RoomHead"), "the RoomHead on the sheet retires with the conversion");
   for (const gone of ['class="intro"', 'class="plate-figure"', 'class="actions"', 'id="pp-caption"']) {
@@ -120,9 +120,9 @@ test("PPR7 the css: the sheet fitted to what the chrome leaves, the plate as the
   assert.match(phone, /\.year-label\s*\{[^}]*display:\s*none/, "the label stands down on a phone (the mockup); the input keeps its aria-label");
   const print = css.match(/@media print\s*\{([\s\S]*)\}\s*$/);
   assert.ok(print, "the page css ends with its print stand-down");
-  assert.match(print[1], /\.stage\s*\{[^}]*position:\s*static/, "the plate prints in flow");
-  assert.match(print[1], /#map\s*\{[^}]*transform:\s*none\s*!important/, "unzoomed");
-  assert.match(print[1], /#pp-plate\s*\{[^}]*position:\s*static;[^}]*height:\s*auto/, "at its own proportion");
+  assert.match(print[1]!, /\.stage\s*\{[^}]*position:\s*static/, "the plate prints in flow");
+  assert.match(print[1]!, /#map\s*\{[^}]*transform:\s*none\s*!important/, "unzoomed");
+  assert.match(print[1]!, /#pp-plate\s*\{[^}]*position:\s*static;[^}]*height:\s*auto/, "at its own proportion");
 });
 
 // eslint-disable-next-line max-lines-per-function

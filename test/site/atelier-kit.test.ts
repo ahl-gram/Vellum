@@ -117,11 +117,11 @@ test("AK7 the legend row is ONE face on home and in the kit: the seed box's cris
     ["the kit's room folio .corner.tr::before", kit.match(/\.corner\.tr::before[^{]*\{([^}]*)\}/)],
     ["the kit's legend row .legend:not(.in-slip)::before", kit.match(/\.legend:not\(\.in-slip\)::before[^{]*\{([^}]*)\}/)],
   ];
-  for (const [name, m] of wearers) assert.ok(m && m[1].includes(`background: ${panel};`), `${name} stands on the one panel`);
+  for (const [name, m] of wearers) assert.ok(m && m[1]!.includes(`background: ${panel};`), `${name} stands on the one panel`);
   const homeVerb = home.match(/\.lf-legend-verb \{([^}]*)\}/);
   const kitVerb = kit.match(/\.legend-btn \.verb \{([^}]*)\}/);
-  assert.ok(homeVerb && /color:\s*var\(--parchment\)/.test(homeVerb[1]), "home's verb wears parchment");
-  assert.ok(kitVerb && /color:\s*var\(--parchment\)/.test(kitVerb[1]), "the kit's verb wears parchment");
+  assert.ok(homeVerb && /color:\s*var\(--parchment\)/.test(homeVerb[1]!), "home's verb wears parchment");
+  assert.ok(kitVerb && /color:\s*var\(--parchment\)/.test(kitVerb[1]!), "the kit's verb wears parchment");
   assert.match(kit, /\.legend-btn\.gold \.verb \{[^}]*color:\s*var\(--ink-brown\)/, "the gold road's verb keeps ink-brown on its gold ground");
 });
 

@@ -146,7 +146,7 @@ export async function runSelected<C>(
   let streak: E2eSuiteName[] = [];
   for (const name of names) {
     const run = suites[name];
-    if (!run) throw new Error(`the runner has no suite named ${name}`); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    if (!run) throw new Error(`the runner has no suite named ${name}`);
     const skippedBefore = skippedGroups ? skippedGroups().length : 0;
     const started = now();
     let stoppedEarly = false;

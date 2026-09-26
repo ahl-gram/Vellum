@@ -262,7 +262,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
     dimTaglines.map((r) => `${r} tagline ${heads[r]?.tagline?.color}`).join(" | ") || `tagline parchment x${SHELLED.length}`,
   );
 
-  const poolAlpha = (color: string) => Number((String(color).match(/\/\s*([\d.]+)\)/) || String(color).match(/rgba\([^)]*,\s*([\d.]+)\)/) || [])[1] ?? "0"); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+  const poolAlpha = (color: string) => Number((String(color).match(/\/\s*([\d.]+)\)/) || String(color).match(/rgba\([^)]*,\s*([\d.]+)\)/) || [])[1] ?? "0");
   // #464: the Gallery joins home, the two pages whose content scrolls or rides under the cluster (a pale plate measured the tagline at 2.26:1 without the pool).
   const POOLED = ["/", "/gallery/"];
   const washWrong = bad((h, r) =>

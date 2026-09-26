@@ -103,7 +103,7 @@ test("every `symbol` in `path` citation resolves: the file exists and names the 
   const failures = scannedFiles().flatMap((file) =>
     commentRuns(file).flatMap(([n, text]) =>
       [...text.matchAll(CITATION)].flatMap(([, symbol, path]) => {
-        const target = resolve(REPO, path);
+        const target = resolve(REPO, path!);
         if (!existsSync(target)) return [`${rel(file)}:${n} cites ${path}, which does not exist`];
         // APPEARS-in-file, not DECLARED-in-file: citations routinely point at a call site, and a declaration-only check fails a good citation, the exact trap this guard exists to avoid.
         const found = new RegExp(`\\b${symbol}\\b`).test(readFileSync(target, "utf8"));

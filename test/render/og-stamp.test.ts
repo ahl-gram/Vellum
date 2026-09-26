@@ -42,6 +42,6 @@ test("stampPng writes one tEXt chunk after IHDR with a valid CRC, replaces an ea
   assert.equal(stamped.readUInt32BE(afterIhdr), OG_STAMP_KEYWORD.length + 1 + "abc".length);
   assert.ok(stripStamps(stamped).equals(bare));
   const corrupt = Buffer.from(stamped);
-  corrupt[afterIhdr + 8 + OG_STAMP_KEYWORD.length + 1 + "abc".length] ^= 0xff;
+  corrupt[afterIhdr + 8 + OG_STAMP_KEYWORD.length + 1 + "abc".length]! ^= 0xff;
   assert.throws(() => readStamps(corrupt), /CRC/);
 });

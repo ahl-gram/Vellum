@@ -72,10 +72,10 @@ export function decodePng(bytes: Buffer): DecodedPng {
   const width = ihdr.data.readUInt32BE(0);
   const height = ihdr.data.readUInt32BE(4);
   const bitDepth = ihdr.data[8];
-  const colorType = ihdr.data[9] ?? -1; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+  const colorType = ihdr.data[9] ?? -1;
   const interlace = ihdr.data[12];
   const bpp = CHANNELS[colorType];
-  if (bitDepth !== 8 || bpp === undefined || interlace !== 0) { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+  if (bitDepth !== 8 || bpp === undefined || interlace !== 0) {
     throw new Error(`unsupported PNG: bit depth ${bitDepth}, colour type ${colorType}, interlace ${interlace}`);
   }
   const idat = Buffer.concat(list.filter((c) => c.type === "IDAT").map((c) => c.data));

@@ -34,7 +34,7 @@ test("homeStage derives every mark from the seed-42 place manifest (#455)", () =
   assert.equal(stage.title, world.title.title);
   assert.equal(stage.dots.length, manifest.places.length, "every settlement is a mark");
   for (const [i, p] of manifest.places.entries()) {
-    const d = stage.dots[i];
+    const d = stage.dots[i]!;
     assert.equal(d.name, p.name, `dot ${i} name`);
     assert.equal(d.nx, p.nx, `dot ${i} nx`);
     assert.equal(d.ny, p.ny, `dot ${i} ny`);

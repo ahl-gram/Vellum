@@ -26,11 +26,11 @@ const sections = (html: string): readonly Section[] => {
   // parts[0] is the preamble before the first heading; then (level, heading, body) triples.
   for (let i = 1; i + 2 < parts.length + 1; i += 3) {
     const level = Number(parts[i]);
-    const heading = parts[i + 1].replace(/<[^>]*>/g, "").replace(/&amp;/g, "&").trim();
+    const heading = parts[i + 1]!.replace(/<[^>]*>/g, "").replace(/&amp;/g, "&").trim();
     const body = parts[i + 2] ?? "";
     // Tolerate attributes on the term: an exact-tag match silently skips every entry carrying an id.
     const terms = [...body.matchAll(/<p class="term"[^>]*>([\s\S]*?)<\/p>/g)].map((m) =>
-      m[1].replace(/<[^>]*>/g, "").trim(),
+      m[1]!.replace(/<[^>]*>/g, "").trim(),
     );
     out.push({ heading, level, terms });
   }

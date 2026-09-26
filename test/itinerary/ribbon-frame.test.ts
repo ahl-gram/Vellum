@@ -47,7 +47,7 @@ function overshootOf(input: RibbonInput): { worst: number; where: string; shapes
   let shapes = 0;
   for (const shape of roadShapes(ribbonSvgFor(input, "antique"), STYLES.antique.road)) {
     const head = shape.pts[0];
-    if (!head) continue; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    if (!head) continue;
     const strip = layout.strips.find((s) => head[0] >= s.x0 - 30 && head[0] <= s.x0 + s.w + 30);
     if (!strip) continue;
     shapes++;

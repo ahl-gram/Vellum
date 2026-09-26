@@ -116,7 +116,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
   function showPlaceCard(idx: number): void {
     if (!placeOverlay || isSuppressed()) return; // the hover card is suppressed while scrubbing
     const place = placeOverlay.places[idx];
-    if (!place) return; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    if (!place) return;
     const card = composePlaceCard(place, placeOverlay.events, placeOverlay.cultureId);
     const el = placeOverlay.card;
     const inner = el.querySelector(".pc-inner") as HTMLElement;

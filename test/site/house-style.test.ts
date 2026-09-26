@@ -11,7 +11,7 @@ const house = () => read("public/house.css");
 
 const ruleOf = (css: string, selector: RegExp): string => {
   const m = css.match(new RegExp(`(^|\\n)\\s*${selector.source}[^{]*\\{([^}]*)\\}`));
-  return m ? m[2] : "";
+  return m ? m[2]! : "";
 };
 
 test("BaseLayout links /house.css on every page, after motion.css and before extraCss (#324)", () => {

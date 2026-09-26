@@ -35,8 +35,8 @@ const lineWorld = [capital, townA, townB, villageC];
 test("plan starts at the capital", () => {
   const plan = buildVoyagePlan(lineWorld, 1059);
   assert.equal(plan.ports.length, 4);
-  assert.equal(plan.ports[0].idx, 0);
-  assert.equal(plan.ports[0].name, "Aelmoor");
+  assert.equal(plan.ports[0]!.idx, 0);
+  assert.equal(plan.ports[0]!.name, "Aelmoor");
 });
 
 test("collinear ports sweep along the line in order, no backtrack", () => {
@@ -78,13 +78,13 @@ test("legs close the tour into a round trip: the last leg sails home to the capi
   assert.equal(plan.legs.length, plan.ports.length, "one leg per port once the tour closes");
   for (let i = 1; i < plan.ports.length; i++) {
     assert.deepEqual(plan.legs[i - 1], {
-      fromIdx: plan.ports[i - 1].idx,
-      toIdx: plan.ports[i].idx,
+      fromIdx: plan.ports[i - 1]!.idx,
+      toIdx: plan.ports[i]!.idx,
     });
   }
   assert.deepEqual(
     plan.legs[plan.legs.length - 1],
-    { fromIdx: plan.ports[plan.ports.length - 1].idx, toIdx: plan.ports[0].idx },
+    { fromIdx: plan.ports[plan.ports.length - 1]!.idx, toIdx: plan.ports[0]!.idx },
     "the closing leg carries the survey home",
   );
 });
@@ -165,14 +165,14 @@ test("no capital yields an empty plan", () => {
 test("a capital-only world is a one-port survey with no legs", () => {
   const plan = buildVoyagePlan([capital], 1059);
   assert.equal(plan.ports.length, 1);
-  assert.equal(plan.ports[0].idx, 0);
+  assert.equal(plan.ports[0]!.idx, 0);
   assert.deepEqual(plan.legs, []);
 });
 
 test("a ruined capital still anchors the survey as its home port", () => {
   const ruinedCap = mark({ idx: 0, name: "Aelmoor", kind: "capital", ruined: true, nx: 0, ny: 0 });
   const plan = buildVoyagePlan([ruinedCap, townA], 1059);
-  assert.equal(plan.ports[0].idx, 0);
+  assert.equal(plan.ports[0]!.idx, 0);
   assert.equal(plan.ports.length, 2);
 });
 
@@ -193,7 +193,7 @@ test("does not mutate the caller's places array (immutability rule)", () => {
 /** A symmetric distance oracle from a sparse pair map; throws on an unknown pair. */
 const matrixD = (m: Record<string, number>) => (a: number, b: number): number => {
   const v = m[a < b ? `${a}:${b}` : `${b}:${a}`];
-  if (v === undefined) throw new Error(`no distance for ${a}:${b}`); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+  if (v === undefined) throw new Error(`no distance for ${a}:${b}`);
   return v;
 };
 
