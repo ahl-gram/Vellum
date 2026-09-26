@@ -269,8 +269,8 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
 
   function onDocClick(e: MouseEvent): void {
     if (!placeOverlay || placeOverlay.card.hidden) return;
-    const t = e.target as Element | null;
-    if (t && t.closest && (t.closest(".place-hit") || t.closest("#place-card"))) return; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    const t = e.target as (Node & Partial<Pick<Element, "closest">>) | null;
+    if (t && t.closest && (t.closest(".place-hit") || t.closest("#place-card"))) return;
     hidePlaceCard();
   }
 

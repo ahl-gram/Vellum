@@ -389,9 +389,9 @@ function setupHunt(world: World): void {
     const name = quarry.settlement.name;
     const soundings = `${guesses} ${guesses === 1 ? "sounding" : "soundings"}`;
     const text = `Vellum Daily Hunt: I took ${name} in ${soundings}. Seed ${seed}. Can you beat it? ${location.href}`;
-    if (navigator.share) { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    if ((navigator as Partial<Navigator>).share) {
       navigator.share({ title: "Vellum Daily Hunt", text }).catch(() => {});
-    } else if (navigator.clipboard) { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    } else if ((navigator as Partial<Navigator>).clipboard) {
       navigator.clipboard
         .writeText(text)
         .then(() => {
