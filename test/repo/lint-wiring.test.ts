@@ -212,6 +212,15 @@ test("through ESLint itself, one witness file per ruled glob resolves to rules t
   assert.equal(await eslint.isPathIgnored("eslint.config.ts"), true, "the root config lints itself, so the scope leaked past the ruled roots");
 });
 
+test("only typescript-eslint's recommended-type-checked block sets a rule Issue #654 turned on, each at error, so no block can take one back for a subtree or a named file", () => {
+  const setters = blocks.flatMap((b) => TURNED_ON.filter((rule) => Object.hasOwn(b.rules ?? {}, rule)).map((rule) => `${(b.name ?? "(unnamed)").replace(/^UserConfig\[\d+\] > /, "")}: ${rule} = ${JSON.stringify(b.rules?.[rule])}`));
+  assert.deepEqual(
+    setters,
+    TURNED_ON.map((rule) => `typescript-eslint/recommended-type-checked: ${rule} = "error"`),
+    "a block other than the preset sets one of these rules, and a block can turn a rule off for every file it matches (a subtree, or one named file) while the witnesses still resolve at error",
+  );
+});
+
 const JS_REFUSED = ["x.js", "src/x.js", "scripts/x.mjs", "scripts/e2e/x.mjs", "test/x.cjs", "test-support/x.js", "public/x.js", ".claude/x.mjs", "x.jsx", "src/site/x.jsx"];
 const JS_ADMITTED = ["design/x.mjs", "design/round/x.js", "design/x.cjs", "design/round/x.jsx"];
 const JS_UNREAD = ["out/x.mjs", "out/probe/x.js", "dist/x.js", "public/explorer/app.bundle.js", "public/atlas/x.js", ".claude/worktrees/w/scripts/x.mjs", "node_modules/x/index.js"];

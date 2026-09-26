@@ -262,7 +262,6 @@ test("LP2 both actions sit inside ONE .pc-acts row, so Issue #428's third action
 });
 
 test("LP3 the press's face and its refusal come from the HOST's table, and the press stays pressable when it refuses so a keyboard reader still meets it (#522, ruled 2026-09-17)", async () => {
-  await import("../../test-support/element-shim.ts");
   const { manifest } = await realWorld();
 
   const open = layHost();
@@ -291,7 +290,6 @@ test("LP3 the press's face and its refusal come from the HOST's table, and the p
 });
 
 test("LP4 the press names the place the card is SHOWING, so a second card's press never files the first card's town (#522)", async () => {
-  await import("../../test-support/element-shim.ts");
   const { manifest } = await realWorld();
   const host = layHost();
   const { lc, mount } = await barlessHost({ layProspect: host.dep });
