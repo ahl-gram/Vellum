@@ -233,6 +233,15 @@ test("only typescript-eslint's recommended-type-checked block sets a rule Issue 
   assert.equal(preset[0]!.ignores, undefined, "the preset carries an ignores key, which takes the rules back for whatever it excludes while its files still name the four roots");
 });
 
+test("only the core recommended layer and the TypeScript block set no-empty, the second with the empty catch Alex ruled in, so no block can take it back for a subtree or a named file (Issue #654 ruling 9)", () => {
+  const setters = blocks.filter((b) => Object.hasOwn(b.rules ?? {}, "no-empty")).map((b) => `${(b.name ?? "(unnamed)").replace(/^.* > /, "")}: ${JSON.stringify(b.rules?.["no-empty"])}`);
+  assert.deepEqual(
+    setters,
+    ['@eslint/js/recommended: "error"', '(unnamed): ["error",{"allowEmptyCatch":true}]'],
+    "a block other than the core layer and the TypeScript block sets no-empty, and a block can turn it off for every file it matches while the witnesses still resolve the ruled scope",
+  );
+});
+
 const JS_REFUSED = ["x.js", "src/x.js", "scripts/x.mjs", "scripts/e2e/x.mjs", "test/x.cjs", "test-support/x.js", "public/x.js", ".claude/x.mjs", "x.jsx", "src/site/x.jsx"];
 const JS_ADMITTED = ["design/x.mjs", "design/round/x.js", "design/x.cjs", "design/round/x.jsx"];
 const JS_UNREAD = ["out/x.mjs", "out/probe/x.js", "dist/x.js", "public/explorer/app.bundle.js", "public/atlas/x.js", ".claude/worktrees/w/scripts/x.mjs", "node_modules/x/index.js"];
