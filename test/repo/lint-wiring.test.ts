@@ -156,6 +156,7 @@ const TURNED_ON = [
   "@typescript-eslint/no-unsafe-call",
   "@typescript-eslint/no-unsafe-member-access",
   "@typescript-eslint/no-unused-vars",
+  "@typescript-eslint/require-await",
 ];
 
 function pinJavaScript(file: string, typed: boolean, config: Resolved, rules: Record<string, unknown>): void {
@@ -170,6 +171,7 @@ function pinJavaScript(file: string, typed: boolean, config: Resolved, rules: Re
   assert.equal(on("no-debugger"), 2, `${file}: the core recommended rules do not reach it`);
   assert.equal(on("prefer-const"), 2, `${file}: prefer-const does not resolve at error (Immutability, Issue #648)`);
   assert.deepEqual(rules["no-param-reassign"], [2, { props: false }], `${file}: no-param-reassign does not resolve as rebinding-only at error (Alex, 2026-09-20, Issue #648)`);
+  assert.deepEqual(rules["no-empty"], typed ? [2, { allowEmptyCatch: true }] : undefined, `${file}: no-empty does not resolve at error with only the empty catch admitted (Alex, 2026-09-26, Issue #654 ruling 9)`);
   assert.equal(on("@typescript-eslint/prefer-readonly"), typed ? 2 : undefined, `${file}: prefer-readonly does not resolve at error (Immutability, Issue #648)`);
   assert.deepEqual(rules["max-lines"], [2, 400], `${file}: max-lines does not resolve at error with the ruled physical-line ceiling (Size, Issue #648)`);
   assert.deepEqual(rules["max-lines-per-function"], [2, 50], `${file}: max-lines-per-function does not resolve at error with the ruled ceiling (Size, Issue #648)`);
@@ -229,6 +231,15 @@ test("only typescript-eslint's recommended-type-checked block sets a rule Issue 
     "the preset that sets these rules does not reach exactly the four TypeScript roots: the block that extends it has changed its own files, and a narrowing (a conjunct such as src/**/*.ts with src/cli/**) takes the rules back for everything it dropped",
   );
   assert.equal(preset[0]!.ignores, undefined, "the preset carries an ignores key, which takes the rules back for whatever it excludes while its files still name the four roots");
+});
+
+test("only the core recommended layer and the TypeScript block set no-empty, the second with the empty catch Alex ruled in, so no block can take it back for a subtree or a named file (Issue #654 ruling 9)", () => {
+  const setters = blocks.filter((b) => Object.hasOwn(b.rules ?? {}, "no-empty")).map((b) => `${(b.name ?? "(unnamed)").replace(/^.* > /, "")}: ${JSON.stringify(b.rules?.["no-empty"])}`);
+  assert.deepEqual(
+    setters,
+    ['@eslint/js/recommended: "error"', '(unnamed): ["error",{"allowEmptyCatch":true}]'],
+    "a block other than the core layer and the TypeScript block sets no-empty, and a block can turn it off for every file it matches while the witnesses still resolve the ruled scope",
+  );
 });
 
 const JS_REFUSED = ["x.js", "src/x.js", "scripts/x.mjs", "scripts/e2e/x.mjs", "test/x.cjs", "test-support/x.js", "public/x.js", ".claude/x.mjs", "x.jsx", "src/site/x.jsx"];

@@ -11,6 +11,7 @@ import { planCartouche } from "../../src/render/layers/cartouche.ts";
 import { planCompass } from "../../src/render/layers/compass.ts";
 import { planScalebar } from "../../src/render/layers/scalebar.ts";
 import { planLegend } from "../../src/render/layers/legend.ts";
+import { THEMES, type ThemeName } from "../../src/render/layers/field.ts";
 import { boxesOverlap } from "../../src/render/geometry.ts";
 
 const world = generateWorld(defaultRecipe(42, { gridW: 160, gridH: 120 }));
@@ -89,6 +90,25 @@ test("the legend names the iso lines on the climate and moisture plates only", (
   assert.doesNotMatch(renderMap(w, { theme: "vegetation", legend: true }), /Isohyet|Isotherm/);
   assert.doesNotMatch(renderMap(w, { theme: "population", legend: true }), /Isohyet|Isotherm/);
   assert.doesNotMatch(renderMap(w, { legend: true }), /Isohyet|Isotherm/);
+});
+
+test("a themed legend keys its theme alone: no row a style adds of its own reaches it, though the same style unthemed carries them", () => {
+  const styles = Object.keys(STYLES) as StyleName[];
+  const duneWorld = generateWorld(defaultRecipe(6, { gridW: 160, gridH: 120 }));
+  for (const w of [world, duneWorld]) {
+    const labels = (style: StyleName, theme?: ThemeName): string[] => planLegend({ ...ctxFor(w, style), theme }, [])?.rows.map((r) => r.label) ?? [];
+    const common = styles.map((s) => labels(s)).reduce((a, b) => a.filter((l) => b.includes(l)));
+    if (w === duneWorld) assert.ok(labels("antique").includes("Dunes"), "seed 6 no longer keys dunes, so the dune row is checked nowhere");
+    for (const style of styles) {
+      const own = labels(style).filter((l) => !common.includes(l));
+      assert.ok(own.length > 0, `${style} adds no row of its own to the unthemed legend, so the themed checks below would pass without looking`);
+      for (const theme of Object.keys(THEMES) as ThemeName[]) {
+        const themeRows = [...THEMES[theme].legendRows(w, STYLES[style]).map((r) => r.label), THEMES[theme].isoLabel];
+        const leaked = labels(style, theme).filter((l) => own.includes(l) && !themeRows.includes(l));
+        assert.deepEqual(leaked, [], `seed ${w.recipe.seed}: ${style} under the ${theme} theme keys the style's own rows beside the theme's`);
+      }
+    }
+  }
 });
 
 test("the key lists roads by rank, and only when present", () => {

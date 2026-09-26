@@ -39,12 +39,13 @@ void settledReadFixtures;
 const reading = (reads: unknown[]) => {
   const asked: string[] = [];
   const slept: number[] = [];
-  const evaluate = async (expression: string): Promise<unknown> => {
+  const evaluate = (expression: string): Promise<unknown> => {
     asked.push(expression);
-    return reads.shift();
+    return Promise.resolve(reads.shift());
   };
-  const sleep = async (ms: number): Promise<void> => {
+  const sleep = (ms: number): Promise<void> => {
     slept.push(ms);
+    return Promise.resolve();
   };
   return { asked, slept, settle: makeSettle({ evaluate, sleep }) };
 };

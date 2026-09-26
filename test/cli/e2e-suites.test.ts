@@ -96,7 +96,7 @@ test("runSelected runs the selected suites, in the order given, and nothing else
   // Guards the escaping mutation: a loop over E2E_SUITE_ORDER passes every other selection test.
   const ran: string[] = [];
   const suites = Object.fromEntries(
-    E2E_SUITE_ORDER.map((n) => [n, async () => { ran.push(n); }]),
+    E2E_SUITE_ORDER.map((n) => [n, () => { ran.push(n); return Promise.resolve(); }]),
   );
   return (async () => {
     const picked = canonical(SMOKE_SUITES);
@@ -109,7 +109,7 @@ test("runSelected runs the selected suites, in the order given, and nothing else
 test("runSelected hands every suite the same ctx, and refuses a name the runner cannot run", async () => {
   const ctx = { marker: 42 };
   const seen: unknown[] = [];
-  await runSelected(["render", "health"], { render: async (c) => { seen.push(c); }, health: async (c) => { seen.push(c); } }, ctx);
+  await runSelected(["render", "health"], { render: (c) => { seen.push(c); return Promise.resolve(); }, health: (c) => { seen.push(c); return Promise.resolve(); } }, ctx);
   assert.deepEqual(seen, [ctx, ctx]);
   await assert.rejects(() => runSelected(["render"], {}, {}), /no suite named render/);
 });
@@ -139,9 +139,9 @@ test("a suite that gives up is contained: the runner is handed the suite's name 
   const handed: Array<readonly [string, string]> = [];
   const gaveUp = new Error('settle timeout open: {"open":false,"checked":true}');
   const suites = {
-    "cluster": async () => { ran.push("cluster"); throw gaveUp; },
-    "room-drawer": async () => { ran.push("room-drawer"); },
-    "specimen": async () => { ran.push("specimen"); },
+    "cluster": () => { ran.push("cluster"); return Promise.reject(gaveUp); },
+    "room-drawer": () => { ran.push("room-drawer"); return Promise.resolve(); },
+    "specimen": () => { ran.push("specimen"); return Promise.resolve(); },
   };
   const hooks: E2eRunHooks = {
     onSuiteError: (name, err) => { handed.push([name, (err as Error).message] as const); },
@@ -161,8 +161,8 @@ test("a suite that gives up is contained: the runner is handed the suite's name 
 test("a caller that passes NO hooks keeps the old contract: the throw comes straight back out", async () => {
   const ran: string[] = [];
   const suites = {
-    "cluster": async () => { ran.push("cluster"); throw new Error("gave up with nobody to hand it to"); },
-    "specimen": async () => { ran.push("specimen"); },
+    "cluster": () => { ran.push("cluster"); return Promise.reject(new Error("gave up with nobody to hand it to")); },
+    "specimen": () => { ran.push("specimen"); return Promise.resolve(); },
   };
   await assert.rejects(
     () => runSelected(["cluster", "specimen"], suites, {}),
@@ -176,13 +176,13 @@ test("a suite that gives up with the browser GONE is still a harness error, so t
   const ran: string[] = [];
   const handed: string[] = [];
   const suites = {
-    "cluster": async () => { ran.push("cluster"); throw new Error("eval exception: the socket closed"); },
-    "specimen": async () => { ran.push("specimen"); },
+    "cluster": () => { ran.push("cluster"); return Promise.reject(new Error("eval exception: the socket closed")); },
+    "specimen": () => { ran.push("specimen"); return Promise.resolve(); },
   };
   await assert.rejects(
     () => runSelected(["cluster", "specimen"], suites, {}, {
       onSuiteError: (name) => { handed.push(name); },
-      alive: async () => false,
+      alive: () => Promise.resolve(false),
     }),
     /the socket closed/,
     "a dead browser was swallowed as a product failure instead of reaching the runner's harness-error exit",
@@ -195,7 +195,7 @@ test("three suites in a row giving up is a broken run, not three defects: it deg
   const ran: string[] = [];
   const handed: string[] = [];
   const names = E2E_SUITE_ORDER.slice(0, 5);
-  const suites = Object.fromEntries(names.map((n) => [n, async () => { ran.push(n); throw new Error(`gave up in ${n}`); }]));
+  const suites = Object.fromEntries(names.map((n) => [n, () => { ran.push(n); return Promise.reject(new Error(`gave up in ${n}`)); }]));
   await assert.rejects(
     () => runSelected(names, suites, {}, { onSuiteError: (name) => { handed.push(name); }, alive: () => true }),
     /in a row/,
@@ -209,7 +209,7 @@ test("the breaker counts suites IN A ROW: a suite that passes between two that g
   const handed: string[] = [];
   const names = E2E_SUITE_ORDER.slice(0, 5);
   const suites = Object.fromEntries(
-    names.map((n, i) => [n, async () => { if (i % 2 === 0) throw new Error(`gave up in ${n}`); }]),
+    names.map((n, i) => [n, () => (i % 2 === 0 ? Promise.reject(new Error(`gave up in ${n}`)) : Promise.resolve())]),
   );
   const timings = await runSelected(names, suites, {}, { onSuiteError: (name) => { handed.push(name); }, alive: () => true });
   assert.deepEqual(handed, [names[0], names[2], names[4]], "three scattered failures tripped a breaker that is meant to catch three in a row");
@@ -220,7 +220,7 @@ test("a suite that RAN TO ITS END with a check group skipped is recorded as such
   const skipped: string[] = [];
   const suites = {
     "render": async () => {},
-    "motion": async () => { skipped.push("D1, D2"); },
+    "motion": () => { skipped.push("D1, D2"); return Promise.resolve(); },
     "turn": async () => {},
   };
   const timings = await runSelected(["render", "motion", "turn"], suites, {}, { skippedGroups: () => skipped });

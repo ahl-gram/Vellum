@@ -13,14 +13,15 @@ test("a wait that gives up inside a step fails THAT check by name with the paylo
   const { results, check } = recorder();
   const step = makeStep({ check, alive: () => true });
   const ran: string[] = [];
-  await step("CL5", async () => {
+  await step("CL5", () => {
     ran.push("CL5");
     check("CL5a a check this step got through before the wait gave up", true);
-    throw new Error('settle timeout afterEscape: {"checked":true,"nav":{"visibility":"hidden"}}');
+    return Promise.reject(new Error('settle timeout afterEscape: {"checked":true,"nav":{"visibility":"hidden"}}'));
   });
-  await step("CL8", async () => {
+  await step("CL8", () => {
     ran.push("CL8");
     check("CL8 the next check in the suite", true);
+    return Promise.resolve();
   });
   assert.deepEqual(ran, ["CL5", "CL8"], "one wait giving up took the rest of the suite with it, which is the defect");
   const failed = results.filter((r) => !r[1]);
@@ -37,9 +38,9 @@ test("a wait that gives up inside a step fails THAT check by name with the paylo
 
 test("a step whose browser is GONE rethrows instead of recording a red, so the suite's own containment can still call it infrastructure", async () => {
   const { results, check } = recorder();
-  const step = makeStep({ check, alive: async () => false });
+  const step = makeStep({ check, alive: () => Promise.resolve(false) });
   await assert.rejects(
-    async () => { await step("CD4", async () => { throw new Error("eval exception: the socket closed"); }); },
+    async () => { await step("CD4", () => Promise.reject(new Error("eval exception: the socket closed"))); },
     /the socket closed/,
     "a dead browser was recorded as this check's own failure, so a broken machine reads as a product regression",
   );
@@ -49,7 +50,7 @@ test("a step whose browser is GONE rethrows instead of recording a red, so the s
 test("a step that runs to its end records nothing of its own, so the checks inside it are the only account of it", async () => {
   const { results, check } = recorder();
   const step = makeStep({ check, alive: () => true });
-  await step("DR2", async () => { check("DR2 the drawer slides home", true, "checked=true"); });
+  await step("DR2", () => { check("DR2 the drawer slides home", true, "checked=true"); return Promise.resolve(); });
   assert.deepEqual(results, [["DR2 the drawer slides home", true, "checked=true"]]);
 });
 
@@ -57,8 +58,8 @@ test("a step that skips its group NAMES that group where the run can see it, and
   const { results, check } = recorder();
   const skippedGroups: string[] = [];
   const step = makeStep({ check, alive: () => true, skippedGroups });
-  await step("CL5", async () => { throw new Error("settle timeout afterEscape: {}"); });
-  await step("CL8", async () => { check("CL8 the next check in the suite", true); });
+  await step("CL5", () => Promise.reject(new Error("settle timeout afterEscape: {}")));
+  await step("CL8", () => { check("CL8 the next check in the suite", true); return Promise.resolve(); });
   assert.deepEqual(
     skippedGroups,
     ["CL5"],
@@ -70,6 +71,6 @@ test("a step that skips its group NAMES that group where the run can see it, and
 test("a step built WITHOUT a sink still contains its group, so a caller that predates the sink cannot crash inside the catch", async () => {
   const { results, check } = recorder();
   const step = makeStep({ check, alive: () => true });
-  await step("DR4", async () => { throw new Error("settle timeout open: {}"); });
+  await step("DR4", () => Promise.reject(new Error("settle timeout open: {}")));
   assert.deepEqual(results.map((r) => r[1]), [false], "a sink-less caller threw out of the containment path instead of recording its red");
 });

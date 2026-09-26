@@ -75,23 +75,24 @@ function buildRows(ctx: RenderCtx): { rows: Row[]; note: string } {
   if (tiers.has("hamlet")) rows.push({ icon: { kind: "settlement", tier: "hamlet" }, label: "Hamlet" });
   if (world.settlements.some((s) => s.ruined)) rows.push({ icon: { kind: "ruin" }, label: "Ruins" });
 
-  if (theme) {
-  } else if (style.name === "nautical") {
-    rows.push({ icon: { kind: "sounding" }, label: "Depth, fathoms" });
-    rows.push({ icon: { kind: "rock" }, label: "Rock awash" });
-    if (style.winds) rows.push({ icon: { kind: "wind" }, label: "Prevailing wind" });
-    if (style.currents) rows.push({ icon: { kind: "current" }, label: "Ocean current" });
-  } else if (style.glyphs) {
-    const terrain = terrainGlyphsPresent(ctx);
-    rows.push({ icon: { kind: "glyph", sym: "gl-mtn-1" }, label: "Mountains" });
-    if (terrain.hill) rows.push({ icon: { kind: "glyph", sym: "gl-hill-1" }, label: "Hills" });
-    const tree = dominantTree(ctx);
-    if (tree) rows.push({ icon: { kind: "glyph", sym: tree }, label: "Forest" });
-    if (terrain.marsh) rows.push({ icon: { kind: "glyph", sym: "gl-marsh" }, label: "Marsh" });
-    if (terrain.dune) rows.push({ icon: { kind: "glyph", sym: "gl-dune" }, label: "Dunes" });
-  } else if (style.hypsometric) {
-    rows.push({ icon: { kind: "hypso" }, label: "Low to high ground" });
-    if (style.contourStroke) rows.push({ icon: { kind: "contour" }, label: "Contour line" });
+  if (!theme) {
+    if (style.name === "nautical") {
+      rows.push({ icon: { kind: "sounding" }, label: "Depth, fathoms" });
+      rows.push({ icon: { kind: "rock" }, label: "Rock awash" });
+      if (style.winds) rows.push({ icon: { kind: "wind" }, label: "Prevailing wind" });
+      if (style.currents) rows.push({ icon: { kind: "current" }, label: "Ocean current" });
+    } else if (style.glyphs) {
+      const terrain = terrainGlyphsPresent(ctx);
+      rows.push({ icon: { kind: "glyph", sym: "gl-mtn-1" }, label: "Mountains" });
+      if (terrain.hill) rows.push({ icon: { kind: "glyph", sym: "gl-hill-1" }, label: "Hills" });
+      const tree = dominantTree(ctx);
+      if (tree) rows.push({ icon: { kind: "glyph", sym: tree }, label: "Forest" });
+      if (terrain.marsh) rows.push({ icon: { kind: "glyph", sym: "gl-marsh" }, label: "Marsh" });
+      if (terrain.dune) rows.push({ icon: { kind: "glyph", sym: "gl-dune" }, label: "Dunes" });
+    } else if (style.hypsometric) {
+      rows.push({ icon: { kind: "hypso" }, label: "Low to high ground" });
+      if (style.contourStroke) rows.push({ icon: { kind: "contour" }, label: "Contour line" });
+    }
   }
 
   if (world.rivers.length > 0) rows.push({ icon: { kind: "river" }, label: "River" });
