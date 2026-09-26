@@ -79,7 +79,7 @@ test("the shell binds all three roles once, in the layout's global style (#263)"
   const style = layout.match(/<style is:global>([\s\S]*?)<\/style>/);
   assert.ok(style, "BaseLayout should carry the global shell <style>");
   for (const v of ROLE_VARS) {
-    assert.match(style[1], new RegExp(`var\\(${v}[,)]`), `the shell style should bind ${v}`);
+    assert.match(style[1]!, new RegExp(`var\\(${v}[,)]`), `the shell style should bind ${v}`);
   }
 });
 

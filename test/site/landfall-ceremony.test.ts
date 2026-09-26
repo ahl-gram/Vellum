@@ -153,7 +153,7 @@ test("the veil's dress is in the home sheet: fixed over everything, lifting, red
   const css = read("public/index.css");
   const rule = (selector: RegExp): string => {
     const m = css.match(new RegExp(`(^|\\n)\\s*${selector.source}[^{]*\\{([^}]*)\\}`));
-    return m ? m[2] : "";
+    return m ? m[2]! : "";
   };
   const veil = rule(/\.veil /);
   assert.match(veil, /position:\s*fixed/, ".veil pins to the viewport");

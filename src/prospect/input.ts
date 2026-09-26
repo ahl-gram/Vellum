@@ -52,7 +52,7 @@ function biomeAt(world: World, x: number, y: number): BiomeName {
 // eslint-disable-next-line max-lines-per-function
 export function buildProspectInput(world: World, index: number): ProspectInput {
   const s = world.settlements[index];
-  if (s === undefined) { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+  if (s === undefined) {
     throw new RangeError(
       `settlement index ${index} out of range 0..${world.settlements.length - 1}`,
     );

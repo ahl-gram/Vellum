@@ -141,7 +141,7 @@ function shapeScan(program: ts.Program, paths: readonly string[]): { perReader: 
     const named = READ_NAMES.has(name);
     const helper = declaration !== undefined && tree.has(resolve(declaration.getSourceFile().fileName)) && name !== "send" && !senders.includes(declaration);
     if (which === -1 && !named && !helper) return;
-    if (which !== -1) perReader[which] += 1;
+    if (which !== -1) perReader[which]! += 1;
     if (which === -1 && named && (declaration?.typeParameters?.length ?? 0) > 0) {
       findings.push(`${where}: ${name} takes a shape through a declaration this scan does not know`);
       return;

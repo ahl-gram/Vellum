@@ -29,7 +29,7 @@ const folioLines = (): string[][] => {
 test("RR-room 1 the Reading Room is a chart room: chartRoom on the layout, the RoomFolio in place of the RoomHead, no legend row", () => {
   const open = page.match(/<BaseLayout([\s\S]*?)>/);
   assert.ok(open, "the page renders through BaseLayout");
-  assert.match(open[1], /\bchartRoom\b/, "the Reading Room passes chartRoom (no band, no footer)");
+  assert.match(open[1]!, /\bchartRoom\b/, "the Reading Room passes chartRoom (no band, no footer)");
   assert.ok(page.includes("<RoomFolio room={room} tagline={tagline}>"), "the room's name stands in the folio corner");
   assert.ok(!page.includes("<RoomHead"), "the RoomHead on the sheet retires with the conversion");
   assert.ok(!page.includes('class="legend"'), "no roads out: the strip owns the bottom band");
@@ -92,8 +92,8 @@ test("RR-room 6 the css: the strip fixed at the bottom, the sheet at the chart-r
   assert.doesNotMatch(frameCss, /\.rf-chart svg\[data-vellum-style\]\s*\{[^}]*box-shadow/, "the frame no longer dresses the sheet: the host's box carries the depth");
   const print = css.match(/@media print\s*\{([\s\S]*)\}\s*$/);
   assert.ok(print, "the page css ends with its print stand-down");
-  assert.match(print[1], /\.strip\s*\{[^}]*display:\s*none/, "the strip prints as nothing");
-  assert.match(print[1], /\.stage\s*\{[^}]*position:\s*static/, "the chart prints in flow");
+  assert.match(print[1]!, /\.strip\s*\{[^}]*display:\s*none/, "the strip prints as nothing");
+  assert.match(print[1]!, /\.stage\s*\{[^}]*position:\s*static/, "the chart prints in flow");
 });
 
 test("RR-room 7 the pace is the room's to wire (#493): app.ts binds each of the frame's presses to the engine's setPace and the frame's mark, and the address never carries it (ruled 2026-09-02)", () => {

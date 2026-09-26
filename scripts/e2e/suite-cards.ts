@@ -271,7 +271,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
     const missed = d.rows.filter((r) => !r.shown || r.got !== r.want);
     const worst = d.rows.filter((r) => r.shown).sort((a, b) => b.over - a.over)[0];
     return {
-      ok: d.rows.length === narrowCount && missed.length === 0 && !!worst && worst.over <= OVER_BOX_TOLERANCE, // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+      ok: d.rows.length === narrowCount && missed.length === 0 && !!worst && worst.over <= OVER_BOX_TOLERANCE,
       detail: JSON.stringify({ width, box: `${d.boxW}x${d.boxH}`, places: d.rows.length, of: narrowCount, missed: missed.map((r) => r.want), worst }),
     };
   };

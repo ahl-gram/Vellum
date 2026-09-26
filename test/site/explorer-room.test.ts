@@ -27,7 +27,7 @@ const folioLines = (): string[][] => {
 test("ER1 the Explorer is a chart room: chartRoom on the layout, the RoomFolio in place of the RoomHead", () => {
   const open = page.match(/<BaseLayout([\s\S]*?)>/);
   assert.ok(open, "the page renders through BaseLayout");
-  assert.match(open[1], /\bchartRoom\b/, "the Explorer passes chartRoom (no band, no footer)");
+  assert.match(open[1]!, /\bchartRoom\b/, "the Explorer passes chartRoom (no band, no footer)");
   assert.ok(page.includes("<RoomFolio room={room} tagline={tagline}>"), "the room's name stands in the folio corner");
   assert.ok(!page.includes("<RoomHead"), "the RoomHead on the sheet retires with the conversion");
 });
@@ -85,8 +85,8 @@ test("ER6 the page css fits the sheet to what the chrome leaves and stands print
   assert.match(css, /#sheet\s*\{[^}]*box-shadow:\s*var\(--stage-shadow\)/, "the sheet rests at the chart-room depth, via the token");
   const print = css.match(/@media print\s*\{([\s\S]*)\}\s*$/);
   assert.ok(print, "the page css ends with its print stand-down");
-  assert.match(print[1], /\.stage\s*\{[^}]*position:\s*static/, "the chart prints in flow");
-  assert.match(print[1], /#map\s*\{[^}]*transform:\s*none\s*!important/, "the chart prints unzoomed");
+  assert.match(print[1]!, /\.stage\s*\{[^}]*position:\s*static/, "the chart prints in flow");
+  assert.match(print[1]!, /#map\s*\{[^}]*transform:\s*none\s*!important/, "the chart prints unzoomed");
 });
 
 test("ER7 app.ts fits the room after the chart lands on BOTH draw paths and writes the folio's lines", () => {

@@ -82,7 +82,7 @@ export function armsPlacements(
       continue;
     }
     const seatIdx = world.realms.seats[realm];
-    const seat = seatIdx !== undefined ? world.settlements[seatIdx] : undefined; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    const seat = seatIdx !== undefined ? world.settlements[seatIdx] : undefined;
     if (seat === undefined) continue;
     out.push({ realm, cx: proj.px(seat.x), cy: proj.py(seat.y), halfW: 22 * k, halfH: 16 * k });
   }
@@ -108,7 +108,7 @@ export function heraldryLayer(
   const nodes: SvgNode[] = [];
   for (const a of placements) {
     const arms = world.arms[a.realm];
-    if (arms === undefined) continue; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    if (arms === undefined) continue;
     const dx = a.halfW + gap + size / 2;
     const dy = a.halfH + gap + sh / 2;
     const dirs: ReadonlyArray<readonly [number, number]> = [

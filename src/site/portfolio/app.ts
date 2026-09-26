@@ -66,7 +66,7 @@ const layPile = (): void => {
 
 const showTop = (): void => {
   const sheet = sheets[top];
-  if (!sheet) return; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+  if (!sheet) return;
   sheetBox.innerHTML = sheet.svg ?? "";
   room.layout();
   folioTitle.textContent = sheetLine(sheet.title, top + 1, sheets.length);
@@ -83,7 +83,7 @@ const bringUp = (at: number): void => {
   top = at;
   showTop();
   const sheet = sheets[top];
-  if (sheet) say(`${sheet.title} is on top`); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+  if (sheet) say(`${sheet.title} is on top`);
 };
 
 // #217's contract, the same function the Print Room's plates are named by: vellum-<seed>-<style>-<slug>.svg, so a sheet
@@ -145,7 +145,7 @@ const rows = (): void => {
     head.className = "group-head";
     const name = document.createElement("span");
     // Any DRAFTED entry names the world, prospects included since #522: thumbNames takes a prospect's world line from the job's own title.
-    const named = group.entries.map((e) => sheets[e.at]).find((sheet) => !!sheet?.worldTitle); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    const named = group.entries.map((e) => sheets[e.at]).find((sheet) => !!sheet?.worldTitle);
     name.textContent = `From ${named?.worldTitle || "this world"} · chart № ${group.seed}`;
     head.append(name);
     const gloss = document.createElement("span");
@@ -157,7 +157,7 @@ const rows = (): void => {
     list.className = "contents";
     for (const { at } of group.entries) {
       const sheet = sheets[at];
-      if (sheet) list.append(rowFor(sheet, at)); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+      if (sheet) list.append(rowFor(sheet, at));
     }
     contents.append(list);
   }
@@ -169,7 +169,7 @@ const retitle = (): void => {
   bound.textContent = items.length === 0
     ? BARE_LINE
     : boundLine(groups.map((g) => ({
-        name: g.entries.map((e) => sheets[e.at]).find((sheet) => !!sheet?.worldTitle)?.worldTitle || `chart № ${g.seed}`, // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+        name: g.entries.map((e) => sheets[e.at]).find((sheet) => !!sheet?.worldTitle)?.worldTitle || `chart № ${g.seed}`,
         count: g.entries.length,
       })));
   const stamp = draftedLine(drawnCount(), sheets.length);
@@ -186,7 +186,7 @@ const draft = async (): Promise<void> => {
   for (const group of groupByWorld(items)) {
     for (const { at } of group.entries) {
       const sheet = sheets[at];
-      if (!sheet) continue; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+      if (!sheet) continue;
       try {
         const res = await runJob(thumbJobFor(sheet.item));
         const named = thumbNames(res);
@@ -240,7 +240,7 @@ const start = async (): Promise<void> => {
     return;
   }
   next.addEventListener("click", () => { bringUp((top + 1) % sheets.length); });
-  download.addEventListener("click", () => { const sheet = sheets[top]; if (sheet) takeHome(sheet); }); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+  download.addEventListener("click", () => { const sheet = sheets[top]; if (sheet) takeHome(sheet); });
   await initWorker();
   if (!usesWorker()) warning.hidden = false;
   await draft();

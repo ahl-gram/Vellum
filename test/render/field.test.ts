@@ -155,7 +155,7 @@ test("the ink theme palette reads as monochrome, not a chromatic ramp", () => {
   const world = generateWorld(defaultRecipe(42));
   for (const theme of THEME_NAMES) {
     for (const r of THEMES[theme].legendRows(world, STYLES.ink)) {
-      const [rr, gg, bb] = [1, 3, 5].map((i) => parseInt(r.color.slice(i, i + 2), 16));
+      const [rr, gg, bb] = [1, 3, 5].map((i) => parseInt(r.color.slice(i, i + 2), 16)) as [number, number, number];
       const spread = Math.max(rr, gg, bb) - Math.min(rr, gg, bb);
       assert.ok(spread <= 45, `${theme} ink swatch ${r.color} too chromatic (spread ${spread})`);
     }

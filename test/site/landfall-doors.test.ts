@@ -41,10 +41,10 @@ test("the failed-bundle reveal is pinned whole: selector polarity, the flow dres
   const rule = css.match(/\.landfall \.stage:not\(\.cam\) ~ \.lf-card:not\(\.lf-card-how\)\[hidden\] \{([^}]*)\}/);
   assert.ok(rule, "the reveal keys on .stage:not(.cam) ~ .lf-card:not(.lf-card-how)[hidden]: :not(.cam) is the whole predicate (an inverted .cam would reveal on every healthy load), [hidden] keeps it off any slip the bundle opened, and the how panel is excluded (the ratification names the four station slips)");
   for (const decl of ["display: block", "position: static", "visibility: hidden", "max-height: 0", "padding: 0", "border-width: 0", "margin: 0 auto"]) {
-    assert.ok(rule[1].includes(decl), `the failed-state base carries ${decl}: display flips immediately (an animation never starts on a display:none element), while zeroed height, margin, padding and border keep the pre-reveal page byte-identical in layout (a 2rem base margin held .landfall 128px taller than the stage on every load until .cam, skeptic round 1)`);
+    assert.ok(rule[1]!.includes(decl), `the failed-state base carries ${decl}: display flips immediately (an animation never starts on a display:none element), while zeroed height, margin, padding and border keep the pre-reveal page byte-identical in layout (a 2rem base margin held .landfall 128px taller than the stage on every load until .cam, skeptic round 1)`);
   }
   assert.match(
-    rule[1],
+    rule[1]!,
     /animation:\s*lf-doors-reveal 0s linear 10s forwards;/,
     "the reveal statement is pinned whole: 0s duration (a discrete jump, nothing interpolates), the 10s delay, and forwards (without it the to-frame releases and the doors vanish again)",
   );
@@ -53,20 +53,20 @@ test("the failed-bundle reveal is pinned whole: selector polarity, the flow dres
 test("the reveal's to-frame restores exactly what the base zeroed, and the dead close control never shows (#470)", () => {
   const frames = css.match(/@keyframes lf-doors-reveal \{([\s\S]*?)\n\}/);
   assert.ok(frames, "the reveal keyframes exist");
-  const to = frames[1].match(/to \{([^}]*)\}/);
+  const to = frames[1]!.match(/to \{([^}]*)\}/);
   assert.ok(to, "with a 0s duration only the to-frame matters");
   for (const decl of ["visibility: visible", "max-height: 100rem", "margin-top: 2rem", "padding: 1.5rem 1.6rem 1.4rem", "border-width: 1px", "outline-width: 3px"]) {
-    assert.ok(to[1].includes(decl), `the to-frame restores ${decl}`);
+    assert.ok(to[1]!.includes(decl), `the to-frame restores ${decl}`);
   }
   const narrow = css.match(/@media \(max-width: 900px\) \{\s*@keyframes lf-doors-reveal \{([\s\S]*?)\n {2}\}/);
   assert.ok(
-    narrow && narrow[1].includes("padding: 1.2rem 1.3rem 1.1rem") && narrow[1].includes("visibility: visible"),
+    narrow && narrow[1]!.includes("padding: 1.2rem 1.3rem 1.1rem") && narrow[1]!.includes("visibility: visible"),
     "the narrow override redefines the keyframes AFTER the base (a definition before it in file order never wins), so revealed doors under 900px wear the narrow padding",
   );
   const narrowCard = css.match(/@media \(max-width: 900px\) \{([\s\S]*?)\n\}/);
-  const fixedSheet = narrowCard && narrowCard[1].match(/\.lf-card\s*\{([^}]*)\}/);
+  const fixedSheet = narrowCard && narrowCard[1]!.match(/\.lf-card\s*\{([^}]*)\}/);
   assert.ok(
-    fixedSheet && fixedSheet[1].includes("max-height: none") && fixedSheet[1].includes("overflow: visible"),
+    fixedSheet && fixedSheet[1]!.includes("max-height: none") && fixedSheet[1]!.includes("overflow: visible"),
     "the narrow fixed sheets lift the desktop cap: position:fixed makes the % resolve against the VIEWPORT, and on a landscape phone the clip would land exactly on the sheet's Enter door, its only action (skeptic round 2)",
   );
   assert.match(
@@ -88,7 +88,7 @@ test("reduced motion keeps the 10s window: the house prm blanket is out-specifie
   const motion = liveCss("public/motion.css");
   const blanket = motion.match(/@media \(prefers-reduced-motion: reduce\) \{([\s\S]*?)\n\}/);
   assert.ok(
-    blanket && /animation-delay:\s*0s !important/.test(blanket[1]),
+    blanket && /animation-delay:\s*0s !important/.test(blanket[1]!),
     "motion.css's prm blanket still zeroes every animation-delay: that blanket is WHY the reveal owes its own exemption; if the blanket ever retires, retire the exemption with it",
   );
   const prm = css.match(/@media \(prefers-reduced-motion: reduce\) \{([\s\S]*?)\n\}/g)?.join("\n") ?? "";

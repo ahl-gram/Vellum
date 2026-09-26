@@ -42,7 +42,7 @@ test("attributes in any order: a class before the id, an id before the class, an
 
 test("the other entry class is invisible: a term list read as questions finds none", () => {
   const sections = roomSections(`<h2 id="a">A</h2><p class="term" id="t">T</p>`, "q");
-  assert.deepEqual(sections[0].entries, []);
+  assert.deepEqual(sections[0]!.entries, []);
 });
 
 for (const [route, cls] of [["faq", "q"], ["glossary", "term"]] as const) {

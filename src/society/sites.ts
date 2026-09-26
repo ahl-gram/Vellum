@@ -124,7 +124,7 @@ export function placeSettlements(
 
   const capital =
     candidates.find((c) => c.harbor || c.onRiver) ?? candidates[0];
-  if (!capital) return []; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+  if (!capital) return [];
   placed.push({ ...capital, kind: "capital" });
 
   for (const c of candidates) {

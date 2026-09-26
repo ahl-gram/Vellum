@@ -116,7 +116,7 @@ test("does not mutate the caller's points array", () => {
 /** A symmetric distance oracle from a sparse pair map; throws on an unknown pair. */
 const matrixD = (m: Record<string, number>) => (a: number, b: number): number => {
   const v = m[a < b ? `${a}:${b}` : `${b}:${a}`];
-  if (v === undefined) throw new Error(`no distance for ${a}:${b}`); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+  if (v === undefined) throw new Error(`no distance for ${a}:${b}`);
   return v;
 };
 

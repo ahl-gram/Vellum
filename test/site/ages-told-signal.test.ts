@@ -96,7 +96,7 @@ test("#442 the survey chamber announces the voyage's told day row, never a null 
   const ages = instrument((t) => seen.push(t));
   ages.armAges(null, null, 42, "sub", { rest: { chamber: "survey", t: 1 } });
   assert.deepEqual(seen[0], DAY_ROW, "the survey half carries the row, so the plate has a port to draw");
-  assert.equal(seen[0]?.chamber, "survey", "and it is discriminated by chamber, not by a null");
+  assert.equal(seen[0].chamber, "survey", "and it is discriminated by chamber, not by a null");
 });
 
 test("#442 the signal is ONE message: the payload switches chamber, it never doubles up", () => {
@@ -165,10 +165,10 @@ test("buildAnnals writes the chronicler's block INTO the strip it is given: the 
   const ages = instrument(undefined, DAY_ROW, strip);
   ages.armAges(null, null, 42, "sub");
   assert.equal(strip.children.length, EVENTS.length + 1, "the head and one row per event, in the strip handed over");
-  assert.equal(strip.children[0].className, "annals-head");
-  assert.equal(strip.children[0].textContent, "Here follow the annals of these waters");
-  assert.deepEqual(strip.children.slice(1).map((li) => li.children[0].textContent), EVENTS.map((e) => String(e.year)), "the year spans in the events' order");
-  assert.equal(strip.children[1].children[1].children[0].className, "cr-dc", "the first row's text opens with its initial");
-  assert.equal(strip.children[1].children[1].textContent, EVENTS[0].text, "and reads whole");
-  assert.equal(strip.children[2].children[1].textContent, EVENTS[1].text, "a later row is plain text");
+  assert.equal(strip.children[0]!.className, "annals-head");
+  assert.equal(strip.children[0]!.textContent, "Here follow the annals of these waters");
+  assert.deepEqual(strip.children.slice(1).map((li) => li.children[0]!.textContent), EVENTS.map((e) => String(e.year)), "the year spans in the events' order");
+  assert.equal(strip.children[1]!.children[1]!.children[0]!.className, "cr-dc", "the first row's text opens with its initial");
+  assert.equal(strip.children[1]!.children[1]!.textContent, EVENTS[0]!.text, "and reads whole");
+  assert.equal(strip.children[2]!.children[1]!.textContent, EVENTS[1]!.text, "a later row is plain text");
 });

@@ -9,16 +9,16 @@ const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 
 const classesIn = (astro: string): Set<string> =>
-  new Set([...astro.matchAll(/class="([^"]*)"/g)].flatMap((m) => m[1].split(/\s+/)).filter((c) => c && !c.includes("{")));
+  new Set([...astro.matchAll(/class="([^"]*)"/g)].flatMap((m) => m[1]!.split(/\s+/)).filter((c) => c && !c.includes("{")));
 
 const rulesIn = (css: string): string[] =>
-  [...css.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}]+)\{[^{}]*\}/g)].map((m) => m[1].trim()).filter((s) => !s.startsWith("@") && !/^\d|^from$|^to$/.test(s));
+  [...css.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}]+)\{[^{}]*\}/g)].map((m) => m[1]!.trim()).filter((s) => !s.startsWith("@") && !/^\d|^from$|^to$/.test(s));
 
 const SCOPED = /(^|\s)body\.(?:chart-room|room)\b/;
 
 const offendersIn = (css: string, home: Set<string>): string[] =>
   rulesIn(css).flatMap((selector) => selector.split(",").map((s) => s.trim())).filter((arm) => {
-    const classes = [...arm.matchAll(/\.([a-zA-Z][\w-]*)/g)].map((m) => m[1]);
+    const classes = [...arm.matchAll(/\.([a-zA-Z][\w-]*)/g)].map((m) => m[1]!);
     return classes.length > 0 && classes.every((c) => home.has(c)) && !SCOPED.test(arm);
   });
 

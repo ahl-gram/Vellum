@@ -147,16 +147,16 @@ test("a lane's child env carries its own suites and ports, and inherits the rest
   const base = { VELLUM_BROWSER: "/usr/bin/google-chrome", VELLUM_REQUIRE_BROWSER: "1", UNSET: undefined };
   const envs = E2E_LANES.map((lane) => laneChildEnv(lane, base));
   for (const [i, lane] of E2E_LANES.entries()) {
-    assert.equal(envs[i][E2E_SUITES_VAR], lane.suites.join(","), `lane ${lane.name} runs the wrong suites`);
-    assert.equal(envs[i][E2E_PORT_VAR], String(lane.port));
-    assert.equal(envs[i][E2E_DPORT_VAR], String(lane.dport));
-    assert.equal(envs[i]["VELLUM_BROWSER"], "/usr/bin/google-chrome", "the browser choice was dropped");
-    assert.equal(envs[i]["VELLUM_REQUIRE_BROWSER"], "1", "the require-browser guard was dropped");
-    assert.ok(!("UNSET" in envs[i]), "an unset ambient var leaked in as undefined");
+    assert.equal(envs[i]![E2E_SUITES_VAR], lane.suites.join(","), `lane ${lane.name} runs the wrong suites`);
+    assert.equal(envs[i]![E2E_PORT_VAR], String(lane.port));
+    assert.equal(envs[i]![E2E_DPORT_VAR], String(lane.dport));
+    assert.equal(envs[i]!["VELLUM_BROWSER"], "/usr/bin/google-chrome", "the browser choice was dropped");
+    assert.equal(envs[i]!["VELLUM_REQUIRE_BROWSER"], "1", "the require-browser guard was dropped");
+    assert.ok(!("UNSET" in envs[i]!), "an unset ambient var leaked in as undefined");
   }
-  assert.notEqual(envs[0][E2E_PORT_VAR], envs[1][E2E_PORT_VAR], "both lanes were handed the same port");
-  assert.notEqual(envs[0][E2E_DPORT_VAR], envs[1][E2E_DPORT_VAR], "both lanes were handed the same debug port");
-  assert.notEqual(envs[0][E2E_SUITES_VAR], envs[1][E2E_SUITES_VAR], "both lanes were handed the same suites");
+  assert.notEqual(envs[0]![E2E_PORT_VAR], envs[1]![E2E_PORT_VAR], "both lanes were handed the same port");
+  assert.notEqual(envs[0]![E2E_DPORT_VAR], envs[1]![E2E_DPORT_VAR], "both lanes were handed the same debug port");
+  assert.notEqual(envs[0]![E2E_SUITES_VAR], envs[1]![E2E_SUITES_VAR], "both lanes were handed the same suites");
 });
 
 test("--lane names one lane and no flag names every lane", () => {
@@ -372,7 +372,7 @@ test("the skip line the driver watches for is the one the runner actually prints
   );
   const printed = runner.match(/"(SKIP:[^"]*)"/);
   assert.ok(printed, "the runner no longer prints a SKIP: line, so the driver watches for nothing");
-  assert.ok(laneLineIsSkip(printed[1]), `the driver does not recognise the runner's own ${printed[1]}`);
+  assert.ok(laneLineIsSkip(printed[1]!), `the driver does not recognise the runner's own ${printed[1]}`);
   assert.ok(!laneLineIsSkip("PASS  R1 the chart draws"), "a passing check must not read as a skip");
   assert.ok(!laneLineIsSkip("  SKIP: indented"), "only the runner's own line counts, not a mention of one");
 });

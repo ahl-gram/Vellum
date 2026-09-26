@@ -18,7 +18,7 @@ test("the encounter gloss lives once, at the legend head (#459)", () => {
   const hits = homeSource.split("Every seed is a world entire").length - 1;
   assert.equal(hits, 1, "the legend head is the one home of the gloss line");
   const head = homeSource.match(/class="lf-legend-head">([^<]+)</);
-  assert.ok(head && head[1].includes("Every seed is a world entire"), "and that one home is the legend head");
+  assert.ok(head && head[1]!.includes("Every seed is a world entire"), "and that one home is the legend head");
 });
 
 test("the station slip keeps the card criterion: verb kicker before the title, grounded and glossed (#458)", () => {

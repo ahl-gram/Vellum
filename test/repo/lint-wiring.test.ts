@@ -260,8 +260,8 @@ test("through ESLint itself, a JavaScript file anywhere outside design/ is refus
   const verdict = async (path: string, lead = ""): Promise<string> => {
     if (await eslint.isPathIgnored(path)) return "unread";
     const [result] = await eslint.lintText(lead + sourceFor(path), { filePath: join(ROOT, path) });
-    const refused = result.messages.some((m) => m.ruleId === "no-restricted-syntax" && m.severity === 2 && m.message.startsWith("JavaScript is not written here"));
-    return refused ? "refused" : result.messages.length === 0 ? "admitted" : result.messages.map((m) => `${m.ruleId ?? "parse"}: ${m.message}`).join(" | ");
+    const refused = result!.messages.some((m) => m.ruleId === "no-restricted-syntax" && m.severity === 2 && m.message.startsWith("JavaScript is not written here"));
+    return refused ? "refused" : result!.messages.length === 0 ? "admitted" : result!.messages.map((m) => `${m.ruleId ?? "parse"}: ${m.message}`).join(" | ");
   };
   for (const path of JS_REFUSED) assert.equal(await verdict(path), "refused", `${path} is not refused, so a JavaScript file there would lint green`);
   for (const lead of DIRECTIVES) {

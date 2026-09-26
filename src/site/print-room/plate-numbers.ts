@@ -21,6 +21,6 @@ export const MATTER_ROW = {
 export const plateRow = (section: PlateSection, ordinal = 0): number => SECTION_ROW[section] + (section === "theme" ? ordinal : 0);
 export const numeralOf = (row: number): string => {
   const numeral = NUMERALS[row];
-  if (numeral === undefined) throw new RangeError(`the contents run to ${NUMERALS.length} rows; row ${row + 1} has no numeral`); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+  if (numeral === undefined) throw new RangeError(`the contents run to ${NUMERALS.length} rows; row ${row + 1} has no numeral`);
   return numeral;
 };

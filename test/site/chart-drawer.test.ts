@@ -241,7 +241,7 @@ test("CT7 the sheet a filing is made from carries its own present year, so a wor
   const fields = [...call.matchAll(/(\w+):\s*([^,}]+)/g)];
   assert.equal(fields.length, 5, "the gate's call no longer reads as the five fields a prospect item takes, so the loop below is sweeping nothing");
   for (const [, field, value] of fields) {
-    assert.match(value.trim(), field === "index" ? /^at\.index$/ : /^at\.sheet\.\w+$/, `${field} reaches past the one sheet, so the filing no longer describes a single chart`);
+    assert.match(value!.trim(), field === "index" ? /^at\.index$/ : /^at\.sheet\.\w+$/, `${field} reaches past the one sheet, so the filing no longer describes a single chart`);
   }
   const other = filingAt({ turning: false, sheet: { ...sheet, presentYear: 809 }, index: 3 });
   assert.ok(other);
@@ -250,7 +250,7 @@ test("CT7 the sheet a filing is made from carries its own present year, so a wor
 
 test("CT7c the Explorer assigns that sheet beside the OVERLAY it describes, which is what keeps an aborted turn consistent rather than skewed (#631 round 3)", () => {
   const src = readFileSync(resolve(REPO, "src/site/explorer/app.ts"), "utf8");
-  const builds = [...src.matchAll(/lc\.buildPlaceOverlay\(res\.manifest\);\n(\s*)([^\n]*)/g)].map((m) => m[2]);
+  const builds = [...src.matchAll(/lc\.buildPlaceOverlay\(res\.manifest\);\n(\s*)([^\n]*)/g)].map((m) => m[2]!);
   assert.ok(builds.length >= 2, "both draw paths build the overlay, or this guard reads fewer than it thinks");
   for (const next of builds) {
     assert.match(next, /^lastSheet = \{/, "the line after an overlay build is not the sheet assignment, so the hit targets on screen and the world the card files from can drift apart");

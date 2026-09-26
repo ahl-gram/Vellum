@@ -37,7 +37,7 @@ export function classifyClick(
     band: classifyDistanceBand(dist, diagonal),
     dist,
     pickedIdx: nearest,
-    pickedName: picked ? picked.name : "", // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    pickedName: picked ? picked.name : "",
   };
 }
 

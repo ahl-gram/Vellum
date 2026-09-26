@@ -31,7 +31,7 @@ const count = (s: string, needle: string): number => s.split(needle).length - 1;
 test("RBR1 the Ribbon is a chart room: chartRoom on the layout, the RoomFolio in place of the RoomHead, the figure and its caption retired", () => {
   const open = page.match(/<BaseLayout([\s\S]*?)>/);
   assert.ok(open, "the page renders through BaseLayout");
-  assert.match(open[1], /\bchartRoom\b/, "the Ribbon passes chartRoom (no band, no footer)");
+  assert.match(open[1]!, /\bchartRoom\b/, "the Ribbon passes chartRoom (no band, no footer)");
   assert.ok(page.includes("<RoomFolio room={room} tagline={tagline}>"), "the room's name stands in the folio corner");
   assert.ok(!page.includes("<RoomHead"), "the RoomHead on the sheet retires with the conversion");
   for (const gone of ['class="plate-figure"', 'class="actions"', 'id="rb-caption"']) {
@@ -133,9 +133,9 @@ test("RBR7 the css: the sheet fitted to what the chrome leaves, the scroll as th
   assert.match(phone, /\.journey\.in-slip\s*\{[^}]*display:\s*grid/, "docked in the sheet the journey is a labelled grid (the mockup's phone shape)");
   const print = css.match(/@media print\s*\{([\s\S]*)\}\s*$/);
   assert.ok(print, "the page css ends with its print stand-down");
-  assert.match(print[1], /\.stage\s*\{[^}]*position:\s*static/, "the scroll prints in flow");
-  assert.match(print[1], /#map\s*\{[^}]*transform:\s*none\s*!important/, "unzoomed");
-  assert.match(print[1], /#rb-plate\s*\{[^}]*position:\s*static;[^}]*height:\s*auto/, "at its own proportion");
+  assert.match(print[1]!, /\.stage\s*\{[^}]*position:\s*static/, "the scroll prints in flow");
+  assert.match(print[1]!, /#map\s*\{[^}]*transform:\s*none\s*!important/, "unzoomed");
+  assert.match(print[1]!, /#rb-plate\s*\{[^}]*position:\s*static;[^}]*height:\s*auto/, "at its own proportion");
 });
 
 test("RBR8 the corner's select dress is the kit's at its second use (#487): atelier.css dresses .folio-controls select.control, the Print Room's sheet no longer does, the Ribbon's sets only the width", () => {

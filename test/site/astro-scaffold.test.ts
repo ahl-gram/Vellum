@@ -233,12 +233,12 @@ const ownScripts = (route: string) => page(route).replace(SHELL_SCRIPT, "");
 const headOf = (html: string) => {
   const m = html.match(/<head>([\s\S]*?)<\/head>/);
   assert.ok(m, "the page should have a <head>");
-  return m[1];
+  return m[1]!;
 };
 
 const metaContent = (head: string, attr: "name" | "property", key: string) => {
   const m = head.match(new RegExp(`<meta ${attr}="${key.replace(/[:]/g, "[:]")}" content="([^"]*)"`));
-  return m ? decode(m[1]) : undefined;
+  return m ? decode(m[1]!) : undefined;
 };
 
 test("astro build emits every page in directory form", () => {
@@ -289,7 +289,7 @@ test("each rendered head carries the canonical meta with the ratified prop fan-o
     const head = headOf(page(p.route));
     const title = head.match(/<title>([\s\S]*?)<\/title>/);
     assert.ok(title, `${p.route} should have a <title>`);
-    assert.equal(decode(title[1]), p.title, `${p.route} title`);
+    assert.equal(decode(title[1]!), p.title, `${p.route} title`);
 
     for (const [attr, key, want] of [
       ["name", "description", p.description],
@@ -349,8 +349,8 @@ test("no head member arrives beyond the canonical set (nothing injected, nothing
   for (const p of PAGES) {
     const head = headOf(page(p.route));
     const seen = [...head.matchAll(/<meta\s+([^>]*?)\/?>/g)].map(([, attrs]) => {
-      if (/charset=/.test(attrs)) return "charset";
-      const m = attrs.match(/(name|property)="([^"]+)"/);
+      if (/charset=/.test(attrs!)) return "charset";
+      const m = attrs!.match(/(name|property)="([^"]+)"/);
       return m ? `${m[1]}:${m[2]}` : `unrecognized: ${attrs}`;
     });
     const expected = new Set([...expectedMeta, ...(p.noindex ? ["name:robots"] : [])]);
@@ -379,7 +379,7 @@ test("the canonical nav renders the typed items flat, root-absolute, one aria-cu
     const html = page(p.route);
     const navs = [...html.matchAll(/<nav class="rooms" aria-label="The rooms">([\s\S]*?)<\/nav>/g)];
     assert.equal(navs.length, 1, `${p.route} should have exactly one rooms nav (semantic <nav>)`);
-    const nav = navs[0][1];
+    const nav = navs[0]![1]!;
 
     const parts = [
       ...nav.matchAll(
@@ -387,19 +387,19 @@ test("the canonical nav renders the typed items flat, root-absolute, one aria-cu
       ),
     ];
     assert.deepEqual(
-      parts.map((m) => decode(m[2] ?? m[3])), // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+      parts.map((m) => decode(m[2] ?? m[3]!)),
       NAV_ITEMS.map((i) => i.label),
       `${p.route} nav renders every item in NAV_ITEMS order`,
     );
     for (const m of parts) {
-      if (m[2] !== undefined) { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-        const item = NAV_ITEMS.find((i) => i.label === decode(m[2]));
+      if (m[2] !== undefined) {
+        const item = NAV_ITEMS.find((i) => i.label === decode(m[2]!));
         assert.equal(m[1], item?.href, `${p.route} nav link ${m[2]} uses the root-absolute href`);
       }
     }
-    const currents = parts.filter((m) => m[3] !== undefined); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    const currents = parts.filter((m) => m[3] !== undefined);
     assert.deepEqual(
-      currents.map((m) => decode(m[3])),
+      currents.map((m) => decode(m[3]!)),
       p.current ? [p.current] : [],
       p.current
         ? `${p.route} marks exactly its own page aria-current, as an unlinked span (brightened AND underlined, never color alone)`
@@ -417,7 +417,7 @@ test("the layout ships the cluster's ratified pins: leading, weight, the aria-cu
     const style = head.match(/<style[^>]*>([\s\S]*?)<\/style>/);
     assert.ok(style, `${p.route} should inline the shell <style>`);
     // The inlined shell CSS arrives minified, so tolerate .72rem and bare attr values.
-    const css = style[1];
+    const css = style[1]!;
     assert.match(
       css,
       /\.rooms\s*\{[^}]*font-size:\s*0?\.72rem/,
@@ -521,7 +521,7 @@ test("the head cluster: wordmark, the atelier tagline, then the rooms nav, fixed
     );
     const [head, tag, nav] = ['<header class="chrome">', 'class="tagline"', '<nav class="rooms"'].map((m) =>
       html.indexOf(m),
-    );
+    ) as [number, number, number];
     assert.ok(head > -1 && head < tag && tag < nav, `${p.route} keeps the cluster order: wordmark head, tagline, rooms nav`);
     for (const gone of ['class="running-head"', 'class="head-rule"', 'class="topnav"']) {
       assert.ok(!html.includes(gone), `${p.route}: the folio ${gone} retired with the cluster (#461)`);
@@ -539,7 +539,7 @@ test("every page's h1 names the page: the room on room pages, the wordmark on ho
     const h1s = [...html.matchAll(/<h1\b[^>]*>([\s\S]*?)<\/h1>/g)];
     assert.equal(h1s.length, 1, `${p.route} has exactly one h1`);
     assert.equal(
-      normalize(decodeAll(h1s[0][1])),
+      normalize(decodeAll(h1s[0]![1]!)),
       p.room ?? "Vellum",
       `${p.route} h1 must name the page itself, not the masthead`,
     );
@@ -584,21 +584,21 @@ test("titles are computed in the layout from the room, never hand-set (#268)", (
     const open = source.match(/<BaseLayout([\s\S]*?)>/);
     assert.ok(open, `${p.route} renders through BaseLayout`);
     for (const gone of ["title=", "ogTitle=", "wordmarkSuffix="]) {
-      assert.ok(!open[1].includes(gone), `${p.route} must not hand-set ${gone.slice(0, -1)} (the layout computes it)`);
+      assert.ok(!open[1]!.includes(gone), `${p.route} must not hand-set ${gone.slice(0, -1)} (the layout computes it)`);
     }
     if (p.room) {
       assert.ok(source.includes(`const room = "${p.room}"`), `${p.route} hoists its room to a const`);
-      assert.ok(open[1].includes("room={room}"), `${p.route} passes the const to the layout`);
+      assert.ok(open[1]!.includes("room={room}"), `${p.route} passes the const to the layout`);
       assert.ok(source.includes(`const tagline = "${p.tagline}"`), `${p.route} hoists its tagline to a const`);
       assert.ok(source.includes("<RoomFolio room={room} tagline={tagline}>"), `${p.route} stands its RoomFolio in the page`);
     } else {
-      assert.ok(!open[1].includes("room="), `${p.route} is home and passes no room`);
+      assert.ok(!open[1]!.includes("room="), `${p.route} is home and passes no room`);
     }
     if (p.ogTitle !== p.title) {
       const normalized = p.ogTitle.replace(" · Vellum", "");
-      assert.ok(open[1].includes(`ogRoom="${normalized}"`), `${p.route} normalizes its og twin via ogRoom`);
+      assert.ok(open[1]!.includes(`ogRoom="${normalized}"`), `${p.route} normalizes its og twin via ogRoom`);
     } else {
-      assert.ok(!open[1].includes("ogRoom="), `${p.route} needs no ogRoom (its room is already normalized)`);
+      assert.ok(!open[1]!.includes("ogRoom="), `${p.route} needs no ogRoom (its room is already normalized)`);
     }
   }
 });
@@ -611,7 +611,7 @@ test("the footer is constant and appears exactly once per page; a chart room alo
       continue;
     }
     assert.equal(footers.length, 1, `${p.route} has exactly one footer`);
-    assert.equal(normalize(footers[0][1]), "Vellum · an atelier of imaginary cartography");
+    assert.equal(normalize(footers[0]![1]!), "Vellum · an atelier of imaginary cartography");
   }
 });
 
@@ -825,12 +825,12 @@ test("every internal link and embed on the rendered pages resolves", () => {
   for (const p of PAGES) {
     const html = page(p.route);
     for (const [, url] of html.matchAll(/(?:href|src)="([^"]+)"/g)) {
-      if (/^(https?:)?\/\//.test(url) || url.startsWith("mailto:")) continue;
-      if (url.startsWith("#")) {
-        assert.ok(html.includes(`id="${url.slice(1)}"`), `${p.route} fragment ${url} should exist on the page`);
+      if (/^(https?:)?\/\//.test(url!) || url!.startsWith("mailto:")) continue;
+      if (url!.startsWith("#")) {
+        assert.ok(html.includes(`id="${url!.slice(1)}"`), `${p.route} fragment ${url} should exist on the page`);
         continue;
       }
-      const path = new URL(url, `https://v.test${p.dir}`).pathname;
+      const path = new URL(url!, `https://v.test${p.dir}`).pathname;
       if (routes.has(path)) continue;
       if (generated.includes(path)) continue;
       if (/^\/gallery\/chart-\d+\.svg$/.test(path)) continue;

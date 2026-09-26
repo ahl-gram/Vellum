@@ -67,7 +67,7 @@ test("sitemap.xml lists every route, absolute against the site, and nothing else
   assert.ok(xml.includes(`<loc>${abs(HOME_ROUTE)}</loc>`), "the sitemap must list home, which has no nav item");
   assert.ok(xml.includes(`<loc>${abs(ATLAS_ROUTE)}</loc>`), "the sitemap must list the generated atlas");
 
-  const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(([, url]) => url);
+  const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(([, url]) => url!);
   assert.equal(locs.length, DISCOVERY_ROUTES.length, "exactly one <loc> per route, no duplicates, nothing invented");
   for (const loc of locs) {
     assert.ok(loc.startsWith("https://charts.example/"), `${loc} must be absolute against the passed site`);
@@ -94,7 +94,7 @@ test("llms.txt follows the llmstxt.org shape: H1, blockquote summary, then linke
   assert.match(txt, /^# Vellum\n/, "llmstxt.org requires an H1 with the project name, first");
   const summary = txt.match(/^> (.+)$/m);
   assert.ok(summary, "llmstxt.org requires a blockquote summary immediately after the H1");
-  assert.ok(summary[1].length > 60, "the summary should actually describe the site");
+  assert.ok(summary[1]!.length > 60, "the summary should actually describe the site");
   assert.match(txt, /^## /m, "the links must live under at least one H2 section");
 
   for (const route of DISCOVERY_ROUTES) {
@@ -133,12 +133,12 @@ test("the real origin comes from astro.config.ts, so a domain move updates all t
 test("astro:generate ends by generating the discovery files into public/", () => {
   const pkg = JSON.parse(readFileSync(root("package.json"), "utf8")) as { scripts: Record<string, string> };
   assert.ok(
-    pkg.scripts["astro:generate"].includes("node scripts/generate-discovery.ts"),
+    pkg.scripts["astro:generate"]!.includes("node scripts/generate-discovery.ts"),
     "astro:generate must run the discovery step or dist/ has no sitemap",
   );
   assert.ok(
-    pkg.scripts["astro:generate"].indexOf("generate-discovery") >
-      pkg.scripts["astro:generate"].indexOf("clean-public-generated"),
+    pkg.scripts["astro:generate"]!.indexOf("generate-discovery") >
+      pkg.scripts["astro:generate"]!.indexOf("clean-public-generated"),
     "it must run AFTER the clean step, which removes the previous run's files",
   );
 });

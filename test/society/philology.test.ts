@@ -138,8 +138,8 @@ test("glossName reads a name in the philologist's register: tongue, syllables, r
     ["l", "k", "w", "-lua"],
     "codas and town suffixes print with the philologists' leading hyphen",
   );
-  assert.equal(g.roots[0].gloss, "leaf, green things");
-  assert.equal(g.roots[3].gloss, "a sheltered mooring");
+  assert.equal(g.roots[0]!.gloss, "leaf, green things");
+  assert.equal(g.roots[3]!.gloss, "a sheltered mooring");
 });
 
 test("glossName never repeats a root, however often the name says it", () => {

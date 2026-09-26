@@ -52,7 +52,7 @@ const ROADS: Record<string, string> = {
 };
 for (const a of document.querySelectorAll<HTMLAnchorElement>("a[data-road]")) {
   const href = ROADS[a.dataset.road ?? ""];
-  if (href !== undefined) a.href = href; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+  if (href !== undefined) a.href = href;
 }
 
 // The SAME shared zoom controller as the Explorer, bound to the STABLE #map-viewport (never wiped by the deferred render) with its live transform landing on #map.
@@ -107,7 +107,7 @@ setTimeout(() => {
 
     const capital =
       world.settlements.find((s) => s.kind === "capital") ?? world.settlements[0];
-    if (capital) { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    if (capital) {
       const lore = createLoreWriter(world, createRng(seed).fork("seed-of-the-day"));
       dryIn($("folio-note"), "400ms");
       $("folio-note").textContent = capitalBlurb(capital, lore.settlementNote(capital));

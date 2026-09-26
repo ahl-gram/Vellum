@@ -43,7 +43,7 @@ function walkMarkdown(root: string): ReadonlyArray<string> {
 }
 
 function extractPaths(text: string): ReadonlyArray<string> {
-  return [...text.matchAll(PATH)].map(([, path]) => path);
+  return [...text.matchAll(PATH)].map(([, path]) => path!);
 }
 
 function citationsIn(file: string): ReadonlyArray<Citation> {

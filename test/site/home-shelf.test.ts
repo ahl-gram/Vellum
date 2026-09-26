@@ -58,7 +58,7 @@ test("the shelf is plain flow: no hidden attribute, no noscript wrapper, no .cam
   assert.ok(shelfAt < noscriptAt || shelfAt > noscriptClose, "the shelf lives outside the noscript doors");
   for (const rule of css.split("}")) {
     if (!rule.includes("lf-shelf")) continue;
-    assert.ok(!rule.split("{")[0].includes(".cam"), "the shelf's dress never keys on the bundle's arrival");
+    assert.ok(!rule.split("{")[0]!.includes(".cam"), "the shelf's dress never keys on the bundle's arrival");
   }
 });
 
@@ -70,8 +70,8 @@ test("the scroll hint pulses only at full pull-back (#472, 2026-08-28 ruling): i
   const hintTag = astro.slice(astro.lastIndexOf("<", hintAt), astro.indexOf(">", hintAt) + 1);
   assert.match(hintTag, /aria-hidden="true"/, "the hint is decorative: the shelf is plain flow for a screen reader already");
   const base = css.match(/\.lf-more \{([^}]*)\}/);
-  assert.ok(base !== null && /opacity:\s*0/.test(base[1]), "the hint rests invisible");
-  assert.match(base[1], /color: var\(--parchment\)/, "parchment tier: line-tan measured 4.03 on the deep (RH9a), under the 4.5 bar");
+  assert.ok(base !== null && /opacity:\s*0/.test(base[1]!), "the hint rests invisible");
+  assert.match(base[1]!, /color: var\(--parchment\)/, "parchment tier: line-tan measured 4.03 on the deep (RH9a), under the 4.5 bar");
   assert.match(
     css,
     /\.landfall \.stage\.cam\.stood-off \.lf-more \{[^}]*opacity:\s*1/,
@@ -94,7 +94,7 @@ test("nothing home loads locks the document's scroll (#472 retired the #461 body
   for (const [name, cssText] of sources) {
     for (const rule of flatten(cssText).split("}")) {
       const [selector, decls] = rule.split("{");
-      if (decls === undefined || !/(^|[^-\w])(body|html|:root)(?![-\w])/.test(selector)) continue; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+      if (decls === undefined || !/(^|[^-\w])(body|html|:root)(?![-\w])/.test(selector!)) continue;
       assert.ok(
         !/overflow(?:-[xy])?\s*:\s*(?:hidden|clip)/.test(decls),
         `${name} locks scroll at the document level: ${rule.trim().slice(0, 80)}`,

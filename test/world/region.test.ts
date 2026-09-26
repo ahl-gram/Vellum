@@ -377,7 +377,7 @@ test("regionTitle names the settlement nearest the window centre (#169)", () => 
 });
 
 test("regionTitle is stable across a regeneration of the same world (#169)", () => {
-  const win = windowAround(bigWorld, bigWorld.settlements[0], 0.5);
+  const win = windowAround(bigWorld, bigWorld.settlements[0]!, 0.5);
   const regen = generateWorld(defaultRecipe(42, { gridW: 320, gridH: 240 }));
   assert.equal(regionTitle(bigWorld, win), regionTitle(regen, win));
 });

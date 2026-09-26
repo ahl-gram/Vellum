@@ -178,7 +178,7 @@ async function runPlateScript(html: string, plates: number) {
   };
   const fetchStub = (src: string) => Promise.resolve({ blob: () => Promise.resolve({ src }) });
   const urlStub = { createObjectURL: (b: { src: string }) => `blob:vellum/${b.src.slice(-6)}` };
-  (new Function("document", "fetch", "URL", "console", body[1]) as (...args: unknown[]) => void)(doc, fetchStub, urlStub, { warn() {} }); // eslint-disable-line @typescript-eslint/no-implied-eval
+  (new Function("document", "fetch", "URL", "console", body[1]!) as (...args: unknown[]) => void)(doc, fetchStub, urlStub, { warn() {} }); // eslint-disable-line @typescript-eslint/no-implied-eval
   await new Promise((r) => setTimeout(r, 0));
   return { imgs, queried };
 }
@@ -198,9 +198,9 @@ test("data-URI mode: running the document's own script really links every plate 
 
   // The script queries plate imgs as direct figure children, so plateFigure may not grow a wrapper around them.
   assert.equal(queried.length, 1);
-  assert.match(queried[0], /figure\s*>\s*img\s*$/, "the plate query must stay a figure > img child match");
+  assert.match(queried[0]!, /figure\s*>\s*img\s*$/, "the plate query must stay a figure > img child match");
   // Scope derived, not pinned: a consistent rename stays green here, but a script reaching for a class the document never emits reds.
-  const scope = queried[0].match(/^\.([\w-]+)\s/)?.[1];
+  const scope = queried[0]!.match(/^\.([\w-]+)\s/)?.[1];
   assert.ok(scope, "the plate query must be scoped to a class");
   assert.match(html, new RegExp(`<body class="[^"]*\\b${scope}\\b`), "the script's scope must be the class the document emits");
   assert.equal((html.match(/<figure><img /g) ?? []).length, 6, "every plate img is a direct figure child");

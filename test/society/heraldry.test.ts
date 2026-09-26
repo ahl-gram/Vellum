@@ -107,7 +107,7 @@ test("every realm's arms obeys the rule of tincture across seeds and cultures", 
 test("mobile charges are drawn only from the culture's own charge set", () => {
   for (const culture of CULTURES) {
     assert.ok(
-      (CULTURE_CHARGES[culture.id]?.length ?? 0) > 0, // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+      (CULTURE_CHARGES[culture.id]?.length ?? 0) > 0,
       `${culture.id} has no charge set`,
     );
   }

@@ -131,7 +131,7 @@ test("settlement attributes and realm identity flow through", () => {
       assert.equal(p.kind, expectedKind, `seed ${seed} index ${i} kind`);
       const realm = w.realms.labels[s.x + s.y * w.elev.w];
       assert.equal(p.realm, realm, `seed ${seed} index ${i} realm id`);
-      if (realm !== undefined && realm >= 0) { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+      if (realm !== undefined && realm >= 0) {
         assert.deepEqual(p.arms, w.arms[realm], `seed ${seed} index ${i} arms`);
         assert.equal(p.realmName, w.names.realms[realm] ?? null);
       } else {

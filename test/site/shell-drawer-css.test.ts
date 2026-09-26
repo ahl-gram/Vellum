@@ -35,7 +35,7 @@ function mediaBodies(sheet: string, query: string, where: string): string {
 const rule = (sheet: string, selector: string): string => {
   const m = sheet.match(new RegExp(`(?:^|[}\\n])\\s*${selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*\\{([^}]*)\\}`));
   assert.ok(m, `a rule for ${selector} exists`);
-  return m[1];
+  return m[1]!;
 };
 
 const narrow = mediaBodies(layout, "(max-width: 900px)", "BaseLayout");

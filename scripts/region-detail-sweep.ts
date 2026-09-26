@@ -120,7 +120,7 @@ function riversEndingOnLand(
   const bad: number[] = [];
   rivers.forEach((river, i) => {
     const last = river.points[river.points.length - 1];
-    if (last === undefined) return; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    if (last === undefined) return;
     const x = Math.round(last.x);
     const y = Math.round(last.y);
     if (x <= tol || y <= tol || x >= w - 1 - tol || y >= h - 1 - tol) return;
@@ -170,7 +170,7 @@ function measure(
   const expected = expectedProjections(world, window);
   const worldSeats = world.realms.seats.filter((si) => {
     const s = world.settlements[si];
-    if (s === undefined) return false; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    if (s === undefined) return false;
     const du = window.u1 - window.u0;
     const dv = window.v1 - window.v0;
     const u = s.x / (world.recipe.gridW - 1);

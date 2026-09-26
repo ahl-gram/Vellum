@@ -36,6 +36,6 @@ test("impassable cells block propagation and stay Infinity", () => {
 test("distances are monotone non-decreasing away from source", () => {
   const w = 9;
   const d = bfsDistance(w, 9, (x, y) => x === 0 && y === 0);
-  assert.ok(d[8 + 8 * w] >= d[4 + 4 * w]);
+  assert.ok(d[8 + 8 * w]! >= d[4 + 4 * w]!);
   assert.equal(d[8 + 8 * w], 8);
 });

@@ -44,7 +44,7 @@ test("every region band obeys lodWindowFor's size <= 0.98 precondition", () => {
 
 test("POSTER_PRESETS stays width-ascending: the clamp envelope reads first and last", () => {
   for (let i = 1; i < POSTER_PRESETS.length; i++) {
-    assert.ok(POSTER_PRESETS[i].width > POSTER_PRESETS[i - 1].width);
+    assert.ok(POSTER_PRESETS[i]!.width > POSTER_PRESETS[i - 1]!.width);
   }
 });
 

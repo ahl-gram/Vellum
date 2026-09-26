@@ -70,7 +70,7 @@ test("the hit divides by --zoom-k once, on the element; the ring pseudos stay pl
   const hit = css.match(/\.place-hit\s*\{[^}]*transform:\s*([^;}]+)/);
   assert.ok(hit, "the hit declares its positioning transform");
   assert.match(
-    hit[1],
+    hit[1]!,
     /translate\(-50%,\s*-50%\)\s*scale\(calc\(1\s*\/\s*var\(--zoom-k,\s*1\)\)\)/,
     "the whole hit counter-scales, so target AND ring hold their designed size at depth",
   );
@@ -154,7 +154,7 @@ test("every card variant reads the clamp, and reads it INSIDE the counter-scale 
   for (const selector of variants) {
     const transform = soleRule(css, selector).match(/transform:\s*([^;}]+)/);
     assert.ok(transform, `${selector} declares no transform`);
-    const t = transform[1].replace(/\s+/g, " ");
+    const t = transform[1]!.replace(/\s+/g, " ");
     for (const prop of ["--pc-dx", "--pc-dy"]) {
       assert.ok(t.includes(prop), `${selector} never reads ${prop}, so that variant of the card cannot clamp`);
     }
