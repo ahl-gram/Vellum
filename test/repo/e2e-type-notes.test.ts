@@ -102,15 +102,17 @@ const NOTE_FIXTURE = [
   "declare const group: RegExpMatchArray;",
   "// @ts-expect-error the whole regex match, which the checker types as present, coerced by arithmetic: one objection, and not a null one",
   "export const thirteen = group[0] * 255;",
+  "// @ts-expect-error the same on the right of the operator, reported as TS2363 rather than TS2362",
+  "export const fourteen = 255 * group[0];",
 ];
 
-test("the note scanner passes one null objection per note and reports a second uncertain value, a misspelling beside or in place of the null read, a wrong type that shares its start, a note with nothing under it, a stray suppression, and an arithmetic objection alone, even on a regex match", () => {
+test("the note scanner passes one null objection per note and reports a second uncertain value, a misspelling beside or in place of the null read, a wrong type that shares its start, a note with nothing under it, a stray suppression, and an arithmetic objection alone on either side of the operator, even on a regex match", () => {
   const path = join(REPO, "scripts", "e2e", "__note-fixture__.ts");
   assert.equal(existsSync(path), false, "the fixture's name is a real file, so the scan below would read the disk instead");
   const text = NOTE_FIXTURE.join("\n");
   const { notes, findings } = noteFindings([{ path, text }]);
-  assert.equal(notes, 12);
-  assert.deepEqual(findings.map((f) => f.at).sort(), [10, 12, 18, 20, 22, 24, 26, 30, 34].map((n) => `${path}:${n}`).sort());
+  assert.equal(notes, 13);
+  assert.deepEqual(findings.map((f) => f.at).sort(), [10, 12, 18, 20, 22, 24, 26, 30, 34, 36].map((n) => `${path}:${n}`).sort());
 });
 
 test("the scan reads every TypeScript file under scripts/e2e at any depth and the e2e scripts beside it, and nothing else", () => {
