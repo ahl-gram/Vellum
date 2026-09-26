@@ -7,10 +7,10 @@ const PNG_1x1 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPh
 
 test("sampleRow takes a VIEWPORT point and asks the browser for the PAGE point: the clip carries the scroll offset, so a page scrolled past a screen reads its pixels instead of a blank frame (plate read on PR #501; the sitting's ruling 6, 2026-09-03 on #454)", async () => {
   const calls: Array<[string, Record<string, unknown> | undefined]> = [];
-  const send = async (method: string, params?: Record<string, unknown>) => {
+  const send = (method: string, params?: Record<string, unknown>) => {
     calls.push([method, params]);
-    if (method === "Runtime.evaluate") return { result: { value: [3, 1200] } };
-    return { data: PNG_1x1 };
+    if (method === "Runtime.evaluate") return Promise.resolve({ result: { value: [3, 1200] } });
+    return Promise.resolve({ data: PNG_1x1 });
   };
   const row = await sampleRow(send, 40, 60, 1);
   assert.equal(row.length, 1, "one pixel decoded");
@@ -23,10 +23,10 @@ test("sampleRow takes a VIEWPORT point and asks the browser for the PAGE point: 
 
 test("sampleRow on an unscrolled page asks for the same point it was given (the every-caller-today case, unchanged)", async () => {
   let clip: { x: number; y: number } | null = null;
-  const send = async (method: string, params?: Record<string, unknown>) => {
-    if (method === "Runtime.evaluate") return { result: { value: [0, 0] } };
+  const send = (method: string, params?: Record<string, unknown>) => {
+    if (method === "Runtime.evaluate") return Promise.resolve({ result: { value: [0, 0] } });
     clip = (params as { clip: { x: number; y: number } }).clip;
-    return { data: PNG_1x1 };
+    return Promise.resolve({ data: PNG_1x1 });
   };
   await sampleRow(send, 40, 60, 1);
   assert.deepEqual(clip, { x: 40, y: 60, width: 1, height: 1, scale: 1 });
@@ -35,10 +35,10 @@ test("sampleRow on an unscrolled page asks for the same point it was given (the 
 test("sampleRow never falls back to the viewport clip: a scroll read that throws in the page, or comes back in another shape, is an error, not a silent [0, 0] (skeptic on PR #510)", async () => {
   for (const answer of [{ result: { type: "undefined" }, exceptionDetails: { text: "boom" } }, {}, { result: { value: [3] } }, { result: { value: "3,1200" } }]) {
     let shot = false;
-    const send = async (method: string) => {
-      if (method === "Runtime.evaluate") return answer;
+    const send = (method: string) => {
+      if (method === "Runtime.evaluate") return Promise.resolve(answer);
       shot = true;
-      return { data: PNG_1x1 };
+      return Promise.resolve({ data: PNG_1x1 });
     };
     await assert.rejects(async () => { await sampleRow(send, 40, 60, 1); }, /could not read the page's scroll/, JSON.stringify(answer));
     assert.equal(shot, false, "no screenshot is taken on a failed scroll read");

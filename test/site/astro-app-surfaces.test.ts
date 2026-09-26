@@ -34,7 +34,7 @@ test("the generated runtime trees are gitignored in public/", () => {
   }
 });
 
-test("astro:generate regenerates the runtime trees into public/, and dev/build run it first", async () => {
+test("astro:generate regenerates the runtime trees into public/, and dev/build run it first", () => {
   const pkg = JSON.parse(readFileSync(root("package.json"), "utf8")) as { scripts: Record<string, string> };
   assert.equal(
     pkg.scripts["astro:generate"],

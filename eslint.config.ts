@@ -31,7 +31,7 @@ export default defineConfig(
       "max-depth": ["error", 4],
       "max-lines": ["error", 400],
       "max-lines-per-function": ["error", 50],
-      "no-empty": "off",
+      "no-empty": ["error", { allowEmptyCatch: true }],
       "no-param-reassign": ["error", { props: false }],
       "@typescript-eslint/no-floating-promises": [
         "error",
@@ -40,7 +40,6 @@ export default defineConfig(
       "@typescript-eslint/no-unnecessary-condition": "error",
       "@typescript-eslint/no-unnecessary-type-assertion": "off",
       "@typescript-eslint/prefer-readonly": "error",
-      "@typescript-eslint/require-await": "off",
       "@typescript-eslint/switch-exhaustiveness-check": "error",
     },
   },
