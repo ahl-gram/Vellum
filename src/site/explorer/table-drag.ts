@@ -118,7 +118,10 @@ export function bindTableDrag(deps: TableDragDeps): void {
     snapBack(deps, c.ghost, c.url);
     if (!filed) c.restore?.();
   };
-  const onMove = (e: PointerEvent): void => { if (carry) moveCarry(deps, carry, { x: e.clientX, y: e.clientY }, (next) => { carry = next; }); };
+  const onMove = (e: PointerEvent): void => {
+    let held = carry;
+    if (held) moveCarry(deps, held, { x: e.clientX, y: e.clientY }, (next) => { if (carry === held) carry = held = next; });
+  };
   deps.handle.addEventListener("pointerdown", (e) => {
     dropOwed();
     if (carry || !grabbable(e) || !deps.canDrag()) return;
