@@ -15,9 +15,9 @@ export type StageInputHandlers = {
 export function bindStageInput(stage: HTMLElement, on: StageInputHandlers): void {
   type Point = { x: number; y: number };
   const pointers = new Map<number, Point>();
-  let last: { x: number; y: number } | null = null;
+  let last: Point | null = null;
   let pinchStart = 0;
-  let mid: { x: number; y: number } | null = null;
+  let mid: Point | null = null;
 
   const local = (e: { clientX: number; clientY: number }) => {
     const r = stage.getBoundingClientRect();
