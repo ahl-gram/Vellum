@@ -150,12 +150,22 @@ function pinCorrectness(file: string, typed: boolean, rules: Record<string, unkn
 }
 
 const CSS_FORM_RULES = ["vellum/css-comment-one-line", "vellum/css-comment-no-em-dash", "vellum/css-comment-issue-form"];
+const TURNED_ON = [
+  "@typescript-eslint/no-unsafe-argument",
+  "@typescript-eslint/no-unsafe-assignment",
+  "@typescript-eslint/no-unsafe-call",
+  "@typescript-eslint/no-unsafe-member-access",
+  "@typescript-eslint/no-unused-vars",
+];
 
 function pinJavaScript(file: string, typed: boolean, config: Resolved, rules: Record<string, unknown>): void {
   const on = (rule: string): unknown => severityOf(rules[rule]);
   assert.equal(config.languageOptions?.parser?.meta?.name, typed ? "typescript-eslint/parser" : undefined, `${file} resolves to the wrong parser`);
   assert.equal(on("@typescript-eslint/no-misused-promises"), typed ? 2 : undefined, `${file}: the roster rule this PR ticks does not resolve at error`);
-  assert.equal(on("@typescript-eslint/no-explicit-any"), typed ? 2 : undefined, `${file}: the rule the one exemption in the tree stands against is not on`);
+  assert.equal(on("@typescript-eslint/no-explicit-any"), typed ? 2 : undefined, `${file}: no-explicit-any does not resolve at error`);
+  for (const rule of TURNED_ON) {
+    assert.equal(on(rule), typed ? 2 : undefined, `${file}: ${rule} does not resolve at error; the config set it off while its violations stood, and Issue #654 turned it on with them fixed`);
+  }
   assert.equal(on("no-undef"), typed ? 0 : 2, `${file}: the core layer is missing or the TypeScript override layer was not applied`);
   assert.equal(on("no-debugger"), 2, `${file}: the core recommended rules do not reach it`);
   assert.equal(on("prefer-const"), 2, `${file}: prefer-const does not resolve at error (Immutability, Issue #648)`);
