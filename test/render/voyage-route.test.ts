@@ -248,7 +248,21 @@ test("every real leg is deterministic across two independent routings", () => {
   assert.deepEqual(a, b);
 });
 
-// eslint-disable-next-line max-lines-per-function
+const nearestOf = (s: ReturnType<typeof realWorld>["s"]) => (x: number, y: number, ok: (c: number) => boolean): number => {
+  let best = Infinity;
+  const cx = Math.round(x);
+  const cy = Math.round(y);
+  for (let dy = -3; dy <= 3; dy++) {
+    for (let dx = -3; dx <= 3; dx++) {
+      const gx = cx + dx;
+      const gy = cy + dy;
+      if (gx < 0 || gx >= s.gridW || gy < 0 || gy >= s.gridH) continue;
+      if (ok(gx + gy * s.gridW)) best = Math.min(best, Math.hypot(x - gx, y - gy));
+    }
+  }
+  return best;
+};
+
 test("a simplified leg never strays past the tolerance from terrain of its own kind", () => {
   // Vertices are on-terrain by construction (RDP only removes vertices), so the question is the chords. BOUND = RDP_EPSILON + 0.5 (a cell-boundary point is half a cell from either centre); measured worst case over seeds 1..40: 1.000 road, 0.902 sea.
   const BOUND = RDP_EPSILON + 0.5;
@@ -256,20 +270,7 @@ test("a simplified leg never strays past the tolerance from terrain of its own k
   const road = new Uint8Array(s.gridW * s.gridH);
   for (const pl of s.roads) for (const [x, y] of pl) road[x + y * s.gridW] = 1;
 
-  const nearest = (x: number, y: number, ok: (c: number) => boolean) => {
-    let best = Infinity;
-    const cx = Math.round(x);
-    const cy = Math.round(y);
-    for (let dy = -3; dy <= 3; dy++) {
-      for (let dx = -3; dx <= 3; dx++) {
-        const gx = cx + dx;
-        const gy = cy + dy;
-        if (gx < 0 || gx >= s.gridW || gy < 0 || gy >= s.gridH) continue;
-        if (ok(gx + gy * s.gridW)) best = Math.min(best, Math.hypot(x - gx, y - gy));
-      }
-    }
-    return best;
-  };
+  const nearest = nearestOf(s);
 
   const isWaterVertex = (p: { x: number; y: number }) => s.land[p.x + p.y * s.gridW] === 0;
 

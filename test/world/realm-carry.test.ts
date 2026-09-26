@@ -28,6 +28,19 @@ const isSeaOf = (world: World): ((i: number) => boolean) => {
   return (i) => (data[i] as number) <= sl;
 };
 
+function touchesOwnLandAt(grown: ArrayLike<number>, isSea: (i: number) => boolean, w: number, h: number, x: number, y: number): boolean {
+  const i = x + y * w;
+  let touchesOwnLand = false;
+  for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {
+    const nx = x + dx;
+    const ny = y + dy;
+    if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;
+    const j = nx + ny * w;
+    if (!isSea(j) && grown[j] === grown[i]) touchesOwnLand = true;
+  }
+  return touchesOwnLand;
+}
+
 const capitalWindow = (world: World, band: number) => {
   const capital = world.settlements.find((s) => s.kind === "capital") ?? world.settlements[0]!;
   const size = LOD_BANDS[band]!.sizeUV;
@@ -139,17 +152,7 @@ test("the sea floor holds everywhere: a grown shore cell sits inside its realm's
       for (let x = 0; x < w; x++) {
         const i = x + y * w;
         if (grown[i]! < 0 || !isSea(i)) continue;
-        let touchesOwnLand = false;
-        for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {
-          const nx = x + dx;
-          const ny = y + dy;
-          // eslint-disable-next-line max-depth
-          if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;
-          const j = nx + ny * w;
-          // eslint-disable-next-line max-depth
-          if (!isSea(j) && grown[j] === grown[i]) touchesOwnLand = true;
-        }
-        if (!touchesOwnLand) continue;
+        if (!touchesOwnLandAt(grown, isSea, w, h, x, y)) continue;
         shoreCells++;
         assert.equal(
           masks.get(grown[i] as number)?.[i],
@@ -230,7 +233,29 @@ const borderWindow = (world: World, band: number) => {
   return null; // island realms: no land border exists, so there is no border window to sweep
 };
 
-// eslint-disable-next-line max-lines-per-function
+const boundaryAdjacentOf = (grown: ArrayLike<number>, pw: number, ph: number) => (wx: number, wy: number, owner: number): boolean => {
+  for (let dy = -1; dy <= 1; dy++) {
+    for (let dx = -1; dx <= 1; dx++) {
+      const nx = wx + dx;
+      const ny = wy + dy;
+      if (nx < 0 || nx >= pw || ny < 0 || ny >= ph) return true;
+      if (grown[nx + ny * pw] !== owner) return true;
+    }
+  }
+  return false;
+};
+
+const tintAt = (masks: ReadonlyMap<number, ArrayLike<number>>, i: number, owner: number): { insideOwn: boolean; insideOther: boolean } => {
+  let insideOwn = false;
+  let insideOther = false;
+  for (const [realm, mask] of masks) {
+    if (mask[i] !== 1) continue;
+    if (realm === owner) insideOwn = true;
+    else insideOther = true;
+  }
+  return { insideOwn, insideOther };
+};
+
 const collarSweep = (seed: number, name: string, window: NonNullable<ReturnType<typeof borderWindow>>) => {
   const world = worldFor(seed);
   const gridW = 320;
@@ -239,7 +264,6 @@ const collarSweep = (seed: number, name: string, window: NonNullable<ReturnType<
   const rings: RealmRings = region.region?.realmRings ?? [];
   const masks = new Map(rings.map((r) => [r.realm, rasterize(r.rings, gridW, gridH)]));
   assert.ok(masks.size > 0, `${name}: the window must carry rings or the sweep proves nothing`);
-
   const pw = world.recipe.gridW;
   const ph = world.recipe.gridH;
   const isSea = isSeaOf(world);
@@ -248,17 +272,7 @@ const collarSweep = (seed: number, name: string, window: NonNullable<ReturnType<
   const du = window.u1 - window.u0;
   const dv = window.v1 - window.v0;
 
-  const boundaryAdjacent = (wx: number, wy: number, owner: number): boolean => {
-    for (let dy = -1; dy <= 1; dy++) {
-      for (let dx = -1; dx <= 1; dx++) {
-        const nx = wx + dx;
-        const ny = wy + dy;
-        if (nx < 0 || nx >= pw || ny < 0 || ny >= ph) return true;
-        if (grown[nx + ny * pw] !== owner) return true;
-      }
-    }
-    return false;
-  };
+  const boundaryAdjacent = boundaryAdjacentOf(grown, pw, ph);
 
   let landCells = 0;
   let bare = 0;
@@ -272,13 +286,7 @@ const collarSweep = (seed: number, name: string, window: NonNullable<ReturnType<
       const wx = Math.round((window.u0 + (gx / (gridW - 1)) * du) * (pw - 1));
       const wy = Math.round((window.v0 + (gy / (gridH - 1)) * dv) * (ph - 1));
       const owner = grown[wx + wy * pw] as number;
-      let insideOwn = false;
-      let insideOther = false;
-      for (const [realm, mask] of masks) {
-        if (mask[gx + gy * gridW] !== 1) continue;
-        if (realm === owner) insideOwn = true;
-        else insideOther = true;
-      }
+      const { insideOwn, insideOther } = tintAt(masks, gx + gy * gridW, owner);
       if (owner < 0) {
         if ((insideOwn || insideOther) && !isSea(wx + wy * pw)) bareTinted++;
         continue;

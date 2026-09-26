@@ -103,21 +103,10 @@ test("before the founding the caption names the ground and drops the year line",
   assert.equal(c.epithet, "the ground where Testholm will rise · An. 1040");
 });
 
-// eslint-disable-next-line max-lines-per-function
-test("the key indexes only drawn features, by rank then west to east, at most four", () => {
-  const harborCapital = composeProspect(
-    makeInput({ kind: "capital", harbor: true, foreground: bandOf(["beach", FOREGROUND_SAMPLES]) }),
-  );
-  const kinds = new Set(harborCapital.foreground.map((e) => e.kind));
-  assert.ok(kinds.has("quay") && kinds.has("mole"), "premise: the capital fronts quay and mole");
-  assert.deepEqual(
-    plateKey(harborCapital).map((e) => `${e.letter}. ${e.label}`),
-    ["A. The Keep", "B. The Quay", "C. The Mole"],
-  );
-
+function crowdedGeometry(): ProspectGeometry {
   const keep: Mass = { form: "keep", x: 300, w: 30, h: 40, base: 232, raise: 0, broken: false };
   const gate: Mass = { form: "tower", x: 120, w: 12, h: 22, base: 228, raise: 0, broken: false };
-  const crowded: ProspectGeometry = {
+  return {
     seed: 1,
     index: 0,
     ground: { base: 232, rise: 0, line: [] },
@@ -146,13 +135,10 @@ test("the key indexes only drawn features, by rank then west to east, at most fo
       { kind: "mole", rootX: 487, headX: 470, headY: 248 },
     ],
   };
-  assert.deepEqual(
-    plateKey(crowded).map((e) => `${e.letter}. ${e.label}`),
-    ["A. The Keep", "B. The Bridge Gate", "C. The Quay", "D. The Mole"],
-    "rank order wins and the fifth and later features are cut",
-  );
+}
 
-  const twoQuays: ProspectGeometry = {
+function twoQuaysOf(crowded: ProspectGeometry): ProspectGeometry {
+  return {
     ...crowded,
     masses: [],
     foreground: [
@@ -176,6 +162,27 @@ test("the key indexes only drawn features, by rank then west to east, at most fo
       },
     ],
   };
+}
+
+test("the key indexes only drawn features, by rank then west to east, at most four", () => {
+  const harborCapital = composeProspect(
+    makeInput({ kind: "capital", harbor: true, foreground: bandOf(["beach", FOREGROUND_SAMPLES]) }),
+  );
+  const kinds = new Set(harborCapital.foreground.map((e) => e.kind));
+  assert.ok(kinds.has("quay") && kinds.has("mole"), "premise: the capital fronts quay and mole");
+  assert.deepEqual(
+    plateKey(harborCapital).map((e) => `${e.letter}. ${e.label}`),
+    ["A. The Keep", "B. The Quay", "C. The Mole"],
+  );
+
+  const crowded = crowdedGeometry();
+  assert.deepEqual(
+    plateKey(crowded).map((e) => `${e.letter}. ${e.label}`),
+    ["A. The Keep", "B. The Bridge Gate", "C. The Quay", "D. The Mole"],
+    "rank order wins and the fifth and later features are cut",
+  );
+
+  const twoQuays = twoQuaysOf(crowded);
   const [west, east] = plateKey(twoQuays);
   assert.ok(west && east && west.x < east.x, "same rank letters west to east");
 

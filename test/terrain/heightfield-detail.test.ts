@@ -14,44 +14,44 @@ const CENTRE_WINDOW = { u0: 0.4, v0: 0.4, u1: 0.6, v1: 0.6 } as const;
 
 type CellPin = readonly [number, number, number];
 
-// eslint-disable-next-line max-lines-per-function
+// The absolute pins are the non-circular half of the oracle (comparing the new path with itself cannot see the default path drift): constants measured against main at f83f1b8 with max |diff| = 0 old-vs-new; tolerance 1e-9 clears ~1e-13 cross-platform libm drift.
+const DETAIL_ZERO_CASES: ReadonlyArray<{ params: TerrainParams; pins: readonly CellPin[] }> = [
+  {
+    params: { seed: 42, gridW: 320, gridH: 240, mapType: "island" },
+    pins: [
+      [80, 72, 0.5277893645742845],
+      [176, 144, 0.5543560623422775],
+      [256, 108, 0.3514573236784098],
+    ],
+  },
+  {
+    params: { seed: 7, gridW: 80, gridH: 60, mapType: "archipelago" },
+    pins: [
+      [20, 18, 0.4913838457534395],
+      [44, 36, 0.6082904106309356],
+      [64, 27, 0.502981231051687],
+    ],
+  },
+  {
+    params: { seed: 2, gridW: 80, gridH: 60, mapType: "continent", window: BAND3_WINDOW },
+    pins: [
+      [20, 18, 0.5398038374837011],
+      [44, 36, 0.403441283162021],
+      [64, 27, 0.344794364769785],
+    ],
+  },
+  {
+    params: { seed: 15, gridW: 80, gridH: 60, mapType: "citystate", coastWarp: 1.0 },
+    pins: [
+      [20, 18, 0.18039037961193152],
+      [44, 36, 0.47411065981034056],
+      [64, 27, 0.4651639781128833],
+    ],
+  },
+];
+
 test("detail 0 reproduces the plain field byte for byte (#396)", () => {
-  // The absolute pins are the non-circular half of the oracle (comparing the new path with itself cannot see the default path drift): constants measured against main at f83f1b8 with max |diff| = 0 old-vs-new; tolerance 1e-9 clears ~1e-13 cross-platform libm drift.
-  const cases: ReadonlyArray<{ params: TerrainParams; pins: readonly CellPin[] }> = [
-    {
-      params: { seed: 42, gridW: 320, gridH: 240, mapType: "island" },
-      pins: [
-        [80, 72, 0.5277893645742845],
-        [176, 144, 0.5543560623422775],
-        [256, 108, 0.3514573236784098],
-      ],
-    },
-    {
-      params: { seed: 7, gridW: 80, gridH: 60, mapType: "archipelago" },
-      pins: [
-        [20, 18, 0.4913838457534395],
-        [44, 36, 0.6082904106309356],
-        [64, 27, 0.502981231051687],
-      ],
-    },
-    {
-      params: { seed: 2, gridW: 80, gridH: 60, mapType: "continent", window: BAND3_WINDOW },
-      pins: [
-        [20, 18, 0.5398038374837011],
-        [44, 36, 0.403441283162021],
-        [64, 27, 0.344794364769785],
-      ],
-    },
-    {
-      params: { seed: 15, gridW: 80, gridH: 60, mapType: "citystate", coastWarp: 1.0 },
-      pins: [
-        [20, 18, 0.18039037961193152],
-        [44, 36, 0.47411065981034056],
-        [64, 27, 0.4651639781128833],
-      ],
-    },
-  ];
-  for (const { params, pins } of cases) {
+  for (const { params, pins } of DETAIL_ZERO_CASES) {
     const plain = buildHeightfield(params);
     const zero = buildHeightfield({ ...params, detail: 0 });
     assert.deepEqual(

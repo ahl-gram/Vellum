@@ -61,26 +61,27 @@ test("legLength: deterministic across two prepared routers", () => {
   }
 });
 
-// eslint-disable-next-line max-lines-per-function
+const nearSeaOf = (w: number, h: number, land: ArrayLike<number>) => (p: Pt): boolean => {
+  const cx = Math.round(p.x);
+  const cy = Math.round(p.y);
+  for (let dy = -2; dy <= 2; dy++) {
+    for (let dx = -2; dx <= 2; dx++) {
+      const x = cx + dx;
+      const y = cy + dy;
+      if (x < 0 || x >= w || y < 0 || y >= h) continue;
+      if (land[x + y * w] === 0 && Math.hypot(p.x - x, p.y - y) <= 1.3) return true;
+    }
+  }
+  return false;
+};
+
 test("water span (#181): sea legs carry the span, coastal stubs stay short, and the pond-decoy port is the isle's one genuine inland handoff", () => {
   const router = prepareVoyageRouter(isle.sites, isle.s);
   const plan = reorderPlanByTravel(isle.plan, router.legLength);
   const routed = plan.legs.map((l) => router.route(l));
   const { gridW: w, gridH: h, land } = isle.s;
 
-  const nearSea = (p: Pt): boolean => {
-    const cx = Math.round(p.x);
-    const cy = Math.round(p.y);
-    for (let dy = -2; dy <= 2; dy++) {
-      for (let dx = -2; dx <= 2; dx++) {
-        const x = cx + dx;
-        const y = cy + dy;
-        if (x < 0 || x >= w || y < 0 || y >= h) continue;
-        if (land[x + y * w] === 0 && Math.hypot(p.x - x, p.y - y) <= 1.3) return true;
-      }
-    }
-    return false;
-  };
+  const nearSea = nearSeaOf(w, h, land);
   const at = (l: RoutedLeg, frac: number): Pt => {
     const g = buildLegGeometry(l.points);
     return pointAtDistance(g, frac * g.total);

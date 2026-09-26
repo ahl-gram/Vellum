@@ -104,111 +104,129 @@ test("the quarry is a real, non-seat village (the broad uniform-glyph pool)", ()
   }
 });
 
-// eslint-disable-next-line max-lines-per-function
-test("every emitted clue re-verifies true against independent raw geometry", () => {
-  // eslint-disable-next-line max-lines-per-function
-  SWEEP.forEach((world, wi) => {
-    const q = mustQuarry(world);
-    const { x, y } = q.settlement;
-    const gates = gatesFor(world, q, SWEEP_SVGS[wi]!);
-    const clues = buildClues(world, q, gates);
+function checkRiverClue(world: World, x: number, y: number, clue: Clue): void {
+  const nr = nearestNamedRiver(world, x, y);
+  assert.ok(nr, "river clue requires a named river to exist");
+  assert.equal(clue.subject, nr.name, "cites the nearest named river");
+  assert.ok(nr.dist <= NEAR + 1e-9, `nearest named river within threshold (${nr.dist})`);
+}
 
-    assert.ok(clues.length >= 3, "at least the three-line floor");
-    assert.ok(clues.length <= MAX_LINES, "never past the line cap");
-    const kinds = clues.map((c) => c.kind);
+function checkLakeClue(world: World, x: number, y: number, clue: Clue): void {
+  const nl = nearestNamedLake(world, x, y);
+  assert.ok(nl, "lake clue requires a named lake to exist");
+  assert.equal(clue.subject, nl.name, "cites the nearest named lake");
+  assert.ok(nl.dist <= NEAR + 1e-9, `nearest named lake within threshold (${nl.dist})`);
+}
+
+function checkTerrainClue(world: World, x: number, y: number, clue: Clue): void {
+  const counts = terrainCounts(world, x, y);
+  const band = clue.subject as TerrainBand;
+  assert.ok(band in counts, `terrain subject ${clue.subject} is a known band`);
+  assert.ok(
+    counts[band] >= TERRAIN_MIN,
+    `enough ${band} glyph cells near the quarry (${counts[band]})`,
+  );
+}
+
+function checkNearClue(world: World, q: Quarry, clue: Clue): void {
+  const anchor = nearestAnchor(world, q.idx);
+  assert.ok(anchor, "near clue requires an anchor settlement to exist");
+  assert.equal(clue.subject, anchor.name, "cites the nearest anchor-tier settlement");
+  assert.ok(
+    clue.leagues !== undefined && LEAGUE_LADDER.includes(clue.leagues),
+    `quotes a round leagues bound (${clue.leagues})`,
+  );
+  assert.ok(
+    anchor.dist <= clue.leagues * MIRROR_CELLS_PER_LEAGUE + 1e-9,
+    `the quoted bound truly contains the quarry (${anchor.dist})`,
+  );
+}
+
+function checkClueGeometry(world: World, q: Quarry, clue: Clue): void {
+  const { x, y } = q.settlement;
+  switch (clue.kind) {
+    case "framing":
+      break;
+    case "ew":
+      assert.equal(clue.subject, expectedEW(world, x), "east/west band matches geometry");
+      break;
+    case "ns":
+      assert.equal(clue.subject, expectedNS(world, y), "north/south band matches geometry");
+      break;
+    case "coast":
+      assert.ok(q.settlement.harbor, "coastal asserted only from settlement.harbor");
+      break;
+    case "onriver":
+      assert.ok(q.settlement.onRiver, "on-a-river asserted only from settlement.onRiver");
+      break;
+    case "river":
+      checkRiverClue(world, x, y, clue);
+      break;
+    case "lake":
+      checkLakeClue(world, x, y, clue);
+      break;
+    case "realm":
+      assert.ok(world.names.realms.length >= 2, "realm clue only when multi-realm");
+      assert.equal(clue.subject, realmNameAt(world, x, y), "cites the cell's realm");
+      break;
+    case "terrain":
+      checkTerrainClue(world, x, y, clue);
+      break;
+    case "road":
+      assert.equal(
+        clue.subject,
+        roadState(world, x, y),
+        "road clue matches the network's true state at the quarry",
+      );
+      break;
+    case "near":
+      checkNearClue(world, q, clue);
+      break;
+  }
+}
+
+function checkClueLine(world: World, q: Quarry, gates: Gates, clue: Clue): void {
+  assert.equal(clue.text, expectedClueText(clue), "the prose matches the clue's subject");
+  assert.ok(ALLOWED_KINDS.has(clue.kind), `kind ${clue.kind} is allowed`);
+  assert.doesNotMatch(clue.text, /ruin|abandon/i, `clue avoids ruin/abandon: ${clue.text}`);
+  assert.doesNotMatch(clue.text, /inland/i, `clue makes no affirmative inland claim: ${clue.text}`);
+
+  if (clue.kind === "river" || clue.kind === "lake" || clue.kind === "near") {
+    assert.ok(gates.isLabeled(clue.subject!), `"${clue.subject}" is printed on the sheet`);
+  }
+  if (clue.kind === "terrain") {
     assert.ok(
-      kinds.includes("framing") && (kinds.includes("ew") || kinds.includes("ns")),
-      "the floor is framing + at least one compass band (#335)",
+      gates.hasGlyphNear(clue.subject as TerrainBand),
+      `${clue.subject} glyphs are truly drawn near the quarry`,
     );
+  }
 
-    for (const clue of clues) {
-      assert.equal(clue.text, expectedClueText(clue), "the prose matches the clue's subject");
-      assert.ok(ALLOWED_KINDS.has(clue.kind), `kind ${clue.kind} is allowed`);
-      assert.doesNotMatch(clue.text, /ruin|abandon/i, `clue avoids ruin/abandon: ${clue.text}`);
-      assert.doesNotMatch(clue.text, /inland/i, `clue makes no affirmative inland claim: ${clue.text}`);
+  checkClueGeometry(world, q, clue);
 
-      if (clue.kind === "river" || clue.kind === "lake" || clue.kind === "near") {
-        assert.ok(gates.isLabeled(clue.subject!), `"${clue.subject}" is printed on the sheet`);
-      }
-      if (clue.kind === "terrain") {
-        assert.ok(
-          gates.hasGlyphNear(clue.subject as TerrainBand),
-          `${clue.subject} glyphs are truly drawn near the quarry`,
-        );
-      }
+  if (clue.subject) {
+    assert.notEqual(clue.subject, world.names.range, "no range reference");
+    assert.notEqual(clue.subject, world.names.forest, "no forest reference");
+  }
+}
 
-      switch (clue.kind) {
-        case "framing":
-          break;
-        case "ew":
-          assert.equal(clue.subject, expectedEW(world, x), "east/west band matches geometry");
-          break;
-        case "ns":
-          assert.equal(clue.subject, expectedNS(world, y), "north/south band matches geometry");
-          break;
-        case "coast":
-          assert.ok(q.settlement.harbor, "coastal asserted only from settlement.harbor");
-          break;
-        case "onriver":
-          assert.ok(q.settlement.onRiver, "on-a-river asserted only from settlement.onRiver");
-          break;
-        case "river": {
-          const nr = nearestNamedRiver(world, x, y);
-          assert.ok(nr, "river clue requires a named river to exist");
-          assert.equal(clue.subject, nr.name, "cites the nearest named river");
-          assert.ok(nr.dist <= NEAR + 1e-9, `nearest named river within threshold (${nr.dist})`);
-          break;
-        }
-        case "lake": {
-          const nl = nearestNamedLake(world, x, y);
-          assert.ok(nl, "lake clue requires a named lake to exist");
-          assert.equal(clue.subject, nl.name, "cites the nearest named lake");
-          assert.ok(nl.dist <= NEAR + 1e-9, `nearest named lake within threshold (${nl.dist})`);
-          break;
-        }
-        case "realm":
-          assert.ok(world.names.realms.length >= 2, "realm clue only when multi-realm");
-          assert.equal(clue.subject, realmNameAt(world, x, y), "cites the cell's realm");
-          break;
-        case "terrain": {
-          const counts = terrainCounts(world, x, y);
-          const band = clue.subject as TerrainBand;
-          assert.ok(band in counts, `terrain subject ${clue.subject} is a known band`);
-          assert.ok(
-            counts[band] >= TERRAIN_MIN,
-            `enough ${band} glyph cells near the quarry (${counts[band]})`,
-          );
-          break;
-        }
-        case "road":
-          assert.equal(
-            clue.subject,
-            roadState(world, x, y),
-            "road clue matches the network's true state at the quarry",
-          );
-          break;
-        case "near": {
-          const anchor = nearestAnchor(world, q.idx);
-          assert.ok(anchor, "near clue requires an anchor settlement to exist");
-          assert.equal(clue.subject, anchor.name, "cites the nearest anchor-tier settlement");
-          assert.ok(
-            clue.leagues !== undefined && LEAGUE_LADDER.includes(clue.leagues),
-            `quotes a round leagues bound (${clue.leagues})`,
-          );
-          assert.ok(
-            anchor.dist <= clue.leagues * MIRROR_CELLS_PER_LEAGUE + 1e-9,
-            `the quoted bound truly contains the quarry (${anchor.dist})`,
-          );
-          break;
-        }
-      }
+function checkWorldClues(world: World, wi: number): void {
+  const q = mustQuarry(world);
+  const gates = gatesFor(world, q, SWEEP_SVGS[wi]!);
+  const clues = buildClues(world, q, gates);
 
-      if (clue.subject) {
-        assert.notEqual(clue.subject, world.names.range, "no range reference");
-        assert.notEqual(clue.subject, world.names.forest, "no forest reference");
-      }
-    }
-  });
+  assert.ok(clues.length >= 3, "at least the three-line floor");
+  assert.ok(clues.length <= MAX_LINES, "never past the line cap");
+  const kinds = clues.map((c) => c.kind);
+  assert.ok(
+    kinds.includes("framing") && (kinds.includes("ew") || kinds.includes("ns")),
+    "the floor is framing + at least one compass band (#335)",
+  );
+
+  for (const clue of clues) checkClueLine(world, q, gates, clue);
+}
+
+test("every emitted clue re-verifies true against independent raw geometry", () => {
+  SWEEP.forEach((world, wi) => checkWorldClues(world, wi));
 });
 
 test("buildClues falls to exactly the three-line floor on a featureless quarry", () => {
@@ -407,11 +425,8 @@ test("the survey leads with the axis the quarry is furthest off-center on", () =
   assert.equal(clues[1]!.subject, "north");
 });
 
-// eslint-disable-next-line max-lines-per-function
-test("the leading compass line is never the strictly less decisive axis (#333's class)", () => {
-  const w = 320;
-  const h = 240;
-  const flat = {
+function flatWorld(w: number, h: number): World {
+  return {
     recipe: { seed: 20260908 },
     elev: { w, h, data: new Float64Array(w * h) },
     seaLevel: -1,
@@ -422,7 +437,10 @@ test("the leading compass line is never the strictly less decisive axis (#333's 
     realms: { labels: new Int16Array(w * h), seats: [] },
     names: { rivers: new Map(), lakes: [], realms: [] },
   } as unknown as World;
-  const at = (x: number, y: number): Quarry => ({
+}
+
+function villageAt(x: number, y: number): Quarry {
+  return {
     idx: 0,
     settlement: {
       x,
@@ -435,7 +453,12 @@ test("the leading compass line is never the strictly less decisive axis (#333's 
       founded: 500,
       ruined: false,
     },
-  });
+  };
+}
+
+test("the leading compass line is never the strictly less decisive axis (#333's class)", () => {
+  const flat = flatWorld(320, 240);
+  const at = villageAt;
   const leadFor = (x: number, y: number): string =>
     buildClues(flat, at(x, y)).filter((c) => c.kind === "ew" || c.kind === "ns")[0]!.kind;
 

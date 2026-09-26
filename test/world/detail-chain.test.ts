@@ -163,33 +163,50 @@ test("band 0 of the chain IS the world field, so the chain anchors on the golden
   assertSameField(chained.data, world.data, "the chain's band 0 diverged from buildHeightfield's world field");
 });
 
-// eslint-disable-next-line max-lines-per-function
+type Camera = { cx: number; cy: number; k: number };
+
+function walkRoute(route: ReadonlyArray<Camera>): Array<{ band: number; window: UvWindow }> {
+  let band = 0;
+  let window: UvWindow = FULL_WINDOW;
+  const visited: Array<{ band: number; window: UvWindow }> = [];
+  for (const camera of route) {
+    const d = decideSettle({ camera, currentWindow: window, currentBand: band });
+    if (d.action === "region") {
+      band = d.band;
+      window = d.window;
+    } else if (d.action === "world") {
+      band = 0;
+      window = FULL_WINDOW;
+    }
+    visited.push({ band, window });
+  }
+  return visited;
+}
+
+function cellsDifferingFromRoutedParent(endA: UvWindow, routedParent: UvWindow, fa: ReturnType<typeof buildChainedField>): number {
+  const bare = bareFieldFor(endA, fa.w, fa.h);
+  const routedSurface = parentSurfaceOnWindow(
+    buildChainedField(specFor(routedParent)),
+    routedParent,
+    endA,
+    fa.w,
+    fa.h,
+  );
+  const routedField = rejectBridges(routedSurface, routedSurface, floorToParent(bare, routedSurface), SEA);
+  let differing = 0;
+  for (let i = 0; i < routedField.data.length; i++) {
+    if (routedField.data[i] !== fa.data[i]) differing++;
+  }
+  return differing;
+}
+
 test("two zoom routes to the same window produce a byte-identical field (#398)", () => {
   // Same environment, so this comparison is exact by design; the float-drift rule bans byte comparison ACROSS environments only.
   const target = { cx: 0.53, cy: 0.42, k: 8 };
   const routeA = [{ cx: 0.53, cy: 0.42, k: 1 }, { cx: 0.53, cy: 0.42, k: 2.6 }, { cx: 0.53, cy: 0.42, k: 5.2 }, target];
   const routeB = [{ cx: 0.12, cy: 0.87, k: 1 }, { cx: 0.12, cy: 0.87, k: 6.5 }, { cx: 0.30, cy: 0.60, k: 6.5 }, target];
-  const walk = (
-    route: ReadonlyArray<{ cx: number; cy: number; k: number }>,
-  ): Array<{ band: number; window: UvWindow }> => {
-    let band = 0;
-    let window: UvWindow = FULL_WINDOW;
-    const visited: Array<{ band: number; window: UvWindow }> = [];
-    for (const camera of route) {
-      const d = decideSettle({ camera, currentWindow: window, currentBand: band });
-      if (d.action === "region") {
-        band = d.band;
-        window = d.window;
-      } else if (d.action === "world") {
-        band = 0;
-        window = FULL_WINDOW;
-      }
-      visited.push({ band, window });
-    }
-    return visited;
-  };
-  const a = walk(routeA);
-  const b = walk(routeB);
+  const a = walkRoute(routeA);
+  const b = walkRoute(routeB);
   assert.equal(a.at(-1)?.band, 3, "route A did not land at band 3");
   const endA = a.at(-1)?.window as UvWindow;
   const endB = b.at(-1)?.window as UvWindow;
@@ -208,19 +225,7 @@ test("two zoom routes to the same window produce a byte-identical field (#398)",
   assertSameField(fb.data, fa.data, "the same window drew different terrain by route");
 
   // What a path-derived parent would have drawn, off route B's previous window; it must differ or the guard above proves nothing.
-  const bare = bareFieldFor(endA, fa.w, fa.h);
-  const routedSurface = parentSurfaceOnWindow(
-    buildChainedField(specFor(routedParent)),
-    routedParent,
-    endA,
-    fa.w,
-    fa.h,
-  );
-  const routedField = rejectBridges(routedSurface, routedSurface, floorToParent(bare, routedSurface), SEA);
-  let differing = 0;
-  for (let i = 0; i < routedField.data.length; i++) {
-    if (routedField.data[i] !== fa.data[i]) differing++;
-  }
+  const differing = cellsDifferingFromRoutedParent(endA, routedParent, fa);
   assert.ok(
     differing > 0,
     "a parent taken from the camera path drew the identical field, so path-independence is untestable here",

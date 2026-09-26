@@ -166,6 +166,18 @@ test("#309: realm webs sharing a landmass are joined into one component by a roy
   assert.equal(ids.size, 1, "the two realm webs never meet: no royal trunk joins them");
 });
 
+function longestShadowRun(points: ReadonlyArray<{ x: number; y: number }>, cells: Set<number>, near: (cells: Set<number>, x: number, y: number) => boolean, W: number): number {
+  let run = 0;
+  let best = 0;
+  for (const p of points) {
+    if (!cells.has(p.x + p.y * W) && near(cells, p.x, p.y)) {
+      run++;
+      best = Math.max(best, run);
+    } else run = 0;
+  }
+  return best;
+}
+
 test("#309: no road shadows another; a royal trunk rides its home web out of town", () => {
   // Seeds 31776, 22, 25 carried the worst measured shadow pairs: a royal trunk re-walking its realm's own corridor beside an existing road.
   for (const seed of [31776, 22, 25]) {
@@ -191,15 +203,7 @@ test("#309: no road shadows another; a royal trunk rides its home web out of tow
     for (let a = 0; a < w.roads.length; a++) {
       for (let b = 0; b < w.roads.length; b++) {
         if (a === b || groupOf(w.roads[a]!) === groupOf(w.roads[b]!)) continue;
-        let run = 0;
-        let best = 0;
-        for (const p of w.roads[a]!.points) {
-          // eslint-disable-next-line max-depth
-          if (!cellSets[b]!.has(p.x + p.y * W) && near(cellSets[b]!, p.x, p.y)) {
-            run++;
-            best = Math.max(best, run);
-          } else run = 0;
-        }
+        const best = longestShadowRun(w.roads[a]!.points, cellSets[b]!, near, W);
         assert.ok(
           best < 15,
           `seed ${seed}: road ${a} shadows road ${b} for ${best} cells without touching it`,
