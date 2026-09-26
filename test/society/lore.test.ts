@@ -88,7 +88,7 @@ test("gazetteer notes reference the world's history (ruins + dated foundings)", 
 
   const ruin = notes.find((n) => n.s.ruined);
   assert.ok(ruin, "seed 42 has a ruined settlement");
-  assert.match(ruin!.note, /year \d+|abandon|ruin|empty|gone|stones|wind/i);
+  assert.match(ruin.note, /year \d+|abandon|ruin|empty|gone|stones|wind/i);
 
   assert.ok(
     notes.some((n) => /the year \d+/.test(n.note)),

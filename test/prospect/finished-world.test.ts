@@ -34,7 +34,7 @@ test("the viewing year turns a real ruin on and off", () => {
   assert.ok(ruinIndex >= 0, "premise: seed 3 carries a ruin");
   const input = buildProspectInput(w3, ruinIndex);
   assert.ok(input.ruinedYear !== null, "premise: the ruin is dated");
-  const year = input.ruinedYear!;
+  const year = input.ruinedYear;
   const fallen = prospectPlate(w3, ruinIndex, STYLES.ink, year);
   const standing = prospectPlate(w3, ruinIndex, STYLES.ink, year - 1);
   assert.ok(fallen.includes(`An. ${year}`), "the fallen plate names the year of ruin");

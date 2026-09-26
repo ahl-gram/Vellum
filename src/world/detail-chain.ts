@@ -12,7 +12,7 @@ import {
   parentSurfaceOnWindow,
   rejectBridges,
 } from "../terrain/detail-guarantees.ts";
-import { FULL_WINDOW, LOD_BANDS, lodWindowFor, quantizeCenter, type LodBand } from "./lod.ts";
+import { FULL_WINDOW, LOD_BANDS, lodWindowFor, quantizeCenter } from "./lod.ts";
 
 /** No band index: the window alone fixes the ancestry, its depth and every detail level, so a caller cannot pass a band that disagrees with its window. */
 export type ChainSpec = {
@@ -123,7 +123,7 @@ export function maxOfSurfaces(surfaces: ReadonlyArray<Field>, w: number, h: numb
 /** An ancestor is a canonical thing, so it draws at its own band's grid and siblings share it whatever grid the target asked for. */
 function gridForWindow(win: UvWindow): { readonly gridW: number; readonly gridH: number } {
   const size = win.u1 - win.u0;
-  const band = LOD_BANDS.find((b) => Math.abs(b.sizeUV - size) < 1e-9) ?? (LOD_BANDS[0] as LodBand);
+  const band = LOD_BANDS.find((b) => Math.abs(b.sizeUV - size) < 1e-9) ?? LOD_BANDS[0]!;
   return { gridW: band.gridW, gridH: band.gridH };
 }
 

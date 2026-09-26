@@ -19,7 +19,7 @@ import type { World } from "../src/world/types.ts";
 
 function gridForWindow(win: UvWindow): { gridW: number; gridH: number } {
   const size = win.u1 - win.u0;
-  const b = LOD_BANDS.find((x) => Math.abs(x.sizeUV - size) < 1e-9) ?? (LOD_BANDS[0] as LodBand);
+  const b = LOD_BANDS.find((x) => Math.abs(x.sizeUV - size) < 1e-9) ?? LOD_BANDS[0]!;
   return { gridW: b.gridW, gridH: b.gridH };
 }
 

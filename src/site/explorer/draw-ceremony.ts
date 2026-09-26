@@ -19,7 +19,7 @@ export function startRedraft(svg: SVGSVGElement | null, dryIn: Iterable<string>)
 }
 
 function dashCoastForInk(svg: SVGSVGElement): void {
-  const coast = svg.querySelector("#layer-land path") as SVGGeometryElement | null;
+  const coast = svg.querySelector<SVGGeometryElement>("#layer-land path");
   if (!coast || typeof coast.getTotalLength !== "function") return;
   const len = coast.getTotalLength();
   if (!Number.isFinite(len) || len <= 0) return;

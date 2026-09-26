@@ -741,7 +741,7 @@ test("the kit's lifted shapes render one shape on every page that wears them: th
     assert.ok(html.includes(glass), `${p.route} carries the Glass as the kit renders it`);
     const folio = html.match(/<div class="chrome corner bl folio">([\s\S]*?)<\/div>/);
     assert.ok(folio, `${p.route} carries the chart folio`);
-    const lines = folio![1]!.trim();
+    const lines = folio[1]!.trim();
     assert.match(lines, /^(<p class="[\w -]+" id="[\w-]+"><\/p>)+$/, `${p.route}'s folio holds nothing but its lines: ${lines}`);
     assert.match(lines, /^<p class="folio-title" id="folio-title"><\/p>/, `${p.route}'s folio leads with the world's name`);
   }

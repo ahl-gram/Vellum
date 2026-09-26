@@ -23,7 +23,7 @@ const between = (from: string, to: string): string => {
 const folioLines = (): string[][] => {
   const m = page.match(/<ChartFolio lines=\{(\[[^\n]*\])\} \/>/);
   assert.ok(m, "the page stands the kit's chart folio");
-  return JSON.parse(m![1]!) as string[][];
+  return JSON.parse(m[1]!) as string[][];
 };
 
 test("PPR1 the Prospect is a chart room: chartRoom on the layout, the RoomFolio in place of the RoomHead, the figure and its caption retired", () => {

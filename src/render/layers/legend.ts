@@ -37,7 +37,7 @@ function dominantTree(ctx: RenderCtx): string | null {
   const counts = FOREST.map(() => 0);
   for (const b of ctx.world.biomes) {
     FOREST.forEach((f, i) => {
-      if (f.biomes.includes(b as number)) counts[i] = (counts[i] as number) + 1;
+      if (f.biomes.includes(b)) counts[i] = (counts[i] as number) + 1;
     });
   }
   let best = -1;

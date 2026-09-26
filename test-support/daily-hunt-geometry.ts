@@ -339,13 +339,13 @@ export function expectedClueText(clue: Clue): string {
         forest: "Deep woods stand close about it.",
         marsh: "Marshland lies hard by its bounds.",
         dunes: "Desert sands lie hard by its bounds.",
-      }[s as TerrainBand]!;
+      }[s as TerrainBand];
     case "road":
       return {
         road: "A made road comes to its gate.",
         track: "No made road serves it, only a track.",
         pathless: "Neither road nor track comes to it.",
-      }[s as RoadState]!;
+      }[s as RoadState];
     case "near":
       return `It lies within ${clue.leagues} leagues of ${s}.`;
   }

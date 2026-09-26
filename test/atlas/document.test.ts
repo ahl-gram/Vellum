@@ -51,8 +51,8 @@ test("#412 the waiting frame reads the real prospect root's dims, not a child re
   const img = html.match(/<img src="prospect-capital\.svg"([^>]*)>/);
   assert.ok(img, "prospect figure present");
   assert.ok(
-    img![1]!.includes(' width="1500" height="1108" '),
-    `the frame must carry the root's integer dims, got${img![1]}`,
+    img[1]!.includes(' width="1500" height="1108" '),
+    `the frame must carry the root's integer dims, got${img[1]}`,
   );
 });
 
@@ -277,6 +277,6 @@ test("#464 the served atlas declares the deep and the sheet depth exactly as Bas
     const a = layout.match(re);
     const b = page.match(re);
     assert.ok(a && b, `${token} declared in both`);
-    assert.equal(norm(b![1]!), norm(a![1]!), `${token} on the served atlas mirrors the layout's`);
+    assert.equal(norm(b[1]!), norm(a[1]!), `${token} on the served atlas mirrors the layout's`);
   }
 });

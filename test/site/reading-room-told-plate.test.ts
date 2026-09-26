@@ -6,7 +6,6 @@ import {
   plateForTold,
   plateSpecsFor,
   plateKeyOf,
-  type PlateSpec,
 } from "../../src/site/reading-room/told-plate.ts";
 import type { StoryBeat } from "../../src/site/reading-room/beats.ts";
 import type { ToldEntry } from "../../src/site/living-chart/told.ts";
@@ -102,7 +101,7 @@ test("#442 the prefetch set carries BOTH halves, deduped by index AND year", () 
     "the survey's ports join the beats, and the same town at two years is two plates",
   );
   const seen = new Set<string>();
-  for (const s of specs as PlateSpec[]) {
+  for (const s of specs) {
     assert.equal(seen.has(plateKeyOf(s)), false, "no plate is pulled twice");
     seen.add(plateKeyOf(s));
   }

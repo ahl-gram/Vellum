@@ -126,13 +126,13 @@ export function surveyItemFrom(c: {
 export function thumbJobFor(item: TableItem): RegionJob | ProspectJob {
   if (item.kind === "prospect") {
     return {
-      kind: "prospect", seed: item.seed, overrides: item.overrides as Partial<WorldRecipe>,
+      kind: "prospect", seed: item.seed, overrides: item.overrides,
       index: item.index, dress: plateDressFor(item.style), year: item.year,
     };
   }
   const band = LOD_BANDS[item.rung] as LodBand;
   return {
-    kind: "region", seed: item.seed, overrides: item.overrides as Partial<WorldRecipe>,
+    kind: "region", seed: item.seed, overrides: item.overrides,
     window: tableWindow(item), gridW: band.gridW, gridH: band.gridH, band: item.rung,
     render: { style: item.style, widthPx: 1500, legend: item.legend, arms: item.arms, beasts: item.beasts, theme: item.theme ?? undefined },
   };

@@ -90,9 +90,9 @@ test("walls paint between the back row and the keep, the spike's layering", () =
   const wall = g.walls[0];
   assert.ok(backMass && keep && wall, "fixture composes back row, keep, and wall");
   const svg = prospectSvg(g, STYLES.antique);
-  const backAt = svg.indexOf(`M${f(backMass!.x)} ${f(backMass!.base)}`);
-  const wallAt = svg.indexOf(`M${f(wall!.x0)} ${f(groundAt(g.ground, wall!.x0))}`);
-  const keepAt = svg.indexOf(`M${f(keep!.x)} ${f(keep!.base)}`);
+  const backAt = svg.indexOf(`M${f(backMass.x)} ${f(backMass.base)}`);
+  const wallAt = svg.indexOf(`M${f(wall.x0)} ${f(groundAt(g.ground, wall.x0))}`);
+  const keepAt = svg.indexOf(`M${f(keep.x)} ${f(keep.base)}`);
   assert.ok(backAt >= 0, "back-row mass outline found");
   assert.ok(wallAt >= 0, "curtain wall outline found");
   assert.ok(keepAt >= 0, "keep outline found");
@@ -127,19 +127,19 @@ test("the sea band wears the style's water tokens", () => {
   const g = FIXTURES.harborCapital!;
   const antique = prospectSvg(g, STYLES.antique);
   const oceanRects = [...antique.matchAll(/<rect\b[^>]*>/g)]
-    .map((m) => attrsOf(m[0]!))
+    .map((m) => attrsOf(m[0]))
     .filter((a) => a.fill === STYLES.antique.ocean);
   assert.equal(oceanRects.length, 1, "antique paints one ocean sheet");
   assert.equal(oceanRects[0]!.y, f(g.water!.y0));
   const halo = [...antique.matchAll(/<path\b[^>]*>/g)]
-    .map((m) => attrsOf(m[0]!))
+    .map((m) => attrsOf(m[0]))
     .filter((a) => a.stroke === STYLES.antique.waterline);
   assert.equal(halo.length, 3, "the 3-pass waterline halo");
 
   // ink's ocean IS its paper, so no sheet: the waterline alone carries it.
   const ink = prospectSvg(g, STYLES.ink);
   const inkRects = [...ink.matchAll(/<rect\b[^>]*>/g)]
-    .map((m) => attrsOf(m[0]!))
+    .map((m) => attrsOf(m[0]))
     .filter((a) => a.fill === STYLES.ink.ocean && a.height !== undefined);
   const oceanSheet = inkRects.filter((a) => a.y === f(g.water!.y0));
   assert.equal(oceanSheet.length, 0, "ink paints no ocean sheet");

@@ -59,7 +59,7 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
       });
 
   let worldMax = -Infinity;
-  for (const v of world.elev.data) worldMax = Math.max(worldMax, v as number);
+  for (const v of world.elev.data) worldMax = Math.max(worldMax, v);
   const elevSpan = worldMax - seaLevel;
 
   const preClimate = computeClimate(elev, seaLevel, recipe.seed, {

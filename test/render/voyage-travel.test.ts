@@ -94,7 +94,7 @@ test("water span (#181): sea legs carry the span, coastal stubs stay short, and 
       continue;
     }
     assert.ok(l.water, `sea leg ${l.fromIdx}->${l.toIdx} must carry its water span`);
-    const { from, to } = l.water!;
+    const { from, to } = l.water;
     assert.ok(from > 0 && from < to && to < 1, `span must sit strictly inside the leg: ${from}..${to}`);
     assert.ok(nearSea(at(l, from)) && nearSea(at(l, to)), "the span's edges sit at the water");
     const len = polylineLength(l.points);

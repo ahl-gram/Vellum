@@ -23,7 +23,7 @@ const between = (from: string, to: string): string => {
 const folioLines = (): string[][] => {
   const m = page.match(/<ChartFolio lines=\{(\[[^\n]*\])\} \/>/);
   assert.ok(m, "the page stands the kit's chart folio");
-  return JSON.parse(m![1]!) as string[][];
+  return JSON.parse(m[1]!) as string[][];
 };
 
 test("RR-room 1 the Reading Room is a chart room: chartRoom on the layout, the RoomFolio in place of the RoomHead, no legend row", () => {
@@ -127,9 +127,9 @@ test("every hash writer in the Reading Room carries the Chart Table through (#52
 
   // Comments are blanked rather than cut, so every index still lines up with the source: prose apostrophes and a '#' inside a comment would otherwise read as string literals.
   const code = src.replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*/g, (c) => " ".repeat(c.length));
-  const spans = writers.map((m) => [m.index!, m.index! + m[0].length] as const);
+  const spans = writers.map((m) => [m.index, m.index + m[0].length] as const);
   for (const hit of code.matchAll(/history\.replaceState\(|["`][^"`\n]*#[^"`\n]*["`]/g)) {
-    const at = hit.index!;
+    const at = hit.index;
     assert.ok(
       spans.some(([a, b]) => at >= a && at < b),
       `a hash is built at index ${at} (${JSON.stringify(code.slice(at, at + 44))}) outside every writer this guard knows, so nothing checks that it carries the table`,

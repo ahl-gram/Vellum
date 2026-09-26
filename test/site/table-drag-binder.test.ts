@@ -20,7 +20,7 @@ Object.assign(globalThis.document, {
 };
 const fireDoc = (type: string, e: unknown) => { for (const fn of [...(docListeners.get(type) ?? [])]) fn(e); };
 const revoked: string[] = [];
-URL.revokeObjectURL = ((u: string) => { revoked.push(u); }) as typeof URL.revokeObjectURL;
+URL.revokeObjectURL = (u: string) => { revoked.push(u); };
 const nextTick = () => new Promise((r) => setTimeout(r, 0));
 
 const MOUSE = { pointerType: "mouse", button: 0, isPrimary: true };

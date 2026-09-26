@@ -164,11 +164,11 @@ const prospect = (over: Partial<ProspectItem> = {}): ProspectItem => ({
 test("CT1 thumbJobFor hands a prospect its own job, dressed as the ADDRESS states, so an ink chart's cutting is an ink plate (#522, #237)", () => {
   const ink = thumbJobFor(prospect());
   assert.equal(ink.kind, "prospect");
-  assert.equal((ink as ProspectJob).dress, "ink", "an ink prospect draws the ink plate");
+  assert.equal(ink.dress, "ink", "an ink prospect draws the ink plate");
   const antique = thumbJobFor(prospect({ style: "antique" }));
   assert.equal((antique as ProspectJob).dress, "antique");
   assert.deepEqual(
-    { index: (ink as ProspectJob).index, year: (ink as ProspectJob).year, seed: ink.seed },
+    { index: ink.index, year: ink.year, seed: ink.seed },
     { index: 3, year: 1059, seed: 42 },
     "the place, the year and the world ride verbatim: they ARE the plate's identity",
   );

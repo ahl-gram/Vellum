@@ -39,7 +39,7 @@ class FakeStore {
     return Object.keys(this.held).length;
   }
 }
-const asStorage = (fake: FakeStore): (() => Storage) => () => fake as unknown as Storage;
+const asStorage = (fake: FakeStore): (() => Storage) => () => fake;
 
 const shut: () => Storage = () => {
   throw new Error("storage is disabled in this browsing mode");
@@ -159,7 +159,7 @@ test("TS13 the device every host reaches for is THE device, named once (#634, gu
   const fake = new FakeStore();
   try {
     Object.defineProperty(globalThis, "localStorage", { value: fake, configurable: true, writable: true });
-    assert.equal(deviceStorage(), fake as unknown as Storage, "the device binding does not resolve to this browser's own localStorage, so every host could be reading and writing something no reader will ever see again");
+    assert.equal(deviceStorage(), fake, "the device binding does not resolve to this browser's own localStorage, so every host could be reading and writing something no reader will ever see again");
     writeStoredTable(deviceStorage, fill(1));
     assert.ok(fake.calls.includes(`set ${TABLE_STORE_KEY}`), "and a write through it reaches nothing");
   } finally {

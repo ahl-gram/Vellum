@@ -52,7 +52,7 @@ test("an inland port's sea leg knows where the water is: the span excludes both 
   const [routed] = routeVoyage([leg(0, 1)], [site(0, 0, 1), site(1, 16, 1)], s);
   assert.equal(routed!.mode, "sea");
   assert.ok(routed!.water, "the sea leg carries a water span");
-  const { from, to } = routed!.water!;
+  const { from, to } = routed!.water;
   assert.ok(from > 0 && from < to && to < 1, `span must sit strictly inside the leg: ${from}..${to}`);
   const st = stubs(routed!);
   assert.ok(Math.abs(st.from - 5) <= 0.8, `embark stub rides ~5 cells, got ${st.from}`);

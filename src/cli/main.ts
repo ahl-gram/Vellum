@@ -156,7 +156,7 @@ export async function main(argv: string[]): Promise<void> {
     ...(coastWarp !== undefined ? { coastWarp } : {}),
   });
 
-  const style = validateStyle(values.style as string);
+  const style = validateStyle(values.style);
   const t0 = performance.now();
   const world = generateWorld(recipe);
   const t1 = performance.now();

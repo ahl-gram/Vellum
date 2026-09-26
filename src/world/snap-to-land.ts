@@ -36,7 +36,7 @@ function offsetsWithin(radius: number): ReadonlyArray<Offset> {
     if (a[0] !== b[0]) return b[0] - a[0];
     return b[1] - a[1];
   });
-  const frozen = Object.freeze(out) as ReadonlyArray<Offset>;
+  const frozen = Object.freeze(out);
   RINGS.set(radius, frozen);
   return frozen;
 }

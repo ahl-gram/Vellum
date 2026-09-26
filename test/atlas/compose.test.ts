@@ -160,7 +160,7 @@ test("the gazetteer's rows run capital, then the towns, then the villages, each 
   const rows = [...html.matchAll(/<td class="name (\w+)">([^<]*)/g)].map((m) => ({ kind: m[1]!, name: unescape(m[2]!) }));
   const RANK: Record<string, number> = { capital: 0, town: 1, village: 2, hamlet: 3 };
   const expected = world.settlements
-    .map((s) => ({ kind: s.kind as string, name: s.name }))
+    .map((s) => ({ kind: s.kind, name: s.name }))
     .sort((a, b) => RANK[a.kind]! - RANK[b.kind]! || a.name.localeCompare(b.name));
   assert.ok(rows.some((r) => r.kind === "town") && rows.some((r) => r.kind === "village"), "premise: seed 42 has more than one rank to order");
   assert.notDeepEqual(rows.map((r) => r.name), world.settlements.map((s) => s.name), "premise: the index order differs from the rank order, or this pin proves nothing");

@@ -318,7 +318,7 @@ function measure(
     worldFusedPairs: [...coveredBy.values()].reduce((a, s) => a + Math.max(0, s.size - 1), 0),
     worldMassesLost: worldMassesPresent.size - worldMassesAlive.size,
     worldMassesInWindow: worldMassesPresent.size,
-    regionMaxElev: region.elev.data.reduce<number>((a, v) => Math.max(a, v as number), -Infinity),
+    regionMaxElev: region.elev.data.reduce<number>((a, v) => Math.max(a, v), -Infinity),
   };
 }
 
