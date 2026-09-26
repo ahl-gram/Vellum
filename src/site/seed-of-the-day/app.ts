@@ -206,7 +206,6 @@ function setHuntStatus(text: string): void {
   line.textContent = text;
   if (text.length > 0) restart(line, "wet"); // visual-only ink-dry blur
   const sticky = $("hunt-sticky");
-  if (!sticky) return; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   const show = text.length > 0;
   sticky.textContent = text;
   sticky.classList.toggle("active", show);
@@ -218,9 +217,8 @@ function setHuntStatus(text: string): void {
 
 // eslint-disable-next-line max-lines-per-function
 function setupHunt(world: World): void {
-  const hunt = $("hunt");
   const svg = $("sheet").querySelector("svg");
-  if (!hunt || !svg) return; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+  if (!svg) return;
 
   const proj = createProjection(world.elev.w, world.elev.h, 1500, MARGIN);
   const quarry = chooseQuarry(world, { exclude: legendExclusions(world, svg, proj) });
@@ -389,9 +387,9 @@ function setupHunt(world: World): void {
     const name = quarry.settlement.name;
     const soundings = `${guesses} ${guesses === 1 ? "sounding" : "soundings"}`;
     const text = `Vellum Daily Hunt: I took ${name} in ${soundings}. Seed ${seed}. Can you beat it? ${location.href}`;
-    if (navigator.share) { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    if ((navigator as Partial<Navigator>).share) {
       navigator.share({ title: "Vellum Daily Hunt", text }).catch(() => {});
-    } else if (navigator.clipboard) { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    } else if ((navigator as Partial<Navigator>).clipboard) {
       navigator.clipboard
         .writeText(text)
         .then(() => {
