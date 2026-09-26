@@ -226,8 +226,9 @@ test("only typescript-eslint's recommended-type-checked block sets a rule Issue 
   assert.deepEqual(
     [...(preset[0]!.files ?? [])].sort(),
     LINT_SCOPE.filter((g) => g.endsWith(".ts")),
-    "the preset that sets these rules reaches less than the four TypeScript roots, so the block that extends it has narrowed its own files (a conjunct such as src/**/*.ts with src/cli/**) and takes the rules back for everything it dropped",
+    "the preset that sets these rules does not reach exactly the four TypeScript roots: the block that extends it has changed its own files, and a narrowing (a conjunct such as src/**/*.ts with src/cli/**) takes the rules back for everything it dropped",
   );
+  assert.equal(preset[0]!.ignores, undefined, "the preset carries an ignores key, which takes the rules back for whatever it excludes while its files still name the four roots");
 });
 
 const JS_REFUSED = ["x.js", "src/x.js", "scripts/x.mjs", "scripts/e2e/x.mjs", "test/x.cjs", "test-support/x.js", "public/x.js", ".claude/x.mjs", "x.jsx", "src/site/x.jsx"];
