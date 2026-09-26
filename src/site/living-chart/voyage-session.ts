@@ -117,21 +117,21 @@ export function createSessionBuilder(deps: SessionBuilderDeps) {
 
     const durations = legDurations(legs.map((l) => l.geom.total));
     const cumMs = [0];
-    for (const d of durations) cumMs.push(cumMs[cumMs.length - 1] + d);
-    const totalMs = cumMs[cumMs.length - 1];
+    for (const d of durations) cumMs.push(cumMs[cumMs.length - 1]! + d);
+    const totalMs = cumMs[cumMs.length - 1]!;
 
     const byIdx = new Map(manifest.places.map((p) => [p.idx, p]));
-    const origin = byIdx.get(plan.ports[0].idx)!;
+    const origin = byIdx.get(plan.ports[0]!.idx)!;
     const originPt = { x: proj.px(origin.gx), y: proj.py(origin.gy) };
 
     const logPorts = plan.ports.map((port, i) => {
       const pm = byIdx.get(port.idx)!;
       return {
         idx: pm.idx, name: pm.name, kind: pm.kind, founded: pm.founded,
-        arrivalMode: i === 0 ? null : routed[i - 1].mode,
-        inlandHandoff: i === 0 ? false : routed[i - 1].inlandHandoff,
+        arrivalMode: i === 0 ? null : routed[i - 1]!.mode,
+        inlandHandoff: i === 0 ? false : routed[i - 1]!.inlandHandoff,
         // #312: GRID-space leg length (routed points are pre-projection), so the day counts are world-derived and never move with the render width.
-        legLength: i === 0 ? 0 : buildLegGeometry(routed[i - 1].points).total,
+        legLength: i === 0 ? 0 : buildLegGeometry(routed[i - 1]!.points).total,
       };
     });
     const closing = plan.ports.length >= 2 ? routed[routed.length - 1]! : null;
@@ -173,7 +173,7 @@ export function createSessionBuilder(deps: SessionBuilderDeps) {
       riderG,
       activeMark: null,
       shownGlyph: "",
-      facing: legs.length ? netFacing(legs[0].geom.points) : 1,
+      facing: legs.length ? netFacing(legs[0]!.geom.points) : 1,
       rafId: 0,
       shownArrived: 0,
     };

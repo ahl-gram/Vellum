@@ -138,7 +138,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
 
   const bad = (pred: (h: Head, r: string) => boolean) => SHELLED.filter((r) => !heads[r] || !pred(heads[r], r));
 
-  const manyH1 = bad((h, r) => h.h1s.length === 1 && (r === "/" ? h.h1s[0].inHeader : h.h1s[0].inMain));
+  const manyH1 = bad((h, r) => h.h1s.length === 1 && (r === "/" ? h.h1s[0]!.inHeader : h.h1s[0]!.inMain));
   check(
     "RH0 every shelled page delivers exactly one h1: home's in the cluster, a room's standing in the page (#461 ruling 1)",
     unreachable.length === 0 && manyH1.length === 0,
@@ -147,7 +147,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
       : manyH1.map((r) => `${r}: ${JSON.stringify(heads[r]?.h1s)}`).join(" | ") || `${SHELLED.length}/${SHELLED.length} pages, one h1 each, placed right`,
   );
 
-  const wrongH1 = bad((h, r) => h.h1s.length === 1 && h.h1s[0].classes.includes(r === "/" ? "wordmark" : "room-name"));
+  const wrongH1 = bad((h, r) => h.h1s.length === 1 && h.h1s[0]!.classes.includes(r === "/" ? "wordmark" : "room-name"));
   check(
     "RH1 the h1 names the page: the wordmark on home, the room name on every room page",
     wrongH1.length === 0,

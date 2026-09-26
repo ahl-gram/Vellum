@@ -18,8 +18,8 @@ export function zoomTransformToCss(t: ZoomState): string {
 /** Mirrors d3-zoom's defaultConstrain against a clamped k, so zoomTo clamps identically to a live gesture. */
 export function constrainZoom(
   t: ZoomState,
-  extent: ReadonlyArray<ReadonlyArray<number>>,
-  scaleExtent: ReadonlyArray<number>,
+  extent: readonly [readonly [number, number], readonly [number, number]],
+  scaleExtent: readonly [number, number],
 ): ZoomState {
   const k = Math.max(scaleExtent[0], Math.min(scaleExtent[1], t.k));
   const [[x0, y0], [x1, y1]] = extent;
@@ -36,7 +36,7 @@ export function constrainZoom(
 export function nextGlideTarget(
   baseK: number,
   factor: number,
-  scaleExtent: ReadonlyArray<number>,
+  scaleExtent: readonly [number, number],
 ): number {
   return Math.max(scaleExtent[0], Math.min(scaleExtent[1], baseK * factor));
 }

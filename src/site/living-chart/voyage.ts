@@ -82,12 +82,12 @@ export function createVoyage(deps: VoyageDeps) {
       const s = fmt(p);
       if (out[out.length - 1] !== s) out.push(s); // a leg starts where the last one ended
     };
-    for (let i = 0; i < f.legIndex; i++) for (const p of session.legs[i].geom.points) push(p);
+    for (let i = 0; i < f.legIndex; i++) for (const p of session.legs[i]!.geom.points) push(p);
 
-    const { geom } = session.legs[f.legIndex];
+    const { geom } = session.legs[f.legIndex]!;
     const s = f.legT * geom.total;
-    push(geom.points[0]);
-    for (let k = 1; k < geom.points.length && geom.cum[k] <= s; k++) push(geom.points[k]);
+    push(geom.points[0]!);
+    for (let k = 1; k < geom.points.length && geom.cum[k]! <= s; k++) push(geom.points[k]!);
     push(pointAtDistance(geom, s));
     return out.join(" ");
   }
@@ -113,7 +113,7 @@ export function createVoyage(deps: VoyageDeps) {
       pos = session.originPt;
       showMark(session, "rider");
     } else {
-      const { geom, mode, water } = session.legs[f.legIndex];
+      const { geom, mode, water } = session.legs[f.legIndex]!;
       const s = f.legT * geom.total;
       pos = pointAtDistance(geom, s);
       const hd = headingAt(geom, s);
@@ -250,14 +250,14 @@ export function createVoyage(deps: VoyageDeps) {
     if (!voyage) return null;
     return {
       ports: voyage.plan.ports,
-      legs: voyage.plan.legs.map((leg, i) => ({ ...leg, mode: voyage!.legs[i].mode })),
+      legs: voyage.plan.legs.map((leg, i) => ({ ...leg, mode: voyage!.legs[i]!.mode })),
     };
   }
 
   function voyageDays(): { first: number; last: number } | null {
     if (!voyage || voyage.log.entries.length === 0) return null;
     const entries = voyage.log.entries;
-    return { first: entries[0].day, last: entries[entries.length - 1].day };
+    return { first: entries[0]!.day, last: entries[entries.length - 1]!.day };
   }
 
   function voyageLog() {

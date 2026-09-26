@@ -338,12 +338,12 @@ function setupHunt(world: World): void {
     const INK = "#4a3826", STAR = "#7a1f12";
     const g = svgEl("g", { "data-vellum-dispatch": "" });
 
-    const misses = missRoute.map((m) => [proj.px(m.gx), proj.py(m.gy)]);
+    const misses = missRoute.map((m): [number, number] => [proj.px(m.gx), proj.py(m.gy)]);
     const qx = proj.px(quarry.settlement.x), qy = proj.py(quarry.settlement.y);
 
     if (misses.length > 0) {
       g.appendChild(svgEl("polyline", {
-        points: [...misses, [qx, qy]].map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`).join(" "),
+        points: [...misses, [qx, qy] as [number, number]].map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`).join(" "),
         style: `fill:none;stroke:${INK};stroke-width:3;stroke-dasharray:1 13;stroke-linecap:round;opacity:0.8`,
       }));
     }

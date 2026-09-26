@@ -8,7 +8,7 @@ export interface Placed {
 
 export function readingAt(heads: readonly Placed[], line: number): string | null {
   if (heads.length === 0) return null;
-  let current = heads[0];
+  let current = heads[0]!;
   for (const h of heads) if (h.top <= line) current = h;
   return current.id;
 }

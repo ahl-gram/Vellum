@@ -185,8 +185,8 @@ export function createLodController(deps: Deps) {
       seed: world.seed,
       overrides: world.overrides,
       window,
-      gridW: LOD_BANDS[band].gridW,
-      gridH: LOD_BANDS[band].gridH,
+      gridW: LOD_BANDS[band]!.gridW,
+      gridH: LOD_BANDS[band]!.gridH,
       band,
       render: world.render,
     })

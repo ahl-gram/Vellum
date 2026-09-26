@@ -11,8 +11,8 @@ test("zoomTransformToCss emits a px-suffixed, browser-valid transform (#164)", (
 });
 
 // A 100x100 viewport; the sheet fills it exactly at k=1, so the world extent IS the viewport extent.
-const EXTENT = [[0, 0], [100, 100]];
-const SCALE = [1, 8];
+const EXTENT = [[0, 0], [100, 100]] as const;
+const SCALE = [1, 8] as const;
 
 test("constrainZoom clamps the scale to the extent [1,8] (#164)", () => {
   assert.equal(constrainZoom({ x: 0, y: 0, k: 20 }, EXTENT, SCALE).k, 8);

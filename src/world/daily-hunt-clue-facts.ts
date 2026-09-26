@@ -360,6 +360,6 @@ function nearestNamedLake(
 
 export function realmNameAt(world: World, x: number, y: number): string | null {
   if (world.names.realms.length < 2) return null;
-  const id = world.realms.labels[x + y * world.elev.w];
+  const id = world.realms.labels[x + y * world.elev.w]!;
   return id >= 0 ? (world.names.realms[id] ?? null) : null;
 }

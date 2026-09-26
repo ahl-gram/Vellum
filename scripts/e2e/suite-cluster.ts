@@ -40,7 +40,7 @@ const DRAWER_READ: Payload<Drawer | NotHome> = `(() => {
     doors: [...nav.querySelectorAll("a, [aria-current]")].map((a) => { const d = a.getBoundingClientRect(); const hit = document.elementFromPoint(d.x + 20, d.y + d.height / 2); return { t: a.textContent, x: d.x, y: d.y, h: d.height, right: d.right, bottom: d.bottom, tappable: hit === a }; }) };
 })()`;
 
-const stacked = (doors: Door[]) => doors.length === 7 && doors.every((d, i) => i === 0 || (d.y >= doors[i - 1].bottom - 0.5 && Math.abs(d.x - doors[0].x) < 0.5));
+const stacked = (doors: Door[]) => doors.length === 7 && doors.every((d, i) => i === 0 || (d.y >= doors[i - 1]!.bottom - 0.5 && Math.abs(d.x - doors[0]!.x) < 0.5));
 const offLeft = (nav: Nav) => nav.visibility === "hidden" && nav.rect !== null && nav.rect.right <= 0.5; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 // @ts-expect-error a page that is not home reads scrollW -1, so the scrollW test before this reads false for it and a missing nav never reaches here
 const atOpen = (d: Drawer | NotHome) => d.scrollW !== -1 && d.nav.transform === "none" &&

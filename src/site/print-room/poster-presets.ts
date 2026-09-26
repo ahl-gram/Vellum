@@ -19,8 +19,8 @@ export function chartFilename(seed: number, style: string, title: string): strin
   return `vellum-${seed}-${style}-${slug}.svg`;
 }
 
-const MIN_WIDTH = POSTER_PRESETS[0].width;
-const MAX_WIDTH = POSTER_PRESETS[POSTER_PRESETS.length - 1].width;
+const MIN_WIDTH = POSTER_PRESETS[0]!.width;
+const MAX_WIDTH = POSTER_PRESETS[POSTER_PRESETS.length - 1]!.width;
 
 // The render worker passes widthPx into renderMap with no clamp of its own, so bounding the width is the page's job.
 export function clampPosterWidth(w: unknown): number {

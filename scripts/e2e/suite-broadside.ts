@@ -232,7 +232,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
       rowY:l?Math.round(l.getBoundingClientRect().top+l.getBoundingClientRect().height/2):null};})()`);
   // The MEDIAN of a wide run (a max passes on one bright press under the sample, a min fails on one hairline crossing it), read at the DOCKED PRESS's own middle after scrolling it into view: the row sits below the fold at 390 (measured 882 in an 844-tall viewport), and a fixed offset from the sheet's top landed on #540's ink-dark selected tab and read 59 against a sheet that had not changed.
   const lums = br6b.rowY === null ? null : (await sampleRow(send, 20, br6b.rowY, 16)).map(luminance).sort((a, b) => a - b);
-  const br6bGround = lums === null ? null : Math.round(lums[Math.floor(lums.length / 2)]);
+  const br6bGround = lums === null ? null : Math.round(lums[Math.floor(lums.length / 2)]!);
   // #532: the mark's contrast is a COMPUTED-STYLE claim and can only be read as one. The declaration that fails here is PRESENT in the stylesheet and simply loses the cascade, so a text match over the CSS passes on the broken code. The three states go through CSS.forcePseudoState, and each asserts its own resolved COLOUR: a floor alone passes when the hover arm is deleted and hover falls back to the resting ink, which still clears it (skeptic on PR #535).
   const doc532 = await send<{ root: { nodeId: number } }>("DOM.getDocument", { depth: 1 });
   await send("CSS.enable");
