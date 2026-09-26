@@ -14,30 +14,15 @@ const ASSIGNS = new Set([2322, 2345]);
 // A bare `unknown` reports TS18046; only one a truthiness guard has narrowed to `{}` reports a member read as TS2339.
 const ON_EMPTY_OBJECT = /on type '\{\}'/;
 
-const ARITHMETIC = new Set([2362, 2363]);
-const MATCH_ARRAYS = new Set(["RegExpMatchArray", "RegExpExecArray"]);
-
 type Source = { readonly path: string; readonly text: string };
-type Covered = { readonly column: number; readonly code: number; readonly text: string; readonly matchGroup: boolean };
+type Covered = { readonly column: number; readonly code: number; readonly text: string };
 type Finding = { readonly at: string; readonly diagnostics: readonly string[] };
 
 const e2eSources = (): Source[] => e2eSourcePaths(REPO).map((path) => ({ path, text: readFileSync(path, "utf8") }));
 
 const nullish = (c: Covered): boolean =>
   NULLISH.has(c.code) || (ASSIGNS.has(c.code) && /\b(null|undefined)\b/.test(c.text)) || (c.code === 2339 && ON_EMPTY_OBJECT.test(c.text));
-const coerced = (covered: readonly Covered[]): boolean => covered.length === 1 && ARITHMETIC.has(covered[0]!.code) && covered[0]!.matchGroup;
-const offends = (covered: readonly Covered[]): boolean =>
-  new Set(covered.map((c) => c.column)).size !== 1 || !(covered.every(nullish) || coerced(covered));
-
-const operandIsMatchGroup = (checker: ts.TypeChecker, sf: ts.SourceFile, start: number, length: number): boolean => {
-  let found: ts.Node | undefined;
-  const visit = (node: ts.Node): void => {
-    if (node.getStart(sf) === start && node.getEnd() === start + length) found = node;
-    if (node.getStart(sf) <= start && node.getEnd() >= start + length) ts.forEachChild(node, visit);
-  };
-  visit(sf);
-  return found !== undefined && ts.isElementAccessExpression(found) && MATCH_ARRAYS.has(checker.getTypeAtLocation(found.expression).getSymbol()?.name ?? "");
-};
+const offends = (covered: readonly Covered[]): boolean => new Set(covered.map((c) => c.column)).size !== 1 || !covered.every(nullish);
 
 function compile(sources: readonly Source[]): ts.Program {
   const blanked = new Map(sources.map(({ path, text }) => [path, text.split("\n").map((line) => (NOTE.test(line) ? line.replace("@ts-expect-error", "@note") : line)).join("\n")]));
@@ -66,8 +51,7 @@ function noteFindings(sources: readonly Source[]): { notes: number; findings: Fi
     for (const d of [...program.getSyntacticDiagnostics(sf), ...program.getSemanticDiagnostics(sf)]) {
       if (d.start === undefined) continue;
       const { line, character } = sf.getLineAndCharacterOfPosition(d.start);
-      const matchGroup = ARITHMETIC.has(d.code) && operandIsMatchGroup(program.getTypeChecker(), sf, d.start, d.length ?? 0);
-      byLine.set(line, [...(byLine.get(line) ?? []), { column: character, code: d.code, text: ts.flattenDiagnosticMessageText(d.messageText, " "), matchGroup }]);
+      byLine.set(line, [...(byLine.get(line) ?? []), { column: character, code: d.code, text: ts.flattenDiagnosticMessageText(d.messageText, " ") }]);
     }
     lines.forEach((line, i) => {
       if (!NOTE.test(line)) {
@@ -146,12 +130,12 @@ test("the scan reads every TypeScript file under scripts/e2e at any depth and th
   }
 });
 
-test("every ruled note in the e2e tree covers one uncertain expression and nothing but its null objection or a coerced regex match group, so a typo or a wrong type beside or in place of it cannot hide under the note (Alex's ruling of 2026-09-23 on Issue #653)", () => {
+test("every ruled note in the e2e tree covers one uncertain expression and nothing but its null objection, so a typo or a wrong type beside or in place of it cannot hide under the note (Alex's ruling of 2026-09-23 on Issue #653)", () => {
   const { notes, findings } = noteFindings(e2eSources());
   assert.ok(notes > 0, "the scan read no note at all, so it is looking at the wrong tree");
   assert.deepEqual(
     findings.map((f) => `${f.at}: ${f.diagnostics.join(" | ")}`),
     [],
-    "a note must cover one uncertain expression and nothing but its null objection, or a regex match group that arithmetic coerces, alone: break the line so each has its own noted line and the rest of the expression is checked. BLIND SPOTS, declared, all three erring toward passing: a member read off a value typed {} (a caught unknown narrowed by a truthiness guard), where a misspelled member and a real one report alike; and an assignability error whose message names null or undefined anywhere, so a wrong type that also mentions an optional field passes as a null objection; and a regex match group under any arithmetic or bitwise operator, on either side or in a compound assignment, which passes whether or not its text is a number",
+    "a note must cover one uncertain expression and nothing but its null objection: break the line so each has its own noted line and the rest of the expression is checked. BLIND SPOTS, declared, both erring toward passing: a member read off a value typed {} (a caught unknown narrowed by a truthiness guard), where a misspelled member and a real one report alike; and an assignability error whose message names null or undefined anywhere, so a wrong type that also mentions an optional field passes as a null objection",
   );
 });

@@ -4,6 +4,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { ESLint, type Linter } from "eslint";
 import { includeIgnoreFile } from "eslint/config";
+import ts from "typescript";
 import lintConfig from "../../eslint.config.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
@@ -277,6 +278,14 @@ test("through ESLint itself, a JavaScript file anywhere outside design/ is refus
 test("npm run lint is the native-loader ESLint over the whole tree, with a warning counted as red", () => {
   const pkg = JSON.parse(src("package.json")) as { scripts: Record<string, string> };
   assert.equal(pkg.scripts["lint"], LINT_SCRIPT);
+});
+
+test("npm run check is tsc over tsconfig.json, which turns on noUncheckedIndexedAccess, so an element read is typed as possibly missing (Issue #654 ruling 1)", () => {
+  const pkg = JSON.parse(src("package.json")) as { scripts: Record<string, string> };
+  assert.equal(pkg.scripts["check"], "tsc --noEmit");
+  const config = ts.getParsedCommandLineOfConfigFile(join(ROOT, "tsconfig.json"), {}, { ...ts.sys, onUnRecoverableConfigFileDiagnostic: () => undefined });
+  assert.ok(config, "tsconfig.json did not parse");
+  assert.equal(config.options.noUncheckedIndexedAccess, true);
 });
 
 // Matched at the file's own step indent the way test/repo/e2e-tiers.test.ts keys its anchors, so a run line planted deeper (under a with: map, which Actions ignores) reds; a step written in flow style reds too, a false red and never a miss. The one miss is a JOB-level if: on check-and-test, which skips Typecheck and Test the same way and which no guard reads; the per-job sweep in test/repo/e2e-tiers.test.ts is its home if it is ever closed.
