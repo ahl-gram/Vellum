@@ -180,3 +180,24 @@ test("TD15 a carry ended from inside its own move (the reveal it calls firing Es
   assert.equal(d.calls.minted, 2, "the next press begins a new carry with a ghost of its own, where a carry brought back after its end refuses every later press");
   fireDoc("keydown", { key: "Escape" });
 });
+
+test("TD16 a move that lifts the ghost and enters the band in one event reveals the drawer once and keeps that reveal, so leaving and re-entering does not reveal again and a snap puts it back once (the guard-prover's round 3 on PR #694)", () => {
+  const d = bound();
+  d.press(700, 130); d.move(640, 680);
+  assert.equal(d.calls.reveal, 1, "one move lifted the ghost and entered the band");
+  d.move(640, 300); d.move(640, 690);
+  assert.equal(d.calls.reveal, 1, "the carry kept its reveal, so re-entering the band does not open the drawer twice");
+  d.move(640, 300); d.up(640, 300);
+  assert.equal(d.calls.restore, 1, "and the snap puts it back once");
+});
+
+test("TD17 a carry that ends inside its own move and is replaced there by a new press leaves the new carry alone, since the old move's late write reaches only the carry it began with (the guard-prover's round 3 on PR #694)", async () => {
+  const ref: { d?: ReturnType<typeof bound> } = {};
+  const d = bound({ onReveal: () => { fireDoc("keydown", { key: "Escape" }); ref.d?.press(700, 130); } });
+  ref.d = d;
+  d.press(700, 130); d.move(640, 680);
+  d.move(640, 300);
+  assert.equal(d.calls.minted, 2, "the new press's first move lifts a ghost of its own, where the old move's late write had put the ended carry back over it");
+  fireDoc("keydown", { key: "Escape" });
+  await nextTick();
+});
