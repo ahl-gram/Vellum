@@ -92,7 +92,8 @@ export function createVoyage(deps: VoyageDeps) {
     return out.join(" ");
   }
 
-  function showMark(session: Session, glyph: MarkGlyph): void {
+  function showMark(glyph: MarkGlyph): void {
+    const session = voyage!;
     if (glyph === session.shownGlyph) return;
     const useShip = glyph === "ship";
     // The SVG `display` presentation attribute, not [hidden]: SVG elements do not honour the HTML hidden attribute through the UA stylesheet.
@@ -103,7 +104,8 @@ export function createVoyage(deps: VoyageDeps) {
   }
 
   // Paint one frame at t (0..1). postLog=false (a resting re-arm) paints silently and never stomps the "" the draw's settle signal depends on.
-  function paintFrame(session: Session, t: number, postLog = true): void {
+  function paintFrame(t: number, postLog = true): void {
+    const session = voyage!;
     const legCount = session.legs.length;
     const f = frameAt(legCount, t);
 
@@ -111,7 +113,7 @@ export function createVoyage(deps: VoyageDeps) {
     let tiltDeg = 0;
     if (legCount <= 0) {
       pos = session.originPt;
-      showMark(session, "rider");
+      showMark("rider");
     } else {
       const { geom, mode, water } = session.legs[f.legIndex]!;
       const s = f.legT * geom.total;
@@ -119,7 +121,7 @@ export function createVoyage(deps: VoyageDeps) {
       const hd = headingAt(geom, s);
       tiltDeg = tiltFor(hd.x, hd.y);
       session.facing = resolveFacing(hd.x, Math.hypot(hd.x, hd.y), session.facing);
-      showMark(session, markGlyphAt(mode, water, f.legT));
+      showMark(markGlyphAt(mode, water, f.legT));
     }
 
     session.trackEl.setAttribute("points", trackString(session, f));
@@ -149,10 +151,11 @@ export function createVoyage(deps: VoyageDeps) {
     );
   }
 
-  function play(session: Session): void {
+  function play(): void {
+    const session = voyage!;
     const legCount = session.legs.length;
     if (legCount <= 0 || session.totalMs <= 0) {
-      paintFrame(session, 1);
+      paintFrame(1);
       syncRestingTrack();
       return;
     }
@@ -161,12 +164,12 @@ export function createVoyage(deps: VoyageDeps) {
       if (!voyage || voyage !== session || !session.rafId) return;
       const elapsed = now - begin;
       if (elapsed >= session.totalMs) {
-        paintFrame(session, 1);
+        paintFrame(1);
         session.rafId = 0;
         syncRestingTrack();
         return;
       }
-      paintFrame(session, tAtElapsed(session.cumMs, elapsed));
+      paintFrame(tAtElapsed(session.cumMs, elapsed));
       session.rafId = requestAnimationFrame(tick);
     };
     session.rafId = requestAnimationFrame(tick);
@@ -183,12 +186,12 @@ export function createVoyage(deps: VoyageDeps) {
     exitVoyage();
     if (!buildVoyage(manifest, survey, seed, subtitle)) return;
     if (opts.skipSweep || prefersReduce()) {
-      paintFrame(voyage!, 1);
+      paintFrame(1);
       syncRestingTrack();
       return;
     }
-    paintFrame(voyage!, 0);
-    play(voyage!);
+    paintFrame(0);
+    play();
   }
 
   function rearmVoyage(
@@ -201,7 +204,7 @@ export function createVoyage(deps: VoyageDeps) {
     cancelVoyageRaf();
     voyage = null;
     if (buildVoyage(manifest, survey, seed, subtitle, opts.quiet)) {
-      paintFrame(voyage!, 1, false);
+      paintFrame(1, false);
     } else {
       dropOverlays();
       logPanel.hideLog();
@@ -223,7 +226,7 @@ export function createVoyage(deps: VoyageDeps) {
   function voyageSnapToRest(): void {
     if (!voyage) return;
     cancelVoyageRaf();
-    paintFrame(voyage, 1);
+    paintFrame(1);
     syncRestingTrack();
   }
 
@@ -234,7 +237,7 @@ export function createVoyage(deps: VoyageDeps) {
     const legCount = voyage.legs.length;
     const clampedPort = Math.max(0, Math.min(portIndex, legCount));
     const t = legCount > 0 ? clampedPort / legCount : 0;
-    paintFrame(voyage, t);
+    paintFrame(t);
     syncRestingTrack();
   }
 
@@ -242,7 +245,7 @@ export function createVoyage(deps: VoyageDeps) {
   function voyagePaintAt(t: number): void {
     if (!voyage) return;
     cancelVoyageRaf();
-    paintFrame(voyage, t);
+    paintFrame(t);
     syncRestingTrack();
   }
 
@@ -279,7 +282,7 @@ export function createVoyage(deps: VoyageDeps) {
   const internals = {
     hasSession: (): boolean => voyage !== null,
     paintLive: (t: number, postLog: boolean): void => {
-      if (voyage) paintFrame(voyage, t, postLog);
+      if (voyage) paintFrame(t, postLog);
     },
     schedule: (): { cumMs: ReadonlyArray<number>; totalMs: number } | null =>
       voyage ? { cumMs: voyage.cumMs, totalMs: voyage.totalMs } : null,

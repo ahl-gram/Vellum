@@ -41,15 +41,14 @@ export function partitionRealms(
 
   const seats = selectSeats(settlements, sizes, n, lmOf, opts);
 
-  const labels = new Int16Array(n).fill(-1);
-  if (seats.length === 0) return { labels, seats };
+  if (seats.length === 0) return { labels: new Int16Array(n).fill(-1), seats };
 
-  floodRealms(labels, elev, seaLevel, slope, riverCells, landmassIds, settlements, seats, opts.barrier);
-  if (opts.barrier) {
-    fillBarrierStrandedLand(labels, elev, seaLevel, slope, riverCells, landmassIds, settlements, seats);
-  }
-  attachSeatlessLandmasses(
-    labels,
+  const flooded = floodRealms(elev, seaLevel, slope, riverCells, landmassIds, settlements, seats, opts.barrier);
+  const bridged = opts.barrier
+    ? fillBarrierStrandedLand(flooded, elev, seaLevel, slope, riverCells, landmassIds, settlements, seats)
+    : flooded;
+  const labels = attachSeatlessLandmasses(
+    bridged,
     landmassIds,
     sizes.length,
     elev,
@@ -178,7 +177,6 @@ function topSettlementOnLandmass(
 
 // eslint-disable-next-line max-lines-per-function
 function floodRealms(
-  labels: Int16Array,
   elev: Field,
   seaLevel: number,
   slope: Field,
@@ -187,9 +185,10 @@ function floodRealms(
   settlements: ReadonlyArray<Settlement>,
   seats: ReadonlyArray<number>,
   barrier?: Uint8Array,
-): void {
+): Int16Array {
   const { w, h, data } = elev;
   const n = w * h;
+  const labels = new Int16Array(n).fill(-1);
   const dist = new Float64Array(n).fill(Infinity);
   const done = new Uint8Array(n);
   const heap = createMinHeap();
@@ -242,10 +241,11 @@ function floodRealms(
       }
     }
   }
+  return labels;
 }
 
 function fillBarrierStrandedLand(
-  labels: Int16Array,
+  flooded: Int16Array,
   elev: Field,
   seaLevel: number,
   slope: Field,
@@ -253,7 +253,7 @@ function fillBarrierStrandedLand(
   landmassIds: Int32Array,
   settlements: ReadonlyArray<Settlement>,
   seats: ReadonlyArray<number>,
-): void {
+): Int16Array {
   const { w, h, data } = elev;
   const n = w * h;
   const seatedLm = new Set<number>();
@@ -265,17 +265,18 @@ function fillBarrierStrandedLand(
   for (let i = 0; i < n; i++) {
     if (
       (data[i] as number) > seaLevel &&
-      (labels[i] as number) < 0 &&
+      (flooded[i] as number) < 0 &&
       seatedLm.has(landmassIds[i] as number)
     ) {
       stranded = true;
       break;
     }
   }
-  if (!stranded) return;
-  const full = new Int16Array(n).fill(-1);
-  floodRealms(full, elev, seaLevel, slope, riverCells, landmassIds, settlements, seats);
+  if (!stranded) return flooded;
+  const full = floodRealms(elev, seaLevel, slope, riverCells, landmassIds, settlements, seats);
+  const labels = Int16Array.from(flooded);
   for (let i = 0; i < n; i++) {
     if ((labels[i] as number) < 0 && (full[i] as number) >= 0) labels[i] = full[i] as number;
   }
+  return labels;
 }

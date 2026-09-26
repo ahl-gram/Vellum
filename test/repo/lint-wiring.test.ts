@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { join, relative, resolve } from "node:path";
 import { ESLint, type Linter } from "eslint";
 import { includeIgnoreFile } from "eslint/config";
 import ts from "typescript";
@@ -161,6 +161,8 @@ const TURNED_ON = [
   "@typescript-eslint/no-unused-vars",
   "@typescript-eslint/require-await",
 ];
+const PAGE_ELEMENT_PARAMETERS = ["drawerEls", "ghostEl", "innerEl", "leafEls", "legendEl", "logEls", "mapEl", "noteEl", "pillEl", "revealEl", "roomEls", "sheetEl", "slipEl", "statusEl", "targetEl", "viewportEl"];
+const PARAM_REASSIGN = { props: true, ignorePropertyModificationsFor: PAGE_ELEMENT_PARAMETERS };
 
 function pinJavaScript(file: string, typed: boolean, config: Resolved, rules: Record<string, unknown>): void {
   const on = (rule: string): unknown => severityOf(rules[rule]);
@@ -173,7 +175,7 @@ function pinJavaScript(file: string, typed: boolean, config: Resolved, rules: Re
   assert.equal(on("no-undef"), typed ? 0 : 2, `${file}: the core layer is missing or the TypeScript override layer was not applied`);
   assert.equal(on("no-debugger"), 2, `${file}: the core recommended rules do not reach it`);
   assert.equal(on("prefer-const"), 2, `${file}: prefer-const does not resolve at error (Immutability, Issue #648)`);
-  assert.deepEqual(rules["no-param-reassign"], [2, { props: false }], `${file}: no-param-reassign does not resolve as rebinding-only at error (Alex, 2026-09-20, Issue #648)`);
+  assert.deepEqual(rules["no-param-reassign"], [2, PARAM_REASSIGN], `${file}: no-param-reassign does not resolve at error with property writes on and exactly the page-element parameter names excused; Alex ruled that only a write into a page element is accepted, excused by one list of names used for nothing else, so a new parameter holding a page element takes a name from the list or joins it here and in eslint.config.ts, with the names guard below as the check, and any other write returns a new value instead (Alex, 2026-09-26, Issue #654 rulings 4 and 5)`);
   assert.deepEqual(rules["no-empty"], typed ? [2, { allowEmptyCatch: true }] : undefined, `${file}: no-empty does not resolve at error with only the empty catch admitted (Alex, 2026-09-26, Issue #654 ruling 9)`);
   assert.equal(on("@typescript-eslint/prefer-readonly"), typed ? 2 : undefined, `${file}: prefer-readonly does not resolve at error (Immutability, Issue #648)`);
   assert.deepEqual(rules["max-lines"], [2, 400], `${file}: max-lines does not resolve at error with the ruled physical-line ceiling (Size, Issue #648)`);
@@ -245,7 +247,7 @@ test("no block sets a rule off but typescript-eslint's own two layers and ruling
   assert.deepEqual(
     offs,
     ["Issue #653 ruling D: design/ archives its round tools as they ran: no-restricted-syntax"],
-    "a block of the house config sets a rule off, which takes it back for every file the block matches whether or not a pin names the rule. BLIND SPOTS, declared, both erring toward passing: a rule left at error but weakened by its options, which only the setters tests for TURNED_ON and no-empty see in every block, while the witness test pins the size rules, no-param-reassign, no-floating-promises, no-unnecessary-condition and switch-exhaustiveness-check only at the witness files, so a block over a subtree with no witness in it weakens them unread; and a rule typescript-eslint's own two layers set off, which an upgrade could change unread",
+    "a block of the house config sets a rule off, which takes it back for every file the block matches whether or not a pin names the rule. BLIND SPOTS, declared, both erring toward passing: a rule left at error but weakened by its options, which only the setters tests for TURNED_ON, no-empty and no-param-reassign see in every block, while the witness test pins the size rules, no-floating-promises, no-unnecessary-condition and switch-exhaustiveness-check only at the witness files, so a block over a subtree with no witness in it weakens them unread; and a rule typescript-eslint's own two layers set off, which an upgrade could change unread",
   );
 });
 
@@ -255,6 +257,80 @@ test("only the core recommended layer and the TypeScript block set no-empty, the
     setters,
     ['@eslint/js/recommended: "error"', '(unnamed): ["error",{"allowEmptyCatch":true}]'],
     "a block other than the core layer and the TypeScript block sets no-empty, and a block can turn it off for every file it matches while the witnesses still resolve the ruled scope",
+  );
+});
+
+test("only the TypeScript block sets no-param-reassign, with property writes on and exactly the ruled names excused, so no block can narrow it for a subtree or a named file (Issue #654 rulings 4 and 5)", () => {
+  const setters = blocks.filter((b) => Object.hasOwn(b.rules ?? {}, "no-param-reassign")).map((b) => `${shortName(b)}: ${JSON.stringify(b.rules?.["no-param-reassign"])}`);
+  assert.deepEqual(
+    setters,
+    [`(unnamed): ${JSON.stringify(["error", PARAM_REASSIGN])}`],
+    "a block other than the TypeScript block sets no-param-reassign, or that block's options are not the ruled ones, and a block over a subtree or one named file can take property writes back off or excuse another name there while every witness still resolves the ruled options",
+  );
+});
+
+const LINT_TS_ROOTS = ["scripts", "src", "test", "test-support"];
+const tsUnder = (dir: string): string[] =>
+  readdirSync(join(ROOT, dir), { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? tsUnder(join(dir, e.name)) : e.name.endsWith(".ts") ? [join(ROOT, dir, e.name)] : []));
+const bindingNames = (b: ts.BindingName): ts.Identifier[] => (ts.isIdentifier(b) ? [b] : b.elements.flatMap((e) => (ts.isOmittedExpression(e) ? [] : bindingNames(e.name))));
+function parameterBindings(sf: ts.SourceFile, names: ReadonlySet<string>): ts.Identifier[] {
+  const out: ts.Identifier[] = [];
+  const visit = (n: ts.Node): void => {
+    if (ts.isParameter(n)) out.push(...bindingNames(n.name).filter((id) => names.has(id.text)));
+    ts.forEachChild(n, visit);
+  };
+  visit(sf);
+  return out;
+}
+
+async function excusedNames(): Promise<Set<string>> {
+  const eslint = new ESLint({ cwd: ROOT, flags: ["unstable_native_nodejs_ts_config"] });
+  const resolved = (await eslint.calculateConfigForFile(WITNESSES["src/**/*.ts"]!)) as Resolved;
+  const option = (resolved.rules?.["no-param-reassign"] as [number, { ignorePropertyModificationsFor?: string[] }?] | undefined)?.[1];
+  return new Set(option?.ignorePropertyModificationsFor ?? []);
+}
+
+test("every parameter bearing a name no-param-reassign excuses holds a page element, and every excused name is borne, so the excuse reaches no state record (Alex, 2026-09-26, Issue #654 rulings 4 and 5)", async () => {
+  const excused = await excusedNames();
+  assert.ok(excused.size > 0, "no-param-reassign excuses no parameter name, so this guard has nothing to check; ruling 5 excuses the page-element parameters by name");
+  const hitFiles = LINT_TS_ROOTS.flatMap(tsUnder).filter((f) => parameterBindings(ts.createSourceFile(f, readFileSync(f, "utf8"), ts.ScriptTarget.Latest, true), excused).length > 0);
+  const config = ts.getParsedCommandLineOfConfigFile(join(ROOT, "tsconfig.json"), {}, { ...ts.sys, onUnRecoverableConfigFileDiagnostic: () => undefined });
+  assert.ok(config && hitFiles.length > 0, "tsconfig.json did not parse, or no parameter bears an excused name");
+  const program = ts.createProgram({ rootNames: hitFiles, options: config.options });
+  const checker = program.getTypeChecker();
+  const dom = (name: string): ts.Type => {
+    const found = checker.getSymbolsInScope(program.getSourceFile(hitFiles[0]!)!, ts.SymbolFlags.Interface).find((s) => s.name === name);
+    assert.ok(found, `the DOM library declares no ${name}, so this guard cannot tell an element from anything else`);
+    return checker.getDeclaredTypeOfSymbol(found);
+  };
+  const [element, input] = [dom("Element"), dom("HTMLInputElement")];
+  const fromDom = (p: ts.Type): boolean => checker.isTypeAssignableTo(p, element) && (p.getSymbol()?.declarations ?? []).some((d) => program.isSourceFileDefaultLibrary(d.getSourceFile()));
+  const isElement = (t: ts.Type): boolean => {
+    const own = checker.getNonNullableType(t);
+    return (own.isUnion() ? own.types : [own]).every(fromDom);
+  };
+  const readonlyMember = (m: ts.Symbol): boolean => (m.declarations ?? []).length > 0 && (m.declarations ?? []).every((d) => (ts.getCombinedModifierFlags(d) & ts.ModifierFlags.Readonly) !== 0);
+  const holdsElements = (t: ts.Type): boolean => {
+    const own = checker.getNonNullableType(t);
+    const members = own.getProperties();
+    const elementShaped = checker.isTypeAssignableTo(input, own) && members.every((m) => input.getProperty(m.name) !== undefined);
+    return isElement(own) || (members.length > 0 && (elementShaped || members.every((m) => readonlyMember(m) && isElement(checker.getTypeOfSymbol(m)))));
+  };
+  const borne = new Set<string>();
+  const offenders: string[] = [];
+  for (const file of hitFiles) {
+    const sf = program.getSourceFile(file)!;
+    for (const id of parameterBindings(sf, excused)) {
+      borne.add(id.text);
+      const t = checker.getTypeAtLocation(id);
+      if (!holdsElements(t)) offenders.push(`${relative(ROOT, file)}:${sf.getLineAndCharacterOfPosition(id.getStart(sf)).line + 1} ${id.text}: ${checker.typeToString(t)}`);
+    }
+  }
+  assert.deepEqual([...excused].filter((n) => !borne.has(n)), [], "no-param-reassign excuses a name no parameter bears, an excuse left behind after its parameter was renamed away");
+  assert.deepEqual(
+    offenders,
+    [],
+    "a parameter bearing an excused name holds something other than a page element (a type the DOM library declares), an element-shaped type, or a record of read-only page elements, so a write into it goes unseen by no-param-reassign; rename it, or return a new value instead of writing (Issue #654 rulings 4 and 5). DECLARED, with their directions: an element-shaped type is one a DOM input element satisfies whose every member an input element also carries, so any record made only of such members ({ value: string }, { hidden: boolean }, { width: number; height: number }) passes, erring toward passing, an errata/guards.md row; a type with no members at all (object, {}) and a type parameter constrained to an element (T extends HTMLElement) fail, erring toward failing",
   );
 });
 

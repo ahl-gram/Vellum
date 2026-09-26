@@ -31,7 +31,7 @@ export default defineConfig(
       "max-lines": ["error", 400],
       "max-lines-per-function": ["error", 50],
       "no-empty": ["error", { allowEmptyCatch: true }],
-      "no-param-reassign": ["error", { props: false }],
+      "no-param-reassign": ["error", { props: true, ignorePropertyModificationsFor: ["drawerEls", "ghostEl", "innerEl", "leafEls", "legendEl", "logEls", "mapEl", "noteEl", "pillEl", "revealEl", "roomEls", "sheetEl", "slipEl", "statusEl", "targetEl", "viewportEl"] }],
       "@typescript-eslint/no-floating-promises": [
         "error",
         { allowForKnownSafeCalls: [{ from: "package", package: "node:test", name: ["test", "suite"] }] },

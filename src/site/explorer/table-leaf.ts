@@ -20,7 +20,7 @@ interface Home {
   readonly before: Node | null;
 }
 
-export interface TableLeafDeps {
+export interface TableLeafEls {
   readonly leaf: HTMLElement;
   readonly cuttings: HTMLElement;
   readonly count: HTMLElement;
@@ -29,21 +29,24 @@ export interface TableLeafDeps {
   readonly broadsideTab: HTMLButtonElement;
   readonly tableTab: HTMLButtonElement;
   readonly slip: HTMLElement;
+}
+
+export interface TableLeafDeps {
   readonly narrow: { matches: boolean; addEventListener: (t: string, fn: () => void) => void };
   readonly onLayout: () => void;
 }
 
-export function bindTableLeaf(deps: TableLeafDeps): { readonly relabel: (count: number) => void } {
+export function bindTableLeaf(leafEls: TableLeafEls, deps: TableLeafDeps): { readonly relabel: (count: number) => void } {
   const homes = new Map<HTMLElement, Home>();
-  for (const el of [deps.cuttings, deps.count, deps.road]) {
+  for (const el of [leafEls.cuttings, leafEls.count, leafEls.road]) {
     if (el.parentNode) homes.set(el, { parent: el.parentNode, before: el.nextSibling });
   }
 
   const seat = (where: LeafSeat): void => {
-    for (const el of [deps.cuttings, deps.count, deps.road]) {
+    for (const el of [leafEls.cuttings, leafEls.count, leafEls.road]) {
       const home = homes.get(el);
       if (!home) continue;
-      const to = el === deps.road ? deps.dock : deps.leaf;
+      const to = el === leafEls.road ? leafEls.dock : leafEls.leaf;
       const want = where === "leaf" ? to : home.parent;
       if (el.parentNode === want) continue;
       if (where === "leaf") to.appendChild(el);
@@ -54,18 +57,18 @@ export function bindTableLeaf(deps: TableLeafDeps): { readonly relabel: (count: 
   const turn = (to: LeafSeat | "form"): void => {
     const table = to === "leaf";
     document.body.classList.toggle("leaf-table", table);
-    deps.tableTab.setAttribute("aria-selected", String(table));
-    deps.broadsideTab.setAttribute("aria-selected", String(!table));
+    leafEls.tableTab.setAttribute("aria-selected", String(table));
+    leafEls.broadsideTab.setAttribute("aria-selected", String(!table));
     // A tab press is a request to read that leaf, so it opens the sheet if the reader had it shut.
-    if (!deps.slip.classList.contains("open")) {
-      deps.slip.classList.add("open");
-      deps.slip.querySelector(".slip-handle")?.setAttribute("aria-expanded", "true");
+    if (!leafEls.slip.classList.contains("open")) {
+      leafEls.slip.classList.add("open");
+      leafEls.slip.querySelector(".slip-handle")?.setAttribute("aria-expanded", "true");
     }
     deps.onLayout();
   };
 
-  deps.tableTab.addEventListener("click", () => turn("leaf"));
-  deps.broadsideTab.addEventListener("click", () => turn("form"));
+  leafEls.tableTab.addEventListener("click", () => turn("leaf"));
+  leafEls.broadsideTab.addEventListener("click", () => turn("form"));
 
   const apply = (): void => {
     seat(leafSeat({ narrow: deps.narrow.matches }));
@@ -75,5 +78,5 @@ export function bindTableLeaf(deps: TableLeafDeps): { readonly relabel: (count: 
   deps.narrow.addEventListener("change", apply);
   apply();
 
-  return { relabel: (count) => { deps.tableTab.textContent = leafTabLine(count); } };
+  return { relabel: (count) => { leafEls.tableTab.textContent = leafTabLine(count); } };
 }

@@ -14,7 +14,7 @@ function pairs(): NotePair[] {
 }
 
 // Anchor the note under its mark at show time: the note lives in the top layer as a fixed-position box, and static CSS cannot place a top-layer box relative to an in-flow anchor. It clears the whole control ROW, not just the mark's line (the neighboring control may be taller), clamped to the viewport so an edge mark never pushes its note off-screen.
-function place(mark: HTMLElement, note: HTMLElement): void {
+function place(mark: HTMLElement, noteEl: HTMLElement): void {
   const r = mark.getBoundingClientRect();
   const cell = mark.closest(".l-label");
   let rowBottom = r.bottom;
@@ -25,10 +25,10 @@ function place(mark: HTMLElement, note: HTMLElement): void {
   } else if (mark.parentElement) {
     rowBottom = Math.max(rowBottom, mark.parentElement.getBoundingClientRect().bottom);
   }
-  const half = note.offsetWidth / 2;
+  const half = noteEl.offsetWidth / 2;
   const x = Math.min(Math.max(r.left + r.width / 2, half + 8), window.innerWidth - half - 8);
-  note.style.left = `${Math.round(x - half)}px`;
-  note.style.top = `${Math.round(rowBottom + 8)}px`;
+  noteEl.style.left = `${Math.round(x - half)}px`;
+  noteEl.style.top = `${Math.round(rowBottom + 8)}px`;
 }
 
 export function wireFootnotes(): void {

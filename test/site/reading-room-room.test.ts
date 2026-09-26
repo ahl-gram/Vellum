@@ -71,8 +71,8 @@ test("RR-room 5 seats.ts seats the frame's parts: chart and status in the stage;
   assert.match(seats, /import\s*\{\s*bindGlassKeys\s*\}\s*from\s*"\.\.\/shared\/glass-keys\.ts"/, "its keys and buttons are the kit's");
   assert.match(app, /seatFrame\(frame, stage, furniture\)/, "app.ts seats the frame once, before binding the room");
   // All three slip-side nodes in the ONE append, and none appended anywhere else: a part seated outside the panel stands through every teardown.
-  assert.match(seats, /scrubber\.panel\.append\(f\.strip, f\.slip, f\.tab\)/, "the strip, the slip and its tab move INTO the panel together");
-  for (const node of ["f.strip", "f.slip", "f.tab"]) {
+  assert.match(seats, /scrubber\.panel\.append\(roomEls\.strip, roomEls\.slip, roomEls\.tab\)/, "the strip, the slip and its tab move INTO the panel together");
+  for (const node of ["roomEls.strip", "roomEls.slip", "roomEls.tab"]) {
     const found = [...(seats + app).matchAll(new RegExp(String.raw`\.(?:append|appendChild|insertBefore|prepend)\([^)]*${node.replace(".", "\\.")}\b`, "g"))];
     assert.equal(found.length, 1, `${node} is seated exactly once, in the panel (found ${found.length})`);
   }

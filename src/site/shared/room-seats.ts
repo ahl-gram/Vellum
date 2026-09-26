@@ -26,12 +26,12 @@ export function textRight(el: Element | null): number | null {
 }
 
 /** The slip hangs below the room's folio; a room with a bottom strip (the Reading Room's instrument) floors it at the strip, not the viewport. */
-export function placeSlip(slip: HTMLElement, folio: Element | null, strip: Element | null): void {
+export function placeSlip(slipEl: HTMLElement, folio: Element | null, strip: Element | null): void {
   const top = (rectOf(folio)?.bottom ?? 0) + SLIP_TOP_GAP;
   const stripRect = rectOf(strip);
   const floor = stripRect !== null ? stripRect.top - STRIP_GAP : window.innerHeight - SLIP_FLOOR;
-  slip.style.top = `${top}px`;
-  slip.style.maxHeight = `${floor - top}px`;
+  slipEl.style.top = `${top}px`;
+  slipEl.style.maxHeight = `${floor - top}px`;
 }
 
 /** A slip standing inside a hidden panel (the Reading Room's, between reads) has no rect; its width is still the sheet's, so the chart does not jump wide and back on every read. */
@@ -59,11 +59,11 @@ export interface LegendRoom {
 }
 
 // Computed, never read back off the row: its left transitions, and a mid-transition rect reads the old seat (plate read 2026-08-29: a resize left the row over the folio).
-export function placeLegendRow(legend: HTMLElement, room: LegendRoom): void {
+export function placeLegendRow(legendEl: HTMLElement, room: LegendRoom): void {
   const chromeX = rectOf(room.chrome)?.left ?? 0;
   const left = (textRight(room.folio) ?? chromeX) + LEGEND_CLEAR;
   const bounds = [window.innerWidth - chromeX, room.glass ?? Infinity, room.slip?.left ?? Infinity];
   const space = Math.max(0, Math.min(...bounds) - LEGEND_GAP - left);
-  legend.style.maxWidth = `${space}px`;
-  legend.style.left = `${left + space / 2}px`;
+  legendEl.style.maxWidth = `${space}px`;
+  legendEl.style.left = `${left + space / 2}px`;
 }

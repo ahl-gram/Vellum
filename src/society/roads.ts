@@ -108,10 +108,8 @@ function weaveRealmWebs(
     for (const [lm, group] of byShore) {
       const anchor = lm === principalLm ? principal : topByScore(group);
       if (anchor === undefined) continue;
-      const network = new Uint8Array(wiring.n);
-      network[cellOf(anchor)] = 1;
       cells.push(cellOf(anchor));
-      connectGroup(wiring, network, anchor, group, budgets[r] as number);
+      connectGroup(wiring, anchor, group, budgets[r] as number);
     }
     for (let i = roadsStart; i < wiring.roads.length; i++) {
       for (const p of (wiring.roads[i] as Road).points) cells.push(p.x + p.y * w);
@@ -129,7 +127,7 @@ function layRoyalTrunks(wiring: Wiring, webs: ReadonlyArray<RealmWeb>): void {
     if (seeded && principal !== undefined) {
       const ride = new Uint8Array(wiring.n);
       for (const c of cells) ride[c] = 1;
-      connectToNetwork(wiring, web, principal.x, principal.y, "trunk", Infinity, ride);
+      for (const p of connectToNetwork(wiring, web, principal.x, principal.y, "trunk", Infinity, ride)) web[p.x + p.y * wiring.w] = 1;
     }
     for (const c of cells) web[c] = 1;
     seeded = true;
@@ -138,21 +136,25 @@ function layRoyalTrunks(wiring: Wiring, webs: ReadonlyArray<RealmWeb>): void {
 
 function connectGroup(
   wiring: Wiring,
-  network: Uint8Array,
   anchor: Settlement,
   members: ReadonlyArray<Settlement>,
   villageBudget: number,
 ): void {
+  const network = new Uint8Array(wiring.n);
+  network[anchor.x + anchor.y * wiring.w] = 1;
+  const lay = (s: Settlement, rank: Road["rank"], budget: number): void => {
+    for (const p of connectToNetwork(wiring, network, s.x, s.y, rank, budget)) network[p.x + p.y * wiring.w] = 1;
+  };
   const anchorDist = (s: Settlement): number =>
     Math.hypot(s.x - anchor.x, s.y - anchor.y);
   const towns = members
     .filter((s) => s.kind === "town")
     .sort((a, b) => anchorDist(a) - anchorDist(b));
-  for (const t of towns) connectToNetwork(wiring, network, t.x, t.y, "trunk", Infinity);
+  for (const t of towns) lay(t, "trunk", Infinity);
   const villages = members
     .filter((s) => s.kind === "village")
     .sort((a, b) => anchorDist(a) - anchorDist(b));
-  for (const v of villages) connectToNetwork(wiring, network, v.x, v.y, "lane", villageBudget);
+  for (const v of villages) lay(v, "lane", villageBudget);
 }
 
 // eslint-disable-next-line max-lines-per-function
@@ -164,10 +166,10 @@ function connectToNetwork(
   rank: Road["rank"],
   budget: number,
   ride?: Uint8Array,
-): void {
+): ReadonlyArray<RoadPoint> {
   const { w, h, n, data, seaLevel, terrainCost } = wiring;
   const start = sx + sy * w;
-  if (network[start]) return;
+  if (network[start]) return [];
 
   const dist = new Float64Array(n).fill(Infinity);
   const prev = new Int32Array(n).fill(-1);
@@ -206,7 +208,7 @@ function connectToNetwork(
       }
     }
   }
-  if (found === -1) return; // unreachable (another island): no road
+  if (found === -1) return []; // unreachable (another island): no road
 
   const points: RoadPoint[] = [];
   let cur = found;
@@ -215,8 +217,8 @@ function connectToNetwork(
     cur = prev[cur] as number;
   }
   points.reverse();
-  for (const p of points) network[p.x + p.y * w] = 1;
   wiring.roads.push({ points, rank });
+  return points;
 }
 
 function topByScore(group: ReadonlyArray<Settlement>): Settlement | undefined {

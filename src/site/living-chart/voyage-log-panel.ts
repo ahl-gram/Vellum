@@ -7,9 +7,9 @@ import {
 } from "../../world/voyage-log.ts";
 
 export interface VoyageLogHost {
-  panel: HTMLElement;
-  sig: HTMLElement;
-  strip: HTMLElement;
+  readonly panel: HTMLElement;
+  readonly sig: HTMLElement;
+  readonly strip: HTMLElement;
 }
 
 export function journalText(text: string): string {
@@ -17,7 +17,7 @@ export function journalText(text: string): string {
 }
 
 // eslint-disable-next-line max-lines-per-function
-export function createVoyageLogPanel(host: VoyageLogHost) {
+export function createVoyageLogPanel(logEls: VoyageLogHost) {
   function buildLogPanel(
     logPorts: ReadonlyArray<VoyageLogPort>,
     presentYear: number,
@@ -26,7 +26,7 @@ export function createVoyageLogPanel(host: VoyageLogHost) {
     homecoming: VoyageHomecoming | null = null,
   ): { log: VoyageLog; rows: HTMLLIElement[] } {
     const log = buildVoyageLog(logPorts, presentYear, (seed >>> 0), subtitle || "", homecoming);
-    host.sig.textContent = log.attribution;
+    logEls.sig.textContent = log.attribution;
     const rows = log.entries.map((e, i) => {
       const li = document.createElement("li");
       li.className = "prologue";
@@ -47,8 +47,8 @@ export function createVoyageLogPanel(host: VoyageLogHost) {
       li.append(year, text);
       return li;
     });
-    host.strip.replaceChildren(...rows);
-    host.panel.hidden = false;
+    logEls.strip.replaceChildren(...rows);
+    logEls.panel.hidden = false;
     return { log, rows };
   }
 
@@ -59,9 +59,9 @@ export function createVoyageLogPanel(host: VoyageLogHost) {
 
   /** Hide and empty the panel. It lives outside the chart mount, so nothing else clears it. */
   function hideLog(): void {
-    host.panel.hidden = true;
-    host.strip.replaceChildren();
-    host.sig.textContent = "";
+    logEls.panel.hidden = true;
+    logEls.strip.replaceChildren();
+    logEls.sig.textContent = "";
   }
 
   /** #121 e2e read payload: the log plus revealed-row count and visibility, so a suite asserts prose and reveal without racing the rAF loop. */
@@ -72,7 +72,7 @@ export function createVoyageLogPanel(host: VoyageLogHost) {
       entries: log.entries.map((e) => ({ idx: e.idx, year: e.year, day: e.day, text: e.text })),
       logged: rows.filter((r) => r.classList.contains("inked")).length,
       rows: rows.length,
-      visible: !host.panel.hidden,
+      visible: !logEls.panel.hidden,
     };
   }
 
