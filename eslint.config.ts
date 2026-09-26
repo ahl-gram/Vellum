@@ -5,7 +5,7 @@ import tseslint from "typescript-eslint";
 import css from "@eslint/css";
 import vellum from "./scripts/lint/css-comment-form.ts";
 
-// Every rule set off below was red on main when the tool landed; Issue #654 is the ledger that turns each one on with its violations fixed.
+// Every rule set off below was red on main when the tool landed; Issue #654 is the ledger that turns each one on, its violations fixed or ruled into scope.
 export default defineConfig(
   includeIgnoreFile(fileURLToPath(new URL(".gitignore", import.meta.url)), "the .gitignore: build output, generated trees and scratch"),
   {

@@ -212,7 +212,7 @@ test("through ESLint itself, one witness file per ruled glob resolves to rules t
   assert.equal(await eslint.isPathIgnored("eslint.config.ts"), true, "the root config lints itself, so the scope leaked past the ruled roots");
 });
 
-test("only typescript-eslint's recommended-type-checked block sets a rule Issue #654 turned on, each at error, and it reaches all four TypeScript roots unnarrowed, so no block can take one back for a subtree or a named file", () => {
+test("only typescript-eslint's recommended-type-checked block sets a rule Issue #654 turned on, each at error, and it reaches all four TypeScript roots unnarrowed with no ignores, so no block can take one back by setting it or by narrowing the preset", () => {
   const PRESET = "typescript-eslint/recommended-type-checked";
   const shortName = (b: Linter.Config): string => (b.name ?? "(unnamed)").replace(/^.* > /, "");
   const setters = blocks.flatMap((b) => TURNED_ON.filter((rule) => Object.hasOwn(b.rules ?? {}, rule)).map((rule) => `${shortName(b)}: ${rule} = ${JSON.stringify(b.rules?.[rule])}`));

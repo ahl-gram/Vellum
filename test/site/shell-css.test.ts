@@ -267,7 +267,6 @@ test("the stage shadow is declared once and consumed as a var: the chart-room de
   assert.match(layoutStyle(), /--stage-shadow:\s*0 18px 60px rgb\(from var\(--chart-ink\) r g b \/ 0\.55\);/, "the token is the mockup's own dress");
 });
 
-/** Rules as (selector, body) pairs, comments stripped FIRST, or a comment's text is read as part of the selector after it. */
 const rulesIn = (css: string): ReadonlyArray<{ selector: string; body: string }> =>
   [...css.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}]+)\{([^{}]*)\}/g)]
     .map((m) => ({ selector: m[1].trim(), body: m[2] }));
