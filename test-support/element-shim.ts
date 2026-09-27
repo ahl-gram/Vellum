@@ -131,3 +131,5 @@ export function walk(el: El, seen: El[] = []): El[] {
   for (const c of el.children) walk(c, seen);
   return seen;
 }
+
+export const el = () => new El("div") as unknown as HTMLElement;

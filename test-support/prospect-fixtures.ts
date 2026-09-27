@@ -31,6 +31,8 @@ export function bandOf(
   return out;
 }
 
+export const band = (b: BiomeName): ReadonlyArray<BiomeName> => bandOf([b, FOREGROUND_SAMPLES]);
+
 export function makeInput(overrides: Partial<ProspectInput> = {}): ProspectInput {
   const kind = overrides.kind ?? "town";
   return {
