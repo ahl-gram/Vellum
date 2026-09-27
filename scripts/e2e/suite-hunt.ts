@@ -4,12 +4,63 @@ import type { SuiteContext } from "./types.ts";
 
 type Frac = { fx: number; fy: number };
 type Zoom = { k: number; x: number; y: number };
-// eslint-disable-next-line max-lines-per-function
+type HuntKit = ReturnType<typeof huntKit>;
+type Quarry = Awaited<ReturnType<typeof huntQuarry>>;
+type Guess = Awaited<ReturnType<HuntKit["clickHunt"]>>;
+const bandRank = (s: string) => (/^Hot/.test(s) ? 3 : /^Warmer/.test(s) ? 2 : /^Cool/.test(s) ? 1 : /^Cold/.test(s) ? 0 : -1);
+
 export async function run(ctx: SuiteContext): Promise<void> {
-  const { evaluate, send, check, shoot, sleep, consoleErrors, PORT } = ctx;
+  const { consoleErrors, PORT } = ctx;
   // Click targets are derived from the browser's OWN world via dynamic import, immune to any node-side date assumption; this is the only coverage of the click -> projection-inversion -> nearest-settlement snap.
   const huntErrBase = consoleErrors.length;
   const HUNT_PAGE = `http://127.0.0.1:${PORT}/seed-of-the-day/`;
+  const k = huntKit(ctx);
+  await h1Opens(ctx, HUNT_PAGE);
+  await h2Clues(ctx);
+  const tgt = await huntQuarry(ctx);
+  const miss = await h3Miss(k, tgt);
+  await h3bWarmer(k, tgt, miss);
+  await h4Solves(k, tgt);
+  await hd1Dispatch(ctx, tgt);
+  await h8Reload(ctx, HUNT_PAGE);
+  await hg0Boots(ctx, HUNT_PAGE);
+  await hg1Zoom(ctx);
+  await hg2Taps(k, tgt);
+  await hg4Solves(k, tgt);
+  h9Clean(ctx, huntErrBase);
+  h10LegendClear(ctx, tgt);
+  await h11Labels(ctx);
+  await h12Terrain(ctx, tgt);
+}
+
+function huntKit(ctx: SuiteContext) {
+  const { evaluate, send } = ctx;
+  const clickHunt = (f: Frac) => evaluate<{ status: string; solved: boolean }>(`(()=>{const svg=document.querySelector("#map svg");const r=svg.getBoundingClientRect();svg.dispatchEvent(new MouseEvent("click",{clientX:r.left+${f.fx}*r.width,clientY:r.top+${f.fy}*r.height,bubbles:true}));return{status:document.getElementById("hunt-status").textContent,solved:document.getElementById("map").classList.contains("solved")};})()`);
+  const mouseTap = async (x: number, y: number) => {
+    await send("Input.dispatchMouseEvent", { type: "mousePressed", x, y, button: "left", buttons: 1, clickCount: 1 });
+    await send("Input.dispatchMouseEvent", { type: "mouseReleased", x, y, button: "left", buttons: 0, clickCount: 1 });
+  };
+  const mouseDrag = async (x0: number, y0: number, x1: number, y1: number) => {
+    await send("Input.dispatchMouseEvent", { type: "mousePressed", x: x0, y: y0, button: "left", buttons: 1, clickCount: 1 });
+    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: Math.round((x0 + x1) / 2), y: Math.round((y0 + y1) / 2), buttons: 1 });
+    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: x1, y: y1, buttons: 1 });
+    await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: x1, y: y1, button: "left", buttons: 0, clickCount: 1 });
+  };
+  // The MISS tap frames the CAPITAL, never a viewport corner: classifyClick snaps to the nearest settlement with no distance cap, and the old farthest-corner scan was a per-day lottery that solved the hunt on linux CI (#304). Since #462 the sheet is fitted inside the stage, so the point is read off the svg's OWN rect at home, never as a fraction of the viewport.
+  const framePoint = (k: number, fx: number, fy: number) => evaluate<{ px: number; py: number; cx: number; cy: number; state: Zoom }>(`(()=>{
+    const vp=document.getElementById("map-viewport"),W=vp.clientWidth,H=vp.clientHeight,k=${k};
+    window.__vellumZoomTo({k:1,x:0,y:0});
+    const svg=document.querySelector("#map svg"),home=svg.getBoundingClientRect(),vr=vp.getBoundingClientRect();
+    const px0=home.left-vr.left+${fx}*home.width,py0=home.top-vr.top+${fy}*home.height;
+    window.__vellumZoomTo({k,x:W/2-k*px0,y:H/2-k*py0});
+    const sr=svg.getBoundingClientRect();
+    return{px:Math.round(sr.left+${fx}*sr.width),py:Math.round(sr.top+${fy}*sr.height),
+      cx:Math.round(vr.left+vr.width/2),cy:Math.round(vr.top+vr.height/2),state:window.__vellumZoomState()};
+  })()`);
+  return { ...ctx, clickHunt, mouseTap, mouseDrag, framePoint };
+}
+
+async function h1Opens({ evaluate, send, check, sleep }: SuiteContext, HUNT_PAGE: string): Promise<void> {
   try { await evaluate(`localStorage.removeItem("vellum.hunt.v1")`); } catch {}
   await send("Page.navigate", { url: HUNT_PAGE });
   let huntReady = false;
@@ -21,10 +72,14 @@ export async function run(ctx: SuiteContext): Promise<void> {
     await sleep(75);
   }
   check("H1 seed-of-the-day hunt card appears with >=3 clues over a rendered map", huntReady);
+}
 
+async function h2Clues({ evaluate, check }: SuiteContext): Promise<void> {
   const clueText = await evaluate<string>(`Array.from(document.getElementById("clues").children).map((li)=>li.textContent).join(" | ")`);
   check("H2 clues never disclose ruin/abandon wording", !/ruin|abandon/i.test(clueText));
+}
 
+async function huntQuarry({ evaluate }: SuiteContext) {
   const tgt = await evaluate<{ seed: number; name: string; formerName: string | null; hit: Frac; miss: Frac; missName: string; legFrac: { x0: number; y0: number; x1: number; y1: number } | null; wpx: number; hpx: number; scale: number }>(`(async()=>{
     const {defaultRecipe,generateWorld}=await import("../explorer/engine/world/generate.js");
     const {chooseQuarry,legendExcluded}=await import("../explorer/engine/world/daily-hunt.js");
@@ -48,10 +103,10 @@ export async function run(ctx: SuiteContext): Promise<void> {
     const frac=(s)=>({fx:proj.px(s.x)/proj.widthPx,fy:proj.py(s.y)/proj.heightPx});
     return{seed,name:q.settlement.name,formerName:q.settlement.formerName??null,hit:frac(q.settlement),miss:frac(cap),missName:cap.name,legFrac,wpx:proj.widthPx,hpx:proj.heightPx,scale:proj.scale};
   })()`, true);
-  const clickHunt = (f: Frac) => evaluate<{ status: string; solved: boolean }>(`(()=>{const svg=document.querySelector("#map svg");const r=svg.getBoundingClientRect();svg.dispatchEvent(new MouseEvent("click",{clientX:r.left+${f.fx}*r.width,clientY:r.top+${f.fy}*r.height,bubbles:true}));return{status:document.getElementById("hunt-status").textContent,solved:document.getElementById("map").classList.contains("solved")};})()`);
+  return tgt;
+}
 
-  const bandRank = (s: string) => (/^Hot/.test(s) ? 3 : /^Warmer/.test(s) ? 2 : /^Cool/.test(s) ? 1 : /^Cold/.test(s) ? 0 : -1);
-
+async function h3Miss({ evaluate, check, clickHunt }: HuntKit, tgt: Quarry): Promise<Guess> {
   const miss = await clickHunt(tgt.miss);
   check(
     "H3 a miss anchors the selected town to the click, reports warmer/colder prose, and does not solve (#327)",
@@ -66,7 +121,10 @@ export async function run(ctx: SuiteContext): Promise<void> {
     snd.dots >= 1 && !snd.inSvg && snd.pe === "none",
     JSON.stringify(snd),
   );
+  return miss;
+}
 
+async function h3bWarmer({ check, clickHunt }: HuntKit, tgt: Quarry, miss: Guess): Promise<void> {
   // The probe sits at 0.4 of the way, NOT halfway: the exact midpoint ties capital vs quarry and float noise in the rect roundtrip can snap it to the quarry (~1 day in 5), silently solving and vacating H4's coverage.
   const near = { fx: tgt.miss.fx + 0.4 * (tgt.hit.fx - tgt.miss.fx), fy: tgt.miss.fy + 0.4 * (tgt.hit.fy - tgt.miss.fy) };
   const nearMiss = await clickHunt(near);
@@ -89,7 +147,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
         : !/warmest sounding/.test(again.status)),
     JSON.stringify({ again: again.status, warmName, missName: tgt.missName }),
   );
+}
 
+async function h4Solves({ evaluate, check, clickHunt }: HuntKit, tgt: Quarry): Promise<void> {
   const won = await clickHunt(tgt.hit);
   check("H4 clicking the quarry snaps to it and solves the hunt", won.solved === true && /found it/i.test(won.status), JSON.stringify(won));
 
@@ -107,7 +167,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
     wire.starStamp && wire.starAnim === "huntStarIn" && wire.revUnfurl && wire.revAnim === "paperUnfurl",
     JSON.stringify(wire),
   );
+}
 
+async function hd1Dispatch({ evaluate, check, shoot }: SuiteContext, tgt: Quarry): Promise<void> {
   // The dispatch is read through the window hook rather than clicking the button, so no real file download happens under CDP.
   const disp = await evaluate<{ exists: boolean; hidden: boolean; hasFn: boolean; svg: string }>(`(()=>{
     const btn=document.getElementById("dispatch");
@@ -153,7 +215,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
     }),
   );
   await shoot("hunt-seed-of-the-day.png");
+}
 
+async function h8Reload({ evaluate, send, check, sleep }: SuiteContext, HUNT_PAGE: string): Promise<void> {
   await send("Page.navigate", { url: HUNT_PAGE });
   let huntRestored = false;
   for (let i = 0; i < 200; i++) {
@@ -177,7 +241,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
     dispRestored.exists && dispRestored.hidden === true,
     JSON.stringify(dispRestored),
   );
+}
 
+async function hg0Boots({ evaluate, send, check, sleep }: SuiteContext, HUNT_PAGE: string): Promise<void> {
   // HG uses REAL CDP mouse input so d3-zoom's own click-distance handling runs: a clean tap (no move) fires the guess click, a moved drag suppresses the trailing click.
   try { await evaluate(`localStorage.removeItem("vellum.hunt.v1")`); } catch {}
   await send("Page.navigate", { url: HUNT_PAGE });
@@ -189,18 +255,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
     await sleep(75);
   }
   check("HG0 the Hunt boots with the shared zoom controller wired (__vellumZoomTo present)", hgReady);
+}
 
-  const mouseTap = async (x: number, y: number) => {
-    await send("Input.dispatchMouseEvent", { type: "mousePressed", x, y, button: "left", buttons: 1, clickCount: 1 });
-    await send("Input.dispatchMouseEvent", { type: "mouseReleased", x, y, button: "left", buttons: 0, clickCount: 1 });
-  };
-  const mouseDrag = async (x0: number, y0: number, x1: number, y1: number) => {
-    await send("Input.dispatchMouseEvent", { type: "mousePressed", x: x0, y: y0, button: "left", buttons: 1, clickCount: 1 });
-    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: Math.round((x0 + x1) / 2), y: Math.round((y0 + y1) / 2), buttons: 1 });
-    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: x1, y: y1, buttons: 1 });
-    await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: x1, y: y1, button: "left", buttons: 0, clickCount: 1 });
-  };
-
+async function hg1Zoom({ evaluate, check }: SuiteContext): Promise<void> {
   const hg1 = await evaluate<{ idle: { inline: string; matrix: string; zoomed: boolean; zoomable: boolean; touch: string }; s: Zoom; matrix: string; origin: string; zoomed: boolean }>(`(()=>{
     const vp=document.getElementById("map-viewport"),m=document.getElementById("map");
     const idle={inline:m.style.transform,matrix:getComputedStyle(m).transform,zoomed:vp.classList.contains("zoomed"),zoomable:vp.classList.contains("zoomable"),touch:getComputedStyle(vp).touchAction};
@@ -216,19 +273,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
       hg1.s.k === 3 && hg1.s.x === -20 && hg1.s.y === -15,
     JSON.stringify(hg1),
   );
+}
 
-  // The MISS tap frames the CAPITAL, never a viewport corner: classifyClick snaps to the nearest settlement with no distance cap, and the old farthest-corner scan was a per-day lottery that solved the hunt on linux CI (#304). Since #462 the sheet is fitted inside the stage, so the point is read off the svg's OWN rect at home, never as a fraction of the viewport.
-  const framePoint = (k: number, fx: number, fy: number) => evaluate<{ px: number; py: number; cx: number; cy: number; state: Zoom }>(`(()=>{
-    const vp=document.getElementById("map-viewport"),W=vp.clientWidth,H=vp.clientHeight,k=${k};
-    window.__vellumZoomTo({k:1,x:0,y:0});
-    const svg=document.querySelector("#map svg"),home=svg.getBoundingClientRect(),vr=vp.getBoundingClientRect();
-    const px0=home.left-vr.left+${fx}*home.width,py0=home.top-vr.top+${fy}*home.height;
-    window.__vellumZoomTo({k,x:W/2-k*px0,y:H/2-k*py0});
-    const sr=svg.getBoundingClientRect();
-    return{px:Math.round(sr.left+${fx}*sr.width),py:Math.round(sr.top+${fy}*sr.height),
-      cx:Math.round(vr.left+vr.width/2),cy:Math.round(vr.top+vr.height/2),state:window.__vellumZoomState()};
-  })()`);
-
+async function hg2Taps({ evaluate, check, sleep, mouseTap, mouseDrag, framePoint }: HuntKit, tgt: Quarry): Promise<void> {
   const fr = await framePoint(2, tgt.miss.fx, tgt.miss.fy);
 
   await mouseTap(fr.px, fr.py);
@@ -249,7 +296,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
     after.solved === false && after.status === before.status && after.dots === before.dots,
     JSON.stringify({ before, after }),
   );
+}
 
+async function hg4Solves({ evaluate, check, shoot, sleep, mouseTap, framePoint }: HuntKit, tgt: Quarry): Promise<void> {
   const fr2 = await framePoint(2, tgt.hit.fx, tgt.hit.fy);
   await mouseTap(fr2.px, fr2.py);
   await sleep(120);
@@ -261,16 +310,23 @@ export async function run(ctx: SuiteContext): Promise<void> {
   );
   await shoot("hunt-seed-of-the-day-zoomed.png");
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
+}
 
+function h9Clean(ctx: SuiteContext, huntErrBase: number): void {
+  const { check, consoleErrors } = ctx;
   const huntErrs = dropExpectedCancellations(consoleErrors.slice(huntErrBase));
   check("H9 the hunt run logged no JS exceptions or console errors", huntErrs.length === 0, huntErrs.join(" | ") || "clean");
+}
 
+function h10LegendClear({ check }: SuiteContext, tgt: Quarry): void {
   const hitInLegend =
     !!tgt.legFrac &&
     tgt.hit.fx >= tgt.legFrac.x0 && tgt.hit.fx <= tgt.legFrac.x1 &&
     tgt.hit.fy >= tgt.legFrac.y0 && tgt.hit.fy <= tgt.legFrac.y1;
   check("H10 the day's quarry sits clear of the rendered legend", !!tgt.legFrac && !hitInLegend, JSON.stringify({ leg: tgt.legFrac, hit: tgt.hit }));
+}
 
+async function h11Labels({ evaluate, check }: SuiteContext): Promise<void> {
   // Capital/seat labels render .toUpperCase() (settlementsLayer), so the name check accepts either spelling; vacuous on days with no river/lake/near clue.
   const labelCheck = await evaluate<{ count: number; missing: string[] }>(`(()=>{
     const svg=document.querySelector("#map svg");
@@ -289,7 +345,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
     return{count:names.length,missing};
   })()`);
   check("H11 every displayed river/lake/near clue names something the chart labeled", labelCheck.missing.length === 0, JSON.stringify(labelCheck));
+}
 
+async function h12Terrain({ evaluate, check }: SuiteContext, tgt: Quarry): Promise<void> {
   const terrainCheck = await evaluate<{ count: number; missing: string[] }>(`(()=>{
     const TEXTS={
       "It sits in the shadow of the mountains.":"gl-mtn",
