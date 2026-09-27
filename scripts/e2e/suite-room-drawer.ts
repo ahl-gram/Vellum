@@ -66,6 +66,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("DR8", () => dr8NoScript(k)).finally(scriptsBackOn);
 
   await clearMobile();
+  await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   await dr9Desktop(k);
   gate.check("DR10 the room drawer suite drove the shell with no console error and no 4xx");
   // A suite's LAST navigation must waitReady: the next suite in the lane starts on whatever page is current.
@@ -217,8 +218,7 @@ async function dr8NoScript({ evaluate, check, goto, tapBurger }: RoomDrawerKit):
   );
 }
 
-async function dr9Desktop({ evaluate, send, check }: RoomDrawerKit): Promise<void> {
-  await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
+async function dr9Desktop({ evaluate, check }: RoomDrawerKit): Promise<void> {
   const wide = await evaluate(READ);
   check(
     "DR9 back at desktop width the burger is gone and the nav is the dot-separated cluster row again, with no drawer state left behind (#483)",
