@@ -60,7 +60,6 @@ type SitesByIdx = ReadonlyMap<number, Site>;
 
 function roadMask(survey: Survey): Uint8Array {
   const { gridW: w, gridH: h } = survey;
-  // Road polylines form one 8-connected component per settled landmass (#309), so BFS over the cell mask IS the road-graph walk; a pair with no shared component has no walk and degrades below.
   const road = new Uint8Array(w * h);
   for (const polyline of survey.roads) for (const [x, y] of polyline) road[x + y * w] = 1;
   return road;
@@ -92,6 +91,7 @@ function createWalkLeg(survey: Survey, road: Uint8Array): WalkLeg {
       return { mode: "straight", cells: straightFallback(w, h, from, to, isRoad, isLand) };
     }
 
+    // Road polylines form one 8-connected component per settled landmass (#309), so BFS over the cell mask IS the road-graph walk; a pair with no shared component has no walk and degrades below.
     if (isRoad(from) && isRoad(to)) {
       const walk = bfsPath(w, h, from, (c) => c === to, isRoad);
       if (walk) {
