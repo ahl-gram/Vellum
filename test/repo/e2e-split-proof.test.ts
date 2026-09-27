@@ -207,6 +207,8 @@ test("a group handed a different value than its parameter names reads as a diffe
 
 test("a group that hands back a different value than the name its caller binds reads as a difference", () => {
   assert.equal(inGroups("  return laid;\n}", "  return null;\n}").same, false);
+  assert.equal(inGroups("  return laid;\n}", "  return { laid };\n}").same, false);
+  assert.equal(inGroups("  return laid;\n}", "  return { ...laid };\n}").same, false);
   const before = ["export async function run(ctx) {", "  const { evaluate, check } = ctx;", "  const wide = await evaluate(`1`);", "  const tall = await evaluate(`2`);", "  check(\"B2 wider\", wide > tall);", "}"].join("\n");
   const after = (ret: string) => ["export async function run(ctx) {", "  const { check } = ctx;", "  const [wide, tall] = await b1Reads(ctx);", "  check(\"B2 wider\", wide > tall);", "}", "async function b1Reads({ evaluate }) {", "  const wide = await evaluate(`1`);", "  const tall = await evaluate(`2`);", `  return ${ret};`, "}"].join("\n");
   assert.equal(compareFamilies(files(before), files(after("[wide, tall]"))).same, true);

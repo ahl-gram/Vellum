@@ -51,14 +51,36 @@ const READ: Payload<Index> = `(() => {
   };
 })()`;
 
-// eslint-disable-next-line max-lines-per-function
+type Settle = ReturnType<typeof makeSettle>;
+type DocRoomsKit = ReturnType<typeof docRoomsKit>;
+
 export async function run(ctx: SuiteContext): Promise<void> {
-  const { evaluate, send, check, sleep, setMobileViewport, clearMobile, touch, waitReady, PORT } = ctx;
+  const { send, setMobileViewport, clearMobile, waitReady, PORT } = ctx;
   const settle = makeSettle(ctx);
   // IX3 is the one group here that waits on a transition, so it is the one that is stepped (#534).
   const step = makeStep(ctx);
   const gate = scopedHealth(ctx);
+  const k = docRoomsKit({ ...ctx, settle });
 
+  // The desktop arm at the sibling suites' 1280x800: the harness window is taller, and a tall viewport cannot scroll a late section up to the reading line.
+  await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
+  const faq = await ix1QaStands(k);
+  await ix2InksRow(k, faq);
+  await step("IX3", () => ix3Folds(k, faq));
+  await ix4FindBox(k);
+  await setMobileViewport(390, 844);
+  await ix5BottomSheet(k);
+  await ix6NoScript(k);
+
+  await clearMobile();
+  await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
+  gate.check("IX7 the document-room suite drove both rooms with no console error and no 4xx");
+  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/` });
+  await waitReady();
+}
+
+function docRoomsKit(ctx: SuiteContext & { settle: Settle }) {
+  const { evaluate, send, sleep, touch, PORT } = ctx;
   // A room's readiness is its own shell (waitReady keys on the Explorer's members); the index script runs at parse, so the slip's inline top is the boot signal.
   const goto = async (path: string) => {
     await send("Page.navigate", { url: "about:blank" });
@@ -75,9 +97,10 @@ export async function run(ctx: SuiteContext): Promise<void> {
     await touch("touchEnd", []);
     await sleep(450);
   };
+  return { ...ctx, goto, tapAt };
+}
 
-  // The desktop arm at the sibling suites' 1280x800: the harness window is taller, and a tall viewport cannot scroll a late section up to the reading line.
-  await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
+async function ix1QaStands({ evaluate, check, goto }: DocRoomsKit): Promise<Index> {
   await goto(FAQ);
   const faq = await evaluate(READ);
   check(
@@ -93,7 +116,10 @@ export async function run(ctx: SuiteContext): Promise<void> {
         faq.slip.x - 8 && !faq.toc && faq.columns === "352px" && faq.scrollW <= faq.innerW,
     `h1 ${JSON.stringify(faq.h1)}, slip ${faq.slipPosition} y=${faq.slip && faq.slip.y.toFixed(1)} folio bottom=${faq.folio && faq.folio.bottom.toFixed(1)}, rows ${faq.rows.length}/${faq.h2s.length}, entries ${faq.rowEntries.join("+")}=${faq.entries}, count "${faq.count}", sheet right ${faq.sheet && faq.sheet.right.toFixed(1)} vs slip x ${faq.slip && faq.slip.x.toFixed(1)}, toc ${faq.toc}, columns ${faq.columns}, scrollW ${faq.scrollW}/${faq.innerW}`,
   );
+  return faq;
+}
 
+async function ix2InksRow({ evaluate, check, sleep }: DocRoomsKit, faq: Index): Promise<void> {
   const target = faq.h2s[2];
   const firstEntryOf = await evaluate<string | null>(`(() => { const h = document.getElementById(${JSON.stringify(target)}); let e = h.nextElementSibling; while (e && !e.matches(".q[id], .term[id]")) e = e.nextElementSibling; return e ? e.id : null; })()`);
   await evaluate(`document.getElementById(${JSON.stringify(target)}).scrollIntoView()`);
@@ -108,41 +134,43 @@ export async function run(ctx: SuiteContext): Promise<void> {
       JSON.stringify(atEntry.inked) === JSON.stringify([target]) && JSON.stringify(atEntry.now) === JSON.stringify([firstEntryOf]),
     `at the head #${target}: inked ${JSON.stringify(atHead.inked)}, now ${JSON.stringify(atHead.now)}; at its first question #${firstEntryOf}: inked ${JSON.stringify(atEntry.inked)}, now ${JSON.stringify(atEntry.now)}`,
   );
+}
 
-  await step("IX3", async () => {
-    await evaluate(`document.querySelector("#index .slip-fold").click()`);
-    const folded = await settle(READ, atFolded(faq), "index-folded");
-    await evaluate(`document.querySelector(".slip-tab").click()`);
-    const back = await settle(READ, atUnfolded(folded), "index-unfolded");
-    check(
-      "IX3 folding the index hands the sheet the width in one settle and stands the bookmark tab on the right edge; the tab brings the index back and the sheet shrinks the same way (#462 ruling 2, Alex's own wording)",
-      // @ts-expect-error a missing tab reads its visibility as null too, which the settle's predicate and the clause before have already refused, so a null never reaches here
-      folded.folded && folded.slipVisibility === "hidden" && folded.tabVisibility === "visible" && folded.tab.right >= folded.innerW - 1 &&
-        // @ts-expect-error the settle returned this read only after its predicate read main, and a null there throws inside the settle, so a null never reaches here
-        folded.main.right >
-          // @ts-expect-error the first settle's predicate read this main already, and a null there throws inside the settle, so a null never reaches here
-          faq.main.right + 200 &&
-          // @ts-expect-error a sheet the page never seated reads null, which throws here inside the step, and the step reds IX3 by name
-          folded.sheet.right >
-          // @ts-expect-error a null sheet on the first read has already thrown at IX1, outside any step, so a null never reaches here
-          faq.sheet.right + 200 &&
-        // @ts-expect-error the settle returned this read only after its predicate read main, and a null there throws inside the settle, so a null never reaches here
-        !back.folded && back.slipVisibility === "visible" && back.tabVisibility === "hidden" && Math.abs(back.main.right -
-          // @ts-expect-error the first settle's predicate read this main already, and a null there throws inside the settle, so a null never reaches here
-          faq.main.right) < 1,
-      // @ts-expect-error the first settle's predicate read this main already, and a null there throws inside the settle, so a null never reaches here
-      `folded: slip ${folded.slipVisibility} tab ${folded.tabVisibility} right=${folded.tab && folded.tab.right}, main right ${faq.main.right.toFixed(1)} -> ${
-        // @ts-expect-error the settle returned this read only after its predicate read main, and a null there throws inside the settle, so a null never reaches here
-        folded.main.right.toFixed(1)} -> ${
-        // @ts-expect-error the settle returned this read only after its predicate read main, and a null there throws inside the settle, so a null never reaches here
-        back.main.right.toFixed(1)}, sheet right ${
+async function ix3Folds({ evaluate, check, settle }: DocRoomsKit, faq: Index): Promise<void> {
+  await evaluate(`document.querySelector("#index .slip-fold").click()`);
+  const folded = await settle(READ, atFolded(faq), "index-folded");
+  await evaluate(`document.querySelector(".slip-tab").click()`);
+  const back = await settle(READ, atUnfolded(folded), "index-unfolded");
+  check(
+    "IX3 folding the index hands the sheet the width in one settle and stands the bookmark tab on the right edge; the tab brings the index back and the sheet shrinks the same way (#462 ruling 2, Alex's own wording)",
+    // @ts-expect-error a missing tab reads its visibility as null too, which the settle's predicate and the clause before have already refused, so a null never reaches here
+    folded.folded && folded.slipVisibility === "hidden" && folded.tabVisibility === "visible" && folded.tab.right >= folded.innerW - 1 &&
+      // @ts-expect-error the settle returned this read only after its predicate read main, and a null there throws inside the settle, so a null never reaches here
+      folded.main.right >
+        // @ts-expect-error the first settle's predicate read this main already, and a null there throws inside the settle, so a null never reaches here
+        faq.main.right + 200 &&
+        // @ts-expect-error a sheet the page never seated reads null, which throws here inside the step, and the step reds IX3 by name
+        folded.sheet.right >
         // @ts-expect-error a null sheet on the first read has already thrown at IX1, outside any step, so a null never reaches here
-        faq.sheet.right.toFixed(1)} -> ${
-        // @ts-expect-error a null sheet on this read has already thrown in the condition above, inside the step
-        folded.sheet.right.toFixed(1)}`,
-    );
-  });
+        faq.sheet.right + 200 &&
+      // @ts-expect-error the settle returned this read only after its predicate read main, and a null there throws inside the settle, so a null never reaches here
+      !back.folded && back.slipVisibility === "visible" && back.tabVisibility === "hidden" && Math.abs(back.main.right -
+        // @ts-expect-error the first settle's predicate read this main already, and a null there throws inside the settle, so a null never reaches here
+        faq.main.right) < 1,
+    // @ts-expect-error the first settle's predicate read this main already, and a null there throws inside the settle, so a null never reaches here
+    `folded: slip ${folded.slipVisibility} tab ${folded.tabVisibility} right=${folded.tab && folded.tab.right}, main right ${faq.main.right.toFixed(1)} -> ${
+      // @ts-expect-error the settle returned this read only after its predicate read main, and a null there throws inside the settle, so a null never reaches here
+      folded.main.right.toFixed(1)} -> ${
+      // @ts-expect-error the settle returned this read only after its predicate read main, and a null there throws inside the settle, so a null never reaches here
+      back.main.right.toFixed(1)}, sheet right ${
+      // @ts-expect-error a null sheet on the first read has already thrown at IX1, outside any step, so a null never reaches here
+      faq.sheet.right.toFixed(1)} -> ${
+      // @ts-expect-error a null sheet on this read has already thrown in the condition above, inside the step
+      folded.sheet.right.toFixed(1)}`,
+  );
+}
 
+async function ix4FindBox({ evaluate, send, check, sleep, goto }: DocRoomsKit): Promise<void> {
   await goto(GLOSSARY);
   const glossary = await evaluate(READ);
   await evaluate(`document.querySelector(".find input").focus()`);
@@ -168,8 +196,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
       cleared.shown === cleared.total && cleared.hits === 0 && cleared.empty === 0,
     `count "${glossary.count}"; "glass": hits ${JSON.stringify(found.hits)} shown ${found.shown}/${found.total}, sections folded ${found.empty}/${found.rows}, definitions mentioning it ${found.defsMatch}; cleared: shown ${cleared.shown}/${cleared.total}, folded ${cleared.empty}`,
   );
+}
 
-  await setMobileViewport(390, 844);
+async function ix5BottomSheet({ evaluate, check, sleep, goto, tapAt }: DocRoomsKit): Promise<void> {
   await goto(FAQ);
   const phone = await evaluate(READ);
   // @ts-expect-error a slip the phone never seated reads null, which throws here, outside any step, and the runner reds the whole suite as stopped early
@@ -193,7 +222,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
       !jumped.open && landed.hash === entry.href && landed.top >= 90 && landed.top < 200 && jumped.scrollW <= jumped.innerW,
     `collapsed: bottom ${phone.slip && phone.slip.bottom} of ${phone.innerH}, h ${phone.slip && phone.slip.h.toFixed(1)}, body ${phone.bodyDisplay}; opened: ${opened.open} h ${opened.slip && opened.slip.h.toFixed(1)}; after the tap: open=${jumped.open}, hash ${landed.hash} vs ${entry.href}, target top ${landed.top.toFixed(1)}, scrollW ${jumped.scrollW}/${jumped.innerW}`,
   );
+}
 
+async function ix6NoScript({ evaluate, send, check, goto }: DocRoomsKit): Promise<void> {
   await send("Emulation.setScriptExecutionDisabled", { value: true });
   await goto(GLOSSARY);
   const noJs = await evaluate(READ);
@@ -205,10 +236,4 @@ export async function run(ctx: SuiteContext): Promise<void> {
       noJsLink.target && noJs.inked.length === 0,
     `rows ${noJs.rows.length}/${noJs.h2s.length}, entries ${noJs.rowEntries.reduce((a, b) => a + b, 0)}/${noJs.entries}, first term ${noJsLink.href} resolves=${noJsLink.target}, inked ${JSON.stringify(noJs.inked)} (the CONTROL: empty says script really was off)`,
   );
-
-  await clearMobile();
-  await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
-  gate.check("IX7 the document-room suite drove both rooms with no console error and no 4xx");
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/` });
-  await waitReady();
 }

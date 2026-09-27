@@ -2,18 +2,32 @@
 import { makeStep } from "./step-support.ts";
 import type { SuiteContext } from "./types.ts";
 
-// eslint-disable-next-line max-lines-per-function
+type Btn = { title: string | null; aria: string | null; svg: boolean; text: string };
+type GlassKit = ReturnType<typeof glassKit>;
+
 export async function run(ctx: SuiteContext): Promise<void> {
-  const { evaluate, send, check, shoot, sleep, waitSettled } = ctx;
+  const { evaluate } = ctx;
   const step = makeStep(ctx);
+  const k = glassKit(ctx);
 
-  await step("G setup", async () => {
-    await evaluate(`(()=>{for(const id of ["ages"]){const c=document.getElementById(id);if(c.checked){c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));}}document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`);
-    await waitSettled("glass-ceremony-base");
-    await evaluate(`window.__vellumSetRedraftEnabled(false)`);
-    await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
-  });
+  await step("G setup", () => gSetup(k));
+  await g1Cluster(k);
+  await g2aGlides(k);
+  await g2bCompounds(k);
+  await g2cKeys(k);
+  await g3ReducedMotion(k);
+  await evaluate(`window.__vellumSetRedraftEnabled(true)`);
+  await g4InksIn(k);
+  await g4bSettles(k);
+  await g5Tokens(k);
+  await g7BandHop(k);
+  await g8WholeSheet(k);
+  await g6ReducedCeremony(k);
+  await step("G restore", () => gRestore(k));
+}
 
+function glassKit(ctx: SuiteContext) {
+  const { evaluate, sleep } = ctx;
   const st = () => evaluate<{ k: number; x: number; y: number }>(`window.__vellumZoomState()`);
   const settleK = async (target: number) => {
     for (let i = 0; i < 100; i++) {
@@ -39,8 +53,17 @@ export async function run(ctx: SuiteContext): Promise<void> {
     for (let i = 0; i < 375; i++) { const s = await rgn(); if (s.redrafts > prev && s.band === wantBand) return s; await sleep(40); }
     return await rgn();
   };
+  return { ...ctx, settleK, settleHome, rgn, enterAt, waitRedraft };
+}
 
-  type Btn = { title: string | null; aria: string | null; svg: boolean; text: string };
+async function gSetup({ evaluate, waitSettled }: GlassKit): Promise<void> {
+  await evaluate(`(()=>{for(const id of ["ages"]){const c=document.getElementById(id);if(c.checked){c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));}}document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`);
+  await waitSettled("glass-ceremony-base");
+  await evaluate(`window.__vellumSetRedraftEnabled(false)`);
+  await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
+}
+
+async function g1Cluster({ evaluate, check }: GlassKit): Promise<void> {
   const g1 = await evaluate<{ grpAria: string | null; order: string; zin: Btn; zout: Btn; zreset: Btn; keys: boolean; radius: string; size: number }>(`(()=>{const grp=document.getElementById("zoom-controls");const btn=(id)=>{const b=document.getElementById(id);return{title:b.getAttribute("title"),aria:b.getAttribute("aria-label"),svg:!!b.querySelector("svg"),text:(b.textContent||"").trim()};};const zin=document.getElementById("zoom-in");return{grpAria:grp.getAttribute("aria-label"),order:[...grp.querySelectorAll("button")].map((b)=>b.id).join(","),zin:btn("zoom-in"),zout:btn("zoom-out"),zreset:btn("zoom-reset"),keys:!!grp.querySelector(".zoom-keys"),radius:getComputedStyle(zin).borderRadius,size:zin.getBoundingClientRect().width};})()`);
   check(
     "G1 the cluster is home's camera (#505, ruled 2026-09-02): Camera; in, out, the whole sheet as text glyphs in home's voice; no tooltips, no engraved glyphs, no keys slip; the house's rounding at 2.2rem",
@@ -51,7 +74,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
       !g1.keys && g1.radius === "4px" && Math.abs(g1.size - 35.2) < 0.5,
     JSON.stringify(g1),
   );
+}
 
+async function g2aGlides({ evaluate, check, settleK }: GlassKit): Promise<void> {
   const g2aNow = await evaluate<number>(`(()=>{document.getElementById("zoom-in").click();return window.__vellumZoomState().k;})()`);
   const g2aEnd = await settleK(1.4);
   check(
@@ -59,7 +84,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
     g2aNow < 1.4 - 1e-6 && Math.abs(g2aEnd.k - 1.4) < 1e-6,
     `immediately=${g2aNow} settled=${g2aEnd.k}`,
   );
+}
 
+async function g2bCompounds({ evaluate, check, settleK }: GlassKit): Promise<void> {
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
   await evaluate(`(()=>{const b=document.getElementById("zoom-in");b.click();b.click();})()`);
   const g2b = await settleK(1.96);
@@ -82,7 +109,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
     Math.abs(g2b2.k - 2.744) < 1e-6,
     `settled=${g2b2.k}`,
   );
+}
 
+async function g2cKeys({ evaluate, check, sleep, settleK, settleHome }: GlassKit): Promise<void> {
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
   await evaluate(`(()=>{const vp=document.getElementById("map-viewport");vp.focus();vp.dispatchEvent(new KeyboardEvent("keydown",{key:"+",bubbles:true}));})()`);
   const g2cIn = await settleK(1.4);
@@ -104,7 +133,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
       g2cHash.k === null,
     `in=${g2cIn.k} home=${JSON.stringify(g2cHome)} hash=${JSON.stringify(g2cHash)}`,
   );
+}
 
+async function g3ReducedMotion({ evaluate, send, check }: GlassKit): Promise<void> {
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
   const g3 = await evaluate<{ stepK: number; home: { k: number; x: number; y: number }; cx: string | null }>(`(()=>{
     window.__vellumZoomTo({k:1,x:0,y:0});
@@ -122,9 +153,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
     JSON.stringify(g3),
   );
   await send("Emulation.setEmulatedMedia", { features: [] });
+}
 
-  await evaluate(`window.__vellumSetRedraftEnabled(true)`);
-
+async function g4InksIn({ evaluate, check, shoot, sleep, rgn, enterAt, waitRedraft }: GlassKit): Promise<void> {
   const before4 = (await rgn()).redrafts;
   await enterAt(2, 0.5, 0.5);
   const s4 = await waitRedraft(before4, 1);
@@ -155,7 +186,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await shoot("explorer-sub9-redraft-inking.png");
   await sleep(600); // into the village wait: the newly revealed name is mid-dry
   await shoot("explorer-sub9-redraft-dryin.png");
+}
 
+async function g4bSettles({ evaluate, check, shoot }: GlassKit): Promise<void> {
   const g4b = await evaluate<{ dash: string; drawLen: string; running: number }>(`(async()=>{
     const svg=document.querySelector("#map .region-inset svg");
     await Promise.all(svg.getAnimations({subtree:true}).map(a=>a.finished.catch(()=>{})));
@@ -169,7 +202,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
     JSON.stringify(g4b),
   );
   await shoot("explorer-sub9-redraft-rested.png");
+}
 
+async function g5Tokens({ evaluate, check }: GlassKit): Promise<void> {
   const g5 = await evaluate<{ draw: number; dry: number; town: number; village: number; villageRule: boolean }>(`(()=>{
     const cs=getComputedStyle(document.documentElement);
     const ms=(v)=>{const s=(v||"").trim();return s.endsWith("ms")?parseFloat(s):s.endsWith("s")?parseFloat(s)*1000:NaN;};
@@ -192,7 +227,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
     g5.draw > 0 && g5.dry > 0 && g5.town > 0 && g5.village > g5.town && g5.villageRule,
     JSON.stringify(g5),
   );
+}
 
+async function g7BandHop({ evaluate, check, rgn, enterAt, waitRedraft }: GlassKit): Promise<void> {
   const before7 = (await rgn()).redrafts;
   await enterAt(3.6, 0.5, 0.5);
   const s7 = await waitRedraft(before7, 2);
@@ -208,7 +245,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
     s7.band === 2 && g7.svg && g7.redrafting && g7.dry === 0,
     `band=${s7.band} ${JSON.stringify(g7)}`,
   );
+}
 
+async function g8WholeSheet({ evaluate, check, sleep, settleHome }: GlassKit): Promise<void> {
   await evaluate(`document.getElementById("zoom-reset").click()`);
   const g8cam = await settleHome();
   let g8 = null;
@@ -232,7 +271,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
       g8.cx === null,
     `cam=${JSON.stringify(g8cam)} ${JSON.stringify(g8)}`,
   );
+}
 
+async function g6ReducedCeremony({ evaluate, send, check, sleep, rgn, enterAt, waitRedraft }: GlassKit): Promise<void> {
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
   // G8's voiced glide home passes THROUGH band 2 and its settle debounce can dispatch a survey on the way; since #400 that draw is still in flight here and commits after before6 is sampled, so wait for the region state to go quiet first: two reads a debounce apart with the same count, and nothing on screen.
   for (let i = 0; i < 100; i++) {
@@ -258,12 +299,12 @@ export async function run(ctx: SuiteContext): Promise<void> {
     `band=${s6.band} title=${JSON.stringify(s6.title)} ${JSON.stringify(g6)}`,
   );
   await send("Emulation.setEmulatedMedia", { features: [] });
+}
 
-  await step("G restore", async () => {
-    await evaluate(`document.getElementById("zoom-reset").click()`);
-    await settleHome();
-    await evaluate(`window.__vellumSetRedraftEnabled(false)`);
-    await evaluate(`(()=>{document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`);
-    await waitSettled("glass-ceremony-restore");
-  });
+async function gRestore({ evaluate, waitSettled, settleHome }: GlassKit): Promise<void> {
+  await evaluate(`document.getElementById("zoom-reset").click()`);
+  await settleHome();
+  await evaluate(`window.__vellumSetRedraftEnabled(false)`);
+  await evaluate(`(()=>{document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`);
+  await waitSettled("glass-ceremony-restore");
 }
