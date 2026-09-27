@@ -250,6 +250,8 @@ test("an import or an export inside the family that renames a name reads as a di
   const defaultExportOnly = compareFamilies(files(before), files(run("import { x1One, x2Two } from \"./map/part1.ts\";"), `${one.replace("export default ", "export ")}\n${two}`)).lines;
   assert.ok(defaultExportOnly.includes("scripts/e2e/map/part1.ts exports a default inside the family"), defaultExportOnly.join("\n"));
   assert.ok(!defaultExportOnly.some((l) => l.includes("imports a default")), "the default-export fixture carries no default import, so only the export can be reported");
+  const assigned = compareFamilies(files(before), files(run("import { x1One, x2Two } from \"./map/part1.ts\";"), `${part}\nexport default x1One;`)).lines;
+  assert.ok(assigned.includes("scripts/e2e/map/part1.ts exports a default inside the family"), assigned.join("\n"));
 });
 
 test("a function only the split declares is read through at every call, so one that stands in for a context member reads as a difference", () => {

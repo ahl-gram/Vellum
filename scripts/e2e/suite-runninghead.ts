@@ -8,7 +8,7 @@ import { runningHeadKit } from "./runninghead/kit.ts";
 import type { RunningHeadKit } from "./runninghead/kit.ts";
 import { DISPLAY_FACE, near, SHELLED } from "./runninghead/reads.ts";
 import type { Head } from "./runninghead/reads.ts";
-import { rh0OneH1, rh1NamesPage, rh2Members, rh3Fixed, rh4OneDress, rh5Leading, rh6Differ, rh9aTagline, rh9bWash, rhSweep } from "./runninghead/heads.ts";
+import { rh0OneH1, rh1NamesPage, rh2Members, rh3Fixed, rh4OneDress, rh5Leading, rh6Differ, rh9ContrastPins, rhSweep } from "./runninghead/heads.ts";
 import { rh10bNarrowFolio, rh10cPrinted, rh10GalleryScrolled } from "./runninghead/gallery.ts";
 
 // Reading the producer's own template couples the injected twin to it: rename the class or demote the heading in renderBoundAtlas and RH7 reds instead of drifting.
@@ -36,8 +36,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   rh5Leading(ctx, heads);
   rh6Differ(ctx, heads, prose);
   await rh7AtlasTitle(k);
-  rh9aTagline(ctx, heads, bad);
-  rh9bWash(ctx, heads, bad);
+  rh9ContrastPins(ctx, heads, bad);
   await rh10GalleryScrolled(k);
   // #531: the OTHER painting arm, body.chart-room:not(:has(.stage)), which SB8e's page never matches.
   await send("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
