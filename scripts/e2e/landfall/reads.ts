@@ -4,7 +4,6 @@ import type { Payload, Point } from "../types.ts";
 export type Headroom = { cx: number; cy: number; w: number; h: number };
 export const stagePoint: Payload<Point | null> = `(() => { const s = document.getElementById("lf-stage"); if (!s) return null; const r = s.getBoundingClientRect(); return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) }; })()`;
 export const down = (y: number, y0: number) => y > y0;
-// Drift-sized stillness: on slow CI the fixture has crossed IDLE_DELAY_MS by here and the ambient ±1.5% drift moved the camera 3e-6 between reads (PR #482 CI); a one-finger pan that drove the map would move it 60px.
 export const stillCam = (a: Cam | null, b: Cam | null) =>
   a !== null && b !== null && Math.abs(b.scale - a.scale) < a.scale * 0.02 && Math.abs(b.x - a.x) < 8 && Math.abs(b.y - a.y) < 8;
 export const roomy = (hr: Headroom | null) => hr !== null && hr.cx > 50 && hr.cx < hr.w - 50 && hr.cy > 50 && hr.cy < hr.h - 50;

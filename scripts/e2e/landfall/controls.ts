@@ -2,7 +2,7 @@ import { buttonPoint } from "../home-support.ts";
 import type { LandfallKit } from "./kit.ts";
 import { roomy } from "./reads.ts";
 
-export async function l9fOnPip({ evaluate, check, sleep, touch, camNow, headroom, recenter }: LandfallKit): Promise<void> {
+export async function l9fPipGestures({ evaluate, check, sleep, touch, pressKey, camNow, headroom, recenter }: LandfallKit): Promise<void> {
   // A gesture may BEGIN on a pip (PR #474 finding 2: the mouse-only capture rationale had gated all pointer types, deadening 47% of start points), and a plain touch TAP on that same pip must still open its card.
   await recenter();
   const pipPt9 = await evaluate(buttonPoint('.lf-station[data-station="how"]'));
@@ -23,9 +23,7 @@ export async function l9fOnPip({ evaluate, check, sleep, touch, camNow, headroom
       && onPipAfter.x - onPipBefore.x > 25 && onPipAfter.x - onPipBefore.x < 55 && cardStayed === true,
     JSON.stringify({ pipPt9, room9f, onPipBefore, onPipAfter, cardStayed }),
   );
-}
 
-export async function l9gTap({ evaluate, check, sleep, touch, pressKey }: LandfallKit): Promise<void> {
   const tapPt = await evaluate(buttonPoint('.lf-station[data-station="how"]'));
   if (tapPt !== null) {
     await touch("touchStart", [{ x: Math.round(tapPt.x), y: Math.round(tapPt.y), id: 0 }]);

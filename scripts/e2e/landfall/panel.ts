@@ -1,5 +1,6 @@
 import { buttonPoint, readXform } from "../home-support.ts";
 import type { Cam } from "../home-support.ts";
+import type { SuiteContext } from "../types.ts";
 import type { LandfallKit } from "./kit.ts";
 
 type How = Awaited<ReturnType<typeof l5HowOpens>>;
@@ -91,7 +92,7 @@ export async function l3HeadSwallows({ check, sleep, scrollY, centerOf, camScale
   );
 }
 
-export async function l7WideClear({ evaluate, check, shoot }: LandfallKit): Promise<void> {
+export async function l7WideClear({ evaluate, check, shoot }: SuiteContext): Promise<void> {
   const clear6 = await evaluate<{ anchorX: number; cardLeft: number; innerWidth: number } | null>(`(() => {
     const btn = document.querySelector('.lf-station[data-station="how"]');
     const stage = document.getElementById("lf-stage");

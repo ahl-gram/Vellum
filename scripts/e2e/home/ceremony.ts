@@ -97,7 +97,7 @@ export async function h8bHoldSkip({ evaluate, send, check, sleep, PORT, pressKey
   );
 }
 
-export async function h9Sitting({ evaluate, send, check, sleep, PORT }: SuiteContext): Promise<void> {
+export async function h9CeremonyStandsDown({ evaluate, send, check, sleep, PORT }: SuiteContext): Promise<void> {
   // H9/H10 poll for the settled state rather than reading once after a fixed sleep (a one-shot read caught a still-loading page on a busy CI lane and saw transform none), and their teeth move to the invariant that NO sample ever sees the veil. The about:blank bounce (the suite-zoom Z13 idiom) keeps the first samples off the previous page, which already sits at the landfall scale.
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
@@ -114,9 +114,7 @@ export async function h9Sitting({ evaluate, send, check, sleep, PORT }: SuiteCon
     atLandfall(returning) && !sawVeil9,
     JSON.stringify({ returning, sawVeil9 }),
   );
-}
 
-export async function h10ReducedMotion({ evaluate, send, check, sleep, PORT }: SuiteContext): Promise<void> {
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
   await evaluate(`sessionStorage.clear()`);
   await send("Page.navigate", { url: "about:blank" });

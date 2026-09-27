@@ -9,7 +9,7 @@ import { l1jHint, l1kSurfaces, l1fScrolledPage, l1gKeys, l1hDrift, l1iCluster } 
 import { l5HowOpens, l5bArrowScrolls, l2ProseScrolls, l6HeadStays, l3HeadSwallows, l7WideClear, l4l8Enters, l7bNarrowClear, l8bNarrowTargets } from "./landfall/panel.ts";
 import { l9aOneFinger, l9bPinch, l9cTwoFingerPan } from "./landfall/touch.ts";
 import { l9dCeiling, l9d2Debt, l9eFloor } from "./landfall/clamps.ts";
-import { l9fOnPip, l9gTap, l9hControlTap } from "./landfall/controls.ts";
+import { l9fPipGestures, l9hControlTap } from "./landfall/controls.ts";
 import { l10NoScriptGet, l11IgnoresQuery } from "./landfall/seed.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
@@ -66,6 +66,7 @@ async function l7bNarrow(k: LandfallKit): Promise<void> {
   await l7bNarrowClear(k, settled9);
   await l8bNarrowTargets(k);
   const stagePt9 = await evaluate(stagePoint);
+  // Drift-sized stillness: on slow CI the fixture has crossed IDLE_DELAY_MS by here and the ambient ±1.5% drift moved the camera 3e-6 between reads (PR #482 CI); a one-finger pan that drove the map would move it 60px.
   await l9aOneFinger(k, stagePt9);
   await l9bPinch(k, stagePt9);
   // L9c-L9g: the real two-finger contract (#475). Every pan read pins its fixture's clamp headroom first: the old L9c went green off a clamp-parked fixture (PR #474 skeptic finding 3), so an unproven fixture is the bug these arms exist to never repeat.
@@ -73,8 +74,7 @@ async function l7bNarrow(k: LandfallKit): Promise<void> {
   await l9dCeiling(k, stagePt9);
   await l9d2Debt(k, stagePt9);
   await l9eFloor(k, stagePt9);
-  await l9fOnPip(k);
-  await l9gTap(k);
+  await l9fPipGestures(k);
   await l9hControlTap(k);
   await clearMobile();
 }
