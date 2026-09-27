@@ -261,14 +261,25 @@ function helperLines(a: ReadonlyMap<string, string[]>, b: ReadonlyMap<string, st
   });
 }
 
+const moduleOf = (path: string, spec: string): string => (spec.startsWith(".") ? posix.normalize(posix.join(posix.dirname(path), spec)) : spec);
+
+function renamedInside(files: readonly FamilyFile[]): string[] {
+  const own = new Set(files.map((x) => posix.normalize(x.path)));
+  return files.flatMap(({ path, text }) => parse(text).statements.flatMap((s) => {
+    const inside = ts.isImportDeclaration(s) && ts.isStringLiteral(s.moduleSpecifier) && own.has(moduleOf(path, s.moduleSpecifier.text));
+    const named = inside ? s.importClause?.namedBindings : ts.isExportDeclaration(s) ? s.exportClause : undefined;
+    const elements = named && (ts.isNamedImports(named) || ts.isNamedExports(named)) ? named.elements : [];
+    return elements.filter((el) => el.propertyName && el.propertyName.getText() !== el.name.text).map((el) => `${path} renames ${el.propertyName?.getText()} to ${el.name.text} inside the family`);
+  }));
+}
+
 function imports(files: readonly FamilyFile[]): string[] {
   const own = new Set(files.map((x) => posix.normalize(x.path)));
   const out = new Set<string>();
   for (const { path, text } of files) {
     for (const s of parse(text).statements) {
       if (!ts.isImportDeclaration(s) || !ts.isStringLiteral(s.moduleSpecifier)) continue;
-      const spec = s.moduleSpecifier.text;
-      const from = spec.startsWith(".") ? posix.normalize(posix.join(posix.dirname(path), spec)) : spec;
+      const from = moduleOf(path, s.moduleSpecifier.text);
       if (own.has(from)) continue;
       const clause = s.importClause;
       const named = clause?.namedBindings;
@@ -300,6 +311,7 @@ export function compareFamilies(beforeFiles: readonly FamilyFile[], afterFiles: 
   const [nb, cb] = markers(after);
   const lines = [
     ...b.unread,
+    ...renamedInside(afterFiles),
     ...sequenceLines("run", a.sequence, b.sequence),
     ...helperLines(a.helpers, b.helpers),
     ...surplus(a.constants, b.constants).map((c) => `constant gone: ${short(c)}`),

@@ -228,6 +228,16 @@ test("an import bound to a different module or a different export reads as a dif
   assert.equal(compareFamilies(files(before), files(run, swapped(part, "../settle-support.ts", "./settle-support.ts"))).same, false);
 });
 
+test("an import or an export inside the family that renames a name reads as a difference, since the proof finds a function the split made by its declared name", () => {
+  const before = ["export async function run(ctx) {", "  const { check, sleep } = ctx;", "  await sleep(1);", "  check(\"X1 one\", true);", "  await sleep(2);", "  check(\"X2 two\", true);", "}"].join("\n");
+  const part = ["export async function x1One({ check, sleep }) {", "  await sleep(1);", "  check(\"X1 one\", true);", "}", "export async function x2Two({ check, sleep }) {", "  await sleep(2);", "  check(\"X2 two\", true);", "}"].join("\n");
+  const run = (wiring: string) => [wiring, "export async function run(ctx) {", "  await x1One(ctx);", "  await x2Two(ctx);", "}"].join("\n");
+  assert.equal(compareFamilies(files(before), files(run("import { x1One, x2Two } from \"./map/part1.ts\";"), part)).same, true);
+  assert.equal(compareFamilies(files(before), files(run("import { x2Two as x1One, x1One as x2Two } from \"./map/part1.ts\";"), part)).same, false);
+  const unexported = swapped(swapped(part, "export async function x1One", "async function x1One"), "export async function x2Two", "async function x2Two");
+  assert.equal(compareFamilies(files(before), files(run("import { x1One, x2Two } from \"./map/part1.ts\";"), `${unexported}\nexport { x2Two as x1One, x1One as x2Two };`)).same, false);
+});
+
 test("a function only the split declares is read through at every call, so one that stands in for a context member reads as a difference", () => {
   const kit = swapped(SPLIT_GROUPS, "  return { ...base, go };", "  const settle = (script, pred, label, budget) => base.settle(script, pred, label, budget * 10);\n  return { ...base, go, settle };");
   assert.equal(split(SPLIT_RUN, kit).same, false);
