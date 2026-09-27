@@ -157,19 +157,14 @@ function connectGroup(
   for (const v of villages) lay(v, "lane", villageBudget);
 }
 
-function connectToNetwork(
+function roadSearch(
   wiring: Wiring,
   network: Uint8Array,
-  sx: number,
-  sy: number,
-  rank: Road["rank"],
+  start: number,
   budget: number,
   ride?: Uint8Array,
-): ReadonlyArray<RoadPoint> {
+): { found: number; prev: Int32Array } {
   const { w, h, n, data, seaLevel, terrainCost } = wiring;
-  const start = sx + sy * w;
-  if (network[start]) return [];
-
   const dist = new Float64Array(n).fill(Infinity);
   const prev = new Int32Array(n).fill(-1);
   const done = new Uint8Array(n);
@@ -177,15 +172,11 @@ function connectToNetwork(
   dist[start] = 0;
   heap.push(start, 0);
 
-  let found = -1;
   while (heap.size() > 0) {
     const i = heap.pop();
     if (done[i]) continue;
     done[i] = 1;
-    if (network[i]) {
-      found = i;
-      break;
-    }
+    if (network[i]) return { found: i, prev };
     const d = dist[i] as number;
     if (d > budget) break;
     const x = i % w;
@@ -207,8 +198,10 @@ function connectToNetwork(
       }
     }
   }
-  if (found === -1) return []; // unreachable (another island): no road
+  return { found: -1, prev };
+}
 
+function tracePath(prev: Int32Array, found: number, w: number): RoadPoint[] {
   const points: RoadPoint[] = [];
   let cur = found;
   while (cur !== -1) {
@@ -216,9 +209,29 @@ function connectToNetwork(
     cur = prev[cur] as number;
   }
   points.reverse();
+  return points;
+}
+
+function connectToNetwork(
+  wiring: Wiring,
+  network: Uint8Array,
+  sx: number,
+  sy: number,
+  rank: Road["rank"],
+  budget: number,
+  ride?: Uint8Array,
+): ReadonlyArray<RoadPoint> {
+  const start = sx + sy * wiring.w;
+  if (network[start]) return [];
+
+  const { found, prev } = roadSearch(wiring, network, start, budget, ride);
+  if (found === -1) return []; // unreachable (another island): no road
+
+  const points = tracePath(prev, found, wiring.w);
   wiring.roads.push({ points, rank });
   return points;
 }
+
 
 function topByScore(group: ReadonlyArray<Settlement>): Settlement | undefined {
   let best: Settlement | undefined;

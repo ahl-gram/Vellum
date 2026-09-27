@@ -132,19 +132,21 @@ export type LoreWriter = {
   realmNote(realmName: string): string;
 };
 
-export function createLoreWriter(world: World, rng: Rng): LoreWriter {
-  const aromatic = AROMATIC_GOODS[world.culture.id] ?? AROMATIC_GOODS["thalassic"]!;
-  const cargo = CARGO_GOODS[world.culture.id] ?? CARGO_GOODS["thalassic"]!;
-  const used = new Map<readonly string[], Set<string>>();
-
+function foundingYearsByName(world: World): Map<string, number> {
   const foundingYear = new Map<string, number>();
   for (const e of world.history.events) {
     if (e.kind === "founding" && e.settlement !== undefined) {
       foundingYear.set(world.settlements[e.settlement]!.name, e.year);
     }
   }
+  return foundingYear;
+}
 
-  const freshPick = (list: readonly string[]): string => {
+type FreshPick = (list: readonly string[]) => string;
+
+function createFreshPick(rng: Rng): FreshPick {
+  const used = new Map<readonly string[], Set<string>>();
+  return (list: readonly string[]): string => {
     let seen = used.get(list);
     if (!seen) {
       seen = new Set();
@@ -156,40 +158,68 @@ export function createLoreWriter(world: World, rng: Rng): LoreWriter {
     seen.add(choice);
     return choice;
   };
+}
 
-  const fill = (template: string): string => {
+function createFill(freshPick: FreshPick, aromatic: readonly string[], cargo: readonly string[]): (template: string) => string {
+  return (template: string): string => {
     let out = template;
     if (out.includes("%a")) out = out.replace("%a", freshPick(aromatic));
     if (out.includes("%c")) out = out.replace("%c", freshPick(cargo));
     return out;
   };
+}
+
+type NoteKit = {
+  readonly world: World;
+  readonly rng: Rng;
+  readonly freshPick: FreshPick;
+  readonly fill: (template: string) => string;
+  readonly foundingYear: ReadonlyMap<string, number>;
+};
+
+function settlementNoteFor(kit: NoteKit, s: NamedSettlement): string {
+  const { world, rng, freshPick, fill, foundingYear } = kit;
+  if (s.ruined) {
+    return freshPick(RUIN_NOTES).replace("%y", String(s.founded));
+  }
+  const parts: string[] = [];
+  if (s.kind === "capital") {
+    parts.push(freshPick(CAPITAL_NOTES));
+    parts.push(fill(freshPick(CAPITAL_DETAILS)));
+  } else if (s.harbor) {
+    parts.push(fill(freshPick(HARBOR_NOTES)));
+  } else if (s.onRiver) {
+    parts.push(fill(freshPick(RIVER_NOTES)));
+  } else {
+    parts.push(fill(freshPick(INLAND_NOTES)));
+  }
+  const founded = foundingYear.get(s.name);
+  if (founded !== undefined) {
+    parts.push(`Its founding is set down in the year ${founded}.`);
+  }
+  const biome = world.biomes[s.x + s.y * world.elev.w] as number;
+  const biomeNote = BIOME_NOTES[biome];
+  if (biomeNote && s.kind !== "capital" && rng.next() < 0.7) {
+    parts.push(biomeNote);
+  }
+  return parts.join(" ");
+}
+
+export function createLoreWriter(world: World, rng: Rng): LoreWriter {
+  const aromatic = AROMATIC_GOODS[world.culture.id] ?? AROMATIC_GOODS["thalassic"]!;
+  const cargo = CARGO_GOODS[world.culture.id] ?? CARGO_GOODS["thalassic"]!;
+  const freshPick = createFreshPick(rng);
+  const kit: NoteKit = {
+    world,
+    rng,
+    freshPick,
+    fill: createFill(freshPick, aromatic, cargo),
+    foundingYear: foundingYearsByName(world),
+  };
 
   return {
     settlementNote(s: NamedSettlement): string {
-      if (s.ruined) {
-        return freshPick(RUIN_NOTES).replace("%y", String(s.founded));
-      }
-      const parts: string[] = [];
-      if (s.kind === "capital") {
-        parts.push(freshPick(CAPITAL_NOTES));
-        parts.push(fill(freshPick(CAPITAL_DETAILS)));
-      } else if (s.harbor) {
-        parts.push(fill(freshPick(HARBOR_NOTES)));
-      } else if (s.onRiver) {
-        parts.push(fill(freshPick(RIVER_NOTES)));
-      } else {
-        parts.push(fill(freshPick(INLAND_NOTES)));
-      }
-      const founded = foundingYear.get(s.name);
-      if (founded !== undefined) {
-        parts.push(`Its founding is set down in the year ${founded}.`);
-      }
-      const biome = world.biomes[s.x + s.y * world.elev.w] as number;
-      const biomeNote = BIOME_NOTES[biome];
-      if (biomeNote && s.kind !== "capital" && rng.next() < 0.7) {
-        parts.push(biomeNote);
-      }
-      return parts.join(" ");
+      return settlementNoteFor(kit, s);
     },
     realmNote(realmName: string): string {
       return `${realmName} ${freshPick(REALM_MOODS)}.`;
