@@ -65,16 +65,14 @@ export function realmAdjacency(
 const dist2 = (a: Centroid, b: Centroid): number =>
   (a.x - b.x) ** 2 + (a.y - b.y) ** 2;
 
-export function assignRealmTints(
+type Conflict = readonly (readonly boolean[])[];
+
+function tintNeighbours(
   centroids: readonly Centroid[],
   adjacency: readonly ReadonlySet<number>[],
-  conflict: readonly (readonly boolean[])[],
-  confusionDist: number,
-): number[] {
+  near: number,
+): Set<number>[] {
   const n = centroids.length;
-  const p = conflict.length;
-  const near = confusionDist * confusionDist;
-
   const neigh: Set<number>[] = Array.from({ length: n }, () => new Set<number>());
   for (let i = 0; i < n; i++) {
     for (let j = i + 1; j < n; j++) {
@@ -84,55 +82,69 @@ export function assignRealmTints(
       }
     }
   }
+  return neigh;
+}
+
+function farthestColour(r: number, color: readonly number[], centroids: readonly Centroid[], p: number): number {
+  const n = centroids.length;
+  let pick = -1;
+  let bestSep = -1;
+  for (let c = 0; c < p; c++) {
+    let sep = Infinity;
+    for (let m = 0; m < n; m++) {
+      if (m === r || color[m] !== c) continue;
+      sep = Math.min(sep, dist2(centroids[r]!, centroids[m]!));
+    }
+    if (sep > bestSep) {
+      bestSep = sep;
+      pick = c;
+    }
+  }
+  return pick < 0 ? 0 : pick;
+}
+
+function pickTint(
+  r: number,
+  neighbours: ReadonlySet<number>,
+  color: readonly number[],
+  conflict: Conflict,
+  centroids: readonly Centroid[],
+): number {
+  const p = conflict.length;
+  const idBlocked = new Array<boolean>(p).fill(false);
+  const cvdBlocked = new Array<boolean>(p).fill(false);
+  for (const m of neighbours) {
+    const c = color[m]!;
+    if (c < 0) continue;
+    idBlocked[c] = true;
+    for (let k = 0; k < p; k++) if (conflict[c]?.[k]) cvdBlocked[k] = true;
+  }
+
+  for (let c = 0; c < p; c++) {
+    if (!idBlocked[c] && !cvdBlocked[c]) return c;
+  }
+  for (let c = 0; c < p; c++) {
+    if (!idBlocked[c]) return c;
+  }
+  return farthestColour(r, color, centroids, p);
+}
+
+export function assignRealmTints(
+  centroids: readonly Centroid[],
+  adjacency: readonly ReadonlySet<number>[],
+  conflict: Conflict,
+  confusionDist: number,
+): number[] {
+  const n = centroids.length;
+  const near = confusionDist * confusionDist;
+  const neigh = tintNeighbours(centroids, adjacency, near);
 
   const order = Array.from({ length: n }, (_, i) => i).sort(
     (a, b) => neigh[b]!.size - neigh[a]!.size || a - b,
   );
 
   const color = new Array<number>(n).fill(-1);
-  for (const r of order) {
-    const idBlocked = new Array<boolean>(p).fill(false);
-    const cvdBlocked = new Array<boolean>(p).fill(false);
-    for (const m of neigh[r]!) {
-      const c = color[m]!;
-      if (c < 0) continue;
-      idBlocked[c] = true;
-      for (let k = 0; k < p; k++) if (conflict[c]?.[k]) cvdBlocked[k] = true;
-    }
-
-    let pick = -1;
-    for (let c = 0; c < p; c++) {
-      if (!idBlocked[c] && !cvdBlocked[c]) {
-        pick = c;
-        break;
-      }
-    }
-    if (pick < 0) {
-      for (let c = 0; c < p; c++) {
-        if (!idBlocked[c]) {
-          pick = c;
-          break;
-        }
-      }
-    }
-    if (pick < 0) {
-      let bestSep = -1;
-      for (let c = 0; c < p; c++) {
-        let sep = Infinity;
-        for (let m = 0; m < n; m++) {
-          if (m === r || color[m] !== c) continue;
-          sep = Math.min(sep, dist2(centroids[r]!, centroids[m]!));
-        }
-        if (sep > bestSep) {
-          bestSep = sep;
-          pick = c;
-        }
-      }
-      if (pick < 0) pick = 0;
-    }
-
-    color[r] = pick;
-  }
+  for (const r of order) color[r] = pickTint(r, neigh[r]!, color, conflict, centroids);
 
   return color;
 }
