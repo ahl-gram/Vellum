@@ -215,42 +215,48 @@ function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-// eslint-disable-next-line max-lines-per-function
-export function createNamer(rng: Rng, culture: Culture): Namer {
+function rawBaseOf(rng: Rng, culture: Culture): string {
+  const pattern = rng.pick(culture.patterns);
+  let s = "";
+  for (const ch of pattern) {
+    if (ch === "O") s += rng.pick(culture.onsets);
+    else if (ch === "N") s += rng.pick(culture.nuclei);
+    else s += rng.pick(culture.codas);
+  }
+  return s;
+}
+
+function baseRejected(s: string, suffix: string, standalone: boolean, usedBases: ReadonlyArray<string>): boolean {
+  if (s.length < 3 || s.length > 9 || s.length + suffix.length > 13) return true;
+  if (/[aeiou]{3}/.test(s) || /(.)\1\1/.test(s)) return true;
+  const stem = s.toLowerCase();
+  if (standalone && ENGLISH_BLOCKLIST.has(stem)) return true;
+  return isNearExisting(stem, usedBases);
+}
+
+function trimForSuffix(s: string, suffix: string): string {
+  if (!suffix) return s;
+  if (s.endsWith(suffix[0] as string)) return s.slice(0, -1);
+  if (/[aeiou]$/.test(s) && /^[aeiou]/.test(suffix)) return s.slice(0, -1);
+  return s;
+}
+
+function createBaseMaker(rng: Rng, culture: Culture): (suffix: string, standalone: boolean) => string {
   const used = new Set<string>();
   const usedBases: string[] = [];
   let overflow = 0;
+  const rawBase = (): string => rawBaseOf(rng, culture);
 
-  const rawBase = (): string => {
-    const pattern = rng.pick(culture.patterns);
-    let s = "";
-    for (const ch of pattern) {
-      if (ch === "O") s += rng.pick(culture.onsets);
-      else if (ch === "N") s += rng.pick(culture.nuclei);
-      else s += rng.pick(culture.codas);
-    }
-    return s;
-  };
-
-  const nearDuplicate = (stem: string): boolean => isNearExisting(stem, usedBases);
-
-  const uniqueBase = (suffix: string, standalone: boolean): string => {
+  return (suffix: string, standalone: boolean): string => {
     for (let attempt = 0; attempt < 30; attempt++) {
-      let s = rawBase();
-      if (s.length < 3 || s.length > 9 || s.length + suffix.length > 13) continue;
-      if (/[aeiou]{3}/.test(s) || /(.)\1\1/.test(s)) continue;
-      const stem = s.toLowerCase();
-      if (standalone && ENGLISH_BLOCKLIST.has(stem)) continue;
-      if (nearDuplicate(stem)) continue;
-      if (suffix) {
-        if (s.endsWith(suffix[0] as string)) s = s.slice(0, -1);
-        else if (/[aeiou]$/.test(s) && /^[aeiou]/.test(suffix)) s = s.slice(0, -1);
-        if (s.length < 3) continue;
-      }
+      const raw = rawBase();
+      if (baseRejected(raw, suffix, standalone, usedBases)) continue;
+      const s = trimForSuffix(raw, suffix);
+      if (suffix && s.length < 3) continue;
       const full = capitalize(s + suffix);
       if (!used.has(full.toLowerCase())) {
         used.add(full.toLowerCase());
-        usedBases.push(stem);
+        usedBases.push(raw.toLowerCase());
         return full;
       }
     }
@@ -265,6 +271,10 @@ export function createNamer(rng: Rng, culture: Culture): Namer {
     }
     return `${capitalize(rawBase())} ${overflow++}`;
   };
+}
+
+export function createNamer(rng: Rng, culture: Culture): Namer {
+  const uniqueBase = createBaseMaker(rng, culture);
 
   const templated = (templates: readonly string[]): string => {
     const t = rng.pick(templates);

@@ -69,18 +69,21 @@ export function hamletName(
   return null;
 }
 
-// eslint-disable-next-line max-lines-per-function
-export function hamletCandidates(world: World, window: UvWindow): HamletCandidate[] {
-  const { seed, gridW, gridH } = world.recipe;
-  const { data } = world.elev;
-  const slope = slopeField(world.elev);
-  const taken = worldNameSet(world);
-  const root = createRng(seed);
+type HamletLattice = {
+  readonly stepU: number;
+  readonly stepV: number;
+  readonly u0: number;
+  readonly u1: number;
+  readonly v0: number;
+  readonly v1: number;
+  readonly ix0: number;
+  readonly ix1: number;
+  readonly iy0: number;
+  readonly iy1: number;
+};
 
-  let worldMax = -Infinity;
-  for (const v of data) worldMax = Math.max(worldMax, v);
-  const span = Math.max(1e-9, worldMax - world.seaLevel);
-
+function hamletLattice(world: World, window: UvWindow): HamletLattice {
+  const { gridW, gridH } = world.recipe;
   const stepU = HAMLET_LATTICE_WORLD_CELLS / (gridW - 1);
   const stepV = HAMLET_LATTICE_WORLD_CELLS / (gridH - 1);
   const du = window.u1 - window.u0;
@@ -94,66 +97,109 @@ export function hamletCandidates(world: World, window: UvWindow): HamletCandidat
   const ix1 = Math.floor(u1 / stepU) + 1;
   const iy0 = Math.max(0, Math.floor(v0 / stepV) - 1);
   const iy1 = Math.floor(v1 / stepV) + 1;
+  return { stepU, stepV, u0, u1, v0, v1, ix0, ix1, iy0, iy1 };
+}
 
+type HamletGround = { readonly slope: Field; readonly span: number };
+
+function hamletSite(world: World, ground: HamletGround, wx: number, wy: number): number | null {
+  const { gridW, gridH } = world.recipe;
+  const { data } = world.elev;
+  if (
+    wx < EDGE_MARGIN || wy < EDGE_MARGIN ||
+    wx >= gridW - EDGE_MARGIN || wy >= gridH - EDGE_MARGIN
+  ) {
+    return null;
+  }
+  const i = wx + wy * gridW;
+  const e = data[i] as number;
+  if (e <= world.seaLevel) return null;
+  const biome = world.biomes[i] as number;
+  if (biome === BIOMES.snow || biome === BIOMES.alpine) return null;
+  if ((e - world.seaLevel) / ground.span > MAX_ELEV_BAND) return null;
+
+  return (
+    (1 - Math.min(1, (ground.slope.data[i] as number) * 8)) +
+    (BIOME_APPEAL[biome] ?? 0.3)
+  );
+}
+
+function shoreAndRiver(world: World, wx: number, wy: number): { harbor: boolean; onRiver: boolean } {
+  const { gridW, gridH } = world.recipe;
+  const { data } = world.elev;
+  let harbor = false;
+  let riverNear = false;
+  for (const [dx, dy] of NEIGHBORS_8) {
+    const nx = wx + dx;
+    const ny = wy + dy;
+    if (nx < 0 || nx >= gridW || ny < 0 || ny >= gridH) continue;
+    const ni = nx + ny * gridW;
+    if ((data[ni] as number) <= world.seaLevel) harbor = true;
+    if (world.riverCells[ni] === 1) riverNear = true;
+  }
+  return { harbor, onRiver: world.riverCells[wx + wy * gridW] === 1 || riverNear };
+}
+
+function hamletAt(
+  world: World,
+  lattice: HamletLattice,
+  ground: HamletGround,
+  cell: { readonly r: Rng; readonly ix: number; readonly iy: number },
+  taken: ReadonlySet<string>,
+): HamletCandidate | null {
+  const { gridW, gridH } = world.recipe;
+  const { stepU, stepV, u0, u1, v0, v1 } = lattice;
+  const { r, ix, iy } = cell;
+  // One fork per lattice cell, FIXED draw order within it: reordering draws re-rolls every hamlet.
+  const roll = r.next();
+  const ju = r.next();
+  const jv = r.next();
+  const u = (ix + 0.5 + (ju - 0.5) * JITTER) * stepU;
+  const v = (iy + 0.5 + (jv - 0.5) * JITTER) * stepV;
+  if (u < u0 || u > u1 || v < v0 || v > v1) return null;
+
+  const wx = Math.round(u * (gridW - 1));
+  const wy = Math.round(v * (gridH - 1));
+  const score = hamletSite(world, ground, wx, wy);
+  if (score === null || roll >= DENSITY * score) return null;
+
+  const tooNear = world.settlements.some(
+    (s) =>
+      Math.hypot(s.x - u * (gridW - 1), s.y - v * (gridH - 1)) <
+      HAMLET_SPACING_WORLD_CELLS,
+  );
+  if (tooNear) return null;
+
+  const { harbor, onRiver } = shoreAndRiver(world, wx, wy);
+
+  const name = hamletName(r.fork("name"), world.culture, taken);
+  if (name === null) return null;
+
+  const presentYear = world.title.year;
+  const founded =
+    presentYear - 8 - r.fork("age").int(Math.max(1, Math.min(240, presentYear - 16)));
+
+  return { u, v, name, harbor, onRiver, score, founded };
+}
+
+export function hamletCandidates(world: World, window: UvWindow): HamletCandidate[] {
+  const { seed } = world.recipe;
+  const { data } = world.elev;
+  const slope = slopeField(world.elev);
+  const taken = worldNameSet(world);
+  const root = createRng(seed);
+
+  let worldMax = -Infinity;
+  for (const v of data) worldMax = Math.max(worldMax, v);
+  const span = Math.max(1e-9, worldMax - world.seaLevel);
+
+  const lattice = hamletLattice(world, window);
   const out: HamletCandidate[] = [];
-  for (let iy = iy0; iy <= iy1; iy++) {
-    for (let ix = ix0; ix <= ix1; ix++) {
-      // One fork per lattice cell, FIXED draw order within it: reordering draws re-rolls every hamlet.
+  for (let iy = lattice.iy0; iy <= lattice.iy1; iy++) {
+    for (let ix = lattice.ix0; ix <= lattice.ix1; ix++) {
       const r = root.fork(`hamlet:${ix},${iy}`);
-      const roll = r.next();
-      const ju = r.next();
-      const jv = r.next();
-      const u = (ix + 0.5 + (ju - 0.5) * JITTER) * stepU;
-      const v = (iy + 0.5 + (jv - 0.5) * JITTER) * stepV;
-      if (u < u0 || u > u1 || v < v0 || v > v1) continue;
-
-      const wx = Math.round(u * (gridW - 1));
-      const wy = Math.round(v * (gridH - 1));
-      if (
-        wx < EDGE_MARGIN || wy < EDGE_MARGIN ||
-        wx >= gridW - EDGE_MARGIN || wy >= gridH - EDGE_MARGIN
-      ) {
-        continue;
-      }
-      const i = wx + wy * gridW;
-      const e = data[i] as number;
-      if (e <= world.seaLevel) continue;
-      const biome = world.biomes[i] as number;
-      if (biome === BIOMES.snow || biome === BIOMES.alpine) continue;
-      if ((e - world.seaLevel) / span > MAX_ELEV_BAND) continue;
-
-      const score =
-        (1 - Math.min(1, (slope.data[i] as number) * 8)) +
-        (BIOME_APPEAL[biome] ?? 0.3);
-      if (roll >= DENSITY * score) continue;
-
-      const tooNear = world.settlements.some(
-        (s) =>
-          Math.hypot(s.x - u * (gridW - 1), s.y - v * (gridH - 1)) <
-          HAMLET_SPACING_WORLD_CELLS,
-      );
-      if (tooNear) continue;
-
-      let harbor = false;
-      let riverNear = false;
-      for (const [dx, dy] of NEIGHBORS_8) {
-        const nx = wx + dx;
-        const ny = wy + dy;
-        if (nx < 0 || nx >= gridW || ny < 0 || ny >= gridH) continue;
-        const ni = nx + ny * gridW;
-        if ((data[ni] as number) <= world.seaLevel) harbor = true;
-        if (world.riverCells[ni] === 1) riverNear = true;
-      }
-      const onRiver = world.riverCells[i] === 1 || riverNear;
-
-      const name = hamletName(r.fork("name"), world.culture, taken);
-      if (name === null) continue;
-
-      const presentYear = world.title.year;
-      const founded =
-        presentYear - 8 - r.fork("age").int(Math.max(1, Math.min(240, presentYear - 16)));
-
-      out.push({ u, v, name, harbor, onRiver, score, founded });
+      const hamlet = hamletAt(world, lattice, { slope, span }, { r, ix, iy }, taken);
+      if (hamlet) out.push(hamlet);
     }
   }
   return out;

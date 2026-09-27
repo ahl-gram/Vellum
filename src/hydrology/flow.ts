@@ -9,12 +9,7 @@ export type FlowResult = {
 
 const EPS = 1e-7;
 
-// eslint-disable-next-line max-lines-per-function
-export function computeFlow(
-  elev: Field,
-  seaLevel: number,
-  rain?: Float64Array,
-): FlowResult {
+function priorityFill(elev: Field, seaLevel: number): Float64Array {
   const { w, h, data } = elev;
   const n = w * h;
 
@@ -54,7 +49,12 @@ export function computeFlow(
       heap.push(ni, fill[ni]);
     }
   }
+  return fill;
+}
 
+function flowDirections(elev: Field, seaLevel: number, fill: Float64Array): Int32Array {
+  const { w, h, data } = elev;
+  const n = w * h;
   const dir = new Int32Array(n).fill(-1);
   for (let y = 0; y < h; y++) {
     for (let x = 0; x < w; x++) {
@@ -76,7 +76,12 @@ export function computeFlow(
       dir[i] = best;
     }
   }
+  return dir;
+}
 
+function accumulate(elev: Field, seaLevel: number, fill: Float64Array, dir: Int32Array, rain?: Float64Array): Float64Array {
+  const { data } = elev;
+  const n = data.length;
   const acc = new Float64Array(n);
   const landOrder: number[] = [];
   for (let i = 0; i < n; i++) {
@@ -88,6 +93,16 @@ export function computeFlow(
     const d = dir[i] as number;
     if (d >= 0) acc[d] = (acc[d] as number) + acc[i];
   }
+  return acc;
+}
 
+export function computeFlow(
+  elev: Field,
+  seaLevel: number,
+  rain?: Float64Array,
+): FlowResult {
+  const fill = priorityFill(elev, seaLevel);
+  const dir = flowDirections(elev, seaLevel, fill);
+  const acc = accumulate(elev, seaLevel, fill, dir, rain);
   return { fill, dir, acc };
 }

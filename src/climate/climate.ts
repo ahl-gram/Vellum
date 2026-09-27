@@ -30,29 +30,38 @@ const LAPSE = 0.85;
 const TEMP_SEED_SALT = 0x1b873593;
 const MOIST_SEED_SALT = 0xcc9e2d51;
 
-// eslint-disable-next-line max-lines-per-function
-export function computeClimate(
-  elev: Field,
-  seaLevel: number,
-  seed: number,
-  opts: ClimateOptions,
-): Climate {
-  const { w, h, data } = elev;
-  const band = BANDS[opts.band ?? "temperate"];
-  const aspect = opts.worldAspect ?? (w - 1) / (h - 1);
+type WindowMap = { readonly toU: (x: number) => number; readonly toV: (y: number) => number };
+
+function windowMap(elev: Field, opts: ClimateOptions): WindowMap {
+  const { w, h } = elev;
   const win = opts.window ?? { u0: 0, v0: 0, u1: 1, v1: 1 };
   const toU = (x: number): number => win.u0 + (x / (w - 1)) * (win.u1 - win.u0);
   const toV = (y: number): number => win.v0 + (y / (h - 1)) * (win.v1 - win.v0);
+  return { toU, toV };
+}
 
-  let span = opts.elevSpan;
+function climateElevSpan(elev: Field, seaLevel: number, given: number | undefined): number {
+  let span = given;
   if (span === undefined) {
     let maxElev = -Infinity;
-    for (const v of data) maxElev = Math.max(maxElev, v);
+    for (const v of elev.data) maxElev = Math.max(maxElev, v);
     span = maxElev - seaLevel;
   }
-  const elevSpan = Math.max(1e-9, span);
+  return Math.max(1e-9, span);
+}
 
-  const temperature = createField(w, h, (x, y) => {
+type ClimateFrame = {
+  readonly seaLevel: number;
+  readonly seed: number;
+  readonly aspect: number;
+  readonly map: WindowMap;
+};
+
+function temperatureField(elev: Field, frame: ClimateFrame, band: { base: number; latSpan: number }, elevSpan: number): Field {
+  const { w, h, data } = elev;
+  const { seaLevel, seed, aspect, map } = frame;
+  const { toU, toV } = map;
+  return createField(w, h, (x, y) => {
     const lat = toV(y); // south (high v) is warm
     const u = toU(x);
     const wobble =
@@ -63,15 +72,13 @@ export function computeClimate(
     const above = Math.max(0, e - seaLevel) / elevSpan;
     return clamp(band.base + band.latSpan * lat + wobble - above * LAPSE, 0, 1);
   });
+}
 
-  const windRain = computeWindMoisture(elev, seaLevel, opts.windDir, !opts.window);
-
-  const riverCells = opts.riverCells;
-  const riverDist = riverCells
-    ? bfsDistance(w, h, (x, y) => riverCells[x + y * w] === 1)
-    : null;
-
-  const moisture = createField(w, h, (x, y) => {
+function moistureField(elev: Field, frame: ClimateFrame, windRain: Float64Array, riverDist: Float64Array | null): Field {
+  const { w, h } = elev;
+  const { seed, aspect, map } = frame;
+  const { toU, toV } = map;
+  return createField(w, h, (x, y) => {
     const u = toU(x);
     const v = toV(y);
     const base =
@@ -87,6 +94,30 @@ export function computeClimate(
       : 0;
     return clamp(base + windBonus + riverBonus, 0, 1);
   });
+}
+
+export function computeClimate(
+  elev: Field,
+  seaLevel: number,
+  seed: number,
+  opts: ClimateOptions,
+): Climate {
+  const { w, h } = elev;
+  const band = BANDS[opts.band ?? "temperate"];
+  const aspect = opts.worldAspect ?? (w - 1) / (h - 1);
+  const frame: ClimateFrame = { seaLevel, seed, aspect, map: windowMap(elev, opts) };
+  const elevSpan = climateElevSpan(elev, seaLevel, opts.elevSpan);
+
+  const temperature = temperatureField(elev, frame, band, elevSpan);
+
+  const windRain = computeWindMoisture(elev, seaLevel, opts.windDir, !opts.window);
+
+  const riverCells = opts.riverCells;
+  const riverDist = riverCells
+    ? bfsDistance(w, h, (x, y) => riverCells[x + y * w] === 1)
+    : null;
+
+  const moisture = moistureField(elev, frame, windRain, riverDist);
 
   return { temperature, moisture };
 }

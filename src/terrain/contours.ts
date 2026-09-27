@@ -22,7 +22,46 @@ function key(x: number, y: number): string {
   return `${Math.round(x * 1e6)},${Math.round(y * 1e6)}`;
 }
 
-// eslint-disable-next-line max-lines-per-function
+function cellSegments(x: number, y: number, corners: readonly [number, number, number, number], idx: number, iso: number): Seg[] {
+  const [a, b, c, d] = corners;
+  const segs: Seg[] = [];
+
+  const top: Point = [x + crossT(a, b, iso), y];
+  const right: Point = [x + 1, y + crossT(b, c, iso)];
+  const bottom: Point = [x + crossT(d, c, iso), y + 1];
+  const left: Point = [x, y + crossT(a, d, iso)];
+
+  const add = (p: Point, q: Point): void => {
+    segs.push([p[0], p[1], q[0], q[1]]);
+  };
+
+  switch (idx) {
+    case 1: add(bottom, left); break;
+    case 2: add(right, bottom); break;
+    case 3: add(right, left); break;
+    case 4: add(top, right); break;
+    case 5: {
+      const center = (a + b + c + d) / 4;
+      if (center > iso) { add(top, left); add(bottom, right); } else { add(top, right); add(bottom, left); }
+      break;
+    }
+    case 6: add(top, bottom); break;
+    case 7: add(top, left); break;
+    case 8: add(left, top); break;
+    case 9: add(bottom, top); break;
+    case 10: {
+      const center = (a + b + c + d) / 4;
+      if (center > iso) { add(right, top); add(left, bottom); } else { add(left, top); add(right, bottom); }
+      break;
+    }
+    case 11: add(right, top); break;
+    case 12: add(left, right); break;
+    case 13: add(bottom, right); break;
+    case 14: add(left, bottom); break;
+  }
+  return segs;
+}
+
 export function marchingSquares(field: Field, iso: number): Contour[] {
   const { w, h, data } = field;
   const segs: Seg[] = [];
@@ -37,60 +76,14 @@ export function marchingSquares(field: Field, iso: number): Contour[] {
       const idx =
         (a > iso ? 8 : 0) | (b > iso ? 4 : 0) | (c > iso ? 2 : 0) | (d > iso ? 1 : 0);
       if (idx === 0 || idx === 15) continue;
-
-      const top: Point = [x + crossT(a, b, iso), y];
-      const right: Point = [x + 1, y + crossT(b, c, iso)];
-      const bottom: Point = [x + crossT(d, c, iso), y + 1];
-      const left: Point = [x, y + crossT(a, d, iso)];
-
-      const add = (p: Point, q: Point): void => {
-        segs.push([p[0], p[1], q[0], q[1]]);
-      };
-
-      switch (idx) {
-        case 1: add(bottom, left); break;
-        case 2: add(right, bottom); break;
-        case 3: add(right, left); break;
-        case 4: add(top, right); break;
-        case 5: {
-          const center = (a + b + c + d) / 4;
-          if (center > iso) {
-            add(top, left);
-            add(bottom, right);
-          } else {
-            add(top, right);
-            add(bottom, left);
-          }
-          break;
-        }
-        case 6: add(top, bottom); break;
-        case 7: add(top, left); break;
-        case 8: add(left, top); break;
-        case 9: add(bottom, top); break;
-        case 10: {
-          const center = (a + b + c + d) / 4;
-          if (center > iso) {
-            add(right, top);
-            add(left, bottom);
-          } else {
-            add(left, top);
-            add(right, bottom);
-          }
-          break;
-        }
-        case 11: add(right, top); break;
-        case 12: add(left, right); break;
-        case 13: add(bottom, right); break;
-        case 14: add(left, bottom); break;
-      }
+      for (const s of cellSegments(x, y, [a, b, c, d], idx, iso)) segs.push(s);
     }
   }
 
   return chainSegments(segs);
 }
 
-// eslint-disable-next-line max-lines-per-function
-function chainSegments(segs: ReadonlyArray<Seg>): Contour[] {
+function startIndex(segs: ReadonlyArray<Seg>): Map<string, number[]> {
   const byStart = new Map<string, number[]>();
   for (let i = 0; i < segs.length; i++) {
     const s = segs[i] as Seg;
@@ -99,11 +92,21 @@ function chainSegments(segs: ReadonlyArray<Seg>): Contour[] {
     if (list) list.push(i);
     else byStart.set(k, [i]);
   }
+  return byStart;
+}
 
-  const used = new Uint8Array(segs.length);
-  const contours: Contour[] = [];
+function headSegment(segs: ReadonlyArray<Seg>, used: Uint8Array, headKey: string): number {
+  for (let j = 0; j < segs.length; j++) {
+    if (used[j]) continue;
+    const s = segs[j] as Seg;
+    if (key(s[2], s[3]) === headKey) return j;
+  }
+  return -1;
+}
 
-  const takeFrom = (k: string): number => {
+function createStartTaker(segs: ReadonlyArray<Seg>): (k: string, used: Uint8Array) => number {
+  const byStart = startIndex(segs);
+  return (k: string, used: Uint8Array): number => {
     const list = byStart.get(k);
     if (!list) return -1;
     while (list.length > 0) {
@@ -112,65 +115,71 @@ function chainSegments(segs: ReadonlyArray<Seg>): Contour[] {
     }
     return -1;
   };
+}
 
-  for (let i = 0; i < segs.length; i++) {
-    if (used[i]) continue;
-    used[i] = 1;
-    const first = segs[i] as Seg;
+function createChainWalker(segs: ReadonlyArray<Seg>): (i: number) => Contour | null {
+  const takeFrom = createStartTaker(segs);
+  const used = new Uint8Array(segs.length);
+
+  const walkForward = (first: Seg): { points: Point[]; closed: boolean } => {
     const points: Point[] = [[first[0], first[1]], [first[2], first[3]]];
     const startKey = key(first[0], first[1]);
-
     let endKey = key(first[2], first[3]);
     while (endKey !== startKey) {
-      const next = takeFrom(endKey);
+      const next = takeFrom(endKey, used);
       if (next === -1) break;
       used[next] = 1;
       const s = segs[next] as Seg;
       points.push([s[2], s[3]]);
       endKey = key(s[2], s[3]);
     }
+    return { points, closed: endKey === startKey };
+  };
 
-    const closed = endKey === startKey;
-    if (closed) {
-      contours.push({ points, closed });
-      continue;
-    }
-
+  const walkBackward = (startKey: string): Point[] => {
     const prefix: Point[] = [];
     let headKey = startKey;
     for (;;) {
-      let found = -1;
-      for (let j = 0; j < segs.length; j++) {
-        if (used[j]) continue;
-        const s = segs[j] as Seg;
-        if (key(s[2], s[3]) === headKey) {
-          found = j;
-          break;
-        }
-      }
+      const found = headSegment(segs, used, headKey);
       if (found === -1) break;
       used[found] = 1;
       const s = segs[found] as Seg;
       prefix.push([s[0], s[1]]);
       headKey = key(s[0], s[1]);
     }
-    prefix.reverse();
-    contours.push({ points: [...prefix, ...points], closed: false });
-  }
+    return prefix.reverse();
+  };
 
+  return (i: number): Contour | null => {
+    if (used[i]) return null;
+    used[i] = 1;
+    const first = segs[i] as Seg;
+    const { points, closed } = walkForward(first);
+    if (closed) return { points, closed };
+    return { points: [...walkBackward(key(first[0], first[1])), ...points], closed: false };
+  };
+}
+
+function chainSegments(segs: ReadonlyArray<Seg>): Contour[] {
+  const chainFrom = createChainWalker(segs);
+  const contours: Contour[] = [];
+  for (let i = 0; i < segs.length; i++) {
+    const contour = chainFrom(i);
+    if (contour) contours.push(contour);
+  }
   return contours;
 }
 
-// eslint-disable-next-line max-lines-per-function
-export function closeChainsOnBoundary(
-  contours: ReadonlyArray<Contour>,
-  w: number,
-  h: number,
-): Contour[] {
+type BoundaryFrame = {
+  readonly tOf: (p: Point) => number;
+  readonly mod: (a: number) => number;
+  readonly cornersBetween: (from: number, to: number) => Point[];
+};
+
+function boundaryFrame(w: number, h: number, eps: number): BoundaryFrame {
   const W = w - 1;
   const H = h - 1;
   const P = 2 * W + 2 * H;
-  const eps = 1e-4;
 
   // Boundary parameter t: left edge walking down, bottom edge right, right edge up, top edge left.
   const tOf = (p: Point): number => {
@@ -191,21 +200,53 @@ export function closeChainsOnBoundary(
 
   const mod = (a: number): number => ((a % P) + P) % P;
 
+  const cornersBetween = (from: number, to: number): Point[] => {
+    const span = mod(to - from);
+    return CORNERS
+      .map(([tc, pt]) => ({ delta: mod(tc - from), pt }))
+      .filter(({ delta }) => delta > eps && delta < span - eps)
+      .sort((a, b) => a.delta - b.delta)
+      .map(({ pt }) => pt);
+  };
+
+  return { tOf, mod, cornersBetween };
+}
+
+function nearestOpenStart(
+  open: ReadonlyArray<Contour>,
+  used: ReadonlyArray<boolean>,
+  endT: number,
+  frame: BoundaryFrame,
+): { bestJ: number; bestDelta: number } {
+  const { tOf, mod } = frame;
+  let bestJ = -1;
+  let bestDelta = Infinity;
+  for (let j = 0; j < open.length; j++) {
+    if (used[j]) continue;
+    const c = open[j] as Contour;
+    const delta = mod(tOf(c.points[0] as Point) - endT);
+    if (delta < bestDelta) {
+      bestDelta = delta;
+      bestJ = j;
+    }
+  }
+  return { bestJ, bestDelta };
+}
+
+export function closeChainsOnBoundary(
+  contours: ReadonlyArray<Contour>,
+  w: number,
+  h: number,
+): Contour[] {
+  const frame = boundaryFrame(w, h, 1e-4);
+  const { tOf, mod, cornersBetween } = frame;
+
   const out: Contour[] = contours.filter((c) => c.closed).map((c) => ({
     points: [...c.points],
     closed: true,
   }));
   const open = contours.filter((c) => !c.closed);
   const used = new Array<boolean>(open.length).fill(false);
-
-  const pushCornersBetween = (ring: Point[], from: number, to: number): void => {
-    const span = mod(to - from);
-    const passed = CORNERS
-      .map(([tc, pt]) => ({ delta: mod(tc - from), pt }))
-      .filter(({ delta }) => delta > eps && delta < span - eps)
-      .sort((a, b) => a.delta - b.delta);
-    for (const { pt } of passed) ring.push(pt);
-  };
 
   for (let i = 0; i < open.length; i++) {
     if (used[i]) continue;
@@ -216,25 +257,15 @@ export function closeChainsOnBoundary(
     let endT = tOf(first.points[first.points.length - 1] as Point);
 
     for (let guard = 0; guard <= open.length + 4; guard++) {
-      let bestJ = -1;
-      let bestDelta = Infinity;
-      for (let j = 0; j < open.length; j++) {
-        if (used[j]) continue;
-        const c = open[j] as Contour;
-        const delta = mod(tOf(c.points[0] as Point) - endT);
-        if (delta < bestDelta) {
-          bestDelta = delta;
-          bestJ = j;
-        }
-      }
+      const { bestJ, bestDelta } = nearestOpenStart(open, used, endT, frame);
       const selfDelta = mod(homeT - endT);
       if (bestJ === -1 || selfDelta <= bestDelta) {
-        pushCornersBetween(ring, endT, homeT);
+        ring.push(...cornersBetween(endT, homeT));
         break;
       }
       const next = open[bestJ] as Contour;
       used[bestJ] = true;
-      pushCornersBetween(ring, endT, tOf(next.points[0] as Point));
+      ring.push(...cornersBetween(endT, tOf(next.points[0] as Point)));
       ring.push(...next.points);
       endT = tOf(next.points[next.points.length - 1] as Point);
     }

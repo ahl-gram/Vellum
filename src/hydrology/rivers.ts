@@ -34,23 +34,17 @@ export function isMajorRiver(r: River): boolean {
   return r.endsInOcean && r.points.length >= 14 && mouthAcc > 0;
 }
 
-// eslint-disable-next-line max-lines-per-function
-export function extractRivers(
-  elev: Field,
-  flow: FlowResult,
-  seaLevel: number,
-  opts: RiverOptions = {},
-): River[] {
-  const { quantileQ = 0.985, minAcc = 8, minLength = 3, absoluteThreshold } = opts;
-  const { w, data } = elev;
-  const { dir, acc } = flow;
+function riverMask(elev: Field, flow: FlowResult, seaLevel: number, opts: RiverOptions): Uint8Array | null {
+  const { quantileQ = 0.985, minAcc = 8, absoluteThreshold } = opts;
+  const { data } = elev;
+  const { acc } = flow;
   const n = data.length;
 
   const landAcc: number[] = [];
   for (let i = 0; i < n; i++) {
     if ((data[i] as number) > seaLevel) landAcc.push(acc[i] as number);
   }
-  if (landAcc.length === 0) return [];
+  if (landAcc.length === 0) return null;
   const threshold = absoluteThreshold ?? riverThreshold(landAcc, quantileQ, minAcc);
 
   const isRiver = new Uint8Array(n);
@@ -58,7 +52,12 @@ export function extractRivers(
     isRiver[i] =
       (data[i] as number) > seaLevel && (acc[i] as number) >= threshold ? 1 : 0;
   }
+  return isRiver;
+}
 
+function riverGraph(elev: Field, dir: Int32Array, seaLevel: number, isRiver: Uint8Array): { children: Map<number, number[]>; mouths: number[] } {
+  const { data } = elev;
+  const n = data.length;
   const children = new Map<number, number[]>();
   const mouths: number[] = [];
   for (let i = 0; i < n; i++) {
@@ -73,12 +72,26 @@ export function extractRivers(
       else children.set(d, [i]);
     }
   }
+  return { children, mouths };
+}
 
-  const point = (i: number): RiverPoint => ({
+function riverPoint(i: number, w: number, acc: Float64Array): RiverPoint {
+  return {
     x: i % w,
     y: (i / w) | 0,
     acc: acc[i] as number,
-  });
+  };
+}
+
+function traceRivers(
+  w: number,
+  flow: FlowResult,
+  graph: { children: ReadonlyMap<number, ReadonlyArray<number>>; mouths: ReadonlyArray<number> },
+  minLength: number,
+): River[] {
+  const { dir, acc } = flow;
+  const { children, mouths } = graph;
+  const point = (i: number): RiverPoint => riverPoint(i, w, acc);
 
   type Trace = { cell: number; tail: RiverPoint; endsInOcean: boolean };
   const stack: Trace[] = [];
@@ -114,4 +127,16 @@ export function extractRivers(
   }
 
   return rivers;
+}
+
+export function extractRivers(
+  elev: Field,
+  flow: FlowResult,
+  seaLevel: number,
+  opts: RiverOptions = {},
+): River[] {
+  const { minLength = 3 } = opts;
+  const isRiver = riverMask(elev, flow, seaLevel, opts);
+  if (isRiver === null) return [];
+  return traceRivers(elev.w, flow, riverGraph(elev, flow.dir, seaLevel, isRiver), minLength);
 }

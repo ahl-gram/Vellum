@@ -89,9 +89,18 @@ const COAST_WARP_OCTAVES = 5;
 const BASE_FBM_OCTAVES = 6;
 export const MAX_DETAIL = OCTAVE_OFFSETS.length - BASE_FBM_OCTAVES;
 
-/** Elevation is a pure function of world-space (u, v) and the seed, so a finer grid over the same recipe samples the identical landscape. */
-// eslint-disable-next-line max-lines-per-function
-export function buildHeightfield(params: TerrainParams): Field {
+type TerrainSettings = {
+  readonly seed: number;
+  readonly shape: Shape;
+  readonly featureScale: number;
+  readonly warpStrength: number;
+  readonly ridgedWeight: number;
+  readonly coastWarp: number;
+  readonly detail: number;
+  readonly aspect: number;
+};
+
+function terrainSettings(params: TerrainParams): TerrainSettings {
   const { seed, gridW, gridH, mapType } = params;
   const shape = SHAPES[mapType];
   const featureScale = params.featureScale ?? shape.featureScale;
@@ -103,55 +112,71 @@ export function buildHeightfield(params: TerrainParams): Field {
     throw new RangeError(`detail must be an integer in [0, ${MAX_DETAIL}], got ${detail}`);
   }
   const aspect = params.worldAspect ?? (gridW - 1) / (gridH - 1);
+  return { seed, shape, featureScale, warpStrength, ridgedWeight, coastWarp, detail, aspect };
+}
+
+function coastDistance(u: number, v: number, s: TerrainSettings): number {
+  const { seed, coastWarp, detail, aspect } = s;
+  const dx = (u - 0.5) * 2;
+  const dy = (v - 0.5) * 2;
+  let d = Math.hypot(dx, dy);
+  if (coastWarp !== 0) {
+    const wx = fbm2(
+      u * COAST_WARP_SCALE * aspect,
+      v * COAST_WARP_SCALE,
+      (seed ^ COAST_SEED_SALT_X) >>> 0,
+      { octaves: COAST_WARP_OCTAVES + detail, normOctaves: COAST_WARP_OCTAVES },
+    );
+    const wy = fbm2(
+      u * COAST_WARP_SCALE * aspect + 41.7,
+      v * COAST_WARP_SCALE + 17.3,
+      (seed ^ COAST_SEED_SALT_Y) >>> 0,
+      { octaves: COAST_WARP_OCTAVES + detail, normOctaves: COAST_WARP_OCTAVES },
+    );
+    d = Math.hypot(dx + coastWarp * wx, dy + coastWarp * wy);
+  }
+  return d;
+}
+
+function elevationAt(u: number, v: number, s: TerrainSettings): number {
+  const { seed, shape, featureScale, warpStrength, ridgedWeight, detail, aspect } = s;
+  const nx = u * featureScale * aspect;
+  const ny = v * featureScale;
+
+  const base = warped2(nx, ny, seed, {
+    octaves: BASE_FBM_OCTAVES + detail,
+    normOctaves: BASE_FBM_OCTAVES,
+    warpStrength,
+  });
+  const e01 = (base + 1) / 2;
+
+  const ridge = ridged2(
+    nx * 1.8 + 31.4,
+    ny * 1.8 + 27.2,
+    (seed ^ RIDGE_SEED_SALT) >>> 0,
+    { octaves: 5 },
+  );
+  const ridgeMask = smoothstep(0.52, 0.78, e01);
+  let e = e01 + ridgedWeight * ridge * ridgeMask;
+
+  const d = coastDistance(u, v, s);
+  const falloff = 1 - smoothstep(shape.falloffStart, shape.falloffEnd, d);
+  e = e * lerp(shape.baseKeep, 1, falloff) - (1 - falloff) * shape.sinkDepth;
+
+  const edge = Math.min(u, 1 - u, v, 1 - v);
+  e -= (1 - smoothstep(0, 0.05, edge)) * 0.8;
+
+  return e;
+}
+
+export function buildHeightfield(params: TerrainParams): Field {
+  const { gridW, gridH } = params;
+  const settings = terrainSettings(params);
   const win = params.window ?? { u0: 0, v0: 0, u1: 1, v1: 1 };
 
   return createField(gridW, gridH, (x, y) => {
     const u = win.u0 + (x / (gridW - 1)) * (win.u1 - win.u0);
     const v = win.v0 + (y / (gridH - 1)) * (win.v1 - win.v0);
-    const nx = u * featureScale * aspect;
-    const ny = v * featureScale;
-
-    const base = warped2(nx, ny, seed, {
-      octaves: BASE_FBM_OCTAVES + detail,
-      normOctaves: BASE_FBM_OCTAVES,
-      warpStrength,
-    });
-    const e01 = (base + 1) / 2;
-
-    const ridge = ridged2(
-      nx * 1.8 + 31.4,
-      ny * 1.8 + 27.2,
-      (seed ^ RIDGE_SEED_SALT) >>> 0,
-      { octaves: 5 },
-    );
-    const ridgeMask = smoothstep(0.52, 0.78, e01);
-    let e = e01 + ridgedWeight * ridge * ridgeMask;
-
-    const dx = (u - 0.5) * 2;
-    const dy = (v - 0.5) * 2;
-    let d = Math.hypot(dx, dy);
-    if (coastWarp !== 0) {
-      const wx = fbm2(
-        u * COAST_WARP_SCALE * aspect,
-        v * COAST_WARP_SCALE,
-        (seed ^ COAST_SEED_SALT_X) >>> 0,
-        { octaves: COAST_WARP_OCTAVES + detail, normOctaves: COAST_WARP_OCTAVES },
-      );
-      const wy = fbm2(
-        u * COAST_WARP_SCALE * aspect + 41.7,
-        v * COAST_WARP_SCALE + 17.3,
-        (seed ^ COAST_SEED_SALT_Y) >>> 0,
-        { octaves: COAST_WARP_OCTAVES + detail, normOctaves: COAST_WARP_OCTAVES },
-      );
-      d = Math.hypot(dx + coastWarp * wx, dy + coastWarp * wy);
-    }
-    const falloff = 1 - smoothstep(shape.falloffStart, shape.falloffEnd, d);
-    e = e * lerp(shape.baseKeep, 1, falloff) - (1 - falloff) * shape.sinkDepth;
-
-    // hard guarantee: outermost fringe is always deep water
-    const edge = Math.min(u, 1 - u, v, 1 - v);
-    e -= (1 - smoothstep(0, 0.05, edge)) * 0.8;
-
-    return e;
+    return elevationAt(u, v, settings);
   });
 }

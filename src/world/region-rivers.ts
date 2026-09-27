@@ -110,8 +110,64 @@ export function extendMouthToWater(
   return points;
 }
 
+type RegionFrame = {
+  readonly world: World;
+  readonly window: UvWindow;
+  readonly gridW: number;
+  readonly gridH: number;
+  readonly elev: Field;
+  readonly flow: FlowResult;
+  readonly seaLevel: number;
+};
+
+function projectedMajors(f: RegionFrame, density: number): River[] {
+  const { world, window, gridW, gridH, elev, flow, seaLevel } = f;
+  const mouthReach = mouthReachCells(gridW, window, world.recipe.gridW);
+  return projectWorldMajors(world, window, gridW, gridH, density).map((river) =>
+    river.endsInOcean
+      ? {
+          points: extendMouthToWater(river.points, elev, flow, seaLevel, mouthReach),
+          endsInOcean: true,
+        }
+      : river,
+  );
+}
+
+function shadowCells(cx: number, cy: number, gridW: number, gridH: number): number[] {
+  const cells: number[] = [];
+  for (let dy = -SHADOW_RADIUS; dy <= SHADOW_RADIUS; dy++) {
+    for (let dx = -SHADOW_RADIUS; dx <= SHADOW_RADIUS; dx++) {
+      const nx = cx + dx;
+      const ny = cy + dy;
+      if (nx >= 0 && nx < gridW && ny >= 0 && ny < gridH) cells.push(nx + ny * gridW);
+    }
+  }
+  return cells;
+}
+
+function majorShadow(projected: ReadonlyArray<River>, gridW: number, gridH: number): Set<number> {
+  const shadow = new Set<number>();
+  for (const river of projected) {
+    for (const p of river.points) {
+      const cx = Math.round(p.x);
+      const cy = Math.round(p.y);
+      for (const cell of shadowCells(cx, cy, gridW, gridH)) shadow.add(cell);
+    }
+  }
+  return shadow;
+}
+
+function uncoveredDetail(extracted: ReadonlyArray<River>, shadow: ReadonlySet<number>, gridW: number): River[] {
+  return extracted.filter((river) => {
+    let covered = 0;
+    for (const p of river.points) {
+      if (shadow.has(Math.round(p.x) + Math.round(p.y) * gridW)) covered++;
+    }
+    return covered / river.points.length < SHADOW_FRACTION;
+  });
+}
+
 /** A cropped window loses upstream drainage, and NO threshold exponent restores it (missing area, not miscalibration): so extract at a density-scaled absolute threshold, and lay the parent's major rivers in as the authoritative through-network. */
-// eslint-disable-next-line max-lines-per-function
 export function anchorRegionRivers(
   world: World,
   window: UvWindow,
@@ -131,40 +187,9 @@ export function anchorRegionRivers(
   const absoluteThreshold = worldRiverThreshold(world) * density;
   const extracted = extractRivers(elev, flow, seaLevel, { absoluteThreshold });
 
-  const mouthReach = mouthReachCells(gridW, window, world.recipe.gridW);
-  const projected = projectWorldMajors(world, window, gridW, gridH, density).map((river) =>
-    river.endsInOcean
-      ? {
-          points: extendMouthToWater(river.points, elev, flow, seaLevel, mouthReach),
-          endsInOcean: true,
-        }
-      : river,
-  );
+  const projected = projectedMajors({ world, window, gridW, gridH, elev, flow, seaLevel }, density);
   if (projected.length === 0) return extracted;
 
-  const shadow = new Set<number>();
-  for (const river of projected) {
-    for (const p of river.points) {
-      const cx = Math.round(p.x);
-      const cy = Math.round(p.y);
-      for (let dy = -SHADOW_RADIUS; dy <= SHADOW_RADIUS; dy++) {
-        for (let dx = -SHADOW_RADIUS; dx <= SHADOW_RADIUS; dx++) {
-          const nx = cx + dx;
-          const ny = cy + dy;
-          // eslint-disable-next-line max-depth
-          if (nx >= 0 && nx < gridW && ny >= 0 && ny < gridH) shadow.add(nx + ny * gridW);
-        }
-      }
-    }
-  }
-
-  const newDetail = extracted.filter((river) => {
-    let covered = 0;
-    for (const p of river.points) {
-      if (shadow.has(Math.round(p.x) + Math.round(p.y) * gridW)) covered++;
-    }
-    return covered / river.points.length < SHADOW_FRACTION;
-  });
-
-  return [...projected, ...newDetail];
+  const shadow = majorShadow(projected, gridW, gridH);
+  return [...projected, ...uncoveredDetail(extracted, shadow, gridW)];
 }

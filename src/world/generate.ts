@@ -1,24 +1,25 @@
 import { bfsDistance } from "../core/bfs-distance.ts";
-import { createRng } from "../core/rng.ts";
+import { createRng, type Rng } from "../core/rng.ts";
+import type { Field } from "../core/grid.ts";
 import { classifyBiomes, BIOMES } from "../climate/biomes.ts";
-import { computeClimate, type ClimateBand } from "../climate/climate.ts";
-import { computeFlow } from "../hydrology/flow.ts";
-import { extractRivers, isMajorRiver } from "../hydrology/rivers.ts";
+import { computeClimate, type Climate, type ClimateBand } from "../climate/climate.ts";
+import { computeFlow, type FlowResult } from "../hydrology/flow.ts";
+import { extractRivers, isMajorRiver, type River } from "../hydrology/rivers.ts";
 import { mountainCrests } from "../hydrology/crests.ts";
 import { findLakes } from "../hydrology/lakes.ts";
 import { buildHeightfield, type MapType } from "../terrain/heightfield.ts";
 import { pickSeaLevel } from "../terrain/sealevel.ts";
-import { CULTURES, createNamer, makeMapTitle } from "../society/names.ts";
-import { placeSettlements } from "../society/sites.ts";
+import { CULTURES, createNamer, makeMapTitle, type Culture, type MapTitle, type Namer } from "../society/names.ts";
+import { placeSettlements, type Settlement } from "../society/sites.ts";
 import { buildRoads } from "../society/roads.ts";
-import { partitionRealms } from "../society/realms.ts";
+import { partitionRealms, type RealmsResult } from "../society/realms.ts";
 import { blazonRealms } from "../society/heraldry.ts";
-import { simulateHistory } from "../society/history.ts";
+import { simulateHistory, type HistoricalEvent, type SettlementCore } from "../society/history.ts";
 import { assignFormerNames } from "../society/renames.ts";
-import { conjureBestiary } from "../society/bestiary.ts";
+import { conjureBestiary, type SeaBeast } from "../society/bestiary.ts";
 import { nameSetOf } from "../society/hamlets.ts";
 import { seaMask } from "../hydrology/sea-mask.ts";
-import type { FeatureNames, World, WorldRecipe } from "./types.ts";
+import type { FeatureNames, NamedSettlement, Winds, World, WorldRecipe } from "./types.ts";
 
 const MAP_TYPE_WEIGHTS: ReadonlyArray<readonly [MapType, number]> = [
   ["island", 0.4],
@@ -79,11 +80,9 @@ function stripUndefined<T extends object>(obj: T): Partial<T> {
   return out as Partial<T>;
 }
 
-// eslint-disable-next-line max-lines-per-function
-export function generateWorld(recipe: WorldRecipe): World {
-  const { seed, gridW, gridH, mapType } = recipe;
-  const rng = createRng(seed);
 
+function terrainStage(recipe: WorldRecipe, rng: Rng): { elev: Field; seaLevel: number; winds: Winds } {
+  const { seed, gridW, gridH, mapType } = recipe;
   const elev = buildHeightfield({
     seed,
     gridW,
@@ -94,7 +93,16 @@ export function generateWorld(recipe: WorldRecipe): World {
   const seaLevel = pickSeaLevel(elev, recipe.landFraction);
 
   const winds = { dir: rng.fork("winds").range(0, Math.PI * 2) };
+  return { elev, seaLevel, winds };
+}
 
+function hydrologyStage(
+  recipe: WorldRecipe,
+  elev: Field,
+  seaLevel: number,
+  winds: Winds,
+): { flow: FlowResult; rivers: River[]; riverCells: Uint8Array } {
+  const { seed, gridW, gridH } = recipe;
   const preClimate = computeClimate(elev, seaLevel, seed, {
     band: recipe.band,
     windDir: winds.dir,
@@ -110,16 +118,37 @@ export function generateWorld(recipe: WorldRecipe): World {
   for (const r of rivers) {
     for (const p of r.points) riverCells[p.x + p.y * gridW] = 1;
   }
+  return { flow, rivers, riverCells };
+}
 
-  const climate = computeClimate(elev, seaLevel, seed, {
+function climateStage(
+  recipe: WorldRecipe,
+  elev: Field,
+  seaLevel: number,
+  winds: Winds,
+  riverCells: Uint8Array,
+): { climate: Climate; biomes: Uint8Array } {
+  const climate = computeClimate(elev, seaLevel, recipe.seed, {
     band: recipe.band,
     riverCells,
     windDir: winds.dir,
   });
   const biomes = classifyBiomes(elev, seaLevel, climate);
+  return { climate, biomes };
+}
 
-  const citystate = mapType === "citystate";
-  const settlements = placeSettlements(
+type Ground = {
+  readonly elev: Field;
+  readonly seaLevel: number;
+  readonly flow: FlowResult;
+  readonly rivers: ReadonlyArray<River>;
+  readonly riverCells: Uint8Array;
+  readonly biomes: Uint8Array;
+};
+
+function siteStage(ground: Ground, rng: Rng, citystate: boolean): Settlement[] {
+  const { elev, seaLevel, flow, riverCells, biomes } = ground;
+  return placeSettlements(
     elev,
     seaLevel,
     flow,
@@ -128,26 +157,43 @@ export function generateWorld(recipe: WorldRecipe): World {
     rng.fork("sites"),
     citystate ? { maxTowns: 2, maxVillages: 18 } : {},
   );
+}
 
-  const frontierMask = new Uint8Array(gridW * gridH);
+function frontierMask(ground: Ground, gridW: number, gridH: number): Uint8Array {
+  const { elev, seaLevel, flow, rivers } = ground;
+  const mask = new Uint8Array(gridW * gridH);
   for (const r of rivers) {
     if (!isMajorRiver(r)) continue;
     for (const p of r.points) {
       const i = p.x + p.y * gridW;
-      if ((elev.data[i] as number) > seaLevel) frontierMask[i] = 1;
+      if ((elev.data[i] as number) > seaLevel) mask[i] = 1;
     }
   }
   const crests = mountainCrests(elev, flow, seaLevel);
-  for (let i = 0; i < frontierMask.length; i++) if (crests[i] === 1) frontierMask[i] = 1;
+  for (let i = 0; i < mask.length; i++) if (crests[i] === 1) mask[i] = 1;
+  return mask;
+}
+
+function realmStage(
+  ground: Ground,
+  settlements: ReadonlyArray<Settlement>,
+  recipe: WorldRecipe,
+  citystate: boolean,
+): { realms: RealmsResult; roads: ReturnType<typeof buildRoads> } {
+  const { elev, seaLevel, riverCells } = ground;
   const realms = partitionRealms(elev, seaLevel, riverCells, settlements, {
     ...(citystate ? { maxRealms: 1 } : {}),
-    barrier: frontierMask,
+    barrier: frontierMask(ground, recipe.gridW, recipe.gridH),
   });
   const roads = buildRoads(elev, seaLevel, riverCells, settlements, realms);
+  return { realms, roads };
+}
 
-  const culture = rng.fork("culture").pick(CULTURES);
-  const arms = blazonRealms(culture, realms.seats.length, rng.fork("heraldry"));
-  const namer = createNamer(rng.fork("names"), culture);
+function namePlaces(
+  namer: Namer,
+  settlements: ReadonlyArray<Settlement>,
+  rivers: ReadonlyArray<River>,
+): { named: SettlementCore[]; riverNames: Map<number, string> } {
   const named = settlements.map((s) => ({ ...s, name: namer.name("settlement") }));
 
   const riverNames = new Map<number, string>();
@@ -156,7 +202,10 @@ export function generateWorld(recipe: WorldRecipe): World {
       riverNames.set(i, namer.name("river"));
     }
   });
+  return { named, riverNames };
+}
 
+function landCensus(biomes: Uint8Array): { hasRange: boolean; forestCells: number; landCells: number } {
   let hasRange = false;
   let forestCells = 0;
   let landCells = 0;
@@ -174,6 +223,19 @@ export function generateWorld(recipe: WorldRecipe): World {
       forestCells++;
     }
   }
+  return { hasRange, forestCells, landCells };
+}
+
+function featureNames(
+  namer: Namer,
+  ground: Ground,
+  recipe: WorldRecipe,
+  riverNames: Map<number, string>,
+  realms: RealmsResult,
+): FeatureNames {
+  const { elev, seaLevel, biomes } = ground;
+  const { gridW, gridH } = recipe;
+  const { hasRange, forestCells, landCells } = landCensus(biomes);
 
   const lakes = findLakes(elev, seaLevel, Math.max(12, Math.round(gridW * gridH * 0.0008)))
     .slice(0, 2)
@@ -183,7 +245,7 @@ export function generateWorld(recipe: WorldRecipe): World {
       name: namer.name("lake"),
     }));
 
-  const names: FeatureNames = {
+  return {
     rivers: riverNames,
     sea: namer.name("sea"),
     range: hasRange ? namer.name("peak") : null,
@@ -194,21 +256,32 @@ export function generateWorld(recipe: WorldRecipe): World {
         ? realms.seats.map(() => namer.name("realm"))
         : [],
   };
+}
 
+function worldTitle(rng: Rng, culture: Culture, mapType: MapType, named: ReadonlyArray<SettlementCore>): MapTitle {
   const capitalName = named.find((s) => s.kind === "capital")?.name;
-  const title = makeMapTitle(
+  return makeMapTitle(
     rng.fork("title"),
     culture,
     mapType,
-    citystate ? capitalName : undefined,
+    mapType === "citystate" ? capitalName : undefined,
   );
+}
 
+function worldHistory(
+  rng: Rng,
+  culture: Culture,
+  named: ReadonlyArray<SettlementCore>,
+  realms: RealmsResult,
+  names: FeatureNames,
+  presentYear: number,
+): { settled: NamedSettlement[]; events: ReadonlyArray<HistoricalEvent> } {
   const history = simulateHistory(
     {
       settlements: named,
       seats: realms.seats,
       realmNames: names.realms,
-      presentYear: title.year,
+      presentYear,
     },
     rng.fork("history"),
   );
@@ -227,24 +300,61 @@ export function generateWorld(recipe: WorldRecipe): World {
     const formerName = formerNames.get(i);
     return formerName === undefined ? s : { ...s, formerName };
   });
+  return { settled, events: history.events };
+}
 
-  const oceanDist = bfsDistance(gridW, gridH, (x, y) =>
+function oceanDistance(elev: Field, seaLevel: number, gridW: number, gridH: number): Float64Array {
+  return bfsDistance(gridW, gridH, (x, y) =>
     (elev.data[x + y * gridW] as number) > seaLevel,
   );
+}
 
-  const beasts = conjureBestiary(
+function worldBestiary(
+  ground: Ground,
+  recipe: WorldRecipe,
+  oceanDist: Float64Array,
+  lore: { readonly culture: Culture; readonly settled: ReadonlyArray<NamedSettlement>; readonly presentYear: number; readonly names: FeatureNames },
+  rng: Rng,
+): ReadonlyArray<SeaBeast> {
+  const { gridW, gridH } = recipe;
+  return conjureBestiary(
     {
       gridW,
       gridH,
       oceanDist,
-      seaMask: seaMask(elev, seaLevel),
-      culture,
-      settlements: settled,
-      presentYear: title.year,
+      seaMask: seaMask(ground.elev, ground.seaLevel),
+      culture: lore.culture,
+      settlements: lore.settled,
+      presentYear: lore.presentYear,
     },
     rng.fork("bestiary"),
-    nameSetOf(settled, names),
+    nameSetOf(lore.settled, lore.names),
   );
+}
+
+export function generateWorld(recipe: WorldRecipe): World {
+  const { seed, gridW, gridH, mapType } = recipe;
+  const rng = createRng(seed);
+
+  const { elev, seaLevel, winds } = terrainStage(recipe, rng);
+  const { flow, rivers, riverCells } = hydrologyStage(recipe, elev, seaLevel, winds);
+  const { climate, biomes } = climateStage(recipe, elev, seaLevel, winds, riverCells);
+  const ground: Ground = { elev, seaLevel, flow, rivers, riverCells, biomes };
+
+  const citystate = mapType === "citystate";
+  const settlements = siteStage(ground, rng, citystate);
+  const { realms, roads } = realmStage(ground, settlements, recipe, citystate);
+
+  const culture = rng.fork("culture").pick(CULTURES);
+  const arms = blazonRealms(culture, realms.seats.length, rng.fork("heraldry"));
+  const namer = createNamer(rng.fork("names"), culture);
+  const { named, riverNames } = namePlaces(namer, settlements, rivers);
+  const names = featureNames(namer, ground, recipe, riverNames, realms);
+
+  const title = worldTitle(rng, culture, mapType, named);
+  const { settled, events } = worldHistory(rng, culture, named, realms, names, title.year);
+  const oceanDist = oceanDistance(elev, seaLevel, gridW, gridH);
+  const beasts = worldBestiary(ground, recipe, oceanDist, { culture, settled, presentYear: title.year, names }, rng);
 
   return {
     recipe,
@@ -263,7 +373,7 @@ export function generateWorld(recipe: WorldRecipe): World {
     culture,
     title,
     names,
-    history: { events: history.events },
+    history: { events },
     beasts,
     oceanDist,
   };

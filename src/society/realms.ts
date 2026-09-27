@@ -60,35 +60,22 @@ export function partitionRealms(
   return { labels, seats };
 }
 
-// eslint-disable-next-line max-lines-per-function
-function selectSeats(
+function landmassBudget(sizes: ReadonlyArray<number>, n: number, lm: number): number {
+  return clamp(
+    Math.round(((sizes[lm] as number) / n) * REALM_LAND_DIVISOR),
+    1,
+    MAX_REALMS_PER_LANDMASS,
+  );
+}
+
+function realmBearingLandmasses(
   settlements: ReadonlyArray<Settlement>,
   sizes: ReadonlyArray<number>,
   n: number,
   lmOf: (s: Settlement) => number,
-  opts: RealmOptions,
+  capitalLm: number,
 ): number[] {
-  const overallCap = opts.maxRealms ?? GENERATION_CEILING;
-  const budgetOf = (lm: number): number =>
-    clamp(
-      Math.round(((sizes[lm] as number) / n) * REALM_LAND_DIVISOR),
-      1,
-      MAX_REALMS_PER_LANDMASS,
-    );
   const substantialArea = SUBSTANTIAL_FRACTION * n;
-
-  const capitalIdx = settlements.findIndex((s) => s.kind === "capital");
-  const capitalLm = capitalIdx >= 0 ? lmOf(settlements[capitalIdx] as Settlement) : -1;
-  const seats: number[] = [];
-
-  if (capitalIdx >= 0) {
-    seats.push(capitalIdx); // realm 0
-    const budget = Math.min(budgetOf(capitalLm), overallCap);
-    for (const idx of pickTownSeats(settlements, lmOf, capitalLm, budget, [capitalIdx])) {
-      if (!seats.includes(idx)) seats.push(idx);
-    }
-  }
-
   const hasSettlement = new Uint8Array(sizes.length);
   for (const s of settlements) {
     const lm = lmOf(s);
@@ -100,16 +87,48 @@ function selectSeats(
     if ((sizes[lm] as number) >= substantialArea && hasSettlement[lm]) realmBearing.push(lm);
   }
   realmBearing.sort((a, b) => (sizes[b] as number) - (sizes[a] as number) || a - b);
+  return realmBearing;
+}
 
-  for (const lm of realmBearing) {
-    if (seats.length >= overallCap) break;
-    const budget = Math.min(budgetOf(lm), overallCap - seats.length);
-    let picks = pickTownSeats(settlements, lmOf, lm, budget, []);
-    if (picks.length === 0) {
-      const top = topSettlementOnLandmass(settlements, lmOf, lm);
-      if (top >= 0) picks = [top];
+function landmassSeatPicks(
+  settlements: ReadonlyArray<Settlement>,
+  lmOf: (s: Settlement) => number,
+  lm: number,
+  budget: number,
+): number[] {
+  const picks = pickTownSeats(settlements, lmOf, lm, budget, []);
+  if (picks.length === 0) {
+    const top = topSettlementOnLandmass(settlements, lmOf, lm);
+    if (top >= 0) return [top];
+  }
+  return picks;
+}
+
+function selectSeats(
+  settlements: ReadonlyArray<Settlement>,
+  sizes: ReadonlyArray<number>,
+  n: number,
+  lmOf: (s: Settlement) => number,
+  opts: RealmOptions,
+): number[] {
+  const overallCap = opts.maxRealms ?? GENERATION_CEILING;
+
+  const capitalIdx = settlements.findIndex((s) => s.kind === "capital");
+  const capitalLm = capitalIdx >= 0 ? lmOf(settlements[capitalIdx] as Settlement) : -1;
+  const seats: number[] = [];
+
+  if (capitalIdx >= 0) {
+    seats.push(capitalIdx); // realm 0
+    const budget = Math.min(landmassBudget(sizes, n, capitalLm), overallCap);
+    for (const idx of pickTownSeats(settlements, lmOf, capitalLm, budget, [capitalIdx])) {
+      if (!seats.includes(idx)) seats.push(idx);
     }
-    for (const idx of picks) {
+  }
+
+  for (const lm of realmBearingLandmasses(settlements, sizes, n, lmOf, capitalLm)) {
+    if (seats.length >= overallCap) break;
+    const budget = Math.min(landmassBudget(sizes, n, lm), overallCap - seats.length);
+    for (const idx of landmassSeatPicks(settlements, lmOf, lm, budget)) {
       if (seats.length >= overallCap) break;
       if (!seats.includes(idx)) seats.push(idx);
     }
@@ -175,7 +194,46 @@ function topSettlementOnLandmass(
   return best;
 }
 
-// eslint-disable-next-line max-lines-per-function
+function realmSeeds(
+  n: number,
+  w: number,
+  settlements: ReadonlyArray<Settlement>,
+  seats: ReadonlyArray<number>,
+): { labels: Int16Array; dist: Float64Array; isSeatCell: Uint8Array; cells: number[] } {
+  const labels = new Int16Array(n).fill(-1);
+  const dist = new Float64Array(n).fill(Infinity);
+  const isSeatCell = new Uint8Array(n);
+  const cells: number[] = [];
+  seats.forEach((settlementIdx, realmId) => {
+    const s = settlements[settlementIdx] as Settlement;
+    const i = s.x + s.y * w;
+    dist[i] = 0;
+    labels[i] = realmId;
+    isSeatCell[i] = 1;
+    cells.push(i);
+  });
+  return { labels, dist, isSeatCell, cells };
+}
+
+function cutsBarrierCorner(barrier: Uint8Array | undefined, x: number, y: number, dx: number, dy: number, w: number): boolean {
+  return (
+    barrier !== undefined &&
+    dx !== 0 &&
+    dy !== 0 &&
+    barrier[x + dx + y * w] === 1 &&
+    barrier[x + (y + dy) * w] === 1
+  );
+}
+
+function realmStepCost(stepDist: number, slope: Field, riverCells: Uint8Array, ni: number): number {
+  return (
+    stepDist *
+    (1 +
+      (slope.data[ni] as number) * SLOPE_WEIGHT +
+      (riverCells[ni] === 1 ? RIVER_WEIGHT : 0))
+  );
+}
+
 function floodRealms(
   elev: Field,
   seaLevel: number,
@@ -188,20 +246,10 @@ function floodRealms(
 ): Int16Array {
   const { w, h, data } = elev;
   const n = w * h;
-  const labels = new Int16Array(n).fill(-1);
-  const dist = new Float64Array(n).fill(Infinity);
+  const { labels, dist, isSeatCell, cells } = realmSeeds(n, w, settlements, seats);
   const done = new Uint8Array(n);
   const heap = createMinHeap();
-
-  const isSeatCell = new Uint8Array(n);
-  seats.forEach((settlementIdx, realmId) => {
-    const s = settlements[settlementIdx] as Settlement;
-    const i = s.x + s.y * w;
-    dist[i] = 0;
-    labels[i] = realmId;
-    isSeatCell[i] = 1;
-    heap.push(i, 0);
-  });
+  for (const i of cells) heap.push(i, 0);
 
   while (heap.size() > 0) {
     const i = heap.pop();
@@ -220,20 +268,8 @@ function floodRealms(
       if (done[ni]) continue;
       if ((data[ni] as number) <= seaLevel) continue;
       if ((landmassIds[ni] as number) !== lm) continue;
-      if (
-        barrier !== undefined &&
-        dx !== 0 &&
-        dy !== 0 &&
-        barrier[x + dx + y * w] === 1 &&
-        barrier[x + (y + dy) * w] === 1
-      )
-        continue;
-      const step =
-        stepDist *
-        (1 +
-          (slope.data[ni] as number) * SLOPE_WEIGHT +
-          (riverCells[ni] === 1 ? RIVER_WEIGHT : 0));
-      const nd = d + step;
+      if (cutsBarrierCorner(barrier, x, y, dx, dy, w)) continue;
+      const nd = d + realmStepCost(stepDist, slope, riverCells, ni);
       if (nd < (dist[ni] as number)) {
         dist[ni] = nd;
         labels[ni] = labels[i] as number;
