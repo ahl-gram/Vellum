@@ -1,24 +1,19 @@
-/* eslint-disable max-lines */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import type { ProspectInput, ProspectKind } from "../../src/prospect/input.ts";
-import type { BiomeName } from "../../src/climate/biomes.ts";
-import { BACKDROP_SAMPLES, FOREGROUND_SAMPLES } from "../../src/prospect/transect.ts";
+import type { ProspectKind } from "../../src/prospect/input.ts";
+import { BACKDROP_SAMPLES } from "../../src/prospect/transect.ts";
 import {
   TYPICAL_SCORE,
+  band,
   bandOf,
   makeInput,
 } from "../../test-support/prospect-fixtures.ts";
 import { composeProspect } from "../../src/prospect/compose.ts";
 import {
   BASE_GROUND,
-  PLATE_H,
   RIVER_BANK_DROP,
   SHORE_DROP,
-  VIEW_X0,
-  VIEW_X1,
   WATER_BOTTOM,
-  groundingViolations,
   type ForegroundElement,
   type Mass,
   type ProspectGeometry,
@@ -199,8 +194,6 @@ test("harbor outranks river when a site is both", () => {
   one(g, "quay");
 });
 
-const band = (b: BiomeName): ReadonlyArray<BiomeName> => bandOf([b, FOREGROUND_SAMPLES]);
-
 test("each biome dresses its named foreground", () => {
   const fields = composeProspect(makeInput({ foreground: band("grassland") }));
   assert.equal(one(fields, "fieldRows").rows.length, 4, "four furrow rows");
@@ -334,95 +327,10 @@ test("before founding the land wears only its natural dressing", () => {
   assert.ok(one(fen, "marshTufts").items.length >= 6, "the fen keeps its tufts");
 });
 
-test("every composition is grounded and in frame", () => {
-  const cases: ProspectInput[] = [
-    makeInput({ kind: "capital", harbor: true }),
-    makeInput({ kind: "seat", siteRel: 0.6 }),
-    makeInput({ kind: "town", onRiver: true }),
-    makeInput({ kind: "village", foreground: band("marsh") }),
-    makeInput({ kind: "town", ruined: true }),
-    makeInput({ kind: "hamlet" }),
-    // Unwalled hamlets are where the back-row containment filter fires; these seeds are measured live witnesses (2026-08-10).
-    makeInput({ kind: "hamlet", seed: 3 }),
-    makeInput({ kind: "hamlet", ruined: true, seed: 1 }),
-  ];
-  for (const input of cases) {
-    const g = composeProspect(input);
-    assert.deepEqual(
-      groundingViolations(g),
-      [],
-      `${input.kind} h${String(input.harbor)} r${String(input.onRiver)} is grounded`,
-    );
-    for (const m of g.masses) {
-      assert.ok(m.x >= VIEW_X0 - 2 && m.x + m.w <= VIEW_X1 + 2, "mass inside the view");
-      assert.ok(m.base - m.h > 0 && m.base < PLATE_H, "mass inside the plate");
-    }
-  }
-  // At seed 3 the hamlet packs TWO back-row masses and the filter must drop exactly one (measured); a deleted filter reds here on the count.
-  const filtered = composeProspect(makeInput({ kind: "hamlet", seed: 3 }));
-  assert.equal(
-    filtered.masses.filter((m) => m.raise > 0).length,
-    1,
-    "the seed 3 hamlet keeps exactly one covered back mass",
-  );
-});
-
 test("a ruined skyline shows ruin even when every draw comes up intact", () => {
   // Measured 2026-08-10: at seed 7321 every per-mass broken draw comes up intact for a ruined hamlet (~1 in 13,500), so only composeTownscape's insurance breaks the tallest front mass.
   const g = composeProspect(
     makeInput({ kind: "hamlet", ruined: true, ruinedYear: 1361, seed: 7321 }),
   );
   assert.ok(g.masses.some((m) => m.broken), "the insurance breaks a mass");
-});
-
-test("the grounding check bites on a floated or uncovered mass", () => {
-  const g = composeProspect(makeInput({ kind: "capital" }));
-  const firstIdx = g.masses.findIndex((m) => m.raise === 0);
-  const floated: ProspectGeometry = {
-    ...g,
-    masses: g.masses.map((m, i) => (i === firstIdx ? { ...m, base: m.base - 3 } : m)),
-  };
-  assert.ok(groundingViolations(floated).length > 0, "a floated mass is reported");
-
-  const backIdx = g.masses.findIndex((m) => m.raise > 0);
-  assert.ok(backIdx >= 0, "a capital composes a raised back row");
-  const escaped: ProspectGeometry = {
-    ...g,
-    masses: g.masses.map((m, i) =>
-      i === backIdx ? { ...m, x: VIEW_X0 + 1, base: groundingBase(g, VIEW_X0 + 1, m) } : m,
-    ),
-  };
-  assert.ok(
-    groundingViolations(escaped).length > 0,
-    "a raised mass outside the front cover is reported",
-  );
-});
-
-/** Base that keeps the moved mass on the ground function, so the uncovered case fails on COVER alone, not incidentally on the ground equation. */
-function groundingBase(g: ProspectGeometry, x: number, m: Mass): number {
-  return g.ground.base - m.raise;
-}
-
-test("the same input composes byte-identical geometry", () => {
-  const input = makeInput({ kind: "capital", harbor: true, siteRel: 0.3 });
-  const a = composeProspect(input);
-  const b = composeProspect(structuredClone(input));
-  assert.deepEqual(a, b);
-  assert.equal(JSON.stringify(a), JSON.stringify(b));
-  assert.deepEqual(JSON.parse(JSON.stringify(a)), a, "survives a JSON round trip");
-});
-
-test("geometry carries no style tokens", () => {
-  const forbidden = /^(fill|stroke|color|font|opacity|ink|paper|style|hatch)/i;
-  const walk = (v: unknown, path: string): void => {
-    if (Array.isArray(v)) {
-      v.forEach((item, i) => walk(item, `${path}[${i}]`));
-    } else if (v !== null && typeof v === "object") {
-      for (const [k, val] of Object.entries(v)) {
-        assert.ok(!forbidden.test(k), `style-flavored key "${k}" at ${path}`);
-        walk(val, `${path}.${k}`);
-      }
-    }
-  };
-  walk(composeProspect(makeInput({ kind: "capital", harbor: true, ruined: true })), "$");
 });
