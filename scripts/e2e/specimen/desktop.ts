@@ -110,7 +110,6 @@ export async function sb5dGlassBare({ check, brightest }: SpecimenKit, leaned: S
 }
 
 export async function sb5eFolioPanel({ check, brightest }: SpecimenKit, rest: Specimen | null, leaned: Specimen): Promise<void> {
-  // Just below the row's box, inside the footing's 0.6rem foot band: the row's own centre is the gold road (227).
   // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
   const panelLeft = Math.round(leaned.folio.x - 0.9 * leaned.rem), panelY = Math.round(
     // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
@@ -132,6 +131,7 @@ export async function sb5eFolioPanel({ check, brightest }: SpecimenKit, rest: Sp
 }
 
 export async function sb5cFooting({ check, brightest }: SpecimenKit, rest: Specimen | null, leaned: Specimen): Promise<void> {
+  // Just below the row's box, inside the footing's 0.6rem foot band: the row's own centre is the gold road (227).
   // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
   const footing = await brightest(Math.round(leaned.legend.x +
     // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early

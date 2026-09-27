@@ -269,7 +269,11 @@ function renamedInside(files: readonly FamilyFile[]): string[] {
     const inside = ts.isImportDeclaration(s) && ts.isStringLiteral(s.moduleSpecifier) && own.has(moduleOf(path, s.moduleSpecifier.text));
     const named = inside ? s.importClause?.namedBindings : ts.isExportDeclaration(s) ? s.exportClause : undefined;
     const elements = named && (ts.isNamedImports(named) || ts.isNamedExports(named)) ? named.elements : [];
-    return elements.filter((el) => el.propertyName && el.propertyName.getText() !== el.name.text).map((el) => `${path} renames ${el.propertyName?.getText()} to ${el.name.text} inside the family`);
+    const defaults = [
+      ...(inside && s.importClause?.name ? [`${path} imports a default as ${s.importClause.name.text} inside the family`] : []),
+      ...(ts.isExportAssignment(s) || (ts.canHaveModifiers(s) && (ts.getModifiers(s) ?? []).some((m) => m.kind === ts.SyntaxKind.DefaultKeyword)) ? [`${path} exports a default inside the family`] : []),
+    ];
+    return [...defaults, ...elements.filter((el) => el.propertyName && el.propertyName.getText() !== el.name.text).map((el) => `${path} renames ${el.propertyName?.getText()} to ${el.name.text} inside the family`)];
   }));
 }
 

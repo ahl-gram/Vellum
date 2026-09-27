@@ -240,6 +240,10 @@ test("an import or an export inside the family that renames a name reads as a di
   const viaRelay = ["import { both } from \"./map/part2.ts\";", "export async function run(ctx) {", "  await both(ctx);", "}"].join("\n");
   assert.equal(compareFamilies(files(before), files(viaRelay, part, relay("import { x1One, x2Two } from \"./part1.ts\";"))).same, true);
   assert.equal(compareFamilies(files(before), files(viaRelay, part, relay("import { x2Two as x1One, x1One as x2Two } from \"./part1.ts\";"))).same, false);
+  const one = ["export default async function x1One({ check, sleep }) {", "  await sleep(1);", "  check(\"X1 one\", true);", "}"].join("\n");
+  const two = ["export default async function x2Two({ check, sleep }) {", "  await sleep(2);", "  check(\"X2 two\", true);", "}"].join("\n");
+  assert.equal(compareFamilies(files(before), files(run("import x1One from \"./map/part2.ts\";\nimport x2Two from \"./map/part1.ts\";"), one, two)).same, false);
+  assert.equal(compareFamilies(files(before), files(run("import { x1One, x2Two } from \"./map/part1.ts\";"), "import x1One from \"./part2.ts\";\nimport x2Two from \"./part3.ts\";\nexport { x1One, x2Two };", two, one)).same, false);
 });
 
 test("a function only the split declares is read through at every call, so one that stands in for a context member reads as a difference", () => {

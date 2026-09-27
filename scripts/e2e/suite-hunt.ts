@@ -11,7 +11,6 @@ const bandRank = (s: string) => (/^Hot/.test(s) ? 3 : /^Warmer/.test(s) ? 2 : /^
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { consoleErrors, PORT } = ctx;
-  // Click targets are derived from the browser's OWN world via dynamic import, immune to any node-side date assumption; this is the only coverage of the click -> projection-inversion -> nearest-settlement snap.
   const huntErrBase = consoleErrors.length;
   const HUNT_PAGE = `http://127.0.0.1:${PORT}/seed-of-the-day/`;
   const k = huntKit(ctx);
@@ -80,6 +79,7 @@ async function h2Clues({ evaluate, check }: SuiteContext): Promise<void> {
 }
 
 async function huntQuarry({ evaluate }: SuiteContext) {
+  // Click targets are derived from the browser's OWN world via dynamic import, immune to any node-side date assumption; this is the only coverage of the click -> projection-inversion -> nearest-settlement snap.
   const tgt = await evaluate<{ seed: number; name: string; formerName: string | null; hit: Frac; miss: Frac; missName: string; legFrac: { x0: number; y0: number; x1: number; y1: number } | null; wpx: number; hpx: number; scale: number }>(`(async()=>{
     const {defaultRecipe,generateWorld}=await import("../explorer/engine/world/generate.js");
     const {chooseQuarry,legendExcluded}=await import("../explorer/engine/world/daily-hunt.js");
