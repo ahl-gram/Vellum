@@ -231,6 +231,11 @@ test("a function only the split declares is read through at every call, so one t
   assert.equal(split(SPLIT_RUN, kit).same, false);
   const noWait = swapped(SPLIT_GROUPS, "export async function m2Lays({ evaluate, waitSettled }) {", "async function waitSettled(label) {\n}\nexport async function m2Lays({ evaluate }) {");
   assert.equal(split(SPLIT_RUN, noWait).same, false);
+  const before = ["export async function run(ctx) {", "  const { evaluate, waitSettled, onDone } = ctx;", "  await evaluate(`1`);", "  await waitSettled(\"m2\");", "  await evaluate(`2`).then(onDone);", "}"].join("\n");
+  const once = ["async function waitSettled(evaluate) {", "  await evaluate(`1`);", "}", "export async function run(ctx) {", "  const { evaluate, onDone } = ctx;", "  await waitSettled(evaluate);", "  await waitSettled(\"m2\");", "  await evaluate(`2`).then(onDone);", "}"].join("\n");
+  assert.deepEqual(compareFamilies(files(before), files(once)).lines, ["a call to waitSettled, a function the split made, is not read through: waitSettled ( \"m2\" )"]);
+  const byValue = ["function onDone(v) {}", "export async function run(ctx) {", "  const { evaluate, waitSettled } = ctx;", "  await evaluate(`1`);", "  await waitSettled(\"m2\");", "  await evaluate(`2`).then(onDone);", "}"].join("\n");
+  assert.deepEqual(compareFamilies(files(before), files(byValue)).lines, ["onDone, a function the split made, is never read through"]);
 });
 
 test("a function declared twice in the split is a difference, whichever copy a call would reach", () => {
@@ -247,9 +252,20 @@ test("a let, a var or a container may not move, even with a literal initializer"
   assert.equal(compareFamilies(files(before), files(inner)).same, false);
   const seenInside = swapped(swapped(before, "  const poll = async () => {\n", "  const poll = async () => {\n    const seen = [];\n"), "  const seen = [];\n  const poll", "  const poll");
   assert.equal(compareFamilies(files(before), files(seenInside)).same, false);
+  const asVar = (text: string) => text.replaceAll("let tries", "var tries");
+  assert.equal(compareFamilies(files(asVar(before)), files(asVar(inner))).same, false);
+  const asObject = (text: string) => text.replaceAll("const seen = [];", "const seen = {};").replaceAll("seen.push(tries);", "seen.n = tries;");
+  assert.equal(compareFamilies(files(asObject(before)), files(asObject(seenInside))).same, false);
+  const regex = ["export async function run(ctx) {", "  const { check } = ctx;", "  const RE = /a/g;", "  const hit = (s) => {", "    return RE.test(s);", "  };", "  check(\"R1\", hit(\"a\"));", "  check(\"R2\", hit(\"a\"));", "}"].join("\n");
+  const regexInside = swapped(swapped(regex, "  const RE = /a/g;\n", ""), "  const hit = (s) => {\n", "  const hit = (s) => {\n    const RE = /a/g;\n");
+  assert.equal(compareFamilies(files(regex), files(regexInside)).same, false);
 });
 
 test("an async function the split made, called without await where the base awaited its body, is a difference", () => {
   assert.equal(split(swapped(SPLIT_RUN, "  await desktop(k);", "  desktop(k);"), SPLIT_GROUPS).same, false);
   assert.equal(split(swapped(SPLIT_RUN, "laid = await m2Lays(k);", "laid = m2Lays(k);"), SPLIT_GROUPS).same, false);
+  const before = ["export async function run(ctx) {", "  const { evaluate, check } = ctx;", "  const g = await evaluate(`1`);", "  check(\"A1\", g > 0);", "}"].join("\n");
+  const declared = (call: string) => [`async function a1Reads({ evaluate }) {`, "  const g = await evaluate(`1`);", "  return g;", "}", "export async function run(ctx) {", "  const { check } = ctx;", `  const g = ${call};`, "  check(\"A1\", g > 0);", "}"].join("\n");
+  assert.equal(compareFamilies(files(before), files(declared("await a1Reads(ctx)"))).same, true);
+  assert.equal(compareFamilies(files(before), files(declared("a1Reads(ctx)"))).same, false);
 });
