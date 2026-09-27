@@ -71,35 +71,27 @@ function makeCycler(rng: Rng, pool: readonly string[]): () => string {
   };
 }
 
-export function simulateHistory(input: HistoryInput, rng: Rng): HistoryResult {
-  const { settlements, seats, realmNames, presentYear } = input;
 
-  const span = Math.min(900, Math.max(150, Math.round(presentYear * 0.7)));
-  const epochStart = presentYear - span;
-  const yearAt = (f: number): number =>
-    Math.round(epochStart + Math.max(0, Math.min(1, f)) * span);
+type YearAt = (f: number) => number;
 
-  const founded: number[] = settlements.map((s) => {
+function foundingYears(settlements: ReadonlyArray<SettlementCore>, rng: Rng, yearAt: YearAt, presentYear: number): number[] {
+  return settlements.map((s) => {
     const base = s.kind === "capital" ? 0.02 : s.kind === "town" ? 0.3 : 0.55;
     const f = base + rng.next() * 0.3;
     return Math.min(presentYear - 1, yearAt(f));
   });
+}
 
+function ruinPicks(settlements: ReadonlyArray<SettlementCore>, seats: ReadonlyArray<number>, rng: Rng): number[] {
   const seatSet = new Set(seats);
   const villageIdxs = settlements
     .map((_, i) => i)
     .filter((i) => settlements[i]!.kind === "village" && !seatSet.has(i));
   const ruinCount = Math.max(0, Math.min(2, Math.floor(villageIdxs.length / 6)));
-  const ruinedIdx = rng.shuffled(villageIdxs).slice(0, ruinCount);
-  const ruinedSet = new Set(ruinedIdx);
-  const ruined: boolean[] = settlements.map((_, i) => ruinedSet.has(i));
+  return rng.shuffled(villageIdxs).slice(0, ruinCount);
+}
 
-  const events: HistoricalEvent[] = [];
-  const founding = makeCycler(rng, FOUNDING_TEMPLATES);
-  const rise = makeCycler(rng, RISE_TEMPLATES);
-  const war = makeCycler(rng, WAR_TEMPLATES);
-  const ruin = makeCycler(rng, RUIN_TEMPLATES);
-
+function foundingEvents(settlements: ReadonlyArray<SettlementCore>, founded: ReadonlyArray<number>, founding: () => string): HistoricalEvent[] {
   const capIdx = settlements.findIndex((s) => s.kind === "capital");
   const townIdxs = settlements
     .map((_, i) => i)
@@ -107,15 +99,16 @@ export function simulateHistory(input: HistoryInput, rng: Rng): HistoryResult {
     .sort((a, b) => founded[a]! - founded[b]!)
     .slice(0, 2);
   const foundingPicks = [capIdx, ...townIdxs].filter((i) => i >= 0);
-  for (const i of foundingPicks) {
-    events.push({
-      year: founded[i]!,
-      kind: "founding",
-      text: founding().replace("%s", settlements[i]!.name),
-      settlement: i,
-    });
-  }
+  return foundingPicks.map((i) => ({
+    year: founded[i]!,
+    kind: "founding" as const,
+    text: founding().replace("%s", settlements[i]!.name),
+    settlement: i,
+  }));
+}
 
+function riseEvents(realmNames: ReadonlyArray<string>, rng: Rng, yearAt: YearAt, rise: () => string): HistoricalEvent[] {
+  const events: HistoricalEvent[] = [];
   realmNames.forEach((rn, realmId) => {
     if (rng.next() < 0.7) {
       events.push({
@@ -126,7 +119,11 @@ export function simulateHistory(input: HistoryInput, rng: Rng): HistoryResult {
       });
     }
   });
+  return events;
+}
 
+function warEvents(realmNames: ReadonlyArray<string>, rng: Rng, yearAt: YearAt, war: () => string): HistoricalEvent[] {
+  const events: HistoricalEvent[] = [];
   if (realmNames.length >= 2) {
     const warCount = rng.int(3);
     for (let k = 0; k < warCount; k++) {
@@ -141,20 +138,57 @@ export function simulateHistory(input: HistoryInput, rng: Rng): HistoryResult {
       });
     }
   }
+  return events;
+}
 
-  for (const i of ruinedIdx) {
+function ruinEvents(
+  settlements: ReadonlyArray<SettlementCore>,
+  ruinedIdx: ReadonlyArray<number>,
+  founded: ReadonlyArray<number>,
+  rng: Rng,
+  presentYear: number,
+  ruin: () => string,
+): HistoricalEvent[] {
+  return ruinedIdx.map((i) => {
     const fy = founded[i]!;
     const ay = Math.min(
       presentYear - 1,
       Math.round(fy + (presentYear - fy) * (0.4 + rng.next() * 0.5)),
     );
-    events.push({
+    return {
       year: ay,
-      kind: "ruin",
+      kind: "ruin" as const,
       text: ruin().replace("%s", settlements[i]!.name),
       settlement: i,
-    });
-  }
+    };
+  });
+}
+
+export function simulateHistory(input: HistoryInput, rng: Rng): HistoryResult {
+  const { settlements, seats, realmNames, presentYear } = input;
+
+  const span = Math.min(900, Math.max(150, Math.round(presentYear * 0.7)));
+  const epochStart = presentYear - span;
+  const yearAt = (f: number): number =>
+    Math.round(epochStart + Math.max(0, Math.min(1, f)) * span);
+
+  const founded = foundingYears(settlements, rng, yearAt, presentYear);
+
+  const ruinedIdx = ruinPicks(settlements, seats, rng);
+  const ruinedSet = new Set(ruinedIdx);
+  const ruined: boolean[] = settlements.map((_, i) => ruinedSet.has(i));
+
+  const founding = makeCycler(rng, FOUNDING_TEMPLATES);
+  const rise = makeCycler(rng, RISE_TEMPLATES);
+  const war = makeCycler(rng, WAR_TEMPLATES);
+  const ruin = makeCycler(rng, RUIN_TEMPLATES);
+
+  const events: HistoricalEvent[] = [
+    ...foundingEvents(settlements, founded, founding),
+    ...riseEvents(realmNames, rng, yearAt, rise),
+    ...warEvents(realmNames, rng, yearAt, war),
+    ...ruinEvents(settlements, ruinedIdx, founded, rng, presentYear, ruin),
+  ];
 
   events.sort((e1, e2) => e1.year - e2.year);
 

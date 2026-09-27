@@ -49,23 +49,67 @@ type Candidate = {
   onRiver: boolean;
 };
 
-export function placeSettlements(
+function landSpan(elev: Field, seaLevel: number): number {
+  let maxElev = -Infinity;
+  for (const v of elev.data) maxElev = Math.max(maxElev, v);
+  return Math.max(1e-9, maxElev - seaLevel);
+}
+
+function siteNeighbourhood(
   elev: Field,
   seaLevel: number,
-  flow: FlowResult,
   riverCells: Uint8Array,
-  biomes: Uint8Array,
-  rng: Rng,
-  opts: SiteOptions = {},
-): Settlement[] {
+  x: number,
+  y: number,
+): { harbor: boolean; riverNear: boolean; riverNeighbors: number } {
   const { w, h, data } = elev;
-  const slope = slopeField(elev);
-  const jitter = rng.fork("site-jitter");
+  let harbor = false;
+  let riverNear = false;
+  let riverNeighbors = 0;
+  for (const [dx, dy] of NEIGHBORS_8) {
+    const nx = x + dx;
+    const ny = y + dy;
+    if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;
+    const ni = nx + ny * w;
+    if ((data[ni] as number) <= seaLevel) harbor = true;
+    if (riverCells[ni] === 1) {
+      riverNear = true;
+      riverNeighbors++;
+    }
+  }
+  return { harbor, riverNear, riverNeighbors };
+}
 
-  let maxElev = -Infinity;
-  for (const v of data) maxElev = Math.max(maxElev, v);
-  const span = Math.max(1e-9, maxElev - seaLevel);
+type SiteTerrain = {
+  readonly elev: Field;
+  readonly seaLevel: number;
+  readonly riverCells: Uint8Array;
+  readonly biomes: Uint8Array;
+  readonly slope: Field;
+};
 
+function siteScore(t: SiteTerrain, x: number, y: number, jitter: Rng): Candidate {
+  const i = x + y * t.elev.w;
+  const biome = t.biomes[i] as number;
+  const { harbor, riverNear, riverNeighbors } = siteNeighbourhood(t.elev, t.seaLevel, t.riverCells, x, y);
+  const onRiver = t.riverCells[i] === 1 || riverNear;
+
+  let score = 0;
+  if (harbor) score += 2.2;
+  if (onRiver) score += 1.6;
+  if (harbor && (t.riverCells[i] === 1 || riverNeighbors > 0)) score += 1.4; // river mouth
+  if (riverNeighbors >= 3) score += 0.5; // confluence-ish
+  score += (1 - Math.min(1, (t.slope.data[i] as number) * 8)) * 1.0;
+  score += BIOME_APPEAL[biome] ?? 0.3;
+  score += jitter.next() * 0.25;
+
+  return { x, y, score, harbor, onRiver };
+}
+
+function siteCandidates(t: SiteTerrain, jitter: Rng): { candidates: Candidate[]; landCells: number } {
+  const { w, h, data } = t.elev;
+  const { seaLevel } = t;
+  const span = landSpan(t.elev, seaLevel);
   let landCells = 0;
   const candidates: Candidate[] = [];
 
@@ -76,47 +120,20 @@ export function placeSettlements(
       if (e <= seaLevel) continue;
       landCells++;
 
-      const biome = biomes[i] as number;
+      const biome = t.biomes[i] as number;
       if (biome === BIOMES.snow || biome === BIOMES.alpine) continue;
       if ((e - seaLevel) / span > 0.6) continue;
       if (x < EDGE_MARGIN || y < EDGE_MARGIN || x >= w - EDGE_MARGIN || y >= h - EDGE_MARGIN) {
         continue;
       }
 
-      let harbor = false;
-      let riverNear = false;
-      let riverNeighbors = 0;
-      for (const [dx, dy] of NEIGHBORS_8) {
-        const nx = x + dx;
-        const ny = y + dy;
-        if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;
-        const ni = nx + ny * w;
-        if ((data[ni] as number) <= seaLevel) harbor = true;
-        if (riverCells[ni] === 1) {
-          riverNear = true;
-          riverNeighbors++;
-        }
-      }
-      const onRiver = riverCells[i] === 1 || riverNear;
-
-      let score = 0;
-      if (harbor) score += 2.2;
-      if (onRiver) score += 1.6;
-      if (harbor && (riverCells[i] === 1 || riverNeighbors > 0)) score += 1.4; // river mouth
-      if (riverNeighbors >= 3) score += 0.5; // confluence-ish
-      score += (1 - Math.min(1, (slope.data[i] as number) * 8)) * 1.0;
-      score += BIOME_APPEAL[biome] ?? 0.3;
-      score += jitter.next() * 0.25;
-
-      candidates.push({ x, y, score, harbor, onRiver });
+      candidates.push(siteScore(t, x, y, jitter));
     }
   }
+  return { candidates, landCells };
+}
 
-  candidates.sort((a, b) => b.score - a.score || a.x - b.x || a.y - b.y);
-
-  const maxTowns = opts.maxTowns ?? clamp(Math.round(landCells / 1400), 2, 9);
-  const maxVillages = opts.maxVillages ?? clamp(Math.round(landCells / 700), 4, 16);
-
+function pickSettlements(candidates: ReadonlyArray<Candidate>, maxTowns: number, maxVillages: number): Settlement[] {
   const placed: Settlement[] = [];
   const farEnough = (c: Candidate, minDist: number): boolean =>
     placed.every((p) => Math.hypot(p.x - c.x, p.y - c.y) >= minDist);
@@ -141,4 +158,25 @@ export function placeSettlements(
   }
 
   return placed;
+}
+
+export function placeSettlements(
+  elev: Field,
+  seaLevel: number,
+  flow: FlowResult,
+  riverCells: Uint8Array,
+  biomes: Uint8Array,
+  rng: Rng,
+  opts: SiteOptions = {},
+): Settlement[] {
+  const slope = slopeField(elev);
+  const jitter = rng.fork("site-jitter");
+
+  const { candidates, landCells } = siteCandidates({ elev, seaLevel, riverCells, biomes, slope }, jitter);
+  candidates.sort((a, b) => b.score - a.score || a.x - b.x || a.y - b.y);
+
+  const maxTowns = opts.maxTowns ?? clamp(Math.round(landCells / 1400), 2, 9);
+  const maxVillages = opts.maxVillages ?? clamp(Math.round(landCells / 700), 4, 16);
+
+  return pickSettlements(candidates, maxTowns, maxVillages);
 }
