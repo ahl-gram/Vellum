@@ -13,7 +13,7 @@ import {
 } from "../src/world/detail-chain.ts";
 import { LOD_BANDS, type LodBand } from "../src/world/lod.ts";
 import type { World } from "../src/world/types.ts";
-import { bandWindows } from "./region-detail-windows.ts";
+import { bandWindows } from "./region-detail-sweep-windows.ts";
 
 /** #443's measurement half: the world chart's OWN partition across three arms, so the anti-merge claim and the vanishing-landmass census reproduce from one command. Committed, not left in out/, because this epic has lost its evidence twice. `before` rebuilds what #397 and #398 shipped, an UNGATED bilinear floor rejected against that same blurred max, so no revert is needed. Costs minutes; the unit-scale claims are in test/world/detail-chain-world.test.ts. */
 
@@ -102,12 +102,12 @@ function tally(
   window: UvWindow,
   worldIds: Int32Array,
   worldSizes: ReadonlyArray<number>,
-  lost: LostMass[],
   seed: number,
   band: number,
   arm: string,
-): Tally {
+): { readonly totals: Tally; readonly lost: ReadonlyArray<LostMass> } {
   const { present, alive, coveredBy, drowned } = census(world, field, window, worldIds);
+  const lost: LostMass[] = [];
   for (const [id, cells] of present) {
     if (alive.has(id)) continue;
     lost.push({
@@ -116,12 +116,13 @@ function tally(
       regionCellsInWindow: cells,
     });
   }
-  return {
+  const totals = {
     fused: [...coveredBy.values()].reduce((a, s) => a + Math.max(0, s.size - 1), 0),
     lost: present.size - alive.size,
     drowned,
     masses: present.size,
   };
+  return { totals, lost };
 }
 
 const SEEDS = [42, 7, 2, 15, 23];
@@ -156,7 +157,9 @@ for (const seed of SEEDS) {
         ["after", buildChainedField(spec, newCache)],
       ];
       for (const [key, f] of arms) {
-        const t = tally(world, f, win, worldIds, worldSizes, lost, seed, idx, key);
+        const counted = tally(world, f, win, worldIds, worldSizes, seed, idx, key);
+        lost.push(...counted.lost);
+        const t = counted.totals;
         const acc = row[key];
         acc.fused += t.fused;
         acc.lost += t.lost;

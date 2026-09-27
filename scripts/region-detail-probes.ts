@@ -7,9 +7,9 @@ import { hamletCandidates } from "../src/society/hamlets.ts";
 import { windowAround } from "../src/world/region.ts";
 import { FULL_WINDOW, LOD_BANDS, lodWindowFor, type LodBand } from "../src/world/lod.ts";
 import type { World } from "../src/world/types.ts";
-import { bandWindows } from "./region-detail-windows.ts";
+import { bandWindows } from "./region-detail-sweep-windows.ts";
 
-/** The two follow-up isolations behind #399's PR and its comment on #443. Committed rather than left in a worktree's out/, because #376's prototype numbers and #443's probes both died with their scratchpads and had to be re-earned. `npm run check` does not cover scripts/; type-check by hand against tsconfig's options if you edit this. */
+/** The two follow-up isolations behind #399's PR and its comment on #443. Committed rather than left in a worktree's out/, because #376's prototype numbers and #443's probes both died with their scratchpads and had to be re-earned. */
 
 const SEEDS = [42, 7, 2, 15, 23];
 const INSET = 0.02; // region.ts's own open-window inset
