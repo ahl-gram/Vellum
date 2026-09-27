@@ -5,11 +5,13 @@ export type Lake = {
   readonly centroid: { readonly x: number; readonly y: number };
 };
 
-export function findLakes(
-  elev: Field,
-  seaLevel: number,
-  minCells = 12,
-): Lake[] {
+type WaterFlood = {
+  readonly isWater: (i: number) => boolean;
+  readonly seen: Uint8Array;
+  readonly flood: (start: number, collect: number[] | null) => void;
+};
+
+function createWaterFlood(elev: Field, seaLevel: number): WaterFlood {
   const { w, h, data } = elev;
   const isWater = (i: number): boolean => (data[i] as number) <= seaLevel;
   const seen = new Uint8Array(w * h);
@@ -34,7 +36,11 @@ export function findLakes(
       }
     }
   };
+  return { isWater, seen, flood };
+}
 
+function floodBorders(w: number, h: number, water: WaterFlood): void {
+  const { isWater, seen, flood } = water;
   for (let x = 0; x < w; x++) {
     for (const y of [0, h - 1]) {
       const i = x + y * w;
@@ -47,7 +53,10 @@ export function findLakes(
       if (isWater(i) && !seen[i]) flood(i, null);
     }
   }
+}
 
+function lakeRecords(w: number, h: number, water: WaterFlood, minCells: number): Lake[] {
+  const { isWater, seen, flood } = water;
   const lakes: Lake[] = [];
   for (let i = 0; i < w * h; i++) {
     if (seen[i] || !isWater(i)) continue;
@@ -65,7 +74,18 @@ export function findLakes(
       centroid: { x: sx / cells.length, y: sy / cells.length },
     });
   }
+  return lakes;
+}
 
+export function findLakes(
+  elev: Field,
+  seaLevel: number,
+  minCells = 12,
+): Lake[] {
+  const { w, h } = elev;
+  const water = createWaterFlood(elev, seaLevel);
+  floodBorders(w, h, water);
+  const lakes = lakeRecords(w, h, water, minCells);
   lakes.sort((a, b) => b.area - a.area);
   return lakes;
 }
