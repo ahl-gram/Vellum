@@ -52,6 +52,61 @@ export type ClueFacts = {
   readonly pool: ReadonlyArray<PoolEntry>;
 };
 
+function waterCandidates(world: World, x: number, y: number, labeled: (name: string) => boolean): ClueCandidate[] {
+  const out: ClueCandidate[] = [];
+  const river = nearestNamedRiver(world, x, y);
+  if (river && river.dist <= NEAR && labeled(river.name)) {
+    out.push({
+      clue: {
+        kind: "river",
+        subject: river.name,
+        text: `It stands within sight of the river ${river.name}.`,
+      },
+      holds: (e) => riverDist(world, river.i, e.s.x, e.s.y) <= NEAR,
+    });
+  }
+
+  const lake = nearestNamedLake(world, x, y);
+  if (lake && lake.dist <= NEAR && labeled(lake.name)) {
+    out.push({
+      clue: {
+        kind: "lake",
+        subject: lake.name,
+        text: `Its prospect takes in the waters of ${lake.name}.`,
+      },
+      holds: (e) => Math.hypot(lake.x - e.s.x, lake.y - e.s.y) <= NEAR,
+    });
+  }
+  return out;
+}
+
+function settlementCandidates(s: NamedSettlement): ClueCandidate[] {
+  const out: ClueCandidate[] = [];
+  if (s.harbor) {
+    out.push({
+      clue: { kind: "coast", text: "It is a harbor settlement, open to the sea." },
+      holds: (e) => e.s.harbor,
+    });
+  }
+
+  if (s.onRiver) {
+    out.push({
+      clue: { kind: "onriver", text: "A river runs through its bounds." },
+      holds: (e) => e.s.onRiver,
+    });
+  }
+  return out;
+}
+
+function realmCandidate(world: World, x: number, y: number): ClueCandidate[] {
+  const realm = realmNameAt(world, x, y);
+  if (!realm) return [];
+  return [{
+    clue: { kind: "realm", subject: realm, text: `It answers to ${realm}.` },
+    holds: (e) => realmNameAt(world, e.s.x, e.s.y) === realm,
+  }];
+}
+
 export function buildClueFacts(
   world: World,
   quarry: Quarry,
@@ -67,53 +122,11 @@ export function buildClueFacts(
   const ns = nsCandidate(world, y);
   const compass = [ew, ns];
   const lead = leadCandidate(world, x, y, ew, ns);
-  const features: ClueCandidate[] = [];
-
-  const river = nearestNamedRiver(world, x, y);
-  if (river && river.dist <= NEAR && labeled(river.name)) {
-    features.push({
-      clue: {
-        kind: "river",
-        subject: river.name,
-        text: `It stands within sight of the river ${river.name}.`,
-      },
-      holds: (e) => riverDist(world, river.i, e.s.x, e.s.y) <= NEAR,
-    });
-  }
-
-  const lake = nearestNamedLake(world, x, y);
-  if (lake && lake.dist <= NEAR && labeled(lake.name)) {
-    features.push({
-      clue: {
-        kind: "lake",
-        subject: lake.name,
-        text: `Its prospect takes in the waters of ${lake.name}.`,
-      },
-      holds: (e) => Math.hypot(lake.x - e.s.x, lake.y - e.s.y) <= NEAR,
-    });
-  }
-
-  if (s.harbor) {
-    features.push({
-      clue: { kind: "coast", text: "It is a harbor settlement, open to the sea." },
-      holds: (e) => e.s.harbor,
-    });
-  }
-
-  if (s.onRiver) {
-    features.push({
-      clue: { kind: "onriver", text: "A river runs through its bounds." },
-      holds: (e) => e.s.onRiver,
-    });
-  }
-
-  const realm = realmNameAt(world, x, y);
-  if (realm) {
-    features.push({
-      clue: { kind: "realm", subject: realm, text: `It answers to ${realm}.` },
-      holds: (e) => realmNameAt(world, e.s.x, e.s.y) === realm,
-    });
-  }
+  const features: ClueCandidate[] = [
+    ...waterCandidates(world, x, y, labeled),
+    ...settlementCandidates(s),
+    ...realmCandidate(world, x, y),
+  ];
 
   features.push(...terrainCandidates(world, x, y).filter((c) => glyphNear(c.band)));
   features.push(roadCandidate(world, x, y));
@@ -122,6 +135,7 @@ export function buildClueFacts(
 
   return { compass, lead, features, pool };
 }
+
 
 function offCenter(extent: number, v: number): number {
   return Math.abs(v - (extent - 1) / 2) / (extent - 1);
