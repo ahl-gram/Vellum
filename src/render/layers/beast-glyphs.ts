@@ -128,69 +128,84 @@ function whale(x: number, y: number, k: number, style: MapStyle): SvgNode[] {
   ];
 }
 
+type KrakenPen = { readonly y: number; readonly s: number; readonly style: MapStyle; readonly stroke: Stroke };
+
+function krakenArm(pen: KrakenPen, bx: number, lean: number, rise: number, c: number): SvgNode {
+  const { y, s, style, stroke } = pen;
+  const w0 = 2.4 * s;
+  const tx = bx + lean * s;
+  const ty = y - rise * s;
+  return el("path", {
+    d:
+      `M${bx - w0} ${y}` +
+      `Q${bx - w0 + lean * s * 0.35} ${y - rise * s * 0.55} ${tx - c * 3 * s} ${ty - 1 * s}` +
+      `Q${tx} ${ty - 4 * s} ${tx + c * 3.5 * s} ${ty - 2.5 * s}` +
+      `Q${tx + c * 5 * s} ${ty + 0.5 * s} ${tx + c * 2.5 * s} ${ty + 1.8 * s}` +
+      `Q${tx + c * 0.5 * s} ${ty + 2.2 * s} ${tx - c * 0.5 * s} ${ty + 0.8 * s}` +
+      `Q${bx + w0 + lean * s * 0.3} ${y - rise * s * 0.5} ${bx + w0} ${y}Z`,
+    fill: style.paper,
+    ...stroke,
+  });
+}
+
+function krakenMantle(x: number, pen: KrakenPen): SvgNode {
+  const { y, s, style, stroke } = pen;
+  return el("path", {
+    d:
+      `M${x - 12 * s} ${y}Q${x - 13 * s} ${y - 9 * s} ${x - 8 * s} ${y - 13.5 * s}` +
+      `Q${x - 4 * s} ${y - 17 * s} ${x} ${y - 17.5 * s}` +
+      `Q${x + 4 * s} ${y - 17 * s} ${x + 8 * s} ${y - 13.5 * s}` +
+      `Q${x + 13 * s} ${y - 9 * s} ${x + 12 * s} ${y}Z`,
+    fill: style.paper,
+    ...stroke,
+  });
+}
+
+function krakenEyes(x: number, y: number, s: number, k: number, style: MapStyle): SvgNode[] {
+  return [
+    el("circle", {
+      cx: (x - 4.5 * s).toFixed(1),
+      cy: (y - 9 * s).toFixed(1),
+      r: (2.0 * k).toFixed(2),
+      fill: style.paper,
+      stroke: style.ink,
+      "stroke-width": (1.0 * k).toFixed(2),
+    }),
+    el("circle", {
+      cx: (x + 4.5 * s).toFixed(1),
+      cy: (y - 9 * s).toFixed(1),
+      r: (2.0 * k).toFixed(2),
+      fill: style.paper,
+      stroke: style.ink,
+      "stroke-width": (1.0 * k).toFixed(2),
+    }),
+    el("circle", {
+      cx: (x - 4.5 * s).toFixed(1),
+      cy: (y - 9 * s).toFixed(1),
+      r: (1.0 * k).toFixed(2),
+      fill: style.ink,
+    }),
+    el("circle", {
+      cx: (x + 4.5 * s).toFixed(1),
+      cy: (y - 9 * s).toFixed(1),
+      r: (1.0 * k).toFixed(2),
+      fill: style.ink,
+    }),
+  ];
+}
+
 function kraken(x: number, y: number, k: number, style: MapStyle): SvgNode[] {
   const s = SCALE.kraken * k;
-  const stroke = inkStroke(style, k, 1.3);
-  const arm = (bx: number, lean: number, rise: number, c: number): SvgNode => {
-    const w0 = 2.4 * s;
-    const tx = bx + lean * s;
-    const ty = y - rise * s;
-    return el("path", {
-      d:
-        `M${bx - w0} ${y}` +
-        `Q${bx - w0 + lean * s * 0.35} ${y - rise * s * 0.55} ${tx - c * 3 * s} ${ty - 1 * s}` +
-        `Q${tx} ${ty - 4 * s} ${tx + c * 3.5 * s} ${ty - 2.5 * s}` +
-        `Q${tx + c * 5 * s} ${ty + 0.5 * s} ${tx + c * 2.5 * s} ${ty + 1.8 * s}` +
-        `Q${tx + c * 0.5 * s} ${ty + 2.2 * s} ${tx - c * 0.5 * s} ${ty + 0.8 * s}` +
-        `Q${bx + w0 + lean * s * 0.3} ${y - rise * s * 0.5} ${bx + w0} ${y}Z`,
-      fill: style.paper,
-      ...stroke,
-    });
-  };
+  const pen: KrakenPen = { y, s, style, stroke: inkStroke(style, k, 1.3) };
   return [
-    arm(x - 20 * s, -6, 24, -1),
-    arm(x + 20 * s, 6, 26, 1),
-    arm(x - 14 * s, -5, 19, 1),
-    arm(x + 14 * s, 5, 20, -1),
-    el("path", {
-      d:
-        `M${x - 12 * s} ${y}Q${x - 13 * s} ${y - 9 * s} ${x - 8 * s} ${y - 13.5 * s}` +
-        `Q${x - 4 * s} ${y - 17 * s} ${x} ${y - 17.5 * s}` +
-        `Q${x + 4 * s} ${y - 17 * s} ${x + 8 * s} ${y - 13.5 * s}` +
-        `Q${x + 13 * s} ${y - 9 * s} ${x + 12 * s} ${y}Z`,
-      fill: style.paper,
-      ...stroke,
-    }),
-    arm(x - 6 * s, -1.5, 7, -1),
-    arm(x + 6 * s, 1.5, 7.5, 1),
-    el("circle", {
-      cx: (x - 4.5 * s).toFixed(1),
-      cy: (y - 9 * s).toFixed(1),
-      r: (2.0 * k).toFixed(2),
-      fill: style.paper,
-      stroke: style.ink,
-      "stroke-width": (1.0 * k).toFixed(2),
-    }),
-    el("circle", {
-      cx: (x + 4.5 * s).toFixed(1),
-      cy: (y - 9 * s).toFixed(1),
-      r: (2.0 * k).toFixed(2),
-      fill: style.paper,
-      stroke: style.ink,
-      "stroke-width": (1.0 * k).toFixed(2),
-    }),
-    el("circle", {
-      cx: (x - 4.5 * s).toFixed(1),
-      cy: (y - 9 * s).toFixed(1),
-      r: (1.0 * k).toFixed(2),
-      fill: style.ink,
-    }),
-    el("circle", {
-      cx: (x + 4.5 * s).toFixed(1),
-      cy: (y - 9 * s).toFixed(1),
-      r: (1.0 * k).toFixed(2),
-      fill: style.ink,
-    }),
+    krakenArm(pen, x - 20 * s, -6, 24, -1),
+    krakenArm(pen, x + 20 * s, 6, 26, 1),
+    krakenArm(pen, x - 14 * s, -5, 19, 1),
+    krakenArm(pen, x + 14 * s, 5, 20, -1),
+    krakenMantle(x, pen),
+    krakenArm(pen, x - 6 * s, -1.5, 7, -1),
+    krakenArm(pen, x + 6 * s, 1.5, 7.5, 1),
+    ...krakenEyes(x, y, s, k, style),
     waterDashes(x, y, s * 0.8, style, k),
   ];
 }
