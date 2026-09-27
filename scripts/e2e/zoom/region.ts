@@ -67,6 +67,9 @@ export async function z17Inset({ evaluate, check, shoot, sleep, rgn, goHome, ent
   );
   await sleep(400); // let the crossfade land so the artifact shows the committed (opaque) inset
   await shoot("explorer-sub8-region-band1.png");
+}
+
+export async function zInsetContextShot({ shoot, sleep, enterAt }: ZoomKit): Promise<void> {
   await enterAt(1.35, 0.5, 0.5);
   await sleep(600);
   await shoot("explorer-sub8-inset-context.png");

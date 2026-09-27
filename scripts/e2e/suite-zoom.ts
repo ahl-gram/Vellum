@@ -5,7 +5,7 @@ import { zoomKit } from "./zoom/kit.ts";
 import { zSetup, z1ZoomTo, z2MaxClamp, zK4Shot, z3MinClamp, z4RoundTrip, z6PinnedCard, z8CardConstant, z8bHoverRing } from "./zoom/camera.ts";
 import { z9Keyboard, z10Buttons, z10bNoDblclickLeak, z11Styles, z12HashWrite } from "./zoom/controls.ts";
 import { z5VersoHomes, z14aDrawHomes, z14bTurnHomes, z14cArmingHomes, zrmReducedMotion, z7TouchAction, z13DeepLink, z13dRefitHolds } from "./zoom/resets.ts";
-import { z15RegionCrop, z16CacheHit, z17Inset, z18Pan, z19RapidSettles, z19bSupersession, z20ZoomOutDrops, z20bReducedMotion, z20cThrottle } from "./zoom/region.ts";
+import { z15RegionCrop, z16CacheHit, z17Inset, zInsetContextShot, z18Pan, z19RapidSettles, z19bSupersession, z20ZoomOutDrops, z20bReducedMotion, z20cThrottle } from "./zoom/region.ts";
 import { z20dInkDrops, z20eCardSurvives, z20fStepsDown, z20gInkBlocks, z21Target, z21Hamlets, z21bOneBandUp, zRestore } from "./zoom/bands.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
@@ -40,6 +40,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await z16CacheHit(ctx);
   await evaluate(`window.__vellumSetRedraftEnabled(true)`);
   await z17Inset(k);
+  await zInsetContextShot(k);
   await z18Pan(k);
   await z19RapidSettles(k);
   await z19bSupersession(k);
