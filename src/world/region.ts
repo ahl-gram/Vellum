@@ -1,8 +1,10 @@
 import { bfsDistance } from "../core/bfs-distance.ts";
 import { clamp } from "../core/math.ts";
-import { computeClimate } from "../climate/climate.ts";
+import { computeClimate, type Climate } from "../climate/climate.ts";
+import type { Field } from "../core/grid.ts";
 import { classifyBiomes } from "../climate/biomes.ts";
-import { computeFlow } from "../hydrology/flow.ts";
+import { computeFlow, type FlowResult } from "../hydrology/flow.ts";
+import type { River } from "../hydrology/rivers.ts";
 import { buildHeightfield, type UvWindow } from "../terrain/heightfield.ts";
 import { buildRoads } from "../society/roads.ts";
 import { placeHamlets } from "../society/hamlets.ts";
@@ -12,7 +14,7 @@ import { landSnapRadius, snapToLand } from "./snap-to-land.ts";
 import { mapChainsToWindow, mapRingsToWindow, realmBorderChains, realmCarryRings } from "./realm-carry.ts";
 import { seaMask } from "../hydrology/sea-mask.ts";
 import { LOD_BANDS } from "./lod.ts";
-import type { NamedLake, NamedSettlement, World } from "./types.ts";
+import type { FeatureNames, NamedLake, NamedSettlement, World } from "./types.ts";
 
 export type RegionSpec = {
   readonly window: UvWindow;
@@ -29,13 +31,18 @@ export function regionDetailLevel(spec: RegionSpec): number {
   return spec.detail === true ? detailForWindow(spec.window) : 0;
 }
 
-export function generateRegionWorld(world: World, spec: RegionSpec): World {
-  const { recipe } = world;
-  const { window, gridW, gridH } = spec;
-  const worldAspect = (recipe.gridW - 1) / (recipe.gridH - 1);
+type RegionGrid = {
+  readonly world: World;
+  readonly window: UvWindow;
+  readonly gridW: number;
+  readonly gridH: number;
+  readonly worldAspect: number;
+};
 
-  const seaLevel = world.seaLevel; // absolute: the same waterline as the world chart
-  const elev = spec.detail === true
+function regionElevation(g: RegionGrid, spec: RegionSpec, seaLevel: number): Field {
+  const { world, window, gridW, gridH, worldAspect } = g;
+  const { recipe } = world;
+  return spec.detail === true
     ? buildChainedField(
         {
           seed: recipe.seed,
@@ -56,11 +63,22 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
         window,
         worldAspect,
       });
+}
 
+function worldElevSpan(world: World, seaLevel: number): number {
   let worldMax = -Infinity;
   for (const v of world.elev.data) worldMax = Math.max(worldMax, v);
-  const elevSpan = worldMax - seaLevel;
+  return worldMax - seaLevel;
+}
 
+function regionWaters(
+  g: RegionGrid,
+  elev: Field,
+  seaLevel: number,
+  elevSpan: number,
+): { flow: FlowResult; rivers: River[]; riverCells: Uint8Array } {
+  const { world, window, gridW, gridH, worldAspect } = g;
+  const { recipe } = world;
   const preClimate = computeClimate(elev, seaLevel, recipe.seed, {
     band: recipe.band,
     windDir: world.winds.dir, // the same wind blows over a region of the same world
@@ -78,6 +96,18 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
   for (const r of rivers) {
     for (const p of r.points) riverCells[Math.round(p.x) + Math.round(p.y) * gridW] = 1;
   }
+  return { flow, rivers, riverCells };
+}
+
+function regionClimate(
+  g: RegionGrid,
+  elev: Field,
+  seaLevel: number,
+  riverCells: Uint8Array,
+  elevSpan: number,
+): { climate: Climate; biomes: Uint8Array } {
+  const { world, window, worldAspect } = g;
+  const { recipe } = world;
   const climate = computeClimate(elev, seaLevel, recipe.seed, {
     band: recipe.band,
     riverCells,
@@ -87,7 +117,17 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
     elevSpan,
   });
   const biomes = classifyBiomes(elev, seaLevel, climate, elevSpan);
+  return { climate, biomes };
+}
 
+function projectSettlements(
+  g: RegionGrid,
+  spec: RegionSpec,
+  elev: Field,
+  seaLevel: number,
+): { settlements: NamedSettlement[]; regionIdxOf: Map<number, number> } {
+  const { world, window, gridW, gridH } = g;
+  const { recipe } = world;
   const du = window.u1 - window.u0;
   const dv = window.v1 - window.v0;
   const inset = 0.02;
@@ -119,9 +159,19 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
       `[region] ${spec.title}: ${drowned.length} settlement(s) found no shore within ${snapRadius} cell(s) and were dropped: ${drowned.join(", ")}`,
     );
   }
+  return { settlements, regionIdxOf };
+}
 
-  const seats = world.realms.seats.map((wi) => regionIdxOf.get(wi) ?? -1);
-
+function regionRoadLabels(
+  g: RegionGrid,
+  elev: Field,
+  seaLevel: number,
+  placed: { readonly settlements: ReadonlyArray<NamedSettlement>; readonly regionIdxOf: ReadonlyMap<number, number> },
+): Int16Array {
+  const { world, window, gridW, gridH } = g;
+  const { recipe } = world;
+  const du = window.u1 - window.u0;
+  const dv = window.v1 - window.v0;
   const roadLabels = new Int16Array(gridW * gridH).fill(-1);
   for (let gy = 0; gy < gridH; gy++) {
     for (let gx = 0; gx < gridW; gx++) {
@@ -133,22 +183,19 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
       roadLabels[gx + gy * gridW] = world.realms.labels[wx + wy * recipe.gridW] as number;
     }
   }
-  for (const [worldIdx, regionIdx] of regionIdxOf) {
+  for (const [worldIdx, regionIdx] of placed.regionIdxOf) {
     const ws = world.settlements[worldIdx] as NamedSettlement;
-    const rs = settlements[regionIdx] as NamedSettlement;
+    const rs = placed.settlements[regionIdx] as NamedSettlement;
     roadLabels[rs.x + rs.y * gridW] = world.realms.labels[ws.x + ws.y * recipe.gridW] as number;
   }
-  const roads = buildRoads(elev, seaLevel, riverCells, settlements, { labels: roadLabels, seats });
+  return roadLabels;
+}
 
-  const deepestSizeUV = (LOD_BANDS[LOD_BANDS.length - 1] as (typeof LOD_BANDS)[number]).sizeUV;
-  const hamlets =
-    du <= deepestSizeUV + 1e-9 ? placeHamlets(world, window, elev, seaLevel) : [];
-  const peopled = hamlets.length > 0 ? [...settlements, ...hamlets] : settlements;
-
-  const oceanDist = bfsDistance(gridW, gridH, (x, y) =>
-    (elev.data[x + y * gridW] as number) > seaLevel,
-  );
-
+function regionSeaGate(g: RegionGrid): Uint8Array {
+  const { world, window, gridW, gridH } = g;
+  const { recipe } = world;
+  const du = window.u1 - window.u0;
+  const dv = window.v1 - window.v0;
   const worldSea = seaMask(world.elev, world.seaLevel);
   const seaGate = new Uint8Array(gridW * gridH);
   for (let gy = 0; gy < gridH; gy++) {
@@ -160,8 +207,15 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
       seaGate[gx + gy * gridW] = worldSea[wx + wy * recipe.gridW] as number;
     }
   }
+  return seaGate;
+}
 
-  const regionLakes: NamedLake[] = world.names.lakes.flatMap((lake) => {
+function regionLakes(g: RegionGrid, elev: Field, seaLevel: number): NamedLake[] {
+  const { world, window, gridW, gridH } = g;
+  const { recipe } = world;
+  const du = window.u1 - window.u0;
+  const dv = window.v1 - window.v0;
+  return world.names.lakes.flatMap((lake) => {
     const u = lake.x / (recipe.gridW - 1);
     const v = lake.y / (recipe.gridH - 1);
     if (u < window.u0 || u > window.u1 || v < window.v0 || v > window.v1) return [];
@@ -170,6 +224,81 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
     if ((elev.data[Math.round(gx) + Math.round(gy) * gridW] as number) > seaLevel) return [];
     return [{ x: gx, y: gy, name: lake.name }];
   });
+}
+
+function regionTitleFor(world: World, spec: RegionSpec): World["title"] {
+  return {
+    title: spec.title,
+    subtitle: `A regional survey, drawn from the greater chart of ${world.title.title}`,
+    year: world.title.year,
+  };
+}
+
+function regionNames(world: World, lakes: NamedLake[]): FeatureNames {
+  return {
+    rivers: new Map(),
+    sea: world.names.sea,
+    range: null,
+    forest: null,
+    lakes,
+    realms: world.names.realms,
+  };
+}
+
+function regionCarry(g: RegionGrid, seaGate: Uint8Array): NonNullable<World["region"]> {
+  const { world, window, gridW, gridH } = g;
+  const { recipe } = world;
+  return {
+    window,
+    worldGridW: recipe.gridW,
+    worldGridH: recipe.gridH,
+    seaGate,
+    realmRings: mapRingsToWindow(
+      realmCarryRings(world),
+      window,
+      recipe.gridW,
+      recipe.gridH,
+      gridW,
+      gridH,
+    ),
+    realmBorders: mapChainsToWindow(
+      realmBorderChains(world),
+      window,
+      recipe.gridW,
+      recipe.gridH,
+      gridW,
+      gridH,
+    ),
+    parentRealmLabels: world.realms.labels,
+  };
+}
+
+export function generateRegionWorld(world: World, spec: RegionSpec): World {
+  const { recipe } = world;
+  const { window, gridW, gridH } = spec;
+  const worldAspect = (recipe.gridW - 1) / (recipe.gridH - 1);
+  const g: RegionGrid = { world, window, gridW, gridH, worldAspect };
+
+  const seaLevel = world.seaLevel; // absolute: the same waterline as the world chart
+  const elev = regionElevation(g, spec, seaLevel);
+  const elevSpan = worldElevSpan(world, seaLevel);
+  const { flow, rivers, riverCells } = regionWaters(g, elev, seaLevel, elevSpan);
+  const { climate, biomes } = regionClimate(g, elev, seaLevel, riverCells, elevSpan);
+
+  const placed = projectSettlements(g, spec, elev, seaLevel);
+  const { settlements } = placed;
+  const seats = world.realms.seats.map((wi) => placed.regionIdxOf.get(wi) ?? -1);
+  const roadLabels = regionRoadLabels(g, elev, seaLevel, placed);
+  const roads = buildRoads(elev, seaLevel, riverCells, settlements, { labels: roadLabels, seats });
+
+  const deepestSizeUV = (LOD_BANDS[LOD_BANDS.length - 1] as (typeof LOD_BANDS)[number]).sizeUV;
+  const hamlets =
+    window.u1 - window.u0 <= deepestSizeUV + 1e-9 ? placeHamlets(world, window, elev, seaLevel) : [];
+  const peopled = hamlets.length > 0 ? [...settlements, ...hamlets] : settlements;
+
+  const oceanDist = bfsDistance(gridW, gridH, (x, y) =>
+    (elev.data[x + y * gridW] as number) > seaLevel,
+  );
 
   return {
     recipe: { ...recipe, gridW, gridH },
@@ -186,45 +315,12 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
     realms: { labels: roadLabels, seats },
     arms: [],
     culture: world.culture,
-    title: {
-      title: spec.title,
-      subtitle: `A regional survey, drawn from the greater chart of ${world.title.title}`,
-      year: world.title.year,
-    },
-    names: {
-      rivers: new Map(),
-      sea: world.names.sea,
-      range: null,
-      forest: null,
-      lakes: regionLakes,
-      realms: world.names.realms,
-    },
+    title: regionTitleFor(world, spec),
+    names: regionNames(world, regionLakes(g, elev, seaLevel)),
     history: { events: [] },
     beasts: [],
     oceanDist,
-    region: {
-      window,
-      worldGridW: recipe.gridW,
-      worldGridH: recipe.gridH,
-      seaGate,
-      realmRings: mapRingsToWindow(
-        realmCarryRings(world),
-        window,
-        recipe.gridW,
-        recipe.gridH,
-        gridW,
-        gridH,
-      ),
-      realmBorders: mapChainsToWindow(
-        realmBorderChains(world),
-        window,
-        recipe.gridW,
-        recipe.gridH,
-        gridW,
-        gridH,
-      ),
-      parentRealmLabels: world.realms.labels,
-    },
+    region: regionCarry(g, regionSeaGate(g)),
   };
 }
 
