@@ -1,16 +1,16 @@
 import { el, type SvgNode } from "../svg.ts";
 import type { MapStyle } from "../style.ts";
 
-export function glyphSymbolDefs(style: MapStyle): SvgNode[] {
-  const ink = style.ink;
-  const paper = style.land;
-  const stroke = (w: number) => ({
-    stroke: ink,
-    "stroke-width": w,
-    "stroke-linecap": "round" as const,
-    "stroke-linejoin": "round" as const,
-  });
+const strokeFor = (ink: string) => (w: number) => ({
+  stroke: ink,
+  "stroke-width": w,
+  "stroke-linecap": "round" as const,
+  "stroke-linejoin": "round" as const,
+});
 
+type Stroke = ReturnType<typeof strokeFor>;
+
+function reliefSymbols(paper: string, stroke: Stroke): SvgNode[] {
   return [
     el("symbol", { id: "gl-mtn-1", overflow: "visible" }, [
       el("path", { d: "M-9 0Q-4.5 -4 0 -13Q4.5 -4 9 0Z", fill: paper, ...stroke(1.2) }),
@@ -30,6 +30,11 @@ export function glyphSymbolDefs(style: MapStyle): SvgNode[] {
     el("symbol", { id: "gl-hill-2", overflow: "visible" }, [
       el("path", { d: "M-8 0Q-3 -6 1 -4Q4 -6 8 0", fill: paper, ...stroke(1.0) }),
     ]),
+  ];
+}
+
+function groundSymbols(paper: string, stroke: Stroke): SvgNode[] {
+  return [
     el("symbol", { id: "gl-tree-round", overflow: "visible" }, [
       el("path", { d: "M0 0L0 -3.4", fill: "none", ...stroke(0.9) }),
       el("path", {
@@ -58,4 +63,9 @@ export function glyphSymbolDefs(style: MapStyle): SvgNode[] {
       el("path", { d: "M-6 0Q-2 -3 2 0M2 -1Q5 -3 7 -1", fill: "none", ...stroke(0.8) }),
     ]),
   ];
+}
+
+export function glyphSymbolDefs(style: MapStyle): SvgNode[] {
+  const stroke = strokeFor(style.ink);
+  return [...reliefSymbols(style.land, stroke), ...groundSymbols(style.land, stroke)];
 }

@@ -1,5 +1,29 @@
 import { el, type SvgNode } from "../svg.ts";
 import type { RenderCtx } from "../context.ts";
+import type { Projection } from "../transform.ts";
+
+function frameTicks(proj: Projection, ink: string): SvgNode[] {
+  const m = proj.margin;
+  const w = proj.widthPx;
+  const h = proj.heightPx;
+  const innerW = w - 2 * m;
+  const ticks: SvgNode[] = [];
+  const step = innerW / 24;
+  const tickLen = m * 0.16;
+  for (let x = m + step; x < w - m - 1; x += step) {
+    ticks.push(
+      el("line", { x1: x, y1: m, x2: x, y2: m - tickLen, stroke: ink, "stroke-width": 0.8 }),
+      el("line", { x1: x, y1: h - m, x2: x, y2: h - m + tickLen, stroke: ink, "stroke-width": 0.8 }),
+    );
+  }
+  for (let y = m + step; y < h - m - 1; y += step) {
+    ticks.push(
+      el("line", { x1: m, y1: y, x2: m - tickLen, y2: y, stroke: ink, "stroke-width": 0.8 }),
+      el("line", { x1: w - m, y1: y, x2: w - m + tickLen, y2: y, stroke: ink, "stroke-width": 0.8 }),
+    );
+  }
+  return ticks;
+}
 
 export function frameLayer(ctx: RenderCtx): SvgNode {
   const { proj, style } = ctx;
@@ -9,22 +33,6 @@ export function frameLayer(ctx: RenderCtx): SvgNode {
   const outerInset = m * 0.45;
   const innerW = w - 2 * m;
   const innerH = h - 2 * m;
-
-  const ticks: SvgNode[] = [];
-  const step = innerW / 24;
-  const tickLen = m * 0.16;
-  for (let x = m + step; x < w - m - 1; x += step) {
-    ticks.push(
-      el("line", { x1: x, y1: m, x2: x, y2: m - tickLen, stroke: style.ink, "stroke-width": 0.8 }),
-      el("line", { x1: x, y1: h - m, x2: x, y2: h - m + tickLen, stroke: style.ink, "stroke-width": 0.8 }),
-    );
-  }
-  for (let y = m + step; y < h - m - 1; y += step) {
-    ticks.push(
-      el("line", { x1: m, y1: y, x2: m - tickLen, y2: y, stroke: style.ink, "stroke-width": 0.8 }),
-      el("line", { x1: w - m, y1: y, x2: w - m + tickLen, y2: y, stroke: style.ink, "stroke-width": 0.8 }),
-    );
-  }
 
   return el("g", { id: "layer-frame" }, [
     el("rect", {
@@ -41,7 +49,7 @@ export function frameLayer(ctx: RenderCtx): SvgNode {
       x: m, y: m, width: innerW, height: innerH,
       fill: "none", stroke: style.ink, "stroke-width": 1.4,
     }),
-    el("g", { "stroke-opacity": 0.55 }, ticks),
+    el("g", { "stroke-opacity": 0.55 }, frameTicks(proj, style.ink)),
     el(
       "text",
       {
