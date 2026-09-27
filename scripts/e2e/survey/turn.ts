@@ -1,5 +1,20 @@
 import type { SurveyKit } from "./kit.ts";
 
+export async function sv9NoSeams({ evaluate, check, goto }: SurveyKit): Promise<void> {
+  await goto("#seed=42&style=antique", "survey-seams");
+  const sv9 = await evaluate<{ stepTo: string; paintAt: string; plan: string; log: string; geom: string; ages: string; inline: string }>(`({
+      stepTo:typeof window.__vellumVoyageStepTo,paintAt:typeof window.__vellumVoyagePaintAt,
+      plan:typeof window.__vellumVoyagePlan,log:typeof window.__vellumVoyageLog,
+      geom:typeof window.__vellumVoyageLegGeometry,ages:typeof window.__vellumAgesState,
+      inline:typeof window.__vellumRunInline})`);
+  check(
+    "SV9 the Explorer publishes no time seams (voyage/ages hooks gone; the runInline oracle stays)",
+    sv9.stepTo === "undefined" && sv9.paintAt === "undefined" && sv9.plan === "undefined" &&
+      sv9.log === "undefined" && sv9.geom === "undefined" && sv9.ages === "undefined" && sv9.inline === "function",
+    JSON.stringify(sv9),
+  );
+}
+
 export async function sv10TurnKeepsTrack({ evaluate, check, waitTurned, armTurnWatch, waitInked }: SurveyKit): Promise<void> {
   await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
   // Wait for the ink BEFORE the turn: a style change inside the arm's gap drops the pending arm, and SV10 would pass on a turn begun over a bare sheet, losing #153's premise.

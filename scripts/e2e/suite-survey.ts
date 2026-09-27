@@ -7,8 +7,8 @@ import { sv1Boots, sv2FirstArm, sv2bAtRest, sv2cReArm, sv2dInsideBeat, sv2eInFli
 import { sv2gSecondArm, sv2hPluralExit, sv2iBuildsOnce, sv2jTurnLanding } from "./survey/mount.ts";
 import { sv2pDrawBeat, sv2pSwapThenInk, sv2mStyleInBeat, sv2oVersoDraw } from "./survey/beat.ts";
 import { sv3Untick, sv4DeepLink, sv5Forwards, sv5bVerbatim, sv5cBadYear, sv5dBothKeys, sv6VersoMirrors, sv7Journal } from "./survey/links.ts";
-import { sv10TurnKeepsTrack, sv2nReducedSwap } from "./survey/turn.ts";
-import { sv9NoSeams, sv8NoYear, sv11Clean } from "./survey/seams.ts";
+import { sv9NoSeams, sv10TurnKeepsTrack, sv2nReducedSwap } from "./survey/turn.ts";
+import { sv8NoYear, sv11Clean } from "./survey/closing.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { evaluate, sleep, consoleErrors, http4xx } = ctx;
