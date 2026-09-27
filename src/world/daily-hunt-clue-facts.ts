@@ -136,7 +136,6 @@ export function buildClueFacts(
   return { compass, lead, features, pool };
 }
 
-
 function offCenter(extent: number, v: number): number {
   return Math.abs(v - (extent - 1) / 2) / (extent - 1);
 }

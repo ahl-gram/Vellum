@@ -22,12 +22,9 @@ function key(x: number, y: number): string {
   return `${Math.round(x * 1e6)},${Math.round(y * 1e6)}`;
 }
 
-function cellSegments(x: number, y: number, corners: readonly [number, number, number, number], iso: number): Seg[] {
+function cellSegments(x: number, y: number, corners: readonly [number, number, number, number], idx: number, iso: number): Seg[] {
   const [a, b, c, d] = corners;
   const segs: Seg[] = [];
-  const idx =
-    (a > iso ? 8 : 0) | (b > iso ? 4 : 0) | (c > iso ? 2 : 0) | (d > iso ? 1 : 0);
-  if (idx === 0 || idx === 15) return segs;
 
   const top: Point = [x + crossT(a, b, iso), y];
   const right: Point = [x + 1, y + crossT(b, c, iso)];
@@ -75,7 +72,11 @@ export function marchingSquares(field: Field, iso: number): Contour[] {
       const b = data[x + 1 + y * w] as number;
       const c = data[x + 1 + (y + 1) * w] as number;
       const d = data[x + (y + 1) * w] as number;
-      segs.push(...cellSegments(x, y, [a, b, c, d], iso));
+
+      const idx =
+        (a > iso ? 8 : 0) | (b > iso ? 4 : 0) | (c > iso ? 2 : 0) | (d > iso ? 1 : 0);
+      if (idx === 0 || idx === 15) continue;
+      for (const s of cellSegments(x, y, [a, b, c, d], idx, iso)) segs.push(s);
     }
   }
 
@@ -103,10 +104,9 @@ function headSegment(segs: ReadonlyArray<Seg>, used: Uint8Array, headKey: string
   return -1;
 }
 
-function createChainWalker(segs: ReadonlyArray<Seg>): (i: number) => Contour | null {
+function createStartTaker(segs: ReadonlyArray<Seg>): (k: string, used: Uint8Array) => number {
   const byStart = startIndex(segs);
-  const used = new Uint8Array(segs.length);
-  const takeFrom = (k: string): number => {
+  return (k: string, used: Uint8Array): number => {
     const list = byStart.get(k);
     if (!list) return -1;
     while (list.length > 0) {
@@ -115,12 +115,18 @@ function createChainWalker(segs: ReadonlyArray<Seg>): (i: number) => Contour | n
     }
     return -1;
   };
+}
+
+function createChainWalker(segs: ReadonlyArray<Seg>): (i: number) => Contour | null {
+  const takeFrom = createStartTaker(segs);
+  const used = new Uint8Array(segs.length);
+
   const walkForward = (first: Seg): { points: Point[]; closed: boolean } => {
     const points: Point[] = [[first[0], first[1]], [first[2], first[3]]];
     const startKey = key(first[0], first[1]);
     let endKey = key(first[2], first[3]);
     while (endKey !== startKey) {
-      const next = takeFrom(endKey);
+      const next = takeFrom(endKey, used);
       if (next === -1) break;
       used[next] = 1;
       const s = segs[next] as Seg;

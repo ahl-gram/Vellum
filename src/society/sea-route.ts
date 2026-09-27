@@ -81,7 +81,6 @@ export function attachSeatlessLandmasses(
   return labels;
 }
 
-
 function euclideanNearestSeat(
   cells: ReadonlyArray<number>,
   seats: ReadonlyArray<number>,

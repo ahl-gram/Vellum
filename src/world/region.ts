@@ -273,6 +273,26 @@ function regionCarry(g: RegionGrid, seaGate: Uint8Array): NonNullable<World["reg
   };
 }
 
+function regionPeople(
+  g: RegionGrid,
+  spec: RegionSpec,
+  land: { readonly elev: Field; readonly seaLevel: number; readonly riverCells: Uint8Array },
+): { peopled: NamedSettlement[]; roads: ReturnType<typeof buildRoads>; roadLabels: Int16Array; seats: number[] } {
+  const { world, window } = g;
+  const { elev, seaLevel, riverCells } = land;
+  const placed = projectSettlements(g, spec, elev, seaLevel);
+  const { settlements } = placed;
+  const seats = world.realms.seats.map((wi) => placed.regionIdxOf.get(wi) ?? -1);
+  const roadLabels = regionRoadLabels(g, elev, seaLevel, placed);
+  const roads = buildRoads(elev, seaLevel, riverCells, settlements, { labels: roadLabels, seats });
+
+  const deepestSizeUV = (LOD_BANDS[LOD_BANDS.length - 1] as (typeof LOD_BANDS)[number]).sizeUV;
+  const hamlets =
+    window.u1 - window.u0 <= deepestSizeUV + 1e-9 ? placeHamlets(world, window, elev, seaLevel) : [];
+  const peopled = hamlets.length > 0 ? [...settlements, ...hamlets] : settlements;
+  return { peopled, roads, roadLabels, seats };
+}
+
 export function generateRegionWorld(world: World, spec: RegionSpec): World {
   const { recipe } = world;
   const { window, gridW, gridH } = spec;
@@ -285,16 +305,7 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
   const { flow, rivers, riverCells } = regionWaters(g, elev, seaLevel, elevSpan);
   const { climate, biomes } = regionClimate(g, elev, seaLevel, riverCells, elevSpan);
 
-  const placed = projectSettlements(g, spec, elev, seaLevel);
-  const { settlements } = placed;
-  const seats = world.realms.seats.map((wi) => placed.regionIdxOf.get(wi) ?? -1);
-  const roadLabels = regionRoadLabels(g, elev, seaLevel, placed);
-  const roads = buildRoads(elev, seaLevel, riverCells, settlements, { labels: roadLabels, seats });
-
-  const deepestSizeUV = (LOD_BANDS[LOD_BANDS.length - 1] as (typeof LOD_BANDS)[number]).sizeUV;
-  const hamlets =
-    window.u1 - window.u0 <= deepestSizeUV + 1e-9 ? placeHamlets(world, window, elev, seaLevel) : [];
-  const peopled = hamlets.length > 0 ? [...settlements, ...hamlets] : settlements;
+  const { peopled, roads, roadLabels, seats } = regionPeople(g, spec, { elev, seaLevel, riverCells });
 
   const oceanDist = bfsDistance(gridW, gridH, (x, y) =>
     (elev.data[x + y * gridW] as number) > seaLevel,

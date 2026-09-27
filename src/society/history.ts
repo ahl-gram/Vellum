@@ -71,7 +71,6 @@ function makeCycler(rng: Rng, pool: readonly string[]): () => string {
   };
 }
 
-
 type YearAt = (f: number) => number;
 
 function foundingYears(settlements: ReadonlyArray<SettlementCore>, rng: Rng, yearAt: YearAt, presentYear: number): number[] {

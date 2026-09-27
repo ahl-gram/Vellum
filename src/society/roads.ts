@@ -232,7 +232,6 @@ function connectToNetwork(
   return points;
 }
 
-
 function topByScore(group: ReadonlyArray<Settlement>): Settlement | undefined {
   let best: Settlement | undefined;
   for (const s of group) {

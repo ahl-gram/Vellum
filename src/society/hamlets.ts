@@ -150,6 +150,7 @@ function hamletAt(
   const { gridW, gridH } = world.recipe;
   const { stepU, stepV, u0, u1, v0, v1 } = lattice;
   const { r, ix, iy } = cell;
+  // One fork per lattice cell, FIXED draw order within it: reordering draws re-rolls every hamlet.
   const roll = r.next();
   const ju = r.next();
   const jv = r.next();
@@ -196,7 +197,6 @@ export function hamletCandidates(world: World, window: UvWindow): HamletCandidat
   const out: HamletCandidate[] = [];
   for (let iy = lattice.iy0; iy <= lattice.iy1; iy++) {
     for (let ix = lattice.ix0; ix <= lattice.ix1; ix++) {
-      // One fork per lattice cell, FIXED draw order within it: reordering draws re-rolls every hamlet.
       const r = root.fork(`hamlet:${ix},${iy}`);
       const hamlet = hamletAt(world, lattice, { slope, span }, { r, ix, iy }, taken);
       if (hamlet) out.push(hamlet);

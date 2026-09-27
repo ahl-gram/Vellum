@@ -14,7 +14,7 @@ import { placeSettlements, type Settlement } from "../society/sites.ts";
 import { buildRoads } from "../society/roads.ts";
 import { partitionRealms, type RealmsResult } from "../society/realms.ts";
 import { blazonRealms } from "../society/heraldry.ts";
-import { simulateHistory } from "../society/history.ts";
+import { simulateHistory, type HistoricalEvent } from "../society/history.ts";
 import { assignFormerNames } from "../society/renames.ts";
 import { conjureBestiary, type SeaBeast } from "../society/bestiary.ts";
 import { nameSetOf } from "../society/hamlets.ts";
@@ -79,7 +79,6 @@ function stripUndefined<T extends object>(obj: T): Partial<T> {
   }
   return out as Partial<T>;
 }
-
 
 type NamedSettlementCore = Settlement & { readonly name: string };
 
@@ -176,6 +175,21 @@ function frontierMask(ground: Ground, gridW: number, gridH: number): Uint8Array 
   return mask;
 }
 
+function realmStage(
+  ground: Ground,
+  settlements: ReadonlyArray<Settlement>,
+  recipe: WorldRecipe,
+  citystate: boolean,
+): { realms: RealmsResult; roads: ReturnType<typeof buildRoads> } {
+  const { elev, seaLevel, riverCells } = ground;
+  const realms = partitionRealms(elev, seaLevel, riverCells, settlements, {
+    ...(citystate ? { maxRealms: 1 } : {}),
+    barrier: frontierMask(ground, recipe.gridW, recipe.gridH),
+  });
+  const roads = buildRoads(elev, seaLevel, riverCells, settlements, realms);
+  return { realms, roads };
+}
+
 function namePlaces(
   namer: Namer,
   settlements: ReadonlyArray<Settlement>,
@@ -262,7 +276,7 @@ function worldHistory(
   realms: RealmsResult,
   names: FeatureNames,
   presentYear: number,
-) {
+): { settled: NamedSettlement[]; events: ReadonlyArray<HistoricalEvent> } {
   const history = simulateHistory(
     {
       settlements: named,
@@ -330,11 +344,7 @@ export function generateWorld(recipe: WorldRecipe): World {
 
   const citystate = mapType === "citystate";
   const settlements = siteStage(ground, rng, citystate);
-  const realms = partitionRealms(elev, seaLevel, riverCells, settlements, {
-    ...(citystate ? { maxRealms: 1 } : {}),
-    barrier: frontierMask(ground, gridW, gridH),
-  });
-  const roads = buildRoads(elev, seaLevel, riverCells, settlements, realms);
+  const { realms, roads } = realmStage(ground, settlements, recipe, citystate);
 
   const culture = rng.fork("culture").pick(CULTURES);
   const arms = blazonRealms(culture, realms.seats.length, rng.fork("heraldry"));

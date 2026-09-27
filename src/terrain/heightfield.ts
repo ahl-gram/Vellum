@@ -89,7 +89,6 @@ const COAST_WARP_OCTAVES = 5;
 const BASE_FBM_OCTAVES = 6;
 export const MAX_DETAIL = OCTAVE_OFFSETS.length - BASE_FBM_OCTAVES;
 
-/** Elevation is a pure function of world-space (u, v) and the seed, so a finer grid over the same recipe samples the identical landscape. */
 type TerrainSettings = {
   readonly seed: number;
   readonly shape: Shape;
@@ -171,6 +170,7 @@ function elevationAt(u: number, v: number, s: TerrainSettings): number {
   return e;
 }
 
+/** Elevation is a pure function of world-space (u, v) and the seed, so a finer grid over the same recipe samples the identical landscape. */
 export function buildHeightfield(params: TerrainParams): Field {
   const { gridW, gridH } = params;
   const settings = terrainSettings(params);
