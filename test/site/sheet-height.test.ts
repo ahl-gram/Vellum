@@ -1,9 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync, readdirSync } from "node:fs";
-import { resolve } from "node:path";
+import { readFileSync } from "node:fs";
+import { relative, resolve, sep } from "node:path";
 import { SHEET } from "../../src/site/home/camera.ts";
 import { homeStage } from "../../src/site/home/stage-data.ts";
+import { e2eSourcePaths, e2eSuiteFamily } from "../../test-support/e2e-source.ts";
 
 // The 1157.931 sheet-height literals were hand-copied from the manifest derivation (#476), so a chart aspect change would misplace every station with all tests green unless something compares them back.
 
@@ -24,9 +25,9 @@ test("the sheet-height literals match their derivation across every carrier (#47
   const carriers = [
     "public/index.css",
     "src/site/home/camera.ts",
-    ...readdirSync(resolve(REPO, "scripts/e2e"))
-      .filter((f) => /\.ts$/.test(f))
-      .map((f) => `scripts/e2e/${f}`),
+    ...e2eSourcePaths(REPO)
+      .filter((p) => p.startsWith(resolve(REPO, "scripts", "e2e") + sep))
+      .map((p) => relative(REPO, p).split(sep).join("/")),
   ];
   // Anchored to the derivation's integer part, so a re-derived height reds the witness below instead of matching nothing; a literal carried OUTSIDE these roots escapes (false negative only).
   const litRe = new RegExp(String.raw`\b${Math.floor(derived)}\.\d+`, "g");
@@ -48,12 +49,13 @@ test("the sheet-width literals match the manifest's build width in every home ca
   assert.equal(SHEET.w, w, `camera SHEET.w ${SHEET.w} is not the width the manifest was built at (${w})`);
   // Presence-witness anchored to the current width. Scoped to the HOME files because elsewhere bare 1500 means sleeps and unrelated render params; a future non-sheet 1500 in these files reds as a false positive and earns a conscious exclusion.
   const wRe = new RegExp(String.raw`\b${w}(?![\d.])`);
-  for (const path of [
-    "public/index.css",
-    "scripts/e2e/home-support.ts",
-    "scripts/e2e/suite-home.ts",
-    "scripts/e2e/suite-landfall.ts",
-  ]) {
-    assert.ok(wRe.test(read(path)), `no width literal ${w} found in ${path}: it drifted or was re-derived`);
+  const suite = (name: string) => e2eSuiteFamily(REPO, name).map(read).join("\n");
+  for (const [path, text] of [
+    ["public/index.css", read("public/index.css")],
+    ["scripts/e2e/home-support.ts", read("scripts/e2e/home-support.ts")],
+    ["the home suite", suite("home")],
+    ["the landfall suite", suite("landfall")],
+  ] as const) {
+    assert.ok(wRe.test(text), `no width literal ${w} found in ${path}: it drifted or was re-derived`);
   }
 });

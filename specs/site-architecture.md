@@ -61,8 +61,8 @@ symbol and path so the reader goes and looks.
   `scripts/clean-public-generated.ts`; `ROUTE_ENTRIES` and `DISCOVERY_ROUTES` in
   `scripts/generate-discovery.ts`. A new suite additionally joins `E2E_SUITE_ORDER`
   (`src/cli/e2e-suites.ts`), the runner's `SUITES` map (`scripts/e2e-explorer.ts`), `E2E_LANES`
-  (`src/cli/e2e-lanes.ts`), `MEASURED_SECONDS` (`test/cli/e2e-lanes.test.ts`) and the containment
-  sweep in `test/repo/e2e-tiers.test.ts`. A new LANE joins two more: `ci.yml`'s job matrix, where
+  (`src/cli/e2e-lanes.ts`), `MEASURED_SECONDS` (`test/cli/e2e-lanes.test.ts`) and `STEPPED_GROUPS`
+  in `test/repo/e2e-tiers.test.ts` if it steps. A new LANE joins two more: `ci.yml`'s job matrix, where
   `test/repo/e2e-tiers.test.ts` reds if the matrix and `E2E_LANES` disagree, and `main`'s required
   checks, which no test can see at all.
 - **The shell dresses once.** Every shared shell rule lives in `BaseLayout.astro`'s
@@ -247,10 +247,10 @@ precisely, because a token that falls outside it looks identical at the point of
   serves the surfaces' canonical trailing-slash URLs in dev, because the dev public middleware serves
   exact file paths only. Removing it looks harmless and 404s every working page in dev, while build
   and preview are untouched.
-- **The e2e harness serves the engine by type-stripping the real source.** `scripts/e2e/harness.ts`
-  strips types from `src/*.ts` on demand, which is how a suite computes an expected value in-browser
-  and dodges cross-engine float drift. It is e2e only; the deploy artifact carries none of it, and a
-  test that proves the artifact carries none of it exists.
+- **The e2e harness serves the engine by type-stripping the real source.** `serveEngineModule` in
+  `scripts/e2e/site-server.ts` strips types from `src/*.ts` on demand, which is how a suite
+  computes an expected value in-browser and dodges cross-engine float drift. It is e2e only; the
+  deploy artifact carries none of it, and a test that proves the artifact carries none of it exists.
 - **CI is parallel jobs on the same triggers**, one running the typecheck, the lint and the unit
   suite, and one per browser lane, each of which builds `dist/` and runs that single lane on a runner
   of its own. A pull request therefore waits for the LONGEST job, not the sum, and the repeated
