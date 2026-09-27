@@ -20,9 +20,11 @@ export async function run(ctx: SuiteContext): Promise<void> {
   // The health bases are captured AFTER the navigate so the pages loaded before this one are not charged to PR6/PR7: this load's own worker, engine and asset requests still fire after navigate() resolves, so they stay inside the window.
   const prErrBase = consoleErrors.length;
   const prHttpBase = http4xx.length;
+  // Every poll below swallows and retries: evaluate throws when it lands in a context an in-flight navigation has destroyed.
   await pr0Boots(ctx);
   await pr3World(ctx);
   await prcCarried(ctx);
+  // about:blank first, here and at every re-entry below: a navigate that differs only in the hash is same-document and never re-bootstraps the page.
   await prbBare(ctx);
   // Downloads are denied for the rest of the run so every a.click() below runs the full blob path with no headless disk write; a denied blob download is not HTTP, so it adds no 4xx and no console error and PR6/PR7 stay clean.
   try { await send("Browser.setDownloadBehavior", { behavior: "deny" }); }
@@ -36,6 +38,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await pr31Turns(ctx);
   await pr33BackMatter(ctx);
   await pr34Leaned(ctx);
+  await shoot("print-room-bound.png");
   await pr21BoundPrint(k);
   await pr23Download(ctx);
   await pr24Redraw(ctx);

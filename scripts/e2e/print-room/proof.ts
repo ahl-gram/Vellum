@@ -1,7 +1,6 @@
 import type { SuiteContext } from "../types.ts";
 
 export async function pr0Boots({ evaluate, check, sleep }: SuiteContext): Promise<void> {
-  // Every poll below swallows and retries: evaluate throws when it lands in a context an in-flight navigation has destroyed.
   let booted = false;
   for (let i = 0; i < 200; i++) {
     let ok = null;
@@ -71,7 +70,6 @@ export async function prcCarried({ evaluate, send, check, sleep, PORT }: SuiteCo
 }
 
 export async function prbBare({ evaluate, send, check, sleep, PORT }: SuiteContext): Promise<void> {
-  // about:blank first, here and at every re-entry below: a navigate that differs only in the hash is same-document and never re-bootstraps the page.
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/print-room/` });
   let bare = null;

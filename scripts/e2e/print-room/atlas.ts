@@ -100,7 +100,7 @@ export async function pr33BackMatter({ evaluate, check, shoot, sleep }: SuiteCon
   );
 }
 
-export async function pr34Leaned({ evaluate, check, shoot, sleep }: SuiteContext): Promise<void> {
+export async function pr34Leaned({ evaluate, check, sleep }: SuiteContext): Promise<void> {
   await evaluate(`document.getElementById("zoom-in").click()`);
   let leaned = false;
   for (let i = 0; i < 60; i++) {
@@ -116,8 +116,6 @@ export async function pr34Leaned({ evaluate, check, shoot, sleep }: SuiteContext
       /^The proof\./.test(unleaned.label),
     JSON.stringify({ leaned, unleaned }),
   );
-
-  await shoot("print-room-bound.png");
 }
 
 export async function pr23Download({ evaluate, check, sleep }: SuiteContext): Promise<void> {

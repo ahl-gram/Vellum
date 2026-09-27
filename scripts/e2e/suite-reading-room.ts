@@ -11,13 +11,14 @@ import { rr34bPhone, rr11bScrubHandles } from "./reading-room/phone.ts";
 import { rr12Clean, rr14Fallback } from "./reading-room/fallback.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
-  const { evaluate, send, sleep, consoleErrors, http4xx, PORT } = ctx;
+  const { evaluate, send, shoot, sleep, consoleErrors, http4xx, PORT } = ctx;
   const k = readingRoomKit(ctx);
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/reading-room/#seed=42&style=antique&legend=1` });
   const rrErrBase = consoleErrors.length;
   const rrHttpBase = http4xx.length;
   await rr0Boots(k);
   await rr4AtRest(ctx);
+  // Seed 42's beats, measured 2026-08-22: foundings 451/552/597 (i=0/4/6), twin ruins 1039 (i=19/22; the LAST told holds the stage), present 1059. This hash carries no live key, so it is a PLAIN visit and opens with no plate (#442 reversing #402); RR29 shows Play bringing one.
   await rr26BareVisit(k);
   // The harness window is 1280x2400, where this page has only a few hundred px of scroll and the strip could never reach the top, so this reading pins #442's governing 1440x900 viewport; mobile:false because mobile:true changes layout semantics as well as size.
   await send("Emulation.setDeviceMetricsOverride", { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
@@ -34,6 +35,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await rr29Play(k);
   await rr6Survey(k);
   await rr7Year(k);
+  await shoot("reading-room.png");
   await rr9Today(k);
   await rr16Colophon(ctx);
   await rr17CounterRead(k);

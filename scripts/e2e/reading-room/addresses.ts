@@ -31,7 +31,7 @@ export async function rr6Survey({ evaluate, send, check, boot, settled, plateSho
   );
 }
 
-export async function rr7Year({ evaluate, send, check, shoot, boot, settled, plateShown, PORT }: ReadingRoomKit): Promise<void> {
+export async function rr7Year({ evaluate, send, check, boot, settled, plateShown, PORT }: ReadingRoomKit): Promise<void> {
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/reading-room/#seed=42&year=650` });
   check("RR7a the year address boots and settles", (await boot()) && (await settled()));
@@ -64,8 +64,6 @@ export async function rr7Year({ evaluate, send, check, shoot, boot, settled, pla
     !!crossed && crossed.hidden === false && /Laukuwelua/.test(crossed.alt || ""),
     JSON.stringify(crossed),
   );
-
-  await shoot("reading-room.png");
 }
 
 export async function rr9Today({ evaluate, send, check, sleep, boot, PORT }: ReadingRoomKit): Promise<void> {

@@ -45,7 +45,6 @@ export async function rr4AtRest({ evaluate, check }: SuiteContext): Promise<void
 }
 
 export async function rr26BareVisit({ evaluate, check, plateStaysHidden }: ReadingRoomKit): Promise<void> {
-  // Seed 42's beats, measured 2026-08-22: foundings 451/552/597 (i=0/4/6), twin ruins 1039 (i=19/22; the LAST told holds the stage), present 1059. This hash carries no live key, so it is a PLAIN visit and opens with no plate (#442 reversing #402); RR29 shows Play bringing one.
   const noPlate = await plateStaysHidden();
   check(
     "RR26 a plain visit opens BARE: no plate until the reader asks for one (#442)",
