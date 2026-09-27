@@ -210,7 +210,6 @@ function labelNode(
   );
 }
 
-// eslint-disable-next-line max-lines-per-function
 export function settlementsLayer(ctx: RenderCtx): SvgNode {
   const { world, proj, style, labels } = ctx;
   const k = proj.widthPx / 1500;

@@ -32,7 +32,6 @@ export type RealmAnchor = {
   readonly halfH: number;
 };
 
-// eslint-disable-next-line max-lines-per-function
 export function featureLabelsLayer(ctx: RenderCtx): {
   defs: SvgNode[];
   node: SvgNode;

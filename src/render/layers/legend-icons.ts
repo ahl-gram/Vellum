@@ -19,7 +19,6 @@ export type Icon =
   | { kind: "iso" }
   | { kind: "swatch"; color: string };
 
-// eslint-disable-next-line max-lines-per-function
 export function iconNode(icon: Icon, cx: number, cy: number, ctx: RenderCtx): SvgNode {
   const { style } = ctx;
   const k = ctx.proj.widthPx / 1500;

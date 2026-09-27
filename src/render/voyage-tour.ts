@@ -129,12 +129,7 @@ function twoOptOnDistances(path: ReadonlyArray<number>, d: TourDistance): number
         const c = t[j]!;
         const e = t[(j + 1) % n]!;
         if (d(a, c) + d(b, e) < d(a, b) + d(c, e) - EPS) {
-          // eslint-disable-next-line max-depth
-          for (let lo = i, hi = j; lo < hi; lo++, hi--) {
-            const tmp = t[lo]!;
-            t[lo] = t[hi]!;
-            t[hi] = tmp;
-          }
+          t.splice(i, j - i + 1, ...t.slice(i, j + 1).reverse());
           improved = true;
         }
       }
@@ -158,12 +153,7 @@ function twoOpt(path: TourPoint[]): TourPoint[] {
         const c = t[j]!;
         const e = t[(j + 1) % n]!;
         if (dist(a, c) + dist(b, e) < dist(a, b) + dist(c, e) - EPS) {
-          // eslint-disable-next-line max-depth
-          for (let lo = i, hi = j; lo < hi; lo++, hi--) {
-            const tmp = t[lo]!;
-            t[lo] = t[hi]!;
-            t[hi] = tmp;
-          }
+          t.splice(i, j - i + 1, ...t.slice(i, j + 1).reverse());
           improved = true;
         }
       }

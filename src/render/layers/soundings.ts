@@ -5,7 +5,6 @@ import type { RenderCtx } from "../context.ts";
 import type { CartouchePlan } from "./cartouche.ts";
 import type { CompassPlan } from "./compass.ts";
 
-// eslint-disable-next-line max-lines-per-function
 export function soundingsLayer(
   ctx: RenderCtx,
   cartouche: CartouchePlan,

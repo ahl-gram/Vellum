@@ -33,7 +33,6 @@ function ordinaryNode(ord: Ordinary, g: Geom, fill: string): SvgNode {
   }
 }
 
-// eslint-disable-next-line max-lines-per-function
 function chargeGlyph(
   charge: MobileCharge,
   X: number,
