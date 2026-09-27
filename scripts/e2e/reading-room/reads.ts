@@ -1,0 +1,16 @@
+import type { Payload } from "../types.ts";
+
+export type Ages = { chamber: string; year: number | null };
+type AgesRead = { ages: Ages | null; play: string | null; panelHidden: boolean | null; hash: string };
+type Stage = { hidden: boolean; src: string | null; alt: string | null; href: string | null; inSlip: boolean; aboveLog: boolean; belowBar: boolean };
+export type Strip = { position: string; top: number; bottom: number; h: number; toldAbove: boolean | null; toldHidden: boolean; toldDisplay: string; gutter: string | undefined; text: string | undefined };
+export type Room = { page: number; vh: number; chartW: number; chartH: number; ratio: number; fillsSheet: boolean; topClear: number; bottomClear: number };
+
+export const agesRead: Payload<AgesRead> = `(()=>{const a=window.__vellumReadingRoomAges();const p=document.querySelector(".rf-play");const panel=document.querySelector(".rf-ages");return{ages:a,play:p?p.textContent:null,panelHidden:panel?panel.hidden:null,hash:location.hash};})()`;
+// #402 the prospect stage: href read raw (getAttribute), src as the browser's absolute blob URL. Placement ruled 2026-08-22: inside the panel, below the sticky strip (#442 wrapped the bar in one), above the journal.
+export const stageRead: Payload<Stage | null> = `(()=>{const f=document.querySelector(".rr-prospect");if(!f)return null;const img=f.querySelector("img");const a=f.querySelector("a");const panel=document.querySelector(".rf-ages");const prev=f.previousElementSibling;const next=f.nextElementSibling;return{hidden:f.hidden,src:img?String(img.src||""):null,alt:img?img.alt:null,href:a?a.getAttribute("href"):null,inSlip:!!f.closest("#journal .journal-dock"),aboveLog:!!(next&&next.classList.contains("rf-log")),belowBar:!!(panel&&panel.contains(f)&&prev&&prev.classList.contains("rf-instrument-strip")&&next&&next.classList.contains("rf-log"))};})()`;
+// The strip (#442; fixed along the bottom since #463): the frame's wrapper inside it stacks the told row ABOVE the bar.
+export const stripRead: Payload<Strip | null> = `(()=>{const w=document.querySelector(".rf-instrument-strip");const s=w&&w.closest(".strip");const t=document.querySelector(".rf-told");const b=document.querySelector(".rf-instrument");if(!s||!t||!b)return null;const cs=getComputedStyle(s);const r=s.getBoundingClientRect();const tr=t.getBoundingClientRect();const br=b.getBoundingClientRect();return{position:cs.position,top:Math.round(r.top),bottom:Math.round(innerHeight-r.bottom),h:s.offsetHeight,toldAbove:t.hidden||getComputedStyle(t).display==="none"?null:tr.bottom<=br.top+1,toldHidden:t.hidden,toldDisplay:getComputedStyle(t).display,gutter:(t.querySelector(".cr-year")||{}).textContent,text:(t.querySelector(".cr-text")||{}).textContent};})()`
+// The strip's height is pinned against measured constants (plate-reader 2026-08-23, seed 42, worst-case row in BOTH halves: 1440 -> 100, 900 -> 100 chronicle / 126 survey, 768 and 700 -> 126, the live row dropped at 40rem so 640 and 560 -> 59, 390 -> 98 where the bar itself wraps; re-measured 2026-08-29 for the bottom strip and pinned with headroom). The ruling budgeted ~104 at 1440x900; between 640 and 900 the told row takes a second line and the strip runs to 126, flagged on the PR as a miss rather than smoothed over.
+export const GOVERNING_BUDGET = 120;
+export const WIDE_WORST = 135;
