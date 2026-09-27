@@ -11,7 +11,6 @@ const RATE_MAX = 0.35;
 const HEADROOM = 1.6;
 const COAST_RAIN = SUPPLY_CAP * RAINOUT_BASE * HEADROOM;
 
-// eslint-disable-next-line max-lines-per-function
 export function computeWindMoisture(
   elev: Field,
   seaLevel: number,

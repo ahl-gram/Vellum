@@ -71,7 +71,6 @@ function makeCycler(rng: Rng, pool: readonly string[]): () => string {
   };
 }
 
-// eslint-disable-next-line max-lines-per-function
 export function simulateHistory(input: HistoryInput, rng: Rng): HistoryResult {
   const { settlements, seats, realmNames, presentYear } = input;
 

@@ -5,7 +5,6 @@ export type Lake = {
   readonly centroid: { readonly x: number; readonly y: number };
 };
 
-// eslint-disable-next-line max-lines-per-function
 export function findLakes(
   elev: Field,
   seaLevel: number,

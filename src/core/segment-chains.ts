@@ -26,14 +26,7 @@ export function chainBorderSegments(segs: ReadonlyArray<Seg>): ChainPoint[][] {
       for (;;) {
         const tip = end === 1 ? chain[chain.length - 1]! : chain[0]!;
         const candidates = touching.get(key(tip[0], tip[1])) ?? [];
-        let nextIdx = -1;
-        for (const c of candidates) {
-          // eslint-disable-next-line max-depth
-          if (!used[c]) {
-            nextIdx = c;
-            break;
-          }
-        }
+        const nextIdx = candidates.find((c) => !used[c]) ?? -1;
         if (nextIdx === -1) break;
         used[nextIdx] = 1;
         const t = segs[nextIdx] as Seg;

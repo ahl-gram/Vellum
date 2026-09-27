@@ -69,7 +69,6 @@ export function hamletName(
   return null;
 }
 
-// eslint-disable-next-line max-lines-per-function
 export function hamletCandidates(world: World, window: UvWindow): HamletCandidate[] {
   const { seed, gridW, gridH } = world.recipe;
   const { data } = world.elev;

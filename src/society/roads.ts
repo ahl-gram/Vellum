@@ -157,7 +157,6 @@ function connectGroup(
   for (const v of villages) lay(v, "lane", villageBudget);
 }
 
-// eslint-disable-next-line max-lines-per-function
 function connectToNetwork(
   wiring: Wiring,
   network: Uint8Array,
