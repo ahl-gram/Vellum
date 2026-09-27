@@ -228,6 +228,32 @@ test("an import bound to a different module or a different export reads as a dif
   assert.equal(compareFamilies(files(before), files(run, swapped(part, "../settle-support.ts", "./settle-support.ts"))).same, false);
 });
 
+test("an import or an export inside the family that renames a name reads as a difference, since the proof finds a function the split made by its declared name", () => {
+  const before = ["export async function run(ctx) {", "  const { check, sleep } = ctx;", "  await sleep(1);", "  check(\"X1 one\", true);", "  await sleep(2);", "  check(\"X2 two\", true);", "}"].join("\n");
+  const part = ["export async function x1One({ check, sleep }) {", "  await sleep(1);", "  check(\"X1 one\", true);", "}", "export async function x2Two({ check, sleep }) {", "  await sleep(2);", "  check(\"X2 two\", true);", "}"].join("\n");
+  const run = (wiring: string) => [wiring, "export async function run(ctx) {", "  await x1One(ctx);", "  await x2Two(ctx);", "}"].join("\n");
+  assert.equal(compareFamilies(files(before), files(run("import { x1One, x2Two } from \"./map/part1.ts\";"), part)).same, true);
+  assert.equal(compareFamilies(files(before), files(run("import { x2Two as x1One, x1One as x2Two } from \"./map/part1.ts\";"), part)).same, false);
+  const unexported = swapped(swapped(part, "export async function x1One", "async function x1One"), "export async function x2Two", "async function x2Two");
+  assert.equal(compareFamilies(files(before), files(run("import { x1One, x2Two } from \"./map/part1.ts\";"), `${unexported}\nexport { x2Two as x1One, x1One as x2Two };`)).same, false);
+  const relay = (wiring: string) => [wiring, "export async function both(ctx) {", "  await x1One(ctx);", "  await x2Two(ctx);", "}"].join("\n");
+  const viaRelay = ["import { both } from \"./map/part2.ts\";", "export async function run(ctx) {", "  await both(ctx);", "}"].join("\n");
+  assert.equal(compareFamilies(files(before), files(viaRelay, part, relay("import { x1One, x2Two } from \"./part1.ts\";"))).same, true);
+  assert.equal(compareFamilies(files(before), files(viaRelay, part, relay("import { x2Two as x1One, x1One as x2Two } from \"./part1.ts\";"))).same, false);
+  const one = ["export default async function x1One({ check, sleep }) {", "  await sleep(1);", "  check(\"X1 one\", true);", "}"].join("\n");
+  const two = ["export default async function x2Two({ check, sleep }) {", "  await sleep(2);", "  check(\"X2 two\", true);", "}"].join("\n");
+  assert.equal(compareFamilies(files(before), files(run("import x1One from \"./map/part2.ts\";\nimport x2Two from \"./map/part1.ts\";"), one, two)).same, false);
+  assert.equal(compareFamilies(files(before), files(run("import { x1One, x2Two } from \"./map/part1.ts\";"), "import x1One from \"./part2.ts\";\nimport x2Two from \"./part3.ts\";\nexport { x1One, x2Two };", two, one)).same, false);
+  const defaultImportOnly = compareFamilies(files(before), files(run("import x1One from \"./map/part1.ts\";\nimport { x2Two } from \"./map/part1.ts\";"), part)).lines;
+  assert.ok(defaultImportOnly.includes("scripts/e2e/suite-map.ts imports a default as x1One inside the family"), defaultImportOnly.join("\n"));
+  assert.ok(!defaultImportOnly.some((l) => l.includes("exports a default")), "the default-import fixture carries no default export, so only the import can be reported");
+  const defaultExportOnly = compareFamilies(files(before), files(run("import { x1One, x2Two } from \"./map/part1.ts\";"), `${one.replace("export default ", "export ")}\n${two}`)).lines;
+  assert.ok(defaultExportOnly.includes("scripts/e2e/map/part1.ts exports a default inside the family"), defaultExportOnly.join("\n"));
+  assert.ok(!defaultExportOnly.some((l) => l.includes("imports a default")), "the default-export fixture carries no default import, so only the export can be reported");
+  const assigned = compareFamilies(files(before), files(run("import { x1One, x2Two } from \"./map/part1.ts\";"), `${part}\nexport default x1One;`)).lines;
+  assert.ok(assigned.includes("scripts/e2e/map/part1.ts exports a default inside the family"), assigned.join("\n"));
+});
+
 test("a function only the split declares is read through at every call, so one that stands in for a context member reads as a difference", () => {
   const kit = swapped(SPLIT_GROUPS, "  return { ...base, go };", "  const settle = (script, pred, label, budget) => base.settle(script, pred, label, budget * 10);\n  return { ...base, go, settle };");
   assert.equal(split(SPLIT_RUN, kit).same, false);

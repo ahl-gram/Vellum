@@ -2,15 +2,52 @@
 import { makeRoom, scopedHealth } from "./room-support.ts";
 import type { SuiteContext } from "./types.ts";
 
-// eslint-disable-next-line max-lines-per-function
+const glyphCount = `const shown=[...document.querySelectorAll(".rf-chart #layer-settlements g.settlement")].filter((g)=>g.style.display!=="none").length;`;
+type Room = ReturnType<typeof makeRoom>;
+type VoyageKit = ReturnType<typeof voyageKit>;
+type Plan = Awaited<ReturnType<typeof rwVoyagePlan>>;
+type Stop = Awaited<ReturnType<VoyageKit["stepTo"]>>;
+
 export async function run(ctx: SuiteContext): Promise<void> {
-  const { evaluate, send, check, shoot, sleep } = ctx;
+  const { evaluate } = ctx;
   const room = makeRoom(ctx);
   const gate = scopedHealth(ctx);
+  const k = voyageKit(ctx);
 
+  await rw0Boots(ctx, room);
+  await rw1Armed(ctx);
+  await rw2Manuscript(ctx);
+  await rw3Leftward(ctx);
+  const { plan, lastPort, homeStep, midPort, entries } = await rwVoyagePlan(ctx);
+  const s0 = await rw4Departs(k, plan, entries);
+  await rw5MidPort(k, midPort, s0);
+  const sLast = await rw6LastPort(k, plan, lastPort, entries);
+  await rw7Home(k, homeStep, entries, sLast);
+  await rw8StepBack(k, midPort);
+  await rw9Sibling(ctx);
+  const presentShown = await evaluate<number>(`(()=>{${glyphCount}return shown;})()`);
+  await rw10Rightward(ctx, presentShown);
+  await rw11Reverses(ctx, presentShown);
+  await rw12Detent(ctx);
+  await rw13Sweeps(ctx);
+  gate.check("RW14 the room voyage run is clean (no console errors, no new 4xx)");
+}
+
+function voyageKit(ctx: SuiteContext) {
+  const { evaluate } = ctx;
+  // #120: the mark is a ship on sea legs and a rider on road legs; reading .voyage-ship unconditionally throws on the ~94% of legs that ride.
+  const markFn = `const mark=()=>{const s=document.querySelector(".rf-chart .voyage-ship");const r=document.querySelector(".rf-chart .voyage-rider");return (s&&s.getAttribute("display")!=="none")?s:r;};`;
+  const stepTo = (n: number) =>
+    evaluate<{ status: string; tf: string | null; glyph: string | null; pts: number; first: string; last: string; logged: number; rows: number; visible: boolean; lastText: string }>(`(()=>{${markFn}window.__vellumVoyageStepTo(${n});const m=mark();const t=m?m.getAttribute("transform"):"";const glyph=m?m.getAttribute("class"):"";const raw=document.querySelector(".voyage-track").getAttribute("points").trim().split(" ");const log=window.__vellumVoyageLog();return{status:document.querySelector(".rf-status").textContent,tf:t,glyph,pts:raw.length,first:raw[0],last:raw[raw.length-1],logged:log?log.logged:-1,rows:log?log.rows:-1,visible:!!(log&&log.visible),lastText:log&&log.logged>0?log.entries[log.logged-1].text:""};})()`);
+  return { ...ctx, stepTo };
+}
+
+async function rw0Boots({ check }: SuiteContext, room: Room): Promise<void> {
   const booted = await room.goto("#seed=42&style=antique&legend=1");
   check("RW0 the room boots armed and settled", booted);
+}
 
+async function rw1Armed({ evaluate, check }: SuiteContext): Promise<void> {
   const vm = await evaluate<{ capitalIdx: number; count: number }>(`(()=>{
     const r=window.__vellumRunInline({kind:"draw",seed:42,overrides:{},render:{style:"antique",widthPx:1500,legend:true}});
     const capital=r.manifest.places.find((p)=>p.kind==="capital");
@@ -33,7 +70,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
       rw1.annals > 0 && rw1.annalsInked === rw1.annals,
     JSON.stringify(rw1) + ` capital=${vm.capitalIdx}`,
   );
+}
 
+async function rw2Manuscript({ evaluate, check }: SuiteContext): Promise<void> {
   const rw2 = await evaluate<{ heads: number; headAfterPrologue: boolean; strict: boolean; firstDays: string[]; proDc: boolean; annDc: boolean }>(`(()=>{
     const lis=[...document.querySelectorAll(".rf-log-strip li")];
     const heads=lis.filter((li)=>li.classList.contains("annals-head"));
@@ -51,7 +90,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
     rw2.heads === 1 && rw2.headAfterPrologue && rw2.strict && rw2.proDc && rw2.annDc,
     JSON.stringify(rw2),
   );
+}
 
+async function rw3Leftward({ evaluate, check }: SuiteContext): Promise<void> {
   const rw3 = await evaluate<{ chamber: string; t: number | null; readout: string; overlayVisible: boolean; annalsInked: number }>(`(()=>{
     const s=document.querySelector(".rf-range");
     s.value=String(Number(s.max)/2);
@@ -69,33 +110,38 @@ export async function run(ctx: SuiteContext): Promise<void> {
       rw3.overlayVisible && rw3.annalsInked === 0,
     JSON.stringify(rw3),
   );
+}
 
+async function rwVoyagePlan({ evaluate }: SuiteContext) {
   const plan = await evaluate<{ ports: { idx: number; logLine: string }[]; legs: number }>(`(()=>{const p=window.__vellumVoyagePlan();return{ports:p.ports.map((x)=>({idx:x.idx,logLine:x.logLine})),legs:p.legs.length};})()`);
   // #275: legs === ports and the LAST leg is the one home, so legs-1 lands on the final distinct port and stepping to legs itself is the homecoming (t=1).
   const lastPort = plan.legs - 1;
   const homeStep = plan.legs;
   const midPort = Math.max(1, Math.floor(plan.legs / 2));
   const entries = plan.ports.length + 1;
+  return { plan, lastPort, homeStep, midPort, entries };
+}
 
-  // #120: the mark is a ship on sea legs and a rider on road legs; reading .voyage-ship unconditionally throws on the ~94% of legs that ride.
-  const markFn = `const mark=()=>{const s=document.querySelector(".rf-chart .voyage-ship");const r=document.querySelector(".rf-chart .voyage-rider");return (s&&s.getAttribute("display")!=="none")?s:r;};`;
-  const stepTo = (n: number) =>
-    evaluate<{ status: string; tf: string | null; glyph: string | null; pts: number; first: string; last: string; logged: number; rows: number; visible: boolean; lastText: string }>(`(()=>{${markFn}window.__vellumVoyageStepTo(${n});const m=mark();const t=m?m.getAttribute("transform"):"";const glyph=m?m.getAttribute("class"):"";const raw=document.querySelector(".voyage-track").getAttribute("points").trim().split(" ");const log=window.__vellumVoyageLog();return{status:document.querySelector(".rf-status").textContent,tf:t,glyph,pts:raw.length,first:raw[0],last:raw[raw.length-1],logged:log?log.logged:-1,rows:log?log.rows:-1,visible:!!(log&&log.visible),lastText:log&&log.logged>0?log.entries[log.logged-1].text:""};})()`);
-
+async function rw4Departs({ check, stepTo }: VoyageKit, plan: Plan["plan"], entries: number): Promise<Stop> {
   const s0 = await stepTo(0);
   check(
     "RW4 step to the capital: the margin log opens with the departure entry",
     s0.visible && s0.rows === entries && s0.logged === 1 && s0.lastText.includes("set out"),
     JSON.stringify({ s0, ports: plan.ports.length, entries }),
   );
+  return s0;
+}
 
+async function rw5MidPort({ check, stepTo }: VoyageKit, midPort: number, s0: Stop): Promise<void> {
   const sMid = await stepTo(midPort);
   check(
     "RW5 step to a mid port: the log accumulated to that port, the track grew, the mark moved",
     sMid.logged === midPort + 1 && sMid.pts > s0.pts && sMid.tf !== s0.tf,
     JSON.stringify({ mid: midPort, sMid, s0pts: s0.pts }),
   );
+}
 
+async function rw6LastPort({ check, stepTo }: VoyageKit, plan: Plan["plan"], lastPort: number, entries: number): Promise<Stop> {
   const sLast = await stepTo(lastPort);
   check(
     "RW6 step to the last port: every port is logged, but the survey has not come home yet",
@@ -103,7 +149,10 @@ export async function run(ctx: SuiteContext): Promise<void> {
       sLast.pts > plan.ports.length,
     JSON.stringify({ last: lastPort, sLast, ports: plan.ports.length, entries }),
   );
+  return sLast;
+}
 
+async function rw7Home({ check, stepTo }: VoyageKit, homeStep: number, entries: number, sLast: Stop): Promise<void> {
   const sHome = await stepTo(homeStep);
   check(
     "RW7 the survey sails home: the homecoming closes the log and the track is a closed circuit",
@@ -112,7 +161,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
       sHome.pts > sLast.pts,
     JSON.stringify({ home: homeStep, sHome, entries }),
   );
+}
 
+async function rw8StepBack({ check, shoot, stepTo }: VoyageKit, midPort: number): Promise<void> {
   const sBack = await stepTo(midPort);
   check(
     "RW8 stepping back from the last port clears the completion summary from the status line",
@@ -120,7 +171,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
     JSON.stringify(sBack),
   );
   await shoot("reading-room-voyage.png");
+}
 
+async function rw9Sibling({ evaluate, check }: SuiteContext): Promise<void> {
   const rw9 = await evaluate<{ chart: boolean; trackInChart: boolean; trackInOverlay: boolean }>(`(()=>{
     const chart=document.querySelector(".rf-chart svg:not(.voyage-overlay)");
     const overlay=document.querySelector(".rf-chart .voyage-overlay");
@@ -128,9 +181,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
       trackInOverlay:overlay?!!overlay.querySelector(".voyage-track"):false};
   })()`);
   check("RW9 the track is a sibling overlay, never inside the baked chart", rw9.chart && !rw9.trackInChart && rw9.trackInOverlay, JSON.stringify(rw9));
+}
 
-  const glyphCount = `const shown=[...document.querySelectorAll(".rf-chart #layer-settlements g.settlement")].filter((g)=>g.style.display!=="none").length;`;
-  const presentShown = await evaluate<number>(`(()=>{${glyphCount}return shown;})()`);
+async function rw10Rightward({ evaluate, check }: SuiteContext, presentShown: number): Promise<void> {
   const rw10 = await evaluate<{ chamber: string; year: number | null; min: number; readout: string; overlayHidden: boolean; shown: number; panelShown: boolean }>(`(()=>{
     const s=document.querySelector(".rf-range");
     s.value=String(Number(s.max)/2);
@@ -151,7 +204,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
       rw10.overlayHidden && rw10.shown < presentShown && rw10.panelShown,
     JSON.stringify(rw10) + ` present=${presentShown}`,
   );
+}
 
+async function rw11Reverses({ evaluate, check }: SuiteContext, presentShown: number): Promise<void> {
   const rw11 = await evaluate<{ chamber: string; t: number | null; readout: string; overlayVisible: boolean; shown: number }>(`(()=>{
     const s=document.querySelector(".rf-range");
     s.value=String(Number(s.max)/2);
@@ -168,7 +223,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
       rw11.overlayVisible && rw11.shown === presentShown,
     JSON.stringify(rw11) + ` present=${presentShown}`,
   );
+}
 
+async function rw12Detent({ evaluate, send, check }: SuiteContext): Promise<void> {
   // The moves carry button:"left" DELIBERATELY: Chromium's native slider drag ignores a move whose button is "none", so the thumb would never follow and the detent would have nothing to hold.
   await evaluate(`(()=>{document.querySelector(".rf-range").scrollIntoView({block:"center"});})()`);
   const bar = await evaluate<{ x: number; y: number; w: number; h: number }>(`(()=>{const s=document.querySelector(".rf-range");const r=s.getBoundingClientRect();return{x:r.x,y:r.y,w:r.width,h:r.height};})()`);
@@ -187,7 +244,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
       escaped.held === false && escaped.chamber === "ages" && escaped.u > 0.55,
     JSON.stringify({ held, escaped }),
   );
+}
 
+async function rw13Sweeps({ evaluate, check, sleep }: SuiteContext): Promise<void> {
   await evaluate(`(()=>{
     const s=document.querySelector(".rf-range");
     s.value=String(Math.round(Number(s.max)/2*0.97));
@@ -207,6 +266,4 @@ export async function run(ctx: SuiteContext): Promise<void> {
     sawSurveyPlaying && !!crossed && crossed.playing === true && crossed.lbl === "Pause",
     JSON.stringify({ sawSurveyPlaying, crossed }),
   );
-
-  gate.check("RW14 the room voyage run is clean (no console errors, no new 4xx)");
 }

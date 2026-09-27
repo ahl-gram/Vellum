@@ -3,23 +3,34 @@ import { makeRoom, makeBar, scrubFacts, scopedHealth, CHART_SVG } from "./room-s
 import type { SuiteContext } from "./types.ts";
 
 type Found = { found: false } | { found: true; hasMark: false };
+type Bar = ReturnType<typeof makeBar>;
+type Facts = Awaited<ReturnType<typeof scrubFacts>>;
 
-// eslint-disable-next-line max-lines-per-function
 export async function run(ctx: SuiteContext): Promise<void> {
-  const { evaluate, check } = ctx;
+  const { evaluate } = ctx;
   const room = makeRoom(ctx);
   const { setYear } = makeBar(ctx);
   const gate = scopedHealth(ctx);
 
   await room.goto("#seed=42&style=antique&legend=1");
   const sm = await scrubFacts(evaluate, 42);
+  await rs18Silent(ctx, setYear, sm);
+  await rs19Stamp(ctx, setYear, sm);
+  await rs20Dries(ctx, setYear, sm);
+  await rs21Ruin(ctx, setYear, sm);
+  await rs22Press(ctx, setYear, sm);
+  gate.check("RS25 the ink-in run is clean (no console errors, no new 4xx)");
+}
 
+async function rs18Silent({ evaluate, check }: SuiteContext, setYear: Bar["setYear"], sm: Facts): Promise<void> {
   await setYear(sm.present);
   const inkedCount = () => evaluate<number>(`document.querySelectorAll('.rf-chart #layer-settlements g.settlement[data-ink]').length`);
 
   const rs18 = await inkedCount();
   check("RS18 the park is silent: every glyph is up and none carries an ink grade (#155)", rs18 === 0, `${rs18} groups inked at the park`);
+}
 
+async function rs19Stamp({ evaluate, check }: SuiteContext, setYear: Bar["setYear"], sm: Facts): Promise<void> {
   if (sm.lateIdx >= 0) {
     await setYear(sm.lateFounded - 1);
     const rs19 = await evaluate<Found | { found: true; hasMark: true; ink: string | null; disp: string; name: string; dur: string; box: string; wantX: number; wantY: number; gotX: number; gotY: number; others: number }>(`(()=>{
@@ -46,7 +57,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
   } else {
     check("RS19 seed 42 has a later living founding to cross", false, "no second living founding in manifest");
   }
+}
 
+async function rs20Dries({ evaluate, check }: SuiteContext, setYear: Bar["setYear"], sm: Facts): Promise<void> {
   await setYear(sm.minFounded);
   const rs20 = await evaluate<{ inked: number; labelled: false } | { inked: number; labelled: true; name: string; dur: string; delay: string }>(`(()=>{
     const s=document.querySelector(".rf-range");const ax=window.__vellumAgesState();s.value=String(Number(s.max)/2+(${sm.present}-ax.min));s.dispatchEvent(new Event("input",{bubbles:true}));
@@ -61,7 +74,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
     rs20.inked > 0 && rs20.labelled && rs20.name === "dryingInk" && rs20.dur.includes("0.18") && rs20.delay.includes("0.18"),
     JSON.stringify(rs20),
   );
+}
 
+async function rs21Ruin({ evaluate, check }: SuiteContext, setYear: Bar["setYear"], sm: Facts): Promise<void> {
   if (sm.ruinIdx >= 0) {
     // @ts-expect-error the ruin's fall year is null only when the world has no ruin, where ruinIdx is -1 and the branch above never reaches this line; a null here would read as 0, and setYear would clamp the -1 to the year after the earliest
     await setYear(sm.ruinYear - 1);
@@ -84,7 +99,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
   } else {
     check("RS21 seed 42 has a ruin to ink in", false, "no ruin in manifest");
   }
+}
 
+async function rs22Press({ evaluate, check }: SuiteContext, setYear: Bar["setYear"], sm: Facts): Promise<void> {
   // Ground truth via the chart's own getScreenCTM, never a .place-hit box (the overlay is sized to the mount while the chart renders a few px wider, and the press would scale that ~1.2px offset into a phantom error); the sub-pixel tolerance is deliberate, the defect this guards is 1.03px at k=1.
   await setYear(sm.minFounded);
   const rs22 = await evaluate<{ groups: number; measured: number; castles: number; worst: number; worstAt: string }>(`(()=>{
@@ -126,6 +143,4 @@ export async function run(ctx: SuiteContext): Promise<void> {
     rs22.measured > 0 && rs22.castles > 0 && rs22.worst < 0.05,
     JSON.stringify(rs22),
   );
-
-  gate.check("RS25 the ink-in run is clean (no console errors, no new 4xx)");
 }

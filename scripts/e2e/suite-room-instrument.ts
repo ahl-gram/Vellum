@@ -1,378 +1,42 @@
 // Room instrument e2e (RS*, #320 Sub 3): the S-suite's live-animation coverage re-hosted against .rf-* selectors and the room's own hooks; the Explorer-hosted S* originals stay green beside these until Sub 4 retires them by name.
-import { makeRoom, makeBar, scrubFacts, scopedHealth } from "./room-support.ts";
-import { HOST_HOOK_NAMES } from "../../src/site/shared/host-hooks.ts";
-import { readPaceSweep, PACE_LEG_MS } from "../../src/cli/e2e-pace.ts";
+import { scrubFacts, scopedHealth } from "./room-support.ts";
 import type { SuiteContext } from "./types.ts";
+import { instrumentKit } from "./room-instrument/kit.ts";
+import { rs0Boots, rs1State, rs2Seams, rs3Parks, rs4AllShown, rs5Scrub, rs7Ruin } from "./room-instrument/scrub.ts";
+import { rs8Sweeps, rs10Drag, rs11Forward, rs12Pause, rs14Glyphs, rs15Slide, rs16Strip, rs17Story } from "./room-instrument/sweep.ts";
+import { rs23OtherWorld, rs26Unfurl, rs27NoReplay, rs28Cancel } from "./room-instrument/arrival.ts";
+import { rs29Pace, rs30Rate } from "./room-instrument/pace.ts";
 
-type Arrival = { seed: number; status: string | undefined; cls: boolean; anim: string };
-
-// eslint-disable-next-line max-lines-per-function
 export async function run(ctx: SuiteContext): Promise<void> {
-  const { evaluate, check, sleep } = ctx;
-  const room = makeRoom(ctx);
-  const { setYear, yearNow, groupVis, roadsDisp, visibleGroups, clickPlay, playLabel, startSweepSamples, stopSweepSamples } = makeBar(ctx);
+  const { evaluate } = ctx;
+  const k = instrumentKit(ctx);
+  const { setYear } = k;
   const gate = scopedHealth(ctx);
 
-  const booted = await room.goto("#seed=42&style=antique&legend=1");
-  check("RS0 the room boots and settles on the deep-linked world", booted);
-
-  // At a present park t is null BY DESIGN (agesState's chamber contract); a check demanding a number there would pin a bug.
-  const state = await evaluate<{ chamber: string; t: number | null; year: number | null; u: number; seamU: number; held: boolean; playing: boolean; pace: number; min: number; max: number } | null>(`window.__vellumReadingRoomAges()`);
-  check(
-    "RS1 the room publishes the whole instrument state (u, held, min, max, playing, seamU), not just chamber+year",
-    !!state &&
-      state.chamber === "ages" &&
-      typeof state.year === "number" &&
-      state.t === null &&
-      typeof state.u === "number" &&
-      typeof state.seamU === "number" &&
-      typeof state.held === "boolean" &&
-      typeof state.min === "number" &&
-      typeof state.max === "number" &&
-      typeof state.playing === "boolean",
-    JSON.stringify(state),
-  );
-
-  // The expected names come from the INSTALLER (HOST_HOOK_NAMES): a hand-copied list catches a seam removed but can never catch one added to installHostHooks (the guard-prover proved that one-sidedness on the first cut).
-  const surface = await evaluate<Record<string, string>>(`(()=>{
-    const names=${JSON.stringify(HOST_HOOK_NAMES)};
-    return Object.fromEntries(names.map((n)=>[n,typeof window[n]]));
-  })()`);
-  check(
-    `RS2 the room publishes every seam installHostHooks installs (${HOST_HOOK_NAMES.length} of them, derived from the installer)`,
-    !!surface && // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-      Object.keys(surface).length === HOST_HOOK_NAMES.length &&
-      Object.values(surface).every((t) => t === "function"),
-    JSON.stringify(surface),
-  );
-
+  await rs0Boots(k);
+  await rs1State(k);
+  await rs2Seams(k);
   const sm = await scrubFacts(evaluate, 42);
-
-  const rs3 = await evaluate<{ panelShown: boolean; setDisp: string; roadsDisp: string; min: number; max: number; val: number; year: number | null; chamber: string }>(`(()=>{
-    const panel=document.querySelector(".rf-ages");
-    const set=document.querySelector(".rf-chart #layer-settlements");
-    const roads=document.querySelector(".rf-chart #layer-roads");
-    const bar=document.querySelector(".rf-range");
-    const a=window.__vellumAgesState();
-    return{panelShown:!panel.hidden,setDisp:set?getComputedStyle(set).display:"(no-el)",
-      roadsDisp:roads?getComputedStyle(roads).display:"(no-el)",
-      min:Number(bar.min),max:Number(bar.max),val:Number(bar.value),
-      year:a?a.year:-1,chamber:a?a.chamber:""};
-  })()`);
-  check(
-    "RS3 the room parks armed at the present: glyph layer + roads visible, the bar at the far right",
-    rs3.panelShown && rs3.setDisp !== "none" && rs3.roadsDisp !== "none" &&
-      rs3.min === 0 && rs3.max === 2 * Math.max(1, sm.present - sm.minFounded) &&
-      rs3.val === rs3.max && rs3.chamber === "ages" && rs3.year === sm.present,
-    JSON.stringify(rs3),
-  );
-
-  const rs4visible = await visibleGroups();
-  check("RS4 parked at the present year: every settlement glyph is shown", rs4visible === sm.count, `${rs4visible} visible groups vs ${sm.count} places`);
-
-  await setYear(sm.earlyFounded);
-  const rs5early = await groupVis(sm.earlyIdx);
-  const rs5late = sm.lateIdx >= 0 ? await groupVis(sm.lateIdx) : "hidden";
-  const rs5roads = await roadsDisp();
-  check(
-    "RS5 scrub to the earliest founding: that glyph shows, a later town's is hidden, roads hidden in the past",
-    rs5early === "shown" && rs5late === "hidden" && rs5roads === "none",
-    `early=${rs5early} late=${rs5late} roads=${rs5roads}`,
-  );
-  const rs6grown = await visibleGroups();
-  check(
-    "RS6 the world reveals over time: fewer glyphs up early than at the present",
-    rs6grown > 0 && rs6grown < sm.count,
-    `${rs6grown} visible at year ${sm.earlyFounded} vs ${sm.count} at present`,
-  );
-
-  if (sm.ruinIdx >= 0) {
-    // @ts-expect-error the ruin's founding and fall year are null only when the world has no ruin, where ruinIdx is -1 and the branch above never reaches this line; a null would read as 0
-    await setYear(Math.floor((sm.ruinFounded +
-      // @ts-expect-error the ruin's founding and fall year are null only when the world has no ruin, where ruinIdx is -1 and the branch above never reaches this line; a null would read as 0
-      sm.ruinYear) / 2));
-    const before = await groupVis(sm.ruinIdx);
-    // @ts-expect-error the ruin's fall year is null only when the world has no ruin, where ruinIdx is -1 and the branch above never reaches this line with a null
-    await setYear(sm.ruinYear);
-    const after = await groupVis(sm.ruinIdx);
-    check(
-      "RS7 a ruin is hidden through its living phase (state-begins), its ruin glyph appears at the fall year",
-      before === "hidden" && after === "shown",
-      `before=${before} after=${after} ruinYear=${sm.ruinYear}`,
-    );
-  } else {
-    check("RS7 seed 42 has a ruin to scrub through", false, "no ruin in manifest");
-  }
-
-  const rs8start = await setYear(sm.minFounded);
-  const startLabel = await evaluate<string>(`(()=>{document.querySelector(".rf-play").click();return document.querySelector(".rf-play").textContent;})()`);
-  let prev = -Infinity, mono = true, ended = false, lastYear = null, sawInterior = false;
-  for (let i = 0; i < 130; i++) {
-    const st = await evaluate<{ y: number | null; lbl: string }>(`({y:window.__vellumAgesState().year,lbl:document.querySelector(".rf-play").textContent})`);
-    // @ts-expect-error the year reads null only in the survey chamber, which a Play from the earliest founding never enters, so a null never reaches here; one would read as 0
-    if (st.y < prev) mono = false;
-    // @ts-expect-error the year reads null only in the survey chamber, which a Play from the earliest founding never enters, so a null never reaches here; one would read as 0
-    if (st.y >
-      // @ts-expect-error setYear reads the year back as null only in the survey chamber, and it scrubs into the ages half, so a null never reaches here; one would read as 0
-      rs8start &&
-      // @ts-expect-error the year reads null only in the survey chamber, which a Play from the earliest founding never enters, so a null never reaches here; one would read as 0
-      st.y < sm.present) sawInterior = true;
-    // @ts-expect-error the year reads null only in the survey chamber, which a Play from the earliest founding never enters, so prev never takes a null here
-    prev = st.y; lastYear = st.y;
-    if (st.lbl === "Play") { ended = true; break; }
-    await sleep(110);
-  }
-  check(
-    "RS8 Play sweeps through interior years monotonically and auto-pauses at the present",
-    startLabel === "Pause" && mono && sawInterior && ended && lastYear === sm.present,
-    `start=${startLabel} mono=${mono} interior=${sawInterior} ended=${ended} last=${lastYear} present=${sm.present}`,
-  );
-  const rs9roads = await roadsDisp();
-  check("RS9 roads return at the end-of-Play present park", rs9roads !== "none", `roads=${rs9roads}`);
-
-  await setYear(sm.minFounded);
-  await clickPlay();
-  await sleep(220);
-  const rs10 = await evaluate<{ before: string; after: string; year: number | null; mid: number }>(`(()=>{
-    const before=document.querySelector(".rf-play").textContent;
-    const s=document.querySelector(".rf-range");const mid=${Math.floor((sm.minFounded + sm.present) / 2)};
-    const a=window.__vellumAgesState();
-    s.value=String(Number(s.max)/2+(mid-a.min));s.dispatchEvent(new Event("input",{bubbles:true}));
-    return{before,after:document.querySelector(".rf-play").textContent,year:window.__vellumAgesState().year,mid};
-  })()`);
-  await sleep(150);
-  const rs10after = await yearNow();
-  check(
-    "RS10 a manual drag during Play pauses it and the sweep stops advancing",
-    rs10.before === "Pause" && rs10.after === "Play" && rs10.year === rs10.mid && rs10after === rs10.mid,
-    JSON.stringify(rs10) + ` settled=${rs10after}`,
-  );
-
-  const rs11mid = Math.floor((sm.minFounded + sm.present) / 2);
-  await setYear(rs11mid);
-  await clickPlay();
-  let rs11min = Infinity, rs11max = -Infinity;
-  for (let i = 0; i < 6; i++) {
-    const y = await yearNow();
-    // @ts-expect-error the year reads null only in the survey chamber, which a Play from a year in the ages half never enters; a null would be kept as the extreme, and RS11 would read false and red by name
-    if (y < rs11min)
-      // @ts-expect-error the year reads null only in the survey chamber, which a Play from a year in the ages half never enters; a null would be kept as the extreme, and RS11 would read false and red by name
-      rs11min = y;
-    // @ts-expect-error the year reads null only in the survey chamber, which a Play from a year in the ages half never enters; a null would be kept as the extreme, and RS11 would read false and red by name
-    if (y > rs11max)
-      // @ts-expect-error the year reads null only in the survey chamber, which a Play from a year in the ages half never enters; a null would be kept as the extreme, and RS11 would read false and red by name
-      rs11max = y;
-    await sleep(70);
-  }
-  check(
-    "RS11 drag-then-Play runs FORWARD from the dragged year (#220: play from any year)",
-    rs11min >= rs11mid && rs11max > rs11mid,
-    `observed min=${rs11min} max=${rs11max} dragged=${rs11mid}`,
-  );
-
-  await setYear(sm.minFounded);
-  await clickPlay();
-  await sleep(700);
-  const frozen = await evaluate<{ year: number | null; lbl: string }>(`(()=>{document.querySelector(".rf-play").click();return{year:window.__vellumAgesState().year,lbl:document.querySelector(".rf-play").textContent};})()`);
-  await sleep(260);
-  const stillFrozen = await yearNow();
-  await clickPlay();
-  await sleep(120);
-  const resumedEarly = await yearNow();
-  await sleep(700);
-  const resumed = await yearNow();
-  check(
-    "RS12 the Pause button freezes mid-sweep; Play resumes from the frozen year (not min/present)",
-    // @ts-expect-error a year read in the survey chamber is null, and a comparison reads null as 0, which fails this clause, so RS12 reads false and reds by name
-    frozen.lbl === "Play" && frozen.year > sm.minFounded &&
-      // @ts-expect-error the same null reads as 0 here, which passes this bound, but the clause before it has already read false for it
-      frozen.year < sm.present &&
-      // @ts-expect-error a year read in the survey chamber is null, and a comparison reads null as 0, which fails this clause, so RS12 reads false and reds by name
-      stillFrozen === frozen.year && resumedEarly >=
-        // @ts-expect-error the same frozen year, which the clause before has already read false for if it is null
-        frozen.year &&
-      // @ts-expect-error a year read in the survey chamber is null, and a comparison reads null as 0, which fails this clause, so RS12 reads false and reds by name
-      resumed >
-        // @ts-expect-error the same frozen year, which the clause before has already read false for if it is null
-        frozen.year &&
-        // @ts-expect-error the same null reads as 0 here, which passes this bound, but the clause before it has already read false for it
-        resumed <= sm.present,
-    `frozen=${frozen.year} early=${resumedEarly} resumed=${resumed} min=${sm.minFounded} present=${sm.present}`,
-  );
-
+  await rs3Parks(k, sm);
+  await rs4AllShown(k, sm);
+  await rs5Scrub(k, sm);
+  await rs7Ruin(k, sm);
+  await rs8Sweeps(k, sm);
+  await rs10Drag(k, sm);
+  await rs11Forward(k, sm);
+  await rs12Pause(k, sm);
   await setYear(sm.present);
-
-
-  const rs14 = await evaluate<{ hasGlyph: boolean; dataStateHits: number }>(`(()=>{
-    const g=[...document.querySelectorAll('.rf-chart #layer-settlements g.settlement')].find((el)=>getComputedStyle(el).display!=="none");
-    return{hasGlyph:!!(g&&g.querySelector("path, circle, text")),
-      dataStateHits:document.querySelectorAll(".place-hit[data-state]").length};
-  })()`);
-  check("RS14 the sweep shows real glyphs, not dots (no data-state dots remain)", rs14.hasGlyph && rs14.dataStateHits === 0, JSON.stringify(rs14));
-
-  const rs15 = await evaluate<{ li: false } | { li: true; prop: string; pastTf: string }>(`(()=>{
-    const li=document.querySelector(".rf-log-strip li");
-    if(!li)return{li:false};
-    const prop=getComputedStyle(li).transitionProperty;
-    const had=li.classList.contains("inked");
-    li.classList.add("inked");const pastTf=getComputedStyle(li).transform;
-    if(!had)li.classList.remove("inked");
-    return{li:true,prop,pastTf};
-  })()`);
-  check("RS15 journal inked-rows slide (transform in the transition + an indent)", rs15.li && rs15.prop.includes("transform") && rs15.pastTf !== "none", JSON.stringify(rs15));
-
-  const rs16 = await evaluate<{ rows: number; scrollH: number; clientH: number }>(`(()=>{const s=document.querySelector(".rf-log-strip");return{rows:s.querySelectorAll("li").length,scrollH:s.scrollHeight,clientH:s.clientHeight};})()`);
-  check("RS16 the journal strip shows every entry without scrolling (#93 Part 2)", rs16.rows > 0 && rs16.scrollH <= rs16.clientH + 1, JSON.stringify(rs16));
-
-  await setYear(sm.present);
-  await clickPlay();
-  let rs17open = null;
-  for (let i = 0; i < 40; i++) {
-    const st = await evaluate<{ chamber: string; t: number | null; playing: boolean; readout: string }>(`(()=>{const a=window.__vellumAgesState();return{chamber:a.chamber,t:a.t,playing:a.playing,readout:document.querySelector(".rf-year").textContent};})()`);
-    if (st.chamber === "survey") { rs17open = st; break; }
-    await sleep(50);
-  }
-  await evaluate(`(()=>{const b=document.querySelector(".rf-play");if(b.textContent==="Pause")b.click();})()`);
-  check(
-    "RS17 a Play from the present park opens the whole story from the survey's first leg",
-    // @ts-expect-error t is null only in the ages chamber, and rs17open is kept only once the chamber is the survey, so a null never reaches here; one would read as 0 and pass this clause
-    !!rs17open && rs17open.playing === true && rs17open.t < 0.5 && rs17open.readout === "the survey",
-    JSON.stringify(rs17open),
-  );
-
-  // SEED 3 is load-bearing: the one nearby seed whose place COUNT differs from seed 42's (21 vs 26; 13 of 14 sampled seeds carry 26), so visible===count actually discriminates (proved on the mutation run). Do not tidy it to a rounder number.
-  const sm2 = await scrubFacts(evaluate, 3);
-  await evaluate(`(()=>{const c=document.querySelector(".rr-colophon");c.querySelector("input").value="3";c.querySelector(".rr-read").click();})()`);
-  let rs23 = null;
-  for (let i = 0; i < 300; i++) {
-    let s = null;
-    try {
-      s = await evaluate<{ seed: number; status: string | undefined; panelShown: boolean; chamber: string | null; year: number | null; max: number; visible: number }>(`(()=>{const st=window.__vellumReadingRoomState();const a=window.__vellumAgesState();const bar=document.querySelector(".rf-range");return{seed:st.seed,status:(document.querySelector(".rf-status")||{}).textContent,
-        panelShown:!document.querySelector(".rf-ages").hidden,
-        chamber:a&&a.chamber,year:a&&a.year,max:Number(bar.max),
-        visible:[...document.querySelectorAll('.rf-chart #layer-settlements g.settlement')].filter((g)=>getComputedStyle(g).display!=="none").length};})()`);
-    } catch {}
-    if (s && s.status === "" && s.seed === 3) { rs23 = s; break; }
-    await sleep(50);
-  }
-  check(
-    "RS23 a draw of a different world re-derives the instrument against THAT world (bar domain and full glyph set)",
-    !!rs23 && rs23.panelShown && rs23.chamber === "ages" &&
-      rs23.max === 2 * Math.max(1, sm2.present - sm2.minFounded) &&
-      rs23.year === sm2.present && rs23.visible === sm2.count,
-    JSON.stringify({ rs23, expectedMax: 2 * Math.max(1, sm2.present - sm2.minFounded), expectedCount: sm2.count, present: sm2.present }),
-  );
-
-  const arrivedRoom = await room.goto("#seed=42&style=antique&legend=1");
-  let rs26 = null;
-  for (let i = 0; i < 40; i++) {
-    const s = await evaluate<{ cls: boolean; instAnim: string; instDelay: string; logAnim: string; logDelay: string }>(`(()=>{const root=document.querySelector(".rf");
-      const inst=document.querySelector(".rf-instrument");const log=document.querySelector(".rf-log");
-      return{cls:root.classList.contains("rf-arrival"),
-        instAnim:getComputedStyle(inst).animationName,instDelay:getComputedStyle(inst).animationDelay,
-        logAnim:getComputedStyle(log).animationName,logDelay:getComputedStyle(log).animationDelay};})()`);
-    if (s.cls) { rs26 = s; break; }
-    await sleep(30);
-  }
-  check(
-    "RS26 the arrival unfurl plays, staged: instrument and journal wear paperUnfurl, the journal one beat behind (S11's room successor)",
-    arrivedRoom && !!rs26 && rs26.instAnim === "paperUnfurl" && rs26.instDelay === "0s" &&
-      rs26.logAnim === "paperUnfurl" && rs26.logDelay === "0.18s",
-    JSON.stringify({ arrivedRoom, rs26 }),
-  );
-
-  // display:none terminates a CSS animation and restoring display starts it AFRESH; the engine drives the panel's hidden flag on every counter read, so a class left in place would replay the unfurl on every dice roll.
-  let rs27clear = false;
-  for (let i = 0; i < 60; i++) {
-    const c = await evaluate<boolean>(`document.querySelector(".rf").classList.contains("rf-arrival")`);
-    if (!c) { rs27clear = true; break; }
-    await sleep(50);
-  }
-  await evaluate(`(()=>{const c=document.querySelector(".rr-colophon");c.querySelector("input").value="7";c.querySelector(".rr-read").click();})()`);
-  let rs27 = null;
-  for (let i = 0; i < 300; i++) {
-    let s = null;
-    try {
-      s = await evaluate<Arrival>(`(()=>{const st=window.__vellumReadingRoomState();return{seed:st.seed,
-        status:(document.querySelector(".rf-status")||{}).textContent,
-        cls:document.querySelector(".rf").classList.contains("rf-arrival"),
-        anim:getComputedStyle(document.querySelector(".rf-instrument")).animationName};})()`);
-    } catch {}
-    if (s && s.status === "" && s.seed === 7) { rs27 = s; break; }
-    await sleep(50);
-  }
-  check(
-    "RS27 the ceremony never replays: a counter read re-arms the panel with no unfurl (the hidden-toggle flash trap, held off)",
-    rs27clear && !!rs27 && rs27.cls === false && rs27.anim === "none",
-    JSON.stringify({ rs27clear, rs27 }),
-  );
-
-  // A read mid-unfurl CANCELS the animations (display:none; animationend never fires), so a removal keyed on animationend alone leaves the class in place and the next unhide replays the whole unfurl.
-  const arrivedAgain = await room.goto("#seed=42&style=antique&legend=1");
-  let rs28armed = false;
-  for (let i = 0; i < 40; i++) {
-    if (await evaluate<boolean>(`document.querySelector(".rf").classList.contains("rf-arrival")`)) { rs28armed = true; break; }
-    await sleep(25);
-  }
-  await evaluate(`(()=>{const c=document.querySelector(".rr-colophon");c.querySelector("input").value="9";c.querySelector(".rr-read").click();})()`);
-  let rs28 = null;
-  for (let i = 0; i < 300; i++) {
-    let s = null;
-    try {
-      s = await evaluate<Arrival>(`(()=>{const st=window.__vellumReadingRoomState();return{seed:st.seed,
-        status:(document.querySelector(".rf-status")||{}).textContent,
-        cls:document.querySelector(".rf").classList.contains("rf-arrival"),
-        anim:getComputedStyle(document.querySelector(".rf-instrument")).animationName};})()`);
-    } catch {}
-    if (s && s.status === "" && s.seed === 9) { rs28 = s; break; }
-    await sleep(50);
-  }
-  check(
-    "RS28 a counter read mid-ceremony cancels it cleanly: the class retires on cancel, no replay on the re-arm",
-    arrivedAgain && rs28armed && !!rs28 && rs28.cls === false && rs28.anim === "none",
-    JSON.stringify({ arrivedAgain, rs28armed, rs28 }),
-  );
-
+  await rs14Glyphs(k);
+  await rs15Slide(k);
+  await rs16Strip(k);
+  await rs17Story(k, sm);
+  await rs23OtherWorld(k);
+  await rs26Unfurl(k);
+  await rs27NoReplay(k);
+  await rs28Cancel(k);
   // #493. The facts of the world ON SCREEN: RS23 and the counter reads above drew seed 9, and seed 42's years would clamp the bar to the present (a Play from the present reopens the whole story in the survey chamber, where the year is null by contract).
   const smNow = await scrubFacts(evaluate, await evaluate<number>(`window.__vellumReadingRoomState().seed`));
-  await setYear(smNow.present);
-  const rs29 = await evaluate<{ role: string | null; label: string | null; labels: string[]; shown: boolean; rest: { pressed: (string | null)[]; pace: number }; after: { pressed: (string | null)[]; pace: number } }>(`(()=>{const g=document.querySelector(".rf-instrument .rf-pace");const b=g?[...g.querySelectorAll("button")]:[];const read=()=>({pressed:b.map((x)=>x.getAttribute("aria-pressed")),pace:window.__vellumAgesState().pace});const rest=read();if(b[2])b[2].click();const after=read();return{role:g&&g.getAttribute("role"),label:g&&g.getAttribute("aria-label"),labels:b.map((x)=>x.textContent),shown:!!g&&getComputedStyle(g).display!=="none",rest,after};})()`);
-  await clickPlay();
-  await sleep(150);
-  await clickPlay();
-  await sleep(80);
-  const rs29hash = await evaluate<string>(`location.hash`);
-  check(
-    "RS29 the pace group stands at the readout's right with 1x pressed and reported, a press moves the mark and reaches the engine, and the address never carries it (#493, ruled 2026-09-02)",
-    !!rs29 && rs29.role === "group" && rs29.label === "The pace" && rs29.shown && // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-      JSON.stringify(rs29.labels) === JSON.stringify(["1\u00d7", "2\u00d7", "4\u00d7"]) &&
-      JSON.stringify(rs29.rest.pressed) === JSON.stringify(["true", "false", "false"]) && rs29.rest.pace === 1 &&
-      JSON.stringify(rs29.after.pressed) === JSON.stringify(["false", "false", "true"]) && rs29.after.pace === 4 &&
-      rs29hash.includes("seed=") && !/pace/.test(rs29hash),
-    JSON.stringify({ rs29, rs29hash }),
-  );
-
-  // #526: the RATE, off the page's own frame clock. storyAt anchors the sweep to the wall clock, so years per page millisecond is a property of the engine that no runner speed can move, while two years a wall window apart can only be read to a frame of quantization at each end.
-  await evaluate(`document.querySelector('.rf-pace button[data-pace="1"]').click()`);
-  await setYear(smNow.minFounded);
-  await clickPlay();
-  await sleep(200);
-  await startSweepSamples();
-  await sleep(PACE_LEG_MS);
-  await evaluate(`document.querySelector('.rf-pace button[data-pace="4"]').click()`);
-  await sleep(PACE_LEG_MS);
-  const rs30samples = await stopSweepSamples();
-  const rs30lbl = await playLabel();
-  const rs30range = await evaluate<{ min: number; max: number }>(`(()=>{const a=window.__vellumAgesState();return{min:a.min,max:a.max};})()`);
-  await clickPlay();
-  await evaluate(`document.querySelector('.rf-pace button[data-pace="1"]').click()`);
-  const rs30 = readPaceSweep(rs30samples, { range: rs30range, paces: [1, 4] });
-  check(
-    "RS30 the sweep runs at the pace it is set to: each leg fits the rate SWEEP_MS names for it, the press neither jumps the story nor steps the year back, and the sweep is still running (#493 the clock re-anchors; #526 read off the frame clock)",
-    rs30.ok && rs30lbl === "Pause",
-    `${rs30.detail} label=${rs30lbl}`,
-  );
-
+  await rs29Pace(k, smNow);
+  await rs30Rate(k, smNow);
   gate.check("RS24 the room instrument run is clean (no console errors, no new 4xx)");
 }
-

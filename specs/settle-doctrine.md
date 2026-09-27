@@ -145,7 +145,7 @@ section points there rather than restating it.
   claim about PAINT goes through the one-row pixel strip, because no hit test and no computed style
   can see paint (`sampleRow` and `luminance` in `scripts/e2e/pixel-support.ts`). A claim about an
   EMULATED condition carries a read of the other condition taken in the same run, which is what the
-  print checks in `scripts/e2e/suite-specimen.ts` call the same-run control. A byte comparison of
+  print checks in `scripts/e2e/specimen/print.ts` call the same-run control. A byte comparison of
   renders from two environments is never the check. No suite compares one screenshot against
   another, and no cause is asserted here for why two shots differ: nothing in this repo measures one.
   The imperative is Gate 2's "run the probe's control in the same run".

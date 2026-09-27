@@ -2,12 +2,29 @@
 import { makeRoom, scopedHealth } from "./room-support.ts";
 import type { SuiteContext } from "./types.ts";
 
-// eslint-disable-next-line max-lines-per-function
+type Room = ReturnType<typeof makeRoom>;
+
 export async function run(ctx: SuiteContext): Promise<void> {
-  const { evaluate, check, shoot, send, PORT } = ctx;
   const room = makeRoom(ctx);
   const gate = scopedHealth(ctx);
 
+  await rv0Arms(ctx, room);
+  await rv0bFirstTrack(ctx);
+  await rv1Modes(ctx);
+  await rv2RoutedPath(ctx);
+  await rv3ShipOrRider(ctx);
+  await rv4TiltAndFacing(ctx);
+  await rv6Overlay(ctx);
+  await rv7FullLog(ctx);
+  await rv8LogMode(ctx);
+  await rv9Journal(ctx);
+  await rv10Handoff(ctx);
+  await rv11Seed39(ctx, room);
+  await rv12Landmasses(ctx, room);
+  gate.check("RV13 the room route run is clean (no console errors, no new 4xx)");
+}
+
+async function rv0Arms({ evaluate, check, send, PORT }: SuiteContext, room: Room): Promise<void> {
   // Seed 526413615 ("The Isle of Selivelai"): 24 ports, a closed 24-leg round trip, exactly one genuine inland handoff. Landed by hand rather than through room.goto (#418) because both guards below instrument the page BETWEEN the boot and the arm: this is the room's FIRST arm on this world, the only uncached one, and a later arm takes the held order and would pass either check blind.
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/reading-room/#seed=526413615&style=antique&legend=1&survey` });
@@ -31,7 +48,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
     based && rv0a.gap > 0 && rv0a.gap < armMs / 3,
     JSON.stringify({ ...rv0a, armMs, share: +(rv0a.gap / armMs).toFixed(3) }),
   );
+}
 
+async function rv0bFirstTrack({ evaluate, check }: SuiteContext): Promise<void> {
   const rv0b = await evaluate<{ ports: number[]; refined: number[]; held: boolean; frozen: boolean }>(`(()=>{
     const ports=window.__vellumVoyagePlan().ports.map((p)=>p.idx);
     const r=window.__vellumRunInline({kind:"draw",seed:526413615,overrides:{},render:{style:"antique",widthPx:1500,legend:true}});
@@ -46,7 +65,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
     rv0b.held && rv0b.frozen && JSON.stringify(rv0b.ports) === JSON.stringify(rv0b.refined),
     JSON.stringify({ frozen: rv0b.frozen, held: rv0b.held, ports: rv0b.ports.slice(0, 6), refined: rv0b.refined.slice(0, 6) }),
   );
+}
 
+async function rv1Modes({ evaluate, check }: SuiteContext): Promise<void> {
   const rv1 = await evaluate<{ legs: number; modes: Record<string, number>; bad: number }>(`(()=>{
     const plan=window.__vellumVoyagePlan();
     const modes={};
@@ -59,7 +80,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
     rv1.bad === 0 && rv1.legs > 10 && (rv1.modes.sea || 0) >= 1 && (rv1.modes.road || 0) >= 10,
     JSON.stringify(rv1),
   );
+}
 
+async function rv2RoutedPath({ evaluate, check }: SuiteContext): Promise<void> {
   const rv2 = await evaluate<{ pts: number; ports: number }>(`(()=>{
     window.__vellumVoyageStepTo(999);
     const plan=window.__vellumVoyagePlan();
@@ -67,7 +90,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
     return{pts,ports:plan.ports.length};
   })()`);
   check("RV2 the resting track is a multi-point routed path, not a port-to-port lerp", rv2.pts > rv2.ports, JSON.stringify(rv2));
+}
 
+async function rv3ShipOrRider({ evaluate, check }: SuiteContext): Promise<void> {
   const rv3 = await evaluate<{ seaLeg: number; roadLeg: number; onSea: string; onRoad: string }>(`(()=>{
     const legs=window.__vellumVoyagePlan().legs;
     const seaLeg=legs.findIndex((l)=>l.mode==="sea");
@@ -86,7 +111,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
     rv3.seaLeg >= 0 && rv3.roadLeg >= 0 && rv3.onSea === "ship" && rv3.onRoad === "rider",
     JSON.stringify(rv3),
   );
+}
 
+async function rv4TiltAndFacing({ evaluate, check }: SuiteContext): Promise<void> {
   // Samples come from voyagePaintAt (stepTo lands only ON ports, never mid-leg where the tilt varies); the anti-flicker leg is selected by the metric ASSERTED, never by index, which once left this passing on a tie.
   const rv45 = await evaluate<{ maxTilt: number; flips: number; naiveFlips: number; legIdx: number; worstNaive: number }>(`(()=>{
     const plan=window.__vellumVoyagePlan();
@@ -126,7 +153,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
     rv45.naiveFlips >= 3 && rv45.flips < rv45.naiveFlips,
     JSON.stringify(rv45),
   );
+}
 
+async function rv6Overlay({ evaluate, check }: SuiteContext): Promise<void> {
   const rv6 = await evaluate<{ inChart: boolean; inOverlay: boolean; shipInOverlay: boolean; riderInOverlay: boolean }>(`(()=>{
     const chart=document.querySelector(".rf-chart svg:not(.voyage-overlay)");
     return{
@@ -141,7 +170,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
     !rv6.inChart && rv6.inOverlay && rv6.shipInOverlay && rv6.riderInOverlay,
     JSON.stringify(rv6),
   );
+}
 
+async function rv7FullLog({ evaluate, check }: SuiteContext): Promise<void> {
   const rv7 = await evaluate<{ visible: boolean; entries: number; logged: number; rows: number; ports: number; legs: number; sig: string; attribution: string; opensDeparture: boolean; closesHome: boolean; homeIdx: number; capitalIdx: number }>(`(()=>{
     window.__vellumVoyageStepTo(999);
     const plan=window.__vellumVoyagePlan();
@@ -166,7 +197,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
       rv7.sig === rv7.attribution && rv7.attribution.startsWith("Being a true"),
     JSON.stringify({ ...rv7, attribution: rv7.attribution.slice(0, 24) }),
   );
+}
 
+async function rv8LogMode({ evaluate, check }: SuiteContext): Promise<void> {
   const rv8 = await evaluate<{ seaLeg: number; roadLeg: number; seaEntry: string; roadEntry: string }>(`(()=>{
     const plan=window.__vellumVoyagePlan();
     const log=window.__vellumVoyageLog();
@@ -182,7 +215,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
     rv8.seaLeg >= 0 && rv8.roadLeg >= 0 && rv8.seaEntry.includes("made sail") && rv8.roadEntry.includes("rode on"),
     JSON.stringify(rv8),
   );
+}
 
+async function rv9Journal({ evaluate, check }: SuiteContext): Promise<void> {
   const rv9 = await evaluate<{ panelOutsideChart: boolean; matches: boolean | null; status: string; summary: string }>(`(()=>{
     const log=window.__vellumVoyageLog();
     const first=document.querySelector(".rf-log-strip li.prologue");
@@ -201,7 +236,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
     rv9.matches && rv9.panelOutsideChart && rv9.status === rv9.summary && rv9.summary !== "",
     JSON.stringify(rv9),
   );
+}
 
+async function rv10Handoff({ evaluate, check, shoot }: SuiteContext): Promise<void> {
   const rv10 = await evaluate<{ seaLegs: number; missing: number; badOrder: number; landSpans: number; fatStub: number; handoffs: number; hi: number; onWater: string; onStub: string; entry: string }>(`(()=>{
     const legs=window.__vellumVoyageLegGeometry();
     const sea=legs.filter((l)=>l.mode==="sea");
@@ -240,7 +277,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
   );
   await evaluate(`window.__vellumVoyageStepTo(999)`);
   await shoot("reading-room-voyage-routed.png");
+}
 
+async function rv11Seed39({ evaluate, check, shoot }: SuiteContext, room: Room): Promise<void> {
   // Seed 39 carries the worst measured handoffs (a 26-cell embark stub and a 48-cell landfall stub, back to back), proving the swap in BOTH directions.
   await room.goto("#seed=39&style=antique&legend=1&survey");
   const rv11 = await evaluate<{ handoffs: 0; embFrom?: undefined; landTo?: undefined; ridesToShore?: undefined; sails?: undefined; ridesFromLandfall?: undefined; narrated?: undefined } | { handoffs: number; embFrom: number; landTo: number; ridesToShore: string; sails: string; ridesFromLandfall: string; narrated: boolean }>(`(()=>{
@@ -272,7 +311,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
     JSON.stringify(rv11),
   );
   await shoot("reading-room-voyage-handoff.png");
+}
 
+async function rv12Landmasses({ evaluate, check, shoot }: SuiteContext, room: Room): Promise<void> {
   // Seed 430445745 puts ports on THREE landmasses; before #309 only the capital's shore had roads and 17 of its 24 legs degraded to straight chords. #298's walk-the-land guard now lives on a synthetic fixture in voyage-route.test.ts.
   await room.goto("#seed=430445745&style=antique&legend=1&survey");
   const rv12 = await evaluate<{ legs: number; road: number; sea: number; straight: number }>(`(()=>{
@@ -287,6 +328,4 @@ export async function run(ctx: SuiteContext): Promise<void> {
     JSON.stringify(rv12),
   );
   await shoot("reading-room-voyage-roaded-landmasses.png");
-
-  gate.check("RV13 the room route run is clean (no console errors, no new 4xx)");
 }
