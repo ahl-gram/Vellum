@@ -236,6 +236,10 @@ test("an import or an export inside the family that renames a name reads as a di
   assert.equal(compareFamilies(files(before), files(run("import { x2Two as x1One, x1One as x2Two } from \"./map/part1.ts\";"), part)).same, false);
   const unexported = swapped(swapped(part, "export async function x1One", "async function x1One"), "export async function x2Two", "async function x2Two");
   assert.equal(compareFamilies(files(before), files(run("import { x1One, x2Two } from \"./map/part1.ts\";"), `${unexported}\nexport { x2Two as x1One, x1One as x2Two };`)).same, false);
+  const relay = (wiring: string) => [wiring, "export async function both(ctx) {", "  await x1One(ctx);", "  await x2Two(ctx);", "}"].join("\n");
+  const viaRelay = ["import { both } from \"./map/part2.ts\";", "export async function run(ctx) {", "  await both(ctx);", "}"].join("\n");
+  assert.equal(compareFamilies(files(before), files(viaRelay, part, relay("import { x1One, x2Two } from \"./part1.ts\";"))).same, true);
+  assert.equal(compareFamilies(files(before), files(viaRelay, part, relay("import { x2Two as x1One, x1One as x2Two } from \"./part1.ts\";"))).same, false);
 });
 
 test("a function only the split declares is read through at every call, so one that stands in for a context member reads as a difference", () => {
