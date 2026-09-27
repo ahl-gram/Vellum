@@ -3,6 +3,7 @@ import { boxesOverlap, type Box } from "../geometry.ts";
 import { seaMask } from "../../hydrology/sea-mask.ts";
 import { bfsDistance } from "../../core/bfs-distance.ts";
 import type { RenderCtx } from "../context.ts";
+import type { MapStyle } from "../style.ts";
 import type { World } from "../../world/types.ts";
 import type { CartouchePlan } from "./cartouche.ts";
 
@@ -16,21 +17,21 @@ export type CompassPlan = {
 // 10 hops of clearing: the landR rose reaches ~7.5 cells on its cardinal petals, and 8 left the tip grazing a town dot.
 const LAND_MIN_OPEN = 10;
 
-// eslint-disable-next-line max-lines-per-function
-export function planCompass(
+type Clearance = {
+  readonly boxAt: (px: number, py: number, rr: number) => Box;
+  readonly clears: (px: number, py: number, rr: number) => boolean;
+};
+
+type Seat = { px: number; py: number; open: number };
+
+function compassClearance(
   ctx: RenderCtx,
   cartouche: CartouchePlan,
   scalebarBox: Box,
   legendBox?: Box,
-): CompassPlan | null {
-  const { world, proj } = ctx;
+): Clearance {
+  const { proj } = ctx;
   const k = proj.widthPx / 1500;
-  const fullR = 47 * k;
-  const landR = 32 * k; // a region rose over land is a shade smaller, to sit in a clearing
-  const { w, h } = world.elev;
-
-  const sea = seaMask(world.elev, world.seaLevel);
-  const gate = world.region?.seaGate;
 
   const boxAt = (px: number, py: number, rr: number): Box => ({
     x: px - rr,
@@ -53,7 +54,15 @@ export function planCompass(
     return true;
   };
 
-  let best: { px: number; py: number; open: number } | null = null;
+  return { boxAt, clears };
+}
+
+function bestSeaSeat(ctx: RenderCtx, clears: Clearance["clears"], fullR: number): Seat | null {
+  const { world, proj } = ctx;
+  const { w, h } = world.elev;
+  const sea = seaMask(world.elev, world.seaLevel);
+  const gate = world.region?.seaGate;
+  let best: Seat | null = null;
   for (let gy = 4; gy < h - 4; gy += 2) {
     for (let gx = 4; gx < w - 4; gx += 2) {
       const i = gx + gy * w;
@@ -67,13 +76,14 @@ export function planCompass(
       if (!best || open > best.open) best = { px, py, open };
     }
   }
-  if (best) {
-    return { cx: best.px, cy: best.py, r: fullR, box: boxAt(best.px, best.py, fullR) };
-  }
+  return best;
+}
 
-  if (!world.region) return null;
+function bestLandSeat(ctx: RenderCtx, clears: Clearance["clears"], landR: number): Seat | null {
+  const { world, proj } = ctx;
+  const { w, h } = world.elev;
   const landOpen = landOpenness(world);
-  let bestLand: { px: number; py: number; open: number } | null = null;
+  let bestLand: Seat | null = null;
   for (let gy = 4; gy < h - 4; gy += 2) {
     for (let gx = 4; gx < w - 4; gx += 2) {
       const openv = landOpen[gx + gy * w] as number;
@@ -84,6 +94,28 @@ export function planCompass(
       if (!bestLand || openv > bestLand.open) bestLand = { px, py, open: openv };
     }
   }
+  return bestLand;
+}
+
+export function planCompass(
+  ctx: RenderCtx,
+  cartouche: CartouchePlan,
+  scalebarBox: Box,
+  legendBox?: Box,
+): CompassPlan | null {
+  const { world, proj } = ctx;
+  const k = proj.widthPx / 1500;
+  const fullR = 47 * k;
+  const landR = 32 * k; // a region rose over land is a shade smaller, to sit in a clearing
+  const { boxAt, clears } = compassClearance(ctx, cartouche, scalebarBox, legendBox);
+
+  const best = bestSeaSeat(ctx, clears, fullR);
+  if (best) {
+    return { cx: best.px, cy: best.py, r: fullR, box: boxAt(best.px, best.py, fullR) };
+  }
+
+  if (!world.region) return null;
+  const bestLand = bestLandSeat(ctx, clears, landR);
   if (bestLand) {
     return { cx: bestLand.px, cy: bestLand.py, r: landR, box: boxAt(bestLand.px, bestLand.py, landR) };
   }
@@ -109,13 +141,9 @@ function landOpenness(world: World): Float64Array {
   });
 }
 
-// eslint-disable-next-line max-lines-per-function
-export function compassLayer(ctx: RenderCtx, plan: CompassPlan): SvgNode {
-  const { style, proj } = ctx;
-  const k = proj.widthPx / 1500;
+function compassPetals(style: MapStyle, plan: CompassPlan, k: number): SvgNode[] {
   const { cx, cy, r } = plan;
   const petals: SvgNode[] = [];
-
   for (let i = 0; i < 8; i++) {
     const a = (i * Math.PI) / 4 - Math.PI / 2;
     const len = i % 2 === 0 ? r : r * 0.55;
@@ -137,6 +165,14 @@ export function compassLayer(ctx: RenderCtx, plan: CompassPlan): SvgNode {
       }),
     );
   }
+  return petals;
+}
+
+export function compassLayer(ctx: RenderCtx, plan: CompassPlan): SvgNode {
+  const { style, proj } = ctx;
+  const k = proj.widthPx / 1500;
+  const { cx, cy, r } = plan;
+  const petals = compassPetals(style, plan, k);
 
   return el("g", { id: "layer-compass", opacity: 0.92 }, [
     el("circle", {

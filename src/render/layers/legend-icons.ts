@@ -19,8 +19,11 @@ export type Icon =
   | { kind: "iso" }
   | { kind: "swatch"; color: string };
 
-// eslint-disable-next-line max-lines-per-function
-export function iconNode(icon: Icon, cx: number, cy: number, ctx: RenderCtx): SvgNode {
+type MarkIcon = Extract<Icon, { kind: "settlement" | "ruin" | "glyph" | "river" | "road" }>;
+type AreaIcon = Extract<Icon, { kind: "realm" | "hypso" | "contour" | "iso" | "swatch" }>;
+type SeaIcon = Extract<Icon, { kind: "sounding" | "rock" | "wind" | "current" }>;
+
+function markIcon(icon: MarkIcon, cx: number, cy: number, ctx: RenderCtx): SvgNode {
   const { style } = ctx;
   const k = ctx.proj.widthPx / 1500;
   switch (icon.kind) {
@@ -66,6 +69,13 @@ export function iconNode(icon: Icon, cx: number, cy: number, ctx: RenderCtx): Sv
         "stroke-opacity": trunk ? 0.85 : 0.7,
       });
     }
+  }
+}
+
+function areaIcon(icon: AreaIcon, cx: number, cy: number, ctx: RenderCtx): SvgNode {
+  const { style } = ctx;
+  const k = ctx.proj.widthPx / 1500;
+  switch (icon.kind) {
     case "realm":
       return el("rect", {
         x: cx - 9 * k, y: cy - 6 * k, width: 18 * k, height: 12 * k, rx: 2 * k,
@@ -93,6 +103,27 @@ export function iconNode(icon: Icon, cx: number, cy: number, ctx: RenderCtx): Sv
         fill: "none", stroke: style.contourStroke ?? style.inkSoft,
         "stroke-width": (0.9 * k).toFixed(1),
       });
+    case "iso": {
+      const s = isoStroke(ctx.theme ?? "", style);
+      return el("path", {
+        d: `M${(cx - 10 * k).toFixed(1)} ${(cy + 2 * k).toFixed(1)}Q${(cx - 3 * k).toFixed(1)} ${(cy - 4 * k).toFixed(1)} ${cx.toFixed(1)} ${cy.toFixed(1)}Q${(cx + 4 * k).toFixed(1)} ${(cy + 3 * k).toFixed(1)} ${(cx + 10 * k).toFixed(1)} ${(cy - 2 * k).toFixed(1)}`,
+        fill: "none", stroke: s.color, "stroke-width": (s.width * k).toFixed(2),
+        "stroke-opacity": s.opacity, "stroke-linecap": "round",
+      });
+    }
+    case "swatch":
+      return el("rect", {
+        x: cx - 9 * k, y: cy - 6 * k, width: 18 * k, height: 12 * k, rx: 1.5 * k,
+        fill: icon.color,
+        stroke: style.inkSoft, "stroke-width": 0.6 * k, "stroke-opacity": 0.5,
+      });
+  }
+}
+
+function seaIcon(icon: SeaIcon, cx: number, cy: number, ctx: RenderCtx): SvgNode {
+  const { style } = ctx;
+  const k = ctx.proj.widthPx / 1500;
+  switch (icon.kind) {
     case "sounding":
       return el("text", {
         x: cx, y: cy + 3 * k, "text-anchor": "middle",
@@ -136,19 +167,27 @@ export function iconNode(icon: Icon, cx: number, cy: number, ctx: RenderCtx): Sv
         "stroke-opacity": 0.6, "stroke-linecap": "round",
       });
     }
-    case "iso": {
-      const s = isoStroke(ctx.theme ?? "", style);
-      return el("path", {
-        d: `M${(cx - 10 * k).toFixed(1)} ${(cy + 2 * k).toFixed(1)}Q${(cx - 3 * k).toFixed(1)} ${(cy - 4 * k).toFixed(1)} ${cx.toFixed(1)} ${cy.toFixed(1)}Q${(cx + 4 * k).toFixed(1)} ${(cy + 3 * k).toFixed(1)} ${(cx + 10 * k).toFixed(1)} ${(cy - 2 * k).toFixed(1)}`,
-        fill: "none", stroke: s.color, "stroke-width": (s.width * k).toFixed(2),
-        "stroke-opacity": s.opacity, "stroke-linecap": "round",
-      });
-    }
+  }
+}
+
+export function iconNode(icon: Icon, cx: number, cy: number, ctx: RenderCtx): SvgNode {
+  switch (icon.kind) {
+    case "settlement":
+    case "ruin":
+    case "glyph":
+    case "river":
+    case "road":
+      return markIcon(icon, cx, cy, ctx);
+    case "realm":
+    case "hypso":
+    case "contour":
+    case "iso":
     case "swatch":
-      return el("rect", {
-        x: cx - 9 * k, y: cy - 6 * k, width: 18 * k, height: 12 * k, rx: 1.5 * k,
-        fill: icon.color,
-        stroke: style.inkSoft, "stroke-width": 0.6 * k, "stroke-opacity": 0.5,
-      });
+      return areaIcon(icon, cx, cy, ctx);
+    case "sounding":
+    case "rock":
+    case "wind":
+    case "current":
+      return seaIcon(icon, cx, cy, ctx);
   }
 }

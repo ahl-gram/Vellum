@@ -1,6 +1,7 @@
 import { el, type SvgNode } from "../svg.ts";
 import type { Box } from "../geometry.ts";
 import type { RenderCtx } from "../context.ts";
+import type { MapStyle } from "../style.ts";
 
 export const CELLS_PER_LEAGUE = 2.2;
 const NICE_TOTALS = [20, 30, 40, 50, 60, 80, 100, 120, 150, 200];
@@ -23,43 +24,32 @@ export function planScalebar(ctx: RenderCtx): ScalebarPlan {
   };
 }
 
-// eslint-disable-next-line max-lines-per-function
-export function scalebarLayer(ctx: RenderCtx, plan: ScalebarPlan): SvgNode {
-  const { style, proj, world } = ctx;
-  const k = proj.widthPx / 1500;
-  const worldCellsPerCell = world.region
-    ? ((world.region.window.u1 - world.region.window.u0) *
-        (world.region.worldGridW - 1)) /
-      (world.elev.w - 1)
-    : 1;
-  const pxPerLeague = (proj.scale / worldCellsPerCell) * CELLS_PER_LEAGUE;
-  const target = 200 * k;
-
-  let total: number;
-  if (world.region) {
-    total = REGION_NICE_TOTALS[0] as number;
+function leaguesTotal(isRegion: boolean, pxPerLeague: number, target: number): number {
+  if (isRegion) {
+    let total = REGION_NICE_TOTALS[0] as number;
     for (const t of REGION_NICE_TOTALS) {
       if (t * pxPerLeague <= target) total = t;
     }
-  } else {
-    total = NICE_TOTALS[NICE_TOTALS.length - 1] as number;
-    let bestDiff = Infinity;
-    for (const t of NICE_TOTALS) {
-      const diff = Math.abs(t * pxPerLeague - target);
-      if (diff < bestDiff) {
-        bestDiff = diff;
-        total = t;
-      }
+    return total;
+  }
+  let total = NICE_TOTALS[NICE_TOTALS.length - 1] as number;
+  let bestDiff = Infinity;
+  for (const t of NICE_TOTALS) {
+    const diff = Math.abs(t * pxPerLeague - target);
+    if (diff < bestDiff) {
+      bestDiff = diff;
+      total = t;
     }
   }
+  return total;
+}
 
-  const barW = total * pxPerLeague;
-  const barH = 7 * k;
-  const x0 = plan.box.x;
-  const y0 = plan.box.y + plan.box.h - barH - 12 * k;
+type Bar = { readonly x0: number; readonly y0: number; readonly barW: number; readonly barH: number; readonly k: number };
+
+function scalebarCells(style: MapStyle, bar: Bar): SvgNode[] {
+  const { x0, y0, barW, barH, k } = bar;
   const segments = 4;
   const segW = barW / segments;
-
   const cells: SvgNode[] = [];
   for (let i = 0; i < segments; i++) {
     cells.push(
@@ -70,17 +60,41 @@ export function scalebarLayer(ctx: RenderCtx, plan: ScalebarPlan): SvgNode {
       }),
     );
   }
+  return cells;
+}
 
-  const label = (lx: number, value: number): SvgNode =>
-    el(
-      "text",
-      {
-        x: lx, y: y0 + barH + 11 * k, "text-anchor": "middle",
-        "font-family": style.fontFamily, "font-size": (9.5 * k).toFixed(1),
-        fill: style.ink,
-      },
-      [String(value)],
-    );
+function scalebarLabel(style: MapStyle, bar: Bar, lx: number, value: number): SvgNode {
+  const { y0, barH, k } = bar;
+  return el(
+    "text",
+    {
+      x: lx, y: y0 + barH + 11 * k, "text-anchor": "middle",
+      "font-family": style.fontFamily, "font-size": (9.5 * k).toFixed(1),
+      fill: style.ink,
+    },
+    [String(value)],
+  );
+}
+
+export function scalebarLayer(ctx: RenderCtx, plan: ScalebarPlan): SvgNode {
+  const { style, proj, world } = ctx;
+  const k = proj.widthPx / 1500;
+  const worldCellsPerCell = world.region
+    ? ((world.region.window.u1 - world.region.window.u0) *
+        (world.region.worldGridW - 1)) /
+      (world.elev.w - 1)
+    : 1;
+  const pxPerLeague = (proj.scale / worldCellsPerCell) * CELLS_PER_LEAGUE;
+  const target = 200 * k;
+  const total = leaguesTotal(Boolean(world.region), pxPerLeague, target);
+
+  const barW = total * pxPerLeague;
+  const barH = 7 * k;
+  const x0 = plan.box.x;
+  const y0 = plan.box.y + plan.box.h - barH - 12 * k;
+  const bar: Bar = { x0, y0, barW, barH, k };
+  const cells = scalebarCells(style, bar);
+  const label = (lx: number, value: number): SvgNode => scalebarLabel(style, bar, lx, value);
 
   return el("g", { id: "layer-scalebar" }, [
     el("rect", {

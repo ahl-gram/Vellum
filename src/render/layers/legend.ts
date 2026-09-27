@@ -2,6 +2,7 @@ import { BIOMES } from "../../climate/biomes.ts";
 import { el, type SvgNode } from "../svg.ts";
 import { boxesOverlap, type Box } from "../geometry.ts";
 import type { RenderCtx } from "../context.ts";
+import type { World } from "../../world/types.ts";
 import { terrainGlyphsPresent } from "./glyphs.ts";
 import { THEMES } from "./field.ts";
 import { iconNode, type Icon } from "./legend-icons.ts";
@@ -51,19 +52,20 @@ function dominantTree(ctx: RenderCtx): string | null {
   return best >= 0 ? (FOREST[best] as { sym: string }).sym : null;
 }
 
-// eslint-disable-next-line max-lines-per-function
-function buildRows(ctx: RenderCtx): { rows: Row[]; note: string } {
+function themeRows(ctx: RenderCtx): Row[] {
   const { style, world, theme } = ctx;
   const rows: Row[] = [];
-
-  if (theme) {
-    for (const sw of THEMES[theme].legendRows(world, style)) {
-      rows.push({ icon: { kind: "swatch", color: sw.color }, label: sw.label });
-    }
-    const isoLabel = THEMES[theme].isoLabel;
-    if (isoLabel) rows.push({ icon: { kind: "iso" }, label: isoLabel });
+  if (!theme) return rows;
+  for (const sw of THEMES[theme].legendRows(world, style)) {
+    rows.push({ icon: { kind: "swatch", color: sw.color }, label: sw.label });
   }
+  const isoLabel = THEMES[theme].isoLabel;
+  if (isoLabel) rows.push({ icon: { kind: "iso" }, label: isoLabel });
+  return rows;
+}
 
+function settlementRows(world: World): Row[] {
+  const rows: Row[] = [];
   const tiers = new Set(world.settlements.map((s) => s.kind));
   if (tiers.has("capital")) rows.push({ icon: { kind: "settlement", tier: "capital" }, label: "Capital" });
   const seatDrawn = world.realms.seats.some(
@@ -74,27 +76,35 @@ function buildRows(ctx: RenderCtx): { rows: Row[]; note: string } {
   if (tiers.has("village")) rows.push({ icon: { kind: "settlement", tier: "village" }, label: "Village" });
   if (tiers.has("hamlet")) rows.push({ icon: { kind: "settlement", tier: "hamlet" }, label: "Hamlet" });
   if (world.settlements.some((s) => s.ruined)) rows.push({ icon: { kind: "ruin" }, label: "Ruins" });
+  return rows;
+}
 
-  if (!theme) {
-    if (style.name === "nautical") {
-      rows.push({ icon: { kind: "sounding" }, label: "Depth, fathoms" });
-      rows.push({ icon: { kind: "rock" }, label: "Rock awash" });
-      if (style.winds) rows.push({ icon: { kind: "wind" }, label: "Prevailing wind" });
-      if (style.currents) rows.push({ icon: { kind: "current" }, label: "Ocean current" });
-    } else if (style.glyphs) {
-      const terrain = terrainGlyphsPresent(ctx);
-      rows.push({ icon: { kind: "glyph", sym: "gl-mtn-1" }, label: "Mountains" });
-      if (terrain.hill) rows.push({ icon: { kind: "glyph", sym: "gl-hill-1" }, label: "Hills" });
-      const tree = dominantTree(ctx);
-      if (tree) rows.push({ icon: { kind: "glyph", sym: tree }, label: "Forest" });
-      if (terrain.marsh) rows.push({ icon: { kind: "glyph", sym: "gl-marsh" }, label: "Marsh" });
-      if (terrain.dune) rows.push({ icon: { kind: "glyph", sym: "gl-dune" }, label: "Dunes" });
-    } else if (style.hypsometric) {
-      rows.push({ icon: { kind: "hypso" }, label: "Low to high ground" });
-      if (style.contourStroke) rows.push({ icon: { kind: "contour" }, label: "Contour line" });
-    }
+function terrainRows(ctx: RenderCtx): Row[] {
+  const { style } = ctx;
+  const rows: Row[] = [];
+  if (style.name === "nautical") {
+    rows.push({ icon: { kind: "sounding" }, label: "Depth, fathoms" });
+    rows.push({ icon: { kind: "rock" }, label: "Rock awash" });
+    if (style.winds) rows.push({ icon: { kind: "wind" }, label: "Prevailing wind" });
+    if (style.currents) rows.push({ icon: { kind: "current" }, label: "Ocean current" });
+  } else if (style.glyphs) {
+    const terrain = terrainGlyphsPresent(ctx);
+    rows.push({ icon: { kind: "glyph", sym: "gl-mtn-1" }, label: "Mountains" });
+    if (terrain.hill) rows.push({ icon: { kind: "glyph", sym: "gl-hill-1" }, label: "Hills" });
+    const tree = dominantTree(ctx);
+    if (tree) rows.push({ icon: { kind: "glyph", sym: tree }, label: "Forest" });
+    if (terrain.marsh) rows.push({ icon: { kind: "glyph", sym: "gl-marsh" }, label: "Marsh" });
+    if (terrain.dune) rows.push({ icon: { kind: "glyph", sym: "gl-dune" }, label: "Dunes" });
+  } else if (style.hypsometric) {
+    rows.push({ icon: { kind: "hypso" }, label: "Low to high ground" });
+    if (style.contourStroke) rows.push({ icon: { kind: "contour" }, label: "Contour line" });
   }
+  return rows;
+}
 
+function waterAndRoadRows(ctx: RenderCtx): Row[] {
+  const { style, world, theme } = ctx;
+  const rows: Row[] = [];
   if (world.rivers.length > 0) rows.push({ icon: { kind: "river" }, label: "River" });
   const roadRanks = new Set(world.roads.map((r) => r.rank));
   if (roadRanks.has("trunk")) rows.push({ icon: { kind: "road", rank: "trunk" }, label: "Road" });
@@ -102,13 +112,26 @@ function buildRows(ctx: RenderCtx): { rows: Row[]; note: string } {
   if (!theme && style.politicalTints && world.realms.seats.length > 1) {
     rows.push({ icon: { kind: "realm" }, label: "Realm & border" });
   }
+  return rows;
+}
 
-  const note = theme
+function legendNote(ctx: RenderCtx): string {
+  const { style, theme } = ctx;
+  return theme
     ? THEMES[theme].note
     : style.name === "nautical"
       ? "italic = water · numbers = fathoms"
       : "italic = water · SPACED CAPS = realm";
-  return { rows, note };
+}
+
+function buildRows(ctx: RenderCtx): { rows: Row[]; note: string } {
+  const rows: Row[] = [
+    ...themeRows(ctx),
+    ...settlementRows(ctx.world),
+    ...(ctx.theme ? [] : terrainRows(ctx)),
+    ...waterAndRoadRows(ctx),
+  ];
+  return { rows, note: legendNote(ctx) };
 }
 
 export function planLegend(ctx: RenderCtx, reserved: ReadonlyArray<Box>): LegendPlan | null {

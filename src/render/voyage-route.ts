@@ -54,17 +54,19 @@ export type VoyageRouter = {
   readonly legLength: (fromIdx: number, toIdx: number) => number;
 };
 
-// eslint-disable-next-line max-lines-per-function
-export function prepareVoyageRouter(sites: ReadonlyArray<Site>, survey: Survey): VoyageRouter {
-  const { gridW: w, gridH: h, land } = survey;
-  const byIdx = new Map(sites.map((s) => [s.idx, s]));
-  const cellOf = (s: Site) => s.x + s.y * w;
-  const toPt = (cell: number): Pt => ({ x: cell % w, y: (cell / w) | 0 });
+type LegWalk = { mode: LegMode; cells: ReadonlyArray<number> };
+type WalkLeg = (from: number, to: number) => LegWalk;
+type SitesByIdx = ReadonlyMap<number, Site>;
 
-  // Road polylines form one 8-connected component per settled landmass (#309), so BFS over the cell mask IS the road-graph walk; a pair with no shared component has no walk and degrades below.
+function roadMask(survey: Survey): Uint8Array {
+  const { gridW: w, gridH: h } = survey;
   const road = new Uint8Array(w * h);
   for (const polyline of survey.roads) for (const [x, y] of polyline) road[x + y * w] = 1;
+  return road;
+}
 
+function createWalkLeg(survey: Survey, road: Uint8Array): WalkLeg {
+  const { gridW: w, gridH: h, land } = survey;
   const comp = labelComponents(land, w, h);
   const seaMask = Uint8Array.from(land, (v) => (v === 1 ? 0 : 1));
   const seaComp = labelComponents(seaMask, w, h, 8);
@@ -82,13 +84,14 @@ export function prepareVoyageRouter(sites: ReadonlyArray<Site>, survey: Survey):
     return m;
   };
 
-  const walkLeg = (from: number, to: number): { mode: LegMode; cells: ReadonlyArray<number> } => {
+  return (from: number, to: number): LegWalk => {
     if (comp[from] !== comp[to]) {
       const water = seaCrossing(w, h, from, to, isSea, launchesFor);
       if (water) return { mode: "sea", cells: water };
       return { mode: "straight", cells: straightFallback(w, h, from, to, isRoad, isLand) };
     }
 
+    // Road polylines form one 8-connected component per settled landmass (#309), so BFS over the cell mask IS the road-graph walk; a pair with no shared component has no walk and degrades below.
     if (isRoad(from) && isRoad(to)) {
       const walk = bfsPath(w, h, from, (c) => c === to, isRoad);
       if (walk) {
@@ -106,8 +109,14 @@ export function prepareVoyageRouter(sites: ReadonlyArray<Site>, survey: Survey):
 
     return { mode: "straight", cells: straightFallback(w, h, from, to, isRoad, isLand) };
   };
+}
 
-  const route = (leg: VoyageLeg): RoutedLeg => {
+function createRoute(byIdx: SitesByIdx, survey: Survey, walkLeg: WalkLeg): VoyageRouter["route"] {
+  const { gridW: w, land } = survey;
+  const cellOf = (s: Site) => s.x + s.y * w;
+  const toPt = (cell: number): Pt => ({ x: cell % w, y: (cell / w) | 0 });
+  const isSea = (c: number) => land[c] === 0;
+  return (leg: VoyageLeg): RoutedLeg => {
     const a = byIdx.get(leg.fromIdx);
     const b = byIdx.get(leg.toIdx);
     if (!a || !b) throw new Error(`voyage leg ${leg.fromIdx} -> ${leg.toIdx} has no site in the manifest`);
@@ -118,9 +127,12 @@ export function prepareVoyageRouter(sites: ReadonlyArray<Site>, survey: Survey):
       mode === "sea" ? waterSpanOf(chain, points, isSea, w) : { water: null, inlandHandoff: false };
     return { ...leg, mode, points, water: span.water, inlandHandoff: span.inlandHandoff };
   };
+}
 
+function createLegLength(byIdx: SitesByIdx, w: number, walkLeg: WalkLeg): VoyageRouter["legLength"] {
+  const cellOf = (s: Site) => s.x + s.y * w;
   const lengthMemo = new Map<string, number>();
-  const legLength = (fromIdx: number, toIdx: number): number => {
+  return (fromIdx: number, toIdx: number): number => {
     const a = byIdx.get(fromIdx);
     const b = byIdx.get(toIdx);
     if (!a || !b) throw new Error(`voyage leg ${fromIdx} -> ${toIdx} has no site in the manifest`);
@@ -132,8 +144,12 @@ export function prepareVoyageRouter(sites: ReadonlyArray<Site>, survey: Survey):
     lengthMemo.set(key, len);
     return len;
   };
+}
 
-  return { route, legLength };
+export function prepareVoyageRouter(sites: ReadonlyArray<Site>, survey: Survey): VoyageRouter {
+  const byIdx = new Map(sites.map((s) => [s.idx, s]));
+  const walkLeg = createWalkLeg(survey, roadMask(survey));
+  return { route: createRoute(byIdx, survey, walkLeg), legLength: createLegLength(byIdx, survey.gridW, walkLeg) };
 }
 
 export function routeVoyage(

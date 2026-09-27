@@ -4,9 +4,9 @@ import { coastSmoothingIterations } from "../terrain/contours.ts";
 import { coastRingsGrid } from "./coast.ts";
 import type { World } from "../world/types.ts";
 import type { MapType } from "../terrain/heightfield.ts";
-import { createLabelArena, type RenderCtx } from "./context.ts";
-import { createProjection, marginFor } from "./transform.ts";
-import { STYLES, type StyleName } from "./style.ts";
+import { createLabelArena, type PxRing, type RenderCtx } from "./context.ts";
+import { createProjection, marginFor, type Projection } from "./transform.ts";
+import { STYLES, type MapStyle, type StyleName } from "./style.ts";
 import { el, pathFrom, renderSvg, type SvgNode } from "./svg.ts";
 import { recipeAttrs, recipeMetadataNode, regionRecipeAttrs, type RegionRecipe } from "./recipe-meta.ts";
 import { oceanLayer, waterlinesLayer } from "./layers/water.ts";
@@ -18,10 +18,10 @@ import { settlementsLayer } from "./layers/settlements.ts";
 import { frameLayer } from "./layers/frame.ts";
 import { glyphSymbolDefs } from "./layers/glyph-symbols.ts";
 import { glyphsLayer } from "./layers/glyphs.ts";
-import { cartoucheLayer, planCartouche } from "./layers/cartouche.ts";
-import { compassLayer, planCompass, rhumbLayer } from "./layers/compass.ts";
-import { planScalebar, scalebarLayer } from "./layers/scalebar.ts";
-import { legendLayer, planLegend } from "./layers/legend.ts";
+import { cartoucheLayer, planCartouche, type CartouchePlan } from "./layers/cartouche.ts";
+import { compassLayer, planCompass, rhumbLayer, type CompassPlan } from "./layers/compass.ts";
+import { planScalebar, scalebarLayer, type ScalebarPlan } from "./layers/scalebar.ts";
+import { legendLayer, planLegend, type LegendPlan } from "./layers/legend.ts";
 import { featureLabelsLayer } from "./layers/feature-labels.ts";
 import { heraldryLayer } from "./layers/heraldry.ts";
 import { seaDecorLayer } from "./layers/sea-decor.ts";
@@ -76,23 +76,16 @@ function describeChart(
   return `${lead} of ${world.title.title}, ${article} ${noun} in a ${world.recipe.band} climate.`;
 }
 
-// eslint-disable-next-line max-lines-per-function
-export function renderMap(world: World, opts: RenderOptions = {}): string {
-  const style = STYLES[opts.style ?? "antique"];
-  const description = describeChart(world, style.name, opts.theme);
-  const widthPx = opts.widthPx ?? 1500;
-  const margin = marginFor(widthPx);
-  const proj = createProjection(world.elev.w, world.elev.h, widthPx, margin);
-
-  const coastIters = coastSmoothingIterations(widthPx);
-  let coastRings = coastRingsGrid(world, coastIters).map((ring) =>
+function projectedCoastRings(world: World, proj: Projection): ReadonlyArray<PxRing> {
+  const coastIters = coastSmoothingIterations(proj.widthPx);
+  const coastRings = coastRingsGrid(world, coastIters).map((ring) =>
     ring.map(([x, y]) => [proj.px(x), proj.py(y)] as const),
   );
   if (coastRings.length === 0) {
     const mid = world.elev.at(world.elev.w >> 1, world.elev.h >> 1);
     if (mid > world.seaLevel) {
-      const m = margin;
-      coastRings = [[
+      const m = proj.margin;
+      return [[
         [m, m],
         [proj.widthPx - m, m],
         [proj.widthPx - m, proj.heightPx - m],
@@ -100,9 +93,18 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
       ]];
     }
   }
+  return coastRings;
+}
 
+function renderContext(
+  world: World,
+  style: MapStyle,
+  proj: Projection,
+  coastRings: ReadonlyArray<PxRing>,
+  theme: ThemeName | undefined,
+): RenderCtx {
   const { max } = minMax(world.elev);
-  const ctx: RenderCtx = {
+  return {
     world,
     style,
     proj,
@@ -125,9 +127,18 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
           style,
         ),
     labels: createLabelArena(),
-    theme: opts.theme,
+    theme,
   };
+}
 
+type ChartPlans = {
+  readonly cartouche: CartouchePlan;
+  readonly scalebar: ScalebarPlan;
+  readonly legend: LegendPlan | null;
+  readonly compass: CompassPlan | null;
+};
+
+function planFurniture(ctx: RenderCtx, opts: RenderOptions): ChartPlans {
   const cartouchePlan = planCartouche(ctx);
   ctx.labels.claim(cartouchePlan.rect);
   const scalebarPlan = planScalebar(ctx);
@@ -138,24 +149,42 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
   if (legendPlan) ctx.labels.claim(legendPlan.box);
   const compassPlan = planCompass(ctx, cartouchePlan, scalebarPlan.box, legendPlan?.box);
   if (compassPlan) ctx.labels.claim(compassPlan.box);
+  return { cartouche: cartouchePlan, scalebar: scalebarPlan, legend: legendPlan, compass: compassPlan };
+}
 
+type LabelledLayers = {
+  readonly settlements: SvgNode;
+  readonly featureLabels: ReturnType<typeof featureLabelsLayer>;
+  readonly bestiary: SvgNode | null;
+  readonly seaDecor: SvgNode | null;
+  readonly heraldry: SvgNode | null;
+};
+
+function labelledLayers(ctx: RenderCtx, plans: ChartPlans, opts: RenderOptions): LabelledLayers {
   // Evaluation order IS label priority: settlements claim before feature labels, before decorative art.
   const settlements = settlementsLayer(ctx);
   const featureLabels = featureLabelsLayer(ctx);
-  const bestiary = opts.beasts ? beastsLayer(ctx, cartouchePlan, compassPlan) : null;
-  const seaDecor = seaDecorLayer(ctx, cartouchePlan, compassPlan, { serpent: bestiary === null });
+  const bestiary = opts.beasts ? beastsLayer(ctx, plans.cartouche, plans.compass) : null;
+  const seaDecor = seaDecorLayer(ctx, plans.cartouche, plans.compass, { serpent: bestiary === null });
   const heraldry = opts.arms ? heraldryLayer(ctx, featureLabels.realmAnchors) : null;
+  return { settlements, featureLabels, bestiary, seaDecor, heraldry };
+}
 
-  const themed = opts.theme !== undefined;
+function clipRegionLand(world: World, node: SvgNode): SvgNode {
+  return world.region
+    ? el("g", { "clip-path": "url(#region-land-clip)" }, [node])
+    : node;
+}
 
-  const clipRegionLand = (node: SvgNode): SvgNode =>
-    world.region
-      ? el("g", { "clip-path": "url(#region-land-clip)" }, [node])
-      : node;
-  const clipRegionLandMaybe = (node: SvgNode | null): SvgNode | null =>
-    node === null ? null : clipRegionLand(node);
+function clipRegionLandMaybe(world: World, node: SvgNode | null): SvgNode | null {
+  return node === null ? null : clipRegionLand(world, node);
+}
 
-  const mapLayers: Array<SvgNode | null> = [
+function mapLayersFor(ctx: RenderCtx, plans: ChartPlans, labelled: LabelledLayers): Array<SvgNode | null> {
+  const { world } = ctx;
+  const { cartouche: cartouchePlan, compass: compassPlan } = plans;
+  const themed = ctx.theme !== undefined;
+  return [
     oceanLayer(ctx),
     compassPlan ? rhumbLayer(ctx, compassPlan) : null,
     waterlinesLayer(ctx),
@@ -165,29 +194,35 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
     themed ? isoLayer(ctx) : null,
     themed ? null : hypsometricLayer(ctx),
     themed ? null : contoursLayer(ctx),
-    themed ? null : clipRegionLandMaybe(realmTintsLayer(ctx)),
-    clipRegionLand(riversLayer(ctx)),
+    themed ? null : clipRegionLandMaybe(world, realmTintsLayer(ctx)),
+    clipRegionLand(world, riversLayer(ctx)),
     themed ? null : glyphsLayer(ctx),
     roadsLayer(ctx),
-    clipRegionLandMaybe(realmBordersLayer(ctx)),
+    clipRegionLandMaybe(world, realmBordersLayer(ctx)),
     soundingsLayer(ctx, cartouchePlan, compassPlan),
     currentsLayer(ctx, cartouchePlan, compassPlan),
     windsLayer(ctx, cartouchePlan, compassPlan),
-    seaDecor,
-    bestiary,
-    settlements,
-    featureLabels.node,
-    heraldry,
+    labelled.seaDecor,
+    labelled.bestiary,
+    labelled.settlements,
+    labelled.featureLabels.node,
+    labelled.heraldry,
   ];
+}
 
-  const furniture: Array<SvgNode | null> = [
-    compassPlan ? compassLayer(ctx, compassPlan) : null,
-    scalebarLayer(ctx, scalebarPlan),
-    cartoucheLayer(ctx, cartouchePlan),
-    legendPlan ? legendLayer(ctx, legendPlan) : null,
+function furnitureFor(ctx: RenderCtx, plans: ChartPlans): Array<SvgNode | null> {
+  return [
+    plans.compass ? compassLayer(ctx, plans.compass) : null,
+    scalebarLayer(ctx, plans.scalebar),
+    cartoucheLayer(ctx, plans.cartouche),
+    plans.legend ? legendLayer(ctx, plans.legend) : null,
   ];
+}
 
-  const defs = el("defs", {}, [
+function chartDefs(ctx: RenderCtx, featureDefs: ReadonlyArray<SvgNode>): SvgNode {
+  const { world, style, proj, coastRings } = ctx;
+  const margin = proj.margin;
+  return el("defs", {}, [
     el("clipPath", { id: "map-clip" }, [
       el("rect", {
         x: margin,
@@ -207,13 +242,24 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
         ]
       : []),
     ...(style.glyphs ? glyphSymbolDefs(style) : []),
-    ...featureLabels.defs,
+    ...featureDefs,
     ...textureDefs(ctx),
   ]);
+}
 
+type ChartBody = {
+  readonly description: string;
+  readonly defs: SvgNode;
+  readonly mapLayers: ReadonlyArray<SvgNode | null>;
+  readonly furniture: ReadonlyArray<SvgNode | null>;
+};
+
+function chartRoot(ctx: RenderCtx, opts: RenderOptions, body: ChartBody): SvgNode {
+  const { world, style, proj } = ctx;
+  const { description, defs, mapLayers, furniture } = body;
   const reproducible = world.region === undefined || opts.regionRecipe !== undefined;
 
-  const root = el(
+  return el(
     "svg",
     {
       xmlns: "http://www.w3.org/2000/svg",
@@ -250,6 +296,21 @@ export function renderMap(world: World, opts: RenderOptions = {}): string {
       frameLayer(ctx),
     ],
   );
+}
 
-  return renderSvg(root);
+export function renderMap(world: World, opts: RenderOptions = {}): string {
+  const style = STYLES[opts.style ?? "antique"];
+  const description = describeChart(world, style.name, opts.theme);
+  const widthPx = opts.widthPx ?? 1500;
+  const margin = marginFor(widthPx);
+  const proj = createProjection(world.elev.w, world.elev.h, widthPx, margin);
+  const ctx = renderContext(world, style, proj, projectedCoastRings(world, proj), opts.theme);
+
+  const plans = planFurniture(ctx, opts);
+  const labelled = labelledLayers(ctx, plans, opts);
+  const mapLayers = mapLayersFor(ctx, plans, labelled);
+  const furniture = furnitureFor(ctx, plans);
+  const defs = chartDefs(ctx, labelled.featureLabels.defs);
+
+  return renderSvg(chartRoot(ctx, opts, { description, defs, mapLayers, furniture }));
 }

@@ -2,6 +2,9 @@ import { BIOMES } from "../../climate/biomes.ts";
 import { el, type SvgNode } from "../svg.ts";
 import { prunePoints } from "../geometry.ts";
 import type { RenderCtx } from "../context.ts";
+import type { Projection } from "../transform.ts";
+import type { Rng } from "../../core/rng.ts";
+import type { World } from "../../world/types.ts";
 
 type Glyph = {
   x: number; // px
@@ -51,26 +54,31 @@ export function terrainGlyphsPresent(ctx: RenderCtx): TerrainGlyphs {
   return { hill, marsh, dune };
 }
 
-// eslint-disable-next-line max-lines-per-function
-export function glyphsLayer(ctx: RenderCtx): SvgNode | null {
-  const { style, world, proj, elevSpan, rng } = ctx;
-  if (!style.glyphs) return null;
+type Cand = { x: number; y: number; rel: number; i: number };
 
-  const { w, h, data } = world.elev;
-  const sea = world.seaLevel;
-  const k = proj.widthPx / 1500;
-  const zoom = world.region
+type GlyphCands = {
+  readonly mtn: Cand[];
+  readonly hill: Cand[];
+  readonly tree: Cand[];
+  readonly marsh: Cand[];
+  readonly dune: Cand[];
+};
+
+function glyphZoom(world: World): number {
+  const { w } = world.elev;
+  return world.region
     ? Math.sqrt(
         (w - 1) /
           ((world.region.window.u1 - world.region.window.u0) *
             (world.region.worldGridW - 1)),
       )
     : 1;
-  const spread = k * zoom;
-  const size = k * Math.min(1.35, 0.85 + zoom * 0.25);
-  const jrng = rng.fork("glyphs");
+}
 
-  type Cand = { x: number; y: number; rel: number; i: number };
+function glyphCandidates(ctx: RenderCtx): GlyphCands {
+  const { world, elevSpan } = ctx;
+  const { w, h, data } = world.elev;
+  const sea = world.seaLevel;
   const mtn: Cand[] = [];
   const hill: Cand[] = [];
   const tree: Cand[] = [];
@@ -97,39 +105,46 @@ export function glyphsLayer(ctx: RenderCtx): SvgNode | null {
 
   mtn.sort((a, b) => b.rel - a.rel || a.i - b.i);
   hill.sort((a, b) => b.rel - a.rel || a.i - b.i);
-  const treeShuffled = jrng.fork("trees").shuffled(tree);
-  const marshShuffled = jrng.fork("marsh").shuffled(marsh);
-  const duneShuffled = jrng.fork("dunes").shuffled(dune);
+  return { mtn, hill, tree, marsh, dune };
+}
 
-  const toPx = (c: Cand): { x: number; y: number; rel: number; i: number } => ({
+function pickGlyphSpots(proj: Projection, jrng: Rng, cands: GlyphCands, spread: number): GlyphCands {
+  const treeShuffled = jrng.fork("trees").shuffled(cands.tree);
+  const marshShuffled = jrng.fork("marsh").shuffled(cands.marsh);
+  const duneShuffled = jrng.fork("dunes").shuffled(cands.dune);
+
+  const toPx = (c: Cand): Cand => ({
     ...c,
     x: proj.px(c.x + jrng.range(-0.4, 0.4)),
     y: proj.py(c.y + jrng.range(-0.4, 0.4)),
   });
 
-  const mtnPicked = prunePoints(mtn.map(toPx), 15 * spread, 260);
-  const hillPicked = prunePoints(hill.map(toPx), 13 * spread, 170);
-  const treePicked = prunePoints(treeShuffled.map(toPx), 12.5 * spread, 340);
-  const marshPicked = prunePoints(marshShuffled.map(toPx), 12 * spread, 90);
-  const dunePicked = prunePoints(duneShuffled.map(toPx), 17 * spread, 70);
+  return {
+    mtn: prunePoints(cands.mtn.map(toPx), 15 * spread, 260),
+    hill: prunePoints(cands.hill.map(toPx), 13 * spread, 170),
+    tree: prunePoints(treeShuffled.map(toPx), 12.5 * spread, 340),
+    marsh: prunePoints(marshShuffled.map(toPx), 12 * spread, 90),
+    dune: prunePoints(duneShuffled.map(toPx), 17 * spread, 70),
+  };
+}
 
+function glyphVariants(world: World, grng: Rng, picked: GlyphCands, size: number): Glyph[] {
   const glyphs: Glyph[] = [];
-  const grng = jrng.fork("variants");
-  for (const c of mtnPicked) {
+  for (const c of picked.mtn) {
     glyphs.push({
       x: c.x, y: c.y,
       symbol: grng.pick(["gl-mtn-1", "gl-mtn-2", "gl-mtn-3"]),
       scale: (0.85 + c.rel * 0.8 + grng.range(-0.08, 0.08)) * size,
     });
   }
-  for (const c of hillPicked) {
+  for (const c of picked.hill) {
     glyphs.push({
       x: c.x, y: c.y,
       symbol: grng.pick(["gl-hill-1", "gl-hill-2"]),
       scale: (0.7 + c.rel * 0.5 + grng.range(-0.06, 0.06)) * size,
     });
   }
-  for (const c of treePicked) {
+  for (const c of picked.tree) {
     const b = world.biomes[c.i] as number;
     const symbol =
       b === BIOMES.taiga
@@ -139,19 +154,20 @@ export function glyphsLayer(ctx: RenderCtx): SvgNode | null {
           : "gl-tree-round";
     glyphs.push({ x: c.x, y: c.y, symbol, scale: (0.8 + grng.range(0, 0.3)) * size });
   }
-  for (const c of marshPicked) {
+  for (const c of picked.marsh) {
     glyphs.push({ x: c.x, y: c.y, symbol: "gl-marsh", scale: (0.8 + grng.range(0, 0.2)) * size });
   }
-  for (const c of dunePicked) {
+  for (const c of picked.dune) {
     glyphs.push({ x: c.x, y: c.y, symbol: "gl-dune", scale: (0.9 + grng.range(0, 0.3)) * size });
   }
+  return glyphs;
+}
 
-  glyphs.sort((a, b) => a.y - b.y);
-
+function glyphUses(glyphs: ReadonlyArray<Glyph>): SvgNode {
   return el(
     "g",
     { id: "layer-glyphs" },
-    glyphs.map((g) =>
+    [...glyphs].sort((a, b) => a.y - b.y).map((g) =>
       el("use", {
         href: `#${g.symbol}`,
         x: 0,
@@ -160,4 +176,19 @@ export function glyphsLayer(ctx: RenderCtx): SvgNode | null {
       }),
     ),
   );
+}
+
+export function glyphsLayer(ctx: RenderCtx): SvgNode | null {
+  const { style, world, proj, rng } = ctx;
+  if (!style.glyphs) return null;
+
+  const k = proj.widthPx / 1500;
+  const zoom = glyphZoom(world);
+  const spread = k * zoom;
+  const size = k * Math.min(1.35, 0.85 + zoom * 0.25);
+  const jrng = rng.fork("glyphs");
+
+  const picked = pickGlyphSpots(proj, jrng, glyphCandidates(ctx), spread);
+  const grng = jrng.fork("variants");
+  return glyphUses(glyphVariants(world, grng, picked, size));
 }

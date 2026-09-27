@@ -145,10 +145,7 @@ export const THEMES: Record<ThemeName, ThemeSpec> = {
   population: POPULATION,
 };
 
-// eslint-disable-next-line max-lines-per-function
-export function fieldLayer(ctx: RenderCtx): SvgNode | null {
-  if (!ctx.theme) return null;
-  const theme = THEMES[ctx.theme];
+function fieldRects(ctx: RenderCtx, theme: ThemeSpec): SvgNode[] {
   const { world, proj, style } = ctx;
   const { w, h } = world.elev;
   const classOf = theme.cellClass(world);
@@ -181,6 +178,14 @@ export function fieldLayer(ctx: RenderCtx): SvgNode | null {
       x = x2;
     }
   }
+  return rects;
+}
+
+export function fieldLayer(ctx: RenderCtx): SvgNode | null {
+  if (!ctx.theme) return null;
+  const theme = THEMES[ctx.theme];
+  const { style } = ctx;
+  const rects = fieldRects(ctx, theme);
 
   const coastD = ctx.coastRings.map((r) => pathFrom(r, true)).join("");
   const clipPath = el("clipPath", { id: "field-clip" }, [
