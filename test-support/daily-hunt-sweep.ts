@@ -6,11 +6,11 @@ import type { World } from "../src/world/types.ts";
 import { glyphGate, labelGate, TERRAIN_RADIUS, type TerrainBand } from "./daily-hunt-geometry.ts";
 
 // Mirrors MARGIN in src/site/seed-of-the-day/app.ts (renderMap's default).
-export const MARGIN = Math.round(1500 * 0.045);
+const MARGIN = Math.round(1500 * 0.045);
 
 export const DAILY_SEEDS = Array.from({ length: 30 }, (_, i) => 20260601 + i);
 export const DAILY: ReadonlyArray<World> = DAILY_SEEDS.map((s) => generateWorld(defaultRecipe(s)));
-export const OFFGRID: ReadonlyArray<World> = [1, 7, 12345].map((s) => generateWorld(defaultRecipe(s)));
+const OFFGRID: ReadonlyArray<World> = [1, 7, 12345].map((s) => generateWorld(defaultRecipe(s)));
 export const SWEEP: ReadonlyArray<World> = [...DAILY, ...OFFGRID];
 
 export const SWEEP_SVGS: ReadonlyArray<string> = SWEEP.map((w) =>
