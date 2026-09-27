@@ -163,14 +163,12 @@ function elevationAt(u: number, v: number, s: TerrainSettings): number {
   const falloff = 1 - smoothstep(shape.falloffStart, shape.falloffEnd, d);
   e = e * lerp(shape.baseKeep, 1, falloff) - (1 - falloff) * shape.sinkDepth;
 
-  // hard guarantee: outermost fringe is always deep water
   const edge = Math.min(u, 1 - u, v, 1 - v);
   e -= (1 - smoothstep(0, 0.05, edge)) * 0.8;
 
   return e;
 }
 
-/** Elevation is a pure function of world-space (u, v) and the seed, so a finer grid over the same recipe samples the identical landscape. */
 export function buildHeightfield(params: TerrainParams): Field {
   const { gridW, gridH } = params;
   const settings = terrainSettings(params);

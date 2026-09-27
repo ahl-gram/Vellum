@@ -14,7 +14,7 @@ import { placeSettlements, type Settlement } from "../society/sites.ts";
 import { buildRoads } from "../society/roads.ts";
 import { partitionRealms, type RealmsResult } from "../society/realms.ts";
 import { blazonRealms } from "../society/heraldry.ts";
-import { simulateHistory, type HistoricalEvent } from "../society/history.ts";
+import { simulateHistory, type HistoricalEvent, type SettlementCore } from "../society/history.ts";
 import { assignFormerNames } from "../society/renames.ts";
 import { conjureBestiary, type SeaBeast } from "../society/bestiary.ts";
 import { nameSetOf } from "../society/hamlets.ts";
@@ -80,7 +80,6 @@ function stripUndefined<T extends object>(obj: T): Partial<T> {
   return out as Partial<T>;
 }
 
-type NamedSettlementCore = Settlement & { readonly name: string };
 
 function terrainStage(recipe: WorldRecipe, rng: Rng): { elev: Field; seaLevel: number; winds: Winds } {
   const { seed, gridW, gridH, mapType } = recipe;
@@ -194,7 +193,7 @@ function namePlaces(
   namer: Namer,
   settlements: ReadonlyArray<Settlement>,
   rivers: ReadonlyArray<River>,
-): { named: NamedSettlementCore[]; riverNames: Map<number, string> } {
+): { named: SettlementCore[]; riverNames: Map<number, string> } {
   const named = settlements.map((s) => ({ ...s, name: namer.name("settlement") }));
 
   const riverNames = new Map<number, string>();
@@ -259,7 +258,7 @@ function featureNames(
   };
 }
 
-function worldTitle(rng: Rng, culture: Culture, mapType: MapType, named: ReadonlyArray<NamedSettlementCore>): MapTitle {
+function worldTitle(rng: Rng, culture: Culture, mapType: MapType, named: ReadonlyArray<SettlementCore>): MapTitle {
   const capitalName = named.find((s) => s.kind === "capital")?.name;
   return makeMapTitle(
     rng.fork("title"),
@@ -272,7 +271,7 @@ function worldTitle(rng: Rng, culture: Culture, mapType: MapType, named: Readonl
 function worldHistory(
   rng: Rng,
   culture: Culture,
-  named: ReadonlyArray<NamedSettlementCore>,
+  named: ReadonlyArray<SettlementCore>,
   realms: RealmsResult,
   names: FeatureNames,
   presentYear: number,

@@ -299,7 +299,7 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
   const worldAspect = (recipe.gridW - 1) / (recipe.gridH - 1);
   const g: RegionGrid = { world, window, gridW, gridH, worldAspect };
 
-  const seaLevel = world.seaLevel; // absolute: the same waterline as the world chart
+  const seaLevel = world.seaLevel;
   const elev = regionElevation(g, spec, seaLevel);
   const elevSpan = worldElevSpan(world, seaLevel);
   const { flow, rivers, riverCells } = regionWaters(g, elev, seaLevel, elevSpan);

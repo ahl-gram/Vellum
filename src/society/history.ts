@@ -17,7 +17,7 @@ export type History = {
   readonly events: ReadonlyArray<HistoricalEvent>;
 };
 
-type SettlementCore = Settlement & { readonly name: string };
+export type SettlementCore = Settlement & { readonly name: string };
 
 export type HistoryInput = {
   readonly settlements: ReadonlyArray<SettlementCore>;
