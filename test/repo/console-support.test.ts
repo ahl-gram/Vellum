@@ -1,12 +1,13 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readdirSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { dirname, join, relative, resolve, sep } from "node:path";
 import { CANCELLATION_PREFIXES, OUR_OWN_REASONS, dropExpectedCancellations } from "../../scripts/e2e/console-support.ts";
-import { readE2eSource } from "../../test-support/e2e-source.ts";
+import { e2eSourcePaths, readE2eSource } from "../../test-support/e2e-source.ts";
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const E2E = resolve(REPO, "scripts", "e2e");
+const e2eFiles = (): string[] => e2eSourcePaths(REPO).filter((p) => p.startsWith(E2E + sep)).map((p) => relative(E2E, p).split(sep).join("/"));
+const importsDrop = (f: string): boolean => [...readE2eSource(join(E2E, f)).matchAll(/from "(\.{1,2}\/[^"]*)"/g)].some((m) => resolve(dirname(join(E2E, f)), m[1]!) === join(E2E, "console-support.ts"));
 
 // Every fixture below is a literal rather than a loop over the exported list: a list-driven case deletes itself along with the behaviour when an entry is removed, so it would pass on an empty list and could never red on the defect this file exists for (#613).
 const H6_MEASURED =
@@ -88,7 +89,7 @@ test("order and multiplicity survive, so a check's payload still reads as what h
 });
 
 test("no suite carries a cancellation opening of its own: one roster, swept from the module's own exported data (#613)", () => {
-  const files = readdirSync(E2E).filter((f) => /\.ts$/.test(f));
+  const files = e2eFiles();
   assert.ok(files.length > 20, `read only ${files.length} .ts files under scripts/e2e; this sweep is looking at the wrong tree`);
   const src = (f: string) => readE2eSource(join(E2E, f));
   assert.ok(CANCELLATION_PREFIXES.length > 0, "the exported roster is empty, so the sweep below would read nothing");
@@ -101,18 +102,18 @@ test("no suite carries a cancellation opening of its own: one roster, swept from
       `${offenders.join(", ")} spell a cancellation opening inline instead of calling the shared drop, which is how one file goes stale while the rest are fixed (#613). BLIND SPOT, and it has occupants: this cannot see a suite that takes a console delta and filters nothing, which five did before #613; that failure is LOUD (a red check the first time the message lands there) where a stale inline copy is silent`,
     );
   }
-  const adopters = files.filter((f) => src(f).includes('from "./console-support.ts"'));
+  const adopters = files.filter(importsDrop);
   assert.ok(adopters.length > 0, "no file imports console-support at all, so the sweep above is reading an empty claim");
   // The at-least-one adopter check above is satisfied by any other file, which is what left this gap (prover round 1).
   const uncited = files.filter(
-    (f) => f !== "console-support.ts" && src(f).includes("dropExpectedCancellations(") && !src(f).includes('from "./console-support.ts"'),
+    (f) => f !== "console-support.ts" && src(f).includes("dropExpectedCancellations(") && !importsDrop(f),
   );
   assert.deepEqual(uncited, [], `${uncited.join(", ")} call the shared drop without the house import spelling; a genuinely missing import is a ReferenceError the first time that check runs, and an unusual spelling reds here too, which is the safe direction`);
 });
 
 test("every read of the console accumulator goes through the shared drop, so a call site cannot quietly stop filtering (cold skeptic on PR #619)", () => {
   // harness.ts FILLS the accumulator and is the one file that reads it for something other than a check.
-  const files = readdirSync(E2E).filter((f) => /\.ts$/.test(f) && f !== "console-support.ts" && f !== "harness.ts");
+  const files = e2eFiles().filter((f) => f !== "console-support.ts" && f !== "harness.ts");
   assert.ok(files.length > 20, `read only ${files.length} .ts files; this sweep is looking at the wrong tree`);
   const offenders: string[] = [];
   let reads = 0;

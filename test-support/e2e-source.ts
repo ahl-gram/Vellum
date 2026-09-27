@@ -1,6 +1,6 @@
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { stripTypeScriptTypes } from "node:module";
-import { join } from "node:path";
+import { join, sep } from "node:path";
 
 export const e2eSourcePaths = (root: string): string[] => {
   const dir = join(root, "scripts", "e2e");
@@ -16,3 +16,9 @@ export const readE2eSource = (path: string): string => {
 };
 
 export const e2eSuitePath = (name: string): string => `scripts/e2e/suite-${name}.ts`;
+
+export const e2eSuiteFamily = (root: string, name: string): string[] => {
+  const folder = join(root, "scripts", "e2e", name);
+  const parts = existsSync(folder) ? readdirSync(folder, { recursive: true, encoding: "utf8" }).filter((f) => f.endsWith(".ts")).map((f) => `scripts/e2e/${name}/${f.split(sep).join("/")}`) : [];
+  return [e2eSuitePath(name), ...parts.sort()];
+};
