@@ -36,11 +36,7 @@ function createWaterFlood(elev: Field, seaLevel: number): WaterFlood {
       }
     }
   };
-  return { isWater, seen, flood };
-}
 
-function floodBorders(w: number, h: number, water: WaterFlood): void {
-  const { isWater, seen, flood } = water;
   for (let x = 0; x < w; x++) {
     for (const y of [0, h - 1]) {
       const i = x + y * w;
@@ -53,6 +49,7 @@ function floodBorders(w: number, h: number, water: WaterFlood): void {
       if (isWater(i) && !seen[i]) flood(i, null);
     }
   }
+  return { isWater, seen, flood };
 }
 
 function lakeRecords(w: number, h: number, water: WaterFlood, minCells: number): Lake[] {
@@ -84,7 +81,6 @@ export function findLakes(
 ): Lake[] {
   const { w, h } = elev;
   const water = createWaterFlood(elev, seaLevel);
-  floodBorders(w, h, water);
   const lakes = lakeRecords(w, h, water, minCells);
   lakes.sort((a, b) => b.area - a.area);
   return lakes;

@@ -75,6 +75,14 @@ function riverGraph(elev: Field, dir: Int32Array, seaLevel: number, isRiver: Uin
   return { children, mouths };
 }
 
+function riverPoint(i: number, w: number, acc: Float64Array): RiverPoint {
+  return {
+    x: i % w,
+    y: (i / w) | 0,
+    acc: acc[i] as number,
+  };
+}
+
 function traceRivers(
   w: number,
   flow: FlowResult,
@@ -83,11 +91,7 @@ function traceRivers(
 ): River[] {
   const { dir, acc } = flow;
   const { children, mouths } = graph;
-  const point = (i: number): RiverPoint => ({
-    x: i % w,
-    y: (i / w) | 0,
-    acc: acc[i] as number,
-  });
+  const point = (i: number): RiverPoint => riverPoint(i, w, acc);
 
   type Trace = { cell: number; tail: RiverPoint; endsInOcean: boolean };
   const stack: Trace[] = [];

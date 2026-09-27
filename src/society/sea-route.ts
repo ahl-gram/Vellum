@@ -56,7 +56,7 @@ function nearestRealmBySea(frozen: Int16Array, cells: ReadonlyArray<number>, ele
   return -1;
 }
 
-/** Reads a frozen snapshot of the post-flood labels, so attachment order can never chain an islet onto an already-attached islet; the flood must stay a true FIFO BFS to reach the NEAREST realm by sea (the DFS-stack floods elsewhere would not). */
+/** Reads a frozen snapshot of the post-flood labels, so attachment order can never chain an islet onto an already-attached islet. */
 export function attachSeatlessLandmasses(
   frozen: Int16Array,
   landmassIds: Int32Array,
