@@ -78,23 +78,26 @@ function levenshtein(a: string, b: string): number {
   return dp[m]![n]!;
 }
 
+function assertNoNearDuplicates(bases: ReadonlyArray<string>, culture: (typeof CULTURES)[number], seed: number): void {
+  for (let i = 0; i < bases.length; i++) {
+    for (let j = i + 1; j < bases.length; j++) {
+      // Roman-numeral fallbacks ("kara ii") are exempt: the numeral disambiguates a genuinely tight namespace.
+      if (/ [ivx]+$/.test(bases[i]!) || / [ivx]+$/.test(bases[j]!)) continue;
+      assert.ok(
+        levenshtein(bases[i]!, bases[j]!) >= 2,
+        `${culture.id} seed ${seed}: "${bases[i]}" ~ "${bases[j]}"`,
+      );
+    }
+  }
+}
+
 test("no two bare bases within a world are near-duplicates (edit distance >= 2)", () => {
   for (const culture of CULTURES) {
     for (const seed of [1, 2, 7, 42, 100]) {
       const namer = createNamer(createRng(seed).fork("names"), culture);
       const bases: string[] = [];
       for (let i = 0; i < 30; i++) bases.push(namer.name("bare").toLowerCase());
-      for (let i = 0; i < bases.length; i++) {
-        for (let j = i + 1; j < bases.length; j++) {
-          // Roman-numeral fallbacks ("kara ii") are exempt: the numeral disambiguates a genuinely tight namespace.
-          // eslint-disable-next-line max-depth
-          if (/ [ivx]+$/.test(bases[i]!) || / [ivx]+$/.test(bases[j]!)) continue;
-          assert.ok(
-            levenshtein(bases[i]!, bases[j]!) >= 2,
-            `${culture.id} seed ${seed}: "${bases[i]}" ~ "${bases[j]}"`,
-          );
-        }
-      }
+      assertNoNearDuplicates(bases, culture, seed);
     }
   }
 });

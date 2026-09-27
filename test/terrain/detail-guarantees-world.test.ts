@@ -112,26 +112,31 @@ function fusedCells(wc: WindowCase, field: Field): number {
 }
 
 // The floor covers a cell where the parent's OWN cell is land AND its interpolated surface still stands above the waterline; where only the interpolation rises, the parent charts water and the child may draw water.
+function assertFloorAndCount(wc: WindowCase, seed: number, cx: number, cy: number): { parentLandCells: number; drownedNoFloor: number } {
+  let drownedNoFloor = 0;
+  let parentLandCells = 0;
+  for (let i = 0; i < CW * CH; i++) {
+    if (!parentLandAt(wc, i)) continue;
+    if (!((wc.surface.data[i] as number) > wc.sea)) continue;
+    parentLandCells++;
+    if ((wc.fine.data[i] as number) <= wc.sea) drownedNoFloor++;
+    assert.ok(
+      (wc.adjusted.data[i] as number) > wc.sea,
+      `seed ${seed} window ${cx},${cy}: parent land drowned at cell ${i % CW},${(i / CW) | 0}`,
+    );
+  }
+  return { parentLandCells, drownedNoFloor };
+}
+
 test("monotone floor: parent land never sinks in the adjusted child, and the guard is not vacuous (#397, narrowed by #443)", () => {
   for (const seed of SWEEP_SEEDS) {
     let drownedNoFloor = 0;
     let parentLandCells = 0;
     for (const cy of LATTICE) {
       for (const cx of LATTICE) {
-        const wc = caseFor(seed, cx, cy);
-        for (let i = 0; i < CW * CH; i++) {
-          // eslint-disable-next-line max-depth
-          if (!parentLandAt(wc, i)) continue;
-          // eslint-disable-next-line max-depth
-          if (!((wc.surface.data[i] as number) > wc.sea)) continue;
-          parentLandCells++;
-          // eslint-disable-next-line max-depth
-          if ((wc.fine.data[i] as number) <= wc.sea) drownedNoFloor++;
-          assert.ok(
-            (wc.adjusted.data[i] as number) > wc.sea,
-            `seed ${seed} window ${cx},${cy}: parent land drowned at cell ${i % CW},${(i / CW) | 0}`,
-          );
-        }
+        const counts = assertFloorAndCount(caseFor(seed, cx, cy), seed, cx, cy);
+        parentLandCells += counts.parentLandCells;
+        drownedNoFloor += counts.drownedNoFloor;
       }
     }
     // Measured 2026-08-23: seed 42 drowns 333 of 59189 parent-land cells without the floor, seed 23 drowns 255 of 42779.
@@ -239,6 +244,17 @@ test("saddle census: the seed-42 world chart's three hairline picture-fuses, dra
   }
 });
 
+function bothCornersOnParentLand(wc: WindowCase, fusing: ReturnType<typeof fusingSaddles>["fusing"]): number {
+  let bothParent = 0;
+  for (const f of fusing) {
+    const [p1, p2] = f.landCorners;
+    const i1 = p1[0] + p1[1] * CW;
+    const i2 = p2[0] + p2[1] * CW;
+    if (parentLandAt(wc, i1) && parentLandAt(wc, i2)) bothParent++;
+  }
+  return bothParent;
+}
+
 test("saddle census: hairline picture-fuses in adjusted band-3 windows stay within the measured band (#397)", () => {
   let fusingTotal = 0;
   let bothParent = 0;
@@ -248,13 +264,7 @@ test("saddle census: hairline picture-fuses in adjusted band-3 windows stay with
         const wc = caseFor(seed, cx, cy);
         const { fusing } = fusingSaddles(wc.adjusted, wc.sea);
         fusingTotal += fusing.length;
-        for (const f of fusing) {
-          const [p1, p2] = f.landCorners;
-          const i1 = p1[0] + p1[1] * CW;
-          const i2 = p2[0] + p2[1] * CW;
-          // eslint-disable-next-line max-depth
-          if (parentLandAt(wc, i1) && parentLandAt(wc, i2)) bothParent++;
-        }
+        bothParent += bothCornersOnParentLand(wc, fusing);
       }
     }
   }

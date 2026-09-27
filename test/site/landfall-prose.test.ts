@@ -70,8 +70,7 @@ test("every pip's at-sea dress is earned from the terrain, not asserted by hand 
   }
 });
 
-// eslint-disable-next-line max-lines-per-function
-test("the panel is a card slip carrying the prose, hidden in the HTML so it stays indexable (#459)", () => {
+function assertPanelMarkup(): void {
   const panelAt = astro.indexOf('id="lf-card-how"');
   assert.ok(panelAt >= 0, "the panel mounts");
   const panel = astro.slice(astro.lastIndexOf("<aside", panelAt), astro.indexOf("</aside>", panelAt));
@@ -99,7 +98,9 @@ test("the panel is a card slip carrying the prose, hidden in the HTML so it stay
   assert.ok(scrollAt >= 0, "the prose rides an inner scroll region");
   assert.ok(closeAt >= 0 && closeAt < scrollAt, "the close button stands OUTSIDE the scroller, so it can never scroll away with the prose (skeptic finding 2)");
   assert.ok(panel.indexOf('class="lf-card-where"') < scrollAt, "the head (verb, title, where) stays put above the scroller");
+}
 
+function assertPanelCss(): void {
   const rule = css.match(/\.lf-card-how \{([^}]*)\}/);
   assert.ok(rule, ".lf-card-how sizes the long prose");
   assert.match(rule[1]!, /max-height/, "the slip caps its height against the stage");
@@ -120,7 +121,9 @@ test("the panel is a card slip carrying the prose, hidden in the HTML so it stay
     "45vh",
     "the narrow cap is the measured value, not merely present: at 62vh the sheet rose past the flight's 0.36 anchor line and buried the cartouche it had just centered (skeptic round 3, sweep at 390x844)",
   );
+}
 
+function assertNoscriptReveal(): void {
   const noscript = astro.match(/<noscript>[\s\S]*?<\/noscript>/);
   assert.ok(noscript, "a no-JS visitor still reads the prose (skeptic finding 4: the pip and panel only exist under .cam)");
   assert.match(noscript[0], /#lf-card-how\[hidden\]\s*\{[^}]*display:\s*block/, "the no-JS reveal targets the hidden attribute itself, flowing the panel statically");
@@ -130,6 +133,12 @@ test("the panel is a card slip carrying the prose, hidden in the HTML so it stay
       `the noscript carries a visible door to ${room}: retiring Go Deeper removed the last human-visible room links, and the Atlas is out of the nav by ratified #202, so without this a no-JS visitor cannot reach it at all (skeptic round 5 finding 1)`,
     );
   }
+}
+
+test("the panel is a card slip carrying the prose, hidden in the HTML so it stays indexable (#459)", () => {
+  assertPanelMarkup();
+  assertPanelCss();
+  assertNoscriptReveal();
 });
 
 test("stage gestures cannot begin on a slip because no slip lives in the stage; the wheel policy rides each slip (#459 skeptic rounds 1 and 2, reshaped at #470; one-finger touch on the fixed sheets is #460's recorded non-provable arm)", () => {

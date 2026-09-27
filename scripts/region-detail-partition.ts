@@ -11,8 +11,9 @@ import {
   maxOfSurfaces,
   type ChainSpec,
 } from "../src/world/detail-chain.ts";
-import { LOD_BANDS, lodWindowFor, type LodBand } from "../src/world/lod.ts";
+import { LOD_BANDS, type LodBand } from "../src/world/lod.ts";
 import type { World } from "../src/world/types.ts";
+import { bandWindows } from "./region-detail-sweep-windows.ts";
 
 /** #443's measurement half: the world chart's OWN partition across three arms, so the anti-merge claim and the vanishing-landmass census reproduce from one command. Committed, not left in out/, because this epic has lost its evidence twice. `before` rebuilds what #397 and #398 shipped, an UNGATED bilinear floor rejected against that same blurred max, so no revert is needed. Costs minutes; the unit-scale claims are in test/world/detail-chain-world.test.ts. */
 
@@ -57,18 +58,14 @@ type LostMass = {
   readonly regionCellsInWindow: number;
 };
 
-// eslint-disable-next-line max-lines-per-function
-function tally(
-  world: World,
-  field: Field,
-  window: UvWindow,
-  worldIds: Int32Array,
-  worldSizes: ReadonlyArray<number>,
-  lost: LostMass[],
-  seed: number,
-  band: number,
-  arm: string,
-): Tally {
+type Census = {
+  readonly present: Map<number, number>;
+  readonly alive: Set<number>;
+  readonly coveredBy: Map<number, Set<number>>;
+  readonly drowned: number;
+};
+
+function census(world: World, field: Field, window: UvWindow, worldIds: Int32Array): Census {
   const { gridW, gridH } = { gridW: field.w, gridH: field.h };
   const sea = world.seaLevel;
   const Ww = world.recipe.gridW;
@@ -96,6 +93,21 @@ function tally(
       s.add(wid);
     }
   }
+  return { present, alive, coveredBy, drowned };
+}
+
+function tally(
+  world: World,
+  field: Field,
+  window: UvWindow,
+  worldIds: Int32Array,
+  worldSizes: ReadonlyArray<number>,
+  seed: number,
+  band: number,
+  arm: string,
+): { readonly totals: Tally; readonly lost: ReadonlyArray<LostMass> } {
+  const { present, alive, coveredBy, drowned } = census(world, field, window, worldIds);
+  const lost: LostMass[] = [];
   for (const [id, cells] of present) {
     if (alive.has(id)) continue;
     lost.push({
@@ -104,12 +116,13 @@ function tally(
       regionCellsInWindow: cells,
     });
   }
-  return {
+  const totals = {
     fused: [...coveredBy.values()].reduce((a, s) => a + Math.max(0, s.size - 1), 0),
     lost: present.size - alive.size,
     drowned,
     masses: present.size,
   };
+  return { totals, lost };
 }
 
 const SEEDS = [42, 7, 2, 15, 23];
@@ -128,33 +141,30 @@ for (const seed of SEEDS) {
   const newCache = createChainCache(400);
   for (const idx of [1, 2, 3]) {
     const band = LOD_BANDS[idx] as LodBand;
-    const n = Math.round(1 / band.sizeUV);
     const row = rows.get(idx) as Record<Arm, Tally>;
-    for (let iy = 0; iy < n; iy++) {
-      for (let ix = 0; ix < n; ix++) {
-        const win = lodWindowFor((ix + 0.5) * band.sizeUV, (iy + 0.5) * band.sizeUV, band.sizeUV);
-        const spec: ChainSpec = {
-          seed, mapType: world.recipe.mapType, window: win,
-          gridW: band.gridW, gridH: band.gridH, worldAspect, seaLevel: world.seaLevel,
-        };
-        // The SHIPPED bare arm takes no `detail` at all, matching region.ts for detail:false; passing the octaves here would measure an arm nothing draws.
-        const arms: ReadonlyArray<readonly [Arm, Field]> = [
-          ["bare", buildHeightfield({
-            seed, gridW: band.gridW, gridH: band.gridH, mapType: world.recipe.mapType,
-            window: win, worldAspect,
-          })],
-          ["before", buildOldField(spec, oldCache)],
-          ["after", buildChainedField(spec, newCache)],
-        ];
-        // eslint-disable-next-line max-depth
-        for (const [key, f] of arms) {
-          const t = tally(world, f, win, worldIds, worldSizes, lost, seed, idx, key);
-          const acc = row[key];
-          acc.fused += t.fused;
-          acc.lost += t.lost;
-          acc.drowned += t.drowned;
-          acc.masses += t.masses;
-        }
+    for (const win of bandWindows(band)) {
+      const spec: ChainSpec = {
+        seed, mapType: world.recipe.mapType, window: win,
+        gridW: band.gridW, gridH: band.gridH, worldAspect, seaLevel: world.seaLevel,
+      };
+      // The SHIPPED bare arm takes no `detail` at all, matching region.ts for detail:false; passing the octaves here would measure an arm nothing draws.
+      const arms: ReadonlyArray<readonly [Arm, Field]> = [
+        ["bare", buildHeightfield({
+          seed, gridW: band.gridW, gridH: band.gridH, mapType: world.recipe.mapType,
+          window: win, worldAspect,
+        })],
+        ["before", buildOldField(spec, oldCache)],
+        ["after", buildChainedField(spec, newCache)],
+      ];
+      for (const [key, f] of arms) {
+        const counted = tally(world, f, win, worldIds, worldSizes, seed, idx, key);
+        lost.push(...counted.lost);
+        const t = counted.totals;
+        const acc = row[key];
+        acc.fused += t.fused;
+        acc.lost += t.lost;
+        acc.drowned += t.drowned;
+        acc.masses += t.masses;
       }
     }
     console.error(`seed ${seed} band ${idx} done`);

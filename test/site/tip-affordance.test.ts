@@ -297,8 +297,7 @@ test("the authored roster is exactly the css-bearing sources under src/ (#360)",
 const fingerprintsOf = (source: string): string[] =>
   CSS_FINGERPRINTS.filter(([, matches]) => matches(withoutComments(source))).map(([name]) => name);
 
-// eslint-disable-next-line max-lines-per-function
-test("the css-source scan sees css, and sees the defects it polices (#360)", () => {
+function assertScanSeesCss(): void {
   assert.deepEqual(
     fingerprintsOf(".toc a { font-family: serif; }"),
     ["a hyphenated declaration"],
@@ -325,7 +324,9 @@ test("the css-source scan sees css, and sees the defects it polices (#360)", () 
     ["a rotate-on-hover tip"],
     "the tip defect must be visible to the scan without a hyphen anywhere",
   );
+}
 
+function assertScanIgnoresNonCss(): void {
   assert.deepEqual(
     fingerprintsOf('const P = {\n  "--ink-dark": "#4a3826",\n  "--ink-brown": "#6b5a40",\n};'),
     [],
@@ -364,6 +365,11 @@ test("the css-source scan sees css, and sees the defects it polices (#360)", () 
     /https:\/\/x/,
     "a protocol's // is not a comment",
   );
+}
+
+test("the css-source scan sees css, and sees the defects it polices (#360)", () => {
+  assertScanSeesCss();
+  assertScanIgnoresNonCss();
 });
 
 test("every generated tree names a source the sweeps actually read (#360)", () => {

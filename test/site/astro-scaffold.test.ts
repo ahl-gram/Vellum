@@ -478,43 +478,47 @@ test("a page whose markup carries the survey sheet passes desk open (#461, the i
   }
 });
 
-// eslint-disable-next-line max-lines-per-function
+// Astro entity-encodes text expressions: & and apostrophes arrive escaped.
+const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/'/g, "&#39;");
+
+function assertRoomOrHomeHead(html: string, p: PageSpec): void {
+  if (p.room) {
+    assert.ok(
+      html.includes(`<h1 class="room-name">${esc(p.room)}</h1>`),
+      `${p.route} names its room as the page's h1, standing in the page (#288, re-ratified at #461)`,
+    );
+    assert.ok(
+      html.includes(`<p class="room-tagline">${esc(p.tagline)}</p>`),
+      `${p.route} keeps its flourish line under the room name`,
+    );
+    assert.equal(
+      html.includes('<div class="band" aria-hidden="true">'),
+      p.chartRoom !== true,
+      p.chartRoom
+        ? `${p.route} is a chart room: the chart runs under the cluster with no band (#462 ruling 7)`
+        : `${p.route} reserves the walnut band the cluster stands on (#461 ruling 5)`,
+    );
+  } else {
+    // Match the markup form, not the bare class: the shell css mentions .room-name on every page.
+    assert.ok(
+      !html.includes('<h1 class="room-name">'),
+      `${p.route} is home: the atelier is not a room`,
+    );
+    assert.ok(
+      !html.includes('class="band"'),
+      `${p.route} is home: the full-bleed stage needs no band (nothing scrolls beneath the cluster)`,
+    );
+  }
+}
+
 test("the head cluster: wordmark, the atelier tagline, then the rooms nav, fixed on the deep (#461 ruling 1)", () => {
-  // Astro entity-encodes text expressions: & and apostrophes arrive escaped.
-  const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/'/g, "&#39;");
   for (const p of PAGES) {
     const html = page(p.route);
     assert.ok(
       html.includes('<a href="/">Vellum</a>'),
       `${p.route} wordmark must be the home link on every page, home included (mixed case: Fell SC sets the small caps)`,
     );
-    if (p.room) {
-      assert.ok(
-        html.includes(`<h1 class="room-name">${esc(p.room)}</h1>`),
-        `${p.route} names its room as the page's h1, standing in the page (#288, re-ratified at #461)`,
-      );
-      assert.ok(
-        html.includes(`<p class="room-tagline">${esc(p.tagline)}</p>`),
-        `${p.route} keeps its flourish line under the room name`,
-      );
-      assert.equal(
-        html.includes('<div class="band" aria-hidden="true">'),
-        p.chartRoom !== true,
-        p.chartRoom
-          ? `${p.route} is a chart room: the chart runs under the cluster with no band (#462 ruling 7)`
-          : `${p.route} reserves the walnut band the cluster stands on (#461 ruling 5)`,
-      );
-    } else {
-      // Match the markup form, not the bare class: the shell css mentions .room-name on every page.
-      assert.ok(
-        !html.includes('<h1 class="room-name">'),
-        `${p.route} is home: the atelier is not a room`,
-      );
-      assert.ok(
-        !html.includes('class="band"'),
-        `${p.route} is home: the full-bleed stage needs no band (nothing scrolls beneath the cluster)`,
-      );
-    }
+    assertRoomOrHomeHead(html, p);
     assert.ok(
       html.includes('<p class="tagline">an atelier of imaginary cartography</p>'),
       `${p.route} carries the atelier tagline in the cluster`,

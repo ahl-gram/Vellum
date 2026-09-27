@@ -56,7 +56,48 @@ function fmt(n: number): string {
   return `${n.toFixed(0)}`.padStart(6);
 }
 
-// eslint-disable-next-line max-lines-per-function
+type BandCost = { readonly label: string; readonly bare: number; readonly detail: number };
+type CacheCost = { readonly cold: number; readonly shared: number; readonly fresh: number };
+
+function wholeDraws(world: World): BandCost[] {
+  console.log("  a whole region draw, as the Glass dispatches it today (fresh chain cache per call)");
+  const out: BandCost[] = [];
+  for (const band of LOD_BANDS.slice(1)) {
+    const window = lodWindowFor(CX, CY, band.sizeUV);
+    const bare = bestOf(REPEATS, () => regionAt(world, window, band, false));
+    const detail = bestOf(REPEATS, () => regionAt(world, window, band, true));
+    const label = `band ${band.index}`;
+    console.log(`    ${label.padEnd(16)} bare ${fmt(bare)}   detail ${fmt(detail)}   x${(detail / bare).toFixed(1)}`);
+    out.push({ label, bare, detail });
+  }
+  return out;
+}
+
+function heldCacheCosts(world: World): CacheCost {
+  const worldAspect = (world.recipe.gridW - 1) / (world.recipe.gridH - 1);
+  const chainSpec = (window: UvWindow, band: LodBand): Parameters<typeof buildChainedField>[0] => ({
+    seed: world.recipe.seed,
+    mapType: world.recipe.mapType,
+    window,
+    gridW: band.gridW,
+    gridH: band.gridH,
+    worldAspect,
+    seaLevel: world.seaLevel,
+  });
+  const home = lodWindowFor(CX, CY, DEEPEST.sizeUV);
+  const { shared, fresh } = neighbours(home);
+  const cache = createChainCache(64);
+  const cold = bestOf(1, () => buildChainedField(chainSpec(home, DEEPEST), cache));
+  const warmShared = bestOf(1, () => buildChainedField(chainSpec(shared, DEEPEST), cache));
+  const warmFresh = bestOf(1, () => buildChainedField(chainSpec(fresh, DEEPEST), cache));
+  console.log("  terrain only, one chain cache held across the calls");
+  console.log(
+    `    ${"first descent".padEnd(16)} ${fmt(cold)}   pan to a neighbour sharing its parent ${fmt(warmShared)}   pan to one that does not ${fmt(warmFresh)}`,
+  );
+  console.log("");
+  return { cold, shared: warmShared, fresh: warmFresh };
+}
+
 function main(): void {
   console.log(`region draw cost, best of ${REPEATS}, ms; centre (${CX}, ${CY})`);
   console.log("");
@@ -65,43 +106,15 @@ function main(): void {
 
   for (const seed of SEEDS) {
     const world = generateWorld(defaultRecipe(seed));
-    const worldAspect = (world.recipe.gridW - 1) / (world.recipe.gridH - 1);
-
     console.log(`seed ${seed}`);
-    console.log("  a whole region draw, as the Glass dispatches it today (fresh chain cache per call)");
-    for (const band of LOD_BANDS.slice(1)) {
-      const window = lodWindowFor(CX, CY, band.sizeUV);
-      const bare = bestOf(REPEATS, () => regionAt(world, window, band, false));
-      const detail = bestOf(REPEATS, () => regionAt(world, window, band, true));
-      const label = `band ${band.index}`;
-      console.log(`    ${label.padEnd(16)} bare ${fmt(bare)}   detail ${fmt(detail)}   x${(detail / bare).toFixed(1)}`);
+    for (const { label, bare, detail } of wholeDraws(world)) {
       const acc = totals.get(label) ?? { bare: 0, detail: 0, n: 0 };
       totals.set(label, { bare: acc.bare + bare, detail: acc.detail + detail, n: acc.n + 1 });
     }
-
-    const chainSpec = (window: UvWindow, band: LodBand): Parameters<typeof buildChainedField>[0] => ({
-      seed: world.recipe.seed,
-      mapType: world.recipe.mapType,
-      window,
-      gridW: band.gridW,
-      gridH: band.gridH,
-      worldAspect,
-      seaLevel: world.seaLevel,
-    });
-    const home = lodWindowFor(CX, CY, DEEPEST.sizeUV);
-    const { shared, fresh } = neighbours(home);
-    const cache = createChainCache(64);
-    const cold = bestOf(1, () => buildChainedField(chainSpec(home, DEEPEST), cache));
-    const warmShared = bestOf(1, () => buildChainedField(chainSpec(shared, DEEPEST), cache));
-    const warmFresh = bestOf(1, () => buildChainedField(chainSpec(fresh, DEEPEST), cache));
-    console.log("  terrain only, one chain cache held across the calls");
-    console.log(
-      `    ${"first descent".padEnd(16)} ${fmt(cold)}   pan to a neighbour sharing its parent ${fmt(warmShared)}   pan to one that does not ${fmt(warmFresh)}`,
-    );
-    console.log("");
-    cacheTotals.cold += cold;
-    cacheTotals.shared += warmShared;
-    cacheTotals.fresh += warmFresh;
+    const c = heldCacheCosts(world);
+    cacheTotals.cold += c.cold;
+    cacheTotals.shared += c.shared;
+    cacheTotals.fresh += c.fresh;
     cacheTotals.n++;
   }
 

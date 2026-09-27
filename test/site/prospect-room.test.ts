@@ -125,8 +125,7 @@ test("PPR7 the css: the sheet fitted to what the chrome leaves, the plate as the
   assert.match(print[1]!, /#pp-plate\s*\{[^}]*position:\s*static;[^}]*height:\s*auto/, "at its own proportion");
 });
 
-// eslint-disable-next-line max-lines-per-function
-test("PR-lay the page's filing press sits ON the engraver's note and not among the roads out, and its authored face is the ONE constant the script paints with (#522, seat C ruled 2026-09-17)", () => {
+function assertLayPressWiring(): void {
   const slip = between('<Slip id="note"', "</Slip>");
   assert.match(slip, /<button id="pp-lay" class="pp-lay" type="button">/, "the press stands inside the note, where the room's desk actions belong");
   assert.ok(slip.indexOf('id="pp-lay"') < slip.indexOf('class="legend-dock"'), "above the docked roads rather than among them");
@@ -155,6 +154,9 @@ test("PR-lay the page's filing press sits ON the engraver's note and not among t
   assert.match(seated, /\(kept, item\) => layOnTable\(kept, item\)\.items/, "the boot table's own builder calls the dedupe gate and throws its answer away, which is the same defect one hop further out");
   assert.match(prologue, /tableOnArrival\(parseTable\(location\.hash\), readStoredTable\(store\), navigationTypeNow\(\)\)/, "the page's boot table no longer asks the ruled precedence (#634, 2026-09-19), so this page and the Explorer can disagree about the same gathering");
   assert.doesNotMatch(app, /"Lay (this|the) prospect on the table"/, "and writes no second copy of the wording");
+}
+
+function assertLayPressDress(): void {
   assert.match(css, /\.pp-lay\.dim\s*\{[^}]*background:\s*var\(--control-cream\)/, "the refusing face dims by losing the featured gold, keeping its ink at full strength");
   assert.doesNotMatch(css, /\.pp-lay\.dim\s*\{[^}]*opacity/, "and never by opacity, which fails the measured contrast floor");
   const dimHold = css.match(/#note \.pp-lay\.dim:hover[^{]*\{[^}]*\}/);
@@ -176,6 +178,11 @@ test("PR-lay the page's filing press sits ON the engraver's note and not among t
   assert.equal(file.length, 1);
   assert.match(file[0], /display:\s*flex/, "the press and its tally stack as a column, which is what the ruled variant showed");
   assert.doesNotMatch(app, /layPress\.disabled/, "and it is never disabled: that drops it out of the tab order");
+}
+
+test("PR-lay the page's filing press sits ON the engraver's note and not among the roads out, and its authored face is the ONE constant the script paints with (#522, seat C ruled 2026-09-17)", () => {
+  assertLayPressWiring();
+  assertLayPressDress();
 });
 
 test("PR-table this page keeps the table's SECOND home too, on both roads the Explorer keeps it on (#634, ruled 2026-09-19)", () => {

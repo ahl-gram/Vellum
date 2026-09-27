@@ -252,8 +252,7 @@ test("THE LATTICE CONTRACT: a filed survey redraws the very window the Glass com
         if (edge) atEdge++;
         for (const nudge of edge ? [0] : [0, 0.7]) {
           const camera = { cx: (i + nudge) * step, cy: (j + nudge) * step, k: band.k };
-          // eslint-disable-next-line max-depth
-          if (nudge !== 0) offGrid++;
+          offGrid += Number(nudge !== 0);
           const decided = decideSettle({ camera, currentWindow: lodWindowFor(0.5, 0.5, 1), currentBand: 0 });
           assert.equal(decided.action, "region", "the sweep must stay inside the region bands");
           const lattice = latticeFromCentre(camera.cx, camera.cy, band.index);

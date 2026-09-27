@@ -7,21 +7,41 @@ import { hamletCandidates } from "../src/society/hamlets.ts";
 import { windowAround } from "../src/world/region.ts";
 import { FULL_WINDOW, LOD_BANDS, lodWindowFor, type LodBand } from "../src/world/lod.ts";
 import type { World } from "../src/world/types.ts";
+import { bandWindows } from "./region-detail-sweep-windows.ts";
 
-/** The two follow-up isolations behind #399's PR and its comment on #443. Committed rather than left in a worktree's out/, because #376's prototype numbers and #443's probes both died with their scratchpads and had to be re-earned. `npm run check` does not cover scripts/; type-check by hand against tsconfig's options if you edit this. */
+/** The two follow-up isolations behind #399's PR and its comment on #443. Committed rather than left in a worktree's out/, because #376's prototype numbers and #443's probes both died with their scratchpads and had to be re-earned. */
 
 const SEEDS = [42, 7, 2, 15, 23];
 const INSET = 0.02; // region.ts's own open-window inset
 const ATLAS_SIZE = 0.38; // `windowAround` in `src/atlas/compose.ts`
 
+type CountWindow = (world: World, label: string, window: UvWindow, gridW: number, gridH: number) => void;
+
+function sweepWindows(count: CountWindow): void {
+  for (const seed of SEEDS) {
+    const world = generateWorld(defaultRecipe(seed));
+    for (const idx of [1, 2, 3]) {
+      const band = LOD_BANDS[idx] as LodBand;
+      for (const window of bandWindows(band)) count(world, `band ${idx}`, window, band.gridW, band.gridH);
+    }
+    const capital = world.settlements.find((s) => s.kind === "capital") ?? world.settlements[0];
+    if (capital === undefined) continue;
+    const far = world.settlements.reduce((a, b) =>
+      Math.hypot(b.x - capital.x, b.y - capital.y) > Math.hypot(a.x - capital.x, a.y - capital.y) ? b : a,
+    );
+    for (const anchor of [capital, far]) {
+      count(world, `atlas ${ATLAS_SIZE}`, windowAround(world, anchor, ATLAS_SIZE), world.recipe.gridW, world.recipe.gridH);
+    }
+  }
+}
+
 /** Does the band-scaled snap radius rescue anything the old radius-1 scan dropped? Bare field only: that is what ships today, so a nonzero answer is a change to sheets Alex can already see. */
-// eslint-disable-next-line max-lines-per-function
 function counterfactual(): void {
   type Row = { onWater: number; rescued: number; lostAnyway: number; radius: number };
   const tally = new Map<string, Row>();
   const rescued: string[] = [];
 
-  const count = (world: World, label: string, window: UvWindow, gridW: number, gridH: number): void => {
+  const count: CountWindow = (world, label, window, gridW, gridH) => {
     const worldAspect = (world.recipe.gridW - 1) / (world.recipe.gridH - 1);
     const elev = buildHeightfield({
       seed: world.recipe.seed, gridW, gridH, mapType: world.recipe.mapType, window, worldAspect,
@@ -59,27 +79,7 @@ function counterfactual(): void {
     tally.set(label, row);
   };
 
-  for (const seed of SEEDS) {
-    const world = generateWorld(defaultRecipe(seed));
-    for (const idx of [1, 2, 3]) {
-      const band = LOD_BANDS[idx] as LodBand;
-      const n = Math.round(1 / band.sizeUV);
-      for (let iy = 0; iy < n; iy++) {
-        for (let ix = 0; ix < n; ix++) {
-          const window = lodWindowFor((ix + 0.5) * band.sizeUV, (iy + 0.5) * band.sizeUV, band.sizeUV);
-          count(world, `band ${idx}`, window, band.gridW, band.gridH);
-        }
-      }
-    }
-    const capital = world.settlements.find((s) => s.kind === "capital") ?? world.settlements[0];
-    if (capital === undefined) continue;
-    const far = world.settlements.reduce((a, b) =>
-      Math.hypot(b.x - capital.x, b.y - capital.y) > Math.hypot(a.x - capital.x, a.y - capital.y) ? b : a,
-    );
-    for (const anchor of [capital, far]) {
-      count(world, `atlas ${ATLAS_SIZE}`, windowAround(world, anchor, ATLAS_SIZE), world.recipe.gridW, world.recipe.gridH);
-    }
-  }
+  sweepWindows(count);
 
   for (const line of rescued) console.log(`rescued: ${line}`);
   for (const [k, v] of [...tally].sort()) {

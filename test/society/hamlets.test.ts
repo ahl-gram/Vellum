@@ -253,17 +253,7 @@ test("label pressure drops hamlet labels first and never force-places them (#171
   }
 });
 
-// eslint-disable-next-line max-lines-per-function
-test("region sheets set settlement labels larger; world sheets keep their type (readability)", () => {
-  const win = richWindow();
-  const region = generateRegionWorld(world, {
-    window: win, gridW: 320, gridH: 240, title: "Legible Environs",
-  });
-  const regionSvg = renderMap(region, { style: "antique" });
-  const worldSvg = renderMap(world, { style: "antique" });
-
-  const layerStart = regionSvg.indexOf('<g id="layer-settlements">');
-  assert.ok(layerStart >= 0);
+function labeledSizes(regionSvg: string, layerStart: number): Array<{ tier: keyof typeof FONT_SIZE; fs: number }> {
   const nextLayer = regionSvg.indexOf('<g id="layer-', layerStart + 10);
   const layer = regionSvg.slice(layerStart, nextLayer > 0 ? nextLayer : undefined);
   const marks = [...layer.matchAll(/<g class="settlement" data-idx="\d+" data-tier="([a-z]+)"[^>]*>/g)];
@@ -276,6 +266,20 @@ test("region sheets set settlement labels larger; world sheets keep their type (
     const fs = body.match(/<text[^>]*font-size="([\d.]+)"/);
     if (fs) labeled.push({ tier: m[1] as keyof typeof FONT_SIZE, fs: Number(fs[1]) });
   });
+  return labeled;
+}
+
+test("region sheets set settlement labels larger; world sheets keep their type (readability)", () => {
+  const win = richWindow();
+  const region = generateRegionWorld(world, {
+    window: win, gridW: 320, gridH: 240, title: "Legible Environs",
+  });
+  const regionSvg = renderMap(region, { style: "antique" });
+  const worldSvg = renderMap(world, { style: "antique" });
+
+  const layerStart = regionSvg.indexOf('<g id="layer-settlements">');
+  assert.ok(layerStart >= 0);
+  const labeled = labeledSizes(regionSvg, layerStart);
   assert.ok(
     labeled.some((l) => l.tier === "hamlet"),
     "the survey labels at least one hamlet",
