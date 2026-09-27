@@ -244,6 +244,12 @@ test("an import or an export inside the family that renames a name reads as a di
   const two = ["export default async function x2Two({ check, sleep }) {", "  await sleep(2);", "  check(\"X2 two\", true);", "}"].join("\n");
   assert.equal(compareFamilies(files(before), files(run("import x1One from \"./map/part2.ts\";\nimport x2Two from \"./map/part1.ts\";"), one, two)).same, false);
   assert.equal(compareFamilies(files(before), files(run("import { x1One, x2Two } from \"./map/part1.ts\";"), "import x1One from \"./part2.ts\";\nimport x2Two from \"./part3.ts\";\nexport { x1One, x2Two };", two, one)).same, false);
+  const defaultImportOnly = compareFamilies(files(before), files(run("import x1One from \"./map/part1.ts\";\nimport { x2Two } from \"./map/part1.ts\";"), part)).lines;
+  assert.ok(defaultImportOnly.includes("scripts/e2e/suite-map.ts imports a default as x1One inside the family"), defaultImportOnly.join("\n"));
+  assert.ok(!defaultImportOnly.some((l) => l.includes("exports a default")), "the default-import fixture carries no default export, so only the import can be reported");
+  const defaultExportOnly = compareFamilies(files(before), files(run("import { x1One, x2Two } from \"./map/part1.ts\";"), `${one.replace("export default ", "export ")}\n${two}`)).lines;
+  assert.ok(defaultExportOnly.includes("scripts/e2e/map/part1.ts exports a default inside the family"), defaultExportOnly.join("\n"));
+  assert.ok(!defaultExportOnly.some((l) => l.includes("imports a default")), "the default-export fixture carries no default import, so only the export can be reported");
 });
 
 test("a function only the split declares is read through at every call, so one that stands in for a context member reads as a difference", () => {
