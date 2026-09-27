@@ -88,26 +88,18 @@ function chevron(
   });
 }
 
-export function currentsLayer(
-  ctx: RenderCtx,
-  cartouche: CartouchePlan,
-  compass: CompassPlan | null,
-): SvgNode | null {
-  const { style, world, proj, rng } = ctx;
-  if (!style.currents) return null;
+type CurrentSpot = { x: number; y: number; gx: number; gy: number };
+
+function currentSpots(ctx: RenderCtx, avoid: ReadonlyArray<Box>): CurrentSpot[] {
+  const { world, proj } = ctx;
   const k = proj.widthPx / 1500;
   const { w, h } = world.elev;
-  const crng = rng.fork("currents");
-  const seed = world.recipe.seed + 7919;
-
-  const avoid: Box[] = [cartouche.rect];
-  if (compass) avoid.push(compass.box);
   const clear = (px: number, py: number): boolean =>
     avoid.every(
       (b) => !boxesOverlap(b, { x: px - 30, y: py - 30, w: 60, h: 60 }, 8),
     );
 
-  const spots: Array<{ x: number; y: number; gx: number; gy: number }> = [];
+  const spots: CurrentSpot[] = [];
   for (let gy = 5; gy < h - 5; gy += 4) {
     for (let gx = 5; gx < w - 5; gx += 4) {
       if ((world.oceanDist[gx + gy * w] as number) < START_OCEAN_DIST) continue;
@@ -122,44 +114,65 @@ export function currentsLayer(
       spots.push({ x: px, y: py, gx, gy });
     }
   }
+  return spots;
+}
+
+function currentStrokes(ctx: RenderCtx, seed: number, s: CurrentSpot): SvgNode[] {
+  const { style, world, proj } = ctx;
+  const k = proj.widthPx / 1500;
+  const grid = traceStreamline(world, s.gx, s.gy, seed);
+  if (grid.length < 9) return []; // drop stubs that hit land at once
+  const px: Array<[number, number]> = grid.map(([x, y]) => [
+    proj.px(x),
+    proj.py(y),
+  ]);
+  const line = chaikinSmooth(px, false, 2);
+
+  let d = `M${line[0]![0].toFixed(1)} ${line[0]![1].toFixed(1)}`;
+  for (let i = 1; i < line.length; i++) {
+    d += `L${line[i]![0].toFixed(1)} ${line[i]![1].toFixed(1)}`;
+  }
+  const strokes: SvgNode[] = [
+    el("path", {
+      d,
+      fill: "none",
+      stroke: style.inkSoft,
+      "stroke-width": (1.15 * k).toFixed(2),
+      "stroke-opacity": 0.52,
+      "stroke-linecap": "round",
+      "stroke-linejoin": "round",
+    }),
+  ];
+
+  const chevrons = 3;
+  for (let c = 1; c <= chevrons; c++) {
+    const i = Math.round(((line.length - 1) * c) / (chevrons + 1));
+    if (i <= 0 || i >= line.length - 1) continue;
+    const a = line[i - 1]!;
+    const b = line[i + 1]!;
+    const angle = Math.atan2(b[1] - a[1], b[0] - a[0]);
+    strokes.push(chevron(line[i]!, angle, k, style));
+  }
+  return strokes;
+}
+
+export function currentsLayer(
+  ctx: RenderCtx,
+  cartouche: CartouchePlan,
+  compass: CompassPlan | null,
+): SvgNode | null {
+  const { style, world, proj, rng } = ctx;
+  if (!style.currents) return null;
+  const k = proj.widthPx / 1500;
+  const crng = rng.fork("currents");
+  const seed = world.recipe.seed + 7919;
+
+  const avoid: Box[] = [cartouche.rect];
+  if (compass) avoid.push(compass.box);
+  const spots = currentSpots(ctx, avoid);
 
   const picked = prunePoints(crng.shuffled(spots), 170 * k, 9);
-  const strokes: SvgNode[] = [];
-  for (const s of picked) {
-    const grid = traceStreamline(world, s.gx, s.gy, seed);
-    if (grid.length < 9) continue; // drop stubs that hit land at once
-    const px: Array<[number, number]> = grid.map(([x, y]) => [
-      proj.px(x),
-      proj.py(y),
-    ]);
-    const line = chaikinSmooth(px, false, 2);
-
-    let d = `M${line[0]![0].toFixed(1)} ${line[0]![1].toFixed(1)}`;
-    for (let i = 1; i < line.length; i++) {
-      d += `L${line[i]![0].toFixed(1)} ${line[i]![1].toFixed(1)}`;
-    }
-    strokes.push(
-      el("path", {
-        d,
-        fill: "none",
-        stroke: style.inkSoft,
-        "stroke-width": (1.15 * k).toFixed(2),
-        "stroke-opacity": 0.52,
-        "stroke-linecap": "round",
-        "stroke-linejoin": "round",
-      }),
-    );
-
-    const chevrons = 3;
-    for (let c = 1; c <= chevrons; c++) {
-      const i = Math.round(((line.length - 1) * c) / (chevrons + 1));
-      if (i <= 0 || i >= line.length - 1) continue;
-      const a = line[i - 1]!;
-      const b = line[i + 1]!;
-      const angle = Math.atan2(b[1] - a[1], b[0] - a[0]);
-      strokes.push(chevron(line[i]!, angle, k, style));
-    }
-  }
+  const strokes = picked.flatMap((s) => currentStrokes(ctx, seed, s));
 
   if (strokes.length === 0) return null;
   return el("g", { id: "layer-currents" }, strokes);

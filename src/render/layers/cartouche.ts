@@ -1,6 +1,7 @@
 import { el, type SvgNode } from "../svg.ts";
 import type { Box } from "../geometry.ts";
 import type { RenderCtx } from "../context.ts";
+import type { MapStyle } from "../style.ts";
 
 export type CartouchePlan = {
   readonly rect: Box;
@@ -24,6 +25,26 @@ function wrapText(text: string, maxChars: number): string[] {
   return lines;
 }
 
+function cornerLandFraction(ctx: RenderCtx, c: { readonly x: number; readonly y: number }, width: number, height: number): number {
+  const { proj, world } = ctx;
+  const m = proj.margin;
+  const { w, data } = world.elev;
+  let land = 0;
+  let n = 0;
+  for (let sy = 0; sy < 8; sy++) {
+    for (let sx = 0; sx < 16; sx++) {
+      const gx = Math.round((c.x + (sx / 15) * width - m) / proj.scale);
+      const gy = Math.round((c.y + (sy / 7) * height - m) / proj.scale);
+      const i = gx + gy * w;
+      if (i >= 0 && i < data.length) {
+        n++;
+        if ((data[i] as number) > world.seaLevel) land++;
+      }
+    }
+  }
+  return n ? land / n : 1;
+}
+
 export function planCartouche(ctx: RenderCtx): CartouchePlan {
   const { proj, world } = ctx;
   const k = proj.widthPx / 1500;
@@ -41,24 +62,10 @@ export function planCartouche(ctx: RenderCtx): CartouchePlan {
     { corner: "bl" as const, x: m + inset, y: proj.heightPx - m - inset - height },
   ];
 
-  const { w, data } = world.elev;
   let best = corners[0]!;
   let bestLand = Infinity;
   for (const c of corners) {
-    let land = 0;
-    let n = 0;
-    for (let sy = 0; sy < 8; sy++) {
-      for (let sx = 0; sx < 16; sx++) {
-        const gx = Math.round((c.x + (sx / 15) * width - m) / proj.scale);
-        const gy = Math.round((c.y + (sy / 7) * height - m) / proj.scale);
-        const i = gx + gy * w;
-        if (i >= 0 && i < data.length) {
-          n++;
-          if ((data[i] as number) > world.seaLevel) land++;
-        }
-      }
-    }
-    const frac = n ? land / n : 1;
+    const frac = cornerLandFraction(ctx, c, width, height);
     if (frac < bestLand - 0.02) {
       bestLand = frac;
       best = c;
@@ -72,14 +79,9 @@ export function planCartouche(ctx: RenderCtx): CartouchePlan {
   };
 }
 
-export function cartoucheLayer(ctx: RenderCtx, plan: CartouchePlan): SvgNode {
-  const { style, world, proj } = ctx;
-  const k = proj.widthPx / 1500;
-  const { x, y, w, h } = plan.rect;
-  const cx = x + w / 2;
-
-  const titleFs = Math.min(27 * k, (w - 56 * k) / (world.title.title.length * 0.58));
-  const children: SvgNode[] = [
+function cartoucheFrame(style: MapStyle, rect: Box, k: number): SvgNode[] {
+  const { x, y, w, h } = rect;
+  return [
     el("rect", {
       x, y, width: w, height: h, rx: 3 * k,
       fill: style.paper, stroke: style.ink, "stroke-width": 2.2 * k,
@@ -99,6 +101,31 @@ export function cartoucheLayer(ctx: RenderCtx, plan: CartouchePlan): SvgNode {
         fill: "none", stroke: style.ink, "stroke-width": 1.8 * k,
       });
     }),
+  ];
+}
+
+function cartoucheRule(style: MapStyle, rect: Box, k: number): SvgNode[] {
+  const { x, y, w } = rect;
+  const cx = x + w / 2;
+  return [
+    el("line", {
+      x1: cx - w * 0.3, y1: y + 46 * k, x2: cx + w * 0.3, y2: y + 46 * k,
+      stroke: style.ink, "stroke-width": 0.9 * k,
+    }),
+    el("path", {
+      d: `M${cx} ${y + 42.4 * k}L${cx + 3.6 * k} ${y + 46 * k}L${cx} ${y + 49.6 * k}L${cx - 3.6 * k} ${y + 46 * k}Z`,
+      fill: style.ink,
+    }),
+  ];
+}
+
+function cartoucheText(ctx: RenderCtx, plan: CartouchePlan, k: number): SvgNode[] {
+  const { style, world } = ctx;
+  const { x, y, w, h } = plan.rect;
+  const cx = x + w / 2;
+
+  const titleFs = Math.min(27 * k, (w - 56 * k) / (world.title.title.length * 0.58));
+  return [
     el(
       "text",
       {
@@ -110,14 +137,7 @@ export function cartoucheLayer(ctx: RenderCtx, plan: CartouchePlan): SvgNode {
       },
       [world.title.title],
     ),
-    el("line", {
-      x1: cx - w * 0.3, y1: y + 46 * k, x2: cx + w * 0.3, y2: y + 46 * k,
-      stroke: style.ink, "stroke-width": 0.9 * k,
-    }),
-    el("path", {
-      d: `M${cx} ${y + 42.4 * k}L${cx + 3.6 * k} ${y + 46 * k}L${cx} ${y + 49.6 * k}L${cx - 3.6 * k} ${y + 46 * k}Z`,
-      fill: style.ink,
-    }),
+    ...cartoucheRule(style, plan.rect, k),
     ...plan.lines.map((line, i) =>
       el(
         "text",
@@ -143,6 +163,12 @@ export function cartoucheLayer(ctx: RenderCtx, plan: CartouchePlan): SvgNode {
       [`CHART № ${world.recipe.seed}`],
     ),
   ];
+}
 
-  return el("g", { id: "layer-cartouche" }, children);
+export function cartoucheLayer(ctx: RenderCtx, plan: CartouchePlan): SvgNode {
+  const k = ctx.proj.widthPx / 1500;
+  return el("g", { id: "layer-cartouche" }, [
+    ...cartoucheFrame(ctx.style, plan.rect, k),
+    ...cartoucheText(ctx, plan, k),
+  ]);
 }

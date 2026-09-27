@@ -1,7 +1,7 @@
 import { el, type SvgNode } from "../svg.ts";
 import { textBox, WIDTH_FACTOR } from "../geometry.ts";
 import type { RenderCtx } from "../context.ts";
-import type { NamedSettlement } from "../../world/types.ts";
+import type { NamedSettlement, World } from "../../world/types.ts";
 
 export type SettlementTier = NamedSettlement["kind"] | "seat";
 
@@ -210,16 +210,12 @@ function labelNode(
   );
 }
 
-export function settlementsLayer(ctx: RenderCtx): SvgNode {
-  const { world, proj, style, labels } = ctx;
-  const k = proj.widthPx / 1500;
-  const nodes: SvgNode[] = [];
+type OrderedSettlement = { readonly s: NamedSettlement; readonly i: number; readonly tier: SettlementTier };
 
+function settlementOrder(world: World): { ordered: OrderedSettlement[]; seatRealm: Map<number, number> } {
   const seats = world.realms.seats;
   const seatRealm = new Map<number, number>();
   seats.forEach((idx, realmId) => seatRealm.set(idx, realmId));
-  const showHalo =
-    style.politicalTints && seats.length > 1 && world.region === undefined;
 
   const RANK: Record<SettlementTier, number> = { capital: 0, seat: 1, town: 2, village: 3, hamlet: 4 };
   const tierOf = (s: NamedSettlement, i: number): SettlementTier =>
@@ -228,60 +224,87 @@ export function settlementsLayer(ctx: RenderCtx): SvgNode {
   const ordered = world.settlements
     .map((s, i) => ({ s, i, tier: tierOf(s, i) }))
     .sort((a, b) => RANK[a.tier] - RANK[b.tier]);
+  return { ordered, seatRealm };
+}
 
-  for (const { s, i, tier } of ordered) {
-    const px = proj.px(s.x);
-    const py = proj.py(s.y);
-
-    const group: SvgNode[] = [];
-
-    if (showHalo && (tier === "capital" || tier === "seat") && !s.ruined) {
-      const realmId = seatRealm.get(i) as number;
-      const color = style.realmTints[ctx.realmTint[realmId] as number] as string;
-      group.push(seatHalo(px, py, tier, color, ctx));
-    }
-    group.push(s.ruined ? ruinGlyph(px, py, ctx) : settlementGlyph(tier, px, py, ctx));
-
-    const sized = world.region !== undefined ? REGION_FONT_SIZE : FONT_SIZE;
-    const fs = sized[tier] * k;
-    const gap =
-      (tier === "capital" ? 11 : tier === "seat" ? 8 : tier === "hamlet" ? 5 : 7) *
-      (sized[tier] / FONT_SIZE[tier]) * k;
-    const upper = tier === "capital" || tier === "seat";
-    const text = s.name;
-    const display = upper ? text.toUpperCase() : text;
-    const wf = upper ? WIDTH_FACTOR.caps : WIDTH_FACTOR.mixed;
-    const ls = tier === "capital" ? 0.8 : tier === "seat" ? 0.5 : 0;
-    const tries = labelCandidates(px, py, fs, gap);
-    let placed = false;
-    for (const t of tries) {
-      const box = textBox(t.x, t.y, text, fs, t.anchor, wf, ls);
-      if (box.x < proj.margin + 4 || box.x + box.w > proj.widthPx - proj.margin - 4) continue;
-      if (box.y < proj.margin + 4 || box.y + box.h > proj.heightPx - proj.margin - 4) continue;
-      if (!labels.tryClaim(box)) continue;
-      group.push(labelNode(display, tier, t.x, t.y, t.anchor, fs, !!s.ruined, ctx));
-      placed = true;
-      break;
-    }
-    if (!placed && tier !== "village" && tier !== "hamlet") {
-      const t = tries[0]!;
-      group.push(labelNode(display, tier, t.x, t.y, t.anchor, fs, !!s.ruined, ctx));
-    }
-
-    nodes.push(
-      el(
-        "g",
-        {
-          class: "settlement",
-          "data-idx": String(i),
-          ...(world.region !== undefined
-            ? { "data-tier": tier, "data-name": s.name }
-            : {}),
-        },
-        group,
-      ),
-    );
+function placeSettlementLabel(
+  ctx: RenderCtx,
+  s: NamedSettlement,
+  tier: SettlementTier,
+  px: number,
+  py: number,
+): SvgNode | null {
+  const { world, proj, labels } = ctx;
+  const k = proj.widthPx / 1500;
+  const sized = world.region !== undefined ? REGION_FONT_SIZE : FONT_SIZE;
+  const fs = sized[tier] * k;
+  const gap =
+    (tier === "capital" ? 11 : tier === "seat" ? 8 : tier === "hamlet" ? 5 : 7) *
+    (sized[tier] / FONT_SIZE[tier]) * k;
+  const upper = tier === "capital" || tier === "seat";
+  const text = s.name;
+  const display = upper ? text.toUpperCase() : text;
+  const wf = upper ? WIDTH_FACTOR.caps : WIDTH_FACTOR.mixed;
+  const ls = tier === "capital" ? 0.8 : tier === "seat" ? 0.5 : 0;
+  const tries = labelCandidates(px, py, fs, gap);
+  for (const t of tries) {
+    const box = textBox(t.x, t.y, text, fs, t.anchor, wf, ls);
+    if (box.x < proj.margin + 4 || box.x + box.w > proj.widthPx - proj.margin - 4) continue;
+    if (box.y < proj.margin + 4 || box.y + box.h > proj.heightPx - proj.margin - 4) continue;
+    if (!labels.tryClaim(box)) continue;
+    return labelNode(display, tier, t.x, t.y, t.anchor, fs, !!s.ruined, ctx);
   }
+  if (tier !== "village" && tier !== "hamlet") {
+    const t = tries[0]!;
+    return labelNode(display, tier, t.x, t.y, t.anchor, fs, !!s.ruined, ctx);
+  }
+  return null;
+}
 
-  return el("g", { id: "layer-settlements" }, nodes);
+function settlementGroup(
+  ctx: RenderCtx,
+  entry: OrderedSettlement,
+  seatRealm: ReadonlyMap<number, number>,
+  showHalo: boolean,
+): SvgNode {
+  const { world, proj, style } = ctx;
+  const { s, i, tier } = entry;
+  const px = proj.px(s.x);
+  const py = proj.py(s.y);
+
+  const group: SvgNode[] = [];
+
+  if (showHalo && (tier === "capital" || tier === "seat") && !s.ruined) {
+    const realmId = seatRealm.get(i) as number;
+    const color = style.realmTints[ctx.realmTint[realmId] as number] as string;
+    group.push(seatHalo(px, py, tier, color, ctx));
+  }
+  group.push(s.ruined ? ruinGlyph(px, py, ctx) : settlementGlyph(tier, px, py, ctx));
+  const label = placeSettlementLabel(ctx, s, tier, px, py);
+  if (label) group.push(label);
+
+  return el(
+    "g",
+    {
+      class: "settlement",
+      "data-idx": String(i),
+      ...(world.region !== undefined
+        ? { "data-tier": tier, "data-name": s.name }
+        : {}),
+    },
+    group,
+  );
+}
+
+export function settlementsLayer(ctx: RenderCtx): SvgNode {
+  const { world, style } = ctx;
+  const { ordered, seatRealm } = settlementOrder(world);
+  const showHalo =
+    style.politicalTints && world.realms.seats.length > 1 && world.region === undefined;
+
+  return el(
+    "g",
+    { id: "layer-settlements" },
+    ordered.map((entry) => settlementGroup(ctx, entry, seatRealm, showHalo)),
+  );
 }
