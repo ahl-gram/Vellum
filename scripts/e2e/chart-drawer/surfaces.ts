@@ -3,7 +3,7 @@ import type { DrawerKit } from "./kit.ts";
 import { DRESS, SURFACES, both, drawerUp, slipTravelled } from "./reads.ts";
 import type { Edge } from "./reads.ts";
 
-// Its own one-shot payload rather than three more fields on SURFACES: that one is polled by four settles here and read again by the CD13 and CD18 steps, and riding it measured 1.73s on this suite against a 0.7s run-to-run spread (2026-09-19, three runs each side).
+// Its own one-shot payload rather than three more fields on SURFACES: that one is polled by six settles in the CD9 step and read again by the CD13 and CD18 steps, and riding it measured 1.73s on this suite against a 0.7s run-to-run spread (2026-09-19, three runs each side).
 const SEATS: Payload<{ tableLeafDisplay: string | null; tableLeafH: number | null; legendDockDisplay: string | null }> = `(() => {
     const leaf = document.getElementById("table-leaf");
     const dock = document.querySelector(".slip .legend-dock");
