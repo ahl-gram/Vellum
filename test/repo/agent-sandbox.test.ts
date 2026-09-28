@@ -25,7 +25,7 @@ test("validateName accepts the two sandbox prefixes and refuses everything else"
   for (const good of ["guard-575", "guard-575-r2", "skeptic-576-r1", "guard-a.b_c-1"]) {
     assert.equal(validateName(good), good, `${good} is a legitimate sandbox name`);
   }
-  for (const bad of ["", "575", "other-session", "agent-a3a1b384d6375057d", "guard", "guard-", "../escape", "guard-../..", "/abs/path", "guard x", "Guard-1"]) {
+  for (const bad of ["", "575", "other-session", "agent-a3a1b384d6375057d", "probe-1", "guard", "guard-", "../escape", "guard-../..", "/abs/path", "guard x", "Guard-1"]) {
     assert.throws(() => validateName(bad), `${bad} was accepted, so the script can address a worktree it did not create`);
   }
 });
