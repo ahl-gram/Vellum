@@ -3,6 +3,7 @@ import {
   buildVoyageLog,
   type VoyageHomecoming,
   type VoyageLog,
+  type VoyageLogEntry,
   type VoyageLogPort,
 } from "../../world/voyage-log.ts";
 
@@ -16,7 +17,27 @@ export function journalText(text: string): string {
   return text.replace(/^Year \d+\. /, "");
 }
 
-// eslint-disable-next-line max-lines-per-function
+function journalRow(e: VoyageLogEntry, i: number): HTMLLIElement {
+  const li = document.createElement("li");
+  li.className = "prologue";
+  const year = document.createElement("span");
+  year.className = "cr-year";
+  year.textContent = `day ${e.day}`;
+  const text = document.createElement("span");
+  text.className = "cr-text";
+  const body = journalText(e.text);
+  if (i === 0 && body.length > 0) {
+    const dc = document.createElement("span");
+    dc.className = "cr-dc";
+    dc.textContent = body[0]!;
+    text.append(dc, document.createTextNode(body.slice(1)));
+  } else {
+    text.textContent = body;
+  }
+  li.append(year, text);
+  return li;
+}
+
 export function createVoyageLogPanel(logEls: VoyageLogHost) {
   function buildLogPanel(
     logPorts: ReadonlyArray<VoyageLogPort>,
@@ -27,26 +48,7 @@ export function createVoyageLogPanel(logEls: VoyageLogHost) {
   ): { log: VoyageLog; rows: HTMLLIElement[] } {
     const log = buildVoyageLog(logPorts, presentYear, (seed >>> 0), subtitle || "", homecoming);
     logEls.sig.textContent = log.attribution;
-    const rows = log.entries.map((e, i) => {
-      const li = document.createElement("li");
-      li.className = "prologue";
-      const year = document.createElement("span");
-      year.className = "cr-year";
-      year.textContent = `day ${e.day}`;
-      const text = document.createElement("span");
-      text.className = "cr-text";
-      const body = journalText(e.text);
-      if (i === 0 && body.length > 0) {
-        const dc = document.createElement("span");
-        dc.className = "cr-dc";
-        dc.textContent = body[0]!;
-        text.append(dc, document.createTextNode(body.slice(1)));
-      } else {
-        text.textContent = body;
-      }
-      li.append(year, text);
-      return li;
-    });
+    const rows = log.entries.map((e, i) => journalRow(e, i));
     logEls.strip.replaceChildren(...rows);
     logEls.panel.hidden = false;
     return { log, rows };

@@ -1,10 +1,10 @@
 // The Living Chart engine: everything the site animates over a baked chart (story cards, the chronicle scrubber, the voyage), behind one host-agnostic boundary. The host hands its elements in and construction only stores the refs; the baked chart string is never mutated for export.
-import { createPlaceOverlay, type BuildPlaceOverlayOpts, type LayProspectHost } from "./place-overlay.ts";
-import { createChronicle } from "./chronicle.ts";
-import { createVoyage, type RestingTrackSink } from "./voyage.ts";
+import { createPlaceOverlay, type BuildPlaceOverlayOpts, type LayProspectHost, type PlaceOverlay } from "./place-overlay.ts";
+import { createChronicle, type Chronicle } from "./chronicle.ts";
+import { createVoyage, type RestingTrackSink, type Voyage } from "./voyage.ts";
 import type { TourOrderSource } from "./voyage-session.ts";
 import { createVoyageLogPanel } from "./voyage-log-panel.ts";
-import { createAges } from "./ages.ts";
+import { createAges, type Ages } from "./ages.ts";
 import { barlessAges, barlessLogPanel } from "./no-bar.ts";
 import type { AgesPos } from "../../render/ages-track.ts";
 import type { PlaceManifest } from "../../render/place-manifest.ts";
@@ -40,7 +40,93 @@ export interface LivingChartHost {
   tourOrder?: TourOrderSource;
 }
 
-// eslint-disable-next-line max-lines-per-function
+function agesFor(bar: ScrubberRefs | undefined, overlay: PlaceOverlay, chronicle: Chronicle, voyage: Voyage): Ages {
+  return bar
+    ? createAges({
+        panel: bar.panel,
+        playBtn: bar.playBtn,
+        range: bar.range,
+        readout: bar.year,
+        strip: bar.strip,
+        onPark: bar.onPark,
+        onAgesTold: bar.onAgesTold,
+        overlay: { data: () => overlay.data() },
+        chronicle,
+        voyage,
+      })
+    : barlessAges({ chronicle, voyage });
+}
+
+function overlayApi(overlay: PlaceOverlay) {
+  return {
+    // #53: the doc-level dismiss pair is wired by the host (document listeners are page-global, a host decision).
+    buildPlaceOverlay: (manifest: PlaceManifest, opts?: BuildPlaceOverlayOpts) =>
+      overlay.buildPlaceOverlay(manifest, opts),
+    onDocKeydown: overlay.onDocKeydown,
+    onDocClick: overlay.onDocClick,
+    reclampCard: overlay.reclampCard,
+    relabelLay: overlay.relabelLay,
+    /** The host's way to dismiss a pinned card when it is about to replace the chart under it. */
+    hideCard: overlay.hideCard,
+  };
+}
+
+function agesApi(ages: Ages) {
+  return {
+    applyAges: (manifest: PlaceManifest | null, survey: Survey | null, seed: number, subtitle: string) =>
+      ages.armAges(manifest, survey, seed, subtitle),
+    rearmAges: (
+      manifest: PlaceManifest | null,
+      survey: Survey | null,
+      seed: number,
+      subtitle: string,
+      opts?: { quiet?: boolean; rest?: AgesPos },
+    ) => ages.armAges(manifest, survey, seed, subtitle, opts),
+    exitAges: ages.exitAges,
+    clearAges: ages.clearAges,
+    agesSnapToRest: ages.snapToRest,
+    agesState: ages.agesState,
+    agesDragStart: ages.dragStart,
+    agesDragEnd: ages.dragEnd,
+  };
+}
+
+function scrubApi(ages: Ages, chronicle: Chronicle) {
+  return {
+    applyScrub: chronicle.applyScrub,
+    exitScrub: chronicle.exitScrub,
+    clearScrub: chronicle.clearScrub,
+    cancelScrubRaf: ages.cancelRaf,
+    pauseScrub: ages.pause,
+    togglePlay: ages.togglePlay,
+    setPace: ages.setPace,
+    onManualScrub: ages.onBarInput,
+    scrubTo: (year: number) => (ages.isActive() ? ages.scrubToYear(year) : chronicle.scrubTo(year)),
+    scrubSnapToPresent: chronicle.scrubSnapToPresent,
+    scrubState: () => {
+      const s = chronicle.scrubState();
+      return s ? { ...s, playing: ages.isPlaying() } : null;
+    },
+  };
+}
+
+function voyageApi(voyage: Voyage) {
+  return {
+    applyVoyage: voyage.applyVoyage,
+    rearmVoyage: voyage.rearmVoyage,
+    exitVoyage: voyage.exitVoyage,
+    clearVoyage: voyage.clearVoyage,
+    cancelVoyageRaf: voyage.cancelVoyageRaf,
+    voyageSnapToRest: voyage.voyageSnapToRest,
+    voyageStepTo: voyage.voyageStepTo,
+    voyagePaintAt: voyage.voyagePaintAt,
+    voyagePlan: voyage.voyagePlan,
+    voyageLog: voyage.voyageLog,
+    voyageDays: voyage.voyageDays,
+    voyageLegGeometry: voyage.voyageLegGeometry,
+  };
+}
+
 export function createLivingChart(host: LivingChartHost) {
   // The one #53<->#54 coupling pair crosses here as late-bound closures, so neither module imports the other.
   const overlay = createPlaceOverlay({
@@ -66,20 +152,7 @@ export function createLivingChart(host: LivingChartHost) {
     restingTrackSink: host.restingTrackSink,
     ...(host.tourOrder ? { tourOrder: host.tourOrder } : {}),
   });
-  const ages = bar
-    ? createAges({
-        panel: bar.panel,
-        playBtn: bar.playBtn,
-        range: bar.range,
-        readout: bar.year,
-        strip: bar.strip,
-        onPark: bar.onPark,
-        onAgesTold: bar.onAgesTold,
-        overlay: { data: () => overlay.data() },
-        chronicle,
-        voyage,
-      })
-    : barlessAges({ chronicle, voyage });
+  const ages = agesFor(bar, overlay, chronicle, voyage);
 
   function destroy(): void {
     ages.exitAges();
@@ -87,56 +160,10 @@ export function createLivingChart(host: LivingChartHost) {
   }
 
   return {
-    // #53: the doc-level dismiss pair is wired by the host (document listeners are page-global, a host decision).
-    buildPlaceOverlay: (manifest: PlaceManifest, opts?: BuildPlaceOverlayOpts) =>
-      overlay.buildPlaceOverlay(manifest, opts),
-    onDocKeydown: overlay.onDocKeydown,
-    onDocClick: overlay.onDocClick,
-    reclampCard: overlay.reclampCard,
-    relabelLay: overlay.relabelLay,
-    /** The host's way to dismiss a pinned card when it is about to replace the chart under it. */
-    hideCard: overlay.hideCard,
-    applyAges: (manifest: PlaceManifest | null, survey: Survey | null, seed: number, subtitle: string) =>
-      ages.armAges(manifest, survey, seed, subtitle),
-    rearmAges: (
-      manifest: PlaceManifest | null,
-      survey: Survey | null,
-      seed: number,
-      subtitle: string,
-      opts?: { quiet?: boolean; rest?: AgesPos },
-    ) => ages.armAges(manifest, survey, seed, subtitle, opts),
-    exitAges: ages.exitAges,
-    clearAges: ages.clearAges,
-    agesSnapToRest: ages.snapToRest,
-    agesState: ages.agesState,
-    agesDragStart: ages.dragStart,
-    agesDragEnd: ages.dragEnd,
-    applyScrub: chronicle.applyScrub,
-    exitScrub: chronicle.exitScrub,
-    clearScrub: chronicle.clearScrub,
-    cancelScrubRaf: ages.cancelRaf,
-    pauseScrub: ages.pause,
-    togglePlay: ages.togglePlay,
-    setPace: ages.setPace,
-    onManualScrub: ages.onBarInput,
-    scrubTo: (year: number) => (ages.isActive() ? ages.scrubToYear(year) : chronicle.scrubTo(year)),
-    scrubSnapToPresent: chronicle.scrubSnapToPresent,
-    scrubState: () => {
-      const s = chronicle.scrubState();
-      return s ? { ...s, playing: ages.isPlaying() } : null;
-    },
-    applyVoyage: voyage.applyVoyage,
-    rearmVoyage: voyage.rearmVoyage,
-    exitVoyage: voyage.exitVoyage,
-    clearVoyage: voyage.clearVoyage,
-    cancelVoyageRaf: voyage.cancelVoyageRaf,
-    voyageSnapToRest: voyage.voyageSnapToRest,
-    voyageStepTo: voyage.voyageStepTo,
-    voyagePaintAt: voyage.voyagePaintAt,
-    voyagePlan: voyage.voyagePlan,
-    voyageLog: voyage.voyageLog,
-    voyageDays: voyage.voyageDays,
-    voyageLegGeometry: voyage.voyageLegGeometry,
+    ...overlayApi(overlay),
+    ...agesApi(ages),
+    ...scrubApi(ages, chronicle),
+    ...voyageApi(voyage),
     // Chamber-aware while the instrument is armed (an ages-chamber rest shows no recto track for the verso to bleed through, so the sink clears); disarmed or bar-less takes the raw voyage sync.
     syncRestingTrack: () => (ages.isActive() ? ages.syncSinkAtRest() : voyage.syncRestingTrack()),
     destroy,

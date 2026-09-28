@@ -5,9 +5,9 @@ import {
   reorderPlanByTravel,
   type VoyagePlan,
 } from "../../render/voyage.ts";
-import { prepareVoyageRouter, type LegMode, type VoyageRouter } from "../../render/voyage-route.ts";
+import { prepareVoyageRouter, type LegMode, type RoutedLeg, type VoyageRouter } from "../../render/voyage-route.ts";
 import type { WaterSpan } from "../../render/voyage-water.ts";
-import { createProjection } from "../../render/transform.ts";
+import { createProjection, type Projection } from "../../render/transform.ts";
 import {
   buildLegGeometry,
   netFacing,
@@ -18,7 +18,7 @@ import {
 } from "../../render/voyage-geometry.ts";
 import { SHIP_PARTS, RIDER_PARTS, makeMark } from "./voyage-marks.ts";
 import type { VoyageLogPanel } from "./voyage-log-panel.ts";
-import type { PlaceManifest } from "../../render/place-manifest.ts";
+import type { PlaceManifest, PlaceMark } from "../../render/place-manifest.ts";
 import { surveyFingerprint, type Survey } from "../../render/survey.ts";
 import type { VoyageLog } from "../../world/voyage-log.ts";
 import type { Pt } from "../../core/rdp.ts";
@@ -62,10 +62,7 @@ export interface SessionBuilderDeps {
   tourOrder?: TourOrderSource;
 }
 
-// eslint-disable-next-line max-lines-per-function
-export function createSessionBuilder(deps: SessionBuilderDeps) {
-  const { mapEl, logPanel, tourOrder } = deps;
-
+function tourOrderMemo(tourOrder: TourOrderSource | undefined) {
   let travelOrder: { key: string; order: ReadonlyArray<number> } | null = null;
 
   function orderItinerary(
@@ -89,7 +86,93 @@ export function createSessionBuilder(deps: SessionBuilderDeps) {
     return ordered;
   }
 
-  // eslint-disable-next-line max-lines-per-function
+  return { orderItinerary };
+}
+
+type OrderItinerary = ReturnType<typeof tourOrderMemo>["orderItinerary"];
+
+function routedPlan(
+  manifest: PlaceManifest,
+  survey: Survey,
+  straight: VoyagePlan,
+  seed: number,
+  quiet: boolean,
+  orderItinerary: OrderItinerary,
+) {
+  const sites = manifest.places.map((p) => ({ idx: p.idx, x: p.gx, y: p.gy }));
+  const router = prepareVoyageRouter(sites, survey);
+  const plan = orderItinerary(straight, router, survey, seed, quiet);
+  const routed = plan.legs.map(router.route);
+  return { plan, routed };
+}
+
+function projectedLegs(routed: RoutedLeg[], proj: Projection) {
+  const legs: SessionLeg[] = routed.map((leg) => ({
+    mode: leg.mode,
+    water: leg.water,
+    inlandHandoff: leg.inlandHandoff,
+    geom: buildLegGeometry(leg.points.map((p) => ({ x: proj.px(p.x), y: proj.py(p.y) }))),
+  }));
+
+  const durations = legDurations(legs.map((l) => l.geom.total));
+  const cumMs = [0];
+  for (const d of durations) cumMs.push(cumMs[cumMs.length - 1]! + d);
+  const totalMs = cumMs[cumMs.length - 1]!;
+  return { legs, cumMs, totalMs };
+}
+
+function sessionLog(
+  logPanel: VoyageLogPanel,
+  manifest: PlaceManifest,
+  plan: VoyagePlan,
+  routed: RoutedLeg[],
+  byIdx: Map<number, PlaceMark>,
+  seed: number,
+  subtitle: string,
+) {
+  const logPorts = plan.ports.map((port, i) => {
+    const pm = byIdx.get(port.idx)!;
+    return {
+      idx: pm.idx, name: pm.name, kind: pm.kind, founded: pm.founded,
+      arrivalMode: i === 0 ? null : routed[i - 1]!.mode,
+      inlandHandoff: i === 0 ? false : routed[i - 1]!.inlandHandoff,
+      // #312: GRID-space leg length (routed points are pre-projection), so the day counts are world-derived and never move with the render width.
+      legLength: i === 0 ? 0 : buildLegGeometry(routed[i - 1]!.points).total,
+    };
+  });
+  const closing = plan.ports.length >= 2 ? routed[routed.length - 1]! : null;
+  return logPanel.buildLogPanel(
+    logPorts,
+    manifest.presentYear,
+    seed,
+    subtitle,
+    closing
+      ? { arrivalMode: closing.mode, inlandHandoff: closing.inlandHandoff, legLength: buildLegGeometry(closing.points).total }
+      : null,
+  );
+}
+
+function voyageOverlay(mapEl: HTMLElement, manifest: PlaceManifest, wPx: number) {
+  const svg = document.createElementNS(SVG_NS, "svg");
+  svg.setAttribute("class", "voyage-overlay");
+  svg.setAttribute("viewBox", `0 0 ${wPx} ${manifest.heightPx}`);
+  svg.setAttribute("preserveAspectRatio", "none");
+  svg.setAttribute("aria-hidden", "true"); // #121: the margin-log panel + one status summary carry the a11y payload
+  const trackEl = document.createElementNS(SVG_NS, "polyline");
+  trackEl.setAttribute("class", "voyage-track");
+  const shipG = makeMark("voyage-ship", SHIP_PARTS);
+  const riderG = makeMark("voyage-rider", RIDER_PARTS);
+  // INVARIANT: the marks are SIBLINGS of trackEl, never inside it; syncRestingTrack feeds the sink trackEl's `points` verbatim, and a mark nested in the track would bleed through to the back of the sheet (#174).
+  svg.append(trackEl, shipG, riderG);
+  mapEl.querySelectorAll(".voyage-overlay").forEach((stale) => stale.remove());
+  mapEl.appendChild(svg);
+  return { svg, trackEl, shipG, riderG };
+}
+
+export function createSessionBuilder(deps: SessionBuilderDeps) {
+  const { mapEl, logPanel, tourOrder } = deps;
+  const { orderItinerary } = tourOrderMemo(tourOrder);
+
   function build(
     manifest: PlaceManifest | null,
     survey: Survey | null,
@@ -101,63 +184,17 @@ export function createSessionBuilder(deps: SessionBuilderDeps) {
     const straight = buildVoyagePlan(manifest.places, manifest.presentYear);
     if (!straight.ports.length) return null;
 
-    const sites = manifest.places.map((p) => ({ idx: p.idx, x: p.gx, y: p.gy }));
-    const router = prepareVoyageRouter(sites, survey);
-    const plan = orderItinerary(straight, router, survey, seed, quiet);
-    const routed = plan.legs.map(router.route);
+    const { plan, routed } = routedPlan(manifest, survey, straight, seed, quiet, orderItinerary);
 
     const wPx = manifest.widthPx;
     const proj = createProjection(survey.gridW, survey.gridH, wPx, Math.round(wPx * 0.045));
-    const legs: SessionLeg[] = routed.map((leg) => ({
-      mode: leg.mode,
-      water: leg.water,
-      inlandHandoff: leg.inlandHandoff,
-      geom: buildLegGeometry(leg.points.map((p) => ({ x: proj.px(p.x), y: proj.py(p.y) }))),
-    }));
-
-    const durations = legDurations(legs.map((l) => l.geom.total));
-    const cumMs = [0];
-    for (const d of durations) cumMs.push(cumMs[cumMs.length - 1]! + d);
-    const totalMs = cumMs[cumMs.length - 1]!;
+    const { legs, cumMs, totalMs } = projectedLegs(routed, proj);
 
     const byIdx = new Map(manifest.places.map((p) => [p.idx, p]));
     const origin = byIdx.get(plan.ports[0]!.idx)!;
     const originPt = { x: proj.px(origin.gx), y: proj.py(origin.gy) };
-
-    const logPorts = plan.ports.map((port, i) => {
-      const pm = byIdx.get(port.idx)!;
-      return {
-        idx: pm.idx, name: pm.name, kind: pm.kind, founded: pm.founded,
-        arrivalMode: i === 0 ? null : routed[i - 1]!.mode,
-        inlandHandoff: i === 0 ? false : routed[i - 1]!.inlandHandoff,
-        // #312: GRID-space leg length (routed points are pre-projection), so the day counts are world-derived and never move with the render width.
-        legLength: i === 0 ? 0 : buildLegGeometry(routed[i - 1]!.points).total,
-      };
-    });
-    const closing = plan.ports.length >= 2 ? routed[routed.length - 1]! : null;
-    const { log, rows: logRows } = logPanel.buildLogPanel(
-      logPorts,
-      manifest.presentYear,
-      seed,
-      subtitle,
-      closing
-        ? { arrivalMode: closing.mode, inlandHandoff: closing.inlandHandoff, legLength: buildLegGeometry(closing.points).total }
-        : null,
-    );
-
-    const svg = document.createElementNS(SVG_NS, "svg");
-    svg.setAttribute("class", "voyage-overlay");
-    svg.setAttribute("viewBox", `0 0 ${wPx} ${manifest.heightPx}`);
-    svg.setAttribute("preserveAspectRatio", "none");
-    svg.setAttribute("aria-hidden", "true"); // #121: the margin-log panel + one status summary carry the a11y payload
-    const trackEl = document.createElementNS(SVG_NS, "polyline");
-    trackEl.setAttribute("class", "voyage-track");
-    const shipG = makeMark("voyage-ship", SHIP_PARTS);
-    const riderG = makeMark("voyage-rider", RIDER_PARTS);
-    // INVARIANT: the marks are SIBLINGS of trackEl, never inside it; syncRestingTrack feeds the sink trackEl's `points` verbatim, and a mark nested in the track would bleed through to the back of the sheet (#174).
-    svg.append(trackEl, shipG, riderG);
-    mapEl.querySelectorAll(".voyage-overlay").forEach((stale) => stale.remove());
-    mapEl.appendChild(svg);
+    const { log, rows: logRows } = sessionLog(logPanel, manifest, plan, routed, byIdx, seed, subtitle);
+    const { svg, trackEl, shipG, riderG } = voyageOverlay(mapEl, manifest, wPx);
 
     return {
       plan,
