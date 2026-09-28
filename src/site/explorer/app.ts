@@ -1,5 +1,5 @@
 // Explorer UI conductor: wires the controls to the render worker, runs draw(), keeps the URL hash in sync. #321: the Explorer is STATIC; no code path here starts an animation clock.
-import { runJob, runInline, usesWorker, initWorker } from "./worker-client.ts";
+import { runJob, runInline, usesWorker, initWorker, type DrawResult } from "./worker-client.ts";
 import { shouldTurn, runTurn, cancelTurn, turnTiming } from "./sheet-turn.ts";
 import { toggleFlip, isFlipped, rebuildVerso, paintVersoTrack, clearVersoTrack } from "./verso.ts";
 import { sliderToLand, updateLandReadout, syncAutoSlider } from "./sea-level.ts";
@@ -202,9 +202,89 @@ function writeFolio(res: { title: string; subtitle: string }, seed: number): voi
   folioSub.textContent = year ? `surveyed ${year[0]}` : res.subtitle;
 }
 
+type DrawOverrides = { mapType?: MapType; band?: ClimateBand; landFraction?: number; coastWarp?: number };
+
+function draftOverrides(seed: number): DrawOverrides {
+  const overrides: DrawOverrides = {};
+  if (typeSel.value) overrides.mapType = typeSel.value as MapType;
+  if (bandSel.value) overrides.band = bandSel.value as ClimateBand;
+  if (touched.land) overrides.landFraction = sliderToLand(landSlider.value);
+  else syncAutoSlider(seed, overrides);
+  updateLandReadout();
+  if (touched.coast) overrides.coastWarp = sliderToCoast(coastSlider.value);
+  else parkCoastDefault();
+  updateCoastReadout();
+  return overrides;
+}
+
+function draftDress(): { style: StyleName; theme: ThemeName | ""; legend: boolean; arms: boolean; beasts: boolean } {
+  const style = styleSel.value as StyleName;
+  const theme = themeSel.value as ThemeName | "";
+  const legend = legendChk.checked;
+  const arms = armsChk.checked;
+  const beasts = beastsChk.checked;
+  return { style, theme, legend, arms, beasts };
+}
+
+function keepDraw(res: DrawResult, seed: number, t0: number): void {
+  drawing = false;
+  versoBtn.disabled = false;
+  lastSvg = res.svg;
+  lastSubtitle = res.subtitle;
+  lastSeed = seed;
+  lastManifest = res.manifest;
+  lastSurvey = res.survey;
+  const ms = (performance.now() - t0).toFixed(0);
+  status.textContent = "";
+  writeFolio(res, seed);
+  caption.textContent = `${res.mapType} · ${res.band} · drawn in ${ms}ms`;
+}
+
+function landDraw(res: DrawResult, seed: number, overrides: Readonly<DrawOverrides>, style: StyleName, theme: ThemeName | "", legend: boolean, arms: boolean, beasts: boolean, quiet: boolean, isTurn: boolean, hadChart: boolean, myGen: number): void {
+  const flipped = isFlipped(sheetEl);
+  const deferArm = deferLandingArm(quiet, flipped);
+  if (shouldTurn({ isTurn, reduceMotion: prefersReduce(), usesWorker: usesWorker(), hasChart: hadChart, flipped })) {
+    const t = turnTiming();
+    void runTurn({ sheetEl, innerEl, mapEl: mapDiv, newSvg: res.svg, durationMs: t.ms, easing: t.ease }).then(() => {
+      if (myGen !== drawGen) return;
+      lc.buildPlaceOverlay(res.manifest);
+      lastSheet = { seed, overrides, style, presentYear: res.manifest.presentYear };
+      room.layout();
+      armOnLanding({ arm: surveyArm, armed: agesChk.checked, defer: deferArm, clear: lc.clearAges,
+        rearm: () => lc.rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet }) });
+      glass.syncZoom();
+      glass.setWorld({ seed, overrides, render: { style, widthPx: 1500, legend, arms, beasts, theme: theme || undefined }, manifest: res.manifest });
+      syncHash();
+    });
+  } else {
+    mapDiv.innerHTML = res.svg;
+    lc.buildPlaceOverlay(res.manifest);
+    lastSheet = { seed, overrides, style, presentYear: res.manifest.presentYear };
+    room.layout();
+    if (!quiet) startArrival(mapDiv.querySelector("svg"));
+    armOnLanding({ arm: surveyArm, armed: agesChk.checked, defer: deferArm, clear: lc.clearAges,
+      rearm: () => lc.rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet }) });
+    glass.syncZoom();
+    // #169: record this world sheet BEFORE a deep-link camera is applied, so the settle that camera triggers redrafts over the SAME base world.
+    glass.setWorld({ seed, overrides, render: { style, widthPx: 1500, legend, arms, beasts, theme: theme || undefined }, manifest: res.manifest });
+    syncHash();
+    if (pendingCamera) {
+      const cam = pendingCamera;
+      pendingCamera = null;
+      glass.applyCamera(cam);
+    }
+  }
+  // #174/#366: whoever paints the track LAST owns this repaint; a DEFERRED arm owns it, so the settle leaves the back face to the arm (e2e SV2k/SV2m/SV2o).
+  const armPaintsVerso = agesChk.checked && deferArm;
+  if (!quiet) {
+    rebuildVerso(versoEl, res, seed);
+    if (!armPaintsVerso) lc.syncRestingTrack();
+  }
+}
+
 // opts.quiet suppresses the arrival ceremony, used only by the sea-level drag's throttled mid-drag redraws.
-// eslint-disable-next-line max-lines-per-function
 function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
+
   const quiet = !!(opts && opts.quiet);
   const isTurn = !!(opts && opts.turn);
   const seed = Number(seedInput.value) >>> 0;
@@ -220,20 +300,8 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
   status.textContent = "Drafting…";
   caption.textContent = "";
   syncHash();
-  const overrides: { mapType?: MapType; band?: ClimateBand; landFraction?: number; coastWarp?: number } = {};
-  if (typeSel.value) overrides.mapType = typeSel.value as MapType;
-  if (bandSel.value) overrides.band = bandSel.value as ClimateBand;
-  if (touched.land) overrides.landFraction = sliderToLand(landSlider.value);
-  else syncAutoSlider(seed, overrides);
-  updateLandReadout();
-  if (touched.coast) overrides.coastWarp = sliderToCoast(coastSlider.value);
-  else parkCoastDefault();
-  updateCoastReadout();
-  const style = styleSel.value as StyleName;
-  const theme = themeSel.value as ThemeName | "";
-  const legend = legendChk.checked;
-  const arms = armsChk.checked;
-  const beasts = beastsChk.checked;
+  const overrides = draftOverrides(seed);
+  const { style, theme, legend, arms, beasts } = draftDress();
   // Whether this draw TURNS is decided at the swap; capture the presence while the outgoing chart is still on screen.
   const hadChart = !!mapDiv.querySelector("svg");
   const t0 = performance.now();
@@ -243,59 +311,10 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
     overrides,
     render: { style, widthPx: 1500, legend, arms, beasts, theme: theme || undefined },
   })
-    // eslint-disable-next-line max-lines-per-function
     .then((res) => {
       if (myGen !== drawGen) return;
-      drawing = false;
-      versoBtn.disabled = false;
-      lastSvg = res.svg;
-      lastSubtitle = res.subtitle;
-      lastSeed = seed;
-      lastManifest = res.manifest;
-      lastSurvey = res.survey;
-      const ms = (performance.now() - t0).toFixed(0);
-      status.textContent = "";
-      writeFolio(res, seed);
-      caption.textContent = `${res.mapType} · ${res.band} · drawn in ${ms}ms`;
-      const flipped = isFlipped(sheetEl);
-      const deferArm = deferLandingArm(quiet, flipped);
-      if (shouldTurn({ isTurn, reduceMotion: prefersReduce(), usesWorker: usesWorker(), hasChart: hadChart, flipped })) {
-        const t = turnTiming();
-        void runTurn({ sheetEl, innerEl, mapEl: mapDiv, newSvg: res.svg, durationMs: t.ms, easing: t.ease }).then(() => {
-          if (myGen !== drawGen) return;
-          lc.buildPlaceOverlay(res.manifest);
-          lastSheet = { seed, overrides, style, presentYear: res.manifest.presentYear };
-          room.layout();
-          armOnLanding({ arm: surveyArm, armed: agesChk.checked, defer: deferArm, clear: lc.clearAges,
-            rearm: () => lc.rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet }) });
-          glass.syncZoom();
-          glass.setWorld({ seed, overrides, render: { style, widthPx: 1500, legend, arms, beasts, theme: theme || undefined }, manifest: res.manifest });
-          syncHash();
-        });
-      } else {
-        mapDiv.innerHTML = res.svg;
-        lc.buildPlaceOverlay(res.manifest);
-        lastSheet = { seed, overrides, style, presentYear: res.manifest.presentYear };
-        room.layout();
-        if (!quiet) startArrival(mapDiv.querySelector("svg"));
-        armOnLanding({ arm: surveyArm, armed: agesChk.checked, defer: deferArm, clear: lc.clearAges,
-          rearm: () => lc.rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet }) });
-        glass.syncZoom();
-        // #169: record this world sheet BEFORE a deep-link camera is applied, so the settle that camera triggers redrafts over the SAME base world.
-        glass.setWorld({ seed, overrides, render: { style, widthPx: 1500, legend, arms, beasts, theme: theme || undefined }, manifest: res.manifest });
-        syncHash();
-        if (pendingCamera) {
-          const cam = pendingCamera;
-          pendingCamera = null;
-          glass.applyCamera(cam);
-        }
-      }
-      // #174/#366: whoever paints the track LAST owns this repaint; a DEFERRED arm owns it, so the settle leaves the back face to the arm (e2e SV2k/SV2m/SV2o).
-      const armPaintsVerso = agesChk.checked && deferArm;
-      if (!quiet) {
-        rebuildVerso(versoEl, res, seed);
-        if (!armPaintsVerso) lc.syncRestingTrack();
-      }
+      keepDraw(res, seed, t0);
+      landDraw(res, seed, overrides, style, theme, legend, arms, beasts, quiet, isTurn, hadChart, myGen);
     })
     .catch((err: Error) => {
       if (myGen !== drawGen) return;
