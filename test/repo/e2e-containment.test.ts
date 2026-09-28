@@ -7,8 +7,8 @@ import { containment } from "../../test-support/e2e-containment.ts";
 import type { FamilyFile } from "../../test-support/e2e-containment.ts";
 import { e2eSuiteFamily } from "../../test-support/e2e-source.ts";
 
-const SUITE = "scripts/e2e/suite-x.ts";
-const PART = "scripts/e2e/x/groups.ts";
+const SUITE = "e2e/suites/x.ts";
+const PART = "e2e/suites/x/groups.ts";
 const one = (...lines: string[]): FamilyFile[] => [{ path: SUITE, text: lines.join("\n") }];
 const names = (files: readonly FamilyFile[]): string[] => containment(files).breaches.map((b) => b.name);
 
@@ -172,10 +172,10 @@ test("a suite's family is its suite file and every TypeScript file in its own fo
       mkdirSync(dirname(join(root, rel)), { recursive: true });
       writeFileSync(join(root, rel), "");
     };
-    ["scripts/e2e/suite-zoom.ts", "scripts/e2e/zoom/reads.ts", "scripts/e2e/zoom/deep/checks.ts", "scripts/e2e/zoom/notes.md",
-      "scripts/e2e/suite-zoom-gestures.ts", "scripts/e2e/zoom-gestures/checks.ts", "scripts/e2e/zoom-support.ts"].forEach(plant);
-    assert.deepEqual(e2eSuiteFamily(root, "zoom"), ["scripts/e2e/suite-zoom.ts", "scripts/e2e/zoom/deep/checks.ts", "scripts/e2e/zoom/reads.ts"]);
-    assert.deepEqual(e2eSuiteFamily(root, "zoom-gestures"), ["scripts/e2e/suite-zoom-gestures.ts", "scripts/e2e/zoom-gestures/checks.ts"]);
+    ["e2e/suites/zoom.ts", "e2e/suites/zoom/reads.ts", "e2e/suites/zoom/deep/checks.ts", "e2e/suites/zoom/notes.md",
+      "e2e/suites/zoom-gestures.ts", "e2e/suites/zoom-gestures/checks.ts", "e2e/support/zoom.ts", "e2e/zoom.ts"].forEach(plant);
+    assert.deepEqual(e2eSuiteFamily(root, "zoom"), ["e2e/suites/zoom.ts", "e2e/suites/zoom/deep/checks.ts", "e2e/suites/zoom/reads.ts"]);
+    assert.deepEqual(e2eSuiteFamily(root, "zoom-gestures"), ["e2e/suites/zoom-gestures.ts", "e2e/suites/zoom-gestures/checks.ts"]);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

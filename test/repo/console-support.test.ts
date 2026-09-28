@@ -5,9 +5,9 @@ import { CANCELLATION_PREFIXES, OUR_OWN_REASONS, dropExpectedCancellations } fro
 import { e2eSourcePaths, readE2eSource } from "../../test-support/e2e-source.ts";
 
 const REPO = resolve(import.meta.dirname, "..", "..");
-const E2E = resolve(REPO, "scripts", "e2e");
+const E2E = resolve(REPO, "e2e");
 const e2eFiles = (): string[] => e2eSourcePaths(REPO).filter((p) => p.startsWith(E2E + sep)).map((p) => relative(E2E, p).split(sep).join("/"));
-const importsDrop = (f: string): boolean => [...readE2eSource(join(E2E, f)).matchAll(/from "(\.{1,2}\/[^"]*)"/g)].some((m) => resolve(dirname(join(E2E, f)), m[1]!) === join(E2E, "console-support.ts"));
+const importsDrop = (f: string): boolean => [...readE2eSource(join(E2E, f)).matchAll(/from "(\.{1,2}\/[^"]*)"/g)].some((m) => resolve(dirname(join(E2E, f)), m[1]!) === join(E2E, "support", "console.ts"));
 
 // Every fixture below is a literal rather than a loop over the exported list: a list-driven case deletes itself along with the behaviour when an entry is removed, so it would pass on an empty list and could never red on the defect this file exists for (#613).
 const H6_MEASURED =
@@ -90,12 +90,12 @@ test("order and multiplicity survive, so a check's payload still reads as what h
 
 test("no suite carries a cancellation opening of its own: one roster, swept from the module's own exported data (#613)", () => {
   const files = e2eFiles();
-  assert.ok(files.length > 20, `read only ${files.length} .ts files under scripts/e2e; this sweep is looking at the wrong tree`);
+  assert.ok(files.length > 20, `read only ${files.length} .ts files under e2e/; this sweep is looking at the wrong tree`);
   const src = (f: string) => readE2eSource(join(E2E, f));
   assert.ok(CANCELLATION_PREFIXES.length > 0, "the exported roster is empty, so the sweep below would read nothing");
   for (const prefix of CANCELLATION_PREFIXES) {
-    assert.ok(src("console-support.ts").includes(prefix), `console-support.ts does not carry ${prefix}, so this sweep cannot bite`);
-    const offenders = files.filter((f) => f !== "console-support.ts" && src(f).includes(prefix));
+    assert.ok(src("support/console.ts").includes(prefix), `support/console.ts does not carry ${prefix}, so this sweep cannot bite`);
+    const offenders = files.filter((f) => f !== "support/console.ts" && src(f).includes(prefix));
     assert.deepEqual(
       offenders,
       [],
@@ -103,17 +103,17 @@ test("no suite carries a cancellation opening of its own: one roster, swept from
     );
   }
   const adopters = files.filter(importsDrop);
-  assert.ok(adopters.length > 0, "no file imports console-support at all, so the sweep above is reading an empty claim");
+  assert.ok(adopters.length > 0, "no file imports support/console.ts at all, so the sweep above is reading an empty claim");
   // The at-least-one adopter check above is satisfied by any other file, which is what left this gap (prover round 1).
   const uncited = files.filter(
-    (f) => f !== "console-support.ts" && src(f).includes("dropExpectedCancellations(") && !importsDrop(f),
+    (f) => f !== "support/console.ts" && src(f).includes("dropExpectedCancellations(") && !importsDrop(f),
   );
   assert.deepEqual(uncited, [], `${uncited.join(", ")} call the shared drop without the house import spelling; a genuinely missing import is a ReferenceError the first time that check runs, and an unusual spelling reds here too, which is the safe direction`);
 });
 
 test("every read of the console accumulator goes through the shared drop, so a call site cannot quietly stop filtering (cold skeptic on PR #619)", () => {
-  // harness.ts FILLS the accumulator and is the one file that reads it for something other than a check.
-  const files = e2eFiles().filter((f) => f !== "console-support.ts" && f !== "harness.ts");
+  // run.ts creates the accumulator and hands it to the harness, and harness.ts FILLS it: the two files that read it for something other than a check.
+  const files = e2eFiles().filter((f) => f !== "support/console.ts" && f !== "harness.ts" && f !== "run.ts");
   assert.ok(files.length > 20, `read only ${files.length} .ts files; this sweep is looking at the wrong tree`);
   const offenders: string[] = [];
   let reads = 0;
@@ -130,6 +130,6 @@ test("every read of the console accumulator goes through the shared drop, so a c
   assert.deepEqual(
     offenders,
     [],
-    `${offenders.join(", ")} read the console accumulator without passing it through the shared drop, so that check silently stopped filtering. BLIND SPOTS, declared, and the third was found by mutation rather than by reasoning (prover round 3): it reads the .ts files under scripts/e2e/ only, types stripped, so scripts/e2e-explorer.ts and scripts/e2e-lanes.ts are outside it, both clean today and neither taking a delta; it reads one LINE, so a read split across lines escapes; and a check built from TWO separately excluded base captures plus a comparison line that never names the accumulator escapes it whole, since every line it could see is legitimately excluded. It errs the other way on a comment that merely mentions the accumulator, which is the direction a scanner here is owed`,
+    `${offenders.join(", ")} read the console accumulator without passing it through the shared drop, so that check silently stopped filtering. BLIND SPOTS, declared, and the second was found by mutation rather than by reasoning (prover round 3): it reads one LINE, so a read split across lines escapes; and a check built from TWO separately excluded base captures plus a comparison line that never names the accumulator escapes it whole, since every line it could see is legitimately excluded. It errs the other way on a comment that merely mentions the accumulator, which is the direction a scanner here is owed`,
   );
 });

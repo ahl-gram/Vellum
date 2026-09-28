@@ -13,7 +13,7 @@ import { containment, CTX_THROWING_WAITS } from "../../test-support/e2e-containm
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const src = (p: string) => readE2eSource(join(ROOT, p));
-const RUNNER = src("scripts/e2e-explorer.ts");
+const RUNNER = src("e2e/run.ts");
 const CI = src(".github/workflows/ci.yml");
 // A source scan reads the CODE, not the file: commenting a line out in place leaves its literal behind, and a raw match cannot tell the two apart. Blind spots, both of which cost a false red rather than a miss: a `//` inside a string literal reads as a comment, and a /* */ block is not seen at all.
 const uncommented = (source: string) => source.split("\n").filter((line) => !line.trim().startsWith("//")).join("\n");
@@ -47,7 +47,7 @@ test("E2E_SUITE_ORDER is exactly the runner's SUITES map, in the same order", ()
 
 test("each suite name maps to the run function imported from its own file", () => {
   const aliasFor = new Map(
-    [...RUNNER_CODE.matchAll(/import \{ run as (\w+) \} from "\.\/e2e\/suite-([\w-]+)\.ts"/g)].map((m) => [m[2], m[1]]),
+    [...RUNNER_CODE.matchAll(/import \{ run as (\w+) \} from "\.\/suites\/([\w-]+)\.ts"/g)].map((m) => [m[2], m[1]]),
   );
   const block = RUNNER_CODE.match(/const SUITES = \{([\s\S]*?)\n\};/);
   if (!block) throw new Error("the runner's SUITES map was not found");
@@ -63,7 +63,7 @@ test("every named suite has a suite file the runner imports", () => {
   for (const name of E2E_SUITE_ORDER) {
     const file = e2eSuitePath(name);
     assert.ok(existsSync(join(ROOT, file)), `${name} has no ${file}`);
-    assert.match(RUNNER_CODE, new RegExp(`from "\\./e2e/suite-${name}\\.ts"`), `${name} is not imported`);
+    assert.match(RUNNER_CODE, new RegExp(`from "\\./suites/${name}\\.ts"`), `${name} is not imported`);
   }
 });
 
@@ -195,7 +195,7 @@ test("every CI trigger gets the same full coverage, so nothing is conditional on
 });
 
 test("the runner actually uses the selection, the timings and the outcome rule it imports", () => {
-  // The runner needs a browser, so behavior is tested in e2e-suites.test.ts and only the CALL sites are pinned here, against the CODE and never the raw file: a line commented out in place leaves its literal behind and satisfies a raw match, which beat this test's .catch assertion and its formatSuiteTimings one when the prover tried it (2026-09-10).
+  // The runner needs a browser, so behavior is tested in test/e2e/suites.test.ts and only the CALL sites are pinned here, against the CODE and never the raw file: a line commented out in place leaves its literal behind and satisfies a raw match, which beat this test's .catch assertion and its formatSuiteTimings one when the prover tried it (2026-09-10).
   assert.match(RUNNER_CODE, /runSelected\(SELECTED, SUITES, ctx, \{/, "the runner does not run the SELECTED suites");
   // The hooks are optional in runSelected, since a caller without them keeps the old rethrow; a runner without them is the #534 defect back, and no unit test of runSelected can see that.
   const hooks = RUNNER_CODE.match(/runSelected\(SELECTED, SUITES, ctx, \{([\s\S]*?)\n {2}\}\);/);
@@ -258,7 +258,7 @@ const SUITE_FILES = E2E_SUITE_ORDER.map((name) => [name, e2eSuitePath(name)] as 
 const familyOf = (name: string) => e2eSuiteFamily(ROOT, name).map((path) => ({ path, text: readFileSync(join(ROOT, path), "utf8") }));
 
 test("the harness hands out exactly the two throwing waits the scan below seeds from, so a third one cannot arrive unread", () => {
-  const harness = src("scripts/e2e/harness.ts").split("\n");
+  const harness = src("e2e/harness.ts").split("\n");
   const found = harness
     .map((line, i) => ({ line, i }))
     .filter(({ line }) => /^async function wait\w+\(/.test(line))
@@ -280,7 +280,7 @@ test("every suite with a wait that THROWS is named in the step roster, and every
 });
 
 test("a suite that builds a step is named in the roster, so adopting one without joining cannot pass unread", () => {
-  const adopters = SUITE_FILES.filter(([, file]) => /from "\.\/step-support\.ts"/.test(src(file))).map(([name]) => name);
+  const adopters = SUITE_FILES.filter(([, file]) => /from "\.\.\/support\/step\.ts"/.test(src(file))).map(([name]) => name);
   assert.ok(adopters.length > 0, "no suite imports step-support at all, so the assertion below would read an empty list");
   assert.deepEqual(
     adopters.filter((name) => !(name in STEPPED_GROUPS)),
@@ -302,7 +302,7 @@ test("every call of a wait that throws is INSIDE a step, across each suite's fil
 test("every check group that waits is still inside its own step, by name (#534)", () => {
   for (const [suite, groups] of Object.entries(STEPPED_GROUPS)) {
     const file = src(e2eSuitePath(suite));
-    assert.match(file, /from "\.\/step-support\.ts"/, `suite-${suite} no longer imports step-support`);
+    assert.match(file, /from "\.\.\/support\/step\.ts"/, `suites/${suite}.ts no longer imports support/step.ts`);
     assert.match(file, /const step = makeStep\(ctx\)/, `suite-${suite} no longer builds a step, so a wait that gives up there takes the suite with it again`);
     const stepped = [...file.matchAll(/await step\("([^"]+)"/g)].map((m) => m[1]);
     assert.deepEqual(
@@ -314,7 +314,7 @@ test("every check group that waits is still inside its own step, by name (#534)"
 });
 
 test("the lane driver spawns the runner itself and refuses an ambient selection", () => {
-  const DRIVER = uncommented(src("scripts/e2e-lanes.ts"));
+  const DRIVER = uncommented(src("e2e/lanes.ts"));
   assert.match(DRIVER, /spawn\(process\.execPath, \[RUNNER\]/, "a lane must spawn the runner directly, so its exit code survives");
   assert.match(DRIVER, /ambientSelectionRefusal\(process\.env\)/, "the driver no longer refuses a narrowing selection");
   assert.match(DRIVER, /laneOutcome\(results, SELECTED\)/, "the driver does not aggregate the lanes it was asked to run, so one could fail unnoticed");
@@ -331,5 +331,6 @@ test("the lane driver spawns the runner itself and refuses an ambient selection"
   );
   assert.match(DRIVER, /browserlessAction\(process\.env, Boolean\(process\.stdout\.isTTY\)\)/, "the driver no longer decides the browserless policy against its own TTY");
   const pkg = JSON.parse(src("package.json")) as { scripts: Record<string, string> };
-  assert.equal(pkg.scripts["test:e2e:lanes"], "node scripts/e2e-lanes.ts");
+  assert.equal(pkg.scripts["test:e2e:lanes"], "node e2e/lanes.ts");
+  assert.equal(pkg.scripts["test:e2e"], "node e2e/run.ts", "npm run test:e2e no longer runs the runner, and nothing else notices until someone runs it");
 });

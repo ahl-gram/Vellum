@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { compareFamilies, familyOf } from "../../e2e/split-proof.ts";
 import type { FamilyFile } from "../../e2e/split-proof.ts";
 
-const files = (...texts: string[]): FamilyFile[] => texts.map((text, i) => ({ path: i === 0 ? "scripts/e2e/suite-map.ts" : `scripts/e2e/map/part${i}.ts`, text }));
+const files = (...texts: string[]): FamilyFile[] => texts.map((text, i) => ({ path: i === 0 ? "e2e/suites/map.ts" : `e2e/suites/map/part${i}.ts`, text }));
 
 const BASE = [
   "import { makeStep } from \"./step-support.ts\";",
@@ -183,13 +183,14 @@ test("a type note or a condition marker gained or lost is a difference", () => {
   assert.equal(inGroups("JSON.stringify(g));", "JSON.stringify(g)); // eslint-disable-line @typescript-eslint/no-unnecessary-condition").same, false);
 });
 
-test("a suite's family is its suite file and its own folder, never a sibling whose name it prefixes, and the harness takes its server", () => {
-  assert.equal(familyOf("scripts/e2e/suite-zoom.ts"), "zoom");
-  assert.equal(familyOf("scripts/e2e/zoom/deep/reads.ts"), "zoom");
-  assert.equal(familyOf("scripts/e2e/suite-zoom-gestures.ts"), "zoom-gestures");
-  assert.equal(familyOf("scripts/e2e/zoom-gestures/checks.ts"), "zoom-gestures");
-  assert.equal(familyOf("scripts/e2e/site-server.ts"), familyOf("scripts/e2e/harness.ts"));
-  assert.equal(familyOf("scripts/e2e/room-support.ts"), "scripts/e2e/room-support.ts");
+test("a suite's family is its suite file and its own folder, never a sibling whose name it prefixes, and the harness takes its server, and a support module is a family of its own, never a suite's", () => {
+  assert.equal(familyOf("e2e/suites/zoom.ts"), "zoom");
+  assert.equal(familyOf("e2e/suites/zoom/deep/reads.ts"), "zoom");
+  assert.equal(familyOf("e2e/suites/zoom-gestures.ts"), "zoom-gestures");
+  assert.equal(familyOf("e2e/suites/zoom-gestures/checks.ts"), "zoom-gestures");
+  assert.equal(familyOf("e2e/site-server.ts"), familyOf("e2e/harness.ts"));
+  assert.equal(familyOf("e2e/support/room.ts"), "e2e/support/room.ts");
+  assert.equal(familyOf("e2e/support/zoom.ts"), "e2e/support/zoom.ts");
 });
 
 test("a group handed a different value than its parameter names reads as a difference: a wrong name, a literal, or two arguments swapped", () => {
@@ -245,13 +246,13 @@ test("an import or an export inside the family that renames a name reads as a di
   assert.equal(compareFamilies(files(before), files(run("import x1One from \"./map/part2.ts\";\nimport x2Two from \"./map/part1.ts\";"), one, two)).same, false);
   assert.equal(compareFamilies(files(before), files(run("import { x1One, x2Two } from \"./map/part1.ts\";"), "import x1One from \"./part2.ts\";\nimport x2Two from \"./part3.ts\";\nexport { x1One, x2Two };", two, one)).same, false);
   const defaultImportOnly = compareFamilies(files(before), files(run("import x1One from \"./map/part1.ts\";\nimport { x2Two } from \"./map/part1.ts\";"), part)).lines;
-  assert.ok(defaultImportOnly.includes("scripts/e2e/suite-map.ts imports a default as x1One inside the family"), defaultImportOnly.join("\n"));
+  assert.ok(defaultImportOnly.includes("e2e/suites/map.ts imports a default as x1One inside the family"), defaultImportOnly.join("\n"));
   assert.ok(!defaultImportOnly.some((l) => l.includes("exports a default")), "the default-import fixture carries no default export, so only the import can be reported");
   const defaultExportOnly = compareFamilies(files(before), files(run("import { x1One, x2Two } from \"./map/part1.ts\";"), `${one.replace("export default ", "export ")}\n${two}`)).lines;
-  assert.ok(defaultExportOnly.includes("scripts/e2e/map/part1.ts exports a default inside the family"), defaultExportOnly.join("\n"));
+  assert.ok(defaultExportOnly.includes("e2e/suites/map/part1.ts exports a default inside the family"), defaultExportOnly.join("\n"));
   assert.ok(!defaultExportOnly.some((l) => l.includes("imports a default")), "the default-export fixture carries no default import, so only the export can be reported");
   const assigned = compareFamilies(files(before), files(run("import { x1One, x2Two } from \"./map/part1.ts\";"), `${part}\nexport default x1One;`)).lines;
-  assert.ok(assigned.includes("scripts/e2e/map/part1.ts exports a default inside the family"), assigned.join("\n"));
+  assert.ok(assigned.includes("e2e/suites/map/part1.ts exports a default inside the family"), assigned.join("\n"));
 });
 
 test("a function only the split declares is read through at every call, so one that stands in for a context member reads as a difference", () => {

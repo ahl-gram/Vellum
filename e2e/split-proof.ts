@@ -331,24 +331,22 @@ export function compareFamilies(beforeFiles: readonly FamilyFile[], afterFiles: 
 }
 
 export function familyOf(path: string): string {
-  const m = path.match(/^scripts\/e2e\/(?:suite-([\w-]+)\.ts|([\w-]+)\/.+\.ts)$/);
+  const m = path.match(/^e2e\/suites\/(?:([\w-]+)\.ts|([\w-]+)\/.+\.ts)$/);
   if (m) return m[1] ?? m[2] ?? path;
-  return path === "scripts/e2e/site-server.ts" ? "scripts/e2e/harness.ts" : path;
+  return path === "e2e/site-server.ts" ? "e2e/harness.ts" : path;
 }
 
 const ROOT = resolve(import.meta.dirname, "..");
 const GIT_TIMEOUT_MS = 30_000;
 const git = (args: string[]): string => execFileSync("git", args, { cwd: ROOT, encoding: "utf8", timeout: GIT_TIMEOUT_MS, maxBuffer: 64 * 1024 * 1024 });
-const inTree = (path: string): boolean => /^scripts\/(e2e\/.+|e2e-[\w-]+)\.ts$/.test(path) && path !== "scripts/e2e-split-proof.ts";
+const inTree = (path: string): boolean => /^e2e\/.+\.ts$/.test(path) && path !== "e2e/split-proof.ts";
 
 function headPaths(): string[] {
-  const nested = readdirSync(join(ROOT, "scripts", "e2e"), { recursive: true, encoding: "utf8" }).map((f) => `scripts/e2e/${f.split(sep).join("/")}`);
-  const beside = readdirSync(join(ROOT, "scripts")).map((f) => `scripts/${f}`);
-  return [...nested, ...beside].filter(inTree).filter((p) => existsSync(join(ROOT, p))).sort();
+  return readdirSync(join(ROOT, "e2e"), { recursive: true, encoding: "utf8" }).map((f) => `e2e/${f.split(sep).join("/")}`).filter(inTree).filter((p) => existsSync(join(ROOT, p))).sort();
 }
 
 function main(base: string): number {
-  const basePaths = git(["ls-tree", "-r", "--name-only", base, "--", "scripts"]).split("\n").filter(inTree).sort();
+  const basePaths = git(["ls-tree", "-r", "--name-only", base, "--", "e2e"]).split("\n").filter(inTree).sort();
   const now = headPaths();
   if (basePaths.length < 30 || now.length < 30) throw new Error(`read ${basePaths.length} files at ${base} and ${now.length} in the tree, so this is not the e2e tree`);
   const families = new Map<string, { before: FamilyFile[]; after: FamilyFile[] }>();
