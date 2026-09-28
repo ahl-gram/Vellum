@@ -1,9 +1,9 @@
 // The Chart Table's drawer (#520 Sub 2 of #401, direction D ruled at the #518 sitting): the dog-ear on the committed survey, the drawer it fills, the cap, and since #634 the table's two homes, the address deciding an arrival and the device a return. `chart-drawer` and never `drawer`: suite-room-drawer is the site's phone nav (#520 ruling 2).
-import { makeSettle } from "./settle-support.ts";
-import { makeStep } from "./step-support.ts";
-import { makeMouse } from "./home-support.ts";
+import { makeSettle } from "../support/settle.ts";
+import { makeStep } from "../support/step.ts";
+import { makeMouse } from "../support/home.ts";
 import { SAY_HOLD_MS } from "../../src/site/shared/announce.ts";
-import type { SuiteContext } from "./types.ts";
+import type { SuiteContext } from "../types.ts";
 import { drawerKit, dragKit, tableKit } from "./chart-drawer/kit.ts";
 import type { DragKit } from "./chart-drawer/kit.ts";
 import { DRESS, ONE } from "./chart-drawer/reads.ts";

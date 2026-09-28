@@ -1,4 +1,4 @@
-import { buttonPoint } from "../home-support.ts";
+import { buttonPoint } from "../../support/home.ts";
 import type { LandfallKit } from "./kit.ts";
 import { roomy } from "./reads.ts";
 

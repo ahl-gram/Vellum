@@ -1,6 +1,6 @@
 // Room ink-in e2e (RS18-RS22, #320 Sub 3, porting S20-S26); split from suite-room-instrument.ts to stay inside the 400-line file rule: that suite carries the reveal and the clock, this one the ceremony and the press.
-import { makeRoom, makeBar, scrubFacts, scopedHealth, CHART_SVG } from "./room-support.ts";
-import type { SuiteContext } from "./types.ts";
+import { makeRoom, makeBar, scrubFacts, scopedHealth, CHART_SVG } from "../support/room.ts";
+import type { SuiteContext } from "../types.ts";
 
 type Found = { found: false } | { found: true; hasMark: false };
 type Bar = ReturnType<typeof makeBar>;

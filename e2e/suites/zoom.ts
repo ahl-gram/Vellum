@@ -1,6 +1,6 @@
 // Surveyor's Glass e2e (Z): pan/zoom on the Explorer chart via the shared d3-zoom controller, plus the settle-to-region redraft (Z17+). Resolved matrices are asserted on purpose: getComputedStyle returns "none" for a rejected value, so the assertion doubles as proof the px-suffixed transform is valid CSS (d3's own toString() is not).
-import { makeStep } from "./step-support.ts";
-import type { SuiteContext } from "./types.ts";
+import { makeStep } from "../support/step.ts";
+import type { SuiteContext } from "../types.ts";
 import { zoomKit } from "./zoom/kit.ts";
 import { zSetup, z1ZoomTo, z2MaxClamp, zK4Shot, z3MinClamp, z4RoundTrip, z6PinnedCard, z8CardConstant, z8bHoverRing } from "./zoom/camera.ts";
 import { z9Keyboard, z10Buttons, z10bNoDblclickLeak, z11Styles, z12HashWrite } from "./zoom/controls.ts";

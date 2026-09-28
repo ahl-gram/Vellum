@@ -1,4 +1,4 @@
-import type { Payload, SuiteContext } from "../types.ts";
+import type { Payload, SuiteContext } from "../../types.ts";
 import type { Matter } from "./reads.ts";
 
 export async function pr20Bind({ evaluate, check, sleep }: SuiteContext): Promise<void> {

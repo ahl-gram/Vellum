@@ -1,6 +1,6 @@
 // Glass ceremony e2e (G, #170): the antique voice on the zoom cluster, the voiced glide, and the redraft ink-in; asserts the PLUMBING (classes, tokens, inline dash props, aria) while the choreography is eyeballed via out/ screenshots. Ground truth at seed 42 (2026-07-19 scan): the world sheet labels 25 of 26 settlements, the band-1 window at (0.5, 0.5) newly labels exactly Lokai, and the k=3.6 hop to band 2 reveals no new name.
-import { makeStep } from "./step-support.ts";
-import type { SuiteContext } from "./types.ts";
+import { makeStep } from "../support/step.ts";
+import type { SuiteContext } from "../types.ts";
 
 type Btn = { title: string | null; aria: string | null; svg: boolean; text: string };
 type GlassKit = ReturnType<typeof glassKit>;

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { browserlessAction } from "../../src/cli/browser-policy.ts";
+import { browserlessAction } from "../../e2e/support/browser-policy.ts";
 
 
 test("unattended run with no browser fails instead of skipping", () => {

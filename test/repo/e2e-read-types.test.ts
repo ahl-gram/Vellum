@@ -3,8 +3,8 @@ import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import ts from "typescript";
-import type { Evaluate, Payload } from "../../scripts/e2e/types.ts";
-import { makeSettle } from "../../scripts/e2e/settle-support.ts";
+import type { Evaluate, Payload } from "../../e2e/types.ts";
+import { makeSettle } from "../../e2e/support/settle.ts";
 import { e2eSourcePaths } from "../../test-support/e2e-source.ts";
 
 type Cam = { scale: number; x: number; y: number };

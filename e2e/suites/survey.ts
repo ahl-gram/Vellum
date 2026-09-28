@@ -1,7 +1,7 @@
 // Survey Ink e2e (SV1-SV11, #321): the static Explorer's survey surface; self-contained like its sibling suites (navigates itself, carries scoped no-4xx and console-error deltas).
-import { makeRoom } from "./room-support.ts";
-import { makeStep } from "./step-support.ts";
-import type { SuiteContext } from "./types.ts";
+import { makeRoom } from "../support/room.ts";
+import { makeStep } from "../support/step.ts";
+import type { SuiteContext } from "../types.ts";
 import { surveyKit } from "./survey/kit.ts";
 import { sv1Boots, sv2FirstArm, sv2bAtRest, sv2cReArm, sv2dInsideBeat, sv2eInFlight, sv2fBare } from "./survey/arm.ts";
 import { sv2gSecondArm, sv2hPluralExit, sv2iBuildsOnce, sv2jTurnLanding } from "./survey/mount.ts";

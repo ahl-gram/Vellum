@@ -1,7 +1,7 @@
-import { dropExpectedCancellations } from "../console-support.ts";
-import { buttonPoint } from "../home-support.ts";
-import type { Cam } from "../home-support.ts";
-import type { Payload, Point, SuiteContext } from "../types.ts";
+import { dropExpectedCancellations } from "../../support/console.ts";
+import { buttonPoint } from "../../support/home.ts";
+import type { Cam } from "../../support/home.ts";
+import type { Payload, Point, SuiteContext } from "../../types.ts";
 import type { HomeKit } from "./kit.ts";
 
 type Flight = Awaited<ReturnType<typeof h14aFlight>>;

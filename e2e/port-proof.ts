@@ -197,7 +197,7 @@ function compareOne(base: string, basePath: string, now: string): PortComparison
   const got = compareSources(git(["show", `${base}:${basePath}`]), readFileSync(join(ROOT, now), "utf8"), moveJudge(basePath, now, (p) => existsSync(join(ROOT, p))));
   const clean = got.edits.length === 0 && got.literalDiffs === 0 && got.payloadDiffs === 0;
   const moved = now === basePath ? now : `${basePath} -> ${now}`;
-  console.log(`${clean ? "same" : "EDIT"}  ${moved}: ${got.literals[1]} literals, ${got.payloads[1]} evaluate payloads, ${got.tokens[1]} tokens, ${got.renames.length} renames`);
+  console.log(`${clean ? "same" : "EDIT"}  ${moved}: ${got.literals[1]} literals (${got.literalDiffs} differ by position), ${got.payloads[1]} evaluate payloads (${got.payloadDiffs} differ), ${got.tokens[1]} tokens, ${got.renames.length} renames`);
   for (const e of got.edits) console.log(`      line ${e.line}: ${e.before} -> ${e.after}`);
   return got;
 }

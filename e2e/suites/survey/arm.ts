@@ -1,4 +1,4 @@
-import type { SuiteContext } from "../types.ts";
+import type { SuiteContext } from "../../types.ts";
 import type { SurveyKit } from "./kit.ts";
 
 export async function sv1Boots({ evaluate, check, goto }: SurveyKit): Promise<void> {

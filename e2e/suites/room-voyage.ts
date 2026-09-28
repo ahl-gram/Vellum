@@ -1,6 +1,6 @@
 // Room voyage e2e (RW1-RW13, #320 Sub 3): the W-suite core re-hosted on the Reading Room; W7 and W8 deliberately did not port (the room is always armed, and its counter draw parks at the present, pinned by RR22).
-import { makeRoom, scopedHealth } from "./room-support.ts";
-import type { SuiteContext } from "./types.ts";
+import { makeRoom, scopedHealth } from "../support/room.ts";
+import type { SuiteContext } from "../types.ts";
 
 const glyphCount = `const shown=[...document.querySelectorAll(".rf-chart #layer-settlements g.settlement")].filter((g)=>g.style.display!=="none").length;`;
 type Room = ReturnType<typeof makeRoom>;

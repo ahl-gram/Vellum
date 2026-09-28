@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { compareFamilies, familyOf } from "../../scripts/e2e-split-proof.ts";
-import type { FamilyFile } from "../../scripts/e2e-split-proof.ts";
+import { compareFamilies, familyOf } from "../../e2e/split-proof.ts";
+import type { FamilyFile } from "../../e2e/split-proof.ts";
 
 const files = (...texts: string[]): FamilyFile[] => texts.map((text, i) => ({ path: i === 0 ? "scripts/e2e/suite-map.ts" : `scripts/e2e/map/part${i}.ts`, text }));
 

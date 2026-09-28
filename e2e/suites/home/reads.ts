@@ -1,5 +1,5 @@
-import type { Cam } from "../home-support.ts";
-import type { Payload } from "../types.ts";
+import type { Cam } from "../../support/home.ts";
+import type { Payload } from "../../types.ts";
 
 export type Seat = { pos: string; z: string; right: number; bottom: number; pe: string; anim: string; top: number; vw: number };
 

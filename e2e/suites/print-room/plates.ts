@@ -1,4 +1,4 @@
-import type { SuiteContext } from "../types.ts";
+import type { SuiteContext } from "../../types.ts";
 import type { PrintRoomKit } from "./kit.ts";
 
 export async function pr10PlatesEnable({ evaluate, check, sleep }: SuiteContext): Promise<void> {

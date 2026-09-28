@@ -1,4 +1,4 @@
-import type { Payload } from "../types.ts";
+import type { Payload } from "../../types.ts";
 
 // #633: a card taller than its box cannot be fitted by any offset, so the bound IS the principle. Swept 2026-09-19: the smallest real overage measured is 8.61px, so 0.5px is the sub-pixel residual of a cap published from a fractional rect and cannot hide one.
 export const OVER_BOX_TOLERANCE = 0.5;

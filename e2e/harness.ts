@@ -7,7 +7,7 @@ import { rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import type { BrowserProcess, CdpMessage, Clip, Payload, StartOptions, SuiteContext, TouchPoint } from "./types.ts";
-import { debugPortConflictMessage } from "../../src/cli/e2e-ports.ts";
+import { debugPortConflictMessage } from "./support/ports.ts";
 import { serverState, startServer } from "./site-server.ts";
 
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));

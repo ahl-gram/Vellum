@@ -1,7 +1,7 @@
 // Ribbon e2e (the RB checks; the chart room since #463 part 4/4): the strip-chart page boots from the shared worker, defaults to the capital's farthest road, the itinerary fills the slip and a row leans the Glass, a picked journey redraws in place and writes the address and the roads out, the phone docks the journey into the sheet, and the same address presses byte-identical scrolls; self-contained like its sibling suites (navigates itself, carries scoped no-4xx and console-error deltas).
-import { makeStep } from "./step-support.ts";
-import { dropExpectedCancellations } from "./console-support.ts";
-import type { Payload, SuiteContext } from "./types.ts";
+import { makeStep } from "../support/step.ts";
+import { dropExpectedCancellations } from "../support/console.ts";
+import type { Payload, SuiteContext } from "../types.ts";
 
 type Ribbon = { seed: number; from: number; to: number; leagues: number; dress: string; stRows: number; blob: boolean; shown: boolean; status: string | null; title: string | null; sub: string | null; unrolled: string | null; chart: string | null; prospect: string | null; prospectVerb: string | null; slipTitle: string | null; where: string | null; rows: number; toName: string | null; fromOptions: number[]; prospectShown: boolean; hash: string };
 type Row = { cls: string; num: string | undefined; strong: string | null; em: string | null; button: boolean };

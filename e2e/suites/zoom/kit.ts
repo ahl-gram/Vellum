@@ -1,4 +1,4 @@
-import type { SuiteContext } from "../types.ts";
+import type { SuiteContext } from "../../types.ts";
 import type { Ring } from "./reads.ts";
 
 export type ZoomKit = ReturnType<typeof zoomKit>;

@@ -1,7 +1,7 @@
 // Living Chart story-card overlay e2e (P1-P15, #53).
-import { makeStep } from "./step-support.ts";
-import { makeSettle } from "./settle-support.ts";
-import type { SuiteContext } from "./types.ts";
+import { makeStep } from "../support/step.ts";
+import { makeSettle } from "../support/settle.ts";
+import type { SuiteContext } from "../types.ts";
 import { cardsKit } from "./cards/kit.ts";
 import { NARROW_SEED } from "./cards/reads.ts";
 import { pSetup, pManifest, p1Overlay, p2Idle, p2bPressLift, p4Capital, p6Ruin, p7Tooltip, p8TapPins, p9Hover, p10Focus, p11OutsideClick, p12PinSwitch, p13AxDescription, p14Unfurl, p15RealHover } from "./cards/overlay.ts";

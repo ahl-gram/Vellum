@@ -1,5 +1,5 @@
-import type { makeRoom } from "../room-support.ts";
-import type { SuiteContext } from "../types.ts";
+import type { makeRoom } from "../../support/room.ts";
+import type { SuiteContext } from "../../types.ts";
 import type { SurveyKit } from "./kit.ts";
 
 type Room = ReturnType<typeof makeRoom>;

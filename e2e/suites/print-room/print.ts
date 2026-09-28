@@ -1,4 +1,4 @@
-import type { Payload, SuiteContext } from "../types.ts";
+import type { Payload, SuiteContext } from "../../types.ts";
 import type { PrintRoomKit } from "./kit.ts";
 import type { Warning } from "./reads.ts";
 

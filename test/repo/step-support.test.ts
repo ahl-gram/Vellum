@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { makeStep } from "../../scripts/e2e/step-support.ts";
+import { makeStep } from "../../e2e/support/step.ts";
 
 type Recorded = readonly [string, boolean, string];
 

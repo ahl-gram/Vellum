@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { dirname, join, relative, resolve, sep } from "node:path";
-import { CANCELLATION_PREFIXES, OUR_OWN_REASONS, dropExpectedCancellations } from "../../scripts/e2e/console-support.ts";
+import { CANCELLATION_PREFIXES, OUR_OWN_REASONS, dropExpectedCancellations } from "../../e2e/support/console.ts";
 import { e2eSourcePaths, readE2eSource } from "../../test-support/e2e-source.ts";
 
 const REPO = resolve(import.meta.dirname, "..", "..");

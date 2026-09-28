@@ -1,5 +1,5 @@
-import type { Cam } from "../home-support.ts";
-import type { Payload, Point } from "../types.ts";
+import type { Cam } from "../../support/home.ts";
+import type { Payload, Point } from "../../types.ts";
 
 export type Headroom = { cx: number; cy: number; w: number; h: number };
 export const stagePoint: Payload<Point | null> = `(() => { const s = document.getElementById("lf-stage"); if (!s) return null; const r = s.getBoundingClientRect(); return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) }; })()`;

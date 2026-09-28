@@ -2,8 +2,8 @@
 import { fileURLToPath } from "node:url";
 import { join, resolve } from "node:path";
 import { findBrowser } from "../src/cli/raster.ts";
-import { browserlessAction } from "../src/cli/browser-policy.ts";
-import { resolveE2ePorts, e2eOutSubdir } from "../src/cli/e2e-ports.ts";
+import { browserlessAction } from "./support/browser-policy.ts";
+import { resolveE2ePorts, e2eOutSubdir } from "./support/ports.ts";
 import {
   resolveSuiteSelection,
   suitesCertifiedByHealth,
@@ -12,41 +12,41 @@ import {
   runOutcome,
   suitesNotWhole,
   E2E_SUITE_ORDER,
-} from "../src/cli/e2e-suites.ts";
-import { start, cleanup } from "./e2e/harness.ts";
-import { run as runRender } from "./e2e/suite-render.ts";
-import { run as runMotion } from "./e2e/suite-motion.ts";
-import { run as runTurn } from "./e2e/suite-turn.ts";
-import { run as runVerso } from "./e2e/suite-verso.ts";
-import { run as runZoom } from "./e2e/suite-zoom.ts";
-import { run as runZoomGestures } from "./e2e/suite-zoom-gestures.ts";
-import { run as runGlassCeremony } from "./e2e/suite-glass-ceremony.ts";
-import { run as runCards } from "./e2e/suite-cards.ts";
-import { run as runHealth } from "./e2e/suite-health.ts";
-import { run as runFallback } from "./e2e/suite-fallback.ts";
-import { run as runHunt } from "./e2e/suite-hunt.ts";
-import { run as runPrintRoom } from "./e2e/suite-print-room.ts";
-import { run as runProspect } from "./e2e/suite-prospect.ts";
-import { run as runRibbon } from "./e2e/suite-ribbon.ts";
-import { run as runHome } from "./e2e/suite-home.ts";
-import { run as runLandfall } from "./e2e/suite-landfall.ts";
-import { run as runSurvey } from "./e2e/suite-survey.ts";
-import { run as runBroadside } from "./e2e/suite-broadside.ts";
-import { run as runReadingRoom } from "./e2e/suite-reading-room.ts";
-import { run as runRoomInstrument } from "./e2e/suite-room-instrument.ts";
-import { run as runRoomInk } from "./e2e/suite-room-ink.ts";
-import { run as runRoomVoyage } from "./e2e/suite-room-voyage.ts";
-import { run as runRoomAddress } from "./e2e/suite-room-address.ts";
-import { run as runRoomVoyageRoute } from "./e2e/suite-room-voyage-route.ts";
-import { run as runRunningHead } from "./e2e/suite-runninghead.ts";
-import { run as runCluster } from "./e2e/suite-cluster.ts";
-import { run as runChartDrawer } from "./e2e/suite-chart-drawer.ts";
-import { run as runRoomDrawer } from "./e2e/suite-room-drawer.ts";
-import { run as runDocumentRooms } from "./e2e/suite-document-rooms.ts";
-import { run as runRegionDetail } from "./e2e/suite-region-detail.ts";
-import { run as runSpecimen } from "./e2e/suite-specimen.ts";
-import type { StartOptions } from "./e2e/types.ts";
-import type { E2eSuiteTiming } from "../src/cli/e2e-suites.ts";
+} from "./support/suites.ts";
+import { start, cleanup } from "./harness.ts";
+import { run as runRender } from "./suites/render.ts";
+import { run as runMotion } from "./suites/motion.ts";
+import { run as runTurn } from "./suites/turn.ts";
+import { run as runVerso } from "./suites/verso.ts";
+import { run as runZoom } from "./suites/zoom.ts";
+import { run as runZoomGestures } from "./suites/zoom-gestures.ts";
+import { run as runGlassCeremony } from "./suites/glass-ceremony.ts";
+import { run as runCards } from "./suites/cards.ts";
+import { run as runHealth } from "./suites/health.ts";
+import { run as runFallback } from "./suites/fallback.ts";
+import { run as runHunt } from "./suites/hunt.ts";
+import { run as runPrintRoom } from "./suites/print-room.ts";
+import { run as runProspect } from "./suites/prospect.ts";
+import { run as runRibbon } from "./suites/ribbon.ts";
+import { run as runHome } from "./suites/home.ts";
+import { run as runLandfall } from "./suites/landfall.ts";
+import { run as runSurvey } from "./suites/survey.ts";
+import { run as runBroadside } from "./suites/broadside.ts";
+import { run as runReadingRoom } from "./suites/reading-room.ts";
+import { run as runRoomInstrument } from "./suites/room-instrument.ts";
+import { run as runRoomInk } from "./suites/room-ink.ts";
+import { run as runRoomVoyage } from "./suites/room-voyage.ts";
+import { run as runRoomAddress } from "./suites/room-address.ts";
+import { run as runRoomVoyageRoute } from "./suites/room-voyage-route.ts";
+import { run as runRunningHead } from "./suites/runninghead.ts";
+import { run as runCluster } from "./suites/cluster.ts";
+import { run as runChartDrawer } from "./suites/chart-drawer.ts";
+import { run as runRoomDrawer } from "./suites/room-drawer.ts";
+import { run as runDocumentRooms } from "./suites/document-rooms.ts";
+import { run as runRegionDetail } from "./suites/region-detail.ts";
+import { run as runSpecimen } from "./suites/specimen.ts";
+import type { StartOptions } from "./types.ts";
+import type { E2eSuiteTiming } from "./support/suites.ts";
 
 const HERE = fileURLToPath(new URL(".", import.meta.url));
 const REPO = resolve(HERE, "..");

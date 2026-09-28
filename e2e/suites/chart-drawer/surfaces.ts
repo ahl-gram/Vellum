@@ -1,4 +1,4 @@
-import type { Payload } from "../types.ts";
+import type { Payload } from "../../types.ts";
 import type { DrawerKit } from "./kit.ts";
 import { DRESS, SURFACES, both, drawerUp, slipTravelled } from "./reads.ts";
 import type { Edge } from "./reads.ts";

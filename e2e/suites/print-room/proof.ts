@@ -1,4 +1,4 @@
-import type { SuiteContext } from "../types.ts";
+import type { SuiteContext } from "../../types.ts";
 
 export async function pr0Boots({ evaluate, check, sleep }: SuiteContext): Promise<void> {
   let booted = false;

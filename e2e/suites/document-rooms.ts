@@ -1,8 +1,8 @@
 // The document rooms' index slip (#462 Landfall Sub 7, document-room rulings 1 to 4): the index is server-rendered from the page's own sections, inks the section being read, folds to hand the sheet the width, is the bottom sheet on a phone, and on the Glossary narrows to the term names typed. Every geometry is MEASURED; the scripts-off arm carries its control.
-import { scopedHealth } from "./room-support.ts";
-import { makeSettle } from "./settle-support.ts";
-import { makeStep } from "./step-support.ts";
-import type { Payload, SuiteContext } from "./types.ts";
+import { scopedHealth } from "../support/room.ts";
+import { makeSettle } from "../support/settle.ts";
+import { makeStep } from "../support/step.ts";
+import type { Payload, SuiteContext } from "../types.ts";
 
 const FAQ = "/faq/";
 const GLOSSARY = "/glossary/";

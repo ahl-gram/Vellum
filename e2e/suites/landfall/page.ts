@@ -1,4 +1,4 @@
-import type { Point } from "../types.ts";
+import type { Point } from "../../types.ts";
 import type { LandfallKit } from "./kit.ts";
 import { down, stagePoint } from "./reads.ts";
 

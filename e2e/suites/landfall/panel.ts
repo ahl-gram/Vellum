@@ -1,6 +1,6 @@
-import { buttonPoint, readXform } from "../home-support.ts";
-import type { Cam } from "../home-support.ts";
-import type { SuiteContext } from "../types.ts";
+import { buttonPoint, readXform } from "../../support/home.ts";
+import type { Cam } from "../../support/home.ts";
+import type { SuiteContext } from "../../types.ts";
 import type { LandfallKit } from "./kit.ts";
 
 type How = Awaited<ReturnType<typeof l5HowOpens>>;

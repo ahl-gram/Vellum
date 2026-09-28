@@ -1,6 +1,6 @@
 // Motion e2e (D the #127 arrival ceremony, F the #130 folio view-transition declarations): hand-authored like its sibling suites, run by the e2e harness rather than the test runner.
-import { makeStep } from "./step-support.ts";
-import type { SuiteContext } from "./types.ts";
+import { makeStep } from "../support/step.ts";
+import type { SuiteContext } from "../types.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { evaluate, check, sleep, waitSettled } = ctx;

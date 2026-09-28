@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { compareSources, inTree, movedTo, moveJudge, pairUp } from "../../scripts/e2e-port-proof.ts";
+import { compareSources, inTree, movedTo, moveJudge, pairUp } from "../../e2e/port-proof.ts";
 
 const SUITE_BEFORE = "scripts/e2e/suite-x.ts";
 const SUITE_AFTER = "e2e/suites/x.ts";

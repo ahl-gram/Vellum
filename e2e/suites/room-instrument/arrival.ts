@@ -1,4 +1,4 @@
-import { scrubFacts } from "../room-support.ts";
+import { scrubFacts } from "../../support/room.ts";
 import type { InstrumentKit } from "./kit.ts";
 
 type Arrival = { seed: number; status: string | undefined; cls: boolean; anim: string };

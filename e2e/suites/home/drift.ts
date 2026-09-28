@@ -1,5 +1,5 @@
-import { atLandfall, readXform, buttonPoint } from "../home-support.ts";
-import type { SuiteContext } from "../types.ts";
+import { atLandfall, readXform, buttonPoint } from "../../support/home.ts";
+import type { SuiteContext } from "../../types.ts";
 import type { HomeKit } from "./kit.ts";
 
 export async function h15aDrift({ evaluate, check, sleep }: SuiteContext): Promise<void> {

@@ -1,5 +1,5 @@
-import { slideRested, foldRested } from "../../../src/cli/e2e-slide.ts";
-import type { Payload, Point } from "../types.ts";
+import { slideRested, foldRested } from "../../support/slide.ts";
+import type { Payload, Point } from "../../types.ts";
 
 type Rect = { x: number; y: number; w: number; h: number; right: number; bottom: number };
 export type Read = { open: boolean; tabText: string | null; tabShown: boolean; count: string | null; cuttings: number; imgs: number; frames: number; titles: string[]; decoded: boolean[]; offs: number; offsReachable: number; offRects: { y: number; h: number }[]; lowestOff: number | null; minOffH: number; drawerAnims: string[]; slideMs: string | null; innerH: number; fullShown: boolean; roadDisabled: boolean; ear: { label: string | null; rect: Rect } | null; insetRect: Rect | null; insetSvgs: number; lastSvgIsSurvey: boolean; status: string; statusFadeMs: string | null; hashTable: string | null; rawHash: string; path: string; scrollW: number; innerW: number };

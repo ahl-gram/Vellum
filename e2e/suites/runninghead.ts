@@ -2,8 +2,8 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { resolve } from "node:path";
-import { dropExpectedCancellations } from "./console-support.ts";
-import type { SuiteContext } from "./types.ts";
+import { dropExpectedCancellations } from "../support/console.ts";
+import type { SuiteContext } from "../types.ts";
 import { runningHeadKit } from "./runninghead/kit.ts";
 import type { RunningHeadKit } from "./runninghead/kit.ts";
 import { DISPLAY_FACE, near, SHELLED } from "./runninghead/reads.ts";

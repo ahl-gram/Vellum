@@ -1,4 +1,4 @@
-import type { SuiteContext } from "../types.ts";
+import type { SuiteContext } from "../../types.ts";
 import { stageRead } from "./reads.ts";
 
 export type ReadingRoomKit = ReturnType<typeof readingRoomKit>;

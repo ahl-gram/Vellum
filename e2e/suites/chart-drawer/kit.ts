@@ -1,7 +1,7 @@
-import { makeStage } from "../home-support.ts";
-import type { makeMouse } from "../home-support.ts";
-import type { makeSettle } from "../settle-support.ts";
-import type { Payload, Point, SuiteContext } from "../types.ts";
+import { makeStage } from "../../support/home.ts";
+import type { makeMouse } from "../../support/home.ts";
+import type { makeSettle } from "../../support/settle.ts";
+import type { Payload, Point, SuiteContext } from "../../types.ts";
 // Imported and never restated: a key spelled twice is a clear that silently stops clearing the day the app's own key moves.
 import { TABLE_STORE_KEY } from "../../../src/site/shared/table-store.ts";
 import { CARRY, DRAWN, FOLDREST, READ, atRest } from "./reads.ts";

@@ -1,4 +1,4 @@
-import type { Payload } from "../types.ts";
+import type { Payload } from "../../types.ts";
 
 export const PAGE = "/specimen/";
 export const CHART_ASPECT = 1500 / 1157.931;

@@ -4,7 +4,7 @@ import { existsSync } from "node:fs";
 import { stripTypeScriptTypes } from "node:module";
 import { dirname, resolve, sep, extname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { E2E_PORT_VAR } from "../../src/cli/e2e-ports.ts";
+import { E2E_PORT_VAR } from "./support/ports.ts";
 
 const MIME: Record<string, string | undefined> = {
   ".html": "text/html; charset=utf-8",
@@ -23,7 +23,7 @@ export const serverState = { blockWorker: false };
 const BLOCKED_WORKERS = new Set(["/explorer/worker.bundle.js"]);
 
 // In-page oracle: suites import engine modules IN THE BROWSER (same JS engine, no cross-engine float drift); since #260 the harness answers /explorer/engine/*.js by type-stripping src/*.ts on demand and rewriting .ts specifiers. e2e-only serving.
-const SRC_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "src");
+const SRC_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "..", "src");
 const ENGINE_MODULE = /^\/explorer\/engine\/(.+)\.js$/;
 function serveEngineModule(pathname: string, res: import("node:http").ServerResponse): boolean | Promise<boolean> {
   const m = pathname.match(ENGINE_MODULE);

@@ -1,4 +1,4 @@
-import type { SuiteContext } from "../types.ts";
+import type { SuiteContext } from "../../types.ts";
 import { ATLAS_FIT } from "./reads.ts";
 
 export type PrintRoomKit = ReturnType<typeof printRoomKit>;

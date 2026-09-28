@@ -1,4 +1,4 @@
-import type { SuiteContext } from "../types.ts";
+import type { SuiteContext } from "../../types.ts";
 import type { RunningHeadKit } from "./kit.ts";
 import { APP, CHART, CLUSTER_NORMAL, expectedHead, FOLIO, HEAD_LEADED, HEAD_READ, matches, MEMBERS, near, PROSE, SHELLED } from "./reads.ts";
 import type { Bad, Head, Heads } from "./reads.ts";

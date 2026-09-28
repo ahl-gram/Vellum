@@ -1,4 +1,4 @@
-import type { SuiteContext } from "../types.ts";
+import type { SuiteContext } from "../../types.ts";
 import type { Cam } from "./reads.ts";
 
 export async function z9Keyboard({ evaluate, check }: SuiteContext): Promise<void> {

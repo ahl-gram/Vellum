@@ -1,4 +1,4 @@
-import type { Payload, SuiteContext } from "../types.ts";
+import type { Payload, SuiteContext } from "../../types.ts";
 import type { DrawerKit } from "./kit.ts";
 import { DRAWN } from "./reads.ts";
 

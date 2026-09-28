@@ -1,5 +1,5 @@
-import { dropExpectedCancellations } from "../console-support.ts";
-import type { SuiteContext } from "../types.ts";
+import { dropExpectedCancellations } from "../../support/console.ts";
+import type { SuiteContext } from "../../types.ts";
 import type { HomeKit } from "./kit.ts";
 import { controlGold } from "./reads.ts";
 

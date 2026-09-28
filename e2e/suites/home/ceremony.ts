@@ -1,6 +1,6 @@
-import { dropExpectedCancellations } from "../console-support.ts";
-import { readCam, atLandfall } from "../home-support.ts";
-import type { SuiteContext } from "../types.ts";
+import { dropExpectedCancellations } from "../../support/console.ts";
+import { readCam, atLandfall } from "../../support/home.ts";
+import type { SuiteContext } from "../../types.ts";
 import type { HomeKit } from "./kit.ts";
 import { anchored, seatOk } from "./reads.ts";
 import type { Seat } from "./reads.ts";

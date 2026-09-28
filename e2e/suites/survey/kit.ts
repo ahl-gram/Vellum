@@ -1,4 +1,4 @@
-import type { SuiteContext } from "../types.ts";
+import type { SuiteContext } from "../../types.ts";
 
 export type SurveyKit = ReturnType<typeof surveyKit>;
 

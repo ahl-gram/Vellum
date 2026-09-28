@@ -1,6 +1,6 @@
-import { atLandfall } from "../home-support.ts";
-import type { Cam } from "../home-support.ts";
-import type { Point } from "../types.ts";
+import { atLandfall } from "../../support/home.ts";
+import type { Cam } from "../../support/home.ts";
+import type { Point } from "../../types.ts";
 import type { LandfallKit } from "./kit.ts";
 import { stagePoint } from "./reads.ts";
 

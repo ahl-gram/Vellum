@@ -1,4 +1,4 @@
-import { readPaceSweep, PACE_LEG_MS } from "../../../src/cli/e2e-pace.ts";
+import { readPaceSweep, PACE_LEG_MS } from "../../support/pace.ts";
 import type { Facts, InstrumentKit } from "./kit.ts";
 
 export async function rs29Pace({ evaluate, check, sleep, setYear, clickPlay }: InstrumentKit, smNow: Facts): Promise<void> {

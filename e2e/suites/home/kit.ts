@@ -1,5 +1,5 @@
-import { makeStage } from "../home-support.ts";
-import type { SuiteContext } from "../types.ts";
+import { makeStage } from "../../support/home.ts";
+import type { SuiteContext } from "../../types.ts";
 import type { Seat } from "./reads.ts";
 
 export type HomeKit = ReturnType<typeof homeKit>;

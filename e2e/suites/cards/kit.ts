@@ -1,5 +1,5 @@
-import type { makeSettle } from "../settle-support.ts";
-import type { SuiteContext } from "../types.ts";
+import type { makeSettle } from "../../support/settle.ts";
+import type { SuiteContext } from "../../types.ts";
 import { NARROW_SEED, SWEEP } from "./reads.ts";
 
 type Settle = ReturnType<typeof makeSettle>;

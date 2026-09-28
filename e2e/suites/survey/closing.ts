@@ -1,5 +1,5 @@
-import { dropExpectedCancellations } from "../console-support.ts";
-import type { SuiteContext } from "../types.ts";
+import { dropExpectedCancellations } from "../../support/console.ts";
+import type { SuiteContext } from "../../types.ts";
 
 export async function sv8NoYear({ evaluate, check }: SuiteContext): Promise<void> {
   const sv8 = await evaluate<boolean>(`location.hash.includes("year=")`);

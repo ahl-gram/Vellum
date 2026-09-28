@@ -1,4 +1,4 @@
-import type { SuiteContext } from "../types.ts";
+import type { SuiteContext } from "../../types.ts";
 
 export async function pr24Redraw({ evaluate, check, sleep }: SuiteContext): Promise<void> {
   const midDraw = await evaluate<{ bind: boolean; print: boolean; atlasEmpty: boolean; hasAtlas: boolean }>(`(()=>{const s=document.getElementById("pr-seed");s.value="2024";document.getElementById("pr-draw").click();return{bind:document.getElementById("pr-bind").disabled,print:document.getElementById("pr-print").disabled,atlasEmpty:document.getElementById("pr-atlas").children.length===0,hasAtlas:document.body.classList.contains("has-atlas")};})()`);

@@ -1,5 +1,5 @@
 // The pace measurement (#526): the sweep's clock is wall-anchored (living-chart/pace.ts), so the years the story covers per page millisecond is a RATE no runner speed can move, only WHEN frames land; each sample pairs a year with the rAF timestamp of the frame that painted it, the slope of year on that timestamp is the rate, and a constant pairing lag is an offset in that fit, not a tilt.
-import { SWEEP_MS } from "../render/chronicle-scrubber.ts";
+import { SWEEP_MS } from "../../src/render/chronicle-scrubber.ts";
 
 /** One painted frame: the frame's own timestamp, the year it painted, the pace it painted at. */
 export interface PaceSample {

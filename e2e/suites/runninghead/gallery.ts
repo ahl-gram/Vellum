@@ -1,5 +1,5 @@
-import { luminance, sampleRow } from "../pixel-support.ts";
-import type { Payload, Point } from "../types.ts";
+import { luminance, sampleRow } from "../../support/pixel.ts";
+import type { Payload, Point } from "../../types.ts";
 import type { RunningHeadKit } from "./kit.ts";
 
 export async function rh10GalleryScrolled({ evaluate, send, check, sleep, visit }: RunningHeadKit): Promise<void> {

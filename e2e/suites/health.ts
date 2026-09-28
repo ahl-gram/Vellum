@@ -1,6 +1,6 @@
 // Health checkpoint e2e (N1/N2) over the whole worker run so far; reads the shared consoleErrors/http4xx accumulators.
-import { dropExpectedCancellations } from "./console-support.ts";
-import type { SuiteContext } from "./types.ts";
+import { dropExpectedCancellations } from "../support/console.ts";
+import type { SuiteContext } from "../types.ts";
 export function run(ctx: SuiteContext): Promise<void> {
   const { check, consoleErrors, http4xx } = ctx;
   const errs = dropExpectedCancellations(consoleErrors);

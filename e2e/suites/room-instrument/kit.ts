@@ -1,6 +1,6 @@
-import { makeRoom, makeBar } from "../room-support.ts";
-import type { scrubFacts } from "../room-support.ts";
-import type { SuiteContext } from "../types.ts";
+import { makeRoom, makeBar } from "../../support/room.ts";
+import type { scrubFacts } from "../../support/room.ts";
+import type { SuiteContext } from "../../types.ts";
 
 export type InstrumentKit = ReturnType<typeof instrumentKit>;
 export type Facts = Awaited<ReturnType<typeof scrubFacts>>;

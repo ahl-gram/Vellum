@@ -1,6 +1,6 @@
-import { luminance, sampleRow } from "../pixel-support.ts";
-import type { makeSettle } from "../settle-support.ts";
-import type { SuiteContext } from "../types.ts";
+import { luminance, sampleRow } from "../../support/pixel.ts";
+import type { makeSettle } from "../../support/settle.ts";
+import type { SuiteContext } from "../../types.ts";
 import { PAGE, READ } from "./reads.ts";
 import type { Specimen } from "./reads.ts";
 

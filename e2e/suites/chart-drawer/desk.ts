@@ -1,4 +1,4 @@
-import type { Point, SuiteContext } from "../types.ts";
+import type { Point, SuiteContext } from "../../types.ts";
 import type { DrawerKit } from "./kit.ts";
 import { DEEP, DRAWN, DRESS, READ, atInset, drawerUp } from "./reads.ts";
 import type { Read } from "./reads.ts";

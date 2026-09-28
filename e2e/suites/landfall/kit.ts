@@ -1,5 +1,5 @@
-import { readCam, buttonPoint, makeStage } from "../home-support.ts";
-import type { Point, SuiteContext } from "../types.ts";
+import { readCam, buttonPoint, makeStage } from "../../support/home.ts";
+import type { Point, SuiteContext } from "../../types.ts";
 import { narrowClosed, narrowAtTop, narrowReachable } from "./narrow.ts";
 import type { Headroom } from "./reads.ts";
 

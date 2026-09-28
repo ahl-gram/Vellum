@@ -1,7 +1,7 @@
 // Room address e2e (RA1-RA8, #320 Sub 3): the #192 A-suite's year-restore checks re-hosted; the Explorer-hosted A* originals stay green beside them.
-import { makeRoom } from "./room-support.ts";
-import { dropExpectedCancellations } from "./console-support.ts";
-import type { SuiteContext } from "./types.ts";
+import { makeRoom } from "../support/room.ts";
+import { dropExpectedCancellations } from "../support/console.ts";
+import type { SuiteContext } from "../types.ts";
 
 type Room = ReturnType<typeof makeRoom>;
 type World = Awaited<ReturnType<typeof raWorld>>;

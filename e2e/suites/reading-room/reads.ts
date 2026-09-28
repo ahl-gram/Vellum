@@ -1,4 +1,4 @@
-import type { Payload } from "../types.ts";
+import type { Payload } from "../../types.ts";
 
 export type Ages = { chamber: string; year: number | null };
 type AgesRead = { ages: Ages | null; play: string | null; panelHidden: boolean | null; hash: string };

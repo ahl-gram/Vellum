@@ -1,8 +1,8 @@
 // Broadside e2e (BR1-BR8, #270): the regrouped controls, seals, journal button, and footnote apparatus on the built running page (the unit pins in test/site/broadside.test.ts hold the SOURCE to this shape); self-contained with scoped deltas.
-import { luminance, sampleRow } from "./pixel-support.ts";
-import { dropExpectedCancellations } from "./console-support.ts";
-import type { Payload, Point, SuiteContext } from "./types.ts";
-import { makeStep } from "./step-support.ts";
+import { luminance, sampleRow } from "../support/pixel.ts";
+import { dropExpectedCancellations } from "../support/console.ts";
+import type { Payload, Point, SuiteContext } from "../types.ts";
+import { makeStep } from "../support/step.ts";
 
 type Box = { l: number; r: number; t: number; b: number; w: number } | null;
 type Room = { lg: Box; bl: Box; sl: Box; gl: Box; sh: Box; folioText: number; w: number; h: number };

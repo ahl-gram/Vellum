@@ -7,7 +7,7 @@ import {
   MOTION_MOVED_PX,
   type MotionRead,
   type SlideRead,
-} from "../../src/cli/e2e-slide.ts";
+} from "../../e2e/support/slide.ts";
 
 // Every fixture below is a read measured through CDP on 2026-09-13 at 1280x800, seed 42, the CD7 hash, named with the moment it came from.
 const slide = (pos: number, size: number, anims: readonly string[]): SlideRead => ({ pos, size, anims, viewportH: 800 });

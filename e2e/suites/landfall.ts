@@ -1,6 +1,6 @@
 // Landfall hardening e2e (#460, second suite by ratification 2026-08-25): the wheel consumed-vs-released contract at both zoom clamps (L1), the six panel arms from the superseding 2026-08-24T18:53 spec plus the sixth-arm clearance (L2-L7), the Enter links as 44px touch targets (L8), touch two-finger-drives vs one-finger-page-scroll under one emulation set (L9), and the seed form's no-JS GET fallback with its bare-visit control (L10-L11). Every gesture is REAL dispatched input; suite-home's plumbing arrives via home-support.ts.
-import { scopedHealth } from "./room-support.ts";
-import type { SuiteContext } from "./types.ts";
+import { scopedHealth } from "../support/room.ts";
+import type { SuiteContext } from "../types.ts";
 import { stageKit, gestureKit, entersKit } from "./landfall/kit.ts";
 import type { LandfallKit } from "./landfall/kit.ts";
 import { stagePoint } from "./landfall/reads.ts";

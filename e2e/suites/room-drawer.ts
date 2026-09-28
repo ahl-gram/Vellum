@@ -1,8 +1,8 @@
 // The drawer on a ROOM (#483 Landfall Sub 6c): the cluster suite covers home, whose chrome rides the page; a room's chrome is fixed, which changes what the scrim must be and whether a scroll closes anything. Every geometry is MEASURED and every door HIT-TESTED, since the sticky cap once sat over three doors with every rect green.
-import { scopedHealth } from "./room-support.ts";
-import { makeSettle } from "./settle-support.ts";
-import { makeStep } from "./step-support.ts";
-import type { Payload, SuiteContext } from "./types.ts";
+import { scopedHealth } from "../support/room.ts";
+import { makeSettle } from "../support/settle.ts";
+import { makeStep } from "../support/step.ts";
+import type { Payload, SuiteContext } from "../types.ts";
 
 const DOCUMENT_ROOM = "/faq/";
 const APP_ROOM = "/explorer/";

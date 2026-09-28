@@ -12,16 +12,16 @@ import {
   laneOutcome,
   resolveLaneSelection,
   splitLaneChunk,
-} from "../../src/cli/e2e-lanes.ts";
-import type { LaneResult } from "../../src/cli/e2e-lanes.ts";
+} from "../../e2e/support/lanes.ts";
+import type { LaneResult } from "../../e2e/support/lanes.ts";
 import {
   E2E_SUITE_ORDER,
   E2E_SUITES_VAR,
   runOutcome,
   suitesCertifiedByHealth,
-} from "../../src/cli/e2e-suites.ts";
-import type { E2eSuiteName } from "../../src/cli/e2e-suites.ts";
-import { E2E_PORT_VAR, E2E_DPORT_VAR, e2eOutSubdir } from "../../src/cli/e2e-ports.ts";
+} from "../../e2e/support/suites.ts";
+import type { E2eSuiteName } from "../../e2e/support/suites.ts";
+import { E2E_PORT_VAR, E2E_DPORT_VAR, e2eOutSubdir } from "../../e2e/support/ports.ts";
 
 // Seconds per suite, from the runner's own per-suite wall clock on a 16-core Mac. Every entry was refreshed 2026-09-20 at #637 from two local runs of each lane with the roster as it stands, the higher reading taken (chart-drawer re-measured the same way on 2026-09-21 at Issue #523) (both readings at the entry, one lane run at a time); refresh from that same output when the split is revisited. These seconds reach CI unevenly, about 2.0x on lane A and 1.8x on lane B against this table and per suite from 1.1x (home, wait-bound) to 3.3x (render), measured 2026-09-20 on main run 35518105601, so a rebalance is SIZED from the CI lane logs' per-suite wall clock and this table decides only the 0.6 bound below.
 const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
@@ -367,7 +367,7 @@ test("a lane's output is split into whole lines, across chunk boundaries and at 
 test("the skip line the driver watches for is the one the runner actually prints", () => {
   // Read as source: a machine with a browser never takes this path, and a reworded SKIP would silently turn an empty run green.
   const runner = readFileSync(
-    join(import.meta.dirname, "..", "..", "scripts", "e2e-explorer.ts"),
+    join(import.meta.dirname, "..", "..", "e2e", "run.ts"),
     "utf8",
   );
   const printed = runner.match(/"(SKIP:[^"]*)"/);

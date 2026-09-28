@@ -1,4 +1,4 @@
-import type { Point, SuiteContext } from "../types.ts";
+import type { Point, SuiteContext } from "../../types.ts";
 
 export type Manifest = Awaited<ReturnType<typeof pManifest>>;
 

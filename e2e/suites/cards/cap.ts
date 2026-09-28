@@ -1,4 +1,4 @@
-import type { Point, SuiteContext } from "../types.ts";
+import type { Point, SuiteContext } from "../../types.ts";
 import type { CardsKit } from "./kit.ts";
 import { NARROW_SEED, OVER_BOX_TOLERANCE } from "./reads.ts";
 import type { Swept } from "./reads.ts";

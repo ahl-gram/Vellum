@@ -7,7 +7,7 @@ import {
   e2eOutSubdir,
   resolveE2ePorts,
   resolvePort,
-} from "../../src/cli/e2e-ports.ts";
+} from "../../e2e/support/ports.ts";
 
 
 test("unset env keeps today's defaults, so every existing invocation is unchanged", () => {

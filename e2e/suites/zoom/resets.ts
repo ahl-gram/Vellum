@@ -1,4 +1,4 @@
-import type { SuiteContext } from "../types.ts";
+import type { SuiteContext } from "../../types.ts";
 
 export async function z5VersoHomes({ evaluate, check, shoot, sleep }: SuiteContext): Promise<void> {
   await evaluate(`window.__vellumZoomTo({k:3,x:-40,y:-30})`);

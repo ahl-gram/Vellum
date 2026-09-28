@@ -1,4 +1,4 @@
-import type { SuiteContext } from "../types.ts";
+import type { SuiteContext } from "../../types.ts";
 import type { ReadingRoomKit } from "./kit.ts";
 import { agesRead, stripRead } from "./reads.ts";
 

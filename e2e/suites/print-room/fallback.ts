@@ -1,5 +1,5 @@
-import { dropExpectedCancellations } from "../console-support.ts";
-import type { SuiteContext } from "../types.ts";
+import { dropExpectedCancellations } from "../../support/console.ts";
+import type { SuiteContext } from "../../types.ts";
 
 export function pr6Clean(ctx: SuiteContext, prErrBase: number, prHttpBase: number): void {
   const { check, consoleErrors, http4xx } = ctx;

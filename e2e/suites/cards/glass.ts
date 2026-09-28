@@ -1,4 +1,4 @@
-import type { SuiteContext } from "../types.ts";
+import type { SuiteContext } from "../../types.ts";
 import type { Manifest } from "./overlay.ts";
 
 export async function p16Glass({ evaluate, check }: SuiteContext, pm: Manifest): Promise<void> {

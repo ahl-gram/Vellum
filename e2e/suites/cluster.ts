@@ -1,9 +1,9 @@
 // The head cluster on home (CL1-CL7, #480 Landfall Sub 6b): the wash sized to the cluster, the stage's lettering opted out of selection, and the phone drawer; every geometry MEASURED against the rendered page, since the #480 screenshots were all things source-scan tests could not see.
-import { makeStage, makeMouse, readCam, atLandfall } from "./home-support.ts";
-import { sampleRow, luminance } from "./pixel-support.ts";
-import { makeSettle } from "./settle-support.ts";
-import { makeStep } from "./step-support.ts";
-import type { Payload, Point, SuiteContext } from "./types.ts";
+import { makeStage, makeMouse, readCam, atLandfall } from "../support/home.ts";
+import { sampleRow, luminance } from "../support/pixel.ts";
+import { makeSettle } from "../support/settle.ts";
+import { makeStep } from "../support/step.ts";
+import type { Payload, Point, SuiteContext } from "../types.ts";
 
 type Rect = { x: number; y: number; w: number; h: number; right: number; bottom: number };
 type Box = { x: number; y: number; w: number; h: number };

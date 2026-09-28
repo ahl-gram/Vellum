@@ -1,4 +1,4 @@
-import type { SuiteContext } from "../types.ts";
+import type { SuiteContext } from "../../types.ts";
 import type { ZoomKit } from "./kit.ts";
 import { ringAtRest, ringScale } from "./reads.ts";
 import type { Cam } from "./reads.ts";

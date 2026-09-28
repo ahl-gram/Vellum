@@ -1,6 +1,6 @@
 // Shared helpers for the Reading-Room-hosted suites (#320); reading-room/kit.ts deliberately keeps its own copies (the double-coverage premise), and the room's settle is NOT the shared waitSettled, which keys on the Explorer's #verso-turn.
-import { dropExpectedCancellations } from "./console-support.ts";
-import type { Evaluate, SuiteContext } from "./types.ts";
+import { dropExpectedCancellations } from "./console.ts";
+import type { Evaluate, SuiteContext } from "../types.ts";
 
 export const CHART_SVG = ".rf-chart svg:not(.voyage-overlay)";
 

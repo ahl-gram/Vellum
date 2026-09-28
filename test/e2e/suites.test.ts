@@ -10,8 +10,8 @@ import {
   runSelected,
   suitesCertifiedByHealth,
   suitesNotWhole,
-} from "../../src/cli/e2e-suites.ts";
-import type { E2eRunHooks } from "../../src/cli/e2e-suites.ts";
+} from "../../e2e/support/suites.ts";
+import type { E2eRunHooks } from "../../e2e/support/suites.ts";
 
 // Selection throws rather than narrowing: `every()` is true for [], so a typo'd name that matched nothing would report ALL PASS (0/0) and exit 0.
 

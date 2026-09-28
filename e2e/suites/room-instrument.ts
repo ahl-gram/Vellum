@@ -1,6 +1,6 @@
 // Room instrument e2e (RS*, #320 Sub 3): the S-suite's live-animation coverage re-hosted against .rf-* selectors and the room's own hooks; the Explorer-hosted S* originals stay green beside these until Sub 4 retires them by name.
-import { scrubFacts, scopedHealth } from "./room-support.ts";
-import type { SuiteContext } from "./types.ts";
+import { scrubFacts, scopedHealth } from "../support/room.ts";
+import type { SuiteContext } from "../types.ts";
 import { instrumentKit } from "./room-instrument/kit.ts";
 import { rs0Boots, rs1State, rs2Seams, rs3Parks, rs4AllShown, rs5Scrub, rs7Ruin } from "./room-instrument/scrub.ts";
 import { rs8Sweeps, rs10Drag, rs11Forward, rs12Pause, rs14Glyphs, rs15Slide, rs16Strip, rs17Story } from "./room-instrument/sweep.ts";

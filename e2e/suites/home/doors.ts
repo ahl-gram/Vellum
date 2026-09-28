@@ -1,4 +1,4 @@
-import type { SuiteContext } from "../types.ts";
+import type { SuiteContext } from "../../types.ts";
 import { doorShown } from "./reads.ts";
 
 type Doors = Awaited<ReturnType<typeof h13cDoorsRead>>;

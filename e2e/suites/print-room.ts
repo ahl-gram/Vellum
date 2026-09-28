@@ -1,5 +1,5 @@
 // Print Room e2e (PRL, PR0-PR29, PRC, PRB, PRW; #133/#134/#135/#136/#137/#212/#217): the shell and inline fallback, the poster plates, the PNG rasterizer and the bound atlas; hand-authored like its sibling suites and self-contained (navigates itself, carries scoped no-4xx and console-error deltas).
-import type { SuiteContext } from "./types.ts";
+import type { SuiteContext } from "../types.ts";
 import { printRoomKit } from "./print-room/kit.ts";
 import { prlLink, prwWarp } from "./print-room/link.ts";
 import { pr0Boots, pr3World, prcCarried, prbBare } from "./print-room/proof.ts";

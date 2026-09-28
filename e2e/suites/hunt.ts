@@ -1,6 +1,6 @@
 // Daily Hunt e2e (H1-H12, HD, HG) on the seed-of-the-day page.
-import { dropExpectedCancellations } from "./console-support.ts";
-import type { SuiteContext } from "./types.ts";
+import { dropExpectedCancellations } from "../support/console.ts";
+import type { SuiteContext } from "../types.ts";
 
 type Frac = { fx: number; fy: number };
 type Zoom = { k: number; x: number; y: number };

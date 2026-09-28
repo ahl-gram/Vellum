@@ -1,6 +1,6 @@
 // The Glass sees it e2e (RD, #400): every check reads the COMMITTED inset the user is looking at, never a job result standing in for it; byte comparisons are same-environment only (one page, one JS engine), the only kind lod.ts's byte-identity contract can be checked by, since a cross-environment SVG compare is barred project-wide.
-import { makeStep } from "./step-support.ts";
-import type { SuiteContext } from "./types.ts";
+import { makeStep } from "../support/step.ts";
+import type { SuiteContext } from "../types.ts";
 
 const SEED = 2; // an archipelago seed: seed 42 is an island map with no straits, so it hides coastline defects (#376)
 // A region sheet is ~500KB, far past what a CDP evaluate should carry back, so the digest is computed IN the page (both sides of every compare hashed by the same engine); the LAST inset, never the first, because during a crossing the outgoing sheet is still mounted and a plain querySelector reads the one on its way off screen.

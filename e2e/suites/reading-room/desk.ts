@@ -1,4 +1,4 @@
-import type { SuiteContext } from "../types.ts";
+import type { SuiteContext } from "../../types.ts";
 import { GOVERNING_BUDGET, stripRead, WIDE_WORST } from "./reads.ts";
 import type { Room, Strip } from "./reads.ts";
 

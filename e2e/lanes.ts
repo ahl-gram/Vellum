@@ -3,7 +3,7 @@ import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { join } from "node:path";
 import { findBrowser } from "../src/cli/raster.ts";
-import { browserlessAction } from "../src/cli/browser-policy.ts";
+import { browserlessAction } from "./support/browser-policy.ts";
 import {
   ambientSelectionRefusal,
   laneCheckTally,
@@ -12,12 +12,12 @@ import {
   laneOutcome,
   resolveLaneSelection,
   splitLaneChunk,
-} from "../src/cli/e2e-lanes.ts";
-import type { E2eLane, LaneResult, LaneTally } from "../src/cli/e2e-lanes.ts";
+} from "./support/lanes.ts";
+import type { E2eLane, LaneResult, LaneTally } from "./support/lanes.ts";
 import type { Readable } from "node:stream";
 
 const HERE = fileURLToPath(new URL(".", import.meta.url));
-const RUNNER = join(HERE, "e2e-explorer.ts");
+const RUNNER = join(HERE, "run.ts");
 
 let SELECTED;
 try {

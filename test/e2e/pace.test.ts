@@ -7,7 +7,7 @@ import {
   PACE_LEG_MIN_SAMPLES,
   PACE_RATE_TOLERANCE,
   type PaceSample,
-} from "../../src/cli/e2e-pace.ts";
+} from "../../e2e/support/pace.ts";
 import { SWEEP_MS } from "../../src/render/chronicle-scrubber.ts";
 
 // The pace reading is taken off the page's frame clock, not two years a wall window apart; these pin the reading itself, so the e2e check is about the engine and not about how fast the runner happened to be.

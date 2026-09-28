@@ -1,4 +1,4 @@
-import { buttonPoint } from "../home-support.ts";
+import { buttonPoint } from "../../support/home.ts";
 import type { StageKit } from "./kit.ts";
 
 export async function narrowClosed({ evaluate, sleep, pressKey }: StageKit): Promise<void> {
