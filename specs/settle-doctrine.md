@@ -172,7 +172,7 @@ section points there rather than restating it.
   rest signal too, never on the clock or the +0 read, which is what keeps that arm the control
   `specs/ui-design.md` makes it. Which signal depends on who retires the animation: where the page
   removes the class on `animationend` (the Chart Table's landing, `settle` in
-  `src/site/explorer/chart-drawer.ts`) the removal CANCELS the animation and empties
+  `src/site/explorer/chart-drawer-bind.ts`) the removal CANCELS the animation and empties
   `getAnimations()`, so the guarded poll above can never see `finished` there, and the rest
   signal is the class's absence AFTER it was seen present, since the same page also removes that
   class on a shut and on an off-screen list, and an absence with no witness reads a settle that

@@ -281,14 +281,14 @@ test("CT7b the Explorer passes the REAL turn flag into the gate, so the pure ref
 });
 
 test("CT8 the road to the Portfolio carries the Explorer's WHOLE address, not the table key alone (#634 ruling 3, 2026-09-19)", () => {
-  const src = readFileSync(resolve(REPO, "src/site/explorer/chart-drawer.ts"), "utf8");
+  const src = readFileSync(resolve(REPO, "src/site/explorer/chart-drawer-bind.ts"), "utf8");
   const at = src.indexOf("drawerEls.road.addEventListener");
   assert.notEqual(at, -1, "the road's own handler is gone, so this guard would be reading the whole file");
   const handler = src.slice(at, src.indexOf("});", at));
   // The ASSIGNMENT is anchored, not the tokens: the guard-prover's round 1 left the whole-address expression standing as a dead local and navigated with `deps.folioHref` alone, and a token-wise guard passed that with the road broken.
   assert.match(
     handler,
-    /window\.location\.href = `\$\{deps\.folioHref[^`]*\$\{tableHash\(window\.location\.hash, emitTable\(items\)\)\}`;/,
+    /window\.location\.href = `\$\{deps\.folioHref[^`]*\$\{tableHash\(window\.location\.hash, emitTable\(items\(\)\)\)\}`;/,
     "the road no longer NAVIGATES to this page's own address plus the table: computing it and going somewhere else is the same defect as never computing it, and it is what #634 measured losing the world",
   );
   assert.doesNotMatch(handler, /#\$\{TABLE_KEY\}=/, "the key-only form is back; it is what #634 defect 1 measured losing the world");
@@ -321,16 +321,16 @@ test("CT9 the table is written to the device when the reader CHANGES it and re-s
 });
 
 test("CT10 a re-seat that lands mid-draw asks for ANOTHER pass, and a sheet that leaves takes its picture with it (#634, the two behaviours restore() gained when it stopped running once at boot)", () => {
-  const src = readFileSync(resolve(REPO, "src/site/explorer/chart-drawer.ts"), "utf8");
+  const src = readFileSync(resolve(REPO, "src/site/explorer/chart-drawer-bind.ts"), "utf8");
   const fill = src.slice(src.indexOf("const fill = async"), src.indexOf("\n  };", src.indexOf("const fill = async")));
   assert.ok(fill.length > 60, "the fill was not found, so the assertions below read an empty slice");
   assert.match(fill, /if \(drawing\) \{ refill = true; return; \}/, "a re-seat that lands while a thumbnail is in flight is DROPPED again, and its sheets keep a drawing frame until the reader shuts the drawer and opens it, which is the whole reason the flag exists");
   assert.match(fill, /do \{[\s\S]*\} while \(refill\)/, "and the flag is set but never acted on, which is the same thing one step later");
   // The other half of that window, which nothing claimed until the cold review's round 3: the sheet can LEAVE while its picture is being drawn, and the url then lands under a key no cutting carries, so nothing ever revokes it.
-  assert.match(fill, /if \(!items\.some\(\(live\) => keyOf\(live\) === keyOf\(item\)\)\) \{ URL\.revokeObjectURL\(drawn\.url\); continue; \}/, "a picture that finishes drawing for a sheet that already left is filed rather than revoked, which leaks one blob url per departed sheet per re-seat mid-draw");
-  const restore = src.slice(src.indexOf("restore(next:"), src.indexOf("\n    },", src.indexOf("restore(next:")));
+  assert.match(fill, /if \(!items\(\)\.some\(\(live\) => keyOf\(live\) === keyOf\(item\)\)\) \{ URL\.revokeObjectURL\(drawn\.url\); continue; \}/, "a picture that finishes drawing for a sheet that already left is filed rather than revoked, which leaks one blob url per departed sheet per re-seat mid-draw");
+  const restore = src.slice(src.indexOf("restore(next:"), src.indexOf("\n  }\n", src.indexOf("restore(next:")));
   assert.ok(restore.length > 60, "restore was not found, so the assertions below read an empty slice");
-  assert.match(restore, /for \(const gone of sheetsThatLeft\(items, kept\)\) forget\(gone\);/, "a sheet that leaves on a cached return keeps its blob url, and this path now runs on every return rather than once at boot, so they accumulate one per re-seat");
+  assert.match(restore, /for \(const gone of sheetsThatLeft\(items\(\), kept\)\) forget\(gone\);/, "a sheet that leaves on a cached return keeps its blob url, and this path now runs on every return rather than once at boot, so they accumulate one per re-seat");
   // The set it is built from is the hazard, so it is BEHAVIOUR here and not a regex: built from the outgoing table it answers "nothing left" for every re-seat, and the line's text is identical.
   const before = [survey(1), survey(2), survey(3)];
   assert.deepEqual(sheetsThatLeft(before, [survey(1), survey(3)]).map((i) => emitTable([i])), [emitTable([survey(2)])], "the middle sheet left and was not named, so its picture is never revoked");

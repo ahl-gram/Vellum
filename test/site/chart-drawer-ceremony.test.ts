@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { bindChartDrawer } from "../../src/site/explorer/chart-drawer.ts";
+import { bindChartDrawer } from "../../src/site/explorer/chart-drawer-bind.ts";
 import { TABLE_CAP, type SurveyItem, type TableItem } from "../../src/site/shared/table-address.ts";
 import { El, installShim } from "../../test-support/element-shim.ts";
 
