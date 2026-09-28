@@ -1,8 +1,8 @@
-// The e2e port's proof (Issue #653): every file under scripts/e2e/ and the two runners, compared with its base as the JavaScript Node will run, so a port shows it changed nothing but types and the specifiers of modules that moved.
+// The e2e tree's proof (Issue #653's port, Issue #679's move): every e2e file compared with its base, at the place the ruled layout moved it, as the JavaScript Node will run, so a port or a move shows it changed nothing but types and specifiers that still reach the same module.
 import { execFileSync } from "node:child_process";
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { stripTypeScriptTypes } from "node:module";
-import { dirname, join, resolve } from "node:path";
+import { join, posix, resolve } from "node:path";
 import ts from "typescript";
 
 type RuntimeEdit = { readonly line: number; readonly before: string; readonly after: string };
@@ -83,18 +83,73 @@ const treeEdit = (sa: ts.SourceFile, sb: ts.SourceFile): RuntimeEdit | null => {
   return at === undefined ? null : { line: b.at(at)?.line ?? a.at(at)?.line ?? 0, before: `syntax ${a.at(at)?.key ?? "(none)"}`, after: `syntax ${b.at(at)?.key ?? "(none)"}` };
 };
 
-const renameOf = (a: Leaf, b: Leaf, existsAsTs: (specifier: string) => boolean): string | null => {
-  if (!a.specifier || !b.specifier || !a.text.endsWith('.mjs"')) return null;
-  const moved = a.text.replace(/\.mjs"$/, '.ts"');
-  return b.text === moved && existsAsTs(moved.slice(1, -1)) ? `${a.text} -> ${b.text}` : null;
+type SameModule = (before: string, after: string) => boolean;
+
+const RELATIVE = /^["']\.\.?\//;
+
+const specifierVerdict = (a: Leaf, b: Leaf, sameModule: SameModule): "same" | "rename" | "edit" | null => {
+  if (!a.specifier || !b.specifier || !RELATIVE.test(a.text) || !RELATIVE.test(b.text)) return null;
+  if (!sameModule(a.text.slice(1, -1), b.text.slice(1, -1))) return "edit";
+  return a.text === b.text ? "same" : "rename";
 };
 
 const differences = (a: readonly string[], b: readonly string[]): number =>
   Array.from({ length: Math.max(a.length, b.length) }, (_, i) => (a[i] === b[i] ? 0 : 1)).reduce<number>((s, d) => s + d, 0);
 
-export function compareSources(before: string, after: string, afterIsTs: boolean, existsAsTs: (specifier: string) => boolean, beforeIsTs = false): PortComparison {
-  const sa = parse(beforeIsTs ? stripTypeScriptTypes(before, { mode: "strip" }) : before);
-  const sb = parse(afterIsTs ? stripTypeScriptTypes(after, { mode: "strip" }) : after);
+const LAYOUT: readonly (readonly [RegExp, (m: RegExpMatchArray) => string])[] = [
+  [/^scripts\/e2e-explorer\.ts$/, () => "e2e/run.ts"],
+  [/^scripts\/e2e-(lanes|port-proof|split-proof)\.ts$/, (m) => `e2e/${m[1]}.ts`],
+  [/^scripts\/e2e\/(harness|types|site-server)\.ts$/, (m) => `e2e/${m[1]}.ts`],
+  [/^scripts\/e2e\/([\w-]+)-support\.ts$/, (m) => `e2e/support/${m[1]}.ts`],
+  [/^scripts\/e2e\/suite-([\w-]+)\.ts$/, (m) => `e2e/suites/${m[1]}.ts`],
+  [/^scripts\/e2e\/([\w-]+)\/(.+\.ts)$/, (m) => `e2e/suites/${m[1]}/${m[2]}`],
+  [/^src\/cli\/(?:e2e-([\w-]+)|(browser-policy))\.ts$/, (m) => `e2e/support/${m[1] ?? m[2]}.ts`],
+  [/^test\/cli\/(?:e2e-([\w-]+)|(browser-policy))\.test\.ts$/, (m) => `test/e2e/${m[1] ?? m[2]}.test.ts`],
+  [/^(e2e\/.+\.ts|test\/e2e\/[\w-]+\.test\.ts)$/, (m) => m[1]!],
+];
+
+export const movedTo = (path: string): string | null => {
+  for (const [rule, to] of LAYOUT) {
+    const m = path.match(rule);
+    if (m) return to(m);
+  }
+  return null;
+};
+
+const TREE = /^(scripts\/(e2e\/.+|e2e-[\w-]+)\.(ts|mjs)|(src|test)\/cli\/(e2e-[\w-]+|browser-policy)\.(test\.)?ts|e2e\/.+\.(ts|mjs)|test\/e2e\/.+\.ts)$/;
+export const inTree = (path: string): boolean => TREE.test(path);
+
+export const moveJudge = (basePath: string, headPath: string, exists: (path: string) => boolean): SameModule => (before, after) => {
+  const from = posix.normalize(posix.join(posix.dirname(basePath), before));
+  const to = posix.normalize(posix.join(posix.dirname(headPath), after));
+  return (movedTo(from) ?? from) === to && exists(to);
+};
+
+type Pairing = { pairs: [string, string][]; gone: string[]; unmapped: string[]; added: string[] };
+
+export function pairUp(basePaths: readonly string[], headPaths: readonly string[]): Pairing {
+  const onDisk = new Set(headPaths);
+  const claimed = new Map<string, string>();
+  const out: Pairing = { pairs: [], gone: [], unmapped: [], added: [] };
+  for (const path of basePaths) {
+    const to = movedTo(path);
+    if (to === null) {
+      out.unmapped.push(path);
+      continue;
+    }
+    const prior = claimed.get(to);
+    if (prior !== undefined) throw new Error(`${prior} and ${path} both move to ${to}`);
+    claimed.set(to, path);
+    if (onDisk.has(to)) out.pairs.push([path, to]);
+    else out.gone.push(path);
+  }
+  out.added = headPaths.filter((p) => !claimed.has(p));
+  return out;
+}
+
+export function compareSources(before: string, after: string, sameModule: SameModule): PortComparison {
+  const sa = parse(stripTypeScriptTypes(before, { mode: "strip" }));
+  const sb = parse(stripTypeScriptTypes(after, { mode: "strip" }));
   const a = leaves(sa);
   const b = leaves(sb);
   const renames: string[] = [];
@@ -103,10 +158,10 @@ export function compareSources(before: string, after: string, afterIsTs: boolean
   for (let i = 0; i < Math.max(a.length, b.length); i++) {
     const x = a.at(i);
     const y = b.at(i);
-    if (x && y && x.kind === y.kind && x.text === y.text) continue;
-    const rename = x && y ? renameOf(x, y, existsAsTs) : null;
-    if (rename !== null) {
-      renames.push(rename);
+    const verdict = x && y ? specifierVerdict(x, y, sameModule) : null;
+    if (verdict === "same" || (verdict === null && x && y && x.kind === y.kind && x.text === y.text)) continue;
+    if (verdict === "rename" && x && y) {
+      renames.push(`${x.text} -> ${y.text}`);
       renamed.add(i);
       continue;
     }
@@ -135,42 +190,31 @@ const ROOT = resolve(import.meta.dirname, "..");
 const GIT_TIMEOUT_MS = 30_000;
 const git = (args: string[]): string => execFileSync("git", args, { cwd: ROOT, encoding: "utf8", timeout: GIT_TIMEOUT_MS, maxBuffer: 64 * 1024 * 1024 });
 
-const inScope = (path: string): boolean => /^scripts\/(e2e\/[^/]+|e2e-[\w-]+)\.(mjs|ts)$/.test(path) && path !== "scripts/e2e-port-proof.ts";
+const SELF = new Set(["scripts/e2e-port-proof.ts", "e2e/port-proof.ts"]);
+const scope = (paths: readonly string[]): string[] => [...new Set(paths.filter((p) => inTree(p) && !SELF.has(p)))].sort();
 
-const workingPath = (basePath: string): string | null => {
-  const stem = basePath.replace(/\.(mjs|ts)$/, "");
-  const found = [`${stem}.ts`, `${stem}.mjs`].filter((p) => existsSync(join(ROOT, p)));
-  if (found.length > 1) throw new Error(`${stem} exists as both .ts and .mjs, so the port left its old file behind`);
-  return found[0] ?? null;
-};
+function compareOne(base: string, basePath: string, now: string): PortComparison {
+  const got = compareSources(git(["show", `${base}:${basePath}`]), readFileSync(join(ROOT, now), "utf8"), moveJudge(basePath, now, (p) => existsSync(join(ROOT, p))));
+  const clean = got.edits.length === 0 && got.literalDiffs === 0 && got.payloadDiffs === 0;
+  const moved = now === basePath ? now : `${basePath} -> ${now}`;
+  console.log(`${clean ? "same" : "EDIT"}  ${moved}: ${got.literals[1]} literals, ${got.payloads[1]} evaluate payloads, ${got.tokens[1]} tokens, ${got.renames.length} renames`);
+  for (const e of got.edits) console.log(`      line ${e.line}: ${e.before} -> ${e.after}`);
+  return got;
+}
+
+const sum = (all: readonly PortComparison[], pick: (c: PortComparison) => number): number => all.reduce((s, c) => s + pick(c), 0);
 
 function main(base: string): number {
-  const basePaths = git(["ls-tree", "-r", "--name-only", base, "--", "scripts"]).split("\n").filter(inScope);
-  if (basePaths.length < 30) throw new Error(`read only ${basePaths.length} e2e files at ${base}, so this is not the tree the port starts from`);
-  const totals = { literals: [0, 0], payloads: [0, 0], tokens: [0, 0], literalDiffs: 0, payloadDiffs: 0, renames: 0, edits: 0 };
-  for (const basePath of basePaths) {
-    const now = workingPath(basePath);
-    if (now === null) {
-      console.log(`GONE  ${basePath}: no .ts or .mjs file by that stem in the working tree`);
-      totals.edits++;
-      continue;
-    }
-    const existsAsTs = (specifier: string): boolean => existsSync(resolve(ROOT, dirname(now), specifier));
-    const got = compareSources(git(["show", `${base}:${basePath}`]), readFileSync(join(ROOT, now), "utf8"), now.endsWith(".ts"), existsAsTs, basePath.endsWith(".ts"));
-    for (const k of ["literals", "payloads", "tokens"] as const) for (const i of [0, 1] as const) totals[k][i]! += got[k][i];
-    totals.literalDiffs += got.literalDiffs;
-    totals.payloadDiffs += got.payloadDiffs;
-    totals.renames += got.renames.length;
-    totals.edits += got.edits.length;
-    const clean = got.edits.length === 0 && got.literalDiffs === 0 && got.payloadDiffs === 0;
-    const moved = now === basePath ? now : `${basePath} -> ${now}`;
-    console.log(`${clean ? "same" : "EDIT"}  ${moved}: ${got.literals[1]} literals, ${got.payloads[1]} evaluate payloads, ${got.tokens[1]} tokens, ${got.renames.length} renames`);
-    for (const e of got.edits) console.log(`      line ${e.line}: ${e.before} -> ${e.after}`);
-  }
-  const added = readdirSync(join(ROOT, "scripts", "e2e")).map((f) => `scripts/e2e/${f}`).filter((p) => inScope(p) && !basePaths.some((b) => b.replace(/\.(mjs|ts)$/, "") === p.replace(/\.(mjs|ts)$/, "")));
-  for (const p of added) console.log(`new   ${p}: no base file, nothing to compare`);
-  console.log(`\n${basePaths.length} files against ${base}: literals ${totals.literals[0]} -> ${totals.literals[1]} (${totals.literalDiffs} differ), evaluate payloads ${totals.payloads[0]} -> ${totals.payloads[1]} (${totals.payloadDiffs} differ), tokens ${totals.tokens[0]} -> ${totals.tokens[1]}, ${totals.renames} specifier renames, ${totals.edits} runtime edits`);
-  return totals.edits + totals.literalDiffs + totals.payloadDiffs === 0 ? 0 : 1;
+  const basePaths = scope(git(["ls-tree", "-r", "--name-only", base]).split("\n"));
+  const headPaths = scope(git(["ls-files", "--cached", "--others", "--exclude-standard"]).split("\n")).filter((p) => existsSync(join(ROOT, p)));
+  if (basePaths.length < 30) throw new Error(`read only ${basePaths.length} e2e files at ${base}, so this is not the e2e tree`);
+  const { pairs, gone, unmapped, added } = pairUp(basePaths, headPaths);
+  const all = pairs.map(([basePath, now]) => compareOne(base, basePath, now));
+  for (const p of gone) console.log(`GONE  ${p}: its place in the layout, ${movedTo(p)}, holds no file`);
+  for (const p of unmapped) console.log(`UNMAPPED  ${p}: no rule of the layout places it`);
+  for (const p of added) console.log(`new   ${p}: no base file reaches it, nothing to compare`);
+  console.log(`\n${basePaths.length} files against ${base}, ${pairs.length} paired, ${gone.length} gone, ${unmapped.length} unmapped, ${added.length} new: literals ${sum(all, (c) => c.literals[0])} -> ${sum(all, (c) => c.literals[1])} (${sum(all, (c) => c.literalDiffs)} differ), evaluate payloads ${sum(all, (c) => c.payloads[0])} -> ${sum(all, (c) => c.payloads[1])} (${sum(all, (c) => c.payloadDiffs)} differ), tokens ${sum(all, (c) => c.tokens[0])} -> ${sum(all, (c) => c.tokens[1])}, ${sum(all, (c) => c.renames.length)} specifier renames, ${sum(all, (c) => c.edits.length)} runtime edits`);
+  return sum(all, (c) => c.edits.length + c.literalDiffs + c.payloadDiffs) + gone.length + unmapped.length === 0 ? 0 : 1;
 }
 
 if (import.meta.main) process.exit(main(process.argv[2] ?? "origin/main"));
