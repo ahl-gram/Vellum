@@ -130,9 +130,9 @@ test("restore puts back every path it is handed, binary bytes included", () => {
     assert.notDeepEqual(bytes(join(wt, "a.txt")), a, "the first mutation did not land");
     assert.notDeepEqual(bytes(join(wt, "b.txt")), b, "the second mutation did not land");
     assert.deepEqual(restore(NAME, ["a.txt", "b.txt", "bin.dat"], linked), ["a.txt", "b.txt", "bin.dat"]);
+    assert.deepEqual(bytes(join(wt, "bin.dat")), BINARY, "a binary file came back re-encoded as text");
     assert.deepEqual(bytes(join(wt, "a.txt")), a, "the first path was not put back");
     assert.deepEqual(bytes(join(wt, "b.txt")), b, "a later path was not put back");
-    assert.deepEqual(bytes(join(wt, "bin.dat")), BINARY, "a binary file came back re-encoded as text");
   });
 });
 
