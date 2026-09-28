@@ -15,7 +15,7 @@ function listSheets(): ReadonlyArray<string> {
   return sheets;
 }
 
-// Every sweep over the site's sheets imports this rather than listing them; a sweep that types out its own list instead reds nothing here (errata/guards.md), so Gate 1 item 16 is the only fence on that.
+// A sweep that types out its own list of sheets instead of importing this reds nothing here (errata/guards.md), so Gate 1 item 16 is the only fence on that.
 export const SITE_SHEETS: ReadonlyArray<string> = listSheets();
 
 export function sheetsSweptBy(exclusions: Readonly<Record<string, string>>): ReadonlyArray<string> {

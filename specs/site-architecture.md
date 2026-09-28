@@ -53,8 +53,10 @@ symbol and path so the reader goes and looks.
   a red.** The stylesheets under `public/` are no list anyone keeps: `SITE_SHEETS` in
   `test-support/site-sheets.ts` reads them from git, so a new sheet joins every sweep that imports
   it by existing, and `test/site/tip-affordance.test.ts` reds when git's list and a walk of `public/`
-  disagree. A sweep over every sheet imports `SITE_SHEETS` and never types a list of its own, and a
-  sweep that skips a sheet names it beside itself through `sheetsSweptBy`, with the reason. The
+  disagree. A new sweep over the sheets imports `SITE_SHEETS` rather than typing a list of its own,
+  and names any sheet it skips beside itself through `sheetsSweptBy`, with the reason. A sweep that
+  walks or globs `public/` for itself reads the disk instead, which on a built tree includes the
+  generated gallery sheet `SITE_SHEETS` leaves out, so the two do not mean the same "every sheet". The
   authored CSS under `src/` closes by a `deepEqual` between `SRC_CSS_FILES` and a fingerprint walk
   of `src/`, which reds by name and tells you what to add. A discovery route closes too, at build
   time, by throwing when it has no blurb. The page, bundle, cleaning and lane rosters are hand-kept

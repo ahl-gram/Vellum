@@ -370,7 +370,7 @@ test("the sheet roster git lists is every stylesheet on disk under public/ that 
   assert.deepEqual(
     sheets.filter((sheet) => !GENERATED_CSS.some(([tree]) => sheet.startsWith(tree))).sort(),
     SITE_SHEETS,
-    "a sheet on disk and off SITE_SHEETS is gitignored, so every sweep skips it: add its tree to GENERATED_CSS " +
+    "a sheet on disk and off SITE_SHEETS is gitignored, so no sweep that reads SITE_SHEETS sees it: add its tree to GENERATED_CSS " +
       "if a generator writes it, or stop ignoring it; a sheet on SITE_SHEETS and off the disk was deleted without git rm",
   );
 });
