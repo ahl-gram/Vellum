@@ -17,7 +17,7 @@ export function journalText(text: string): string {
   return text.replace(/^Year \d+\. /, "");
 }
 
-function journalRow(e: VoyageLogEntry, i: number): HTMLLIElement {
+function journalRow(e: Readonly<VoyageLogEntry>, i: number): HTMLLIElement {
   const li = document.createElement("li");
   li.className = "prologue";
   const year = document.createElement("span");

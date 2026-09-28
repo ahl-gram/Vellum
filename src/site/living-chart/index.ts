@@ -40,7 +40,7 @@ export interface LivingChartHost {
   tourOrder?: TourOrderSource;
 }
 
-function agesFor(bar: ScrubberRefs | undefined, overlay: PlaceOverlay, chronicle: Chronicle, voyage: Voyage): Ages {
+function agesFor(bar: Readonly<ScrubberRefs> | undefined, overlay: Readonly<PlaceOverlay>, chronicle: Readonly<Chronicle>, voyage: Readonly<Voyage>): Ages {
   return bar
     ? createAges({
         panel: bar.panel,
@@ -57,7 +57,7 @@ function agesFor(bar: ScrubberRefs | undefined, overlay: PlaceOverlay, chronicle
     : barlessAges({ chronicle, voyage });
 }
 
-function overlayApi(overlay: PlaceOverlay) {
+function overlayApi(overlay: Readonly<PlaceOverlay>) {
   return {
     // #53: the doc-level dismiss pair is wired by the host (document listeners are page-global, a host decision).
     buildPlaceOverlay: (manifest: PlaceManifest, opts?: BuildPlaceOverlayOpts) =>
@@ -71,7 +71,7 @@ function overlayApi(overlay: PlaceOverlay) {
   };
 }
 
-function agesApi(ages: Ages) {
+function agesApi(ages: Readonly<Ages>) {
   return {
     applyAges: (manifest: PlaceManifest | null, survey: Survey | null, seed: number, subtitle: string) =>
       ages.armAges(manifest, survey, seed, subtitle),
@@ -91,7 +91,7 @@ function agesApi(ages: Ages) {
   };
 }
 
-function scrubApi(ages: Ages, chronicle: Chronicle) {
+function scrubApi(ages: Readonly<Ages>, chronicle: Readonly<Chronicle>) {
   return {
     applyScrub: chronicle.applyScrub,
     exitScrub: chronicle.exitScrub,
@@ -110,7 +110,7 @@ function scrubApi(ages: Ages, chronicle: Chronicle) {
   };
 }
 
-function voyageApi(voyage: Voyage) {
+function voyageApi(voyage: Readonly<Voyage>) {
   return {
     applyVoyage: voyage.applyVoyage,
     rearmVoyage: voyage.rearmVoyage,
@@ -140,7 +140,7 @@ export function createLivingChart(host: LivingChartHost) {
     mapEl: host.mapEl,
     overlay: { data: () => overlay.data(), hideCard: () => overlay.hideCard() },
   });
-  // The one place the optional instrument branches; everything downstream is shape-identical for the two host kinds (ratified 2026-08-09 on #319).
+  // The optional instrument branches only here and in agesFor, both on bar (ratified 2026-08-09 on #319).
   const bar = host.scrubber;
   const logPanel = bar
     ? createVoyageLogPanel({ panel: bar.panel, sig: bar.sig, strip: bar.strip })

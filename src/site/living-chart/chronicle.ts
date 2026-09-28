@@ -70,7 +70,7 @@ function chroniclePaint() {
 
 type ChroniclePaint = ReturnType<typeof chroniclePaint>;
 
-function chronicleArm(deps: ChronicleDeps, paint: ChroniclePaint) {
+function chronicleArm(deps: Readonly<ChronicleDeps>, paint: Readonly<ChroniclePaint>) {
   const { mapEl, overlay } = deps;
   const { setScrub, paintYear } = paint;
 
@@ -115,7 +115,7 @@ function chronicleArm(deps: ChronicleDeps, paint: ChroniclePaint) {
   return { applyScrub };
 }
 
-function chronicleRestore(deps: ChronicleDeps, paint: ChroniclePaint) {
+function chronicleRestore(deps: Readonly<ChronicleDeps>, paint: Readonly<ChroniclePaint>) {
   const { mapEl } = deps;
   const { scrub, setScrub } = paint;
 

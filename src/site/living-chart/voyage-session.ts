@@ -62,7 +62,7 @@ export interface SessionBuilderDeps {
   tourOrder?: TourOrderSource;
 }
 
-function tourOrderMemo(tourOrder: TourOrderSource | undefined) {
+function tourOrderMemo(tourOrder: Readonly<TourOrderSource> | undefined) {
   let travelOrder: { key: string; order: ReadonlyArray<number> } | null = null;
 
   function orderItinerary(
@@ -92,9 +92,9 @@ function tourOrderMemo(tourOrder: TourOrderSource | undefined) {
 type OrderItinerary = ReturnType<typeof tourOrderMemo>["orderItinerary"];
 
 function routedPlan(
-  manifest: PlaceManifest,
-  survey: Survey,
-  straight: VoyagePlan,
+  manifest: Readonly<PlaceManifest>,
+  survey: Readonly<Survey>,
+  straight: Readonly<VoyagePlan>,
   seed: number,
   quiet: boolean,
   orderItinerary: OrderItinerary,
@@ -106,7 +106,7 @@ function routedPlan(
   return { plan, routed };
 }
 
-function projectedLegs(routed: RoutedLeg[], proj: Projection) {
+function projectedLegs(routed: ReadonlyArray<RoutedLeg>, proj: Readonly<Projection>) {
   const legs: SessionLeg[] = routed.map((leg) => ({
     mode: leg.mode,
     water: leg.water,
@@ -122,11 +122,11 @@ function projectedLegs(routed: RoutedLeg[], proj: Projection) {
 }
 
 function sessionLog(
-  logPanel: VoyageLogPanel,
-  manifest: PlaceManifest,
-  plan: VoyagePlan,
-  routed: RoutedLeg[],
-  byIdx: Map<number, PlaceMark>,
+  logPanel: Readonly<VoyageLogPanel>,
+  manifest: Readonly<PlaceManifest>,
+  plan: Readonly<VoyagePlan>,
+  routed: ReadonlyArray<RoutedLeg>,
+  byIdx: ReadonlyMap<number, PlaceMark>,
   seed: number,
   subtitle: string,
 ) {
@@ -152,7 +152,7 @@ function sessionLog(
   );
 }
 
-function voyageOverlay(mapEl: HTMLElement, manifest: PlaceManifest, wPx: number) {
+function voyageOverlay(mapEl: HTMLElement, manifest: Readonly<PlaceManifest>, wPx: number) {
   const svg = document.createElementNS(SVG_NS, "svg");
   svg.setAttribute("class", "voyage-overlay");
   svg.setAttribute("viewBox", `0 0 ${wPx} ${manifest.heightPx}`);

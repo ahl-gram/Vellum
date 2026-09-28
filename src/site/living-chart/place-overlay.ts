@@ -63,7 +63,7 @@ function makeLayPress(host: LayProspectHost): HTMLButtonElement {
   return press;
 }
 
-function overlayBox(opts: BuildPlaceOverlayOpts | undefined): HTMLDivElement {
+function overlayBox(opts: Readonly<BuildPlaceOverlayOpts> | undefined): HTMLDivElement {
   const overlay = document.createElement("div");
   overlay.className = "place-overlay";
   if (opts && opts.box) {
@@ -91,7 +91,7 @@ function cardShell() {
   return { card, inner };
 }
 
-function cardActs(inner: HTMLDivElement, opts: BuildPlaceOverlayOpts | undefined, prospectHref: PlaceOverlayDeps["prospectHref"], layProspect: LayProspectHost | undefined) {
+function cardActs(inner: HTMLDivElement, opts: Readonly<BuildPlaceOverlayOpts> | undefined, prospectHref: PlaceOverlayDeps["prospectHref"], layProspect: Readonly<LayProspectHost> | undefined) {
   // Both card actions are world-sheet only: a region manifest renumbers its places (#242), so an inset's index names a different settlement.
   const onWorldSheet = !(opts && opts.box);
   let prospectLink: HTMLAnchorElement | null = null;
