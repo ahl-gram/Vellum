@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import { GALLERY_PAGE_CSS } from "../../src/cli/gallery.ts";
 import { atlasDocument } from "../../src/atlas/document.ts";
 import { OG_FONT_FACES, fontFaceCss } from "../../src/render/og-card.ts";
+import { SITE_SHEETS, SRC_CSS_FILES } from "../../test-support/site-sheets.ts";
 
 // Two contracts over every authored sheet the site has (#289, #356, #358, #360): what tips must go somewhere or be a ratified chart instrument, and an inline-block link must pin its bullet or be recorded as living outside a marker-bearing list. A tip is the shape rotate(, so a translate-only lift and the bare rotate: property are not swept (a #289 question).
 
@@ -14,28 +15,6 @@ const read = (p: string) => readFileSync(root(p), "utf8");
 
 /** Generator-written trees under public/, gitignored and so absent from a fresh clone: each is skipped by the public/ walk and swept at the src/ source named beside it instead. */
 const GENERATED_CSS = [["public/gallery/", "src/cli/gallery.ts"]] as const;
-
-const AUTHORED_CSS = [
-  "public/atelier.css",
-  "public/explorer/broadside.css",
-  "public/explorer/chart-drawer.css",
-  "public/explorer/index.css",
-  "public/faq/index.css",
-  "public/fonts.css",
-  "public/glossary/index.css",
-  "public/house.css",
-  "public/index.css",
-  "public/living-chart.css",
-  "public/motion.css",
-  "public/print-room/index.css",
-  "public/print-room/portfolio/index.css",
-  "public/prospect/index.css",
-  "public/specimen/index.css",
-  "public/ribbon/index.css",
-  "public/reading-frame.css",
-  "public/reading-room/index.css",
-  "public/seed-of-the-day/index.css",
-] as const;
 
 /** Joining a source's several <style> blocks is safe here: every sweep reads rules independently, none depends on cascade order between blocks. */
 const styleBlocksIn = (source: string): string =>
@@ -61,17 +40,17 @@ const atlasCss = (): string => {
 };
 
 /** Authored css outside public/ (#360), each paired with a way to get its css as a string. Keys keep the whole src/ path, so they cannot collide with the public/ side, which strips its prefix. */
-const SRC_CSS: ReadonlyArray<readonly [string, () => string]> = [
-  ["src/layouts/BaseLayout.astro", () => styleBlocksIn(read("src/layouts/BaseLayout.astro"))],
-  ["src/pages/index.astro", () => styleBlocksIn(read("src/pages/index.astro"))],
-  ["src/cli/gallery.ts", () => GALLERY_PAGE_CSS],
-  ["src/atlas/document.ts", atlasCss],
-  ["src/render/og-card.ts", () => OG_FONT_FACES.map((face) => fontFaceCss(face, "")).join("\n")],
-];
+const SRC_CSS: Readonly<Record<(typeof SRC_CSS_FILES)[number], () => string>> = {
+  "src/layouts/BaseLayout.astro": () => styleBlocksIn(read("src/layouts/BaseLayout.astro")),
+  "src/pages/index.astro": () => styleBlocksIn(read("src/pages/index.astro")),
+  "src/cli/gallery.ts": () => GALLERY_PAGE_CSS,
+  "src/atlas/document.ts": atlasCss,
+  "src/render/og-card.ts": () => OG_FONT_FACES.map((face) => fontFaceCss(face, "")).join("\n"),
+};
 
 const authoredSheets = (): ReadonlyArray<readonly [string, string]> => [
-  ...AUTHORED_CSS.map((file) => [file.replace("public/", ""), read(file)] as const),
-  ...SRC_CSS.map(([file, css]) => [file, css()] as const),
+  ...SITE_SHEETS.map((file) => [file.replace("public/", ""), read(file)] as const),
+  ...SRC_CSS_FILES.map((file) => [file, SRC_CSS[file]()] as const),
 ];
 
 const withoutComments = (source: string): string =>
@@ -288,8 +267,8 @@ test("every hover tip belongs to a surface that goes somewhere (#289; #324 feel 
 test("the authored roster is exactly the css-bearing sources under src/ (#360)", () => {
   assert.deepEqual(
     cssBearingSources().sort(),
-    SRC_CSS.map(([file]) => file).sort(),
-    "authored css in src/ is swept only if it is on SRC_CSS; add the file with a way " +
+    [...SRC_CSS_FILES].sort(),
+    "authored css in src/ is swept only if it is on SRC_CSS_FILES; add the file there and to SRC_CSS with a way " +
       "to get its css as a string, or if this is not really css, say why the scan thinks it is",
   );
 });
@@ -373,27 +352,25 @@ test("the css-source scan sees css, and sees the defects it polices (#360)", () 
 });
 
 test("every generated tree names a source the sweeps actually read (#360)", () => {
-  const swept = new Set(SRC_CSS.map(([file]) => file));
+  const swept = new Set<string>(SRC_CSS_FILES);
   for (const [tree, source] of GENERATED_CSS) {
     assert.ok(
       swept.has(source),
       `${tree} is skipped by the public/ walk because ${source} is supposed to be ` +
-        `swept in its place, and ${source} is not on SRC_CSS. Either add it there or ` +
+        `swept in its place, and ${source} is not on SRC_CSS_FILES. Either add it there or ` +
         `stop exempting the tree; as it stands that css is in no sweep at all`,
     );
   }
 });
 
-test("the authored roster covers every stylesheet under public/ (#358)", () => {
+test("the sheet roster git lists is every stylesheet on disk under public/ that no generator writes (#358, Issue #709)", () => {
   const sheets = readdirSync(root("public"), { recursive: true, encoding: "utf8" })
     .map((entry) => `public/${entry.split(sep).join("/")}`)
     .filter((p) => p.endsWith(".css"));
-  for (const sheet of sheets) {
-    assert.ok(
-      AUTHORED_CSS.includes(sheet as (typeof AUTHORED_CSS)[number]) ||
-        GENERATED_CSS.some(([tree]) => sheet.startsWith(tree)),
-      `${sheet} is on disk but not on AUTHORED_CSS, so every sweep skips it; add it, ` +
-        `or add its tree to GENERATED_CSS if a generator writes it`,
-    );
-  }
+  assert.deepEqual(
+    sheets.filter((sheet) => !GENERATED_CSS.some(([tree]) => sheet.startsWith(tree))).sort(),
+    SITE_SHEETS,
+    "a sheet on disk and off SITE_SHEETS is gitignored, so every sweep skips it: add its tree to GENERATED_CSS " +
+      "if a generator writes it, or stop ignoring it; a sheet on SITE_SHEETS and off the disk was deleted without git rm",
+  );
 });

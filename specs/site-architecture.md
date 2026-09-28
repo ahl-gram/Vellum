@@ -50,13 +50,19 @@ symbol and path so the reader goes and looks.
   Gate 4 one: grep the nearest sibling's name across `src/`, `scripts/`, `test/` and `.github/`, and
   join every list it appears in. A list written in prose is a starting point and goes stale; the
   grep does not. **Some rosters close themselves and some do not, so learn which before you rely on
-  a red.** Both sheet rosters in `test/site/tip-affordance.test.ts` close: one walks `public/` and
-  reds on an unlisted sheet, and the other is a `deepEqual` between `SRC_CSS` and a fingerprint walk
+  a red.** The stylesheets under `public/` are no list anyone keeps: `SITE_SHEETS` in
+  `test-support/site-sheets.ts` reads them from git, so a new sheet joins every sweep that imports
+  it by existing, and `test/site/tip-affordance.test.ts` reds when git's list and a walk of `public/`
+  disagree. A sweep over every sheet imports `SITE_SHEETS` and never types a list of its own, and a
+  sweep that skips a sheet names it beside itself through `sheetsSweptBy`, with the reason. The
+  authored CSS under `src/` closes by a `deepEqual` between `SRC_CSS_FILES` and a fingerprint walk
   of `src/`, which reds by name and tells you what to add. A discovery route closes too, at build
   time, by throwing when it has no blurb. The page, bundle, cleaning and lane rosters are hand-kept
-  and silent when missed, which is why the grep comes first.
-- **The rosters a page or a sheet joins**, by symbol: `PAGE_CSS`, `SHARED_CSS`, `ROOT_CSS` and
-  `TOKENS` in `test/site/shell-css.test.ts`; `PAGES` in `test/site/astro-scaffold.test.ts`;
+  and silent when missed, which is why the grep comes first, and so are the lists that name a sheet
+  for what it does rather than for being a sheet: `CHART_MOUNTS` in
+  `test/site/shell-css-ground.test.ts`, and the sheets home loads in `test/site/home-shelf.test.ts`.
+- **The rosters a page or a sheet joins**, by symbol: `TOKENS` in `test/site/shell-css.test.ts`;
+  `PAGES` in `test/site/astro-scaffold.test.ts`;
   `BUNDLE_ENTRIES` in `scripts/build-app-bundles.ts`; `GENERATED_SUBTREES` in
   `scripts/clean-public-generated.ts`; `ROUTE_ENTRIES` and `DISCOVERY_ROUTES` in
   `scripts/generate-discovery.ts`. A new suite additionally joins `E2E_SUITE_ORDER`
@@ -74,10 +80,12 @@ symbol and path so the reader goes and looks.
   page override of a shell rule needs higher specificity; that trap belongs to
   `specs/cascade-traps.md` and is not restated here.
 - **Authored CSS hides in more places than `public/`.** A sweep written against `public/` alone
-  misses every source in `src/` and passes. **The repo keeps its own roster of those**, `SRC_CSS` in
-  `test/site/tip-affordance.test.ts`, which pairs each source with a way to get its CSS as a string,
-  including a page that carries its own style block and a card whose faces are built rather than
-  authored. Read that roster rather than any list written in prose, this one included: the sources
+  misses every source in `src/` and passes. **The repo keeps its own roster of those**,
+  `SRC_CSS_FILES` in `test-support/site-sheets.ts`, and `SRC_CSS` in
+  `test/site/tip-affordance.test.ts` pairs each with a way to get its CSS as a string, typed against
+  that list so neither can hold a source the other lacks, including a page that carries its own
+  style block and a card whose faces are built rather than authored. Read that roster rather than
+  any list written in prose, this one included: the sources
   are of several shapes (a layout's global block, a constant written verbatim to a generated sheet,
   constants that only exist once the document is composed) and each needs its own way in.
 - **Link form is scoped, and the flat rule is false.** Root-absolute is the form for the links the
