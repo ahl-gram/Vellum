@@ -107,9 +107,7 @@ function townKeep(tier: Tier, walled: boolean, hs: number, ruined: boolean, g: G
   return { form: "keep", x: cx - w / 2, w, h, base: g(cx) - raise, raise, broken };
 }
 
-function backMasses(backRow: Row, frontRow: Row, g: GroundAt): Mass[] {
-  const first = frontRow[0]!;
-  const lastB = frontRow[frontRow.length - 1]!;
+function backMasses(backRow: Row, first: Row[number], lastB: Row[number], g: GroundAt): Mass[] {
   return backRow
     .map((b) => ({ ...b, x: b.x + 6 }))
     .filter((b) => b.x >= first.x && b.x + b.w <= lastB.x + lastB.w)
@@ -181,7 +179,7 @@ export function composeTownscape(
   const verticals = townVerticals(tier, frontRow, hs, ruined, g, rng);
   const walled = tier.walled && !fen;
   const keep = townKeep(tier, walled, hs, ruined, g, rng);
-  const back = backMasses(backRow, frontRow, g);
+  const back = backMasses(backRow, first, lastB, g);
   const front = frontMasses(frontRow, g);
 
   const stacked: Mass[] = [...back, ...(keep ? [keep] : []), ...front, ...verticals];
