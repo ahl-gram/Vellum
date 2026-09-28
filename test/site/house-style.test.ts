@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import { SITE_SHEETS, SRC_CSS_FILES, sheetsSweptBy } from "../../test-support/site-sheets.ts";
 
 // The Specimen Book (#324): the house style lives ONCE in /house.css, linked by BaseLayout on every page. The specs are the 2026-07-30 ledger ratifications (the comment on #324); a change is a re-ratification, so these pins are deliberately literal.
 
@@ -32,20 +33,11 @@ test("the intro role: flourish italic, ink-brown, centered (#324 decision 1)", (
   assert.match(rule, /text-align:\s*center/, ".intro is centered");
 });
 
-test("no page sheet re-binds the intro voice (#324)", () => {
-  for (const page of [
-    "public/index.css", "public/explorer/index.css", "public/explorer/broadside.css", "public/explorer/chart-drawer.css",
-    "public/faq/index.css",
-    "public/glossary/index.css", "public/print-room/index.css",
-  "public/print-room/portfolio/index.css",
-    "public/reading-room/index.css", "public/seed-of-the-day/index.css",
-    "public/prospect/index.css", "public/ribbon/index.css", "public/specimen/index.css",
-    "public/atelier.css",
-  ]) {
-    const css = read(page);
+test("no sheet but the house sheet binds the intro voice (#324, Issue #709)", () => {
+  for (const sheet of sheetsSweptBy({ "public/house.css": "the house sheet is where the intro voice is written" })) {
     assert.ok(
-      !/\.intro[^{]*\{[^}]*(font-family|font-style|color)/.test(css),
-      `${page} re-binds the intro voice; the house sheet owns it`,
+      !/\.intro[^{]*\{[^}]*(font-family|font-style|color)/.test(read(sheet)),
+      `${sheet} re-binds the intro voice; the house sheet owns it`,
     );
   }
 });
@@ -143,21 +135,15 @@ test("home's flourish family survives the section removals (#324, reshaped at #4
   );
 });
 
-test("the old page-local skins are gone (#324)", () => {
+test("the old page-local skins are gone: no sheet but the house sheet dresses the controls (#324, Issue #709)", () => {
   assert.ok(
     !/border-radius:\s*2px/.test(read("public/index.css")),
     "the seedrow's 2px corners joined the idiom",
   );
-  for (const page of [
-    "public/explorer/index.css", "public/explorer/broadside.css", "public/explorer/chart-drawer.css",
-    "public/print-room/index.css",
-  "public/print-room/portfolio/index.css",
-    "public/reading-room/index.css", "public/seed-of-the-day/index.css",
-    "public/prospect/index.css", "public/ribbon/index.css", "public/specimen/index.css",
-  ]) {
+  for (const sheet of sheetsSweptBy({ "public/house.css": "the house sheet is where the control skin is written" })) {
     assert.ok(
-      !/select,\s*button[^{]*\{[^}]*background/.test(read(page)),
-      `${page} re-declares the control skin; the house sheet owns it`,
+      !/select,\s*button[^{]*\{[^}]*background/.test(read(sheet)),
+      `${sheet} re-declares the control skin; the house sheet owns it`,
     );
   }
 });
@@ -165,17 +151,7 @@ test("the old page-local skins are gone (#324)", () => {
 test("no token value smuggled past the guards in rgb() form (#324)", async () => {
   // rgb(74 56 38 / a) IS --ink-dark with alpha, invisible to the hex guard; alpha over a token is written rgb(from var(--token) r g b / a) so the quotation stays attached to its name.
   const { SITE_PALETTE } = await import("../../src/atlas/palette.ts");
-  const sources = [
-    "public/index.css", "public/explorer/index.css", "public/explorer/broadside.css", "public/explorer/chart-drawer.css",
-    "public/faq/index.css",
-    "public/glossary/index.css", "public/print-room/index.css",
-  "public/print-room/portfolio/index.css",
-    "public/reading-room/index.css", "public/seed-of-the-day/index.css",
-    "public/prospect/index.css", "public/ribbon/index.css", "public/specimen/index.css",
-    "public/reading-frame.css", "public/living-chart.css", "public/motion.css",
-    "public/house.css", "public/atelier.css", "src/layouts/BaseLayout.astro", "src/pages/index.astro",
-    "src/atlas/document.ts", "src/cli/gallery.ts",
-  ];
+  const sources = [...SITE_SHEETS, ...SRC_CSS_FILES];
   for (const [name, hex] of Object.entries(SITE_PALETTE)) {
     const h = String(hex);
     if (!/^#[0-9a-f]{6}$/.test(h)) continue;
@@ -184,7 +160,7 @@ test("no token value smuggled past the guards in rgb() form (#324)", async () =>
     for (const source of sources) {
       assert.ok(
         !smuggled.test(read(source)),
-        `${source} carries ${name}'s value as raw rgb(${r} ${g} ${b}); use rgb(from var(${name}) r g b / a)`,
+        `${source} carries ${name}'s value as raw rgb(${r} ${g} ${b}); use rgb(from var(${name}) r g b / a) where the css declares the token, or read SITE_PALETTE["${name}"] where it does not (render code)`,
       );
     }
   }

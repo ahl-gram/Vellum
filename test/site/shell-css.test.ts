@@ -3,34 +3,12 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { rulesIn } from "../../test-support/shell-css-rules.ts";
+import { SITE_SHEETS } from "../../test-support/site-sheets.ts";
 
 // The shell dresses once (#263): the palette is named ONCE in BaseLayout's global style and consumed as var() everywhere it matched exactly.
 
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 const read = (p: string) => readFileSync(root(p), "utf8");
-
-const PAGE_CSS = [
-  "public/index.css",
-  "public/explorer/index.css",
-  "public/explorer/broadside.css", "public/explorer/chart-drawer.css",
-  "public/faq/index.css",
-  "public/glossary/index.css",
-  "public/print-room/index.css",
-  "public/print-room/portfolio/index.css",
-  "public/reading-room/index.css",
-  "public/seed-of-the-day/index.css",
-  "public/prospect/index.css",
-  "public/specimen/index.css",
-  "public/ribbon/index.css",
-] as const;
-
-// Host-agnostic sheets: linked by whichever page mounts them, and answering to the same palette discipline.
-const SHARED_CSS = ["public/reading-frame.css", "public/living-chart.css"] as const;
-
-// house.css (#324) and atelier.css (#487, the room furniture) are linked by BaseLayout on every page; the role specs are pinned in test/site/house-style.test.ts.
-const ROOT_CSS = ["public/house.css", "public/atelier.css"] as const;
-
-const AUTHORED_CSS = [...PAGE_CSS, ...SHARED_CSS, ...ROOT_CSS] as const;
 
 // The ratified token set (#263, the PR #269 review item 4, #324).
 const TOKENS: Record<string, string> = {
@@ -77,7 +55,7 @@ test("BaseLayout declares the four palette tokens at their ratified values (#263
 });
 
 test("no tokenized hex survives raw: pages consume the vars, the layout declares each once", () => {
-  for (const page of AUTHORED_CSS) {
+  for (const page of SITE_SHEETS) {
     const css = read(page).toLowerCase();
     for (const [name, hex] of Object.entries(TOKENS)) {
       assert.ok(
@@ -94,7 +72,7 @@ test("no tokenized hex survives raw: pages consume the vars, the layout declares
 });
 
 test("the retired near-miss inks never reappear (#269 review, item 4)", () => {
-  for (const source of AUTHORED_CSS) {
+  for (const source of SITE_SHEETS) {
     const text = read(source).toLowerCase();
     for (const hex of RETIRED_INKS) {
       assert.ok(!text.includes(hex), `${source} carries retired ink ${hex}; use var(--ink-dark)`);
@@ -152,9 +130,7 @@ test("drift guard: every var() consumed without a fallback is declared (#263)", 
   const { paletteRootCss } = await import("../../src/atlas/palette.ts");
   const declared = new Set<string>();
   const declarationSources = [
-    ...AUTHORED_CSS.map(read),
-    read("public/fonts.css"),
-    read("public/motion.css"),
+    ...SITE_SHEETS.map(read),
     layoutStyle(),
     paletteRootCss(),
   ];
@@ -163,8 +139,7 @@ test("drift guard: every var() consumed without a fallback is declared (#263)", 
   }
 
   const consumers: Array<[string, string]> = [
-    ...AUTHORED_CSS.map((p): [string, string] => [p, read(p)]),
-    ["public/motion.css", read("public/motion.css")],
+    ...SITE_SHEETS.map((p): [string, string] => [p, read(p)]),
     ["BaseLayout <style is:global>", layoutStyle()],
     ["src/atlas/document.ts", read("src/atlas/document.ts")],
     ["src/cli/gallery.ts", read("src/cli/gallery.ts")],
@@ -181,7 +156,7 @@ const SHEET_SHADOW_GEOMETRY = "0 12px 34px";
 const STAGE_SHADOW_GEOMETRY = "0 18px 60px";
 
 test("the sheet shadow is declared once and consumed as a var: no raw geometry survives (#367)", () => {
-  for (const page of AUTHORED_CSS) {
+  for (const page of SITE_SHEETS) {
     assert.ok(
       !read(page).includes(SHEET_SHADOW_GEOMETRY),
       `${page} still writes the sheet shadow out longhand; it should consume var(--sheet-shadow)`,
@@ -195,7 +170,7 @@ test("the sheet shadow is declared once and consumed as a var: no raw geometry s
 });
 
 test("the stage shadow is declared once and consumed as a var: the chart-room depth has one home too (#463)", () => {
-  for (const page of AUTHORED_CSS) {
+  for (const page of SITE_SHEETS) {
     assert.ok(
       !read(page).includes(STAGE_SHADOW_GEOMETRY),
       `${page} still writes the stage shadow out longhand; it should consume var(--stage-shadow)`,
@@ -232,7 +207,7 @@ test("motion.css declares each raise/press token once, at its ratified value (#4
 });
 
 test("--raise-grand is retired: no declaration, no consumer (#470 ratified 2026-08-24, the #405 table update)", () => {
-  for (const sheet of [...AUTHORED_CSS, "public/motion.css", "public/house.css"]) {
+  for (const sheet of SITE_SHEETS) {
     assert.ok(!read(sheet).includes("--raise-grand"), `${sheet} must not declare or consume the retired --raise-grand`);
   }
 });
@@ -293,9 +268,7 @@ test("no hover or active rule states a lift as a px literal: the raise is a toke
   // Scoped to :hover/:active selectors, so keyframe steps pass by construction (their selectors are waypoints like "70%": the paperSettle trap in motion.css); translateY(0) is a return to rest, not a lift.
   const { GALLERY_PAGE_CSS } = await import("../../src/cli/gallery.ts");
   const sheets: Array<[string, string]> = [
-    ...AUTHORED_CSS.map((p): [string, string] => [p, read(p)]),
-    ["public/motion.css", read("public/motion.css")],
-    ["public/fonts.css", read("public/fonts.css")],
+    ...SITE_SHEETS.map((p): [string, string] => [p, read(p)]),
     ["BaseLayout <style is:global>", layoutStyle()],
     ["src/pages/index.astro <style>", [...read("src/pages/index.astro").matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join("\n")],
     ["src/cli/gallery.ts", GALLERY_PAGE_CSS],
