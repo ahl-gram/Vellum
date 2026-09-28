@@ -1,6 +1,10 @@
 import type { Specimen } from "./reads.ts";
 import type { SpecimenKit } from "./kit.ts";
 
+const px531 = (rem: number, v: number) => `${Math.round(v * rem * 100) / 100}px`;
+const same = (a: string[] | null, b: string[] | null) => !!a && !!b && a.length === b.length && a.every((v, i) => v === b[i]);
+const asRgb = (hex: string) => { const h = hex.replace("#", ""); return `rgb(${parseInt(h.slice(0, 2), 16)}, ${parseInt(h.slice(2, 4), 16)}, ${parseInt(h.slice(4, 6), 16)})`; };
+
 export async function sb7Phone({ check, shoot }: SpecimenKit, phone: Specimen | null): Promise<void> {
   check(
     "SB7 at a true 390 the slip is the bottom sheet, collapsed to its head: fixed, full width, on the floor, its body hidden; the tab and the chart folio stand down, the legend row is docked in the slip, the Glass seats above the sheet, no sideways scroll",
@@ -49,10 +53,8 @@ export async function sb8bNoFooting({ check, shoot, groundOf }: SpecimenKit, lea
 
 export function sb8eInsets({ check }: SpecimenKit, leanedOpen: Specimen, leaned: Specimen): void {
   // #531: the RESOLVED inset. The narrow value sat in the stylesheet for four days and inert, so a text match passes on the broken code.
-  const px531 = (rem: number, v: number) => `${Math.round(v * rem * 100) / 100}px`;
   const insetNarrow = [-0.7, -0.7, -0.75, -0.7].map((v) => px531(leanedOpen.rem, v));
   const insetWide = [-0.7, -0.9, -0.8, -0.9].map((v) => px531(leaned.rem, v));
-  const same = (a: string[] | null, b: string[] | null) => !!a && !!b && a.length === b.length && a.every((v, i) => v === b[i]);
   check(
     "SB8e the folio's panel takes the NARROW insets at 390 and home's base padding at 1280 (#531): the override is carried on BOTH painting arms, since a media query adds no specificity and the rule that gives the pseudo its inset outranks a bare .corner.tr::before at every width; the value mirrors home's seed box at each width (.lf-seed, public/index.css)",
     same(leanedOpen.folioInset, insetNarrow) && same(leaned.folioInset, insetWide),
@@ -65,7 +67,6 @@ export async function sb8cRing({ evaluate, send, check }: SpecimenKit): Promise<
   const ring = await evaluate<{ color: string; offset: string; inkDark: string; bright: string; focused: boolean } | null>(`(()=>{const b=document.querySelector(".legend.in-slip .legend-row .legend-btn");if(!b)return null;b.focus();
     const cs=getComputedStyle(b);const root=getComputedStyle(document.documentElement);
     return{color:cs.outlineColor,offset:cs.outlineOffset,inkDark:root.getPropertyValue("--ink-dark").trim(),bright:root.getPropertyValue("--parchment-bright").trim(),focused:document.activeElement===b};})()`);
-  const asRgb = (hex: string) => { const h = hex.replace("#", ""); return `rgb(${parseInt(h.slice(0, 2), 16)}, ${parseInt(h.slice(2, 4), 16)}, ${parseInt(h.slice(4, 6), 16)})`; };
   check(
     "SB8c the docked row's focus ring is the house's ink-dark, not the cream one meant for a row standing on its own footing: the ring is drawn OUTSIDE the button, onto the sheet's parchment, where cream reads about 1:1 (#525)",
     !!ring && ring.focused && ring.color === asRgb(ring.inkDark) && ring.color !== asRgb(ring.bright),

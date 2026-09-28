@@ -3,6 +3,8 @@ import type { RunningHeadKit } from "./kit.ts";
 import { APP, CHART, CLUSTER_NORMAL, expectedHead, FOLIO, HEAD_LEADED, HEAD_READ, matches, MEMBERS, near, PROSE, SHELLED } from "./reads.ts";
 import type { Bad, Head, Heads } from "./reads.ts";
 
+const poolAlpha = (color: string) => Number((String(color).match(/\/\s*([\d.]+)\)/) || String(color).match(/rgba\([^)]*,\s*([\d.]+)\)/) || [])[1] ?? "0");
+
 export async function rhSweep({ evaluate, shoot, visit }: RunningHeadKit) {
   const heads: Record<string, Head | undefined> = {};
   const unreachable: string[] = [];
@@ -133,7 +135,6 @@ export function rh9ContrastPins({ check }: SuiteContext, heads: Heads, bad: Bad)
     dimTaglines.map((r) => `${r} tagline ${heads[r]?.tagline?.color}`).join(" | ") || `tagline parchment x${SHELLED.length}`,
   );
 
-  const poolAlpha = (color: string) => Number((String(color).match(/\/\s*([\d.]+)\)/) || String(color).match(/rgba\([^)]*,\s*([\d.]+)\)/) || [])[1] ?? "0");
   // #464: the Gallery joins home, the two pages whose content scrolls or rides under the cluster (a pale plate measured the tagline at 2.26:1 without the pool).
   const POOLED = ["/", "/gallery/"];
   const washWrong = bad((h, r) =>
