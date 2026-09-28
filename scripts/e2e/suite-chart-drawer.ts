@@ -72,6 +72,7 @@ async function cd9Surfaces(kd: DragKit, step: Step, SIX: string): Promise<void> 
   await cd18bRoadCarries(kd);
   await cd19PortfolioDrafts(kd);
   await cd24PortfolioSays(kd);
+  // BARE means bare on both homes since #634: a Portfolio the address names no folio for now shows what the device holds (ruling 4), so the six this group just laid would arrive here as a full pile.
   await cd20BarePortfolio(kd);
   await cd21PortfolioGlass(kd);
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });

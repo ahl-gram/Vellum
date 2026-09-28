@@ -56,7 +56,6 @@ export async function cd24PortfolioSays({ evaluate, check, sleep, clickAt }: Dra
 }
 
 export async function cd20BarePortfolio({ evaluate, send, check, sleep, PORT, forget }: DrawerKit): Promise<void> {
-  // BARE means bare on both homes since #634: a Portfolio the address names no folio for now shows what the device holds (ruling 4), so the six this group just laid would arrive here as a full pile.
   await forget();
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/print-room/portfolio/` });
