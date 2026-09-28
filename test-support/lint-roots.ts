@@ -4,7 +4,7 @@ import lintConfig from "../eslint.config.ts";
 type FileEntry = string | string[];
 
 const TS_ROOT_GLOB = /^([\w-]+)\/\*\*\/\*\.ts$/;
-const TS_GLOB = /\.[cm]?ts\b|\bts\b/;
+const TS_GLOB = /\.[cm]?tsx?\b|\bts\b/;
 const blocks: readonly Linter.Config[] = lintConfig;
 
 const rootOf = (entry: FileEntry): string | null => {
