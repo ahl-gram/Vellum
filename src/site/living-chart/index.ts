@@ -140,7 +140,6 @@ export function createLivingChart(host: LivingChartHost) {
     mapEl: host.mapEl,
     overlay: { data: () => overlay.data(), hideCard: () => overlay.hideCard() },
   });
-  // The optional instrument branches only here and in agesFor, both on bar (ratified 2026-08-09 on #319).
   const bar = host.scrubber;
   const logPanel = bar
     ? createVoyageLogPanel({ panel: bar.panel, sig: bar.sig, strip: bar.strip })
