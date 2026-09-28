@@ -129,6 +129,6 @@ test("every read of the console accumulator goes through the shared drop, so a c
   assert.deepEqual(
     offenders,
     [],
-    `${offenders.join(", ")} read the console accumulator without passing it through the shared drop, so that check silently stopped filtering. BLIND SPOTS, declared, and the second was found by mutation rather than by reasoning (prover round 3): it reads one LINE, so a read split across lines escapes; and a check built from TWO separately excluded base captures plus a comparison line that never names the accumulator escapes it whole, since every line it could see is legitimately excluded. It errs the other way on a comment that merely mentions the accumulator, which is the direction a scanner here is owed`,
+    `${offenders.join(", ")} read the console accumulator without passing it through the shared drop, so that check silently stopped filtering. BLIND SPOTS, declared, and the third was found by mutation rather than by reasoning (prover round 3): it skips e2e/run.ts, which creates the accumulator, and e2e/harness.ts, which fills it, so a check-like read there that skips the drop passes unseen (both read it only to build and fill it today); it reads one LINE, so a read split across lines escapes; and a check built from TWO separately excluded base captures plus a comparison line that never names the accumulator escapes it whole, since every line it could see is legitimately excluded. It errs the other way on a comment that merely mentions the accumulator, which is the direction a scanner here is owed`,
   );
 });

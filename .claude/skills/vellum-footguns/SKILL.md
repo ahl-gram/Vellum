@@ -114,7 +114,7 @@ Scars: #366, #368, #454, #474, #501, #520, #526, #529, #533, #535, #536, #537, #
    it) or a min (one hairline fails it). Give the sample a control that legitimately paints.
 5. **A regex inside a CDP `evaluate` template literal loses its backslashes.** Write `\\s`, or build
    the payload with `String.raw`. It never throws: `/\s+/` arrives as `/s+/` and splits on the letter. The hook refuses the
-   single-escaped form in every `.ts` and `.mjs` under `scripts/`, `out/` and `e2e/`.
+   single-escaped form in every `.ts` and `.mjs` under `scripts/`, `out/` and `e2e/` (and so under `test/e2e/` too).
 6. **No blind sleeps.** A settle polls to rest, requires the geometry to have LEFT where it began
    (stillness at the start looks like stillness at the end), and never carries the check's own claim.
    **A readiness wait THROWS on timeout; a measurement poll keeps reading and asserts on its LAST
@@ -306,7 +306,7 @@ The hook in `hooks/`, wired in `.claude/settings.json`, refuses the mechanical o
 
 - A bare mutation of the stash stack (`git stash`, `pop`, `clear`, `apply` or `drop` without a ref): it is shared across every worktree. `git stash push -m ... -- <paths>`, `apply <sha>`, or a WIP commit.
 - `perl -pi` with a non-ASCII replacement: it re-encodes every existing non-ASCII byte in the file. Use node or a heredoc, then grep for `Â`.
-- A single-escaped `\s`, `\d`, `\w`, `\b` inside a backtick string in a `.ts` or `.mjs` file under `scripts/`, `out/` or `e2e/`.
+- A single-escaped `\s`, `\d`, `\w`, `\b` inside a backtick string in a `.ts` or `.mjs` file under `scripts/`, `out/` or `e2e/` (`test/e2e/` included).
 - A PR body with an em-dash, or with "not close #N" / "does not fix #N".
 - A PR body that skips one of `.github/PULL_REQUEST_TEMPLATE.md`'s `## ` sections. Presence is the check, not content: a section with nothing to report says so and stays.
 - A negative claim built from `head`, `tail`, `--limit`, or a jq slice. Count against the true total or query the item.

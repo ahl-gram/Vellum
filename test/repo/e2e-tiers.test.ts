@@ -101,7 +101,7 @@ test("the two worker-bearing surfaces assert the worker is live AND that it degr
   assert.ok(assertsWorkerLive("render"), "render no longer asserts the worker is live");
   assert.ok(assertsWorkerLive("reading-room"), "reading-room no longer asserts the worker is live");
   for (const name of ["fallback", "reading-room"]) {
-    assert.match(family(name), /serverState\.blockWorker = true/, `suite-${name} no longer exercises the 404 fallback`);
+    assert.match(family(name), /serverState\.blockWorker = true/, `suites/${name}.ts no longer exercises the 404 fallback`);
   }
 });
 
@@ -294,8 +294,8 @@ test("every call of a wait that throws is INSIDE a step, across each suite's fil
   for (const name of E2E_SUITE_ORDER) {
     const got = containment(familyOf(name));
     const groups = STEPPED_GROUPS[name] ?? [];
-    assert.equal(got.steps.length, groups.length, `suite-${name}: the scan read ${got.steps.length} step calls against ${groups.length} in the roster, so it is reading the wrong files`);
-    assert.deepEqual(got.breaches, [], `suite-${name} calls a thrower or throws outside every step, so a timeout there fails the SUITE rather than the numbered check, and the checks after it never run (#560)`);
+    assert.equal(got.steps.length, groups.length, `suites/${name}.ts: the scan read ${got.steps.length} step calls against ${groups.length} in the roster, so it is reading the wrong files`);
+    assert.deepEqual(got.breaches, [], `suites/${name}.ts calls a thrower or throws outside every step, so a timeout there fails the SUITE rather than the numbered check, and the checks after it never run (#560)`);
   }
 });
 
@@ -303,12 +303,12 @@ test("every check group that waits is still inside its own step, by name (#534)"
   for (const [suite, groups] of Object.entries(STEPPED_GROUPS)) {
     const file = src(e2eSuitePath(suite));
     assert.match(file, /from "\.\.\/support\/step\.ts"/, `suites/${suite}.ts no longer imports support/step.ts`);
-    assert.match(file, /const step = makeStep\(ctx\)/, `suite-${suite} no longer builds a step, so a wait that gives up there takes the suite with it again`);
+    assert.match(file, /const step = makeStep\(ctx\)/, `suites/${suite}.ts no longer builds a step, so a wait that gives up there takes the suite with it again`);
     const stepped = [...file.matchAll(/await step\("([^"]+)"/g)].map((m) => m[1]);
     assert.deepEqual(
       stepped,
       groups.slice(),
-      `suite-${suite}'s stepped groups are not the ones this roster names: one was unwrapped, renamed, reordered or added without joining the roster`,
+      `suites/${suite}.ts's stepped groups are not the ones this roster names: one was unwrapped, renamed, reordered or added without joining the roster`,
     );
   }
 });
