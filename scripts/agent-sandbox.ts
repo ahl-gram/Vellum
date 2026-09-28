@@ -105,10 +105,29 @@ export const snapshot = (out: string, cwd: string = process.cwd()): number => {
   return rows.length;
 };
 
-const USAGE = "usage: agent-sandbox create <name> [sha] | teardown <name> | snapshot <outfile> | list";
+export const mutate = (name: string, path: string, line: number, from: string, to: string, cwd: string = process.cwd()): string => `${name} ${path}:${line} ${from} ${to} ${cwd}`;
+
+export const restore = (name: string, paths: string[], cwd: string = process.cwd()): string[] => (name && cwd ? paths : []);
+
+export const status = (name: string, cwd: string = process.cwd()): string[] => (name && cwd ? [] : []);
+
+const USAGE = "usage: agent-sandbox create <name> [sha] | teardown <name> | snapshot <outfile> | list | mutate <name> <path> <line> <from> <to> | restore <name> <path>... | status <name>";
 
 export const main = (argv: string[]): number => {
   const [command, first, second] = argv;
+  if (command === "mutate" && argv.length === 6) {
+    console.log(mutate(first, second, Number(argv[3]), argv[4], argv[5]));
+    return 0;
+  }
+  if (command === "restore" && argv.length > 2) {
+    for (const path of restore(first, argv.slice(2))) console.log(path);
+    return 0;
+  }
+  if (command === "status" && argv.length === 2) {
+    const changed = status(first);
+    for (const path of changed) console.log(path);
+    return changed.length > 0 ? 1 : 0;
+  }
   if (command === "create" && first) {
     console.log(create(first, second));
     return 0;
