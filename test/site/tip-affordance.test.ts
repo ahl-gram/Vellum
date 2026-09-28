@@ -39,7 +39,7 @@ const atlasCss = (): string => {
   return [styleBlocksIn(atlasDocument(data, () => "")), styleBlocksIn(atlasDocument(data, () => "", { anchor: true, motion: true }))].join("\n");
 };
 
-/** Authored css outside public/ (#360), each paired with a way to get its css as a string. Keys keep the whole src/ path, so they cannot collide with the public/ side, which strips its prefix. */
+/** Keys keep the whole src/ path, so they cannot collide with the public/ side, which strips its prefix. */
 const SRC_CSS: Readonly<Record<(typeof SRC_CSS_FILES)[number], () => string>> = {
   "src/layouts/BaseLayout.astro": () => styleBlocksIn(read("src/layouts/BaseLayout.astro")),
   "src/pages/index.astro": () => styleBlocksIn(read("src/pages/index.astro")),

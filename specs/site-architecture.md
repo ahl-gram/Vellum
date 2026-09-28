@@ -62,7 +62,8 @@ symbol and path so the reader goes and looks.
   time, by throwing when it has no blurb. The page, bundle, cleaning and lane rosters are hand-kept
   and silent when missed, which is why the grep comes first, and so are the lists that name a sheet
   for what it does rather than for being a sheet: `CHART_MOUNTS` in
-  `test/site/shell-css-ground.test.ts`, and the sheets home loads in `test/site/home-shelf.test.ts`.
+  `test/site/shell-css-ground.test.ts`, the sheets home loads in `test/site/home-shelf.test.ts`, and
+  `KIT_SHEETS` in `test/site/kit-scope.test.ts`, the sheets linked on every page.
 - **The rosters a page or a sheet joins**, by symbol: `TOKENS` in `test/site/shell-css.test.ts`;
   `PAGES` in `test/site/astro-scaffold.test.ts`;
   `BUNDLE_ENTRIES` in `scripts/build-app-bundles.ts`; `GENERATED_SUBTREES` in
