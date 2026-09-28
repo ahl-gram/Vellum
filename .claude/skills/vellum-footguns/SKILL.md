@@ -56,9 +56,8 @@ Scars: #49, #124, #270, #275, #295, #320, #353, #358, #360, #363, #380, #383, #3
 9. **Run the mutation, paste the red line into the PR body's guard table**, commit, then dispatch
    `vellum-guard-prover` for the whole guard set (10 minutes, unit tests only, name the mutations you
    did NOT try). It mutates in its OWN detached worktree, built by `scripts/agent-sandbox.ts` at the
-   DISPATCH tree's HEAD (#575), so uncommitted work is not in the tree it proves unless carried
-   across by hand: commit first, or you prove something about a different tree than the one you are
-   shipping, and the sha it reports is then a false attribution it has to declare. Zero red is a
+   DISPATCH tree's HEAD (#575), so uncommitted work is not in the tree it proves, and it stops
+   rather than carry any across: commit first. Zero red is a
    hole. A guard proved unable to red is deleted, never shipped. Mutate BY LINE, never by text:
    several wearers can share one declaration, so a substitution changes them all at once and the red
    names nothing (PR #510).
