@@ -1,36 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { execFileSync, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, readlinkSync, realpathSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+import { join } from "node:path";
 import { create, createPlan, listing, readHead, resolveRoot, resolveTree, sandboxPath, sandboxes, snapshot, teardown, teardownPlan, validateName } from "../../scripts/agent-sandbox.ts";
-
-const BOUND_MS = 30_000;
-const SCRIPT = resolve(import.meta.dirname, "..", "..", "scripts", "agent-sandbox.ts");
-const git = (args: string[], cwd: string): string => execFileSync("git", args, { cwd, encoding: "utf8", timeout: BOUND_MS }).trim();
-
-const withRepo = (body: (main: string, linked: string) => void): void => {
-  const made = mkdtempSync(join(tmpdir(), "agent-sandbox-"));
-  const dir = realpathSync(made); // git reports realpaths, and on macOS tmpdir() is /var, a symlink to /private/var, so an unresolved fixture path never equals what resolveRoot returns
-
-  try {
-    git(["init", "-q", "-b", "main", "."], dir);
-    git(["config", "user.email", "t@t"], dir);
-    git(["config", "user.name", "t"], dir);
-    writeFileSync(join(dir, "f.txt"), "one\n");
-    git(["add", "-A"], dir);
-    git(["commit", "-qm", "c1"], dir);
-    const linked = join(dir, "linked");
-    git(["worktree", "add", "-q", "--detach", linked, "HEAD"], dir);
-    writeFileSync(join(linked, "f.txt"), "two\n");
-    git(["add", "-A"], linked);
-    git(["commit", "-qm", "c2"], linked);
-    body(dir, linked);
-  } finally {
-    rmSync(made, { recursive: true, force: true });
-  }
-};
+import { cli, git, withRepo } from "../../test-support/sandbox-repo.ts";
 
 test("resolveRoot returns the main checkout from inside a linked worktree", () => {
   withRepo((main, linked) => {
@@ -51,7 +25,7 @@ test("validateName accepts the two sandbox prefixes and refuses everything else"
   for (const good of ["guard-575", "guard-575-r2", "skeptic-576-r1", "guard-a.b_c-1"]) {
     assert.equal(validateName(good), good, `${good} is a legitimate sandbox name`);
   }
-  for (const bad of ["", "575", "other-session", "guard", "guard-", "../escape", "guard-../..", "/abs/path", "guard x", "Guard-1"]) {
+  for (const bad of ["", "575", "other-session", "agent-a3a1b384d6375057d", "probe-1", "guard", "guard-", "../escape", "guard-../..", "/abs/path", "guard x", "Guard-1"]) {
     assert.throws(() => validateName(bad), `${bad} was accepted, so the script can address a worktree it did not create`);
   }
 });
@@ -143,11 +117,6 @@ test("listing returns its rows in a stable sorted order", () => {
     assert.deepEqual(listing(linked), ["a.txt", "b.txt", "c.txt", "f.txt"], "listing is unsorted or missed a file, so a residue diff reports spurious reorderings as residue");
   });
 });
-
-const cli = (args: string[], cwd: string): { status: number; out: string; err: string } => {
-  const r: { status: number | null; stdout: string | undefined; stderr: string | undefined } = spawnSync(process.execPath, [SCRIPT, ...args], { cwd, encoding: "utf8", timeout: BOUND_MS });
-  return { status: r.status ?? -1, out: r.stdout ?? "", err: r.stderr ?? "" };
-};
 
 test("the CLI prints the sandbox path alone on stdout, so WT=$(...) captures a usable path", () => {
   withRepo((main, linked) => {
