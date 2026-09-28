@@ -193,8 +193,8 @@ A new page, sheet, suite, room, or CSS surface joins lists it does not know abou
 fail silently (an undeclared CSS variable, a suite the runner never calls, a budget nobody re-measured).
 
 1. `grep -rn` the nearest sibling's name across `src/`, `scripts/`, `test/`, `.github/` and join
-   every list it appears in: the runner's `SUITES` map, `PAGE_CSS`, `MEASURED_SECONDS`, the tiers
-   test, the tip-affordance roster, the discovery files.
+   every list it appears in: the runner's `SUITES` map, `MEASURED_SECONDS`, the tiers test, the
+   discovery files. A sheet under `public/` joins the sheet sweeps by existing (`SITE_SHEETS`).
 2. Name in the PR body which rosters self-check and which were joined by hand;
    `specs/site-architecture.md` names the rosters a page or a sheet joins, and which close themselves.
 3. Re-measure any budget the roster carries; a number measured on an eleven-check suite is wrong on a
