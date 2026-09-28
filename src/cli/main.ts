@@ -90,11 +90,9 @@ async function writeOut(path: string, content: string): Promise<void> {
   await writeFile(path, content, "utf8");
 }
 
-// eslint-disable-next-line max-lines-per-function
-export async function main(argv: string[]): Promise<void> {
-  const command = argv[0];
-  const { values } = parseArgs({
-    args: argv.slice(1),
+function parseChartArgs(args: string[]) {
+  return parseArgs({
+    args,
     options: {
       seed: { type: "string" },
       style: { type: "string", default: "antique" },
@@ -113,16 +111,12 @@ export async function main(argv: string[]): Promise<void> {
       out: { type: "string" },
       help: { type: "boolean", default: false },
     },
-  });
+  }).values;
+}
 
-  if (!command || values.help || command === "help") {
-    console.log(HELP);
-    return;
-  }
-  if (command !== "chart") {
-    throw new Error(`unknown command "${command}"\n${HELP}`);
-  }
+type ChartArgs = ReturnType<typeof parseChartArgs>;
 
+function chartOptions(values: ChartArgs) {
   const seed =
     values.seed !== undefined
       ? Number(values.seed) >>> 0
@@ -147,45 +141,71 @@ export async function main(argv: string[]): Promise<void> {
   if (coastWarp !== undefined && (!Number.isFinite(coastWarp) || coastWarp < 0 || coastWarp > 1)) {
     throw new Error("--coast-warp must be between 0 and 1");
   }
+  return { seed, grid, mapType, band, theme, widthPx, landFraction, coastWarp };
+}
 
-  const recipe = defaultRecipe(seed, {
-    ...(grid ?? {}),
-    ...(mapType ? { mapType } : {}),
-    ...(band ? { band } : {}),
-    ...(landFraction !== undefined ? { landFraction } : {}),
-    ...(coastWarp !== undefined ? { coastWarp } : {}),
+type ChartOptions = ReturnType<typeof chartOptions>;
+
+function chartRecipe(o: ChartOptions) {
+  return defaultRecipe(o.seed, {
+    ...(o.grid ?? {}),
+    ...(o.mapType ? { mapType: o.mapType } : {}),
+    ...(o.band ? { band: o.band } : {}),
+    ...(o.landFraction !== undefined ? { landFraction: o.landFraction } : {}),
+    ...(o.coastWarp !== undefined ? { coastWarp: o.coastWarp } : {}),
   });
+}
 
-  const style = validateStyle(values.style);
+async function drawChart(values: ChartArgs, o: ChartOptions, recipe: ReturnType<typeof chartRecipe>, style: StyleName): Promise<string> {
   const t0 = performance.now();
   const world = generateWorld(recipe);
   const t1 = performance.now();
-  const svg = renderMap(world, { widthPx, style, legend: values.legend, arms: values.arms, beasts: values.beasts, theme });
+  const svg = renderMap(world, { widthPx: o.widthPx, style, legend: values.legend, arms: values.arms, beasts: values.beasts, theme: o.theme });
   const t2 = performance.now();
-  const out = resolve(values.out ?? `out/chart-${seed}-${style}.svg`);
+  const out = resolve(values.out ?? `out/chart-${o.seed}-${style}.svg`);
   await writeOut(out, svg);
-  console.log(`seed ${seed} · ${recipe.mapType} · ${world.title.title}`);
+  console.log(`seed ${o.seed} · ${recipe.mapType} · ${world.title.title}`);
   console.log(
     `world ${(t1 - t0).toFixed(0)}ms · render ${(t2 - t1).toFixed(0)}ms · ${out}`,
   );
+  return out;
+}
 
-  if (values.png) {
-    const browser = findBrowser();
-    if (!browser) {
-      console.error(NO_BROWSER_HINT);
-      return;
-    }
-    const scale = values.scale ? Number(values.scale) : 2;
-    if (!Number.isFinite(scale) || scale < 0.5 || scale > 4) {
-      throw new Error("--scale must be between 0.5 and 4");
-    }
-    const pngOut = out.replace(/\.svg$/, ".png");
-    const t3 = performance.now();
-    await rasterizeSvg(browser, out, pngOut, scale);
-    console.log(
-      `png ${(performance.now() - t3).toFixed(0)}ms · scale ${scale} · ${pngOut}`,
-    );
+async function rasterizeChart(out: string, scaleArg: string | undefined): Promise<void> {
+  const browser = findBrowser();
+  if (!browser) {
+    console.error(NO_BROWSER_HINT);
+    return;
   }
+  const scale = scaleArg ? Number(scaleArg) : 2;
+  if (!Number.isFinite(scale) || scale < 0.5 || scale > 4) {
+    throw new Error("--scale must be between 0.5 and 4");
+  }
+  const pngOut = out.replace(/\.svg$/, ".png");
+  const t3 = performance.now();
+  await rasterizeSvg(browser, out, pngOut, scale);
+  console.log(
+    `png ${(performance.now() - t3).toFixed(0)}ms · scale ${scale} · ${pngOut}`,
+  );
+}
+
+export async function main(argv: string[]): Promise<void> {
+  const command = argv[0];
+  const values = parseChartArgs(argv.slice(1));
+
+  if (!command || values.help || command === "help") {
+    console.log(HELP);
+    return;
+  }
+  if (command !== "chart") {
+    throw new Error(`unknown command "${command}"\n${HELP}`);
+  }
+
+  const o = chartOptions(values);
+  const recipe = chartRecipe(o);
+  const style = validateStyle(values.style);
+  const out = await drawChart(values, o, recipe, style);
+  if (values.png) await rasterizeChart(out, values.scale);
 }
 
 const isDirectRun = process.argv[1]?.endsWith("main.ts") ?? false;

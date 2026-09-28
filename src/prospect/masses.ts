@@ -80,7 +80,81 @@ function packRow(
   return row.map((b) => ({ ...b, x: b.x + shift }));
 }
 
-// eslint-disable-next-line max-lines-per-function
+type Row = ReturnType<typeof packRow>;
+type GroundAt = (x: number) => number;
+
+function townVerticals(tier: Tier, frontRow: Row, hs: number, ruined: boolean, g: GroundAt, rng: Rng): Mass[] {
+  const verticals: Mass[] = [];
+  for (let i = 0; i < tier.spires; i++) {
+    const slot = frontRow[Math.floor(rng.next() * frontRow.length)]!;
+    const form: Mass["form"] = i === 0 ? "spire" : rng.next() < 0.5 ? "tower" : "spire";
+    const x = slot.x + slot.w * 0.2;
+    const w = 9 + rng.next() * 4;
+    const h = (tier.hMax + VERTICAL_BONUS + rng.next() * VERTICAL_JITTER) * hs;
+    const broken = ruined && rng.next() < 0.8;
+    verticals.push({ form, x, w, h, base: g(x + w / 2), raise: 0, broken });
+  }
+  return verticals;
+}
+
+function townKeep(tier: Tier, walled: boolean, hs: number, ruined: boolean, g: GroundAt, rng: Rng): Mass | null {
+  if (tier.keepW <= 0) return null;
+  const cx = (VIEW_X0 + VIEW_X1) / 2;
+  const w = tier.keepW;
+  const h = (tier.hMax + (w > 30 ? KEEP_TALL_BONUS : KEEP_SHORT_BONUS)) * hs;
+  const raise = walled ? WALLED_KEEP_RAISE : 0;
+  const broken = ruined && rng.next() < 0.6;
+  return { form: "keep", x: cx - w / 2, w, h, base: g(cx) - raise, raise, broken };
+}
+
+function backMasses(backRow: Row, first: Row[number], lastB: Row[number], g: GroundAt): Mass[] {
+  return backRow
+    .map((b) => ({ ...b, x: b.x + 6 }))
+    .filter((b) => b.x >= first.x && b.x + b.w <= lastB.x + lastB.w)
+    .map((b) => ({
+      form: b.form,
+      x: b.x,
+      w: b.w,
+      h: b.h,
+      base: g(b.x + b.w / 2) - BACK_ROW_RAISE,
+      raise: BACK_ROW_RAISE,
+      broken: b.broken,
+    }));
+}
+
+function frontMasses(frontRow: Row, g: GroundAt): Mass[] {
+  return frontRow.map((b) => ({
+    form: b.form,
+    x: b.x,
+    w: b.w,
+    h: b.h,
+    base: g(b.x + b.w / 2),
+    raise: 0,
+    broken: b.broken,
+  }));
+}
+
+function breakTallest(masses: Mass[], front: Mass[]): Mass[] {
+  let tallest = 0;
+  front.forEach((m, i) => {
+    if (m.h > front[tallest]!.h) tallest = i;
+  });
+  const target = front[tallest]!;
+  return masses.map((m) => (m === target ? { ...m, broken: true } : m));
+}
+
+function townWalls(kind: ProspectKind, walled: boolean, ruined: boolean, runX0: number, runX1: number): WallSegment[] {
+  const walls: WallSegment[] = [];
+  if (walled && !ruined) {
+    walls.push({ x0: runX0, x1: runX1, h: kind === "capital" ? 13 : 10, gate: true, heel: 0 });
+  }
+  if (walled && ruined) {
+    walls.push({ x0: runX0, x1: runX0 + 44, h: 9, gate: false, heel: 0 });
+    walls.push({ x0: runX1 - 38, x1: runX1, h: 8, gate: false, heel: -5 });
+  }
+  return walls;
+}
+
 export function composeTownscape(
   kind: ProspectKind,
   score: number,
@@ -93,7 +167,6 @@ export function composeTownscape(
   const f = scoreFactor(kind, score);
   const n = Math.max(2, Math.min(tier.n + 2, Math.max(tier.n - 2, Math.round(tier.n * f))));
   const hs = 0.9 + (f - 0.75) * 0.4;
-  const cx = (VIEW_X0 + VIEW_X1) / 2;
   const g = (x: number): number => groundAt(ground, x);
 
   const backRow = packRow(rng, Math.round(n * 0.6), tier.hMin, tier.hMax, 0.8 * hs, ruined);
@@ -103,68 +176,15 @@ export function composeTownscape(
   const runX0 = first.x - WALL_MARGIN;
   const runX1 = lastB.x + lastB.w + WALL_MARGIN;
 
-  const verticals: Mass[] = [];
-  for (let i = 0; i < tier.spires; i++) {
-    const slot = frontRow[Math.floor(rng.next() * frontRow.length)]!;
-    const form: Mass["form"] = i === 0 ? "spire" : rng.next() < 0.5 ? "tower" : "spire";
-    const x = slot.x + slot.w * 0.2;
-    const w = 9 + rng.next() * 4;
-    const h = (tier.hMax + VERTICAL_BONUS + rng.next() * VERTICAL_JITTER) * hs;
-    const broken = ruined && rng.next() < 0.8;
-    verticals.push({ form, x, w, h, base: g(x + w / 2), raise: 0, broken });
-  }
-
+  const verticals = townVerticals(tier, frontRow, hs, ruined, g, rng);
   const walled = tier.walled && !fen;
-  let keep: Mass | null = null;
-  if (tier.keepW > 0) {
-    const w = tier.keepW;
-    const h = (tier.hMax + (w > 30 ? KEEP_TALL_BONUS : KEEP_SHORT_BONUS)) * hs;
-    const raise = walled ? WALLED_KEEP_RAISE : 0;
-    const broken = ruined && rng.next() < 0.6;
-    keep = { form: "keep", x: cx - w / 2, w, h, base: g(cx) - raise, raise, broken };
-  }
+  const keep = townKeep(tier, walled, hs, ruined, g, rng);
+  const back = backMasses(backRow, first, lastB, g);
+  const front = frontMasses(frontRow, g);
 
-  const back: Mass[] = backRow
-    .map((b) => ({ ...b, x: b.x + 6 }))
-    .filter((b) => b.x >= first.x && b.x + b.w <= lastB.x + lastB.w)
-    .map((b) => ({
-      form: b.form,
-      x: b.x,
-      w: b.w,
-      h: b.h,
-      base: g(b.x + b.w / 2) - BACK_ROW_RAISE,
-      raise: BACK_ROW_RAISE,
-      broken: b.broken,
-    }));
-
-  const front: Mass[] = frontRow.map((b) => ({
-    form: b.form,
-    x: b.x,
-    w: b.w,
-    h: b.h,
-    base: g(b.x + b.w / 2),
-    raise: 0,
-    broken: b.broken,
-  }));
-
-  let masses: Mass[] = [...back, ...(keep ? [keep] : []), ...front, ...verticals];
-  if (ruined && !masses.some((m) => m.broken)) {
-    let tallest = 0;
-    front.forEach((m, i) => {
-      if (m.h > front[tallest]!.h) tallest = i;
-    });
-    const target = front[tallest]!;
-    masses = masses.map((m) => (m === target ? { ...m, broken: true } : m));
-  }
-
-  const walls: WallSegment[] = [];
-  if (walled && !ruined) {
-    walls.push({ x0: runX0, x1: runX1, h: kind === "capital" ? 13 : 10, gate: true, heel: 0 });
-  }
-  if (walled && ruined) {
-    walls.push({ x0: runX0, x1: runX0 + 44, h: 9, gate: false, heel: 0 });
-    walls.push({ x0: runX1 - 38, x1: runX1, h: 8, gate: false, heel: -5 });
-  }
+  const stacked: Mass[] = [...back, ...(keep ? [keep] : []), ...front, ...verticals];
+  const masses = ruined && !stacked.some((m) => m.broken) ? breakTallest(stacked, front) : stacked;
+  const walls = townWalls(kind, walled, ruined, runX0, runX1);
 
   return { masses, walls, front, runX0, runX1 };
 }

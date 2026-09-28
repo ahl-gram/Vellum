@@ -51,8 +51,12 @@ export type DressOptions = {
   readonly widthPx?: number;
 };
 
+type WorksElement = Extract<
+  ForegroundElement,
+  { kind: "stilts" | "quay" | "mastRow" | "ship" | "mole" | "beachedHulls" | "jetty" | "nets" | "bridge" | "weir" | "mill" | "rubble" | "beams" | "drownedStubs" }
+>;
+
 /** Exhaustive on purpose: a new foreground kind without a dress breaks the build here, not silently on a blank plate. */
-// eslint-disable-next-line max-lines-per-function
 export function foregroundNodes(c: DressContext, e: ForegroundElement): SvgNode[] {
   switch (e.kind) {
     case "fieldRows":
@@ -69,6 +73,32 @@ export function foregroundNodes(c: DressContext, e: ForegroundElement): SvgNode[
       return e.items.map((i) => dune(c, i));
     case "ripples":
       return e.items.map((i) => rippleDash(c, i.x, i.y, i.s));
+    case "birds":
+      return e.items.map((i) => bird(c, i));
+    case "seaSerpent":
+      return [seaSerpent(c, e.x, e.y, e.s)];
+    case "stilts":
+    case "quay":
+    case "mastRow":
+    case "ship":
+    case "mole":
+    case "beachedHulls":
+    case "jetty":
+    case "nets":
+    case "bridge":
+    case "weir":
+    case "mill":
+    case "rubble":
+    case "beams":
+    case "drownedStubs":
+      return worksNodes(c, e);
+    default:
+      return unreachable(e);
+  }
+}
+
+function worksNodes(c: DressContext, e: WorksElement): SvgNode[] {
+  switch (e.kind) {
     case "stilts":
       return [stiltNodes(c, e.posts)];
     case "quay":
@@ -97,12 +127,6 @@ export function foregroundNodes(c: DressContext, e: ForegroundElement): SvgNode[
       return [beamNodes(c, e.items)];
     case "drownedStubs":
       return e.stubs.flatMap((s) => drownedStubNodes(c, s));
-    case "birds":
-      return e.items.map((i) => bird(c, i));
-    case "seaSerpent":
-      return [seaSerpent(c, e.x, e.y, e.s)];
-    default:
-      return unreachable(e);
   }
 }
 
@@ -147,7 +171,15 @@ function parchmentOverlay(suffix: string): SvgNode[] {
   ];
 }
 
-// eslint-disable-next-line max-lines-per-function
+function massWeight(m: ProspectGeometry["masses"][number]): number {
+  return m.raise >= BACK_ROW_RAISE ? 0.9 : m.form === "keep" ? 1.3 : 1.2;
+}
+
+function backRowEnd(masses: ProspectGeometry["masses"]): number {
+  const splitAt = masses.findIndex((m) => m.raise < BACK_ROW_RAISE);
+  return splitAt === -1 ? masses.length : splitAt;
+}
+
 export function renderProspect(
   g: ProspectGeometry,
   style: MapStyle,
@@ -161,10 +193,7 @@ export function renderProspect(
   const rWaves = rng.fork(`prospect:${g.index}:dress:waves`);
   const rGrass = rng.fork(`prospect:${g.index}:dress:grass`);
 
-  const splitAt = g.masses.findIndex((m) => m.raise < BACK_ROW_RAISE);
-  const split = splitAt === -1 ? g.masses.length : splitAt;
-  const weightOf = (m: ProspectGeometry["masses"][number]): number =>
-    m.raise >= BACK_ROW_RAISE ? 0.9 : m.form === "keep" ? 1.3 : 1.2;
+  const split = backRowEnd(g.masses);
 
   const children: SvgNode[] = [
     ...(parchment ? parchmentDefs(c, suffix, (g.seed * 31 + g.index * 7) % 9973) : []),
@@ -172,9 +201,9 @@ export function renderProspect(
     ...(style.name === "ink" ? skyNodes(c) : []),
     ...(g.ridge ? ridgeNodes(c, g.ridge, g.ground.base) : []),
     ...groundNodes(c, g.ground, g.water?.kind === "drowned"),
-    ...g.masses.slice(0, split).flatMap((m) => massNodes(c, m, weightOf(m))),
+    ...g.masses.slice(0, split).flatMap((m) => massNodes(c, m, massWeight(m))),
     ...g.walls.flatMap((w) => wallNodes(c, g.ground, w)),
-    ...g.masses.slice(split).flatMap((m) => massNodes(c, m, weightOf(m))),
+    ...g.masses.slice(split).flatMap((m) => massNodes(c, m, massWeight(m))),
     ...(g.water ? waterBandNodes(c, g.water, rWaves) : []),
     ...(g.water?.kind === "river" ? riverBankNodes(c, g.water, rGrass) : []),
     ...g.foreground.flatMap((e) => foregroundNodes(c, e)),

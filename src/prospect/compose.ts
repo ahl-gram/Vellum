@@ -1,8 +1,8 @@
-import { createRng } from "../core/rng.ts";
+import { createRng, type Rng } from "../core/rng.ts";
 import type { ProspectInput } from "./input.ts";
-import { type ForegroundElement, type ProspectGeometry, VIEW_X0 } from "./geometry.ts";
+import { type ForegroundElement, type ProspectGeometry, type Water, VIEW_X0 } from "./geometry.ts";
 import { buildGround, buildRidge } from "./ground.ts";
-import { composeTownscape } from "./masses.ts";
+import { composeTownscape, type Townscape } from "./masses.ts";
 import {
   composeBirds,
   composeLandDressing,
@@ -11,6 +11,7 @@ import {
   riverWater,
   seaWater,
   treatmentFor,
+  type Treatment,
 } from "./foreground.ts";
 import { composeCollapseField, composeDrowned } from "./ruin.ts";
 
@@ -18,62 +19,46 @@ export type ComposeOptions = { readonly era?: "standing" | "before-founding" };
 
 const SERPENT_ODDS = 1 / 12;
 
-// eslint-disable-next-line max-lines-per-function
-export function composeProspect(
-  input: ProspectInput,
-  opts: ComposeOptions = {},
-): ProspectGeometry {
-  const era = opts.era ?? "standing";
-  const treatment = treatmentFor(input.foreground);
-  const ground = buildGround(input);
-  const ridge = buildRidge(input, ground);
-  const base = { seed: input.seed, index: input.index, ground, ridge };
+type GeometryBase = Pick<ProspectGeometry, "seed" | "index" | "ground" | "ridge">;
+type Scene = {
+  readonly input: ProspectInput;
+  readonly treatment: Treatment;
+  readonly sea: boolean;
+  readonly river: boolean;
+  readonly water: Water | null;
+};
 
-  const rng = createRng(input.seed);
-  const rGeo = rng.fork(`prospect:${input.index}:masses`);
-  const rDecor = rng.fork(`prospect:${input.index}:decor`);
-  const rDelight = rng.fork(`prospect:${input.index}:delight`);
+function beforeFoundingGeometry(base: GeometryBase, scene: Scene, rDecor: Rng): ProspectGeometry {
+  const { input, treatment, sea, river, water } = scene;
+  const land = sea || river
+    ? []
+    : composeLandDressing(treatment, input.kind, base.ground, rDecor, {
+        built: false,
+        frontRow: [],
+      });
+  return {
+    ...base,
+    water,
+    masses: [],
+    walls: [],
+    foreground: [...land, ...(sea ? [composeBirds(2, rDecor)] : [])],
+  };
+}
 
-  const sea = input.harbor;
-  const river = !sea && input.onRiver;
-  const water = sea ? seaWater(ground) : river ? riverWater(ground) : null;
+function drownedGeometry(base: GeometryBase, rDecor: Rng): ProspectGeometry {
+  const drowned = composeDrowned(base.ground, rDecor);
+  return {
+    ...base,
+    water: drowned.water,
+    masses: [],
+    walls: [],
+    foreground: [...drowned.elements, composeBirds(6, rDecor)],
+  };
+}
 
-  if (era === "before-founding") {
-    const land = sea || river
-      ? []
-      : composeLandDressing(treatment, input.kind, ground, rDecor, {
-          built: false,
-          frontRow: [],
-        });
-    return {
-      ...base,
-      water,
-      masses: [],
-      walls: [],
-      foreground: [...land, ...(sea ? [composeBirds(2, rDecor)] : [])],
-    };
-  }
-
-  if (input.ruined && treatment === "marsh" && !sea) {
-    const drowned = composeDrowned(ground, rDecor);
-    return {
-      ...base,
-      water: drowned.water,
-      masses: [],
-      walls: [],
-      foreground: [...drowned.elements, composeBirds(6, rDecor)],
-    };
-  }
-
-  const town = composeTownscape(
-    input.kind,
-    input.score,
-    input.ruined,
-    treatment === "marsh",
-    ground,
-    rGeo,
-  );
-
+function townForeground(scene: Scene, base: GeometryBase, town: Townscape, rDecor: Rng, rDelight: Rng): ForegroundElement[] {
+  const { input, treatment, sea, river, water } = scene;
+  const ground = base.ground;
   const foreground: ForegroundElement[] = [];
   if (!sea && !river) {
     foreground.push(
@@ -95,6 +80,40 @@ export function composeProspect(
   }
   if (input.ruined) foreground.push(composeBirds(6, rDecor));
   else if (sea) foreground.push(composeBirds(2, rDecor));
+  return foreground;
+}
 
+export function composeProspect(
+  input: ProspectInput,
+  opts: ComposeOptions = {},
+): ProspectGeometry {
+  const era = opts.era ?? "standing";
+  const treatment = treatmentFor(input.foreground);
+  const ground = buildGround(input);
+  const ridge = buildRidge(input, ground);
+  const base = { seed: input.seed, index: input.index, ground, ridge };
+
+  const rng = createRng(input.seed);
+  const rGeo = rng.fork(`prospect:${input.index}:masses`);
+  const rDecor = rng.fork(`prospect:${input.index}:decor`);
+  const rDelight = rng.fork(`prospect:${input.index}:delight`);
+
+  const sea = input.harbor;
+  const river = !sea && input.onRiver;
+  const water = sea ? seaWater(ground) : river ? riverWater(ground) : null;
+  const scene = { input, treatment, sea, river, water };
+
+  if (era === "before-founding") return beforeFoundingGeometry(base, scene, rDecor);
+  if (input.ruined && treatment === "marsh" && !sea) return drownedGeometry(base, rDecor);
+
+  const town = composeTownscape(
+    input.kind,
+    input.score,
+    input.ruined,
+    treatment === "marsh",
+    ground,
+    rGeo,
+  );
+  const foreground = townForeground(scene, base, town, rDecor, rDelight);
   return { ...base, water, masses: town.masses, walls: town.walls, foreground };
 }
