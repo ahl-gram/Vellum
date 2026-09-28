@@ -12,7 +12,7 @@ type Box = { main: string; linked: string; wt: string };
 
 const withSandbox = (body: (box: Box) => void): void => {
   withRepo((main, linked) => {
-    writeFileSync(join(linked, "a.txt"), "same\nsame\nsame\n");
+    writeFileSync(join(linked, "a.txt"), "same 1\nsame 2\nsame 3\n");
     writeFileSync(join(linked, "b.txt"), "a + a\nab\naxb a.b\nkeep\n");
     writeFileSync(join(linked, "c.txt"), "if (bad) return;\nok\n");
     writeFileSync(join(linked, "bin.dat"), BINARY);
@@ -39,7 +39,7 @@ const bytes = (file: string): Buffer => readFileSync(file);
 test("mutate changes the one line it names and leaves every other line byte for byte", () => {
   withSandbox(({ linked, wt }) => {
     mutate(NAME, "a.txt", 2, "same", "diff", linked);
-    assert.equal(readFileSync(join(wt, "a.txt"), "utf8"), "same\ndiff\nsame\n", "mutate changed some other line, or none: three byte-identical lines are the PR #510 shape, where a match-based edit lands on every wearer at once");
+    assert.equal(readFileSync(join(wt, "a.txt"), "utf8"), "same 1\ndiff 2\nsame 3\n", "mutate changed some other line, none, or the named line from another line's text: three lines wearing one anchor are the PR #510 shape, where a match-based edit lands on every wearer at once");
   });
 });
 
@@ -75,7 +75,7 @@ test("mutate and restore refuse a skeptic sandbox and any path that is not a reg
       assert.throws(() => mutate("skeptic-mutate", "a.txt", 1, "same", "diff", linked), /not a guard-\* sandbox/);
       assert.throws(() => restore("skeptic-mutate", ["a.txt"], linked), /not a guard-\* sandbox/);
       assert.throws(() => status("skeptic-mutate", linked), /not a guard-\* sandbox/);
-      assert.equal(readFileSync(join(skeptic, "a.txt"), "utf8"), "same\nsame\nsame\n", "mutate wrote into a skeptic's sandbox, which is read-only");
+      assert.equal(readFileSync(join(skeptic, "a.txt"), "utf8"), "same 1\nsame 2\nsame 3\n", "mutate wrote into a skeptic's sandbox, which is read-only");
     } finally {
       teardown("skeptic-mutate", linked);
     }
@@ -95,6 +95,10 @@ test("mutate and restore refuse a skeptic sandbox and any path that is not a reg
     symlinkSync(join(main, "outside"), join(wt, "d"));
     assert.throws(() => mutate(NAME, "d/g.txt", 1, "outer", "X", linked), /outside the sandbox/);
     assert.throws(() => restore(NAME, ["d/g.txt"], linked), /outside the sandbox/);
+    rmSync(join(wt, "c.txt"));
+    symlinkSync(join(main, "outside", "g.txt"), join(wt, "c.txt"));
+    assert.throws(() => mutate(NAME, "c.txt", 1, "outer", "X", linked), /outside the sandbox/, "a tracked regular file swapped for a symlink on disk was written through");
+    assert.throws(() => restore(NAME, ["c.txt"], linked), /outside the sandbox/, "restore wrote through a tracked regular file swapped for a symlink on disk");
     assert.equal(readFileSync(join(main, "outside", "g.txt"), "utf8"), "outer\n", "a write followed a symlinked directory out of the sandbox, into a tree it does not own");
   });
 });
@@ -170,6 +174,6 @@ test("the CLI runs mutate, status and restore, deletes with an empty replacement
       assert.equal(r.status, 1, `a line of ${line} exited 0`);
       assert.match(r.err, /line/, `a line of ${line} was refused without saying why`);
     }
-    assert.equal(readFileSync(join(wt, "a.txt"), "utf8"), "same\nsame\nsame\n", "a refused call wrote the file");
+    assert.equal(readFileSync(join(wt, "a.txt"), "utf8"), "same 1\nsame 2\nsame 3\n", "a refused call wrote the file");
   });
 });
