@@ -66,7 +66,7 @@ export function dragKit(k: DrawerKit & Mouse) {
     await evaluate(`document.getElementById("chart-drawer-shut").click()`);
     await sleep(400);
     await evaluate(`(() => { const s = document.querySelector(".slip"); if (!s.classList.contains("folded")) document.querySelector(".slip-fold").click(); })()`);
-    // A finished transition stays in getAnimations() (the shape src/cli/e2e-slide.ts reads), and a slip that was folded already has none: rest is every entry finished and the edge still across two reads.
+    // A finished transition stays in getAnimations() (the shape e2e/support/slide.ts reads), and a slip that was folded already has none: rest is every entry finished and the edge still across two reads.
     await settle(FOLDREST, (d, last) => d.folded && !d.open && d.anims.every((s) => s === "finished") && !!last && d.slipX === last.slipX, label);
     await sleep(400);
   };

@@ -2,7 +2,7 @@
 
 **A settle is the wait until the thing a check is about to measure has come to rest**, so the
 reading is of its final state and not of a frame in flight. It is a poll, never a sleep:
-`makeSettle` in `scripts/e2e/settle-support.ts` reads a value repeatedly and hands each read to a
+`makeSettle` in `e2e/support/settle.ts` reads a value repeatedly and hands each read to a
 predicate beside the previous one, the check proceeds only when consecutive reads agree the thing
 has arrived, and a poll that runs out of tries throws with its last read rather than handing back a
 value still in flight. A fixed sleep measures the runner, not the page, and is the flake this file
@@ -23,7 +23,7 @@ headless browser actually do, so a green run can be believed.
    on returns nothing useful when it gives up, so returning its last read hands the check a stale
    snapshot that passes: it throws. A poll that is GATHERING a measurement keeps reading until the
    value settles and asserts on the last sample, never on the first, because the first sample that is
-   merely non-null is whatever was still in flight. `makeSettle` in `scripts/e2e/settle-support.ts`
+   merely non-null is whatever was still in flight. `makeSettle` in `e2e/support/settle.ts`
    is both at once, and is the shape to copy: it hands the previous sample to the predicate as
    `settled(d, last)`, and it throws with that last read as the payload. **Judging the last sample is
    not the same as RETURNING it**: a poll that runs out of tries and falls through to its last read
@@ -33,7 +33,7 @@ headless browser actually do, so a green run can be believed.
    readiness wait in the wrong shape, so its caller asserts on the answer; a discarded false burns
    the whole budget and passes having tested nothing. What #534 changed is where the throw lands.
    Wrap the gestures, waits and checks that make up one numbered check in
-   `step("CL5", async () => ...)` (`makeStep` in `scripts/e2e/step-support.ts`), and a timeout
+   `step("CL5", async () => ...)` (`makeStep` in `e2e/support/step.ts`), and a timeout
    fails THAT check by its own code, with the wait's label and last read as the payload, while the
    groups after it still run. A throw outside every step is contained one level up by `runSelected`,
    which records it as that suite's own red and runs the rest of the lane. Only a browser that has
@@ -53,7 +53,7 @@ headless browser actually do, so a green run can be believed.
 8. **`waitSettled` proves the draw, not ambient stillness.** Wait on the draft counter or the
    commit the gesture requested, and let stale in-flight commits pass by. **What it keys on**: an
    empty `#status`, `#verso-turn` not disabled, and an `#map svg` present (`waitSettled` in
-   `scripts/e2e/harness.ts`, whose comment at the line says why that control carries the draw
+   `e2e/harness.ts`, whose comment at the line says why that control carries the draw
    lifecycle). The two ways a new draw path breaks it are opposite. A path that never disables the
    control does not hang: it resolves at once on the draw before, which is a silent pass. A path
    that fails to re-enable it on BOTH the resolve and the catch hangs every suite that waits on it.
@@ -72,9 +72,9 @@ headless browser actually do, so a green run can be believed.
    `pageshow` with `persisted`, so a check that drives Back and reads the drawer is reading the
    device's table and not the address's. `specs/explorer-doctrine.md` carries the rule; a suite that
    wants a bare arrival clears `vellum.table.v1` before it navigates, which is what
-   `scripts/e2e/chart-drawer/kit.ts` does in its own `go`. Reach a new address by
+   `e2e/suites/chart-drawer/kit.ts` does in its own `go`. Reach a new address by
    re-bootstrapping through `about:blank` and then the target, then poll for the boot committing:
-   that is what `goto` does in `scripts/e2e/room-support.ts`, and a fixed sleep in its place is the
+   that is what `goto` does in `e2e/support/room.ts`, and a fixed sleep in its place is the
    flake.
 10. **Region-job settles scale with the runner.** 20s on CI where 6s passes locally; derive the
     factor from a measured worst case and date it at the constant.
@@ -94,16 +94,16 @@ headless browser actually do, so a green run can be believed.
     starts on whatever page is current, so the last navigation waits for readiness instead of
     returning mid-boot, or a suite that reads the page it expects without navigating of its own goes
     red in lane order and green alone. The VIEWPORT is the runner's job, not the suite's:
-    `onSuiteError` in `scripts/e2e-explorer.ts` races the mobile-emulation reset against a timeout
+    `onSuiteError` in `e2e/run.ts` races the mobile-emulation reset against a timeout
     on the error path, and the race is bounded precisely because a browser that dies after the
     liveness probe would leave that send pending forever, which is the one path where the next suite
     does inherit a phone viewport. Depend on the suite, not on the rescue. **Attribute a lane-order
     red by BISECTING the order, never by reasoning about what the last suite left behind**: the
     guess made that way on PR #482 blamed a cleared viewport override, was wrong, and had to be
     retracted; the un-awaited navigation was the cause. The selector is `E2E_SUITES_VAR` in
-    `src/cli/e2e-suites.ts`, and it carries two traps. The lane runner REFUSES to start when it is
+    `e2e/support/suites.ts`, and it carries two traps. The lane runner REFUSES to start when it is
     set, because the lanes are themselves the selection (`ambientSelectionRefusal` in
-    `src/cli/e2e-lanes.ts`), so a bisect runs the serial script. And `resolveSuiteSelection` reorders
+    `e2e/support/lanes.ts`), so a bisect runs the serial script. And `resolveSuiteSelection` reorders
     any selection into the canonical order and auto-adds the suite that consumes the boot draw, so
     an arbitrary order cannot be reproduced by asking for it.
 
@@ -115,19 +115,19 @@ an imperative for it already exists at the moment of typing, that is a `vellum-f
 section points there rather than restating it.
 
 - **Focus is emulated for the whole run, best-effort.** The harness asks for focus emulation once at
-  start up (`Emulation.setFocusEmulationEnabled` in `scripts/e2e/harness.ts`), inside a `try`/`catch`
+  start up (`Emulation.setFocusEmulationEnabled` in `e2e/harness.ts`), inside a `try`/`catch`
   because a browser build may not support it. Without it `element.focus()` fires no real events and
   `:focus-visible` never applies, and nothing throws: the focus path silently does nothing. A suite
   needs no call of its own unless it turned the emulation off, and a build that ignores the request
   degrades to exactly that silent no-op.
-- **The harness serves the BUILT site.** `scripts/e2e-explorer.ts` serves `dist/`, with
+- **The harness serves the BUILT site.** `e2e/run.ts` serves `dist/`, with
   `VELLUM_SITE_DIR` as the override, and `dist/` does not exist in a fresh checkout. A change under
   `public/` is invisible to every suite until the build runs again. Two causes put a run on a stale
   build and this file ranks neither: that one, and an orphaned browser still holding the debug port,
-  whose conflict message in `src/cli/e2e-ports.ts` says in its own words that the run would report
+  whose conflict message in `e2e/support/ports.ts` says in its own words that the run would report
   results from that browser's stale build instead of this one.
 - **A browserless run's meaning is decided by policy, not by luck.** `browserlessAction` in
-  `src/cli/browser-policy.ts` fixes the precedence: `VELLUM_REQUIRE_BROWSER` forces a FAIL and is
+  `e2e/support/browser-policy.ts` fixes the precedence: `VELLUM_REQUIRE_BROWSER` forces a FAIL and is
   read first, so a contradictory pair resolves to fail; `VELLUM_ALLOW_NO_BROWSER` is the
   deliberate-skip hatch; `CI` fails; and with none of them set an interactive session SKIPS while an
   unattended one FAILS, which is what stops a cron, a piped run or a dispatched agent reporting a
@@ -135,17 +135,17 @@ section points there rather than restating it.
   failure message names is `VELLUM_BROWSER`, a path to the binary for when `findBrowser`
   (`src/cli/raster.ts`) cannot find one.
 - **Ports are overridable and the debug port is preflighted.** `resolveE2ePorts` in
-  `src/cli/e2e-ports.ts` reads `VELLUM_E2E_PORT` and `VELLUM_E2E_DPORT`, which is what lets two local
+  `e2e/support/ports.ts` reads `VELLUM_E2E_PORT` and `VELLUM_E2E_DPORT`, which is what lets two local
   lanes run at once, and a bad value THROWS rather than falling back, because a silent fallback puts
   both lanes back on one port. The run does not bind the debug port, it CONNECTS to it, so
-  `assertDebugPortFree` in `scripts/e2e/harness.ts` preflights it once ABOVE the launch retry loop:
+  `assertDebugPortFree` in `e2e/harness.ts` preflights it once ABOVE the launch retry loop:
   a killed attempt does not release its port synchronously, so a per-attempt preflight would report
   this run's own dying browser as the stray.
 - **A visual claim is carried by a control taken in the same run, never by a byte comparison.** A
   claim about PAINT goes through the one-row pixel strip, because no hit test and no computed style
-  can see paint (`sampleRow` and `luminance` in `scripts/e2e/pixel-support.ts`). A claim about an
+  can see paint (`sampleRow` and `luminance` in `e2e/support/pixel.ts`). A claim about an
   EMULATED condition carries a read of the other condition taken in the same run, which is what the
-  print checks in `scripts/e2e/specimen/print.ts` call the same-run control. A byte comparison of
+  print checks in `e2e/suites/specimen/print.ts` call the same-run control. A byte comparison of
   renders from two environments is never the check. No suite compares one screenshot against
   another, and no cause is asserted here for why two shots differ: nothing in this repo measures one.
   The imperative is Gate 2's "run the probe's control in the same run".
@@ -161,7 +161,7 @@ section points there rather than restating it.
   is foreshortened, and every number taken from it is plausible and wrong. Wait on the animation's
   own state, never on the clock: poll `getAnimations()` on the element that CARRIES the animation,
   `.pc-inner` and not `#place-card`, until the list is NON-EMPTY and every entry's `playState` is
-  `"finished"`, the shape `atRest` in `src/cli/e2e-slide.ts` carries, because `[].every()` is true
+  `"finished"`, the shape `atRest` in `e2e/support/slide.ts` carries, because `[].every()` is true
   and an element with no animation at all reports finished; a parent box reports none while its
   child rolls, so a bare poll there resolves at once and a guarded one never does, and
   `{ subtree: true }` from the box is the other way to reach the child. Take the rect only once
@@ -176,9 +176,9 @@ section points there rather than restating it.
   `getAnimations()`, so the guarded poll above can never see `finished` there, and the rest
   signal is the class's absence AFTER it was seen present, since the same page also removes that
   class on a shut and on an off-screen list, and an absence with no witness reads a settle that
-  never played as rest; `restSeeing` in `scripts/e2e/chart-drawer/kit.ts` is the shape, the
+  never played as rest; `restSeeing` in `e2e/suites/chart-drawer/kit.ts` is the shape, the
   poll counting the class or the running animation on the way to `atRest`. And this harness is
-  Chromium only (it drives the browser over the debug port, `scripts/e2e/harness.ts`), whose
+  Chromium only (it drives the browser over the debug port, `e2e/harness.ts`), whose
   computed style spells the blanket's `0.01ms` as `1e-05s`, so a check reads the duration as a
   number (CD46) and never compares the string. Gate 2 item 6 carries the typing-moment half.
 - **A clip with a negative `x` is neither clamped nor refused: `Page.captureScreenshot` hands back a
@@ -187,8 +187,8 @@ section points there rather than restating it.
   edge yields once a probe pads its rect (a pad subtracted from a `left` of 0). A negative `y` is
   honoured as an offset, with the rows above the document white, so the two axes do not fail alike
   and a symmetric expectation is what keeps the `x` case silent. Nothing in the harness guards it:
-  `shoot` in `scripts/e2e/harness.ts` passes its clip straight through, and `sampleRow` in
-  `scripts/e2e/pixel-support.ts` adds the scroll and clamps nothing. Clamp a computed origin at
+  `shoot` in `e2e/harness.ts` passes its clip straight through, and `sampleRow` in
+  `e2e/support/pixel.ts` adds the scroll and clamps nothing. Clamp a computed origin at
   zero before the call, and read a frame that shows the header or the nav as this before reading it
   as the thing you meant. A card at `left: 0` is the clamp working (`axisNudge` in
   `src/render/place-card.ts` never pushes a card's near edge past its box), so a negative origin is
@@ -196,11 +196,11 @@ section points there rather than restating it.
 - **The headless window has a minimum width clamp.** A window asked for narrower than the clamp lays
   out at the clamp and the capture is cropped, which reads as an overflow bug that is not there. The
   route to a true narrow viewport is device-metric emulation, wrapped as `setMobileViewport` and
-  `clearMobile` in `scripts/e2e/harness.ts`. The figure is not written down here because no command
+  `clearMobile` in `e2e/harness.ts`. The figure is not written down here because no command
   in this repo demonstrates it. Gate 3 already carries the typing-moment half, that a window size
   does not set the layout viewport.
 - **A run deletes its own browser profile only if it is allowed to finish.** Each local run mints a
-  throwaway profile under `tmpdir()` (`mkdtemp` in `scripts/e2e/harness.ts`) and `cleanup()` removes
+  throwaway profile under `tmpdir()` (`mkdtemp` in `e2e/harness.ts`) and `cleanup()` removes
   it with `rmSync` rather than the promise `rm`, which is not a style choice: `cleanup()` is
   synchronous and every caller exits immediately after it, so an unawaited promise there never runs
   and no run ever deletes anything. An ad-hoc script driving the harness owes the same discipline,
@@ -215,10 +215,10 @@ section points there rather than restating it.
   `find /var/folders/*/T -maxdepth 1 -name 'vellum-e2e-*' -type d -mmin +30 -print0 | xargs -0 rm -rf`,
   whose age filter is what keeps it from deleting the profile of the run you are watching.
 - **The harness ASKS for a window far taller than a screen**, `--window-size=1280,2400` in
-  `scripts/e2e/harness.ts`. What it lays out at is a different question, for the reason the width
+  `e2e/harness.ts`. What it lays out at is a different question, for the reason the width
   bullet above gives, and no CHECK in this repo asserts the answer: the nearest instrument is the
-  `innerHeight` carried in `legendRoom` in `scripts/e2e/suite-broadside.ts`, which is captured and
-  printed on failure but never asserted. `scripts/e2e/suite-reading-room.ts` does reason from
+  `innerHeight` carried in `legendRoom` in `e2e/suites/broadside.ts`, which is captured and
+  printed on failure but never asserted. `e2e/suites/reading-room.ts` does reason from
   the requested figure in a comment at its own override, which is a suite explaining its choice and
   not a measurement of the effective height. So the height is stated here as the REQUEST and no
   effective figure is claimed. What the suites do establish is the consequence: a page that would
@@ -226,8 +226,8 @@ section points there rather than restating it.
   scroll never reaches its own fixture, because the late section it meant to bring up to the reading
   line was on screen the whole time, so it passes having exercised nothing. A suite that depends on
   scrolling sizes its OWN viewport with `Emulation.setDeviceMetricsOverride`, at whatever its
-  fixture needs and with the reason at the line; `scripts/e2e/suite-document-rooms.ts` and
-  `scripts/e2e/suite-reading-room.ts` both do, at different sizes, which is why the rule is size
+  fixture needs and with the reason at the line; `e2e/suites/document-rooms.ts` and
+  `e2e/suites/reading-room.ts` both do, at different sizes, which is why the rule is size
   your own fixture and not any one figure. It is the raw call rather than `setMobileViewport`
   because that wrapper sets `mobile: true`, which changes layout semantics as well as size. **This
   is not the case clause 14 governs**: there the VIEWPORT is the runner's job because the reset on

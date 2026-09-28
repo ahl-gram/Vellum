@@ -147,7 +147,7 @@ async function main() {
         false,
         e && e.message ? e.message : String(err),
       );
-      // clearMobile() is a trailing statement in the phone suites, not a finally (suite-cluster.ts, suite-room-drawer.ts, suite-chart-drawer.ts), so a suite that stops at 390x844 hands every later suite in the lane a phone viewport and a cascade of reds that are not defects.
+      // clearMobile() is a trailing statement in the phone suites, not a finally (suites/cluster.ts, suites/room-drawer.ts, suites/chart-drawer.ts), so a suite that stops at 390x844 hands every later suite in the lane a phone viewport and a cascade of reds that are not defects.
       // Bounded, because a browser that dies AFTER the liveness probe leaves this send pending forever: the harness settles a waiter only on the matching reply, so an unbounded reset here is a lane that stalls with nothing to read rather than one that fails.
       await Promise.race([
         ctx.clearMobile().catch(() => {}),

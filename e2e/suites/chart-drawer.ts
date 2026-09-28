@@ -52,7 +52,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await cd25CapturesAndHomes(kd, step, SIX);
   // OUTSIDE every step, which is the whole point: `makeStep` swallows a throw from anywhere in a step's body, so a
   // clear that sits after a check inside one is skipped exactly when a check gave up early and leaks the key into
-  // document-rooms and region-detail. suite-hunt.ts brackets its own key at start and end for the same reason.
+  // document-rooms and region-detail. suites/hunt.ts brackets its own key at start and end for the same reason.
   await forget();
 }
 

@@ -140,7 +140,7 @@ at #260 with its clean-list entry kept deliberately.
   `test/world/golden-seed42.test.ts` and `test/world/covenant-seed42.test.ts` to go red, a deliberate
   throw from `mooring` (`src/site/home/stations.ts`), and a spread of e2e suites that hard-assert the
   hero world's own strings. Do not size that last group from memory or from this line: it is most of
-  the suites, and `git grep -l` for the world's title across `scripts/e2e/` is the only honest count.
+  the suites, and `git grep -l` for the world's title across `e2e/` is the only honest count.
   Loudness is not the problem. The problem is the prose those reds do not enumerate.
   **Sweep for the world's strings, plural, not for one of them.** The tail quotes the world's title,
   its realm names, its settlement names and its culture, in different places, so a grep for the title

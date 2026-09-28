@@ -10,7 +10,7 @@
   background: transparent; border: 0; border-radius: 0; padding: 0;
   pointer-events: auto; cursor: pointer;
 }
-/* The ring rides ::after (the scrub dot is ::before) so the .place-hit element keeps its zero-transition reset (`P2c` in `scripts/e2e/cards/overlay.ts`) and idle parity holds. */
+/* The ring rides ::after (the scrub dot is ::before) so the .place-hit element keeps its zero-transition reset (`P2c` in `e2e/suites/cards/overlay.ts`) and idle parity holds. */
 .place-hit::after {
   content: ""; position: absolute; inset: 0; margin: auto;
   width: 20px; height: 20px; border-radius: 50%; box-sizing: border-box;
@@ -94,7 +94,7 @@
   font-style: italic; color: var(--ink-tale); }
 
 .place-overlay.scrub .place-hit { pointer-events: none; cursor: default; }
-/* Animations ride the children, never the group, whose box spans halo, glyph and label; the origin is per-element data written inline by `applyScrub` in `src/site/living-chart/chronicle.ts` because a profile glyph stands on its point while a plan glyph centres on it (`RS22` in `scripts/e2e/suite-room-ink.ts` reads the town point staying fixed). */
+/* Animations ride the children, never the group, whose box spans halo, glyph and label; the origin is per-element data written inline by `applyScrub` in `src/site/living-chart/chronicle.ts` because a profile glyph stands on its point while a plan glyph centres on it (`RS22` in `e2e/suites/room-ink.ts` reads the town point staying fixed). */
 .living-chart g.settlement[data-ink="founding"] > :not(text) {
   animation: inkStamp var(--paper) var(--ease-paper) both;
 }

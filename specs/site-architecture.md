@@ -47,7 +47,7 @@ symbol and path so the reader goes and looks.
   e2e suite, which then joins the suite order, the runner's map, a lane and that lane's measured
   budget. **Budgeting a working page as a two-file change is the mistake this rule exists to stop.**
 - **The rosters are found by grepping, never by reading a list.** The mechanism is the footguns
-  Gate 4 one: grep the nearest sibling's name across `src/`, `scripts/`, `test/` and `.github/`, and
+  Gate 4 one: grep the nearest sibling's name across `src/`, `scripts/`, `e2e/`, `test/` and `.github/`, and
   join every list it appears in. A list written in prose is a starting point and goes stale; the
   grep does not. **Some rosters close themselves and some do not, so learn which before you rely on
   a red.** Both sheet rosters in `test/site/tip-affordance.test.ts` close: one walks `public/` and
@@ -60,8 +60,8 @@ symbol and path so the reader goes and looks.
   `BUNDLE_ENTRIES` in `scripts/build-app-bundles.ts`; `GENERATED_SUBTREES` in
   `scripts/clean-public-generated.ts`; `ROUTE_ENTRIES` and `DISCOVERY_ROUTES` in
   `scripts/generate-discovery.ts`. A new suite additionally joins `E2E_SUITE_ORDER`
-  (`src/cli/e2e-suites.ts`), the runner's `SUITES` map (`scripts/e2e-explorer.ts`), `E2E_LANES`
-  (`src/cli/e2e-lanes.ts`), `MEASURED_SECONDS` (`test/cli/e2e-lanes.test.ts`) and `STEPPED_GROUPS`
+  (`e2e/support/suites.ts`), the runner's `SUITES` map (`e2e/run.ts`), `E2E_LANES`
+  (`e2e/support/lanes.ts`), `MEASURED_SECONDS` (`test/e2e/lanes.test.ts`) and `STEPPED_GROUPS`
   in `test/repo/e2e-tiers.test.ts` if it steps. A new LANE joins two more: `ci.yml`'s job matrix, where
   `test/repo/e2e-tiers.test.ts` reds if the matrix and `E2E_LANES` disagree, and `main`'s required
   checks, which no test can see at all.
@@ -248,7 +248,7 @@ precisely, because a token that falls outside it looks identical at the point of
   exact file paths only. Removing it looks harmless and 404s every working page in dev, while build
   and preview are untouched.
 - **The e2e harness serves the engine by type-stripping the real source.** `serveEngineModule` in
-  `scripts/e2e/site-server.ts` strips types from `src/*.ts` on demand, which is how a suite
+  `e2e/site-server.ts` strips types from `src/*.ts` on demand, which is how a suite
   computes an expected value in-browser and dodges cross-engine float drift. It is e2e only; the
   deploy artifact carries none of it, and a test that proves the artifact carries none of it exists.
 - **CI is parallel jobs on the same triggers**, one running the typecheck, the lint and the unit
