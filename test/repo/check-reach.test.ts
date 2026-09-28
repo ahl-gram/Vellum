@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 import ts from "typescript";
-import { lintTsRoots } from "../../test-support/lint-roots.ts";
+import { lintTsRoots, tsRootsOf } from "../../test-support/lint-roots.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 
@@ -13,6 +13,13 @@ const tsUnder = (dir: string): string[] =>
     if (e.isDirectory()) return tsUnder(join(dir, e.name));
     return e.name.endsWith(".ts") ? [join(ROOT, dir, e.name)] : [];
   });
+
+test("the lint's TypeScript roots are read from globs of one shape, and a TypeScript glob of any other shape is refused rather than dropped", () => {
+  assert.deepEqual(tsRootsOf(["src/**/*.ts", "e2e/**/*.ts", "**/*.js", "public/**/*.css", "src/**/*.ts", ["test/**/*.ts", "**/*.mts"]]), ["e2e", "src", "test"]);
+  for (const entry of ["tools/bench/**/*.ts", "e2e/**/*.mts", "src/**/*.{ts,mts}", ".claude/skills/**/*.ts", "**/*.ts", "test/**/*.cts", ["**/*.ts", "**/*.tsx"]]) {
+    assert.throws(() => tsRootsOf([entry]), /cannot read/, `${JSON.stringify(entry)} was dropped, so a root the lint reads through it would be one neither guard walks`);
+  }
+});
 
 test("npm run check reaches every TypeScript file the lint reaches, so a root the lint gains is never one the type checker skips (Issue #679)", () => {
   const roots = lintTsRoots();

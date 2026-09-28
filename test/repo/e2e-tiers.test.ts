@@ -281,7 +281,7 @@ test("every suite with a wait that THROWS is named in the step roster, and every
 
 test("a suite that builds a step is named in the roster, so adopting one without joining cannot pass unread", () => {
   const adopters = SUITE_FILES.filter(([, file]) => /from "\.\.\/support\/step\.ts"/.test(src(file))).map(([name]) => name);
-  assert.ok(adopters.length > 0, "no suite imports step-support at all, so the assertion below would read an empty list");
+  assert.ok(adopters.length > 0, "no suite imports support/step.ts at all, so the assertion below would read an empty list");
   assert.deepEqual(
     adopters.filter((name) => !(name in STEPPED_GROUPS)),
     [],

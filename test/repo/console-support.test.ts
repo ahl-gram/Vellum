@@ -112,7 +112,6 @@ test("no suite carries a cancellation opening of its own: one roster, swept from
 });
 
 test("every read of the console accumulator goes through the shared drop, so a call site cannot quietly stop filtering (cold skeptic on PR #619)", () => {
-  // run.ts creates the accumulator and hands it to the harness, and harness.ts FILLS it: the two files that read it for something other than a check.
   const files = e2eFiles().filter((f) => f !== "support/console.ts" && f !== "harness.ts" && f !== "run.ts");
   assert.ok(files.length > 20, `read only ${files.length} .ts files; this sweep is looking at the wrong tree`);
   const offenders: string[] = [];

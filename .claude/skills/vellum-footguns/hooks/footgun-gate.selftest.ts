@@ -242,6 +242,7 @@ const FIXTURES: Fixture[] = [
   ["a moved e2e helper that was under src/cli gets gate 2", edit("Edit", "e2e/support/suites.ts", "x"), "context", "## Gate 2"],
   ["the retired runner path under scripts/ gets no gate 2", edit("Edit", "scripts/e2e-lanes.ts", "x"), null, ""],
   ["a scripts .mjs draft still gets gate 2", edit("Write", "scripts/draft.mjs", "x"), "context", "## Gate 2"],
+  ["an e2e .mjs draft gets gate 2 as well", edit("Write", "e2e/draft.mjs", "x"), "context", "## Gate 2"],
   ["a unit test under test/e2e gets gate 1, the first match", edit("Edit", "test/e2e/lanes.test.ts", "x"), "context", "## Gate 1"],
   ["a single escape in a unit test under test/e2e is denied too", edit("Write", "test/e2e/x.test.ts", "const P = `s.split(/\\d/)`;"), "deny", "backtick"],
   ["a non-e2e scripts .ts gets no gate 2", edit("Edit", "scripts/agent-sandbox.ts", "x"), null, ""],
