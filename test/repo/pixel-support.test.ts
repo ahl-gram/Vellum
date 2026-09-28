@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { sampleRow } from "../../scripts/e2e/pixel-support.ts";
+import { sampleRow } from "../../e2e/support/pixel.ts";
 
 // A 1x1 8-bit RGBA PNG, enough for the decoder.
 const PNG_1x1 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==";

@@ -107,7 +107,7 @@ const NOTE_FIXTURE = [
 ];
 
 test("the note scanner passes one null objection per note and reports a second uncertain value, a misspelling beside or in place of the null read, a wrong type that shares its start, a note with nothing under it, a stray suppression, and an arithmetic objection alone on either side of the operator, even on a regex match", () => {
-  const path = join(REPO, "scripts", "e2e", "__note-fixture__.ts");
+  const path = join(REPO, "e2e", "__note-fixture__.ts");
   assert.equal(existsSync(path), false, "the fixture's name is a real file, so the scan below would read the disk instead");
   const text = NOTE_FIXTURE.join("\n");
   const { notes, findings } = noteFindings([{ path, text }]);
@@ -115,17 +115,17 @@ test("the note scanner passes one null objection per note and reports a second u
   assert.deepEqual(findings.map((f) => f.at).sort(), [10, 12, 18, 20, 22, 24, 26, 30, 34, 36].map((n) => `${path}:${n}`).sort());
 });
 
-test("the scan reads every TypeScript file under scripts/e2e at any depth and the e2e scripts beside it, and nothing else", () => {
+test("the scan reads every TypeScript file under e2e/ at any depth, and nothing else", () => {
   const root = mkdtempSync(join(tmpdir(), "vellum-e2e-notes-"));
   try {
     const plant = (rel: string): void => {
       mkdirSync(dirname(join(root, rel)), { recursive: true });
       writeFileSync(join(root, rel), "");
     };
-    ["scripts/e2e/top.ts", "scripts/e2e/split/nested.ts", "scripts/e2e-beside.ts", "scripts/e2e/left.mjs", "scripts/other.ts"].forEach(plant);
+    ["e2e/top.ts", "e2e/suites/split/nested.ts", "e2e/left.mjs", "scripts/other.ts", "scripts/e2e-beside.ts", "test/e2e/x.test.ts"].forEach(plant);
     assert.deepEqual(
       e2eSourcePaths(root).map((p) => relative(root, p)).sort(),
-      ["scripts/e2e/top.ts", "scripts/e2e/split/nested.ts", "scripts/e2e-beside.ts"].sort(),
+      ["e2e/top.ts", "e2e/suites/split/nested.ts"].sort(),
     );
   } finally {
     rmSync(root, { recursive: true, force: true });

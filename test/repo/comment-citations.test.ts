@@ -2,12 +2,13 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
+import { lintTsRoots } from "../../test-support/lint-roots.ts";
 
 // Comments in this project get read and trusted, so a citation which no longer resolves is worse than none; the check is mechanical because the drift that motivated it was.
 // These guards do NOT check the CLAIM wrapped around a citation: green means the citations resolve, never that the prose is current.
 
 const REPO = resolve(import.meta.dirname, "..", "..");
-const CODE_ROOTS = ["src", "test", "test-support", "scripts"];
+const CODE_ROOTS = ["src", "test", "test-support", "scripts", "e2e"];
 const SKIP_DIRS = new Set(["node_modules", "dist", "out", ".git", ".claude"]);
 
 // The gitignored Vite twins are the only real .js artifacts the tree produces (scripts/build-app-bundles.ts BUNDLE_ENTRIES); any other .js name is a leftover, since no .js source has existed since #260.
@@ -15,7 +16,7 @@ const isBuildArtifact = (name: string): boolean => /(^|\.)bundle\.js$/.test(name
 
 // The ratified citation form (#296, 2026-07-26): backtick-symbol in repo/relative/path, line numbers deliberately absent. The backticks are load-bearing: a bare "foo in src/x.ts" is not checked and not honored.
 const CITATION =
-  /`([A-Za-z_]\w*)`\s+in\s+`?((?:src|test|scripts|test-support|public)\/[\w./-]+\.(?:ts|mjs|astro|css))`?/g;
+  /`([A-Za-z_]\w*)`\s+in\s+`?((?:src|test|scripts|e2e|test-support|public)\/[\w./-]+\.(?:ts|mjs|astro|css))`?/g;
 
 const JS_NAME = /\b[A-Za-z][\w.-]*\.js\b/g;
 
@@ -80,6 +81,16 @@ function commentRuns(file: string): ReadonlyArray<readonly [number, string]> {
 }
 
 const rel = (file: string): string => file.slice(REPO.length + 1);
+
+test("this guard reads every root the lint reads, and its citation form reads a path under each of them and under public/, so no citation there goes unchecked (Issue #679)", () => {
+  const lintRoots = lintTsRoots();
+  assert.ok(lintRoots.includes("src"), `read the lint's TypeScript roots as [${lintRoots.join(", ")}], so that reader has lost the config's shape`);
+  assert.deepEqual(lintRoots.filter((r) => !CODE_ROOTS.includes(r)), [], "the lint reads a root this guard never walks, so a stale citation in a comment there stays green");
+  for (const [root, ext] of [...CODE_ROOTS.map((r) => [r, "ts"] as const), ["public", "css"] as const]) {
+    const read = [...`\`sym\` in \`${root}/x/y.${ext}\``.matchAll(CITATION)].map((m) => m[2]);
+    assert.deepEqual(read, [`${root}/x/y.${ext}`], `a citation into ${root}/ is not read at all, so it is never checked`);
+  }
+});
 
 test("no comment names a .js module: nothing but the build artifacts is .js since #260", () => {
   const offenders = scannedFiles().flatMap((file) =>

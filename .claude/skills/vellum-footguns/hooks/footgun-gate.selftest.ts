@@ -52,7 +52,7 @@ const deployed = (payload: Payload, projectDir: string) => async (): Promise<Dec
   );
 
 type Kind = "deny" | "context" | null;
-type Fixture = [string, Payload | (() => Promise<Decision>), Kind, string];
+type Fixture = [string, Payload | (() => Promise<Decision>), Kind, string, string?];
 const STASH_POP = bash("git stash pop");
 // The five section names are written out HERE and derived in the hook. That asymmetry is the guard: a heading renamed in the template changes only one side, so these rows red instead of the hook silently enforcing yesterday's shape.
 const SECTIONS = ["## Guards", "## Ran", "## Records", "## Rulings", "## Look for these when you use it"];
@@ -219,35 +219,44 @@ const FIXTURES: Fixture[] = [
   ["a warning does not swallow the gate 5 note", bash("gh pr create --body-file nope.md", "/"), "context", "## Gate 5"],
   ["git push gets gate 5 once", bash("git push -u origin footguns-skill"), "context", "## Gate 5"],
   ["git status gets nothing", bash("git status"), null, ""],
-  ["heredoc into e2e denied", bash("cat > scripts/e2e/suite-x.mjs <<'EOF'\nconst R = `x.split(/\\s+/)`;\nEOF"), "deny", "backtick"],
+  ["heredoc into e2e denied", bash("cat > e2e/suites/x.ts <<'EOF'\nconst R = `x.split(/\\s+/)`;\nEOF"), "deny", "backtick"],
   ["heredoc into out probe denied", bash("cat > out/probe.mjs <<'EOF'\nawait evaluate(`a.match(/b\\.c/)`)\nEOF"), "deny", "backtick"],
-  ["e2e single-escaped class denied", edit("Write", "scripts/e2e/suite-x.mjs", "const R = `(() => 'a b'.split(/\\s+/))()`;"), "deny", "backtick"],
-  ["e2e single-escaped dot denied", edit("Edit", "scripts/e2e/suite-x.mjs", "await evaluate(`x.match(/a\\.b/)`)"), "deny", "backtick"],
-  ["multiedit edits[] denied", multi("scripts/e2e/suite-x.mjs", "`split(/\\s/)`"), "deny", "backtick"],
+  ["e2e single-escaped class denied", edit("Write", "e2e/suites/x.ts", "const R = `(() => 'a b'.split(/\\s+/))()`;"), "deny", "backtick"],
+  ["e2e single-escaped dot denied", edit("Edit", "e2e/suites/x/part.ts", "await evaluate(`x.match(/a\\.b/)`)"), "deny", "backtick"],
+  ["multiedit edits[] denied", multi("e2e/support/x.ts", "`split(/\\s/)`"), "deny", "backtick"],
   ["out probe single-escaped denied", edit("Write", "out/probe-x.mjs", "const P = `s.replace(/\\s+/g, ' ')`;"), "deny", "backtick"],
   ["String.raw is the remedy and is allowed", edit("Write", "out/probe-x.mjs", "const P = String.raw`s.replace(/\\s+/g, ' ')`;"), "context", "## Gate 2"],
   ["odd backtick in a regex literal does not swallow code", edit("Write", "out/rewrap.mjs", "const md = /^```/;\nconst r = s.match(/\\s+/);"), "context", "## Gate 2"],
   ["escape inside a substitution template denied", edit("Write", "out/p.mjs", "const P = `a${1}b.split(/\\d/)`;"), "deny", "backtick"],
-  ["e2e double-escaped gets gate 2", edit("Write", "scripts/e2e/suite-x.mjs", "const R = `(() => 'a b'.split(/\\\\s+/))()`;"), "context", "## Gate 2"],
-  ["e2e regex literal outside backticks gets gate 2", edit("Write", "scripts/e2e/suite-x.mjs", "const a = s.match(/\\s+/);"), "context", "## Gate 2"],
-  ["e2e .click() warns", edit("Edit", "scripts/e2e/suite-x.mjs", "el.click();"), "context", "pointer-events"],
-  ["e2e .ts single-escaped class denied", edit("Write", "scripts/e2e/suite-x.ts", "const R = `(() => 'a b'.split(/\\s+/))()`;"), "deny", "backtick"],
-  ["a template after a generic arrow in a .ts file denied", edit("Write", "scripts/e2e/suite-x.ts", "const id = <T>(x: T): T => x;\nconst R = `(() => 'a b'.split(/\\s+/))()`;"), "deny", "backtick"],
+  ["e2e double-escaped gets gate 2", edit("Write", "e2e/suites/x.ts", "const R = `(() => 'a b'.split(/\\\\s+/))()`;"), "context", "## Gate 2"],
+  ["e2e regex literal outside backticks gets gate 2", edit("Write", "e2e/suites/x.ts", "const a = s.match(/\\s+/);"), "context", "## Gate 2"],
+  ["e2e .click() warns", edit("Edit", "e2e/suites/x/part.ts", "el.click();"), "context", "pointer-events"],
+  ["e2e .ts single-escaped class denied", edit("Write", "e2e/harness.ts", "const R = `(() => 'a b'.split(/\\s+/))()`;"), "deny", "backtick"],
+  ["a template after a generic arrow in a .ts file denied", edit("Write", "e2e/suites/x.ts", "const id = <T>(x: T): T => x;\nconst R = `(() => 'a b'.split(/\\s+/))()`;"), "deny", "backtick"],
   ["a template after an angle-bracket assertion denied", edit("Write", "out/probe-x.ts", "const P = <string>`s.split(/\\s+/)`;"), "deny", "backtick"],
   ["a single escape in a non-e2e scripts .ts denied", edit("Write", "scripts/lint/x.ts", "const P = `s.split(/\\d/)`;"), "deny", "backtick"],
-  ["heredoc into an e2e .ts denied", bash("cat > scripts/e2e/suite-x.ts <<'EOF'\nconst R = `x.split(/\\s+/)`;\nEOF"), "deny", "backtick"],
-  ["String.raw in a .ts is allowed", edit("Write", "scripts/e2e/suite-x.ts", "const P = String.raw`s.replace(/\\s+/g, ' ')`;"), "context", "## Gate 2"],
-  ["an e2e runner .ts gets gate 2", edit("Edit", "scripts/e2e-lanes.ts", "x"), "context", "## Gate 2"],
+  ["heredoc into an e2e .ts denied", bash("cat > e2e/support/x.ts <<'EOF'\nconst R = `x.split(/\\s+/)`;\nEOF"), "deny", "backtick"],
+  ["String.raw in a .ts is allowed", edit("Write", "e2e/suites/x.ts", "const P = String.raw`s.replace(/\\s+/g, ' ')`;"), "context", "## Gate 2"],
+  ["the lane driver gets gate 2", edit("Edit", "e2e/lanes.ts", "x"), "context", "## Gate 2"],
+  ["the runner gets gate 2", edit("Edit", "e2e/run.ts", "x"), "context", "## Gate 2"],
+  ["a moved e2e helper that was under src/cli gets gate 2", edit("Edit", "e2e/support/suites.ts", "x"), "context", "## Gate 2"],
+  ["the retired runner path under scripts/ gets no gate 2", edit("Edit", "scripts/e2e-lanes.ts", "x"), null, ""],
+  ["a scripts .mjs draft still gets gate 2", edit("Write", "scripts/draft.mjs", "x"), "context", "## Gate 2"],
+  ["an e2e .mjs draft gets gate 2 as well", edit("Write", "e2e/draft.mjs", "x"), "context", "## Gate 2"],
+  ["a unit test under test/e2e gets gate 1, the first match", edit("Edit", "test/e2e/lanes.test.ts", "x"), "context", "## Gate 1"],
+  ["a single escape in a unit test under test/e2e is denied too", edit("Write", "test/e2e/x.test.ts", "const P = `s.split(/\\d/)`;"), "deny", "backtick"],
   ["a non-e2e scripts .ts gets no gate 2", edit("Edit", "scripts/agent-sandbox.ts", "x"), null, ""],
   ["unit test file gets gate 1", edit("Edit", "test/site/thing.test.ts", "assert.ok(1);"), "context", "## Gate 1"],
   ["stylesheet gets gate 3", edit("Edit", "public/atelier.css", ".a { color: red }"), "context", "## Gate 3"],
   ["new page gets gate 4", edit("Write", "src/pages/never-exists-zz/index.astro", "---\n---"), "context", "## Gate 4"],
+  ["a new e2e suite gets gate 4", edit("Write", "e2e/suites/never-exists-zz.ts", "x"), "context", "## Gate 4"],
+  ["a new part in a suite's folder gets gate 2 and no gate 4", edit("Write", "e2e/suites/never-exists-zz/part.ts", "x"), "context", "## Gate 2", "## Gate 4"],
   // One fixture per ARM of the Gate 6 regex, because a roster is only as good as its least-swept alternative: the prover found 10 of 19 arms had no fixture, so a typo in any of them shipped silent.
   ...GATE6_ARMS.map(([arm, path]): Fixture => [`gate 6 arm: ${arm}`, edit("Edit", path, "x"), "context", "## Gate 6"]),
   ["gate 6 on the ABSOLUTE path a real tool call passes", edit("Edit", join(ROOT, "src/render/style.ts"), "x"), "context", "## Gate 6"],
   ["an earlier gate still wins a path that matches BOTH", edit("Edit", "src/render/x.css", ".a{}"), "context", "## Gate 3"],
   ["site source is not chart work", edit("Edit", "src/site/explorer/app.ts", "const x = 1;"), null, ""],
-  ["the e2e CLI is not chart work", edit("Edit", "src/cli/e2e-suites.ts", "x"), null, ""],
+  ["a cli module other than the rasteriser is not chart work", edit("Edit", "src/cli/main.ts", "x"), null, ""],
   ["deployed: real project dir denies stash pop", deployed(STASH_POP, ROOT), "deny", "shared"],
   ["deployed: symlinked project dir denies stash pop", deployed(STASH_POP, LINK), "deny", "shared"],
   ["deployed: missing project dir exits 0 with no output", deployed(STASH_POP, "/nonexistent"), null, ""],
@@ -271,13 +280,13 @@ const run = async (): Promise<number> => {
   for (const label of ["Gate 1", "Gate 2", "Gate 3", "Gate 4", "Gate 5", "Gate 6"]) report(gateText(label).length > 200, `${label} text found in SKILL.md`);
   report(requiredHeadings() !== null, "section names found in .github/PULL_REQUEST_TEMPLATE.md");
   report(!readFileSync(TEMPLATE_PATH, "utf8").includes("—"), "the PR template carries no em-dash to prefill a body with");
-  for (const [name, subject, want, needle] of FIXTURES) {
+  for (const [name, subject, want, needle, absent] of FIXTURES) {
     const sessionId = `selftest-${process.pid}-${name}`;
     const got = typeof subject === "function" ? await subject() : await decide({ ...subject, session_id: sessionId });
     const out = got?.hookSpecificOutput;
     const kind: Kind = out ? (out.permissionDecision === "deny" ? "deny" : "context") : null;
     const text = out?.permissionDecisionReason ?? out?.additionalContext ?? "";
-    report(kind === want && text.includes(needle), `${name}: want ${want} with ${JSON.stringify(needle)}, got ${kind}`);
+    report(kind === want && text.includes(needle) && (absent === undefined || !text.includes(absent)), `${name}: want ${want} with ${JSON.stringify(needle)}${absent === undefined ? "" : ` and without ${JSON.stringify(absent)}`}, got ${kind}`);
     try {
       unlinkSync(statePath(sessionId));
     } catch {

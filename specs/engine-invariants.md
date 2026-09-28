@@ -80,7 +80,7 @@ produces a different world for the same seed, which is the defect this contract 
 
 The guards: `test/cli/poster-parity.test.ts` holds the covenant at recipe level rather than byte
 level, because a Print Room proof defaults its legend on and so is deliberately not byte-identical
-to a plain chart; and the `R4` check in `scripts/e2e/suite-render.ts` compares the browser worker's
+to a plain chart; and the `R4` check in `e2e/suites/render.ts` compares the browser worker's
 draw against the committed chart.
 
 ## What a terrain change moves, and what it does not
@@ -191,7 +191,7 @@ The closing of coasts against the window boundary is not in that file. It is `cl
 guarantees that walk provides.** A surface wanting a different clue population changes the candidate
 pool, not the output.
 
-The e2e halves are `H11` and `H12` in `scripts/e2e/suite-hunt.ts`.
+The e2e halves are `H11` and `H12` in `e2e/suites/hunt.ts`.
 
 ## Engine outputs a consuming surface must respect
 

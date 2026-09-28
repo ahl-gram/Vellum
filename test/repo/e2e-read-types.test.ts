@@ -3,8 +3,8 @@ import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import ts from "typescript";
-import type { Evaluate, Payload } from "../../scripts/e2e/types.ts";
-import { makeSettle } from "../../scripts/e2e/settle-support.ts";
+import type { Evaluate, Payload } from "../../e2e/types.ts";
+import { makeSettle } from "../../e2e/support/settle.ts";
 import { e2eSourcePaths } from "../../test-support/e2e-source.ts";
 
 type Cam = { scale: number; x: number; y: number };
@@ -97,15 +97,15 @@ function e2eProgram(extra: ReadonlyMap<string, string> = new Map()): ts.Program 
 
 function knownDeclarations(program: ts.Program): { readers: readonly ts.Node[]; senders: readonly ts.Node[] } {
   const statements = (file: string): readonly ts.Statement[] => {
-    const sf = program.getSourceFile(join(REPO, "scripts", "e2e", file));
-    assert.ok(sf, `scripts/e2e/${file} is not in the program`);
+    const sf = program.getSourceFile(join(REPO, "e2e", file));
+    assert.ok(sf, `e2e/${file} is not in the program`);
     return sf.statements;
   };
   const aliased = (file: string, name: string) => statements(file).find((s): s is ts.TypeAliasDeclaration => ts.isTypeAliasDeclaration(s) && s.name.text === name)?.type;
   const declared = (file: string, name: string) => statements(file).find((s): s is ts.FunctionDeclaration => ts.isFunctionDeclaration(s) && s.name?.text === name);
   const evaluateType = aliased("types.ts", "Evaluate");
   const harnessEvaluate = declared("harness.ts", "evaluate");
-  const settleArrow = declared("settle-support.ts", "makeSettle")?.body?.statements.find(ts.isReturnStatement)?.expression;
+  const settleArrow = declared("support/settle.ts", "makeSettle")?.body?.statements.find(ts.isReturnStatement)?.expression;
   const sendType = aliased("types.ts", "Send");
   const harnessSend = declared("harness.ts", "send");
   assert.ok(evaluateType && ts.isFunctionTypeNode(evaluateType), "types.ts no longer declares Evaluate as a function type, so this scan knows no context read");
@@ -166,7 +166,7 @@ function shapeScan(program: ts.Program, paths: readonly string[]): { perReader: 
 
 const SHAPE_FIXTURE = [
   'import type { Payload, SuiteContext } from "./types.ts";',
-  'import { makeSettle } from "./settle-support.ts";',
+  'import { makeSettle } from "./support/settle.ts";',
   "declare const ctx: SuiteContext;",
   "const { evaluate } = ctx;",
   "const settle = makeSettle(ctx);",
@@ -225,7 +225,7 @@ const SHAPE_FIXTURE = [
 ];
 
 test("the shape scan passes a read that states its shape or discards its value, and reports every kept read whose shape is unknown, any or empty, whether reached by name, alias, context, wrapper, chain or condition, a cast in place of a type argument, a helper that launders or erases the shape, or a shape of never or of a type that awaits itself", () => {
-  const path = join(REPO, "scripts", "e2e", "__shape-fixture__.ts");
+  const path = join(REPO, "e2e", "__shape-fixture__.ts");
   assert.equal(existsSync(path), false, "the fixture's name is a real file, so the scan below would read the disk instead");
   const { findings } = shapeScan(e2eProgram(new Map([[path, SHAPE_FIXTURE.join("\n")]])), [path]);
   const flagged = SHAPE_FIXTURE.flatMap((line, i) => (line.endsWith("// flagged") ? [`${relative(REPO, path)}:${i + 1}`] : []));
@@ -239,6 +239,6 @@ test("every evaluate and settle in the e2e tree whose value is kept states its s
   assert.deepEqual(
     findings,
     [],
-    "a read that keeps its value states the shape its payload returns, <undefined> for one that returns nothing. BLIND SPOTS, declared, all erring toward passing: a stated shape is never checked against its payload (the checker cannot read the page's JavaScript); a shape is judged at its top level only, so a field, element or index typed unknown or any passes; send is not a read (the ruling names evaluate and settle); and a reader handed on as a value (.call, .apply, .bind, or passed to a function declared outside the e2e tree) is not read where it is finally called. Two choices err toward failing: a value counts as discarded only as a statement or the operand of void, and a kept unknown from any helper declared in the tree fails, a send wrapper's included. A callee named evaluate or settle that takes no type argument may state its shape by a cast at the boundary (settle-support's plain evaluate, whose T its settle's caller states)",
+    "a read that keeps its value states the shape its payload returns, <undefined> for one that returns nothing. BLIND SPOTS, declared, all erring toward passing: a stated shape is never checked against its payload (the checker cannot read the page's JavaScript); a shape is judged at its top level only, so a field, element or index typed unknown or any passes; send is not a read (the ruling names evaluate and settle); and a reader handed on as a value (.call, .apply, .bind, or passed to a function declared outside the e2e tree) is not read where it is finally called. Two choices err toward failing: a value counts as discarded only as a statement or the operand of void, and a kept unknown from any helper declared in the tree fails, a send wrapper's included. A callee named evaluate or settle that takes no type argument may state its shape by a cast at the boundary (support/settle.ts's plain evaluate, whose T its settle's caller states)",
   );
 });
