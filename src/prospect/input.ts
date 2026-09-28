@@ -48,8 +48,41 @@ function biomeAt(world: World, x: number, y: number): BiomeName {
   return biomeName(world.biomes[xi + yi * w] as number);
 }
 
+type Site = World["settlements"][number];
+
+function transects(
+  world: World,
+  s: Site,
+  view: ProspectView,
+  rel: (e: number) => number,
+): { backdrop: number[]; foreground: BiomeName[] } {
+  const right = viewRight(view);
+  const backdrop = linePoints(
+    s.x + BACKDROP_OFFSET * view.dx,
+    s.y + BACKDROP_OFFSET * view.dy,
+    right,
+    TRANSECT_HALF_WIDTH,
+    BACKDROP_SAMPLES,
+  ).map((p) => rel(sampleBilinear(world.elev, p.x, p.y)));
+  const foreground = linePoints(
+    s.x - FOREGROUND_OFFSET * view.dx,
+    s.y - FOREGROUND_OFFSET * view.dy,
+    right,
+    TRANSECT_HALF_WIDTH,
+    FOREGROUND_SAMPLES,
+  ).map((p) => biomeAt(world, p.x, p.y));
+  return { backdrop, foreground };
+}
+
+function prospectKind(world: World, s: Site, index: number): ProspectKind {
+  return s.kind === "capital"
+    ? "capital"
+    : world.realms.seats.includes(index)
+      ? "seat"
+      : s.kind;
+}
+
 /** World sheets only: a region world carries no realm labels, arms, or chronicle, so a region-sourced input would silently degrade; region insets must resolve those through the parent world. */
-// eslint-disable-next-line max-lines-per-function
 export function buildProspectInput(world: World, index: number): ProspectInput {
   const s = world.settlements[index];
   if (s === undefined) {
@@ -62,29 +95,10 @@ export function buildProspectInput(world: World, index: number): ProspectInput {
   const rel = (e: number): number => (e - seaLevel) / span;
 
   const view = viewDirection(elev, seaLevel, s);
-  const right = viewRight(view);
-  const backdrop = linePoints(
-    s.x + BACKDROP_OFFSET * view.dx,
-    s.y + BACKDROP_OFFSET * view.dy,
-    right,
-    TRANSECT_HALF_WIDTH,
-    BACKDROP_SAMPLES,
-  ).map((p) => rel(sampleBilinear(elev, p.x, p.y)));
-  const foreground = linePoints(
-    s.x - FOREGROUND_OFFSET * view.dx,
-    s.y - FOREGROUND_OFFSET * view.dy,
-    right,
-    TRANSECT_HALF_WIDTH,
-    FOREGROUND_SAMPLES,
-  ).map((p) => biomeAt(world, p.x, p.y));
+  const { backdrop, foreground } = transects(world, s, view, rel);
 
   const realm = world.realms.labels[s.x + s.y * elev.w] ?? -1;
-  const kind: ProspectKind =
-    s.kind === "capital"
-      ? "capital"
-      : world.realms.seats.includes(index)
-        ? "seat"
-        : s.kind;
+  const kind = prospectKind(world, s, index);
   const ruinEvent = world.history.events.find(
     (e) => e.kind === "ruin" && e.settlement === index,
   );

@@ -80,126 +80,144 @@ function scatter(
   return Array.from({ length: count }, (_, i) => make(rng, i));
 }
 
-// eslint-disable-next-line max-lines-per-function
+type LandOptions = { readonly built: boolean; readonly frontRow: ReadonlyArray<Mass> };
+
+function fieldsDressing(base: number, built: boolean, rng: Rng): ForegroundElement[] {
+  const out: ForegroundElement[] = [];
+  if (built) {
+    const rows = Array.from({ length: 4 }, (_, row) => {
+      const y = base + 10 + row * 9;
+      const x0 = VIEW_X0 + 18 + row * 12 + rng.next() * 8;
+      const x1 = VIEW_X1 - 20 - row * 9 - rng.next() * 8;
+      return { y, x0, x1 };
+    });
+    out.push({ kind: "fieldRows", rows });
+  }
+  out.push({
+    kind: "trees",
+    species: "round",
+    items: [
+      { x: VIEW_X0 + 42 + rng.next() * 20, y: base + 26, s: 1.7 },
+      { x: VIEW_X1 - 50 - rng.next() * 20, y: base + 30, s: 1.9 },
+    ],
+  });
+  return out;
+}
+
+function woodDressing(treatment: "forest" | "pines", cx: number, base: number, rng: Rng): ForegroundElement[] {
+  const back = scatter(rng, 8, (r, i) => ({
+    x: cx + (i % 2 === 0 ? -1 : 1) * (105 + r.next() * 105),
+    y: base - 4 - r.next() * 10,
+    s: 1.3 + r.next() * 0.5,
+  }));
+  const frontTrees = scatter(rng, 8, (r, i) => ({
+    x: cx + (i % 2 === 0 ? -1 : 1) * (66 + r.next() * 145),
+    y: base + 12 + r.next() * 22,
+    s: 1.9 + r.next() * 0.9,
+  }));
+  return [{
+    kind: "trees",
+    species: treatment === "pines" ? "pine" : "round",
+    items: [...back, ...frontTrees],
+  }];
+}
+
+function palmsDressing(cx: number, base: number, rng: Rng): ForegroundElement[] {
+  return [{
+    kind: "trees",
+    species: "palm",
+    items: scatter(rng, 6, (r, i) => ({
+      x: cx + (i % 2 === 0 ? -1 : 1) * (88 + r.next() * 60),
+      y: base + (i < 3 ? -2 : 8) + r.next() * 6,
+      s: 2.1 + r.next() * 0.5,
+    })),
+  }];
+}
+
+function strandDressing(cx: number, base: number, rng: Rng): ForegroundElement[] {
+  const out: ForegroundElement[] = [];
+  out.push({
+    kind: "dunes",
+    items: scatter(rng, 5, (r) => ({
+      x: VIEW_X0 + 40 + r.next() * (width() - 80),
+      y: base - 8 + r.next() * 11,
+      s: 1.6 + r.next() * 0.5,
+    })),
+  });
+  out.push({
+    kind: "trees",
+    species: "palm",
+    items: [
+      { x: cx - 95 - rng.next() * 30, y: base - 2, s: 2.1 },
+      { x: cx + 88 + rng.next() * 30, y: base - 4, s: 2.4 },
+      { x: cx - 130 - rng.next() * 30, y: base + 1, s: 2.6 },
+    ],
+  });
+  return out;
+}
+
+function marshDressing(kind: ProspectKind, base: number, rng: Rng, opts: LandOptions): ForegroundElement[] {
+  const out: ForegroundElement[] = [];
+  out.push({
+    kind: "marshTufts",
+    items: scatter(rng, 9, (r) => ({
+      x: VIEW_X0 + 30 + r.next() * (width() - 60),
+      y: base + 12 + r.next() * 26,
+      s: 1.5 + r.next() * 0.7,
+    })),
+  });
+  out.push({
+    kind: "ripples",
+    items: scatter(rng, 4, (r) => ({
+      x: VIEW_X0 + 30 + r.next() * (width() - 120),
+      y: base + 14 + r.next() * 22,
+      s: 0.8,
+    })),
+  });
+  if (opts.built && kind === "village") {
+    const posts = opts.frontRow.slice(0, 3).flatMap((b) => [
+      { x: b.x + 2, y: b.base },
+      { x: b.x + b.w - 2, y: b.base },
+    ]);
+    out.push({ kind: "stilts", posts });
+  }
+  return out;
+}
+
+function scrubDressing(base: number): ForegroundElement[] {
+  const rows = Array.from({ length: 3 }, (_, row) => ({
+    y: base + 12 + row * 9,
+    x0: VIEW_X0 + 30 + row * 16,
+    x1: VIEW_X1 - 30 - row * 12,
+  }));
+  return [{ kind: "scrubRows", rows }];
+}
+
 export function composeLandDressing(
   treatment: Treatment,
   kind: ProspectKind,
   ground: Ground,
   rng: Rng,
-  opts: { readonly built: boolean; readonly frontRow: ReadonlyArray<Mass> },
+  opts: LandOptions,
 ): ForegroundElement[] {
   const cx = cxOf();
   const base = ground.base;
-  const out: ForegroundElement[] = [];
   switch (treatment) {
-    case "fields": {
-      if (opts.built) {
-        const rows = Array.from({ length: 4 }, (_, row) => {
-          const y = base + 10 + row * 9;
-          const x0 = VIEW_X0 + 18 + row * 12 + rng.next() * 8;
-          const x1 = VIEW_X1 - 20 - row * 9 - rng.next() * 8;
-          return { y, x0, x1 };
-        });
-        out.push({ kind: "fieldRows", rows });
-      }
-      out.push({
-        kind: "trees",
-        species: "round",
-        items: [
-          { x: VIEW_X0 + 42 + rng.next() * 20, y: base + 26, s: 1.7 },
-          { x: VIEW_X1 - 50 - rng.next() * 20, y: base + 30, s: 1.9 },
-        ],
-      });
-      break;
-    }
+    case "fields":
+      return fieldsDressing(base, opts.built, rng);
     case "forest":
-    case "pines": {
-      const back = scatter(rng, 8, (r, i) => ({
-        x: cx + (i % 2 === 0 ? -1 : 1) * (105 + r.next() * 105),
-        y: base - 4 - r.next() * 10,
-        s: 1.3 + r.next() * 0.5,
-      }));
-      const frontTrees = scatter(rng, 8, (r, i) => ({
-        x: cx + (i % 2 === 0 ? -1 : 1) * (66 + r.next() * 145),
-        y: base + 12 + r.next() * 22,
-        s: 1.9 + r.next() * 0.9,
-      }));
-      out.push({
-        kind: "trees",
-        species: treatment === "pines" ? "pine" : "round",
-        items: [...back, ...frontTrees],
-      });
-      break;
-    }
-    case "palms": {
-      out.push({
-        kind: "trees",
-        species: "palm",
-        items: scatter(rng, 6, (r, i) => ({
-          x: cx + (i % 2 === 0 ? -1 : 1) * (88 + r.next() * 60),
-          y: base + (i < 3 ? -2 : 8) + r.next() * 6,
-          s: 2.1 + r.next() * 0.5,
-        })),
-      });
-      break;
-    }
-    case "strand": {
-      out.push({
-        kind: "dunes",
-        items: scatter(rng, 5, (r) => ({
-          x: VIEW_X0 + 40 + r.next() * (width() - 80),
-          y: base - 8 + r.next() * 11,
-          s: 1.6 + r.next() * 0.5,
-        })),
-      });
-      out.push({
-        kind: "trees",
-        species: "palm",
-        items: [
-          { x: cx - 95 - rng.next() * 30, y: base - 2, s: 2.1 },
-          { x: cx + 88 + rng.next() * 30, y: base - 4, s: 2.4 },
-          { x: cx - 130 - rng.next() * 30, y: base + 1, s: 2.6 },
-        ],
-      });
-      break;
-    }
-    case "marsh": {
-      out.push({
-        kind: "marshTufts",
-        items: scatter(rng, 9, (r) => ({
-          x: VIEW_X0 + 30 + r.next() * (width() - 60),
-          y: base + 12 + r.next() * 26,
-          s: 1.5 + r.next() * 0.7,
-        })),
-      });
-      out.push({
-        kind: "ripples",
-        items: scatter(rng, 4, (r) => ({
-          x: VIEW_X0 + 30 + r.next() * (width() - 120),
-          y: base + 14 + r.next() * 22,
-          s: 0.8,
-        })),
-      });
-      if (opts.built && kind === "village") {
-        const posts = opts.frontRow.slice(0, 3).flatMap((b) => [
-          { x: b.x + 2, y: b.base },
-          { x: b.x + b.w - 2, y: b.base },
-        ]);
-        out.push({ kind: "stilts", posts });
-      }
-      break;
-    }
-    case "scrub": {
-      const rows = Array.from({ length: 3 }, (_, row) => ({
-        y: base + 12 + row * 9,
-        x0: VIEW_X0 + 30 + row * 16,
-        x1: VIEW_X1 - 30 - row * 12,
-      }));
-      out.push({ kind: "scrubRows", rows });
-      break;
-    }
+    case "pines":
+      return woodDressing(treatment, cx, base, rng);
+    case "palms":
+      return palmsDressing(cx, base, rng);
+    case "strand":
+      return strandDressing(cx, base, rng);
+    case "marsh":
+      return marshDressing(kind, base, rng, opts);
+    case "scrub":
+      return scrubDressing(base);
   }
-  return out;
+  return [];
 }
 
 export function seaWater(ground: Ground): Water {
@@ -210,7 +228,70 @@ export function riverWater(ground: Ground): Water {
   return { kind: "river", y0: ground.base + 10, y1: ground.base + 38 };
 }
 
-// eslint-disable-next-line max-lines-per-function
+function quayAt(cx: number, q1: number, shore: number): ForegroundElement {
+  const q0 = cx - 130;
+  return {
+    kind: "quay",
+    x0: q0,
+    x1: q1,
+    y: shore,
+    bollards: [q0 + 10, (q0 + q1) / 2, q1 - 10],
+    steps: { x: q1 - 18, y: shore, count: 3 },
+    arcade: { x0: q0 + 8, x1: cx - 20, arches: 4 },
+  };
+}
+
+function harborShipping(kind: ProspectKind, q1: number, shore: number, water: Water, rng: Rng): ForegroundElement[] {
+  const out: ForegroundElement[] = [];
+  const count = kind === "capital" ? 5 : 4;
+  const m0 = q1 + 14;
+  const m1 = VIEW_X1 - 60;
+  out.push({
+    kind: "mastRow",
+    masts: Array.from({ length: count }, (_, i) => ({
+      x: m0 + (i + 0.5) * ((m1 - m0) / count) + (rng.next() - 0.5) * 8,
+      hullY: shore + 10 + rng.next() * 6,
+      mastH: 42 + rng.next() * 26,
+    })),
+  });
+  out.push({
+    kind: "ship",
+    x: VIEW_X0 + 70 + rng.next() * 30,
+    y: water.y1 - 16,
+    s: 1.15,
+  });
+  if (kind === "capital") {
+    out.push({ kind: "mole", rootX: VIEW_X1 - 10, headX: VIEW_X1 - 52, headY: shore + 10 });
+  }
+  return out;
+}
+
+function beachFront(kind: ProspectKind, cx: number, shore: number): ForegroundElement[] {
+  const out: ForegroundElement[] = [];
+  const hulls =
+    kind === "village"
+      ? [
+          { x: cx - 60, y: shore - 2, tilt: -7 },
+          { x: cx + 34, y: shore - 2, tilt: 5 },
+        ]
+      : [{ x: cx - 30, y: shore - 2, tilt: -5 }];
+  out.push({ kind: "beachedHulls", hulls });
+  const jx = cx + 110;
+  out.push({
+    kind: "jetty",
+    x0: jx - 30,
+    y0: shore - 1,
+    x1: jx + 34,
+    y1: shore + 6,
+    posts: Array.from({ length: 4 }, (_, i) => ({
+      x: jx - 20 + i * 16,
+      y: shore + 0.5 + i * 1.6,
+    })),
+  });
+  if (kind === "village") out.push({ kind: "nets", x: cx - 122, y: shore - 16 });
+  return out;
+}
+
 export function composeSeaFront(
   kind: ProspectKind,
   ruined: boolean,
@@ -219,65 +300,11 @@ export function composeSeaFront(
 ): ForegroundElement[] {
   const cx = cxOf();
   const shore = water.y0;
-  const out: ForegroundElement[] = [];
   if (kind === "capital" || kind === "seat" || kind === "town") {
-    const q0 = cx - 130;
     const q1 = cx + 40;
-    out.push({
-      kind: "quay",
-      x0: q0,
-      x1: q1,
-      y: shore,
-      bollards: [q0 + 10, (q0 + q1) / 2, q1 - 10],
-      steps: { x: q1 - 18, y: shore, count: 3 },
-      arcade: { x0: q0 + 8, x1: cx - 20, arches: 4 },
-    });
-    if (!ruined) {
-      const count = kind === "capital" ? 5 : 4;
-      const m0 = q1 + 14;
-      const m1 = VIEW_X1 - 60;
-      out.push({
-        kind: "mastRow",
-        masts: Array.from({ length: count }, (_, i) => ({
-          x: m0 + (i + 0.5) * ((m1 - m0) / count) + (rng.next() - 0.5) * 8,
-          hullY: shore + 10 + rng.next() * 6,
-          mastH: 42 + rng.next() * 26,
-        })),
-      });
-      out.push({
-        kind: "ship",
-        x: VIEW_X0 + 70 + rng.next() * 30,
-        y: water.y1 - 16,
-        s: 1.15,
-      });
-      if (kind === "capital") {
-        out.push({ kind: "mole", rootX: VIEW_X1 - 10, headX: VIEW_X1 - 52, headY: shore + 10 });
-      }
-    }
-  } else if (!ruined) {
-    const hulls =
-      kind === "village"
-        ? [
-            { x: cx - 60, y: shore - 2, tilt: -7 },
-            { x: cx + 34, y: shore - 2, tilt: 5 },
-          ]
-        : [{ x: cx - 30, y: shore - 2, tilt: -5 }];
-    out.push({ kind: "beachedHulls", hulls });
-    const jx = cx + 110;
-    out.push({
-      kind: "jetty",
-      x0: jx - 30,
-      y0: shore - 1,
-      x1: jx + 34,
-      y1: shore + 6,
-      posts: Array.from({ length: 4 }, (_, i) => ({
-        x: jx - 20 + i * 16,
-        y: shore + 0.5 + i * 1.6,
-      })),
-    });
-    if (kind === "village") out.push({ kind: "nets", x: cx - 122, y: shore - 16 });
+    return [quayAt(cx, q1, shore), ...(ruined ? [] : harborShipping(kind, q1, shore, water, rng))];
   }
-  return out;
+  return ruined ? [] : beachFront(kind, cx, shore);
 }
 
 export function composeRiverFront(

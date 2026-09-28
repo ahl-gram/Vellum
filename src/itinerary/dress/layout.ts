@@ -66,8 +66,20 @@ export function eventSeat(layout: RibbonLayout, dist: number): { sx: number; sy:
   return strip === null ? null : stripPos(strip, dist);
 }
 
-// eslint-disable-next-line max-lines-per-function
-export function layoutRibbon(input: RibbonInput): RibbonLayout {
+type RibbonFrame = {
+  readonly n: number;
+  readonly stripW: number;
+  readonly left: number;
+  readonly y0: number;
+  readonly h: number;
+  readonly cellsPer: number;
+  readonly pxPerCell: number;
+  readonly latScale: number;
+  readonly latMax: number;
+  readonly overlap: number;
+};
+
+function ribbonFrame(input: RibbonInput): RibbonFrame {
   const total = input.totalCells;
   const n = Math.min(7, Math.max(3, Math.ceil(input.totalLeagues / LEAGUES_PER_STRIP)));
   const innerW = RIBBON_W - RIBBON_MARGIN * 2;
@@ -80,41 +92,47 @@ export function layoutRibbon(input: RibbonInput): RibbonLayout {
   const pxPerCell = (h - STRIP_PAD * 2) / cellsPer;
   const latScale = Math.min(pxPerCell * 0.55, 9);
   const latMax = stripW / 2 - 34;
-
-  const strips: StripLayout[] = [];
   const overlap = Math.min(0.75, STRIP_PAD / pxPerCell);
-  for (let s = 0; s < n; s++) {
-    const d0 = cellsPer * s;
-    const d1 = cellsPer * (s + 1);
-    const inRange = input.samples.filter((p) => p.dist >= d0 - overlap && p.dist <= d1 + overlap);
-    const chord = chordOf(inRange.length >= 2 ? inRange : input.samples);
-    const x0 = left + s * (stripW + STRIP_GAP);
-    const xc = x0 + stripW / 2;
-    const origin = (inRange[0] ?? input.samples[0]) as RibbonSample;
-    const pts: StripPoint[] = inRange.map((p) => {
-      const perp = chord.x * (p.y - origin.y) - chord.y * (p.x - origin.x);
-      const lat = Math.max(-latMax, Math.min(latMax, perp * latScale));
-      return {
-        sx: xc + lat,
-        sy: y0 + h - STRIP_PAD - (p.dist - d0) * pxPerCell,
-        dist: p.dist,
-      };
-    });
-    const lean = pts.length === 0 ? 0 : pts.reduce((a, p) => a + p.sx - xc, 0) / pts.length;
-    strips.push({
-      index: s,
-      x0,
-      y0,
-      w: stripW,
-      h,
-      d0,
-      d1,
-      needleDeg: (Math.atan2(-chord.x, -chord.y) * 180) / Math.PI,
-      pts,
-      samples: inRange,
-      lean,
-      pxPerCell,
-    });
-  }
-  return { strips, pxPerCell };
+  return { n, stripW, left, y0, h, cellsPer, pxPerCell, latScale, latMax, overlap };
+}
+
+function stripAt(input: RibbonInput, f: RibbonFrame, s: number): StripLayout {
+  const { stripW, left, y0, h, cellsPer, pxPerCell, latScale, latMax, overlap } = f;
+  const d0 = cellsPer * s;
+  const d1 = cellsPer * (s + 1);
+  const inRange = input.samples.filter((p) => p.dist >= d0 - overlap && p.dist <= d1 + overlap);
+  const chord = chordOf(inRange.length >= 2 ? inRange : input.samples);
+  const x0 = left + s * (stripW + STRIP_GAP);
+  const xc = x0 + stripW / 2;
+  const origin = (inRange[0] ?? input.samples[0]) as RibbonSample;
+  const pts: StripPoint[] = inRange.map((p) => {
+    const perp = chord.x * (p.y - origin.y) - chord.y * (p.x - origin.x);
+    const lat = Math.max(-latMax, Math.min(latMax, perp * latScale));
+    return {
+      sx: xc + lat,
+      sy: y0 + h - STRIP_PAD - (p.dist - d0) * pxPerCell,
+      dist: p.dist,
+    };
+  });
+  const lean = pts.length === 0 ? 0 : pts.reduce((a, p) => a + p.sx - xc, 0) / pts.length;
+  return {
+    index: s,
+    x0,
+    y0,
+    w: stripW,
+    h,
+    d0,
+    d1,
+    needleDeg: (Math.atan2(-chord.x, -chord.y) * 180) / Math.PI,
+    pts,
+    samples: inRange,
+    lean,
+    pxPerCell,
+  };
+}
+
+export function layoutRibbon(input: RibbonInput): RibbonLayout {
+  const f = ribbonFrame(input);
+  const strips = Array.from({ length: f.n }, (_, s) => stripAt(input, f, s));
+  return { strips, pxPerCell: f.pxPerCell };
 }

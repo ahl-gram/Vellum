@@ -56,15 +56,10 @@ function directionAt(chain: ReadonlyArray<number>, w: number, k: number): { x: n
   return { x: dx / len, y: dy / len };
 }
 
-// eslint-disable-next-line max-lines-per-function
-export function buildRibbonInput(world: World, fromIdx: number, toIdx: number): RibbonInput | null {
-  const from = world.settlements[fromIdx];
-  const to = world.settlements[toIdx];
-  if (!from || !to) return null;
-  const mask = roadMask(world);
-  const chain = roadWalk(world, mask, fromIdx, toIdx);
-  if (!chain || chain.length < 4) return null;
-
+function roadSamples(
+  world: World,
+  chain: ReadonlyArray<number>,
+): { samples: RibbonSample[]; dists: number[]; dist: number } {
   const w = world.elev.w;
   const samples: RibbonSample[] = [];
   const dists: number[] = [];
@@ -92,6 +87,19 @@ export function buildRibbonInput(world: World, fromIdx: number, toIdx: number): 
       biomeR: biomeAt(world, x + rx * FLANK_OFFSET, y + ry * FLANK_OFFSET),
     });
   }
+  return { samples, dists, dist };
+}
+
+export function buildRibbonInput(world: World, fromIdx: number, toIdx: number): RibbonInput | null {
+  const from = world.settlements[fromIdx];
+  const to = world.settlements[toIdx];
+  if (!from || !to) return null;
+  const mask = roadMask(world);
+  const chain = roadWalk(world, mask, fromIdx, toIdx);
+  if (!chain || chain.length < 4) return null;
+
+  const w = world.elev.w;
+  const { samples, dists, dist } = roadSamples(world, chain);
 
   const events = findEvents(world, mask, chain, dists, fromIdx, toIdx);
   const realm = world.realms.labels[to.x + to.y * w] ?? -1;

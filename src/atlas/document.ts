@@ -174,17 +174,24 @@ function plateFigure(
   return `<figure>${linked}<figcaption>${alt}</figcaption></figure>`;
 }
 
-/** `plateSrc` decides how a plate is embedded: a filename (CLI, anchor:true) or a data URI (download, anchor:false); `motion` links /fonts.css and /motion.css and wears the screen dress, the offline download omits all three and relies on the CSS fallbacks above. */
-// eslint-disable-next-line max-lines-per-function
-export function atlasDocument(
-  data: AtlasDocumentData,
-  plateSrc: (plate: AtlasPlate, section: PlateSection) => string,
-  opts: { anchor?: boolean; motion?: boolean } = {},
-): string {
-  const anchor = opts.anchor ?? false;
-  const motion = opts.motion ?? false;
-  const fig = (p: AtlasPlate, section: PlateSection) => plateFigure(p, section, plateSrc, anchor);
+type Figure = (p: AtlasPlate, section: PlateSection) => string;
 
+function atlasHead(title: string, motion: boolean): string {
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${escapeXml(title)}: a Vellum atlas</title>
+${motion ? '<link rel="stylesheet" href="/fonts.css">\n<link rel="stylesheet" href="/motion.css">\n' : ""}<style>
+${PAGE_CHROME_CSS}
+${ATLAS_SHEET_CSS}${motion ? `\n${SCREEN_DRESS_CSS}` : ""}
+</style>
+</head>
+`;
+}
+
+function plateSections(data: AtlasDocumentData, fig: Figure): string {
   const draughtings = data.draughtings.map((p) => fig(p, "draughting")).join("\n");
   const themes = data.themes.map((p) => fig(p, "theme")).join("\n");
   const regions = data.regions.map((p) => fig(p, "region")).join("\n");
@@ -199,25 +206,7 @@ ${prospects}
 
 `;
 
-  return `<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${escapeXml(data.title)}: a Vellum atlas</title>
-${motion ? '<link rel="stylesheet" href="/fonts.css">\n<link rel="stylesheet" href="/motion.css">\n' : ""}<style>
-${PAGE_CHROME_CSS}
-${ATLAS_SHEET_CSS}${motion ? `\n${SCREEN_DRESS_CSS}` : ""}
-</style>
-</head>
-<body class="atlas-sheet">
-<header>
-  <h1>${escapeXml(data.title)}</h1>
-  <p class="subtitle">${escapeXml(data.subtitle)}</p>
-  <p class="chartno">VELLUM · CHART № ${data.seed}</p>
-</header>
-
-${fig(data.hero, "hero")}
+  return `${fig(data.hero, "hero")}
 
 <section>
 <h2>Other Draughtings</h2>
@@ -238,7 +227,27 @@ ${themes}
 ${regions}
 </section>
 
-${prospectSection}${data.bannersHtml}
+${prospectSection}`;
+}
+
+/** `plateSrc` decides how a plate is embedded: a filename (CLI, anchor:true) or a data URI (download, anchor:false); `motion` links /fonts.css and /motion.css and wears the screen dress, the offline download omits all three and relies on the CSS fallbacks above. */
+export function atlasDocument(
+  data: AtlasDocumentData,
+  plateSrc: (plate: AtlasPlate, section: PlateSection) => string,
+  opts: { anchor?: boolean; motion?: boolean } = {},
+): string {
+  const anchor = opts.anchor ?? false;
+  const motion = opts.motion ?? false;
+  const fig = (p: AtlasPlate, section: PlateSection) => plateFigure(p, section, plateSrc, anchor);
+
+  return `${atlasHead(data.title, motion)}<body class="atlas-sheet">
+<header>
+  <h1>${escapeXml(data.title)}</h1>
+  <p class="subtitle">${escapeXml(data.subtitle)}</p>
+  <p class="chartno">VELLUM · CHART № ${data.seed}</p>
+</header>
+
+${plateSections(data, fig)}${data.bannersHtml}
 
 ${data.chronicleHtml}
 
