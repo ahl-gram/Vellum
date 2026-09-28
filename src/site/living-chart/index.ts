@@ -1,10 +1,10 @@
 // The Living Chart engine: everything the site animates over a baked chart (story cards, the chronicle scrubber, the voyage), behind one host-agnostic boundary. The host hands its elements in and construction only stores the refs; the baked chart string is never mutated for export.
-import { createPlaceOverlay, type BuildPlaceOverlayOpts, type LayProspectHost } from "./place-overlay.ts";
-import { createChronicle } from "./chronicle.ts";
-import { createVoyage, type RestingTrackSink } from "./voyage.ts";
+import { createPlaceOverlay, type BuildPlaceOverlayOpts, type LayProspectHost, type PlaceOverlay } from "./place-overlay.ts";
+import { createChronicle, type Chronicle } from "./chronicle.ts";
+import { createVoyage, type RestingTrackSink, type Voyage } from "./voyage.ts";
 import type { TourOrderSource } from "./voyage-session.ts";
 import { createVoyageLogPanel } from "./voyage-log-panel.ts";
-import { createAges } from "./ages.ts";
+import { createAges, type Ages } from "./ages.ts";
 import { barlessAges, barlessLogPanel } from "./no-bar.ts";
 import type { AgesPos } from "../../render/ages-track.ts";
 import type { PlaceManifest } from "../../render/place-manifest.ts";
@@ -40,33 +40,8 @@ export interface LivingChartHost {
   tourOrder?: TourOrderSource;
 }
 
-// eslint-disable-next-line max-lines-per-function
-export function createLivingChart(host: LivingChartHost) {
-  // The one #53<->#54 coupling pair crosses here as late-bound closures, so neither module imports the other.
-  const overlay = createPlaceOverlay({
-    mapEl: host.mapEl,
-    isSuppressed: () => chronicle.isActive(),
-    ...(host.prospectHref ? { prospectHref: host.prospectHref } : {}),
-    ...(host.layProspect ? { layProspect: host.layProspect } : {}),
-    ...(host.clampBox ? { clampBox: host.clampBox } : {}),
-  });
-  const chronicle = createChronicle({
-    mapEl: host.mapEl,
-    overlay: { data: () => overlay.data(), hideCard: () => overlay.hideCard() },
-  });
-  // The one place the optional instrument branches; everything downstream is shape-identical for the two host kinds (ratified 2026-08-09 on #319).
-  const bar = host.scrubber;
-  const logPanel = bar
-    ? createVoyageLogPanel({ panel: bar.panel, sig: bar.sig, strip: bar.strip })
-    : barlessLogPanel();
-  const voyage = createVoyage({
-    mapEl: host.mapEl,
-    statusEl: host.statusEl,
-    logPanel,
-    restingTrackSink: host.restingTrackSink,
-    ...(host.tourOrder ? { tourOrder: host.tourOrder } : {}),
-  });
-  const ages = bar
+function agesFor(bar: Readonly<ScrubberRefs> | undefined, overlay: Readonly<PlaceOverlay>, chronicle: Readonly<Chronicle>, voyage: Readonly<Voyage>): Ages {
+  return bar
     ? createAges({
         panel: bar.panel,
         playBtn: bar.playBtn,
@@ -80,12 +55,9 @@ export function createLivingChart(host: LivingChartHost) {
         voyage,
       })
     : barlessAges({ chronicle, voyage });
+}
 
-  function destroy(): void {
-    ages.exitAges();
-    overlay.teardown();
-  }
-
+function overlayApi(overlay: Readonly<PlaceOverlay>) {
   return {
     // #53: the doc-level dismiss pair is wired by the host (document listeners are page-global, a host decision).
     buildPlaceOverlay: (manifest: PlaceManifest, opts?: BuildPlaceOverlayOpts) =>
@@ -96,6 +68,11 @@ export function createLivingChart(host: LivingChartHost) {
     relabelLay: overlay.relabelLay,
     /** The host's way to dismiss a pinned card when it is about to replace the chart under it. */
     hideCard: overlay.hideCard,
+  };
+}
+
+function agesApi(ages: Readonly<Ages>) {
+  return {
     applyAges: (manifest: PlaceManifest | null, survey: Survey | null, seed: number, subtitle: string) =>
       ages.armAges(manifest, survey, seed, subtitle),
     rearmAges: (
@@ -111,6 +88,11 @@ export function createLivingChart(host: LivingChartHost) {
     agesState: ages.agesState,
     agesDragStart: ages.dragStart,
     agesDragEnd: ages.dragEnd,
+  };
+}
+
+function scrubApi(ages: Readonly<Ages>, chronicle: Readonly<Chronicle>) {
+  return {
     applyScrub: chronicle.applyScrub,
     exitScrub: chronicle.exitScrub,
     clearScrub: chronicle.clearScrub,
@@ -125,6 +107,11 @@ export function createLivingChart(host: LivingChartHost) {
       const s = chronicle.scrubState();
       return s ? { ...s, playing: ages.isPlaying() } : null;
     },
+  };
+}
+
+function voyageApi(voyage: Readonly<Voyage>) {
+  return {
     applyVoyage: voyage.applyVoyage,
     rearmVoyage: voyage.rearmVoyage,
     exitVoyage: voyage.exitVoyage,
@@ -137,6 +124,45 @@ export function createLivingChart(host: LivingChartHost) {
     voyageLog: voyage.voyageLog,
     voyageDays: voyage.voyageDays,
     voyageLegGeometry: voyage.voyageLegGeometry,
+  };
+}
+
+export function createLivingChart(host: LivingChartHost) {
+  // The one #53<->#54 coupling pair crosses here as late-bound closures, so neither module imports the other.
+  const overlay = createPlaceOverlay({
+    mapEl: host.mapEl,
+    isSuppressed: () => chronicle.isActive(),
+    ...(host.prospectHref ? { prospectHref: host.prospectHref } : {}),
+    ...(host.layProspect ? { layProspect: host.layProspect } : {}),
+    ...(host.clampBox ? { clampBox: host.clampBox } : {}),
+  });
+  const chronicle = createChronicle({
+    mapEl: host.mapEl,
+    overlay: { data: () => overlay.data(), hideCard: () => overlay.hideCard() },
+  });
+  const bar = host.scrubber;
+  const logPanel = bar
+    ? createVoyageLogPanel({ panel: bar.panel, sig: bar.sig, strip: bar.strip })
+    : barlessLogPanel();
+  const voyage = createVoyage({
+    mapEl: host.mapEl,
+    statusEl: host.statusEl,
+    logPanel,
+    restingTrackSink: host.restingTrackSink,
+    ...(host.tourOrder ? { tourOrder: host.tourOrder } : {}),
+  });
+  const ages = agesFor(bar, overlay, chronicle, voyage);
+
+  function destroy(): void {
+    ages.exitAges();
+    overlay.teardown();
+  }
+
+  return {
+    ...overlayApi(overlay),
+    ...agesApi(ages),
+    ...scrubApi(ages, chronicle),
+    ...voyageApi(voyage),
     // Chamber-aware while the instrument is armed (an ages-chamber rest shows no recto track for the verso to bleed through, so the sink clears); disarmed or bar-less takes the raw voyage sync.
     syncRestingTrack: () => (ages.isActive() ? ages.syncSinkAtRest() : voyage.syncRestingTrack()),
     destroy,

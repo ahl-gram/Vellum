@@ -23,15 +23,8 @@ export interface ChronicleDeps {
   overlay: { data(): OverlayData | null; hideCard(): void };
 }
 
-// eslint-disable-next-line max-lines-per-function
-export function createChronicle(deps: ChronicleDeps) {
-  const { mapEl, overlay } = deps;
-
+function chroniclePaint() {
   let scrub: ScrubState | null = null;
-
-  function isActive(): boolean {
-    return scrub !== null;
-  }
 
   // Restore by clearing the inline display, never by setting "block": an SVG <g> does not take it.
   function setRoadsVisible(visible: boolean): void {
@@ -53,6 +46,33 @@ export function createChronicle(deps: ChronicleDeps) {
     }
     setRoadsVisible(year >= scrub.range.max);
   }
+
+  // Clamped so a driver interpolating past either end parks at the boundary year.
+  function scrubTo(year: number): void {
+    if (!scrub) return;
+    paintYear(Math.max(scrub.range.min, Math.min(scrub.range.max, Math.round(year))), false);
+  }
+
+  // The flip parks at the present, silently: the recto is then the chart the worker-drawn ghost already holds, so both faces agree with no ghost work.
+  function scrubSnapToPresent(): void {
+    if (!scrub) return;
+    paintYear(scrub.range.max, true);
+  }
+
+  function scrubState(): { year: number; min: number; max: number } | null {
+    if (!scrub) return null;
+    return { year: scrub.year, min: scrub.range.min, max: scrub.range.max };
+  }
+
+  const setScrub = (next: ScrubState | null): void => { scrub = next; };
+  return { scrub: (): ScrubState | null => scrub, setScrub, paintYear, scrubTo, scrubSnapToPresent, scrubState };
+}
+
+type ChroniclePaint = ReturnType<typeof chroniclePaint>;
+
+function chronicleArm(deps: Readonly<ChronicleDeps>, paint: Readonly<ChroniclePaint>) {
+  const { mapEl, overlay } = deps;
+  const { setScrub, paintYear } = paint;
 
   function applyScrub(): void {
     const data = overlay.data();
@@ -82,14 +102,25 @@ export function createChronicle(deps: ChronicleDeps) {
         mark.style.transformOrigin = `${m.nx * 100}% ${m.ny * 100}%`;
       }
     }
-    scrub = {
+    setScrub({
       marks,
       range,
       groups,
       roadsEl: mapEl.querySelector<SVGGElement>("#layer-roads"),
       year: range.max,
-    };
+    });
     paintYear(range.max, true);
+  }
+
+  return { applyScrub };
+}
+
+function chronicleRestore(deps: Readonly<ChronicleDeps>, paint: Readonly<ChroniclePaint>) {
+  const { mapEl } = deps;
+  const { scrub, setScrub } = paint;
+
+  function isActive(): boolean {
+    return scrub() !== null;
   }
 
   function exitScrub(): void {
@@ -113,30 +144,22 @@ export function createChronicle(deps: ChronicleDeps) {
     }
     const roads = mapEl.querySelector<SVGGElement>("#layer-roads");
     if (roads) roads.style.display = "";
-    scrub = null;
+    setScrub(null);
   }
 
   // Drop the session without restoring layers: after a redraw with the toggle off, the host's innerHTML swap already replaced the baked layers fresh.
   function clearScrub(): void {
-    scrub = null;
+    setScrub(null);
   }
 
-  // Clamped so a driver interpolating past either end parks at the boundary year.
-  function scrubTo(year: number): void {
-    if (!scrub) return;
-    paintYear(Math.max(scrub.range.min, Math.min(scrub.range.max, Math.round(year))), false);
-  }
+  return { isActive, exitScrub, clearScrub };
+}
 
-  // The flip parks at the present, silently: the recto is then the chart the worker-drawn ghost already holds, so both faces agree with no ghost work.
-  function scrubSnapToPresent(): void {
-    if (!scrub) return;
-    paintYear(scrub.range.max, true);
-  }
-
-  function scrubState(): { year: number; min: number; max: number } | null {
-    if (!scrub) return null;
-    return { year: scrub.year, min: scrub.range.min, max: scrub.range.max };
-  }
+export function createChronicle(deps: ChronicleDeps) {
+  const paint = chroniclePaint();
+  const { applyScrub } = chronicleArm(deps, paint);
+  const { isActive, exitScrub, clearScrub } = chronicleRestore(deps, paint);
+  const { scrubTo, scrubSnapToPresent, scrubState, paintYear } = paint;
 
   return {
     isActive,

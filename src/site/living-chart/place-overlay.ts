@@ -63,6 +63,54 @@ function makeLayPress(host: LayProspectHost): HTMLButtonElement {
   return press;
 }
 
+function overlayBox(opts: Readonly<BuildPlaceOverlayOpts> | undefined): HTMLDivElement {
+  const overlay = document.createElement("div");
+  overlay.className = "place-overlay";
+  if (opts && opts.box) {
+    const b = opts.box;
+    overlay.style.left = `${b.x * 100}%`;
+    overlay.style.top = `${b.y * 100}%`;
+    overlay.style.width = `${b.w * 100}%`;
+    overlay.style.height = `${b.h * 100}%`;
+    overlay.style.right = "auto"; // the stylesheet's inset:0 would otherwise fight width/height
+    overlay.style.bottom = "auto";
+  }
+  return overlay;
+}
+
+function cardShell() {
+  const card = document.createElement("div");
+  card.id = "place-card";
+  card.setAttribute("role", "tooltip");
+  card.hidden = true;
+  const inner = document.createElement("div");
+  inner.className = "pc-inner";
+  // #633: d3-zoom is bound on the host's viewport, an ANCESTOR of the card carrying touch-action: none, so without this a drag or a wheel over the card reaches the camera and the card never scrolls; measured with a CDP touch pan, which cannot see a touch-action line at all and still read scrollTop 0 to 0. Whether a real thumb scrolls it is UNVERIFIABLE in this harness.
+  for (const ev of ["touchstart", "touchmove", "wheel"]) inner.addEventListener(ev, (e) => { if (inner.scrollHeight - inner.clientHeight > 1) e.stopPropagation(); }, { passive: true });
+  card.appendChild(inner);
+  return { card, inner };
+}
+
+function cardActs(inner: HTMLDivElement, opts: Readonly<BuildPlaceOverlayOpts> | undefined, prospectHref: PlaceOverlayDeps["prospectHref"], layProspect: Readonly<LayProspectHost> | undefined) {
+  // Both card actions are world-sheet only: a region manifest renumbers its places (#242), so an inset's index names a different settlement.
+  const onWorldSheet = !(opts && opts.box);
+  let prospectLink: HTMLAnchorElement | null = null;
+  if (prospectHref && onWorldSheet) {
+    prospectLink = document.createElement("a");
+    prospectLink.className = "pc-prospect";
+    prospectLink.textContent = "View the prospect";
+  }
+  const layPress = layProspect && onWorldSheet ? makeLayPress(layProspect) : null;
+  const acts = prospectLink || layPress ? document.createElement("div") : null;
+  if (acts) {
+    acts.className = "pc-acts";
+    if (prospectLink) acts.appendChild(prospectLink);
+    if (layPress) acts.appendChild(layPress);
+    inner.appendChild(acts);
+  }
+  return { prospectLink, layPress, acts };
+}
+
 // eslint-disable-next-line max-lines-per-function
 export function createPlaceOverlay(deps: PlaceOverlayDeps) {
   const { mapEl, isSuppressed, prospectHref, layProspect, clampBox } = deps;
@@ -184,7 +232,6 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
   }
 
   // opts.box positions the overlay over a region inset's rect so the region manifest's own nx/ny fractions land on the inset's drawn glyphs; the card lives inside the overlay so its % anchor resolves against the same box.
-  // eslint-disable-next-line max-lines-per-function
   function buildPlaceOverlay(manifest: PlaceManifest, opts?: BuildPlaceOverlayOpts): void {
     const preserveName =
       opts && opts.preservePinByName && placeOverlay && placeOverlay.pinned && placeOverlay.pinnedIdx >= 0
@@ -192,42 +239,9 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
         : null;
     // An inset commit rebuilds the overlay with no mount wipe before it (unlike a draw), so this builder owns removing the previous overlay + card; a no-op after a wipe.
     for (const stale of mapEl.querySelectorAll(":scope > .place-overlay, :scope > #place-card")) stale.remove();
-    const overlay = document.createElement("div");
-    overlay.className = "place-overlay";
-    if (opts && opts.box) {
-      const b = opts.box;
-      overlay.style.left = `${b.x * 100}%`;
-      overlay.style.top = `${b.y * 100}%`;
-      overlay.style.width = `${b.w * 100}%`;
-      overlay.style.height = `${b.h * 100}%`;
-      overlay.style.right = "auto"; // the stylesheet's inset:0 would otherwise fight width/height
-      overlay.style.bottom = "auto";
-    }
-    const card = document.createElement("div");
-    card.id = "place-card";
-    card.setAttribute("role", "tooltip");
-    card.hidden = true;
-    const inner = document.createElement("div");
-    inner.className = "pc-inner";
-    // #633: d3-zoom is bound on the host's viewport, an ANCESTOR of the card carrying touch-action: none, so without this a drag or a wheel over the card reaches the camera and the card never scrolls; measured with a CDP touch pan, which cannot see a touch-action line at all and still read scrollTop 0 to 0. Whether a real thumb scrolls it is UNVERIFIABLE in this harness.
-    for (const ev of ["touchstart", "touchmove", "wheel"]) inner.addEventListener(ev, (e) => { if (inner.scrollHeight - inner.clientHeight > 1) e.stopPropagation(); }, { passive: true });
-    card.appendChild(inner);
-    // Both card actions are world-sheet only: a region manifest renumbers its places (#242), so an inset's index names a different settlement.
-    const onWorldSheet = !(opts && opts.box);
-    let prospectLink: HTMLAnchorElement | null = null;
-    if (prospectHref && onWorldSheet) {
-      prospectLink = document.createElement("a");
-      prospectLink.className = "pc-prospect";
-      prospectLink.textContent = "View the prospect";
-    }
-    const layPress = layProspect && onWorldSheet ? makeLayPress(layProspect) : null;
-    const acts = prospectLink || layPress ? document.createElement("div") : null;
-    if (acts) {
-      acts.className = "pc-acts";
-      if (prospectLink) acts.appendChild(prospectLink);
-      if (layPress) acts.appendChild(layPress);
-      inner.appendChild(acts);
-    }
+    const overlay = overlayBox(opts);
+    const { card, inner } = cardShell();
+    const { prospectLink, layPress, acts } = cardActs(inner, opts, prospectHref, layProspect);
     placeOverlay = { card, places: manifest.places, events: manifest.events, cultureId: manifest.cultureId, presentYear: manifest.presentYear, currentIdx: -1, pinned: false, pinnedIdx: -1, prospectLink, acts, layPress };
     manifest.places.forEach((place, idx) => {
       const hit = document.createElement("button");
