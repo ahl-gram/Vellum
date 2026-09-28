@@ -7,6 +7,7 @@ import { cli, git, withRepo } from "../../test-support/sandbox-repo.ts";
 
 const NAME = "guard-mutate";
 const BINARY = Buffer.from([0xff, 0x00, 0xfe, 0x0a]);
+const LATIN = Buffer.from([0x6f, 0x6b, 0x0a, 0xe9, 0x0a]);
 
 type Box = { main: string; linked: string; wt: string };
 
@@ -16,6 +17,7 @@ const withSandbox = (body: (box: Box) => void): void => {
     writeFileSync(join(linked, "b.txt"), "a + a\nab\naxb a.b\nkeep\n");
     writeFileSync(join(linked, "c.txt"), "if (bad) return;\nok\n");
     writeFileSync(join(linked, "bin.dat"), BINARY);
+    writeFileSync(join(linked, "latin.txt"), LATIN);
     mkdirSync(join(linked, "d"));
     writeFileSync(join(linked, "d", "g.txt"), "inner\n");
     symlinkSync(join("..", "..", "..", "f.txt"), join(linked, "esc"));
@@ -59,6 +61,26 @@ test("mutate refuses an anchor that is not on its line exactly once, a no-op, an
   });
 });
 
+test("mutate refuses a file that is not valid UTF-8, since rewriting it would change bytes on lines it does not name", () => {
+  withSandbox(({ linked, wt }) => {
+    assert.throws(() => mutate(NAME, "latin.txt", 1, "ok", "no", linked), /not valid UTF-8/);
+    assert.deepEqual(bytes(join(wt, "latin.txt")), LATIN, "the refused mutation re-encoded the file");
+  });
+});
+
+test("the commands read the sandbox's whole commit from a subdirectory of the dispatch tree", () => {
+  withSandbox(({ linked, wt }) => {
+    const deep = join(linked, "deep", "er");
+    mkdirSync(deep, { recursive: true });
+    mutate(NAME, "a.txt", 1, "same", "diff", linked);
+    assert.deepEqual(status(NAME, deep), ["a.txt"], "status run below the dispatch tree's root read only that directory of the commit, and reported a mutated tree as clean");
+    assert.deepEqual(restore(NAME, ["a.txt"], deep), ["a.txt"]);
+    assert.equal(readFileSync(join(wt, "a.txt"), "utf8"), "same 1\nsame 2\nsame 3\n");
+    mutate(NAME, "b.txt", 4, "keep", "lose", deep);
+    assert.deepEqual(status(NAME, deep), ["b.txt"]);
+  });
+});
+
 test("mutate takes the anchor and the replacement literally", () => {
   withSandbox(({ linked, wt }) => {
     mutate(NAME, "b.txt", 3, "a.b", "A.B", linked);
@@ -89,7 +111,8 @@ test("mutate and restore refuse a skeptic sandbox and any path that is not a reg
     for (const [path, from, target] of untracked) {
       const before = bytes(target);
       assert.throws(() => mutate(NAME, path, 1, from, "X", linked), /not a regular file tracked at/, `mutate did not refuse ${path} on the tracked-file check`);
-      assert.deepEqual(bytes(target), before, `mutate of ${path} wrote ${target}`);
+      assert.throws(() => restore(NAME, [path], linked), /not a regular file tracked at/, `restore did not refuse ${path} on the tracked-file check`);
+      assert.deepEqual(bytes(target), before, `mutate or restore of ${path} wrote ${target}`);
     }
     renameSync(join(wt, "d"), join(wt, "d-real"));
     symlinkSync(join(main, "outside"), join(wt, "d"));
@@ -110,10 +133,13 @@ test("restore writes back the bytes at the sandbox's own commit, not the dispatc
     try {
       const before = bytes(join(wt, "f.txt"));
       assert.equal(before.toString(), "one\n", "the fixture sandbox is not at c1, so this asserts nothing about which commit restore reads");
+      assert.deepEqual(status("guard-restore", linked), [], "a fresh sandbox at c1 read as changed: status compared it against the dispatch tree's commit, which holds two");
       mutate("guard-restore", "f.txt", 1, "one", "uno", linked);
       assert.notDeepEqual(bytes(join(wt, "f.txt")), before, "mutate did not change the file, so the restore below proves nothing");
+      assert.deepEqual(status("guard-restore", linked), ["f.txt"]);
       assert.deepEqual(restore("guard-restore", ["f.txt"], linked), ["f.txt"]);
       assert.deepEqual(bytes(join(wt, "f.txt")), before, "restore did not bring back the sandbox commit's bytes: the dispatch tree's commit holds two, and a trimming read drops the newline");
+      assert.deepEqual(status("guard-restore", linked), []);
     } finally {
       teardown("guard-restore", linked);
     }

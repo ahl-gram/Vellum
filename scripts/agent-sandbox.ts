@@ -130,7 +130,7 @@ const sandboxCommit = (wt: string): string => {
 const trackedFile = (sha: string, path: string, cwd: string): string => {
   const rel = normalize(path);
   const outside = isAbsolute(rel) || rel === ".." || rel.startsWith(`..${sep}`);
-  const [entry = ""] = outside ? [] : gitBytes(["ls-tree", "-z", sha, "--", rel], cwd).toString("utf8").split("\0");
+  const [entry = ""] = outside ? [] : gitBytes(["ls-tree", "--full-tree", "-z", sha, "--", rel], cwd).toString("utf8").split("\0");
   if (entry.slice(entry.indexOf("\t") + 1) !== rel || !REGULAR_MODES.has(entry.split(" ")[0] ?? "")) {
     throw new Error(`${path} is not a regular file tracked at ${sha}, so the sandbox could not put it back`);
   }
@@ -152,7 +152,10 @@ export const mutate = (name: string, path: string, line: number, from: string, t
   const file = containedFile(wt, rel);
   if (from === "") throw new Error("the anchor is empty, and an empty anchor matches between every character");
   if (from === to) throw new Error(`the anchor and the replacement are the same, so the mutation changes nothing and its green run would read as a HOLE`);
-  const lines = readFileSync(file, "utf8").split("\n");
+  const raw = readFileSync(file);
+  const text = raw.toString("utf8");
+  if (!Buffer.from(text, "utf8").equals(raw)) throw new Error(`${rel} is not valid UTF-8, so rewriting it would change bytes on lines the mutation does not name`);
+  const lines = text.split("\n");
   if (!Number.isInteger(line) || line < 1 || line > lines.length) throw new Error(`line ${line} is not a line of ${rel}, which has ${lines.length}`);
   const before = lines[line - 1] ?? "";
   const count = before.split(from).length - 1;
@@ -187,7 +190,7 @@ const differs = (wt: string, entry: string): boolean => {
 
 export const status = (name: string, cwd: string = process.cwd()): string[] => {
   const wt = guardSandbox(name, cwd);
-  const entries = gitBytes(["ls-tree", "-r", "-z", sandboxCommit(wt)], cwd).toString("utf8").split("\0").filter((e) => e !== "");
+  const entries = gitBytes(["ls-tree", "--full-tree", "-r", "-z", sandboxCommit(wt)], cwd).toString("utf8").split("\0").filter((e) => e !== "");
   return entries.filter((entry) => differs(wt, entry)).map((entry) => entry.slice(entry.indexOf("\t") + 1));
 };
 
