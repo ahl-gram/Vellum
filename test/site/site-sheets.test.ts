@@ -11,4 +11,9 @@ test("a sweep's exclusion names a sheet on the roster and says why (Issue #709)"
     SITE_SHEETS.filter((sheet) => sheet !== "public/house.css"),
     "the sweep reads every other sheet on the roster",
   );
+  assert.deepEqual(
+    sheetsSweptBy({ "public/index.css": "a sheet whose basename others share" }),
+    SITE_SHEETS.filter((sheet) => sheet !== "public/index.css"),
+    "an exclusion drops the one sheet it names, not every sheet of that name",
+  );
 });

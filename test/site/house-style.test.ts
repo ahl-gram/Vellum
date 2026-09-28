@@ -160,7 +160,7 @@ test("no token value smuggled past the guards in rgb() form (#324)", async () =>
     for (const source of sources) {
       assert.ok(
         !smuggled.test(read(source)),
-        `${source} carries ${name}'s value as raw rgb(${r} ${g} ${b}); use rgb(from var(${name}) r g b / a)`,
+        `${source} carries ${name}'s value as raw rgb(${r} ${g} ${b}); use rgb(from var(${name}) r g b / a) where the css declares the token, or read SITE_PALETTE["${name}"] where it does not (render code)`,
       );
     }
   }

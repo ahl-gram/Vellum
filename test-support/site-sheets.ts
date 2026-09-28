@@ -2,7 +2,7 @@ import { spawnSync } from "node:child_process";
 import { resolve } from "node:path";
 
 const REPO = resolve(import.meta.dirname, "..");
-// A cap on a hang, never a budget (2026-09-27: the listing ran in 6 to 7 ms on a Mac, so 30 s is three orders above it): spawnSync's timeout is the mechanism test/repo/footgun-deployed-run.test.ts pins with a child that outlives it.
+// A cap on a hang, never a budget (2026-09-27: the listing ran in 6 to 7 ms on a Mac, so 30 s is three orders above it); a timed-out spawnSync returns status null rather than throwing, which the status check below turns into a throw, and no test drives that path.
 const GIT_TIMEOUT_MS = 30_000;
 const WITNESSES = ["public/house.css", "public/explorer/broadside.css"] as const;
 
