@@ -23,7 +23,7 @@ export default defineConfig(
     rules: { "no-restricted-syntax": "off" },
   },
   {
-    files: ["src/**/*.ts", "scripts/**/*.ts", "test/**/*.ts", "test-support/**/*.ts"],
+    files: ["src/**/*.ts", "scripts/**/*.ts", "e2e/**/*.ts", "test/**/*.ts", "test-support/**/*.ts"],
     extends: [js.configs.recommended, tseslint.configs.recommendedTypeChecked],
     languageOptions: { parserOptions: { projectService: true, tsconfigRootDir: import.meta.dirname } },
     rules: {

@@ -10,7 +10,7 @@ import lintConfig from "../../eslint.config.ts";
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const src = (p: string) => readFileSync(join(ROOT, p), "utf8");
 
-const LINT_SCOPE = ["**/*.cjs", "**/*.js", "**/*.jsx", "**/*.mjs", "public/**/*.css", "scripts/**/*.ts", "src/**/*.ts", "test-support/**/*.ts", "test/**/*.ts"];
+const LINT_SCOPE = ["**/*.cjs", "**/*.js", "**/*.jsx", "**/*.mjs", "e2e/**/*.ts", "public/**/*.css", "scripts/**/*.ts", "src/**/*.ts", "test-support/**/*.ts", "test/**/*.ts"];
 const REFUSED = LINT_SCOPE.filter((g) => g.startsWith("**/"));
 const DESIGN_EXEMPT = ["design/**/*.cjs", "design/**/*.js", "design/**/*.jsx", "design/**/*.mjs"];
 const LINT_SCRIPT = "eslint --flag unstable_native_nodejs_ts_config --max-warnings 0 .";
@@ -112,6 +112,7 @@ test("the lint config is bounded to the ruled scope, covers all of it, and narro
 });
 
 const WITNESSES: Record<string, string> = {
+  "e2e/**/*.ts": "e2e/harness.ts",
   "public/**/*.css": "public/house.css",
   "scripts/**/*.ts": "scripts/build-app-bundles.ts",
   "src/**/*.ts": "src/cli/main.ts",
@@ -219,7 +220,7 @@ test("through ESLint itself, one witness file per ruled glob resolves to rules t
   assert.equal(await eslint.isPathIgnored("eslint.config.ts"), true, "the root config lints itself, so the scope leaked past the ruled roots");
 });
 
-test("only typescript-eslint's recommended-type-checked block sets a rule Issue #654 turned on, each at error, and it reaches all four TypeScript roots unnarrowed with no ignores, so no block can take one back by setting it or by narrowing the preset", () => {
+test("only typescript-eslint's recommended-type-checked block sets a rule Issue #654 turned on, each at error, and it reaches every TypeScript root unnarrowed with no ignores, so no block can take one back by setting it or by narrowing the preset", () => {
   const PRESET = "typescript-eslint/recommended-type-checked";
   const setters = blocks.flatMap((b) => TURNED_ON.filter((rule) => Object.hasOwn(b.rules ?? {}, rule)).map((rule) => `${shortName(b)}: ${rule} = ${JSON.stringify(b.rules?.[rule])}`));
   assert.deepEqual(
@@ -232,9 +233,9 @@ test("only typescript-eslint's recommended-type-checked block sets a rule Issue 
   assert.deepEqual(
     [...(preset[0]!.files ?? [])].sort(),
     LINT_SCOPE.filter((g) => g.endsWith(".ts")),
-    "the preset that sets these rules does not reach exactly the four TypeScript roots: the block that extends it has changed its own files, and a narrowing (a conjunct such as src/**/*.ts with src/cli/**) takes the rules back for everything it dropped",
+    "the preset that sets these rules does not reach exactly the TypeScript roots: the block that extends it has changed its own files, and a narrowing (a conjunct such as src/**/*.ts with src/cli/**) takes the rules back for everything it dropped",
   );
-  assert.equal(preset[0]!.ignores, undefined, "the preset carries an ignores key, which takes the rules back for whatever it excludes while its files still name the four roots");
+  assert.equal(preset[0]!.ignores, undefined, "the preset carries an ignores key, which takes the rules back for whatever it excludes while its files still name the roots");
 });
 
 test("no block sets a rule off but typescript-eslint's own two layers and ruling D's design/ block, so the house config takes no rule back once Issue #654 has turned each on", () => {
@@ -265,7 +266,7 @@ test("only the TypeScript block sets no-param-reassign, with property writes on 
   assert.deepEqual(setters, [`(unnamed): ${JSON.stringify(["error", PARAM_REASSIGN])}`], "a block other than the TypeScript block sets no-param-reassign, or that block's options are not the ruled ones, and a block over a subtree or one named file can take property writes back off or excuse another name there while every witness still resolves the ruled options");
 });
 
-const LINT_TS_ROOTS = ["scripts", "src", "test", "test-support"];
+const LINT_TS_ROOTS = ["e2e", "scripts", "src", "test", "test-support"];
 const tsUnder = (dir: string): string[] =>
   readdirSync(join(ROOT, dir), { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? tsUnder(join(dir, e.name)) : e.name.endsWith(".ts") ? [join(ROOT, dir, e.name)] : []));
 const bindingNames = (b: ts.BindingName): ts.Identifier[] => (ts.isIdentifier(b) ? [b] : b.elements.flatMap((e) => (ts.isOmittedExpression(e) ? [] : bindingNames(e.name))));
@@ -337,7 +338,7 @@ test("every parameter bearing a name no-param-reassign excuses holds a page elem
   assert.deepEqual(offenders, [], "a parameter bearing an excused name holds something other than a page element (a type the DOM library declares), an element-shaped type, or a record of read-only page elements, so a write into it goes unseen by no-param-reassign; rename it, or return a new value instead of writing (Issue #654 rulings 4 and 5). DECLARED, with their directions: an element-shaped type is one a DOM input element satisfies whose every member an input element also carries, so any record made only of such members ({ value: string }, { hidden: boolean }, { width: number; height: number }) passes, erring toward passing, an errata/guards.md row; a type with no members at all (object, {}) and a type parameter constrained to an element (T extends HTMLElement) fail, erring toward failing");
 });
 
-const JS_REFUSED = ["x.js", "src/x.js", "scripts/x.mjs", "scripts/e2e/x.mjs", "test/x.cjs", "test-support/x.js", "public/x.js", ".claude/x.mjs", "x.jsx", "src/site/x.jsx"];
+const JS_REFUSED = ["x.js", "src/x.js", "scripts/x.mjs", "e2e/x.mjs", "test/x.cjs", "test-support/x.js", "public/x.js", ".claude/x.mjs", "x.jsx", "src/site/x.jsx"];
 const JS_ADMITTED = ["design/x.mjs", "design/round/x.js", "design/x.cjs", "design/round/x.jsx"];
 const JS_UNREAD = ["out/x.mjs", "out/probe/x.js", "dist/x.js", "public/explorer/app.bundle.js", "public/atlas/x.js", ".claude/worktrees/w/scripts/x.mjs", "node_modules/x/index.js"];
 const sourceFor = (path: string): string =>
