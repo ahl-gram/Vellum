@@ -27,14 +27,35 @@ export function cancelTurn(): void {
   active = null;
 }
 
+function turnFace(back: HTMLDivElement, blobUrl: string): void {
+  const img = document.createElement("img");
+  img.alt = "";
+  img.src = blobUrl;
+  back.appendChild(img);
+}
+
+function turnAnimation(innerEl: HTMLElement, durationMs: number, easing: string): Animation {
+  return innerEl.animate(
+    [{ transform: "rotateY(0deg)" }, { transform: "rotateY(-180deg)" }],
+    { duration: durationMs, easing, fill: "forwards" },
+  );
+}
+
+function turnFallback(sheetEl: HTMLElement, innerEl: HTMLElement, mapEl: HTMLElement, newSvg: string, back: HTMLDivElement | null, blobUrl: string, resolve: () => void): void {
+  try { sheetEl.classList.remove("turning"); innerEl.classList.remove("turning"); } catch {}
+  if (back && back.parentNode) back.remove();
+  if (blobUrl) { try { URL.revokeObjectURL(blobUrl); } catch {} }
+  active = null;
+  mapEl.innerHTML = newSvg;
+  resolve();
+}
+
 /** Turn the sheet, re-dressing #map when the leaf lands. Resolves ONLY on a real landing (the caller then rebuilds the overlay); a superseding cancelTurn() aborts it and the promise stays pending forever. It NEVER rejects: an unbuildable 3D scaffold degrades to an instant swap and resolves, so the caller needs no .catch. */
-// eslint-disable-next-line max-lines-per-function
 export function runTurn(
   { sheetEl, innerEl, mapEl, newSvg, durationMs, easing }:
   { sheetEl: HTMLElement; innerEl: HTMLElement; mapEl: HTMLElement; newSvg: string; durationMs: number; easing: string },
 ): Promise<void> {
   cancelTurn();
-  // eslint-disable-next-line max-lines-per-function
   return new Promise<void>((resolve) => {
     let blobUrl = "";
     let back: HTMLDivElement | null = null;
@@ -43,19 +64,13 @@ export function runTurn(
       back = document.createElement("div");
       back.className = "sheet-back";
       back.setAttribute("aria-hidden", "true");
-      const img = document.createElement("img");
-      img.alt = "";
-      img.src = blobUrl;
-      back.appendChild(img);
+      turnFace(back, blobUrl);
       innerEl.appendChild(back);
 
       sheetEl.classList.add("turning");
       innerEl.classList.add("turning");
 
-      const anim = innerEl.animate(
-        [{ transform: "rotateY(0deg)" }, { transform: "rotateY(-180deg)" }],
-        { duration: durationMs, easing, fill: "forwards" },
-      );
+      const anim = turnAnimation(innerEl, durationMs, easing);
 
       let settled = false;
       // When committing, the new chart is written into #map FIRST, in the same synchronous tick, so the reader never sees a frame between the back face and the re-dressed recto.
@@ -78,12 +93,7 @@ export function runTurn(
       active = { abort: () => finish(false) };
     } catch {
       // Setup failed: undo any partial scaffold and fall back to an instant swap, so the chart still updates and the caller still rebuilds the overlay.
-      try { sheetEl.classList.remove("turning"); innerEl.classList.remove("turning"); } catch {}
-      if (back && back.parentNode) back.remove();
-      if (blobUrl) { try { URL.revokeObjectURL(blobUrl); } catch {} }
-      active = null;
-      mapEl.innerHTML = newSvg;
-      resolve();
+      turnFallback(sheetEl, innerEl, mapEl, newSvg, back, blobUrl, resolve);
     }
   });
 }

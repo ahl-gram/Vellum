@@ -18,8 +18,37 @@ export interface Controls {
   coastSlider: HTMLInputElement;
 }
 
+function landFromHash(params: URLSearchParams, controls: Readonly<Controls>): boolean {
+  const { landSlider } = controls;
+  const land = params.get("land");
+  let landTouched = false;
+  if (land !== null) {
+    const f = Number(land) / 1000;
+    if (Number.isFinite(f)) {
+      landSlider.value = String(landToSlider(f));
+      updateLandReadout();
+      landTouched = true;
+    }
+  }
+  return landTouched;
+}
+
+function coastFromHash(params: URLSearchParams, controls: Readonly<Controls>): boolean {
+  const { coastSlider } = controls;
+  const coast = params.get("coast");
+  let coastTouched = false;
+  if (coast !== null) {
+    const w = Number(coast) / 100;
+    if (Number.isFinite(w)) {
+      coastSlider.value = String(coastToSlider(w));
+      updateCoastReadout();
+      coastTouched = true;
+    }
+  }
+  return coastTouched;
+}
+
 /** Apply a bookmarked hash to the controls; only keys present and valid apply. Returns which slider gates the link touched, the #165 camera if carried (restored by the conductor after the first chart lands), and the #192 live address; absent params mean home, still, disarmed. */
-// eslint-disable-next-line max-lines-per-function
 export function readHash(controls: Controls): {
   land: boolean;
   coast: boolean;
@@ -27,7 +56,7 @@ export function readHash(controls: Controls): {
   live: Live | null;
   table: ReadonlyArray<TableItem> | null;
 } {
-  const { seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, beastsChk, landSlider, coastSlider } = controls;
+  const { seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, beastsChk } = controls;
   const params = new URLSearchParams(location.hash.slice(1));
   const seed = seedFromHash(params.get("seed"));
   if (seed !== null) seedInput.value = String(seed);
@@ -47,26 +76,8 @@ export function readHash(controls: Controls): {
   if (arms !== null) armsChk.checked = arms === "1";
   const beasts = params.get("beasts");
   if (beasts !== null) beastsChk.checked = beasts === "1";
-  const land = params.get("land");
-  let landTouched = false;
-  if (land !== null) {
-    const f = Number(land) / 1000;
-    if (Number.isFinite(f)) {
-      landSlider.value = String(landToSlider(f));
-      updateLandReadout();
-      landTouched = true;
-    }
-  }
-  const coast = params.get("coast");
-  let coastTouched = false;
-  if (coast !== null) {
-    const w = Number(coast) / 100;
-    if (Number.isFinite(w)) {
-      coastSlider.value = String(coastToSlider(w));
-      updateCoastReadout();
-      coastTouched = true;
-    }
-  }
+  const landTouched = landFromHash(params, controls);
+  const coastTouched = coastFromHash(params, controls);
   const cxRaw = params.get("cx");
   const cyRaw = params.get("cy");
   const kRaw = params.get("k");
