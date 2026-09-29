@@ -1,5 +1,5 @@
 // The Surveyor's Glass wiring: one factory owns the geometric camera, the semantic redraft, the card counter-scale and the keyboard + on-screen driving; app.ts keeps only the POLICY calls (when to rebase, reset, or home).
-import { createZoomController, type ZoomState } from "../shared/zoom-controller.ts";
+import { createZoomController, type ZoomController, type ZoomState } from "../shared/zoom-controller.ts";
 import { createLodController } from "./lod-controller.ts";
 import { cameraFromTransform, transformFromCamera, type Camera } from "./camera.ts";
 import type { PlaceManifest } from "../../render/place-manifest.ts";
@@ -24,7 +24,6 @@ interface GlassDeps {
   buttons: { zoomIn: HTMLElement; zoomOut: HTMLElement; reset: HTMLElement; cluster: HTMLElement };
 }
 
-type ZoomController = ReturnType<typeof createZoomController>;
 type LodController = ReturnType<typeof createLodController>;
 
 // #170: single timing source (the --glide token), read per glide so a stylesheet tweak takes effect without a reload; reduced motion never reaches it.

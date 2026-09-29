@@ -285,7 +285,6 @@ function landDraw(res: DrawResult, seed: number, overrides: Readonly<DrawOverrid
 
 // opts.quiet suppresses the arrival ceremony, used only by the sea-level drag's throttled mid-drag redraws.
 function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
-
   const quiet = !!(opts && opts.quiet);
   const isTurn = !!(opts && opts.turn);
   const seed = Number(seedInput.value) >>> 0;

@@ -67,7 +67,7 @@ function recount(drawerEls: ChartDrawerEls, deps: ChartDrawerDeps, items: Readon
   drawerEls.cuttings.classList.remove("jolt");
 }
 
-function drawerArt() {
+function drawerArt(): { art: ReadonlyMap<string, string>; titleOf: ItemText; pictureOf: (item: TableItem) => HTMLElement; forget: (item: TableItem) => void; putArt: Put; putName: Put } {
   // Blob urls are revoked when their cutting leaves, and never churned per redraw: the key is the item's own emitted spelling, so a redraw reuses the url it already made.
   const art = new Map<string, string>();
   const names = new Map<string, string>();
@@ -99,7 +99,7 @@ function drawerArt() {
   return { art, titleOf, pictureOf, forget, putArt, putName };
 }
 
-function drawerCuttings(drawerEls: ChartDrawerEls, deps: ChartDrawerDeps, titleOf: ItemText, pictureOf: (item: TableItem) => HTMLElement, forget: (item: TableItem) => void) {
+function drawerCuttings(drawerEls: ChartDrawerEls, deps: ChartDrawerDeps, titleOf: ItemText, pictureOf: (item: TableItem) => HTMLElement, forget: (item: TableItem) => void): { rows: ReadonlyMap<string, Row>; render: () => void; commit: (next: ReadonlyArray<TableItem>) => void; items: Items; setItems: (next: ReadonlyArray<TableItem>) => void; setLanding: (next: string | null) => void } {
   let items: ReadonlyArray<TableItem> = [];
   const rows = new Map<string, Row>();
   let landing: string | null = null;
