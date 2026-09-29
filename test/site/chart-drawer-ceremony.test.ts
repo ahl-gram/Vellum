@@ -149,7 +149,7 @@ test("CT14d a shut inside a ceremony clears it rather than leaving it armed: dis
   assert.equal(cuttings.classList.contains("jolt"), false, "a shut mid-dip takes the jolt off too");
 });
 
-test("CT10b a re-seat that drops a sheet revokes that sheet's picture and no other, and the table then holds what it kept (#634, the leak CT10 reads as text)", () => {
+test("CT10b a re-seat that drops sheets revokes every departed sheet's picture and no other, and the table then holds what it kept (#634, the leak CT10 reads as text)", () => {
   const revoked: string[] = [];
   const realMint = URL.createObjectURL.bind(URL);
   const realRevoke = URL.revokeObjectURL.bind(URL);
@@ -160,11 +160,12 @@ test("CT10b a re-seat that drops a sheet revokes that sheet's picture and no oth
     const { table } = drawer();
     assert.equal(table.lay(survey(1), SVG, "one"), true);
     assert.equal(table.lay(survey(2), SVG, "two"), true);
-    assert.equal(minted, 2, "each laid sheet minted its own picture, so the revokes below have two urls to tell apart");
-    table.restore([survey(1), survey(2)]);
-    assert.deepEqual(revoked, [], "a re-seat that keeps both sheets drops neither picture");
+    assert.equal(table.lay(survey(3), SVG, "three"), true);
+    assert.equal(minted, 3, "each laid sheet minted its own picture, so the revokes below have three urls to tell apart");
+    table.restore([survey(1), survey(2), survey(3)]);
+    assert.deepEqual(revoked, [], "a re-seat that keeps every sheet drops no picture");
     table.restore([survey(2)]);
-    assert.deepEqual(revoked, ["blob:minted-0"], "the sheet that left takes its picture with it, and the one that stayed keeps its own");
+    assert.deepEqual([...revoked].sort(), ["blob:minted-0", "blob:minted-2"], "every sheet that left takes its picture with it, and the one that stayed keeps its own");
     assert.deepEqual(table.state().map((item) => (item.kind === "survey" ? item.lx : -1)), [2], "and the table holds exactly what the re-seat kept");
   } finally {
     URL.createObjectURL = realMint;
