@@ -5,7 +5,6 @@ import { resolve } from "node:path";
 import ts from "typescript";
 
 const REPO = resolve(import.meta.dirname, "..", "..");
-// The files Issue #654 row 8b split into parts and helpers; elsewhere in src/site older calls hand values on under other names, which this rule does not reach.
 const SPLIT_FILES = [
   "src/site/explorer/app.ts",
   "src/site/explorer/chart-drawer-bind.ts",
@@ -17,7 +16,7 @@ const SPLIT_FILES = [
   "src/site/shared/zoom-controller.ts",
 ];
 
-// Blind spots, each erring toward passing: a module-level const arrow (settle, keyOf, isHome take one parameter each, so none can swap), an exported function (five calls in src/site/shared/zoom-controller.ts, moved unchanged, hand values under other names), a call through an alias, a shadowing local, and a file off the list.
+// Blind spots, each erring toward passing: a module-level const arrow (each in these files takes one parameter, or two of different types, so a swap is a type error), an exported function (five calls in src/site/shared/zoom-controller.ts, moved unchanged, hand values under other names), a call through an alias, a shadowing local, and any file off the list (72 older calls in 17 other files under src/site hand values on under other names).
 function handOffs(file: string): { site: string; args: string[]; params: string[] }[] {
   const sf = ts.createSourceFile(file, readFileSync(resolve(REPO, file), "utf8"), ts.ScriptTarget.Latest, true);
   const local = new Map<string, string[]>();
