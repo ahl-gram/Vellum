@@ -260,6 +260,7 @@ test("CT7c the Explorer assigns that sheet beside the OVERLAY it describes, whic
     assert.deepEqual(fields, ["seed", "overrides", "style", "presentYear: res.manifest.presentYear"], "the sheet is built from something other than the drawn world's own seed, overrides and style and that same manifest's year, so a filing can name a different chart than the one the reader is looking at");
   }
   assert.equal((src.match(/presentYear: res\.manifest\.presentYear/g) ?? []).length, builds.length, "one build's year is read from the manifest it was built from and another's is not, which is the drift with one of the two doors left open");
+  // Read as text, so a local shadowing one of these names above the call passes it.
   const calls = [...src.matchAll(/^\s*landDraw\(([^)]*)\);$/gm)].map((m) => m[1]!.split(",").map((a) => a.trim()));
   assert.equal(calls.length, 1, "the landing paths are reached from some number of places other than the one draw, so the arguments pinned below are not the ones every landing takes");
   const params = /function landDraw\(([^)]*)\)/.exec(src);

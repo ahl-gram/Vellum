@@ -1,4 +1,4 @@
-// The Chart Table's drawer: binds its elements, its cuttings and its road to the table state ./chart-drawer.ts computes.
+// The Chart Table's drawer: binds its elements, its cuttings and its road to the table state src/site/explorer/chart-drawer.ts computes.
 import { emitTable, tableHash, type TableItem } from "../shared/table-address.ts";
 import { countLine, layOnTable, placeholderTitle, refusalLine, roomOnTable, sheetsThatLeft, subOf, tabLine, takeOffTable } from "./chart-drawer.ts";
 import type { SlipFold } from "../shared/slip.ts";

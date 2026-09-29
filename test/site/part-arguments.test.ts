@@ -17,6 +17,7 @@ const SPLIT_FILES = [
   "src/site/shared/zoom-controller.ts",
 ];
 
+// Blind spots, each erring toward passing: a module-level const arrow (settle, keyOf, isHome take one parameter each, so none can swap), an exported function (five calls in src/site/shared/zoom-controller.ts, moved unchanged, hand values under other names), a call through an alias, a shadowing local, and a file off the list.
 function handOffs(file: string): { site: string; args: string[]; params: string[] }[] {
   const sf = ts.createSourceFile(file, readFileSync(resolve(REPO, file), "utf8"), ts.ScriptTarget.Latest, true);
   const local = new Map<string, string[]>();
