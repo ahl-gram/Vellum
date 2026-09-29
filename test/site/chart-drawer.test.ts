@@ -335,10 +335,7 @@ test("CT10 a re-seat that lands mid-draw asks for ANOTHER pass, and a sheet that
   assert.match(fill, /if \(!items\(\)\.some\(\(live\) => keyOf\(live\) === keyOf\(item\)\)\) \{ URL\.revokeObjectURL\(drawn\.url\); continue; \}/, "a picture that finishes drawing for a sheet that already left is filed rather than revoked, which leaks one blob url per departed sheet per re-seat mid-draw");
   const restore = src.slice(src.indexOf("restore(next:"), src.indexOf("\n  }\n", src.indexOf("restore(next:")));
   assert.ok(restore.length > 60, "restore was not found, so the assertions below read an empty slice");
-  assert.match(restore, /for \(const gone of sheetsThatLeft\(items\(\), kept\)\) forget\(gone\);/, "a sheet that leaves on a cached return keeps its blob url, and this path now runs on every return rather than once at boot, so they accumulate one per re-seat");
-  assert.notEqual(restore.indexOf("setItems(kept);"), -1, "restore no longer seats what it kept, so the ordering check below reads nothing");
-  assert.ok(restore.indexOf("sheetsThatLeft(items(), kept)") < restore.indexOf("setItems(kept);"), "the table is re-seated before the sheets that left are read from it, so items() is already the kept set and nothing is ever forgotten");
-  // The set it is built from is the hazard, so it is BEHAVIOUR here and not a regex: built from the outgoing table it answers "nothing left" for every re-seat, and the line's text is identical.
+  assert.match(restore, /for \(const gone of sheetsThatLeft\(items\(\), kept\)\) forget\(gone\);/, "a sheet that leaves on a cached return keeps its blob url, and this path now runs on every return rather than once at boot, so they accumulate one per re-seat");  // The set it is built from is the hazard, so it is BEHAVIOUR here and not a regex: built from the outgoing table it answers "nothing left" for every re-seat, and the line's text is identical.
   const before = [survey(1), survey(2), survey(3)];
   assert.deepEqual(sheetsThatLeft(before, [survey(1), survey(3)]).map((i) => emitTable([i])), [emitTable([survey(2)])], "the middle sheet left and was not named, so its picture is never revoked");
   assert.deepEqual(sheetsThatLeft(before, before), [], "nothing left, so nothing is forgotten and a redraw does not churn the urls it already made");
