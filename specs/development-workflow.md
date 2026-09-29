@@ -116,10 +116,13 @@ scar:
 
 - **Archive the finalized plan before the first commit.** Copy the plan exactly as step 6 left it
   to `plans/<N>/<N>-plan.md` at the repo root, `N` the issue's number, and commit it with the
-  implementation. Every plan for an issue lives in that issue's own directory: an issue that ships
-  as several pull requests archives each one's plan beside the first as
-  `plans/<N>/<N>-<label>-plan.md`, `<label>` naming the row or pull request (`row8a`, `pr2`). It
-  is a record of what was planned and is never edited afterwards: a plan that
+  implementation. Every plan for an issue lives in that issue's own directory. An issue that ships
+  as several pull requests archives one plan per pull request: the first is
+  `plans/<N>/<N>-plan.md` and stays frozen as that pull request left it, and each later pull
+  request archives its own reviewed design beside it as `plans/<N>/<N>-<label>-plan.md`, `<label>`
+  naming the row or pull request (`row8a`, `pr2`), copied as it stood after the plan skeptic's
+  findings were folded in and committed with that pull request's first commit. Each is a record
+  of what was planned and is never edited afterwards: a plan that
   changes at review is named in the PR body with the difference, not a rewritten file.
   `plans/` is an archive on `design/`'s pattern, content only, and sits outside the roots
   `test/repo/prose-paths.test.ts` walks on purpose, so a plan may name the paths it is about to
