@@ -1,5 +1,5 @@
 // The Surveyor's Glass wiring: one factory owns the geometric camera, the semantic redraft, the card counter-scale and the keyboard + on-screen driving; app.ts keeps only the POLICY calls (when to rebase, reset, or home).
-import { createZoomController, type ZoomState } from "../shared/zoom-controller.ts";
+import { createZoomController, type ZoomController, type ZoomState } from "../shared/zoom-controller.ts";
 import { createLodController } from "./lod-controller.ts";
 import { cameraFromTransform, transformFromCamera, type Camera } from "./camera.ts";
 import type { PlaceManifest } from "../../render/place-manifest.ts";
@@ -24,16 +24,15 @@ interface GlassDeps {
   buttons: { zoomIn: HTMLElement; zoomOut: HTMLElement; reset: HTMLElement; cluster: HTMLElement };
 }
 
-// eslint-disable-next-line max-lines-per-function
-export function createGlass(deps: GlassDeps) {
-  const { mapViewport, mapDiv, buttons } = deps;
+type LodController = ReturnType<typeof createLodController>;
 
-  // #170: single timing source (the --glide token), read per glide so a stylesheet tweak takes effect without a reload; reduced motion never reaches it.
-  function glideMs(): number {
-    const v = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--glide"));
-    return Number.isFinite(v) ? v : 300;
-  }
+// #170: single timing source (the --glide token), read per glide so a stylesheet tweak takes effect without a reload; reduced motion never reaches it.
+function glideMs(): number {
+  const v = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--glide"));
+  return Number.isFinite(v) ? v : 300;
+}
 
+function glassCard(mapDiv: HTMLElement, deps: Readonly<GlassDeps>) {
   // #164/#331: publish k onto the card and the .place-overlay, both LEAF siblings of the chart svg, never the mount: a per-frame non-transform style write on an svg ancestor re-rasterizes the baked labels and they visibly jiggle.
   function setCardZoom(k: number): void {
     const card = document.getElementById("place-card");
@@ -48,18 +47,11 @@ export function createGlass(deps: GlassDeps) {
     // #387/#388: ordered AFTER the publish above, and reached by every camera apply and every redraft rebuild. A redraft's fresh card has no counter-scale until that loop runs, so re-measuring before it measures the card k times too large.
     deps.reclampCard();
   }
+  return { setCardZoom };
+}
 
-  // reducedMotion is left unset so the controller reads the OS setting LIVE.
-  const zoomController = createZoomController({
-    viewportEl: mapViewport,
-    targetEl: mapDiv,
-    scaleExtent: [1, 8],
-    onApply: (state) => setCardZoom(state.k),
-    onSettle: () => onCameraSettle(),
-    glideMs,
-  });
-
-  const lodController = createLodController({
+function glassLod(mapDiv: HTMLElement, deps: Readonly<GlassDeps>, setCardZoom: (k: number) => void, zoomController: ZoomController): LodController {
+  return createLodController({
     mapDiv,
     runJob: deps.runJob,
     // Every controller path (commit, revert, homeToWorld) rebuilds a FRESH #place-card and none touches the camera, so re-publish the zoom here or a card shown after a redraft renders k-times too large.
@@ -73,7 +65,9 @@ export function createGlass(deps: GlassDeps) {
     prefersReduce: deps.prefersReduce,
     decorateInset: deps.decorateInset,
   });
+}
 
+function glassCamera(mapViewport: HTMLElement, deps: Readonly<GlassDeps>, zoomController: ZoomController, lodController: LodController, setCardZoom: (k: number) => void) {
   // #165/#169: sheet fractions of the WORLD sheet at every band (the inset design never rebases), read from the STABLE viewport; guard a zero-size box (before first layout) so the division is finite.
   function cameraNow(): Camera {
     const W = mapViewport.clientWidth || 1;
@@ -104,7 +98,10 @@ export function createGlass(deps: GlassDeps) {
     lodController.easeHome();
     zoomController.glideHome(deps.syncHash);
   }
+  return { cameraNow, onCameraSettle, syncZoom, applyCamera, refitCamera, goHomeVoiced };
+}
 
+function glassKeys(mapViewport: HTMLElement, zoomController: ZoomController, goHomeVoiced: () => void): void {
   // Scoped to the focusable viewport, not document, so the arrows never hijack page scroll; preventDefault only for keys we consume, so Escape still bubbles to the card dismiss; the pan arrows stay instant on purpose (the accessible pan baseline).
   mapViewport.addEventListener("keydown", (e) => {
     if (e.altKey || e.ctrlKey || e.metaKey) return;
@@ -123,6 +120,9 @@ export function createGlass(deps: GlassDeps) {
     }
     e.preventDefault();
   });
+}
+
+function glassPresses(buttons: GlassDeps["buttons"], zoomController: ZoomController, goHomeVoiced: () => void): void {
   buttons.zoomIn.addEventListener("click", () => zoomController.glideBy(ZOOM_STEP));
   buttons.zoomOut.addEventListener("click", () => zoomController.glideBy(1 / ZOOM_STEP));
   buttons.reset.addEventListener("click", goHomeVoiced);
@@ -130,12 +130,10 @@ export function createGlass(deps: GlassDeps) {
   for (const type of ["mousedown", "dblclick", "wheel", "touchstart"]) {
     buttons.cluster.addEventListener(type, (e) => e.stopPropagation());
   }
+}
 
+function glassApi(zoomController: ZoomController, lodController: LodController) {
   return {
-    cameraNow,
-    syncZoom,
-    applyCamera,
-    refitCamera,
     rebase: () => zoomController.rebase(),
     reset: () => zoomController.reset(),
     zoomTo: (t: ZoomState) => zoomController.zoomTo(t),
@@ -145,6 +143,34 @@ export function createGlass(deps: GlassDeps) {
     homeToWorld: () => lodController.homeToWorld(),
     committedSurvey: () => lodController.committedSurvey(),
     lodState: () => lodController.state(),
+  };
+}
+
+export function createGlass(deps: GlassDeps) {
+  const { mapViewport, mapDiv, buttons } = deps;
+  const { setCardZoom } = glassCard(mapDiv, deps);
+
+  // reducedMotion is left unset so the controller reads the OS setting LIVE.
+  const zoomController = createZoomController({
+    viewportEl: mapViewport,
+    targetEl: mapDiv,
+    scaleExtent: [1, 8],
+    onApply: (state) => setCardZoom(state.k),
+    onSettle: () => onCameraSettle(),
+    glideMs,
+  });
+
+  const lodController = glassLod(mapDiv, deps, setCardZoom, zoomController);
+  const { cameraNow, onCameraSettle, syncZoom, applyCamera, refitCamera, goHomeVoiced } = glassCamera(mapViewport, deps, zoomController, lodController, setCardZoom);
+  glassKeys(mapViewport, zoomController, goHomeVoiced);
+  glassPresses(buttons, zoomController, goHomeVoiced);
+
+  return {
+    cameraNow,
+    syncZoom,
+    applyCamera,
+    refitCamera,
+    ...glassApi(zoomController, lodController),
   };
 }
 

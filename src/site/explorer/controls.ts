@@ -30,9 +30,21 @@ function randomSeed(): number {
   return Math.floor(Math.random() * 0xffffffff);
 }
 
-// eslint-disable-next-line max-lines-per-function
+function wireCoast(deps: Readonly<ControlsDeps>): void {
+  const { coastSlider, touched, draw } = deps;
+  // #137: unlike sea-level (which re-levels the SAME terrain and can afford quiet mid-drag redraws), every coastWarp value is a different ~0.6s world, so the readout updates live but the redraw waits for release.
+  coastSlider.addEventListener("input", () => {
+    touched.coast = true;
+    updateCoastReadout();
+  });
+  coastSlider.addEventListener("change", () => {
+    touched.coast = true;
+    draw();
+  });
+}
+
 export function wireControls(deps: ControlsDeps): void {
-  const { seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, beastsChk, landSlider, coastSlider, touched, draw } = deps;
+  const { seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, beastsChk, landSlider, touched, draw } = deps;
 
   let landDebounce: ReturnType<typeof setTimeout> | 0 = 0;
 
@@ -71,15 +83,7 @@ export function wireControls(deps: ControlsDeps): void {
     clearTimeout(landDebounce);
     draw();
   });
-  // #137: unlike sea-level (which re-levels the SAME terrain and can afford quiet mid-drag redraws), every coastWarp value is a different ~0.6s world, so the readout updates live but the redraw waits for release.
-  coastSlider.addEventListener("input", () => {
-    touched.coast = true;
-    updateCoastReadout();
-  });
-  coastSlider.addEventListener("change", () => {
-    touched.coast = true;
-    draw();
-  });
+  wireCoast(deps);
 
   // #53: the doc-level dismiss pair, added once; both read the engine's current overlay so they stay correct across redraws.
   document.addEventListener("keydown", deps.onDocKeydown);

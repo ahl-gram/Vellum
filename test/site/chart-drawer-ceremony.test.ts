@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { bindChartDrawer } from "../../src/site/explorer/chart-drawer.ts";
+import { bindChartDrawer } from "../../src/site/explorer/chart-drawer-bind.ts";
 import { TABLE_CAP, type SurveyItem, type TableItem } from "../../src/site/shared/table-address.ts";
 import { El, installShim } from "../../test-support/element-shim.ts";
 
@@ -147,6 +147,30 @@ test("CT14d a shut inside a ceremony clears it rather than leaving it armed: dis
   assert.equal(cuttings.classList.contains("jolt"), true, "dipping");
   els.shut.fire("click");
   assert.equal(cuttings.classList.contains("jolt"), false, "a shut mid-dip takes the jolt off too");
+});
+
+test("CT10b a re-seat that drops sheets revokes every departed sheet's picture and no other, and the table then holds what it kept (#634, the leak CT10 reads as text)", () => {
+  const revoked: string[] = [];
+  const realMint = URL.createObjectURL.bind(URL);
+  const realRevoke = URL.revokeObjectURL.bind(URL);
+  let minted = 0;
+  URL.createObjectURL = (blob: Blob) => { void blob; return `blob:minted-${minted++}`; };
+  URL.revokeObjectURL = (url: string) => { revoked.push(url); };
+  try {
+    const { table } = drawer();
+    assert.equal(table.lay(survey(1), SVG, "one"), true);
+    assert.equal(table.lay(survey(2), SVG, "two"), true);
+    assert.equal(table.lay(survey(3), SVG, "three"), true);
+    assert.equal(minted, 3, "each laid sheet minted its own picture, so the revokes below have three urls to tell apart");
+    table.restore([survey(1), survey(2), survey(3)]);
+    assert.deepEqual(revoked, [], "a re-seat that keeps every sheet drops no picture");
+    table.restore([survey(2)]);
+    assert.deepEqual([...revoked].sort(), ["blob:minted-0", "blob:minted-2"], "every sheet that left takes its picture with it, and the one that stayed keeps its own");
+    assert.deepEqual(table.state().map((item) => (item.kind === "survey" ? item.lx : -1)), [2], "and the table holds exactly what the re-seat kept");
+  } finally {
+    URL.createObjectURL = realMint;
+    URL.revokeObjectURL = realRevoke;
+  }
 });
 
 test("CT15 a lay handed a ready url (the drag's ghost) adopts it and mints none; a lay handed only the svg mints one", () => {

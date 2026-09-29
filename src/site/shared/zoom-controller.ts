@@ -69,41 +69,41 @@ export interface ZoomController {
 // d3-zoom stashes the live transform on the element itself as `__zoom`; typed so getState/rebase read and write it through one cast.
 type ZoomStoredElement = HTMLElement & { __zoom?: ZoomTransform };
 
-// eslint-disable-next-line max-lines-per-function
-export function createZoomController({
-  viewportEl,
-  targetEl,
-  scaleExtent = [1, 8],
-  settleMs = 250,
-  onSettle,
-  onApply,
-  reducedMotion,
-  glideMs = 250,
-}: ZoomControllerOptions): ZoomController {
+type Extent = [[number, number], [number, number]];
+type Behavior = ZoomBehavior<HTMLElement, unknown>;
+type Sel = ReturnType<typeof zoomFrame>["sel"];
+
+const isHome = (t: ZoomTransform) => t.k === 1 && t.x === 0 && t.y === 0;
+
+function zoomFrame(viewportEl: HTMLElement) {
   const viewportExtent = (): [[number, number], [number, number]] =>
     [[0, 0], [viewportEl.clientWidth, viewportEl.clientHeight]];
 
-  // Reduced motion is read LIVE (boolean, getter, or matchMedia), so an OS toggle and the e2e emulation take effect without a reload.
-  const mq =
-    typeof globalThis.matchMedia === "function"
-      ? globalThis.matchMedia("(prefers-reduced-motion: reduce)")
-      : null;
+  const sel = () => select(viewportEl);
+
+  function getState(): ZoomState {
+    const t = (viewportEl as ZoomStoredElement).__zoom || zoomIdentity;
+    return { x: t.x, y: t.y, k: t.k };
+  }
+  return { viewportExtent, sel, getState };
+}
+
+function zoomMotion(reducedMotion: ZoomControllerOptions["reducedMotion"], mq: MediaQueryList | null, glideMs: number | (() => number)) {
   const prefersReduced = () => {
     if (typeof reducedMotion === "function") return !!reducedMotion();
     if (typeof reducedMotion === "boolean") return reducedMotion;
     return !!(mq && mq.matches);
   };
-  const DBLCLICK_MS = 250;
   // Read live: a getter lets the page hand in a lazy /motion.css token read (the stylesheet may not be applied at construction).
   const glideMsNow = () => {
     const v = typeof glideMs === "function" ? glideMs() : glideMs;
     return Number.isFinite(v) && v >= 0 ? v : 250;
   };
-  // The in-flight glide's absolute target k; glideSeq guards so only the LATEST glide's end/interrupt clears it (a superseding press interrupts its predecessor one frame AFTER setting the new target).
-  let glideTargetK: number | null = null;
-  let glideSeq = 0;
+  return { prefersReduced, glideMsNow };
+}
 
-  const behavior: ZoomBehavior<HTMLElement, unknown> = zoom<HTMLElement, unknown>()
+function zoomBehavior(scaleExtent: [number, number], viewportExtent: () => Extent, prefersReduced: () => boolean, DBLCLICK_MS: number): Behavior {
+  return zoom<HTMLElement, unknown>()
     .scaleExtent(scaleExtent)
     .extent(viewportExtent)
     .duration(prefersReduced() ? 0 : DBLCLICK_MS)
@@ -111,7 +111,9 @@ export function createZoomController({
       const c = constrainZoom({ x: transform.x, y: transform.y, k: transform.k }, ext, scaleExtent);
       return zoomIdentity.translate(c.x, c.y).scale(c.k);
     });
+}
 
+function zoomPaint(behavior: Behavior, prefersReduced: () => boolean, DBLCLICK_MS: number, targetEl: HTMLElement, viewportEl: HTMLElement, onApply: ZoomControllerOptions["onApply"]) {
   // d3-zoom reads behavior.duration() inside its own bubble-phase dblclick handler, so this capture-phase refresh runs first and keeps reduced motion live per click.
   const syncDblDuration = () => behavior.duration(prefersReduced() ? 0 : DBLCLICK_MS);
 
@@ -123,8 +125,6 @@ export function createZoomController({
     }
   };
 
-  const isHome = (t: ZoomTransform) => t.k === 1 && t.x === 0 && t.y === 0;
-
   function apply(transform: ZoomTransform) {
     if (isHome(transform)) {
       targetEl.style.transform = "";
@@ -135,19 +135,27 @@ export function createZoomController({
     }
     if (onApply) onApply({ x: transform.x, y: transform.y, k: transform.k });
   }
+  const setSettleTimer = (next: ReturnType<typeof setTimeout> | 0): void => { settleTimer = next; };
+  return { syncDblDuration, clearSettle, apply, setSettleTimer };
+}
 
+function listenZoom(behavior: Behavior, apply: (transform: ZoomTransform) => void, onSettle: ZoomControllerOptions["onSettle"], clearSettle: () => void, setSettleTimer: (next: ReturnType<typeof setTimeout> | 0) => void, getState: () => ZoomState, settleMs: number): void {
   behavior.on("zoom", (event: D3ZoomEvent<HTMLElement, unknown>) => {
     apply(event.transform);
     if (onSettle) {
       clearSettle();
-      settleTimer = setTimeout(() => {
-        settleTimer = 0;
+      setSettleTimer(setTimeout(() => {
+        setSettleTimer(0);
         onSettle(getState());
-      }, settleMs);
+      }, settleMs));
     }
   });
+}
 
-  const sel = () => select(viewportEl);
+function zoomGlide(sel: Sel, behavior: Behavior, glideMsNow: () => number, prefersReduced: () => boolean, getState: () => ZoomState, scaleExtent: [number, number]) {
+  // The in-flight glide's absolute target k; glideSeq guards so only the LATEST glide's end/interrupt clears it (a superseding press interrupts its predecessor one frame AFTER setting the new target).
+  let glideTargetK: number | null = null;
+  let glideSeq = 0;
 
   function glideTo(k: number): void {
     glideTargetK = k;
@@ -161,11 +169,20 @@ export function createZoomController({
       });
   }
 
-  function getState(): ZoomState {
-    const t = (viewportEl as ZoomStoredElement).__zoom || zoomIdentity;
-    return { x: t.x, y: t.y, k: t.k };
+  /** Magnify by `factor` about the viewport centre as a d3 transition through the same zoom pipeline; reduced motion collapses to the instant scaleBy. */
+  function glideBy(factor: number) {
+    if (prefersReduced()) {
+      sel().call((s, f) => behavior.scaleBy(s, f), factor);
+      return;
+    }
+    const base = glideTargetK != null ? glideTargetK : getState().k;
+    glideTo(nextGlideTarget(base, factor, scaleExtent));
   }
+  const setGlideTargetK = (next: number | null): void => { glideTargetK = next; };
+  return { glideTo, glideBy, glideTargetK: () => glideTargetK, setGlideTargetK };
+}
 
+function zoomSeat(viewportEl: HTMLElement, syncDblDuration: () => void, sel: Sel, behavior: Behavior, clearSettle: () => void, apply: (transform: ZoomTransform) => void): Pick<ZoomController, "attach" | "detach" | "reset" | "rebase"> {
   return {
     /** Bind the gesture listeners to viewportEl. Idempotent (re-binds in place). */
     attach() {
@@ -194,6 +211,11 @@ export function createZoomController({
       (viewportEl as ZoomStoredElement).__zoom = zoomIdentity;
       apply(zoomIdentity);
     },
+  };
+}
+
+function zoomFit(viewportExtent: () => Extent, scaleExtent: [number, number], sel: Sel, behavior: Behavior, glideTargetK: () => number | null, viewportEl: HTMLElement, apply: (transform: ZoomTransform) => void, glideTo: (k: number) => void): Pick<ZoomController, "zoomTo" | "refit"> {
+  return {
     /** Programmatically zoom to a proposed transform, clamped like a live gesture. */
     zoomTo(next: ZoomState) {
       const c = constrainZoom({ x: next.x, y: next.y, k: next.k }, viewportExtent(), scaleExtent);
@@ -203,25 +225,21 @@ export function createZoomController({
       const c = constrainZoom({ x: next.x, y: next.y, k: next.k }, viewportExtent(), scaleExtent);
       const t = zoomIdentity.translate(c.x, c.y).scale(c.k);
       // A glide in flight tweens from the transform it captured at its start and rewrites __zoom every frame (d3-zoom's schedule), so a framing written under it is gone on the next frame: stop the glide, seat the framing, restart the glide toward its pending target against the refitted box (skeptic on PR #491, round 3).
-      const pending = glideTargetK;
+      const pending = glideTargetK();
       if (pending !== null) sel().interrupt();
       (viewportEl as ZoomStoredElement).__zoom = t;
       apply(t);
       if (pending !== null) glideTo(pending);
     },
-    /** Magnify by `factor` about the viewport centre as a d3 transition through the same zoom pipeline; reduced motion collapses to the instant scaleBy. */
-    glideBy(factor: number) {
-      if (prefersReduced()) {
-        sel().call((s, f) => behavior.scaleBy(s, f), factor);
-        return;
-      }
-      const base = glideTargetK != null ? glideTargetK : getState().k;
-      glideTo(nextGlideTarget(base, factor, scaleExtent));
-    },
+  };
+}
+
+function zoomHome(clearSettle: () => void, setGlideTargetK: (next: number | null) => void, prefersReduced: () => boolean, sel: Sel, behavior: Behavior, apply: (transform: ZoomTransform) => void, glideMsNow: () => number, getState: () => ZoomState): Pick<ZoomController, "glideHome" | "panBy"> {
+  return {
     /** Glide the camera to k=1; onDone fires at the landing and is skipped on interrupt (the interrupting action owns the camera and the hash). */
     glideHome(onDone?: () => void) {
       clearSettle();
-      glideTargetK = null;
+      setGlideTargetK(null);
       if (prefersReduced()) {
         sel().call((s, t) => behavior.transform(s, t), zoomIdentity);
         apply(zoomIdentity);
@@ -241,6 +259,39 @@ export function createZoomController({
       const k = getState().k;
       sel().call((s, dx, dy) => behavior.translateBy(s, dx, dy), dxScreen / k, dyScreen / k);
     },
+  };
+}
+
+export function createZoomController({
+  viewportEl,
+  targetEl,
+  scaleExtent = [1, 8],
+  settleMs = 250,
+  onSettle,
+  onApply,
+  reducedMotion,
+  glideMs = 250,
+}: ZoomControllerOptions): ZoomController {
+  const { viewportExtent, sel, getState } = zoomFrame(viewportEl);
+
+  // Reduced motion is read LIVE (boolean, getter, or matchMedia), so an OS toggle and the e2e emulation take effect without a reload.
+  const mq =
+    typeof globalThis.matchMedia === "function"
+      ? globalThis.matchMedia("(prefers-reduced-motion: reduce)")
+      : null;
+  const { prefersReduced, glideMsNow } = zoomMotion(reducedMotion, mq, glideMs);
+  const DBLCLICK_MS = 250;
+
+  const behavior = zoomBehavior(scaleExtent, viewportExtent, prefersReduced, DBLCLICK_MS);
+  const { syncDblDuration, clearSettle, apply, setSettleTimer } = zoomPaint(behavior, prefersReduced, DBLCLICK_MS, targetEl, viewportEl, onApply);
+  listenZoom(behavior, apply, onSettle, clearSettle, setSettleTimer, getState, settleMs);
+  const { glideTo, glideBy, glideTargetK, setGlideTargetK } = zoomGlide(sel, behavior, glideMsNow, prefersReduced, getState, scaleExtent);
+
+  return {
+    ...zoomSeat(viewportEl, syncDblDuration, sel, behavior, clearSettle, apply),
+    ...zoomFit(viewportExtent, scaleExtent, sel, behavior, glideTargetK, viewportEl, apply, glideTo),
+    glideBy,
+    ...zoomHome(clearSettle, setGlideTargetK, prefersReduced, sel, behavior, apply, glideMsNow, getState),
     getState,
   };
 }

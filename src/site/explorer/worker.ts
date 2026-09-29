@@ -18,75 +18,100 @@ const ctx = self as unknown as {
   postMessage(msg: WorkerResponse): void;
 };
 
-// eslint-disable-next-line max-lines-per-function
+type Job<K extends WorkerRequest["kind"]> = Extract<WorkerRequest, { kind: K }>;
+
+function answerDraw(msg: Job<"draw">): void {
+  const { world } = worldFor(msg.seed, msg.overrides);
+  ctx.postMessage({
+    id: msg.id,
+    ok: true,
+    // widthPx reaches renderMap UNCLAMPED by design: callers own that guard (the CLI bounds 400-6000; the Print Room clamps posters to the [2400, 4200] envelope), so a hand-edited width can never ask for a tab-killing render.
+    svg: renderMap(world, msg.render),
+    manifest: buildPlaceManifest(world, msg.render.widthPx ?? 1500),
+    survey: buildSurvey(world.elev, world.seaLevel, world.roads),
+    title: world.title.title,
+    subtitle: world.title.subtitle,
+    mapType: world.recipe.mapType,
+    band: world.recipe.band,
+  });
+}
+
+function answerRegion(msg: Job<"region">): void {
+  const { world, cached } = worldFor(msg.seed, msg.overrides);
+  const title = msg.title ?? regionTitle(world, msg.window);
+  const spec = {
+    window: msg.window,
+    gridW: msg.gridW,
+    gridH: msg.gridH,
+    title,
+    detail: true,
+    chainCache: regionChainCache,
+  };
+  const region = generateRegionWorld(world, spec);
+  const regionRecipe = { window: msg.window, worldGridW: world.recipe.gridW, detail: regionDetailLevel(spec) };
+  ctx.postMessage({
+    id: msg.id,
+    ok: true,
+    svg: renderMap(region, { ...msg.render, regionRecipe }),
+    manifest: buildPlaceManifest(region, msg.render.widthPx ?? 1500),
+    window: msg.window,
+    band: msg.band,
+    title,
+    // The PARENT world's own title, which the region's title does not carry; the same line stands in the inline path so the two stay identical (#169's rule, #521's need).
+    worldTitle: world.title.title,
+    cached, // whether worldFor skipped generateWorld this call (the cache-timing AC's flag)
+  });
+}
+
+function answerAtlas(msg: Job<"atlas">): void {
+  const { world } = worldFor(msg.seed, msg.overrides);
+  ctx.postMessage({
+    id: msg.id,
+    ok: true,
+    atlas: serializableAtlas(composeAtlas(world, { width: msg.width, bannerStyle: msg.bannerStyle })),
+  });
+}
+
+function answerProspect(msg: Job<"prospect">): void {
+  const { world } = worldFor(msg.seed, msg.overrides);
+  ctx.postMessage({ id: msg.id, ok: true, ...prospectResultFor(world, msg) });
+}
+
+function answerRibbon(msg: Job<"ribbon">): void {
+  const { world } = worldFor(msg.seed, msg.overrides);
+  ctx.postMessage({ id: msg.id, ok: true, ...ribbonResultFor(world, msg) });
+}
+
+function answerTour(msg: Job<"tour">): void {
+  ctx.postMessage({ id: msg.id, ok: true, order: tourOrderFor(msg) });
+}
+
 ctx.onmessage = (e) => {
   const msg = e.data;
   try {
     switch (msg.kind) {
       case "draw": {
-        const { world } = worldFor(msg.seed, msg.overrides);
-        ctx.postMessage({
-          id: msg.id,
-          ok: true,
-          // widthPx reaches renderMap UNCLAMPED by design: callers own that guard (the CLI bounds 400-6000; the Print Room clamps posters to the [2400, 4200] envelope), so a hand-edited width can never ask for a tab-killing render.
-          svg: renderMap(world, msg.render),
-          manifest: buildPlaceManifest(world, msg.render.widthPx ?? 1500),
-          survey: buildSurvey(world.elev, world.seaLevel, world.roads),
-          title: world.title.title,
-          subtitle: world.title.subtitle,
-          mapType: world.recipe.mapType,
-          band: world.recipe.band,
-        });
+        answerDraw(msg);
         break;
       }
       case "region": {
-        const { world, cached } = worldFor(msg.seed, msg.overrides);
-        const title = msg.title ?? regionTitle(world, msg.window);
-        const spec = {
-          window: msg.window,
-          gridW: msg.gridW,
-          gridH: msg.gridH,
-          title,
-          detail: true,
-          chainCache: regionChainCache,
-        };
-        const region = generateRegionWorld(world, spec);
-        const regionRecipe = { window: msg.window, worldGridW: world.recipe.gridW, detail: regionDetailLevel(spec) };
-        ctx.postMessage({
-          id: msg.id,
-          ok: true,
-          svg: renderMap(region, { ...msg.render, regionRecipe }),
-          manifest: buildPlaceManifest(region, msg.render.widthPx ?? 1500),
-          window: msg.window,
-          band: msg.band,
-          title,
-          // The PARENT world's own title, which the region's title does not carry; the same line stands in the inline path so the two stay identical (#169's rule, #521's need).
-          worldTitle: world.title.title,
-          cached, // whether worldFor skipped generateWorld this call (the cache-timing AC's flag)
-        });
+        answerRegion(msg);
         break;
       }
       case "atlas": {
-        const { world } = worldFor(msg.seed, msg.overrides);
-        ctx.postMessage({
-          id: msg.id,
-          ok: true,
-          atlas: serializableAtlas(composeAtlas(world, { width: msg.width, bannerStyle: msg.bannerStyle })),
-        });
+        answerAtlas(msg);
         break;
       }
       case "prospect": {
-        const { world } = worldFor(msg.seed, msg.overrides);
-        ctx.postMessage({ id: msg.id, ok: true, ...prospectResultFor(world, msg) });
+        answerProspect(msg);
         break;
       }
       case "ribbon": {
-        const { world } = worldFor(msg.seed, msg.overrides);
-        ctx.postMessage({ id: msg.id, ok: true, ...ribbonResultFor(world, msg) });
+        answerRibbon(msg);
         break;
       }
       case "tour": {
-        ctx.postMessage({ id: msg.id, ok: true, order: tourOrderFor(msg) });
+        answerTour(msg);
         break;
       }
     }
