@@ -260,6 +260,11 @@ test("CT7c the Explorer assigns that sheet beside the OVERLAY it describes, whic
     assert.deepEqual(fields, ["seed", "overrides", "style", "presentYear: res.manifest.presentYear"], "the sheet is built from something other than the drawn world's own seed, overrides and style and that same manifest's year, so a filing can name a different chart than the one the reader is looking at");
   }
   assert.equal((src.match(/presentYear: res\.manifest\.presentYear/g) ?? []).length, builds.length, "one build's year is read from the manifest it was built from and another's is not, which is the drift with one of the two doors left open");
+  const calls = [...src.matchAll(/^\s*landDraw\(([^)]*)\);$/gm)].map((m) => m[1]!.split(",").map((a) => a.trim()));
+  assert.equal(calls.length, 1, "the landing paths are reached from some number of places other than the one draw, so the arguments pinned below are not the ones every landing takes");
+  const params = /function landDraw\(([^)]*)\)/.exec(src);
+  assert.ok(params, "landDraw is gone, so the argument check below reads nothing");
+  assert.deepEqual(calls[0], params[1]!.split(",").map((p) => p.split(":")[0]!.trim()), "a landing path is handed something other than the drawn world's own value under its own name, which is where a constant style would now stand in, with every field of the sheet above still reading `style`");
 });
 
 test("CT7b the Explorer passes the REAL turn flag into the gate, so the pure refusal above cannot be fed a constant (#631)", () => {
@@ -331,6 +336,8 @@ test("CT10 a re-seat that lands mid-draw asks for ANOTHER pass, and a sheet that
   const restore = src.slice(src.indexOf("restore(next:"), src.indexOf("\n  }\n", src.indexOf("restore(next:")));
   assert.ok(restore.length > 60, "restore was not found, so the assertions below read an empty slice");
   assert.match(restore, /for \(const gone of sheetsThatLeft\(items\(\), kept\)\) forget\(gone\);/, "a sheet that leaves on a cached return keeps its blob url, and this path now runs on every return rather than once at boot, so they accumulate one per re-seat");
+  assert.notEqual(restore.indexOf("setItems(kept);"), -1, "restore no longer seats what it kept, so the ordering check below reads nothing");
+  assert.ok(restore.indexOf("sheetsThatLeft(items(), kept)") < restore.indexOf("setItems(kept);"), "the table is re-seated before the sheets that left are read from it, so items() is already the kept set and nothing is ever forgotten");
   // The set it is built from is the hazard, so it is BEHAVIOUR here and not a regex: built from the outgoing table it answers "nothing left" for every re-seat, and the line's text is identical.
   const before = [survey(1), survey(2), survey(3)];
   assert.deepEqual(sheetsThatLeft(before, [survey(1), survey(3)]).map((i) => emitTable([i])), [emitTable([survey(2)])], "the middle sheet left and was not named, so its picture is never revoked");
