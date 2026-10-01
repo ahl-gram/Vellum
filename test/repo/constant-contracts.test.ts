@@ -80,8 +80,8 @@ const marginMirror = (code: string, re: RegExp, where: string) => {
 };
 
 test("seed-of-the-day's MARGIN mirrors renderMap's margin fraction", () => {
-  const code = src("src/site/seed-of-the-day/app.ts");
-  marginMirror(code, /const MARGIN = Math\.round\(1500 \* ([\d.]+|MARGIN_FRACTION)\)/, "seed-of-the-day/app.ts");
+  const code = src("src/site/seed-of-the-day/app-hunt.ts");
+  marginMirror(code, /const MARGIN = Math\.round\(1500 \* ([\d.]+|MARGIN_FRACTION)\)/, "seed-of-the-day/app-hunt.ts");
 });
 
 test("the voyage session's projection margin mirrors renderMap's margin fraction", () => {

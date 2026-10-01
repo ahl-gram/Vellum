@@ -1,5 +1,5 @@
 // The reading frame (#219, both open decisions ratified in issue comment 5097366231): one chart over one dated log, a framework-free layout module that BUILDS its own DOM and hands back a LivingChartHost. The journal rides INSIDE the panel the engine hides: the teardown hides the panel without emptying the strip, so a log mounted as the panel's sibling would keep a dead world's rows on screen.
-import { createDatedLog } from "./dated-log.ts";
+import { createDatedLog, type DatedLog } from "./dated-log.ts";
 import { DEFAULT_PACE, PACES, type Pace } from "../living-chart/pace.ts";
 import type { LivingChartHost, ScrubberRefs, ToldEntry } from "../living-chart/index.ts";
 
@@ -10,8 +10,7 @@ export interface ReadingFrameOpts {
   readonly onAgesTold?: (told: ToldEntry | null) => void;
 }
 
-// eslint-disable-next-line max-lines-per-function
-export function createReadingFrame(mount: HTMLElement, opts: ReadingFrameOpts = {}) {
+function frameMount() {
   const root = document.createElement("div");
   root.className = "rf";
 
@@ -24,7 +23,10 @@ export function createReadingFrame(mount: HTMLElement, opts: ReadingFrameOpts = 
   status.className = "rf-status status";
   status.setAttribute("role", "status");
   status.setAttribute("aria-live", "polite");
+  return { root, chart, status };
+}
 
+function frameInstrument() {
   const reading = document.createElement("div");
   reading.className = "rf-reading";
 
@@ -50,7 +52,10 @@ export function createReadingFrame(mount: HTMLElement, opts: ReadingFrameOpts = 
   const year = document.createElement("span");
   year.className = "rf-year";
   year.setAttribute("aria-hidden", "true");
+  return { reading, agesPanel, instrument, playBtn, range, year };
+}
 
+function frameTold() {
   const strip = document.createElement("div");
   strip.className = "rf-instrument-strip";
 
@@ -64,9 +69,10 @@ export function createReadingFrame(mount: HTMLElement, opts: ReadingFrameOpts = 
   const toldText = document.createElement("span");
   toldText.className = "cr-text";
   told.append(toldGutter, toldText);
+  return { strip, told, toldGutter, toldText };
+}
 
-  const log = createDatedLog({ label: "The ages" });
-
+function framePace() {
   // The room wires the presses; the engine never sees them.
   const pace = document.createElement("div");
   pace.className = "rf-pace";
@@ -81,14 +87,10 @@ export function createReadingFrame(mount: HTMLElement, opts: ReadingFrameOpts = 
     return [k, b];
   }));
   pace.append(...paceButtons.values());
+  return { pace, paceButtons };
+}
 
-  instrument.append(playBtn, range, year, pace);
-  strip.append(instrument, told);
-  agesPanel.append(strip, log.panel);
-  reading.append(agesPanel);
-  root.append(chart, status, reading);
-  mount.appendChild(root);
-
+function frameHost(chart: HTMLElement, status: HTMLElement, agesPanel: HTMLElement, playBtn: HTMLButtonElement, range: HTMLInputElement, year: HTMLElement, log: Readonly<DatedLog>, opts: Readonly<ReadingFrameOpts>) {
   // LivingChartHost.scrubber is optional; this frame ALWAYS builds one and says so in its own type, so the room's frame.host.scrubber reads need no narrowing.
   const host: LivingChartHost & { scrubber: ScrubberRefs } = {
     mapEl: chart,
@@ -104,6 +106,24 @@ export function createReadingFrame(mount: HTMLElement, opts: ReadingFrameOpts = 
       onAgesTold: opts.onAgesTold,
     },
   };
+  return host;
+}
+
+export function createReadingFrame(mount: HTMLElement, opts: ReadingFrameOpts = {}) {
+  const { root, chart, status } = frameMount();
+  const { reading, agesPanel, instrument, playBtn, range, year } = frameInstrument();
+  const { strip, told, toldGutter, toldText } = frameTold();
+  const log = createDatedLog({ label: "The ages" });
+  const { pace, paceButtons } = framePace();
+
+  instrument.append(playBtn, range, year, pace);
+  strip.append(instrument, told);
+  agesPanel.append(strip, log.panel);
+  reading.append(agesPanel);
+  root.append(chart, status, reading);
+  mount.appendChild(root);
+
+  const host = frameHost(chart, status, agesPanel, playBtn, range, year, log, opts);
 
   function setTold(t: ToldEntry | null): void {
     if (t === null) {

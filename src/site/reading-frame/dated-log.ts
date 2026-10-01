@@ -18,7 +18,18 @@ export interface DatedLogSnapshot {
   readonly attribution: string;
 }
 
-// eslint-disable-next-line max-lines-per-function
+function datedRow(r: DatedRow): HTMLLIElement {
+  const li = document.createElement("li");
+  const year = document.createElement("span");
+  year.className = "cr-year";
+  year.textContent = String(r.year);
+  const text = document.createElement("span");
+  text.className = "cr-text";
+  text.textContent = r.text;
+  li.append(year, text);
+  return li;
+}
+
 export function createDatedLog(opts: DatedLogOpts) {
   const panel = document.createElement("div");
   panel.className = "rf-log";
@@ -37,17 +48,7 @@ export function createDatedLog(opts: DatedLogOpts) {
 
   function render(dated: ReadonlyArray<DatedRow>, attribution = ""): HTMLLIElement[] {
     sig.textContent = attribution;
-    rows = dated.map((r) => {
-      const li = document.createElement("li");
-      const year = document.createElement("span");
-      year.className = "cr-year";
-      year.textContent = String(r.year);
-      const text = document.createElement("span");
-      text.className = "cr-text";
-      text.textContent = r.text;
-      li.append(year, text);
-      return li;
-    });
+    rows = dated.map((r) => datedRow(r));
     strip.replaceChildren(...rows);
     return rows;
   }

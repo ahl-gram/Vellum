@@ -58,12 +58,7 @@ export type CeremonyOptions = {
   readonly random?: () => number;
 };
 
-// eslint-disable-next-line max-lines-per-function
-export function playCeremony(opts: CeremonyOptions): void {
-  const { doc } = opts;
-  const veil = acquireVeil(doc);
-  const stopSounding = startSounding(veil.status, opts.random ?? Math.random);
-  const began = performance.now();
+function ceremonySkip(doc: Document, veil: Readonly<{ root: HTMLElement; status: Element | null }>, stopSounding: () => void, opts: Readonly<CeremonyOptions>) {
   let over = false;
   let holdTimer: ReturnType<typeof setTimeout> | undefined;
   let gateTimer: ReturnType<typeof setTimeout> | undefined;
@@ -82,11 +77,22 @@ export function playCeremony(opts: CeremonyOptions): void {
     veil.root.remove();
     opts.land(0);
   };
+  const setHoldTimer = (next: ReturnType<typeof setTimeout> | undefined): void => { holdTimer = next; };
+  const setGateTimer = (next: ReturnType<typeof setTimeout> | undefined): void => { gateTimer = next; };
+  return { over: (): boolean => over, setHoldTimer, setGateTimer, unlisten, skip };
+}
+
+export function playCeremony(opts: CeremonyOptions): void {
+  const { doc } = opts;
+  const veil = acquireVeil(doc);
+  const stopSounding = startSounding(veil.status, opts.random ?? Math.random);
+  const began = performance.now();
+  const { over, setHoldTimer, setGateTimer, unlisten, skip } = ceremonySkip(doc, veil, stopSounding, opts);
   doc.addEventListener("pointerdown", skip, true);
   doc.addEventListener("keydown", skip, true);
 
   const lift = () => {
-    if (over) return;
+    if (over()) return;
     veil.root.classList.add("lifting");
     veil.root.setAttribute("aria-hidden", "true");
     // animationend bubbles up from the rose's own keyframes, and a slow first paint can put needle-settle's end after the hold, so only veil-lift may end the veil.
@@ -99,16 +105,16 @@ export function playCeremony(opts: CeremonyOptions): void {
   };
 
   const arrive = () => {
-    if (over) return;
+    if (over()) return;
     stopSounding();
     if (veil.status !== null) veil.status.textContent = LANDFALL_LABEL;
-    holdTimer = setTimeout(lift, LANDFALL_HOLD_MS);
+    setHoldTimer(setTimeout(lift, LANDFALL_HOLD_MS));
   };
 
   const decoded = opts.chart?.decode !== undefined ? opts.chart.decode().catch(() => {}) : Promise.resolve();
   void decoded.then(() => {
-    if (over) return;
+    if (over()) return;
     const wait = Math.max(0, MIN_VEIL_MS - (performance.now() - began));
-    gateTimer = setTimeout(arrive, wait);
+    setGateTimer(setTimeout(arrive, wait));
   });
 }

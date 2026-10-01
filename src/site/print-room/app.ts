@@ -1,9 +1,9 @@
 // The Print Room controller: takes a world by URL hash or seed entry and pulls a modest proof through the SHARED render worker; worker-client is inlined into this bundle, so initWorker takes no URL here.
-import { runJob, usesWorker, initWorker } from "../explorer/worker-client.ts";
+import { runJob, usesWorker, initWorker, type DrawResult } from "../explorer/worker-client.ts";
 import { startArrival } from "../explorer/draw-ceremony.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import { POSTER_PRESETS, CHART_PRESET, clampPosterWidth, posterFilename, posterPngFilename, chartFilename, type PosterPreset } from "./poster-presets.ts";
-import { rasterizeSvg } from "../lib/rasterize.ts";
+import { rasterizeSvg, type RasterizeResult } from "../lib/rasterize.ts";
 import { initBoundAtlas, clearBoundAtlas, enableBind, sheetAspect, type PosterBasis } from "./bound-atlas.ts";
 import { bindPrintRoom, matterAspect, showMatter, showPlate, showProof, writeFolio, type RoomFurniture } from "./seats.ts";
 import { TABLE_KEY } from "../shared/table-address.ts";
@@ -234,17 +234,52 @@ function selectedFormat(): string {
   return el ? el.value : "svg";
 }
 
-// eslint-disable-next-line max-lines-per-function
+function orderShape(preset: Readonly<PosterPreset>): { isChart: boolean; format: string; width: number } {
+  // The chart IGNORES the format select rather than pinning it (the plates are instant-order buttons), and its width skips clampPosterWidth (the 2400 poster floor would silently raise 1500).
+  const isChart = preset.key === CHART_PRESET.key;
+  const format = isChart ? "svg" : selectedFormat(); // snapshot alongside the basis; a later click can change it
+  const width = isChart ? CHART_PRESET.width : clampPosterWidth(preset.width);
+  return { isChart, format, width };
+}
+
+function pullSvg(res: Readonly<DrawResult>, basis: Readonly<PosterBasis>, isChart: boolean, width: number, preset: Readonly<PosterPreset>): void {
+  // The chart reuses the Explorer's exact artifact name (byte-parity by construction: same worker, same draw kind, same widthPx); the posters keep width-stamped names.
+  const filename = isChart
+    ? chartFilename(basis.seed, basis.style, res.title)
+    : posterFilename(basis.seed, basis.style, width);
+  downloadSvg(res.svg, filename);
+  window.__vellumLastPoster = { svg: res.svg, filename, width, seed: basis.seed, style: basis.style };
+  posterStatus.textContent = isChart
+    ? `The chart is pulled as the engraving: ${filename}`
+    : `${preset.label} plate pulled: ${filename}`;
+}
+
+function pressPng(png: Readonly<RasterizeResult>, basis: Readonly<PosterBasis>, preset: Readonly<PosterPreset>): void {
+  const filename = posterPngFilename(basis.seed, basis.style, png.width);
+  downloadBlob(png.blob, filename);
+  window.__vellumLastPng = {
+    filename, type: png.blob.type, size: png.blob.size,
+    width: png.width, height: png.height, scale: png.scale, clamped: png.clamped,
+    seed: basis.seed, style: basis.style,
+  };
+  posterStatus.textContent = png.clamped
+    ? `${preset.label} plate pressed at reduced resolution to fit this browser: ${filename}`
+    : `${preset.label} plate pressed: ${filename}`;
+}
+
+function orderSettled(): void {
+  // Re-open ONLY if no draw is now in flight; a redraw started while this order rolled must keep the plates closed until its own proof settles.
+  ordering = false;
+  refreshOrderControls();
+}
+
 function orderPoster(key: string): void {
   const preset = presetByKey.get(key);
   // The plates are disabled during a draw, so a real click cannot land mid-redraw, but a programmatic call must not press the stale, about-to-change posterBasis either.
   if (!preset || ordering || drawing || !posterBasis) return;
   // Snapshot synchronously: the preview controls stay live during a render, so a style change could redraw and reassign posterBasis mid-flight.
   const basis = posterBasis;
-  // The chart IGNORES the format select rather than pinning it (the plates are instant-order buttons), and its width skips clampPosterWidth (the 2400 poster floor would silently raise 1500).
-  const isChart = preset.key === CHART_PRESET.key;
-  const format = isChart ? "svg" : selectedFormat(); // snapshot alongside the basis; a later click can change it
-  const width = isChart ? CHART_PRESET.width : clampPosterWidth(preset.width);
+  const { isChart, format, width } = orderShape(preset);
   const myGen = ++posterGen;
   ordering = true;
   refreshOrderControls();
@@ -258,15 +293,7 @@ function orderPoster(key: string): void {
     .then(async (res) => {
       if (myGen !== posterGen) return;
       if (format === "svg") {
-        // The chart reuses the Explorer's exact artifact name (byte-parity by construction: same worker, same draw kind, same widthPx); the posters keep width-stamped names.
-        const filename = isChart
-          ? chartFilename(basis.seed, basis.style, res.title)
-          : posterFilename(basis.seed, basis.style, width);
-        downloadSvg(res.svg, filename);
-        window.__vellumLastPoster = { svg: res.svg, filename, width, seed: basis.seed, style: basis.style };
-        posterStatus.textContent = isChart
-          ? `The chart is pulled as the engraving: ${filename}`
-          : `${preset.label} plate pulled: ${filename}`;
+        pullSvg(res, basis, isChart, width, preset);
         return;
       }
       // PNG: rasterized client-side off a blob-URL Image, still never entering the DOM; failures reject with an in-voice full sentence, shown directly.
@@ -280,26 +307,13 @@ function orderPoster(key: string): void {
         return;
       }
       if (myGen !== posterGen) return; // a newer order landed while rasterizing
-      const filename = posterPngFilename(basis.seed, basis.style, png.width);
-      downloadBlob(png.blob, filename);
-      window.__vellumLastPng = {
-        filename, type: png.blob.type, size: png.blob.size,
-        width: png.width, height: png.height, scale: png.scale, clamped: png.clamped,
-        seed: basis.seed, style: basis.style,
-      };
-      posterStatus.textContent = png.clamped
-        ? `${preset.label} plate pressed at reduced resolution to fit this browser: ${filename}`
-        : `${preset.label} plate pressed: ${filename}`;
+      pressPng(png, basis, preset);
     })
     .catch((err: Error) => {
       if (myGen !== posterGen) return;
       posterStatus.textContent = "The press jammed: " + err.message;
     })
-    .finally(() => {
-      // Re-open ONLY if no draw is now in flight; a redraw started while this order rolled must keep the plates closed until its own proof settles.
-      ordering = false;
-      refreshOrderControls();
-    });
+    .finally(() => orderSettled());
 }
 
 for (const b of plateButtons) b.addEventListener("click", () => orderPoster(b.dataset.poster as string));
