@@ -23,12 +23,16 @@ interface WorldPlates {
   readonly cache: Map<string, Promise<BoundPlate>>;
 }
 
-// eslint-disable-next-line max-lines-per-function
-export function createProspectStage(opts: ProspectStageOpts = {}) {
+interface StageEls { readonly root: HTMLElement; readonly link: HTMLAnchorElement; readonly img: HTMLImageElement }
+
+function blobSeams(opts: Readonly<ProspectStageOpts>) {
   const toUrl =
     opts.toUrl ?? ((svg: string) => URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" })));
   const revokeUrl = opts.revokeUrl ?? ((url: string) => URL.revokeObjectURL(url));
+  return { toUrl, revokeUrl };
+}
 
+function stagePlate() {
   const root = document.createElement("figure");
   root.className = "rr-prospect";
   root.hidden = true;
@@ -38,14 +42,39 @@ export function createProspectStage(opts: ProspectStageOpts = {}) {
   img.className = "rr-prospect-plate";
   link.appendChild(img);
   root.appendChild(link);
+  return { root, link, img };
+}
 
-  let world: WorldPlates | null = null;
+function revokePrior(prior: Readonly<WorldPlates> | null, revokeUrl: (url: string) => void): void {
+  if (prior) {
+    for (const bound of prior.cache.values()) {
+      bound.then((p) => revokeUrl(p.url)).catch(() => {});
+    }
+  }
+}
+
+function paintPlate(stageEls: StageEls, p: BoundPlate, spec: PlateSpec, w: Readonly<WorldPlates>): void {
+  const { img, link, root } = stageEls;
+  img.src = p.url;
+  img.alt = `The prospect of ${p.name} in the year ${spec.year}`;
+  link.href = w.hrefFor(spec);
+  root.hidden = false;
+}
+
+function stageShown(stageEls: StageEls) {
+  const { root } = stageEls;
   let shown: string | null = null;
 
   function hide(): void {
     shown = null;
     root.hidden = true;
   }
+  const setShown = (next: string | null): void => { shown = next; };
+  return { shown: (): string | null => shown, setShown, hide };
+}
+
+function stageWorld(toUrl: (svg: string) => string, revokeUrl: (url: string) => void, stageEls: StageEls, shown: () => string | null, setShown: (next: string | null) => void, hide: () => void) {
+  let world: WorldPlates | null = null;
 
   function plateFor(w: WorldPlates, spec: PlateSpec): Promise<BoundPlate> {
     const key = plateKeyOf(spec);
@@ -64,20 +93,6 @@ export function createProspectStage(opts: ProspectStageOpts = {}) {
     return bound;
   }
 
-  function setWorld(
-    fetchPlate: (spec: PlateSpec) => Promise<PlateResult>,
-    hrefFor: (spec: PlateSpec) => string,
-  ): void {
-    const prior = world;
-    world = { fetchPlate, hrefFor, cache: new Map() };
-    hide();
-    if (prior) {
-      for (const bound of prior.cache.values()) {
-        bound.then((p) => revokeUrl(p.url)).catch(() => {});
-      }
-    }
-  }
-
   /** The host calls this once the instrument is armed, so the fetches queue off the settle path. */
   function prefetch(specs: ReadonlyArray<PlateSpec>): void {
     if (world === null) return;
@@ -91,19 +106,36 @@ export function createProspectStage(opts: ProspectStageOpts = {}) {
     }
     const w = world;
     const key = plateKeyOf(spec);
-    if (key === shown) return;
-    shown = key;
+    if (key === shown()) return;
+    setShown(key);
     plateFor(w, spec)
       .then((p) => {
-        if (world !== w || shown !== key) return;
-        img.src = p.url;
-        img.alt = `The prospect of ${p.name} in the year ${spec.year}`;
-        link.href = w.hrefFor(spec);
-        root.hidden = false;
+        if (world !== w || shown() !== key) return;
+        paintPlate(stageEls, p, spec, w);
       })
       .catch(() => {
-        if (world === w && shown === key) hide();
+        if (world === w && shown() === key) hide();
       });
+  }
+  const bindWorld = (next: WorldPlates | null): void => { world = next; };
+  return { world: (): WorldPlates | null => world, bindWorld, prefetch, show };
+}
+
+export function createProspectStage(opts: ProspectStageOpts = {}) {
+  const { toUrl, revokeUrl } = blobSeams(opts);
+  const { root, link, img } = stagePlate();
+  const stageEls: StageEls = { root, link, img };
+  const { shown, setShown, hide } = stageShown(stageEls);
+  const { world, bindWorld, prefetch, show } = stageWorld(toUrl, revokeUrl, stageEls, shown, setShown, hide);
+
+  function setWorld(
+    fetchPlate: (spec: PlateSpec) => Promise<PlateResult>,
+    hrefFor: (spec: PlateSpec) => string,
+  ): void {
+    const prior = world();
+    bindWorld({ fetchPlate, hrefFor, cache: new Map() });
+    hide();
+    revokePrior(prior, revokeUrl);
   }
 
   return { root, link, img, setWorld, prefetch, show };
