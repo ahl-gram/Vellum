@@ -58,14 +58,31 @@ function specifiers(file: string): string[] {
   return out;
 }
 
-// Every createZoomController(...) call's option names, read from the syntax tree; a first argument that is not an object literal reads as null.
+// Every call of the shared zoom controller's factory, under whatever local name, namespace or parentheses the module reaches it by, with its option names as the controller reads them; a first argument that is not an object literal reads as null, and a key that is not a plain name as "...".
 function controllerOptions(file: string): (string[] | null)[] {
   const sf = ts.createSourceFile(file, read(file), ts.ScriptTarget.Latest, true);
+  const names = new Set<string>();
+  const spaces = new Set<string>();
+  for (const st of sf.statements) {
+    if (!ts.isImportDeclaration(st) || !ts.isStringLiteral(st.moduleSpecifier) || !/zoom-controller(\.ts)?$/.test(st.moduleSpecifier.text)) continue;
+    const nb = st.importClause?.namedBindings;
+    if (nb && ts.isNamedImports(nb)) for (const el of nb.elements) if ((el.propertyName ?? el.name).text === "createZoomController") names.add(el.name.text);
+    if (nb && ts.isNamespaceImport(nb)) spaces.add(nb.name.text);
+  }
+  const bare = (e: ts.Expression): ts.Expression => (ts.isParenthesizedExpression(e) || ts.isAsExpression(e) || ts.isNonNullExpression(e) || ts.isSatisfiesExpression(e) ? bare(e.expression) : e);
+  const isFactory = (e: ts.Expression): boolean => {
+    const c = bare(e);
+    return (ts.isIdentifier(c) && names.has(c.text)) || (ts.isPropertyAccessExpression(c) && c.name.text === "createZoomController" && ts.isIdentifier(c.expression) && spaces.has(c.expression.text));
+  };
+  const keyOf = (p: ts.ObjectLiteralElementLike): string => {
+    const n = p.name && ts.isComputedPropertyName(p.name) ? p.name.expression : p.name;
+    return n && (ts.isIdentifier(n) || ts.isPrivateIdentifier(n) || ts.isStringLiteralLike(n) || ts.isNumericLiteral(n)) ? n.text : "...";
+  };
   const out: (string[] | null)[] = [];
   const visit = (n: ts.Node): void => {
-    if (ts.isCallExpression(n) && ts.isIdentifier(n.expression) && n.expression.text === "createZoomController") {
+    if (ts.isCallExpression(n) && isFactory(n.expression)) {
       const arg = n.arguments[0];
-      out.push(arg && ts.isObjectLiteralExpression(arg) ? arg.properties.map((p) => (p.name ? p.name.getText(sf) : "...")) : null);
+      out.push(arg && ts.isObjectLiteralExpression(arg) ? arg.properties.map(keyOf) : null);
     }
     ts.forEachChild(n, visit);
   };
