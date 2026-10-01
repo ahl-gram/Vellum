@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vellum — A Survey of Unbuilt Coasts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=IM+Fell+English:ital@0;1&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --parchment:#EAE0C9;
+    --vellum:#E2D5B4;
+    --ink:#3A2E1F;
+    --gall:#6E5C3E;
+    --rubric:#8C3B2E;
+    --verdigris:#54705F;
+    --line:#8A7A58;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+  body{
+    background:var(--vellum);
+    background-image:
+      radial-gradient(ellipse at 20% 10%, rgba(255,250,235,.5), transparent 60%),
+      radial-gradient(ellipse at 85% 90%, rgba(120,95,50,.18), transparent 55%);
+    font-family:"EB Garamond", Georgia, serif;
+    color:var(--ink);
+    line-height:1.65;
+    font-size:18px;
+    padding:2.5rem 1rem 5rem;
+  }
+  .sheet{
+    max-width:880px;margin:0 auto;
+    background:var(--parchment);
+    background-image:
+      radial-gradient(ellipse at 50% 0%, rgba(255,252,240,.55), transparent 70%),
+      radial-gradient(ellipse at 90% 100%, rgba(110,85,45,.14), transparent 60%);
+    border:1px solid var(--line);
+    outline:3px double var(--line);
+    outline-offset:6px;
+    padding:3.5rem clamp(1.25rem,6vw,4.5rem) 4rem;
+    box-shadow:0 18px 50px rgba(58,46,31,.28);
+    position:relative;
+  }
+  /* corner ticks like a chart's neat line */
+  .sheet::before,.sheet::after{
+    content:"";position:absolute;width:26px;height:26px;
+    border:1px solid var(--line);pointer-events:none;
+  }
+  .sheet::before{top:14px;left:14px;border-right:none;border-bottom:none}
+  .sheet::after{bottom:14px;right:14px;border-left:none;border-top:none}
+
+  /* ── Cartouche ── */
+  .cartouche{
+    text-align:center;
+    border:1px solid var(--line);
+    box-shadow:inset 0 0 0 4px var(--parchment), inset 0 0 0 5px var(--line);
+    padding:2.2rem 1.5rem 1.8rem;
+    margin-bottom:3rem;
+    position:relative;
+  }
+  .cartouche .flourish{color:var(--gall);letter-spacing:.5em;font-size:.9rem}
+  h1{
+    font-family:"IM Fell English SC", serif;
+    font-weight:400;font-size:clamp(2rem,5.5vw,3.1rem);
+    letter-spacing:.06em;line-height:1.15;margin:.4rem 0 .2rem;
+  }
+  .cartouche .sub{
+    font-family:"IM Fell English", serif;font-style:italic;
+    color:var(--gall);font-size:1.05rem;max-width:34em;margin:0 auto;
+  }
+  .cartouche .imprint{
+    margin-top:1.4rem;font-size:.8rem;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--gall);
+  }
+  .rose{display:block;margin:0 auto 0.6rem;width:54px;height:54px;color:var(--rubric)}
+
+  /* ── Structure ── */
+  .plate-no{
+    font-family:"IM Fell English SC", serif;
+    letter-spacing:.25em;font-size:.85rem;color:var(--rubric);
+    display:block;margin-bottom:.3rem;
+  }
+  h2{
+    font-family:"IM Fell English SC", serif;font-weight:400;
+    font-size:1.7rem;letter-spacing:.04em;margin:0 0 .4rem;
+  }
+  h3{
+    font-family:"IM Fell English SC", serif;font-weight:400;
+    font-size:1.22rem;margin:2rem 0 .5rem;letter-spacing:.03em;
+  }
+  section{margin-bottom:3.2rem}
+  .rule{
+    border:none;height:1px;background:var(--line);margin:2.6rem auto;
+    position:relative;overflow:visible;width:70%;
+  }
+  .rule::after{
+    content:"❦";position:absolute;left:50%;top:50%;
+    transform:translate(-50%,-52%);background:var(--parchment);
+    padding:0 .8rem;color:var(--gall);font-size:1rem;
+  }
+  p{margin-bottom:1rem;max-width:66ch}
+  .lede{font-family:"IM Fell English", serif;font-style:italic;color:var(--gall);font-size:1.08rem}
+  em{font-style:italic}
+  strong{font-weight:600}
+  ul{margin:0 0 1rem 1.3rem}
+  li{margin-bottom:.45rem}
+  .issue{
+    font-variant-numeric:oldstyle-nums;color:var(--rubric);
+    white-space:nowrap;font-weight:500;
+  }
+  .marginal{
+    font-family:"IM Fell English", serif;font-style:italic;
+    color:var(--gall);font-size:.95rem;border-left:2px solid var(--line);
+    padding:.4rem 0 .4rem 1rem;margin:1.2rem 0 1.4rem;
+  }
+
+  /* ── Ledger table ── */
+  .ledger{width:100%;border-collapse:collapse;margin:1.2rem 0 .4rem;font-size:.97rem}
+  .ledger caption{
+    caption-side:top;text-align:left;font-family:"IM Fell English SC",serif;
+    letter-spacing:.12em;font-size:.85rem;color:var(--gall);padding-bottom:.5rem;
+  }
+  .ledger th{
+    font-family:"IM Fell English SC", serif;font-weight:400;letter-spacing:.08em;
+    text-align:left;font-size:.9rem;border-bottom:1px solid var(--ink);
+    padding:.45rem .7rem .45rem 0;
+  }
+  .ledger td{border-bottom:1px solid rgba(138,122,88,.45);padding:.55rem .7rem .55rem 0;vertical-align:top}
+  .ledger tr:last-child td{border-bottom:none}
+
+  /* ── Legend marks ── */
+  .mark{
+    display:inline-block;font-family:"IM Fell English SC",serif;font-size:.78rem;
+    letter-spacing:.14em;padding:.1rem .55rem .12rem;border:1px solid currentColor;
+    border-radius:2px;vertical-align:middle;margin-right:.5rem;white-space:nowrap;
+  }
+  .mark.shipped{color:var(--verdigris)}
+  .mark.ticketed{color:var(--gall)}
+  .mark.open{color:var(--rubric)}
+  .star{color:var(--rubric);font-size:1.05em}
+
+  .idea{margin:1.8rem 0}
+  .idea h3{margin-top:0}
+  .risk{
+    border:1px solid var(--rubric);padding:.8rem 1.1rem;margin:1rem 0;
+    color:var(--rubric);font-size:.98rem;background:rgba(140,59,46,.05);
+  }
+  .colophon{
+    text-align:center;font-family:"IM Fell English",serif;font-style:italic;
+    color:var(--gall);font-size:.95rem;margin-top:3.5rem;
+  }
+  .colophon .sc{font-family:"IM Fell English SC",serif;font-style:normal;letter-spacing:.2em;font-size:.8rem}
+  a{color:var(--rubric)}
+  @media (max-width:600px){
+    body{font-size:16.5px;padding:1.2rem .6rem 3rem}
+    .sheet{outline-offset:4px}
+    .ledger{font-size:.9rem}
+    .ledger th,.ledger td{padding-right:.45rem}
+  }
+</style>
+</head>
+<body>
+<main class="sheet">
+
+  <header class="cartouche">
+    <svg class="rose" viewBox="0 0 100 100" aria-hidden="true" fill="none" stroke="currentColor">
+      <circle cx="50" cy="50" r="30" stroke-width="1.5"/>
+      <circle cx="50" cy="50" r="12" stroke-width="1"/>
+      <path d="M50 4 L56 44 L50 50 L44 44 Z" fill="currentColor" stroke="none"/>
+      <path d="M50 96 L56 56 L50 50 L44 56 Z" stroke-width="1.2"/>
+      <path d="M4 50 L44 44 L50 50 L44 56 Z" stroke-width="1.2"/>
+      <path d="M96 50 L56 44 L50 50 L56 56 Z" stroke-width="1.2"/>
+      <path d="M50 50 L72 28 M50 50 L28 28 M50 50 L72 72 M50 50 L28 72" stroke-width="1"/>
+    </svg>
+    <div class="flourish">✦ ✦ ✦</div>
+    <h1>A Survey of Unbuilt Coasts</h1>
+    <p class="sub">Being a chart of interactive &amp; whimsical prospects for Vellum, an atelier of imaginary cartography; with a reckoning of waters already charted, and those still open.</p>
+    <p class="imprint">Drafted at the sign of the compass rose · July MMXXVI</p>
+  </header>
+
+  <!-- ═══════════ PART I ═══════════ -->
+  <section>
+    <span class="plate-no">Plate I</span>
+    <h2>The Workshop Ideas</h2>
+    <p class="lede">Simulate not just the world, but the workshop and the physical object — the plate, the paper, the ink, and the hands the map passed through.</p>
+    <p>A printed 17th-century map passed through a shop of specialists: mapmaker, engraver (cutting the design <em>in reverse</em> into copper), printer, papermaker, and colorist, who added color by hand after printing. Plates were precious, revised, and reused for decades; late impressions from worn plates show visible cracks. Even the sea monsters were often copied from books the era considered scientifically authoritative — enchantment <em>and</em> education.</p>
+
+    <h3>The Engraver's Bench</h3>
+    <ul>
+      <li><strong>The map engraves itself.</strong> Animate the initial draw as a time-lapse of the burin at work: coastlines scratch in first, then rivers, hatching, and lettering last.</li>
+      <li><strong>Plate view.</strong> A toggle showing the matrix: the map mirrored, white-on-burnished-copper — the incised negative the engraver cut. Sign it in period style: <em>Vellum delin. et sculp.</em></li>
+      <li><strong>Plate wear, impressions, and states.</strong> Each seed gets a virtual copperplate with an impression number as an explicit render parameter. Impression 1 is crisp; impression 800 shows softened hatching, plate tone, and a deterministic hairline crack. <em>"Impression No. 214, second state."</em> States map onto existing flags — first state without legend, second state with legend and arms — so you don't export files, you <em>pull impressions</em>.</li>
+    </ul>
+
+    <h3>The Colorist's Table</h3>
+    <p>The ink chart prints uncolored; the user (or a simulated apprentice colorist of selectable skill) washes in realm tints with period pigments. The kicker: <strong>pigments age</strong>. Verdigris green really did eat through paper over centuries — add a time slider (1650 → today) and watch the map fox, yellow, and burn through.</p>
+
+    <h3>The Paper Itself</h3>
+    <ul>
+      <li><strong>Hold it to the light:</strong> hover reveals chain lines and a watermark, deterministically generated per seed from a small heraldic grammar.</li>
+      <li>Deckle edges; a fold crease from atlas binding; an ink ghost offset from the facing page.</li>
+      <li><strong>Provenance layer:</strong> an old owner's bookplate, a dealer's pencil price, a coffee ring, a wormhole — plus a generated auction-catalog description: <em>"Engraved chart, original hand color, minor foxing, small wormhole affecting neat line, else fine."</em></li>
+    </ul>
+
+    <h3>The Surveyor's Instruments</h3>
+    <ul>
+      <li><strong>Unsurveyed regions:</strong> distant regions render lighter, dashed, conjectural — <em>hic sunt dracones</em> — and zooming in <em>is</em> the act of surveying: the survey party arrives, and fresh detail draws itself in.</li>
+      <li><strong>Dividers cursor:</strong> click two ports; brass dividers walk the distance and report it in leagues.</li>
+      <li><strong>Candlelight mode:</strong> a dark workshop, the map lit by a flickering candle radius, a magnifying lens following the cursor.</li>
+      <li><strong>Rotatable compass rose,</strong> with an east-up option — "orienting" a map literally comes from putting the Orient at top.</li>
+    </ul>
+
+    <h3>The Marginalia &amp; Lore Desk</h3>
+    <ul>
+      <li><strong>A bestiary:</strong> sea serpents become clickable, each citing an invented authority in the culture's own language — <em>"after the Thalassographia of Maro Veshel."</em></li>
+      <li><strong>Wind heads that blow,</strong> and a tiny ship sailing a rhumb line across the chart on a slow loop.</li>
+      <li><strong>The expedition journal:</strong> the lore writer drafts the survey log that "produced" the map — evidence of a voyage that never happened.</li>
+      <li><strong>A trap hamlet:</strong> real cartographers planted phantom "paper towns" as copyright traps. Every seed gets one deterministic phantom hamlet, unmarked in the legend. Hint at it in the FAQ; let people hunt.</li>
+      <li><strong>The dedicatory cartouche:</strong> type a name, receive a properly pompous dedication — <em>"To the Most Illustrious ALEX, this Chart is humbly Dedicated by the Surveyor."</em></li>
+    </ul>
+
+    <div class="marginal">Status: parked. These ideas run close to work already charted — the Print Room, the Reading Room, the motion doctrine. Kept here for reference and salvage.</div>
+  </section>
+
+  <hr class="rule">
+
+  <!-- ═══════════ PART II ═══════════ -->
+  <section>
+    <span class="plate-no">Plate II</span>
+    <h2>The Myst Direction, Reconciled</h2>
+    <p class="lede">The brief: Minecraft's generativity with the original Myst's refinement.</p>
+    <p><strong>The design stake.</strong> Minecraft's loop is <em>modification</em>; Myst's is <em>comprehension</em>. Vellum's identity — same seed, same world, identical SVG — says comprehend. Lean Myst; borrow only Minecraft's infinity. No terrain editing: the moment users can move a mountain, determinism dies, and that sentence is Vellum's whole personality.</p>
+
+    <h3>Waters already charted</h3>
+    <table class="ledger">
+      <caption>The brainstorm arrived late — a reckoning</caption>
+      <thead>
+        <tr><th style="width:46%">Idea</th><th>Shipped or ticketed as</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="mark shipped">Shipped</span>The Traveler — journey mode, travelogue</td><td><strong>The Wayfarer's Passage</strong> <span class="issue">#117–121</span>: deterministic itinerary, ship &amp; rider on real road and ocean routes, the margin log</td></tr>
+        <tr><td><span class="mark shipped">Shipped</span>Deep time — year dial, world history</td><td><strong>The Chronicle</strong> <span class="issue">#51, #54, #85, #93</span>; the Reading Room's Continuous Chronicle <span class="issue">#220</span> will fuse voyage and chronicle into one scrubber</td></tr>
+        <tr><td><span class="mark shipped">Shipped</span>One puzzle per world</td><td><strong>The Daily Hunt</strong> <span class="issue">#56, #82, #94</span>: warmer/colder feedback, a gated win</td></tr>
+        <tr><td><span class="mark ticketed">Ticketed</span>Provenance — later owners' marks</td><td><strong>The Annalist's Hand</strong> <span class="issue">#122</span></td></tr>
+        <tr><td><span class="mark shipped">Shipped</span>The self-engraving draw</td><td>Largely the <strong>Drafting Moment</strong> <span class="issue">#127</span>, Paper &amp; Ink motion epic</td></tr>
+        <tr><td><span class="mark shipped">Shipped</span>Diegetic surfaces</td><td><strong>The Verso</strong> <span class="issue">#116</span>, the Tide Wheel <span class="issue">#55/#61</span>, Ages of the World <span class="issue">#50</span></td></tr>
+      </tbody>
+    </table>
+
+    <h3 style="margin-top:2.6rem">Open water — no ticket anywhere</h3>
+
+    <div class="idea">
+      <h3><span class="mark open">Open</span>1 · Write the Age <span class="star">★</span></h3>
+      <p>Every current entry point to a world is a number. Instead: write a founding sentence — <em>"a cold archipelago of black pines, iron harbors, and a drowned kingdom"</em> — and Vellum parses the descriptors it recognizes into generation parameters (band, type, land fraction, culture weights) and hashes the remainder into the seed. The sentence is engraved into the cartouche as the world's founding text. Deterministic: same sentence, same world. It turns generation into authorship, and it composes with everything built — a written age gets a voyage, a chronicle, a hunt. The one idea that changes what <em>kind</em> of object a Vellum world is.</p>
+    </div>
+
+    <div class="idea">
+      <h3><span class="mark open">Open</span>2 · Sound <span class="star">★</span></h3>
+      <p>Zero of 226 issues mention audio. Seed-deterministic ambience — Web Audio, procedural, no samples — driven by the terrain under the viewport: gulls and rope-creak at harbors, wind rising in the ranges, river murmur, a far bell from the capital, weather shifting with the chronicle year. Not music; <em>place-sound</em>. The most Myst-shaped gap in the project: Myst without its soundscape is half a game. And it is a layer, not a surface — it improves the Voyage, the Chronicle, and the Reading Room without adding a page. The only idea here that isn't epic-sized.</p>
+    </div>
+
+    <div class="idea">
+      <h3><span class="mark open">Open</span>3 · The Linked Archipelago</h3>
+      <p>No world acknowledges another's existence. A clickable departing ship sails off the neat line to a deterministically neighboring seed, whose gazetteer mentions the world you came from. The linking-book ritual plus Minecraft's infinity: one endless ocean of charted worlds. The voyage engine already knows ocean routes, so the ship is mostly built; the gallery's outward walk becomes diegetic.</p>
+    </div>
+
+    <div class="idea">
+      <h3><span class="mark open">Open</span>4 · The Night Sky</h3>
+      <p>No constellation in the backlog. Each culture's syllable grammar names its own invented constellations, drawn as a celestial plate — the Verso's natural sibling: turn the sheet, or look up. It could feed the Daily Hunt a clue written in stars.</p>
+    </div>
+
+    <div class="idea">
+      <h3><span class="mark open">Open</span>5 · Systematic Language Drift</h3>
+      <p>The ambitious version of <span class="issue">#49</span> (deep history renamings) and <span class="issue">#124</span> (the Philologist's Glass): sound-change rules applied across the chronicle, so a name shows its etymology <em>through time</em>, and scrubbing the chronicle re-letters the chart — <em>Maraveli</em> → <em>Mravel</em>, "formerly Maraveli."</p>
+      <div class="risk"><strong>Risk flag:</strong> editing cultures re-rolls every saved seed's names (documented in the README). Drift rules must layer on top of the base draw, never inside it.</div>
+    </div>
+
+    <h3>Recommendation</h3>
+    <p>With the Reading Room, the Surveyor's Glass, and the Scriptorium all open, the backlog is three epics deep — and everything above except sound is epic-sized. <strong>Sound</strong> slots in without disturbing the sequencing rulebook. <strong>Write the Age</strong> is the flagship candidate for the epic after the Scriptorium lands.</p>
+  </section>
+
+  <footer class="colophon">
+    <p>Here ends the survey. The unsurveyed remains, as ever, the larger part.</p>
+    <p class="sc">Vellum delin. et sculp. · Anno MMXXVI</p>
+  </footer>
+
+</main>
+</body>
+</html>
