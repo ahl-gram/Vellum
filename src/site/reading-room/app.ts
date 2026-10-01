@@ -231,7 +231,58 @@ function armRoom(res: DrawResult, forSeed: number, rest: AgesPos | undefined): v
   syncHash();
 }
 
-// eslint-disable-next-line max-lines-per-function
+function landChart(res: Readonly<DrawResult>): void {
+  // res.svg is engine-rendered markup, not user content: the only inputs are the uint32 seed and allowlisted recipe params, the same trusted-string injection the Explorer and Print Room do.
+  frame.host.mapEl.innerHTML = res.svg;
+  lc.buildPlaceOverlay(res.manifest);
+  writeFolio(furniture, res, seed);
+  room.layout();
+  startArrival(frame.host.mapEl.querySelector("svg"));
+  lastTitle = res.title;
+  shownSeed = seed;
+}
+
+function bindPlates(res: Readonly<DrawResult>, forSeed: number, overrides: Readonly<ReturnType<typeof recipeOverrides>>): void {
+  // The stage's world binds in lockstep with lastRes, so the failure path's re-arm can never paint one world's plate over another's chart; prefetch is the arm's step.
+  const dress = plateDressFor(style);
+  plates = {
+    beats: storyBeats(res.manifest.events),
+    hasArms: armsBearing(res.manifest.places),
+    presentYear: res.manifest.presentYear,
+  };
+  surveyRows = null;
+  stage.setWorld(
+    (s) =>
+      runJob({ kind: "prospect", seed: forSeed, overrides, index: s.index, dress, year: s.year })
+        .then((r) => ({ svg: r.svg, name: r.name })),
+    (s) => prospectHrefFor(forSeed, s),
+  );
+}
+
+function scheduleArm(res: Readonly<DrawResult>, forSeed: number, armedByLink: boolean, rest: AgesPos | undefined): void {
+  // Both halves close over THIS draw's res, never module state, so an arm landing late cannot meet another world's chart.
+  roomArm.schedule({
+    prime: () => tourOrder.prime(res.manifest, res.survey, forSeed),
+    arm: () => {
+      plateArmed = armedByLink;
+      armRoom(res, forSeed, rest);
+      // AFTER the arm, since the survey half's plates are keyed by the travel order the arm decides; every plate either half can reach is pulled in one step, so no reveal can stall the sweep.
+      stage.prefetch(plateSpecsFor(plates!.beats, rowsForSurvey()));
+      frame.host.statusEl.textContent = "";
+    },
+  });
+}
+
+function rollBack(err: Readonly<Error>, wasArmed: boolean): void {
+  // The previous world is still on screen: converge the module state back onto it, or the next park would serialize the failed seed into a shareable wrong address.
+  seed = shownSeed;
+  seedInput.value = String(shownSeed);
+  // A superseding draw that fails would leave a chart with no instrument and no way back (the hash is read once, at boot): re-arm the world actually on screen (a no-op if still armed), and converge the plate state onto it too, since draw() disarmed it at the top for a world that never arrived.
+  plateArmed = wasArmed;
+  if (!lc.agesState() && lastRes) armRoom(lastRes, shownSeed, undefined);
+  frame.host.statusEl.textContent = "The cartographer spilled the ink: " + err.message;
+}
+
 function draw(): void {
   const myGen = ++drawGen;
   // Every draw is a fresh ARRIVAL, so the plate goes back to bare until this world is asked for one. Held, because a draw that FAILS leaves the previous world on screen and its plate state must come back with it.
@@ -255,56 +306,20 @@ function draw(): void {
   })
     .then((res) => {
       if (myGen !== drawGen) return;
-      // res.svg is engine-rendered markup, not user content: the only inputs are the uint32 seed and allowlisted recipe params, the same trusted-string injection the Explorer and Print Room do.
-      frame.host.mapEl.innerHTML = res.svg;
-      lc.buildPlaceOverlay(res.manifest);
-      writeFolio(furniture, res, seed);
-      room.layout();
-      startArrival(frame.host.mapEl.querySelector("svg"));
-      lastTitle = res.title;
-      shownSeed = seed;
+      landChart(res);
       const rest = restFor(pendingLive);
       // A deep link of either kind (year=N, or a bare survey parking at the return to the capital) is a reader asking for that moment, so it shows its plate on arrival; a plain visit opens bare.
       const armedByLink = pendingLive !== null;
       pendingLive = null;
       lastRes = res;
       const forSeed = seed;
-      // The stage's world binds in lockstep with lastRes, so the failure path's re-arm can never paint one world's plate over another's chart; prefetch is the arm's step.
-      const dress = plateDressFor(style);
-      plates = {
-        beats: storyBeats(res.manifest.events),
-        hasArms: armsBearing(res.manifest.places),
-        presentYear: res.manifest.presentYear,
-      };
-      surveyRows = null;
-      stage.setWorld(
-        (s) =>
-          runJob({ kind: "prospect", seed: forSeed, overrides, index: s.index, dress, year: s.year })
-            .then((r) => ({ svg: r.svg, name: r.name })),
-        (s) => prospectHrefFor(forSeed, s),
-      );
+      bindPlates(res, forSeed, overrides);
       lc.clearAges();
-      // Both halves close over THIS draw's res, never module state, so an arm landing late cannot meet another world's chart.
-      roomArm.schedule({
-        prime: () => tourOrder.prime(res.manifest, res.survey, forSeed),
-        arm: () => {
-          plateArmed = armedByLink;
-          armRoom(res, forSeed, rest);
-          // AFTER the arm, since the survey half's plates are keyed by the travel order the arm decides; every plate either half can reach is pulled in one step, so no reveal can stall the sweep.
-          stage.prefetch(plateSpecsFor(plates!.beats, rowsForSurvey()));
-          frame.host.statusEl.textContent = "";
-        },
-      });
+      scheduleArm(res, forSeed, armedByLink, rest);
     })
     .catch((err: Error) => {
       if (myGen !== drawGen) return;
-      // The previous world is still on screen: converge the module state back onto it, or the next park would serialize the failed seed into a shareable wrong address.
-      seed = shownSeed;
-      seedInput.value = String(shownSeed);
-      // A superseding draw that fails would leave a chart with no instrument and no way back (the hash is read once, at boot): re-arm the world actually on screen (a no-op if still armed), and converge the plate state onto it too, since draw() disarmed it at the top for a world that never arrived.
-      plateArmed = wasArmed;
-      if (!lc.agesState() && lastRes) armRoom(lastRes, shownSeed, undefined);
-      frame.host.statusEl.textContent = "The cartographer spilled the ink: " + err.message;
+      rollBack(err, wasArmed);
     });
 }
 
