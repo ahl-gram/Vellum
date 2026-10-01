@@ -58,36 +58,64 @@ function specifiers(file: string): string[] {
   return out;
 }
 
-// Every call of the shared zoom controller's factory, under whatever local name, namespace or parentheses the module reaches it by, with its option names as the controller reads them; a first argument that is not an object literal reads as null, and a key that is not a plain name as "...".
-function controllerOptions(file: string): (string[] | null)[] {
+const isWrapper = (n: ts.Node): boolean => ts.isParenthesizedExpression(n) || ts.isAsExpression(n) || ts.isNonNullExpression(n) || ts.isSatisfiesExpression(n);
+const bare = (e: ts.Expression): ts.Expression => (isWrapper(e) ? bare((e as ts.ParenthesizedExpression).expression) : e);
+
+function keyOf(p: ts.ObjectLiteralElementLike): string {
+  const computed = !!p.name && ts.isComputedPropertyName(p.name);
+  const n = p.name && ts.isComputedPropertyName(p.name) ? p.name.expression : p.name;
+  return n && ((!computed && (ts.isIdentifier(n) || ts.isPrivateIdentifier(n))) || ts.isStringLiteralLike(n) || ts.isNumericLiteral(n)) ? n.text : "...";
+}
+
+// Where a reference to the factory stands once its wrappers are peeled: a call's callee, `.call`'s receiver and an alias's initializer are read; anything else is refused.
+function readable(ref: ts.Node): boolean {
+  let top: ts.Node = ref;
+  while (isWrapper(top.parent)) top = top.parent;
+  const p = top.parent;
+  return (ts.isCallExpression(p) && p.expression === top) || (ts.isVariableDeclaration(p) && p.initializer === top) || (ts.isPropertyAccessExpression(p) && p.expression === top && p.name.text === "call" && ts.isCallExpression(p.parent) && p.parent.expression === p);
+}
+
+// The shared zoom controller's factory as each module reaches it: every call under an imported name, an alias, a namespace or parentheses, with its option names as the controller reads them (a non-literal argument reads as null, a key that is not a written name as "..."), and every other use of the factory or its module (a re-export, a default or dynamic import, new, apply, handing it on) refused rather than read.
+function controllerUses(file: string): { calls: (string[] | null)[]; refused: string[] } {
   const sf = ts.createSourceFile(file, read(file), ts.ScriptTarget.Latest, true);
+  const isZoom = (s: string): boolean => /zoom-controller/.test(s);
   const names = new Set<string>();
   const spaces = new Set<string>();
+  const refused: string[] = [];
   for (const st of sf.statements) {
-    if (!ts.isImportDeclaration(st) || !ts.isStringLiteral(st.moduleSpecifier) || !/zoom-controller(\.ts)?$/.test(st.moduleSpecifier.text)) continue;
+    if (ts.isExportDeclaration(st) && st.moduleSpecifier && ts.isStringLiteral(st.moduleSpecifier) && isZoom(st.moduleSpecifier.text)) refused.push(`a re-export from ${st.moduleSpecifier.text}`);
+    if (!ts.isImportDeclaration(st) || !ts.isStringLiteral(st.moduleSpecifier) || !isZoom(st.moduleSpecifier.text)) continue;
+    if (st.importClause?.name) refused.push(`a default import from ${st.moduleSpecifier.text}`);
     const nb = st.importClause?.namedBindings;
     if (nb && ts.isNamedImports(nb)) for (const el of nb.elements) if ((el.propertyName ?? el.name).text === "createZoomController") names.add(el.name.text);
     if (nb && ts.isNamespaceImport(nb)) spaces.add(nb.name.text);
   }
-  const bare = (e: ts.Expression): ts.Expression => (ts.isParenthesizedExpression(e) || ts.isAsExpression(e) || ts.isNonNullExpression(e) || ts.isSatisfiesExpression(e) ? bare(e.expression) : e);
   const isFactory = (e: ts.Expression): boolean => {
     const c = bare(e);
     return (ts.isIdentifier(c) && names.has(c.text)) || (ts.isPropertyAccessExpression(c) && c.name.text === "createZoomController" && ts.isIdentifier(c.expression) && spaces.has(c.expression.text));
   };
-  const keyOf = (p: ts.ObjectLiteralElementLike): string => {
-    const n = p.name && ts.isComputedPropertyName(p.name) ? p.name.expression : p.name;
-    return n && (ts.isIdentifier(n) || ts.isPrivateIdentifier(n) || ts.isStringLiteralLike(n) || ts.isNumericLiteral(n)) ? n.text : "...";
+  const aliases = (n: ts.Node): boolean => {
+    let grew = false;
+    if (ts.isVariableDeclaration(n) && ts.isIdentifier(n.name) && n.initializer && isFactory(n.initializer) && !names.has(n.name.text)) { names.add(n.name.text); grew = true; }
+    return ts.forEachChild(n, aliases) === true || grew;
   };
-  const out: (string[] | null)[] = [];
+  while (aliases(sf));
+  const optionsOf = (arg: ts.Expression | undefined): string[] | null => (arg && ts.isObjectLiteralExpression(arg) ? arg.properties.map(keyOf) : null);
+  const calls: (string[] | null)[] = [];
   const visit = (n: ts.Node): void => {
-    if (ts.isCallExpression(n) && isFactory(n.expression)) {
-      const arg = n.arguments[0];
-      out.push(arg && ts.isObjectLiteralExpression(arg) ? arg.properties.map(keyOf) : null);
+    if (ts.isCallExpression(n) && n.expression.kind === ts.SyntaxKind.ImportKeyword && n.arguments.some((a) => ts.isStringLiteralLike(a) && isZoom(a.text))) refused.push("a dynamic import of the zoom controller");
+    if (ts.isCallExpression(n) && isFactory(n.expression)) calls.push(optionsOf(n.arguments[0]));
+    if (ts.isCallExpression(n) && ts.isPropertyAccessExpression(n.expression) && n.expression.name.text === "call" && isFactory(n.expression.expression)) calls.push(optionsOf(n.arguments[1]));
+    if (ts.isIdentifier(n) && names.has(n.text) && !ts.isImportSpecifier(n.parent) && !(ts.isVariableDeclaration(n.parent) && n.parent.name === n) && !readable(n)) refused.push(`${n.text} used other than as a call`);
+    if (ts.isIdentifier(n) && spaces.has(n.text) && !ts.isNamespaceImport(n.parent)) {
+      const member = ts.isPropertyAccessExpression(n.parent) && n.parent.expression === n ? n.parent : null;
+      if (!member) refused.push(`the namespace ${n.text} used other than for a named member`);
+      else if (member.name.text === "createZoomController" && !readable(member)) refused.push(`${n.text}.createZoomController used other than as a call`);
     }
     ts.forEachChild(n, visit);
   };
   visit(sf);
-  return out;
+  return { calls, refused };
 }
 
 test("HZ4 the Hunt stays a FIXED world: no LOD, no region worker (#161 boundary)", () => {
@@ -101,8 +129,10 @@ test("HZ4 the Hunt stays a FIXED world: no LOD, no region worker (#161 boundary)
       assert.doesNotMatch(p, /lod|region|worker/i, `the Hunt must not import a semantic-redraft path (${dir}/${f} imports ${p})`);
     }
   }
-  const controllers = files.flatMap((f) => controllerOptions(`${dir}/${f}`).map((names) => ({ f, names })));
-  assert.ok(controllers.some((c) => c.f === "app.ts"), "app.js should construct the controller");
+  const uses = files.map((f) => ({ f, ...controllerUses(`${dir}/${f}`) }));
+  for (const { f, refused } of uses) assert.deepEqual(refused, [], `${dir}/${f} reaches the zoom controller in a form this check cannot read, so its hooks go unchecked`);
+  const controllers = uses.flatMap(({ f, calls }) => calls.map((names) => ({ f, names })));
+  assert.ok(controllers.some((c) => c.f === "app.ts"), "app.ts should construct the controller");
   for (const { f, names } of controllers) {
     assert.ok(names, `${dir}/${f} should construct the controller with an options literal, so its hooks can be read`);
     assert.ok(!names.some((n) => n === "onSettle" || n === "onApply" || n === "..."), `the Hunt controller is geometric-only (no redraft/counter-scale hooks): ${dir}/${f} hands it ${names.join(", ")}`);

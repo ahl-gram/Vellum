@@ -21,11 +21,12 @@ const SPLIT_FILES = [
   "src/site/reading-frame/index.ts",
   "src/site/reading-room/app.ts",
   "src/site/reading-room/prospect-stage.ts",
+  "src/site/seed-of-the-day/app.ts",
   "src/site/seed-of-the-day/app-hunt.ts",
   "src/site/seed-of-the-day/app-dispatch.ts",
 ];
 
-// Older calls in the listed files that hand values on under other names, excused as written (Alex, Issue #654 comment 5939656565, decision B): each by its callee and its arguments' text with whitespace collapsed, once per time it stands.
+// Older calls that hand values on under other names, excused as written (Alex, Issue #654 comment 5939656565, decision B).
 const OLDER_CALLS: Readonly<Record<string, readonly string[]>> = {
   "src/site/home/veil.ts": ["startSounding(veil.status, opts.random ?? Math.random)"],
   "src/site/print-room/app.ts": [
@@ -35,6 +36,7 @@ const OLDER_CALLS: Readonly<Record<string, readonly string[]>> = {
     "orderPoster(b.dataset.poster as string)",
   ],
   "src/site/reading-room/app.ts": ["onTold(t)", "prospectHrefFor(forSeed, s)", "armRoom(lastRes, shownSeed, undefined)", "restFor(pendingLive)"],
+  "src/site/seed-of-the-day/app.ts": ['dryIn($("folio-title"), "120ms")', 'dryIn($("folio-sub"), "260ms")', 'dryIn($("folio-coords"), "320ms")', 'dryIn($("folio-note"), "400ms")'],
   "src/site/seed-of-the-day/app-hunt.ts": [
     'restart(line, "wet")',
     'restart(sticky, "rise")',
@@ -50,7 +52,7 @@ const OLDER_CALLS: Readonly<Record<string, readonly string[]>> = {
 
 const collapse = (text: string): string => text.replace(/\s+/g, " ").trim();
 
-// Blind spots, each erring toward passing: a module-level const arrow (each in these files takes one parameter, or several of different types, but `starNode` in `src/site/seed-of-the-day/app-dispatch.ts`, whose two numbers its one call hands as written), an exported function (five calls in src/site/shared/zoom-controller.ts, moved unchanged, hand values under other names; `huntDispatch`'s one call from src/site/seed-of-the-day/app-hunt.ts hands five values of five types), a function declared inside another (`plateFor` in `src/site/reading-room/prospect-stage.ts` is handed `world` for `w`, as at the base), a call of a method rather than a bare name, a call through an alias, a shadowing local, and any file off the list (54 older calls in 14 other files under src/site hand values on under other names).
+// Blind spots, each erring toward passing: a module-level const arrow (each in these files takes one parameter, or several of different types, but `starNode` in `src/site/seed-of-the-day/app-dispatch.ts`, whose two numbers its one call hands as written), an exported function (five calls in src/site/shared/zoom-controller.ts, moved unchanged, hand values under other names; `huntDispatch`'s one call from src/site/seed-of-the-day/app-hunt.ts hands five values of five types), a function declared inside another (`plateFor` in `src/site/reading-room/prospect-stage.ts` is handed `world` for `w`, as at the base), a call of a method rather than a bare name, a call through an alias, a shadowing local, and any file off the list (50 older calls in 13 other files under src/site hand values on under other names).
 function handOffs(file: string): { site: string; call: string; args: string[]; params: string[] }[] {
   const sf = ts.createSourceFile(file, readFileSync(resolve(REPO, file), "utf8"), ts.ScriptTarget.Latest, true);
   const local = new Map<string, string[]>();
