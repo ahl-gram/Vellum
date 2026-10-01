@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 
 // The Daily Hunt takes the Glass (#167), geometric-only; the behaviour is proven by e2e/suites/hunt.ts. BOUNDARY (#161): the Hunt is a FIXED world and must never import the LOD schedule or the region worker, since revealing new places mid-game would change the clue difficulty.
@@ -42,12 +42,17 @@ test("HZ3 app.js exposes the deterministic zoom hooks the e2e drives (#167)", ()
 });
 
 test("HZ4 the Hunt stays a FIXED world: no LOD, no region worker (#161 boundary)", () => {
-  const js = read("src/site/seed-of-the-day/app.ts");
-  // Inspect the ACTUAL import specifiers, not prose: comments are free to name these paths.
-  const importPaths = [...js.matchAll(/from\s+"([^"]+)"/g)].map((m) => m[1]!);
-  for (const p of importPaths) {
-    assert.doesNotMatch(p, /lod|region|worker/i, `the Hunt must not import a semantic-redraft path (${p})`);
+  const dir = "src/site/seed-of-the-day";
+  const files = readdirSync(resolve(REPO, dir)).filter((f) => f.endsWith(".ts"));
+  assert.ok(files.includes("app.ts") && files.includes("app-hunt.ts"), `the Hunt's entry and its setup were not both found in ${dir}, so this scan reads the wrong place`);
+  for (const f of files) {
+    // Inspect the ACTUAL import specifiers, not prose: comments are free to name these paths.
+    const importPaths = [...read(`${dir}/${f}`).matchAll(/from\s+"([^"]+)"/g)].map((m) => m[1]!);
+    for (const p of importPaths) {
+      assert.doesNotMatch(p, /lod|region|worker/i, `the Hunt must not import a semantic-redraft path (${dir}/${f} imports ${p})`);
+    }
   }
+  const js = read(`${dir}/app.ts`);
   const opts = js.match(/createZoomController\(\{([\s\S]*?)\}\)/);
   assert.ok(opts, "app.js should construct the controller with an options literal");
   assert.doesNotMatch(opts[1]!, /onSettle|onApply/, "the Hunt controller is geometric-only (no redraft/counter-scale hooks)");

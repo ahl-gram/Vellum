@@ -262,7 +262,7 @@ function namedFeatureWithin(
 }
 
 
-/** Mirrors setupHunt in src/site/seed-of-the-day/app.ts: a label emits as ">Name<", and capital and seat labels render .toUpperCase(), so both spellings count as printed. */
+/** Mirrors `isLabeled` in `src/site/seed-of-the-day/app-hunt.ts`: a label emits as ">Name<", and capital and seat labels render .toUpperCase(), so both spellings count as printed. */
 export function labelGate(markup: string): (name: string) => boolean {
   return (name) => markup.includes(`>${name}<`) || markup.includes(`>${name.toUpperCase()}<`);
 }
