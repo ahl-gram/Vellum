@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
+import ts from "typescript";
 
 // The Daily Hunt takes the Glass (#167), geometric-only; the behaviour is proven by e2e/suites/hunt.ts. BOUNDARY (#161): the Hunt is a FIXED world and must never import the LOD schedule or the region worker, since revealing new places mid-game would change the clue difficulty.
 
@@ -41,14 +42,28 @@ test("HZ3 app.js exposes the deterministic zoom hooks the e2e drives (#167)", ()
   assert.match(js, /window\.__vellumZoomState\s*=/, "app.js should expose __vellumZoomState");
 });
 
+// The ACTUAL module specifiers, not prose (comments are free to name these paths), read from the syntax tree: static imports and re-exports, dynamic import() and a worker's new URL(...), in either quote; only a specifier computed at run time escapes it.
+function specifiers(file: string): string[] {
+  const sf = ts.createSourceFile(file, read(file), ts.ScriptTarget.Latest, true);
+  const out: string[] = [];
+  const visit = (n: ts.Node): void => {
+    if ((ts.isImportDeclaration(n) || ts.isExportDeclaration(n)) && n.moduleSpecifier && ts.isStringLiteral(n.moduleSpecifier)) out.push(n.moduleSpecifier.text);
+    if (ts.isCallExpression(n) && n.expression.kind === ts.SyntaxKind.ImportKeyword && n.arguments[0] && ts.isStringLiteralLike(n.arguments[0])) out.push(n.arguments[0].text);
+    if (ts.isNewExpression(n) && ts.isIdentifier(n.expression) && n.expression.text === "URL" && n.arguments?.[0] && ts.isStringLiteralLike(n.arguments[0])) out.push(n.arguments[0].text);
+    ts.forEachChild(n, visit);
+  };
+  visit(sf);
+  return out;
+}
+
 test("HZ4 the Hunt stays a FIXED world: no LOD, no region worker (#161 boundary)", () => {
   const dir = "src/site/seed-of-the-day";
-  const files = readdirSync(resolve(REPO, dir)).filter((f) => f.endsWith(".ts"));
+  const files = readdirSync(resolve(REPO, dir), { recursive: true, encoding: "utf8" }).filter((f) => f.endsWith(".ts"));
   assert.ok(files.includes("app.ts") && files.includes("app-hunt.ts"), `the Hunt's entry and its setup were not both found in ${dir}, so this scan reads the wrong place`);
-  for (const f of files) {
-    // Inspect the ACTUAL import specifiers, not prose: comments are free to name these paths.
-    const importPaths = [...read(`${dir}/${f}`).matchAll(/from\s+"([^"]+)"/g)].map((m) => m[1]!);
-    for (const p of importPaths) {
+  const seen = files.map((f) => ({ f, paths: specifiers(`${dir}/${f}`) }));
+  assert.ok(seen.find((s) => s.f === "app.ts")!.paths.includes("./app-hunt.ts"), "the scan no longer reads the entry's own import of the Hunt, so it reads nothing it should");
+  for (const { f, paths } of seen) {
+    for (const p of paths) {
       assert.doesNotMatch(p, /lod|region|worker/i, `the Hunt must not import a semantic-redraft path (${dir}/${f} imports ${p})`);
     }
   }
