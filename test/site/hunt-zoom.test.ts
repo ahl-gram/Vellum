@@ -42,14 +42,31 @@ test("HZ3 app.js exposes the deterministic zoom hooks the e2e drives (#167)", ()
   assert.match(js, /window\.__vellumZoomState\s*=/, "app.js should expose __vellumZoomState");
 });
 
-// The ACTUAL module specifiers, not prose (comments are free to name these paths), read from the syntax tree: static imports and re-exports, dynamic import() and a worker's new URL(...), in either quote; only a specifier computed at run time escapes it.
+// The ACTUAL module specifiers, not prose (comments are free to name these paths), read from the syntax tree in the Hunt's own modules: static imports and re-exports, literal import(), new URL(...), new Worker(...) and import.meta.glob(...); a specifier computed at run time escapes it, and so does a module whose name hides what IT imports (../explorer/glass.ts imports the finer-survey controller), an errata/guards.md row.
 function specifiers(file: string): string[] {
   const sf = ts.createSourceFile(file, read(file), ts.ScriptTarget.Latest, true);
   const out: string[] = [];
+  const literals = (args: ts.NodeArray<ts.Expression> | undefined): string[] => (args?.[0] && ts.isStringLiteralLike(args[0]) ? [args[0].text] : args?.[0] && ts.isArrayLiteralExpression(args[0]) ? args[0].elements.filter(ts.isStringLiteralLike).map((e) => e.text) : []);
   const visit = (n: ts.Node): void => {
     if ((ts.isImportDeclaration(n) || ts.isExportDeclaration(n)) && n.moduleSpecifier && ts.isStringLiteral(n.moduleSpecifier)) out.push(n.moduleSpecifier.text);
-    if (ts.isCallExpression(n) && n.expression.kind === ts.SyntaxKind.ImportKeyword && n.arguments[0] && ts.isStringLiteralLike(n.arguments[0])) out.push(n.arguments[0].text);
-    if (ts.isNewExpression(n) && ts.isIdentifier(n.expression) && n.expression.text === "URL" && n.arguments?.[0] && ts.isStringLiteralLike(n.arguments[0])) out.push(n.arguments[0].text);
+    if (ts.isCallExpression(n) && n.expression.kind === ts.SyntaxKind.ImportKeyword) out.push(...literals(n.arguments));
+    if (ts.isNewExpression(n) && ts.isIdentifier(n.expression) && ["URL", "Worker", "SharedWorker"].includes(n.expression.text)) out.push(...literals(n.arguments));
+    if (ts.isCallExpression(n) && ts.isPropertyAccessExpression(n.expression) && n.expression.name.text === "glob" && n.expression.expression.getText(sf) === "import.meta") out.push(...literals(n.arguments));
+    ts.forEachChild(n, visit);
+  };
+  visit(sf);
+  return out;
+}
+
+// Every createZoomController(...) call's option names, read from the syntax tree; a first argument that is not an object literal reads as null.
+function controllerOptions(file: string): (string[] | null)[] {
+  const sf = ts.createSourceFile(file, read(file), ts.ScriptTarget.Latest, true);
+  const out: (string[] | null)[] = [];
+  const visit = (n: ts.Node): void => {
+    if (ts.isCallExpression(n) && ts.isIdentifier(n.expression) && n.expression.text === "createZoomController") {
+      const arg = n.arguments[0];
+      out.push(arg && ts.isObjectLiteralExpression(arg) ? arg.properties.map((p) => (p.name ? p.name.getText(sf) : "...")) : null);
+    }
     ts.forEachChild(n, visit);
   };
   visit(sf);
@@ -58,7 +75,7 @@ function specifiers(file: string): string[] {
 
 test("HZ4 the Hunt stays a FIXED world: no LOD, no region worker (#161 boundary)", () => {
   const dir = "src/site/seed-of-the-day";
-  const files = readdirSync(resolve(REPO, dir), { recursive: true, encoding: "utf8" }).filter((f) => f.endsWith(".ts"));
+  const files = readdirSync(resolve(REPO, dir), { recursive: true, encoding: "utf8" }).filter((f) => /\.[cm]?[jt]sx?$/.test(f));
   assert.ok(files.includes("app.ts") && files.includes("app-hunt.ts"), `the Hunt's entry and its setup were not both found in ${dir}, so this scan reads the wrong place`);
   const seen = files.map((f) => ({ f, paths: specifiers(`${dir}/${f}`) }));
   assert.ok(seen.find((s) => s.f === "app.ts")!.paths.includes("./app-hunt.ts"), "the scan no longer reads the entry's own import of the Hunt, so it reads nothing it should");
@@ -67,10 +84,12 @@ test("HZ4 the Hunt stays a FIXED world: no LOD, no region worker (#161 boundary)
       assert.doesNotMatch(p, /lod|region|worker/i, `the Hunt must not import a semantic-redraft path (${dir}/${f} imports ${p})`);
     }
   }
-  const js = read(`${dir}/app.ts`);
-  const opts = js.match(/createZoomController\(\{([\s\S]*?)\}\)/);
-  assert.ok(opts, "app.js should construct the controller with an options literal");
-  assert.doesNotMatch(opts[1]!, /onSettle|onApply/, "the Hunt controller is geometric-only (no redraft/counter-scale hooks)");
+  const controllers = files.flatMap((f) => controllerOptions(`${dir}/${f}`).map((names) => ({ f, names })));
+  assert.ok(controllers.some((c) => c.f === "app.ts"), "app.js should construct the controller");
+  for (const { f, names } of controllers) {
+    assert.ok(names, `${dir}/${f} should construct the controller with an options literal, so its hooks can be read`);
+    assert.ok(!names.some((n) => n === "onSettle" || n === "onApply" || n === "..."), `the Hunt controller is geometric-only (no redraft/counter-scale hooks): ${dir}/${f} hands it ${names.join(", ")}`);
+  }
 });
 
 test("HZ5 index.css gives #map-viewport the clip + touch-action wiring and #map a top-left pivot (#167)", () => {
