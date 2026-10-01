@@ -42,7 +42,14 @@ test("HZ3 app.js exposes the deterministic zoom hooks the e2e drives (#167)", ()
   assert.match(js, /window\.__vellumZoomState\s*=/, "app.js should expose __vellumZoomState");
 });
 
-// The ACTUAL module specifiers, not prose (comments are free to name these paths), read from the syntax tree in the Hunt's own modules: static imports and re-exports, literal import(), new URL(...), new Worker(...) under any object (globalThis.Worker) and import.meta.glob(...); a specifier computed at run time escapes it, and so does a module whose name hides what IT imports (../explorer/glass.ts imports the finer-survey controller), an errata/guards.md row.
+const isWrapper = (n: ts.Node): boolean => ts.isParenthesizedExpression(n) || ts.isAsExpression(n) || ts.isNonNullExpression(n) || ts.isSatisfiesExpression(n);
+const bare = (e: ts.Expression): ts.Expression => (isWrapper(e) ? bare((e as ts.ParenthesizedExpression).expression) : e);
+const ctorName = (e: ts.Expression): string => {
+  const c = bare(e);
+  return ts.isIdentifier(c) ? c.text : ts.isPropertyAccessExpression(c) ? c.name.text : ts.isElementAccessExpression(c) && ts.isStringLiteralLike(c.argumentExpression) ? c.argumentExpression.text : "";
+};
+
+// The ACTUAL module specifiers, not prose (comments are free to name these paths), read from the syntax tree in the Hunt's own modules: static imports and re-exports, literal import(), new URL(...), Worker(...) or SharedWorker(...) however the constructor is reached (globalThis.Worker, self["Worker"], a cast or parentheses) and import.meta.glob(...); a specifier computed at run time escapes it, and so does a module whose name hides what IT imports (../explorer/glass.ts imports the finer-survey controller), an errata/guards.md row.
 function specifiers(file: string): string[] {
   const sf = ts.createSourceFile(file, read(file), ts.ScriptTarget.Latest, true);
   const out: string[] = [];
@@ -50,16 +57,13 @@ function specifiers(file: string): string[] {
   const visit = (n: ts.Node): void => {
     if ((ts.isImportDeclaration(n) || ts.isExportDeclaration(n)) && n.moduleSpecifier && ts.isStringLiteral(n.moduleSpecifier)) out.push(n.moduleSpecifier.text);
     if (ts.isCallExpression(n) && n.expression.kind === ts.SyntaxKind.ImportKeyword) out.push(...literals(n.arguments));
-    if (ts.isNewExpression(n) && (ts.isIdentifier(n.expression) || ts.isPropertyAccessExpression(n.expression)) && ["URL", "Worker", "SharedWorker"].includes(ts.isIdentifier(n.expression) ? n.expression.text : n.expression.name.text)) out.push(...literals(n.arguments));
+    if (ts.isNewExpression(n) && ["URL", "Worker", "SharedWorker"].includes(ctorName(n.expression))) out.push(...literals(n.arguments));
     if (ts.isCallExpression(n) && ts.isPropertyAccessExpression(n.expression) && n.expression.name.text === "glob" && n.expression.expression.getText(sf) === "import.meta") out.push(...literals(n.arguments));
     ts.forEachChild(n, visit);
   };
   visit(sf);
   return out;
 }
-
-const isWrapper = (n: ts.Node): boolean => ts.isParenthesizedExpression(n) || ts.isAsExpression(n) || ts.isNonNullExpression(n) || ts.isSatisfiesExpression(n);
-const bare = (e: ts.Expression): ts.Expression => (isWrapper(e) ? bare((e as ts.ParenthesizedExpression).expression) : e);
 
 function keyOf(p: ts.ObjectLiteralElementLike): string {
   const computed = !!p.name && ts.isComputedPropertyName(p.name);
