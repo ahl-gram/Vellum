@@ -10,7 +10,7 @@ const paeth = (a: number, b: number, c: number): number => {
 // The first row of a PNG, unfiltered against an all-zero row above (there is none).
 export function decodeFirstRow(png: Buffer): [number, number, number][] {
   let at = 8;
-  let width = 0, channels = 0, depth = 0;
+  let width = 0, channels: number | undefined = 0, depth = 0;
   const idat: Buffer[] = [];
   while (at < png.length) {
     const len = png.readUInt32BE(at);
@@ -19,7 +19,6 @@ export function decodeFirstRow(png: Buffer): [number, number, number][] {
     if (type === "IHDR") {
       width = data.readUInt32BE(0);
       depth = data[8]!;
-      // @ts-expect-error a PNG colour type outside the four keys reads undefined, which the depth-and-channels check below refuses
       channels = { 0: 1, 2: 3, 4: 2, 6: 4 }[data[9]!];
     } else if (type === "IDAT") idat.push(data);
     else if (type === "IEND") break;

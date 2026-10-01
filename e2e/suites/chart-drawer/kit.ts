@@ -100,7 +100,7 @@ export function tableKit(kd: DragKit) {
   };
   // A measurement poll, not a readiness wait (specs/settle-doctrine.md clause 4), and deliberately NOT keyed on the number the check is about (clause 6): it reads until the count stops moving and hands back its LAST read, which the caller asserts on. The first version of CD37 and CD38 put `cuttings === 2` in the settle instead, and the mutations that were supposed to prove them killed the predicate, so the checks' own booleans were never evaluated at all (the cold review on PR #635).
   const restedAtExplorer = async (): Promise<Back> => {
-    let last = null;
+    let last: Back | null = null;
     let same = 0;
     for (let i = 0; i < DRAWN; i++) {
       const d = await evaluate<Back>(`(() => ({ ...${READ}, marker: window.__cd634 || null, navType: (performance.getEntriesByType("navigation")[0] || {}).type || null, stored: ${STORE} }))()`);
@@ -109,8 +109,7 @@ export function tableKit(kd: DragKit) {
       if (last.path === "/explorer/" && same >= 2) return last;
       await sleep(50);
     }
-    // @ts-expect-error the loop runs DRAWN times and sets last on every pass, so it is never null when the loop ends
-    return last;
+    return last!;
   };
   const pressById = async (id: string) => {
     const at = await evaluate<{ x: number; y: number; hit: boolean } | null>(`(() => { const e = document.getElementById(${JSON.stringify(id)}); if (!e) return null; e.scrollIntoView({ block: "center" }); const b = e.getBoundingClientRect(); if (b.width < 1) return null; const c = { x: Math.round(b.x + b.width / 2), y: Math.round(b.y + b.height / 2) }; return { ...c, hit: document.elementFromPoint(c.x, c.y) === e || e.contains(document.elementFromPoint(c.x, c.y)) }; })()`);

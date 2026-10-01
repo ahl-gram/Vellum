@@ -75,10 +75,8 @@ export const HEAD_READ: Payload<string> = `(() => {
   });
 })()`;
 
-// @ts-expect-error an absent member reads undefined, and NaN < 0.01 is false, which is the red the checks want
-export const near = (got: number | undefined, want: number | undefined): boolean => Math.abs(got -
-  // @ts-expect-error an absent member reads undefined, and NaN < 0.01 is false, which is the red the checks want
-  want) < 0.01;
+export const near = (got: number | undefined, want: number | undefined): boolean => Math.abs(got! -
+  want!) < 0.01;
 export const matches = (m: Member | undefined, want: Want): boolean => {
   if (want === null) return m === null;
   if (!m) return false;

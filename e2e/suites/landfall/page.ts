@@ -82,8 +82,7 @@ export async function l1fScrolledPage({ evaluate, check, sleep, lastWheel, camNo
     "L1f over the scrolled page a wheel-up scrolls the page and never zooms; back at the top, a fresh wheel-up is the camera's again",
     // Drift-sized stillness (2%, L9a's), not 1%: the idle drift breathes the scale +-1.5% and the reads straddle a wheel-scroll poll of up to 2s, while a wheel step is 21%; lane A's length moved this fixture against the 9s idle delay again at #463 (CI red twice, green locally).
     yMid > 0 && backUp !== null && backUp.prevented === false && midCamBefore !== null
-      // @ts-expect-error a null camera means the stage vanished between two reads of one page; a null throws here, outside any step, and the runner reds the whole suite as stopped early
-      && Math.abs(backUp.cam.scale / midCamBefore.scale - 1) < 0.02 && backUp.y < yMid
+      && Math.abs(backUp.cam!.scale / midCamBefore.scale - 1) < 0.02 && backUp.y < yMid
       && topCamBefore !== null && topZoom !== null && topZoom.scale > topCamBefore.scale * 1.05,
     JSON.stringify({ yMid, backUp, topCamBefore, topZoom }),
   );

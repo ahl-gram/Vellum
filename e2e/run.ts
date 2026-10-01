@@ -62,8 +62,7 @@ function fatalOnThrow<T>(fn: () => T): T {
   try {
     return fn();
   } catch (err) {
-    // @ts-expect-error a caught value is unknown to the checker; the two resolvers this wraps throw only an Error, whose message it prints
-    console.error(`FAIL: ${err.message}`);
+    console.error(`FAIL: ${(err as Error).message}`);
     process.exit(1);
   }
 }
@@ -133,8 +132,7 @@ if (missing.length > 0) {
 }
 
 async function main() {
-  // @ts-expect-error main runs only after the browser test above, which exits the process when no browser is found, and a hoisted function keeps none of that narrowing, so browser is never null here
-  const ctx = await start({ browser, SITE, OUT, PORT, DPORT, PAGE, results, consoleErrors, http4xx, skippedGroups });
+  const ctx = await start({ browser: browser!, SITE, OUT, PORT, DPORT, PAGE, results, consoleErrors, http4xx, skippedGroups });
   return runSelected(SELECTED, SUITES, ctx, {
     alive: ctx.alive,
     skippedGroups: () => skippedGroups,

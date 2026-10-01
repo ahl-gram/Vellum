@@ -67,12 +67,10 @@ export const DRAWN = 400;
 export const atInset = (d: Read) => !!d.ear && d.insetSvgs === 1;
 // No buttons at all reports pos at the viewport edge, not 0: 0 is inside the fold and would leave `size` alone rejecting a shut drawer.
 const asSlide = (d: Slides | null) => (d ? { pos: d.lowestOff === null ? d.innerH : d.lowestOff, size: d.minOffH, anims: d.drawerAnims, viewportH: d.innerH } : null);
-// @ts-expect-error the settle hands its predicate a read only once it is truthy, so asSlide(d) is never null here
-export const drawerUp = (d: Slides, last: Slides | null) => slideRested(asSlide(d), asSlide(last));
+export const drawerUp = (d: Slides, last: Slides | null) => slideRested(asSlide(d)!, asSlide(last));
 const asFold = (d: Folds | null) => (d ? { pos: d.slipX, size: d.slipW, anims: d.slipAnims } : null);
-// @ts-expect-error the settle hands its predicate a read only once it is truthy, so asFold(d) is never null here; the checker reports only a call's first bad argument, so asFold(from) below, a SURFACES read that is never null either, is reported the day this one is fixed
-export const slipTravelled = (from: Folds) => (d: Folds, last: Folds | null) => foldRested(asFold(d), asFold(last),
-  asFold(from));
+export const slipTravelled = (from: Folds) => (d: Folds, last: Folds | null) => foldRested(asFold(d)!, asFold(last),
+  asFold(from)!);
 export const both = (a: Rested, b: Rested) => (d: Surfaces, last: Surfaces | null) => a(d, last) && b(d, last);
 
 export const CARRY: Payload<Carry> = `(() => {

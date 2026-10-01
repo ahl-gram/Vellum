@@ -144,8 +144,7 @@ export async function z21Hamlets({ evaluate, check, shoot, sleep, rgn, enterAt, 
   );
   check(
     "Z21 hamlets: the deepest band grows the smallest tier, engine count/name parity over the stamped window, tier order held",
-    // @ts-expect-error the count is missing when no inset was mounted, and undefined >= 3 reads false, so Z21 reds by name
-    deep21.band === 3 && dom21.hamlets >= 3 && dom21.hamlets === dom21.expected &&
+    deep21.band === 3 && dom21.hamlets! >= 3 && dom21.hamlets === dom21.expected &&
       dom21.namesMatch && dom21.ordered && dom21.outside === 0,
     `band=${deep21.band} dom=${dom21.hamlets} engine=${dom21.expected} ordered=${dom21.ordered} ` +
       `namesMatch=${dom21.namesMatch} worldSheetHamlets=${dom21.outside} (scouted n=${target21.n})`,

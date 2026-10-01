@@ -68,12 +68,9 @@ async function rb1SetsOut({ evaluate, send, check, page, opened }: RibbonKit): P
   check("RB2 the render worker serves the page (no silent inline fallback)", await evaluate<boolean>(`window.__vellumRibbonUsesWorker() === true`));
   check(
     "RB3 the chart's folio names the journey, its world, its length and its dress",
-    // @ts-expect-error a folio line the page never filled reads null, and a pattern test reads null as the text "null", so RB3 reads false and reds by name
-    /^Laukuwelua to .+ · Chart № 42$/.test(first.title) && /^The Isle of Rahai · the road as the wayfarers' chain measured it, An\. \d+$/.test(
-      // @ts-expect-error a folio line the page never filled reads null, and a pattern test reads null as the text "null", so RB3 reads false and reds by name
-      first.sub) && /^unrolled in \d+ms · \d+ leagues · antique$/.test(
-      // @ts-expect-error a folio line the page never filled reads null, and a pattern test reads null as the text "null", so RB3 reads false and reds by name
-      first.unrolled),
+    /^Laukuwelua to .+ · Chart № 42$/.test(first.title!) && /^The Isle of Rahai · the road as the wayfarers' chain measured it, An\. \d+$/.test(
+      first.sub!) && /^unrolled in \d+ms · \d+ leagues · antique$/.test(
+      first.unrolled!),
     JSON.stringify({ title: first.title, sub: first.sub, unrolled: first.unrolled }),
   );
   check(
@@ -98,8 +95,7 @@ async function rb5bTheSlip({ evaluate, check, sleep }: RibbonKit, first: Ribbon)
   const rows = await evaluate<{ first: Row | null; last: Row | null; buttons: boolean }>(`(()=>{const lis=[...document.querySelectorAll("#rb-itinerary li")];const read=(li)=>({cls:li.className,num:(li.querySelector(".cr-num")||{}).textContent,strong:(li.querySelector("strong")||{}).textContent||null,em:(li.querySelector("em")||{}).textContent||null,button:!!li.querySelector("button.lean")});return{first:lis.length?read(lis[0]):null,last:lis.length?read(lis[lis.length-1]):null,buttons:lis.every((li)=>!!li.querySelector("button.lean"))};})()`);
   check(
     "RB5b the itinerary fills the slip: one row per event, the departure first as the capital at 0 leagues, the arrival last, every row a lean button; the slip's head names the journey",
-    // @ts-expect-error a slip line the page never filled reads null, and a pattern test reads null as the text "null", so RB5b reads false and reds by name
-    first.rows === first.stRows && first.rows >= 4 && rows.first && rows.first.cls === "waypoint" && rows.first.num === "0" && rows.first.strong === "Laukuwelua" && rows.first.em === "the capital" && rows.last && rows.last.cls === "waypoint" && rows.last.strong === first.toName && rows.buttons && first.slipTitle === `Laukuwelua to ${first.toName}` && /^\d+ leagues · in .+ · An\. \d+$/.test(first.where),
+    first.rows === first.stRows && first.rows >= 4 && rows.first && rows.first.cls === "waypoint" && rows.first.num === "0" && rows.first.strong === "Laukuwelua" && rows.first.em === "the capital" && rows.last && rows.last.cls === "waypoint" && rows.last.strong === first.toName && rows.buttons && first.slipTitle === `Laukuwelua to ${first.toName}` && /^\d+ leagues · in .+ · An\. \d+$/.test(first.where!),
     JSON.stringify({ rows: first.rows, stRows: first.stRows, first: rows.first, last: rows.last, slipTitle: first.slipTitle, where: first.where, toName: first.toName }),
   );
   check(

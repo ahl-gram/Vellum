@@ -6,16 +6,11 @@ export async function rs8Sweeps({ evaluate, check, sleep, setYear, roadsDisp }: 
   let prev = -Infinity, mono = true, ended = false, lastYear = null, sawInterior = false;
   for (let i = 0; i < 130; i++) {
     const st = await evaluate<{ y: number | null; lbl: string }>(`({y:window.__vellumAgesState().year,lbl:document.querySelector(".rf-play").textContent})`);
-    // @ts-expect-error the year reads null only in the survey chamber, which a Play from the earliest founding never enters, so a null never reaches here; one would read as 0
-    if (st.y < prev) mono = false;
-    // @ts-expect-error the year reads null only in the survey chamber, which a Play from the earliest founding never enters, so a null never reaches here; one would read as 0
-    if (st.y >
-      // @ts-expect-error setYear reads the year back as null only in the survey chamber, and it scrubs into the ages half, so a null never reaches here; one would read as 0
-      rs8start &&
-      // @ts-expect-error the year reads null only in the survey chamber, which a Play from the earliest founding never enters, so a null never reaches here; one would read as 0
-      st.y < sm.present) sawInterior = true;
-    // @ts-expect-error the year reads null only in the survey chamber, which a Play from the earliest founding never enters, so prev never takes a null here
-    prev = st.y; lastYear = st.y;
+    if (st.y! < prev) mono = false;
+    if (st.y! >
+      rs8start! &&
+      st.y! < sm.present) sawInterior = true;
+    prev = st.y!; lastYear = st.y;
     if (st.lbl === "Play") { ended = true; break; }
     await sleep(110);
   }
@@ -55,14 +50,10 @@ export async function rs11Forward({ check, sleep, setYear, yearNow, clickPlay }:
   let rs11min = Infinity, rs11max = -Infinity;
   for (let i = 0; i < 6; i++) {
     const y = await yearNow();
-    // @ts-expect-error the year reads null only in the survey chamber, which a Play from a year in the ages half never enters; a null would be kept as the extreme, and RS11 would read false and red by name
-    if (y < rs11min)
-      // @ts-expect-error the year reads null only in the survey chamber, which a Play from a year in the ages half never enters; a null would be kept as the extreme, and RS11 would read false and red by name
-      rs11min = y;
-    // @ts-expect-error the year reads null only in the survey chamber, which a Play from a year in the ages half never enters; a null would be kept as the extreme, and RS11 would read false and red by name
-    if (y > rs11max)
-      // @ts-expect-error the year reads null only in the survey chamber, which a Play from a year in the ages half never enters; a null would be kept as the extreme, and RS11 would read false and red by name
-      rs11max = y;
+    if (y! < rs11min)
+      rs11min = y!;
+    if (y! > rs11max)
+      rs11max = y!;
     await sleep(70);
   }
   check(
@@ -86,20 +77,13 @@ export async function rs12Pause({ evaluate, check, sleep, setYear, yearNow, clic
   const resumed = await yearNow();
   check(
     "RS12 the Pause button freezes mid-sweep; Play resumes from the frozen year (not min/present)",
-    // @ts-expect-error a year read in the survey chamber is null, and a comparison reads null as 0, which fails this clause, so RS12 reads false and reds by name
-    frozen.lbl === "Play" && frozen.year > sm.minFounded &&
-      // @ts-expect-error the same null reads as 0 here, which passes this bound, but the clause before it has already read false for it
-      frozen.year < sm.present &&
-      // @ts-expect-error a year read in the survey chamber is null, and a comparison reads null as 0, which fails this clause, so RS12 reads false and reds by name
-      stillFrozen === frozen.year && resumedEarly >=
-        // @ts-expect-error the same frozen year, which the clause before has already read false for if it is null
-        frozen.year &&
-      // @ts-expect-error a year read in the survey chamber is null, and a comparison reads null as 0, which fails this clause, so RS12 reads false and reds by name
-      resumed >
-        // @ts-expect-error the same frozen year, which the clause before has already read false for if it is null
-        frozen.year &&
-        // @ts-expect-error the same null reads as 0 here, which passes this bound, but the clause before it has already read false for it
-        resumed <= sm.present,
+    frozen.lbl === "Play" && frozen.year! > sm.minFounded &&
+      frozen.year! < sm.present &&
+      stillFrozen === frozen.year && resumedEarly! >=
+        frozen.year! &&
+      resumed! >
+        frozen.year! &&
+        resumed! <= sm.present,
     `frozen=${frozen.year} early=${resumedEarly} resumed=${resumed} min=${sm.minFounded} present=${sm.present}`,
   );
 }
@@ -143,8 +127,7 @@ export async function rs17Story({ evaluate, check, sleep, setYear, clickPlay }: 
   await evaluate(`(()=>{const b=document.querySelector(".rf-play");if(b.textContent==="Pause")b.click();})()`);
   check(
     "RS17 a Play from the present park opens the whole story from the survey's first leg",
-    // @ts-expect-error t is null only in the ages chamber, and rs17open is kept only once the chamber is the survey, so a null never reaches here; one would read as 0 and pass this clause
-    !!rs17open && rs17open.playing === true && rs17open.t < 0.5 && rs17open.readout === "the survey",
+    !!rs17open && rs17open.playing === true && rs17open.t! < 0.5 && rs17open.readout === "the survey",
     JSON.stringify(rs17open),
   );
 }

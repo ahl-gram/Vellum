@@ -86,13 +86,10 @@ export async function rs5Scrub({ check, setYear, groupVis, roadsDisp, visibleGro
 
 export async function rs7Ruin({ check, setYear, groupVis }: InstrumentKit, sm: Facts): Promise<void> {
   if (sm.ruinIdx >= 0) {
-    // @ts-expect-error the ruin's founding and fall year are null only when the world has no ruin, where ruinIdx is -1 and the branch above never reaches this line; a null would read as 0
-    await setYear(Math.floor((sm.ruinFounded +
-      // @ts-expect-error the ruin's founding and fall year are null only when the world has no ruin, where ruinIdx is -1 and the branch above never reaches this line; a null would read as 0
-      sm.ruinYear) / 2));
+    await setYear(Math.floor((sm.ruinFounded! +
+      sm.ruinYear!) / 2));
     const before = await groupVis(sm.ruinIdx);
-    // @ts-expect-error the ruin's fall year is null only when the world has no ruin, where ruinIdx is -1 and the branch above never reaches this line with a null
-    await setYear(sm.ruinYear);
+    await setYear(sm.ruinYear!);
     const after = await groupVis(sm.ruinIdx);
     check(
       "RS7 a ruin is hidden through its living phase (state-begins), its ruin glyph appears at the fall year",

@@ -84,8 +84,7 @@ export async function pr33BackMatter({ evaluate, check, shoot, sleep }: SuiteCon
       matter.on === "xi" && matter.here === "gazetteer" && /^plate xi of the bound atlas · the gazetteer$/.test(matter.line) &&
       /^VELLUM · THE BOUND ATLAS OF The Isle of Rahai · CHART № 42$/.test(matter.head) &&
       matter.places > 0 && matter.measureEmpty === true && matter.scrollY === 0 &&
-      // @ts-expect-error a viewport with no aria-label reads null, and a pattern test reads null as the text "null", so PR33 reads false and reds by name
-      matter.fits >= -0.5 && matter.fits <= 2 && matter.innerW < 1 && matter.noX === true && /^A page of the bound atlas: The gazetteer\./.test(matter.label),
+      matter.fits >= -0.5 && matter.fits <= 2 && matter.innerW < 1 && matter.noX === true && /^A page of the bound atlas: The gazetteer\./.test(matter.label!),
     JSON.stringify(matter),
   );
 
@@ -112,8 +111,7 @@ export async function pr34Leaned({ evaluate, check, sleep }: SuiteContext): Prom
     "PR34 a turn while leaned rests the camera and puts the page away: zoom in on the gazetteer, turn to the vegetation survey, the sheet back at the chart's aspect and k=1",
     leaned === true && !!unleaned && unleaned.zoomed === false && unleaned.pageHidden === true &&
       unleaned.turnedHidden === false && Math.abs(unleaned.ratio - 1500 / 1157.931) < 0.01 &&
-      // @ts-expect-error a viewport with no aria-label reads null, and a pattern test reads null as the text "null", so PR34 reads false and reds by name
-      /^The proof\./.test(unleaned.label),
+      /^The proof\./.test(unleaned.label!),
     JSON.stringify({ leaned, unleaned }),
   );
 }
@@ -149,8 +147,7 @@ export async function pr25Hide({ evaluate, check, sleep }: SuiteContext): Promis
     "PR25 Hide dismisses the bound atlas and re-enables Bind: the proof back on the sheet, the contents unbound, the plate line cleared",
     reboundForHide && hidden.atlasEmpty === true && hidden.hasAtlas === false &&
       hidden.bindEnabled === true && hidden.printDisabled === true && hidden.hideDisabled === true &&
-      // @ts-expect-error a viewport with no aria-label reads null, and a pattern test reads null as the text "null", so PR25 reads false and reds by name
-      hidden.proofBack === true && hidden.pageAway === true && /^The proof\./.test(hidden.label) && hidden.thumbs === 0 && hidden.plateLine === "",
+      hidden.proofBack === true && hidden.pageAway === true && /^The proof\./.test(hidden.label!) && hidden.thumbs === 0 && hidden.plateLine === "",
     JSON.stringify({ reboundForHide, hidden }),
   );
 }

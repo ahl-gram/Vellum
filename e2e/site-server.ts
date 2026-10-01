@@ -46,8 +46,7 @@ function serveEngineModule(pathname: string, res: import("node:http").ServerResp
 export function startServer(SITE: string, PORT: number): Promise<import("node:http").Server> {
   const server = createServer((req, res) => { void (async () => {
     try {
-      // @ts-expect-error a server-side request always carries its url, which Node types as possibly undefined
-      const url = new URL(req.url, "http://127.0.0.1");
+      const url = new URL(req.url!, "http://127.0.0.1");
       let pathname = decodeURIComponent(url.pathname);
       if (serverState.blockWorker && BLOCKED_WORKERS.has(pathname)) {
         res.writeHead(404).end("worker blocked for fallback test");

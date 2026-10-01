@@ -23,8 +23,7 @@ let SELECTED;
 try {
   SELECTED = resolveLaneSelection(process.argv.slice(2));
 } catch (err) {
-  // @ts-expect-error a caught value is unknown to the checker; resolveLaneSelection throws only an Error, whose message this prints
-  console.error(`FAIL: ${err.message}`);
+  console.error(`FAIL: ${(err as Error).message}`);
   process.exit(1);
 }
 

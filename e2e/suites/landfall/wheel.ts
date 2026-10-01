@@ -12,8 +12,7 @@ export async function l1aConsumed({ check, sleep, lastWheel, camNow, wheelAt }: 
   const mid = { prevented: await lastWheel(), cam: await camNow() };
   check(
     "L1a mid-range a real wheel is consumed: the zoom steps and the event is defaultPrevented",
-    // @ts-expect-error atLandfall has already read false for a null settle, so a null never reaches here
-    atLandfall(settled1) && mid.prevented === true && mid.cam !== null && mid.cam.scale > settled1.scale * 1.05,
+    atLandfall(settled1) && mid.prevented === true && mid.cam !== null && mid.cam.scale > settled1!.scale * 1.05,
     JSON.stringify({ settled1, mid }),
   );
 }
@@ -33,8 +32,7 @@ export async function l1bCloseClamp({ evaluate, check, sleep, lastWheel, camNow,
   const atMax = { prevented: await lastWheel(), cam: await camNow(), y: await scrollY() };
   check(
     "L1b at the close-in clamp (scale 7) a further wheel-in is released: no zoom step, not defaultPrevented, and the page holds (nothing above to scroll to)",
-    // @ts-expect-error a null camera means the stage vanished between two reads of one page; a null throws here, outside any step, and the runner reds the whole suite as stopped early
-    sat !== null && Math.abs(sat.scale - 7) < 1e-6 && atMax.prevented === false && Math.abs(atMax.cam.scale - 7) < 1e-6 && atMax.y === 0,
+    sat !== null && Math.abs(sat.scale - 7) < 1e-6 && atMax.prevented === false && Math.abs(atMax.cam!.scale - 7) < 1e-6 && atMax.y === 0,
     JSON.stringify({ sat, atMax }),
   );
 }
@@ -78,8 +76,7 @@ export async function l1dReleased({ evaluate, check, sleep, lastWheel, camNow, s
   check(
     "L1d at the stand-off clamp (0.65 of fit) a fresh wheel-out is released to the page: the wheel is not prevented, the camera holds, and the shelf scrolls into view (#472; the #461 body lock is retired)",
     floor !== null && Math.abs(floor.scale - floor.fit * 0.65) < 1e-6 && yBefore === 0 && atMin !== null
-      // @ts-expect-error a null camera means the stage vanished between two reads of one page; a null throws here, outside any step, and the runner reds the whole suite as stopped early
-      && atMin.prevented === false && Math.abs(atMin.cam.scale - floor.scale) < 1e-9 && atMin.y > 0
+      && atMin.prevented === false && Math.abs(atMin.cam!.scale - floor.scale) < 1e-9 && atMin.y > 0
       && bodyLocked1d !== "hidden",
     JSON.stringify({ floor, yBefore, atMin, bodyLocked1d }),
   );

@@ -42,21 +42,14 @@ const DRAWER_READ: Payload<Drawer | NotHome> = `(() => {
 
 const stacked = (doors: Door[]) => doors.length === 7 && doors.every((d, i) => i === 0 || (d.y >= doors[i - 1]!.bottom - 0.5 && Math.abs(d.x - doors[0]!.x) < 0.5));
 const offLeft = (nav: Nav) => nav.visibility === "hidden" && nav.rect !== null && nav.rect.right <= 0.5; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-// @ts-expect-error a page that is not home reads scrollW -1, so the scrollW test before this reads false for it and a missing nav never reaches here
-const atOpen = (d: Drawer | NotHome) => d.scrollW !== -1 && d.nav.transform === "none" &&
-  // @ts-expect-error the same scrollW test has already read false for a page that is not home, so a missing nav never reaches here
-  d.nav.rect !== null && // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-  // @ts-expect-error the same scrollW test has already read false for a page that is not home, so a missing nav never reaches here
-  d.nav.rect.x === 0 &&
-  // @ts-expect-error the same scrollW test has already read false for a page that is not home, so a missing nav never reaches here
-  d.nav.visibility === "visible" && d.seedOpacity === "0";
-// @ts-expect-error a page that is not home reads scrollW -1, so the scrollW test before this reads false for it and a missing nav never reaches here
-const atClosed = (d: Drawer | NotHome) => d.scrollW !== -1 && offLeft(d.nav) && d.seedOpacity === "1";
+const atOpen = (d: Drawer | NotHome) => d.scrollW !== -1 && d.nav!.transform === "none" &&
+  d.nav!.rect !== null && // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+  d.nav!.rect.x === 0 &&
+  d.nav!.visibility === "visible" && d.seedOpacity === "0";
+const atClosed = (d: Drawer | NotHome) => d.scrollW !== -1 && offLeft(d.nav!) && d.seedOpacity === "1";
 // The INK, not the cluster's capped box: an overflowing wordmark sits outside the box the cap sizes (skeptic finding 3 on PR #482).
-// @ts-expect-error a page that is not home reads inkRight undefined, which the Number.isFinite test before this has already read false for, so an undefined never reaches here
-const clear = (s: Drawer | NotHome) => s.seed !== null && Number.isFinite(s.inkRight) && s.inkRight + 4 <= // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-  // @ts-expect-error the same page reads seed undefined, and the same Number.isFinite test has already read false for it, so an undefined never reaches here
-  s.seed.x;
+const clear = (s: Drawer | NotHome) => s.seed !== null && Number.isFinite(s.inkRight) && s.inkRight! + 4 <= // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+  s.seed!.x;
 // The glyph run of one door, by its label: a strip through its middle reads parchment when the door shows and chart ink when the cap covers it.
 const glyphRun = (label: string): Payload<Box | null> => `(() => { const a = [...document.querySelectorAll("header.chrome nav.rooms a, header.chrome nav.rooms [aria-current]")].find((e) => e.textContent === ${JSON.stringify(label)}); if (!a) return null; const r = new Range(); r.selectNodeContents(a); const b = r.getBoundingClientRect(); return { x: b.x, y: b.y, w: b.width, h: b.height }; })()`;
 const brightest = (strip: Pixel[]) => Math.max(...strip.map(luminance));
@@ -156,8 +149,7 @@ async function cl3Closed({ evaluate, check }: SuiteContext, settleHome: Stage["s
 async function cl4Opens({ evaluate, check, shoot, sleep }: SuiteContext, settle: Settle, clickAt: Stage["clickAt"], pressKey: Stage["pressKey"], burger: Rect | null): Promise<void> {
   if (burger) await clickAt(burger.x + burger.w / 2, burger.y + burger.h / 2);
   const open = await settle(DRAWER_READ, atOpen, "open");
-  // @ts-expect-error the settle's predicate, atOpen, reads false for a page that is not home, so the read it hands back always carries its doors
-  const firstDoor = open?.doors[0] ?? null; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+  const firstDoor = open?.doors![0] ?? null; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   await evaluate(`[...document.querySelectorAll("header.chrome nav.rooms a")].pop().focus()`);
   await pressKey("Tab", "Tab", 9);
   await sleep(400);
@@ -189,11 +181,9 @@ async function cl5Closes({ check }: SuiteContext, settle: Settle, clickAt: Stage
   check(
     "CL5 Escape closes the drawer, the burger reopens it, and a real tap on the scrim closes it again: each close is a slide back off the left edge, doors hidden, and each script close releases the page from inert (prover round 3, C6) (#480)",
     !!openForEscape && openForEscape.checked && openForEscape.scrollY === 0 // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-      // @ts-expect-error the settle's predicate, atClosed, reads false for a page that is not home, so the read it hands back always carries its nav
-      && !!afterEscape && !afterEscape.checked && offLeft(afterEscape.nav) && afterEscape.seedOpacity === "1" && !afterEscape.stageInert // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+      && !!afterEscape && !afterEscape.checked && offLeft(afterEscape.nav!) && afterEscape.seedOpacity === "1" && !afterEscape.stageInert // eslint-disable-line @typescript-eslint/no-unnecessary-condition
       && !!reopened && reopened.checked && reopened.nav.visibility === "visible" && reopened.stageInert // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-      // @ts-expect-error the settle's predicate, atClosed, reads false for a page that is not home, so the read it hands back always carries its nav
-      && !!afterScrim && !afterScrim.checked && offLeft(afterScrim.nav) && !afterScrim.stageInert, // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+      && !!afterScrim && !afterScrim.checked && offLeft(afterScrim.nav!) && !afterScrim.stageInert, // eslint-disable-line @typescript-eslint/no-unnecessary-condition
     JSON.stringify({ openForEscape: openForEscape && { checked: openForEscape.checked, scrollY: openForEscape.scrollY }, afterEscape: afterEscape && { checked: afterEscape.checked, nav: afterEscape.nav }, reopened: reopened && reopened.checked, afterScrim: afterScrim && { checked: afterScrim.checked, nav: afterScrim.nav } }), // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   );
 }
@@ -216,13 +206,10 @@ async function cl8Swipe({ evaluate, check, sleep, touch }: SuiteContext, settle:
   check(
     "CL8 a real swipe on the scrim scrolls the page and the scroll CLOSES the drawer: no open drawer, burger or scrim ever rides off-screen as an orphaned state (plate round 2 C, skeptic findings 4 and round 2 finding 2), the point that hit the scrim before the swipe hits the live shelf after it, the page is released, and back at the top the burger opens it again",
     !!openAgain && openAgain.checked && openAgain.scrimHitAt400 === "SECTION.landfall" // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-      // @ts-expect-error the settle's predicate, atClosed, reads false for a page that is not home, so the read it hands back always carries its scroll
-      && !!swiped && !swiped.checked && swiped.scrollY > 100 && swiped.scrimHitAt400 !== "SECTION.landfall" && !swiped.stageInert && !swiped.shelfInert // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-      // @ts-expect-error the same settle's read, which for the same reason always carries its nav
-      && offLeft(swiped.nav)
+      && !!swiped && !swiped.checked && swiped.scrollY! > 100 && swiped.scrimHitAt400 !== "SECTION.landfall" && !swiped.stageInert && !swiped.shelfInert // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+      && offLeft(swiped.nav!)
       && !!reopenedAtTop && reopenedAtTop.checked && reopenedAtTop.scrollY === 0, // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-    // @ts-expect-error the settle's predicate, atClosed, reads false for a page that is not home, so the read it hands back always carries its nav
-    JSON.stringify({ openAgain: openAgain && { checked: openAgain.checked, hit: openAgain.scrimHitAt400 }, swiped: swiped && { checked: swiped.checked, scrollY: swiped.scrollY, hit: swiped.scrimHitAt400, stageInert: swiped.stageInert, shelfInert: swiped.shelfInert, navVisibility: swiped.nav.visibility }, reopenedAtTop: reopenedAtTop && { checked: reopenedAtTop.checked, scrollY: reopenedAtTop.scrollY } }), // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    JSON.stringify({ openAgain: openAgain && { checked: openAgain.checked, hit: openAgain.scrimHitAt400 }, swiped: swiped && { checked: swiped.checked, scrollY: swiped.scrollY, hit: swiped.scrimHitAt400, stageInert: swiped.stageInert, shelfInert: swiped.shelfInert, navVisibility: swiped.nav!.visibility }, reopenedAtTop: reopenedAtTop && { checked: reopenedAtTop.checked, scrollY: reopenedAtTop.scrollY } }), // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   );
 }
 
@@ -281,8 +268,7 @@ async function cl7Landscape({ evaluate, send, check, shoot, sleep, setMobileView
       && !!landscape && landscape.overflow > 0 && landscape.lastTappable && landscape.scrollTop > 0 && landscape.lastBottom <= landscape.clientH + 0.5 // eslint-disable-line @typescript-eslint/no-unnecessary-condition
       && scrollBefore === 0 && landscape.pageScrollY === 0 && landscape.firstTop < landscape.clusterBottom && landscape.capHit && landscape.stripOnCap
       && shownStrip.length === 12 && brightest(shownStrip) > 150 && cappedStrip.length === 12 && brightest(cappedStrip) < 100,
-    // @ts-expect-error the settle's predicate, atOpen, reads false for a page that is not home, so the read it hands back always carries its doors
-    JSON.stringify({ camWide: !!camWide, cardOpen, cardInert, doorsTappable: overCard?.doors.map((d) => d.tappable), scrollBefore, landscape, shownRun, shownBrightest: shownStrip.length ? brightest(shownStrip) : null, cappedRun, cappedBrightest: cappedStrip.length ? brightest(cappedStrip) : null }), // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    JSON.stringify({ camWide: !!camWide, cardOpen, cardInert, doorsTappable: overCard?.doors!.map((d) => d.tappable), scrollBefore, landscape, shownRun, shownBrightest: shownStrip.length ? brightest(shownStrip) : null, cappedRun, cappedBrightest: cappedStrip.length ? brightest(cappedStrip) : null }), // eslint-disable-line @typescript-eslint/no-unnecessary-condition
   );
   await shoot("cluster-drawer-landscape-scrolled.png");
 }

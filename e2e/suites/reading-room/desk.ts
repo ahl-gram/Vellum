@@ -49,16 +49,12 @@ export async function rr37Envelope({ evaluate, send, check, sleep }: SuiteContex
   check(
     `RR37 and it stays within the ${WIDE_WORST}px envelope across the widths: the told row stands at 1024 and drops at 900 and below (#462 ruling 6, the phone rule is inclusive at 900)`,
     byWidth.length === 3 &&
-      // @ts-expect-error a width whose strip was never seated reads its height as null, and null > 0 is false, so RR37 reads false and reds by name
-      byWidth.every((r) => r.h > 0 &&
-        // @ts-expect-error the same null reads as 0 here, which passes this bound, but the clause before it has already read false for it, so RR37 still reds by name
-        r.h <= WIDE_WORST) &&
+      byWidth.every((r) => r.h! > 0 &&
+        r.h! <= WIDE_WORST) &&
       byWidth[0]!.told === "flex" && byWidth[1]!.told === "none" && byWidth[2]!.told === "none" &&
       // The witness, same half: the survey row wrapped at 1024 must cost more than it did on one line at 1440, or the envelope bounds nothing.
-      // @ts-expect-error a width whose strip was never seated reads its height as null, which the every clause above has already read false for, so RR37 reds by name before this clause runs
-      byWidth[0]!.h >
-        // @ts-expect-error a strip the governing width never seated leaves deskSurvey null, which RR35 has already failed; a null throws here, outside any step, and the runner reds the whole suite as stopped early
-        deskSurvey.h,
+      byWidth[0]!.h! >
+        deskSurvey!.h,
     JSON.stringify({ byWidth, envelope: WIDE_WORST, budget: GOVERNING_BUDGET }),
   );
 }

@@ -118,7 +118,7 @@ async function g2cKeys({ evaluate, check, sleep, settleK, settleHome }: GlassKit
   await sleep(400); // let the settle debounce write cx/cy/k so the drop below is observable
   await evaluate(`(()=>{const vp=document.getElementById("map-viewport");vp.dispatchEvent(new KeyboardEvent("keydown",{key:"0",bubbles:true}));})()`);
   const g2cHome = await settleHome();
-  let g2cHash = null;
+  let g2cHash: { cx: string | null; k: string | null } | null = null;
   for (let i = 0; i < 50; i++) {
     g2cHash = await evaluate<{ cx: string | null; k: string | null }>(`(()=>{const p=new URLSearchParams(location.hash.slice(1));return{cx:p.get("cx"),k:p.get("k")};})()`);
     if (g2cHash.cx === null && g2cHash.k === null) break;
@@ -127,10 +127,8 @@ async function g2cKeys({ evaluate, check, sleep, settleK, settleHome }: GlassKit
   check(
     "G2c the keys glide too; 0 glides home and the hash drops cx/cy/k at the landing (#170)",
     Math.abs(g2cIn.k - 1.4) < 1e-6 && g2cHome.k === 1 && g2cHome.x === 0 && g2cHome.y === 0 &&
-      // @ts-expect-error the poll above always runs, so the hash read is never null here; the checker cannot count its passes
-      g2cHash.cx === null &&
-      // @ts-expect-error the same hash read, for its k
-      g2cHash.k === null,
+      g2cHash!.cx === null &&
+      g2cHash!.k === null,
     `in=${g2cIn.k} home=${JSON.stringify(g2cHome)} hash=${JSON.stringify(g2cHash)}`,
   );
 }
@@ -250,7 +248,7 @@ async function g7BandHop({ evaluate, check, rgn, enterAt, waitRedraft }: GlassKi
 async function g8WholeSheet({ evaluate, check, sleep, settleHome }: GlassKit): Promise<void> {
   await evaluate(`document.getElementById("zoom-reset").click()`);
   const g8cam = await settleHome();
-  let g8 = null;
+  let g8: { band: number; committed: boolean; insets: number; hits: number; cx: string | null } | null = null;
   for (let i = 0; i < 50; i++) {
     g8 = await evaluate<{ band: number; committed: boolean; insets: number; hits: number; cx: string | null }>(`(()=>{const s=window.__vellumRegion();const p=new URLSearchParams(location.hash.slice(1));return{band:s.band,committed:s.committed,insets:document.querySelectorAll("#map .region-inset").length,hits:document.querySelectorAll("#map .place-hit").length,cx:p.get("cx")};})()`);
     if (g8.insets === 0 && g8.cx === null) break;
@@ -259,16 +257,11 @@ async function g8WholeSheet({ evaluate, check, sleep, settleHome }: GlassKit): P
   check(
     "G8 the whole sheet returns on one press: glide home, inset faded off, hash clean, world overlay back (#170; home's voice since #505)",
     g8cam.k === 1 && g8cam.x === 0 && g8cam.y === 0 &&
-      // @ts-expect-error the poll above always runs, so the region read is never null here; the checker cannot count its passes
-      g8.band === 0 &&
-      // @ts-expect-error the same region read, for its committed flag
-      g8.committed === false &&
-      // @ts-expect-error the same region read, for its inset count
-      g8.insets === 0 &&
-      // @ts-expect-error the same region read, for its place hits
-      g8.hits > 0 &&
-      // @ts-expect-error the same region read, for its hash centre
-      g8.cx === null,
+      g8!.band === 0 &&
+      g8!.committed === false &&
+      g8!.insets === 0 &&
+      g8!.hits > 0 &&
+      g8!.cx === null,
     `cam=${JSON.stringify(g8cam)} ${JSON.stringify(g8)}`,
   );
 }

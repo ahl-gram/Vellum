@@ -96,18 +96,12 @@ async function br1cLegendClears({ evaluate, send, check, sleep }: BroadsideKit):
       const lg=r(".legend"),bl=r(".corner.bl"),sl=r("#broadside"),gl=r(".corner.br"),sh=r("#sheet");
       const range=document.createRange();let text=0;for(const p of document.querySelectorAll(".corner.bl p")){if(!p.textContent)continue;range.selectNodeContents(p);text=Math.max(text,range.getBoundingClientRect().right);}
       return{lg,bl,sl,gl,sh,folioText:Math.round(text),w:innerWidth,h:innerHeight};})()`;
-  // @ts-expect-error the slip, the Glass, the sheet and the folio are read as present; a missing one throws inside the step, which reds it by name
-  const legendClear = (m: Room): boolean => !!m.lg && m.lg.l >= m.folioText + 16 && m.lg.r <= m.sl.l - 8 && m.lg.r <=
-    // @ts-expect-error the slip, the Glass, the sheet and the folio are read as present; a missing one throws inside the step, which reds it by name
-    m.gl.l - 8 &&
-    // @ts-expect-error the slip, the Glass, the sheet and the folio are read as present; a missing one throws inside the step, which reds it by name
-    m.sh.r <=
-      // @ts-expect-error the slip, the Glass, the sheet and the folio are read as present; a missing one throws inside the step, which reds it by name
-      m.gl.l - 8 &&
-      // @ts-expect-error the slip, the Glass, the sheet and the folio are read as present; a missing one throws inside the step, which reds it by name
-      m.sh.b <= Math.min(
-      // @ts-expect-error the slip, the Glass, the sheet and the folio are read as present; a missing one throws inside the step, which reds it by name
-      m.bl.t, m.lg.t) - 8;
+  const legendClear = (m: Room): boolean => !!m.lg && m.lg.l >= m.folioText + 16 && m.lg.r <= m.sl!.l - 8 && m.lg.r <=
+    m.gl!.l - 8 &&
+    m.sh!.r <=
+      m.gl!.l - 8 &&
+      m.sh!.b <= Math.min(
+      m.bl!.t, m.lg.t) - 8;
   await sleep(400); // the row's left transitions 0.32s to its measured seat; a read mid-flight is the old seat
   const at1280 = await evaluate(legendRoom);
   await send("Emulation.setDeviceMetricsOverride", { width: 1680, height: 900, deviceScaleFactor: 1, mobile: false });
@@ -325,8 +319,7 @@ async function br6bToBr6d({ evaluate, check, sleep, clearMobile }: BroadsideKit,
   }
   check(
     "BR6b on a phone with a committed survey's camera, the opened Broadside carries NO footing behind its docked Press: the sheet's ground reads parchment where the pool used to paint (#525)",
-    // @ts-expect-error a ground that could not be sampled is null, and null > 200 is false, which is the red the check wants
-    br6b.docked && br6b.open && br6b.zoomed && br6b.groundOn === "none" && br6bGround > 200,
+    br6b.docked && br6b.open && br6b.zoomed && br6b.groundOn === "none" && br6bGround! > 200,
     JSON.stringify({ ...br6b, ground: br6bGround }),
   );
 
