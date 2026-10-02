@@ -191,8 +191,9 @@ is run and PROVEN in a particular way.
   works. Prove the verifier itself on fixtures before trusting it, including a changed identifier,
   string, regular-expression body or template literal, a dropped default argument or type
   annotation, a deleted CSS declaration, a changed selector, a dropped media query, and an edited
-  Astro attribute, expression, style or script. Pure reindentation is its one acceptable blind spot, and a comment inside a
-  template literal is string data rather than a comment, so it is out of scope by construction.
+  Astro attribute, expression, style or script. Pure reindentation is its one acceptable blind
+  spot, and a comment inside a template literal is string data rather than a comment, so it is out
+  of scope by construction.
 - **A keeper scan is a separate step, and token identity cannot do it.** Proving no code changed says
   nothing about whether the sweep deleted the trap that cost someone a debugging session. Scan the
   DELETED text for keeper signals (a measured number with a unit, a hand measurement, a named

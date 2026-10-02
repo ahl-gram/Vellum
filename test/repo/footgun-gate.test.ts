@@ -25,21 +25,25 @@ test("every section of the PR template has its own denial row in the table", () 
   for (const section of sections) assert.ok(out.includes(`ok   pr body missing ${section} denied`), `no passing row for ${section}\n${out}`);
 });
 
-// Names and limit written out on purpose: this file only spawns the selftest, and a deleted size check, an emptied probe list or a raised limit all print no FAIL.
+// Names, needles and limit written out on purpose: this file only spawns the selftest, and a deleted size check, an emptied probe or needle list, a loosened needle test or a raised limit all print no FAIL.
 test("every gate-size probe passes at the 8,000-character limit", () => {
   const out = execFileSync(process.execPath, [SELFTEST], { encoding: "utf8", timeout: BOUND_MS });
-  const probes = [
-    "a test file",
-    "a browser-harness unit test that clicks and escapes",
-    "a new e2e suite that clicks and escapes",
-    "a new stylesheet",
-    "the renderer",
-    "a push",
-    "a PR body from an unreadable file",
+  const probes: [string, string][] = [
+    ["a test file", "## Gate 1"],
+    ["a browser-harness unit test that clicks and escapes", "## Gate 1, for wiring only, double the backslash"],
+    ["a new e2e suite that clicks and escapes", "## Gate 4, ## Gate 2, for wiring only, double the backslash"],
+    ["a new stylesheet", "## Gate 4, ## Gate 3"],
+    ["a new page", "## Gate 4, ## Gate 3"],
+    ["a new site module", "## Gate 4"],
+    ["the renderer", "## Gate 6"],
+    ["a push", "## Gate 5"],
+    ["a PR body from an unreadable file", "## Gate 5, could not read"],
+    ["a shell line that writes a script, kills a browser, pushes and opens a PR", "## Gate 5, could not read, double the backslash, browser profile"],
   ];
-  for (const name of probes) {
-    const row = new RegExp(`^ok +${name}: .* in (\\d+) of 8000 characters$`, "m").exec(out);
-    assert.ok(row && Number(row[1]) <= 8000, `no passing size row within 8000 for ${name}\n${out}`);
+  for (const [name, carries] of probes) {
+    const row = out.split("\n").find((l) => l.startsWith(`ok   ${name}: the pasted note carries ${carries} in `));
+    const size = /in (\d+) of 8000 characters$/.exec(row ?? "");
+    assert.ok(size && Number(size[1]) <= 8000, `no passing size row carrying ${carries} within 8000 for ${name}\n${out}`);
   }
 });
 

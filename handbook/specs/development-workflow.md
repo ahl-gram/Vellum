@@ -65,9 +65,10 @@ With no ledger it runs truly cold, on the issue number and the plan alone.
 **6. Put the open decisions to Alex as a menu, and STOP.** Every option in plain words with its
 consequence, no jargon, no acronyms, in `AskUserQuestion` rather than in prose. **A decision that is
 his is not one to default your way and mention afterwards**, and **a ruling that rested on a wrong
-premise goes back to him and is re-taken**, never patched underneath. This step is load bearing and it is the
-one most often skipped: on #534 the issue offered three options and ruled none, and Alex's ruling
-(both of them, in one go) roughly tripled the work from what the session would have defaulted to.
+premise goes back to him and is re-taken**, never patched underneath. This step is load bearing
+and it is the one most often skipped: on #534 the issue offered three options and ruled none, and
+Alex's ruling (both of them, in one go) roughly tripled the work from what the session would have
+defaulted to.
 Do not begin step 8 until he has answered.
 
 **When the session running this sequence is a dispatched `vellum-implementer` lane, the menu goes to

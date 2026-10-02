@@ -5,16 +5,17 @@ description: Checklists keyed to the moment of typing. Read the matching gate be
 
 # Vellum footguns: the gates
 
-The doctrine behind every line here already exists, in `CLAUDE.md`, in the specs under `handbook/specs/`,
-and in the agents. It keeps failing anyway, and the record says why: it is read at session
-start and applied at the push, hours apart, so the first push routinely carries a guard that cannot
-go red, a probe that measured the wrong thing, a cascade rule that loses, or a body claim nobody
-measured. The cold skeptic or the prover then changes the diff, and the lesson is re-learned on the
-next sub. `references/scars.md` is the dated ledger.
+The doctrine behind most lines here also lives in `CLAUDE.md`, in the specs under `handbook/specs/`,
+or in the agents, and a line that lives nowhere else is that imperative's one home, as the routing
+rule in `handbook/specs/conventions.md` makes a gate. It keeps failing anyway, and the record says
+why: it is read at session start and applied at the push, hours apart, so the first push routinely
+carries a guard that cannot go red, a probe that measured the wrong thing, a cascade rule that
+loses, or a body claim nobody measured. The cold skeptic or the prover then changes the diff, and
+the lesson is re-learned on the next sub. `references/scars.md` is the dated ledger.
 `references/held-lines.md` holds the candidates that did not earn a line, each with the incident that would.
 
-So this file is not doctrine. It is the checklist form of it, keyed to the moment you are about to
-type. Read the gate you are at, do each line, and move on. Provenance is in `references/`.
+So this file is mostly not new doctrine. It is the checklist form of it, keyed to the moment you
+are about to type. Read the gate you are at, do each line, and move on. Provenance is in `references/`.
 
 ## Gate 1: before writing a test or a guard
 
@@ -45,11 +46,12 @@ Scars: #49, #124, #270, #275, #295, #320, #353, #358, #360, #363, #380, #383, #3
    determinism oracle builds a FRESH subject for the second run: a per-object memo makes a
    same-object compare a tautology that passes however broken the computation is (#423).
 8. **A shared helper goes in `test-support/`, never in `test/`, and never in a sibling.** `node
-   --test` collects every module under ANY directory named `test`, and ANYWHERE a file named `test`,
-   `test-*`, `*-test`, `*_test` or `*.test`, so a helper there or so named runs as a passing test of
-   its own, and a `.test.ts` importing a sibling `.test.ts` runs the sibling's tests twice; neither
-   fails, both inflate the count, and `test/repo/test-collection.test.ts` reds on both arms. No
-   precedent in `test-support/` is not evidence the repo lacks the convention (PR #363).
+   --test` collects every module under ANY directory named `test` outside dot segments and
+   `node_modules`, and ANYWHERE a file named `test`, `test-*`, `*-test`, `*_test` or `*.test`, so a
+   helper there or so named runs as a passing test of its own, and a `.test.ts` importing a sibling
+   `.test.ts` runs the sibling's tests twice; neither fails, both inflate the count, and
+   `test/repo/test-collection.test.ts` reds on both arms. No precedent in `test-support/` is no
+   evidence against the convention.
 9. **Run the mutation, paste the red line into the PR body's guard table**, commit, then dispatch
    `vellum-guard-prover` for the whole guard set (10 minutes, unit tests only, name the mutations you
    did NOT try). It mutates in its OWN detached worktree, built by `scripts/agent-sandbox.ts` at the
@@ -59,12 +61,12 @@ Scars: #49, #124, #270, #275, #295, #320, #353, #358, #360, #363, #380, #383, #3
    several wearers can share one declaration, so a substitution changes them all at once and the red
    names nothing (PR #510). A byte-identical mutant proves nothing until it is live in the built
    bundle; then suspect the aim (PR #349).
-10. **A test that spawns a child gives it its own time limit** (`execFileSync`'s `timeout`): with
-    none, a wedged child (a large `input` to a child that DRAINS it) hangs the unit lane with no red,
-    and `--test-timeout` cannot stop a synchronous block (Issue #564). Set the cap far above the
-    worst real run, keep one child that outlives it written as a SINGLE command (`sh -c 'sleep 5'`),
-    since killing a multi-command child orphans its grandchild and leaks a process per firing, pin
-    what reaches the spawn, not what the option builder returns, and give it its own `TMPDIR` (PR #552).
+10. **A test that spawns a child gives it its own time limit**: with none, a wedged child (a large
+    `input` to a child that DRAINS it) hangs the unit lane with no red, and `--test-timeout` cannot
+    stop a synchronous block (Issue #564). Set its `timeout` far above the worst real run, keep one
+    child that outlives it written as a SINGLE command, since killing a multi-command child orphans
+    its grandchild and leaks a process per firing, pin what reaches the spawn, not what the option
+    builder returns, and give it its own `TMPDIR` (PR #552).
 11. **Narrow-width or column-width work owes a sweep across seeds, never the seed-42 fixture.** Seed
     42 is one of the few clean seeds, which is why a sideways-scroll defect left the suite green
     while other seeds overflowed. Pin the declaration by regex, so flipping its value fails too and
@@ -109,8 +111,7 @@ Scars: #366, #368, #454, #474, #501, #520, #526, #529, #533, #535, #536, #537, #
    A multi-touch gesture can hand back the artifact you hoped to see: with no touch-pan path, two
    fingers reached only the pinch handler and the apparent pan was two zoom half-steps whose factors
    cancel unless one is clamped, which a before-and-after read cannot tell from the real thing
-   (PR #474's review, fixed in PR #477). A multi-touch claim owes evidence of both fingers. Aim
-   inside a clip-path's drawn shape, never at its box's centre (Issue #520, recorded on Issue #708).
+   (PR #474's review, fixed in PR #477). A multi-touch claim owes evidence of both fingers.
 2. **Reachability is its own assertion**: `document.elementFromPoint(x, y) === el`, taken with the
    thing OPEN and after `scrollIntoView({block: "center"})`. Off-viewport returns null, not "hidden".
 3. **Visible means `getBoundingClientRect().width > 0`.** `getComputedStyle(child).display` is not
