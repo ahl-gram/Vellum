@@ -159,9 +159,11 @@ section points there rather than restating it.
   itself between two runs of the same build, with motion reduced as well as on; trust only 0
   against nonzero on every other row, and read `magick compare -metric AE` as a float, because it
   prints a difference under one pixel as a fraction and exits 0 on it. Locate a change with
-  `-fuzz 1%` and the bounding box of a trimmed diff. Reduced motion is the control for the
-  compositor's text antialiasing (`handbook/specs/ui-design.md`, under reduced motion), and with it
-  on the first-visit arrival is never photographed. A full-page capture (`captureBeyondViewport`)
+  `-fuzz 1%` and the bounding box of a trimmed diff. Reduced motion is the control
+  `handbook/specs/ui-design.md` names for the compositor's text antialiasing, and it does not settle
+  every page, which is why trust is per row; with it on, the first-visit arrival is never
+  photographed. Two shots of different sizes are a difference whatever AE says, since ImageMagick
+  scores the extra rows against the smaller image's edge. A full-page capture (`captureBeyondViewport`)
   is for a scrolling page alone, for three reasons: it drops a chart room's bottom-left fixed
   furniture; it lays the page out at its document height, not at the viewport a visitor sees; and
   it CHANGES the page it photographs, so it is taken once per page and a page is never polled that

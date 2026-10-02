@@ -6,7 +6,7 @@ import { dirname, extname, join, resolve } from "node:path";
 import vm from "node:vm";
 import { assertLaidOutAt, captureParams, FULL_PAGE_CAP, parseShots, readProbe, servedUrl, withoutFavicon, withoutHash, type Shot } from "../../scripts/design/shoot.ts";
 import { BAND, modeOf, parseSweepArgs, PIN, planSweep, PROBE, routesOf } from "../../scripts/design/oracle.ts";
-import { aeOf, failed, verdictOf, type Row } from "../../scripts/design/compare.ts";
+import { aeOf, compareRows, failed, sizedAe, verdictOf, type Row } from "../../scripts/design/compare.ts";
 import { stillArgs } from "../../scripts/design/stills.ts";
 
 const REPO = resolve(import.meta.dirname, "..", "..");
@@ -131,6 +131,9 @@ test("the sweep runs with motion reduced unless it is asked for motion", () => {
   assert.deepEqual(parseSweepArgs(["dist", "out/a", "--motion"]), { dist: "dist", out: "out/a", label: undefined, reducedMotion: false });
   assert.deepEqual(parseSweepArgs(["--motion", "dist", "out/a", "main-1"]), { dist: "dist", out: "out/a", label: "main-1", reducedMotion: false });
   assert.throws(() => parseSweepArgs(["dist"]), /usage/);
+  assert.throws(() => parseSweepArgs(["dist", "out/a", "--motoin"]), /usage/, "a mistyped flag would leave motion reduced unnoticed");
+  assert.throws(() => parseSweepArgs(["dist", "out/a", "--reduced-motion"]), /usage/, "the camera's flag means the opposite here");
+  assert.throws(() => parseSweepArgs(["dist", "out/a", "main-1", "extra"]), /usage/);
 });
 
 test("the caption pin rewrites every timing on every element the archive pinned, in the page itself, and touches nothing else", () => {
@@ -156,6 +159,22 @@ test("a row is trusted only where the unchanged build matched itself, and a diff
   assert.equal(verdictOf(row({ present: [false, false, true], control: null, branch: null })), "new");
   assert.equal(verdictOf(row({ present: [true, true, false], branch: null })), "gone");
   assert.equal(verdictOf(row({ present: [true, false, true], control: null, branch: null })), "missing");
+});
+
+test("a page counts as shot only where that run's manifest lists it, controls are measured against each other and the branch against the second control", () => {
+  const listed = (...names: string[]) => names.map((name) => ({ name }));
+  const calls: string[] = [];
+  const measure = (from: 0 | 1, to: 1 | 2, name: string): number => {
+    calls.push(`${from}${to} ${name}`);
+    return name === "flip.png" && from === 0 ? 46 : name === "moved.png" && to === 2 ? 12 : 0;
+  };
+  const rows = compareRows([listed("a.png", "flip.png", "gone.png", "half.png", "moved.png"), listed("a.png", "flip.png", "gone.png", "moved.png"), listed("a.png", "flip.png", "half.png", "moved.png", "new.png")], measure);
+  assert.deepEqual(Object.fromEntries(rows.map((r) => [r.name, verdictOf(r)])), { "a.png": "same", "flip.png": "untrusted", "gone.png": "gone", "half.png": "missing", "moved.png": "differs", "new.png": "new" });
+  assert.deepEqual(calls.sort(), ["01 a.png", "01 flip.png", "01 moved.png", "12 a.png", "12 moved.png"], "an untrusted, lost, half-shot or new page is never measured");
+  assert.equal(sizedAe("1280 800", "1280 840", () => 0), Number.POSITIVE_INFINITY, "a page that only grew at the bottom scores 0 against its own edge");
+  assert.equal(sizedAe("1280 800", "1280 800", () => 7), 7);
+  assert.equal(verdictOf(row({ branch: Number.POSITIVE_INFINITY })), "differs");
+  assert.equal(verdictOf(row({ control: Number.POSITIVE_INFINITY, branch: null })), "untrusted");
 });
 
 test("a comparison fails on a trusted difference, an error, a lost or half-shot page, or when it trusted no row at all", () => {

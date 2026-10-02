@@ -77,8 +77,10 @@ async function sweep(dist: string, out: string, options: { readonly label?: stri
 type SweepArgs = { readonly dist: string; readonly out: string; readonly label: string | undefined; readonly reducedMotion: boolean };
 
 export function parseSweepArgs(args: readonly string[]): SweepArgs {
-  const [dist, out, label] = args.filter((a) => !a.startsWith("--"));
-  if (dist === undefined || out === undefined) throw new Error("usage: node scripts/design/oracle.ts <dist-dir> <out-dir> [label] [--motion]");
+  const usage = "usage: node scripts/design/oracle.ts <dist-dir> <out-dir> [label] [--motion]";
+  const flags = args.filter((a) => a.startsWith("--"));
+  const [dist, out, label, ...extra] = args.filter((a) => !a.startsWith("--"));
+  if (dist === undefined || out === undefined || extra.length > 0 || flags.some((f) => f !== "--motion")) throw new Error(usage);
   return { dist, out, label, reducedMotion: !args.includes("--motion") };
 }
 

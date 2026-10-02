@@ -39,30 +39,56 @@ export function failed(rows: readonly Row[]): boolean {
   return verdicts.some((v) => FAILING.has(v)) || !verdicts.some((v) => v === "same" || v === "differs");
 }
 
-function ae(a: string, b: string): number {
-  const r = spawnSync("magick", ["compare", "-metric", "AE", a, b, "null:"], { encoding: "utf8", timeout: MAGICK_TIMEOUT_MS });
+export const sizedAe = (sizeA: string, sizeB: string, compare: () => number): number =>
+  sizeA === sizeB ? compare() : Number.POSITIVE_INFINITY;
+
+function magick(args: readonly string[]): { status: number | null; stdout: string; stderr: string } {
+  const r = spawnSync("magick", args, { encoding: "utf8", timeout: MAGICK_TIMEOUT_MS });
   if (r.error) throw r.error;
-  if (r.status !== 0 && r.status !== 1) throw new Error(`magick compare failed on ${a} (${r.status}): ${r.stderr}`);
-  return aeOf(r.stderr);
+  return r;
 }
 
-type ManifestEntry = { readonly name: string; readonly http4xx?: readonly string[]; readonly consoleErrors?: readonly string[] };
+function sizeOf(path: string): string {
+  const r = magick(["identify", "-format", "%w %h", path]);
+  if (r.status !== 0) throw new Error(`magick could not read ${path} (${r.status}): ${r.stderr}`);
+  return r.stdout.trim();
+}
+
+function ae(a: string, b: string): number {
+  return sizedAe(sizeOf(a), sizeOf(b), () => {
+    const r = magick(["compare", "-metric", "AE", a, b, "null:"]);
+    if (r.status !== 0 && r.status !== 1) throw new Error(`magick compare failed on ${a} (${r.status}): ${r.stderr}`);
+    return aeOf(r.stderr);
+  });
+}
+
+export type ManifestEntry = { readonly name: string; readonly http4xx?: readonly string[]; readonly consoleErrors?: readonly string[] };
+export type Manifests = readonly [readonly ManifestEntry[], readonly ManifestEntry[], readonly ManifestEntry[]];
+export type Measure = (from: 0 | 1, to: 1 | 2, name: string) => number;
+
+export function compareRows(manifests: Manifests, measure: Measure): Row[] {
+  const listed = manifests.map((m) => new Set(m.map((e) => e.name)));
+  const branchRows = new Map(manifests[2].map((m) => [m.name, m]));
+  const names = [...new Set(manifests.flatMap((m) => m.map((e) => e.name)))].sort();
+  return names.map((name) => {
+    const present = [listed[0]!.has(name), listed[1]!.has(name), listed[2]!.has(name)] as const;
+    const shot = branchRows.get(name);
+    const errors = [...(shot?.http4xx ?? []), ...(shot?.consoleErrors ?? [])];
+    if (!present.every(Boolean)) return { name, present, control: null, branch: null, errors };
+    const control = measure(0, 1, name);
+    return { name, present, control, branch: control === 0 ? measure(1, 2, name) : null, errors };
+  });
+}
+
 const manifestOf = (dir: string): ManifestEntry[] =>
   existsSync(join(dir, "manifest.json")) ? (JSON.parse(readFileSync(join(dir, "manifest.json"), "utf8")) as ManifestEntry[]) : [];
 
 function compareSweeps(controlA: string, controlB: string, branch: string): Row[] {
-  const manifests = [controlA, controlB, branch].map(manifestOf);
-  const branchRows = new Map(manifests[2]!.map((m) => [m.name, m]));
-  const names = [...new Set(manifests.flatMap((m) => m.map((e) => e.name)))].sort();
-  return names.map((name) => {
-    const present = [controlA, controlB, branch].map((d) => existsSync(join(d, name))) as [boolean, boolean, boolean];
-    const shot = branchRows.get(name);
-    const errors = [...(shot?.http4xx ?? []), ...(shot?.consoleErrors ?? [])];
-    if (!present.every(Boolean)) return { name, present, control: null, branch: null, errors };
-    const control = ae(join(controlA, name), join(controlB, name));
-    return { name, present, control, branch: control === 0 ? ae(join(controlB, name), join(branch, name)) : null, errors };
-  });
+  const dirs = [controlA, controlB, branch] as const;
+  return compareRows([manifestOf(controlA), manifestOf(controlB), manifestOf(branch)], (from, to, name) => ae(join(dirs[from], name), join(dirs[to], name)));
 }
+
+const shown = (ae: number | null): string => (ae === null ? "-" : ae === Number.POSITIVE_INFINITY ? "size differs" : String(ae));
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const [a, b, branch] = process.argv.slice(2);
@@ -71,7 +97,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     process.exit(2);
   }
   const rows = compareSweeps(a, b, branch);
-  for (const r of rows) console.log(`${verdictOf(r).padEnd(9)} ${r.name}  control ${r.control ?? "-"}  branch ${r.branch ?? "-"}${r.errors.length > 0 ? `  ${r.errors.join(" | ")}` : ""}`);
+  for (const r of rows) console.log(`${verdictOf(r).padEnd(9)} ${r.name}  control ${shown(r.control)}  branch ${shown(r.branch)}${r.errors.length > 0 ? `  ${r.errors.join(" | ")}` : ""}`);
   const trusted = rows.filter((r) => ["same", "differs"].includes(verdictOf(r))).length;
   console.log(`${rows.length} rows, ${trusted} trusted`);
   process.exitCode = failed(rows) ? 1 : 0;
