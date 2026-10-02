@@ -1,11 +1,11 @@
 # How the cascade breaks here
 
-The craft half of `specs/ui-design.md`. This class of defect has shipped repeatedly and reads as correct
+The craft half of `handbook/specs/ui-design.md`. This class of defect has shipped repeatedly and reads as correct
 in the source every time, because **the failing declaration is present in the file and merely loses.**
 A text search over the CSS passes on the broken code; pin the resolved value instead.
 
 Read this file before writing or moving CSS, and before reading a rendered frame after a change:
-`specs/ui-design.md` rules what the site looks like, and this file is what the browser does to the
+`handbook/specs/ui-design.md` rules what the site looks like, and this file is what the browser does to the
 declaration you write to get there. The checklist form of the same lines is `vellum-footguns` Gate
 3, which points here rather than copying the reasons.
 
@@ -46,7 +46,7 @@ declaration you write to get there. The checklist form of the same lines is `vel
 - **An absolutely positioned box wider than a phone viewport makes the browser widen the LAYOUT
   viewport to fit it**, and clipping overflow at the root does not stop that sizing. Cap the box.
 - **When an engine-dressing rule is the one losing, the opt-out may not be written in the host's own
-  sheet.** `specs/explorer-doctrine.md` rules that engine dressing is edited in the one shared sheet
+  sheet.** `handbook/specs/explorer-doctrine.md` rules that engine dressing is edited in the one shared sheet
   and never in a host's, so the repair belongs to the rule that is losing.
 - **A transform on a container re-anchors every fixed descendant to it** for the length of the
   animation, so a landing settle applied to the wrong element throws the corner furniture across the
@@ -68,7 +68,7 @@ These are about looking rather than the cascade, and belong beside them:
 
 ---
 
-*Companion to `specs/ui-design.md` (the look these traps break), `specs/site-architecture.md`
-(where the authored CSS lives and what the build does to it), `specs/explorer-doctrine.md` (the
-engine dressing one of these traps defers to), and `specs/settle-doctrine.md` (how a rendered frame
+*Companion to `handbook/specs/ui-design.md` (the look these traps break), `handbook/specs/site-architecture.md`
+(where the authored CSS lives and what the build does to it), `handbook/specs/explorer-doctrine.md` (the
+engine dressing one of these traps defers to), and `handbook/specs/settle-doctrine.md` (how a rendered frame
 is read in the harness).*

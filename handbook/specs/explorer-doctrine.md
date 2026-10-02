@@ -8,13 +8,13 @@ torn down.
 It carries rules that bind future work. A detail that applies to exactly one piece of code stays in
 that code beside its test.
 
-**Its other half is `specs/region-and-voyage.md`**, which holds what a region sheet may do that a
+**Its other half is `handbook/specs/region-and-voyage.md`**, which holds what a region sheet may do that a
 world sheet may not, how a finer view is constructed and what it guarantees, and how the voyage
 divides work between the worker and the client. The redraft that mounts a region sheet is an overlay,
 so how it is mounted, scaled and torn down is here; what it DRAWS is there.
 
-Its other siblings hold what this file is not about: `specs/rulebook.md` the golden, the regen and
-the order of work, `specs/ui-design.md` how any of this looks, `specs/settle-doctrine.md` how a wait
+Its other siblings hold what this file is not about: `handbook/specs/rulebook.md` the golden, the regen and
+the order of work, `handbook/specs/ui-design.md` how any of this looks, `handbook/specs/settle-doctrine.md` how a wait
 on it is written and what the harness environment does, and `.claude/skills/vellum-footguns/SKILL.md`
 the imperatives keyed to the moment of typing a check. Where this file and the rulebook disagree
 about a rule, the rulebook wins.
@@ -64,7 +64,7 @@ make an unqualified rule false. Read the surface, not just the rule.
 - **A room's stage binds its world in LOCKSTEP with the last draw result**, never only in a
   droppable arm callback, or one world's plate paints over another's chart.
 - **What may be mounted inside the chart mount** (what a region inset DRAWS once mounted is
-  `specs/region-and-voyage.md`'s):
+  `handbook/specs/region-and-voyage.md`'s):
   - **Furniture mounted INSIDE A REGION INSET is CSS-drawn and carries no inline `<svg>` of its
     own.** A suite reads the committed survey as the last `#map .region-inset svg` and hashes it, so
     anything mounted there with an inline svg inside BECOMES that element and takes the suite's reads
@@ -239,7 +239,7 @@ image. A future surface inherits the Explorer's rule the moment its chart is inl
   previous world's track onto the new world's ghost.
 - **A quiet rebuild never computes the travel matrix.** The quiet flag does double duty, sink and
   matrix, so pinning it true on an arm path ships an unordered itinerary. What the order itself
-  guarantees is `specs/region-and-voyage.md`'s; this is the arm's half of the same flag.
+  guarantees is `handbook/specs/region-and-voyage.md`'s; this is the arm's half of the same flag.
 - **A park is silent.** A silent apply clears every pending grade and reveals nothing; without it,
   arming mass-stamps the whole world and a flip re-inks a century as the sheet swings away.
 - **No hide, reflow and restore dance is owed on the chronicle's marks**, because every paint drives
@@ -280,7 +280,7 @@ image. A future surface inherits the Explorer's rule the moment its chart is inl
   camera no longer swallows the gesture, and a real device is the evidence.
 - **A place link is world-sheet only.** A region inset renumbers its places and its smallest tier has
   no world index, so an inset card is deliberately linkless. Why an inset renumbers is
-  `specs/region-and-voyage.md`'s.
+  `handbook/specs/region-and-voyage.md`'s.
 - **A card is chart furniture, not an instrument**, so it stays live while the resting track is
   inked. But **a host that arms its instrument every draw has no live place cards**, which makes any
   card-side feature Explorer-only by construction. The builder is called on both hosts, so the call
@@ -302,7 +302,7 @@ image. A future surface inherits the Explorer's rule the moment its chart is inl
 
 ---
 
-*Companion to `specs/region-and-voyage.md` (region sheets, level of detail, the voyage),
-`specs/rulebook.md` (the golden, the regen, the order of work), `specs/ui-design.md` (how all of this
-looks), and `specs/settle-doctrine.md` (how a wait on it is written, and what the harness
+*Companion to `handbook/specs/region-and-voyage.md` (region sheets, level of detail, the voyage),
+`handbook/specs/rulebook.md` (the golden, the regen, the order of work), `handbook/specs/ui-design.md` (how all of this
+looks), and `handbook/specs/settle-doctrine.md` (how a wait on it is written, and what the harness
 environment does).*

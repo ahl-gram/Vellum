@@ -8,13 +8,13 @@ divides work between the worker and the client.
 It carries rules that bind future work. A detail that applies to exactly one piece of code stays in
 that code beside its test.
 
-**Its other half is `specs/explorer-doctrine.md`**, which holds the living chart the reader touches:
+**Its other half is `handbook/specs/explorer-doctrine.md`**, which holds the living chart the reader touches:
 the engine boundary and what a host page owes it, the camera and gesture contracts, counter-scale,
 and the overlay lifecycle. The redraft that mounts a region sheet is an overlay, so anything about
 how it is mounted, scaled or torn down is there and not here.
 
-Its other siblings hold what this file is not about: `specs/rulebook.md` the golden, the regen and
-the order of work, `specs/ui-design.md` how any of this looks, `specs/settle-doctrine.md` how a wait
+Its other siblings hold what this file is not about: `handbook/specs/rulebook.md` the golden, the regen and
+the order of work, `handbook/specs/ui-design.md` how any of this looks, `handbook/specs/settle-doctrine.md` how a wait
 on it is written and what the harness environment does, and `.claude/skills/vellum-footguns/SKILL.md`
 the imperatives keyed to the moment of typing a check. Where this file and the rulebook disagree
 about a rule, the rulebook wins.
@@ -97,7 +97,7 @@ about a rule, the rulebook wins.
   no byte comparison can guard it.
 - **The redraft is an INSET mounted inside the chart mount**, aligned so its plot area lands on the
   window it re-surveys. It is not a sheet replacement. What the inset owes the live transform, and
-  what may be mounted beside it, are `specs/explorer-doctrine.md`'s.
+  what may be mounted beside it, are `handbook/specs/explorer-doctrine.md`'s.
 - **What a finer survey reveals is LABELS.** A region sheet's settlement set is a crop of the world's
   until the smallest tier appears, so a reveal ceremony keys on placed labels and never on place
   presence.
@@ -140,7 +140,7 @@ about a rule, the rulebook wins.
     exact-order fixture is ambiguous.
 - **The order at rest is a pure function of the world.** A quiet mid-drag rebuild reuses the cached
   order or falls back to a straight line for that frame rather than recomputing the matrix per drag
-  frame. The arm's half of that same quiet flag is `specs/explorer-doctrine.md`'s: pinning it true
+  frame. The arm's half of that same quiet flag is `handbook/specs/explorer-doctrine.md`'s: pinning it true
   on an arm path ships an unordered itinerary.
 - **The journal's day count is GRID-space**, so render width never moves a day, and each day is the
   later of the computed day and one past its predecessor (`nextDay` in `src/world/voyage-log.ts`).
@@ -174,7 +174,7 @@ about a rule, the rulebook wins.
 
 ---
 
-*Companion to `specs/explorer-doctrine.md` (the living chart the reader touches),
-`specs/rulebook.md` (the golden, the regen, the order of work), `specs/ui-design.md` (how all of this
-looks), and `specs/settle-doctrine.md` (how a wait on it is written, and what the harness
+*Companion to `handbook/specs/explorer-doctrine.md` (the living chart the reader touches),
+`handbook/specs/rulebook.md` (the golden, the regen, the order of work), `handbook/specs/ui-design.md` (how all of this
+looks), and `handbook/specs/settle-doctrine.md` (how a wait on it is written, and what the harness
 environment does).*

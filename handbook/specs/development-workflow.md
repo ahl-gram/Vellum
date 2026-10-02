@@ -7,9 +7,9 @@ what, so sessions improvised the order and improvised it differently each time.
 
 Four other places carry what this one deliberately does not:
 
-- **`specs/rulebook.md`** holds the durable rules, invariants and working agreements. Where that
+- **`handbook/specs/rulebook.md`** holds the durable rules, invariants and working agreements. Where that
   file and this one disagree about a rule, it wins. This file sequences; it does not legislate.
-- **`specs/conventions.md`** holds how a design decision is made, and how a rule is written down
+- **`handbook/specs/conventions.md`** holds how a design decision is made, and how a rule is written down
   once made: where it lives, the voice, the citation form, the comment sweep.
 - **`.claude/skills/vellum-footguns/SKILL.md`** holds the gates, which are keyed to the moment of
   typing rather than to a step here. They are not a phase of this workflow and cannot be turned into
@@ -33,21 +33,21 @@ agent audit built from scratch. This file does not carve out an exception, and n
 
 **3. Write the plan. No code.** The plan names the design, the files, the tests with the mutation
 that reds each one, the evidence that will say it works, and the rosters and doctrine the change
-drags with it. The required reading is due before the plan, not after it: `specs/rulebook.md` before
+drags with it. The required reading is due before the plan, not after it: `handbook/specs/rulebook.md` before
 any change that touches the renderer, a committed chart, the golden, a regen, a seed or the order of
-work, `specs/ui-design.md` before any work whose deliverable is an appearance, `specs/chart-dress.md`
+work, `handbook/specs/ui-design.md` before any work whose deliverable is an appearance, `handbook/specs/chart-dress.md`
 before any change to a chart's dress, in the renderer or in how the site mounts a sheet,
-`specs/cascade-traps.md` before writing or moving CSS or reading a rendered frame after a change,
-`specs/engine-invariants.md` before any change to world generation or to a surface that quotes
+`handbook/specs/cascade-traps.md` before writing or moving CSS or reading a rendered frame after a change,
+`handbook/specs/engine-invariants.md` before any change to world generation or to a surface that quotes
 generated output, and before any script that measures a world, since the traps that make such a
-script return a plausible wrong number are there, `specs/explorer-doctrine.md` before any work on the
-Explorer or on a chart camera, gesture or overlay, `specs/region-and-voyage.md` before any work on a
+script return a plausible wrong number are there, `handbook/specs/explorer-doctrine.md` before any work on the
+Explorer or on a chart camera, gesture or overlay, `handbook/specs/region-and-voyage.md` before any work on a
 region sheet, level of detail,
-or the voyage, `specs/site-architecture.md` before adding or restructuring a page, a stylesheet, a
-bundle or an inlined script, `specs/conventions.md` before starting a design round or building to
+or the voyage, `handbook/specs/site-architecture.md` before adding or restructuring a page, a stylesheet, a
+bundle or an inlined script, `handbook/specs/conventions.md` before starting a design round or building to
 ruled stills, and before adding or moving a rule, editing a spec, or writing, citing or sweeping a
 comment, and
-`specs/settle-doctrine.md` before any work that writes an e2e wait, settle, or CDP probe, or that
+`handbook/specs/settle-doctrine.md` before any work that writes an e2e wait, settle, or CDP probe, or that
 reads a screenshot, a focus state or a narrow viewport in the harness.
 
 **4. Get a cold read on the plan: `vellum-plan-skeptic`.** Not `vellum-pr-skeptic`, which reviews a
@@ -79,7 +79,7 @@ rulings on the issue at step 12 exactly as a session would record its own.
 Alex to picture it and then holds him to what he pictured, which is how a ruling gets made on
 something nobody measured. Render the candidates instead, through `vellum-plate-reader`, whose own
 definition carries the zooms, at the viewports and on the seeds the defect was measured at, or on the
-ones the decision turns on where nothing measured it. `specs/conventions.md` "How a design decision
+ones the decision turns on where nothing measured it. `handbook/specs/conventions.md` "How a design decision
 is made" governs the sitting itself, how many directions are drawn and what becomes of the stills
 afterwards. **Where the decision changes an appearance that already ships, today's behavior is
 rendered beside the candidates as a control**, because a candidate with nothing beside it reads as
@@ -115,16 +115,16 @@ worktree when it starts, and its definition carries the rename.
 scar:
 
 - **Archive the finalized plan before the first commit.** Copy the plan exactly as step 6 left it
-  to `plans/<N>/<N>-plan.md` at the repo root, `N` the issue's number, and commit it with the
+  to `handbook/plans/<N>/<N>-plan.md` at the repo root, `N` the issue's number, and commit it with the
   implementation. Every plan for an issue lives in that issue's own directory. An issue that ships
   as several pull requests archives one plan per pull request: the first is
-  `plans/<N>/<N>-plan.md` and stays frozen as that pull request left it, and each later pull
-  request archives its own reviewed design beside it as `plans/<N>/<N>-<label>-plan.md`, `<label>`
+  `handbook/plans/<N>/<N>-plan.md` and stays frozen as that pull request left it, and each later pull
+  request archives its own reviewed design beside it as `handbook/plans/<N>/<N>-<label>-plan.md`, `<label>`
   naming the row or pull request (`row8a`, `pr2`), copied as it stood after the plan skeptic's
   findings were folded in and committed with that pull request's first commit. Each is a record
   of what was planned and is never edited afterwards: a plan that
   changes at review is named in the PR body with the difference, not a rewritten file.
-  `plans/` is an archive on `design/`'s pattern, content only, and sits outside the roots
+  `handbook/plans/` is an archive on `design/`'s pattern, content only, and sits outside the roots
   `test/repo/prose-paths.test.ts` walks on purpose, so a plan may name the paths it is about to
   change and a later refactor does not red the history. A change with no issue has no plan step
   and writes nothing here.
@@ -231,9 +231,9 @@ definition it loaded, so the check would be unfalsifiable the moment it was writ
 
 **15. Fix, re-prove, repeat, at most three rounds.** A guard you change is a guard the prover has
 not seen, so it goes back through step 11. A finding that will not be fixed in this pull request
-is filed as an issue or added to `errata/` as a row in the same diff, with the reason, and the PR
+is filed as an issue or added to `handbook/errata/` as a row in the same diff, with the reason, and the PR
 body names which; a finding left as prose in the body alone is itself a finding. The shape of a row
-and how one leaves are `errata/README.md`.
+and how one leaves are `handbook/errata/README.md`.
 
 **An integration pull request takes no review commits.** When a long-lived epic branch finally
 merges to main, every commit on it has already run this whole sequence on its own sub, and new

@@ -8,23 +8,23 @@ Explorer animates) and `project_vellum_landfall.md` (the Landfall epic, #454): r
 whichever companion your work touches. The live PLAN is the private GitHub Project "Vellum Roadmap"
 (`gh project item-list 1 --owner ahl-gram`), and there is no local plan file.
 
-**`specs/` holds the tracked, normative house specs, and unlike everything above they are public.**
+**`handbook/specs/` holds the tracked, normative house specs, and unlike everything above they are public.**
 None is summarized here; where this file and a spec disagree, the spec is right. Each is REQUIRED
 READING before the work its row names.
 
 | spec | what it holds | read it before |
 |---|---|---|
-| `specs/rulebook.md` | the sequencing rules and working agreements: product direction, the cost axis, the golden and committed-chart discipline, the re-roll set, scheduling, cross-epic coordination, and the index of durable engineering constraints from shipped work | any change touching the renderer, a committed chart, the golden, a regen, a seed, or the order of work |
-| `specs/ui-design.md` | the look and feel itself: the ground, the type case, the palette by role, the rooms, the voice, contrast, gesture, motion and print | any work whose deliverable is an appearance |
-| `specs/chart-dress.md` | how a chart itself is dressed: a style as a palette over identical geometry, what is a style token and what is a layer literal, the mount, the hatching, the tint, the river names and the sea beasts | any change to a chart's dress, in the renderer or in how the site mounts a drawn sheet |
-| `specs/cascade-traps.md` | how the cascade breaks here: the declaration that is present in the file and loses, and the two habits of looking that catch it | writing or moving CSS, and reading a rendered frame after a change |
-| `specs/engine-invariants.md` | what the generator guarantees about a world, what breaks those guarantees silently, and what a surface quoting generated output may not assume | any change to world generation, any surface that quotes it, and any script that measures a world |
-| `specs/explorer-doctrine.md` | the living chart over the baked sheet: the engine boundary and what a host page owes it, the camera and gesture contracts, counter-scale, the overlay lifecycle | any work on the Explorer or on a chart camera, gesture or overlay |
-| `specs/region-and-voyage.md` | its other half: what a region sheet may do that a world sheet may not, how a finer view is built and what it guarantees, how the voyage splits worker from client | any work on a region sheet, a level of detail, or the voyage |
-| `specs/site-architecture.md` | how the site is authored, bundled, discovered and shipped: the page model, the rosters a page joins, what the build does to authored markup, the two forms that fail silently | adding or restructuring a page, a stylesheet, a bundle or an inlined script |
-| `specs/development-workflow.md` | the order of operations from a filed issue to a pull request, which subagent runs at which step, and the one place the work stops for Alex's ruling | starting a sub or an epic, since its early steps are the ones a session cannot go back and take later |
-| `specs/conventions.md` | how the house decides, and how it writes a rule down: how a design decision is made and built to, where a rule lives and what a new spec joins, how a spec and the rest of the house's prose are written, how code is cited, and how a comment sweep is run and proven | starting a design round or building to ruled stills; adding or moving a rule, adding a spec, editing a spec, or writing, citing or sweeping a comment |
-| `specs/settle-doctrine.md` | how an e2e wait is written, and what the harness environment it runs in actually does | any e2e wait, settle or CDP probe, and any screenshot, focus state or narrow viewport read in the harness |
+| `handbook/specs/rulebook.md` | the sequencing rules and working agreements: product direction, the cost axis, the golden and committed-chart discipline, the re-roll set, scheduling, cross-epic coordination, and the index of durable engineering constraints from shipped work | any change touching the renderer, a committed chart, the golden, a regen, a seed, or the order of work |
+| `handbook/specs/ui-design.md` | the look and feel itself: the ground, the type case, the palette by role, the rooms, the voice, contrast, gesture, motion and print | any work whose deliverable is an appearance |
+| `handbook/specs/chart-dress.md` | how a chart itself is dressed: a style as a palette over identical geometry, what is a style token and what is a layer literal, the mount, the hatching, the tint, the river names and the sea beasts | any change to a chart's dress, in the renderer or in how the site mounts a drawn sheet |
+| `handbook/specs/cascade-traps.md` | how the cascade breaks here: the declaration that is present in the file and loses, and the two habits of looking that catch it | writing or moving CSS, and reading a rendered frame after a change |
+| `handbook/specs/engine-invariants.md` | what the generator guarantees about a world, what breaks those guarantees silently, and what a surface quoting generated output may not assume | any change to world generation, any surface that quotes it, and any script that measures a world |
+| `handbook/specs/explorer-doctrine.md` | the living chart over the baked sheet: the engine boundary and what a host page owes it, the camera and gesture contracts, counter-scale, the overlay lifecycle | any work on the Explorer or on a chart camera, gesture or overlay |
+| `handbook/specs/region-and-voyage.md` | its other half: what a region sheet may do that a world sheet may not, how a finer view is built and what it guarantees, how the voyage splits worker from client | any work on a region sheet, a level of detail, or the voyage |
+| `handbook/specs/site-architecture.md` | how the site is authored, bundled, discovered and shipped: the page model, the rosters a page joins, what the build does to authored markup, the two forms that fail silently | adding or restructuring a page, a stylesheet, a bundle or an inlined script |
+| `handbook/specs/development-workflow.md` | the order of operations from a filed issue to a pull request, which subagent runs at which step, and the one place the work stops for Alex's ruling | starting a sub or an epic, since its early steps are the ones a session cannot go back and take later |
+| `handbook/specs/conventions.md` | how the house decides, and how it writes a rule down: how a design decision is made and built to, where a rule lives and what a new spec joins, how a spec and the rest of the house's prose are written, how code is cited, and how a comment sweep is run and proven | starting a design round or building to ruled stills; adding or moving a rule, adding a spec, editing a spec, or writing, citing or sweeping a comment |
+| `handbook/specs/settle-doctrine.md` | how an e2e wait is written, and what the harness environment it runs in actually does | any e2e wait, settle or CDP probe, and any screenshot, focus state or narrow viewport read in the harness |
 
 The ruled pixels those specs were decided from are archived under `design/`, one directory per design
 round (`design/oracle/` is the odd one out: a screenshot sweep tool, not a sitting).
@@ -52,7 +52,7 @@ handoff keep it current: newly filed issues added and phased, shipped issues clo
 `session-handoff` skill updates SESSION-NOTES (at `session-notes/SESSION-NOTES.md`, not the repo
 root), RESUME-HERE and auto-memory but does NOT know about the Project, so this is the Vellum extra
 step. **A rule change EDITS the spec that owns the rule** (the table above names each, and
-`specs/conventions.md` says where a rule lives) in a branch and a PR, as readily for a corrected fact
+`handbook/specs/conventions.md` says where a rule lives) in a branch and a PR, as readily for a corrected fact
 as for a changed rule, and may leave a dated comment on the originating issue as the audit trail.
 
 `gh project` needs the `project` token scope (`gh auth refresh -s project`). The project, field and
@@ -105,7 +105,7 @@ prediction failing to match data, never by a test.
 - **Sanity-check a number against a prediction before writing it down.** If every seed yields an
   identical count, if a ship sails over dry land, if two labels "overlap" without touching: the
   measurement is broken, not the world.
-- **A script that measures a world reads `specs/engine-invariants.md` first**, for the traps that
+- **A script that measures a world reads `handbook/specs/engine-invariants.md` first**, for the traps that
   hand back a plausible wrong number instead of throwing.
 - **The chart number IS the seed** (the `CHART №` line in `src/render/layers/cartouche.ts`), so any
   screenshot identifies its world exactly. Reproduce before theorising.
@@ -140,7 +140,7 @@ gh api repos/ahl-gram/Vellum/issues/N/comments   # decisions, ratifications, re-
 ```
 
 **`gh issue view N` silently returns EMPTY for some issues here** (exit 0, no output), which is why
-both are the `api` form. **The rulebook is not an issue at all**: it is `specs/rulebook.md`, and #193
+both are the `api` form. **The rulebook is not an issue at all**: it is `handbook/specs/rulebook.md`, and #193
 is a pointer whose comments are history. **Remind Alex of any open decision and get his call before
 implementing it**, and **run
 `vellum-spec-recon` at the start of any sub or epic**: it verifies every cited path, symbol, test name
@@ -156,7 +156,7 @@ which is the difference that stopped the same defects reaching PR after PR. Its
 `.claude/skills/vellum-footguns/hooks/footgun-gate.ts`, wired in `.claude/settings.json`, puts the matching gate in front of you and
 refuses the mechanical never-list items outright, the ones `.claude/skills/vellum-footguns/hooks/README.md` enumerates.
 
-**The order of operations is `specs/development-workflow.md`**, and it names which subagent runs at
+**The order of operations is `handbook/specs/development-workflow.md`**, and it names which subagent runs at
 which step: `vellum-spec-recon` at the start, `vellum-plan-skeptic` on the plan before the decisions
 go to Alex, `vellum-guard-prover` on every new or strengthened guard before the PR,
 `vellum-plate-reader` when the deliverable is an appearance, and `vellum-pr-skeptic` COLD on every
@@ -238,7 +238,7 @@ the sandbox for both review agents that build one, so the depth lives in one pla
   with a WIP commit instead.
 - **Let every local e2e run finish.** A killed run leaves its browser profile behind, and a starved
   machine then STALLS a lane you did not touch rather than failing it; the cause, the tell and the
-  commands that clear it are `specs/settle-doctrine.md`'s environment section and Gate 2.
+  commands that clear it are `handbook/specs/settle-doctrine.md`'s environment section and Gate 2.
 
 ## Write visual samples to out/
 
@@ -247,7 +247,7 @@ goes in **`out/`** (the CLI's default output location; gitignored). That is wher
 MAIN checkout: name the files in your reply so they are easy to open, and do not scatter samples in
 `/tmp`, the scratchpad or anywhere else he will not find. A dispatched lane's own `out/` is inside
 its worktree and he never opens it, so a lane reports absolute paths and whoever dispatched it copies
-them across, per `specs/development-workflow.md` step 6. **For a presentation sub, run `vellum-plate-reader` before the PR**:
+them across, per `handbook/specs/development-workflow.md` step 6. **For a presentation sub, run `vellum-plate-reader` before the PR**:
 structural tests cannot see layout, and #219's sideways scroll at 320px is what got through when one
 was trusted to. It renders through CDP and returns MEASUREMENTS plus named files in `out/`, at both
 full scale and 1:1 crop, since glance properties only exist at full scale.

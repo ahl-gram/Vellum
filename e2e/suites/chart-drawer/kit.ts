@@ -76,7 +76,7 @@ export function dragKit(k: DrawerKit & Mouse) {
 export function tableKit(kd: DragKit) {
   const { evaluate, sleep, clickAt } = kd;
   const STORE: Payload<string | null> = `(() => { try { return localStorage.getItem(${JSON.stringify(TABLE_STORE_KEY)}); } catch { return "THREW"; } })()`;
-  // Two shapes on purpose (specs/settle-doctrine.md clause 4). Where arriving is a PRECONDITION the wait throws;
+  // Two shapes on purpose (handbook/specs/settle-doctrine.md clause 4). Where arriving is a PRECONDITION the wait throws;
   // where arriving is the CHECK's own claim it keeps reading and hands back its last read, and the caller asserts
   // on that, so a press that navigated nowhere reds by naming the page it is still standing on.
   const reachedExplorer = async () => {
@@ -98,7 +98,7 @@ export function tableKit(kd: DragKit) {
     await evaluate(`(() => { const t = document.getElementById("chart-drawer-tab"); if (t && getComputedStyle(t).display !== "none") t.click(); })()`);
     await sleep(400);
   };
-  // A measurement poll, not a readiness wait (specs/settle-doctrine.md clause 4), and deliberately NOT keyed on the number the check is about (clause 6): it reads until the count stops moving and hands back its LAST read, which the caller asserts on. The first version of CD37 and CD38 put `cuttings === 2` in the settle instead, and the mutations that were supposed to prove them killed the predicate, so the checks' own booleans were never evaluated at all (the cold review on PR #635).
+  // A measurement poll, not a readiness wait (handbook/specs/settle-doctrine.md clause 4), and deliberately NOT keyed on the number the check is about (clause 6): it reads until the count stops moving and hands back its LAST read, which the caller asserts on. The first version of CD37 and CD38 put `cuttings === 2` in the settle instead, and the mutations that were supposed to prove them killed the predicate, so the checks' own booleans were never evaluated at all (the cold review on PR #635).
   const restedAtExplorer = async (): Promise<Back> => {
     let last: Back | null = null;
     let same = 0;

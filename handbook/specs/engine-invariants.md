@@ -5,9 +5,9 @@ surface quoting generated output may not assume.** This file is upstream of how 
 is about the world itself: what belongs to its identity, what order the pipeline settles it in, and
 which engine outputs a consuming surface has to respect.
 
-Its siblings under `specs/` hold what this one deliberately does not. `specs/rulebook.md` owns the
+Its siblings under `handbook/specs/` hold what this one deliberately does not. `handbook/specs/rulebook.md` owns the
 golden, the regen and the re-roll discipline, and keeps it; where this file touches that, it states
-the engine fact and points there for what the fact costs. `specs/chart-dress.md` owns how a world is
+the engine fact and points there for what the fact costs. `handbook/specs/chart-dress.md` owns how a world is
 drawn.
 
 **Counts and seed-specific measurements are not here.** They live at the guards named throughout,
@@ -36,7 +36,7 @@ unchanged. Both are adjacent to the rule and neither is the rule.
 new root attribute changes the committed charts' skeleton, so `test/site/hero-charts.test.ts` fails
 and tells you to run the chart regen. A session that reads that red as unrelated drift will regen,
 go green, and ship a view option stamped into world identity. **Read a structural drift red as a
-question about what you just stamped, before you treat it as a regen**, and see `specs/rulebook.md`
+question about what you just stamped, before you treat it as a regen**, and see `handbook/specs/rulebook.md`
 for why a regen bundled into a feature branch is the wrong move regardless.
 
 Treat a new option's classification as a review question, because nothing else will name it for you.
@@ -60,7 +60,7 @@ exactly and numbers with a tolerance. Do not describe either as pinning bytes.
 **Realm count is a world property, not a style one.** It is settled inside `generateWorld` with no
 style input. `politicalTints` in `src/render/style.ts` decides only whether `realmTintsLayer` in
 `src/render/layers/realms.ts` draws anything. Changing a tint is a view change; changing what makes
-a realm is an identity change, and `specs/rulebook.md` says what that costs.
+a realm is an identity change, and `handbook/specs/rulebook.md` says what that costs.
 
 ## World identity is entry-point independent
 
@@ -109,7 +109,7 @@ hashes the per-cell realm label array in `test/world/golden-seed42.test.ts`.
 A terrain change can move the checksum while leaving the seat roster identical, and it can move
 both. **Check with a scratch run. Do not assume in either direction.**
 
-A culture or name-template change is the other axis and behaves differently. `specs/rulebook.md`
+A culture or name-template change is the other axis and behaves differently. `handbook/specs/rulebook.md`
 carries that covenant. Do not restate it here.
 
 ## Fork derivation
@@ -124,7 +124,7 @@ staying last in the pipeline.
 **The hazard is inserting a draw mid-fork.** Every later value on that fork moves.
 `simulateHistory` in `src/society/history.ts` is the one to watch: it runs on its own fork and its
 output feeds every settlement's founding and ruin, so a draw inserted inside it moves committed
-bytes. `specs/rulebook.md` says what that costs.
+bytes. `handbook/specs/rulebook.md` says what that costs.
 
 ## Landmass labelling versus the drawn coast
 
@@ -246,7 +246,7 @@ argument and returns an unrelated cell rather than failing.
 
 ---
 
-*Companion to `specs/rulebook.md` (the golden, the regen and the re-roll discipline) and
-`specs/chart-dress.md` (how a world is drawn). This file sits upstream of both: it is the world
+*Companion to `handbook/specs/rulebook.md` (the golden, the regen and the re-roll discipline) and
+`handbook/specs/chart-dress.md` (how a world is drawn). This file sits upstream of both: it is the world
 itself. Every rule about a FINER view of that world, and what resampling does and does not preserve,
-is `specs/region-and-voyage.md`'s.*
+is `handbook/specs/region-and-voyage.md`'s.*

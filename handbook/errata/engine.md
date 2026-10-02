@@ -1,6 +1,6 @@
 # Errata: the generated world
 
-Rows for what the generator and the renderer put on a sheet: terrain, rivers, realms, names, the chronicle, the drawn layers. The protocol, and how a row leaves, is `errata/README.md`. Rows are ordered by the pull request that left them.
+Rows for what the generator and the renderer put on a sheet: terrain, rivers, realms, names, the chronicle, the drawn layers. The protocol, and how a row leaves, is `handbook/errata/README.md`. Rows are ordered by the pull request that left them.
 
 ## Open
 

@@ -81,5 +81,5 @@ test("the e2e tree carries no type-check or lint skip in any form, so a doubted 
   const tree = listing.filter((f) => f.endsWith(".ts")).map((f) => join(REPO, "e2e", f));
   assert.ok(tree.includes(join(REPO, "e2e", "run.ts")) && tree.includes(join(REPO, "e2e", "support", "settle.ts")) && tree.includes(join(REPO, "e2e", "suites", "specimen", "desktop.ts")), "the listing missed the runner, a support module or a suite's part file, so it is reading the wrong tree");
   assert.deepEqual([...paths].sort(), tree.sort(), "the scan's source list is not every TypeScript file under e2e/");
-  assert.deepEqual(paths.flatMap((p) => skips(relative(REPO, p), readFileSync(p, "utf8"))), [], "an e2e file carries a skip; the accepted skips elsewhere are listed in specs/rulebook.md");
+  assert.deepEqual(paths.flatMap((p) => skips(relative(REPO, p), readFileSync(p, "utf8"))), [], "an e2e file carries a skip; the accepted skips elsewhere are listed in handbook/specs/rulebook.md");
 });

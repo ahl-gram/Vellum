@@ -1,6 +1,6 @@
 # Errata: the rooms
 
-Rows for what a visitor meets: the pages, the charts as shown, the cards, the drawers, contrast, gesture, print. The protocol, and how a row leaves, is `errata/README.md`. Rows are ordered by the pull request that left them.
+Rows for what a visitor meets: the pages, the charts as shown, the cards, the drawers, contrast, gesture, print. The protocol, and how a row leaves, is `handbook/errata/README.md`. Rows are ordered by the pull request that left them.
 
 ## Open
 

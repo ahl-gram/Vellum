@@ -2,10 +2,10 @@
 
 What Vellum looks like, how it sounds, how it moves, and how to build a new piece of it so that it
 belongs. This is the record of the idiom itself, not of how a decision gets made: **how a decision
-gets made lives in `specs/conventions.md`, the rules in `specs/rulebook.md`, the order of operations
-in `specs/development-workflow.md`, process at the keyboard in `CLAUDE.md`, and a ruling about one
+gets made lives in `handbook/specs/conventions.md`, the rules in `handbook/specs/rulebook.md`, the order of operations
+in `handbook/specs/development-workflow.md`, process at the keyboard in `CLAUDE.md`, and a ruling about one
 feature as a dated comment on its own issue.** Two halves of the look stand beside this file:
-`specs/chart-dress.md` is how a chart itself is dressed, and `specs/cascade-traps.md` is what the
+`handbook/specs/chart-dress.md` is how a chart itself is dressed, and `handbook/specs/cascade-traps.md` is what the
 browser does to the declaration you write to get the look ruled here.
 
 Where this file names a measured value, a guard pins that value, and **the guard is right if they
@@ -99,12 +99,12 @@ a custom property: there is no honest stylesheet default for one settlement's co
 per-element values go inline on the element.
 
 **That join is stated here for colours, and the tokens it does not reach are
-`specs/site-architecture.md`'s**, under tokens outside the palette join. The boundary is a
+`handbook/specs/site-architecture.md`'s**, under tokens outside the palette join. The boundary is a
 derivation rather than a list, so check it there before assuming a token has a remembered home.
 
 ## The chart's own dress
 
-**How the chart itself is dressed is `specs/chart-dress.md`'s**, from the style as a palette over
+**How the chart itself is dressed is `handbook/specs/chart-dress.md`'s**, from the style as a palette over
 identical geometry to the sea beasts; this file is the site around it.
 
 ## The room and its furniture
@@ -129,7 +129,7 @@ scrolling page it washes out whatever passes through it. Four corners, each a na
 - **The chart folio**, bottom left: the lines the room's script fills at the draw, the chart's title,
   survey line and coordinates.
 - **The Surveyor's Glass**, bottom right of the chart: the camera's presses. Where it is seated and
-  why is `specs/explorer-doctrine.md`'s, under the camera, the gesture and the fit.
+  why is `handbook/specs/explorer-doctrine.md`'s, under the camera, the gesture and the fit.
 
 Between them: **the slip**, the working panel on the right, which is the mockup's station card grown
 into a desk. It folds away to a bookmark tab on the right edge, and on a phone it is the bottom
@@ -178,7 +178,7 @@ block and the generated sheets alike.
 
 **A new component's CSS goes in its own sheet.** Fold it into an existing one only if a separate
 sheet breaks something or costs performance; the rosters a new sheet joins are never the reason,
-and what those rosters are and what each costs is `specs/site-architecture.md`'s.
+and what those rosters are and what each costs is `handbook/specs/site-architecture.md`'s.
 
 **Derive a clearance from the token, never from either literal.** The panel-width token is redeclared
 per page by design, so a clearance computed from a remembered value is right on one page and wrong on
@@ -290,7 +290,7 @@ bullet beside line two: such a box pins `vertical-align: top`. Never "fix" that 
 `display: inline`, which kills the tip.
 
 **How an affordance gate is written**, and why never on absent hover alone, is
-`specs/cascade-traps.md`'s.
+`handbook/specs/cascade-traps.md`'s.
 
 **A real tap fires the compatibility hover and focus events BEFORE its click**, and the tap's own
 press light-dismisses an open auto popover first. So a press that toggles a popover needs the hover
@@ -351,7 +351,7 @@ own mount, or the ceremony is silently inert and its cleanup never runs.
 its heading works. That is why every other moving mark is a profile glyph that FLIPS east to west and
 tilts, rather than rotating: a profile glyph has an up, and a full rotation lays it on its beam ends
 on a northward leg. The tilt's own constant, and what moving it costs, are
-`specs/region-and-voyage.md`'s.
+`handbook/specs/region-and-voyage.md`'s.
 
 ## Print
 
@@ -377,7 +377,7 @@ survives the print stylesheet unless something says otherwise.
 **A plate on a page the reader is meant to save as PDF carries no `loading="lazy"`.** A lazy plate
 below the fold snapshots blank, so the page takes the eager default and authors nothing: this is a
 prohibition, not an instruction to add an attribute. It is scoped to the printed page. The atlas
-download is a heavyweight embed a reader scrolls rather than prints, and `specs/rulebook.md` ratifies
+download is a heavyweight embed a reader scrolls rather than prints, and `handbook/specs/rulebook.md` ratifies
 reserved frames plus lazy loading for it; that rule stands and this one does not reach it.
 
 **Save-as-PDF fidelity is not automatable headlessly.** An e2e may assert that a file came out
@@ -391,5 +391,5 @@ form, and a plate whose link fails is left a plain image rather than a dead one.
 
 ## How the cascade breaks here
 
-**The craft half of this file is `specs/cascade-traps.md`**: what the browser does to the declaration
+**The craft half of this file is `handbook/specs/cascade-traps.md`**: what the browser does to the declaration
 you write to get the look above, read before writing or moving CSS.
