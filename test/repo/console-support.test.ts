@@ -89,49 +89,8 @@ test("order and multiplicity survive, so a check's payload still reads as what h
   );
 });
 
-test("no suite carries a cancellation opening of its own: one roster, swept from the module's own exported data (#613)", () => {
-  const files = e2eFiles();
-  assert.ok(files.length > 20, `read only ${files.length} .ts files under e2e/; this sweep is looking at the wrong tree`);
-  const src = (f: string) => readE2eSource(join(E2E, f));
-  assert.ok(CANCELLATION_PREFIXES.length > 0, "the exported roster is empty, so the sweep below would read nothing");
-  for (const prefix of CANCELLATION_PREFIXES) {
-    assert.ok(src("support/console.ts").includes(prefix), `support/console.ts does not carry ${prefix}, so this sweep cannot bite`);
-    const offenders = files.filter((f) => f !== "support/console.ts" && src(f).includes(prefix));
-    assert.deepEqual(
-      offenders,
-      [],
-      `${offenders.join(", ")} spell a cancellation opening inline instead of calling the shared drop, which is how one file goes stale while the rest are fixed (#613). BLIND SPOT, and it has occupants: this cannot see a suite that takes a console delta and filters nothing, which five did before #613; that failure is LOUD (a red check the first time the message lands there) where a stale inline copy is silent`,
-    );
-  }
-  const adopters = files.filter(importsDrop);
-  assert.ok(adopters.length > 0, "no file imports support/console.ts at all, so the sweep above is reading an empty claim");
-  // The at-least-one adopter check above is satisfied by any other file, which is what left this gap (prover round 1).
-  const uncited = files.filter(
-    (f) => f !== "support/console.ts" && src(f).includes("dropExpectedCancellations(") && !importsDrop(f),
-  );
-  assert.deepEqual(uncited, [], `${uncited.join(", ")} call the shared drop without the house import spelling; a genuinely missing import is a ReferenceError the first time that check runs, and an unusual spelling reds here too, which is the safe direction`);
-});
-
-test("every read of the console accumulator goes through the shared drop, so a call site cannot quietly stop filtering (cold skeptic on PR #619)", () => {
-  const files = e2eFiles().filter((f) => f !== "support/console.ts" && f !== "harness.ts" && f !== "run.ts");
-  assert.ok(files.length > 20, `read only ${files.length} .ts files; this sweep is looking at the wrong tree`);
-  const offenders: string[] = [];
-  let reads = 0;
-  for (const f of files) {
-    readE2eSource(join(E2E, f)).split("\n").forEach((raw, i) => {
-      const line = raw.trim();
-      if (!line.includes("consoleErrors") || line.startsWith("//")) return;
-      if (line.startsWith("const {") || /=\s*consoleErrors\.length;?$/.test(line)) return;
-      reads += 1;
-      if (!line.includes("dropExpectedCancellations")) offenders.push(`${f}:${i + 1}`);
-    });
-  }
-  assert.ok(reads > 10, `only ${reads} accumulator reads classified; the exclusions above have eaten the sweep`);
-  assert.deepEqual(
-    offenders,
-    [],
-    `${offenders.join(", ")} read the console accumulator without passing it through the shared drop, so that check silently stopped filtering. BLIND SPOTS, declared, and the third was found by mutation rather than by reasoning (prover round 3): it skips e2e/run.ts, which creates the accumulator, and e2e/harness.ts, which fills it, so a check-like read there that skips the drop passes unseen (both read it only to build and fill it today); it reads one LINE, so a read split across lines escapes; and a check built from TWO separately excluded base captures plus a comparison line that never names the accumulator escapes it whole, since every line it could see is legitimately excluded. It errs the other way on a comment that merely mentions the accumulator, which is the direction a scanner here is owed`,
-  );
+test("some e2e file imports the shared drop, so vellum/e2e-cancellation-roster has an import binding to hold (Issue #675)", () => {
+  assert.ok(e2eFiles().filter(importsDrop).length > 0, "no e2e file imports support/console.ts at all, so the lint rule's import check reads an empty claim");
 });
 
 test("the accumulator is still the consoleErrors field vellum/e2e-console-read-through-drop reads, and more than ten e2e files still hand it to the shared drop, so a rename cannot leave that rule reading nothing (Issue #675)", () => {
