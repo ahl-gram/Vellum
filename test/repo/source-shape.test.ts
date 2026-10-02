@@ -81,10 +81,11 @@ const WORKER_PLANT = [
   "const k2 = \"Worker\" as const; export const viaConst = (u: URL) => new (globalThis as unknown as Record<string, new (u: URL) => object>)[k2]!(u);",
   "export const angledName = <string>\"SharedWorker\";",
   "export const checkedName = \"Worker\" satisfies string;",
+  "export const extra = () => new Worker(new URL(\"./worker.ts\", import.meta.url), { type: \"module\" }, 1);",
 ];
 
 test("a worker spawn in the site is the one static form the bundler reads, wrapped or single-quoted, and any other form reports", async () => {
-  assert.deepEqual(await houseReports(WORKER_PLANT, "src/site/explorer/worker-client.ts"), at(WORKER, [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 45, 46, 47]), "BLIND SPOTS, declared, each erring toward passing: the name assembled from pieces, or handed to eval or Reflect.get; and a TypeScript value position other than the four casts (an instantiation, an import alias, an export assignment, an enum member), each of which npm run check refuses first (TS2635, TS1294)");
+  assert.deepEqual(await houseReports(WORKER_PLANT, "src/site/explorer/worker-client.ts"), at(WORKER, [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 45, 46, 47, 48]), "BLIND SPOTS, declared, each erring toward passing: the name assembled from pieces, or handed to eval or Reflect.get; and a TypeScript value position other than the four casts (an instantiation, an import alias, an export assignment, an enum member), each of which npm run check refuses first (TS2635, TS1294)");
 });
 
 const viteWorkerMatcher = (): RegExp => {
@@ -107,7 +108,7 @@ const SPELLINGS = [
   "new Worker(new URL(\"./worker.ts\", import.meta\n.url), { type: \"module\" })",
 ];
 
-test("the worker rule passes exactly the spawn spellings Vite's own matcher rewrites, read from the installed Vite, so a spelling the bundler skips cannot lint clean", async () => {
+test("the worker rule passes no spawn spelling Vite's own matcher skips, read from the installed Vite, and every listed spelling it rewrites; a backtick target, which Vite also takes, still reports by design", async () => {
   const vite = viteWorkerMatcher();
   assert.ok(vite.test(SPELLINGS[0]!) && !vite.test(SPELLINGS[3]!), "the matcher read from Vite neither takes the plain spawn nor refuses a parenthesised callee, so this reader has lost it");
   for (const spelling of SPELLINGS) {
@@ -158,8 +159,13 @@ test("no e2e file but the console module spells a cancellation opening, in a str
   ], "e2e/suites/home.ts"), at(ROSTER, [2]));
   assert.deepEqual(await houseReports([
     "import * as other from \"../support/elsewhere.ts\";",
-    "export const g = (other as unknown as { dropExpectedCancellations: (e: string[]) => string[] }).dropExpectedCancellations([]);",
-  ], "e2e/suites/home.ts"), at(ROSTER, [2]));
+    "type Dropper = { dropExpectedCancellations: (e: string[]) => string[] };",
+    "export const g = (other as unknown as Dropper).dropExpectedCancellations([]);",
+    "export const h = (other as unknown as Dropper)[\"dropExpectedCancellations\"]([]);",
+    "export const i = (other as unknown as Dropper)[`dropExpectedCancellations`]([]);",
+    "const { dropExpectedCancellations: d } = other as unknown as Dropper; export const j = d([]);",
+    "const name = \"dropExpectedCancellations\"; export const k = (other as unknown as Record<string, (e: string[]) => string[]>)[name]!([]);",
+  ], "e2e/suites/home.ts"), at(ROSTER, [3, 4, 5, 6, 7]));
   assert.deepEqual(await houseReports(["export const roster = [\"Transition was skipped\"];"], "e2e/support/console.ts"), []);
 });
 
@@ -181,6 +187,8 @@ const CLEAN_READS = [
   "}",
   "export type Picked = Pick<SuiteContext, \"consoleErrors\">;",
   "export interface Own { consoleErrors: string[] }",
+  "export const withDefault = (consoleErrors: string[] = []): number => dropExpectedCancellations(consoleErrors).length;",
+  "export const filtered = (ctx: SuiteContext): number => { const consoleErrors = dropExpectedCancellations(ctx.consoleErrors); return 0; };",
 ];
 const DIRTY_READS = [
   "export function dirty(ctx: SuiteContext, base: number, helper: (o: object) => boolean): void {",
@@ -203,6 +211,9 @@ const DIRTY_READS = [
   "  const key = \"consoleErrors\";",
   "  check(\"B14\", (Reflect.get(ctx, \"consoleErrors\") as string[]).length === 0);",
   "  check(\"B15\", (ctx as unknown as Record<string, string[]>)[key]!.length === 0);",
+  "  const lengthKey = \"length\";",
+  "  const n2 = consoleErrors[lengthKey as \"length\"];",
+  "  check(\"B16\", n2 === 0);",
   "}",
 ];
 const OWNER_SHAPE = ["export const sink = (consoleErrors: string[]): void => { consoleErrors.push(\"x\"); };"];
@@ -212,7 +223,7 @@ test("every read of the console accumulator outside its two owners goes through 
   const offset = CLEAN_READS.length;
   assert.deepEqual(
     await houseReports([...CLEAN_READS, ...DIRTY_READS], "e2e/suites/home.ts"),
-    at(READS, [3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18, 19].map((n) => n + offset)),
+    at(READS, [3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18, 19, 22].map((n) => n + offset)),
     "BLIND SPOTS, declared, each erring toward passing (a handbook/errata/guards.md row): a base capture of the destructured accumulator compared directly (const n = consoleErrors.length; then n === 0 in a check), which the old line scanner excused too; two such captures and a comparison of them; a base handed to a helper that compares it, since a base legitimately crosses files as a call argument; the accumulator under another name (const { consoleErrors: raw } = ctx), or its name assembled from pieces; the nested destructure const { consoleErrors: { length } } = ctx; and any read inside e2e/run.ts or e2e/harness.ts, the two owners that create and fill it",
   );
   assert.deepEqual(await houseReports(["import { consoleErrors } from \"../support/elsewhere.ts\";", "export { consoleErrors };"], "e2e/suites/home.ts"), [], "an import or export specifier binds the name and reads nothing");

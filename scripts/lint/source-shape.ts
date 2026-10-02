@@ -126,15 +126,22 @@ const e2eCancellationRoster: Rule.RuleModule = {
     return {
       Literal(node) {
         const text = typeof node.value === "string" ? node.value : "regex" in node ? node.regex.pattern : "";
-        if (carriesOpening(text)) found(node);
+        if (carriesOpening(text) || (text === DROP && !inTypePosition(node.parent))) found(node);
       },
       TemplateElement(node) {
         if (carriesOpening(node.value.cooked ?? node.value.raw)) found(node);
       },
       CallExpression(node) {
-        const callee = node.callee as Node;
-        const throughMember = callee.type === "MemberExpression" && !callee.computed && isName(callee.property as Node, DROP);
-        if (throughMember || (isName(callee, DROP) && !importedDrop(context, callee))) found(node);
+        if (isName(node.callee as Node, DROP) && !importedDrop(context, node.callee as Node)) found(node);
+      },
+      MemberExpression(node) {
+        if (!node.computed && isName(node.property as Node, DROP)) found(node);
+      },
+      Property(node) {
+        if (node.parent.type === "ObjectPattern" && !node.computed && isName(node.key as Node, DROP)) found(node);
+      },
+      TemplateLiteral(node) {
+        if (wholeString(node) === DROP) found(node);
       },
     };
   },
