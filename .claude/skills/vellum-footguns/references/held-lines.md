@@ -42,7 +42,8 @@ Noted 2026-10-02, promoted: Gate 1 item 3 now carries it with its incident (Issu
 
 - Count the terms; do not pattern-match. Earns its line when: the prover reports a mutant matching the pattern and escaping.
 
-Noted 2026-10-02, promoted: PR #631's brace-bounded pattern is that incident, and Gate 1 item 13 now says match the bare token and count, via Issue #708.
+Noted 2026-10-02, promoted: PR #631's brace-bounded pattern is that incident, and Gate 1 item 13 now says count call sites by the bare token, via Issue #708.
+
 - The element shim never grows a selector matcher; where its empty answer makes a removal unprovable, say so. Earns its line when: a guard proved unable to red that way.
 - CASUALTY, named in PR #608: `node --test` prints the spec reporter even when piped, so a mutation loop grepping TAP's failure line reads every mutant as escaped. Earns its line when: a zero-red run that is the reporter.
 

@@ -276,22 +276,18 @@ const SIZE_PROBES: [string, Payload, string[]][] = [
   ["a new page", edit("Write", `${LONG_ROOT}/src/pages/a-new-room-name/index.astro`, "x"), ["## Gate 4", "## Gate 3"]],
   ["a new site module", edit("Write", `${LONG_ROOT}/src/site/a-room-name/a-new-module-name.ts`, "x"), ["## Gate 4"]],
   ["the renderer", edit("Edit", `${LONG_ROOT}/src/render/layers/a-layer-name.ts`, "x"), ["## Gate 6"]],
-  ["a push", bash("git push -u origin a-long-branch-name"), ["## Gate 5"]],
-  ["a PR body from an unreadable file", bash("gh pr create --body-file a-missing-body-file.md", "/"), ["## Gate 5", "could not read"]],
-  ["a shell line that writes a script, kills a browser, pushes and opens a PR", bash(EVERY_SHELL_NOTE, "/"), ["## Gate 5", "could not read", "double the backslash", "browser profile"]],
+  ["a push", bash("git push -u origin a-long-branch-name", LONG_ROOT), ["## Gate 5"]],
+  ["a PR body from an unreadable file", bash("gh pr create --body-file a-missing-body-file.md", LONG_ROOT), ["## Gate 5", "could not read"]],
+  ["a shell line that writes a script, kills a browser, pushes and opens a PR", bash(EVERY_SHELL_NOTE, LONG_ROOT), ["## Gate 5", "could not read", "double the backslash", "browser profile"]],
 ];
 
 const sizeChecks = async (report: (ok: boolean, line: string) => void): Promise<void> => {
-  const edited = SIZE_PROBES.map(([, payload]) => payload.tool_input?.file_path).filter((p): p is string => p !== undefined);
-  report(LONG_ROOT.length === 100 && edited.length > 0 && edited.every((p) => p.startsWith(`${LONG_ROOT}/`)), `the size probes' ${edited.length} edited paths sit under a root of ${LONG_ROOT.length} characters`);
+  const quoted = SIZE_PROBES.map(([, payload]) => payload.tool_input?.file_path ?? payload.cwd ?? "");
+  report(LONG_ROOT.length === 100 && quoted.every((p) => p === LONG_ROOT || p.startsWith(`${LONG_ROOT}/`)), `the size probes' ${quoted.length} quoted paths sit under a root of ${LONG_ROOT.length} characters`);
   for (const [name, payload, needles] of SIZE_PROBES) {
     const sessionId = `selftest-size-${process.pid}-${name}`;
     const text = (await decide({ ...payload, session_id: sessionId }))?.hookSpecificOutput?.additionalContext ?? "";
-    try {
-      unlinkSync(statePath(sessionId));
-    } catch {
-      /* nothing was written for a null decision */
-    }
+    rmSync(statePath(sessionId), { force: true });
     const found = needles.filter((n) => text.includes(n));
     report(found.length === needles.length && text.length <= HOOK_CONTEXT_LIMIT, `${name}: the pasted note carries ${found.join(", ")} in ${text.length} of ${HOOK_CONTEXT_LIMIT} characters`);
   }

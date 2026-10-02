@@ -66,7 +66,7 @@ Scars: #49, #124, #270, #275, #295, #320, #353, #358, #360, #363, #380, #383, #3
     stop a synchronous block (Issue #564). Set its `timeout` far above the worst real run, keep one
     child that outlives it written as a SINGLE command, since killing a multi-command child orphans
     its grandchild and leaks a process per firing, pin what reaches the spawn, not what the option
-    builder returns, and give it its own `TMPDIR` (PR #552).
+    builder returns, and give a child that reads shared state its own `TMPDIR` (PR #552).
 11. **Narrow-width or column-width work owes a sweep across seeds, never the seed-42 fixture.** Seed
     42 is one of the few clean seeds, which is why a sideways-scroll defect left the suite green
     while other seeds overflowed. Pin the declaration by regex, so flipping its value fails too and
@@ -97,8 +97,8 @@ Scars: #49, #124, #270, #275, #295, #320, #353, #358, #360, #363, #380, #383, #3
     inverting the selector (PR #410).
 19. **A reference that went through a transform shares the defect's oracle**: also assert against
     the RAW source, on what the transform cannot represent (Issue #443).
-20. **A ratified acceptance gets a driving check beside any pure-function or source-text read**,
-    never instead of one (PR #631).
+20. **A ratified acceptance gets a driving check beside any pure-function or source-text read**
+    (PR #631).
 
 ## Gate 2: before writing an e2e check or a CDP probe
 
