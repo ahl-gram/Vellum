@@ -33,6 +33,7 @@ const engineNoIdLookup: Rule.RuleModule = {
   },
 };
 
+const VALUE_WRAPPERS = new Set(["TSAsExpression", "TSNonNullExpression", "TSSatisfiesExpression", "TSTypeAssertion"]);
 const WORKERS = new Set(["Worker", "SharedWorker"]);
 const STATIC_TARGET = /^\.\/[\w-]+\.ts$/;
 const isName = (node: Node | undefined, name: string): boolean => node?.type === "Identifier" && node.name === name;
@@ -54,7 +55,7 @@ const constructsOrTests = (id: Node, parent: Node): boolean =>
   (parent.type === "UnaryExpression" && parent.operator === "typeof") ||
   (parent.type === "BinaryExpression" && parent.operator === "instanceof" && parent.right === id) ||
   (parent.type === "Property" && parent.key === id && !parent.computed && parent.parent.type === "ObjectExpression") ||
-  parent.type.startsWith("TS");
+  (parent.type.startsWith("TS") && !VALUE_WRAPPERS.has(parent.type));
 
 const workerSpawnStatic: Rule.RuleModule = {
   meta: problem("a worker is spawned as a bare new Worker(new URL(\"./<name>.ts\", import.meta.url), { type: \"module\" }), or new SharedWorker in the same form, written out in full: the bundler rewrites only that form, never a constructor reached through a member, a variable or an alias (handbook/specs/site-architecture.md)"),
@@ -127,7 +128,6 @@ const e2eCancellationRoster: Rule.RuleModule = {
 
 const ACCUMULATOR = "consoleErrors";
 const OWNERS = new Set(["e2e/run.ts", "e2e/harness.ts"]);
-const VALUE_WRAPPERS = new Set(["TSAsExpression", "TSNonNullExpression", "TSSatisfiesExpression", "TSTypeAssertion"]);
 const FUNCTIONS = new Set(["ArrowFunctionExpression", "FunctionDeclaration", "FunctionExpression"]);
 const BINDINGS = new Set(["ImportSpecifier", "ExportSpecifier"]);
 

@@ -61,7 +61,13 @@ test("a worker spawn in the site is the one static form the bundler reads, wrapp
     "export const isWorker = (w: unknown): boolean => w instanceof Worker;",
     "export const labels = { Worker: \"a key, not a constructor\" };",
     "export const hold = (w: Worker | null): Worker | null => w;",
-  ], "src/site/explorer/worker-client.ts"), at(WORKER, [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]));
+    "export const cast = Worker as typeof Worker;",
+    "export const asserted = Worker!;",
+    "export const checked = Worker satisfies unknown;",
+    "export const angled = <typeof Worker>Worker;",
+    "export const proxied = () => new Proxy(Worker, {});",
+    "export const bag = { make: Worker };",
+  ], "src/site/explorer/worker-client.ts"), at(WORKER, [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 27, 28, 29, 30, 31, 32]));
 });
 
 test("a single-escaped regex class or dot in a backtick string reports in every chunk, an odd run of backslashes included, and String.raw is the remedy", async () => {
@@ -177,6 +183,8 @@ test("each scoped rule resolves at error inside its scope and not outside it, an
     assert.equal((await resolvedRules(outside))[rule], undefined, `${rule} reaches ${outside}, outside its scope`);
   }
   assert.deepEqual((await resolvedRules("src/site/explorer/app.ts"))["max-lines"], [2, 400], "app.ts no longer resolves max-lines at the 400-line bound Issue #191 ratified for it");
-  const nested = (await eslint.calculateConfigForFile("src/site/living-chart/nested/deeper/part.ts")) as { rules?: Record<string, unknown> };
-  assert.deepEqual(nested.rules?.[ENGINE], [2], "the engine rule does not reach a module nested under src/site/living-chart/, so a subdirectory escapes it");
+  for (const [rule, nested] of [[ENGINE, "src/site/living-chart/nested/deeper/part.ts"], [WORKER, "src/site/explorer/nested/deeper/part.ts"], [ROSTER, "e2e/suites/nested/deeper/part.ts"], [READS, "e2e/suites/nested/deeper/part.ts"]] as const) {
+    const resolved = (await eslint.calculateConfigForFile(nested)) as { rules?: Record<string, unknown> };
+    assert.deepEqual(resolved.rules?.[rule], [2], `${rule} does not reach ${nested}, so a module nested deeper in its scope escapes it`);
+  }
 });
