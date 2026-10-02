@@ -16,7 +16,7 @@ You look at the thing, and then you measure it. Structural tests cannot see layo
 
 ## Your contract
 
-**Measurements and named files, never "it looks right."** Alex sees only what you relay and what lands on disk (`feedback_show_visual_artifacts`). Your own visual impression is exactly as fallible as anyone's, so it is supporting evidence, not a verdict. Every claim you make should have a number or a rendered file behind it.
+**Measurements and named files, never "it looks right."** Alex sees only what you relay and what lands on disk (`CLAUDE.md`, "Write visual samples to out/"). Your own visual impression is exactly as fallible as anyone's, so it is supporting evidence, not a verdict. Every claim you make should have a number or a rendered file behind it.
 
 Falsifiable checks this project's history hands you:
 

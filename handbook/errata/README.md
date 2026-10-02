@@ -9,7 +9,7 @@ This directory holds the findings a pull request could not fix and did not deser
 | `handbook/errata/guards.md` | what the tests, the e2e suites, CI, the hooks and the linter do not yet cover or prove |
 | `handbook/errata/prose.md` | the specs, the code comments, the agent definitions, the page copy |
 
-**A review finding has exactly three exits: it is fixed in the pull request, it is filed as an issue, or it joins this ledger as a row.** A finding left as prose in a PR body alone is a defect in the PR. The one exception is the fold: a finding the PR fixes because it caused it (an accessibility failure of its own making) or because Alex ruled the batch folded.
+**A review finding has exactly three exits: it is fixed in the pull request, it is filed as an issue, or it joins this ledger as a row.** A finding left as prose in a PR body alone is a defect in the PR. Which exit a finding may take, one about the pull request's own work (an accessibility failure like any other) or a sibling defect, is `handbook/specs/development-workflow.md` step 15's, and when a sibling defect may be folded into the pull request instead is `vellum-footguns` Gate 5 item 7's.
 
 ## A row
 

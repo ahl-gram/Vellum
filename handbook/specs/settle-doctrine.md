@@ -120,6 +120,11 @@ section points there rather than restating it.
   `:focus-visible` never applies, and nothing throws: the focus path silently does nothing. A suite
   needs no call of its own unless it turned the emulation off, and a build that ignores the request
   degrades to exactly that silent no-op.
+- **A popup opened at page load is refused whatever the origin, and the refusal leaves a blank tab
+  that reads as success.** A probe opens one through `Runtime.evaluate` with `userGesture: true` or
+  a real dispatched input event, then reads what the opened tab actually holds; anything else the
+  browser gates on user activation is measured under a gesture the same way before its result is
+  trusted.
 - **The harness serves the BUILT site.** `e2e/run.ts` serves `dist/`, with
   `VELLUM_SITE_DIR` as the override, and `dist/` does not exist in a fresh checkout. A change under
   `public/` is invisible to every suite until the build runs again. Two causes put a run on a stale
@@ -140,7 +145,10 @@ section points there rather than restating it.
   both lanes back on one port. The run does not bind the debug port, it CONNECTS to it, so
   `assertDebugPortFree` in `e2e/harness.ts` preflights it once ABOVE the launch retry loop:
   a killed attempt does not release its port synchronously, so a per-attempt preflight would report
-  this run's own dying browser as the stray.
+  this run's own dying browser as the stray. **The preflight is not a lock**: it catches a browser
+  already holding the port, a stray or a lane still running, but two lanes started at the same
+  moment on the same debug port can both pass it before either browser binds, so distinct port
+  variables are what keep two local lanes apart.
 - **A visual claim in a suite is carried by a control taken in the same run.** A
   claim about PAINT goes through the one-row pixel strip, because no hit test and no computed style
   can see paint (`sampleRow` and `luminance` in `e2e/support/pixel.ts`). A claim about an

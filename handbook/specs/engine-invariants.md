@@ -193,6 +193,14 @@ pool, not the output.
 
 The e2e halves are `H11` and `H12` in `e2e/suites/hunt.ts`.
 
+**A new clue kind ships its whole kit**, or the guarantees above hold for every kind but it: its
+candidate and `holds` predicate (`src/world/daily-hunt-clue-facts.ts`); its place in the test-support
+mirror (`ALLOWED_KINDS` and `expectedClueText` in `test-support/daily-hunt-geometry.ts`) and its case
+in the independent geometry re-check (`checkClueGeometry` in `test/world/daily-hunt-clues.test.ts`);
+a drift-alarm entry there for every constant it mirrors; and, where its truth rests on what the chart
+draws, a findability gate that the closed-gate test in that file covers and an e2e half beside `H11`
+and `H12`.
+
 ## Engine outputs a consuming surface must respect
 
 **Lore prose depends on call order.** `createLoreWriter` in `src/society/lore.ts` keeps a per-writer

@@ -138,6 +138,10 @@ about a rule, the rulebook wins.
   - A closed tour and its reverse cost the same, so orientation is CHOSEN by `orientCycle` in
     `src/render/voyage-tour.ts` rather than inherited from the hull's winding; without it every
     exact-order fixture is ambiguous.
+- **A reorder of the itinerary invalidates every per-leg number measured before it.** Which leg a
+  fixture lands on, and that leg's length, flips and day, are functions of the order, so a per-leg
+  claim is re-measured after any change to the tour, never carried forward; picking the leg on the
+  metric the assertion reads is `vellum-footguns` Gate 1 item 2's.
 - **The order at rest is a pure function of the world.** A quiet mid-drag rebuild reuses the cached
   order or falls back to a straight line for that frame rather than recomputing the matrix per drag
   frame. The arm's half of that same quiet flag is `handbook/specs/explorer-doctrine.md`'s: pinning it true
