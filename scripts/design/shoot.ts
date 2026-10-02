@@ -62,7 +62,7 @@ const optional = (v: unknown, ok: (x: unknown) => boolean): boolean => v === und
 const text = (v: unknown): boolean => typeof v === "string" && v.length > 0;
 const finite = (v: unknown): boolean => typeof v === "number" && Number.isFinite(v);
 const clipOk = (v: unknown): boolean =>
-  isRecord(v) && finite(v["x"]) && finite(v["y"]) && positiveInt(v["width"]) && positiveInt(v["height"]) && optional(v["scale"], finite);
+  isRecord(v) && finite(v["x"]) && finite(v["y"]) && positiveInt(v["width"]) && positiveInt(v["height"]) && optional(v["scale"], (s) => finite(s) && (s as number) > 0);
 
 function shotProblem(s: Record<string, unknown>): string | null {
   if (!text(s["url"])) return "url must be a non-empty string";
@@ -73,7 +73,7 @@ function shotProblem(s: Record<string, unknown>): string | null {
   if (!optional(s["scriptWaitMs"], (v) => Number.isInteger(v) && (v as number) >= 0)) return "scriptWaitMs must be a whole number of milliseconds";
   if (!optional(s["script"], text) || !optional(s["probe"], text)) return "script and probe must be non-empty strings";
   if (!optional(s["full"], (v) => typeof v === "boolean")) return "full must be true or false";
-  if (!optional(s["clip"], clipOk)) return "clip must carry finite x and y and positive integer width and height";
+  if (!optional(s["clip"], clipOk)) return "clip must carry finite x and y, positive integer width and height, and a positive finite scale if any";
   if (s["full"] === true && s["clip"] !== undefined) return "a full-page shot takes no clip";
   return null;
 }

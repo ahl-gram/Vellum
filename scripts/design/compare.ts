@@ -83,9 +83,11 @@ export function compareRows(manifests: Manifests, measure: Measure): Row[] {
 const manifestOf = (dir: string): ManifestEntry[] =>
   existsSync(join(dir, "manifest.json")) ? (JSON.parse(readFileSync(join(dir, "manifest.json"), "utf8")) as ManifestEntry[]) : [];
 
+export const measureIn = (dirs: readonly [string, string, string], pair: (a: string, b: string) => number): Measure =>
+  (from, to, name) => pair(join(dirs[from], name), join(dirs[to], name));
+
 function compareSweeps(controlA: string, controlB: string, branch: string): Row[] {
-  const dirs = [controlA, controlB, branch] as const;
-  return compareRows([manifestOf(controlA), manifestOf(controlB), manifestOf(branch)], (from, to, name) => ae(join(dirs[from], name), join(dirs[to], name)));
+  return compareRows([manifestOf(controlA), manifestOf(controlB), manifestOf(branch)], measureIn([controlA, controlB, branch], ae));
 }
 
 const shown = (ae: number | null): string => (ae === null ? "-" : ae === Number.POSITIVE_INFINITY ? "size differs" : String(ae));

@@ -6,7 +6,7 @@ import { dirname, extname, join, resolve } from "node:path";
 import vm from "node:vm";
 import { assertLaidOutAt, captureParams, FULL_PAGE_CAP, parseShots, readProbe, servedUrl, withoutFavicon, withoutHash, type Shot } from "../../scripts/design/shoot.ts";
 import { BAND, modeOf, parseSweepArgs, PIN, planSweep, PROBE, routesOf } from "../../scripts/design/oracle.ts";
-import { aeOf, compareRows, failed, sizedAe, verdictOf, type Row } from "../../scripts/design/compare.ts";
+import { aeOf, compareRows, failed, measureIn, sizedAe, verdictOf, type Row } from "../../scripts/design/compare.ts";
 import { stillArgs } from "../../scripts/design/stills.ts";
 
 const REPO = resolve(import.meta.dirname, "..", "..");
@@ -37,6 +37,12 @@ test("a shot list is refused, naming the shot, wherever a job would otherwise ru
     [{ ...shot(), scriptWaitMs: 1.5 }, /shot 1: scriptWaitMs/],
     [{ ...shot(), scriptWaitMs: -1 }, /shot 1: scriptWaitMs/],
     [{ ...shot(), clip: { x: 0, y: 0, width: 10, height: 10, scale: Number.NaN } }, /shot 1: clip/],
+    [{ ...shot(), clip: { x: 0, y: 0, width: 10, height: 10, scale: Number.POSITIVE_INFINITY } }, /shot 1: clip/],
+    [{ ...shot(), clip: { x: 0, y: 0, width: 10, height: 10, scale: "2" } }, /shot 1: clip/],
+    [{ ...shot(), clip: { x: 0, y: 0, width: 10, height: 10, scale: 0 } }, /shot 1: clip/],
+    [{ ...shot(), clip: { x: 0, y: 0, width: 10, height: 10, scale: -1 } }, /shot 1: clip/],
+    [{ ...shot(), waitMs: "100" }, /shot 1: waitMs/],
+    [{ ...shot(), scriptWaitMs: "100" }, /shot 1: scriptWaitMs/],
     [{ ...shot(), script: "" }, /shot 1: script and probe/],
     [{ ...shot(), probe: 7 }, /shot 1: script and probe/],
     [{ ...shot(), full: "yes" }, /shot 1: full/],
@@ -134,6 +140,7 @@ test("the sweep runs with motion reduced unless it is asked for motion", () => {
   assert.throws(() => parseSweepArgs(["dist", "out/a", "--motoin"]), /usage/, "a mistyped flag would leave motion reduced unnoticed");
   assert.throws(() => parseSweepArgs(["dist", "out/a", "--reduced-motion"]), /usage/, "the camera's flag means the opposite here");
   assert.throws(() => parseSweepArgs(["dist", "out/a", "main-1", "extra"]), /usage/);
+  assert.throws(() => parseSweepArgs(["dist", "out/a", "--motion", "--motoin"]), /usage/, "a known flag does not excuse an unknown one");
 });
 
 test("the caption pin rewrites every timing on every element the archive pinned, in the page itself, and touches nothing else", () => {
@@ -171,10 +178,33 @@ test("a page counts as shot only where that run's manifest lists it, controls ar
   const rows = compareRows([listed("a.png", "flip.png", "gone.png", "half.png", "moved.png"), listed("a.png", "flip.png", "gone.png", "moved.png"), listed("a.png", "flip.png", "half.png", "moved.png", "new.png")], measure);
   assert.deepEqual(Object.fromEntries(rows.map((r) => [r.name, verdictOf(r)])), { "a.png": "same", "flip.png": "untrusted", "gone.png": "gone", "half.png": "missing", "moved.png": "differs", "new.png": "new" });
   assert.deepEqual(calls.sort(), ["01 a.png", "01 flip.png", "01 moved.png", "12 a.png", "12 moved.png"], "an untrusted, lost, half-shot or new page is never measured");
+  assert.deepEqual(rows.map((r) => r.name), ["a.png", "flip.png", "gone.png", "half.png", "moved.png", "new.png"], "the report reads in name order");
   assert.equal(sizedAe("1280 800", "1280 840", () => 0), Number.POSITIVE_INFINITY, "a page that only grew at the bottom scores 0 against its own edge");
+  assert.equal(sizedAe("1280 800", "1264 800", () => 0), Number.POSITIVE_INFINITY, "a width change too");
   assert.equal(sizedAe("1280 800", "1280 800", () => 7), 7);
   assert.equal(verdictOf(row({ branch: Number.POSITIVE_INFINITY })), "differs");
   assert.equal(verdictOf(row({ control: Number.POSITIVE_INFINITY, branch: null })), "untrusted");
+});
+
+test("a row carries the branch shot's own missing resources and console errors, and nothing from the controls", () => {
+  const manifests = [
+    [{ name: "a.png", consoleErrors: ["console.error: control only"] }, { name: "b.png" }],
+    [{ name: "a.png" }, { name: "b.png" }],
+    [{ name: "a.png" }, { name: "b.png", http4xx: ["404 http://127.0.0.1/fonts/x.woff2"], consoleErrors: ["console.error: y"] }],
+  ] as const;
+  const rows = compareRows(manifests, () => 0);
+  assert.deepEqual(rows.map((r) => [r.name, r.errors, verdictOf(r)]), [
+    ["a.png", [], "same"],
+    ["b.png", ["404 http://127.0.0.1/fonts/x.woff2", "console.error: y"], "errors"],
+  ]);
+});
+
+test("the controls and the branch are measured as the files in their own directories", () => {
+  const seen: string[] = [];
+  const measure = measureIn(["out/c-a", "out/c-b", "out/br"], (a, b) => (seen.push(`${a} ${b}`), 0));
+  measure(0, 1, "home-1280.png");
+  measure(1, 2, "home-1280.png");
+  assert.deepEqual(seen, [`${join("out/c-a", "home-1280.png")} ${join("out/c-b", "home-1280.png")}`, `${join("out/c-b", "home-1280.png")} ${join("out/br", "home-1280.png")}`]);
 });
 
 test("a comparison fails on a trusted difference, an error, a lost or half-shot page, or when it trusted no row at all", () => {
