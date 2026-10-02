@@ -169,7 +169,8 @@ section points there rather than restating it.
   is for a scrolling page alone, for three reasons: it drops a chart room's bottom-left fixed
   furniture; it lays the page out at its document height, not at the viewport a visitor sees; and
   it CHANGES the page it photographs, so it is taken once per page and a page is never polled that
-  way (measured 2026-10-02 on home and the Specimen Book, cause unverified).
+  way; and on home and the atlas at 1280 it varies between runs where a viewport capture of the
+  same page does not, so their rows are often untrusted (measured 2026-10-02, cause unverified).
 - **A sleep past an animation's nominal duration still lands mid-animation.** The place card's
   unfurl is `paperUnfurl` in `public/motion.css`, a `rotateX` roll that the `.pc-inner` rules in
   `public/living-chart.css` grade `--unfurl-quick` (400ms) on a shown card and `--unfurl` (650ms)

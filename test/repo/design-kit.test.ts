@@ -79,6 +79,7 @@ test("a shot of a page that answered with an error stops the run, and a missing 
   const faq = "http://127.0.0.1:8123/faq/";
   assert.throws(() => assertPageServed(shot({ out: "out/faq.png" }), faq, ["404 http://127.0.0.1:8123/faq/"]), /out\/faq\.png would photograph an error page: the page itself answered 404/);
   assert.throws(() => assertPageServed(shot(), `${faq}#seed=1`, ["404 http://127.0.0.1:8123/faq/"]), /error page/);
+  assert.throws(() => assertPageServed(shot(), faq, ["404 http://127.0.0.1:8123/fonts/late.woff2", "404 http://127.0.0.1:8123/faq/"]), /error page/, "the page's own answer can arrive after another request's");
   assert.doesNotThrow(() => assertPageServed(shot(), faq, ["404 http://127.0.0.1:8123/fonts/x.woff2", "404 http://127.0.0.1:8123/faq/other/"]));
 });
 
@@ -89,6 +90,7 @@ test("the camera takes one list of shots, a site and the reduced-motion switch, 
   assert.throws(() => parseShootArgs(["shots.json", "--motion"]), /--motion is not one of its flags/, "the sweep's flag means the opposite here");
   assert.throws(() => parseShootArgs(["shots.json", "--site", "--reduced-motion"]), /not one of its flags/, "a flag is not a site");
   assert.throws(() => parseShootArgs(["shots.json", "more.json"]), /usage/);
+  assert.throws(() => parseShootArgs(["--site", "a", "--site", "b", "shots.json"]), /--site is given twice/);
   assert.throws(() => parseShootArgs([]), /usage/);
 });
 
@@ -141,6 +143,7 @@ test("every page is shot at a desktop and a true phone viewport, under the archi
     assert.deepEqual(s.clip, s.mode === "head" ? { x: 0, y: 0, width: s.width, height: BAND } : undefined, `${s.name} clip`);
   }
   assert.equal(BAND, 122, "the head cluster's band, as the archive clipped it");
+  assert.throws(() => planSweep(["/a/b/", "/ab/"], "out/s"), /\/a\/b\/ and \/ab\/ would both be shot as ab-1280\.png/);
   assert.equal(byName.get("explorer-390-head.png")?.url, "/explorer/");
 });
 
@@ -237,6 +240,8 @@ test("the compare takes three sweeps, two of them distinct controls, and refuses
   assert.throws(() => parseCompareArgs(["out/a", "--fuzz", "out/br"]), /usage/, "a flag is never a sweep");
   assert.throws(() => parseCompareArgs(["out/a", "out/b"]), /usage/);
   assert.throws(() => parseCompareArgs(["out/a", "out/a/", "out/br"]), /both controls/);
+  assert.throws(() => parseCompareArgs(["out/a", "out/b", "./out/b/"]), /the branch and a control/);
+  assert.throws(() => parseCompareArgs(["out/a", "out/b", "out/a"]), /the branch and a control/);
 });
 
 test("the controls and the branch are measured as the files in their own directories", () => {

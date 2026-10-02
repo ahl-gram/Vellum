@@ -53,7 +53,7 @@ in TypeScript under `scripts/design/`, inside `npm run check` and `npm run lint`
 are taken through `shootAll` in `scripts/design/shoot.ts` rather than a shooter of its own, and two
 builds are compared the way `handbook/specs/settle-doctrine.md` says. Assets live in `design/kit/`,
 which a round links rather than copies. The kit holds content and no code, and
-`test/repo/design-kit.test.ts` refuses code there: code in the kit is not harmful in itself, but it
+`test/repo/design-kit.test.ts` refuses JavaScript and TypeScript there: code in the kit is not harmful in itself, but it
 escapes `npm run check` and `npm run lint` and would be a second home for tools beside
 `scripts/design/`. The kit is also where the house faces live: the site builds its fonts from
 `design/kit/fonts/` (`handbook/specs/site-architecture.md`), so a face changed there changes the

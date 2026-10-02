@@ -91,7 +91,9 @@ export function parseCompareArgs(args: readonly string[]): readonly [string, str
   if (a === undefined || b === undefined || branch === undefined || extra.length > 0 || args.some((x) => x.startsWith("-"))) {
     throw new Error("usage: node scripts/design/compare.ts <control-a> <control-b> <branch>");
   }
-  if (resolve(a) === resolve(b)) throw new Error(`${a} is both controls, so every row would trust itself`);
+  const [ra, rb, rbr] = [resolve(a), resolve(b), resolve(branch)];
+  if (ra === rb) throw new Error(`${a} is both controls, so every row would trust itself`);
+  if (rbr === ra || rbr === rb) throw new Error(`${branch} is the branch and a control, so every trusted row would match itself`);
   return [a, b, branch];
 }
 

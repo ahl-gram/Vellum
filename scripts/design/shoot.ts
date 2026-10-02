@@ -195,7 +195,8 @@ export function parseShootArgs(args: readonly string[]): ShootArgs {
   for (let i = 0; i < args.length; i++) {
     const a = args[i]!;
     if (a === "--reduced-motion") reducedMotion = true;
-    else if (a === "--site" && site === undefined && args[i + 1] !== undefined && !args[i + 1]!.startsWith("--")) site = args[++i];
+    else if (a === "--site" && site !== undefined) throw new Error(`${usage}; --site is given twice`);
+    else if (a === "--site" && args[i + 1] !== undefined && !args[i + 1]!.startsWith("--")) site = args[++i];
     else if (a.startsWith("--")) throw new Error(`${usage}; ${a} is not one of its flags`);
     else positional.push(a);
   }
@@ -204,14 +205,15 @@ export function parseShootArgs(args: readonly string[]): ShootArgs {
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  let args: ShootArgs;
+  let args: ShootArgs, shots: Shot[];
   try {
     args = parseShootArgs(process.argv.slice(2));
+    shots = parseShots(JSON.parse(readFileSync(args.list, "utf8")));
   } catch (err) {
     console.error(err instanceof Error ? err.message : err);
     process.exit(2);
   }
-  shootAll(parseShots(JSON.parse(readFileSync(args.list, "utf8"))), { site: args.site, reducedMotion: args.reducedMotion })
+  shootAll(shots, { site: args.site, reducedMotion: args.reducedMotion })
     .then((results) => console.log(JSON.stringify(results, null, 1)))
     .catch((err: unknown) => {
       console.error(err instanceof Error ? err.message : err);

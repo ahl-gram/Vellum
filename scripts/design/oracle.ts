@@ -46,6 +46,13 @@ type PlannedShot = Shot & { readonly route: string; readonly mode: Mode; readonl
 
 export function planSweep(routes: readonly string[], out: string): PlannedShot[] {
   const ordered = MODE_ORDER.flatMap((m) => routes.filter((r) => modeOf(r) === m));
+  const named = new Map<string, string>();
+  for (const route of ordered) {
+    const name = shotName(route, VIEWPORTS[0].width, modeOf(route));
+    const other = named.get(name);
+    if (other !== undefined) throw new Error(`${other} and ${route} would both be shot as ${name}, so one page would go unphotographed`);
+    named.set(name, route);
+  }
   return VIEWPORTS.flatMap(({ width, height, mobile }) =>
     ordered.map((route) => {
       const mode = modeOf(route);

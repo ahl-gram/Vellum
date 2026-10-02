@@ -1,6 +1,6 @@
 # The design kit
 
-The assets design rounds share, so a round links them here instead of copying them. Content only: no code lives here (a test refuses it), because the shared tooling is `scripts/design/`. The rule is `handbook/specs/conventions.md`'s, under "How a design decision is made".
+The assets design rounds share, so a round links them here instead of copying them. Content only: no JavaScript or TypeScript lives here (a test refuses both), because the shared tooling is `scripts/design/`. The rule is `handbook/specs/conventions.md`'s, under "How a design decision is made".
 
 - `fonts/`: the house faces and their OFL licence. This is the copy the site itself builds from: `npm run astro:generate` copies it into the generated `public/fonts/` (`scripts/kit-fonts.ts`), so a face added or changed here changes the site, the OG card and the icons, and every round that links it.
 - `fonts.css`: the same faces as `public/fonts.css`, with URLs relative to this folder. A round links it as `../kit/fonts.css` and is opened from `file://` or served from `design/` (for the shared camera, `node scripts/design/shoot.ts <shots.json> --site design`).
