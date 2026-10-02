@@ -234,6 +234,7 @@ test("the compare takes three sweeps, two of them distinct controls, and refuses
   assert.deepEqual(parseCompareArgs(["out/a", "out/b", "out/br"]), ["out/a", "out/b", "out/br"]);
   assert.throws(() => parseCompareArgs(["out/a", "out/b", "out/br", "out/c"]), /usage/);
   assert.throws(() => parseCompareArgs(["out/a", "out/b", "out/br", "--fuzz"]), /usage/);
+  assert.throws(() => parseCompareArgs(["out/a", "--fuzz", "out/br"]), /usage/, "a flag is never a sweep");
   assert.throws(() => parseCompareArgs(["out/a", "out/b"]), /usage/);
   assert.throws(() => parseCompareArgs(["out/a", "out/a/", "out/br"]), /both controls/);
 });
