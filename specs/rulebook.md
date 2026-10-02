@@ -300,6 +300,44 @@ comment. This is a convenience index, not their home.
   #470, so this line is the rule's durable home until a lazy heavyweight embed returns; the atlas
   keeps reserved frames plus `loading="lazy"` in `src/atlas/document.ts`.
 
+## The accepted lint and type-check skips
+
+**A skip in the linted tree is one of the entries below, or it does not exist.** A skip is any
+inline directive that switches a check off at a line or a file: an `eslint-disable` comment in any
+form, an inline `eslint` rule setting, or a `@ts-expect-error`, `@ts-ignore` or `@ts-nocheck`. Fix
+the code rather than add one. Where the code cannot be fixed, put the skip to Alex; the pull request
+that adds it adds its entry here, and the one that removes it removes the entry. A marker stays at
+its line exactly as written, with no reason beside it: the reason is the entry.
+
+- **`no-implied-eval` on the `new Function(...)` call in `runPlateScript`
+  (`test/atlas/document.test.ts`).** The atlas's linking script reaches the test as text inside the
+  generated page, and a string-built function is the one way to run it under stubs outside a
+  browser.
+- **`no-unnecessary-condition` on `} while (refill);` in `fill`, inside `drawerFill`
+  (`src/site/explorer/chart-drawer-bind.ts`).** `refill` is set by a second `fill()` that runs while
+  the first waits at an `await`, which the checker's narrowing cannot see, so it reads the flag as
+  always false.
+- **`no-unnecessary-condition` on `document.fonts?.ready` in `bindRoom`
+  (`src/site/shared/room.ts`).** A browser can switch the font-loading interface off by preference,
+  and `lib.dom` types `document.fonts` as always present.
+- **`max-lines` at the head of `test/site/astro-scaffold.test.ts`.** Its single `before()` cleans the
+  generated assets and runs one full build that most of its tests read; split into two files, each
+  would need that build and race the other on its output folder under `node --test`'s parallel
+  files.
+- **`max-lines-per-function` on `createVoyage` (`src/site/living-chart/voyage.ts`), `createAges`
+  (`src/site/living-chart/ages.ts`), `createPlaceOverlay` (`src/site/living-chart/place-overlay.ts`)
+  and `createLodController` (`src/site/explorer/lod-controller.ts`).** Each builder's functions read
+  one shared live record after a guard; split into parts, each such read would carry a hand-written
+  non-null mark the checker cannot tie to its guard, so an edit deleting the guard would still
+  compile.
+
+**Not skips:** the `@ts-expect-error` lines in `test/repo/e2e-read-types.test.ts`, each a negative
+type test asserting the checker rejects a shape; directive text inside a string in a test fixture;
+and the element parameters `no-param-reassign` lets a function write through, a scope set in
+`eslint.config.ts` rather than a skip at a line. **The e2e tree carries no skip at all**, and
+`test/repo/e2e-type-notes.test.ts` holds it there: a read it doubts is written with a non-null mark
+or a real check.
+
 ## The comment sweep
 
 **How a sweep is run and proven is `specs/conventions.md`'s**, beside the citation convention it
