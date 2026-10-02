@@ -5,8 +5,8 @@ description: Checklists keyed to the moment of typing. Read the matching gate be
 
 # Vellum footguns: the gates
 
-The doctrine behind every line here already exists, in `CLAUDE.md`, in `handbook/specs/rulebook.md`, in the
-agents, and in the auto-memory doctrine files. It keeps failing anyway, and the record says why: it is read at session
+The doctrine behind every line here already exists, in `CLAUDE.md`, in the specs under `handbook/specs/`,
+and in the agents. It keeps failing anyway, and the record says why: it is read at session
 start and applied at the push, hours apart, so the first push routinely carries a guard that cannot
 go red, a probe that measured the wrong thing, a cascade rule that loses, or a body claim nobody
 measured. The cold skeptic or the prover then changes the diff, and the lesson is re-learned on the
@@ -33,6 +33,7 @@ Scars: #49, #124, #270, #275, #295, #320, #353, #358, #360, #363, #380, #383, #3
    a "this world" default, a `slice` that ran to EOF: a check on its own input is not a guard. A
    DEFAULT is a fallback too: a guard that exercises a threaded value only at its default cannot tell
    threading from a hardcode, so assert once through the top-level API at a non-default value (#412).
+   **Assert the OUTCOME, never the declaration** (Issue #155, PR #290).
 4. **Narrowing before asserting owes an anchor check.** `indexOf`, `slice`, `match`, `find`: assert
    the anchor was found (`notEqual(at, -1)`) before the negative assertion runs against the remainder.
 5. **N states or N siblings need N pins, not one floor.** Assert each state's own resolved value
@@ -44,15 +45,11 @@ Scars: #49, #124, #270, #275, #295, #320, #353, #358, #360, #363, #380, #383, #3
    determinism oracle builds a FRESH subject for the second run: a per-object memo makes a
    same-object compare a tautology that passes however broken the computation is (#423).
 8. **A shared helper goes in `test-support/`, never in `test/`, and never in a sibling.** `node
-   --test` collects every `.ts`/`.js` module under ANY directory named `test`, at any depth (its six
-   extensions, outside dot segments and `node_modules`), so a bare helper there is reported as a
-   passing test of its own, and a `.test.ts` that imports a sibling `.test.ts` runs that sibling's
-   tests a second time. Neither fails; both inflate the count. It also collects, ANYWHERE in the
-   tree, a file named `test`, `test-*`, `*-test`, `*_test` or `*.test`, so a helper in
-   `test-support/` must not carry one of those names either; `test/repo/test-collection.test.ts`
-   reds on both arms. If `test-support/` has no precedent for the
-   shape you need, that is not evidence the repo lacks the convention: it already holds the helpers
-   and the importers.
+   --test` collects every module under ANY directory named `test`, and ANYWHERE a file named `test`,
+   `test-*`, `*-test`, `*_test` or `*.test`, so a helper there or so named runs as a passing test of
+   its own, and a `.test.ts` importing a sibling `.test.ts` runs the sibling's tests twice; neither
+   fails, both inflate the count, and `test/repo/test-collection.test.ts` reds on both arms. No
+   precedent in `test-support/` is not evidence the repo lacks the convention (PR #363).
 9. **Run the mutation, paste the red line into the PR body's guard table**, commit, then dispatch
    `vellum-guard-prover` for the whole guard set (10 minutes, unit tests only, name the mutations you
    did NOT try). It mutates in its OWN detached worktree, built by `scripts/agent-sandbox.ts` at the
@@ -60,28 +57,30 @@ Scars: #49, #124, #270, #275, #295, #320, #353, #358, #360, #363, #380, #383, #3
    rather than carry any across: commit first. Zero red is a
    hole. A guard proved unable to red is deleted, never shipped. Mutate BY LINE, never by text:
    several wearers can share one declaration, so a substitution changes them all at once and the red
-   names nothing (PR #510).
-10. **A test that spawns a child gives it its own time limit.** `execFileSync` takes a `timeout`;
-    with none, a wedged child hangs the unit lane forever with no red to read, and `--test-timeout`
-    cannot save it, because the block is synchronous and the runner's own timer never gets the event
-    loop. The shape that wedges is a large `input` to a child that DRAINS it (#564, measured in
-    `references/scars.md`). The limit is a cap on a hang, not a performance budget, so set it far
-    above the worst real run; and a cap nothing ever reaches cannot bite, so keep one child that
-    deliberately outlives it, written as a SINGLE command (`sh -c 'sleep 5'`), since killing a
-    multi-command child orphans its grandchild and the cap then leaks a process every time it fires.
-    Pin what reaches the spawn, not what the option builder returns: the seam between them is where
-    a default cap goes missing with every child still green.
+   names nothing (PR #510). A mutation that leaves the output byte-identical proves nothing until it
+   is confirmed live in the built bundle; then suspect the aim before the guard (Issue #320, PR #349).
+10. **A test that spawns a child gives it its own time limit** (`execFileSync`'s `timeout`): with
+    none, a wedged child (a large `input` to a child that DRAINS it) hangs the unit lane with no red,
+    and `--test-timeout` cannot stop a synchronous block (Issue #564). Set the cap far above the worst real
+    run, keep one child that outlives it written as a SINGLE command (`sh -c 'sleep 5'`), since
+    killing a multi-command child orphans its grandchild and leaks a process per firing, and pin
+    what reaches the spawn, not what the option builder returns. A child that reads global state gets
+    its own copy, `TMPDIR` included (Issue #551, PR #552).
 11. **Narrow-width or column-width work owes a sweep across seeds, never the seed-42 fixture.** Seed
     42 is one of the few clean seeds, which is why a sideways-scroll defect left the suite green
     while other seeds overflowed. Pin the declaration by regex, so flipping its value fails too and
-    not only deleting it (#49, PR #406).
+    not only deleting it (#49, PR #406). A width-scoped feature is guarded on BOTH sides of its
+    breakpoint (Issue #547).
 12. **`test-support/element-shim.ts` does no layout.** Every rect it reports is the one the test
     STATED, so a box computed from it measures the shim and not the code (#387, #388).
 13. **A hand-rolled reader is a guard's blind spot.** A CSS selector reader splits on TOP-LEVEL
     commas and tests the SUBJECT, the last compound; otherwise an `:is()` arm, an ancestor's
     pseudo-class and a colon inside an attribute value each drop rules from the sweep (#358). A
     markup regex allows trailing attributes, and an empty parse never SKIPS a section unless every
-    companion parse is empty too (#353, whose guards went blind when #270 added per-term ids).
+    companion parse is empty too (#353, whose guards went blind when #270 added per-term ids). A regex
+    guard gets one fixture per arm before a hand mutation table is trusted (PR #554), and never
+    bounds a span with `[^}]*`, which cannot cross a nested brace: match the bare token and count
+    (PR #631).
 14. **A test file that imports a module which can exit at import is reported as a PASS.** It dies
     before any `test()` registers and its assertions are simply gone from the tally, with nothing
     saying so, which is the zero-red alarm inverted. A guard for "importing this does no work" SPAWNS
@@ -92,6 +91,15 @@ Scars: #49, #124, #270, #275, #295, #320, #353, #358, #360, #363, #380, #383, #3
 16. **A roster a guard checks is exported DATA the guard imports, never a list the guard restates.** A
     hand-copied roster is one-sided by construction: it catches a member removed from the thing it
     checks and can never catch one added and asserted nowhere, and the arithmetic still closes (#320).
+17. **A guard over a config file a test cannot execute pins its SHAPE**, operator order and negation
+    included, and is proved by INVERTING the config, never only by deleting it; better, move the
+    logic into a module a test imports (PR #380).
+18. **A selection rule is guarded on a consequence that differs by WHO was chosen**, and proved by
+    inverting the selector (Issue #309, PR #410).
+19. **A reference that went through a transform shares the defect's oracle**: also assert against
+    the RAW source, on exactly what the transform cannot represent (Issue #398, Issue #443).
+20. **A ratified acceptance gets a driving check beside any read of a pure function or source
+    text**, never instead of one (Issue #522, PR #631).
 
 ## Gate 2: before writing an e2e check or a CDP probe
 
@@ -104,14 +112,17 @@ Scars: #366, #368, #454, #474, #501, #520, #526, #529, #533, #535, #536, #537, #
    A multi-touch gesture can hand back the artifact you hoped to see: with no touch-pan path, two
    fingers reached only the pinch handler and the apparent pan was two zoom half-steps whose factors
    cancel unless one is clamped, which a before-and-after read cannot tell from the real thing
-   (PR #474's review, fixed in PR #477). A multi-touch claim owes evidence of both fingers.
+   (PR #474's review, fixed in PR #477). A multi-touch claim owes evidence of both fingers. Aim
+   inside a clip-path's drawn shape, never at its box's centre (Issue #520, recorded on Issue #708).
 2. **Reachability is its own assertion**: `document.elementFromPoint(x, y) === el`, taken with the
    thing OPEN and after `scrollIntoView({block: "center"})`. Off-viewport returns null, not "hidden".
 3. **Visible means `getBoundingClientRect().width > 0`.** `getComputedStyle(child).display` is not
    `none` when an ANCESTOR is `display: none`.
 4. **Sample the thing's own rect, never a fixed offset.** A proxy coordinate decays the day something
    else lands there. Sample a ground with the MEDIAN of a run, never a max (one bright control passes
-   it) or a min (one hairline fails it). Give the sample a control that legitimately paints.
+   it) or a min (one hairline fails it). Give the sample a control that legitimately paints. A sample
+   point moved to land your own work leaves the assertion alone and is mutation-proved on its
+   original defect (Issue #540, PR #545).
 5. **A regex inside a CDP `evaluate` template literal loses its backslashes.** Write `\\s`, or build
    the payload with `String.raw`. It never throws: `/\s+/` arrives as `/s+/` and splits on the letter. The hook refuses the
    single-escaped form in every `.ts` and `.mjs` under `scripts/`, `out/` and `e2e/` (and so under `test/e2e/` too).
@@ -128,7 +139,9 @@ Scars: #366, #368, #454, #474, #501, #520, #526, #529, #533, #535, #536, #537, #
    the redraft the gesture requested.
 8. **A budget is derived, dated, and named at the constant**: measured worst case times a runner
    factor, with the suite size it was measured at. A wall-clock cap measures the runner; read the
-   engine's own clock. Pin the transition duration so a settle cannot wait out a 10x regression.
+   engine's own clock. Pin the transition duration so a settle cannot wait out a 10x regression. A
+   PR that moves a measured cost, either way, re-checks the poll budgets and the reads taken after a
+   commit or settle before the push (Issue #400, PR #452).
 9. **Run the probe's control in the same run**: one case known to pass and one known to fail. Your
    root font size, a cached stylesheet from a persistent profile, and a rect field name (`y` read as
    `top` makes `undefined >= n` quietly false) are the first suspects when a probe surprises you.
@@ -156,6 +169,8 @@ Scars: #366, #368, #454, #474, #501, #520, #526, #529, #533, #535, #536, #537, #
     Block the page's own main thread, queue a marker behind the code's own hop, or dispatch from
     inside a `MutationObserver` callback, which lands in a gap a wall clock cannot hit. Say at the
     check why the instrument is artificial (#366).
+15. **A clamped value saturates and hides the regression**: measure what the clamp acts ON
+    (Issue #522).
 
 ## Gate 3: before writing CSS or moving layout
 
@@ -174,6 +189,9 @@ This is the checklist; the reasons are not copied here.
    (`--window-size` does not set the layout viewport) and read the WHOLE frame: rows, wraps, seats,
    the nav, the head, and after every open and close, what the previous state left behind (a
    tooltip, a class, an inline style). The piece you changed is the one place you will look by default.
+   A collision is measured on ink, every visible text node's line boxes and each control's own rect,
+   never a layout box, and an edge defect is swept a pixel at a time by resizing the loaded page,
+   `innerWidth` recorded beside the width set (Issue #638).
 4. **Re-grounding a surface owes a contrast sweep of everything standing on it**: rest, hover,
    focus-visible, disabled, marks, roads. A defect that painted over a surface hid how the rest of it
    read.
@@ -226,11 +244,13 @@ Scars: #49, #101, #203, #255, #408, #486, #491, #492, #507, #508, #524, #528, #5
    retarget (PR #408).
 6. `grep -n '—'` over the body and the diff returns nothing.
 7. **A finding this PR does not fix is FILED or added to `handbook/errata/`, never left as prose in the
-   body.** A sibling defect found on the way is filed, or joins the ledger as one row (the PR, the
-   finding, what was searched; `handbook/errata/README.md` has the shape), not folded; grep `handbook/errata/` and
-   the open issues for it first. The exceptions that fold: an accessibility failure this PR itself
-   caused, and an orchestrated batch whose dispatcher has relayed Alex's ruling to fold for that
-   batch (ruled 2026-09-14, Issue #591).
+   body.** A finding about this PR's own work, an accessibility failure included, is fixed in the
+   review rounds and leaves unfixed only on the terms `handbook/specs/development-workflow.md`
+   step 15 sets (Alex, 2026-09-27 and 2026-10-02, Issue #708). A sibling defect found on the way is
+   filed, or joins the ledger as one row (the PR, the finding, what was searched;
+   `handbook/errata/README.md` has the shape), not folded; grep `handbook/errata/` and the open
+   issues for it first. The one exception that folds: an orchestrated batch whose dispatcher has
+   relayed Alex's ruling to fold for that batch (ruled 2026-09-14, Issue #591).
 8. **Any call you made that the issue did not rule on gets a dated issue comment before the PR is
    opened.** The branch goes up at the first commit, so the review is the deadline that matters, not
    the push. The skeptic diffs against the newest ratified statement. A recon that falsifies an

@@ -262,6 +262,32 @@ const FIXTURES: Fixture[] = [
   ["deployed: missing project dir exits 0 with no output", deployed(STASH_POP, "/nonexistent"), null, ""],
 ];
 
+// Claude Code 2.1.287, read 2026-10-02: hook additionalContext past 10,000 characters reaches the model as a 2,000-character preview, and the binary's hook-output sanitizer cuts the field at 8,000; which path a project hook takes is unverified, so the stricter binds (Issue #708, ruling D).
+const HOOK_CONTEXT_LIMIT = 8_000;
+// Every lead quotes the edited path, and a harness worktree is the longest root a session edits under.
+const LONG_ROOT = "/Users/someone/CodeProjects/Vellum/.claude/worktrees/agent-0000000000000000a";
+const SIZE_PROBES: [string, Payload, string[]][] = [
+  ["a test file", edit("Edit", `${LONG_ROOT}/test/a-directory/a-long-test-name.test.ts`, "x"), ["## Gate 1"]],
+  ["a new e2e suite that clicks and escapes", edit("Write", `${LONG_ROOT}/e2e/suites/a-new-suite-name.ts`, "const R = `a\\(b`; el.click();"), ["## Gate 4", "## Gate 2", "pointer-events", "double the backslash"]],
+  ["a new stylesheet", edit("Write", `${LONG_ROOT}/public/a-new-sheet-name.css`, "x"), ["## Gate 4", "## Gate 3"]],
+  ["the renderer", edit("Edit", `${LONG_ROOT}/src/render/layers/a-layer-name.ts`, "x"), ["## Gate 6"]],
+  ["a push", bash("git push -u origin a-long-branch-name"), ["## Gate 5"]],
+];
+
+const sizeChecks = async (report: (ok: boolean, line: string) => void): Promise<void> => {
+  for (const [name, payload, needles] of SIZE_PROBES) {
+    const sessionId = `selftest-size-${process.pid}-${name}`;
+    const text = (await decide({ ...payload, session_id: sessionId }))?.hookSpecificOutput?.additionalContext ?? "";
+    try {
+      unlinkSync(statePath(sessionId));
+    } catch {
+      /* nothing was written for a null decision */
+    }
+    const ok = needles.every((n) => text.includes(n)) && text.length <= HOOK_CONTEXT_LIMIT;
+    report(ok, `${name}: the pasted note carries ${needles.join(", ")} in ${text.length} of ${HOOK_CONTEXT_LIMIT} characters`);
+  }
+};
+
 const run = async (): Promise<number> => {
   let fails = 0;
   const report = (ok: boolean, line: string): void => {
@@ -278,6 +304,7 @@ const run = async (): Promise<number> => {
   cpSync(join(HERE, "..", "SKILL.md"), join(ROOTLESS, ".claude", "skills", "vellum-footguns", "SKILL.md"));
   symlinkSync(ROOT, LINK);
   for (const label of ["Gate 1", "Gate 2", "Gate 3", "Gate 4", "Gate 5", "Gate 6"]) report(gateText(label).length > 200, `${label} text found in SKILL.md`);
+  await sizeChecks(report);
   report(requiredHeadings() !== null, "section names found in .github/PULL_REQUEST_TEMPLATE.md");
   report(!readFileSync(TEMPLATE_PATH, "utf8").includes("—"), "the PR template carries no em-dash to prefill a body with");
   for (const [name, subject, want, needle, absent] of FIXTURES) {
