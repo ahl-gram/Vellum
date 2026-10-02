@@ -119,9 +119,9 @@ const e2eCancellationRoster: Rule.RuleModule = {
 
 const ACCUMULATOR = "consoleErrors";
 const OWNERS = new Set(["e2e/run.ts", "e2e/harness.ts"]);
-const VALUE_WRAPPERS = new Set(["TSAsExpression", "TSNonNullExpression", "TSSatisfiesExpression", "TSTypeAssertion", "TSInstantiationExpression"]);
+const VALUE_WRAPPERS = new Set(["TSAsExpression", "TSNonNullExpression", "TSSatisfiesExpression", "TSTypeAssertion"]);
 const FUNCTIONS = new Set(["ArrowFunctionExpression", "FunctionDeclaration", "FunctionExpression"]);
-const BINDINGS = new Set(["ImportSpecifier", "ImportDefaultSpecifier", "ImportNamespaceSpecifier", "ExportSpecifier"]);
+const BINDINGS = new Set(["ImportSpecifier", "ExportSpecifier"]);
 
 const readOf = (id: Node): Node | null => {
   const parent = id.parent;
