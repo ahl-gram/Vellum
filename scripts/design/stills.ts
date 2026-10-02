@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 
 /** Palette-reduces chosen full-colour PNGs into a design round's `stills/`, the same bytes on every run. */
 
-// 2026-10-02: a 1280x16000 still quantizes in NNN ms here; two minutes is a cap on a hang.
+// 2026-10-02: a 1280x11494 still reduces in 3.8 s; two minutes is a cap on a hang.
 const MAGICK_TIMEOUT_MS = 120_000;
 
 export const stillArgs = (from: string, to: string): string[] => [

@@ -112,14 +112,24 @@ export async function freePorts(): Promise<[number, number]> {
 
 export const servedUrl = (url: string, port: number): string => (url.startsWith("/") ? `http://127.0.0.1:${port}${url}` : new URL(url).href);
 
-// 2026-10-02: the slowest commit measured over the thirteen built pages is NNN ms (the atlas); 600 tries of 50 ms is a cap on a hang, far above it.
+// 2026-10-02: the slowest commit over the thirteen built pages at both viewports was 611 ms (the Seed of the Day); 600 tries of 50 ms is a cap on a hang, some fifty times that.
 const COMMIT_TRIES = 600;
+
+export const withoutHash = (href: string): string => href.split("#")[0]!;
+
+export function assertLaidOutAt(shot: Shot, innerWidth: number): void {
+  if (innerWidth !== shot.width) {
+    throw new Error(`${shot.out} laid out ${innerWidth}px wide, not the ${shot.width}px asked for; under phone emulation a page with no viewport meta tag lays out 980px wide`);
+  }
+}
+
+export const withoutFavicon = (responses: readonly string[]): string[] => responses.filter((u) => !/favicon/i.test(u));
 
 async function committed(ctx: SuiteContext, href: string): Promise<void> {
   const settle = makeSettle(ctx);
   await settle<{ href: string; ready: string; fonts: string }>(
     `({ href: location.href, ready: document.readyState, fonts: document.fonts ? document.fonts.status : "loaded" })`,
-    (d) => d.href === href && d.ready === "complete" && d.fonts === "loaded",
+    (d) => withoutHash(d.href) === withoutHash(href) && d.ready === "complete" && d.fonts === "loaded",
     `the page at ${href} never committed`,
     COMMIT_TRIES,
   );
@@ -142,8 +152,9 @@ async function takeShot(ctx: SuiteContext, shot: Shot, port: number): Promise<Sh
   mkdirSync(dirname(resolve(shot.out)), { recursive: true });
   writeFileSync(resolve(shot.out), Buffer.from(png.data, "base64"));
   const viewport = await ctx.evaluate<{ innerWidth: number; innerHeight: number }>("({ innerWidth, innerHeight })");
+  assertLaidOutAt(shot, viewport.innerWidth);
   const probe = shot.probe === undefined ? null : readProbe(await ctx.evaluate<unknown>(shot.probe, true), shot.out);
-  const http4xx = ctx.http4xx.slice(httpBase);
+  const http4xx = withoutFavicon(ctx.http4xx.slice(httpBase));
   return { out: shot.out, url, viewport, probe, http4xx, consoleErrors: dropExpectedCancellations(ctx.consoleErrors.slice(errBase)) };
 }
 

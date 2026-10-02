@@ -4,7 +4,7 @@ import { spawnSync } from "node:child_process";
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, extname, join, resolve } from "node:path";
 import vm from "node:vm";
-import { captureParams, FULL_PAGE_CAP, parseShots, readProbe, servedUrl, type Shot } from "../../scripts/design/shoot.ts";
+import { assertLaidOutAt, captureParams, FULL_PAGE_CAP, parseShots, readProbe, servedUrl, withoutFavicon, withoutHash, type Shot } from "../../scripts/design/shoot.ts";
 import { BAND, modeOf, parseSweepArgs, PIN, pinText, planSweep, routesOf } from "../../scripts/design/oracle.ts";
 import { aeOf, failed, verdictOf, type Row } from "../../scripts/design/compare.ts";
 import { stillArgs } from "../../scripts/design/stills.ts";
@@ -46,6 +46,16 @@ test("a probe that hands back nothing stops the run instead of writing an undefi
 test("a path is served by the run's own server and any other address is taken as given", () => {
   assert.equal(servedUrl("/faq/", 8123), "http://127.0.0.1:8123/faq/");
   assert.equal(servedUrl("file:///a/b/explorer.html?dir=a&state=three", 8123), "file:///a/b/explorer.html?dir=a&state=three");
+  assert.equal(withoutHash("http://127.0.0.1:8123/explorer/#seed=20261002&style=antique"), "http://127.0.0.1:8123/explorer/", "a page that writes its address into the hash at boot has still arrived");
+});
+
+test("a shot that did not lay out at the width it asked for stops the run, since its picture would be of another viewport", () => {
+  assert.doesNotThrow(() => assertLaidOutAt(shot({ width: 390, height: 844, mobile: true }), 390));
+  assert.throws(() => assertLaidOutAt(shot({ width: 390, height: 844, mobile: true, out: "out/kit.png" }), 980), /out\/kit\.png laid out 980px wide, not the 390px/);
+});
+
+test("a shot's missing resources are recorded, the browser's own favicon request aside, as e2e N2 reads them", () => {
+  assert.deepEqual(withoutFavicon(["404 http://127.0.0.1:8123/favicon.ico", "404 http://127.0.0.1:8123/fonts/eb-garamond-latin-600-normal.woff2"]), ["404 http://127.0.0.1:8123/fonts/eb-garamond-latin-600-normal.woff2"]);
 });
 
 test("the sweep reads its pages from the built tree: every index.html, and nothing else", () => {
@@ -68,7 +78,7 @@ test("a page that runs a live chart app is framed by its head box, home and the 
     "/explorer/": "head", "/reading-room/": "head", "/print-room/": "head", "/prospect/": "head", "/ribbon/": "head", "/seed-of-the-day/": "head",
     "/specimen/": "view",
   };
-  for (const [route, mode] of Object.entries(archive)) assert.equal(modeOf(route), mode, `${route}, as design/oracle/sweep.mjs framed it`);
+  for (const [route, mode] of Object.entries(archive)) assert.equal(modeOf(route), mode, `${route}, as the sweep this ports framed it (PR #509)`);
   assert.equal(modeOf("/print-room/portfolio/"), "head", "the Portfolio runs a live chart app");
   assert.equal(modeOf("/atlas/"), "full", "the Atlas is a document");
 });

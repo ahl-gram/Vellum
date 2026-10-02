@@ -48,6 +48,18 @@ comment and move on.
 content only, in its own pull request. That archive is the visual spec; these specs and the issue
 ledgers are the words.
 
+**What rounds share has one home each, and a round uses it rather than copying it.** Tooling lives
+in TypeScript under `scripts/design/`, inside `npm run check` and `npm run lint`: a round's stills
+are taken through `shootAll` in `scripts/design/shoot.ts` rather than a shooter of its own, and two
+builds are compared the way `handbook/specs/settle-doctrine.md` says. Assets live in `design/kit/`,
+which a round links rather than copies. The kit holds content and no code, and
+`test/repo/design-kit.test.ts` refuses code there: code in the kit is not harmful in itself, but it
+escapes `npm run check` and `npm run lint` and would be a second home for tools beside
+`scripts/design/`. The kit is also where the house faces live: the site builds its fonts from
+`design/kit/fonts/` (`handbook/specs/site-architecture.md`), so a face changed there changes the
+site and every round that links the kit, and is made as a site change. A round's own tools stay in
+its directory as they ran, even where they no longer run.
+
 **A sitting held at the workflow's STOP is not a round, and owes no archive.** Where
 `handbook/specs/development-workflow.md` step 6 renders candidates so a fix can be ruled from pictures rather
 than from prose, the stills go with the session (Alex, 2026-09-19); that step says where they live

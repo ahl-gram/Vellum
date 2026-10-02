@@ -14,7 +14,7 @@ export type Row = {
 };
 export type Verdict = "same" | "differs" | "untrusted" | "errors" | "new" | "gone" | "missing";
 
-// 2026-10-02: the slowest pair measured is a 1280x16000 full page at NNN ms; two minutes is a cap on a hang.
+// 2026-10-02: the slowest pair of a sweep, two 1280x11494 full pages, compares in 0.58 s; two minutes is a cap on a hang.
 const MAGICK_TIMEOUT_MS = 120_000;
 const FAILING: ReadonlySet<Verdict> = new Set(["differs", "errors", "gone", "missing"]);
 

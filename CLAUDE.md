@@ -27,7 +27,9 @@ READING before the work its row names.
 | `handbook/specs/settle-doctrine.md` | how an e2e wait is written, and what the harness environment it runs in actually does | any e2e wait, settle or CDP probe, and any screenshot, focus state or narrow viewport read in the harness |
 
 The ruled pixels those specs were decided from are archived under `design/`, one directory per design
-round (`design/oracle/` is the odd one out: a screenshot sweep tool, not a sitting).
+round, beside directories that are not rounds: `design/kit/`, the assets rounds share and the one
+copy of the house faces the site builds from, and `design/survey-of-unbuilt-coasts/`, an old
+artifact kept for its ideas. The tooling rounds share is `scripts/design/`.
 
 The rules below refine the workspace rules in `~/CodeProjects/CLAUDE.md` for this project.
 
@@ -95,7 +97,7 @@ engine/CLI/scripts natively). **No JavaScript file is tracked outside `design/`*
 `.cjs`, `.jsx`), and `npm run lint` is what enforces it: the blocks named for Issue #653's ruling D in
 `eslint.config.ts` refuse every such file the `.gitignore` does not ignore, whatever inline directive
 it carries. `design/`, an archive whose round tools keep the JavaScript they ran as, is the single
-exemption. `public/` is static assets only (goldens, fonts, CSS, the icons).
+exemption. `public/` is static assets only (goldens, CSS, the icons); its fonts are copied in from `design/kit/fonts/` at build.
 
 ## Measure before you assert
 
