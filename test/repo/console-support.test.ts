@@ -1,5 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { dirname, join, relative, resolve, sep } from "node:path";
 import { CANCELLATION_PREFIXES, OUR_OWN_REASONS, dropExpectedCancellations } from "../../e2e/support/console.ts";
 import { e2eSourcePaths, readE2eSource } from "../../test-support/e2e-source.ts";
@@ -131,4 +132,10 @@ test("every read of the console accumulator goes through the shared drop, so a c
     [],
     `${offenders.join(", ")} read the console accumulator without passing it through the shared drop, so that check silently stopped filtering. BLIND SPOTS, declared, and the third was found by mutation rather than by reasoning (prover round 3): it skips e2e/run.ts, which creates the accumulator, and e2e/harness.ts, which fills it, so a check-like read there that skips the drop passes unseen (both read it only to build and fill it today); it reads one LINE, so a read split across lines escapes; and a check built from TWO separately excluded base captures plus a comparison line that never names the accumulator escapes it whole, since every line it could see is legitimately excluded. It errs the other way on a comment that merely mentions the accumulator, which is the direction a scanner here is owed`,
   );
+});
+
+test("the accumulator is still the consoleErrors field vellum/e2e-console-read-through-drop reads, and more than ten e2e files still hand it to the shared drop, so a rename cannot leave that rule reading nothing (Issue #675)", () => {
+  assert.match(readFileSync(join(E2E, "types.ts"), "utf8"), /^\s+consoleErrors: string\[\];$/m, "e2e/types.ts no longer declares the consoleErrors field, so the lint rule keyed on that name reads nothing; rename the rule's ACCUMULATOR in scripts/lint/source-shape.ts with it");
+  const handed = e2eFiles().filter((f) => /dropExpectedCancellations\([^)]*\bconsoleErrors\b/.test(readE2eSource(join(E2E, f))));
+  assert.ok(handed.length > 10, `only ${handed.length} e2e files hand consoleErrors to the shared drop, so the accumulator was renamed or the checks stopped filtering`);
 });

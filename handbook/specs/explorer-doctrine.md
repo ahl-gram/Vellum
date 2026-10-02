@@ -32,9 +32,9 @@ make an unqualified rule false. Read the surface, not just the rule.
   chronicle reaches the chart's own layer groups and how the overlay reaches the card it assigned.
   The line is where the id comes from, not whether one appears.
   - **The guard is narrower than the rule, so hold the rule yourself.**
-    `test/site/living-chart-boundary.test.ts` refuses `getElementById` in the `.ts` files sitting
-    DIRECTLY in `src/site/living-chart/`. It does not read a subdirectory, and it does not catch a
-    document-scoped `querySelector`. A new engine module in a nested directory is outside it.
+    `vellum/engine-no-id-lookup` (`scripts/lint/source-shape.ts`) refuses a `getElementById`
+    lookup in every `.ts` under `src/site/living-chart/`, at any depth, at `npm run lint`. It does
+    not catch a document-scoped `querySelector`, or the name assembled from pieces.
 - **A page that mounts the engine owes the sheet and the class**: link `/living-chart.css` through
   `BaseLayout`'s `extraCss` prop (`src/layouts/BaseLayout.astro`), and put `class="living-chart"` on
   the chart mount it hands in. A page that skips either renders its overlays undressed. **The order

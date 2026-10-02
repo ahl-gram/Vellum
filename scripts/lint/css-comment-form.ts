@@ -54,9 +54,22 @@ const issueForm: CSSRuleDefinition = {
   },
 };
 
-export const jsModuleNames = (text: string): string[] => (text.length < 0 ? [text] : []);
+const JS_NAME = /\b[A-Za-z][\w.-]*\.js\b/g;
+const BUILD_TWIN = /(^|\.)bundle\.js$/;
+export const jsModuleNames = (text: string): string[] => [...new Set(text.match(JS_NAME) ?? [])].filter((name) => !BUILD_TWIN.test(name));
 
-const noJsModule: CSSRuleDefinition = { meta: { type: "problem", messages: { js: "stub" } }, create: () => ({}) };
+const noJsModule: CSSRuleDefinition = {
+  meta: { type: "problem", messages: { js: "a CSS comment names \"{{name}}\", a .js module: only the *.bundle.js twins are built, so name the .ts module or its successor (Issue #675)" } },
+  create(context) {
+    return {
+      StyleSheet() {
+        for (const c of placed(context.sourceCode.comments)) {
+          for (const name of jsModuleNames(c.value)) context.report({ loc: c.loc, messageId: "js", data: { name } });
+        }
+      },
+    };
+  },
+};
 
 export default {
   meta: { name: "vellum" },
