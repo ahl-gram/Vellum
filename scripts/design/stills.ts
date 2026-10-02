@@ -12,7 +12,7 @@ export const stillArgs = (from: string, to: string): string[] => [
   from, "-colors", "256", "-define", "png:exclude-chunks=date", "+set", "date:create", "+set", "date:modify", `PNG8:${to}`,
 ];
 
-export function makeStills(from: string, to: string, names: readonly string[] = []): string[] {
+function makeStills(from: string, to: string, names: readonly string[] = []): string[] {
   const chosen = names.length > 0 ? names.map((n) => `${n}.png`) : readdirSync(from).filter((f) => f.endsWith(".png")).sort();
   mkdirSync(to, { recursive: true });
   for (const file of chosen) {

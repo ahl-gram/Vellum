@@ -44,8 +44,8 @@ export type CaptureParams = {
 };
 
 export const FULL_PAGE_CAP = 16000;
-export const DEFAULT_WAIT_MS = 2600;
-export const DEFAULT_SCRIPT_WAIT_MS = 600;
+const DEFAULT_WAIT_MS = 2600;
+const DEFAULT_SCRIPT_WAIT_MS = 600;
 
 export function captureParams(shot: Shot, documentHeight: number): CaptureParams {
   if (shot.full === true) {
@@ -103,7 +103,7 @@ const freePort = (): Promise<number> =>
     });
   });
 
-export async function freePorts(): Promise<[number, number]> {
+async function freePorts(): Promise<[number, number]> {
   const a = await freePort();
   let b = await freePort();
   while (b === a) b = await freePort();

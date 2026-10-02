@@ -5,7 +5,7 @@ import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, extname, join, resolve } from "node:path";
 import vm from "node:vm";
 import { assertLaidOutAt, captureParams, FULL_PAGE_CAP, parseShots, readProbe, servedUrl, withoutFavicon, withoutHash, type Shot } from "../../scripts/design/shoot.ts";
-import { BAND, modeOf, parseSweepArgs, PIN, pinText, planSweep, routesOf } from "../../scripts/design/oracle.ts";
+import { BAND, modeOf, parseSweepArgs, PIN, planSweep, PROBE, routesOf } from "../../scripts/design/oracle.ts";
 import { aeOf, failed, verdictOf, type Row } from "../../scripts/design/compare.ts";
 import { stillArgs } from "../../scripts/design/stills.ts";
 
@@ -17,20 +17,29 @@ test("a full page is the one capture taken beyond the viewport, its height cappe
   assert.equal(captureParams(shot({ full: true, width: 390, height: 844 }), 22073).clip.height, FULL_PAGE_CAP);
   assert.equal(FULL_PAGE_CAP, 16000, "the archived sweep's cap");
   assert.deepEqual(captureParams(shot(), 3500), { format: "png", captureBeyondViewport: false, clip: { x: 0, y: 0, width: 1280, height: 800, scale: 1 } });
+  assert.equal(captureParams(shot({ full: false }), 3500).captureBeyondViewport, false, "the sweep marks every head and view shot full: false");
   assert.deepEqual(captureParams(shot({ clip: { x: 0, y: 0, width: 1280, height: 122 } }), 3500), { format: "png", captureBeyondViewport: false, clip: { x: 0, y: 0, width: 1280, height: 122, scale: 1 } });
   assert.deepEqual(captureParams(shot({ clip: { x: -8, y: -4, width: 100, height: 50, scale: 3 } }), 3500).clip, { x: 0, y: 0, width: 92, height: 46, scale: 3 }, "the origin clamps and the far edge stays where it was");
 });
 
 test("a shot list is refused, naming the shot, wherever a job would otherwise run blind", () => {
   assert.deepEqual(parseShots([shot()]), [shot()]);
+  assert.deepEqual(parseShots([shot({ waitMs: 0, scriptWaitMs: 0 })]), [shot({ waitMs: 0, scriptWaitMs: 0 })], "no wait at all is a wait");
   assert.throws(() => parseShots({ shots: [] }), /must be a JSON array/);
   const bad: [Record<string, unknown>, RegExp][] = [
     [{ ...shot(), out: undefined }, /shot 1: out/],
     [{ ...shot(), width: 390.5 }, /shot 1: width and height/],
+    [{ ...shot(), height: 0 }, /shot 1: width and height/],
     [{ ...shot(), mobile: "yes" }, /shot 1: mobile/],
     [{ ...shot(), url: "" }, /shot 1: url/],
     [{ ...shot(), waitMs: -1 }, /shot 1: waitMs/],
+    [{ ...shot(), scriptWaitMs: 1.5 }, /shot 1: scriptWaitMs/],
+    [{ ...shot(), script: "" }, /shot 1: script and probe/],
+    [{ ...shot(), probe: 7 }, /shot 1: script and probe/],
+    [{ ...shot(), full: "yes" }, /shot 1: full/],
     [{ ...shot(), clip: { x: 0, y: 0, width: 0, height: 10 } }, /shot 1: clip/],
+    [{ ...shot(), clip: { x: "0", y: 0, width: 10, height: 10 } }, /shot 1: clip/],
+    [{ ...shot(), clip: { x: 0, y: Number.NaN, width: 10, height: 10 } }, /shot 1: clip/],
     [{ ...shot(), full: true, clip: { x: 0, y: 0, width: 10, height: 10 } }, /shot 1: a full-page shot takes no clip/],
   ];
   for (const [job, message] of bad) assert.throws(() => parseShots([shot(), job]), message, JSON.stringify(job));
@@ -46,22 +55,25 @@ test("a probe that hands back nothing stops the run instead of writing an undefi
 test("a path is served by the run's own server and any other address is taken as given", () => {
   assert.equal(servedUrl("/faq/", 8123), "http://127.0.0.1:8123/faq/");
   assert.equal(servedUrl("file:///a/b/explorer.html?dir=a&state=three", 8123), "file:///a/b/explorer.html?dir=a&state=three");
+  assert.equal(servedUrl("file:///a/b/../c.html", 8123), "file:///a/c.html", "taken in the form the browser reports it, or the commit witness never matches");
+  assert.throws(() => servedUrl("faq/", 8123), /Invalid URL/);
   assert.equal(withoutHash("http://127.0.0.1:8123/explorer/#seed=20261002&style=antique"), "http://127.0.0.1:8123/explorer/", "a page that writes its address into the hash at boot has still arrived");
 });
 
 test("a shot that did not lay out at the width it asked for stops the run, since its picture would be of another viewport", () => {
   assert.doesNotThrow(() => assertLaidOutAt(shot({ width: 390, height: 844, mobile: true }), 390));
   assert.throws(() => assertLaidOutAt(shot({ width: 390, height: 844, mobile: true, out: "out/kit.png" }), 980), /out\/kit\.png laid out 980px wide, not the 390px/);
+  assert.throws(() => assertLaidOutAt(shot({ width: 390, height: 844, mobile: true }), 320), /laid out 320px wide/, "narrower is another viewport too");
 });
 
 test("a shot's missing resources are recorded, the browser's own favicon request aside, as e2e N2 reads them", () => {
-  assert.deepEqual(withoutFavicon(["404 http://127.0.0.1:8123/favicon.ico", "404 http://127.0.0.1:8123/fonts/eb-garamond-latin-600-normal.woff2"]), ["404 http://127.0.0.1:8123/fonts/eb-garamond-latin-600-normal.woff2"]);
+  assert.deepEqual(withoutFavicon(["404 http://127.0.0.1:8123/favicon.ico", "404 http://127.0.0.1:8123/FAVICON.ICO", "404 http://127.0.0.1:8123/fonts/eb-garamond-latin-600-normal.woff2"]), ["404 http://127.0.0.1:8123/fonts/eb-garamond-latin-600-normal.woff2"]);
 });
 
 test("the sweep reads its pages from the built tree: every index.html, and nothing else", () => {
   const dir = join(REPO, "out", "test-design-kit-routes");
   rmSync(dir, { recursive: true, force: true });
-  for (const f of ["index.html", "faq/index.html", "print-room/portfolio/index.html", "gallery/chart-1.html", "explorer/app.bundle.js", "fonts/OFL.txt"]) {
+  for (const f of ["index.html", "faq/index.html", "print-room/portfolio/index.html", "gallery/chart-1.html", "gallery/chart-index.html", "explorer/app.bundle.js", "fonts/OFL.txt"]) {
     mkdirSync(dirname(join(dir, f)), { recursive: true });
     writeFileSync(join(dir, f), "x");
   }
@@ -96,27 +108,31 @@ test("every page is shot at a desktop and a true phone viewport, under the archi
     assert.equal(s.full, s.mode === "full", `${s.name} full`);
     assert.equal(s.waitMs, s.mode === "head" ? 4500 : 2500, `${s.name} wait`);
     assert.equal(s.script, PIN, `${s.name} pins the caption`);
+    assert.equal(s.scriptWaitMs, 200, `${s.name} waits after the pin as the archive did`);
+    assert.equal(s.probe, PROBE, `${s.name} records the archive's probe`);
+    assert.equal(s.url, s.route, `${s.name} photographs its own page`);
     assert.equal(s.out, join("out/s", s.name));
+    assert.deepEqual(s.clip, s.mode === "head" ? { x: 0, y: 0, width: s.width, height: BAND } : undefined, `${s.name} clip`);
   }
   assert.equal(BAND, 122, "the head cluster's band, as the archive clipped it");
-  assert.deepEqual(byName.get("explorer-390-head.png")?.clip, { x: 0, y: 0, width: 390, height: 122 });
-  assert.equal(byName.get("specimen-1280.png")?.clip, undefined);
+  assert.equal(byName.get("explorer-390-head.png")?.url, "/explorer/");
+  assert.match(PROBE, /clientWidth[\s\S]*scrollWidth[\s\S]*scrollHeight/, "the archive's probe: client width, scroll width, scroll height");
 });
 
 test("the sweep runs with motion reduced unless it is asked for motion", () => {
   assert.deepEqual(parseSweepArgs(["dist", "out/a", "main-1"]), { dist: "dist", out: "out/a", label: "main-1", reducedMotion: true });
-  assert.equal(parseSweepArgs(["dist", "out/a", "--motion"]).reducedMotion, false);
+  assert.deepEqual(parseSweepArgs(["dist", "out/a", "--motion"]), { dist: "dist", out: "out/a", label: undefined, reducedMotion: false });
+  assert.deepEqual(parseSweepArgs(["--motion", "dist", "out/a", "main-1"]), { dist: "dist", out: "out/a", label: "main-1", reducedMotion: false });
   assert.throws(() => parseSweepArgs(["dist"]), /usage/);
 });
 
 test("the caption pin rewrites every timing on every element the archive pinned, in the page itself, and touches nothing else", () => {
   const arms = [`[id$="-status"]`, ".status", ".rf-status", "#pressed", "#folio-sub"];
   const els = new Map([...arms, "#caption"].map((arm) => [arm, { textContent: "drawn in 412 ms, pressed in 9ms" }]));
-  const document = { querySelectorAll: (sel: string) => sel.split(",").map((a) => a.trim()).flatMap((a) => (a !== "#caption" && els.has(a) ? [els.get(a)!] : [])) };
+  const document = { querySelectorAll: (sel: string) => sel.split(",").map((a) => a.trim()).flatMap((a) => (els.has(a) ? [els.get(a)!] : [])) };
   assert.equal(vm.runInNewContext(PIN, { document }), true);
   for (const arm of arms) assert.equal(els.get(arm)!.textContent, "drawn in NNNms, pressed in NNNms", arm);
-  assert.equal(els.get("#caption")!.textContent, "drawn in 412 ms, pressed in 9ms");
-  assert.equal(pinText("drawn in 412 ms"), "drawn in NNNms");
+  assert.equal(els.get("#caption")!.textContent, "drawn in 412 ms, pressed in 9ms", "an element the archive did not pin keeps its timing");
 });
 
 const row = (over: Partial<Row>): Row => ({ name: "a.png", present: [true, true, true], control: 0, branch: 0, errors: [], ...over });
@@ -129,6 +145,7 @@ test("a row is trusted only where the unchanged build matched itself, and a diff
   assert.equal(verdictOf(row({ branch: 0.075817 })), "differs");
   assert.equal(verdictOf(row({ control: 46, branch: null })), "untrusted");
   assert.equal(verdictOf(row({ errors: ["404 http://127.0.0.1/fonts/x.woff2"] })), "errors");
+  assert.equal(verdictOf(row({ control: 46, branch: null, errors: ["console.error: x"] })), "errors", "an error fails a row whether or not its control was stable");
   assert.equal(verdictOf(row({ present: [false, false, true], control: null, branch: null })), "new");
   assert.equal(verdictOf(row({ present: [true, true, false], branch: null })), "gone");
   assert.equal(verdictOf(row({ present: [true, false, true], control: null, branch: null })), "missing");

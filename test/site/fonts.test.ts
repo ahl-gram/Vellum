@@ -73,7 +73,7 @@ test("the self-hosted woff2 files and their OFL license live in design/kit/fonts
 const FACE = /@font-face\s*\{([^}]*)\}/g;
 const faceOf = (block: string): string => {
   const get = (prop: string): string => block.match(new RegExp(`${prop}:\\s*([^;]+);`))?.[1]?.trim() ?? "";
-  return [get("font-family"), get("font-style"), get("font-weight"), get("src")].join(" | ");
+  return [get("font-family"), get("font-style"), get("font-weight"), get("font-display"), get("src")].join(" | ");
 };
 const facesIn = (css: string): string[] => [...css.matchAll(FACE)].map(([, block]) => faceOf(block!));
 
@@ -82,6 +82,7 @@ test("every face the site serves is a file in the kit, and the kit's own sheet d
   const kit = facesIn(await readText("design/kit/fonts.css"));
   assert.equal(site.length, WOFF2.length, "public/fonts.css should declare one face per woff2");
   for (const face of site) {
+    assert.match(face, /\| swap \|/, `${face} must use font-display: swap`);
     const file = face.match(/url\('\/fonts\/([^']+)'\)/)?.[1];
     assert.ok(file !== undefined, `${face} does not load from /fonts/`);
     assert.ok(existsSync(root(`design/kit/fonts/${file}`)), `${file} is served at /fonts/ but is not in design/kit/fonts/`);
@@ -106,7 +107,23 @@ test("the build copies every file of the kit into the site's fonts, byte for byt
     rmSync(dir, { recursive: true, force: true });
   }
   assert.ok(GENERATED_SUBTREES.includes("fonts"), "public/fonts/ is generated, so the clean before regeneration owns it");
-  assert.ok(readFileSync(root(".gitignore"), "utf8").split("\n").includes("public/fonts/"), ".gitignore should carry public/fonts/");
+  // 2026-10-02: this git check-ignore answers in under 10 ms on a Mac; thirty seconds is a cap on a hang, not a budget.
+  const ignored = spawnSync("git", ["check-ignore", "-q", "--no-index", "public/fonts/OFL.txt"], { cwd: root(""), timeout: 30_000 });
+  assert.equal(ignored.status, 0, "git does not ignore public/fonts/, so a generated face could be committed beside the kit's");
+});
+
+test("npm run astro:generate's fonts step copies the real kit into the public directory it is given", () => {
+  const dir = root("out/test-kit-fonts-cli");
+  rmSync(dir, { recursive: true, force: true });
+  try {
+    // 2026-10-02: the step runs in about 0.1 s here; a minute is a cap on a hang, not a budget.
+    const run = spawnSync("node", ["scripts/kit-fonts.ts", dir], { cwd: root(""), encoding: "utf8", timeout: 60_000 });
+    assert.equal(run.status, 0, `the step failed: ${run.stderr}`);
+    assert.deepEqual(readdirSync(join(dir, "fonts")).sort(), ["OFL.txt", ...WOFF2].sort());
+    for (const f of WOFF2) assert.deepEqual(readFileSync(join(dir, "fonts", f)), readFileSync(root(`design/kit/fonts/${f}`)), f);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });
 
 test("every page shell in the folio links /fonts.css (root-absolute, like /motion.css)", async () => {

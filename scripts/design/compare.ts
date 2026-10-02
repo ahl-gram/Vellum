@@ -50,7 +50,7 @@ type ManifestEntry = { readonly name: string; readonly http4xx?: readonly string
 const manifestOf = (dir: string): ManifestEntry[] =>
   existsSync(join(dir, "manifest.json")) ? (JSON.parse(readFileSync(join(dir, "manifest.json"), "utf8")) as ManifestEntry[]) : [];
 
-export function compareSweeps(controlA: string, controlB: string, branch: string): Row[] {
+function compareSweeps(controlA: string, controlB: string, branch: string): Row[] {
   const manifests = [controlA, controlB, branch].map(manifestOf);
   const branchRows = new Map(manifests[2]!.map((m) => [m.name, m]));
   const names = [...new Set(manifests.flatMap((m) => m.map((e) => e.name)))].sort();

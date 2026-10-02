@@ -8,7 +8,7 @@ import { shootAll, type Shot, type ShotResult } from "./shoot.ts";
 
 export type Mode = "full" | "head" | "view";
 
-export const VIEWPORTS = [
+const VIEWPORTS = [
   { width: 1280, height: 800, mobile: false },
   { width: 390, height: 844, mobile: true },
 ] as const;
@@ -18,12 +18,10 @@ const PAGE_WAIT_MS = 2500;
 const PIN_WAIT_MS = 200;
 const MODE_ORDER: readonly Mode[] = ["full", "head", "view"];
 
-export const CAPTION_MS = /\d+\s*ms/;
-export const PIN_SELECTORS = `[id$="-status"], .status, .rf-status, #pressed, #folio-sub`;
+const CAPTION_MS = /\d+\s*ms/;
+const PIN_SELECTORS = `[id$="-status"], .status, .rf-status, #pressed, #folio-sub`;
 export const PIN = `(() => { const re = new RegExp(${JSON.stringify(CAPTION_MS.source)}, "g"); for (const el of document.querySelectorAll(${JSON.stringify(PIN_SELECTORS)})) { const t = el.textContent; const n = t.replace(re, "NNNms"); if (n !== t) el.textContent = n; } return true; })()`;
 export const PROBE = `JSON.stringify({ cw: document.documentElement.clientWidth, sw: document.documentElement.scrollWidth, sh: document.documentElement.scrollHeight })`;
-
-export const pinText = (t: string): string => t.replace(new RegExp(CAPTION_MS.source, "g"), "NNNms");
 
 export function routesOf(dist: string): string[] {
   return readdirSync(dist, { recursive: true, encoding: "utf8" })
@@ -41,10 +39,10 @@ const KEPT_MODES: Readonly<Record<string, Mode>> = { "/": "full", "/specimen/": 
 
 export const modeOf = (route: string): Mode => KEPT_MODES[route] ?? (APP_ROUTES.has(route) ? "head" : "full");
 
-export const shotName = (route: string, width: number, mode: Mode): string =>
+const shotName = (route: string, width: number, mode: Mode): string =>
   `${route === "/" ? "home" : route.replace(/\//g, "")}-${width}${mode === "head" ? "-head" : ""}.png`;
 
-export type PlannedShot = Shot & { readonly route: string; readonly mode: Mode; readonly name: string };
+type PlannedShot = Shot & { readonly route: string; readonly mode: Mode; readonly name: string };
 
 export function planSweep(routes: readonly string[], out: string): PlannedShot[] {
   const ordered = MODE_ORDER.flatMap((m) => routes.filter((r) => modeOf(r) === m));
@@ -61,9 +59,9 @@ export function planSweep(routes: readonly string[], out: string): PlannedShot[]
   );
 }
 
-export type ManifestRow = { readonly name: string; readonly route: string; readonly w: number; readonly mode: Mode } & Omit<ShotResult, "out" | "url">;
+type ManifestRow = { readonly name: string; readonly route: string; readonly w: number; readonly mode: Mode } & Omit<ShotResult, "out" | "url">;
 
-export async function sweep(dist: string, out: string, options: { readonly label?: string | undefined; readonly reducedMotion: boolean }): Promise<ManifestRow[]> {
+async function sweep(dist: string, out: string, options: { readonly label?: string | undefined; readonly reducedMotion: boolean }): Promise<ManifestRow[]> {
   const plan = planSweep(routesOf(resolve(dist)), out);
   mkdirSync(out, { recursive: true });
   const results = await shootAll(plan, { site: dist, reducedMotion: options.reducedMotion });
@@ -76,7 +74,7 @@ export async function sweep(dist: string, out: string, options: { readonly label
   return rows;
 }
 
-export type SweepArgs = { readonly dist: string; readonly out: string; readonly label: string | undefined; readonly reducedMotion: boolean };
+type SweepArgs = { readonly dist: string; readonly out: string; readonly label: string | undefined; readonly reducedMotion: boolean };
 
 export function parseSweepArgs(args: readonly string[]): SweepArgs {
   const [dist, out, label] = args.filter((a) => !a.startsWith("--"));
