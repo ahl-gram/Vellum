@@ -57,6 +57,8 @@ const constructsOrTests = (id: Node, parent: Node): boolean =>
   (parent.type === "Property" && parent.key === id && !parent.computed && parent.parent.type === "ObjectExpression") ||
   (parent.type.startsWith("TS") && !VALUE_WRAPPERS.has(parent.type));
 
+const isWorkerKey = (node: Node): boolean => node.parent?.type === "MemberExpression" && node.parent.computed && node.parent.property === node && WORKERS.has(wholeString(node) ?? "");
+
 const workerSpawnStatic: Rule.RuleModule = {
   meta: problem("a worker is spawned as a bare new Worker(new URL(\"./<name>.ts\", import.meta.url), { type: \"module\" }), or new SharedWorker in the same form, written out in full: the bundler rewrites only that form, never a constructor reached through a member, a variable or an alias (handbook/specs/site-architecture.md)"),
   create(context) {
@@ -68,6 +70,12 @@ const workerSpawnStatic: Rule.RuleModule = {
       },
       Identifier(node) {
         if (WORKERS.has(node.name) && !constructsOrTests(node, node.parent)) context.report({ node, messageId: "found" });
+      },
+      Literal(node) {
+        if (isWorkerKey(node)) context.report({ node, messageId: "found" });
+      },
+      TemplateLiteral(node) {
+        if (isWorkerKey(node)) context.report({ node, messageId: "found" });
       },
     };
   },

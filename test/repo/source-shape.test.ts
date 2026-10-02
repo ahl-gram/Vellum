@@ -67,7 +67,15 @@ test("a worker spawn in the site is the one static form the bundler reads, wrapp
     "export const angled = <typeof Worker>Worker;",
     "export const proxied = () => new Proxy(Worker, {});",
     "export const bag = { make: Worker };",
-  ], "src/site/explorer/worker-client.ts"), at(WORKER, [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 27, 28, 29, 30, 31, 32]));
+    "export const keyed = (u: URL) => new globalThis[\"Worker\"](u);",
+    "export const ticked = globalThis[`SharedWorker`];",
+    "export const negated = !Worker;",
+    "export const compared = (x: unknown) => Worker === x;",
+    "export const leftSide = (X: new () => object) => Worker instanceof X;",
+    "export const computedKey = { [Worker]: 1 };",
+    "export const called = () => Worker(1);",
+    "export const short = { Worker };",
+  ], "src/site/explorer/worker-client.ts"), at(WORKER, [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40]));
 });
 
 test("a single-escaped regex class or dot in a backtick string reports in every chunk, an odd run of backslashes included, and String.raw is the remedy", async () => {
