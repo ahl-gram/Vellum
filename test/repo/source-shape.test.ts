@@ -148,6 +148,7 @@ test("no e2e file but the console module spells a cancellation opening, in a str
     "const dropExpectedCancellations = (e: readonly string[]): string[] => [...e];",
     "export const c = dropExpectedCancellations([]);",
     "export const f = (e: string) => !/Transition was skipped/.test(e);",
+    "export type Key = \"dropExpectedCancellations\";",
   ], "e2e/suites/home.ts"), at(ROSTER, [1, 2, 5, 6]));
   assert.deepEqual(await houseReports([
     "import { dropExpectedCancellations } from \"../support/console.ts\";",
@@ -165,7 +166,7 @@ test("no e2e file but the console module spells a cancellation opening, in a str
     "export const i = (other as unknown as Dropper)[`dropExpectedCancellations`]([]);",
     "const { dropExpectedCancellations: d } = other as unknown as Dropper; export const j = d([]);",
     "const name = \"dropExpectedCancellations\"; export const k = (other as unknown as Record<string, (e: string[]) => string[]>)[name]!([]);",
-  ], "e2e/suites/home.ts"), at(ROSTER, [3, 4, 5, 6, 7]));
+  ], "e2e/suites/home.ts"), at(ROSTER, [3, 4, 5, 6, 7]), "BLIND SPOTS, declared: a namespace import of e2e/support/console.ts itself calling the drop as a member reports too, since the house spelling is the named import, erring toward reporting; the drop's name assembled from pieces passes, erring toward passing");
   assert.deepEqual(await houseReports(["export const roster = [\"Transition was skipped\"];"], "e2e/support/console.ts"), []);
 });
 
@@ -214,6 +215,12 @@ const DIRTY_READS = [
   "  const lengthKey = \"length\";",
   "  const n2 = consoleErrors[lengthKey as \"length\"];",
   "  check(\"B16\", n2 === 0);",
+  "  const length = \"length\";",
+  "  const n3 = consoleErrors[length];",
+  "  check(\"B17\", n3 === 0);",
+  "  const alias = consoleErrors;",
+  "  const fallback = (e: string[] = consoleErrors): boolean => e.length === 0;",
+  "  check(\"B18\", fallback() && alias.length === 0);",
   "}",
 ];
 const OWNER_SHAPE = ["export const sink = (consoleErrors: string[]): void => { consoleErrors.push(\"x\"); };"];
@@ -223,7 +230,7 @@ test("every read of the console accumulator outside its two owners goes through 
   const offset = CLEAN_READS.length;
   assert.deepEqual(
     await houseReports([...CLEAN_READS, ...DIRTY_READS], "e2e/suites/home.ts"),
-    at(READS, [3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18, 19, 22].map((n) => n + offset)),
+    at(READS, [3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18, 19, 22, 25, 27, 28].map((n) => n + offset)),
     "BLIND SPOTS, declared, each erring toward passing (a handbook/errata/guards.md row): a base capture of the destructured accumulator compared directly (const n = consoleErrors.length; then n === 0 in a check), which the old line scanner excused too; two such captures and a comparison of them; a base handed to a helper that compares it, since a base legitimately crosses files as a call argument; the accumulator under another name (const { consoleErrors: raw } = ctx), or its name assembled from pieces; the nested destructure const { consoleErrors: { length } } = ctx; and any read inside e2e/run.ts or e2e/harness.ts, the two owners that create and fill it",
   );
   assert.deepEqual(await houseReports(["import { consoleErrors } from \"../support/elsewhere.ts\";", "export { consoleErrors };"], "e2e/suites/home.ts"), [], "an import or export specifier binds the name and reads nothing");
