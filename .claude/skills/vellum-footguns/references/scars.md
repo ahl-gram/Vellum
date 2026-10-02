@@ -4,8 +4,8 @@ Compiled 2026-09-09 from the bodies, commits and verification comments of PRs #5
 their issues, with older and later scars added beneath when a gate needs one (#378, #518 to #521, #525, #526, #529, #531, #532, #539, #540, #543, epic #401).
 Every row was found by a cold skeptic, a prover, a plate-reader, CI, or Alex live, after the
 implementing session had already reported the work done. Ranked by how many PRs in that window
-carried it. The long form of each lesson, with the earlier scars, is in the auto-memory doctrine
-files named at the end.
+carried it. Where a lesson's rule is written down in this repo, it is in one of the homes named at
+the end.
 
 ## Families, most recurrent first
 
@@ -27,7 +27,11 @@ files named at the end.
   fired `lay()`. #548: a comment deleted against a cited test that did not pin it. #124: the
   reading's ranking keys were invisible to a test that only asserts a name PARSED, since almost any
   ranking still produces a parse; the prover found the leftmost-longest key guarded nowhere and
-  inverting it moved corpus names with the suite green. Proves Gate 1 item 3.
+  inverting it moved corpus names with the suite green. Earlier, Issue #155: the press check S21, as
+  PR #290 first wrote it, asserted the `transform-box` declaration and passed on the buggy origin,
+  while S26 measured the town point staying a fixed point of the press, 0.873px on the old origin
+  against exactly 0 on the new at a 0.05px tolerance; S26 is RS22 in `e2e/suites/room-ink.ts`
+  today. Proves Gate 1 item 3, its outcome clause included.
 - *The instance, not the class.* #533: two siblings the first sweep missed. #536: three cameras
   pinned, the lattice unswept. #544: the clamp fixed on the road's button and not the stamp line.
   #530: one arm scoped of a selector list. #545: one child clamped.
@@ -137,13 +141,76 @@ left open and the session failed to write down).
   still held the write end of the socketpair, so the child's `read()` never saw EOF while the parent
   sat in `uv__io_poll`; the issue's own hypothesis, a write blocked into a full pipe, was wrong, and
   the lost-completion mechanism behind it stays UNVERIFIABLE. `--test-timeout` cannot bound a
-  synchronous block. Now the Gate 1 line on bounding a spawned child.
+  synchronous block. Now the Gate 1 line on bounding a spawned child, whose two reasons live here:
+  the limit is a cap on a hang, not a performance budget, which is why it sits far above the worst
+  real run; and a cap nothing ever reaches cannot bite, which is why one child deliberately outlives
+  it. It pins what reaches the spawn rather than what the option builder returns because the seam
+  between them is where a default cap goes missing with every child still green.
 
-## Where the long form lives
+## Promoted from the memory triage (Issue #708)
 
-Auto-memory, in the private per-project memory directory, which is Alex's machine only:
-`feedback_guard_doctrine.md` (whether a guard bites), `feedback_measurement_doctrine.md` (whether
-a measurement is true), `feedback_drive_real_input_not_synthetic.md`, `feedback_look_at_visual_work.md`,
-`feedback_pr_discipline_doctrine.md`, `feedback_verification_budget_doctrine.md`,
-`feedback_comment_doctrine.md`, `feedback_check_dont_reason.md`, and the `reference_*` files for
-the tooling traps (CDP escapes, perl wide chars, the rebase subject strip, closing keywords).
+Older and later incidents behind gate lines that Issue #708 moved out of private memory, one row
+each, with the gate line it proves. Each was read from the public record on 2026-10-02.
+
+- Issue #320, PR #349: freezing the manifest passed to `rearmAges` left RS23's output byte-identical,
+  because `armAges` takes its range from `overlay.data()` and only forwards that argument. The
+  mutation was confirmed live in `dist/reading-room/app.bundle.js` first, so the zero red was the
+  aim; retargeted at `buildPlaceOverlay`, it reddened RS23 alone. Proves Gate 1 item 9's
+  byte-identical clause.
+- Issue #551, PR #552: the guard proving the selftest mints no scratch directory on import first
+  read the real tmpdir and failed 3 of 3 beside `test/repo/footgun-gate.test.ts`, whose selftest
+  holds a scratch directory mid-window; its child now gets its own `TMPDIR`. Proves Gate 1 item 10's
+  `TMPDIR` clause.
+- Issue #547: CD14 to CD16 ran only at 390, so the phone leaf's two tabs, standing unstyled on the
+  desktop, were asserted only where they belong; the fix's guard asserts them absent at a desktop
+  width too. Proves Gate 1 item 11's both-sides clause.
+- PR #554: the prover found 10 of 19 arms of Gate 6's roster regex with no fixture, so a typo in any
+  of them would have shipped silent; the selftest now generates one row per arm. Proves
+  Gate 1 item 13's per-arm clause.
+- PR #631: TP2's `[^}]*`-bounded pattern could not cross a `}`, so a second spelling nesting
+  `overrides: {}` between its two fields evaded it, the second guard in that PR blinded by the same
+  brace, and the third prover round found a third of the family; call sites are now enumerated on
+  the bare token. Proves Gate 1 item 13's bare-token clause.
+- PR #380: the ci.yml tier guards checked only that their tokens were present, so a swapped ternary
+  (pull requests on the full suite, main merged on smoke) and a lost `!` (smoke forced onto risky
+  pull requests) both escaped; the run loop and the pass and fail rule moved where tests execute
+  them, today `runSelected` and `runOutcome` in `e2e/support/suites.ts`. Proves Gate 1 item 17.
+- Issue #309, PR #410: inverting `topByScore` to anchor at the LOWEST score escaped all 1294 tests,
+  since both ends of a connecting road land on the web whoever anchors; rank pins closed it, the
+  inverted anchor turning the islet's village lane into a town trunk. Proves Gate 1 item 18.
+- Issue #398, Issue #443: every finer-view guarantee was measured against the parent's resampled
+  surface, where a one-cell strait is already closed, so 1428 passing tests could not see straits
+  closing; the guard and the defect shared an oracle, and the fix labels the parent's landmasses on
+  the parent's own grid (`test-support/parent-partition.ts`). Proves Gate 1 item 19.
+- Issue #522, PR #631: every guard on the Chart Table's two doors sat on a pure function or on
+  source text, so "the year is the Explorer's present" was pinned as `\d+` and `year: 1` shipped
+  green, and swapping the booleans handed to `layPressFace` would have inverted a ruling with
+  everything green; both closed by driving checks, each proved by running its mutation. Proves
+  Gate 1 item 20.
+- Issue #540, PR #545: BR6b's fixed offset landed on the new leaf tabs and read 59 against an
+  unchanged ground; it was re-anchored to the docked press's own middle and mutation-proved against
+  the pool it was written for. Proves Gate 2 item 4's moved-sample clause.
+- Issue #400, PR #452: a held chain cache took a band-1 draw from about 550 ms to 294 ms, which moved
+  Z17's read inside the outgoing sheet's crossfade, and `waitRedraft`'s 4 s poll, sized for the bare
+  arm, was outrun on CI by a slower detailed draw; three checks had been sized around how fast a bare
+  region draw used to be. Proves Gate 2 item 8's moved-cost clause.
+- Issue #522: a card hanging below its box is pinned at a clearance of 0, so two arms both read 0.00
+  while one card stood 16.28px taller; heights, not clearances, were the honest comparison. Proves
+  Gate 2 item 15.
+- Issue #638: a tagline measured against a control group's layout box reported two collisions that
+  are not there and could not see a dateline at all; ink, every visible text node's line boxes and
+  every control's own rect, swept from 320 to 480 a pixel at a time, found the class across eight
+  pages. Proves Gate 3 item 3's collision clause.
+
+## Where the rules are written down
+
+Where a lesson's rule is written down in this repo, it is in one of these: the gate lines in
+`.claude/skills/vellum-footguns/SKILL.md`, each with its incident; `handbook/specs/settle-doctrine.md`
+(how an e2e wait is written and what the harness does); `handbook/specs/development-workflow.md`
+(what a pull request owes, and in what order); `handbook/specs/conventions.md` (the comment sweep,
+citations, where a rule lives); `handbook/specs/ui-design.md`'s colour, contrast and legibility
+section (measuring a ground); `CLAUDE.md`'s "Measure before you assert" and "Write visual samples to
+out/"; the agent definitions under `.claude/agents/`; and, for the tooling traps (CDP escapes, perl
+wide chars, the rebase subject strip, closing keywords), the Never list,
+`.claude/skills/vellum-footguns/hooks/README.md` and the Never section of
+`.claude/skills/vellum-footguns/references/held-lines.md`.

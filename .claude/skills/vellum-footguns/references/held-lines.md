@@ -37,7 +37,13 @@ Sub 6 of epic Issue #585 (Issue #591, PR #608) triaged candidate gate lines for 
 - A killed prover leaves mutants in two places; restore both. Earns its line when: a green taken over a mutated tree.
 - A scratch tree probing what node loads carries the package's `"type"`, or it silently measures another loader; and a comment naming a built file by its `.js` name reds the citation guard. Earns its line when: a rerun contradicts a probe, or a CI red.
 - Assert the OUTCOME, never the declaration; adjacent to the landed just-set clause. Earns its line when: a scars row where a declaration-level assertion survived a broken outcome.
+
+Noted 2026-10-02, promoted: Gate 1 item 3 now carries it with its incident (Issue #155, PR #290, a scars row under "The assertion read its own input or the fallback"), via Issue #708.
+
 - Count the terms; do not pattern-match. Earns its line when: the prover reports a mutant matching the pattern and escaping.
+
+Noted 2026-10-02, promoted: PR #631's brace-bounded pattern is that incident, and Gate 1 item 13 now says count call sites by the bare token, via Issue #708.
+
 - The element shim never grows a selector matcher; where its empty answer makes a removal unprovable, say so. Earns its line when: a guard proved unable to red that way.
 - CASUALTY, named in PR #608: `node --test` prints the spec reporter even when piped, so a mutation loop grepping TAP's failure line reads every mutant as escaped. Earns its line when: a zero-red run that is the reporter.
 
@@ -48,6 +54,7 @@ Sub 6 of epic Issue #585 (Issue #591, PR #608) triaged candidate gate lines for 
 Noted 2026-09-16, overtaken before the move: the rule itself is written in `.claude/agents/vellum-plate-reader.md`, the bullet opening "CDP touch is fragile", there since PR #346 (2026-08-10); this row records only that it did not earn a gate line.
 
 - The status region keeps only its LAST write and cannot tell one announcement from two; arm an observer and count. Earns its line when: the cold skeptic catches one.
+- Added 2026-10-02 by Issue #708 (its item 14): a clip-path shrinks the hit region to the drawn shape, so aim inside the shape, never at its box's centre, which the dog-ear's triangle (`.dog-ear` in `public/explorer/chart-drawer.css`) puts exactly on its cut edge. Earns its line when: a numbered incident on the public record where a press aimed at a clip-path's box centre missed; Issue #708 attributes the lesson to Issue #520, whose record does not state it.
 - A probe leaves the page as it found it: a stayed-on-page claim comes from a FRESH evaluate past the commit, and a probe that adds or strips a class or inline style restores it. Earns its line when: a later check fails on what a probe left.
 - Send the left button on every `mouseMoved` of a drag on a native range. Earns its line when: a CI red where such a drag moves nothing.
 - A scroll fixture is fragile at both ends: a helper that scrolls first dissolves it, and a CDP space key scrolls only with text alongside. Earns its line when: a CI red.
