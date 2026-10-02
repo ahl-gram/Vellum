@@ -7,7 +7,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   // B1 and B2 are deliberately not stepped: their own poll returns rather than throwing, and their checks already guard on it.
   const step = makeStep(ctx);
   try {
-    await send("Network.clearBrowserCache"); // so the now-404 worker.js isn't served from cache
+    await send("Network.clearBrowserCache"); // so the now-404 worker chunk isn't served from cache
     await send("Network.setCacheDisabled", { cacheDisabled: true });
     await evaluate(`window.__preReload = true`);
     serverState.blockWorker = true;

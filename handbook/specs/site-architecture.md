@@ -169,10 +169,12 @@ other way, which is what earns them a section of their own.
   the call. The bundler rewrites only the statically analyzable form, so hoisting the target into a
   variable or a parameter emits no worker chunk and kills the worker at runtime for every surface
   that runs a job through that client. It is held by a file-specific pin in
-  `test/site/app-bundles.test.ts` and by the sweep "every worker spawn under `src/site` keeps the
-  static form Vite's build analysis requires" in `test/repo/constant-contracts.test.ts`, which walks
-  the tree, compares static spawns to total spawns per file, and asserts a floor so it cannot pass
-  over an empty scan.
+  `test/site/app-bundles.test.ts`, by `vellum/worker-spawn-static` (`scripts/lint/source-shape.ts`),
+  which `npm run lint` runs over `src/site`, holding every bare `new Worker` and `new SharedWorker`
+  to the static form and refusing a worker constructor reached any other way (through a member, a
+  variable, an alias or a string naming it; the name assembled from pieces still passes), and by a
+  floor in `test/repo/constant-contracts.test.ts`, so the rule cannot pass over a tree with no
+  spawn in it.
 - **A bare relative worker URL resolves against the DOCUMENT base**, not the module URL, so it does
   not throw. It 404s, and the client falls back to running the job inline, which looks like a slow
   page rather than a broken one. That is the failure the literal form above exists to prevent.

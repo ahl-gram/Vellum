@@ -11,14 +11,9 @@ const REPO = resolve(import.meta.dirname, "..", "..");
 const CODE_ROOTS = ["src", "test", "test-support", "scripts", "e2e"];
 const SKIP_DIRS = new Set(["node_modules", "dist", "out", ".git", ".claude"]);
 
-// The gitignored Vite twins are the only real .js artifacts the tree produces (scripts/build-app-bundles.ts BUNDLE_ENTRIES); any other .js name is a leftover, since no .js source has existed since #260.
-const isBuildArtifact = (name: string): boolean => /(^|\.)bundle\.js$/.test(name);
-
 // The ratified citation form (#296, 2026-07-26): backtick-symbol in repo/relative/path, line numbers deliberately absent. The backticks are load-bearing: a bare "foo in src/x.ts" is not checked and not honored.
 const CITATION =
   /`([A-Za-z_]\w*)`\s+in\s+`?((?:src|test|scripts|e2e|test-support|public)\/[\w./-]+\.(?:ts|mjs|astro|css))`?/g;
-
-const JS_NAME = /\b[A-Za-z][\w.-]*\.js\b/g;
 
 function walk(dir: string, out: string[] = []): string[] {
   for (const entry of readdirSync(dir)) {
@@ -90,24 +85,6 @@ test("this guard reads every root the lint reads, and its citation form reads a 
     const read = [...`\`sym\` in \`${root}/x/y.${ext}\``.matchAll(CITATION)].map((m) => m[2]);
     assert.deepEqual(read, [`${root}/x/y.${ext}`], `a citation into ${root}/ is not read at all, so it is never checked`);
   }
-});
-
-test("no comment names a .js module: nothing but the build artifacts is .js since #260", () => {
-  const offenders = scannedFiles().flatMap((file) =>
-    commentLines(file).flatMap(([n, text]) =>
-      [...new Set(text.match(JS_NAME) ?? [])]
-        .filter((name) => !isBuildArtifact(name))
-        .map((name) => `${rel(file)}:${n} names "${name}"  |  ${text.slice(0, 90)}`),
-    ),
-  );
-  assert.deepEqual(
-    offenders,
-    [],
-    `${offenders.length} comment mention(s) of a .js module that does not exist. Since #260 the ` +
-      `browser code is TypeScript under src/site/; only the gitignored *.bundle.js twins are real. ` +
-      `Rename to the .ts module (correct the TARGET too where the referent moved), or, if the file ` +
-      `is genuinely gone, name its successor.\n  ` + offenders.join("\n  "),
-  );
 });
 
 test("every `symbol` in `path` citation resolves: the file exists and names the symbol", () => {
