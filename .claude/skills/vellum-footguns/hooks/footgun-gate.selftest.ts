@@ -4,9 +4,9 @@
  * string from .claude/settings.json through sh with a real, a symlinked, and a missing CLAUDE_PROJECT_DIR.
  */
 import { execFileSync } from "node:child_process";
-import { cpSync, mkdirSync, readFileSync, realpathSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
+import { cpSync, mkdirSync, readdirSync, readFileSync, realpathSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { decide, gateText, headingCheck, requiredHeadings, statePath, type Decision, type Payload } from "./footgun-gate.ts";
 
@@ -277,24 +277,35 @@ const HOOK_CONTEXT_LIMIT = 8_000;
 const LONG_ROOT = `/Users/someone/CodeProjects/Vellum/.claude/worktrees/${"b".repeat(47)}`;
 const NOISY_AND_CLICK = "const R = `a\\(b`; el.click();";
 const EVERY_SHELL_NOTE = "cat > scripts/a-probe.ts <<'EOF'\nconst R = `a\\(b`;\nEOF\npkill -f brave; git push; gh pr create --body-file a-missing-body-file.md";
-const SIZE_PROBES: [string, Payload, string[]][] = [
-  ["a test file", edit("Edit", `${LONG_ROOT}/test/a-directory/a-long-test-name.test.ts`, "x"), ["## Gate 1"]],
-  ["a browser-harness unit test that clicks and escapes", edit("Edit", `${LONG_ROOT}/test/e2e/a-long-test-name.test.ts`, NOISY_AND_CLICK), ["## Gate 1", "for wiring only", "double the backslash"]],
-  ["a new e2e suite that clicks and escapes", edit("Write", `${LONG_ROOT}/e2e/suites/a-new-suite-name.ts`, NOISY_AND_CLICK), ["## Gate 4", "## Gate 2", "for wiring only", "double the backslash"]],
-  ["a new unit test under a suite-shaped path that clicks and escapes", edit("Write", `${LONG_ROOT}/test/e2e/suites/a-long-test-name.test.ts`, NOISY_AND_CLICK), ["## Gate 1", "for wiring only", "double the backslash"]],
-  ["a new stylesheet", edit("Write", `${LONG_ROOT}/public/a-new-sheet-name.css`, "x"), ["## Gate 4", "## Gate 3"]],
-  ["a new page", edit("Write", `${LONG_ROOT}/src/pages/a-new-room-name/index.astro`, "x"), ["## Gate 4", "## Gate 3"]],
-  ["a new site module", edit("Write", `${LONG_ROOT}/src/site/a-room-name/a-new-module-name.ts`, "x"), ["## Gate 4"]],
-  ["the renderer", edit("Edit", `${LONG_ROOT}/src/render/layers/a-layer-name.ts`, "x"), ["## Gate 6"]],
-  ["a push", bash("git push -u origin a-long-branch-name", LONG_ROOT), ["## Gate 5"]],
-  ["a PR body from an unreadable file", bash("gh pr create --body-file a-missing-body-file.md", LONG_ROOT), ["## Gate 5", "could not read"]],
-  ["a shell line that writes a script, kills a browser, pushes and opens a PR", bash(EVERY_SHELL_NOTE, LONG_ROOT), ["## Gate 5", "could not read", "double the backslash", "browser profile"]],
-];
+const longestName = (dir: string, suffix: string, recursive: boolean): string =>
+  readdirSync(join(ROOT, dir), { recursive, encoding: "utf8" })
+    .map((p) => basename(p))
+    .filter((n) => n.endsWith(suffix))
+    .reduce((a, b) => (b.length > a.length ? b : a), "");
+
+const sizeProbes = (): [string, Payload, string[]][] => {
+  const test = longestName("test", ".test.ts", true);
+  const suite = longestName(join("e2e", "suites"), ".ts", false);
+  return [
+    ["a test file", edit("Edit", `${LONG_ROOT}/test/a-directory/${test}`, "x"), ["## Gate 1"]],
+    ["a browser-harness unit test that clicks and escapes", edit("Edit", `${LONG_ROOT}/test/e2e/${test}`, NOISY_AND_CLICK), ["## Gate 1", "for wiring only", "double the backslash"]],
+    ["a new e2e suite that clicks and escapes", edit("Write", `${LONG_ROOT}/e2e/suites/never-exists-${suite}`, NOISY_AND_CLICK), ["## Gate 4", "## Gate 2", "for wiring only", "double the backslash"]],
+    ["a new unit test under a suite-shaped path that clicks and escapes", edit("Write", `${LONG_ROOT}/test/e2e/suites/${test}`, NOISY_AND_CLICK), ["## Gate 1", "for wiring only", "double the backslash"]],
+    ["a new stylesheet", edit("Write", `${LONG_ROOT}/public/a-new-sheet-name.css`, "x"), ["## Gate 4", "## Gate 3"]],
+    ["a new page", edit("Write", `${LONG_ROOT}/src/pages/a-new-room-name/index.astro`, "x"), ["## Gate 4", "## Gate 3"]],
+    ["a new site module", edit("Write", `${LONG_ROOT}/src/site/a-room-name/a-new-module-name.ts`, "x"), ["## Gate 4"]],
+    ["the renderer", edit("Edit", `${LONG_ROOT}/src/render/layers/a-layer-name.ts`, "x"), ["## Gate 6"]],
+    ["a push", bash("git push -u origin a-long-branch-name", LONG_ROOT), ["## Gate 5"]],
+    ["a PR body from an unreadable file", bash("gh pr create --body-file a-missing-body-file.md", LONG_ROOT), ["## Gate 5", "could not read"]],
+    ["a shell line that writes a script, kills a browser, pushes and opens a PR", bash(EVERY_SHELL_NOTE, LONG_ROOT), ["## Gate 5", "could not read", "double the backslash", "browser profile"]],
+  ];
+};
 
 const sizeChecks = async (report: (ok: boolean, line: string) => void): Promise<void> => {
-  const quoted = SIZE_PROBES.map(([, payload]) => payload.tool_input?.file_path ?? payload.cwd ?? "");
+  const probes = sizeProbes();
+  const quoted = probes.map(([, payload]) => payload.tool_input?.file_path ?? payload.cwd ?? "");
   report(LONG_ROOT.length === 100 && quoted.every((p) => p === LONG_ROOT || p.startsWith(`${LONG_ROOT}/`)), `the size probes' ${quoted.length} quoted paths sit under a root of ${LONG_ROOT.length} characters`);
-  for (const [name, payload, needles] of SIZE_PROBES) {
+  for (const [name, payload, needles] of probes) {
     const sessionId = `selftest-size-${process.pid}-${name}`;
     const text = (await decide({ ...payload, session_id: sessionId }))?.hookSpecificOutput?.additionalContext ?? "";
     rmSync(statePath(sessionId), { force: true });

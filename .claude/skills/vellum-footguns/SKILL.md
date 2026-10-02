@@ -247,8 +247,9 @@ Scars: #49, #101, #203, #255, #408, #486, #491, #492, #507, #508, #524, #528, #5
    step 15 sets (Alex, 2026-09-27 and 2026-10-02, Issue #708). A sibling defect found on the way is
    filed, or joins the ledger as one row (the PR, the finding, what was searched;
    `handbook/errata/README.md` has the shape), not folded; grep `handbook/errata/` and the open
-   issues for it first. The one exception that folds: an orchestrated batch whose dispatcher has
-   relayed Alex's ruling to fold for that batch (ruled 2026-09-14, Issue #591).
+   issues for it first. It folds only in an orchestrated batch whose dispatcher has relayed Alex's
+   ruling to fold for that batch (ruled 2026-09-14, Issue #591), or in text this PR only moved and
+   chooses to edit (step 15).
 8. **Any call you made that the issue did not rule on gets a dated issue comment before the PR is
    opened.** The branch goes up at the first commit, so the review is the deadline that matters, not
    the push. The skeptic diffs against the newest ratified statement. A recon that falsifies an

@@ -144,7 +144,8 @@ left open and the session failed to write down).
   synchronous block. Now the Gate 1 line on bounding a spawned child, whose two reasons live here:
   the limit is a cap on a hang, not a performance budget, which is why it sits far above the worst
   real run; and a cap nothing ever reaches cannot bite, which is why one child deliberately outlives
-  it.
+  it. It pins what reaches the spawn rather than what the option builder returns because the seam
+  between them is where a default cap goes missing with every child still green.
 
 ## Promoted from the memory triage (Issue #708)
 
