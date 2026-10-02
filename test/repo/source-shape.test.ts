@@ -85,7 +85,8 @@ test("no e2e file but the console module spells a cancellation opening, in a str
     "// Transition was skipped, named in a comment, filters nothing",
     "const dropExpectedCancellations = (e: readonly string[]): string[] => [...e];",
     "export const c = dropExpectedCancellations([]);",
-  ], "e2e/suites/home.ts"), at(ROSTER, [1, 2, 5]));
+    "export const f = (e: string) => !/Transition was skipped/.test(e);",
+  ], "e2e/suites/home.ts"), at(ROSTER, [1, 2, 5, 6]));
   assert.deepEqual(await houseReports([
     "import { dropExpectedCancellations } from \"../support/console.ts\";",
     "export const d = dropExpectedCancellations([]);",
@@ -108,6 +109,9 @@ const CLEAN_READS = [
   "  check(\"A3\", dropExpectedCancellations(ctx.consoleErrors.slice(base)).length === 0);",
   "  const ctxBase = ctx.consoleErrors.length;",
   "  check(\"A4\", ctxBase >= 0);",
+  "  const wrapped = (consoleErrors as string[]).length;",
+  "  const shape = { consoleErrors: wrapped };",
+  "  check(\"A5\", Object.keys(shape).length > 0);",
   "}",
   "export type Picked = Pick<SuiteContext, \"consoleErrors\">;",
   "export interface Own { consoleErrors: string[] }",
@@ -121,6 +125,8 @@ const DIRTY_READS = [
   "    .length > base);",
   "  check(\"B4\", helper({ check, consoleErrors }));",
   "  check(\"B5\", ctx[\"consoleErrors\"].length === 0);",
+  "  check(\"B6\", (consoleErrors as string[]).length === 0);",
+  "  check(\"B7\", consoleErrors!.length === 0);",
   "}",
 ];
 const OWNER_SHAPE = ["export const sink = (consoleErrors: string[]): void => { consoleErrors.push(\"x\"); };"];
@@ -128,7 +134,7 @@ const OWNER_SHAPE = ["export const sink = (consoleErrors: string[]): void => { c
 test("every read of the console accumulator outside its two owners goes through the shared drop, read across lines, through the context, or handed on", async () => {
   assert.deepEqual(await houseReports(CLEAN_READS, "e2e/suites/home.ts"), []);
   const offset = CLEAN_READS.length;
-  assert.deepEqual(await houseReports([...CLEAN_READS, ...DIRTY_READS], "e2e/suites/home.ts"), at(READS, [3, 4, 5, 7, 8].map((n) => n + offset)));
+  assert.deepEqual(await houseReports([...CLEAN_READS, ...DIRTY_READS], "e2e/suites/home.ts"), at(READS, [3, 4, 5, 7, 8, 9, 10].map((n) => n + offset)));
   assert.deepEqual(await houseReports(OWNER_SHAPE, "e2e/suites/home.ts"), at(READS, [1]));
   for (const owner of ["e2e/run.ts", "e2e/harness.ts"]) assert.deepEqual(await houseReports(OWNER_SHAPE, owner), [], `${owner} creates or fills the accumulator, so its own shapes are not reads`);
 });

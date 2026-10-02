@@ -104,7 +104,8 @@ const e2eCancellationRoster: Rule.RuleModule = {
     const found = (node: Node): void => context.report({ node, messageId: "found" });
     return {
       Literal(node) {
-        if (typeof node.value === "string" && carriesOpening(node.value)) found(node);
+        const text = typeof node.value === "string" ? node.value : "regex" in node ? node.regex.pattern : "";
+        if (carriesOpening(text)) found(node);
       },
       TemplateElement(node) {
         if (carriesOpening(node.value.cooked ?? node.value.raw)) found(node);

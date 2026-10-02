@@ -20,9 +20,10 @@ test("no comment in the TypeScript tree names a .js module, a trailing comment i
     "// the twin is app.bundle.js",
     "export const b = \"x.js\";",
     "/* reveal.js and stage.js, both gone */",
+    "// mybundle.js is no twin: a twin's name is app.bundle.js or bundle.js",
   ].join("\n"), { filePath: join(ROOT, "src/cli/main.ts") });
   assert.deepEqual(result!.messages.filter((m) => m.fatal).map((m) => m.message), []);
-  assert.deepEqual(result!.messages.filter((m) => m.ruleId === NO_JS).map((m) => [m.line, m.message.match(/"([^"]+)"/)?.[1]]), [[1, "worker.js"], [2, "x.js"], [5, "reveal.js"], [5, "stage.js"]]);
+  assert.deepEqual(result!.messages.filter((m) => m.ruleId === NO_JS).map((m) => [m.line, m.message.match(/"([^"]+)"/)?.[1]]), [[1, "worker.js"], [2, "x.js"], [5, "reveal.js"], [5, "stage.js"], [6, "mybundle.js"]]);
 });
 
 const ROOT_WITNESSES: Readonly<Record<string, string>> = {
@@ -129,6 +130,9 @@ test("the skip collector reads every directive form through ESLint's own parser,
   assert.deepEqual(skipsIn(await collector.lintText(plant, { filePath: join(ROOT, at) })), [
     "max-lines-per-function", "no-unnecessary-condition", "max-lines", "(every rule)", "no-console", "no-debugger", "@ts-expect-error", "@ts-ignore",
   ].map((s) => `${at} ${s}`));
+  const sheet = "public/house.css";
+  const sheetPlant = "/* eslint-disable vellum/css-comment-one-line */\n.a { color: red; } /* eslint-disable-line vellum/css-comment-issue-form */\n";
+  assert.deepEqual(skipsIn(await collector.lintText(sheetPlant, { filePath: join(ROOT, sheet) })), [`${sheet} vellum/css-comment-one-line`, `${sheet} vellum/css-comment-issue-form`]);
 });
 
 test("every lint and type-check skip in the linted tree is an entry in the rulebook's accepted list, and every entry is a skip in the tree (Issue #654 ruling D, Issue #675)", async () => {
