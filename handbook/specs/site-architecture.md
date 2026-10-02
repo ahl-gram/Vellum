@@ -171,7 +171,9 @@ other way, which is what earns them a section of their own.
   that runs a job through that client. It is held by a file-specific pin in
   `test/site/app-bundles.test.ts`, by `vellum/worker-spawn-static` (`scripts/lint/source-shape.ts`),
   which `npm run lint` runs over `src/site`, holding every bare `new Worker` and `new SharedWorker`
-  to the static form and refusing a worker constructor reached any other way (through a member, a
+  to the static form spelled as the bundler's own matcher reads it (no parentheses inside it, and
+  `import.meta.url` unbroken; `test/repo/source-shape.test.ts` reads that matcher from the installed
+  Vite) and refusing a worker constructor reached any other way (through a member, a
   variable, an alias or a string naming it; the name assembled from pieces still passes), and by a
   floor in `test/repo/constant-contracts.test.ts`, so the rule cannot pass over a tree with no
   spawn in it.
