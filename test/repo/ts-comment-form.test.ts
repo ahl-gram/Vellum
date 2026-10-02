@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import { join, relative, resolve, sep } from "node:path";
-import { ESLint } from "eslint";
+import { ESLint, type Rule } from "eslint";
 import { includeIgnoreFile } from "eslint/config";
 import css from "@eslint/css";
 import tseslint from "typescript-eslint";
@@ -74,6 +74,16 @@ function acceptedSkips(): { pairs: string[]; typeNotes: string[] } {
   return { pairs: pairs.sort(), typeNotes };
 }
 
+const NOCHECK = "collector/ts-nocheck-any-case";
+const nocheckAnyCase: Rule.RuleModule = {
+  meta: { type: "problem", messages: { found: "@ts-nocheck" } },
+  create: (context) => ({
+    Program() {
+      for (const comment of context.sourceCode.getAllComments()) if (/@ts-nocheck/i.test(comment.value)) context.report({ loc: comment.loc!, messageId: "found" });
+    },
+  }),
+};
+
 const collector = new ESLint({
   cwd: ROOT,
   overrideConfigFile: true,
@@ -82,9 +92,9 @@ const collector = new ESLint({
     {
       files: ["**/*.ts"],
       languageOptions: { parser: tseslint.parser },
-      plugins: { "@typescript-eslint": tseslint.plugin },
+      plugins: { "@typescript-eslint": tseslint.plugin, collector: { rules: { "ts-nocheck-any-case": nocheckAnyCase } } },
       linterOptions: { noInlineConfig: true, reportUnusedDisableDirectives: "off" },
-      rules: { "@typescript-eslint/ban-ts-comment": ["error", { "ts-expect-error": true, "ts-ignore": true, "ts-nocheck": true, "ts-check": false }] },
+      rules: { "@typescript-eslint/ban-ts-comment": ["error", { "ts-expect-error": true, "ts-ignore": true, "ts-nocheck": false, "ts-check": false }], [NOCHECK]: "error" },
     },
     { files: ["**/*.css"], plugins: { css }, language: "css/css", languageOptions: { tolerant: true }, linterOptions: { noInlineConfig: true, reportUnusedDisableDirectives: "off" } },
   ],
@@ -110,6 +120,7 @@ const skipsIn = (results: readonly ESLint.LintResult[]): string[] =>
       const inline = m.ruleId === null ? INLINE.exec(m.message) : null;
       if (inline) return directiveRules(inline[1]!).map((rule) => `${file} ${rule}`);
       if (m.ruleId === "@typescript-eslint/ban-ts-comment") return [`${file} ${tsDirective(m)}`];
+      if (m.ruleId === NOCHECK) return [`${file} @ts-nocheck`];
       return [`${file} (unread: ${m.ruleId ?? "parse"} ${m.message})`];
     });
   });
@@ -125,10 +136,12 @@ test("the skip collector reads every directive form through ESLint's own parser,
     "export const b: number = 1;",
     "/* @ts-ignore */",
     "export const c = \"// eslint-disable-line no-console\";",
+    "// @TS-NOCHECK, which the type checker obeys in any case",
+    "export const d = \"// @ts-nocheck\";",
   ].join("\n");
   const at = "src/cli/main.ts";
   assert.deepEqual(skipsIn(await collector.lintText(plant, { filePath: join(ROOT, at) })), [
-    "max-lines-per-function", "no-unnecessary-condition", "max-lines", "(every rule)", "no-console", "no-debugger", "@ts-expect-error", "@ts-ignore",
+    "max-lines-per-function", "no-unnecessary-condition", "max-lines", "(every rule)", "no-console", "no-debugger", "@ts-expect-error", "@ts-ignore", "@ts-nocheck",
   ].map((s) => `${at} ${s}`));
   const sheet = "public/house.css";
   const sheetPlant = "/* eslint-disable vellum/css-comment-one-line */\n.a { color: red; } /* eslint-disable-line vellum/css-comment-issue-form */\n";
@@ -142,7 +155,8 @@ test("every lint and type-check skip in the linted tree is an entry in the ruleb
   assert.deepEqual(
     found.filter((e) => !isType(e)).sort(),
     pairs,
-    `the skips in the tree and the entries in ${RULEBOOK} ("The accepted lint and type-check skips") differ: fix the code, or put the skip to Alex and add its entry in the same change, and remove an entry with the skip it named. BLIND SPOTS, declared: a file the lint does not read (gitignored, design/, .claude/) is not read here either, erring toward passing; a second skip of an accepted rule in an accepted file reds, since the list is matched as a multiset, erring toward failing`,
+    `the skips in the tree and the entries in ${RULEBOOK} ("The accepted lint and type-check skips") differ: fix the code, or put the skip to Alex and add its entry in the same change, and remove an entry with the skip it named. BLIND SPOTS, declared: a file the lint does not read (gitignored, design/, .claude/) is not read here either, erring toward passing; an entry is matched by file and rule, never by line or form, so an accepted line skip widened to the whole file (a block eslint-disable, or a rule-off comment at the head) passes, erring toward passing (a handbook/errata/guards.md row); a second skip of an accepted rule in an accepted file reds, since the list is matched as a multiset, erring toward failing; eslint-enable, global and exported comments read as skips, and a comment merely mentioning @ts-nocheck reads as one, erring toward failing`,
   );
   assert.deepEqual(found.filter(isType).filter((e) => !typeNotes.includes(e)), [], `a type-check skip stands in the tree that ${RULEBOOK}'s Not skips line does not name`);
+  assert.deepEqual(typeNotes.filter((note) => !found.includes(note)), [], `${RULEBOOK}'s Not skips line names a type-check skip the tree no longer carries`);
 });

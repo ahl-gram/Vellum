@@ -36,8 +36,6 @@ const engineNoIdLookup: Rule.RuleModule = {
 const WORKERS = new Set(["Worker", "SharedWorker"]);
 const STATIC_TARGET = /^\.\/[\w-]+\.ts$/;
 const isName = (node: Node | undefined, name: string): boolean => node?.type === "Identifier" && node.name === name;
-const constructed = (node: Node): string | null =>
-  node.type === "Identifier" ? node.name : node.type === "MemberExpression" && !node.computed && node.property.type === "Identifier" ? node.property.name : null;
 const isImportMetaUrl = (node: Node | undefined): boolean =>
   node?.type === "MemberExpression" && !node.computed && isName(node.property as Node, "url") && node.object.type === "MetaProperty" && node.object.meta.name === "import" && node.object.property.name === "meta";
 const isStaticUrl = (node: Node | undefined): boolean => {
@@ -51,14 +49,24 @@ const isModuleOptions = (node: Node | undefined): boolean => {
   return only?.type === "Property" && !only.computed && isName(only.key as Node, "type") && only.value.type === "Literal" && only.value.value === "module";
 };
 
+const constructsOrTests = (id: Node, parent: Node): boolean =>
+  (parent.type === "NewExpression" && parent.callee === id) ||
+  (parent.type === "UnaryExpression" && parent.operator === "typeof") ||
+  (parent.type === "BinaryExpression" && parent.operator === "instanceof" && parent.right === id) ||
+  (parent.type === "Property" && parent.key === id && !parent.computed && parent.parent.type === "ObjectExpression") ||
+  parent.type.startsWith("TS");
+
 const workerSpawnStatic: Rule.RuleModule = {
-  meta: problem("a worker is spawned as new Worker(new URL(\"./<name>.ts\", import.meta.url), { type: \"module\" }), written out in full, because the bundler rewrites only that form (handbook/specs/site-architecture.md)"),
+  meta: problem("a worker is spawned as a bare new Worker(new URL(\"./<name>.ts\", import.meta.url), { type: \"module\" }), or new SharedWorker in the same form, written out in full: the bundler rewrites only that form, never a constructor reached through a member, a variable or an alias (handbook/specs/site-architecture.md)"),
   create(context) {
     return {
       NewExpression(node) {
-        if (!WORKERS.has(constructed(node.callee as Node) ?? "")) return;
+        if (node.callee.type !== "Identifier" || !WORKERS.has(node.callee.name)) return;
         const [target, options, ...rest] = node.arguments as Node[];
         if (rest.length > 0 || !isStaticUrl(target) || !isModuleOptions(options)) context.report({ node, messageId: "found" });
+      },
+      Identifier(node) {
+        if (WORKERS.has(node.name) && !constructsOrTests(node, node.parent)) context.report({ node, messageId: "found" });
       },
     };
   },

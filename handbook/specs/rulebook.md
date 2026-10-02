@@ -313,8 +313,9 @@ its line exactly as written, with no reason beside it: the reason is the entry.
 in the linted tree through ESLint's own parser, the rule-off form included, and reds on a skip no
 entry names and on an entry no skip answers. It reads an entry's bold lead only: the FIRST
 backticked token there is the rule, and every backticked path there is a file it is skipped in, so
-write a new entry in that shape. A type-check skip passes only where the "Not skips" line below
-names it.
+write a new entry in that shape. It matches an entry by file and rule, never by line or form, so it
+cannot tell an accepted line skip from the same rule switched off for the whole file; hold that
+line yourself. A type-check skip passes only where the "Not skips" line below names it.
 
 - **`no-implied-eval` on the `new Function(...)` call in `runPlateScript`
   (`test/atlas/document.test.ts`).** The atlas's linking script reaches the test as text inside the

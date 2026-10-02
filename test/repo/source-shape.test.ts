@@ -52,7 +52,16 @@ test("a worker spawn in the site is the one static form the bundler reads, wrapp
     "export const page = () => new Worker(new URL(\"./worker.ts\", location.href), { type: \"module\" });",
     "export const member = (u: URL) => new window.Worker(u, { type: \"module\" });",
     "export const shared = (u: URL) => new SharedWorker(u);",
-  ], "src/site/explorer/worker-client.ts"), at(WORKER, [8, 9, 10, 11, 12, 13, 14, 15, 16, 17]));
+    "export const memberStatic = () => new window.Worker(new URL(\"./worker.ts\", import.meta.url), { type: \"module\" });",
+    "export const viaGlobal = () => new globalThis.SharedWorker(new URL(\"./worker.ts\", import.meta.url), { type: \"module\" });",
+    "const W = Worker; export const alias = () => new W(new URL(\"./worker.ts\", import.meta.url), { type: \"module\" });",
+    "const { SharedWorker: S } = globalThis; export const pulled = () => new S(new URL(\"./worker.ts\", import.meta.url), { type: \"module\" });",
+    "export const sharedOk = () => new SharedWorker(new URL(\"./worker.ts\", import.meta.url), { type: \"module\" });",
+    "export const detect = (): boolean => typeof Worker !== \"undefined\";",
+    "export const isWorker = (w: unknown): boolean => w instanceof Worker;",
+    "export const labels = { Worker: \"a key, not a constructor\" };",
+    "export const hold = (w: Worker | null): Worker | null => w;",
+  ], "src/site/explorer/worker-client.ts"), at(WORKER, [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21]));
 });
 
 test("a single-escaped regex class or dot in a backtick string reports in every chunk, an odd run of backslashes included, and String.raw is the remedy", async () => {
@@ -139,7 +148,11 @@ const OWNER_SHAPE = ["export const sink = (consoleErrors: string[]): void => { c
 test("every read of the console accumulator outside its two owners goes through the shared drop, read across lines, through the context, or handed on", async () => {
   assert.deepEqual(await houseReports(CLEAN_READS, "e2e/suites/home.ts"), []);
   const offset = CLEAN_READS.length;
-  assert.deepEqual(await houseReports([...CLEAN_READS, ...DIRTY_READS], "e2e/suites/home.ts"), at(READS, [3, 4, 5, 7, 8, 9, 10, 11, 12, 13].map((n) => n + offset)));
+  assert.deepEqual(
+    await houseReports([...CLEAN_READS, ...DIRTY_READS], "e2e/suites/home.ts"),
+    at(READS, [3, 4, 5, 7, 8, 9, 10, 11, 12, 13].map((n) => n + offset)),
+    "BLIND SPOTS, declared, each erring toward passing (a handbook/errata/guards.md row): a base capture compared directly (const n = consoleErrors.length; then n === 0 in a check); two captures and a comparison of them; a base handed to a helper that compares it, since a base legitimately crosses files as a call argument; the accumulator under another name (const { consoleErrors: raw } = ctx); and the nested destructure const { consoleErrors: { length } } = ctx",
+  );
   assert.deepEqual(await houseReports(["import { consoleErrors } from \"../support/elsewhere.ts\";", "export { consoleErrors };"], "e2e/suites/home.ts"), [], "an import or export specifier binds the name and reads nothing");
   assert.deepEqual(await houseReports(OWNER_SHAPE, "e2e/suites/home.ts"), at(READS, [1]));
   for (const owner of ["e2e/run.ts", "e2e/harness.ts"]) assert.deepEqual(await houseReports(OWNER_SHAPE, owner), [], `${owner} creates or fills the accumulator, so its own shapes are not reads`);
@@ -164,4 +177,6 @@ test("each scoped rule resolves at error inside its scope and not outside it, an
     assert.equal((await resolvedRules(outside))[rule], undefined, `${rule} reaches ${outside}, outside its scope`);
   }
   assert.deepEqual((await resolvedRules("src/site/explorer/app.ts"))["max-lines"], [2, 400], "app.ts no longer resolves max-lines at the 400-line bound Issue #191 ratified for it");
+  const nested = (await eslint.calculateConfigForFile("src/site/living-chart/nested/deeper/part.ts")) as { rules?: Record<string, unknown> };
+  assert.deepEqual(nested.rules?.[ENGINE], [2], "the engine rule does not reach a module nested under src/site/living-chart/, so a subdirectory escapes it");
 });
