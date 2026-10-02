@@ -36,7 +36,6 @@ const engineNoIdLookup: Rule.RuleModule = {
 const VALUE_WRAPPERS = new Set(["TSAsExpression", "TSNonNullExpression", "TSSatisfiesExpression", "TSTypeAssertion"]);
 const WORKERS = new Set(["Worker", "SharedWorker"]);
 const STATIC_TARGET = /^\.\/[\w-]+\.ts$/;
-const SPAWN_TEXT = /^new\s+(?:Worker|SharedWorker)\s*\(\s*new\s+URL\s*\(\s*(["'])\.\/[\w-]+\.ts\1\s*,\s*import\.meta\.url\s*(?:,\s*)?\)/;
 const isName = (node: Node | undefined, name: string): boolean => node?.type === "Identifier" && node.name === name;
 const isImportMetaUrl = (node: Node | undefined): boolean =>
   node?.type === "MemberExpression" && !node.computed && isName(node.property as Node, "url") && node.object.type === "MetaProperty" && node.object.meta.name === "import" && node.object.property.name === "meta";
@@ -69,8 +68,7 @@ const workerSpawnStatic: Rule.RuleModule = {
       NewExpression(node) {
         if (node.callee.type !== "Identifier" || !WORKERS.has(node.callee.name)) return;
         const [target, options, ...rest] = node.arguments as Node[];
-        const spelled = SPAWN_TEXT.test(context.sourceCode.getText(node));
-        if (rest.length > 0 || !isStaticUrl(target) || !isModuleOptions(options) || !spelled) context.report({ node, messageId: "found" });
+        if (rest.length > 0 || !isStaticUrl(target) || !isModuleOptions(options)) context.report({ node, messageId: "found" });
       },
       Identifier(node) {
         if (WORKERS.has(node.name) && !constructsOrTests(node, node.parent)) context.report({ node, messageId: "found" });

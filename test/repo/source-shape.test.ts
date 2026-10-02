@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { ESLint } from "eslint";
 
@@ -88,14 +88,6 @@ test("a worker spawn in the site is the one static form the bundler reads, wrapp
   assert.deepEqual(await houseReports(WORKER_PLANT, "src/site/explorer/worker-client.ts"), at(WORKER, [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 45, 46, 47, 48]), "BLIND SPOTS, declared, each erring toward passing: the name assembled from pieces, or handed to eval or Reflect.get; and a TypeScript value position other than the four casts (an instantiation, an import alias, an export assignment, an enum member), each of which npm run check refuses first (TS2635, TS1294)");
 });
 
-const viteWorkerMatcher = (): RegExp => {
-  const chunk = join(ROOT, "node_modules/vite/dist/node/chunks/node.js");
-  const line = readFileSync(chunk, "utf8").split("\n").find((l) => l.startsWith("const workerImportMetaUrlRE = /"));
-  const literal = line === undefined ? null : /^const workerImportMetaUrlRE = \/(.+)\/([a-z]*);$/.exec(line);
-  assert.ok(literal, `Vite's worker matcher (workerImportMetaUrlRE) is no longer a regex literal in ${chunk}, so this check cannot read it; find its new home after the Vite upgrade`);
-  return new RegExp(literal[1]!, literal[2]!.replace("g", ""));
-};
-
 const SPELLINGS = [
   "new Worker(new URL(\"./worker.ts\", import.meta.url), { type: \"module\" })",
   "new SharedWorker(new URL('./worker.ts', import.meta.url), { type: \"module\" })",
@@ -108,13 +100,8 @@ const SPELLINGS = [
   "new Worker(new URL(\"./worker.ts\", import.meta\n.url), { type: \"module\" })",
 ];
 
-test("the worker rule passes no spawn spelling Vite's own matcher skips, read from the installed Vite, and every listed spelling it rewrites; a backtick target, which Vite also takes, still reports by design", async () => {
-  const vite = viteWorkerMatcher();
-  assert.ok(vite.test(SPELLINGS[0]!) && !vite.test(SPELLINGS[3]!), "the matcher read from Vite neither takes the plain spawn nor refuses a parenthesised callee, so this reader has lost it");
-  for (const spelling of SPELLINGS) {
-    const reports = await houseReports([`export const w = () => ${spelling};`], "src/site/explorer/worker-client.ts");
-    assert.equal(reports.length > 0, !vite.test(spelling), `${JSON.stringify(spelling)}: the rule ${reports.length > 0 ? "reports" : "passes"} a spelling Vite ${vite.test(spelling) ? "rewrites" : "never rewrites"}`);
-  }
+test("a static spawn wearing parentheses, a line break or a trailing comma passes, since the bundler's TypeScript transform prints each as the plain form before its worker matcher reads it (measured by a real vite build on PR #731); ruling 2 keeps harmless spelling from reddening", async () => {
+  for (const spelling of SPELLINGS) assert.deepEqual(await houseReports([`export const w = () => ${spelling};`], "src/site/explorer/worker-client.ts"), [], `${JSON.stringify(spelling)} reports, though the bundler rewrites it`);
 });
 
 test("a single-escaped regex class or dot in a backtick string reports in every chunk, an odd run of backslashes included, and String.raw is the remedy", async () => {
@@ -149,7 +136,16 @@ test("no e2e file but the console module spells a cancellation opening, in a str
     "export const c = dropExpectedCancellations([]);",
     "export const f = (e: string) => !/Transition was skipped/.test(e);",
     "export type Key = \"dropExpectedCancellations\";",
-  ], "e2e/suites/home.ts"), at(ROSTER, [1, 2, 5, 6]));
+  ], "e2e/suites/home.ts"), at(ROSTER, [1, 2, 5, 6]), "BLIND SPOTS, declared, each erring toward passing (a handbook/errata/guards.md row): an opening matched in a shape whose text does not carry it whole, such as a regex alternation (/Transition was (skipped|aborted)/), an escape class (\\s), a case-folded match (/i, or toLowerCase().includes), a string assembled from pieces, or a shorter fragment (\"Transition was\")");
+  assert.deepEqual(await houseReports([
+    "import { CANCELLATION_PREFIXES as dropExpectedCancellations } from \"../support/console.ts\";",
+    "export const m = dropExpectedCancellations([]);",
+  ], "e2e/suites/home.ts"), at(ROSTER, [2]), "an import of another export under the drop's name is not the drop");
+  assert.deepEqual(await houseReports([
+    "import { dropExpectedCancellations } from \"../support/console.ts\";",
+    "export const n = (): string[] => dropExpectedCancellations([]);",
+    "export const o = (dropExpectedCancellations: (e: string[]) => string[]): string[] => dropExpectedCancellations([]);",
+  ], "e2e/suites/home.ts"), at(ROSTER, [3]), "the drop called inside a function resolves to its import through the scopes above, and a parameter shadowing the name is not the drop");
   assert.deepEqual(await houseReports([
     "import { dropExpectedCancellations } from \"../support/console.ts\";",
     "export const d = dropExpectedCancellations([]);",
@@ -182,6 +178,7 @@ const CLEAN_READS = [
   "  check(\"A4\", dropExpectedCancellations(ctx[\"consoleErrors\"]).length === 0);",
   "  const wrapped = (consoleErrors as string[]).length;",
   "  const satisfied = (consoleErrors satisfies string[]).length;",
+  "  const doubled = (consoleErrors as unknown as string[]).length;",
   "  check(\"A6\", satisfied >= 0);",
   "  const shape = { consoleErrors: wrapped };",
   "  check(\"A5\", Object.keys(shape).length > 0);",
@@ -221,6 +218,8 @@ const DIRTY_READS = [
   "  const alias = consoleErrors;",
   "  const fallback = (e: string[] = consoleErrors): boolean => e.length === 0;",
   "  check(\"B18\", fallback() && alias.length === 0);",
+  "  const get = (): string[] => consoleErrors;",
+  "  check(\"B19\", get().length === 0);",
   "}",
 ];
 const OWNER_SHAPE = ["export const sink = (consoleErrors: string[]): void => { consoleErrors.push(\"x\"); };"];
@@ -230,8 +229,8 @@ test("every read of the console accumulator outside its two owners goes through 
   const offset = CLEAN_READS.length;
   assert.deepEqual(
     await houseReports([...CLEAN_READS, ...DIRTY_READS], "e2e/suites/home.ts"),
-    at(READS, [3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18, 19, 22, 25, 27, 28].map((n) => n + offset)),
-    "BLIND SPOTS, declared, each erring toward passing (a handbook/errata/guards.md row): a base capture of the destructured accumulator compared directly (const n = consoleErrors.length; then n === 0 in a check), which the old line scanner excused too; two such captures and a comparison of them; a base handed to a helper that compares it, since a base legitimately crosses files as a call argument; the accumulator under another name (const { consoleErrors: raw } = ctx), or its name assembled from pieces; the nested destructure const { consoleErrors: { length } } = ctx; and any read inside e2e/run.ts or e2e/harness.ts, the two owners that create and fill it",
+    at(READS, [3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18, 19, 22, 25, 27, 28, 30].map((n) => n + offset)),
+    "BLIND SPOTS, declared, each erring toward passing (a handbook/errata/guards.md row): a base capture of the destructured accumulator compared directly (const n = consoleErrors.length; then n === 0 in a check), which the old line scanner excused too; two such captures and a comparison of them; a base handed to a helper that compares it, since a base legitimately crosses files as a call argument; the accumulator under another name (const { consoleErrors: raw } = ctx), or its name assembled from pieces; the nested destructure const { consoleErrors: { length } } = ctx; any read inside e2e/run.ts or e2e/harness.ts, the two owners that create and fill it; and a read nested anywhere inside the drop's arguments, filtered or not (dropExpectedCancellations([String(consoleErrors.length)]))",
   );
   assert.deepEqual(await houseReports(["import { consoleErrors } from \"../support/elsewhere.ts\";", "export { consoleErrors };"], "e2e/suites/home.ts"), [], "an import or export specifier binds the name and reads nothing");
   assert.deepEqual(await houseReports(OWNER_SHAPE, "e2e/suites/home.ts"), at(READS, [1]));
