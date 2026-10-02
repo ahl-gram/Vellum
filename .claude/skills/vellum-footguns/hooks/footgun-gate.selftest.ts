@@ -283,9 +283,7 @@ const longestName = (dir: string, suffix: string, recursive: boolean): string =>
     .filter((n) => n.endsWith(suffix))
     .reduce((a, b) => (b.length > a.length ? b : a), "");
 
-const sizeProbes = (): [string, Payload, string[]][] => {
-  const test = longestName("test", ".test.ts", true);
-  const suite = longestName(join("e2e", "suites"), ".ts", false);
+const sizeProbes = (test: string, suite: string): [string, Payload, string[]][] => {
   return [
     ["a test file", edit("Edit", `${LONG_ROOT}/test/a-directory/${test}`, "x"), ["## Gate 1"]],
     ["a browser-harness unit test that clicks and escapes", edit("Edit", `${LONG_ROOT}/test/e2e/${test}`, NOISY_AND_CLICK), ["## Gate 1", "for wiring only", "double the backslash"]],
@@ -302,9 +300,11 @@ const sizeProbes = (): [string, Payload, string[]][] => {
 };
 
 const sizeChecks = async (report: (ok: boolean, line: string) => void): Promise<void> => {
-  const probes = sizeProbes();
+  const test = longestName("test", ".test.ts", true);
+  const suite = longestName(join("e2e", "suites"), ".ts", false);
+  const probes = sizeProbes(test, suite);
   const quoted = probes.map(([, payload]) => payload.tool_input?.file_path ?? payload.cwd ?? "");
-  report(LONG_ROOT.length === 100 && quoted.every((p) => p === LONG_ROOT || p.startsWith(`${LONG_ROOT}/`)), `the size probes' ${quoted.length} quoted paths sit under a root of ${LONG_ROOT.length} characters`);
+  report(LONG_ROOT.length === 100 && quoted.every((p) => p === LONG_ROOT || p.startsWith(`${LONG_ROOT}/`)), `the size probes' ${quoted.length} quoted paths sit under a root of ${LONG_ROOT.length} characters, naming test files of ${test.length} and suites of ${suite.length} characters`);
   for (const [name, payload, needles] of probes) {
     const sessionId = `selftest-size-${process.pid}-${name}`;
     const text = (await decide({ ...payload, session_id: sessionId }))?.hookSpecificOutput?.additionalContext ?? "";

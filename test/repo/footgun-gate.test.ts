@@ -41,7 +41,10 @@ test("every gate-size probe passes at the 8,000-character limit", () => {
     ["a PR body from an unreadable file", "## Gate 5, could not read"],
     ["a shell line that writes a script, kills a browser, pushes and opens a PR", "## Gate 5, could not read, double the backslash, browser profile"],
   ];
-  assert.match(out, /^ok {3}the size probes' 11 quoted paths sit under a root of 100 characters$/m, out);
+  const named = /^ok {3}the size probes' 11 quoted paths sit under a root of 100 characters, naming test files of (\d+) and suites of (\d+) characters$/m.exec(out);
+  const longest = (dir: string, suffix: string, recursive: boolean): number =>
+    Math.max(...readdirSync(resolve(import.meta.dirname, "..", "..", dir), { recursive, encoding: "utf8" }).map((p) => p.split("/").pop() ?? "").filter((n) => n.endsWith(suffix)).map((n) => n.length));
+  assert.deepEqual([Number(named?.[1]), Number(named?.[2])], [longest("test", ".test.ts", true), longest("e2e/suites", ".ts", false)], `the size probes do not name the longest real test file and suite\n${out}`);
   for (const [name, carries] of probes) {
     const row = out.split("\n").find((l) => l.startsWith(`ok   ${name}: the pasted note carries ${carries} in `));
     const size = /in (\d+) of 8000 characters$/.exec(row ?? "");
@@ -59,6 +62,7 @@ test("every row on whether a new unit test joins a roster passes", () => {
     ["a new unit test under test/src/pages gets gate 1 and no gate 4", gate1Not4],
     ["a new unit test on the absolute path a real call passes gets gate 1 and no gate 4", gate1Not4],
     ["a new unit test beside a suite gets gate 2 and no gate 4", 'want context with "## Gate 2" and without "## Gate 4", got context'],
+    ["a new part in a suite's folder gets gate 2 and no gate 4", 'want context with "## Gate 2" and without "## Gate 4", got context'],
     ["a new unit test beside a site module gets no gate at all", 'want null with "", got null'],
     ["a new unit test beside a page gets no gate at all", 'want null with "", got null'],
     ["a new suite whose name ends in test still gets gate 4", 'want context with "## Gate 4", got context'],
