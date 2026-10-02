@@ -49,6 +49,23 @@ test("every gate-size probe passes at the 8,000-character limit", () => {
   }
 });
 
+// Written out for the same reason as the size probes: several of these rows are the only guard of their roster arm, and deleting one prints no FAIL.
+test("every row on whether a new unit test joins a roster passes", () => {
+  const out = execFileSync(process.execPath, [SELFTEST], { encoding: "utf8", timeout: BOUND_MS });
+  const rows = [
+    "a new unit test under test/e2e/suites gets gate 1 and no gate 4",
+    "a new unit test under test/src/site gets gate 1 and no gate 4",
+    "a new unit test under test/src/pages gets gate 1 and no gate 4",
+    "a new unit test on the absolute path a real call passes gets gate 1 and no gate 4",
+    "a new unit test beside a suite gets gate 2 and no gate 4",
+    "a new unit test beside a site module gets no gate at all",
+    "a new unit test beside a page gets no gate at all",
+    "a new suite whose name ends in test still gets gate 4",
+    "a new site module whose name ends in test still gets gate 4",
+  ];
+  for (const row of rows) assert.ok(out.split("\n").some((l) => l.startsWith(`ok   ${row}: `)), `no passing row "${row}"\n${out}`);
+});
+
 // This guard lives here, not beside the readDeployed tests, because it has to survive the defect it guards: footgun-deployed-run.test.ts imports the selftest statically, so an entry guard that stops working exits that whole file at import time and the runner reports it green with every assertion silently absent (measured: 7 gone, "pass 2 fail 0"). This file only ever spawns the selftest, so it still runs.
 test("a bare import of the fixture table runs nothing and mints nothing", () => {
   const own = mkdtempSync(join(tmpdir(), "footgun-import-probe-"));

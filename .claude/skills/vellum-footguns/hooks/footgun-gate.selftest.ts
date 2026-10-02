@@ -254,6 +254,12 @@ const FIXTURES: Fixture[] = [
   ["a new unit test under test/e2e/suites gets gate 1 and no gate 4", edit("Write", "test/e2e/suites/never-exists-zz.test.ts", "x"), "context", "## Gate 1", "## Gate 4"],
   ["a new unit test under test/src/site gets gate 1 and no gate 4", edit("Write", "test/src/site/never-exists-zz.test.ts", "x"), "context", "## Gate 1", "## Gate 4"],
   ["a new unit test under test/src/pages gets gate 1 and no gate 4", edit("Write", "test/src/pages/never-exists-zz.test.ts", "x"), "context", "## Gate 1", "## Gate 4"],
+  ["a new unit test on the absolute path a real call passes gets gate 1 and no gate 4", edit("Write", join(ROOT, "test/src/site/never-exists-zz.test.ts"), "x"), "context", "## Gate 1", "## Gate 4"],
+  ["a new unit test beside a suite gets gate 2 and no gate 4", edit("Write", "e2e/suites/never-exists-zz.test.ts", "x"), "context", "## Gate 2", "## Gate 4"],
+  ["a new unit test beside a site module gets no gate at all", edit("Write", "src/site/never-exists-zz.test.ts", "x"), null, ""],
+  ["a new unit test beside a page gets no gate at all", edit("Write", "src/pages/never-exists-zz.test.ts", "x"), null, ""],
+  ["a new suite whose name ends in test still gets gate 4", edit("Write", "e2e/suites/never-exists-latest.ts", "x"), "context", "## Gate 4"],
+  ["a new site module whose name ends in test still gets gate 4", edit("Write", "src/site/a-room/never-exists-contest.ts", "x"), "context", "## Gate 4"],
   // One fixture per ARM of the Gate 6 regex, because a roster is only as good as its least-swept alternative: the prover found 10 of 19 arms had no fixture, so a typo in any of them shipped silent.
   ...GATE6_ARMS.map(([arm, path]): Fixture => [`gate 6 arm: ${arm}`, edit("Edit", path, "x"), "context", "## Gate 6"]),
   ["gate 6 on the ABSOLUTE path a real tool call passes", edit("Edit", join(ROOT, "src/render/style.ts"), "x"), "context", "## Gate 6"],
