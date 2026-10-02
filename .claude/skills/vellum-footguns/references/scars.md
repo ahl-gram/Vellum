@@ -156,7 +156,7 @@ each, with the gate line it proves. Each was read from the public record on 2026
 - Issue #551, PR #552: the guard proving the selftest mints no scratch directory on import first
   read the real tmpdir and failed 3 of 3 beside `test/repo/footgun-gate.test.ts`, whose selftest
   holds a scratch directory mid-window; its child now gets its own `TMPDIR`. Proves Gate 1 item 10's
-  global-state clause.
+  `TMPDIR` clause.
 - Issue #547: CD14 to CD16 ran only at 390, so the phone leaf's two tabs, standing unstyled on the
   desktop, were asserted only where they belong; the fix's guard asserts them absent at a desktop
   width too. Proves Gate 1 item 11's both-sides clause.

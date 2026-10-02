@@ -264,14 +264,17 @@ const FIXTURES: Fixture[] = [
 
 // Claude Code 2.1.287, read 2026-10-02: hook additionalContext past 10,000 characters reaches the model as a 2,000-character preview, and the binary's hook-output sanitizer cuts the field at 8,000; which path a project hook takes is unverified, so the stricter binds (Issue #708, ruling D).
 const HOOK_CONTEXT_LIMIT = 8_000;
-// Every lead quotes the edited path, and a harness worktree is the longest root a session edits under.
+// Every lead quotes the edited path, and a harness worktree is the longest root a session edits under; a shorter root here under-measures every probe.
 const LONG_ROOT = "/Users/someone/CodeProjects/Vellum/.claude/worktrees/agent-0000000000000000a";
+const NOISY_AND_CLICK = "const R = `a\\(b`; el.click();";
 const SIZE_PROBES: [string, Payload, string[]][] = [
   ["a test file", edit("Edit", `${LONG_ROOT}/test/a-directory/a-long-test-name.test.ts`, "x"), ["## Gate 1"]],
-  ["a new e2e suite that clicks and escapes", edit("Write", `${LONG_ROOT}/e2e/suites/a-new-suite-name.ts`, "const R = `a\\(b`; el.click();"), ["## Gate 4", "## Gate 2", "pointer-events", "double the backslash"]],
+  ["a browser-harness unit test that clicks and escapes", edit("Edit", `${LONG_ROOT}/test/e2e/a-long-test-name.test.ts`, NOISY_AND_CLICK), ["## Gate 1", "for wiring only", "double the backslash"]],
+  ["a new e2e suite that clicks and escapes", edit("Write", `${LONG_ROOT}/e2e/suites/a-new-suite-name.ts`, NOISY_AND_CLICK), ["## Gate 4", "## Gate 2", "for wiring only", "double the backslash"]],
   ["a new stylesheet", edit("Write", `${LONG_ROOT}/public/a-new-sheet-name.css`, "x"), ["## Gate 4", "## Gate 3"]],
   ["the renderer", edit("Edit", `${LONG_ROOT}/src/render/layers/a-layer-name.ts`, "x"), ["## Gate 6"]],
   ["a push", bash("git push -u origin a-long-branch-name"), ["## Gate 5"]],
+  ["a PR body from an unreadable file", bash("gh pr create --body-file a-missing-body-file.md", "/"), ["## Gate 5", "could not read"]],
 ];
 
 const sizeChecks = async (report: (ok: boolean, line: string) => void): Promise<void> => {

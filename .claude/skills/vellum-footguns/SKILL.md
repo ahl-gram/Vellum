@@ -33,7 +33,7 @@ Scars: #49, #124, #270, #275, #295, #320, #353, #358, #360, #363, #380, #383, #3
    a "this world" default, a `slice` that ran to EOF: a check on its own input is not a guard. A
    DEFAULT is a fallback too: a guard that exercises a threaded value only at its default cannot tell
    threading from a hardcode, so assert once through the top-level API at a non-default value (#412).
-   **Assert the OUTCOME, never the declaration** (Issue #155, PR #290).
+   **Assert the OUTCOME, never the declaration** (PR #290).
 4. **Narrowing before asserting owes an anchor check.** `indexOf`, `slice`, `match`, `find`: assert
    the anchor was found (`notEqual(at, -1)`) before the negative assertion runs against the remainder.
 5. **N states or N siblings need N pins, not one floor.** Assert each state's own resolved value
@@ -57,15 +57,14 @@ Scars: #49, #124, #270, #275, #295, #320, #353, #358, #360, #363, #380, #383, #3
    rather than carry any across: commit first. Zero red is a
    hole. A guard proved unable to red is deleted, never shipped. Mutate BY LINE, never by text:
    several wearers can share one declaration, so a substitution changes them all at once and the red
-   names nothing (PR #510). A mutation that leaves the output byte-identical proves nothing until it
-   is confirmed live in the built bundle; then suspect the aim before the guard (Issue #320, PR #349).
+   names nothing (PR #510). A byte-identical mutant proves nothing until it is live in the built
+   bundle; then suspect the aim (PR #349).
 10. **A test that spawns a child gives it its own time limit** (`execFileSync`'s `timeout`): with
     none, a wedged child (a large `input` to a child that DRAINS it) hangs the unit lane with no red,
-    and `--test-timeout` cannot stop a synchronous block (Issue #564). Set the cap far above the worst real
-    run, keep one child that outlives it written as a SINGLE command (`sh -c 'sleep 5'`), since
-    killing a multi-command child orphans its grandchild and leaks a process per firing, and pin
-    what reaches the spawn, not what the option builder returns. A child that reads global state gets
-    its own copy, `TMPDIR` included (Issue #551, PR #552).
+    and `--test-timeout` cannot stop a synchronous block (Issue #564). Set the cap far above the
+    worst real run, keep one child that outlives it written as a SINGLE command (`sh -c 'sleep 5'`),
+    since killing a multi-command child orphans its grandchild and leaks a process per firing, pin
+    what reaches the spawn, not what the option builder returns, and give it its own `TMPDIR` (PR #552).
 11. **Narrow-width or column-width work owes a sweep across seeds, never the seed-42 fixture.** Seed
     42 is one of the few clean seeds, which is why a sideways-scroll defect left the suite green
     while other seeds overflowed. Pin the declaration by regex, so flipping its value fails too and
@@ -78,9 +77,8 @@ Scars: #49, #124, #270, #275, #295, #320, #353, #358, #360, #363, #380, #383, #3
     pseudo-class and a colon inside an attribute value each drop rules from the sweep (#358). A
     markup regex allows trailing attributes, and an empty parse never SKIPS a section unless every
     companion parse is empty too (#353, whose guards went blind when #270 added per-term ids). A regex
-    guard gets one fixture per arm before a hand mutation table is trusted (PR #554), and never
-    bounds a span with `[^}]*`, which cannot cross a nested brace: match the bare token and count
-    (PR #631).
+    guard gets one fixture per arm (PR #554) and counts call sites by the bare token, never a
+    `[^}]*` span, which cannot cross a nested brace (PR #631).
 14. **A test file that imports a module which can exit at import is reported as a PASS.** It dies
     before any `test()` registers and its assertions are simply gone from the tally, with nothing
     saying so, which is the zero-red alarm inverted. A guard for "importing this does no work" SPAWNS
@@ -92,14 +90,13 @@ Scars: #49, #124, #270, #275, #295, #320, #353, #358, #360, #363, #380, #383, #3
     hand-copied roster is one-sided by construction: it catches a member removed from the thing it
     checks and can never catch one added and asserted nowhere, and the arithmetic still closes (#320).
 17. **A guard over a config file a test cannot execute pins its SHAPE**, operator order and negation
-    included, and is proved by INVERTING the config, never only by deleting it; better, move the
-    logic into a module a test imports (PR #380).
-18. **A selection rule is guarded on a consequence that differs by WHO was chosen**, and proved by
-    inverting the selector (Issue #309, PR #410).
+    included, proved by INVERTING the config; better, move the logic where a test runs it (PR #380).
+18. **A selection rule is guarded on a consequence that differs by WHO was chosen**, proved by
+    inverting the selector (PR #410).
 19. **A reference that went through a transform shares the defect's oracle**: also assert against
-    the RAW source, on exactly what the transform cannot represent (Issue #398, Issue #443).
-20. **A ratified acceptance gets a driving check beside any read of a pure function or source
-    text**, never instead of one (Issue #522, PR #631).
+    the RAW source, on what the transform cannot represent (Issue #443).
+20. **A ratified acceptance gets a driving check beside any pure-function or source-text read**,
+    never instead of one (PR #631).
 
 ## Gate 2: before writing an e2e check or a CDP probe
 

@@ -25,6 +25,21 @@ test("every section of the PR template has its own denial row in the table", () 
   for (const section of sections) assert.ok(out.includes(`ok   pr body missing ${section} denied`), `no passing row for ${section}\n${out}`);
 });
 
+// Names and limit written out on purpose: this file only spawns the selftest, and a deleted size check, an emptied probe list or a raised limit all print no FAIL.
+test("every gate-size probe passes at the 8,000-character limit", () => {
+  const out = execFileSync(process.execPath, [SELFTEST], { encoding: "utf8", timeout: BOUND_MS });
+  const probes = [
+    "a test file",
+    "a browser-harness unit test that clicks and escapes",
+    "a new e2e suite that clicks and escapes",
+    "a new stylesheet",
+    "the renderer",
+    "a push",
+    "a PR body from an unreadable file",
+  ];
+  for (const name of probes) assert.match(out, new RegExp(`^ok +${name}: .* of 8000 characters$`, "m"), `no passing size row for ${name}\n${out}`);
+});
+
 // This guard lives here, not beside the readDeployed tests, because it has to survive the defect it guards: footgun-deployed-run.test.ts imports the selftest statically, so an entry guard that stops working exits that whole file at import time and the runner reports it green with every assertion silently absent (measured: 7 gone, "pass 2 fail 0"). This file only ever spawns the selftest, so it still runs.
 test("a bare import of the fixture table runs nothing and mints nothing", () => {
   const own = mkdtempSync(join(tmpdir(), "footgun-import-probe-"));
