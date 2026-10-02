@@ -33,7 +33,10 @@ test("a shot list is refused, naming the shot, wherever a job would otherwise ru
     [{ ...shot(), mobile: "yes" }, /shot 1: mobile/],
     [{ ...shot(), url: "" }, /shot 1: url/],
     [{ ...shot(), waitMs: -1 }, /shot 1: waitMs/],
+    [{ ...shot(), waitMs: 1.5 }, /shot 1: waitMs/],
     [{ ...shot(), scriptWaitMs: 1.5 }, /shot 1: scriptWaitMs/],
+    [{ ...shot(), scriptWaitMs: -1 }, /shot 1: scriptWaitMs/],
+    [{ ...shot(), clip: { x: 0, y: 0, width: 10, height: 10, scale: Number.NaN } }, /shot 1: clip/],
     [{ ...shot(), script: "" }, /shot 1: script and probe/],
     [{ ...shot(), probe: 7 }, /shot 1: script and probe/],
     [{ ...shot(), full: "yes" }, /shot 1: full/],
@@ -116,7 +119,11 @@ test("every page is shot at a desktop and a true phone viewport, under the archi
   }
   assert.equal(BAND, 122, "the head cluster's band, as the archive clipped it");
   assert.equal(byName.get("explorer-390-head.png")?.url, "/explorer/");
-  assert.match(PROBE, /clientWidth[\s\S]*scrollWidth[\s\S]*scrollHeight/, "the archive's probe: client width, scroll width, scroll height");
+});
+
+test("the sweep's probe reads the document element's box under the archive's keys", () => {
+  const document = { documentElement: { clientWidth: 1, scrollWidth: 2, scrollHeight: 3 }, body: { clientWidth: 7, scrollWidth: 8, scrollHeight: 9 } };
+  assert.deepEqual(JSON.parse(vm.runInNewContext(PROBE, { document, JSON }) as string), { cw: 1, sw: 2, sh: 3 });
 });
 
 test("the sweep runs with motion reduced unless it is asked for motion", () => {
