@@ -20,8 +20,7 @@ export async function cd44CarryFiles({ evaluate, check, settle, release, bandPoi
       mid.drag && mid.cursor === "grabbing" && mid.sel === 0 && mid.open && mid.receiving &&
       landed.cuttings === 1 && landed.saw && !landed.landing && !landed.ghost && !landed.drag && !landed.receiving &&
       typeof landed.hashTable === "string" && landed.hashTable.startsWith("k-s.seed-42") && /lies on the table/.test(landed.status) &&
-      // @ts-expect-error the duration reads null only with no cutting on the table, and parseFloat(null) is NaN, which reads this comparison false and reds the check by name
-      sameCam(before.cam, landed.cam) && landed.folded && parseFloat(duration) === 0.34,
+      sameCam(before.cam, landed.cam) && landed.folded && parseFloat(duration!) === 0.34,
     JSON.stringify({ before: { cuttings: before.cuttings, folded: before.folded, open: before.open, cam: before.cam }, mid, to, landed: { cuttings: landed.cuttings, saw: landed.saw, landing: landed.landing, ghost: landed.ghost, drag: landed.drag, hashTable: landed.hashTable, status: landed.status, cam: landed.cam, folded: landed.folded }, duration }),
   );
 }
@@ -64,8 +63,7 @@ export async function cd46ReducedCarry({ evaluate, send, check, settle, release,
   await send("Emulation.setEmulatedMedia", { features: [] });
   check(
     "CD46 under reduced motion a carry still files and the settle collapses to an instant place: the cutting lands, its class retires, and the settle's declared duration reads the blanket's near-zero against CD44's 0.34s in the same run, which is the same-run control that makes the emulation a measurement (Issue #523; motion.css's blanket)",
-    // @ts-expect-error the duration reads null only with no cutting on the table, and parseFloat(null) is NaN, which reads this comparison false and reds the check by name
-    reduced === true && landed.cuttings === 1 && !landed.landing && !landed.ghost && parseFloat(duration) < 0.01,
+    reduced === true && landed.cuttings === 1 && !landed.landing && !landed.ghost && parseFloat(duration!) < 0.01,
     JSON.stringify({ reduced, cuttings: landed.cuttings, landing: landed.landing, ghost: landed.ghost, duration }),
   );
 }

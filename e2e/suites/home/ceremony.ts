@@ -1,5 +1,6 @@
 import { dropExpectedCancellations } from "../../support/console.ts";
 import { readCam, atLandfall } from "../../support/home.ts";
+import type { Cam } from "../../support/home.ts";
 import type { SuiteContext } from "../../types.ts";
 import type { HomeKit } from "./kit.ts";
 import { anchored, seatOk } from "./reads.ts";
@@ -172,7 +173,7 @@ export async function h12bNarrowSkip({ evaluate, check, sleep, pressKey }: HomeK
     await sleep(60);
   }
   await pressKey("Escape", "Escape", 27);
-  let narrowLand = null;
+  let narrowLand: Cam | null = null;
   for (let i = 0; i < 40; i++) {
     try { narrowLand = await evaluate(readCam); } catch {}
     if (atLandfall(narrowLand)) break;
@@ -180,10 +181,8 @@ export async function h12bNarrowSkip({ evaluate, check, sleep, pressKey }: HomeK
   }
   check(
     "H12b the narrow skip lands at the narrow landfall framing (1.6 of fit under a 900px viewport)",
-    // @ts-expect-error atLandfall has already read false for a null camera, so a null never reaches here
-    anchored(armed12) && atLandfall(narrowLand) && narrowLand.expected <
-      // @ts-expect-error atLandfall has already read false for a null camera, so a null never reaches here
-      narrowLand.fit * 1.65,
+    anchored(armed12) && atLandfall(narrowLand) && narrowLand!.expected <
+      narrowLand!.fit * 1.65,
     JSON.stringify({ armed12, narrowLand }),
   );
 }
@@ -191,7 +190,7 @@ export async function h12bNarrowSkip({ evaluate, check, sleep, pressKey }: HomeK
 export async function h18CameraSeat({ evaluate, send, check, sleep, PORT, camSeat }: HomeKit, seat390: Seat | null): Promise<void> {
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
-  let seatWide = null;
+  let seatWide: Seat | null = null;
   for (let i = 0; i < 120; i++) { try { seatWide = await camSeat(); } catch {} if (seatWide) break; await sleep(50); }
   await evaluate(`window.scrollTo(0, 600)`);
   await sleep(80);
@@ -199,12 +198,9 @@ export async function h18CameraSeat({ evaluate, send, check, sleep, PORT, camSea
   await evaluate(`window.scrollTo(0, 0)`);
   check(
     "H18 the camera's seat is home's own (#505): absolute in the stage, 1.6rem from its right edge and 1.4rem up at the wide sheet and at 390, no depth, no ink-in, the container taking the pointer, and it scrolls away with the stage",
-    // @ts-expect-error seatOk has already read false for a null seat, so a null never reaches here
-    seatOk(seatWide) && seatOk(seat390) && seatWide.vw >= 1024 &&
-      // @ts-expect-error seatOk has already read false for a null seat, so a null never reaches here
-      seat390.vw === 390 && !!camScrolled && camScrolled.y > 0 && Math.abs(( // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-      // @ts-expect-error seatOk has already read false for a null seat, so a null never reaches here
-      seatWide.top - camScrolled.top) - camScrolled.y) < 2,
+    seatOk(seatWide) && seatOk(seat390) && seatWide!.vw >= 1024 &&
+      seat390!.vw === 390 && camScrolled.y > 0 && Math.abs((
+      seatWide!.top - camScrolled.top) - camScrolled.y) < 2,
     JSON.stringify({ seatWide, seat390, camScrolled }),
   );
 }

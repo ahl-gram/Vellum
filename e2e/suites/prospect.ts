@@ -105,41 +105,27 @@ async function pb2CapitalPlate({ send, check, page, opened }: ProspectKit, href:
   );
   check(
     "PB3 the chart's folio names the place, the chart and its world",
-    // @ts-expect-error a folio line the page never filled reads null, and a pattern test reads null as the text "null", so PB3 reads false and reds by name
-    /^The Prospect of Laukuwelua · Chart № 42$/.test(cap.title) && /The Isle of Rahai/.test(
-      // @ts-expect-error a folio line the page never filled reads null, and a pattern test reads null as the text "null", so PB3 reads false and reds by name
-      cap.sub) && /^pressed in \d+ms · antique$/.test(
-      // @ts-expect-error a folio line the page never filled reads null, and a pattern test reads null as the text "null", so PB3 reads false and reds by name
-      cap.pressed),
+    /^The Prospect of Laukuwelua · Chart № 42$/.test(cap.title!) && /The Isle of Rahai/.test(
+      cap.sub!) && /^pressed in \d+ms · antique$/.test(
+      cap.pressed!),
     JSON.stringify({ title: cap.title, sub: cap.sub, pressed: cap.pressed }),
   );
-  // @ts-expect-error a folio line the page never filled reads null, and a pattern test reads null as the text "null", so PB3b reads false and reds by name
-  check("PB3b the folio names what the place was once called (#49)", /once called Haitani/.test(cap.sub),
-    // @ts-expect-error the same null handed to check as its detail prints the verdict with no detail, and the test before it has already failed PB3b
-    cap.sub);
+  check("PB3b the folio names what the place was once called (#49)", /once called Haitani/.test(cap.sub!),
+    cap.sub!);
   check(
     "PB3c the engraver's note is filled: the place as the slip's title, its epithet and founding, Today's card's note for the town, the plate's lettered key, the era line (#494 ruling 4)",
-    // @ts-expect-error a slip line the page never filled reads null, and a pattern test reads null as the text "null", so PB3c reads false and reds by name
-    cap.noteTitle === "Laukuwelua" && /^chief port of .+ · founded An\. \d+$/.test(cap.where) &&
-      // @ts-expect-error a note the page never filled reads null, which throws here inside the step, and the step reds "PB2 to PB5" by name
-      cap.note.length > 20 && cap.keyLis === cap.keyRows && cap.keyRows > 0 && !cap.keyHeadHidden && /^Standing · An\. \d+$/.test(
-      // @ts-expect-error an era line the page never filled reads null, and a pattern test reads null as the text "null", so PB3c reads false and reds by name
-      cap.eraLine),
-    // @ts-expect-error a note the page never filled reads null, which throws here inside the step, and the step reds "PB2 to PB5" by name
-    JSON.stringify({ noteTitle: cap.noteTitle, where: cap.where, noteLen: cap.note.length, keyLis: cap.keyLis, keyRows: cap.keyRows, eraLine: cap.eraLine }),
+    cap.noteTitle === "Laukuwelua" && /^chief port of .+ · founded An\. \d+$/.test(cap.where!) &&
+      cap.note!.length > 20 && cap.keyLis === cap.keyRows && cap.keyRows > 0 && !cap.keyHeadHidden && /^Standing · An\. \d+$/.test(
+      cap.eraLine!),
+    JSON.stringify({ noteTitle: cap.noteTitle, where: cap.where, noteLen: cap.note!.length, keyLis: cap.keyLis, keyRows: cap.keyRows, eraLine: cap.eraLine }),
   );
   check(
     "PB3d the roads out: the Explorer keeps the world's keys and sheds the page's own; the Ribbon takes the same world with this town as its departure (#494 ruling 3)",
-    // @ts-expect-error an Explorer road the page never addressed reads null, which throws here inside the step, and the step reds "PB2 to PB5" by name
-    cap.chart.startsWith("/explorer/#seed=42") && !/(^|&)i=/.test(
-      // @ts-expect-error an Explorer road the page never addressed reads null, which throws here inside the step, and the step reds "PB2 to PB5" by name
-      cap.chart.slice(
-      // @ts-expect-error an Explorer road the page never addressed reads null, which throws here inside the step, and the step reds "PB2 to PB5" by name
-      cap.chart.indexOf("#") + 1)) && cap.ribbon === "/ribbon/#" +
-      // @ts-expect-error an Explorer road the page never addressed reads null, which throws here inside the step, and the step reds "PB2 to PB5" by name
-      cap.chart.slice("/explorer/#".length) + "&a=0" && /^Take the road from Laukuwelua in$/.test(
-      // @ts-expect-error a Ribbon verb the page never filled reads null, and a pattern test reads null as the text "null", so PB3d reads false and reds by name
-      cap.ribbonVerb) && cap.roads === true && cap.ribbonShown,
+    cap.chart!.startsWith("/explorer/#seed=42") && !/(^|&)i=/.test(
+      cap.chart!.slice(
+      cap.chart!.indexOf("#") + 1)) && cap.ribbon === "/ribbon/#" +
+      cap.chart!.slice("/explorer/#".length) + "&a=0" && /^Take the road from Laukuwelua in$/.test(
+      cap.ribbonVerb!) && cap.roads === true && cap.ribbonShown,
     JSON.stringify({ chart: cap.chart, ribbon: cap.ribbon, verb: cap.ribbonVerb, roads: cap.roads, shown: cap.ribbonShown }),
   );
 }
@@ -198,15 +184,13 @@ async function pb7YearFilter({ evaluate, check, sleep, goto, opened, state, svgO
   );
   check(
     "PB7b a viewed year reads in the year control and the era line, the bare ground has no key, and the Explorer link sheds the page's own keys",
-    // @ts-expect-error a slip line the page never filled reads null, and a pattern test reads null as the text "null", so PB7b reads false and reds by name
-    early.yearField === "300" && early.eraLine === "Before the founding · An. 300" && early.era === "before-founding" && early.keyRows === 0 && early.keyHeadHidden && /will rise · An\. 300$/.test(early.where) && !/founded/.test(
-      // @ts-expect-error the same null reads as the text "null", which this negated test passes, but the clause before it has already read false for it, so PB7b still reds by name
-      early.where) && early.chart === "/explorer/#seed=42",
+    early.yearField === "300" && early.eraLine === "Before the founding · An. 300" && early.era === "before-founding" && early.keyRows === 0 && early.keyHeadHidden && /will rise · An\. 300$/.test(early.where!) && !/founded/.test(
+      early.where!) && early.chart === "/explorer/#seed=42",
     JSON.stringify({ yearField: early.yearField, eraLine: early.eraLine, keyRows: early.keyRows, keyHeadHidden: early.keyHeadHidden, where: early.where, chart: early.chart }),
   );
 
   await evaluate(`(()=>{document.getElementById("pp-year").value=${JSON.stringify(String(early.presentYear))};document.getElementById("pp-year-form").requestSubmit();})()`);
-  let engraved = null;
+  let engraved: Prospect | null = null;
   for (let i = 0; i < 200; i++) {
     let s = null;
     try { s = await state(); } catch {}
@@ -228,8 +212,7 @@ async function pb7YearFilter({ evaluate, check, sleep, goto, opened, state, svgO
   const emptied = await state();
   check(
     "PB7d a year that is not a year is refused: garbage fails the control's pattern and nothing is re-engraved; an emptied field returns to the plate's year",
-    // @ts-expect-error the PB7c poll leaves engraved null when the re-engrave never landed, which PB7c has already failed; a null throws here inside the step, and the step reds "PB7 to PB7d" by name
-    garbage === false && !!refused && refused.year === early.presentYear && refused.status === "" && refused.svgLength === engraved.svgLength && !!emptied && emptied.yearField === String(early.presentYear) && emptied.year === early.presentYear,
+    garbage === false && !!refused && refused.year === early.presentYear && refused.status === "" && refused.svgLength === engraved!.svgLength && !!emptied && emptied.yearField === String(early.presentYear) && emptied.year === early.presentYear,
     JSON.stringify({ garbageValid: garbage, refused: refused && { yearField: refused.yearField, year: refused.year }, emptied: emptied && { yearField: emptied.yearField, year: emptied.year } }),
   );
 }

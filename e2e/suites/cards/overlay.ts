@@ -114,8 +114,7 @@ export async function p13AxDescription({ evaluate, check, axDescription }: Suite
   if (pm.ruinIdx >= 0) {
     await evaluate(`(()=>{if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();document.querySelector('.place-hit[data-idx="'+${pm.ruinIdx}+'"]').focus();})()`);
     const axDesc = await axDescription(`.place-hit[data-idx="${pm.ruinIdx}"]`);
-    // @ts-expect-error the tale is null when the ruin carries no ruin event, and includes() then searches for the text "null", so P13 reads false and reds by name
-    const readable = !!axDesc && axDesc.includes(pm.ruinName + " ") && axDesc.includes("Founded in the year") && axDesc.includes(pm.tale);
+    const readable = !!axDesc && axDesc.includes(pm.ruinName + " ") && axDesc.includes("Founded in the year") && axDesc.includes(pm.tale!);
     check("P13 card body reachable as a readable AX description (founding + tale, separated)", readable, JSON.stringify(axDesc));
     await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}))`);
   }
@@ -147,10 +146,8 @@ export async function p14Unfurl({ evaluate, check }: SuiteContext, pm: Manifest)
     p14.hoverName === "paperUnfurl" && p14.pinName === "paperUnfurl" &&
     p14.pinnedAtHover === false && p14.pinnedAtPin === true &&
     Number.isFinite(p14.pinDur) && Number.isFinite(p14.hoverDur) &&
-    // @ts-expect-error Number.isFinite above reads false for a null duration, so the comparison is never reached with one; the checker does not narrow through isFinite
-    p14.pinDur >
-    // @ts-expect-error the hover duration, under the same isFinite guard
-    p14.hoverDur,
+    p14.pinDur! >
+    p14.hoverDur!,
     JSON.stringify(p14));
 }
 

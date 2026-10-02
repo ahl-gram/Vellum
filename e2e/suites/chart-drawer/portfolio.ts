@@ -8,13 +8,13 @@ export async function cd18bRoadCarries({ evaluate, check, sleep, clickAt }: Draw
     const x = Math.round(r.x + r.width / 2), y = Math.round(r.y + r.height / 2);
     const h = document.elementFromPoint(x, y);
     return { x, y, reachable: h === b || b.contains(h) }; })()`);
-  if (roadAt) await clickAt(roadAt.x, roadAt.y); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+  await clickAt(roadAt.x, roadAt.y);
   for (let i = 0; i < 200; i++) { await sleep(100); if (await evaluate<boolean>(`location.pathname.indexOf("/portfolio/") !== -1`)) break; }
   const arrived = await evaluate<{ path: string; table: string | null }>(`({ path: location.pathname, table: new URLSearchParams(location.hash.slice(1)).get("table") })`);
   check(
     "CD18b the road answers a REAL press and carries the WHOLE gathering in the Portfolio's own address, which is the epic's core insight: the folio is a link, so the page it lands on can draft the same six sheets for anyone",
     arrived.path.indexOf("/print-room/portfolio/") !== -1 && typeof arrived.table === "string" && arrived.table.split("_").length === 6 &&
-      !!roadAt && roadAt.reachable, // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+      roadAt.reachable,
     JSON.stringify({ ...arrived, roadBefore, roadAt }),
   );
 }

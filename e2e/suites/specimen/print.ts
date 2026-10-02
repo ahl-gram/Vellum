@@ -9,8 +9,8 @@ export async function sb9bPrinted({ send, check, read }: SpecimenKit): Promise<v
   const leanedBack = await read();
   check(
     "SB9b leaned and then printed, the room folio's panel stands down (#538): the zoomed class survives the print sheet, so the arm still matches on paper (read under print) while the corner is static and in flow, where the panel's absolute box resolved against the whole page; the same read under screen paints it before and after, the same-run control that the emulation took; and with the panel gone the printed page carries no sideways overflow",
-    !!leanedScreen && !!leanedScreen.st && leanedScreen.st.zoomed && leanedScreen.pool === '""' && !!leanedPrint && !!leanedPrint.st && leanedPrint.st.zoomed && leanedPrint.folioRoomPos === "static" && leanedPrint.pool === "none" && leanedPrint.noX && !!leanedBack && leanedBack.pool === '""', // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-    JSON.stringify({ before: leanedScreen && leanedScreen.pool, printedZoomed: leanedPrint && leanedPrint.st && leanedPrint.st.zoomed, folio: leanedPrint && leanedPrint.folioRoomPos, printed: leanedPrint && leanedPrint.pool, after: leanedBack && leanedBack.pool, noX: leanedPrint && leanedPrint.noX }), // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    !!leanedScreen.st && leanedScreen.st.zoomed && leanedScreen.pool === '""' && !!leanedPrint.st && leanedPrint.st.zoomed && leanedPrint.folioRoomPos === "static" && leanedPrint.pool === "none" && leanedPrint.noX && leanedBack.pool === '""',
+    JSON.stringify({ before: leanedScreen.pool, printedZoomed: leanedPrint.st && leanedPrint.st.zoomed, folio: leanedPrint.folioRoomPos, printed: leanedPrint.pool, after: leanedBack.pool, noX: leanedPrint.noX }),
   );
 }
 
@@ -23,14 +23,14 @@ export async function sb9PrintIsPaper({ send, check, sleep, setState, read }: Sp
   const printed = await read();
   check(
     "SB9 print is paper: the fog, the vignettes, the slip, the legend and the Glass print as nothing; the room's folio prints in flow",
-    !!printed && printed.fog === "none" && printed.vignette === "none" && printed.slipDisp === "none" && printed.legendDisp === "none" && printed.glassDisp === "none" && printed.folioRoomPos === "static", // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-    JSON.stringify(printed && { fog: printed.fog, vignette: printed.vignette, slip: printed.slipDisp, legend: printed.legendDisp, glass: printed.glassDisp, folio: printed.folioRoomPos }), // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    printed.fog === "none" && printed.vignette === "none" && printed.slipDisp === "none" && printed.legendDisp === "none" && printed.glassDisp === "none" && printed.folioRoomPos === "static",
+    JSON.stringify({ fog: printed.fog, vignette: printed.vignette, slip: printed.slipDisp, legend: printed.legendDisp, glass: printed.glassDisp, folio: printed.folioRoomPos }),
   );
   check(
     "SB9c the status pill prints as nothing (#566, ruled 2026-09-11): on screen the Book's pill stands filled over the chart, the same-run control, and on paper it is gone, box and all, where its absolute seat resolved against the page box and laid a grey slab on it, 2.6:1 below the chart at this width and about 3.0:1 across the chart itself at letter width; the width is read beside the display because a visibility stand-down would leave the box reserved; the Book is the only room whose pill carries text at rest, so it is the only witness here that is not vacuous, and the scripts-off notice the same arm covers cannot be reached with scripting on (test/site/room.test.ts pins the arm's scope)",
-    !!restScreen && restScreen.pillDisp !== "none" && !!restScreen.pill && restScreen.pill.w > 0 && !!restScreen.pillText && restScreen.pillText.trim().length > 0 && // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-      !!printed && printed.pillDisp === "none" && !!printed.pill && printed.pill.w === 0, // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-    JSON.stringify({ screen: restScreen && { disp: restScreen.pillDisp, w: restScreen.pill && restScreen.pill.w, text: restScreen.pillText && restScreen.pillText.trim().length }, print: printed && { disp: printed.pillDisp, w: printed.pill && printed.pill.w } }), // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    restScreen.pillDisp !== "none" && !!restScreen.pill && restScreen.pill.w > 0 && !!restScreen.pillText && restScreen.pillText.trim().length > 0 &&
+      printed.pillDisp === "none" && !!printed.pill && printed.pill.w === 0,
+    JSON.stringify({ screen: { disp: restScreen.pillDisp, w: restScreen.pill && restScreen.pill.w, text: restScreen.pillText && restScreen.pillText.trim().length }, print: { disp: printed.pillDisp, w: printed.pill && printed.pill.w } }),
   );
   await send("Emulation.setEmulatedMedia", { media: "" });
 }
@@ -58,8 +58,8 @@ export async function sb9dNoScript({ evaluate, send, check, sleep, PORT }: Speci
   }
   check(
     "SB9d with SCRIPT EXECUTION DISABLED, the other half of #566's ruling: the scripts-off notice is in the DOM at all only here, and on paper it goes with the pill, both of them gone, box and all; on screen in the same state both stand filled, which is the control that says scripting really was off and the notice really rendered",
-    !!noJsScreen && noJsScreen.present && noJsScreen.disp !== "none" && noJsScreen.w > 0 && noJsScreen.text > 0 && !!noJsScreen.pill && noJsScreen.pill.w > 0 && // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-      !!noJsPrint && noJsPrint.present && noJsPrint.disp === "none" && noJsPrint.w === 0 && !!noJsPrint.pill && noJsPrint.pill.disp === "none" && noJsPrint.pill.w === 0, // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    !!noJsScreen && noJsScreen.disp !== "none" && noJsScreen.w > 0 && noJsScreen.text > 0 && !!noJsScreen.pill && noJsScreen.pill.w > 0 &&
+      noJsPrint.present && noJsPrint.disp === "none" && noJsPrint.w === 0 && !!noJsPrint.pill && noJsPrint.pill.disp === "none" && noJsPrint.pill.w === 0,
     JSON.stringify({ screen: noJsScreen, print: noJsPrint }),
   );
 }

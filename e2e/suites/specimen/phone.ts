@@ -8,17 +8,12 @@ const asRgb = (hex: string) => { const h = hex.replace("#", ""); return `rgb(${p
 export async function sb7Phone({ check, shoot }: SpecimenKit, phone: Specimen | null): Promise<void> {
   check(
     "SB7 at a true 390 the slip is the bottom sheet, collapsed to its head: fixed, full width, on the floor, its body hidden; the tab and the chart folio stand down, the legend row is docked in the slip, the Glass seats above the sheet, no sideways scroll",
-    // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
-    !!phone && phone.slipPos === "fixed" && phone.slip.x === 0 &&
-      // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
-      phone.slip.w === 390 && Math.abs(
-      // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
-      phone.slip.bottom - 844) < 1 && phone.slipBody === "none" &&
+    !!phone && phone.slipPos === "fixed" && phone.slip!.x === 0 &&
+      phone.slip!.w === 390 && Math.abs(
+      phone.slip!.bottom - 844) < 1 && phone.slipBody === "none" &&
       phone.tabDisp === "none" && phone.chartFolioDisp === "none" && phone.legendInSlip && phone.legendDocked &&
-      // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
-      phone.glass.bottom <
-        // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
-        phone.slip.y && phone.sheetH !== "" && phone.noX,
+      phone.glass!.bottom <
+        phone.slip!.y && phone.sheetH !== "" && phone.noX,
     JSON.stringify(phone && { slip: phone.slip, pos: phone.slipPos, body: phone.slipBody, tab: phone.tabDisp, chartFolio: phone.chartFolioDisp, docked: [phone.legendInSlip, phone.legendDocked], glass: phone.glass, sheetH: phone.sheetH, noX: phone.noX }),
   );
   await shoot("specimen-390.png", { x: 0, y: 0, width: 390, height: 844, scale: 1 });
@@ -30,21 +25,18 @@ export async function sb8Opens({ evaluate, check, shoot, sleep, read }: Specimen
   const open = await read();
   check(
     "SB8 the handle opens the sheet: its body shows, the handle reports expanded, the docked legend row is in it, and the Glass stands down while the sheet is open (the kit's rule since the 2026-09-03 sitting, ruling 1; above the sheet it climbed into the corner's row, 35x85 at 390)",
-    // @ts-expect-error the booted page and its boxes are read as present, and goto() returns null only when SB1 has already failed; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
-    !!open && open.st && open.slipBody !== "none" && open.handleExpanded === "true" && open.legendDocked && open.slip.y < // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-      // @ts-expect-error the booted page and its boxes are read as present, and goto() returns null only when SB1 has already failed; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
-      phone.slip.y && open.glassDisp === "none" && open.glassOverFolio === null && open.noX,
-    JSON.stringify(open && { body: open.slipBody, expanded: open.handleExpanded, slip: open.slip, glass: open.glass, glassOverFolio: open.glassOverFolio }), // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    open.st && open.slipBody !== "none" && open.handleExpanded === "true" && open.legendDocked && open.slip!.y <
+      phone!.slip!.y && open.glassDisp === "none" && open.glassOverFolio === null && open.noX,
+    JSON.stringify({ body: open.slipBody, expanded: open.handleExpanded, slip: open.slip, glass: open.glass, glassOverFolio: open.glassOverFolio }),
   );
   await shoot("specimen-390-open.png", { x: 0, y: 0, width: 390, height: 844, scale: 1 });
 }
 
 export async function sb8bNoFooting({ check, shoot, groundOf }: SpecimenKit, leanedOpen: Specimen): Promise<void> {
-  // @ts-expect-error the booted Book's boxes and state are read as present; a null one throws here, outside any step, and the runner reds the whole suite as stopped early
-  const slipGround = await groundOf(20, Math.round(leanedOpen.slip.y) + 120);
+  const slipGround = await groundOf(20, Math.round(leanedOpen.slip!.y) + 120);
   check(
     "SB8b zoomed with the sheet open, the docked row carries NO footing: the row is still in the slip, the camera still leaned, and the sheet's ground reads parchment where the pool used to paint (#525; SB5c is the control that the sampler reads the pool dark where it legitimately paints)",
-    !!leanedOpen && leanedOpen.st && leanedOpen.st.zoomed && leanedOpen.legendInSlip && leanedOpen.legendDocked && // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    leanedOpen.st && leanedOpen.st.zoomed && leanedOpen.legendInSlip && leanedOpen.legendDocked &&
       leanedOpen.slipBody !== "none" && leanedOpen.legendGroundOn === "none" && slipGround > 200,
     JSON.stringify({ zoomed: leanedOpen.st && leanedOpen.st.zoomed, docked: [leanedOpen.legendInSlip, leanedOpen.legendDocked], groundOn: leanedOpen.legendGroundOn, slipGround, slip: leanedOpen.slip }),
   );

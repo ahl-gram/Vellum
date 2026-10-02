@@ -151,8 +151,7 @@ async function rd3SameBytes(ctx: SuiteContext, { evaluate, check, waitReady, wai
   const panMs = await captionMs();
   check(
     "RD4 a pan at the deepest band commits its own detailed survey (cost reported, not asserted: it is machine-bound)",
-    // @ts-expect-error direct is null only when the direct descent committed no inset, which RD3 has just redded; the read throws inside the step, which reds RD3, RD4 by name
-    panned.band === 3 && neighbour !== null && neighbour.detail === "3" && neighbour.digest !== direct.digest,
+    panned.band === 3 && neighbour !== null && neighbour.detail === "3" && neighbour.digest !== direct!.digest,
     `first descent ${directMs}ms, pan ${panMs}ms, ladder ${ladder.map((r) => r.ms).join("/")}ms`,
   );
 }

@@ -31,7 +31,7 @@ export async function rr4AtRest({ evaluate, check }: SuiteContext): Promise<void
   const drawn = await evaluate<{ days: number; years: number; seam: number; labels: string[]; folioTitle: string; folioSub: string }>(`(()=>{const sc=document.querySelector(".scale");const t=(sel)=>(document.querySelector(sel)||{}).textContent||"";const lbl=[...sc.querySelectorAll(".tick .lbl")].map((l)=>l.textContent);return{days:sc.querySelectorAll(".tick.day").length,years:sc.querySelectorAll(".tick.year").length,seam:sc.querySelectorAll(".seam").length,labels:lbl,folioTitle:t("#folio-title"),folioSub:t("#folio-sub")};})()`);
   check(
     "RR4b the strip's scale is drawn from the world (two day ticks, the star, the centuries and the present) and the chart folio carries the world's name and survey line (#463)",
-    !!drawn && drawn.days === 2 && drawn.seam === 1 && drawn.years >= 2 && drawn.labels.includes("day 1") && drawn.labels.some((l) => /^\d{3,4}$/.test(l)) && // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    drawn.days === 2 && drawn.seam === 1 && drawn.years >= 2 && drawn.labels.includes("day 1") && drawn.labels.some((l) => /^\d{3,4}$/.test(l)) &&
       drawn.labels.length === new Set(drawn.labels).size && /Chart № 42/.test(drawn.folioTitle) && drawn.folioSub.length > 20,
     JSON.stringify(drawn),
   );

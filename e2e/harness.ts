@@ -81,12 +81,10 @@ async function getPageTarget(DPORT: number): Promise<{ webSocketDebuggerUrl: str
     try {
       const list = JSON.parse(await httpGet(`http://127.0.0.1:${DPORT}/json`)) as { type: string; webSocketDebuggerUrl?: string }[];
       const page = list.find((t) => t.type === "page" && t.webSocketDebuggerUrl);
-      // @ts-expect-error find() cannot narrow the url the predicate just proved present
-      if (page) return page;
+      if (page) return page as { type: string; webSocketDebuggerUrl: string };
       lastErr = `/json had ${list.length} targets, none a page`;
     } catch (e) {
-      // @ts-expect-error a caught value is unknown to the checker; the || falls back to the value itself when it carries no message
-      lastErr = String(e.message || e);
+      lastErr = String((e as { message?: string }).message || e);
     }
     await sleep(125);
   }
@@ -103,8 +101,7 @@ function send<T = unknown>(method: string, params: Record<string, unknown> = {})
   const id = nextId++;
   return new Promise((resolve, reject) => {
     waiters.set(id, { resolve, reject });
-    // @ts-expect-error start() opens the socket before any send, which the checker cannot see across functions
-    ws.send(JSON.stringify({ id, method, params }));
+    ws!.send(JSON.stringify({ id, method, params }));
   });
 }
 async function evaluate<T = unknown>(expression: Payload<T>, awaitPromise = false): Promise<NoInfer<T>> {
@@ -263,10 +260,8 @@ function onCdpMessage(ev: MessageEvent, consoleErrors: string[], http4xx: string
   if (m.id && waiters.has(m.id)) {
     const w = waiters.get(m.id);
     waiters.delete(m.id);
-    // @ts-expect-error has() in the enclosing if proved the waiter present, which get() cannot carry
-    if (m.error) w.reject(new Error(JSON.stringify(m.error)));
-    // @ts-expect-error has() in the enclosing if proved the waiter present, which get() cannot carry
-    else w.resolve(m.result);
+    if (m.error) w!.reject(new Error(JSON.stringify(m.error)));
+    else w!.resolve(m.result);
     return;
   }
   if (m.method === "Runtime.exceptionThrown") {
@@ -289,10 +284,8 @@ export async function start({ browser, SITE, OUT, PORT, DPORT, PAGE, results, co
   const target = await launchBrowser(browser, DPORT);
   ws = new WebSocket(target.webSocketDebuggerUrl);
   await new Promise((res, rej) => {
-    // @ts-expect-error the socket was opened two lines up, which the checker forgets inside a closure over a module variable
-    ws.addEventListener("open", res, { once: true });
-    // @ts-expect-error the same socket, the same closure
-    ws.addEventListener("error", rej, { once: true });
+    ws!.addEventListener("open", res, { once: true });
+    ws!.addEventListener("error", rej, { once: true });
   });
   ws.addEventListener("message", (ev) => onCdpMessage(ev, consoleErrors, http4xx));
 

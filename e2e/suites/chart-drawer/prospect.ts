@@ -69,7 +69,6 @@ export async function cd28PagePress({ evaluate, send, check, sleep, PORT, settle
   const opened = await evaluate<boolean>(`(() => { const s = document.getElementById("note"); if (s && !s.classList.contains("open")) s.querySelector(".slip-handle").click(); return true; })()`);
   // The slip's fold is a transition, and CD28 derives a real pointer target from this press's rect: a fixed sleep either
   // measures a box still moving or waits longer than it needs. Poll it to REST instead, and throw naming the last read.
-  // @ts-expect-error the predicate reads null rather than false while either press has no centre, and the settle treats a null as it treats false and keeps polling
   const pp = await settle(PP, (d, last) => !!d.press && d.press.shown && !!last && !!last.press && d.press.centre && last.press.centre &&
     d.press.centre.x === last.press.centre.x && d.press.centre.y === last.press.centre.y, "prospect-note-open");
   check(
@@ -84,8 +83,7 @@ export async function cd28PagePress({ evaluate, send, check, sleep, PORT, settle
   // The same town at a second year: the year IS part of the sheet's identity, which is the case that won "press and stay".
   // The form is submitted synthetically because the claim here is about the FILING, not about the year control, whose own gesture PB6 already drives.
   await evaluate(`(() => { const y = document.getElementById("pp-year"); y.value = String(Math.max(1, Number(y.value) - 300)); document.getElementById("pp-year-form").dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })); })()`);
-  // @ts-expect-error the state is null only on a Prospect page that never drew, which the boot loop above waits for; while the poll reads no year the s !== null test before it reads false and the loop runs out its tries, and once it reads a year a null state throws here, inside the step, which reds CD28, CD29, CD34, CD35, CD31 by name
-  for (let i = 0; i < 300; i++) { await sleep(100); const s = await evaluate<number | null>(`(() => { const st = window.__vellumProspectState(); return st ? st.year : null; })()`); if (s !== null && s !== one.state.year) break; }
+  for (let i = 0; i < 300; i++) { await sleep(100); const s = await evaluate<number | null>(`(() => { const st = window.__vellumProspectState(); return st ? st.year : null; })()`); if (s !== null && s !== one.state!.year) break; }
   let two = await evaluate(PP);
   if (two.press && two.press.centre) await clickAt(two.press.centre.x, two.press.centre.y);
   two = await settle(PP, (d) => typeof d.hashTable === "string" && d.hashTable.split("_").length === 2, "prospect-filed-two");
@@ -117,7 +115,6 @@ export async function cd34PageRefusals({ evaluate, send, check, sleep, PORT, set
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/prospect/#seed=42&i=3&table=${SIX}` });
   for (let i = 0; i < 300; i++) { await sleep(100); if (await evaluate<boolean>(`!!(window.__vellumProspectState && window.__vellumProspectState())`)) break; }
   await evaluate(`(() => { const s = document.getElementById("note"); if (s && !s.classList.contains("open")) s.querySelector(".slip-handle").click(); })()`);
-  // @ts-expect-error the predicate reads null rather than false while either press has no centre, and the settle treats a null as it treats false and keeps polling
   const atCapPage = await settle(PP, (d, last) => !!d.press && d.press.shown && !!last && !!last.press && d.press.centre && last.press.centre &&
     d.press.centre.x === last.press.centre.x && d.press.centre.y === last.press.centre.y, "prospect-note-open-full");
   if (atCapPage.press && atCapPage.press.centre) await clickAt(atCapPage.press.centre.x, atCapPage.press.centre.y);
@@ -139,10 +136,8 @@ export async function cd34PageRefusals({ evaluate, send, check, sleep, PORT, set
 export async function cd31RoundTrip({ evaluate, send, check, sleep, PORT, settle }: DrawerKit, two: Awaited<ReturnType<typeof cd28PagePress>>): Promise<void> {
   // Home through chartTarget, the way the page offers: the Explorer restores the table with both sheets on it.
   await send("Page.navigate", { url: "about:blank" });
-  // @ts-expect-error a chart link with no href reads null, which CD29 has already read false for; a null throws here, inside the step, which reds CD28, CD29, CD34, CD35, CD31 by name
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/${two.chartHref.slice(
-    // @ts-expect-error the same null link, which the slice before it has already thrown on
-    two.chartHref.indexOf("#"))}` });
+  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/${two.chartHref!.slice(
+    two.chartHref!.indexOf("#"))}` });
   for (let i = 0; i < 200; i++) { await sleep(150); if (await evaluate<boolean>(`!!document.querySelector("#map svg") && !!document.getElementById("chart-drawer")`)) break; }
   const home = await settle(CARD, (d) => d.cuttings === 2, "chart-drawer-round-trip");
   check(
@@ -203,10 +198,8 @@ export async function cd33PhonePress({ send, check, setMobileViewport, clearMobi
   );
   check(
     "CD33 at the ruled phone width BOTH card actions answer a real thumb, the card does not scroll the page sideways, and a successful press is ANSWERED where a phone reader can see it: the drawer is stood down at narrow, so the leaf tab's tally and the status pill are the whole of the feedback and a press that changed neither would read as nothing happening",
-    // @ts-expect-error the settle's predicate has already required a press, so a null never reaches here
-    narrow.press.hit === "self" &&
-      // @ts-expect-error a card with no prospect link reads null, which throws here, inside CD33's step, and the step reds CD33 by name
-      narrow.link.hit === "self" &&
+    narrow.press!.hit === "self" &&
+      narrow.link!.hit === "self" &&
       said.scrollW === said.innerW && said.cuttings === 1 && said.prospects === 1 &&
       /^The Table · 1$/.test(said.leafTab || "") && /lies on the table/.test(said.status || ""),
     JSON.stringify({ press: narrow.press, link: narrow.link, scrollW: said.scrollW, innerW: said.innerW, leafTab: said.leafTab, status: said.status, cuttings: said.cuttings }),

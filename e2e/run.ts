@@ -62,8 +62,7 @@ function fatalOnThrow<T>(fn: () => T): T {
   try {
     return fn();
   } catch (err) {
-    // @ts-expect-error a caught value is unknown to the checker; the two resolvers this wraps throw only an Error, whose message it prints
-    console.error(`FAIL: ${err.message}`);
+    console.error(`FAIL: ${(err as Error).message}`);
     process.exit(1);
   }
 }
@@ -126,15 +125,14 @@ const SUITES = {
   "specimen": runSpecimen,
 };
 
-const missing = E2E_SUITE_ORDER.filter((name) => !SUITES[name]); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+const missing = E2E_SUITE_ORDER.filter((name) => !(SUITES as Partial<typeof SUITES>)[name]);
 if (missing.length > 0) {
   console.error(`FAIL: E2E_SUITE_ORDER names suites this runner cannot run: ${missing.join(", ")}`);
   process.exit(1);
 }
 
 async function main() {
-  // @ts-expect-error main runs only after the browser test above, which exits the process when no browser is found, and a hoisted function keeps none of that narrowing, so browser is never null here
-  const ctx = await start({ browser, SITE, OUT, PORT, DPORT, PAGE, results, consoleErrors, http4xx, skippedGroups });
+  const ctx = await start({ browser: browser!, SITE, OUT, PORT, DPORT, PAGE, results, consoleErrors, http4xx, skippedGroups });
   return runSelected(SELECTED, SUITES, ctx, {
     alive: ctx.alive,
     skippedGroups: () => skippedGroups,

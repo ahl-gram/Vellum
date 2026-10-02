@@ -91,7 +91,7 @@ export async function pr28ChartPlate({ evaluate, check, sleep }: SuiteContext): 
   );
   check(
     "PR29 changing the Pressed-as format dismisses the stale poster status line",
-    !!dismissed && dismissed.before.length > 0 && dismissed.after === "" && dismissed.plateOpen === true, // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    dismissed.before.length > 0 && dismissed.after === "" && dismissed.plateOpen === true,
     JSON.stringify(dismissed),
   );
 }

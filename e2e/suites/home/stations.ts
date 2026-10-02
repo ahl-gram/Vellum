@@ -99,8 +99,7 @@ export async function h14dPipHover({ evaluate, send, check, sleep, pressKey }: H
   await sleep(450);
   check(
     "H14d a real hover keeps the pip on its anchor at its size, its button square unpainted, while the glyph grows the mockup's quarter",
-    pipRest !== null && pipHover !== null // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-      && Math.abs(pipHover.cx - pipRest.cx) < 0.5 && Math.abs(pipHover.cy - pipRest.cy) < 0.5
+    Math.abs(pipHover.cx - pipRest.cx) < 0.5 && Math.abs(pipHover.cy - pipRest.cy) < 0.5
       && Math.abs(pipHover.w - pipRest.w) < 0.5 && Math.abs(pipRest.w - 34) < 0.5
       && Math.abs(pipHover.glyphW / pipRest.glyphW - 1.25) < 0.02
       && pipHover.btnBg === "rgba(0, 0, 0, 0)",

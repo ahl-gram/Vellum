@@ -9,7 +9,7 @@ export async function rr31StripStands({ evaluate, check, sleep }: SuiteContext, 
   check(
     "RR31 at 1440x900 the strip stands on the viewport's bottom edge and a chart room has no page scroll to leave it by (#463, ruling 6)",
     !!afterScroll && afterScroll.bottom === 0 && afterScroll.position === "fixed" &&
-      !!room && room.page <= room.vh, // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+      room.page <= room.vh,
     JSON.stringify({ rest: deskRest, stuck: afterScroll, room }),
   );
 }
@@ -49,16 +49,12 @@ export async function rr37Envelope({ evaluate, send, check, sleep }: SuiteContex
   check(
     `RR37 and it stays within the ${WIDE_WORST}px envelope across the widths: the told row stands at 1024 and drops at 900 and below (#462 ruling 6, the phone rule is inclusive at 900)`,
     byWidth.length === 3 &&
-      // @ts-expect-error a width whose strip was never seated reads its height as null, and null > 0 is false, so RR37 reads false and reds by name
-      byWidth.every((r) => r.h > 0 &&
-        // @ts-expect-error the same null reads as 0 here, which passes this bound, but the clause before it has already read false for it, so RR37 still reds by name
-        r.h <= WIDE_WORST) &&
+      byWidth.every((r) => r.h! > 0 &&
+        r.h! <= WIDE_WORST) &&
       byWidth[0]!.told === "flex" && byWidth[1]!.told === "none" && byWidth[2]!.told === "none" &&
       // The witness, same half: the survey row wrapped at 1024 must cost more than it did on one line at 1440, or the envelope bounds nothing.
-      // @ts-expect-error a width whose strip was never seated reads its height as null, which the every clause above has already read false for, so RR37 reds by name before this clause runs
-      byWidth[0]!.h >
-        // @ts-expect-error a strip the governing width never seated leaves deskSurvey null, which RR35 has already failed; a null throws here, outside any step, and the runner reds the whole suite as stopped early
-        deskSurvey.h,
+      byWidth[0]!.h! >
+        deskSurvey!.h,
     JSON.stringify({ byWidth, envelope: WIDE_WORST, budget: GOVERNING_BUDGET }),
   );
 }
@@ -68,7 +64,7 @@ export function rr36ChartFills({ check }: SuiteContext, room: Room): void {
   const SOURCE_RATIO = 1158 / 1500;
   check(
     "RR36 the chart fills its fitted sheet at its source aspect and clears the folio above and the strip below by room.ts's 14px (#442; the chart room's fit since #463)",
-    !!room && room.fillsSheet && room.topClear >= 14 && room.bottomClear >= 14 && // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    room.fillsSheet && room.topClear >= 14 && room.bottomClear >= 14 &&
       Math.abs(room.ratio - SOURCE_RATIO) < 0.005,
     JSON.stringify({ ...room, sourceRatio: SOURCE_RATIO }),
   );

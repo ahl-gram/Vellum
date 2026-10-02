@@ -63,10 +63,8 @@ export async function h2Hook({ evaluate, check, shoot }: SuiteContext, ready: bo
   })()`) : null;
   check(
     "H2 the hook reads as ratified, the seed input is prefilled 42, the gloss is italic",
-    // @ts-expect-error a hook the page never seated reads null, and a pattern test reads null as the text "null", so H2 reads false and reds by name
-    !!hero && /Give Vellum a number\./.test(hero.hook) && /It gives you back a world\./.test(
-      // @ts-expect-error the same hook, which the pattern test before has already read false for if it is null
-      hero.hook) && hero.seed === "42" && hero.lineStyle === "italic",
+    !!hero && /Give Vellum a number\./.test(hero.hook!) && /It gives you back a world\./.test(
+      hero.hook!) && hero.seed === "42" && hero.lineStyle === "italic",
     JSON.stringify(hero),
   );
   await shoot("home-seed-chrome.png");
@@ -174,7 +172,7 @@ export async function h5aRefused({ evaluate, check, sleep }: SuiteContext, backH
       })()`);
       await sleep(600);
       const stayed = await evaluate<boolean>(`location.pathname === "/" && !!document.getElementById("seed-form")`);
-      refused = refused ? { ...refused, stayed } : null; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+      refused = { ...refused, stayed };
     } catch { refused = null; }
   }
   check(
