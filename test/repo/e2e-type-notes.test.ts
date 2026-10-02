@@ -7,7 +7,7 @@ import { e2eSourcePaths } from "../../test-support/e2e-source.ts";
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const TYPE_SKIP = /@ts-(?:expect-error|ignore|nocheck)/i;
-const LINT_SKIP = /\/[/*]\s*eslint(?:-disable(?:-next-line|-line)?|-enable)?(?![\w-])/g;
+const LINT_SKIP = /\/[/*]\s*eslint(?:-disable(?:-next-line|-line)?|-enable)?(?![\w-])|\/\*\s*(?:globals?|exported)(?=\s)/g;
 
 const skips = (path: string, text: string): string[] => {
   const lines = text.split("\n");
@@ -38,10 +38,23 @@ const FIXTURE = [
   "// a comment about the linter and the checker, neither switched off",
   "// eslintrc was the old config's name",
   "// eslint-config-x is named in prose",
+  "/** @ts-ignore */",
+  "/// @ts-ignore",
+  "const d = 1; // @ts-ignore",
+  "/*",
+  " * a note",
+  " * @ts-ignore */",
+  "/* @ts-ignore */ // eslint-disable-line no-unused-vars",
+  "/*\teslint-disable */",
+  "/* eslint-disable */",
+  "/* global someName */",
+  "/* exported someName */",
+  "// global state lives in the harness",
 ];
 
 test("the scan reports every form of type-check or lint skip, a block directive at its opening line, one finding per line, and nothing on a clean line", () => {
-  assert.deepEqual(skips("f.ts", FIXTURE.join("\n")).map((f) => f.split(":")[1]), ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"]);
+  const expected = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "22", "23", "24", "27", "28", "29", "30", "31", "32"];
+  assert.deepEqual(skips("f.ts", FIXTURE.join("\n")).map((f) => f.split(":")[1]), expected);
 });
 
 test("the scan reads every TypeScript file under e2e/ at any depth, and nothing else", () => {
@@ -63,7 +76,9 @@ test("the scan reads every TypeScript file under e2e/ at any depth, and nothing 
 
 test("the e2e tree carries no type-check or lint skip in any form, so a doubted read is written with a non-null mark or a real check (Alex's ruling C of 2026-10-01 on Issue #654)", () => {
   const paths = e2eSourcePaths(REPO);
-  const tree = readdirSync(join(REPO, "e2e"), { recursive: true, encoding: "utf8" }).filter((f) => f.endsWith(".ts")).map((f) => join(REPO, "e2e", f));
+  const listing = readdirSync(join(REPO, "e2e"), { recursive: true, encoding: "utf8" });
+  assert.deepEqual(listing.filter((f) => /\.(?:mts|cts|tsx)$/.test(f)), [], "an e2e source the scan does not read: the checker follows an imported .mts, .cts or .tsx and honors its directives");
+  const tree = listing.filter((f) => f.endsWith(".ts")).map((f) => join(REPO, "e2e", f));
   assert.ok(tree.includes(join(REPO, "e2e", "run.ts")) && tree.includes(join(REPO, "e2e", "support", "settle.ts")) && tree.includes(join(REPO, "e2e", "suites", "specimen", "desktop.ts")), "the listing missed the runner, a support module or a suite's part file, so it is reading the wrong tree");
   assert.deepEqual([...paths].sort(), tree.sort(), "the scan's source list is not every TypeScript file under e2e/");
   assert.deepEqual(paths.flatMap((p) => skips(relative(REPO, p), readFileSync(p, "utf8"))), [], "an e2e file carries a skip; the accepted skips elsewhere are listed in specs/rulebook.md");
