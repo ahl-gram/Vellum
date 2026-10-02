@@ -6,7 +6,7 @@ import { dirname, join, relative, resolve } from "node:path";
 import { e2eSourcePaths } from "../../test-support/e2e-source.ts";
 
 const REPO = resolve(import.meta.dirname, "..", "..");
-const TYPE_SKIP = /@ts-(?:expect-error|ignore|nocheck)\b/i;
+const TYPE_SKIP = /@ts-(?:expect-error|ignore|nocheck)/i;
 const LINT_SKIP = /\/[/*]\s*eslint(?:-disable(?:-next-line|-line)?|-enable)?(?![\w-])/g;
 
 const skips = (path: string, text: string): string[] => {
@@ -21,6 +21,8 @@ const FIXTURE = [
   "// @ts-ignore",
   "// @ts-nocheck",
   "// @TS-NOCHECK",
+  "// @ts-ignored, a typo the checker still obeys",
+  "/* @ts-expect-errors */",
   "/* @ts-ignore */ const a = 1;",
   "const b = 1; // eslint-disable-line no-unused-vars",
   "const c = 1; //eslint-disable-line no-unused-vars",
@@ -39,7 +41,7 @@ const FIXTURE = [
 ];
 
 test("the scan reports every form of type-check or lint skip, a block directive at its opening line, one finding per line, and nothing on a clean line", () => {
-  assert.deepEqual(skips("f.ts", FIXTURE.join("\n")).map((f) => f.split(":")[1]), ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13"]);
+  assert.deepEqual(skips("f.ts", FIXTURE.join("\n")).map((f) => f.split(":")[1]), ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15"]);
 });
 
 test("the scan reads every TypeScript file under e2e/ at any depth, and nothing else", () => {

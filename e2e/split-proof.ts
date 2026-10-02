@@ -12,7 +12,6 @@ type Flat = { sequence: string[]; helpers: Map<string, string[]>; constants: str
 type Family = { readonly sfs: readonly ts.SourceFile[]; readonly fns: ReadonlyMap<string, Fn>; readonly inline: ReadonlySet<string>; readonly through: Set<ts.CallExpression> };
 
 const DROPPED = new Set([ts.SyntaxKind.ConstKeyword, ts.SyntaxKind.LetKeyword, ts.SyntaxKind.VarKeyword, ts.SyntaxKind.ExportKeyword]);
-// Spelled in pieces so this file is not itself a hit in the greps Issue #654 keeps as the live lists of the e2e notes and condition markers.
 const NOTE = new RegExp(String.raw`^\s*\/\/ @ts-` + "expect-error\\b");
 const CONDITION = ["no-unnecessary", "condition"].join("-");
 
