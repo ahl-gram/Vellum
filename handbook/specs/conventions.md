@@ -182,14 +182,16 @@ is run and PROVEN in a particular way.
   near-identical fixture, a state poke, the units on a bare constant, a coordinate convention, a
   sentinel's decode.
 - **The proof that a sweep changed no code is an AST token-stream comparison against the base, per
-  file.** These things it must handle or it lies. Exclude the JSDoc kind range, because TypeScript
-  models JSDoc as real syntax and a reworded doc block otherwise reads as a code change. Strip
-  Astro's markup comment form, which no comment counter inventories and the comparison reads as
-  text. And never build it on `ts.createScanner`, which mis-lexes regular-expression literals and
-  backticks and reports drift that is not there; `ts.createSourceFile` and a leaf walk are the shape
-  that works. Prove the verifier itself on fixtures before trusting it, including a changed
-  identifier, a changed string, a dropped type annotation, a deleted CSS declaration and an edited
-  Astro expression. Pure reindentation is its one acceptable blind spot, and a comment inside a
+  file.** These things it must handle or it lies. Exclude the JSDoc kind range, `FirstJSDocNode` to
+  `LastJSDocNode`, because TypeScript models JSDoc as real syntax and a reworded doc block otherwise
+  reads as a code change. Strip Astro's two comment forms, `<!-- -->` in the markup and `{/* */}`
+  in an expression, which no comment counter inventories and the comparison reads as text. And
+  never build it on `ts.createScanner`, which mis-lexes regular-expression literals and backticks
+  and reports drift that is not there; `ts.createSourceFile` and a leaf walk are the shape that
+  works. Prove the verifier itself on fixtures before trusting it, including a changed identifier,
+  string, regular-expression body or template literal, a dropped default argument or type
+  annotation, a deleted CSS declaration, a changed selector, a dropped media query, and an edited
+  Astro attribute, expression, style or script. Pure reindentation is its one acceptable blind spot, and a comment inside a
   template literal is string data rather than a comment, so it is out of scope by construction.
 - **A keeper scan is a separate step, and token identity cannot do it.** Proving no code changed says
   nothing about whether the sweep deleted the trap that cost someone a debugging session. Scan the

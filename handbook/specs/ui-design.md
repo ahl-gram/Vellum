@@ -113,7 +113,8 @@ Two room patterns, both ratified whole after live use (#462, ratified at #454).
 
 **A chart room.** The chart is the room: full bleed on the deep, pannable and zoomable, fitted to
 what the chrome leaves and **measured off the chrome's own rects, never guessed** (and measured after
-the chrome has its text, or the fit reads an empty box). **The stage is the fixed full-viewport box
+the chrome has its text, or the fit reads an empty box, and again once the fonts are ready and on
+every resize, which `bindRoom` in `src/site/shared/room.ts` wires). **The stage is the fixed full-viewport box
 the chart is mounted in**, declared as `body.chart-room .stage` in `public/atelier.css`; a room that
 hangs its plates on the deep rather than mounting one chart has none, and the Gallery is that room
 today. No band, no footer: a chart room with a
@@ -245,7 +246,9 @@ hairline crossing it, and the point you assumed was dark may be the parchment ch
 
 **Sample the ground UNDER the ink, not beside it.** Isolate the glyph pixels by rendering the ground
 without the copy and diffing the two, sample the ground in a small halo around those pixels, take the
-worst case, and make the guard model that same ground. A number measured beside the text is a number
+worst case, and make the guard model that same ground and assert it, not only the ratio divided by
+it, since a walk up the ancestors' computed backgrounds cannot see a pseudo-element's paint under the
+text. A number measured beside the text is a number
 about a different place, and the error runs both ways: a ratio taken from the bright outer edge of a
 radial ground overstates the margin, and one taken from a dark neighbour understates it.
 
@@ -258,6 +261,11 @@ knowing, including a keyboard focus ring that fell to about 1.0:1.
 conforming, not inventing. It is drawn *outside* the control, so it stands on the surrounding ground
 and is measured against that ground. Where a ring's contrast leans on a footing, it is scoped with
 that footing, and it falls back to the house ink when the piece is docked somewhere paler.
+
+**A refusing press dims by swapping its ground, never by opacity.** Opacity takes the face under the
+floor, where a cream ground under full-strength ink keeps it far above it (`.pc-lay.dim` in
+`public/living-chart.css` carries the measurement). The press stays pressable rather than
+`disabled`, so a keyboard reader still reaches it and hears why it refuses.
 
 **Controls sit in three radius families, descending**: panels, then slips and controls, then chips.
 Warnings are panels, not slips. Beside them: one standard control in the cream fill, one dark primary

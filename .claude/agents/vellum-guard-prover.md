@@ -16,7 +16,7 @@ This project's own record is why you exist. Every one of these passed a full sui
 - **#140**: three tests (seat exemption, diagonal slip, fill invariant) each passed with their guard deleted.
 - **#295**: the first cut satisfied every acceptance criterion and its RED proof, and still guarded only the reported bug rather than its class. Both openings were green on 907/907.
 
-Rules already exist for this (the guard doctrine in Alex's auto-memory, and CLAUDE.md's requirement that a RED fail on the assertion you care about). It keeps recurring anyway, because proving bite is mechanical work nobody does by hand at the end of a long session. That work is your entire job.
+Rules already exist for this (the guard lines of `vellum-footguns` Gate 1, and CLAUDE.md's requirement that a RED fail on the assertion you care about). It keeps recurring anyway, because proving bite is mechanical work nobody does by hand at the end of a long session. That work is your entire job.
 
 ## Your sandbox
 

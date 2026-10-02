@@ -61,6 +61,18 @@ make an unqualified rule false. Read the surface, not just the rule.
     block type-checks clean and silently takes the stand-ins.
 - **The instrument-less arm-at-rest entry is `rearmVoyage`.** `applyVoyage` is the wrong static
   entry: it posts to the status line and hangs the settle.
+- **The two hosts differ on purpose; do not re-unify them.** The Explorer keeps SPACE: it is static,
+  its survey checkbox is one to one with the bare `survey` flag and arms through `rearmVoyage`, it
+  publishes no time seams (`installHostHooks` in `src/site/shared/host-hooks.ts` is the Reading
+  Room's alone; the Explorer installs `installExplorerHooks` in `src/site/explorer/hooks.ts`), and it
+  never writes `year=N` itself, only forwarding a link that carries one (`forwardTarget` in
+  `src/site/explorer/address.ts`, under the forwarding rule in "The address is a photograph" below).
+  The Reading Room keeps TIME.
+- **The Reading Room arrives at rest on every path.** A bare visit is the day's seed parked at the
+  present with the journal fully told, `survey` rests at t=1, and `year=N` rests at that year; Play
+  is the visitor's gesture. Every draw rearms through `rearmAges` with the deep link's key as a
+  one-shot rest (`restFor` in `src/site/reading-room/app.ts`). Between the two hosts the room is the
+  only writer of `year=N`, on park, on release and on boot convergence.
 - **A room's stage binds its world in LOCKSTEP with the last draw result**, never only in a
   droppable arm callback, or one world's plate paints over another's chart.
 - **What may be mounted inside the chart mount** (what a region inset DRAWS once mounted is

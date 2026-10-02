@@ -64,7 +64,8 @@ With no ledger it runs truly cold, on the issue number and the plan alone.
 
 **6. Put the open decisions to Alex as a menu, and STOP.** Every option in plain words with its
 consequence, no jargon, no acronyms, in `AskUserQuestion` rather than in prose. **A decision that is
-his is not one to default your way and mention afterwards.** This step is load bearing and it is the
+his is not one to default your way and mention afterwards**, and **a ruling that rested on a wrong
+premise goes back to him and is re-taken**, never patched underneath. This step is load bearing and it is the
 one most often skipped: on #534 the issue offered three options and ruled none, and Alex's ruling
 (both of them, in one go) roughly tripled the work from what the session would have defaulted to.
 Do not begin step 8 until he has answered.
@@ -157,7 +158,14 @@ being enforced while you work on it.
 e2e suites the change touches, and the evidence run that demonstrates the acceptance. "Delivered",
 "one line" and "that will be fast" are predictions until a command's output says otherwise. Where a
 claim genuinely cannot be run down, mark it UNVERIFIABLE, the word `vellum-spec-recon` already uses,
-and do not coin a second one.
+and do not coin a second one. **A measured table that exists only in `out/` is copied into a PR
+comment with the harness that produced it**, because `out/` is gitignored and nothing else holds
+them; a still is the exception, and goes with the session (`handbook/specs/conventions.md`).
+
+**A comparison's baseline is the control, the arm that ships today**, of which step 6's rendered
+control is the case for stills. Name it before comparing and check how it is actually built; report
+the control, the predecessor and yours wherever they differ; and never promote a comparison measured
+on one fixture into an unconditional invariant.
 
 **Name which checks ran.** CI is the full-suite gate and runs everything on the pull request
 regardless, so the local run is the targeted one this step already describes. Say so plainly in the
@@ -230,10 +238,17 @@ cause. Proving the new definition takes effect is not asked for here: no session
 definition it loaded, so the check would be unfalsifiable the moment it was written down.
 
 **15. Fix, re-prove, repeat, at most three rounds.** A guard you change is a guard the prover has
-not seen, so it goes back through step 11. A finding that will not be fixed in this pull request
-is filed as an issue or added to `handbook/errata/` as a row in the same diff, with the reason, and the PR
-body names which; a finding left as prose in the body alone is itself a finding. The shape of a row
-and how one leaves are `handbook/errata/README.md`.
+not seen, so it goes back through step 11. **A finding about this pull request's own work is fixed
+in the review rounds**, an accessibility failure like any other. It becomes an issue or a
+`handbook/errata/` row only when the third round is used up or when fixing it needs a decision of
+Alex's, and the PR body names which and why. **A finding it found but did not cause**, a sibling
+defect in code or text it did not write, goes to an issue or a row in any round, as `vellum-footguns`
+Gate 5 item 7 says. Text a pull request only moves, unchanged, keeps its old owner: a defect in
+moved-verbatim text is the sibling kind, and the pull request fixes it only if it chooses to edit
+that text, which keeps a pure move a pure move. Either way the row lands in the same diff, with the
+reason; a finding left as prose in the body alone is itself a finding. The shape of a row and how
+one leaves are `handbook/errata/README.md`, and an integration pull request is the exception that
+follows.
 
 **An integration pull request takes no review commits.** When a long-lived epic branch finally
 merges to main, every commit on it has already run this whole sequence on its own sub, and new

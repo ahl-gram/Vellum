@@ -62,11 +62,21 @@ without the others is the defect. Whether the layer draws at all is the style's 
 (`politicalTints` in `src/render/style.ts`); what that means for the world underneath is
 `handbook/specs/engine-invariants.md`'s.
 
+**Close realms differ before colour-vision separation does.** Up to `BASE_TINTS` realms each take
+their own tint. Past that, a realm's tint neighbours are the realms it borders OR whose centroid lies
+within `confusionDist` of its own, since two close island realms share no border (`tintNeighbours`
+and `realmTintIndices` in `src/render/realm-tints.ts`), and `pickTint` gives way in order: it drops
+the colour-vision constraint first, and falls back to the colour farthest away only when the
+neighbours between them hold every tint.
+
 **A river keeps its name over a graze.** A river yields only where it would truly bury a neighbour, never where it merely touches
 one. The bar is `RIVER_MAX_OVERLAP` in `src/render/layers/feature-labels.ts`, tested against the river's true rotated ink rather than an upright box. **What it yields to is
 everything already claimed in the arena**, which is more than the labels: the cartouche and the
 scalebar are claimed before any label layer runs, and the legend and compass are claimed too when
-they are drawn. Terrain glyphs are the exception that reserve nothing, so grazing a stand of trees
+they are drawn. The label layers claim in the order they run, and that order IS their priority
+(`labelledLayers` in `src/render/map-renderer.ts`): the settlements claim before the feature labels,
+so a river's name yields to every settlement label as well, and a reorder moves labels wherever two
+claims collide. Terrain glyphs are the exception that reserve nothing, so grazing a stand of trees
 costs a river nothing at all. A residual graze just under the bar is correct behaviour, not a defect.
 
 **A sea beast is drawn last and yields to everything.** `beastsLayer`
