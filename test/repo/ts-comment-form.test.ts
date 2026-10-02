@@ -1,0 +1,144 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { existsSync, readFileSync } from "node:fs";
+import { join, relative, resolve, sep } from "node:path";
+import { ESLint } from "eslint";
+import { includeIgnoreFile } from "eslint/config";
+import css from "@eslint/css";
+import tseslint from "typescript-eslint";
+import { lintTsRoots } from "../../test-support/lint-roots.ts";
+
+const ROOT = resolve(import.meta.dirname, "..", "..");
+const eslint = new ESLint({ cwd: ROOT, flags: ["unstable_native_nodejs_ts_config"] });
+const NO_JS = "vellum/ts-comment-no-js-module";
+const EVERY_ROOT = [NO_JS, "vellum/template-silent-escape"];
+
+test("no comment in the TypeScript tree names a .js module, a trailing comment included, the bundle twins excepted", async () => {
+  const [result] = await eslint.lintText([
+    "// see worker.js for the old copy",
+    "export const a = 1; // was x.js",
+    "// the twin is app.bundle.js",
+    "export const b = \"x.js\";",
+    "/* reveal.js and stage.js, both gone */",
+  ].join("\n"), { filePath: join(ROOT, "src/cli/main.ts") });
+  assert.deepEqual(result!.messages.filter((m) => m.fatal).map((m) => m.message), []);
+  assert.deepEqual(result!.messages.filter((m) => m.ruleId === NO_JS).map((m) => [m.line, m.message.match(/"([^"]+)"/)?.[1]]), [[1, "worker.js"], [2, "x.js"], [5, "reveal.js"], [5, "stage.js"]]);
+});
+
+const ROOT_WITNESSES: Readonly<Record<string, string>> = {
+  "e2e": "e2e/harness.ts",
+  "scripts": "scripts/build-app-bundles.ts",
+  "src": "src/cli/main.ts",
+  "test": "test/repo/lint-wiring.test.ts",
+  "test-support": "test-support/element-shim.ts",
+};
+
+const resolvedRules = async (file: string): Promise<Record<string, unknown>> => {
+  assert.ok(existsSync(join(ROOT, file)), `${file}, a witness here, does not exist`);
+  assert.equal(await eslint.isPathIgnored(file), false, `${file} is ignored, so its root reads nothing`);
+  return ((await eslint.calculateConfigForFile(file)) as { rules?: Record<string, unknown> }).rules ?? {};
+};
+
+test("the .js comment rule and the escape twin reach every TypeScript root the lint reads, and the sheets carry the CSS sibling instead (Issue #675)", async () => {
+  assert.deepEqual(Object.keys(ROOT_WITNESSES).sort(), lintTsRoots(), "a TypeScript root the lint reads has no witness here, so these rules' reach there is unpinned");
+  for (const file of Object.values(ROOT_WITNESSES)) {
+    const rules = await resolvedRules(file);
+    for (const rule of EVERY_ROOT) assert.deepEqual(rules[rule], [2], `${file}: ${rule} does not resolve at error`);
+  }
+  const sheet = await resolvedRules("public/house.css");
+  assert.deepEqual(sheet["vellum/css-comment-no-js-module"], [2], "the sheets lost the .js comment rule's CSS sibling");
+  for (const rule of EVERY_ROOT) assert.equal(sheet[rule], undefined, `${rule} reaches a sheet`);
+});
+
+const RULEBOOK = "handbook/specs/rulebook.md";
+const FILE_TOKEN = /^(?:e2e|public|scripts|src|test|test-support)\/\S+\.(?:css|ts)$/;
+const shortRule = (rule: string): string => rule.replace(/^@typescript-eslint\//, "");
+
+function acceptedSkips(): { pairs: string[]; typeNotes: string[] } {
+  const text = readFileSync(join(ROOT, RULEBOOK), "utf8");
+  const at = text.indexOf("\n## The accepted lint and type-check skips\n");
+  assert.notEqual(at, -1, `${RULEBOOK} has no accepted-skips section, so this guard has no list to hold the tree to`);
+  const section = text.slice(at, text.indexOf("\n## ", at + 1));
+  const notSkips = section.indexOf("**Not skips:**");
+  assert.notEqual(notSkips, -1, "the accepted-skips section has no Not skips line, so this reader has lost its shape");
+  const leads = [...section.slice(0, notSkips).matchAll(/^- \*\*([\s\S]*?)\*\*/gm)].map((m) => m[1]!);
+  assert.ok(leads.length > 0, "the accepted-skips section lists no entry, so this reader has lost its shape");
+  const pairs = leads.flatMap((lead) => {
+    const ticks = [...lead.matchAll(/`([^`]+)`/g)].map((m) => m[1]!);
+    const files = ticks.filter((t) => FILE_TOKEN.test(t));
+    assert.ok(ticks.length > 0 && files.length > 0, `an accepted-skip entry names no rule or no file in its bold lead: ${lead}`);
+    return files.map((file) => `${file} ${shortRule(ticks[0]!)}`);
+  });
+  const typeNotes = [...section.slice(notSkips).matchAll(/the `(@ts-[\w-]+)` lines in `([^`]+)`/g)].map((m) => `${m[2]!} ${m[1]!}`);
+  return { pairs: pairs.sort(), typeNotes };
+}
+
+const collector = new ESLint({
+  cwd: ROOT,
+  overrideConfigFile: true,
+  overrideConfig: [
+    includeIgnoreFile(join(ROOT, ".gitignore")),
+    {
+      files: ["**/*.ts"],
+      languageOptions: { parser: tseslint.parser },
+      plugins: { "@typescript-eslint": tseslint.plugin },
+      linterOptions: { noInlineConfig: true, reportUnusedDisableDirectives: "off" },
+      rules: { "@typescript-eslint/ban-ts-comment": ["error", { "ts-expect-error": true, "ts-ignore": true, "ts-nocheck": true, "ts-check": false }] },
+    },
+    { files: ["**/*.css"], plugins: { css }, language: "css/css", languageOptions: { tolerant: true }, linterOptions: { noInlineConfig: true, reportUnusedDisableDirectives: "off" } },
+  ],
+});
+
+const INLINE = /^'([\s\S]*)' has no effect because you have 'noInlineConfig'/;
+
+function directiveRules(directive: string): string[] {
+  const body = directive.replace(/^\/\/|^\/\*|\*\/$/g, "").split(/\s--\s/)[0]!.trim();
+  const [kind = "", ...rest] = body.split(/\s+/);
+  const tail = rest.join(" ");
+  const named = kind === "eslint" ? [...tail.matchAll(/([@\w/-]+)\s*:/g)].map((m) => m[1]!) : kind.startsWith("eslint-disable") ? tail.split(",").map((r) => r.trim()).filter(Boolean) : [`(${kind})`];
+  return named.length > 0 ? named.map(shortRule) : ["(every rule)"];
+}
+
+const tsDirective = (m: { messageId?: string; message: string }): string =>
+  m.messageId === "tsIgnoreInsteadOfExpectError" ? "@ts-ignore" : (/"(@ts-[\w-]+)"/.exec(m.message)?.[1] ?? "@ts-(unread)");
+
+const skipsIn = (results: readonly ESLint.LintResult[]): string[] =>
+  results.flatMap((r) => {
+    const file = relative(ROOT, r.filePath).split(sep).join("/");
+    return r.messages.flatMap((m) => {
+      const inline = m.ruleId === null ? INLINE.exec(m.message) : null;
+      if (inline) return directiveRules(inline[1]!).map((rule) => `${file} ${rule}`);
+      if (m.ruleId === "@typescript-eslint/ban-ts-comment") return [`${file} ${tsDirective(m)}`];
+      return [`${file} (unread: ${m.ruleId ?? "parse"} ${m.message})`];
+    });
+  });
+
+test("the skip collector reads every directive form through ESLint's own parser, the rule-off form included, and nothing inside a string", async () => {
+  const plant = [
+    "// eslint-disable-next-line max-lines-per-function",
+    "export const a = 1; // eslint-disable-line @typescript-eslint/no-unnecessary-condition",
+    "/* eslint max-lines: \"off\" */",
+    "/* eslint-disable */",
+    "/*eslint-disable no-console, no-debugger -- a reason */",
+    "// @ts-expect-error a note",
+    "export const b: number = 1;",
+    "/* @ts-ignore */",
+    "export const c = \"// eslint-disable-line no-console\";",
+  ].join("\n");
+  const at = "src/cli/main.ts";
+  assert.deepEqual(skipsIn(await collector.lintText(plant, { filePath: join(ROOT, at) })), [
+    "max-lines-per-function", "no-unnecessary-condition", "max-lines", "(every rule)", "no-console", "no-debugger", "@ts-expect-error", "@ts-ignore",
+  ].map((s) => `${at} ${s}`));
+});
+
+test("every lint and type-check skip in the linted tree is an entry in the rulebook's accepted list, and every entry is a skip in the tree (Issue #654 ruling D, Issue #675)", async () => {
+  const { pairs, typeNotes } = acceptedSkips();
+  const found = skipsIn(await collector.lintFiles([...lintTsRoots().map((root) => `${root}/**/*.ts`), "public/**/*.css"]));
+  const isType = (entry: string): boolean => / @ts-/.test(entry);
+  assert.deepEqual(
+    found.filter((e) => !isType(e)).sort(),
+    pairs,
+    `the skips in the tree and the entries in ${RULEBOOK} ("The accepted lint and type-check skips") differ: fix the code, or put the skip to Alex and add its entry in the same change, and remove an entry with the skip it named. BLIND SPOTS, declared: a file the lint does not read (gitignored, design/, .claude/) is not read here either, erring toward passing; a second skip of an accepted rule in an accepted file reds, since the list is matched as a multiset, erring toward failing`,
+  );
+  assert.deepEqual(found.filter(isType).filter((e) => !typeNotes.includes(e)), [], `a type-check skip stands in the tree that ${RULEBOOK}'s Not skips line does not name`);
+});

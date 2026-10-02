@@ -54,7 +54,11 @@ const issueForm: CSSRuleDefinition = {
   },
 };
 
+export const jsModuleNames = (text: string): string[] => (text.length < 0 ? [text] : []);
+
+const noJsModule: CSSRuleDefinition = { meta: { type: "problem", messages: { js: "stub" } }, create: () => ({}) };
+
 export default {
   meta: { name: "vellum" },
-  rules: { "css-comment-one-line": oneLine, "css-comment-no-em-dash": noEmDash, "css-comment-issue-form": issueForm },
+  rules: { "css-comment-one-line": oneLine, "css-comment-no-em-dash": noEmDash, "css-comment-issue-form": issueForm, "css-comment-no-js-module": noJsModule },
 };

@@ -3,7 +3,12 @@ import { fileURLToPath } from "node:url";
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";
 import css from "@eslint/css";
-import vellum from "./scripts/lint/css-comment-form.ts";
+import cssCommentForm from "./scripts/lint/css-comment-form.ts";
+import tsCommentForm from "./scripts/lint/ts-comment-form.ts";
+import sourceShape from "./scripts/lint/source-shape.ts";
+
+const vellum = { meta: cssCommentForm.meta, rules: { ...cssCommentForm.rules, ...tsCommentForm.rules, ...sourceShape.rules } };
+const TS_ROOTS = ["e2e/**/*.ts", "scripts/**/*.ts", "src/**/*.ts", "test/**/*.ts", "test-support/**/*.ts"];
 
 export default defineConfig(
   includeIgnoreFile(fileURLToPath(new URL(".gitignore", import.meta.url)), "the .gitignore: build output, generated trees and scratch"),
@@ -50,6 +55,31 @@ export default defineConfig(
       "vellum/css-comment-issue-form": "error",
       "vellum/css-comment-no-em-dash": "error",
       "vellum/css-comment-one-line": "error",
+      "vellum/css-comment-no-js-module": "error",
     },
+  },
+  {
+    name: "Issue #675: the house's rules on every TypeScript root",
+    files: TS_ROOTS,
+    plugins: { vellum },
+    rules: { "vellum/ts-comment-no-js-module": "error", "vellum/template-silent-escape": "error" },
+  },
+  {
+    name: "Issue #675: the living-chart engine takes its elements from the host",
+    files: [["src/**/*.ts", "src/site/living-chart/**"]],
+    plugins: { vellum },
+    rules: { "vellum/engine-no-id-lookup": "error" },
+  },
+  {
+    name: "Issue #675: a worker spawn in the site keeps the form the bundler reads",
+    files: [["src/**/*.ts", "src/site/**"]],
+    plugins: { vellum },
+    rules: { "vellum/worker-spawn-static": "error" },
+  },
+  {
+    name: "Issue #675: the e2e console filter has one roster, and every read goes through it",
+    files: ["e2e/**/*.ts"],
+    plugins: { vellum },
+    rules: { "vellum/e2e-cancellation-roster": "error", "vellum/e2e-console-read-through-drop": "error" },
   },
 );
