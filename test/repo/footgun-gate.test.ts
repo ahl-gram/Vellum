@@ -32,6 +32,7 @@ test("every gate-size probe passes at the 8,000-character limit", () => {
     ["a test file", "## Gate 1"],
     ["a browser-harness unit test that clicks and escapes", "## Gate 1, for wiring only, double the backslash"],
     ["a new e2e suite that clicks and escapes", "## Gate 4, ## Gate 2, for wiring only, double the backslash"],
+    ["a new unit test under a suite-shaped path that clicks and escapes", "## Gate 1, for wiring only, double the backslash"],
     ["a new stylesheet", "## Gate 4, ## Gate 3"],
     ["a new page", "## Gate 4, ## Gate 3"],
     ["a new site module", "## Gate 4"],
@@ -40,7 +41,7 @@ test("every gate-size probe passes at the 8,000-character limit", () => {
     ["a PR body from an unreadable file", "## Gate 5, could not read"],
     ["a shell line that writes a script, kills a browser, pushes and opens a PR", "## Gate 5, could not read, double the backslash, browser profile"],
   ];
-  assert.match(out, /^ok {3}the size probes' 10 quoted paths sit under a root of 100 characters$/m, out);
+  assert.match(out, /^ok {3}the size probes' 11 quoted paths sit under a root of 100 characters$/m, out);
   for (const [name, carries] of probes) {
     const row = out.split("\n").find((l) => l.startsWith(`ok   ${name}: the pasted note carries ${carries} in `));
     const size = /in (\d+) of 8000 characters$/.exec(row ?? "");

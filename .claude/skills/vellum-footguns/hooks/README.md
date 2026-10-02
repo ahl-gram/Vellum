@@ -11,7 +11,7 @@ is ever removed.
 - **Injects a gate once per session**, reading the text from `SKILL.md` so the skill stays the single
   source: Gate 1 on `test/**/*.test.ts`; Gate 2 on `.mjs` under `scripts/`, `out/` and `e2e/`, and on `.ts` under `e2e/` and `out/` (the whole e2e tree: the harness, the runners, the suites, their helpers and the two proof tools; never all of `scripts/**/*.ts`, since the first matching route wins and Gate 6 owns the render scripts); Gate 3 on
   `*.css` and `*.astro`; Gate 4 on a Write that creates a new file under `src/pages/`, `src/site/`,
-  `e2e/suites/*.ts` (a suite, never a file in a suite's folder) or `public/*.css`; Gate 5 on `git push` and `gh pr create` / `gh pr edit`;
+  `e2e/suites/*.ts` (a suite, never a file in a suite's folder) or `public/*.css`, never a `*.test.ts`, since a unit test joins no roster and its path can echo one (`test/e2e/suites/`); Gate 5 on `git push` and `gh pr create` / `gh pr edit`;
   Gate 6 on the renderer, `generateWorld`'s transitive closure, the committed artifacts and the
   modules their writers reach. Gate 6's roster was derived by walking those import graphs, so widen
   it the same way rather than by adding paths that look related.

@@ -251,6 +251,9 @@ const FIXTURES: Fixture[] = [
   ["new page gets gate 4", edit("Write", "src/pages/never-exists-zz/index.astro", "---\n---"), "context", "## Gate 4"],
   ["a new e2e suite gets gate 4", edit("Write", "e2e/suites/never-exists-zz.ts", "x"), "context", "## Gate 4"],
   ["a new part in a suite's folder gets gate 2 and no gate 4", edit("Write", "e2e/suites/never-exists-zz/part.ts", "x"), "context", "## Gate 2", "## Gate 4"],
+  ["a new unit test under test/e2e/suites gets gate 1 and no gate 4", edit("Write", "test/e2e/suites/never-exists-zz.test.ts", "x"), "context", "## Gate 1", "## Gate 4"],
+  ["a new unit test under test/src/site gets gate 1 and no gate 4", edit("Write", "test/src/site/never-exists-zz.test.ts", "x"), "context", "## Gate 1", "## Gate 4"],
+  ["a new unit test under test/src/pages gets gate 1 and no gate 4", edit("Write", "test/src/pages/never-exists-zz.test.ts", "x"), "context", "## Gate 1", "## Gate 4"],
   // One fixture per ARM of the Gate 6 regex, because a roster is only as good as its least-swept alternative: the prover found 10 of 19 arms had no fixture, so a typo in any of them shipped silent.
   ...GATE6_ARMS.map(([arm, path]): Fixture => [`gate 6 arm: ${arm}`, edit("Edit", path, "x"), "context", "## Gate 6"]),
   ["gate 6 on the ABSOLUTE path a real tool call passes", edit("Edit", join(ROOT, "src/render/style.ts"), "x"), "context", "## Gate 6"],
@@ -272,6 +275,7 @@ const SIZE_PROBES: [string, Payload, string[]][] = [
   ["a test file", edit("Edit", `${LONG_ROOT}/test/a-directory/a-long-test-name.test.ts`, "x"), ["## Gate 1"]],
   ["a browser-harness unit test that clicks and escapes", edit("Edit", `${LONG_ROOT}/test/e2e/a-long-test-name.test.ts`, NOISY_AND_CLICK), ["## Gate 1", "for wiring only", "double the backslash"]],
   ["a new e2e suite that clicks and escapes", edit("Write", `${LONG_ROOT}/e2e/suites/a-new-suite-name.ts`, NOISY_AND_CLICK), ["## Gate 4", "## Gate 2", "for wiring only", "double the backslash"]],
+  ["a new unit test under a suite-shaped path that clicks and escapes", edit("Write", `${LONG_ROOT}/test/e2e/suites/a-long-test-name.test.ts`, NOISY_AND_CLICK), ["## Gate 1", "for wiring only", "double the backslash"]],
   ["a new stylesheet", edit("Write", `${LONG_ROOT}/public/a-new-sheet-name.css`, "x"), ["## Gate 4", "## Gate 3"]],
   ["a new page", edit("Write", `${LONG_ROOT}/src/pages/a-new-room-name/index.astro`, "x"), ["## Gate 4", "## Gate 3"]],
   ["a new site module", edit("Write", `${LONG_ROOT}/src/site/a-room-name/a-new-module-name.ts`, "x"), ["## Gate 4"]],
