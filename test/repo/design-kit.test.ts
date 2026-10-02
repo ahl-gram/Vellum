@@ -1,0 +1,152 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
+import { mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { dirname, extname, join, resolve } from "node:path";
+import vm from "node:vm";
+import { captureParams, FULL_PAGE_CAP, parseShots, readProbe, servedUrl, type Shot } from "../../scripts/design/shoot.ts";
+import { BAND, modeOf, parseSweepArgs, PIN, pinText, planSweep, routesOf } from "../../scripts/design/oracle.ts";
+import { aeOf, failed, verdictOf, type Row } from "../../scripts/design/compare.ts";
+import { stillArgs } from "../../scripts/design/stills.ts";
+
+const REPO = resolve(import.meta.dirname, "..", "..");
+const shot = (over: Partial<Shot> = {}): Shot => ({ url: "/faq/", width: 1280, height: 800, mobile: false, out: "out/x.png", ...over });
+
+test("a full page is the one capture taken beyond the viewport, its height capped; a viewport or clip shot never is, and a clip origin clamps at zero", () => {
+  assert.deepEqual(captureParams(shot({ full: true }), 3500), { format: "png", captureBeyondViewport: true, clip: { x: 0, y: 0, width: 1280, height: 3500, scale: 1 } });
+  assert.equal(captureParams(shot({ full: true, width: 390, height: 844 }), 22073).clip.height, FULL_PAGE_CAP);
+  assert.equal(FULL_PAGE_CAP, 16000, "the archived sweep's cap");
+  assert.deepEqual(captureParams(shot(), 3500), { format: "png", captureBeyondViewport: false, clip: { x: 0, y: 0, width: 1280, height: 800, scale: 1 } });
+  assert.deepEqual(captureParams(shot({ clip: { x: 0, y: 0, width: 1280, height: 122 } }), 3500), { format: "png", captureBeyondViewport: false, clip: { x: 0, y: 0, width: 1280, height: 122, scale: 1 } });
+  assert.deepEqual(captureParams(shot({ clip: { x: -8, y: -4, width: 100, height: 50, scale: 3 } }), 3500).clip, { x: 0, y: 0, width: 92, height: 46, scale: 3 }, "the origin clamps and the far edge stays where it was");
+});
+
+test("a shot list is refused, naming the shot, wherever a job would otherwise run blind", () => {
+  assert.deepEqual(parseShots([shot()]), [shot()]);
+  assert.throws(() => parseShots({ shots: [] }), /must be a JSON array/);
+  const bad: [Record<string, unknown>, RegExp][] = [
+    [{ ...shot(), out: undefined }, /shot 1: out/],
+    [{ ...shot(), width: 390.5 }, /shot 1: width and height/],
+    [{ ...shot(), mobile: "yes" }, /shot 1: mobile/],
+    [{ ...shot(), url: "" }, /shot 1: url/],
+    [{ ...shot(), waitMs: -1 }, /shot 1: waitMs/],
+    [{ ...shot(), clip: { x: 0, y: 0, width: 0, height: 10 } }, /shot 1: clip/],
+    [{ ...shot(), full: true, clip: { x: 0, y: 0, width: 10, height: 10 } }, /shot 1: a full-page shot takes no clip/],
+  ];
+  for (const [job, message] of bad) assert.throws(() => parseShots([shot(), job]), message, JSON.stringify(job));
+  assert.throws(() => parseShots([shot(), "x"]), /shot 1: each shot must be an object/);
+});
+
+test("a probe that hands back nothing stops the run instead of writing an undefined row", () => {
+  assert.throws(() => readProbe(undefined, "out/a.png"), /out\/a\.png/);
+  assert.equal(readProbe('{"cw":390}', "out/a.png"), '{"cw":390}');
+  assert.equal(readProbe({ cw: 390 }, "out/a.png"), '{"cw":390}');
+});
+
+test("a path is served by the run's own server and any other address is taken as given", () => {
+  assert.equal(servedUrl("/faq/", 8123), "http://127.0.0.1:8123/faq/");
+  assert.equal(servedUrl("file:///a/b/explorer.html?dir=a&state=three", 8123), "file:///a/b/explorer.html?dir=a&state=three");
+});
+
+test("the sweep reads its pages from the built tree: every index.html, and nothing else", () => {
+  const dir = join(REPO, "out", "test-design-kit-routes");
+  rmSync(dir, { recursive: true, force: true });
+  for (const f of ["index.html", "faq/index.html", "print-room/portfolio/index.html", "gallery/chart-1.html", "explorer/app.bundle.js", "fonts/OFL.txt"]) {
+    mkdirSync(dirname(join(dir, f)), { recursive: true });
+    writeFileSync(join(dir, f), "x");
+  }
+  try {
+    assert.deepEqual(routesOf(dir), ["/", "/faq/", "/print-room/portfolio/"]);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("a page that runs a live chart app is framed by its head box, home and the Specimen Book keep the archive's framing, and the rest are whole pages", () => {
+  const archive: Record<string, string> = {
+    "/": "full", "/faq/": "full", "/glossary/": "full", "/gallery/": "full",
+    "/explorer/": "head", "/reading-room/": "head", "/print-room/": "head", "/prospect/": "head", "/ribbon/": "head", "/seed-of-the-day/": "head",
+    "/specimen/": "view",
+  };
+  for (const [route, mode] of Object.entries(archive)) assert.equal(modeOf(route), mode, `${route}, as design/oracle/sweep.mjs framed it`);
+  assert.equal(modeOf("/print-room/portfolio/"), "head", "the Portfolio runs a live chart app");
+  assert.equal(modeOf("/atlas/"), "full", "the Atlas is a document");
+});
+
+test("every page is shot at a desktop and a true phone viewport, under the archive's file names", () => {
+  const plan = planSweep(["/", "/atlas/", "/explorer/", "/print-room/portfolio/", "/specimen/"], "out/s");
+  const byName = new Map(plan.map((s) => [s.name, s]));
+  assert.deepEqual([...byName.keys()].sort(), [
+    "atlas-1280.png", "atlas-390.png", "explorer-1280-head.png", "explorer-390-head.png", "home-1280.png", "home-390.png",
+    "print-roomportfolio-1280-head.png", "print-roomportfolio-390-head.png", "specimen-1280.png", "specimen-390.png",
+  ]);
+  for (const s of plan) {
+    assert.equal(s.mobile, s.width === 390, `${s.name} mobile`);
+    assert.equal(s.height, s.width === 390 ? 844 : 800, `${s.name} height`);
+    assert.equal(s.full, s.mode === "full", `${s.name} full`);
+    assert.equal(s.waitMs, s.mode === "head" ? 4500 : 2500, `${s.name} wait`);
+    assert.equal(s.script, PIN, `${s.name} pins the caption`);
+    assert.equal(s.out, join("out/s", s.name));
+  }
+  assert.equal(BAND, 122, "the head cluster's band, as the archive clipped it");
+  assert.deepEqual(byName.get("explorer-390-head.png")?.clip, { x: 0, y: 0, width: 390, height: 122 });
+  assert.equal(byName.get("specimen-1280.png")?.clip, undefined);
+});
+
+test("the sweep runs with motion reduced unless it is asked for motion", () => {
+  assert.deepEqual(parseSweepArgs(["dist", "out/a", "main-1"]), { dist: "dist", out: "out/a", label: "main-1", reducedMotion: true });
+  assert.equal(parseSweepArgs(["dist", "out/a", "--motion"]).reducedMotion, false);
+  assert.throws(() => parseSweepArgs(["dist"]), /usage/);
+});
+
+test("the caption pin rewrites every timing on every element the archive pinned, in the page itself, and touches nothing else", () => {
+  const arms = [`[id$="-status"]`, ".status", ".rf-status", "#pressed", "#folio-sub"];
+  const els = new Map([...arms, "#caption"].map((arm) => [arm, { textContent: "drawn in 412 ms, pressed in 9ms" }]));
+  const document = { querySelectorAll: (sel: string) => sel.split(",").map((a) => a.trim()).flatMap((a) => (a !== "#caption" && els.has(a) ? [els.get(a)!] : [])) };
+  assert.equal(vm.runInNewContext(PIN, { document }), true);
+  for (const arm of arms) assert.equal(els.get(arm)!.textContent, "drawn in NNNms, pressed in NNNms", arm);
+  assert.equal(els.get("#caption")!.textContent, "drawn in 412 ms, pressed in 9ms");
+  assert.equal(pinText("drawn in 412 ms"), "drawn in NNNms");
+});
+
+const row = (over: Partial<Row>): Row => ({ name: "a.png", present: [true, true, true], control: 0, branch: 0, errors: [], ...over });
+
+test("a row is trusted only where the unchanged build matched itself, and a difference under one pixel still counts", () => {
+  assert.equal(aeOf("0.075817 (4.20085e-08)"), 0.075817);
+  assert.equal(aeOf("0 (0)"), 0);
+  assert.throws(() => aeOf("compare: unable to open image"), /no AE/);
+  assert.equal(verdictOf(row({})), "same");
+  assert.equal(verdictOf(row({ branch: 0.075817 })), "differs");
+  assert.equal(verdictOf(row({ control: 46, branch: null })), "untrusted");
+  assert.equal(verdictOf(row({ errors: ["404 http://127.0.0.1/fonts/x.woff2"] })), "errors");
+  assert.equal(verdictOf(row({ present: [false, false, true], control: null, branch: null })), "new");
+  assert.equal(verdictOf(row({ present: [true, true, false], branch: null })), "gone");
+  assert.equal(verdictOf(row({ present: [true, false, true], control: null, branch: null })), "missing");
+});
+
+test("a comparison fails on a trusted difference, an error, a lost or half-shot page, or when it trusted no row at all", () => {
+  assert.equal(failed([row({}), row({ control: 46, branch: null })]), false, "an untrusted row is reported, not failed");
+  assert.equal(failed([row({}), row({ present: [false, false, true], control: null, branch: null })]), false, "a new page is reported, not failed");
+  assert.equal(failed([row({}), row({ branch: 0.075817 })]), true);
+  assert.equal(failed([row({}), row({ errors: ["console.error: x"] })]), true);
+  assert.equal(failed([row({}), row({ present: [true, true, false], branch: null })]), true);
+  assert.equal(failed([row({}), row({ present: [true, false, true], control: null, branch: null })]), true);
+  assert.equal(failed([row({ control: 46, branch: null }), row({ control: 3, branch: null })]), true, "a run that trusted nothing compared nothing");
+});
+
+test("a still is palette-reduced with its date chunks stripped, so a re-run writes the same bytes", () => {
+  assert.deepEqual(stillArgs("a.png", "s/a.png"), ["a.png", "-colors", "256", "-define", "png:exclude-chunks=date", "+set", "date:create", "+set", "date:modify", "PNG8:s/a.png"]);
+});
+
+const CODE = new Set([".js", ".mjs", ".cjs", ".jsx", ".ts", ".mts", ".cts", ".tsx"]);
+const codeIn = (paths: readonly string[]): string[] => paths.filter((p) => CODE.has(extname(p).toLowerCase()));
+
+test("design/kit/ holds content and no code, since code there escapes npm run check and npm run lint and would be a second home for tools beside scripts/design/", () => {
+  assert.deepEqual(codeIn(["design/kit/a.js", "design/kit/b.MJS", "design/kit/c.cjs", "design/kit/d.jsx", "design/kit/e.ts", "design/kit/f.mts", "design/kit/g.cts", "design/kit/h.tsx", "design/kit/fonts.css", "design/kit/fonts/x.woff2"]).length, 8);
+  // 2026-10-02: git ls-files over the whole tree runs in well under a second; thirty seconds is a cap on a hang.
+  const listing = spawnSync("git", ["ls-files", "-z", "--", "design/kit"], { cwd: REPO, encoding: "utf8", timeout: 30_000 });
+  assert.equal(listing.status, 0, `git ls-files failed: ${listing.stderr}`);
+  const kit = listing.stdout.split("\0").filter(Boolean);
+  assert.ok(kit.includes("design/kit/fonts/OFL.txt"), "the kit's fonts are not tracked, so this scan reads an empty kit");
+  assert.deepEqual(codeIn(kit), []);
+});

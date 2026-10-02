@@ -83,7 +83,7 @@ test("the tsc engine emit retired: no browser tsconfig, astro:generate is clean-
   const pkg = JSON.parse(read("package.json")) as { scripts: Record<string, string> };
   assert.equal(
     pkg.scripts["astro:generate"],
-    "node scripts/clean-public-generated.ts && node scripts/build-app-bundles.ts && node scripts/generate-showcases.ts && node scripts/generate-discovery.ts",
+    "node scripts/clean-public-generated.ts && node scripts/kit-fonts.ts && node scripts/build-app-bundles.ts && node scripts/generate-showcases.ts && node scripts/generate-discovery.ts",
     "no tsc step: Vite compiles the engine graph from src/ directly",
   );
 });
