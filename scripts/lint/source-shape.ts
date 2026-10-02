@@ -50,14 +50,16 @@ const isModuleOptions = (node: Node | undefined): boolean => {
   return only?.type === "Property" && !only.computed && isName(only.key as Node, "type") && only.value.type === "Literal" && only.value.value === "module";
 };
 
+const inTypePosition = (parent: Node): boolean => parent.type.startsWith("TS") && !VALUE_WRAPPERS.has(parent.type);
+
 const constructsOrTests = (id: Node, parent: Node): boolean =>
   (parent.type === "NewExpression" && parent.callee === id) ||
   (parent.type === "UnaryExpression" && parent.operator === "typeof") ||
   (parent.type === "BinaryExpression" && parent.operator === "instanceof" && parent.right === id) ||
   (parent.type === "Property" && parent.key === id && !parent.computed && parent.parent.type === "ObjectExpression") ||
-  (parent.type.startsWith("TS") && !VALUE_WRAPPERS.has(parent.type));
+  inTypePosition(parent);
 
-const isWorkerString = (node: Node): boolean => node.parent !== null && !node.parent.type.startsWith("TS") && WORKERS.has(wholeString(node) ?? "");
+const isWorkerString = (node: Node): boolean => node.parent !== null && !inTypePosition(node.parent) && WORKERS.has(wholeString(node) ?? "");
 
 const workerSpawnStatic: Rule.RuleModule = {
   meta: problem("a worker is spawned as a bare new Worker(new URL(\"./<name>.ts\", import.meta.url), { type: \"module\" }), or new SharedWorker in the same form, written out in full: the bundler rewrites only that form, never a constructor reached through a member, a variable, an alias or a string naming it (handbook/specs/site-architecture.md)"),
