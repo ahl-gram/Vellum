@@ -5,7 +5,7 @@ description: Checklists keyed to the moment of typing. Read the matching gate be
 
 # Vellum footguns: the gates
 
-The doctrine behind every line here already exists, in `CLAUDE.md`, in `specs/rulebook.md`, in the
+The doctrine behind every line here already exists, in `CLAUDE.md`, in `handbook/specs/rulebook.md`, in the
 agents, and in the auto-memory doctrine files. It keeps failing anyway, and the record says why: it is read at session
 start and applied at the push, hours apart, so the first push routinely carries a guard that cannot
 go red, a probe that measured the wrong thing, a cascade rule that loses, or a body claim nobody
@@ -122,7 +122,7 @@ Scars: #366, #368, #454, #474, #501, #520, #526, #529, #533, #535, #536, #537, #
    handing back that last read (ruled 2026-09-13, #589). **The throw belongs inside a `step`**: wrap
    the gestures, waits and checks of one numbered check in `step("CL5", async () => ...)` and a
    timeout fails that check by name
-   instead of taking the suite with it (#534). See `specs/settle-doctrine.md`.
+   instead of taking the suite with it (#534). See `handbook/specs/settle-doctrine.md`.
 7. **A wait's break condition demands every conjunct the check asserts.** Navigation commits before
    the document parses; a same-URL `Page.navigate` returns on the stale document; any redraft is not
    the redraft the gesture requested.
@@ -150,7 +150,7 @@ Scars: #366, #368, #454, #474, #501, #520, #526, #529, #533, #535, #536, #537, #
     scrolled page photographs empty margin rather than the thing you meant, and a uniformly coloured
     crop is the tell; `sampleRow` in `e2e/support/pixel.ts` adds the scroll for you (plate
     read on PR #501, ruling 6 of the 2026-09-03 sitting on Issue #454, fixed in PR #510). A
-    NEGATIVE origin is the other way a clip lies, and `specs/settle-doctrine.md`'s environment
+    NEGATIVE origin is the other way a clip lies, and `handbook/specs/settle-doctrine.md`'s environment
     section carries what comes back and what to clamp.
 14. **Where the window you need is unreachable by a naturally written check, reach it deliberately.**
     Block the page's own main thread, queue a marker behind the code's own hop, or dispatch from
@@ -161,7 +161,7 @@ Scars: #366, #368, #454, #474, #501, #520, #526, #529, #533, #535, #536, #537, #
 
 Scars: #219, #295, #465, #525, #530, #531, #532, #535, #537, #542, #543, #545, #546.
 
-The traps themselves are `specs/cascade-traps.md`'s, and the look they break is `specs/ui-design.md`'s.
+The traps themselves are `handbook/specs/cascade-traps.md`'s, and the look they break is `handbook/specs/ui-design.md`'s.
 This is the checklist; the reasons are not copied here.
 
 1. **Compute the specificity of the rule you are overriding, in numbers.** A media query adds none.
@@ -181,7 +181,7 @@ This is the checklist; the reasons are not copied here.
    workflow steps 6 and 11, which that file specifies. The step 11 record goes in the PR as a comment
    before the body claims it exists.
 6. **A feel decision gets rendered variants before a ruling**, the contract for which is
-   `specs/development-workflow.md` step 6: the candidates, the control arm, and where the stills go.
+   `handbook/specs/development-workflow.md` step 6: the candidates, the control arm, and where the stills go.
    The ruling stays provisional until Alex has used the branch live. Pin correctness now, let
    dressing-level pins lag one live cycle.
 
@@ -196,7 +196,7 @@ fail silently (an undeclared CSS variable, a suite the runner never calls, a bud
    every list it appears in: the runner's `SUITES` map, `MEASURED_SECONDS`, the tiers test, the
    discovery files. A sheet under `public/` joins the sheet sweeps by existing (`SITE_SHEETS`).
 2. Name in the PR body which rosters self-check and which were joined by hand;
-   `specs/site-architecture.md` names the rosters a page or a sheet joins, and which close themselves.
+   `handbook/specs/site-architecture.md` names the rosters a page or a sheet joins, and which close themselves.
 3. Re-measure any budget the roster carries; a number measured on an eleven-check suite is wrong on a
    twenty-three-check one.
 
@@ -225,9 +225,9 @@ Scars: #49, #101, #203, #255, #408, #486, #491, #492, #507, #508, #524, #528, #5
    base is a feature branch, so the keyword goes on the last PR to land and is re-checked after the
    retarget (PR #408).
 6. `grep -n '—'` over the body and the diff returns nothing.
-7. **A finding this PR does not fix is FILED or added to `errata/`, never left as prose in the
+7. **A finding this PR does not fix is FILED or added to `handbook/errata/`, never left as prose in the
    body.** A sibling defect found on the way is filed, or joins the ledger as one row (the PR, the
-   finding, what was searched; `errata/README.md` has the shape), not folded; grep `errata/` and
+   finding, what was searched; `handbook/errata/README.md` has the shape), not folded; grep `handbook/errata/` and
    the open issues for it first. The exceptions that fold: an accessibility failure this PR itself
    caused, and an orchestrated batch whose dispatcher has relayed Alex's ruling to fold for that
    batch (ruled 2026-09-14, Issue #591).
@@ -253,7 +253,7 @@ Scars: #49, #101, #203, #255, #408, #486, #491, #492, #507, #508, #524, #528, #5
    there, the higher one DOES bring its branch current with `git merge origin/main` and take the
    stated position, which is what resolved #593 against #596 with both already open.
 10. Then `vellum-pr-skeptic`, dispatched COLD (the PR number and nothing else), with no edits under it
-    while it runs; three rounds at most, and a finding not fixed is filed or an `errata/` row
+    while it runs; three rounds at most, and a finding not fixed is filed or an `handbook/errata/` row
     (item 7), never body prose. **Commit before you dispatch it**,
     and before any review agent: it runs in the directory you launched it from, and a suite run there
     DELETES the generated assets under `public/`, which neither `git status` nor `git status --ignored`
@@ -263,7 +263,7 @@ Scars: #49, #101, #203, #255, #408, #486, #491, #492, #507, #508, #524, #528, #5
 
 Scars: #40 (the drift guard exists because a regen was forgotten), #205 (the regen commands), #309 (a change everyone priced as a re-roll and measured as a regen), #489 (the icons, a committed pair with a single writer), and the 2026-09-09 move of these rules out of `CLAUDE.md`.
 
-The authority is `specs/rulebook.md`, its golden discipline and its flight-exclusion set. This is the
+The authority is `handbook/specs/rulebook.md`, its golden discipline and its flight-exclusion set. This is the
 checklist; the file has the reasoning, the checksum and the set's current membership, none of which
 are copied here.
 

@@ -49,7 +49,7 @@ const ctorName = (e: ts.Expression): string => {
   return ts.isIdentifier(c) ? c.text : ts.isPropertyAccessExpression(c) ? c.name.text : ts.isElementAccessExpression(c) && ts.isStringLiteralLike(c.argumentExpression) ? c.argumentExpression.text : "";
 };
 
-// The ACTUAL module specifiers, not prose (comments are free to name these paths), read from the syntax tree in the Hunt's own modules: static imports and re-exports, literal import(), new URL(...), Worker(...) or SharedWorker(...) however the constructor is reached (globalThis.Worker, self["Worker"], a cast or parentheses) and import.meta.glob(...); a specifier computed at run time escapes it, and so does a module whose name hides what IT imports (../explorer/glass.ts imports the finer-survey controller), an errata/guards.md row.
+// The ACTUAL module specifiers, not prose (comments are free to name these paths), read from the syntax tree in the Hunt's own modules: static imports and re-exports, literal import(), new URL(...), Worker(...) or SharedWorker(...) however the constructor is reached (globalThis.Worker, self["Worker"], a cast or parentheses) and import.meta.glob(...); a specifier computed at run time escapes it, and so does a module whose name hides what IT imports (../explorer/glass.ts imports the finer-survey controller), a handbook/errata/guards.md row.
 function specifiers(file: string): string[] {
   const sf = ts.createSourceFile(file, read(file), ts.ScriptTarget.Latest, true);
   const out: string[] = [];

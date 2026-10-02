@@ -164,6 +164,6 @@ attribution required.
 
 ## For contributors
 
-The house rules live in [`specs/`](specs/), one file per area and every one of
+The house rules live in [`handbook/specs/`](handbook/specs/), one file per area and every one of
 them normative. Read them rather than a summary here, since the summary is the
 thing that goes stale.

@@ -70,7 +70,7 @@ headless browser actually do, so a green run can be believed.
    has an exception since #634**: going BACK to a page no longer serves state nothing re-reads. The
    Explorer and the Prospect page re-seat the Chart Table from the device on a cached restore, through
    `pageshow` with `persisted`, so a check that drives Back and reads the drawer is reading the
-   device's table and not the address's. `specs/explorer-doctrine.md` carries the rule; a suite that
+   device's table and not the address's. `handbook/specs/explorer-doctrine.md` carries the rule; a suite that
    wants a bare arrival clears `vellum.table.v1` before it navigates, which is what
    `e2e/suites/chart-drawer/kit.ts` does in its own `go`. Reach a new address by
    re-bootstrapping through `about:blank` and then the target, then poll for the boot committing:
@@ -170,7 +170,7 @@ section points there rather than restating it.
   class change that starts one finds the animation pending at its `from` keyframe with the class
   still set, and rest arrives with the next rendered frame, so the reduced-motion arm waits on a
   rest signal too, never on the clock or the +0 read, which is what keeps that arm the control
-  `specs/ui-design.md` makes it. Which signal depends on who retires the animation: where the page
+  `handbook/specs/ui-design.md` makes it. Which signal depends on who retires the animation: where the page
   removes the class on `animationend` (the Chart Table's landing, `settle` in
   `src/site/explorer/chart-drawer-bind.ts`) the removal CANCELS the animation and empties
   `getAnimations()`, so the guarded poll above can never see `finished` there, and the rest

@@ -3,9 +3,9 @@
 The charts are the thing the site exists to show, and they are dressed on their own terms.
 
 This file holds how a chart is dressed, in the renderer and in what the site does with a drawn
-sheet. The world the chart draws is `specs/engine-invariants.md`'s; what a change to the dress
-costs (a regen, the golden, a re-roll) is `specs/rulebook.md`'s; the site's own look around the
-chart is `specs/ui-design.md`'s, and its preamble's rule that the guard pinning a named value is
+sheet. The world the chart draws is `handbook/specs/engine-invariants.md`'s; what a change to the dress
+costs (a regen, the golden, a re-roll) is `handbook/specs/rulebook.md`'s; the site's own look around the
+chart is `handbook/specs/ui-design.md`'s, and its preamble's rule that the guard pinning a named value is
 right if the two disagree holds here too. Read it before any change to a chart's dress: a style, a
 layer's ink, a label's treatment, or how the site mounts a sheet.
 
@@ -60,7 +60,7 @@ hatching existed.
 and the legend swatch are all drawn; where it does not, they go together. A dress that shows one
 without the others is the defect. Whether the layer draws at all is the style's own flag
 (`politicalTints` in `src/render/style.ts`); what that means for the world underneath is
-`specs/engine-invariants.md`'s.
+`handbook/specs/engine-invariants.md`'s.
 
 **A river keeps its name over a graze.** A river yields only where it would truly bury a neighbour, never where it merely touches
 one. The bar is `RIVER_MAX_OVERLAP` in `src/render/layers/feature-labels.ts`, tested against the river's true rotated ink rather than an upright box. **What it yields to is
@@ -74,10 +74,10 @@ costs a river nothing at all. A residual graze just under the bar is correct beh
 its ink off the land, and escalates as the sheet fills: the full label, then the name alone, then the
 glyph alone. It searches near its haunt first and then the whole sheet before it drops, so a legend
 drawn over the haunt moves the beast rather than losing it. What a beast is, and what it does to the
-anonymous sea decor, is `specs/engine-invariants.md`'s.
+anonymous sea decor, is `handbook/specs/engine-invariants.md`'s.
 
 ---
 
-*Companion to `specs/ui-design.md` (the site's look around the chart), `specs/engine-invariants.md`
-(the world the chart draws), `specs/rulebook.md` (what a change to the dress costs), and
-`specs/explorer-doctrine.md` (the living chart the dress is worn on).*
+*Companion to `handbook/specs/ui-design.md` (the site's look around the chart), `handbook/specs/engine-invariants.md`
+(the world the chart draws), `handbook/specs/rulebook.md` (what a change to the dress costs), and
+`handbook/specs/explorer-doctrine.md` (the living chart the dress is worn on).*

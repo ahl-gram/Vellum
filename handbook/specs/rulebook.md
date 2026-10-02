@@ -3,7 +3,7 @@
 **This is the rulebook, not the task list.** It holds the durable sequencing rules, invariants,
 working agreements and rationale that a task board has no field for. How a design decision gets
 made before any of it is scheduled, and how a rule is written down once made, are
-`specs/conventions.md`'s.
+`handbook/specs/conventions.md`'s.
 
 It replaces the body of issue #193, which is now a pointer to this file.
 
@@ -13,13 +13,13 @@ Five other places carry what this one deliberately does not:
   backlog of record: what is open, its status, its phase, its order.
 - **`CLAUDE.md`** holds process at the keyboard: feature to branch to PR, Alex merges, test first,
   no em-dashes, measure before you assert, and what each subagent is for.
-- **`specs/development-workflow.md`** holds the order those steps happen in, from a filed issue to a
+- **`handbook/specs/development-workflow.md`** holds the order those steps happen in, from a filed issue to a
   pull request, and which subagent runs at which point in it.
 - **`.claude/skills/vellum-footguns/references/flake-record.md`** holds every CI red believed to be a
   flake, one row per failure, with the run id, the payload and what was done about it.
 - **`RESUME-HERE.md`** (local, per-session, gitignored) is the hot pointer to where we are right now.
 
-Its siblings under `specs/` hold what this file is not about: `conventions.md` how a design decision
+Its siblings under `handbook/specs/` hold what this file is not about: `conventions.md` how a design decision
 is made and how a rule is written down (where it lives, the voice, the citation form, the comment
 sweep), `ui-design.md` the look and feel itself (the ground, the case, the palette, the rooms, the
 voice, motion and ceremony), `chart-dress.md` how a chart itself is dressed, `cascade-traps.md` what
@@ -37,7 +37,7 @@ wait is written and what the harness environment does.
 **This file is normative and complete on the rules it owns.** A reader who reads only this file is
 correctly informed about them. That property is the whole point, and it is worth what it costs to
 keep. Where a sibling spec is the normative home, this file POINTS at it by name and section rather
-than carrying a second copy, which is the routing rule (`specs/conventions.md`) applied to this file
+than carrying a second copy, which is the routing rule (`handbook/specs/conventions.md`) applied to this file
 itself.
 
 **Where this file and `CLAUDE.md` overlap, this file wins**, and the overlap is now small and known:
@@ -51,7 +51,7 @@ a pull request like any other tracked change. It may additionally leave a dated 
 the change came from, as an audit trail. It must never live only in a comment somewhere.
 
 **Where a rule lives, how a spec is written, how code is cited and how a comment sweep is proven
-are `specs/conventions.md`'s**, together with how a design decision is made and the fidelity rule
+are `handbook/specs/conventions.md`'s**, together with how a design decision is made and the fidelity rule
 for building to one. This file keeps the rules it owns and points there for the conventions
 behind them.
 
@@ -83,7 +83,7 @@ page of the Print Room (#521). The rule stands for everything else.
 ## How a design decision is made
 
 **The six steps, the fidelity rule for building to a ruled still, and what a design round owes are
-`specs/conventions.md`'s.**
+`handbook/specs/conventions.md`'s.**
 
 ## The cost axis and ordering principle
 
@@ -265,7 +265,7 @@ comment. This is a convenience index, not their home.
 - **Verso (#116, #174):** `#status` must be empty at rest, because the draw settle and e2e
   `waitSettled` both key on it. The back face's own rules (the ghost and its overlay from one draw,
   the overlay static and never live, one ghost object URL minted and revoked per redraw) are
-  `specs/explorer-doctrine.md`'s, under the overlay lifecycle.
+  `handbook/specs/explorer-doctrine.md`'s, under the overlay lifecycle.
 - **Realm labels (#145):** `realm-label-placement.ts` stage 1 stays first and unchanged, or the
   golden-free property dies. The dead `blob.length < 60` gate was removed after measuring that 0 of
   173 realms hit it, which is what lets "always named" survive #113.
@@ -289,7 +289,7 @@ comment. This is a convenience index, not their home.
   that world-sourced geometry is quantized to three decimals before hashing, far above the
   cross-platform drift and far below any real composition change.
 - **Borders (#158):** the border attribute-order invariant is commented at its line; keep it.
-- **The comment citation convention** is `specs/conventions.md`'s, under how code is cited.
+- **The comment citation convention** is `handbook/specs/conventions.md`'s, under how code is cited.
 - **A parameter property is refused by the type check, not by Node.** Node's type stripping accepts
   no enums, no namespaces and no parameter properties, but here `erasableSyntaxOnly` in
   `tsconfig.json` means `npm run check` rejects one before Node is ever involved. Read a red about it
@@ -340,7 +340,7 @@ or a real check.
 
 ## The comment sweep
 
-**How a sweep is run and proven is `specs/conventions.md`'s**, beside the citation convention it
+**How a sweep is run and proven is `handbook/specs/conventions.md`'s**, beside the citation convention it
 checks against.
 
 ## Retired rules, do not resurrect
@@ -348,7 +348,7 @@ checks against.
 - **The nav-tax gotcha is retired.** The shared `BaseLayout` owns nav, footer and meta; adding a
   READING page is one `.astro` file plus one `src/layouts/nav.ts` entry. That prices the reading-page
   kind only; a working page that mounts a bundle owes a good deal more, and
-  `specs/site-architecture.md` writes both kinds out. The flat versus
+  `handbook/specs/site-architecture.md` writes both kinds out. The flat versus
   grouped question was ratified FLAT in #202's decision doc, modeled once as typed data, to be
   revisited only on a named trigger: an eighth nav-listed surface scheduled, three or more wrapped
   lines at 360px, or any item acquiring children.
@@ -364,14 +364,14 @@ checks against.
 ---
 
 *Companion to the roadmap Project (status, order, phase), to `CLAUDE.md` (process at the keyboard),
-to `specs/conventions.md` (how a design decision is made, and how a rule is written down), to
-`specs/ui-design.md` (the look and feel), to `specs/chart-dress.md` (how a chart itself is dressed),
-to `specs/cascade-traps.md` (how the cascade breaks here), to `specs/engine-invariants.md` (what
-the generator guarantees), to `specs/explorer-doctrine.md` (the living chart, its camera and its
+to `handbook/specs/conventions.md` (how a design decision is made, and how a rule is written down), to
+`handbook/specs/ui-design.md` (the look and feel), to `handbook/specs/chart-dress.md` (how a chart itself is dressed),
+to `handbook/specs/cascade-traps.md` (how the cascade breaks here), to `handbook/specs/engine-invariants.md` (what
+the generator guarantees), to `handbook/specs/explorer-doctrine.md` (the living chart, its camera and its
 overlays), to
-`specs/region-and-voyage.md` (region sheets, level of detail, the voyage), to
-`specs/site-architecture.md` (how the site is authored and shipped), to
-`specs/development-workflow.md` (the order of operations), to `specs/settle-doctrine.md` (how an e2e
+`handbook/specs/region-and-voyage.md` (region sheets, level of detail, the voyage), to
+`handbook/specs/site-architecture.md` (how the site is authored and shipped), to
+`handbook/specs/development-workflow.md` (the order of operations), to `handbook/specs/settle-doctrine.md` (how an e2e
 wait is written, and what the harness environment does), and to the flake record at
 `.claude/skills/vellum-footguns/references/flake-record.md` (the CI reds believed to be flakes).
 Rules change rarely; when one does, edit the spec that owns it, this file for the rules here.*

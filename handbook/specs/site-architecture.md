@@ -8,11 +8,11 @@ way, how the site is discovered, and how it reaches the reader.
 It carries rules that bind future work. A detail that applies to exactly one piece of code stays in
 that code beside its test.
 
-Its siblings hold what this file deliberately does not: `specs/ui-design.md` how any of it looks,
-and `specs/cascade-traps.md` what the browser does to a declaration that reads as correct;
-`specs/rulebook.md` the golden, the committed set, the regen and the
-order of work; `specs/explorer-doctrine.md` and `specs/region-and-voyage.md` what an app surface
-draws once it is mounted; `specs/settle-doctrine.md` how a wait on it is written; and
+Its siblings hold what this file deliberately does not: `handbook/specs/ui-design.md` how any of it looks,
+and `handbook/specs/cascade-traps.md` what the browser does to a declaration that reads as correct;
+`handbook/specs/rulebook.md` the golden, the committed set, the regen and the
+order of work; `handbook/specs/explorer-doctrine.md` and `handbook/specs/region-and-voyage.md` what an app surface
+draws once it is mounted; `handbook/specs/settle-doctrine.md` how a wait on it is written; and
 `.claude/skills/vellum-footguns/SKILL.md` the imperatives keyed to the moment of typing. Where this
 file and the rulebook disagree about a rule, the rulebook wins, with ONE known exception: the
 rulebook's retired-rules line that a page is one `.astro` file plus one nav entry describes a
@@ -80,7 +80,7 @@ symbol and path so the reader goes and looks.
   the last word on its own layout. An `extraCss` href is validated at render and THROWS unless it is
   root-absolute. The layout's inline `<style>` renders after the page sheet's link, which is why a
   page override of a shell rule needs higher specificity; that trap belongs to
-  `specs/cascade-traps.md` and is not restated here.
+  `handbook/specs/cascade-traps.md` and is not restated here.
 - **Authored CSS hides in more places than `public/`.** A sweep written against `public/` alone
   misses every source in `src/` and passes. **The repo keeps its own roster of those**,
   `SRC_CSS_FILES` in `test-support/site-sheets.ts`, including a page that carries its own style
@@ -206,12 +206,12 @@ other way, which is what earns them a section of their own.
   a second copy beside it.
 - **Why a page pauses before navigating is usually bandwidth.** A click's html request queues behind
   still-streaming plate bytes, which is what the reserved frames and the low fetch priority for
-  below-the-fold plates in `specs/rulebook.md` are for. That rule lives there; this line is only the
+  below-the-fold plates in `handbook/specs/rulebook.md` are for. That rule lives there; this line is only the
   diagnosis, so the next session stops looking for slow rendering.
 
 ## Tokens outside the palette join
 
-`specs/ui-design.md` states the join for colours and states no exception. The exception is here,
+`handbook/specs/ui-design.md` states the join for colours and states no exception. The exception is here,
 precisely, because a token that falls outside it looks identical at the point of use.
 
 - **A colour goes in BOTH places, which is `ui-design.md`'s own wording**: declared once in
@@ -279,8 +279,8 @@ precisely, because a token that falls outside it looks identical at the point of
 
 ---
 
-*Companion to `specs/ui-design.md` (how it looks), `specs/cascade-traps.md` (how the cascade breaks
-here), `specs/rulebook.md` (the golden, the committed
-set, the order of work), `specs/explorer-doctrine.md` and `specs/region-and-voyage.md` (what a
-mounted surface draws), `specs/settle-doctrine.md` (how a wait on it is written), and
-`specs/development-workflow.md` (the order a change moves through).*
+*Companion to `handbook/specs/ui-design.md` (how it looks), `handbook/specs/cascade-traps.md` (how the cascade breaks
+here), `handbook/specs/rulebook.md` (the golden, the committed
+set, the order of work), `handbook/specs/explorer-doctrine.md` and `handbook/specs/region-and-voyage.md` (what a
+mounted surface draws), `handbook/specs/settle-doctrine.md` (how a wait on it is written), and
+`handbook/specs/development-workflow.md` (the order a change moves through).*

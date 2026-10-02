@@ -4,10 +4,10 @@ This directory holds the findings a pull request could not fix and did not deser
 
 | file | rows for |
 |---|---|
-| `errata/engine.md` | what the generator and the renderer put on a sheet |
-| `errata/site.md` | what a visitor meets: the rooms, the charts as shown, the cards, contrast, gesture, print |
-| `errata/guards.md` | what the tests, the e2e suites, CI, the hooks and the linter do not yet cover or prove |
-| `errata/prose.md` | the specs, the code comments, the agent definitions, the page copy |
+| `handbook/errata/engine.md` | what the generator and the renderer put on a sheet |
+| `handbook/errata/site.md` | what a visitor meets: the rooms, the charts as shown, the cards, contrast, gesture, print |
+| `handbook/errata/guards.md` | what the tests, the e2e suites, CI, the hooks and the linter do not yet cover or prove |
+| `handbook/errata/prose.md` | the specs, the code comments, the agent definitions, the page copy |
 
 **A review finding has exactly three exits: it is fixed in the pull request, it is filed as an issue, or it joins this ledger as a row.** A finding left as prose in a PR body alone is a defect in the PR. The one exception is the fold: a finding the PR fixes because it caused it (an accessibility failure of its own making) or because Alex ruled the batch folded.
 
@@ -31,6 +31,6 @@ Write `Issue #N` and `PR #N`, never a bare number; no em-dash; one physical line
 
 ## Where this sits in the house
 
-`errata/` is an archive at the repo root on `design/`'s and `plans/`'s pattern: not a spec, not required reading, outside the roots `test/repo/prose-paths.test.ts` walks, so a row may name a path that later moves and the history does not red. The rule that sends a finding here is `vellum-footguns` Gate 5 item 7 and `specs/development-workflow.md` step 15. The pointer on the roadmap is the issue titled "Errata: the ledger", whose comments carry the rulings.
+`handbook/errata/` is an archive, on `design/`'s and `handbook/plans/`'s pattern: not a spec, not required reading, outside the roots `test/repo/prose-paths.test.ts` walks, so a row may name a path that later moves and the history does not red. The rule that sends a finding here is `vellum-footguns` Gate 5 item 7 and `handbook/specs/development-workflow.md` step 15. The pointer on the roadmap is the issue titled "Errata: the ledger", whose comments carry the rulings.
 
 The ledger was seeded on 2026-09-20 from a read of every merged pull request to that date (306 of them, 192 carrying findings that were left); rows from before PR #577, when the PR template gained a named slot for what was left, are best effort, since those PRs recorded the leavings under whatever word the author chose.

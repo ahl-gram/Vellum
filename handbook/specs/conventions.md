@@ -6,9 +6,9 @@ is cited in prose and in a comment, and how a comment sweep is run and proven. R
 starting a design round or building to ruled stills, before adding or moving a rule, before
 editing a spec, and before writing, citing or sweeping a comment.
 
-The rules themselves live elsewhere. `specs/rulebook.md` holds the sequencing rules, the golden
+The rules themselves live elsewhere. `handbook/specs/rulebook.md` holds the sequencing rules, the golden
 and the order of work, and where it and this file disagree about a rule of the product, it wins.
-`specs/development-workflow.md` holds the order of operations from a filed issue to a pull
+`handbook/specs/development-workflow.md` holds the order of operations from a filed issue to a pull
 request. `CLAUDE.md` holds process at the keyboard, including its copy of the comment doctrine,
 whose binding statement is the rulebook's and which this file's last section says how to enforce.
 `.claude/skills/vellum-footguns/SKILL.md` holds the gates keyed to the moment of typing, and its
@@ -49,7 +49,7 @@ content only, in its own pull request. That archive is the visual spec; these sp
 ledgers are the words.
 
 **A sitting held at the workflow's STOP is not a round, and owes no archive.** Where
-`specs/development-workflow.md` step 6 renders candidates so a fix can be ruled from pictures rather
+`handbook/specs/development-workflow.md` step 6 renders candidates so a fix can be ruled from pictures rather
 than from prose, the stills go with the session (Alex, 2026-09-19); that step says where they live
 while it lasts. Nothing visual survives such a sitting, so the fidelity rule below has no archived
 still to hold a build to, and the ruling's words carry it alone.
@@ -90,7 +90,7 @@ option, his sentence is the ruling.
 ## Where a rule lives
 
 **Where a rule lives: the routing rule.** Anything Vellum-specific AND normative AND slow-changing is
-a spec under `specs/`. An imperative keyed to the moment of typing a particular kind of line is a
+a spec under `handbook/specs/`. An imperative keyed to the moment of typing a particular kind of line is a
 `vellum-footguns` gate. An incident whose value is proving that a gate bites is a row in that skill's
 `.claude/skills/vellum-footguns/references/scars.md`. A gate candidate declined under the strict
 filter (a line joins a gate only with its own incident number or a ruling of Alex's) is a row in
@@ -108,9 +108,9 @@ not by itself a reason to delete the comment. What the routing rule forbids is a
 home: another spec, or a gate re-explaining the contract rather than pointing at it.
 
 **A new spec file joins its reading lists by hand, and none of them checks itself**: the table in
-`CLAUDE.md`, step 3 of `specs/development-workflow.md`, the reading list in
+`CLAUDE.md`, step 3 of `handbook/specs/development-workflow.md`, the reading list in
 `.claude/agents/vellum-implementer.md`, and the sibling paragraph and companion footer of
-`specs/rulebook.md`. The other specs name only the siblings they lean on, so a new file joins those
+`handbook/specs/rulebook.md`. The other specs name only the siblings they lean on, so a new file joins those
 where a citation of its parent pointed into the text it took.
 
 ## How a spec, and the rest of the house's prose, is written
@@ -158,7 +158,7 @@ exactly when a citation should fail, while a line number drifts silently onto un
 the FULL repo-relative path even for a sibling in the same directory, because basenames repeat
 under `src/` and the ambiguity is day one rather than drift.
 `test/repo/comment-citations.test.ts` enforces it **for code comments only**: it reads `.ts` and
-`.mjs` under the code roots plus `.css` under `public/`, and reaches neither `specs/` nor
+`.mjs` under the code roots plus `.css` under `public/`, and reaches neither `handbook/specs/` nor
 `.claude/`, so of a citation written in prose like this one only the PATH half is checked, by
 `test/repo/prose-paths.test.ts`, and the symbol half by hand or not at all. These
 behaviours of the comment guard are deliberate rather
@@ -170,7 +170,7 @@ wrapped around it, which stays the business of the invariant at the line that br
 
 ## The comment sweep
 
-A sweep deletes comments the comment doctrine (`specs/rulebook.md`, under the durable engineering
+A sweep deletes comments the comment doctrine (`handbook/specs/rulebook.md`, under the durable engineering
 constraints) says are not owed. It is a mechanical change with a non-mechanical failure mode, so it
 is run and PROVEN in a particular way.
 
@@ -209,9 +209,9 @@ is run and PROVEN in a particular way.
 
 ---
 
-*Companion to `specs/rulebook.md` (the rules this file says how to write down, and the comment
-doctrine's binding statement), `specs/development-workflow.md` (the order of operations),
-`CLAUDE.md` (process at the keyboard), `specs/ui-design.md` (the look a design decision decides),
+*Companion to `handbook/specs/rulebook.md` (the rules this file says how to write down, and the comment
+doctrine's binding statement), `handbook/specs/development-workflow.md` (the order of operations),
+`CLAUDE.md` (process at the keyboard), `handbook/specs/ui-design.md` (the look a design decision decides),
 and the footguns skill's dated records beside its gates,
 `.claude/skills/vellum-footguns/references/scars.md`,
 `.claude/skills/vellum-footguns/references/flake-record.md` and

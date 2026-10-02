@@ -103,7 +103,7 @@ left open and the session failed to write down).
 ## Once, and expensive
 
 - #546: `cleanup()` called the promise `rm` unawaited; 446 leaked profiles, 20GB, two hours; the
-  tell is a lane that STALLS rather than fails. Now in `specs/settle-doctrine.md` under "The
+  tell is a lane that STALLS rather than fails. Now in `handbook/specs/settle-doctrine.md` under "The
   environment".
 - #548: three of six sweep agents stopped before their ledger; the keeper scan found eleven
   stylesheet invariants; `ts.createScanner` reported 11 false drifts, only the full parser compares.
