@@ -310,6 +310,14 @@ the code rather than add one. Where the code cannot be fixed, put the skip to Al
 that adds it adds its entry here, and the one that removes it removes the entry. A marker stays at
 its line exactly as written, with no reason beside it: the reason is the entry.
 
+**`test/repo/ts-comment-form.test.ts` holds the tree to this list.** It reads every inline directive
+in the linted tree through ESLint's own parser, the rule-off form included, and reds on a skip no
+entry names and on an entry no skip answers. It reads an entry's bold lead only: the FIRST
+backticked token there is the rule, and every backticked path there is a file it is skipped in, so
+write a new entry in that shape. It matches an entry by file and rule, never by line or form, so it
+cannot tell an accepted line skip from the same rule switched off for the whole file; hold that
+line yourself. A type-check skip passes only where the "Not skips" line below names it.
+
 - **`no-implied-eval` on the `new Function(...)` call in `runPlateScript`
   (`test/atlas/document.test.ts`).** The atlas's linking script reaches the test as text inside the
   generated page, and a string-built function is the one way to run it under stubs outside a
