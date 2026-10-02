@@ -64,7 +64,7 @@ test("the self-hosted woff2 files and their OFL license live in design/kit/fonts
   const ofl = readFileSync(root("design/kit/fonts/OFL.txt"), "utf8");
   assert.match(ofl, /Open Font License/, "design/kit/fonts/OFL.txt should carry the OFL text");
   assert.equal(relative(root(""), KIT_FONTS), join("design", "kit", "fonts"), "every reader of the faces takes this path");
-  // 2026-10-02: git ls-files over the whole tree answers in well under a second; thirty seconds is a cap on a hang.
+  // 2026-10-02: this git ls-files answers in under 10 ms on a Mac; thirty seconds is a cap on a hang, not a budget.
   const tracked = spawnSync("git", ["ls-files", "--", "public/fonts"], { cwd: root(""), encoding: "utf8", timeout: 30_000 });
   assert.equal(tracked.status, 0, `git ls-files failed: ${tracked.stderr}`);
   assert.equal(tracked.stdout, "", "public/fonts/ is generated from the kit, so git tracks nothing there");

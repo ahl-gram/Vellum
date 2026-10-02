@@ -1,10 +1,9 @@
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 import * as fontkit from "fontkit";
 import type { GlyphOutline } from "../src/render/favicon.ts";
+import { KIT_FONTS } from "./kit-fonts.ts";
 
-export const FELL_SC_WOFF2 = fileURLToPath(
-  new URL("../public/fonts/im-fell-english-sc-latin-400-normal.woff2", import.meta.url),
-);
+export const FELL_SC_WOFF2 = join(KIT_FONTS, "im-fell-english-sc-latin-400-normal.woff2");
 export const SMALL_CAP_V = 0x76;
 
 export type FontGlyph = GlyphOutline & {

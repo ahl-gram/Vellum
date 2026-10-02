@@ -32,6 +32,8 @@ public/specimen/app.bundle.js
 public/app.bundle.js
 public/atlas/
 public/gallery/
+# The house faces, copied in from design/kit/fonts/, their one tracked home (Issue #706).
+public/fonts/
 
 # The discovery files (#286), generated from NAV_ITEMS by the same step so they
 # cannot drift from the nav.

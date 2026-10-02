@@ -143,7 +143,7 @@ const codeIn = (paths: readonly string[]): string[] => paths.filter((p) => CODE.
 
 test("design/kit/ holds content and no code, since code there escapes npm run check and npm run lint and would be a second home for tools beside scripts/design/", () => {
   assert.deepEqual(codeIn(["design/kit/a.js", "design/kit/b.MJS", "design/kit/c.cjs", "design/kit/d.jsx", "design/kit/e.ts", "design/kit/f.mts", "design/kit/g.cts", "design/kit/h.tsx", "design/kit/fonts.css", "design/kit/fonts/x.woff2"]).length, 8);
-  // 2026-10-02: git ls-files over the whole tree runs in well under a second; thirty seconds is a cap on a hang.
+  // 2026-10-02: this git ls-files answers in under 10 ms on a Mac; thirty seconds is a cap on a hang, not a budget.
   const listing = spawnSync("git", ["ls-files", "-z", "--", "design/kit"], { cwd: REPO, encoding: "utf8", timeout: 30_000 });
   assert.equal(listing.status, 0, `git ls-files failed: ${listing.stderr}`);
   const kit = listing.stdout.split("\0").filter(Boolean);
