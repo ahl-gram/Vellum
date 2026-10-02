@@ -282,6 +282,8 @@ const SIZE_PROBES: [string, Payload, string[]][] = [
 ];
 
 const sizeChecks = async (report: (ok: boolean, line: string) => void): Promise<void> => {
+  const edited = SIZE_PROBES.map(([, payload]) => payload.tool_input?.file_path).filter((p): p is string => p !== undefined);
+  report(LONG_ROOT.length === 100 && edited.length > 0 && edited.every((p) => p.startsWith(`${LONG_ROOT}/`)), `the size probes' ${edited.length} edited paths sit under a root of ${LONG_ROOT.length} characters`);
   for (const [name, payload, needles] of SIZE_PROBES) {
     const sessionId = `selftest-size-${process.pid}-${name}`;
     const text = (await decide({ ...payload, session_id: sessionId }))?.hookSpecificOutput?.additionalContext ?? "";

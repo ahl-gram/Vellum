@@ -40,6 +40,7 @@ test("every gate-size probe passes at the 8,000-character limit", () => {
     ["a PR body from an unreadable file", "## Gate 5, could not read"],
     ["a shell line that writes a script, kills a browser, pushes and opens a PR", "## Gate 5, could not read, double the backslash, browser profile"],
   ];
+  assert.match(out, /^ok {3}the size probes' 7 edited paths sit under a root of 100 characters$/m, out);
   for (const [name, carries] of probes) {
     const row = out.split("\n").find((l) => l.startsWith(`ok   ${name}: the pasted note carries ${carries} in `));
     const size = /in (\d+) of 8000 characters$/.exec(row ?? "");
