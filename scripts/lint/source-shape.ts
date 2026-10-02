@@ -130,7 +130,7 @@ const readOf = (id: Node): Node | null => {
   if (VALUE_WRAPPERS.has(kind)) return id;
   if (kind.startsWith("TS") || BINDINGS.has(kind)) return null;
   if (parent.type === "MemberExpression") return parent.property === id && !parent.computed ? parent : id;
-  if (parent.type === "Property") return parent.parent.type === "ObjectExpression" && parent.value === id ? id : null;
+  if (parent.type === "Property") return parent.parent.type === "ObjectExpression" && (parent.value === id || (parent.computed && parent.key === id)) ? id : null;
   if ((parent.type === "VariableDeclarator" && parent.id === id) || (parent.type === "AssignmentPattern" && parent.left === id)) return null;
   return FUNCTIONS.has(kind) && (parent as unknown as { params: readonly unknown[] }).params.includes(id) ? null : id;
 };

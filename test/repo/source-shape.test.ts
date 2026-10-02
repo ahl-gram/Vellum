@@ -110,6 +110,8 @@ const CLEAN_READS = [
   "  const ctxBase = ctx.consoleErrors.length;",
   "  check(\"A4\", ctxBase >= 0);",
   "  const wrapped = (consoleErrors as string[]).length;",
+  "  const satisfied = (consoleErrors satisfies string[]).length;",
+  "  check(\"A6\", satisfied >= 0);",
   "  const shape = { consoleErrors: wrapped };",
   "  check(\"A5\", Object.keys(shape).length > 0);",
   "}",
@@ -127,6 +129,9 @@ const DIRTY_READS = [
   "  check(\"B5\", ctx[\"consoleErrors\"].length === 0);",
   "  check(\"B6\", (consoleErrors as string[]).length === 0);",
   "  check(\"B7\", consoleErrors!.length === 0);",
+  "  check(\"B8\", (consoleErrors satisfies string[]).length === 0);",
+  "  check(\"B9\", (<string[]>consoleErrors).length === 0);",
+  "  check(\"B10\", Object.keys({ [consoleErrors]: 1 }).length === 0);",
   "}",
 ];
 const OWNER_SHAPE = ["export const sink = (consoleErrors: string[]): void => { consoleErrors.push(\"x\"); };"];
@@ -134,7 +139,8 @@ const OWNER_SHAPE = ["export const sink = (consoleErrors: string[]): void => { c
 test("every read of the console accumulator outside its two owners goes through the shared drop, read across lines, through the context, or handed on", async () => {
   assert.deepEqual(await houseReports(CLEAN_READS, "e2e/suites/home.ts"), []);
   const offset = CLEAN_READS.length;
-  assert.deepEqual(await houseReports([...CLEAN_READS, ...DIRTY_READS], "e2e/suites/home.ts"), at(READS, [3, 4, 5, 7, 8, 9, 10].map((n) => n + offset)));
+  assert.deepEqual(await houseReports([...CLEAN_READS, ...DIRTY_READS], "e2e/suites/home.ts"), at(READS, [3, 4, 5, 7, 8, 9, 10, 11, 12, 13].map((n) => n + offset)));
+  assert.deepEqual(await houseReports(["import { consoleErrors } from \"../support/elsewhere.ts\";", "export { consoleErrors };"], "e2e/suites/home.ts"), [], "an import or export specifier binds the name and reads nothing");
   assert.deepEqual(await houseReports(OWNER_SHAPE, "e2e/suites/home.ts"), at(READS, [1]));
   for (const owner of ["e2e/run.ts", "e2e/harness.ts"]) assert.deepEqual(await houseReports(OWNER_SHAPE, owner), [], `${owner} creates or fills the accumulator, so its own shapes are not reads`);
 });
