@@ -75,7 +75,11 @@ test("a worker spawn in the site is the one static form the bundler reads, wrapp
     "export const computedKey = { [Worker]: 1 };",
     "export const called = () => Worker(1);",
     "export const short = { Worker };",
-  ], "src/site/explorer/worker-client.ts"), at(WORKER, [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40]));
+    "const k = \"Worker\"; export const viaKey = (u: URL) => new (globalThis as unknown as Record<string, new (u: URL) => object>)[k]!(u);",
+    "const { [\"SharedWorker\"]: S2 } = globalThis; export const destructured = (u: URL) => new S2(u);",
+    "export const mention = \"a Worker is spawned once, in worker-client\";",
+    "export type Name = \"Worker\" | \"SharedWorker\";",
+  ], "src/site/explorer/worker-client.ts"), at(WORKER, [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42]), "BLIND SPOTS, declared, each erring toward passing: the name assembled from pieces, or handed to eval or Reflect.get; and a TypeScript value position other than the four casts (an instantiation, an import alias, an export assignment, an enum member), each of which npm run check refuses first (TS2635, TS1294)");
 });
 
 test("a single-escaped regex class or dot in a backtick string reports in every chunk, an odd run of backslashes included, and String.raw is the remedy", async () => {
