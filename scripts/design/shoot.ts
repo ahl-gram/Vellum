@@ -31,7 +31,7 @@ export type Shot = {
 export type ShotResult = {
   readonly out: string;
   readonly url: string;
-  readonly viewport: { readonly innerWidth: number; readonly innerHeight: number };
+  readonly viewport: { readonly innerWidth: number; readonly innerHeight: number; readonly clientWidth: number };
   readonly probe: string | null;
   readonly http4xx: readonly string[];
   readonly consoleErrors: readonly string[];
@@ -117,10 +117,15 @@ const COMMIT_TRIES = 600;
 
 export const withoutHash = (href: string): string => href.split("#")[0]!;
 
-export function assertLaidOutAt(shot: Shot, innerWidth: number): void {
-  if (innerWidth !== shot.width) {
-    throw new Error(`${shot.out} laid out ${innerWidth}px wide, not the ${shot.width}px asked for; under phone emulation a page with no viewport meta tag lays out 980px wide`);
+export function assertLaidOutAt(shot: Shot, layoutWidth: number): void {
+  if (layoutWidth !== shot.width) {
+    throw new Error(`${shot.out} laid out ${layoutWidth}px wide, not the ${shot.width}px asked for; under phone emulation a page with no viewport meta tag lays out 980px wide`);
   }
+}
+
+export function assertPageServed(shot: Shot, href: string, responses: readonly string[]): void {
+  const missing = responses.find((r) => withoutHash(r.slice(r.indexOf(" ") + 1)) === withoutHash(href));
+  if (missing !== undefined) throw new Error(`${shot.out} would photograph an error page: the page itself answered ${missing}`);
 }
 
 export const withoutFavicon = (responses: readonly string[]): string[] => responses.filter((u) => !/favicon/i.test(u));
@@ -142,17 +147,18 @@ async function takeShot(ctx: SuiteContext, shot: Shot, port: number): Promise<Sh
   await ctx.send("Page.navigate", { url: "about:blank" });
   await ctx.send("Page.navigate", { url });
   await committed(ctx, url);
+  assertPageServed(shot, url, ctx.http4xx.slice(httpBase));
   await ctx.sleep(shot.waitMs ?? DEFAULT_WAIT_MS);
   if (shot.script !== undefined) {
     await ctx.evaluate(shot.script, true);
     await ctx.sleep(shot.scriptWaitMs ?? DEFAULT_SCRIPT_WAIT_MS);
   }
+  const viewport = await ctx.evaluate<{ innerWidth: number; innerHeight: number; clientWidth: number }>("({ innerWidth, innerHeight, clientWidth: document.documentElement.clientWidth })");
+  assertLaidOutAt(shot, viewport.clientWidth);
   const documentHeight = await ctx.evaluate<number>("Math.ceil(document.documentElement.scrollHeight)");
   const png = await ctx.send<{ data: string }>("Page.captureScreenshot", captureParams(shot, documentHeight));
   mkdirSync(dirname(resolve(shot.out)), { recursive: true });
   writeFileSync(resolve(shot.out), Buffer.from(png.data, "base64"));
-  const viewport = await ctx.evaluate<{ innerWidth: number; innerHeight: number }>("({ innerWidth, innerHeight })");
-  assertLaidOutAt(shot, viewport.innerWidth);
   const probe = shot.probe === undefined ? null : readProbe(await ctx.evaluate<unknown>(shot.probe, true), shot.out);
   const http4xx = withoutFavicon(ctx.http4xx.slice(httpBase));
   return { out: shot.out, url, viewport, probe, http4xx, consoleErrors: dropExpectedCancellations(ctx.consoleErrors.slice(errBase)) };
@@ -180,19 +186,32 @@ export async function shootAll(shots: readonly Shot[], options: ShootOptions = {
   }
 }
 
-function flag(args: readonly string[], name: string): string | undefined {
-  const at = args.indexOf(name);
-  return at === -1 ? undefined : args[at + 1];
+export type ShootArgs = { readonly list: string; readonly site: string | undefined; readonly reducedMotion: boolean };
+
+export function parseShootArgs(args: readonly string[]): ShootArgs {
+  const usage = "usage: node scripts/design/shoot.ts <shots.json> [--site <dir>] [--reduced-motion]";
+  const positional: string[] = [];
+  let site: string | undefined, reducedMotion = false;
+  for (let i = 0; i < args.length; i++) {
+    const a = args[i]!;
+    if (a === "--reduced-motion") reducedMotion = true;
+    else if (a === "--site" && site === undefined && args[i + 1] !== undefined && !args[i + 1]!.startsWith("--")) site = args[++i];
+    else if (a.startsWith("--")) throw new Error(`${usage}; ${a} is not one of its flags`);
+    else positional.push(a);
+  }
+  if (positional.length !== 1) throw new Error(usage);
+  return { list: positional[0]!, site, reducedMotion };
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const args = process.argv.slice(2);
-  const list = args[0];
-  if (list === undefined) {
-    console.error("usage: node scripts/design/shoot.ts <shots.json> [--site <dir>] [--reduced-motion]");
+  let args: ShootArgs;
+  try {
+    args = parseShootArgs(process.argv.slice(2));
+  } catch (err) {
+    console.error(err instanceof Error ? err.message : err);
     process.exit(2);
   }
-  shootAll(parseShots(JSON.parse(readFileSync(list, "utf8"))), { site: flag(args, "--site"), reducedMotion: args.includes("--reduced-motion") })
+  shootAll(parseShots(JSON.parse(readFileSync(args.list, "utf8"))), { site: args.site, reducedMotion: args.reducedMotion })
     .then((results) => console.log(JSON.stringify(results, null, 1)))
     .catch((err: unknown) => {
       console.error(err instanceof Error ? err.message : err);

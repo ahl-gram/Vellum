@@ -152,7 +152,8 @@ section points there rather than restating it.
 - **Two builds are compared by the sweep, row by row, against two runs of the unchanged build.**
   `node scripts/design/oracle.ts <dist> <out> [label]` shoots every page of a built site at 1280x800
   and at a true 390x844 phone: a page that runs a live chart app as its head box, the Specimen Book
-  as one screen, every other page whole, with motion reduced unless `--motion` is passed. Shoot the
+  as one screen, every other page whole down to 16000px, with motion reduced unless `--motion` is
+  passed; below that cap only the page height the probe records is compared. Shoot the
   unchanged build twice and the branch once, all on one date, since the Seed of the Day's head box
   carries it, then run `node scripts/design/compare.ts <control-a> <control-b> <branch>`. A row
   whose two control shots differ is UNTRUSTED and is not compared, because a page can disagree with
@@ -162,8 +163,9 @@ section points there rather than restating it.
   `-fuzz 1%` and the bounding box of a trimmed diff. Reduced motion is the control
   `handbook/specs/ui-design.md` names for the compositor's text antialiasing, and it does not settle
   every page, which is why trust is per row; with it on, the first-visit arrival is never
-  photographed. Two shots of different sizes are a difference whatever AE says, since ImageMagick
-  scores the extra rows against the smaller image's edge. A full-page capture (`captureBeyondViewport`)
+  photographed. Two shots of different sizes, or whose probes recorded different layouts, are a
+  difference whatever AE says, since ImageMagick scores the extra rows against the smaller image's
+  edge. A full-page capture (`captureBeyondViewport`)
   is for a scrolling page alone, for three reasons: it drops a chart room's bottom-left fixed
   furniture; it lays the page out at its document height, not at the viewport a visitor sees; and
   it CHANGES the page it photographs, so it is taken once per page and a page is never polled that

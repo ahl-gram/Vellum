@@ -1,4 +1,4 @@
-import { mkdirSync, readdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { BUNDLE_ENTRIES } from "../build-app-bundles.ts";
@@ -64,6 +64,7 @@ type ManifestRow = { readonly name: string; readonly route: string; readonly w: 
 async function sweep(dist: string, out: string, options: { readonly label?: string | undefined; readonly reducedMotion: boolean }): Promise<ManifestRow[]> {
   const plan = planSweep(routesOf(resolve(dist)), out);
   mkdirSync(out, { recursive: true });
+  rmSync(join(out, "manifest.json"), { force: true });
   const results = await shootAll(plan, { site: dist, reducedMotion: options.reducedMotion });
   const rows = plan.map((s, i) => {
     const r = results[i]!;

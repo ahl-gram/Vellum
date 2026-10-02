@@ -4,9 +4,9 @@ import { spawnSync } from "node:child_process";
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, extname, join, resolve } from "node:path";
 import vm from "node:vm";
-import { assertLaidOutAt, captureParams, FULL_PAGE_CAP, parseShots, readProbe, servedUrl, withoutFavicon, withoutHash, type Shot } from "../../scripts/design/shoot.ts";
+import { assertLaidOutAt, assertPageServed, captureParams, FULL_PAGE_CAP, parseShootArgs, parseShots, readProbe, servedUrl, withoutFavicon, withoutHash, type Shot } from "../../scripts/design/shoot.ts";
 import { BAND, modeOf, parseSweepArgs, PIN, planSweep, PROBE, routesOf } from "../../scripts/design/oracle.ts";
-import { aeOf, compareRows, failed, measureIn, sizedAe, verdictOf, type Row } from "../../scripts/design/compare.ts";
+import { aeOf, compareRows, failed, measureIn, parseCompareArgs, sizedAe, verdictOf, type Row } from "../../scripts/design/compare.ts";
 import { stillArgs } from "../../scripts/design/stills.ts";
 
 const REPO = resolve(import.meta.dirname, "..", "..");
@@ -73,6 +73,23 @@ test("a shot that did not lay out at the width it asked for stops the run, since
   assert.doesNotThrow(() => assertLaidOutAt(shot({ width: 390, height: 844, mobile: true }), 390));
   assert.throws(() => assertLaidOutAt(shot({ width: 390, height: 844, mobile: true, out: "out/kit.png" }), 980), /out\/kit\.png laid out 980px wide, not the 390px/);
   assert.throws(() => assertLaidOutAt(shot({ width: 390, height: 844, mobile: true }), 320), /laid out 320px wide/, "narrower is another viewport too");
+});
+
+test("a shot of a page that answered with an error stops the run, and a missing resource on a served page does not", () => {
+  const faq = "http://127.0.0.1:8123/faq/";
+  assert.throws(() => assertPageServed(shot({ out: "out/faq.png" }), faq, ["404 http://127.0.0.1:8123/faq/"]), /out\/faq\.png would photograph an error page: the page itself answered 404/);
+  assert.throws(() => assertPageServed(shot(), `${faq}#seed=1`, ["404 http://127.0.0.1:8123/faq/"]), /error page/);
+  assert.doesNotThrow(() => assertPageServed(shot(), faq, ["404 http://127.0.0.1:8123/fonts/x.woff2", "404 http://127.0.0.1:8123/faq/other/"]));
+});
+
+test("the camera takes one list of shots, a site and the reduced-motion switch, and refuses anything else by name", () => {
+  assert.deepEqual(parseShootArgs(["shots.json"]), { list: "shots.json", site: undefined, reducedMotion: false });
+  assert.deepEqual(parseShootArgs(["--site", "dist", "shots.json", "--reduced-motion"]), { list: "shots.json", site: "dist", reducedMotion: true });
+  assert.throws(() => parseShootArgs(["shots.json", "--reduce-motion"]), /--reduce-motion is not one of its flags/);
+  assert.throws(() => parseShootArgs(["shots.json", "--motion"]), /--motion is not one of its flags/, "the sweep's flag means the opposite here");
+  assert.throws(() => parseShootArgs(["shots.json", "--site", "--reduced-motion"]), /not one of its flags/, "a flag is not a site");
+  assert.throws(() => parseShootArgs(["shots.json", "more.json"]), /usage/);
+  assert.throws(() => parseShootArgs([]), /usage/);
 });
 
 test("a shot's missing resources are recorded, the browser's own favicon request aside, as e2e N2 reads them", () => {
@@ -197,6 +214,28 @@ test("a row carries the branch shot's own missing resources and console errors, 
     ["a.png", [], "same"],
     ["b.png", ["404 http://127.0.0.1/fonts/x.woff2", "console.error: y"], "errors"],
   ]);
+});
+
+test("a page laid out differently is a difference however its pixels compare, past the 16000px cap included, and a new page with errors fails", () => {
+  const at = (name: string, sh: number) => ({ name, probe: JSON.stringify({ cw: 390, sw: 390, sh }) });
+  const measured: string[] = [];
+  const rows = compareRows([[at("glossary-390.png", 22073), at("flip.png", 900)], [at("glossary-390.png", 22073), at("flip.png", 920)], [at("glossary-390.png", 22100), at("flip.png", 900)]], (from, to, name) => (measured.push(`${from}${to} ${name}`), 0));
+  assert.deepEqual(rows.map((r) => [r.name, r.control, r.branch, verdictOf(r)]), [
+    ["flip.png", Number.POSITIVE_INFINITY, null, "untrusted"],
+    ["glossary-390.png", 0, Number.POSITIVE_INFINITY, "differs"],
+  ]);
+  assert.deepEqual(measured, ["01 glossary-390.png"], "a pair whose layouts differ is never measured");
+  const newWithError = { name: "a.png", present: [false, false, true] as const, control: null, branch: null, errors: ["404 http://127.0.0.1:8123/fonts/x.woff2"] };
+  assert.equal(verdictOf(newWithError), "errors", "a page with nothing to compare against can still carry a missing face");
+  assert.equal(failed([row({}), newWithError]), true);
+});
+
+test("the compare takes three sweeps, two of them distinct controls, and refuses anything else", () => {
+  assert.deepEqual(parseCompareArgs(["out/a", "out/b", "out/br"]), ["out/a", "out/b", "out/br"]);
+  assert.throws(() => parseCompareArgs(["out/a", "out/b", "out/br", "out/c"]), /usage/);
+  assert.throws(() => parseCompareArgs(["out/a", "out/b", "out/br", "--fuzz"]), /usage/);
+  assert.throws(() => parseCompareArgs(["out/a", "out/b"]), /usage/);
+  assert.throws(() => parseCompareArgs(["out/a", "out/a/", "out/br"]), /both controls/);
 });
 
 test("the controls and the branch are measured as the files in their own directories", () => {

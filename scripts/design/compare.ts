@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 /** Compares a branch's sweep against two sweeps of the unchanged build, row by row, trusting a row only where the unchanged build matched itself; the method is `handbook/specs/settle-doctrine.md`'s. */
@@ -26,10 +26,10 @@ export function aeOf(stderr: string): number {
 
 export function verdictOf(row: Row): Verdict {
   const [a, b, branch] = row.present;
+  if (branch && row.errors.length > 0) return "errors";
   if (!a && !b) return "new";
   if (a !== b) return "missing";
   if (!branch) return "gone";
-  if (row.errors.length > 0) return "errors";
   if (row.control !== 0) return "untrusted";
   return row.branch === 0 ? "same" : "differs";
 }
@@ -62,22 +62,37 @@ function ae(a: string, b: string): number {
   });
 }
 
-export type ManifestEntry = { readonly name: string; readonly http4xx?: readonly string[]; readonly consoleErrors?: readonly string[] };
+export type ManifestEntry = {
+  readonly name: string;
+  readonly probe?: string | null;
+  readonly http4xx?: readonly string[];
+  readonly consoleErrors?: readonly string[];
+};
 export type Manifests = readonly [readonly ManifestEntry[], readonly ManifestEntry[], readonly ManifestEntry[]];
 export type Measure = (from: 0 | 1, to: 1 | 2, name: string) => number;
 
 export function compareRows(manifests: Manifests, measure: Measure): Row[] {
-  const listed = manifests.map((m) => new Set(m.map((e) => e.name)));
-  const branchRows = new Map(manifests[2].map((m) => [m.name, m]));
+  const byName = manifests.map((m) => new Map(m.map((e) => [e.name, e])));
   const names = [...new Set(manifests.flatMap((m) => m.map((e) => e.name)))].sort();
   return names.map((name) => {
-    const present = [listed[0]!.has(name), listed[1]!.has(name), listed[2]!.has(name)] as const;
-    const shot = branchRows.get(name);
-    const errors = [...(shot?.http4xx ?? []), ...(shot?.consoleErrors ?? [])];
-    if (!present.every(Boolean)) return { name, present, control: null, branch: null, errors };
-    const control = measure(0, 1, name);
-    return { name, present, control, branch: control === 0 ? measure(1, 2, name) : null, errors };
+    const [a, b, br] = [byName[0]!.get(name), byName[1]!.get(name), byName[2]!.get(name)];
+    const present = [a !== undefined, b !== undefined, br !== undefined] as const;
+    const errors = [...(br?.http4xx ?? []), ...(br?.consoleErrors ?? [])];
+    if (a === undefined || b === undefined || br === undefined) return { name, present, control: null, branch: null, errors };
+    const pair = (x: ManifestEntry, y: ManifestEntry, from: 0 | 1, to: 1 | 2): number =>
+      (x.probe ?? null) === (y.probe ?? null) ? measure(from, to, name) : Number.POSITIVE_INFINITY;
+    const control = pair(a, b, 0, 1);
+    return { name, present, control, branch: control === 0 ? pair(b, br, 1, 2) : null, errors };
   });
+}
+
+export function parseCompareArgs(args: readonly string[]): readonly [string, string, string] {
+  const [a, b, branch, ...extra] = args;
+  if (a === undefined || b === undefined || branch === undefined || extra.length > 0 || args.some((x) => x.startsWith("-"))) {
+    throw new Error("usage: node scripts/design/compare.ts <control-a> <control-b> <branch>");
+  }
+  if (resolve(a) === resolve(b)) throw new Error(`${a} is both controls, so every row would trust itself`);
+  return [a, b, branch];
 }
 
 const manifestOf = (dir: string): ManifestEntry[] =>
@@ -90,15 +105,19 @@ function compareSweeps(controlA: string, controlB: string, branch: string): Row[
   return compareRows([manifestOf(controlA), manifestOf(controlB), manifestOf(branch)], measureIn([controlA, controlB, branch], ae));
 }
 
-const shown = (ae: number | null): string => (ae === null ? "-" : ae === Number.POSITIVE_INFINITY ? "size differs" : String(ae));
+const shown = (ae: number | null): string => (ae === null ? "-" : ae === Number.POSITIVE_INFINITY ? "size or layout differs" : String(ae));
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const [a, b, branch] = process.argv.slice(2);
-  if (a === undefined || b === undefined || branch === undefined) {
-    console.error("usage: node scripts/design/compare.ts <control-a> <control-b> <branch>");
+  let dirs: readonly [string, string, string];
+  try {
+    dirs = parseCompareArgs(process.argv.slice(2));
+    const unswept = dirs.filter((d) => !existsSync(join(d, "manifest.json")));
+    if (unswept.length > 0) throw new Error(`no manifest.json in ${unswept.join(", ")}: not a finished sweep`);
+  } catch (err) {
+    console.error(err instanceof Error ? err.message : err);
     process.exit(2);
   }
-  const rows = compareSweeps(a, b, branch);
+  const rows = compareSweeps(...dirs);
   for (const r of rows) console.log(`${verdictOf(r).padEnd(9)} ${r.name}  control ${shown(r.control)}  branch ${shown(r.branch)}${r.errors.length > 0 ? `  ${r.errors.join(" | ")}` : ""}`);
   const trusted = rows.filter((r) => ["same", "differs"].includes(verdictOf(r))).length;
   console.log(`${rows.length} rows, ${trusted} trusted`);
