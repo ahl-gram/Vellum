@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import { join, resolve } from "node:path";
+import ts from "typescript";
 import { MAX_TILT } from "../../src/render/voyage-geometry.ts";
 import { RDP_EPSILON, COAST_EMBARK_MAX } from "../../src/render/voyage-route.ts";
 import { INLAND_STUB_CELLS } from "../../src/render/voyage-water.ts";
@@ -89,16 +90,19 @@ test("the voyage session's projection margin mirrors renderMap's margin fraction
   marginMirror(code, /Math\.round\(wPx \* ([\d.]+|MARGIN_FRACTION)\)/, "voyage-session.ts");
 });
 
-test("every worker spawn under src/site keeps the static form Vite's build analysis requires", () => {
+const workerSpawns = (file: string): number => {
   let spawns = 0;
-  for (const file of walk("src/site")) {
-    const code = codeOnly(readFileSync(join(ROOT, file), "utf8"));
-    const found = code.match(/new Worker\(/g) ?? [];
-    const statics = code.match(/new Worker\(new URL\("\.\/[\w-]+\.ts", import\.meta\.url\), \{ type: "module" \}\)/g) ?? [];
-    assert.equal(statics.length, found.length, `${file} spawns a worker in a non-static form`);
-    spawns += found.length;
-  }
-  assert.ok(spawns >= 1, "expected at least one worker spawn under src/site");
+  const visit = (node: ts.Node): void => {
+    if (ts.isNewExpression(node) && ts.isIdentifier(node.expression) && node.expression.text === "Worker") spawns++;
+    ts.forEachChild(node, visit);
+  };
+  visit(ts.createSourceFile(file, src(file), ts.ScriptTarget.Latest, true));
+  return spawns;
+};
+
+test("a worker spawn stands under src/site, so vellum/worker-spawn-static has a spawn to hold (Issue #675)", () => {
+  const spawns = walk("src/site").reduce((n, file) => n + workerSpawns(file), 0);
+  assert.ok(spawns >= 1, "no worker spawn stands under src/site, so the lint rule on its form passes over nothing");
 });
 
 test("every publicDir in the press config is false", () => {

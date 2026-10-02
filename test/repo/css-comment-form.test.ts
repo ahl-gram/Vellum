@@ -9,6 +9,7 @@ const eslint = new ESLint({ cwd: ROOT, flags: ["unstable_native_nodejs_ts_config
 const ONE_LINE = "vellum/css-comment-one-line";
 const NO_EM_DASH = "vellum/css-comment-no-em-dash";
 const ISSUE_FORM = "vellum/css-comment-issue-form";
+const NO_JS_MODULE = "vellum/css-comment-no-js-module";
 
 const lintSheet = async (text: string, name = "lint-plant.css"): Promise<Array<[string | null, number]>> => {
   const results = await eslint.lintText(text, { filePath: join(ROOT, "public", name) });
@@ -37,9 +38,11 @@ const PLANT = [
   "/* nor is a shopr #21 a PR: the word must stand alone before the number */",
   '.c { content: "/* #99 */"; }',
   "/* a wider one, Chrome 137 */",
+  ".d { color: red; } /* the old reveal.js drew this */",
+  "/* the twin is app.bundle.js, a build artifact */",
 ].join("\n");
 
-test("the three form rules red on exactly the planted lines and nowhere else", async () => {
+test("the comment-form rules red on exactly the planted lines and nowhere else", async () => {
   assert.deepEqual(await lintSheet(PLANT), [
     [ONE_LINE, 4],
     [NO_EM_DASH, 7],
@@ -49,6 +52,7 @@ test("the three form rules red on exactly the planted lines and nowhere else", a
     [ISSUE_FORM, 16],
     [ISSUE_FORM, 17],
     [ISSUE_FORM, 18],
+    [NO_JS_MODULE, 21],
   ]);
 });
 
@@ -67,7 +71,7 @@ const walk = (dir: string): string[] =>
     return statSync(path).isDirectory() ? walk(path) : path.endsWith(".css") ? [path] : [];
   });
 
-test("every sheet under public/ that the lint reads satisfies the three form rules", async () => {
+test("every sheet under public/ that the lint reads satisfies the comment-form rules", async () => {
   const onDisk = walk(join(ROOT, "public"));
   const unread = await Promise.all(onDisk.map((path) => eslint.isPathIgnored(path)));
   const sheets = onDisk.filter((_, i) => !unread[i]);
