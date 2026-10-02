@@ -31,6 +31,6 @@ Write `Issue #N` and `PR #N`, never a bare number; no em-dash; one physical line
 
 ## Where this sits in the house
 
-`handbook/errata/` is an archive at the repo root on `design/`'s and `handbook/plans/`'s pattern: not a spec, not required reading, outside the roots `test/repo/prose-paths.test.ts` walks, so a row may name a path that later moves and the history does not red. The rule that sends a finding here is `vellum-footguns` Gate 5 item 7 and `handbook/specs/development-workflow.md` step 15. The pointer on the roadmap is the issue titled "Errata: the ledger", whose comments carry the rulings.
+`handbook/errata/` is an archive, on `design/`'s and `handbook/plans/`'s pattern: not a spec, not required reading, outside the roots `test/repo/prose-paths.test.ts` walks, so a row may name a path that later moves and the history does not red. The rule that sends a finding here is `vellum-footguns` Gate 5 item 7 and `handbook/specs/development-workflow.md` step 15. The pointer on the roadmap is the issue titled "Errata: the ledger", whose comments carry the rulings.
 
 The ledger was seeded on 2026-09-20 from a read of every merged pull request to that date (306 of them, 192 carrying findings that were left); rows from before PR #577, when the PR template gained a named slot for what was left, are best effort, since those PRs recorded the leavings under whatever word the author chose.
