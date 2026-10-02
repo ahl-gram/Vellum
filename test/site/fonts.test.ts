@@ -110,7 +110,7 @@ test("the build copies every file of the kit into the site's fonts, byte for byt
   // 2026-10-02: this git check-ignore answers in under 10 ms on a Mac; thirty seconds is a cap on a hang, not a budget.
   const generated = ["OFL.txt", ...WOFF2].map((f) => `public/fonts/${f}`);
   const ignored = spawnSync("git", ["check-ignore", "--no-index", "--", ...generated], { cwd: root(""), encoding: "utf8", timeout: 30_000 });
-  assert.equal(ignored.status, 0, `git check-ignore failed: ${ignored.stderr}`);
+  assert.ok(ignored.status === 0 || ignored.status === 1, `git check-ignore failed (${ignored.status}): ${ignored.stderr}`);
   assert.deepEqual(ignored.stdout.split("\n").filter(Boolean).sort(), [...generated].sort(), "git does not ignore every generated face, so one could be committed beside the kit's");
 });
 
