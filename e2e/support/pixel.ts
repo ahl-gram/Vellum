@@ -41,8 +41,8 @@ export function decodeFirstRow(png: Buffer): [number, number, number][] {
 // The clip the browser wants is the page's, not the viewport's, so the scroll is added here (a scrolled page read blank frames until the 2026-09-03 sitting, ruling 6).
 export async function sampleRow(send: (method: string, params?: Record<string, unknown>) => Promise<unknown>, x: number, y: number, width: number): Promise<[number, number, number][]> {
   const s = await send("Runtime.evaluate", { expression: "[window.scrollX, window.scrollY]", returnByValue: true }) as { result?: { value?: unknown }; exceptionDetails?: { text?: string } };
-  const v = s && s.result ? s.result.value : undefined; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-  if (s && s.exceptionDetails) throw new Error(`sampleRow could not read the page's scroll: ${s.exceptionDetails.text || "exception"}`); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+  const v = s.result ? s.result.value : undefined;
+  if (s.exceptionDetails) throw new Error(`sampleRow could not read the page's scroll: ${s.exceptionDetails.text || "exception"}`);
   if (!Array.isArray(v) || v.length !== 2 || !v.every(Number.isFinite)) throw new Error(`sampleRow could not read the page's scroll: ${JSON.stringify(v)}`);
   const [sx, sy] = v as [number, number];
   const r = await send("Page.captureScreenshot", { format: "png", clip: { x: x + sx, y: y + sy, width, height: 1, scale: 1 } }) as { data: string };

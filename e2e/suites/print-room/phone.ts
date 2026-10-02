@@ -5,7 +5,7 @@ export async function pr32Phone({ evaluate, send, check, sleep }: SuiteContext):
   const phone390 = await evaluate<{ shown: boolean; glassClosed: string; glassOpen: string; hitOk: boolean; glassBack: string }>(`(()=>{const cs=(s)=>getComputedStyle(document.querySelector(s));const style=document.getElementById("pr-style");const shown=cs("#pr-style").display!=="none";const glassClosed=cs(".zoomery").display;document.querySelector(".slip-handle").click();const glassOpen=cs(".zoomery").display;const r=style.getBoundingClientRect();const hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);const hitOk=hit===style||style.contains(hit);document.querySelector(".slip-handle").click();return{shown,glassClosed,glassOpen,hitOk,glassBack:cs(".zoomery").display};})()`);
   check(
     "PR32 at 390 the style picker shows and takes its own tap; the Glass stands down while the sheet is open and returns when it folds (ruled 2026-08-30; skeptic round 2's stolen-tap collision)",
-    !!phone390 && phone390.shown === true && phone390.glassClosed === "flex" && phone390.glassOpen === "none" && phone390.hitOk === true && phone390.glassBack === "flex", // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    phone390.shown === true && phone390.glassClosed === "flex" && phone390.glassOpen === "none" && phone390.hitOk === true && phone390.glassBack === "flex",
     JSON.stringify(phone390),
   );
 

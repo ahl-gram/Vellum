@@ -95,7 +95,7 @@ export async function l1eAbsorbed({ evaluate, check, sleep, camNow, scrollY, whe
     await wheelAt(pt, 480);
     await sleep(250);
     const log = await evaluate<{ p: boolean; t: number }[]>(`window.__lfW2`);
-    if (log !== null && log.length === 2 && log[1]!.t - log[0]!.t < 280) { // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    if (log.length === 2 && log[1]!.t - log[0]!.t < 280) {
       usedUp = { log, y: await scrollY(), cam: await camNow() };
     }
   }

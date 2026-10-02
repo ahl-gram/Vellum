@@ -125,7 +125,7 @@ const SUITES = {
   "specimen": runSpecimen,
 };
 
-const missing = E2E_SUITE_ORDER.filter((name) => !SUITES[name]); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+const missing = E2E_SUITE_ORDER.filter((name) => !(SUITES as Partial<typeof SUITES>)[name]);
 if (missing.length > 0) {
   console.error(`FAIL: E2E_SUITE_ORDER names suites this runner cannot run: ${missing.join(", ")}`);
   process.exit(1);

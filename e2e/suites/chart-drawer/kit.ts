@@ -38,7 +38,7 @@ export function drawerKit(ctx: SuiteContext & { settle: Settle }) {
     await sleep(250);
     return r;
   };
-  const pressCard = async (d: Card) => { if (d && d.press && d.press.box) await clickAt(d.press.box.x, d.press.box.y); await sleep(250); }; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+  const pressCard = async (d: Card) => { if (d.press) await clickAt(d.press.box.x, d.press.box.y); await sleep(250); };
   return { ...ctx, clickAt, clickEar, forget, go, pinCard, pressCard };
 }
 

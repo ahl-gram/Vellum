@@ -199,7 +199,7 @@ export async function h18CameraSeat({ evaluate, send, check, sleep, PORT, camSea
   check(
     "H18 the camera's seat is home's own (#505): absolute in the stage, 1.6rem from its right edge and 1.4rem up at the wide sheet and at 390, no depth, no ink-in, the container taking the pointer, and it scrolls away with the stage",
     seatOk(seatWide) && seatOk(seat390) && seatWide!.vw >= 1024 &&
-      seat390!.vw === 390 && !!camScrolled && camScrolled.y > 0 && Math.abs(( // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+      seat390!.vw === 390 && camScrolled.y > 0 && Math.abs((
       seatWide!.top - camScrolled.top) - camScrolled.y) < 2,
     JSON.stringify({ seatWide, seat390, camScrolled }),
   );

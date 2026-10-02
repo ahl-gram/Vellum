@@ -22,7 +22,7 @@ export function cardsKit(ctx: SuiteContext & { settle: Settle }) {
     }
     if (fonts === "loading") throw new Error(`P19 the faces never finished loading at ${width}`);
     const d = await evaluate(SWEEP);
-    if (!d || d.error) throw new Error(`P19 the sweep found no chart box at ${width}: ${JSON.stringify(d)}`); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    if (d.error) throw new Error(`P19 the sweep found no chart box at ${width}: ${JSON.stringify(d)}`);
     return d;
   };
   return { ...ctx, sweepAt };

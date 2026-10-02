@@ -41,11 +41,11 @@ export async function sb4Folded({ check, settle, setState }: SpecimenKit, rest: 
   const folded = await settle(READ, atFolded(rest!), "specimen-folded");
   check(
     "SB4 folded, through the slip's own fold: the slip is gone and its tab shown, the Glass moves out to the chrome's inset, the legend row re-centres rightward",
-    !!folded && folded.st!.folded && folded.slipVis === "hidden" && folded.tabVis === "visible" && // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    folded.st!.folded && folded.slipVis === "hidden" && folded.tabVis === "visible" &&
       Math.abs(folded.innerW - folded.glass!.right - folded.chromeX * folded.rem) < 2 &&
         folded.legend!.x >
         rest!.legend!.x,
-    JSON.stringify(folded && { st: folded.st, slip: folded.slipVis, tab: folded.tabVis, glass: folded.glass, legendX: [rest && rest.legend!.x, // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    JSON.stringify({ st: folded.st, slip: folded.slipVis, tab: folded.tabVis, glass: folded.glass, legendX: [rest && rest.legend!.x,
       folded.legend!.x] }),
   );
 }
@@ -53,12 +53,12 @@ export async function sb4Folded({ check, settle, setState }: SpecimenKit, rest: 
 export function sb5Leaned({ check }: SpecimenKit, leaned: Specimen): void {
   check(
     "SB5 leaned, through the Glass's own controller: the slip is back from its tab, the gesture box is zoomed, the sheet spills under the top and the left corners (the slip holds the right), and the corners and the cluster stand on the pool",
-    !!leaned && leaned.st!.zoomed && // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    leaned.st!.zoomed &&
       !leaned.st!.folded && leaned.slipVis === "visible" && leaned.pool === '""' && leaned.poolChrome === '""' &&
       leaned.map!.x < 0 &&
         leaned.map!.y < 0 &&
         leaned.map!.bottom > 800,
-    JSON.stringify(leaned && { st: leaned.st, slip: leaned.slipVis, pool: leaned.pool, poolChrome: leaned.poolChrome, map: leaned.map }), // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    JSON.stringify({ st: leaned.st, slip: leaned.slipVis, pool: leaned.pool, poolChrome: leaned.poolChrome, map: leaned.map }),
   );
 }
 
@@ -78,7 +78,7 @@ export async function sb5dGlassBare({ check, brightest }: SpecimenKit, leaned: S
   const underGlass = await brightest(Math.round(leaned.glass!.x) + 2, 797);
   check(
     "SB5d leaned, the Glass stands bare on the chart as home's does: no pool behind its presses, and the chart shows through beside them (the edge just below the Glass reads well above the pooled interior)",
-    !!leaned && leaned.poolGlass === "none" && underGlass > interior + 30, // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    leaned.poolGlass === "none" && underGlass > interior + 30,
     JSON.stringify({ poolGlass: leaned.poolGlass, underGlass, interior }),
   );
 }
@@ -90,7 +90,7 @@ export async function sb5eFolioPanel({ check, brightest }: SpecimenKit, rest: Sp
   const panelIn = await brightest(panelLeft + 3, panelY), panelOut = await brightest(panelLeft - 11, panelY);
   check(
     "SB5e leaned, the room folio stands on home's seed box: a crisp panel (a top-to-bottom gradient, no blur) whose left edge is a step against the chart, the pixels 3px inside dark and 11px outside bright",
-    !!leaned && /^linear-gradient\((?!to top)/.test(leaned.folioPanel!) && leaned.folioFilter === "none" && panelOut - panelIn > 60 && // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    /^linear-gradient\((?!to top)/.test(leaned.folioPanel!) && leaned.folioFilter === "none" && panelOut - panelIn > 60 &&
       rest!.pool === "none",
     JSON.stringify({ panel: leaned.folioPanel!.slice(0, 44), filter: leaned.folioFilter, panelIn, panelOut, rest:
       rest!.pool }),
@@ -104,7 +104,7 @@ export async function sb5cFooting({ check, brightest }: SpecimenKit, rest: Speci
     leaned.legend!.bottom) + 3);
   check(
     "SB5c leaned, the legend row stands on home's footing, the seed box's crisp panel (a top-to-bottom gradient, no fade) drawn as the row's own ::before, not the blurred pool: the panel resolves, its foot band reads dark over the chart, and at rest the row carried no ground (the fade left at the 2026-09-03 sitting, ruling 23)",
-    !!leaned && leaned.legendGroundOn === '""' && /^linear-gradient\((?!to top)/.test(leaned.legendGround!) && footing < 120 && // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    leaned.legendGroundOn === '""' && /^linear-gradient\((?!to top)/.test(leaned.legendGround!) && footing < 120 &&
       rest!.legendGroundOn === "none",
     JSON.stringify({ leaned: leaned.legendGround!.slice(0, 40), footing, rest:
       rest!.legendGroundOn }),
@@ -119,7 +119,7 @@ export async function sb6RestAgain({ evaluate, check, sleep, setState, read }: S
   const refilled = await evaluate<{ text: string; disp: string }>(`(()=>{document.getElementById("sb-report").click();const p=document.getElementById("sb-status");return{text:p.textContent,disp:getComputedStyle(p).display};})()`);
   check(
     "SB6 at rest again the camera is home and the pool gone; the foot's press empties the status pill (which then hides, :empty) and fills it back",
-    !!back && !back.st!.zoomed && back.pool === "none" && emptied.text === "" && emptied.disp === "none" && /Fill/.test(emptied.btn) && refilled.text.length > 0 && refilled.disp !== "none", // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-    JSON.stringify({ back: back && { st: back.st, pool: back.pool }, emptied, refilled }), // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    !back.st!.zoomed && back.pool === "none" && emptied.text === "" && emptied.disp === "none" && /Fill/.test(emptied.btn) && refilled.text.length > 0 && refilled.disp !== "none",
+    JSON.stringify({ back: { st: back.st, pool: back.pool }, emptied, refilled }),
   );
 }

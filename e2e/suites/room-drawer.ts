@@ -8,7 +8,7 @@ const DOCUMENT_ROOM = "/faq/";
 const APP_ROOM = "/explorer/";
 type Rect = { x: number; y: number; w: number; h: number; right: number; bottom: number };
 type Door = { t: string; x: number; y: number; h: number; bottom: number; current: boolean; display: string; offset: string; tappable: boolean };
-type Nav = { rect: Rect; visibility: string; position: string };
+type Nav = { rect: Rect | null; visibility: string; position: string };
 type Drawer = { innerW: number; innerH: number; scrollW: number; scrollY: number; bandH: number; chromePosition: string; chromeZ: string; checked: boolean; burger: Rect; burgerDisplay: string; burgerReachable: boolean; cluster: Rect; nav: Nav; scrim: { position: string; top: string; z: string; content: string; background: string }; mainInert: boolean; footerInert: boolean | null; chromeInert: boolean; hitMidPage: string | null; doors: Door[] };
 
 const READ: Payload<Drawer> = `(() => {
@@ -36,9 +36,9 @@ const READ: Payload<Drawer> = `(() => {
 })()`;
 
 const stacked = (doors: Door[]) => doors.length > 1 && doors.every((d, i) => i === 0 || (d.y >= doors[i - 1]!.bottom - 0.5 && Math.abs(d.x - doors[0]!.x) < 0.5));
-const offLeft = (nav: Nav) => nav.visibility === "hidden" && nav.rect !== null && nav.rect.right <= 0.5; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-const atOpen = (d: Drawer) => !!d.nav && d.nav.visibility === "visible" && d.nav.rect !== null && d.nav.rect.x === 0; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-const atClosed = (d: Drawer) => !!d.nav && offLeft(d.nav); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+const offLeft = (nav: Nav) => nav.visibility === "hidden" && nav.rect !== null && nav.rect.right <= 0.5;
+const atOpen = (d: Drawer) => d.nav.visibility === "visible" && d.nav.rect !== null && d.nav.rect.x === 0;
+const atClosed = (d: Drawer) => offLeft(d.nav);
 
 type Settle = ReturnType<typeof makeSettle>;
 type RoomDrawerKit = ReturnType<typeof roomDrawerKit>;
@@ -109,7 +109,7 @@ async function dr1Folded({ evaluate, check, goto }: RoomDrawerKit): Promise<void
     "DR1 at 390 a document room's nav is folded into the drawer: it waits invisible off the left edge, the burger stands in the cluster and is reachable, the cluster ends inside the reserved band, and nothing scrolls sideways (#483)",
     offLeft(closed.nav) && closed.burgerDisplay !== "none" && closed.burgerReachable &&
       closed.cluster.bottom <= closed.bandH && closed.scrollW <= closed.innerW,
-    `nav ${closed.nav.visibility} right=${closed.nav.rect && closed.nav.rect.right.toFixed(1)}, burger ${closed.burgerDisplay} reachable=${closed.burgerReachable}, cluster bottom ${closed.cluster.bottom.toFixed(1)} vs band ${closed.bandH.toFixed(1)}, scrollW ${closed.scrollW}/${closed.innerW}`, // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    `nav ${closed.nav.visibility} right=${closed.nav.rect && closed.nav.rect.right.toFixed(1)}, burger ${closed.burgerDisplay} reachable=${closed.burgerReachable}, cluster bottom ${closed.cluster.bottom.toFixed(1)} vs band ${closed.bandH.toFixed(1)}, scrollW ${closed.scrollW}/${closed.innerW}`,
   );
 }
 
@@ -162,10 +162,10 @@ async function dr5SwipeScrolls({ evaluate, check, sleep, touch, tapBurger }: Roo
   check(
     "DR5 a real swipe with a room's drawer open scrolls the page beneath it while the drawer, its burger and its scrim stay exactly where they were and the drawer stays OPEN: nothing rides away, so a room needs no scroll-to-close the way home does (#483, ruling item 2)",
     beforeSwipe.checked && afterSwipe.checked && afterSwipe.scrollY > beforeSwipe.scrollY &&
-      Math.abs(afterSwipe.nav.rect.y - beforeSwipe.nav.rect.y) < 1 &&
+      Math.abs(afterSwipe.nav.rect!.y - beforeSwipe.nav.rect!.y) < 1 &&
       Math.abs(afterSwipe.burger.y - beforeSwipe.burger.y) < 1 &&
       afterSwipe.hitMidPage === "BODY.room" && afterSwipe.mainInert,
-    `scrollY ${beforeSwipe.scrollY} to ${afterSwipe.scrollY}, drawer y ${beforeSwipe.nav.rect.y.toFixed(1)} to ${afterSwipe.nav.rect.y.toFixed(1)}, burger y ${beforeSwipe.burger.y.toFixed(1)} to ${afterSwipe.burger.y.toFixed(1)}, still open=${afterSwipe.checked}, page point hits ${afterSwipe.hitMidPage}`,
+    `scrollY ${beforeSwipe.scrollY} to ${afterSwipe.scrollY}, drawer y ${beforeSwipe.nav.rect!.y.toFixed(1)} to ${afterSwipe.nav.rect!.y.toFixed(1)}, burger y ${beforeSwipe.burger.y.toFixed(1)} to ${afterSwipe.burger.y.toFixed(1)}, still open=${afterSwipe.checked}, page point hits ${afterSwipe.hitMidPage}`,
   );
 }
 

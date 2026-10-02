@@ -172,7 +172,7 @@ export async function h5aRefused({ evaluate, check, sleep }: SuiteContext, backH
       })()`);
       await sleep(600);
       const stayed = await evaluate<boolean>(`location.pathname === "/" && !!document.getElementById("seed-form")`);
-      refused = refused ? { ...refused, stayed } : null; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+      refused = { ...refused, stayed };
     } catch { refused = null; }
   }
   check(

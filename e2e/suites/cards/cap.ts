@@ -42,7 +42,7 @@ export async function p20PinnedTakesPointer({ evaluate, send, check, settle }: C
         return { name: (c.querySelector(".pc-name") || {}).textContent, pinned: c.classList.contains("pinned"), scrolls: c.classList.contains("pc-scrolls"),
           arrived: typeof i.getAnimations === "function" && i.getAnimations().every((a) => a.playState === "finished"),
           pe: cs.pointerEvents, over: +(i.scrollHeight - i.clientHeight).toFixed(2), top: +r.top.toFixed(2), bottom: +r.bottom.toFixed(2), left: +r.left.toFixed(2), right: +r.right.toFixed(2), w: +r.width.toFixed(2), h: +r.height.toFixed(2) }; })()`,
-    (d, last) => !!d && d.name === "Kralgov" && d.pinned && d.arrived && !!last && last.name === "Kralgov" && d.h === last.h && d.pe === last.pe, // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    (d, last) => d.name === "Kralgov" && d.pinned && d.arrived && !!last && last.name === "Kralgov" && d.h === last.h && d.pe === last.pe,
     "P20 Kralgov pinned at 320",
   );
   check("P20 a SHOWN unpinned card does not take the pointer and a pinned scrolling one does, or the card takes it from its own mark (#633)",
@@ -88,7 +88,7 @@ export async function p23CapHolds({ evaluate, send, check, sleep, wheel, settle 
   const deep = await settle<{ k: number; w: number; h: number; boxH: number; over: number } | null>(
     `(() => { const c = document.getElementById("place-card"); if (!c || c.hidden) return null; const v = document.getElementById("map-viewport").getBoundingClientRect(); const r = c.getBoundingClientRect();
         return { k: window.__vellumZoomState().k, w: +r.width.toFixed(2), h: +r.height.toFixed(2), boxH: +v.height.toFixed(2), over: +(r.height - v.height).toFixed(2) }; })()`,
-    (d, last) => !!d && d.k > 1.05 && !!last && d.k === last.k && d.h === last.h, // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    (d, last) => d.k > 1.05 && !!last && d.k === last.k && d.h === last.h,
     "P23 the camera coming to rest above k=1",
   );
   // The card is a fixed 16rem, so its rendered width is the control that says which way the scales compose: unchanged means the counter-scale cancels the mount and the cap must be raw.
@@ -104,7 +104,7 @@ export async function p23CapHolds({ evaluate, send, check, sleep, wheel, settle 
     `(() => { const c = document.getElementById("place-card"); if (!c || c.hidden) return null; const i = c.querySelector(".pc-inner"); const n = c.querySelector(".pc-name");
         const ir = i.getBoundingClientRect(), nr = n.getBoundingClientRect();
         return { name: n.textContent, scrollTop: +i.scrollTop.toFixed(2), nameBelowTop: +(nr.top - ir.top).toFixed(2), h: +c.getBoundingClientRect().height.toFixed(2) }; })()`,
-    (d, last) => !!d && !!last && d.h === last.h && d.scrollTop === last.scrollTop, // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    (d, last) => !!last && d.h === last.h && d.scrollTop === last.scrollTop,
     "P25 the card after a switch from a scrolled one",
   );
   check("P25 a card switched to from a scrolled one opens at its own top, with its name below the fold and not above it (#633)",
@@ -128,7 +128,7 @@ export async function p24NothingToScroll({ evaluate, send, check, sleep, wheel, 
         return { name: (c.querySelector(".pc-name") || {}).textContent, pinned: c.classList.contains("pinned"), scrolls: c.classList.contains("pc-scrolls"),
           tail: +(i.scrollHeight - i.clientHeight).toFixed(2), pe: getComputedStyle(i).pointerEvents, k: window.__vellumZoomState().k,
           x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2), h: +r.height.toFixed(2) }; })()`,
-    (d, last) => !!d && d.name === "Kralgov" && d.pinned && !!last && d.h === last.h, // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    (d, last) => d.name === "Kralgov" && d.pinned && !!last && d.h === last.h,
     "P24 Kralgov pinned at 390",
   );
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: card.x, y: card.y });

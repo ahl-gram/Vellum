@@ -33,8 +33,7 @@ export async function rs2Seams({ evaluate, check }: InstrumentKit): Promise<void
   })()`);
   check(
     `RS2 the room publishes every seam installHostHooks installs (${HOST_HOOK_NAMES.length} of them, derived from the installer)`,
-    !!surface && // eslint-disable-line @typescript-eslint/no-unnecessary-condition
-      Object.keys(surface).length === HOST_HOOK_NAMES.length &&
+    Object.keys(surface).length === HOST_HOOK_NAMES.length &&
       Object.values(surface).every((t) => t === "function"),
     JSON.stringify(surface),
   );

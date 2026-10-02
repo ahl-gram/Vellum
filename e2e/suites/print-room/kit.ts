@@ -20,7 +20,7 @@ export function printRoomKit(ctx: SuiteContext) {
     let read = null;
     for (let i = 0; i < 40; i++) {
       read = await evaluate(ATLAS_FIT);
-      if (read && read.clientW === want) return read; // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+      if (read.clientW === want) return read;
       await sleep(50);
     }
     return read;

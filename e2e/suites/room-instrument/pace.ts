@@ -11,7 +11,7 @@ export async function rs29Pace({ evaluate, check, sleep, setYear, clickPlay }: I
   const rs29hash = await evaluate<string>(`location.hash`);
   check(
     "RS29 the pace group stands at the readout's right with 1x pressed and reported, a press moves the mark and reaches the engine, and the address never carries it (#493, ruled 2026-09-02)",
-    !!rs29 && rs29.role === "group" && rs29.label === "The pace" && rs29.shown && // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    rs29.role === "group" && rs29.label === "The pace" && rs29.shown &&
       JSON.stringify(rs29.labels) === JSON.stringify(["1\u00d7", "2\u00d7", "4\u00d7"]) &&
       JSON.stringify(rs29.rest.pressed) === JSON.stringify(["true", "false", "false"]) && rs29.rest.pace === 1 &&
       JSON.stringify(rs29.after.pressed) === JSON.stringify(["false", "false", "true"]) && rs29.after.pace === 4 &&

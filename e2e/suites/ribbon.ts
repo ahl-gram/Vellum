@@ -140,7 +140,7 @@ async function rb6PickedDestination({ evaluate, check, sleep, state }: RibbonKit
   }
   check(
     "RB6 a picked destination redraws in place and writes the address",
-    redrawn !== null && new RegExp(`(^|&)b=${picked}(&|$)`).test(String(redrawn && redrawn.hash).slice(1)), // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    redrawn !== null && new RegExp(`(^|&)b=${picked}(&|$)`).test(String(redrawn.hash).slice(1)),
     JSON.stringify({ picked, redrawn: redrawn && { to: redrawn.to, hash: redrawn.hash } }),
   );
   check(

@@ -9,7 +9,7 @@ export async function rr31StripStands({ evaluate, check, sleep }: SuiteContext, 
   check(
     "RR31 at 1440x900 the strip stands on the viewport's bottom edge and a chart room has no page scroll to leave it by (#463, ruling 6)",
     !!afterScroll && afterScroll.bottom === 0 && afterScroll.position === "fixed" &&
-      !!room && room.page <= room.vh, // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+      room.page <= room.vh,
     JSON.stringify({ rest: deskRest, stuck: afterScroll, room }),
   );
 }
@@ -64,7 +64,7 @@ export function rr36ChartFills({ check }: SuiteContext, room: Room): void {
   const SOURCE_RATIO = 1158 / 1500;
   check(
     "RR36 the chart fills its fitted sheet at its source aspect and clears the folio above and the strip below by room.ts's 14px (#442; the chart room's fit since #463)",
-    !!room && room.fillsSheet && room.topClear >= 14 && room.bottomClear >= 14 && // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+    room.fillsSheet && room.topClear >= 14 && room.bottomClear >= 14 &&
       Math.abs(room.ratio - SOURCE_RATIO) < 0.005,
     JSON.stringify({ ...room, sourceRatio: SOURCE_RATIO }),
   );
