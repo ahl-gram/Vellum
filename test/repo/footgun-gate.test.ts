@@ -37,7 +37,10 @@ test("every gate-size probe passes at the 8,000-character limit", () => {
     "a push",
     "a PR body from an unreadable file",
   ];
-  for (const name of probes) assert.match(out, new RegExp(`^ok +${name}: .* of 8000 characters$`, "m"), `no passing size row for ${name}\n${out}`);
+  for (const name of probes) {
+    const row = new RegExp(`^ok +${name}: .* in (\\d+) of 8000 characters$`, "m").exec(out);
+    assert.ok(row && Number(row[1]) <= 8000, `no passing size row within 8000 for ${name}\n${out}`);
+  }
 });
 
 // This guard lives here, not beside the readDeployed tests, because it has to survive the defect it guards: footgun-deployed-run.test.ts imports the selftest statically, so an entry guard that stops working exits that whole file at import time and the runner reports it green with every assertion silently absent (measured: 7 gone, "pass 2 fail 0"). This file only ever spawns the selftest, so it still runs.
