@@ -57,18 +57,17 @@ export function rh2Members({ check }: SuiteContext, heads: Heads): void {
 }
 
 export function rh3Fixed({ check }: SuiteContext, heads: Heads, bad: Bad): void {
-  // The band clips the deep at --band-h (121.6px at desktop); home has no band. The invariant is band >= cluster (ruling 5's "never beneath bare lettering"), not just the literal clip, so nav growth that overflows the band must red here.
   const unfixed = bad((h, r) =>
     (r === "/" ? h.chromePosition === "absolute" && h.bandClip === null
                : CHART.includes(r) ? h.chromePosition === "fixed" && h.bandClip === null
                : h.chromePosition === "fixed" &&
-                 typeof h.bandClip === "string" && h.bandClip.includes("121.6px") &&
-                 typeof h.chromeBottom === "number" && h.chromeBottom <= 121.6));
+                 typeof h.bandClip === "string" && h.bandClip.includes("169.6px") &&
+                 typeof h.chromeBottom === "number" && h.chromeBottom <= 169.6));
   check(
     "RH3 the cluster is fixed inside the reserved band on rooms; on home it is bandless and RIDES the page; a chart room is bandless too, the chart running under a fixed cluster (#461 rulings 1+5; #472's ride; #462 ruling 7)",
     unfixed.length === 0,
     unfixed.map((r) => `${r}: chrome=${heads[r]?.chromePosition} bottom=${heads[r]?.chromeBottom} band=${heads[r]?.bandClip}`).join(" | ") ||
-      `chrome fixed x${SHELLED.length - 1}, cluster inside the 121.6px band x${SHELLED.length - 1 - CHART.length}, home and the chart room bandless`,
+      `chrome fixed x${SHELLED.length - 1}, cluster inside the 169.6px band x${SHELLED.length - 1 - CHART.length}, home and the chart room bandless`,
   );
 }
 

@@ -184,15 +184,15 @@ async function ix5BottomSheet({ evaluate, check, sleep, goto, tapAt }: DocRoomsK
   await tapAt(entry.x, entry.y);
   await sleep(400);
   const jumped = await evaluate(READ);
-  const landed = await evaluate<{ top: number; hash: string }>(`(() => { const t = document.querySelector(${JSON.stringify(entry.href)}); const r = t.getBoundingClientRect(); return { top: r.top, hash: location.hash }; })()`);
+  const landed = await evaluate<{ top: number; hash: string; band: number }>(`(() => { const t = document.querySelector(${JSON.stringify(entry.href)}); const r = t.getBoundingClientRect(); const root = getComputedStyle(document.documentElement); return { top: r.top, hash: location.hash, band: parseFloat(root.getPropertyValue("--band-h")) * parseFloat(root.fontSize) }; })()`);
   check(
     "IX5 at 390 the index is the bottom sheet collapsed to its head at the foot of the viewport; a tap on the head opens it, a tap on a question jumps to it below the band and closes the sheet again (#462 ruling 2, the phone half)",
     phone.slipPosition === "fixed" && Math.abs(phone.slip!.bottom - phone.innerH) < 1 && !phone.open && phone.bodyDisplay === "none" &&
       phone.slip!.h < 140 &&
       opened.open && opened.bodyDisplay !== "none" && opened.slip!.h >
         phone.slip!.h + 100 &&
-      !jumped.open && landed.hash === entry.href && landed.top >= 90 && landed.top < 200 && jumped.scrollW <= jumped.innerW,
-    `collapsed: bottom ${phone.slip && phone.slip.bottom} of ${phone.innerH}, h ${phone.slip && phone.slip.h.toFixed(1)}, body ${phone.bodyDisplay}; opened: ${opened.open} h ${opened.slip && opened.slip.h.toFixed(1)}; after the tap: open=${jumped.open}, hash ${landed.hash} vs ${entry.href}, target top ${landed.top.toFixed(1)}, scrollW ${jumped.scrollW}/${jumped.innerW}`,
+      !jumped.open && landed.hash === entry.href && landed.top >= landed.band && landed.top <= landed.band + 32 && jumped.scrollW <= jumped.innerW,
+    `collapsed: bottom ${phone.slip && phone.slip.bottom} of ${phone.innerH}, h ${phone.slip && phone.slip.h.toFixed(1)}, body ${phone.bodyDisplay}; opened: ${opened.open} h ${opened.slip && opened.slip.h.toFixed(1)}; after the tap: open=${jumped.open}, hash ${landed.hash} vs ${entry.href}, target top ${landed.top.toFixed(1)} under a ${landed.band.toFixed(1)} band, scrollW ${jumped.scrollW}/${jumped.innerW}`,
   );
 }
 

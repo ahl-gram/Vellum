@@ -32,16 +32,22 @@ symbol and path so the reader goes and looks.
   mis-budgeted.** The first is how the page is reached, which decides its place in the nav and the
   discovery files. The second is whether it mounts a bundle, which decides everything in the rule
   below. A page can be any combination of the two.
-- **How a page is reached comes in three kinds.** A nav-listed room has its entry in `NAV_ITEMS` in
-  `src/layouts/nav.ts`. A destination is off the nav but inside the discovery routes, which is how
-  `/prospect/` and `/atlas/` are reached. A page may also be deliberately off BOTH, carrying the
-  layout's `noindex` prop, which is what `/specimen/` is. A page that is off a list is a decision
-  with a mechanism behind it, so do not "fix" one by adding it.
-- **Placement is ratified (#202): the nav lists ROOMS**, world-agnostic and shell-wearing, and the
-  atlas stays permanently out of it with the home card as its way in. **The home cards are modes of
-  encounter**, one to a mode, and a page deliberately without a card is not an oversight.
+- **How a page is reached comes in four kinds.** A nav-listed room has its entry in `NAV_ITEMS` in
+  `src/layouts/nav.ts`. A child is seated under its room in `ROUTE_CHILDREN` beside it: off the
+  nav's top line, inside the discovery routes, and named by the trail, which is how `/prospect/`,
+  `/ribbon/` and the Portfolio are reached. A destination is off the tree but inside the discovery
+  routes, which is how `/atlas/` is reached, and a new discovery route is either seated or named
+  beside the atlas, which `test/site/route-tree.test.ts` holds. A page may also be deliberately off
+  all of them, carrying the layout's `noindex` prop, which is what `/specimen/` is. A page that is
+  off a list is a decision with a mechanism behind it, so do not "fix" one by adding it.
+- **The nav's top line lists ROOMS, world-agnostic and shell-wearing, and a room may carry children
+  seated under it that are not strictly rooms.** A route's seat is its first appearance in the tree
+  and any later appearance is an alias. The atlas stays out of both, because it is one world's
+  generated output rather than a room, with the home card as its way in. **The home cards are modes
+  of encounter**, one to a mode, and a page deliberately without a card is not an oversight.
 - **A reading page is cheap and a working page is not.** A reading page is the `.astro` file plus,
-  if it is a room, its `NAV_ITEMS` entry and its own sheet. A working page that mounts a bundle owes
+  if it is a room, its `NAV_ITEMS` entry or its seat in `ROUTE_CHILDREN`, its name in
+  `ROUTE_NAMES`, and its own sheet. A working page that mounts a bundle owes
   all of that plus its entry in `BUNDLE_ENTRIES` (`scripts/build-app-bundles.ts`), its generated
   twin in `GENERATED_SUBTREES` (`scripts/clean-public-generated.ts`) and in `.gitignore`, and its own
   e2e suite, which then joins the suite order, the runner's map, a lane and that lane's measured
@@ -64,7 +70,8 @@ symbol and path so the reader goes and looks.
   name a sheet for what it does rather than for being a sheet: `CHART_MOUNTS` in
   `test/site/shell-css-ground.test.ts`, the sheets home loads in `test/site/home-shelf.test.ts`,
   and `KIT_SHEETS` in `test/site/kit-scope.test.ts`, the sheets linked on every page.
-- **The rosters a page or a sheet joins**, by symbol: `TOKENS` in `test/site/shell-css.test.ts`;
+- **The rosters a page or a sheet joins**, by symbol: `NAV_ITEMS`, `ROUTE_NAMES` and
+  `ROUTE_CHILDREN` in `src/layouts/nav.ts`; `TOKENS` in `test/site/shell-css.test.ts`;
   `PAGES` in `test/site/astro-scaffold.test.ts`; `BUNDLE_ENTRIES` in `scripts/build-app-bundles.ts`;
   `GENERATED_SUBTREES` in `scripts/clean-public-generated.ts`; `ROUTE_ENTRIES` and
   `DISCOVERY_ROUTES` in `scripts/generate-discovery.ts`. A new suite additionally joins `E2E_SUITE_ORDER`

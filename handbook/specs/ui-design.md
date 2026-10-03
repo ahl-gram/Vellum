@@ -123,8 +123,9 @@ content passing under the fixed chrome, which is why it pools every piece of tha
 the cluster alone, and why **it wears no vignettes**: a vignette is a fixed darkening band, and on a
 scrolling page it washes out whatever passes through it. Four corners, each a named piece of the kit:
 
-- **The head cluster**, top left: wordmark, flourish tagline, dot-separated rooms nav, directly on
-  the deep. Fixed in a room, riding the page on home.
+- **The head cluster**, top left: wordmark, flourish tagline, dot-separated rooms nav and, on every
+  page with a seat in the route tree, the trail under it, directly on the deep. Fixed in a room,
+  riding the page on home.
 - **The room folio**, top right: the room's name and tagline, with the room's *one* primary control
   under them. One control. The rest of the press is the legend row.
 - **The chart folio**, bottom left: the lines the room's script fills at the draw, the chart's title,
@@ -136,10 +137,26 @@ Between them: **the slip**, the working panel on the right, which is the mockup'
 into a desk. It folds away to a bookmark tab on the right edge, and on a phone it is the bottom
 sheet. **The legend row** runs along the bottom and carries the roads out.
 
+**The head cluster says where the reader is standing, on every page with a seat in the route tree.**
+Exactly one element on the page carries the current-page mark (`aria-current`): the nav's segment
+when the page is on its top line, the trail's last segment when it is not. The mark is brightened
+AND underlined, never colour alone; on a top-level room the trail's last segment wears the same
+dress without the mark, which the nav carries. Home carries none, its wordmark being its mark, and
+so does a page deliberately outside the tree. The trail's links are parchment like the nav's, never
+a dimmer ink, and at every width each clears a thumb's 24px from the cluster's other links and
+controls. Below the fold the trail rides into the open drawer's cap above the doors, because opening
+the nav to ask where you are must not take the answer away. **Provisional until the post-use
+review:** the trail's size step under the nav, its separator glyph, the alias line's wording and
+whether it earns its place, the trail and the nav sharing one ink above 901, the margins that clear
+the targets' spacing, the Gallery's first row given back its gap, the phone-sized band on a document
+room, the trail standing aside on a chart room while the phone sheet is up, and the alias link's
+strengthened underline.
+
 **A document room** is the sheet instead. It keeps the band and the footer because it scrolls, and it
 replaces a table of contents with an **index slip** that inks the section being read and keeps it in
 view. Folding the index hands the sheet the width, in one smooth settle, and gives it back the same
-way.
+way. **The band buys the ground for what the cluster carries**: its height is keyed to the
+cluster's contents, never to a page's name, and raised only on a room that renders a band.
 
 **A room's name stands in the corner, not on the sheet.** Exactly one `h1` per page, and it is the
 first heading; the wordmark is the `h1` on home alone, because home is roomless.

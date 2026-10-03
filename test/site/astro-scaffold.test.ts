@@ -5,7 +5,7 @@ import { readFile, readdir, rm } from "node:fs/promises";
 import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { join, relative } from "node:path";
-import { NAV_ITEMS } from "../../src/layouts/nav.ts";
+import { NAV_ITEMS, ROUTE_NAMES } from "../../src/layouts/nav.ts";
 import { cleanPublicGenerated } from "../../scripts/clean-public-generated.ts";
 
 // The Astro scaffold and shared layout (Issue #203; SPEC: the ratified 2026-07-21 comment on Issue #202). Builds once into out/test-astro-build (gitignored) and asserts on the rendered output plus the committed sources.
@@ -46,6 +46,8 @@ type PageSpec = {
   /** A document room's index script, Astro-processed and inlined (Issue #483); a pattern because the minifier picks the quote style. */
   pageScript?: RegExp;
   noindex?: true;
+  trail?: readonly (readonly [string, string])[];
+  also?: readonly [string, string];
 };
 
 /** The shell's binder, inlined into every page by Astro (Issue #483); stripped before a page's OWN scripts are counted. */
@@ -69,6 +71,7 @@ const PAGES: readonly PageSpec[] = [
     route: "faq/index.html",
     dir: "/faq/",
     current: "Q & A",
+    trail: [["Vellum", "/"], ["Questions & Answers", "/faq/"]],
     room: "Questions & Answers",
     title: "Questions & Answers · Vellum",
     ogTitle: "Questions and Answers · Vellum",
@@ -81,6 +84,7 @@ const PAGES: readonly PageSpec[] = [
     route: "glossary/index.html",
     dir: "/glossary/",
     current: "Glossary",
+    trail: [["Vellum", "/"], ["The Glossary", "/glossary/"]],
     room: "The Glossary",
     title: "The Glossary · Vellum",
     ogTitle: "The Glossary · Vellum",
@@ -93,6 +97,7 @@ const PAGES: readonly PageSpec[] = [
     route: "explorer/index.html",
     dir: "/explorer/",
     current: "Explorer",
+    trail: [["Vellum", "/"], ["The Explorer", "/explorer/"]],
     room: "The Explorer",
     title: "The Explorer · Vellum",
     ogTitle: "The Explorer · Vellum",
@@ -105,6 +110,7 @@ const PAGES: readonly PageSpec[] = [
     route: "print-room/index.html",
     dir: "/print-room/",
     current: "Print Room",
+    trail: [["Vellum", "/"], ["The Print Room", "/print-room/"]],
     room: "The Print Room",
     title: "The Print Room · Vellum",
     ogTitle: "The Print Room · Vellum",
@@ -117,6 +123,7 @@ const PAGES: readonly PageSpec[] = [
   {
     route: "print-room/portfolio/index.html",
     dir: "/print-room/portfolio/",
+    trail: [["Vellum", "/"], ["The Explorer", "/explorer/"], ["The Portfolio", "/print-room/portfolio/"]],
     room: "The Portfolio",
     title: "The Portfolio · Vellum",
     ogTitle: "The Portfolio · Vellum",
@@ -130,6 +137,7 @@ const PAGES: readonly PageSpec[] = [
     route: "reading-room/index.html",
     dir: "/reading-room/",
     current: "Reading Room",
+    trail: [["Vellum", "/"], ["The Reading Room", "/reading-room/"]],
     room: "The Reading Room",
     title: "The Reading Room · Vellum",
     ogTitle: "The Reading Room · Vellum",
@@ -143,6 +151,7 @@ const PAGES: readonly PageSpec[] = [
     route: "seed-of-the-day/index.html",
     dir: "/seed-of-the-day/",
     current: "Today",
+    trail: [["Vellum", "/"], ["The Seed of the Day", "/seed-of-the-day/"]],
     room: "The Seed of the Day",
     title: "The Seed of the Day · Vellum",
     ogTitle: "The Seed of the Day · Vellum",
@@ -157,6 +166,8 @@ const PAGES: readonly PageSpec[] = [
   {
     route: "prospect/index.html",
     dir: "/prospect/",
+    trail: [["Vellum", "/"], ["The Explorer", "/explorer/"], ["The Prospect", "/prospect/"]],
+    also: ["The Reading Room", "/reading-room/"],
     room: "The Prospect",
     title: "The Prospect · Vellum",
     ogTitle: "The Prospect · Vellum",
@@ -169,6 +180,7 @@ const PAGES: readonly PageSpec[] = [
   {
     route: "ribbon/index.html",
     dir: "/ribbon/",
+    trail: [["Vellum", "/"], ["The Explorer", "/explorer/"], ["The Wayfarer's Ribbon", "/ribbon/"]],
     room: "The Wayfarer's Ribbon",
     title: "The Wayfarer's Ribbon · Vellum",
     ogTitle: "The Wayfarer's Ribbon · Vellum",
@@ -182,6 +194,7 @@ const PAGES: readonly PageSpec[] = [
     route: "gallery/index.html",
     dir: "/gallery/",
     current: "Gallery",
+    trail: [["Vellum", "/"], ["The Gallery", "/gallery/"]],
     room: "The Gallery",
     title: "The Gallery · Vellum",
     ogTitle: "The Gallery · Vellum",
@@ -408,6 +421,57 @@ test("the canonical nav renders the typed items flat, root-absolute, one aria-cu
     assert.ok(!nav.includes("manicule"), `${p.route}: the manicule retired with the folio band (#461 ruling 1)`);
     const seps = nav.split('<span class="sep" aria-hidden="true">').length - 1;
     assert.equal(seps, NAV_ITEMS.length - 1, `${p.route} items are dotted apart by hidden separator spans`);
+  }
+});
+
+const TRAIL = /<div class="where"><nav class="trail" aria-label="Where you are">([\s\S]*?)<\/nav>([\s\S]*?)<\/div>/g;
+const SEGMENT = /<a href="([^"]+)">([^<]+)<\/a>|<span (aria-current="page"|class="here")>([^<]+)<\/span>/g;
+const WAY = /<span class="way" aria-hidden="true">[^<]*<\/span><wbr>/g;
+
+test("the trail names the path from Vellum to the page on every page in the tree and on no other, every segment a link but the page's own, which is its room (Issue #668)", () => {
+  for (const p of PAGES) {
+    const html = page(p.route);
+    const trails = [...html.matchAll(TRAIL)];
+    if (!p.trail) {
+      assert.equal(trails.length, 0, `${p.route} has no seat in the tree, so it draws no trail`);
+      for (const piece of ['class="where"', 'class="trail"', 'class="also"']) assert.ok(!html.includes(piece), `${p.route} carries no ${piece}`);
+      continue;
+    }
+    assert.equal(trails.length, 1, `${p.route} draws exactly one trail`);
+    const [whole, inner = ""] = trails[0]!;
+    const navEnd = html.indexOf("</nav>", html.indexOf('<nav class="rooms"'));
+    assert.notEqual(navEnd, -1, `${p.route} has its rooms nav`);
+    assert.ok(html.indexOf(whole) > navEnd && html.indexOf(whole) < html.indexOf("</header>"), `${p.route} seats the trail in the cluster after the rooms nav and outside it, so the doors reads never meet it`);
+    const segments = [...inner.matchAll(SEGMENT)];
+    assert.equal(inner.replace(SEGMENT, "").replace(WAY, ""), "", `${p.route}'s trail holds segments and hidden way-marks and nothing else: ${inner}`);
+    assert.equal(inner.split('<span class="way" aria-hidden="true">').length - 1, segments.length - 1, `${p.route}'s segments are parted by hidden way-marks`);
+    assert.deepEqual(segments.map((m) => [decode(m[2] ?? m[4]!), m[1] ?? p.dir]), p.trail, `${p.route}'s trail, root-absolute`);
+    assert.ok(segments.slice(0, -1).every((m) => m[1] !== undefined), `${p.route}: every segment above the page is a link`);
+    const last = segments.at(-1)!;
+    assert.equal(last[1], undefined, `${p.route}: the page you stand on is not somewhere to go`);
+    assert.equal(last[3], p.current ? 'class="here"' : 'aria-current="page"', `${p.route}: the trail carries the page mark exactly when the nav does not`);
+    assert.equal(decode(last[4]!), p.room, `${p.route}: the trail ends at the page's own room`);
+  }
+});
+
+test("the alias line: the Prospect alone says where else it is reached from, as one link under its trail (Issue #668)", () => {
+  for (const p of PAGES.filter((q) => q.trail)) {
+    const tail = [...page(p.route).matchAll(TRAIL)][0]?.[2];
+    assert.notEqual(tail, undefined, `${p.route} draws its trail`);
+    if (!p.also) {
+      assert.equal(tail, "", `${p.route} is reached from nowhere else`);
+      continue;
+    }
+    const m = tail!.match(/^<p class="also">[^<]*<a href="([^"]+)">([^<]+)<\/a><\/p>$/);
+    assert.ok(m, `${p.route} carries one alias line holding one link: ${tail}`);
+    assert.deepEqual([decode(m[2]!), m[1]], p.also, `${p.route}'s alias line names the room it is also reached from`);
+  }
+});
+
+test("one page mark per page across nav and trail: one on every page in the tree, none on home or the Specimen (Issue #668)", () => {
+  for (const p of PAGES) {
+    const marks = page(p.route).match(/<[a-z]+\b[^>]*\saria-current="page"/g) ?? [];
+    assert.equal(marks.length, p.trail ? 1 : 0, `${p.route} carries ${marks.length} page marks`);
   }
 });
 
@@ -762,6 +826,19 @@ test("the kit's lifted shapes render one shape on every page that wears them: th
     const got = [...page(p.route).matchAll(/<a[^>]*class="legend-btn[^"]*"[^>]*><span class="verb"[^>]*>/g)].map((m) => m[0]);
     assert.deepEqual(got, (ROADS[p.route] ?? []).map(roadOpening), `${p.route}'s roads out, in order, as the kit renders them`);
   }
+});
+
+test("every road out names its destination by that route's name in the tree (Issue #668)", () => {
+  let roads = 0;
+  for (const p of PAGES) {
+    for (const m of page(p.route).matchAll(/<a\b[^>]*\bclass="legend-btn[^"]*"[^>]*\bhref="([^"]+)"[^>]*><span class="verb"[^>]*>[^<]*<\/span><span class="room">([^<]+)<\/span><\/a>/g)) {
+      roads++;
+      const route = new URL(m[1]!, `https://v.test${p.dir}`).pathname;
+      assert.notEqual(ROUTE_NAMES[route], undefined, `${p.route}'s road to ${route} goes to a named route`);
+      assert.equal(decode(m[2]!), ROUTE_NAMES[route], `${p.route}'s road to ${route} names it as the tree does`);
+    }
+  }
+  assert.equal(roads, Object.values(ROADS).flat().length, "every road on the ROADS roster was read");
 });
 
 test("the seed form floats on the stage as the mockup's corner chrome, its ratified semantics whole (#470, was the #289 cartouche hero)", () => {

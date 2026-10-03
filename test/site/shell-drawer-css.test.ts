@@ -109,3 +109,50 @@ test("home's sheet keeps only what clears home's own furniture (#263, #483)", ()
     assert.ok(homeNarrow.includes(kept), `${kept} clears home's own furniture, so it stays home's; test/site/home-cluster.test.ts pins its dress`);
   }
 });
+
+type CssRule = { readonly media: readonly string[]; readonly selector: string; readonly body: string };
+function cssRules(css: string, media: readonly string[] = []): CssRule[] {
+  const out: CssRule[] = [];
+  for (let i = 0, open = css.indexOf("{"); open >= 0; open = css.indexOf("{", i)) {
+    let close = open + 1;
+    for (let depth = 1; depth > 0 && close < css.length; close++) depth += css[close] === "{" ? 1 : css[close] === "}" ? -1 : 0;
+    const prelude = css.slice(i, open).trim();
+    const body = css.slice(open + 1, close - 1);
+    if (prelude.startsWith("@media")) out.push(...cssRules(body, [...media, prelude]));
+    else if (!prelude.startsWith("@")) out.push({ media, selector: prelude, body });
+    i = close;
+  }
+  return out;
+}
+
+const shellRules = cssRules(layout.slice(styleAt + "<style is:global>".length, layout.indexOf("</style>", styleAt)));
+const trailRules = shellRules.filter((r) => /\.(trail|also|where)\b/.test(r.selector));
+const ruleAt = (selector: string, media: readonly string[]): string => {
+  const found = shellRules.filter((r) => r.selector === selector && JSON.stringify(r.media) === JSON.stringify(media));
+  assert.equal(found.length, 1, `exactly one rule ${selector} under ${JSON.stringify(media)}`);
+  return found[0]!.body;
+};
+
+test("the trail is quiet by size and never by a dimmer ink: no rule that dresses it reaches for an ink under the floor on the deep (Issue #668)", () => {
+  assert.ok(trailRules.length >= 10, `the reader found the trail's rules (${trailRules.length}), so the sweep below is not of nothing`);
+  for (const r of trailRules) assert.doesNotMatch(r.body, /--ink-faded|--line-tan/, `${r.selector} wears an ink that reads under 4.5:1 on the deep`);
+  const here = ruleAt('.trail [aria-current="page"], .trail .here', []);
+  assert.match(here, /color:\s*var\(--parchment-bright\)/, "the page's own segment brightens");
+  assert.match(here, /text-decoration:\s*underline/, "and is underlined, never colour alone");
+});
+
+test("the band buys the trail its ground where a band renders, keyed to what the cluster carries, declared on the root, its padding derived and on screen alone (Issue #668)", () => {
+  assert.match(ruleAt(":root:has(.band):has(.trail)", []), /--band-h:\s*[\d.]+rem/, "the band's height on the root every reader of the token reads");
+  assert.match(ruleAt(":root:has(.band):has(.trail)", ["@media (max-width: 720px)"]), /--band-h:\s*[\d.]+rem/, "and a phone's, on the root too");
+  const padding = shellRules.filter((r) => r.selector === "body.room:has(.band):has(.trail)");
+  assert.equal(padding.length, 2, "one padding for a wide screen and one for a phone");
+  for (const r of padding) assert.ok(r.media.some((m) => /\bscreen\b/.test(m)), `${JSON.stringify(r.media)}: on paper the layout's own padding: 0 stands`);
+  for (const media of [["@media screen"], ["@media screen and (max-width: 720px)"]]) {
+    assert.match(ruleAt("body.room:has(.band):has(.trail)", media), /padding-top:\s*calc\(var\(--band-h\) \+ [\d.]+rem\)/, `${media[0]}: the padding derives from the token, never a literal beside it`);
+  }
+});
+
+test("the drawer's cap grows only where a trail rides in it, and the cap every page wears is unchanged (Issue #668)", () => {
+  assert.match(ruleAt("body:has(.rooms-reveal:checked) .chrome:has(.trail) .rooms::before", ["@media (max-width: 900px)"]), /height:\s*calc\(var\(--band-h\) \+ [\d.]+rem\)/);
+  assert.match(rule(narrow, ".chrome .rooms::before"), /height:\s*calc\(var\(--band-h\) \+ 1rem\)/, "home's drawer, which carries no trail, keeps its cap");
+});
