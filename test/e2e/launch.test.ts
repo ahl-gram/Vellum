@@ -195,8 +195,8 @@ test("the retry pauses after the killed browser is gone, and never after the las
   assert.equal(all.logs.filter((l) => /retrying/.test(l)).length, 2, `a retry was announced after the last attempt: ${JSON.stringify(all.logs)}`);
 });
 
-test("the ruled tuning is the default: three attempts of 160 polls at 125ms, a 5s kill cap, a 2s pause (Issue #621 rulings M1 and M2)", async () => {
-  assert.deepEqual(LAUNCH_TUNING, { attempts: 3, polls: 160, pollMs: 125, killGraceMs: 5000, retryPauseMs: 2000 });
+test("the ruled tuning is the default: three attempts of a 40s wait (320 polls at 125ms), a 5s kill cap, a 2s pause (Issue #621 rulings)", async () => {
+  assert.deepEqual(LAUNCH_TUNING, { attempts: 3, polls: 320, pollMs: 125, killGraceMs: 5000, retryPauseMs: 2000 });
   const r = rig([{ exitAfterMs: 1 }, { exitAfterMs: 1 }, { exitAfterMs: 1 }]);
   const got = await settle(launchWithRetry(r.deps));
   assert.match(got.error?.message ?? "", /after 3 launch attempts/);
