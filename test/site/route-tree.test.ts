@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { NAV_ITEMS, ROUTE_CHILDREN, ROUTE_NAMES, aliasesOf, seatOf, trailFor } from "../../src/layouts/nav.ts";
 import { ATLAS_ROUTE, DISCOVERY_ROUTES, HOME_ROUTE, ROUTE_ENTRIES } from "../../scripts/generate-discovery.ts";
 
-// The route tree the trail reads (Issue #668, the tree ruled on Issue #667). Every expectation is LITERAL: a roster taken from the data it checks would be circular.
+// The route tree the trail reads (Issue #668, the tree ruled on Issue #667). The trails, the children and the unseated routes are LITERAL, since a roster taken from the data it checks would be circular; only the top line is read from NAV_ITEMS, and TRAILS' literal keys red if the nav grows.
 
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 

@@ -85,7 +85,7 @@ function fitRoom({ frame, sheet: sheetEl, aspect, phone, slipRect, slipW, glassL
   if (phone && slipRect !== null) document.body.style.setProperty("--sheet-h", `${window.innerHeight - slipRect.top}px`);
   else document.body.style.removeProperty("--sheet-h");
 }
-const drawerOpen = (narrow: MediaQueryList): boolean => q<HTMLInputElement>(".rooms-reveal")?.checked === true && narrow.matches;
+const drawerLiftsTrail = (narrow: MediaQueryList): boolean => q(".where") !== null && q<HTMLInputElement>(".rooms-reveal")?.checked === true && narrow.matches;
 
 function refitOnChrome(layout: () => void): void {
   const chrome = q("header.chrome");
@@ -112,7 +112,7 @@ export function bindRoom<Held>(parts: RoomParts<Held>): Room {
   const aspect = () => parts.aspect?.() ?? svgAspect();
 
   const layout = () => {
-    if (drawerOpen(narrowQuery)) return;
+    if (drawerLiftsTrail(narrowQuery)) return;
     const held = camera.hold();
     const phone = narrowQuery.matches;
     if (home !== null) dockLegend<HTMLElement>(home, legendSeat({ narrow: phone, hasSlip: true }));
