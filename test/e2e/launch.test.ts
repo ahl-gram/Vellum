@@ -155,16 +155,20 @@ test("a browser that exits on its own fails its attempt at once, and the next st
 });
 
 test("a killed browser that is never gone stops the launch rather than start another on the port it may hold", async () => {
-  const r = rig([{ reapMs: null }, { upAtProbe: 1 }]);
+  const r = rig([{ exitAfterMs: 5, output: "first browser output" }, { reapMs: null, output: "second browser hung" }, { upAtProbe: 1 }]);
   const got = await settle(launchWithRetry(r.deps, { ...FAST, killGraceMs: 100 }));
-  assert.match(got.error?.message ?? "", /pid 101, was not gone 100ms after SIGKILL/);
-  assert.deepEqual(r.events.filter((e) => e.startsWith("spawn")), ["spawn 101"]);
+  assert.match(
+    got.error?.message ?? "",
+    /pid 102, was not gone 100ms after SIGKILL[\s\S]*attempt 1\/3[^\n]*exited code=1[\s\S]*first browser output[\s\S]*attempt 2\/3[^\n]*no page target[\s\S]*second browser hung/,
+  );
+  assert.deepEqual(r.events.filter((e) => e.startsWith("spawn")), ["spawn 101", "spawn 102"]);
 });
 
 test("no launch line and no line of the launch error reads as a check tally, which a lane that dies at launch would report as its score", async () => {
   const ok = rig([{}, { upAtProbe: 1 }]);
   await launchWithRetry(ok.deps, FAST);
   assert.equal(ok.logs.length, 2, `expected the retry line and the success line, got ${JSON.stringify(ok.logs)}`);
+  assert.deepEqual(ok.logs.map((l) => l.includes("launch attempt")), [true, false], `a search for "launch attempt" must find the retry and not the success line: ${JSON.stringify(ok.logs)}`);
   const failed = await settle(launchWithRetry(rig([{ output: "x" }, { exitAfterMs: 5 }, { spawnError: true }]).deps, FAST));
   const lines = [...ok.logs, ...(failed.error?.message ?? "").split("\n")];
   assert.ok(lines.length > 6, "the failed launch threw no multi-line error to read");
@@ -256,7 +260,7 @@ test("the harness's own launch, with a stand-in browser silent on its first star
     assert.ok(retry, `no retry line naming attempt 1's own reason: ${JSON.stringify(s.lines())}`);
     assert.equal(isAlive(Number(retry[1])), false, "attempt 1's stand-in is still running");
     assert.equal(s.profiles().length, 1, `expected only the live attempt's profile, found ${s.profiles().join(", ")}`);
-    const up = s.lines().join("\n").match(/browser up on attempt 2\/3, pid (\d+), devtools target in \d+ms/);
+    const up = s.lines().join("\n").match(/browser up on attempt 2\/3, pid (\d+), devtools target in \d+ms$/m);
     assert.ok(up, `no success line: ${JSON.stringify(s.lines())}`);
     cleanup();
     assert.ok(await goneWithin(Number(up[1]), 5000), "cleanup() left attempt 2's stand-in running");

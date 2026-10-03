@@ -8,7 +8,7 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import type { BrowserProcess, CdpMessage, Clip, Payload, StartOptions, SuiteContext, TouchPoint } from "./types.ts";
 import { debugPortConflictMessage } from "./support/ports.ts";
-import { LAUNCH_TUNING, launchWithRetry } from "./support/launch.ts";
+import { launchWithRetry } from "./support/launch.ts";
 import type { LaunchAttempt, LaunchTuning } from "./support/launch.ts";
 import { serverState, startServer } from "./site-server.ts";
 
@@ -221,7 +221,7 @@ async function spawnBrowser(browser: string, DPORT: number): Promise<LaunchAttem
   return { child, discard: () => rm(dir, { recursive: true, force: true }).catch(() => {}) };
 }
 
-export async function launchBrowser(browser: string, DPORT: number, tuning: LaunchTuning = LAUNCH_TUNING): Promise<{ webSocketDebuggerUrl: string }> {
+export async function launchBrowser(browser: string, DPORT: number, tuning?: LaunchTuning): Promise<{ webSocketDebuggerUrl: string }> {
   return launchWithRetry(
     {
       preflight: () => assertDebugPortFree(DPORT),
