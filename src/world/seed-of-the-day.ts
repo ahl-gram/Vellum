@@ -5,8 +5,10 @@ export function seedForDate(date: Date): number {
   return year * 10000 + month * 100 + day;
 }
 
+const DATELINE = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
+
 export function datelineFor(date: Date): string {
-  return String(seedForDate(date));
+  return `${DATELINE.format(date)} · seed ${seedForDate(date)}`;
 }
 
 /** The day's capital line. Pure so the former-name clause is unit-reachable; the page only appends it to the DOM. */
