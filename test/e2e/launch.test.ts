@@ -175,6 +175,13 @@ test("no launch line and no line of the launch error reads as a check tally, whi
   for (const line of lines) assert.equal(laneCheckTally(line), null, `${JSON.stringify(line)} reads as a check tally`);
 });
 
+test("a browser that cannot even be started keeps every earlier attempt in the error", async () => {
+  const r = rig([{ output: "first browser output" }]);
+  const deps: LaunchDeps<string> = { ...r.deps, spawn: (attempt) => (attempt === 2 ? Promise.reject(new Error("ENOSPC: no space left on device, mkdtemp")) : r.deps.spawn(attempt)) };
+  const got = await settle(launchWithRetry(deps, FAST));
+  assert.match(got.error?.message ?? "", /attempt 2\/3 could not start a browser: ENOSPC[\s\S]*attempt 1\/3[^\n]*no page target[\s\S]*first browser output/);
+});
+
 test("a busy debug port stops the launch before any browser starts", async () => {
   const r = rig([{ upAtProbe: 1 }]);
   const got = await settle(launchWithRetry({ ...r.deps, preflight: () => Promise.reject(new Error("port busy")) }, FAST));

@@ -24,7 +24,7 @@ const httpGet = (url: string): Promise<string> =>
       .on("error", reject);
   });
 
-// #339: probePageTarget attaches to whatever answers /json, so an orphaned browser holding the port would be adopted in SILENCE; a plain TCP connect also catches a non-browser squatter.
+// Issue #339: probePageTarget attaches to whatever answers /json, so an orphaned browser holding the port would be adopted in SILENCE; a plain TCP connect also catches a non-browser squatter.
 function probeDebugPort(DPORT: number, timeoutMs = 300): Promise<boolean> {
   return new Promise((res) => {
     const socket = net.connect({ host: "127.0.0.1", port: DPORT });

@@ -159,8 +159,11 @@ section points there rather than restating it.
   cold browser can take 20 seconds or more to bind its debug port, and why is not established:
   every launch prints its attempt and its time to a page target, each retry line names that
   attempt's own reason, its pid and its kill-to-gone time, and a rescued lane passes, so read the
-  logs of passing runs before asserting a cause or moving the wait. The measurement that found the
-  broken retry, and the probe that reproduces it against a real browser, are in
+  logs of passing runs before asserting a cause or moving the wait:
+  `gh api --allow-escape-sequences repos/ahl-gram/Vellum/actions/jobs/<job>/logs`, grepped for
+  `browser up on attempt` and `exposed no devtools target`. The same read of the failing lanes'
+  logs is what showed the broken retry, every attempt after the first ending one 125ms poll after
+  it began; the probe that reproduces it against a real browser is in
   `handbook/plans/621/621-plan.md`.
 - **A visual claim in a suite is carried by a control taken in the same run.** A
   claim about PAINT goes through the one-row pixel strip, because no hit test and no computed style

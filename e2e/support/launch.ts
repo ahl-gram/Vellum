@@ -100,9 +100,17 @@ const outputOf = (life: Life): string => life.output.slice(0, OUTPUT_CHARS) || "
 
 type Outcome<T> = { readonly target: T } | { readonly failure: string };
 
+async function spawnAttempt<T>(deps: LaunchDeps<T>, tuning: LaunchTuning, attempt: number, earlier: readonly string[]): Promise<LaunchAttempt> {
+  try {
+    return await deps.spawn(attempt);
+  } catch (err) {
+    throw new Error(`browser launch attempt ${attempt}/${tuning.attempts} could not start a browser: ${messageOf(err)}\n${earlier.join("\n")}`, { cause: err });
+  }
+}
+
 async function attemptOnce<T>(deps: LaunchDeps<T>, tuning: LaunchTuning, attempt: number, earlier: readonly string[]): Promise<Outcome<T>> {
   const started = Date.now();
-  const spawned = await deps.spawn(attempt);
+  const spawned = await spawnAttempt(deps, tuning, attempt, earlier);
   const child = spawned.child;
   const life = watch(child);
   const head = `attempt ${attempt}/${tuning.attempts}, pid ${child.pid ?? "none"}`;
