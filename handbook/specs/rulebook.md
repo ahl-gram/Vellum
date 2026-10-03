@@ -355,12 +355,13 @@ checks against.
 ## Retired rules, do not resurrect
 
 - **The nav-tax gotcha is retired.** The shared `BaseLayout` owns nav, footer and meta; adding a
-  READING page is one `.astro` file plus one `src/layouts/nav.ts` entry. That prices the reading-page
-  kind only; a working page that mounts a bundle owes a good deal more, and
-  `handbook/specs/site-architecture.md` writes both kinds out. The flat versus
-  grouped question was ratified FLAT in #202's decision doc, modeled once as typed data, to be
-  revisited only on a named trigger: an eighth nav-listed surface scheduled, three or more wrapped
-  lines at 360px, or any item acquiring children.
+  READING page is one `.astro` file plus its entries in `src/layouts/nav.ts`. That prices the
+  reading-page kind only; a working page that mounts a bundle owes a good deal more, and
+  `handbook/specs/site-architecture.md` writes both kinds out. **The nav is a flat top line over a
+  tree**, both modeled once as typed data: `NAV_ITEMS` stays flat and is all the nav renders, and a
+  room's children are seated under it in `ROUTE_CHILDREN`, which the trail reads. Revisit the top
+  line only on a named trigger: an eighth surface scheduled for it, or three or more wrapped lines
+  at 360px.
 - **"Site-shell issues park behind the Scriptorium"** was a working agreement for the duration of that
   migration only. #201 closed 2026-07-23 and the agreement is discharged.
 - **The old comment rule** ("a local invariant belongs in a code comment at the line that breaks") was
