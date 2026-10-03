@@ -128,7 +128,7 @@ const trail = trailFor(path);
   /* The reserved walnut band the head cluster stands on (#461 ruling 5): the sheet scrolls beneath the band, never beneath bare lettering. */
   --band-h: 7.6rem;
   --chrome-x: 1.6rem; --chrome-y: 1.4rem;
-  --trail-gap: 0.36rem;
+  --trail-gap: 0.6rem;
 }
 /* The layout's inline style renders AFTER the page css link, so an equal-specificity page rule silently loses: page deviations need higher specificity. A palette inversion, not a dark mode: form controls stay light. */
 :root { color-scheme: light; }
@@ -175,7 +175,7 @@ header.chrome a:focus-visible, footer a:focus-visible { outline-color: var(--par
   text-decoration: underline; text-underline-offset: 0.4em; text-decoration-thickness: 1px; }
 .trail .way { margin: 0 0.45em; color: var(--parchment); font-size: 0.78rem; vertical-align: -0.04em; }
 .trail > :not(.way) { white-space: nowrap; }
-.also { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.62rem; color: var(--parchment); margin: 0.12rem 0 0; }
+.also { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.62rem; color: var(--parchment); margin: 0.55rem 0 0; }
 .also a { color: var(--parchment); text-decoration-color: rgb(from var(--parchment) r g b / 0.55); text-underline-offset: 0.25em; }
 :root:has(.band):has(.trail) { --band-h: 10.6rem; }
 @media screen {
@@ -274,7 +274,6 @@ footer a { color: inherit; }
   }
   body.room:has(.rooms-reveal:checked) [popover]:popover-open { display: none; }
   :root { --trail-gap: 0.55rem; }
-  .also { margin-top: 0.55rem; }
   body:has(.rooms-reveal:checked) .where {
     position: fixed; z-index: 46; left: var(--chrome-x); top: calc(var(--band-h) + 0.6rem);
     width: calc(min(16rem, 100vw) - var(--chrome-x) - 1rem); padding-bottom: 0.25rem;

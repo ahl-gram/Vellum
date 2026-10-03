@@ -143,11 +143,11 @@ when the page is on its top line, the trail's last segment when it is not. The m
 AND underlined, never colour alone; on a top-level room the trail's last segment wears the same
 dress without the mark, which the nav carries. Home carries none, its wordmark being its mark, and
 so does a page deliberately outside the tree. The trail's links are parchment like the nav's, never
-a dimmer ink, and below the fold each clears a thumb's 24px from every other target. Below the fold
+a dimmer ink, and at every width each clears a thumb's 24px from every other target. Below the fold
 the trail rides into the open drawer's cap above the doors, because opening the nav to ask where
 you are must not take the answer away. **Provisional until the post-use review:** the trail's size
 step under the nav, its separator glyph, the alias line's wording and whether it earns its place,
-the trail and the nav sharing one ink above 901, the spacing that clears the phone's targets, the
+the trail and the nav sharing one ink above 901, the margins that clear the targets' spacing, the
 Gallery's first row given back its gap, the phone-sized band on a document room, the trail standing
 aside on a chart room while the phone sheet is up, and the alias link's strengthened underline.
 

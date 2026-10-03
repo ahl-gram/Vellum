@@ -1,4 +1,4 @@
-// The trail under the nav (Issue #668): its links take a real press at every width, it rides the phone drawer's cap above the doors, below the fold it clears a thumb's 24px round each of its links, it stands aside while a chart room's phone sheet is up, and the band and the Gallery give it ground. Every target is HIT-TESTED, never clicked through element.click().
+// The trail under the nav (Issue #668): its links take a real press at every width, it rides the phone drawer's cap above the doors, it clears a thumb's 24px round each of its links at every width, it stands aside while a chart room's phone sheet is up, and the band and the Gallery give it ground. Every target is HIT-TESTED, never clicked through element.click().
 import type { Payload, SuiteContext } from "../../types.ts";
 import type { makeSettle } from "../../support/settle.ts";
 
@@ -6,7 +6,7 @@ type Box = { x: number; y: number; w: number; h: number; right: number; bottom: 
 type Target = Box & { t: string; hit: boolean };
 type Trail = {
   path: string; innerW: number; innerH: number; scrollW: number; bandH: number; checked: boolean; cluster: Box; where: Box | null; whereVisibility: string | null;
-  trailInk: Box | null; alsoInk: Box | null; links: Target[]; crumbs: number[]; crumbWrap: string[]; burger: Box | null; drawer: Box | null; capBottom: number; doors: Target[];
+  trailInk: Box | null; alsoInk: Box | null; links: Target[]; navLinks: Target[]; crumbs: number[]; crumbWrap: string[]; burger: Box | null; drawer: Box | null; capBottom: number; doors: Target[];
   firstDoorInk: Box | null; linkColor: string | null; hereColor: string | null; hereLine: string | null;
 };
 export type TrailKit = SuiteContext & { settle: ReturnType<typeof makeSettle>; goto: (path: string) => Promise<void> };
@@ -24,7 +24,7 @@ const READ: Payload<Trail> = `(() => {
     bandH: parseFloat(getComputedStyle(root).getPropertyValue("--band-h")) * parseFloat(getComputedStyle(root).fontSize),
     checked: !!document.querySelector(".rooms-reveal")?.checked, cluster: box(document.querySelector("header.chrome")), where: box(where),
     whereVisibility: where ? getComputedStyle(where).visibility : null, trailInk: ink(document.querySelector("header.chrome .trail")), alsoInk: ink(document.querySelector("header.chrome .also")),
-    links: [...document.querySelectorAll("header.chrome .where a")].map(target), crumbs: [...document.querySelectorAll("header.chrome .trail > :is(a, span):not(.way)")].map((c) => c.getClientRects().length),
+    links: [...document.querySelectorAll("header.chrome .where a")].map(target), navLinks: [...document.querySelectorAll("header.chrome nav.rooms a")].map(target), crumbs: [...document.querySelectorAll("header.chrome .trail > :is(a, span):not(.way)")].map((c) => c.getClientRects().length),
     crumbWrap: [...document.querySelectorAll("header.chrome .trail > :is(a, span):not(.way)")].map((c) => getComputedStyle(c).whiteSpace),
     burger: box(document.querySelector(".rooms-reveal")), drawer: box(nav), capBottom: nav ? box(nav).y + parseFloat(getComputedStyle(nav, "::before").height) : 0,
     doors: nav ? [...nav.querySelectorAll("a, [aria-current]")].map(target) : [],
@@ -59,9 +59,11 @@ export async function dr11Wide(k: TrailKit): Promise<void> {
     for (const page of ["/prospect/", "/faq/"]) {
       await k.goto(page);
       const d = await evaluate(READ);
-      const good = d.links.length > 0 && d.links.every((l) => l.hit) && d.linkColor === PARCHMENT && d.hereColor === PARCHMENT_BRIGHT && d.hereLine === "underline";
+      const margins = spacing([...d.links, ...d.navLinks]);
+      const good = d.links.length > 0 && d.navLinks.length > 0 && d.links.every((l) => l.hit) && margins.every((m) => m >= 0)
+        && d.linkColor === PARCHMENT && d.hereColor === PARCHMENT_BRIGHT && d.hereLine === "underline";
       ok &&= good;
-      rows.push(`${width} ${page}: ${d.links.map((l) => `${l.t}=${l.hit}`).join(",")} link ${d.linkColor} here ${d.hereColor} ${d.hereLine}`);
+      rows.push(`${width} ${page}: ${d.links.map((l) => `${l.t}=${l.hit}`).join(",")} spacing ${margins.map((m) => m.toFixed(2)).join(",")} link ${d.linkColor} here ${d.hereColor} ${d.hereLine}`);
     }
   }
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
@@ -74,7 +76,7 @@ export async function dr11Wide(k: TrailKit): Promise<void> {
   }
   const landed = await arrived(k, "/explorer/");
   check(
-    "DR11 at 1280 and 901 every trail link on the Prospect and the FAQ takes the hand at its centre, the links resolve parchment and the page's own segment parchment-bright AND underlined, and a REAL press on the Prospect's \"The Explorer\" lands on the Explorer (Issue #668)",
+    "DR11 at 1280 and 901 every trail link on the Prospect and the FAQ takes the hand at its centre, a thumb's 24px clears round every trail, alias and nav link (Alex, 2026-10-03, on Issue #668), the links resolve parchment and the page's own segment parchment-bright AND underlined, and a REAL press on the Prospect's \"The Explorer\" lands on the Explorer (Issue #668)",
     ok && !!explorer && landed,
     `${rows.join(" | ")}; press on The Explorer ${explorer ? "sent" : "MISSING"}, landed ${landed}`,
   );
