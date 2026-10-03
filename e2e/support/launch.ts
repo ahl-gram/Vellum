@@ -33,8 +33,8 @@ export interface LaunchTuning {
 
 // killGraceMs is a cap on a hang, not a budget: the one kill measured on a GitHub runner was gone 8ms after SIGKILL (PR #735's CI, 2026-10-02), and the old loop's 0.13s retries put every earlier one under about 130ms.
 // retryPauseMs is Alex's ruling on Issue #621 (2026-10-02): insurance against an overloaded runner, which nothing measured has shown.
-// polls x pollMs is a 40s wait, about twice the slowest start measured on a GitHub runner (attempt 1 up in 0.7, 6.2, 7.4, 9.8 and 20.4s, one attempt 1 past 20s whose retry came up in 9.4s; PR #735's CI, 2026-10-02), Alex's ruling on Issue #621.
-export const LAUNCH_TUNING: LaunchTuning = { attempts: 3, polls: 320, pollMs: 125, killGraceMs: 5000, retryPauseMs: 2000 };
+// polls x pollMs is a 60s wait, about 1.7 times the slowest start measured on a GitHub runner, as Alex ruled on Issue #621 (2026-10-02): attempt 1 up in 0.7, 1.2, 6.2, 7.2, 7.4, 7.5, 7.6, 8.5, 9.8, 20.4, 24.5, 28.0 and 35.7s, and one past 20s whose retry came up in 9.4s (PR #735's CI).
+export const LAUNCH_TUNING: LaunchTuning = { attempts: 3, polls: 480, pollMs: 125, killGraceMs: 5000, retryPauseMs: 2000 };
 
 const OUTPUT_CHARS = 2000;
 

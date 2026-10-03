@@ -202,11 +202,11 @@ test("the retry pauses after the killed browser is gone, and never after the las
   assert.equal(all.logs.filter((l) => /retrying/.test(l)).length, 2, `a retry was announced after the last attempt: ${JSON.stringify(all.logs)}`);
 });
 
-test("the ruled tuning is pinned: three attempts of a 40s wait (320 polls at 125ms), a 5s kill cap, a 2s pause (Issue #621 rulings)", () => {
-  assert.deepEqual(LAUNCH_TUNING, { attempts: 3, polls: 320, pollMs: 125, killGraceMs: 5000, retryPauseMs: 2000 });
+test("the ruled tuning is pinned: three attempts of a 60s wait (480 polls at 125ms), a 5s kill cap, a 2s pause (Issue #621 rulings)", () => {
+  assert.deepEqual(LAUNCH_TUNING, { attempts: 3, polls: 480, pollMs: 125, killGraceMs: 5000, retryPauseMs: 2000 });
 });
 
-test("with no tuning passed, an attempt that never answers is killed after the ruled 40s: 320 probes, 40000ms of waiting", async () => {
+test("with no tuning passed, an attempt that never answers is killed after the ruled 60s: 480 probes, 60000ms of waiting", async () => {
   mock.timers.enable({ apis: ["setTimeout"] });
   try {
     const r = rig([{}, { upAtProbe: 1 }]);
@@ -216,13 +216,13 @@ test("with no tuning passed, an attempt that never answers is killed after the r
     });
     const flush = () => new Promise((res) => setImmediate(res));
     let waited = 0;
-    for (; waited <= 60_000; waited += 25) {
+    for (; waited <= 90_000; waited += 25) {
       await flush();
       if (r.events.includes("kill 101 SIGKILL")) break;
       mock.timers.tick(25);
     }
-    assert.equal(r.probes[0], 320, "attempt 1 did not probe 320 times before its kill");
-    assert.equal(waited, 40_000, "attempt 1 was not killed after exactly 40s of waiting");
+    assert.equal(r.probes[0], 480, "attempt 1 did not probe 480 times before its kill");
+    assert.equal(waited, 60_000, "attempt 1 was not killed after exactly 60s of waiting");
     for (let n = 0; !launch.done && n < 1000; n++) {
       mock.timers.tick(25);
       await flush();
