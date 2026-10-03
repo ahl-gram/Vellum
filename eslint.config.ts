@@ -62,7 +62,7 @@ export default defineConfig(
     name: "Issue #675: the house's rules on every TypeScript root",
     files: TS_ROOTS,
     plugins: { vellum },
-    rules: { "vellum/ts-comment-no-js-module": "error", "vellum/template-silent-escape": "error" },
+    rules: { "vellum/ts-comment-no-js-module": "error", "vellum/ts-comment-issue-form": "error", "vellum/template-silent-escape": "error" },
   },
   {
     name: "Issue #675: the living-chart engine takes its elements from the host",

@@ -1,4 +1,4 @@
-// Shared helpers for the homepage-hosted suites (#460): the camera oracle and real-input plumbing suite-home built across #455-#470, lifted here so the second landfall suite drives the same stage; extraction only, no check added or changed (ratified 2026-08-25 on #460).
+// Shared helpers for the homepage-hosted suites (Issue #460): the camera oracle and real-input plumbing suite-home built across Issue #455-Issue #470, lifted here so the second landfall suite drives the same stage; extraction only, no check added or changed (ratified 2026-08-25 on Issue #460).
 
 // The camera's state measured against the same stage box and constants it uses; the landfall breakpoint reads the VIEWPORT, as the mockup's v.w < 900 does (skeptic finding 1 on PR #467: the stage box is narrower than the viewport, so keying on it fired the narrow framing up to 947px).
 import type { Payload, Point, SuiteContext } from "../types.ts";

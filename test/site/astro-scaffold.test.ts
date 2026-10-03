@@ -8,7 +8,7 @@ import { join, relative } from "node:path";
 import { NAV_ITEMS } from "../../src/layouts/nav.ts";
 import { cleanPublicGenerated } from "../../scripts/clean-public-generated.ts";
 
-// The Astro scaffold and shared layout (#203; SPEC: the ratified 2026-07-21 comment on #202). Builds once into out/test-astro-build (gitignored) and asserts on the rendered output plus the committed sources.
+// The Astro scaffold and shared layout (Issue #203; SPEC: the ratified 2026-07-21 comment on Issue #202). Builds once into out/test-astro-build (gitignored) and asserts on the rendered output plus the committed sources.
 
 process.env.ASTRO_TELEMETRY_DISABLED = "1";
 
@@ -24,7 +24,7 @@ const decode = (s: string) =>
     .replace(/&gt;/g, ">")
     .replace(/&amp;/g, "&");
 
-// Per-page expectations (#268): room is the layout prop and title is COMPUTED from it; ogTitle feeds the og/twitter twins; current is the aria-current nav label, absent on home (the wordmark carries the home link).
+// Per-page expectations (Issue #268): room is the layout prop and title is COMPUTED from it; ogTitle feeds the og/twitter twins; current is the aria-current nav label, absent on home (the wordmark carries the home link).
 type PageSpec = {
   route: string;
   dir: string;
@@ -37,18 +37,18 @@ type PageSpec = {
   tagline: string;
   /** App surfaces only: the is:inline bundle-twin script the page must keep. */
   scriptSrc?: string;
-  /** The one stated content-page script exception (#289): home's seed-form intercept marker. */
+  /** The one stated content-page script exception (Issue #289): home's seed-form intercept marker. */
   inlineScript?: string;
-  /** The pre-paint veil script (#457): must parse before the stage. */
+  /** The pre-paint veil script (Issue #457): must parse before the stage. */
   prePaintScript?: string;
-  /** Sub 7 (#462, chart-room rulings 7 and 9): a chart room renders no band and no footer; the chart is the room. */
+  /** Sub 7 (Issue #462, chart-room rulings 7 and 9): a chart room renders no band and no footer; the chart is the room. */
   chartRoom?: true;
-  /** A document room's index script, Astro-processed and inlined (#483); a pattern because the minifier picks the quote style. */
+  /** A document room's index script, Astro-processed and inlined (Issue #483); a pattern because the minifier picks the quote style. */
   pageScript?: RegExp;
   noindex?: true;
 };
 
-/** The shell's binder, inlined into every page by Astro (#483); stripped before a page's OWN scripts are counted. */
+/** The shell's binder, inlined into every page by Astro (Issue #483); stripped before a page's OWN scripts are counted. */
 const SHELL_SCRIPT = /<script type="module">(?:(?!<\/script>)[\s\S])*closesOnScroll(?:(?!<\/script>)[\s\S])*<\/script>/;
 
 const PAGES: readonly PageSpec[] = [
@@ -227,7 +227,7 @@ const page = (route: string) => {
   return html;
 };
 
-/** A page with the shell's sitewide binder taken out, so a count is of the page's OWN scripts (#483). */
+/** A page with the shell's sitewide binder taken out, so a count is of the page's OWN scripts (Issue #483). */
 const ownScripts = (route: string) => page(route).replace(SHELL_SCRIPT, "");
 
 const headOf = (html: string) => {
@@ -428,7 +428,7 @@ test("the layout ships the cluster's ratified pins: leading, weight, the aria-cu
       /\.rooms\s+\[aria-current=(?:"page"|page)\]\s*\{[^}]*display:\s*inline-block/,
       "the current label joins motion.css's inline-block rule so a multi-word label cannot wrap mid-label",
     );
-    // The you-are-here marker never relies on color alone (#268, re-ratified at #461): brightened AND underlined.
+    // The you-are-here marker never relies on color alone (Issue #268, re-ratified at Issue #461): brightened AND underlined.
     assert.match(
       css,
       /\.rooms\s+\[aria-current=(?:"page"|page)\]\s*\{[^}]*color:\s*var\(--parchment-bright\)/,
@@ -439,7 +439,7 @@ test("the layout ships the cluster's ratified pins: leading, weight, the aria-cu
       /\.rooms\s+\[aria-current=(?:"page"|page)\]\s*\{[^}]*text-decoration(?:-line)?:\s*underline/,
       "the current label is underlined",
     );
-    // #461's second addendum: the cluster pins its own line-height rather than inheriting the page's reading leading.
+    // Issue #461's second addendum: the cluster pins its own line-height rather than inheriting the page's reading leading.
     assert.match(
       css,
       /(?:header\.chrome|\.chrome)\s*\{[^}]*line-height:\s*normal/,
@@ -698,7 +698,7 @@ test("each app page keeps its bundle-twin module script, rendered verbatim insid
   }
 });
 
-// Measured 2026-09-02 against the #464 build: home, the FAQ, the Gallery, the Glossary and the atlas byte-identical; the Print Room, the Reading Room and Today identical after collapsing whitespace between tags; the Prospect and the Ribbon the same plus one apostrophe entity each (Astro escapes a prop's text); the Explorer the same plus data-zoom on its three presses, which nothing on that page reads.
+// Measured 2026-09-02 against the Issue #464 build: home, the FAQ, the Gallery, the Glossary and the atlas byte-identical; the Print Room, the Reading Room and Today identical after collapsing whitespace between tags; the Prospect and the Ribbon the same plus one apostrophe entity each (Astro escapes a prop's text); the Explorer the same plus data-zoom on its three presses, which nothing on that page reads.
 const KIT_FOG = '<div class="fog a" aria-hidden="true"></div><div class="fog b" aria-hidden="true"></div>';
 const KIT_VIGNETTES = '<div class="vignette top" aria-hidden="true"></div><div class="vignette bottom" aria-hidden="true"></div>';
 const KIT_GLASS = (id: string) => `<div class="chrome corner br zoomery"${id} role="group" aria-label="Camera">
@@ -719,7 +719,7 @@ type Road = { id?: string; gold?: true; road?: string; href: string; verbId?: st
 const ROADS: Record<string, ReadonlyArray<Road>> = {
   "explorer/index.html": [{ id: "order-plates", gold: true, href: "../print-room/" }, { id: "journal-link", gold: true, href: "/reading-room/" }],
   "print-room/index.html": [{ id: "pr-explorer", gold: true, href: "../explorer/" }],
-  // #521 ruling 1: C's picture with A's words. Two of the row's three are BUTTONS acting on this page and not roads out: Download goes through a blob the way the Print Room's does, and Bring up turns the pile. The way in from the Print Room is the Bound Atlas slip (ruling 2), not a road back.
+  // Issue #521 ruling 1: C's picture with A's words. Two of the row's three are BUTTONS acting on this page and not roads out: Download goes through a blob the way the Print Room's does, and Bring up turns the pile. The way in from the Print Room is the Bound Atlas slip (ruling 2), not a road back.
   "print-room/portfolio/index.html": [{ id: "pf-explorer", gold: true, href: "../../explorer/" }],
   "prospect/index.html": [{ id: "pp-chart-link", gold: true, href: "/explorer/" }, { id: "pp-ribbon-link", href: "/ribbon/", verbId: "pp-ribbon-verb" }],
   "ribbon/index.html": [{ id: "rb-chart-link", gold: true, href: "/explorer/" }, { id: "rb-prospect-link", href: "/prospect/", verbId: "rb-prospect-verb" }],

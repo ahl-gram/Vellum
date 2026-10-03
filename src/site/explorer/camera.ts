@@ -1,4 +1,4 @@
-// The camera <-> transform bridge (#165): a link stores cx/cy (the world-uv centre of the viewport, 0..1) and k rather than the raw d3 translate in px, which is what lets a deep link restore the same framing on any device.
+// The camera <-> transform bridge (Issue #165): a link stores cx/cy (the world-uv centre of the viewport, 0..1) and k rather than the raw d3 translate in px, which is what lets a deep link restore the same framing on any device.
 
 export interface CameraTransform {
   x: number;

@@ -92,7 +92,7 @@ test("a quarry near (not exactly at) the chart's center reads central, not west/
 });
 
 test("the survey leads with the axis the quarry is furthest off-center on", () => {
-  // Live play, seed 20260908 (#539): Diggai at grid (208, 28) on 320x240 read "the eastern reach" while sitting 0.15 of the width east of center and 0.38 of the height north of it.
+  // Live play, seed 20260908 (Issue #539): Diggai at grid (208, 28) on 320x240 read "the eastern reach" while sitting 0.15 of the width east of center and 0.38 of the height north of it.
   const world = generateWorld(defaultRecipe(20260908));
   const q = mustQuarry(world);
   assert.equal(q.settlement.name, "Diggai", "the reported quarry");

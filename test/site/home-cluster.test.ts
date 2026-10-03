@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-// Home's head cluster (#480; SPEC: the four screenshots on #480 and their captions, the measured baseline on PR #482). The drawer's dress is the shell's, pinned in test/site/shell-drawer-css.test.ts; what stays here is what clears home's own furniture.
+// Home's head cluster (Issue #480; SPEC: the four screenshots on Issue #480 and their captions, the measured baseline on PR #482). The drawer's dress is the shell's, pinned in test/site/shell-drawer-css.test.ts; what stays here is what clears home's own furniture.
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");

@@ -45,7 +45,7 @@ function huntKit(ctx: SuiteContext) {
     await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: x1, y: y1, buttons: 1 });
     await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: x1, y: y1, button: "left", buttons: 0, clickCount: 1 });
   };
-  // The MISS tap frames the CAPITAL, never a viewport corner: classifyClick snaps to the nearest settlement with no distance cap, and the old farthest-corner scan was a per-day lottery that solved the hunt on linux CI (#304). Since #462 the sheet is fitted inside the stage, so the point is read off the svg's OWN rect at home, never as a fraction of the viewport.
+  // The MISS tap frames the CAPITAL, never a viewport corner: classifyClick snaps to the nearest settlement with no distance cap, and the old farthest-corner scan was a per-day lottery that solved the hunt on linux CI (Issue #304). Since Issue #462 the sheet is fitted inside the stage, so the point is read off the svg's OWN rect at home, never as a fraction of the viewport.
   const framePoint = (k: number, fx: number, fy: number) => evaluate<{ px: number; py: number; cx: number; cy: number; state: Zoom }>(`(()=>{
     const vp=document.getElementById("map-viewport"),W=vp.clientWidth,H=vp.clientHeight,k=${k};
     window.__vellumZoomTo({k:1,x:0,y:0});

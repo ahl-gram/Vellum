@@ -16,7 +16,7 @@ import type { PlaceManifest } from "../../render/place-manifest.ts";
 import type { Survey } from "../../render/survey.ts";
 import type { Pt } from "../../core/rdp.ts";
 
-/** #174: where the resting track mirrors to (the Explorer's verso). The engine paints ONLY where the survey rests, never from the rAF tick, and clears when the voyage leaves. */
+/** Issue #174: where the resting track mirrors to (the Explorer's verso). The engine paints ONLY where the survey rests, never from the rAF tick, and clears when the voyage leaves. */
 export interface RestingTrackSink {
   paint(points: string, viewBox: string): void;
   clear(): void;
@@ -58,7 +58,7 @@ export function createVoyage(deps: VoyageDeps) {
     mapEl.querySelectorAll(".voyage-overlay").forEach((overlay) => overlay.remove());
   }
 
-  // The #121 margin log is a SIBLING of the mount, so it survives the innerHTML wipe and must be hidden explicitly.
+  // The Issue #121 margin log is a SIBLING of the mount, so it survives the innerHTML wipe and must be hidden explicitly.
   function clearVoyage(): void {
     logPanel.hideLog();
     voyage = null;
@@ -136,7 +136,7 @@ export function createVoyage(deps: VoyageDeps) {
       // The log brightens per arrival even on a silent re-arm; the ONE polite status summary posts only on the LIVE completion, and any earlier or backward-stepped rest returns the status to "".
       logPanel.revealLog(session.logRows, f.arrived);
       if (postLog) {
-        // #275: against logEntryCount, NEVER ports.length, or the summary posts a leg early at the last port and again at the homecoming.
+        // Issue #275: against logEntryCount, NEVER ports.length, or the summary posts a leg early at the last port and again at the homecoming.
         statusEl.textContent = f.arrived >= logEntryCount(session.plan) ? session.log.summary : "";
       }
     }
@@ -175,7 +175,7 @@ export function createVoyage(deps: VoyageDeps) {
     session.rafId = requestAnimationFrame(tick);
   }
 
-  // Toggle ON: animate the sweep from the capital. Reduced motion and opts.skipSweep (the sheet resting on its verso, #174) take the at-rest path: a ~13s sweep nobody can see is not a feature.
+  // Toggle ON: animate the sweep from the capital. Reduced motion and opts.skipSweep (the sheet resting on its verso, Issue #174) take the at-rest path: a ~13s sweep nobody can see is not a feature.
   function applyVoyage(
     manifest: PlaceManifest | null,
     survey: Survey | null,
@@ -209,7 +209,7 @@ export function createVoyage(deps: VoyageDeps) {
       dropOverlays();
       logPanel.hideLog();
     }
-    // #174 INVARIANT: the sink's ghost and its track come from the SAME draw; a quiet mid-drag redraw freezes the whole back face (re-blobbing the ghost per frame is the ~1 MB leak #116 exists to avoid).
+    // Issue #174 INVARIANT: the sink's ghost and its track come from the SAME draw; a quiet mid-drag redraw freezes the whole back face (re-blobbing the ghost per frame is the ~1 MB leak Issue #116 exists to avoid).
     if (!opts.quiet) syncRestingTrack();
   }
 
@@ -217,12 +217,12 @@ export function createVoyage(deps: VoyageDeps) {
     cancelVoyageRaf();
     dropOverlays();
     if (voyage) statusEl.textContent = "";
-    logPanel.hideLog(); // #121: the margin log is a sibling of the mount, so remove it explicitly
+    logPanel.hideLog(); // Issue #121: the margin log is a sibling of the mount, so remove it explicitly
     voyage = null;
     restingTrackSink?.clear();
   }
 
-  // #174: snap a running sweep to its resting track, both faces (a flip must never wait out a 10-16s sweep); the shownArrived diff fires once, so only the final port's line posts.
+  // Issue #174: snap a running sweep to its resting track, both faces (a flip must never wait out a 10-16s sweep); the shownArrived diff fires once, so only the final port's line posts.
   function voyageSnapToRest(): void {
     if (!voyage) return;
     cancelVoyageRaf();
@@ -241,7 +241,7 @@ export function createVoyage(deps: VoyageDeps) {
     syncRestingTrack();
   }
 
-  // #120 e2e hook and #220's timeline seam: paint an arbitrary t in [0,1]; voyageStepTo can only land ON a port and can never sample the MID-leg frames where tilt and facing vary.
+  // Issue #120 e2e hook and Issue #220's timeline seam: paint an arbitrary t in [0,1]; voyageStepTo can only land ON a port and can never sample the MID-leg frames where tilt and facing vary.
   function voyagePaintAt(t: number): void {
     if (!voyage) return;
     cancelVoyageRaf();
@@ -278,7 +278,7 @@ export function createVoyage(deps: VoyageDeps) {
     }));
   }
 
-  // #220 seams for the fused ages driver, consumed by index.ts and never on the public engine API; paintLive writes NO sink (#174 keeps the sink rest-only).
+  // Issue #220 seams for the fused ages driver, consumed by index.ts and never on the public engine API; paintLive writes NO sink (Issue #174 keeps the sink rest-only).
   const internals = {
     hasSession: (): boolean => voyage !== null,
     paintLive: (t: number, postLog: boolean): void => {

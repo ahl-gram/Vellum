@@ -11,7 +11,7 @@ import { renderMap, type RenderOptions } from "../../src/render/map-renderer.ts"
 import { recipeFromSvg } from "../../src/render/recipe-meta.ts";
 import { LOD_BANDS, lodWindowFor, type LodBand } from "../../src/world/lod.ts";
 
-// What the Glass dispatches (#400): the bands are the Explorer's own (lod.ts), so these run the real runInline; the worker's own branch is not importable (its module body casts self), so its agreement with runInline is read as source at the foot of this file and proved live by e2e R14.
+// What the Glass dispatches (Issue #400): the bands are the Explorer's own (lod.ts), so these run the real runInline; the worker's own branch is not importable (its module body casts self), so its agreement with runInline is read as source at the foot of this file and proved live by e2e R14.
 
 const SEED = 2;
 const CX = 0.5625;

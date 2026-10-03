@@ -85,14 +85,14 @@ function cardShell() {
   card.hidden = true;
   const inner = document.createElement("div");
   inner.className = "pc-inner";
-  // #633: d3-zoom is bound on the host's viewport, an ANCESTOR of the card carrying touch-action: none, so without this a drag or a wheel over the card reaches the camera and the card never scrolls; measured with a CDP touch pan, which cannot see a touch-action line at all and still read scrollTop 0 to 0. Whether a real thumb scrolls it is UNVERIFIABLE in this harness.
+  // Issue #633: d3-zoom is bound on the host's viewport, an ANCESTOR of the card carrying touch-action: none, so without this a drag or a wheel over the card reaches the camera and the card never scrolls; measured with a CDP touch pan, which cannot see a touch-action line at all and still read scrollTop 0 to 0. Whether a real thumb scrolls it is UNVERIFIABLE in this harness.
   for (const ev of ["touchstart", "touchmove", "wheel"]) inner.addEventListener(ev, (e) => { if (inner.scrollHeight - inner.clientHeight > 1) e.stopPropagation(); }, { passive: true });
   card.appendChild(inner);
   return { card, inner };
 }
 
 function cardActs(inner: HTMLDivElement, opts: Readonly<BuildPlaceOverlayOpts> | undefined, prospectHref: PlaceOverlayDeps["prospectHref"], layProspect: Readonly<LayProspectHost> | undefined) {
-  // Both card actions are world-sheet only: a region manifest renumbers its places (#242), so an inset's index names a different settlement.
+  // Both card actions are world-sheet only: a region manifest renumbers its places (Issue #242), so an inset's index names a different settlement.
   const onWorldSheet = !(opts && opts.box);
   let prospectLink: HTMLAnchorElement | null = null;
   if (prospectHref && onWorldSheet) {

@@ -1,4 +1,4 @@
-// Room instrument e2e (RS*, #320 Sub 3): the S-suite's live-animation coverage re-hosted against .rf-* selectors and the room's own hooks; the Explorer-hosted S* originals stay green beside these until Sub 4 retires them by name.
+// Room instrument e2e (RS*, Issue #320 Sub 3): the S-suite's live-animation coverage re-hosted against .rf-* selectors and the room's own hooks; the Explorer-hosted S* originals stay green beside these until Sub 4 retires them by name.
 import { scrubFacts, scopedHealth } from "../support/room.ts";
 import type { SuiteContext } from "../types.ts";
 import { instrumentKit } from "./room-instrument/kit.ts";
@@ -34,7 +34,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await rs26Unfurl(k);
   await rs27NoReplay(k);
   await rs28Cancel(k);
-  // #493. The facts of the world ON SCREEN: RS23 and the counter reads above drew seed 9, and seed 42's years would clamp the bar to the present (a Play from the present reopens the whole story in the survey chamber, where the year is null by contract).
+  // Issue #493. The facts of the world ON SCREEN: RS23 and the counter reads above drew seed 9, and seed 42's years would clamp the bar to the present (a Play from the present reopens the whole story in the survey chamber, where the year is null by contract).
   const smNow = await scrubFacts(evaluate, await evaluate<number>(`window.__vellumReadingRoomState().seed`));
   await rs29Pace(k, smNow);
   await rs30Rate(k, smNow);

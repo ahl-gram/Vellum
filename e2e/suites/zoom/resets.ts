@@ -72,7 +72,7 @@ export async function z13DeepLink({ evaluate, send, check, shoot, sleep, waitSet
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/#seed=42&style=antique&cx=0.5&cy=0.5&k=4` });
   await waitReady();
-  await evaluate(`window.__vellumSetRedraftEnabled(false)`); // #169: a fresh page defaults ON; keep the geometric block clean before the deep-link settle fires
+  await evaluate(`window.__vellumSetRedraftEnabled(false)`); // Issue #169: a fresh page defaults ON; keep the geometric block clean before the deep-link settle fires
   await waitSettled("zoom-deeplink-load");
   await sleep(80);
   const z13 = await evaluate<{ k: number; x: number; W: number }>(`(()=>{const s=window.__vellumZoomState();const vp=document.getElementById("map-viewport");return{k:s.k,x:s.x,W:vp.clientWidth};})()`);
@@ -85,7 +85,7 @@ export async function z13DeepLink({ evaluate, send, check, shoot, sleep, waitSet
 }
 
 export async function z13dRefitHolds({ evaluate, send, check, sleep }: SuiteContext): Promise<void> {
-  // #463: the chart room fits the sheet to the viewport, so a resize refits the box the camera is clamped against; the room holds the FRAMING (cx/cy/k) across the refit, never the raw transform, or a resize walks the camera and the settle re-drafts a different region (the G7 class, found by the harness's own screenshot resize).
+  // Issue #463: the chart room fits the sheet to the viewport, so a resize refits the box the camera is clamped against; the room holds the FRAMING (cx/cy/k) across the refit, never the raw transform, or a resize walks the camera and the settle re-drafts a different region (the G7 class, found by the harness's own screenshot resize).
   const sheetBefore = await evaluate<number>(`document.getElementById("sheet").getBoundingClientRect().width`);
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 600, deviceScaleFactor: 1, mobile: false });
   await sleep(400); // past the resize layout and the 250ms settle debounce

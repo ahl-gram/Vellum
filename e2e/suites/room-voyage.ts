@@ -1,4 +1,4 @@
-// Room voyage e2e (RW1-RW13, #320 Sub 3): the W-suite core re-hosted on the Reading Room; W7 and W8 deliberately did not port (the room is always armed, and its counter draw parks at the present, pinned by RR22).
+// Room voyage e2e (RW1-RW13, Issue #320 Sub 3): the W-suite core re-hosted on the Reading Room; W7 and W8 deliberately did not port (the room is always armed, and its counter draw parks at the present, pinned by RR22).
 import { makeRoom, scopedHealth } from "../support/room.ts";
 import type { SuiteContext } from "../types.ts";
 
@@ -35,7 +35,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
 
 function voyageKit(ctx: SuiteContext) {
   const { evaluate } = ctx;
-  // #120: the mark is a ship on sea legs and a rider on road legs; reading .voyage-ship unconditionally throws on the ~94% of legs that ride.
+  // Issue #120: the mark is a ship on sea legs and a rider on road legs; reading .voyage-ship unconditionally throws on the ~94% of legs that ride.
   const markFn = `const mark=()=>{const s=document.querySelector(".rf-chart .voyage-ship");const r=document.querySelector(".rf-chart .voyage-rider");return (s&&s.getAttribute("display")!=="none")?s:r;};`;
   const stepTo = (n: number) =>
     evaluate<{ status: string; tf: string | null; glyph: string | null; pts: number; first: string; last: string; logged: number; rows: number; visible: boolean; lastText: string }>(`(()=>{${markFn}window.__vellumVoyageStepTo(${n});const m=mark();const t=m?m.getAttribute("transform"):"";const glyph=m?m.getAttribute("class"):"";const raw=document.querySelector(".voyage-track").getAttribute("points").trim().split(" ");const log=window.__vellumVoyageLog();return{status:document.querySelector(".rf-status").textContent,tf:t,glyph,pts:raw.length,first:raw[0],last:raw[raw.length-1],logged:log?log.logged:-1,rows:log?log.rows:-1,visible:!!(log&&log.visible),lastText:log&&log.logged>0?log.entries[log.logged-1].text:""};})()`);
@@ -114,7 +114,7 @@ async function rw3Leftward({ evaluate, check }: SuiteContext): Promise<void> {
 
 async function rwVoyagePlan({ evaluate }: SuiteContext) {
   const plan = await evaluate<{ ports: { idx: number; logLine: string }[]; legs: number }>(`(()=>{const p=window.__vellumVoyagePlan();return{ports:p.ports.map((x)=>({idx:x.idx,logLine:x.logLine})),legs:p.legs.length};})()`);
-  // #275: legs === ports and the LAST leg is the one home, so legs-1 lands on the final distinct port and stepping to legs itself is the homecoming (t=1).
+  // Issue #275: legs === ports and the LAST leg is the one home, so legs-1 lands on the final distinct port and stepping to legs itself is the homecoming (t=1).
   const lastPort = plan.legs - 1;
   const homeStep = plan.legs;
   const midPort = Math.max(1, Math.floor(plan.legs / 2));

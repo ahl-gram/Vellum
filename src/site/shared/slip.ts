@@ -23,7 +23,7 @@ export interface SlipParts {
 /** The slip's fold transition in atelier.css, plus a beat. */
 export const FOLD_SETTLE_MS = 340;
 
-/** The fold, as something another surface can drive: the Chart Table folds the Broadside when it opens (#543, ruled 2026-09-08). */
+/** The fold, as something another surface can drive: the Chart Table folds the Broadside when it opens (Issue #543, ruled 2026-09-08). */
 export interface SlipFold {
   readonly folded: () => boolean;
   readonly setFolded: (folded: boolean) => void;

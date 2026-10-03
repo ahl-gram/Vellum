@@ -1,11 +1,11 @@
-// #127 the Drafting Moment: the arrival ceremony a freshly injected chart runs (CSS on .arriving). It styles the live SVG only, never the pristine chart string, and animationend removes the inline dash so the resting stroke is byte-for-byte the original.
+// Issue #127 the Drafting Moment: the arrival ceremony a freshly injected chart runs (CSS on .arriving). It styles the live SVG only, never the pristine chart string, and animationend removes the inline dash so the resting stroke is byte-for-byte the original.
 export function startArrival(svg: SVGSVGElement | null): void {
   if (!svg) return;
   dashCoastForInk(svg);
   svg.classList.add("arriving");
 }
 
-// #170: the redraft's shorter ceremony; `dryIn` is already the NEWLY labeled names (redraft-plan.ts), so persisting names get no class and never re-animate.
+// Issue #170: the redraft's shorter ceremony; `dryIn` is already the NEWLY labeled names (redraft-plan.ts), so persisting names get no class and never re-animate.
 export function startRedraft(svg: SVGSVGElement | null, dryIn: Iterable<string>): void {
   if (!svg) return;
   dashCoastForInk(svg);

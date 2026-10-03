@@ -142,7 +142,7 @@ test("pools are non-trivial and em-dash free (authored copy sanity)", () => {
   }
 });
 
-// The inland handoff narrative (#181, ratified 2026-07-24).
+// The inland handoff narrative (Issue #181, ratified 2026-07-24).
 
 test("an inland handoff reads as the full ride-sail-ride narrative", () => {
   const handoff = port({ idx: 2, name: "Meamere", kind: "village", founded: 420, arrivalMode: "sea", inlandHandoff: true });
@@ -182,7 +182,7 @@ test("handoff closings cycle without repeating until the pool is exhausted", () 
   assert.equal(new Set(texts).size, n, "each handoff draws a fresh closing until the pool empties");
 });
 
-// The homecoming (#275, prose shape ratified 2026-07-24): the pool is mode-aware with no fixed closing sentence, "whence we set out" in place of a descriptor.
+// The homecoming (Issue #275, prose shape ratified 2026-07-24): the pool is mode-aware with no fixed closing sentence, "whence we set out" in place of a descriptor.
 
 const homeBySea = { arrivalMode: "sea", inlandHandoff: false, legLength: 40 } as const;
 const homeByRoad = { arrivalMode: "road", inlandHandoff: false, legLength: 40 } as const;
@@ -300,7 +300,7 @@ test("empty survey yields an attributed but empty log", () => {
   assert.equal(log.attribution, SUBTITLE);
 });
 
-// The days of the voyage (#312, ratified 2026-07-28): day = max(previousDay + 1, 1 + round(cumLength / GRID_UNITS_PER_DAY)), STRICTLY increasing by ruling, so a long sail jumps many days and no two rows share a day.
+// The days of the voyage (Issue #312, ratified 2026-07-28): day = max(previousDay + 1, 1 + round(cumLength / GRID_UNITS_PER_DAY)), STRICTLY increasing by ruling, so a long sail jumps many days and no two rows share a day.
 
 test("the origin departs on day 1", () => {
   const log = buildVoyageLog(smallSurvey, 1059, 42, SUBTITLE);

@@ -9,7 +9,7 @@ import { FULL_WINDOW, LOD_BANDS, lodWindowFor, type LodBand } from "../src/world
 import type { World } from "../src/world/types.ts";
 import { bandWindows } from "./region-detail-sweep-windows.ts";
 
-/** The two follow-up isolations behind #399's PR and its comment on #443. Committed rather than left in a worktree's out/, because #376's prototype numbers and #443's probes both died with their scratchpads and had to be re-earned. */
+/** The two follow-up isolations behind Issue #399's PR and its comment on Issue #443. Committed rather than left in a worktree's out/, because Issue #376's prototype numbers and Issue #443's probes both died with their scratchpads and had to be re-earned. */
 
 const SEEDS = [42, 7, 2, 15, 23];
 const INSET = 0.02; // region.ts's own open-window inset
@@ -87,7 +87,7 @@ function counterfactual(): void {
   }
 }
 
-/** Which term of the chained construction lifts a parent water cell above the waterline. The two cells are the river mouths #399's sweep could not walk to water; the answer is on #443. */
+/** Which term of the chained construction lifts a parent water cell above the waterline. The two cells are the river mouths Issue #399's sweep could not walk to water; the answer is on Issue #443. */
 function mouthMechanism(): void {
   const cases: ReadonlyArray<readonly [number, UvWindow, number, number]> = [
     [15, lodWindowFor(0.4375, 0.1875, 0.125), 115, 105],

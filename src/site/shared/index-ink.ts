@@ -1,4 +1,4 @@
-// The document rooms' index (#462 ruling 1): the section being read is inked and the entry being read is marked as the page scrolls.
+// The document rooms' index (Issue #462 ruling 1): the section being read is inked and the entry being read is marked as the page scrolls.
 
 export interface Placed {
   readonly id: string;

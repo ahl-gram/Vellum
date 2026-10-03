@@ -4,7 +4,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { LAY_ON_PAGE } from "../../src/site/explorer/chart-drawer.ts";
 
-// The Prospect is a chart room on the #462 pattern, ruled on #494 (2026-08-30): the engraving full-bleed at the plate's own aspect, the year as the room's one control, the engraver's note on the slip, the Explorer and the Ribbon as the roads out, print standing down.
+// The Prospect is a chart room on the Issue #462 pattern, ruled on Issue #494 (2026-08-30): the engraving full-bleed at the plate's own aspect, the year as the room's one control, the engraver's note on the slip, the Explorer and the Ribbon as the roads out, print standing down.
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => (existsSync(resolve(REPO, p)) ? readFileSync(resolve(REPO, p), "utf8") : "");
 const page = read("src/pages/prospect/index.astro");
@@ -146,7 +146,7 @@ function assertLayPressWiring(): void {
   assert.match(handler, /ribbonLink\.href = ribbonTarget\(/, "and so does the road to the Ribbon: each href is built once per draw, so a road left unrefreshed carries the table as it stood BEFORE this filing");
   // The boot table, likewise unread until a mutation removed the gate and shipped green.
   const prologue = app.slice(app.indexOf("const addr = parseProspectAddress"), app.indexOf("function filedItem"));
-  // #634 gave the boot table a second source, so the gate moved one hop into `seated` and is asserted in two steps rather than one: that the boot table is built by it, and that it IS the gate.
+  // Issue #634 gave the boot table a second source, so the gate moved one hop into `seated` and is asserted in two steps rather than one: that the boot table is built by it, and that it IS the gate.
   assert.match(prologue, /let table[^;]*=\s*seated\(/, "the page's boot table skips the dedupe gate restore() runs, so a shared link carrying one sheet twice leaves this page's tally and cap disagreeing with the Explorer's over one address");
   const seated = prologue.slice(prologue.indexOf("const seated ="), prologue.indexOf(";", prologue.indexOf("const seated =")));
   // The gate's ANSWER, not a call to it: the prover's round 1 discarded the return inside this reduce and appended
@@ -167,7 +167,7 @@ function assertLayPressDress(): void {
   for (const prop of [...dimRule.matchAll(/(\b[a-z-]+):/g)].map((m) => m[1])) {
     assert.ok(heldDecls.some((d) => d.startsWith(`${prop}:`)), `the dim sets ${prop} and the (1,2,0) hover rule does not re-assert it, so a pointer or a keyboard focus restores it on a refusing press`);
   }
-  // The press's OWN rule, not merely its dim: the card's side took this guard at #631 round 1 because a bare-substring
+  // The press's OWN rule, not merely its dim: the card's side took this guard at PR #631 round 1 because a bare-substring
   // roster could not see the primary block deleted, and this is the same class on the mirror surface. Without it the
   // ruled featured gold can be removed here with every markup and e2e assertion still green.
   const rule = css.match(/(^|\n)\.pp-lay\s*\{[^}]*\}/g) ?? [];
@@ -186,7 +186,7 @@ test("PR-lay the page's filing press sits ON the engraver's note and not among t
 });
 
 test("PR-table this page keeps the table's SECOND home too, on both roads the Explorer keeps it on (#634, ruled 2026-09-19)", () => {
-  // The whole of this check exists because the wiring is DUPLICATED at two hosts and only the Explorer's half was guarded: the guard-prover's round 2 deleted this page's device write, and then its entire pageshow listener, with every other test in the set green. That is #634's own defect recurring one level down, in the tests. `store` is the SHARED binding, which table-store.test.ts drives against the real global (guard-prover round 3).
+  // The whole of this check exists because the wiring is DUPLICATED at two hosts and only the Explorer's half was guarded: the guard-prover's round 2 deleted this page's device write, and then its entire pageshow listener, with every other test in the set green. That is Issue #634's own defect recurring one level down, in the tests. `store` is the SHARED binding, which table-store.test.ts drives against the real global (guard-prover round 3).
   assert.match(app, /import \{ deviceStorage as store,[^}]*\} from "\.\.\/shared\/table-store\.ts";/, "this page names its own device instead of taking the one the store module exports and tests, so it can be wired to nothing with every assertion here green");
   const from = app.indexOf('layPress.addEventListener("click"');
   assert.notEqual(from, -1, "the filing press has no handler, so this guard reads the whole file");

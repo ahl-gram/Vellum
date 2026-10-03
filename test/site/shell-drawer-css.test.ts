@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-// The drawer is the SHELL's (#483), so its dress lives once in the layout and every shelled page wears it; home keeps only what clears its own furniture (public/index.css), pinned in test/site/home-cluster.test.ts.
+// The drawer is the SHELL's (Issue #483), so its dress lives once in the layout and every shelled page wears it; home keeps only what clears its own furniture (public/index.css), pinned in test/site/home-cluster.test.ts.
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");

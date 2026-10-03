@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-// #379: these cannot move back into bound-atlas.ts. It reads the DOM at module scope, so a bare Node import throws before any test runs, and the markup's only other guard is a ten-minute browser round.
+// Issue #379: these cannot move back into bound-atlas.ts. It reads the DOM at module scope, so a bare Node import throws before any test runs, and the markup's only other guard is a ten-minute browser round.
 
 const MODULE = "../../src/site/print-room/plate-markup.ts";
 type PlateMarkup = typeof import("../../src/site/print-room/plate-markup.ts");

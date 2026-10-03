@@ -27,7 +27,7 @@ export async function rr4AtRest({ evaluate, check }: SuiteContext): Promise<void
     JSON.stringify(rest),
   );
 
-  // #463 (skeptic on PR #492, round 3): the scale and the folio are DRAWN from the world, not merely present in the markup.
+  // Issue #463 (skeptic on PR #492, round 3): the scale and the folio are DRAWN from the world, not merely present in the markup.
   const drawn = await evaluate<{ days: number; years: number; seam: number; labels: string[]; folioTitle: string; folioSub: string }>(`(()=>{const sc=document.querySelector(".scale");const t=(sel)=>(document.querySelector(sel)||{}).textContent||"";const lbl=[...sc.querySelectorAll(".tick .lbl")].map((l)=>l.textContent);return{days:sc.querySelectorAll(".tick.day").length,years:sc.querySelectorAll(".tick.year").length,seam:sc.querySelectorAll(".seam").length,labels:lbl,folioTitle:t("#folio-title"),folioSub:t("#folio-sub")};})()`);
   check(
     "RR4b the strip's scale is drawn from the world (two day ticks, the star, the centuries and the present) and the chart folio carries the world's name and survey line (#463)",

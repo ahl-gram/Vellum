@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { heroChartSvgs } from "../../scripts/hero-charts.ts";
 import { diffSvg, DRIFT_TOL } from "../../scripts/svg-drift.ts";
 
-// Drift guard (#40): nothing else re-renders the committed public/charts heroes, so this re-renders via heroChartSvgs() and compares via diffSvg, tolerant of cross-platform float noise; on a real drift run npm run charts:regen and land the regen ALONE.
+// Drift guard (Issue #40): nothing else re-renders the committed public/charts heroes, so this re-renders via heroChartSvgs() and compares via diffSvg, tolerant of cross-platform float noise; on a real drift run npm run charts:regen and land the regen ALONE.
 
 const chartsDir = fileURLToPath(new URL("../../public/charts/", import.meta.url));
 

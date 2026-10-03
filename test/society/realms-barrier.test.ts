@@ -4,7 +4,7 @@ import { createField } from "../../src/core/grid.ts";
 import { partitionRealms } from "../../src/society/realms.ts";
 import type { Settlement } from "../../src/society/sites.ts";
 
-// #140: opts.barrier is a HARD frontier: the realm flood may claim a barrier cell but never propagate across it, so realms meet ON the river. Hand-drawn masks on a synthetic grid; seats must sit > MIN_SEAT_SPACING (24) apart to be picked.
+// Issue #140: opts.barrier is a HARD frontier: the realm flood may claim a barrier cell but never propagate across it, so realms meet ON the river. Hand-drawn masks on a synthetic grid; seats must sit > MIN_SEAT_SPACING (24) apart to be picked.
 
 const SEA = 0.5;
 const allLand = (w: number, h: number) => createField(w, h, () => 1);

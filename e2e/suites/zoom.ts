@@ -13,7 +13,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   // The geometric checks between the steps below are deliberately not stepped: they read the camera and the CSSOM, with nothing to wait on.
   const step = makeStep(ctx);
   const k = zoomKit(ctx);
-  // #169: the semantic redraft is OFF for the geometric block (Z1-Z16) and back ON for Z17+; a fresh page defaults it ON, so re-set it after every reload.
+  // Issue #169: the semantic redraft is OFF for the geometric block (Z1-Z16) and back ON for Z17+; a fresh page defaults it ON, so re-set it after every reload.
   await step("Z setup", () => zSetup(ctx));
   await z1ZoomTo(ctx);
   await z2MaxClamp(ctx);

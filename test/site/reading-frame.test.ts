@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 
-// The Reading Room's frame (#219): host-agnostic, the first non-Explorer host of the #191 engine; ratified 2026-07-27 (https://github.com/ahl-gram/Vellum/issues/219#issuecomment-5097366231): no Explorer watch view, and the log FLOWS at every width, bounded by construction. The frame BUILDS DOM, so the element shim stands in for the environment, never the module under test.
+// The Reading Room's frame (Issue #219): host-agnostic, the first non-Explorer host of the Issue #191 engine; ratified 2026-07-27 (https://github.com/ahl-gram/Vellum/issues/219#issuecomment-5097366231): no Explorer watch view, and the log FLOWS at every width, bounded by construction. The frame BUILDS DOM, so the element shim stands in for the environment, never the module under test.
 import { El, el, installShim, walk } from "../../test-support/element-shim.ts";
 
 const REPO = resolve(import.meta.dirname, "..", "..");

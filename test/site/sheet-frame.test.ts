@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-// Pins the #289 review call: FAQ/Glossary CONTENT lies on the desk as a bounded survey sheet (hairline frame, outer double rule, corner ticks, raised shadow, lighter panel paper); the running head, nav, and footer stay OFF the sheet, so the frame lives on .sheet, never on main.
+// Pins the Issue #289 review call: FAQ/Glossary CONTENT lies on the desk as a bounded survey sheet (hairline frame, outer double rule, corner ticks, raised shadow, lighter panel paper); the running head, nav, and footer stay OFF the sheet, so the frame lives on .sheet, never on main.
 
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 

@@ -33,7 +33,7 @@ export function readingRoomKit(ctx: SuiteContext) {
     }
     return null;
   };
-  // The NEGATIVE half of the arrival rule (#442) needs its own dwell: this holds for the window plateShown polls and fails on the first frame a plate is shown. A missing .rr-prospect is a failure, not quiet success: stageRead yields null for an absent element, and a negative check that read null as "stayed hidden" would pass with the stage deleted outright.
+  // The NEGATIVE half of the arrival rule (Issue #442) needs its own dwell: this holds for the window plateShown polls and fails on the first frame a plate is shown. A missing .rr-prospect is a failure, not quiet success: stageRead yields null for an absent element, and a negative check that read null as "stayed hidden" would pass with the stage deleted outright.
   const plateStaysHidden = async (ms = 2500) => {
     let saw = 0;
     for (let i = 0; i < ms / 50; i++) {

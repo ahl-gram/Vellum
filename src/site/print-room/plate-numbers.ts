@@ -1,4 +1,4 @@
-// The bound atlas's numbering (#465 ruling 7): every plate and every page of the back matter has its own row in the contents, and the folio's plate line reads the row's numeral; the thematic surveys are numbered one by one, so the rows after them hang on the atlas's own theme list.
+// The bound atlas's numbering (Issue #465 ruling 7): every plate and every page of the back matter has its own row in the contents, and the folio's plate line reads the row's numeral; the thematic surveys are numbered one by one, so the rows after them hang on the atlas's own theme list.
 import { THEMATIC } from "../../atlas/thematic.ts";
 import type { PlateSection } from "../../atlas/document.ts";
 

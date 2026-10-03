@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-// The engine's overlay dressing is ONE shared sheet, public/living-chart.css (#302), the CSS twin of the #191 boundary: it dresses every engine-emitted hook, names no host's own element, and has ONE home.
+// The engine's overlay dressing is ONE shared sheet, public/living-chart.css (Issue #302), the CSS twin of the Issue #191 boundary: it dresses every engine-emitted hook, names no host's own element, and has ONE home.
 
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 const read = (p: string) => {

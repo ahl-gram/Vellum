@@ -5,7 +5,7 @@ import { chaikinSmooth, marchingSquares } from "../terrain/contours.ts";
 import type { UvWindow } from "../terrain/heightfield.ts";
 import type { World } from "./types.ts";
 
-// Ratified 2026-08-20: measured max reach today is 4 parent cells and #376's coast excursion adds up to ~2.4 more (the sweep is recorded on #423), so 8 is generous without letting a realm wander the open ocean.
+// Ratified 2026-08-20: measured max reach today is 4 parent cells and Issue #376's coast excursion adds up to ~2.4 more (the sweep is recorded on Issue #423), so 8 is generous without letting a realm wander the open ocean.
 export const REALM_REACH_CAP = 8;
 
 export type RealmRing = ReadonlyArray<readonly [number, number]>;

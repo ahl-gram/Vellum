@@ -1,4 +1,4 @@
-// The survey's arm: every arm path (the tick, a settle, a turn's commit) defers one painted frame through ONE slot, then holds for the off-thread travel matrix rather than blocking on it (measurements on #373).
+// The survey's arm: every arm path (the tick, a settle, a turn's commit) defers one painted frame through ONE slot, then holds for the off-thread travel matrix rather than blocking on it (measurements on Issue #373).
 export interface SurveyArmDeps {
   afterPaint: (run: () => void) => void;
   isArmed: () => boolean;

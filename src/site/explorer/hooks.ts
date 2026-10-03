@@ -1,4 +1,4 @@
-// The window.__vellum* verification hooks the Explorer publishes. It does NOT call the shared installHostHooks (ratified #320 decision A, 2026-08-10: seams that paint non-rest positions would break "every reachable state is a rest"); the two hosts differ on purpose, do not re-unify them.
+// The window.__vellum* verification hooks the Explorer publishes. It does NOT call the shared installHostHooks (ratified Issue #320 decision A, 2026-08-10: seams that paint non-rest positions would break "every reachable state is a rest"); the two hosts differ on purpose, do not re-unify them.
 import type { runJob, runInline, usesWorker } from "./worker-client.ts";
 import type { ZoomState } from "../shared/zoom-controller.ts";
 import type { Glass } from "./glass.ts";

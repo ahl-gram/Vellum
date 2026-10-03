@@ -5,13 +5,13 @@ import { existsSync, mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync
 import { resolve, join } from "node:path";
 import { tmpdir } from "node:os";
 
-// One press (#208): one multi-entry Vite build covers every app page, and the worker spawn is the static import-URL form Vite rewrites.
+// One press (Issue #208): one multi-entry Vite build covers every app page, and the worker spawn is the static import-URL form Vite rewrites.
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 
 test("all four app pages load their bundled app twin via is:inline, none load raw source (#208, #254)", () => {
-  // is:inline is load-bearing: without it Astro routes the script through its own Vite pass, which #204's ratified analysis rejects for these surfaces.
+  // is:inline is load-bearing: without it Astro routes the script through its own Vite pass, which Issue #204's ratified analysis rejects for these surfaces.
   for (const [pageSource, src] of [
     ["src/pages/explorer/index.astro", /<script type="module" src="\.\/app\.bundle\.js" is:inline><\/script>/],
     ["src/pages/print-room/index.astro", /<script type="module" src="\.\/app\.bundle\.js" is:inline><\/script>/],

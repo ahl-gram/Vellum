@@ -48,7 +48,7 @@ function coastFromHash(params: URLSearchParams, controls: Readonly<Controls>): b
   return coastTouched;
 }
 
-/** Apply a bookmarked hash to the controls; only keys present and valid apply. Returns which slider gates the link touched, the #165 camera if carried (restored by the conductor after the first chart lands), and the #192 live address; absent params mean home, still, disarmed. */
+/** Apply a bookmarked hash to the controls; only keys present and valid apply. Returns which slider gates the link touched, the Issue #165 camera if carried (restored by the conductor after the first chart lands), and the Issue #192 live address; absent params mean home, still, disarmed. */
 export function readHash(controls: Controls): {
   land: boolean;
   coast: boolean;

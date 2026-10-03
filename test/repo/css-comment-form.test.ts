@@ -40,6 +40,7 @@ const PLANT = [
   "/* a wider one, Chrome 137 */",
   ".d { color: red; } /* the old reveal.js drew this */",
   "/* the twin is app.bundle.js, a build artifact */",
+  "/* PRs #23, the plural Issue #648 recorded */",
 ].join("\n");
 
 test("the comment-form rules red on exactly the planted lines and nowhere else", async () => {

@@ -11,7 +11,7 @@ export const APP = "/explorer/";
 export const DISPLAY_FACE = /^"IM Fell English SC",/;
 const FLOURISH_FACE = /^"IM Fell English",/;
 
-// Every constant MEASURED against the built dist/ (out/probe-cluster.mjs, 2026-08-26), never derived; tracking null means the browser reported "normal" and is asserted as such. The cluster is ONE dress on every page (#461 ruling 1): home differs only in the wordmark's tag (h1, #288) and in having no room head to measure.
+// Every constant MEASURED against the built dist/ (out/probe-cluster.mjs, 2026-08-26), never derived; tracking null means the browser reported "normal" and is asserted as such. The cluster is ONE dress on every page (Issue #461 ruling 1): home differs only in the wordmark's tag (h1, Issue #288) and in having no room head to measure.
 const ROOM_HEAD = {
   wordmark: { tag: "P", weight: "400", size: 33.6, tracking: 4.032, face: DISPLAY_FACE },
   tagline: { tag: "P", weight: "400", size: 14.72, tracking: null, face: FLOURISH_FACE },
@@ -26,7 +26,7 @@ const HOME_HEAD = {
   roomName: null,
   roomTagline: null,
 };
-// Sub 7 (#462): a converted room stands its name in the RoomFolio corner (1.32rem, the corner's own leading), measured 2026-08-29 against the built dist; a CHART room renders no footer (ruling 9).
+// Sub 7 (Issue #462): a converted room stands its name in the RoomFolio corner (1.32rem, the corner's own leading), measured 2026-08-29 against the built dist; a CHART room renders no footer (ruling 9).
 export const FOLIO = ["/seed-of-the-day/", "/faq/", "/glossary/", "/explorer/", "/reading-room/", "/print-room/", "/prospect/", "/ribbon/", "/gallery/", "/specimen/"];
 export const CHART = ["/seed-of-the-day/", "/explorer/", "/reading-room/", "/print-room/", "/prospect/", "/ribbon/", "/gallery/", "/specimen/"];
 const FOLIO_HEAD = {
@@ -38,7 +38,7 @@ const CHART_HEAD = { ...FOLIO_HEAD, footer: null };
 export const expectedHead = (route: string) =>
   route === "/" ? HOME_HEAD : CHART.includes(route) ? CHART_HEAD : FOLIO.includes(route) ? FOLIO_HEAD : ROOM_HEAD;
 export const MEMBERS = ["wordmark", "tagline", "rooms", "roomName", "roomTagline", "footer"] as const;
-// The second addendum on #461: the cluster pins its OWN leading (wordmark 1.15, the rest normal) and never inherits the page's reading 1.6; the room head pins 1.6 and never inherits an app page's normal. Both polarities are asserted per page in RH5.
+// The second addendum on Issue #461: the cluster pins its OWN leading (wordmark 1.15, the rest normal) and never inherits the page's reading 1.6; the room head pins 1.6 and never inherits an app page's normal. Both polarities are asserted per page in RH5.
 export const CLUSTER_NORMAL = ["tagline", "rooms", "footer"] as const;
 export const HEAD_LEADED = ["roomName", "roomTagline"] as const;
 type Member = { tag: string; weight: string; size: number; family: string; tracking: string; lineHeight: string; ratio: number; position: string; color: string } | null;

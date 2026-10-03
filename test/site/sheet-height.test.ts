@@ -6,7 +6,7 @@ import { SHEET } from "../../src/site/home/camera.ts";
 import { homeStage } from "../../src/site/home/stage-data.ts";
 import { e2eSourcePaths, e2eSuiteFamily } from "../../test-support/e2e-source.ts";
 
-// The 1157.931 sheet-height literals were hand-copied from the manifest derivation (#476), so a chart aspect change would misplace every station with all tests green unless something compares them back.
+// The 1157.931 sheet-height literals were hand-copied from the manifest derivation (Issue #476), so a chart aspect change would misplace every station with all tests green unless something compares them back.
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");

@@ -36,7 +36,7 @@ export function traceStreamline(
 ): Array<[number, number]> {
   const { w, h } = world.elev;
   const od = world.oceanDist;
-  const gate = world.region?.seaGate; // #251: parent's genuine-sea partition, if a region
+  const gate = world.region?.seaGate; // Issue #251: parent's genuine-sea partition, if a region
   const inWater = (x: number, y: number): boolean => {
     const ix = Math.round(x);
     const iy = Math.round(y);

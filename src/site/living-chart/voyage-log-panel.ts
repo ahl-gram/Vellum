@@ -1,4 +1,4 @@
-// #121 the margin log: the surveyor's dated journal, the PROLOGUE block of the fused journal (the ages driver appends the annal rows after these); the host hands its three panel elements in, and the voyage overlay reads exactly one field back, `log.summary`.
+// Issue #121 the margin log: the surveyor's dated journal, the PROLOGUE block of the fused journal (the ages driver appends the annal rows after these); the host hands its three panel elements in, and the voyage overlay reads exactly one field back, `log.summary`.
 import {
   buildVoyageLog,
   type VoyageHomecoming,
@@ -66,7 +66,7 @@ export function createVoyageLogPanel(logEls: VoyageLogHost) {
     logEls.sig.textContent = "";
   }
 
-  /** #121 e2e read payload: the log plus revealed-row count and visibility, so a suite asserts prose and reveal without racing the rAF loop. */
+  /** Issue #121 e2e read payload: the log plus revealed-row count and visibility, so a suite asserts prose and reveal without racing the rAF loop. */
   function logSnapshot(log: VoyageLog, rows: HTMLLIElement[]) {
     return {
       attribution: log.attribution,

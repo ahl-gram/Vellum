@@ -94,7 +94,7 @@ function setHuntStatus(text: string): void {
 }
 
 function huntClues(world: World, quarry: Readonly<Quarry>, svg: SVGSVGElement, proj: Readonly<Projection>): void {
-  // The rendered SVG is the source of truth for what was drawn: the findability gates read it and run BEFORE selection (#335), so a clue never cites a name or terrain the player cannot find.
+  // The rendered SVG is the source of truth for what was drawn: the findability gates read it and run BEFORE selection (Issue #335), so a clue never cites a name or terrain the player cannot find.
   // A label emits as ">Name<" except capital and seat labels, which `settlementsLayer` in `src/render/layers/settlements.ts` renders .toUpperCase(), so both spellings are checked.
   const markup = svg.outerHTML;
   const isLabeled = (name: string) =>

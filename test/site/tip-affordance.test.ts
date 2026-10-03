@@ -8,7 +8,7 @@ import { atlasDocument } from "../../src/atlas/document.ts";
 import { OG_FONT_FACES, fontFaceCss } from "../../src/render/og-card.ts";
 import { SITE_SHEETS, SRC_CSS_FILES } from "../../test-support/site-sheets.ts";
 
-// Two contracts over every authored sheet the site has (#289, #356, #358, #360): what tips must go somewhere or be a ratified chart instrument, and an inline-block link must pin its bullet or be recorded as living outside a marker-bearing list. A tip is the shape rotate(, so a translate-only lift and the bare rotate: property are not swept (a #289 question).
+// Two contracts over every authored sheet the site has (Issue #289, Issue #356, Issue #358, Issue #360): what tips must go somewhere or be a ratified chart instrument, and an inline-block link must pin its bullet or be recorded as living outside a marker-bearing list. A tip is the shape rotate(, so a translate-only lift and the bare rotate: property are not swept (a Issue #289 question).
 
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 const read = (p: string) => readFileSync(root(p), "utf8");
@@ -20,7 +20,7 @@ const GENERATED_CSS = [["public/gallery/", "src/cli/gallery.ts"]] as const;
 const styleBlocksIn = (source: string): string =>
   [...source.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join("\n");
 
-/** Built rather than importing the css constants, so this sweeps what the DOCUMENT ships: a refactor that dropped one from the <style> stops the sweep instead of leaving it to report coverage that had gone fictional. Both dresses since #464, the download's (the default) and the served page's (motion). The fixture is empty because the data never reaches the css (measured: a fully populated fixture yields a byte-identical style block). */
+/** Built rather than importing the css constants, so this sweeps what the DOCUMENT ships: a refactor that dropped one from the <style> stops the sweep instead of leaving it to report coverage that had gone fictional. Both dresses since Issue #464, the download's (the default) and the served page's (motion). The fixture is empty because the data never reaches the css (measured: a fully populated fixture yields a byte-identical style block). */
 const atlasCss = (): string => {
   const plate = { key: "x", title: "x", svg: "<svg></svg>" };
   const data = {
@@ -81,7 +81,7 @@ const cssBearingSources = (): string[] =>
 const TIPPING_LINKS = new Set([
   "motion.css :: .plate:hover",
   "motion.css :: body:has(.room-name) .wordmark a:hover, body:has(.room-name) .wordmark a:focus-visible",
-  // #270 ruling 7: the footnote marks follow through to /glossary/ anchors, so the ruling extended the tipping surface to them.
+  // Issue #270 ruling 7: the footnote marks follow through to /glossary/ anchors, so the ruling extended the tipping surface to them.
   "explorer/broadside.css :: a.fn:hover",
   // `cardFigureHtml` in `src/cli/gallery.ts` wraps every contact-sheet plate in a link to the Explorer at the plate's seed (gallery-room.test.ts GR5 pins it).
   "src/cli/gallery.ts :: figure img:hover",
@@ -168,12 +168,12 @@ const settled = (css: string, selector: string): Readonly<Record<string, string>
   return out;
 };
 
-// Hand-measured (#356): an inline-block takes its baseline from its LAST line box, so a wrapped tipping slip drops its bullet 26.00px to line two and vertical-align: top pins it back; a ::marker is not reachable from the DOM, so the rule is guarded as text.
+// Hand-measured (Issue #356): an inline-block takes its baseline from its LAST line box, so a wrapped tipping slip drops its bullet 26.00px to line two and vertical-align: top pins it back; a ::marker is not reachable from the DOM, so the rule is guarded as text.
 /** Each entry is a MEASUREMENT of the markup taken 2026-08-12, not a rule: it says these boxes are not list items on the pages that use them today, so re-take it when you touch one. */
 const INLINE_BLOCKS_OUTSIDE_MARKER_LISTS = new Set([
-  // Inside <p class="wordmark"> or <h1 class="wordmark"> in BaseLayout's head cluster (#461; the rooms nav pins vertical-align itself).
+  // Inside <p class="wordmark"> or <h1 class="wordmark"> in BaseLayout's head cluster (Issue #461; the rooms nav pins vertical-align itself).
   "motion.css :: .wordmark a",
-  // A period mark inline in a control's label (#270), not a list item.
+  // A period mark inline in a control's label (Issue #270), not a list item.
   "explorer/broadside.css :: a.fn",
 ]);
 

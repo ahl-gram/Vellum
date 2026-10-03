@@ -91,7 +91,7 @@ footer { margin-top: 4rem; text-align: center; letter-spacing: 0.25em;
   font-size: 0.75rem; color: var(--ink-faded); }
 a { color: inherit; }`;
 
-// The served /atlas/ page's screen dress (#464), emitted with `motion` only; the download keeps its paper chrome (print is paper, #454 decision 4). Shipped as page bytes: no process prose here.
+// The served /atlas/ page's screen dress (Issue #464), emitted with `motion` only; the download keeps its paper chrome (print is paper, Issue #454 decision 4). Shipped as page bytes: no process prose here.
 const SCREEN_DRESS_CSS = `:root {
   --the-deep:
     radial-gradient(120% 90% at 50% 30%, rgb(from var(--ink-dark) r g b / 0) 40%, rgb(from var(--chart-ink) r g b / 0.55) 100%),

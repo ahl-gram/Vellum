@@ -59,7 +59,7 @@ function agesFor(bar: Readonly<ScrubberRefs> | undefined, overlay: Readonly<Plac
 
 function overlayApi(overlay: Readonly<PlaceOverlay>) {
   return {
-    // #53: the doc-level dismiss pair is wired by the host (document listeners are page-global, a host decision).
+    // Issue #53: the doc-level dismiss pair is wired by the host (document listeners are page-global, a host decision).
     buildPlaceOverlay: (manifest: PlaceManifest, opts?: BuildPlaceOverlayOpts) =>
       overlay.buildPlaceOverlay(manifest, opts),
     onDocKeydown: overlay.onDocKeydown,
@@ -128,7 +128,7 @@ function voyageApi(voyage: Readonly<Voyage>) {
 }
 
 export function createLivingChart(host: LivingChartHost) {
-  // The one #53<->#54 coupling pair crosses here as late-bound closures, so neither module imports the other.
+  // The one Issue #53<->Issue #54 coupling pair crosses here as late-bound closures, so neither module imports the other.
   const overlay = createPlaceOverlay({
     mapEl: host.mapEl,
     isSuppressed: () => chronicle.isActive(),

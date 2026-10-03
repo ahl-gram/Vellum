@@ -9,7 +9,7 @@ import { emitTableKey } from "../../src/site/explorer/address.ts";
 const REPO = resolve(import.meta.dirname, "..", "..");
 import type { ProspectJob, ProspectResult, RegionResult } from "../../src/site/explorer/worker-client.ts";
 
-// The Chart Table's state (#520 Sub 2), pure and apart from the DOM: what the drawer draws and what the address carries are both this array. The surface is `chart-drawer` and never `drawer`, which src/site/shell/drawer.ts already spends on the site's phone nav (#520 ruling 2).
+// The Chart Table's state (Issue #520 Sub 2), pure and apart from the DOM: what the drawer draws and what the address carries are both this array. The surface is `chart-drawer` and never `drawer`, which src/site/shell/drawer.ts already spends on the site's phone nav (Issue #520 ruling 2).
 const survey = (lx: number): SurveyItem => ({
   kind: "survey", seed: 42, overrides: {}, rung: 2, lx, ly: 3,
   style: "antique", legend: true, arms: false, beasts: false, theme: null,
@@ -78,7 +78,7 @@ test("an empty table writes no key, and a laid one writes the grammar's (#520 ru
   assert.equal(one.get(TABLE_KEY), emitTable(fill(1)), "ONE sheet is the commonest table and is written like any other: the emptiness gate is exactly zero");
 });
 
-// #518 ruling 6 (period voice): the wordings are provisional until Sub 5's post-use re-review.
+// Issue #518 ruling 6 (period voice): the wordings are provisional until Sub 5's post-use re-review.
 test("the head counts the table in words, and says when it is bare and when it is full (#520)", () => {
   assert.equal(countLine([]), "the table is bare");
   assert.equal(countLine(fill(1)), "one sheet laid · room for five more");
@@ -156,7 +156,7 @@ test("a full table refusing a sheet it ALREADY holds says so, not that it is ful
   assert.equal(again.reason, "already", "the more useful of the two true things");
 });
 
-// #522 Sub 4: a prospect draws its own plate, which is what #518 ruling 7 calls "the plate itself in its own dress".
+// Issue #522 Sub 4: a prospect draws its own plate, which is what Issue #518 ruling 7 calls "the plate itself in its own dress".
 const prospect = (over: Partial<ProspectItem> = {}): ProspectItem => ({
   kind: "prospect", seed: 42, overrides: {}, style: "ink", index: 3, year: 1059, ...over,
 });

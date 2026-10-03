@@ -19,7 +19,7 @@ import {
 } from "../../src/society/hamlets.ts";
 import type { UvWindow } from "../../src/terrain/heightfield.ts";
 
-// #171 Hamlets: a region-only tier on the deepest band's sheets (sizeUV 0.125). Candidates sit on a fixed world-space lattice, each point hashed independently off the seed, so existence, spot, and name are window- and interaction-order-independent, and no hamlet name collides with a world-sheet name.
+// Issue #171 Hamlets: a region-only tier on the deepest band's sheets (sizeUV 0.125). Candidates sit on a fixed world-space lattice, each point hashed independently off the seed, so existence, spot, and name are window- and interaction-order-independent, and no hamlet name collides with a world-sheet name.
 
 const world = generateWorld(defaultRecipe(42, { gridW: 320, gridH: 240 }));
 const DEEP = 0.125;

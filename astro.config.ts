@@ -3,7 +3,7 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-// #204 dev-only rewrite: Vite's dev public middleware serves EXACT file paths only and
+// Issue #204 dev-only rewrite: Vite's dev public middleware serves EXACT file paths only and
 // Astro dev installs no dir -> index.html fallback, so /explorer/ would 404 in dev while
 // /explorer/index.html serves. Registered BEFORE Vite's internal middlewares; astro
 // build/preview are untouched (raw public/ copy).
@@ -27,7 +27,7 @@ const publicDirIndexes = () => ({
 });
 
 // Contractual shape per the ratified Sub 1 decision doc (the 2026-07-21 comment on
-// #202): base "/", outDir "./dist", and build.format "directory" are all Astro defaults,
+// Issue #202): base "/", outDir "./dist", and build.format "directory" are all Astro defaults,
 // so they are not restated here; changing any of them breaks the site or the deploy.
 export default defineConfig({
   site: "https://www.vellumworlds.com",

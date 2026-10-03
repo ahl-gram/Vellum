@@ -6,7 +6,7 @@ import { SWEEP_MS, sweepYearAt } from "../../src/render/chronicle-scrubber.ts";
 import type { Chronicle } from "../../src/site/living-chart/chronicle.ts";
 import type { Voyage } from "../../src/site/living-chart/voyage.ts";
 
-// #493: the instrument's pace (1x, 2x, 4x). The clock is story milliseconds per wall millisecond, so the survey half's schedule and the ages half's SWEEP_MS scale together, and a change mid-sweep re-anchors rather than jumping.
+// Issue #493: the instrument's pace (1x, 2x, 4x). The clock is story milliseconds per wall millisecond, so the survey half's schedule and the ages half's SWEEP_MS scale together, and a change mid-sweep re-anchors rather than jumping.
 installShim();
 const { createAges } = await import("../../src/site/living-chart/ages.ts");
 

@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
-// #217 Part 2: the Explorer's Download SVG retired (ruling recorded on #217, 2026-07-29); the Print Room's Chart plate is the covenant take-home. A revisit is a NEW issue, not a quiet re-add, which is what these pins are for.
+// Issue #217 Part 2: the Explorer's Download SVG retired (ruling recorded on Issue #217, 2026-07-29); the Print Room's Chart plate is the covenant take-home. A revisit is a NEW issue, not a quiet re-add, which is what these pins are for.
 const here = (p: string): string => readFileSync(new URL(p, import.meta.url), { encoding: "utf8" });
 const page = here("../../src/pages/explorer/index.astro");
 const app = here("../../src/site/explorer/app.ts");
@@ -18,7 +18,7 @@ test("the Explorer wiring carries no download plumbing", () => {
   assert.ok(!controls.includes("downloadBtn"), "controls.ts re-grew the download handler");
 });
 
-// #317 decision 1 (2026-07-29) names the survey label; time lives in the Reading Room.
+// Issue #317 decision 1 (2026-07-29) names the survey label; time lives in the Reading Room.
 test("the Explorer page carries no scrubber panel or journal strip (#321)", () => {
   assert.ok(!page.includes('id="scrubber"'), "the #scrubber region regrew in the Explorer page");
   assert.ok(!page.includes('id="scrub-play"'), "the Play button regrew in the Explorer page");

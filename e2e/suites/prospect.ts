@@ -1,4 +1,4 @@
-// Prospect e2e (the PB checks, #242; the chart room since #463 part 4/4): the Explorer card's way in, the room's plate on the fitted sheet, the engraver's note on the slip, the year control engraving in place and writing the address, the roads out, the two-dress fallback, year-awareness, and same-address byte determinism; self-contained like its sibling suites (navigates itself, carries scoped no-4xx and console-error deltas).
+// Prospect e2e (the PB checks, Issue #242; the chart room since Issue #463 part 4/4): the Explorer card's way in, the room's plate on the fitted sheet, the engraver's note on the slip, the year control engraving in place and writing the address, the roads out, the two-dress fallback, year-awareness, and same-address byte determinism; self-contained like its sibling suites (navigates itself, carries scoped no-4xx and console-error deltas).
 import { makeStep } from "../support/step.ts";
 import { dropExpectedCancellations } from "../support/console.ts";
 import type { Payload, SuiteContext } from "../types.ts";

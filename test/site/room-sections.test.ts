@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { indexCount, roomSections } from "../../src/layouts/room-sections.ts";
 
-// #462 document-room ruling 1: the index is read from the page's own source at build, so every section and every entry on the page is in it and nothing else is.
+// Issue #462 document-room ruling 1: the index is read from the page's own source at build, so every section and every entry on the page is in it and nothing else is.
 
 const read = (p: string) => readFileSync(fileURLToPath(new URL(`../../${p}`, import.meta.url)), "utf8");
 

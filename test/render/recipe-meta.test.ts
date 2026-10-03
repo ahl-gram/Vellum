@@ -133,7 +133,7 @@ test("a region sheet stamps the detail it was drawn at, and an unstamped sheet r
 });
 
 test("a stamped region redraws byte-for-byte with a title RE-DERIVED from the window (#169)", () => {
-  // Only geometry is stamped, never the title, so the redraw must recompute the same cartouche from (world, window); the #168 test above reused a title constant on both sides and cannot prove this.
+  // Only geometry is stamped, never the title, so the redraw must recompute the same cartouche from (world, window); the Issue #168 test above reused a title constant on both sides and cannot prove this.
   const world = generateWorld(defaultRecipe(7, { mapType: "continent" }));
   const capital = world.settlements.find((s) => s.kind === "capital");
   assert.ok(capital);

@@ -15,11 +15,11 @@ export interface ChartDrawerEls {
 
 export interface ChartDrawerDeps {
   readonly say: (line: string) => void;
-  /** Persist: the address and the device both, since #634 (2026-09-19) gave the table a second home; the host owns which. */
+  /** Persist: the address and the device both, since Issue #634 (2026-09-19) gave the table a second home; the host owns which. */
   readonly onChange: (items: ReadonlyArray<TableItem>) => void;
   /** Draw one recovered sheet's thumbnail, deferred to the first opening (ruled 2026-09-07). */
   readonly drawThumb?: (item: TableItem) => Promise<{ url: string; title: string } | null>;
-  /** The Broadside's fold. Read late: the room is bound after the table (#543, ruled 2026-09-08). */
+  /** The Broadside's fold. Read late: the room is bound after the table (Issue #543, ruled 2026-09-08). */
   readonly broadside?: () => SlipFold | null;
   readonly relabelLeaf?: (count: number) => void;
   readonly folioHref?: string;
@@ -206,7 +206,7 @@ function drawerOpen(drawerEls: ChartDrawerEls, deps: ChartDrawerDeps, clearCerem
   let broadsideWasOpen = false;
 
   const setOpen = (open: boolean, moveFocus = false): void => {
-    // Ruled 2026-09-08 (#543): the drawer and the Broadside never stand open together; the reader who had the Broadside open gets it back when the table shuts, the one who folded it keeps it folded.
+    // Ruled 2026-09-08 (Issue #543): the drawer and the Broadside never stand open together; the reader who had the Broadside open gets it back when the table shuts, the one who folded it keeps it folded.
     if (open !== drawerEls.root.classList.contains("open")) {
       const broadside = deps.broadside?.() ?? null;
       if (open) broadsideWasOpen = broadside !== null && !broadside.folded();
@@ -256,7 +256,7 @@ function drawerTable(drawerEls: ChartDrawerEls, items: Items, setOpen: (open: bo
   function receiving(over: boolean): void { drawerEls.root.classList.toggle("receiving", over); }
   function restore(next: ReadonlyArray<TableItem>): void {
     // Through the same gate a filing takes: a hand-typed or shared link can carry one sheet twice, and parseTable does not dedupe. Two twins would also share ONE blob url, keyed by the item, so removing either would revoke the survivor's picture.
-    // The gate is byte equality on the emitted item, so it does NOT catch one prospect spelled two ways: `k-p...style-nautical` and `...style-antique` at one seat draw the same plate (plateDressFor sends both to antique) yet seat twice and spend two of the six. Both DOORS normalise through prospectItemFrom, so only a hand-typed or hand-edited link reaches it; closing it here would rewrite the address the reader shared, which is Alex's call and not a one-liner (#631's cold review, residue).
+    // The gate is byte equality on the emitted item, so it does NOT catch one prospect spelled two ways: `k-p...style-nautical` and `...style-antique` at one seat draw the same plate (plateDressFor sends both to antique) yet seat twice and spend two of the six. Both DOORS normalise through prospectItemFrom, so only a hand-typed or hand-edited link reaches it; closing it here would rewrite the address the reader shared, which is Alex's call and not a one-liner (PR #631's cold review, residue).
     let kept: ReadonlyArray<TableItem> = [];
     for (const item of next) kept = layOnTable(kept, item).items;
     for (const gone of sheetsThatLeft(items(), kept)) forget(gone);

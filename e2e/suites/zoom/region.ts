@@ -50,7 +50,7 @@ export async function z17Inset({ evaluate, check, shoot, sleep, rgn, goHome, ent
   await enterAt(2, 0.5, 0.5);
   const s17 = await waitRedraft(before17);
   const drawMs17 = await captionMs();
-  // The CAMERA is read at the commit, which is what this check is named for (a settle must not move it); the inset geometry cannot be, because insetView reads the FIRST .region-inset and during a crossing that is the OUTGOING sheet (#400's held chain cache lands this band-1 draw in ~300ms, mid-crossfade, and the outgoing sheet is torn down only on the incoming's transitionend with a 700ms fallback), so geometry is read once the pair has resolved, and a pair left mounted for good still fails on the count.
+  // The CAMERA is read at the commit, which is what this check is named for (a settle must not move it); the inset geometry cannot be, because insetView reads the FIRST .region-inset and during a crossing that is the OUTGOING sheet (Issue #400's held chain cache lands this band-1 draw in ~300ms, mid-crossfade, and the outgoing sheet is torn down only on the incoming's transitionend with a 700ms fallback), so geometry is read once the pair has resolved, and a pair left mounted for good still fails on the count.
   const atCommit = await insetView();
   let view17 = atCommit;
   for (let i = 0; i < 50 && view17.insets !== 1; i++) { await sleep(40); view17 = await insetView(); }

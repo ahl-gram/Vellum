@@ -9,7 +9,7 @@ export async function z20dInkDrops({ evaluate, check, waitInked, rgn, goHome, en
   await enterAt(2, 0.5, 0.5);
   await waitRedraft(before20d);
   await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
-  await waitInked("z20d-survey-ink"); // #300: the ink lands a beat after the tick, so wait for it rather than sleeping
+  await waitInked("z20d-survey-ink"); // Issue #300: the ink lands a beat after the tick, so wait for it rather than sleeping
   const chron = await evaluate<{ band: number; committed: boolean; noStamp: boolean; insets: number; trackShown: boolean }>(
     `(()=>{const s=window.__vellumRegion();const svg=document.querySelector("#map > svg");` +
       `return{band:s.band,committed:s.committed,noStamp:!!svg&&!svg.hasAttribute("data-vellum-region-u0"),` +
@@ -77,7 +77,7 @@ export async function z20gInkBlocks({ evaluate, check, sleep, waitInked, rgn, go
   await enterAt(2, 0.5, 0.5);
   const reg20g = await waitRedraft(before20g);
   await evaluate(`(()=>{const v=document.getElementById("ages");v.checked=true;v.dispatchEvent(new Event("change",{bubbles:true}));})()`);
-  await waitInked("z20g-survey-ink"); // #300: as Z20d, the ink is a beat behind the tick
+  await waitInked("z20g-survey-ink"); // Issue #300: as Z20d, the ink is a beat behind the tick
   const von = await evaluate<{ band: number; committed: boolean; insets: number; track: boolean; k: number }>(
     `(()=>{const s=window.__vellumRegion();return{band:s.band,committed:s.committed,` +
       `insets:document.querySelectorAll("#map .region-inset").length,track:!!document.querySelector("#map .voyage-overlay"),` +
@@ -135,7 +135,7 @@ export async function z21Hamlets({ evaluate, check, shoot, sleep, rgn, enterAt, 
       `const {defaultRecipe,generateWorld}=await import("/explorer/engine/world/generate.js");` +
       `const {generateRegionWorld}=await import("/explorer/engine/world/region.js");` +
       `const world=generateWorld(defaultRecipe(42,{gridW:320,gridH:240}));` +
-      `const region=generateRegionWorld(world,{window:win,gridW:320,gridH:240,title:"parity",detail:true});` + // #400: the Glass draws every region band detailed, so the parity arm must too
+      `const region=generateRegionWorld(world,{window:win,gridW:320,gridH:240,title:"parity",detail:true});` + // Issue #400: the Glass draws every region band detailed, so the parity arm must too
       `const engine=region.settlements.filter(s=>s.kind==="hamlet").map(s=>s.name);` +
       `const names=new Set(engine);` +
       `return {hamlets:domNames.length,expected:engine.length,ordered,outside,` +
@@ -170,7 +170,7 @@ export async function z21bOneBandUp({ evaluate, check, sleep, enterAt, waitRedra
 
 export async function zRestore({ evaluate, waitSettled, goHome }: ZoomKit): Promise<void> {
   await goHome();
-  await evaluate(`window.__vellumSetRedraftEnabled(false)`); // #169: geometric-only again for the suites that follow
+  await evaluate(`window.__vellumSetRedraftEnabled(false)`); // Issue #169: geometric-only again for the suites that follow
 
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
   await evaluate(`(()=>{const c=document.getElementById("ages");if(c.checked){c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));}document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`);

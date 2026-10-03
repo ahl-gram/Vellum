@@ -143,7 +143,7 @@ test("a routed road leg is simplified: fewer vertices than the cells it walks", 
 });
 
 test("seed 526413615 sails: it has at least one sea leg and many road legs", () => {
-  // The Isle of Selivelai; the measured leg mixes are in the census comment on #309.
+  // The Isle of Selivelai; the measured leg mixes are in the census comment on Issue #309.
   const { routed } = realWorld(526413615);
   const modes = routed.map((l) => l.mode);
   assert.ok(modes.filter((m) => m === "sea").length >= 1, `expected a sea leg, got ${modes.join(",")}`);
@@ -233,7 +233,7 @@ test("a simplified leg never strays past the tolerance from terrain of its own k
 });
 
 test("a straight fallback leg walks the land, never across open water (#298)", () => {
-  // No natural fixture degrades since #309 roads every settled landmass; this U of roadless land forces the fallback, with the chord crossing the bay.
+  // No natural fixture degrades since Issue #309 roads every settled landmass; this U of roadless land forces the fallback, with the chord crossing the bay.
   const BOUND = RDP_EPSILON + 0.5;
   const s = survey([
     "............",

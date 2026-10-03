@@ -1,4 +1,4 @@
-// The Chart Table's grammar (Sub 1 of #401): one key, two hosts. It rides in the Explorer's hash while the table is being gathered and it IS the Portfolio page's address once the button is pressed, so the folio survives a reload and a round trip to the Prospect page. Pure and DOM-free like its siblings in src/site/{explorer,prospect,ribbon}/address.ts, because three bundles import it. The key is `table` (ruled at #518's sitting, 2026-09-07; `plates` is taken by the Explorer's order button and the poster/atlas plates).
+// The Chart Table's grammar (Sub 1 of Issue #401): one key, two hosts. It rides in the Explorer's hash while the table is being gathered and it IS the Portfolio page's address once the button is pressed, so the folio survives a reload and a round trip to the Prospect page. Pure and DOM-free like its siblings in src/site/{explorer,prospect,ribbon}/address.ts, because three bundles import it. The key is `table` (ruled at Issue #518's sitting, 2026-09-07; `plates` is taken by the Explorer's order button and the poster/atlas plates).
 import { LATTICE_DIVISIONS, LOD_BANDS, lodWindowFor, plotUvFromSheet, type LodBand, type SheetMargins, type UvCamera } from "../../world/lod.ts";
 import { plateDressFor } from "../../prospect/dress/context.ts";
 import { parseYear } from "./year.ts";
@@ -8,7 +8,7 @@ import type { StyleName } from "../../render/style.ts";
 import type { ThemeName } from "../../render/layers/field.ts";
 
 export const TABLE_KEY = "table";
-/** #401 ruling 5. The refusal wording is the hosts', not the grammar's. */
+/** Issue #401 ruling 5. The refusal wording is the hosts', not the grammar's. */
 export const TABLE_CAP = 6;
 
 // The urlencoded serializer leaves only A-Za-z0-9 and * - . _ alone, so the epic body's `~` would have ridden as %7E; this is also why a centre encodes as an integer index and never as a decimal.
@@ -68,7 +68,7 @@ export interface TableGroup {
   readonly entries: ReadonlyArray<{ readonly at: number; readonly item: TableItem }>;
 }
 
-// `beasts` rides though #519 lists a four-field dress: it cannot change a survey today (`generateRegionWorld` sets `beasts: []`, measured byte-identical either way), and is encoded for the reason #519 gives for encoding the style while the redraft is antique-only.
+// `beasts` rides though Issue #519 lists a four-field dress: it cannot change a survey today (`generateRegionWorld` sets `beasts: []`, measured byte-identical either way), and is encoded for the reason Issue #519 gives for encoding the style while the redraft is antique-only.
 
 // undefined = not stated; null = stated and unreadable, which drops the whole ITEM rather than quietly drafting a different world. Continuous values clamp instead.
 type Field<T> = T | null | undefined;
@@ -174,7 +174,7 @@ export function parseTable(hash: string): ReadonlyArray<TableItem> | null {
 const keptKeys = (hash: string, drop: RegExp): string[] =>
   (hash.startsWith("#") ? hash.slice(1) : hash).split("&").filter((kv) => kv !== "" && !drop.test(kv));
 
-/** One address with its table key replaced, keeping every other key verbatim and in place. #522: the Prospect page files onto the table and STAYS (ruled 2026-09-17), so its own address carries the gathering; #634: the Explorer's road to the Portfolio carries its whole address the same way, so the press back returns the reader's world and not only their sheets. An empty table writes no key at all, the rule `emitTableKey` in ../explorer/address.ts already keeps. */
+/** One address with its table key replaced, keeping every other key verbatim and in place. Issue #522: the Prospect page files onto the table and STAYS (ruled 2026-09-17), so its own address carries the gathering; Issue #634: the Explorer's road to the Portfolio carries its whole address the same way, so the press back returns the reader's world and not only their sheets. An empty table writes no key at all, the rule `emitTableKey` in ../explorer/address.ts already keeps. */
 export function tableHash(hash: string, table: string): string {
   const keys = keptKeys(hash, new RegExp(`^${TABLE_KEY}(=|$)`));
   const all = table === "" ? keys : [...keys, `${TABLE_KEY}=${table}`];
@@ -252,7 +252,7 @@ export function tableWindow(item: SurveyItem): UvWindow {
   return lodWindowFor(item.lx * step, item.ly * step, band.sizeUV);
 }
 
-/** The ONE builder both capture points use (#522). It lives here rather than beside `surveyItemFrom` in ../explorer/chart-drawer.ts because two bundles build a prospect item where only the Explorer builds a survey one, and `sameSheet` is byte equality on the emitted item: a card spelling the dress and a page spelling the chart's style would make one plate two sheets, defeating the cap and the dedupe. */
+/** The ONE builder both capture points use (Issue #522). It lives here rather than beside `surveyItemFrom` in ../explorer/chart-drawer.ts because two bundles build a prospect item where only the Explorer builds a survey one, and `sameSheet` is byte equality on the emitted item: a card spelling the dress and a page spelling the chart's style would make one plate two sheets, defeating the cap and the dedupe. */
 export function prospectItemFrom(c: {
   readonly seed: number;
   readonly overrides: TableOverrides;

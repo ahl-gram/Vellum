@@ -4,7 +4,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import ts from "typescript";
 
-// The Daily Hunt takes the Glass (#167), geometric-only; the behaviour is proven by e2e/suites/hunt.ts. BOUNDARY (#161): the Hunt is a FIXED world and must never import the LOD schedule or the region worker, since revealing new places mid-game would change the clue difficulty.
+// The Daily Hunt takes the Glass (Issue #167), geometric-only; the behaviour is proven by e2e/suites/hunt.ts. BOUNDARY (Issue #161): the Hunt is a FIXED world and must never import the LOD schedule or the region worker, since revealing new places mid-game would change the clue difficulty.
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");

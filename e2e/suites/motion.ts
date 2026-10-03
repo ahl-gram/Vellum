@@ -1,4 +1,4 @@
-// Motion e2e (D the #127 arrival ceremony, F the #130 folio view-transition declarations): hand-authored like its sibling suites, run by the e2e harness rather than the test runner.
+// Motion e2e (D the Issue #127 arrival ceremony, F the Issue #130 folio view-transition declarations): hand-authored like its sibling suites, run by the e2e harness rather than the test runner.
 import { makeStep } from "../support/step.ts";
 import type { SuiteContext } from "../types.ts";
 

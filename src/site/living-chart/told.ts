@@ -1,4 +1,4 @@
-// #442 the story's ONE live signal, a survey day row or a chronicle annal: one message and never two channels, so a stage never reconciles a year against a port and paints a stale one over a live one.
+// Issue #442 the story's ONE live signal, a survey day row or a chronicle annal: one message and never two channels, so a stage never reconciles a year against a port and paints a stale one over a live one.
 import { eventIsPast } from "../../render/chronicle-scrubber.ts";
 
 export type ToldEntry =

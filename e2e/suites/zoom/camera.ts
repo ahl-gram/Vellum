@@ -116,7 +116,7 @@ export async function z8bHoverRing({ evaluate, send, check, sleep, readRing }: Z
       mapK:getComputedStyle(document.getElementById("map")).getPropertyValue("--zoom-k").trim()};
   })()`);
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: z8b.x ?? 0, y: z8b.y ?? 0 });
-  // Poll, never sleep: opacity below has NO tolerance, and #381's second lane stretched this 180ms grow-in past a fixed 400ms once in eight runs (o=0.906, still climbing).
+  // Poll, never sleep: opacity below has NO tolerance, and Issue #381's second lane stretched this 180ms grow-in past a fixed 400ms once in eight runs (o=0.906, still climbing).
   let z8bRing = await readRing();
   for (let i = 0; i < 60 && !ringAtRest(z8bRing); i++) {
     await sleep(50);

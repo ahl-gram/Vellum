@@ -55,7 +55,7 @@ test("the empty onset and the empty coda are never glossed: the vowel is only th
 });
 
 test("the three scholars' footnotes #124 asks for are still in the lexicon", () => {
-  // The only deviations from the 140 entries locked on #124: the footnotes the issue describes in prose but did not table.
+  // The only deviations from the 140 entries locked on Issue #124: the footnotes the issue describes in prose but did not table.
   assert.match(PHILOLOGY_LEXICON.thalassic!.onsets.vel!, /^sail, fine cloth,.*vellum/);
   assert.match(PHILOLOGY_LEXICON.thalassic!.suffixes.mere!, /^a still water,.*sylvan/);
   assert.match(PHILOLOGY_LEXICON.sylvan!.suffixes.mere!, /^a still pool,.*thalassic/);

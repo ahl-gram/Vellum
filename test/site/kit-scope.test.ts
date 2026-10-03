@@ -22,7 +22,7 @@ const offendersIn = (css: string, home: Set<string>): string[] =>
     return classes.length > 0 && classes.every((c) => home.has(c)) && !SCOPED.test(arm);
   });
 
-/** Every atelier*.css on disk is a kit sheet and is swept (#487 allows the kit to split). */
+/** Every atelier*.css on disk is a kit sheet and is swept (Issue #487 allows the kit to split). */
 const kitSheets = (): string[] => readdirSync(resolve(REPO, "public")).filter((f) => /^atelier.*\.css$/.test(f)).map((f) => `public/${f}`);
 
 /** The pages that do not wear the kit on purpose: home and every room not yet converted (no chartRoom, no open desk); the kit sheet is linked on all of them. */

@@ -7,7 +7,7 @@ export type FbmOptions = {
 };
 
 export type FbmDetailOptions = FbmOptions & {
-  /** Pins the amplitude normalizer to this base octave count so octaves beyond it are purely additive; defaults to octaves (#396). */
+  /** Pins the amplitude normalizer to this base octave count so octaves beyond it are purely additive; defaults to octaves (Issue #396). */
   normOctaves?: number;
 };
 

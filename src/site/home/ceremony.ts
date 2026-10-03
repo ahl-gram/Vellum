@@ -1,6 +1,6 @@
 import { type Box, type Cam, camForCenter } from "./camera.ts";
 
-// The clock and framing quote runCeremony in the archived mockup at design/atelier-map, the epic's visual spec (#454).
+// The clock and framing quote runCeremony in the archived mockup at design/atelier-map, the epic's visual spec (Issue #454).
 export const TARGET_FATHOMS = 42;
 export const MIN_VEIL_MS = 2400;
 export const SOUNDING_TICK_MS = 46;

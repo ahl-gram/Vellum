@@ -3,14 +3,14 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-// The glossary's shape (#353): sections cap at 5-8 terms, Zoryan and Ordai run over by ratified exception, homographs take Smyth's (1867) period form, one headword with its senses run together.
+// The glossary's shape (Issue #353): sections cap at 5-8 terms, Zoryan and Ordai run over by ratified exception, homographs take Smyth's (1867) period form, one headword with its senses run together.
 
 const glossaryPath = fileURLToPath(new URL("../../src/pages/glossary/index.astro", import.meta.url));
 const source = readFileSync(glossaryPath, "utf8");
 
 const CAP = 8;
 const FLOOR = 5;
-/** Ratified overage (#353), by heading prefix. Nothing else may exceed CAP. */
+/** Ratified overage (Issue #353), by heading prefix. Nothing else may exceed CAP. */
 const OVER_CAP_BY_RATIFICATION = ["Zoryan", "Ordai"];
 const RATIFIED_CEILING = 10;
 

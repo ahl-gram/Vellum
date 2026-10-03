@@ -6,7 +6,7 @@ import { buildRibbonInput, type RibbonInput } from "../../src/itinerary/input.ts
 import { eventCaption } from "../../src/itinerary/prose.ts";
 import type { RibbonEvent } from "../../src/itinerary/events.ts";
 
-// #427 wrote "River Skeksvy"; the world says "River Skuksvy" and the golden says the engine has not moved: measured wins.
+// Issue #427 wrote "River Skeksvy"; the world says "River Skuksvy" and the golden says the engine has not moved: measured wins.
 
 function journey(seed: number, toName: string): { input: RibbonInput; rng: ReturnType<typeof createRng> } {
   const world = generateWorld(defaultRecipe(seed));

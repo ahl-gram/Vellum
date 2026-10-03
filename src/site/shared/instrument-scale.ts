@@ -1,4 +1,4 @@
-// The strip's scale (#462 ruling 6): the survey's days on the left, the annals' years on the right, the compass star at the seam. The seam is the bar's own (SEAM_U, render/ages-track.ts) and the ages half is linear in years; the survey half's ports fall by the itinerary's schedule, so only its ends are marked, the last day ON the seam where the bar puts it.
+// The strip's scale (Issue #462 ruling 6): the survey's days on the left, the annals' years on the right, the compass star at the seam. The seam is the bar's own (SEAM_U, render/ages-track.ts) and the ages half is linear in years; the survey half's ports fall by the itinerary's schedule, so only its ends are marked, the last day ON the seam where the bar puts it.
 import { SEAM_U } from "../../render/ages-track.ts";
 
 export interface ScaleTick {

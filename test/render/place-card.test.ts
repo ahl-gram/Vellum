@@ -198,7 +198,7 @@ test("integration: every seed 42 place carries a derivation, and the ruin keeps 
   assert.ok(ruinCard.tale && ruinCard.tale.includes(ruin.name), "the ruin's tale survives the new lines");
 });
 
-// Ruled 2026-08-16 (#387/#388): the nudge is applied AFTER cardSide has chosen a side, in screen px because the CSS folds it in after the counter-scale; the spills below are the measured worst cases on seed 42 at 390 (Laukuwelua at the bottom edge, Homaitani at the top).
+// Ruled 2026-08-16 (Issue #387/Issue #388): the nudge is applied AFTER cardSide has chosen a side, in screen px because the CSS folds it in after the counter-scale; the spills below are the measured worst cases on seed 42 at 390 (Laukuwelua at the bottom edge, Homaitani at the top).
 const box = { left: 0, top: 0, right: 342, bottom: 266 };
 const at = (left: number, top: number, w: number, h: number) => ({ left, top, right: left + w, bottom: top + h });
 

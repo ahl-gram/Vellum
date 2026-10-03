@@ -8,7 +8,7 @@ import { pathToFileURL } from "node:url";
 
 const SELFTEST = resolve(import.meta.dirname, "..", "..", ".claude", "skills", "vellum-footguns", "hooks", "footgun-gate.selftest.ts");
 const TEMPLATE = resolve(import.meta.dirname, "..", "..", ".github", "PULL_REQUEST_TEMPLATE.md");
-// The cap reaches the selftest's own three deployed rows, which pipe input to a child that drains it and so share the shape #564 wedged on; a cap here bounds that whole subtree in one place. Measured 2026-09-11: the selftest runs in 0.34s, so this is about 90x.
+// The cap reaches the selftest's own three deployed rows, which pipe input to a child that drains it and so share the shape Issue #564 wedged on; a cap here bounds that whole subtree in one place. Measured 2026-09-11: the selftest runs in 0.34s, so this is about 90x.
 const BOUND_MS = 30_000;
 
 test("the footgun hook's fixture table passes, including the deployed settings.json command", () => {
@@ -17,7 +17,7 @@ test("the footgun hook's fixture table passes, including the deployed settings.j
   assert.match(out, /^ok +deployed: symlinked project dir denies stash pop/m, out);
 });
 
-// The table's only other assertion is "no FAIL", which an EMPTY roster satisfies: a headingRows() that returned [] would leave npm test green with the whole PR-section guard gone (#140's deletable-guard shape). The required row per section is derived from the template rather than listed here, so this cannot drift from it either.
+// The table's only other assertion is "no FAIL", which an EMPTY roster satisfies: a headingRows() that returned [] would leave npm test green with the whole PR-section guard gone (Issue #140's deletable-guard shape). The required row per section is derived from the template rather than listed here, so this cannot drift from it either.
 test("every section of the PR template has its own denial row in the table", () => {
   const sections = readFileSync(TEMPLATE, "utf8").split("\n").map((l) => l.trim()).filter((l) => l.startsWith("## "));
   assert.ok(sections.length >= 2, `the template carries ${sections.length} sections, so this guard cannot bite`);
@@ -86,7 +86,7 @@ test("a bare import of the fixture table runs nothing and mints nothing", () => 
   }
 });
 
-// Both guards below read the TEMPLATE, so neither can red when a PR body ships with no closing reference: the hook that reads a body off disk checks the sections and denies a negated keyword but never requires one, and a body written by hand rather than seeded from this file carries whatever its author typed, so #597's own defect, a merged PR leaving its issue open, is not guardable from a test here and the template line is a prompt rather than a mechanism. The number scan errs toward a false positive, since a number deliberately written as an example would red it, and never toward a miss.
+// Both guards below read the TEMPLATE, so neither can red when a PR body ships with no closing reference: the hook that reads a body off disk checks the sections and denies a negated keyword but never requires one, and a body written by hand rather than seeded from this file carries whatever its author typed, so Issue #597's own defect, a merged PR leaving its issue open, is not guardable from a test here and the template line is a prompt rather than a mechanism. The number scan errs toward a false positive, since a number deliberately written as an example would red it, and never toward a miss.
 test("the PR template prompts for a closing reference above its first section, with a note beside it", () => {
   const lines = readFileSync(TEMPLATE, "utf8").split("\n");
   const firstSection = lines.findIndex((l) => l.trim().startsWith("## "));

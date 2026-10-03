@@ -4,7 +4,7 @@ import type { SurveyKit } from "./kit.ts";
 export async function sv2pDrawBeat({ evaluate, waitSettled, goto, waitInked }: SurveyKit): Promise<void> {
   await goto("#seed=7&style=antique&survey", "survey-draw-beat-base");
   await waitInked("survey-draw-beat-base-ink");
-  // #373: the same rAF loop samples the coastline's inkDraw, whose stroke-dashoffset is not compositable and so advances ONLY while the main thread is free. dashCoastForInk (draw-ceremony.ts) sets the dash; animationend clears it.
+  // Issue #373: the same rAF loop samples the coastline's inkDraw, whose stroke-dashoffset is not compositable and so advances ONLY while the main thread is free. dashCoastForInk (draw-ceremony.ts) sets the dash; animationend clears it.
   await evaluate(`(()=>{window.__land={batches:[],frames:0,raf:0,dashSteps:0,lastDash:"",dashSeen:0,gap:0,last:performance.now()};
       const bump=(now)=>{window.__land.frames++;
         window.__land.gap=Math.max(window.__land.gap,now-window.__land.last);window.__land.last=now;

@@ -17,7 +17,7 @@ export async function sv9NoSeams({ evaluate, check, goto }: SurveyKit): Promise<
 
 export async function sv10TurnKeepsTrack({ evaluate, check, waitTurned, armTurnWatch, waitInked }: SurveyKit): Promise<void> {
   await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
-  // Wait for the ink BEFORE the turn: a style change inside the arm's gap drops the pending arm, and SV10 would pass on a turn begun over a bare sheet, losing #153's premise.
+  // Wait for the ink BEFORE the turn: a style change inside the arm's gap drops the pending arm, and SV10 would pass on a turn begun over a bare sheet, losing Issue #153's premise.
   await waitInked("survey-armed-before-turn");
   await armTurnWatch();
   await evaluate(`(()=>{window.__land={batches:[],frames:0,raf:0};

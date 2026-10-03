@@ -134,7 +134,7 @@ export async function h14cLegend({ evaluate, check, sleep, pressKey, clickAt }: 
 }
 
 export async function h16bOpen({ evaluate, sleep, clickAt }: HomeKit) {
-  // The legend stands down under 900px (#461 phone doors), so the narrow entry is the station pip itself, the same door desktop flights use.
+  // The legend stands down under 900px (Issue #461 phone doors), so the narrow entry is the station pip itself, the same door desktop flights use.
   const sheetPt = await evaluate(buttonPoint('.lf-station[data-station="atlas"]'));
   if (sheetPt !== null) await clickAt(Math.round(sheetPt.x), Math.round(sheetPt.y));
   let opened16 = false;
@@ -202,7 +202,7 @@ export async function h16cLegendStands({ evaluate, check, sleep, pressKey }: Hom
     if (anyOpen === false) break;
     await sleep(75);
   }
-  // Round-3 plate finding: the unconditional .landfall .stage.cam .lf-legend show-rule (0,4,0) beat the media-scoped hide (0,1,0), so scripts-on phones kept the legend AND it sat on two of the three camera buttons. Resolved computed styles only, the #288 lesson.
+  // Round-3 plate finding: the unconditional .landfall .stage.cam .lf-legend show-rule (0,4,0) beat the media-scoped hide (0,1,0), so scripts-on phones kept the legend AND it sat on two of the three camera buttons. Resolved computed styles only, the Issue #288 lesson.
   let doors16c = null;
   try {
     doors16c = await evaluate<{ cam: boolean; legendDisplay: string | null; hits: boolean[] }>(`(() => {

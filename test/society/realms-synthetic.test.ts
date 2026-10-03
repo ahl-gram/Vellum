@@ -7,7 +7,7 @@ import { realmTintIndices, realmCentroids } from "../../src/render/realm-tints.t
 import { STYLES } from "../../src/render/style.ts";
 import type { Settlement } from "../../src/society/sites.ts";
 
-// Hand-built worlds DRIVE paths no natural seed reaches (real worlds cap at ~5 realms): the generation ceiling, over-ceiling attachment, the >BASE_TINTS tint path (#78), and BY-SEA-ROUTE attachment, the one behaviour a generated-world test would still pass with the old Euclidean fallback.
+// Hand-built worlds DRIVE paths no natural seed reaches (real worlds cap at ~5 realms): the generation ceiling, over-ceiling attachment, the >BASE_TINTS tint path (Issue #78), and BY-SEA-ROUTE attachment, the one behaviour a generated-world test would still pass with the old Euclidean fallback.
 
 const SEA = 0.5;
 type Rect = { x0: number; y0: number; x1: number; y1: number };

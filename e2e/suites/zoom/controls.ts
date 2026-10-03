@@ -77,7 +77,7 @@ export async function z12HashWrite({ evaluate, check, sleep, waitTurned }: Suite
   await waitTurned("zoom-styles-restore-antique");
 
   await evaluate(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:2,x:-0.2*W,y:-0.3*H});})()`);
-  // Poll the 250ms settle debounce: the assertion below is strict string equality, and a deferred timer under #381's second lane can land after any fixed wait.
+  // Poll the 250ms settle debounce: the assertion below is strict string equality, and a deferred timer under Issue #381's second lane can land after any fixed wait.
   const readZ12 = () => evaluate<{ cx: string | null; cy: string | null; k: string | null }>(`(()=>{const p=new URLSearchParams(location.hash.slice(1));return{cx:p.get("cx"),cy:p.get("cy"),k:p.get("k")};})()`);
   let z12 = await readZ12();
   for (let i = 0; i < 60 && z12.k !== "2.0000"; i++) {

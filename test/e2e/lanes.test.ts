@@ -23,7 +23,7 @@ import {
 import type { E2eSuiteName } from "../../e2e/support/suites.ts";
 import { E2E_PORT_VAR, E2E_DPORT_VAR, e2eOutSubdir } from "../../e2e/support/ports.ts";
 
-// Seconds per suite, from the runner's own per-suite wall clock on a 16-core Mac. Every entry was refreshed 2026-09-20 at #637 from two local runs of each lane with the roster as it stands, the higher reading taken (chart-drawer re-measured the same way on 2026-09-21 at Issue #523) (both readings at the entry, one lane run at a time); refresh from that same output when the split is revisited. These seconds reach CI unevenly, about 2.0x on lane A and 1.8x on lane B against this table and per suite from 1.1x (home, wait-bound) to 3.3x (render), measured 2026-09-20 on main run 35518105601, so a rebalance is SIZED from the CI lane logs' per-suite wall clock and this table decides only the 0.6 bound below.
+// Seconds per suite, from the runner's own per-suite wall clock on a 16-core Mac. Every entry was refreshed 2026-09-20 at Issue #637 from two local runs of each lane with the roster as it stands, the higher reading taken (chart-drawer re-measured the same way on 2026-09-21 at Issue #523) (both readings at the entry, one lane run at a time); refresh from that same output when the split is revisited. These seconds reach CI unevenly, about 2.0x on lane A and 1.8x on lane B against this table and per suite from 1.1x (home, wait-bound) to 3.3x (render), measured 2026-09-20 on main run 35518105601, so a rebalance is SIZED from the CI lane logs' per-suite wall clock and this table decides only the 0.6 bound below.
 const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   "home": 104.2, // 2026-09-20: 104.1, 104.2
   "chart-drawer": 73.3, // 2026-09-21: 72.7, 73.3, two lane B runs at Issue #523 with CD44 to CD48 in (63.0 on 2026-09-20 before them); CD23's 8.45s of SAY_HOLD_MS + SAY_FADE_MS is a floor no machine can undercut, so the principle bounds it from below and the runs set the budget above
@@ -62,7 +62,7 @@ const laneSeconds = (suites: readonly E2eSuiteName[]) =>
   suites.reduce((sum, name) => sum + MEASURED_SECONDS[name], 0);
 
 const BALANCE_CAP = 0.6;
-// Seconds added to a lane raise the total too, so `(L + x) / (T + x) <= cap` solves to `x <= (cap * T - L) / (1 - cap)`, positive when the lane has room and negative by exactly the seconds it must shed (#637; at 0.6 and two lanes it is the `1.5A - B` the #635 review derived).
+// Seconds added to a lane raise the total too, so `(L + x) / (T + x) <= cap` solves to `x <= (cap * T - L) / (1 - cap)`, positive when the lane has room and negative by exactly the seconds it must shed (Issue #637; at 0.6 and two lanes it is the `1.5A - B` the PR #635 review derived).
 const laneHeadroom = (seconds: number, total: number) => (BALANCE_CAP * total - seconds) / (1 - BALANCE_CAP);
 const balanceLine = (name: string, seconds: number, total: number): string => {
   const headroom = laneHeadroom(seconds, total);
@@ -256,7 +256,7 @@ test("the split is balanced against measured cost, not check counts", () => {
   const total = laneSeconds(E2E_SUITE_ORDER);
   for (const lane of E2E_LANES) {
     const seconds = laneSeconds(lane.suites);
-    // Since #623 put one job on each runner the wall clock IS max(A, B), so an unbalanced pair wastes the parallelism it was split for and balance matters more here than it did inside one job, not less (Alex, 2026-09-14).
+    // Since Issue #623 put one job on each runner the wall clock IS max(A, B), so an unbalanced pair wastes the parallelism it was split for and balance matters more here than it did inside one job, not less (Alex, 2026-09-14).
     assert.ok(seconds / total <= BALANCE_CAP, balanceLine(lane.name, seconds, total));
   }
 });

@@ -1,4 +1,4 @@
-// The stage's announcement, which leaves on its own (#547, ruled 2026-09-13): every chart room's status pill is one aria-live region with several owners, so this holds the line for a moment, fades it, and clears it ONLY if the text it wrote is still the text standing there.
+// The stage's announcement, which leaves on its own (Issue #547, ruled 2026-09-13): every chart room's status pill is one aria-live region with several owners, so this holds the line for a moment, fades it, and clears it ONLY if the text it wrote is still the text standing there.
 
 export const SAY_HOLD_MS = 8000;
 export const SAY_FADE_MS = 450;

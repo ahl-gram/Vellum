@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { entryAt, readingAt } from "../../src/site/shared/index-ink.ts";
 
-// #462 document-room ruling 1: the section being read is the last head at or above the reading line.
+// Issue #462 document-room ruling 1: the section being read is the last head at or above the reading line.
 
 const heads = [{ id: "a", top: -400 }, { id: "b", top: 60 }, { id: "c", top: 900 }];
 

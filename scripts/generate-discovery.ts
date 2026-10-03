@@ -3,13 +3,13 @@ import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { NAV_ITEMS } from "../src/layouts/nav.ts";
 
-/** #286: the three discovery files (sitemap.xml, robots.txt, llms.txt), GENERATED from NAV_ITEMS in the astro:generate step so they cannot drift from the nav; robots.txt is generated rather than committed because its Sitemap: line carries the origin, which the 2026-07-24 domain move would have stranded. */
+/** Issue #286: the three discovery files (sitemap.xml, robots.txt, llms.txt), GENERATED from NAV_ITEMS in the astro:generate step so they cannot drift from the nav; robots.txt is generated rather than committed because its Sitemap: line carries the origin, which the 2026-07-24 domain move would have stranded. */
 
 export const HOME_ROUTE = "/";
 export const ATLAS_ROUTE = "/atlas/";
 export const PROSPECT_ROUTE = "/prospect/";
 export const RIBBON_ROUTE = "/ribbon/";
-// Omitted from the nav like its three siblings: the Portfolio is reached from a gathered table or from the Print Room's Bound Atlas slip, never as a standing room (#521).
+// Omitted from the nav like its three siblings: the Portfolio is reached from a gathered table or from the Print Room's Bound Atlas slip, never as a standing room (Issue #521).
 export const PORTFOLIO_ROUTE = "/print-room/portfolio/";
 
 // Deliberately NOT grouped by NavItem.kind: nav.ts declares kind a placeholder nothing may depend on, so these files stay flat.
@@ -122,7 +122,7 @@ export function robotsTxt(site: string): string {
   ].join("\n");
 }
 
-/** The llmstxt.org convention (H1, blockquote summary, H2 link sections); adoption is not universal, so generating it from the same route data is what keeps the bet cheap (#286). */
+/** The llmstxt.org convention (H1, blockquote summary, H2 link sections); adoption is not universal, so generating it from the same route data is what keeps the bet cheap (Issue #286). */
 export function llmsTxt(site: string): string {
   const links = DISCOVERY_ROUTES.map((route) => {
     const { title, blurb } = entryFor(route);

@@ -1,4 +1,4 @@
-// The live-state keys of the Explorer hash, pure and DOM-free (the live plumbing is the e2e suite-survey's and the room-hosted RA suite's). Ratified vocabulary (the 2026-07-26 comment on #192): two mutually exclusive keys, a bare `survey` flag and `year=N`; the writer emits exactly one of them, or neither.
+// The live-state keys of the Explorer hash, pure and DOM-free (the live plumbing is the e2e suite-survey's and the room-hosted RA suite's). Ratified vocabulary (the 2026-07-26 comment on Issue #192): two mutually exclusive keys, a bare `survey` flag and `year=N`; the writer emits exactly one of them, or neither.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { parseLive, emitLive, finalizeHash, liveNow, forwardTarget, prospectTarget } from "../../src/site/explorer/address.ts";
@@ -106,7 +106,7 @@ test("liveNow: an unknowable state or a disarmed instrument emits nothing", () =
   );
 });
 
-// Ratified as decision 2 on #321 (2026-08-11): forward BEFORE any draw, hash verbatim; the room reads the same recipe keys and ignores what it cannot use.
+// Ratified as decision 2 on Issue #321 (2026-08-11): forward BEFORE any draw, hash verbatim; the room reads the same recipe keys and ignores what it cannot use.
 test("forwardTarget: a valid year=N link forwards to the Reading Room, hash verbatim", () => {
   assert.equal(
     forwardTarget("#seed=42&style=antique&legend=1&arms=0&year=814"),

@@ -4,7 +4,7 @@ import {
   createSurveyArm, afterNextPaint, armOnLanding, wireSurveyToggle, deferLandingArm,
 } from "../../src/site/explorer/survey-arm.ts";
 
-// The survey tick's session build (measured 895-1207ms) ran inside the change handler, blocking the tick's paint (#300); the fix yields a frame first and this scheduler owns the window that opens. DOM-free: the yield is an injected afterPaint, the live browser yield is proven by e2e suite-survey SV2/SV2c/SV2d.
+// The survey tick's session build (measured 895-1207ms) ran inside the change handler, blocking the tick's paint (Issue #300); the fix yields a frame first and this scheduler owns the window that opens. DOM-free: the yield is an injected afterPaint, the live browser yield is proven by e2e suite-survey SV2/SV2c/SV2d.
 
 /** A held-open frame: `afterPaint` queues, `paint()` releases everything queued so far. */
 function paintQueue() {
@@ -17,7 +17,7 @@ function paintQueue() {
 
 function harness() {
   const q = paintQueue();
-  // builds = the tick's arm, landings = a settle or turn arm (#366), clears = the unticked teardown: counted apart so a test can say WHICH ran.
+  // builds = the tick's arm, landings = a settle or turn arm (Issue #366), clears = the unticked teardown: counted apart so a test can say WHICH ran.
   const state = { armed: false, worldGen: 0, builds: 0, landings: 0, clears: 0 };
   const arm = createSurveyArm({
     afterPaint: q.afterPaint,
@@ -102,7 +102,7 @@ test("#300 cancel() with no arm pending is a no-op, and does not poison the next
   assert.equal(h.state.builds, 1, "a later arm still runs after a bare cancel");
 });
 
-// #366: the same beat on the other two arm paths (1245ms settle-to-frame before, ~105ms after); a landing schedules through the SAME single slot the tick uses.
+// Issue #366: the same beat on the other two arm paths (1245ms settle-to-frame before, ~105ms after); a landing schedules through the SAME single slot the tick uses.
 
 test("#366 a landing's arm waits for the paint too: the settle's own task builds nothing", () => {
   const h = harness();
@@ -155,7 +155,7 @@ test("#366 a quiet mid-drag landing arms INLINE: the track follows the coastline
   h.state.armed = true;
   h.arm.schedule(); // a pending tick the landing must still supersede
   h.land({ defer: false });
-  // A quiet settle skips the #184 matrix (23-36ms), and deferring would let each throttled redraw drop the one before it: the track would lag the coastline.
+  // A quiet settle skips the Issue #184 matrix (23-36ms), and deferring would let each throttled redraw drop the one before it: the track would lag the coastline.
   assert.equal(h.state.landings, 1, "the quiet arm runs in the settle's own task");
   h.paint();
   assert.equal(h.state.builds, 0, "the pending tick is dropped all the same: one landing, one arm");
@@ -245,7 +245,7 @@ test("#192 the untick writes the hash AFTER the teardown, not before", () => {
   assert.deepEqual(h.order, ["exit", "syncHash"]);
 });
 
-// Extracted so the defer decision is testable; the host's second reader (who repaints the #174 back face) is only visible to e2e SV2k/SV2m/SV2o.
+// Extracted so the defer decision is testable; the host's second reader (who repaints the Issue #174 back face) is only visible to e2e SV2k/SV2m/SV2o.
 test("#366 a landing defers its arm only when the paint it waits for can actually be seen", () => {
   assert.equal(deferLandingArm(false, false), true, "the ordinary settle: the chart is facing the reader");
   assert.equal(deferLandingArm(false, true), false, "flipped: the chart is facing away, the back face is not");

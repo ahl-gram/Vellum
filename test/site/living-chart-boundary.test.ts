@@ -4,7 +4,7 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { API, bareEl } from "../../test-support/living-chart-hosts.ts";
 
-// The engine must be hostable by a page that is NOT the Explorer (#191) and the bar is OPTIONAL (#319): document-less Node can import and construct it. Bar-less BEHAVIOUR lives in living-chart-no-bar.test.ts; this file stays DOM-free so the import proof keeps its meaning.
+// The engine must be hostable by a page that is NOT the Explorer (Issue #191) and the bar is OPTIONAL (Issue #319): document-less Node can import and construct it. Bar-less BEHAVIOUR lives in living-chart-no-bar.test.ts; this file stays DOM-free so the import proof keeps its meaning.
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 
@@ -17,7 +17,7 @@ const assertFullApi = (lc: unknown, shape: string): void => {
       `the engine exposes ${method}() (${shape})`,
     );
   }
-  // Both directions, so the roster catches an ADDED entry too: #319's contract is that the optional bar earns no new method.
+  // Both directions, so the roster catches an ADDED entry too: Issue #319's contract is that the optional bar earns no new method.
   assert.deepEqual(
     returned.filter((k) => !(API as readonly string[]).includes(k)),
     [],
@@ -34,7 +34,7 @@ test("the engine imports without a DOM: no module-scope document access (#191)",
 
 test("createLivingChart constructs against a plain-object host and exposes the full API (#191)", async () => {
   const { createLivingChart } = await import("../../src/site/living-chart/index.ts");
-  // Plain empty objects, not DOM stubs: every element access must happen inside a method call, or a host that builds its DOM after wiring null-binds exactly like #191's bug.
+  // Plain empty objects, not DOM stubs: every element access must happen inside a method call, or a host that builds its DOM after wiring null-binds exactly like Issue #191's bug.
   const lc = createLivingChart({
     mapEl: bareEl(),
     statusEl: bareEl(),

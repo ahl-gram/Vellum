@@ -74,7 +74,7 @@ test("prospectResultFor carries the former name through to the page (#49)", () =
   assert.ok(!("formerName" in plain), "an absent former name should not leave the key behind");
 });
 
-// The note is Today's card's (#494 ruling 4 was made on a preview carrying it), NOT the bound atlas's gazetteer note for the same town, which the same writer only reaches after walking the rows before it.
+// The note is Today's card's (Issue #494 ruling 4 was made on a preview carrying it), NOT the bound atlas's gazetteer note for the same town, which the same writer only reaches after walking the rows before it.
 test("prospectResultFor carries the engraver's note: the era, the epithet, the founding, the lettered key and Today's card's note for the town", () => {
   const res = prospectResultFor(world, { index: 1, dress: "ink", year: null });
   const e = engravedProspectPlate(world, 1, STYLES.ink, world.title.year);

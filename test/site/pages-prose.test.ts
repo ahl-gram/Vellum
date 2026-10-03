@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { join } from "node:path";
 import { CULTURES } from "../../src/society/names.ts";
 
-// Prose facts the pages state about the engine (#289, #292): the culture count is read from the roster, never a number written down twice.
+// Prose facts the pages state about the engine (Issue #289, Issue #292): the culture count is read from the roster, never a number written down twice.
 
 const pagesDir = fileURLToPath(new URL("../../src/pages", import.meta.url));
 

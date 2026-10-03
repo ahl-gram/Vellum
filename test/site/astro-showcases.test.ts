@@ -8,7 +8,7 @@ import { GENERATED_SUBTREES } from "../../scripts/clean-public-generated.ts";
 import { generateShowcases } from "../../scripts/generate-showcases.ts";
 import { HERO_CHART_DIRS, regenHeroCharts } from "../../scripts/regen-hero-charts.ts";
 
-// Scriptorium Sub 4 (#205): build-time generation replaces the homegrown site build. SPEC: the ratified 2026-07-21 comment on #202, section 2 and decision D; the hero-charts decision ratified 2026-07-24 (option a, the goldens stay committed).
+// Scriptorium Sub 4 (Issue #205): build-time generation replaces the homegrown site build. SPEC: the ratified 2026-07-21 comment on Issue #202, section 2 and decision D; the hero-charts decision ratified 2026-07-24 (option a, the goldens stay committed).
 
 const root = (p = "") => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 

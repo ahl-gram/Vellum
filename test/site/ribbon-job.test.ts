@@ -33,7 +33,7 @@ test("ribbonResultFor renders through ribbonSvgFor byte-for-byte and reports the
   assert.deepEqual(res.reachable, reachable);
 });
 
-// #494: "the two selects filled from the road-reachable places"; picking a road-orphan would fall back to the capital's road under the wrong name.
+// Issue #494: "the two selects filled from the road-reachable places"; picking a road-orphan would fall back to the capital's road under the wrong name.
 test("every option says whether a road leaves it, and seed 42's one road-orphan says no", () => {
   const res = ribbonResultFor(world, { from: capital, to: null, dress: "antique" });
   assert.ok(stranded >= 0, "premise: seed 42 strands a settlement off the network");

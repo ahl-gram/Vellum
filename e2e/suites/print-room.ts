@@ -1,4 +1,4 @@
-// Print Room e2e (PRL, PR0-PR29, PRC, PRB, PRW; #133/#134/#135/#136/#137/#212/#217): the shell and inline fallback, the poster plates, the PNG rasterizer and the bound atlas; hand-authored like its sibling suites and self-contained (navigates itself, carries scoped no-4xx and console-error deltas).
+// Print Room e2e (PRL, PR0-PR29, PRC, PRB, PRW; Issue #133/Issue #134/Issue #135/Issue #136/Issue #137/Issue #212/Issue #217): the shell and inline fallback, the poster plates, the PNG rasterizer and the bound atlas; hand-authored like its sibling suites and self-contained (navigates itself, carries scoped no-4xx and console-error deltas).
 import type { SuiteContext } from "../types.ts";
 import { printRoomKit } from "./print-room/kit.ts";
 import { prlLink, prwWarp } from "./print-room/link.ts";
@@ -53,6 +53,6 @@ export async function run(ctx: SuiteContext): Promise<void> {
   // PR6/PR7 must stay ahead of the inline-fallback block below, which 404s the worker on purpose.
   pr6Clean(ctx, prErrBase, prHttpBase);
   await pr8Fallback(ctx);
-  // PRW/PRW2 (#137) run LAST: they navigate away from the page every check above shares.
+  // PRW/PRW2 (Issue #137) run LAST: they navigate away from the page every check above shares.
   await prwWarp(ctx);
 }

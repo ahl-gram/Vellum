@@ -1,4 +1,4 @@
-// Coastline warp slider (#137), sibling of sea-level.ts; the slider integer is coastWarp x 100. DEFAULT_COAST_WARP mirrors SHAPES[mapType].coastWarp, uniformly 0.55 today: if map types ever get different warp defaults, heightfield.test.ts's additive guard and this constant are the two places to revisit.
+// Coastline warp slider (Issue #137), sibling of sea-level.ts; the slider integer is coastWarp x 100. DEFAULT_COAST_WARP mirrors SHAPES[mapType].coastWarp, uniformly 0.55 today: if map types ever get different warp defaults, heightfield.test.ts's additive guard and this constant are the two places to revisit.
 const coastSlider = document.getElementById("coast") as HTMLInputElement;
 const coastReadout = document.getElementById("coast-readout") as HTMLElement;
 

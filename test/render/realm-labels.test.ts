@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 
-// The chart number IS the seed, each with exactly one silently dropped realm; #235 re-rolled only the name STRINGS (culture is picked AFTER the partition, so realm index i is the same realm).
+// The chart number IS the seed, each with exactly one silently dropped realm; Issue #235 re-rolled only the name STRINGS (culture is picked AFTER the partition, so realm index i is the same realm).
 const CASES = [
   { seed: 1619895893, chart: "The Whispering Reaches of Ciapa", dropped: "The Empire of Non" },
   { seed: 3767410253, chart: "The Verdant Isle of Noca", dropped: "The Niayax Dominion" },

@@ -5,7 +5,7 @@ import { resolve } from "node:path";
 import { NAV_ITEMS } from "../../src/layouts/nav.ts";
 import { DISCOVERY_ROUTES } from "../../scripts/generate-discovery.ts";
 
-// The Specimen Book (#487 item 4, cut at #465 ruling 6): the kit's oracle and the live sitting's bench.
+// The Specimen Book (Issue #487 item 4, cut at Issue #465 ruling 6): the kit's oracle and the live sitting's bench.
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 const PAGE = "src/pages/specimen/index.astro";

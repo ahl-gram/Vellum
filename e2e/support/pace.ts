@@ -1,4 +1,4 @@
-// The pace measurement (#526): the sweep's clock is wall-anchored (living-chart/pace.ts), so the years the story covers per page millisecond is a RATE no runner speed can move, only WHEN frames land; each sample pairs a year with the rAF timestamp of the frame that painted it, the slope of year on that timestamp is the rate, and a constant pairing lag is an offset in that fit, not a tilt.
+// The pace measurement (Issue #526): the sweep's clock is wall-anchored (living-chart/pace.ts), so the years the story covers per page millisecond is a RATE no runner speed can move, only WHEN frames land; each sample pairs a year with the rAF timestamp of the frame that painted it, the slope of year on that timestamp is the rate, and a constant pairing lag is an offset in that fit, not a tilt.
 import { SWEEP_MS } from "../../src/render/chronicle-scrubber.ts";
 
 /** One painted frame: the frame's own timestamp, the year it painted, the pace it painted at. */
@@ -64,7 +64,7 @@ export interface PaceSweepOpts {
   readonly paces: readonly number[];
 }
 
-/** Read a pace sweep: one leg per pace, each fitted against the rate SWEEP_MS says it should run at, plus the whole series' continuity (#493's re-anchor keeps the story where it stands, and storyAt's floor keeps a frame stamped before the anchor from stepping the year back). */
+/** Read a pace sweep: one leg per pace, each fitted against the rate SWEEP_MS says it should run at, plus the whole series' continuity (Issue #493's re-anchor keeps the story where it stands, and storyAt's floor keeps a frame stamped before the anchor from stepping the year back). */
 export function readPaceSweep(samples: readonly PaceSample[], opts: PaceSweepOpts): PaceSweepReading {
   const span = opts.range.max - opts.range.min;
   const legs = opts.paces.map((pace, i) => {

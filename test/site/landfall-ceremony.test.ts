@@ -21,7 +21,7 @@ import {
 } from "../../src/site/home/ceremony.ts";
 import { veilMarkup } from "../../src/site/home/veil.ts";
 
-// Landfall Sub 2 (#457): the ceremony; the spec is the archived mockup (design/atelier-map, PR #466) and the 2026-08-23 ratified comment on #457.
+// Landfall Sub 2 (Issue #457): the ceremony; the spec is the archived mockup (design/atelier-map, PR #466) and the 2026-08-23 ratified comment on Issue #457.
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");

@@ -1,4 +1,4 @@
-// The Portfolio's period voice (#521 Sub 3 of #401), pure and DOM-free so the wording is unit-testable
+// The Portfolio's period voice (Issue #521 Sub 3 of Issue #401), pure and DOM-free so the wording is unit-testable
 // the way the Chart Table's countLine is. Ruled 2026-09-08: direction C's picture with direction A's
 // words, so nothing here says "sheaf".
 

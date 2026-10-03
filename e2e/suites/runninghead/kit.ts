@@ -14,7 +14,7 @@ export function runningHeadKit(ctx: SuiteContext) {
       if (i === 199) return false;
     }
     if (route !== "/") return true;
-    // Home's first arrival raises the ceremony veil (#457); a key before the module arms the skip hits nothing, so press until the veil goes and the cluster shows on the stage.
+    // Home's first arrival raises the ceremony veil (Issue #457); a key before the module arms the skip hits nothing, so press until the veil goes and the cluster shows on the stage.
     for (let i = 0; i < 40; i++) {
       await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
       await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });

@@ -44,7 +44,7 @@ export async function sb8bNoFooting({ check, shoot, groundOf }: SpecimenKit, lea
 }
 
 export function sb8eInsets({ check }: SpecimenKit, leanedOpen: Specimen, leaned: Specimen): void {
-  // #531: the RESOLVED inset. The narrow value sat in the stylesheet for four days and inert, so a text match passes on the broken code.
+  // Issue #531: the RESOLVED inset. The narrow value sat in the stylesheet for four days and inert, so a text match passes on the broken code.
   const insetNarrow = [-0.7, -0.7, -0.75, -0.7].map((v) => px531(leanedOpen.rem, v));
   const insetWide = [-0.7, -0.9, -0.8, -0.9].map((v) => px531(leaned.rem, v));
   check(

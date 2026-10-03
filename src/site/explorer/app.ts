@@ -1,4 +1,4 @@
-// Explorer UI conductor: wires the controls to the render worker, runs draw(), keeps the URL hash in sync. #321: the Explorer is STATIC; no code path here starts an animation clock.
+// Explorer UI conductor: wires the controls to the render worker, runs draw(), keeps the URL hash in sync. Issue #321: the Explorer is STATIC; no code path here starts an animation clock.
 import { runJob, runInline, usesWorker, initWorker, type DrawResult } from "./worker-client.ts";
 import { shouldTurn, runTurn, cancelTurn, turnTiming } from "./sheet-turn.ts";
 import { toggleFlip, isFlipped, rebuildVerso, paintVersoTrack, clearVersoTrack } from "./verso.ts";
@@ -42,9 +42,9 @@ let lastSvg = "";
 let lastSubtitle = "";
 let lastSeed = 0;
 let lastManifest: PlaceManifest | null = null;
-// #120: assigned beside lastManifest from the SAME draw; a mismatched pair would route this world's ports over another world's roads.
+// Issue #120: assigned beside lastManifest from the SAME draw; a mismatched pair would route this world's ports over another world's roads.
 let lastSurvey: Survey | null = null;
-// #522: the sheet the card files FROM, assigned beside the overlay whose hit targets name its places. Never from the controls, because a seed or a style typed without pressing Draw describes a chart nobody has drawn.
+// Issue #522: the sheet the card files FROM, assigned beside the overlay whose hit targets name its places. Never from the controls, because a seed or a style typed without pressing Draw describes a chart nobody has drawn.
 let lastSheet: FilingSheet | null = null;
 
 const touched = { land: false, coast: false };
@@ -86,7 +86,7 @@ const lc = createLivingChart({
       lc.reclampCard();
     },
   },
-  // #387/#388: at k=1 this rect IS the chart box, and under the Glass it is the room actually on screen, which is why one box serves both errata.
+  // Issue #387/Issue #388: at k=1 this rect IS the chart box, and under the Glass it is the room actually on screen, which is why one box serves both errata.
   clampBox: () => mapViewport.getBoundingClientRect(),
   restingTrackSink: {
     paint: (points, viewBox) => paintVersoTrack(versoEl, points, viewBox),
@@ -95,7 +95,7 @@ const lc = createLivingChart({
 });
 
 let redraftEnabled = true;
-// #169: semantic redraft is antique-only (the epic's ratified decision); the survey track and the verso keep the world sheet.
+// Issue #169: semantic redraft is antique-only (the epic's ratified decision); the survey track and the verso keep the world sheet.
 function regionEligible(): boolean {
   return redraftEnabled && styleSel.value === "antique" && !agesChk.checked && !isFlipped(sheetEl) && !!lastSvg;
 }
@@ -133,7 +133,7 @@ const chartTable = bindChartDrawer({
   onChange: (laid) => { writeStoredTable(store, laid); syncHash(); relabelEar(); lc.relabelLay(); },
 });
 
-// The one road no boot code can see: a page served from the browser's back/forward cache runs none at all (#634, measured 2026-09-19).
+// The one road no boot code can see: a page served from the browser's back/forward cache runs none at all (Issue #634, measured 2026-09-19).
 window.addEventListener("pageshow", (e) => {
   if (!e.persisted) return;
   const held = tableOnArrival(parseTable(location.hash), readStoredTable(store), TRAVERSAL);
@@ -143,7 +143,7 @@ window.addEventListener("pageshow", (e) => {
   relabelEar();
   lc.relabelLay();
 });
-// #165/#169/#192: the ONE hash writer, every trigger funnels through here; #321: the box IS the flag and the Explorer never authors year=.
+// Issue #165/Issue #169/Issue #192: the ONE hash writer, every trigger funnels through here; Issue #321: the box IS the flag and the Explorer never authors year=.
 function syncHash(): void {
   writeHash(hashControls, touched.land, touched.coast, glass.cameraNow(),
     agesChk.checked ? { kind: "survey" } : null, chartTable.state());
@@ -266,7 +266,7 @@ function landDraw(res: DrawResult, seed: number, overrides: Readonly<DrawOverrid
     armOnLanding({ arm: surveyArm, armed: agesChk.checked, defer: deferArm, clear: lc.clearAges,
       rearm: () => lc.rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet }) });
     glass.syncZoom();
-    // #169: record this world sheet BEFORE a deep-link camera is applied, so the settle that camera triggers redrafts over the SAME base world.
+    // Issue #169: record this world sheet BEFORE a deep-link camera is applied, so the settle that camera triggers redrafts over the SAME base world.
     glass.setWorld({ seed, overrides, render: { style, widthPx: 1500, legend, arms, beasts, theme: theme || undefined }, manifest: res.manifest });
     syncHash();
     if (pendingCamera) {
@@ -275,7 +275,7 @@ function landDraw(res: DrawResult, seed: number, overrides: Readonly<DrawOverrid
       glass.applyCamera(cam);
     }
   }
-  // #174/#366: whoever paints the track LAST owns this repaint; a DEFERRED arm owns it, so the settle leaves the back face to the arm (e2e SV2k/SV2m/SV2o).
+  // Issue #174/Issue #366: whoever paints the track LAST owns this repaint; a DEFERRED arm owns it, so the settle leaves the back face to the arm (e2e SV2k/SV2m/SV2o).
   const armPaintsVerso = agesChk.checked && deferArm;
   if (!quiet) {
     rebuildVerso(versoEl, res, seed);
@@ -292,7 +292,7 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
   cancelTurn();
   // The card belongs to the chart being replaced: left pinned it hangs over the turn with hit targets that name the OUTGOING world's places, which is the window `filingAt` refuses in. Dropping it closes the window rather than dressing it.
   lc.hideCard();
-  // #165: rebase(), not reset(): the chart under the camera is being replaced, so drop to home with no spurious settle.
+  // Issue #165: rebase(), not reset(): the chart under the camera is being replaced, so drop to home with no spurious settle.
   glass.rebase();
   glass.cancelRedraft();
   drawing = true;
@@ -335,8 +335,8 @@ wireFootnotes();
 
 versoBtn.addEventListener("click", () => {
   if (!lastSvg || drawing || sheetEl.classList.contains("turning")) return;
-  // #165: reset(), not rebase(): the SAME chart stays, it is only re-homed before the flip.
-  glass.homeToWorld(); // #169: drop a committed region inset before the flip
+  // Issue #165: reset(), not rebase(): the SAME chart stays, it is only re-homed before the flip.
+  glass.homeToWorld(); // Issue #169: drop a committed region inset before the flip
   glass.reset();
   syncHash();
   const flipped = toggleFlip(sheetEl);

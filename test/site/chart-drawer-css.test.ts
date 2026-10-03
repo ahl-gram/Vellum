@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-// #547: .sheet-tabs is rendered by src/layouts/Slip.astro at EVERY width and was dressed only inside the phone block, so the phone's two leaf tabs stood in the Broadside's head on the desktop from #540 until this rule. The resolved read is e2e CD22 (desktop) and CD14 (390); this is the fast lane and is blind to anything the cascade decides.
+// Issue #547: .sheet-tabs is rendered by src/layouts/Slip.astro at EVERY width and was dressed only inside the phone block, so the phone's two leaf tabs stood in the Broadside's head on the desktop from Issue #540 until this rule. The resolved read is e2e CD22 (desktop) and CD14 (390); this is the fast lane and is blind to anything the cascade decides.
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const liveCss = (p: string): string => readFileSync(resolve(REPO, p), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");

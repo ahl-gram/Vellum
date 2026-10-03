@@ -1,7 +1,7 @@
-// The Portfolio (#521 Sub 3 of #401): the Print Room's second page. The table rides in this page's
-// address, and since #634 falls back to the device when the address names no folio; either way the
+// The Portfolio (Issue #521 Sub 3 of Issue #401): the Print Room's second page. The table rides in this page's
+// address, and since Issue #634 falls back to the device when the address names no folio; either way the
 // page reads it ONCE at load and never rewrites it. One job per
-// gathered sheet, a region for a survey and a plate for a prospect since #522, dispatched grouped by
+// gathered sheet, a region for a survey and a plate for a prospect since Issue #522, dispatched grouped by
 // world because worldFor is a single-entry cache, and the sheets arrive progressively into a pile
 // whose top sheet stands on the stage.
 import { initWorker, runJob, usesWorker } from "../explorer/worker-client.ts";
@@ -85,12 +85,12 @@ const bringUp = (at: number): void => {
   if (sheet) say(`${sheet.title} is on top`);
 };
 
-// #217's contract, the same function the Print Room's plates are named by: vellum-<seed>-<style>-<slug>.svg, so a sheet
+// Issue #217's contract, the same function the Print Room's plates are named by: vellum-<seed>-<style>-<slug>.svg, so a sheet
 // on disk can be traced back to the world that drew it.
 const nameOf = (sheet: Drawn): string =>
   chartFilename(sheet.item.seed, sheet.item.kind === "survey" ? sheet.item.style : "prospect", sheet.title);
 
-// #134's rule: the svg goes STRAIGHT to a blob download and is never injected anywhere to be downloaded.
+// Issue #134's rule: the svg goes STRAIGHT to a blob download and is never injected anywhere to be downloaded.
 const takeHome = (sheet: Drawn): void => {
   if (!sheet.svg) return;
   const a = document.createElement("a");
@@ -143,7 +143,7 @@ const rows = (): void => {
     const head = document.createElement("p");
     head.className = "group-head";
     const name = document.createElement("span");
-    // Any DRAFTED entry names the world, prospects included since #522: thumbNames takes a prospect's world line from the job's own title.
+    // Any DRAFTED entry names the world, prospects included since Issue #522: thumbNames takes a prospect's world line from the job's own title.
     const named = group.entries.map((e) => sheets[e.at]).find((sheet) => !!sheet?.worldTitle);
     name.textContent = `From ${named?.worldTitle || "this world"} · chart № ${group.seed}`;
     head.append(name);
@@ -180,7 +180,7 @@ const retitle = (): void => {
   }
 };
 
-/** One job per gathered SHEET since #522, grouped by world: worldFor is a single-entry cache, so interleaving seeds regenerates the parent every time. */
+/** One job per gathered SHEET since Issue #522, grouped by world: worldFor is a single-entry cache, so interleaving seeds regenerates the parent every time. */
 const draft = async (): Promise<void> => {
   for (const group of groupByWorld(items)) {
     for (const { at } of group.entries) {
@@ -206,7 +206,7 @@ const draft = async (): Promise<void> => {
   say("");
 };
 
-// The kit renders the Glass on every chart room and the stage's label promises its keys, so the page owes the binding: three corner presses and six keys that do nothing are the #520 scar, a control nobody can use.
+// The kit renders the Glass on every chart room and the stage's label promises its keys, so the page owes the binding: three corner presses and six keys that do nothing are the Issue #520 scar, a control nobody can use.
 const zoomController = createZoomController({
   viewportEl: $("map-viewport"),
   targetEl: $("map"),
@@ -216,7 +216,7 @@ const zoomController = createZoomController({
 zoomController.attach();
 bindGlassKeys($("map-viewport"), zoomController);
 
-// #462's chart room: the sheet is fitted to what the chrome leaves, or it fills the viewport and runs under the nav, the room's name and the slip. A page that draws a chart and never binds the room has no fit at all.
+// Issue #462's chart room: the sheet is fitted to what the chrome leaves, or it fills the viewport and runs under the nav, the room's name and the slip. A page that draws a chart and never binds the room has no fit at all.
 const room = bindRoom({
   frame: document.querySelector(".stage") as HTMLElement,
   sheet: document.getElementById("sheet") as HTMLElement,
@@ -232,7 +232,7 @@ const start = async (): Promise<void> => {
   showTop();
   if (sheets.length === 0) {
     // hidden is inert on these: atelier.css sets an author display on .legend-btn, which beats the UA [hidden] rule, so
-    // el.hidden = true silently no-ops (the #270 guard-prover's find). The Prospect and the Ribbon hide the same way.
+    // el.hidden = true silently no-ops (the Issue #270 guard-prover's find). The Prospect and the Ribbon hide the same way.
     next.style.display = "none";
     download.style.display = "none";
     say("");

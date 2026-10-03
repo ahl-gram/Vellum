@@ -63,7 +63,7 @@ export function cardFigureHtml(card: GalleryCard): string {
 </figure>`;
 }
 
-/* Sub 9 (#464): the Gallery hangs its twelve plates on the deep, a chart room without a stage; the furniture is /atelier.css's, this sheet keeps the plates' layout. Shipped verbatim as public/gallery/index.css: no process prose here (test/site/gallery-room.test.ts carries the measurements). */
+/* Sub 9 (Issue #464): the Gallery hangs its twelve plates on the deep, a chart room without a stage; the furniture is /atelier.css's, this sheet keeps the plates' layout. Shipped verbatim as public/gallery/index.css: no process prose here (test/site/gallery-room.test.ts carries the measurements). */
 export const GALLERY_PAGE_CSS = `html:has(body.chart-room), body.chart-room { height: auto; overflow: visible; }
 main { max-width: 1500px; box-sizing: border-box; padding: calc(var(--band-h) + 1.2rem) 2.2rem 9.5rem; }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 2.4rem 2rem;

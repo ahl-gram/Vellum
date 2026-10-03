@@ -84,7 +84,7 @@ test("the chain never fuses two landmasses of the WORLD CHART, not merely of its
   assert.ok(controlPairs >= 6, `the bare control barely bridges here (${controlPairs}), so the guard proves nothing`);
 });
 
-// NOT the general case, which `node scripts/region-detail-partition.ts` measures and #443 records: some window-edge slivers do go, on every arm.
+// NOT the general case, which `node scripts/region-detail-partition.ts` measures and Issue #443 records: some window-edge slivers do go, on every arm.
 test("no landmass the world chart draws inside these windows loses all its land (#443)", () => {
   for (const [seed, cx, cy] of WORLD_FUSION_WINDOWS) {
     const c = worldCase(seed, cx, cy);

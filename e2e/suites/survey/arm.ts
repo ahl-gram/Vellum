@@ -23,7 +23,7 @@ export async function sv1Boots({ evaluate, check, goto }: SurveyKit): Promise<vo
 }
 
 export async function sv2FirstArm({ evaluate, check, shoot, waitInked, tick }: SurveyKit) {
-  // #373: the frame clock runs across the FIRST arm, the only uncached one; every later arm takes the held order and would pass this blind.
+  // Issue #373: the frame clock runs across the FIRST arm, the only uncached one; every later arm takes the held order and would pass this blind.
   await evaluate(`(()=>{window.__gap=0;window.__gapStop=false;let last=performance.now();
       const step=(now)=>{window.__gap=Math.max(window.__gap,now-last);last=now;
         if(!window.__gapStop)requestAnimationFrame(step);};requestAnimationFrame(step);})()`);
@@ -71,7 +71,7 @@ export async function sv2bAtRest({ evaluate, check, sleep }: SuiteContext): Prom
 }
 
 export async function sv2cReArm({ evaluate, check, waitInked, tick }: SurveyKit, firstInkMs: number): Promise<void> {
-  // #373 rewrote what these two measure: the matrix runs in the render worker now, so __armMs (a rAF-then-task hop) collapses to one frame whether the order is cached or not, and the ratio it used to carry moved to the wall clock from tick to ink. #529 dropped the 800ms absolute cap that rode beside the ratio, because it measured runner tail rather than the cache and is what failed CI at 810ms while the ratio passed at 810/3097; mutation-checked 2026-09-07 by deleting prime()'s cache-hit test in tour-order.ts, which reads 1187/1171 (ratio 1.01) against 157/1189 (0.13) healthy, so the ratio alone separates the two populations at any runner speed.
+  // Issue #373 rewrote what these two measure: the matrix runs in the render worker now, so __armMs (a rAF-then-task hop) collapses to one frame whether the order is cached or not, and the ratio it used to carry moved to the wall clock from tick to ink. Issue #529 dropped the 800ms absolute cap that rode beside the ratio, because it measured runner tail rather than the cache and is what failed CI at 810ms while the ratio passed at 810/3097; mutation-checked 2026-09-07 by deleting prime()'s cache-hit test in tour-order.ts, which reads 1187/1171 (ratio 1.01) against 157/1189 (0.13) healthy, so the ratio alone separates the two populations at any runner speed.
   await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
   const reInkT0 = Date.now();
   await tick(true, "__armMs2");

@@ -12,7 +12,7 @@ import { buildGallery } from "../../src/cli/gallery.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 
-// The Punchcutter's Case (#228): three self-hosted OFL faces for the site chrome; the charts' own SVG lettering is out of scope, so no chart byte moves.
+// The Punchcutter's Case (Issue #228): three self-hosted OFL faces for the site chrome; the charts' own SVG lettering is out of scope, so no chart byte moves.
 
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 const readText = (p: string) => readFile(root(p), "utf8").catch(() => "");

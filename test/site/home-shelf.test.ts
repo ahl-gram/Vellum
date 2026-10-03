@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-// Home's shelf (#472, ratified 2026-08-27 on the issue): One World, Many Charts is plain server-rendered flow BELOW the landfall section, reachable with no JS and no camera, and no authored sheet locks the document's scroll.
+// Home's shelf (Issue #472, ratified 2026-08-27 on the issue): One World, Many Charts is plain server-rendered flow BELOW the landfall section, reachable with no JS and no camera, and no authored sheet locks the document's scroll.
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");

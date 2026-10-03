@@ -4,7 +4,7 @@ import { scaleTicks } from "../../src/site/shared/instrument-scale.ts";
 import { SEAM_U } from "../../src/render/ages-track.ts";
 import { El, installShim } from "../../test-support/element-shim.ts";
 
-// #462 ruling 6: the strip's scale, the seam the bar's own (SEAM_U), the ages half linear in years.
+// Issue #462 ruling 6: the strip's scale, the seam the bar's own (SEAM_U), the ages half linear in years.
 
 test("the seam stands at the midpoint, the first day at the left end, the last day just short of the seam", () => {
   const t = scaleTicks({ days: { first: 1, last: 44 }, years: { min: 435, max: 876 } });

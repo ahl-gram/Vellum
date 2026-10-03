@@ -63,7 +63,7 @@ export async function cd14LeafTabs({ evaluate, check, sleep, touch, go }: Drawer
   );
 }
 
-// Was a hand-rolled loop that returned its last read BECAUSE a settle that gives up killed the lane. The step is what that comment was waiting for (#534), so the wait is a settle again and its timeout is CD15 and CD17 going red by name.
+// Was a hand-rolled loop that returned its last read BECAUSE a settle that gives up killed the lane. The step is what that comment was waiting for (Issue #534), so the wait is a settle again and its timeout is CD15 and CD17 going red by name.
 export async function cd15TableLeaf({ check, settle }: DrawerKit): Promise<void> {
   const leafOpen = await settle(LEAF, (d) => d.leafShown && d.cuttings === 6, "chart-drawer-leaf", DRAWN);
   check(

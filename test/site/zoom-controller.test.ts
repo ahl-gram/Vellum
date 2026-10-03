@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { zoomTransformToCss, constrainZoom, nextGlideTarget } from "../../src/site/shared/zoom-controller.ts";
 
-// The Glass (#164): d3-zoom handles the gestures; the translate clamp mirrors d3-zoom's defaultConstrain (the sheet is the viewport, so the world extent IS the viewport extent), recomputed against a scale itself clamped to the extent. Live gestures are proven by e2e suite-zoom Z1-Z4.
+// The Glass (Issue #164): d3-zoom handles the gestures; the translate clamp mirrors d3-zoom's defaultConstrain (the sheet is the viewport, so the world extent IS the viewport extent), recomputed against a scale itself clamped to the extent. Live gestures are proven by e2e suite-zoom Z1-Z4.
 
 test("zoomTransformToCss emits a px-suffixed, browser-valid transform (#164)", () => {
   // d3's ZoomTransform.toString() emits translate(x,y) with NO unit, which the CSS transform property silently rejects: a live gesture would set an ignored value and nothing would move.
@@ -33,7 +33,7 @@ test("constrainZoom keeps the zoomed sheet covering the viewport at every edge (
   assert.equal(constrainZoom({ x: 0, y: -260, k: 2 }, EXTENT, SCALE).y, -100);
 });
 
-// Sub 9 (#170): the glide flies to an ABSOLUTE k computed here, compounding against the pending target when presses stack, so the DOM path stays a thin d3-transition wrapper around this pure decision.
+// Sub 9 (Issue #170): the glide flies to an ABSOLUTE k computed here, compounding against the pending target when presses stack, so the DOM path stays a thin d3-transition wrapper around this pure decision.
 
 test("nextGlideTarget compounds a step from the base k (#170)", () => {
   assert.ok(Math.abs(nextGlideTarget(1, 1.4, SCALE) - 1.4) < 1e-9);

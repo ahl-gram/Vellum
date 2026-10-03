@@ -1,4 +1,4 @@
-// Living Chart story-card overlay e2e (P1-P15, #53).
+// Living Chart story-card overlay e2e (P1-P15, Issue #53).
 import { makeStep } from "../support/step.ts";
 import { makeSettle } from "../support/settle.ts";
 import type { SuiteContext } from "../types.ts";

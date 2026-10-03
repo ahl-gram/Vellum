@@ -27,7 +27,7 @@ export async function rr23Usurped({ evaluate, send, check, sleep, boot, PORT }: 
 }
 
 export async function rr24BeforeArm({ evaluate, send, check, sleep, boot, settled, PORT }: ReadingRoomKit): Promise<void> {
-  // #418: the arm waits for an off-thread travel order, so a window NEW to this issue opens between the painted chart and the armed instrument. `.rf-ages` is hidden across it (reading-frame.css gives [hidden] display:none), so a reader cannot click the scrubber; what IS live is every handler behind it, reachable from a stray keypress, a document click, or any programmatic dispatch. Each guards on `if (!ages) return`, and until this window existed nothing could test that they do.
+  // Issue #418: the arm waits for an off-thread travel order, so a window NEW to this issue opens between the painted chart and the armed instrument. `.rf-ages` is hidden across it (reading-frame.css gives [hidden] display:none), so a reader cannot click the scrubber; what IS live is every handler behind it, reachable from a stray keypress, a document click, or any programmatic dispatch. Each guards on `if (!ages) return`, and until this window existed nothing could test that they do.
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/reading-room/#seed=42&style=antique&legend=1` });
   const pokeBooted = await boot();
@@ -66,7 +66,7 @@ export async function rr24BeforeArm({ evaluate, send, check, sleep, boot, settle
 }
 
 export async function rr25TearDown({ evaluate, check, sleep, settled }: ReadingRoomKit): Promise<void> {
-  // #418: on a COUNTER read the arm waits too, and the previous world's instrument must not outlive the chart it belonged to. clearAges runs in the task that swaps the chart, never with the deferred arm; held back with the arm, this window would show the OLD world's panel armed over the NEW world's chart, where a scrub filters these glyphs by that world's years and a release writes that year into this world's address.
+  // Issue #418: on a COUNTER read the arm waits too, and the previous world's instrument must not outlive the chart it belonged to. clearAges runs in the task that swaps the chart, never with the deferred arm; held back with the arm, this window would show the OLD world's panel armed over the NEW world's chart, where a scrub filters these glyphs by that world's years and a release writes that year into this world's address.
   const rr25Before = await evaluate<string>(`window.__vellumReadingRoomState().title`);
   await evaluate(`(()=>{const c=document.querySelector(".rr-colophon");c.querySelector("input").value="526413615";c.querySelector(".rr-read").click();})()`);
   let rr25Window = null;

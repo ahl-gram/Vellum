@@ -36,7 +36,7 @@ import { DAILY, SWEEP, SWEEP_SVGS, type Gates, gatesFor } from "../../test-suppo
 
 // Mirrors MAX_LINES in src/world/daily-hunt-clues.ts.
 const MAX_LINES = 8;
-// Ratified narrowing target (#335): villages consistent with all clues.
+// Ratified narrowing target (Issue #335): villages consistent with all clues.
 const NARROW_TARGET = 3;
 
 function checkRiverClue(world: World, x: number, y: number, clue: Clue): void {

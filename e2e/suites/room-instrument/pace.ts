@@ -21,7 +21,7 @@ export async function rs29Pace({ evaluate, check, sleep, setYear, clickPlay }: I
 }
 
 export async function rs30Rate({ evaluate, check, sleep, setYear, clickPlay, playLabel, startSweepSamples, stopSweepSamples }: InstrumentKit, smNow: Facts): Promise<void> {
-  // #526: the RATE, off the page's own frame clock. storyAt anchors the sweep to the wall clock, so years per page millisecond is a property of the engine that no runner speed can move, while two years a wall window apart can only be read to a frame of quantization at each end.
+  // Issue #526: the RATE, off the page's own frame clock. storyAt anchors the sweep to the wall clock, so years per page millisecond is a property of the engine that no runner speed can move, while two years a wall window apart can only be read to a frame of quantization at each end.
   await evaluate(`document.querySelector('.rf-pace button[data-pace="1"]').click()`);
   await setYear(smNow.minFounded);
   await clickPlay();

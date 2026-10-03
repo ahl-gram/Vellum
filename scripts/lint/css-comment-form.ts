@@ -9,8 +9,9 @@ const placed = (comments: ReadonlyArray<Comment> | undefined): Placed[] =>
 
 const isHead = (text: string, comment: Placed): boolean => text.slice(0, comment.loc.start.offset).trim() === "";
 
-// A # followed by digits, not preceded by "issue" or "pr" (either case, singular or plural) and one space, and not followed by a hex letter; whitespace is collapsed first so a head block may wrap between the word and the number. Named directions, all false reds and never a miss: an all-digit hex colour (#333), a fragment after a word (page.html#12), an HTML entity (&#8212;), and any prefix other than Issue and PR.
-const BARE_NUMBER = /(?<!\b(?:issue|issues|pr) )#\d+(?![0-9a-f])/i;
+// A # followed by digits, not preceded by "issue" or "pr" (either case, singular or plural) and one space, and not followed by a hex letter; whitespace is collapsed first so a head block may wrap between the word and the number.
+const BARE_NUMBER = /(?<!\b(?:issue|issues|pr|prs) )#\d+(?![0-9a-f])/gi;
+export const bareNumbers = (text: string): string[] => [...text.replace(/\s+/g, " ").matchAll(BARE_NUMBER)].map((m) => m[0]);
 
 const oneLine: CSSRuleDefinition = {
   meta: {
@@ -47,7 +48,7 @@ const issueForm: CSSRuleDefinition = {
     return {
       StyleSheet() {
         for (const c of placed(context.sourceCode.comments)) {
-          if (BARE_NUMBER.test(c.value.replace(/\s+/g, " "))) context.report({ loc: c.loc, messageId: "bare" });
+          if (bareNumbers(c.value).length > 0) context.report({ loc: c.loc, messageId: "bare" });
         }
       },
     };

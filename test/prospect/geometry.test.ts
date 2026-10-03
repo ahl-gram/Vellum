@@ -113,7 +113,7 @@ test("a harbor town fronts the sea: quay, masts, ship", () => {
   assert.equal(g.water.y0, BASE_GROUND + SHORE_DROP);
   assert.equal(g.water.y1, WATER_BOTTOM);
 
-  // The articulate quay face (#237 GO condition 9): steps, arcade, bollards.
+  // The articulate quay face (Issue #237 GO condition 9): steps, arcade, bollards.
   const quay = one(g, "quay");
   assert.equal(quay.y, BASE_GROUND + SHORE_DROP);
   assert.ok(quay.bollards.length >= 3, "quay carries bollards");
@@ -160,7 +160,7 @@ test("a river town stands on the bank and anchors its bridge", () => {
 
   const bridge = one(g, "bridge");
   assert.equal(bridge.arches, 3);
-  // Anchoring (#237 GO condition 4): the bridge-gate tower at the town bank.
+  // Anchoring (Issue #237 GO condition 4): the bridge-gate tower at the town bank.
   assert.equal(bridge.gateTower.form, "tower");
   assert.equal(bridge.gateTower.base, bridge.deckY + 1, "gate tower stands on the deck end");
   assert.ok(Math.abs(bridge.gateTower.x + 6 - bridge.x0) < 1e-9, "gate tower holds the town bank");
@@ -250,7 +250,7 @@ test("high ground composes the seat hill and the backdrop ridge", () => {
   const seat = composeProspect(
     makeInput({ kind: "seat", siteRel: 0.6, backdrop: humped }),
   );
-  // #237 GO condition 5: a mountain seat stands on a filled hill mass.
+  // Issue #237 GO condition 5: a mountain seat stands on a filled hill mass.
   assert.ok(seat.ground.rise > 0, "the seat hill rises");
   assert.ok(seat.ridge !== null, "terrain behind the site draws the ridge");
   assert.equal(seat.ridge.length, BACKDROP_SAMPLES, "the ridge is the transect polyline");
