@@ -49,8 +49,8 @@
 @media (min-width: 1024px) { .folio-room { max-width: 25rem; } }
 .folio-controls input.control { width: 5.6rem; }
 .folio-controls select.control { width: 7.4rem; }
-/* The style picker stays at every width (the mockup hid it on a phone; no feature is lost): where the corner is too narrow for one row, on a phone and from the fold to 1023, the row wraps, seed, then style, then Pull a proof. */
-.folio-controls { flex-wrap: wrap; }
+/* The style picker stays at every width (the mockup hid it on a phone; no feature is lost): below 1024, where the corner is the kit's width, the row wraps, seed, then style, then Pull a proof. */
+@media (max-width: 1023px) { .folio-controls { flex-wrap: wrap; } }
 
 .slip .bound-line { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; color: var(--ink-brown); font-size: 0.95rem; line-height: 1.5; margin: 0.7rem 0 0; }
 .slip .bound-line:empty { display: none; }

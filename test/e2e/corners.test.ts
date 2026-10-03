@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { resolve } from "node:path";
-import { fillBetween, mediaEdges, meetings, MOTTO, nearest, plainShift, routesUnder, squeezed, strideWidths, unreadWidthConditions, verdict } from "../../e2e/suites/corners/geometry.ts";
+import { fillBetween, mediaEdges, meetings, MOTTO, nearest, plainShift, routesUnder, squeezes, strideWidths, unreadWidthConditions, verdict } from "../../e2e/suites/corners/geometry.ts";
 import type { Box, CornerRead, Row } from "../../e2e/suites/corners/geometry.ts";
 
 const REPO = resolve(import.meta.dirname, "..", "..");
@@ -95,9 +95,7 @@ test("the Gallery's forced layout is skipped only while it lasts: the skip fails
   assert.equal(verdict({ w: 390, read: room().read }, gallery), null, "above the edge it is an ordinary page");
 });
 
-test("a corner control is squeezed when it reads narrower than its widest in the same stretch, and words that rewrap are not controls", () => {
-  const at = (w: number, seedW: number, nameR: number): Row => ({ w, read: read(w, [], [box(10, 0, nameR, 10, "The Print Room"), box(0, 20, seedW, 40, "input#pr-seed"), box(0, 50, 118.4, 70, "select#pr-style")]) });
-  assert.deepEqual(squeezed([at(1024, 89.6, 200), at(1023, 89.6, 150)]), [], "the name's box narrowing is a rewrap, not a squeeze");
-  assert.deepEqual(squeezed([at(1024, 89.6, 200), at(1023, 89.3, 200)]), [], "under half a pixel is rounding");
-  assert.deepEqual(squeezed([at(1024, 89.6, 200), at(1023, 63.4, 200)]), ["at 1023 the corner's input#pr-seed is squeezed to 63.4 from 89.6"]);
+test("a corner control is squeezed when it renders narrower than its own width by more than rounding", () => {
+  assert.deepEqual(squeezes(1023, [{ t: "input#pr-seed", w: 110.78, natural: 110.78 }, { t: "select#pr-style", w: 118.2, natural: 118.39 }]), [], "whole, or under half a pixel short");
+  assert.deepEqual(squeezes(1023, [{ t: "input#pr-seed", w: 63.44, natural: 110.78 }, { t: "button#pr-random", w: 38.39, natural: 38.39 }]), ["at 1023 the corner's input#pr-seed is squeezed to 63.4 from its own 110.8"], "the step 11 plate read's figure on the Print Room before its row wrapped");
 });

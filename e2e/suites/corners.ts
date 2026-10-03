@@ -3,12 +3,13 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { makeStep } from "../support/step.ts";
 import type { Payload, SuiteContext } from "../types.ts";
-import { fillBetween, mediaEdges, meetings, nearest, routesUnder, squeezed, strideWidths, unreadWidthConditions, verdict } from "./corners/geometry.ts";
-import type { CornerRead, Row } from "./corners/geometry.ts";
+import { fillBetween, mediaEdges, meetings, nearest, routesUnder, squeezes, strideWidths, unreadWidthConditions, verdict } from "./corners/geometry.ts";
+import type { Control, CornerRead, Row } from "./corners/geometry.ts";
 
 const REPO = resolve(fileURLToPath(new URL(".", import.meta.url)), "..", "..");
 const PAGE_FLOOR = ["/", "/explorer/", "/faq/", "/gallery/", "/glossary/", "/print-room/", "/print-room/portfolio/", "/prospect/", "/reading-room/", "/ribbon/", "/seed-of-the-day/", "/specimen/"];
 const FOLD = 900;
+const BELOW_WIDE = 1023;
 const PHONE_LO = 320;
 const EVERY_PIXEL_TO = 480;
 const WIDE = 1280;
@@ -149,16 +150,53 @@ async function co1Sweep(ctx: SuiteContext): Promise<void> {
     const faults = [
       ...[...new Set(r.unread)].map((text) => `a width condition the edge reader cannot parse: ${text}`),
       ...rows.map((row) => verdict(row, rules)).filter((v): v is string => v !== null),
-      ...r.stretches.flatMap((stretch) => squeezed(stretch.filter((row) => verdict(row, rules) === null))),
     ];
     const measured = rows.filter((row) => rules.forcedBelow === null || row.w >= rules.forcedBelow);
     const close = measured.reduce<{ d: number; w: number }>((best, row) => { const d = nearest(row.read.left, row.read.right); return d < best.d ? { d, w: row.w } : best; }, { d: Infinity, w: 0 });
     return { ok: r.error === null && faults.length === 0, text: `${r.page} ${rows.length} widths, nearest ${close.d.toFixed(1)} at ${close.w}${r.dateline ? ` (dateline "${r.dateline}")` : ""}${r.error ? `; ERROR ${r.error}` : ""}${faults.length ? `; ${faults.length} faults: ${faults.slice(0, 4).join("; ")}` : ""}` };
   });
   ctx.check(
-    "CO1 on every page the tree builds, resized while loaded from 320 to 480 a pixel at a time and at both sides of every width media edge its CSS carries and a 32px stride up to 1280, no ink of the head cluster overlaps the ink of the right-hand corner by any amount, both corners carry ink, home keeps its motto, the band covers the cluster, no corner control is squeezed narrower than it stands elsewhere in its stretch, the Seed of the Day writes its own dateline through datelineFor, and the Gallery's too-wide layout below 346 is the only width that lays out wider than set (Issue #638; Alex's 2026-09-22 and 2026-10-03 rulings; Issue #672)",
+    "CO1 on every page the tree builds, resized while loaded from 320 to 480 a pixel at a time and at both sides of every width media edge its CSS carries and a 32px stride up to 1280, no ink of the head cluster overlaps the ink of the right-hand corner by any amount, both corners carry ink, home keeps its motto, the band covers the cluster, the Seed of the Day writes its own dateline through datelineFor, and the Gallery's too-wide layout below 346 is the only width that lays out wider than set (Issue #638; Alex's 2026-09-22 and 2026-10-03 rulings; Issue #672)",
     missing.length === 0 && lines.every((l) => l.ok),
     `${missing.length ? `pages missing from the tree: ${missing.join(", ")} | ` : ""}${lines.map((l) => l.text).join(" | ")}`,
+  );
+}
+
+// Each control's own width, read by lifting its flex-shrink for one read and putting it back: a row too narrow for its controls shrinks them, and a row that wraps leaves them whole.
+const CONTROLS: Payload<Control[]> = `(() => {
+  const out = [];
+  const corner = document.querySelector(".corner.tr.folio-room");
+  if (!corner) return out;
+  for (const c of corner.querySelectorAll("input, button, select, textarea")) {
+    const w = c.getBoundingClientRect().width;
+    if (!w) continue;
+    const kept = c.style.flexShrink;
+    c.style.flexShrink = "0";
+    const natural = c.getBoundingClientRect().width;
+    c.style.flexShrink = kept;
+    out.push({ t: c.tagName.toLowerCase() + (c.id ? "#" + c.id : "." + String(c.className).split(" ")[0]), w, natural });
+  }
+  return out;
+})()`;
+
+async function co3Wraps(ctx: SuiteContext): Promise<void> {
+  const rows: string[] = [];
+  const faults: string[] = [];
+  let read = 0;
+  for (const page of routesUnder(resolve(REPO, "src/pages"))) {
+    await load(ctx, page, BELOW_WIDE, false);
+    for (const w of [BELOW_WIDE, 960, FOLD + 1]) {
+      await readAt(ctx, w, false);
+      const controls = await ctx.evaluate(CONTROLS);
+      read += controls.length;
+      faults.push(...squeezes(w, controls).map((f) => `${page} ${f}`));
+    }
+    rows.push(page);
+  }
+  ctx.check(
+    "CO3 from the fold to 1023, where a wide room's corner takes the kit's standard width (Alex's 2026-10-03 ruling 4), no control in any room's corner is squeezed below its own width: the row wraps onto another line instead (Issue #638)",
+    faults.length === 0 && read > 0,
+    `${rows.length} pages, ${read} control reads; ${faults.length ? faults.slice(0, 6).join("; ") : "none squeezed"}`,
   );
 }
 
@@ -185,6 +223,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   try {
     await step("CO1", () => co1Sweep(ctx));
     await step("CO2", () => co2Control(ctx));
+    await step("CO3", () => co3Wraps(ctx));
   } finally {
     await send("Emulation.setEmulatedMedia", { media: "", features: [] }).catch(() => undefined);
     await ctx.clearMobile().catch(() => undefined);

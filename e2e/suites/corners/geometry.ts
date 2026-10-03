@@ -116,15 +116,8 @@ export function verdict({ w, read }: Row, rules: Rules): string | null {
   return null;
 }
 
-const CONTROL = /^(input|button|select|textarea)[#.]/;
+export type Control = { readonly t: string; readonly w: number; readonly natural: number };
 
-export function squeezed(rows: readonly Row[]): string[] {
-  const widest = new Map<string, number>();
-  for (const { read } of rows) for (const b of read.right) if (CONTROL.test(b.t)) widest.set(b.t, Math.max(widest.get(b.t) ?? 0, b.r - b.x));
-  const faults: string[] = [];
-  for (const { w, read } of rows) for (const b of read.right) {
-    const most = widest.get(b.t);
-    if (most !== undefined && b.r - b.x < most - 0.5) faults.push(`at ${w} the corner's ${b.t} is squeezed to ${(b.r - b.x).toFixed(1)} from ${most.toFixed(1)}`);
-  }
-  return faults;
+export function squeezes(w: number, controls: readonly Control[]): string[] {
+  return controls.filter((c) => c.w < c.natural - 0.5).map((c) => `at ${w} the corner's ${c.t} is squeezed to ${c.w.toFixed(1)} from its own ${c.natural.toFixed(1)}`);
 }
