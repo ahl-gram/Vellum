@@ -195,13 +195,35 @@ test("the retry pauses after the killed browser is gone, and never after the las
   assert.equal(all.logs.filter((l) => /retrying/.test(l)).length, 2, `a retry was announced after the last attempt: ${JSON.stringify(all.logs)}`);
 });
 
-test("the ruled tuning is the default: three attempts of a 40s wait (320 polls at 125ms), a 5s kill cap, a 2s pause (Issue #621 rulings)", async () => {
+test("the ruled tuning is pinned: three attempts of a 40s wait (320 polls at 125ms), a 5s kill cap, a 2s pause (Issue #621 rulings)", () => {
   assert.deepEqual(LAUNCH_TUNING, { attempts: 3, polls: 320, pollMs: 125, killGraceMs: 5000, retryPauseMs: 2000 });
-  const r = rig([{ exitAfterMs: 1 }, { exitAfterMs: 1 }, { exitAfterMs: 1 }]);
-  const got = await settle(launchWithRetry(r.deps));
-  assert.match(got.error?.message ?? "", /after 3 launch attempts/);
-  const gap = (r.at.get("spawn 102") ?? 0) - (r.at.get("exit 101") ?? Infinity);
-  assert.ok(gap >= LAUNCH_TUNING.retryPauseMs - 10, `with no tuning passed, attempt 2 started ${gap.toFixed(0)}ms after attempt 1's browser was gone`);
+});
+
+test("with no tuning passed, an attempt that never answers is killed after the ruled 40s: 320 probes, 40000ms of waiting", async () => {
+  mock.timers.enable({ apis: ["setTimeout"] });
+  try {
+    const r = rig([{}, { upAtProbe: 1 }]);
+    const launch = { done: false };
+    void launchWithRetry(r.deps).finally(() => {
+      launch.done = true;
+    });
+    const flush = () => new Promise((res) => setImmediate(res));
+    let waited = 0;
+    for (; waited <= 60_000; waited += 25) {
+      await flush();
+      if (r.events.includes("kill 101 SIGKILL")) break;
+      mock.timers.tick(25);
+    }
+    assert.equal(r.probes[0], 320, "attempt 1 did not probe 320 times before its kill");
+    assert.equal(waited, 40_000, "attempt 1 was not killed after exactly 40s of waiting");
+    for (let n = 0; !launch.done && n < 1000; n++) {
+      mock.timers.tick(25);
+      await flush();
+    }
+    assert.ok(launch.done, "the launch never finished once attempt 2's browser answered");
+  } finally {
+    mock.timers.reset();
+  }
 });
 
 const REAL: LaunchTuning = { attempts: 3, polls: 150, pollMs: 20, killGraceMs: 5000, retryPauseMs: 50 };
@@ -215,13 +237,13 @@ function freePort(): Promise<number> {
   });
 }
 
-async function standIn(silent: number) {
+async function standIn(silent: number, body = `exec "${process.execPath}" "${STAND_IN_BROWSER}" "$@"`) {
   const dir = mkdtempSync(join(tmpdir(), "launch-test-"));
   const saved = { tmp: process.env["TMPDIR"], silent: process.env[STAND_IN_SILENT_VAR] };
   process.env["TMPDIR"] = dir;
   process.env[STAND_IN_SILENT_VAR] = String(silent);
   const browser = join(dir, "browser");
-  writeFileSync(browser, `#!/bin/sh\nexec "${process.execPath}" "${STAND_IN_BROWSER}" "$@"\n`);
+  writeFileSync(browser, `#!/bin/sh\n${body}\n`);
   chmodSync(browser, 0o755);
   const logged = mock.method(console, "error", () => {});
   const restore = () => {
@@ -294,6 +316,19 @@ test("the harness's own launch checks the debug port first: a port already held 
     assert.equal(existsSync(join(s.dir, STAND_IN_COUNTER)), false, "a stand-in browser was started against a held port");
   } finally {
     holder.close();
+    cleanup();
+    s.restore();
+  }
+});
+
+test("the harness's own launch with no tuning passed takes the ruled default: three attempts, a 2s pause before each retry", { timeout: 60_000 }, async () => {
+  const s = await standIn(0, "exit 1");
+  try {
+    const got = await settle(launchBrowser(s.browser, s.port));
+    assert.match(got.error?.message ?? "", /no devtools page target after 3 launch attempts[\s\S]*browser exited code=1/);
+    const retries = s.lines().filter((l) => /exposed no devtools target/.test(l));
+    assert.deepEqual(retries.map((l) => /retrying with a fresh profile in (\d+)ms/.exec(l)?.[1]), ["2000", "2000"]);
+  } finally {
     cleanup();
     s.restore();
   }
