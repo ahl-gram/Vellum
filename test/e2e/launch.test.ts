@@ -180,9 +180,10 @@ test("the retry pauses after the killed browser is gone, and never after the las
   const gap = (r.at.get("spawn 102") ?? 0) - (r.at.get("exit 101") ?? Infinity);
   assert.ok(gap >= 58, `attempt 2 started ${gap.toFixed(1)}ms after attempt 1's browser was gone, inside the 60ms pause`);
   const all = rig([{ exitAfterMs: 1 }, { exitAfterMs: 1 }, { exitAfterMs: 1 }]);
-  await settle(launchWithRetry(all.deps, { ...FAST, retryPauseMs: 200 }));
+  const pause = 500;
+  await settle(launchWithRetry(all.deps, { ...FAST, retryPauseMs: pause }));
   const tail = performance.now() - (all.at.get("exit 103") ?? 0);
-  assert.ok(tail < 100, `the launch waited ${tail.toFixed(1)}ms after its last browser was gone`);
+  assert.ok(tail < pause / 2, `the launch waited ${tail.toFixed(1)}ms after its last browser was gone, a pause's worth`);
 });
 
 const REAL: LaunchTuning = { attempts: 3, polls: 150, pollMs: 20, killGraceMs: 5000, retryPauseMs: 50 };
