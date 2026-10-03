@@ -16,3 +16,30 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { label: "Q & A", href: "/faq/", kind: "reference" },
   { label: "Glossary", href: "/glossary/", kind: "reference" },
 ];
+
+export const ROUTE_NAMES: Readonly<Record<string, string>> = {};
+
+export const ROUTE_CHILDREN: Readonly<Record<string, readonly string[]>> = {};
+
+export interface Crumb {
+  readonly name: string;
+  readonly href: string;
+}
+
+export interface Trail {
+  readonly crumbs: readonly Crumb[];
+  readonly current: boolean;
+  readonly also: readonly Crumb[];
+}
+
+export function seatOf(route: string): string | null | undefined {
+  return route === "" ? null : undefined;
+}
+
+export function aliasesOf(route: string): readonly string[] {
+  return route === "" ? [route] : [];
+}
+
+export function trailFor(path: string): Trail | null {
+  return path === "" ? { crumbs: [], current: false, also: [] } : null;
+}
