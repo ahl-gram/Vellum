@@ -155,12 +155,13 @@ section points there rather than restating it.
   gives up after a single poll, reporting a `SIGKILL` that was its own kill of the attempt before.
   `launchWithRetry` in `e2e/support/launch.ts` keeps each attempt's exit, spawn error and output on
   that attempt's own browser, kills a browser only after its whole wait, and waits, capped, for it
-  to be gone before it removes the profile, pauses and starts the next. On the GitHub runners the
-  FIRST attempt sometimes runs its whole wait alive with no page target, and why is not
-  established: each retry line names that attempt's own reason, its pid and its kill-to-gone time,
-  and a rescued lane passes, so read the logs of passing runs before asserting a cause. The
-  measurement that found the broken retry, and the probe that reproduces it against a real browser,
-  are in `handbook/plans/621/621-plan.md`.
+  to be gone before it removes the profile, pauses and starts the next. On the GitHub runners a
+  cold browser can take 20 seconds or more to bind its debug port, and why is not established:
+  every launch prints its attempt and its time to a page target, each retry line names that
+  attempt's own reason, its pid and its kill-to-gone time, and a rescued lane passes, so read the
+  logs of passing runs before asserting a cause or moving the wait. The measurement that found the
+  broken retry, and the probe that reproduces it against a real browser, are in
+  `handbook/plans/621/621-plan.md`.
 - **A visual claim in a suite is carried by a control taken in the same run.** A
   claim about PAINT goes through the one-row pixel strip, because no hit test and no computed style
   can see paint (`sampleRow` and `luminance` in `e2e/support/pixel.ts`). A claim about an

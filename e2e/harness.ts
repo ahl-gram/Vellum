@@ -24,7 +24,7 @@ const httpGet = (url: string): Promise<string> =>
       .on("error", reject);
   });
 
-// #339: getPageTarget attaches to whatever answers /json, so an orphaned browser holding the port would be adopted in SILENCE; a plain TCP connect also catches a non-browser squatter.
+// #339: probePageTarget attaches to whatever answers /json, so an orphaned browser holding the port would be adopted in SILENCE; a plain TCP connect also catches a non-browser squatter.
 function probeDebugPort(DPORT: number, timeoutMs = 300): Promise<boolean> {
   return new Promise((res) => {
     const socket = net.connect({ host: "127.0.0.1", port: DPORT });
@@ -222,7 +222,7 @@ async function spawnBrowser(browser: string, DPORT: number): Promise<LaunchAttem
 }
 
 export async function launchBrowser(browser: string, DPORT: number, tuning: LaunchTuning = LAUNCH_TUNING): Promise<{ webSocketDebuggerUrl: string }> {
-  const launched = await launchWithRetry(
+  return launchWithRetry(
     {
       preflight: () => assertDebugPortFree(DPORT),
       spawn: () => spawnBrowser(browser, DPORT),
@@ -231,7 +231,6 @@ export async function launchBrowser(browser: string, DPORT: number, tuning: Laun
     },
     tuning,
   );
-  return launched.target;
 }
 
 function onCdpMessage(ev: MessageEvent, consoleErrors: string[], http4xx: string[]): void {

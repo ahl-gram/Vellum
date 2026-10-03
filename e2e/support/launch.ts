@@ -1,8 +1,8 @@
-export type BrowserExit = { readonly code: number | null; readonly signal: NodeJS.Signals | null };
+type BrowserExit = { readonly code: number | null; readonly signal: NodeJS.Signals | null };
 
 type DataSource = { on(event: "data", listener: (chunk: unknown) => void): unknown };
 
-export interface LaunchChild {
+interface LaunchChild {
   readonly pid?: number | undefined;
   readonly stdout: DataSource;
   readonly stderr: DataSource;
@@ -31,13 +31,7 @@ export interface LaunchTuning {
   readonly retryPauseMs: number;
 }
 
-export interface Launched<T> {
-  readonly target: T;
-  readonly attempt: number;
-  readonly ms: number;
-}
-
-// killGraceMs is a cap on a hang, not a budget: in every failing CI lane through 2026-10-02 the killed browser's exit landed inside the next attempt's first 125ms poll (Issue #621).
+// killGraceMs is a cap on a hang, not a budget: the one kill measured on a GitHub runner was gone 8ms after SIGKILL (PR #735's CI, 2026-10-02), and the old loop's 0.13s retries put every earlier one under about 130ms.
 // retryPauseMs is Alex's ruling on Issue #621 (2026-10-02): insurance against an overloaded runner, which nothing measured has shown.
 export const LAUNCH_TUNING: LaunchTuning = { attempts: 3, polls: 160, pollMs: 125, killGraceMs: 5000, retryPauseMs: 2000 };
 
@@ -103,7 +97,9 @@ async function stop(child: LaunchChild, life: Life, capMs: number): Promise<stri
 
 const outputOf = (life: Life): string => life.output.slice(0, OUTPUT_CHARS) || "(none captured)";
 
-async function attemptOnce<T>(deps: LaunchDeps<T>, tuning: LaunchTuning, attempt: number, failures: string[]): Promise<Launched<T> | null> {
+type Outcome<T> = { readonly target: T } | { readonly failure: string };
+
+async function attemptOnce<T>(deps: LaunchDeps<T>, tuning: LaunchTuning, attempt: number, earlier: readonly string[]): Promise<Outcome<T>> {
   const started = Date.now();
   const spawned = await deps.spawn(attempt);
   const child = spawned.child;
@@ -111,27 +107,28 @@ async function attemptOnce<T>(deps: LaunchDeps<T>, tuning: LaunchTuning, attempt
   const head = `attempt ${attempt}/${tuning.attempts}, pid ${child.pid ?? "none"}`;
   try {
     const target = await awaitTarget(() => deps.probe(), life, tuning);
-    deps.log(`  e2e: browser launch ${head}, exposed its devtools target in ${Date.now() - started}ms`);
-    return { target, attempt, ms: Date.now() - started };
+    deps.log(`  e2e: browser up on ${head}, devtools target in ${Date.now() - started}ms`);
+    return { target };
   } catch (err) {
     const reason = messageOf(err);
     const stopped = await stop(child, life, tuning.killGraceMs);
-    failures.push(`${head}: ${reason}; ${stopped ?? `was not gone ${tuning.killGraceMs}ms after SIGKILL`}\n--- browser output, attempt ${attempt} ---\n${outputOf(life)}`);
-    if (stopped === null) throw new Error(`browser launch ${head}, was not gone ${tuning.killGraceMs}ms after SIGKILL, so no further attempt can own the debug port\n${failures.join("\n")}`, { cause: err });
+    const failure = `${head}: ${reason}; ${stopped ?? `was not gone ${tuning.killGraceMs}ms after SIGKILL`}\n--- browser output, attempt ${attempt} ---\n${outputOf(life)}`;
+    if (stopped === null) throw new Error(`browser launch ${head}, was not gone ${tuning.killGraceMs}ms after SIGKILL, so no further attempt can own the debug port\n${[...earlier, failure].join("\n")}`, { cause: err });
     await spawned.discard();
-    if (attempt === tuning.attempts) return null;
+    if (attempt === tuning.attempts) return { failure };
     deps.log(`  e2e: browser launch attempt ${attempt}/${tuning.attempts} exposed no devtools target: ${reason}; pid ${child.pid ?? "none"}, ${stopped}; retrying with a fresh profile in ${tuning.retryPauseMs}ms...`);
     await sleep(tuning.retryPauseMs);
-    return null;
+    return { failure };
   }
 }
 
-export async function launchWithRetry<T>(deps: LaunchDeps<T>, tuning: LaunchTuning = LAUNCH_TUNING): Promise<Launched<T>> {
+export async function launchWithRetry<T>(deps: LaunchDeps<T>, tuning: LaunchTuning = LAUNCH_TUNING): Promise<T> {
   await deps.preflight();
-  const failures: string[] = [];
+  let failures: readonly string[] = [];
   for (let attempt = 1; attempt <= tuning.attempts; attempt++) {
-    const launched = await attemptOnce(deps, tuning, attempt, failures);
-    if (launched) return launched;
+    const outcome = await attemptOnce(deps, tuning, attempt, failures);
+    if ("target" in outcome) return outcome.target;
+    failures = [...failures, outcome.failure];
   }
   throw new Error(`no devtools page target after ${tuning.attempts} launch attempts\n${failures.join("\n")}`);
 }

@@ -7,7 +7,7 @@ import type { Server as HttpServer } from "node:http";
 import { createServer } from "node:net";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { launchWithRetry } from "../../e2e/support/launch.ts";
+import { LAUNCH_TUNING, launchWithRetry } from "../../e2e/support/launch.ts";
 import type { LaunchDeps, LaunchTuning } from "../../e2e/support/launch.ts";
 import { laneCheckTally } from "../../e2e/support/lanes.ts";
 import { cleanup, launchBrowser } from "../../e2e/harness.ts";
@@ -112,8 +112,7 @@ test("a killed browser's late exit cannot fail the next attempt: the CI shape la
   const got = await settle(launchWithRetry(r.deps, FAST));
   assert.match(r.logs[0] ?? "", /attempt 1\/3 exposed no devtools target/, "attempt 1 never failed, so the fixture never reached the retry");
   assert.equal(got.error, undefined, `the launch failed although attempt 2's browser was alive and coming up: ${got.error?.message ?? ""}`);
-  assert.equal(got.value?.attempt, 2);
-  assert.equal(got.value.target, "target of 102");
+  assert.equal(got.value, "target of 102", "the launch did not come up on attempt 2's browser");
   assert.equal(r.browsers[1]?.gone, false, "attempt 2's own browser exited, so this is not the CI shape");
 });
 
@@ -192,6 +191,15 @@ test("the retry pauses after the killed browser is gone, and never after the las
   assert.equal(all.logs.filter((l) => /retrying/.test(l)).length, 2, `a retry was announced after the last attempt: ${JSON.stringify(all.logs)}`);
 });
 
+test("the ruled tuning is the default: three attempts of 160 polls at 125ms, a 5s kill cap, a 2s pause (Issue #621 rulings M1 and M2)", async () => {
+  assert.deepEqual(LAUNCH_TUNING, { attempts: 3, polls: 160, pollMs: 125, killGraceMs: 5000, retryPauseMs: 2000 });
+  const r = rig([{ exitAfterMs: 1 }, { exitAfterMs: 1 }, { exitAfterMs: 1 }]);
+  const got = await settle(launchWithRetry(r.deps));
+  assert.match(got.error?.message ?? "", /after 3 launch attempts/);
+  const gap = (r.at.get("spawn 102") ?? 0) - (r.at.get("exit 101") ?? Infinity);
+  assert.ok(gap >= LAUNCH_TUNING.retryPauseMs - 10, `with no tuning passed, attempt 2 started ${gap.toFixed(0)}ms after attempt 1's browser was gone`);
+});
+
 const REAL: LaunchTuning = { attempts: 3, polls: 150, pollMs: 20, killGraceMs: 5000, retryPauseMs: 50 };
 
 function freePort(): Promise<number> {
@@ -248,7 +256,7 @@ test("the harness's own launch, with a stand-in browser silent on its first star
     assert.ok(retry, `no retry line naming attempt 1's own reason: ${JSON.stringify(s.lines())}`);
     assert.equal(isAlive(Number(retry[1])), false, "attempt 1's stand-in is still running");
     assert.equal(s.profiles().length, 1, `expected only the live attempt's profile, found ${s.profiles().join(", ")}`);
-    const up = s.lines().join("\n").match(/attempt 2\/3, pid (\d+), exposed its devtools target/);
+    const up = s.lines().join("\n").match(/browser up on attempt 2\/3, pid (\d+), devtools target in \d+ms/);
     assert.ok(up, `no success line: ${JSON.stringify(s.lines())}`);
     cleanup();
     assert.ok(await goneWithin(Number(up[1]), 5000), "cleanup() left attempt 2's stand-in running");
