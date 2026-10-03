@@ -3,8 +3,8 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { makeStep } from "../support/step.ts";
 import type { Payload, SuiteContext } from "../types.ts";
-import { mediaEdges, meetings, nearest, plainShift, routesUnder, strideWidths } from "./corners/geometry.ts";
-import type { CornerRead } from "./corners/geometry.ts";
+import { fillBetween, mediaEdges, meetings, nearest, routesUnder, squeezed, strideWidths, unreadWidthConditions, verdict } from "./corners/geometry.ts";
+import type { CornerRead, Row } from "./corners/geometry.ts";
 
 const REPO = resolve(fileURLToPath(new URL(".", import.meta.url)), "..", "..");
 const PAGE_FLOOR = ["/", "/explorer/", "/faq/", "/gallery/", "/glossary/", "/print-room/", "/print-room/portfolio/", "/prospect/", "/reading-room/", "/ribbon/", "/seed-of-the-day/", "/specimen/"];
@@ -18,8 +18,7 @@ const WIDE_H = 800;
 const GALLERY_FORCED_BELOW = 346;
 const MAX_FRAMES = 40;
 
-type Row = { readonly w: number; readonly read: CornerRead };
-type PageResult = { readonly page: string; readonly rows: readonly Row[]; readonly dateline: string | null; readonly error: string | null };
+type PageResult = { readonly page: string; readonly stretches: readonly (readonly Row[])[]; readonly unread: readonly string[]; readonly dateline: string | null; readonly error: string | null };
 
 const READ = `(() => {
   const r2 = (n) => Math.round(n * 100) / 100;
@@ -66,9 +65,12 @@ const restAt = (w: number): Payload<CornerRead> => `new Promise((resolve, reject
 
 const MEDIA: Payload<string[]> = `(() => { const out = []; const walk = (rules) => { for (const r of rules) { if (r instanceof CSSMediaRule) out.push(r.media.mediaText); if (r.cssRules) walk(r.cssRules); } }; for (const s of document.styleSheets) { try { walk(s.cssRules); } catch {} } return out; })()`;
 
+// The page's own dateline must be datelineFor's for today (or yesterday, across a UTC midnight) before the sweep swaps in the widest one.
 const WIDEST_DATELINE: Payload<string> = `(async () => {
   const { datelineFor } = await import("/explorer/engine/world/seed-of-the-day.js");
   const el = document.getElementById("dateline");
+  const booted = el.textContent, now = Date.now();
+  if (booted !== datelineFor(new Date(now)) && booted !== datelineFor(new Date(now - 86400000))) throw new Error("the page wrote its own dateline: " + JSON.stringify(booted));
   let best = "", widest = -1;
   for (let t = Date.UTC(2026, 0, 1); t < Date.UTC(2126, 0, 1); t += 86400000) {
     el.textContent = datelineFor(new Date(t));
@@ -108,9 +110,7 @@ async function readStretch(ctx: SuiteContext, widths: readonly number[], mobile:
   let prev: Row | null = null;
   for (const w of widths) {
     const row = await readAt(ctx, w, mobile);
-    if (prev && prev.w - w > 1 && !plainShift(prev.read, row.read)) {
-      for (let fill = prev.w - 1; fill > w; fill--) rows.push(await readAt(ctx, fill, mobile));
-    }
+    if (prev) for (const fill of fillBetween(prev, row)) rows.push(await readAt(ctx, fill, mobile));
     rows.push(row);
     prev = row;
   }
@@ -118,32 +118,24 @@ async function readStretch(ctx: SuiteContext, widths: readonly number[], mobile:
 }
 
 async function sweepPage(ctx: SuiteContext, page: string): Promise<PageResult> {
-  const rows: Row[] = [];
+  const stretches: Row[][] = [];
+  const unread: string[] = [];
   let dateline: string | null = null;
   try {
     dateline = await load(ctx, page, FOLD, true);
-    const narrowEdges = mediaEdges(await ctx.evaluate(MEDIA), EVERY_PIXEL_TO, FOLD);
+    const narrowMedia = await ctx.evaluate(MEDIA);
+    unread.push(...unreadWidthConditions(narrowMedia));
     const pixels = Array.from({ length: EVERY_PIXEL_TO - PHONE_LO + 1 }, (_, i) => EVERY_PIXEL_TO - i);
-    rows.push(...await readStretch(ctx, [...strideWidths(FOLD, EVERY_PIXEL_TO + 1, STRIDE, narrowEdges), ...pixels], true));
+    stretches.push(await readStretch(ctx, [...strideWidths(FOLD, EVERY_PIXEL_TO + 1, STRIDE, mediaEdges(narrowMedia, EVERY_PIXEL_TO, FOLD)), ...pixels], true));
     const wideDateline = await load(ctx, page, WIDE, false);
     if (wideDateline) dateline = `${dateline ?? ""}; above the fold ${wideDateline}`;
-    rows.push(...await readStretch(ctx, strideWidths(WIDE, FOLD + 1, STRIDE, mediaEdges(await ctx.evaluate(MEDIA), FOLD, WIDE)), false));
-    return { page, rows, dateline, error: null };
+    const wideMedia = await ctx.evaluate(MEDIA);
+    unread.push(...unreadWidthConditions(wideMedia));
+    stretches.push(await readStretch(ctx, strideWidths(WIDE, FOLD + 1, STRIDE, mediaEdges(wideMedia, FOLD, WIDE)), false));
+    return { page, stretches, unread, dateline, error: null };
   } catch (err) {
-    return { page, rows, dateline, error: err instanceof Error ? err.message.slice(0, 400) : String(err) };
+    return { page, stretches, unread, dateline, error: err instanceof Error ? err.message.slice(0, 400) : String(err) };
   }
-}
-
-function verdict(page: string, { w, read }: Row): string | null {
-  if (page === "/gallery/" && w < GALLERY_FORCED_BELOW) {
-    return read.innerW !== w ? null : `the Gallery lays out at ${w} now, so Issue #672 has landed and its skip below ${GALLERY_FORCED_BELOW} goes`;
-  }
-  if (read.innerW !== w) return `laid out at ${read.innerW}, not ${w}`;
-  if (read.left.length < 2 || read.right.length < 1) return `at ${w} the read found ${read.left.length} cluster and ${read.right.length} corner inks`;
-  const [m] = meetings(read.left, read.right);
-  if (m) return `at ${w} "${m.a}" meets "${m.b}" by ${m.w.toFixed(1)} x ${m.h.toFixed(1)}`;
-  if (read.bandH !== null && read.clusterBottom > read.bandH) return `at ${w} the cluster ends at ${read.clusterBottom}, past the band's ${read.bandH}`;
-  return null;
 }
 
 async function co1Sweep(ctx: SuiteContext): Promise<void> {
@@ -152,13 +144,19 @@ async function co1Sweep(ctx: SuiteContext): Promise<void> {
   const results: PageResult[] = [];
   for (const page of pages) results.push(await sweepPage(ctx, page));
   const lines = results.map((r) => {
-    const faults = r.rows.map((row) => verdict(r.page, row)).filter((v): v is string => v !== null);
-    const measured = r.rows.filter((row) => !(r.page === "/gallery/" && row.w < GALLERY_FORCED_BELOW));
+    const rules = { forcedBelow: r.page === "/gallery/" ? GALLERY_FORCED_BELOW : null, keepsMotto: r.page === "/" };
+    const rows = r.stretches.flat();
+    const faults = [
+      ...[...new Set(r.unread)].map((text) => `a width condition the edge reader cannot parse: ${text}`),
+      ...rows.map((row) => verdict(row, rules)).filter((v): v is string => v !== null),
+      ...r.stretches.flatMap((stretch) => squeezed(stretch.filter((row) => verdict(row, rules) === null))),
+    ];
+    const measured = rows.filter((row) => rules.forcedBelow === null || row.w >= rules.forcedBelow);
     const close = measured.reduce<{ d: number; w: number }>((best, row) => { const d = nearest(row.read.left, row.read.right); return d < best.d ? { d, w: row.w } : best; }, { d: Infinity, w: 0 });
-    return { ok: r.error === null && faults.length === 0, text: `${r.page} ${r.rows.length} widths, nearest ${close.d.toFixed(1)} at ${close.w}${r.dateline ? ` (dateline "${r.dateline}")` : ""}${r.error ? `; ERROR ${r.error}` : ""}${faults.length ? `; ${faults.length} faults: ${faults.slice(0, 4).join("; ")}` : ""}` };
+    return { ok: r.error === null && faults.length === 0, text: `${r.page} ${rows.length} widths, nearest ${close.d.toFixed(1)} at ${close.w}${r.dateline ? ` (dateline "${r.dateline}")` : ""}${r.error ? `; ERROR ${r.error}` : ""}${faults.length ? `; ${faults.length} faults: ${faults.slice(0, 4).join("; ")}` : ""}` };
   });
   ctx.check(
-    "CO1 on every page the tree builds, resized while loaded from 320 to 480 a pixel at a time and at every media edge and a 32px stride up to 1280, no ink of the head cluster overlaps the ink of the right-hand corner by any amount, both corners carry ink, the band covers the cluster, and the Gallery's too-wide layout below 346 is the only width that lays out wider than set (Issue #638; Alex's 2026-09-22 and 2026-10-03 rulings; Issue #672)",
+    "CO1 on every page the tree builds, resized while loaded from 320 to 480 a pixel at a time and at both sides of every width media edge its CSS carries and a 32px stride up to 1280, no ink of the head cluster overlaps the ink of the right-hand corner by any amount, both corners carry ink, home keeps its motto, the band covers the cluster, no corner control is squeezed narrower than it stands elsewhere in its stretch, the Seed of the Day writes its own dateline through datelineFor, and the Gallery's too-wide layout below 346 is the only width that lays out wider than set (Issue #638; Alex's 2026-09-22 and 2026-10-03 rulings; Issue #672)",
     missing.length === 0 && lines.every((l) => l.ok),
     `${missing.length ? `pages missing from the tree: ${missing.join(", ")} | ` : ""}${lines.map((l) => l.text).join(" | ")}`,
   );

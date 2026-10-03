@@ -12,7 +12,11 @@ export type CornerRead = {
   readonly clusterBottom: number;
   readonly bandH: number | null;
 };
+export type Row = { readonly w: number; readonly read: CornerRead };
 export type Meeting = { readonly w: number; readonly h: number; readonly a: string; readonly b: string };
+export type Rules = { readonly forcedBelow: number | null; readonly keepsMotto: boolean };
+
+export const MOTTO = "an atelier of imaginary";
 
 export function routesUnder(pagesDir: string): string[] {
   const routes: string[] = [];
@@ -30,16 +34,30 @@ export function routesUnder(pagesDir: string): string[] {
   return routes.sort();
 }
 
+const FLIP: Readonly<Record<string, string>> = { "<=": ">=", "<": ">", ">=": "<=", ">": "<" };
+const COMPARISONS: readonly { readonly re: RegExp; readonly read: (m: RegExpMatchArray) => [string, number] }[] = [
+  { re: /\((max|min)-width:\s*(\d+(?:\.\d+)?)px\)/g, read: (m) => [m[1] === "max" ? "<=" : ">=", Number(m[2])] },
+  { re: /width\s*(<=|<|>=|>)\s*(\d+(?:\.\d+)?)px/g, read: (m) => [m[1]!, Number(m[2])] },
+  { re: /(\d+(?:\.\d+)?)px\s*(<=|<|>=|>)\s*width/g, read: (m) => [FLIP[m[2]!]!, Number(m[1])] },
+];
+
+function sides(op: string, n: number): [number, number] {
+  if (op === "<=" || op === ">") return [Math.floor(n), Math.floor(n) + 1];
+  return [Math.ceil(n) - 1, Math.ceil(n)];
+}
+
 export function mediaEdges(conditions: readonly string[], above: number, upTo: number): number[] {
   const edges = new Set<number>();
   for (const text of conditions) {
-    for (const m of text.matchAll(/\((max|min)-width:\s*(\d+(?:\.\d+)?)px\)/g)) {
-      const n = Math.round(Number(m[2]));
-      const pair = m[1] === "max" ? [n, n + 1] : [n - 1, n];
-      for (const w of pair) if (w > above && w <= upTo) edges.add(w);
+    for (const { re, read } of COMPARISONS) {
+      for (const m of text.matchAll(re)) for (const w of sides(...read(m))) if (w > above && w <= upTo) edges.add(w);
     }
   }
   return [...edges].sort((a, b) => b - a);
+}
+
+export function unreadWidthConditions(conditions: readonly string[]): string[] {
+  return conditions.filter((text) => COMPARISONS.reduce((rest, { re }) => rest.replace(re, ""), text).includes("width"));
 }
 
 export function meetings(left: readonly Box[], right: readonly Box[]): Meeting[] {
@@ -74,8 +92,39 @@ export function plainShift(wider: CornerRead, narrower: CornerRead): boolean {
   return same(wider.left, narrower.left, 0) && same(wider.right, narrower.right, dx);
 }
 
+export function fillBetween(wider: Row, narrower: Row): number[] {
+  if (wider.w - narrower.w <= 1 || plainShift(wider.read, narrower.read)) return [];
+  return Array.from({ length: wider.w - narrower.w - 1 }, (_, i) => wider.w - 1 - i);
+}
+
 export function strideWidths(hi: number, lo: number, stride: number, edges: readonly number[]): number[] {
   const set = new Set<number>([hi, lo, ...edges.filter((w) => w <= hi && w >= lo)]);
   for (let w = hi - stride; w > lo; w -= stride) set.add(w);
   return [...set].sort((a, b) => b - a);
+}
+
+export function verdict({ w, read }: Row, rules: Rules): string | null {
+  if (rules.forcedBelow !== null && w < rules.forcedBelow) {
+    return read.innerW !== w ? null : `lays out at ${w} now, so Issue #672 has landed and its skip below ${rules.forcedBelow} goes`;
+  }
+  if (read.innerW !== w) return `laid out at ${read.innerW}, not ${w}`;
+  if (read.left.length < 2 || read.right.length < 1) return `at ${w} the read found ${read.left.length} cluster and ${read.right.length} corner inks`;
+  if (rules.keepsMotto && !read.left.some((b) => b.t.startsWith(MOTTO))) return `at ${w} the motto is gone from a page that keeps it`;
+  const [m] = meetings(read.left, read.right);
+  if (m) return `at ${w} "${m.a}" meets "${m.b}" by ${m.w.toFixed(1)} x ${m.h.toFixed(1)}`;
+  if (read.bandH !== null && read.clusterBottom > read.bandH) return `at ${w} the cluster ends at ${read.clusterBottom}, past the band's ${read.bandH}`;
+  return null;
+}
+
+const CONTROL = /^(input|button|select|textarea)[#.]/;
+
+export function squeezed(rows: readonly Row[]): string[] {
+  const widest = new Map<string, number>();
+  for (const { read } of rows) for (const b of read.right) if (CONTROL.test(b.t)) widest.set(b.t, Math.max(widest.get(b.t) ?? 0, b.r - b.x));
+  const faults: string[] = [];
+  for (const { w, read } of rows) for (const b of read.right) {
+    const most = widest.get(b.t);
+    if (most !== undefined && b.r - b.x < most - 0.5) faults.push(`at ${w} the corner's ${b.t} is squeezed to ${(b.r - b.x).toFixed(1)} from ${most.toFixed(1)}`);
+  }
+  return faults;
 }

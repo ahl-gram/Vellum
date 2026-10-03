@@ -1,10 +1,22 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
+import { resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import { datelineFor, seedForDate } from "../../src/world/seed-of-the-day.ts";
 
 test("the room folio's dateline names the UTC day in full and the seed it yields", () => {
   assert.equal(datelineFor(new Date("2026-07-06T00:00:00Z")), "Monday, 6 July 2026 · seed 20260706");
   assert.equal(datelineFor(new Date("2026-09-23T23:59:59Z")), "Wednesday, 23 September 2026 · seed 20260923");
+});
+
+test("the dateline names the UTC day whatever the clock's own zone, on both sides of the date line", () => {
+  const module = pathToFileURL(resolve(import.meta.dirname, "..", "..", "src/world/seed-of-the-day.ts")).href;
+  const script = `import(${JSON.stringify(module)}).then((m) => process.stdout.write(m.datelineFor(new Date("2026-09-23T23:59:59Z")) + "|" + m.datelineFor(new Date("2026-07-06T00:00:00Z"))))`;
+  for (const zone of ["Pacific/Kiritimati", "Pacific/Pago_Pago"]) {
+    const out = execFileSync(process.execPath, ["--input-type=module", "-e", script], { env: { ...process.env, TZ: zone }, encoding: "utf8", timeout: 30_000 });
+    assert.equal(out, "Wednesday, 23 September 2026 · seed 20260923|Monday, 6 July 2026 · seed 20260706", `under TZ=${zone}`);
+  }
 });
 
 test("a date maps to its UTC YYYYMMDD as the seed", () => {
