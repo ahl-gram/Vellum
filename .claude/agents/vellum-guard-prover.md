@@ -79,8 +79,8 @@ Derive the mutation set from the DIFF, not from the test file. `git diff main...
 Run the narrowest suite that could catch each mutation:
 
 - If the target is covered by one unit test file, run **that file alone** and stop there. It costs under a second. Do not run the full unit suite per mutation; run it once at the end, unmutated and after the last `status` listed nothing, to confirm the tree as a whole still passes.
-- Escalate to e2e ONLY for a mutation no unit test could possibly see, and price each e2e round at roughly six minutes of your budget. Two or three rounds is usually the whole e2e allowance. Behavior that is browser-only (a paint, a yield, an event ordering, a layout) is where that allowance belongs.
-- **Name the mutations you did NOT prove**, rather than dropping them silently. "Not proven, e2e-only, would cost six minutes each" is a useful report line, and the caller can ask for it.
+- Escalate to e2e ONLY for a mutation no unit test could possibly see, and price each e2e round as the largest single item in your budget. Two or three rounds is usually the whole e2e allowance. Behavior that is browser-only (a paint, a yield, an event ordering, a layout) is where that allowance belongs.
+- **Name the mutations you did NOT prove**, rather than dropping them silently. "Not proven, e2e-only, would cost one e2e round each" is a useful report line, and the caller can ask for it.
 
 **Write the ledger before the budget runs out, not after.** If you are near the limit, stop mutating and report what you have. Three proven rows in hand beat a thorough run that gets killed with nothing written down.
 
@@ -116,9 +116,9 @@ These are the specific shapes that have shipped green in this repo. Check for th
 
 ## Running the suites here
 
-- Unit: `node --test test/<file>.test.ts` for one file, which is what you should almost always be running. `node --test` for the whole suite takes about 40 seconds; spend it once at the end, after the last `status` listed nothing, not per mutation.
+- Unit: `node --test test/<file>.test.ts` for one file, which is what you should almost always be running. `node --test` for the whole suite is slow enough to spend once at the end, after the last `status` listed nothing, not per mutation.
 - Typecheck: `npm run check`.
-- e2e: needs `npm run build` first, then `VELLUM_REQUIRE_BROWSER=1 npm run test:e2e` (needs Brave or Chrome). Roughly six minutes per round in the worktree, which is the single biggest thing that blows a budget. Spend it only where no unit test can reach, and it never licenses combining mutations.
+- e2e: needs `npm run build` first, then `VELLUM_REQUIRE_BROWSER=1 npm run test:e2e` (needs Brave or Chrome). A round in the worktree is the single biggest thing that blows a budget. Spend it only where no unit test can reach, and it never licenses combining mutations.
 - If you run e2e or any CDP driver, pick server and debugger ports distinct from the defaults the scratch drivers in `out/` use (8797 and 9247) and from the e2e default, so a worktree run cannot collide with a parent-session run.
 - Never byte-compare SVGs rendered in different environments. `Math.sin/cos/atan2` are not correctly rounded, so coordinates drift about 1e-13 and a 2-decimal rounding boundary can flip. Compare structure exactly and numbers with a tolerance.
 - After a regen the #40 hero drift guard compares a fresh render against the committed one, so it is circular and proves nothing. Do not treat it as a guard you can mutate against.
