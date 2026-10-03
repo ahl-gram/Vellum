@@ -154,8 +154,8 @@ the sentence wants it; what it may not be is absent. **It never governs a form a
 word**: a commit SUBJECT keeps the house's leading `#N`, a closing reference stays `Closes #N`
 exactly (a word between the keyword and the number closes nothing, `vellum-footguns` Gate 5 item 5),
 a pull request body's title line keeps `#N`, and a field label such as the template's `Issue: #N`
-already says which it is, though the lint reads one inside a comment as bare. Strings in code are
-outside the rule. Existing bare references in prose, and in comments no lint reads (an `.astro`
+already says which it is, though the lint reads one inside a comment as bare. No lint reads a
+string in code. Existing bare references in prose, and in comments no lint reads (an `.astro`
 page, `astro.config.ts`, the hooks under `.claude/`), are trimmed as each line is touched, not swept
 separately, the same way the older narrative is; `design/`'s round tools keep theirs, as the archive
 keeps everything.

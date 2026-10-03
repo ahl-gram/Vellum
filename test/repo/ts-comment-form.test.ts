@@ -35,6 +35,9 @@ const FORMS: ReadonlyArray<readonly [string, string | null]> = [
   ["// #30 and #31", "#30, #31"],
   ["// Issue#18", "#18"],
   ["// a reissue #22", "#22"],
+  ["// reissues #34 and shopr #35", "#34, #35"],
+  ["// fixed in #5", "#5"],
+  ["// the #12th pass", "#12"],
   ["// Issue #133/#134", "#134"],
   ["// the grey #123456", "#123456"],
   ["// page.html#12", "#12"],
@@ -55,6 +58,9 @@ const FORMS: ReadonlyArray<readonly [string, string | null]> = [
   ["// the ink #12ab3c", null],
   ["// the ink #1A2B3C", null],
   ["// the # key and a #hashtag", null],
+  ["// the inks #00a #11b #22c #33d #44e #55f #66a #77b #88c #99d", null],
+  ["// see #675b for the second part", null],
+  ["// a re-issue #36 and a non-PR #37", null],
   ["export const s = \"#27\";", null],
   ["export const t = `#28`;", null],
   ["export const r = /#29/;", null],
@@ -68,7 +74,7 @@ test("every comment in the TypeScript tree writes Issue #N or PR #N, each number
   assert.deepEqual(
     result!.messages.filter((m) => m.ruleId === ISSUE_FORM).map((m) => [m.line, m.message.match(/names (.+) bare:/)?.[1]]),
     FORMS.flatMap(([, numbers], i) => (numbers === null ? [] : [[starts[i], numbers]])),
-    "the comments reporting differ from the planted forms. DECLARED, each erring toward failing: an all-digit hex colour, digits after a word and a hash, an HTML numeric entity, a field label (Issue: #N), another repository's number (owner/repo#N), a doc block wrapped between the word and the number with its * leader, and a run of line comments wrapped the same way all report. DECLARED, erring toward passing (a handbook/errata/guards.md row): the rule reads the form and never the kind, so Issue #731, a pull request, passes",
+    "the comments reporting differ from the planted forms. DECLARED, each erring toward failing: an all-digit hex colour, digits after a word and a hash, an HTML numeric entity, a field label (Issue: #N), another repository's number (owner/repo#N), a doc block wrapped between the word and the number with its * leader, and a run of line comments wrapped the same way all report. DECLARED, erring toward passing (handbook/errata/guards.md rows): the rule reads the form and never the kind, so Issue #731, a pull request, passes; digits running straight into a hex letter read as a colour, so #675b passes; and a hyphenated compound ending in the word reads as the word, so re-issue #36 and non-PR #37 pass, which keeps the ranges ruling A1 wrote (Issue #455-Issue #470, pre-Issue #260) clean",
   );
 });
 
