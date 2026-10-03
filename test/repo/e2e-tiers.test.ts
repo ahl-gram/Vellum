@@ -80,7 +80,7 @@ test("the smoke tier covers every page that ships its own bundle", () => {
     "specimen": ["specimen"],
   };
   for (const { twin } of BUNDLE_ENTRIES) {
-    // The home twin sits at the public root (#455), so its surface has no directory prefix.
+    // The home twin sits at the public root (Issue #455), so its surface has no directory prefix.
     const surface = twin === "app.bundle.js" ? "home" : twin.replace(/\/app\.bundle\.js$/, "");
     const suites = covers[surface];
     assert.ok(suites, `bundle ${surface} has no smoke suite mapped, so it ships uncovered`);
@@ -197,7 +197,7 @@ test("every CI trigger gets the same full coverage, so nothing is conditional on
 test("the runner actually uses the selection, the timings and the outcome rule it imports", () => {
   // The runner needs a browser, so behavior is tested in test/e2e/suites.test.ts and only the CALL sites are pinned here, against the CODE and never the raw file: a line commented out in place leaves its literal behind and satisfies a raw match, which beat this test's .catch assertion and its formatSuiteTimings one when the prover tried it (2026-09-10).
   assert.match(RUNNER_CODE, /runSelected\(SELECTED, SUITES, ctx, \{/, "the runner does not run the SELECTED suites");
-  // The hooks are optional in runSelected, since a caller without them keeps the old rethrow; a runner without them is the #534 defect back, and no unit test of runSelected can see that.
+  // The hooks are optional in runSelected, since a caller without them keeps the old rethrow; a runner without them is the Issue #534 defect back, and no unit test of runSelected can see that.
   const hooks = RUNNER_CODE.match(/runSelected\(SELECTED, SUITES, ctx, \{([\s\S]*?)\n {2}\}\);/);
   assert.ok(hooks, "the runSelected call's argument block was not found, so the two assertions below would read an empty string");
   assert.match(hooks[1]!, /onSuiteError:/, "the runner passes no per-suite handler, so one suite giving up kills the whole lane again (#534)");
@@ -222,7 +222,7 @@ test("the runner actually uses the selection, the timings and the outcome rule i
   );
 });
 
-// The helper is proved in isolation by test/repo/step-support.test.ts; what no test could see is a suite quietly going back to a bare await, which is the #534 defect returning one suite at a time.
+// The helper is proved in isolation by test/repo/step-support.test.ts; what no test could see is a suite quietly going back to a bare await, which is the Issue #534 defect returning one suite at a time.
 // The GROUPS by name, never "at least one step": an import plus a single `await step(` left five of room-drawer's six groups unwrappable with this sweep still green (skeptic, 2026-09-10), which is a guard shaped like one instance of the class it claims to cover.
 const STEPPED_GROUPS: Readonly<Record<string, readonly string[]>> = {
   "render": ["R8", "R11a", "R11b", "R11c", "R12a", "R12b", "R15a", "R15b", "R13a", "R13b", "R13c", "R13e", "R restore"],

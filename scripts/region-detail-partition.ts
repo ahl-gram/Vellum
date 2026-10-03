@@ -15,7 +15,7 @@ import { LOD_BANDS, type LodBand } from "../src/world/lod.ts";
 import type { World } from "../src/world/types.ts";
 import { bandWindows } from "./region-detail-sweep-windows.ts";
 
-/** #443's measurement half: the world chart's OWN partition across three arms, so the anti-merge claim and the vanishing-landmass census reproduce from one command. Committed, not left in out/, because this epic has lost its evidence twice. `before` rebuilds what #397 and #398 shipped, an UNGATED bilinear floor rejected against that same blurred max, so no revert is needed. Costs minutes; the unit-scale claims are in test/world/detail-chain-world.test.ts. */
+/** Issue #443's measurement half: the world chart's OWN partition across three arms, so the anti-merge claim and the vanishing-landmass census reproduce from one command. Committed, not left in out/, because this epic has lost its evidence twice. `before` rebuilds what Issue #397 and Issue #398 shipped, an UNGATED bilinear floor rejected against that same blurred max, so no revert is needed. Costs minutes; the unit-scale claims are in test/world/detail-chain-world.test.ts. */
 
 
 function gridForWindow(win: UvWindow): { gridW: number; gridH: number } {

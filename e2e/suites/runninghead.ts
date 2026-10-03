@@ -1,4 +1,4 @@
-// Running Head e2e (RH0-RH8, #295; reshaped for the #461 head cluster): the shell's masthead asserted by RESOLVED computed styles, because a rule that is present but LOSES the cascade passes every source-text test (#288); self-contained, restores the Explorer base.
+// Running Head e2e (RH0-RH8, Issue #295; reshaped for the Issue #461 head cluster): the shell's masthead asserted by RESOLVED computed styles, because a rule that is present but LOSES the cascade passes every source-text test (Issue #288); self-contained, restores the Explorer base.
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { resolve } from "node:path";
@@ -38,7 +38,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await rh7AtlasTitle(k);
   rh9ContrastPins(ctx, heads, bad);
   await rh10GalleryScrolled(k);
-  // #531: the OTHER painting arm, body.chart-room:not(:has(.stage)), which SB8e's page never matches.
+  // Issue #531: the OTHER painting arm, body.chart-room:not(:has(.stage)), which SB8e's page never matches.
   await send("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
   // The Z13 bounce: /gallery/ is already loaded, and visit()'s probe (readyState complete plus a .wordmark) is satisfied by the STALE document, so a same-URL navigate can return before the new one commits.
   await send("Page.navigate", { url: "about:blank" });

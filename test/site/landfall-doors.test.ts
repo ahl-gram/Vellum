@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-// Landfall Sub 4a (#470), ratified 2026-08-24: the failed-bundle doors. SPEC: the 2026-08-24 ratification comment on #470 and the re-baseline comment beneath it.
+// Landfall Sub 4a (Issue #470), ratified 2026-08-24: the failed-bundle doors. SPEC: the 2026-08-24 ratification comment on Issue #470 and the re-baseline comment beneath it.
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");

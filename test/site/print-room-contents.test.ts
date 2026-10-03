@@ -6,7 +6,7 @@ import { plateAspect } from "../../src/site/print-room/plate-aspect.ts";
 import { composeAtlas } from "../../src/atlas/compose.ts";
 import { generateWorld, defaultRecipe } from "../../src/world/generate.ts";
 
-// The slip's contents (#463): string in and string out like plate-markup.ts, so the rows unit-test in Node and the page and the runtime render one shape.
+// The slip's contents (Issue #463): string in and string out like plate-markup.ts, so the rows unit-test in Node and the page and the runtime render one shape.
 const ref = (key: string, title: string) => ({ key, title, href: `blob:http://127.0.0.1:4173/${key}` });
 const DATA: ContentsData = {
   hero: ref("antique", "The world chart, drawn in the antique manner"),

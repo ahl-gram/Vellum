@@ -102,7 +102,7 @@ export function entersKit(k1: GestureKit) {
     const boxes = [];
     let swallowed = null;
     for (const id of ["atlas", "explorer", "reading-room", "gallery"]) {
-      // The legend stands down under 900px (#461 phone doors): narrow enters by the station pip, desktop keeps the legend chip it is really testing. At 390 the open card is a full-width fixed bottom sheet over the pips and controls, so each entry first Escapes any open card and polls it CLOSED, then resets the camera and polls until the hit-test actually reaches the pip (a timed sleep here is the CI-red poll-break class: the break must demand what the click needs).
+      // The legend stands down under 900px (Issue #461 phone doors): narrow enters by the station pip, desktop keeps the legend chip it is really testing. At 390 the open card is a full-width fixed bottom sheet over the pips and controls, so each entry first Escapes any open card and polls it CLOSED, then resets the camera and polls until the hit-test actually reaches the pip (a timed sleep here is the CI-red poll-break class: the break must demand what the click needs).
       let open = false;
       // The reachability poll must GATE the click (its expiry used to fall through to a blind click, and the now-scrollable page gave a slow lane a new way to miss: CI L8b, atlas + gallery never opened), so the whole entry retries: close, pin scroll, reset the camera, poll the hit-test, and only a proven pip gets the click.
       const attempts = label === "narrow" ? 3 : 1;

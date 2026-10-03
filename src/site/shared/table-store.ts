@@ -1,4 +1,4 @@
-// The Chart Table's second home (#634, ruled 2026-09-18 and 2026-09-19, superseding #401 ruling 3): the address decides an ARRIVAL and the device decides a RETURN. Pure and DOM-free like its sibling ./table-address.ts, whose grammar it stores verbatim so the table has one spelling everywhere; the store and the browser's navigation entry are injected the way firstArrival takes its own in ../home/ceremony.ts, which is what makes the precedence provable outside a browser.
+// The Chart Table's second home (Issue #634, ruled 2026-09-18 and 2026-09-19, superseding Issue #401 ruling 3): the address decides an ARRIVAL and the device decides a RETURN. Pure and DOM-free like its sibling ./table-address.ts, whose grammar it stores verbatim so the table has one spelling everywhere; the store and the browser's navigation entry are injected the way firstArrival takes its own in ../home/ceremony.ts, which is what makes the precedence provable outside a browser.
 import { emitTable, parseTableValue, type TableItem } from "./table-address.ts";
 
 export const TABLE_STORE_KEY = "vellum.table.v1";

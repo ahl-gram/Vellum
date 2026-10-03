@@ -9,7 +9,7 @@ const placed = (comments: ReadonlyArray<Comment> | undefined): Placed[] =>
 
 const isHead = (text: string, comment: Placed): boolean => text.slice(0, comment.loc.start.offset).trim() === "";
 
-// A # followed by digits, not preceded by "issue" or "pr" (either case, singular or plural) and one space, and not followed by a hex letter; whitespace is collapsed first so a head block may wrap between the word and the number. Named directions, all false reds and never a miss: an all-digit hex colour (#333), a fragment after a word (page.html#12), an HTML entity (&#8212;), and any prefix other than Issue and PR.
+// A # followed by digits, not preceded by "issue" or "pr" (either case, singular or plural) and one space, and not followed by a hex letter; whitespace is collapsed first so a head block may wrap between the word and the number. Named directions, all false reds and never a miss: an all-digit hex colour, digits after a word and a hash as in a page fragment, an HTML numeric entity, and any prefix other than Issue and PR.
 const BARE_NUMBER = /(?<!\b(?:issue|issues|pr) )#\d+(?![0-9a-f])/i;
 
 const oneLine: CSSRuleDefinition = {

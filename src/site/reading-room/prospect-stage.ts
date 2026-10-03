@@ -1,4 +1,4 @@
-// The prospect stage: the room's engraved plate for whatever the story is telling, a chronicle beat or the port the survey is visiting. Its own element, never the card path; nests inside the instrument panel (ruled 2026-08-22 on #442) and inherits its hidden teardowns on purpose. The plate is a blob <img>, never inline <svg> (the cross-chart url(#) id rule), and a LINK to the full Prospect page. It is handed a PlateSpec and draws it; WHICH plate a told row means is told-plate.ts's rule.
+// The prospect stage: the room's engraved plate for whatever the story is telling, a chronicle beat or the port the survey is visiting. Its own element, never the card path; nests inside the instrument panel (ruled 2026-08-22 on Issue #442) and inherits its hidden teardowns on purpose. The plate is a blob <img>, never inline <svg> (the cross-chart url(#) id rule), and a LINK to the full Prospect page. It is handed a PlateSpec and draws it; WHICH plate a told row means is told-plate.ts's rule.
 import { plateKeyOf, type PlateSpec } from "./told-plate.ts";
 
 export interface PlateResult {

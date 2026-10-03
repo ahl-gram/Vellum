@@ -7,7 +7,7 @@ import { fullWidthWideningRules } from "../../test-support/css-box-sweep.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 
-// The Gallery (#464, ruled 2026-09-02 on the issue): twelve plates on the deep as twelve sheets, a chart room without a stage; the plates are the roads into their own worlds, the legend row the one gold road back to the Explorer.
+// The Gallery (Issue #464, ruled 2026-09-02 on the issue): twelve plates on the deep as twelve sheets, a chart room without a stage; the plates are the roads into their own worlds, the legend row the one gold road back to the Explorer.
 const REPO = resolve(import.meta.dirname, "..", "..");
 const page = readFileSync(resolve(REPO, "src/pages/gallery/index.astro"), "utf8");
 const css = GALLERY_PAGE_CSS;

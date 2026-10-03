@@ -31,7 +31,7 @@ export function drawerKit(ctx: SuiteContext & { settle: Settle }) {
     await sleep(400);
   };
   // A card is pinned by a REAL press on its hit target, and at a NONZERO index, because a filing that always names place 0
-  // passes every shape check (#428's own hard-coded-index trap, and PB1b's).
+  // passes every shape check (Issue #428's own hard-coded-index trap, and PB1b's).
   const pinCard = async (at: number) => {
     const r = await evaluate<Point | null>(`(() => { const h = document.querySelector('.place-overlay .place-hit[data-idx="${at}"]'); if (!h) return null; const b = h.getBoundingClientRect(); return { x: Math.round(b.x + b.width / 2), y: Math.round(b.y + b.height / 2) }; })()`);
     if (r) await clickAt(r.x, r.y);

@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-// #521 Sub 3: the three guards the cold review on PR #546 found missing on the Portfolio. This is not the room's full test (the kit sweep, the css, the folio lines): it is the inline-fallback notice every other worker-driven room carries, the slip's where-line in the bare state, and what the two sheet presses actually stand down on.
+// Issue #521 Sub 3: the three guards the cold review on PR #546 found missing on the Portfolio. This is not the room's full test (the kit sweep, the css, the folio lines): it is the inline-fallback notice every other worker-driven room carries, the slip's where-line in the bare state, and what the two sheet presses actually stand down on.
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 const page = read("src/pages/print-room/portfolio/index.astro");

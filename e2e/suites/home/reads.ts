@@ -3,7 +3,7 @@ import type { Payload } from "../../types.ts";
 
 export type Seat = { pos: string; z: string; right: number; bottom: number; pe: string; anim: string; top: number; vw: number };
 
-// Gold compared NUMERICALLY: Chromium serializes var() colors as rgb()/color(srgb ...), so the channels, not the spelling, are under test (#324).
+// Gold compared NUMERICALLY: Chromium serializes var() colors as rgb()/color(srgb ...), so the channels, not the spelling, are under test (Issue #324).
 export const controlGold = (bg: string | null) => {
   if (!bg) return false;
   let m = bg.match(/^rgb\((\d+), (\d+), (\d+)\)$/);

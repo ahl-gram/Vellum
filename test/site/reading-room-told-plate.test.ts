@@ -13,7 +13,7 @@ import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { buildPlaceManifest } from "../../src/render/place-manifest.ts";
 import { buildVoyagePlan } from "../../src/render/voyage.ts";
 
-// The survey half's picture (#442 G, ruled 2026-08-22): it changes only for a capital or a realm seat, the places whose plates hang arms, and HOLDS at the last one through towns, villages and hamlets; pure, so provable without a browser.
+// The survey half's picture (Issue #442 G, ruled 2026-08-22): it changes only for a capital or a realm seat, the places whose plates hang arms, and HOLDS at the last one through towns, villages and hamlets; pure, so provable without a browser.
 
 const PRESENT = 1218;
 

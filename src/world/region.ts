@@ -21,9 +21,9 @@ export type RegionSpec = {
   readonly gridW: number;
   readonly gridH: number;
   readonly title: string;
-  /** Draw the terrain from the chained detail field (#396-#398) instead of the bare heightfield. Dark by default: #400 turns it on for the Glass and leaves the atlas plates bare. */
+  /** Draw the terrain from the chained detail field (Issue #396-Issue #398) instead of the bare heightfield. Dark by default: Issue #400 turns it on for the Glass and leaves the atlas plates bare. */
   readonly detail?: boolean;
-  /** A chain cache to build the ancestry in, so a caller drawing many windows of one world shares their parents (#400). Omitted, each call builds its own and shares nothing. */
+  /** A chain cache to build the ancestry in, so a caller drawing many windows of one world shares their parents (Issue #400). Omitted, each call builds its own and shares nothing. */
   readonly chainCache?: ChainCache;
 };
 

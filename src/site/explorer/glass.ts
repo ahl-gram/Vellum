@@ -4,7 +4,7 @@ import { createLodController } from "./lod-controller.ts";
 import { cameraFromTransform, transformFromCamera, type Camera } from "./camera.ts";
 import type { PlaceManifest } from "../../render/place-manifest.ts";
 
-// #165: keys and buttons route through the controller into d3-zoom's own entry points, so a keystroke enters the EXACT same pipeline as a gesture (one clamp, one settle, one hash write).
+// Issue #165: keys and buttons route through the controller into d3-zoom's own entry points, so a keystroke enters the EXACT same pipeline as a gesture (one clamp, one settle, one hash write).
 const ZOOM_STEP = 1.4;
 const PAN_FRACTION = 0.15;
 
@@ -19,21 +19,21 @@ interface GlassDeps {
   prefersReduce: () => boolean;
   regionEligible: () => boolean;
   syncHash: () => void;
-  /** #520: the dog-ear rides the committed inset, so the conductor hangs it here rather than on a sibling that would outlive the sheet. */
+  /** Issue #520: the dog-ear rides the committed inset, so the conductor hangs it here rather than on a sibling that would outlive the sheet. */
   decorateInset?: (el: HTMLElement) => void;
   buttons: { zoomIn: HTMLElement; zoomOut: HTMLElement; reset: HTMLElement; cluster: HTMLElement };
 }
 
 type LodController = ReturnType<typeof createLodController>;
 
-// #170: single timing source (the --glide token), read per glide so a stylesheet tweak takes effect without a reload; reduced motion never reaches it.
+// Issue #170: single timing source (the --glide token), read per glide so a stylesheet tweak takes effect without a reload; reduced motion never reaches it.
 function glideMs(): number {
   const v = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--glide"));
   return Number.isFinite(v) ? v : 300;
 }
 
 function glassCard(mapDiv: HTMLElement, deps: Readonly<GlassDeps>) {
-  // #164/#331: publish k onto the card and the .place-overlay, both LEAF siblings of the chart svg, never the mount: a per-frame non-transform style write on an svg ancestor re-rasterizes the baked labels and they visibly jiggle.
+  // Issue #164/Issue #331: publish k onto the card and the .place-overlay, both LEAF siblings of the chart svg, never the mount: a per-frame non-transform style write on an svg ancestor re-rasterizes the baked labels and they visibly jiggle.
   function setCardZoom(k: number): void {
     const card = document.getElementById("place-card");
     const overlay = mapDiv.querySelector<HTMLElement>(".place-overlay");
@@ -44,7 +44,7 @@ function glassCard(mapDiv: HTMLElement, deps: Readonly<GlassDeps>) {
       if (k === 1) el.style.removeProperty("--zoom-k");
       else el.style.setProperty("--zoom-k", String(k));
     }
-    // #387/#388: ordered AFTER the publish above, and reached by every camera apply and every redraft rebuild. A redraft's fresh card has no counter-scale until that loop runs, so re-measuring before it measures the card k times too large.
+    // Issue #387/Issue #388: ordered AFTER the publish above, and reached by every camera apply and every redraft rebuild. A redraft's fresh card has no counter-scale until that loop runs, so re-measuring before it measures the card k times too large.
     deps.reclampCard();
   }
   return { setCardZoom };
@@ -68,7 +68,7 @@ function glassLod(mapDiv: HTMLElement, deps: Readonly<GlassDeps>, setCardZoom: (
 }
 
 function glassCamera(mapViewport: HTMLElement, deps: Readonly<GlassDeps>, zoomController: ZoomController, lodController: LodController, setCardZoom: (k: number) => void) {
-  // #165/#169: sheet fractions of the WORLD sheet at every band (the inset design never rebases), read from the STABLE viewport; guard a zero-size box (before first layout) so the division is finite.
+  // Issue #165/Issue #169: sheet fractions of the WORLD sheet at every band (the inset design never rebases), read from the STABLE viewport; guard a zero-size box (before first layout) so the division is finite.
   function cameraNow(): Camera {
     const W = mapViewport.clientWidth || 1;
     const H = mapViewport.clientHeight || 1;
@@ -80,7 +80,7 @@ function glassCamera(mapViewport: HTMLElement, deps: Readonly<GlassDeps>, zoomCo
     if (deps.regionEligible()) lodController.onSettle(cameraNow());
   }
 
-  // #165: geometric pan/zoom belongs to ALL FOUR styles (the epic's ratified decision); the controller attaches unconditionally, and the reset-home-on-world-change policy lives in the conductor, so no style branch can strand a magnified sheet.
+  // Issue #165: geometric pan/zoom belongs to ALL FOUR styles (the epic's ratified decision); the controller attaches unconditionally, and the reset-home-on-world-change policy lives in the conductor, so no style branch can strand a magnified sheet.
   function syncZoom(): void {
     zoomController.attach();
     setCardZoom(zoomController.getState().k);
@@ -93,7 +93,7 @@ function glassCamera(mapViewport: HTMLElement, deps: Readonly<GlassDeps>, zoomCo
     zoomController.refit(transformFromCamera(cam, mapViewport.clientWidth, mapViewport.clientHeight));
   }
 
-  // #170: the voiced home (full-sheet button, the 0 key); the hash writes at the landing (glideHome's onDone), never mid-flight. The programmatic homes (verso, chronicle, voyage, draw) keep their INSTANT homeToWorld() + reset() + explicit syncHash in the conductor.
+  // Issue #170: the voiced home (full-sheet button, the 0 key); the hash writes at the landing (glideHome's onDone), never mid-flight. The programmatic homes (verso, chronicle, voyage, draw) keep their INSTANT homeToWorld() + reset() + explicit syncHash in the conductor.
   function goHomeVoiced(): void {
     lodController.easeHome();
     zoomController.glideHome(deps.syncHash);

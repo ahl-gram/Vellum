@@ -1,4 +1,4 @@
-// The Reading Room conductor: takes a world from the URL hash (read ONCE at boot, no hashchange listener), draws it through the SHARED render worker, and mounts the reading frame driving the fused ages instrument. The room is ALWAYS armed and arrival is at rest on every path (ratified 2026-07-29 on #221); seats.ts seats the frame's parts.
+// The Reading Room conductor: takes a world from the URL hash (read ONCE at boot, no hashchange listener), draws it through the SHARED render worker, and mounts the reading frame driving the fused ages instrument. The room is ALWAYS armed and arrival is at rest on every path (ratified 2026-07-29 on Issue #221); seats.ts seats the frame's parts.
 import { runJob, runInline, usesWorker, initWorker, type DrawResult } from "../explorer/worker-client.ts";
 import { installHostHooks } from "../shared/host-hooks.ts";
 import { startArrival } from "../explorer/draw-ceremony.ts";
@@ -158,7 +158,7 @@ interface RoomPlates {
 let plates: RoomPlates | null = null;
 // The survey half's per-row plates, memoized: they need the TRAVEL order, which exists only once the instrument has armed.
 let surveyRows: ReadonlyArray<PlateSpec | null> | null = null;
-// Ruled 2026-08-22 on #442: a plain visit opens with NO plate. A deep link of either kind is the reader asking for a moment, so it arms on arrival; otherwise Play or a slider move does.
+// Ruled 2026-08-22 on Issue #442: a plain visit opens with NO plate. A deep link of either kind is the reader asking for a moment, so it arms on arrival; otherwise Play or a slider move does.
 let plateArmed = false;
 
 // voyageLog() is the engine's own row list, in travel order, already on the 34-name surface: nothing here recomputes an itinerary the engine has already decided.

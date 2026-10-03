@@ -74,7 +74,7 @@ export async function cd12SeatsHold({ evaluate, check, settle, go }: DrawerKit, 
 
 export async function cd13TabClear(bag: DrawerKit & { edge: Record<string, Edge> }): Promise<void> {
   const { evaluate, send, check, settle, go, edge } = bag;
-  // CD13 (#543): folded, the camera comes home to --chrome-x where the tab already stands, and the tab's z-19 over the corner's z-10 wins the pointer, so this is a reachability check.
+  // CD13 (Issue #543): folded, the camera comes home to --chrome-x where the tab already stands, and the tab's z-19 over the corner's z-10 wins the pointer, so this is a reachability check.
   const EDGE: Payload<Edge> = `(() => {
     const tab = document.getElementById("chart-drawer-tab");
     const zoom = document.querySelector(".corner.br.zoomery");

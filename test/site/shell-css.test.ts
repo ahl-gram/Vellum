@@ -5,12 +5,12 @@ import { fileURLToPath } from "node:url";
 import { rulesIn } from "../../test-support/shell-css-rules.ts";
 import { SITE_SHEETS } from "../../test-support/site-sheets.ts";
 
-// The shell dresses once (#263): the palette is named ONCE in BaseLayout's global style and consumed as var() everywhere it matched exactly.
+// The shell dresses once (Issue #263): the palette is named ONCE in BaseLayout's global style and consumed as var() everywhere it matched exactly.
 
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 const read = (p: string) => readFileSync(root(p), "utf8");
 
-// The ratified token set (#263, the PR #269 review item 4, #324).
+// The ratified token set (Issue #263, the PR #269 review item 4, Issue #324).
 const TOKENS: Record<string, string> = {
   "--ink-dark": "#4a3826",
   "--ink-brown": "#6b5a40",
@@ -151,7 +151,7 @@ test("drift guard: every var() consumed without a fallback is declared (#263)", 
   }
 });
 
-// The sheet's lift is ONE token (#367), ratified at 0.4 (2026-08-12): two coincident 0.2 shadows measured as a single 0.385.
+// The sheet's lift is ONE token (Issue #367), ratified at 0.4 (2026-08-12): two coincident 0.2 shadows measured as a single 0.385.
 const SHEET_SHADOW_GEOMETRY = "0 12px 34px";
 const STAGE_SHADOW_GEOMETRY = "0 18px 60px";
 
@@ -184,7 +184,7 @@ test("the stage shadow is declared once and consumed as a var: the chart-room de
   assert.match(layoutStyle(), /--stage-shadow:\s*0 18px 60px rgb\(from var\(--chart-ink\) r g b \/ 0\.55\);/, "the token is the mockup's own dress");
 });
 
-// The hover raise and press are house values (#405), named in motion.css's :root, the one sheet both the site pages and the standalone atlas page load.
+// The hover raise and press are house values (Issue #405), named in motion.css's :root, the one sheet both the site pages and the standalone atlas page load.
 const RAISE_TOKENS = [
   ["--raise", "-2px"],
   ["--press", "1px"],
@@ -226,7 +226,7 @@ test("the plate dress rests flat and tips on hover (#130, the consumer is now pr
 
 test("the wordmark tips under the hand on room pages, and stays still on home (#289)", () => {
   const css = read("public/motion.css");
-  // Keyed on .wordmark, not h1 (#288): on a room page the h1 is the room name with no link to tip, so keying on h1 would silently select nothing.
+  // Keyed on .wordmark, not h1 (Issue #288): on a room page the h1 is the room name with no link to tip, so keying on h1 would silently select nothing.
   const hover = css.match(/body:has\(\.room-name\) \.wordmark a:hover,\s*body:has\(\.room-name\) \.wordmark a:focus-visible\s*\{([^}]*)\}/);
   assert.ok(hover, "the room-scoped wordmark hover rule should exist in motion.css");
   assert.ok(
@@ -239,7 +239,7 @@ test("the wordmark tips under the hand on room pages, and stays still on home (#
   );
 });
 
-// The grander plate, gallery and atlas scales are a question #405 left standing, so each literal is sanctioned at its exact selector and value, and every comma arm of a literal-bearing rule must be individually sanctioned: a new surface cannot borrow an exception.
+// The grander plate, gallery and atlas scales are a question Issue #405 left standing, so each literal is sanctioned at its exact selector and value, and every comma arm of a literal-bearing rule must be individually sanctioned: a new surface cannot borrow an exception.
 const SANCTIONED_LIFTS: Record<string, string> = {
   ".plate:hover": "-5px",
   ".plate:active": "-1px",

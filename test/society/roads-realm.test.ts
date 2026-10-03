@@ -8,7 +8,7 @@ import { labelLandmasses } from "../../src/world/landmass.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import type { Settlement } from "../../src/society/sites.ts";
 
-// #309 guards on hand-built worlds: exact realm and landmass geometry no natural seed guarantees.
+// Issue #309 guards on hand-built worlds: exact realm and landmass geometry no natural seed guarantees.
 
 const SEA = 0.5;
 type Rect = { x0: number; y0: number; x1: number; y1: number };

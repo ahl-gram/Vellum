@@ -5,7 +5,7 @@ import { LOD_BANDS, type LodBand } from "../src/world/lod.ts";
 import { measure, type RiverFailure, type WindowResult } from "./region-detail-sweep-measure.ts";
 import { bandWindows } from "./region-detail-sweep-windows.ts";
 
-/** The measurement half of #399. Every claim in that sub's acceptance is a number this script prints, for both arms (bare heightfield and chained detail) so a difference can be attributed. Not in `npm test`: a chained band-3 region costs ~1.1s and the whole sweep runs minutes. */
+/** The measurement half of Issue #399. Every claim in that sub's acceptance is a number this script prints, for both arms (bare heightfield and chained detail) so a difference can be attributed. Not in `npm test`: a chained band-3 region costs ~1.1s and the whole sweep runs minutes. */
 
 const SEEDS = [42, 7, 2, 15, 23];
 

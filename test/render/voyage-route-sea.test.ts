@@ -58,7 +58,7 @@ test("a same-landmass coastal shortcut puts to sea over a short OVERLAND stub, n
     seaLegs++;
     const from = l.points[0]!;
     const to = l.points[l.points.length - 1]!;
-    if (comp[from.x + from.y * s.gridW] !== comp[to.x + to.y * s.gridW]) continue; // cross-landmass: #181-waived
+    if (comp[from.x + from.y * s.gridW] !== comp[to.x + to.y * s.gridW]) continue; // cross-landmass: Issue #181-waived
     shortcuts++;
     const next = l.points[1]!;
     const dx = next.x - from.x;

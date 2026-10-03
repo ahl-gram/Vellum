@@ -52,7 +52,7 @@ const HERE = fileURLToPath(new URL(".", import.meta.url));
 const REPO = resolve(HERE, "..");
 // Serves the built dist/ so the e2e validates exactly what gets published (VELLUM_SITE_DIR overrides; run `npm run build` first).
 const SITE = process.env["VELLUM_SITE_DIR"] ? resolve(process.env["VELLUM_SITE_DIR"]) : join(REPO, "dist");
-// #339: VELLUM_E2E_PORT / VELLUM_E2E_DPORT (defaults 8765 / 9222) let two checkouts run side by side; a bad value fails here rather than falling back, since a silent fallback puts both lanes back on the same port.
+// Issue #339: VELLUM_E2E_PORT / VELLUM_E2E_DPORT (defaults 8765 / 9222) let two checkouts run side by side; a bad value fails here rather than falling back, since a silent fallback puts both lanes back on the same port.
 const { PORT, DPORT } = fatalOnThrow(() => resolveE2ePorts(process.env));
 const OUT = join(REPO, "out", e2eOutSubdir(PORT));
 const PAGE = `http://127.0.0.1:${PORT}/explorer/`;

@@ -84,7 +84,7 @@ const CHART_MOUNTS = [
 ] as const;
 const DEPTH_TOKENS = /box-shadow:\s*var\(--(?:sheet|stage)-shadow\)/;
 
-// The qualifier itself (#463 body: "the chart mounts' svg[data-vellum-style] qualifier stays or the #367 shadow doubling returns"), pinned as a presence beside the BARE-svg sweep below.
+// The qualifier itself (Issue #463 body: "the chart mounts' svg[data-vellum-style] qualifier stays or the Issue #367 shadow doubling returns"), pinned as a presence beside the BARE-svg sweep below.
 const QUALIFIED_CHART_RULES = [
   ["public/explorer/index.css", `#map svg${CHART_MARKER}`],
   ["public/reading-frame.css", `.rf-chart svg${CHART_MARKER}`],

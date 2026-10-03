@@ -19,7 +19,7 @@ import {
   driftTarget,
 } from "../../src/site/home/drift.ts";
 
-// Landfall Sub 3 (#458): the stations, the cards, the legend, and the idle drift; the spec is the archived mockup (design/atelier-map, PR #466) and the ratified comments on #458.
+// Landfall Sub 3 (Issue #458): the stations, the cards, the legend, and the idle drift; the spec is the archived mockup (design/atelier-map, PR #466) and the ratified comments on Issue #458.
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");

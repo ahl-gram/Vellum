@@ -18,7 +18,7 @@ import { windsLayer } from "../../src/render/layers/winds.ts";
 import type { SvgNode } from "../../src/render/svg.ts";
 import type { World } from "../../src/world/types.ts";
 
-// region.seaGate (#234's parent partition) gates sea furniture to genuine sea; the compass, ratified with Alex, falls back to a shrunk rose on open LAND when a window has no qualifying sea.
+// region.seaGate (Issue #234's parent partition) gates sea furniture to genuine sea; the compass, ratified with Alex, falls back to a shrunk rose on open LAND when a window has no qualifying sea.
 
 const WIDTH = 1500;
 const FULL_R = 47 * (WIDTH / 1500); // the compass radius at chart width

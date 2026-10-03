@@ -1,4 +1,4 @@
-// The two stand-ins the engine wires when the host hands in no scrubber: the instrument half goes silent while the chart side stays live (ratified 2026-08-09 on #319), nothing throws, and neither touches document.
+// The two stand-ins the engine wires when the host hands in no scrubber: the instrument half goes silent while the chart side stays live (ratified 2026-08-09 on Issue #319), nothing throws, and neither touches document.
 import { buildVoyageLog } from "../../world/voyage-log.ts";
 import type { Ages } from "./ages.ts";
 import type { Chronicle } from "./chronicle.ts";

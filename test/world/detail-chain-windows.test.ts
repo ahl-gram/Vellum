@@ -83,7 +83,7 @@ test("the detail level is keyed off the window size, one octave per halving (#39
 });
 
 test("the detail level never exceeds what buildHeightfield accepts (#398)", () => {
-  // #396 caps the offsets table at MAX_DETAIL and throws past it, so the clamp is what keeps a deep window from throwing.
+  // Issue #396 caps the offsets table at MAX_DETAIL and throws past it, so the clamp is what keeps a deep window from throwing.
   const tiny = { u0: 0.5, v0: 0.5, u1: 0.5 + 2 ** -12, v1: 0.5 + 2 ** -12 };
   assert.equal(detailForWindow(tiny), MAX_DETAIL, "a very small window must clamp to the table's headroom");
   assert.doesNotThrow(() =>

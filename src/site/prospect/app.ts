@@ -114,7 +114,7 @@ layPress.addEventListener("click", () => {
   paintLay();
 });
 
-// A page served from the browser's back/forward cache runs no boot code at all, so this is the only place the table it froze can be brought up to date (#634, measured: pageshow fires with persisted true and nothing else does).
+// A page served from the browser's back/forward cache runs no boot code at all, so this is the only place the table it froze can be brought up to date (Issue #634, measured: pageshow fires with persisted true and nothing else does).
 window.addEventListener("pageshow", (e) => {
   if (!e.persisted) return;
   const held = seated(tableOnArrival(parseTable(location.hash), readStoredTable(store), TRAVERSAL));

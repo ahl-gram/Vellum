@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { SITE_SHEETS, SRC_CSS_FILES, sheetsSweptBy } from "../../test-support/site-sheets.ts";
 
-// The Specimen Book (#324): the house style lives ONCE in /house.css, linked by BaseLayout on every page. The specs are the 2026-07-30 ledger ratifications (the comment on #324); a change is a re-ratification, so these pins are deliberately literal.
+// The Specimen Book (Issue #324): the house style lives ONCE in /house.css, linked by BaseLayout on every page. The specs are the 2026-07-30 ledger ratifications (the comment on Issue #324); a change is a re-ratification, so these pins are deliberately literal.
 
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 const read = (p: string) => readFileSync(root(p), "utf8");

@@ -1,5 +1,5 @@
-// The Chart Table on a phone (#518 ruling 4): the table is the sheet's SECOND LEAF, not a drawer; the docking follows dockLegend's precedent in ../shared/room.ts, one set of elements moved between two homes.
-// Ruled 2026-09-08 against rendered variants: the fold #543 gave the desktop stays desktop-only, since at narrow the two are already mutually exclusive by being leaves of one sheet.
+// The Chart Table on a phone (Issue #518 ruling 4): the table is the sheet's SECOND LEAF, not a drawer; the docking follows dockLegend's precedent in ../shared/room.ts, one set of elements moved between two homes.
+// Ruled 2026-09-08 against rendered variants: the fold Issue #543 gave the desktop stays desktop-only, since at narrow the two are already mutually exclusive by being leaves of one sheet.
 
 export interface LeafSeatable {
   readonly parentElement: object | null;

@@ -1,4 +1,4 @@
-// Broadside e2e (BR1-BR8, #270): the regrouped controls, seals, journal button, and footnote apparatus on the built running page (the unit pins in test/site/broadside.test.ts hold the SOURCE to this shape); self-contained with scoped deltas.
+// Broadside e2e (BR1-BR8, Issue #270): the regrouped controls, seals, journal button, and footnote apparatus on the built running page (the unit pins in test/site/broadside.test.ts hold the SOURCE to this shape); self-contained with scoped deltas.
 import { luminance, sampleRow } from "../support/pixel.ts";
 import { dropExpectedCancellations } from "../support/console.ts";
 import type { Payload, Point, SuiteContext } from "../types.ts";
@@ -120,7 +120,7 @@ async function br1cLegendClears({ evaluate, send, check, sleep }: BroadsideKit):
 }
 
 async function br2JournalPeer({ evaluate, check, waitInked }: BroadsideKit): Promise<void> {
-  // Tick, wait-for-ink, and untick are three separate turns (#300): inside ONE evaluate the yield cancels the arm before it builds, so `during` would be measured on a never-armed sheet.
+  // Tick, wait-for-ink, and untick are three separate turns (Issue #300): inside ONE evaluate the yield cancels the arm before it builds, so `during` would be measured on a never-armed sheet.
   const at = `((el)=>({shown:el.getClientRects().length>0,top:Math.round(el.getBoundingClientRect().top)}))`;
   const before = await evaluate<{ j: { shown: boolean; top: number }; o: { shown: boolean; top: number }; cls: boolean }>(`(()=>{
       const j=document.getElementById("journal-link"),o=document.getElementById("order-plates");const at=${at};
@@ -239,7 +239,7 @@ async function br6Tap({ evaluate, check, sleep, touch, setMobileViewport, clearM
   );
 }
 
-// #525: the camera arrives by HASH, not by gesture: the Glass is display:none under an open sheet at narrow (the 2026-09-03 ruling 1), so there is nothing to press, and a hash camera needs none of the CDP touch apparatus.
+// Issue #525: the camera arrives by HASH, not by gesture: the Glass is display:none under an open sheet at narrow (the 2026-09-03 ruling 1), so there is nothing to press, and a hash camera needs none of the CDP touch apparatus.
 async function br6bSetup({ evaluate, sleep, setMobileViewport, goto, EXP }: BroadsideKit): Promise<void> {
   await setMobileViewport(390, 844);
   await goto(EXP + "#seed=42&style=antique&cx=0.52&cy=0.45&k=4", "broadside-390-zoomed");
@@ -256,14 +256,14 @@ async function br6bGroundRead({ evaluate, send }: BroadsideKit) {
       groundOn:l?getComputedStyle(l,"::before").content:null,
       slipY:b?Math.round(b.y):null,
       rowY:l?Math.round(l.getBoundingClientRect().top+l.getBoundingClientRect().height/2):null};})()`);
-  // The MEDIAN of a wide run (a max passes on one bright press under the sample, a min fails on one hairline crossing it), read at the DOCKED PRESS's own middle after scrolling it into view: the row sits below the fold at 390 (measured 882 in an 844-tall viewport), and a fixed offset from the sheet's top landed on #540's ink-dark selected tab and read 59 against a sheet that had not changed.
+  // The MEDIAN of a wide run (a max passes on one bright press under the sample, a min fails on one hairline crossing it), read at the DOCKED PRESS's own middle after scrolling it into view: the row sits below the fold at 390 (measured 882 in an 844-tall viewport), and a fixed offset from the sheet's top landed on Issue #540's ink-dark selected tab and read 59 against a sheet that had not changed.
   const lums = br6b.rowY === null ? null : (await sampleRow(send, 20, br6b.rowY, 16)).map(luminance).sort((a, b) => a - b);
   const br6bGround = lums === null ? null : Math.round(lums[Math.floor(lums.length / 2)]!);
   return { br6b, br6bGround };
 }
 
 async function br6cMarks({ evaluate, send }: BroadsideKit) {
-  // #532: the mark's contrast is a COMPUTED-STYLE claim and can only be read as one. The declaration that fails here is PRESENT in the stylesheet and simply loses the cascade, so a text match over the CSS passes on the broken code. The three states go through CSS.forcePseudoState, and each asserts its own resolved COLOUR: a floor alone passes when the hover arm is deleted and hover falls back to the resting ink, which still clears it (skeptic on PR #535).
+  // Issue #532: the mark's contrast is a COMPUTED-STYLE claim and can only be read as one. The declaration that fails here is PRESENT in the stylesheet and simply loses the cascade, so a text match over the CSS passes on the broken code. The three states go through CSS.forcePseudoState, and each asserts its own resolved COLOUR: a floor alone passes when the hover arm is deleted and hover falls back to the resting ink, which still clears it (skeptic on PR #535).
   const doc532 = await send<{ root: { nodeId: number } }>("DOM.getDocument", { depth: 1 });
   await send("CSS.enable");
   const fnNode = (await send<{ nodeId: number }>("DOM.querySelector", { nodeId: doc532.root.nodeId, selector: "#broadside .legend.in-slip .legend-row a.fn" })).nodeId;
@@ -284,7 +284,7 @@ async function br6cMarks({ evaluate, send }: BroadsideKit) {
   const fnFocus = await readMark(["focus", "focus-visible"]);
   await readMark([]);
   await send("CSS.disable");
-  // #532 (Alex's call, 2026-09-07): the docked gold road keeps its cream fill, which is what marks it as the road OUT, and its hairline takes ink so the button's box reads against the sheet. Two-sided: the fill must STILL be the gold, so "make it dark like its siblings" fails this as surely as leaving the tan hairline does.
+  // Issue #532 (Alex's call, 2026-09-07): the docked gold road keeps its cream fill, which is what marks it as the road OUT, and its hairline takes ink so the button's box reads against the sheet. Two-sided: the fill must STILL be the gold, so "make it dark like its siblings" fails this as surely as leaving the tan hairline does.
   const goldBox = await evaluate<{ fill: string; edge: string; ground: string; edgeOnGround: number; edgeOnFill: number; fillOnGround: number; width: string } | null>(`(()=>{const b=document.querySelector("#broadside .legend.in-slip .legend-row .legend-btn.gold");if(!b)return null;
     const lin=(c)=>{c/=255;return c<=0.03928?c/12.92:Math.pow((c+0.055)/1.055,2.4);};
     const parse=(s)=>s.slice(s.indexOf("(")+1,s.lastIndexOf(")")).split(",").map(parseFloat);
@@ -304,14 +304,14 @@ async function br6bToBr6d({ evaluate, check, sleep, clearMobile }: BroadsideKit,
   // The house's text floor. The mark is a link, so 3:1 (a non-text component) is not the bar it answers to.
   const FN_FLOOR = 4.5;
   const INK_BROWN = "rgb(107, 90, 64)", INK_DARK = "rgb(74, 56, 38)", LINE_TAN = "rgb(185, 167, 127)";
-  // Asserted, not just used as the divisor: opaque() walks parent backgrounds and is blind to a ::before overlay, which is exactly how #525's pool painted, so a returned pool would leave the ratio reading against a ground that no longer paints.
+  // Asserted, not just used as the divisor: opaque() walks parent backgrounds and is blind to a ::before overlay, which is exactly how Issue #525's pool painted, so a returned pool would leave the ratio reading against a ground that no longer paints.
   const SHEET = "rgb(244, 236, 216)";
   await clearMobile();
   // The other side of the same claim: undocked the row still paints its own dark footing, where line-tan is what reads, so the repair has to be a DOCKED arm. Without this, changing the base rule globally passes the three reads above and quietly breaks the floating mark.
   const readFloat: Payload<{ color: string; footing: string } | null> = `(()=>{const m=document.querySelector(".legend:not(.in-slip) .legend-row a.fn");
     return m?{color:getComputedStyle(m).color,footing:getComputedStyle(m.closest(".legend"),"::before").content}:null;})()`;
   let fnFloat: { color: string; footing: string } | null = null;
-  // The undocked read waits for the resize-driven relayout to seat the row back on the stage; a blind sleep here is #529's CL4 shape and would go red for reasons unrelated to colour.
+  // The undocked read waits for the resize-driven relayout to seat the row back on the stage; a blind sleep here is Issue #529's CL4 shape and would go red for reasons unrelated to colour.
   for (let i = 0; i < 100; i++) {
     fnFloat = await evaluate(readFloat);
     if (fnFloat) break;

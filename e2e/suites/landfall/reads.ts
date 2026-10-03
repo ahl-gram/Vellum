@@ -7,7 +7,7 @@ export const down = (y: number, y0: number) => y > y0;
 export const stillCam = (a: Cam | null, b: Cam | null) =>
   a !== null && b !== null && Math.abs(b.scale - a.scale) < a.scale * 0.02 && Math.abs(b.x - a.x) < 8 && Math.abs(b.y - a.y) < 8;
 export const roomy = (hr: Headroom | null) => hr !== null && hr.cx > 50 && hr.cx < hr.w - 50 && hr.cy > 50 && hr.cy < hr.h - 50;
-// Ruling 3 on #475: at a limit the arm picks the drag direction FROM measured headroom and proves the room exists, instead of assuming an unparked centre.
+// Ruling 3 on Issue #475: at a limit the arm picks the drag direction FROM measured headroom and proves the room exists, instead of assuming an unparked centre.
 export const roomDir = (hr: Headroom | null) => {
   if (hr === null) return null;
   const sx = hr.w - hr.cx >= hr.cx ? 1 : -1;

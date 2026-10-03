@@ -136,7 +136,7 @@ function sessionLog(
       idx: pm.idx, name: pm.name, kind: pm.kind, founded: pm.founded,
       arrivalMode: i === 0 ? null : routed[i - 1]!.mode,
       inlandHandoff: i === 0 ? false : routed[i - 1]!.inlandHandoff,
-      // #312: GRID-space leg length (routed points are pre-projection), so the day counts are world-derived and never move with the render width.
+      // Issue #312: GRID-space leg length (routed points are pre-projection), so the day counts are world-derived and never move with the render width.
       legLength: i === 0 ? 0 : buildLegGeometry(routed[i - 1]!.points).total,
     };
   });
@@ -157,12 +157,12 @@ function voyageOverlay(mapEl: HTMLElement, manifest: Readonly<PlaceManifest>, wP
   svg.setAttribute("class", "voyage-overlay");
   svg.setAttribute("viewBox", `0 0 ${wPx} ${manifest.heightPx}`);
   svg.setAttribute("preserveAspectRatio", "none");
-  svg.setAttribute("aria-hidden", "true"); // #121: the margin-log panel + one status summary carry the a11y payload
+  svg.setAttribute("aria-hidden", "true"); // Issue #121: the margin-log panel + one status summary carry the a11y payload
   const trackEl = document.createElementNS(SVG_NS, "polyline");
   trackEl.setAttribute("class", "voyage-track");
   const shipG = makeMark("voyage-ship", SHIP_PARTS);
   const riderG = makeMark("voyage-rider", RIDER_PARTS);
-  // INVARIANT: the marks are SIBLINGS of trackEl, never inside it; syncRestingTrack feeds the sink trackEl's `points` verbatim, and a mark nested in the track would bleed through to the back of the sheet (#174).
+  // INVARIANT: the marks are SIBLINGS of trackEl, never inside it; syncRestingTrack feeds the sink trackEl's `points` verbatim, and a mark nested in the track would bleed through to the back of the sheet (Issue #174).
   svg.append(trackEl, shipG, riderG);
   mapEl.querySelectorAll(".voyage-overlay").forEach((stale) => stale.remove());
   mapEl.appendChild(svg);

@@ -3,11 +3,11 @@ import type { ReadingRoomKit } from "./kit.ts";
 import { stripRead } from "./reads.ts";
 
 export async function rr34bPhone({ evaluate, send, check, shoot, sleep, boot, settled, PORT }: ReadingRoomKit, ctx: SuiteContext): Promise<void> {
-  // Device metrics go on BEFORE the navigation (the CDP-touch rule; no touch is dispatched), and the probe waits out the paperUnfurl: its keyframe fakes a sideways overflow in mid-flight geometry (the #312 screenshot rule).
+  // Device metrics go on BEFORE the navigation (the CDP-touch rule; no touch is dispatched), and the probe waits out the paperUnfurl: its keyframe fakes a sideways overflow in mid-flight geometry (the Issue #312 screenshot rule).
   await ctx.setMobileViewport(390, 844);
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/reading-room/#seed=42&style=antique&legend=1` });
-  // #463 (skeptic on PR #492): between the boot and the arm the engine's panel is hidden and the slip inside it has no rect; a fit that read its zero top reserved the whole viewport and seated the Glass above it. Sampled through the boot, before the arm lands.
+  // Issue #463 (skeptic on PR #492): between the boot and the arm the engine's panel is hidden and the slip inside it has no rect; a fit that read its zero top reserved the whole viewport and seated the Glass above it. Sampled through the boot, before the arm lands.
   let glassOff = 0, glassSamples = 0, preArm = 0;
   for (let i = 0; i < 160; i++) {
     let s = null;
@@ -24,9 +24,9 @@ export async function rr34bPhone({ evaluate, send, check, shoot, sleep, boot, se
     JSON.stringify({ glassSamples, preArm, glassOff }),
   );
   const mobile = await evaluate<{ w: number; vw: number }>(`({w:document.body.scrollWidth,vw:window.innerWidth})`);
-  // #442 ruled 2026-08-23: on a phone the CONTROLS stick and the live row does not, so the strip stays the bar's own height; read after the same dwell, at the same viewport.
+  // Issue #442 ruled 2026-08-23: on a phone the CONTROLS stick and the live row does not, so the strip stays the bar's own height; read after the same dwell, at the same viewport.
   const mobileStrip = await evaluate(stripRead);
-  // #462 ruling 6's phone half: the scale loses its LABELS, not its star.
+  // Issue #462 ruling 6's phone half: the scale loses its LABELS, not its star.
   const mobileScale = await evaluate<{ labelsHidden: boolean; seamShown: boolean }>(`(()=>{const sc=document.querySelector(".scale");const lbl=[...sc.querySelectorAll(".tick .lbl")];const seam=sc.querySelector(".seam");return{labelsHidden:lbl.length>0&&lbl.every((l)=>getComputedStyle(l).display==="none"),seamShown:!!seam&&seam.getBoundingClientRect().width>0};})()`);
   await evaluate(`(()=>{window.scrollTo(0,900);return null;})()`);
   await sleep(120);
@@ -53,7 +53,7 @@ export async function rr34bPhone({ evaluate, send, check, shoot, sleep, boot, se
 }
 
 export async function rr11bScrubHandles({ evaluate, check }: SuiteContext): Promise<void> {
-  // #124: the room builds the same overlay the Explorer does, so it LOOKS like it should card; it does not, since the ages chamber is armed on every draw and the overlay is permanently .scrub with every hit inert. Pinned because reading the call site alone says the opposite.
+  // Issue #124: the room builds the same overlay the Explorer does, so it LOOKS like it should card; it does not, since the ages chamber is armed on every draw and the overlay is permanently .scrub with every hit inert. Pinned because reading the call site alone says the opposite.
   const rrCard = await evaluate<{ hits: number; card: boolean; scrub?: undefined; pe?: undefined; hidden?: undefined } | { hits: number; card: true; scrub: boolean; pe: string; hidden: boolean }>(`(()=>{
     const hits=[...document.querySelectorAll(".place-hit")];
     const card=document.getElementById("place-card");

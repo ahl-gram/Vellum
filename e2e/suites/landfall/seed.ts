@@ -1,7 +1,7 @@
 import type { LandfallKit } from "./kit.ts";
 
 export async function l10NoScriptGet({ evaluate, send, check, sleep, PORT, clickAt, centerOf }: LandfallKit): Promise<void> {
-  // L10/L11: the seed form's no-JS GET fallback (#454: "no-JS GET fallback degrading to today's world"), then the JS-on control proving the Explorer ignores the query (bare visit and ?seed=777 visit must show the SAME seed; comparing to 777's absence would flake the day the daily seed IS 777).
+  // L10/L11: the seed form's no-JS GET fallback (Issue #454: "no-JS GET fallback degrading to today's world"), then the JS-on control proving the Explorer ignores the query (bare visit and ?seed=777 visit must show the SAME seed; comparing to 777's absence would flake the day the daily seed IS 777).
   await send("Emulation.setScriptExecutionDisabled", { value: true });
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });

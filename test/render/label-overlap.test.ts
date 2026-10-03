@@ -63,7 +63,7 @@ test("the range label survives the tighter arena on both filed seeds", () => {
   assert.deepEqual(missing, [], `range label dropped on seeds: ${missing.join(", ")}`);
 });
 
-// The metric mirrors #178's >= 15% bar; touching alone is sub-visual and not asserted.
+// The metric mirrors Issue #178's >= 15% bar; touching alone is sub-visual and not asserted.
 const RIVER_CASES = [
   { seed: 4, note: "The Waters of Haiki over the village Kakau (46%)" },
   { seed: 6, note: "Wadi Qaar over THE SULTANATE OF ZAIMAZU (20%)" },

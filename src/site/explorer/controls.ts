@@ -32,7 +32,7 @@ function randomSeed(): number {
 
 function wireCoast(deps: Readonly<ControlsDeps>): void {
   const { coastSlider, touched, draw } = deps;
-  // #137: unlike sea-level (which re-levels the SAME terrain and can afford quiet mid-drag redraws), every coastWarp value is a different ~0.6s world, so the readout updates live but the redraw waits for release.
+  // Issue #137: unlike sea-level (which re-levels the SAME terrain and can afford quiet mid-drag redraws), every coastWarp value is a different ~0.6s world, so the readout updates live but the redraw waits for release.
   coastSlider.addEventListener("input", () => {
     touched.coast = true;
     updateCoastReadout();
@@ -75,7 +75,7 @@ export function wireControls(deps: ControlsDeps): void {
     touched.land = true;
     updateLandReadout();
     clearTimeout(landDebounce);
-    // #127: mid-drag redraws are quiet (no arrival ceremony); the release handler runs the full ceremony once the tide settles.
+    // Issue #127: mid-drag redraws are quiet (no arrival ceremony); the release handler runs the full ceremony once the tide settles.
     landDebounce = setTimeout(() => draw({ quiet: true }), 100);
   });
   landSlider.addEventListener("change", () => {
@@ -85,7 +85,7 @@ export function wireControls(deps: ControlsDeps): void {
   });
   wireCoast(deps);
 
-  // #53: the doc-level dismiss pair, added once; both read the engine's current overlay so they stay correct across redraws.
+  // Issue #53: the doc-level dismiss pair, added once; both read the engine's current overlay so they stay correct across redraws.
   document.addEventListener("keydown", deps.onDocKeydown);
   document.addEventListener("click", deps.onDocClick);
 }

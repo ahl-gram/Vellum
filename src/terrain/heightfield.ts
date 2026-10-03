@@ -21,7 +21,7 @@ export type TerrainParams = {
   readonly ridgedWeight?: number;
   /** Wobbles the radial falloff by direction so the coast forms lobes and peninsulas instead of an oval. Range [0, 1]; 0 is the pure radial dome; omitted takes the map type's SHAPES value. */
   readonly coastWarp?: number;
-  /** Extra fBm octaves for a finer survey window, keyed off the window size by the caller; default 0, the world chart's density (#396). */
+  /** Extra fBm octaves for a finer survey window, keyed off the window size by the caller; default 0, the world chart's density (Issue #396). */
   readonly detail?: number;
   readonly window?: UvWindow;
   readonly worldAspect?: number;

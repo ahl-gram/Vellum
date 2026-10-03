@@ -1,4 +1,4 @@
-/** Provisional feel constants (#472, judged live): the pause that separates two wheel gestures (momentum events arrive well inside it, deliberate flicks outside it), and how long the clamp swallows a finished flick's leftover momentum before the page takes the wheel. */
+/** Provisional feel constants (Issue #472, judged live): the pause that separates two wheel gestures (momentum events arrive well inside it, deliberate flicks outside it), and how long the clamp swallows a finished flick's leftover momentum before the page takes the wheel. */
 export const GESTURE_BREAK_MS = 300;
 export const MOMENTUM_ABSORB_MS = 400;
 

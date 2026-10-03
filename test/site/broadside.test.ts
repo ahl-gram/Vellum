@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
-// The Broadside (#270): controls grouped by what they do to the WORLD (The Land = generation, The Hand = dressing); moving a control across a hairline is a re-ratification, not a tidy.
+// The Broadside (Issue #270): controls grouped by what they do to the WORLD (The Land = generation, The Hand = dressing); moving a control across a hairline is a re-ratification, not a tidy.
 const here = (p: string): string => readFileSync(new URL(p, import.meta.url), { encoding: "utf8" });
 const page = here("../../src/pages/explorer/index.astro");
 const glossary = here("../../src/pages/glossary/index.astro");
@@ -77,14 +77,14 @@ test("The Press is the legend row: Turn the sheet, then the Print Room and the j
   assert.match(press, /<LegendButton id="journal-link" gold /, "the journal road stopped being the gold legend road");
 });
 
-// The journal pointer (ratified 2026-08-11, decision 2 on #270): always visible, the print road's gold peer; the old caption wrapper must be GONE, not hidden.
+// The journal pointer (ratified 2026-08-11, decision 2 on Issue #270): always visible, the print road's gold peer; the old caption wrapper must be GONE, not hidden.
 test("the journal pointer is the always-visible gold road, not the old caption (#270)", () => {
   assert.ok(!page.includes('id="journal-line"'), "the old #journal-line caption wrapper survived the move");
   assert.ok(page.includes('verb="Read the journal in" room="The Reading Room"'), "the road's verb and room lines are missing");
   assert.ok(!app.includes("journalLine"), "app.ts still gates a caption wrapper that no longer exists");
 });
 
-// Decision 4 on #270 (2026-08-11): the seals stay REAL checkboxes, ids and label text untouched.
+// Decision 4 on Issue #270 (2026-08-11): the seals stay REAL checkboxes, ids and label text untouched.
 test("the overlay checkboxes wear the seal dressing with ids untouched (#270)", () => {
   for (const [label, id] of [["legend", "legend"], ["arms", "arms"], ["beasts", "beasts"], ["survey", "ages"]]) {
     const re = new RegExp(`<label class="[^"]*seal[^"]*">${label} <input id="${id}" type="checkbox"`);
@@ -92,7 +92,7 @@ test("the overlay checkboxes wear the seal dressing with ids untouched (#270)", 
   }
 });
 
-// The footnote apparatus (ratified 2026-08-11, decision 5 on #270): four Fell marks, each a real link to a /glossary/ anchor with its note as real text, never a title attribute.
+// The footnote apparatus (ratified 2026-08-11, decision 5 on Issue #270): four Fell marks, each a real link to a /glossary/ anchor with its note as real text, never a title attribute.
 const MARKS = [
   ["seeds-choice", "of the seed's choice"],
   ["coast-warp", "of the coast warp"],

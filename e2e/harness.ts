@@ -22,7 +22,7 @@ const httpGet = (url: string): Promise<string> =>
       .on("error", reject);
   });
 
-// #339: getPageTarget attaches to whatever answers /json, so an orphaned browser holding the port would be adopted in SILENCE; a plain TCP connect also catches a non-browser squatter.
+// Issue #339: getPageTarget attaches to whatever answers /json, so an orphaned browser holding the port would be adopted in SILENCE; a plain TCP connect also catches a non-browser squatter.
 function probeDebugPort(DPORT: number, timeoutMs = 300): Promise<boolean> {
   return new Promise((res) => {
     const socket = net.connect({ host: "127.0.0.1", port: DPORT });
@@ -131,7 +131,7 @@ async function axDescription(selector: string): Promise<string | null> {
 
 async function waitSettled(label = ""): Promise<void> {
   for (let i = 0; i < 200; i++) {
-    // The settle probe keys on #verso-turn's disabled flag (#199: it has the exact draw lifecycle the retired #bind button had).
+    // The settle probe keys on #verso-turn's disabled flag (Issue #199: it has the exact draw lifecycle the retired #bind button had).
     const s = await evaluate<{ status: string; dis: boolean; map: boolean }>(
       `({status:document.getElementById("status").textContent,dis:document.getElementById("verso-turn").disabled,map:!!document.querySelector("#map svg")})`,
     );

@@ -15,7 +15,7 @@ test("the place card carries the prospect way in only on a world sheet whose hos
   assert.equal(link.tagName, "A", "and it is a real link, not a button");
   assert.match(link.textContent, /prospect/i, "named for what it opens");
 
-  // A region inset renumbers its places (#169), so a world-index link there would name the WRONG settlement.
+  // A region inset renumbers its places (Issue #169), so a world-index link there would name the WRONG settlement.
   linked.lc.buildPlaceOverlay(manifest, { box: { x: 0.25, y: 0.25, w: 0.5, h: 0.5 } });
   const overlays = linked.mount.children.filter((c) => c.classList.contains("place-overlay"));
   const inset = overlays[overlays.length - 1]!;
@@ -33,7 +33,7 @@ test("the place card carries the prospect way in only on a world sheet whose hos
   );
 });
 
-// #522 Sub 4: the card's SECOND action, injected on the same terms as the prospect link.
+// Issue #522 Sub 4: the card's SECOND action, injected on the same terms as the prospect link.
 // The shim's querySelector answers null by design, so showing a card needs the .pc-inner stub place-card-clamp.test.ts already uses.
 const armShow = async (mount: { children: unknown[] }) => {
   const { walk } = await import("../../test-support/element-shim.ts");
@@ -78,7 +78,7 @@ test("LP1 the card carries the LAY press only on a world sheet whose host provid
     "the card sits inside the zoom-bound gesture box, so the press stops d3's gesture events or a rapid double-press zooms the chart under the reader (the makeDogEar rule)",
   );
 
-  // A region inset renumbers its places (#242), so the world index a filing would carry names the WRONG settlement there.
+  // A region inset renumbers its places (Issue #242), so the world index a filing would carry names the WRONG settlement there.
   linked.lc.buildPlaceOverlay(manifest, { box: { x: 0.25, y: 0.25, w: 0.5, h: 0.5 } });
   const insets = linked.mount.children.filter((c) => c.classList.contains("place-overlay"));
   assert.ok(

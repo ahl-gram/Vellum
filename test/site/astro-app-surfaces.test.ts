@@ -8,7 +8,7 @@ import { cleanPublicGenerated, GENERATED_SUBTREES } from "../../scripts/clean-pu
 
 process.env.ASTRO_TELEMETRY_DISABLED = "1";
 
-// Scriptorium Sub 3 (#204): the app surfaces' source served verbatim from public/. SPEC: the ratified 2026-07-21 comment on #202 (sections 1 and 3, constraints 2, 3, 4, 10), with decision D's clean-before-regen so a renamed engine module cannot leave an importable orphan that masks a 404 locally.
+// Scriptorium Sub 3 (Issue #204): the app surfaces' source served verbatim from public/. SPEC: the ratified 2026-07-21 comment on Issue #202 (sections 1 and 3, constraints 2, 3, 4, 10), with decision D's clean-before-regen so a renamed engine module cannot leave an importable orphan that masks a 404 locally.
 
 const root = (p = "") => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 

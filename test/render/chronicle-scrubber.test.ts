@@ -93,7 +93,7 @@ test("placeStateAt: a ruin is LIVING between founding and abandonment, RUIN afte
   assert.equal(placeStateAt(m, 800), "ruin");
 });
 
-// #93: the static chart bakes each settlement in its PRESENT-DAY state only, so a glyph can only be shown in the state it was drawn in ("state-begins").
+// Issue #93: the static chart bakes each settlement in its PRESENT-DAY state only, so a glyph can only be shown in the state it was drawn in ("state-begins").
 test("glyphVisibleAt: a living town's glyph shows at and after founding, hidden before (#93)", () => {
   const mark = { idx: 0, nx: 0.5, ny: 0.5, founded: 300, ruinYear: null };
   assert.equal(glyphVisibleAt(mark, 299), false, "hidden before founding");
@@ -120,7 +120,7 @@ test("glyphRevealedBetween: true only on the frame that crosses a founding (#155
 });
 
 test("glyphRevealedBetween: a park (fromYear === toYear) reveals nothing (#155)", () => {
-  // applyScrub and the #180 verso snap PARK the scrubber; a park must be silent, or glyphs already in place re-stamp.
+  // applyScrub and the Issue #180 verso snap PARK the scrubber; a park must be silent, or glyphs already in place re-stamp.
   const m = { idx: 0, nx: 0.5, ny: 0.5, founded: 300, ruinYear: null };
   assert.equal(glyphRevealedBetween(m, 900, 900), false, "parking at the present is not a reveal");
   assert.equal(glyphRevealedBetween(m, 300, 300), false, "nor is parking on the founding year itself");

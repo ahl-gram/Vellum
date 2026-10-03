@@ -6,7 +6,7 @@ import { lodWindowFor, LOD_BANDS, type LodBand } from "../src/world/lod.ts";
 import { renderMap } from "../src/render/map-renderer.ts";
 import { findBrowser, rasterizeSvg, NO_BROWSER_HINT } from "../src/cli/raster.ts";
 
-/** The look half of #399: the same region window drawn from the bare heightfield and from the chained detail field, so the coast, the rivers and the biome bands can be compared by eye. A metric can lie (#376); the picture is what corrects it. */
+/** The look half of Issue #399: the same region window drawn from the bare heightfield and from the chained detail field, so the coast, the rivers and the biome bands can be compared by eye. A metric can lie (Issue #376); the picture is what corrects it. */
 
 type Shot = { readonly seed: number; readonly band: number; readonly cx: number; readonly cy: number };
 

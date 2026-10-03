@@ -2,7 +2,7 @@ import type { SuiteContext } from "../../types.ts";
 import type { Manifest } from "./overlay.ts";
 
 export async function p16Glass({ evaluate, check }: SuiteContext, pm: Manifest): Promise<void> {
-  // #124 the philologist's glass: seed 42 speaks oromi (the seed-42 covenant pins that), so the tongue line is checkable by name and not merely by shape.
+  // Issue #124 the philologist's glass: seed 42 speaks oromi (the seed-42 covenant pins that), so the tongue line is checkable by name and not merely by shape.
   const p16 = await evaluate<{ tongue: string | undefined; roots: string | undefined; former: string | undefined; order: string; acts: string }>(`(()=>{
     if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();
     const hit=document.querySelector('.place-hit[data-idx="'+${pm.cap}+'"]');

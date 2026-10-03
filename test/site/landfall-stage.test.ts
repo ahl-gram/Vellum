@@ -18,7 +18,7 @@ import { bearingLine, LEAGUES_PER_SHEET } from "../../src/site/home/coords.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { buildPlaceManifest } from "../../src/render/place-manifest.ts";
 
-// Landfall Sub 1 (#455): the stage, the marks derived from the place manifest, and the pure camera.
+// Landfall Sub 1 (Issue #455): the stage, the marks derived from the place manifest, and the pure camera.
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");

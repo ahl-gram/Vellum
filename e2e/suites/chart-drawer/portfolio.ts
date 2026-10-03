@@ -40,7 +40,7 @@ export async function cd19PortfolioDrafts({ evaluate, check, sleep }: SuiteConte
 }
 
 export async function cd24PortfolioSays({ evaluate, check, sleep, clickAt }: DrawerKit): Promise<void> {
-  // CD24 (#547 ruling 4, Alex 2026-09-13): the Portfolio's "is on top" was the Explorer's defect on a second page, so one shared announcer and ONE kit rule take both lines away. Named blind spot, with its direction: this does not wait the hold out, so it does not watch THIS line go. The going is the shared module (test/site/announce.test.ts) and CD23's resolved read; a second eight-second wait is what the lane's measured budget cannot buy, and the PR body carries it as residue.
+  // CD24 (Issue #547 ruling 4, Alex 2026-09-13): the Portfolio's "is on top" was the Explorer's defect on a second page, so one shared announcer and ONE kit rule take both lines away. Named blind spot, with its direction: this does not wait the hold out, so it does not watch THIS line go. The going is the shared module (test/site/announce.test.ts) and CD23's resolved read; a second eight-second wait is what the lane's measured budget cannot buy, and the PR body carries it as residue.
   const pfNext = await evaluate<{ x: number; y: number; reachable: boolean } | null>(`(() => { const b = document.getElementById("pf-next"); if (!b) return null; b.scrollIntoView({ block: "center" }); const r = b.getBoundingClientRect(); if (r.width < 1) return null; const x = Math.round(r.x + r.width / 2), y = Math.round(r.y + r.height / 2); const h = document.elementFromPoint(x, y); return { x, y, reachable: h === b || b.contains(h) }; })()`);
   if (pfNext) await clickAt(pfNext.x, pfNext.y);
   const PF_SAID: Payload<{ line: string; fadeMs: string; rest: string; faded: string } | null> = `(() => { const s = document.getElementById("pf-status"); if (!s) return null; const was = s.style.transition; s.style.transition = "none"; const rest = getComputedStyle(s).opacity; s.classList.add("fading"); const faded = getComputedStyle(s).opacity; s.classList.remove("fading"); s.style.transition = was; return { line: s.textContent || "", fadeMs: getComputedStyle(s).transitionDuration, rest, faded }; })()`;
@@ -77,9 +77,9 @@ export async function cd20BarePortfolio({ evaluate, send, check, sleep, PORT, fo
 }
 
 export async function cd21PortfolioGlass({ evaluate, check, sleep }: SuiteContext): Promise<void> {
-  // CD21 (#521): the Portfolio is a chart room, so the kit renders its Glass and the stage's label promises the keys.
+  // CD21 (Issue #521): the Portfolio is a chart room, so the kit renders its Glass and the stage's label promises the keys.
   // Both halves are the claim. d3-zoom does NOT set touch-action, so a bound controller with no `touch-action: none`
-  // is still dead to a real thumb: the browser's native pan takes the gesture first (#164).
+  // is still dead to a real thumb: the browser's native pan takes the gesture first (Issue #164).
   const glass = await evaluate<{ zoomable: boolean; touch: string; before: string }>(`(() => {
     const v = document.getElementById("map-viewport");
     const before = document.getElementById("map").style.transform;

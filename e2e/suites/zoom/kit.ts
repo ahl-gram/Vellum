@@ -5,7 +5,7 @@ export type ZoomKit = ReturnType<typeof zoomKit>;
 
 export function zoomKit(ctx: SuiteContext) {
   const { evaluate, sleep } = ctx;
-  // Fixed sleeps only outlasted the #300 deferred ink because a CDP evaluate sent mid-build queues behind the blocked main thread; wait for the ink itself.
+  // Fixed sleeps only outlasted the Issue #300 deferred ink because a CDP evaluate sent mid-build queues behind the blocked main thread; wait for the ink itself.
   const waitInked = async (label: string): Promise<void> => {
     for (let i = 0; i < 120; i++) {
       if (await evaluate<boolean>(`!!document.querySelector("#map .voyage-overlay .voyage-track")`)) return;
@@ -26,7 +26,7 @@ export function zoomKit(ctx: SuiteContext) {
   const enterAt = (k: number, cu: number, cv: number) =>
     evaluate<undefined>(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:${k},x:W/2-(${cu})*${k}*W,y:H/2-(${cv})*${k}*H});})()`);
   const waitRedraft = async (prev: number) => {
-    // 15s, not the old 4s: #400 made a cold band-3 draw cost 1084ms measured locally and a CI runner is several times slower, so 4s returned BEFORE the redraft landed and every band downstream read one step off; long enough for the draw, short enough that a real hang still fails rather than hanging the lane.
+    // 15s, not the old 4s: Issue #400 made a cold band-3 draw cost 1084ms measured locally and a CI runner is several times slower, so 4s returned BEFORE the redraft landed and every band downstream read one step off; long enough for the draw, short enough that a real hang still fails rather than hanging the lane.
     for (let i = 0; i < 375; i++) { const s = await rgn(); if (s.redrafts > prev) return s; await sleep(40); }
     return await rgn();
   };

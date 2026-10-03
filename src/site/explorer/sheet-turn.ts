@@ -12,7 +12,7 @@ export function shouldTurn(s: TurnDecision): boolean {
   return !!(s.isTurn && !s.reduceMotion && s.usesWorker && s.hasChart && !s.flipped);
 }
 
-// #131: duration + easing from /motion.css (the single timing source), read lazily so the stylesheet is applied, with the ratified fallback if a custom property is unreadable.
+// Issue #131: duration + easing from /motion.css (the single timing source), read lazily so the stylesheet is applied, with the ratified fallback if a custom property is unreadable.
 export function turnTiming(): { ms: number; ease: string } {
   const cs = getComputedStyle(document.documentElement);
   const ms = parseFloat(cs.getPropertyValue("--turn")) || 900;

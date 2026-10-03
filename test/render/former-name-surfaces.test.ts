@@ -6,7 +6,7 @@ import { composePlaceCard } from "../../src/render/place-card.ts";
 import { composeAtlas } from "../../src/atlas/compose.ts";
 import { ATLAS_SHEET_CSS } from "../../src/atlas/document.ts";
 
-// #49: the two PR 1 surfaces. Ruling 4 is the plain voice, ruling 5 keeps ruins out.
+// Issue #49: the two PR 1 surfaces. Ruling 4 is the plain voice, ruling 5 keeps ruins out.
 
 const world = generateWorld(defaultRecipe(42));
 const manifest = buildPlaceManifest(world, 1200);

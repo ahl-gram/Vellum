@@ -1,4 +1,4 @@
-// The Specimen Book (#487 item 4, cut at #465 ruling 6): every kit piece at its seat, in every state, on one page; MEASURED at 1280x800 and a true 390x844, and shot at both as the closing review's pair (specimen-1280.png, specimen-390.png, specimen-390-open.png, specimen-390-open-leaned.png in the e2e out dir). Every state is reached through the kit's own binders (the fold, the tab, the handle, the Glass), never by planting a class.
+// The Specimen Book (Issue #487 item 4, cut at Issue #465 ruling 6): every kit piece at its seat, in every state, on one page; MEASURED at 1280x800 and a true 390x844, and shot at both as the closing review's pair (specimen-1280.png, specimen-390.png, specimen-390-open.png, specimen-390-open-leaned.png in the e2e out dir). Every state is reached through the kit's own binders (the fold, the tab, the handle, the Glass), never by planting a class.
 import { scopedHealth } from "../support/room.ts";
 import { makeSettle } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
@@ -11,7 +11,7 @@ import { sb9bPrinted, sb9PrintIsPaper, sb9dNoScript } from "./specimen/print.ts"
 export async function run(ctx: SuiteContext): Promise<void> {
   const { send, sleep } = ctx;
   const settle = makeSettle(ctx);
-  // SB4 is the one group here that waits on a transition, so it is the one that is stepped (#534).
+  // SB4 is the one group here that waits on a transition, so it is the one that is stepped (Issue #534).
   const step = makeStep(ctx);
   const gate = scopedHealth(ctx);
   const k = specimenKit({ ...ctx, settle });
@@ -35,7 +35,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const phone = await goto();
   await sb7Phone(k, phone);
   await sb8Opens(k, phone);
-  // #525: a docked row goes position:static, so under a live footing rule its ::before resolves against the fixed slip and pools over the sheet's own parchment; the ground reading is the half that proves a reader can still read it.
+  // Issue #525: a docked row goes position:static, so under a live footing rule its ::before resolves against the fixed slip and pools over the sheet's own parchment; the ground reading is the half that proves a reader can still read it.
   await setState("leaned");
   await sleep(900);
   const leanedOpen = await read();

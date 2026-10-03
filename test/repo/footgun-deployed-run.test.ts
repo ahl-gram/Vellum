@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { readDeployed } from "../../.claude/skills/vellum-footguns/hooks/footgun-gate.selftest.ts";
 
-// A cap on a hang, not a performance budget: an ETIMEDOUT here is the darwin wedge of #564, where a child that DRAINS a payload larger than one write leaves the parent holding the socketpair with the completion never delivered. Measured 2026-09-11 under four other agents: no run of any shape in this file took over 7ms unless it wedged outright.
+// A cap on a hang, not a performance budget: an ETIMEDOUT here is the darwin wedge of Issue #564, where a child that DRAINS a payload larger than one write leaves the parent holding the socketpair with the completion never delivered. Measured 2026-09-11 under four other agents: no run of any shape in this file took over 7ms unless it wedged outright.
 const BOUND_MS = 30_000;
 // 200000 forces deterministically what a loaded linux runner hits by timing: the write outruns the 64KB pipe buffer, so it is still in flight when the non-reading child exits. Measured 2026-09-09 on darwin: 10/10 EPIPE at 200000, 0/10 at 65536.
 const OVER_PIPE_BUFFER = "x".repeat(200000);

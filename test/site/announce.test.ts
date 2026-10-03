@@ -132,7 +132,7 @@ test("an empty line written mid-fade takes the fade off with it (#547 ruling 4)"
   assert.equal(f.timers.waiting(), 0);
 });
 
-// Both pages, because one page wired and the other not is exactly the shape #547 was filed about (the Chart Table's guards all ran at 390 and nowhere else). Read against the source with whitespace COLLAPSED: the prover reverted the Explorer to a multi-line bare write and a line-bounded pattern could not see across the break (2026-09-13). Blind spot, named with its direction: this reads the source and not the running page, so it errs toward a miss, and e2e CD23 is the Explorer's resolved read; the Portfolio has no behavioural read inside this suite's measured time budget, which the PR body carries as residue.
+// Both pages, because one page wired and the other not is exactly the shape Issue #547 was filed about (the Chart Table's guards all ran at 390 and nowhere else). Read against the source with whitespace COLLAPSED: the prover reverted the Explorer to a multi-line bare write and a line-bounded pattern could not see across the break (2026-09-13). Blind spot, named with its direction: this reads the source and not the running page, so it errs toward a miss, and e2e CD23 is the Explorer's resolved read; the Portfolio has no behavioural read inside this suite's measured time budget, which the PR body carries as residue.
 test("every room that announces on a status pill announces through the one announcer, uses what it built, and keeps no bare write of its own (#547 ruling 4)", () => {
   const REPO = resolve(import.meta.dirname, "..", "..");
   const pages = [

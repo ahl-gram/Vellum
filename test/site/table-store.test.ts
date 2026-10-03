@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readStoredTable, writeStoredTable, tableOnArrival, folioOnArrival, navigationType, navigationTypeNow, deviceStorage, TABLE_STORE_KEY, TRAVERSAL } from "../../src/site/shared/table-store.ts";
 import { emitTable, parseTable, type SurveyItem, type TableItem } from "../../src/site/shared/table-address.ts";
 
-// The Chart Table's second home (#634, ruled 2026-09-18 and 2026-09-19): the address decides an ARRIVAL and the device decides a RETURN. The store is injected rather than reached for, the way firstArrival/markArrival take theirs in src/site/home/ceremony.ts, so the precedence is provable here instead of only in a browser.
+// The Chart Table's second home (Issue #634, ruled 2026-09-18 and 2026-09-19): the address decides an ARRIVAL and the device decides a RETURN. The store is injected rather than reached for, the way firstArrival/markArrival take theirs in src/site/home/ceremony.ts, so the precedence is provable here instead of only in a browser.
 const survey = (lx: number): SurveyItem => ({
   kind: "survey", seed: 42, overrides: {}, rung: 2, lx, ly: 3,
   style: "antique", legend: true, arms: false, beasts: false, theme: null,

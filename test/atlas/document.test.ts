@@ -68,7 +68,7 @@ test("svgToDataUri: a base64 SVG data URI that round-trips Unicode", () => {
 test("ATLAS_SHEET_CSS: the shared inner CSS, scoped under .atlas-sheet, is the drift-trap's single source", () => {
   assert.ok(ATLAS_SHEET_CSS.length > 200, "shared atlas CSS should be substantial, not a stub");
   assert.match(ATLAS_SHEET_CSS, /\.atlas-sheet\s+figure\b/);
-  // The lift attaches only to anchored plates (#368 ruling): the gesture promises a destination, and the link is absent exactly when scripting is off in the download.
+  // The lift attaches only to anchored plates (Issue #368 ruling): the gesture promises a destination, and the link is absent exactly when scripting is off in the download.
   assert.match(ATLAS_SHEET_CSS, /\.atlas-sheet\s+figure\s+a\s+img:hover\s*\{[^}]*translateY/);
   assert.doesNotMatch(
     ATLAS_SHEET_CSS,
@@ -239,7 +239,7 @@ test("file-ref mode carries no plate-linking script: its anchors are already rea
   );
 });
 
-// Taken over this file's own fixture, before the screen dress existed; re-taken 2026-09-11 for the plates' box-sizing (#565), a paper correction and so one the download is meant to carry.
+// Taken over this file's own fixture, before the screen dress existed; re-taken 2026-09-11 for the plates' box-sizing (Issue #565), a paper correction and so one the download is meant to carry.
 const DOWNLOAD_SHA256 = "50f2dd5a529f36542caf0a88e390fb32f8bb2d87d59b50bb3ad10a9eb9a323f0";
 const served = () => atlasDocument(fixture(), (p, s) => atlasPlateFilename(p, s), { anchor: true, motion: true });
 const download = () => atlasDocument(fixture(), (p) => svgToDataUri(p.svg), { anchor: false, motion: false });

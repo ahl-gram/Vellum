@@ -148,7 +148,7 @@ test("monotone floor: parent land never sinks in the adjusted child, and the gua
   }
 });
 
-// NOT the general case, which `node scripts/region-detail-partition.ts` measures and #443 records: some window-edge slivers do go, on every arm.
+// NOT the general case, which `node scripts/region-detail-partition.ts` measures and Issue #443 records: some window-edge slivers do go, on every arm.
 test("no landmass the parent charts inside these windows loses all its land (#443)", () => {
   for (const seed of SWEEP_SEEDS) {
     let masses = 0;

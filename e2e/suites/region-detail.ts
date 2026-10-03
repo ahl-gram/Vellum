@@ -1,8 +1,8 @@
-// The Glass sees it e2e (RD, #400): every check reads the COMMITTED inset the user is looking at, never a job result standing in for it; byte comparisons are same-environment only (one page, one JS engine), the only kind lod.ts's byte-identity contract can be checked by, since a cross-environment SVG compare is barred project-wide.
+// The Glass sees it e2e (RD, Issue #400): every check reads the COMMITTED inset the user is looking at, never a job result standing in for it; byte comparisons are same-environment only (one page, one JS engine), the only kind lod.ts's byte-identity contract can be checked by, since a cross-environment SVG compare is barred project-wide.
 import { makeStep } from "../support/step.ts";
 import type { SuiteContext } from "../types.ts";
 
-const SEED = 2; // an archipelago seed: seed 42 is an island map with no straits, so it hides coastline defects (#376)
+const SEED = 2; // an archipelago seed: seed 42 is an island map with no straits, so it hides coastline defects (Issue #376)
 // A region sheet is ~500KB, far past what a CDP evaluate should carry back, so the digest is computed IN the page (both sides of every compare hashed by the same engine); the LAST inset, never the first, because during a crossing the outgoing sheet is still mounted and a plain querySelector reads the one on its way off screen.
 const LAST_INSET = `[...document.querySelectorAll("#map .region-inset svg")].pop()`;
 type Inset = { digest: string; detail: string | null; u0: number; v0: number; u1: number; v1: number };
@@ -61,7 +61,7 @@ async function rdSetup({ evaluate, waitSettled }: RegionKit): Promise<void> {
       `document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`,
   );
   await waitSettled("region-detail-base");
-  // #169: a fresh page defaults the semantic redraft ON, but a suite that ran earlier in this lane may have left it off (glass-ceremony's tail does), and without it no inset ever commits and every check here reads band 0.
+  // Issue #169: a fresh page defaults the semantic redraft ON, but a suite that ran earlier in this lane may have left it off (glass-ceremony's tail does), and without it no inset ever commits and every check here reads band 0.
   await evaluate(`window.__vellumSetRedraftEnabled(true)`);
 }
 
@@ -97,7 +97,7 @@ async function rd1Ladder({ check, shoot, rgn, enterAt, waitRedraft, waitInset, i
 }
 
 async function rd2CoastGains({ evaluate, check }: RegionKit, deepest: Ladder[number]): Promise<void> {
-  // RD2 is measured on the sheet the page is SHOWING: shore LENGTH alone rises when a coast turns into a staircase (#376), so the drawn ring count carries the claim and length only corroborates it; both arms are rendered by this page's own engine and counted the same way as the live coast.
+  // RD2 is measured on the sheet the page is SHOWING: shore LENGTH alone rises when a coast turns into a staircase (Issue #376), so the drawn ring count carries the claim and length only corroborates it; both arms are rendered by this page's own engine and counted the same way as the live coast.
   const gained = await evaluate<{ drawn: number; bare: number; detail: number; bareLen: number; detailLen: number }>(
     `(async()=>{const win={u0:${deepest.u0},v0:${deepest.v0},u1:${deepest.u1},v1:${deepest.v1}};` +
       `const {defaultRecipe,generateWorld}=await import("./engine/world/generate.js");` +

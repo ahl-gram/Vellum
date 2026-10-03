@@ -1,4 +1,4 @@
-// The drawer on a ROOM (#483 Landfall Sub 6c): the cluster suite covers home, whose chrome rides the page; a room's chrome is fixed, which changes what the scrim must be and whether a scroll closes anything. Every geometry is MEASURED and every door HIT-TESTED, since the sticky cap once sat over three doors with every rect green.
+// The drawer on a ROOM (Issue #483 Landfall Sub 6c): the cluster suite covers home, whose chrome rides the page; a room's chrome is fixed, which changes what the scrim must be and whether a scroll closes anything. Every geometry is MEASURED and every door HIT-TESTED, since the sticky cap once sat over three doors with every rect green.
 import { scopedHealth } from "../support/room.ts";
 import { makeSettle } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";

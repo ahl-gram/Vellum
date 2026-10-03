@@ -1,4 +1,4 @@
-// The floating seed chrome (H0-H6, #289 semantics relanded at #470), the ceremony (H7-H13, #457), the failed-bundle doors (H13c, #470), and the stations, cards, and idle drift (H14-H17, #458): the homepage frame at desktop and a real 390px viewport, the corner form, the seed form's real promise (the chart number in the baked cartouche IS the seed, so the drawn SVG identifies its world), the veil's arrival, skips in both phases, sitting memory, reduced-motion and narrow-viewport stories, and the station flights driven by REAL dispatched input; deltas scoped per flow, plumbing shared via support/home.ts (#460).
+// The floating seed chrome (H0-H6, Issue #289 semantics relanded at Issue #470), the ceremony (H7-H13, Issue #457), the failed-bundle doors (H13c, Issue #470), and the stations, cards, and idle drift (H14-H17, Issue #458): the homepage frame at desktop and a real 390px viewport, the corner form, the seed form's real promise (the chart number in the baked cartouche IS the seed, so the drawn SVG identifies its world), the veil's arrival, skips in both phases, sitting memory, reduced-motion and narrow-viewport stories, and the station flights driven by REAL dispatched input; deltas scoped per flow, plumbing shared via support/home.ts (Issue #460).
 import type { SuiteContext } from "../types.ts";
 import { homeKit } from "./home/kit.ts";
 import type { HomeKit } from "./home/kit.ts";
@@ -45,15 +45,15 @@ async function h7Ceremony(ctx: SuiteContext, k: HomeKit): Promise<void> {
   await clearMobile();
   await h18CameraSeat(k, seat390);
   h11Clean(ctx, errBase2, httpBase2);
-  // H13 runs AFTER the clean check on purpose: blocking the bundle logs an expected load error. It proves the pre-paint story (#457, the incognito flash): the inline script dresses first paint without the module, and an unadopted veil releases itself rather than trapping the page.
+  // H13 runs AFTER the clean check on purpose: blocking the bundle logs an expected load error. It proves the pre-paint story (Issue #457, the incognito flash): the inline script dresses first paint without the module, and an unadopted veil releases itself rather than trapping the page.
   await send("Network.setBlockedURLs", { urls: ["*app.bundle.js*"] });
   await h13aPrePaint(ctx);
   await h13bRelease(ctx);
-  // The doors share the veil's 10s window (#470, ratified 2026-08-24), so after H13b's release they are due at once; the poll absorbs animation-fill timing, and the bundle stays blocked until the doors are read.
+  // The doors share the veil's 10s window (Issue #470, ratified 2026-08-24), so after H13b's release they are due at once; the poll absorbs animation-fill timing, and the bundle stays blocked until the doors are read.
   const doors = await h13cDoorsRead(ctx);
   await send("Network.setBlockedURLs", { urls: [] });
   await h13cStaticDoors(ctx, doors);
-  // Reduced motion crosses the doors both ways (#470 skeptic round 1: motion.css's prm blanket zeroed the 10s delay, so prm visitors got the failure doors on every HEALTHY load); both halves matter, since a display:none card still computes visibility:visible and a pre-reveal card is display:block with visibility:hidden.
+  // Reduced motion crosses the doors both ways (Issue #470 skeptic round 1: motion.css's prm blanket zeroed the 10s delay, so prm visitors got the failure doors on every HEALTHY load); both halves matter, since a display:none card still computes visibility:visible and a pre-reveal card is display:block with visibility:hidden.
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
   await h13dPrmDoors(ctx);
   await h13ePrmNoFlash(ctx);
@@ -65,7 +65,7 @@ async function h7Ceremony(ctx: SuiteContext, k: HomeKit): Promise<void> {
 async function h14Stations(ctx: SuiteContext, k: HomeKit): Promise<void> {
   const { send, setMobileViewport, clearMobile, consoleErrors, http4xx } = ctx;
   const { settleHome } = k;
-  // Stations, cards, and the drift (#458) at the ratified 1280x800 (the harness's tall default hides the short-viewport collisions the plate-reader measured). Every gesture is REAL dispatched input (#460): pointer capture retargets clicks, so synthetic .click() proves nothing here.
+  // Stations, cards, and the drift (Issue #458) at the ratified 1280x800 (the harness's tall default hides the short-viewport collisions the plate-reader measured). Every gesture is REAL dispatched input (Issue #460): pointer capture retargets clicks, so synthetic .click() proves nothing here.
   const errBase3 = consoleErrors.length;
   const httpBase3 = http4xx.length;
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });

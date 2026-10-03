@@ -4,7 +4,7 @@ import { buildFavicon, buildTouchIcon, TOUCH_ICON_SIZE } from "../src/render/fav
 import { findBrowser, rasterizeSvg, NO_BROWSER } from "../src/cli/raster.ts";
 import { readGlyphOutline, FELL_SC_WOFF2, SMALL_CAP_V } from "./glyph-outline.ts";
 
-/** npm run icons: cuts the Punchcutter's Mark (#489) from the shipped Fell SC woff2 into public/favicon.svg and public/apple-touch-icon.png, both committed because the Pages deploy CI has no browser to rasterize; any change to that font file re-runs this. */
+/** npm run icons: cuts the Punchcutter's Mark (Issue #489) from the shipped Fell SC woff2 into public/favicon.svg and public/apple-touch-icon.png, both committed because the Pages deploy CI has no browser to rasterize; any change to that font file re-runs this. */
 
 async function main(): Promise<void> {
   const browser = findBrowser();

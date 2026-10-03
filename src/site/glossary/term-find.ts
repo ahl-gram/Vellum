@@ -1,4 +1,4 @@
-// The Glossary's find box (#462 ruling 4).
+// The Glossary's find box (Issue #462 ruling 4).
 
 export interface Hit {
   readonly hit: boolean;

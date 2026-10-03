@@ -126,7 +126,7 @@ export function rh6Differ({ check }: SuiteContext, heads: Heads, prose: Head | u
 }
 
 export function rh9ContrastPins({ check }: SuiteContext, heads: Heads, bad: Bad): void {
-  // Both pins rest on the 2026-08-26 plate read (out/461-plate/contrast-v2.json): line-tan on the deep 4.03 < 4.5, and home's bandless cluster at 1280x800 over the close-in chart as low as 1.17; Alex's calls the same day on #461.
+  // Both pins rest on the 2026-08-26 plate read (out/461-plate/contrast-v2.json): line-tan on the deep 4.03 < 4.5, and home's bandless cluster at 1280x800 over the close-in chart as low as 1.17; Alex's calls the same day on Issue #461.
   const PARCHMENT = "rgb(239, 230, 207)";
   const dimTaglines = bad((h) => h.tagline?.color === PARCHMENT);
   check(
@@ -135,7 +135,7 @@ export function rh9ContrastPins({ check }: SuiteContext, heads: Heads, bad: Bad)
     dimTaglines.map((r) => `${r} tagline ${heads[r]?.tagline?.color}`).join(" | ") || `tagline parchment x${SHELLED.length}`,
   );
 
-  // #464: the Gallery joins home, the two pages whose content scrolls or rides under the cluster (a pale plate measured the tagline at 2.26:1 without the pool).
+  // Issue #464: the Gallery joins home, the two pages whose content scrolls or rides under the cluster (a pale plate measured the tagline at 2.26:1 without the pool).
   const POOLED = ["/", "/gallery/"];
   const washWrong = bad((h, r) =>
     POOLED.includes(r) ? !!h.chromeWash && h.chromeWash.content !== "none" && /blur\(/.test(h.chromeWash.filter) && poolAlpha(h.chromeWash.backgroundColor) >= 0.8

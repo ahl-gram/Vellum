@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { realWorld, recordingLogPanel, recordingSink, recordingStatus, stackedMount } from "../../test-support/living-chart-hosts.ts";
 
-// What the session builder does to the MOUNT (#364): the wipe of every .voyage-overlay immediately before the unconditional append, asserted from the mount's own side via stackedMount's ordered ledger (three wrong forms of that line survived e2e SV2g/SV2h); and what the ENGINE does to the mount when that build bails (#371), which no arm path can reach through the UI.
+// What the session builder does to the MOUNT (Issue #364): the wipe of every .voyage-overlay immediately before the unconditional append, asserted from the mount's own side via stackedMount's ordered ledger (three wrong forms of that line survived e2e SV2g/SV2h); and what the ENGINE does to the mount when that build bails (Issue #371), which no arm path can reach through the UI.
 
 const SUBTITLE = "as surveyed by Taiki the Wayfarer";
 

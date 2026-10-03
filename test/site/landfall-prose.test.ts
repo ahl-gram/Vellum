@@ -7,7 +7,7 @@ import { homeStations, howStation } from "../../src/site/home/stations.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { createProjection, marginFor } from "../../src/render/transform.ts";
 
-// Landfall Sub 4 (#459): the prose finds a home. Ratified in the 2026-08-24 decision-2 comment on #454 (restated on #459): the How It Works prose and underhood links live in a panel opened from a dedicated pip on the chart, never the legend; the text ships hidden but indexable; the Notice to Mariners is the mockup's decorative stamp on the deep, stamp only.
+// Landfall Sub 4 (Issue #459): the prose finds a home. Ratified in the 2026-08-24 decision-2 comment on Issue #454 (restated on Issue #459): the How It Works prose and underhood links live in a panel opened from a dedicated pip on the chart, never the legend; the text ships hidden but indexable; the Notice to Mariners is the mockup's decorative stamp on the deep, stamp only.
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
@@ -294,7 +294,7 @@ test("the Notice to Mariners is the mockup's stamp on the deep, and only the sta
   assert.match(rule[1]!, /rotate\(-5deg\)/, "the stamp tilts as the mockup stamps it");
   assert.match(rule[1]!, /3px double/, "the stamp wears the mockup's double rule");
   assert.match(rule[1]!, /pointer-events:\s*none/, "the stamp is decoration, never a control");
-  // The voice the #324 re-ratification comment names (2026-08-24): the mockup's own, not archivist-head.
+  // The voice the Issue #324 re-ratification comment names (2026-08-24): the mockup's own, not archivist-head.
   const head = css.match(/\.stamp-head \{([^}]*)\}/);
   assert.ok(head, ".stamp-head dresses in index.css");
   assert.match(head[1]!, /font-size:\s*0\.72rem/, "the head keeps the mockup's 0.72rem");

@@ -15,7 +15,7 @@ export async function rr6Survey({ evaluate, send, check, boot, settled, plateSho
     JSON.stringify(survey),
   );
 
-  // #442 ruled 2026-08-22: a bare `survey` link parks at t=1, the return to the capital, so it shows the CAPITAL's plate at the present year; seed 42's capital is i=0 Laukuwelua, present year 1059.
+  // Issue #442 ruled 2026-08-22: a bare `survey` link parks at t=1, the return to the capital, so it shows the CAPITAL's plate at the present year; seed 42's capital is i=0 Laukuwelua, present year 1059.
   const surveyPlate = await plateShown();
   check(
     "RR32 a bare `survey` link arrives showing the capital's plate, at the present (#442)",
@@ -57,7 +57,7 @@ export async function rr7Year({ evaluate, send, check, boot, settled, plateShown
     JSON.stringify(scrubbed),
   );
 
-  // #442 G reverses #402 here: crossing into the survey half swaps the plate's SOURCE rather than stowing it; the slider at its minimum is the first leg out of the capital, i=0 Laukuwelua at the present, not the year-650 beat plate.
+  // Issue #442 G reverses Issue #402 here: crossing into the survey half swaps the plate's SOURCE rather than stowing it; the slider at its minimum is the first leg out of the capital, i=0 Laukuwelua at the present, not the year-650 beat plate.
   const crossed = await plateShown("i=0&year=1059");
   check(
     "RR27b crossing into the survey half SWAPS the plate's source with no gap, never hiding it (#442)",
@@ -67,7 +67,7 @@ export async function rr7Year({ evaluate, send, check, boot, settled, plateShown
 }
 
 export async function rr9Today({ evaluate, send, check, sleep, boot, PORT }: ReadingRoomKit): Promise<void> {
-  // The seedForDate oracle is sampled BEFORE the navigation and again after settle: the page freezes its seed at load, so a fresh-per-poll oracle flakes when the run crosses 00:00Z (#304's date-flake class); either sample matching is a pass.
+  // The seedForDate oracle is sampled BEFORE the navigation and again after settle: the page freezes its seed at load, so a fresh-per-poll oracle flakes when the run crosses 00:00Z (Issue #304's date-flake class); either sample matching is a pass.
   const todayBefore = seedForDate(new Date());
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/reading-room/` });

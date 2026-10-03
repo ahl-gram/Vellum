@@ -27,7 +27,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
     await step("B3", async () => {
       await evaluate(`(()=>{document.getElementById("seed").value="42";document.getElementById("theme").value="";document.getElementById("draw").click();})()`);
       await waitSettled("fallback-draw");
-      // #199 retired the inline Bind button, so the atlas job is driven through runJob, which routes to the inline engine here (the worker is 404'd), exactly the path this suite exists to prove.
+      // Issue #199 retired the inline Bind button, so the atlas job is driven through runJob, which routes to the inline engine here (the worker is 404'd), exactly the path this suite exists to prove.
       const fb = await evaluate<{ hero: boolean; draughtings: number; themes: number; gaz: number }>(
         `(async()=>{const a=(await window.__vellumRunJob({kind:"atlas",seed:42,overrides:{},width:1500})).atlas;` +
           `return{hero:!!(a.hero&&a.hero.svg),draughtings:a.draughtings.length,themes:a.themes.length,gaz:a.gazetteerHtml.length};})()`,

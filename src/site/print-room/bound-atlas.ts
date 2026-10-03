@@ -1,4 +1,4 @@
-// The Print Room's bound atlas: composes the full atlas of the proof on the desk off-thread, lays it out as the hidden document Print and Download deliver, turns its plates onto the sheet and lists them on the slip (the #494 ruling).
+// The Print Room's bound atlas: composes the full atlas of the proof on the desk off-thread, lays it out as the hidden document Print and Download deliver, turns its plates onto the sheet and lists them on the slip (the Issue #494 ruling).
 import { runJob } from "../explorer/worker-client.ts";
 import { plateFigure } from "./plate-markup.ts";
 import { contentsRows, plateCounts, plateLine, type PlateRef } from "./contents-markup.ts";

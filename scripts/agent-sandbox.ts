@@ -4,7 +4,7 @@ import { lstatSync, readdirSync, readFileSync, readlinkSync, realpathSync, symli
 import { dirname, isAbsolute, join, normalize, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
-/** The sandbox lifecycle a dispatched review agent needs, in one reviewed place: #575 is what four hand-retyped copies of it cost. The git argv is returned as data by the *Plan functions so a test can pin which commands run, which is the only way to pin the absence of one. */
+/** The sandbox lifecycle a dispatched review agent needs, in one reviewed place: Issue #575 is what four hand-retyped copies of it cost. The git argv is returned as data by the *Plan functions so a test can pin which commands run, which is the only way to pin the absence of one. */
 
 const SANDBOX_NAME = /^(guard|skeptic)-[A-Za-z0-9._-]+$/;
 const GIT_TIMEOUT_MS = 120_000;

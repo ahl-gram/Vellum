@@ -1,6 +1,6 @@
 import type { Payload } from "../../types.ts";
 
-// #633: a card taller than its box cannot be fitted by any offset, so the bound IS the principle. Swept 2026-09-19: the smallest real overage measured is 8.61px, so 0.5px is the sub-pixel residual of a cap published from a fractional rect and cannot hide one.
+// Issue #633: a card taller than its box cannot be fitted by any offset, so the bound IS the principle. Swept 2026-09-19: the smallest real overage measured is 8.61px, so 0.5px is the sub-pixel residual of a cap published from a fractional rect and cannot hide one.
 export const OVER_BOX_TOLERANCE = 0.5;
 // Seed 4294967295 is the WITNESS that makes this bite: its Kralgov card measured 150.95px past a 247.02px box at 320 and 61.27px past a 301.05px box at 390 on main at 18bacfd. Every place is measured, not that one card, because the defect is a class and a copy change that promotes a different place to the worst would leave a single-card guard green.
 export const NARROW_SEED = 4294967295;

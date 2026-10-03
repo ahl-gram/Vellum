@@ -1,4 +1,4 @@
-// Verso e2e (V, #116): the sheet flip to its back face and the key turn-vs-flip shared-transform races (both drive #sheet-inner's rotateY, never together); e2e cannot SEE the 3D flip, so these assert end states, class toggles, and the docket text.
+// Verso e2e (V, Issue #116): the sheet flip to its back face and the key turn-vs-flip shared-transform races (both drive #sheet-inner's rotateY, never together); e2e cannot SEE the 3D flip, so these assert end states, class toggles, and the docket text.
 import { makeStep } from "../support/step.ts";
 import type { SuiteContext } from "../types.ts";
 

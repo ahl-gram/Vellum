@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-// The Reading Room is a chart room on the #462 pattern (#463): the chart full-bleed on the deep, the name and its one control top right, the Journal on a slip that scrolls, the dated log's instrument as a bottom strip, no band, no footer, no roads out.
+// The Reading Room is a chart room on the Issue #462 pattern (Issue #463): the chart full-bleed on the deep, the name and its one control top right, the Journal on a slip that scrolls, the dated log's instrument as a bottom strip, no band, no footer, no roads out.
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 const page = read("src/pages/reading-room/index.astro");
@@ -107,7 +107,7 @@ test("RR-room 8 under reduced motion the pace group hides (#493, ruled 2026-09-0
   assert.doesNotMatch(frameCss, /prefers-reduced-motion/, "and not the frame's (motion.css owns the collapse)");
 });
 
-// #520 ruling B (2026-09-07): the room's writers each build a FRESH URLSearchParams and finalize it, so any key they do not know dies on a copied link. A FRESH bag is the writer's structural mark and every emitted hash must sit inside a known writer (a writer serializing through String(p) escaped a text filter); the blind spot, a writer emitting through a helper in another module, costs a false pass at worst. Behavioural survival is part 2's e2e.
+// Issue #520 ruling B (2026-09-07): the room's writers each build a FRESH URLSearchParams and finalize it, so any key they do not know dies on a copied link. A FRESH bag is the writer's structural mark and every emitted hash must sit inside a known writer (a writer serializing through String(p) escaped a text filter); the blind spot, a writer emitting through a helper in another module, costs a false pass at worst. Behavioural survival is part 2's e2e.
 test("every hash writer in the Reading Room carries the Chart Table through (#520 ruling B)", () => {
   const src = read("src/site/reading-room/app.ts");
   const decls = [

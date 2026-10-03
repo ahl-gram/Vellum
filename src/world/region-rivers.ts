@@ -13,7 +13,7 @@ import type { World } from "./types.ts";
 
 const SHADOW_RADIUS = 2;
 
-/** A policy cap, not a derived bound: past about this far the walk stops repairing a mouth and starts inventing a river, so a run needing further is left as the parent drew it (#443 records the ones that do). */
+/** A policy cap, not a derived bound: past about this far the walk stops repairing a mouth and starts inventing a river, so a run needing further is left as the parent drew it (Issue #443 records the ones that do). */
 const MOUTH_REACH_PARENT_CELLS = 3;
 const SHADOW_FRACTION = 0.5;
 
@@ -85,7 +85,7 @@ function projectWorldMajors(
   return runs;
 }
 
-/** A parent major's mouth is a parent SEA cell, and on a detailed region field that cell can be new land, leaving the river drawn short of the water (#399). The region's own drainage is where the water would actually go. */
+/** A parent major's mouth is a parent SEA cell, and on a detailed region field that cell can be new land, leaving the river drawn short of the water (Issue #399). The region's own drainage is where the water would actually go. */
 export function extendMouthToWater(
   points: ReadonlyArray<RiverPoint>,
   elev: Field,

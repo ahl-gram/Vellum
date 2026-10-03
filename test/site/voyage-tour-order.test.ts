@@ -8,7 +8,7 @@ import { createTourOrder } from "../../src/site/explorer/tour-order.ts";
 import type { PlaceManifest } from "../../src/render/place-manifest.ts";
 import type { Survey } from "../../src/render/survey.ts";
 
-// The #184 travel matrix is 96.7-98.0% of the ~0.9-1.2s the arm blocks the main thread for (measured across five seeds), so it moves to the render worker (#373): the engine keeps ONE routing path and asks an injected source for the order, and a source with nothing ready leaves every host computing it inline.
+// The Issue #184 travel matrix is 96.7-98.0% of the ~0.9-1.2s the arm blocks the main thread for (measured across five seeds), so it moves to the render worker (Issue #373): the engine keeps ONE routing path and asks an injected source for the order, and a source with nothing ready leaves every host computing it inline.
 
 const SUBTITLE = "as surveyed by Taiki the Wayfarer";
 const SEED = 42;

@@ -1,4 +1,4 @@
-// The Chart Table's state (#520 Sub 2 of #401): what the drawer draws and what the Explorer's address carries are the same array, so this half is pure and holds no DOM. `chart-drawer`, never `drawer`: src/site/shell/drawer.ts is the site's phone nav (#520 ruling 2).
+// The Chart Table's state (Issue #520 Sub 2 of Issue #401): what the drawer draws and what the Explorer's address carries are the same array, so this half is pure and holds no DOM. `chart-drawer`, never `drawer`: src/site/shell/drawer.ts is the site's phone nav (Issue #520 ruling 2).
 import { TABLE_CAP, emitTable, prospectItemFrom, tableWindow, type TableItem, type SurveyItem, type ProspectItem, type Rung, type TableOverrides } from "../shared/table-address.ts";
 import { LOD_BANDS, type LodBand } from "../../world/lod.ts";
 import { plateDressFor, prospectTitle } from "./prospect-job.ts";
@@ -137,7 +137,7 @@ export function thumbJobFor(item: TableItem): RegionJob | ProspectJob {
   };
 }
 
-/** The dog-ear: the survey's own top-right corner turned back (#518 ruling 3). Drawn in CSS and carrying NO inline svg of its own, because suite-region-detail reads the inset's survey as [...querySelectorAll("#map .region-inset svg")].pop() and a handle with an icon inside would become that element. */
+/** The dog-ear: the survey's own top-right corner turned back (Issue #518 ruling 3). Drawn in CSS and carrying NO inline svg of its own, because suite-region-detail reads the inset's survey as [...querySelectorAll("#map .region-inset svg")].pop() and a handle with an icon inside would become that element. */
 export function makeDogEar(label: string, k: number, onLay: () => void): HTMLButtonElement {
   const b = document.createElement("button");
   // Set HERE and not left to the next zoom publish: the outgoing inset is still mounted at commit and carries its own ear, so a querySelector that takes the first one hands the counter-scale to the sheet on its way out and leaves this one 3x oversized until the reader zooms again.

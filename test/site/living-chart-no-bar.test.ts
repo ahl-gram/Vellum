@@ -9,7 +9,7 @@ import {
   recordingSink,
 } from "../../test-support/living-chart-hosts.ts";
 
-// A host that hands in no scrubber (#319; the ratified split is the 2026-08-09 comment on #319): the INSTRUMENT surface goes silently inert while the CHART side stays fully live. Construction is pinned DOM-free in living-chart-boundary.test.ts; this file installs the shim because proving the chart side runs means running it.
+// A host that hands in no scrubber (Issue #319; the ratified split is the 2026-08-09 comment on Issue #319): the INSTRUMENT surface goes silently inert while the CHART side stays fully live. Construction is pinned DOM-free in living-chart-boundary.test.ts; this file installs the shim because proving the chart side runs means running it.
 
 test("the bar-less instrument surface is silent no-ops, and never throws (#319)", async () => {
   const { createLivingChart } = await import("../../src/site/living-chart/index.ts");

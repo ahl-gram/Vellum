@@ -1,4 +1,4 @@
-// #270 the Broadside's footnote apparatus: a period mark (<a class="fn">) opens a marginalia note through the native popover API and follows through to the term's /glossary/ anchor; fine pointers get hover/focus + click-through, touch gets the ratified tap-toggle instead of navigation.
+// Issue #270 the Broadside's footnote apparatus: a period mark (<a class="fn">) opens a marginalia note through the native popover API and follows through to the term's /glossary/ anchor; fine pointers get hover/focus + click-through, touch gets the ratified tap-toggle instead of navigation.
 interface NotePair {
   mark: HTMLAnchorElement;
   note: HTMLElement;

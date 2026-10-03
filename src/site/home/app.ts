@@ -95,7 +95,7 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
     armDrift();
   };
 
-  // Any deliberate camera action summons the reader back to watch it (the 2026-08-28 ruling on #472), through the browser's own scrollTo: the contract forbids intercepting scroll INPUT, and this is the anchor-link class it protects.
+  // Any deliberate camera action summons the reader back to watch it (the 2026-08-28 ruling on Issue #472), through the browser's own scrollTo: the contract forbids intercepting scroll INPUT, and this is the anchor-link class it protects.
   const surface = () => {
     if (window.scrollY === 0) return;
     window.scrollTo({ top: 0, behavior: reduced() ? "auto" : "smooth" });
@@ -139,7 +139,7 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
     },
     wheelZoom: (px, py, deltaY) =>
       valve(performance.now(), deltaY, window.scrollY, () => {
-        // The drift's ±1.5% wander is ambient, not the user's zoom: measured from the drifted scale, a clamp-parked camera reads the snap-back as consumed and eats the release flick (#481 skeptic finding 1; e2e L1h).
+        // The drift's ±1.5% wander is ambient, not the user's zoom: measured from the drifted scale, a clamp-parked camera reads the snap-back as consumed and eats the release flick (PR #481 skeptic finding 1; e2e L1h).
         if (driftBase !== null) {
           assign(driftBase);
           settle();

@@ -131,7 +131,7 @@ test("#311 the stage stalls nothing and moves nothing: no status write, no scrol
     "src/site/reading-frame/index.ts",
   ]) {
     const src = readFileSync(resolve(REPO, path), "utf8");
-    // #442 decision 4 (ruled 2026-08-22): Play does not move the reading position; the sticky row follows the story, not a scroll.
+    // Issue #442 decision 4 (ruled 2026-08-22): Play does not move the reading position; the sticky row follows the story, not a scroll.
     assert.doesNotMatch(
       src,
       /scrollIntoView|window\.scrollTo|\.scrollTop\s*=/,

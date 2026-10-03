@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { El, installShim, walk } from "../../test-support/element-shim.ts";
 import { realWorld } from "../../test-support/living-chart-hosts.ts";
 
-// #387/#388: clampOffset's arithmetic is pinned in test/render/place-card.test.ts; this file pins the half that is not arithmetic, that showing a card MEASURES it and publishes the nudge. The shim does no layout, so every rect here is stated rather than computed.
+// Issue #387/Issue #388: clampOffset's arithmetic is pinned in test/render/place-card.test.ts; this file pins the half that is not arithmetic, that showing a card MEASURES it and publishes the nudge. The shim does no layout, so every rect here is stated rather than computed.
 
 const CHART = { left: 0, top: 0, right: 342, bottom: 266 };
 const stated = new WeakMap<El, typeof CHART>();
@@ -139,7 +139,7 @@ test("#387/#388 the host's box reaches the card through createLivingChart, not o
   assert.deepEqual(shownWith(card, hit, { left: 80, top: 200, right: 254, bottom: 390 }), { dx: "0px", dy: "-124px" });
 });
 
-// #633: the shim does no layout, so the inner's scroll geometry is stated here the way every rect in this file is.
+// Issue #633: the shim does no layout, so the inner's scroll geometry is stated here the way every rect in this file is.
 const withScroll = (inner: El, scrollHeight: number, clientHeight: number, scrollTop = 0) => {
   Object.assign(inner as unknown as Record<string, number>, { scrollHeight, clientHeight, scrollTop });
 };

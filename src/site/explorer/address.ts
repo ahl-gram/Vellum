@@ -1,4 +1,4 @@
-// The #192 address grammar, pure and DOM-free. Ratified vocabulary (the 2026-07-26 comment on #192): a bare `survey` flag or `year=N`, never both and no sentinel year; `survey=<t>` is reserved for mid-sweep addresses and deliberately not built.
+// The Issue #192 address grammar, pure and DOM-free. Ratified vocabulary (the 2026-07-26 comment on Issue #192): a bare `survey` flag or `year=N`, never both and no sentinel year; `survey=<t>` is reserved for mid-sweep addresses and deliberately not built.
 import { TABLE_KEY, emitTable, type TableItem } from "../shared/table-address.ts";
 
 export type Live = { kind: "survey" } | { kind: "year"; year: number };

@@ -1,4 +1,4 @@
-// The chart room's seats (#462), the measured placements bindRoom runs on every layout: the slip below the folio and above a strip, the legend row centred in the room the chart folio, the Glass and an open slip leave it.
+// The chart room's seats (Issue #462), the measured placements bindRoom runs on every layout: the slip below the folio and above a strip, the legend row centred in the room the chart folio, the Glass and an open slip leave it.
 const SLIP_TOP_GAP = 16;
 const SLIP_FLOOR = 22;
 const STRIP_GAP = 12;

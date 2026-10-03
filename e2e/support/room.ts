@@ -1,4 +1,4 @@
-// Shared helpers for the Reading-Room-hosted suites (#320); reading-room/kit.ts deliberately keeps its own copies (the double-coverage premise), and the room's settle is NOT the shared waitSettled, which keys on the Explorer's #verso-turn.
+// Shared helpers for the Reading-Room-hosted suites (Issue #320); reading-room/kit.ts deliberately keeps its own copies (the double-coverage premise), and the room's settle is NOT the shared waitSettled, which keys on the Explorer's #verso-turn.
 import { dropExpectedCancellations } from "./console.ts";
 import type { Evaluate, SuiteContext } from "../types.ts";
 
@@ -17,7 +17,7 @@ export const makeRoom = (ctx: Pick<SuiteContext, "evaluate" | "send" | "sleep" |
     return false;
   };
 
-  // #418: the status line still clears at the ARM, so this still means "armed and at rest"; the budget widens to 15s because the arm now waits out an off-thread travel order, and a worker that stops answering spends ROOM_TOUR_TIMEOUT_MS (6s) before the inline fallback arms anyway.
+  // Issue #418: the status line still clears at the ARM, so this still means "armed and at rest"; the budget widens to 15s because the arm now waits out an off-thread travel order, and a worker that stops answering spends ROOM_TOUR_TIMEOUT_MS (6s) before the inline fallback arms anyway.
   const settled = async (): Promise<boolean> => {
     for (let i = 0; i < 300; i++) {
       let s: { svg: boolean; status?: string } | null = null;
@@ -39,7 +39,7 @@ export const makeRoom = (ctx: Pick<SuiteContext, "evaluate" | "send" | "sleep" |
   return { boot, settled, goto };
 };
 
-// Same #220 domain as the Explorer ([0, 2*span], seam at the midpoint, a year at barMax/2 + (year - min)); the earliest year is the one position the seam already owns, so setYear clamps to min+1.
+// Same Issue #220 domain as the Explorer ([0, 2*span], seam at the midpoint, a year at barMax/2 + (year - min)); the earliest year is the one position the seam already owns, so setYear clamps to min+1.
 export const makeBar = (ctx: Pick<SuiteContext, "evaluate">) => {
   const { evaluate } = ctx;
   return {
@@ -52,7 +52,7 @@ export const makeBar = (ctx: Pick<SuiteContext, "evaluate">) => {
       evaluate<string>(`(()=>{const r=document.querySelector('.rf-chart #layer-roads');return r?getComputedStyle(r).display:"(no-el)";})()`),
     visibleGroups: () =>
       evaluate<number>(`[...document.querySelectorAll('.rf-chart #layer-settlements g.settlement')].filter((g)=>getComputedStyle(g).display!=="none").length`),
-    // #526: the sweep's own frame clock. The year is read synchronously inside the rAF callback so every sample carries the SAME pairing lag, which a rate fit cancels as an offset; a year read on a wall-clock timer instead carries a frame of quantization at each end, and that is what made the old RS30 read 2.76 to 4.31 on unchanged code.
+    // Issue #526: the sweep's own frame clock. The year is read synchronously inside the rAF callback so every sample carries the SAME pairing lag, which a rate fit cancels as an offset; a year read on a wall-clock timer instead carries a frame of quantization at each end, and that is what made the old RS30 read 2.76 to 4.31 on unchanged code.
     startSweepSamples: () =>
       evaluate<boolean>(`(()=>{window.__sweep={s:[],stop:false};
         const step=(t)=>{const a=window.__vellumAgesState();

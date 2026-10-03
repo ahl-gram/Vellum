@@ -1,4 +1,4 @@
-// Room address e2e (RA1-RA8, #320 Sub 3): the #192 A-suite's year-restore checks re-hosted; the Explorer-hosted A* originals stay green beside them.
+// Room address e2e (RA1-RA8, Issue #320 Sub 3): the Issue #192 A-suite's year-restore checks re-hosted; the Explorer-hosted A* originals stay green beside them.
 import { makeRoom } from "../support/room.ts";
 import { dropExpectedCancellations } from "../support/console.ts";
 import type { SuiteContext } from "../types.ts";
@@ -13,7 +13,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const errBase = consoleErrors.length;
   const httpBase = http4xx.length;
 
-  // #637 (Alex, 2026-09-20): RA5 reds under a leaked prefers-reduced-motion (a Play then parks at once and writes year=present into the hash), and any upstream suite that stops between setting and resetting it leaks it, since the runner's rescue resets the viewport and never emulated media (#616's class; in lane A that is survey's pair inside step("SV2n")); measured 2026-09-20 with a probe that ran this suite clean (8/8) and then under a leaked reduce (7/8, RA5), so the suite clears the features itself before its first boot rather than depending on its predecessor.
+  // Issue #637 (Alex, 2026-09-20): RA5 reds under a leaked prefers-reduced-motion (a Play then parks at once and writes year=present into the hash), and any upstream suite that stops between setting and resetting it leaks it, since the runner's rescue resets the viewport and never emulated media (Issue #616's class; in lane A that is survey's pair inside step("SV2n")); measured 2026-09-20 with a probe that ran this suite clean (8/8) and then under a leaked reduce (7/8, RA5), so the suite clears the features itself before its first boot rather than depending on its predecessor.
   await send("Emulation.setEmulatedMedia", { features: [] });
 
   const { sm, midYear } = await raWorld(ctx, room);
@@ -108,7 +108,7 @@ async function ra4Ignored({ evaluate, check }: SuiteContext, room: Room, sm: Wor
 }
 
 async function ra5AutoPark({ evaluate, check, sleep }: SuiteContext, sm: World["sm"], midYear: number): Promise<void> {
-  // Play's auto-park is the one path where the year moves with NO input/change event, so the engine's onPark seam is all that re-writes the address; #317 makes the room the sole author of year=N.
+  // Play's auto-park is the one path where the year moves with NO input/change event, so the engine's onPark seam is all that re-writes the address; Issue #317 makes the room the sole author of year=N.
   const ra5set = await evaluate<string>(`(()=>{
     const s=document.querySelector(".rf-range");const a=window.__vellumAgesState();
     s.value=String(Number(s.max)/2+(${midYear}-a.min));

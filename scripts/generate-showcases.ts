@@ -4,7 +4,7 @@ import { buildAtlas } from "../src/cli/atlas.ts";
 import { buildGallery, GALLERY_COUNT, GALLERY_SEED } from "../src/cli/gallery.ts";
 import { HERO_SEED } from "./hero-charts.ts";
 
-/** #205 decision D: the showcases are built INTO public/ as the final astro:generate step (Astro copies public/ verbatim, so the deploy artifact gets them with no post-build injection); since #268 the gallery tree is assets alone, the /gallery/ page itself is an Astro route. */
+/** Issue #205 decision D: the showcases are built INTO public/ as the final astro:generate step (Astro copies public/ verbatim, so the deploy artifact gets them with no post-build injection); since Issue #268 the gallery tree is assets alone, the /gallery/ page itself is an Astro route. */
 
 export async function generateShowcases(root: string): Promise<void> {
   await buildAtlas(HERO_SEED, { out: join(root, "atlas") });

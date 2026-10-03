@@ -34,7 +34,7 @@ export interface RegionJob {
   /** The LOD band INDEX (0..3) to echo back, not a climate band. */
   readonly band: number;
   readonly render: RenderOptions;
-  /** Honored for back-compat when given (#169); the Explorer's client sends none. */
+  /** Honored for back-compat when given (Issue #169); the Explorer's client sends none. */
   readonly title?: string;
 }
 
@@ -64,7 +64,7 @@ export interface RibbonJob {
   readonly dress: PlateDress;
 }
 
-/** #373: the #184 travel matrix, off the main thread. Self-contained on purpose (no seed lookup, no world rebuild): the inputs ARE the world facts the router walks, so the two sides cannot compute over different worlds. */
+/** Issue #373: the Issue #184 travel matrix, off the main thread. Self-contained on purpose (no seed lookup, no world rebuild): the inputs ARE the world facts the router walks, so the two sides cannot compute over different worlds. */
 export interface TourJob {
   readonly kind: "tour";
   readonly seed: number;

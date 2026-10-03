@@ -10,7 +10,7 @@ const E2E = resolve(REPO, "e2e");
 const e2eFiles = (): string[] => e2eSourcePaths(REPO).filter((p) => p.startsWith(E2E + sep)).map((p) => relative(E2E, p).split(sep).join("/"));
 const importsDrop = (f: string): boolean => [...readE2eSource(join(E2E, f)).matchAll(/from "(\.{1,2}\/[^"]*)"/g)].some((m) => resolve(dirname(join(E2E, f)), m[1]!) === join(E2E, "support", "console.ts"));
 
-// Every fixture below is a literal rather than a loop over the exported list: a list-driven case deletes itself along with the behaviour when an entry is removed, so it would pass on an empty list and could never red on the defect this file exists for (#613).
+// Every fixture below is a literal rather than a loop over the exported list: a list-driven case deletes itself along with the behaviour when an entry is removed, so it would pass on an empty list and could never red on the defect this file exists for (Issue #613).
 const H6_MEASURED =
   "EXCEPTION: InvalidStateError: Transition was aborted because of invalid state. ViewTransition opt-in disabled";
 const SKIPPED_WITH_REASON = "EXCEPTION: AbortError: Transition was skipped. Document hidden";

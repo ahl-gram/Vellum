@@ -2,12 +2,12 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { SLIP_CLEARANCE, fitStage } from "../../src/site/shared/stage-fit.ts";
 
-// #462 chart-room ruling 1: the chart is fitted to the space the chrome leaves, measured off the chrome rects, never guessed.
+// Issue #462 chart-room ruling 1: the chart is fitted to the space the chrome leaves, measured off the chrome rects, never guessed.
 
 const ASPECT = 1500 / 1157.931;
 const base = { view: { w: 1280, h: 800 }, aspect: ASPECT, gap: 14, narrow: false };
 
-// #463 plate read: at 1680 the keys slip (123px wide, right-aligned under the Glass) ran 17px under the centred sheet, because the reserve knew only the slip. The Glass's left edge bounds the sheet whenever it is handed in.
+// Issue #463 plate read: at 1680 the keys slip (123px wide, right-aligned under the Glass) ran 17px under the centred sheet, because the reserve knew only the slip. The Glass's left edge bounds the sheet whenever it is handed in.
 test("chrome standing at the right edge (the Glass) widens the reserve past the slip's clearance when it reaches further in", () => {
   const withGlass = fitStage({ ...base, above: [100], below: [700], beside: 384, right: [790] });
   assert.equal(withGlass.reserve.right, 1280 - 790 + 14, "the Glass's left edge plus the gap, since that reaches further in than the slip's clearance");

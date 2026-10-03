@@ -25,7 +25,7 @@ function parentCoords(
   return { px: Math.min(Math.max(px, 0), parent.w - 1), py: Math.min(Math.max(py, 0), parent.h - 1) };
 }
 
-/** Nearest-neighbour sampling and the naive per-cell clamp both draw the shore as rectangular staircases at depth, which no test can pin (#397). */
+/** Nearest-neighbour sampling and the naive per-cell clamp both draw the shore as rectangular staircases at depth, which no test can pin (Issue #397). */
 export function parentSurfaceOnWindow(
   parent: Field,
   parentWindow: UvWindow,
@@ -50,7 +50,7 @@ export function parentSurfaceOnWindow(
   });
 }
 
-/** The parent's OWN cell under each child cell, nearest neighbour. Interpolation cannot carry a channel one cell wide, so the parent's verdict on land and water has to travel unblurred (#443). */
+/** The parent's OWN cell under each child cell, nearest neighbour. Interpolation cannot carry a channel one cell wide, so the parent's verdict on land and water has to travel unblurred (Issue #443). */
 export function parentCellsOnWindow(
   parent: Field,
   parentWindow: UvWindow,
@@ -68,7 +68,7 @@ export function parentCellsOnWindow(
   });
 }
 
-/** The parent's cell decides WHETHER it floors, its interpolated surface decides how high. Ungated, the surface rises over a one-cell strait and fills a one-cell basin, inventing land the parent never had (#443). */
+/** The parent's cell decides WHETHER it floors, its interpolated surface decides how high. Ungated, the surface rises over a one-cell strait and fills a one-cell basin, inventing land the parent never had (Issue #443). */
 export function gateToParentLand(surface: Field, cells: Field, seaLevel: number): Field {
   if (surface.w !== cells.w || surface.h !== cells.h) {
     throw new RangeError(

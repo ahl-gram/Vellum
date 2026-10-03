@@ -1,4 +1,4 @@
-// The head cluster on home (CL1-CL7, #480 Landfall Sub 6b): the wash sized to the cluster, the stage's lettering opted out of selection, and the phone drawer; every geometry MEASURED against the rendered page, since the #480 screenshots were all things source-scan tests could not see.
+// The head cluster on home (CL1-CL7, Issue #480 Landfall Sub 6b): the wash sized to the cluster, the stage's lettering opted out of selection, and the phone drawer; every geometry MEASURED against the rendered page, since the Issue #480 screenshots were all things source-scan tests could not see.
 import { makeStage, makeMouse, readCam, atLandfall } from "../support/home.ts";
 import { sampleRow, luminance } from "../support/pixel.ts";
 import { makeSettle } from "../support/settle.ts";

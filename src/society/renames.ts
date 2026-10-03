@@ -1,7 +1,7 @@
 import type { Rng } from "../core/rng.ts";
 import { createNamer, isNearExisting, type Culture } from "./names.ts";
 
-/** #49: a few living towns were called something else once. A different word from the same tongue, not an older form of the current one (that is #282's ground). Drawn on its own fork, so nothing else in the world moves. */
+/** Issue #49: a few living towns were called something else once. A different word from the same tongue, not an older form of the current one (that is Issue #282's ground). Drawn on its own fork, so nothing else in the world moves. */
 
 const SHARE = 0.15;
 const MIN = 1;

@@ -1,4 +1,4 @@
-// Room voyage-route e2e (RV1-RV12, #320 Sub 3): W17-W28 re-hosted on the Reading Room, the only host that can still run them. RV4 is the ONLY numeric guard on MAX_TILT anywhere (a 24 -> 30 mutation leaves every unit test green and reds only RV4); RV3/RV9/RV10 guard showMark's #181 wiring, which has no unit coverage.
+// Room voyage-route e2e (RV1-RV12, Issue #320 Sub 3): W17-W28 re-hosted on the Reading Room, the only host that can still run them. RV4 is the ONLY numeric guard on MAX_TILT anywhere (a 24 -> 30 mutation leaves every unit test green and reds only RV4); RV3/RV9/RV10 guard showMark's Issue #181 wiring, which has no unit coverage.
 import { makeRoom, scopedHealth } from "../support/room.ts";
 import type { SuiteContext } from "../types.ts";
 
@@ -25,7 +25,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
 }
 
 async function rv0Arms({ evaluate, check, send, PORT }: SuiteContext, room: Room): Promise<void> {
-  // Seed 526413615 ("The Isle of Selivelai"): 24 ports, a closed 24-leg round trip, exactly one genuine inland handoff. Landed by hand rather than through room.goto (#418) because both guards below instrument the page BETWEEN the boot and the arm: this is the room's FIRST arm on this world, the only uncached one, and a later arm takes the held order and would pass either check blind.
+  // Seed 526413615 ("The Isle of Selivelai"): 24 ports, a closed 24-leg round trip, exactly one genuine inland handoff. Landed by hand rather than through room.goto (Issue #418) because both guards below instrument the page BETWEEN the boot and the arm: this is the room's FIRST arm on this world, the only uncached one, and a later arm takes the held order and would pass either check blind.
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/reading-room/#seed=526413615&style=antique&legend=1&survey` });
   const booted = await room.boot();
@@ -314,7 +314,7 @@ async function rv11Seed39({ evaluate, check, shoot }: SuiteContext, room: Room):
 }
 
 async function rv12Landmasses({ evaluate, check, shoot }: SuiteContext, room: Room): Promise<void> {
-  // Seed 430445745 puts ports on THREE landmasses; before #309 only the capital's shore had roads and 17 of its 24 legs degraded to straight chords. #298's walk-the-land guard now lives on a synthetic fixture in voyage-route.test.ts.
+  // Seed 430445745 puts ports on THREE landmasses; before Issue #309 only the capital's shore had roads and 17 of its 24 legs degraded to straight chords. Issue #298's walk-the-land guard now lives on a synthetic fixture in voyage-route.test.ts.
   await room.goto("#seed=430445745&style=antique&legend=1&survey");
   const rv12 = await evaluate<{ legs: number; road: number; sea: number; straight: number }>(`(()=>{
     const legs=window.__vellumVoyageLegGeometry();

@@ -1,4 +1,4 @@
-// Landfall hardening e2e (#460, second suite by ratification 2026-08-25): the wheel consumed-vs-released contract at both zoom clamps (L1), the six panel arms from the superseding 2026-08-24T18:53 spec plus the sixth-arm clearance (L2-L7), the Enter links as 44px touch targets (L8), touch two-finger-drives vs one-finger-page-scroll under one emulation set (L9), and the seed form's no-JS GET fallback with its bare-visit control (L10-L11). Every gesture is REAL dispatched input; suite-home's plumbing arrives via support/home.ts.
+// Landfall hardening e2e (Issue #460, second suite by ratification 2026-08-25): the wheel consumed-vs-released contract at both zoom clamps (L1), the six panel arms from the superseding 2026-08-24T18:53 spec plus the sixth-arm clearance (L2-L7), the Enter links as 44px touch targets (L8), touch two-finger-drives vs one-finger-page-scroll under one emulation set (L9), and the seed form's no-JS GET fallback with its bare-visit control (L10-L11). Every gesture is REAL dispatched input; suite-home's plumbing arrives via support/home.ts.
 import { scopedHealth } from "../support/room.ts";
 import type { SuiteContext } from "../types.ts";
 import { stageKit, gestureKit, entersKit } from "./landfall/kit.ts";
@@ -69,7 +69,7 @@ async function l7bNarrow(k: LandfallKit): Promise<void> {
   // Drift-sized stillness: on slow CI the fixture has crossed IDLE_DELAY_MS by here and the ambient ±1.5% drift moved the camera 3e-6 between reads (PR #482 CI); a one-finger pan that drove the map would move it 60px.
   await l9aOneFinger(k, stagePt9);
   await l9bPinch(k, stagePt9);
-  // L9c-L9g: the real two-finger contract (#475). Every pan read pins its fixture's clamp headroom first: the old L9c went green off a clamp-parked fixture (PR #474 skeptic finding 3), so an unproven fixture is the bug these arms exist to never repeat.
+  // L9c-L9g: the real two-finger contract (Issue #475). Every pan read pins its fixture's clamp headroom first: the old L9c went green off a clamp-parked fixture (PR #474 skeptic finding 3), so an unproven fixture is the bug these arms exist to never repeat.
   await l9cTwoFingerPan(k, stagePt9);
   await l9dCeiling(k, stagePt9);
   await l9d2Debt(k, stagePt9);

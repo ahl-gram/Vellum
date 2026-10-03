@@ -140,7 +140,7 @@ test("antique theme palettes stay byte-identical (full interpolated ramps pinned
 });
 
 test("every style yields 6-digit hex legend swatches for every theme", () => {
-  // Ink's realmTints are 3-digit (#888); theme swatches must never borrow those, so every swatch routes through the padded ramp helper.
+  // Ink's realmTints are 3-digit hex shorthand; theme swatches must never borrow those, so every swatch routes through the padded ramp helper.
   const world = generateWorld(defaultRecipe(42));
   for (const style of STYLE_NAMES) {
     for (const theme of THEME_NAMES) {

@@ -282,7 +282,7 @@ export function createAges(deps: AgesDeps) {
     } else play();
   }
 
-  // The flip snaps to the CURRENT chamber's rest: a survey-chamber flip rests on the full track (both faces agree, the one summary posts at most once, #174); an ages-chamber flip parks at the present (#180).
+  // The flip snaps to the CURRENT chamber's rest: a survey-chamber flip rests on the full track (both faces agree, the one summary posts at most once, Issue #174); an ages-chamber flip parks at the present (Issue #180).
   function snapToRest(): void {
     if (!ages) return;
     pause();

@@ -117,7 +117,7 @@ export async function pr34Leaned({ evaluate, check, sleep }: SuiteContext): Prom
 }
 
 export async function pr23Download({ evaluate, check, sleep }: SuiteContext): Promise<void> {
-  // hasBlobUrl reads the downloaded FILE's own bytes: no blob: URL may be BAKED IN, though since #368 the file's own script creates them at load. The metadata hook is read instead of the ~20MB string.
+  // hasBlobUrl reads the downloaded FILE's own bytes: no blob: URL may be BAKED IN, though since Issue #368 the file's own script creates them at load. The metadata hook is read instead of the ~20MB string.
   await evaluate(`(()=>{window.__vellumLastAtlasDownload=undefined;document.getElementById("pr-download").click();})()`);
   let dl = null;
   for (let i = 0; i < 200; i++) {

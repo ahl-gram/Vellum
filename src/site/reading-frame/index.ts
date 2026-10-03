@@ -1,4 +1,4 @@
-// The reading frame (#219, both open decisions ratified in issue comment 5097366231): one chart over one dated log, a framework-free layout module that BUILDS its own DOM and hands back a LivingChartHost. The journal rides INSIDE the panel the engine hides: the teardown hides the panel without emptying the strip, so a log mounted as the panel's sibling would keep a dead world's rows on screen.
+// The reading frame (Issue #219, both open decisions ratified in issue comment 5097366231): one chart over one dated log, a framework-free layout module that BUILDS its own DOM and hands back a LivingChartHost. The journal rides INSIDE the panel the engine hides: the teardown hides the panel without emptying the strip, so a log mounted as the panel's sibling would keep a dead world's rows on screen.
 import { createDatedLog, type DatedLog } from "./dated-log.ts";
 import { DEFAULT_PACE, PACES, type Pace } from "../living-chart/pace.ts";
 import type { LivingChartHost, ScrubberRefs, ToldEntry } from "../living-chart/index.ts";
@@ -15,7 +15,7 @@ function frameMount() {
   root.className = "rf";
 
   const chart = document.createElement("div");
-  // living-chart is the #302 host contract: the shared /living-chart.css keys the engine's ink-in dressing on this mount class, never on a host element id.
+  // living-chart is the Issue #302 host contract: the shared /living-chart.css keys the engine's ink-in dressing on this mount class, never on a host element id.
   chart.className = "rf-chart living-chart";
 
   // The polite status line: "" at rest, the settle signal a host's draw depends on.

@@ -23,7 +23,7 @@ export async function sv3Untick({ evaluate, check, goto, waitInked }: SurveyKit)
 
 export async function sv4DeepLink({ evaluate, check, goto, waitInked }: SurveyKit): Promise<void> {
   await goto("#seed=42&style=antique&survey", "survey-restore");
-  // waitSettled keys on #status, which the settle clears BEFORE the deferred arm (#366): wait for the ink, never read in the settle's shadow.
+  // waitSettled keys on #status, which the settle clears BEFORE the deferred arm (Issue #366): wait for the ink, never read in the settle's shadow.
   await waitInked("survey-restore-ink");
   const sv4 = await evaluate<{ checked: boolean; vertices: number; overlays: number; hash: string; status: string; href: string | null }>(`(()=>{
       const t=document.querySelector("#map .voyage-overlay .voyage-track");

@@ -18,11 +18,11 @@ const MIME: Record<string, string | undefined> = {
   ".woff2": "font/woff2",
 };
 
-// blockWorker 404s the ONE shared Vite-emitted worker chunk (since the #208 fold both pages spawn it), so the inline fallback is exercised without mutating the working tree.
+// blockWorker 404s the ONE shared Vite-emitted worker chunk (since the Issue #208 fold both pages spawn it), so the inline fallback is exercised without mutating the working tree.
 export const serverState = { blockWorker: false };
 const BLOCKED_WORKERS = new Set(["/explorer/worker.bundle.js"]);
 
-// In-page oracle: suites import engine modules IN THE BROWSER (same JS engine, no cross-engine float drift); since #260 the harness answers /explorer/engine/*.js by type-stripping src/*.ts on demand and rewriting .ts specifiers. e2e-only serving.
+// In-page oracle: suites import engine modules IN THE BROWSER (same JS engine, no cross-engine float drift); since Issue #260 the harness answers /explorer/engine/*.js by type-stripping src/*.ts on demand and rewriting .ts specifiers. e2e-only serving.
 const SRC_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "..", "src");
 const ENGINE_MODULE = /^\/explorer\/engine\/(.+)\.js$/;
 function serveEngineModule(pathname: string, res: import("node:http").ServerResponse): boolean | Promise<boolean> {

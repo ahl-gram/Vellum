@@ -7,7 +7,7 @@ import type { Chronicle } from "../../src/site/living-chart/chronicle.ts";
 import type { Voyage } from "../../src/site/living-chart/voyage.ts";
 import { toldAnnal, type ToldEntry } from "../../src/site/living-chart/told.ts";
 
-// One told signal, widened at #442 rather than doubled: it announces whatever the story tells (a survey day row or a chronicle annal) through the one paint primitive; buildAnnals needs a document, hence the shim.
+// One told signal, widened at Issue #442 rather than doubled: it announces whatever the story tells (a survey day row or a chronicle annal) through the one paint primitive; buildAnnals needs a document, hence the shim.
 installShim();
 const { createAges } = await import("../../src/site/living-chart/ages.ts");
 

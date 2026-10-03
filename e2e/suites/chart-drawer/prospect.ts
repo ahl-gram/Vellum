@@ -22,7 +22,7 @@ export async function cd25CardPress({ evaluate, check, settle, go, pinCard, pres
     filed.cuttings === 1 && filed.prospects === 1 && filed.imgs === 1 && filed.frames === 0 &&
       filed.decoded.every(Boolean) && /^The Prospect of \S/.test(filed.titles[0] || "") &&
       // The year LITERAL, not a shape: "the year is the Explorer's present" is the ratified acceptance, and seed 42's
-      // present is 1059, so `\d+` would pass on any year at all and the acceptance would have no guard (#631's review).
+      // present is 1059, so `\d+` would pass on any year at all and the acceptance would have no guard (PR #631's review).
       filed.titles[0] !== "The Isle of Rahai" && filed.subs[0] === "a prospect, antique, 1059" &&
       (filed.hashTable || "").indexOf("year-1059") !== -1 &&
       !!filed.press && filed.press.text === "Already on the table" && filed.press.dim && !filed.press.disabled &&
@@ -44,7 +44,7 @@ export async function cd25CardPress({ evaluate, check, settle, go, pinCard, pres
   );
 }
 
-// A full table costs no worker job, because the drawer fills its frames only when OPENED (#520's ruling), so this boot is cheap.
+// A full table costs no worker job, because the drawer fills its frames only when OPENED (Issue #520's ruling), so this boot is cheap.
 export async function cd27CardAtCap({ evaluate, check, settle, go, pinCard, pressCard }: DrawerKit, SIX: string): Promise<void> {
   await go(`${DRESS}&table=${SIX}`);
   await settle(CARD, (d) => d.hits > 1, "chart-drawer-card-full");
@@ -101,7 +101,7 @@ export async function cd28PagePress({ evaluate, send, check, sleep, PORT, settle
 export async function cd34PageRefusals({ evaluate, send, check, sleep, PORT, settle, clickAt, forget }: DrawerKit, SIX: string): Promise<void> {
   // The page's own two refusing faces. Nothing else drives them, and with no check here the two booleans handed to
   // layPressFace could be swapped and ship green, which would put "No room" on a duplicate and "Already" on a full
-  // table, the exact inverse of ruling 4 (#631's review).
+  // table, the exact inverse of ruling 4 (PR #631's review).
   const held = await evaluate(PP);
   check(
     "CD34 filing the SAME plate twice turns the page's press to its held face, not its full one: the two refusals are told apart here or they can be swapped with every other check green (ruled 2026-09-17)",

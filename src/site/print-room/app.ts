@@ -215,7 +215,7 @@ formatSel.addEventListener("change", () => {
   if (!ordering) posterStatus.textContent = "";
 });
 
-// A wide poster SVG goes STRAIGHT to a Blob download, NEVER injected into the live DOM (a multi-MB innerHTML swap is the #132 epic's one hard warning).
+// A wide poster SVG goes STRAIGHT to a Blob download, NEVER injected into the live DOM (a multi-MB innerHTML swap is the Issue #132 epic's one hard warning).
 function downloadBlob(blob: Blob, filename: string): void {
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);

@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createRoomArm } from "../../src/site/reading-room/arm.ts";
 
-// #418: the slot's contract, whose why lives at the head of src/site/reading-room/arm.ts.
+// Issue #418: the slot's contract, whose why lives at the head of src/site/reading-room/arm.ts.
 
 /** A held-open frame: `afterPaint` queues, `paint()` releases everything queued so far. */
 function paintQueue() {
@@ -53,7 +53,7 @@ test("#418 the arm is deferred past the settle's paint, so the ink ceremony gets
   const h = harness();
   h.schedule();
 
-  // A cached world's prime resolves immediately, so without this the whole ~130ms arm lands back inside the settle's task and re-blocks the #127 inkDraw the deferral exists to protect.
+  // A cached world's prime resolves immediately, so without this the whole ~130ms arm lands back inside the settle's task and re-blocks the Issue #127 inkDraw the deferral exists to protect.
   assert.equal(h.calls(), 0, "nothing is asked for until the chart has painted");
   assert.equal(h.state.arms, 0);
 });

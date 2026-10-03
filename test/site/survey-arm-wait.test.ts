@@ -4,7 +4,7 @@ import {
   createSurveyArm, armOnLanding, wireSurveyToggle,
 } from "../../src/site/explorer/survey-arm.ts";
 
-// The second wait (#373): the #184 travel matrix moved to the render worker, so between the paint and the arm the slot holds for an off-thread order; every #300/#366 guard in survey-arm.test.ts is re-read on the far side, never captured, because ~1s is long enough for the box, the world, or both to move.
+// The second wait (Issue #373): the Issue #184 travel matrix moved to the render worker, so between the paint and the arm the slot holds for an off-thread order; every Issue #300/Issue #366 guard in survey-arm.test.ts is re-read on the far side, never captured, because ~1s is long enough for the box, the world, or both to move.
 
 /** A held-open frame: `afterPaint` queues, `paint()` releases everything queued so far. */
 function paintQueue() {

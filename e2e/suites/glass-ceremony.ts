@@ -1,4 +1,4 @@
-// Glass ceremony e2e (G, #170): the antique voice on the zoom cluster, the voiced glide, and the redraft ink-in; asserts the PLUMBING (classes, tokens, inline dash props, aria) while the choreography is eyeballed via out/ screenshots. Ground truth at seed 42 (2026-07-19 scan): the world sheet labels 25 of 26 settlements, the band-1 window at (0.5, 0.5) newly labels exactly Lokai, and the k=3.6 hop to band 2 reveals no new name.
+// Glass ceremony e2e (G, Issue #170): the antique voice on the zoom cluster, the voiced glide, and the redraft ink-in; asserts the PLUMBING (classes, tokens, inline dash props, aria) while the choreography is eyeballed via out/ screenshots. Ground truth at seed 42 (2026-07-19 scan): the world sheet labels 25 of 26 settlements, the band-1 window at (0.5, 0.5) newly labels exactly Lokai, and the k=3.6 hop to band 2 reveals no new name.
 import { makeStep } from "../support/step.ts";
 import type { SuiteContext } from "../types.ts";
 
@@ -49,7 +49,7 @@ function glassKit(ctx: SuiteContext) {
   const enterAt = (k: number, cu: number, cv: number) =>
     evaluate<undefined>(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:${k},x:W/2-(${cu})*${k}*W,y:H/2-(${cv})*${k}*H});})()`);
   const waitRedraft = async (prev: number, wantBand: number) => {
-    // 15s, not 4s (the same note at `waitRedraft` in `e2e/suites/zoom/kit.ts`): #400's detailed draw outran the old budget on CI and G6 read band 2. The waiter also demands the band its caller asserts: a stale in-flight survey (G8's glide debounce) can commit FIRST and increment redrafts at the wrong band (CI 2026-08-25).
+    // 15s, not 4s (the same note at `waitRedraft` in `e2e/suites/zoom/kit.ts`): Issue #400's detailed draw outran the old budget on CI and G6 read band 2. The waiter also demands the band its caller asserts: a stale in-flight survey (G8's glide debounce) can commit FIRST and increment redrafts at the wrong band (CI 2026-08-25).
     for (let i = 0; i < 375; i++) { const s = await rgn(); if (s.redrafts > prev && s.band === wantBand) return s; await sleep(40); }
     return await rgn();
   };
@@ -268,7 +268,7 @@ async function g8WholeSheet({ evaluate, check, sleep, settleHome }: GlassKit): P
 
 async function g6ReducedCeremony({ evaluate, send, check, sleep, rgn, enterAt, waitRedraft }: GlassKit): Promise<void> {
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
-  // G8's voiced glide home passes THROUGH band 2 and its settle debounce can dispatch a survey on the way; since #400 that draw is still in flight here and commits after before6 is sampled, so wait for the region state to go quiet first: two reads a debounce apart with the same count, and nothing on screen.
+  // G8's voiced glide home passes THROUGH band 2 and its settle debounce can dispatch a survey on the way; since Issue #400 that draw is still in flight here and commits after before6 is sampled, so wait for the region state to go quiet first: two reads a debounce apart with the same count, and nothing on screen.
   for (let i = 0; i < 100; i++) {
     const a = await rgn();
     await sleep(300);

@@ -1,4 +1,4 @@
-// Reading Room e2e (RR0-RR34; #221 plus #318 colophon dice, #418 pre-arm window, #402 prospect stage and #442 the sticky strip): self-contained (navigates itself, scoped no-4xx and console-error delta); there is deliberately NO Explorer entry point (decision 3 on #221), so checks navigate with constructed hashes, and arrival is AT REST on every path.
+// Reading Room e2e (RR0-RR34; Issue #221 plus Issue #318 colophon dice, Issue #418 pre-arm window, Issue #402 prospect stage and Issue #442 the sticky strip): self-contained (navigates itself, scoped no-4xx and console-error delta); there is deliberately NO Explorer entry point (decision 3 on Issue #221), so checks navigate with constructed hashes, and arrival is AT REST on every path.
 import type { SuiteContext } from "../types.ts";
 import { readingRoomKit } from "./reading-room/kit.ts";
 import { stripRead } from "./reading-room/reads.ts";
@@ -18,9 +18,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const rrHttpBase = http4xx.length;
   await rr0Boots(k);
   await rr4AtRest(ctx);
-  // Seed 42's beats, measured 2026-08-22: foundings 451/552/597 (i=0/4/6), twin ruins 1039 (i=19/22; the LAST told holds the stage), present 1059. This hash carries no live key, so it is a PLAIN visit and opens with no plate (#442 reversing #402); RR29 shows Play bringing one.
+  // Seed 42's beats, measured 2026-08-22: foundings 451/552/597 (i=0/4/6), twin ruins 1039 (i=19/22; the LAST told holds the stage), present 1059. This hash carries no live key, so it is a PLAIN visit and opens with no plate (Issue #442 reversing Issue #402); RR29 shows Play bringing one.
   await rr26BareVisit(k);
-  // The harness window is 1280x2400, where this page has only a few hundred px of scroll and the strip could never reach the top, so this reading pins #442's governing 1440x900 viewport; mobile:false because mobile:true changes layout semantics as well as size.
+  // The harness window is 1280x2400, where this page has only a few hundred px of scroll and the strip could never reach the top, so this reading pins Issue #442's governing 1440x900 viewport; mobile:false because mobile:true changes layout semantics as well as size.
   await send("Emulation.setDeviceMetricsOverride", { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
   await sleep(200);
   const deskRest = await evaluate(stripRead);

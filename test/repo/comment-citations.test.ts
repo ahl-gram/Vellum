@@ -11,7 +11,7 @@ const REPO = resolve(import.meta.dirname, "..", "..");
 const CODE_ROOTS = ["src", "test", "test-support", "scripts", "e2e"];
 const SKIP_DIRS = new Set(["node_modules", "dist", "out", ".git", ".claude"]);
 
-// The ratified citation form (#296, 2026-07-26): backtick-symbol in repo/relative/path, line numbers deliberately absent. The backticks are load-bearing: a bare "foo in src/x.ts" is not checked and not honored.
+// The ratified citation form (Issue #296, 2026-07-26): backtick-symbol in repo/relative/path, line numbers deliberately absent. The backticks are load-bearing: a bare "foo in src/x.ts" is not checked and not honored.
 const CITATION =
   /`([A-Za-z_]\w*)`\s+in\s+`?((?:src|test|scripts|e2e|test-support|public)\/[\w./-]+\.(?:ts|mjs|astro|css))`?/g;
 
