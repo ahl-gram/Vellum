@@ -98,3 +98,10 @@ Noted 2026-09-16, overtaken before the move: the harness window height now lives
 ## From Issue #611's comment of 2026-09-14
 
 Two more for this holder, from PR #608's third round (2026-09-14): (1) the conflicted rebase that strips a number-sign-leading subject is the Never list's first bullet above, which carries it and sits beside Gate 5 item 9's rebase --onto recipe; the comment's own wording of it is replaced by this cross-reference (Alex's ruling of 2026-09-16, relayed on Issue #626). (2) A screenshot cannot photograph a blocked main thread: withdrawn from Gate 2 item 13 as unverifiable (no command in the repo demonstrates it); earns its line when a capture taken during a blocked thread is shown to be the cause of a wrong read.
+
+## From Issue #638, 2026-10-03
+
+Two candidates from building the corners sweep (`e2e/suites/corners.ts`), the first for Gate 2 and the second for Gate 1, each measured but with no incident of its own yet:
+
+- A sweep that resizes a loaded page cannot read the new width from a frame or two after `Emulation.setDeviceMetricsOverride`: a `vw` length is not recomputed while the resizing goes on (a one-frame read never applied home's `calc(100vw - 15rem)` cap from 396 down to 320), and `screen.width` does not follow the override at all, `screenWidth` passed or not. Wait on `matchMedia("(width: Npx)")` and a 100vw sentinel matching `clientWidth`, then two agreeing frame reads, the shape `restAt` in that suite carries. Earns its line when a check is shown to have passed on a read taken before the width it named.
+- A guard whose fixture is a date picks the date by the widest line it lays out over a span, never by the longest words: the Seed of the Day's worst dateline is "Monday, 6 July 2026", whose first line fills the corner's 12.5rem to 199.0px, not "Wednesday, 23 September", which carries the longest weekday and month. Earns its line when a date-dependent check is shown to have passed on a short date.
