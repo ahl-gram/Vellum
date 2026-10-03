@@ -29,8 +29,8 @@ const parseColour = (css: string): { rgb: Rgb; alpha: number } => {
 };
 
 async function underlineContrast(k: TrailKit): Promise<number> {
-  const u = await k.evaluate<{ colour: string; x: number; w: number; bottom: number } | null>(`(() => { const a = document.querySelector("header.chrome .also a"); if (!a) return null; const b = a.getBoundingClientRect(); return { colour: getComputedStyle(a).textDecorationColor, x: b.x, w: b.width, bottom: b.bottom }; })()`);
-  if (!u) return NaN;
+  const u = await k.evaluate<{ colour: string; line: string; x: number; w: number; bottom: number } | null>(`(() => { const a = document.querySelector("header.chrome .also a"); if (!a) return null; const b = a.getBoundingClientRect(); const cs = getComputedStyle(a); return { colour: cs.textDecorationColor, line: cs.textDecorationLine, x: b.x, w: b.width, bottom: b.bottom }; })()`);
+  if (!u || !u.line.split(" ").includes("underline")) return NaN;
   const row = await sampleRow(k.send, Math.round(u.x), Math.round(u.bottom + 3), Math.max(1, Math.round(u.w)));
   const ground: Rgb = [median(row.map((p) => p[0])), median(row.map((p) => p[1])), median(row.map((p) => p[2]))];
   const { rgb, alpha } = parseColour(u.colour);
@@ -235,8 +235,8 @@ export async function dr16SheetUp(k: TrailKit): Promise<void> {
   );
 }
 
-type Fit = { top: number; w: number; h: number; checked: boolean; innerW: number };
-const FIT: Payload<Fit> = `(() => { const s = document.getElementById("sheet").getBoundingClientRect(); return { top: s.top, w: s.width, h: s.height, checked: !!document.querySelector(".rooms-reveal")?.checked, innerW: innerWidth }; })()`;
+type Fit = { top: number; w: number; h: number; checked: boolean; innerW: number; chromeH: number };
+const FIT: Payload<Fit> = `(() => { const s = document.getElementById("sheet").getBoundingClientRect(); return { top: s.top, w: s.width, h: s.height, checked: !!document.querySelector(".rooms-reveal")?.checked, innerW: innerWidth, chromeH: document.querySelector("header.chrome").getBoundingClientRect().height }; })()`;
 const restingFit = (k: TrailKit, label: string, checked: boolean, innerW: number) => k.settle(FIT, (d, last) => d.checked === checked && d.innerW === innerW && d.w > 0 && last !== null && d.top === last.top && d.w === last.w && d.h === last.h, label);
 
 export async function dr17Refit(k: TrailKit): Promise<void> {
@@ -258,8 +258,8 @@ export async function dr17Refit(k: TrailKit): Promise<void> {
   await setMobileViewport(390, 844);
   const near = (a: Fit, b: Fit) => Math.abs(a.top - b.top) < 0.5 && Math.abs(a.w - b.w) < 0.5 && Math.abs(a.h - b.h) < 0.5;
   check(
-    "DR17 the open drawer lifts the trail out of the cluster, so the chart does not refit while it is open, and a resize made while it was open is fitted when it closes: the Prospect opened at 390, resized to 430 and closed sits where a fresh 430 load puts it (Issue #668, the cold review's round 2)",
-    near(open, shut) && near(closed, fresh) && !near(fresh, shut),
+    "DR17 the open drawer lifts the trail out of the cluster (the cluster's box shrinks, the witness), so the chart does not refit while it is open, and a resize made while it was open is fitted when it closes: the Prospect opened at 390, resized to 430 and closed sits where a fresh 430 load puts it (Issue #668, the cold review's round 2)",
+    open.chromeH < shut.chromeH - 10 && near(open, shut) && near(closed, fresh) && !near(fresh, shut),
     JSON.stringify({ shut, open, fresh, closed }),
   );
 }
