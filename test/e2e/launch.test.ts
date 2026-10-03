@@ -233,6 +233,28 @@ test("with no tuning passed, an attempt that never answers is killed after the r
   }
 });
 
+test("with no tuning passed, a killed browser that is never gone stops the launch after the ruled 5s cap", async () => {
+  mock.timers.enable({ apis: ["setTimeout"] });
+  try {
+    const r = rig([{ reapMs: null }]);
+    const launch: { error?: Error } = {};
+    void launchWithRetry(r.deps).catch((e: unknown) => {
+      launch.error = e as Error;
+    });
+    const flush = () => new Promise((res) => setImmediate(res));
+    let waited = 0;
+    for (; waited <= 90_000; waited += 25) {
+      await flush();
+      if (launch.error) break;
+      mock.timers.tick(25);
+    }
+    assert.match(launch.error?.message ?? "", /pid 101, was not gone 5000ms after SIGKILL/);
+    assert.equal(waited, 65_000, "the launch did not give up exactly 5s after its 60s wait ended in a kill");
+  } finally {
+    mock.timers.reset();
+  }
+});
+
 const REAL: LaunchTuning = { attempts: 3, polls: 150, pollMs: 20, killGraceMs: 5000, retryPauseMs: 50 };
 
 function freePort(): Promise<number> {
