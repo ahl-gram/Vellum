@@ -2,8 +2,9 @@ import { mock, test } from "node:test";
 import assert from "node:assert/strict";
 import { EventEmitter } from "node:events";
 import { chmodSync, existsSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { createServer as createHttpServer } from "node:http";
+import type { Server as HttpServer } from "node:http";
 import { createServer } from "node:net";
-import type { Server } from "node:net";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { launchWithRetry } from "../../e2e/support/launch.ts";
@@ -42,7 +43,7 @@ class FakeBrowser extends EventEmitter {
     if (this.plan.spawnError) setImmediate(() => this.failToSpawn());
   }
   kill(signal: NodeJS.Signals): boolean {
-    this.mark(`kill ${this.pid}`);
+    this.mark(`kill ${this.pid} ${signal}`);
     if (this.gone) return false;
     const reap = this.plan.reapMs === undefined ? 5 : this.plan.reapMs;
     if (reap !== null) setTimeout(() => this.exit(null, signal), reap);
@@ -119,7 +120,7 @@ test("a killed browser's late exit cannot fail the next attempt: the CI shape la
 test("the next browser starts only once the killed one is gone, and the port is checked once, before the first", async () => {
   const r = rig([{ reapMs: 15 }, { upAtProbe: 1 }]);
   await launchWithRetry(r.deps, { ...FAST, retryPauseMs: 5 });
-  assert.deepEqual(r.events, ["preflight", "spawn 101", "kill 101", "exit 101", "spawn 102"]);
+  assert.deepEqual(r.events, ["preflight", "spawn 101", "kill 101 SIGKILL", "exit 101", "spawn 102"]);
 });
 
 test("each attempt reports only its own browser's output: a line a gone browser writes after its exit is not the next one's", async () => {
@@ -131,12 +132,16 @@ test("each attempt reports only its own browser's output: a line a gone browser 
 });
 
 test("the error after the last attempt names every attempt's own reason and output, a failed spawn included", async () => {
-  const r = rig([{ output: "first browser output" }, { exitAfterMs: 15, output: "second browser crashed" }, { spawnError: true }]);
+  const flood = "y".repeat(3000);
+  const r = rig([{ output: `first browser output${flood}` }, { exitAfterMs: 15, output: "second browser crashed" }, { spawnError: true }]);
   const got = await settle(launchWithRetry(r.deps, FAST));
+  const message = got.error?.message ?? "";
   assert.match(
-    got.error?.message ?? "",
-    /attempt 1\/3[^\n]*no page target in 80ms \(last: connect ECONNREFUSED[\s\S]*first browser output[\s\S]*attempt 2\/3[^\n]*exited code=1[\s\S]*second browser crashed[\s\S]*attempt 3\/3[^\n]*failed to start: spawn \/no\/such\/browser ENOENT/,
+    message,
+    /attempt 1\/3[^\n]*no page target in 80ms \(last: connect ECONNREFUSED[\s\S]*first browser output[\s\S]*attempt 2\/3[^\n]*exited code=1[\s\S]*second browser crashed[\s\S]*attempt 3\/3[^\n]*failed to start: spawn \/no\/such\/browser ENOENT[\s\S]*\(none captured\)$/,
   );
+  assert.equal(r.probes[0], FAST.polls, "attempt 1 did not run its whole wait before giving up");
+  assert.ok(!message.includes(flood), "an attempt's whole output was pasted into the error, uncapped");
 });
 
 test("a browser that exits on its own fails its attempt at once, and the next starts without waiting out the kill cap", async () => {
@@ -184,6 +189,7 @@ test("the retry pauses after the killed browser is gone, and never after the las
   await settle(launchWithRetry(all.deps, { ...FAST, retryPauseMs: pause }));
   const tail = performance.now() - (all.at.get("exit 103") ?? 0);
   assert.ok(tail < pause / 2, `the launch waited ${tail.toFixed(1)}ms after its last browser was gone, a pause's worth`);
+  assert.equal(all.logs.filter((l) => /retrying/.test(l)).length, 2, `a retry was announced after the last attempt: ${JSON.stringify(all.logs)}`);
 });
 
 const REAL: LaunchTuning = { attempts: 3, polls: 150, pollMs: 20, killGraceMs: 5000, retryPauseMs: 50 };
@@ -267,8 +273,8 @@ test("the harness's own launch, every stand-in silent, fails with each attempt's
 
 test("the harness's own launch checks the debug port first: a port already held starts no browser", { timeout: 60_000 }, async () => {
   const s = await standIn(0);
-  const holder: Server = await new Promise((resolve) => {
-    const h = createServer().listen(s.port, "127.0.0.1", () => resolve(h));
+  const holder: HttpServer = await new Promise((resolve) => {
+    const h = createHttpServer((_req, res) => res.end("{}")).listen(s.port, "127.0.0.1", () => resolve(h));
   });
   try {
     const got = await settle(launchBrowser(s.browser, s.port, REAL));

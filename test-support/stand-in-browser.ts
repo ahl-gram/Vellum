@@ -22,7 +22,8 @@ function main(): void {
   setTimeout(() => process.exit(0), LIFETIME_MS);
   if (launch <= Number(process.env[STAND_IN_SILENT_VAR] ?? "0")) return;
   createServer((req, res) => {
-    const body = req.url === "/json" ? [{ type: "page", webSocketDebuggerUrl: standInTarget(port, launch) }] : {};
+    const worker = { type: "service_worker", webSocketDebuggerUrl: `ws://127.0.0.1:${port}/devtools/worker/stand-in-${launch}` };
+    const body = req.url === "/json" ? [worker, { type: "page", webSocketDebuggerUrl: standInTarget(port, launch) }] : {};
     res.writeHead(200, { "content-type": "application/json" }).end(JSON.stringify(body));
   }).listen(port, "127.0.0.1");
 }
