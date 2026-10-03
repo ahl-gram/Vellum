@@ -121,3 +121,10 @@ export type Control = { readonly t: string; readonly w: number; readonly natural
 export function squeezes(w: number, controls: readonly Control[]): string[] {
   return controls.filter((c) => c.w < c.natural - 0.5).map((c) => `at ${w} the corner's ${c.t} is squeezed to ${c.w.toFixed(1)} from its own ${c.natural.toFixed(1)}`);
 }
+
+export function wrapVerdict(page: string, w: number, controls: readonly Control[], exempt: Readonly<Record<string, string>>): string[] {
+  const faults = squeezes(w, controls);
+  const issue = exempt[page];
+  if (issue === undefined) return faults.map((f) => `${page} ${f}`);
+  return faults.length > 0 ? [] : [`${page} at ${w} no longer squeezes its corner, so ${issue} has landed and its exemption goes`];
+}

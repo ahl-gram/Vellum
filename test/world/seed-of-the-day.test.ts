@@ -12,10 +12,11 @@ test("the room folio's dateline names the UTC day in full and the seed it yields
 
 test("the dateline names the UTC day whatever the clock's own zone, on both sides of the date line", () => {
   const module = pathToFileURL(resolve(import.meta.dirname, "..", "..", "src/world/seed-of-the-day.ts")).href;
-  const script = `import(${JSON.stringify(module)}).then((m) => process.stdout.write(m.datelineFor(new Date("2026-09-23T23:59:59Z")) + "|" + m.datelineFor(new Date("2026-07-06T00:00:00Z"))))`;
+  const dates = ["2026-09-23T23:59:59Z", "2026-07-06T00:00:00Z", "2026-12-31T23:59:59Z", "2027-01-01T00:00:00Z"];
+  const script = `import(${JSON.stringify(module)}).then((m) => process.stdout.write(${JSON.stringify(dates)}.map((d) => m.datelineFor(new Date(d))).join("|")))`;
   for (const zone of ["Pacific/Kiritimati", "Pacific/Pago_Pago"]) {
     const out = execFileSync(process.execPath, ["--input-type=module", "-e", script], { env: { ...process.env, TZ: zone }, encoding: "utf8", timeout: 30_000 });
-    assert.equal(out, "Wednesday, 23 September 2026 · seed 20260923|Monday, 6 July 2026 · seed 20260706", `under TZ=${zone}`);
+    assert.equal(out, "Wednesday, 23 September 2026 · seed 20260923|Monday, 6 July 2026 · seed 20260706|Thursday, 31 December 2026 · seed 20261231|Friday, 1 January 2027 · seed 20270101", `under TZ=${zone}`);
   }
 });
 

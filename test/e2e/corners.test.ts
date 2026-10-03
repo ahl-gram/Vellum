@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { resolve } from "node:path";
-import { fillBetween, mediaEdges, meetings, MOTTO, nearest, plainShift, routesUnder, squeezes, strideWidths, unreadWidthConditions, verdict } from "../../e2e/suites/corners/geometry.ts";
+import { fillBetween, mediaEdges, meetings, MOTTO, nearest, plainShift, routesUnder, squeezes, strideWidths, unreadWidthConditions, verdict, wrapVerdict } from "../../e2e/suites/corners/geometry.ts";
 import type { Box, CornerRead, Row } from "../../e2e/suites/corners/geometry.ts";
 
 const REPO = resolve(import.meta.dirname, "..", "..");
@@ -24,11 +24,13 @@ test("a media edge is read on both of its sides, inside the stretch only, widest
   assert.deepEqual(mediaEdges(["(width < 600px)", "(width > 700px)", "(width >= 800px)"], 480, 900), [800, 799, 701, 700, 600, 599]);
   assert.deepEqual(mediaEdges(["(600px <= width)", "(700px > width)", "(500px < width <= 560px)"], 480, 900), [700, 699, 600, 599, 561, 560, 501, 500]);
   assert.deepEqual(mediaEdges(["(max-width: 719.98px)"], 480, 900), [720, 719], "a fractional edge lands on the last whole width it holds and the first it does not");
+  assert.deepEqual(mediaEdges(["(min-width: 900.02px)"], 480, 1280), [901, 900], "and so does a fractional lower edge");
+  assert.deepEqual(mediaEdges(["(700px >= width)"], 480, 900), [701, 700]);
   assert.deepEqual(mediaEdges(["(width <= 340px)"], 480, 900), [], "an edge below the stretch is the 1px sweep's, not this list's");
 });
 
 test("a width condition the edge reader cannot parse is named, so no media edge hides from the sweep", () => {
-  assert.deepEqual(unreadWidthConditions(["(width <= 720px)", "(max-width: 900px)", "(500px < width <= 560px)", "(max-height: 640px)", "print", "(prefers-reduced-motion: reduce)"]), []);
+  assert.deepEqual(unreadWidthConditions(["(width <= 720px)", "(max-width: 900px)", "(500px < width <= 560px)", "(600px <= width)", "(700px > width)", "(max-height: 640px)", "print", "(prefers-reduced-motion: reduce)"]), []);
   assert.deepEqual(unreadWidthConditions(["(width <= 45em)", "(min-device-width: 400px)", "(max-width: 30rem)"]), ["(width <= 45em)", "(min-device-width: 400px)", "(max-width: 30rem)"]);
 });
 
@@ -39,6 +41,8 @@ test("two corners meet only when their boxes overlap on both axes; boxes that on
   assert.deepEqual(meetings([box(16, 42, 120, 58)], [box(120, 42, 304, 74)]), [], "and the same horizontally");
   assert.equal(meetings([box(16, 75.6, 150, 90)], [box(120, 42, 304, 76)]).length, 1, "a 0.4px line-box overlap counts: the ruled 2px allowance is not carried (the close-up arm on Issue #638)");
   assert.deepEqual(meetings([box(16, 14, 140, 42)], [box(148, 14, 304, 33)]), [], "side by side on one row is clear");
+  assert.deepEqual(meetings([box(16, 14, 150, 30)], [box(120, 52, 304, 70)]), [], "one above the other in the same columns is clear");
+  assert.equal(meetings([box(0, 0, 10, 10, "a")], [box(5, 5, 12, 12, "small"), box(0, 0, 10, 10, "big")])[0]?.b, "big", "the largest meeting is named first");
 });
 
 test("the nearest approach is the true distance between two boxes, zero when they meet", () => {
@@ -58,6 +62,9 @@ test("a plain shift is the cluster standing still while the corner slides with t
   assert.ok(!plainShift(wide, read(868, [box(16, 14, 140, 42, "Vellum")], [box(700, 14, 884, 33, "room")])), "the corner did not move with the edge");
   assert.ok(!plainShift(wide, read(868, [box(16, 14, 140, 42, "Vellum"), box(16, 50, 60, 60, "more")], [box(668, 14, 852, 33, "room")])), "a box appeared");
   assert.ok(!plainShift(wide, read(868, [box(16, 14, 140, 42, "Vellum")], [box(668, 14, 852, 33, "another room")])), "the same geometry carrying different words is not the same layout");
+  assert.ok(!plainShift(wide, read(868, [box(16, 14, 140, 42, "Vellum")], [box(640, 14, 852, 33, "room")])), "a left edge that moved on its own");
+  assert.ok(!plainShift(wide, read(868, [box(16, 14, 140, 42, "Vellum")], [box(668, 20, 852, 33, "room")])), "a top edge that moved on its own");
+  assert.ok(!plainShift(read(900, [box(16, 14, 140, 42, "Vellum"), box(16, 50, 60, 60, "more")], [box(700, 14, 884, 33, "room")]), read(868, [box(16, 14, 140, 42, "Vellum")], [box(668, 14, 852, 33, "room")])), "a box that went away");
 });
 
 test("between two reads that are not a plain shift every width is filled in, widest first, and nothing otherwise", () => {
@@ -66,6 +73,7 @@ test("between two reads that are not a plain shift every width is filled in, wid
   assert.deepEqual(fillBetween({ w: 900, read: wide }, plain), []);
   assert.deepEqual(fillBetween({ w: 868, read: plain.read }, changed), [867, 866, 865]);
   assert.deepEqual(fillBetween({ w: 865, read: plain.read }, changed), [], "adjacent widths have nothing between them");
+  assert.deepEqual(fillBetween({ w: 866, read: plain.read }, changed), [865], "two apart leaves one width between");
 });
 
 test("the stride list keeps both ends and every edge, widest first, with no width twice", () => {
@@ -93,9 +101,19 @@ test("the Gallery's forced layout is skipped only while it lasts: the skip fails
   assert.equal(verdict({ w: 320, read: read(347, [], []) }, gallery), null, "too wide, as Issue #672 records: skipped, ink unread");
   assert.match(verdict({ w: 320, read: read(320, [], []) }, gallery) ?? "", /Issue #672 has landed/, "laid out true below the edge: the skip has outlived its cause");
   assert.equal(verdict({ w: 390, read: room().read }, gallery), null, "above the edge it is an ordinary page");
+  assert.match(verdict({ w: 346, read: read(347, [], []) }, gallery) ?? "", /laid out at 347, not 346/, "and from the edge itself");
 });
 
 test("a corner control is squeezed when it renders narrower than its own width by more than rounding", () => {
   assert.deepEqual(squeezes(1023, [{ t: "input#pr-seed", w: 110.78, natural: 110.78 }, { t: "select#pr-style", w: 118.2, natural: 118.39 }]), [], "whole, or under half a pixel short");
   assert.deepEqual(squeezes(1023, [{ t: "input#pr-seed", w: 63.44, natural: 110.78 }, { t: "button#pr-random", w: 38.39, natural: 38.39 }]), ["at 1023 the corner's input#pr-seed is squeezed to 63.4 from its own 110.8"], "the step 11 plate read's figure on the Print Room before its row wrapped");
+  assert.equal(squeezes(1023, [{ t: "select#pr-style", w: 117.8, natural: 118.4 }]).length, 1, "six tenths of a pixel short is a squeeze");
+});
+
+test("a room that already squeezes is exempt only while it still does, and every other room is held", () => {
+  const exempt = { "/specimen/": "Issue #741" };
+  const squeezed = [{ t: "button#sb-random", w: 22.7, natural: 38.4 }];
+  assert.deepEqual(wrapVerdict("/specimen/", 960, squeezed, exempt), [], "squeezing as filed");
+  assert.deepEqual(wrapVerdict("/specimen/", 960, [{ t: "button#sb-random", w: 38.4, natural: 38.4 }], exempt), ["/specimen/ at 960 no longer squeezes its corner, so Issue #741 has landed and its exemption goes"]);
+  assert.deepEqual(wrapVerdict("/print-room/", 960, squeezed, exempt), ["/print-room/ at 960 the corner's button#sb-random is squeezed to 22.7 from its own 38.4"]);
 });
