@@ -32,7 +32,6 @@ export interface LaunchTuning {
 }
 
 // killGraceMs is a cap on a hang, not a budget: the one kill measured on a GitHub runner was gone 8ms after SIGKILL (PR #735's CI, 2026-10-02), and the old loop's 0.13s retries put every earlier one under about 130ms.
-// retryPauseMs is Alex's ruling on Issue #621 (2026-10-02): insurance against an overloaded runner, which nothing measured has shown.
 // polls x pollMs is a 60s wait, about 1.7 times the slowest start measured on a GitHub runner, as Alex ruled on Issue #621 (2026-10-02): attempt 1 up in 0.7, 1.2, 6.2, 7.2, 7.4, 7.5, 7.6, 8.5, 9.8, 20.4, 24.5, 28.0 and 35.7s, and one past 20s whose retry came up in 9.4s (PR #735's CI).
 export const LAUNCH_TUNING: LaunchTuning = { attempts: 3, polls: 480, pollMs: 125, killGraceMs: 5000, retryPauseMs: 2000 };
 
@@ -42,31 +41,36 @@ const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms
 const messageOf = (e: unknown): string => String((e as { message?: string } | null)?.message ?? e);
 
 interface Life {
-  exit: BrowserExit | null;
-  error: Error | null;
-  output: string;
+  exit(): BrowserExit | null;
+  error(): Error | null;
+  output(): string;
   readonly gone: Promise<void>;
 }
 
 function watch(child: LaunchChild): Life {
+  let exit: BrowserExit | null = null;
+  let error: Error | null = null;
+  let output = "";
   let settle = (): void => {};
-  const life: Life = { exit: null, error: null, output: "", gone: new Promise<void>((r) => (settle = r)) };
-  child.stdout.on("data", (d) => (life.output += String(d)));
-  child.stderr.on("data", (d) => (life.output += String(d)));
+  const gone = new Promise<void>((r) => (settle = r));
+  child.stdout.on("data", (d) => (output = output + String(d)));
+  child.stderr.on("data", (d) => (output = output + String(d)));
   child.on("exit", (code, signal) => {
-    life.exit = { code, signal };
+    exit = { code, signal };
     settle();
   });
   child.on("error", (err) => {
-    life.error = err;
+    error = err;
     settle();
   });
-  return life;
+  return { exit: () => exit, error: () => error, output: () => output, gone };
 }
 
 function death(life: Life): string | null {
-  if (life.error) return `browser failed to start: ${life.error.message}`;
-  if (life.exit) return `browser exited code=${life.exit.code} signal=${life.exit.signal}`;
+  const error = life.error();
+  if (error) return `browser failed to start: ${error.message}`;
+  const exit = life.exit();
+  if (exit) return `browser exited code=${exit.code} signal=${exit.signal}`;
   return null;
 }
 
@@ -96,7 +100,7 @@ async function stop(child: LaunchChild, life: Life, capMs: number): Promise<stri
   return gone ? `gone ${Date.now() - t0}ms after SIGKILL` : null;
 }
 
-const outputOf = (life: Life): string => life.output.slice(0, OUTPUT_CHARS) || "(none captured)";
+const outputOf = (life: Life): string => life.output().slice(0, OUTPUT_CHARS) || "(none captured)";
 
 type Outcome<T> = { readonly target: T } | { readonly failure: string };
 

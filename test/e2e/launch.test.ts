@@ -91,7 +91,11 @@ function rig(plans: readonly Plan[]) {
       browsers.push(browser);
       probes.push(0);
       browser.start();
-      return Promise.resolve({ child: browser, discard: () => Promise.resolve() });
+      const discard = () => {
+        mark(`discard ${browser.pid}`);
+        return Promise.resolve();
+      };
+      return Promise.resolve({ child: browser, discard });
     },
     probe: () => {
       const i = browsers.length - 1;
@@ -119,7 +123,7 @@ test("a killed browser's late exit cannot fail the next attempt: the CI shape la
 test("the next browser starts only once the killed one is gone, and the port is checked once, before the first", async () => {
   const r = rig([{ reapMs: 15 }, { upAtProbe: 1 }]);
   await launchWithRetry(r.deps, { ...FAST, retryPauseMs: 5 });
-  assert.deepEqual(r.events, ["preflight", "spawn 101", "kill 101 SIGKILL", "exit 101", "spawn 102"]);
+  assert.deepEqual(r.events, ["preflight", "spawn 101", "kill 101 SIGKILL", "exit 101", "discard 101", "spawn 102"]);
 });
 
 test("each attempt reports only its own browser's output: a line a gone browser writes after its exit is not the next one's", async () => {
@@ -170,8 +174,12 @@ test("no launch line and no line of the launch error reads as a check tally, whi
   assert.equal(ok.logs.length, 2, `expected the retry line and the success line, got ${JSON.stringify(ok.logs)}`);
   assert.deepEqual(ok.logs.map((l) => l.includes("launch attempt")), [true, false], `a search for "launch attempt" must find the retry and not the success line: ${JSON.stringify(ok.logs)}`);
   const failed = await settle(launchWithRetry(rig([{ output: "x" }, { exitAfterMs: 5 }, { spawnError: true }]).deps, FAST));
-  const lines = [...ok.logs, ...(failed.error?.message ?? "").split("\n")];
-  assert.ok(lines.length > 6, "the failed launch threw no multi-line error to read");
+  const stuck = await settle(launchWithRetry(rig([{ exitAfterMs: 5 }, { reapMs: null }]).deps, { ...FAST, killGraceMs: 50 }));
+  const unspawnable = rig([{}]);
+  const cannot = await settle(launchWithRetry({ ...unspawnable.deps, spawn: (a) => (a === 2 ? Promise.reject(new Error("EMFILE")) : unspawnable.deps.spawn(a)) }, FAST));
+  const errors = [failed, stuck, cannot].map((got) => got.error?.message ?? "");
+  assert.deepEqual(errors.map((m) => /^(no devtools page target after|browser launch attempt 2\/3, pid 102, was not gone|browser launch attempt 2\/3 could not start)/.test(m)), [true, true, true], `the three ways a launch fails did not all throw: ${JSON.stringify(errors.map((m) => m.split("\n")[0]))}`);
+  const lines = [...ok.logs, ...errors.flatMap((m) => m.split("\n"))];
   for (const line of lines) assert.equal(laneCheckTally(line), null, `${JSON.stringify(line)} reads as a check tally`);
 });
 
@@ -255,6 +263,7 @@ test("with no tuning passed, a killed browser that is never gone stops the launc
   }
 });
 
+// REAL gives a stand-in node child 3000ms to bind: on ten CI runs through 2026-10-03 (PR #735) the slowest second stand-in came up in about 420ms.
 const REAL: LaunchTuning = { attempts: 3, polls: 150, pollMs: 20, killGraceMs: 5000, retryPauseMs: 50 };
 
 function freePort(): Promise<number> {
