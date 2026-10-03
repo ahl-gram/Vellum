@@ -8,6 +8,8 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import type { BrowserProcess, CdpMessage, Clip, Payload, StartOptions, SuiteContext, TouchPoint } from "./types.ts";
 import { debugPortConflictMessage } from "./support/ports.ts";
+import { launchWithRetry } from "./support/launch.ts";
+import type { LaunchAttempt, LaunchTuning } from "./support/launch.ts";
 import { serverState, startServer } from "./site-server.ts";
 
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
@@ -22,7 +24,7 @@ const httpGet = (url: string): Promise<string> =>
       .on("error", reject);
   });
 
-// #339: getPageTarget attaches to whatever answers /json, so an orphaned browser holding the port would be adopted in SILENCE; a plain TCP connect also catches a non-browser squatter.
+// Issue #339: probePageTarget attaches to whatever answers /json, so an orphaned browser holding the port would be adopted in SILENCE; a plain TCP connect also catches a non-browser squatter.
 function probeDebugPort(DPORT: number, timeoutMs = 300): Promise<boolean> {
   return new Promise((res) => {
     const socket = net.connect({ host: "127.0.0.1", port: DPORT });
@@ -61,8 +63,6 @@ async function assertDebugPortFree(DPORT: number): Promise<void> {
 }
 
 let server: import("node:http").Server | undefined, brave: BrowserProcess | undefined, ws: WebSocket | undefined, userDataDir: string | undefined;
-let browserOut = "";
-let browserExit: { code: number | null; signal: NodeJS.Signals | null } | null = null;
 let OUT_DIR = "";
 export function cleanup(): void {
   try { ws?.close(); } catch {}
@@ -74,25 +74,11 @@ export function cleanup(): void {
   try { if (userDataDir) rmSync(userDataDir, { recursive: true, force: true }); } catch {}
 }
 
-async function getPageTarget(DPORT: number): Promise<{ webSocketDebuggerUrl: string }> {
-  let lastErr = "";
-  for (let i = 0; i < 160; i++) {
-    if (browserExit) break;
-    try {
-      const list = JSON.parse(await httpGet(`http://127.0.0.1:${DPORT}/json`)) as { type: string; webSocketDebuggerUrl?: string }[];
-      const page = list.find((t) => t.type === "page" && t.webSocketDebuggerUrl);
-      if (page) return page as { type: string; webSocketDebuggerUrl: string };
-      lastErr = `/json had ${list.length} targets, none a page`;
-    } catch (e) {
-      lastErr = String((e as { message?: string }).message || e);
-    }
-    await sleep(125);
-  }
-  throw new Error(
-    "no devtools page target" +
-      (browserExit ? ` (browser exited code=${browserExit.code} signal=${browserExit.signal})` : ` (last: ${lastErr})`) +
-      `\n--- browser output ---\n${browserOut.slice(0, 4000) || "(none captured)"}`,
-  );
+async function probePageTarget(DPORT: number): Promise<{ webSocketDebuggerUrl: string }> {
+  const list = JSON.parse(await httpGet(`http://127.0.0.1:${DPORT}/json`)) as { type: string; webSocketDebuggerUrl?: string }[];
+  const page = list.find((t) => t.type === "page" && t.webSocketDebuggerUrl);
+  if (page) return page as { type: string; webSocketDebuggerUrl: string };
+  throw new Error(`/json had ${list.length} targets, none a page`);
 }
 
 let nextId = 1;
@@ -212,47 +198,39 @@ async function shoot(file: string, clip?: Clip): Promise<void> {
   console.log(`  shot -> ${join(OUT_DIR, file)} (${clip ? `${clip.width}x${clip.height}` : `${h}px tall`})`);
 }
 
-// A cold Chrome on CI intermittently comes up but never binds the debugging port (a transient dbus/crashpad hiccup; the process stays alive), so retry with a fresh profile; a genuine break still fails after the last attempt with the captured output.
-async function launchBrowser(browser: string, DPORT: number): Promise<{ webSocketDebuggerUrl: string }> {
-  // Preflight once, ABOVE the retry loop: a SIGKILLed attempt does not release the port synchronously, so a per-attempt preflight would report our own dying browser as the stray.
-  await assertDebugPortFree(DPORT);
-  const MAX_ATTEMPTS = 3;
-  let lastErr: unknown;
-  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-    browserExit = null;
-    browserOut = "";
-    userDataDir = await mkdtemp(join(tmpdir(), "vellum-e2e-"));
-    brave = spawn(
-      browser,
-      [
-        "--headless=new",
-        `--remote-debugging-port=${DPORT}`,
-        `--user-data-dir=${userDataDir}`,
-        "--no-sandbox",
-        "--disable-dev-shm-usage",
-        "--disable-gpu",
-        "--hide-scrollbars",
-        "--force-device-scale-factor=1",
-        "--window-size=1280,2400",
-        "about:blank",
-      ],
-      { stdio: ["ignore", "pipe", "pipe"] },
-    );
-    brave.stdout.on("data", (d) => (browserOut += d));
-    brave.stderr.on("data", (d) => (browserOut += d));
-    brave.on("exit", (code, signal) => (browserExit = { code, signal }));
-    try {
-      return await getPageTarget(DPORT);
-    } catch (err) {
-      lastErr = err;
-      try { brave.kill("SIGKILL"); } catch {}
-      try { await rm(userDataDir, { recursive: true, force: true }); } catch {}
-      if (attempt < MAX_ATTEMPTS) {
-        console.log(`  e2e: browser launch attempt ${attempt}/${MAX_ATTEMPTS} exposed no devtools target; retrying with a fresh profile...`);
-      }
-    }
-  }
-  throw lastErr;
+async function spawnBrowser(browser: string, DPORT: number): Promise<LaunchAttempt> {
+  const dir = await mkdtemp(join(tmpdir(), "vellum-e2e-"));
+  userDataDir = dir;
+  const child = spawn(
+    browser,
+    [
+      "--headless=new",
+      `--remote-debugging-port=${DPORT}`,
+      `--user-data-dir=${dir}`,
+      "--no-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-gpu",
+      "--hide-scrollbars",
+      "--force-device-scale-factor=1",
+      "--window-size=1280,2400",
+      "about:blank",
+    ],
+    { stdio: ["ignore", "pipe", "pipe"] },
+  );
+  brave = child;
+  return { child, discard: () => rm(dir, { recursive: true, force: true }).catch(() => {}) };
+}
+
+export async function launchBrowser(browser: string, DPORT: number, tuning?: LaunchTuning): Promise<{ webSocketDebuggerUrl: string }> {
+  return launchWithRetry(
+    {
+      preflight: () => assertDebugPortFree(DPORT),
+      spawn: () => spawnBrowser(browser, DPORT),
+      probe: () => probePageTarget(DPORT),
+      log: (line) => console.error(line),
+    },
+    tuning,
+  );
 }
 
 function onCdpMessage(ev: MessageEvent, consoleErrors: string[], http4xx: string[]): void {
