@@ -5,6 +5,10 @@ export function seedForDate(date: Date): number {
   return year * 10000 + month * 100 + day;
 }
 
+export function datelineFor(date: Date): string {
+  return String(seedForDate(date));
+}
+
 /** The day's capital line. Pure so the former-name clause is unit-reachable; the page only appends it to the DOM. */
 export function capitalBlurb(
   capital: { readonly name: string; readonly formerName?: string },

@@ -252,6 +252,7 @@ const STEPPED_GROUPS: Readonly<Record<string, readonly string[]>> = {
   ],
   "document-rooms": ["IX3"],
   "specimen": ["SB4"],
+  "corners": ["CO1", "CO2"],
 };
 
 const SUITE_FILES = E2E_SUITE_ORDER.map((name) => [name, e2eSuitePath(name)] as const);

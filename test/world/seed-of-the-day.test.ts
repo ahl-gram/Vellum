@@ -1,6 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { seedForDate } from "../../src/world/seed-of-the-day.ts";
+import { datelineFor, seedForDate } from "../../src/world/seed-of-the-day.ts";
+
+test("the room folio's dateline names the UTC day in full and the seed it yields", () => {
+  assert.equal(datelineFor(new Date("2026-07-06T00:00:00Z")), "Monday, 6 July 2026 · seed 20260706");
+  assert.equal(datelineFor(new Date("2026-09-23T23:59:59Z")), "Wednesday, 23 September 2026 · seed 20260923");
+});
 
 test("a date maps to its UTC YYYYMMDD as the seed", () => {
   assert.equal(seedForDate(new Date("2026-06-19T00:00:00Z")), 20260619);

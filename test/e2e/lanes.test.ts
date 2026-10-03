@@ -55,6 +55,7 @@ const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   "room-ink": 2.7, // 2026-09-20: 2.7, 2.4
   "fallback": 2.5, // 2026-09-20: 2.4, 2.5
   "motion": 2.4, // 2026-09-20: 2.4, 2.4
+  "corners": 100.0, // PLACEHOLDER until measured
   "health": 0.0, // 2026-09-20: 0.0, 0.0
 };
 
