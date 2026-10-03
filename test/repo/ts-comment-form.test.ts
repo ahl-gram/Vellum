@@ -67,6 +67,18 @@ const FORMS: ReadonlyArray<readonly [string, string | null]> = [
   ["export const t = `#28`;", null],
   ["export const r = /#29/;", null],
   ["// Issue #731", null],
+  ["// pull #46, pulls #47, fixes #48, closes #49, resolves #50, refs #51, sub #52, epic #53, no #54, task #55, number #56, gh #57", "#46, #47, #48, #49, #50, #51, #52, #53, #54, #55, #56, #57"],
+  ["// v2pr #78 and x_pr #79 and shoprs #80", "#78, #79, #80"],
+  ["// Issue-#81 and PR/#82 and PR#83 and PRs#84 and Issues#85", "#81, #82, #83, #84, #85"],
+  ["// ISSUE #86 and Pr #87", null],
+  ["// the colour #12345678", "#12345678"],
+  ["// #102 and #102", "#102, #102"],
+  ["// fixed (#60), see [#61]. \"#62\" '#63' -#65- ,#66, :#67: .#68. /#69/ *#70* _#71_ ?#72? <#74> #76#77", "#60, #61, #62, #63, #65, #66, #67, #68, #69, #70, #71, #72, #74, #76, #77"],
+  ["/* Issue\t#88 */", null],
+  ["/* Issue\r\n   #89 */", null],
+  ["// Issue #97 and #98, PR #99, #100 & #101", "#98, #100, #101"],
+  ["// (Issue #91) [PR #92] \"Issue #93\" a:PR #94 x,Issue #95 *PR #96", null],
+  ["// `#64` and #73! and >#75<", "#64, #73, #75"],
 ];
 
 test("every comment in the TypeScript tree writes Issue #N or PR #N, each number with its own word, and a string is never read (Issue #675)", async () => {
