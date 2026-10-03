@@ -145,14 +145,20 @@ a file outside this repo at its real home under `~`. The test is the list of wha
 one numbering sequence here and interleave, so a bare number does not say which kind of thing it
 points at. It governs replies, pull request bodies, issue comments, commit message bodies, and prose
 anywhere in the repo: these specs, `CLAUDE.md`, and the files under `.claude/agents/` and
-`.claude/skills/`, and the comments in the sheets under `public/`, where `npm run lint` enforces it
-(`vellum/css-comment-issue-form` in `scripts/lint/css-comment-form.ts`). The word may be lowercase
-where the sentence wants it; what it may not be is absent. **It never governs a form a tool parses, or one that already carries the
+`.claude/skills/`, and the comments in the sheets under `public/` and in the TypeScript the lint
+reads, where `npm run lint` enforces it (`vellum/css-comment-issue-form` in
+`scripts/lint/css-comment-form.ts` and `vellum/ts-comment-issue-form` in
+`scripts/lint/ts-comment-form.ts`, sharing one matcher, `bareNumbers`). Every number carries its own
+word, one in a list included (`Issue #133/Issue #134`). The word may be lowercase or plural where
+the sentence wants it; what it may not be is absent. **It never governs a form a tool parses, or one that already carries the
 word**: a commit SUBJECT keeps the house's leading `#N`, a closing reference stays `Closes #N`
 exactly (a word between the keyword and the number closes nothing, `vellum-footguns` Gate 5 item 5),
 a pull request body's title line keeps `#N`, and a field label such as the template's `Issue: #N`
-already says which it is. Existing bare references are trimmed as each line is touched, not swept
-separately, the same way the older narrative is.
+already says which it is, though the lint reads one inside a comment as bare. Strings in code are
+outside the rule. Existing bare references in prose, and in comments no lint reads (an `.astro`
+page, `astro.config.ts`, the hooks under `.claude/`), are trimmed as each line is touched, not swept
+separately, the same way the older narrative is; `design/`'s round tools keep theirs, as the archive
+keeps everything.
 
 **Do not copy volatile state into a spec.** Phase names, board membership and issue status belong
 to the Project and are read from it. Counts, rosters and file line numbers rot without any guard
