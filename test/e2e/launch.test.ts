@@ -200,6 +200,8 @@ test("a busy debug port stops the launch before any browser starts", async () =>
 test("the retry pauses after the killed browser is gone, and never after the last attempt", async () => {
   const r = rig([{ reapMs: 30 }, { upAtProbe: 1 }]);
   await launchWithRetry(r.deps, { ...FAST, retryPauseMs: 60 });
+  const discardLag = (r.at.get("discard 101") ?? Infinity) - (r.at.get("exit 101") ?? 0);
+  assert.ok(discardLag < 30, `the failed attempt's profile was discarded ${discardLag.toFixed(1)}ms after its browser was gone, inside the 60ms pause`);
   const gap = (r.at.get("spawn 102") ?? 0) - (r.at.get("exit 101") ?? Infinity);
   assert.ok(gap >= 58, `attempt 2 started ${gap.toFixed(1)}ms after attempt 1's browser was gone, inside the 60ms pause`);
   const all = rig([{ exitAfterMs: 1 }, { exitAfterMs: 1 }, { exitAfterMs: 1 }]);
