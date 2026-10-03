@@ -11,7 +11,8 @@ import { lintTsRoots } from "../../test-support/lint-roots.ts";
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const eslint = new ESLint({ cwd: ROOT, flags: ["unstable_native_nodejs_ts_config"] });
 const NO_JS = "vellum/ts-comment-no-js-module";
-const EVERY_ROOT = [NO_JS, "vellum/template-silent-escape"];
+const ISSUE_FORM = "vellum/ts-comment-issue-form";
+const EVERY_ROOT = [NO_JS, ISSUE_FORM, "vellum/template-silent-escape"];
 
 test("no comment in the TypeScript tree names a .js module, a trailing comment included, the bundle twins excepted", async () => {
   const [result] = await eslint.lintText([
@@ -24,6 +25,48 @@ test("no comment in the TypeScript tree names a .js module, a trailing comment i
   ].join("\n"), { filePath: join(ROOT, "src/cli/main.ts") });
   assert.deepEqual(result!.messages.filter((m) => m.fatal).map((m) => m.message), []);
   assert.deepEqual(result!.messages.filter((m) => m.ruleId === NO_JS).map((m) => [m.line, m.message.match(/"([^"]+)"/)?.[1]]), [[1, "worker.js"], [2, "x.js"], [5, "reveal.js"], [5, "stage.js"], [6, "mybundle.js"]]);
+});
+
+const FORMS: ReadonlyArray<readonly [string, string | null]> = [
+  ["// fixed in #12", "#12"],
+  ["/* see #16 */", "#16"],
+  ["/** cites #20 */", "#20"],
+  ["export const a = 1; // #19", "#19"],
+  ["// #30 and #31", "#30, #31"],
+  ["// Issue#18", "#18"],
+  ["// a reissue #22", "#22"],
+  ["// Issue #133/#134", "#134"],
+  ["// the grey #123456", "#123456"],
+  ["// page.html#12", "#12"],
+  ["// &#8212;", "#8212"],
+  ["// Issue: #32", "#32"],
+  ["// owner/repo#33", "#33"],
+  ["/**\n * Issue\n * #24\n */", "#24"],
+  ["// Issue", null],
+  ["// #25", "#25"],
+  ["// Issue #13", null],
+  ["// PR #14", null],
+  ["// issue #15", null],
+  ["// pr #16", null],
+  ["// Issues #17", null],
+  ["// PRs #21", null],
+  ["/* Issue\n   #26 */", null],
+  ["// the ink #1a2b3c", null],
+  ["export const s = \"#27\";", null],
+  ["export const t = `#28`;", null],
+  ["export const r = /#29/;", null],
+  ["// Issue #731", null],
+];
+
+test("every comment in the TypeScript tree writes Issue #N or PR #N, each number with its own word, and a string is never read (Issue #675)", async () => {
+  const starts = FORMS.map((_, i) => 1 + FORMS.slice(0, i).reduce((n, [form]) => n + form.split("\n").length, 0));
+  const [result] = await eslint.lintText(FORMS.map(([form]) => form).join("\n"), { filePath: join(ROOT, "src/cli/main.ts") });
+  assert.deepEqual(result!.messages.filter((m) => m.fatal).map((m) => m.message), []);
+  assert.deepEqual(
+    result!.messages.filter((m) => m.ruleId === ISSUE_FORM).map((m) => [m.line, m.message.match(/names (.+) bare:/)?.[1]]),
+    FORMS.flatMap(([, numbers], i) => (numbers === null ? [] : [[starts[i], numbers]])),
+    "the comments reporting differ from the planted forms. DECLARED, each erring toward failing: an all-digit hex colour, digits after a word and a hash, an HTML numeric entity, a field label (Issue: #N), another repository's number (owner/repo#N), a doc block wrapped between the word and the number with its * leader, and a run of line comments wrapped the same way all report. DECLARED, erring toward passing (a handbook/errata/guards.md row): the rule reads the form and never the kind, so Issue #731, a pull request, passes",
+  );
 });
 
 const ROOT_WITNESSES: Readonly<Record<string, string>> = {
@@ -40,14 +83,14 @@ const resolvedRules = async (file: string): Promise<Record<string, unknown>> => 
   return ((await eslint.calculateConfigForFile(file)) as { rules?: Record<string, unknown> }).rules ?? {};
 };
 
-test("the .js comment rule and the escape twin reach every TypeScript root the lint reads, and the sheets carry the CSS sibling instead (Issue #675)", async () => {
+test("the two comment rules and the escape twin reach every TypeScript root the lint reads, and the sheets carry the CSS siblings instead (Issue #675)", async () => {
   assert.deepEqual(Object.keys(ROOT_WITNESSES).sort(), lintTsRoots(), "a TypeScript root the lint reads has no witness here, so these rules' reach there is unpinned");
   for (const file of Object.values(ROOT_WITNESSES)) {
     const rules = await resolvedRules(file);
     for (const rule of EVERY_ROOT) assert.deepEqual(rules[rule], [2], `${file}: ${rule} does not resolve at error`);
   }
   const sheet = await resolvedRules("public/house.css");
-  assert.deepEqual(sheet["vellum/css-comment-no-js-module"], [2], "the sheets lost the .js comment rule's CSS sibling");
+  for (const rule of ["vellum/css-comment-no-js-module", "vellum/css-comment-issue-form"]) assert.deepEqual(sheet[rule], [2], `the sheets lost ${rule}, a comment rule's CSS sibling`);
   for (const rule of EVERY_ROOT) assert.equal(sheet[rule], undefined, `${rule} reaches a sheet`);
 });
 
