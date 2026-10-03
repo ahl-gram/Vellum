@@ -53,7 +53,6 @@ const crumbOf = (href: string): Crumb => {
   return { name, href };
 };
 
-/** The parent a route is seated under: null at the nav's top line, undefined when it has no seat. */
 export function seatOf(route: string): string | null | undefined {
   for (const item of NAV_ITEMS) {
     if (item.href === route) return null;

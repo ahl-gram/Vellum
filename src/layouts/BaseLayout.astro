@@ -128,6 +128,7 @@ const trail = trailFor(path);
   /* The reserved walnut band the head cluster stands on (#461 ruling 5): the sheet scrolls beneath the band, never beneath bare lettering. */
   --band-h: 7.6rem;
   --chrome-x: 1.6rem; --chrome-y: 1.4rem;
+  --trail-gap: 0.36rem;
 }
 /* The layout's inline style renders AFTER the page css link, so an equal-specificity page rule silently loses: page deviations need higher specificity. A palette inversion, not a dark mode: form controls stay light. */
 :root { color-scheme: light; }
@@ -167,8 +168,7 @@ header.chrome a, header.chrome .rooms-reveal { pointer-events: auto; }
 header.chrome a:focus-visible, footer a:focus-visible { outline-color: var(--parchment-bright); }
 .rooms [aria-current="page"] { display: inline-block; vertical-align: top; color: var(--parchment-bright);
   text-decoration: underline; text-underline-offset: 0.45em; text-decoration-thickness: 1px; }
-/* The trail (Issue #668): the dress of the ruled round, design/nav-wayfinding/mock.css. */
-.trail { font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); font-size: 0.62rem; letter-spacing: 0.1em; margin: 0.36rem 0 0; }
+.trail { font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); font-size: 0.62rem; letter-spacing: 0.1em; margin: var(--trail-gap) 0 0; }
 .trail a { color: var(--parchment); text-decoration: none; }
 .trail a:hover, .trail a:focus-visible { color: var(--parchment-bright); }
 .trail [aria-current="page"], .trail .here { color: var(--parchment-bright);
@@ -273,10 +273,11 @@ footer a { color: inherit; }
     background: rgb(from var(--chart-ink) r g b / 0.45);
   }
   body.room:has(.rooms-reveal:checked) [popover]:popover-open { display: none; }
-  .trail, .also { margin-top: 0.55rem; }
+  :root { --trail-gap: 0.55rem; }
+  .also { margin-top: 0.55rem; }
   body:has(.rooms-reveal:checked) .where {
     position: fixed; z-index: 46; left: var(--chrome-x); top: calc(var(--band-h) + 0.6rem);
-    width: calc(min(16rem, 100vw) - 2 * var(--chrome-x)); padding-bottom: 0.25rem;
+    width: calc(min(16rem, 100vw) - var(--chrome-x) - 1rem); padding-bottom: 0.25rem;
     background: var(--chart-ink); pointer-events: auto;
   }
   body:has(.rooms-reveal:checked) .trail { margin-top: 0; }

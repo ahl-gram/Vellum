@@ -57,7 +57,7 @@ export function rh2Members({ check }: SuiteContext, heads: Heads): void {
 }
 
 export function rh3Fixed({ check }: SuiteContext, heads: Heads, bad: Bad): void {
-  // The band clips the deep at --band-h (169.6px at desktop since the trail, Issue #668); home has no band. The invariant is band >= cluster (ruling 5's "never beneath bare lettering"), not just the literal clip, so cluster growth that overflows the band must red here.
+  // The band clips the deep at --band-h; home has no band. The invariant is band >= cluster (ruling 5's "never beneath bare lettering"), not just the literal clip, so cluster growth that overflows the band must red here.
   const unfixed = bad((h, r) =>
     (r === "/" ? h.chromePosition === "absolute" && h.bandClip === null
                : CHART.includes(r) ? h.chromePosition === "fixed" && h.bandClip === null

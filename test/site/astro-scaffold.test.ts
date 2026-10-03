@@ -46,9 +46,7 @@ type PageSpec = {
   /** A document room's index script, Astro-processed and inlined (Issue #483); a pattern because the minifier picks the quote style. */
   pageScript?: RegExp;
   noindex?: true;
-  /** The trail's segments, name and route, LITERAL (Issue #668): absent on a page with no seat in the route tree. */
   trail?: readonly (readonly [string, string])[];
-  /** The alias line's link, name and route: the page is also reached from that room. */
   also?: readonly [string, string];
 };
 

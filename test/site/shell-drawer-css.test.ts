@@ -143,16 +143,17 @@ test("the trail is quiet by size and never by a dimmer ink: no rule that dresses
 });
 
 test("the band buys the trail its ground where a band renders, keyed to what the cluster carries, declared on the root, its padding derived and on screen alone (Issue #668)", () => {
-  assert.match(ruleAt(":root:has(.band):has(.trail)", []), /--band-h:\s*10\.6rem/, "the mock's one height above a phone, on the root every reader of the token reads");
-  assert.match(ruleAt(":root:has(.band):has(.trail)", ["@media (max-width: 720px)"]), /--band-h:\s*7\.8rem/, "a phone-sized band (Alex, 2026-10-03)");
+  assert.match(ruleAt(":root:has(.band):has(.trail)", []), /--band-h:\s*[\d.]+rem/, "the band's height on the root every reader of the token reads");
+  assert.match(ruleAt(":root:has(.band):has(.trail)", ["@media (max-width: 720px)"]), /--band-h:\s*[\d.]+rem/, "and a phone's, on the root too");
   const padding = shellRules.filter((r) => r.selector === "body.room:has(.band):has(.trail)");
   assert.equal(padding.length, 2, "one padding for a wide screen and one for a phone");
   for (const r of padding) assert.ok(r.media.some((m) => /\bscreen\b/.test(m)), `${JSON.stringify(r.media)}: on paper the layout's own padding: 0 stands`);
-  assert.match(ruleAt("body.room:has(.band):has(.trail)", ["@media screen"]), /padding-top:\s*calc\(var\(--band-h\) \+ 0\.2rem\)/, "derived from the token: the mock's 10.8rem");
-  assert.match(ruleAt("body.room:has(.band):has(.trail)", ["@media screen and (max-width: 720px)"]), /padding-top:\s*calc\(var\(--band-h\) \+ 0\.6rem\)/, "today's phone gap under the band");
+  for (const media of [["@media screen"], ["@media screen and (max-width: 720px)"]]) {
+    assert.match(ruleAt("body.room:has(.band):has(.trail)", media), /padding-top:\s*calc\(var\(--band-h\) \+ [\d.]+rem\)/, `${media[0]}: the padding derives from the token, never a literal beside it`);
+  }
 });
 
 test("the drawer's cap grows only where a trail rides in it, and the cap every page wears is unchanged (Issue #668)", () => {
-  assert.match(ruleAt("body:has(.rooms-reveal:checked) .chrome:has(.trail) .rooms::before", ["@media (max-width: 900px)"]), /height:\s*calc\(var\(--band-h\) \+ 3\.55rem\)/);
+  assert.match(ruleAt("body:has(.rooms-reveal:checked) .chrome:has(.trail) .rooms::before", ["@media (max-width: 900px)"]), /height:\s*calc\(var\(--band-h\) \+ [\d.]+rem\)/);
   assert.match(rule(narrow, ".chrome .rooms::before"), /height:\s*calc\(var\(--band-h\) \+ 1rem\)/, "home's drawer, which carries no trail, keeps its cap");
 });

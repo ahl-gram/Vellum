@@ -138,15 +138,18 @@ into a desk. It folds away to a bookmark tab on the right edge, and on a phone i
 sheet. **The legend row** runs along the bottom and carries the roads out.
 
 **The head cluster says where the reader is standing, on every page with a seat in the route tree.**
-It carries exactly one mark of the current page, brightened AND underlined, never colour alone: the
-nav carries it when the page is on its top line, and the trail carries it when the page is not.
-Home carries none, its wordmark being its mark, and so does a page deliberately outside the tree.
-The trail's links are parchment like the nav's, never a dimmer ink, and each clears a thumb's 24px
-from every other target. Below the fold the trail rides into the open drawer's cap above the
-doors, because opening the nav to ask where you are must not take the answer away, and on a chart
-room it stands aside while the phone sheet is up, as the Glass does. **Provisional until the
-review after live use:** the trail's size step under the nav, its separator glyph, the alias
-line's wording and whether it earns its place, and the trail and the nav sharing one ink above 901.
+Exactly one element on the page carries the current-page mark (`aria-current`): the nav's segment
+when the page is on its top line, the trail's last segment when it is not. The mark is brightened
+AND underlined, never colour alone; on a top-level room the trail's last segment wears the same
+dress without the mark, which the nav carries. Home carries none, its wordmark being its mark, and
+so does a page deliberately outside the tree. The trail's links are parchment like the nav's, never
+a dimmer ink, and below the fold each clears a thumb's 24px from every other target. Below the fold
+the trail rides into the open drawer's cap above the doors, because opening the nav to ask where
+you are must not take the answer away. **Provisional until the post-use review:** the trail's size
+step under the nav, its separator glyph, the alias line's wording and whether it earns its place,
+the trail and the nav sharing one ink above 901, the spacing that clears the phone's targets, the
+Gallery's first row given back its gap, the phone-sized band on a document room, the trail standing
+aside on a chart room while the phone sheet is up, and the alias link's strengthened underline.
 
 **A document room** is the sheet instead. It keeps the band and the footer because it scrolls, and it
 replaces a table of contents with an **index slip** that inks the section being read and keeps it in
