@@ -143,10 +143,10 @@ export async function dr14PhoneShut(k: TrailKit): Promise<void> {
   const faq = await evaluate(READ);
   const margins = (d: Trail) => spacing([...d.links, ...(d.burger ? [d.burger] : [])]);
   check(
-    "DR14 at 390 with the drawer shut the trail and its alias line stand in the cluster below the burger, every link takes the hand at its centre, a thumb's 24px clears round every link and the burger, nothing scrolls sideways, and the FAQ's band covers the cluster (Issue #668; Alex's 2026-10-03 rulings)",
+    "DR14 at 390 with the drawer shut the trail and its alias line stand in the cluster below the burger, every link takes the hand at its centre, a thumb's 24px clears round every link and the burger, and nothing scrolls sideways; DR1 holds the FAQ's band over the cluster (Issue #668; Alex's 2026-10-03 rulings)",
     [prospect, faq].every((d) => d.links.length > 0 && d.links.every((l) => l.hit) && margins(d).every((m) => m >= 0) && d.scrollW <= d.innerW && !!d.burger && d.trailInk !== null && d.trailInk.y >= d.burger.bottom)
-      && prospect.links.length === 3 && faq.bandH - faq.cluster.bottom >= 0,
-    [prospect, faq].map((d) => `${d.path}: links ${d.links.map((l) => `${l.t}=${l.hit}`).join(",")}, spacing ${margins(d).map((m) => m.toFixed(2)).join(",")}, band ${d.bandH.toFixed(1)} over cluster ${d.cluster.bottom.toFixed(1)}, scrollW ${d.scrollW}/${d.innerW}`).join(" | "),
+      && prospect.links.length === 3,
+    [prospect, faq].map((d) => `${d.path}: links ${d.links.map((l) => `${l.t}=${l.hit}`).join(",")}, spacing ${margins(d).map((m) => m.toFixed(2)).join(",")}, scrollW ${d.scrollW}/${d.innerW}`).join(" | "),
   );
 }
 
