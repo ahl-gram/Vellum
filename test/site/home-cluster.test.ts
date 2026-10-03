@@ -93,7 +93,7 @@ test("the cluster yields the seed panel its corner under 900: the mockup's phone
 test("the wordmark's 340px step is the shell's, one rule every page wears, and home's sheet no longer carries a copy (Issue #480; lifted at its second use, Issue #638)", () => {
   const shell = liveCss("src/layouts/BaseLayout.astro");
   const tiny = mediaBodies(shell, "(max-width: 340px)", "src/layouts/BaseLayout.astro");
-  assert.match(rule(tiny, "header.chrome .wordmark"), /font-size:\s*1\.3rem/, "at 320 the 1.5rem wordmark overran home's seed panel by 4.69px (skeptic finding 6 on PR #482) and the Ribbon's room name by 4.4px (Issue #638); header.chrome-qualified so it outranks the layout's 720px .wordmark");
+  assert.match(rule(tiny, "header.chrome .wordmark"), /font-size:\s*1\.3rem/, "without it the 1.5rem wordmark runs into the Ribbon's room name (4.4px at 320) and the Seed of the Day's dateline at 320 to 324 (the guard prover on Issue #638; home's own seed panel, which it first cleared on PR #482, no longer needs it); header.chrome-qualified so it outranks the layout's 720px .wordmark");
   assert.doesNotMatch(css, /@media \(max-width: 340px\)/, "home keeps no copy of the shell's step");
   assert.doesNotMatch(css, /\.wordmark\s*\{[^}]*font-size/, "and sizes no wordmark of its own");
 });

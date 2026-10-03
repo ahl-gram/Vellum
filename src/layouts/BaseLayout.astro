@@ -224,13 +224,15 @@ footer a { color: inherit; }
   :root { --band-h: 6.4rem; --chrome-x: 1rem; --chrome-y: 0.9rem; }
   .wordmark { font-size: 1.5rem; }
   .tagline { font-size: 0.78rem; }
-  body.room header.chrome .tagline { visibility: hidden; }
   body.room { padding: 7rem 1rem 1.2rem; }
   body.room.chart-room { padding: 0; }
   :root:has(.band):has(.trail) { --band-h: 7.8rem; }
 }
 @media screen and (max-width: 720px) {
   body.room:has(.band):has(.trail) { padding-top: calc(var(--band-h) + 0.6rem); }
+}
+@media (max-width: 719px) {
+  body.room header.chrome .tagline { visibility: hidden; }
 }
 @media (max-width: 340px) {
   header.chrome .wordmark { font-size: 1.3rem; }
