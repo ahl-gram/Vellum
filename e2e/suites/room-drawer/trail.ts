@@ -6,15 +6,15 @@ type Box = { x: number; y: number; w: number; h: number; right: number; bottom: 
 type Target = Box & { t: string; hit: boolean };
 type Trail = {
   path: string; innerW: number; innerH: number; scrollW: number; bandH: number; checked: boolean; cluster: Box; where: Box | null; whereVisibility: string | null;
-  trailInk: Box | null; alsoInk: Box | null; links: Target[]; crumbs: number[]; burger: Box | null; drawer: Box | null; capBottom: number; doors: Target[];
+  trailInk: Box | null; alsoInk: Box | null; links: Target[]; crumbs: number[]; crumbWrap: string[]; burger: Box | null; drawer: Box | null; capBottom: number; doors: Target[];
   firstDoorInk: Box | null; linkColor: string | null; hereColor: string | null; hereLine: string | null;
 };
 export type TrailKit = SuiteContext & { settle: ReturnType<typeof makeSettle>; goto: (path: string) => Promise<void> };
 
 const PARCHMENT = "rgb(239, 230, 207)";
 const PARCHMENT_BRIGHT = "rgb(255, 247, 228)";
-// The Gallery's first row against the cluster's bottom on today's main, before the trail (measured 2026-10-03 by vellum-plate-reader on a 9ce09e6 build: 39.0 at 1280, 31.6 at 390); the ruling gives that gap back, so a bound a pixel and a half under it reds on the 17.2 and 9.9 the trail alone leaves.
-const GALLERY_GAP = { 1280: 37.5, 390: 30 } as const;
+// The Gallery's first row against the cluster's bottom on main before the trail, read by DR13 itself on a 9ce09e6 build (2026-10-03: 39.92 at 1280, 31.65 at 390); the ruling gives that gap back, so 2px either way reds on the trail's 18.2 and 6.9 and on a narrow restore left out (35.0 at 390, the guard prover's 14b).
+const GALLERY_GAP = { 1280: 39.92, 390: 31.65 } as const;
 
 const READ: Payload<Trail> = `(() => {
   const box = (e) => { if (!e) return null; const b = e.getBoundingClientRect(); return { x: b.x, y: b.y, w: b.width, h: b.height, right: b.right, bottom: b.bottom }; };
@@ -27,6 +27,7 @@ const READ: Payload<Trail> = `(() => {
     checked: !!document.querySelector(".rooms-reveal")?.checked, cluster: box(document.querySelector("header.chrome")), where: box(where),
     whereVisibility: where ? getComputedStyle(where).visibility : null, trailInk: ink(document.querySelector("header.chrome .trail")), alsoInk: ink(document.querySelector("header.chrome .also")),
     links: [...document.querySelectorAll("header.chrome .where a")].map(target), crumbs: [...document.querySelectorAll("header.chrome .trail > :is(a, span):not(.way)")].map((c) => c.getClientRects().length),
+    crumbWrap: [...document.querySelectorAll("header.chrome .trail > :is(a, span):not(.way)")].map((c) => getComputedStyle(c).whiteSpace),
     burger: box(document.querySelector(".rooms-reveal")), drawer: box(nav), capBottom: nav ? box(nav).y + parseFloat(getComputedStyle(nav, "::before").height) : 0,
     doors: nav ? [...nav.querySelectorAll("a, [aria-current]")].map(target) : [],
     linkColor: link ? getComputedStyle(link).color : null, hereColor: here ? getComputedStyle(here).color : null, hereLine: here ? getComputedStyle(here).textDecorationLine : null };
@@ -129,7 +130,7 @@ export async function dr13Gallery(k: TrailKit): Promise<void> {
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   check(
     "DR13 the Gallery's first row keeps the gap above it that it had before the trail, at 1280 and at 390 (Alex, 2026-10-03, on Issue #668)",
-    rows.every((r) => r.gap >= GALLERY_GAP[r.width as keyof typeof GALLERY_GAP]),
+    rows.every((r) => Math.abs(r.gap - GALLERY_GAP[r.width as keyof typeof GALLERY_GAP]) <= 2),
     JSON.stringify(rows),
   );
 }
@@ -153,7 +154,8 @@ const ridesTheCap = (d: Trail): boolean => {
   if (!d.where || !d.drawer || !d.trailInk || !d.firstDoorInk) return false;
   const inkBottom = Math.max(d.trailInk.bottom, d.alsoInk?.bottom ?? 0);
   return d.where.y >= d.bandH && d.where.x >= d.drawer.x && d.where.right <= d.drawer.right && inkBottom <= d.firstDoorInk.y
-    && (d.alsoInk === null || d.alsoInk.y >= d.trailInk.bottom) && d.crumbs.length > 1 && d.crumbs.every((n) => n === 1) && d.links.every((l) => l.hit)
+    && d.trailInk.y - d.where.y <= 1 && (d.alsoInk === null || d.alsoInk.y >= d.trailInk.bottom)
+    && d.crumbs.length > 1 && d.crumbs.every((n) => n === 1) && d.crumbWrap.every((w) => w === "nowrap") && d.links.every((l) => l.hit)
     && d.doors.length === 7 && d.doors.filter((x) => x.bottom <= d.innerH).every((x) => x.hit);
 };
 
@@ -166,7 +168,7 @@ export async function dr15Drawer(k: TrailKit): Promise<void> {
     for (const page of pages) {
       const d = await openDrawer(k, page);
       ok &&= ridesTheCap(d);
-      rows.push(`${w} ${page}: where ${JSON.stringify(d.where)} band ${d.bandH.toFixed(1)} crumbs ${d.crumbs.join("")} links ${d.links.map((l) => l.hit).join(",")} doors ${d.doors.filter((x) => x.hit).length}/${d.doors.length}`);
+      rows.push(`${w} ${page}: where ${JSON.stringify(d.where)} trail top ${d.trailInk?.y.toFixed(1)} band ${d.bandH.toFixed(1)} crumbs ${d.crumbs.join("")} ${d.crumbWrap.join("/")} links ${d.links.map((l) => l.hit).join(",")} doors ${d.doors.filter((x) => x.hit).length}/${d.doors.length}`);
     }
   }
   const under = await underTheBlock(k);
