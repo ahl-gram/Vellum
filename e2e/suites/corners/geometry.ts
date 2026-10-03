@@ -47,13 +47,8 @@ function sides(op: string, n: number): [number, number] {
 }
 
 export function mediaEdges(conditions: readonly string[], above: number, upTo: number): number[] {
-  const edges = new Set<number>();
-  for (const text of conditions) {
-    for (const { re, read } of COMPARISONS) {
-      for (const m of text.matchAll(re)) for (const w of sides(...read(m))) if (w > above && w <= upTo) edges.add(w);
-    }
-  }
-  return [...edges].sort((a, b) => b - a);
+  const all = conditions.flatMap((text) => COMPARISONS.flatMap(({ re, read }) => [...text.matchAll(re)].flatMap((m) => sides(...read(m)))));
+  return [...new Set(all.filter((w) => w > above && w <= upTo))].sort((a, b) => b - a);
 }
 
 export function unreadWidthConditions(conditions: readonly string[]): string[] {
