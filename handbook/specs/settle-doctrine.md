@@ -149,6 +149,22 @@ section points there rather than restating it.
   already holding the port, a stray or a lane still running, but two lanes started at the same
   moment on the same debug port can both pass it before either browser binds, so distinct port
   variables are what keep two local lanes apart.
+- **A launch retry is a retry only when the new attempt watches its own browser and starts after
+  the last one is gone.** A browser's `exit` event arrives asynchronously after `SIGKILL`, so a
+  retry that reads one shared exit record takes the killed browser's death for the new one's and
+  gives up after a single poll, reporting a `SIGKILL` that was its own kill of the attempt before.
+  `launchWithRetry` in `e2e/support/launch.ts` keeps each attempt's exit, spawn error and output on
+  that attempt's own browser, kills a browser only after its whole wait, and waits, capped, for it
+  to be gone before it removes the profile, pauses and starts the next. On the GitHub runners a
+  cold browser can take 20 seconds or more to bind its debug port, and why is not established:
+  every launch prints its attempt and its time to a page target, each retry line names that
+  attempt's own reason, its pid and its kill-to-gone time, and a rescued lane passes, so read the
+  logs of passing runs before asserting a cause or moving the wait:
+  `gh api --allow-escape-sequences repos/ahl-gram/Vellum/actions/jobs/<job>/logs`, grepped for
+  `browser up on attempt` and `exposed no devtools target`. The same read of the failing lanes'
+  logs is what showed the broken retry, every attempt after the first ending one 125ms poll after
+  it began; the probe that reproduces it against a real browser is in
+  `handbook/plans/621/621-plan.md`.
 - **A visual claim in a suite is carried by a control taken in the same run.** A
   claim about PAINT goes through the one-row pixel strip, because no hit test and no computed style
   can see paint (`sampleRow` and `luminance` in `e2e/support/pixel.ts`). A claim about an
