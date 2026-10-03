@@ -3,6 +3,7 @@ import { scopedHealth } from "../support/room.ts";
 import { makeSettle } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
 import type { Payload, SuiteContext } from "../types.ts";
+import { dr11Wide, dr12Print, dr13Gallery, dr14PhoneShut, dr15Drawer, dr16SheetUp } from "./room-drawer/trail.ts";
 
 const DOCUMENT_ROOM = "/faq/";
 const APP_ROOM = "/explorer/";
@@ -68,6 +69,15 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await clearMobile();
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   await dr9Desktop(k);
+  await step("DR11", () => dr11Wide(k));
+  await step("DR12", () => dr12Print(k));
+  await step("DR13", () => dr13Gallery(k));
+  await setMobileViewport(390, 844);
+  await step("DR14", () => dr14PhoneShut(k));
+  await step("DR15", () => dr15Drawer(k));
+  await step("DR16", () => dr16SheetUp(k));
+  await clearMobile();
+  await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   gate.check("DR10 the room drawer suite drove the shell with no console error and no 4xx");
   // A suite's LAST navigation must waitReady: the next suite in the lane starts on whatever page is current.
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/` });
