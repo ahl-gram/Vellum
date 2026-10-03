@@ -1,6 +1,7 @@
-// The trail under the nav (Issue #668): its links take a real press at every width, it rides the phone drawer's cap above the doors, it clears a thumb's 24px round each of its links at every width, it stands aside while a chart room's phone sheet is up, and the band and the Gallery give it ground. Every target is HIT-TESTED, never clicked through element.click().
+// The trail under the nav (Issue #668), read at 1280, 901, 768 and 390: its links answer a hit-test and one takes a real press, it clears a thumb's 24px round each of its links, it rides the phone drawer's cap above the doors, it stands aside while a chart room's phone sheet is up, and the band and the Gallery give it ground. Every target is HIT-TESTED, never clicked through element.click().
 import type { Payload, SuiteContext } from "../../types.ts";
 import type { makeSettle } from "../../support/settle.ts";
+import { sampleRow } from "../../support/pixel.ts";
 
 type Box = { x: number; y: number; w: number; h: number; right: number; bottom: number };
 type Target = Box & { t: string; hit: boolean };
@@ -13,6 +14,29 @@ export type TrailKit = SuiteContext & { settle: ReturnType<typeof makeSettle>; g
 
 const PARCHMENT = "rgb(239, 230, 207)";
 const PARCHMENT_BRIGHT = "rgb(255, 247, 228)";
+
+type Rgb = readonly [number, number, number];
+const channel = (c: number) => { const s = c / 255; return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4; };
+const lum = ([r, g, b]: Rgb) => 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+const contrast = (a: Rgb, b: Rgb) => (Math.max(lum(a), lum(b)) + 0.05) / (Math.min(lum(a), lum(b)) + 0.05);
+const median = (xs: number[]) => [...xs].sort((p, q) => p - q)[Math.floor(xs.length / 2)] ?? NaN;
+const parseColour = (css: string): { rgb: Rgb; alpha: number } => {
+  const srgb = css.match(/^color\(srgb ([\d.]+) ([\d.]+) ([\d.]+)(?: \/ ([\d.]+))?\)$/);
+  if (srgb) return { rgb: [Number(srgb[1]) * 255, Number(srgb[2]) * 255, Number(srgb[3]) * 255], alpha: Number(srgb[4] ?? 1) };
+  const rgba = css.match(/^rgba?\(([\d.]+), ([\d.]+), ([\d.]+)(?:, ([\d.]+))?\)$/);
+  if (rgba) return { rgb: [Number(rgba[1]), Number(rgba[2]), Number(rgba[3])], alpha: Number(rgba[4] ?? 1) };
+  return { rgb: [NaN, NaN, NaN], alpha: NaN };
+};
+
+async function underlineContrast(k: TrailKit): Promise<number> {
+  const u = await k.evaluate<{ colour: string; x: number; w: number; bottom: number } | null>(`(() => { const a = document.querySelector("header.chrome .also a"); if (!a) return null; const b = a.getBoundingClientRect(); return { colour: getComputedStyle(a).textDecorationColor, x: b.x, w: b.width, bottom: b.bottom }; })()`);
+  if (!u) return NaN;
+  const row = await sampleRow(k.send, Math.round(u.x), Math.round(u.bottom + 3), Math.max(1, Math.round(u.w)));
+  const ground: Rgb = [median(row.map((p) => p[0])), median(row.map((p) => p[1])), median(row.map((p) => p[2]))];
+  const { rgb, alpha } = parseColour(u.colour);
+  const ink: Rgb = [rgb[0] * alpha + ground[0] * (1 - alpha), rgb[1] * alpha + ground[1] * (1 - alpha), rgb[2] * alpha + ground[2] * (1 - alpha)];
+  return contrast(ink, ground);
+}
 
 const READ: Payload<Trail> = `(() => {
   const box = (e) => { if (!e) return null; const b = e.getBoundingClientRect(); return { x: b.x, y: b.y, w: b.width, h: b.height, right: b.right, bottom: b.bottom }; };
@@ -68,6 +92,7 @@ export async function dr11Wide(k: TrailKit): Promise<void> {
   }
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   await k.goto("/prospect/");
+  const underline = await underlineContrast(k);
   const explorer = (await evaluate(READ)).links.find((l) => l.t === "The Explorer");
   if (explorer) {
     const at = centre(explorer);
@@ -76,9 +101,9 @@ export async function dr11Wide(k: TrailKit): Promise<void> {
   }
   const landed = await arrived(k, "/explorer/");
   check(
-    "DR11 at 1280 and 901 every trail link on the Prospect and the FAQ takes the hand at its centre, a thumb's 24px clears round every trail, alias and nav link (Alex, 2026-10-03, on Issue #668), the links resolve parchment and the page's own segment parchment-bright AND underlined, and a REAL press on the Prospect's \"The Explorer\" lands on the Explorer (Issue #668)",
-    ok && !!explorer && landed,
-    `${rows.join(" | ")}; press on The Explorer ${explorer ? "sent" : "MISSING"}, landed ${landed}`,
+    "DR11 at 1280 and 901 every trail link on the Prospect and the FAQ takes the hand at its centre, a thumb's 24px clears round every trail, alias and nav link (Alex, 2026-10-03, on Issue #668), the links resolve parchment and the page's own segment parchment-bright AND underlined, the alias link's underline, its only cue, reads at least 3:1 over its ground at 1280 (ruling 6), and a REAL press on the Prospect's \"The Explorer\" lands on the Explorer (Issue #668)",
+    ok && underline >= 3 && !!explorer && landed,
+    `${rows.join(" | ")}; alias underline ${underline.toFixed(2)}:1; press on The Explorer ${explorer ? "sent" : "MISSING"}, landed ${landed}`,
   );
 }
 
@@ -139,14 +164,15 @@ export async function dr14PhoneShut(k: TrailKit): Promise<void> {
   const { evaluate, check } = k;
   await k.goto("/prospect/");
   const prospect = await evaluate(READ);
+  const underline = await underlineContrast(k);
   await k.goto("/faq/");
   const faq = await evaluate(READ);
   const margins = (d: Trail) => spacing([...d.links, ...(d.burger ? [d.burger] : [])]);
   check(
-    "DR14 at 390 with the drawer shut the trail and its alias line stand in the cluster below the burger, every link takes the hand at its centre, a thumb's 24px clears round every link and the burger, and nothing scrolls sideways; DR1 holds the FAQ's band over the cluster (Issue #668; Alex's 2026-10-03 rulings)",
+    "DR14 at 390 with the drawer shut the trail and its alias line stand in the cluster below the burger, every link takes the hand at its centre, a thumb's 24px clears round every link and the burger, the alias link's underline reads at least 3:1 over its ground (ruling 6), and nothing scrolls sideways; DR1 holds the FAQ's band over the cluster (Issue #668; Alex's 2026-10-03 rulings)",
     [prospect, faq].every((d) => d.links.length > 0 && d.links.every((l) => l.hit) && margins(d).every((m) => m >= 0) && d.scrollW <= d.innerW && !!d.burger && d.trailInk !== null && d.trailInk.y >= d.burger.bottom)
-      && prospect.links.length === 3,
-    [prospect, faq].map((d) => `${d.path}: links ${d.links.map((l) => `${l.t}=${l.hit}`).join(",")}, spacing ${margins(d).map((m) => m.toFixed(2)).join(",")}, scrollW ${d.scrollW}/${d.innerW}`).join(" | "),
+      && prospect.links.length === 3 && underline >= 3,
+    `${[prospect, faq].map((d) => `${d.path}: links ${d.links.map((l) => `${l.t}=${l.hit}`).join(",")}, spacing ${margins(d).map((m) => m.toFixed(2)).join(",")}, scrollW ${d.scrollW}/${d.innerW}`).join(" | ")}; alias underline ${underline.toFixed(2)}:1`,
   );
 }
 
@@ -183,7 +209,6 @@ export async function dr15Drawer(k: TrailKit): Promise<void> {
 async function underTheBlock(k: TrailKit): Promise<{ reaches: boolean; doorAnswers: boolean; at: { x: number; y: number } | null }> {
   await k.setMobileViewport(844, 390);
   await openDrawer(k, "/prospect/");
-  // ARTIFICIAL, on purpose: no real trail reaches past the cap today, so the alias line is lengthened in place until the block overruns it, the case its pointer-events exist for; the next navigation discards the edit.
   await k.evaluate(`document.querySelector("header.chrome .also a").textContent += " by the long road round the coast and back over the hills"`);
   const d = await k.evaluate(READ);
   if (!d.where || d.where.bottom <= d.capBottom) return { reaches: false, doorAnswers: false, at: null };
@@ -207,5 +232,34 @@ export async function dr16SheetUp(k: TrailKit): Promise<void> {
     "DR16 on a chart room at 390 the trail stands aside while the phone sheet is up, its links no longer answering, and comes back in the drawer's cap when the nav is opened over the sheet; before the sheet it is there, which is the same-run control (Alex, 2026-10-03, on Issue #668)",
     before.whereVisibility === "visible" && before.links.every((l) => l.hit) && !!handle && sheetOpen && up.links.every((l) => !l.hit) && drawer.links.every((l) => l.hit) && drawer.links.length > 0,
     `before ${before.whereVisibility} ${before.links.map((l) => l.hit).join(",")}; handle ${handle ? "found" : "MISSING"}, sheet open ${sheetOpen}, trail ${up.whereVisibility} ${up.links.map((l) => l.hit).join(",")}; drawer over the sheet ${drawer.whereVisibility} ${drawer.links.map((l) => l.hit).join(",")}`,
+  );
+}
+
+type Fit = { top: number; w: number; h: number; checked: boolean; innerW: number };
+const FIT: Payload<Fit> = `(() => { const s = document.getElementById("sheet").getBoundingClientRect(); return { top: s.top, w: s.width, h: s.height, checked: !!document.querySelector(".rooms-reveal")?.checked, innerW: innerWidth }; })()`;
+const restingFit = (k: TrailKit, label: string, checked: boolean, innerW: number) => k.settle(FIT, (d, last) => d.checked === checked && d.innerW === innerW && d.w > 0 && last !== null && d.top === last.top && d.w === last.w && d.h === last.h, label);
+
+export async function dr17Refit(k: TrailKit): Promise<void> {
+  const { check, setMobileViewport, send } = k;
+  await setMobileViewport(430, 844);
+  await k.goto("/prospect/");
+  const fresh = await restingFit(k, "a fresh Prospect at 430", false, 430);
+  await setMobileViewport(390, 844);
+  await k.goto("/prospect/");
+  const shut = await restingFit(k, "the Prospect at 390", false, 390);
+  const burger = (await k.evaluate(READ)).burger;
+  if (burger) await tapAt(k, burger.x + burger.w / 2, burger.y + burger.h / 2);
+  const open = await restingFit(k, "the drawer open at 390", true, 390);
+  await setMobileViewport(430, 844);
+  await restingFit(k, "the drawer still open at 430", true, 430);
+  await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
+  await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
+  const closed = await restingFit(k, "the drawer closed at 430", false, 430);
+  await setMobileViewport(390, 844);
+  const near = (a: Fit, b: Fit) => Math.abs(a.top - b.top) < 0.5 && Math.abs(a.w - b.w) < 0.5 && Math.abs(a.h - b.h) < 0.5;
+  check(
+    "DR17 the open drawer lifts the trail out of the cluster, so the chart does not refit while it is open, and a resize made while it was open is fitted when it closes: the Prospect opened at 390, resized to 430 and closed sits where a fresh 430 load puts it (Issue #668, the cold review's round 2)",
+    near(open, shut) && near(closed, fresh) && !near(fresh, shut),
+    JSON.stringify({ shut, open, fresh, closed }),
   );
 }

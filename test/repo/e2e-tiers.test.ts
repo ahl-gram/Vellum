@@ -243,7 +243,7 @@ const STEPPED_GROUPS: Readonly<Record<string, readonly string[]>> = {
     "SV3", "SV4", "SV5c", "SV5d", "SV6", "SV9", "SV10", "SV2n",
   ],
   "cluster": ["CL4", "CL5", "CL8", "CL7"],
-  "room-drawer": ["DR2, DR3", "DR4", "DR5", "DR6", "DR7", "DR8", "DR11", "DR12", "DR13", "DR14", "DR15", "DR16"],
+  "room-drawer": ["DR2, DR3", "DR4", "DR5", "DR6", "DR7", "DR8", "DR11", "DR12", "DR13", "DR14", "DR15", "DR16", "DR17"],
   "chart-drawer": [
     "CD1", "CD2, CD2b, CD2c", "CD23", "CD3", "CD44", "CD45", "CD46", "CD4", "CD5", "CD7, CD7b, CD7c", "CD47", "CD8",
     "CD9, CD11, CD12, CD22, CD43", "CD13", "CD18", "CD6, CD48", "CD15, CD17",

@@ -111,7 +111,6 @@ test("home's sheet keeps only what clears home's own furniture (#263, #483)", ()
 });
 
 type CssRule = { readonly media: readonly string[]; readonly selector: string; readonly body: string };
-// Brace-counted, so a media block written on one line cannot swallow the rules after it the way the topLevel pattern above does.
 function cssRules(css: string, media: readonly string[] = []): CssRule[] {
   const out: CssRule[] = [];
   for (let i = 0, open = css.indexOf("{"); open >= 0; open = css.indexOf("{", i)) {

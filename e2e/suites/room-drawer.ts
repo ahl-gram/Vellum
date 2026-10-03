@@ -3,7 +3,7 @@ import { scopedHealth } from "../support/room.ts";
 import { makeSettle } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
 import type { Payload, SuiteContext } from "../types.ts";
-import { dr11Wide, dr12Print, dr13Gallery, dr14PhoneShut, dr15Drawer, dr16SheetUp } from "./room-drawer/trail.ts";
+import { dr11Wide, dr12Print, dr13Gallery, dr14PhoneShut, dr15Drawer, dr16SheetUp, dr17Refit } from "./room-drawer/trail.ts";
 
 const DOCUMENT_ROOM = "/faq/";
 const APP_ROOM = "/explorer/";
@@ -76,6 +76,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("DR14", () => dr14PhoneShut(k));
   await step("DR15", () => dr15Drawer(k));
   await step("DR16", () => dr16SheetUp(k));
+  await step("DR17", () => dr17Refit(k));
   await clearMobile();
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   gate.check("DR10 the room drawer suite drove the shell with no console error and no 4xx");
