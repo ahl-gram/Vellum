@@ -149,14 +149,36 @@ section points there rather than restating it.
   already holding the port, a stray or a lane still running, but two lanes started at the same
   moment on the same debug port can both pass it before either browser binds, so distinct port
   variables are what keep two local lanes apart.
-- **A visual claim is carried by a control taken in the same run, never by a byte comparison.** A
+- **A visual claim in a suite is carried by a control taken in the same run.** A
   claim about PAINT goes through the one-row pixel strip, because no hit test and no computed style
   can see paint (`sampleRow` and `luminance` in `e2e/support/pixel.ts`). A claim about an
   EMULATED condition carries a read of the other condition taken in the same run, which is what the
   print checks in `e2e/suites/specimen/print.ts` call the same-run control. A byte comparison of
   renders from two environments is never the check. No suite compares one screenshot against
-  another, and no cause is asserted here for why two shots differ: nothing in this repo measures one.
+  another; the one tool that does is the sweep in the next bullet, which carries a control of its own.
   The imperative is Gate 2's "run the probe's control in the same run".
+- **Two builds are compared by the sweep, row by row, against two runs of the unchanged build.**
+  `node scripts/design/oracle.ts <dist> <out> [label]` shoots every page of a built site at 1280x800
+  and at a true 390x844 phone: a page that runs a live chart app as its head box, the Specimen Book
+  as one screen, every other page whole down to 16000px, with motion reduced unless `--motion` is
+  passed; below that cap only the page height the probe records is compared. Shoot the
+  unchanged build twice and the branch once, all on one date, since the Seed of the Day's head box
+  carries it, then run `node scripts/design/compare.ts <control-a> <control-b> <branch>`. A row
+  whose two control shots differ is UNTRUSTED and is not compared, because a page can disagree with
+  itself between two runs of the same build, with motion reduced as well as on; trust only 0
+  against nonzero on every other row, and read `magick compare -metric AE` as a float, because it
+  prints a difference under one pixel as a fraction and exits 0 on it. Locate a change with
+  `-fuzz 1%` and the bounding box of a trimmed diff. Reduced motion is the control
+  `handbook/specs/ui-design.md` names for the compositor's text antialiasing, and it does not settle
+  every page, which is why trust is per row; with it on, the first-visit arrival is never
+  photographed. Two shots of different sizes, or whose probes recorded different layouts, are a
+  difference whatever AE says, since ImageMagick scores the extra rows against the smaller image's
+  edge. A full-page capture (`captureBeyondViewport`)
+  is for a scrolling page alone, for three reasons: it drops a chart room's bottom-left fixed
+  furniture; it lays the page out at its document height, not at the viewport a visitor sees; and
+  it CHANGES the page it photographs, so it is taken once per page and a page is never polled that
+  way; and on home and the atlas at 1280 it varies between runs where a viewport capture of the
+  same page does not, so their rows are often untrusted (measured 2026-10-02, cause unverified).
 - **A sleep past an animation's nominal duration still lands mid-animation.** The place card's
   unfurl is `paperUnfurl` in `public/motion.css`, a `rotateX` roll that the `.pc-inner` rules in
   `public/living-chart.css` grade `--unfurl-quick` (400ms) on a shown card and `--unfurl` (650ms)

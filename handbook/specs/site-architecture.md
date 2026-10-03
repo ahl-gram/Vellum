@@ -247,9 +247,14 @@ precisely, because a token that falls outside it looks identical at the point of
   directory and copied into `public/`; shared chunks take fixed names with no hashes; one worker
   chunk serves the surfaces that spawn it. `publicDir` is false in each press config, guarded, since
   a truthy value copies `public/` into itself.
-- **`astro:generate` is clean, bundle, showcases, discovery, in that order**, and several suites pin
+- **`astro:generate` is clean, fonts, bundle, showcases, discovery, in that order**, and several suites pin
   its exact command string. A reordered or added step reds all of them at once: that is the pin
   working, not a break, but budget the edits.
+- **The site's fonts are generated, from the design kit.** `scripts/kit-fonts.ts` copies
+  `design/kit/fonts/`, the one copy the site reads, into the gitignored `public/fonts/`, so a face is
+  added or changed in the kit and never under `public/`. Nothing under test reads `public/fonts/`:
+  `test/site/astro-scaffold.test.ts` cleans the generated trees while other files run, so a reader
+  there races it; read `KIT_FONTS` from `scripts/kit-fonts.ts` instead.
 - **Clean before regenerate.** The generators overwrite and never delete, so without the clean a
   renamed module leaves an importable orphan that masks a missing file locally while CI, always a
   fresh checkout, stays fine. `GENERATED_SUBTREES` is that list; it may grow and may not shrink, it

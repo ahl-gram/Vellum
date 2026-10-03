@@ -2,6 +2,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import { join } from "node:path";
+import { KIT_FONTS } from "../../scripts/kit-fonts.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 import { SITE_PALETTE } from "../../src/atlas/palette.ts";
@@ -242,7 +244,7 @@ test("the two Fell faces travel inside the card as data: @font-face rules, no Ga
   const declared = read("public/fonts.css");
   const css = OG_FONT_FACES.map((face) => {
     assert.match(declared, new RegExp(`font-family: '${face.family}';\\s*font-style: ${face.style};`), `${face.family} ${face.style} is a face fonts.css serves`);
-    const b64 = readFileSync(root(`public/fonts/${face.file}`)).toString("base64");
+    const b64 = readFileSync(join(KIT_FONTS, face.file)).toString("base64");
     const rule = fontFaceCss(face, b64);
     assert.match(rule, /^@font-face\s*\{/);
     assert.match(rule, new RegExp(`font-family:\\s*'${face.family}';`));

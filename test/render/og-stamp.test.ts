@@ -2,6 +2,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import { join } from "node:path";
+import { KIT_FONTS } from "../../scripts/kit-fonts.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 import { buildOgCard, fontFaceCss, OG_FONT_FACES } from "../../src/render/og-card.ts";
@@ -10,7 +12,7 @@ import { OG_STAMP_KEYWORD, cardStamp, readStamps, stampPng, stripStamps } from "
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 
 const shippingFontCss = (): string =>
-  OG_FONT_FACES.map((face) => fontFaceCss(face, readFileSync(root(`public/fonts/${face.file}`)).toString("base64"))).join("\n");
+  OG_FONT_FACES.map((face) => fontFaceCss(face, readFileSync(join(KIT_FONTS, face.file)).toString("base64"))).join("\n");
 
 const shippingCard = (): string =>
   buildOgCard(renderMap(generateWorld(defaultRecipe(42)), { style: "antique", legend: false }), { fontCss: shippingFontCss() });

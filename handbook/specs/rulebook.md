@@ -103,7 +103,8 @@ items that unlock the most downstream value, then the re-roll tail.
 `public/charts/arms-42-*.svg`, `public/og.png`, and `public/favicon.svg` plus
 `public/apple-touch-icon.png` (#489; `npm run icons` is their single writer, and a test pins the SVG
 to the Fell SC woff2). Everything else generated is gitignored and rebuilt per deploy:
-`public/atlas/`, `public/gallery/`, the bundle twins and their chunks.
+`public/atlas/`, `public/gallery/`, the bundle twins and their chunks, and `public/fonts/`, copied
+from `design/kit/fonts/`.
 
 **The committed list above is the rule; there is no shorter procedure that derives it.** "Referenced
 by a hand-authored page" is the family resemblance, not a test: `src/pages/specimen/index.astro`

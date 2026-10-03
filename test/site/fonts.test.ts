@@ -1,9 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFile, rm } from "node:fs/promises";
-import { existsSync, readFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { join } from "node:path";
+import { join, relative } from "node:path";
+import { copyKitFonts, KIT_FONTS } from "../../scripts/kit-fonts.ts";
+import { GENERATED_SUBTREES } from "../../scripts/clean-public-generated.ts";
 import { atlasDocument, atlasPlateFilename, type AtlasDocumentData } from "../../src/atlas/document.ts";
 import { buildGallery } from "../../src/cli/gallery.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
@@ -50,16 +53,79 @@ test("fonts.css self-hosts the three Fell/Garamond faces with font-display: swap
   assert.match(css, /Iowan Old Style/, "the role vars should fall back to the existing serif stack");
 });
 
-test("the self-hosted woff2 files and their OFL license ship under public/fonts/", () => {
+test("the self-hosted woff2 files and their OFL license live in design/kit/fonts/, the one copy the site builds from", () => {
   for (const file of WOFF2) {
-    const path = root(`public/fonts/${file}`);
-    assert.ok(existsSync(path), `public/fonts/${file} should exist`);
+    const path = root(`design/kit/fonts/${file}`);
+    assert.ok(existsSync(path), `design/kit/fonts/${file} should exist`);
     const sig = readFileSync(path).subarray(0, 4).toString("latin1");
     assert.equal(sig, "wOF2", `${file} should be a real WOFF2 (wOF2 signature)`);
   }
   // OFL 1.1 requires the copyright + license accompany the redistributed fonts.
-  const ofl = readFileSync(root("public/fonts/OFL.txt"), "utf8");
-  assert.match(ofl, /Open Font License/, "public/fonts/OFL.txt should carry the OFL text");
+  const ofl = readFileSync(root("design/kit/fonts/OFL.txt"), "utf8");
+  assert.match(ofl, /Open Font License/, "design/kit/fonts/OFL.txt should carry the OFL text");
+  assert.equal(relative(root(""), KIT_FONTS), join("design", "kit", "fonts"), "every reader of the faces takes this path");
+  // 2026-10-02: this git ls-files answers in under 10 ms on a Mac; thirty seconds is a cap on a hang, not a budget.
+  const tracked = spawnSync("git", ["ls-files", "--", "public/fonts"], { cwd: root(""), encoding: "utf8", timeout: 30_000 });
+  assert.equal(tracked.status, 0, `git ls-files failed: ${tracked.stderr}`);
+  assert.equal(tracked.stdout, "", "public/fonts/ is generated from the kit, so git tracks nothing there");
+});
+
+const FACE = /@font-face\s*\{([^}]*)\}/g;
+const faceOf = (block: string): string => {
+  const get = (prop: string): string => block.match(new RegExp(`${prop}:\\s*([^;]+);`))?.[1]?.trim() ?? "";
+  return [get("font-family"), get("font-style"), get("font-weight"), get("font-display"), get("src")].join(" | ");
+};
+const facesIn = (css: string): string[] => [...css.matchAll(FACE)].map(([, block]) => faceOf(block!));
+
+test("every face the site serves is a file in the kit, and the kit's own sheet declares the same faces for a design round", async () => {
+  const site = facesIn(await readText("public/fonts.css"));
+  const kit = facesIn(await readText("design/kit/fonts.css"));
+  assert.equal(site.length, WOFF2.length, "public/fonts.css should declare one face per woff2");
+  for (const face of site) {
+    assert.match(face, /\| swap \|/, `${face} must use font-display: swap`);
+    const file = face.match(/url\('\/fonts\/([^']+)'\)/)?.[1];
+    assert.ok(file !== undefined, `${face} does not load from /fonts/`);
+    assert.ok(existsSync(root(`design/kit/fonts/${file}`)), `${file} is served at /fonts/ but is not in design/kit/fonts/`);
+  }
+  assert.deepEqual(kit, site.map((face) => face.replace("url('/fonts/", "url('fonts/")), "design/kit/fonts.css should declare the site's faces with URLs relative to the kit");
+});
+
+test("the build copies every file of the kit into the site's fonts, byte for byte", async () => {
+  const dir = root("out/test-kit-fonts");
+  const from = join(dir, "kit");
+  rmSync(dir, { recursive: true, force: true });
+  mkdirSync(from, { recursive: true });
+  writeFileSync(join(from, "face.woff2"), "wOF2 face");
+  writeFileSync(join(from, "OFL.txt"), "SIL Open Font License");
+  try {
+    await copyKitFonts(join(dir, "public"), from);
+    assert.ok(existsSync(join(dir, "public", "fonts")), "the copy wrote no public/fonts/");
+    const copied = readdirSync(join(dir, "public", "fonts")).sort();
+    assert.deepEqual(copied, ["OFL.txt", "face.woff2"]);
+    for (const f of copied) assert.deepEqual(readFileSync(join(dir, "public", "fonts", f)), readFileSync(join(from, f)), f);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+  assert.ok(GENERATED_SUBTREES.includes("fonts"), "public/fonts/ is generated, so the clean before regeneration owns it");
+  // 2026-10-02: this git check-ignore answers in under 10 ms on a Mac; thirty seconds is a cap on a hang, not a budget.
+  const generated = ["OFL.txt", ...WOFF2].map((f) => `public/fonts/${f}`);
+  const ignored = spawnSync("git", ["check-ignore", "--no-index", "--", ...generated], { cwd: root(""), encoding: "utf8", timeout: 30_000 });
+  assert.ok(ignored.status === 0 || ignored.status === 1, `git check-ignore failed (${ignored.status}): ${ignored.stderr}`);
+  assert.deepEqual(ignored.stdout.split("\n").filter(Boolean).sort(), [...generated].sort(), "git does not ignore every generated face, so one could be committed beside the kit's");
+});
+
+test("npm run astro:generate's fonts step copies the real kit into the public directory it is given", () => {
+  const dir = root("out/test-kit-fonts-cli");
+  rmSync(dir, { recursive: true, force: true });
+  try {
+    // 2026-10-02: the step runs in about 0.1 s here; a minute is a cap on a hang, not a budget.
+    const run = spawnSync("node", ["scripts/kit-fonts.ts", dir], { cwd: root(""), encoding: "utf8", timeout: 60_000 });
+    assert.equal(run.status, 0, `the step failed: ${run.stderr}`);
+    assert.deepEqual(readdirSync(join(dir, "fonts")).sort(), ["OFL.txt", ...WOFF2].sort());
+    for (const f of WOFF2) assert.deepEqual(readFileSync(join(dir, "fonts", f)), readFileSync(root(`design/kit/fonts/${f}`)), f);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });
 
 test("every page shell in the folio links /fonts.css (root-absolute, like /motion.css)", async () => {

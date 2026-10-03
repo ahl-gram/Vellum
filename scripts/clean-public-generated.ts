@@ -20,6 +20,7 @@ export const GENERATED_SUBTREES: ReadonlyArray<string> = [
   "app.bundle.js",
   "atlas",
   "gallery",
+  "fonts",
   "sitemap.xml",
   "robots.txt",
   "llms.txt",
