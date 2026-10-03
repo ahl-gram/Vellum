@@ -17,9 +17,24 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { label: "Glossary", href: "/glossary/", kind: "reference" },
 ];
 
-export const ROUTE_NAMES: Readonly<Record<string, string>> = {};
+export const ROUTE_NAMES: Readonly<Record<string, string>> = {
+  "/": "Vellum",
+  "/seed-of-the-day/": "The Seed of the Day",
+  "/explorer/": "The Explorer",
+  "/reading-room/": "The Reading Room",
+  "/print-room/": "The Print Room",
+  "/gallery/": "The Gallery",
+  "/faq/": "Questions & Answers",
+  "/glossary/": "The Glossary",
+  "/prospect/": "The Prospect",
+  "/ribbon/": "The Wayfarer's Ribbon",
+  "/print-room/portfolio/": "The Portfolio",
+};
 
-export const ROUTE_CHILDREN: Readonly<Record<string, readonly string[]>> = {};
+export const ROUTE_CHILDREN: Readonly<Record<string, readonly string[]>> = {
+  "/explorer/": ["/prospect/", "/ribbon/", "/print-room/portfolio/"],
+  "/reading-room/": ["/prospect/"],
+};
 
 export interface Crumb {
   readonly name: string;
@@ -32,14 +47,32 @@ export interface Trail {
   readonly also: readonly Crumb[];
 }
 
+const crumbOf = (href: string): Crumb => {
+  const name = ROUTE_NAMES[href];
+  if (name === undefined) throw new Error(`no ROUTE_NAMES entry for ${href}: every route the trail names needs one`);
+  return { name, href };
+};
+
+/** The parent a route is seated under: null at the nav's top line, undefined when it has no seat. */
 export function seatOf(route: string): string | null | undefined {
-  return route === "" ? null : undefined;
+  for (const item of NAV_ITEMS) {
+    if (item.href === route) return null;
+    if (ROUTE_CHILDREN[item.href]?.includes(route)) return item.href;
+  }
+  return undefined;
 }
 
 export function aliasesOf(route: string): readonly string[] {
-  return route === "" ? [route] : [];
+  const seat = seatOf(route);
+  return NAV_ITEMS.map((i) => i.href).filter((parent) => parent !== seat && ROUTE_CHILDREN[parent]?.includes(route));
 }
 
 export function trailFor(path: string): Trail | null {
-  return path === "" ? { crumbs: [], current: false, also: [] } : null;
+  const seat = seatOf(path);
+  if (seat === undefined) return null;
+  return {
+    crumbs: ["/", ...(seat === null ? [] : [seat]), path].map(crumbOf),
+    current: seat !== null,
+    also: aliasesOf(path).map(crumbOf),
+  };
 }

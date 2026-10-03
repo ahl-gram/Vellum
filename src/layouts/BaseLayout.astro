@@ -1,5 +1,5 @@
 ---
-import { NAV_ITEMS } from "./nav.ts";
+import { NAV_ITEMS, trailFor } from "./nav.ts";
 
 // The one shared shell (the Sub 1 decision doc comment on #202; the atelier-map idiom at #461): head meta from the props, <title> computed from `room`, the fixed head cluster on the walnut deep, the canonical nav, the constant footer, and the rooms' landing ceremony.
 interface Props {
@@ -61,6 +61,7 @@ const ogUrl = new URL(path, Astro.site).href;
 const ogImage = new URL("/og.png", Astro.site).href;
 const ogImageAlt = "The Vellum wordmark and a compass rose on a dark walnut ground, with the chart of seed 42 faint behind.";
 const cardDescription = ogDescription ?? description;
+const trail = trailFor(path);
 ---
 
 <!doctype html>
@@ -166,6 +167,20 @@ header.chrome a, header.chrome .rooms-reveal { pointer-events: auto; }
 header.chrome a:focus-visible, footer a:focus-visible { outline-color: var(--parchment-bright); }
 .rooms [aria-current="page"] { display: inline-block; vertical-align: top; color: var(--parchment-bright);
   text-decoration: underline; text-underline-offset: 0.45em; text-decoration-thickness: 1px; }
+/* The trail (Issue #668): the dress of the ruled round, design/nav-wayfinding/mock.css. */
+.trail { font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); font-size: 0.62rem; letter-spacing: 0.1em; margin: 0.36rem 0 0; }
+.trail a { color: var(--parchment); text-decoration: none; }
+.trail a:hover, .trail a:focus-visible { color: var(--parchment-bright); }
+.trail [aria-current="page"], .trail .here { color: var(--parchment-bright);
+  text-decoration: underline; text-underline-offset: 0.4em; text-decoration-thickness: 1px; }
+.trail .way { margin: 0 0.45em; color: var(--parchment); font-size: 0.78rem; vertical-align: -0.04em; }
+.trail > :not(.way) { white-space: nowrap; }
+.also { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.62rem; color: var(--parchment); margin: 0.12rem 0 0; }
+.also a { color: var(--parchment); text-decoration-color: rgb(from var(--parchment) r g b / 0.55); text-underline-offset: 0.25em; }
+:root:has(.band):has(.trail) { --band-h: 10.6rem; }
+@media screen {
+  body.room:has(.band):has(.trail) { padding-top: calc(var(--band-h) + 0.2rem); }
+}
 .band { position: fixed; inset: 0; z-index: 9; pointer-events: none; }
 .band::before {
   content: ""; position: absolute; inset: 0;
@@ -211,6 +226,10 @@ footer a { color: inherit; }
   .tagline { font-size: 0.78rem; }
   body.room { padding: 7rem 1rem 1.2rem; }
   body.room.chart-room { padding: 0; }
+  :root:has(.band):has(.trail) { --band-h: 7.8rem; }
+}
+@media screen and (max-width: 720px) {
+  body.room:has(.band):has(.trail) { padding-top: calc(var(--band-h) + 0.6rem); }
 }
 /* The phone doors: the nav folds into a drawer a native checkbox burger reveals, with no bundle, so the doors survive scripts off; src/site/shell/app.ts adds the manners on top. */
 @media (max-width: 900px) {
@@ -254,6 +273,15 @@ footer a { color: inherit; }
     background: rgb(from var(--chart-ink) r g b / 0.45);
   }
   body.room:has(.rooms-reveal:checked) [popover]:popover-open { display: none; }
+  .trail, .also { margin-top: 0.55rem; }
+  body:has(.rooms-reveal:checked) .where {
+    position: fixed; z-index: 46; left: var(--chrome-x); top: calc(var(--band-h) + 0.6rem);
+    width: calc(min(16rem, 100vw) - 2 * var(--chrome-x)); padding-bottom: 0.25rem;
+    background: var(--chart-ink); pointer-events: auto;
+  }
+  body:has(.rooms-reveal:checked) .trail { margin-top: 0; }
+  body:has(.rooms-reveal:checked) .chrome:has(.trail) .rooms::before { height: calc(var(--band-h) + 3.55rem); }
+  body.chart-room:has(.slip.open):not(:has(.rooms-reveal:checked)) .where { visibility: hidden; }
 }
 @media print {
   .band, header.chrome { display: none; }
@@ -282,6 +310,7 @@ footer a { color: inherit; }
       )}</Fragment>
     ))}
   </nav>
+  {trail && <div class="where"><nav class="trail" aria-label="Where you are">{trail.crumbs.map((c, i) => <Fragment>{i > 0 ? <Fragment><span class="way" aria-hidden="true">›</span><wbr /></Fragment> : ""}{i < trail.crumbs.length - 1 ? <a href={c.href}>{c.name}</a> : trail.current ? <span aria-current="page">{c.name}</span> : <span class="here">{c.name}</span>}</Fragment>)}</nav>{trail.also.length > 0 && <p class="also">also reached from {trail.also.map((c, i) => <Fragment>{i > 0 ? " and " : ""}<a href={c.href}>{c.name}</a></Fragment>)}</p>}</div>}
   <slot name="header-extra" />
 </header>
 <main class:list={[room && desk !== "open" && "desk-panel"]}>
