@@ -43,7 +43,7 @@ const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   "specimen": 7.9, // 2026-09-20: 7.9, 7.9
   "verso": 7.0, // 2026-09-20: 7.0, 7.0
   "broadside": 7.0, // 2026-09-20: 7.0, 7.0
-  "room-drawer": 6.7, // 2026-09-20: 6.7, 6.7
+  "room-drawer": 17.4, // 2026-10-03: 17.4, 17.4, two single-suite runs at Issue #668 with DR11 to DR16 in (6.7 on 2026-09-20 before them)
   "turn": 6.5, // 2026-09-20: 6.3, 6.5
   "prospect": 6.5, // 2026-09-20: 6.5, 6.3
   "document-rooms": 5.5, // 2026-09-20: 5.5, 5.5
