@@ -9,7 +9,7 @@ const placed = (comments: ReadonlyArray<Comment> | undefined): Placed[] =>
 
 const isHead = (text: string, comment: Placed): boolean => text.slice(0, comment.loc.start.offset).trim() === "";
 
-// A # followed by digits, not preceded by "issue" or "pr" (either case, singular or plural) and one space, and not followed by a hex letter; whitespace is collapsed first so a head block may wrap between the word and the number. False reds: an all-digit hex colour, digits after a word and a hash as in a page fragment, an HTML numeric entity, and any prefix other than Issue and PR.
+// A # followed by digits, not preceded by "issue" or "pr" (either case, singular or plural) and one space, and not followed by a hex letter; whitespace is collapsed first so a head block may wrap between the word and the number.
 const BARE_NUMBER = /(?<!\b(?:issue|issues|pr|prs) )#\d+(?![0-9a-f])/gi;
 export const bareNumbers = (text: string): string[] => [...text.replace(/\s+/g, " ").matchAll(BARE_NUMBER)].map((m) => m[0]);
 
