@@ -42,11 +42,12 @@ make an unqualified rule false. Read the surface, not just the rule.
   and `test/site/living-chart-boundary.test.ts` pins that by constructing against bare objects.
 - **Engine dressing is edited in `public/living-chart.css`, never in a host's own sheet.** The
   dressing keys on the mount class and never on a host's id.
-- **The host wires the document's click and keydown to the engine; the engine adds one document
-  listener of its own, and only while a place card is shown** (Alex, Issue #750): the card's pointer
-  watch, a `mousemove` on the mount's own document (`mapEl.ownerDocument`), added when a card opens
-  and removed on every path that closes one, so with no card up nothing listens. `PC7` in
-  `test/site/living-chart-no-bar-card.test.ts` walks the close paths.
+- **The host wires the document's click and keydown to the engine; the engine adds document
+  listeners of its own only while a place card is shown** (Alex, Issue #750): a `mousemove` and a
+  capture-phase `pointerdown` on the mount's own document (`mapEl.ownerDocument`), added when a card
+  opens and removed on every path that closes one, so with no card up nothing listens, and no town
+  listens for movement at all. `PC7` in `test/site/living-chart-no-bar-card.test.ts` walks the close
+  paths.
 - **A seam roster is DATA the guard imports, never a list the guard restates.** `HOST_HOOK_NAMES` in
   `src/site/shared/host-hooks.ts` is the source of truth and the seam map is typed against it, so
   the type checker rejects a name with no implementation and an implementation with no name. A
@@ -241,8 +242,10 @@ image. A future surface inherits the Explorer's rule the moment its chart is inl
   other's centres, and the later-painted box used to take both (Issue #632: 25 of 156 centre presses
   opened a neighbour at 1024). Every hover, move and press resolves through `nearestMark` in
   `src/site/living-chart/place-card-hold.ts`, every box keeps its size, and the resolved box is
-  raised under the card so the hover ring follows it. Shrinking boxes or reordering paint only moves
-  the loss to another town.
+  raised under the card, where the ring is drawn by that class rather than by `:hover`, which the
+  browser recomputes only on the pointer's next move after a raise. The alternatives measured worse:
+  reordering paint only moves the loss to another town, smaller boxes still lose centres, and a
+  collision pass keeps every centre at the cost of boxes shrunk to 11.7px.
 - **A published nudge rides INSIDE the counter-scaled translate.** Placed ahead of the division it
   composes with the live scale, which is exactly right at rest and wrong by the depth factor under
   magnification. The guard matches the leading counter-scale AND COUNTS the translates and scales per
@@ -317,8 +320,12 @@ image. A future surface inherits the Explorer's rule the moment its chart is inl
   - **While it holds, other towns are ignored**: their hovers, and their presses inside the outline.
     A pinned card ignores every hover and is moved by a press on another town outside it.
   - **Only KEYBOARD focus switches the card.** A press or a tap focuses what it lands on (a town
-    beneath the card's text, the town a pan starts on), so a town's `pointerdown` marks the focus that
-    follows as the pointer's and the press path decides instead.
+    beneath the card's text, the town a pan starts on), so a town's `mousedown` marks the focus that
+    follows as the press's, and the press path decides instead. A town's blur closes only its own
+    unpinned card.
+  - **Whether a press landed on the card is read where the finger came down** (the document's
+    `pointerdown`), never where the click arrives: a tap's mouse events are moved onto the nearest
+    pressable box, which can be a town just outside the card.
   - **Every close path clears the grace timer**: Escape, a press on open chart clear of the card,
     `hideCard` from the scrub and the draw, a blur, a focus leaving the card, a second press, a
     rebuild and teardown. A stale expiry cuts the next card's grace short.

@@ -85,9 +85,6 @@ test("the hit divides by --zoom-k once, on the element; the ring pseudos stay pl
   }
 });
 
-// ENGINE_RULES matches a bare selector as a SUBSTRING, and a compound selector sharing it keeps the substring alive: the
-// guard-prover deleted the whole `.pc-lay { ... }` block and the roster passed, because `.pc-lay:hover` and `.pc-lay.dim`
-// still spelled it. The card's two actions are the row's load-bearing pair, so each takes a soleRule read of its own.
 test("the town raised over an overlapping neighbour stays below the card it opens (#632)", () => {
   const css = read(SHEET);
   const z = (selector: string) => Number((soleRule(css, selector).match(/z-index:\s*(-?\d+)/) ?? [])[1]);
@@ -96,6 +93,9 @@ test("the town raised over an overlapping neighbour stays below the card it open
   assert.ok(raised > 0 && raised < card, `a raised town paints over its neighbours (${raised} > 0) and under the card (${raised} < ${card})`);
 });
 
+// ENGINE_RULES matches a bare selector as a SUBSTRING, and a compound selector sharing it keeps the substring alive: the
+// guard-prover deleted the whole `.pc-lay { ... }` block and the roster passed, because `.pc-lay:hover` and `.pc-lay.dim`
+// still spelled it. The card's two actions are the row's load-bearing pair, so each takes a soleRule read of its own.
 test("the card's action row and its filing press are dressed by a rule of their OWN, not merely spelled somewhere in the sheet (#522)", () => {
   const css = read(SHEET);
   const acts = soleRule(css, ".pc-acts");

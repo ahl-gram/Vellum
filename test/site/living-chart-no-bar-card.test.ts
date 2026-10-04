@@ -224,11 +224,14 @@ const holdRig = async () => {
   const { walk } = await import("../../test-support/element-shim.ts");
   const { manifest } = await realWorld();
   const { lc, mount } = await barlessHost({ prospectHref: (idx) => `/prospect/#i=${idx}`, layProspect: layHost().dep });
-  const listening = new Set<unknown>();
+  const docListeners = new Map<string, Set<(e: unknown) => void>>();
+  const on = (type: string) => docListeners.get(type) ?? docListeners.set(type, new Set()).get(type)!;
   (mount as unknown as { ownerDocument: unknown }).ownerDocument = {
-    addEventListener: (type: string, fn: unknown) => { if (type === "mousemove") listening.add(fn); },
-    removeEventListener: (type: string, fn: unknown) => { if (type === "mousemove") listening.delete(fn); },
+    addEventListener: (type: string, fn: (e: unknown) => void) => { on(type).add(fn); },
+    removeEventListener: (type: string, fn: (e: unknown) => void) => { on(type).delete(fn); },
   };
+  const listening = on("mousemove");
+  const fireDoc = (type: string, e: unknown) => { for (const fn of [...on(type)]) fn(e); };
   lc.buildPlaceOverlay(manifest);
   const armed = await armShow(mount);
   const face = await cardFace(mount);
@@ -236,7 +239,7 @@ const holdRig = async () => {
   const card = () => walk(overlay()).find((n) => n.getAttribute("id") === "place-card")!;
   // The shim does no layout, so every box is a zero rect at the origin; a pointer off the origin lies in none of them, and a press falls back to the town it landed on.
   const at = { clientX: -100, clientY: -100 };
-  return { lc, manifest, armed, face, overlay, card, listening, at };
+  return { lc, manifest, armed, face, overlay, card, listening, fireDoc, on, at };
 };
 
 test("PC3 a dismissal clears a pending grace, so the next card's grace runs its whole length (#750)", async (t) => {
@@ -298,9 +301,11 @@ test("PC6 a card refilled for another town keeps its action row in place, so a f
 
 test("PC7 the page listens for mouse movement only while a place card is shown, and every way a card closes stops it (#750 ruling 1)", async (t) => {
   t.mock.timers.enable({ apis: ["setTimeout"] });
-  const { lc, manifest, armed, listening, at } = await holdRig();
-  assert.equal(listening.size, 0, "built, with no card up: nothing listens");
-  const open = (label: string) => { armed.hits[0]!.fire("focus"); assert.equal(listening.size, 1, `${label}: a shown card listens, once`); };
+  const { lc, manifest, armed, listening, on, at } = await holdRig();
+  const presses = on("pointerdown");
+  assert.equal(listening.size + presses.size, 0, "built, with no card up: nothing listens on the page");
+  assert.ok(armed.hits.every((h) => !h.listeners.includes("mousemove")), "and no town listens for movement either");
+  const open = (label: string) => { armed.hits[0]!.fire("focus"); assert.deepEqual([listening.size, presses.size], [1, 1], `${label}: a shown card listens for movement and presses, once each`); };
   const outside = { closest: () => null };
   const paths: [string, () => void][] = [
     ["Escape", () => lc.onDocKeydown({ key: "Escape" } as KeyboardEvent)],
@@ -314,17 +319,16 @@ test("PC7 the page listens for mouse movement only while a place card is shown, 
   for (const [label, close] of paths) {
     open(label);
     close();
-    assert.equal(listening.size, 0, `${label} closes the card and stops listening`);
+    assert.deepEqual([listening.size, presses.size], [0, 0], `${label} closes the card and stops listening`);
   }
   open("teardown");
   lc.destroy();
-  assert.equal(listening.size, 0, "teardown stops listening");
+  assert.deepEqual([listening.size, presses.size], [0, 0], "teardown stops listening");
 });
 
 test("PC8 a pointer drifting inside overlapping boxes toward a nearer town waits out the grace before the card switches, so heading for a card's button never loses it (#750, #632)", async (t) => {
   t.mock.timers.enable({ apis: ["setTimeout"] });
-  const { armed, face } = await holdRig();
-  // Seed 4294967295 at 1024 in miniature: town 0's centre lies inside town 1's box, and town 1 paints on top.
+  const { armed, face, fireDoc } = await holdRig();
   const box = (x: number, y: number) => ({ left: x - 13, top: y - 13, right: x + 13, bottom: y + 13 });
   armed.hits[0]!.rect = box(100, 100);
   armed.hits[1]!.rect = box(108, 104);
@@ -333,7 +337,7 @@ test("PC8 a pointer drifting inside overlapping boxes toward a nearer town waits
   armed.hits[1]!.fire("mouseenter", { clientX: 108, clientY: 104 });
   assert.equal(face().name, nameOf(1), "the precondition: the pointer at town 1's centre shows town 1");
   assert.deepEqual(raised(), ["1"], "the town under the pointer is the raised one, so the hover ring is its");
-  armed.hits[1]!.fire("mousemove", { clientX: 101, clientY: 101 });
+  fireDoc("mousemove", { buttons: 0, clientX: 101, clientY: 101, target: armed.hits[1] });
   assert.deepEqual(raised(), ["0"], "nearer town 0's box is raised over town 1's, and only it");
   assert.equal(face().name, nameOf(1), "drifting nearer town 0 does not swap the card at once");
   t.mock.timers.tick(HOLD_GRACE_MS);
@@ -347,7 +351,6 @@ test("PC9 the focus a press gives a town leaves a pinned card alone, whichever t
   const { armed, face, at } = await holdRig();
   armed.hits[0]!.fire("click", { ...at, detail: 1 });
   assert.equal(face().pinned, true, "the precondition: town 0 is pinned");
-  // On a tablet the box raised under the finger can change between the tap's press and the focus it gives, so the press lands on one town and the focus on another.
   armed.hits[3]!.fire("mousedown", at);
   armed.hits[4]!.fire("focus");
   assert.deepEqual({ pinned: face().pinned, idx: face().pressIdx }, { pinned: true, idx: "0" }, "a press's focus, even on another town's box, does not move the card");
@@ -358,7 +361,7 @@ test("PC9 the focus a press gives a town leaves a pinned card alone, whichever t
 });
 
 test("PC10 a tap that came down on the card's text keeps it, even when the browser moves the tap's click onto a town just outside (#750)", async () => {
-  const { armed, face, card, overlay, at } = await holdRig();
+  const { armed, face, card, overlay, fireDoc, at } = await holdRig();
   armed.hits[0]!.fire("click", { ...at, detail: 1 });
   card().rect = { left: 50, top: 150, right: 300, bottom: 370 };
   armed.hits[1]!.fire("mouseenter", { clientX: 179, clientY: 364 });
@@ -367,10 +370,10 @@ test("PC10 a tap that came down on the card's text keeps it, even when the brows
   armed.hits[1]!.fire("mouseleave", { clientX: 172, clientY: 373 });
   assert.equal(overlay().classList.contains("pc-over"), false, "and its hand comes back once the pointer is off the card");
   // Measured 2026-10-04 on seed 4294967295 at 1024 (an emulated tablet): a finger at 179,364 on Kalkulin's card reached Vadelgrad's box as a click at 172,373.
-  armed.hits[1]!.fire("pointerdown", { clientX: 179, clientY: 364 });
+  fireDoc("pointerdown", { clientX: 179, clientY: 364, target: card() });
   armed.hits[1]!.fire("click", { detail: 1, clientX: 172, clientY: 373 });
-  assert.deepEqual({ pinned: face().pinned, idx: face().pressIdx }, { pinned: true, idx: "0" }, "the town the click was moved onto does not take the card");
-  armed.hits[1]!.fire("pointerdown", { clientX: 172, clientY: 373 });
+  assert.deepEqual({ pinned: face().pinned, idx: face().pressIdx }, { pinned: true, idx: "0" }, "the town the click was moved onto does not take the card, whatever the finger's own press landed on");
+  fireDoc("pointerdown", { clientX: 172, clientY: 373, target: armed.hits[1] });
   armed.hits[1]!.fire("click", { detail: 1, clientX: 172, clientY: 373 });
   assert.equal(face().pressIdx, "1", "a finger that came down outside the card does move the pin");
 });

@@ -18,7 +18,7 @@ test("H1 leaving the shown town starts the grace, and only its expiry hides the 
   assert.equal(run([expire()], left).shown, -1, "the expiry hides it");
   assert.equal(run([expire()], run([...hoverA, leave(A, true)])).shown, A, "an expiry with no grace running is a stale timer and changes nothing, even with the pointer off the town");
   assert.equal(run([enter(A)], left).waiting, false, "coming back to the town inside the grace cancels it");
-  assert.ok(HOLD_GRACE_MS >= 91 && HOLD_GRACE_MS <= 300, `the grace outlasts the 9.1px gap at 0.1 px/ms (91ms) without lingering; got ${HOLD_GRACE_MS}`);
+  assert.equal(HOLD_GRACE_MS, 150, "the ruled 0.15s (Issue #750 ruling 5), which outlasts the widest measured gap crossed at 0.1 px/ms (91ms)");
 });
 
 test("H2 the pointer inside the card's outline holds it through any number of expiries, which is Issue #639's guard", () => {
@@ -55,10 +55,16 @@ test("H5 the second click of a double-click keeps the pinned card; a later click
 
 test("H6 every dismissal clears the grace and the outline flag", () => {
   const busy: Hold = { shown: A, pinned: false, onCard: true, hovered: A, waiting: true };
-  for (const input of [{ kind: "dismiss" }, { kind: "pressOpen", onCard: false }, { kind: "blur", intoCard: false }, { kind: "focusOut", staysNear: false }] as const) {
+  for (const input of [{ kind: "dismiss" }, { kind: "pressOpen", onCard: false }, { kind: "blur", idx: A, intoCard: false }, { kind: "focusOut", staysNear: false }] as const) {
     const after = nextHold(busy, input);
     assert.deepEqual({ shown: after.shown, pinned: after.pinned, waiting: after.waiting, onCard: after.onCard }, { shown: -1, pinned: false, waiting: false, onCard: false }, `${input.kind} closes cleanly`);
   }
+});
+
+test("H10 a town's blur closes only its own unpinned card, never a card another town's hover opened", () => {
+  const hovered = run([enter(B)]);
+  assert.equal(run([{ kind: "blur", idx: A, intoCard: false }], hovered).shown, B, "town A losing an old focus leaves town B's hovered card up");
+  assert.equal(run([{ kind: "blur", idx: B, intoCard: false }], hovered).shown, -1, "town B's own blur closes it");
 });
 
 test("H7 keyboard focus on another town shows it, unpinned, even while one is pinned", () => {

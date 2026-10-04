@@ -2,7 +2,7 @@
 import { composePlaceCard, placeAriaLabel, cardSide, clampOffset, type CardBox, type PlaceCard } from "../../render/place-card.ts";
 import type { PlaceManifest, PlaceMark } from "../../render/place-manifest.ts";
 import type { HistoricalEvent } from "../../society/history.ts";
-import { CLOSED, HOLD_GRACE_MS, isHit, nearestMark, nextHold, pressMark, wireHit, type Hold, type HoldInput, type Point } from "./place-card-hold.ts";
+import { CLOSED, HOLD_GRACE_MS, isHit, nearestMark, nextHold, pointerTrack, pressMark, wireHit, type Hold, type HoldInput, type Point } from "./place-card-hold.ts";
 
 interface PlaceOverlayState {
   card: HTMLDivElement;
@@ -245,10 +245,12 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
 
   function onMove(e: MouseEvent): void {
     if (e.buttons !== 0) return;
-    last = { x: e.clientX, y: e.clientY };
-    const over = inside(last);
+    track.move(e);
+    const over = inside(point(e));
     if (over !== hold.onCard) feed({ kind: "move", onCard: over });
   }
+
+  const onDown = (e: Event): void => { track.down(e); };
 
   function placeCard(po: PlaceOverlayState): void {
     const overlay = po.card.parentElement;
@@ -263,10 +265,13 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     const doc = (mapEl as { ownerDocument?: Document | null }).ownerDocument ?? null;
     if (hold.shown >= 0 && !watching && doc) {
       doc.addEventListener("mousemove", onMove, { passive: true });
+      doc.addEventListener("pointerdown", onDown, { capture: true, passive: true });
       watching = doc;
     } else if (hold.shown < 0 && watching) {
       watching.removeEventListener("mousemove", onMove);
+      watching.removeEventListener("pointerdown", onDown, { capture: true });
       watching = null;
+      track.reset();
     }
   }
 
@@ -293,9 +298,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     own = tag("pc-own", own, hold.shown >= 0 ? po.hits[hold.shown] ?? null : null);
   }
 
-  function hidePlaceCard(): void {
-    feed({ kind: "dismiss" });
-  }
+  const hidePlaceCard = (): void => { feed({ kind: "dismiss" }); };
 
   function raise(idx: number): void {
     near = tag("pc-near", near, placeOverlay && idx >= 0 ? placeOverlay.hits[idx] ?? null : null);
@@ -315,6 +318,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     last = { x: me.clientX, y: me.clientY };
     return last;
   };
+  const track = pointerTrack({ feed, point, resolve, inside, raise });
 
   function reset(): void {
     hold = CLOSED;
@@ -334,18 +338,16 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     // An inset commit rebuilds the overlay with no mount wipe before it (unlike a draw), so this builder owns removing the previous overlay + card; a no-op after a wipe.
     for (const stale of mapEl.querySelectorAll(":scope > .place-overlay, :scope > #place-card")) stale.remove();
     const overlay = overlayBox(opts);
-    // A town raised under the pointer between a press and its release splits the click onto the overlay, their common parent; it is still a press on the town nearest the pointer.
     overlay.addEventListener("click", (e) => {
-      const p = e.target === overlay && e.detail > 0 ? point(e) : null;
-      const at = p ? resolve(p, -1) : -1;
-      if (p && at >= 0) feed({ kind: "press", idx: at, detail: e.detail, onCard: inside(p) });
+      const pressed = e.target === overlay && e.detail > 0 ? track.press(e, -1) : null;
+      if (pressed && pressed.idx >= 0) feed({ kind: "press", ...pressed });
     });
     const { card, inner } = cardShell();
     card.addEventListener("focusout", (e) => {
       feed({ kind: "focusOut", staysNear: inCard(e.relatedTarget) || isHit(e.relatedTarget) });
     });
     const { prospectLink, layPress, acts } = cardActs(inner, opts, prospectHref, layProspect);
-    const wiring = { feed, point, resolve, inside, raise, inCard, markPress, takePress };
+    const wiring = { feed, inCard, markPress, takePress, track };
     const hits = manifest.places.map((place, idx) => {
       const hit = document.createElement("button");
       hit.type = "button";

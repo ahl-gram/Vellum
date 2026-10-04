@@ -44,7 +44,6 @@ export function holdKit(ctx: HoldKit) {
     await settle<string>(`document.fonts ? document.fonts.status : "loaded"`, (s) => s !== "loading", "fonts at 1024");
     return evaluate(MARKS);
   };
-  // Straight to the target at a steady pace, every position read off the clock so the pace is the one asked for.
   const travel = async (from: Point, to: Point, pxPerMs: number) => {
     const len = Math.hypot(to.x - from.x, to.y - from.y), t0 = Date.now();
     for (;;) {
@@ -133,8 +132,40 @@ export async function p29NearestTown(k: Kit, marks: Mark[]): Promise<void> {
     const c = await k.settle(CARD, (d) => d.shown, `P29 a press on ${m.name}`);
     if (c.name !== m.name || !c.pinned) wrong.push(`${m.name} -> ${c.name}${c.pinned ? "" : " (unpinned)"}`);
   }
-  k.check("P29 a real press at every town's own centre opens and pins that town, never the neighbour whose box covers it (#632)",
-    marks.length > 20 && wrong.length === 0, JSON.stringify({ towns: marks.length, wrong }));
+  // A press with no move first goes down on the covering box before the nearer town is raised, so its click is split onto the overlay: the press path PC11 pins in the shim.
+  const covered = marks.filter((m) => marks.some((o) => o.idx > m.idx && Math.abs(o.x - m.x) < 13 && Math.abs(o.y - m.y) < 13));
+  for (const m of covered) {
+    await k.reset();
+    await k.press(m);
+    const c = await k.settle(CARD, (d) => d.shown, `P29 a press with no move on ${m.name}`);
+    if (c.name !== m.name || !c.pinned) wrong.push(`${m.name} with no move first -> ${c.name}${c.pinned ? "" : " (unpinned)"}`);
+  }
+  k.check("P29 a real press at every town's own centre opens and pins that town, never the neighbour whose box covers it, moved to first or not (#632)",
+    marks.length > 20 && covered.length > 0 && wrong.length === 0, JSON.stringify({ towns: marks.length, covered: covered.map((m) => m.name), wrong }));
+}
+
+export async function p33DragKeepsPin(k: Kit, marks: Mark[]): Promise<void> {
+  const rows: string[] = [];
+  let tried = 0;
+  for (const a of marks) {
+    if (tried === 3) break;
+    await k.reset();
+    await k.move(a);
+    await k.press(a);
+    const c = await k.atRest(`P33 ${a.name}`);
+    if (!c.pinned || c.name !== a.name) continue;
+    const b = marks.find((o) => o.idx !== a.idx && !(o.x > c.left - 20 && o.x < c.right + 20 && o.y > c.top - 20 && o.y < c.bottom + 20));
+    if (!b) continue;
+    tried++;
+    await k.move(b);
+    await k.send("Input.dispatchMouseEvent", { type: "mousePressed", x: b.x, y: b.y, button: "left", buttons: 1, clickCount: 1 });
+    for (let i = 1; i <= 8; i++) await k.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: b.x + 5 * i, y: b.y + 3 * i, button: "left", buttons: 1 });
+    await k.send("Input.dispatchMouseEvent", { type: "mouseReleased", x: b.x + 40, y: b.y + 24, button: "left", buttons: 0, clickCount: 1 });
+    const after = await k.card();
+    if (!after.pinned || after.name !== a.name) rows.push(`${a.name}: a drag from ${b.name} left ${after.shown ? after.name : "nothing"}${after.pinned ? "" : " unpinned"}`);
+    await k.evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
+  }
+  k.check("P33 a drag that starts on another town leaves the pinned card pinned (#750 ruling 2)", tried === 3 && rows.length === 0, JSON.stringify({ tried, failures: rows }));
 }
 
 export async function p31Keyboard(k: Kit, marks: Mark[]): Promise<void> {

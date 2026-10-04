@@ -140,8 +140,8 @@ test("a bar-less host BUILDS the place overlay over the baked chart (#319)", asy
   assert.match(first.style.top ?? "", /%$/);
   assert.deepEqual(
     [...new Set(first.listeners)].sort(),
-    ["blur", "click", "focus", "mousedown", "mouseenter", "mouseleave", "mousemove", "pointerdown"],
-    "hover / focus / tap are all wired, with the move that finds the nearest town and the press that marks a pointer's focus (#750)",
+    ["blur", "click", "focus", "mousedown", "mouseenter", "mouseleave"],
+    "hover / focus / tap are all wired, with the press that marks a pointer's focus; no town listens for movement (#750 ruling 1)",
   );
   const card = walk(overlay).find((n) => n.getAttribute("id") === "place-card");
   assert.ok(card, "the card is built inside the overlay");
