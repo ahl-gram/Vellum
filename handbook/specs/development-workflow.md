@@ -108,6 +108,16 @@ to the MAIN checkout's `out/` before putting the menu; a dispatched lane cannot 
 tree, so it reports absolute paths and its dispatcher copies them, the same way it holds the menu
 itself. Copy before the spike goes, because `out/` is gitignored and nothing else holds them.
 
+**A harness-isolated agent's tree goes the moment its run ends, `out/` included, unless git sees a
+change in it.** The harness removes an `isolation: worktree` agent's tree at the end of every run
+when `git status --porcelain --untracked-files=normal` prints nothing and no commit is ahead
+(Claude Code 2.1.288), and the gitignored `out/` never prints there. So an agent whose only
+deliverable is files under `out/`, such as a design round or a measurement, is never dispatched with
+harness isolation. Its dispatcher builds the tree with `git worktree add --detach` under
+`.claude/worktrees/`, and the agent writes straight to the main checkout's `out/<issue>/`. A
+`vellum-implementer` lane keeps its tree through the STOP by the untracked plan copy its definition
+makes, and by its commits after that.
+
 **7. Worktree, then rename the branch**, before the first commit, or the PR carries the harness's
 name instead of yours. The rest of the worktree rules, including why the branch needs renaming at
 all, are `CLAUDE.md`'s Worktrees section. A `vellum-implementer` lane already stands in a harness
