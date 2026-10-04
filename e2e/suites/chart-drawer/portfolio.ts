@@ -1,20 +1,14 @@
 import type { Payload, SuiteContext } from "../../types.ts";
+import { makeSettle } from "../../support/settle.ts";
 import type { DrawerKit, TableKit } from "./kit.ts";
 import { DRAWN, DRESS, ONE } from "./reads.ts";
 
 type Arrival = { path: string; ready: string; table: string | null; seed: string | null; items: number | null; room: string | null };
 const ARRIVAL: Payload<Arrival> = `(() => { const p = new URLSearchParams(location.hash.slice(1)); return { path: location.pathname, ready: document.readyState, table: p.get("table"), seed: p.get("seed"), items: window.__vellumPortfolio ? window.__vellumPortfolio().items : null, room: (document.querySelector(".room-name") || {}).textContent || null }; })()`;
 
-/** A measurement poll, not a readiness wait (handbook/specs/settle-doctrine.md clause 4): it reads until the page has LEFT `from` and finished loading, wherever it went, and hands back its last read for the caller to assert on, so a road to a missing page reds by naming where it landed. */
-async function arrivalFrom(evaluate: TableKit["evaluate"], sleep: TableKit["sleep"], from: string): Promise<Arrival | null> {
-  let last: Arrival | null = null;
-  for (let i = 0; i < DRAWN; i++) {
-    await sleep(50);
-    last = await evaluate(ARRIVAL).catch(() => last);
-    if (last && last.path !== from && last.ready === "complete") return last;
-  }
-  return last;
-}
+/** Waits until the page has LEFT `from` and finished loading, wherever it went, and throws with its last read if it never does; where it landed is the caller's claim, so a road to a missing page reds by naming it. A read the navigation interrupts counts as no read. */
+const arrivalFrom = ({ evaluate, sleep }: Pick<TableKit, "evaluate" | "sleep">, from: string): Promise<Arrival> =>
+  makeSettle({ evaluate: (e: string) => evaluate(e).catch(() => null), sleep })(ARRIVAL, (d) => d.path !== from && d.ready === "complete", `chart-drawer-arrival-from-${from}`, DRAWN);
 
 export async function cd49PrintRoomRoad({ evaluate, send, check, sleep, settle, PORT, forget, pressById }: TableKit): Promise<void> {
   await forget();
@@ -22,14 +16,11 @@ export async function cd49PrintRoomRoad({ evaluate, send, check, sleep, settle, 
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/print-room/#${DRESS}&table=${ONE}` });
   // The road carries this page's address only once the proof has drawn (`writeHash` in `src/site/print-room/app.ts`), so the press waits for that; where it lands is the claim.
   const written = await settle<{ href: string | null } | null>(`(() => { const a = document.getElementById("pr-portfolio"); return a ? { href: a.getAttribute("href") } : null; })()`, (d) => typeof d.href === "string" && d.href.indexOf("#") !== -1, "chart-drawer-print-room-road-written", DRAWN);
-  // Wiring, not a gesture claim: the Bound Atlas slip may stand folded, and the road is in its foot.
-  await evaluate(`(() => { const s = document.getElementById("atlas"); const t = document.querySelector('.slip-tab[aria-controls="atlas"]'); if (s && t && s.classList.contains("folded")) t.click(); return true; })()`);
-  await sleep(400);
   const press = await pressById("pr-portfolio");
-  const arrived = await arrivalFrom(evaluate, sleep, "/print-room/");
+  const arrived = await arrivalFrom({ evaluate, sleep }, "/print-room/");
   check(
     "CD49 the Print Room's road to the Portfolio answers a REAL press and lands at the Portfolio's address under the Explorer, carrying the Print Room's own address with it: the table it was handed and the world it shows (Issue #669)",
-    press.hit && !!arrived && arrived.path === "/explorer/portfolio/" && arrived.table === ONE && arrived.seed === "42" && arrived.items === 1,
+    press.hit && arrived.path === "/explorer/portfolio/" && arrived.table === ONE && arrived.seed === "42" && arrived.items === 1,
     JSON.stringify({ written: written.href, press, arrived }),
   );
 }
@@ -41,10 +32,10 @@ export async function cd50ScriptsOffHome({ evaluate, send, check, sleep, settle,
   // At rest means the document complete and the road still across two reads: read while the page is still interactive, the road sits unstyled at the top right (measured 2026-10-04: 1038,27 at interactive, 809,455 from 100ms on), and a press there lands nowhere.
   const road = await settle<{ x: number; y: number; hit: boolean; href: string | null; ready: string } | null>(`(() => { const a = document.querySelector(".stage noscript a"); if (!a) return null; a.scrollIntoView({ block: "center" }); const b = a.getBoundingClientRect(); if (b.width < 1) return null; const x = Math.round(b.x + b.width / 2), y = Math.round(b.y + b.height / 2); const h = document.elementFromPoint(x, y); return { x, y, hit: h === a || a.contains(h), href: a.getAttribute("href"), ready: document.readyState }; })()`, (d, last) => d.ready === "complete" && !!last && last.x === d.x && last.y === d.y, "chart-drawer-scripts-off-road", DRAWN);
   await clickAt(road.x, road.y);
-  const arrived = await arrivalFrom(evaluate, sleep, "/explorer/portfolio/");
+  const arrived = await arrivalFrom({ evaluate, sleep }, "/explorer/portfolio/");
   check(
     "CD50 with scripts off, the Portfolio's notice still has a road home that answers a REAL press and lands on the Explorer, the parent the page now sits under (Issue #669)",
-    road.hit && !!arrived && arrived.path === "/explorer/" && arrived.room === "The Explorer",
+    road.hit && arrived.path === "/explorer/" && arrived.room === "The Explorer",
     JSON.stringify({ road, arrived }),
   );
 }
@@ -56,8 +47,7 @@ export async function cd18bRoadCarries({ evaluate, check, sleep, clickAt }: Draw
     const h = document.elementFromPoint(x, y);
     return { x, y, reachable: h === b || b.contains(h), room: (b.querySelector(".room") || {}).textContent || null }; })()`);
   await clickAt(roadAt.x, roadAt.y);
-  for (let i = 0; i < 200; i++) { await sleep(100); if (await evaluate<boolean>(`location.pathname.indexOf("/portfolio/") !== -1 && !!document.querySelector(".room-name")`)) break; }
-  const arrived = await evaluate<{ path: string; table: string | null; room: string | null }>(`({ path: location.pathname, table: new URLSearchParams(location.hash.slice(1)).get("table"), room: (document.querySelector(".room-name") || {}).textContent || null })`);
+  const arrived = await arrivalFrom({ evaluate, sleep }, "/explorer/");
   check(
     "CD18b the road answers a REAL press and carries the WHOLE gathering to the Portfolio's own address under the Explorer, which is the epic's core insight: the folio is a link, so the page it lands on can draft the same six sheets for anyone; and the road names the room it lands in (Issue #669, ruled 2026-10-04)",
     arrived.path === "/explorer/portfolio/" && arrived.table === SIX && roadAt.reachable &&
@@ -78,7 +68,7 @@ export async function cd19PortfolioDrafts({ evaluate, check, sleep }: SuiteConte
   let pf = await evaluate(PF);
   for (let i = 0; i < DRAWN && (!pf || pf.drawn < 6); i++) { await sleep(50); pf = await evaluate(PF); }
   check(
-    "CD19 the Portfolio drafts every gathered sheet from its own number, groups the index by world under the parent world's NAME, and stands one sheet on the stage (#518 ruling 5), on the render worker, whose address a moved page resolves for itself and whose loss would only look slow (Issue #669)",
+    "CD19 the Portfolio drafts every gathered sheet from its own number, groups the index by world under the parent world's NAME, and stands one sheet on the stage (#518 ruling 5), on the render worker, whose loss from a moved page would only look slow (Issue #669)",
     // The warning is unhidden right after initWorker() when the worker did not start, and drafting starts after that, so with sheets drawn its state is final.
     !!pf && pf.items === 6 && pf.drawn === 6 && pf.rows === 6 && pf.groups >= 1 && pf.onStage && !pf.warned &&
       // The LITERAL world, not a shape: seed 42's parent is deterministic (measured 2026-09-08), and a shape check passes on

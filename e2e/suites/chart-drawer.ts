@@ -69,7 +69,7 @@ async function cd9Surfaces(kd: DragKit, step: Step, SIX: string): Promise<void> 
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   await go(`${DRESS}&table=${SIX}`);
   await step("CD18", () => cd18RoadOn(kd));
-  await cd18bRoadCarries(kd, SIX);
+  await step("CD18b", () => cd18bRoadCarries(kd, SIX));
   await cd19PortfolioDrafts(kd);
   await cd24PortfolioSays(kd);
   // BARE means bare on both homes since Issue #634: a Portfolio the address names no folio for now shows what the device holds (ruling 4), so the six this group just laid would arrive here as a full pile.
@@ -98,7 +98,6 @@ async function cd25CapturesAndHomes(kd: DragKit, step: Step, SIX: string): Promi
   const TWO = `${ONE}_k-p.seed-42.style-antique.i-0.year-1059`;
   const kt = tableKit(kd);
   await step("CD49", () => cd49PrintRoomRoad(kt));
-  // Re-enabled on the step's own promise, DR8's form in e2e/suites/room-drawer.ts: a step rethrows when the browser stops answering, and a line after it would then never run.
   const scriptsBackOn = async () => { try { await kt.send("Emulation.setScriptExecutionDisabled", { value: false }); } catch {} };
   await step("CD50", () => cd50ScriptsOffHome(kt)).finally(scriptsBackOn);
   await step("CD36", () => cd36GoldPress(kt));

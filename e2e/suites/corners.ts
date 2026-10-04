@@ -1,6 +1,8 @@
 // The head cluster against the right-hand corner on every page (Issue #638): each page is resized while loaded, a pixel at a time across the phone band and at every media edge and a stride above it, and no box of the cluster's ink (its text line boxes and its controls) may overlap a box of the corner's. Ink, never a layout box, because a corner's layout box is wider than what it draws.
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { DISCOVERY_ROUTES } from "../../scripts/generate-discovery.ts";
+import { makeSettle } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
 import type { Payload, SuiteContext } from "../types.ts";
 import { fillBetween, mediaEdges, meetings, nearest, routesUnder, strideWidths, unreadWidthConditions, verdict, wrapVerdict } from "./corners/geometry.ts";
@@ -22,7 +24,6 @@ const MAX_FRAMES = 40;
 
 type PageResult = { readonly page: string; readonly stretches: readonly (readonly Row[])[]; readonly unread: readonly string[]; readonly dateline: string | null; readonly links: readonly string[]; readonly error: string | null };
 
-// Every same-origin link's RESOLVED path, so a relative road is read where it actually goes.
 const LINKS: Payload<string[]> = `[...document.querySelectorAll("a[href]")].map((a) => a.href).filter((h) => h.startsWith(location.origin + "/")).map((h) => new URL(h).pathname)`;
 
 const READ = `(() => {
@@ -147,9 +148,10 @@ async function sweepPage(ctx: SuiteContext, page: string): Promise<PageResult> {
   }
 }
 
-async function co1Sweep(ctx: SuiteContext, results: PageResult[]): Promise<void> {
+async function co1Sweep(ctx: SuiteContext): Promise<readonly PageResult[]> {
   const pages = routesUnder(resolve(REPO, "src/pages"));
   const missing = PAGE_FLOOR.filter((p) => !pages.includes(p));
+  const results: PageResult[] = [];
   for (const page of pages) results.push(await sweepPage(ctx, page));
   const lines = results.map((r) => {
     const rules = { forcedBelow: r.page === "/gallery/" ? GALLERY_FORCED_BELOW : null, keepsMotto: r.page === "/" };
@@ -167,22 +169,35 @@ async function co1Sweep(ctx: SuiteContext, results: PageResult[]): Promise<void>
     missing.length === 0 && lines.every((l) => l.ok),
     `${missing.length ? `pages missing from the tree: ${missing.join(", ")} | ` : ""}${lines.map((l) => l.text).join(" | ")}`,
   );
+  return results;
+}
+
+/** A discovery route the sweep never opens (the atlas, written by the showcase generator rather than the tree): its links read once the document is complete and they stop changing. */
+async function linksAtRest(ctx: SuiteContext, page: string): Promise<readonly string[]> {
+  await ctx.send("Page.navigate", { url: "about:blank" });
+  await ctx.send("Page.navigate", { url: `http://127.0.0.1:${ctx.PORT}${page}` });
+  const read: Payload<{ ready: string; links: string[] }> = `({ ready: document.readyState, links: ${LINKS} })`;
+  const rest = await makeSettle(ctx)(read, (d, last) => d.ready === "complete" && !!last && last.ready === "complete" && JSON.stringify(last.links) === JSON.stringify(d.links), `corners-links-${page}`, 200);
+  return rest.links;
 }
 
 // Blind spots, each erring toward a miss: a link a script writes later than its page's sweep is read in its authored form; a button that navigates is not a link (the Chart Table's road is walked by CD18b); and with scripts on, a link inside <noscript> is not an element at all (the scaffold test's resolver and its scripts-off pin, and CD50, read the Portfolio's).
 async function co4Roads(ctx: SuiteContext, swept: readonly PageResult[]): Promise<void> {
+  const unswept = DISCOVERY_ROUTES.filter((route) => !swept.some((r) => r.page === route));
+  const read: { page: string; links: readonly string[] }[] = [...swept];
+  for (const page of unswept) read.push({ page, links: await linksAtRest(ctx, page) });
   const from = new Map<string, string[]>();
-  for (const r of swept) for (const path of r.links) from.set(path, [...(from.get(path) ?? []), r.page]);
-  const bare = swept.filter((r) => r.links.length === 0).map((r) => r.page);
+  for (const r of read) for (const path of r.links) from.set(path, [...(from.get(path) ?? []), r.page]);
+  const bare = read.filter((r) => r.links.length === 0).map((r) => r.page);
   const dead: string[] = [];
   for (const [path, pages] of from) {
     const status = (await fetch(`http://127.0.0.1:${ctx.PORT}${path}`)).status;
     if (status !== 200) dead.push(`${path} answers ${status}, linked from ${[...new Set(pages)].join(", ")}`);
   }
   ctx.check(
-    "CO4 every link on every page the tree builds, read where it resolves once the page's scripts have run, opens a page that answers: a road written as a short relative path, or rewritten by a script, breaks silently otherwise (Issue #669, ruled 2026-10-04)",
-    swept.length > 0 && bare.length === 0 && dead.length === 0,
-    `${swept.length} pages, ${from.size} distinct paths${bare.length ? `; no links read on ${bare.join(", ")}` : ""}${dead.length ? `; ${dead.join("; ")}` : ""}`,
+    "CO4 every link on every page the site serves, the tree's and every discovery route's (the atlas among them), read where it resolves once the page's scripts have run, opens a page that answers: a road written as a short relative path, or rewritten by a script, breaks silently otherwise (Issue #669, ruled 2026-10-04)",
+    swept.length > 0 && unswept.length > 0 && bare.length === 0 && dead.length === 0,
+    `${read.length} pages (${unswept.join(", ")} beyond the sweep), ${from.size} distinct paths${bare.length ? `; no links read on ${bare.join(", ")}` : ""}${dead.length ? `; ${dead.join("; ")}` : ""}`,
   );
 }
 
@@ -245,8 +260,8 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const { send } = ctx;
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
   try {
-    const swept: PageResult[] = [];
-    await step("CO1", () => co1Sweep(ctx, swept));
+    let swept: readonly PageResult[] = [];
+    await step("CO1", async () => { swept = await co1Sweep(ctx); });
     await step("CO4", () => co4Roads(ctx, swept));
     await step("CO2", () => co2Control(ctx));
     await step("CO3", () => co3Wraps(ctx));
