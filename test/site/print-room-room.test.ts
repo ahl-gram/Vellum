@@ -91,7 +91,7 @@ test("PRR4 the legend row is the poster plates plus a road back (ruled 2026-08-3
   assert.ok(!phone.includes("select.control"), "the style picker stays on a phone (ruled 2026-08-30: no feature lost at any width; the wrap makes room)");
   assert.match(phone, /\.legend\.in-slip \.legend-head\s*\{[^}]*display:\s*block/, "docked in the phone sheet the head stays, since it carries the Pressed-as choice (the kit hides it)");
   assert.match(phone, /\.legend\.in-slip \.legend-note\s*\{[^}]*display:\s*none/, "the note stands down there");
-  assert.match(css, /@media \(max-width: 1023px\) \{ \.folio-controls \{ flex-wrap: wrap; \} \}/, "the corner's row wraps below 1024: on a phone (the mockup's seed-controls) and from the fold to 1023, where the corner takes the kit's 19rem rather than the room's 25rem (Issue #638; CO3 in e2e/suites/corners.ts reds a squeezed control there); from 1024 the one row stands as it did");
+  assert.match(css.replace(/\/\*[\s\S]*?\*\//g, ""), /@media \(max-width: 1023px\) \{ \.folio-controls \{ flex-wrap: wrap; \} \}/, "the corner's row wraps below 1024: on a phone (the mockup's seed-controls) and from the fold to 1023, where the corner takes the kit's 19rem rather than the room's 25rem (Issue #638; CO3 in e2e/suites/corners.ts reds a squeezed control there); from 1024 the one row stands as it did");
   assert.doesNotMatch(phone, /slip\.open\)[^{]*\.zoomery/, "the Glass standing down under the open sheet is the kit's rule since the 2026-09-03 sitting (room.test.ts pins it); the page keeps no copy");
 });
 

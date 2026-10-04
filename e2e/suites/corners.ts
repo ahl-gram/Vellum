@@ -166,7 +166,7 @@ async function co1Sweep(ctx: SuiteContext): Promise<void> {
 // Each control's own width, read by lifting its flex-shrink for one read and putting it back: a row too narrow for its controls shrinks them, and a row that wraps leaves them whole.
 const CONTROLS: Payload<Control[]> = `(() => {
   const out = [];
-  const corner = document.querySelector(".corner.tr.folio-room");
+  const corner = document.querySelector(".corner.tr.folio-room") || document.querySelector(".lf-seed");
   if (!corner) return out;
   for (const c of corner.querySelectorAll("input, button, select, textarea")) {
     const w = c.getBoundingClientRect().width;
@@ -195,9 +195,9 @@ async function co3Wraps(ctx: SuiteContext): Promise<void> {
     rows.push(page);
   }
   ctx.check(
-    "CO3 from the fold to 1023, where a wide room's corner takes the kit's standard width (Alex's 2026-10-03 ruling 4), no control in any room's corner is squeezed below its own width: the row wraps onto another line instead; the Specimen Book, which squeezes at every width above the fold on main too, is exempt until Issue #741 lands and fails here the day it stops (Issue #638)",
+    "CO3 from the fold to 1023, where a wide room's corner takes the kit's standard width (Alex's 2026-10-03 ruling 4), no control in any page's right-hand corner is squeezed below its own width: the row wraps onto another line instead; the Specimen Book, which squeezes at every width above the fold on main too, is exempt until Issue #741 lands and fails here the day it stops (Issue #638)",
     faults.length === 0 && read > 0,
-    `${rows.length} pages, ${read} control reads; ${faults.length ? faults.slice(0, 6).join("; ") : "none squeezed"}`,
+    `${rows.length} pages, ${read} control reads; ${faults.length ? `${faults.length} squeezed: ${faults.slice(0, 6).join("; ")}` : "none squeezed"}`,
   );
 }
 

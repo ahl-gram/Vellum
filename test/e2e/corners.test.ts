@@ -26,6 +26,7 @@ test("a media edge is read on both of its sides, inside the stretch only, widest
   assert.deepEqual(mediaEdges(["(max-width: 719.98px)"], 480, 900), [720, 719], "a fractional edge lands on the last whole width it holds and the first it does not");
   assert.deepEqual(mediaEdges(["(min-width: 900.02px)"], 480, 1280), [901, 900], "and so does a fractional lower edge");
   assert.deepEqual(mediaEdges(["(700px >= width)"], 480, 900), [701, 700]);
+  assert.deepEqual(mediaEdges(["(min-width: 601px) and (max-width: 900px)"], 480, 1280), [901, 900, 601, 600], "every comparison in one condition, not the first");
   assert.deepEqual(mediaEdges(["(width <= 340px)"], 480, 900), [], "an edge below the stretch is the 1px sweep's, not this list's");
 });
 
@@ -108,6 +109,7 @@ test("a corner control is squeezed when it renders narrower than its own width b
   assert.deepEqual(squeezes(1023, [{ t: "input#pr-seed", w: 110.78, natural: 110.78 }, { t: "select#pr-style", w: 118.2, natural: 118.39 }]), [], "whole, or under half a pixel short");
   assert.deepEqual(squeezes(1023, [{ t: "input#pr-seed", w: 63.44, natural: 110.78 }, { t: "button#pr-random", w: 38.39, natural: 38.39 }]), ["at 1023 the corner's input#pr-seed is squeezed to 63.4 from its own 110.8"], "the step 11 plate read's figure on the Print Room before its row wrapped");
   assert.equal(squeezes(1023, [{ t: "select#pr-style", w: 117.8, natural: 118.4 }]).length, 1, "six tenths of a pixel short is a squeeze");
+  assert.deepEqual(squeezes(1023, [{ t: "button#x", w: 38, natural: 38.5 }]), [], "exactly half a pixel short is rounding");
 });
 
 test("a room that already squeezes is exempt only while it still does, and every other room is held", () => {
