@@ -169,7 +169,7 @@ async function co1Sweep(ctx: SuiteContext, results: PageResult[]): Promise<void>
   );
 }
 
-// Blind spot, erring toward a miss: a link a script writes later than its page's sweep is read in its authored form, and a button that navigates is not a link (the Chart Table's road is walked by CD18b).
+// Blind spots, each erring toward a miss: a link a script writes later than its page's sweep is read in its authored form; a button that navigates is not a link (the Chart Table's road is walked by CD18b); and with scripts on, a link inside <noscript> is not an element at all (the scaffold test's resolver and its scripts-off pin, and CD50, read the Portfolio's).
 async function co4Roads(ctx: SuiteContext, swept: readonly PageResult[]): Promise<void> {
   const from = new Map<string, string[]>();
   for (const r of swept) for (const path of r.links) from.set(path, [...(from.get(path) ?? []), r.page]);

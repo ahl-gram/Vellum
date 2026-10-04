@@ -73,7 +73,7 @@ test("PFR4 the Portfolio's road home is built from the address it is SHOWING, an
   assert.ok(hrefAt > road, "nothing assigns the road's href after it is looked up, so the press back is the Astro literal and loses the whole gathering (#634 defect 1)");
   // Both calls are anchored WHOLE rather than by their tokens. The guard-prover's round 1 on this branch put the address and the device the wrong way round as arguments and put "" in place of the sheets, and two unordered assert.match calls passed both mutations while the ruled precedence was inverted and the gathering dropped.
   const line = app.slice(road, app.indexOf("\n", hrefAt));
-  assert.match(line, /roadHome\.href = "\.\.\/" \+ tableHash\(location\.hash, emitTable\(items\)\)/, "the road home is no longer the parent this page sits under (Issue #669) plus this page's own address and the sheets it is showing, so a reader who presses it loses the chart they gathered from, the sheets, or both");
+  assert.match(line, /roadHome\.href = "\.\.\/" \+ tableHash\(location\.hash, emitTable\(items\)\);/,"the road home is no longer the parent this page sits under (Issue #669) plus this page's own address and the sheets it is showing, so a reader who presses it loses the chart they gathered from, the sheets, or both");
   // COUNTED, because an anchored slice ends where it ends: a second assignment just past this line overwrites the first with the bare fallback and every regex above still passes (guard-prover round 2).
   assert.equal((app.match(/roadHome\.href\s*=/g) ?? []).length, 1, "the road home is written in more than one place, and the last write is the one the reader presses");
   // The shared binding, which table-store.test.ts drives against the real global (guard-prover round 3).

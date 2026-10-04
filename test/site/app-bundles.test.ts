@@ -113,6 +113,14 @@ test("the Portfolio's twin is cleaned and ignored at its address under the Explo
   assert.ok(read(".gitignore").split("\n").includes("public/explorer/portfolio/app.bundle.js"), ".gitignore should carry the exact line public/explorer/portfolio/app.bundle.js");
 });
 
+test("the clean never reaches a tracked file: no GENERATED_SUBTREES entry is, or holds, a path git tracks under public/ (Issue #669)", async () => {
+  const { GENERATED_SUBTREES } = await import("../../scripts/clean-public-generated.ts");
+  const tracked = execFileSync("git", ["ls-files", "public"], { cwd: REPO, encoding: "utf8", timeout: 30_000 }).split("\n").filter(Boolean);
+  assert.ok(tracked.includes("public/explorer/portfolio/index.css"), "precondition: the Portfolio's tracked sheet shares its directory with a generated twin, which is the case that makes a directory-wide entry destructive");
+  const reached = GENERATED_SUBTREES.flatMap((sub) => tracked.filter((f) => f === `public/${sub}` || f.startsWith(`public/${sub}/`)).map((f) => `${sub} reaches ${f}`));
+  assert.deepEqual(reached, [], "a cleaned entry that is or holds a tracked file deletes committed content on every npm test and every build");
+});
+
 // Characterization of the press on a hermetic fixture (the real entries only resolve after generation; npm test runs before it); the full e2e against dist/ is what proves the real entries stay invisible.
 
 async function withFixture<T>(run: (dir: string) => T | Promise<T>): Promise<T> {

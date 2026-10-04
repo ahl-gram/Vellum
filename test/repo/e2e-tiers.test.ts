@@ -354,6 +354,12 @@ test("every check group that waits is still inside its own step, by name (#534)"
   }
 });
 
+test("CD50 turns page scripts back on from its own step's promise, so a scripts-off check cannot leak into the checks after it (Issue #669)", () => {
+  const suite = src(e2eSuitePath("chart-drawer"));
+  assert.match(suite, /await step\("CD50", \(\) => cd50ScriptsOffHome\(kt\)\)\.finally\(scriptsBackOn\);/, "CD50's step no longer ends in .finally(scriptsBackOn), so scripts stay off for every check after it whenever that line is skipped or removed");
+  assert.match(suite, /const scriptsBackOn = async \(\) => \{ try \{ await kt\.send\("Emulation\.setScriptExecutionDisabled", \{ value: false \}\); \} catch \{\} \};/, "scriptsBackOn no longer switches page scripts back on");
+});
+
 test("the lane driver spawns the runner itself and refuses an ambient selection", () => {
   const DRIVER = uncommented(src("e2e/lanes.ts"));
   assert.match(DRIVER, /spawn\(process\.execPath, \[RUNNER\]/, "a lane must spawn the runner directly, so its exit code survives");
