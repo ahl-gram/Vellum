@@ -4,9 +4,10 @@ import { makeSettle } from "../support/settle.ts";
 import type { SuiteContext } from "../types.ts";
 import { cardsKit } from "./cards/kit.ts";
 import { NARROW_SEED } from "./cards/reads.ts";
-import { pSetup, pManifest, p1Overlay, p2Idle, p2bPressLift, p4Capital, p6Ruin, p7Tooltip, p8TapPins, p9Hover, p10Focus, p11OutsideClick, p12PinSwitch, p13AxDescription, p14Unfurl, p15RealHover } from "./cards/overlay.ts";
+import { pSetup, pManifest, p1Overlay, p2Idle, p2bPressLift, p4Capital, p6Ruin, p7Tooltip, p8TapPins, p10Focus, p11OutsideClick, p12PinSwitch, p13AxDescription, p14Unfurl, p15RealHover } from "./cards/overlay.ts";
 import { p16Glass, p18Renamed, p18bNeverRenamed, p17RuinNote, pCardShot } from "./cards/glass.ts";
 import { p19CardsFit, p20PinnedTakesPointer, p26TailScrolls, p23CapHolds, p24NothingToScroll, pRestore } from "./cards/cap.ts";
+import { holdKit, p9Grace, p28Travel, p29NearestTown, p30Tablet, p31Keyboard, p31bFocusSurvivesRefill, p32Dismiss } from "./cards/hold.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { evaluate } = ctx;
@@ -22,7 +23,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await p6Ruin(ctx, pm);
   await p7Tooltip(ctx, pm);
   await p8TapPins(ctx, pm);
-  await p9Hover(ctx, pm);
+  await p9Grace(ctx, pm.cap);
   await p10Focus(ctx, pm);
   await p11OutsideClick(ctx, pm);
   await p12PinSwitch(ctx, pm);
@@ -39,5 +40,15 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("P19, P19b", () => p19CardsFit(k, narrowCount));
   await step("P20 to P27", async () => { const open = await p20PinnedTakesPointer(k); await p26TailScrolls(ctx, open); await p23CapHolds(k, open); });
   await step("P24", () => p24NothingToScroll(k));
+  const hk = holdKit({ ...ctx, settle });
+  await step("P28 to P32", async () => {
+    const marks = await hk.boot(false);
+    await p29NearestTown(hk, marks);
+    await p28Travel(hk, marks);
+    await p31Keyboard(hk, marks);
+    await p31bFocusSurvivesRefill(hk, marks);
+    await p32Dismiss(hk, marks);
+  });
+  await step("P30", () => p30Tablet(hk));
   await step("P restore", () => pRestore(ctx));
 }

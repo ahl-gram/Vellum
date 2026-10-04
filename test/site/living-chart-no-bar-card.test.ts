@@ -318,3 +318,19 @@ test("PC7 the page listens for mouse movement only while a place card is shown, 
   lc.destroy();
   assert.equal(listening.size, 0, "teardown stops listening");
 });
+
+test("PC8 a pointer drifting inside overlapping boxes toward a nearer town waits out the grace before the card switches, so heading for a card's button never loses it (#750, #632)", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const { armed, face } = await holdRig();
+  // Seed 4294967295 at 1024 in miniature: town 0's centre lies inside town 1's box, and town 1 paints on top.
+  const box = (x: number, y: number) => ({ left: x - 13, top: y - 13, right: x + 13, bottom: y + 13 });
+  armed.hits[0]!.rect = box(100, 100);
+  armed.hits[1]!.rect = box(108, 104);
+  const nameOf = (i: number) => (armed.hits[i]!.getAttribute("aria-label") ?? "").split(", ")[0];
+  armed.hits[1]!.fire("mouseenter", { clientX: 108, clientY: 104 });
+  assert.equal(face().name, nameOf(1), "the precondition: the pointer at town 1's centre shows town 1");
+  armed.hits[1]!.fire("mousemove", { clientX: 101, clientY: 101 });
+  assert.equal(face().name, nameOf(1), "drifting nearer town 0 does not swap the card at once");
+  t.mock.timers.tick(HOLD_GRACE_MS);
+  assert.equal(face().name, nameOf(0), "resting there, the nearer town takes the card once the grace has run");
+});

@@ -86,11 +86,6 @@ export async function p8TapPins({ evaluate, check }: SuiteContext, pm: Manifest)
   check("P8 tap opens+pins from closed, survives mouseleave, Escape dismisses", p8.startHidden === true && p8.opened && p8.survived && p8.closed, JSON.stringify(p8));
 }
 
-export async function p9Hover({ evaluate, check }: SuiteContext, pm: Manifest): Promise<void> {
-  const p9 = await evaluate<{ shown: boolean; gone: boolean }>(`(()=>{const c=document.getElementById("place-card");const hit=document.querySelector('.place-hit[data-idx="'+${pm.cap}+'"]');hit.dispatchEvent(new MouseEvent("mouseenter",{bubbles:true}));const shown=!c.hidden;hit.dispatchEvent(new MouseEvent("mouseleave",{bubbles:true}));const gone=c.hidden;return{shown,gone};})()`);
-  check("P9 unpinned: mouseenter shows, mouseleave dismisses", p9.shown && p9.gone, JSON.stringify(p9));
-}
-
 export async function p10Focus({ evaluate, check }: SuiteContext, pm: Manifest): Promise<void> {
   const p10 = await evaluate<{ shown: boolean; gone: boolean }>(`(()=>{const c=document.getElementById("place-card");const hit=document.querySelector('.place-hit[data-idx="'+${pm.cap}+'"]');hit.focus();const shown=!c.hidden;hit.blur();const gone=c.hidden;return{shown,gone};})()`);
   check("P10 unpinned: focus shows, blur dismisses", p10.shown && p10.gone, JSON.stringify(p10));

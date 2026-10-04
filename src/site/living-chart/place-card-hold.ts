@@ -109,7 +109,12 @@ export function wireHit(hit: HTMLElement, idx: number, w: HitWiring): void {
   };
   hit.addEventListener("pointerdown", () => { pointerFocus = true; });
   hit.addEventListener("mouseenter", enter);
-  hit.addEventListener("mousemove", (e) => { const p = w.point(e); if (p && w.resolve(p, idx) !== owner) enter(e); });
+  hit.addEventListener("mousemove", (e) => {
+    const p = w.point(e);
+    if (!p || w.resolve(p, idx) === owner) return;
+    w.feed({ kind: "leave", idx: owner, onCard: w.inside(p) });
+    enter(e);
+  });
   hit.addEventListener("mouseleave", (e) => {
     const to = e.relatedTarget;
     if (isHit(to) && to.dataset["idx"] === String(owner)) return;
