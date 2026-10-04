@@ -2,7 +2,7 @@
 import { composePlaceCard, placeAriaLabel, cardSide, clampOffset, type CardBox, type PlaceCard } from "../../render/place-card.ts";
 import type { PlaceManifest, PlaceMark } from "../../render/place-manifest.ts";
 import type { HistoricalEvent } from "../../society/history.ts";
-import { CLOSED, HOLD_GRACE_MS, isHit, nearestMark, nextHold, wireHit, type Hold, type HoldInput, type Point } from "./place-card-hold.ts";
+import { CLOSED, HOLD_GRACE_MS, isHit, nearestMark, nextHold, pressMark, wireHit, type Hold, type HoldInput, type Point } from "./place-card-hold.ts";
 
 interface PlaceOverlayState {
   card: HTMLDivElement;
@@ -304,17 +304,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     return at >= 0 ? at : idx;
   }
 
-  // A press focuses the town it lands on as its default action, synchronously inside the mousedown, so a mark set there and cleared on the next task tells that focus from a keyboard's; it is shared because the town raised under the pointer can change between a tap's pointerdown and its mousedown.
-  let pressFocus = false;
-  const markPress = (): void => {
-    pressFocus = true;
-    setTimeout(() => { pressFocus = false; }, 0);
-  };
-  const takePress = (): boolean => {
-    const was = pressFocus;
-    pressFocus = false;
-    return was;
-  };
+  const { markPress, takePress } = pressMark();
 
   const point = (e: Event): Point | null => {
     const me = e as MouseEvent;
@@ -341,6 +331,12 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     // An inset commit rebuilds the overlay with no mount wipe before it (unlike a draw), so this builder owns removing the previous overlay + card; a no-op after a wipe.
     for (const stale of mapEl.querySelectorAll(":scope > .place-overlay, :scope > #place-card")) stale.remove();
     const overlay = overlayBox(opts);
+    // A town raised under the pointer between a press and its release splits the click onto the overlay, their common parent; it is still a press on the town nearest the pointer.
+    overlay.addEventListener("click", (e) => {
+      const p = e.target === overlay && e.detail > 0 ? point(e) : null;
+      const at = p ? resolve(p, -1) : -1;
+      if (p && at >= 0) feed({ kind: "press", idx: at, detail: e.detail, onCard: inside(p) });
+    });
     const { card, inner } = cardShell();
     card.addEventListener("focusout", (e) => {
       feed({ kind: "focusOut", staysNear: inCard(e.relatedTarget) || isHit(e.relatedTarget) });
@@ -377,6 +373,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     if (!placeOverlay || hold.shown < 0) return;
     const t = e.target as (Node & Partial<Pick<Element, "closest">>) | null;
     if (t && t.closest && (t.closest(".place-hit") || t.closest("#place-card"))) return;
+    if (t === placeOverlay.card.parentElement) return;
     feed({ kind: "pressOpen", onCard: e.detail > 0 && inside({ x: e.clientX, y: e.clientY }) });
   }
 

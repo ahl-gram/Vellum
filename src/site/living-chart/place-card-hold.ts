@@ -98,6 +98,22 @@ export interface HitWiring {
   takePress(): boolean;
 }
 
+// A press focuses the town it lands on as its default action, synchronously inside the mousedown, so a mark set there and cleared on the next task tells that focus from a keyboard's; it is shared across towns because the town raised under the pointer can change between a tap's pointerdown and its mousedown.
+export function pressMark(): { markPress: () => void; takePress: () => boolean } {
+  let marked = false;
+  return {
+    markPress: () => {
+      marked = true;
+      setTimeout(() => { marked = false; }, 0);
+    },
+    takePress: () => {
+      const was = marked;
+      marked = false;
+      return was;
+    },
+  };
+}
+
 export const isHit = (node: unknown): node is HTMLElement => (node as Partial<Element> | null)?.classList?.contains("place-hit") === true;
 
 export function wireHit(hit: HTMLElement, idx: number, w: HitWiring): void {
@@ -122,7 +138,6 @@ export function wireHit(hit: HTMLElement, idx: number, w: HitWiring): void {
   hit.addEventListener("mouseleave", (e) => {
     const to = e.relatedTarget;
     if (isHit(to) && to.dataset["idx"] === String(owner)) return;
-    if (!isHit(to)) w.raise(-1);
     w.feed({ kind: "leave", idx: owner, onCard: w.inside(w.point(e)) });
   });
   hit.addEventListener("focus", () => {

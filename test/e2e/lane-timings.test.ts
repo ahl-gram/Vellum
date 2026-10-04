@@ -13,7 +13,7 @@ const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   "zoom": 92.4,
   "zoom-gestures": 8.4,
   "glass-ceremony": 16.6,
-  "cards": 19.2,
+  "cards": 58.0,
   "health": 0.0,
   "fallback": 7.5,
   "hunt": 11.0,

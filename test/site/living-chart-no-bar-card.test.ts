@@ -362,3 +362,13 @@ test("PC10 a tap that came down on the card's text keeps it, even when the brows
   armed.hits[1]!.fire("click", { detail: 1, clientX: 172, clientY: 373 });
   assert.equal(face().pressIdx, "1", "a finger that came down outside the card does move the pin");
 });
+
+test("PC11 a click split onto the overlay, because a town was raised between the press and the release, still pins the town nearest the pointer (#632)", async () => {
+  const { lc, armed, face, overlay } = await holdRig();
+  // Measured 2026-10-04 at 1024: a press with no move first on Nykrask's centre went down on Dradkrov's box, Nykrask was raised under it, and the click landed on their common parent.
+  armed.hits[2]!.rect = { left: 87, top: 87, right: 113, bottom: 113 };
+  overlay().fire("click", { target: overlay(), detail: 1, clientX: 100, clientY: 100 });
+  assert.deepEqual({ pinned: face().pinned, idx: face().pressIdx }, { pinned: true, idx: "2" }, "the split click pins the town under the pointer");
+  lc.onDocClick({ target: overlay(), detail: 1, clientX: 100, clientY: 100 } as unknown as MouseEvent);
+  assert.equal(face().pinned, true, "and the same click reaching the document is not a press on open chart");
+});
