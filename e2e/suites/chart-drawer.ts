@@ -11,7 +11,7 @@ import type { Edge, Read } from "./chart-drawer/reads.ts";
 import { cd1DogEar, cd2Lays, cd2bRealPointer, cd23LineLeaves, cd3Refused, cd4Reload, cd5CuttingOff, cd7Cap, cd8Home } from "./chart-drawer/desk.ts";
 import { cd44CarryFiles, cd45SnapBack, cd46ReducedCarry, cd47FullCarry } from "./chart-drawer/drag.ts";
 import { cd9NeverTogether, cd12SeatsHold, cd13TabClear, cd18RoadOn } from "./chart-drawer/surfaces.ts";
-import { cd18bRoadCarries, cd19PortfolioDrafts, cd24PortfolioSays, cd20BarePortfolio, cd21PortfolioGlass } from "./chart-drawer/portfolio.ts";
+import { cd18bRoadCarries, cd19PortfolioDrafts, cd24PortfolioSays, cd20BarePortfolio, cd21PortfolioGlass, cd49PrintRoomRoad, cd50ScriptsOffHome } from "./chart-drawer/portfolio.ts";
 import { cd6PhoneDoor, cd14LeafTabs, cd15TableLeaf, cd16LeafTurnsBack } from "./chart-drawer/phone.ts";
 import { cd25CardPress, cd27CardAtCap, cd28PagePress, cd34PageRefusals, cd31RoundTrip, cd32MixedFolio, cd33PhonePress } from "./chart-drawer/prospect.ts";
 import { cd36GoldPress, cd37BackCached, cd38BackRebuilt, cd39LinkBeatsDevice, cd40EmptySticks, cd41CachedReturn } from "./chart-drawer/homes.ts";
@@ -69,7 +69,7 @@ async function cd9Surfaces(kd: DragKit, step: Step, SIX: string): Promise<void> 
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   await go(`${DRESS}&table=${SIX}`);
   await step("CD18", () => cd18RoadOn(kd));
-  await cd18bRoadCarries(kd);
+  await step("CD18b", () => cd18bRoadCarries(kd, SIX));
   await cd19PortfolioDrafts(kd);
   await cd24PortfolioSays(kd);
   // BARE means bare on both homes since Issue #634: a Portfolio the address names no folio for now shows what the device holds (ruling 4), so the six this group just laid would arrive here as a full pile.
@@ -97,6 +97,9 @@ async function cd25CapturesAndHomes(kd: DragKit, step: Step, SIX: string): Promi
   // Issue #634: the table's second home, and the four roads the two homes exist for. ONE and TWO are addresses rather than gestures because every check below is about WHERE the table came from, not about the handle that filed it.
   const TWO = `${ONE}_k-p.seed-42.style-antique.i-0.year-1059`;
   const kt = tableKit(kd);
+  await step("CD49", () => cd49PrintRoomRoad(kt));
+  const scriptsBackOn = async () => { try { await kt.send("Emulation.setScriptExecutionDisabled", { value: false }); } catch {} };
+  await step("CD50", () => cd50ScriptsOffHome(kt)).finally(scriptsBackOn);
   await step("CD36", () => cd36GoldPress(kt));
   await step("CD37", () => cd37BackCached(kt));
   await step("CD38", () => cd38BackRebuilt(kt));

@@ -101,12 +101,12 @@ test("a shot's missing resources are recorded, the browser's own favicon request
 test("the sweep reads its pages from the built tree: every index.html, and nothing else", () => {
   const dir = join(REPO, "out", "test-design-kit-routes");
   rmSync(dir, { recursive: true, force: true });
-  for (const f of ["index.html", "faq/index.html", "print-room/portfolio/index.html", "gallery/chart-1.html", "gallery/chart-index.html", "explorer/app.bundle.js", "fonts/OFL.txt"]) {
+  for (const f of ["index.html", "faq/index.html", "explorer/portfolio/index.html", "gallery/chart-1.html", "gallery/chart-index.html", "explorer/app.bundle.js", "fonts/OFL.txt"]) {
     mkdirSync(dirname(join(dir, f)), { recursive: true });
     writeFileSync(join(dir, f), "x");
   }
   try {
-    assert.deepEqual(routesOf(dir), ["/", "/faq/", "/print-room/portfolio/"]);
+    assert.deepEqual(routesOf(dir), ["/", "/explorer/portfolio/", "/faq/"]);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -119,16 +119,16 @@ test("a page that runs a live chart app is framed by its head box, home and the 
     "/specimen/": "view",
   };
   for (const [route, mode] of Object.entries(archive)) assert.equal(modeOf(route), mode, `${route}, as the sweep this ports framed it (PR #509)`);
-  assert.equal(modeOf("/print-room/portfolio/"), "head", "the Portfolio runs a live chart app");
+  assert.equal(modeOf("/explorer/portfolio/"), "head", "the Portfolio runs a live chart app");
   assert.equal(modeOf("/atlas/"), "full", "the Atlas is a document");
 });
 
 test("every page is shot at a desktop and a true phone viewport, under the archive's file names", () => {
-  const plan = planSweep(["/", "/atlas/", "/explorer/", "/print-room/portfolio/", "/specimen/"], "out/s");
+  const plan = planSweep(["/", "/atlas/", "/explorer/", "/explorer/portfolio/", "/specimen/"], "out/s");
   const byName = new Map(plan.map((s) => [s.name, s]));
   assert.deepEqual([...byName.keys()].sort(), [
-    "atlas-1280.png", "atlas-390.png", "explorer-1280-head.png", "explorer-390-head.png", "home-1280.png", "home-390.png",
-    "print-roomportfolio-1280-head.png", "print-roomportfolio-390-head.png", "specimen-1280.png", "specimen-390.png",
+    "atlas-1280.png", "atlas-390.png", "explorer-1280-head.png", "explorer-390-head.png",
+    "explorerportfolio-1280-head.png", "explorerportfolio-390-head.png", "home-1280.png", "home-390.png", "specimen-1280.png", "specimen-390.png",
   ]);
   for (const s of plan) {
     assert.equal(s.mobile, s.width === 390, `${s.name} mobile`);

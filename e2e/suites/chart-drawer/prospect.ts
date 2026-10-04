@@ -156,7 +156,7 @@ export async function cd32MixedFolio({ evaluate, send, check, sleep, PORT }: Sui
     "k-p.seed-42.style-antique.i-1.year-1059",
   ].join("_");
   await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/print-room/portfolio/#table=${MIXED}` });
+  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/portfolio/#table=${MIXED}` });
   for (let i = 0; i < 200; i++) { await sleep(100); if (await evaluate<boolean>(`!!window.__vellumPortfolio`)) break; }
   const PFM: Payload<{ items: number; drawn: number; rows: number; thumbs: number; awaited: number; bands: string[]; titles: string[]; downloads: number; bound: string | null } | null> = `(() => { const s = window.__vellumPortfolio ? window.__vellumPortfolio() : null; return s ? { ...s,
       rows: document.querySelectorAll("#pf-contents .row").length,

@@ -77,8 +77,8 @@ deliberately moved posters, atlas and PDF off the CLI onto dedicated pages, shri
 **New interactive surfaces are DESTINATIONS** (the Print Room, the Reading Room #190), not more
 Explorer panels. **One ruled exception** (2026-09-07, the #518 sitting): the Chart Table's drawer
 (#401) is an Explorer-side surface, a drawer sliding out from behind a tab on the right edge holding
-the gathered sheets. Its destination still complies, since the gathering lands on The Portfolio, a
-page of the Print Room (#521). The rule stands for everything else.
+the gathered sheets. Its destination still complies, since the gathering lands on The Portfolio, its
+own page, under the Explorer (Issue #521). The rule stands for everything else.
 
 ## How a design decision is made
 
@@ -235,7 +235,7 @@ byte-identical, and the drift guard is green.**
   filed the same day against a spec-recon re-baseline. Sub 0 (#518) was the mockup sitting and gated
   the rest. It ruled the full table as a drawer in the Explorer, by the exception recorded on the
   destinations rule above; the count-and-button minimum was drawn and passed on. The destination
-  complies: the gathered sheets land on The Portfolio, a second page of the Print Room.
+  complies: the gathered sheets land on The Portfolio, its own page, under the Explorer.
 - Each epic carries its own contract, sub shape (a Sub 0 spike or mockup round first), open decisions,
   and golden or regen posture in its own issue, per the house pattern.
 - **Delight and anytime work interleaves but never leads.** It is not the lead lane, and a delight

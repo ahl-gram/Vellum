@@ -10,7 +10,7 @@ const read = (innerW: number, left: Box[], right: Box[], more: Partial<CornerRea
 
 test("the corners sweep reads every page the tree builds, home and a nested room among them, in a stable order", () => {
   const routes = routesUnder(resolve(REPO, "src/pages"));
-  for (const route of ["/", "/explorer/", "/print-room/", "/print-room/portfolio/", "/seed-of-the-day/", "/specimen/"]) {
+  for (const route of ["/", "/explorer/", "/explorer/portfolio/", "/print-room/", "/seed-of-the-day/", "/specimen/"]) {
     assert.ok(routes.includes(route), `${route} is one of ${routes.join(", ")}`);
   }
   assert.ok(routes.every((r) => r.startsWith("/") && r.endsWith("/")), "directory form, as the layout's path prop is");

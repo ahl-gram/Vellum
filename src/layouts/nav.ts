@@ -28,11 +28,11 @@ export const ROUTE_NAMES: Readonly<Record<string, string>> = {
   "/glossary/": "The Glossary",
   "/prospect/": "The Prospect",
   "/ribbon/": "The Wayfarer's Ribbon",
-  "/print-room/portfolio/": "The Portfolio",
+  "/explorer/portfolio/": "The Portfolio",
 };
 
 export const ROUTE_CHILDREN: Readonly<Record<string, readonly string[]>> = {
-  "/explorer/": ["/prospect/", "/ribbon/", "/print-room/portfolio/"],
+  "/explorer/": ["/prospect/", "/ribbon/", "/explorer/portfolio/"],
   "/reading-room/": ["/prospect/"],
 };
 

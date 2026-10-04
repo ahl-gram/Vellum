@@ -1,13 +1,15 @@
 // The head cluster against the right-hand corner on every page (Issue #638): each page is resized while loaded, a pixel at a time across the phone band and at every media edge and a stride above it, and no box of the cluster's ink (its text line boxes and its controls) may overlap a box of the corner's. Ink, never a layout box, because a corner's layout box is wider than what it draws.
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { DISCOVERY_ROUTES } from "../../scripts/generate-discovery.ts";
+import { makeSettle } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
 import type { Payload, SuiteContext } from "../types.ts";
 import { fillBetween, mediaEdges, meetings, nearest, routesUnder, strideWidths, unreadWidthConditions, verdict, wrapVerdict } from "./corners/geometry.ts";
 import type { Control, CornerRead, Row } from "./corners/geometry.ts";
 
 const REPO = resolve(fileURLToPath(new URL(".", import.meta.url)), "..", "..");
-const PAGE_FLOOR = ["/", "/explorer/", "/faq/", "/gallery/", "/glossary/", "/print-room/", "/print-room/portfolio/", "/prospect/", "/reading-room/", "/ribbon/", "/seed-of-the-day/", "/specimen/"];
+const PAGE_FLOOR = ["/", "/explorer/", "/explorer/portfolio/", "/faq/", "/gallery/", "/glossary/", "/print-room/", "/prospect/", "/reading-room/", "/ribbon/", "/seed-of-the-day/", "/specimen/"];
 const FOLD = 900;
 const BELOW_WIDE = 1023;
 const SQUEEZED_ALREADY: Readonly<Record<string, string>> = { "/specimen/": "Issue #741" };
@@ -20,7 +22,9 @@ const WIDE_H = 800;
 const GALLERY_FORCED_BELOW = 346;
 const MAX_FRAMES = 40;
 
-type PageResult = { readonly page: string; readonly stretches: readonly (readonly Row[])[]; readonly unread: readonly string[]; readonly dateline: string | null; readonly error: string | null };
+type PageResult = { readonly page: string; readonly stretches: readonly (readonly Row[])[]; readonly unread: readonly string[]; readonly dateline: string | null; readonly links: readonly string[]; readonly error: string | null };
+
+const LINKS: Payload<string[]> = `[...document.querySelectorAll("a[href]")].map((a) => a.href).filter((h) => h.startsWith(location.origin + "/")).map((h) => new URL(h).pathname)`;
 
 const READ = `(() => {
   const r2 = (n) => Math.round(n * 100) / 100;
@@ -122,6 +126,7 @@ async function readStretch(ctx: SuiteContext, widths: readonly number[], mobile:
 async function sweepPage(ctx: SuiteContext, page: string): Promise<PageResult> {
   const stretches: Row[][] = [];
   const unread: string[] = [];
+  const links: string[] = [];
   let dateline: string | null = null;
   try {
     dateline = await load(ctx, page, FOLD, true);
@@ -129,18 +134,21 @@ async function sweepPage(ctx: SuiteContext, page: string): Promise<PageResult> {
     unread.push(...unreadWidthConditions(narrowMedia));
     const pixels = Array.from({ length: EVERY_PIXEL_TO - PHONE_LO + 1 }, (_, i) => EVERY_PIXEL_TO - i);
     stretches.push(await readStretch(ctx, [...strideWidths(FOLD, EVERY_PIXEL_TO + 1, STRIDE, mediaEdges(narrowMedia, EVERY_PIXEL_TO, FOLD)), ...pixels], true));
+    // Read at the END of each stretch, seconds after the load, so a link the page's script rewrites (the Print Room's road on to the Portfolio waits for the proof) is read as rewritten.
+    links.push(...await ctx.evaluate(LINKS));
     const wideDateline = await load(ctx, page, WIDE, false);
     if (wideDateline) dateline = `${dateline ?? ""}; above the fold ${wideDateline}`;
     const wideMedia = await ctx.evaluate(MEDIA);
     unread.push(...unreadWidthConditions(wideMedia));
     stretches.push(await readStretch(ctx, strideWidths(WIDE, FOLD + 1, STRIDE, mediaEdges(wideMedia, FOLD, WIDE)), false));
-    return { page, stretches, unread, dateline, error: null };
+    links.push(...await ctx.evaluate(LINKS));
+    return { page, stretches, unread, dateline, links, error: null };
   } catch (err) {
-    return { page, stretches, unread, dateline, error: err instanceof Error ? err.message.slice(0, 400) : String(err) };
+    return { page, stretches, unread, dateline, links, error: err instanceof Error ? err.message.slice(0, 400) : String(err) };
   }
 }
 
-async function co1Sweep(ctx: SuiteContext): Promise<void> {
+async function co1Sweep(ctx: SuiteContext): Promise<readonly PageResult[]> {
   const pages = routesUnder(resolve(REPO, "src/pages"));
   const missing = PAGE_FLOOR.filter((p) => !pages.includes(p));
   const results: PageResult[] = [];
@@ -160,6 +168,36 @@ async function co1Sweep(ctx: SuiteContext): Promise<void> {
     "CO1 on every page the tree builds, resized while loaded from 320 to 480 a pixel at a time and at both sides of every width media edge its CSS carries and a 32px stride up to 1280, no ink of the head cluster overlaps the ink of the right-hand corner by any amount, both corners carry ink, home keeps its motto, the band covers the cluster, the Seed of the Day writes its own dateline through datelineFor, and the Gallery's too-wide layout below 346 is the only width that lays out wider than set (Issue #638; Alex's 2026-09-22 and 2026-10-03 rulings; Issue #672)",
     missing.length === 0 && lines.every((l) => l.ok),
     `${missing.length ? `pages missing from the tree: ${missing.join(", ")} | ` : ""}${lines.map((l) => l.text).join(" | ")}`,
+  );
+  return results;
+}
+
+/** A discovery route the sweep never opens (the atlas, written by the showcase generator rather than the tree): its links read once the document is complete and they stop changing. */
+async function linksAtRest(ctx: SuiteContext, page: string): Promise<readonly string[]> {
+  await ctx.send("Page.navigate", { url: "about:blank" });
+  await ctx.send("Page.navigate", { url: `http://127.0.0.1:${ctx.PORT}${page}` });
+  const read: Payload<{ ready: string; links: string[] }> = `({ ready: document.readyState, links: ${LINKS} })`;
+  const rest = await makeSettle(ctx)(read, (d, last) => d.ready === "complete" && !!last && last.ready === "complete" && JSON.stringify(last.links) === JSON.stringify(d.links), `corners-links-${page}`, 200);
+  return rest.links;
+}
+
+// Blind spots, each erring toward a miss: a link a script writes later than its page's sweep is read in its authored form; a button that navigates is not a link (the Chart Table's road is walked by CD18b); and with scripts on, a link inside <noscript> is not an element at all (the scaffold test's resolver and its scripts-off pin, and CD50, read the Portfolio's).
+async function co4Roads(ctx: SuiteContext, swept: readonly PageResult[]): Promise<void> {
+  const unswept = DISCOVERY_ROUTES.filter((route) => !swept.some((r) => r.page === route));
+  const read: { page: string; links: readonly string[] }[] = [...swept];
+  for (const page of unswept) read.push({ page, links: await linksAtRest(ctx, page) });
+  const from = new Map<string, string[]>();
+  for (const r of read) for (const path of r.links) from.set(path, [...(from.get(path) ?? []), r.page]);
+  const bare = read.filter((r) => r.links.length === 0).map((r) => r.page);
+  const dead: string[] = [];
+  for (const [path, pages] of from) {
+    const status = (await fetch(`http://127.0.0.1:${ctx.PORT}${path}`)).status;
+    if (status !== 200) dead.push(`${path} answers ${status}, linked from ${[...new Set(pages)].join(", ")}`);
+  }
+  ctx.check(
+    "CO4 every link on every page the site serves, the tree's and every discovery route's (the atlas among them), read where it resolves once the page's scripts have run, opens a page that answers: a road written as a short relative path, or rewritten by a script, breaks silently otherwise (Issue #669, ruled 2026-10-04)",
+    swept.length > 0 && unswept.length > 0 && bare.length === 0 && dead.length === 0,
+    `${read.length} pages (${unswept.join(", ")} beyond the sweep), ${from.size} distinct paths${bare.length ? `; no links read on ${bare.join(", ")}` : ""}${dead.length ? `; ${dead.join("; ")}` : ""}`,
   );
 }
 
@@ -222,7 +260,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const { send } = ctx;
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
   try {
-    await step("CO1", () => co1Sweep(ctx));
+    let swept: readonly PageResult[] = [];
+    await step("CO1", async () => { swept = await co1Sweep(ctx); });
+    await step("CO4", () => co4Roads(ctx, swept));
     await step("CO2", () => co2Control(ctx));
     await step("CO3", () => co3Wraps(ctx));
   } finally {

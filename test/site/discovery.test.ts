@@ -76,6 +76,13 @@ test("sitemap.xml lists every route, absolute against the site, and nothing else
   assert.ok(!xml.includes("vellumworlds"), "the origin is a parameter: no domain may be hardcoded in the generator");
 });
 
+test("the Portfolio is discovered at its address under the Explorer, and the sitemap no longer names the old one (Issue #669)", () => {
+  assert.equal(PORTFOLIO_ROUTE, "/explorer/portfolio/");
+  const xml = sitemapXml(TEST_SITE);
+  assert.ok(xml.includes(`<loc>${abs("/explorer/portfolio/")}</loc>`), "the sitemap lists the Portfolio where it lives");
+  assert.ok(!xml.includes("print-room/portfolio"), "the sitemap still sends a crawler to the Portfolio's old address");
+});
+
 test("robots.txt allows everyone, forbids nobody, and its real payload is the Sitemap: line", () => {
   const txt = robotsTxt(TEST_SITE);
   assert.match(txt, /^User-agent: \*$/m, "one record, for every agent");

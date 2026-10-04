@@ -123,7 +123,7 @@ const chartTable = bindChartDrawer({
 }, {
   broadside: () => room.broadside,
   relabelLeaf: (count) => leaf.relabel(count),
-  folioHref: "../print-room/portfolio/",
+  folioHref: "./portfolio/",
   say: announce,
   drawThumb: async (item) => {
     const res = await runJob(thumbJobFor(item)).catch(() => null);
