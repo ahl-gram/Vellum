@@ -38,7 +38,7 @@ https://www.vellumworlds.com/print-room/
 type ParsedGrid = { gridW: number; gridH: number };
 
 function parseGrid(s: string | undefined): ParsedGrid | undefined {
-  if (!s) return undefined;
+  if (s === undefined) return undefined;
   const m = /^(\d+)x(\d+)$/i.exec(s);
   if (!m) throw new Error(`--grid expects WxH (e.g. 320x240), got "${s}"`);
   const gridW = Number(m[1]);

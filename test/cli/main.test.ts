@@ -102,7 +102,8 @@ for (const [flag, args, message] of REFUSALS) {
 test("every string flag that can refuse a value has a refusal row", () => {
   assert.ok(STRING_FLAGS.length > 0, "the roster sweep read no flags");
   for (const flag of STRING_FLAGS.filter((f) => f !== "out")) {
-    assert.ok(REFUSALS.some(([f]) => f === flag), `--${flag} has no refusal row`);
+    const named = (arg: string | undefined): boolean => arg === `--${flag}` || (arg?.startsWith(`--${flag}=`) ?? false);
+    assert.ok(REFUSALS.some(([f, args]) => f === flag && named(args[0])), `--${flag} has no refusal row`);
   }
 });
 
@@ -137,10 +138,27 @@ test("an empty --out writes the chart to the default path", async (t) => {
   assert.ok(empty === absent, `--out "" must write the default path's chart`);
 });
 
-test("a valid --land draws and stamps its own value, at both edges", async (t) => {
-  t.after(() => rm(TMP, { recursive: true, force: true }));
-  for (const land of ["0.1", "0.3", "0.7"]) {
-    const svg = await draw([...SMALL, "--land", land], `land-${land}`);
-    assert.equal(recipeFromSvg(svg)?.recipe.landFraction, Number(land), `--land ${land}`);
-  }
-});
+const ACCEPTED: ReadonlyArray<readonly [flag: string, value: string, drawn: (svg: string) => number | undefined]> = [
+  ["land", "0.1", (svg) => recipeFromSvg(svg)?.recipe.landFraction],
+  ["land", "0.3", (svg) => recipeFromSvg(svg)?.recipe.landFraction],
+  ["land", "0.7", (svg) => recipeFromSvg(svg)?.recipe.landFraction],
+  ["coast-warp", "0", (svg) => recipeFromSvg(svg)?.recipe.coastWarp],
+  ["coast-warp", "1", (svg) => recipeFromSvg(svg)?.recipe.coastWarp],
+  ["width", "400", (svg) => Number(/<svg\b[^>]*\bwidth="(\d+)"/.exec(svg)?.[1])],
+  ["width", "6000", (svg) => Number(/<svg\b[^>]*\bwidth="(\d+)"/.exec(svg)?.[1])],
+];
+
+for (const [flag, value, drawn] of ACCEPTED) {
+  test(`a valid --${flag} ${value} at or inside its edge draws, with that value`, async (t) => {
+    t.after(() => rm(TMP, { recursive: true, force: true }));
+    const svg = await draw([...SMALL, `--${flag}`, value], `accepted-${flag}-${value}`);
+    assert.equal(drawn(svg), Number(value), `--${flag} ${value}`);
+  });
+}
+
+for (const scale of ["0.5", "4"]) {
+  test(`a valid --scale ${scale} at its edge is accepted without --png`, async (t) => {
+    t.after(() => rm(TMP, { recursive: true, force: true }));
+    await draw([...SMALL, "--scale", scale], `accepted-scale-${scale}`);
+  });
+}
