@@ -284,7 +284,7 @@ export function bindChartDrawer(drawerEls: ChartDrawerEls, deps: ChartDrawerDeps
   drawerEls.shut.addEventListener("click", () => setOpen(false, true));
   drawerEls.road.addEventListener("click", () => {
     if (items().length === 0) return;
-    window.location.href = `${deps.folioHref ?? "../print-room/portfolio/"}${tableHash(window.location.hash, emitTable(items()))}`;
+    window.location.href = `${deps.folioHref ?? "./portfolio/"}${tableHash(window.location.hash, emitTable(items()))}`;
   });
 
   return { lay, reveal, receiving, restore, state, isFull, holds };

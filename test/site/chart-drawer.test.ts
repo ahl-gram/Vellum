@@ -298,8 +298,8 @@ test("CT8 the road to the Portfolio carries the Explorer's WHOLE address, not th
     "the road no longer NAVIGATES to this page's own address plus the table: computing it and going somewhere else is the same defect as never computing it, and it is what #634 measured losing the world",
   );
   assert.doesNotMatch(handler, /#\$\{TABLE_KEY\}=/, "the key-only form is back; it is what #634 defect 1 measured losing the world");
-  // The fallback literal sits inside the wildcard above, so it needs its own pin: dropped to "../print-room/portfolio" it resolves one directory up and the road reaches the Print Room's own page (guard-prover round 2).
-  assert.match(handler, /deps\.folioHref \?\? "\.\.\/print-room\/portfolio\/"/, "the road's fallback destination changed, and a relative path without its trailing slash resolves somewhere else entirely");
+  // The fallback literal sits inside the wildcard above, so it needs its own pin (guard-prover round 2).
+  assert.match(handler, /deps\.folioHref \?\? "\.\/portfolio\/"/, "the road's fallback destination changed: it is the Portfolio under the Explorer (Issue #669), trailing slash and all");
 });
 
 test("CT9 the table is written to the device when the reader CHANGES it and re-seated on a cached return, which are the only two roads #634 leaves (ruled 2026-09-19)", () => {

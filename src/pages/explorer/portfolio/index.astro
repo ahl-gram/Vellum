@@ -1,7 +1,5 @@
 ---
-// The Portfolio (#521 Sub 3 of #401): the Print Room's second page, where the sheets gathered at the
-// Chart Table are drafted again from their own numbers. Ruled 2026-09-08: direction C's picture (the
-// pile) with direction A's name and words, so the room is The Portfolio and no line says "sheaf".
+// The Portfolio (Issue #521 Sub 3 of Issue #401), where the sheets gathered at the Chart Table are drafted again from their own numbers. Ruled 2026-09-08: direction C's picture (the pile) with direction A's name and words, so the room is The Portfolio and no line says "sheaf".
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import RoomFolio from "../../../layouts/RoomFolio.astro";
 import Fog from "../../../layouts/Fog.astro";
@@ -19,7 +17,7 @@ const tagline = "the sheets you laid on the table, taken home";
 <BaseLayout
   room={room}
   description="The atelier's portfolio: the regional surveys you gathered at the Chart Table, drafted again from the numbers in their margins and taken home one engraving at a time."
-  path="/print-room/portfolio/"
+  path="/explorer/portfolio/"
   chartRoom
 >
 <Fog />
@@ -34,7 +32,7 @@ const tagline = "the sheets you laid on the table, taken home";
     <noscript>
       <p class="status">Every sheet here is drafted in your browser from the number in its
       margin, so the Portfolio needs JavaScript. The sheets were gathered in the
-      <a href="../../explorer/">Explorer</a>.</p>
+      <a href="../">Explorer</a>.</p>
     </noscript>
   </Fragment>
 </ChartStage>
@@ -62,7 +60,7 @@ const tagline = "the sheets you laid on the table, taken home";
   <div class="legend-row">
     <button id="pf-download" class="legend-btn gold" type="button"><span class="verb">Download</span><span class="room">The Engraving</span></button>
     <button id="pf-next" class="legend-btn" type="button"><span class="verb">Bring up</span><span class="room">The Next Sheet</span></button>
-    <LegendButton id="pf-explorer" gold href="../../explorer/" verb="Back to" room="The Explorer" />
+    <LegendButton id="pf-explorer" gold href="../" verb="Back to" room="The Explorer" />
   </div>
 </nav>
 

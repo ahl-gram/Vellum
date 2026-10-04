@@ -10,7 +10,7 @@ export const ATLAS_ROUTE = "/atlas/";
 export const PROSPECT_ROUTE = "/prospect/";
 export const RIBBON_ROUTE = "/ribbon/";
 // Omitted from the nav like its three siblings: the Portfolio is reached from a gathered table or from the Print Room's Bound Atlas slip, never as a standing room (Issue #521).
-export const PORTFOLIO_ROUTE = "/print-room/portfolio/";
+export const PORTFOLIO_ROUTE = "/explorer/portfolio/";
 
 // Deliberately NOT grouped by NavItem.kind: nav.ts declares kind a placeholder nothing may depend on, so these files stay flat.
 export const DISCOVERY_ROUTES: readonly string[] = [

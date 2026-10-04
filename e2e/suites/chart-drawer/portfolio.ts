@@ -1,26 +1,73 @@
 import type { Payload, SuiteContext } from "../../types.ts";
-import type { DrawerKit } from "./kit.ts";
-import { DRAWN } from "./reads.ts";
+import type { DrawerKit, TableKit } from "./kit.ts";
+import { DRAWN, DRESS, ONE } from "./reads.ts";
 
-export async function cd18bRoadCarries({ evaluate, check, sleep, clickAt }: DrawerKit): Promise<void> {
+type Arrival = { path: string; ready: string; table: string | null; seed: string | null; items: number | null; room: string | null };
+const ARRIVAL: Payload<Arrival> = `(() => { const p = new URLSearchParams(location.hash.slice(1)); return { path: location.pathname, ready: document.readyState, table: p.get("table"), seed: p.get("seed"), items: window.__vellumPortfolio ? window.__vellumPortfolio().items : null, room: (document.querySelector(".room-name") || {}).textContent || null }; })()`;
+
+/** A measurement poll, not a readiness wait (handbook/specs/settle-doctrine.md clause 4): it reads until the page has LEFT `from` and finished loading, wherever it went, and hands back its last read for the caller to assert on, so a road to a missing page reds by naming where it landed. */
+async function arrivalFrom(evaluate: TableKit["evaluate"], sleep: TableKit["sleep"], from: string): Promise<Arrival | null> {
+  let last: Arrival | null = null;
+  for (let i = 0; i < DRAWN; i++) {
+    await sleep(50);
+    last = await evaluate(ARRIVAL).catch(() => last);
+    if (last && last.path !== from && last.ready === "complete") return last;
+  }
+  return last;
+}
+
+export async function cd49PrintRoomRoad({ evaluate, send, check, sleep, settle, PORT, forget, pressById }: TableKit): Promise<void> {
+  await forget();
+  await send("Page.navigate", { url: "about:blank" });
+  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/print-room/#${DRESS}&table=${ONE}` });
+  // The road carries this page's address only once the proof has drawn (`writeHash` in `src/site/print-room/app.ts`), so the press waits for that; where it lands is the claim.
+  const written = await settle<{ href: string | null } | null>(`(() => { const a = document.getElementById("pr-portfolio"); return a ? { href: a.getAttribute("href") } : null; })()`, (d) => typeof d.href === "string" && d.href.indexOf("#") !== -1, "chart-drawer-print-room-road-written", DRAWN);
+  // Wiring, not a gesture claim: the Bound Atlas slip may stand folded, and the road is in its foot.
+  await evaluate(`(() => { const s = document.getElementById("atlas"); const t = document.querySelector('.slip-tab[aria-controls="atlas"]'); if (s && t && s.classList.contains("folded")) t.click(); return true; })()`);
+  await sleep(400);
+  const press = await pressById("pr-portfolio");
+  const arrived = await arrivalFrom(evaluate, sleep, "/print-room/");
+  check(
+    "CD49 the Print Room's road to the Portfolio answers a REAL press and lands at the Portfolio's address under the Explorer, carrying the Print Room's own address with it: the table it was handed and the world it shows (Issue #669)",
+    press.hit && !!arrived && arrived.path === "/explorer/portfolio/" && arrived.table === ONE && arrived.seed === "42" && arrived.items === 1,
+    JSON.stringify({ written: written.href, press, arrived }),
+  );
+}
+
+export async function cd50ScriptsOffHome({ evaluate, send, check, sleep, settle, PORT, clickAt }: TableKit): Promise<void> {
+  await send("Emulation.setScriptExecutionDisabled", { value: true });
+  await send("Page.navigate", { url: "about:blank" });
+  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/portfolio/` });
+  const road = await settle<{ x: number; y: number; hit: boolean; href: string | null } | null>(`(() => { const a = document.querySelector(".stage noscript a"); if (!a) return null; a.scrollIntoView({ block: "center" }); const b = a.getBoundingClientRect(); if (b.width < 1) return null; const x = Math.round(b.x + b.width / 2), y = Math.round(b.y + b.height / 2); const h = document.elementFromPoint(x, y); return { x, y, hit: h === a || a.contains(h), href: a.getAttribute("href") }; })()`, () => true, "chart-drawer-scripts-off-road", DRAWN);
+  await clickAt(road.x, road.y);
+  const arrived = await arrivalFrom(evaluate, sleep, "/explorer/portfolio/");
+  check(
+    "CD50 with scripts off, the Portfolio's notice still has a road home that answers a REAL press and lands on the Explorer, the parent the page now sits under (Issue #669)",
+    road.hit && !!arrived && arrived.path === "/explorer/" && arrived.room === "The Explorer",
+    JSON.stringify({ road, arrived }),
+  );
+}
+
+export async function cd18bRoadCarries({ evaluate, check, sleep, clickAt }: DrawerKit, SIX: string): Promise<void> {
   const roadBefore = await evaluate<boolean>(`document.getElementById("table-road").disabled`);
-  const roadAt = await evaluate<{ x: number; y: number; reachable: boolean }>(`(() => { const b = document.getElementById("table-road"); const r = b.getBoundingClientRect();
+  const roadAt = await evaluate<{ x: number; y: number; reachable: boolean; room: string | null }>(`(() => { const b = document.getElementById("table-road"); const r = b.getBoundingClientRect();
     const x = Math.round(r.x + r.width / 2), y = Math.round(r.y + r.height / 2);
     const h = document.elementFromPoint(x, y);
-    return { x, y, reachable: h === b || b.contains(h) }; })()`);
+    return { x, y, reachable: h === b || b.contains(h), room: (b.querySelector(".room") || {}).textContent || null }; })()`);
   await clickAt(roadAt.x, roadAt.y);
-  for (let i = 0; i < 200; i++) { await sleep(100); if (await evaluate<boolean>(`location.pathname.indexOf("/portfolio/") !== -1`)) break; }
-  const arrived = await evaluate<{ path: string; table: string | null }>(`({ path: location.pathname, table: new URLSearchParams(location.hash.slice(1)).get("table") })`);
+  for (let i = 0; i < 200; i++) { await sleep(100); if (await evaluate<boolean>(`location.pathname.indexOf("/portfolio/") !== -1 && !!document.querySelector(".room-name")`)) break; }
+  const arrived = await evaluate<{ path: string; table: string | null; room: string | null }>(`({ path: location.pathname, table: new URLSearchParams(location.hash.slice(1)).get("table"), room: (document.querySelector(".room-name") || {}).textContent || null })`);
   check(
-    "CD18b the road answers a REAL press and carries the WHOLE gathering in the Portfolio's own address, which is the epic's core insight: the folio is a link, so the page it lands on can draft the same six sheets for anyone",
-    arrived.path.indexOf("/print-room/portfolio/") !== -1 && typeof arrived.table === "string" && arrived.table.split("_").length === 6 &&
-      roadAt.reachable,
+    "CD18b the road answers a REAL press and carries the WHOLE gathering to the Portfolio's own address under the Explorer, which is the epic's core insight: the folio is a link, so the page it lands on can draft the same six sheets for anyone; and the road names the room it lands in (Issue #669, ruled 2026-10-04)",
+    arrived.path === "/explorer/portfolio/" && arrived.table === SIX && roadAt.reachable &&
+      roadAt.room !== null && roadAt.room === arrived.room,
     JSON.stringify({ ...arrived, roadBefore, roadAt }),
   );
 }
 
 export async function cd19PortfolioDrafts({ evaluate, check, sleep }: SuiteContext): Promise<void> {
-  const PF: Payload<{ items: number; drawn: number; rows: number; groups: number; heads: string[]; onStage: boolean; folio: string | null; bound: string | null } | null> = `(() => { const s = window.__vellumPortfolio ? window.__vellumPortfolio() : null; return s ? { ...s,
+  const PF: Payload<{ items: number; drawn: number; rows: number; groups: number; heads: string[]; onStage: boolean; folio: string | null; bound: string | null; warned: boolean } | null> = `(() => { const s = window.__vellumPortfolio ? window.__vellumPortfolio() : null; return s ? { ...s,
+    warned: !document.getElementById("pf-warning").hidden,
     rows: document.querySelectorAll("#pf-contents .row").length,
     groups: document.querySelectorAll("#pf-contents .group-head").length,
     heads: [...document.querySelectorAll("#pf-contents .group-head span:first-child")].map((e) => e.textContent),
@@ -30,8 +77,9 @@ export async function cd19PortfolioDrafts({ evaluate, check, sleep }: SuiteConte
   let pf = await evaluate(PF);
   for (let i = 0; i < DRAWN && (!pf || pf.drawn < 6); i++) { await sleep(50); pf = await evaluate(PF); }
   check(
-    "CD19 the Portfolio drafts every gathered sheet from its own number, groups the index by world under the parent world's NAME, and stands one sheet on the stage (#518 ruling 5)",
-    !!pf && pf.items === 6 && pf.drawn === 6 && pf.rows === 6 && pf.groups >= 1 && pf.onStage &&
+    "CD19 the Portfolio drafts every gathered sheet from its own number, groups the index by world under the parent world's NAME, and stands one sheet on the stage (#518 ruling 5), on the render worker, whose address a moved page resolves for itself and whose loss would only look slow (Issue #669)",
+    // The warning is unhidden right after initWorker() when the worker did not start, and drafting starts after that, so with sheets drawn its state is final.
+    !!pf && pf.items === 6 && pf.drawn === 6 && pf.rows === 6 && pf.groups >= 1 && pf.onStage && !pf.warned &&
       // The LITERAL world, not a shape: seed 42's parent is deterministic (measured 2026-09-08), and a shape check passes on
       // the "this world" fallback the page uses before worldTitle arrives, which is the whole thing this pins.
       pf.heads.length === 1 && pf.heads[0] === "From The Isle of Rahai · chart № 42",
@@ -58,7 +106,7 @@ export async function cd24PortfolioSays({ evaluate, check, sleep, clickAt }: Dra
 export async function cd20BarePortfolio({ evaluate, send, check, sleep, PORT, forget }: DrawerKit): Promise<void> {
   await forget();
   await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/print-room/portfolio/` });
+  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/portfolio/` });
   for (let i = 0; i < 200; i++) { await sleep(100); if (await evaluate<boolean>(`!!window.__vellumPortfolio`)) break; }
   await sleep(400);
   const empty = await evaluate<{ bound: string | null; where: string | null; explorer: boolean; next: boolean; download: boolean }>(`(() => ({ bound: (document.getElementById("pf-bound") || {}).textContent || null,

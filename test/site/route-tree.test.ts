@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { existsSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { NAV_ITEMS, ROUTE_CHILDREN, ROUTE_NAMES, aliasesOf, seatOf, trailFor } from "../../src/layouts/nav.ts";
 import { ATLAS_ROUTE, DISCOVERY_ROUTES, HOME_ROUTE, ROUTE_ENTRIES } from "../../scripts/generate-discovery.ts";
@@ -9,7 +10,7 @@ import { ATLAS_ROUTE, DISCOVERY_ROUTES, HOME_ROUTE, ROUTE_ENTRIES } from "../../
 
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 
-const UNDER_THE_EXPLORER = ["/prospect/", "/ribbon/", "/print-room/portfolio/"];
+const UNDER_THE_EXPLORER = ["/prospect/", "/ribbon/", "/explorer/portfolio/"];
 const SEATED = [...NAV_ITEMS.map((i) => i.href), ...UNDER_THE_EXPLORER];
 const UNSEATED = ["/", "/specimen/", "/atlas/"];
 
@@ -28,7 +29,7 @@ const TRAILS: Record<string, Want> = {
     also: [["The Reading Room", "/reading-room/"]],
   },
   "/ribbon/": { crumbs: [["Vellum", "/"], ["The Explorer", "/explorer/"], ["The Wayfarer's Ribbon", "/ribbon/"]], current: true, also: [] },
-  "/print-room/portfolio/": { crumbs: [["Vellum", "/"], ["The Explorer", "/explorer/"], ["The Portfolio", "/print-room/portfolio/"]], current: true, also: [] },
+  "/explorer/portfolio/": { crumbs: [["Vellum", "/"], ["The Explorer", "/explorer/"], ["The Portfolio", "/explorer/portfolio/"]], current: true, also: [] },
 };
 
 test("the tree's top line IS the nav: every nav route is seated at the top, and home, the Specimen and the atlas have no seat", () => {
@@ -46,7 +47,7 @@ test("an alias is every later appearance: the Prospect alone has one, the Readin
   for (const route of SEATED.filter((r) => r !== "/prospect/")) assert.deepEqual(aliasesOf(route), [], `${route} has no alias`);
 });
 
-test("every seated route's trail runs from Vellum down to the page, the Portfolio at its address until Issue #669 moves it; home, the Specimen and the atlas draw none", () => {
+test("every seated route's trail runs from Vellum down to the page; home, the Specimen and the atlas draw none", () => {
   assert.deepEqual(Object.keys(TRAILS).sort(), [...SEATED].sort(), "the literal covers every seat");
   for (const [route, want] of Object.entries(TRAILS)) {
     const got = trailFor(route);
@@ -81,4 +82,12 @@ test("every route the tree names is a page", () => {
   const named = [...NAV_ITEMS.map((i) => i.href), ...Object.keys(ROUTE_CHILDREN), ...Object.values(ROUTE_CHILDREN).flat()];
   assert.ok(named.length > NAV_ITEMS.length, "precondition: the tree seats children, or this reads the nav alone");
   for (const route of named) assert.ok(existsSync(root(`src/pages${route}index.astro`)), `src/pages${route}index.astro exists`);
+});
+
+test("no shipped file names the Portfolio's old address but the tombstone that cleans it (Issue #669)", () => {
+  const files = execFileSync("git", ["ls-files", "src", "scripts", "e2e", "public"], { cwd: root(""), encoding: "utf8", timeout: 30_000 }).split("\n").filter(Boolean);
+  assert.ok(files.includes("src/site/explorer/app.ts") && files.includes("public/house.css"), "precondition: git listed the shipped trees, or this scan reads nothing");
+  // Blind spot, erring toward a miss: a RELATIVE road to the old address never spells it out, which the built-page resolver, the road pins and the e2e walks cover instead.
+  const hits = files.flatMap((f) => readFileSync(root(f), "utf8").split("\n").filter((line) => line.includes("print-room/portfolio")).map((line) => `${f}: ${line.trim()}`));
+  assert.deepEqual(hits, ['scripts/clean-public-generated.ts: "print-room/portfolio/app.bundle.js",'], "only the tombstone in GENERATED_SUBTREES may name the Portfolio's old address; anything else is a road to a page that no longer exists");
 });

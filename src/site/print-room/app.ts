@@ -153,7 +153,7 @@ function writeHash(seed: number, style: string): void {
   if (carried.table !== null) p.set(TABLE_KEY, carried.table);
   history.replaceState(null, "", "#" + p.toString());
   road.href = "../explorer/#" + p.toString();
-  if (folioRoad) folioRoad.href = "./portfolio/#" + p.toString();
+  if (folioRoad) folioRoad.href = "../explorer/portfolio/#" + p.toString();
 }
 
 function draw(): void {

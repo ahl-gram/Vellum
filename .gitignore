@@ -22,8 +22,8 @@ public/explorer/engine/
 public/explorer/app.bundle.js
 public/explorer/worker.bundle.js
 public/explorer/chunks/
+public/explorer/portfolio/app.bundle.js
 public/print-room/app.bundle.js
-public/print-room/portfolio/app.bundle.js
 public/seed-of-the-day/app.bundle.js
 public/reading-room/app.bundle.js
 public/prospect/app.bundle.js

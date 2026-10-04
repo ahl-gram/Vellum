@@ -58,7 +58,7 @@ test("the press bundles from the src/site TypeScript entries (#260)", async () =
     [
       { entry: "src/site/explorer/app.ts", twin: "explorer/app.bundle.js" },
       { entry: "src/site/print-room/app.ts", twin: "print-room/app.bundle.js" },
-      { entry: "src/site/portfolio/app.ts", twin: "print-room/portfolio/app.bundle.js" },
+      { entry: "src/site/portfolio/app.ts", twin: "explorer/portfolio/app.bundle.js" },
       { entry: "src/site/seed-of-the-day/app.ts", twin: "seed-of-the-day/app.bundle.js" },
       { entry: "src/site/reading-room/app.ts", twin: "reading-room/app.bundle.js" },
       { entry: "src/site/prospect/app.ts", twin: "prospect/app.bundle.js" },
@@ -104,6 +104,13 @@ test("the cleaned set and gitignore cover the Print Room and Reading Room twins 
   for (const line of ["public/print-room/app.bundle.js", "public/reading-room/app.bundle.js", "public/explorer/chunks/"]) {
     assert.ok(lines.includes(line), `.gitignore should carry the exact line ${line}`);
   }
+});
+
+test("the Portfolio's twin is cleaned and ignored at its address under the Explorer, and its old address stays in the cleaned set as a tombstone (Issue #669)", async () => {
+  const { GENERATED_SUBTREES } = await import("../../scripts/clean-public-generated.ts");
+  assert.ok(GENERATED_SUBTREES.includes("explorer/portfolio/app.bundle.js"), "GENERATED_SUBTREES must include explorer/portfolio/app.bundle.js, or a renamed module leaves an importable orphan beside the moved page");
+  assert.ok(GENERATED_SUBTREES.includes("print-room/portfolio/app.bundle.js"), "GENERATED_SUBTREES must keep print-room/portfolio/app.bundle.js: the list may grow and may not shrink, and that entry is what cleans a bundle built before the move");
+  assert.ok(read(".gitignore").split("\n").includes("public/explorer/portfolio/app.bundle.js"), ".gitignore should carry the exact line public/explorer/portfolio/app.bundle.js");
 });
 
 // Characterization of the press on a hermetic fixture (the real entries only resolve after generation; npm test runs before it); the full e2e against dist/ is what proves the real entries stay invisible.

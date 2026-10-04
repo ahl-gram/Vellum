@@ -202,7 +202,7 @@ test("PRR8 the contents row is the kit's (#487, second use of the dated-row idio
 test("PRR11 the way to the Portfolio stands in the Bound Atlas slip and not in the room's legend row (#521 ruling 2)", () => {
   // The slip closes on </Slip> here: Slip.astro renders the <aside>, so a slice bounded on </aside> finds nothing, runs to the end of the file, and carries the whole legend with it.
   const slip = between('id="atlas"', "</Slip>");
-  assert.match(slip, /<a id="pr-portfolio" href="\.\/portfolio\/">The Portfolio<\/a>/, "the Bound Atlas slip carries the way in");
+  assert.match(slip, /<a id="pr-portfolio" href="\.\.\/explorer\/portfolio\/">The Portfolio<\/a>/, "the Bound Atlas slip carries the way in, to the Portfolio's address under the Explorer (Issue #669)");
   const row = between('class="legend-row"', "</nav>");
   assert.doesNotMatch(row, /portfolio/, "the legend row keeps the ruled shape: the poster sizes, then the one gold road back to the Explorer");
 });
@@ -217,7 +217,7 @@ test("PRR-table the Print Room carries a gathering THROUGH rather than dropping 
   assert.match(writer, /if \(carried\.table !== null\) p\.set\(TABLE_KEY, carried\.table\)/, "the one address writer here drops the table again, and it runs on EVERY draw including the boot one");
   assert.match(writer, /road\.href = "\.\.\/explorer\/#" \+ p\.toString\(\)/, "and the road back is no longer built from that same address, so the two can disagree");
   // The same whole address the road back to the Explorer is built from, and for the same reason: handing the folio page the sheets alone sends the reader's press BACK from it to the seed of the day, which is Issue #634 defect 1 one room over (the cold review on PR #635).
-  assert.match(writer, /folioRoad\.href = "\.\/portfolio\/#" \+ p\.toString\(\)/, "the road on to The Portfolio carries less than this page's own address, so the gathering or the world is dropped on the way");
+  assert.match(writer, /folioRoad\.href = "\.\.\/explorer\/portfolio\/#" \+ p\.toString\(\)/, "the road on to The Portfolio carries less than this page's own address, or goes to the Portfolio's old address beside this page (Issue #669), so the gathering, the world or the page is lost on the way");
   assert.equal((app.match(/folioRoad\.href\s*=/g) ?? []).length, 1, "the folio road is written in more than one place, and the last write is the one the reader presses");
   // The BINDING, checked against the page rather than restated here: the script can look up an id this page does not author, `folioRoad` is then null, and the `if (folioRoad)` guard swallows every write in silence with the assertions above all green (guard-prover round 3). The id is read out of the script and looked for in the markup, so the two cannot drift apart in either direction.
   const bind = app.match(/const folioRoad = document\.getElementById\("([^"]+)"\)/);

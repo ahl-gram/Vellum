@@ -71,7 +71,7 @@ test("the smoke tier covers every page that ships its own bundle", () => {
   const covers: Readonly<Record<string, readonly E2eSuiteName[]>> = {
     "explorer": ["render"],
     "print-room": ["print-room"],
-    "print-room/portfolio": ["chart-drawer"],
+    "explorer/portfolio": ["chart-drawer"],
     "seed-of-the-day": ["hunt"],
     "reading-room": ["reading-room"],
     "prospect": ["prospect"],
@@ -288,11 +288,11 @@ const STEPPED_GROUPS: Readonly<Record<string, readonly string[]>> = {
     "CD1", "CD2, CD2b, CD2c", "CD23", "CD3", "CD44", "CD45", "CD46", "CD4", "CD5", "CD7, CD7b, CD7c", "CD47", "CD8",
     "CD9, CD11, CD12, CD22, CD43", "CD13", "CD18", "CD6, CD48", "CD15, CD17",
     "CD25, CD26, CD30", "CD27", "CD28, CD29, CD34, CD35, CD31", "CD32", "CD33",
-    "CD36", "CD37", "CD38", "CD39", "CD40", "CD41, CD42",
+    "CD49", "CD50", "CD36", "CD37", "CD38", "CD39", "CD40", "CD41, CD42",
   ],
   "document-rooms": ["IX3"],
   "specimen": ["SB4"],
-  "corners": ["CO1", "CO2", "CO3"],
+  "corners": ["CO1", "CO4", "CO2", "CO3"],
 };
 
 const SUITE_FILES = E2E_SUITE_ORDER.map((name) => [name, e2eSuitePath(name)] as const);

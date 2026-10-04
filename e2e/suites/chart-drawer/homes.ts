@@ -13,9 +13,7 @@ export async function cd36GoldPress({ evaluate, check, sleep, go, reachedExplore
   // longer than its 30s poll exactly once, with nothing else in the suite slow (flake-record.md carries the row).
   // Pressing from a finished page removes the contention rather than widening a budget against it.
   for (let i = 0; i < DRAWN; i++) { await sleep(50); const s = await evaluate<number>(`(() => { const p = window.__vellumPortfolio ? window.__vellumPortfolio() : null; return p ? p.drawn : -1; })()`); if (s >= 1) break; }
-  // The HREF is the measurement, taken before the press: once the table has a second home, pressing a bare
-  // ../../explorer/ ALSO lands on a populated drawer, so a check that only counted cuttings afterwards would pass
-  // for the wrong reason forever. What the address carries is the only thing that reaches a reader on another device.
+  // The HREF is the measurement, taken before the press: once the table has a second home, pressing a bare ../ ALSO lands on a populated drawer, so a check that only counted cuttings afterwards would pass for the wrong reason forever. What the address carries is the only thing that reaches a reader on another device.
   const home = await evaluate<{ href: string | null; hash: string } | null>(`(() => { const a = document.getElementById("pf-explorer"); return a ? { href: a.getAttribute("href"), hash: location.hash } : null; })()`);
   const back = await pressById("pf-explorer");
   const arrived = await reachedExplorer();

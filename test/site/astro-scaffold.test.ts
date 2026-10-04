@@ -121,9 +121,9 @@ const PAGES: readonly PageSpec[] = [
     chartRoom: true,
   },
   {
-    route: "print-room/portfolio/index.html",
-    dir: "/print-room/portfolio/",
-    trail: [["Vellum", "/"], ["The Explorer", "/explorer/"], ["The Portfolio", "/print-room/portfolio/"]],
+    route: "explorer/portfolio/index.html",
+    dir: "/explorer/portfolio/",
+    trail: [["Vellum", "/"], ["The Explorer", "/explorer/"], ["The Portfolio", "/explorer/portfolio/"]],
     room: "The Portfolio",
     title: "The Portfolio · Vellum",
     ogTitle: "The Portfolio · Vellum",
@@ -776,7 +776,7 @@ const STAGES: ReadonlyArray<readonly [string, string]> = [
   ["prospect/index.html", "The plate. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet."],
   ["ribbon/index.html", "The scroll. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet."],
   ["specimen/index.html", "The specimen sheet. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet."],
-  ["print-room/portfolio/index.html", "The sheet on top. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet."],
+  ["explorer/portfolio/index.html", "The sheet on top. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet."],
 ];
 type Road = { id?: string; gold?: true; road?: string; href: string; verbId?: string };
 /** Every road out on the site, by page and in order, LITERAL: the id, the gold, the data-road stamp and the verb's id are what the pages' scripts and the suites read, and a roster taken from the source it is compared against would be circular (skeptic on PR #502). A page absent here renders no road. */
@@ -784,7 +784,7 @@ const ROADS: Record<string, ReadonlyArray<Road>> = {
   "explorer/index.html": [{ id: "order-plates", gold: true, href: "../print-room/" }, { id: "journal-link", gold: true, href: "/reading-room/" }],
   "print-room/index.html": [{ id: "pr-explorer", gold: true, href: "../explorer/" }],
   // Issue #521 ruling 1: C's picture with A's words. Two of the row's three are BUTTONS acting on this page and not roads out: Download goes through a blob the way the Print Room's does, and Bring up turns the pile. The way in from the Print Room is the Bound Atlas slip (ruling 2), not a road back.
-  "print-room/portfolio/index.html": [{ id: "pf-explorer", gold: true, href: "../../explorer/" }],
+  "explorer/portfolio/index.html": [{ id: "pf-explorer", gold: true, href: "../" }],
   "prospect/index.html": [{ id: "pp-chart-link", gold: true, href: "/explorer/" }, { id: "pp-ribbon-link", href: "/ribbon/", verbId: "pp-ribbon-verb" }],
   "ribbon/index.html": [{ id: "rb-chart-link", gold: true, href: "/explorer/" }, { id: "rb-prospect-link", href: "/prospect/", verbId: "rb-prospect-verb" }],
   "seed-of-the-day/index.html": [{ road: "explorer", href: "../explorer/" }, { road: "reading-room", href: "../reading-room/" }],
@@ -841,6 +841,25 @@ test("every road out names its destination by that route's name in the tree (Iss
   assert.equal(roads, Object.values(ROADS).flat().length, "every road on the ROADS roster was read");
 });
 
+test("the Chart Table's road names the page it goes to by that route's name in the tree, though it is a button the sweep above never reads (Issue #669, ruled 2026-10-04)", () => {
+  const folio = /folioHref: "([^"]+)"/.exec(readFileSync(root("src/site/explorer/app.ts"), "utf8"));
+  assert.ok(folio, "the Explorer no longer hands the table road a folioHref, so this check has no destination to read");
+  const room = /<button id="table-road"[^>]*><span class="verb">[^<]*<\/span><span class="room">([^<]+)<\/span><\/button>/.exec(page("explorer/index.html"));
+  assert.ok(room, "the built Explorer carries no table road in the kit's two-line shape");
+  const route = new URL(folio[1]!, "https://v.test/explorer/").pathname;
+  assert.notEqual(ROUTE_NAMES[route], undefined, `the table road goes to ${route}, which the tree does not name`);
+  assert.equal(decode(room[1]!), ROUTE_NAMES[route], `the table road goes to ${route} and calls it something else`);
+});
+
+test("the Portfolio's scripts-off road goes home to the Explorer as ../, the form its gold road takes (Issue #669)", () => {
+  const html = page("explorer/portfolio/index.html");
+  const at = html.indexOf('<div class="stage">');
+  assert.notEqual(at, -1, "the Portfolio's stage was not found, so the notice below would be read from anywhere on the page");
+  const notice = html.slice(at).match(/<noscript>([\s\S]*?)<\/noscript>/);
+  assert.ok(notice, "the Portfolio's stage carries its scripts-off notice");
+  assert.match(notice[1]!, /<a href="\.\.\/">Explorer<\/a>/, "the scripts-off road home is not ../, the parent the page now sits under");
+});
+
 test("the seed form floats on the stage as the mockup's corner chrome, its ratified semantics whole (#470, was the #289 cartouche hero)", () => {
   const html = normalize(decode(page("index.html")));
   const order = [
@@ -894,7 +913,7 @@ test("every internal link and embed on the rendered pages resolves", () => {
     "/gallery/index.css",
     "/explorer/app.bundle.js",
     "/print-room/app.bundle.js",
-    "/print-room/portfolio/app.bundle.js",
+    "/explorer/portfolio/app.bundle.js",
     "/seed-of-the-day/app.bundle.js",
     "/reading-room/app.bundle.js",
     "/prospect/app.bundle.js",

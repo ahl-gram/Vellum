@@ -1,9 +1,4 @@
-// The Portfolio (Issue #521 Sub 3 of Issue #401): the Print Room's second page. The table rides in this page's
-// address, and since Issue #634 falls back to the device when the address names no folio; either way the
-// page reads it ONCE at load and never rewrites it. One job per
-// gathered sheet, a region for a survey and a plate for a prospect since Issue #522, dispatched grouped by
-// world because worldFor is a single-entry cache, and the sheets arrive progressively into a pile
-// whose top sheet stands on the stage.
+// The Portfolio (Issue #521 Sub 3 of Issue #401). The table rides in this page's address, and since Issue #634 falls back to the device when the address names no folio; either way the page reads it ONCE at load and never rewrites it. One job per gathered sheet, a region for a survey and a plate for a prospect since Issue #522, dispatched grouped by world because worldFor is a single-entry cache, and the sheets arrive progressively into a pile whose top sheet stands on the stage.
 import { initWorker, runJob, usesWorker } from "../explorer/worker-client.ts";
 import { bindRoom } from "../shared/room.ts";
 import { bindGlassKeys } from "../shared/glass-keys.ts";
@@ -40,7 +35,7 @@ interface Drawn {
 
 const items = folioOnArrival(parseTable(location.hash), readStoredTable(store));
 const roadHome = document.getElementById("pf-explorer") as HTMLAnchorElement | null;
-if (roadHome) roadHome.href = "../../explorer/" + tableHash(location.hash, emitTable(items));
+if (roadHome) roadHome.href = "../" + tableHash(location.hash, emitTable(items));
 const sheets: Drawn[] = items.map((item, at) => ({ item, at, title: `Chart № ${item.seed}`, worldTitle: "", svg: null, url: null }));
 let top = 0;
 
