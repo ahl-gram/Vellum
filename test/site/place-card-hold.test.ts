@@ -16,7 +16,7 @@ test("H1 leaving the shown town starts the grace, and only its expiry hides the 
   const left = run([...hoverA, leave(A)]);
   assert.deepEqual({ shown: left.shown, waiting: left.waiting }, { shown: A, waiting: true }, "the card is still up while the grace runs");
   assert.equal(run([expire()], left).shown, -1, "the expiry hides it");
-  assert.equal(run([expire()], run(hoverA)).shown, A, "an expiry with no grace running is a stale timer and changes nothing");
+  assert.equal(run([expire()], run([...hoverA, leave(A, true)])).shown, A, "an expiry with no grace running is a stale timer and changes nothing, even with the pointer off the town");
   assert.equal(run([enter(A)], left).waiting, false, "coming back to the town inside the grace cancels it");
   assert.ok(HOLD_GRACE_MS >= 91 && HOLD_GRACE_MS <= 300, `the grace outlasts the 9.1px gap at 0.1 px/ms (91ms) without lingering; got ${HOLD_GRACE_MS}`);
 });

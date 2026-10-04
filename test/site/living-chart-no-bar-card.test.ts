@@ -164,13 +164,14 @@ const cardFace = async (mount: { children: unknown[] }) => {
   const overlay = (mount.children as ReturnType<typeof walk>).find((c) => c.classList.contains("place-overlay"))!;
   const card = walk(overlay).find((n) => n.getAttribute("id") === "place-card")!;
   const find = (cls: string) => walk(card).find((n) => n.classList.contains(cls));
-  return () => ({
-    shown: !card.hidden,
+  // A hidden card keeps the last town's text and classes, so everything but `shown` reads as nothing while it is hidden.
+  return () => card.hidden ? { shown: false, pinned: false, name: null, pressIdx: null, linkIdx: null } : {
+    shown: true,
     pinned: card.classList.contains("pinned"),
     name: find("pc-name")?.textContent ?? null,
     pressIdx: find("pc-lay")?.dataset["idx"] ?? null,
     linkIdx: String((find("pc-prospect") as { href?: string } | undefined)?.href ?? "").split("i=")[1] ?? null,
-  });
+  };
 };
 
 test("PC1 a hover over another town never leaves a pinned card naming one town while it opens or files another (#750 point 3)", async () => {
@@ -192,6 +193,7 @@ test("PC1 a hover over another town never leaves a pinned card naming one town w
   const after = face();
   assert.ok(after.shown, "the pin survives the pointer crossing town B on its way somewhere");
   const shownIdx = String(manifest.places.findIndex((p) => p.name === after.name));
+  assert.equal(after.name, a.name, "the pinned card still names town A");
   assert.equal(after.pinned, true, "a card that will not hide on leave is a pinned card and says so; main shows town B unmarked while still pinned to A");
   assert.equal(after.pressIdx, shownIdx, "the filing press names the town the card shows");
   assert.equal(after.linkIdx, shownIdx, "and so does the prospect link");
@@ -327,9 +329,12 @@ test("PC8 a pointer drifting inside overlapping boxes toward a nearer town waits
   armed.hits[0]!.rect = box(100, 100);
   armed.hits[1]!.rect = box(108, 104);
   const nameOf = (i: number) => (armed.hits[i]!.getAttribute("aria-label") ?? "").split(", ")[0];
+  const raised = () => armed.hits.filter((h) => h.classList.contains("pc-near")).map((h) => h.dataset["idx"]);
   armed.hits[1]!.fire("mouseenter", { clientX: 108, clientY: 104 });
   assert.equal(face().name, nameOf(1), "the precondition: the pointer at town 1's centre shows town 1");
+  assert.deepEqual(raised(), ["1"], "the town under the pointer is the raised one, so the hover ring is its");
   armed.hits[1]!.fire("mousemove", { clientX: 101, clientY: 101 });
+  assert.deepEqual(raised(), ["0"], "nearer town 0's box is raised over town 1's, and only it");
   assert.equal(face().name, nameOf(1), "drifting nearer town 0 does not swap the card at once");
   t.mock.timers.tick(HOLD_GRACE_MS);
   assert.equal(face().name, nameOf(0), "resting there, the nearer town takes the card once the grace has run");
@@ -351,9 +356,13 @@ test("PC9 the focus a press gives a town leaves a pinned card alone, whichever t
 });
 
 test("PC10 a tap that came down on the card's text keeps it, even when the browser moves the tap's click onto a town just outside (#750)", async () => {
-  const { armed, face, card, at } = await holdRig();
+  const { armed, face, card, overlay, at } = await holdRig();
   armed.hits[0]!.fire("click", { ...at, detail: 1 });
   card().rect = { left: 50, top: 150, right: 300, bottom: 370 };
+  armed.hits[1]!.fire("mouseenter", { clientX: 179, clientY: 364 });
+  assert.equal(overlay().classList.contains("pc-over"), true, "a town beneath the card's text shows no hand while the pointer is over the card");
+  armed.hits[1]!.fire("mouseleave", { clientX: 172, clientY: 373 });
+  assert.equal(overlay().classList.contains("pc-over"), false, "and its hand comes back once the pointer is off the card");
   // Measured 2026-10-04 on seed 4294967295 at 1024 (an emulated tablet): a finger at 179,364 on Kalkulin's card reached Vadelgrad's box as a click at 172,373.
   armed.hits[1]!.fire("pointerdown", { clientX: 179, clientY: 364 });
   armed.hits[1]!.fire("click", { detail: 1, clientX: 172, clientY: 373 });
@@ -370,5 +379,5 @@ test("PC11 a click split onto the overlay, because a town was raised between the
   overlay().fire("click", { target: overlay(), detail: 1, clientX: 100, clientY: 100 });
   assert.deepEqual({ pinned: face().pinned, idx: face().pressIdx }, { pinned: true, idx: "2" }, "the split click pins the town under the pointer");
   lc.onDocClick({ target: overlay(), detail: 1, clientX: 100, clientY: 100 } as unknown as MouseEvent);
-  assert.equal(face().pinned, true, "and the same click reaching the document is not a press on open chart");
+  assert.deepEqual({ shown: face().shown, pinned: face().pinned }, { shown: true, pinned: true }, "and the same click reaching the document is not a press on open chart");
 });
