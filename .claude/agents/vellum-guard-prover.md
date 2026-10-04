@@ -38,7 +38,7 @@ The `cat` prints the sandbox's detached HEAD, the sha you report: it is read INS
 
 `create` builds the sandbox at the dispatch tree's HEAD, which is the code under review: the two reads that decide WHAT to build (`readHead`, `resolveRoot`) take the dispatch tree's `cwd`, and `test/repo/agent-sandbox.test.ts` pins that along with the anchor to the main checkout and the `node_modules` link (#575 is what a hand-written copy of this shell cost: it proved the wrong commit in silence). The script refuses any name outside `guard-*` and `skeptic-*`: that keeps it out of any session's own worktree, but it is a namespace and not provenance, so a concurrent review agent's sandbox of the same shape is still addressable.
 
-One thing in that block is yours to get right: **the name carries the round.** Step 15 of `handbook/specs/development-workflow.md` sends a changed guard back through step 11, and a fixed name fails the second time with `fatal: ... already exists`. Do not hand-write the sandbox shell yourself.
+One thing in that block is yours to get right: **the name carries the round.** Step 15 of `handbook/specs/development-workflow.md` gives you one round per pull request, but a round that ended early leaves its sandbox behind, and a fixed name then fails the next run with `fatal: ... already exists`. Do not hand-write the sandbox shell yourself.
 
 **Changing a sandbox file, and putting it back.** The same script does it, run from the dispatch tree like `create`, one call per line:
 

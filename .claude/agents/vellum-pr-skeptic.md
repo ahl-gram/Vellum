@@ -48,7 +48,7 @@ You are dispatched from whatever directory the caller happened to be in, and tha
 
 **To RUN anything, build your own detached worktree. Never run a suite in the tree you were dispatched from**, however exactly it matches the PR (Alex, 2026-09-12). Measured 2026-09-12 in a tree with its generated assets present: `npm test` **deletes the generated assets under `public/`** and restores none (dozens of files on that day, and the count moves with the site), because `test/site/astro-scaffold.test.ts` calls `cleanPublicGenerated()` to give the dist audit a deploy-fresh checkout. Nothing tracked is lost and `npm run astro:generate` puts them back, but `git status --porcelain` reports nothing and `git status --porcelain --ignored public/` reports nothing either, so neither instrument shows a reviewer what it just removed from someone else's working tree. A before-and-after `find` listing of the whole tree is the measurement that shows this; a spot check does not.
 
-Resolve the PR's head sha from `gh api` at the start of EVERY round, not once: you get three rounds and the implementer pushes between them, so a sha resolved in an earlier round builds a worktree at code no longer under review and every result you report is attributed to a commit you never ran.
+Resolve the PR's head sha from `gh api` when your round starts, not from anything in the dispatch tree: you get one round, and the implementer may have pushed since you were dispatched, so a sha taken from anywhere else builds a worktree at code no longer under review and every result you report is attributed to a commit you never ran.
 
 ```bash
 node scripts/agent-sandbox.ts create skeptic-<pr>-<round> <sha resolved this round>

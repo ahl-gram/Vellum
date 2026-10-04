@@ -242,8 +242,8 @@ Scars: #49, #101, #203, #255, #408, #486, #491, #492, #507, #508, #524, #528, #5
    retarget (PR #408).
 6. `grep -n '—'` over the body and the diff returns nothing.
 7. **A finding this PR does not fix is FILED or added to `handbook/errata/`, never left as prose in the
-   body.** A finding about this PR's own work, an accessibility failure included, is fixed in the
-   review rounds and leaves unfixed only on the terms `handbook/specs/development-workflow.md`
+   body.** A finding about this PR's own work, an accessibility failure included, is fixed after the
+   review round and leaves unfixed only on the terms `handbook/specs/development-workflow.md`
    step 15 sets (Alex, 2026-09-27 and 2026-10-02, Issue #708). A sibling defect found on the way is
    filed, or joins the ledger as one row (the PR, the finding, what was searched;
    `handbook/errata/README.md` has the shape), not folded; grep `handbook/errata/` and the open
@@ -272,7 +272,7 @@ Scars: #49, #101, #203, #255, #408, #486, #491, #492, #507, #508, #524, #528, #5
    there, the higher one DOES bring its branch current with `git merge origin/main` and take the
    stated position, which is what resolved #593 against #596 with both already open.
 10. Then `vellum-pr-skeptic`, dispatched COLD (the PR number and nothing else), with no edits under it
-    while it runs; three rounds at most, and a finding not fixed is filed or an `handbook/errata/` row
+    while it runs; one round, and a finding not fixed is filed or an `handbook/errata/` row
     (item 7), never body prose. **Commit before you dispatch it**,
     and before any review agent: it runs in the directory you launched it from, and a suite run there
     DELETES the generated assets under `public/`, which neither `git status` nor `git status --ignored`

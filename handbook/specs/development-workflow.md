@@ -238,11 +238,14 @@ definition wrote the change and which reviewed it**, which is the part that does
 cause. Proving the new definition takes effect is not asked for here: no session can be asked which
 definition it loaded, so the check would be unfalsifiable the moment it was written down.
 
-**15. Fix, re-prove, repeat, at most three rounds.** A guard you change is a guard the prover has
-not seen, so it goes back through step 11. **A finding about this pull request's own work is fixed
-in the review rounds**, an accessibility failure like any other. It becomes an issue or a
-`handbook/errata/` row only when the third round is used up or when fixing it needs a decision of
-Alex's, and the PR body names which and why. **A finding it found but did not cause**, a sibling
+**15. Fix, one round each.** The cold skeptic and the prover each get ONE round per pull request
+(Alex, 2026-10-03, down from three). **A finding about this pull request's own work is fixed after
+that round**, an accessibility failure like any other, and the fix goes back to neither agent. A
+guard the fix changes or adds is one the prover has not seen, so you prove it bites yourself, by
+breaking the behavior it guards and watching it go red, committed first as "Commit before you
+mutate" says, and the PR body names it as proven by the implementing
+session only. A finding becomes an issue or a `handbook/errata/` row only when you cannot fix it
+after the round or when fixing it needs a decision of Alex's, and the PR body names which and why. **A finding it found but did not cause**, a sibling
 defect in code or text it did not write, goes to an issue or a row in any round, as `vellum-footguns`
 Gate 5 item 7 says. Text a pull request only moves, unchanged, keeps its old owner: a defect in
 moved-verbatim text is the sibling kind, and the pull request fixes it only if it chooses to edit
