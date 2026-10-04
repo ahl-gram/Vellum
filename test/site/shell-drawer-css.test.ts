@@ -95,6 +95,16 @@ test("a room's scrim is fixed with the chrome that is fixed, and starts below th
   assert.match(rule(print, "body.room:has(.rooms-reveal:checked)::after"), /content:\s*none/, "print never stamps the scrim: paper widths match the narrow query and :checked is state (#454 decision 4)");
 });
 
+test("on a phone a room's tagline stands aside and keeps its line, and home keeps its own (Issue #638, Alex's 2026-10-03 ruling 1)", () => {
+  const css = layout.slice(styleAt, layout.indexOf("</style>", styleAt));
+  const at = css.search(/\n\s*body\.room header\.chrome \.tagline\s*\{/);
+  assert.notEqual(at, -1, "the shell carries the room-scoped rule, written header.chrome because RoomFolio's root wears .chrome too");
+  assert.match(rule(css, "body.room header.chrome .tagline"), /visibility:\s*hidden/, "visibility, not display: the line stays, so the burger and the trail do not ride up into the corner's controls (the close-up arm, measured -0.4 to -1.9px on Issue #638)");
+  const opened = css.lastIndexOf("@media", at);
+  assert.ok(opened !== -1 && /^@media \(max-width: \d+px\)/.test(css.slice(opened)) && css.slice(opened, at).split("{").length - css.slice(opened, at).split("}").length === 1, "inside a narrow-width block, never unconditional; the edge itself is a provisional feel call held by the corners sweep until Issue #736");
+  assert.doesNotMatch(topLevel, /\.tagline\s*\{[^}]*visibility/, "no unconditional stand-down");
+});
+
 test("home's sheet keeps only what clears home's own furniture (#263, #483)", () => {
   const homeNarrow = mediaBodies(home, "(max-width: 900px)", "public/index.css");
   for (const moved of [".chrome .rooms {", ".chrome .rooms::before", ".rooms-reveal:checked ~ .rooms", ".rooms-reveal {"]) {
@@ -103,7 +113,7 @@ test("home's sheet keeps only what clears home's own furniture (#263, #483)", ()
   assert.match(
     rule(homeNarrow, "body > header.chrome"),
     /max-width:\s*calc\(100vw - 15rem\)/,
-    "the cluster's width cap STAYS home's: the 15rem is the clearance for home's seed panel, and on a room with no panel it would wrap the tagline for nothing",
+    "the cluster's width cap STAYS home's: the 15rem is the clearance for home's seed panel, and a room clears its own corner by standing the tagline aside instead (Issue #638)",
   );
   for (const kept of ["body:has(.rooms-reveal:checked) .lf-seed", "body:has(.rooms-reveal:checked) .landfall::before"]) {
     assert.ok(homeNarrow.includes(kept), `${kept} clears home's own furniture, so it stays home's; test/site/home-cluster.test.ts pins its dress`);

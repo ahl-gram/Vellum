@@ -125,9 +125,13 @@ scrolling page it washes out whatever passes through it. Four corners, each a na
 
 - **The head cluster**, top left: wordmark, flourish tagline, dot-separated rooms nav and, on every
   page with a seat in the route tree, the trail under it, directly on the deep. Fixed in a room,
-  riding the page on home.
+  riding the page on home. In a room on a phone the tagline stands aside and keeps its line, so
+  nothing under it rides up into the room folio, and on the narrowest phones the wordmark steps down
+  a size on every page. **Provisional until the post-use review:** the width the tagline stands aside
+  below.
 - **The room folio**, top right: the room's name and tagline, with the room's *one* primary control
-  under them. One control. The rest of the press is the legend row.
+  under them. One control. The rest of the press is the legend row. A room that widens its folio
+  does so only from the width where the wider folio clears the nav's top line.
 - **The chart folio**, bottom left: the lines the room's script fills at the draw, the chart's title,
   survey line and coordinates.
 - **The Surveyor's Glass**, bottom right of the chart: the camera's presses. Where it is seated and
@@ -293,7 +297,10 @@ Glass, whose translucency is load-bearing over a chart.
 makes iOS Safari zoom the page on focus.
 
 **The ruled phone width is 390.** 320 is checked, and its squeezes are accepted and recorded rather
-than designed for. A deviation that is knowingly shipped is recorded with its measurement, not left
+than designed for, with one exception: **the head cluster and the room's right-hand corner never
+overlap, at any width from 320 up.** A room folio line, a control or a widened corner is written to
+fit beside the cluster rather than accepted as a squeeze, and the sweep in `e2e/suites/corners.ts`
+holds every page to it. A deviation that is knowingly shipped is recorded with its measurement, not left
 silent, because an unrecorded one reads to the next session as a defect and gets "fixed" back.
 **A panel that quotes generated prose is held to BOTH widths, because generated prose has no length
 and a panel sized for the copy you measured overflows on the next seed**: give it a definite width

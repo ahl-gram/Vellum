@@ -1,7 +1,7 @@
 // Seed-of-the-day controller: today's UTC date is the seed, so a purely static page shows a fresh world each day, rendered inline on the main thread. The Daily Hunt is a deterministic click-to-find puzzle over that already-generated world.
 import { defaultRecipe, generateWorld } from "../../world/generate.ts";
 import { renderMap } from "../../render/map-renderer.ts";
-import { seedForDate, capitalBlurb } from "../../world/seed-of-the-day.ts";
+import { capitalBlurb, datelineFor, seedForDate } from "../../world/seed-of-the-day.ts";
 import { createRng } from "../../core/rng.ts";
 import { createLoreWriter } from "../../society/lore.ts";
 import { setupHunt } from "./app-hunt.ts";
@@ -25,15 +25,7 @@ const $ = <T extends HTMLElement = HTMLElement>(id: string): T => document.getEl
 const now = new Date();
 const seed = seedForDate(now);
 
-const dateLabel = new Intl.DateTimeFormat("en-GB", {
-  weekday: "long",
-  day: "numeric",
-  month: "long",
-  year: "numeric",
-  timeZone: "UTC",
-}).format(now);
-
-$("dateline").textContent = `${dateLabel} · seed ${seed}`;
+$("dateline").textContent = datelineFor(now);
 // The roads out carry the seed explicitly, so they keep opening THIS page's world even after UTC midnight rolls the bare-visit default to a new day; the row and the phone's copy inside the slip both take it.
 const ROADS: Record<string, string> = {
   explorer: `../explorer/#seed=${seed}&style=antique&legend=1`,
