@@ -55,7 +55,7 @@ const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   "room-ink": 2.7, // 2026-09-20: 2.7, 2.4
   "fallback": 2.5, // 2026-09-20: 2.4, 2.5
   "motion": 2.4, // 2026-09-20: 2.4, 2.4
-  "corners": 145.4, // 2026-10-03: 145.4 alone at Issue #638 with CO1 to CO3 in (134.7 and 134.5 with CO1 and CO2 alone)
+  "corners": 145.7, // 2026-10-03: 145.7, 145.4 at Issue #638 with CO1 to CO3 in, once alone and once with nine neighbours (134.7 and 134.5 with CO1 and CO2 alone)
   "health": 0.0, // 2026-09-20: 0.0, 0.0
 };
 
