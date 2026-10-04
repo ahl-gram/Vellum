@@ -76,10 +76,14 @@ symbol and path so the reader goes and looks.
   `GENERATED_SUBTREES` in `scripts/clean-public-generated.ts`; `ROUTE_ENTRIES` and
   `DISCOVERY_ROUTES` in `scripts/generate-discovery.ts`. A new suite additionally joins `E2E_SUITE_ORDER`
   (`e2e/support/suites.ts`), the runner's `SUITES` map (`e2e/run.ts`), `E2E_LANES`
-  (`e2e/support/lanes.ts`), `MEASURED_SECONDS` (`test/e2e/lanes.test.ts`) and `STEPPED_GROUPS`
-  in `test/repo/e2e-tiers.test.ts` if it steps. A new LANE joins two more: `ci.yml`'s job matrix, where
+  (`e2e/support/lanes.ts`), `MEASURED_SECONDS` (`test/e2e/lane-timings.test.ts`, CI seconds: an
+  estimate first, corrected from its pull request's own lane log) and `STEPPED_GROUPS`
+  in `test/repo/e2e-tiers.test.ts` if it steps, and `NEEDS_PREDECESSOR` or `OPENS_ON_HOME`
+  (`e2e/support/suites.ts`) if it reads the page the suite before it leaves or navigates first to
+  `/`. A new LANE joins two more: `ci.yml`'s job matrix, where
   `test/repo/e2e-tiers.test.ts` reds if the matrix and `E2E_LANES` disagree, and `main`'s required
-  checks, which no test can see at all.
+  checks, which no test can see at all. A change to the number of unit shards joins the same
+  required checks, since each shard reports a check of its own.
 - **The shell dresses once.** Every shared shell rule lives in `BaseLayout.astro`'s
   `<style is:global>` block, and a page's own sheet carries page-specific rules only.
 - **Sheet order is a contract.** The layout links the root sheets, then the shared sheets a page
@@ -275,12 +279,12 @@ precisely, because a token that falls outside it looks identical at the point of
   `e2e/site-server.ts` strips types from `src/*.ts` on demand, which is how a suite
   computes an expected value in-browser and dodges cross-engine float drift. It is e2e only; the
   deploy artifact carries none of it, and a test that proves the artifact carries none of it exists.
-- **CI is parallel jobs on the same triggers**, one running the typecheck, the lint and the unit
-  suite, and one per browser lane, each of which builds `dist/` and runs that single lane on a runner
-  of its own. A pull request therefore waits for the LONGEST job, not the sum, and the repeated
-  install and build are the price of that. Every shard rebuilds rather than downloading a shared
-  artifact, and prints a hash of its own `dist/` so a disagreement between two shards is visible
-  instead of silent.
+- **CI is parallel jobs on the same triggers**, one per unit shard, each running the typecheck, the
+  lint and its own slice of the unit files, and one per browser lane, each of which builds `dist/` and
+  runs that single lane on a runner of its own. A pull request therefore waits for the LONGEST job,
+  not the sum, and the repeated install and build are the price of that. Every lane rebuilds rather
+  than downloading a shared artifact, and prints a hash of its own `dist/` so a disagreement between
+  two lanes is visible instead of silent.
 - **Required checks are matched by JOB NAME, and that roster lives outside the tree.** Renaming a job
   in the workflow looks cosmetic and blocks EVERY merge, because the required context never reports
   again until branch protection is updated to match; ADDING a job that ought to be required is the

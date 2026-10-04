@@ -74,6 +74,15 @@ const INHERITS_HARNESS_PAGE: readonly E2eSuiteName[] = [
   "fallback",
 ];
 
+// Each suite here depends on the page the named suite leaves, so a lane runs it directly after that one: print-room's first navigate, `prlLink` in `e2e/suites/print-room/link.ts`, only changes the hash on an Explorer tab, so it must follow a suite that leaves some other page, and hunt (ending on /seed-of-the-day/) is the one canonical order allows; `rdSetup` in `e2e/suites/region-detail.ts` writes the Explorer's controls without navigating at all, so it needs the settled Explorer document-rooms leaves.
+export const NEEDS_PREDECESSOR: Readonly<Partial<Record<E2eSuiteName, E2eSuiteName>>> = {
+  "print-room": "hunt",
+  "region-detail": "document-rooms",
+};
+
+// Each suite here navigates first to `/`, where home ends, so directly after home that navigate returns on home's stale document (settle-doctrine clause 9).
+export const OPENS_ON_HOME: readonly E2eSuiteName[] = ["landfall", "runninghead", "cluster"];
+
 const FULL_WORDS = new Set(["full", "all"]);
 const canonicalise = (wanted: ReadonlySet<string>): E2eSuiteName[] =>
   E2E_SUITE_ORDER.filter((name) => wanted.has(name));
@@ -130,7 +139,7 @@ export interface E2eRunHooks {
   readonly skippedGroups?: () => readonly string[];
 }
 
-// A policy bound, not a measurement (Alex ruled it stays, 2026-09-10): every aborted suite still burns its own waits before it throws, and ci.yml's `timeout-minutes: 25` sits against the 7m05s worst case test/repo/e2e-tiers.test.ts cites, so a cascade with no stop can be killed at the cap with no tally at all. 3 is a judgment about where a cascade stops being news; nothing measured picks it.
+// A policy bound, not a measurement (Alex ruled it stays, 2026-09-10): every aborted suite still burns its own waits before it throws, and ci.yml caps each lane at about twice its worst run, so a cascade with no stop can be killed at the cap with no tally at all. 3 is a judgment about where a cascade stops being news; nothing measured picks it.
 const ABORTED_STREAK_LIMIT = 3;
 
 const errorText = (err: unknown): string => (err instanceof Error ? err.message : String(err));

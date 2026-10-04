@@ -17,61 +17,13 @@ import type { LaneResult } from "../../e2e/support/lanes.ts";
 import {
   E2E_SUITE_ORDER,
   E2E_SUITES_VAR,
+  NEEDS_PREDECESSOR,
+  OPENS_ON_HOME,
+  resolveSuiteSelection,
   runOutcome,
   suitesCertifiedByHealth,
 } from "../../e2e/support/suites.ts";
-import type { E2eSuiteName } from "../../e2e/support/suites.ts";
 import { E2E_PORT_VAR, E2E_DPORT_VAR, e2eOutSubdir } from "../../e2e/support/ports.ts";
-
-// Seconds per suite, from the runner's own per-suite wall clock on a 16-core Mac. Every entry was refreshed 2026-09-20 at Issue #637 from two local runs of each lane with the roster as it stands, the higher reading taken (chart-drawer re-measured the same way on 2026-09-21 at Issue #523) (both readings at the entry, one lane run at a time); refresh from that same output when the split is revisited. These seconds reach CI unevenly, about 2.0x on lane A and 1.8x on lane B against this table and per suite from 1.1x (home, wait-bound) to 3.3x (render), measured 2026-09-20 on main run 35518105601, so a rebalance is SIZED from the CI lane logs' per-suite wall clock and this table decides only the 0.6 bound below.
-const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
-  "home": 104.2, // 2026-09-20: 104.1, 104.2
-  "chart-drawer": 73.3, // 2026-09-21: 72.7, 73.3, two lane B runs at Issue #523 with CD44 to CD48 in (63.0 on 2026-09-20 before them); CD23's 8.45s of SAY_HOLD_MS + SAY_FADE_MS is a floor no machine can undercut, so the principle bounds it from below and the runs set the budget above
-  "landfall": 54.8, // 2026-09-20: 54.8, 54.5
-  "survey": 52.3, // 2026-09-20: 52.3, 50.8
-  "zoom": 48.8, // 2026-09-20: 48.2, 48.8
-  "reading-room": 36.3, // 2026-09-20: 36.3, 35.8
-  "print-room": 25.0, // 2026-09-20: 25.0, 24.1
-  "room-instrument": 24.7, // 2026-09-20: 24.7, 24.5
-  "room-address": 20.0, // 2026-09-20: 20.0, 19.5; three single-suite runs the same day read 19.9, 19.9 and 19.8
-  "region-detail": 14.7, // 2026-09-20: 14.6, 14.7
-  "render": 13.7, // 2026-09-20: 13.3, 13.7
-  "cluster": 9.8, // 2026-09-20: 9.8, 9.7
-  "cards": 9.7, // 2026-09-20: 9.7, 9.7; this suite's own line, not the render plus cards tally the runner forces whenever cards is selected alone
-  "room-voyage-route": 9.0, // 2026-09-20: 9.0, 8.7
-  "glass-ceremony": 8.7, // 2026-09-20: 8.7, 8.7
-  "specimen": 7.9, // 2026-09-20: 7.9, 7.9
-  "verso": 7.0, // 2026-09-20: 7.0, 7.0
-  "broadside": 7.0, // 2026-09-20: 7.0, 7.0
-  "room-drawer": 21.2, // 2026-10-03: 21.2 alone at Issue #668 with DR11 to DR17 and DR17's Specimen arm in (19.6 in a lane B run before that arm, 6.7 on 2026-09-20 before them all)
-  "turn": 6.5, // 2026-09-20: 6.3, 6.5
-  "prospect": 6.5, // 2026-09-20: 6.5, 6.3
-  "document-rooms": 5.5, // 2026-09-20: 5.5, 5.5
-  "runninghead": 5.3, // 2026-09-20: 5.3, 5.1
-  "hunt": 3.6, // 2026-09-20: 3.6, 3.5
-  "zoom-gestures": 3.5, // 2026-09-20: 3.5, 3.4
-  "ribbon": 3.4, // 2026-09-20: 3.4, 3.3
-  "room-voyage": 3.4, // 2026-09-20: 3.4, 3.3
-  "room-ink": 2.7, // 2026-09-20: 2.7, 2.4
-  "fallback": 2.5, // 2026-09-20: 2.4, 2.5
-  "motion": 2.4, // 2026-09-20: 2.4, 2.4
-  "corners": 145.7, // 2026-10-03: 145.7, 145.4 at Issue #638 with CO1 to CO3 in, once alone and once with nine neighbours (134.7 and 134.5 with CO1 and CO2 alone)
-  "health": 0.0, // 2026-09-20: 0.0, 0.0
-};
-
-const laneSeconds = (suites: readonly E2eSuiteName[]) =>
-  suites.reduce((sum, name) => sum + MEASURED_SECONDS[name], 0);
-
-const BALANCE_CAP = 0.6;
-// Seconds added to a lane raise the total too, so `(L + x) / (T + x) <= cap` solves to `x <= (cap * T - L) / (1 - cap)`, positive when the lane has room and negative by exactly the seconds it must shed (Issue #637; at 0.6 and two lanes it is the `1.5A - B` the PR #635 review derived).
-const laneHeadroom = (seconds: number, total: number) => (BALANCE_CAP * total - seconds) / (1 - BALANCE_CAP);
-const balanceLine = (name: string, seconds: number, total: number): string => {
-  const headroom = laneHeadroom(seconds, total);
-  const room = headroom >= 0
-    ? `${headroom.toFixed(1)}s of room under the ${BALANCE_CAP} cap`
-    : `${(-headroom).toFixed(1)}s past the ${BALANCE_CAP} cap, so it must shed at least that`;
-  return `lane ${name} is ${((seconds / total) * 100).toFixed(1)}% of measured serial cost (${seconds.toFixed(1)}s of ${total.toFixed(1)}s, ${room}), so that shard alone sets the wall clock while the other idles`;
-};
 
 const result = (over: Partial<LaneResult> & { name: string }): LaneResult => ({
   code: 0,
@@ -83,6 +35,9 @@ const result = (over: Partial<LaneResult> & { name: string }): LaneResult => ({
 
 const everyLane = (over: Partial<LaneResult> = {}) =>
   E2E_LANES.map((lane) => result({ name: lane.name, ...over }));
+
+const withLane = (name: string, over: Partial<LaneResult>) =>
+  E2E_LANES.map((lane) => result({ name: lane.name, ...(lane.name === name ? over : {}) }));
 
 test("the lanes are an exact partition of the runner's suites, so nothing is dropped or doubled", () => {
   // Counted suite by suite: a union or count check passes a swap that drops one and duplicates another.
@@ -130,6 +85,31 @@ test("each lane runs its suites in the runner's canonical order", () => {
   }
 });
 
+test("a suite that depends on its predecessor's page runs directly after it, and no suite that opens on the home page runs directly after home", () => {
+  // Blind spot, erring toward passing: this reads the lanes only, and the full serial tier runs E2E_SUITE_ORDER, where landfall follows home (a handbook/errata/guards.md row).
+  assert.ok(Object.keys(NEEDS_PREDECESSOR).length > 0 && OPENS_ON_HOME.length > 0, "an ordering roster is empty, so the sweep below checks nothing");
+  for (const lane of E2E_LANES) {
+    for (const [i, suite] of lane.suites.entries()) {
+      const before = i === 0 ? null : lane.suites[i - 1]!;
+      const needs = NEEDS_PREDECESSOR[suite];
+      if (needs !== undefined) {
+        assert.equal(before, needs, `lane ${lane.name} runs ${suite} after ${before ?? "nothing, on the harness's boot page"}, but it depends on the page ${needs} leaves`);
+      }
+      if (before === "home") {
+        assert.ok(!OPENS_ON_HOME.includes(suite), `lane ${lane.name} runs ${suite} directly after home, so its first navigate to / returns on home's stale document`);
+      }
+    }
+  }
+});
+
+test("no lane is empty, since an empty lane's child is handed an empty selection and the runner reads that as the whole suite", () => {
+  for (const lane of E2E_LANES) {
+    const selection = resolveSuiteSelection(laneChildEnv(lane, {}));
+    assert.equal(selection.tier, "custom", `lane ${lane.name} resolves to the ${selection.tier} tier, so its runner runs ${selection.names.length} suites rather than its own`);
+    assert.deepEqual(selection.names, lane.suites, `lane ${lane.name}'s runner would run ${selection.names.join(", ")}, not the lane's own suites`);
+  }
+});
+
 test("the lanes never share a name, a port, a debug port, or an output directory", () => {
   const names = E2E_LANES.map((l) => l.name);
   assert.equal(new Set(names).size, names.length, `two lanes share a name (${names.join(", ")}), so --lane picks one of them and the other runs in no job at all`);
@@ -155,9 +135,6 @@ test("a lane's child env carries its own suites and ports, and inherits the rest
     assert.equal(envs[i]!["VELLUM_REQUIRE_BROWSER"], "1", "the require-browser guard was dropped");
     assert.ok(!("UNSET" in envs[i]!), "an unset ambient var leaked in as undefined");
   }
-  assert.notEqual(envs[0]![E2E_PORT_VAR], envs[1]![E2E_PORT_VAR], "both lanes were handed the same port");
-  assert.notEqual(envs[0]![E2E_DPORT_VAR], envs[1]![E2E_DPORT_VAR], "both lanes were handed the same debug port");
-  assert.notEqual(envs[0]![E2E_SUITES_VAR], envs[1]![E2E_SUITES_VAR], "both lanes were handed the same suites");
 });
 
 test("--lane names one lane and no flag names every lane", () => {
@@ -253,61 +230,30 @@ test("an ambient suite selection is refused, since the lanes ARE the selection",
   assert.equal(ambientSelectionRefusal({ [E2E_SUITES_VAR]: "  " }), null);
 });
 
-test("the split is balanced against measured cost, not check counts", () => {
-  const total = laneSeconds(E2E_SUITE_ORDER);
-  for (const lane of E2E_LANES) {
-    const seconds = laneSeconds(lane.suites);
-    // Since Issue #623 put one job on each runner the wall clock IS max(A, B), so an unbalanced pair wastes the parallelism it was split for and balance matters more here than it did inside one job, not less (Alex, 2026-09-14).
-    assert.ok(seconds / total <= BALANCE_CAP, balanceLine(lane.name, seconds, total));
-  }
-});
-
-test("the balance message names the seconds a lane must shed, as a positive number that lands it exactly on the cap", () => {
-  const [seconds, total] = [420, 686.4];
-  assert.ok(seconds / total > BALANCE_CAP, "the fixture is under the cap, so the message's shed branch never runs");
-  const shed = -laneHeadroom(seconds, total);
-  assert.ok(shed > 0, `a lane over the cap reports ${shed}s of headroom instead of seconds to shed`);
-  assert.ok(Math.abs((seconds - shed) / (total - shed) - BALANCE_CAP) < 1e-9, `shedding ${shed}s lands at ${(seconds - shed) / (total - shed)}, not on the cap`);
-  const red = balanceLine("Q", seconds, total);
-  assert.ok(red.startsWith("lane Q is "), "the red message does not name the lane");
-  assert.ok(red.includes(`${shed.toFixed(1)}s past the ${BALANCE_CAP} cap`), "the red message does not name the seconds to shed");
-  assert.doesNotMatch(red, /-\d/, "the red message carries a negative number, which reads as room where there is none");
-  // The prover's round on f1b07c5 found `* 1000` passing with the seconds clause alone under test, and its round on 27150ab found the parenthetical's order and the lane name free.
-  assert.ok(red.includes("61.2% of measured serial cost (420.0s of 686.4s, "), "the red message does not name the share, then the lane's seconds before the total");
-  const [under, underTotal] = [302.2, 568.6];
-  const room = laneHeadroom(under, underTotal);
-  assert.ok(room > 0, "a lane under the cap reports no room");
-  assert.ok(Math.abs((under + room) / (underTotal + room) - BALANCE_CAP) < 1e-9, `adding ${room}s lands at ${(under + room) / (underTotal + room)}, not on the cap`);
-  const green = balanceLine("Q", under, underTotal);
-  assert.ok(green.includes(`${room.toFixed(1)}s of room under the ${BALANCE_CAP} cap`), "the green-shaped message does not name the room");
-  assert.ok(green.includes("53.1% of measured serial cost (302.2s of 568.6s, "), "the green-shaped message does not name the share, then the lane's seconds before the total");
-});
-
 test("a lane failing fails the run and the line says which lane", () => {
-  const green = laneOutcome([result({ name: "A" }), result({ name: "B" })]);
-  assert.equal(green.ok, true, "two green lanes must pass");
+  const green = laneOutcome(everyLane());
+  assert.equal(green.ok, true, "every lane green must pass");
   assert.match(green.line, /ALL LANES PASS/);
-
-  const bFailed = laneOutcome([result({ name: "A" }), result({ name: "B", code: 1 })]);
-  assert.equal(bFailed.ok, false, "a failed lane must fail the run");
-  assert.match(bFailed.line, /LANE B/, "the line does not name the failing lane");
-  assert.doesNotMatch(bFailed.line, /ALL LANES PASS/);
-
-  const aFailed = laneOutcome([result({ name: "A", code: 1 }), result({ name: "B" })]);
-  assert.equal(aFailed.ok, false);
-  assert.match(aFailed.line, /LANE A/, "the line does not name the failing lane");
-
-  const both = laneOutcome([result({ name: "A", code: 1 }), result({ name: "B", code: 1 })]);
-  assert.equal(both.ok, false);
-  assert.match(both.line, /A/);
-  assert.match(both.line, /B/);
+  for (const lane of E2E_LANES) {
+    const red = laneOutcome(withLane(lane.name, { code: 1 }));
+    assert.equal(red.ok, false, `lane ${lane.name} failing did not fail the run`);
+    assert.match(red.line, new RegExp(`LANE ${lane.name} FAILED`), `the line does not name failing lane ${lane.name}`);
+    assert.doesNotMatch(red.line, /ALL LANES PASS/);
+  }
+  const all = laneOutcome(everyLane({ code: 1 }));
+  assert.equal(all.ok, false);
+  assert.match(all.line, new RegExp(`LANE ${E2E_LANES.map((l) => l.name).join(" and ")} FAILED`), "the line does not name every failing lane");
 });
 
 test("a harness error is reported as its own category, not as a failed check", () => {
-  const crashed = laneOutcome([result({ name: "A" }), result({ name: "B", code: 2 })]);
-  assert.equal(crashed.ok, false);
-  assert.match(crashed.line, /2/, "exit 2 must survive into the line");
-  assert.match(crashed.line, /harness/i, "exit 2 is a harness error, not a failed check");
+  for (const lane of E2E_LANES) {
+    const crashed = laneOutcome(withLane(lane.name, { code: 2 }));
+    assert.equal(crashed.ok, false, `lane ${lane.name}'s harness error did not fail the run`);
+    assert.ok(crashed.line.includes(`${lane.name} HARNESS ERROR (exit 2)`), `exit 2 on lane ${lane.name} is a harness error, not a failed check, and the line does not say so: ${crashed.line}`);
+    const failed = laneOutcome(withLane(lane.name, { code: 1 })).line;
+    assert.ok(failed.includes(`${lane.name} failed (exit 1)`), `exit 1 on lane ${lane.name} is a failed check, and the line does not say so: ${failed}`);
+    assert.doesNotMatch(failed, /HARNESS ERROR/, `exit 1 on lane ${lane.name} reads as a harness error, so a red check looks like infrastructure`);
+  }
 });
 
 test("no lanes at all fails instead of reporting a vacuous pass", () => {
@@ -347,8 +293,9 @@ test("the combined line states the check total the acceptance criterion names", 
   assert.equal(laneCheckTally("shot -> out/e2e/explorer.png (1584px tall)"), null, "only the outcome line carries a tally");
   assert.equal(laneCheckTally("PASS  R1 the chart draws"), null);
 
-  const counted = laneOutcome(everyLane({ tally: { passed: 100, total: 100 } }));
-  assert.match(counted.line, /200\/200 checks/, "the lanes' tallies must be summed onto the combined line");
+  const counted = laneOutcome(everyLane({ tally: { passed: 99, total: 100 } }));
+  const n = E2E_LANES.length;
+  assert.ok(counted.line.includes(`${99 * n}/${100 * n} checks`), `the lanes' passes and totals must each be summed onto the combined line: ${counted.line}`);
   assert.match(laneOutcome(everyLane()).line, /ALL LANES PASS/, "a run with no tally read must still report");
   assert.doesNotMatch(laneOutcome(everyLane()).line, /checks/, "no tally read means no invented count");
 });
@@ -380,17 +327,16 @@ test("the skip line the driver watches for is the one the runner actually prints
 
 test("lanes that skipped for want of a browser never read as a pass", () => {
   // The single-lane runner exits 0 when it skips, so the lanes do too; only the LINE can say so.
-  const skipped = laneOutcome([
-    result({ name: "A", skipped: true }),
-    result({ name: "B", skipped: true }),
-  ]);
+  const skipped = laneOutcome(everyLane({ skipped: true }));
   assert.doesNotMatch(skipped.line, /ALL LANES PASS/, "a fully skipped run must not read as a pass");
-  assert.match(skipped.line, /SKIP/i);
+  assert.match(skipped.line, new RegExp(`LANE ${E2E_LANES.map((l) => l.name).join(" and ")} SKIPPED`), "the line does not name every skipped lane");
 
-  const half = laneOutcome([result({ name: "A" }), result({ name: "B", skipped: true })]);
-  assert.doesNotMatch(half.line, /ALL LANES PASS/, "a half-skipped run must not read as a pass");
-  assert.match(half.line, /SKIP/i);
+  for (const lane of E2E_LANES) {
+    const one = laneOutcome(withLane(lane.name, { skipped: true }));
+    assert.doesNotMatch(one.line, /ALL LANES PASS/, `a run where lane ${lane.name} skipped must not read as a pass`);
+    assert.match(one.line, new RegExp(`LANE ${lane.name} SKIPPED`), `the line does not name skipped lane ${lane.name}`);
+  }
 
-  const required = laneOutcome([result({ name: "A" }), result({ name: "B", code: 1, skipped: true })]);
+  const required = laneOutcome(withLane(E2E_LANES[1]!.name, { code: 1, skipped: true }));
   assert.equal(required.ok, false, "a lane that exited non-zero must fail even if it printed SKIP");
 });
