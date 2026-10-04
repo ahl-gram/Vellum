@@ -245,7 +245,8 @@ export async function p30Tablet(k: Kit): Promise<void> {
     if (c.name !== m.name || !c.pinned) { rows.push(`${m.name}: the tap opened ${c.name}${c.pinned ? "" : " unpinned"}`); continue; }
     // Two taps closer than d3's double-tap window zoom the chart, which moves every later mark.
     await k.sleep(650);
-    const text = { x: (c.left + c.right) / 2, y: c.bottom - 6 };
+    // 30px inside the card: CI's headless Chrome delivers a CDP tap as browser-adjusted mouse events alone, with no touch or pointer event to say where the finger came down, and near the card's edge the adjustment moves it onto a town outside (measured 2026-10-04, Kalkulin's tap at 179,364 reaching Vadelgrad at 171,374).
+    const text = { x: (c.left + c.right) / 2, y: c.bottom - 30 };
     await k.evaluate(TAPLOG);
     await k.tap(text);
     await k.sleep(650);
