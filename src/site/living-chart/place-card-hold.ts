@@ -102,12 +102,15 @@ export const isHit = (node: unknown): node is HTMLElement => (node as Partial<El
 
 export function wireHit(hit: HTMLElement, idx: number, w: HitWiring): void {
   let owner = idx;
+  let pressAt: Point | null = null;
   const enter = (e: Event): void => {
     const p = w.point(e);
     owner = p ? w.resolve(p, idx) : idx;
     w.raise(owner);
     w.feed({ kind: "enter", idx: owner, onCard: w.inside(p) });
   };
+  // A tap's mouse events are moved onto the nearest pressable box (the browser's touch adjustment), so whether a press landed on the card is read where the finger actually came down.
+  hit.addEventListener("pointerdown", (e) => { pressAt = w.point(e); });
   hit.addEventListener("mousedown", () => { w.markPress(); });
   hit.addEventListener("mouseenter", enter);
   hit.addEventListener("mousemove", (e) => {
@@ -129,6 +132,8 @@ export function wireHit(hit: HTMLElement, idx: number, w: HitWiring): void {
   hit.addEventListener("click", (e) => {
     const detail = (e as MouseEvent).detail || 0;
     const p = detail > 0 ? w.point(e) : null;
-    w.feed({ kind: "press", idx: p ? w.resolve(p, idx) : idx, detail, onCard: w.inside(p) });
+    const down = detail > 0 ? pressAt ?? p : null;
+    pressAt = null;
+    w.feed({ kind: "press", idx: p ? w.resolve(p, idx) : idx, detail, onCard: w.inside(down) });
   });
 }

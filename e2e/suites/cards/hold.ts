@@ -169,7 +169,8 @@ export async function p31bFocusSurvivesRefill(k: Kit, marks: Mark[]): Promise<vo
   if (!b) throw new Error("P31b no town with a clear path from the card");
   await k.evaluate(QUIET);
   await k.travel(link, b, 1);
-  // At rest once nothing on the card has changed for longer than the grace, the only clock that can still change it.
+  await k.evaluate(`window.__p750q = performance.now()`);
+  // At rest once nothing on the card has changed for longer than the grace since the pointer's last move: the grace is the only clock that can still change it.
   const after = await k.settle(QUIET, (d) => d.quiet > HOLD_GRACE_MS + 100, `P31b the card after leaving ${a.name}`);
   k.check("P31b with focus on a card's link, the card still switches to the town the pointer settles on, and the link keeps its focus (#750)",
     after.card === b.name && after.active === "pc-prospect", JSON.stringify({ from: a.name, to: b.name, card: after.card, active: after.active }));

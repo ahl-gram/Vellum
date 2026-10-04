@@ -349,3 +349,16 @@ test("PC9 the focus a press gives a town leaves a pinned card alone, whichever t
   armed.hits[5]!.fire("focus");
   assert.deepEqual({ pinned: face().pinned, idx: face().pressIdx }, { pinned: false, idx: "5" }, "a press that gave no focus is forgotten by the next task, so keyboard focus after it switches the card");
 });
+
+test("PC10 a tap that came down on the card's text keeps it, even when the browser moves the tap's click onto a town just outside (#750)", async () => {
+  const { armed, face, card, at } = await holdRig();
+  armed.hits[0]!.fire("click", { ...at, detail: 1 });
+  card().rect = { left: 50, top: 150, right: 300, bottom: 370 };
+  // Measured 2026-10-04 on seed 4294967295 at 1024 (an emulated tablet): a finger at 179,364 on Kalkulin's card reached Vadelgrad's box as a click at 172,373.
+  armed.hits[1]!.fire("pointerdown", { clientX: 179, clientY: 364 });
+  armed.hits[1]!.fire("click", { detail: 1, clientX: 172, clientY: 373 });
+  assert.deepEqual({ pinned: face().pinned, idx: face().pressIdx }, { pinned: true, idx: "0" }, "the town the click was moved onto does not take the card");
+  armed.hits[1]!.fire("pointerdown", { clientX: 172, clientY: 373 });
+  armed.hits[1]!.fire("click", { detail: 1, clientX: 172, clientY: 373 });
+  assert.equal(face().pressIdx, "1", "a finger that came down outside the card does move the pin");
+});
