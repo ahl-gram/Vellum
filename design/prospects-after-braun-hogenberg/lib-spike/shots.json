@@ -1,0 +1,217 @@
+[
+ {
+  "url": "/lib-spike/sheet.html",
+  "width": 2200,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/lib-spike/sheet-lib-spike.png",
+  "full": true,
+  "waitMs": 1800
+ },
+ {
+  "url": "/lib-spike/plate.html?f=e-today-antique.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/lib-spike/full-e-today-antique.png",
+  "waitMs": 1200
+ },
+ {
+  "url": "/lib-spike/plate.html?f=e-today-ink.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/lib-spike/full-e-today-ink.png",
+  "waitMs": 1200
+ },
+ {
+  "url": "/lib-spike/plate.html?f=e-today-antique.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/lib-spike/crop-today-cartouche.png",
+  "waitMs": 1200,
+  "clip": {
+   "x": 180,
+   "y": 40,
+   "width": 680,
+   "height": 150,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/lib-spike/plate.html?f=e-today-antique.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/lib-spike/crop-today-key.png",
+  "waitMs": 1200,
+  "clip": {
+   "x": 560,
+   "y": 580,
+   "width": 460,
+   "height": 150,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/lib-spike/plate.html?f=e-fell-antique.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/lib-spike/full-e-fell-antique.png",
+  "waitMs": 1200
+ },
+ {
+  "url": "/lib-spike/plate.html?f=e-fell-ink.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/lib-spike/full-e-fell-ink.png",
+  "waitMs": 1200
+ },
+ {
+  "url": "/lib-spike/plate.html?f=e-fell-antique.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/lib-spike/crop-fell-cartouche.png",
+  "waitMs": 1200,
+  "clip": {
+   "x": 180,
+   "y": 40,
+   "width": 680,
+   "height": 150,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/lib-spike/plate.html?f=e-fell-antique.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/lib-spike/crop-fell-key.png",
+  "waitMs": 1200,
+  "clip": {
+   "x": 560,
+   "y": 580,
+   "width": 460,
+   "height": 150,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/lib-spike/plate.html?f=e-cormorant-antique.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/lib-spike/full-e-cormorant-antique.png",
+  "waitMs": 1200
+ },
+ {
+  "url": "/lib-spike/plate.html?f=e-cormorant-ink.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/lib-spike/full-e-cormorant-ink.png",
+  "waitMs": 1200
+ },
+ {
+  "url": "/lib-spike/plate.html?f=e-cormorant-antique.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/lib-spike/crop-cormorant-cartouche.png",
+  "waitMs": 1200,
+  "clip": {
+   "x": 180,
+   "y": 40,
+   "width": 680,
+   "height": 150,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/lib-spike/plate.html?f=e-cormorant-antique.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/lib-spike/crop-cormorant-key.png",
+  "waitMs": 1200,
+  "clip": {
+   "x": 560,
+   "y": 580,
+   "width": 460,
+   "height": 150,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/lib-spike/plate.html?f=e-rough-antique.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/lib-spike/full-e-rough-antique.png",
+  "waitMs": 1200
+ },
+ {
+  "url": "/lib-spike/plate.html?f=e-rough-antique.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/lib-spike/crop-rough-cartouche.png",
+  "waitMs": 1200,
+  "clip": {
+   "x": 180,
+   "y": 40,
+   "width": 680,
+   "height": 150,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/lib-spike/plate.html?f=e-rough-antique.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/lib-spike/crop-rough-key.png",
+  "waitMs": 1200,
+  "clip": {
+   "x": 560,
+   "y": 580,
+   "width": 460,
+   "height": 150,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/lib-spike/plate.html?f=e-rough-antique.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/lib-spike/crop-rough-figures.png",
+  "waitMs": 1200,
+  "clip": {
+   "x": 140,
+   "y": 360,
+   "width": 460,
+   "height": 170,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/lib-spike/plate.html?f=e-today-antique.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/lib-spike/crop-today-figures.png",
+  "waitMs": 1200,
+  "clip": {
+   "x": 140,
+   "y": 360,
+   "width": 460,
+   "height": 170,
+   "scale": 2
+  }
+ }
+]
