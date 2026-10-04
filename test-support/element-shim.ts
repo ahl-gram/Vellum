@@ -75,9 +75,21 @@ export class El {
     this.#text = String(v);
   }
   get parentElement(): El | null { return this.parentNode; }
+  /** As in the DOM, a node inserted somewhere leaves wherever it was first. */
   #adopt(kids: El[]): void {
-    for (const k of kids) k.parentNode = this;
+    for (const k of kids) {
+      k.remove();
+      k.parentNode = this;
+    }
   }
+  #insertBeside(offset: 0 | 1, kids: El[]): void {
+    const p = this.parentNode;
+    if (!p) return;
+    p.#adopt(kids);
+    p.children.splice(p.children.indexOf(this) + offset, 0, ...kids);
+  }
+  before(...kids: El[]): void { this.#insertBeside(0, kids); }
+  after(...kids: El[]): void { this.#insertBeside(1, kids); }
   append(...kids: El[]): void {
     this.#adopt(kids);
     this.children.push(...kids);

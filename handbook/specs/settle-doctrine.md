@@ -199,8 +199,9 @@ section points there rather than restating it.
   unfurl is `paperUnfurl` in `public/motion.css`, a `rotateX` roll that the `.pc-inner` rules in
   `public/living-chart.css` grade `--unfurl-quick` (400ms) on a shown card and `--unfurl` (650ms)
   on a pinned one, and `showPlaceCard` in `src/site/living-chart/place-overlay.ts` restarts it on
-  every show, which `mouseenter`, `focus` and `click` each trigger, so a gesture sequence starts
-  the roll more than once and a clock started at the first show is not started at the last restart;
+  every show, which a hover onto another town, keyboard focus on another town and a press that pins
+  each trigger (a re-entry on the town already shown does not), so a gesture sequence starts the
+  roll more than once and a clock started at the first show is not started at the last restart;
   and on a throttled runner the wait before the class change that starts a roll even commits is
   main-thread bound (the CD7b rows in `.claude/skills/vellum-footguns/references/flake-record.md`),
   so a sleep sized to the animation is a bet on the runner besides. A rect or a frame read mid-roll

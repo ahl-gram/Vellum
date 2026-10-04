@@ -19,10 +19,12 @@
   transition: opacity var(--paper-quick) var(--ease-paper),
               transform var(--paper-quick) var(--ease-paper);
 }
-/* No zoom division of its own: the element carries it, and a second would shrink the ring k-fold below its 20px. */
-.place-hit:hover::after, .place-hit:focus-visible::after {
+/* No zoom division of its own: the element carries it, and a second would shrink the ring k-fold below its 20px. The ring rides the town the overlay resolved under the pointer, not :hover, which the browser recomputes only on the pointer's next move after a raise (measured 2026-10-04, Issue #750). */
+.place-hit.pc-near::after, .place-hit:focus-visible::after {
   opacity: 1; transform: scale(1);
 }
+.place-hit.pc-near { z-index: 1; }
+.place-overlay.pc-over .place-hit:not(.pc-own) { cursor: default; }
 /* The clamp rides inside the counter-scaled translate: the mount carries the Glass's scale(k), so a nudge ahead of scale(1/k) composes as k times itself, exactly right at k=1 and wrong at every other depth, which no unit test can catch. */
 /* --zoom-k is published on the card itself, never the mount, which would re-rasterize the baked labels every frame; the origin sits on the corner the card is anchored by, so the gap at the mark holds a constant screen distance at every depth. */
 #place-card {

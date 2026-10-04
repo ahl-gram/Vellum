@@ -2,16 +2,17 @@
 import { composePlaceCard, placeAriaLabel, cardSide, clampOffset, type CardBox, type PlaceCard } from "../../render/place-card.ts";
 import type { PlaceManifest, PlaceMark } from "../../render/place-manifest.ts";
 import type { HistoricalEvent } from "../../society/history.ts";
+import { CLOSED, HOLD_GRACE_MS, isHit, nearestMark, nextHold, pointerTrack, pressMark, wireHit, type Hold, type HoldInput, type Point } from "./place-card-hold.ts";
 
 interface PlaceOverlayState {
   card: HTMLDivElement;
+  inner: HTMLDivElement;
+  hits: HTMLButtonElement[];
   places: ReadonlyArray<PlaceMark>;
   events: ReadonlyArray<HistoricalEvent>;
   cultureId: string;
   presentYear: number;
   currentIdx: number;
-  pinned: boolean;
-  pinnedIdx: number;
   prospectLink: HTMLAnchorElement | null;
   acts: HTMLElement | null;
   layPress: HTMLButtonElement | null;
@@ -111,70 +112,86 @@ function cardActs(inner: HTMLDivElement, opts: Readonly<BuildPlaceOverlayOpts> |
   return { prospectLink, layPress, acts };
 }
 
+function fillCardInner(innerEl: HTMLElement, card: PlaceCard, acts: HTMLElement | null): void {
+  for (const child of [...innerEl.children]) if (child !== acts) child.remove();
+  innerEl.scrollTop = 0;
+  const name = document.createElement("strong");
+  name.className = "pc-name";
+  name.textContent = card.name;
+  const rank = document.createElement("span");
+  rank.className = "pc-rank";
+  rank.textContent = card.rank;
+  const founded = document.createElement("span");
+  founded.className = "pc-founded";
+  founded.textContent = card.foundedLine;
+  const head: HTMLElement[] = [name, rank, founded];
+  if (card.formerLine) {
+    const former = document.createElement("span");
+    former.className = "pc-former";
+    former.textContent = card.formerLine;
+    head.push(former);
+  }
+  const tail: HTMLElement[] = [];
+  if (card.tale) {
+    const tale = document.createElement("p");
+    tale.className = "pc-tale";
+    tale.textContent = card.tale;
+    tail.push(tale);
+  }
+  const tongue = document.createElement("p");
+  tongue.className = "pc-tongue";
+  tongue.textContent = card.tongueLine;
+  const derivation = document.createElement("p");
+  derivation.className = "pc-roots";
+  derivation.textContent = card.derivationLine;
+  tail.push(tongue, derivation);
+  if (!acts) { innerEl.append(...head, ...tail); return; }
+  acts.before(...head);
+  acts.after(...tail);
+}
+
+function seatCard(po: PlaceOverlayState, hold: Hold): void {
+  const overlay = po.card.parentElement;
+  if (!overlay) return;
+  const kids = [...overlay.children];
+  const hit = hold.pinned ? po.hits[hold.shown] : undefined;
+  if (hit && kids[kids.indexOf(hit) + 1] !== po.card) hit.after(po.card);
+  else if (!hit && kids[kids.length - 1] !== po.card) overlay.appendChild(po.card);
+}
+
+const tag = (cls: string, prev: HTMLElement | null, el: HTMLElement | null): HTMLElement | null => {
+  if (prev && prev !== el) prev.classList.remove(cls);
+  if (el) el.classList.add(cls);
+  return el;
+};
+
 // eslint-disable-next-line max-lines-per-function
 export function createPlaceOverlay(deps: PlaceOverlayDeps) {
   const { mapEl, isSuppressed, prospectHref, layProspect, clampBox } = deps;
 
   let placeOverlay: PlaceOverlayState | null = null;
+  let hold: Hold = CLOSED;
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  let last: Point = { x: Number.NaN, y: Number.NaN };
+  let watching: Document | null = null;
+  let near: HTMLElement | null = null, own: HTMLElement | null = null;
 
-  function fillCardInner(innerEl: HTMLElement, card: PlaceCard, place: PlaceMark): void {
-    innerEl.replaceChildren();
-    innerEl.scrollTop = 0;
-    const name = document.createElement("strong");
-    name.className = "pc-name";
-    name.textContent = card.name;
-    const rank = document.createElement("span");
-    rank.className = "pc-rank";
-    rank.textContent = card.rank;
-    const founded = document.createElement("span");
-    founded.className = "pc-founded";
-    founded.textContent = card.foundedLine;
-    innerEl.append(name, rank, founded);
-    if (card.formerLine) {
-      const former = document.createElement("span");
-      former.className = "pc-former";
-      former.textContent = card.formerLine;
-      innerEl.append(former);
-    }
-    const acts = placeOverlay!.acts;
-    if (acts) {
-      if (placeOverlay!.prospectLink) {
-        placeOverlay!.prospectLink.href = prospectHref!(place.idx);
-        acts.append(placeOverlay!.prospectLink);
-      }
-      if (placeOverlay!.layPress) acts.append(placeOverlay!.layPress);
-      paintLay(place.idx);
-      innerEl.append(acts);
-    }
-    if (card.tale) {
-      const tale = document.createElement("p");
-      tale.className = "pc-tale";
-      tale.textContent = card.tale;
-      innerEl.append(tale);
-    }
-    const tongue = document.createElement("p");
-    tongue.className = "pc-tongue";
-    tongue.textContent = card.tongueLine;
-    const derivation = document.createElement("p");
-    derivation.className = "pc-roots";
-    derivation.textContent = card.derivationLine;
-    innerEl.append(tongue, derivation);
-  }
-
-  function showPlaceCard(idx: number): void {
-    if (!placeOverlay || isSuppressed()) return; // the hover card is suppressed while scrubbing
+  function showPlaceCard(idx: number): boolean {
+    if (!placeOverlay || isSuppressed()) return false; // the hover card is suppressed while scrubbing
     const place = placeOverlay.places[idx];
-    if (!place) return;
+    if (!place) return false;
     const card = composePlaceCard(place, placeOverlay.events, placeOverlay.cultureId);
     const el = placeOverlay.card;
-    const inner = el.querySelector(".pc-inner") as HTMLElement;
-    fillCardInner(inner, card, place);
+    const inner = placeOverlay.inner;
+    fillCardInner(inner, card, placeOverlay.acts);
+    if (placeOverlay.prospectLink) placeOverlay.prospectLink.href = prospectHref!(place.idx);
+    paintLay(place.idx);
     el.style.setProperty("--pc-nx", String(place.nx));
     el.style.setProperty("--pc-ny", String(place.ny));
     const side = cardSide(place.nx, place.ny);
     el.classList.toggle("flip-h", side.h === "left");
     el.classList.toggle("flip-v", side.v === "above");
-    el.classList.toggle("pinned", placeOverlay.pinned && placeOverlay.pinnedIdx === idx);
+    el.classList.toggle("pinned", hold.pinned && hold.shown === idx);
     el.hidden = false;
     // The none/reflow/restore reset replays the unfurl at the current grade on every show: a CSS animation does not replay while the card stays displayed across a content swap, and a mid-flight grade change would leave a partial roll.
     inner.style.animation = "none";
@@ -183,6 +200,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     clampIntoView(el);
     inner.tabIndex = el.classList.contains("pc-scrolls") && el.classList.contains("pinned") ? 0 : -1;
     placeOverlay.currentIdx = idx;
+    return true;
   }
 
   function reclampCard(): void {
@@ -220,30 +238,117 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     const { dx, dy } = clampOffset(el.getBoundingClientRect(), box);
     el.style.setProperty("--pc-dx", `${dx}px`);
     el.style.setProperty("--pc-dy", `${dy}px`);
-    const inner = el.querySelector(".pc-inner");
-    if (inner) markScroll(el, inner as HTMLElement);
+    if (placeOverlay) markScroll(el, placeOverlay.inner);
   }
 
-  function hidePlaceCard(): void {
-    if (!placeOverlay) return;
-    placeOverlay.pinned = false;
-    placeOverlay.pinnedIdx = -1;
-    placeOverlay.card.hidden = true;
+  const inside = (p: Point | null): boolean => {
+    if (!p || !placeOverlay || placeOverlay.card.hidden) return false;
+    const r = placeOverlay.card.getBoundingClientRect();
+    return r.width > 0 && r.height > 0 && p.x >= r.left && p.x <= r.right && p.y >= r.top && p.y <= r.bottom;
+  };
+
+  const inCard = (node: unknown): boolean => {
+    for (let n = node as Node | null; n; n = n.parentNode) if (placeOverlay && n === placeOverlay.card) return true;
+    return false;
+  };
+
+  function onMove(e: MouseEvent): void {
+    if (e.buttons !== 0) return;
+    track.move(e);
+    const over = inside(point(e));
+    if (over !== hold.onCard) feed({ kind: "move", onCard: over });
+  }
+
+  const onDown = (e: Event): void => { track.down(e); };
+
+  function syncWatch(): void {
+    const doc = (mapEl as { ownerDocument?: Document | null }).ownerDocument ?? null;
+    if (hold.shown >= 0 && !watching && doc) {
+      doc.addEventListener("mousemove", onMove, { passive: true });
+      doc.addEventListener("pointerdown", onDown, { capture: true, passive: true });
+      watching = doc;
+    } else if (hold.shown < 0 && watching) {
+      watching.removeEventListener("mousemove", onMove);
+      watching.removeEventListener("pointerdown", onDown, { capture: true });
+      watching = null;
+      track.reset();
+    }
+  }
+
+  function expire(): void {
+    timer = null;
+    feed({ kind: "expire", onCard: inside(last) });
+  }
+
+  function feed(input: HoldInput): void {
+    const po = placeOverlay;
+    if (!po) return;
+    const prev = hold;
+    hold = nextHold(prev, input);
+    seatCard(po, hold);
+    if (hold.shown >= 0 && (hold.shown !== prev.shown || hold.pinned !== prev.pinned) && !showPlaceCard(hold.shown)) hold = { ...CLOSED, hovered: hold.hovered };
+    if (hold.shown < 0) {
+      po.card.hidden = true;
+      seatCard(po, hold);
+    }
+    if (hold.waiting && !timer) timer = setTimeout(expire, HOLD_GRACE_MS);
+    else if (!hold.waiting && timer) { clearTimeout(timer); timer = null; }
+    syncWatch();
+    if (po.card.parentElement) po.card.parentElement.classList.toggle("pc-over", hold.shown >= 0 && hold.onCard);
+    own = tag("pc-own", own, hold.shown >= 0 ? po.hits[hold.shown] ?? null : null);
+  }
+
+  const hidePlaceCard = (): void => { feed({ kind: "dismiss" }); };
+
+  function raise(idx: number): void {
+    near = tag("pc-near", near, placeOverlay && idx >= 0 ? placeOverlay.hits[idx] ?? null : null);
+  }
+
+  function resolve(p: Point, idx: number): number {
+    const boxes = placeOverlay ? placeOverlay.hits.map((h, i) => { const r = h.getBoundingClientRect(); return { idx: i, left: r.left, top: r.top, right: r.right, bottom: r.bottom }; }) : [];
+    const at = nearestMark(p, boxes);
+    return at >= 0 ? at : idx;
+  }
+
+  const { markPress, takePress } = pressMark();
+
+  const point = (e: Event): Point | null => {
+    const me = e as MouseEvent;
+    if (!Number.isFinite(me.clientX) || !Number.isFinite(me.clientY)) return null;
+    last = { x: me.clientX, y: me.clientY };
+    return last;
+  };
+  const track = pointerTrack({ feed, point, resolve, inside, raise });
+
+  function reset(): void {
+    hold = CLOSED;
+    if (timer) clearTimeout(timer);
+    timer = null;
+    near = own = null;
+    syncWatch();
   }
 
   // opts.box positions the overlay over a region inset's rect so the region manifest's own nx/ny fractions land on the inset's drawn glyphs; the card lives inside the overlay so its % anchor resolves against the same box.
   function buildPlaceOverlay(manifest: PlaceManifest, opts?: BuildPlaceOverlayOpts): void {
     const preserveName =
-      opts && opts.preservePinByName && placeOverlay && placeOverlay.pinned && placeOverlay.pinnedIdx >= 0
-        ? ((placeOverlay.places[placeOverlay.pinnedIdx] || {}) as Partial<PlaceMark>).name
+      opts && opts.preservePinByName && placeOverlay && hold.pinned && hold.shown >= 0
+        ? ((placeOverlay.places[hold.shown] || {}) as Partial<PlaceMark>).name
         : null;
+    reset();
     // An inset commit rebuilds the overlay with no mount wipe before it (unlike a draw), so this builder owns removing the previous overlay + card; a no-op after a wipe.
     for (const stale of mapEl.querySelectorAll(":scope > .place-overlay, :scope > #place-card")) stale.remove();
     const overlay = overlayBox(opts);
+    overlay.addEventListener("click", (e) => {
+      const pressed = e.target === overlay && e.detail > 0 ? track.press(e, -1) : null;
+      if (pressed && pressed.idx >= 0) feed({ kind: "press", ...pressed });
+    });
     const { card, inner } = cardShell();
+    card.addEventListener("focusout", (e) => {
+      feed({ kind: "focusOut", staysNear: inCard(e.relatedTarget) || isHit(e.relatedTarget) });
+    });
     const { prospectLink, layPress, acts } = cardActs(inner, opts, prospectHref, layProspect);
-    placeOverlay = { card, places: manifest.places, events: manifest.events, cultureId: manifest.cultureId, presentYear: manifest.presentYear, currentIdx: -1, pinned: false, pinnedIdx: -1, prospectLink, acts, layPress };
-    manifest.places.forEach((place, idx) => {
+    const wiring = { feed, inCard, markPress, takePress, track };
+    const hits = manifest.places.map((place, idx) => {
       const hit = document.createElement("button");
       hit.type = "button";
       hit.className = "place-hit";
@@ -252,39 +357,29 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
       hit.setAttribute("aria-describedby", "place-card");
       hit.style.left = `${place.nx * 100}%`;
       hit.style.top = `${place.ny * 100}%`;
-      hit.addEventListener("mouseenter", () => showPlaceCard(idx));
-      hit.addEventListener("focus", () => showPlaceCard(idx));
-      hit.addEventListener("mouseleave", () => { if (!placeOverlay!.pinned) placeOverlay!.card.hidden = true; });
-      hit.addEventListener("blur", () => { if (!placeOverlay!.pinned) placeOverlay!.card.hidden = true; });
-      hit.addEventListener("click", () => {
-        if (placeOverlay!.pinned && placeOverlay!.pinnedIdx === idx) { hidePlaceCard(); return; }
-        placeOverlay!.pinned = true;
-        placeOverlay!.pinnedIdx = idx;
-        showPlaceCard(idx);
-      });
+      wireHit(hit, idx, wiring);
       overlay.appendChild(hit);
+      return hit;
     });
+    placeOverlay = { card, inner, hits, places: manifest.places, events: manifest.events, cultureId: manifest.cultureId, presentYear: manifest.presentYear, currentIdx: -1, prospectLink, acts, layPress };
     overlay.appendChild(card);
     mapEl.appendChild(overlay);
     if (preserveName != null) {
       const idx = manifest.places.findIndex((p) => p.name === preserveName);
-      if (idx >= 0) {
-        placeOverlay.pinned = true;
-        placeOverlay.pinnedIdx = idx;
-        showPlaceCard(idx);
-      }
+      if (idx >= 0) feed({ kind: "press", idx, detail: 0, onCard: false });
     }
   }
 
   function onDocKeydown(e: KeyboardEvent): void {
-    if (e.key === "Escape" && placeOverlay && !placeOverlay.card.hidden) hidePlaceCard();
+    if (e.key === "Escape" && hold.shown >= 0) hidePlaceCard();
   }
 
   function onDocClick(e: MouseEvent): void {
-    if (!placeOverlay || placeOverlay.card.hidden) return;
+    if (!placeOverlay || hold.shown < 0) return;
     const t = e.target as (Node & Partial<Pick<Element, "closest">>) | null;
     if (t && t.closest && (t.closest(".place-hit") || t.closest("#place-card"))) return;
-    hidePlaceCard();
+    if (t === placeOverlay.card.parentElement) return;
+    feed({ kind: "pressOpen", onCard: e.detail > 0 && inside({ x: e.clientX, y: e.clientY }) });
   }
 
   function data(): OverlayData | null {
@@ -293,6 +388,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
   }
 
   function teardown(): void {
+    reset();
     for (const stale of mapEl.querySelectorAll(":scope > .place-overlay, :scope > #place-card")) stale.remove();
     placeOverlay = null;
   }
