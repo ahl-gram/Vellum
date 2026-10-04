@@ -250,7 +250,8 @@ MAIN checkout: name the files in your reply so they are easy to open, and do not
 `/tmp`, the scratchpad or anywhere else he will not find. A dispatched lane's own `out/` is inside
 its worktree and he never opens it, so a lane reports absolute paths and whoever dispatched it copies
 them across, per `handbook/specs/development-workflow.md` step 6, which also says why an agent whose
-only output is `out/` never runs in a harness-isolated tree: that tree is deleted when the run ends. **For a presentation sub, run `vellum-plate-reader` before the PR**:
+only output is `out/` never runs in a harness-isolated tree: that tree is deleted when the run ends
+unless git sees a change in it, and `out/` is not one. **For a presentation sub, run `vellum-plate-reader` before the PR**:
 structural tests cannot see layout, and #219's sideways scroll at 320px is what got through when one
 was trusted to. It renders through CDP and returns MEASUREMENTS plus named files in `out/`, at both
 full scale and 1:1 crop, since glance properties only exist at full scale.
