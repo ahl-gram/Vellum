@@ -338,6 +338,8 @@ test("PC8 a pointer drifting inside overlapping boxes toward a nearer town waits
   assert.equal(face().name, nameOf(1), "drifting nearer town 0 does not swap the card at once");
   t.mock.timers.tick(HOLD_GRACE_MS);
   assert.equal(face().name, nameOf(0), "resting there, the nearer town takes the card once the grace has run");
+  armed.hits[1]!.fire("mouseleave", { clientX: 300, clientY: 300 });
+  assert.deepEqual(raised(), [], "leaving the towns for open chart lowers the raised box, and its ring with it");
 });
 
 test("PC9 the focus a press gives a town leaves a pinned card alone, whichever town's box took the press; keyboard focus still switches (#750 ruling 2)", async (t) => {
@@ -361,6 +363,7 @@ test("PC10 a tap that came down on the card's text keeps it, even when the brows
   card().rect = { left: 50, top: 150, right: 300, bottom: 370 };
   armed.hits[1]!.fire("mouseenter", { clientX: 179, clientY: 364 });
   assert.equal(overlay().classList.contains("pc-over"), true, "a town beneath the card's text shows no hand while the pointer is over the card");
+  assert.deepEqual(armed.hits.filter((h) => h.classList.contains("pc-own")).map((h) => h.dataset["idx"]), ["0"], "except the card's own town, which is still pressable");
   armed.hits[1]!.fire("mouseleave", { clientX: 172, clientY: 373 });
   assert.equal(overlay().classList.contains("pc-over"), false, "and its hand comes back once the pointer is off the card");
   // Measured 2026-10-04 on seed 4294967295 at 1024 (an emulated tablet): a finger at 179,364 on Kalkulin's card reached Vadelgrad's box as a click at 172,373.

@@ -138,6 +138,7 @@ export function wireHit(hit: HTMLElement, idx: number, w: HitWiring): void {
   hit.addEventListener("mouseleave", (e) => {
     const to = e.relatedTarget;
     if (isHit(to) && to.dataset["idx"] === String(owner)) return;
+    if (!isHit(to)) w.raise(-1);
     w.feed({ kind: "leave", idx: owner, onCard: w.inside(w.point(e)) });
   });
   hit.addEventListener("focus", () => {

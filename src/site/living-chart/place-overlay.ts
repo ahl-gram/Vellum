@@ -121,7 +121,12 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
   let timer: ReturnType<typeof setTimeout> | null = null;
   let last: Point = { x: Number.NaN, y: Number.NaN };
   let watching: Document | null = null;
-  let near: HTMLElement | null = null;
+  let near: HTMLElement | null = null, own: HTMLElement | null = null;
+  const tag = (cls: string, prev: HTMLElement | null, el: HTMLElement | null): HTMLElement | null => {
+    if (prev && prev !== el) prev.classList.remove(cls);
+    if (el) el.classList.add(cls);
+    return el;
+  };
 
   function fillCardInner(innerEl: HTMLElement, card: PlaceCard, place: PlaceMark): void {
     const acts = placeOverlay!.acts;
@@ -285,6 +290,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     else if (!hold.waiting && timer) { clearTimeout(timer); timer = null; }
     syncWatch();
     if (po.card.parentElement) po.card.parentElement.classList.toggle("pc-over", hold.shown >= 0 && hold.onCard);
+    own = tag("pc-own", own, hold.shown >= 0 ? po.hits[hold.shown] ?? null : null);
   }
 
   function hidePlaceCard(): void {
@@ -292,10 +298,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
   }
 
   function raise(idx: number): void {
-    const el = placeOverlay && idx >= 0 ? placeOverlay.hits[idx] ?? null : null;
-    if (near && near !== el) near.classList.remove("pc-near");
-    if (el) el.classList.add("pc-near");
-    near = el;
+    near = tag("pc-near", near, placeOverlay && idx >= 0 ? placeOverlay.hits[idx] ?? null : null);
   }
 
   function resolve(p: Point, idx: number): number {
@@ -317,7 +320,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     hold = CLOSED;
     if (timer) clearTimeout(timer);
     timer = null;
-    near = null;
+    near = own = null;
     syncWatch();
   }
 
