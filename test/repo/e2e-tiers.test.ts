@@ -127,8 +127,8 @@ test("ci.yml runs the lane driver, and never sets a suite selection under it", (
   assert.doesNotMatch(CI, /run: npm run test:e2e\s*$/m, "ci.yml still runs the serial single-lane e2e too");
 });
 
-// Each job's worst run in minutes, the larger of this workflow's own runs and the slow-draw prediction from the main runs' slowest per-suite readings, so three fast runners cannot set it low (Issue #743, 2026-10-04: PROVISIONAL, the prediction alone).
-const WORST_JOB_MINUTES: Readonly<Record<string, number>> = { "check-and-test": 3.9, "build-and-e2e": 6.8 };
+// Each job's worst run in minutes, the larger of this workflow's own runs and a slow-runner prediction from the main runs' slowest per-suite readings, so three fast runners cannot set it low (Issue #743, 2026-10-04: shards 4m03s measured against 3m54s predicted, lanes 6m48s against 6m47s, over runs 37181981868, 37182262449 and 37182334494).
+const WORST_JOB_MINUTES: Readonly<Record<string, number>> = { "check-and-test": 4.1, "build-and-e2e": 6.8 };
 const CAP_HEADROOM = 1.5;
 
 test("every ci.yml job is bounded, so no hung job can hold a runner for hours", () => {

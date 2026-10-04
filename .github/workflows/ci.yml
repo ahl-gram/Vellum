@@ -15,8 +15,8 @@ jobs:
       fail-fast: false
       matrix:
         shard: [1, 2, 3]
-    # An uncapped job inherits GitHub's 360-minute default, and npm test can hang with no red to read (Issue #564), so each shard's cap sits at about twice its worst run; PROVISIONAL at Issue #743, from the slow-draw prediction (a shard about 4 minutes), until this pull request's own runs read it.
-    timeout-minutes: 10
+    # An uncapped job inherits GitHub's 360-minute default, and npm test can hang with no red to read (Issue #564), so each shard's cap sits at about twice its worst run; measured 2026-10-04 at Issue #743 over the first three runs of the three-shard shape (37181981868, 37182262449, 37182334494): worst shard JOB 4m03s, against a slow-runner prediction of 3m54s.
+    timeout-minutes: 9
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -38,8 +38,8 @@ jobs:
       fail-fast: false
       matrix:
         lane: ["A", "B", "C", "D"]
-    # A hung lane is the one failure the outcome rule cannot catch, and this cap kills a hang rather than budgeting a run, so it sits at about twice the worst real one; PROVISIONAL at Issue #743, from the slow-draw prediction (a lane job about 6.8 minutes), until this pull request's own runs read it.
-    timeout-minutes: 15
+    # A hung lane is the one failure the outcome rule cannot catch, and this cap kills a hang rather than budgeting a run, so it sits at about twice the worst real one; measured 2026-10-04 at Issue #743 over the first three runs of the four-lane shape (37181981868, 37182262449, 37182334494): worst lane JOB 6m48s (lane D), against a slow-runner prediction of 6m47s.
+    timeout-minutes: 14
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
