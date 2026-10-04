@@ -38,7 +38,8 @@ export async function cd50ScriptsOffHome({ evaluate, send, check, sleep, settle,
   await send("Emulation.setScriptExecutionDisabled", { value: true });
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/portfolio/` });
-  const road = await settle<{ x: number; y: number; hit: boolean; href: string | null } | null>(`(() => { const a = document.querySelector(".stage noscript a"); if (!a) return null; a.scrollIntoView({ block: "center" }); const b = a.getBoundingClientRect(); if (b.width < 1) return null; const x = Math.round(b.x + b.width / 2), y = Math.round(b.y + b.height / 2); const h = document.elementFromPoint(x, y); return { x, y, hit: h === a || a.contains(h), href: a.getAttribute("href") }; })()`, () => true, "chart-drawer-scripts-off-road", DRAWN);
+  // At rest means the document complete and the road still across two reads: read while the page is still interactive, the road sits unstyled at the top right (measured 2026-10-04: 1038,27 at interactive, 809,455 from 100ms on), and a press there lands nowhere.
+  const road = await settle<{ x: number; y: number; hit: boolean; href: string | null; ready: string } | null>(`(() => { const a = document.querySelector(".stage noscript a"); if (!a) return null; a.scrollIntoView({ block: "center" }); const b = a.getBoundingClientRect(); if (b.width < 1) return null; const x = Math.round(b.x + b.width / 2), y = Math.round(b.y + b.height / 2); const h = document.elementFromPoint(x, y); return { x, y, hit: h === a || a.contains(h), href: a.getAttribute("href"), ready: document.readyState }; })()`, (d, last) => d.ready === "complete" && !!last && last.x === d.x && last.y === d.y, "chart-drawer-scripts-off-road", DRAWN);
   await clickAt(road.x, road.y);
   const arrived = await arrivalFrom(evaluate, sleep, "/explorer/portfolio/");
   check(
