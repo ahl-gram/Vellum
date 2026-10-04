@@ -108,6 +108,22 @@ to the MAIN checkout's `out/` before putting the menu; a dispatched lane cannot 
 tree, so it reports absolute paths and its dispatcher copies them, the same way it holds the menu
 itself. Copy before the spike goes, because `out/` is gitignored and nothing else holds them.
 
+**A harness-isolated agent's tree goes when its run ends, `out/` included, unless git sees a change
+in it.** The harness removes an `isolation: worktree` agent's tree at the end of its run when
+`git status --porcelain --untracked-files=normal` prints nothing and no commit is ahead of where the
+tree was made, and the gitignored `out/` never prints there. So an agent that would run in its own
+harness tree but whose only deliverable is files under `out/`, such as a design round or a
+measurement, is dispatched WITHOUT isolation, by a session standing in the main checkout:
+- The dispatcher builds its tree with `git -C <main checkout> worktree add --detach <main checkout>/.claude/worktrees/<name> origin/main` and links `node_modules` from inside it as `scripts/agent-sandbox.ts` does.
+- The agent writes straight to the main checkout's `out/<issue>/`, and names the sha it ran at.
+- The dispatcher removes the tree once the stills have been ruled.
+
+A dispatcher fenced inside a worktree, an implementer lane or an EnterWorktree session, hands such an
+agent to the orchestrating session instead. This does not touch the agents that run in their
+dispatcher's own tree: `vellum-plate-reader` still reads an uncommitted spike there and writes that
+tree's `out/`. A `vellum-implementer` lane keeps its harness tree through the STOP by the untracked
+plan copy its definition makes, and by its commits after that.
+
 **7. Worktree, then rename the branch**, before the first commit, or the PR carries the harness's
 name instead of yours. The rest of the worktree rules, including why the branch needs renaming at
 all, are `CLAUDE.md`'s Worktrees section. A `vellum-implementer` lane already stands in a harness
