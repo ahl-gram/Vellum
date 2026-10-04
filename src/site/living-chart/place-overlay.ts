@@ -112,6 +112,59 @@ function cardActs(inner: HTMLDivElement, opts: Readonly<BuildPlaceOverlayOpts> |
   return { prospectLink, layPress, acts };
 }
 
+function fillCardInner(innerEl: HTMLElement, card: PlaceCard, acts: HTMLElement | null): void {
+  for (const child of [...innerEl.children]) if (child !== acts) child.remove();
+  innerEl.scrollTop = 0;
+  const name = document.createElement("strong");
+  name.className = "pc-name";
+  name.textContent = card.name;
+  const rank = document.createElement("span");
+  rank.className = "pc-rank";
+  rank.textContent = card.rank;
+  const founded = document.createElement("span");
+  founded.className = "pc-founded";
+  founded.textContent = card.foundedLine;
+  const head: HTMLElement[] = [name, rank, founded];
+  if (card.formerLine) {
+    const former = document.createElement("span");
+    former.className = "pc-former";
+    former.textContent = card.formerLine;
+    head.push(former);
+  }
+  const tail: HTMLElement[] = [];
+  if (card.tale) {
+    const tale = document.createElement("p");
+    tale.className = "pc-tale";
+    tale.textContent = card.tale;
+    tail.push(tale);
+  }
+  const tongue = document.createElement("p");
+  tongue.className = "pc-tongue";
+  tongue.textContent = card.tongueLine;
+  const derivation = document.createElement("p");
+  derivation.className = "pc-roots";
+  derivation.textContent = card.derivationLine;
+  tail.push(tongue, derivation);
+  if (!acts) { innerEl.append(...head, ...tail); return; }
+  acts.before(...head);
+  acts.after(...tail);
+}
+
+function seatCard(po: PlaceOverlayState, hold: Hold): void {
+  const overlay = po.card.parentElement;
+  if (!overlay) return;
+  const kids = [...overlay.children];
+  const hit = hold.pinned ? po.hits[hold.shown] : undefined;
+  if (hit && kids[kids.indexOf(hit) + 1] !== po.card) hit.after(po.card);
+  else if (!hit && kids[kids.length - 1] !== po.card) overlay.appendChild(po.card);
+}
+
+const tag = (cls: string, prev: HTMLElement | null, el: HTMLElement | null): HTMLElement | null => {
+  if (prev && prev !== el) prev.classList.remove(cls);
+  if (el) el.classList.add(cls);
+  return el;
+};
+
 // eslint-disable-next-line max-lines-per-function
 export function createPlaceOverlay(deps: PlaceOverlayDeps) {
   const { mapEl, isSuppressed, prospectHref, layProspect, clampBox } = deps;
@@ -122,52 +175,6 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
   let last: Point = { x: Number.NaN, y: Number.NaN };
   let watching: Document | null = null;
   let near: HTMLElement | null = null, own: HTMLElement | null = null;
-  const tag = (cls: string, prev: HTMLElement | null, el: HTMLElement | null): HTMLElement | null => {
-    if (prev && prev !== el) prev.classList.remove(cls);
-    if (el) el.classList.add(cls);
-    return el;
-  };
-
-  function fillCardInner(innerEl: HTMLElement, card: PlaceCard, place: PlaceMark): void {
-    const acts = placeOverlay!.acts;
-    for (const child of [...innerEl.children]) if (child !== acts) child.remove();
-    innerEl.scrollTop = 0;
-    const name = document.createElement("strong");
-    name.className = "pc-name";
-    name.textContent = card.name;
-    const rank = document.createElement("span");
-    rank.className = "pc-rank";
-    rank.textContent = card.rank;
-    const founded = document.createElement("span");
-    founded.className = "pc-founded";
-    founded.textContent = card.foundedLine;
-    const head: HTMLElement[] = [name, rank, founded];
-    if (card.formerLine) {
-      const former = document.createElement("span");
-      former.className = "pc-former";
-      former.textContent = card.formerLine;
-      head.push(former);
-    }
-    const tail: HTMLElement[] = [];
-    if (card.tale) {
-      const tale = document.createElement("p");
-      tale.className = "pc-tale";
-      tale.textContent = card.tale;
-      tail.push(tale);
-    }
-    const tongue = document.createElement("p");
-    tongue.className = "pc-tongue";
-    tongue.textContent = card.tongueLine;
-    const derivation = document.createElement("p");
-    derivation.className = "pc-roots";
-    derivation.textContent = card.derivationLine;
-    tail.push(tongue, derivation);
-    if (!acts) { innerEl.append(...head, ...tail); return; }
-    if (placeOverlay!.prospectLink) placeOverlay!.prospectLink.href = prospectHref!(place.idx);
-    paintLay(place.idx);
-    acts.before(...head);
-    acts.after(...tail);
-  }
 
   function showPlaceCard(idx: number): boolean {
     if (!placeOverlay || isSuppressed()) return false; // the hover card is suppressed while scrubbing
@@ -176,7 +183,9 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     const card = composePlaceCard(place, placeOverlay.events, placeOverlay.cultureId);
     const el = placeOverlay.card;
     const inner = placeOverlay.inner;
-    fillCardInner(inner, card, place);
+    fillCardInner(inner, card, placeOverlay.acts);
+    if (placeOverlay.prospectLink) placeOverlay.prospectLink.href = prospectHref!(place.idx);
+    paintLay(place.idx);
     el.style.setProperty("--pc-nx", String(place.nx));
     el.style.setProperty("--pc-ny", String(place.ny));
     const side = cardSide(place.nx, place.ny);
@@ -252,15 +261,6 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
 
   const onDown = (e: Event): void => { track.down(e); };
 
-  function placeCard(po: PlaceOverlayState): void {
-    const overlay = po.card.parentElement;
-    if (!overlay) return;
-    const kids = [...overlay.children];
-    const hit = hold.pinned ? po.hits[hold.shown] : undefined;
-    if (hit && kids[kids.indexOf(hit) + 1] !== po.card) hit.after(po.card);
-    else if (!hit && kids[kids.length - 1] !== po.card) overlay.appendChild(po.card);
-  }
-
   function syncWatch(): void {
     const doc = (mapEl as { ownerDocument?: Document | null }).ownerDocument ?? null;
     if (hold.shown >= 0 && !watching && doc) {
@@ -285,11 +285,11 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     if (!po) return;
     const prev = hold;
     hold = nextHold(prev, input);
-    placeCard(po);
+    seatCard(po, hold);
     if (hold.shown >= 0 && (hold.shown !== prev.shown || hold.pinned !== prev.pinned) && !showPlaceCard(hold.shown)) hold = { ...CLOSED, hovered: hold.hovered };
     if (hold.shown < 0) {
       po.card.hidden = true;
-      placeCard(po);
+      seatCard(po, hold);
     }
     if (hold.waiting && !timer) timer = setTimeout(expire, HOLD_GRACE_MS);
     else if (!hold.waiting && timer) { clearTimeout(timer); timer = null; }

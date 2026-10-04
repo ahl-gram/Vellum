@@ -132,7 +132,6 @@ export async function p29NearestTown(k: Kit, marks: Mark[]): Promise<void> {
     const c = await k.settle(CARD, (d) => d.shown, `P29 a press on ${m.name}`);
     if (c.name !== m.name || !c.pinned) wrong.push(`${m.name} -> ${c.name}${c.pinned ? "" : " (unpinned)"}`);
   }
-  // A press with no move first goes down on the covering box before the nearer town is raised, so its click is split onto the overlay: the press path PC11 pins in the shim.
   const covered = marks.filter((m) => marks.some((o) => o.idx > m.idx && Math.abs(o.x - m.x) < 13 && Math.abs(o.y - m.y) < 13));
   for (const m of covered) {
     await k.reset();
