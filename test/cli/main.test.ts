@@ -1,9 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
+import { access, mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { CHART_OPTIONS, main } from "../../src/cli/main.ts";
+import { CHART_OPTIONS, chartOptions, main, parseChartArgs } from "../../src/cli/main.ts";
 import { recipeFromSvg } from "../../src/render/recipe-meta.ts";
 
 // Bytes are compared only between two draws in the same run, never against a file from another run: an SVG byte-compare drifts across OS/Node; the --png path is raster.test.ts's.
@@ -84,6 +84,9 @@ const REFUSALS: ReadonlyArray<readonly [flag: string, args: readonly string[], m
 const STRING_FLAGS = Object.entries(CHART_OPTIONS)
   .filter(([, option]) => option.type === "string")
   .map(([flag]) => flag);
+const BOOLEAN_FLAGS = Object.entries(CHART_OPTIONS)
+  .filter(([, option]) => option.type === "boolean")
+  .map(([flag]) => flag);
 
 async function draw(args: readonly string[], name: string): Promise<string> {
   await mkdir(TMP, { recursive: true });
@@ -92,15 +95,39 @@ async function draw(args: readonly string[], name: string): Promise<string> {
   return readFile(out, "utf8");
 }
 
-for (const [flag, args, message] of REFUSALS) {
-  test(`chart refuses ${args.map((a) => JSON.stringify(a)).join(" ")} with "${message}"`, async (t) => {
+for (const [i, [flag, args, message]] of REFUSALS.entries()) {
+  test(`chart refuses ${args.map((a) => JSON.stringify(a)).join(" ")} with "${message}", drawing nothing`, async (t) => {
     t.after(() => rm(TMP, { recursive: true, force: true }));
-    await assert.rejects(() => draw([...SMALL, ...args], `refused-${flag}`), { message });
+    await assert.rejects(() => draw([...SMALL, ...args], `refused-${flag}-${i}`), { message });
+    await assert.rejects(() => access(`${TMP}/refused-${flag}-${i}.svg`), { code: "ENOENT" }, "a refused flag writes no chart");
   });
 }
 
+for (const flag of BOOLEAN_FLAGS) {
+  test(`chart refuses a value given to the switch --${flag}`, async (t) => {
+    t.after(() => rm(TMP, { recursive: true, force: true }));
+    await assert.rejects(() => draw([...SMALL, `--${flag}`, ""], `switch-${flag}-empty`), {
+      message: "Unexpected argument ''. This command does not take positional arguments",
+    });
+    await assert.rejects(() => draw([...SMALL, `--${flag}=yes`], `switch-${flag}-yes`), {
+      message: `Option '--${flag}' does not take an argument`,
+    });
+  });
+}
+
+test("chart refuses a flag it does not know", async (t) => {
+  t.after(() => rm(TMP, { recursive: true, force: true }));
+  await assert.rejects(() => draw([...SMALL, "--lnad", "0.3"], "unknown-flag"), { message: "Unknown option '--lnad'" });
+});
+
+test("an empty --scale means the default scale, 2", () => {
+  assert.equal(chartOptions(parseChartArgs(["--scale", ""])).scale, 2);
+  assert.equal(chartOptions(parseChartArgs(["--scale", "3"])).scale, 3, "a given scale is read, so the default is not a hardcode");
+});
+
 test("every string flag that can refuse a value has a refusal row", () => {
   assert.ok(STRING_FLAGS.length > 0, "the roster sweep read no flags");
+  assert.ok(BOOLEAN_FLAGS.length > 0, "the roster sweep read no switches");
   for (const flag of STRING_FLAGS.filter((f) => f !== "out")) {
     const named = (arg: string | undefined): boolean => arg === `--${flag}` || (arg?.startsWith(`--${flag}=`) ?? false);
     assert.ok(REFUSALS.some(([f, args]) => f === flag && named(args[0])), `--${flag} has no refusal row`);

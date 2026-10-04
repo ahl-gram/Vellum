@@ -113,7 +113,7 @@ function withoutEmpty<T extends object>(values: T): T {
   return Object.fromEntries(Object.entries(values).filter(([, v]) => v !== "")) as T;
 }
 
-function parseChartArgs(args: string[]) {
+export function parseChartArgs(args: string[]) {
   const { values } = parseArgs({ args, options: CHART_OPTIONS });
   return { ...withoutEmpty(values), seed: values.seed };
 }
@@ -122,7 +122,7 @@ type ChartArgs = ReturnType<typeof parseChartArgs>;
 
 const num = (s: string): number => (s.trim() === "" ? Number.NaN : Number(s));
 
-function chartOptions(values: ChartArgs) {
+export function chartOptions(values: ChartArgs) {
   const seed =
     values.seed !== undefined
       ? Number(values.seed) >>> 0
