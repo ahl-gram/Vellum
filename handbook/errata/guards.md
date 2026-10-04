@@ -159,6 +159,8 @@ Rows for what the tests, the e2e suites, CI, the hooks and the linter do not yet
 - PR #742 (2026-10-03, low): whether the sweep's settle alone, without its media-query and 100vw terms, reads a viewport-width length correctly was never isolated. Searched: PR #742's prover comment.
 - PR #742 (2026-10-03, medium): commit 0b9e264, the lane's last guard change, was never re-proved by the prover. Searched: PR #742's prover comment, which proves round 3 at 7e07ce0, before it.
 - PR #742 (2026-10-03, medium): PR #742's cold review round on fe6819c never finished, since Alex merged on green CI with the lane stopped; its partial findings are the PR #742 rows in this ledger and the fold-in on Issue #741. Searched: PR #742's comments and Issue #638's issuecomment-5975219125.
+- PR #746 (2026-10-04, high): `pb1WayIn` in `e2e/suites/prospect.ts` navigates to `/explorer/#seed=42&...` with no `about:blank` first, and `prospect` is the first suite of lane B (it was before PR #746 too), which inherits the harness's boot page `/explorer/`, so the navigate is same-document and PB1 reads the card link built from the hash it just typed (`prospectTarget(location.hash, idx)`) rather than from a world it drew, passing vacuously; the fix is the `about:blank` bounce the PR #701 row names for `prlLink`. Searched: this directory for "pb1WayIn", "PB1", "same-document"; the PR #701 row covers `prlLink` and `prcCarried` only.
+- PR #746 (2026-10-04, low): the PR #598 row's reason "cannot bite while specimen runs last" has been stale since PR #742 put `corners` after `specimen`; it still cannot bite, since `corners` never uses focus. Searched: this directory for "specimen runs last" and "focus emulation": the PR #598 row alone.
 
 ## Ruled and left
 
