@@ -8,7 +8,7 @@ const ARRIVAL: Payload<Arrival> = `(() => { const p = new URLSearchParams(locati
 
 /** Waits until the page has LEFT `from` and finished loading, wherever it went, and throws with its last read if it never does; where it landed is the caller's claim, so a road to a missing page reds by naming it. A read the navigation interrupts counts as no read. */
 const arrivalFrom = ({ evaluate, sleep }: Pick<TableKit, "evaluate" | "sleep">, from: string): Promise<Arrival> =>
-  makeSettle({ evaluate: (e: string) => evaluate(e).catch(() => null), sleep })(ARRIVAL, (d) => d.path !== from && d.ready === "complete", `chart-drawer-arrival-from-${from}`, DRAWN);
+  makeSettle({ evaluate: (e: string) => evaluate<Arrival>(e).catch(() => null), sleep })(ARRIVAL, (d) => d.path !== from && d.ready === "complete", `chart-drawer-arrival-from-${from}`, DRAWN);
 
 export async function cd49PrintRoomRoad({ evaluate, send, check, sleep, settle, PORT, forget, pressById }: TableKit): Promise<void> {
   await forget();
