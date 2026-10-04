@@ -1,4 +1,4 @@
-import { parseArgs } from "node:util";
+import { parseArgs, type ParseArgsOptionsConfig } from "node:util";
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { defaultRecipe, generateWorld } from "../world/generate.ts";
@@ -38,7 +38,7 @@ https://www.vellumworlds.com/print-room/
 type ParsedGrid = { gridW: number; gridH: number };
 
 function parseGrid(s: string | undefined): ParsedGrid | undefined {
-  if (!s) return undefined;
+  if (s === undefined) return undefined;
   const m = /^(\d+)x(\d+)$/i.exec(s);
   if (!m) throw new Error(`--grid expects WxH (e.g. 320x240), got "${s}"`);
   const gridW = Number(m[1]);
@@ -90,58 +90,68 @@ async function writeOut(path: string, content: string): Promise<void> {
   await writeFile(path, content, "utf8");
 }
 
-function parseChartArgs(args: string[]) {
-  return parseArgs({
-    args,
-    options: {
-      seed: { type: "string" },
-      style: { type: "string", default: "antique" },
-      type: { type: "string" },
-      band: { type: "string" },
-      grid: { type: "string" },
-      width: { type: "string" },
-      land: { type: "string" },
-      "coast-warp": { type: "string" },
-      png: { type: "boolean", default: false },
-      scale: { type: "string" },
-      legend: { type: "boolean", default: false },
-      arms: { type: "boolean", default: false },
-      beasts: { type: "boolean", default: false },
-      theme: { type: "string" },
-      out: { type: "string" },
-      help: { type: "boolean", default: false },
-    },
-  }).values;
+export const CHART_OPTIONS = {
+  seed: { type: "string" },
+  style: { type: "string" },
+  type: { type: "string" },
+  band: { type: "string" },
+  grid: { type: "string" },
+  width: { type: "string" },
+  land: { type: "string" },
+  "coast-warp": { type: "string" },
+  png: { type: "boolean", default: false },
+  scale: { type: "string" },
+  legend: { type: "boolean", default: false },
+  arms: { type: "boolean", default: false },
+  beasts: { type: "boolean", default: false },
+  theme: { type: "string" },
+  out: { type: "string" },
+  help: { type: "boolean", default: false },
+} as const satisfies ParseArgsOptionsConfig;
+
+function withoutEmpty<T extends object>(values: T): T {
+  return Object.fromEntries(Object.entries(values).filter(([, v]) => v !== "")) as T;
+}
+
+export function parseChartArgs(args: string[]) {
+  const { values } = parseArgs({ args, options: CHART_OPTIONS });
+  return { ...withoutEmpty(values), seed: values.seed };
 }
 
 type ChartArgs = ReturnType<typeof parseChartArgs>;
 
-function chartOptions(values: ChartArgs) {
+const num = (s: string): number => (s.trim() === "" ? Number.NaN : Number(s));
+
+export function chartOptions(values: ChartArgs) {
   const seed =
     values.seed !== undefined
       ? Number(values.seed) >>> 0
       : (Date.now() % 0xffffffff) >>> 0;
-  if (values.seed !== undefined && !Number.isFinite(Number(values.seed))) {
+  if (values.seed !== undefined && !Number.isFinite(num(values.seed))) {
     throw new Error(`--seed must be a number, got "${values.seed}"`);
   }
   const grid = parseGrid(values.grid);
   const mapType = validateType(values.type);
   const band = validateBand(values.band);
   const theme = validateTheme(values.theme);
-  const widthPx = values.width ? Number(values.width) : 1500;
+  const widthPx = values.width !== undefined ? num(values.width) : 1500;
   if (!Number.isFinite(widthPx) || widthPx < 400 || widthPx > 6000) {
     throw new Error("--width must be between 400 and 6000");
   }
-  const landFraction = values.land ? Number(values.land) : undefined;
-  if (landFraction !== undefined && (landFraction < 0.1 || landFraction > 0.7)) {
+  const landFraction = values.land !== undefined ? num(values.land) : undefined;
+  if (landFraction !== undefined && (!Number.isFinite(landFraction) || landFraction < 0.1 || landFraction > 0.7)) {
     throw new Error("--land must be between 0.1 and 0.7");
   }
   const coastWarp =
-    values["coast-warp"] !== undefined ? Number(values["coast-warp"]) : undefined;
+    values["coast-warp"] !== undefined ? num(values["coast-warp"]) : undefined;
   if (coastWarp !== undefined && (!Number.isFinite(coastWarp) || coastWarp < 0 || coastWarp > 1)) {
     throw new Error("--coast-warp must be between 0 and 1");
   }
-  return { seed, grid, mapType, band, theme, widthPx, landFraction, coastWarp };
+  const scale = values.scale !== undefined ? num(values.scale) : 2;
+  if (!Number.isFinite(scale) || scale < 0.5 || scale > 4) {
+    throw new Error("--scale must be between 0.5 and 4");
+  }
+  return { seed, grid, mapType, band, theme, widthPx, landFraction, coastWarp, scale };
 }
 
 type ChartOptions = ReturnType<typeof chartOptions>;
@@ -171,15 +181,11 @@ async function drawChart(values: ChartArgs, o: ChartOptions, recipe: ReturnType<
   return out;
 }
 
-async function rasterizeChart(out: string, scaleArg: string | undefined): Promise<void> {
+async function rasterizeChart(out: string, scale: number): Promise<void> {
   const browser = findBrowser();
   if (!browser) {
     console.error(NO_BROWSER_HINT);
     return;
-  }
-  const scale = scaleArg ? Number(scaleArg) : 2;
-  if (!Number.isFinite(scale) || scale < 0.5 || scale > 4) {
-    throw new Error("--scale must be between 0.5 and 4");
   }
   const pngOut = out.replace(/\.svg$/, ".png");
   const t3 = performance.now();
@@ -203,9 +209,9 @@ export async function main(argv: string[]): Promise<void> {
 
   const o = chartOptions(values);
   const recipe = chartRecipe(o);
-  const style = validateStyle(values.style);
+  const style = validateStyle(values.style ?? "antique");
   const out = await drawChart(values, o, recipe, style);
-  if (values.png) await rasterizeChart(out, values.scale);
+  if (values.png) await rasterizeChart(out, o.scale);
 }
 
 const isDirectRun = process.argv[1]?.endsWith("main.ts") ?? false;

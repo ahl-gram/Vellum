@@ -111,6 +111,9 @@ function terrainSettings(params: TerrainParams): TerrainSettings {
   if (!Number.isInteger(detail) || detail < 0 || detail > MAX_DETAIL) {
     throw new RangeError(`detail must be an integer in [0, ${MAX_DETAIL}], got ${detail}`);
   }
+  if (!Number.isFinite(coastWarp)) {
+    throw new RangeError(`coastWarp must be a finite number, got ${coastWarp}`);
+  }
   const aspect = params.worldAspect ?? (gridW - 1) / (gridH - 1);
   return { seed, shape, featureScale, warpStrength, ridgedWeight, coastWarp, detail, aspect };
 }

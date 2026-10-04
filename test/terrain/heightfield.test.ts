@@ -114,6 +114,37 @@ test("sea level hits the requested land fraction", () => {
   }
 });
 
+test("sea level refuses a land fraction outside (0, 1), NaN included", () => {
+  const f = buildHeightfield(RECIPE);
+  for (const bad of [Number.NaN, 0, 1, -0.1, 1.5, Infinity, -Infinity]) {
+    assert.throws(
+      () => pickSeaLevel(f, bad),
+      { name: "RangeError", message: `landFraction must be in (0, 1), got ${bad}` },
+      `landFraction ${bad}`,
+    );
+  }
+  assert.throws(
+    () => generateWorld(defaultRecipe(11, { gridW: 80, gridH: 60, landFraction: Number.NaN })),
+    { name: "RangeError", message: "landFraction must be in (0, 1), got NaN" },
+    "every surface builds its world through generateWorld",
+  );
+});
+
+test("the terrain refuses a coast warp that is not a finite number", () => {
+  for (const bad of [Number.NaN, Infinity, -Infinity]) {
+    assert.throws(
+      () => buildHeightfield({ ...RECIPE, coastWarp: bad }),
+      { name: "RangeError", message: `coastWarp must be a finite number, got ${bad}` },
+      `coastWarp ${bad}`,
+    );
+  }
+  assert.throws(
+    () => generateWorld(defaultRecipe(11, { gridW: 80, gridH: 60, coastWarp: Number.NaN })),
+    { name: "RangeError", message: "coastWarp must be a finite number, got NaN" },
+    "every surface builds its world through generateWorld",
+  );
+});
+
 test("sea level leaves the border underwater", () => {
   const f = buildHeightfield(RECIPE);
   const sea = pickSeaLevel(f, 0.35);
