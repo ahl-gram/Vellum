@@ -23,6 +23,10 @@
 .place-hit:hover::after, .place-hit:focus-visible::after {
   opacity: 1; transform: scale(1);
 }
+/* Where two boxes overlap, the town nearest the pointer is raised over its neighbour so the hover ring follows it (Issue #632); always below the card. */
+.place-hit.pc-near { z-index: 1; }
+/* While the pointer is over the see-through card, a town beneath it takes no press, so it shows no hand either. */
+.place-overlay.pc-over .place-hit { cursor: default; }
 /* The clamp rides inside the counter-scaled translate: the mount carries the Glass's scale(k), so a nudge ahead of scale(1/k) composes as k times itself, exactly right at k=1 and wrong at every other depth, which no unit test can catch. */
 /* --zoom-k is published on the card itself, never the mount, which would re-rasterize the baked labels every frame; the origin sits on the corner the card is anchored by, so the gap at the mark holds a constant screen distance at every depth. */
 #place-card {

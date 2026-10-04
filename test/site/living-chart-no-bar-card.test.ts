@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { barlessHost, realWorld } from "../../test-support/living-chart-hosts.ts";
+import { HOLD_GRACE_MS } from "../../src/site/living-chart/place-card-hold.ts";
 
 test("the place card carries the prospect way in only on a world sheet whose host provides one (#242)", async () => {
   const { walk } = await import("../../test-support/element-shim.ts");
@@ -182,12 +183,12 @@ test("PC1 a hover over another town never leaves a pinned card naming one town w
   const [a, b] = [manifest.places[0]!, manifest.places[1]!];
   assert.notEqual(a.name, b.name, "two distinct towns, or a card naming the wrong one reads the same");
 
-  armed.hits[0]!.fire("mouseenter");
-  armed.hits[0]!.fire("click");
+  armed.hits[0]!.fire("mouseenter", { clientX: -100, clientY: -100 });
+  armed.hits[0]!.fire("click", { detail: 1, clientX: -100, clientY: -100 });
   assert.deepEqual(face(), { shown: true, pinned: true, name: a.name, pressIdx: "0", linkIdx: "0" }, "the precondition: a press pins town A");
 
-  armed.hits[1]!.fire("mouseenter");
-  armed.hits[1]!.fire("mouseleave");
+  armed.hits[1]!.fire("mouseenter", { clientX: -100, clientY: -100 });
+  armed.hits[1]!.fire("mouseleave", { clientX: -100, clientY: -100 });
   const after = face();
   assert.ok(after.shown, "the pin survives the pointer crossing town B on its way somewhere");
   const shownIdx = String(manifest.places.findIndex((p) => p.name === after.name));
@@ -203,8 +204,8 @@ test("PC2 the second click of a double-click keeps the pinned card, and a later 
   const armed = await armShow(mount);
   const face = await cardFace(mount);
   const town = armed.hits[0]!;
-  const click = (detail: number) => town.fire("click", { detail, clientX: 0, clientY: 0 });
-  town.fire("mouseenter", { clientX: 0, clientY: 0 });
+  const click = (detail: number) => town.fire("click", { detail, clientX: -100, clientY: -100 });
+  town.fire("mouseenter", { clientX: -100, clientY: -100 });
   click(1);
   assert.equal(face().pinned, true, "the precondition: the first press pins");
   click(2);
@@ -215,4 +216,105 @@ test("PC2 the second click of a double-click keeps the pinned card, and a later 
   assert.equal(face().pinned, true, "Enter (a click with no pointer count) pins");
   click(0);
   assert.equal(face().shown, false, "and a second Enter on the pinned town closes it");
+});
+
+const holdRig = async () => {
+  const { walk } = await import("../../test-support/element-shim.ts");
+  const { manifest } = await realWorld();
+  const { lc, mount } = await barlessHost({ prospectHref: (idx) => `/prospect/#i=${idx}`, layProspect: layHost().dep });
+  const listening = new Set<unknown>();
+  (mount as unknown as { ownerDocument: unknown }).ownerDocument = {
+    addEventListener: (type: string, fn: unknown) => { if (type === "mousemove") listening.add(fn); },
+    removeEventListener: (type: string, fn: unknown) => { if (type === "mousemove") listening.delete(fn); },
+  };
+  lc.buildPlaceOverlay(manifest);
+  const armed = await armShow(mount);
+  const face = await cardFace(mount);
+  const overlay = () => mount.children.filter((c) => c.classList.contains("place-overlay")).at(-1)!;
+  const card = () => walk(overlay()).find((n) => n.getAttribute("id") === "place-card")!;
+  // The shim does no layout, so every box is a zero rect at the origin; a pointer off the origin lies in none of them, and a press falls back to the town it landed on.
+  const at = { clientX: -100, clientY: -100 };
+  return { lc, manifest, armed, face, overlay, card, listening, at };
+};
+
+test("PC3 a dismissal clears a pending grace, so the next card's grace runs its whole length (#750)", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const { lc, armed, face, at } = await holdRig();
+  armed.hits[0]!.fire("mouseenter", at);
+  armed.hits[0]!.fire("mouseleave", at);
+  assert.equal(face().shown, true, "the precondition: leaving a town starts a grace instead of hiding at once");
+  t.mock.timers.tick(100);
+  lc.hideCard();
+  armed.hits[1]!.fire("mouseenter", at);
+  armed.hits[1]!.fire("mouseleave", at);
+  t.mock.timers.tick(HOLD_GRACE_MS - 90);
+  assert.equal(face().shown, true, "the first grace, had it survived the dismissal, would have fired here and cut the second one short");
+  t.mock.timers.tick(100);
+  assert.equal(face().shown, false, "the second grace runs out on its own clock");
+});
+
+test("PC4 the overlay waits the whole grace after the pointer leaves, and no longer (#750)", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const { armed, face, at } = await holdRig();
+  armed.hits[0]!.fire("mouseenter", at);
+  armed.hits[0]!.fire("mouseleave", at);
+  t.mock.timers.tick(91);
+  assert.equal(face().shown, true, "still up at 91ms, the measured worst gap crossed at 0.1 px/ms");
+  t.mock.timers.tick(HOLD_GRACE_MS - 92);
+  assert.equal(face().shown, true, "still up a millisecond before the grace ends");
+  t.mock.timers.tick(1);
+  assert.equal(face().shown, false, "gone when it ends");
+});
+
+test("PC5 a pinned card sits right after its town, so Tab reaches its buttons next; an unpinned one stays out of the way (#750 ruling 7)", async () => {
+  const { armed, face, overlay, card, at } = await holdRig();
+  const after = (i: number) => { const kids = overlay().children; return kids.indexOf(card()) === kids.indexOf(armed.hits[i]!) + 1; };
+  const last = () => overlay().children.at(-1) === card();
+  armed.hits[2]!.fire("click", { ...at, detail: 1 });
+  assert.ok(face().pinned && after(2), "pinned by a press: the card follows its town");
+  armed.hits[4]!.fire("focus");
+  assert.ok(face().shown && !face().pinned && last(), "keyboard focus on another town shows it unpinned, and the card goes back to the end");
+  const link = card().children[0]!.children.find((n) => n.classList.contains("pc-acts"))!.children[0]!;
+  armed.hits[4]!.fire("blur", { relatedTarget: link });
+  assert.equal(face().shown, true, "focus moving from the town into its card keeps the card");
+  card().fire("focusout", { relatedTarget: null });
+  assert.equal(face().shown, false, "focus leaving the card for the page hides an unpinned card");
+});
+
+test("PC6 a card refilled for another town keeps its action row in place, so a focused button keeps its focus (#750)", async () => {
+  const { armed, card } = await holdRig();
+  const inner = card().children[0]!;
+  const acts = inner.children.find((n) => n.classList.contains("pc-acts"))!;
+  const detached: string[] = [];
+  let parent = acts.parentNode;
+  Object.defineProperty(acts, "parentNode", { get: () => parent, set: (p: typeof parent) => { if (p !== inner) detached.push(p ? p.tagName : "nowhere"); parent = p; }, configurable: true });
+  armed.hits[0]!.fire("focus");
+  armed.hits[1]!.fire("focus");
+  assert.equal(inner.children.filter((n) => n === acts).length, 1, "the one action row is still the card's");
+  assert.deepEqual(detached, [], "and it never left the card on the way");
+});
+
+test("PC7 the page listens for mouse movement only while a place card is shown, and every way a card closes stops it (#750 ruling 1)", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const { lc, manifest, armed, listening, at } = await holdRig();
+  assert.equal(listening.size, 0, "built, with no card up: nothing listens");
+  const open = (label: string) => { armed.hits[0]!.fire("focus"); assert.equal(listening.size, 1, `${label}: a shown card listens, once`); };
+  const outside = { closest: () => null };
+  const paths: [string, () => void][] = [
+    ["Escape", () => lc.onDocKeydown({ key: "Escape" } as KeyboardEvent)],
+    ["a press on open chart", () => lc.onDocClick({ target: outside, detail: 1, clientX: -50, clientY: -50 } as unknown as MouseEvent)],
+    ["hideCard (the scrub and the draw)", () => lc.hideCard()],
+    ["the grace running out", () => { armed.hits[0]!.fire("mouseleave", at); t.mock.timers.tick(HOLD_GRACE_MS); }],
+    ["a blur", () => armed.hits[0]!.fire("blur", { relatedTarget: null })],
+    ["a second press on the pinned town", () => { armed.hits[0]!.fire("click", { ...at, detail: 1 }); armed.hits[0]!.fire("click", { ...at, detail: 1 }); }],
+    ["a rebuild", () => lc.buildPlaceOverlay(manifest)],
+  ];
+  for (const [label, close] of paths) {
+    open(label);
+    close();
+    assert.equal(listening.size, 0, `${label} closes the card and stops listening`);
+  }
+  open("teardown");
+  lc.destroy();
+  assert.equal(listening.size, 0, "teardown stops listening");
 });

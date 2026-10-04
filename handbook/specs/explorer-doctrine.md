@@ -42,6 +42,11 @@ make an unqualified rule false. Read the surface, not just the rule.
   and `test/site/living-chart-boundary.test.ts` pins that by constructing against bare objects.
 - **Engine dressing is edited in `public/living-chart.css`, never in a host's own sheet.** The
   dressing keys on the mount class and never on a host's id.
+- **The host wires the document's click and keydown to the engine; the engine adds one document
+  listener of its own, and only while a place card is shown** (Alex, Issue #750): the card's pointer
+  watch, a `mousemove` on the mount's own document (`mapEl.ownerDocument`), added when a card opens
+  and removed on every path that closes one, so with no card up nothing listens. `PC7` in
+  `test/site/living-chart-no-bar-card.test.ts` walks the close paths.
 - **A seam roster is DATA the guard imports, never a list the guard restates.** `HOST_HOOK_NAMES` in
   `src/site/shared/host-hooks.ts` is the source of truth and the seam map is typed against it, so
   the type checker rejects a name with no implementation and an implementation with no name. A
@@ -231,6 +236,13 @@ image. A future surface inherits the Explorer's rule the moment its chart is inl
   with the depth. The target and its ring hold their designed size at every depth.
 - **A hit area does not scale free.** Scaled boxes keep their rest-scale overlaps while the marks
   look far apart, so a hover near one town rings its neighbour.
+- **Where hit boxes overlap, the pointer belongs to the NEAREST town, never to paint order.** A box
+  is 26px whatever its glyph, so even at rest two towns closer than 13px in both axes cover each
+  other's centres, and the later-painted box used to take both (Issue #632: 25 of 156 centre presses
+  opened a neighbour at 1024). Every hover, move and press resolves through `nearestMark` in
+  `src/site/living-chart/place-card-hold.ts`, every box keeps its size, and the resolved box is
+  raised under the card so the hover ring follows it. Shrinking boxes or reordering paint only moves
+  the loss to another town.
 - **A published nudge rides INSIDE the counter-scaled translate.** Placed ahead of the division it
   composes with the live scale, which is exactly right at rest and wrong by the depth factor under
   magnification. The guard matches the leading counter-scale AND COUNTS the translates and scales per
@@ -278,10 +290,13 @@ image. A future surface inherits the Explorer's rule the moment its chart is inl
   is 1 and a CSS pixel on it is already a screen pixel. Multiplying reads as right and is this
   defect coming back, the cap k times looser at every depth. It sets `box-sizing: border-box`, or
   `max-height` caps the content box and the card stands over the box by its own padding and border.
-  And it restores `pointer-events` on a card that is BOTH pinned and actually scrolling: unpinned,
-  the card lands over its own mark, takes the pointer and hides itself on that mark's `mouseleave`;
-  pinned with nothing to scroll, it is a dead zone for the wheel, the pan and the pinch over the
-  chart it covers, which is the bound Issue #633 recorded as NOT broken.
+  And it restores `pointer-events` on a card that is BOTH pinned and actually scrolling, and on no
+  other, because a card that takes the pointer can land over its own town and take a press or a tap
+  meant for that town (measured for Issue #750 at 1024 across three seeds: 4 of 78 mouse presses and
+  6 of 52 tablet taps). The wheel, the pan and the pinch are NOT the reason: a live card with nothing
+  to scroll passed all three to the camera in the harness at 1024 and 1280 and on an emulated
+  tablet, because `cardShell`'s `stopPropagation` fires only on a card with a tail to scroll.
+  Whether a real tablet agrees is UNVERIFIABLE there, since the harness cannot see `touch-action`.
 - **A card with a tail to scroll stops touch and wheel reaching the camera, and one without does
   not.** d3-zoom is bound on the host's viewport, an ancestor of the card carrying
   `touch-action: none`, so the card needs a `touch-action` of its own AND `stopPropagation` on
@@ -293,6 +308,25 @@ image. A future surface inherits the Explorer's rule the moment its chart is inl
 - **A place link is world-sheet only.** A region inset renumbers its places and its smallest tier has
   no world index, so an inset card is deliberately linkless. Why an inset renumbers is
   `handbook/specs/region-and-voyage.md`'s.
+- **A shown card holds while the pointer is anywhere over its outline, and stays see-through
+  while it does** (Issue #750, the rules pure in `src/site/living-chart/place-card-hold.ts`). The
+  outline is the card's rectangle read against the pointer, never a card that takes the pointer, so
+  the wheel, the drag and the pinch over it still reach the chart and a press on its own town still
+  reaches the town. It holds for `HOLD_GRACE_MS` after the pointer leaves both the card and its town,
+  then shows the town under the pointer or hides.
+  - **While it holds, other towns are ignored**: their hovers, and their presses inside the outline.
+    A pinned card ignores every hover and is moved by a press on another town outside it.
+  - **Only KEYBOARD focus switches the card.** A press or a tap focuses what it lands on (a town
+    beneath the card's text, the town a pan starts on), so a town's `pointerdown` marks the focus that
+    follows as the pointer's and the press path decides instead.
+  - **Every close path clears the grace timer**: Escape, a press on open chart clear of the card,
+    `hideCard` from the scrub and the draw, a blur, a focus leaving the card, a second press, a
+    rebuild and teardown. A stale expiry cuts the next card's grace short.
+  - **A pinned card sits right after its town in the DOM**, so Tab goes from the town to the card's
+    buttons; any other card waits at the end of the overlay, out of the town-to-town Tab walk. A
+    refill keeps the action row in place, or a button holding focus loses it.
+  - **The second click of a double-click keeps a pinned card** (`detail` 2, the platform's own
+    interval); a later click, a tap or Enter on the pinned town closes it.
 - **A card is chart furniture, not an instrument**, so it stays live while the resting track is
   inked. But **a host that arms its instrument every draw has no live place cards**, which makes any
   card-side feature Explorer-only by construction. The builder is called on both hosts, so the call

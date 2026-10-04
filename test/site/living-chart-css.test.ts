@@ -47,6 +47,8 @@ const ENGINE_RULES = [
   ".pc-prospect",
   ".pc-lay",
   ".place-overlay.scrub .place-hit",
+  ".place-hit.pc-near",
+  ".place-overlay.pc-over .place-hit",
   '.living-chart g.settlement[data-ink="founding"]',
   '.living-chart g.settlement[data-ink="ruin"]',
   ".living-chart g.settlement[data-ink] > text",
@@ -85,6 +87,14 @@ test("the hit divides by --zoom-k once, on the element; the ring pseudos stay pl
 // ENGINE_RULES matches a bare selector as a SUBSTRING, and a compound selector sharing it keeps the substring alive: the
 // guard-prover deleted the whole `.pc-lay { ... }` block and the roster passed, because `.pc-lay:hover` and `.pc-lay.dim`
 // still spelled it. The card's two actions are the row's load-bearing pair, so each takes a soleRule read of its own.
+test("the town raised over an overlapping neighbour stays below the card it opens (#632)", () => {
+  const css = read(SHEET);
+  const z = (selector: string) => Number((soleRule(css, selector).match(/z-index:\s*(-?\d+)/) ?? [])[1]);
+  const raised = z(".place-hit.pc-near"), card = z("#place-card");
+  assert.ok(Number.isFinite(raised) && Number.isFinite(card), `both declare a z-index (${raised}, ${card})`);
+  assert.ok(raised > 0 && raised < card, `a raised town paints over its neighbours (${raised} > 0) and under the card (${raised} < ${card})`);
+});
+
 test("the card's action row and its filing press are dressed by a rule of their OWN, not merely spelled somewhere in the sheet (#522)", () => {
   const css = read(SHEET);
   const acts = soleRule(css, ".pc-acts");
