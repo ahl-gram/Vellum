@@ -1,10 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdir, readFile, rm } from "node:fs/promises";
-import { main } from "../../src/cli/main.ts";
+import { mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { CHART_OPTIONS, main } from "../../src/cli/main.ts";
 import { recipeFromSvg } from "../../src/render/recipe-meta.ts";
 
-// Pinned at the STRUCTURE level (the stamped recipe), never bytes: an SVG byte-compare drifts across OS/Node; the --png path is raster.test.ts's.
+// Bytes are compared only between two draws in the same run, never against a file from another run: an SVG byte-compare drifts across OS/Node; the --png path is raster.test.ts's.
 
 const TMP = "out/test-tmp-chart";
 
@@ -41,4 +43,104 @@ test("an unknown verb is rejected once chart is the only command", async () => {
     /unknown command "poster"/,
     "poster and the other retired verbs must error, not silently draw",
   );
+});
+
+const SMALL = ["--seed", "11", "--grid", "80x60"] as const;
+const LAND_RANGE = "--land must be between 0.1 and 0.7";
+const COAST_RANGE = "--coast-warp must be between 0 and 1";
+const SCALE_RANGE = "--scale must be between 0.5 and 4";
+const WIDTH_RANGE = "--width must be between 400 and 6000";
+
+const REFUSALS: ReadonlyArray<readonly [flag: string, args: readonly string[], message: string]> = [
+  ["land", ["--land", "abc"], LAND_RANGE],
+  ["land", ["--land", "NaN"], LAND_RANGE],
+  ["land", ["--land", "0.3abc"], LAND_RANGE],
+  ["land", ["--land", " "], LAND_RANGE],
+  ["land", ["--land", "Infinity"], LAND_RANGE],
+  ["land", ["--land", "0.05"], LAND_RANGE],
+  ["land", ["--land", "0.8"], LAND_RANGE],
+  ["seed", ["--seed", "abc"], '--seed must be a number, got "abc"'],
+  ["seed", ["--seed", ""], '--seed must be a number, got ""'],
+  ["seed", ["--seed", " "], '--seed must be a number, got " "'],
+  ["coast-warp", ["--coast-warp", "abc"], COAST_RANGE],
+  ["coast-warp", ["--coast-warp", " "], COAST_RANGE],
+  ["coast-warp", ["--coast-warp", "1.5"], COAST_RANGE],
+  ["coast-warp", ["--coast-warp=-0.1"], COAST_RANGE],
+  ["scale", ["--scale", "abc"], SCALE_RANGE],
+  ["scale", ["--scale", " "], SCALE_RANGE],
+  ["scale", ["--scale", "0.1"], SCALE_RANGE],
+  ["scale", ["--scale", "5"], SCALE_RANGE],
+  ["width", ["--width", "abc"], WIDTH_RANGE],
+  ["width", ["--width", "100"], WIDTH_RANGE],
+  ["width", ["--width", "7000"], WIDTH_RANGE],
+  ["grid", ["--grid", "abc"], '--grid expects WxH (e.g. 320x240), got "abc"'],
+  ["grid", ["--grid", "10x10"], "--grid must be between 40x30 and 1200x900"],
+  ["style", ["--style", "bogus"], 'unknown style "bogus" (use antique | topographic | ink | nautical)'],
+  ["type", ["--type", "bogus"], 'unknown map type "bogus"'],
+  ["band", ["--band", "bogus"], 'unknown climate band "bogus"'],
+  ["theme", ["--theme", "bogus"], 'unknown theme "bogus" (use vegetation | climate | moisture | population)'],
+];
+
+const STRING_FLAGS = Object.entries(CHART_OPTIONS)
+  .filter(([, option]) => option.type === "string")
+  .map(([flag]) => flag);
+
+async function draw(args: readonly string[], name: string): Promise<string> {
+  await mkdir(TMP, { recursive: true });
+  const out = `${TMP}/${name}.svg`;
+  await main(["chart", ...args, "--out", out]);
+  return readFile(out, "utf8");
+}
+
+for (const [flag, args, message] of REFUSALS) {
+  test(`chart refuses ${args.map((a) => JSON.stringify(a)).join(" ")} with "${message}"`, async (t) => {
+    t.after(() => rm(TMP, { recursive: true, force: true }));
+    await assert.rejects(() => draw([...SMALL, ...args], `refused-${flag}`), { message });
+  });
+}
+
+test("every string flag that can refuse a value has a refusal row", () => {
+  assert.ok(STRING_FLAGS.length > 0, "the roster sweep read no flags");
+  for (const flag of STRING_FLAGS.filter((f) => f !== "out")) {
+    assert.ok(REFUSALS.some(([f]) => f === flag), `--${flag} has no refusal row`);
+  }
+});
+
+for (const flag of STRING_FLAGS.filter((f) => f !== "seed" && f !== "grid" && f !== "out")) {
+  test(`an empty --${flag} draws exactly the chart drawn without it`, async (t) => {
+    t.after(() => rm(TMP, { recursive: true, force: true }));
+    const absent = await draw(SMALL, `absent-${flag}`);
+    const empty = await draw([...SMALL, `--${flag}`, ""], `empty-${flag}`);
+    assert.ok(empty === absent, `--${flag} "" must mean the flag's default`);
+  });
+}
+
+test("an empty --grid draws exactly the chart drawn at the default grid", async (t) => {
+  t.after(() => rm(TMP, { recursive: true, force: true }));
+  const absent = await draw(["--seed", "11"], "absent-grid");
+  const empty = await draw(["--seed", "11", "--grid", ""], "empty-grid");
+  assert.ok(empty === absent, `--grid "" must mean the default grid`);
+});
+
+test("an empty --out writes the chart to the default path", async (t) => {
+  const home = process.cwd();
+  const dir = await mkdtemp(join(tmpdir(), "vellum-chart-out-"));
+  t.after(async () => {
+    process.chdir(home);
+    await rm(dir, { recursive: true, force: true });
+    await rm(TMP, { recursive: true, force: true });
+  });
+  const absent = await draw(SMALL, "absent-out");
+  process.chdir(dir);
+  await main(["chart", ...SMALL, "--out", ""]);
+  const empty = await readFile(join(dir, "out", "chart-11-antique.svg"), "utf8");
+  assert.ok(empty === absent, `--out "" must write the default path's chart`);
+});
+
+test("a valid --land draws and stamps its own value, at both edges", async (t) => {
+  t.after(() => rm(TMP, { recursive: true, force: true }));
+  for (const land of ["0.1", "0.3", "0.7"]) {
+    const svg = await draw([...SMALL, "--land", land], `land-${land}`);
+    assert.equal(recipeFromSvg(svg)?.recipe.landFraction, Number(land), `--land ${land}`);
+  }
 });
