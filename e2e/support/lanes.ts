@@ -31,6 +31,8 @@ export const E2E_LANES: readonly E2eLane[] = [
       "room-address",
       // Moved from lane B at Issue #522, when the drawer suite's re-measured budget took B to 60.2% and the balance assertion below reds at 0.6. It is appended at the END of this lane, which is after `health`, so the prefix that suite certifies is unchanged, and it boots its own page through about:blank, so it inherits no document from whatever ran before it (emulated media it would, Issue #616's class, and nothing it reads depends on motion).
       "specimen",
+      // Issue #638: appended, after `health`, so the prefix it certifies is unchanged; it boots every page through about:blank and sets its own viewport and media, so it inherits nothing from the suite before it, and lane B had too little room under the balance cap for it.
+      "corners",
     ],
     port: DEFAULT_E2E_PORT,
     dport: DEFAULT_E2E_DPORT,

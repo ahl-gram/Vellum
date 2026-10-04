@@ -231,6 +231,12 @@ footer a { color: inherit; }
 @media screen and (max-width: 720px) {
   body.room:has(.band):has(.trail) { padding-top: calc(var(--band-h) + 0.6rem); }
 }
+@media (max-width: 719px) {
+  body.room header.chrome .tagline { visibility: hidden; }
+}
+@media (max-width: 340px) {
+  header.chrome .wordmark { font-size: 1.3rem; }
+}
 /* The phone doors: the nav folds into a drawer a native checkbox burger reveals, with no bundle, so the doors survive scripts off; src/site/shell/app.ts adds the manners on top. */
 @media (max-width: 900px) {
   .chrome .rooms {

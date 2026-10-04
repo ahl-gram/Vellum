@@ -371,9 +371,6 @@ header.chrome::before {
   .lf-shelf-grid { grid-template-columns: 1fr; gap: 2.6rem; }
   .lf-more { bottom: 1.2rem; }
 }
-@media (max-width: 340px) {
-  .chrome .wordmark { font-size: 1.3rem; }
-}
 /* Print hides the chrome and the drawer with it, but :checked is state and paper widths match the narrow query, so the open state's scrim and the faded panel need their own stand-down. */
 @media print {
   body:has(.rooms-reveal:checked) .landfall::before { content: none; }
