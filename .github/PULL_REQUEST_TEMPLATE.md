@@ -22,9 +22,9 @@ Closes #NNN
 ## Records
 
 - vellum-plan-skeptic: `<ran at step 4, with or without the recon ledger>` / not run (say why)
-- vellum-guard-prover: `<link to comment>` / in flight / not owed (no new guard)
-- vellum-plate-reader: `<link to comment>` / in flight / not owed (no presentation change); and, where the ruling at workflow step 6 was made from stills, `<that sitting's run>` / not owed (the ruling was not an appearance)
-- vellum-pr-skeptic: round `<n>` of 3, `<link to its ledger on the PR, or "relayed in chat <date>" since CLAUDE.md leaves what lands on the PR to Alex>`; not fixed here: `<each as Issue #N or a handbook/errata/ row, with the reason>`, or none
+- vellum-guard-prover: `<link to comment>` / in flight / not owed (no new guard); guards changed or added after its one round, proven by this session only: `<each>`, or none
+- vellum-plate-reader: `<link to comment>` / in flight / not owed (no presentation change); and, where the ruling at workflow step 6 was made from stills, `<that sitting's run>` / not owed (the ruling was not an appearance); presentation fixes after its one round, measured by this session only: `<each>`, or none
+- vellum-pr-skeptic: `<link to its ledger on the PR, or "relayed in chat <date>" since CLAUDE.md leaves what lands on the PR to Alex>`; not fixed here: `<each as Issue #N or a handbook/errata/ row, with the reason>`, or none
 
 ## Rulings
 

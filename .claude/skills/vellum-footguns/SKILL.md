@@ -53,8 +53,8 @@ Scars: #49, #124, #270, #275, #295, #320, #353, #358, #360, #363, #380, #383, #3
    `test/repo/test-collection.test.ts` reds on both arms. No precedent in `test-support/` is no
    evidence against the convention.
 9. **Run the mutation, paste the red line into the PR body's guard table**, commit, then dispatch
-   `vellum-guard-prover` for the whole guard set (10 minutes, unit tests only, name the mutations you
-   did NOT try). It mutates in its OWN detached worktree, built by `scripts/agent-sandbox.ts` at the
+   `vellum-guard-prover`, one round (step 15), for the guard set (10 minutes, unit tests only,
+   untried mutations named). It mutates in its OWN detached worktree, built by `scripts/agent-sandbox.ts` at the
    DISPATCH tree's HEAD (#575), so uncommitted work is not in the tree it proves, and it stops
    rather than carry any across: commit first. Zero red is a
    hole. A guard proved unable to red is deleted, never shipped. Mutate BY LINE, never by text:
@@ -242,8 +242,8 @@ Scars: #49, #101, #203, #255, #408, #486, #491, #492, #507, #508, #524, #528, #5
    retarget (PR #408).
 6. `grep -n '—'` over the body and the diff returns nothing.
 7. **A finding this PR does not fix is FILED or added to `handbook/errata/`, never left as prose in the
-   body.** A finding about this PR's own work, an accessibility failure included, is fixed in the
-   review rounds and leaves unfixed only on the terms `handbook/specs/development-workflow.md`
+   body.** A finding about this PR's own work, an accessibility failure included, is fixed after the
+   review round and leaves unfixed only on the terms `handbook/specs/development-workflow.md`
    step 15 sets (Alex, 2026-09-27 and 2026-10-02, Issue #708). A sibling defect found on the way is
    filed, or joins the ledger as one row (the PR, the finding, what was searched;
    `handbook/errata/README.md` has the shape), not folded; grep `handbook/errata/` and the open
@@ -272,7 +272,7 @@ Scars: #49, #101, #203, #255, #408, #486, #491, #492, #507, #508, #524, #528, #5
    there, the higher one DOES bring its branch current with `git merge origin/main` and take the
    stated position, which is what resolved #593 against #596 with both already open.
 10. Then `vellum-pr-skeptic`, dispatched COLD (the PR number and nothing else), with no edits under it
-    while it runs; three rounds at most, and a finding not fixed is filed or an `handbook/errata/` row
+    while it runs; one round, and a finding not fixed is filed or an `handbook/errata/` row
     (item 7), never body prose. **Commit before you dispatch it**,
     and before any review agent: it runs in the directory you launched it from, and a suite run there
     DELETES the generated assets under `public/`, which neither `git status` nor `git status --ignored`
@@ -316,8 +316,8 @@ are copied here.
 - A mid-build naming or placement choice (a new file, a new stylesheet, a new key) is Alex's when
   it is visible in the tree; ask with a menu, once, before writing it (`drawer.ts` was taken and
   `chart-drawer` ruled, #519, 2026-09-07; the drawer's own stylesheet, #520).
-- A trivial one-line edit made after the cold skeptic has finished does not earn another round; name
-  it in the PR body and push (Alex, 2026-09-10, on PR #559).
+- No edit made after the cold skeptic has finished earns another round, however large; name it in
+  the PR body and push (Alex, 2026-09-10 on PR #559 for a one-line edit, 2026-10-03 for every edit).
 
 ## Never
 
