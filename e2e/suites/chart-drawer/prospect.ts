@@ -148,7 +148,7 @@ export async function cd31RoundTrip({ evaluate, send, check, sleep, PORT, settle
   );
 }
 
-// A MIXED folio, kept to three sheets because each one is a real worker job and lane B's measured budget is the constraint.
+// A MIXED folio, kept to three sheets because each one is a real worker job that its lane pays for in seconds.
 export async function cd32MixedFolio({ evaluate, send, check, sleep, PORT }: SuiteContext): Promise<void> {
   const MIXED = [
     "k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-2.lx-5.ly-5",

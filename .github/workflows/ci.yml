@@ -6,17 +6,17 @@ on:
   pull_request:
   workflow_dispatch:
 
-# Independent jobs run in parallel: check-and-test never builds, so it returns
-# fast; one build-and-e2e job per lane in E2E_LANES builds dist/ and runs that
-# one lane on a runner of its own. PR wall-clock is the longest job, not the sum,
-# and every job runs on every trigger, so push-to-main and PRs cover exactly what
-# the old single serial job covered.
+# Independent jobs run in parallel: each check-and-test shard typechecks, lints and runs its slice of the unit files without building, and each build-and-e2e job builds dist/ and runs one lane of E2E_LANES, all on runners of their own; a pull request waits for the longest job, not the sum, and every job runs on every trigger.
 jobs:
   check-and-test:
-    name: check & test
+    name: check & test ${{ matrix.shard }} of ${{ strategy.job-total }}
     runs-on: ubuntu-latest
-    # An uncapped job inherits GitHub's 360-minute default, and npm test can hang with no red to read (#564); measured 2026-09-11 over the last 20 successful runs, worst 8m12s.
-    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
+    # An uncapped job inherits GitHub's 360-minute default, and npm test can hang with no red to read (Issue #564), so each shard's cap sits at about twice its worst run; PROVISIONAL at Issue #743, from the slow-draw prediction (a shard about 4 minutes), until this pull request's own runs read it.
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -29,7 +29,7 @@ jobs:
       - name: Lint
         run: npm run lint
       - name: Test
-        run: npm test
+        run: npm test -- --test-shard=${{ matrix.shard }}/${{ strategy.job-total }}
 
   build-and-e2e:
     name: build & e2e lane ${{ matrix.lane }}
@@ -37,9 +37,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        lane: ["A", "B"]
-    # A hung lane is the one failure the outcome rule cannot catch, and this cap kills a hang rather than budgeting a run, so it sits at about twice the worst real one; re-measured 2026-10-03 at Issue #638 on one run (37164478124) after the corners suite joined lane A: lane A JOB 13m50s and e2e step 13m04s, corners 234.7s of it (2026-09-14, over 12 runs before it: worst lane JOB 10m05s, worst e2e step 9m16s).
-    timeout-minutes: 28
+        lane: ["A", "B", "C", "D"]
+    # A hung lane is the one failure the outcome rule cannot catch, and this cap kills a hang rather than budgeting a run, so it sits at about twice the worst real one; PROVISIONAL at Issue #743, from the slow-draw prediction (a lane job about 6.8 minutes), until this pull request's own runs read it.
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

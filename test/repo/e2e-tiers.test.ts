@@ -127,16 +127,20 @@ test("ci.yml runs the lane driver, and never sets a suite selection under it", (
   assert.doesNotMatch(CI, /run: npm run test:e2e\s*$/m, "ci.yml still runs the serial single-lane e2e too");
 });
 
+// Each job's worst run in minutes, the larger of this workflow's own runs and the slow-draw prediction from the main runs' slowest per-suite readings, so three fast runners cannot set it low (Issue #743, 2026-10-04: PROVISIONAL, the prediction alone).
+const WORST_JOB_MINUTES: Readonly<Record<string, number>> = { "check-and-test": 3.9, "build-and-e2e": 6.8 };
+const CAP_HEADROOM = 1.5;
+
 test("every ci.yml job is bounded, so no hung job can hold a runner for hours", () => {
   const jobs = ciJobBlocks();
-  assert.equal(jobs.length, 2, `this sweep read ${jobs.length} job blocks in ci.yml, so it is covering the wrong part of the file; a job added here joins the sweep deliberately`);
+  assert.deepEqual(jobs.map((j) => j.id), Object.keys(WORST_JOB_MINUTES), "this sweep read other job blocks than the ones with a measured worst, so it is covering the wrong part of the file; a job added here joins the sweep with its own worst");
   for (const job of jobs) {
     const body = ciUncommented(job.lines);
     const bound = body.match(/^ {4}timeout-minutes: (\d+)$/m);
     assert.ok(bound, `ci.yml's ${job.id} job has no timeout-minutes, so a hang there runs to GitHub's 6-hour default`);
     const minutes = Number(bound[1]);
-    // The floor is these two jobs' own, measured 2026-09-14: worst lane job 10m05s over 12 runs of the matrix shape, worst unit job 9m00s over 18 on main. A cheaper job added later reds here deliberately, since the count anchor above already forces a visit.
-    assert.ok(minutes >= 15, `${job.id}'s timeout-minutes is ${minutes}, under the worst case its own dated comment measures, plus headroom`);
+    const floor = CAP_HEADROOM * WORST_JOB_MINUTES[job.id]!;
+    assert.ok(minutes >= floor, `${job.id}'s timeout-minutes is ${minutes}, under ${floor.toFixed(1)}, ${CAP_HEADROOM} times its worst run, so a slow runner's real run is killed as a hang`);
     assert.ok(minutes <= 60, `${job.id}'s timeout-minutes is ${minutes}, long enough that a hang still costs an hour`);
     assert.doesNotMatch(
       body,
@@ -182,6 +186,40 @@ test("ci.yml runs one job per lane, and its matrix is exactly E2E_LANES", () => 
     body,
     /find dist -type f -exec sha256sum \{\} \+ \| LC_ALL=C sort \| sha256sum/,
     "the lane job no longer hashes its own dist/, so two shards building different trees is silent (ruled 2026-09-14 on #623)",
+  );
+});
+
+test("ci.yml shards the unit suite across a matrix of 1 to N, and every leg runs its own slice, so no test file is dropped", () => {
+  const unit = ciJobBlocks().find((j) => j.id === "check-and-test");
+  assert.ok(unit, "ci.yml has no check-and-test job at all, so every assertion below would read an empty block");
+  const body = ciUncommented(unit.lines);
+  const lines = body.split("\n");
+  const at = lines.findIndex((l) => /^ {6}matrix:$/.test(l));
+  assert.notEqual(at, -1, "the unit job has no matrix, so the assertions below would read nothing");
+  const after = lines.slice(at + 1);
+  const end = after.findIndex((l) => !/^ {8}/.test(l));
+  const keys = (end === -1 ? after : after.slice(0, end)).filter((l) => /^ {8}\S/.test(l));
+  assert.equal(keys.length, 1, `the unit matrix carries ${keys.length} keys, so legs multiply and the shard denominator stops matching the slices`);
+  const shards = keys[0]!.match(/^ {8}shard: \[([^\]]*)\]$/);
+  assert.ok(shards, `the unit matrix's one key is not a shard list: ${keys[0]}`);
+  const named = shards[1]!.split(",").map((s) => Number(s.trim()));
+  assert.ok(named.length >= 2, `the unit matrix has ${named.length} leg, so the suite is not split across runners at all (Issue #743)`);
+  assert.deepEqual(named, named.map((_, i) => i + 1), `the shards are ${named.join(", ")}, not 1 to ${named.length}, so node --test drops the slices no leg names`);
+  assert.match(
+    body,
+    /^ {6}- name: Test\n {8}run: npm test -- --test-shard=\$\{\{ matrix\.shard \}\}\/\$\{\{ strategy\.job-total \}\}\n(?= {6}- |\n|$)/m,
+    "the unit job has no Test step of exactly `- name: Test` / `run: npm test -- --test-shard=${{ matrix.shard }}/${{ strategy.job-total }}` at the step indent, so a leg runs every file, a slice against the wrong total, or a conditional that skips one",
+  );
+  assert.match(body, /fail-fast: false/, "fail-fast is on, so a red shard cancels the others and their verdicts go with it");
+  const parallel = body.match(/^ {6}max-parallel: (\d+)$/m);
+  assert.ok(
+    parallel === null || Number(parallel[1]) >= named.length,
+    `ci.yml caps the unit matrix at ${parallel?.[1]} concurrent jobs against ${named.length} shards, so the shards queue and the wall clock goes back to their sum`,
+  );
+  assert.match(
+    body,
+    /^ {4}name: check & test \$\{\{ matrix\.shard \}\} of \$\{\{ strategy\.job-total \}\}$/m,
+    "the unit job's name no longer carries its shard, so the legs report one check name and main's required checks no longer match",
   );
 });
 

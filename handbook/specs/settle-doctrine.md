@@ -140,8 +140,8 @@ section points there rather than restating it.
   failure message names is `VELLUM_BROWSER`, a path to the binary for when `findBrowser`
   (`src/cli/raster.ts`) cannot find one.
 - **Ports are overridable and the debug port is preflighted.** `resolveE2ePorts` in
-  `e2e/support/ports.ts` reads `VELLUM_E2E_PORT` and `VELLUM_E2E_DPORT`, which is what lets two local
-  lanes run at once, and a bad value THROWS rather than falling back, because a silent fallback puts
+  `e2e/support/ports.ts` reads `VELLUM_E2E_PORT` and `VELLUM_E2E_DPORT`, which is what lets every local
+  lane run at once, and a bad value THROWS rather than falling back, because a silent fallback puts
   both lanes back on one port. The run does not bind the debug port, it CONNECTS to it, so
   `assertDebugPortFree` in `e2e/harness.ts` preflights it once ABOVE the launch retry loop:
   a killed attempt does not release its port synchronously, so a per-attempt preflight would report
