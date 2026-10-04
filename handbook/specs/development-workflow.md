@@ -307,10 +307,20 @@ number), and once the ledger is posted, run the recon against the LEDGER and put
 surfaces to Alex in the same sitting. A completeness claim in a ledger's preamble is exactly the
 confidence with no command behind it that this file exists to refuse.
 
-**An epic links its subs in prose, never with native sub-issues.** A body checklist, a shared label
-and membership of the roadmap Project are the mechanism, so the board shows an epic and its subs as
-flat peers and nothing on it records that one subsumes another. Trust the prose over the flat board,
-and when a later decision changes what an epic subsumes, say so in a dated comment on both ends.
+**A new sub is linked to its epic as a native sub-issue** (Alex, 2026-10-04), so the roadmap board
+nests it under the epic. `gh issue` has no sub-issue verb, so link through the REST API, using the
+sub's numeric `id` (not its number):
+
+```
+gh api -X POST repos/ahl-gram/Vellum/issues/<epic>/sub_issues \
+  -F sub_issue_id=$(gh api repos/ahl-gram/Vellum/issues/<sub> --jq .id)
+```
+
+The body still names its epic in prose. An issue has one parent, so a sub that serves two epics
+nests under the one that builds it, and the other names it in prose. Epics filed before this rule
+keep their prose links and are not back-filled, so for those, trust the prose over the flat board.
+When a later decision changes what an epic subsumes, move the link and say so in a dated comment on
+both ends.
 
 ## The gates are not a step
 
