@@ -376,6 +376,14 @@ test("PC10 a tap that came down on the card's text keeps it, even when the brows
   fireDoc("pointerdown", { clientX: 172, clientY: 373, target: armed.hits[1] });
   armed.hits[1]!.fire("click", { detail: 1, clientX: 172, clientY: 373 });
   assert.equal(face().pressIdx, "1", "a finger that came down outside the card does move the pin");
+  fireDoc("pointerdown", { clientX: 179, clientY: 364, target: card() });
+  fireDoc("pointerdown", { clientX: 172, clientY: 373, target: armed.hits[0] });
+  armed.hits[0]!.fire("click", { detail: 1, clientX: 172, clientY: 373 });
+  assert.equal(face().pressIdx, "0", "a finger that came down on the card and panned away leaves no point behind for the next press to read");
+  fireDoc("pointerdown", { clientX: 179, clientY: 364, target: card() });
+  armed.hits[1]!.fire("click", { detail: 1, clientX: 179, clientY: 364 });
+  armed.hits[1]!.fire("click", { detail: 1, clientX: 172, clientY: 373 });
+  assert.equal(face().pressIdx, "1", "and a press's point is spent on its own click, so a later click with none of its own is read where it landed");
 });
 
 test("PC11 a click split onto the overlay, because a town was raised between the press and the release, still pins the town nearest the pointer (#632)", async () => {
