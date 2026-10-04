@@ -249,6 +249,9 @@ test("a harness error is reported as its own category, not as a failed check", (
     const crashed = laneOutcome(withLane(lane.name, { code: 2 }));
     assert.equal(crashed.ok, false, `lane ${lane.name}'s harness error did not fail the run`);
     assert.ok(crashed.line.includes(`${lane.name} HARNESS ERROR (exit 2)`), `exit 2 on lane ${lane.name} is a harness error, not a failed check, and the line does not say so: ${crashed.line}`);
+    const failed = laneOutcome(withLane(lane.name, { code: 1 })).line;
+    assert.ok(failed.includes(`${lane.name} failed (exit 1)`), `exit 1 on lane ${lane.name} is a failed check, and the line does not say so: ${failed}`);
+    assert.doesNotMatch(failed, /HARNESS ERROR/, `exit 1 on lane ${lane.name} reads as a harness error, so a red check looks like infrastructure`);
   }
 });
 
@@ -289,9 +292,9 @@ test("the combined line states the check total the acceptance criterion names", 
   assert.equal(laneCheckTally("shot -> out/e2e/explorer.png (1584px tall)"), null, "only the outcome line carries a tally");
   assert.equal(laneCheckTally("PASS  R1 the chart draws"), null);
 
-  const counted = laneOutcome(everyLane({ tally: { passed: 100, total: 100 } }));
-  const summed = 100 * E2E_LANES.length;
-  assert.ok(counted.line.includes(`${summed}/${summed} checks`), `the lanes' tallies must be summed onto the combined line: ${counted.line}`);
+  const counted = laneOutcome(everyLane({ tally: { passed: 99, total: 100 } }));
+  const n = E2E_LANES.length;
+  assert.ok(counted.line.includes(`${99 * n}/${100 * n} checks`), `the lanes' passes and totals must each be summed onto the combined line: ${counted.line}`);
   assert.match(laneOutcome(everyLane()).line, /ALL LANES PASS/, "a run with no tally read must still report");
   assert.doesNotMatch(laneOutcome(everyLane()).line, /checks/, "no tally read means no invented count");
 });
@@ -325,7 +328,7 @@ test("lanes that skipped for want of a browser never read as a pass", () => {
   // The single-lane runner exits 0 when it skips, so the lanes do too; only the LINE can say so.
   const skipped = laneOutcome(everyLane({ skipped: true }));
   assert.doesNotMatch(skipped.line, /ALL LANES PASS/, "a fully skipped run must not read as a pass");
-  assert.match(skipped.line, /SKIP/i);
+  assert.match(skipped.line, new RegExp(`LANE ${E2E_LANES.map((l) => l.name).join(" and ")} SKIPPED`), "the line does not name every skipped lane");
 
   for (const lane of E2E_LANES) {
     const one = laneOutcome(withLane(lane.name, { skipped: true }));

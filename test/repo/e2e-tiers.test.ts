@@ -140,7 +140,7 @@ test("every ci.yml job is bounded, so no hung job can hold a runner for hours", 
     assert.ok(bound, `ci.yml's ${job.id} job has no timeout-minutes, so a hang there runs to GitHub's 6-hour default`);
     const minutes = Number(bound[1]);
     const floor = CAP_HEADROOM * WORST_JOB_MINUTES[job.id]!;
-    assert.ok(minutes >= floor, `${job.id}'s timeout-minutes is ${minutes}, under ${floor.toFixed(1)}, ${CAP_HEADROOM} times its worst run, so a slow runner's real run is killed as a hang`);
+    assert.ok(minutes >= floor, `${job.id}'s timeout-minutes is ${minutes}, under ${floor.toFixed(2)}, ${CAP_HEADROOM} times its worst run, so a slow runner's real run is killed as a hang`);
     assert.ok(minutes <= 60, `${job.id}'s timeout-minutes is ${minutes}, long enough that a hang still costs an hour`);
     assert.doesNotMatch(
       body,
