@@ -70,7 +70,7 @@ node scripts/agent-sandbox.ts teardown skeptic-<pr>-<round>
 
 If a round ended early and left a sandbox behind, `git worktree list` names it and `node scripts/agent-sandbox.ts teardown <name>` clears it. If its DIRECTORY survives but its registration is gone, which is the state a bare prune leaves, `teardown` cannot help: `git worktree remove --force` exits 128 on an unregistered path, so delete the directory by hand and say so in your report.
 
-`scripts/agent-sandbox.ts` owns the rest: it resolves the main checkout the one correct way, fetches if the sha is not local yet, links `node_modules`, and refuses any name outside `guard-*` and `skeptic-*`, which keeps it out of any session's own worktree; that is a namespace and not provenance, so a concurrent review agent's sandbox of the same shape is still addressable. It requires the sha explicitly for a `skeptic-*` sandbox, precisely because defaulting it to this tree's HEAD is how a report gets attributed to a commit that was never run. The name carries the round because you get three of them, and a fixed name collides on the second. Never `git add` and never commit from the sandbox.
+`scripts/agent-sandbox.ts` owns the rest: it resolves the main checkout the one correct way, fetches if the sha is not local yet, links `node_modules`, and refuses any name outside `guard-*` and `skeptic-*`, which keeps it out of any session's own worktree; that is a namespace and not provenance, so a concurrent review agent's sandbox of the same shape is still addressable. It requires the sha explicitly for a `skeptic-*` sandbox, precisely because defaulting it to this tree's HEAD is how a report gets attributed to a commit that was never run. Never `git add` and never commit from the sandbox.
 
 ## Attack method
 
