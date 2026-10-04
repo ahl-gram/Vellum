@@ -230,6 +230,10 @@ export async function p32Dismiss(k: Kit, marks: Mark[]): Promise<void> {
 }
 
 const TABLET = [0, 5, 8, 9, 11, 16, 17, 21, 23];
+// Diagnostic only, printed on a failure: what each event of the tap reported, since CI's browser and a local one have disagreed on this check.
+const TAPLOG: Payload<boolean> = `(() => { window.__p30 = []; const name = (t) => t && t.classList ? (t.classList.contains("place-hit") ? "hit" + t.dataset.idx : (t.className || t.tagName)) : String(t);
+  for (const type of ["touchstart", "pointerdown", "mousedown", "click"]) document.addEventListener(type, (e) => { const p = e.touches && e.touches[0] ? e.touches[0] : e; window.__p30.push(type + "@" + Math.round(p.clientX) + "," + Math.round(p.clientY) + ">" + name(e.target) + (type === "click" ? " d" + e.detail : "")); }, { capture: true, once: true });
+  return true; })()`;
 
 export async function p30Tablet(k: Kit): Promise<void> {
   const marks = (await k.boot(true)).filter((m) => TABLET.includes(m.idx));
@@ -241,10 +245,12 @@ export async function p30Tablet(k: Kit): Promise<void> {
     if (c.name !== m.name || !c.pinned) { rows.push(`${m.name}: the tap opened ${c.name}${c.pinned ? "" : " unpinned"}`); continue; }
     // Two taps closer than d3's double-tap window zoom the chart, which moves every later mark.
     await k.sleep(650);
-    await k.tap({ x: (c.left + c.right) / 2, y: c.bottom - 6 });
+    const text = { x: (c.left + c.right) / 2, y: c.bottom - 6 };
+    await k.evaluate(TAPLOG);
+    await k.tap(text);
     await k.sleep(650);
     const kept = await k.card();
-    if (!kept.shown || kept.name !== m.name) rows.push(`${m.name}: a tap on the card's text left ${kept.shown ? kept.name : "nothing"}`);
+    if (!kept.shown || kept.name !== m.name) rows.push(`${m.name}: a tap at ${Math.round(text.x)},${Math.round(text.y)} on the card's text (${[c.left, c.top, c.right, c.bottom].map(Math.round).join(",")}) left ${kept.shown ? kept.name : "nothing"}; events ${await k.evaluate<string>(`window.__p30.join(" | ")`)}`);
   }
   k.check("P30 on a tablet a tap opens and pins its own town, and a tap on the card's text keeps it (#750, #632)",
     marks.length === TABLET.length && rows.length === 0, JSON.stringify({ towns: marks.map((m) => m.name), failures: rows }));
