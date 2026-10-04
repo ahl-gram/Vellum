@@ -94,20 +94,21 @@ export interface HitWiring {
   inside(p: Point | null): boolean;
   raise(idx: number): void;
   inCard(node: unknown): boolean;
+  markPress(): void;
+  takePress(): boolean;
 }
 
 export const isHit = (node: unknown): node is HTMLElement => (node as Partial<Element> | null)?.classList?.contains("place-hit") === true;
 
 export function wireHit(hit: HTMLElement, idx: number, w: HitWiring): void {
   let owner = idx;
-  let pointerFocus = false;
   const enter = (e: Event): void => {
     const p = w.point(e);
     owner = p ? w.resolve(p, idx) : idx;
     w.raise(owner);
     w.feed({ kind: "enter", idx: owner, onCard: w.inside(p) });
   };
-  hit.addEventListener("pointerdown", () => { pointerFocus = true; });
+  hit.addEventListener("mousedown", () => { w.markPress(); });
   hit.addEventListener("mouseenter", enter);
   hit.addEventListener("mousemove", (e) => {
     const p = w.point(e);
@@ -122,14 +123,9 @@ export function wireHit(hit: HTMLElement, idx: number, w: HitWiring): void {
     w.feed({ kind: "leave", idx: owner, onCard: w.inside(w.point(e)) });
   });
   hit.addEventListener("focus", () => {
-    const fromPointer = pointerFocus;
-    pointerFocus = false;
-    w.feed({ kind: "focus", idx, fromPointer });
+    w.feed({ kind: "focus", idx, fromPointer: w.takePress() });
   });
-  hit.addEventListener("blur", (e) => {
-    pointerFocus = false;
-    w.feed({ kind: "blur", intoCard: w.inCard(e.relatedTarget) });
-  });
+  hit.addEventListener("blur", (e) => { w.feed({ kind: "blur", intoCard: w.inCard(e.relatedTarget) }); });
   hit.addEventListener("click", (e) => {
     const detail = (e as MouseEvent).detail || 0;
     const p = detail > 0 ? w.point(e) : null;

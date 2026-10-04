@@ -304,6 +304,18 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     return at >= 0 ? at : idx;
   }
 
+  // A press focuses the town it lands on as its default action, synchronously inside the mousedown, so a mark set there and cleared on the next task tells that focus from a keyboard's; it is shared because the town raised under the pointer can change between a tap's pointerdown and its mousedown.
+  let pressFocus = false;
+  const markPress = (): void => {
+    pressFocus = true;
+    setTimeout(() => { pressFocus = false; }, 0);
+  };
+  const takePress = (): boolean => {
+    const was = pressFocus;
+    pressFocus = false;
+    return was;
+  };
+
   const point = (e: Event): Point | null => {
     const me = e as MouseEvent;
     if (!Number.isFinite(me.clientX) || !Number.isFinite(me.clientY)) return null;
@@ -334,7 +346,7 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
       feed({ kind: "focusOut", staysNear: inCard(e.relatedTarget) || isHit(e.relatedTarget) });
     });
     const { prospectLink, layPress, acts } = cardActs(inner, opts, prospectHref, layProspect);
-    const wiring = { feed, point, resolve, inside, raise, inCard };
+    const wiring = { feed, point, resolve, inside, raise, inCard, markPress, takePress };
     const hits = manifest.places.map((place, idx) => {
       const hit = document.createElement("button");
       hit.type = "button";

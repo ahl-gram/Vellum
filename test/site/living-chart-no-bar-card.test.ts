@@ -334,3 +334,18 @@ test("PC8 a pointer drifting inside overlapping boxes toward a nearer town waits
   t.mock.timers.tick(HOLD_GRACE_MS);
   assert.equal(face().name, nameOf(0), "resting there, the nearer town takes the card once the grace has run");
 });
+
+test("PC9 the focus a press gives a town leaves a pinned card alone, whichever town's box took the press; keyboard focus still switches (#750 ruling 2)", async (t) => {
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const { armed, face, at } = await holdRig();
+  armed.hits[0]!.fire("click", { ...at, detail: 1 });
+  assert.equal(face().pinned, true, "the precondition: town 0 is pinned");
+  // On a tablet the box raised under the finger can change between the tap's press and the focus it gives, so the press lands on one town and the focus on another.
+  armed.hits[3]!.fire("mousedown", at);
+  armed.hits[4]!.fire("focus");
+  assert.deepEqual({ pinned: face().pinned, idx: face().pressIdx }, { pinned: true, idx: "0" }, "a press's focus, even on another town's box, does not move the card");
+  armed.hits[5]!.fire("mousedown", at);
+  t.mock.timers.tick(0);
+  armed.hits[5]!.fire("focus");
+  assert.deepEqual({ pinned: face().pinned, idx: face().pressIdx }, { pinned: false, idx: "5" }, "a press that gave no focus is forgotten by the next task, so keyboard focus after it switches the card");
+});

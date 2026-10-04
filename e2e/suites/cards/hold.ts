@@ -91,6 +91,15 @@ const gapOf = (m: Point, link: Point, c: Card): number => {
   return gap;
 };
 
+const outsideCrossing = (m: Mark, link: Point, c: Card, marks: Mark[]): boolean => {
+  for (let i = 1; i < 100; i++) {
+    const x = m.x + ((link.x - m.x) * i) / 100, y = m.y + ((link.y - m.y) * i) / 100;
+    if (x >= c.left && x <= c.right && y >= c.top && y <= c.bottom) continue;
+    if (marks.some((o) => o.idx !== m.idx && Math.abs(x - o.x) < 13 && Math.abs(y - o.y) < 13)) return true;
+  }
+  return false;
+};
+
 export async function p28Travel(k: Kit, marks: Mark[]): Promise<void> {
   const rows: string[] = [];
   let crossing = 0, widest = { m: marks[0]!, gap: -1 };
@@ -100,7 +109,7 @@ export async function p28Travel(k: Kit, marks: Mark[]): Promise<void> {
     const c = await k.atRest(`P28 probe ${m.name}`);
     if (!c.link || c.name !== m.name) continue;
     const link = c.link, gap = gapOf(m, link, c);
-    if (gap > widest.gap) widest = { m, gap };
+    if (gap > widest.gap && !outsideCrossing(m, link, c, marks)) widest = { m, gap };
     if (crossing === 6 || !marks.some((o) => o.idx !== m.idx && crossesBox(m, link, o))) continue;
     crossing++;
     for (const pinned of [false, true]) {
@@ -108,7 +117,7 @@ export async function p28Travel(k: Kit, marks: Mark[]): Promise<void> {
       if (r.took !== String(m.idx)) rows.push(`${m.name}${pinned ? " pinned" : ""}: arrived on ${r.arrived}, press took ${r.took}`);
     }
   }
-  // The slow hand (0.1 px/ms) on the widest gap is what a grace shorter than the measured bound fails.
+  // The slow hand (0.1 px/ms) on the widest gap, on a path that crosses no town outside the card, is what a grace shorter than the measured bound fails.
   const s = await reach(k, widest.m, false, 0.1);
   if (s.took !== String(widest.m.idx)) rows.push(`${widest.m.name} at 0.1 px/ms over a ${widest.gap.toFixed(1)}px gap: arrived on ${s.arrived}, press took ${s.took}`);
   k.check("P28 a reader's pointer travels from a town to its card's button across other towns, hovered or pinned, and the button opens that town (#750)",
@@ -141,24 +150,29 @@ export async function p31Keyboard(k: Kit, marks: Mark[]): Promise<void> {
     at.active === "pc-prospect" && at.card === m.name && at.pinned, JSON.stringify({ town: m.name, ...at }));
 }
 
+const QUIET: Payload<{ card: string | null; active: string; quiet: number }> = `(() => { const c = document.getElementById("place-card"); if (!window.__p750mo) { window.__p750q = performance.now(); window.__p750mo = new MutationObserver(() => { window.__p750q = performance.now(); }); window.__p750mo.observe(c, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ["hidden"] }); }
+  const a = document.activeElement; return { card: c.hidden ? null : (c.querySelector(".pc-name") || {}).textContent, active: a ? String(a.className) : "none", quiet: performance.now() - window.__p750q }; })()`;
+
 export async function p31bFocusSurvivesRefill(k: Kit, marks: Mark[]): Promise<void> {
   const a = marks[2]!;
   await k.reset();
   await k.move(a);
   const c = await k.atRest(`P31b ${a.name}`);
-  if (!c.link) throw new Error("P31b no link");
-  await k.travel(a, c.link, 1);
+  const link = c.link;
+  if (!link) throw new Error("P31b no link");
+  await k.travel(a, link, 1);
   await k.evaluate(CATCH);
-  await k.press(c.link);
+  await k.press(link);
   await k.evaluate(CAUGHT);
-  const box = { left: c.left - 14, top: c.top - 14, right: c.right + 14, bottom: c.bottom + 14 };
-  const b = marks.filter((o) => o.idx !== a.idx && !(o.x > box.left && o.x < box.right && o.y > box.top && o.y < box.bottom))
-    .sort((p, q) => Math.hypot(p.x - c.link!.x, p.y - c.link!.y) - Math.hypot(q.x - c.link!.x, q.y - c.link!.y))[0]!;
-  await k.travel(c.link, b, 1);
-  const after = await k.settle<{ card: string | null; active: string }>(`(() => { const c = document.getElementById("place-card"); const a = document.activeElement; return { card: c.hidden ? null : (c.querySelector(".pc-name") || {}).textContent, active: a ? String(a.className) : "none" }; })()`,
-    (d, last) => !!last && d.card === last.card && d.card !== a.name, `P31b the card leaving ${a.name}`);
+  const clear = (b: Mark) => !(b.x > c.left - 14 && b.x < c.right + 14 && b.y > c.top - 14 && b.y < c.bottom + 14) && !outsideCrossing({ ...b, idx: -1 }, link, c, marks.filter((o) => o.idx !== b.idx));
+  const b = marks.filter((o) => o.idx !== a.idx && clear(o)).sort((p, q) => Math.hypot(p.x - link.x, p.y - link.y) - Math.hypot(q.x - link.x, q.y - link.y))[0];
+  if (!b) throw new Error("P31b no town with a clear path from the card");
+  await k.evaluate(QUIET);
+  await k.travel(link, b, 1);
+  // At rest once nothing on the card has changed for longer than the grace, the only clock that can still change it.
+  const after = await k.settle(QUIET, (d) => d.quiet > HOLD_GRACE_MS + 100, `P31b the card after leaving ${a.name}`);
   k.check("P31b with focus on a card's link, the card still switches to the town the pointer settles on, and the link keeps its focus (#750)",
-    after.card === b.name && after.active === "pc-prospect", JSON.stringify({ from: a.name, to: b.name, ...after }));
+    after.card === b.name && after.active === "pc-prospect", JSON.stringify({ from: a.name, to: b.name, card: after.card, active: after.active }));
 }
 
 export async function p32Dismiss(k: Kit, marks: Mark[]): Promise<void> {
