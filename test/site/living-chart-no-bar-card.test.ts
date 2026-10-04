@@ -157,3 +157,62 @@ test("LP4 the press names the place the card is SHOWING, so a second card's pres
   armed.press().fire("click");
   assert.deepEqual(host.laid, [1], "so pressing files the place on screen, not the one before it");
 });
+
+const cardFace = async (mount: { children: unknown[] }) => {
+  const { walk } = await import("../../test-support/element-shim.ts");
+  const overlay = (mount.children as ReturnType<typeof walk>).find((c) => c.classList.contains("place-overlay"))!;
+  const card = walk(overlay).find((n) => n.getAttribute("id") === "place-card")!;
+  const find = (cls: string) => walk(card).find((n) => n.classList.contains(cls));
+  return () => ({
+    shown: !card.hidden,
+    pinned: card.classList.contains("pinned"),
+    name: find("pc-name")?.textContent ?? null,
+    pressIdx: find("pc-lay")?.dataset["idx"] ?? null,
+    linkIdx: String((find("pc-prospect") as { href?: string } | undefined)?.href ?? "").split("i=")[1] ?? null,
+  });
+};
+
+test("PC1 a hover over another town never leaves a pinned card naming one town while it opens or files another (#750 point 3)", async () => {
+  const { manifest } = await realWorld();
+  const host = layHost();
+  const { lc, mount } = await barlessHost({ prospectHref: (idx) => `/prospect/#i=${idx}`, layProspect: host.dep });
+  lc.buildPlaceOverlay(manifest);
+  const armed = await armShow(mount);
+  const face = await cardFace(mount);
+  const [a, b] = [manifest.places[0]!, manifest.places[1]!];
+  assert.notEqual(a.name, b.name, "two distinct towns, or a card naming the wrong one reads the same");
+
+  armed.hits[0]!.fire("mouseenter");
+  armed.hits[0]!.fire("click");
+  assert.deepEqual(face(), { shown: true, pinned: true, name: a.name, pressIdx: "0", linkIdx: "0" }, "the precondition: a press pins town A");
+
+  armed.hits[1]!.fire("mouseenter");
+  armed.hits[1]!.fire("mouseleave");
+  const after = face();
+  assert.ok(after.shown, "the pin survives the pointer crossing town B on its way somewhere");
+  const shownIdx = String(manifest.places.findIndex((p) => p.name === after.name));
+  assert.equal(after.pinned, true, "a card that will not hide on leave is a pinned card and says so; main shows town B unmarked while still pinned to A");
+  assert.equal(after.pressIdx, shownIdx, "the filing press names the town the card shows");
+  assert.equal(after.linkIdx, shownIdx, "and so does the prospect link");
+});
+
+test("PC2 the second click of a double-click keeps the pinned card, and a later deliberate click or Enter still closes it (#750 point 4, ruled 2026-10-04)", async () => {
+  const { manifest } = await realWorld();
+  const { lc, mount } = await barlessHost({ prospectHref: (idx) => `/prospect/#i=${idx}` });
+  lc.buildPlaceOverlay(manifest);
+  const armed = await armShow(mount);
+  const face = await cardFace(mount);
+  const town = armed.hits[0]!;
+  const click = (detail: number) => town.fire("click", { detail, clientX: 0, clientY: 0 });
+  town.fire("mouseenter", { clientX: 0, clientY: 0 });
+  click(1);
+  assert.equal(face().pinned, true, "the precondition: the first press pins");
+  click(2);
+  assert.deepEqual({ shown: face().shown, pinned: face().pinned }, { shown: true, pinned: true }, "the second click of a double-click is not a dismissal");
+  click(1);
+  assert.equal(face().shown, false, "a later deliberate click on the pinned town still closes it");
+  click(0);
+  assert.equal(face().pinned, true, "Enter (a click with no pointer count) pins");
+  click(0);
+  assert.equal(face().shown, false, "and a second Enter on the pinned town closes it");
+});
