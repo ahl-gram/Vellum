@@ -307,10 +307,23 @@ number), and once the ledger is posted, run the recon against the LEDGER and put
 surfaces to Alex in the same sitting. A completeness claim in a ledger's preamble is exactly the
 confidence with no command behind it that this file exists to refuse.
 
-**An epic links its subs in prose, never with native sub-issues.** A body checklist, a shared label
-and membership of the roadmap Project are the mechanism, so the board shows an epic and its subs as
-flat peers and nothing on it records that one subsumes another. Trust the prose over the flat board,
-and when a later decision changes what an epic subsumes, say so in a dated comment on both ends.
+**An epic filed from 2026-10-04 on nests its subs as native sub-issues** (Alex, 2026-10-04), so the
+roadmap board shows each sub under its epic. File a sub with `gh issue create --parent <epic>`, or
+link an existing one with `gh issue edit <sub> --parent <epic>`. The older markers stay beside the
+nesting:
+- the epic and every sub carry one `epic:<name>` label;
+- the epic's body keeps a checklist of its subs;
+- each sub's body names its epic in prose.
+
+An issue has one parent, so a sub that serves two epics nests under the one that builds it, and the
+other names it in prose. `gh issue edit --parent` and `--add-sub-issue` replace an existing parent
+without asking, so read `gh api repos/ahl-gram/Vellum/issues/<sub> --jq .parent_issue_url` before
+linking. When a later decision changes what an epic subsumes, that same `--parent` moves the link,
+and a dated comment goes on both ends.
+
+**Epics filed before that date stay linked in prose and are not back-filled.** A new sub of one is
+linked in prose like its siblings, not nested, so no old epic is left half nested. For those epics,
+trust the prose over the flat board.
 
 ## The gates are not a step
 
