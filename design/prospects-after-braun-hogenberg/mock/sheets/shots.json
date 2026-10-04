@@ -1,0 +1,341 @@
+[
+ {
+  "url": "/mock/sheets/capital-laukuwelua.html",
+  "width": 1660,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/stills/sheet-capital-laukuwelua.png",
+  "full": true,
+  "waitMs": 1800
+ },
+ {
+  "url": "/mock/sheets/town-nailo.html",
+  "width": 1660,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/stills/sheet-town-nailo.png",
+  "full": true,
+  "waitMs": 1800
+ },
+ {
+  "url": "/mock/sheets/village-lokai.html",
+  "width": 1660,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/stills/sheet-village-lokai.png",
+  "full": true,
+  "waitMs": 1800
+ },
+ {
+  "url": "/mock/sheets/ruin-homaitani.html",
+  "width": 1660,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/stills/sheet-ruin-homaitani.png",
+  "full": true,
+  "waitMs": 1800
+ },
+ {
+  "url": "/mock/sheets/hill-voorea.html",
+  "width": 1660,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/stills/sheet-hill-voorea.png",
+  "full": true,
+  "waitMs": 1800
+ },
+ {
+  "url": "/mock/sheets/capital-laukuwelua-an400.html",
+  "width": 1660,
+  "height": 900,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/stills/sheet-capital-laukuwelua-an400.png",
+  "full": true,
+  "waitMs": 1800
+ },
+ {
+  "url": "/mock/sheets/small.html",
+  "width": 2200,
+  "height": 700,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/stills/sheet-small-sizes.png",
+  "full": true,
+  "waitMs": 1800
+ },
+ {
+  "url": "/mock/sheets/plate.html?f=control-capital-laukuwelua-antique.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/stills/full-control-capital-laukuwelua-antique.png",
+  "waitMs": 1200
+ },
+ {
+  "url": "/mock/sheets/plate.html?f=control-capital-laukuwelua-ink.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/stills/full-control-capital-laukuwelua-ink.png",
+  "waitMs": 1200
+ },
+ {
+  "url": "/mock/sheets/plate.html?f=control-capital-laukuwelua-antique.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/stills/crop-control-capital-town.png",
+  "waitMs": 1200,
+  "clip": {
+   "x": 300,
+   "y": 300,
+   "width": 520,
+   "height": 260,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/mock/sheets/plate.html?f=control-capital-laukuwelua-antique.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/stills/crop-control-capital-foreground.png",
+  "waitMs": 1200,
+  "clip": {
+   "x": 60,
+   "y": 420,
+   "width": 520,
+   "height": 300,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/mock/sheets/plate.html?f=a-capital-laukuwelua-antique.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/stills/full-a-capital-laukuwelua-antique.png",
+  "waitMs": 1200
+ },
+ {
+  "url": "/mock/sheets/plate.html?f=a-capital-laukuwelua-ink.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/stills/full-a-capital-laukuwelua-ink.png",
+  "waitMs": 1200
+ },
+ {
+  "url": "/mock/sheets/plate.html?f=a-capital-laukuwelua-antique.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/stills/crop-a-capital-town.png",
+  "waitMs": 1200,
+  "clip": {
+   "x": 300,
+   "y": 300,
+   "width": 520,
+   "height": 260,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/mock/sheets/plate.html?f=a-capital-laukuwelua-antique.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/stills/crop-a-capital-foreground.png",
+  "waitMs": 1200,
+  "clip": {
+   "x": 60,
+   "y": 420,
+   "width": 520,
+   "height": 300,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/mock/sheets/plate.html?f=b-capital-laukuwelua-antique.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/stills/full-b-capital-laukuwelua-antique.png",
+  "waitMs": 1200
+ },
+ {
+  "url": "/mock/sheets/plate.html?f=b-capital-laukuwelua-ink.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/stills/full-b-capital-laukuwelua-ink.png",
+  "waitMs": 1200
+ },
+ {
+  "url": "/mock/sheets/plate.html?f=b-capital-laukuwelua-antique.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/stills/crop-b-capital-town.png",
+  "waitMs": 1200,
+  "clip": {
+   "x": 300,
+   "y": 300,
+   "width": 520,
+   "height": 260,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/mock/sheets/plate.html?f=b-capital-laukuwelua-antique.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/stills/crop-b-capital-foreground.png",
+  "waitMs": 1200,
+  "clip": {
+   "x": 60,
+   "y": 420,
+   "width": 520,
+   "height": 300,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/mock/sheets/plate.html?f=c-capital-laukuwelua-antique.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/stills/full-c-capital-laukuwelua-antique.png",
+  "waitMs": 1200
+ },
+ {
+  "url": "/mock/sheets/plate.html?f=c-capital-laukuwelua-ink.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/stills/full-c-capital-laukuwelua-ink.png",
+  "waitMs": 1200
+ },
+ {
+  "url": "/mock/sheets/plate.html?f=c-capital-laukuwelua-antique.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/stills/crop-c-capital-town.png",
+  "waitMs": 1200,
+  "clip": {
+   "x": 300,
+   "y": 300,
+   "width": 520,
+   "height": 260,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/mock/sheets/plate.html?f=c-capital-laukuwelua-antique.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/stills/crop-c-capital-foreground.png",
+  "waitMs": 1200,
+  "clip": {
+   "x": 60,
+   "y": 420,
+   "width": 520,
+   "height": 300,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/mock/sheets/plate.html?f=d-capital-laukuwelua-antique.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/stills/full-d-capital-laukuwelua-antique.png",
+  "waitMs": 1200
+ },
+ {
+  "url": "/mock/sheets/plate.html?f=d-capital-laukuwelua-ink.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/stills/full-d-capital-laukuwelua-ink.png",
+  "waitMs": 1200
+ },
+ {
+  "url": "/mock/sheets/plate.html?f=d-capital-laukuwelua-antique.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/stills/crop-d-capital-town.png",
+  "waitMs": 1200,
+  "clip": {
+   "x": 300,
+   "y": 300,
+   "width": 520,
+   "height": 260,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/mock/sheets/plate.html?f=d-capital-laukuwelua-antique.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/stills/crop-d-capital-foreground.png",
+  "waitMs": 1200,
+  "clip": {
+   "x": 60,
+   "y": 420,
+   "width": 520,
+   "height": 300,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/mock/sheets/plate.html?f=e-capital-laukuwelua-antique.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/stills/full-e-capital-laukuwelua-antique.png",
+  "waitMs": 1200
+ },
+ {
+  "url": "/mock/sheets/plate.html?f=e-capital-laukuwelua-ink.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/stills/full-e-capital-laukuwelua-ink.png",
+  "waitMs": 1200
+ },
+ {
+  "url": "/mock/sheets/plate.html?f=e-capital-laukuwelua-antique.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/stills/crop-e-capital-town.png",
+  "waitMs": 1200,
+  "clip": {
+   "x": 300,
+   "y": 300,
+   "width": 520,
+   "height": 260,
+   "scale": 2
+  }
+ },
+ {
+  "url": "/mock/sheets/plate.html?f=e-capital-laukuwelua-antique.svg&w=1040",
+  "width": 1040,
+  "height": 768,
+  "mobile": false,
+  "out": "/Users/ahl/CodeProjects/Vellum/out/747/stills/crop-e-capital-foreground.png",
+  "waitMs": 1200,
+  "clip": {
+   "x": 60,
+   "y": 420,
+   "width": 520,
+   "height": 300,
+   "scale": 2
+  }
+ }
+]
