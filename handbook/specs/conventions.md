@@ -68,6 +68,10 @@ still to hold a build to, and the ruling's words carry it alone.
 
 Things a design round owes that the steps above do not cover:
 
+- **A round's agent writes its stills to the main checkout's `out/<issue>/`**, from a tree
+  `handbook/specs/development-workflow.md` step 6 says how to build, because a harness tree holding
+  only `out/` is deleted when its agent's run ends.
+
 - **The archive pull request gets the cold skeptic, and the mock pages get the plate-reader.** An
   archive is content rather than code, which makes it look like neither is owed; both have found real
   defects in one, and the mocks are the only place a ruling is made from pixels nobody measured.
