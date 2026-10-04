@@ -127,8 +127,8 @@ test("ci.yml runs the lane driver, and never sets a suite selection under it", (
   assert.doesNotMatch(CI, /run: npm run test:e2e\s*$/m, "ci.yml still runs the serial single-lane e2e too");
 });
 
-// Each job's worst run in minutes, the larger of this workflow's own runs and a slow-runner prediction from the main runs' slowest per-suite readings, so three fast runners cannot set it low (Issue #743, 2026-10-04: shards 4m08s measured against 3m54s predicted, lanes 6m48s against 6m47s, over the five runs 37181981868 to 37183160284).
-const WORST_JOB_MINUTES: Readonly<Record<string, number>> = { "check-and-test": 4.2, "build-and-e2e": 6.8 };
+// Each job's worst run in minutes, the larger of this workflow's own runs and a slow-runner prediction from the main runs' slowest per-suite readings, so three fast runners cannot set it low (Issue #743, 2026-10-04: shards 4m08s measured against 3m54s predicted, lanes 7m07s against 6m47s, over the six runs 37181981868 to 37183552447).
+const WORST_JOB_MINUTES: Readonly<Record<string, number>> = { "check-and-test": 4.2, "build-and-e2e": 7.2 };
 const CAP_HEADROOM = 1.5;
 
 test("every ci.yml job is bounded, so no hung job can hold a runner for hours", () => {
@@ -210,6 +210,8 @@ test("ci.yml shards the unit suite across a matrix of 1 to N, and every leg runs
     /^ {6}- name: Test\n {8}run: npm test -- --test-shard=\$\{\{ matrix\.shard \}\}\/\$\{\{ strategy\.job-total \}\}\n(?= {6}- |\n|$)/m,
     "the unit job has no Test step of exactly `- name: Test` / `run: npm test -- --test-shard=${{ matrix.shard }}/${{ strategy.job-total }}` at the step indent, so a leg runs every file, a slice against the wrong total, or a conditional that skips one",
   );
+  const pkg = JSON.parse(src("package.json")) as { scripts: Record<string, string> };
+  assert.equal(pkg.scripts["test"], "node --test", "npm test is no longer node --test alone, so the shard flag ci.yml appends lands on some other command and every leg runs every file");
   assert.match(body, /fail-fast: false/, "fail-fast is on, so a red shard cancels the others and their verdicts go with it");
   const parallel = body.match(/^ {6}max-parallel: (\d+)$/m);
   assert.ok(

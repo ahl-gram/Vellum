@@ -74,7 +74,7 @@ const INHERITS_HARNESS_PAGE: readonly E2eSuiteName[] = [
   "fallback",
 ];
 
-// Each suite here reads the page the named suite leaves, so a lane runs it directly after that one: print-room's first navigate, `prlLink` in `e2e/suites/print-room/link.ts`, only changes the hash on an Explorer tab and so reads the last world drawn, and `rdSetup` in `e2e/suites/region-detail.ts` writes the Explorer's controls without navigating at all.
+// Each suite here depends on the page the named suite leaves, so a lane runs it directly after that one: print-room's first navigate, `prlLink` in `e2e/suites/print-room/link.ts`, only changes the hash on an Explorer tab, so it must follow a suite that leaves some other page, and hunt (ending on /seed-of-the-day/) is the one canonical order allows; `rdSetup` in `e2e/suites/region-detail.ts` writes the Explorer's controls without navigating at all, so it needs the settled Explorer document-rooms leaves.
 export const NEEDS_PREDECESSOR: Readonly<Partial<Record<E2eSuiteName, E2eSuiteName>>> = {
   "print-room": "hunt",
   "region-detail": "document-rooms",

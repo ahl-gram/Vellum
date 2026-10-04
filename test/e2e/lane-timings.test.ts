@@ -45,7 +45,6 @@ const laneSeconds = (suites: readonly E2eSuiteName[]) =>
 
 // The slowest of four lanes at most 1.2 times an even split, which is what 0.6 meant at two (Alex, 2026-10-04, Issue #743).
 const BALANCE_CAP = 0.3;
-// Seconds added to a lane raise the total too, so `(L + x) / (T + x) <= cap` solves to `x <= (cap * T - L) / (1 - cap)`, positive when the lane has room and negative by exactly the seconds it must shed (Issue #637).
 const laneHeadroom = (seconds: number, total: number) => (BALANCE_CAP * total - seconds) / (1 - BALANCE_CAP);
 const balanceLine = (name: string, seconds: number, total: number): string => {
   const headroom = laneHeadroom(seconds, total);
@@ -59,7 +58,6 @@ test("the split is balanced against measured cost, not check counts", () => {
   const total = laneSeconds(E2E_SUITE_ORDER);
   for (const lane of E2E_LANES) {
     const seconds = laneSeconds(lane.suites);
-    // One job on each runner (Issue #623), so the wall clock IS the slowest lane and an unbalanced split wastes the parallelism it was cut for (Alex, 2026-09-14).
     assert.ok(seconds / total <= BALANCE_CAP, balanceLine(lane.name, seconds, total));
   }
 });

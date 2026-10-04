@@ -85,14 +85,15 @@ test("each lane runs its suites in the runner's canonical order", () => {
   }
 });
 
-test("a suite that reads its predecessor's page runs directly after it, and no suite that opens on the home page runs directly after home", () => {
+test("a suite that depends on its predecessor's page runs directly after it, and no suite that opens on the home page runs directly after home", () => {
+  // Blind spot, erring toward passing: this reads the lanes only, and the full serial tier runs E2E_SUITE_ORDER, where landfall follows home (a handbook/errata/guards.md row).
   assert.ok(Object.keys(NEEDS_PREDECESSOR).length > 0 && OPENS_ON_HOME.length > 0, "an ordering roster is empty, so the sweep below checks nothing");
   for (const lane of E2E_LANES) {
     for (const [i, suite] of lane.suites.entries()) {
       const before = i === 0 ? null : lane.suites[i - 1]!;
       const needs = NEEDS_PREDECESSOR[suite];
       if (needs !== undefined) {
-        assert.equal(before, needs, `lane ${lane.name} runs ${suite} after ${before ?? "nothing, on the harness's boot page"}, but it reads the page ${needs} leaves`);
+        assert.equal(before, needs, `lane ${lane.name} runs ${suite} after ${before ?? "nothing, on the harness's boot page"}, but it depends on the page ${needs} leaves`);
       }
       if (before === "home") {
         assert.ok(!OPENS_ON_HOME.includes(suite), `lane ${lane.name} runs ${suite} directly after home, so its first navigate to / returns on home's stale document`);
