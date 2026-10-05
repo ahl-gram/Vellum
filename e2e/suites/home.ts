@@ -29,7 +29,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
 }
 
 async function h7Ceremony(ctx: SuiteContext, k: HomeKit): Promise<void> {
-  const { send, setMobileViewport, clearMobile, consoleErrors, http4xx } = ctx;
+  const { send, setNarrowViewport, clearMobile, consoleErrors, http4xx } = ctx;
   const { camSeat } = k;
   const errBase2 = consoleErrors.length;
   const httpBase2 = http4xx.length;
@@ -38,7 +38,7 @@ async function h7Ceremony(ctx: SuiteContext, k: HomeKit): Promise<void> {
   await h8KeySkip(k);
   await h8bHoldSkip(k);
   await h9CeremonyStandsDown(ctx);
-  await setMobileViewport(390, 844);
+  await setNarrowViewport(390, 844);
   await h12aVeilCovers(ctx);
   await h12bNarrowSkip(k);
   const seat390 = await camSeat();
@@ -63,7 +63,7 @@ async function h7Ceremony(ctx: SuiteContext, k: HomeKit): Promise<void> {
 }
 
 async function h14Stations(ctx: SuiteContext, k: HomeKit): Promise<void> {
-  const { send, setMobileViewport, clearMobile, consoleErrors, http4xx } = ctx;
+  const { send, setNarrowViewport, clearMobile, consoleErrors, http4xx } = ctx;
   const { settleHome } = k;
   // Stations, cards, and the drift (Issue #458) at the ratified 1280x800 (the harness's tall default hides the short-viewport collisions the plate-reader measured). Every gesture is REAL dispatched input (Issue #460): pointer capture retargets clicks, so synthetic .click() proves nothing here.
   const errBase3 = consoleErrors.length;
@@ -80,7 +80,7 @@ async function h14Stations(ctx: SuiteContext, k: HomeKit): Promise<void> {
   await h15cRearmed(ctx);
   await h15dFlightStops(k);
   await h16NoDrift(k);
-  await setMobileViewport(390, 844);
+  await setNarrowViewport(390, 844);
   const settled16b = await settleHome();
   const sheetPt = await h16bOpen(k);
   await h16bBottomSheet(ctx, settled16b, sheetPt);

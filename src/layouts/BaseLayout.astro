@@ -68,7 +68,7 @@ const trail = trailFor(path);
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=1024">
 <title>{title}</title>
 <meta name="description" content={description}>
 {noindex && <meta name="robots" content="noindex">}
@@ -220,6 +220,32 @@ footer {
   padding: 1.4rem 0 1.8rem; margin: 0; line-height: normal;
 }
 footer a { color: inherit; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+.desk-notice { display: none; --fit: 1; --u: calc(1rem * var(--fit)); }
+.desk-notice.on {
+  display: block; position: fixed; z-index: 48; left: 50%; bottom: calc(var(--u) * 1.6);
+  translate: -50% 0; rotate: -1.2deg; box-sizing: border-box;
+  width: calc(var(--u) * 20); max-width: calc(100% - var(--u) * 2.4);
+  padding: calc(var(--u) * 1.15) calc(var(--u) * 1.3) calc(var(--u) * 1.2);
+  background: var(--parchment); color: var(--ink-dark); text-align: center; line-height: 1.42;
+  font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif);
+  border: calc(1.5px * var(--fit)) solid var(--ink-dark);
+  box-shadow: 0 0 0 calc(3px * var(--fit)) var(--parchment), 0 0 0 calc(5px * var(--fit)) var(--ink-dark),
+    0 0 calc(10px * var(--fit)) calc(12px * var(--fit)) rgb(from var(--chart-ink) r g b / 0.6),
+    0 calc(12px * var(--fit)) calc(34px * var(--fit)) calc(8px * var(--fit)) rgb(from var(--chart-ink) r g b / 0.65);
+}
+.desk-notice p { margin: 0; }
+.desk-notice .dn-head {
+  font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); font-weight: 400;
+  letter-spacing: 0.12em; font-size: calc(var(--u) * 1.2); line-height: 1.2; color: var(--ink-brown);
+}
+.desk-notice .dn-body { font-size: var(--u); margin-top: calc(var(--u) * 0.5); }
+.desk-notice button.dn-go {
+  display: block; margin: calc(var(--u) * 0.85) auto 0; min-height: calc(var(--u) * 2.75);
+  padding: calc(var(--u) * 0.5) calc(var(--u) * 1.2); font-size: var(--u); letter-spacing: 0.06em;
+  border-width: calc(1.5px * var(--fit)); border-radius: calc(4px * var(--fit));
+}
+.desk-notice button.dn-go:focus-visible { outline-width: calc(2px * var(--fit)); outline-offset: calc(2px * var(--fit)); }
 @media (max-width: 720px) {
   :root { --band-h: 6.4rem; --chrome-x: 1rem; --chrome-y: 0.9rem; }
   .wordmark { font-size: 1.5rem; }
@@ -289,7 +315,7 @@ footer a { color: inherit; }
   body:has(.rooms-reveal:checked) .chrome:has(.trail) .rooms::before { height: calc(var(--band-h) + 3.55rem); }
 }
 @media print {
-  .band, header.chrome { display: none; }
+  .band, header.chrome, .desk-notice.on { display: none; }
   body.room:has(.rooms-reveal:checked)::after { content: none; }
   body { background: none; }
   body::before { display: none; }
@@ -326,7 +352,12 @@ footer a { color: inherit; }
 {!chartRoom && <footer>
   Vellum · an atelier of imaginary cartography
 </footer>}
-{/* Astro-processed, not is:inline, so it can import the binder: measured 2026-08-28 at 905 bytes against Vite's 4096 inline limit, so Astro writes it into the html and emits no file. */}
+<aside class="desk-notice" aria-label="A note on screen size">
+  <p class="dn-head">Notice to Travellers</p>
+  <p class="dn-body">These charts are drawn for a wider table. On a phone the page is set small: pinch to read closer, or come back at a desktop, a laptop or a large tablet.</p>
+  <button type="button" class="dn-go">Continue anyway</button>
+</aside>
+{/* Astro-processed, not is:inline, so it can import the binders. */}
 <script>
 import "../site/shell/app.ts";
 </script>

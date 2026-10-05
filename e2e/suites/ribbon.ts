@@ -8,7 +8,7 @@ type Row = { cls: string; num: string | undefined; strong: string | null; em: st
 type RibbonKit = ReturnType<typeof ribbonKit>;
 
 export async function run(ctx: SuiteContext): Promise<void> {
-  const { setMobileViewport, clearMobile, consoleErrors, http4xx } = ctx;
+  const { setNarrowViewport, clearMobile, consoleErrors, http4xx } = ctx;
   const errBase = consoleErrors.length;
   const httpBase = http4xx.length;
   // RB6, RB6b, RB9 and RB10 are deliberately not stepped: their own bounded loops return rather than throwing, and their checks already guard on it.
@@ -20,7 +20,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await rb6PickedDestination(k);
   await step("RB7", () => rb7SameScroll(k, svg1));
   await step("RB8", () => rb8InkDress(k));
-  await setMobileViewport(390, 844);
+  await setNarrowViewport(390, 844);
   await step("RB8b", () => rb8bPhoneDocks(k));
   // clearMobile stays OUTSIDE every step: the runner compensates for a suite left at phone metrics in onSuiteError, which a contained step no longer reaches.
   await clearMobile();

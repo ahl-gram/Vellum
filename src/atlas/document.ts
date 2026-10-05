@@ -181,7 +181,7 @@ function atlasHead(title: string, motion: boolean): string {
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="${motion ? "width=1024" : "width=device-width, initial-scale=1"}">
 <title>${escapeXml(title)}: a Vellum atlas</title>
 ${motion ? '<link rel="stylesheet" href="/fonts.css">\n<link rel="stylesheet" href="/motion.css">\n' : ""}<style>
 ${PAGE_CHROME_CSS}

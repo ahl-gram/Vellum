@@ -6,7 +6,7 @@ import type { Box, CornerRead, Row } from "../../e2e/suites/corners/geometry.ts"
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const box = (x: number, y: number, r: number, b: number, t = "ink"): Box => ({ x, y, r, b, t });
-const read = (innerW: number, left: Box[], right: Box[], more: Partial<CornerRead> = {}): CornerRead => ({ innerW, clientW: innerW, vw: innerW, left, right, clusterBottom: 100, bandH: null, ...more });
+const read = (innerW: number, left: Box[], right: Box[], more: Partial<CornerRead> = {}): CornerRead => ({ innerW, clientW: innerW, vw: innerW, scrollW: innerW, left, right, clusterBottom: 100, bandH: null, ...more });
 
 test("the corners sweep reads every page the tree builds, home and a nested room among them, in a stable order", () => {
   const routes = routesUnder(resolve(REPO, "src/pages"));
@@ -88,6 +88,7 @@ const ROOM = { forcedBelow: null, keepsMotto: false } as const;
 test("a width passes only clear, laid out at the width set, with ink in both corners, the band over the cluster, and the motto where it is kept", () => {
   assert.equal(verdict(room(), ROOM), null);
   assert.match(verdict({ w: 380, read: room().read }, ROOM) ?? "", /laid out at 390, not 380/);
+  assert.match(verdict(room({ scrollW: 412 }), ROOM) ?? "", /at 390 the page scrolls sideways to 412/, "a narrow desktop window never widens its layout, so an overflowing page shows as a sideways scroll instead (Issue #761)");
   assert.match(verdict(room({ left: [box(16, 14, 140, 42, "Vellum")] }), ROOM) ?? "", /found 1 cluster and 1 corner inks/);
   assert.match(verdict(room({ right: [] }), ROOM) ?? "", /found 2 cluster and 0 corner inks/);
   assert.match(verdict(room({ right: [box(120, 14, 374, 33, "The Explorer")] }), ROOM) ?? "", /"Vellum" meets "The Explorer" by 20\.0 x 19\.0/);
@@ -100,6 +101,7 @@ test("a width passes only clear, laid out at the width set, with ink in both cor
 test("the Gallery's forced layout is skipped only while it lasts: the skip fails the day the page lays out at the width set (Issue #672)", () => {
   const gallery = { forcedBelow: 346, keepsMotto: false } as const;
   assert.equal(verdict({ w: 320, read: read(347, [], []) }, gallery), null, "too wide, as Issue #672 records: skipped, ink unread");
+  assert.equal(verdict({ w: 320, read: read(320, [], [], { scrollW: 347 }) }, gallery), null, "a narrow desktop window never widens its layout, so the same defect scrolls sideways instead (Issue #761): still skipped");
   assert.match(verdict({ w: 320, read: read(320, [], []) }, gallery) ?? "", /Issue #672 has landed/, "laid out true below the edge: the skip has outlived its cause");
   assert.equal(verdict({ w: 390, read: room().read }, gallery), null, "above the edge it is an ordinary page");
   assert.match(verdict({ w: 346, read: read(347, [], []) }, gallery) ?? "", /laid out at 347, not 346/, "and from the edge itself");

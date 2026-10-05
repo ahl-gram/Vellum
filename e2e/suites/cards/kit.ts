@@ -6,9 +6,9 @@ type Settle = ReturnType<typeof makeSettle>;
 export type CardsKit = ReturnType<typeof cardsKit>;
 
 export function cardsKit(ctx: SuiteContext & { settle: Settle }) {
-  const { evaluate, send, sleep, waitReady, setMobileViewport, PORT } = ctx;
+  const { evaluate, send, sleep, waitReady, setNarrowViewport, PORT } = ctx;
   const sweepAt = async (width: number) => {
-    await setMobileViewport(width, 844);
+    await setNarrowViewport(width, 844);
     // The metrics override has to be in effect BEFORE the boot navigate, and this suite otherwise never navigates at all, so the group re-boots through about:blank rather than resizing the page it inherited.
     await send("Page.navigate", { url: "about:blank" });
     await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/#seed=${NARROW_SEED}&style=antique` });

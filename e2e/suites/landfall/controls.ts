@@ -8,7 +8,7 @@ export async function l9fPipGestures({ evaluate, check, sleep, touch, pressKey, 
   const pipPt9 = await evaluate(buttonPoint('.lf-station[data-station="how"]'));
   const room9f = await headroom();
   const onPipBefore = await camNow();
-  // The second finger sits LEFT of the pip and the move stays horizontal: at 390 the pip rides near the stage's right and lower edges, and a finger dispatched off the stage never registers (touch pointers are uncaptured), which faked this arm's first red.
+  // The second finger sits LEFT of the pip and the move stays horizontal: the pip can ride near the stage's right and lower edges, and a finger dispatched off the stage never registers (touch pointers are uncaptured), which faked this arm's first red.
   if (pipPt9 !== null) {
     await touch("touchStart", [{ x: Math.round(pipPt9.x), y: Math.round(pipPt9.y), id: 0 }, { x: Math.round(pipPt9.x) - 80, y: Math.round(pipPt9.y), id: 1 }]);
     await touch("touchMove", [{ x: Math.round(pipPt9.x) + 40, y: Math.round(pipPt9.y), id: 0 }, { x: Math.round(pipPt9.x) - 40, y: Math.round(pipPt9.y), id: 1 }]);

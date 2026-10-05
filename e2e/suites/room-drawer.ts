@@ -45,13 +45,13 @@ type Settle = ReturnType<typeof makeSettle>;
 type RoomDrawerKit = ReturnType<typeof roomDrawerKit>;
 
 export async function run(ctx: SuiteContext): Promise<void> {
-  const { send, setMobileViewport, clearMobile, waitReady, PORT } = ctx;
+  const { send, setNarrowViewport, clearMobile, waitReady, PORT } = ctx;
   const settle = makeSettle(ctx);
   const step = makeStep(ctx);
   const gate = scopedHealth(ctx);
   const k = roomDrawerKit({ ...ctx, settle });
 
-  await setMobileViewport(390, 844);
+  await setNarrowViewport(390, 844);
   await dr1Folded(k);
   await step("DR2, DR3", () => dr2SlidesHome(k));
   await step("DR4", () => dr4Closes(k));
@@ -60,7 +60,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("DR7", () => dr7Landscape(k));
 
   // The acceptance floor, and the one no sheet-text assertion can see: the resolved cascade across house.css, motion.css, the page sheet and the layout sheet, with the binder gone.
-  await setMobileViewport(390, 844);
+  await setNarrowViewport(390, 844);
   await send("Emulation.setScriptExecutionDisabled", { value: true });
   // The re-enable rides the step's own promise, not a line after it: outside-and-after covers a wait that gives up, but a step RETHROWS when the browser stops answering, and then the next line never runs and the rest of the lane meets a browser with page scripts switched off. check() itself needs no page script.
   const scriptsBackOn = async () => { try { await send("Emulation.setScriptExecutionDisabled", { value: false }); } catch {} };
@@ -72,7 +72,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("DR11", () => dr11Wide(k));
   await step("DR12", () => dr12Print(k));
   await step("DR13", () => dr13Gallery(k));
-  await setMobileViewport(390, 844);
+  await setNarrowViewport(390, 844);
   await step("DR14", () => dr14PhoneShut(k));
   await step("DR15", () => dr15Drawer(k));
   await step("DR16", () => dr16SheetUp(k));
@@ -192,8 +192,8 @@ async function dr6AppRoom({ evaluate, check, goto, tapBurger }: RoomDrawerKit): 
   );
 }
 
-async function dr7Landscape({ evaluate, check, setMobileViewport, goto, tapBurger }: RoomDrawerKit): Promise<void> {
-  await setMobileViewport(844, 390);
+async function dr7Landscape({ evaluate, check, setNarrowViewport, goto, tapBurger }: RoomDrawerKit): Promise<void> {
+  await setNarrowViewport(844, 390);
   await goto(DOCUMENT_ROOM);
   await tapBurger(atOpen, "land");
   const land = await evaluate(READ);
