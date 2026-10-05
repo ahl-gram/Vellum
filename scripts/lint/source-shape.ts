@@ -214,28 +214,56 @@ const e2eConsoleReadThroughDrop: Rule.RuleModule = {
 
 const frameNoIdLookup: Rule.RuleModule = {
   meta: problem("the reading frame looks up no element by id: it builds what it holds, and ids are the host's namespace, so a second frame on one page would collide (Issue #191, Issue #219)"),
-  create: () => ({}),
+  create: (context) => engineNoIdLookup.create(context),
 };
 
-const frameNoExplorerImport: Rule.RuleModule = {
-  meta: problem("the reading frame imports nothing from the Explorer, so a page that is not the Explorer can mount it (Issue #219)"),
-  create: () => ({}),
+const DECLARES_SOURCE = new Set(["ImportDeclaration", "ExportNamedDeclaration", "ExportAllDeclaration"]);
+
+const isModuleSource = (node: Node): boolean => {
+  for (let child: Node = node, parent = node.parent; parent !== null; child = parent, parent = parent.parent) {
+    if (DECLARES_SOURCE.has(parent.type)) return (parent as unknown as { source: unknown }).source === child;
+    if (parent.type === "ImportExpression" && parent.source === child) return true;
+    if (parent.type === "CallExpression" && isName(parent.callee as Node, "require") && (parent.arguments as Node[]).includes(child)) return true;
+  }
+  return false;
 };
 
-const explorerNoGlassKeys: Rule.RuleModule = {
-  meta: problem("the Explorer and home bind their own zoom presses by id: neither imports glass-keys.ts nor queries [data-zoom], a document-wide binding that would double every press (handbook/specs/explorer-doctrine.md)"),
-  create: () => ({}),
+const stringText = (node: Node): string | null =>
+  node.type === "Literal" && typeof node.value === "string" ? node.value : node.type === "TemplateElement" ? (node.value.cooked ?? node.value.raw) : null;
+
+const never = (): boolean => false;
+
+const stringJudge = (context: Rule.RuleContext, asSource: (text: string) => boolean, anywhere: (text: string) => boolean): Rule.RuleListener => {
+  const judge = (node: Node): void => {
+    const text = stringText(node);
+    const at = node.type === "TemplateElement" ? node.parent : node;
+    if (text === null || inTypePosition(at.parent ?? at)) return;
+    if ((asSource(text) && isModuleSource(at)) || anywhere(text)) context.report({ node, messageId: "found" });
+  };
+  return { Literal: judge, TemplateElement: judge };
 };
+
+const sourceBan = (message: string, asSource: (text: string) => boolean, anywhere: (text: string) => boolean = never): Rule.RuleModule => ({
+  meta: problem(message),
+  create: (context) => stringJudge(context, asSource, anywhere),
+});
+
+const frameNoExplorerImport = sourceBan("the reading frame imports nothing from the Explorer, so a page that is not the Explorer can mount it (Issue #219)", (text) => text.includes("explorer/"));
+
+const explorerNoGlassKeys = sourceBan(
+  "the Explorer and home bind their own zoom presses by id: neither imports glass-keys.ts nor queries [data-zoom], a document-wide binding that would double every press (handbook/specs/explorer-doctrine.md)",
+  (text) => text.includes("glass-keys"),
+  (text) => text.includes("[data-zoom"),
+);
+
+const CONTENTS_ROW_BUILDER = "src/site/shared/contents-row.ts";
 
 const contentsRowBuilderOnly: Rule.RuleModule = {
   meta: problem("the contents row's cr-num class is written only by its shared builder, src/site/shared/contents-row.ts, so no room builds the row by hand"),
-  create: () => ({}),
+  create: (context) => (repoPath(context.filename) === CONTENTS_ROW_BUILDER ? {} : stringJudge(context, never, (text) => text.includes("cr-num"))),
 };
 
-const testNoTestImport: Rule.RuleModule = {
-  meta: problem("nothing imports a .test.ts: node --test would run that file's tests a second time; share through test-support/ instead"),
-  create: () => ({}),
-};
+const testNoTestImport = sourceBan("nothing imports a .test.ts: node --test would run that file's tests a second time; share through test-support/ instead", (text) => /\.test\.ts(?:\?|$)/.test(text));
 
 export default {
   rules: {
