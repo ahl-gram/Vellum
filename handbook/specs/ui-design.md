@@ -113,8 +113,9 @@ Two room patterns, both ratified whole after live use (#462, ratified at #454).
 
 **A chart room.** The chart is the room: full bleed on the deep, pannable and zoomable, fitted to
 what the chrome leaves and **measured off the chrome's own rects, never guessed** (and measured after
-the chrome has its text, or the fit reads an empty box, and again once the fonts are ready and on
-every resize, which `bindRoom` in `src/site/shared/room.ts` wires). **The stage is the fixed
+the chrome has its text, or the fit reads an empty box, and again once the fonts are ready, on
+every resize, and whenever the head cluster or the room folio changes size, which `bindRoom` in
+`src/site/shared/room.ts` wires). **The stage is the fixed
 full-viewport box the chart is mounted in**, declared as `body.chart-room .stage` in
 `public/atelier.css`; a room that hangs its plates on the deep rather than mounting one chart has
 none, and the Gallery is that room today. No band, no footer: a chart room with a
@@ -130,13 +131,17 @@ scrolling page it washes out whatever passes through it. Four corners, each a na
 
 - **The head cluster**, top left: wordmark, flourish tagline, dot-separated rooms nav and, on every
   page with a seat in the route tree, the trail under it, directly on the deep. Fixed in a room,
-  riding the page on home. In a room on a phone the tagline stands aside and keeps its line, so
-  nothing under it rides up into the room folio, and on the narrowest phones the wordmark steps down
-  a size on every page. **Provisional until the post-use review:** the width the tagline stands aside
-  below.
+  riding the page on home. The motto keeps its line and the wordmark its size at every width. **The
+  cluster and the right-hand corner share one top row** on every page, laid out from their own boxes
+  by `src/site/shell/top-row.ts`: a corner wider than the kit's gives way toward the kit's width first,
+  then the cluster takes the width the corner leaves and the nav wraps between rooms, never inside a
+  room's name, at a pitch that keeps a thumb's 24px between its doors; the two boxes always stand
+  `--chrome-x` apart, wider than any backing the corner draws toward the nav. With scripts off a
+  window below 1024 can overlap.
 - **The room folio**, top right: the room's name and tagline, with the room's *one* primary control
   under them. One control. The rest of the press is the legend row. A room that widens its folio
-  does so only from the width where the wider folio clears the nav's top line.
+  declares its cap as `--folio-cap` over the kit's `--folio-w`, with no width query, and the top row
+  narrows it toward the kit's width wherever the cap would run under the nav.
 - **The chart folio**, bottom left: the lines the room's script fills at the draw, the chart's title,
   survey line and coordinates.
 - **The Surveyor's Glass**, bottom right of the chart: the camera's presses. Where it is seated and
@@ -157,19 +162,19 @@ AND underlined, never colour alone; on a top-level room the trail's last segment
 dress without the mark, which the nav carries. Home carries none, its wordmark being its mark, and
 so does a page deliberately outside the tree. The trail's links are parchment like the nav's, never
 a dimmer ink, and at every width each clears a thumb's 24px from the cluster's other links and
-controls. Below the fold the trail rides into the open drawer's cap above the doors, because opening
-the nav to ask where you are must not take the answer away. **Provisional until the post-use
-review:** the trail's size step under the nav, its separator glyph, the alias line's wording and
-whether it earns its place, the trail and the nav sharing one ink above 901, the margins that clear
-the targets' spacing, the Gallery's first row given back its gap, the phone-sized band on a document
-room, the trail standing aside on a chart room while the phone sheet is up, and the alias link's
+controls. **Provisional until the post-use review:** the trail's size step under the nav, its separator glyph, the alias line's wording and
+whether it earns its place, the trail and the nav sharing one ink, the margins that clear
+the targets' spacing, the Gallery's first row given back its gap, the
+trail standing aside on a chart room while the phone sheet is up, and the alias link's
 strengthened underline.
 
 **A document room** is the sheet instead. It keeps the band and the footer because it scrolls, and it
 replaces a table of contents with an **index slip** that inks the section being read and keeps it in
 view. Folding the index hands the sheet the width, in one smooth settle, and gives it back the same
 way. **The band buys the ground for what the cluster carries**: its height is keyed to the
-cluster's contents, never to a page's name, and raised only on a room that renders a band.
+cluster's contents, never to a page's name, and raised only on a room that renders a band. When the
+top row wraps the nav, the band token grows by exactly what the cluster grew, on every page that reads
+it.
 
 **A room's name stands in the corner, not on the sheet.** Exactly one `h1` per page, and it is the
 first heading; the wordmark is the `h1` on home alone, because home is roomless.
@@ -178,8 +183,7 @@ first heading; the wordmark is the `h1` on home alone, because home is roomless.
 subtree.** That is the whole of what the set owes. A click over an inert subtree retargets to its
 nearest live ancestor, so a member outside the host retargets to something that is not the scrim and
 is dead with no way out. Painted extent is a separate, visual question: a fixed wash may sit off an
-inert region the page has scrolled without any harm, because the body is that region's host too. The
-wirings are `HOME_WIRING` and `ROOM_WIRING` in `src/site/shell/wiring.ts`.
+inert region the page has scrolled without any harm, because the body is that region's host too.
 
 **Which scrim shape belongs where follows the chrome.** Where the chrome rides the page, a fixed
 scrim is the defect, because an open overlay scrolls away from it; where the chrome is fixed, the
@@ -199,8 +203,7 @@ clear of the chrome, the chrome carries none. The
 legend row and the room folio take home's crisp panel instead of the blurred pool, so that a chart
 room's corners read the same as home's, corner for corner. Over a floored sheet the strip alone takes
 none: its lines stand on its own panel, and a pool there would lie over the chart folio and the Glass.
-The room folio's panel reaches only a little way toward the nav there, since at the narrowest windows
-the nav stands closer to the folio than a full reach clears.
+The room folio's panel reaches only a little way toward the nav there.
 
 **The legend row never takes a real padding.** Its seat gives it its width, and the footing that
 looks like padding is the row's own pseudo-element drawn at those insets, so the row's box, which the
@@ -324,10 +327,10 @@ Glass, whose translucency is load-bearing over a chart.
 makes iOS Safari zoom the page on focus.
 
 **The ruled phone width is 390.** 320 is checked, and its squeezes are accepted and recorded rather
-than designed for, with one exception: **the head cluster and the room's right-hand corner never
-overlap, at any width from 320 up.** A room folio line, a control or a widened corner is written to
-fit beside the cluster rather than accepted as a squeeze, and the sweep in `e2e/suites/corners.ts`
-holds every page to it. A deviation that is knowingly shipped is recorded with its measurement, not left
+than designed for. **The head cluster and the room's right-hand corner never overlap, at any width
+from 640 up:** a room folio line, a control or a widened corner is written to fit beside the cluster
+rather than accepted as a squeeze, the top row holds it by script, and the sweep in
+`e2e/suites/corners.ts` holds every page to it. A deviation that is knowingly shipped is recorded with its measurement, not left
 silent, because an unrecorded one reads to the next session as a defect and gets "fixed" back.
 **A panel that quotes generated prose is held to BOTH widths, because generated prose has no length
 and a panel sized for the copy you measured overflows on the next seed**: give it a definite width
