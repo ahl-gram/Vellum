@@ -6,6 +6,7 @@ import ts from "typescript";
 import type { Evaluate, Payload } from "../../e2e/types.ts";
 import { makeSettle } from "../../e2e/support/settle.ts";
 import { e2eSourcePaths } from "../../test-support/e2e-source.ts";
+import { compileWithVirtual } from "../../test-support/virtual-compile.ts";
 
 type Cam = { scale: number; x: number; y: number };
 const readCam = "(() => null)()" as Payload<Cam | null>;
@@ -84,15 +85,7 @@ const READ_NAMES = new Set(["evaluate", "settle"]);
 function e2eProgram(extra: ReadonlyMap<string, string> = new Map()): ts.Program {
   const config = ts.getParsedCommandLineOfConfigFile(join(REPO, "tsconfig.json"), {}, { ...ts.sys, onUnRecoverableConfigFileDiagnostic: () => undefined });
   assert.ok(config, "tsconfig.json did not parse");
-  const host = ts.createCompilerHost(config.options);
-  const read = host.getSourceFile.bind(host);
-  host.getSourceFile = (name, version, ...rest) => {
-    const text = extra.get(resolve(name));
-    return text === undefined ? read(name, version, ...rest) : ts.createSourceFile(name, text, version, true);
-  };
-  const exists = host.fileExists.bind(host);
-  host.fileExists = (name) => extra.has(resolve(name)) || exists(name);
-  return ts.createProgram({ rootNames: [...e2eSourcePaths(REPO), ...extra.keys()], options: config.options, host });
+  return compileWithVirtual(config.options, e2eSourcePaths(REPO), extra);
 }
 
 function knownDeclarations(program: ts.Program): { readers: readonly ts.Node[]; senders: readonly ts.Node[] } {
