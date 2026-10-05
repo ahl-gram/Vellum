@@ -4,7 +4,7 @@ import { E2E_LANES } from "../../e2e/support/lanes.ts";
 import { E2E_SUITE_ORDER } from "../../e2e/support/suites.ts";
 import type { E2eSuiteName } from "../../e2e/support/suites.ts";
 
-// CI seconds per suite, the median of the runner's own per-suite wall clock in the CI lane logs over main runs 37080729164 to 37168764434 (nine, 2026-10-02 to 2026-10-04; room-drawer six from 7266e12, corners three from 40b89d3, cluster one from PR #774 run 37255002357 after the desk notice joined it), read at Issue #743 with `gh api --allow-escape-sequences repos/ahl-gram/Vellum/actions/jobs/<job>/logs` and the lines under `per-suite wall clock`; a new suite enters an estimate and is corrected from its pull request's own lane log.
+// CI seconds per suite, the median of the runner's own per-suite wall clock in the CI lane logs over main runs 37080729164 to 37168764434 (nine, 2026-10-02 to 2026-10-04; room-drawer six from 7266e12, corners one from PR #777 run 37308657898 after the minimum-size stage group joined it, cluster one from PR #774 run 37255002357 after the desk notice joined it), read at Issue #743 with `gh api --allow-escape-sequences repos/ahl-gram/Vellum/actions/jobs/<job>/logs` and the lines under `per-suite wall clock`; a new suite enters an estimate and is corrected from its pull request's own lane log.
 const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   "render": 44.7,
   "motion": 3.7,
@@ -37,7 +37,7 @@ const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   "document-rooms": 8.1,
   "region-detail": 44.2,
   "specimen": 9.3,
-  "corners": 290.0,
+  "corners": 274.4,
 };
 
 const laneSeconds = (suites: readonly E2eSuiteName[]) =>
