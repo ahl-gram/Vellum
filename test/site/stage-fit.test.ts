@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { SLIP_CLEARANCE, fitStage } from "../../src/site/shared/stage-fit.ts";
+import { CHROME_GAP, SLIP_CLEARANCE, fitStage } from "../../src/site/shared/stage-fit.ts";
 
 // Issue #462 chart-room ruling 1: the chart is fitted to the space the chrome leaves, measured off the chrome rects, never guessed.
 
@@ -66,7 +66,7 @@ test("no chrome at all leaves the gap alone, and a chrome past the viewport cann
 
 // The Explorer's own chrome as bindRoom reads it on a build of main, the Broadside open (measured 2026-10-05, Issue #762): the cluster and the folio above, the chart folio and the Press below, the slip beside, the Glass's left edge.
 const explorer = (w: number, h: number, folio: number, press: number, glass: number) =>
-  fitStage({ ...base, view: { w, h }, above: [127.41, 130.73], below: [folio, press], beside: 384, right: [glass] });
+  fitStage({ ...base, gap: CHROME_GAP, view: { w, h }, above: [127.41, 130.73], below: [folio, press], beside: 384, right: [glass] });
 const near = (actual: number, expected: number, what: string) => assert.ok(Math.abs(actual - expected) < 0.05, `${what}: ${actual}, not ${expected}`);
 
 test("a fit the chrome leaves healthy is untouched: the sheet, the reserves and no floor (Issue #762)", () => {

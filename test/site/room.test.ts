@@ -156,4 +156,6 @@ test("the Press stacks when its presses take more than two lines, or two or more
   assert.equal(pressRowStacks([12]), false, "a single press is never a stack");
   assert.equal(pressRowStacks([]), false, "a row with no press shown");
   assert.equal(pressRowStacks([10.4, 10.6, 71.6]), false, "presses on one line read as one, even a fraction of a pixel apart across a rounding edge");
+  assert.equal(pressRowStacks([44, 0]), true, "tops read in any order: the lines are counted from the sorted tops, not the order the presses come in");
+  assert.equal(pressRowStacks([88, 44, 0]), true, "three presses each alone, read bottom first");
 });
