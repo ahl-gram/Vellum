@@ -282,8 +282,7 @@ const STEPPED_GROUPS: Readonly<Record<string, readonly string[]>> = {
     "SV1", "SV2 to SV2c", "SV2d", "SV2e", "SV2g", "SV2h", "SV2i", "SV2j", "SV2p", "SV2m", "SV2o",
     "SV3", "SV4", "SV5c", "SV5d", "SV6", "SV9", "SV10", "SV2n",
   ],
-  "cluster": ["CL4", "CL5", "CL8", "CL7", "DN1, DN2, DN3, DN9, DN3r", "DN5", "DN6", "DN7", "DN4"],
-  "room-drawer": ["DR2, DR3", "DR4", "DR5", "DR6", "DR7", "DR8", "DR11", "DR12", "DR13", "DR14", "DR15", "DR16", "DR17"],
+  "cluster": ["DN1, DN2, DN3, DN9, DN3r", "DN5", "DN6", "DN7", "DN4", "DR11", "DR12", "DR13", "DR16"],
   "chart-drawer": [
     "CD1", "CD2, CD2b, CD2c", "CD23", "CD3", "CD44", "CD45", "CD46", "CD4", "CD5", "CD7, CD7b, CD7c", "CD47", "CD8",
     "CD9, CD11, CD12, CD22, CD43", "CD13", "CD18", "CD18b", "CD6, CD48", "CD15, CD17",
@@ -292,7 +291,7 @@ const STEPPED_GROUPS: Readonly<Record<string, readonly string[]>> = {
   ],
   "document-rooms": ["IX3"],
   "specimen": ["SB4"],
-  "corners": ["CO1", "CO4", "CO2", "CO3", "EA1", "EA2, EA3, EL1, EL2", "EA4", "EA5"],
+  "corners": ["CO1", "CO4", "CO2", "CO3", "CO5", "CO6", "CO7", "EA1", "EA2, EA3, EL1, EL2", "EA4", "EA5"],
 };
 
 const SUITE_FILES = E2E_SUITE_ORDER.map((name) => [name, e2eSuitePath(name)] as const);

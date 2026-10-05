@@ -74,6 +74,6 @@ export function bindTopRow(): void {
   const lay = (): void => { layRow(cluster, corner, nav); };
   lay();
   window.addEventListener("resize", lay);
-  void document.fonts?.ready.then(lay); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+  void document.fonts.ready.then(lay);
   new MutationObserver(lay).observe(corner, { childList: true, characterData: true, subtree: true });
 }
