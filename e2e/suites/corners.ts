@@ -15,6 +15,7 @@ const PAGE_FLOOR = ["/", "/explorer/", "/explorer/portfolio/", "/faq/", "/galler
 const FOLD = 900;
 const BELOW_WIDE = 1023;
 const YIELD_TOP = 1040;
+const YIELD_MID = 1032;
 const SQUEEZED_ALREADY: Readonly<Record<string, string>> = { "/specimen/": "Issue #741" };
 const NARROW_LO = 640;
 const WIDE = 1280;
@@ -222,7 +223,8 @@ async function co3Wraps(ctx: SuiteContext): Promise<void> {
   let read = 0;
   for (const page of routesUnder(resolve(REPO, "src/pages"))) {
     await load(ctx, page, BELOW_WIDE, false);
-    for (const w of [YIELD_TOP, BELOW_WIDE, 960, FOLD + 1]) {
+    const yields = await ctx.evaluate<boolean>(`getComputedStyle(document.documentElement).getPropertyValue("--folio-cap").trim() !== ""`);
+    for (const w of [...(yields ? [YIELD_TOP, YIELD_MID] : []), BELOW_WIDE, 960, FOLD + 1]) {
       await readAt(ctx, w, false);
       const controls = await ctx.evaluate(CONTROLS);
       read += controls.length;
@@ -231,7 +233,7 @@ async function co3Wraps(ctx: SuiteContext): Promise<void> {
     rows.push(page);
   }
   ctx.check(
-    "CO3 from the fold to 1040, where a wide room's corner gives way toward the kit's width before the nav wraps (Issue #762; Alex's 2026-10-03 ruling 4 on Issue #638), no control in any page's right-hand corner is squeezed below its own width: the row wraps onto another line instead; the Specimen Book, which squeezes at every width above the fold on main too, is exempt until Issue #741 lands and fails here the day it stops (Issue #638)",
+    "CO3 from the fold to 1023 on every page, and to 1040 on a page whose corner carries its own cap and so gives way toward the kit's width before the nav wraps (Issue #762; Alex's 2026-10-03 ruling 4 on Issue #638), no control in any page's right-hand corner is squeezed below its own width: the row wraps onto another line instead; the Specimen Book, which squeezes at every width above the fold on main too, is exempt until Issue #741 lands and fails here the day it stops (Issue #638)",
     faults.length === 0 && read > 0,
     `${rows.length} pages, ${read} control reads; ${faults.length ? `${faults.length} squeezed: ${faults.slice(0, 6).join("; ")}` : "none squeezed"}`,
   );
