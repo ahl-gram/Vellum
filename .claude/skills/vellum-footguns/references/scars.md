@@ -3,9 +3,9 @@
 Compiled 2026-09-09 from the bodies, commits and verification comments of PRs #524 to #548 and
 their issues, with older and later scars added beneath when a gate needs one (#378, #518 to #521, #525, #526, #529, #531, #532, #539, #540, #543, epic #401).
 Every row before "Behind the spec lines Issue #708 promoted" was found by a cold skeptic, a prover, a
-plate-reader, CI, or Alex live, after the implementing session had already reported the work done. Ranked by how many PRs in that window
-carried it. Where a lesson's rule is written down in this repo, it is in one of the homes named at
-the end.
+plate-reader, CI, or Alex live, after the implementing session had already reported the work done.
+Ranked by how many PRs in that window carried it. Where a lesson's rule is written down in this
+repo, it is in one of the homes named at the end.
 
 ## Families, most recurrent first
 
