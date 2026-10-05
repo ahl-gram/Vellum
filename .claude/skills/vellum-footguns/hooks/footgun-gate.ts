@@ -9,6 +9,7 @@ import { tmpdir } from "node:os";
 import { dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type * as TS from "typescript";
+import { bareCdReason } from "./bare-cd.ts";
 import { proseOf } from "./markdown-code.ts";
 
 export type ToolInput = {
@@ -18,7 +19,7 @@ export type ToolInput = {
   command?: string;
   edits?: { new_string?: string }[];
 };
-export type Payload = { tool_name?: string; session_id?: string; cwd?: string; tool_input?: ToolInput };
+export type Payload = { tool_name?: string; session_id?: string; cwd?: string; agent_id?: string; tool_input?: ToolInput };
 type Output = { hookEventName: "PreToolUse"; permissionDecision?: "deny"; permissionDecisionReason?: string; additionalContext?: string };
 export type Decision = { hookSpecificOutput: Output } | null;
 
@@ -354,6 +355,8 @@ const checkBash = async (payload: Payload, sessionId: string): Promise<Decision>
     if (ghDeny) return ghDeny;
     notes.push(warning);
   }
+  const moved = payload.agent_id === undefined ? bareCdReason(command, cwd, process.env.CLAUDE_PROJECT_DIR) : null;
+  if (moved) return deny(moved);
   if (REDIRECT_INTO_SCRIPT.test(command)) {
     const bodies = heredocBodies(command);
     const { refusal, note } = await escapeScan(bodies.length ? bodies.join("\n") : command, "a script written from the shell");
