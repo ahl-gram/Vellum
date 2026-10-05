@@ -84,6 +84,9 @@ const CODE_ROWS: ReadonlyArray<readonly [string, "deny" | "null" | "context"]> =
   ["an em-dash inside a tilde fence whose info string holds a backtick allowed", "null"],
   ["an em-dash inside a fence indented three spaces allowed", "null"],
   ["an em-dash inside an inline body's span allowed", "null"],
+  ["an em-dash inside a fence of a crlf body allowed", "null"],
+  ["an em-dash in a span after a doubled backslash allowed", "null"],
+  ["an em-dash in a fence after an html block that a blank line ended allowed", "null"],
   ["an em-dash in prose beside a span denied", "deny"],
   ["an em-dash after an unclosed backtick denied", "deny"],
   ["an em-dash in a span opened on one line and closed on the next denied", "deny"],
@@ -96,8 +99,11 @@ const CODE_ROWS: ReadonlyArray<readonly [string, "deny" | "null" | "context"]> =
   ["an em-dash inside a fence indented four spaces denied", "deny"],
   ["an em-dash in an indented block with no fence denied", "deny"],
   ["an em-dash in a table cell whose bare pipe splits the span denied", "deny"],
+  ["an em-dash in a cell of a table whose rows start with no pipe denied", "deny"],
   ["an em-dash in the body after a fence the command opened denied", "deny"],
   ["an em-dash in the title outside code denied", "deny"],
+  ["an em-dash in a body after a backtick the title left open denied", "deny"],
+  ["an em-dash in a second call's body after a backtick the first left open denied", "deny"],
   ["an em-dash on the line after a closing fence denied", "deny"],
   ["an em-dash glued after a span denied", "deny"],
   ["an em-dash glued before a span denied", "deny"],
@@ -106,9 +112,16 @@ const CODE_ROWS: ReadonlyArray<readonly [string, "deny" | "null" | "context"]> =
   ["an em-dash in a span whose only closer is a longer run denied", "deny"],
   ["an em-dash before a fence line that carries an info string denied", "deny"],
   ["an em-dash in a second body file after a fence the first opened denied", "deny"],
+  ["an em-dash after a list item's fence that its item ended denied", "deny"],
+  ["an em-dash on a line that leaves a list item's fence denied", "deny"],
+  ["an em-dash inside a list item's fence allowed", "null"],
+  ["an em-dash between html tags whose attributes hold backticks denied", "deny"],
+  ["an em-dash in an autolink whose address holds backticks denied", "deny"],
+  ["an em-dash in a fence inside an html block denied", "deny"],
+  ["an em-dash between two spans that each hold a tag denied", "deny"],
+  ["a long prose line is quoted at its em-dash", "deny"],
 ];
 
-// Written out like the size probes, for Issue #644's reader: each row is the only guard of its rule, and a row deleted from the table, or the whole set unspread, prints no FAIL.
 test("every row on reading an em-dash inside code passes, with the decision it was written for", () => {
   const out = execFileSync(process.execPath, [SELFTEST], { encoding: "utf8", timeout: BOUND_MS });
   const lines = out.split("\n");
