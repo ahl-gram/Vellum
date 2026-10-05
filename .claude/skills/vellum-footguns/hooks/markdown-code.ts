@@ -25,11 +25,8 @@ const closesFence = (line: string, fence: Fence): boolean => {
 };
 
 const inList = (lines: readonly string[], at: number): boolean => {
-  for (let j = at - 1; j >= 0; j -= 1) {
-    const line = lines[j] ?? "";
-    if (line.trim() !== "") return LIST_ITEM.test(line) || indentOf(line) > 0;
-  }
-  return false;
+  const before = lines.slice(0, at).filter((line) => line.trim() !== "");
+  return before.some((line) => LIST_ITEM.test(line)) || indentOf(before.at(-1) ?? "") > 0;
 };
 
 const fenceEnd = (lines: readonly string[], at: number, fence: Fence): number => {

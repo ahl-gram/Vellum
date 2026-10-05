@@ -113,6 +113,7 @@ const CODE_ROWS: ReadonlyArray<readonly [string, "deny" | "null" | "context"]> =
   ["an em-dash before a fence line that carries an info string denied", "deny"],
   ["an em-dash in a second body file after a fence the first opened denied", "deny"],
   ["an em-dash after a list item's fence that its item ended denied", "deny"],
+  ["an em-dash on a line that leaves the fence of a list item with a lazy line denied", "deny"],
   ["an em-dash on a line that leaves a list item's fence denied", "deny"],
   ["an em-dash inside a list item's fence allowed", "null"],
   ["an em-dash between html tags whose attributes hold backticks denied", "deny"],

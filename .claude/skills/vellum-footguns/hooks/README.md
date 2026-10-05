@@ -100,9 +100,13 @@ is ever removed.
   after an indented paragraph line that is not a list, a line that starts with a pipe outside a
   table, a paragraph line that opens with inline HTML (read as an HTML block), and a backtick typed
   as backslash-backtick inside a double-quoted `--body`, where the shell needs the escape and the
-  reader sees an escaped opener. Its misses: an em-dash inside an HTML tag's attribute, which a tag
-  takes out whole though a `title` shows as a tooltip; and the dash written as an entity
-  (`&mdash;`, `&#8212;`), which GitHub renders and no check of this hook has ever read.
+  reader sees an escaped opener, and an inline body holding the other kind of quote, which is split
+  at it. Known misses, each checked against GitHub's renderer: an em-dash inside an HTML tag's
+  attribute, which a tag takes out whole though a `title` shows as a tooltip; and the dash written
+  as an entity (`&mdash;`, `&#8212;`), which GitHub renders and no check of this hook has ever read.
+  The reader models no container but a list item's fence, so a blockquote, a deeper list or a
+  footnote is read as top-level text: a fence there is usually refused, and anything that would
+  close inside such a container and not outside it is a miss this list has not found.
 
 - A regex inside a single- or double-quoted JS string loses its backslash the same way and is not
   scanned: an apostrophe in prose would open a false span, so the scanner errs toward silence there.

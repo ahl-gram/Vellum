@@ -47,6 +47,7 @@ export const CODE_ROWS: ReadonlyArray<CodeRow> = [
   ["an em-dash after a list item's fence that its item ended denied", COMMENT, ["- item\n  ```\n  code\n\nprose <D> here\n\n```\nmore\n```"], "deny"],
   ["an em-dash on a line that leaves a list item's fence denied", COMMENT, ["- item\n  ```\nprose <D> here\n  ```"], "deny"],
   ["an em-dash inside a list item's fence allowed", COMMENT, ["- item\n\n  ```\n  FAIL x <D> y\n  ```"], null],
+  ["an em-dash on a line that leaves the fence of a list item with a lazy line denied", COMMENT, ["- item\nlazy\n  ```\nprose <D> x\n  ```"], "deny"],
   ["an em-dash between html tags whose attributes hold backticks denied", COMMENT, ['see <a title="`">x <D> y</a><a title="`">z</a>'], "deny"],
   ["an em-dash in an autolink whose address holds backticks denied", COMMENT, ["see <https://a.example/`b<D>c`> here"], "deny"],
   ["an em-dash in a fence inside an html block denied", COMMENT, ["<details>\n```\nFAIL x <D> y\n```\n</details>"], "deny"],
