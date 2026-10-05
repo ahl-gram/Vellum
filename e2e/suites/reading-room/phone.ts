@@ -4,7 +4,7 @@ import { stripRead } from "./reads.ts";
 
 export async function rr34bPhone({ evaluate, send, check, shoot, sleep, boot, settled, PORT }: ReadingRoomKit, ctx: SuiteContext): Promise<void> {
   // Device metrics go on BEFORE the navigation (the CDP-touch rule; no touch is dispatched), and the probe waits out the paperUnfurl: its keyframe fakes a sideways overflow in mid-flight geometry (the Issue #312 screenshot rule).
-  await ctx.setMobileViewport(390, 844);
+  await ctx.setNarrowViewport(390, 844);
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/reading-room/#seed=42&style=antique&legend=1` });
   // Issue #463 (skeptic on PR #492): between the boot and the arm the engine's panel is hidden and the slip inside it has no rect; a fit that read its zero top reserved the whole viewport and seated the Glass above it. Sampled through the boot, before the arm lands.

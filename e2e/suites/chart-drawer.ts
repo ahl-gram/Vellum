@@ -57,7 +57,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
 }
 
 async function cd9Surfaces(kd: DragKit, step: Step, SIX: string): Promise<void> {
-  const { send, setMobileViewport, clearMobile, go } = kd;
+  const { send, setNarrowViewport, clearMobile, go } = kd;
   // CD9 / CD11 / CD12 (Issue #543, Alex 2026-09-08): the Broadside and the Chart Table are never open together and nothing is lifted onto the chart, because covering the caption and the roads out while leaving the side panel standing made no sense to the reader.
   await step("CD9, CD11, CD12, CD22, CD43", async () => { const withOpen = await cd9NeverTogether(kd, SIX); await cd12SeatsHold(kd, SIX, withOpen); });
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
@@ -77,9 +77,9 @@ async function cd9Surfaces(kd: DragKit, step: Step, SIX: string): Promise<void> 
   await cd21PortfolioGlass(kd);
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   // CD6 (Issue #540 Sub 2a): the desktop drawer must never paint at 390, and the check has to try the door that opens it: `lay()` calls setOpen(true) with no width term, and `.chart-drawer.open` (0,2,0) beat the stand-down's (0,1,0), so once .open landed the drawer displayed at 390 over a reader who could not shut it.
-  await setMobileViewport(390, 844);
+  await setNarrowViewport(390, 844);
   await step("CD6, CD48", () => cd6PhoneDoor(kd));
-  await setMobileViewport(390, 844);
+  await setNarrowViewport(390, 844);
   await cd14LeafTabs(kd, SIX);
   await step("CD15, CD17", () => cd15TableLeaf(kd));
   await cd16LeafTurnsBack(kd);

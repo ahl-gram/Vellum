@@ -47,7 +47,7 @@ const READ = `(() => {
   };
   const root = getComputedStyle(document.documentElement);
   const sentinel = document.getElementById("co-vw");
-  return { innerW: innerWidth, clientW: document.documentElement.clientWidth, vw: sentinel ? r2(sentinel.getBoundingClientRect().width) : -1,
+  return { innerW: innerWidth, clientW: document.documentElement.clientWidth, vw: sentinel ? r2(sentinel.getBoundingClientRect().width) : -1, scrollW: document.documentElement.scrollWidth,
     left: ink(document.querySelector("header.chrome")), right: ink(document.querySelector(".corner.tr.folio-room") || document.querySelector(".lf-seed")),
     clusterBottom: r2(document.querySelector("header.chrome").getBoundingClientRect().bottom),
     bandH: document.querySelector(".band") ? r2(parseFloat(root.getPropertyValue("--band-h")) * parseFloat(root.fontSize)) : null };
@@ -89,7 +89,7 @@ const WIDEST_DATELINE: Payload<string> = `(async () => {
 
 async function load(ctx: SuiteContext, page: string, w: number, mobile: boolean): Promise<string | null> {
   const { send, evaluate, sleep, PORT } = ctx;
-  if (mobile) await ctx.setMobileViewport(w, PHONE_H);
+  if (mobile) await ctx.setNarrowViewport(w, PHONE_H);
   else {
     await ctx.setTouch(false);
     await send("Emulation.setDeviceMetricsOverride", { width: w, height: WIDE_H, deviceScaleFactor: 1, mobile: false });
@@ -107,7 +107,7 @@ async function load(ctx: SuiteContext, page: string, w: number, mobile: boolean)
 }
 
 async function readAt(ctx: SuiteContext, w: number, mobile: boolean): Promise<Row> {
-  await ctx.send("Emulation.setDeviceMetricsOverride", { width: w, height: mobile ? PHONE_H : WIDE_H, deviceScaleFactor: 1, mobile });
+  await ctx.send("Emulation.setDeviceMetricsOverride", { width: w, height: mobile ? PHONE_H : WIDE_H, deviceScaleFactor: 1, mobile: false });
   return { w, read: await ctx.evaluate(restAt(w), true) };
 }
 
@@ -165,7 +165,7 @@ async function co1Sweep(ctx: SuiteContext): Promise<readonly PageResult[]> {
     return { ok: r.error === null && faults.length === 0, text: `${r.page} ${rows.length} widths, nearest ${close.d.toFixed(1)} at ${close.w}${r.dateline ? ` (dateline "${r.dateline}")` : ""}${r.error ? `; ERROR ${r.error}` : ""}${faults.length ? `; ${faults.length} faults: ${faults.slice(0, 4).join("; ")}` : ""}` };
   });
   ctx.check(
-    "CO1 on every page the tree builds, resized while loaded from 320 to 480 a pixel at a time and at both sides of every width media edge its CSS carries and a 32px stride up to 1280, no ink of the head cluster overlaps the ink of the right-hand corner by any amount, both corners carry ink, home keeps its motto, the band covers the cluster, the Seed of the Day writes its own dateline through datelineFor, and the Gallery's too-wide layout below 346 is the only width that lays out wider than set (Issue #638; Alex's 2026-09-22 and 2026-10-03 rulings; Issue #672)",
+    "CO1 on every page the tree builds, resized while loaded from 320 to 480 a pixel at a time and at both sides of every width media edge its CSS carries and a 32px stride up to 1280, no ink of the head cluster overlaps the ink of the right-hand corner by any amount, both corners carry ink, home keeps its motto, the band covers the cluster, the Seed of the Day writes its own dateline through datelineFor, and the Gallery's too-wide layout below 346 is the only width that lays out wider than set or scrolls sideways (Issue #638; Alex's 2026-09-22 and 2026-10-03 rulings; Issue #672)",
     missing.length === 0 && lines.every((l) => l.ok),
     `${missing.length ? `pages missing from the tree: ${missing.join(", ")} | ` : ""}${lines.map((l) => l.text).join(" | ")}`,
   );

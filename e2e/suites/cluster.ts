@@ -4,6 +4,7 @@ import { sampleRow, luminance } from "../support/pixel.ts";
 import { makeSettle } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
 import type { Payload, Point, SuiteContext } from "../types.ts";
+import { deskKit, dnContinue, dnNarrow, dnPhone, dnRefused, dnTablet, storageRefusal } from "./cluster/desk-notice.ts";
 
 type Rect = { x: number; y: number; w: number; h: number; right: number; bottom: number };
 type Box = { x: number; y: number; w: number; h: number };
@@ -58,7 +59,7 @@ type Settle = ReturnType<typeof makeSettle>;
 type Stage = ReturnType<typeof makeStage>;
 
 export async function run(ctx: SuiteContext): Promise<void> {
-  const { send, setMobileViewport, clearMobile, waitReady, PORT } = ctx;
+  const { send, setNarrowViewport, clearMobile, waitReady, PORT } = ctx;
   const settle = makeSettle(ctx);
   // CL1, CL2, CL3 and CL6 are deliberately not stepped: settleHome returns null rather than throwing, and their checks already guard on it.
   const step = makeStep(ctx);
@@ -67,13 +68,21 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   await cl1Wash(ctx, settleHome);
   await cl2Selection(ctx);
-  await setMobileViewport(390, 844);
+  await setNarrowViewport(390, 844);
   const burger = await cl3Closed(ctx, settleHome);
   await step("CL4", () => cl4Opens(ctx, settle, clickAt, pressKey, burger));
   await step("CL5", () => cl5Closes(ctx, settle, clickAt, pressKey, burger));
   await step("CL8", () => cl8Swipe(ctx, settle, clickAt, pressKey, burger));
   await cl6Narrow(ctx, settleHome);
   await step("CL7", () => cl7Landscape(ctx, settle, clickAt, settleHome));
+
+  const desk = deskKit(ctx);
+  const refusal = storageRefusal(ctx);
+  await step("DN1, DN2, DN3, DN9, DN3r", () => dnPhone(desk));
+  await step("DN5", () => dnTablet(desk));
+  await step("DN6", () => dnNarrow(desk));
+  await step("DN7", () => dnRefused(desk, refusal)).finally(refusal.disarm);
+  await step("DN4", () => dnContinue(desk)).finally(desk.forget);
 
   await clearMobile();
   await send("Emulation.clearDeviceMetricsOverride");
@@ -213,10 +222,10 @@ async function cl8Swipe({ evaluate, check, sleep, touch }: SuiteContext, settle:
   );
 }
 
-async function cl6Narrow({ evaluate, check, setMobileViewport }: SuiteContext, settleHome: Stage["settleHome"]): Promise<void> {
+async function cl6Narrow({ evaluate, check, setNarrowViewport }: SuiteContext, settleHome: Stage["settleHome"]): Promise<void> {
   const narrows = [];
   for (const w of [360, 320]) {
-    await setMobileViewport(w, 780);
+    await setNarrowViewport(w, 780);
     const cam = await settleHome();
     const s = await evaluate(DRAWER_READ);
     narrows.push({ w, cam: !!cam, scrollW: s.scrollW, inkRight: s.inkRight, seedX: s.seed?.x, ok: !!cam && s.scrollW === w && clear(s) });
@@ -228,8 +237,8 @@ async function cl6Narrow({ evaluate, check, setMobileViewport }: SuiteContext, s
   );
 }
 
-async function cl7Landscape({ evaluate, send, check, shoot, sleep, setMobileViewport, touch }: SuiteContext, settle: Settle, clickAt: Stage["clickAt"], settleHome: Stage["settleHome"]): Promise<void> {
-  await setMobileViewport(844, 390);
+async function cl7Landscape({ evaluate, send, check, shoot, sleep, setNarrowViewport, touch }: SuiteContext, settle: Settle, clickAt: Stage["clickAt"], settleHome: Stage["settleHome"]): Promise<void> {
+  await setNarrowViewport(844, 390);
   const camWide = await settleHome();
   const wideClosed = await evaluate(DRAWER_READ);
   const pip = await evaluate<Point | null>(`(() => { const b = document.querySelector('.lf-station[data-station="explorer"]'); if (!b) return null; const r = b.getBoundingClientRect(); return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) }; })()`);

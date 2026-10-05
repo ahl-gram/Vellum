@@ -39,7 +39,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   rh9ContrastPins(ctx, heads, bad);
   await rh10GalleryScrolled(k);
   // Issue #531: the OTHER painting arm, body.chart-room:not(:has(.stage)), which SB8e's page never matches.
-  await send("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
+  await send("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 1, mobile: false });
   // The Z13 bounce: /gallery/ is already loaded, and visit()'s probe (readyState complete plus a .wordmark) is satisfied by the STALE document, so a same-URL navigate can return before the new one commits.
   await send("Page.navigate", { url: "about:blank" });
   const galleryNarrow = await visit("/gallery/");

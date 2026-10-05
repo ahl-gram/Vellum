@@ -117,12 +117,12 @@ async function arrived({ evaluate, sleep }: TrailKit, path: string): Promise<boo
 }
 
 export async function dr12Print(k: TrailKit): Promise<void> {
-  const { send, evaluate, check, setMobileViewport, clearMobile } = k;
+  const { send, evaluate, check, setNarrowViewport, clearMobile } = k;
   const read = `parseFloat(getComputedStyle(document.body).paddingTop)` as Payload<number>;
   const rows: { width: number; screen: number; print: number }[] = [];
   try {
     for (const width of [1280, 390]) {
-      if (width === 390) await setMobileViewport(390, 844);
+      if (width === 390) await setNarrowViewport(390, 844);
       await k.goto("/faq/");
       const screen = await evaluate(read);
       await send("Emulation.setEmulatedMedia", { media: "print" });
@@ -142,10 +142,10 @@ export async function dr12Print(k: TrailKit): Promise<void> {
 }
 
 export async function dr13Gallery(k: TrailKit): Promise<void> {
-  const { evaluate, check, setMobileViewport, clearMobile, send } = k;
+  const { evaluate, check, setNarrowViewport, clearMobile, send } = k;
   const rows: { width: number; gap: number }[] = [];
   for (const width of [1280, 390] as const) {
-    if (width === 390) await setMobileViewport(390, 844);
+    if (width === 390) await setNarrowViewport(390, 844);
     await k.goto("/gallery/");
     await k.settle(`(() => { const a = document.querySelector(".grid")?.getAnimations() ?? []; return a.length > 0 && a.every((x) => x.playState === "finished"); })()`, (done) => done === true, "the Gallery's grid has landed");
     const gap = await evaluate<number>(`document.querySelector(".grid figure").getBoundingClientRect().top - document.querySelector("header.chrome").getBoundingClientRect().bottom`);
@@ -186,11 +186,11 @@ const ridesTheCap = (d: Trail): boolean => {
 };
 
 export async function dr15Drawer(k: TrailKit): Promise<void> {
-  const { check, setMobileViewport } = k;
+  const { check, setNarrowViewport } = k;
   const rows: string[] = [];
   let ok = true;
   for (const [w, h, pages] of [[390, 844, ["/faq/", "/explorer/", "/prospect/", "/ribbon/"]], [768, 1024, ["/prospect/", "/ribbon/"]]] as const) {
-    await setMobileViewport(w, h);
+    await setNarrowViewport(w, h);
     for (const page of pages) {
       const d = await openDrawer(k, page);
       ok &&= ridesTheCap(d);
@@ -198,7 +198,7 @@ export async function dr15Drawer(k: TrailKit): Promise<void> {
     }
   }
   const under = await underTheBlock(k);
-  await setMobileViewport(390, 844);
+  await setNarrowViewport(390, 844);
   check(
     "DR15 with the drawer open by a real tap, at 390 on the FAQ, the Explorer, the Prospect and the Ribbon and at 768 on the Prospect and the Ribbon, the trail block rides in the cap at or below the band, inside the drawer and ending inside the cap, its alias line clear of the trail, each crumb whole on one line, every trail link and every door in view taking the hand; and at 844x390, with the alias line lengthened until the block reaches past the cap, a door lying under the block does not answer through it (Issue #668)",
     ok && under.reaches && !under.doorAnswers,
@@ -207,7 +207,7 @@ export async function dr15Drawer(k: TrailKit): Promise<void> {
 }
 
 async function underTheBlock(k: TrailKit): Promise<{ reaches: boolean; doorAnswers: boolean; at: { x: number; y: number } | null }> {
-  await k.setMobileViewport(844, 390);
+  await k.setNarrowViewport(844, 390);
   await openDrawer(k, "/prospect/");
   await k.evaluate(`document.querySelector("header.chrome .also a").textContent += " by the long road round the coast and back over the hills"`);
   const d = await k.evaluate(READ);
@@ -240,22 +240,22 @@ const FIT: Payload<Fit> = `(() => { const s = document.getElementById("sheet").g
 const restingFit = (k: TrailKit, label: string, checked: boolean, innerW: number) => k.settle(FIT, (d, last) => d.checked === checked && d.innerW === innerW && d.w > 0 && last !== null && d.top === last.top && d.w === last.w && d.h === last.h, label);
 
 async function resizedUnderDrawer(k: TrailKit, page: string): Promise<Record<"fresh" | "shut" | "open" | "closed", Fit>> {
-  const { setMobileViewport, send } = k;
-  await setMobileViewport(430, 844);
+  const { setNarrowViewport, send } = k;
+  await setNarrowViewport(430, 844);
   await k.goto(page);
   const fresh = await restingFit(k, `a fresh ${page} at 430`, false, 430);
-  await setMobileViewport(390, 844);
+  await setNarrowViewport(390, 844);
   await k.goto(page);
   const shut = await restingFit(k, `${page} at 390`, false, 390);
   const burger = (await k.evaluate(READ)).burger;
   if (burger) await tapAt(k, burger.x + burger.w / 2, burger.y + burger.h / 2);
   const open = await restingFit(k, `the drawer open on ${page} at 390`, true, 390);
-  await setMobileViewport(430, 844);
+  await setNarrowViewport(430, 844);
   await restingFit(k, `the drawer still open on ${page} at 430`, true, 430);
   await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
   await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Escape", code: "Escape", windowsVirtualKeyCode: 27 });
   const closed = await restingFit(k, `the drawer closed on ${page} at 430`, false, 430);
-  await setMobileViewport(390, 844);
+  await setNarrowViewport(390, 844);
   return { fresh, shut, open, closed };
 }
 

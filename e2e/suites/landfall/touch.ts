@@ -5,8 +5,8 @@ import { roomy, stillCam } from "./reads.ts";
 export async function l9aOneFinger({ evaluate, send, check, sleep, touch, camNow }: LandfallKit, stagePt9: Point | null): Promise<void> {
   const touchAction9 = await evaluate<string | null>(`(() => { const s = document.getElementById("lf-stage"); return s ? getComputedStyle(s).touchAction : null; })()`);
   // The drag heads INTO clamp headroom (+x,+y): the original (-x,-y) gesture aimed at the corner the camera was already parked on, so stillness held with every gate deleted (guard-prover round 2).
-  const bodyLocked390 = await evaluate<string>(`getComputedStyle(document.body).overflow`);
-  const belowFold390 = await evaluate<number>(`document.scrollingElement.scrollHeight - window.innerHeight`);
+  const bodyLocked9 = await evaluate<string>(`getComputedStyle(document.body).overflow`);
+  const belowFold9 = await evaluate<number>(`document.scrollingElement.scrollHeight - window.innerHeight`);
   const oneBefore = await camNow();
   if (stagePt9 !== null) {
     await touch("touchStart", [{ x: stagePt9.x, y: stagePt9.y, id: 0 }]);
@@ -23,10 +23,10 @@ export async function l9aOneFinger({ evaluate, send, check, sleep, touch, camNow
   await sleep(300);
   const mouseWitness = await camNow();
   check(
-    "L9a one finger never drives the map, and the fixture can prove it: the touch drag leaves the whole camera untouched while the SAME drag by mouse carries the sheet, the stage declares pan-y, and the 390 body is unlocked with the shelf below the fold to scroll to (#472 retired the #461 lock; that the one-finger swipe then MOVES the page is CDP-blind, phone-owed like the pan-y line itself)",
-    stagePt9 !== null && stillCam(oneBefore, oneAfter) && touchAction9 === "pan-y" && bodyLocked390 !== "hidden"
-      && belowFold390 > 0 && mouseWitness !== null && oneAfter !== null && Math.abs(mouseWitness.x - oneAfter.x) > 30,
-    JSON.stringify({ touchAction9, bodyLocked390, belowFold390, oneBefore, oneAfter, mouseWitness }),
+    "L9a one finger never drives the map, and the fixture can prove it: the touch drag leaves the whole camera untouched while the SAME drag by mouse carries the sheet, the stage declares pan-y, and the body is unlocked with the shelf below the fold to scroll to (#472 retired the #461 lock; that the one-finger swipe then MOVES the page is CDP-blind, phone-owed like the pan-y line itself)",
+    stagePt9 !== null && stillCam(oneBefore, oneAfter) && touchAction9 === "pan-y" && bodyLocked9 !== "hidden"
+      && belowFold9 > 0 && mouseWitness !== null && oneAfter !== null && Math.abs(mouseWitness.x - oneAfter.x) > 30,
+    JSON.stringify({ touchAction9, bodyLocked9, belowFold9, oneBefore, oneAfter, mouseWitness }),
   );
 }
 

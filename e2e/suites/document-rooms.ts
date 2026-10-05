@@ -47,7 +47,7 @@ type Settle = ReturnType<typeof makeSettle>;
 type DocRoomsKit = ReturnType<typeof docRoomsKit>;
 
 export async function run(ctx: SuiteContext): Promise<void> {
-  const { send, setMobileViewport, clearMobile, waitReady, PORT } = ctx;
+  const { send, setNarrowViewport, clearMobile, waitReady, PORT } = ctx;
   const settle = makeSettle(ctx);
   // IX3 is the one group here that waits on a transition, so it is the one that is stepped (Issue #534).
   const step = makeStep(ctx);
@@ -60,7 +60,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await ix2InksRow(k, faq);
   await step("IX3", () => ix3Folds(k, faq));
   await ix4FindBox(k);
-  await setMobileViewport(390, 844);
+  await setNarrowViewport(390, 844);
   await ix5BottomSheet(k);
   await ix6NoScript(k);
 

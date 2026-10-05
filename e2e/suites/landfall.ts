@@ -59,12 +59,15 @@ async function l1Desktop(k: LandfallKit): Promise<void> {
 }
 
 async function l7bNarrow(k: LandfallKit): Promise<void> {
-  const { evaluate, setMobileViewport, clearMobile, settleHome } = k;
-  // L7 narrow + L9: ONE mobile emulation set for everything touch (the suite-zoom-gestures trap: enable BEFORE the navigate that boots, never change after the first real touch).
-  await setMobileViewport(390, 844);
-  const settled9 = await settleHome();
-  await l7bNarrowClear(k, settled9);
+  const { evaluate, setNarrowViewport, setMobileViewport, clearMobile, settleHome } = k;
+  // L7b and L8b read the narrow layout and press no touch; L9 is the touch contract on a tablet at the 1024 floor (Issue #761), its emulation set once before the boot that binds touch and never changed after the first real touch (the suite-zoom-gestures trap).
+  await setNarrowViewport(390, 844);
+  const settled7 = await settleHome();
+  await l7bNarrowClear(k, settled7);
   await l8bNarrowTargets(k);
+  await setMobileViewport(1024, 768);
+  await k.send("Page.navigate", { url: "about:blank" });
+  await settleHome();
   const stagePt9 = await evaluate(stagePoint);
   // Drift-sized stillness: on slow CI the fixture has crossed IDLE_DELAY_MS by here and the ambient ±1.5% drift moved the camera 3e-6 between reads (PR #482 CI); a one-finger pan that drove the map would move it 60px.
   await l9aOneFinger(k, stagePt9);

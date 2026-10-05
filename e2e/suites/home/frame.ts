@@ -70,8 +70,8 @@ export async function h2Hook({ evaluate, check, shoot }: SuiteContext, ready: bo
   await shoot("home-seed-chrome.png");
 }
 
-export async function h3Narrow({ evaluate, send, check, shoot, sleep, setMobileViewport, clearMobile, PORT }: SuiteContext): Promise<void> {
-  await setMobileViewport(390, 900);
+export async function h3Narrow({ evaluate, send, check, shoot, sleep, setNarrowViewport, clearMobile, PORT }: SuiteContext): Promise<void> {
+  await setNarrowViewport(390, 900);
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
   let mobileReady = false;
   for (let i = 0; i < 100; i++) {
