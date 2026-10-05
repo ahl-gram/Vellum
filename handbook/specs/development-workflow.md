@@ -116,7 +116,7 @@ in it.** The harness removes an `isolation: worktree` agent's tree at the end of
 tree was made, and the gitignored `out/` never prints there. So an agent that would run in its own
 harness tree but whose only deliverable is files under `out/`, such as a design round or a
 measurement, is dispatched WITHOUT isolation, by a session standing in the main checkout:
-- The dispatcher builds its tree with `git -C <main checkout> worktree add --detach <main checkout>/.claude/worktrees/<name> origin/main` and links `node_modules` from inside it as `scripts/agent-sandbox.ts` does.
+- The dispatcher builds its tree with `git -C <main checkout> worktree add --detach <main checkout>/.claude/worktrees/<name> origin/main` and links `node_modules` into it by path, with no `cd`, as `scripts/agent-sandbox.ts` does.
 - The agent writes straight to the main checkout's `out/<issue>/`, and names the sha it ran at.
 - The dispatcher removes the tree once the stills have been ruled.
 

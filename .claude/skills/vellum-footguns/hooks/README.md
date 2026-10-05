@@ -88,6 +88,31 @@ is ever removed.
     A body file is a body only when a body FLAG named it: `$(cat f)` is read from any flag for the
     em-dash scan, and counting it here would refuse `gh pr edit N --add-label "$(cat notes.md)"` as a
     PR body skipping sections it was never meant to carry.
+  - a bare `cd`, `chdir`, `pushd` or `popd` in the MAIN session that moves it to another directory
+    inside the project, worktrees and `out/` included, so that every later relative path, `git` call
+    and dispatched agent would run from there (Issue #781). The session is the main one when the
+    payload carries no `agent_id`, which Claude Code sets only for a call from inside a subagent, and
+    a subagent's directory never carries over between calls, so its `cd` is never refused; the review
+    agents' sandbox recipes rely on that. `bare-cd.ts` reads the RAW command, because the segmenter
+    splits on `(` and blanks quotes: a mask of the same length blanks escapes, quoted spans, heredoc
+    bodies (in every form, including `cat <<'EOF' > f` and a tab-indented `<<-` terminator, which the
+    hook's own heredoc pattern misses) and comments; its boundaries track subshell depth (`(`, `$(`,
+    `<(` and backticks open one); and only a command at depth zero that no pipe or background `&`
+    ends is read, since zsh, the shell here, runs a pipeline's earlier stages and a background job in
+    a subshell and its LAST stage in the session. The target is read raw, unquoted, and resolved
+    against the payload's `cwd`. It passes when its real path is the cwd's, so a link to where you
+    stand passes; and when it lies outside `CLAUDE_PROJECT_DIR` (its real path when it resolves, its
+    spelling when it does not, against the project directory both ways), since Claude Code resets
+    such a `cd` after the call, which keeps the session-end
+    `cd ~/CodeProjects/claude-config && git add -A` working (Alex, 2026-10-05). The project root itself is inside, so a `cd` back to it from
+    a worktree is refused, and the reason sends a session that has already moved to Alex for
+    `/cd <path>`. A target it cannot work out is refused (Alex, 2026-10-05): a shell variable, a glob,
+    `cd -`, `popd`, `pushd` with no directory, more than one argument, no `cwd` or one that does not
+    resolve, and every move when `CLAUDE_PROJECT_DIR` is unset. A directory the same call creates is
+    refused, since it is inside and is not the cwd. Each `cd` is judged alone, so a round trip is
+    refused at its first leg. The way through is a subshell with a literal path,
+    `( cd <path> && ... )`, `git -C <path>`, or an absolute path. It runs after every refusal above,
+    so nothing it does can hide one, and the rows are `bare-cd.fixtures.ts`;
 - **Warns** (context only, the call runs): `.click()` in a browser-script fragment; a punctuation
   escape inside a template literal; `pkill` aimed at the browser; an unreadable body file; a
   `typescript` package that could not be loaded, which skips the escape scan.
@@ -108,6 +133,26 @@ is ever removed.
   footnote is read as top-level text: a fence there is usually refused, and anything that would
   close inside such a container and not outside it is a miss this list has not found.
 
+- **The `cd` reader's misses are silence**, and the first is the ruling's own price: a `cd` into a
+  directory added with `--add-dir`, `/add-dir` or `additionalDirectories`, outside the project,
+  passes, though Claude Code carries such a move over, because the hook sees only
+  `CLAUDE_PROJECT_DIR` and not the added set (Alex ruled the outside-project pass on 2026-10-05
+  knowing this). The rest are shapes this house does not type by habit, which is the whole of the
+  argument for leaving them: an alias or function that changes directory under another name, a
+  sourced script (`source x.sh`, `. x.sh`), `eval cd x`, zsh's `AUTO_CD` (a bare directory name as a
+  command), and quote nesting inside a `$( )` inside double quotes odd enough to end the reader's
+  quoted span early. The main-session test rests on Claude Code's documented `agent_id`, seen by no
+  run here before this merged: if a main-session payload carried it, the refusal would go silent.
+- **The `cd` reader's other errors are refusals**, each one edit away: a whole list or compound
+  command piped or sent to the background (`cd x && y &`, `{ cd x; } | cat`), which runs in a
+  subshell, is read at its own boundary; a redirect on a `cd` that stays (`cd . 2>/dev/null`) counts
+  as a second argument; a `case` pattern's `)` inside a subshell closes it early; a `cd` in a call run
+  with `run_in_background`, whose carry-over is unmeasured; `CDPATH`; a command that fails before its
+  end, after which Claude Code's `pwd -P` capture does not run and nothing moves; a path spelled in
+  another case on a case-insensitive volume; and `command cd x`, which in zsh runs the external `cd`
+  and stays, though in bash it moves. If a subagent's payload lacked `agent_id`, every review agent's
+  sandbox `cd` would be refused, loudly, on its first call. `env cd`, `sudo cd`, `nohup cd`, `nice cd`
+  and `coproc cd` run the `cd` in another process and pass, which is correct.
 - A regex inside a single- or double-quoted JS string loses its backslash the same way and is not
   scanned: an apostrophe in prose would open a false span, so the scanner errs toward silence there.
 - A script written by anything other than a shell redirect or heredoc (a `python3 -c` write, a
@@ -177,7 +222,8 @@ is ever removed.
   it SHARES the parent's `session_id`, so that agent's `git push --dry-run` spent the parent session's
   Gate 5 and the parent never saw it. The once-per-session limit lives in `gateNote` alone, so a
   subagent cannot re-show a gate the parent spent; `deny` carries no such state and fires on every
-  matching call, so refusals reach a subagent unaffected.
+  matching call, so refusals reach a subagent unaffected, all but the bare `cd`, which reads the
+  payload's `agent_id` and is never refused there.
 
 ## How it is wired
 
@@ -211,8 +257,9 @@ command string from `.claude/settings.json` through `sh` with a real, a symlinke
 `test/repo/footgun-gate.test.ts` runs the whole table under `npm test`, so CI runs it on every PR.
 This is the implementer's own table, not an independent prover run. The once-per-session state
 lives at `$TMPDIR/vellum-footguns-<session_id>.json`; delete it to see a gate again. `npm run check`
-types every file here through the tsconfig include, and the selftest copies `markdown-code.ts` beside
-the hook in its rootless checkout, since the hook imports it.
+types every file here through the tsconfig include, and the selftest copies `markdown-code.ts` and
+`bare-cd.ts` beside the hook in its rootless checkout, since the hook imports both. The cd rows set
+`CLAUDE_PROJECT_DIR` for themselves and put it back, so a session's own value never reaches one.
 
 ## Cost
 
