@@ -197,7 +197,9 @@ the furniture stands on a pool**: a blurred box that follows the cluster, runnin
 viewport edge on its edge-facing sides so the fade never lands on screen. At rest on a chart fitted
 clear of the chrome, the chrome carries none. The
 legend row and the room folio take home's crisp panel instead of the blurred pool, so that a chart
-room's corners read the same as home's, corner for corner.
+room's corners read the same as home's, corner for corner. Over a floored sheet only the cluster, the
+chart folio and the legend row take theirs: the room folio's lines and the strip's stand on their own
+fields and panel, and a backing there would lie over the nav or the Glass.
 
 **The legend row never takes a real padding.** Its seat gives it its width, and the footing that
 looks like padding is the row's own pseudo-element drawn at those insets, so the row's box, which the

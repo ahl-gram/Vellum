@@ -140,7 +140,7 @@ export function rh9ContrastPins({ check }: SuiteContext, heads: Heads, bad: Bad)
     POOLED.includes(r) ? !!h.chromeWash && h.chromeWash.content !== "none" && /blur\(/.test(h.chromeWash.filter) && poolAlpha(h.chromeWash.backgroundColor) >= 0.8
               : !!h.chromeWash && h.chromeWash.content === "none");
   check(
-    "RH9b home's chrome carries its wash, a blurred pool of the chart ink since #480, the Gallery's too since #464 (its plates scroll under the cluster), and every other room's carries none, the band or the fitted stage being its ground (#461, 2026-08-26 call)",
+    "RH9b home's chrome carries its wash, a blurred pool of the chart ink since #480, the Gallery's too since #464 (its plates scroll under the cluster), and every other room's carries none at a window where its chart fits clear of the chrome, the band or the fitted stage being its ground (#461, 2026-08-26 call; a floored chart's pool is EA4's, Issue #762)",
     washWrong.length === 0,
     washWrong.map((r) => `${r} wash ${JSON.stringify(heads[r]?.chromeWash)}`).join(" | ") || "wash on home and the Gallery alone",
   );
