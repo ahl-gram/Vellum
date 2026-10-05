@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync, globSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { El, installShim } from "../../test-support/element-shim.ts";
 import { contentsRow, contentsRowHtml } from "../../src/site/shared/contents-row.ts";
@@ -75,9 +75,7 @@ test("the hosts build the kit's row through the builder: the Ribbon keeps strong
   assert.equal(pf.keyHead.hidden, false);
 });
 
-test("the three runtime copies are gone: src/site names cr-num in the shared builder alone, and the Print Room's contents, the Prospect's key and the Ribbon's itinerary import it", () => {
-  const byHand = globSync("src/site/**/*.ts", { cwd: REPO }).filter((p) => p !== "src/site/shared/contents-row.ts" && /cr-num/.test(read(p)));
-  assert.deepEqual(byHand, [], "no app bundle builds the contents row by hand");
+test("the Print Room's contents, the Prospect's key and the Ribbon's itinerary take their rows from the shared builder, the one place vellum/contents-row-builder-only lets cr-num be written", () => {
   for (const [p, face] of [["src/site/print-room/contents-markup.ts", "contentsRowHtml"], ["src/site/prospect/seats.ts", "contentsRow"], ["src/site/ribbon/seats.ts", "contentsRow"]] as const) {
     assert.match(read(p), new RegExp(`import \\{[^}]*\\b${face}\\b[^}]*\\} from "\\.\\./shared/contents-row\\.ts"`), `${p} takes ${face} from the kit`);
   }

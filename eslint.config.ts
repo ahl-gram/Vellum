@@ -77,6 +77,30 @@ export default defineConfig(
     rules: { "vellum/worker-spawn-static": "error" },
   },
   {
+    name: "Issue #728: the reading frame looks nothing up by id and imports nothing from the Explorer",
+    files: [["src/**/*.ts", "src/site/reading-frame/**"]],
+    plugins: { vellum },
+    rules: { "vellum/frame-no-id-lookup": "error", "vellum/frame-no-explorer-import": "error" },
+  },
+  {
+    name: "Issue #728: the Explorer and home bind no zoom press through the kit's document-wide binding",
+    files: [["src/**/*.ts", "src/site/explorer/**"], ["src/**/*.ts", "src/site/home/**"]],
+    plugins: { vellum },
+    rules: { "vellum/explorer-no-glass-keys": "error" },
+  },
+  {
+    name: "Issue #728: the contents row is built in one place",
+    files: [["src/**/*.ts", "src/site/**"]],
+    plugins: { vellum },
+    rules: { "vellum/contents-row-builder-only": "error" },
+  },
+  {
+    name: "Issue #728: nothing imports a test file",
+    files: TS_ROOTS,
+    plugins: { vellum },
+    rules: { "vellum/test-no-test-import": "error" },
+  },
+  {
     name: "Issue #675: the e2e console filter has one roster, and every read goes through it",
     files: ["e2e/**/*.ts"],
     plugins: { vellum },
