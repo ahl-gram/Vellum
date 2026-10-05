@@ -45,7 +45,7 @@ Alex, 2026-10-04, on this plan's step 6 menu (Issue #729 comment 5986103023, rel
 | `references/scars.md` preamble, "The long form of each lesson ... is in the auto-memory doctrine files named at the end" | "Where a lesson's rule is written down in this repo, it is in one of the homes named at the end" | re-aimed by narrowing the promise |
 | `references/scars.md`, "Where the long form lives" (eight `feedback_*.md` names and the `reference_*` files) | "Where the rules are written down", a list of tracked homes | as the first row; the four tooling traps were already in the Never list, Gate 2, Gate 5, `references/held-lines.md` and `hooks/README.md` |
 | `vellum-guard-prover.md`, "the guard doctrine in Alex's auto-memory" | "the guard lines of `vellum-footguns` Gate 1" | promoted by PR #730 items 1 to 10; the residue of items 3, 5, 9 and 10 comes in below |
-| `vellum-plate-reader.md`, `feedback_show_visual_artifacts` | `CLAUDE.md`, "Write visual samples to out/" | already there |
+| `vellum-plate-reader.md`, a private memory file named by its file name | `CLAUDE.md`, "Write visual samples to out/" | already there |
 
 ## Design
 
