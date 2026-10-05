@@ -4,6 +4,7 @@ import { sampleRow, luminance } from "../support/pixel.ts";
 import { makeSettle } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
 import type { Payload, Point, SuiteContext } from "../types.ts";
+import { deskKit, dnContinue, dnNarrow, dnPhone, dnRefused, dnTablet, storageRefusal } from "./cluster/desk-notice.ts";
 
 type Rect = { x: number; y: number; w: number; h: number; right: number; bottom: number };
 type Box = { x: number; y: number; w: number; h: number };
@@ -74,6 +75,14 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("CL8", () => cl8Swipe(ctx, settle, clickAt, pressKey, burger));
   await cl6Narrow(ctx, settleHome);
   await step("CL7", () => cl7Landscape(ctx, settle, clickAt, settleHome));
+
+  const desk = deskKit(ctx);
+  const refusal = storageRefusal(ctx);
+  await step("DN1, DN2, DN3, DN9, DN3r", () => dnPhone(desk));
+  await step("DN5", () => dnTablet(desk));
+  await step("DN6", () => dnNarrow(desk));
+  await step("DN7", () => dnRefused(desk, refusal)).finally(refusal.disarm);
+  await step("DN4", () => dnContinue(desk)).finally(desk.forget);
 
   await clearMobile();
   await send("Emulation.clearDeviceMetricsOverride");

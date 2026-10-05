@@ -282,7 +282,7 @@ const STEPPED_GROUPS: Readonly<Record<string, readonly string[]>> = {
     "SV1", "SV2 to SV2c", "SV2d", "SV2e", "SV2g", "SV2h", "SV2i", "SV2j", "SV2p", "SV2m", "SV2o",
     "SV3", "SV4", "SV5c", "SV5d", "SV6", "SV9", "SV10", "SV2n",
   ],
-  "cluster": ["CL4", "CL5", "CL8", "CL7"],
+  "cluster": ["CL4", "CL5", "CL8", "CL7", "DN1, DN2, DN3, DN9, DN3r", "DN5", "DN6", "DN7", "DN4"],
   "room-drawer": ["DR2, DR3", "DR4", "DR5", "DR6", "DR7", "DR8", "DR11", "DR12", "DR13", "DR14", "DR15", "DR16", "DR17"],
   "chart-drawer": [
     "CD1", "CD2, CD2b, CD2c", "CD23", "CD3", "CD44", "CD45", "CD46", "CD4", "CD5", "CD7, CD7b, CD7c", "CD47", "CD8",
@@ -352,6 +352,15 @@ test("every check group that waits is still inside its own step, by name (#534)"
       `suites/${suite}.ts's stepped groups are not the ones this roster names: one was unwrapped, renamed, reordered or added without joining the roster`,
     );
   }
+});
+
+test("DN7 takes its storage refusal back off from its own step's promise, and DN4 forgets its dismissal, so neither leaks into the checks after it (Issue #761)", () => {
+  const suite = src(e2eSuitePath("cluster"));
+  assert.match(suite, /await step\("DN7", \(\) => dnRefused\(desk, refusal\)\)\.finally\(refusal\.disarm\);/, "DN7's step no longer ends in .finally(refusal.disarm), so every later page boots with storage refused whenever DN7 throws");
+  assert.match(suite, /await step\("DN4", \(\) => dnContinue\(desk\)\)\.finally\(desk\.forget\);/, "DN4's step no longer ends in .finally(desk.forget), so the dismissal outlives the suite");
+  const kit = src("e2e/suites/cluster/desk-notice.ts");
+  assert.match(kit, /send\("Page\.removeScriptToEvaluateOnNewDocument", \{ identifier: id \}\)/, "disarm no longer removes the injected refusal");
+  assert.match(kit, /localStorage\.removeItem\(\$\{JSON\.stringify\(KEY\)\}\)/, "forget no longer removes the dismissal key");
 });
 
 test("CD50 turns page scripts back on from its own step's promise, so a scripts-off check cannot leak into the checks after it (Issue #669)", () => {
