@@ -64,8 +64,7 @@ test("AK4 the kit's shapes: the fog and vignette pairs, the Glass with data-zoom
   assert.match(road, /<a id=\{id\} class=\{gold \? "legend-btn gold" : "legend-btn"\} data-road=\{road\} href=\{href\}><span class="verb" id=\{verbId\}>\{verb\}<\/span><span class="room">\{room\}<\/span><\/a>/, "a road is an <a> in the legend dress, gold when it is the room's featured road");
 });
 
-test("AK6 the Explorer binds its Glass by id from its own glass.ts and never imports glass-keys.ts, whose [data-zoom] binding is document-wide: a second binding would double every press", () => {
-  for (const p of [...globSync("src/site/explorer/*.ts", { cwd: REPO }), ...globSync("src/site/home/*.ts", { cwd: REPO })]) assert.ok(!read(p).includes("glass-keys"), `${p} must not bind the kit's keys (home binds its own camera by id, #505)`);
+test("AK6 the kit's glass-keys.ts binds every [data-zoom] press on the page, document-wide, which is why vellum/explorer-no-glass-keys keeps the Explorer and home, each binding its own presses by id, off it", () => {
   assert.match(read("src/site/shared/glass-keys.ts"), /querySelectorAll<HTMLElement>\("\[data-zoom\]"\)/, "the kit's binding reads every data-zoom press on the page");
 });
 
