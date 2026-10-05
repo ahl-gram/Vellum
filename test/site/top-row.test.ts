@@ -46,12 +46,15 @@ test("TR5 a corner's own padding is not part of the width written for its conten
   assert.ok(width !== null && Math.abs(width - (990 - 510.2 - GAP - 28.8)) < 0.01, `the content width that puts the box the gap clear, got ${width}`);
 });
 
-test("TR6 a corner written to the boundary and read back a hair short does not cap the cluster (the Ribbon at 1024)", () => {
+test("TR6 a corner read back a hair short of the gap does not cap the cluster, and one short by more than the tolerance does (a synthetic witness: the browser read the Ribbon 0.0094 over at 1024, so no e2e width reaches the tolerance)", () => {
   const read = { left: 535.75, right: 998.4 };
   const exact = { left: 25.6, right: 510.1625 };
   assert.ok(read.left < exact.right + GAP, "the witness: the re-read box is short of the gap by 0.0125");
   assert.equal(clusterWidth(exact, read, GAP), null, "a sub-pixel inside the tolerance leaves the nav on one line");
   assert.equal(clears(exact, read, GAP), true);
+  const edge = exact.right + GAP;
+  assert.equal(clusterWidth(exact, { left: edge - 0.4, right: 998.4 }, GAP), null, "0.4 short still clears");
+  assert.notEqual(clusterWidth(exact, { left: edge - 0.6, right: 998.4 }, GAP), null, "0.6 short does not: the tolerance is half a pixel, no more");
 });
 
 test("TR7 the band grows by exactly the cluster's growth, written in rem at the page's own root size", () => {

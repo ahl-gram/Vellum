@@ -8,7 +8,7 @@ const NARROW = 640;
 const H = 800;
 
 type Row = {
-  innerW: number; navLines: number; splitDoors: string[]; wrapped: boolean;
+  innerW: number; navLines: number; leadingDots: number; wrapped: boolean;
   cornerInline: string; clusterInline: string; bandInline: string; band: number;
   corner: { left: number; width: number; height: number }; cluster: { right: number; bottom: number }; boxGap: number;
 };
@@ -18,9 +18,10 @@ const ROW: Payload<Row> = `(() => {
   const cluster = document.querySelector("header.chrome"), nav = cluster.querySelector("nav.rooms");
   const corner = document.querySelector(".corner.tr.folio-room") || document.querySelector(".lf-seed");
   const doors = [...nav.querySelectorAll("a, [aria-current]")];
+  const mid = (e) => { const r = e.getBoundingClientRect(); return (r.top + r.bottom) / 2; };
   const tops = new Set(doors.map((d) => Math.round(d.getBoundingClientRect().top)));
   const c = cluster.getBoundingClientRect(), k = corner.getBoundingClientRect();
-  return { innerW: innerWidth, navLines: tops.size, splitDoors: doors.filter((d) => d.getClientRects().length > 1).map((d) => d.textContent), wrapped: nav.classList.contains("wrapped"),
+  return { innerW: innerWidth, navLines: tops.size, leadingDots: [...nav.querySelectorAll(".sep")].filter((d) => Math.abs(mid(d) - mid(d.previousElementSibling)) > parseFloat(getComputedStyle(nav).lineHeight) / 2).length, wrapped: nav.classList.contains("wrapped"),
     cornerInline: corner.style.maxWidth, clusterInline: cluster.style.maxWidth, bandInline: root.style.getPropertyValue("--band-h"),
     band: parseFloat(getComputedStyle(root).getPropertyValue("--band-h")) * rem,
     corner: { left: k.left, width: k.width, height: k.height }, cluster: { right: c.right, bottom: c.bottom }, boxGap: k.left - c.right };
@@ -44,7 +45,7 @@ async function open(ctx: SuiteContext, page: string, w: number): Promise<Row> {
 const oneLine = (r: Row) => r.navLines === 1 && !r.wrapped && r.clusterInline === "";
 const yielded = (r: Row) => r.cornerInline !== "" && r.corner.width > KIT - 0.5 && r.corner.width < CAP;
 const unwritten = (r: Row) => r.cornerInline === "" && r.clusterInline === "" && r.bandInline === "" && !r.wrapped;
-const fmt = (page: string, w: number, r: Row) => `${page}@${w}: lines ${r.navLines}${r.splitDoors.length ? ` split ${r.splitDoors.join("/")}` : ""} corner ${r.corner.width.toFixed(1)}${r.cornerInline ? ` (${r.cornerInline})` : ""} cluster ${r.clusterInline || "-"} gap ${r.boxGap.toFixed(1)}${r.bandInline ? ` band ${r.bandInline}` : ""}`;
+const fmt = (page: string, w: number, r: Row) => `${page}@${w}: lines ${r.navLines}${r.leadingDots ? ` ${r.leadingDots} dots lead a line` : ""} corner ${r.corner.width.toFixed(1)}${r.cornerInline ? ` (${r.cornerInline})` : ""} cluster ${r.clusterInline || "-"} gap ${r.boxGap.toFixed(1)}${r.bandInline ? ` band ${r.bandInline}` : ""}`;
 
 async function ribbonYields(ctx: SuiteContext, motion: string): Promise<{ ok: boolean; rows: string[] }> {
   await ctx.send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: motion }] });
@@ -66,9 +67,9 @@ export async function co5Yields(ctx: SuiteContext): Promise<void> {
   const moving = await ribbonYields(ctx, "no-preference").finally(() => ctx.send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] }));
   const narrow: string[] = [];
   let wraps = true;
-  for (const page of ["/faq/", "/print-room/"]) {
+  for (const page of ["/", "/faq/", "/print-room/", "/prospect/", "/ribbon/"]) {
     const r = await open(ctx, page, NARROW);
-    wraps &&= r.navLines >= 2 && r.splitDoors.length === 0 && r.wrapped && r.boxGap >= 25.6 - 0.5;
+    wraps &&= r.navLines >= 2 && r.leadingDots === 0 && r.wrapped && r.boxGap >= 25.6 - 0.5;
     narrow.push(fmt(page, NARROW, r));
   }
   const widened: string[] = [];
@@ -78,6 +79,12 @@ export async function co5Yields(ctx: SuiteContext): Promise<void> {
     const now = await at(ctx, 1280, `top-row-widened-${page}`);
     lays &&= was.wrapped && unwritten(now) && now.navLines === 1;
     widened.push(`${fmt(page, NARROW, was)} then ${fmt(page, 1280, now)}`);
+  }
+  for (const w of [960, 1024, 1032]) {
+    const was = await open(ctx, "/ribbon/", w);
+    const now = await at(ctx, 1280, `top-row-widened-ribbon-${w}`);
+    lays &&= was.cornerInline !== "" && unwritten(now) && Math.abs(now.corner.width - CAP) < 0.5;
+    widened.push(`${fmt("/ribbon/", w, was)} then ${fmt("/ribbon/", 1280, now)}`);
   }
   const held: string[] = [];
   let untouched = true;
@@ -92,7 +99,7 @@ export async function co5Yields(ctx: SuiteContext): Promise<void> {
   const off = await open(ctx, "/ribbon/", 1024).finally(() => ctx.send("Emulation.setScriptExecutionDisabled", { value: false }));
   const scriptsOff = Math.abs(off.corner.width - CAP) < 0.5 && off.boxGap > 0 && off.cornerInline === "";
   ctx.check(
-    "CO5 the corner gives way before the nav wraps: the Ribbon at 960, 1024 and 1032 keeps its nav on one line, its corner written between the kit's 19rem and its 30rem cap and standing the gap clear, under reduced motion and with motion on, and at 1280 nothing is written; at 640 the FAQ's and the Print Room's nav wraps between rooms, no room's name split; a page loaded at 640 and widened to 1280 lays out from its sheets again; Issue #741's two corners are never written; and with scripts off the Ribbon's corner stands at its cap, clear, at 1024 (Issue #762)",
+    "CO5 the corner gives way before the nav wraps: the Ribbon at 960, 1024 and 1032 keeps its nav on one line, its corner written between the kit's 19rem and its 30rem cap and standing the gap clear, under reduced motion and with motion on, and at 1280 nothing is written; at 640 the nav wraps between rooms on home, the FAQ, the Print Room, the Prospect and the Ribbon, every wrapped line ending on its dot; a page loaded at 640, or the Ribbon at 960, 1024 or 1032 where its corner was written, and widened to 1280 lays out from its sheets again; Issue #741's two corners are never written; and with scripts off the Ribbon's corner stands at its cap, clear, at 1024 (Issue #762)",
     reduced.ok && moving.ok && wraps && lays && untouched && scriptsOff,
     [...reduced.rows, ...moving.rows, ...narrow, ...widened, ...held, `scripts off ${fmt("/ribbon/", 1024, off)}`].join(" | "),
   );
@@ -131,11 +138,11 @@ export async function co7Band(ctx: SuiteContext): Promise<void> {
     await open(ctx, page, NARROW);
     const narrow = await settle(GROUND, (d, last) => last !== null && JSON.stringify(d) === JSON.stringify(last), `co7-${page}-640`);
     const growth = narrow.clusterBottom - wide.clusterBottom;
-    ok &&= wide.bandInline === "" && growth > 10 && Math.abs(narrow.band - (wide.band + growth)) < 0.5 && narrow.firstTop >= narrow.clusterBottom;
+    ok &&= wide.bandInline === "" && growth > 10 && Math.abs(narrow.band - (wide.band + growth)) < 0.5 && narrow.firstTop >= Math.max(narrow.clusterBottom, narrow.band);
     rows.push(`${page}: band ${wide.band.toFixed(1)} to ${narrow.band.toFixed(1)} (${narrow.bandInline}), cluster foot ${wide.clusterBottom.toFixed(1)} to ${narrow.clusterBottom.toFixed(1)}, first row at ${narrow.firstTop.toFixed(1)}`);
   }
   ctx.check(
-    "CO7 the band grows by exactly what the cluster grew: on the FAQ, the Glossary and the Gallery at 640, where the nav wraps, the band token is its 1280 value plus the cluster's growth and the page's first row starts below the cluster; at 1280 nothing is written (Issue #762)",
+    "CO7 the band grows by exactly what the cluster grew: on the FAQ, the Glossary and the Gallery at 640, where the nav wraps, the band token is its 1280 value plus the cluster's growth and the page's first row starts below both the cluster and the token, so its padding follows the token; at 1280 nothing is written (Issue #762; it holds what the unit band test held before Issue #779's check placement)",
     ok,
     rows.join(" | "),
   );

@@ -162,7 +162,7 @@ header.chrome a { pointer-events: auto; }
 }
 .rooms { font-size: 0.72rem; letter-spacing: 0.14em; color: var(--ink-faded); margin: 0.55rem 0 0; }
 .rooms .sep { margin: 0 0.35em; opacity: 0.7; }
-.rooms > :is(a, [aria-current]) { white-space: nowrap; }
+.rooms .door { white-space: nowrap; }
 .rooms.wrapped { line-height: 1.6rem; }
 .rooms a { color: var(--parchment); text-decoration: none; }
 .rooms a:hover, .rooms a:focus-visible { color: var(--parchment-bright); }
@@ -265,11 +265,11 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   <p class="tagline">{SITE_TAGLINE}</p>
   <nav class="rooms" aria-label="The rooms">
     {NAV_ITEMS.map((item, i) => (
-      <Fragment>{i > 0 ? <Fragment><span class="sep" aria-hidden="true">·</span><wbr /></Fragment> : ""}{item.href === path ? (
+      <Fragment><span class="door">{item.href === path ? (
         <span aria-current="page">{item.label}</span>
       ) : (
         <a href={item.href}>{item.label}</a>
-      )}</Fragment>
+      )}{i < NAV_ITEMS.length - 1 ? <span class="sep" aria-hidden="true">·</span> : ""}</span>{i < NAV_ITEMS.length - 1 ? <wbr /> : ""}</Fragment>
     ))}
   </nav>
   {trail && <div class="where"><nav class="trail" aria-label="Where you are">{trail.crumbs.map((c, i) => <Fragment>{i > 0 ? <Fragment><span class="way" aria-hidden="true">›</span><wbr /></Fragment> : ""}{i < trail.crumbs.length - 1 ? <a href={c.href}>{c.name}</a> : trail.current ? <span aria-current="page">{c.name}</span> : <span class="here">{c.name}</span>}</Fragment>)}</nav>{trail.also.length > 0 && <p class="also">also reached from {trail.also.map((c, i) => <Fragment>{i > 0 ? " and " : ""}<a href={c.href}>{c.name}</a></Fragment>)}</p>}</div>}

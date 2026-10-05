@@ -200,7 +200,7 @@ async function co4Roads(ctx: SuiteContext, swept: readonly PageResult[]): Promis
   );
 }
 
-// Each control's own width, read by lifting its flex-shrink for one read and putting it back: a row too narrow for its controls shrinks them, and a row that wraps leaves them whole.
+// Each control's own width, read by lifting its flex-shrink for one read and putting it back, its transition held off since under reduced motion the read otherwise returns the 0.01ms transition's start value: a row too narrow for its controls shrinks them, and a row that wraps leaves them whole.
 const CONTROLS: Payload<Control[]> = `(() => {
   const out = [];
   const corner = document.querySelector(".corner.tr.folio-room") || document.querySelector(".lf-seed");
@@ -208,10 +208,12 @@ const CONTROLS: Payload<Control[]> = `(() => {
   for (const c of corner.querySelectorAll("input, button, select, textarea")) {
     const w = c.getBoundingClientRect().width;
     if (!w) continue;
-    const kept = c.style.flexShrink;
+    const kept = c.style.flexShrink, held = c.style.transition;
+    c.style.transition = "none";
     c.style.flexShrink = "0";
     const natural = c.getBoundingClientRect().width;
     c.style.flexShrink = kept;
+    c.style.transition = held;
     out.push({ t: c.tagName.toLowerCase() + (c.id ? "#" + c.id : "." + String(c.className).split(" ")[0]), w, natural });
   }
   return out;

@@ -365,11 +365,3 @@ test("the trail is quiet by size and never by a dimmer ink: no rule that dresses
   assert.match(here, /color:\s*var\(--parchment-bright\)/, "the page's own segment brightens");
   assert.match(here, /text-decoration:\s*underline/, "and is underlined, never colour alone");
 });
-
-test("the band buys the trail its ground where a band renders, keyed to what the cluster carries, declared on the root, its padding derived and on screen alone (Issue #668)", () => {
-  assert.match(ruleAt(":root:has(.band):has(.trail)", []), /--band-h:\s*[\d.]+rem/, "the band's height on the root every reader of the token reads");
-  const padding = shellRules.filter((r) => r.selector === "body.room:has(.band):has(.trail)");
-  assert.equal(padding.length, 1, "one padding at every width: the top row grows the token, never a width query (Issue #762)");
-  assert.deepEqual(padding[0]!.media, ["@media screen"], "on paper the layout's own padding: 0 stands");
-  assert.match(padding[0]!.body, /padding-top:\s*calc\(var\(--band-h\) \+ [\d.]+rem\)/, "the padding derives from the token, never a literal beside it");
-});
