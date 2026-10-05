@@ -19,6 +19,7 @@ const KNOWN: readonly { check: "EA1" | "EL1"; fault: string; row: string }[] = [
   { check: "EL1", fault: `/specimen/ at 901x800: p#sb-status.status "the status pill, as a ro" meets aside#specimen.slip`, row: "the handbook/errata/site.md row on the Specimen's status pill over its slip" },
   { check: "EL1", fault: `/specimen/ at 932x430: p#sb-status.status "the status pill, as a ro" meets aside#specimen.slip`, row: "the handbook/errata/site.md row on the Specimen's status pill over its slip" },
   { check: "EL1", fault: `/print-room/ at 932x430: the Press's backing lies over header.chrome`, row: "the handbook/errata/site.md row on the Print Room's risen Press at 932x430" },
+  { check: "EL1", fault: `/ribbon/ at 932x430: the room folio's backing lies over button.slip-fold`, row: "the handbook/errata/site.md row on the slip left at its old seat when a resize rewraps the room folio" },
 ];
 const SLIP_TAB_SIBLING = { at: `at ${SHORT.w}x${SHORT.h} folded`, pieces: ["button.slip-tab", "button.chart-drawer-tab"], row: "the handbook/errata/site.md row on the slip's tab at 932x430" };
 
