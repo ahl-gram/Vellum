@@ -33,13 +33,13 @@ function spansOf(text: string, phrase: string): ReadonlyArray<readonly [number, 
   return spans;
 }
 
-function findingsIn(file: string, raw: string): ReadonlyArray<string> {
+function findingsIn(file: string, raw: string, kept: ReadonlyArray<Kept> = KEPT): ReadonlyArray<string> {
   const text = fold(raw);
-  const spans = KEPT.filter((k) => k.file === file).flatMap((k) => spansOf(text, k.phrase));
-  const kept = (from: number, to: number): boolean => spans.some(([start, end]) => start <= from && to <= end);
+  const spans = kept.filter((k) => k.file === file).flatMap((k) => spansOf(text, k.phrase));
+  const inside = (from: number, to: number): boolean => spans.some(([start, end]) => start <= from && to <= end);
   const addresses = [...text.matchAll(ADDRESS)].map((m) => `${file} names ${m[0]}, an address in the private memory: "${near(text, m.index)}"`);
   const loose = [...text.matchAll(MENTION)]
-    .filter((m) => !kept(m.index, m.index + m[0].length))
+    .filter((m) => !inside(m.index, m.index + m[0].length))
     .map((m) => `${file} names the memory store outside every kept line: "${near(text, m.index)}"`);
   return [...addresses, ...loose];
 }
@@ -135,10 +135,14 @@ test("each arm refuses its own form, a kept phrase keeps only its own words in i
     [".claude/agents/vellum-spec-recon.md", "This trap was already in auto-memory when"],
     [PLATE, "This trap was already in auto-memory when it nearly hid. The long form is in the auto-memory."],
     [PLATE, "This trap was already in auto-memory when `feedback_x.md` said so"],
+    [OUTSIDE, "the long form is in the private\nmemory"],
   ];
   for (const [file, text] of refused) assert.notDeepEqual(findingsIn(file, text), [], `${file}: "${text}" passes`);
+  const naming = "it was once in `feedback_x.md`, in the private memory";
+  assert.notDeepEqual(findingsIn(OUTSIDE, naming, [{ file: OUTSIDE, phrase: naming, why: "history" }]), [], "a kept phrase excused the memory file it names");
   const passed: ReadonlyArray<readonly [string, string]> = [
     [".claude/skills/vellum-footguns/references/scars.md", "that Issue #708 moved out of private\nmemory, one row"],
+    [".claude/agents/vellum-plan-skeptic.md", "or the auto-memory files. They carry\nthe planning session's framing"],
     [OUTSIDE, "a plan is usually written from memory"],
     [OUTSIDE, "`a7e3018`, `chore/708-memory-to-specs-round-two`"],
     [OUTSIDE, "## Promoted from the memory triage (Issue #708)"],
