@@ -33,7 +33,7 @@ function witnessReds(options: ts.CompilerOptions, roots: readonly string[], witn
   const file = program.getSourceFile(witness);
   assert.ok(file, "the witness never reached the program, so nothing below reads it");
   return [...program.getSyntacticDiagnostics(file), ...program.getSemanticDiagnostics(file)]
-    .map((d) => `${source.slice(d.start ?? 0, (d.start ?? 0) + (d.length ?? 0))} ${d.code}`)
+    .map((d) => `${file.getLineAndCharacterOfPosition(d.start ?? 0).line + 1}: ${source.slice(d.start ?? 0, (d.start ?? 0) + (d.length ?? 0))} ${d.code}`)
     .sort();
 }
 
@@ -46,7 +46,7 @@ test("code under src/ outside src/site/ that names a browser global or type fail
   const engine = parse("tsconfig.engine.json");
   assert.deepEqual(
     witnessReds(engine.options, engine.fileNames, ENGINE_WITNESS, ENGINE_SOURCE),
-    ["HTMLElement 2304", "document 2584", "globalThis.document 7017", "window 2304"],
+    ["1: HTMLElement 2304", "1: document 2584", "1: window 2304", "2: document 7017"],
     "a browser name resolves in the engine pass: the DOM library is back in its lib, through a reference directive in one of its files, or as a declared global",
   );
   assert.deepEqual(engine.options.lib, withoutDom(ROOT_OPTIONS.lib), "the engine pass's lib is not the root's minus the DOM libraries, so the two passes read different languages");
@@ -60,7 +60,7 @@ test("code the worker loads that names anything a worker lacks fails the tsconfi
   const worker = parse("tsconfig.worker.json");
   assert.deepEqual(
     witnessReds(worker.options, worker.fileNames, WORKER_WITNESS, WORKER_SOURCE),
-    ['"node:crypto" 2307', "HTMLElement 2304", "document 2584", "localStorage 2304", "process 2591", "sessionStorage 2304", "window 2304"],
+    ['1: "node:crypto" 2307', "2: HTMLElement 2304", "2: document 2584", "2: localStorage 2304", "2: process 2591", "2: sessionStorage 2304", "2: window 2304"],
     "a name a worker lacks resolves in the worker pass: the DOM library or Node's types are back in it, through its options, a reference directive in a file it loads, or a declared global",
   );
   assert.deepEqual(worker.options.lib, [...withoutDom(ROOT_OPTIONS.lib), "lib.webworker.d.ts"], "the worker pass's lib is not the root's minus the DOM libraries plus the worker's");

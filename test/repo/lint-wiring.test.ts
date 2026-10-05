@@ -377,7 +377,7 @@ test("npm run lint is the native-loader ESLint over the whole tree, with a warni
 
 test("npm run check is tsc over tsconfig.json, which turns on noUncheckedIndexedAccess, and ci.yml's check-and-test job runs it as a real step, so an element read is typed as possibly missing on every pull request (Issue #654 ruling 1)", () => {
   const pkg = JSON.parse(src("package.json")) as { scripts: Record<string, string> };
-  assert.equal(pkg.scripts["check"], "tsc --noEmit");
+  assert.equal(pkg.scripts["check"], "tsc --noEmit && tsc --noEmit -p tsconfig.engine.json && tsc --noEmit -p tsconfig.worker.json");
   const config = ts.getParsedCommandLineOfConfigFile(join(ROOT, "tsconfig.json"), {}, { ...ts.sys, onUnRecoverableConfigFileDiagnostic: () => undefined });
   assert.ok(config, "tsconfig.json did not parse");
   assert.equal(config.options.noUncheckedIndexedAccess, true);

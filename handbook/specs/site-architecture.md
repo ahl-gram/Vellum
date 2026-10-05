@@ -258,6 +258,20 @@ precisely, because a token that falls outside it looks identical at the point of
   directory and copied into `public/`; shared chunks take fixed names with no hashes; one worker
   chunk serves the surfaces that spawn it. `publicDir` is false in each press config, guarded, since
   a truthy value copies `public/` into itself.
+- **`npm run check` is three passes, and code that runs where no page does may not name the page.**
+  `tsconfig.json` checks every TypeScript root with the browser libraries. `tsconfig.engine.json`
+  checks every `.ts` under `src/` outside `src/site/` without the DOM libraries: the generator, the
+  renderer, the CLI, `src/layouts/` and every directory added there, and not the living chart under
+  `src/site/living-chart/`, which `handbook/specs/explorer-doctrine.md` calls the engine. Nothing in
+  that tree names `document`, `window`, an element type or any other DOM-only global.
+  `tsconfig.worker.json` checks everything `src/site/explorer/worker.ts` loads against the language
+  and the worker library alone, with no Node types, so nothing the worker loads names the DOM,
+  `localStorage`, `sessionStorage` or a Node-only global such as `process`. A new worker joins that
+  file's `files`, and `test/repo/type-check.test.ts` reds until it does. Two known gaps: a browser
+  name Node's own type files also declare (`localStorage`, `sessionStorage`, `navigator`) passes the
+  engine pass in code the worker does not load; and `src/site/explorer/worker-client.ts`, page code,
+  sits in the worker pass through a type-only import, so a DOM use there reds falsely until
+  `WorkerRequest` and `WorkerResponse` move to a module of their own.
 - **`astro:generate` is clean, fonts, bundle, showcases, discovery, in that order**, and several suites pin
   its exact command string. A reordered or added step reds all of them at once: that is the pin
   working, not a break, but budget the edits.

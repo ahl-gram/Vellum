@@ -20,7 +20,7 @@
     "test": "node --test",
     "test:e2e": "node e2e/run.ts",
     "test:e2e:lanes": "node e2e/lanes.ts",
-    "check": "tsc --noEmit",
+    "check": "tsc --noEmit && tsc --noEmit -p tsconfig.engine.json && tsc --noEmit -p tsconfig.worker.json",
     "lint": "eslint --flag unstable_native_nodejs_ts_config --max-warnings 0 ."
   },
   "dependencies": {
