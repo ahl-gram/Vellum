@@ -108,7 +108,8 @@ option, his sentence is the ruling.
 **Where a rule lives: the routing rule.** Anything Vellum-specific AND normative AND slow-changing is
 a spec under `handbook/specs/`. An imperative keyed to the moment of typing a particular kind of line is a
 `vellum-footguns` gate. An incident whose value is proving that a gate bites is a row in that skill's
-`.claude/skills/vellum-footguns/references/scars.md`. A gate candidate declined under the strict
+`.claude/skills/vellum-footguns/references/scars.md`, which also keeps the incident behind a spec
+line, since the spec itself leaves it out. A gate candidate declined under the strict
 filter (a line joins a gate only with its own incident number or a ruling of Alex's) is a row in
 `.claude/skills/vellum-footguns/references/held-lines.md`, each with the incident that would earn it
 its line. Fast-changing empirical traps, private infrastructure and status stay out of
@@ -122,6 +123,16 @@ is the same carve-out that lets a hand-measured browser quirk keep its line. So 
 and a comment stating it at the line that breaks are both correct, and moving a rule into a spec is
 not by itself a reason to delete the comment. What the routing rule forbids is a second NORMATIVE
 home: another spec, or a gate re-explaining the contract rather than pointing at it.
+
+**A tracked agent or skill file never sends its reader to the private auto-memory for content.**
+That memory is private to Alex, so a pointer into it is one no other reader can follow and nothing
+notices when it goes stale: write the content into the tracked home the routing rule names and point
+there. A line that names the memory without sending anyone to it for content stays: an instruction
+not to read it, a record that something was once held there, or a rule of thumb about it. Such a
+line names the store, never a file in it. `test/repo/memory-pointers.test.ts` reads every tracked
+file under `.claude/agents/` and `.claude/skills/`, refuses a memory file's name or a path into the
+memory directory, and holds the store's names it lists to its kept lines; the test is the list of
+what it reads and what passes.
 
 **A new spec file joins its reading lists by hand, and none of them checks itself**: the table in
 `CLAUDE.md`, step 3 of `handbook/specs/development-workflow.md`, the reading list in

@@ -2,10 +2,10 @@
 
 Compiled 2026-09-09 from the bodies, commits and verification comments of PRs #524 to #548 and
 their issues, with older and later scars added beneath when a gate needs one (#378, #518 to #521, #525, #526, #529, #531, #532, #539, #540, #543, epic #401).
-Every row was found by a cold skeptic, a prover, a plate-reader, CI, or Alex live, after the
-implementing session had already reported the work done. Ranked by how many PRs in that window
-carried it. Where a lesson's rule is written down in this repo, it is in one of the homes named at
-the end.
+Every row before "Behind the spec lines Issue #708 promoted" was found by a cold skeptic, a prover, a
+plate-reader, CI, or Alex live, after the implementing session had already reported the work done.
+Ranked by how many PRs in that window carried it. Where a lesson's rule is written down in this
+repo, it is in one of the homes named at the end.
 
 ## Families, most recurrent first
 
@@ -150,7 +150,9 @@ left open and the session failed to write down).
 ## Promoted from the memory triage (Issue #708)
 
 Older and later incidents behind gate lines that Issue #708 moved out of private memory, one row
-each, with the gate line it proves. Each was read from the public record on 2026-10-02.
+each, with the gate line it proves. Each was read from the public record on 2026-10-02. A sentence
+beginning "Added by Issue #729" came in on 2026-10-04: its incident or figure was checked against
+the public record that day, and a lesson in it came from a private note.
 
 - Issue #320, PR #349: freezing the manifest passed to `rearmAges` left RS23's output byte-identical,
   because `armAges` takes its range from `overlay.data()` and only forwards that argument. The
@@ -160,7 +162,8 @@ each, with the gate line it proves. Each was read from the public record on 2026
 - Issue #551, PR #552: the guard proving the selftest mints no scratch directory on import first
   read the real tmpdir and failed 3 of 3 beside `test/repo/footgun-gate.test.ts`, whose selftest
   holds a scratch directory mid-window; its child now gets its own `TMPDIR`. Proves Gate 1 item 10's
-  `TMPDIR` clause.
+  `TMPDIR` clause. Added by Issue #729: `TMPDIR` is the instance the gate names; the general form is
+  that any guard reading global state is not isolated from its siblings.
 - Issue #547: CD14 to CD16 ran only at 390, so the phone leaf's two tabs, standing unstyled on the
   desktop, were asserted only where they belong; the fix's guard asserts them absent at a desktop
   width too. Proves Gate 1 item 11's both-sides clause.
@@ -175,18 +178,28 @@ each, with the gate line it proves. Each was read from the public record on 2026
   (pull requests on the full suite, main merged on smoke) and a lost `!` (smoke forced onto risky
   pull requests) both escaped; the run loop and the pass and fail rule moved where tests execute
   them, today `runSelected` and `runOutcome` in `e2e/support/suites.ts`. Proves Gate 1 item 17.
+  Added by Issue #729: its ci.yml shape regexes, `/&&\s*'smoke'\s*\|\|\s*'full'/` and one on
+  `!contains(...)`, left with the logic they pinned, and the PR #380 diff is their only record. The
+  cost its body names is the `SUITES` map guard's, a regex over source text, which fails loudly when
+  that literal is reformatted: the safe direction for a shape pin.
 - Issue #309, PR #410: inverting `topByScore` to anchor at the LOWEST score escaped all 1294 tests,
   since both ends of a connecting road land on the web whoever anchors; rank pins closed it, the
   inverted anchor turning the islet's village lane into a town trunk. Proves Gate 1 item 18.
 - Issue #398, Issue #443: every finer-view guarantee was measured against the parent's resampled
   surface, where a one-cell strait is already closed, so 1428 passing tests could not see straits
   closing; the guard and the defect shared an oracle, and the fix labels the parent's landmasses on
-  the parent's own grid (`test-support/parent-partition.ts`). Proves Gate 1 item 19.
+  the parent's own grid (`test-support/parent-partition.ts`). Proves Gate 1 item 19. Added by
+  Issue #729: a control that comes back vacuous is evidence about the oracle, not a fixture to swap
+  until green.
 - Issue #522, PR #631: every guard on the Chart Table's two doors sat on a pure function or on
   source text, so "the year is the Explorer's present" was pinned as `\d+` and `year: 1` shipped
   green, and swapping the booleans handed to `layPressFace` would have inverted a ruling with
   everything green; both closed by driving checks, each proved by running its mutation. Proves
-  Gate 1 item 20.
+  Gate 1 item 20. Added by Issue #729: the driving check goes beside the source read, never instead
+  of it. The general form is PR #576's (Issue #575): a proof resting on several instruments, each
+  blind where another sees, loses coverage silently when one is swapped for a better-looking one;
+  there a file listing stood in for `git status --porcelain`, the only one of the two that sees a
+  tracked file edited in place, and the proof now runs both.
 - Issue #540, PR #545: BR6b's fixed offset landed on the new leaf tabs and read 59 against an
   unchanged ground; it was re-anchored to the docked press's own middle and mutation-proved against
   the pool it was written for. Proves Gate 2 item 4's moved-sample clause.
@@ -200,7 +213,42 @@ each, with the gate line it proves. Each was read from the public record on 2026
 - Issue #638: a tagline measured against a control group's layout box reported two collisions that
   are not there and could not see a dateline at all; ink, every visible text node's line boxes and
   every control's own rect, swept from 320 to 480 a pixel at a time, found the class across eight
-  pages. Proves Gate 3 item 3's collision clause.
+  pages. Proves Gate 3 item 3's collision clause. Added by Issue #729: the recipe is a TreeWalker
+  over `SHOW_TEXT` that skips hidden ancestors, plus each control's own rect, and a crop of every
+  page is viewed before a collision table is posted. The Gallery laid out at 347 when set to 320
+  (Issue #672), so the layout width is read before a narrow measurement is trusted.
+
+## Behind the spec lines Issue #708 promoted
+
+The incidents and figures behind spec lines that Issue #708 promoted, brought into the repo by
+Issue #729 on 2026-10-04, one row each with the spec line it stands behind. Each was checked against
+the public record that day, and a stated unknown says so.
+
+- Issue #368: only the popup was measured. Clipboard, fullscreen, audio and file pickers are likely
+  gated on user activation the same way, and none of them has been measured. Stands behind
+  `handbook/specs/settle-doctrine.md`'s popup at page load.
+- Issue #221, Issue #317, Issue #320: the Explorer's survey checkbox is labelled `survey`, ratified
+  on Issue #317 on 2026-07-29, but keeps `id="ages"` in `src/pages/explorer/index.astro`. Arrival
+  at rest on every path was ratified on Issue #221 the same day and graduated to stable at Alex's
+  post-use review, also on 2026-07-29; e2e RR7 and RR8 in `e2e/suites/reading-room/addresses.ts`
+  hold its year address. The static Explorer keeps no voyage hooks by Issue #320's decision A.
+  Stands behind `handbook/specs/explorer-doctrine.md`'s two hosts and arrival at rest.
+- PR #277: W20b, the facing anti-flicker check, picked its fixture leg by raw x-reversals but
+  asserted on the naive flip count; it was passing on a tie, the reordered itinerary shifted which
+  leg won that tie, and it went toothless (naive flips 3 to 1) with a 5-flip leg left unselected.
+  Issue #298 carried the lesson on as selecting the fixture on the metric asserted. Stands behind
+  `handbook/specs/region-and-voyage.md`'s reorder bullet.
+- PR #283, PR #277: each carries a comment headed "Raw evidence, mirrored here because `out/` is
+  gitignored", Issue #185's ladders and Issue #275's scripts, the model of what an `out/`-only table
+  owes. Stands behind `handbook/specs/development-workflow.md` step 10.
+- PR #449, Issue #443: fused world landmasses went from 38, 52 and 52 to 0 at bands 1 to 3, while
+  landmasses lost read 4 before and 3 after at band 1 against a bare control of 1, so "no shore
+  disappears" was false in the one comparison that mattered. Stands behind
+  `handbook/specs/development-workflow.md` step 10's control.
+- Issue #145: a realm's five name candidates all stood in one column, which settlement labels had
+  claimed first, so the realm went unnamed with room to spare; the diagnosis noted the arena itself
+  was not instrumented, so its list of blockers is indicative. Stands behind
+  `handbook/specs/chart-dress.md`'s claim order.
 
 ## Where the rules are written down
 
@@ -209,7 +257,9 @@ Where a lesson's rule is written down in this repo, it is in one of these: the g
 (how an e2e wait is written and what the harness does); `handbook/specs/development-workflow.md`
 (what a pull request owes, and in what order); `handbook/specs/conventions.md` (the comment sweep,
 citations, where a rule lives); `handbook/specs/ui-design.md`'s colour, contrast and legibility
-section (measuring a ground); `CLAUDE.md`'s "Measure before you assert" and "Write visual samples to
+section (measuring a ground); `handbook/specs/explorer-doctrine.md`,
+`handbook/specs/region-and-voyage.md` and `handbook/specs/chart-dress.md` (the rules the spec-line
+rows above stand behind); `CLAUDE.md`'s "Measure before you assert" and "Write visual samples to
 out/"; the agent definitions under `.claude/agents/`; and, for the tooling traps (CDP escapes, perl
 wide chars, the rebase subject strip, closing keywords), the Never list,
 `.claude/skills/vellum-footguns/hooks/README.md` and the Never section of
