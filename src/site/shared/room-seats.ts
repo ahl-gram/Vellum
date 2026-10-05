@@ -69,15 +69,23 @@ export function pressRowStacks(tops: readonly number[]): boolean {
 
 // Computed, never read back off the row: its left transitions, and a mid-transition rect reads the old seat (plate read 2026-08-29: a resize left the row over the folio).
 export function placeLegendRow(legendEl: HTMLElement, room: LegendRoom): void {
-  for (const prop of ["bottom", "transform", "transition"] as const) legendEl.style[prop] = "";
+  const from = legendEl.style.bottom === "" ? legendEl.style.left : "";
+  Object.assign(legendEl.style, { bottom: "", transform: "", transition: "none" });
   const chromeX = rectOf(room.chrome)?.left ?? 0;
   const left = (textRight(room.folio) ?? chromeX) + LEGEND_CLEAR;
   const bound = Math.min(window.innerWidth - chromeX, room.glass ?? Infinity, room.slip?.left ?? Infinity) - LEGEND_GAP;
   const space = Math.max(0, bound - left);
-  legendEl.style.maxWidth = `${space}px`;
-  legendEl.style.left = `${left + space / 2}px`;
-  const tops = [...legendEl.querySelectorAll(".legend-row .legend-btn")].map((b) => b.getBoundingClientRect()).filter((r) => r.width > 0).map((r) => r.top);
+  const to = `${left + space / 2}px`;
+  Object.assign(legendEl.style, { maxWidth: `${space}px`, left: to });
+  const tops = [...legendEl.querySelectorAll<HTMLElement>(".legend-row .legend-btn")].filter((b) => b.offsetWidth > 0).map((b) => b.offsetTop);
   const folio = rectOf(room.folio);
-  if (folio === null || !pressRowStacks(tops)) return;
-  Object.assign(legendEl.style, { transition: "none", transform: "none", left: `${chromeX}px`, maxWidth: `${Math.max(0, bound - chromeX)}px`, bottom: `${window.innerHeight - folio.top + LEGEND_RISE}px` });
+  if (folio !== null && pressRowStacks(tops)) {
+    Object.assign(legendEl.style, { transform: "none", left: `${chromeX}px`, maxWidth: `${Math.max(0, bound - chromeX)}px`, bottom: `${window.innerHeight - folio.top + LEGEND_RISE}px` });
+    return;
+  }
+  if (from !== "" && from !== to) {
+    legendEl.style.left = from;
+    legendEl.getBoundingClientRect();
+  }
+  Object.assign(legendEl.style, { transition: "", left: to });
 }
