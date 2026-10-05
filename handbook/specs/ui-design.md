@@ -118,7 +118,12 @@ every resize, which `bindRoom` in `src/site/shared/room.ts` wires). **The stage 
 full-viewport box the chart is mounted in**, declared as `body.chart-room .stage` in
 `public/atelier.css`; a room that hangs its plates on the deep rather than mounting one chart has
 none, and the Gallery is that room today. No band, no footer: a chart room with a
-stage does not scroll. **A chart room without a stage is the exception and it does scroll**, its
+stage does not scroll. **The chart keeps a minimum size**: where the chrome would leave the sheet
+under half the width it could have (the window less an open slip, at the window's full height), the
+sheet takes all of that room instead, centred and wholly inside the window, and runs under the
+chrome; it does not pan at rest, and the reader zooms to see beneath the chrome (`fitStage` in
+`src/site/shared/stage-fit.ts`, which marks the page `stage-under` while it does). **Provisional
+until the post-use review:** the floor's trigger and its size. **A chart room without a stage is the exception and it does scroll**, its
 content passing under the fixed chrome, which is why it pools every piece of that chrome rather than
 the cluster alone, and why **it wears no vignettes**: a vignette is a fixed darkening band, and on a
 scrolling page it washes out whatever passes through it. Four corners, each a named piece of the kit:
@@ -139,7 +144,11 @@ scrolling page it washes out whatever passes through it. Four corners, each a na
 
 Between them: **the slip**, the working panel on the right, which is the mockup's station card grown
 into a desk. It folds away to a bookmark tab on the right edge, and on a phone it is the bottom
-sheet. **The legend row** runs along the bottom and carries the roads out.
+sheet. **The legend row** runs along the bottom and carries the roads out, seated in the gap beside
+the chart folio; where its presses would stack down the page there (more than two lines, or two or
+more presses each alone on its line), it stands above the chart folio instead, from the chrome's
+inset to the Glass or the slip (`placeLegendRow` in `src/site/shared/room-seats.ts`). **Provisional
+until the post-use review:** where the risen row stands.
 
 **The head cluster says where the reader is standing, on every page with a seat in the route tree.**
 Exactly one element on the page carries the current-page mark (`aria-current`): the nav's segment
@@ -183,9 +192,10 @@ it does not re-dress it.** A page may give its own element inside a piece a face
 under its own state, but an arm made only of kit classes may set no colour, border, shadow, font or
 tracking. A guard sweeps for exactly that.
 
-**When the reader is zoomed in, or the room has no stage, the furniture stands on
-a pool**: a blurred box that follows the cluster, running well past the viewport edge on its
-edge-facing sides so the fade never lands on screen. At rest on a chart, the chrome carries none. The
+**When the reader is zoomed in, or the room has no stage, or the sheet is floored under the chrome,
+the furniture stands on a pool**: a blurred box that follows the cluster, running well past the
+viewport edge on its edge-facing sides so the fade never lands on screen. At rest on a chart fitted
+clear of the chrome, the chrome carries none. The
 legend row and the room folio take home's crisp panel instead of the blurred pool, so that a chart
 room's corners read the same as home's, corner for corner.
 
