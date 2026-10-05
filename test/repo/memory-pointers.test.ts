@@ -11,7 +11,7 @@ const ROOTS = [".claude/agents", ".claude/skills"];
 // 2026-10-04: this git ls-files answers in under 10 ms on a Mac; thirty seconds is a cap on a hang, not a budget.
 const GIT_TIMEOUT_MS = 30_000;
 const ADDRESS = /\b(?:feedback|project|reference|user)_(?:[a-z][a-z0-9_]*|\*)|\[\[(?:feedback|project|reference|user)-[a-z0-9-]+\]\]|MEMORY\.md|\.claude\/projects/g;
-const MENTION = /auto(?:- ?| )?memory|private(?:- ?| )memory|alex['’]s memory|memory files?|memory folders?|memory director(?:y|ies)/gi;
+const MENTION = /auto(?:- ?| )?memory|private(?:- ?| )memory|alex['’]s memory|memory file|memory folder|memory director/gi;
 
 type Kept = { readonly file: string; readonly phrase: string; readonly why: "forbids reading it" | "history" | "rule of thumb" };
 
@@ -118,7 +118,7 @@ const REFUSED: ReadonlyArray<readonly [string, string]> = [
   [OUTSIDE, "the long form is in automemory"],
   [OUTSIDE, "see the Auto Memory"],
   [OUTSIDE, "kept in private-memory"],
-  [OUTSIDE, "the auto-\nmemory files"],
+  [OUTSIDE, "see the auto-\nmemory"],
   [OUTSIDE, "kept in private-\nmemory"],
   [OUTSIDE, "in Alex's memory"],
   [OUTSIDE, "in Alex’s memory"],
