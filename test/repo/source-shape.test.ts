@@ -89,7 +89,9 @@ const CONTENTS_PLANT = [
 ];
 
 test("a room writes the contents row's cr-num class only through the shared builder, which alone may spell it", async () => {
-  assert.deepEqual(await houseReports(CONTENTS_PLANT, "src/site/prospect/seats.ts"), at(CONTENTS, [1, 2, 3]), "BLIND SPOT, declared, erring toward passing: the class name assembled from pieces");
+  for (const path of ["src/site/prospect/seats.ts", "src/site/shared/room.ts"]) {
+    assert.deepEqual(await houseReports(CONTENTS_PLANT, path), at(CONTENTS, [1, 2, 3]), `${path}: BLIND SPOT, declared, erring toward passing: the class name assembled from pieces`);
+  }
   assert.deepEqual(await houseReports(CONTENTS_PLANT, "src/site/shared/contents-row.ts"), [], "the shared builder is the one place the class is written");
 });
 
