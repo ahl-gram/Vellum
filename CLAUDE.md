@@ -190,7 +190,11 @@ session already at xhigh cannot tell the frontmatter from inheritance.
   in an `AskUserQuestion` menu rather than in prose, and STOP there. A decision that is his is not one
   to default your way and mention afterwards. A dispatched `vellum-implementer` lane cannot reach him,
   so it hands the menu to its dispatcher at the same STOP.
-- **No em-dashes** in issue bodies, PR bodies, published copy or new code comments.
+- **No em-dashes** in issue bodies, PR bodies, issue and PR comments, commit messages, published copy
+  or new code comments. In a body, a comment, a commit message or the repo's markdown, one inside
+  inline backticks or a fenced code block is code, not prose, and stands: that is how a pasted red
+  line keeps its own (Issue #644). The footgun hook refuses one in a body's prose and reads what code
+  is the way `.claude/skills/vellum-footguns/hooks/README.md` says.
 - **Comments are the exception, not the rule.** A behavior a test pins needs no comment: the test is
   the record, delete the prose. A local invariant earns a test first; only where no test can
   practically pin it (cross-platform float drift, hand-measured browser quirks) does it keep a single

@@ -62,4 +62,4 @@ Lead with what you measured and what it says, then the file list. For every acce
 
 Name every file you wrote, with its path under `out/`, so Alex can open it. Give ABSOLUTE paths when you are dispatched inside a worktree, since its `out/` is not the one he opens. That list is half the deliverable.
 
-No em-dashes in anything you write.
+No em-dashes in anything you write, except inside inline backticks or a fenced code block.

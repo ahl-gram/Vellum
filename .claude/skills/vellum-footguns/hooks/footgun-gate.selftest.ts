@@ -66,6 +66,38 @@ const headingRows = (): Fixture[] =>
     "deny",
     `"${heading}"`,
   ]);
+const DASH = String.fromCharCode(0x2014);
+const CODE_BODIES = new Map<string, string>();
+const codeRow = (name: string, command: string, body: string, want: Kind): Fixture => {
+  const file = `code-${CODE_BODIES.size}.md`;
+  CODE_BODIES.set(file, body.replaceAll("<D>", DASH));
+  return [name, bash(`${command.replaceAll("<D>", DASH)} --body-file ${file}`, SCRATCH), want, want === "deny" ? "em-dash outside code" : want ? "## Gate 5" : ""];
+};
+const CODE_ROWS: Fixture[] = [
+  codeRow("an em-dash inside an inline span in a pr comment allowed", "gh pr comment 5", "see `FAIL  x  <D> {}` here", null),
+  codeRow("an em-dash inside a span in a whole pr body allowed", "gh pr create --title t", `${WHOLE_BODY}\n\`a <D> b\`\n`, "context"),
+  codeRow("an em-dash after a single backtick inside a double-backtick span allowed", "gh issue comment 5", "``a ` b <D> c``", null),
+  codeRow("an em-dash inside a closed backtick fence allowed", "gh issue comment 5", "```\nFAIL  x  <D> y\n```", null),
+  codeRow("an em-dash inside a closed tilde fence allowed", "gh issue comment 5", "~~~\nx <D> y\n~~~", null),
+  codeRow("an em-dash inside a fence indented two spaces allowed", "gh issue comment 5", "  ```\nx <D> y\n  ```", null),
+  codeRow("an em-dash inside a fence closed by a longer run allowed", "gh issue comment 5", "```\nx <D> y\n`````", null),
+  codeRow("an em-dash in a table cell's span with its pipe escaped allowed", "gh issue comment 5", '| a | `FAIL x <D> {"k":"a\\|b"}` |', null),
+  codeRow("an em-dash inside a span in an issue body allowed", "gh issue create --title t", "see `x <D> y`", null),
+  codeRow("an em-dash in prose beside a span denied", "gh issue comment 5", "`code` and x <D> y", "deny"),
+  codeRow("an em-dash after an unclosed backtick denied", "gh issue comment 5", "`x <D> y", "deny"),
+  codeRow("an em-dash in a span opened on one line and closed on the next denied", "gh issue comment 5", "`x\n<D> y`", "deny"),
+  codeRow("an em-dash after a backslash-escaped backtick denied", "gh issue comment 5", "\\`x <D> y`", "deny"),
+  codeRow("an em-dash after a span closed by a backslash-preceded backtick denied", "gh issue comment 5", "`a\\` <D> prose `b`", "deny"),
+  codeRow("an em-dash after an unclosed fence denied", "gh issue comment 5", "```\nx <D> y", "deny"),
+  codeRow("an em-dash inside a fence closed by the other character denied", "gh issue comment 5", "```\nx <D> y\n~~~", "deny"),
+  codeRow("an em-dash inside a fence closed by a shorter run denied", "gh issue comment 5", "````\nx <D> y\n```", "deny"),
+  codeRow("an em-dash after a backtick line whose info string holds a backtick denied", "gh issue comment 5", "```x```\nprose <D> here\n```", "deny"),
+  codeRow("an em-dash inside a fence indented four spaces denied", "gh issue comment 5", "    ```\nx <D> y\n    ```", "deny"),
+  codeRow("an em-dash in an indented block with no fence denied", "gh issue comment 5", "    x <D> y", "deny"),
+  codeRow("an em-dash in a table cell whose bare pipe splits the span denied", "gh issue comment 5", "| a | `x <D> y|z` |", "deny"),
+  codeRow("an em-dash in the body after a fence the command opened denied", "gh issue create --title '\n```\n'", "x <D> y\n```", "deny"),
+  codeRow("an em-dash in the title outside code denied", "gh issue create --title 'a <D> b'", "a clean body", "deny"),
+];
 const asContext = (text: string): Decision => ({ hookSpecificOutput: { hookEventName: "PreToolUse", additionalContext: text } });
 // The unlink is what lets the two rows share a session id: the gate is once per session, so without it the second row would see no Gate 5 and read as the warning having swallowed it. The FIXTURES loop's own unlink does not reach a function subject.
 const inRootlessCheckout = (payload: Payload) => async (): Promise<Decision> => {
@@ -149,6 +181,7 @@ const FIXTURES: Fixture[] = [
   // The line-continuation join reaches these two refusals as well as the gh api one, and the join is what puts the body on the same segment as the command that carries it.
   ["pr body em-dash across a line continuation denied", bash("gh pr create --title t \\\n  --body 'a — b'"), "deny", "em-dash"],
   ["pr body negated close across a line continuation denied", bash("gh pr create --title t \\\n  --body 'this does not close #518'"), "deny", "CLOSING"],
+  ...CODE_ROWS,
   ["issue comment negated close allowed", bash("gh issue comment 5 --body 'does not close #3'"), null, ""],
   ["typed -F field is not a body file", bash("gh issue comment 549 -F body=hello"), null, ""],
   ["gh api issue body overwrite denied", bash("gh api repos/o/r/issues/193 -f body='new text'"), "deny", "bare issue or pull-request endpoint"],
@@ -326,8 +359,10 @@ const run = async (): Promise<number> => {
   writeFileSync(join(SCRATCH, "headingless.md"), "# a template with no sections\n\nprose only.\n");
   writeFileSync(join(SCRATCH, "no-ran.md"), bodyWith(SECTIONS.filter((x) => x !== "## Ran")));
   writeFileSync(join(SCRATCH, "whole.md"), WHOLE_BODY);
+  for (const [file, body] of CODE_BODIES) writeFileSync(join(SCRATCH, file), body);
   mkdirSync(dirname(ROOTLESS_HOOK), { recursive: true });
   cpSync(join(HERE, "footgun-gate.ts"), ROOTLESS_HOOK);
+  cpSync(join(HERE, "markdown-code.ts"), join(dirname(ROOTLESS_HOOK), "markdown-code.ts"));
   cpSync(join(HERE, "..", "SKILL.md"), join(ROOTLESS, ".claude", "skills", "vellum-footguns", "SKILL.md"));
   symlinkSync(ROOT, LINK);
   for (const label of ["Gate 1", "Gate 2", "Gate 3", "Gate 4", "Gate 5", "Gate 6"]) report(gateText(label).length > 200, `${label} text found in SKILL.md`);

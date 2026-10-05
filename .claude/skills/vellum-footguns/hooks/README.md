@@ -58,7 +58,13 @@ is ever removed.
     swallows every template after it), never a hand-rolled lexer, so a stray backtick in a regex or a string does not swallow the code after it,
     and a `String.raw` tag is skipped because it is the remedy;
   - `gh pr create` / `gh pr edit` / `gh pr comment` / `gh issue create` / `gh issue edit` /
-    `gh issue comment` whose body carries an em-dash, and a PR body (create or edit) carrying a
+    `gh issue comment` whose text carries an em-dash in its prose (Issue #644): the command string
+    (its title and an inline body) and each body file are read apart, and `markdown-code.ts` takes
+    out of each a fenced code block (backticks or tildes, indented at most three spaces, closed by
+    the same character at least as long; a backtick fence's info string holds no backtick) and an
+    inline span (a run of backticks closed by an equal run on its own line, or in its own cell of a
+    line that starts with a pipe, split on unescaped pipes; a run after a backslash opens nothing).
+    An unclosed fence or span is prose, so it opens no loophole. And a PR body (create or edit) carrying a
     negated closing keyword such as "does not close #N" or "does not fix owner/repo#N". The body is
     read inline, from `--body-file` (resolved against the call's cwd), and from `$(cat file)`; a body
     file it cannot read is named in a warning instead of skipped. A `-F name=value` typed field is
@@ -83,6 +89,14 @@ is ever removed.
   `typescript` package that could not be loaded, which skips the escape scan.
 
 ## Blind spots, with their direction
+
+- The code reader is hand-rolled and errs toward prose, so most of what it gets wrong is a refusal:
+  a span that runs across a line break, a fence in a blockquote or indented past three spaces in a
+  list, an indented block with no fence, a fence GitHub would run to the end unclosed, and a backtick
+  typed as backslash-backtick inside a double-quoted `--body`, where the shell needs the escape and
+  the reader sees an escaped opener. Its one miss: a raw HTML block (`<details>` with no blank line
+  after it, a raw `<table>`) shows a fence or span as literal text, and an em-dash inside it passes
+  though GitHub renders it as prose.
 
 - A regex inside a single- or double-quoted JS string loses its backslash the same way and is not
   scanned: an apostrophe in prose would open a false span, so the scanner errs toward silence there.
@@ -187,7 +201,8 @@ command string from `.claude/settings.json` through `sh` with a real, a symlinke
 `test/repo/footgun-gate.test.ts` runs the whole table under `npm test`, so CI runs it on every PR.
 This is the implementer's own table, not an independent prover run. The once-per-session state
 lives at `$TMPDIR/vellum-footguns-<session_id>.json`; delete it to see a gate again. `npm run check`
-types both files through the tsconfig include.
+types every file here through the tsconfig include, and the selftest copies `markdown-code.ts` beside
+the hook in its rootless checkout, since the hook imports it.
 
 ## Cost
 

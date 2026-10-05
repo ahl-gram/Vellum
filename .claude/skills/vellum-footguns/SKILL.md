@@ -240,7 +240,8 @@ Scars: #49, #101, #203, #255, #408, #486, #491, #492, #507, #508, #524, #528, #5
    "implements #203" left #203 to be shut by hand an hour after the merge. It is also inert while the
    base is a feature branch, so the keyword goes on the last PR to land and is re-checked after the
    retarget (PR #408).
-6. `grep -n '—'` over the body and the diff returns nothing.
+6. `grep -n '—'` over the body and the diff finds nothing outside inline backticks or a fenced code
+   block (Issue #644): a pasted red line keeps its own inside code.
 7. **A finding this PR does not fix is FILED or added to `handbook/errata/`, never left as prose in the
    body.** A finding about this PR's own work, an accessibility failure included, is fixed after the
    review round and leaves unfixed only on the terms `handbook/specs/development-workflow.md`
@@ -326,7 +327,7 @@ The hook in `hooks/`, wired in `.claude/settings.json`, refuses the mechanical o
 - A bare mutation of the stash stack (`git stash`, `pop`, `clear`, `apply` or `drop` without a ref): it is shared across every worktree. `git stash push -m ... -- <paths>`, `apply <sha>`, or a WIP commit.
 - `perl -pi` with a non-ASCII replacement: it re-encodes every existing non-ASCII byte in the file. Use node or a heredoc, then grep for `Â`.
 - A single-escaped `\s`, `\d`, `\w`, `\b` inside a backtick string in a `.ts` or `.mjs` file under `scripts/`, `out/` or `e2e/` (`test/e2e/` included).
-- A PR body with an em-dash, or with "not close #N" / "does not fix #N".
+- A PR body with an em-dash outside inline backticks or a fenced code block, or with "not close #N" / "does not fix #N".
 - A PR body that skips one of `.github/PULL_REQUEST_TEMPLATE.md`'s `## ` sections. Presence is the check, not content: a section with nothing to report says so and stays.
 - A negative claim built from `head`, `tail`, `--limit`, or a jq slice. Count against the true total or query the item.
 - `gh issue view` as evidence an issue is empty. It silently returns nothing for some issues here; use `gh api`.
