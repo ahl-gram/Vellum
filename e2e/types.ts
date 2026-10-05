@@ -44,6 +44,7 @@ export type SuiteContext = {
   pinch: (cx: number, cy: number, from: number, to: number) => Promise<void>;
   setTouch: (enabled: boolean, maxTouchPoints?: number) => Promise<unknown>;
   setMobileViewport: (width: number, height: number) => Promise<void>;
+  setNarrowViewport: (width: number, height: number) => Promise<void>;
   clearMobile: () => Promise<void>;
   serverState: { blockWorker: boolean };
   cleanup: () => void;

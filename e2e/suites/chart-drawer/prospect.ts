@@ -183,8 +183,8 @@ export async function cd32MixedFolio({ evaluate, send, check, sleep, PORT }: Sui
 }
 
 // The phone, where the drawer is stood down and the only feedback is the leaf tab and the status pill.
-export async function cd33PhonePress({ send, check, setMobileViewport, clearMobile, settle, go, pinCard, pressCard }: DrawerKit): Promise<void> {
-  await setMobileViewport(390, 844);
+export async function cd33PhonePress({ send, check, setNarrowViewport, clearMobile, settle, go, pinCard, pressCard }: DrawerKit): Promise<void> {
+  await setNarrowViewport(390, 844);
   await go(DRESS);
   await settle(CARD, (d) => d.hits > 1, "chart-drawer-card-390");
   await pinCard(1);

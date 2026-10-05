@@ -31,7 +31,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await sb5eFolioPanel(k, rest, leaned);
   await sb5cFooting(k, rest, leaned);
   await sb6RestAgain(k);
-  await send("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
+  await send("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 1, mobile: false });
   const phone = await goto();
   await sb7Phone(k, phone);
   await sb8Opens(k, phone);

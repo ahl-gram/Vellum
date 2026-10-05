@@ -198,9 +198,9 @@ async function br5Hover({ evaluate, send, check, sleep }: BroadsideKit): Promise
   check("BR5 the note shows under a real hover and hides when the pointer leaves", overOpen && awayClosed, JSON.stringify({ overOpen, awayClosed }));
 }
 
-async function br6Tap({ evaluate, check, sleep, touch, setMobileViewport, clearMobile }: BroadsideKit): Promise<void> {
+async function br6Tap({ evaluate, check, sleep, touch, setNarrowViewport, clearMobile }: BroadsideKit): Promise<void> {
   // REAL CDP taps fire the full compat sequence a synthetic .click() skips (which once hid an off-by-one here); device metrics + touch emulation is what actually flips the hover/pointer media in this browser, setEmulatedMedia's feature overrides are a no-op.
-  await setMobileViewport(390, 700);
+  await setNarrowViewport(390, 700);
   const emulated = await evaluate<boolean>(`window.matchMedia("(hover: none)").matches`);
   await sleep(120);
   await evaluate(`(()=>{const h=document.querySelector("#broadside .slip-handle");if(h&&!document.getElementById("broadside").classList.contains("open"))h.click();})()`);
@@ -240,8 +240,8 @@ async function br6Tap({ evaluate, check, sleep, touch, setMobileViewport, clearM
 }
 
 // Issue #525: the camera arrives by HASH, not by gesture: the Glass is display:none under an open sheet at narrow (the 2026-09-03 ruling 1), so there is nothing to press, and a hash camera needs none of the CDP touch apparatus.
-async function br6bSetup({ evaluate, sleep, setMobileViewport, goto, EXP }: BroadsideKit): Promise<void> {
-  await setMobileViewport(390, 844);
+async function br6bSetup({ evaluate, sleep, setNarrowViewport, goto, EXP }: BroadsideKit): Promise<void> {
+  await setNarrowViewport(390, 844);
   await goto(EXP + "#seed=42&style=antique&cx=0.52&cy=0.45&k=4", "broadside-390-zoomed");
   await evaluate(`(()=>{const h=document.querySelector("#broadside .slip-handle");if(h&&!document.getElementById("broadside").classList.contains("open"))h.click();})()`);
   await sleep(400);

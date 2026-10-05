@@ -123,7 +123,7 @@ test("a page that runs a live chart app is framed by its head box, home and the 
   assert.equal(modeOf("/atlas/"), "full", "the Atlas is a document");
 });
 
-test("every page is shot at a desktop and a true phone viewport, under the archive's file names", () => {
+test("every page is shot at a desktop and a narrow desktop viewport, under the archive's file names (a phone obeys the fixed 1024 viewport since Issue #761, so the 390 row is the narrow layout a zoomed desktop still gets)", () => {
   const plan = planSweep(["/", "/atlas/", "/explorer/", "/explorer/portfolio/", "/specimen/"], "out/s");
   const byName = new Map(plan.map((s) => [s.name, s]));
   assert.deepEqual([...byName.keys()].sort(), [
@@ -131,7 +131,7 @@ test("every page is shot at a desktop and a true phone viewport, under the archi
     "explorerportfolio-1280-head.png", "explorerportfolio-390-head.png", "home-1280.png", "home-390.png", "specimen-1280.png", "specimen-390.png",
   ]);
   for (const s of plan) {
-    assert.equal(s.mobile, s.width === 390, `${s.name} mobile`);
+    assert.equal(s.mobile, false, `${s.name} mobile`);
     assert.equal(s.height, s.width === 390 ? 844 : 800, `${s.name} height`);
     assert.equal(s.full, s.mode === "full", `${s.name} full`);
     assert.equal(s.waitMs, s.mode === "head" ? 4500 : 2500, `${s.name} wait`);

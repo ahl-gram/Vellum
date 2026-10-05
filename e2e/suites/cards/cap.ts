@@ -114,8 +114,8 @@ export async function p23CapHolds({ evaluate, send, check, sleep, wheel, settle 
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
 }
 
-export async function p24NothingToScroll({ evaluate, send, check, sleep, wheel, settle, waitReady, setMobileViewport, PORT }: CardsKit): Promise<void> {
-  await setMobileViewport(390, 844);
+export async function p24NothingToScroll({ evaluate, send, check, sleep, wheel, settle, waitReady, setNarrowViewport, PORT }: CardsKit): Promise<void> {
+  await setNarrowViewport(390, 844);
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/#seed=${NARROW_SEED}&style=antique` });
   if (!(await waitReady())) throw new Error("P24 the explorer never drew at 390");

@@ -4,13 +4,13 @@ import { fileURLToPath } from "node:url";
 import { BUNDLE_ENTRIES } from "../build-app-bundles.ts";
 import { shootAll, type Shot, type ShotResult } from "./shoot.ts";
 
-/** The screenshot sweep (the Issue #465 closing review's oracle, ported by Issue #706): every built page at a desktop and a true phone viewport, for comparing two builds through `scripts/design/compare.ts`; the method is `handbook/specs/settle-doctrine.md`'s. */
+/** The screenshot sweep (the Issue #465 closing review's oracle, ported by Issue #706): every built page at a desktop and a narrow desktop viewport, for comparing two builds through `scripts/design/compare.ts`; the method is `handbook/specs/settle-doctrine.md`'s. */
 
 export type Mode = "full" | "head" | "view";
 
 const VIEWPORTS = [
   { width: 1280, height: 800, mobile: false },
-  { width: 390, height: 844, mobile: true },
+  { width: 390, height: 844, mobile: false },
 ] as const;
 export const BAND = 122;
 const HEAD_WAIT_MS = 4500;

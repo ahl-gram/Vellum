@@ -58,7 +58,7 @@ type Settle = ReturnType<typeof makeSettle>;
 type Stage = ReturnType<typeof makeStage>;
 
 export async function run(ctx: SuiteContext): Promise<void> {
-  const { send, setMobileViewport, clearMobile, waitReady, PORT } = ctx;
+  const { send, setNarrowViewport, clearMobile, waitReady, PORT } = ctx;
   const settle = makeSettle(ctx);
   // CL1, CL2, CL3 and CL6 are deliberately not stepped: settleHome returns null rather than throwing, and their checks already guard on it.
   const step = makeStep(ctx);
@@ -67,7 +67,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   await cl1Wash(ctx, settleHome);
   await cl2Selection(ctx);
-  await setMobileViewport(390, 844);
+  await setNarrowViewport(390, 844);
   const burger = await cl3Closed(ctx, settleHome);
   await step("CL4", () => cl4Opens(ctx, settle, clickAt, pressKey, burger));
   await step("CL5", () => cl5Closes(ctx, settle, clickAt, pressKey, burger));
@@ -213,10 +213,10 @@ async function cl8Swipe({ evaluate, check, sleep, touch }: SuiteContext, settle:
   );
 }
 
-async function cl6Narrow({ evaluate, check, setMobileViewport }: SuiteContext, settleHome: Stage["settleHome"]): Promise<void> {
+async function cl6Narrow({ evaluate, check, setNarrowViewport }: SuiteContext, settleHome: Stage["settleHome"]): Promise<void> {
   const narrows = [];
   for (const w of [360, 320]) {
-    await setMobileViewport(w, 780);
+    await setNarrowViewport(w, 780);
     const cam = await settleHome();
     const s = await evaluate(DRAWER_READ);
     narrows.push({ w, cam: !!cam, scrollW: s.scrollW, inkRight: s.inkRight, seedX: s.seed?.x, ok: !!cam && s.scrollW === w && clear(s) });
@@ -228,8 +228,8 @@ async function cl6Narrow({ evaluate, check, setMobileViewport }: SuiteContext, s
   );
 }
 
-async function cl7Landscape({ evaluate, send, check, shoot, sleep, setMobileViewport, touch }: SuiteContext, settle: Settle, clickAt: Stage["clickAt"], settleHome: Stage["settleHome"]): Promise<void> {
-  await setMobileViewport(844, 390);
+async function cl7Landscape({ evaluate, send, check, shoot, sleep, setNarrowViewport, touch }: SuiteContext, settle: Settle, clickAt: Stage["clickAt"], settleHome: Stage["settleHome"]): Promise<void> {
+  await setNarrowViewport(844, 390);
   const camWide = await settleHome();
   const wideClosed = await evaluate(DRAWER_READ);
   const pip = await evaluate<Point | null>(`(() => { const b = document.querySelector('.lf-station[data-station="explorer"]'); if (!b) return null; const r = b.getBoundingClientRect(); return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) }; })()`);

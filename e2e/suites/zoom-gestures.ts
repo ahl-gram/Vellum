@@ -1,4 +1,4 @@
-// Glass gestures e2e (Issue #166): suite-zoom's behaviour re-proven through REAL CDP input (mouse wheel, touch, device metrics); runs right after suite-zoom and restores its clean desktop home before suite-cards. d3-zoom binds its touch listeners ONLY when the page BOOTS as a touch device (defaultTouchable reads navigator.maxTouchPoints at attach time), so the touch block enables emulation and then RELOADS. NEVER dispatch a real touch while touch emulation is off (it wedges Chrome's touch input pipeline for the WHOLE session; a real mouse wheel is safe, only touch poisons), and NEVER change the emulation config after a real touch (later touches route to native page pinch-zoom and a clear+reload does NOT recover it), so ALL touch checks run under ONE phone-metric emulation set enabled once and left alone.
+// Glass gestures e2e (Issue #166): suite-zoom's behaviour re-proven through REAL CDP input (mouse wheel, touch, device metrics); runs right after suite-zoom and restores its clean desktop home before suite-cards. d3-zoom binds its touch listeners ONLY when the page BOOTS as a touch device (defaultTouchable reads navigator.maxTouchPoints at attach time), so the touch block enables emulation and then RELOADS. NEVER dispatch a real touch while touch emulation is off (it wedges Chrome's touch input pipeline for the WHOLE session; a real mouse wheel is safe, only touch poisons), and NEVER change the emulation config after a real touch (later touches route to native page pinch-zoom and a clear+reload does NOT recover it), so ALL touch checks run under ONE tablet-metric emulation set (1024x768, Issue #761) enabled once and left alone.
 import { makeStep } from "../support/step.ts";
 import type { SuiteContext } from "../types.ts";
 
@@ -11,7 +11,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const k = gesturesKit(ctx);
 
   await zg1WheelZooms(k);
-  await setMobileViewport(390, 780);
+  await setMobileViewport(1024, 768);
   await step("ZG2, ZG3, ZG4", () => zg2TouchGestures(k));
 
   // clearMobile stays OUTSIDE every step: the runner compensates for a suite left at phone metrics in onSuiteError, which a contained step no longer reaches.
@@ -60,6 +60,7 @@ async function zg1WheelZooms({ evaluate, check, shoot, sleep, wheel, vpRect, sta
 
 async function zg2TouchGestures({ evaluate, check, shoot, sleep, pinch, touchPan, reloadHome, vpRect, state }: GesturesKit): Promise<void> {
   await reloadHome("gesture-mobile-boot");
+  await zg2aTablet(evaluate, check);
   const touchAction = await evaluate<string>(`getComputedStyle(document.getElementById("map-viewport")).touchAction`);
   const scaleAtBoot = await evaluate<number>(`visualViewport.scale`);
   const scrollToMap = () => evaluate<undefined>(`document.getElementById("map-viewport").scrollIntoView({block:"center"})`);
@@ -104,6 +105,15 @@ async function zg2TouchGestures({ evaluate, check, shoot, sleep, pinch, touchPan
     JSON.stringify({ touchAction, scaleAtBoot, k: zg4.k, page }),
   );
   await shoot("explorer-gesture-mobile-pinch.png");
+}
+
+async function zg2aTablet(evaluate: GesturesKit["evaluate"], check: GesturesKit["check"]): Promise<void> {
+  const tablet = await evaluate<{ width: number; scale: number; coarse: boolean }>(`({width:document.documentElement.clientWidth,scale:visualViewport.scale,coarse:matchMedia("(hover: none) and (pointer: coarse)").matches})`);
+  check(
+    "ZG2a the touch block runs on a tablet at the 1024 floor (Issue #761): the page lays out 1024 wide at scale 1 under a coarse pointer",
+    tablet.width === 1024 && tablet.scale === 1 && tablet.coarse,
+    JSON.stringify(tablet),
+  );
 }
 
 async function zgRestore({ evaluate, waitSettled, reloadHome }: GesturesKit): Promise<void> {

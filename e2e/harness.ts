@@ -181,6 +181,11 @@ async function setMobileViewport(width: number, height: number): Promise<void> {
   await setTouch(true);
 }
 
+async function setNarrowViewport(width: number, height: number): Promise<void> {
+  await send("Emulation.setDeviceMetricsOverride", { width, height, deviceScaleFactor: 1, mobile: false });
+  await setTouch(true);
+}
+
 async function clearMobile(): Promise<void> {
   await send("Emulation.clearDeviceMetricsOverride");
   await setTouch(false);
@@ -283,7 +288,7 @@ export async function start({ browser, SITE, OUT, PORT, DPORT, PAGE, results, co
   return {
     evaluate, send, check, shoot, sleep, alive,
     waitSettled, waitReady, waitTurned, armTurnWatch, axDescription,
-    wheel, touch, touchPan, pinch, setTouch, setMobileViewport, clearMobile,
+    wheel, touch, touchPan, pinch, setTouch, setMobileViewport, setNarrowViewport, clearMobile,
     serverState, cleanup, consoleErrors, http4xx, skippedGroups, PORT,
   };
 }

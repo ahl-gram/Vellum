@@ -89,7 +89,7 @@ const WIDEST_DATELINE: Payload<string> = `(async () => {
 
 async function load(ctx: SuiteContext, page: string, w: number, mobile: boolean): Promise<string | null> {
   const { send, evaluate, sleep, PORT } = ctx;
-  if (mobile) await ctx.setMobileViewport(w, PHONE_H);
+  if (mobile) await ctx.setNarrowViewport(w, PHONE_H);
   else {
     await ctx.setTouch(false);
     await send("Emulation.setDeviceMetricsOverride", { width: w, height: WIDE_H, deviceScaleFactor: 1, mobile: false });
@@ -107,7 +107,7 @@ async function load(ctx: SuiteContext, page: string, w: number, mobile: boolean)
 }
 
 async function readAt(ctx: SuiteContext, w: number, mobile: boolean): Promise<Row> {
-  await ctx.send("Emulation.setDeviceMetricsOverride", { width: w, height: mobile ? PHONE_H : WIDE_H, deviceScaleFactor: 1, mobile });
+  await ctx.send("Emulation.setDeviceMetricsOverride", { width: w, height: mobile ? PHONE_H : WIDE_H, deviceScaleFactor: 1, mobile: false });
   return { w, read: await ctx.evaluate(restAt(w), true) };
 }
 
