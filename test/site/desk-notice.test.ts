@@ -14,7 +14,7 @@ test("a phone held either way had to shrink the page and is under 1024 tall: the
 test("the screen's height is read against 1024 exactly, after rounding to the pixel the browser reported", () => {
   assert.equal(noticeDue(0.5, 2048), false, "exactly 1024 tall is the floor itself: no notice");
   assert.equal(noticeDue(0.5, 2046), true, "1023 tall is under it");
-  assert.equal(noticeDue(0.75, 1365), false, "a 768x1024 tablet upright reads 1023.75 from a rounded innerHeight, which is 1024");
+  assert.equal(noticeDue(0.75, 1365), false, "a 768x1024 tablet upright, emulated with no browser toolbar, reads 1023.75 from a rounded innerHeight, which is 1024");
   assert.equal(noticeDue(0.25, 4093), true, "1023.25 is 1023 to the pixel, under the floor");
 });
 
@@ -105,7 +105,21 @@ test("where the notice is not due, nothing is shown or sized", () => {
   assert.equal(h.props.size, 0);
 });
 
+const withoutMedia = (css: string): string => {
+  let out = "", at = 0;
+  for (let m = css.indexOf("@media", at); m !== -1; m = css.indexOf("@media", at)) {
+    let depth = 0, i = css.indexOf("{", m);
+    for (; i < css.length; i++) { if (css[i] === "{") depth++; else if (css[i] === "}" && --depth === 0) break; }
+    out += css.slice(at, m);
+    at = i + 1;
+  }
+  return out + css.slice(at);
+};
+
 test("the layout stops a phone browser enlarging text inside the 1024 page (its effect on a real phone is UNVERIFIABLE under emulation, so the declaration is the pin)", () => {
   const layout = readFileSync(resolve(import.meta.dirname, "..", "..", "src/layouts/BaseLayout.astro"), "utf8");
-  assert.match(layout, /html\s*\{[^}]*-webkit-text-size-adjust:\s*100%;[^}]*\btext-size-adjust:\s*100%;/);
+  const open = layout.indexOf("<style is:global>");
+  assert.notEqual(open, -1, "the layout carries its global style block");
+  const screenRules = withoutMedia(layout.slice(open, layout.indexOf("</style>", open)).replace(/\/\*[\s\S]*?\*\//g, ""));
+  assert.match(screenRules, /^html\s*\{[^}]*-webkit-text-size-adjust:\s*100%;[^}]*\btext-size-adjust:\s*100%;/m, "declared on html, outside every comment and every media block");
 });

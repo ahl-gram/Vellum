@@ -41,7 +41,7 @@ export function deskKit(ctx: SuiteContext): DeskKit {
     try {
       await open(PAGE);
       await evaluate(`localStorage.removeItem(${JSON.stringify(KEY)})`);
-    } catch { /* the next check reads the key and says so */ }
+    } catch {}
   };
   return { ...ctx, settle, open, forget };
 }
@@ -83,7 +83,7 @@ export async function dnTablet(k: DeskKit): Promise<void> {
   await setMobileViewport(820, 1180);
   await k.open(PAGE);
   const upright = await readSettled(k, "the page on a tablet held upright");
-  check("DN5b a tablet held upright shrinks the page to fit but stands over 1024 tall, so it never sees the notice: the shell reads the screen's height, not its width", upright.width === 1024 && upright.scale < 1 && !upright.shown && upright.w === 0 && upright.key === null, JSON.stringify(upright));
+  check("DN5b a tablet held upright (emulated, no browser toolbar) shrinks the page to fit but stands over 1024 tall, so it never sees the notice: the shell reads the screen's height, not its width", upright.width === 1024 && upright.scale < 1 && !upright.shown && upright.w === 0 && upright.key === null, JSON.stringify(upright));
 }
 
 export async function dnNarrow(k: DeskKit): Promise<void> {
@@ -104,7 +104,7 @@ export function storageRefusal({ send }: SuiteContext): Refusal {
   };
   const disarm = async (): Promise<void> => {
     if (id === null) return;
-    try { await send("Page.removeScriptToEvaluateOnNewDocument", { identifier: id }); } catch { /* the browser has gone */ }
+    try { await send("Page.removeScriptToEvaluateOnNewDocument", { identifier: id }); } catch {}
     id = null;
   };
   return { arm, disarm };

@@ -24,9 +24,7 @@ export function dismissed(getStorage: () => Storage): boolean {
 export function dismiss(getStorage: () => Storage): void {
   try {
     getStorage().setItem(DESK_NOTICE_KEY, "1");
-  } catch {
-    /* unwritable storage: shown again next time */
-  }
+  } catch {}
 }
 
 export function bindNotice(notice: NoticeHost, view: NoticeView, innerHeight: number, getStorage: () => Storage): void {
