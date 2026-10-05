@@ -88,6 +88,7 @@ const ROOM = { forcedBelow: null, keepsMotto: false } as const;
 test("a width passes only clear, laid out at the width set, with ink in both corners, the band over the cluster, and the motto where it is kept", () => {
   assert.equal(verdict(room(), ROOM), null);
   assert.match(verdict({ w: 380, read: room().read }, ROOM) ?? "", /laid out at 390, not 380/);
+  assert.match(verdict(room({ scrollW: 412 }), ROOM) ?? "", /at 390 the page scrolls sideways to 412/, "a narrow desktop window never widens its layout, so an overflowing page shows as a sideways scroll instead (Issue #761)");
   assert.match(verdict(room({ left: [box(16, 14, 140, 42, "Vellum")] }), ROOM) ?? "", /found 1 cluster and 1 corner inks/);
   assert.match(verdict(room({ right: [] }), ROOM) ?? "", /found 2 cluster and 0 corner inks/);
   assert.match(verdict(room({ right: [box(120, 14, 374, 33, "The Explorer")] }), ROOM) ?? "", /"Vellum" meets "The Explorer" by 20\.0 x 19\.0/);

@@ -104,6 +104,7 @@ export function verdict({ w, read }: Row, rules: Rules): string | null {
     return read.innerW !== w || read.scrollW > w ? null : `lays out at ${w} now, so Issue #672 has landed and its skip below ${rules.forcedBelow} goes`;
   }
   if (read.innerW !== w) return `laid out at ${read.innerW}, not ${w}`;
+  if (read.scrollW > w) return `at ${w} the page scrolls sideways to ${read.scrollW}`;
   if (read.left.length < 2 || read.right.length < 1) return `at ${w} the read found ${read.left.length} cluster and ${read.right.length} corner inks`;
   if (rules.keepsMotto && !read.left.some((b) => b.t.startsWith(MOTTO))) return `at ${w} the motto is gone from a page that keeps it`;
   const [m] = meetings(read.left, read.right);
