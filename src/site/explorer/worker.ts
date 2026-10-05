@@ -12,7 +12,7 @@ import { worldFor } from "./world-cache.ts";
 import { regionChainCache } from "./region-chain-cache.ts";
 import type { WorkerRequest, WorkerResponse } from "./worker-client.ts";
 
-// The project tsconfig lib is DOM (no WebWorker lib), so `self` types as Window here; cast once to the minimal worker-global surface.
+// The root tsconfig lib is DOM, so `self` types as Window in that pass (tsconfig.worker.json types it as the worker scope); cast once to the minimal worker-global surface both accept.
 const ctx = self as unknown as {
   onmessage: ((e: MessageEvent<WorkerRequest>) => void) | null;
   postMessage(msg: WorkerResponse): void;
