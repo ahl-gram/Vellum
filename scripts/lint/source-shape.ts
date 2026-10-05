@@ -253,7 +253,7 @@ const frameNoExplorerImport = sourceBan("the reading frame imports nothing from 
 const explorerNoGlassKeys = sourceBan(
   "the Explorer and home bind their own zoom presses by id: neither imports glass-keys.ts nor queries [data-zoom], a document-wide binding that would double every press (handbook/specs/explorer-doctrine.md)",
   (text) => text.includes("glass-keys"),
-  (text) => text.includes("[data-zoom"),
+  (text) => /\[\s*data-zoom/i.test(text) || /(?:^|\/)glass-keys(?:\.ts)?$/.test(text),
 );
 
 const CONTENTS_ROW_BUILDER = "src/site/shared/contents-row.ts";

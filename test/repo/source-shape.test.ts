@@ -1,8 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { existsSync } from "node:fs";
+import { existsSync, globSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { ESLint } from "eslint";
+import { ESLint, Linter } from "eslint";
+import tseslint from "typescript-eslint";
+import sourceShape from "../../scripts/lint/source-shape.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const eslint = new ESLint({ cwd: ROOT, flags: ["unstable_native_nodejs_ts_config"] });
@@ -72,11 +74,14 @@ const GLASS_PLANT = [
   "export const e = \"the other rooms bind glass-keys\";",
   "import { f } from \"../shared/room.ts\";",
   "export const g = (el: HTMLElement) => el.dataset[\"zoom\"];",
+  "const GK = \"../shared/glass-keys.ts\"; export const h = () => import(GK);",
+  "export const i = (root: ParentNode) => root.querySelectorAll(\"[ DATA-ZOOM]\");",
+  "export { j } from \"../shared/glass-keys.ts\";",
 ];
 
-test("neither the Explorer nor home imports the kit's glass-keys or queries [data-zoom] itself, in either directory, and naming the kit is not binding it", async () => {
+test("neither the Explorer nor home imports the kit's glass-keys, by any route a path to it can take, or queries [data-zoom] itself, in either directory, and naming the kit is not binding it", async () => {
   for (const path of ["src/site/explorer/app.ts", "src/site/home/app.ts"]) {
-    assert.deepEqual(await houseReports(GLASS_PLANT, path), at(GLASS, [1, 2, 3, 4, 5]), `${path}: ${SOURCE_BLIND_SPOTS}; and a [data-zoom] selector assembled from pieces`);
+    assert.deepEqual(await houseReports(GLASS_PLANT, path), at(GLASS, [1, 2, 3, 4, 5, 10, 11, 12]), `${path}: BLIND SPOTS, declared, each erring toward passing: a path or selector assembled at run time from pieces none of which carries glass-keys or [data-zoom], and the kit reached through another module outside this rule's scope`);
   }
 });
 
@@ -93,6 +98,30 @@ test("a room writes the contents row's cr-num class only through the shared buil
     assert.deepEqual(await houseReports(CONTENTS_PLANT, path), at(CONTENTS, [1, 2, 3]), `${path}: BLIND SPOT, declared, erring toward passing: the class name assembled from pieces`);
   }
   assert.deepEqual(await houseReports(CONTENTS_PLANT, "src/site/shared/contents-row.ts"), [], "the shared builder is the one place the class is written");
+  const namesake = new Linter({ cwd: ROOT }).verify(CONTENTS_PLANT.join("\n"), [{ files: ["**/*.ts"], plugins: { vellum: sourceShape }, languageOptions: { parser: tseslint.parser }, rules: { [CONTENTS]: "error" } }], { filename: join(ROOT, "src/site/zz-room/contents-row.ts") });
+  assert.deepEqual(namesake.map((m): [string, number] => [m.ruleId ?? "", m.line]), at(CONTENTS, [1, 2, 3]), "a module that only shares the builder's name is exempted, so the owner is matched by more than its exact path");
+});
+
+const SCOPES: ReadonlyArray<readonly [string, readonly string[]]> = [
+  [FRAME_IDS, ["src/site/reading-frame/**/*.ts"]],
+  [FRAME_IMPORTS, ["src/site/reading-frame/**/*.ts"]],
+  [GLASS, ["src/site/explorer/**/*.ts", "src/site/home/**/*.ts"]],
+  [CONTENTS, ["src/site/**/*.ts"]],
+  [TEST_IMPORTS, ["e2e/**/*.ts", "scripts/**/*.ts", "src/**/*.ts", "test/**/*.ts", "test-support/**/*.ts"]],
+];
+
+test("each Issue #728 rule resolves at error on every linted file its ruled scope holds today, so a scope narrowed to the files that once held a copy reds", async () => {
+  for (const [rule, globs] of SCOPES) {
+    const files = globs.flatMap((g) => globSync(g, { cwd: ROOT }));
+    assert.ok(files.length > 0, `${rule}'s scope holds no file, so this sweep reads nothing`);
+    const unresolved: string[] = [];
+    for (const file of files) {
+      if (await eslint.isPathIgnored(file)) continue;
+      const resolved = (await eslint.calculateConfigForFile(file)) as { rules?: Record<string, unknown> };
+      if (JSON.stringify(resolved.rules?.[rule]) !== "[2]") unresolved.push(file);
+    }
+    assert.deepEqual(unresolved, [], `${rule} does not resolve at error on these files of its ruled scope`);
+  }
 });
 
 test("no module imports a .test.ts, by a static import, a re-export, or any string inside import() or require(), and naming a test file is not importing it", async () => {
@@ -350,7 +379,7 @@ test("each scoped rule resolves at error inside its scope and not outside it, an
     assert.equal((await resolvedRules(outside))[rule], undefined, `${rule} reaches ${outside}, outside its scope`);
   }
   assert.deepEqual((await resolvedRules("src/site/explorer/app.ts"))["max-lines"], [2, 400], "app.ts no longer resolves max-lines at the 400-line bound Issue #191 ratified for it");
-  for (const [rule, nested] of [[ENGINE, "src/site/living-chart/nested/deeper/part.ts"], [WORKER, "src/site/explorer/nested/deeper/part.ts"], [ROSTER, "e2e/suites/nested/deeper/part.ts"], [READS, "e2e/suites/nested/deeper/part.ts"], [FRAME_IDS, "src/site/reading-frame/nested/deeper/part.ts"], [FRAME_IMPORTS, "src/site/reading-frame/nested/deeper/part.ts"], [GLASS, "src/site/explorer/nested/deeper/part.ts"], [GLASS, "src/site/home/nested/deeper/part.ts"], [CONTENTS, "src/site/prospect/nested/deeper/part.ts"], [TEST_IMPORTS, "test/nested/deeper/part.test.ts"]] as const) {
+  for (const [rule, nested] of [[ENGINE, "src/site/living-chart/nested/deeper/part.ts"], [WORKER, "src/site/explorer/nested/deeper/part.ts"], [ROSTER, "e2e/suites/nested/deeper/part.ts"], [READS, "e2e/suites/nested/deeper/part.ts"], [FRAME_IDS, "src/site/reading-frame/nested/deeper/part.ts"], [FRAME_IMPORTS, "src/site/reading-frame/nested/deeper/part.ts"], [GLASS, "src/site/explorer/nested/deeper/part.ts"], [GLASS, "src/site/home/nested/deeper/part.ts"], [CONTENTS, "src/site/prospect/nested/deeper/part.ts"], [CONTENTS, "src/site/zz-new-room/part.ts"], [TEST_IMPORTS, "test/nested/deeper/part.test.ts"], [TEST_IMPORTS, "e2e/nested/deeper/part.ts"], [TEST_IMPORTS, "scripts/nested/deeper/part.ts"], [TEST_IMPORTS, "test-support/nested/deeper/part.ts"]] as const) {
     const resolved = (await eslint.calculateConfigForFile(nested)) as { rules?: Record<string, unknown> };
     assert.deepEqual(resolved.rules?.[rule], [2], `${rule} does not reach ${nested}, so a module nested deeper in its scope escapes it`);
   }
