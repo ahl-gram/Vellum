@@ -9,6 +9,7 @@ export async function pr32Phone({ evaluate, send, check, sleep }: SuiteContext):
     JSON.stringify(phone390),
   );
 
+  await send("Emulation.setDeviceMetricsOverride", { width: 640, height: 844, deviceScaleFactor: 3, mobile: false });
   await evaluate(`document.getElementById("pr-bind").click()`);
   let phoneBound = false;
   for (let i = 0; i < 300; i++) {
@@ -25,9 +26,9 @@ export async function pr32Phone({ evaluate, send, check, sleep }: SuiteContext):
     await sleep(50);
   }
   check(
-    "PR33c at 390 the gazetteer page fits the phone stage: clear of the fixed header above and the bottom sheet below, narrower than the viewport at its own aspect",
+    "PR33c at 640 (Issue #762 moved it from 390), where the phone layout ships until pull request C, the gazetteer page fits the phone stage: clear of the fixed header above and the bottom sheet below, narrower than the viewport at its own aspect",
     phoneBound && !!phonePage && phonePage.pageUp === true && Math.abs(phonePage.ratio - phonePage.aspect) < 0.01 &&
-      phonePage.w < 390 && phonePage.w > 200 && phonePage.top >= phonePage.headBottom - 0.5 && phonePage.bottom <= phonePage.slipTop + 0.5 &&
+      phonePage.w < 640 && phonePage.w > 200 && phonePage.top >= phonePage.headBottom - 0.5 && phonePage.bottom <= phonePage.slipTop + 0.5 &&
       phonePage.fits >= -0.5 && phonePage.fits <= 2 && phonePage.innerW < 1 && phonePage.noX === true,
     JSON.stringify(phonePage),
   );

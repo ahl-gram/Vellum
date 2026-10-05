@@ -241,8 +241,8 @@ async function br6Tap({ evaluate, check, sleep, touch, setNarrowViewport, clearM
 
 // Issue #525: the camera arrives by HASH, not by gesture: the Glass is display:none under an open sheet at narrow (the 2026-09-03 ruling 1), so there is nothing to press, and a hash camera needs none of the CDP touch apparatus.
 async function br6bSetup({ evaluate, sleep, setNarrowViewport, goto, EXP }: BroadsideKit): Promise<void> {
-  await setNarrowViewport(390, 844);
-  await goto(EXP + "#seed=42&style=antique&cx=0.52&cy=0.45&k=4", "broadside-390-zoomed");
+  await setNarrowViewport(640, 844);
+  await goto(EXP + "#seed=42&style=antique&cx=0.52&cy=0.45&k=4", "broadside-640-zoomed");
   await evaluate(`(()=>{const h=document.querySelector("#broadside .slip-handle");if(h&&!document.getElementById("broadside").classList.contains("open"))h.click();})()`);
   await sleep(400);
 }
@@ -318,7 +318,7 @@ async function br6bToBr6d({ evaluate, check, sleep, clearMobile }: BroadsideKit,
     await sleep(50);
   }
   check(
-    "BR6b on a phone with a committed survey's camera, the opened Broadside carries NO footing behind its docked Press: the sheet's ground reads parchment where the pool used to paint (#525)",
+    "BR6b at 640 (Issue #762 moved it from 390), where the phone layout ships until pull request C, with a committed survey's camera, the opened Broadside carries NO footing behind its docked Press: the sheet's ground reads parchment where the pool used to paint (#525)",
     br6b.docked && br6b.open && br6b.zoomed && br6b.groundOn === "none" && br6bGround! > 200,
     JSON.stringify({ ...br6b, ground: br6bGround }),
   );

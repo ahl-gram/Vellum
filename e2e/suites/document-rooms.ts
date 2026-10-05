@@ -60,7 +60,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await ix2InksRow(k, faq);
   await step("IX3", () => ix3Folds(k, faq));
   await ix4FindBox(k);
-  await setNarrowViewport(390, 844);
+  await setNarrowViewport(640, 844);
   await ix5BottomSheet(k);
   await ix6NoScript(k);
 
@@ -186,7 +186,7 @@ async function ix5BottomSheet({ evaluate, check, sleep, goto, tapAt }: DocRoomsK
   const jumped = await evaluate(READ);
   const landed = await evaluate<{ top: number; hash: string; band: number }>(`(() => { const t = document.querySelector(${JSON.stringify(entry.href)}); const r = t.getBoundingClientRect(); const root = getComputedStyle(document.documentElement); return { top: r.top, hash: location.hash, band: parseFloat(root.getPropertyValue("--band-h")) * parseFloat(root.fontSize) }; })()`);
   check(
-    "IX5 at 390 the index is the bottom sheet collapsed to its head at the foot of the viewport; a tap on the head opens it, a tap on a question jumps to it below the band and closes the sheet again (#462 ruling 2, the phone half)",
+    "IX5 at 640 (Issue #762 moved it from 390), where the phone layout ships until pull request C, the index is the bottom sheet collapsed to its head at the foot of the viewport; a tap on the head opens it, a tap on a question jumps to it below the band and closes the sheet again (#462 ruling 2, the phone half)",
     phone.slipPosition === "fixed" && Math.abs(phone.slip!.bottom - phone.innerH) < 1 && !phone.open && phone.bodyDisplay === "none" &&
       phone.slip!.h < 140 &&
       opened.open && opened.bodyDisplay !== "none" && opened.slip!.h >

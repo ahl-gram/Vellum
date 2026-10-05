@@ -15,7 +15,6 @@ export type CornerRead = {
 };
 export type Row = { readonly w: number; readonly read: CornerRead };
 export type Meeting = { readonly w: number; readonly h: number; readonly a: string; readonly b: string };
-export type Rules = { readonly forcedBelow: number | null; readonly keepsMotto: boolean };
 
 export const MOTTO = "an atelier of imaginary";
 
@@ -99,14 +98,11 @@ export function strideWidths(hi: number, lo: number, stride: number, edges: read
   return [...set].sort((a, b) => b - a);
 }
 
-export function verdict({ w, read }: Row, rules: Rules): string | null {
-  if (rules.forcedBelow !== null && w < rules.forcedBelow) {
-    return read.innerW !== w || read.scrollW > w ? null : `lays out at ${w} now, so Issue #672 has landed and its skip below ${rules.forcedBelow} goes`;
-  }
+export function verdict({ w, read }: Row): string | null {
   if (read.innerW !== w) return `laid out at ${read.innerW}, not ${w}`;
   if (read.scrollW > w) return `at ${w} the page scrolls sideways to ${read.scrollW}`;
   if (read.left.length < 2 || read.right.length < 1) return `at ${w} the read found ${read.left.length} cluster and ${read.right.length} corner inks`;
-  if (rules.keepsMotto && !read.left.some((b) => b.t.startsWith(MOTTO))) return `at ${w} the motto is gone from a page that keeps it`;
+  if (!read.left.some((b) => b.t.startsWith(MOTTO))) return `at ${w} the motto is gone`;
   const [m] = meetings(read.left, read.right);
   if (m) return `at ${w} "${m.a}" meets "${m.b}" by ${m.w.toFixed(1)} x ${m.h.toFixed(1)}`;
   if (read.bandH !== null && read.clusterBottom > read.bandH) return `at ${w} the cluster ends at ${read.clusterBottom}, past the band's ${read.bandH}`;
