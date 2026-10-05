@@ -25,6 +25,7 @@ READING before the work its row names.
 | `handbook/specs/development-workflow.md` | the order of operations from a filed issue to a pull request, which subagent runs at which step, and the one place the work stops for Alex's ruling | starting a sub or an epic, since its early steps are the ones a session cannot go back and take later |
 | `handbook/specs/conventions.md` | how the house decides, and how it writes a rule down: how a design decision is made and built to, where a rule lives and what a new spec joins, how a spec and the rest of the house's prose are written, how code is cited, and how a comment sweep is run and proven | starting a design round or building to ruled stills; adding or moving a rule, adding a spec, editing a spec, or writing, citing or sweeping a comment |
 | `handbook/specs/settle-doctrine.md` | how an e2e wait is written, and what the harness environment it runs in actually does | any e2e wait, settle or CDP probe, and any screenshot, focus state or narrow viewport read in the harness |
+| `handbook/specs/check-placement.md` | which check holds which kind of rule: the type checker, the lint, the unit suite or the browser, and what a unit test may read | writing a test, a lint rule or a browser check, and moving a rule from one to another |
 
 The ruled pixels those specs were decided from are archived under `design/`, one directory per design
 round, beside directories that are not rounds: `design/kit/`, the assets rounds share and the one
