@@ -1,9 +1,8 @@
 // The chart room (Issue #462, lifted into the Atelier Kit at its second use, Issue #463/Issue #487): the sheet fitted to what the chrome leaves, the slip's fold and the phone sheet, the legend row's seat. The Glass's keys and buttons are the page's own (glass-keys.ts for a plain controller, the Explorer's glass.ts for the LOD camera).
-import { fitStage } from "./stage-fit.ts";
+import { CHROME_GAP, fitStage } from "./stage-fit.ts";
 import { bindSlip, type SlipFold } from "./slip.ts";
 import { glassLeft, placeLegendRow, placeSlip, rectOf, slipWidth } from "./room-seats.ts";
 
-const CHROME_GAP = 14;
 const PHONE_GAP = 8;
 const NARROW = "(max-width: 900px)";
 const FALLBACK_ASPECT = 1500 / 1157.931;
@@ -82,6 +81,7 @@ function fitRoom({ frame, sheet: sheetEl, aspect, phone, slipRect, slipW, glassL
   frame.style.setProperty("--reserve-bottom", `${fit.reserve.bottom}px`);
   sheetEl.style.width = `${fit.sheet.w}px`;
   sheetEl.style.height = `${fit.sheet.h}px`;
+  document.body.classList.toggle("stage-under", fit.under);
   if (phone && slipRect !== null) document.body.style.setProperty("--sheet-h", `${window.innerHeight - slipRect.top}px`);
   else document.body.style.removeProperty("--sheet-h");
 }

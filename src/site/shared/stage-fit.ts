@@ -26,10 +26,13 @@ export interface Reserve {
 export interface StageFit {
   readonly reserve: Reserve;
   readonly sheet: Box;
+  readonly under: boolean;
 }
 
 /** The mockup's clear beside an open slip: its own 2rem inset plus a 1.5rem breath. */
 export const SLIP_CLEARANCE = 56;
+
+export const CHROME_GAP = 14;
 
 export function fitStage(input: StageInput): StageFit {
   const { view, aspect, gap } = input;
@@ -40,5 +43,7 @@ export function fitStage(input: StageInput): StageFit {
   const free = { w: Math.max(0, view.w - right), h: Math.max(0, view.h - top - bottom) };
   let w = Math.min(free.w, free.h * aspect);
   if (input.narrow && aspect >= 1) w = Math.max(w, view.w);
-  return { reserve: { top, right, bottom }, sheet: { w, h: w / aspect } };
+  const room = Math.max(0, Math.min(view.w - right - 2 * gap, (view.h - 2 * gap) * aspect));
+  if (!input.narrow && w < room / 2) return { reserve: { top: 0, right, bottom: 0 }, sheet: { w: room, h: room / aspect }, under: true };
+  return { reserve: { top, right, bottom }, sheet: { w, h: w / aspect }, under: false };
 }

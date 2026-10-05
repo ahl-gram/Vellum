@@ -13,6 +13,17 @@ const page = readFileSync(resolve(REPO, "src/pages/gallery/index.astro"), "utf8"
 const css = GALLERY_PAGE_CSS;
 const kit = readFileSync(resolve(REPO, "public/atelier.css"), "utf8");
 
+const topLevelArms = (list: string): string[] => {
+  const arms: string[] = [];
+  let depth = 0, from = 0;
+  for (let i = 0; i < list.length; i++) {
+    if (list[i] === "(") depth++;
+    else if (list[i] === ")") depth--;
+    else if (list[i] === "," && depth === 0) { arms.push(list.slice(from, i).trim()); from = i + 1; }
+  }
+  return [...arms, list.slice(from).trim()].filter((a) => a !== "");
+};
+
 const between = (from: string, to: string): string => {
   const a = page.indexOf(from);
   assert.ok(a >= 0, `the page is missing ${from}`);
@@ -94,7 +105,9 @@ test("GR6 the css: twelve sheets at the house depth on the deep, captions letter
   const footing = kit.match(/\n([^\n]*body\.chart-room:not\(:has\(\.stage\)\) \.legend:not\(\.in-slip\)::before[^{]*)\{([^}]*)\}/);
   assert.ok(footing, "the kit gives a stage-less room's legend row home's footing");
   assert.match(footing[1]!, /body:has\(#map-viewport\.zoomed\) \.legend:not\(\.in-slip\)::before/, "the same rule serves the zoomed rooms' row");
-  assert.equal((footing[1]!.match(/\.legend:not\(\.in-slip\)::before/g) || []).length, 2, "#525: every arm skips a docked row, since selector-list arms are ranked independently and a scope on one is a scope on neither");
+  const arms = topLevelArms(footing[1]!);
+  assert.ok(arms.length >= 2, `the footing rule carries its arms: ${arms.length}`);
+  assert.deepEqual(arms.filter((a) => !a.endsWith(".legend:not(.in-slip)::before")), [], "#525: every arm skips a docked row, since selector-list arms are ranked independently and a scope on one is a scope on neither");
   assert.match(footing[2]!, /inset:\s*-0\.5rem -1\.1rem -0\.6rem;[^}]*linear-gradient\(to bottom, rgb\(from var\(--chart-ink\) r g b \/ 0\.85\), rgb\(from var\(--chart-ink\) r g b \/ 0\.72\)\)/, "home's own footing: its padding as the insets, the seed box's crisp panel (public/index.css .lf-legend; the fade left at the 2026-09-03 sitting, ruling 23)");
   assert.doesNotMatch(css, /\/\*/, "the shipped sheet carries no prose (public/gallery/index.css ships it verbatim)");
   const phone = css.slice(css.indexOf("@media (max-width: 900px)"), css.indexOf("@media print"));
