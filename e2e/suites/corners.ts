@@ -7,7 +7,7 @@ import { makeStep } from "../support/step.ts";
 import type { Payload, SuiteContext } from "../types.ts";
 import { fillBetween, mediaEdges, meetings, nearest, routesUnder, strideWidths, unreadWidthConditions, verdict, wrapVerdict } from "./corners/geometry.ts";
 import type { Control, CornerRead, Row } from "./corners/geometry.ts";
-import { ea1Phone, ea4Reads, eaDesk } from "./corners/stage.ts";
+import { ea1Phone, ea4Reads, ea5Lift, eaDesk } from "./corners/stage.ts";
 
 const REPO = resolve(fileURLToPath(new URL(".", import.meta.url)), "..", "..");
 const PAGE_FLOOR = ["/", "/explorer/", "/explorer/portfolio/", "/faq/", "/gallery/", "/glossary/", "/print-room/", "/prospect/", "/reading-room/", "/ribbon/", "/seed-of-the-day/", "/specimen/"];
@@ -268,8 +268,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
     await step("CO3", () => co3Wraps(ctx));
     await step("EA1", async () => { await ea1Phone(ctx); });
     await ctx.clearMobile();
-    await step("EA2, EA3, EL1", () => eaDesk(ctx));
+    await step("EA2, EA3, EL1, EL2", () => eaDesk(ctx));
     await step("EA4", () => ea4Reads(ctx));
+    await step("EA5", () => ea5Lift(ctx));
   } finally {
     await send("Emulation.setEmulatedMedia", { media: "", features: [] }).catch(() => undefined);
     await ctx.clearMobile().catch(() => undefined);

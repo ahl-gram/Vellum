@@ -127,7 +127,7 @@ body:has(.slip.folded) .legend { left: 50%; }
 button.slip-tab.shown:is(:hover, :focus-visible, :active) { box-shadow: none; background: var(--ink-dark); color: var(--parchment-bright); }
 
 /* Zoomed, the sheet spills under the chrome and parchment on paper reads 1.1:1, so the cluster, the corners and the strip stand on a blurred pool while the Glass is zoomed and carry none at rest (`RH9b` in `e2e/suites/runninghead/heads.ts`). */
-body:has(#map-viewport.zoomed) :is(header.chrome, .corner.bl, .strip)::before, body.stage-under :is(header.chrome, .corner.bl, .strip)::before, body.chart-room:not(:has(.stage)) :is(header.chrome, .corner.bl)::before { content: ""; position: absolute; z-index: -1; pointer-events: none;
+body:has(#map-viewport.zoomed) :is(header.chrome, .corner.bl, .strip)::before, body.stage-under :is(header.chrome, .corner.bl)::before, body.chart-room:not(:has(.stage)) :is(header.chrome, .corner.bl)::before { content: ""; position: absolute; z-index: -1; pointer-events: none;
   inset: var(--pool-top, -1.3rem) var(--pool-right, -1.6rem) var(--pool-bottom, -1.3rem) var(--pool-left, -1.6rem);
   background: rgb(from var(--chart-ink) r g b / 0.92); filter: blur(16px); }
 /* Edge-facing sides run 4rem out, matching home's inset in public/index.css, so the blur's fade lies past the viewport edge and no chart bleeds through at a corner (measured 97 at the edge against a 60 interior); the Glass carries no pool, its presses stand on their own half-ink fill. */
@@ -140,7 +140,7 @@ body:has(#map-viewport.zoomed) .legend:not(.in-slip)::before, body.stage-under .
   background: linear-gradient(to bottom, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.72)); }
 body.stage-under .legend:not(.in-slip)::before { left: -0.9rem; right: -0.9rem; }
 @media screen {
-  body:has(#map-viewport.zoomed) .corner.tr::before, body.stage-under .corner.tr::before, body.chart-room:not(:has(.stage)) .corner.tr::before { content: ""; position: absolute; inset: -0.7rem -0.9rem -0.8rem; z-index: -1; pointer-events: none;
+  body:has(#map-viewport.zoomed) .corner.tr::before, body.chart-room:not(:has(.stage)) .corner.tr::before { content: ""; position: absolute; inset: -0.7rem -0.9rem -0.8rem; z-index: -1; pointer-events: none;
     background: linear-gradient(to bottom, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.72)); }
 }
 
