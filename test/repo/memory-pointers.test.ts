@@ -10,8 +10,8 @@ const REPO = resolve(import.meta.dirname, "..", "..");
 const ROOTS = [".claude/agents", ".claude/skills"];
 // 2026-10-04: this git ls-files answers in under 10 ms on a Mac; thirty seconds is a cap on a hang, not a budget.
 const GIT_TIMEOUT_MS = 30_000;
-const ADDRESS = /\b(?:feedback|project|reference|user)_[a-z][a-z0-9_]*|\[\[(?:feedback|project|reference|user)-[a-z0-9-]+\]\]|MEMORY\.md|\.claude\/projects/g;
-const MENTION = /auto[- ]?memory|private[- ]memory|alex['’]s memory|memory files?|memory folders?|memory director(?:y|ies)/gi;
+const ADDRESS = /\b(?:feedback|project|reference|user)_(?:[a-z][a-z0-9_]*|\*)|\[\[(?:feedback|project|reference|user)-[a-z0-9-]+\]\]|MEMORY\.md|\.claude\/projects/g;
+const MENTION = /auto(?:- ?| )?memory|private(?:- ?| )memory|alex['’]s memory|memory files?|memory folders?|memory director(?:y|ies)/gi;
 
 type Kept = { readonly file: string; readonly phrase: string; readonly why: "forbids reading it" | "history" | "rule of thumb" };
 
@@ -63,13 +63,12 @@ test("no agent or skill file names an address in the private memory, or names th
   );
 });
 
-test("every kept phrase is still in its file, names the store, and names no address", () => {
+test("every kept phrase is still in its file and names the store", () => {
   const files = new Set(trackedUnderRoots());
   for (const { file, phrase, why } of KEPT) {
     assert.ok(files.has(file), `${file} is not a tracked file under ${ROOTS.join(" or ")}`);
     assert.notEqual(fold(readFileSync(resolve(REPO, file), "utf8")).indexOf(phrase), -1, `${file}: the kept line "${phrase}" (${why}) is gone, so its KEPT row goes too`);
     assert.match(phrase, new RegExp(MENTION.source, "i"), `"${phrase}" names no store, so it keeps nothing`);
-    assert.doesNotMatch(phrase, new RegExp(ADDRESS.source), `"${phrase}" names an address, which no kept line may`);
   }
 });
 
@@ -115,41 +114,53 @@ test("each pointer PR #730 re-aimed, as it stood at a4edabd^, is refused in the 
 const OUTSIDE = ".claude/agents/no-such-agent.md";
 const PLATE = ".claude/agents/vellum-plate-reader.md";
 
+const REFUSED: ReadonlyArray<readonly [string, string]> = [
+  [OUTSIDE, "the long form is in automemory"],
+  [OUTSIDE, "see the Auto Memory"],
+  [OUTSIDE, "kept in private-memory"],
+  [OUTSIDE, "the auto-\nmemory files"],
+  [OUTSIDE, "kept in private-\nmemory"],
+  [OUTSIDE, "in Alex's memory"],
+  [OUTSIDE, "in Alex’s memory"],
+  [OUTSIDE, "read the memory files"],
+  [OUTSIDE, "see the memory file"],
+  [OUTSIDE, "the per-project memory directory"],
+  [OUTSIDE, "the memory directories"],
+  [OUTSIDE, "the memory folder"],
+  [OUTSIDE, "the memory folders"],
+  [OUTSIDE, "see [[feedback-x]]"],
+  [OUTSIDE, "see [[project-b]]"],
+  [OUTSIDE, "see [[reference-c]]"],
+  [OUTSIDE, "see [[user-d]]"],
+  [OUTSIDE, "the index, MEMORY.md"],
+  [OUTSIDE, "`feedback_a`"],
+  [OUTSIDE, "`project_b.md`"],
+  [OUTSIDE, "`reference_c.md`"],
+  [OUTSIDE, "`user_d.md`"],
+  [OUTSIDE, "the `reference_*` files"],
+  [OUTSIDE, "under ~/.claude/projects/x/"],
+  [".claude/agents/vellum-spec-recon.md", "This trap was already in auto-memory when"],
+  [PLATE, "This trap was already in auto-memory when it nearly hid. The long form is in the auto-memory."],
+  [PLATE, "This trap was already in auto-memory when `feedback_x.md` said so"],
+  [OUTSIDE, "the long form is in the private\nmemory"],
+];
+
+const PASSED: ReadonlyArray<readonly [string, string]> = [
+  [".claude/skills/vellum-footguns/references/scars.md", "that Issue #708 moved out of private\nmemory, one row"],
+  [".claude/agents/vellum-plan-skeptic.md", "or the auto-memory files. They carry\nthe planning session's framing"],
+  [".claude/agents/vellum-spec-recon.md", "Auto-memory is a pointer, not a citation."],
+  [OUTSIDE, "a plan is usually written from memory"],
+  [OUTSIDE, "`a7e3018`, `chore/708-memory-to-specs-round-two`"],
+  [OUTSIDE, "## Promoted from the memory triage (Issue #708)"],
+  [OUTSIDE, "a memorial"],
+  [OUTSIDE, "my_project_x"],
+  [OUTSIDE, "${CLAUDE_PROJECT_DIR}"],
+  [OUTSIDE, "`~/.claude/settings.json`"],
+];
+
 test("each arm refuses its own form, a kept phrase keeps only its own words in its own file, and the near misses pass", () => {
-  const refused: ReadonlyArray<readonly [string, string]> = [
-    [OUTSIDE, "the long form is in automemory"],
-    [OUTSIDE, "see the Auto Memory"],
-    [OUTSIDE, "kept in private-memory"],
-    [OUTSIDE, "in Alex's memory"],
-    [OUTSIDE, "in Alex’s memory"],
-    [OUTSIDE, "read the memory files"],
-    [OUTSIDE, "the per-project memory directory"],
-    [OUTSIDE, "the memory folder"],
-    [OUTSIDE, "see [[feedback-x]]"],
-    [OUTSIDE, "the index, MEMORY.md"],
-    [OUTSIDE, "`feedback_a`"],
-    [OUTSIDE, "`project_b.md`"],
-    [OUTSIDE, "`reference_c.md`"],
-    [OUTSIDE, "`user_d.md`"],
-    [OUTSIDE, "under ~/.claude/projects/x/"],
-    [".claude/agents/vellum-spec-recon.md", "This trap was already in auto-memory when"],
-    [PLATE, "This trap was already in auto-memory when it nearly hid. The long form is in the auto-memory."],
-    [PLATE, "This trap was already in auto-memory when `feedback_x.md` said so"],
-    [OUTSIDE, "the long form is in the private\nmemory"],
-  ];
-  for (const [file, text] of refused) assert.notDeepEqual(findingsIn(file, text), [], `${file}: "${text}" passes`);
+  for (const [file, text] of REFUSED) assert.notDeepEqual(findingsIn(file, text), [], `${file}: "${text}" passes`);
   const naming = "it was once in `feedback_x.md`, in the private memory";
   assert.notDeepEqual(findingsIn(OUTSIDE, naming, [{ file: OUTSIDE, phrase: naming, why: "history" }]), [], "a kept phrase excused the memory file it names");
-  const passed: ReadonlyArray<readonly [string, string]> = [
-    [".claude/skills/vellum-footguns/references/scars.md", "that Issue #708 moved out of private\nmemory, one row"],
-    [".claude/agents/vellum-plan-skeptic.md", "or the auto-memory files. They carry\nthe planning session's framing"],
-    [OUTSIDE, "a plan is usually written from memory"],
-    [OUTSIDE, "`a7e3018`, `chore/708-memory-to-specs-round-two`"],
-    [OUTSIDE, "## Promoted from the memory triage (Issue #708)"],
-    [OUTSIDE, "a memorial"],
-    [OUTSIDE, "my_project_x"],
-    [OUTSIDE, "${CLAUDE_PROJECT_DIR}"],
-    [OUTSIDE, "`~/.claude/settings.json`"],
-  ];
-  for (const [file, text] of passed) assert.deepEqual(findingsIn(file, text), [], `${file}: "${text}"`);
+  for (const [file, text] of PASSED) assert.deepEqual(findingsIn(file, text), [], `${file}: "${text}"`);
 });
