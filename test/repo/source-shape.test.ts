@@ -11,6 +11,11 @@ const WORKER = "vellum/worker-spawn-static";
 const ESCAPE = "vellum/template-silent-escape";
 const ROSTER = "vellum/e2e-cancellation-roster";
 const READS = "vellum/e2e-console-read-through-drop";
+const FRAME_IDS = "vellum/frame-no-id-lookup";
+const FRAME_IMPORTS = "vellum/frame-no-explorer-import";
+const GLASS = "vellum/explorer-no-glass-keys";
+const CONTENTS = "vellum/contents-row-builder-only";
+const TEST_IMPORTS = "vellum/test-no-test-import";
 
 const houseReports = async (lines: readonly string[], path: string): Promise<Array<[string, number]>> => {
   const [result] = await eslint.lintText(lines.join("\n"), { filePath: join(ROOT, path) });
@@ -19,18 +24,95 @@ const houseReports = async (lines: readonly string[], path: string): Promise<Arr
 };
 const at = (rule: string, lines: readonly number[]): Array<[string, number]> => lines.map((line) => [rule, line]);
 
+const ID_LOOKUP_PLANT = [
+  "export const a = (doc: Document) => doc.getElementById(\"a\");",
+  "export const b = (doc?: Document) => doc?.getElementById(\"a\");",
+  "export const c = (doc: Document) => doc[\"getElementById\"](\"a\");",
+  "export const d = (doc: Document) => doc[`getElementById`](\"a\");",
+  "export const e = (doc: Document) => { const { getElementById } = doc; return getElementById; };",
+  "const k = \"getElementById\"; export const f = (doc: Document) => (doc as unknown as Record<string, () => null>)[k]!();",
+  "// getElementById, named in a comment",
+  "export const g = \"do not call getElementById here\";",
+  "export const h = (el: Element) => el.querySelector(\"#a\");",
+];
+
 test("the living-chart engine looks up no element by id, however the lookup is spelled, and a mention is not a lookup", async () => {
+  assert.deepEqual(await houseReports(ID_LOOKUP_PLANT, "src/site/living-chart/index.ts"), at(ENGINE, [1, 2, 3, 4, 5, 6]));
+});
+
+test("the reading frame looks up no element by id, spelled any way the engine's rule reads", async () => {
+  assert.deepEqual(await houseReports(ID_LOOKUP_PLANT, "src/site/reading-frame/index.ts"), at(FRAME_IDS, [1, 2, 3, 4, 5, 6]), "BLIND SPOT, declared, erring toward passing: the name assembled from pieces, as for the engine's rule");
+});
+
+const SOURCE_BLIND_SPOTS = "BLIND SPOTS, declared, each erring toward passing: a module source held in a variable and handed to import() (const MODULE = \"...\"; import(MODULE)), a source assembled at run time from pieces none of which carries the banned text, and a module reached through another module outside this rule's scope";
+
+test("the reading frame imports nothing from the Explorer, by a static import, a re-export, a type import or any string inside import(), and naming the Explorer is not importing it", async () => {
   assert.deepEqual(await houseReports([
-    "export const a = (doc: Document) => doc.getElementById(\"a\");",
-    "export const b = (doc?: Document) => doc?.getElementById(\"a\");",
-    "export const c = (doc: Document) => doc[\"getElementById\"](\"a\");",
-    "export const d = (doc: Document) => doc[`getElementById`](\"a\");",
-    "export const e = (doc: Document) => { const { getElementById } = doc; return getElementById; };",
-    "const k = \"getElementById\"; export const f = (doc: Document) => (doc as unknown as Record<string, () => null>)[k]!();",
-    "// getElementById, named in a comment",
-    "export const g = \"do not call getElementById here\";",
-    "export const h = (el: Element) => el.querySelector(\"#a\");",
-  ], "src/site/living-chart/index.ts"), at(ENGINE, [1, 2, 3, 4, 5, 6]));
+    "import { a } from \"../explorer/app.ts\";",
+    "export { b } from \"../explorer/b.ts\";",
+    "export * from \"../explorer/c.ts\";",
+    "import type { D } from \"../explorer/d.ts\";",
+    "export const e = () => import(\"../explorer/e.ts\");",
+    "export const f = (x: string) => import(`../explorer/${x}.ts`);",
+    "export const g = (x: string) => import(\"../\" + \"explorer/\" + x);",
+    "// ../explorer/app.ts, named in a comment",
+    "export const h = \"the Explorer lives in ../explorer/app.ts\";",
+    "import { i } from \"../shared/room.ts\";",
+    "const MODULE = \"../explorer/m.ts\"; export const j = () => import(MODULE);",
+  ], "src/site/reading-frame/index.ts"), at(FRAME_IMPORTS, [1, 2, 3, 4, 5, 6, 7]), SOURCE_BLIND_SPOTS);
+});
+
+const GLASS_PLANT = [
+  "import { bindGlassKeys } from \"../shared/glass-keys.ts\";",
+  "export * from \"../shared/glass-keys.ts\";",
+  "export const b = () => import(\"../shared/glass-keys.ts\");",
+  "export const c = (root: ParentNode) => root.querySelectorAll(\"[data-zoom]\");",
+  "export const d = (root: ParentNode) => root.querySelector(`button[data-zoom=\"in\"]`);",
+  "// glass-keys.ts and [data-zoom], named in a comment",
+  "export const e = \"the other rooms bind glass-keys\";",
+  "import { f } from \"../shared/room.ts\";",
+  "export const g = (el: HTMLElement) => el.dataset[\"zoom\"];",
+];
+
+test("neither the Explorer nor home imports the kit's glass-keys or queries [data-zoom] itself, in either directory, and naming the kit is not binding it", async () => {
+  for (const path of ["src/site/explorer/app.ts", "src/site/home/app.ts"]) {
+    assert.deepEqual(await houseReports(GLASS_PLANT, path), at(GLASS, [1, 2, 3, 4, 5]), `${path}: ${SOURCE_BLIND_SPOTS}; and a [data-zoom] selector assembled from pieces`);
+  }
+});
+
+const CONTENTS_PLANT = [
+  "export const a = \"<span class=\\\"cr-num\\\">1</span>\";",
+  "export const b = (n: number) => `<span class=\"cr-num\">${n}</span>`;",
+  "export const c = (el: HTMLElement) => { el.classList.add(\"cr-num\"); };",
+  "// cr-num, named in a comment",
+  "export type K = \"cr-num\";",
+];
+
+test("a room writes the contents row's cr-num class only through the shared builder, which alone may spell it", async () => {
+  assert.deepEqual(await houseReports(CONTENTS_PLANT, "src/site/prospect/seats.ts"), at(CONTENTS, [1, 2, 3]), "BLIND SPOT, declared, erring toward passing: the class name assembled from pieces");
+  assert.deepEqual(await houseReports(CONTENTS_PLANT, "src/site/shared/contents-row.ts"), [], "the shared builder is the one place the class is written");
+});
+
+test("no module imports a .test.ts, by a static import, a re-export, or any string inside import() or require(), and naming a test file is not importing it", async () => {
+  const plant = [
+    "import { a } from \"./other.test.ts\";",
+    "export { b } from \"../site/b.test.ts\";",
+    "export * from \"./c.test.ts\";",
+    "export const d = () => import(\"./d.test.ts\");",
+    "export const e = () => import(\"./e.test.ts?x=1\");",
+    "export const f = (x: string) => import(`./${x}.test.ts`);",
+    "export const g = (root: string) => import(new URL(\"test/g.test.ts\", root).href);",
+    "export const h = () => import(\"./a\" + \".test.ts\");",
+    "export const i = require(\"./i.test.ts\");",
+    "// import \"./j.test.ts\", named in a comment",
+    "export const k = \"node --test collects every .test.ts\";",
+    "import { l } from \"./l.ts\";",
+    "const MODULE = \"./m.test.ts\"; export const m = () => import(MODULE);",
+    "export const n = \"./n.test.ts\";",
+  ];
+  for (const path of ["test/repo/lint-config.test.ts", "test-support/lint-roots.ts"]) {
+    assert.deepEqual(await houseReports(plant, path), at(TEST_IMPORTS, [1, 2, 3, 4, 5, 6, 7, 8, 9]), `${path}: ${SOURCE_BLIND_SPOTS}`);
+  }
 });
 
 const WORKER_PLANT = [
@@ -248,6 +330,16 @@ const REACH: ReadonlyArray<readonly [string, string, string]> = [
   [WORKER, "src/site/explorer/worker-client.ts", "src/cli/main.ts"],
   [ROSTER, "e2e/suites/home.ts", "src/cli/main.ts"],
   [READS, "e2e/suites/home.ts", "src/cli/main.ts"],
+  [FRAME_IDS, "src/site/reading-frame/index.ts", "src/site/living-chart/index.ts"],
+  [FRAME_IMPORTS, "src/site/reading-frame/index.ts", "src/site/explorer/app.ts"],
+  [GLASS, "src/site/explorer/app.ts", "src/site/prospect/seats.ts"],
+  [GLASS, "src/site/home/app.ts", "src/site/prospect/seats.ts"],
+  [CONTENTS, "src/site/prospect/seats.ts", "src/cli/main.ts"],
+  [TEST_IMPORTS, "e2e/harness.ts", "public/house.css"],
+  [TEST_IMPORTS, "scripts/build-app-bundles.ts", "public/house.css"],
+  [TEST_IMPORTS, "src/cli/main.ts", "public/house.css"],
+  [TEST_IMPORTS, "test/repo/lint-config.test.ts", "public/house.css"],
+  [TEST_IMPORTS, "test-support/lint-roots.ts", "public/house.css"],
 ];
 
 test("each scoped rule resolves at error inside its scope and not outside it, and the 400-line bound resolves at app.ts itself (Issue #675, Issue #191)", async () => {
@@ -256,7 +348,7 @@ test("each scoped rule resolves at error inside its scope and not outside it, an
     assert.equal((await resolvedRules(outside))[rule], undefined, `${rule} reaches ${outside}, outside its scope`);
   }
   assert.deepEqual((await resolvedRules("src/site/explorer/app.ts"))["max-lines"], [2, 400], "app.ts no longer resolves max-lines at the 400-line bound Issue #191 ratified for it");
-  for (const [rule, nested] of [[ENGINE, "src/site/living-chart/nested/deeper/part.ts"], [WORKER, "src/site/explorer/nested/deeper/part.ts"], [ROSTER, "e2e/suites/nested/deeper/part.ts"], [READS, "e2e/suites/nested/deeper/part.ts"]] as const) {
+  for (const [rule, nested] of [[ENGINE, "src/site/living-chart/nested/deeper/part.ts"], [WORKER, "src/site/explorer/nested/deeper/part.ts"], [ROSTER, "e2e/suites/nested/deeper/part.ts"], [READS, "e2e/suites/nested/deeper/part.ts"], [FRAME_IDS, "src/site/reading-frame/nested/deeper/part.ts"], [FRAME_IMPORTS, "src/site/reading-frame/nested/deeper/part.ts"], [GLASS, "src/site/explorer/nested/deeper/part.ts"], [GLASS, "src/site/home/nested/deeper/part.ts"], [CONTENTS, "src/site/prospect/nested/deeper/part.ts"], [TEST_IMPORTS, "test/nested/deeper/part.test.ts"]] as const) {
     const resolved = (await eslint.calculateConfigForFile(nested)) as { rules?: Record<string, unknown> };
     assert.deepEqual(resolved.rules?.[rule], [2], `${rule} does not reach ${nested}, so a module nested deeper in its scope escapes it`);
   }

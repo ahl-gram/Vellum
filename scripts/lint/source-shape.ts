@@ -212,8 +212,38 @@ const e2eConsoleReadThroughDrop: Rule.RuleModule = {
   },
 };
 
+const frameNoIdLookup: Rule.RuleModule = {
+  meta: problem("the reading frame looks up no element by id: it builds what it holds, and ids are the host's namespace, so a second frame on one page would collide (Issue #191, Issue #219)"),
+  create: () => ({}),
+};
+
+const frameNoExplorerImport: Rule.RuleModule = {
+  meta: problem("the reading frame imports nothing from the Explorer, so a page that is not the Explorer can mount it (Issue #219)"),
+  create: () => ({}),
+};
+
+const explorerNoGlassKeys: Rule.RuleModule = {
+  meta: problem("the Explorer and home bind their own zoom presses by id: neither imports glass-keys.ts nor queries [data-zoom], a document-wide binding that would double every press (handbook/specs/explorer-doctrine.md)"),
+  create: () => ({}),
+};
+
+const contentsRowBuilderOnly: Rule.RuleModule = {
+  meta: problem("the contents row's cr-num class is written only by its shared builder, src/site/shared/contents-row.ts, so no room builds the row by hand"),
+  create: () => ({}),
+};
+
+const testNoTestImport: Rule.RuleModule = {
+  meta: problem("nothing imports a .test.ts: node --test would run that file's tests a second time; share through test-support/ instead"),
+  create: () => ({}),
+};
+
 export default {
   rules: {
+    "frame-no-id-lookup": frameNoIdLookup,
+    "frame-no-explorer-import": frameNoExplorerImport,
+    "explorer-no-glass-keys": explorerNoGlassKeys,
+    "contents-row-builder-only": contentsRowBuilderOnly,
+    "test-no-test-import": testNoTestImport,
     "engine-no-id-lookup": engineNoIdLookup,
     "worker-spawn-static": workerSpawnStatic,
     "template-silent-escape": templateSilentEscape,
