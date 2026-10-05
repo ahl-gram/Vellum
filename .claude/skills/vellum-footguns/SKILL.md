@@ -69,8 +69,8 @@ Scars: #49, #124, #270, #275, #295, #320, #353, #358, #360, #363, #380, #383, #3
     builder returns, and give a child that reads shared state its own `TMPDIR` (PR #552).
 11. **Narrow-width or column-width work owes a sweep across seeds, never the seed-42 fixture.** Seed
     42 is one of the few clean seeds, which is why a sideways-scroll defect left the suite green
-    while other seeds overflowed. Pin the declaration by regex, so flipping its value fails too and
-    not only deleting it (#49, PR #406). A width-scoped feature is guarded on BOTH sides of its
+    while other seeds overflowed. Pin the resolved value, not the sheet's text, so flipping it fails
+    too (`handbook/specs/check-placement.md`, #49, PR #406). A width-scoped feature is guarded on BOTH sides of its
     breakpoint (Issue #547).
 12. **`test-support/element-shim.ts` does no layout.** Every rect it reports is the one the test
     STATED, so a box computed from it measures the shim and not the code (#387, #388).
@@ -97,7 +97,7 @@ Scars: #49, #124, #270, #275, #295, #320, #353, #358, #360, #363, #380, #383, #3
     inverting the selector (PR #410).
 19. **A reference that went through a transform shares the defect's oracle**: also assert against
     the RAW source, on what the transform cannot represent (Issue #443).
-20. **A ratified acceptance gets a driving check beside any pure-function or source-text read**
+20. **A ratified acceptance gets a driving check beside any pure-function read**
     (PR #631).
 
 ## Gate 2: before writing an e2e check or a CDP probe

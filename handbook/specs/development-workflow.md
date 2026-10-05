@@ -46,9 +46,11 @@ region sheet, level of detail,
 or the voyage, `handbook/specs/site-architecture.md` before adding or restructuring a page, a stylesheet, a
 bundle or an inlined script, `handbook/specs/conventions.md` before starting a design round or building to
 ruled stills, and before adding or moving a rule, editing a spec, or writing, citing or sweeping a
-comment, and
+comment,
 `handbook/specs/settle-doctrine.md` before any work that writes an e2e wait, settle, or CDP probe, or that
-reads a screenshot, a focus state or a narrow viewport in the harness.
+reads a screenshot, a focus state or a narrow viewport in the harness, and
+`handbook/specs/check-placement.md` before writing a test, a lint rule or a browser check, or moving a rule
+from one to another.
 
 **4. Get a cold read on the plan: `vellum-plan-skeptic`.** Not `vellum-pr-skeptic`, which reviews a
 diff and has none to read at this point. The plan skeptic attacks the plan's assumptions, its

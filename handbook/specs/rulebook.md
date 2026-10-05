@@ -29,8 +29,9 @@ not assume, `explorer-doctrine.md` the living chart over the baked sheet (the en
 host contract, the camera and gesture, counter-scale, the overlay lifecycle),
 `region-and-voyage.md` its other half (region sheets, level of detail, the voyage),
 `site-architecture.md` how the site is authored, bundled, discovered and shipped,
-`development-workflow.md` the sequence a change moves through, and `settle-doctrine.md` how an e2e
-wait is written and what the harness environment does.
+`development-workflow.md` the sequence a change moves through, `settle-doctrine.md` how an e2e
+wait is written and what the harness environment does, and `check-placement.md` which check holds
+which kind of rule.
 
 ## How to read and update this file
 
@@ -382,6 +383,7 @@ overlays), to
 `handbook/specs/region-and-voyage.md` (region sheets, level of detail, the voyage), to
 `handbook/specs/site-architecture.md` (how the site is authored and shipped), to
 `handbook/specs/development-workflow.md` (the order of operations), to `handbook/specs/settle-doctrine.md` (how an e2e
-wait is written, and what the harness environment does), and to the flake record at
+wait is written, and what the harness environment does), to `handbook/specs/check-placement.md` (which
+check holds which kind of rule), and to the flake record at
 `.claude/skills/vellum-footguns/references/flake-record.md` (the CI reds believed to be flakes).
 Rules change rarely; when one does, edit the spec that owns it, this file for the rules here.*
