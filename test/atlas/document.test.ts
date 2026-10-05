@@ -248,6 +248,12 @@ test("#464 the download is byte-identical to the paper artifact it was before th
   assert.equal(createHash("sha256").update(download()).digest("hex"), DOWNLOAD_SHA256, "the download changed by a byte: the screen dress may only reach the served page");
 });
 
+test("Issue #761 the served page lays out at the site's fixed 1024 viewport; the download keeps its own head (the digest above holds it)", () => {
+  const viewport = (html: string) => html.match(/<meta name="viewport" content="([^"]*)">/)?.[1];
+  assert.equal(viewport(served()), "width=1024");
+  assert.equal(viewport(download()), "width=device-width, initial-scale=1");
+});
+
 test("#464 the served page takes the deep with its sections on parchment sheets; the download carries none of that dress", () => {
   const page = served();
   const file = download();

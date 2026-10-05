@@ -305,6 +305,7 @@ test("each rendered head carries the canonical meta with the ratified prop fan-o
     assert.equal(decode(title[1]!), p.title, `${p.route} title`);
 
     for (const [attr, key, want] of [
+      ["name", "viewport", "width=1024"],
       ["name", "description", p.description],
       ["property", "og:description", p.ogDescription ?? p.description],
       ["name", "twitter:description", p.ogDescription ?? p.description],
