@@ -50,8 +50,7 @@ Scars: #49, #124, #270, #275, #295, #320, #353, #358, #360, #363, #380, #383, #3
    `node_modules`, and ANYWHERE a file named `test`, `test-*`, `*-test`, `*_test` or `*.test`, so a
    helper there or so named runs as a passing test of its own, and a `.test.ts` importing a sibling
    `.test.ts` runs the sibling's tests twice; neither fails, both inflate the count, and
-   `test/repo/test-collection.test.ts` reds on the first arm and `vellum/test-no-test-import`, at
-   `npm run lint`, on the second. No precedent in `test-support/` is no
+   `test/repo/test-collection.test.ts` and the lint red them. No precedent in `test-support/` is no
    evidence against the convention.
 9. **Run the mutation, paste the red line into the PR body's guard table**, commit, then dispatch
    `vellum-guard-prover`, one round (step 15), for the guard set (10 minutes, unit tests only,
