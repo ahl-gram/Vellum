@@ -84,6 +84,13 @@ symbol and path so the reader goes and looks.
   `test/repo/e2e-tiers.test.ts` reds if the matrix and `E2E_LANES` disagree, and `main`'s required
   checks, which no test can see at all. A change to the number of unit shards joins the same
   required checks, since each shard reports a check of its own.
+- **A phone lays every page out at a fixed 1024 CSS pixels and shrinks it to fit.** The layout's
+  viewport tag is exactly `width=1024`: no `initial-scale`, which defeats the fit, and nothing that
+  stops pinch-zoom. The one other document that writes its own head, the served atlas (the `motion`
+  arm of `atlasHead` in `src/atlas/document.ts`), carries the same tag; the offline download keeps its
+  own, since its bytes are pinned. A desktop browser ignores the tag, so a narrowed or zoomed desktop
+  window still lays out at its own width. `test/site/astro-scaffold.test.ts` and
+  `test/atlas/document.test.ts` hold both.
 - **The shell dresses once.** Every shared shell rule lives in `BaseLayout.astro`'s
   `<style is:global>` block, and a page's own sheet carries page-specific rules only.
 - **Sheet order is a contract.** The layout links the root sheets, then the shared sheets a page

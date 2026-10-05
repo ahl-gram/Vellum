@@ -175,7 +175,7 @@ section points there rather than restating it.
   The imperative is Gate 2's "run the probe's control in the same run".
 - **Two builds are compared by the sweep, row by row, against two runs of the unchanged build.**
   `node scripts/design/oracle.ts <dist> <out> [label]` shoots every page of a built site at 1280x800
-  and at a true 390x844 phone: a page that runs a live chart app as its head box, the Specimen Book
+  and at a 390x844 narrow desktop window: a page that runs a live chart app as its head box, the Specimen Book
   as one screen, every other page whole down to 16000px, with motion reduced unless `--motion` is
   passed; below that cap only the page height the probe records is compared. Shoot the
   unchanged build twice and the branch once, all on one date, since the Seed of the Day's head box
@@ -242,10 +242,14 @@ section points there rather than restating it.
   the probe's own arithmetic on the rect and not the DOM's. Gate 2 item 13 points here.
 - **The headless window has a minimum width clamp.** A window asked for narrower than the clamp lays
   out at the clamp and the capture is cropped, which reads as an overflow bug that is not there. The
-  route to a true narrow viewport is device-metric emulation, wrapped as `setMobileViewport` and
-  `clearMobile` in `e2e/harness.ts`. The figure is not written down here because no command
-  in this repo demonstrates it. Gate 3 already carries the typing-moment half, that a window size
-  does not set the layout viewport.
+  route to a true narrow viewport is device-metric emulation, and the harness wraps it two ways in
+  `e2e/harness.ts`, which are not interchangeable. `setNarrowViewport` is a desktop window that narrow
+  (what browser zoom gives), with touch: it ignores the site's fixed `width=1024` viewport, so it is
+  how a check reads the narrow layout. `setMobileViewport` is a phone (`mobile: true`, with touch): it
+  obeys that viewport, so the page lays out 1024 wide and is shrunk to fit, and a real touch on it is
+  aimed in layout CSS pixels from the visual viewport's origin, unscaled. `clearMobile` resets both.
+  The clamp's figure is not written down here because no command in this repo demonstrates it. Gate 3
+  already carries the typing-moment half, that a window size does not set the layout viewport.
 - **A run deletes its own browser profile only if it is allowed to finish.** Each local run mints a
   throwaway profile under `tmpdir()` (`mkdtemp` in `e2e/harness.ts`) and `cleanup()` removes
   it with `rmSync` rather than the promise `rm`, which is not a style choice: `cleanup()` is

@@ -198,6 +198,17 @@ than a page one, so a new chart room inherits it instead of discovering it. Writ
 is a copy, and the sweep that looks for copies has to reach every authored sheet, a page's own style
 block and the generated sheets alike.
 
+**The desk notice is a note, never a wall.** A phone that had to shrink the page to fit sees the
+Notice to Travellers: a tilted parchment stamp above the foot of the screen, edged in a dark double
+rule with a close walnut halo so it stands clear of the page beneath it, and sized in units of the
+shrink so its text reads at 16 pixels on the phone's own screen, re-fitted when the phone turns. It
+shows on every page until "Continue anyway" is pressed once, then never again in that browser. It
+takes no focus, dims nothing, sits under the first-arrival veil, prints as nothing, and stays hidden
+with scripts off. Who sees it is `noticeDue` in `src/site/shell/desk-notice.ts`, which reads the
+page's own shrink: never gate it on a screen size, which Brave disguises, or on a coarse pointer
+alone, which every tablet reports. **Provisional until the post-use review:** its look, its words and
+its seat.
+
 **A new component's CSS goes in its own sheet.** Fold it into an existing one only if a separate
 sheet breaks something or costs performance; the rosters a new sheet joins are never the reason,
 and what those rosters are and what each costs is `handbook/specs/site-architecture.md`'s.
