@@ -71,6 +71,50 @@ test("every row on whether a new unit test joins a roster passes", () => {
   for (const [row, wants] of rows) assert.ok(out.split("\n").includes(`ok   ${row}: ${wants}`), `no passing row "${row}: ${wants}"\n${out}`);
 });
 
+const CODE_ROWS: ReadonlyArray<readonly [string, "deny" | "null" | "context"]> = [
+  ["an em-dash inside an inline span in a pr comment allowed", "null"],
+  ["an em-dash inside a span in a whole pr body allowed", "context"],
+  ["an em-dash after a single backtick inside a double-backtick span allowed", "null"],
+  ["an em-dash inside a closed backtick fence allowed", "null"],
+  ["an em-dash inside a closed tilde fence allowed", "null"],
+  ["an em-dash inside a fence indented two spaces allowed", "null"],
+  ["an em-dash inside a fence closed by a longer run allowed", "null"],
+  ["an em-dash in a table cell's span with its pipe escaped allowed", "null"],
+  ["an em-dash inside a span in an issue body allowed", "null"],
+  ["an em-dash inside a tilde fence whose info string holds a backtick allowed", "null"],
+  ["an em-dash inside a fence indented three spaces allowed", "null"],
+  ["an em-dash inside an inline body's span allowed", "null"],
+  ["an em-dash in prose beside a span denied", "deny"],
+  ["an em-dash after an unclosed backtick denied", "deny"],
+  ["an em-dash in a span opened on one line and closed on the next denied", "deny"],
+  ["an em-dash after a backslash-escaped backtick denied", "deny"],
+  ["an em-dash after a span closed by a backslash-preceded backtick denied", "deny"],
+  ["an em-dash after an unclosed fence denied", "deny"],
+  ["an em-dash inside a fence closed by the other character denied", "deny"],
+  ["an em-dash inside a fence closed by a shorter run denied", "deny"],
+  ["an em-dash after a backtick line whose info string holds a backtick denied", "deny"],
+  ["an em-dash inside a fence indented four spaces denied", "deny"],
+  ["an em-dash in an indented block with no fence denied", "deny"],
+  ["an em-dash in a table cell whose bare pipe splits the span denied", "deny"],
+  ["an em-dash in the body after a fence the command opened denied", "deny"],
+  ["an em-dash in the title outside code denied", "deny"],
+  ["an em-dash on the line after a closing fence denied", "deny"],
+  ["an em-dash glued after a span denied", "deny"],
+  ["an em-dash glued before a span denied", "deny"],
+  ["an em-dash after an opener indented four spaces denied", "deny"],
+  ["an em-dash before a closer indented four spaces denied", "deny"],
+  ["an em-dash in a span whose only closer is a longer run denied", "deny"],
+  ["an em-dash before a fence line that carries an info string denied", "deny"],
+  ["an em-dash in a second body file after a fence the first opened denied", "deny"],
+];
+
+// Written out like the size probes, for Issue #644's reader: each row is the only guard of its rule, and a row deleted from the table, or the whole set unspread, prints no FAIL.
+test("every row on reading an em-dash inside code passes, with the decision it was written for", () => {
+  const out = execFileSync(process.execPath, [SELFTEST], { encoding: "utf8", timeout: BOUND_MS });
+  const lines = out.split("\n");
+  for (const [row, want] of CODE_ROWS) assert.ok(lines.some((l) => l.startsWith(`ok   ${row}: want ${want} with `)), `no passing row "${row}" wanting ${want}\n${out}`);
+});
+
 // This guard lives here, not beside the readDeployed tests, because it has to survive the defect it guards: footgun-deployed-run.test.ts imports the selftest statically, so an entry guard that stops working exits that whole file at import time and the runner reports it green with every assertion silently absent (measured: 7 gone, "pass 2 fail 0"). This file only ever spawns the selftest, so it still runs.
 test("a bare import of the fixture table runs nothing and mints nothing", () => {
   const own = mkdtempSync(join(tmpdir(), "footgun-import-probe-"));

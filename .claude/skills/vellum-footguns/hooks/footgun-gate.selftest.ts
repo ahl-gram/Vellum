@@ -97,7 +97,20 @@ const CODE_ROWS: Fixture[] = [
   codeRow("an em-dash in a table cell whose bare pipe splits the span denied", "gh issue comment 5", "| a | `x <D> y|z` |", "deny"),
   codeRow("an em-dash in the body after a fence the command opened denied", "gh issue create --title '\n```\n'", "x <D> y\n```", "deny"),
   codeRow("an em-dash in the title outside code denied", "gh issue create --title 'a <D> b'", "a clean body", "deny"),
+  codeRow("an em-dash on the line after a closing fence denied", "gh issue comment 5", "```\ncode\n```\nprose <D> here", "deny"),
+  codeRow("an em-dash glued after a span denied", "gh issue comment 5", "`code`<D> y", "deny"),
+  codeRow("an em-dash glued before a span denied", "gh issue comment 5", "x<D>`code`", "deny"),
+  codeRow("an em-dash after an opener indented four spaces denied", "gh issue comment 5", "    ```\nx <D> y\n```", "deny"),
+  codeRow("an em-dash before a closer indented four spaces denied", "gh issue comment 5", "```\nx <D> y\n    ```", "deny"),
+  codeRow("an em-dash in a span whose only closer is a longer run denied", "gh issue comment 5", "`x <D> y`` z", "deny"),
+  codeRow("an em-dash before a fence line that carries an info string denied", "gh issue comment 5", "```\nx <D> y\n```js", "deny"),
+  codeRow("an em-dash inside a tilde fence whose info string holds a backtick allowed", "gh issue comment 5", "~~~ a`b\nx <D> y\n~~~", null),
+  codeRow("an em-dash inside a fence indented three spaces allowed", "gh issue comment 5", "   ```\nx <D> y\n   ```", null),
+  ["an em-dash in a second body file after a fence the first opened denied", bash("gh issue comment 5 --body-file code-split-a.md --body \"$(cat code-split-b.md)\"", SCRATCH), "deny", "em-dash outside code"],
+  ["an em-dash inside an inline body's span allowed", bash(`gh issue comment 5 --body 'see \`x ${DASH} y\`'`), null, ""],
 ];
+CODE_BODIES.set("code-split-a.md", "```\nx");
+CODE_BODIES.set("code-split-b.md", `y ${DASH} z\n\`\`\``);
 const asContext = (text: string): Decision => ({ hookSpecificOutput: { hookEventName: "PreToolUse", additionalContext: text } });
 // The unlink is what lets the two rows share a session id: the gate is once per session, so without it the second row would see no Gate 5 and read as the warning having swallowed it. The FIXTURES loop's own unlink does not reach a function subject.
 const inRootlessCheckout = (payload: Payload) => async (): Promise<Decision> => {
