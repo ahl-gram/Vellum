@@ -30,7 +30,8 @@ body.chart-room .stage .status a { color: var(--parchment-bright); }
 .corner.br { right: var(--chrome-x); bottom: var(--chrome-y); }
 .corner :is(a, button, input, select):focus-visible { outline-color: var(--parchment-bright); }
 
-.folio-room { max-width: 19rem; }
+:root { --folio-w: 19rem; }
+.folio-room { max-width: var(--folio-cap, var(--folio-w)); }
 .folio-room .room-name { font-size: 1.32rem; letter-spacing: 0.14em; line-height: 1.2; color: var(--parchment-bright); }
 .folio-room .room-tagline { font-size: 0.92rem; line-height: normal; color: var(--parchment); margin: 0.1rem 0 0; }
 /* parchment, not line-tan: line-tan reads 4.03:1 on the deep, under the 4.5:1 floor for small text, and ink-faded is darker still. */
@@ -190,7 +191,7 @@ body.chart-room .stage { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3,
   .corner.bl { display: none; }
   .corner.br.zoomery, body:has(.slip.folded) .corner.br.zoomery { right: var(--chrome-x); bottom: calc(var(--sheet-h, 6rem) + 1rem); }
   body:has(.slip.open) .corner.br.zoomery { display: none; }
-  body.chart-room:has(.slip.open):not(:has(.rooms-reveal:checked)) .where { visibility: hidden; }
+  body.chart-room:has(.slip.open) .where { visibility: hidden; }
   body:has(#map-viewport.zoomed) .corner.tr::before, body.chart-room:not(:has(.stage)) .corner.tr::before { inset: -0.7rem -0.7rem -0.75rem; }
   .legend { display: none; }
   .legend.in-slip { display: block; position: static; transform: none; margin-top: 0.9rem; animation: none; max-width: none !important; }
@@ -215,12 +216,11 @@ body.chart-room .stage { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3,
   .slip-fold { display: none; }
   .slip-body { padding: 0 1.3rem 1rem; }
   .slip-foot { padding: 0.7rem 1.3rem 0.9rem; }
-  body.room.chart-room:has(.rooms-reveal:checked)::after { inset: 0; }
 }
 
 @media print {
   .fog, .corner, .slip, .slip-tab, .vignette, .legend, .zoomery, .folio, body.chart-room .stage .status, body.chart-room .stage .warning { display: none !important; }
-  .corner.folio-room { display: block !important; position: static; text-align: left; margin: 0 0 1rem; max-width: none; }
+  .corner.folio-room { display: block !important; position: static; text-align: left; margin: 0 0 1rem; max-width: none !important; }
   .folio-room .room-name, .folio-room .room-tagline { color: var(--ink-dark); display: block; }
   .folio-room .room-name { font-size: 1.32rem; }
   .folio-room .dateline, .folio-room .gloss, .folio-controls { display: none; }

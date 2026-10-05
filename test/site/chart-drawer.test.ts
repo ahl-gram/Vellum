@@ -9,7 +9,7 @@ import { emitTableKey } from "../../src/site/explorer/address.ts";
 const REPO = resolve(import.meta.dirname, "..", "..");
 import type { ProspectJob, ProspectResult, RegionResult } from "../../src/site/explorer/worker-client.ts";
 
-// The Chart Table's state (Issue #520 Sub 2), pure and apart from the DOM: what the drawer draws and what the address carries are both this array. The surface is `chart-drawer` and never `drawer`, which src/site/shell/drawer.ts already spends on the site's phone nav (Issue #520 ruling 2).
+// The Chart Table's state (Issue #520 Sub 2), pure and apart from the DOM: what the drawer draws and what the address carries are both this array. The surface is `chart-drawer` and never `drawer` (Issue #520 ruling 2).
 const survey = (lx: number): SurveyItem => ({
   kind: "survey", seed: 42, overrides: {}, rung: 2, lx, ly: 3,
   style: "antique", legend: true, arms: false, beasts: false, theme: null,

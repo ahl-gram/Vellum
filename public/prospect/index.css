@@ -12,7 +12,7 @@
 .stage .warning { position: absolute; left: 50%; top: calc(50% + 2.8rem); transform: translateX(-50%); max-width: 30rem; z-index: 2; margin: 0; }
 .stage .warning[hidden] { display: none; }
 
-@media (min-width: 901px) { .folio-room { max-width: 22rem; } }
+:root { --folio-cap: 22rem; }
 .folio-controls { align-items: center; }
 .folio-controls .control { width: 5.2rem; }
 .year-label { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.82rem; color: var(--parchment); white-space: nowrap; }

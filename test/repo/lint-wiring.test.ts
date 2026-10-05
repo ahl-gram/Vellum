@@ -163,7 +163,7 @@ const TURNED_ON = [
   "@typescript-eslint/no-unused-vars",
   "@typescript-eslint/require-await",
 ];
-const PAGE_ELEMENT_PARAMETERS = ["drawerEls", "ghostEl", "innerEl", "leafEls", "legendEl", "logEls", "mapEl", "noteEl", "pillEl", "revealEl", "roomEls", "sheetEl", "slipEl", "statusEl", "targetEl", "viewportEl"];
+const PAGE_ELEMENT_PARAMETERS = ["drawerEls", "ghostEl", "innerEl", "leafEls", "legendEl", "logEls", "mapEl", "noteEl", "pillEl", "roomEls", "sheetEl", "slipEl", "statusEl", "targetEl", "viewportEl"];
 const PARAM_REASSIGN = { props: true, ignorePropertyModificationsFor: PAGE_ELEMENT_PARAMETERS };
 
 function pinJavaScript(file: string, typed: boolean, config: Resolved, rules: Record<string, unknown>): void {
