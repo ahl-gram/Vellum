@@ -15,6 +15,7 @@ test("the screen's height is read against 1024 exactly, after rounding to the pi
   assert.equal(noticeDue(0.5, 2048), false, "exactly 1024 tall is the floor itself: no notice");
   assert.equal(noticeDue(0.5, 2046), true, "1023 tall is under it");
   assert.equal(noticeDue(0.75, 1365), false, "a 768x1024 tablet upright reads 1023.75 from a rounded innerHeight, which is 1024");
+  assert.equal(noticeDue(0.25, 4093), true, "1023.25 is 1023 to the pixel, under the floor");
 });
 
 test("a page the browser did not shrink never takes the notice, however short the window", () => {

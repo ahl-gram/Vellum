@@ -80,6 +80,10 @@ export async function dnTablet(k: DeskKit): Promise<void> {
   await k.open(PAGE);
   const tablet = await readSettled(k, "the page on a tablet");
   check("DN5 a tablet at the 1024 floor lays the page out at scale 1 and never sees the notice", tablet.scale === 1 && !tablet.shown && tablet.w === 0 && tablet.key === null, JSON.stringify(tablet));
+  await setMobileViewport(820, 1180);
+  await k.open(PAGE);
+  const upright = await readSettled(k, "the page on a tablet held upright");
+  check("DN5b a tablet held upright shrinks the page to fit but stands over 1024 tall, so it never sees the notice: the shell reads the screen's height, not its width", upright.width === 1024 && upright.scale < 1 && !upright.shown && upright.w === 0 && upright.key === null, JSON.stringify(upright));
 }
 
 export async function dnNarrow(k: DeskKit): Promise<void> {
