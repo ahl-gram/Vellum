@@ -40,13 +40,13 @@ const STAGE: Payload<Stage | { chartRoom: false; ready: boolean }> = `(() => {
   const pieceEls = [];
   const pieceOf = (el) => { for (let e = el; e && e !== document.body; e = e.parentElement) { const p = getComputedStyle(e).position; if (p === "fixed" || p === "absolute" || p === "sticky") { let i = pieceEls.indexOf(e); if (i < 0) { pieceEls.push(e); i = pieceEls.length - 1; } return i; } } return -1; };
   const clipOf = (el, b) => { let c = { x: b.left, y: b.top, r: b.right, b: b.bottom }; for (let e = el.parentElement; e && e !== document.body; e = e.parentElement) { const cs = getComputedStyle(e); if (cs.overflowX !== "visible" || cs.overflowY !== "visible") { const q = e.getBoundingClientRect(); c = { x: Math.max(c.x, q.left), y: Math.max(c.y, q.top), r: Math.min(c.r, q.right), b: Math.min(c.b, q.bottom) }; } } return c.r - c.x > 0.5 && c.b - c.y > 0.5 ? c : null; };
-  const skip = "svg, option, select, noscript, script, style, .desk-notice, #map, .living-chart, .place-hit, #sheet";
+  const skip = "svg, noscript, script, style, .desk-notice, #map, .living-chart, .place-hit, #sheet";
   const ink = [];
   const add = (el, b, t) => { const c = clipOf(el, b); const piece = pieceOf(el); if (c && piece >= 0 && c.r > 0 && c.x < innerWidth && c.b > 0 && c.y < innerHeight) ink.push({ ...box({ left: c.x, top: c.y, right: c.r, bottom: c.b }), piece, t }); };
   const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
   for (let n = walk.nextNode(); n; n = walk.nextNode()) {
     const el = n.parentElement;
-    if (!n.textContent.trim() || !el || el.closest(skip) || el.closest("button") || unseen(el)) continue;
+    if (!n.textContent.trim() || !el || el.closest(skip) || el.closest("button, select") || unseen(el)) continue;
     const rg = new Range(); rg.selectNodeContents(n);
     for (const b of rg.getClientRects()) if (b.width > 0.5 && b.height > 0.5) add(el, b, n.textContent.trim().slice(0, 24));
   }
