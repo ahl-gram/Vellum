@@ -13,6 +13,8 @@ test("TR1 a row whose corner already stands the gap clear of the cluster writes 
   assert.equal(clears(cluster, faq, GAP), true);
   assert.equal(cornerWidth(cluster, faq, GAP), null);
   assert.equal(clusterWidth(cluster, faq, GAP), null);
+  const prospect = { left: 579.3, right: 875.4, cap: 352, floor: KIT, pad: 0 };
+  assert.equal(cornerWidth(cluster, prospect, GAP), null, "the Prospect at 901: a corner whose content sits under its cap and already clears takes no width, where 339.6 would also clear");
 });
 
 test("TR2 a corner wider than the kit gives way first, to exactly the width that clears the cluster by the gap (the Ribbon at 960)", () => {
