@@ -212,8 +212,80 @@ const e2eConsoleReadThroughDrop: Rule.RuleModule = {
   },
 };
 
+const frameNoIdLookup: Rule.RuleModule = {
+  meta: problem("the reading frame looks up no element by id: it builds what it holds, and ids are the host's namespace, so a second frame on one page would collide (Issue #191, Issue #219)"),
+  create: (context) => engineNoIdLookup.create(context),
+};
+
+const DECLARES_SOURCE = new Set(["ImportDeclaration", "ExportNamedDeclaration", "ExportAllDeclaration"]);
+
+const isCreateRequireCall = (node: Node | null | undefined): boolean => node?.type === "CallExpression" && isName(node.callee as Node, "createRequire");
+
+const boundToCreateRequire = (context: Rule.RuleContext, callee: Node): boolean => {
+  if (callee.type !== "Identifier") return false;
+  for (let scope: ReturnType<typeof context.sourceCode.getScope> | null = context.sourceCode.getScope(callee); scope; scope = scope.upper) {
+    const def = scope.set.get(callee.name)?.defs[0];
+    if (def) return def.type === "Variable" && isCreateRequireCall(def.node.init as Node | null | undefined);
+  }
+  return false;
+};
+
+const isLoader = (context: Rule.RuleContext, callee: Node): boolean => isName(callee, "require") || isCreateRequireCall(callee) || boundToCreateRequire(context, callee);
+
+const isModuleSource = (context: Rule.RuleContext, node: Node): boolean => {
+  for (let child: Node = node, parent = node.parent; parent !== null; child = parent, parent = parent.parent) {
+    if (DECLARES_SOURCE.has(parent.type)) return (parent as unknown as { source: unknown }).source === child;
+    if (parent.type === "ImportExpression" && parent.source === child) return true;
+    if (parent.type === "CallExpression" && (parent.arguments as Node[]).includes(child) && isLoader(context, parent.callee as Node)) return true;
+    if (parent.type === "NewExpression" && isName(parent.callee as Node, "URL") && parent.arguments[0] === child && isImportMetaUrl(parent.arguments[1] as Node | undefined)) return true;
+  }
+  return false;
+};
+
+const stringText = (node: Node): string | null =>
+  node.type === "Literal" && typeof node.value === "string" ? node.value : node.type === "TemplateElement" ? (node.value.cooked ?? node.value.raw) : null;
+
+const never = (): boolean => false;
+
+const stringJudge = (context: Rule.RuleContext, asSource: (text: string) => boolean, anywhere: (text: string) => boolean): Rule.RuleListener => {
+  const judge = (node: Node): void => {
+    const text = stringText(node);
+    const at = node.type === "TemplateElement" ? node.parent : node;
+    if (text === null || inTypePosition(at.parent ?? at)) return;
+    if ((asSource(text) && isModuleSource(context, at)) || anywhere(text)) context.report({ node, messageId: "found" });
+  };
+  return { Literal: judge, TemplateElement: judge };
+};
+
+const sourceBan = (message: string, asSource: (text: string) => boolean, anywhere: (text: string) => boolean = never): Rule.RuleModule => ({
+  meta: problem(message),
+  create: (context) => stringJudge(context, asSource, anywhere),
+});
+
+const frameNoExplorerImport = sourceBan("the reading frame imports nothing from the Explorer, so a page that is not the Explorer can mount it (Issue #219)", (text) => text.includes("explorer/"));
+
+const explorerNoGlassKeys = sourceBan(
+  "the Explorer and home bind their own zoom presses by id: neither imports glass-keys.ts nor queries [data-zoom], a document-wide binding that would double every press (handbook/specs/explorer-doctrine.md)",
+  (text) => text.includes("glass-keys"),
+  (text) => /\[\s*data-zoom/i.test(text) || /(?:^|\/)glass-keys\b/.test(text),
+);
+
+const CONTENTS_ROW_BUILDER = "src/site/shared/contents-row.ts";
+
+const contentsRowBuilderOnly: Rule.RuleModule = {
+  meta: problem("the contents row's cr-num class is written only by its shared builder, src/site/shared/contents-row.ts, so no room builds the row by hand"),
+  create: (context) => (repoPath(context.filename) === CONTENTS_ROW_BUILDER ? {} : stringJudge(context, never, (text) => text.includes("cr-num"))),
+};
+
+const testNoTestImport = sourceBan("nothing imports a .test.ts: node --test would run that file's tests a second time; share through test-support/ instead", (text) => /\.test\.ts(?:[?#]|$)/.test(text));
+
 export default {
   rules: {
+    "frame-no-id-lookup": frameNoIdLookup,
+    "frame-no-explorer-import": frameNoExplorerImport,
+    "explorer-no-glass-keys": explorerNoGlassKeys,
+    "contents-row-builder-only": contentsRowBuilderOnly,
+    "test-no-test-import": testNoTestImport,
     "engine-no-id-lookup": engineNoIdLookup,
     "worker-spawn-static": workerSpawnStatic,
     "template-silent-escape": templateSilentEscape,

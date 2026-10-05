@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, dirname, extname, join, relative, resolve } from "node:path";
 
@@ -47,7 +47,6 @@ const collectedOutside = (files: string[]) =>
 
 const repoFiles = filesUnder(ROOT);
 const testDirFiles = repoFiles.filter((f) => f.startsWith("test/"));
-const suiteFiles = repoFiles.filter((f) => f.endsWith(".test.ts"));
 
 const withSeededTree = (files: string[], run: (dir: string) => void) => {
   const dir = mkdtempSync(join(tmpdir(), "vellum-walk-"));
@@ -60,13 +59,6 @@ const withSeededTree = (files: string[], run: (dir: string) => void) => {
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
-};
-
-// Comments are stripped before matching because this file names ".test.ts" in its own prose; a match still needs an import/export/require keyword, so a bare mention in a string cannot trip it. It errs toward a false positive and never toward a miss.
-const importsOf = (src: string): string[] => {
-  const bare = src.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/\/\/[^\n]*/g, " ");
-  const pat = /\b(?:import|export|require)\b[^;]*?["']([^"']*\.test\.ts(?:\?[^"']*)?)["']/g;
-  return [...bare.matchAll(pat)].map((m) => m[1]!);
 };
 
 test("a stray is a file node --test would load that is not a .test.ts, never a fixture or a Finder artifact", () => {
@@ -208,7 +200,7 @@ test("every file node --test loads under test/ is a .test.ts, so none is a phant
   assert.deepEqual(
     strays,
     [],
-    `${strays.length} file(s) under test/ that node --test loads yet are not .test.ts suites (${strays.join(", ")}): a helper here counts as a passing test of its own, and a suite under any other name escapes the .test.ts guards in this file; helpers belong in test-support/`,
+    `${strays.length} file(s) under test/ that node --test loads yet are not .test.ts suites (${strays.join(", ")}): a helper here counts as a passing test of its own, and a suite under any other name escapes the guards keyed to the .test.ts name, vellum/test-no-test-import among them; helpers belong in test-support/`,
   );
 });
 
@@ -220,12 +212,6 @@ test("every file node --test collects lives under test/, where the runner is aim
   assert.deepEqual(
     outside,
     [],
-    `${outside.length} file(s) node --test collects outside test/ (${outside.join(", ")}): it collects any directory named test at any depth and any file named test, test-*, *-test, *_test or *.test, so a module there is reported as a passing test of its own and a suite there escapes the .test.ts guards in this file; move a real suite under test/, rename a helper out of that family (test-support/ is its home), and keep generated output from carrying one of those names`,
+    `${outside.length} file(s) node --test collects outside test/ (${outside.join(", ")}): it collects any directory named test at any depth and any file named test, test-*, *-test, *_test or *.test, so a module there is reported as a passing test of its own and a suite there escapes the guards keyed to the .test.ts name, vellum/test-no-test-import among them; move a real suite under test/, rename a helper out of that family (test-support/ is its home), and keep generated output from carrying one of those names`,
   );
-});
-
-test("no .test.ts imports another .test.ts, which would run that file's tests twice", () => {
-  assert.ok(suiteFiles.length > 100, `found only ${suiteFiles.length} suites; this guard is reading the wrong tree`);
-  const offenders = suiteFiles.flatMap((f) => importsOf(readFileSync(join(ROOT, f), "utf8")).map((s) => `${f} -> ${s}`));
-  assert.deepEqual(offenders, [], "share through test-support/ instead; an imported sibling re-registers its tests");
 });

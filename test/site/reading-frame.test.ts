@@ -1,13 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync, readdirSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 // The Reading Room's frame (Issue #219): host-agnostic, the first non-Explorer host of the Issue #191 engine; ratified 2026-07-27 (https://github.com/ahl-gram/Vellum/issues/219#issuecomment-5097366231): no Explorer watch view, and the log FLOWS at every width, bounded by construction. The frame BUILDS DOM, so the element shim stands in for the environment, never the module under test.
 import { El, el, installShim, walk } from "../../test-support/element-shim.ts";
 
 const REPO = resolve(import.meta.dirname, "..", "..");
-const FRAME_DIR = resolve(REPO, "src/site/reading-frame");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 
 installShim();
@@ -243,7 +242,7 @@ test("the instrument panel starts hidden and the ONE journal nests inside it (#2
   );
 });
 
-test("the frame owns no element ids: identity stays the host's namespace (#191, #219)", async () => {
+test("the frame sets no element id on anything it builds: identity stays the host's namespace, and vellum/frame-no-id-lookup keeps its source from looking one up (#191, #219)", async () => {
   const { createReadingFrame } = await import("../../src/site/reading-frame/index.ts");
   const frame = createReadingFrame(new El("div") as unknown as HTMLElement);
   for (const node of walk(frame.root as unknown as El)) {
@@ -251,23 +250,6 @@ test("the frame owns no element ids: identity stays the host's namespace (#191, 
       !node.attrs.has("id"),
       `the frame set an id on <${node.tagName.toLowerCase()}>; a second frame on one page would collide`,
     );
-  }
-  for (const f of readdirSync(FRAME_DIR).filter((n) => n.endsWith(".ts"))) {
-    const src = read(`src/site/reading-frame/${f}`);
-    assert.doesNotMatch(src, /getElementById/, `${f} must not look elements up by id: it BUILDS them`);
-  }
-});
-
-test("the frame imports nothing from the Explorer (#219 acceptance)", () => {
-  for (const f of readdirSync(FRAME_DIR).filter((n) => n.endsWith(".ts"))) {
-    const src = read(`src/site/reading-frame/${f}`);
-    for (const m of src.matchAll(/from\s+"([^"]+)"/g)) {
-      assert.doesNotMatch(
-        m[1]!,
-        /explorer\//,
-        `${f} imports ${m[1]}; the frame must be mountable by a page that is not the Explorer`,
-      );
-    }
   }
 });
 

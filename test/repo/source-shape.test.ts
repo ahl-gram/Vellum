@@ -1,8 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { existsSync } from "node:fs";
+import { existsSync, globSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { ESLint } from "eslint";
+import { ESLint, Linter } from "eslint";
+import tseslint from "typescript-eslint";
+import sourceShape from "../../scripts/lint/source-shape.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const eslint = new ESLint({ cwd: ROOT, flags: ["unstable_native_nodejs_ts_config"] });
@@ -11,6 +13,11 @@ const WORKER = "vellum/worker-spawn-static";
 const ESCAPE = "vellum/template-silent-escape";
 const ROSTER = "vellum/e2e-cancellation-roster";
 const READS = "vellum/e2e-console-read-through-drop";
+const FRAME_IDS = "vellum/frame-no-id-lookup";
+const FRAME_IMPORTS = "vellum/frame-no-explorer-import";
+const GLASS = "vellum/explorer-no-glass-keys";
+const CONTENTS = "vellum/contents-row-builder-only";
+const TEST_IMPORTS = "vellum/test-no-test-import";
 
 const houseReports = async (lines: readonly string[], path: string): Promise<Array<[string, number]>> => {
   const [result] = await eslint.lintText(lines.join("\n"), { filePath: join(ROOT, path) });
@@ -19,18 +26,134 @@ const houseReports = async (lines: readonly string[], path: string): Promise<Arr
 };
 const at = (rule: string, lines: readonly number[]): Array<[string, number]> => lines.map((line) => [rule, line]);
 
+const ID_LOOKUP_PLANT = [
+  "export const a = (doc: Document) => doc.getElementById(\"a\");",
+  "export const b = (doc?: Document) => doc?.getElementById(\"a\");",
+  "export const c = (doc: Document) => doc[\"getElementById\"](\"a\");",
+  "export const d = (doc: Document) => doc[`getElementById`](\"a\");",
+  "export const e = (doc: Document) => { const { getElementById } = doc; return getElementById; };",
+  "const k = \"getElementById\"; export const f = (doc: Document) => (doc as unknown as Record<string, () => null>)[k]!();",
+  "// getElementById, named in a comment",
+  "export const g = \"do not call getElementById here\";",
+  "export const h = (el: Element) => el.querySelector(\"#a\");",
+];
+
 test("the living-chart engine looks up no element by id, however the lookup is spelled, and a mention is not a lookup", async () => {
+  assert.deepEqual(await houseReports(ID_LOOKUP_PLANT, "src/site/living-chart/index.ts"), at(ENGINE, [1, 2, 3, 4, 5, 6]));
+});
+
+test("the reading frame looks up no element by id, spelled any way the engine's rule reads", async () => {
+  assert.deepEqual(await houseReports(ID_LOOKUP_PLANT, "src/site/reading-frame/index.ts"), at(FRAME_IDS, [1, 2, 3, 4, 5, 6]), "BLIND SPOT, declared, erring toward passing: the name assembled from pieces, as for the engine's rule");
+});
+
+const SOURCE_BLIND_SPOTS = "BLIND SPOTS, declared, each erring toward passing: a module source held in a variable and handed to import() (const MODULE = \"...\"; import(MODULE)), a source assembled at run time from pieces none of which carries the banned text, an import in a type position (typeof import(\"...\"), import(\"...\").T), which run time erases, a source resolved through import.meta.resolve or a loader other than require, createRequire's result or a URL on import.meta.url, and a module reached through another module outside this rule's scope";
+
+test("the reading frame imports nothing from the Explorer, by a static import, a re-export, a type import or any string inside import(), and naming the Explorer is not importing it", async () => {
   assert.deepEqual(await houseReports([
-    "export const a = (doc: Document) => doc.getElementById(\"a\");",
-    "export const b = (doc?: Document) => doc?.getElementById(\"a\");",
-    "export const c = (doc: Document) => doc[\"getElementById\"](\"a\");",
-    "export const d = (doc: Document) => doc[`getElementById`](\"a\");",
-    "export const e = (doc: Document) => { const { getElementById } = doc; return getElementById; };",
-    "const k = \"getElementById\"; export const f = (doc: Document) => (doc as unknown as Record<string, () => null>)[k]!();",
-    "// getElementById, named in a comment",
-    "export const g = \"do not call getElementById here\";",
-    "export const h = (el: Element) => el.querySelector(\"#a\");",
-  ], "src/site/living-chart/index.ts"), at(ENGINE, [1, 2, 3, 4, 5, 6]));
+    "import { a } from \"../explorer/app.ts\";",
+    "export { b } from \"../explorer/b.ts\";",
+    "export * from \"../explorer/c.ts\";",
+    "import type { D } from \"../explorer/d.ts\";",
+    "export const e = () => import(\"../explorer/e.ts\");",
+    "export const f = (x: string) => import(`../explorer/${x}.ts`);",
+    "export const g = (x: string) => import(\"../\" + \"explorer/\" + x);",
+    "// ../explorer/app.ts, named in a comment",
+    "export const h = \"the Explorer lives in ../explorer/app.ts\";",
+    "import { i } from \"../shared/room.ts\";",
+    "const MODULE = \"../explorer/m.ts\"; export const j = () => import(MODULE);",
+    "export const k = () => new URL(\"../explorer/worker.ts\", import.meta.url);",
+    "export type L = typeof import(\"../explorer/l.ts\");",
+  ], "src/site/reading-frame/index.ts"), at(FRAME_IMPORTS, [1, 2, 3, 4, 5, 6, 7, 12]), SOURCE_BLIND_SPOTS);
+});
+
+const GLASS_PLANT = [
+  "import { bindGlassKeys } from \"../shared/glass-keys.ts\";",
+  "export * from \"../shared/glass-keys.ts\";",
+  "export const b = () => import(\"../shared/glass-keys.ts\");",
+  "export const c = (root: ParentNode) => root.querySelectorAll(\"[data-zoom]\");",
+  "export const d = (root: ParentNode) => root.querySelector(`button[data-zoom=\"in\"]`);",
+  "// glass-keys.ts and [data-zoom], named in a comment",
+  "export const e = \"the other rooms bind glass-keys\";",
+  "import { f } from \"../shared/room.ts\";",
+  "export const g = (el: HTMLElement) => el.dataset[\"zoom\"];",
+  "const GK = \"../shared/glass-keys.ts\"; export const h = () => import(GK);",
+  "export const i = (root: ParentNode) => root.querySelectorAll(\"[ DATA-ZOOM]\");",
+  "export { j } from \"../shared/glass-keys.ts\";",
+  "const GQ = \"../shared/glass-keys.ts?v=1\"; export const k = () => import(GQ);",
+  "const GJ = \"../shared/glass-keys.js\"; export const l = () => import(GJ);",
+];
+
+test("neither the Explorer nor home imports the kit's glass-keys, by a path to it in a module source or held in any string, or queries [data-zoom] itself, in either directory, and naming the kit is not binding it", async () => {
+  for (const path of ["src/site/explorer/app.ts", "src/site/home/app.ts"]) {
+    assert.deepEqual(await houseReports(GLASS_PLANT, path), at(GLASS, [1, 2, 3, 4, 5, 10, 11, 12, 13, 14]), `${path}: BLIND SPOTS, declared, each erring toward passing: a path or selector assembled at run time from pieces none of which carries glass-keys or [data-zoom], and the kit reached through another module outside this rule's scope`);
+  }
+});
+
+const CONTENTS_PLANT = [
+  "export const a = \"<span class=\\\"cr-num\\\">1</span>\";",
+  "export const b = (n: number) => `<span class=\"cr-num\">${n}</span>`;",
+  "export const c = (el: HTMLElement) => { el.classList.add(\"cr-num\"); };",
+  "// cr-num, named in a comment",
+  "export type K = \"cr-num\";",
+];
+
+test("a room writes the contents row's cr-num class only through the shared builder, which alone may spell it", async () => {
+  for (const path of ["src/site/prospect/seats.ts", "src/site/shared/room.ts"]) {
+    assert.deepEqual(await houseReports(CONTENTS_PLANT, path), at(CONTENTS, [1, 2, 3]), `${path}: BLIND SPOT, declared, erring toward passing: the class name assembled from pieces`);
+  }
+  assert.deepEqual(await houseReports(CONTENTS_PLANT, "src/site/shared/contents-row.ts"), [], "the shared builder is the one place the class is written");
+  const namesake = new Linter({ cwd: ROOT }).verify(CONTENTS_PLANT.join("\n"), [{ files: ["**/*.ts"], plugins: { vellum: sourceShape }, languageOptions: { parser: tseslint.parser }, rules: { [CONTENTS]: "error" } }], { filename: join(ROOT, "src/site/zz-room/contents-row.ts") });
+  assert.deepEqual(namesake.map((m): [string, number] => [m.ruleId ?? "", m.line]), at(CONTENTS, [1, 2, 3]), "a module that only shares the builder's name is exempted, so the owner is matched by more than its exact path");
+});
+
+const SCOPES: ReadonlyArray<readonly [string, readonly string[]]> = [
+  [FRAME_IDS, ["src/site/reading-frame/**/*.ts"]],
+  [FRAME_IMPORTS, ["src/site/reading-frame/**/*.ts"]],
+  [GLASS, ["src/site/explorer/**/*.ts", "src/site/home/**/*.ts"]],
+  [CONTENTS, ["src/site/**/*.ts"]],
+  [TEST_IMPORTS, ["e2e/**/*.ts", "scripts/**/*.ts", "src/**/*.ts", "test/**/*.ts", "test-support/**/*.ts"]],
+];
+
+test("each Issue #728 rule resolves at error on every linted file its ruled scope holds today, so a scope narrowed to the files that once held a copy reds", async () => {
+  for (const [rule, globs] of SCOPES) {
+    const files = globs.flatMap((g) => globSync(g, { cwd: ROOT }));
+    assert.ok(files.length > 0, `${rule}'s scope holds no file, so this sweep reads nothing`);
+    const unresolved: string[] = [];
+    for (const file of files) {
+      if (await eslint.isPathIgnored(file)) continue;
+      const resolved = (await eslint.calculateConfigForFile(file)) as { rules?: Record<string, unknown> };
+      if (JSON.stringify(resolved.rules?.[rule]) !== "[2]") unresolved.push(file);
+    }
+    assert.deepEqual(unresolved, [], `${rule} does not resolve at error on these files of its ruled scope`);
+  }
+});
+
+test("no module imports a .test.ts, by a static import, a re-export, or any string inside import() or require(), and naming a test file is not importing it", async () => {
+  const plant = [
+    "import { a } from \"./other.test.ts\";",
+    "export { b } from \"../site/b.test.ts\";",
+    "export * from \"./c.test.ts\";",
+    "export const d = () => import(\"./d.test.ts\");",
+    "export const e = () => import(\"./e.test.ts?x=1\");",
+    "export const f = (x: string) => import(`./${x}.test.ts`);",
+    "export const g = (root: string) => import(new URL(\"test/g.test.ts\", root).href);",
+    "export const h = () => import(\"./a\" + \".test.ts\");",
+    "export const i = require(\"./i.test.ts\");",
+    "// import \"./j.test.ts\", named in a comment",
+    "export const k = \"node --test collects every .test.ts\";",
+    "import { l } from \"./l.ts\";",
+    "const MODULE = \"./m.test.ts\"; export const m = () => import(MODULE);",
+    "export const n = \"./n.test.ts\";",
+    "import { createRequire } from \"node:module\";",
+    "export const o = createRequire(import.meta.url)(\"./o.test.ts\");",
+    "const r = createRequire(import.meta.url); export const p = r(\"./p.test.ts\");",
+    "export const q = () => import(\"./q.test.ts#x\");",
+    "export const s = () => new URL(\"./s.test.ts\", import.meta.url);",
+    "const t = (x: string) => x; export const u = t(\"./u.test.ts\");",
+  ];
+  for (const path of ["test/repo/lint-config.test.ts", "test-support/lint-roots.ts"]) {
+    assert.deepEqual(await houseReports(plant, path), at(TEST_IMPORTS, [1, 2, 3, 4, 5, 6, 7, 8, 9, 16, 17, 18, 19]), `${path}: ${SOURCE_BLIND_SPOTS}`);
+  }
 });
 
 const WORKER_PLANT = [
@@ -248,6 +371,16 @@ const REACH: ReadonlyArray<readonly [string, string, string]> = [
   [WORKER, "src/site/explorer/worker-client.ts", "src/cli/main.ts"],
   [ROSTER, "e2e/suites/home.ts", "src/cli/main.ts"],
   [READS, "e2e/suites/home.ts", "src/cli/main.ts"],
+  [FRAME_IDS, "src/site/reading-frame/index.ts", "src/site/living-chart/index.ts"],
+  [FRAME_IMPORTS, "src/site/reading-frame/index.ts", "src/site/explorer/app.ts"],
+  [GLASS, "src/site/explorer/app.ts", "src/site/prospect/seats.ts"],
+  [GLASS, "src/site/home/app.ts", "src/site/prospect/seats.ts"],
+  [CONTENTS, "src/site/prospect/seats.ts", "src/cli/main.ts"],
+  [TEST_IMPORTS, "e2e/harness.ts", "public/house.css"],
+  [TEST_IMPORTS, "scripts/build-app-bundles.ts", "public/house.css"],
+  [TEST_IMPORTS, "src/cli/main.ts", "public/house.css"],
+  [TEST_IMPORTS, "test/repo/lint-config.test.ts", "public/house.css"],
+  [TEST_IMPORTS, "test-support/lint-roots.ts", "public/house.css"],
 ];
 
 test("each scoped rule resolves at error inside its scope and not outside it, and the 400-line bound resolves at app.ts itself (Issue #675, Issue #191)", async () => {
@@ -256,7 +389,7 @@ test("each scoped rule resolves at error inside its scope and not outside it, an
     assert.equal((await resolvedRules(outside))[rule], undefined, `${rule} reaches ${outside}, outside its scope`);
   }
   assert.deepEqual((await resolvedRules("src/site/explorer/app.ts"))["max-lines"], [2, 400], "app.ts no longer resolves max-lines at the 400-line bound Issue #191 ratified for it");
-  for (const [rule, nested] of [[ENGINE, "src/site/living-chart/nested/deeper/part.ts"], [WORKER, "src/site/explorer/nested/deeper/part.ts"], [ROSTER, "e2e/suites/nested/deeper/part.ts"], [READS, "e2e/suites/nested/deeper/part.ts"]] as const) {
+  for (const [rule, nested] of [[ENGINE, "src/site/living-chart/nested/deeper/part.ts"], [WORKER, "src/site/explorer/nested/deeper/part.ts"], [ROSTER, "e2e/suites/nested/deeper/part.ts"], [READS, "e2e/suites/nested/deeper/part.ts"], [FRAME_IDS, "src/site/reading-frame/nested/deeper/part.ts"], [FRAME_IMPORTS, "src/site/reading-frame/nested/deeper/part.ts"], [GLASS, "src/site/explorer/nested/deeper/part.ts"], [GLASS, "src/site/home/nested/deeper/part.ts"], [CONTENTS, "src/site/prospect/nested/deeper/part.ts"], [CONTENTS, "src/site/zz-new-room/part.ts"], [TEST_IMPORTS, "test/nested/deeper/part.test.ts"], [TEST_IMPORTS, "e2e/nested/deeper/part.ts"], [TEST_IMPORTS, "scripts/nested/deeper/part.ts"], [TEST_IMPORTS, "test-support/nested/deeper/part.ts"]] as const) {
     const resolved = (await eslint.calculateConfigForFile(nested)) as { rules?: Record<string, unknown> };
     assert.deepEqual(resolved.rules?.[rule], [2], `${rule} does not reach ${nested}, so a module nested deeper in its scope escapes it`);
   }
