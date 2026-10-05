@@ -375,7 +375,7 @@ test("npm run lint is the native-loader ESLint over the whole tree, with a warni
   assert.equal(pkg.scripts["lint"], LINT_SCRIPT);
 });
 
-test("npm run check is tsc over tsconfig.json, which turns on noUncheckedIndexedAccess, and ci.yml's check-and-test job runs it as a real step, so an element read is typed as possibly missing on every pull request (Issue #654 ruling 1)", () => {
+test("npm run check is tsc over tsconfig.json, which turns on noUncheckedIndexedAccess (Issue #654 ruling 1), then over tsconfig.engine.json and tsconfig.worker.json (Issue #710), and ci.yml's check-and-test job runs it as a real step, so every pull request is held to all three passes", () => {
   const pkg = JSON.parse(src("package.json")) as { scripts: Record<string, string> };
   assert.equal(pkg.scripts["check"], "tsc --noEmit && tsc --noEmit -p tsconfig.engine.json && tsc --noEmit -p tsconfig.worker.json");
   const config = ts.getParsedCommandLineOfConfigFile(join(ROOT, "tsconfig.json"), {}, { ...ts.sys, onUnRecoverableConfigFileDiagnostic: () => undefined });

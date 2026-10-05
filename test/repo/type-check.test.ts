@@ -23,13 +23,16 @@ function listed(pathspecs: readonly string[]): string[] {
   return run.stdout.split("\0").filter(Boolean).sort();
 }
 
-function witnessReds(options: ts.CompilerOptions, roots: readonly string[], witness: string, source: string): string[] {
+function witnessProgram(options: ts.CompilerOptions, roots: readonly string[], witness: string, source: string): ts.Program {
   const host = ts.createCompilerHost(options);
   const read = host.getSourceFile.bind(host);
   host.getSourceFile = (name, version, ...rest) => (resolve(name) === witness ? ts.createSourceFile(name, source, version, true) : read(name, version, ...rest));
   const exists = host.fileExists.bind(host);
   host.fileExists = (name) => resolve(name) === witness || exists(name);
-  const program = ts.createProgram({ rootNames: [...roots, witness], options, host });
+  return ts.createProgram({ rootNames: [...roots, witness], options, host });
+}
+
+function witnessReds(program: ts.Program, witness: string, source: string): string[] {
   const file = program.getSourceFile(witness);
   assert.ok(file, "the witness never reached the program, so nothing below reads it");
   return [...program.getSyntacticDiagnostics(file), ...program.getSemanticDiagnostics(file)]
@@ -37,34 +40,47 @@ function witnessReds(options: ts.CompilerOptions, roots: readonly string[], witn
     .sort();
 }
 
+const writesGlobals = (file: ts.SourceFile): boolean =>
+  file.libReferenceDirectives.length > 0 ||
+  file.typeReferenceDirectives.length > 0 ||
+  !ts.isExternalModule(file) ||
+  file.statements.some((s) => ts.isModuleDeclaration(s) && (s.flags & ts.NodeFlags.GlobalAugmentation) !== 0);
+
+const globalWriters = (program: ts.Program, allowed?: RegExp): string[] =>
+  program.getSourceFiles().filter((file) => !program.isSourceFileDefaultLibrary(file) && !(allowed?.test(file.fileName) ?? false) && writesGlobals(file)).map((file) => rel(file.fileName)).sort();
+
+const NODE_TYPES = /\/node_modules\/(?:@types\/node|undici-types)\//;
 const ENGINE_WITNESS = join(ROOT, "src/world/type-check-witness.virtual.ts");
 const ENGINE_SOURCE = "export const w = (el: HTMLElement): number => document.body.childElementCount + window.innerWidth + el.offsetWidth;\nexport const g = (): unknown => globalThis.document;\n";
 
 // Blind spot, erring toward passing: a browser name @types/node also declares (localStorage, sessionStorage, navigator) resolves in this pass, and so does a reach through Reflect.get(globalThis, ...) or a cast.
 test("code under src/ outside src/site/ that names a browser global or type fails the tsconfig.engine.json pass of npm run check, and the same code passes the root pass", () => {
-  assert.deepEqual(witnessReds(ROOT_OPTIONS, [], ENGINE_WITNESS, ENGINE_SOURCE), [], "the witness fails the root pass too, so a red below would not be the browser's absence");
+  assert.deepEqual(witnessReds(witnessProgram(ROOT_OPTIONS, [], ENGINE_WITNESS, ENGINE_SOURCE), ENGINE_WITNESS, ENGINE_SOURCE), [], "the witness fails the root pass too, so a red below would not be the browser's absence");
   const engine = parse("tsconfig.engine.json");
+  const program = witnessProgram(engine.options, engine.fileNames, ENGINE_WITNESS, ENGINE_SOURCE);
   assert.deepEqual(
-    witnessReds(engine.options, engine.fileNames, ENGINE_WITNESS, ENGINE_SOURCE),
+    witnessReds(program, ENGINE_WITNESS, ENGINE_SOURCE),
     ["1: HTMLElement 2304", "1: document 2584", "1: window 2304", "2: document 7017"],
     "a browser name resolves in the engine pass: the DOM library is back in its lib, through a reference directive in one of its files, or as a declared global",
   );
+  assert.deepEqual(globalWriters(program, NODE_TYPES), [], "a file in the engine pass, other than Node's own types, writes the global scope (a lib or types reference directive, a declare global, or a script-shaped file), which can bring back any browser name the witness does not");
   assert.deepEqual(engine.options.lib, withoutDom(ROOT_OPTIONS.lib), "the engine pass's lib is not the root's minus the DOM libraries, so the two passes read different languages");
 });
 
 const WORKER_WITNESS = join(ROOT, "src/site/explorer/type-check-witness.virtual.ts");
-const WORKER_SOURCE = 'import { createHash } from "node:crypto";\nexport const w = (el: HTMLElement): unknown => [document.title, window.name, el.id, localStorage.length, sessionStorage.length, process.pid, createHash];\n';
+const WORKER_SOURCE = 'import { createHash } from "node:crypto";\nexport const w = (el: HTMLElement): unknown => [document.title, window.name, el.id, localStorage.length, sessionStorage.length, process.pid, createHash];\nexport const g = (): unknown => globalThis.document;\n';
 
 test("code the worker loads that names anything a worker lacks fails the tsconfig.worker.json pass of npm run check, and the same code passes the root pass", () => {
-  assert.deepEqual(witnessReds(ROOT_OPTIONS, [], WORKER_WITNESS, WORKER_SOURCE), [], "the witness fails the root pass too, so a red below would not be the worker's narrower runtime");
+  assert.deepEqual(witnessReds(witnessProgram(ROOT_OPTIONS, [], WORKER_WITNESS, WORKER_SOURCE), WORKER_WITNESS, WORKER_SOURCE), [], "the witness fails the root pass too, so a red below would not be the worker's narrower runtime");
   const worker = parse("tsconfig.worker.json");
+  const program = witnessProgram(worker.options, worker.fileNames, WORKER_WITNESS, WORKER_SOURCE);
   assert.deepEqual(
-    witnessReds(worker.options, worker.fileNames, WORKER_WITNESS, WORKER_SOURCE),
-    ['1: "node:crypto" 2307', "2: HTMLElement 2304", "2: document 2584", "2: localStorage 2304", "2: process 2591", "2: sessionStorage 2304", "2: window 2304"],
+    witnessReds(program, WORKER_WITNESS, WORKER_SOURCE),
+    ['1: "node:crypto" 2307', "2: HTMLElement 2304", "2: document 2584", "2: localStorage 2304", "2: process 2591", "2: sessionStorage 2304", "2: window 2304", "3: document 7017"],
     "a name a worker lacks resolves in the worker pass: the DOM library or Node's types are back in it, through its options, a reference directive in a file it loads, or a declared global",
   );
+  assert.deepEqual(globalWriters(program), [], "a file in the worker pass writes the global scope (a type package, a lib or types reference directive, a declare global, or a script-shaped file), which can bring back any name the witness does not");
   assert.deepEqual(worker.options.lib, [...withoutDom(ROOT_OPTIONS.lib), "lib.webworker.d.ts"], "the worker pass's lib is not the root's minus the DOM libraries plus the worker's");
-  assert.deepEqual(worker.options.types, [], "the worker pass loads ambient type packages, so Node's globals resolve in code that runs in a worker");
 });
 
 test("tsconfig.engine.json reaches every .ts under src/ outside src/site/, and nothing inside it", () => {
