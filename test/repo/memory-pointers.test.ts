@@ -4,13 +4,13 @@ import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-// A tracked agent or skill file never sends its reader to the private auto-memory for content (Issue #729, handbook/specs/conventions.md). Misses, by Alex's ruling A or by construction: a pointer that names the store by none of its names and no address ("see memory", "Alex's notes"); a memory file's hyphenated name outside wikilink brackets; a file under neither root (CLAUDE.md by the ruling, the specs, .claude/settings.json); an untracked file; a copy of a kept phrase elsewhere in its own file. Errs toward a false positive: a MENTION one is reworded or kept when it lands, an ADDRESS one (a future project_id) only reworded.
+// A tracked agent or skill file never sends its reader to the private auto-memory for content (Issue #729, handbook/specs/conventions.md). Misses, by Alex's ruling A or by construction: a pointer that names the store by none of its names and no address ("see memory", "Alex's notes"); a memory file's hyphenated name outside wikilink brackets; a typographic variant (a non-breaking hyphen, another apostrophe, a recased file name, "memory-file"); a file under neither root (CLAUDE.md by the ruling, the specs, .claude/settings.json); an untracked file; a copy of a kept phrase elsewhere in its own file. Errs toward a false positive: a MENTION one is reworded or kept when it lands, an ADDRESS one (a future project_id) only reworded.
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const ROOTS = [".claude/agents", ".claude/skills"];
 // 2026-10-04: this git ls-files answers in under 10 ms on a Mac; thirty seconds is a cap on a hang, not a budget.
 const GIT_TIMEOUT_MS = 30_000;
-const ADDRESS = /\b(?:feedback|project|reference|user)_(?:[a-z][a-z0-9_]*|\*)|\[\[(?:feedback|project|reference|user)-[a-z0-9-]+\]\]|MEMORY\.md|\.claude\/projects/g;
+const ADDRESS = /\b(?:feedback|project|reference|user)_(?:[a-z][a-z0-9_]*|\*)|\[\[(?:feedback|project|reference|user)-[a-z0-9-]+\]\]|MEMORY\.md|\.claude\/projects|\b[Mm]emory\//g;
 const MENTION = /auto(?:- ?| )?memory|private(?:- ?| )memory|alex['’]s memory|memory file|memory folder|memory director/gi;
 
 type Kept = { readonly file: string; readonly phrase: string; readonly why: "forbids reading it" | "history" | "rule of thumb" };
@@ -139,6 +139,7 @@ const REFUSED: ReadonlyArray<readonly [string, string]> = [
   [OUTSIDE, "`user_d.md`"],
   [OUTSIDE, "the `reference_*` files"],
   [OUTSIDE, "under ~/.claude/projects/x/"],
+  [OUTSIDE, "the per-project `memory/` directory"],
   [".claude/agents/vellum-spec-recon.md", "This trap was already in auto-memory when"],
   [PLATE, "This trap was already in auto-memory when it nearly hid. The long form is in the auto-memory."],
   [PLATE, "This trap was already in auto-memory when `feedback_x.md` said so"],

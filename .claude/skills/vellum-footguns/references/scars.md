@@ -178,9 +178,10 @@ the public record that day, and a lesson in it came from a private note.
   (pull requests on the full suite, main merged on smoke) and a lost `!` (smoke forced onto risky
   pull requests) both escaped; the run loop and the pass and fail rule moved where tests execute
   them, today `runSelected` and `runOutcome` in `e2e/support/suites.ts`. Proves Gate 1 item 17.
-  Added by Issue #729: the shape regexes PR #380 wrote, `/&&\s*'smoke'\s*\|\|\s*'full'/` and one on
-  `!contains(...)`, failed loudly on any reformat, harmless or not, the safe direction for a shape
-  pin; they left with the logic they pinned, and the PR #380 diff is their only record.
+  Added by Issue #729: its ci.yml shape regexes, `/&&\s*'smoke'\s*\|\|\s*'full'/` and one on
+  `!contains(...)`, left with the logic they pinned, and the PR #380 diff is their only record. The
+  cost its body names is the `SUITES` map guard's, a regex over source text, which fails loudly when
+  that literal is reformatted: the safe direction for a shape pin.
 - Issue #309, PR #410: inverting `topByScore` to anchor at the LOWEST score escaped all 1294 tests,
   since both ends of a connecting road land on the web whoever anchors; rank pins closed it, the
   inverted anchor turning the islet's village lane into a town trunk. Proves Gate 1 item 18.
