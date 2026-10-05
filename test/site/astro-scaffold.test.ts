@@ -684,15 +684,16 @@ test("the footer is constant and appears exactly once per page; a chart room alo
   }
 });
 
-test("the body skeleton pins the shell order: band, cluster, main, footer on the deep (#461)", () => {
+test("the body skeleton pins the shell order: band, cluster, main, footer on the deep, the desk notice (#461, Issue #761)", () => {
+  const NOTICE = String.raw`<aside class="desk-notice" aria-label="A note on screen size">[\s\S]*?<button type="button" class="dn-go">Continue anyway</button>\s*</aside>`;
   for (const p of PAGES) {
     const html = page(p.route);
     if (p.chartRoom) {
       assert.match(html, /<body class="room chart-room">\s*<header class="chrome">/, `${p.route} is a chart room: no band, the cluster floats over the chart`);
       assert.match(
         html,
-        /<\/main>\s*<script type="module">[\s\S]*?<\/script>\s*<\/body>\s*<\/html>\s*$/,
-        `${p.route} must close main, then the shell's own script, then body and html with nothing after: no footer on a chart room`,
+        new RegExp(String.raw`</main>\s*${NOTICE}\s*<script type="module">[\s\S]*?</script>\s*</body>\s*</html>\s*$`),
+        `${p.route} must close main, then the desk notice, then the shell's own script, then body and html with nothing after: no footer on a chart room`,
       );
       continue;
     }
@@ -707,8 +708,8 @@ test("the body skeleton pins the shell order: band, cluster, main, footer on the
     }
     assert.match(
       html,
-      /<\/main>\s*<footer>[\s\S]*?<\/footer>\s*<script type="module">[\s\S]*?<\/script>\s*<\/body>\s*<\/html>\s*$/,
-      `${p.route} must close main, then the footer on the deep, then the shell's own script, then body and html with nothing after`,
+      new RegExp(String.raw`</main>\s*<footer>[\s\S]*?</footer>\s*${NOTICE}\s*<script type="module">[\s\S]*?</script>\s*</body>\s*</html>\s*$`),
+      `${p.route} must close main, then the footer on the deep, then the desk notice, then the shell's own script, then body and html with nothing after`,
     );
   }
 });
