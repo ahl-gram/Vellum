@@ -65,4 +65,4 @@ Then two short sections: **Open decisions awaiting Alex's call**, and **Ratified
 
 If you audited only bodies and not comments for any issue, say so explicitly. That disclosure is what the #190 re-baseline had to make about itself.
 
-No em-dashes in anything you write.
+No em-dashes in anything you write, except inside inline backticks or a fenced code block.

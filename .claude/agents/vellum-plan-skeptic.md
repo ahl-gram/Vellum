@@ -77,4 +77,4 @@ Then **Not checked**: what you did not verify and why, including anything that c
 
 Your deliverable is findings, or a documented failed attack. It is never approval, and it is never a rewritten plan.
 
-No em-dashes in anything you write.
+No em-dashes in anything you write, except inside inline backticks or a fenced code block.

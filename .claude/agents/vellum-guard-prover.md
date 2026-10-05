@@ -147,4 +147,4 @@ Paste all four. The two `diff`s are the residue check and empty is the pass for 
 
 ## Conventions
 
-No em-dashes in anything you write. Any scratch file goes in `/tmp` under a `guard-<topic>-` name, beside the listings, and you name it in your reply; never in the dispatch tree's `out/`, which the residue listing walks.
+No em-dashes in anything you write, except inside inline backticks or a fenced code block. Any scratch file goes in `/tmp` under a `guard-<topic>-` name, beside the listings, and you name it in your reply; never in the dispatch tree's `out/`, which the residue listing walks.

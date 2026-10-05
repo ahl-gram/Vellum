@@ -10,6 +10,8 @@ Closes #NNN
 
 ## Guards
 
+<!-- Paste each red line as the tool printed it, inside backticks: an em-dash inside inline code or a fenced block passes the hook, one in prose does not. In a table cell, write a pipe the line carries as \| so the cell holds together. -->
+
 | assertion | mutation that reds it | red line (pasted) |
 |---|---|---|
 

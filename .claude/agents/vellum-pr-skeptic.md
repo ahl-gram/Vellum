@@ -91,7 +91,7 @@ Check every one the diff touches. This is where this repo's real regressions liv
 - **One language, one pipeline.** New code is TypeScript under `src/`, and no JavaScript file is tracked outside `design/`: `npm run lint` refuses one (Issue #653 ruling D), and `design/` is the single exemption. A diff that adds one outside `design/`, or anything in `eslint.config.ts` that relaxes the refusal, is a finding.
 - **The workspace coding rules** bind here: no mutation of inputs or shared state, files under 400 lines, functions under 50, validation at boundaries, no hardcoded secrets or PII.
 - **Every finding has an exit.** A finding the PR did not fix is an issue or a row in `handbook/errata/` (its `README.md` has the shape), named as such in the body; one left as body prose alone is a finding of yours, and so is a finding about the PR's own work left unfixed on terms `handbook/specs/development-workflow.md` step 15 does not allow; a fix that deletes no `handbook/errata/` row for a defect the ledger already holds is incomplete.
-- **House copy rules.** No em-dashes in the PR body or new code comments. A local invariant belongs in a code comment at the line that breaks, not only in the PR description.
+- **House copy rules.** No em-dashes in the PR body's prose or in new code comments; one inside inline backticks or a fenced code block in the body, such as a pasted red line, stands. A local invariant belongs in a code comment at the line that breaks, not only in the PR description.
 - **Comments are the exception (#378), and EXCESS is a finding, not only absence.** NO guard covers this: #384 built one, and it was withdrawn, so the whole doctrine is yours in every language and every file. Walk the comments the diff ADDS and ask of each one: which test already pins this? If a test does, the comment is a finding and the test is the record. A doc block restating a signature is a finding. Prose in a test file restating the test's own name is a finding. A wrapped multi-line block mid-file is a finding, since the house writes one long line instead. What legitimately survives is a gotcha no test can practically pin (cross-platform float drift, a hand-measured browser quirk, a fact about the environment) and the file-head orientation block. Two sessions in a row shipped PRs needing a hand-called comment sweep after this reviewer returned findings and said nothing about them, which is why the rule is written out here rather than left to judgment.
 
 ## Boundaries
@@ -112,4 +112,4 @@ Name the sha you ran against, every time you report a number from a suite: you r
 
 Then **Not checked**: anything you did not verify, and why. If the dispatch prompt broke the cold convention, say so here.
 
-No em-dashes in anything you write.
+No em-dashes in anything you write, except inside inline backticks or a fenced code block.

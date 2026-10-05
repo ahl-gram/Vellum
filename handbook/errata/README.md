@@ -21,7 +21,7 @@ One line, in the file's `## Open` section, ordered by the pull request that left
 
 `confidence` is high, medium or low: high means the finding is concrete and the search was specific; low means it is a judgement call or the terms were weak. A row that a PR author disposed of as "left" without a ruling reads `Left by the author:` in place of `Searched:`, so it is visible as an author's call rather than Alex's.
 
-Write `Issue #N` and `PR #N`, never a bare number; no em-dash; one physical line. Before adding a row, grep this directory and the open issues for the finding, since a second row for one defect is a defect here.
+Write `Issue #N` and `PR #N`, never a bare number; no em-dash outside inline backticks or a fenced code block; one physical line. Before adding a row, grep this directory and the open issues for the finding, since a second row for one defect is a defect here.
 
 ## How a row leaves
 

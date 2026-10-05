@@ -9,6 +9,7 @@ import { tmpdir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { decide, gateText, headingCheck, requiredHeadings, statePath, type Decision, type Payload } from "./footgun-gate.ts";
+import { CODE_ROWS } from "./markdown-code.fixtures.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, "..", "..", "..", "..");
@@ -66,6 +67,15 @@ const headingRows = (): Fixture[] =>
     "deny",
     `"${heading}"`,
   ]);
+const DASH = String.fromCharCode(0x2014);
+const filled = (text: string): string => text.replaceAll("<D>", DASH).replaceAll("<WHOLE>", WHOLE_BODY);
+const codeFile = (row: number, k: number): string => `code-${row}-${k}.md`;
+const CODE_FIXTURES: Fixture[] = CODE_ROWS.map(([name, command, bodies, want, needle], row): Fixture => [
+  name,
+  bash(filled(bodies.reduce((text, _, k) => text.replaceAll(`{${k}}`, codeFile(row, k)), command)), bodies.length ? SCRATCH : undefined),
+  want,
+  needle ? filled(needle) : want === "deny" ? "em-dash outside code" : want ? "## Gate 5" : "",
+]);
 const asContext = (text: string): Decision => ({ hookSpecificOutput: { hookEventName: "PreToolUse", additionalContext: text } });
 // The unlink is what lets the two rows share a session id: the gate is once per session, so without it the second row would see no Gate 5 and read as the warning having swallowed it. The FIXTURES loop's own unlink does not reach a function subject.
 const inRootlessCheckout = (payload: Payload) => async (): Promise<Decision> => {
@@ -149,6 +159,7 @@ const FIXTURES: Fixture[] = [
   // The line-continuation join reaches these two refusals as well as the gh api one, and the join is what puts the body on the same segment as the command that carries it.
   ["pr body em-dash across a line continuation denied", bash("gh pr create --title t \\\n  --body 'a — b'"), "deny", "em-dash"],
   ["pr body negated close across a line continuation denied", bash("gh pr create --title t \\\n  --body 'this does not close #518'"), "deny", "CLOSING"],
+  ...CODE_FIXTURES,
   ["issue comment negated close allowed", bash("gh issue comment 5 --body 'does not close #3'"), null, ""],
   ["typed -F field is not a body file", bash("gh issue comment 549 -F body=hello"), null, ""],
   ["gh api issue body overwrite denied", bash("gh api repos/o/r/issues/193 -f body='new text'"), "deny", "bare issue or pull-request endpoint"],
@@ -326,8 +337,10 @@ const run = async (): Promise<number> => {
   writeFileSync(join(SCRATCH, "headingless.md"), "# a template with no sections\n\nprose only.\n");
   writeFileSync(join(SCRATCH, "no-ran.md"), bodyWith(SECTIONS.filter((x) => x !== "## Ran")));
   writeFileSync(join(SCRATCH, "whole.md"), WHOLE_BODY);
+  CODE_ROWS.forEach(([, , bodies], row) => bodies.forEach((body, k) => writeFileSync(join(SCRATCH, codeFile(row, k)), filled(body))));
   mkdirSync(dirname(ROOTLESS_HOOK), { recursive: true });
   cpSync(join(HERE, "footgun-gate.ts"), ROOTLESS_HOOK);
+  cpSync(join(HERE, "markdown-code.ts"), join(dirname(ROOTLESS_HOOK), "markdown-code.ts"));
   cpSync(join(HERE, "..", "SKILL.md"), join(ROOTLESS, ".claude", "skills", "vellum-footguns", "SKILL.md"));
   symlinkSync(ROOT, LINK);
   for (const label of ["Gate 1", "Gate 2", "Gate 3", "Gate 4", "Gate 5", "Gate 6"]) report(gateText(label).length > 200, `${label} text found in SKILL.md`);

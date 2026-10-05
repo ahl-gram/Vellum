@@ -57,7 +57,7 @@ The dispatcher sends Alex's rulings. If your worktree is gone, do not rebuild it
 - Verify a body in one command and edit it in the next: the hook reads `$(...)` text from any flag on a `gh pr` line, so a checking `grep` in the same compound command is read as the body.
 - Comments are the exception. One long line at the line that breaks, only for what no test can pin; a wrapped block restating what a test pins comes out before the PR opens, not after the skeptic names it.
 
-No em-dashes anywhere: code, comments, commit messages, PR body, issue comments. End commit messages and PR bodies with the attribution lines the dispatching session gives you; if the prompt carries none, ask for them in your phase-one report.
+No em-dashes anywhere: code, comments, commit messages, PR body, issue comments. In a commit message, or an issue or PR body or comment, one inside inline backticks or a fenced code block, such as a pasted red line, stands. End commit messages and PR bodies with the attribution lines the dispatching session gives you; if the prompt carries none, ask for them in your phase-one report.
 
 ## When to stop
 

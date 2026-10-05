@@ -9,6 +9,7 @@ import { tmpdir } from "node:os";
 import { dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type * as TS from "typescript";
+import { proseOf } from "./markdown-code.ts";
 
 export type ToolInput = {
   file_path?: string;
@@ -248,22 +249,23 @@ const readRelative = (name: string, cwd: string): string => {
   return readFileSync(isAbsolute(expanded) ? expanded : join(cwd || ".", expanded), "utf8");
 };
 
-const bodyText = (command: string, cwd: string): { body: string; unread: string[]; fromBodyFlag: string[] } => {
-  let body = command;
+const bodyText = (command: string, cwd: string): { body: string; pieces: string[]; unread: string[]; fromBodyFlag: string[] } => {
+  const pieces = [command.replace(QUOTED, "''"), ...[...command.matchAll(QUOTED)].map((m) => m[0].slice(1, -1))];
+  const files: string[] = [];
   const unread: string[] = [];
   const fromBodyFlag: string[] = [];
   for (const pattern of [BODY_FILE, BODY_SUBSHELL]) {
     for (const match of command.matchAll(pattern)) {
       const name = match[1] ?? "";
       try {
-        body += "\n" + readRelative(name, cwd);
+        files.push(readRelative(name, cwd));
         if (pattern === BODY_FILE) fromBodyFlag.push(name);
       } catch {
         unread.push(name);
       }
     }
   }
-  return { body, unread, fromBodyFlag };
+  return { body: [command, ...files].join("\n"), pieces: [...pieces, ...files], unread, fromBodyFlag };
 };
 
 export const requiredHeadings = (file: string = TEMPLATE): string[] | null => {
@@ -300,9 +302,11 @@ export const headingCheck = (body: string, file: string = TEMPLATE): { deny: str
 
 const ghRefusal = (segment: string, command: string, cwd: string): [Decision, string | null] => {
   if (!GH_BODY_WRITE.test(segment)) return [null, null];
-  const { body, unread, fromBodyFlag } = bodyText(command, cwd);
-  if (body.includes(EM_DASH)) {
-    return [deny("vellum-footguns: the body carries an em-dash; the house forbids them in issue and PR bodies."), null];
+  const { body, pieces, unread, fromBodyFlag } = bodyText(command, cwd);
+  const dashed = pieces.flatMap((piece) => proseOf(piece).split("\n")).find((line) => line.includes(EM_DASH));
+  if (dashed !== undefined) {
+    const at = dashed.indexOf(EM_DASH);
+    return [deny(`vellum-footguns: the body carries an em-dash outside code, near "${dashed.slice(Math.max(0, at - 60), at + 60).trim()}"; the house forbids them in the prose of issue and PR bodies and comments. One inside inline backticks or a fenced code block passes, which is how a pasted red line carries one.`), null];
   }
   const hit = GH_PR_WRITE.test(segment) ? NEGATED_CLOSE.exec(body) : null;
   if (hit) {
