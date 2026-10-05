@@ -6,6 +6,7 @@ import { ESLint, type Linter } from "eslint";
 import { includeIgnoreFile } from "eslint/config";
 import ts from "typescript";
 import lintConfig from "../../eslint.config.ts";
+import { compileWithVirtual } from "../../test-support/virtual-compile.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const src = (p: string) => readFileSync(join(ROOT, p), "utf8");
@@ -290,12 +291,7 @@ const ARM_WITNESS_SOURCE = "export function witnesses(element: HTMLElement | nul
 function compileWithWitnesses(roots: readonly string[]): ts.Program {
   const config = ts.getParsedCommandLineOfConfigFile(join(ROOT, "tsconfig.json"), {}, { ...ts.sys, onUnRecoverableConfigFileDiagnostic: () => undefined });
   assert.ok(config, "tsconfig.json did not parse");
-  const host = ts.createCompilerHost(config.options);
-  const read = host.getSourceFile.bind(host);
-  host.getSourceFile = (name, version, ...rest) => (resolve(name) === ARM_WITNESSES ? ts.createSourceFile(name, ARM_WITNESS_SOURCE, version, true) : read(name, version, ...rest));
-  const exists = host.fileExists.bind(host);
-  host.fileExists = (name) => resolve(name) === ARM_WITNESSES || exists(name);
-  return ts.createProgram({ rootNames: [...roots, ARM_WITNESSES], options: config.options, host });
+  return compileWithVirtual(config.options, roots, new Map([[ARM_WITNESSES, ARM_WITNESS_SOURCE]]));
 }
 
 function pageElementTest(program: ts.Program): (t: ts.Type) => boolean {

@@ -4,6 +4,7 @@ import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
 import ts from "typescript";
+import { compileWithVirtual } from "../../test-support/virtual-compile.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const rel = (path: string): string => relative(ROOT, path);
@@ -23,14 +24,7 @@ function listed(pathspecs: readonly string[]): string[] {
   return run.stdout.split("\0").filter(Boolean).sort();
 }
 
-function witnessProgram(options: ts.CompilerOptions, roots: readonly string[], witness: string, source: string): ts.Program {
-  const host = ts.createCompilerHost(options);
-  const read = host.getSourceFile.bind(host);
-  host.getSourceFile = (name, version, ...rest) => (resolve(name) === witness ? ts.createSourceFile(name, source, version, true) : read(name, version, ...rest));
-  const exists = host.fileExists.bind(host);
-  host.fileExists = (name) => resolve(name) === witness || exists(name);
-  return ts.createProgram({ rootNames: [...roots, witness], options, host });
-}
+const witnessProgram = (options: ts.CompilerOptions, roots: readonly string[], witness: string, source: string): ts.Program => compileWithVirtual(options, roots, new Map([[witness, source]]));
 
 function witnessReds(program: ts.Program, witness: string, source: string): string[] {
   const file = program.getSourceFile(witness);
