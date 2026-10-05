@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { globSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { dockLegend, legendSeat, type LegendHome } from "../../src/site/shared/room.ts";
-import { GLASS_GAP_REM } from "../../src/site/shared/room-seats.ts";
+import { GLASS_GAP_REM, pressRowStacks } from "../../src/site/shared/room-seats.ts";
 
 test("the Glass's computed seat beside an open slip is the sheet's own arithmetic (atelier.css: --slip-w + 2rem + 1.4rem)", () => {
   const css = readFileSync(resolve(import.meta.dirname, "..", "..", "public/atelier.css"), "utf8");
@@ -145,4 +145,15 @@ test("the phone Glass stands down while the sheet is open as a KIT rule, in ever
   for (const p of sheets) {
     assert.doesNotMatch(readFileSync(resolve(REPO, p), "utf8"), /slip\.open\)[^{]*\.zoomery/, `${p} carries its own copy of the kit's rule`);
   }
+});
+
+test("the Press stacks when its presses take more than two lines, or two or more stand each alone; one or two shared lines do not (Issue #762)", () => {
+  assert.equal(pressRowStacks([0, 0, 40, 40, 80]), true, "the Print Room's 2+2+1 column at 1024x600, which painted its footing over the nav");
+  assert.equal(pressRowStacks([0, 44]), true, "the Seed of the Day's two presses each alone at 901, a sliver over the Glass");
+  assert.equal(pressRowStacks([0, 44, 88]), true, "the Explorer's one-press column at 901");
+  assert.equal(pressRowStacks([0, 0, 62]), false, "the Explorer's two lines at 1280x800, as main seats them");
+  assert.equal(pressRowStacks([0, 0, 0, 0, 0]), false, "one line");
+  assert.equal(pressRowStacks([12]), false, "a single press is never a stack");
+  assert.equal(pressRowStacks([]), false, "a row with no press shown");
+  assert.equal(pressRowStacks([10.4, 10.6, 71.6]), false, "presses on one line read as one, even a fraction of a pixel apart across a rounding edge");
 });

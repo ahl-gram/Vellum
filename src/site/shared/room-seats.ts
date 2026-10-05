@@ -4,6 +4,8 @@ const SLIP_FLOOR = 22;
 const STRIP_GAP = 12;
 const LEGEND_CLEAR = 32;
 const LEGEND_GAP = 16;
+const LEGEND_RISE = 12;
+const SAME_LINE = 1;
 
 export const rectOf = (el: Element | null): DOMRect | null => {
   if (el === null) return null;
@@ -58,12 +60,24 @@ export interface LegendRoom {
   readonly slip: DOMRect | null;
 }
 
+export function pressRowStacks(tops: readonly number[]): boolean {
+  if (tops.length < 2) return false;
+  const sorted = [...tops].sort((a, b) => a - b);
+  const lines = 1 + sorted.slice(1).filter((top, i) => top - sorted[i]! > SAME_LINE).length;
+  return lines > 2 || lines === tops.length;
+}
+
 // Computed, never read back off the row: its left transitions, and a mid-transition rect reads the old seat (plate read 2026-08-29: a resize left the row over the folio).
 export function placeLegendRow(legendEl: HTMLElement, room: LegendRoom): void {
+  for (const prop of ["bottom", "transform", "transition"] as const) legendEl.style[prop] = "";
   const chromeX = rectOf(room.chrome)?.left ?? 0;
   const left = (textRight(room.folio) ?? chromeX) + LEGEND_CLEAR;
-  const bounds = [window.innerWidth - chromeX, room.glass ?? Infinity, room.slip?.left ?? Infinity];
-  const space = Math.max(0, Math.min(...bounds) - LEGEND_GAP - left);
+  const bound = Math.min(window.innerWidth - chromeX, room.glass ?? Infinity, room.slip?.left ?? Infinity) - LEGEND_GAP;
+  const space = Math.max(0, bound - left);
   legendEl.style.maxWidth = `${space}px`;
   legendEl.style.left = `${left + space / 2}px`;
+  const tops = [...legendEl.querySelectorAll(".legend-row .legend-btn")].map((b) => b.getBoundingClientRect()).filter((r) => r.width > 0).map((r) => r.top);
+  const folio = rectOf(room.folio);
+  if (folio === null || !pressRowStacks(tops)) return;
+  Object.assign(legendEl.style, { transition: "none", transform: "none", left: `${chromeX}px`, maxWidth: `${Math.max(0, bound - chromeX)}px`, bottom: `${window.innerHeight - folio.top + LEGEND_RISE}px` });
 }
