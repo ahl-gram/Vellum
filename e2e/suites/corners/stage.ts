@@ -143,11 +143,13 @@ export async function ea1Phone(ctx: SuiteContext): Promise<StageRun> {
 async function fold(ctx: SuiteContext): Promise<void> {
   const at = await ctx.evaluate<{ x: number; y: number } | null>(`(() => { const b = document.querySelector(".slip-fold"); if (!b) return null; const r = b.getBoundingClientRect(); return r.width > 0 ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : null; })()`);
   if (!at) throw new Error("the Broadside has no fold press to take");
+  const sheetX: Payload<{ folded: boolean; x: number }> = `({ folded: document.querySelector(".slip").classList.contains("folded"), x: document.getElementById("sheet").getBoundingClientRect().left })`;
+  const before = await ctx.evaluate(sheetX);
   await ctx.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: at.x, y: at.y });
   await ctx.send("Input.dispatchMouseEvent", { type: "mousePressed", x: at.x, y: at.y, button: "left", clickCount: 1 });
   await ctx.send("Input.dispatchMouseEvent", { type: "mouseReleased", x: at.x, y: at.y, button: "left", clickCount: 1 });
-  const folded: Payload<boolean> = `document.querySelector(".slip").classList.contains("folded")`;
-  await makeSettle(ctx)(folded, (d) => d, "the Broadside folds");
+  // The fold refits on a timer after its slide (FOLD_SETTLE_MS in src/site/shared/slip.ts), so the read waits for the sheet to leave where it stood, not for the class alone.
+  await makeSettle(ctx)(sheetX, (d) => d.folded && Math.abs(d.x - before.x) > 1, "the Broadside folds and the sheet refits");
 }
 
 export async function eaDesk(ctx: SuiteContext): Promise<void> {
@@ -203,48 +205,101 @@ const relative = ([r, g, b]: readonly [number, number, number]): number => 0.212
 const ratio = (a: number, b: number): number => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
 const median = (xs: number[]): number => { const s = [...xs].sort((a, b) => a - b); return s[Math.floor(s.length / 2)]!; };
 
-type Glyph = { t: string; ink: [number, number, number]; row: number; x: number; w: number };
+type Glyph = { piece: string; t: string; ink: [number, number, number]; row: number; x: number; w: number };
+type Ground = { piece: string; t: string; ratio: number };
+const PIECES = "header.chrome, .corner, .strip, .legend:not(.in-slip)";
+
+// Every text node of the chrome whose box centre stands on the sheet, by piece; decor hidden from assistive technology (the nav's separator dots) is left out, and the ink is the computed colour, so a translucent ancestor reads darker ink than it paints and errs toward passing.
 const GLYPHS_OVER_SHEET: Payload<Glyph[]> = `(() => {
   const sheet = document.getElementById("sheet").getBoundingClientRect();
+  const unseen = (el) => { for (let e = el; e; e = e.parentElement) { const cs = getComputedStyle(e); if (cs.display === "none" || cs.visibility === "hidden" || parseFloat(cs.opacity) === 0) return true; } return false; };
+  const name = (root) => root.matches("header.chrome") ? "cluster" : root.matches(".corner.tr") ? "room folio" : root.matches(".corner.bl") ? "chart folio" : root.matches(".corner.br") ? "Glass" : root.matches(".strip") ? "strip" : root.matches(".legend") ? "Press" : "corner";
   const out = [];
-  for (const el of document.querySelectorAll("header.chrome .wordmark a, header.chrome .tagline, header.chrome .rooms a, .trail a, .trail [aria-current], .legend:not(.in-slip) .legend-row a.fn, .legend:not(.in-slip) .legend-head, .corner.bl p")) {
-    const rg = new Range(); rg.selectNodeContents(el);
-    const b = rg.getBoundingClientRect();
-    if (!(b.width > 0)) continue;
-    const cx = b.left + b.width / 2, cy = b.top + b.height / 2;
-    if (cx < sheet.left || cx > sheet.right || cy < sheet.top || cy > sheet.bottom) continue;
-    const m = getComputedStyle(el).color.match(/[0-9.]+/g).map(Number);
-    out.push({ t: (el.classList.contains("fn") ? "the section mark " : "") + el.textContent.trim().slice(0, 24), ink: [m[0], m[1], m[2]], row: Math.round(cy), x: Math.max(0, Math.floor(b.left)), w: Math.max(1, Math.floor(b.width)) });
+  for (const root of document.querySelectorAll(${JSON.stringify(PIECES)})) {
+    const walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    for (let n = walk.nextNode(); n; n = walk.nextNode()) {
+      const el = n.parentElement;
+      if (!n.textContent.trim() || !el || el.closest("[aria-hidden='true'], option, select, script, style") || unseen(el)) continue;
+      const rg = new Range(); rg.selectNodeContents(n);
+      const b = rg.getBoundingClientRect();
+      if (!(b.width > 0)) continue;
+      const cx = b.left + b.width / 2, cy = b.top + b.height / 2;
+      if (cx < sheet.left || cx > sheet.right || cy < sheet.top || cy > sheet.bottom) continue;
+      const m = getComputedStyle(el).color.match(/[0-9.]+/g).map(Number);
+      out.push({ piece: name(root), t: (el.classList.contains("fn") ? "the section mark " : "") + n.textContent.trim().slice(0, 24), ink: [m[0], m[1], m[2]], row: Math.round(cy), x: Math.max(0, Math.floor(b.left)), w: Math.max(1, Math.floor(b.width)) });
+    }
+    for (const input of root.querySelectorAll("input[type=number], input[type=text], input[type=search], input:not([type])")) {
+      if (!input.value || unseen(input)) continue;
+      const b = input.getBoundingClientRect(), cs = getComputedStyle(input);
+      const x = b.left + parseFloat(cs.paddingLeft) + parseFloat(cs.borderLeftWidth), w = b.width - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - parseFloat(cs.borderLeftWidth) - parseFloat(cs.borderRightWidth);
+      const cx = x + w / 2, cy = b.top + b.height / 2;
+      if (!(w > 0) || cx < sheet.left || cx > sheet.right || cy < sheet.top || cy > sheet.bottom) continue;
+      const m = cs.color.match(/[0-9.]+/g).map(Number);
+      out.push({ piece: name(root), t: "the field " + (input.id || input.name || input.type), ink: [m[0], m[1], m[2]], row: Math.round(cy), x: Math.max(0, Math.floor(x)), w: Math.max(1, Math.floor(w)) });
+    }
   }
   return out;
 })()`;
 
-async function grounds(ctx: SuiteContext, glyphs: readonly Glyph[]): Promise<{ t: string; ratio: number }[]> {
-  await ctx.evaluate(`(() => { const s = document.createElement("style"); s.id = "ea4-hide"; s.textContent = "header.chrome *, .legend *, .corner * { color: transparent !important; text-decoration-color: transparent !important; }"; document.head.appendChild(s); return true; })()`);
-  const out: { t: string; ratio: number }[] = [];
-  for (const g of glyphs) {
-    const row = await sampleRow(ctx.send, g.x, g.row, g.w);
-    out.push({ t: g.t, ratio: ratio(relative(g.ink), median(row.map(relative))) });
+const HIDE_TEXT = `header.chrome *, .legend *, .corner *, .strip * { color: transparent !important; text-decoration-color: transparent !important; }`;
+const NO_POOLS = `body.stage-under :is(header.chrome, .legend, .corner, .strip)::before { content: none !important; }`;
+
+async function withStyle<T>(ctx: SuiteContext, id: string, css: string, body: () => Promise<T>): Promise<T> {
+  await ctx.evaluate(`(() => { const s = document.createElement("style"); s.id = ${JSON.stringify(id)}; s.textContent = ${JSON.stringify(css)}; document.head.appendChild(s); return true; })()`);
+  try {
+    return await body();
+  } finally {
+    await ctx.evaluate(`document.getElementById(${JSON.stringify(id)}).remove()`);
   }
-  await ctx.evaluate(`document.getElementById("ea4-hide").remove()`);
-  return out;
 }
 
+async function grounds(ctx: SuiteContext, glyphs: readonly Glyph[]): Promise<Ground[]> {
+  return withStyle(ctx, "ea4-hide", HIDE_TEXT, async () => {
+    const out: Ground[] = [];
+    for (const g of glyphs) {
+      const row = await sampleRow(ctx.send, g.x, g.row, g.w);
+      out.push({ piece: g.piece, t: g.t, ratio: ratio(relative(g.ink), median(row.map(relative))) });
+    }
+    return out;
+  });
+}
+
+type Reading = { fixture: string; under: boolean; read: Ground[]; bare: Ground[]; needs: string; witnesses: readonly string[] };
+const worstOf = (gs: readonly Ground[], piece?: string): number => gs.filter((g) => piece === undefined || g.piece === piece).reduce((m, g) => Math.min(m, g.ratio), Infinity);
+
+async function readFixture(ctx: SuiteContext, fixture: string, page: string, folded: boolean, needs: string, witnesses: readonly string[]): Promise<Reading> {
+  const { w, h } = PHONE.laidOut;
+  const s = await open(ctx, page, w, h, PHONE.laidOut, `EA4 ${fixture}`);
+  let under = s?.under === true;
+  if (folded) {
+    await fold(ctx);
+    under = (await rest(ctx, w, h, `EA4 ${fixture} folded`))?.under === true;
+  }
+  const glyphs = await ctx.evaluate(GLYPHS_OVER_SHEET);
+  const read = await grounds(ctx, glyphs);
+  const bare = await withStyle(ctx, "ea4-bare", NO_POOLS, () => grounds(ctx, glyphs));
+  return { fixture, under, read, bare, needs, witnesses };
+}
+
+// The room folio's and the strip's lines stand on their own fields and panel, which read 7.86 and 9.10 with every pool taken away (measured 2026-10-05), so their pool arms are the ruled dress and not a contrast need, and only the cluster's, the chart folio's and the Press's pools are witnessed here.
 export async function ea4Reads(ctx: SuiteContext): Promise<void> {
   await ctx.setTouch(false);
   await ctx.send("Emulation.setDeviceMetricsOverride", { width: PHONE.laidOut.w, height: PHONE.laidOut.h, deviceScaleFactor: 1, mobile: false });
-  const s = await open(ctx, "/explorer/", PHONE.laidOut.w, PHONE.laidOut.h, PHONE.laidOut, "EA4");
-  const glyphs = await ctx.evaluate(GLYPHS_OVER_SHEET);
-  const read = await grounds(ctx, glyphs);
-  await ctx.evaluate(`(() => { const s = document.createElement("style"); s.id = "ea4-bare"; s.textContent = "body.stage-under header.chrome::before, body.stage-under .legend::before, body.stage-under .corner::before { content: none !important; }"; document.head.appendChild(s); return true; })()`);
-  const bare = await grounds(ctx, glyphs);
-  await ctx.evaluate(`document.getElementById("ea4-bare").remove()`);
-  const worst = read.reduce((m, g) => Math.min(m, g.ratio), Infinity);
-  const bareWorst = bare.reduce((m, g) => Math.min(m, g.ratio), Infinity);
-  const mark = read.find((g) => g.t.startsWith("the section mark"));
+  const readings = [
+    await readFixture(ctx, "the Explorer", "/explorer/", false, "Press", ["cluster", "chart folio", "Press"]),
+    await readFixture(ctx, "the Print Room, its slip folded", "/print-room/", true, "room folio", []),
+    await readFixture(ctx, "the Reading Room", "/reading-room/", false, "strip", []),
+  ];
+  const faults = readings.flatMap((r) => [
+    ...(r.under ? [] : [`${r.fixture} is not floored`]),
+    ...(r.read.some((g) => g.piece === r.needs) ? [] : [`${r.fixture} has no ${r.needs} line on the sheet`]),
+    ...r.read.filter((g) => g.ratio < FLOOR_PLAIN).map((g) => `${r.fixture}: ${g.piece} "${g.t}" reads ${g.ratio.toFixed(2)}`),
+    ...r.witnesses.filter((p) => !(worstOf(r.bare, p) < FLOOR_PLAIN)).map((p) => `${r.fixture}: the ${p} reads ${worstOf(r.bare, p).toFixed(2)} with the pools taken away, so the read cannot see its pool fail`),
+  ]);
+  const mark = readings[0]!.read.find((g) => g.t.startsWith("the section mark"));
   ctx.check(
-    "EA4 over the Explorer's floored chart at 1024x474 every chrome line whose glyphs stand on the sheet (the section mark beside the Press among them) reads at 4.5:1 or better against the ground under it, which the same run reads under 4.5:1 with the pools taken away, so the instrument can see the failure (Issue #762, ruling 4b; the mark read 3.44 at the second plate sitting)",
-    s?.under === true && read.length > 0 && !!mark && worst >= FLOOR_PLAIN && bareWorst < FLOOR_PLAIN,
-    `floored ${s?.under}; ${read.length} lines: ${read.map((g) => `${g.t} ${g.ratio.toFixed(2)}`).join(", ")}; without the pools the worst ${bareWorst.toFixed(2)}`,
+    "EA4 over a floored chart at 1024x474 every chrome line whose glyphs stand on the sheet, a field's value among them, reads at 4.5:1 or better against the ground under it: on the Explorer (the section mark beside the Press among them), on the Print Room with its slip folded (the room folio over the sheet) and in the Reading Room (its strip over the sheet); on the Explorer the cluster, the chart folio and the Press each read under 4.5:1 in the same run with the pools taken away, so the read can see each of their pools fail (Issue #762, ruling 4b; the mark read 3.44 at the second plate sitting)",
+    !!mark && faults.length === 0,
+    readings.map((r) => `${r.fixture}: ${r.read.length} lines, worst ${worstOf(r.read).toFixed(2)}${r.witnesses.map((p) => `, ${p} bare ${worstOf(r.bare, p).toFixed(2)}`).join("")}`).join("; ") + (mark ? `; the section mark ${mark.ratio.toFixed(2)}` : "; no section mark read") + (faults.length ? `; ${faults.slice(0, 6).join("; ")}` : ""),
   );
 }
