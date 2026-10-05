@@ -46,7 +46,7 @@ test("the reading frame looks up no element by id, spelled any way the engine's 
   assert.deepEqual(await houseReports(ID_LOOKUP_PLANT, "src/site/reading-frame/index.ts"), at(FRAME_IDS, [1, 2, 3, 4, 5, 6]), "BLIND SPOT, declared, erring toward passing: the name assembled from pieces, as for the engine's rule");
 });
 
-const SOURCE_BLIND_SPOTS = "BLIND SPOTS, declared, each erring toward passing: a module source held in a variable and handed to import() (const MODULE = \"...\"; import(MODULE)), a source assembled at run time from pieces none of which carries the banned text, and a module reached through another module outside this rule's scope";
+const SOURCE_BLIND_SPOTS = "BLIND SPOTS, declared, each erring toward passing: a module source held in a variable and handed to import() (const MODULE = \"...\"; import(MODULE)), a source assembled at run time from pieces none of which carries the banned text, an import in a type position (typeof import(\"...\"), import(\"...\").T), which run time erases, a source resolved through import.meta.resolve or a loader other than require, createRequire's result or a URL on import.meta.url, and a module reached through another module outside this rule's scope";
 
 test("the reading frame imports nothing from the Explorer, by a static import, a re-export, a type import or any string inside import(), and naming the Explorer is not importing it", async () => {
   assert.deepEqual(await houseReports([
@@ -61,7 +61,9 @@ test("the reading frame imports nothing from the Explorer, by a static import, a
     "export const h = \"the Explorer lives in ../explorer/app.ts\";",
     "import { i } from \"../shared/room.ts\";",
     "const MODULE = \"../explorer/m.ts\"; export const j = () => import(MODULE);",
-  ], "src/site/reading-frame/index.ts"), at(FRAME_IMPORTS, [1, 2, 3, 4, 5, 6, 7]), SOURCE_BLIND_SPOTS);
+    "export const k = () => new URL(\"../explorer/worker.ts\", import.meta.url);",
+    "export type L = typeof import(\"../explorer/l.ts\");",
+  ], "src/site/reading-frame/index.ts"), at(FRAME_IMPORTS, [1, 2, 3, 4, 5, 6, 7, 12]), SOURCE_BLIND_SPOTS);
 });
 
 const GLASS_PLANT = [
@@ -77,11 +79,13 @@ const GLASS_PLANT = [
   "const GK = \"../shared/glass-keys.ts\"; export const h = () => import(GK);",
   "export const i = (root: ParentNode) => root.querySelectorAll(\"[ DATA-ZOOM]\");",
   "export { j } from \"../shared/glass-keys.ts\";",
+  "const GQ = \"../shared/glass-keys.ts?v=1\"; export const k = () => import(GQ);",
+  "const GJ = \"../shared/glass-keys.js\"; export const l = () => import(GJ);",
 ];
 
-test("neither the Explorer nor home imports the kit's glass-keys, by any route a path to it can take, or queries [data-zoom] itself, in either directory, and naming the kit is not binding it", async () => {
+test("neither the Explorer nor home imports the kit's glass-keys, by a path to it in a module source or held in any string, or queries [data-zoom] itself, in either directory, and naming the kit is not binding it", async () => {
   for (const path of ["src/site/explorer/app.ts", "src/site/home/app.ts"]) {
-    assert.deepEqual(await houseReports(GLASS_PLANT, path), at(GLASS, [1, 2, 3, 4, 5, 10, 11, 12]), `${path}: BLIND SPOTS, declared, each erring toward passing: a path or selector assembled at run time from pieces none of which carries glass-keys or [data-zoom], and the kit reached through another module outside this rule's scope`);
+    assert.deepEqual(await houseReports(GLASS_PLANT, path), at(GLASS, [1, 2, 3, 4, 5, 10, 11, 12, 13, 14]), `${path}: BLIND SPOTS, declared, each erring toward passing: a path or selector assembled at run time from pieces none of which carries glass-keys or [data-zoom], and the kit reached through another module outside this rule's scope`);
   }
 });
 
@@ -140,9 +144,15 @@ test("no module imports a .test.ts, by a static import, a re-export, or any stri
     "import { l } from \"./l.ts\";",
     "const MODULE = \"./m.test.ts\"; export const m = () => import(MODULE);",
     "export const n = \"./n.test.ts\";",
+    "import { createRequire } from \"node:module\";",
+    "export const o = createRequire(import.meta.url)(\"./o.test.ts\");",
+    "const r = createRequire(import.meta.url); export const p = r(\"./p.test.ts\");",
+    "export const q = () => import(\"./q.test.ts#x\");",
+    "export const s = () => new URL(\"./s.test.ts\", import.meta.url);",
+    "const t = (x: string) => x; export const u = t(\"./u.test.ts\");",
   ];
   for (const path of ["test/repo/lint-config.test.ts", "test-support/lint-roots.ts"]) {
-    assert.deepEqual(await houseReports(plant, path), at(TEST_IMPORTS, [1, 2, 3, 4, 5, 6, 7, 8, 9]), `${path}: ${SOURCE_BLIND_SPOTS}`);
+    assert.deepEqual(await houseReports(plant, path), at(TEST_IMPORTS, [1, 2, 3, 4, 5, 6, 7, 8, 9, 16, 17, 18, 19]), `${path}: ${SOURCE_BLIND_SPOTS}`);
   }
 });
 

@@ -362,7 +362,7 @@ test("through ESLint itself, a JavaScript file anywhere outside design/ is refus
   }
   for (const path of JS_ADMITTED) assert.equal(await verdict(path), "admitted", `${path} is not admitted, though design/ is the one exemption ruling D names`);
   for (const path of JS_UNREAD) {
-    assert.equal(await verdict(path), "unread", `${path} is read, so gitignored build output or scratch trips the JavaScript refusal. BLIND SPOTS, declared: the unread set is whatever the root .gitignore ignores, and test/repo/lint-config.test.ts refuses any tracked file under it;a nested .gitignore and .git/info/exclude are not read, so a file only they ignore is refused, erring toward refusing, as is an untracked file no ignore file covers; an upper-case extension (X.JS) matches no JavaScript glob and is never read, erring toward passing; test/repo/lint-config.test.ts refuses a processor on any block;and a file that does not parse is refused by its parse error rather than by this rule's message`);
+    assert.equal(await verdict(path), "unread", `${path} is read, so gitignored build output or scratch trips the JavaScript refusal. BLIND SPOTS, declared: the unread set is whatever the root .gitignore ignores, and test/repo/lint-config.test.ts refuses any tracked file under it; a nested .gitignore and .git/info/exclude are not read, so a file only they ignore is refused, erring toward refusing, as is an untracked file no ignore file covers; an upper-case extension (X.JS) matches no JavaScript glob and is never read, erring toward passing; test/repo/lint-config.test.ts refuses a processor on any block; and a file that does not parse is refused by its parse error rather than by this rule's message`);
   }
 });
 

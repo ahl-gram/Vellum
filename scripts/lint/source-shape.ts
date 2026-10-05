@@ -219,11 +219,25 @@ const frameNoIdLookup: Rule.RuleModule = {
 
 const DECLARES_SOURCE = new Set(["ImportDeclaration", "ExportNamedDeclaration", "ExportAllDeclaration"]);
 
-const isModuleSource = (node: Node): boolean => {
+const isCreateRequireCall = (node: Node | null | undefined): boolean => node?.type === "CallExpression" && isName(node.callee as Node, "createRequire");
+
+const boundToCreateRequire = (context: Rule.RuleContext, callee: Node): boolean => {
+  if (callee.type !== "Identifier") return false;
+  for (let scope: ReturnType<typeof context.sourceCode.getScope> | null = context.sourceCode.getScope(callee); scope; scope = scope.upper) {
+    const def = scope.set.get(callee.name)?.defs[0];
+    if (def) return def.type === "Variable" && isCreateRequireCall(def.node.init as Node | null | undefined);
+  }
+  return false;
+};
+
+const isLoader = (context: Rule.RuleContext, callee: Node): boolean => isName(callee, "require") || isCreateRequireCall(callee) || boundToCreateRequire(context, callee);
+
+const isModuleSource = (context: Rule.RuleContext, node: Node): boolean => {
   for (let child: Node = node, parent = node.parent; parent !== null; child = parent, parent = parent.parent) {
     if (DECLARES_SOURCE.has(parent.type)) return (parent as unknown as { source: unknown }).source === child;
     if (parent.type === "ImportExpression" && parent.source === child) return true;
-    if (parent.type === "CallExpression" && isName(parent.callee as Node, "require") && (parent.arguments as Node[]).includes(child)) return true;
+    if (parent.type === "CallExpression" && (parent.arguments as Node[]).includes(child) && isLoader(context, parent.callee as Node)) return true;
+    if (parent.type === "NewExpression" && isName(parent.callee as Node, "URL") && parent.arguments[0] === child && isImportMetaUrl(parent.arguments[1] as Node | undefined)) return true;
   }
   return false;
 };
@@ -238,7 +252,7 @@ const stringJudge = (context: Rule.RuleContext, asSource: (text: string) => bool
     const text = stringText(node);
     const at = node.type === "TemplateElement" ? node.parent : node;
     if (text === null || inTypePosition(at.parent ?? at)) return;
-    if ((asSource(text) && isModuleSource(at)) || anywhere(text)) context.report({ node, messageId: "found" });
+    if ((asSource(text) && isModuleSource(context, at)) || anywhere(text)) context.report({ node, messageId: "found" });
   };
   return { Literal: judge, TemplateElement: judge };
 };
@@ -253,7 +267,7 @@ const frameNoExplorerImport = sourceBan("the reading frame imports nothing from 
 const explorerNoGlassKeys = sourceBan(
   "the Explorer and home bind their own zoom presses by id: neither imports glass-keys.ts nor queries [data-zoom], a document-wide binding that would double every press (handbook/specs/explorer-doctrine.md)",
   (text) => text.includes("glass-keys"),
-  (text) => /\[\s*data-zoom/i.test(text) || /(?:^|\/)glass-keys(?:\.ts)?$/.test(text),
+  (text) => /\[\s*data-zoom/i.test(text) || /(?:^|\/)glass-keys\b/.test(text),
 );
 
 const CONTENTS_ROW_BUILDER = "src/site/shared/contents-row.ts";
@@ -263,7 +277,7 @@ const contentsRowBuilderOnly: Rule.RuleModule = {
   create: (context) => (repoPath(context.filename) === CONTENTS_ROW_BUILDER ? {} : stringJudge(context, never, (text) => text.includes("cr-num"))),
 };
 
-const testNoTestImport = sourceBan("nothing imports a .test.ts: node --test would run that file's tests a second time; share through test-support/ instead", (text) => /\.test\.ts(?:\?|$)/.test(text));
+const testNoTestImport = sourceBan("nothing imports a .test.ts: node --test would run that file's tests a second time; share through test-support/ instead", (text) => /\.test\.ts(?:[?#]|$)/.test(text));
 
 export default {
   rules: {
