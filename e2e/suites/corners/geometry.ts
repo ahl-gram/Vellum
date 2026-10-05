@@ -7,6 +7,7 @@ export type CornerRead = {
   readonly innerW: number;
   readonly clientW: number;
   readonly vw: number;
+  readonly scrollW: number;
   readonly left: readonly Box[];
   readonly right: readonly Box[];
   readonly clusterBottom: number;
@@ -100,7 +101,7 @@ export function strideWidths(hi: number, lo: number, stride: number, edges: read
 
 export function verdict({ w, read }: Row, rules: Rules): string | null {
   if (rules.forcedBelow !== null && w < rules.forcedBelow) {
-    return read.innerW !== w ? null : `lays out at ${w} now, so Issue #672 has landed and its skip below ${rules.forcedBelow} goes`;
+    return read.innerW !== w || read.scrollW > w ? null : `lays out at ${w} now, so Issue #672 has landed and its skip below ${rules.forcedBelow} goes`;
   }
   if (read.innerW !== w) return `laid out at ${read.innerW}, not ${w}`;
   if (read.left.length < 2 || read.right.length < 1) return `at ${w} the read found ${read.left.length} cluster and ${read.right.length} corner inks`;

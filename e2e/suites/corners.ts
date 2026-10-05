@@ -47,7 +47,7 @@ const READ = `(() => {
   };
   const root = getComputedStyle(document.documentElement);
   const sentinel = document.getElementById("co-vw");
-  return { innerW: innerWidth, clientW: document.documentElement.clientWidth, vw: sentinel ? r2(sentinel.getBoundingClientRect().width) : -1,
+  return { innerW: innerWidth, clientW: document.documentElement.clientWidth, vw: sentinel ? r2(sentinel.getBoundingClientRect().width) : -1, scrollW: document.documentElement.scrollWidth,
     left: ink(document.querySelector("header.chrome")), right: ink(document.querySelector(".corner.tr.folio-room") || document.querySelector(".lf-seed")),
     clusterBottom: r2(document.querySelector("header.chrome").getBoundingClientRect().bottom),
     bandH: document.querySelector(".band") ? r2(parseFloat(root.getPropertyValue("--band-h")) * parseFloat(root.fontSize)) : null };
