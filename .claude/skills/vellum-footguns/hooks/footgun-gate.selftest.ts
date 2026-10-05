@@ -94,7 +94,7 @@ const inProject = (payload: Payload, project: string | undefined) => async (): P
 const CD_FIXTURES: Fixture[] = CD_ROWS.map(([name, command, cwd, want, who]): Fixture => {
   const payload = { ...bash(placed(command), cwd === null ? undefined : placed(cwd)), ...(who === "subagent" ? { agent_id: "a781" } : {}) };
   const project = who === "no project" ? undefined : cwd?.startsWith("<S>") ? SCRATCH : ROOT;
-  return [name, inProject(payload, project), want, who === "stash" ? "refs/stash" : want ? "would move the main session" : ""];
+  return [name, inProject(payload, project), want, who === "stash" ? "refs/stash" : want ? "move the main session" : ""];
 });
 const asContext = (text: string): Decision => ({ hookSpecificOutput: { hookEventName: "PreToolUse", additionalContext: text } });
 // The unlink is what lets the two rows share a session id: the gate is once per session, so without it the second row would see no Gate 5 and read as the warning having swallowed it. The FIXTURES loop's own unlink does not reach a function subject.
