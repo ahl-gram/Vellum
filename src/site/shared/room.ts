@@ -82,6 +82,7 @@ function fitRoom({ frame, sheet: sheetEl, aspect, phone, slipRect, slipW, glassL
   frame.style.setProperty("--reserve-bottom", `${fit.reserve.bottom}px`);
   sheetEl.style.width = `${fit.sheet.w}px`;
   sheetEl.style.height = `${fit.sheet.h}px`;
+  document.body.classList.toggle("stage-under", fit.under);
   if (phone && slipRect !== null) document.body.style.setProperty("--sheet-h", `${window.innerHeight - slipRect.top}px`);
   else document.body.style.removeProperty("--sheet-h");
 }
