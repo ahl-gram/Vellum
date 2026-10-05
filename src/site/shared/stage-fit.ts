@@ -32,6 +32,8 @@ export interface StageFit {
 /** The mockup's clear beside an open slip: its own 2rem inset plus a 1.5rem breath. */
 export const SLIP_CLEARANCE = 56;
 
+export const CHROME_GAP = 14;
+
 export function fitStage(input: StageInput): StageFit {
   const { view, aspect, gap } = input;
   const top = Math.max(0, ...input.above) + gap;

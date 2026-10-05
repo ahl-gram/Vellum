@@ -37,7 +37,7 @@ const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   "document-rooms": 8.1,
   "region-detail": 44.2,
   "specimen": 9.3,
-  "corners": 230.1,
+  "corners": 290.0,
 };
 
 const laneSeconds = (suites: readonly E2eSuiteName[]) =>
