@@ -101,6 +101,12 @@ export default defineConfig(
     rules: { "vellum/test-no-test-import": "error" },
   },
   {
+    name: "Issue #759: the prospect layer and the builder of its pinned fixtures read no clock, no entropy and nothing libm computes",
+    files: [["src/**/*.ts", "src/prospect/**"], "test-support/prospect-fixtures.ts"],
+    plugins: { vellum },
+    rules: { "vellum/prospect-libm-clock-free": "error" },
+  },
+  {
     name: "Issue #675: the e2e console filter has one roster, and every read goes through it",
     files: ["e2e/**/*.ts"],
     plugins: { vellum },
