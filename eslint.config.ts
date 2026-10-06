@@ -69,7 +69,6 @@ export default defineConfig(
       "@typescript-eslint/restrict-plus-operands": ["error", { allowAny: false, allowBoolean: false, allowNullish: true, allowNumberAndString: true, allowRegExp: false }],
       "@typescript-eslint/use-unknown-in-catch-callback-variable": "error",
       "@typescript-eslint/no-confusing-void-expression": ["error", { ignoreArrowShorthand: true, ignoreVoidOperator: false, ignoreVoidReturningFunctions: false }],
-      // At typescript-eslint 8.70.0 this rule's fix runs under --fix unasked, and where the dropped default's value reaches text, String() or ?? it changes behavior with the lint and the type check green; 8.70.1 makes it a suggestion (typescript-eslint PR #12826).
       "@typescript-eslint/no-useless-default-assignment": "error",
     },
   },
