@@ -57,26 +57,34 @@ function ridgeEngraved(e: Engraver, ridge: ReadonlyArray<Pt>, horizon: number, r
   return out;
 }
 
-/** A flock of n birds anchored at (x, y) in plate units, stepped sideways off anything it must clear. */
-function stepAside(x0: number, y: number, n: number, clear: ReadonlyArray<Box>): { readonly x: number; readonly y: number } {
-  let x = x0;
-  for (let pass = 0; pass < 4; pass++) {
-    const f = flockBox(x, y, n);
-    const hit = clear.find((c) => f.x0 < c.x1 && c.x0 < f.x1 && f.y0 < c.y1 && c.y0 < f.y1);
-    if (hit === undefined) break;
-    x = hit.x1 + 7 + 5 * n < VIEW_X1 - 4 ? hit.x1 + 7 : hit.x0 - 7 - 5 * n;
+type Sky = { readonly obstacles: ReadonlyArray<Box>; readonly horizonYAt: (x: number) => number };
+
+/** The nearest open sky for a flock of n birds anchored at (x0, y) in plate units: clear of every obstacle and above the hills, sideways first, then lifted no higher than the band under the named plate; null where the hills and the town fill the sky. */
+function openSky(x0: number, y: number, n: number, sky: Sky): { readonly x: number; readonly y: number } | null {
+  const free = (x: number, yy: number): boolean => {
+    const f = flockBox(x, yy, n);
+    if (sky.obstacles.some((c) => f.x0 < c.x1 && c.x0 < f.x1 && f.y0 < c.y1 && c.y0 < f.y1)) return false;
+    for (let px = f.x0; px <= f.x1; px += 1) if (f.y1 >= sky.horizonYAt(px)) return false;
+    return true;
+  };
+  for (let yy = y; yy >= Math.min(y, BIRD_TOP); yy -= 8) {
+    for (let k = 0; k <= 40; k++) {
+      for (const x of k === 0 ? [x0] : [x0 + 12 * k, x0 - 12 * k]) if (x >= VIEW_X0 + 6 && x <= VIEW_X1 - 6 - 5 * n && free(x, yy)) return { x, y: yy };
+    }
   }
-  return { x, y };
+  return null;
 }
 
-/** Where a composed bird flies once held: under the named plate, and stepped aside from anything it must clear. */
-function heldBird(b: { readonly x: number; readonly y: number; readonly s: number }, clear: ReadonlyArray<Box>): { readonly x: number; readonly y: number; readonly s: number } {
-  const y = Math.max(b.y, BIRD_TOP - LIFT);
-  return { x: stepAside(b.x, y + LIFT, 2 + Math.floor(b.s * 3), clear).x, y, s: b.s };
+type Bird = { readonly x: number; readonly y: number; readonly s: number };
+
+/** Where a composed bird flies once held: under the named plate, in the nearest open sky, or nowhere when there is none. */
+function heldBird(b: Bird, sky: Sky): Bird | null {
+  const at = openSky(b.x, Math.max(b.y + LIFT, BIRD_TOP), 2 + Math.floor(b.s * 3), sky);
+  return at === null ? null : { x: at.x, y: at.y - LIFT, s: b.s };
 }
 
-const holdBirds = (f: ForegroundElement, clear: ReadonlyArray<Box>): ForegroundElement =>
-  f.kind === "birds" ? { ...f, items: f.items.map((b) => heldBird(b, clear)) } : f;
+const holdBirds = (f: ForegroundElement, sky: Sky): ForegroundElement =>
+  f.kind === "birds" ? { ...f, items: f.items.flatMap((b) => heldBird(b, sky) ?? []) } : f;
 
 function townNodes(e: Engraver, g: ProspectGeometry, rng: Rng): SvgNode[] {
   const split = ((): number => { const i = g.masses.findIndex((m) => m.raise < BACK_ROW_RAISE); return i === -1 ? g.masses.length : i; })();
@@ -121,7 +129,17 @@ export function vignette(e: Engraver, scene: Scene, s: Streams): Vignette {
   const g = scene.g;
   const horizon = g.ground.base + 2 + LIFT;
   const clouds = cloudsFor(s.sky, horizon);
-  const engraved = g.foreground.filter((f) => !(scene.beast && f.kind === "seaSerpent")).map((f) => foregroundEngraved(e, holdBirds(f, scene.clear), s.town));
+  const ridge = g.ridge;
+  const horizonYAt = (x: number): number => (ridge === null ? horizon : yOnPolyline(ridge, x) + LIFT);
+  const masts = g.foreground.flatMap((f): Box[] => {
+    if (f.kind === "mastRow") return f.masts.map((m) => shipRig(m.x, m.hullY, 0.72 + (m.mastH - 42) / 90, m.mastH > 56));
+    if (f.kind === "ship") return [shipRig(f.x, f.y + 1, f.s * 1.15, true)];
+    return [];
+  });
+  const town = [...g.masses.map(massReach), ...g.walls.map((w) => wallReach(g, w))];
+  const sky: Sky = { obstacles: [...scene.clear, ...town, ...masts], horizonYAt };
+  const foreground = g.foreground.filter((f) => !(scene.beast && f.kind === "seaSerpent")).map((f) => holdBirds(f, sky));
+  const engraved = foreground.map((f) => foregroundEngraved(e, f, s.town));
   const gaps: Gap[] = engraved.flatMap((f) => f.gaps).map((h) => ({ ...h, y0: h.y0 + LIFT, y1: h.y1 + LIFT }));
   const river = g.water?.kind === "river";
   const nearBand = g.water === null ? [{ x: VIEW_X0, y: g.ground.base }, { x: VIEW_X1, y: g.ground.base }, { x: VIEW_X1, y: WATER_BOTTOM - LIFT }, { x: VIEW_X0, y: WATER_BOTTOM - LIFT }] : null;
@@ -129,30 +147,24 @@ export function vignette(e: Engraver, scene: Scene, s: Streams): Vignette {
     ...waterEngraved(e, VIEW_X0, VIEW_X1, g.water.y0 + LIFT, river ? g.water.y1 + LIFT : WATER_BOTTOM, gaps, s.water),
     ...(river ? [el("path", { d: `M${VIEW_X0} ${r1(g.water.y1 + LIFT)}H${VIEW_X1}`, fill: "none", ...stroke(e, 1.0) })] : []),
   ];
-  const sky = skyLines(e, VIEW_X0 + 4, VIEW_X1 - 4, SKY_TOP, horizon - 1, clouds, s.sky);
-  const flock = stepAside(VIEW_X0 + 60 + s.sky.next() * 200, SKY_TOP + 30 + s.sky.next() * 30, 5, scene.clear);
+  const skyHatch = skyLines(e, VIEW_X0 + 4, VIEW_X1 - 4, SKY_TOP, horizon - 1, clouds, s.sky);
+  const flock = openSky(VIEW_X0 + 60 + s.sky.next() * 200, SKY_TOP + 30 + s.sky.next() * 30, 5, sky);
   const nodes: SvgNode[] = [
-    ...sky,
-    birdFlock(e, flock.x, flock.y, 5, s.sky),
+    ...skyHatch,
+    ...(flock === null ? [] : [birdFlock(e, flock.x, flock.y, 5, s.sky)]),
     el("g", { transform: `translate(0 ${LIFT})` }, townNodes(e, g, s.town)),
     ...water,
     el("g", { transform: `translate(0 ${LIFT})` }, [...(nearBand ? groundSweep(e, nearBand, 0.08, 3.2, s.town, 36) : []), ...engraved.flatMap((f) => f.nodes)]),
   ];
   const xs = [...g.masses.map((m) => m.x), ...g.walls.map((w) => w.x0)];
   const xe = [...g.masses.map((m) => m.x + m.w), ...g.walls.map((w) => w.x1)];
-  const masts = g.foreground.flatMap((f): Box[] => {
-    if (f.kind === "mastRow") return f.masts.map((m) => shipRig(m.x, m.hullY, 0.72 + (m.mastH - 42) / 90, m.mastH > 56));
-    if (f.kind === "ship") return [shipRig(f.x, f.y + 1, f.s * 1.15, true)];
-    return [];
-  });
-  const ridge = g.ridge;
   return {
     nodes,
-    horizonYAt: (x) => (ridge === null ? horizon : yOnPolyline(ridge, x) + LIFT),
+    horizonYAt,
     townRun: xs.length > 0 ? [Math.min(...xs), Math.max(...xe)] : [260, 260],
     masts,
-    town: [...g.masses.map(massReach), ...g.walls.map((w) => wallReach(g, w))],
-    birds: [flockBox(flock.x, flock.y, 5), ...g.foreground.flatMap((f) => (f.kind === "birds" ? f.items.map((b) => heldBird(b, scene.clear)).map((b) => flockBox(b.x, b.y + LIFT, 2 + Math.floor(b.s * 3))) : []))],
+    town,
+    birds: [...(flock === null ? [] : [flockBox(flock.x, flock.y, 5)]), ...foreground.flatMap((f) => (f.kind === "birds" ? f.items.map((b) => flockBox(b.x, b.y + LIFT, 2 + Math.floor(b.s * 3))) : []))],
   };
 }
 
