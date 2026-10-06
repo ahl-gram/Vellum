@@ -612,13 +612,21 @@ test("every page's h1 names the page: the room on room pages, the wordmark on ho
       assert.ok(headClose > -1 && mainOpen > headClose && mainClose > mainOpen, `${p.route} renders the head cluster, then <main>`);
       const desk = html.includes('<div class="desk-layer on">');
       assert.equal(desk, DESK_ROOMS.includes(p.route), `${p.route} ${desk ? "seats" : "does not seat"} pieces in the desk layer`);
+      const folioOpen = html.lastIndexOf("<div", firstHeading);
+      const folio = html.slice(folioOpen, html.indexOf(">", folioOpen) + 1);
+      assert.ok(folioOpen > -1 && folio.includes("folio-room"), `${p.route} opens its room folio just before its h1`);
       if (desk) {
         assert.ok(
           firstHeading > headClose && firstHeading < mainOpen,
-          `${p.route} stands its h1 in the desk layer, after the head cluster and before <main> (Issue #762 call CC20, the handbook/errata/site.md row)`,
+          `${p.route} stands its h1 in the desk layer, after the head cluster and before <main> (Issue #762 call CC20)`,
+        );
+        assert.ok(
+          folio.includes('role="region"') && folio.includes(`aria-label="${esc(p.room)}"`),
+          `${p.route} stands its h1 in a region named for the room, a landmark of its own (Alex, 2026-10-06, Issue #762 issuecomment-6019508051)`,
         );
       } else {
         assert.ok(firstHeading > mainOpen && firstHeading < mainClose, `${p.route} keeps its h1 standing in the page (inside <main>)`);
+        assert.ok(!folio.includes('role="region"'), `${p.route} keeps its folio a plain corner, the page's own landmark around it`);
       }
     } else {
       const [headOpen, headClose] = [html.indexOf('<header class="chrome">'), html.indexOf("</header>")];
