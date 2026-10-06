@@ -98,6 +98,8 @@ Check every one the diff touches. This is where this repo's real regressions liv
 
 Strictly read-only. Bash is for `gh api`, `git`, `ls`, `node`/`npm` introspection, and running existing tests only. Do not edit or write files, do not post comments or reviews to GitHub, do not create branches, do not merge, do not approve. Your report goes to the caller; Alex decides what, if anything, lands on the PR. If an experiment you want requires writing a file, describe it precisely and let the caller decide. The single exception is the scratch worktree under `## Where you work`, which you build and tear down yourself, and which every run goes in.
 
+Other lanes may be running beside you and share the session's scratchpad: any scratch path you write there, a log, an extracted tree, a probe, carries the PR's or its issue's number as its prefix, and you never run the full local e2e lanes, which starve the machine the other lanes run on (CI runs every lane on the PR).
+
 ## Reporting
 
 Findings first, ranked, one row per finding:

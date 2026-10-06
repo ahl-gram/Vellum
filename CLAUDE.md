@@ -2,10 +2,12 @@
 
 Procedural fantasy-atlas generator (TypeScript, Node 24+ native type-stripping). Working context
 lives in `RESUME-HERE.md` (start here) and `session-notes/SESSION-NOTES.md` (history), both
-gitignored. **Durable facts and gotchas live in auto-memory**, split across `project_vellum.md` (the
-core), `project_vellum_site.md` (the delivery layer), `project_vellum_livingchart.md` (everything the
-Explorer animates) and `project_vellum_landfall.md` (the Landfall epic, #454): read the core plus
-whichever companion your work touches. The live PLAN is the private GitHub Project "Vellum Roadmap"
+gitignored. **Private facts and the measurements behind the specs live in auto-memory**, split across
+`project_vellum.md` (the core), `project_vellum_site.md` (the delivery layer),
+`project_vellum_livingchart.md` (everything the Explorer animates) and `project_vellum_landfall.md`
+(the Landfall epic, #454): read the core plus whichever companion your work touches. **No
+development-process rule lives there**: what the store keeps is `handbook/specs/conventions.md`'s list
+(Where a rule lives), and the specs, the gates and the agents hold every rule. The live PLAN is the private GitHub Project "Vellum Roadmap"
 (`gh project item-list 1 --owner ahl-gram`), and there is no local plan file.
 
 **`handbook/specs/` holds the tracked, normative house specs, and unlike everything above they are public.**
@@ -64,13 +66,21 @@ phase-option ids are NOT written here (the board is private, this file is public
 per session, they are stable:
 
 ```
-gh project item-list 1 --owner ahl-gram                    # the plan, at session start
+gh project item-list 1 --owner ahl-gram --limit 1000 --format json   # the plan, at session start
 gh project view 1 --owner ahl-gram --format json           # .id -> the project id
 gh project field-list 1 --owner ahl-gram --format json     # "Roadmap" .id, and .options[].id per phase
 gh project item-add 1 --owner ahl-gram --url <issue-url> --format json   # -> the item id
 gh project item-edit --id <item> --project-id <project-id> \
   --field-id <field-id> --single-select-option-id <phase-option-id>
 ```
+
+**The listing returns one page, far shorter than the board, unless `--limit` says otherwise**, so a
+read of the plan checks `.totalCount` against `.items | length` and raises `--limit` until they
+agree before treating anything as absent. **A finished phase is renamed `<Name> (done)` in place,
+never deleted**, and its open stragglers are offered a move, never moved unasked. **A phase option
+is added or renamed only by resending EVERY existing option with its `id`** (GraphQL
+`updateProjectV2Field` takes the whole option list, so an option left out is deleted and its items
+lose their phase): snapshot every item's phase first, and diff the tally after.
 
 ## Bold delight is welcome: relax "touch only what you're asked"
 
@@ -171,7 +181,8 @@ Every project agent under `.claude/agents/` sets `effort: xhigh` in its frontmat
 `echo $CLAUDE_EFFORT` inside a dispatched agent, run from a session at some OTHER level, since a
 session already at xhigh cannot tell the frontmatter from inheritance.
 
-- Feature -> branch -> PR. **Alex reviews and merges**; do not merge for him unless he asks.
+- Feature -> branch -> PR. **Alex reviews and merges**; do not merge for him unless he asks, and a
+  clearance to merge covers what it names (`handbook/specs/orchestration.md`).
 - **Write the failing test first.** It must fail on the assertion you care about, not on a missing
   module.
 - **Zero red from the prover is a hole, not a pass.** A guard proved unable to bite is deleted rather
@@ -228,7 +239,8 @@ the sandbox for both review agents that build one, so the depth lives in one pla
   the harness is a fence: it refuses a compound command whose `cd` goes to a shell variable, any `git`
   run in a directory other than that worktree, and some quoted `jq` or `sed` constructs it cannot
   parse, while a plain single command passes (measured 2026-09-13). That is why the sandbox recipes
-  take `create`'s printed path literally and read the sandbox's sha from its `.git` file.
+  take `create`'s printed path literally and read the sandbox's sha from its `.git` file. How a
+  session runs several such lanes at once is `handbook/specs/orchestration.md`'s.
 - **A dispatched review agent may not move or restore the tree it was dispatched from**, normally your
   live worktree. Commit before you dispatch one: `git restore` and `git checkout -- <path>` discard
   without leaving a reflog entry, so there is nothing to recover from afterwards.

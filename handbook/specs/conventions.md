@@ -113,7 +113,12 @@ line, since the spec itself leaves it out. A gate candidate declined under the s
 filter (a line joins a gate only with its own incident number or a ruling of Alex's) is a row in
 `.claude/skills/vellum-footguns/references/held-lines.md`, each with the incident that would earn it
 its line. Fast-changing empirical traps, private infrastructure and status stay out of
-the repo entirely. **Exactly one home is normative, and every other copy points at it by name**,
+the repo entirely. **No development-process rule lives in the private auto-memory**: a working rule,
+a moment-of-typing check and an incident each take the home above, and the store keeps only private
+facts (the board's ids, Alex's own devices and accounts), the fast-changing traps and exact tool
+behaviour this paragraph keeps out of the repo, the measurements behind the product specs, and
+pointers into the repo. A rule whose reason is a tool's behaviour comes into the repo as the step to
+take, in plain words, and the behaviour's error text, timings and versions stay out. **Exactly one home is normative, and every other copy points at it by name**,
 because two copies of a rule are two rules the moment either is edited. Apply this when adding a rule
 and when finding one in two places; the second case is a defect to fix, not a redundancy to keep.
 
