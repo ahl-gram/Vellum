@@ -13,9 +13,10 @@ export type Surroundings = {
   readonly roadTowns: ReadonlyArray<RoadTown>;
   readonly roadCount: number;
   readonly beast: PlateBeast | null;
+  readonly realmProclaimed: boolean;
 };
 
-export const NO_SURROUNDINGS: Surroundings = { seaName: null, riverName: null, rangeName: null, roadTowns: [], roadCount: 0, beast: null };
+export const NO_SURROUNDINGS: Surroundings = { seaName: null, riverName: null, rangeName: null, roadTowns: [], roadCount: 0, beast: null, realmProclaimed: true };
 
 const NEAR = 40;
 const RANGE_REACH = 60;
@@ -131,5 +132,6 @@ export function plateSurroundings(world: World, index: number, year: number): Su
     roadTowns: roadTowns(world, index, view, year),
     roadCount: roadsEndingAt(world, s),
     beast: beastInBay(world, s, view),
+    realmProclaimed: true,
   };
 }

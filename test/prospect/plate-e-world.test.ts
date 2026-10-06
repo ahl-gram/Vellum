@@ -58,21 +58,30 @@ test("every piece of furniture, every lettered run and every bird stays inside t
   assert.ok(plates > 300, `premise: the sweep engraves the ruled places and whole worlds (${plates})`);
 });
 
-test("a horizon town's name and number clear every mast and the ridge line under them (the round's \"3 Poalo\" and \"6 Haireno\")", () => {
+test("a horizon town's name and number clear every mast, the ridge line under them, the furniture and every other horizon name (the round's \"3 Poalo\" and \"6 Haireno\", and the class)", () => {
   let labels = 0;
+  let paired = 0;
   everyPlate((label, plate, surroundings) => {
     const v = plate.picture.vignette;
-    const unflown = horizonTowns(engraver(STYLES.antique), createLettering("t"), plate.era === "before-founding" ? [] : surroundings.roadTowns, plate.key, { ...skylineOf(plate.g), birds: [] });
+    const unflown = horizonTowns(engraver(STYLES.antique), createLettering("t"), plate.era === "before-founding" ? [] : surroundings.roadTowns, plate.key, { ...skylineOf(plate.g), birds: [], avoid: [plate.furniture.cartouche, plate.furniture.medals, plate.furniture.key, plate.furniture.margin].flat() });
     assert.deepEqual(plate.furniture.towns, unflown.boxes, `${label}: a horizon name stands where the hills and the masts put it; the birds give way to it, never it to them`);
-    for (const b of plate.furniture.towns) {
+    const furniture = [plate.furniture.cartouche, plate.furniture.medals, plate.furniture.key, plate.furniture.margin].flat();
+    const named = plate.furniture.towns;
+    if (named.length >= 4) paired++;
+    named.forEach((b, i) => {
+      for (const f of furniture) assert.ok(!overlaps(b, f), `${label}: a horizon name ${JSON.stringify(b)} crosses the furniture at ${JSON.stringify(f)}`);
+      named.forEach((o, j) => assert.ok(j <= i || Math.floor(i / 2) === Math.floor(j / 2) || !overlaps(b, o), `${label}: two horizon names cross, ${JSON.stringify(b)} and ${JSON.stringify(o)}`));
+    });
+    for (const b of named) {
       labels++;
       for (const m of v.masts) assert.ok(!overlaps(b, m), `${label}: a horizon label ${JSON.stringify(b)} crosses a mast ${JSON.stringify(m)}`);
       for (let x = b.x0; x <= b.x1; x += 1) assert.ok(b.y1 < v.horizonYAt(x), `${label}: the ridge runs through a horizon label at x ${x.toFixed(1)}`);
     }
   });
   const capital = engrave(42, 0);
-  assert.ok(capital.furniture.towns.length >= 4 && capital.picture.vignette.masts.length > 0, "premise: the capital names its horizon towns among its masts, the witness");
+  assert.ok(capital.furniture.towns.length === 4 && capital.picture.vignette.masts.length > 0, "premise: the capital names its two horizon towns, a name and a number each, among its masts, the witness");
   assert.ok(labels > 50, `premise: the sweep reads horizon labels (${labels})`);
+  assert.ok(paired > 30, `premise: the sweep meets plates naming two horizon towns (${paired})`);
 });
 
 test("the named sea beast surfaces in the open bay, clear of the people and the near ship (ruling D4)", () => {

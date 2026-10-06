@@ -18,7 +18,11 @@ const TOP_LINE = FRAME_INNER + 7;
 
 export type Inked = { readonly nodes: SvgNode[]; readonly boxes: ReadonlyArray<Box> };
 
-const boxOfRun = (spec: RunSpec): Box => { const b = runBox(spec); return { x0: b.x0, x1: b.x1, y0: b.top, y1: b.bottom }; };
+const boxOfRun = (spec: RunSpec): Box => {
+  const b = runBox(spec);
+  const h = (spec.halo?.width ?? 0) / 2;
+  return { x0: b.x0 - h, x1: b.x1 + h, y0: b.top - h, y1: b.bottom + h };
+};
 
 function lettered(letters: Lettering, specs: ReadonlyArray<RunSpec>): Inked {
   return { nodes: specs.map((s) => letters.run(s)), boxes: specs.map(boxOfRun) };
@@ -166,44 +170,68 @@ export function frameNodes(e: Engraver): SvgNode[] {
   ];
 }
 
-export type HorizonContext = { readonly horizonYAt: (x: number) => number; readonly townRun: readonly [number, number]; readonly masts: ReadonlyArray<Box>; readonly birds: ReadonlyArray<Box> };
+export type HorizonContext = { readonly horizonYAt: (x: number) => number; readonly townRun: readonly [number, number]; readonly masts: ReadonlyArray<Box>; readonly birds: ReadonlyArray<Box>; readonly avoid: ReadonlyArray<Box> };
 
 const overlaps = (a: Box, b: Box): boolean => a.x0 < b.x1 && b.x0 < a.x1 && a.y0 < b.y1 && b.y0 < a.y1;
 
-/** Lifts a horizon label until it clears every mast, every bird and the ridge line under it (the round's "3 Poalo" and "6 Haireno" class). */
-function clearLabel(box: Box, ctx: HorizonContext): number {
-  for (let lift = 0; lift <= 40; lift += 1) {
-    const b = { ...box, y0: box.y0 - lift, y1: box.y1 - lift };
-    let ridgeTop = Infinity;
-    for (let x = b.x0; x <= b.x1; x += 1) ridgeTop = Math.min(ridgeTop, ctx.horizonYAt(x));
-    if (b.y1 < ridgeTop - 0.5 && !ctx.masts.some((m) => overlaps(b, m)) && !ctx.birds.some((m) => overlaps(b, m))) return lift;
-  }
-  return 40;
+const lifted = (b: Box, lift: number): Box => ({ ...b, y0: b.y0 - lift, y1: b.y1 - lift });
+
+function clearLabel(boxes: ReadonlyArray<Box>, ctx: HorizonContext, placed: ReadonlyArray<Box>): number | null {
+  const blocks = [...ctx.masts, ...ctx.birds, ...ctx.avoid, ...placed];
+  const clear = (b: Box): boolean => {
+    for (let x = b.x0; x <= b.x1; x += 1) if (b.y1 >= ctx.horizonYAt(x) - 0.5) return false;
+    return !blocks.some((m) => overlaps(b, m));
+  };
+  for (let lift = 0; lift <= 40; lift += 1) if (boxes.every((b) => clear(lifted(b, lift)))) return lift;
+  return null;
 }
 
-/** The road towns standing on the horizon by their true bearing, pushed clear of the town's own run, each named and numbered for its key entry. */
+type Seat = { readonly x: number; readonly s: number; readonly name: RunSpec; readonly tag: RunSpec; readonly boxes: ReadonlyArray<Box> };
+
+function seatAt(e: Engraver, t: RoadTown, n: string, x: number, ctx: HorizonContext, placed: ReadonlyArray<Box>): Seat | null {
+  const y = ctx.horizonYAt(x);
+  const s = t.kind === "capital" ? 1.3 : t.kind === "town" ? 1 : 0.75;
+  const name: RunSpec = { text: t.name, x, y: y - 12 * s, size: 6, italic: true, anchor: "middle", fill: e.ink };
+  const tag: RunSpec = { text: n, x, y: y - 12 * s - 7, size: 8, italic: true, anchor: "middle", fill: e.ink, halo: { color: e.paper, width: 2.4 } };
+  const both = [boxOfRun(name), boxOfRun(tag)].map((k) => ({ x0: k.x0 - 1.2, x1: k.x1 + 1.2, y0: k.y0 - 1.2, y1: k.y1 + 1.2 }));
+  const lift = clearLabel(both, ctx, placed);
+  if (lift === null) return null;
+  return { x, s, name: { ...name, y: name.y - lift }, tag: { ...tag, y: tag.y - lift }, boxes: both.map((k) => lifted(k, lift)) };
+}
+
+/** The nearest seat to a road town's bearing, stepping away from the town's own run, where its name and number clear the hills, the masts, the birds, the furniture and every name seated before it. */
+function seatLabel(e: Engraver, t: RoadTown, n: string, ctx: HorizonContext, placed: ReadonlyArray<Box>): Seat | null {
+  const bearing = Math.max(VIEW_X0 + 30, Math.min(VIEW_X1 - 30, CX + t.lateral * 230));
+  const pushed = bearing > ctx.townRun[0] - 24 && bearing < ctx.townRun[1] + 24;
+  const x0 = pushed ? (t.lateral < 0 ? ctx.townRun[0] - 30 : ctx.townRun[1] + 30) : bearing;
+  const away = t.lateral < 0 ? -1 : 1;
+  for (let k = 0; k <= 8; k++) {
+    for (const x of pushed || k === 0 ? [x0 + away * 14 * k] : [x0 + away * 14 * k, x0 - away * 14 * k]) {
+      if (x < VIEW_X0 + 24 || x > VIEW_X1 - 24 || (x > ctx.townRun[0] - 24 && x < ctx.townRun[1] + 24)) continue;
+      const seat = seatAt(e, t, n, x, ctx, placed);
+      if (seat !== null) return seat;
+    }
+  }
+  return null;
+}
+
+/** The road towns standing on the horizon by their true bearing, pushed clear of the town's own run, each named and numbered for its key entry; a name with no clear seat is left to the key. */
 export function horizonTowns(e: Engraver, letters: Lettering, towns: ReadonlyArray<RoadTown>, entries: ReadonlyArray<PlateKeyEntry>, ctx: HorizonContext): Inked {
   const out: SvgNode[] = [];
   const boxes: Box[] = [];
   towns.forEach((t, i) => {
-    let x = Math.max(VIEW_X0 + 30, Math.min(VIEW_X1 - 30, CX + t.lateral * 230));
-    if (x > ctx.townRun[0] - 24 && x < ctx.townRun[1] + 24) x = t.lateral < 0 ? ctx.townRun[0] - 30 : ctx.townRun[1] + 30;
     const entry = entries.find((k) => k.town === i);
-    if (x < VIEW_X0 + 24 || x > VIEW_X1 - 24 || entry === undefined) return;
+    if (entry === undefined) return;
+    const seat = seatLabel(e, t, entry.letter, ctx, boxes);
+    if (seat === null) return;
+    const { x, s } = seat;
     const y = ctx.horizonYAt(x);
-    const s = t.kind === "capital" ? 1.3 : t.kind === "town" ? 1 : 0.75;
     out.push(el("path", {
       d: `M${r1(x - 7 * s)} ${r1(y)}v${r1(-3 * s)}l${r1(2 * s)} ${r1(-2 * s)}l${r1(2 * s)} ${r1(2 * s)}v${r1(3 * s)}M${r1(x - 2 * s)} ${r1(y)}v${r1(-4 * s)}l${r1(2 * s)} ${r1(-2 * s)}l${r1(2 * s)} ${r1(2 * s)}v${r1(4 * s)}M${r1(x + 3 * s)} ${r1(y)}v${r1(-3 * s)}l${r1(2 * s)} ${r1(-1.6 * s)}l${r1(2 * s)} ${r1(1.6 * s)}v${r1(3 * s)}M${r1(x + 0.6 * s)} ${r1(y - 4 * s)}v${r1(-3 * s)}l${r1(1.2 * s)} ${r1(-4 * s)}l${r1(1.2 * s)} ${r1(4 * s)}v${r1(3 * s)}`,
       fill: e.paper, ...stroke(e, 0.55),
     }));
-    const name: RunSpec = { text: t.name, x, y: y - 12 * s, size: 6, italic: true, anchor: "middle", fill: e.ink };
-    const tag: RunSpec = { text: entry.letter, x, y: y - 12 * s - 7, size: 8, italic: true, anchor: "middle", fill: e.ink, halo: { color: e.paper, width: 2.4 } };
-    const both = [boxOfRun(name), boxOfRun(tag)];
-    const label = { x0: Math.min(...both.map((k) => k.x0)) - 1, x1: Math.max(...both.map((k) => k.x1)) + 1, y0: Math.min(...both.map((k) => k.y0)), y1: Math.max(...both.map((k) => k.y1)) };
-    const lift = clearLabel(label, ctx);
-    const runs = lettered(letters, [{ ...name, y: name.y - lift }, { ...tag, y: tag.y - lift }]);
-    out.push(...runs.nodes);
-    boxes.push(...runs.boxes, { ...label, y0: label.y0 - lift, y1: label.y1 - lift });
+    out.push(...lettered(letters, [seat.name, seat.tag]).nodes);
+    boxes.push(...seat.boxes);
   });
   return { nodes: out, boxes };
 }

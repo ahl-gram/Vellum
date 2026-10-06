@@ -51,3 +51,29 @@ test("over whole worlds the key stays within its rules: at most eight, the sea o
     });
   }
 });
+
+test("the key never names what the viewed year has not yet seen: no realm before the founding or the realm's proclamation, no beast before its first sighting", () => {
+  let realmLater = 0;
+  for (const seed of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]) {
+    const w = worldFor(seed);
+    w.settlements.forEach((s, i) => {
+      const realm = w.realms.labels[s.x + s.y * w.elev.w] ?? -1;
+      const rise = w.history.events.find((e) => e.kind === "rise" && e.realm === realm)?.year ?? -Infinity;
+      for (const year of [s.founded - 1, s.founded, w.title.year]) {
+        const key = keyOf(seed, i, year);
+        const keysRealm = key.some((k) => /\. In /.test(k));
+        if (year < s.founded) assert.ok(!keysRealm, `seed ${seed} index ${i} at An. ${year}: the bare ground keys no realm`);
+        if (rise > year) {
+          realmLater++;
+          assert.ok(!keysRealm, `seed ${seed} index ${i} at An. ${year}: the realm, proclaimed An. ${rise}, is not yet keyed`);
+        }
+        for (const b of w.beasts) {
+          if (b.firstSeen <= year) continue;
+          if (key.some((k) => k.endsWith(`. ${b.name}, ${b.epithet}`))) assert.fail(`seed ${seed} index ${i} at An. ${year}: ${b.name}, first seen An. ${b.firstSeen}, is keyed`);
+        }
+      }
+    });
+  }
+  assert.ok(realmLater > 10, `premise: the sweep meets realms the viewed year has not seen proclaimed (${realmLater})`);
+  assert.ok(!keyOf(7, 6, 412).some((k) => k.includes("Kaipu")) && keyOf(7, 6).some((k) => k.includes("Kaipu")), "the witness: Wailua's bay keys Kaipu, first seen An. 780, at the present and not on its bare ground of An. 412");
+});

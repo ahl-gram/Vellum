@@ -9,7 +9,7 @@ import { eraFor, plateCaption, type PlateEra } from "../../src/prospect/caption.
 import { plateKey } from "../../src/prospect/key.ts";
 import { engravePlate, finishedPlateSvg } from "../../src/prospect/finished.ts";
 import { INNER } from "../../src/prospect/dress/furniture.ts";
-import type { Surroundings } from "../../src/prospect/surroundings.ts";
+import { NO_SURROUNDINGS, type Surroundings } from "../../src/prospect/surroundings.ts";
 import { layoutRun } from "../../src/prospect/letter/letter.ts";
 import { GRID } from "../../src/prospect/letter/face.ts";
 import { renderSvg } from "../../src/render/svg.ts";
@@ -218,6 +218,7 @@ test("every place in a realm hangs the realm's arms in its wreath, from its foun
   }
   assert.ok(!finishedPlateSvg(makeInput({ kind: "capital", arms: ARMS }), STYLES.antique, 1040).includes('class="vellum-arms"'), "no realm yet, no arms");
   assert.ok(!finishedPlateSvg(makeInput({ kind: "town", arms: null }), STYLES.antique, 1300).includes('class="vellum-arms"'), "no realm, no arms");
+  assert.ok(!finishedPlateSvg(makeInput({ kind: "town", arms: ARMS }), STYLES.antique, 1300, { surroundings: { ...NO_SURROUNDINGS, realmProclaimed: false } }).includes('class="vellum-arms"'), "a realm not yet proclaimed hangs no arms");
 });
 
 test("the plate wears its named furniture: the name alone in the cartouche, the epithet and founding on the banderole, the footer, the double frame", () => {
@@ -280,6 +281,7 @@ const SURROUNDED: Surroundings = {
   roadTowns: [{ index: 1, name: "Haireno", kind: "town", lateral: 0.39, dist: 21 }, { index: 2, name: "Nanawotani", kind: "village", lateral: -0.5, dist: 30 }],
   roadCount: 3,
   beast: { name: "Kaipu", epithet: "the Weed That Wakes", lateral: -0.2 },
+  realmProclaimed: true,
 };
 
 // Re-pinned 2026-10-06 for E (Issue #754): armless synthetic fixtures only (the arms spend render/layers/heraldry, whose charges carry libm ancestry), so these bytes cannot drift across platforms. A deliberate plate change re-pins these with the cause named in the commit.
