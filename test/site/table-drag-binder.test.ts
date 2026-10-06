@@ -97,7 +97,7 @@ test("TD10 one url per carry: a filing adopts it and every other end revokes it,
   revoked.length = 0;
   d.press(700, 130); d.move(640, 680); d.up(640, 680);
   assert.deepEqual(d.calls.file, ["blob:ghost-1"], "the ghost's url is the one handed to lay");
-  assert.deepEqual(d.revoked, [], "adopted, not revoked");
+  assert.equal(d.revoked.length, 0, "adopted, not revoked");
   d.press(700, 130); d.move(640, 300); d.up(640, 300);
   assert.equal(d.revoked.at(-1), "blob:ghost-2", "a snap revokes");
   d.press(700, 130); d.move(640, 300); fireDoc("pointercancel", {});

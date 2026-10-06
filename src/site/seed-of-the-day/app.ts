@@ -10,6 +10,7 @@ import { createZoomController } from "../shared/zoom-controller.ts";
 import type { ZoomState } from "../shared/zoom-controller.ts";
 import { bindRoom } from "../shared/room.ts";
 import { bindGlassKeys } from "../shared/glass-keys.ts";
+import { errorText } from "../shared/error-text.ts";
 import { cameraFromTransform, transformFromCamera } from "../explorer/camera.ts";
 
 declare global {
@@ -90,7 +91,7 @@ setTimeout(() => {
     room.layout();
     setupHunt(world, seed);
   } catch (err) {
-    $("status").textContent = "The cartographer spilled the ink: " + (err as Error).message;
+    $("status").textContent = "The cartographer spilled the ink: " + errorText(err);
   }
 }, 0);
 

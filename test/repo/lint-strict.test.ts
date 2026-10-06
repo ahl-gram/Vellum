@@ -29,6 +29,9 @@ const RULED: Readonly<Record<string, Linter.RuleEntry>> = {
   "@typescript-eslint/no-unnecessary-template-expression": "error",
   "@typescript-eslint/no-unnecessary-type-arguments": "error",
   "@typescript-eslint/restrict-plus-operands": ["error", { allowAny: false, allowBoolean: false, allowNullish: true, allowNumberAndString: true, allowRegExp: false }],
+  "@typescript-eslint/use-unknown-in-catch-callback-variable": "error",
+  "@typescript-eslint/no-confusing-void-expression": ["error", { ignoreArrowShorthand: true, ignoreVoidOperator: false, ignoreVoidReturningFunctions: false }],
+  "@typescript-eslint/no-useless-default-assignment": "error",
 };
 
 type Plant = { lines: readonly string[]; refused: readonly number[] };
@@ -49,6 +52,9 @@ const PLANTS: Readonly<Record<string, Plant>> = {
   "@typescript-eslint/no-unnecessary-template-expression": { lines: ["declare const w: string;", "export const t = `${w}`;", "export const u = `${w}!`;"], refused: [2] },
   "@typescript-eslint/no-unnecessary-type-arguments": { lines: ["declare function fd<T = number>(): T;", "export const z = fd<number>();", "export const y = fd<string>();"], refused: [2] },
   "@typescript-eslint/restrict-plus-operands": { lines: ["declare const a: any;", "declare const m: string | undefined;", "export const p1 = \"x\" + a;", "export const p2 = \"x\" + true;", "export const p3 = \"x\" + /re/;", "export const p4 = \"x\" + 1;", "export const p5 = \"x\" + m;", "let d = \"\";", "d += a;", "export { d };"], refused: [3, 4, 5, 9] },
+  "@typescript-eslint/use-unknown-in-catch-callback-variable": { lines: ["declare const pr: Promise<number>;", "export const a = pr.catch((e: Error) => e.message);", "export const b = pr.catch((e) => String(e));", "export const c = pr.then((n) => n, (e: Error) => e.message);", "export const d = pr.catch((e: unknown) => String(e));", "export const f = pr.then((n) => n, (e: unknown) => String(e));"], refused: [2, 3, 4] },
+  "@typescript-eslint/no-confusing-void-expression": { lines: ["declare function g(): void;", "export function r(c: boolean): void { if (c) return g(); g(); }", "export function v(): void { void g(); }", "export const x = [g()];", "export const h = (): void => g();", "export function s(c: boolean): void { if (c) { g(); return; } g(); }"], refused: [2, 3, 4] },
+  "@typescript-eslint/no-useless-default-assignment": { lines: ["type Req = (a: number) => number;", "type Opt = (a?: number) => number;", "export const r: Req = (a = 1) => a;", "export const o: Opt = (a = 1) => a;"], refused: [3] },
 };
 
 const PLANT_AT = WITNESSES["src/**/*.ts"]!;
@@ -98,6 +104,6 @@ test("through ESLint itself, each adopted rule refuses its plant at exactly the 
   for (const [rule, plant] of Object.entries(PLANTS)) {
     const [result] = await eslint.lintText(plant.lines.join("\n"), { filePath: join(ROOT, PLANT_AT) });
     assert.deepEqual(result!.messages.filter((m) => m.fatal).map((m) => m.message), [], `the plant for ${rule} does not parse at ${PLANT_AT}, so no rule read it`);
-    assert.deepEqual(result!.messages.filter((m) => m.ruleId === rule).map((m) => m.line), plant.refused, `${rule} does not refuse exactly the planted lines at ${PLANT_AT}: a refused line passing means the rule or one of its ruled options is gone, an admitted line refused means an option admitting it is gone. BLIND SPOT, declared: the plant runs at one path, and reach to every root is the witness test's`);
+    assert.deepEqual(result!.messages.filter((m) => m.ruleId === rule).map((m) => m.line), plant.refused, `${rule} does not refuse exactly the planted lines at ${PLANT_AT}: a refused line passing means the rule or one of its ruled options is gone, an admitted line refused means an option admitting it is gone. BLIND SPOTS, declared: the plant runs at one path, and reach to every root is the witness test's; and use-unknown-in-catch-callback-variable reads only a callback written inline, so .catch(onErr) with a named onErr taking (e: Error) passes, erring toward passing (the tree held none on 2026-10-06)`);
   }
 });

@@ -44,7 +44,7 @@ export function createVoyageLogPanel(logEls: VoyageLogHost) {
     presentYear: number,
     seed: number,
     subtitle: string,
-    homecoming: VoyageHomecoming | null = null,
+    homecoming?: VoyageHomecoming | null,
   ): { log: VoyageLog; rows: HTMLLIElement[] } {
     const log = buildVoyageLog(logPorts, presentYear, (seed >>> 0), subtitle || "", homecoming);
     logEls.sig.textContent = log.attribution;

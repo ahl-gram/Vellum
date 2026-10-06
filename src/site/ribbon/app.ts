@@ -1,5 +1,6 @@
 // The Wayfarer's Ribbon room's controller: resolves the address, pulls the scroll through the SHARED render worker as a blob <img> (never inline <svg>: the cross-chart url(#) id rule), and redraws in place when the traveller picks a new journey; the world itself never changes on this page.
 import { runJob, usesWorker, initWorker } from "../explorer/worker-client.ts";
+import { errorText } from "../shared/error-text.ts";
 import { plateDressFor, type PlateDress } from "../explorer/prospect-job.ts";
 import { parseRibbonAddress, chartTarget, journeyHash, prospectTarget } from "./address.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
@@ -106,9 +107,9 @@ function draw(from: number | null, to: number | null): void {
       sheet.room.layout();
       last = { seed, from: res.fromIdx, to: res.toIdx, leagues: res.leagues, dress, rows: res.events.length, svgLength: res.svg.length };
     })
-    .catch((err: Error) => {
+    .catch((err: unknown) => {
       if (myGen !== drawGen) return;
-      status.textContent = "The surveyor turned back: " + err.message;
+      status.textContent = "The surveyor turned back: " + errorText(err);
     });
 }
 

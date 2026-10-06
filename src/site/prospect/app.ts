@@ -4,6 +4,7 @@ import { plateDressFor, type PlateDress } from "../explorer/prospect-job.ts";
 import { countLine, layOnTable, layPressFace, LAY_ON_PAGE } from "../explorer/chart-drawer.ts";
 import { emitTable, parseTable, prospectItemFrom, tableHash, type TableItem, type TableOverrides } from "../shared/table-address.ts";
 import { deviceStorage as store, navigationTypeNow, readStoredTable, tableOnArrival, writeStoredTable, TRAVERSAL } from "../shared/table-store.ts";
+import { errorText } from "../shared/error-text.ts";
 import { parseProspectAddress, chartTarget, parseYear, ribbonTarget, yearHash } from "./address.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import { bindProspectRoom, showPlate, writeFolio, writeNote, type RoomFurniture } from "./seats.ts";
@@ -166,9 +167,9 @@ function draw(year: number | null, writeAddress: boolean): void {
       // AFTER `last`, never before it: the press files what `last` names, and painted a beat early it reads the previous plate or none at all.
       paintLay();
     })
-    .catch((err: Error) => {
+    .catch((err: unknown) => {
       if (myGen !== drawGen) return;
-      status.textContent = "The engraver slipped: " + err.message;
+      status.textContent = "The engraver slipped: " + errorText(err);
     });
 }
 
