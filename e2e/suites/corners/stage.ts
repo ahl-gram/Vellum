@@ -14,7 +14,7 @@ const DESK = { w: 1280, h: 800 };
 const WINDOWS: readonly (readonly [number, number])[] = [[1280, 720], [1024, 768], [1024, 600], [960, 800], [901, 800], [1024, 474], [932, 430]];
 const FOLDED_WINDOWS: readonly (readonly [number, number])[] = [[1024, 600], [901, 800]];
 const SHORT = { w: 932, h: 430 };
-const FLOOR_PLAIN = 4.5;
+export const FLOOR_PLAIN = 4.5;
 const KNOWN: readonly { check: "EA1" | "EL1"; fault: string; row: string }[] = [
   { check: "EL1", fault: `/specimen/ at 901x800: p#sb-status.status "the status pill, as a ro" meets aside#specimen.slip`, row: "the handbook/errata/site.md row on the Specimen's status pill over its slip" },
   { check: "EL1", fault: `/specimen/ at 932x430: p#sb-status.status "the status pill, as a ro" meets aside#specimen.slip`, row: "the handbook/errata/site.md row on the Specimen's status pill over its slip" },
@@ -125,7 +125,7 @@ const known = (all: readonly string[], check: "EA1" | "EL1" | "EL2"): string[] =
 // At rest: the document and its fonts are in, the stage no longer reports a draw in progress (a line ending in an ellipsis), and the fit, the floor and the Press's seat read the same on STILL_READS polls running, since a plate with no draw to wait on (an empty Portfolio) gives no other signal.
 const STILL_READS = 6;
 
-async function rest(ctx: SuiteContext, w: number, h: number, label: string): Promise<Stage | null> {
+export async function rest(ctx: SuiteContext, w: number, h: number, label: string): Promise<Stage | null> {
   const settle = makeSettle(ctx);
   const key = (d: Stage): string => JSON.stringify([d.innerW, d.innerH, d.sheet, d.under, d.presses, d.risen, d.reserveRight, d.drawn]);
   let still = 0;
@@ -302,7 +302,7 @@ type Ground = { piece: string; t: string; ratio: number };
 const PIECES = "header.chrome, .corner, .strip, .legend:not(.in-slip)";
 
 // Every text node of the chrome whose box centre stands on the sheet, by piece; decor hidden from assistive technology (the nav's separator dots) is left out, and the ink is the computed colour, so a translucent ancestor reads darker ink than it paints and errs toward passing.
-const GLYPHS_OVER_SHEET: Payload<Glyph[]> = `(() => {
+export const GLYPHS_OVER_SHEET: Payload<Glyph[]> = `(() => {
   const sheet = document.getElementById("sheet").getBoundingClientRect();
   const unseen = (el) => { for (let e = el; e; e = e.parentElement) { const cs = getComputedStyle(e); if (cs.display === "none" || cs.visibility === "hidden" || parseFloat(cs.opacity) === 0) return true; } return false; };
   const name = (root) => root.matches("header.chrome") ? "cluster" : root.matches(".corner.tr") ? "room folio" : root.matches(".corner.bl") ? "chart folio" : root.matches(".corner.br") ? "Glass" : root.matches(".strip") ? "strip" : root.matches(".legend") ? "Press" : "corner";
@@ -334,9 +334,9 @@ const GLYPHS_OVER_SHEET: Payload<Glyph[]> = `(() => {
 })()`;
 
 const HIDE_TEXT = `header.chrome *, .legend *, .corner *, .strip * { color: transparent !important; text-decoration-color: transparent !important; }`;
-const NO_POOLS = `body.stage-under :is(header.chrome, .legend, .corner, .strip)::before { content: none !important; }`;
+export const NO_POOLS = `body.stage-under :is(header.chrome, .legend, .corner, .strip)::before { content: none !important; }`;
 
-async function withStyle<T>(ctx: SuiteContext, id: string, css: string, body: () => Promise<T>): Promise<T> {
+export async function withStyle<T>(ctx: SuiteContext, id: string, css: string, body: () => Promise<T>): Promise<T> {
   await ctx.evaluate(`(() => { const s = document.createElement("style"); s.id = ${JSON.stringify(id)}; s.textContent = ${JSON.stringify(css)}; document.head.appendChild(s); return true; })()`);
   try {
     return await body();
@@ -345,7 +345,7 @@ async function withStyle<T>(ctx: SuiteContext, id: string, css: string, body: ()
   }
 }
 
-async function grounds(ctx: SuiteContext, glyphs: readonly Glyph[]): Promise<Ground[]> {
+export async function grounds(ctx: SuiteContext, glyphs: readonly Glyph[]): Promise<Ground[]> {
   return withStyle(ctx, "ea4-hide", HIDE_TEXT, async () => {
     const out: Ground[] = [];
     for (const g of glyphs) {
@@ -357,7 +357,7 @@ async function grounds(ctx: SuiteContext, glyphs: readonly Glyph[]): Promise<Gro
 }
 
 type Reading = { fixture: string; under: boolean; read: Ground[]; bare: Ground[]; needs: string; witnesses: readonly string[] };
-const worstOf = (gs: readonly Ground[], piece?: string): number => gs.filter((g) => piece === undefined || g.piece === piece).reduce((m, g) => Math.min(m, g.ratio), Infinity);
+export const worstOf = (gs: readonly Ground[], piece?: string): number => gs.filter((g) => piece === undefined || g.piece === piece).reduce((m, g) => Math.min(m, g.ratio), Infinity);
 
 async function readFixture(ctx: SuiteContext, fixture: string, page: string, folded: boolean, needs: string, witnesses: readonly string[]): Promise<Reading> {
   const { w, h } = PHONE.laidOut;
