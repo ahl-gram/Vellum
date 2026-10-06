@@ -44,6 +44,9 @@ const REFUSED: ReadonlyArray<readonly [string, string]> = [
   ["host", "export const loaded = () => require(\"./geometry.ts\");"],
   ["host", "export const year = (n: number) => n.toLocaleString();"],
   ["host", "export const order = (s: string, t: string) => s.localeCompare(t);"],
+  ["host", "export const day = (d: Date) => d.toLocaleDateString();"],
+  ["host", "export const hour = (d: Date) => d.toLocaleTimeString();"],
+  ["host", "export const lower = (s: string) => s.toLocaleLowerCase();"],
   ["host", "export const keyedLocale = (n: number) => n[\"toLocaleString\"]();"],
   ["host", "export const tickedLocale = (s: string) => s[`toLocaleUpperCase`]();"],
   ["host", "export const where = () => import.meta.url;"],
@@ -51,6 +54,7 @@ const REFUSED: ReadonlyArray<readonly [string, string]> = [
   ["ambient", "declare function stamped(): number;"],
   ["ambient", "declare class Clock {}"],
   ["ambient", "declare global { const hiddenClock: () => number; }"],
+  ["ambient", "declare enum Hidden { A }"],
   ["module", "import { randomUUID } from \"node:crypto\";"],
   ["module", "import { performance as perfHooks } from \"perf_hooks\";"],
   ["module", "export const lazy = () => import(\"node:perf_hooks\");"],
@@ -69,10 +73,9 @@ const PASSED: readonly string[] = [
   "export const shadowed = (Date: number): number => Date + 1;",
   "export const keys = { Date: 1, performance: 2 }.performance;",
   "export const field = (o: { toLocale: number }) => o.toLocale;",
-  "export const exact = (x: number) => Math.abs(x) + Math.ceil(x) + Math.clz32(x) + Math.floor(x) + Math.fround(x) + Math.imul(x, 2) + Math.max(x, 1) + Math.min(x, 1) + Math.round(x) + Math.sign(x) + Math.sqrt(x) + Math.trunc(x);",
-  "export const constants = Math.E + Math.LN10 + Math.LN2 + Math.LOG10E + Math.LOG2E + Math.PI + Math.SQRT1_2 + Math.SQRT2;",
   "export const optional = (x: number) => Math?.floor(x);",
   "export const builtIns = (s: string) => [new Map<string, number>(), new Set<number>(), JSON.stringify([s]), parseInt(s, 10), String(s), Array.from(s), Number(s), Object.keys({}), Boolean(s), Infinity, NaN, undefined, new Error(s), new RangeError(s), new TypeError(s)];",
+  "export function Ctor(this: unknown) { return new.target; }",
   "import { el } from \"../render/svg.ts\";",
   "import { zoom } from \"d3-zoom\";",
   "export const lazyLocal = () => import(\"./geometry.ts\");",
@@ -81,11 +84,25 @@ const PASSED: readonly string[] = [
   "export function overloaded(x: number): number { return x; }",
 ];
 
+// Restated on purpose, an oracle beside EXACT_MATH and PROSPECT_GLOBALS in scripts/lint/source-shape.ts rather than read from them, so a name wrongly added to either list reds here; every other Math member and every other global this Node holds is planted as refused.
+const EXACT = ["E", "LN10", "LN2", "LOG10E", "LOG2E", "PI", "SQRT1_2", "SQRT2", "abs", "ceil", "clz32", "floor", "fround", "imul", "max", "min", "round", "sign", "sqrt", "trunc"];
+const APPROVED = ["Array", "Boolean", "Error", "Infinity", "JSON", "Map", "Math", "NaN", "Number", "Object", "RangeError", "Set", "String", "TypeError", "parseInt", "undefined"];
+const BROWSER_SAMPLE = ["document", "localStorage", "location", "navigator", "requestAnimationFrame", "self", "window"];
+const IDENTIFIER = /^[A-Za-z_$][\w$]*$/;
+const offList = (names: readonly string[], approved: readonly string[]): string[] => [...new Set(names)].filter((name) => !approved.includes(name) && IDENTIFIER.test(name)).sort();
+const OFF_LIST: ReadonlyArray<readonly [string, string]> = [
+  ...offList(Object.getOwnPropertyNames(Math), EXACT).map((name, i): [string, string] => ["libm", `export const offMath${i} = Math.${name};`]),
+  ...offList([...Object.getOwnPropertyNames(globalThis), ...BROWSER_SAMPLE], APPROVED).map((name, i): [string, string] => ["host", `export const offGlobal${i} = (): unknown => ${name};`]),
+];
+const ON_LIST = [...EXACT.map((name, i) => `export const onMath${i} = Math.${name};`), ...APPROVED.filter((name) => name !== "Math").map((name, i) => `export const onGlobal${i} = (): unknown => ${name};`)];
+
 const BLIND_SPOTS = "BLIND SPOTS, declared: a module outside src/prospect/, the repo's or a package's, is not read (src/prospect/dress/furniture.ts reaches Math.cos through armsNode in src/render/layers/heraldry.ts, which is why the finished-plate pins are armless), erring toward passing; the Function constructor reached through a value's constructor chain (Object.constructor, [].constructor.constructor), erring toward passing; a host read through a value the rule does not name (new Error().stack, a locale member behind a computed key that is not a string, a built-in whose result follows the engine's Unicode data, such as normalize), erring toward passing; a TypeScript value position read as a type (an instantiation expression), erring toward passing; and Math behind a cast or a non-null mark ((Math as M).floor, Math!.floor), erring toward reporting";
 
 test("the prospect layer refuses libm, the exponent in both forms, Math reached any way but an exact member, every global outside the approved built-ins, the locale members, import.meta, an ambient declaration, a Node module and a computed import, while a type, a key, a shadow, a comment, a string, a package and a relative module pass", async () => {
-  const plant = [...REFUSED.map(([, line]) => line), ...PASSED];
-  const expected = REFUSED.map(([arm], i): [number, string] => [i + 1, arm]);
+  const refused = [...REFUSED, ...OFF_LIST];
+  assert.ok(OFF_LIST.length > 50, `only ${OFF_LIST.length} off-list Math members and globals were found, so the oracle reads almost nothing`);
+  const plant = [...refused.map(([, line]) => line), ...PASSED, ...ON_LIST];
+  const expected = refused.map(([arm], i): [number, string] => [i + 1, arm]);
   assert.deepEqual(await reports(plant, "src/prospect/compose.ts"), expected, BLIND_SPOTS);
 });
 

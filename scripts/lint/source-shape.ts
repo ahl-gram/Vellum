@@ -290,7 +290,7 @@ const memberKey = (member: Node): string | null =>
   member.type !== "MemberExpression" ? null : member.computed ? wholeString(member.property as Node) : member.property.type === "Identifier" ? member.property.name : null;
 const exactMath = (id: Node): boolean => {
   const member = id.parent;
-  return member?.type === "MemberExpression" && member.object === id && !member.computed && EXACT_MATH.has(memberKey(member) ?? "");
+  return member?.type === "MemberExpression" && !member.computed && EXACT_MATH.has(memberKey(member) ?? "");
 };
 const typeQueried = (node: Node | null): boolean => {
   if (node === null) return false;
