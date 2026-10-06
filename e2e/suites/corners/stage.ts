@@ -32,10 +32,14 @@ type Stage = {
 };
 type Read = { page: string; size: string; s: Stage };
 
+// A room's landing holds its from keyframe until the next rendered frame, reduced motion or not, so a starved runner can hand back two identical reads of a sheet still at 1.004 and 10px low (lane C on PR #795, FL1 on the Glossary); `both` keeps the finished landing listed, so a read after a resize passes at once, and home has none to wait for.
+export const LANDED = `(() => { const a = document.getAnimations().filter((x) => x.animationName === "sheet-land"); return a.every((x) => x.playState === "finished") && (a.length > 0 || !document.body.classList.contains("room")); })()`;
+
 const STAGE: Payload<Stage | { chartRoom: false; ready: boolean }> = `(() => {
-  const ready = document.readyState === "complete" && (!document.fonts || document.fonts.status === "loaded");
+  const loaded = document.readyState === "complete" && (!document.fonts || document.fonts.status === "loaded");
   const sheet = document.getElementById("sheet");
-  if (!document.querySelector("body.chart-room .stage") || !sheet) return { chartRoom: false, ready };
+  if (!document.querySelector("body.chart-room .stage") || !sheet) return { chartRoom: false, ready: loaded };
+  const ready = loaded && ${LANDED};
   const r1 = (n) => Math.round(n * 10) / 10;
   const box = (b) => ({ x: r1(b.left), y: r1(b.top), r: r1(b.right), b: r1(b.bottom) });
   const frame = document.querySelector("[style*='--reserve-right']");

@@ -1,6 +1,7 @@
 // The top row (Issue #762 pull request B; re-floored by pull request C, where a room below 1024 lays out its 1024 page): a wide corner gives way toward the kit's width before the nav wraps, home's nav wraps between rooms, a page that widens again lays out from its sheets, Issue #741's corners are never written, a chart room's slip follows its folio, and a room's band and first row hold at the floor.
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
+import { LANDED } from "./stage.ts";
 
 const KIT = 304;
 const CAP = 480;
@@ -37,7 +38,7 @@ async function open(ctx: SuiteContext, page: string, w: number): Promise<Row> {
   await ctx.send("Emulation.setDeviceMetricsOverride", { width: w, height: H, deviceScaleFactor: 1, mobile: false });
   await ctx.send("Page.navigate", { url: "about:blank" });
   await ctx.send("Page.navigate", { url: `http://127.0.0.1:${ctx.PORT}${page}` });
-  const up: Payload<string | null> = `document.readyState === "complete" && (!document.fonts || document.fonts.status === "loaded") && !!document.querySelector("header.chrome nav.rooms") ? location.pathname : null`;
+  const up: Payload<string | null> = `document.readyState === "complete" && (!document.fonts || document.fonts.status === "loaded") && !!document.querySelector("header.chrome nav.rooms") && ${LANDED} ? location.pathname : null`;
   await makeSettle(ctx)(up, (d) => d === page, `top-row-open-${page}-${w}`, 300);
   return at(ctx, w, `top-row-${page}-${w}`);
 }

@@ -1,7 +1,7 @@
 // The 1024 floor (Issue #762 pull request C; Alex, 2026-10-06, issuecomment-6010814718): a window narrower than 1024 keeps every room's 1024 layout at full size and scrolls sideways, the scroll reaches every piece, a layout fired while scrolled keeps every piece where it stood, and a room that scrolls down keeps its chrome in view.
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
-import { CHART_ROOM_FLOOR, rest } from "./stage.ts";
+import { CHART_ROOM_FLOOR, LANDED, rest } from "./stage.ts";
 
 const SCROLLING_ROOMS = ["/faq/", "/glossary/", "/gallery/"];
 const ROOMS = [...CHART_ROOM_FLOOR, ...SCROLLING_ROOMS];
@@ -13,6 +13,7 @@ type Pieces = { innerW: number; innerH: number; sx: number; over: number; cw: nu
 
 // Page coordinates: the viewport rect plus the root's sideways scroll, so a read taken scrolled compares with one taken at rest.
 const PIECES: Payload<Pieces> = `(() => {
+  if (!document.documentElement || !document.body) return { ready: false, pieces: {} };
   const sx = scrollX, r1 = (n) => Math.round(n * 10) / 10;
   const box = (e) => { const r = e.getBoundingClientRect(); return r.width === 0 && r.height === 0 ? null : [r1(r.left + sx), r1(r.top), r1(r.width), r1(r.height)]; };
   const pieces = {};
@@ -23,7 +24,7 @@ const PIECES: Payload<Pieces> = `(() => {
   }
   const root = document.documentElement, nav = document.querySelector("header.chrome nav.rooms");
   const navLines = nav ? new Set([...nav.querySelectorAll("a, [aria-current]")].map((d) => Math.round(d.getBoundingClientRect().top))).size : 0;
-  return { innerW: innerWidth, innerH: innerHeight, sx, over: root.scrollWidth - root.clientWidth, cw: root.clientWidth, pieces, navLines, ready: document.readyState === "complete" && (!document.fonts || document.fonts.status === "loaded") };
+  return { innerW: innerWidth, innerH: innerHeight, sx, over: root.scrollWidth - root.clientWidth, cw: root.clientWidth, pieces, navLines, ready: document.readyState === "complete" && (!document.fonts || document.fonts.status === "loaded") && ${LANDED} };
 })()`;
 
 const size = (ctx: SuiteContext, w: number, h: number): Promise<unknown> => ctx.send("Emulation.setDeviceMetricsOverride", { width: w, height: h, deviceScaleFactor: 1, mobile: false });
@@ -33,10 +34,21 @@ async function still(ctx: SuiteContext, page: string, w: number, h: number, labe
   return makeSettle(ctx)(PIECES, (d, last) => d.ready && d.innerW === w && d.innerH === h && last !== null && JSON.stringify(d) === JSON.stringify(last), label, 300);
 }
 
-async function open(ctx: SuiteContext, page: string, w: number, h: number): Promise<Pieces> {
+// A read that lands between documents is taken again (lane C on PR #795 caught one with no document element).
+async function load(ctx: SuiteContext, page: string, w: number, h: number): Promise<void> {
   await size(ctx, w, h);
   await ctx.send("Page.navigate", { url: "about:blank" });
   await ctx.send("Page.navigate", { url: `http://127.0.0.1:${ctx.PORT}${page}` });
+  const committed = `location.pathname === ${JSON.stringify(page.split("#")[0])} && document.readyState === "complete" && !!document.querySelector("main")`;
+  for (let i = 0; i < 300; i++) {
+    if (await ctx.evaluate<boolean>(committed).catch(() => false)) return;
+    await ctx.sleep(50);
+  }
+  throw new Error(`floor: ${page} never came up`);
+}
+
+async function open(ctx: SuiteContext, page: string, w: number, h: number): Promise<Pieces> {
+  await load(ctx, page, w, h);
   return still(ctx, page, w, h, `floor ${page} ${w}x${h}`);
 }
 
@@ -240,24 +252,12 @@ export async function fl5KeyboardDrawer(ctx: SuiteContext): Promise<void> {
 // Paper is narrower than 900, so main's narrow blocks dressed it by accident; with them gone each room says what paper drops itself (the step 11 plate read on Issue #762 pull request C, real PDFs at Letter).
 const PRINTED: Payload<{ tab: string | null; shadow: string | null; pad: number | null }> = `(() => { const t = document.getElementById("chart-drawer-tab"), s = document.querySelector("#sheet"), p = document.querySelector("main .sheet"); return { tab: t ? getComputedStyle(t).display : null, shadow: s ? getComputedStyle(s).boxShadow : null, pad: p ? parseFloat(getComputedStyle(p).paddingLeft) : null }; })()`;
 
-// Only the cascade is read here, so the load waits for the parsed page and nothing else, and a read that lands between documents is taken again (lane C on PR #795 caught one with no document element).
-async function loadSheets(ctx: SuiteContext, page: string): Promise<void> {
-  await size(ctx, 640, 800);
-  await ctx.send("Page.navigate", { url: "about:blank" });
-  await ctx.send("Page.navigate", { url: `http://127.0.0.1:${ctx.PORT}${page}` });
-  for (let i = 0; i < 300; i++) {
-    if (await ctx.evaluate<boolean>(`document.readyState === "complete" && !!document.querySelector("main")`).catch(() => false)) return;
-    await ctx.sleep(50);
-  }
-  throw new Error(`FL6: ${page} never came up`);
-}
-
 export async function fl6Paper(ctx: SuiteContext): Promise<void> {
   await ctx.setTouch(false);
   const faults: string[] = [];
   const rows: string[] = [];
   for (const page of ["/explorer/", "/explorer/portfolio/", "/faq/", "/glossary/"]) {
-    await loadSheets(ctx, page);
+    await load(ctx, page, 640, 800);
     const screen = await ctx.evaluate(PRINTED);
     await size(ctx, 816, 1056);
     await ctx.send("Emulation.setEmulatedMedia", { media: "print" });
