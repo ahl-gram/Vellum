@@ -1,4 +1,6 @@
 import { gsap } from "gsap";
+import { revealLeft } from "./station-flight.ts";
+import { overhangOf, sidewaysToPage } from "./valve.ts";
 
 const OPEN_SECONDS = 0.55;
 const OPEN_DELAY_SECONDS = 0.35;
@@ -83,6 +85,33 @@ function anchorOf(doc: Document, id: string): StationVisit | null {
   return Number.isFinite(nx) && Number.isFinite(ny) ? { id, nx, ny } : null;
 }
 
+function revealCard(doc: Document, id: string, reduced: boolean): void {
+  const card = doc.getElementById(`lf-card-${id}`);
+  const host = card?.offsetParent;
+  if (!(card instanceof HTMLElement) || !(host instanceof HTMLElement)) return;
+  const root = doc.documentElement;
+  const rootStyle = getComputedStyle(root);
+  const margin = parseFloat(rootStyle.getPropertyValue("--chrome-x")) * parseFloat(rootStyle.fontSize);
+  const left = host.getBoundingClientRect().left + window.scrollX + card.offsetLeft;
+  const to = revealLeft(window.scrollX, root.clientWidth, left, left + card.offsetWidth, margin);
+  if (to !== window.scrollX) window.scrollTo({ top: 0, left: to, behavior: reduced ? "auto" : "smooth" });
+}
+
+function guardSlipWheels(doc: Document): void {
+  for (const slip of slips(doc)) {
+    slip.addEventListener(
+      "wheel",
+      (e) => {
+        const scroller = e.target instanceof Element ? e.target.closest(".lf-card-scroll") : null;
+        if (scroller !== null && scroller.scrollHeight > scroller.clientHeight) return;
+        if (sidewaysToPage(e.deltaX, e.deltaY, overhangOf(doc.documentElement))) return;
+        e.preventDefault();
+      },
+      { passive: false },
+    );
+  }
+}
+
 export function bindStations(on: StationBindings): void {
   const { doc } = on;
   let opener: HTMLElement | null = null;
@@ -100,22 +129,13 @@ export function bindStations(on: StationBindings): void {
       opener = btn;
       on.fly(visit);
       openCard(doc, visit.id, on.reduced());
+      revealCard(doc, visit.id, on.reduced());
     });
   }
   for (const btn of doc.querySelectorAll(".lf-card-close")) {
     btn.addEventListener("click", () => close(true));
   }
-  for (const slip of slips(doc)) {
-    slip.addEventListener(
-      "wheel",
-      (e) => {
-        const scroller = e.target instanceof Element ? e.target.closest(".lf-card-scroll") : null;
-        if (scroller !== null && scroller.scrollHeight > scroller.clientHeight) return;
-        e.preventDefault();
-      },
-      { passive: false },
-    );
-  }
+  guardSlipWheels(doc);
   doc.addEventListener("keydown", (e) => {
     if (e.key === "Escape") close(true);
   });

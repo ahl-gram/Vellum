@@ -1,4 +1,4 @@
-// The top of every page (Issue #762 pull request B): the head cluster and the right-hand corner share one row, measured off their own boxes. A wide corner gives way toward the kit's width first; then the cluster takes what the corner leaves and the nav wraps between rooms; the band token grows by what the cluster grew.
+// The top of every page (Issue #762 pull requests B and D): the head cluster and the right-hand corner share one row, measured off their own boxes, and a corner wider than the kit's gives way toward the kit's width, never below it, wherever it would run under the cluster.
 export const TOLERANCE = 0.5;
 
 export interface Span {
@@ -22,14 +22,6 @@ export function cornerWidth(cluster: Span, corner: Corner, gap: number): number 
   return width < corner.cap ? width : null;
 }
 
-export function clusterWidth(cluster: Span, corner: Span, gap: number): number | null {
-  return clears(cluster, corner, gap) ? null : corner.left - gap - cluster.left;
-}
-
-export function grownBand(tokenRem: number, growth: number, rootPx: number): string | null {
-  return growth > TOLERANCE ? `${Number((tokenRem + growth / rootPx).toFixed(4))}rem` : null;
-}
-
 type Styled = HTMLElement;
 
 const remOf = (style: CSSStyleDeclaration, prop: string): number => parseFloat(style.getPropertyValue(prop));
@@ -42,35 +34,22 @@ function cornerOf(el: Styled, floorPx: number): Corner {
   return { left: r.left, right: r.right, cap, floor: Math.min(cap, floorPx), pad };
 }
 
-function layRow(cluster: Styled, corner: Styled, nav: Element | null): void {
-  const root = document.documentElement;
-  for (const el of [cluster, corner]) el.style.setProperty("transition", "none");
+function layRow(cluster: Styled, corner: Styled): void {
+  corner.style.setProperty("transition", "none");
   corner.style.removeProperty("max-width");
-  cluster.style.removeProperty("max-width");
-  nav?.classList.remove("wrapped");
-  root.style.removeProperty("--band-h");
-  const rootStyle = getComputedStyle(root);
+  const rootStyle = getComputedStyle(document.documentElement);
   const rootPx = parseFloat(rootStyle.fontSize);
   const gap = remOf(rootStyle, "--chrome-x") * rootPx;
-  const before = cluster.getBoundingClientRect();
-  const width = cornerWidth(before, cornerOf(corner, remOf(rootStyle, "--folio-w") * rootPx), gap);
+  const width = cornerWidth(cluster.getBoundingClientRect(), cornerOf(corner, remOf(rootStyle, "--folio-w") * rootPx), gap);
   if (width !== null) corner.style.setProperty("max-width", `${width}px`);
-  const capped = clusterWidth(before, corner.getBoundingClientRect(), gap);
-  if (capped !== null) {
-    cluster.style.setProperty("max-width", `${capped}px`);
-    nav?.classList.add("wrapped");
-    const band = grownBand(remOf(rootStyle, "--band-h"), cluster.getBoundingClientRect().bottom - before.bottom, rootPx);
-    if (band !== null) root.style.setProperty("--band-h", band);
-  }
-  for (const el of [cluster, corner]) el.style.removeProperty("transition");
+  corner.style.removeProperty("transition");
 }
 
 export function bindTopRow(): void {
   const cluster = document.querySelector<HTMLElement>("header.chrome");
-  const corner = document.querySelector<HTMLElement>(".corner.tr.folio-room") ?? document.querySelector<HTMLElement>(".lf-seed");
+  const corner = document.querySelector<HTMLElement>(".corner.tr.folio-room");
   if (cluster === null || corner === null) return;
-  const nav = cluster.querySelector("nav.rooms");
-  const lay = (): void => { layRow(cluster, corner, nav); };
+  const lay = (): void => { layRow(cluster, corner); };
   lay();
   window.addEventListener("resize", lay);
   void document.fonts.ready.then(lay);

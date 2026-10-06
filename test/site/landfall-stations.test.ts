@@ -8,6 +8,7 @@ import { homeStations, stationSpots, unclaimedDots } from "../../src/site/home/s
 import {
   STATION_FLIGHT_SECONDS,
   STATION_SCALE_FACTOR,
+  revealLeft,
   stationFlightView,
 } from "../../src/site/home/station-flight.ts";
 import {
@@ -137,37 +138,36 @@ test("the station flight frames the anchor beside the card, at the mockup's dept
 
   const anchor = { nx: 0.3103, ny: 0.5906 };
   const shallow = { x: 0, y: 0, s: fit };
-  const wide = stationFlightView(shallow, fit, anchor, view, SHEET, 1280);
+  const wide = stationFlightView(shallow, fit, anchor, view, SHEET);
   assert.ok(Math.abs(wide.s - fit * STATION_SCALE_FACTOR) < 1e-12, "a shallow camera dives to 2.6 of fit");
   assert.ok(
     Math.abs(anchor.nx * SHEET.w * wide.s + wide.x - view.w * 0.4) < 1e-9,
-    "wide: the anchor sits at 0.4 of the stage width, clear of the card at the right",
+    "the anchor sits at 0.4 of the stage width, clear of the card at the right",
   );
   assert.ok(
     Math.abs(anchor.ny * SHEET.h * wide.s + wide.y - view.h / 2) < 1e-9,
-    "wide: the anchor rides the vertical center",
+    "the anchor rides the vertical center",
   );
 
   const deep = { x: 0, y: 0, s: fit * 4 };
-  const held = stationFlightView(deep, fit, anchor, view, SHEET, 1280);
+  const held = stationFlightView(deep, fit, anchor, view, SHEET);
   assert.ok(Math.abs(held.s - fit * 4) < 1e-12, "a deeper camera keeps its depth, as the mockup's Math.max does");
 
-  const narrow = stationFlightView(shallow, fit, anchor, view, SHEET, 900);
-  assert.ok(
-    Math.abs(anchor.nx * SHEET.w * narrow.s + narrow.x - view.w / 2) < 1e-9,
-    "narrow: the anchor centers, the card lies below",
-  );
-  assert.ok(
-    Math.abs(anchor.ny * SHEET.h * narrow.s + narrow.y - view.h * 0.36) < 1e-9,
-    "narrow: the anchor rises to 0.36 of the stage height, clear of the bottom card",
-  );
-  const justWide = stationFlightView(shallow, fit, anchor, view, SHEET, 901);
-  assert.ok(
-    Math.abs(anchor.nx * SHEET.w * justWide.s + justWide.x - view.w * 0.4) < 1e-9,
-    "the cut is the mockup's v.w <= 900: 901 frames wide, and it reads the VIEWPORT, not the stage box",
-  );
   const c = centerFraction(wide, view, SHEET);
-  assert.ok(c.fx > anchor.nx, "the wide framing pushes the anchor left of center, so the card never covers it");
+  assert.ok(c.fx > anchor.nx, "the framing pushes the anchor left of center, so the card never covers it");
+});
+
+test("UR1 an opened slip on a window narrower than the page takes the least sideways scroll that shows it whole, a margin clear (Alex, 2026-10-06, Issue #762; the slip measured at page 608 to 960)", () => {
+  const near = (got: number, want: number, why: string) => { assert.ok(Math.abs(got - want) < 1e-9, `${why}: got ${got}, want ${want}`); };
+  near(revealLeft(0, 640, 608, 960, 25.6), 345.6, "640: the slip's right edge comes in by the margin");
+  near(revealLeft(0, 800, 608, 960, 25.6), 185.6, "800");
+  near(revealLeft(0, 900, 608, 960, 25.6), 85.6, "900");
+  near(revealLeft(0, 1024, 608, 960, 25.6), 0, "1024: already whole, no scroll");
+  near(revealLeft(0, 560, 608, 960, 25.6), 425.6, "560");
+  near(revealLeft(0, 380, 608, 960, 25.6), 582.4, "380, narrower than the slip and its margins: the slip's left edge stands at the margin");
+  near(revealLeft(346, 640, 608, 960, 25.6), 346, "a slip already in the window leaves the scroll where it is");
+  near(revealLeft(700, 640, 608, 960, 25.6), 582.4, "a slip left of the window brings its left edge in by the margin");
+  near(revealLeft(0, 640, 10, 362, 25.6), 0, "never a scroll below 0");
 });
 
 test("the idle drift breathes at the mockup's numbers and never mutates the camera (#458)", () => {

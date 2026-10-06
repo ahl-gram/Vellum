@@ -6,7 +6,7 @@ import type { LandfallKit } from "./landfall/kit.ts";
 import { stagePoint } from "./landfall/reads.ts";
 import { l1aConsumed, l1bCloseClamp, l1cNotDeadZone, l1dStandOff, l1dReleased, l1eAbsorbed } from "./landfall/wheel.ts";
 import { l1jHint, l1kSurfaces, l1fScrolledPage, l1gKeys, l1hDrift, l1iCluster } from "./landfall/page.ts";
-import { l5HowOpens, l5bArrowScrolls, l2ProseScrolls, l6HeadStays, l3HeadSwallows, l7WideClear, l4l8Enters, l7bNarrowClear, l8bNarrowTargets } from "./landfall/panel.ts";
+import { l5HowOpens, l5bArrowScrolls, l2ProseScrolls, l6HeadStays, l3HeadSwallows, l7WideClear, l4l8Enters } from "./landfall/panel.ts";
 import { l9aOneFinger, l9bPinch, l9cTwoFingerPan } from "./landfall/touch.ts";
 import { l9dCeiling, l9d2Debt, l9eFloor } from "./landfall/clamps.ts";
 import { l9fPipGestures, l9hControlTap } from "./landfall/controls.ts";
@@ -20,7 +20,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const k = entersKit(k1);
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   await l1Desktop(k);
-  await l7bNarrow(k);
+  await l9Touch(k);
   await l10NoScriptGet(k);
   await l11IgnoresQuery(k);
   gate.check("L12 the landfall hardening flow is clean (no console errors, no new 4xx)");
@@ -58,13 +58,9 @@ async function l1Desktop(k: LandfallKit): Promise<void> {
   await l4l8Enters(k);
 }
 
-async function l7bNarrow(k: LandfallKit): Promise<void> {
-  const { evaluate, setNarrowViewport, setMobileViewport, clearMobile, settleHome } = k;
-  // L7b and L8b read the narrow layout and press no touch; L9 is the touch contract on a tablet at the 1024 floor (Issue #761), its emulation set once before the boot that binds touch and never changed after the first real touch (the suite-zoom-gestures trap).
-  await setNarrowViewport(390, 844);
-  const settled7 = await settleHome();
-  await l7bNarrowClear(k, settled7);
-  await l8bNarrowTargets(k);
+async function l9Touch(k: LandfallKit): Promise<void> {
+  const { evaluate, setMobileViewport, clearMobile, settleHome } = k;
+  // L9 is the touch contract on a tablet at the 1024 floor (Issue #761), its emulation set once before the boot that binds touch and never changed after the first real touch (the suite-zoom-gestures trap).
   await setMobileViewport(1024, 768);
   await k.send("Page.navigate", { url: "about:blank" });
   await settleHome();

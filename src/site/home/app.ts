@@ -17,7 +17,7 @@ import { bindStations } from "./cards.ts";
 import { DRIFT_SECONDS, IDLE_DELAY_MS, driftTarget } from "./drift.ts";
 import { bindStageInput } from "./input.ts";
 import { STATION_FLIGHT_SECONDS, stationFlightView } from "./station-flight.ts";
-import { createValve } from "./valve.ts";
+import { createValve, overhangOf, sidewaysToPage } from "./valve.ts";
 import { playCeremony } from "./veil.ts";
 
 const reducedQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -137,7 +137,8 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
       assign({ x: cam.x + dx, y: cam.y + dy, s: cam.s });
       settle();
     },
-    wheelZoom: (px, py, deltaY) =>
+    wheelZoom: (px, py, deltaY, deltaX) =>
+      !sidewaysToPage(deltaX, deltaY, overhangOf(document.documentElement)) &&
       valve(performance.now(), deltaY, window.scrollY, () => {
         // The drift's ±1.5% wander is ambient, not the user's zoom: measured from the drifted scale, a clamp-parked camera reads the snap-back as consumed and eats the release flick (PR #481 skeptic finding 1; e2e L1h).
         if (driftBase !== null) {
@@ -166,7 +167,7 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
     doc: document,
     reduced,
     fly: (visit) =>
-      flyTo(stationFlightView(cam, fit, visit, view(), SHEET, window.innerWidth), reduced() ? 0 : STATION_FLIGHT_SECONDS),
+      flyTo(stationFlightView(cam, fit, visit, view(), SHEET), reduced() ? 0 : STATION_FLIGHT_SECONDS),
   });
 
   new ResizeObserver(() => {
@@ -188,11 +189,11 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
     playCeremony({
       doc: document,
       chart: chart instanceof HTMLImageElement ? chart : null,
-      land: (seconds) => flyTo(landfallView(view(), SHEET, fit, window.innerWidth), seconds),
+      land: (seconds) => flyTo(landfallView(view(), SHEET, fit), seconds),
     });
   } else {
     document.getElementById("lf-veil")?.remove();
-    assign(landfallView(view(), SHEET, fit, window.innerWidth));
+    assign(landfallView(view(), SHEET, fit));
     settle();
   }
   armDrift();

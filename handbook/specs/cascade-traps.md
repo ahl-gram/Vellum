@@ -59,6 +59,11 @@ declaration you write to get there. The checklist form of the same lines is `vel
   Their overflow also counts in the element's own `scrollWidth` and `scrollHeight`, so a script that
   sizes a capture or a scroll by that body reads past anything a reader can reach; read the
   document's instead.
+- **An absolutely positioned box with no positioned ancestor lays out against the window, not the
+  floored page.** Its containing block is the initial one, the window's size, so under the 1024
+  floor a shrink-to-fit box there wraps at a narrow window while every piece around it keeps its
+  1024 seat. Home's riding head cluster is one; its body is made its containing block
+  (`position: relative`), and `FL1` in `e2e/suites/corners/floor.ts` reads it at a 400 window.
 - **An affordance gate is `(hover: none) and (pointer: coarse)`, never `(hover: none)` on its own**,
   wherever it is asked, which today is a `matchMedia` call rather than a sheet. A machine with no pointing device at all reports `hover: none`
   together with `pointer: none`, so the bare query matches it too and stands the affordance down

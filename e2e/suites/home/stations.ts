@@ -1,7 +1,7 @@
 import { dropExpectedCancellations } from "../../support/console.ts";
 import { buttonPoint } from "../../support/home.ts";
 import type { Cam } from "../../support/home.ts";
-import type { Payload, Point, SuiteContext } from "../../types.ts";
+import type { Payload, SuiteContext } from "../../types.ts";
 import type { HomeKit } from "./kit.ts";
 
 type Flight = Awaited<ReturnType<typeof h14aFlight>>;
@@ -131,97 +131,6 @@ export async function h14cLegend({ evaluate, check, sleep, pressKey, clickAt }: 
   );
   await pressKey("Escape", "Escape", 27);
   await sleep(500);
-}
-
-export async function h16bOpen({ evaluate, sleep, clickAt }: HomeKit) {
-  // The legend stands down under 900px (Issue #461 phone doors), so the narrow entry is the station pip itself, the same door desktop flights use.
-  const sheetPt = await evaluate(buttonPoint('.lf-station[data-station="atlas"]'));
-  if (sheetPt !== null) await clickAt(Math.round(sheetPt.x), Math.round(sheetPt.y));
-  let opened16 = false;
-  for (let i = 0; i < 80; i++) {
-    try {
-      opened16 = await evaluate<boolean>(`(() => {
-        const card = document.getElementById("lf-card-atlas");
-        if (!card || card.hidden) return false;
-        const cs = getComputedStyle(card);
-        return cs.visibility !== "hidden" && Number(cs.opacity) > 0.95;
-      })()`);
-    } catch {}
-    if (opened16 === true) break;
-    await sleep(75);
-  }
-  return sheetPt;
-}
-
-export async function h16bBottomSheet({ evaluate, check, shoot, sleep }: SuiteContext, settled16b: Cam | null, sheetPt: Point | null): Promise<void> {
-  // The open tween ends on rotate 0 / y 0; a mid-tween rect leans past the viewport edge by design, so the geometry is read after it settles.
-  await sleep(700);
-  let sheet16 = null;
-  try {
-    sheet16 = await evaluate<{ open: boolean; slipUp: boolean; inViewport: boolean; cardRect: number[]; anchorClear: boolean; closeReach: boolean; scrollW: number } | null>(`(() => {
-      const stage = document.getElementById("lf-stage");
-      const sheet = document.getElementById("lf-sheet");
-      const btn = document.querySelector('.lf-station[data-station="atlas"]');
-      const card = document.getElementById("lf-card-atlas");
-      if (!stage || !sheet || !btn || !card) return null;
-      const cs = getComputedStyle(card);
-      const cr = card.getBoundingClientRect();
-      const sr = stage.getBoundingClientRect();
-      const m = new DOMMatrixReadOnly(getComputedStyle(sheet).transform);
-      const anchorVX = sr.left + Number(btn.dataset.nx) * 1500 * m.a + m.e;
-      const anchorVY = sr.top + Number(btn.dataset.ny) * 1157.931 * m.a + m.f;
-      const close = card.querySelector(".lf-card-close");
-      const cb = close.getBoundingClientRect();
-      const hit = document.elementFromPoint(cb.x + cb.width / 2, cb.y + cb.height / 2);
-      const slip = getComputedStyle(btn.querySelector(".lf-station-slip"));
-      return {
-        open: !card.hidden && cs.visibility !== "hidden" && Number(cs.opacity) > 0.95,
-        slipUp: slip.display !== "none",
-        inViewport: cr.left >= -0.5 && cr.right <= 390.5 && cr.top >= -0.5 && cr.bottom <= 844.5,
-        cardRect: [cr.left, cr.top, cr.right, cr.bottom].map((v) => Math.round(v * 10) / 10),
-        anchorClear: !(anchorVX >= cr.left && anchorVX <= cr.right && anchorVY >= cr.top && anchorVY <= cr.bottom),
-        closeReach: hit !== null && (hit === close || close.contains(hit)),
-        scrollW: document.documentElement.scrollWidth,
-      };
-    })()`);
-  } catch {}
-  check(
-    "H16b at 390 the slip lies as a bottom sheet fixed whole within the viewport, every edge, the flown-to anchor clear above it, its close reachable, the station name tags STANDING (the boxed-era stand-down retired with the full bleed, #461), nothing scrolling sideways",
-    sheet16 !== null && sheet16.open && sheet16.slipUp && sheet16.inViewport && sheet16.anchorClear && sheet16.closeReach && sheet16.scrollW === 390,
-    JSON.stringify({ settled16b: !!settled16b, sheetPt, sheet16 }),
-  );
-  await shoot("home-station-card-390.png");
-}
-
-export async function h16cLegendStands({ evaluate, check, sleep, pressKey }: HomeKit): Promise<void> {
-  await pressKey("Escape", "Escape", 27);
-  // The card must be fully CLOSED before the hit-tests below, or a mid-close sheet intercepts them on a slow CI runner (the poll-break class): poll hidden, never a timed sleep.
-  for (let i = 0; i < 80; i++) {
-    let anyOpen = true;
-    try { anyOpen = await evaluate<boolean>(`[...document.querySelectorAll(".lf-card")].some((c) => !c.hidden)`); } catch {}
-    if (anyOpen === false) break;
-    await sleep(75);
-  }
-  // Round-3 plate finding: the unconditional .landfall .stage.cam .lf-legend show-rule (0,4,0) beat the media-scoped hide (0,1,0), so scripts-on phones kept the legend AND it sat on two of the three camera buttons. Resolved computed styles only, the Issue #288 lesson.
-  let doors16c = null;
-  try {
-    doors16c = await evaluate<{ cam: boolean; legendDisplay: string | null; hits: boolean[] }>(`(() => {
-      const legend = document.querySelector(".lf-legend");
-      const cam = !!document.querySelector(".stage.cam");
-      const hits = [...document.querySelectorAll("#lf-controls button")].map((b) => {
-        const r = b.getBoundingClientRect();
-        const hit = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
-        return hit === b || b.contains(hit);
-      });
-      return { cam, legendDisplay: legend ? getComputedStyle(legend).display : null, hits };
-    })()`);
-  } catch {}
-  check(
-    "H16c at 390 with the camera armed the legend stands down and every camera button answers its own tap (#461 phone doors, the specificity flip the round-3 plate caught)",
-    doors16c !== null && doors16c.cam && doors16c.legendDisplay === "none" &&
-      doors16c.hits.length > 0 && doors16c.hits.every(Boolean),
-    JSON.stringify({ doors16c }),
-  );
 }
 
 export function h17Clean(ctx: SuiteContext, errBase3: number, httpBase3: number): void {

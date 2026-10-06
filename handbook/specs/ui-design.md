@@ -47,6 +47,12 @@ the role variables are declared in `public/fonts.css`:
 stack, and that side is the byte-determinism contract: changing it owes a regen. A guard refuses any
 Fell or Garamond leaking into rendered SVG. Keep the boundary.
 
+**The prospect plate is lettered in neither.** Its words are IM Fell DW Pica, roman, italic and small
+capitals, drawn as outlines from the committed tables under `src/prospect/letter/` (Issue #754), so a
+plate names no font and draws the same on every device. The face has no "№", so the plate's is
+drawn by hand in the face's ink (`src/prospect/letter/numero.ts`). That face is the plate's alone: it is not
+self-hosted, never joins `public/fonts.css`, and its tables are written only by `npm run plate-face`.
+
 Things the Fell faces do that have each cost something:
 
 - **Fell has no bold cut.** Asking for weight 700 gets synthetic bold, which looks like a rendering
@@ -127,8 +133,9 @@ chrome; it does not pan at rest, and the reader zooms to see beneath the chrome 
 until the post-use review:** the floor's trigger and its size. **A room narrower than 1024 keeps its
 1024 layout at full size and the window scrolls sideways over it** (Alex, 2026-10-06, Issue #762):
 there is one layout, every piece of the chrome stands on the 1024 page where it stands at 1024, and
-the fit reads that page at the window's height. Home joins the floor in its own pull request and
-until then lays out at the window's width. **A chart room without a stage is the exception and it does scroll**, its
+the fit reads that page at the window's height. Home takes the same floor: its stage, its camera and
+its corners stand on the 1024 page, and its riding cluster is laid out against that page, never the
+window. **A chart room without a stage is the exception and it does scroll**, its
 content passing under the fixed chrome, which is why it pools every piece of that chrome rather than
 the cluster alone, and why **it wears no vignettes**: a vignette is a fixed darkening band, and on a
 scrolling page it washes out whatever passes through it. Four corners, each a named piece of the kit:
@@ -137,11 +144,10 @@ scrolling page it washes out whatever passes through it. Four corners, each a na
   page with a seat in the route tree, the trail under it, directly on the deep. Fixed in a room,
   riding the page on home. The motto keeps its line and the wordmark its size at every width. **The
   cluster and the right-hand corner share one top row** on every page, laid out from their own boxes
-  by `src/site/shell/top-row.ts`: a corner wider than the kit's gives way toward the kit's width first,
-  then the cluster takes the width the corner leaves and the nav wraps between rooms, never inside a
-  room's name, at a pitch that keeps a thumb's 24px between its doors; the two boxes stand at least
-  `--chrome-x` apart, less a half pixel, wider than any backing the corner draws toward the nav. With scripts off
-  home's window below 1024 can overlap.
+  by `src/site/shell/top-row.ts`: a corner wider than the kit's gives way toward the kit's width,
+  never below it, so the two boxes stand at least `--chrome-x` apart, less a half pixel, wider than
+  any backing the corner draws toward the nav. The nav keeps one line and never wraps; at a larger
+  browser text size it can run under the corner, a cost recorded in `handbook/errata/site.md`.
 - **The room folio**, top right: the room's name and tagline, with the room's *one* primary control
   under them. One control. The rest of the press is the legend row. A room that widens its folio
   declares its cap as `--folio-cap` over the kit's `--folio-w`, with no width query, and the top row
@@ -176,9 +182,7 @@ strengthened underline.
 replaces a table of contents with an **index slip** that inks the section being read and keeps it in
 view. Folding the index hands the sheet the width, in one smooth settle, and gives it back the same
 way. **The band buys the ground for what the cluster carries**: its height is keyed to the
-cluster's contents, never to a page's name, and raised only on a room that renders a band. When the
-top row caps the cluster, the band token grows by exactly what the cap added to the cluster's height,
-on every page that reads it.
+cluster's contents, never to a page's name, and raised only on a room that renders a band.
 
 **A room's name stands in the corner, not on the sheet.** Exactly one `h1` per page, and it is the
 first heading; the wordmark is the `h1` on home alone, because home is roomless.
@@ -331,7 +335,7 @@ makes iOS Safari zoom the page on focus.
 
 **The ruled phone width is 390.** 320 is checked, and its squeezes are accepted and recorded rather
 than designed for. **The head cluster and the room's right-hand corner never overlap, at any width
-from 1024 up on a room, which a narrower window lays out as its 1024 page, and from 640 up on home:** a room folio line, a control or a widened corner is written to fit beside the cluster
+from 1024 up, which a narrower window lays out as its 1024 page:** a room folio line, a control or a widened corner is written to fit beside the cluster
 rather than accepted as a squeeze, the top row holds it by script, and the sweep in
 `e2e/suites/corners.ts` holds every page to it. A deviation that is knowingly shipped is recorded with its measurement, not left
 silent, because an unrecorded one reads to the next session as a defect and gets "fixed" back.

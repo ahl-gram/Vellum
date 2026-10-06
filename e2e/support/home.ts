@@ -1,6 +1,5 @@
 // Shared helpers for the homepage-hosted suites (Issue #460): the camera oracle and real-input plumbing suite-home built across Issue #455-Issue #470, lifted here so the second landfall suite drives the same stage; extraction only, no check added or changed (ratified 2026-08-25 on Issue #460).
 
-// The camera's state measured against the same stage box and constants it uses; the landfall breakpoint reads the VIEWPORT, as the mockup's v.w < 900 does (skeptic finding 1 on PR #467: the stage box is narrower than the viewport, so keying on it fired the narrow framing up to 947px).
 import type { Payload, Point, SuiteContext } from "../types.ts";
 
 export type Cam = { veil: boolean; lifting: boolean; status: string | null; scale: number; x: number; y: number; fit: number; expected: number };
@@ -15,7 +14,7 @@ export const readCam: Payload<Cam | null> = `(() => {
   const v = document.getElementById("lf-veil");
   return { veil: !!v, lifting: !!v && v.classList.contains("lifting"),
     status: v ? (v.querySelector(".veil-status")?.textContent ?? null) : null,
-    scale: m.a, x: m.e, y: m.f, fit, expected: fit * (window.innerWidth < 900 ? 1.6 : 1.72) };
+    scale: m.a, x: m.e, y: m.f, fit, expected: fit * 1.72 };
 })()`;
 
 export const atLandfall = (s: Cam | null): boolean => !!s && !s.veil && Math.abs(s.scale - s.expected) < 1e-3;

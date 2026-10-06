@@ -46,7 +46,6 @@
   font-size: 8.5px; letter-spacing: 0.08em; color: var(--chart-ink); white-space: nowrap;
   text-shadow: 0 0 4px var(--chart-paper), 0 0 8px var(--chart-paper);
 }
-/* Home seats the kit's Glass with literal offsets, not the chrome vars, which src/layouts/BaseLayout.astro narrows under 720px while home's camera never moved; what the kit's corner sets beyond dress is stood down here, and `stoodDown` in `test/site/kit-scope.test.ts` pins that list. */
 #lf-controls { display: none; position: absolute; right: 1.6rem; bottom: 1.4rem; z-index: auto; animation: none; pointer-events: auto; }
 #lf-controls.on { display: flex; }
 #lf-controls button:focus-visible { outline-color: var(--ink-dark); }
@@ -78,6 +77,7 @@
   background: var(--parchment); border-radius: 50%;
 }
 /* On home the cluster rides the page, so the chart and its chrome scroll away together and nothing fixed collides with the shelf (`L1i` in `e2e/suites/landfall/page.ts` reads the ride, `RH9b` in `e2e/suites/runninghead/heads.ts` the wash); body-child specificity because the layout's inline global sheet renders after the page css. */
+body { position: relative; }
 body > header.chrome { position: absolute; }
 header.chrome::before {
   content: ""; position: absolute; inset: -4rem -2.2rem -1.8rem -4rem; z-index: -1; pointer-events: none;
@@ -233,7 +233,6 @@ header.chrome::before {
   /* Centred by abspos and margin auto, never translateY(-50%), since the open tween writes the card's transform; border-box because the shell has no global reset; right 4rem keeps the slip clear of the zoom-controls column on short viewports. */
   box-sizing: border-box;
   right: 4rem; top: 0; bottom: 0; margin: auto 0; height: fit-content;
-  /* Desktop only: the narrow block lifts the cap, where the % would resolve against the viewport instead of .landfall and clip the sheet's Enter door. */
   max-height: calc(100% - 2rem); overflow: hidden;
   width: min(22rem, calc(100% - 8rem));
   background: var(--parchment-panel);
@@ -292,7 +291,7 @@ header.chrome::before {
   max-height: calc(100% - 3rem);
   display: flex; flex-direction: column;
 }
-.lf-card-scroll { overflow-y: auto; overscroll-behavior: contain; min-height: 0; }
+.lf-card-scroll { overflow-y: auto; overscroll-behavior-y: contain; min-height: 0; }
 .lf-card-how .how { font-size: 0.95rem; line-height: 1.55; margin: 0.8rem 0 0; }
 .lf-card-how .underhood { margin: 0.8rem 0 0; }
 .notice-stamp {
@@ -340,32 +339,6 @@ header.chrome::before {
   font-size: 0.92rem; color: var(--parchment);
 }
 
-@media (max-width: 900px) {
-  body > header.chrome { max-width: calc(100vw - 15rem); }
-  .seed-controls .control { width: 4.6rem; }
-  .lf-legend, .landfall .stage.cam .lf-legend { display: none; }
-  /* The bottom sheet is fixed to the viewport: inside the boxed stage it was taller than the stage and buried the chart; z-index stays under the veil's 50. */
-  .lf-card {
-    position: fixed; right: 0; left: 0; top: auto; bottom: 0; margin: 0;
-    width: 100%; outline-offset: -8px; z-index: 40;
-    padding: 1.2rem 1.3rem 1.1rem;
-    max-height: none; overflow: visible;
-  }
-  .lf-card-arms img { width: 42px; }
-  .lf-card-how { max-height: 45vh; }
-  .lf-coords.on { display: none; }
-  .notice-stamp { display: none; }
-  .lf-seed { right: 1rem; top: 0.9rem; max-width: 12rem; padding: 0.7rem 0.7rem 0.75rem; }
-  .seed-controls { gap: 0.35rem; }
-  .lf-seed .control { padding: 0.32rem 0.45rem; }
-  .lf-seed .primary { padding: 0.32rem 0.7rem; }
-  .seed-hook { font-size: 0.85rem; }
-  .seed-gloss { display: none; }
-  .lf-shelf { padding: 3rem 1.2rem 3.5rem; }
-  .lf-shelf-grid { grid-template-columns: 1fr; gap: 2.6rem; }
-  .lf-more { bottom: 1.2rem; }
-}
-
 .landfall .stage:not(.cam) ~ .lf-card:not(.lf-card-how)[hidden] {
   display: block; position: static;
   width: auto; max-width: 46rem; height: auto;
@@ -388,18 +361,6 @@ header.chrome::before {
     outline-width: 3px;
   }
 }
-@media (max-width: 900px) {
-  @keyframes lf-doors-reveal {
-    to {
-      visibility: visible;
-      max-height: 100rem;
-      margin-top: 2rem;
-      padding: 1.2rem 1.3rem 1.1rem;
-      border-width: 1px;
-      outline-width: 3px;
-    }
-  }
-}
 
 .veil {
   position: fixed; inset: 0; z-index: 50;
@@ -410,7 +371,7 @@ header.chrome::before {
 .veil-inner { text-align: center; }
 .veil-wordmark {
   font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
-  font-size: clamp(3rem, 8vw, 4.6rem);
+  font-size: 4.6rem;
   letter-spacing: 0.14em;
   color: var(--parchment-bright);
   line-height: 1.1;

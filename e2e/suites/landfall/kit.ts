@@ -1,6 +1,5 @@
 import { readCam, buttonPoint, makeStage } from "../../support/home.ts";
 import type { Point, SuiteContext } from "../../types.ts";
-import { narrowClosed, narrowAtTop, narrowReachable } from "./narrow.ts";
 import type { Headroom } from "./reads.ts";
 
 export type StageKit = ReturnType<typeof stageKit>;
@@ -98,37 +97,24 @@ export function gestureKit(k0: StageKit) {
 
 export function entersKit(k1: GestureKit) {
   const { evaluate, sleep, pressKey, clickAt, scrollY, centerOf, camScale, wheelAt } = k1;
-  const measureEnters = async (label: string) => {
+  const measureEnters = async () => {
     const boxes = [];
     let swallowed = null;
     for (const id of ["atlas", "explorer", "reading-room", "gallery"]) {
-      // The legend stands down under 900px (Issue #461 phone doors): narrow enters by the station pip, desktop keeps the legend chip it is really testing. At 390 the open card is a full-width fixed bottom sheet over the pips and controls, so each entry first Escapes any open card and polls it CLOSED, then resets the camera and polls until the hit-test actually reaches the pip (a timed sleep here is the CI-red poll-break class: the break must demand what the click needs).
       let open = false;
-      // The reachability poll must GATE the click (its expiry used to fall through to a blind click, and the now-scrollable page gave a slow lane a new way to miss: CI L8b, atlas + gallery never opened), so the whole entry retries: close, pin scroll, reset the camera, poll the hit-test, and only a proven pip gets the click.
-      const attempts = label === "narrow" ? 3 : 1;
-      for (let attempt = 0; attempt < attempts && !open; attempt++) {
-        if (label === "narrow") {
-          await narrowClosed(k1);
-          await narrowAtTop(k1);
-          const reachable = await narrowReachable(k1, id);
-          if (!reachable) continue;
-        }
-        const chipPt = await evaluate(buttonPoint(
-          label === "narrow" ? `.lf-station[data-station="${id}"]` : `.lf-legend-btn[data-station="${id}"]`,
-        ));
-        if (chipPt !== null) await clickAt(Math.round(chipPt.x), Math.round(chipPt.y));
-        for (let i = 0; i < 80; i++) {
-          try {
-            open = await evaluate<boolean>(`(() => { const c = document.getElementById("lf-card-${id}"); if (!c || c.hidden) return false; const cs = getComputedStyle(c); return cs.visibility !== "hidden" && Number(cs.opacity) > 0.95; })()`);
-          } catch {}
-          if (open === true) break;
-          await sleep(75);
-        }
+      const chipPt = await evaluate(buttonPoint(`.lf-legend-btn[data-station="${id}"]`));
+      if (chipPt !== null) await clickAt(Math.round(chipPt.x), Math.round(chipPt.y));
+      for (let i = 0; i < 80; i++) {
+        try {
+          open = await evaluate<boolean>(`(() => { const c = document.getElementById("lf-card-${id}"); if (!c || c.hidden) return false; const cs = getComputedStyle(c); return cs.visibility !== "hidden" && Number(cs.opacity) > 0.95; })()`);
+        } catch {}
+        if (open === true) break;
+        await sleep(75);
       }
       await sleep(400);
       const box = await evaluate<{ id: string; open: boolean; w: number; h: number } | null>(`(() => { const a = document.querySelector("#lf-card-${id} .lf-card-enter"); if (!a) return null; const r = a.getBoundingClientRect(); return { id: "${id}", open: ${open}, w: r.width, h: r.height }; })()`);
       boxes.push(box);
-      if (id === "atlas" && label === "desktop") {
+      if (id === "atlas") {
         const cardPt = await centerOf("#lf-card-atlas .lf-card-prose");
         const yA = await scrollY();
         const sA = await camScale();
