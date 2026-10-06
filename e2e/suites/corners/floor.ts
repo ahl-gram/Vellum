@@ -1,10 +1,12 @@
-// The 1024 floor (Issue #762 pull request C; Alex, 2026-10-06, issuecomment-6010814718): a window narrower than 1024 keeps every room's 1024 layout at full size and scrolls sideways, the scroll reaches every piece, a layout fired while scrolled keeps every piece where it stood, and a room that scrolls down keeps its chrome in view.
+// The 1024 floor (Issue #762 pull request C; Alex, 2026-10-06, issuecomment-6010814718): a window narrower than 1024 keeps every page's 1024 layout at full size and scrolls sideways, the scroll reaches every piece, a layout fired while scrolled keeps every piece where it stood, and a room that scrolls down keeps its chrome in view.
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import { CHART_ROOM_FLOOR, LANDED, rest } from "./stage.ts";
 
 const SCROLLING_ROOMS = ["/faq/", "/glossary/", "/gallery/"];
 const ROOMS = [...CHART_ROOM_FLOOR, ...SCROLLING_ROOMS];
+const HOME = "/";
+const SCROLLS_DOWN = [...SCROLLING_ROOMS, HOME];
 const FLOOR = 1024;
 const TOLERANCE = 0.5;
 
@@ -17,14 +19,18 @@ const PIECES: Payload<Pieces> = `(() => {
   const sx = scrollX, r1 = (n) => Math.round(n * 10) / 10;
   const box = (e) => { const r = e.getBoundingClientRect(); return r.width === 0 && r.height === 0 ? null : [r1(r.left + sx), r1(r.top), r1(r.width), r1(r.height)]; };
   const pieces = {};
-  for (const s of ["header.chrome", "main", ".corner.tr", ".corner.bl", ".corner.br", ".slip", ".slip-tab", ".legend", ".chart-drawer-tab", "#sheet", ".strip", ".sheet h2"]) {
+  for (const s of ["header.chrome", "main", ".corner.tr", ".corner.bl", ".corner.br", ".slip", ".slip-tab", ".legend", ".chart-drawer-tab", "#sheet", ".strip", ".sheet h2", "#lf-stage", "#lf-sheet", ".lf-seed", ".lf-legend", "#lf-controls", ".lf-coords", ".notice-stamp", ".lf-shelf"]) {
     const e = document.querySelector(s);
     const b = e && getComputedStyle(e).visibility !== "hidden" ? box(e) : null;
     if (b) pieces[s] = b;
   }
   const root = document.documentElement, nav = document.querySelector("header.chrome nav.rooms");
   const navLines = nav ? new Set([...nav.querySelectorAll("a, [aria-current]")].map((d) => Math.round(d.getBoundingClientRect().top))).size : 0;
-  return { innerW: innerWidth, innerH: innerHeight, sx, over: root.scrollWidth - root.clientWidth, cw: root.clientWidth, pieces, navLines, ready: document.readyState === "complete" && (!document.fonts || document.fonts.status === "loaded") && ${LANDED} };
+  const st = document.querySelector("#lf-stage.cam"), cam = st && st.querySelector("#lf-sheet");
+  // On a fresh load home's sheet can report its stage-sized box after the camera is written and the page is complete (main's build too, and on CI longer, measured 2026-10-06), so the camera counts as laid out only once the sheet's box is the one the page wrote.
+  const wrote = cam && cam.style.transform ? new DOMMatrixReadOnly(cam.style.transform) : null, cr = cam ? cam.getBoundingClientRect() : null, sr = st ? st.getBoundingClientRect() : null;
+  const camera = !document.getElementById("lf-stage") || (!!wrote && Math.abs(cr.width - cam.offsetWidth * wrote.a) < 1 && Math.abs(cr.left - sr.left - wrote.e) < 1 && Math.abs(cr.top - sr.top - wrote.f) < 1);
+  return { innerW: innerWidth, innerH: innerHeight, sx, over: root.scrollWidth - root.clientWidth, cw: root.clientWidth, pieces, navLines, ready: document.readyState === "complete" && (!document.fonts || document.fonts.status === "loaded") && camera && ${LANDED} };
 })()`;
 
 const size = (ctx: SuiteContext, w: number, h: number): Promise<unknown> => ctx.send("Emulation.setDeviceMetricsOverride", { width: w, height: h, deviceScaleFactor: 1, mobile: false });
@@ -73,7 +79,7 @@ export async function fl1Floor(ctx: SuiteContext): Promise<void> {
   await ctx.setTouch(false);
   const faults: string[] = [];
   const rows: string[] = [];
-  for (const page of ROOMS) {
+  for (const page of [...ROOMS, HOME]) {
     const fresh = await open(ctx, page, FLOOR, 800);
     const wide = await resized(ctx, page, 1100, 800);
     const at800 = await resized(ctx, page, FLOOR, 800);
@@ -83,17 +89,17 @@ export async function fl1Floor(ctx: SuiteContext): Promise<void> {
     faults.push(...overhang(`${page} 640x800`, narrow), ...differences(`${page} 640x800`, narrow, fresh));
     const n900 = await resized(ctx, page, 900, 800);
     faults.push(...overhang(`${page} 900x800`, n900), ...differences(`${page} 900x800`, n900, at800));
-    const short = await resized(ctx, page, 640, 400);
-    faults.push(...overhang(`${page} 640x400`, short), ...differences(`${page} 640x400`, short, at400));
-    if (SCROLLING_ROOMS.includes(page)) {
+    if (SCROLLS_DOWN.includes(page)) {
       const slim = await resized(ctx, page, 400, 800);
       faults.push(...overhang(`${page} 400x800`, slim), ...differences(`${page} 400x800`, slim, at800));
       if (slim.navLines !== 1) faults.push(`${page} 400x800: the nav runs to ${slim.navLines} lines`);
     }
+    const short = await resized(ctx, page, 640, 400);
+    faults.push(...overhang(`${page} 640x400`, short), ...differences(`${page} 640x400`, short, at400));
     rows.push(`${page} ${Object.keys(at800.pieces).length} pieces, overhang ${narrow.over} at 640`);
   }
   ctx.check(
-    "FL1 a window narrower than 1024 lays out every room's 1024 page at full size and scrolls sideways by exactly the page's overhang: every piece of chrome, the sheet and the main column stand where they stand at 1024 of the same height, freshly loaded at 640x800 and resized to 900x800 and 640x400, the rooms that scroll down at 400x800 too with their nav on one line; and no room scrolls sideways at 1024 or 1100 (Alex, 2026-10-06, on Issue #762)",
+    "FL1 a window narrower than 1024 lays out every page's 1024 layout at full size and scrolls sideways by exactly the page's overhang: every piece of chrome, the sheet and the main column (on home its stage, its camera's sheet, its seed panel, legend, Glass, bearing line, stamp and shelf) stand where they stand at 1024 of the same height, freshly loaded at 640x800 and resized to 900x800 and 640x400, the pages that scroll down at 400x800 too with their nav on one line; and no page scrolls sideways at 1024 or 1100 (Alex, 2026-10-06, on Issue #762)",
     faults.length === 0,
     `${rows.join(" | ")}${faults.length ? `; ${faults.length} faults: ${faults.slice(0, 8).join("; ")}` : ""}`,
   );

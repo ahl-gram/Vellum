@@ -70,41 +70,6 @@ export async function h2Hook({ evaluate, check, shoot }: SuiteContext, ready: bo
   await shoot("home-seed-chrome.png");
 }
 
-export async function h3Narrow({ evaluate, send, check, shoot, sleep, setNarrowViewport, clearMobile, PORT }: SuiteContext): Promise<void> {
-  await setNarrowViewport(390, 900);
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
-  let mobileReady = false;
-  for (let i = 0; i < 100; i++) {
-    let ok = null;
-    try { ok = await evaluate<boolean>(`document.readyState === "complete" && !!document.getElementById("seed-form")`); } catch {}
-    if (ok) { mobileReady = true; break; }
-    await sleep(75);
-  }
-  const mobile = mobileReady ? await evaluate<{ innerWidth: number; scrollW: number; inViewport: boolean; glossShown: string; inputInsidePanel: boolean; drawItLines: number } | null>(`(() => {
-    const form = document.getElementById("seed-form");
-    const gloss = document.querySelector(".lf-seed .seed-gloss");
-    const input = document.getElementById("seed-input");
-    const btn = form ? form.querySelector("button.primary") : null;
-    if (!form || !gloss || !input || !btn) return null;
-    const f = form.getBoundingClientRect();
-    const i = input.getBoundingClientRect();
-    const r = new Range();
-    r.selectNodeContents(btn);
-    return { innerWidth: window.innerWidth, scrollW: document.documentElement.scrollWidth,
-      inViewport: f.left >= 0 && f.right <= 390.5, glossShown: getComputedStyle(gloss).display,
-      inputInsidePanel: i.left >= f.left - 0.5 && i.right <= f.right + 0.5,
-      drawItLines: r.getClientRects().length };
-  })()`) : null;
-  check(
-    "H3 at 390px the corner form stays whole in the viewport, its controls whole inside the panel, Draw it on one line, the gloss stood down, nothing scrolling sideways",
-    !!mobile && mobile.innerWidth === 390 && mobile.scrollW === 390 && mobile.inViewport
-      && mobile.inputInsidePanel && mobile.drawItLines === 1 && mobile.glossShown === "none",
-    JSON.stringify(mobile),
-  );
-  await shoot("home-seed-chrome-390.png");
-  await clearMobile();
-}
-
 export async function h4DrawIt({ evaluate, send, check, shoot, sleep, PORT }: SuiteContext): Promise<void> {
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
   let ready = false;
