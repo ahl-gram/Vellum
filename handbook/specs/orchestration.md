@@ -168,6 +168,10 @@ home's line wins for the lane and this file's for the orchestrator.
   nothing there. The harness locks the tree to the session's own process, so unlock it once the lane
   has reported (`git -C <main checkout> worktree unlock <path>`), remove the `node_modules` link,
   then `git -C <main checkout> worktree remove --force <path>`.
+- **Stop the review agents a retired lane dispatched.** They stay in the session's agent list as
+  finished rows after their lane goes, and with the parent gone they show at the top level beside the
+  main session, where they read as stuck. List the session's agents, and stop each one the lane
+  dispatched (its plate reader, prover, skeptics, recon), so nothing it started outlives it.
 
 ## Before the session ends
 
