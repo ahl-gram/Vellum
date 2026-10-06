@@ -91,7 +91,19 @@ home's line wins for the lane and this file's for the orchestrator.
 - **When Alex says he is near his usage limit**, tell every running lane to commit and push small and
   often, and start the handoff early.
 - **A lost tree is rebuilt by the orchestrator, never by the lane.** Workflow step 6 says when the
-  harness takes a lane's tree; the branch survives it. LOST-TREE-RECIPE
+  harness takes a lane's tree; the branch survives it. Read
+  `git -C <main checkout> worktree list --porcelain` first: where the dead tree's registration
+  survives too, locked as a lane's tree is, a plain `worktree add` at the same path refuses. Rebuild
+  at the SAME path on the lane's branch in two commands,
+  `git -C <main checkout> worktree remove -f -f <path>` to clear a dead registration (skip it when
+  none is listed) and then `git -C <main checkout> worktree add <path> <branch>`, reading each
+  exit code rather than the output, which prints a preparing line before a refusal. Never `-f` on the
+  `add`, which also switches off git's refusal to check out a branch some live tree already has, and
+  never `git worktree prune`, which clears every other unlocked missing registration too, other
+  sessions' included. A leftover directory with anything in it blocks both commands: move it to the Trash
+  first. Then link `node_modules` by path as `scripts/agent-sandbox.ts` does, bring a lane that had
+  no commits current with `git -C <path> merge --ff-only origin/main`, and message the lane to resume
+  from its scratchpad plan.
 
 ## Merging
 
