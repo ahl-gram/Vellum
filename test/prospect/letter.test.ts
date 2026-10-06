@@ -64,7 +64,7 @@ test("runs lay out exactly as the face itself does: its kerning and its ligature
     const caps = text.toUpperCase().replace(/[^A-Z0-9 ,.\-·]/g, "");
     const capsExpect = font("caps").layout(caps, { calt: false }).positions.reduce((s, p) => s + p.xAdvance, 0);
     assert.equal(unitsWide(caps, false), capsExpect, `caps ${JSON.stringify(caps)}`);
-    if (capsExpect !== [...caps].reduce((s, c) => s + font("caps").glyphForCodePoint(c.codePointAt(0) ?? 0).advanceWidth, 0)) kerned++;
+    if (capsExpect !== Array.from(caps).reduce((s, c) => s + font("caps").glyphForCodePoint(c.codePointAt(0) ?? 0).advanceWidth, 0)) kerned++;
   }
   assert.ok(kerned > corpus.length / 2, `premise: the caps face kerns most of these runs (${kerned} of ${corpus.length})`);
 });

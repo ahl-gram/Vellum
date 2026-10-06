@@ -114,12 +114,12 @@ function openFace(name: FaceName): fontkit.Font {
 function glyphRecord(g: fontkit.Glyph): string {
   const { minX, maxX, minY, maxY } = g.bbox;
   const nums = [g.advanceWidth, minX, maxX, minY, maxY].map((v) => String(Number.isFinite(v) ? v : 0));
-  return `[${nums.join(", ")}, ${JSON.stringify(encode(flatten(g.path.commands as Cmd[])))}]`;
+  return `[${nums.join(", ")}, ${JSON.stringify(encode(flatten(g.path.commands)))}]`;
 }
 
 function ligaturesOf(font: fontkit.Font, chars: string): string[] {
   const found = new Set<string>();
-  const letters = [...chars].filter((c) => c !== " ");
+  const letters = Array.from(chars).filter((c) => c !== " ");
   for (const a of letters) for (const b of letters) if (font.layout(a + b).glyphs.length === 1) found.add(a + b);
   for (const lig of [...found]) for (const c of letters) if (font.layout(lig + c).glyphs.length === 1) found.add(lig + c);
   return [...found].sort((p, q) => q.length - p.length || (p < q ? -1 : 1));
@@ -144,7 +144,7 @@ export function faceModuleSource(name: FaceName): string {
   const font = openFace(name);
   const { chars, symbol } = PLATE_FACES[name];
   const ligatures = ligaturesOf(font, chars);
-  const keys = [...chars, ...ligatures];
+  const keys = [...Array.from(chars), ...ligatures];
   const glyphLines = keys.map((k) => {
     const run = font.layout(k);
     if (run.glyphs.length !== 1 || run.glyphs[0]!.id === 0) throw new RangeError(`${name} has no glyph for ${JSON.stringify(k)}`);
