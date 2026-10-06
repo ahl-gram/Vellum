@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { STYLES, type MapStyle } from "../../src/render/style.ts";
-import { renderSvg } from "../../src/render/svg.ts";
+import { el, renderSvg } from "../../src/render/svg.ts";
 import { createRng } from "../../src/core/rng.ts";
 import { composeProspect } from "../../src/prospect/compose.ts";
 import { FOREGROUND_SAMPLES } from "../../src/prospect/transect.ts";
@@ -10,10 +10,11 @@ import { massNodes } from "../../src/prospect/dress/buildings.ts";
 import { foregroundNodes, PROSPECT_DRESSES } from "../../src/prospect/dress/plate.ts";
 import { dressContext } from "../../src/prospect/dress/context.ts";
 import { engraver } from "../../src/prospect/dress/burin.ts";
-import { foregroundEngraved, massNodesEngraved } from "../../src/prospect/dress/townscape.ts";
+import { foregroundEngraved, massNodesEngraved, wallNodesEngraved } from "../../src/prospect/dress/townscape.ts";
+import { LIFT, massReach, wallReach, type Box } from "../../src/prospect/dress/rise.ts";
 import { finishedPlateSvg } from "../../src/prospect/finished.ts";
 import { bandOf, makeInput } from "../../test-support/prospect-fixtures.ts";
-import { outlinedSolids, tokenColors } from "../../test-support/dress-svg.ts";
+import { inkExtent, outlinedSolids, tokenColors } from "../../test-support/dress-svg.ts";
 
 /** The dress rounds coordinates to 0.1 at SVG emit; tests locate elements by reproducing that rounding. */
 const f = (v: number): string => String(Math.round(v * 10) / 10);
@@ -141,4 +142,31 @@ test("every foreground kind, every tree species, inks at least one node in today
     beachedHulls: true, jetty: true, nets: true, bridge: true, weir: true, mill: true, rubble: true, beams: true, drownedStubs: true, birds: true, seaSerpent: true,
   };
   assert.deepEqual([...seen].sort(), Object.keys(KINDS).sort(), "every kind sampled");
+});
+
+test("a mass's reach, which a bird keeps clear of, holds every mark it engraves, roof, spire, battlements and pennant, and a wall's holds its towers", () => {
+  const e = engraver(STYLES.antique);
+  const STROKE = 0.7;
+  const holds = (reach: Box, svg: string, what: string): void => {
+    const ink = inkExtent(svg);
+    const inside = ink.x0 - STROKE >= reach.x0 && ink.x1 + STROKE <= reach.x1 && ink.y0 - STROKE >= reach.y0 - LIFT && ink.y1 + STROKE <= reach.y1 - LIFT + STROKE;
+    assert.ok(inside, `${what}: ink ${JSON.stringify(ink)} reaches past ${JSON.stringify({ ...reach, y0: reach.y0 - LIFT, y1: reach.y1 - LIFT })}`);
+  };
+  for (const form of ["gable", "ridge", "tower", "spire", "keep"] as const) {
+    for (const [w, h] of [[8, 10], [16, 24], [30, 48], [46, 70]] as const) {
+      for (const broken of [false, true]) {
+        const m: Mass = { form, x: 100, w, h, base: 200, raise: 0, broken };
+        holds(massReach(m), renderSvg(el("g", {}, massNodesEngraved(e, m, 1.2, form === "spire"))), `${form} ${w}x${h}${broken ? " broken" : ""}`);
+      }
+    }
+  }
+  for (const rise of [0, 14]) {
+    for (const [x0, x1] of [[60, 140], [200, 330]] as const) {
+      for (const gate of [false, true]) {
+        const ground = { base: 200, rise, line: [] };
+        const wall = { x0, x1, h: 9, gate, heel: 0 };
+        holds(wallReach(ground, wall), renderSvg(el("g", {}, wallNodesEngraved(e, ground, wall))), `wall ${x0} to ${x1}, rise ${rise}${gate ? ", gated" : ""}`);
+      }
+    }
+  }
 });
