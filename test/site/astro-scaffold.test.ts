@@ -591,6 +591,8 @@ test("the head cluster: wordmark, the atelier tagline, then the rooms nav, fixed
   }
 });
 
+const DESK_ROOMS: readonly string[] = ["faq/index.html", "glossary/index.html", "gallery/index.html"];
+
 test("every page's h1 names the page: the room on room pages, the wordmark on home (#288)", () => {
   const decodeAll = (s: string) => decode(s.replace(/<[^>]*>/g, ""));
   for (const p of PAGES) {
@@ -606,11 +608,18 @@ test("every page's h1 names the page: the room on room pages, the wordmark on ho
     const firstHeading = html.search(/<h[1-6]\b/);
     assert.equal(firstHeading, html.search(/<h1\b/), `${p.route} h1 is the first heading on the page`);
     if (p.room) {
-      const [headOpen, headClose] = [html.indexOf('<header class="chrome">'), html.indexOf("</header>")];
-      assert.ok(
-        headOpen > -1 && !(firstHeading > headOpen && firstHeading < headClose),
-        `${p.route} keeps its h1 out of the head cluster: the room's own name, in its corner (#288, #461 ruling 1)`,
-      );
+      const [headClose, mainOpen, mainClose] = [html.indexOf("</header>"), html.search(/<main\b/), html.indexOf("</main>")];
+      assert.ok(headClose > -1 && mainOpen > headClose && mainClose > mainOpen, `${p.route} renders the head cluster, then <main>`);
+      const desk = html.includes('<div class="desk-layer on">');
+      assert.equal(desk, DESK_ROOMS.includes(p.route), `${p.route} ${desk ? "seats" : "does not seat"} pieces in the desk layer`);
+      if (desk) {
+        assert.ok(
+          firstHeading > headClose && firstHeading < mainOpen,
+          `${p.route} stands its h1 in the desk layer, after the head cluster and before <main> (Issue #762 call CC20, the handbook/errata/site.md row)`,
+        );
+      } else {
+        assert.ok(firstHeading > mainOpen && firstHeading < mainClose, `${p.route} keeps its h1 standing in the page (inside <main>)`);
+      }
     } else {
       const [headOpen, headClose] = [html.indexOf('<header class="chrome">'), html.indexOf("</header>")];
       assert.ok(
