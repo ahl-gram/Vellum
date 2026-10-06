@@ -24,6 +24,7 @@ Rows for what the generator and the renderer put on a sheet: terrain, rivers, re
 - PR #435 (2026-08-21, high): The seat halo on region sheets (settlements.ts:223) stays gated though the carry removes Issue #162's reason; re-enabling is a feel question Searched: Recorded in Issue #423's body (closed); searched issues-all for "seat halo", "settlements.ts:223", "halo" with region: no open issue; no later PR
 - PR #452 (2026-08-23, medium): Nine rivers leave the sheets at band 3 (221 bare to 212 detail) having run on land the old construction invented Left by the author: listed under "Known and accepted, all pre-named"; the two neighbours in that section carry dated Alex rulings, this one carries only the heading
 - PR #491 (2026-08-30, high): The legend row's max-width wrap was never exercised at 1280 or 1680 (its 461px always fit) Searched: "461px", "max-width wrap", "legend row's max-width" (none)
+- PR #797 (2026-10-06, low): on Wailua's prospect plate (seed 7, index 6) the sea beast's head meets a harbour ship's wake dashes (distance 0; that ship's hull 2.0 away, its rigging 2.75), measured by `vellum-plate-reader` at step 11; the beast's seat keeps clear of the people and of the near ship only. Left by the author: the wake dashes are the water's own line work and the beast swims in that water, and how far it keeps from the harbour's hulls is a layout call for the post-use re-review, Issue #796. Searched: this directory for "beast" (only PR #420's row on the beast tales) and for "wake": none.
 
 ## Ruled and left
 
