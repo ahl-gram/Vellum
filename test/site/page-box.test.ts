@@ -2,7 +2,6 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { PAGE_FLOOR, pageWidth, pageX } from "../../src/site/shared/page-box.ts";
 
-// Alex, 2026-10-06 (Issue #762 issuecomment-6010814718): a window narrower than 1024 keeps the page's 1024 layout at full size and scrolls sideways.
 
 test("UF1 the page is never narrower than the floor, and is the window from the floor up", () => {
   assert.equal(PAGE_FLOOR, 1024);

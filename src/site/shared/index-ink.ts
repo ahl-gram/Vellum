@@ -28,7 +28,6 @@ interface InkParts {
   readonly rows: ReadonlyMap<string, HTMLElement>;
   readonly entryRows: ReadonlyMap<string, HTMLElement>;
   readonly line: () => number;
-  /** The slip's scrolling body, so the inked row is kept in view. */
   readonly keepInView: () => HTMLElement | null;
 }
 

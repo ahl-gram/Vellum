@@ -26,7 +26,6 @@ button.chart-drawer-tab:is(:hover, :focus-visible) { background: var(--ink-dark)
 
 body:has(.chart-drawer.open) .slip-tab { display: none; }
 
-/* Paper carries neither the drawer nor its tab (main stood the tab down on paper only by its narrow block, which paper's width matched). */
 @media print { .chart-drawer, .chart-drawer-tab { display: none; } }
 
 /* Folded, the camera comes home to --chrome-x where the tab stands at z 19 over the corner's z 10, leaving each zoom press a real pointer over 44% of its face; so the camera stands inboard of the tab whenever the Broadside is folded, drawer open or not (a seat that moved with the drawer would be one more thing jumping as it opens). */

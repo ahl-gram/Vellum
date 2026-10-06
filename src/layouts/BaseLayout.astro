@@ -62,7 +62,6 @@ const ogImage = new URL("/og.png", Astro.site).href;
 const ogImageAlt = "The Vellum wordmark and a compass rose on a dark walnut ground, with the chart of seed 42 faint behind.";
 const cardDescription = ogDescription ?? description;
 const trail = trailFor(path);
-// A room keeps its band, its head cluster and the pieces it seats in the desk slot together, so a room that scrolls down can hold them in one sticky layer on the 1024 page; home keeps its cluster as the body's own child.
 const Desk = room ? "div" : Fragment;
 const deskAttrs = room ? { class: Astro.slots.has("desk") ? "desk-layer on" : "desk-layer" } : {};
 ---
@@ -204,7 +203,7 @@ header.chrome a:focus-visible, footer a:focus-visible { outline-color: var(--par
 /* The rooms stand clear of the band; a chart room has no band to clear. */
 body.room { --room-pad-top: 8.4rem; padding: var(--room-pad-top) 2.2rem 1.6rem; }
 body.room.chart-room { --room-pad-top: 0px; padding: 0; }
-/* The 1024 floor (Alex, 2026-10-06, Issue #762): a room narrower than the floor keeps its 1024 layout at full size and the window scrolls sideways. A px floor, not a viewport-unit one: under the harness's emulated resize Chrome still resolved `vw` against the old window at the resize event, so a floor written in `vw` laid the head cluster out against a 640 page (measured 2026-10-06). */
+/* A px floor, not a viewport-unit one: under the harness's emulated resize Chrome still resolved `vw` against the old window at the resize event, so a floor written in `vw` laid the head cluster out against a 640 page (measured 2026-10-06). */
 @media screen {
   html:has(body.room) { overflow-x: auto; }
   body.room { min-width: 1024px; box-sizing: border-box; }

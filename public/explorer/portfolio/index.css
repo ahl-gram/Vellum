@@ -49,5 +49,4 @@
 .contents .row .row-download:is(:hover, :focus-visible) { color: var(--ink-dark); background: none; transform: none; box-shadow: none; }
 .contents .row .row-download:disabled { color: var(--ink-faded); cursor: default; text-decoration: none; }
 
-/* Paper drops the sheet's stage shadow, which an empty Portfolio otherwise prints as a shadowed blank box. */
 @media print { #sheet { box-shadow: none; } }

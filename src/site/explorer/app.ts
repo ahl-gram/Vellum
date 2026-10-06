@@ -20,6 +20,7 @@ import { wireSurveyToggle, armOnLanding, deferLandingArm } from "./survey-arm.ts
 import { createTourOrder } from "./tour-order.ts";
 import { createLivingChart } from "../living-chart/index.ts";
 import { bindRoom } from "../shared/room.ts";
+import { pageBox } from "../shared/page-box.ts";
 import { makeAnnouncer } from "../shared/announce.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import type { PlaceManifest } from "../../render/place-manifest.ts";
@@ -169,7 +170,7 @@ const glass = createGlass({
     bindTableDrag({
       handle: ear,
       ghostUrl: () => URL.createObjectURL(new Blob([committed.svg], { type: "image/svg+xml" })),
-      band: () => bandOf(drawerHeightPx(), window.innerHeight),
+      band: () => bandOf(drawerHeightPx(), pageBox().h),
       reveal: () => chartTable.reveal(),
       receiving: (over) => { chartTable.receiving(over); },
       file: (url) => chartTable.lay(item, committed.svg, committed.title, { url }),

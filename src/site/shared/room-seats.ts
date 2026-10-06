@@ -6,7 +6,7 @@ const SLIP_FLOOR = 22;
 const STRIP_GAP = 12;
 const LEGEND_CLEAR = 32;
 const LEGEND_GAP = 16;
-export const LEGEND_RISE = 12;
+const LEGEND_RISE = 12;
 const SAME_LINE = 1;
 
 export const rectOf = (el: Element | null): DOMRect | null => {
@@ -72,7 +72,6 @@ export function pressRowStacks(tops: readonly number[]): boolean {
   return lines > 2 || lines === tops.length;
 }
 
-/** A risen row whose top, or the backing it draws above it, would come within the gap of the head cluster's foot sheds its note and any head line holding no control (Alex, 2026-10-06, Issue #762: "lean"). Decided on the unshed row, so the shed cannot flip as its own lowering of the row is read again. */
 export function rowSheds(rowTop: number, clusterFoot: number, backingReach = 0): boolean {
   return rowTop < clusterFoot + Math.max(LEGEND_GAP, backingReach);
 }

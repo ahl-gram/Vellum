@@ -10,7 +10,6 @@ export interface StageInput {
   readonly above: readonly number[];
   /** Tops of the chrome below it. */
   readonly below: readonly number[];
-  /** An open slip's width, 0 when folded. */
   readonly beside: number;
   readonly right?: readonly number[];
   readonly gap: number;
@@ -46,5 +45,4 @@ export function fitStage(input: StageInput): StageFit {
   return { reserve: { top, right, bottom }, sheet: { w, h: w / aspect }, under: false };
 }
 
-/** A window too small to hold any sheet (a full-page capture shrinks the viewport to one pixel for a moment) fits nothing: the room keeps its last fit and leaves the camera alone. */
 export const holdsSheet = (fit: StageFit): boolean => fit.sheet.w > 0 && fit.sheet.h > 0;

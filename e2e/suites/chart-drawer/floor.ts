@@ -67,7 +67,7 @@ export async function na2DrawerBelowFloor(kd: DragKit): Promise<void> {
   );
 }
 
-// CD48 (Issue #523 build item 4), moved to a 1024 tablet when the narrow layout went (Issue #762 pull request C): the handle's touch drag first, the pan control LAST, since a pan at DEEP can recommit the inset and rebuild the ear. No tap files a sheet first, as it did at 640, since at 1024 the filing opens the drawer and folds the Broadside, whose refit moves the camera under the read..
+// CD48 (Issue #523 build item 4), moved to a 1024 tablet when the narrow layout went (Issue #762 pull request C): the handle's touch drag first, the pan control LAST, since a pan at DEEP can recommit the inset and rebuild the ear. No tap files a sheet first, as it did at 640, since at 1024 the filing opens the drawer and folds the Broadside, whose refit moves the camera under the read.
 export async function cd48TouchHandle({ evaluate, check, sleep, touch, touchPan, settle, go, setNarrowViewport, clearMobile, send }: DragKit): Promise<void> {
   await setNarrowViewport(1024, 844);
   await go(`${DRESS}&${DEEP}`);

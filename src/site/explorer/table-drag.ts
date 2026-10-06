@@ -59,7 +59,6 @@ function makeGhost(url: string): HTMLImageElement {
   return ghost;
 }
 
-// The ghost is a fixed box on the body, which a chart room's floor makes the 1024 page (page-box.ts), so the pointer's viewport x is moved onto the page.
 function seat(ghostEl: HTMLImageElement, at: Point): void {
   const s = ghostSeat({ x: pageX(at.x, window.scrollX), y: at.y }, ghostEl.offsetWidth);
   ghostEl.style.translate = `${s.x}px ${s.y}px`;
@@ -141,4 +140,3 @@ export function bindTableDrag(deps: TableDragDeps): void {
     e.preventDefault();
   }, { capture: true });
 }
-

@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { globSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { GLASS_GAP_REM, LEGEND_RISE, pressRowStacks, rowSheds } from "../../src/site/shared/room-seats.ts";
+import { GLASS_GAP_REM, pressRowStacks, rowSheds } from "../../src/site/shared/room-seats.ts";
 
 test("the Glass's computed seat beside an open slip is the sheet's own arithmetic (atelier.css: --slip-w + 2rem + 1.4rem)", () => {
   const css = readFileSync(resolve(import.meta.dirname, "..", "..", "public/atelier.css"), "utf8");
@@ -87,7 +87,6 @@ test("the Press stacks when its presses take more than two lines, or two or more
   assert.equal(pressRowStacks([88, 44, 0]), true, "three presses each alone, read bottom first");
 });
 
-// Alex, 2026-10-06 (Issue #762 issuecomment-6010814718), "lean": a risen row is measured against the cluster's foot, 127.4 at 1024 on every room with a trail.
 test("UL1 a risen row sheds its note only where its top would come within the gap of the head cluster's foot", () => {
   assert.equal(rowSheds(127.4 + 15.9, 127.4), true, "within the gap: the Press would stand at the cluster's foot");
   assert.equal(rowSheds(116.5, 127.4), true, "over the cluster's foot outright");
@@ -95,5 +94,4 @@ test("UL1 a risen row sheds its note only where its top would come within the ga
   assert.equal(rowSheds(127.4 + 16, 127.4), false, "exactly the gap below the cluster is clear");
   assert.equal(rowSheds(127.4 + 18, 127.4, 20.8), true, "clear of the gap, but the soft pool's 1.3rem above the row would reach the cluster's foot");
   assert.equal(rowSheds(127.4 + 18, 127.4, 8), false, "a backing that reaches less than the gap leaves the gap the rule");
-  assert.equal(LEGEND_RISE, 12, "the soft pool stops inside this rise gap above the chart folio");
 });
