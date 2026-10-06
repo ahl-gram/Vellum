@@ -26,7 +26,7 @@ test("GR1 the Gallery is a chart room: chartRoom on the layout, the RoomFolio in
   assert.ok(open, "the page renders through BaseLayout");
   assert.match(open[1]!, /\bchartRoom\b/, "the Gallery passes chartRoom (no band, no footer)");
   assert.ok(!open[1]!.includes("desk="), "the interim desk retires with the conversion");
-  assert.ok(page.includes('<RoomFolio slot="desk" room={room} tagline={tagline}>'), "the room's name stands in the folio corner, in the desk layer that holds a scrolling room's chrome on the 1024 page (Issue #762)");
+  assert.ok(page.includes('<RoomFolio slot="desk" region room={room} tagline={tagline}>'), "the room's name stands in the folio corner, in the desk layer that holds a scrolling room's chrome on the 1024 page (Issue #762)");
   assert.ok(!page.includes("<RoomHead"), "the RoomHead on the sheet retires with the conversion");
   assert.ok(!page.includes('class="sub intro"'), "the intro line retires; its fact moves to the dateline");
   assert.ok(!page.includes("<script"), "the Gallery is composed at build time and ships no engine bundle (ruling 2)");

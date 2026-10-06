@@ -666,7 +666,7 @@ test("titles are computed in the layout from the room, never hand-set (#268)", (
       assert.ok(source.includes(`const room = "${p.room}"`), `${p.route} hoists its room to a const`);
       assert.ok(open[1]!.includes("room={room}"), `${p.route} passes the const to the layout`);
       assert.ok(source.includes(`const tagline = "${p.tagline}"`), `${p.route} hoists its tagline to a const`);
-      assert.match(source, /<RoomFolio (?:slot="desk" )?room=\{room\} tagline=\{tagline\}>/, `${p.route} stands its RoomFolio in the page, or in the desk layer on a room that scrolls down`);
+      assert.match(source, /<RoomFolio (?:slot="desk" region )?room=\{room\} tagline=\{tagline\}>/, `${p.route} stands its RoomFolio in the page, or as a named region in the desk layer on a room that scrolls down`);
     } else {
       assert.ok(!open[1]!.includes("room="), `${p.route} is home and passes no room`);
     }
