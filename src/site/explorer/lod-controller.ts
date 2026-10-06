@@ -238,7 +238,7 @@ export function createLodController(deps: Deps) {
         currentBand,
       });
       if (decision.action === "noop") return;
-      if (decision.action === "world") return revertToWorld();
+      if (decision.action === "world") { revertToWorld(); return; }
       dispatchRegion(decision.band, decision.window, latticeFromSettle(cam, margins(), decision.band));
     },
 
