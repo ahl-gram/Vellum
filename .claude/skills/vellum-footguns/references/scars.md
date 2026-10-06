@@ -199,7 +199,8 @@ the public record that day, and a lesson in it came from a private note.
   of it. The general form is PR #576's (Issue #575): a proof resting on several instruments, each
   blind where another sees, loses coverage silently when one is swapped for a better-looking one;
   there a file listing stood in for `git status --porcelain`, the only one of the two that sees a
-  tracked file edited in place, and the proof now runs both.
+  tracked file edited in place, and the proof now runs both. Gate 1 item 21 states that general
+  form, added by Issue #783.
 - Issue #540, PR #545: BR6b's fixed offset landed on the new leaf tabs and read 59 against an
   unchanged ground; it was re-anchored to the docked press's own middle and mutation-proved against
   the pool it was written for. Proves Gate 2 item 4's moved-sample clause.

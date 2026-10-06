@@ -19,7 +19,7 @@ are about to type. Read the gate you are at, do each line, and move on. Provenan
 
 ## Gate 1: before writing a test or a guard
 
-Scars: #49, #124, #270, #275, #295, #320, #353, #358, #360, #363, #380, #383, #387, #388, #400, #412, #423, #510, #528, #533, #535, #536, #542, #544, #545, #546, #551, #561, #562, #564.
+Scars: #49, #124, #270, #275, #295, #320, #353, #358, #360, #363, #380, #383, #387, #388, #400, #412, #423, #510, #528, #533, #535, #536, #542, #544, #545, #546, #551, #561, #562, #564, #576.
 
 1. **Write the mutation before the test.** Name the one-line change to `src/` that must turn this
    test red. If you cannot name one, you are about to write a test that cannot fail.
@@ -90,6 +90,9 @@ Scars: #49, #124, #270, #275, #295, #320, #353, #358, #360, #363, #380, #383, #3
     the RAW source, on what the transform cannot represent (Issue #443).
 20. **A ratified acceptance gets a driving check beside any pure-function read**
     (PR #631).
+21. **A proof resting on several instruments, each blind where another sees, takes a new one BESIDE
+    the old, never in its place.** Ask what each one already there sees that no other does; if
+    anything, it stays (PR #576).
 
 ## Gate 7: before writing a test that reads the repo's own files
 
@@ -266,8 +269,9 @@ Scars: #49, #101, #203, #255, #408, #486, #491, #492, #507, #508, #524, #528, #5
    opened.** The branch goes up at the first commit, so the review is the deadline that matters, not
    the push. The skeptic diffs against the newest ratified statement. A recon that falsifies an
    older comment says so in a new comment; the old one is never edited. **A ruling of Alex's goes
-   there too, and you are the one who records it**: he rules in the session, which leaves the issue
-   reading unruled to everyone after. Where there is no issue, the PR body and a PR comment are the
+   there too, and you are the one who records it**, or, in an orchestrated run, the dispatcher posts
+   it in his words and your comment points at that post: he rules in the session, which leaves the
+   issue reading unruled to everyone after. Where there is no issue, the PR body and a PR comment are the
    record. Open decisions go to Alex as a menu, and you STOP there.
 9. **A stacked PR lands BEFORE its base does.** Squashing a base deletes the branch, and a PR whose
    base is gone is closed and can be neither reopened nor retargeted: the review record goes with it.
