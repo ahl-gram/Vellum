@@ -36,16 +36,19 @@ function everyPlate(visit: (label: string, plate: ReturnType<typeof engrave>) =>
   for (const seed of SWEEP) worldFor(seed).settlements.forEach((_, i) => visit(`seed ${seed} index ${i}`, engrave(seed, i)));
 }
 
-test("every piece of furniture, every lettered run and every bird stays inside the inner frame, and no run is left as device text", () => {
+test("every piece of furniture, every lettered run and every bird stays inside the inner frame, every bird flies in open sky clear of the town, the masts and the hills, and no run is left as device text", () => {
   let plates = 0;
   everyPlate((label, plate) => {
     plates++;
     for (const [group, boxes] of Object.entries(plate.furniture)) {
       for (const b of boxes) assert.ok(inside(b), `${label}: the ${group} reaches past the inner frame: ${JSON.stringify(b)}`);
     }
-    for (const b of plate.picture.vignette.birds) {
+    const v = plate.picture.vignette;
+    for (const b of v.birds) {
       assert.ok(inside(b), `${label}: a flock at ${JSON.stringify(b)} straddles the frame`);
       for (const [group, boxes] of Object.entries(plate.furniture)) assert.ok(!boxes.some((f) => overlaps(b, f)), `${label}: a bird crosses the ${group}`);
+      for (const t of [...v.town, ...v.masts]) assert.ok(!overlaps(b, t), `${label}: a flock at ${JSON.stringify(b)} crosses the town or a mast at ${JSON.stringify(t)}`);
+      for (let x = b.x0; x <= b.x1; x += 1) assert.ok(b.y1 < v.horizonYAt(x), `${label}: a flock at ${JSON.stringify(b)} flies into the hills at x ${x.toFixed(1)}`);
     }
     assert.ok(!/<text\b/.test(renderSvg(plate.node)), `${label}: a run left as device text`);
   });

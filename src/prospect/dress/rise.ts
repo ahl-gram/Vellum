@@ -1,7 +1,7 @@
 import { el, type SvgNode } from "../../render/svg.ts";
 import type { Rng } from "../../core/rng.ts";
 import type { Arms } from "../../society/heraldry.ts";
-import { BACK_ROW_RAISE, VIEW_X0, VIEW_X1, type ForegroundElement, type ProspectGeometry, type Pt } from "../geometry.ts";
+import { BACK_ROW_RAISE, groundAt, VIEW_X0, VIEW_X1, type ForegroundElement, type Mass, type ProspectGeometry, type Pt, type WallSegment } from "../geometry.ts";
 import type { ProspectKind } from "../input.ts";
 import type { PlateEra } from "../caption.ts";
 import { birdFlock, groundSweep, hillTone, poly, r1, skyLines, stroke, treeClump, washOr, yOnPolyline, type Cloud, type Engraver, type Gap } from "./burin.ts";
@@ -103,7 +103,18 @@ const flockBox = (x: number, y: number, n: number): Box => ({ x0: x - 3, x1: x +
 /** The ink an engraved ship reaches, hull to pennant, lifted with the town: what a horizon label must clear. */
 const shipRig = (x: number, y: number, s: number, great: boolean): Box => ({ x0: x - 16 * s, x1: x + 16 * s, y0: y + LIFT - 2.5 * s - (great ? 24 : 18) * s * 1.15 - 3.2 * s - 1, y1: y + LIFT + 3 * s });
 
-export type Vignette = { readonly nodes: SvgNode[]; readonly horizonYAt: (x: number) => number; readonly townRun: readonly [number, number]; readonly masts: ReadonlyArray<Box>; readonly birds: ReadonlyArray<Box> };
+/** The ink an engraved mass reaches, roof, spire, battlements and pennant included (massNodesEngraved in townscape.ts), lifted with the town. */
+const massReach = (m: Mass): Box => {
+  const up = m.form === "keep" ? 21 : m.form === "tower" ? 3.4 + m.w * 0.55 : m.form === "spire" ? Math.max(12, m.h * 0.55) + 5.4 : 13;
+  return { x0: m.x - 2, x1: m.x + m.w + 2.6, y0: m.base - m.h - up + LIFT, y1: m.base + LIFT };
+};
+
+/** The ink a wall reaches, its towers capped (wallNodesEngraved in townscape.ts), lifted with the town. */
+const wallReach = (g: ProspectGeometry, w: WallSegment): Box => ({
+  x0: w.x0 - 4.5, x1: w.x1 + 4.5, y0: groundAt(g.ground, Math.max(w.x0, Math.min(w.x1, (VIEW_X0 + VIEW_X1) / 2))) - w.h - 12 + LIFT, y1: g.ground.base + LIFT,
+});
+
+export type Vignette = { readonly nodes: SvgNode[]; readonly horizonYAt: (x: number) => number; readonly townRun: readonly [number, number]; readonly masts: ReadonlyArray<Box>; readonly birds: ReadonlyArray<Box>; readonly town: ReadonlyArray<Box> };
 
 /** The engine's composed town and foreground redrawn by the burin and lifted into the upper third, the water deepened to the rise. */
 export function vignette(e: Engraver, scene: Scene, s: Streams): Vignette {
@@ -140,6 +151,7 @@ export function vignette(e: Engraver, scene: Scene, s: Streams): Vignette {
     horizonYAt: (x) => (ridge === null ? horizon : yOnPolyline(ridge, x) + LIFT),
     townRun: xs.length > 0 ? [Math.min(...xs), Math.max(...xe)] : [260, 260],
     masts,
+    town: [...g.masses.map(massReach), ...g.walls.map((w) => wallReach(g, w))],
     birds: [flockBox(flock.x, flock.y, 5), ...g.foreground.flatMap((f) => (f.kind === "birds" ? f.items.map((b) => heldBird(b, scene.clear)).map((b) => flockBox(b.x, b.y + LIFT, 2 + Math.floor(b.s * 3))) : []))],
   };
 }
