@@ -35,6 +35,22 @@ export type MapStyle = {
   readonly winds: boolean;
   readonly currents: boolean;
   readonly realmTints: ReadonlyArray<string>;
+  /** The hand-colouring on a prospect plate (Issue #754); null where the dress is not coloured. No chart reads it. */
+  readonly limner: Limner | null;
+};
+
+export type Limner = {
+  readonly roof: string;
+  readonly roofChurch: string;
+  readonly grass: string;
+  readonly grassDeep: string;
+  readonly wood: string;
+  readonly water: string;
+  readonly hill: string;
+  readonly vermilion: string;
+  readonly cartouche: string;
+  readonly skin: string;
+  readonly horse: string;
 };
 
 const ANTIQUE: MapStyle = {
@@ -69,6 +85,19 @@ const ANTIQUE: MapStyle = {
   winds: false,
   currents: false,
   realmTints: ["#c46d5e", "#7d9a6a", "#bf9b4f", "#7a8aa6", "#a97ba6", "#5f9e91", "#5f6b2e"],
+  limner: {
+    roof: "#c9553a",
+    roofChurch: "#7d93a6",
+    grass: "#b9c98f",
+    grassDeep: "#8aa96a",
+    wood: "#6f9460",
+    water: "#c6d6d0",
+    hill: "#d6c79a",
+    vermilion: "#c23b22",
+    cartouche: "#b7cbd3",
+    skin: "#e8cfae",
+    horse: "#c9b38a",
+  },
 };
 
 const TOPOGRAPHIC: MapStyle = {
@@ -112,6 +141,7 @@ const TOPOGRAPHIC: MapStyle = {
   winds: false,
   currents: false,
   realmTints: ["#e74c3c", "#27ae60", "#f39c12", "#2980b9", "#8e44ad", "#1abc9c", "#9bc53d", "#e84393"],
+  limner: null,
 };
 
 const INK: MapStyle = {
@@ -146,6 +176,7 @@ const INK: MapStyle = {
   winds: false,
   currents: false,
   realmTints: ["#888", "#aaa", "#777", "#999", "#666"],
+  limner: null,
 };
 
 const NAUTICAL: MapStyle = {
@@ -180,6 +211,7 @@ const NAUTICAL: MapStyle = {
   winds: true,
   currents: true,
   realmTints: ["#c46d5e", "#7d9a6a", "#bf9b4f", "#7a8aa6", "#a97ba6"],
+  limner: null,
 };
 
 export const STYLES: Record<StyleName, MapStyle> = {

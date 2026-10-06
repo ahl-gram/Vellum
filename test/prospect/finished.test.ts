@@ -1,17 +1,17 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { STYLES } from "../../src/render/style.ts";
-import { el } from "../../src/render/svg.ts";
 import type { Arms } from "../../src/society/heraldry.ts";
 import { FOREGROUND_SAMPLES } from "../../src/prospect/transect.ts";
 import { composeProspect } from "../../src/prospect/compose.ts";
-import { prospectSvg } from "../../src/prospect/dress/plate.ts";
 import type { Mass, ProspectGeometry } from "../../src/prospect/geometry.ts";
 import { eraFor, plateCaption, type PlateEra } from "../../src/prospect/caption.ts";
 import { plateKey } from "../../src/prospect/key.ts";
-import { finishedPlateSvg } from "../../src/prospect/finished.ts";
+import { engravePlate, finishedPlateSvg } from "../../src/prospect/finished.ts";
+import { INNER } from "../../src/prospect/dress/furniture.ts";
+import type { Surroundings } from "../../src/prospect/surroundings.ts";
 import { bandOf, makeInput } from "../../test-support/prospect-fixtures.ts";
-import { fnv1a, tokenColors } from "../../test-support/dress-svg.ts";
+import { fnv1a } from "../../test-support/dress-svg.ts";
 
 const f = (v: number): string => String(Math.round(v * 10) / 10);
 
@@ -209,46 +209,36 @@ test("the finished plate honors the year in ground and lettering", () => {
   assert.notEqual(fallen, standing, "the ruin changes the plate");
 });
 
-test("the finished plate wears its furniture, and only capitals and seats hang arms", () => {
-  const capital = finishedPlateSvg(makeInput({ kind: "capital", arms: ARMS }), STYLES.antique, 1300);
-  assert.ok(capital.includes("THE PROSPECT OF TESTHOLM"), "title");
-  assert.ok(capital.includes("FOUNDED AN. 1100"), "year line");
-  assert.ok(capital.includes("VELLUM · CHART № 4242"), "footer");
-  assert.ok(capital.includes('width="500"') && capital.includes('width="492"'), "double-rule frame");
-  assert.ok(capital.includes('class="vellum-arms"'), "a capital hangs its arms");
-
-  const seat = finishedPlateSvg(makeInput({ kind: "seat", arms: ARMS }), STYLES.antique, 1300);
-  assert.ok(seat.includes('class="vellum-arms"'), "a seat hangs its arms");
-
-  const town = finishedPlateSvg(makeInput({ kind: "town", arms: ARMS }), STYLES.antique, 1300);
-  assert.ok(!town.includes('class="vellum-arms"'), "a mere town hangs none (GO condition 2)");
-
-  const unfounded = finishedPlateSvg(makeInput({ kind: "capital", arms: ARMS }), STYLES.antique, 1040);
-  assert.ok(!unfounded.includes('class="vellum-arms"'), "no realm yet, no arms");
+test("every place in a realm hangs the realm's arms in its wreath, from its founding (ruling D2, which overrules Issue #237's capitals and seats)", () => {
+  for (const kind of ["capital", "seat", "town", "village", "hamlet"] as const) {
+    assert.ok(finishedPlateSvg(makeInput({ kind, arms: ARMS }), STYLES.antique, 1300).includes('class="vellum-arms"'), `a ${kind} hangs its realm's arms`);
+  }
+  assert.ok(!finishedPlateSvg(makeInput({ kind: "capital", arms: ARMS }), STYLES.antique, 1040).includes('class="vellum-arms"'), "no realm yet, no arms");
+  assert.ok(!finishedPlateSvg(makeInput({ kind: "town", arms: null }), STYLES.antique, 1300).includes('class="vellum-arms"'), "no realm, no arms");
 });
 
-test("the key strip renders when entries exist and is omitted when empty", () => {
-  const keyed = finishedPlateSvg(
-    makeInput({ kind: "capital", harbor: true, foreground: bandOf(["beach", FOREGROUND_SAMPLES]) }),
-    STYLES.antique,
-    1300,
-  );
-  assert.ok(keyed.includes("A. The Keep."), "the strip letters the keep");
-  const bare = finishedPlateSvg(makeInput({ kind: "hamlet" }), STYLES.antique, 1300);
-  assert.ok(!bare.includes("A. The "), "a hamlet's key is omitted, not empty");
+test("the plate wears its named furniture: the name alone in the cartouche, the epithet and founding on the banderole, the footer, the double frame", () => {
+  const capital = finishedPlateSvg(makeInput({ kind: "capital", harbor: true }), STYLES.antique, 1300);
+  assert.ok(capital.includes('aria-label="TESTHOLM"'), "the cartouche holds the name alone");
+  assert.ok(capital.includes('aria-label="chief port of Testrealm, founded An. 1100"'), "the banderole carries the epithet and the founding");
+  assert.ok(capital.includes('aria-label="FOUNDED AN. 1100 · VELLUM · CHART № 4242"'), "the footer");
+  assert.ok(capital.includes('width="500"') && capital.includes('width="492"'), "the double-rule frame");
+  assert.ok(!/<text\b/.test(capital), "every run is engraved, none left as device text");
 });
 
-// Measured 2026-08-14 by vellum-plate-reader: at the cap the title inks ~0.65*fs units per character plus the constant 1.3 letter-spacing, so the fit must divide the spacing out before scaling the glyphs.
-test("a very long name shrinks its title and stays inside the inner frame", () => {
+test("the key panel renders when entries exist and is omitted when empty", () => {
+  const keyed = finishedPlateSvg(makeInput({ kind: "capital", harbor: true, foreground: bandOf(["beach", FOREGROUND_SAMPLES]) }), STYLES.antique, 1300);
+  assert.ok(keyed.includes('aria-label="1. The Keep"'), "the panel numbers the keep");
+  const bare = finishedPlateSvg(makeInput({ kind: "hamlet", realmName: null }), STYLES.antique, 1300);
+  assert.ok(!/aria-label="1\. /.test(bare), "a hamlet with nothing to key draws no panel");
+});
+
+test("a very long name shrinks its title and its cartouche stays inside the inner frame", () => {
   const name = "Weluarapa-upon-Woaku-by-the-Strand-of-Hakoawelua";
-  const svg = finishedPlateSvg(makeInput({ name }), STYLES.antique, 1300);
-  const m = svg.match(/font-size="([\d.]+)" letter-spacing="1.3"/);
-  assert.ok(m, "title text node found");
-  const fs = parseFloat(m[1]!);
-  assert.ok(fs < 14.5, `the title shrinks (${fs})`);
-  const len = `THE PROSPECT OF ${name}`.length;
-  const inkWidth = len * fs * 0.65 + (len - 1) * 1.3;
-  assert.ok(inkWidth <= 492, `estimated title ink ${inkWidth} exceeds the inner frame span`);
+  const plate = engravePlate(makeInput({ name }), STYLES.antique, 1300);
+  const cartouche = plate.furniture.cartouche;
+  assert.ok(cartouche.length > 0, "the cartouche reports its boxes");
+  for (const b of cartouche) assert.ok(b.x0 >= INNER.x0 && b.x1 <= INNER.x1, `a cartouche box runs past the frame: ${JSON.stringify(b)}`);
 });
 
 test("the two ratified dresses render; the others refuse", () => {
@@ -259,77 +249,56 @@ test("the two ratified dresses render; the others refuse", () => {
   assert.throws(() => finishedPlateSvg(input, STYLES.nautical, 1300), RangeError);
 });
 
-test("engraved nodes sit under the parchment grain; furniture rides above it", () => {
-  const g = composeProspect(makeInput({}));
-  const opts = {
-    idSuffix: "probe",
-    engraved: [el("circle", { id: "probe-under" })],
-    furniture: [el("circle", { id: "probe-over" })],
-  };
-  const antique = prospectSvg(g, STYLES.antique, opts);
-  const under = antique.indexOf('id="probe-under"');
-  const grain = antique.indexOf('filter="url(#prospect-parch-probe)"');
-  const over = antique.indexOf('id="probe-over"');
-  assert.ok(under >= 0 && grain >= 0 && over >= 0, "all three render");
-  assert.ok(under < grain, "engraved work lies under the grain");
-  assert.ok(grain < over, "furniture rides above the grain");
-
-  const ink = prospectSvg(g, STYLES.ink, opts);
-  const iU = ink.indexOf('id="probe-under"');
-  const iO = ink.indexOf('id="probe-over"');
-  assert.ok(iU >= 0 && iO >= 0 && iU < iO, "ink keeps the order without grain");
-});
-
-// Armless on purpose: the arms spend the heraldic palette, which is its own token set.
-test("finished plates spend only style tokens", () => {
-  for (const style of [STYLES.antique, STYLES.ink]) {
-    const svg = finishedPlateSvg(
-      makeInput({ kind: "capital", harbor: true, foreground: bandOf(["beach", FOREGROUND_SAMPLES]) }),
-      style,
-      1300,
-    );
-    const inks = (svg.match(/#[0-9a-fA-F]{3,8}\b/g) ?? []).filter((c) =>
-      /^#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3,5})?$/.test(c),
-    );
-    assert.ok(inks.length >= 3, `${style.name}: the plate carries ink`);
-    const allowed = tokenColors(style);
-    for (const c of inks) {
-      assert.ok(allowed.has(c.toLowerCase()), `${style.name}: ${c} is not a token`);
-    }
-  }
+test("the picture lies under the parchment grain; the named furniture rides above it", () => {
+  const antique = finishedPlateSvg(makeInput({}), STYLES.antique, 1300);
+  const rise = antique.indexOf(`fill="${STYLES.antique.limner!.grassDeep}"`);
+  const grain = antique.indexOf("filter=\"url(#prospect-parch-");
+  const furniture = antique.indexOf("class=\"pc-");
+  assert.ok(rise >= 0 && grain >= 0 && furniture >= 0, JSON.stringify({ rise, grain, furniture }));
+  assert.ok(rise < grain && grain < furniture, "the rise, then the grain, then the cartouche");
 });
 
 test("the same finished tuple renders byte-identically", () => {
   const input = makeInput({ kind: "capital", harbor: true, arms: ARMS });
   for (const style of [STYLES.antique, STYLES.ink]) {
-    assert.equal(
-      finishedPlateSvg(input, style, 1300),
-      finishedPlateSvg(input, style, 1300),
-      `${style.name}: the finish is pure`,
-    );
+    assert.equal(finishedPlateSvg(input, style, 1300), finishedPlateSvg(input, style, 1300), `${style.name}: the finish is pure`);
   }
 });
 
-// Pinned 2026-08-14 from a measured run; armless synthetic fixtures only (the arms spend render/layers/heraldry, whose charges carry libm ancestry), so these bytes cannot drift across platforms. A deliberate plate change re-pins these with the cause named in the commit.
+/** A world's facts as plain data, so the pins cover the road towns, the beast and the cast's rider without a world (and its libm) behind them. */
+const SURROUNDED: Surroundings = {
+  seaName: "The Great Woaku",
+  riverName: "The Waters of Lalo",
+  rangeName: null,
+  roadTowns: [{ index: 1, name: "Haireno", kind: "town", lateral: 0.39, dist: 21 }, { index: 2, name: "Nanawotani", kind: "village", lateral: -0.5, dist: 30 }],
+  roadCount: 3,
+  beast: { name: "Kaipu", epithet: "the Weed That Wakes", lateral: -0.2 },
+};
+
+// Re-pinned 2026-10-06 for E (Issue #754): armless synthetic fixtures only (the arms spend render/layers/heraldry, whose charges carry libm ancestry), so these bytes cannot drift across platforms. A deliberate plate change re-pins these with the cause named in the commit.
 const PINNED: ReadonlyArray<{ name: string; year: number; style: "antique" | "ink"; sum: number }> = [
-  { name: "harborCapital", year: 1300, style: "antique", sum: 3845457821 },
-  { name: "harborCapital", year: 1300, style: "ink", sum: 2154475468 },
-  { name: "ruinedTown", year: 1200, style: "antique", sum: 2254064444 },
-  { name: "ruinedTown", year: 1120, style: "ink", sum: 1578688448 },
-  { name: "harborCapital", year: 1040, style: "ink", sum: 289721786 },
+  { name: "harborCapital", year: 1300, style: "antique", sum: 150870279 },
+  { name: "harborCapital", year: 1300, style: "ink", sum: 589594686 },
+  { name: "harborCapital", year: 1040, style: "ink", sum: 752328001 },
+  { name: "ruinedTown", year: 1200, style: "antique", sum: 1305155772 },
+  { name: "ruinedTown", year: 1120, style: "ink", sum: 2747277410 },
+  { name: "riverVillage", year: 1300, style: "antique", sum: 2317616647 },
+  { name: "riverVillage", year: 1300, style: "ink", sum: 3038860025 },
+  { name: "fieldsHamlet", year: 1300, style: "antique", sum: 3041714856 },
+  { name: "fieldsHamlet", year: 1300, style: "ink", sum: 3869592275 },
 ];
 
-test("finished plates are byte-pinned across the eras", () => {
+test("finished plates are byte-pinned across the eras and the dresses", () => {
   const fixtures = {
-    harborCapital: makeInput({
-      kind: "capital",
-      harbor: true,
-      foreground: bandOf(["beach", FOREGROUND_SAMPLES]),
-    }),
-    ruinedTown: makeInput({ ruined: true, ruinedYear: 1150 }),
+    harborCapital: { input: makeInput({ kind: "capital", harbor: true, foreground: bandOf(["beach", FOREGROUND_SAMPLES]) }), surroundings: SURROUNDED },
+    ruinedTown: { input: makeInput({ ruined: true, ruinedYear: 1150 }), surroundings: undefined },
+    riverVillage: { input: makeInput({ kind: "village", onRiver: true }), surroundings: undefined },
+    fieldsHamlet: { input: makeInput({ kind: "hamlet" }), surroundings: undefined },
   };
+  assert.ok(PINNED.length >= 8, "the pins cover every fixture in both dresses and the eras");
   for (const { name, year, style, sum } of PINNED) {
-    const svg = finishedPlateSvg(fixtures[name as keyof typeof fixtures], STYLES[style], year);
+    const fx = fixtures[name as keyof typeof fixtures];
+    const svg = finishedPlateSvg(fx.input, STYLES[style], year, fx.surroundings === undefined ? {} : { surroundings: fx.surroundings });
     assert.equal(fnv1a(svg), sum, `${name}/${style}/An. ${year}: pinned plate checksum`);
   }
 });

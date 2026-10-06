@@ -12,7 +12,7 @@ const w42 = generateWorld(defaultRecipe(42));
 test("seed 42's capital plate arrives finished, armed, and pure", () => {
   assert.ok(w42.settlements[0]!.harbor, "premise: the capital is a harbor");
   const svg = prospectPlate(w42, 0, STYLES.antique, w42.title.year);
-  assert.ok(svg.includes("THE PROSPECT OF LAUKUWELUA"), "title from the world's own name");
+  assert.ok(svg.includes('aria-label="LAUKUWELUA"'), "the cartouche holds the world's own name");
   assert.ok(svg.includes("FOUNDED AN. "), "year line");
   assert.ok(svg.includes("chief port of "), "capital epithet");
   assert.ok(svg.includes("VELLUM · CHART № 42"), "the chart number is the seed");

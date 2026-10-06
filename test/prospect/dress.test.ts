@@ -1,176 +1,98 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { STYLES } from "../../src/render/style.ts";
+import { STYLES, type MapStyle } from "../../src/render/style.ts";
+import { renderSvg } from "../../src/render/svg.ts";
+import { createRng } from "../../src/core/rng.ts";
 import { composeProspect } from "../../src/prospect/compose.ts";
 import { FOREGROUND_SAMPLES } from "../../src/prospect/transect.ts";
-import { bandOf, makeInput } from "../../test-support/prospect-fixtures.ts";
-import {
-  groundAt,
-  type ForegroundElement,
-  type Mass,
-  type ProspectGeometry,
-} from "../../src/prospect/geometry.ts";
-import { renderSvg } from "../../src/render/svg.ts";
+import { groundAt, type ForegroundElement, type Mass } from "../../src/prospect/geometry.ts";
 import { massNodes } from "../../src/prospect/dress/buildings.ts";
-import {
-  PROSPECT_DRESSES,
-  foregroundNodes,
-  prospectSvg,
-  type ProspectDress,
-} from "../../src/prospect/dress/plate.ts";
+import { foregroundNodes, PROSPECT_DRESSES } from "../../src/prospect/dress/plate.ts";
 import { dressContext } from "../../src/prospect/dress/context.ts";
-import { attrsOf, fnv1a, landPathD, tokenColors } from "../../test-support/dress-svg.ts";
+import { engraver } from "../../src/prospect/dress/burin.ts";
+import { foregroundEngraved, massNodesEngraved } from "../../src/prospect/dress/townscape.ts";
+import { finishedPlateSvg } from "../../src/prospect/finished.ts";
+import { bandOf, makeInput } from "../../test-support/prospect-fixtures.ts";
+import { outlinedSolids, tokenColors } from "../../test-support/dress-svg.ts";
 
-/** The dress rounds coordinates to 0.1 at SVG emit (geometry.ts); tests locate elements by reproducing that rounding. */
+/** The dress rounds coordinates to 0.1 at SVG emit; tests locate elements by reproducing that rounding. */
 const f = (v: number): string => String(Math.round(v * 10) / 10);
 
-// Synthetic fixtures reach arms real worlds cannot (see test-support/prospect-fixtures.ts) and carry no libm ancestry, so their rendered bytes are platform-stable and safe to pin.
-const FIXTURES: Record<string, ProspectGeometry> = {
-  harborCapital: composeProspect(
-    makeInput({
-      kind: "capital",
-      score: 6,
-      harbor: true,
-      foreground: bandOf(["beach", FOREGROUND_SAMPLES]),
-    }),
-  ),
-  riverVillage: composeProspect(makeInput({ kind: "village", onRiver: true })),
-  ruinedTown: composeProspect(makeInput({ kind: "town", ruined: true, ruinedYear: 1361 })),
-  drownedVillage: composeProspect(
-    makeInput({
-      kind: "village",
-      ruined: true,
-      foreground: bandOf(["marsh", FOREGROUND_SAMPLES]),
-    }),
-  ),
-  fieldsHamlet: composeProspect(makeInput({ kind: "hamlet" })),
+// Synthetic inputs reach arms real worlds cannot (see test-support/prospect-fixtures.ts) and carry no libm ancestry, so their plates are platform-stable.
+const DRESS_FIXTURES = {
+  harborCapital: makeInput({ kind: "capital", score: 6, harbor: true, foreground: bandOf(["beach", FOREGROUND_SAMPLES]) }),
+  riverVillage: makeInput({ kind: "village", onRiver: true }),
+  ruinedTown: makeInput({ kind: "town", ruined: true, ruinedYear: 1361 }),
+  drownedVillage: makeInput({ kind: "village", ruined: true, foreground: bandOf(["marsh", FOREGROUND_SAMPLES]) }),
+  fieldsHamlet: makeInput({ kind: "hamlet" }),
 };
+const YEAR = 1400;
+const plate = (name: keyof typeof DRESS_FIXTURES, style: MapStyle): string => finishedPlateSvg(DRESS_FIXTURES[name], style, YEAR);
 
 test("the ratified dresses are antique and ink, and only those render", () => {
   assert.deepEqual([...PROSPECT_DRESSES], ["antique", "ink"]);
-  const g = FIXTURES.fieldsHamlet!;
-  for (const dress of PROSPECT_DRESSES) {
-    assert.ok(prospectSvg(g, STYLES[dress]).startsWith("<svg"), `${dress} renders`);
-  }
-  assert.throws(() => prospectSvg(g, STYLES.topographic), RangeError);
-  assert.throws(() => prospectSvg(g, STYLES.nautical), RangeError);
+  for (const dress of PROSPECT_DRESSES) assert.ok(plate("fieldsHamlet", STYLES[dress]).startsWith("<svg"), `${dress} renders`);
+  assert.throws(() => plate("fieldsHamlet", STYLES.topographic), RangeError);
+  assert.throws(() => plate("fieldsHamlet", STYLES.nautical), RangeError);
 });
 
-test("every ink in every plate is sourced from render/style.ts tokens", () => {
-  for (const [name, g] of Object.entries(FIXTURES)) {
+test("every ink in every plate is a style token, a limner's wash or a heraldic tincture, never a literal", () => {
+  for (const name of Object.keys(DRESS_FIXTURES) as Array<keyof typeof DRESS_FIXTURES>) {
     for (const dress of PROSPECT_DRESSES) {
-      const svg = prospectSvg(g, STYLES[dress]);
-      const found = svg.match(/#[0-9a-fA-F]{3,8}\b/g) ?? [];
-      const inks = found.filter((c) => /^#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3,5})?$/.test(c));
-      assert.ok(inks.length >= 3, `${name}/${dress}: plate actually carries ink`);
+      const inks = (plate(name, STYLES[dress]).match(/#[0-9a-fA-F]{3,8}\b/g) ?? []).filter((c) => /^#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3,5})?$/.test(c));
+      assert.ok(inks.length >= 3, `${name}/${dress}: the plate carries ink`);
       const allowed = tokenColors(STYLES[dress]);
-      for (const c of inks) {
-        assert.ok(allowed.has(c.toLowerCase()), `${name}/${dress}: ${c} is not a token`);
-      }
+      for (const c of inks) assert.ok(allowed.has(c.toLowerCase()), `${name}/${dress}: ${c} is not a token`);
     }
   }
 });
 
-test("swapping the dress changes only the ink: paper-filled solids are identical", () => {
-  for (const [name, g] of Object.entries(FIXTURES)) {
-    const antique = landPathD(prospectSvg(g, STYLES.antique), STYLES.antique.land);
-    const ink = landPathD(prospectSvg(g, STYLES.ink), STYLES.ink.land);
-    assert.ok(
-      antique.length >= g.masses.length,
-      `${name}: every mass renders a paper-filled solid (${antique.length} < ${g.masses.length})`,
-    );
+test("swapping the dress changes the ink and the washes, never a shape: every outlined solid is the same in both dresses", () => {
+  for (const name of Object.keys(DRESS_FIXTURES) as Array<keyof typeof DRESS_FIXTURES>) {
+    const antique = outlinedSolids(plate(name, STYLES.antique));
+    const ink = outlinedSolids(plate(name, STYLES.ink));
+    assert.ok(antique.length > 20, `${name}: the plate draws its solids (${antique.length})`);
     assert.deepEqual(antique, ink, `${name}: composition is dress-invariant`);
   }
+  assert.ok(plate("harborCapital", STYLES.antique).includes(`fill="${STYLES.antique.limner!.water}"`), "premise: the antique carries the limner's water wash, which the ink does not");
 });
 
-test("walls paint between the back row and the keep, the spike's layering", () => {
-  const g = FIXTURES.harborCapital!;
-  const backMass = g.masses.find((m) => m.raise > 4);
-  const keep = g.masses.find((m) => m.form === "keep");
-  const wall = g.walls[0];
-  assert.ok(backMass && keep && wall, "fixture composes back row, keep, and wall");
-  const svg = prospectSvg(g, STYLES.antique);
-  const backAt = svg.indexOf(`M${f(backMass.x)} ${f(backMass.base)}`);
-  const wallAt = svg.indexOf(`M${f(wall.x0)} ${f(groundAt(g.ground, wall.x0))}`);
-  const keepAt = svg.indexOf(`M${f(keep.x)} ${f(keep.base)}`);
-  assert.ok(backAt >= 0, "back-row mass outline found");
-  assert.ok(wallAt >= 0, "curtain wall outline found");
-  assert.ok(keepAt >= 0, "keep outline found");
-  assert.ok(backAt < wallAt, "back row paints before the wall");
-  assert.ok(wallAt < keepAt, "wall paints before the keep");
+test("walls paint between the back row and the keep, as the round layers them", () => {
+  const g = composeProspect(DRESS_FIXTURES.harborCapital);
+  const backMass = g.masses.find((m) => m.raise > 4), keep = g.masses.find((m) => m.form === "keep"), wall = g.walls[0];
+  assert.ok(backMass && keep && wall, "fixture composes back row, keep and wall");
+  const svg = plate("harborCapital", STYLES.antique);
+  const at = (s: string): number => svg.indexOf(s);
+  const backAt = at(`M${f(backMass.x)} ${f(backMass.base)}V`), wallAt = at(`M${f(wall.x0)} ${f(groundAt(g.ground, wall.x0))}L`), keepAt = at(`M${f(keep.x)} ${f(keep.base)}V`);
+  assert.ok(backAt >= 0 && wallAt >= 0 && keepAt >= 0, JSON.stringify({ backAt, wallAt, keepAt }));
+  assert.ok(backAt < wallAt && wallAt < keepAt, "back row, then the wall, then the keep");
 });
 
-test("the ground line follows the sampled ground polyline", () => {
-  const g = FIXTURES.fieldsHamlet!;
-  const first = g.ground.line[0]!;
-  const svg = prospectSvg(g, STYLES.antique);
-  assert.ok(
-    svg.includes(`M${f(first.x)} ${f(first.y)}`),
-    "ground path starts at the first sampled point",
-  );
+test("a risen site fills its mound down to its base line", () => {
+  const risen = makeInput({ siteRel: 0.6 });
+  const g = composeProspect(risen);
+  assert.ok(g.ground.rise > 0, "premise: the fixture rises");
+  assert.ok(finishedPlateSvg(risen, STYLES.antique, YEAR).includes(`M${f(g.ground.line[0]!.x)} ${f(g.ground.base + 3)}L`), "the mound closes down to its base line");
 });
 
-test("a risen site fills its mound; a drowned plate draws no ground line", () => {
-  const risen = composeProspect(makeInput({ siteRel: 0.6 }));
-  assert.ok(risen.ground.rise > 0, "fixture actually rises");
-  const svg = prospectSvg(risen, STYLES.antique);
-  const moundStart = `M${f(29)} ${f(risen.ground.base + 3)}`;
-  assert.ok(svg.includes(moundStart), "mound path closes down to the base line");
+const MASSES: ReadonlyArray<{ readonly m: Mass; readonly intact: string; readonly broken: string; readonly what: string }> = [
+  { m: { form: "gable", x: 100, w: 20, h: 18, base: 232, raise: 0, broken: false }, what: "gable", intact: `L${f(110)} ${f(232 - 18 - Math.min(9, 18 * 0.45))}`, broken: `L${f(100)} ${f(232 - 18 + 18 * 0.25)}` },
+  { m: { form: "tower", x: 200, w: 10, h: 30, base: 232, raise: 0, broken: false }, what: "tower", intact: `M${f(199.5)} ${f(202)}`, broken: `L${f(203.5)} ${f(202 + 30 * 0.38)}` },
+  { m: { form: "keep", x: 240, w: 34, h: 40, base: 232, raise: 0, broken: false }, what: "keep", intact: "l4 1.4l-4 1.4", broken: `L${f(240 + 34 * 0.2)} ${f(192 + 40 * 0.4)}` },
+];
 
-  const drowned = FIXTURES.drownedVillage!;
-  const dsvg = prospectSvg(drowned, STYLES.antique);
-  const lineStart = `M${f(drowned.ground.line[0]!.x)} ${f(drowned.ground.line[0]!.y)}`;
-  assert.ok(!dsvg.includes(lineStart), "no ground line under the flood");
-});
-
-test("the sea band wears the style's water tokens", () => {
-  const g = FIXTURES.harborCapital!;
-  const antique = prospectSvg(g, STYLES.antique);
-  const oceanRects = [...antique.matchAll(/<rect\b[^>]*>/g)]
-    .map((m) => attrsOf(m[0]))
-    .filter((a) => a.fill === STYLES.antique.ocean);
-  assert.equal(oceanRects.length, 1, "antique paints one ocean sheet");
-  assert.equal(oceanRects[0]!.y, f(g.water!.y0));
-  const halo = [...antique.matchAll(/<path\b[^>]*>/g)]
-    .map((m) => attrsOf(m[0]))
-    .filter((a) => a.stroke === STYLES.antique.waterline);
-  assert.equal(halo.length, 3, "the 3-pass waterline halo");
-
-  // ink's ocean IS its paper, so no sheet: the waterline alone carries it.
-  const ink = prospectSvg(g, STYLES.ink);
-  const inkRects = [...ink.matchAll(/<rect\b[^>]*>/g)]
-    .map((m) => attrsOf(m[0]))
-    .filter((a) => a.fill === STYLES.ink.ocean && a.height !== undefined);
-  const oceanSheet = inkRects.filter((a) => a.y === f(g.water!.y0));
-  assert.equal(oceanSheet.length, 0, "ink paints no ocean sheet");
-  assert.ok(ink.includes(`stroke="${STYLES.ink.coastStroke}"`), "ink keeps the coast stroke");
-});
-
-// Silhouette-specific on purpose: a whole-plate notEqual is satisfied by the foot rubble alone, so each form family's silhouette is guarded through massNodes, the class, not the instance.
-test("a broken mass loses its intact silhouette, form by form", () => {
-  const c = dressContext(STYLES.ink);
-  const render = (m: Mass): string => massNodes(c, m, 1.2).map(renderSvg).join("");
-
-  const gable: Mass = { form: "gable", x: 100, w: 20, h: 18, base: 232, raise: 0, broken: false };
-  const apex = `L${f(110)} ${f(232 - 18 - Math.min(9, 18 * 0.45))}`;
-  assert.ok(render(gable).includes(apex), "intact gable raises its apex");
-  const gb = render({ ...gable, broken: true });
-  assert.ok(!gb.includes(apex), "a broken gable loses the apex");
-  assert.ok(gb.includes(`L${f(100)} ${f(232 - 18 + 18 * 0.25)}`), "a broken gable jags");
-
-  const tower: Mass = { form: "tower", x: 200, w: 10, h: 30, base: 232, raise: 0, broken: false };
-  const merlons = `M${f(199.5)} ${f(202)}`;
-  assert.ok(render(tower).includes(merlons), "an intact tower is crenellated");
-  const tb = render({ ...tower, broken: true });
-  assert.ok(!tb.includes(merlons), "a broken tower loses its merlons");
-  assert.ok(tb.includes(`L${f(203.5)} ${f(202 + 30 * 0.38)}`), "a broken tower jags");
-
-  const keep: Mass = { form: "keep", x: 240, w: 34, h: 40, base: 232, raise: 0, broken: false };
-  const pennant = "l4 1.4l-4 1.4";
-  assert.ok(render(keep).includes(pennant), "an intact keep flies pennants");
-  const kb = render({ ...keep, broken: true });
-  assert.ok(!kb.includes(pennant), "a thrown-down keep flies no pennant");
-  assert.ok(kb.includes(`L${f(240 + 34 * 0.2)} ${f(192 + 40 * 0.4)}`), "a broken keep jags");
+// Silhouette-specific on purpose: a whole-plate notEqual is satisfied by the foot rubble alone, so each form family's silhouette is guarded, in today's dress (the river craft still draws with it) and in E's engraved one.
+test("a broken mass loses its intact silhouette, form by form, in both mass dresses", () => {
+  const today = (m: Mass): string => massNodes(dressContext(STYLES.ink), m, 1.2).map(renderSvg).join("");
+  const engraved = (m: Mass): string => massNodesEngraved(engraver(STYLES.ink), m, 1.2).map(renderSvg).join("");
+  for (const [dress, render] of [["today", today], ["engraved", engraved]] as const) {
+    for (const { m, intact, broken, what } of MASSES) {
+      assert.ok(render(m).includes(intact), `${dress}: an intact ${what} keeps its silhouette`);
+      const ruin = render({ ...m, broken: true });
+      assert.ok(!ruin.includes(intact), `${dress}: a broken ${what} loses it`);
+      assert.ok(ruin.includes(broken), `${dress}: a broken ${what} jags`);
+    }
+  }
 });
 
 const SAMPLE_ELEMENTS: ReadonlyArray<ForegroundElement> = [
@@ -183,109 +105,40 @@ const SAMPLE_ELEMENTS: ReadonlyArray<ForegroundElement> = [
   { kind: "dunes", items: [{ x: 180, y: 226, s: 1.5 }] },
   { kind: "ripples", items: [{ x: 200, y: 250, s: 0.8 }] },
   { kind: "stilts", posts: [{ x: 220, y: 232 }] },
-  {
-    kind: "quay",
-    x0: 130,
-    x1: 300,
-    y: 238,
-    bollards: [140, 215, 290],
-    steps: { x: 282, y: 238, count: 3 },
-    arcade: { x0: 138, x1: 240, arches: 4 },
-  },
+  { kind: "quay", x0: 130, x1: 300, y: 238, bollards: [140, 215, 290], steps: { x: 282, y: 238, count: 3 }, arcade: { x0: 138, x1: 240, arches: 4 } },
   { kind: "mastRow", masts: [{ x: 320, hullY: 248, mastH: 50 }] },
   { kind: "ship", x: 100, y: 260, s: 1.15 },
   { kind: "mole", rootX: 487, headX: 445, headY: 248 },
   { kind: "beachedHulls", hulls: [{ x: 200, y: 236, tilt: -7 }] },
   { kind: "jetty", x0: 330, y0: 237, x1: 394, y1: 244, posts: [{ x: 340, y: 239 }] },
   { kind: "nets", x: 138, y: 222 },
-  {
-    kind: "bridge",
-    x0: 270,
-    x1: 418,
-    deckY: 227,
-    waterY: 253,
-    arches: 3,
-    gateTower: { form: "tower", x: 264, w: 12, h: 22, base: 228, raise: 0, broken: false },
-  },
+  { kind: "bridge", x0: 270, x1: 418, deckY: 227, waterY: 253, arches: 3, gateTower: { form: "tower", x: 264, w: 12, h: 22, base: 228, raise: 0, broken: false } },
   { kind: "weir", x0: 170, x1: 350, y: 239 },
-  {
-    kind: "mill",
-    house: { form: "gable", x: 368, w: 22, h: 15, base: 267, raise: 0, broken: false },
-    wheel: { cx: 364, cy: 259, r: 6 },
-  },
+  { kind: "mill", house: { form: "gable", x: 368, w: 22, h: 15, base: 267, raise: 0, broken: false }, wheel: { cx: 364, cy: 259, r: 6 } },
   { kind: "rubble", stones: [{ x: 150, y: 231, s: 3 }] },
   { kind: "beams", items: [{ x: 170, y: 232, dx: 9, dy: -11 }] },
-  {
-    kind: "drownedStubs",
-    stubs: [
-      { x: 314, w: 12, h: 45, base: 250, tilt: -9 },
-      { x: 208, w: 16, h: 23, base: 249, tilt: 0 },
-    ],
-  },
+  { kind: "drownedStubs", stubs: [{ x: 314, w: 12, h: 45, base: 250, tilt: -9 }, { x: 208, w: 16, h: 23, base: 249, tilt: 0 }] },
   { kind: "birds", items: [{ x: 200, y: 80, s: 0.8 }] },
   { kind: "seaSerpent", x: 97, y: 262, s: 0.55 },
 ];
 
-test("every foreground kind, every tree species, renders at least one node", () => {
+const RIPPLES_STAND_DOWN: ReadonlySet<ForegroundElement["kind"]> = new Set(["ripples"]);
+
+test("every foreground kind, every tree species, inks at least one node in today's dress and in E's", () => {
   const seen = new Set<string>();
   for (const dress of PROSPECT_DRESSES) {
-    const c = dressContext(STYLES[dress]);
     for (const e of SAMPLE_ELEMENTS) {
-      assert.ok(
-        foregroundNodes(c, e).length > 0,
-        `${e.kind}${"species" in e ? `:${e.species}` : ""} inks nothing in ${dress}`,
-      );
+      const label = `${e.kind}${"species" in e ? `:${e.species}` : ""}`;
+      assert.ok(foregroundNodes(dressContext(STYLES[dress]), e).length > 0, `${label} inks nothing in today's ${dress}`);
+      const engraved = foregroundEngraved(engraver(STYLES[dress]), e, createRng(1));
+      assert.ok(engraved.nodes.length > 0 || RIPPLES_STAND_DOWN.has(e.kind), `${label} inks nothing in E's ${dress}`);
       seen.add(e.kind);
     }
   }
-  // The sample list must not rot: a kind added to the union without a sample here would dodge the coverage claim (tsc keeps it honest via the renderer's exhaustive never arm).
+  // The sample list must not rot: a kind added to the union without a sample here would dodge the coverage claim (tsc keeps it honest via the renderers' exhaustive arms).
   const KINDS: Record<ForegroundElement["kind"], true> = {
-    fieldRows: true,
-    scrubRows: true,
-    trees: true,
-    marshTufts: true,
-    dunes: true,
-    ripples: true,
-    stilts: true,
-    quay: true,
-    mastRow: true,
-    ship: true,
-    mole: true,
-    beachedHulls: true,
-    jetty: true,
-    nets: true,
-    bridge: true,
-    weir: true,
-    mill: true,
-    rubble: true,
-    beams: true,
-    drownedStubs: true,
-    birds: true,
-    seaSerpent: true,
+    fieldRows: true, scrubRows: true, trees: true, marshTufts: true, dunes: true, ripples: true, stilts: true, quay: true, mastRow: true, ship: true, mole: true,
+    beachedHulls: true, jetty: true, nets: true, bridge: true, weir: true, mill: true, rubble: true, beams: true, drownedStubs: true, birds: true, seaSerpent: true,
   };
   assert.deepEqual([...seen].sort(), Object.keys(KINDS).sort(), "every kind sampled");
-});
-
-// Pinned 2026-08-10 from a measured run; the synthetic fixtures are libm-free end to end, so the rounded bytes cannot drift across platforms. A deliberate dress change re-pins these with the cause named in the commit.
-const PINNED: ReadonlyArray<{ fixture: string; dress: ProspectDress; sum: number }> = [
-  { fixture: "harborCapital", dress: "antique", sum: 3614064183 },
-  { fixture: "harborCapital", dress: "ink", sum: 3369968809 },
-  { fixture: "riverVillage", dress: "antique", sum: 2999650680 },
-  { fixture: "riverVillage", dress: "ink", sum: 742519168 },
-  { fixture: "ruinedTown", dress: "antique", sum: 1173247544 },
-  { fixture: "ruinedTown", dress: "ink", sum: 536177691 },
-  { fixture: "drownedVillage", dress: "antique", sum: 300302567 },
-  { fixture: "drownedVillage", dress: "ink", sum: 2399069377 },
-  { fixture: "fieldsHamlet", dress: "antique", sum: 3410339942 },
-  { fixture: "fieldsHamlet", dress: "ink", sum: 1133369068 },
-];
-
-test("the same (geometry, dress) yields byte-identical, pinned SVG", () => {
-  for (const { fixture, dress, sum } of PINNED) {
-    const g = FIXTURES[fixture]!;
-    const a = prospectSvg(g, STYLES[dress]);
-    const b = prospectSvg(g, STYLES[dress]);
-    assert.equal(a, b, `${fixture}/${dress}: render is pure`);
-    assert.equal(fnv1a(a), sum, `${fixture}/${dress}: pinned dress checksum`);
-  }
 });

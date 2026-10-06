@@ -1,11 +1,16 @@
 // String-level SVG probes shared by the prospect dress and finished-plate tests: assertions are on the exact emitted bytes, not a parsed DOM.
 
 import type { MapStyle } from "../src/render/style.ts";
+import type { Tincture } from "../src/society/heraldry.ts";
+import { paletteForStyle } from "../src/render/layers/heraldry.ts";
 
-/** The tokens the dress may draw from; deliberately NOT the whole style object: realmTints are excluded so a hard-coded grey that happens to equal a tint still fails. */
+const TINCTURES: ReadonlyArray<Tincture> = ["or", "argent", "gules", "azure", "sable", "vert", "purpure"];
+
+/** The tokens the dress may draw from: the style's inks and papers, its limner's washes, and the heraldic palette the realm's clothes are cut from; deliberately NOT the whole style object: realmTints are excluded so a hard-coded grey that happens to equal a tint still fails. */
 export function tokenColors(s: MapStyle): Set<string> {
+  const palette = paletteForStyle(s);
   return new Set(
-    [s.paper, s.ink, s.inkSoft, s.ocean, s.waterline, s.coastStroke, s.land].map((c) =>
+    [s.paper, s.ink, s.inkSoft, s.ocean, s.waterline, s.coastStroke, s.land, ...Object.values(s.limner ?? {}), ...TINCTURES.map((t) => palette.tincture(t))].map((c) =>
       c.toLowerCase(),
     ),
   );
@@ -28,12 +33,12 @@ export function attrsOf(elem: string): Record<string, string> {
   return out;
 }
 
-/** All land-filled <path> d strings, sorted: the composition solids, whose d multiset must be dress-invariant. */
-export function landPathD(svg: string, land: string): string[] {
+/** Every outlined solid's d, sorted: paths that fill and carry a stroke. Their shapes are the composition, which the dress may recolour but never redraw. */
+export function outlinedSolids(svg: string): string[] {
   const out: string[] = [];
   for (const m of svg.matchAll(/<path\b[^>]*>/g)) {
     const a = attrsOf(m[0]);
-    if (a.fill === land && a.d !== undefined) out.push(a.d);
+    if (a.d !== undefined && a.fill !== undefined && a.fill !== "none" && a.stroke !== undefined) out.push(a.d);
   }
   return out.sort();
 }
