@@ -5,7 +5,9 @@ working agreements and rationale that a task board has no field for. How a desig
 made before any of it is scheduled, and how a rule is written down once made, are
 `handbook/specs/conventions.md`'s.
 
-It replaces the body of issue #193, which is now a pointer to this file.
+It replaces the body of issue #193, which is now a pointer to this file. Other issues' citations
+of #193 were deliberately left as they stand and resolve through that pointer, so an old one is not
+drift to report.
 
 Five other places carry what this one deliberately does not:
 
