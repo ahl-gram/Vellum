@@ -160,6 +160,8 @@ const TEXT: ReadonlyArray<CdRow> = [
   ["a quoted heredoc whose last body line ends in a backslash ends at its terminator", "cat >/dev/null <<'END'\nnpm test \\\nEND\ncd src && pwd", "<ROOT>", "deny"],
   ["an escaped backslash at a line's end is not a continuation", "echo a\\\\\ncd src && pwd", "<ROOT>", "deny"],
   ["a heredoc delimiter holding a dash is a heredoc", "cat >/dev/null <<'END-NOTE'\nIt's fine\nEND-NOTE\ncd src && echo 'x' && pwd", "<ROOT>", "deny"],
+  ["an unquoted heredoc delimiter holding a dash is a heredoc", "cat >/dev/null <<END-NOTE\nIt's fine\nEND-NOTE\ncd src && echo 'x'", "<ROOT>", "deny"],
+  ["a comment after a cd that stays is not an argument", "cd . # back where we were", "<ROOT>", null],
   ["a heredoc delimiter quoted with a backslash is a heredoc", "cat <<\\EOF\ncd src\nEOF", "<ROOT>", null],
   ["an ANSI-C quoted apostrophe does not hide a later cd", "echo $'it\\'s'; cd src; echo 'x'", "<ROOT>", "deny"],
   ["an escape script after a cd keeps its own refusal", "cd src && cat > scripts/781-x.ts <<'END'\nconst R = `a\\s`;\nEND", "<ROOT>", "deny", "escape"],

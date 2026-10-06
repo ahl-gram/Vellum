@@ -272,6 +272,8 @@ const CD_ROWS: ReadonlyArray<readonly [string, "deny" | "null"]> = [
   ["a quoted heredoc whose last body line ends in a backslash ends at its terminator", "deny"],
   ["an escaped backslash at a line's end is not a continuation", "deny"],
   ["a heredoc delimiter holding a dash is a heredoc", "deny"],
+  ["an unquoted heredoc delimiter holding a dash is a heredoc", "deny"],
+  ["a comment after a cd that stays is not an argument", "null"],
   ["a heredoc delimiter quoted with a backslash is a heredoc", "null"],
   ["an ANSI-C quoted apostrophe does not hide a later cd", "deny"],
   ["an escape script after a cd keeps its own refusal", "deny"],

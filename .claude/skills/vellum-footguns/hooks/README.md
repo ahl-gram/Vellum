@@ -101,7 +101,7 @@ is ever removed.
     comment opens nothing), single, double, ANSI-C (`$'...'`) and backtick spans, arithmetic
     expansions (`$((...))`, so a shift is not a heredoc), and heredoc bodies, whether the operator
     is last on its line or not (`cat <<'EOF' > f`, which the hook's own heredoc pattern misses), its
-    delimiter bare, quoted, backslash-quoted or holding `-` or `.`, and `<<-` stripping tabs from
+    delimiter bare, quoted, backslash-quoted or holding `-`, and `<<-` stripping tabs from
     the terminator; its boundaries track
     subshell depth (`(`, `$(` and `<(` open one); and only a command at depth zero that no pipe or
     background `&` ends is read, since zsh, the shell here, runs a pipeline's earlier stages and a background job in
