@@ -108,6 +108,20 @@ test("the floor fires below half the room exactly, and a sheet shorter than wide
   near(portrait.sheet.w, (474 - 28) * 0.5, "at its own aspect");
 });
 
+// The narrow fit's inputs as bindRoom reads them on this branch's build (measured 2026-10-05, Issue #762 pull request B): the wrapped cluster's foot above, the bottom sheet's head below, no slip beside.
+const narrowFit = (h: number, above: number, sheetTop: number, aspect: number) =>
+  fitStage({ ...base, aspect, view: { w: 640, h }, above: [above], below: [sheetTop], beside: 0, gap: 8, narrow: true });
+
+test("a narrow fit whose width floor runs the sheet past its room says it runs under the chrome, so the chrome stands on its dark backing (Alex, 2026-10-05, on PR #784)", () => {
+  const explorer = narrowFit(400, 164.59, 254.75, ASPECT);
+  near(explorer.sheet.w, 640, "the Explorer at 640x400 keeps the narrow width floor");
+  assert.ok(explorer.sheet.h > 400 - (164.59 + 8) - (400 - 254.75 + 8), "the witness: a sheet taller than the room between the cluster and the bottom sheet");
+  assert.equal(explorer.under, true, "and the fit says it runs under the chrome");
+  const printRoom = narrowFit(800, 164.59, 693.73, 1.2952268987960809);
+  near(printRoom.sheet.w, 640, "the Print Room at 640x800 keeps the narrow width floor too");
+  assert.equal(printRoom.under, false, "but its sheet fits the room between the cluster and the bottom sheet, so it runs under nothing");
+});
+
 test("the floor waits on a narrow layout, whose own width floor still stands until Issue #762's pull request C", () => {
   const narrow = fitStage({ ...base, aspect: 0.5, view: { w: 390, h: 844 }, above: [700], below: [760], gap: 8, beside: 0, narrow: true });
   assert.equal(narrow.under, false, "no floor on the narrow layout, even for a degenerate portrait fit the width floor leaves alone");
