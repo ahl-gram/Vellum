@@ -113,10 +113,8 @@ export async function p23CapHolds({ evaluate, send, check, sleep, wheel, settle 
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
 }
 
-export async function p24NothingToScroll({ evaluate, send, check, sleep, wheel, settle, waitReady, setTouch, PORT }: CardsKit): Promise<void> {
-  // A mouse's wheel on a desktop, touch off: with touch emulation on, this zoom left the browser so that the next suite's real clicks missed (chart-drawer after cards, measured 2026-10-06, cause not found).
-  await setTouch(false);
-  await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
+export async function p24NothingToScroll({ evaluate, send, check, sleep, wheel, settle, waitReady, setNarrowViewport, PORT }: CardsKit): Promise<void> {
+  await setNarrowViewport(1280, 800);
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/#seed=${NARROW_SEED}&style=antique` });
   if (!(await waitReady())) throw new Error("P24 the explorer never drew at 1280x800");
