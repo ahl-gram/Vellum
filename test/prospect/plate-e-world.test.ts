@@ -51,7 +51,7 @@ test("every piece of furniture, every lettered run and every bird stays inside t
       assert.ok(inside(b), `${label}: a flock at ${JSON.stringify(b)} straddles the frame`);
       for (const [group, boxes] of Object.entries(plate.furniture)) assert.ok(!boxes.some((f) => overlaps(b, f)), `${label}: a bird crosses the ${group}`);
       for (const t of [...v.town, ...v.masts]) assert.ok(!overlaps(b, t), `${label}: a flock at ${JSON.stringify(b)} crosses the town or a mast at ${JSON.stringify(t)}`);
-      for (let x = b.x0; x <= b.x1; x += 1) assert.ok(b.y1 < v.horizonYAt(x), `${label}: a flock at ${JSON.stringify(b)} flies into the hills at x ${x.toFixed(1)}`);
+      for (let x = b.x0; x <= b.x1; x += 1) assert.ok(b.y1 < v.hillTopAt(x), `${label}: a flock at ${JSON.stringify(b)} flies into the hills at x ${x.toFixed(1)}`);
     }
     assert.ok(!/<text\b/.test(renderSvg(plate.node)), `${label}: a run left as device text`);
   });

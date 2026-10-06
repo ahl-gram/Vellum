@@ -122,16 +122,20 @@ export const wallReach = (ground: Ground, w: WallSegment): Box => ({
   x0: w.x0 - 4.5, x1: w.x1 + 4.5, y0: groundAt(ground, Math.max(w.x0, Math.min(w.x1, (VIEW_X0 + VIEW_X1) / 2))) - w.h - 12 + LIFT, y1: ground.base + LIFT,
 });
 
-/** What stands against the sky once the town is lifted, before any bird flies: the hills' line, the town's run and ink, the masts. */
-export type Skyline = { readonly horizonYAt: (x: number) => number; readonly townRun: readonly [number, number]; readonly masts: ReadonlyArray<Box>; readonly town: ReadonlyArray<Box> };
+/** What stands against the sky once the town is lifted, before any bird flies: the hills' crest, the top of their wash, the town's run and ink, the masts. */
+export type Skyline = { readonly horizonYAt: (x: number) => number; readonly hillTopAt: (x: number) => number; readonly townRun: readonly [number, number]; readonly masts: ReadonlyArray<Box>; readonly town: ReadonlyArray<Box> };
 
 export function skylineOf(g: ProspectGeometry): Skyline {
   const horizon = g.ground.base + 2 + LIFT;
   const ridge = g.ridge;
   const xs = [...g.masses.map((m) => m.x), ...g.walls.map((w) => w.x0)];
   const xe = [...g.masses.map((m) => m.x + m.w), ...g.walls.map((w) => w.x1)];
+  const crest = (x: number): number => (ridge === null ? horizon : yOnPolyline(ridge, x) + LIFT);
+  const a = ridge?.[0], b = ridge?.[ridge.length - 1];
+  const chord = (x: number): number => (a === undefined || b === undefined || b.x <= a.x || x < a.x || x > b.x ? Infinity : a.y + ((b.y - a.y) * (x - a.x)) / (b.x - a.x) + LIFT);
   return {
-    horizonYAt: (x) => (ridge === null ? horizon : yOnPolyline(ridge, x) + LIFT),
+    horizonYAt: crest,
+    hillTopAt: (x) => Math.min(crest(x), chord(x)),
     townRun: xs.length > 0 ? [Math.min(...xs), Math.max(...xe)] : [260, 260],
     masts: g.foreground.flatMap((f): Box[] => {
       if (f.kind === "mastRow") return f.masts.map((m) => shipRig(m.x, m.hullY, 0.72 + (m.mastH - 42) / 90, m.mastH > 56));
