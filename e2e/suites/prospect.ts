@@ -179,14 +179,14 @@ async function pb7YearFilter({ evaluate, check, sleep, goto, opened, state, svgO
   const ground = await svgOf();
   check(
     "PB7 the year is a chronicle filter: the standing town at the present, the bare ground before its founding",
-    /THE PROSPECT OF PAUKILUA/.test(standing) && !/will rise/.test(standing) && /will rise/.test(ground) && early.year === 300,
+    /aria-label="PAUKILUA"/.test(standing) && !/will rise/.test(standing) && /will rise/.test(ground) && early.year === 300,
     JSON.stringify({ year: early.year, presentYear: early.presentYear }),
   );
   check(
-    "PB7b a viewed year reads in the year control and the era line, the bare ground has no key, and the Explorer link sheds the page's own keys",
-    early.yearField === "300" && early.eraLine === "Before the founding · An. 300" && early.era === "before-founding" && early.keyRows === 0 && early.keyHeadHidden && /will rise · An\. 300$/.test(early.where!) && !/founded/.test(
+    "PB7b a viewed year reads in the year control and the era line, the bare ground keys the world alone (Issue #754 ruling D12), and the Explorer link sheds the page's own keys",
+    early.yearField === "300" && early.eraLine === "Before the founding · An. 300" && early.era === "before-founding" && early.keyRows > 0 && early.keyLis === early.keyRows && !early.keyHeadHidden && /will rise · An\. 300$/.test(early.where!) && !/founded/.test(
       early.where!) && early.chart === "/explorer/#seed=42",
-    JSON.stringify({ yearField: early.yearField, eraLine: early.eraLine, keyRows: early.keyRows, keyHeadHidden: early.keyHeadHidden, where: early.where, chart: early.chart }),
+    JSON.stringify({ yearField: early.yearField, eraLine: early.eraLine, keyRows: early.keyRows, keyLis: early.keyLis, keyHeadHidden: early.keyHeadHidden, where: early.where, chart: early.chart }),
   );
 
   await evaluate(`(()=>{document.getElementById("pp-year").value=${JSON.stringify(String(early.presentYear))};document.getElementById("pp-year-form").requestSubmit();})()`);
