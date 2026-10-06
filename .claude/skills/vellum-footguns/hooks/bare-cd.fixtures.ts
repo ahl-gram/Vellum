@@ -1,5 +1,5 @@
 // The cd reader's rows (Issue #781), as data: footgun-gate.selftest.ts fills <ROOT> (the checkout), <S> (its scratch directory, holding `a dir`, `to-a-dir` linked to it, `.claude/worktrees/orch-779` and `out/762/baseline-phone`) and <LINK> (its link in <S> to the checkout); it runs each row with CLAUDE_PROJECT_DIR at <S> when the cwd lies under <S>, at <ROOT> otherwise, or as the last field says; a "deny" row wants the reason for a directory inside the project, an "unplaced" row the one for a directory the hook cannot work out.
-export type CdRow = readonly [name: string, command: string, cwd: string | null, want: "deny" | "unplaced" | null, who?: "subagent" | "with --agent" | "no project" | "project via link" | "project at home" | "stash"];
+export type CdRow = readonly [name: string, command: string, cwd: string | null, want: "deny" | "unplaced" | null, who?: "subagent" | "with --agent" | "no project" | "project via link" | "project at home" | "stash" | "escape"];
 
 const SPACED = "<S>/a dir";
 const OUTSIDE = "<S>/..";
@@ -152,6 +152,17 @@ const TEXT: ReadonlyArray<CdRow> = [
   ["a cd after a heredoc whose body opens a quote and a paren denied", "cat <<'EOF' > n.md\nIt's a note (with a paren\nEOF\ncd .claude/worktrees/orch-779 && gh pr view", "<S>", "deny"],
   ["a here-string is not a heredoc", "cat <<<note\ncd src", "<ROOT>", "deny"],
   ["an arithmetic shift is not a heredoc", "echo $((1 << 2))\ncd src", "<ROOT>", "deny"],
+  ["an arithmetic shift by a name is not a heredoc", "n=1; echo $((1 << n))\ncd src && pwd", "<ROOT>", "deny"],
+  ["an apostrophe in a comment does not hide a later cd", "# the sandbox's path\ncd src && jq '.x' a.json", "<ROOT>", "deny"],
+  ["a double quote in a comment does not hide a later cd", 'ls # a " mark\ncd src && echo "x"', "<ROOT>", "deny"],
+  ["a backtick in a comment does not hide a later cd", "ls # see `x\ncd src && echo `pwd`", "<ROOT>", "deny"],
+  ["a heredoc operator in a comment does not hide a later cd", "ls >/dev/null # see <<EOF for the body\ncd src && pwd\nls >/dev/null", "<ROOT>", "deny"],
+  ["a quoted heredoc whose last body line ends in a backslash ends at its terminator", "cat >/dev/null <<'END'\nnpm test \\\nEND\ncd src && pwd", "<ROOT>", "deny"],
+  ["an escaped backslash at a line's end is not a continuation", "echo a\\\\\ncd src && pwd", "<ROOT>", "deny"],
+  ["a heredoc delimiter holding a dash is a heredoc", "cat >/dev/null <<'END-NOTE'\nIt's fine\nEND-NOTE\ncd src && echo 'x' && pwd", "<ROOT>", "deny"],
+  ["a heredoc delimiter quoted with a backslash is a heredoc", "cat <<\\EOF\ncd src\nEOF", "<ROOT>", null],
+  ["an ANSI-C quoted apostrophe does not hide a later cd", "echo $'it\\'s'; cd src; echo 'x'", "<ROOT>", "deny"],
+  ["an escape script after a cd keeps its own refusal", "cd src && cat > scripts/781-x.ts <<'END'\nconst R = `a\\s`;\nEND", "<ROOT>", "deny", "escape"],
 ];
 
 const WHO: ReadonlyArray<CdRow> = [

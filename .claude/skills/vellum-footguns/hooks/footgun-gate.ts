@@ -355,14 +355,14 @@ const checkBash = async (payload: Payload, sessionId: string): Promise<Decision>
     if (ghDeny) return ghDeny;
     notes.push(warning);
   }
-  const moved = payload.agent_id === undefined ? bareCdReason(command, cwd, process.env.CLAUDE_PROJECT_DIR) : null;
-  if (moved) return deny(moved);
   if (REDIRECT_INTO_SCRIPT.test(command)) {
     const bodies = heredocBodies(command);
     const { refusal, note } = await escapeScan(bodies.length ? bodies.join("\n") : command, "a script written from the shell");
     if (refusal) return refusal;
     notes.push(note);
   }
+  const moved = payload.agent_id === undefined ? bareCdReason(command, cwd, process.env.CLAUDE_PROJECT_DIR) : null;
+  if (moved) return deny(moved);
   if (parts.some((s) => GH_PR_WRITE.test(s) || gitCall(s)?.sub === "push")) {
     notes.push(gateNote(sessionId, "push", "Gate 5", "You are about to push or write a PR body."));
   }

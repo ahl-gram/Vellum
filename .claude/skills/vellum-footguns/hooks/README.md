@@ -95,9 +95,14 @@ is ever removed.
     main session started with `--agent` carries `agent_type` and is still the main one), and
     a subagent's directory never carries over between calls, so its `cd` is never refused; the review
     agents' sandbox recipes rely on that. `bare-cd.ts` reads the RAW command, because the segmenter
-    splits on `(` and blanks quotes: a mask of the same length blanks escapes, quoted and backtick
-    spans, heredoc bodies (in every form, including `cat <<'EOF' > f` and a tab-indented `<<-`
-    terminator, which the hook's own heredoc pattern misses) and comments; its boundaries track
+    splits on `(` and blanks quotes. One left-to-right pass, in the order the shell reads, builds a
+    mask of the same length that blanks escapes (a backslash-newline becomes a space, so a
+    continued line splits words as the shell does), comments (`#` at a word start, so a quote in a
+    comment opens nothing), single, double, ANSI-C (`$'...'`) and backtick spans, arithmetic
+    expansions (`$((...))`, so a shift is not a heredoc), and heredoc bodies, whether the operator
+    is last on its line or not (`cat <<'EOF' > f`, which the hook's own heredoc pattern misses), its
+    delimiter bare, quoted, backslash-quoted or holding `-` or `.`, and `<<-` stripping tabs from
+    the terminator; its boundaries track
     subshell depth (`(`, `$(` and `<(` open one); and only a command at depth zero that no pipe or
     background `&` ends is read, since zsh, the shell here, runs a pipeline's earlier stages and a background job in
     a subshell and its LAST stage in the session. The target is read raw, unquoted, and resolved
@@ -115,7 +120,8 @@ is ever removed.
     refused, since it is inside and is not the cwd. Each `cd` is judged alone, so a round trip is
     refused at its first leg. The way through is a subshell with a literal path,
     `( cd <path> && ... )`, `git -C <path>`, or an absolute path. It runs after every refusal above,
-    so nothing it does can hide one, and the rows are `bare-cd.fixtures.ts`;
+    the escape scan of a script written from the shell included, so nothing it does can hide one,
+    and before the Gate 5 note, so a refused call spends no gate; the rows are `bare-cd.fixtures.ts`;
 - **Warns** (context only, the call runs): `.click()` in a browser-script fragment; a punctuation
   escape inside a template literal; `pkill` aimed at the browser; an unreadable body file; a
   `typescript` package that could not be loaded, which skips the escape scan.
@@ -143,14 +149,20 @@ is ever removed.
   knowing this). The rest are shapes this house does not type by habit, which is the whole of the
   argument for leaving them: an alias or function that changes directory under another name, a
   sourced script (`source x.sh`, `. x.sh`), `eval cd x`, zsh's `repeat 1 cd x`, zsh's `AUTO_CD` (a
-  bare directory name as a command), and quote nesting inside a `$( )` inside double quotes odd enough to end the reader's
-  quoted span early. The main-session test rests on Claude Code's documented `agent_id`, seen by no
+  bare directory name as a command), an arithmetic command `(( x << n ))` written without the `$`,
+  whose shift reads as a heredoc that blanks the rest, and quote nesting inside a `$( )` inside
+  double quotes odd enough to end the reader's quoted span early. The main-session test rests on Claude Code's documented `agent_id`, seen by no
   run here before this merged: if a main-session payload carried it, the refusal would go silent.
 - **The `cd` reader's other errors are refusals**, each one edit away: a whole list or compound
   command piped or sent to the background (`cd x && y &`, `{ cd x; } | cat`), which runs in a
   subshell, is read at its own boundary; a redirect on a `cd` that stays (`cd . 2>/dev/null`) counts
   as a second argument; a double-quoted path holding a backslash is not unescaped and reads as one
-  the reader cannot work out; `command -v cd x` prints a path and moves nothing; a `case` pattern's
+  the reader cannot work out; `command -v cd x` prints a path and moves nothing; a function
+  definition (`f() { cd x; }`) is read as the `cd` it would run; a keyword used as an argument
+  (`echo do cd x`) is read as a boundary; an unquoted heredoc whose last body line ends in a
+  backslash, which the shell joins to its terminator so that the rest of the command is body, is
+  ended at the terminator by the reader; the same odd quote nesting as above can as easily start a
+  later span early and expose text as a command; a `case` pattern's
   `)` inside a subshell closes it early; a `cd` in a call run
   with `run_in_background`, whose carry-over is unmeasured; `CDPATH`; a command that fails before its
   end, after which Claude Code's `pwd -P` capture does not run and nothing moves; a path spelled in

@@ -91,11 +91,11 @@ const inProject = (payload: Payload, project: string | undefined) => async (): P
   }
 };
 const PROJECTS: Record<string, string | undefined> = { "no project": undefined, "project via link": LINK, "project at home": homedir() };
-const NEEDLES = { deny: "inside the project", unplaced: "cannot work out" } as const;
+const NEEDLES: Record<string, string> = { deny: "inside the project", unplaced: "cannot work out", stash: "refs/stash", escape: "inside a backtick string" };
 const CD_FIXTURES: Fixture[] = CD_ROWS.map(([name, command, cwd, want, who]): Fixture => {
   const agent = who === "subagent" ? { agent_id: "a781" } : who === "with --agent" ? { agent_type: "vellum-implementer" } : {};
   const project = who !== undefined && who in PROJECTS ? PROJECTS[who] : cwd?.startsWith("<S>") ? SCRATCH : ROOT;
-  return [name, inProject({ ...bash(placed(command), cwd === null ? undefined : placed(cwd)), ...agent }, project), want && "deny", who === "stash" ? "refs/stash" : want ? NEEDLES[want] : ""];
+  return [name, inProject({ ...bash(placed(command), cwd === null ? undefined : placed(cwd)), ...agent }, project), want && "deny", NEEDLES[who ?? ""] ?? (want ? (NEEDLES[want] ?? "") : "")];
 });
 const asContext = (text: string): Decision => ({ hookSpecificOutput: { hookEventName: "PreToolUse", additionalContext: text } });
 // The unlink is what lets the two rows share a session id: the gate is once per session, so without it the second row would see no Gate 5 and read as the warning having swallowed it. The FIXTURES loop's own unlink does not reach a function subject.

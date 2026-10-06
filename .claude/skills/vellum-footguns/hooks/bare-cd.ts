@@ -3,9 +3,7 @@ import { realpathSync } from "node:fs";
 import { homedir } from "node:os";
 import { resolve, sep } from "node:path";
 
-const LINE_CONTINUATION = /\\\n/g;
-const LEX = /\\[\s\S]|'[^']*'|"(?:[^"\\]|\\[\s\S])*"|`(?:[^`\\]|\\[\s\S])*`|(?<!<)<<(-?)[ \t]*(['"]?)([A-Za-z_]\w*)\2|\n/g;
-const COMMENT = /(^|[\s;&|)])#[^\n]*/g;
+const LEX = /\\\n|\\[\s\S]|\$'(?:[^'\\]|\\[\s\S])*'|'[^']*'|"(?:[^"\\]|\\[\s\S])*"|`(?:[^`\\]|\\[\s\S])*`|\$\(\((?:[^()]|\([^()]*\))*\)\)|(?<=^|[\s;&|)])#[^\n]*|(?<!<)<<(-?)[ \t]*(?:'([^'\n]*)'|"([^"\n]*)"|\\?([A-Za-z_][\w.-]*))|\n/g;
 const BOUNDARY = /\n|;|&&|\|\||\||(?<![<>])&(?!>)|\(|\)|\{(?=\s)|(?<=\s)\}|(?<![\w-])(?:if|then|do|else|elif|while|until|!)(?!\w)/g;
 const WORD_PART = /'[^']*'|"(?:[^"\\]|\\[\s\S])*"|\\[\s\S]|[^'"\\]+/g;
 const ASSIGNMENT = /^[A-Za-z_][A-Za-z0-9_]*=/;
@@ -39,12 +37,12 @@ const mask = (raw: string): string => {
       at += body.length;
       lex.lastIndex = at;
       pending = [];
-    } else if (m[3] !== undefined) {
-      pending.push({ delim: m[3], dash: m[1] === "-" });
+    } else if (m[1] !== undefined) {
+      pending.push({ delim: m[2] ?? m[3] ?? m[4] ?? "", dash: m[1] === "-" });
       out += m[0];
-    } else out += "_".repeat(m[0].length);
+    } else out += (m[0] === "\\\n" || m[0].startsWith("#") ? " " : "_").repeat(m[0].length);
   }
-  return (out + raw.slice(at)).replace(COMMENT, (m, lead: string) => lead + " ".repeat(m.length - lead.length));
+  return out + raw.slice(at);
 };
 
 const topLevel = (masked: string): [number, number][] => {
@@ -143,10 +141,9 @@ const REASON = (said: string, cwd: string, move: string): string =>
   "passes, and a subagent is never refused. If the session has already moved, ask Alex to type `/cd <path>` to bring it back.";
 
 export const bareCdReason = (command: string, cwd: string, project: string | undefined): string | null => {
-  const raw = command.replace(LINE_CONTINUATION, "  ");
-  const masked = mask(raw);
+  const masked = mask(command);
   for (const [start, end] of topLevel(masked)) {
-    const words = [...masked.slice(start, end).matchAll(/\S+/g)].map((w) => raw.slice(start + w.index, start + w.index + w[0].length));
+    const words = [...masked.slice(start, end).matchAll(/\S+/g)].map((w) => command.slice(start + w.index, start + w.index + w[0].length));
     const i = commandWord(words);
     const verb = literal(words[i] ?? "");
     if (verb === null || !VERBS.has(verb)) continue;
