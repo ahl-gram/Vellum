@@ -8,9 +8,9 @@ import type { Payload, SuiteContext } from "../../types.ts";
 import { routesUnder } from "./geometry.ts";
 
 const REPO = resolve(fileURLToPath(new URL(".", import.meta.url)), "..", "..", "..");
-const CHART_ROOM_FLOOR = ["/explorer/", "/explorer/portfolio/", "/print-room/", "/prospect/", "/reading-room/", "/ribbon/", "/seed-of-the-day/", "/specimen/"];
+export const CHART_ROOM_FLOOR = ["/explorer/", "/explorer/portfolio/", "/print-room/", "/prospect/", "/reading-room/", "/ribbon/", "/seed-of-the-day/", "/specimen/"];
 const PHONE = { w: 844, h: 390, laidOut: { w: 1024, h: 474 } };
-const DESK = { w: 1280, h: 800 };
+export const DESK = { w: 1280, h: 800 };
 const WINDOWS: readonly (readonly [number, number])[] = [[1280, 720], [1024, 768], [1024, 600], [960, 800], [901, 800], [1024, 474], [932, 430]];
 const FOLDED_WINDOWS: readonly (readonly [number, number])[] = [[1024, 600], [901, 800]];
 const SHORT = { w: 932, h: 430 };

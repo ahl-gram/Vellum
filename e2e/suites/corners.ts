@@ -8,6 +8,7 @@ import type { Payload, SuiteContext } from "../types.ts";
 import { fillBetween, mediaEdges, meetings, nearest, routesUnder, strideWidths, unreadWidthConditions, verdict, wrapVerdict } from "./corners/geometry.ts";
 import type { Control, CornerRead, Row } from "./corners/geometry.ts";
 import { ea1Phone, ea4Reads, ea5Lift, eaDesk } from "./corners/stage.ts";
+import { el3Docked } from "./corners/dock.ts";
 import { co5Yields, co6Follows, co7Band, co8Floored } from "./corners/top-row.ts";
 
 const REPO = resolve(fileURLToPath(new URL(".", import.meta.url)), "..", "..");
@@ -284,6 +285,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
     await step("EA2, EA3, EL1, EL2", () => eaDesk(ctx));
     await step("EA4", () => ea4Reads(ctx));
     await step("EA5", () => ea5Lift(ctx));
+    await step("EL3", () => el3Docked(ctx));
   } finally {
     await send("Page.removeScriptToEvaluateOnNewDocument", { identifier: clock.identifier }).catch(() => undefined);
     await send("Emulation.setEmulatedMedia", { media: "", features: [] }).catch(() => undefined);
