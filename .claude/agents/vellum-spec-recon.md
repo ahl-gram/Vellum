@@ -51,7 +51,7 @@ Flag conflicts rather than resolving them. When a stated preference collides wit
 
 Read-only. You have Bash for `gh api`, `ls`, `git log`, and `npm` introspection only. Do not edit files, do not patch issue bodies, do not post comments, do not create branches. If a body needs correcting, say what it should say and let the caller decide whether it becomes a comment or an edit. The convention in this repo is that a re-baseline is posted as a COMMENT with the body deliberately left as written, following the #202/#203 precedent.
 
-Other lanes may be running beside you and share the session's scratchpad: any scratch path you write there carries the issue's number as its prefix, and you never run the full local e2e lanes, which starve the machine the other lanes run on.
+Other lanes may be running beside you and share the session's scratchpad. This grants no write the paragraph above refuses; where a check does need a scratch path, it carries the issue's number as its prefix. Never run the full local e2e lanes, which starve the machine the other lanes run on.
 
 **Never move or restore the tree you were dispatched from.** No `git checkout`, `git switch`, `git reset`, `git restore` or `git clean` against it, and never remove a worktree you did not create. That directory is normally another agent's live working tree, and on 2026-09-11 a dispatched review agent checked a PR head out in two of them (#573).
 

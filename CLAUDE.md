@@ -2,12 +2,12 @@
 
 Procedural fantasy-atlas generator (TypeScript, Node 24+ native type-stripping). Working context
 lives in `RESUME-HERE.md` (start here) and `session-notes/SESSION-NOTES.md` (history), both
-gitignored. **Private facts and the measurements behind the specs live in auto-memory**, split across
-`project_vellum.md` (the core), `project_vellum_site.md` (the delivery layer),
-`project_vellum_livingchart.md` (everything the Explorer animates) and `project_vellum_landfall.md`
-(the Landfall epic, #454): read the core plus whichever companion your work touches. **No
-development-process rule lives there**: what the store keeps is `handbook/specs/conventions.md`'s list
-(Where a rule lives), and the specs, the gates and the agents hold every rule. The live PLAN is the private GitHub Project "Vellum Roadmap"
+gitignored. **Auto-memory keeps only what `handbook/specs/conventions.md`'s list (Where a rule
+lives) names, and no development-process rule**: the specs, the gates and the agents hold every
+rule. Its Vellum files are `project_vellum.md` (the core), `project_vellum_site.md` (the delivery
+layer), `project_vellum_livingchart.md` (everything the Explorer animates) and
+`project_vellum_landfall.md` (the Landfall epic, #454): read the core plus whichever companion your
+work touches. The live PLAN is the private GitHub Project "Vellum Roadmap"
 (`gh project item-list 1 --owner ahl-gram`), and there is no local plan file.
 
 **`handbook/specs/` holds the tracked, normative house specs, and unlike everything above they are public.**

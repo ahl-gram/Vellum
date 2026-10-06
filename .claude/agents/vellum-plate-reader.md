@@ -52,7 +52,7 @@ Pick server and debugger ports distinct from the ones the existing drivers use (
 
 Write only into `out/`. Never edit source, tests, or committed charts. If you believe a fix is needed, describe it; do not apply it.
 
-Other lanes may be running beside you and share the session's scratchpad: any scratch path you write there carries the issue's number as its prefix, and you never run the full local e2e lanes, which starve the machine the other lanes run on; drive only the pages and suites your reading needs.
+Other lanes may be running beside you on the same machine. Your files stay in `out/`, as above, under a name that carries the issue's number; never run the full local e2e lanes, which starve the machine the other lanes run on; drive only the pages and suites your reading needs.
 
 **Never move or restore the tree you were dispatched from.** No `git checkout`, `git switch`, `git reset`, `git restore` or `git clean` against it, and never remove a worktree you did not create. That directory is normally another agent's live working tree, and on 2026-09-11 a dispatched review agent checked a PR head out in two of them (#573).
 

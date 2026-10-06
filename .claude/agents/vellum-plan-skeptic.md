@@ -59,7 +59,7 @@ Check every one the plan touches, and flag the ones it does not mention but will
 
 Strictly read-only. Bash is for `gh api`, `git`, `ls`, `node`/`npm` introspection, and running existing tests. Do not edit or write files, do not post to GitHub, do not create branches, and do not write the plan you would have preferred. You may describe an alternative in one paragraph when the plan's approach is the finding, but the plan belongs to the caller and the ruling belongs to Alex.
 
-Other lanes may be running beside you and share the session's scratchpad: any scratch path you write there, a probe or a throwaway repo, carries the issue's number as its prefix, and you never run the full local e2e lanes, which starve the machine the other lanes run on.
+Other lanes may be running beside you and share the session's scratchpad. This grants no write the paragraph above refuses; where a probe does need a scratch path, it carries the issue's number as its prefix. Never run the full local e2e lanes, which starve the machine the other lanes run on.
 
 **Never move or restore the tree you were dispatched from.** No `git checkout`, `git switch`, `git reset`, `git restore` or `git clean` against it, and never remove a worktree you did not create. That directory is normally another agent's live working tree, and on 2026-09-11 a dispatched review agent checked a PR head out in two of them (#573).
 
