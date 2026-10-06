@@ -47,6 +47,11 @@ export default defineConfig(
     },
   },
   {
+    name: "Issue #779: the strict rules adopted one at a time",
+    files: TS_ROOTS,
+    rules: {},
+  },
+  {
     files: ["public/**/*.css"],
     plugins: { css, vellum },
     language: "css/css",
