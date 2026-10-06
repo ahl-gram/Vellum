@@ -9,7 +9,7 @@ import { fillBetween, mediaEdges, meetings, nearest, routesUnder, strideWidths, 
 import type { Control, CornerRead, Row } from "./corners/geometry.ts";
 import { ea1Phone, ea4Reads, ea5Lift, eaDesk } from "./corners/stage.ts";
 import { co5Yields, co6Follows, co7Band } from "./corners/top-row.ts";
-import { fl1Floor, fl2Reach, fl3Relayout, fl4Read, fl5KeyboardDrawer } from "./corners/floor.ts";
+import { fl1Floor, fl2Reach, fl3Relayout, fl4Read, fl5KeyboardDrawer, fl6Paper } from "./corners/floor.ts";
 import { na4Lean, ns1Soft } from "./corners/short.ts";
 
 const REPO = resolve(fileURLToPath(new URL(".", import.meta.url)), "..", "..");
@@ -290,6 +290,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
     await step("FL3", () => fl3Relayout(ctx));
     await step("FL4", () => fl4Read(ctx));
     await step("FL5", () => fl5KeyboardDrawer(ctx));
+    await step("FL6", () => fl6Paper(ctx));
     await step("NS1", () => ns1Soft(ctx));
     await step("NA4", () => na4Lean(ctx));
     await step("EA1", async () => { await ea1Phone(ctx); });
