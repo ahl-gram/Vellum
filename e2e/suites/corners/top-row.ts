@@ -110,7 +110,9 @@ const SEAT: Payload<Seat> = `(() => { const f = document.querySelector("[style*=
 
 // The witness, deliberate: under the 1024 floor no window rewraps a room's folio (the Ribbon's yields from 480 at 1041 to 462.6 at the floor and keeps its 146.6 height, measured 2026-10-06), so a style narrows it to the kit's 19rem, which rewraps it taller, and only a refit on the folio's own resize carries that to the slip.
 const NARROWED = ".corner.tr.folio-room { max-width: 19rem !important; }";
-const WEAR = `(() => { const s = document.createElement("style"); s.id = "co6-narrowed"; s.textContent = ${JSON.stringify(NARROWED)}; document.documentElement.appendChild(s); return true; })()`;
+const WEAR = `(() => { const s = document.createElement("style"); s.id = "co6-narrowed"; s.textContent = ${JSON.stringify(NARROWED)}; document.head.appendChild(s); return true; })()`;
+// At document start there is no head to wear it yet, and a module script runs after parsing, so the style goes in as parsing ends and the room's first layout already wears it.
+const WEAR_FROM_THE_START = `document.addEventListener("readystatechange", () => { if (document.readyState === "interactive") ${WEAR}; })`;
 
 export async function co6Follows(ctx: SuiteContext): Promise<void> {
   const settle = makeSettle(ctx);
@@ -119,7 +121,7 @@ export async function co6Follows(ctx: SuiteContext): Promise<void> {
   const wide = await rest("co6-wide");
   await ctx.evaluate(WEAR);
   const resized = await rest("co6-narrowed", wide);
-  const early = await ctx.send<{ identifier: string }>("Page.addScriptToEvaluateOnNewDocument", { source: WEAR });
+  const early = await ctx.send<{ identifier: string }>("Page.addScriptToEvaluateOnNewDocument", { source: WEAR_FROM_THE_START });
   try {
     await open(ctx, "/ribbon/", 1280);
   } finally {
@@ -128,7 +130,7 @@ export async function co6Follows(ctx: SuiteContext): Promise<void> {
   const fresh = await rest("co6-fresh");
   ctx.check(
     "CO6 a chart room's slip follows its folio: the Ribbon at 1280 whose folio a style narrows to the kit's 19rem, rewrapping it taller, seats its slip and its stage's top reserve where a fresh load wearing the same style does (Issue #762; the PR #777 slip-seat row; the style since pull request C's floor, under which no window rewraps a room's folio)",
-    fresh.folioH - wide.folioH > 10 && Math.abs(resized.slipTop - fresh.slipTop) < 0.5 && Math.abs(resized.reserveTop - fresh.reserveTop) < 0.5,
+    resized.folioH - wide.folioH > 10 && Math.abs(resized.folioH - fresh.folioH) < 0.5 && Math.abs(resized.slipTop - fresh.slipTop) < 0.5 && Math.abs(resized.reserveTop - fresh.reserveTop) < 0.5,
     JSON.stringify({ wide, resized, fresh }),
   );
 }

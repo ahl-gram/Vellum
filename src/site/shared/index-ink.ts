@@ -28,7 +28,7 @@ interface InkParts {
   readonly rows: ReadonlyMap<string, HTMLElement>;
   readonly entryRows: ReadonlyMap<string, HTMLElement>;
   readonly line: () => number;
-  /** The slip's scrolling body, so the inked row is kept in view (a wide sheet only; a phone's sheet scrolls itself). */
+  /** The slip's scrolling body, so the inked row is kept in view. */
   readonly keepInView: () => HTMLElement | null;
 }
 
@@ -49,7 +49,8 @@ export function indexInk(p: InkParts): () => void {
     if (box !== null && row !== undefined) {
       const r = row.getBoundingClientRect();
       const b = box.getBoundingClientRect();
-      if (r.top < b.top || r.bottom > b.bottom) row.scrollIntoView({ block: "nearest" });
+      if (r.top < b.top) box.scrollTop += r.top - b.top;
+      else if (r.bottom > b.bottom) box.scrollTop += r.bottom - b.bottom;
     }
   };
   return ink;

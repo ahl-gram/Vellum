@@ -1,7 +1,7 @@
 // The chrome's text over the chart, piece by piece, for the contrast reads over a floored sheet (EA4 in stage.ts, NS1 in short.ts).
 import type { Payload } from "../../types.ts";
 
-export type Glyph = { piece: string; t: string; ink: [number, number, number]; row: number; x: number; w: number };
+export type Glyph = { piece: string; t: string; ink: [number, number, number]; row: number; x: number; w: number; disabled: boolean };
 const PIECES = "header.chrome, .corner, .strip, .legend";
 
 // Every text node of the chrome whose box centre stands on the sheet, by piece; decor hidden from assistive technology (the nav's separator dots) is left out, and the ink is the computed colour, so a translucent ancestor reads darker ink than it paints and errs toward passing.
@@ -21,7 +21,7 @@ const glyphsOverSheet = (perLine: boolean): Payload<Glyph[]> => `(() => {
         const cx = b.left + b.width / 2, cy = b.top + b.height / 2;
         if (cx < sheet.left || cx > sheet.right || cy < sheet.top || cy > sheet.bottom) continue;
         const m = getComputedStyle(el).color.match(/[0-9.]+/g).map(Number);
-        out.push({ piece: name(root), t: (el.classList.contains("fn") ? "the section mark " : "") + n.textContent.trim().slice(0, 24), ink: [m[0], m[1], m[2]], row: Math.round(cy), x: Math.max(0, Math.floor(b.left)), w: Math.max(1, Math.floor(b.width)) });
+        out.push({ piece: name(root), t: (el.classList.contains("fn") ? "the section mark " : "") + n.textContent.trim().slice(0, 24), ink: [m[0], m[1], m[2]], row: Math.round(cy), x: Math.max(0, Math.floor(b.left)), w: Math.max(1, Math.floor(b.width)), disabled: !!el.closest(":disabled") });
       }
     }
     for (const input of root.querySelectorAll("input[type=number], input[type=text], input[type=search], input:not([type])")) {
@@ -31,7 +31,7 @@ const glyphsOverSheet = (perLine: boolean): Payload<Glyph[]> => `(() => {
       const cx = x + w / 2, cy = b.top + b.height / 2;
       if (!(w > 0) || cx < sheet.left || cx > sheet.right || cy < sheet.top || cy > sheet.bottom) continue;
       const m = cs.color.match(/[0-9.]+/g).map(Number);
-      out.push({ piece: name(root), t: "the field " + (input.id || input.name || input.type), ink: [m[0], m[1], m[2]], row: Math.round(cy), x: Math.max(0, Math.floor(x)), w: Math.max(1, Math.floor(w)) });
+      out.push({ piece: name(root), t: "the field " + (input.id || input.name || input.type), ink: [m[0], m[1], m[2]], row: Math.round(cy), x: Math.max(0, Math.floor(x)), w: Math.max(1, Math.floor(w)), disabled: input.disabled });
     }
   }
   return out;

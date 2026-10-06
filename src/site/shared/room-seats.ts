@@ -72,9 +72,9 @@ export function pressRowStacks(tops: readonly number[]): boolean {
   return lines > 2 || lines === tops.length;
 }
 
-/** A risen row whose top would come within the gap of the head cluster's foot sheds its note and any head line holding no control (Alex, 2026-10-06, Issue #762: "lean"). Decided on the unshed row, so the shed cannot flip as its own lowering of the row is read again. */
-export function rowSheds(rowTop: number, clusterFoot: number): boolean {
-  return rowTop < clusterFoot + LEGEND_GAP;
+/** A risen row whose top, or the backing it draws above it, would come within the gap of the head cluster's foot sheds its note and any head line holding no control (Alex, 2026-10-06, Issue #762: "lean"). Decided on the unshed row, so the shed cannot flip as its own lowering of the row is read again. */
+export function rowSheds(rowTop: number, clusterFoot: number, backingReach = 0): boolean {
+  return rowTop < clusterFoot + Math.max(LEGEND_GAP, backingReach);
 }
 
 // Computed, never read back off the row: its left transitions, and a mid-transition rect reads the old seat (plate read 2026-08-29: a resize left the row over the folio).
@@ -93,7 +93,7 @@ export function placeLegendRow(legendEl: HTMLElement, room: LegendRoom): void {
   const folio = rectOf(room.folio);
   if (folio !== null && pressRowStacks(tops)) {
     Object.assign(legendEl.style, { transform: "none", left: `${chromeX}px`, maxWidth: `${Math.max(0, bound - chromeX)}px`, bottom: `${pageBox().h - folio.top + LEGEND_RISE}px` });
-    if (chrome !== null) legendEl.classList.toggle("lean", rowSheds(legendEl.getBoundingClientRect().top, chrome.bottom));
+    if (chrome !== null) legendEl.classList.toggle("lean", rowSheds(legendEl.getBoundingClientRect().top, chrome.bottom, -parseFloat(getComputedStyle(legendEl, "::before").top) || 0));
     return;
   }
   if (from !== "" && from !== to) {

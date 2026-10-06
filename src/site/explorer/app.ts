@@ -155,7 +155,7 @@ const glass = createGlass({
   buildPlaceOverlay: lc.buildPlaceOverlay,
   reclampCard: lc.reclampCard,
   setCaption: (t) => { caption.textContent = t; },
-  // The chart folio stands down on a phone (the mockup), so a failed survey reports on the status pill, the page's one error channel at every width.
+  // A failed survey reports on the status pill, the page's one error channel.
   setError: (t) => { status.textContent = t; },
   prefersReduce,
   regionEligible,

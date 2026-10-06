@@ -93,5 +93,7 @@ test("UL1 a risen row sheds its note only where its top would come within the ga
   assert.equal(rowSheds(116.5, 127.4), true, "over the cluster's foot outright");
   assert.equal(rowSheds(588, 127.4), false, "a row far below the cluster keeps its note");
   assert.equal(rowSheds(127.4 + 16, 127.4), false, "exactly the gap below the cluster is clear");
+  assert.equal(rowSheds(127.4 + 18, 127.4, 20.8), true, "clear of the gap, but the soft pool's 1.3rem above the row would reach the cluster's foot");
+  assert.equal(rowSheds(127.4 + 18, 127.4, 8), false, "a backing that reaches less than the gap leaves the gap the rule");
   assert.equal(LEGEND_RISE, 12, "the soft pool stops inside this rise gap above the chart folio");
 });

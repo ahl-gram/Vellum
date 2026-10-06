@@ -99,8 +99,6 @@ make an unqualified rule false. Read the surface, not just the rule.
   Broadside and takes its tab off the edge; shutting gives it back to the reader who had it open and
   leaves it folded for the reader who folded it. Nothing is lifted onto the chart: the drawer covers
   the caption and the roads where they stand.
-- **On a phone the table is a leaf, not a drawer**, and one set of elements is docked between its two
-  homes rather than copied, on `dockLegend`'s precedent in `src/site/shared/room.ts`.
 
 ## The camera, the gesture and the fit
 

@@ -7,7 +7,7 @@ import type { Glyph } from "./glyphs.ts";
 import { CHART_ROOM_FLOOR, FLOOR_PLAIN, rest, stageFaults, withStyle } from "./stage.ts";
 
 const NAMED_WORLD = "/print-room/#seed=20261006";
-const SHORT: readonly (readonly [number, number])[] = [[1024, 540], [1024, 474], [1024, 430], [1024, 360]];
+const SHORT: readonly (readonly [number, number])[] = [[1024, 540], [1024, 474], [1024, 430]];
 const HIDE_TEXT = `header.chrome *, .legend *, .corner *, .strip * { color: transparent !important; text-decoration-color: transparent !important; }`;
 
 type Backings = { under: boolean; press: string | null; folio: string | null; lean: boolean; pressTop: number | null; clusterFoot: number | null };
@@ -60,22 +60,23 @@ export async function ns1Soft(ctx: SuiteContext): Promise<void> {
       const at = `${page} ${w}x${h}`;
       for (const [piece, f] of [["Press", b.press], ["room folio", b.folio]] as const) if (f !== null && !/blur/.test(f)) faults.push(`${at}: the ${piece} stands on a hard-edged panel (${f})`);
       faults.push(...stageFaults({ page, size: `${w}x${h}`, s }).filter((f) => /backing lies over/.test(f)));
-      // The Glass's presses are the PR #784 row's in handbook/errata/site.md (2.63 to 3.23 over the chart on main too), not soft's.
-      const reads = await painted(ctx, (await ctx.evaluate(GLYPH_LINES_OVER_SHEET)).filter((g) => g.piece !== "Glass"));
+      // Two rows in handbook/errata/site.md own what this leaves out, on main as here: the Glass's presses (PR #784, 2.63 to 3.23 over the chart) and the Specimen's disabled press, dimmed by the kit's opacity (PR #777, 3.33 to 3.41).
+      const reads = await painted(ctx, (await ctx.evaluate(GLYPH_LINES_OVER_SHEET)).filter((g) => g.piece !== "Glass" && !g.disabled));
       faults.push(...reads.filter((g) => g.ratio < FLOOR_PLAIN).map((g) => `${at}: ${g.piece} "${g.t}" reads ${g.ratio.toFixed(2)} painted`));
       if (page === "/ribbon/") ribbonNav ||= reads.some((g) => g.piece === "cluster" && g.t.startsWith("Glossary"));
       rows.push(`${at} ${reads.length} lines, worst ${Math.min(...reads.map((g) => g.ratio)).toFixed(2)}`);
     }
   }
   ctx.check(
-    "NS1 over a floored chart on a short window (1024x540, 1024x474, 1024x430 and 1024x360, where the Print Room's Press sheds) the Press and the room folio stand on the cluster's blurred pool, not a hard-edged panel, no backing lies over another piece's lines, and every chrome line over the sheet but the Glass's reads 4.5:1 or better as it is painted, in every chart room and the Print Room's named world, the Ribbon's \"Glossary\" beside its corner among them (Alex, 2026-10-06, Issue #762: soft)",
+    "NS1 over a floored chart on a short window (1024x540, 1024x474 and 1024x430) the Press and the room folio stand on the cluster's blurred pool, not a hard-edged panel, no backing lies over another piece's lines, and every chrome line over the sheet but the Glass's and a disabled press's reads 4.5:1 or better as it is painted, in every chart room and the Print Room's named world, the Ribbon's \"Glossary\" beside its corner among them (Alex, 2026-10-06, Issue #762: soft)",
     faults.length === 0 && ribbonNav,
     `${rows.join(" | ")}; the Ribbon's Glossary read ${ribbonNav}${faults.length ? `; ${faults.length} faults: ${faults.slice(0, 8).join("; ")}` : ""}`,
   );
 }
 
-// The witness, swept 2026-10-06 on this branch: the Print Room's risen Press, slip open, stands 34px under the cluster's foot at 1024x400 and sheds from 1024x380 down on both worlds, and unshed at 360 it would reach 5.6px over the foot; the Explorer's sheds only from 1024x320 and the Prospect's from 340. The PR #777 row's 932x430 is the 1024x430 page under the floor, clear by 64px with no shed.
+// The witnesses, swept 2026-10-06 on this branch: the Print Room's risen Press, slip open, stands 34px under the cluster's foot at 1024x400 and sheds from 1024x380 down on both worlds, and unshed at 360 it would reach 5.6px over the foot; the Seed of the Day's, unshed at 1024x388, stands 16.3px under the foot, outside the gap, while its soft pool's 1.3rem would reach 4.5px over the cluster's last line. The PR #777 row's 932x430 is the 1024x430 page under the floor, clear by 64px with no shed.
 const LEAN_H = 360;
+const REACH_H = 388;
 export async function na4Lean(ctx: SuiteContext): Promise<void> {
   await ctx.setTouch(false);
   const settle = makeSettle(ctx);
@@ -99,6 +100,14 @@ export async function na4Lean(ctx: SuiteContext): Promise<void> {
     if (s) faults.push(...stageFaults({ page, size: `1024x${LEAN_H}`, s }).filter((f) => /header\.chrome/.test(f)));
     rows.push(`${page} lean ${b.lean}, Press top ${b.pressTop?.toFixed(1)} under the cluster's foot ${b.clusterFoot?.toFixed(1)}`);
   }
+  await size(ctx, 1024, REACH_H);
+  await ctx.send("Page.navigate", { url: "about:blank" });
+  await ctx.send("Page.navigate", { url: `http://127.0.0.1:${ctx.PORT}/seed-of-the-day/` });
+  const sd = await rest(ctx, 1024, REACH_H, "NA4 the Seed of the Day");
+  const day = await ctx.evaluate(BACKINGS);
+  if (!day.lean) faults.push(`the Seed of the Day's risen Press keeps its head at 1024x${REACH_H}, where its pool would reach the cluster`);
+  if (sd) faults.push(...stageFaults({ page: "/seed-of-the-day/", size: `1024x${REACH_H}`, s: sd }).filter((f) => /header\.chrome/.test(f)));
+  rows.push(`/seed-of-the-day/ at 1024x${REACH_H} lean ${day.lean}, Press top ${day.pressTop?.toFixed(1)}`);
   await size(ctx, 1024, 474);
   await ctx.send("Page.navigate", { url: "about:blank" });
   await ctx.send("Page.navigate", { url: `http://127.0.0.1:${ctx.PORT}/explorer/` });
@@ -107,7 +116,7 @@ export async function na4Lean(ctx: SuiteContext): Promise<void> {
   if (!explorer.under) faults.push("the Explorer at 1024x474 is not floored, so the no-shed arm reads nothing");
   if (explorer.lean) faults.push("the Explorer's risen Press sheds at 1024x474, where it stands clear of the cluster");
   ctx.check(
-    "NA4 a risen Press that would reach the head cluster sheds its note and every head line holding no control, and stands clear of the cluster's foot: the Print Room at 1024x360 with its slip open, on the fixed day's world and 2026-10-06's, the same shed on every read across a resize and back twice; while the Explorer's floored Press at 1024x474, clear of the cluster, keeps its head (Alex, 2026-10-06, Issue #762: lean)",
+    "NA4 a risen Press that would reach the head cluster, by its own top or by the soft pool it stands on, sheds its note and every head line holding no control, and stands clear of the cluster's foot with no backing over the cluster's lines: the Print Room at 1024x360 with its slip open, on the fixed day's world and 2026-10-06's, the same shed on every read across a resize and back twice, and the Seed of the Day at 1024x388, where only the pool would reach; while the Explorer's floored Press at 1024x474, clear of the cluster, keeps its head (Alex, 2026-10-06, Issue #762: lean)",
     faults.length === 0,
     `${rows.join(" | ")}; the Explorer lean ${explorer.lean}${faults.length ? `; ${faults.slice(0, 6).join("; ")}` : ""}`,
   );

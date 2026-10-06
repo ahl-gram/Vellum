@@ -19,19 +19,14 @@ const SHORT = { w: 932, h: 430 };
 export const FLOOR_PLAIN = 4.5;
 // The day's seed on which the Print Room's Press came to rest over its folio at 932x430 folded (2026-10-06), read beside the suite's fixed day (Alex, 2026-10-05, on PR #784).
 const COLLIDED_2026_10_06 = "/print-room/#seed=20261006";
-const KNOWN: readonly { check: "EA1" | "EL1"; fault: string; row: string }[] = [
-  { check: "EL1", fault: `/specimen/ at 901x800: p#sb-status.status "the status pill, as a ro" meets aside#specimen.slip`, row: "the handbook/errata/site.md row on the Specimen's status pill over its slip" },
-  { check: "EL1", fault: `/specimen/ at 932x430: p#sb-status.status "the status pill, as a ro" meets aside#specimen.slip`, row: "the handbook/errata/site.md row on the Specimen's status pill over its slip" },
-  { check: "EL1", fault: `/print-room/ at 932x430: the Press's backing lies over header.chrome`, row: "the handbook/errata/site.md row on the Print Room's risen Press at 932x430" },
-  { check: "EL1", fault: `${COLLIDED_2026_10_06} at 932x430: the Press's backing lies over header.chrome`, row: "the handbook/errata/site.md row on the Print Room's risen Press at 932x430" },
-];
+// Below 1024 the tab stands on the 1024 page past the window's edge, and the ink is read on the page, so the sibling is seen there too.
 const SLIP_TAB_SIBLING = { at: `at ${SHORT.w}x${SHORT.h} folded`, pieces: ["button.slip-tab", "button.chart-drawer-tab"], row: "the handbook/errata/site.md row on the slip's tab at 932x430" };
 
 type Box = { x: number; y: number; r: number; b: number };
 type Ink = Box & { piece: number; t: string };
 type Backing = Box & { piece: number; role: string };
 type Stage = {
-  chartRoom: true; ready: boolean; drawn: boolean; innerW: number; innerH: number;
+  chartRoom: true; ready: boolean; drawn: boolean; innerW: number; innerH: number; pageW: number;
   sheet: Box; under: boolean; reserveRight: number; presses: Box[]; risen: boolean;
   ink: Ink[]; pieces: string[]; ranks: number[]; contains: [number, number][]; backings: Backing[];
 };
@@ -51,8 +46,9 @@ const STAGE: Payload<Stage | { chartRoom: false; ready: boolean }> = `(() => {
   const pieceOf = (el) => { for (let e = el; e && e !== document.body; e = e.parentElement) { const p = getComputedStyle(e).position; if (p === "fixed" || p === "absolute" || p === "sticky") return enlist(e); } return -1; };
   const clipOf = (el, b) => { let c = { x: b.left, y: b.top, r: b.right, b: b.bottom }; for (let e = el.parentElement; e && e !== document.body; e = e.parentElement) { const cs = getComputedStyle(e); if (cs.overflowX !== "visible" || cs.overflowY !== "visible") { const q = e.getBoundingClientRect(); c = { x: Math.max(c.x, q.left), y: Math.max(c.y, q.top), r: Math.min(c.r, q.right), b: Math.min(c.b, q.bottom) }; } } return c.r - c.x > 0.5 && c.b - c.y > 0.5 ? c : null; };
   const skip = "svg, noscript, script, style, .desk-notice, #map, .living-chart, .place-hit, #sheet";
+  const pageW = Math.max(innerWidth, document.body.getBoundingClientRect().width);
   const ink = [];
-  const add = (el, b, t) => { const c = clipOf(el, b); const piece = pieceOf(el); if (c && piece >= 0 && c.r > 0 && c.x < innerWidth && c.b > 0 && c.y < innerHeight) ink.push({ ...box({ left: c.x, top: c.y, right: c.r, bottom: c.b }), piece, t }); };
+  const add = (el, b, t) => { const c = clipOf(el, b); const piece = pieceOf(el); if (c && piece >= 0 && c.r > 0 && c.x < pageW && c.b > 0 && c.y < innerHeight) ink.push({ ...box({ left: c.x, top: c.y, right: c.r, bottom: c.b }), piece, t }); };
   const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
   for (let n = walk.nextNode(); n; n = walk.nextNode()) {
     const el = n.parentElement;
@@ -78,7 +74,7 @@ const STAGE: Payload<Stage | { chartRoom: false; ready: boolean }> = `(() => {
   const order = pieceEls.map((e, i) => i).sort((i, j) => (pieceEls[i].compareDocumentPosition(pieceEls[j]) & Node.DOCUMENT_POSITION_FOLLOWING) ? -1 : 1);
   const ranks = pieceEls.map((e, i) => (parseInt(getComputedStyle(e).zIndex, 10) || 0) * 1000 + order.indexOf(i));
   const status = document.querySelector(".stage .status");
-  return { chartRoom: true, ready, drawn: !status || !status.textContent.trim().endsWith("\\u2026"), innerW: innerWidth, innerH: innerHeight,
+  return { chartRoom: true, ready, drawn: !status || !status.textContent.trim().endsWith("\\u2026"), innerW: innerWidth, innerH: innerHeight, pageW,
     sheet: box(sheet.getBoundingClientRect()), under: document.body.classList.contains("stage-under"),
     reserveRight: frame ? parseFloat(frame.style.getPropertyValue("--reserve-right")) : NaN,
     presses: legend ? [...legend.querySelectorAll(".legend-row .legend-btn")].map((b) => b.getBoundingClientRect()).filter((b) => b.width > 0).map(box) : [],
@@ -104,11 +100,12 @@ export function stageFaults({ page, size, s }: Read): string[] {
   const at = `${page} at ${size}`;
   const w = s.sheet.r - s.sheet.x, h = s.sheet.b - s.sheet.y;
   if (!(w > 0 && h > 0)) return [`${at}: no sheet (${w} x ${h})`];
-  const room = Math.min(s.innerW - s.reserveRight - 2 * CHROME_GAP, (s.innerH - 2 * CHROME_GAP) * (w / h));
+  // The page, not the window: below 1024 a room lays out its 1024 page (Issue #762), read unscrolled so the two share an origin.
+  const room = Math.min(s.pageW - s.reserveRight - 2 * CHROME_GAP, (s.innerH - 2 * CHROME_GAP) * (w / h));
   if (!Number.isFinite(room)) faults.push(`${at}: no reserve read`);
   if (s.under && Math.abs(w - room) > 1) faults.push(`${at}: floored at ${w.toFixed(1)}, not the whole room ${room.toFixed(1)}`);
   if (!s.under && w < room / 2 - 0.5) faults.push(`${at}: the sheet is ${w.toFixed(1)}, under half its room ${room.toFixed(1)}, and not floored`);
-  if (s.under && (s.sheet.x < -0.5 || s.sheet.y < -0.5 || s.sheet.r > s.innerW + 0.5 || s.sheet.b > s.innerH + 0.5)) faults.push(`${at}: the floored sheet leaves the window (${JSON.stringify(s.sheet)})`);
+  if (s.under && (s.sheet.x < -0.5 || s.sheet.y < -0.5 || s.sheet.r > s.pageW + 0.5 || s.sheet.b > s.innerH + 0.5)) faults.push(`${at}: the floored sheet leaves the page (${JSON.stringify(s.sheet)})`);
   const lines = lineCount(s.presses);
   if (s.presses.length >= 2 && (lines > 2 || lines === s.presses.length)) faults.push(`${at}: the Press stacks down the page (${lines} lines for ${s.presses.length} presses)`);
   const nested = (a: number, b: number): boolean => a === b || s.contains.some(([p, q]) => (p === a && q === b) || (p === b && q === a));
@@ -122,10 +119,7 @@ export function stageFaults({ page, size, s }: Read): string[] {
   return faults;
 }
 
-const known = (all: readonly string[], check: "EA1" | "EL1" | "EL2"): string[] => [
-  ...all.filter((f) => !KNOWN.some((m) => f.startsWith(m.fault)) && !(f.includes(SLIP_TAB_SIBLING.at) && SLIP_TAB_SIBLING.pieces.some((p) => f.includes(p)))),
-  ...KNOWN.filter((m) => m.check === check && !all.some((f) => f.startsWith(m.fault))).map((m) => `${m.fault} no longer, so ${m.row} goes`),
-];
+const known = (all: readonly string[]): string[] => all.filter((f) => !(f.includes(SLIP_TAB_SIBLING.at) && SLIP_TAB_SIBLING.pieces.some((p) => f.includes(p))));
 
 // At rest: the document and its fonts are in, the stage no longer reports a draw in progress (a line ending in an ellipsis), and the fit, the floor and the Press's seat read the same on STILL_READS polls running, since a plate with no draw to wait on (an empty Portfolio) gives no other signal.
 const STILL_READS = 6;
@@ -163,7 +157,7 @@ export async function ea1Phone(ctx: SuiteContext): Promise<StageRun> {
   const rooms = reads.map((r) => r.page);
   const missing = CHART_ROOM_FLOOR.filter((p) => !rooms.includes(p));
   const floored = reads.filter((r) => r.s.under).map((r) => r.page);
-  const faults = known(reads.flatMap(stageFaults), "EA1");
+  const faults = known(reads.flatMap(stageFaults));
   ctx.check(
     "EA1 on a phone held sideways (844x390, laid out 1024x474 by the fixed viewport) every chart room keeps at least half the room it could show its sheet in, a floored sheet takes all of it inside the window, the Press never stacks, and no chrome ink meets other chrome ink or lies under another piece's backing; the Explorer and the Print Room floor (39x30 and 0x0 on screen on main)(Issue #762, rulings 4a and 4c)",
     missing.length === 0 && floored.includes("/explorer/") && floored.includes("/print-room/") && faults.length === 0,
@@ -237,10 +231,10 @@ export async function eaDesk(ctx: SuiteContext): Promise<void> {
   const rooms = [...new Set(reads.map((r) => r.page))];
   const missing = CHART_ROOM_FLOOR.filter((p) => !rooms.includes(p));
   const pick = (page: string, at: string): Stage | undefined => reads.find((r) => r.page === page && r.size === at)?.s;
-  const faults = known(reads.flatMap(stageFaults), "EL1");
+  const faults = known(reads.flatMap(stageFaults));
   const foldedAll = folded.flatMap(stageFaults);
   const siblingSeen = foldedAll.some((f) => SLIP_TAB_SIBLING.pieces.some((p) => f.includes(p)));
-  const foldedFaults = [...known(foldedAll, "EL2"), ...drifts, ...(siblingSeen ? [] : [`no slip tab meets anything at ${SHORT.w}x${SHORT.h} folded, so ${SLIP_TAB_SIBLING.row} goes`])];
+  const foldedFaults = [...known(foldedAll), ...drifts, ...(siblingSeen ? [] : [`no slip tab meets anything at ${SHORT.w}x${SHORT.h} folded, so ${SLIP_TAB_SIBLING.row} goes`])];
   const control = reads.filter((r) => r.size === "1280x800" || r.size === "1280x720");
   const controlFaults = control.filter((r) => r.s.under || r.s.risen).map((r) => `${r.page} at ${r.size}: ${r.s.under ? "floored" : "risen"}`);
   ctx.check(
@@ -254,12 +248,12 @@ export async function eaDesk(ctx: SuiteContext): Promise<void> {
     `${control.length} control reads over ${rooms.length} rooms${missing.length ? `, missing ${missing.join(", ")}` : ""}; ${controlFaults.join("; ") || "none floored or risen"}`,
   );
   ctx.check(
-    "EL1 in every chart room, resized while loaded from 1280x800 through 1280x720, 1024x768, 1024x600, 960x800, 901x800, 1024x474 and 932x430, and on the Explorer with the Broadside folded at 1024x600 and 901x800, the sheet keeps at least half its room (all of it when floored, inside the window), the Press never stacks down the page, and no chrome ink meets other chrome ink or lies under another piece's backing; the Print Room's risen Press over the cluster at 932x430 is a known errata row, exempt by name until it goes (Issue #762)",
+    "EL1 in every chart room, resized while loaded from 1280x800 through 1280x720, 1024x768, 1024x600, 960x800, 901x800, 1024x474 and 932x430, and on the Explorer with the Broadside folded at 1024x600 and 901x800, the sheet keeps at least half its room (all of it when floored, inside the page, which below 1024 is the 1024 page), the Press never stacks down the page, and no chrome ink meets other chrome ink or lies under another piece's backing (Issue #762)",
     missing.length === 0 && reads.length >= CHART_ROOM_FLOOR.length * (WINDOWS.length + 1) && faults.length === 0,
     `${reads.length} reads over ${rooms.length} rooms; ${faults.length ? `${faults.length} faults: ${faults.slice(0, 6).join("; ")}` : "no faults"}`,
   );
   ctx.check(
-    "EL2 in every chart room with a slip, folded at 932x430 and resized a pixel taller and back twice, the seat comes to rest the same way each time and holds EL1's rules; the slip's tab meeting the folio or the Glass there is a sibling on main too, exempt until it goes (Issue #762; the cold review of PR #777)",
+    "EL2 in every chart room with a slip, folded at 932x430 and resized a pixel taller and back twice, the seat comes to rest the same way each time and holds EL1's rules; the slip's tab meeting the folio, the Glass or the drawer's tab there, on the 1024 page that window lays out, is a sibling on main too, exempt until it goes (Issue #762; the cold review of PR #777)",
     folded.length >= 3 * (CHART_ROOM_FLOOR.length - 1) && foldedFaults.length === 0,
     `${folded.length} folded reads; ${foldedFaults.length ? `${foldedFaults.length} faults: ${foldedFaults.slice(0, 6).join("; ")}` : "no faults"}`,
   );

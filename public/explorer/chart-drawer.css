@@ -26,7 +26,7 @@ button.chart-drawer-tab:is(:hover, :focus-visible) { background: var(--ink-dark)
 
 body:has(.chart-drawer.open) .slip-tab { display: none; }
 
-/* Folded, the camera comes home to --chrome-x where the tab stands at z 19 over the corner's z 10, leaving each zoom press a real pointer over 44% of its face; so the camera stands inboard of the tab whenever the Broadside is folded, drawer open or not (a seat that moved with the drawer would be one more thing jumping as it opens), and not below 901px, where the tab is stood down and atelier.css's narrow seat rules. */
+/* Folded, the camera comes home to --chrome-x where the tab stands at z 19 over the corner's z 10, leaving each zoom press a real pointer over 44% of its face; so the camera stands inboard of the tab whenever the Broadside is folded, drawer open or not (a seat that moved with the drawer would be one more thing jumping as it opens). */
 body:has(.slip.folded) .corner.br.zoomery { right: calc(var(--chrome-x) + var(--chart-drawer-tab-w) + 0.6rem); }
 
 .chart-drawer-head { flex: 0 0 var(--chart-drawer-head); display: flex; flex-direction: column; }

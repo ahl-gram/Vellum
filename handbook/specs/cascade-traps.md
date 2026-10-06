@@ -51,6 +51,11 @@ declaration you write to get there. The checklist form of the same lines is `vel
 - **A transform on a container re-anchors every fixed descendant to it** for the length of the
   animation, so a landing settle applied to the wrong element throws the corner furniture across the
   page.
+- **`contain: layout` re-anchors every fixed descendant too, and for good**: the element becomes their
+  containing block and a stacking context. The 1024 floor relies on it, on a staged chart room's body,
+  so the fixed furniture lays out on the 1024 page and scrolls sideways with it; and that body clips
+  (`overflow: clip`) rather than hides, since an `overflow: hidden` box is a scroll container that a
+  focus moving onto a piece can scroll out from under the reader.
 - **An affordance gate is `(hover: none) and (pointer: coarse)`, never `(hover: none)` on its own**,
   wherever it is asked, which today is a `matchMedia` call rather than a sheet. A machine with no pointing device at all reports `hover: none`
   together with `pointer: none`, so the bare query matches it too and stands the affordance down

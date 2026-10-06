@@ -159,15 +159,20 @@ export async function fl3Relayout(ctx: SuiteContext): Promise<void> {
   );
 }
 
-type Held = { sy: number; ys: Record<string, number>; focus: { inView: boolean; hit: boolean } | null };
+type Held = { sx: number; sy: number; ys: Record<string, number>; focus: { inView: boolean; hit: boolean } | null };
 const HELD: Payload<Held> = `(() => {
   const ys = {};
   for (const s of ["header.chrome", ".corner.tr", ".slip"]) { const e = document.querySelector(s); if (e) ys[s] = Math.round(e.getBoundingClientRect().top * 10) / 10; }
   const a = document.activeElement;
   let focus = null;
   if (a && a.matches(".index .sec")) { const b = a.getBoundingClientRect(); const e = document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2); focus = { inView: b.left >= 0 && b.right <= innerWidth && b.top >= 0 && b.bottom <= innerHeight, hit: e === a || a.contains(e) }; }
-  return { sy: scrollY, ys, focus };
+  return { sx: scrollX, sy: scrollY, ys, focus };
 })()`;
+
+const heldFaults = (where: string, top: Held, reads: readonly (readonly [string, Held])[]): string[] => reads.flatMap(([at, read]) => [
+  ...Object.entries(top.ys).filter(([s, y]) => Math.abs((read.ys[s] ?? NaN) - y) > TOLERANCE).map(([s, y]) => `${where}: ${s} moved from ${y} to ${read.ys[s]} ${at}`),
+  ...(read.sx !== 0 ? [`${where}: the window swung ${read.sx}px sideways ${at}, which only the reader may do`] : []),
+]);
 
 export async function fl4Read(ctx: SuiteContext): Promise<void> {
   await ctx.setTouch(false);
@@ -179,7 +184,9 @@ export async function fl4Read(ctx: SuiteContext): Promise<void> {
       const top = await ctx.evaluate<Held>(HELD);
       await ctx.evaluate(`window.scrollTo(0, 900)`);
       const down = await settle(HELD, (d, last) => d.sy >= 899 && last !== null && JSON.stringify(d) === JSON.stringify(last), `FL4 ${page} ${w} scrolled down`);
-      for (const [s, y] of Object.entries(top.ys)) if (Math.abs((down.ys[s] ?? NaN) - y) > TOLERANCE) faults.push(`${page} at ${w}: ${s} moved from ${y} to ${down.ys[s]} when the text scrolled`);
+      await ctx.evaluate(`window.scrollTo(0, document.documentElement.scrollHeight)`);
+      const end = await settle(HELD, (d, last) => d.sy > down.sy && last !== null && JSON.stringify(d) === JSON.stringify(last), `FL4 ${page} ${w} at the end`);
+      faults.push(...heldFaults(`${page} at ${w}`, top, [["scrolled down", down], ["at the document's end", end]]));
       if (w === 640) {
         await ctx.evaluate(`window.scrollTo(0, 0)`);
         await ctx.evaluate(`document.querySelector(".index .sec").focus()`);
@@ -189,8 +196,43 @@ export async function fl4Read(ctx: SuiteContext): Promise<void> {
     }
   }
   ctx.check(
-    "FL4 a room that scrolls down keeps its head cluster, room folio and index where they stand while the text scrolls, at 640 and 1280, and at 640 a keyboard focus on the index's first link brings it into the window where it takes a hit (Issue #762)",
+    "FL4 a room that scrolls down keeps its head cluster, room folio and index where they stand while the text scrolls, down the page and at its end, at 640 and 1280, the window never swinging sideways on its own while the reader scrolls down (the index's ink keeps its row in view by scrolling the index alone), and at 640 a keyboard focus on the index's first link brings it into the window where it takes a hit (Issue #762)",
     faults.length === 0,
     faults.length ? `${faults.length} faults: ${faults.slice(0, 8).join("; ")}` : "the FAQ and the Glossary held",
+  );
+}
+
+type Displaced = { open: boolean; running: number; bodyTop: number; bodyLeft: number; stageTop: number; stagePageLeft: number; focus: string };
+const DISPLACED: Payload<Displaced> = `(() => {
+  const d = document.getElementById("chart-drawer"), st = document.querySelector(".stage").getBoundingClientRect();
+  return { open: d.classList.contains("open"), running: d.getAnimations().filter((a) => a.playState === "running").length, bodyTop: document.body.scrollTop, bodyLeft: document.body.scrollLeft,
+    stageTop: Math.round(st.top * 10) / 10, stagePageLeft: Math.round((st.left + scrollX) * 10) / 10, focus: document.activeElement ? document.activeElement.id : "" };
+})()`;
+
+// Motion on, so the drawer is still sliding up from below the body when the press moves the focus into it; under `overflow: hidden` the body is a scroll container and that focus scrolls it.
+export async function fl5KeyboardDrawer(ctx: SuiteContext): Promise<void> {
+  await ctx.setTouch(false);
+  const settle = makeSettle(ctx);
+  const faults: string[] = [];
+  const rows: string[] = [];
+  await ctx.send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "no-preference" }] });
+  try {
+    for (const w of [1280, 640]) {
+      await open(ctx, "/explorer/", w, 800);
+      await ctx.evaluate(`document.getElementById("chart-drawer-tab").focus()`);
+      await ctx.send("Input.dispatchKeyEvent", { type: "keyDown", key: "Enter", code: "Enter", windowsVirtualKeyCode: 13, nativeVirtualKeyCode: 13, text: "\r" });
+      await ctx.send("Input.dispatchKeyEvent", { type: "keyUp", key: "Enter", code: "Enter", windowsVirtualKeyCode: 13, nativeVirtualKeyCode: 13 });
+      const d = await settle(DISPLACED, (x, last) => x.open && x.running === 0 && last !== null && JSON.stringify(x) === JSON.stringify(last), `FL5 the drawer opened by keyboard at ${w}`);
+      if (d.focus !== "chart-drawer-shut") faults.push(`at ${w}: the press left the focus on "${d.focus}", not the drawer's shut press`);
+      if (d.bodyTop !== 0 || d.bodyLeft !== 0 || d.stageTop !== 0 || d.stagePageLeft !== 0) faults.push(`at ${w}: the room moved, the body scrolled to ${d.bodyLeft},${d.bodyTop} and the stage stands at ${d.stagePageLeft},${d.stageTop} on the page`);
+      rows.push(`${w}: body ${d.bodyLeft},${d.bodyTop}, stage ${d.stagePageLeft},${d.stageTop}, focus ${d.focus}`);
+    }
+  } finally {
+    await ctx.send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
+  }
+  ctx.check(
+    "FL5 the Chart Table opened by the keyboard, with motion on, takes the focus to its shut press and leaves the room where it stood: the body does not scroll and the stage keeps the page's corner, at 1280 and at 640 (Issue #762: a staged room's body clips rather than hides, so it is no scroll container under the floor's containment)",
+    faults.length === 0,
+    `${rows.join(" | ")}${faults.length ? `; ${faults.join("; ")}` : ""}`,
   );
 }

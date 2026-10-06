@@ -26,7 +26,7 @@ const now = new Date();
 const seed = seedForDate(now);
 
 $("dateline").textContent = datelineFor(now);
-// The roads out carry the seed explicitly, so they keep opening THIS page's world even after UTC midnight rolls the bare-visit default to a new day; the row and the phone's copy inside the slip both take it.
+// The roads out carry the seed explicitly, so they keep opening THIS page's world even after UTC midnight rolls the bare-visit default to a new day; the legend row takes it.
 const ROADS: Record<string, string> = {
   explorer: `../explorer/#seed=${seed}&style=antique&legend=1`,
   "reading-room": `../reading-room/#seed=${seed}`,

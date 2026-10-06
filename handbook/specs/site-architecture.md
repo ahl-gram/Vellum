@@ -89,7 +89,9 @@ symbol and path so the reader goes and looks.
   stops pinch-zoom. The one other document that writes its own head, the served atlas (the `motion`
   arm of `atlasHead` in `src/atlas/document.ts`), carries the same tag; the offline download keeps its
   own, since its bytes are pinned. A desktop browser ignores the tag, so a narrowed or zoomed desktop
-  window still lays out at its own width. `test/site/astro-scaffold.test.ts` and
+  window lays out at its own width: a room below 1024 keeps its 1024 layout at full size and the window
+  scrolls sideways over it (the `min-width` on `body.room` in `BaseLayout.astro`, Issue #762), and
+  home, until it joins that floor, lays out at the window's width. `test/site/astro-scaffold.test.ts` and
   `test/atlas/document.test.ts` hold both.
 - **The shell dresses once.** Every shared shell rule lives in `BaseLayout.astro`'s
   `<style is:global>` block, and a page's own sheet carries page-specific rules only.

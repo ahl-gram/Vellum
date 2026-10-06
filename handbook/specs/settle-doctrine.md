@@ -248,7 +248,7 @@ section points there rather than restating it.
   route to a true narrow viewport is device-metric emulation, and the harness wraps it two ways in
   `e2e/harness.ts`, which are not interchangeable. `setNarrowViewport` is a desktop window that narrow
   (what browser zoom gives), with touch: it ignores the site's fixed `width=1024` viewport, so it is
-  how a check reads the narrow layout. `setMobileViewport` is a phone (`mobile: true`, with touch): it
+  how a check reads a room's 1024 page in a narrower window (Issue #762) and home's narrow layout. `setMobileViewport` is a phone (`mobile: true`, with touch): it
   obeys that viewport, so the page lays out 1024 wide and is shrunk to fit, and a real touch on it is
   aimed in layout CSS pixels from the visual viewport's origin, unscaled. `clearMobile` resets both.
   The clamp's figure is not written down here because no command in this repo demonstrates it. Gate 3
