@@ -42,7 +42,7 @@ export const MEMBERS = ["wordmark", "tagline", "rooms", "roomName", "roomTagline
 export const CLUSTER_NORMAL = ["tagline", "rooms", "footer"] as const;
 export const HEAD_LEADED = ["roomName", "roomTagline"] as const;
 type Member = { tag: string; weight: string; size: number; family: string; tracking: string; lineHeight: string; ratio: number; position: string; color: string } | null;
-export type Head = { chromeWash: { content: string; backgroundColor: string; filter: string } | null; chromePosition: string | null; chromeBottom: number | null; bandClip: string | null; h1s: { classes: string[]; inHeader: boolean; inMain: boolean }[]; bodyLineHeight: string } & Record<(typeof MEMBERS)[number], Member>;
+export type Head = { chromeWash: { content: string; backgroundColor: string; filter: string } | null; chromePosition: string | null; chromeBottom: number | null; bandClip: string | null; h1s: { classes: string[]; inHeader: boolean; inMain: boolean; inFolio: boolean }[]; bodyLineHeight: string } & Record<(typeof MEMBERS)[number], Member>;
 type Want = { tag: string; weight: string; size: number; tracking: number | null; face: RegExp } | null;
 export type Heads = Record<string, Head | undefined>;
 export type Bad = (pred: (h: Head, r: string) => boolean) => string[];
@@ -65,12 +65,12 @@ export const HEAD_READ: Payload<string> = `(() => {
     chromeWash: chrome ? (({ content, backgroundColor, filter }) => ({ content, backgroundColor, filter }))(getComputedStyle(chrome, "::before")) : null,
     wordmark: read("header.chrome .wordmark"), tagline: read("header.chrome .tagline"),
     rooms: read("header.chrome nav.rooms"),
-    roomName: read("main .room-name"), roomTagline: read("main .room-tagline"),
+    roomName: read("body > :is(main, .desk-layer) .room-name"), roomTagline: read("body > :is(main, .desk-layer) .room-tagline"),
     footer: read("body > footer"),
     chromePosition: read("header.chrome")?.position ?? null,
     chromeBottom: document.querySelector("header.chrome")?.getBoundingClientRect().bottom ?? null,
     bandClip: band ? getComputedStyle(band, "::before").clipPath : null,
-    h1s: [...document.querySelectorAll("h1")].map((h) => ({ classes: [...h.classList], inHeader: !!h.closest("header"), inMain: !!h.closest("main") })),
+    h1s: [...document.querySelectorAll("h1")].map((h) => ({ classes: [...h.classList], inHeader: !!h.closest("header"), inMain: !!h.closest("main"), inFolio: !!h.closest(".folio-room") })),
     bodyLineHeight: getComputedStyle(document.body).lineHeight,
   });
 })()`;

@@ -1,4 +1,4 @@
-// The trail under the nav (Issue #668), read at 1280, 901 and 640: its links answer a hit-test and one takes a real press, it clears a thumb's 24px round each of its links and the nav's, wrapped or not, it stands aside while a chart room's phone sheet is up, and the band and the Gallery give it ground. Every target is HIT-TESTED, never clicked through element.click().
+// The trail under the nav (Issue #668), read at 1280, 901 and 640, the last two laying out the 1024 page (Issue #762): its links answer a hit-test and one takes a real press, it clears a thumb's 24px round each of its links and the nav's, and the band and the Gallery give it ground. Every target is HIT-TESTED, never clicked through element.click().
 import type { Payload, SuiteContext } from "../../types.ts";
 import { makeSettle } from "../../support/settle.ts";
 import { sampleRow } from "../../support/pixel.ts";
@@ -65,11 +65,6 @@ const spacing = (ts: readonly Box[]): number[] => ts.map((a, i) => Math.min(...t
   return small ? Math.hypot(centre(a).x - centre(b).x, centre(a).y - centre(b).y) - 24 : toBox(centre(a), b) - 12;
 })));
 
-async function tapAt({ touch }: TrailKit, x: number, y: number): Promise<void> {
-  await touch("touchStart", [{ x: Math.round(x), y: Math.round(y) }]);
-  await touch("touchEnd", []);
-}
-
 export async function dr11Wide(k: TrailKit): Promise<void> {
   const { send, evaluate, check } = k;
   const rows: string[] = [];
@@ -97,7 +92,7 @@ export async function dr11Wide(k: TrailKit): Promise<void> {
   }
   const landed = await arrived(k, "/explorer/");
   check(
-    "DR11 at 1280, 901 and 640, the nav wrapped at 640 (Issue #762), every trail link on the Prospect and the FAQ takes the hand at its centre, a thumb's 24px clears round every trail, alias and nav link (Alex, 2026-10-03, on Issue #668), the links resolve parchment and the page's own segment parchment-bright AND underlined, the alias link's underline, its only cue, reads at least 3:1 over its ground at 1280 (ruling 6), and a REAL press on the Prospect's \"The Explorer\" lands on the Explorer (Issue #668)",
+    "DR11 at 1280, 901 and 640, the last two laying out the 1024 page (Issue #762), every trail link on the Prospect and the FAQ takes the hand at its centre, a thumb's 24px clears round every trail, alias and nav link (Alex, 2026-10-03, on Issue #668), the links resolve parchment and the page's own segment parchment-bright AND underlined, the alias link's underline, its only cue, reads at least 3:1 over its ground at 1280 (ruling 6), and a REAL press on the Prospect's \"The Explorer\" lands on the Explorer (Issue #668)",
     ok && underline >= 3 && !!explorer && landed,
     `${rows.join(" | ")}; alias underline ${underline.toFixed(2)}:1; press on The Explorer ${explorer ? "sent" : "MISSING"}, landed ${landed}`,
   );
@@ -150,27 +145,8 @@ export async function dr13Gallery(k: TrailKit): Promise<void> {
   await clearMobile();
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   check(
-    "DR13 the Gallery's first row stands clear of the head cluster with the trail in it, at 1280 and at 640, where the top row grows the band token by what the wrapped nav adds (Issue #762; Issue #668; the size of the gap is ruling 3's, provisional until Issue #736)",
+    "DR13 the Gallery's first row stands clear of the head cluster with the trail in it, at 1280 and at 640, which lays out the 1024 page (Issue #762; Issue #668; the size of the gap is ruling 3's, provisional until Issue #736)",
     rows.length === 2 && rows.every((r) => r.gap >= 4),
     JSON.stringify(rows),
-  );
-}
-
-export async function dr16SheetUp(k: TrailKit): Promise<void> {
-  const { evaluate, check, waitReady, setNarrowViewport, clearMobile, send } = k;
-  await setNarrowViewport(NARROW, 844);
-  await k.goto("/explorer/");
-  await waitReady();
-  const before = await evaluate(READ);
-  const handle = await evaluate<Box | null>(`(() => { const e = document.querySelector(".slip-handle"); if (!e) return null; const b = e.getBoundingClientRect(); return { x: b.x, y: b.y, w: b.width, h: b.height, right: b.right, bottom: b.bottom }; })()`);
-  if (handle) await tapAt(k, handle.x + handle.w / 2, handle.y + handle.h / 2);
-  const up = await k.settle(READ, (d) => d.whereVisibility === "hidden", "the trail stands aside under the open sheet");
-  const sheetOpen = await evaluate<boolean>(`!!document.querySelector(".slip.open")`);
-  await clearMobile();
-  await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
-  check(
-    "DR16 on a chart room at 640, where the phone sheet ships until pull request C, the trail stands aside while the sheet is up, its links no longer answering; before the sheet it is there, which is the same-run control (Alex, 2026-10-03, on Issue #668; the drawer half left with the drawer, Issue #762)",
-    before.whereVisibility === "visible" && before.links.length > 0 && before.links.every((l) => l.hit) && !!handle && sheetOpen && up.links.every((l) => !l.hit),
-    `before ${before.whereVisibility} ${before.links.map((l) => l.hit).join(",")}; handle ${handle ? "found" : "MISSING"}, sheet open ${sheetOpen}, trail ${up.whereVisibility} ${up.links.map((l) => l.hit).join(",")}`,
   );
 }

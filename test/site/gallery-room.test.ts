@@ -13,17 +13,6 @@ const page = readFileSync(resolve(REPO, "src/pages/gallery/index.astro"), "utf8"
 const css = GALLERY_PAGE_CSS;
 const kit = readFileSync(resolve(REPO, "public/atelier.css"), "utf8");
 
-const topLevelArms = (list: string): string[] => {
-  const arms: string[] = [];
-  let depth = 0, from = 0;
-  for (let i = 0; i < list.length; i++) {
-    if (list[i] === "(") depth++;
-    else if (list[i] === ")") depth--;
-    else if (list[i] === "," && depth === 0) { arms.push(list.slice(from, i).trim()); from = i + 1; }
-  }
-  return [...arms, list.slice(from).trim()].filter((a) => a !== "");
-};
-
 const between = (from: string, to: string): string => {
   const a = page.indexOf(from);
   assert.ok(a >= 0, `the page is missing ${from}`);
@@ -37,7 +26,7 @@ test("GR1 the Gallery is a chart room: chartRoom on the layout, the RoomFolio in
   assert.ok(open, "the page renders through BaseLayout");
   assert.match(open[1]!, /\bchartRoom\b/, "the Gallery passes chartRoom (no band, no footer)");
   assert.ok(!open[1]!.includes("desk="), "the interim desk retires with the conversion");
-  assert.ok(page.includes("<RoomFolio room={room} tagline={tagline}>"), "the room's name stands in the folio corner");
+  assert.ok(page.includes('<RoomFolio slot="desk" region room={room} tagline={tagline}>'), "the room's name stands in the folio corner, in the desk layer that holds a scrolling room's chrome on the 1024 page (Issue #762)");
   assert.ok(!page.includes("<RoomHead"), "the RoomHead on the sheet retires with the conversion");
   assert.ok(!page.includes('class="sub intro"'), "the intro line retires; its fact moves to the dateline");
   assert.ok(!page.includes("<script"), "the Gallery is composed at build time and ships no engine bundle (ruling 2)");
@@ -60,7 +49,7 @@ test("GR3 the plates hang on the deep: the fog, the grid of figures, then the co
 
 test("GR4 the legend row is one gold road back to the Explorer (ruling 2)", () => {
   const legend = between('<nav class="legend"', "</nav>");
-  assert.match(legend, /<nav class="legend" aria-label="The road out">/);
+  assert.match(legend, /<nav class="legend" slot="desk" aria-label="The road out">/);
   assert.match(legend, /<p class="legend-head">[^<]+<\/p>/, "the row keeps its flourish line");
   assert.equal([...legend.matchAll(/<LegendButton /g)].length, 1, "one road, no more");
   assert.match(legend, /<LegendButton gold href="\/explorer\/" verb="Return to" room="The Explorer" \/>/, "the gold road home, as the other rooms carry it (the kit's, #487)");
@@ -81,7 +70,7 @@ test("GR5 every plate is a road into its own world: the Explorer at the plate's 
   assert.notEqual(renderMap(world, { style: "antique", widthPx: 900, legend: true }), plate, "the Explorer's default dress is a different drawing");
 });
 
-test("GR6 the css: twelve sheets at the house depth on the deep, captions lettered in parchment, the chart room's scroll lock lifted, the grid landing, the legend centred and standing on a phone, print standing down", () => {
+test("GR6 the css: twelve sheets at the house depth on the deep, captions lettered in parchment, the chart room's scroll lock lifted, the grid landing, the legend centred, print standing down", () => {
   assert.match(css, /html:has\(body\.chart-room\), body\.chart-room\s*\{[^}]*height:\s*auto;[^}]*overflow:\s*visible/, "the kit locks a stage room's scroll; the plates scroll in flow");
   assert.match(css, /(^|\n)main\s*\{[^}]*padding:[^}]*var\(--band-h\)/, "the first row clears the cluster's band");
   assert.match(css, /(^|\n)\.grid\s*\{[^}]*animation:\s*sheet-land/, "the plates land as one sheet (#461 ruling 6)");
@@ -102,16 +91,11 @@ test("GR6 the css: twelve sheets at the house depth on the deep, captions letter
   assert.match(panel[1]!, /body:has\(#map-viewport\.zoomed\) \.corner\.tr::before/, "the same rule serves the zoomed rooms' folio");
   assert.match(panel[2]!, /inset:\s*-0\.7rem -0\.9rem -0\.8rem;[^}]*linear-gradient\(to bottom, rgb\(from var\(--chart-ink\) r g b \/ 0\.85\), rgb\(from var\(--chart-ink\) r g b \/ 0\.72\)\)/, "home's own box: its padding as the insets, chart ink 0.85 to 0.72, no blur (public/index.css .lf-seed)");
   assert.doesNotMatch(panel[2]!, /filter/, "a crisp panel, not the pool");
-  const footing = kit.match(/\n([^\n]*body\.chart-room:not\(:has\(\.stage\)\) \.legend:not\(\.in-slip\)::before[^{]*)\{([^}]*)\}/);
+  const footing = kit.match(/\n([^\n]*body\.chart-room:not\(:has\(\.stage\)\) \.legend::before[^{]*)\{([^}]*)\}/);
   assert.ok(footing, "the kit gives a stage-less room's legend row home's footing");
-  assert.match(footing[1]!, /body:has\(#map-viewport\.zoomed\) \.legend:not\(\.in-slip\)::before/, "the same rule serves the zoomed rooms' row");
-  const arms = topLevelArms(footing[1]!);
-  assert.ok(arms.length >= 2, `the footing rule carries its arms: ${arms.length}`);
-  assert.deepEqual(arms.filter((a) => !a.endsWith(".legend:not(.in-slip)::before")), [], "#525: every arm skips a docked row, since selector-list arms are ranked independently and a scope on one is a scope on neither");
+  assert.match(footing[1]!, /body:has\(#map-viewport\.zoomed\) \.legend::before/, "the same rule serves the zoomed rooms' row");
   assert.match(footing[2]!, /inset:\s*-0\.5rem -1\.1rem -0\.6rem;[^}]*linear-gradient\(to bottom, rgb\(from var\(--chart-ink\) r g b \/ 0\.85\), rgb\(from var\(--chart-ink\) r g b \/ 0\.72\)\)/, "home's own footing: its padding as the insets, the seed box's crisp panel (public/index.css .lf-legend; the fade left at the 2026-09-03 sitting, ruling 23)");
   assert.doesNotMatch(css, /\/\*/, "the shipped sheet carries no prose (public/gallery/index.css ships it verbatim)");
-  const phone = css.slice(css.indexOf("@media (max-width: 900px)"), css.indexOf("@media print"));
-  assert.match(phone, /\.legend\s*\{[^}]*display:\s*block/, "the kit hides the row for a slip to dock it; the Gallery has no slip and no script, so the row stays");
   assert.doesNotMatch(css, /(^|\n)\s*(header|footer|p\.sub|main\.desk-panel)\s*[{,]/, "no rule targets furniture a chart room no longer has");
   assert.doesNotMatch(css, /(^|\n)\s*\.(legend-btn|legend-row|legend-head|folio-room|room-name|dateline|fog|vignette|corner)\b[^{]*\{/, "the page css does not re-dress the kit (#302)");
   const print = css.match(/@media print\s*\{([\s\S]*)\}\s*$/);

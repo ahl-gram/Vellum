@@ -1,4 +1,4 @@
-// The document rooms' index slip (Issue #462 Landfall Sub 7, document-room rulings 1 to 4): the index is server-rendered from the page's own sections, inks the section being read, folds to hand the sheet the width, is the bottom sheet on a phone, and on the Glossary narrows to the term names typed. Every geometry is MEASURED; the scripts-off arm carries its control.
+// The document rooms' index slip (Issue #462 Landfall Sub 7, document-room rulings 1 to 4): the index is server-rendered from the page's own sections, inks the section being read, folds to hand the sheet the width, stands beside the 1024 page in a narrower window (Issue #762), and on the Glossary narrows to the term names typed. Every geometry is MEASURED; the scripts-off arm carries its control.
 import { scopedHealth } from "../support/room.ts";
 import { makeSettle } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
@@ -35,7 +35,7 @@ const READ: Payload<Index> = `(() => {
     folded: !!slip && slip.classList.contains("folded"), open: !!slip && slip.classList.contains("open"),
     bodyDisplay: body ? getComputedStyle(body).display : null,
     tab: r(".slip-tab"), tabVisibility: (() => { const t = document.querySelector(".slip-tab"); return t ? getComputedStyle(t).visibility : null; })(),
-    folio: r(".corner.tr"), h1: r("main h1.room-name"),
+    folio: r(".corner.tr"), h1: r("h1.room-name"),
     main: r("body > main"), sheet: r(".sheet"),
     count: (document.querySelector(".folio-room .dateline, .folio-room .gloss") || {}).textContent,
     toc: !!document.querySelector(".toc"),
@@ -47,7 +47,7 @@ type Settle = ReturnType<typeof makeSettle>;
 type DocRoomsKit = ReturnType<typeof docRoomsKit>;
 
 export async function run(ctx: SuiteContext): Promise<void> {
-  const { send, setNarrowViewport, clearMobile, waitReady, PORT } = ctx;
+  const { send, setTouch, waitReady, PORT } = ctx;
   const settle = makeSettle(ctx);
   // IX3 is the one group here that waits on a transition, so it is the one that is stepped (Issue #534).
   const step = makeStep(ctx);
@@ -60,11 +60,11 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await ix2InksRow(k, faq);
   await step("IX3", () => ix3Folds(k, faq));
   await ix4FindBox(k);
-  await setNarrowViewport(640, 844);
-  await ix5BottomSheet(k);
+  await setTouch(false);
+  await step("NA3", () => na3Floor(k));
   await ix6NoScript(k);
+  await step("IX8", () => ix8Landmark(k));
 
-  await clearMobile();
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   gate.check("IX7 the document-room suite drove both rooms with no console error and no 4xx");
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/` });
@@ -72,7 +72,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
 }
 
 function docRoomsKit(ctx: SuiteContext & { settle: Settle }) {
-  const { evaluate, send, sleep, touch, PORT } = ctx;
+  const { evaluate, send, sleep, PORT } = ctx;
   // A room's readiness is its own shell (waitReady keys on the Explorer's members); the index script runs at parse, so the slip's inline top is the boot signal.
   const goto = async (path: string) => {
     await send("Page.navigate", { url: "about:blank" });
@@ -84,12 +84,7 @@ function docRoomsKit(ctx: SuiteContext & { settle: Settle }) {
     }
     await sleep(300);
   };
-  const tapAt = async (x: number, y: number) => {
-    await touch("touchStart", [{ x: Math.round(x), y: Math.round(y) }]);
-    await touch("touchEnd", []);
-    await sleep(450);
-  };
-  return { ...ctx, goto, tapAt };
+  return { ...ctx, goto };
 }
 
 async function ix1QaStands({ evaluate, check, goto }: DocRoomsKit): Promise<Index> {
@@ -175,24 +170,42 @@ async function ix4FindBox({ evaluate, send, check, sleep, goto }: DocRoomsKit): 
   );
 }
 
-async function ix5BottomSheet({ evaluate, check, sleep, goto, tapAt }: DocRoomsKit): Promise<void> {
+async function pressAt({ send }: DocRoomsKit, x: number, y: number): Promise<void> {
+  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x, y });
+  await send("Input.dispatchMouseEvent", { type: "mousePressed", x, y, button: "left", clickCount: 1 });
+  await send("Input.dispatchMouseEvent", { type: "mouseReleased", x, y, button: "left", clickCount: 1 });
+}
+
+const centreOf: (sel: string) => Payload<{ x: number; y: number } | null> = (sel) => `(() => { const e = document.querySelector(${JSON.stringify(sel)}); if (!e) return null; const r = e.getBoundingClientRect(); return r.width > 0 && r.right <= innerWidth ? { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) } : null; })()`;
+
+// At a 640 window the page is the 1024 one, so the index stands past the window's right edge until the window scrolls to it; every press here is a real one at the element's own centre.
+async function na3Floor(k: DocRoomsKit): Promise<void> {
+  const { evaluate, send, check, settle, goto } = k;
+  await send("Emulation.setDeviceMetricsOverride", { width: 1024, height: 800, deviceScaleFactor: 1, mobile: false });
   await goto(FAQ);
-  const phone = await evaluate(READ);
-  await tapAt(phone.innerW / 2, phone.slip!.y + 40);
-  const opened = await evaluate(READ);
-  const entry = await evaluate<{ href: string | null; x: number; y: number }>(`(() => { const a = document.querySelector("#index .entries li:nth-child(2) a"); const r = a.getBoundingClientRect(); return { href: a.getAttribute("href"), x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`);
-  await tapAt(entry.x, entry.y);
-  await sleep(400);
-  const jumped = await evaluate(READ);
-  const landed = await evaluate<{ top: number; hash: string; band: number }>(`(() => { const t = document.querySelector(${JSON.stringify(entry.href)}); const r = t.getBoundingClientRect(); const root = getComputedStyle(document.documentElement); return { top: r.top, hash: location.hash, band: parseFloat(root.getPropertyValue("--band-h")) * parseFloat(root.fontSize) }; })()`);
+  const wide = await evaluate(READ);
+  await send("Emulation.setDeviceMetricsOverride", { width: 640, height: 800, deviceScaleFactor: 1, mobile: false });
+  await goto(FAQ);
+  const at = await evaluate(READ);
+  await evaluate("window.scrollTo(document.documentElement.scrollWidth, 0)");
+  const scrolled = await evaluate(READ);
+  const fold = await evaluate(centreOf("#index .slip-fold"));
+  if (fold) await pressAt(k, fold.x, fold.y);
+  const folded = await settle(READ, atFolded(scrolled), "na3-folded");
+  const tab = await evaluate(centreOf(".slip-tab"));
+  if (tab) await pressAt(k, tab.x, tab.y);
+  const back = await settle(READ, atUnfolded(folded), "na3-unfolded");
+  const entry = await evaluate<{ href: string | null; x: number; y: number } | null>(`(() => { const a = document.querySelector("#index .entries li:nth-child(2) a"); if (!a) return null; const r = a.getBoundingClientRect(); return { href: a.getAttribute("href"), x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) }; })()`);
+  if (entry) await pressAt(k, entry.x, entry.y);
+  const landed = await settle<{ top: number; hash: string; band: number; rem: number; folded: boolean; visibility: string }>(`(() => { const t = document.querySelector(${JSON.stringify(entry?.href ?? "#")}); const s = document.getElementById("index"); const root = getComputedStyle(document.documentElement); return { top: t ? Math.round(t.getBoundingClientRect().top) : NaN, hash: location.hash, band: parseFloat(root.getPropertyValue("--band-h")) * parseFloat(root.fontSize), rem: parseFloat(root.fontSize), folded: s.classList.contains("folded"), visibility: getComputedStyle(s).visibility }; })()`, (d, last) => d.hash === entry?.href && last !== null && last.top === d.top, "na3-jumped");
+  const sameAsWide = Math.abs(at.slip!.x - wide.slip!.x) < 0.5 && Math.abs(at.sheet!.right - wide.sheet!.right) < 0.5;
   check(
-    "IX5 at 640 (Issue #762 moved it from 390), where the phone layout ships until pull request C, the index is the bottom sheet collapsed to its head at the foot of the viewport; a tap on the head opens it, a tap on a question jumps to it below the band and closes the sheet again (#462 ruling 2, the phone half)",
-    phone.slipPosition === "fixed" && Math.abs(phone.slip!.bottom - phone.innerH) < 1 && !phone.open && phone.bodyDisplay === "none" &&
-      phone.slip!.h < 140 &&
-      opened.open && opened.bodyDisplay !== "none" && opened.slip!.h >
-        phone.slip!.h + 100 &&
-      !jumped.open && landed.hash === entry.href && landed.top >= landed.band && landed.top <= landed.band + 32 && jumped.scrollW <= jumped.innerW,
-    `collapsed: bottom ${phone.slip && phone.slip.bottom} of ${phone.innerH}, h ${phone.slip && phone.slip.h.toFixed(1)}, body ${phone.bodyDisplay}; opened: ${opened.open} h ${opened.slip && opened.slip.h.toFixed(1)}; after the tap: open=${jumped.open}, hash ${landed.hash} vs ${entry.href}, target top ${landed.top.toFixed(1)} under a ${landed.band.toFixed(1)} band, scrollW ${jumped.scrollW}/${jumped.innerW}`,
+    "NA3 at a 640x800 window the Q & A lays out its 1024 page: the index stands beside the sheet where it stands at 1024 and the window scrolls sideways to it; scrolled there, a real press folds it and hands the sheet the width, its tab brings it back, and a followed question lands at its own scroll margin, a rem under the band, with the index left open (Alex, 2026-10-06, Issue #762: the 1024 floor; the phone's bottom sheet went with the narrow layout)",
+    at.innerW === 640 && at.scrollW === 1024 && !at.folded && at.slipVisibility === "visible" && sameAsWide &&
+      !!fold && folded.folded && folded.main!.right > scrolled.main!.right + 200 &&
+      !!tab && !back.folded && back.slipVisibility === "visible" && Math.abs(back.main!.right - scrolled.main!.right) < 1 &&
+      !!entry && landed.hash === entry.href && Math.abs(landed.top - (landed.band + landed.rem)) <= 1 && !landed.folded && landed.visibility === "visible",
+    JSON.stringify({ innerW: at.innerW, scrollW: at.scrollW, slipX: [at.slip?.x, wide.slip?.x], sheetRight: [at.sheet?.right, wide.sheet?.right], fold, foldedMain: [scrolled.main?.right, folded.main?.right, back.main?.right], tab, entry, landed }),
   );
 }
 
@@ -207,5 +220,39 @@ async function ix6NoScript({ evaluate, send, check, goto }: DocRoomsKit): Promis
     JSON.stringify(noJs.rows) === JSON.stringify(noJs.h2s) && noJs.rowEntries.reduce((a, b) => a + b, 0) === noJs.entries &&
       noJsLink.target && noJs.inked.length === 0,
     `rows ${noJs.rows.length}/${noJs.h2s.length}, entries ${noJs.rowEntries.reduce((a, b) => a + b, 0)}/${noJs.entries}, first term ${noJsLink.href} resolves=${noJsLink.target}, inked ${JSON.stringify(noJs.inked)} (the CONTROL: empty says script really was off)`,
+  );
+}
+
+type AxNode = { role?: { value?: string }; name?: { value?: string }; ignored?: boolean };
+const LANDMARKS = new Set(["main", "banner", "navigation", "complementary", "contentinfo", "region", "form", "search"]);
+
+async function roomName({ evaluate, send, sleep, PORT }: DocRoomsKit, page: string): Promise<string> {
+  await send("Page.navigate", { url: "about:blank" });
+  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}${page}` });
+  for (let i = 0; i < 200; i++) {
+    const name = await evaluate<string>(`document.readyState === "complete" && location.pathname === ${JSON.stringify(page)} ? (document.querySelector("h1.room-name") || {}).textContent || "" : ""`).catch(() => "");
+    if (name) return name;
+    await sleep(25);
+  }
+  throw new Error(`IX8: ${page} never named its room`);
+}
+
+// The accessibility tree itself, read over the debug port: the landmark a reader jumping by landmarks meets the room's name in; the Print Room's, inside <main>, is the same-run control.
+async function ix8Landmark(k: DocRoomsKit): Promise<void> {
+  const rows: string[] = [];
+  let ok = true;
+  for (const [page, want] of [["/faq/", "region"], ["/glossary/", "region"], ["/gallery/", "region"], ["/print-room/", "main"]] as const) {
+    const name = await roomName(k, page);
+    const h1 = await k.send<{ result: { objectId?: string } }>("Runtime.evaluate", { expression: `document.querySelector("h1.room-name")` });
+    const node = await k.send<{ node: { backendNodeId: number } }>("DOM.describeNode", { objectId: h1.result.objectId });
+    const ax = await k.send<{ nodes: AxNode[] }>("Accessibility.getAXNodeAndAncestors", { backendNodeId: node.node.backendNodeId });
+    const landmark = ax.nodes.find((n) => !n.ignored && LANDMARKS.has(n.role?.value ?? ""));
+    ok &&= landmark?.role?.value === want && (want !== "region" || landmark.name?.value === name);
+    rows.push(`${page} "${name}" in ${landmark ? `${landmark.role!.value}${landmark.name?.value ? ` "${landmark.name.value}"` : ""}` : "no landmark"}`);
+  }
+  k.check(
+    "IX8 the Q & A's, the Glossary's and the Gallery's name, standing in the desk layer ahead of <main>, sits in a region landmark named for the room, read from the accessibility tree, where the Print Room's sits in <main> (Alex, 2026-10-06, Issue #762 issuecomment-6019508051)",
+    ok,
+    rows.join(" | "),
   );
 }

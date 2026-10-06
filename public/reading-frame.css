@@ -65,7 +65,6 @@
   font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif);
   font-size: 2.1em; line-height: 0.8; margin: 0.08em 0.12em 0 0; }
 
-@media (max-width: 900px) { .rf-told { display: none; } .rf-instrument { gap: 0.6rem; } .rf-instrument .rf-pace { display: none; } }
 
 /* 3.6rem: "day 105" runs wider than a bare year. */
 .rf-log-strip .cr-year { flex: 0 0 3.6rem; text-align: right;

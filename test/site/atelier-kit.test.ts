@@ -114,7 +114,7 @@ test("AK7 the legend row is ONE face on home and in the kit: the seed box's cris
     ["home's seed box .lf-seed", home.match(/\.lf-seed \{([^}]*)\}/)],
     ["home's legend row .lf-legend", home.match(/\.lf-legend \{([^}]*)\}/)],
     ["the kit's room folio .corner.tr::before", kit.match(/\.corner\.tr::before[^{]*\{([^}]*)\}/)],
-    ["the kit's legend row .legend:not(.in-slip)::before", kit.match(/\.legend:not\(\.in-slip\)::before[^{]*\{([^}]*)\}/)],
+    ["the kit's legend row .legend::before", kit.match(/\.legend::before[^{]*\{([^}]*)\}/)],
   ];
   for (const [name, m] of wearers) assert.ok(m && m[1]!.includes(`background: ${panel};`), `${name} stands on the one panel`);
   const homeVerb = home.match(/\.lf-legend-verb \{([^}]*)\}/);
@@ -124,32 +124,3 @@ test("AK7 the legend row is ONE face on home and in the kit: the seed box's cris
   assert.match(kit, /\.legend-btn\.gold \.verb \{[^}]*color:\s*var\(--ink-brown\)/, "the gold road's verb keeps ink-brown on its gold ground");
 });
 
-test("AK7c the narrow folio panel carries BOTH painting arms (#531): a media query adds no specificity, so a bare .corner.tr::before loses to each arm of the rule that gives the pseudo its inset, and the override paints nowhere", () => {
-  const kit = read("public/atelier.css").replace(/\/\*[\s\S]*?\*\//g, "");
-  const narrow = kit.slice(kit.indexOf("@media (max-width: 900px)"), kit.indexOf("@media print"));
-  const rule = narrow.match(/([^\n]*\.corner\.tr::before[^{]*)\{([^}]*)\}/);
-  assert.ok(rule, "the narrow block still overrides the folio panel's inset");
-  assert.equal((rule[1]!.match(/\.corner\.tr::before/g) || []).length, 2, "#531: both arms, since selector-list arms are ranked independently and an override on one is an override on neither");
-  // home's .lf-seed at narrow, the box this panel IS (e2e SB8e and RH10b pin the resolved px).
-  assert.match(rule[2]!, /inset:\s*-0\.7rem -0\.7rem -0\.75rem/);
-  assert.match(read("public/index.css"), /\.lf-seed \{[^}]*padding:\s*0\.7rem 0\.7rem 0\.75rem/, "and it still mirrors home's seed box at narrow");
-});
-
-test("AK9 the legend dock stands down while it is EMPTY, so the rooms that render it carry no unruled box at the widths the legend is not docked at, and the rule is the KIT's because the dock is furniture every one of them renders (#583)", () => {
-  const dockPages = pages.filter((p) => read(p).includes('class="legend-dock"'));
-  assert.ok(dockPages.length > 2, `the sweep found ${dockPages.length} pages rendering the dock, so it is reading a class and not one page`);
-  for (const p of dockPages) {
-    assert.match(
-      read(p),
-      /<div class="legend-dock"(?: id="legend-dock")?><\/div>/,
-      `${p} authors the dock EMPTY, which is the condition the kit's rule keys on: author anything inside it and the dock stands at every width again`,
-    );
-  }
-  const kit = read("public/atelier.css").replace(/\/\*[\s\S]*?\*\//g, "");
-  assert.match(kit, /\.legend-dock:empty \{ display: none; \}/, "the kit stands the empty dock down");
-  assert.deepEqual(
-    [...kit.matchAll(/\.legend-dock\s*\{([^}]*)\}/g)].filter((m) => /display\s*:/.test(m[1]!)).map((m) => m[0]),
-    [],
-    "and NEVER a bare .legend-dock display rule: the dock receives the WHOLE legend at narrow on every page above, so a stand-down that cannot see the contents takes the roads out off the phone on all of them",
-  );
-});

@@ -33,9 +33,6 @@
 #note .pp-lay.dim:hover, #note .pp-lay.dim:focus-visible { background: var(--control-cream); border-color: var(--line-faint); }
 .pp-lay-count { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.8rem; color: var(--ink-brown); margin: 0; text-align: left; }
 
-@media (max-width: 900px) {
-  .year-label { display: none; }
-}
 
 @media print {
   .stage { position: static; padding: 0 !important; display: block; }

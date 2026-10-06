@@ -39,7 +39,6 @@ const OLDER_CALLS: Readonly<Record<string, readonly string[]>> = {
   "src/site/seed-of-the-day/app.ts": ['dryIn($("folio-title"), "120ms")', 'dryIn($("folio-sub"), "260ms")', 'dryIn($("folio-coords"), "320ms")', 'dryIn($("folio-note"), "400ms")'],
   "src/site/seed-of-the-day/app-hunt.ts": [
     'restart(line, "wet")',
-    'restart(sticky, "rise")',
     "prevSeed(seed)",
     "writeStore({ solved: seed, streak })",
     'restart(share, "rise")',

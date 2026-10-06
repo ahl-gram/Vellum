@@ -129,10 +129,12 @@ stage does not scroll. **The chart keeps a minimum size**: where the chrome woul
 under half the width it could have (the window less an open slip, at the window's full height), the
 sheet takes all of that room instead, centred and wholly inside the window, and runs under the
 chrome; it does not pan at rest, and the reader zooms to see beneath the chrome (`fitStage` in
-`src/site/shared/stage-fit.ts`, which marks the page `stage-under` while it does). A narrow window's
-width floor that runs the sheet past the room between the chrome is marked the same, so the chrome
-over it stands on the same dark backing. **Provisional until the post-use review:** the floor's
-trigger and its size. **A chart room without a stage is the exception and it does scroll**, its
+`src/site/shared/stage-fit.ts`, which marks the page `stage-under` while it does). **Provisional
+until the post-use review:** the floor's trigger and its size. **A room narrower than 1024 keeps its
+1024 layout at full size and the window scrolls sideways over it** (Alex, 2026-10-06, Issue #762):
+there is one layout, every piece of the chrome stands on the 1024 page where it stands at 1024, and
+the fit reads that page at the window's height. Home joins the floor in its own pull request and
+until then lays out at the window's width. **A chart room without a stage is the exception and it does scroll**, its
 content passing under the fixed chrome, which is why it pools every piece of that chrome rather than
 the cluster alone, and why **it wears no vignettes**: a vignette is a fixed darkening band, and on a
 scrolling page it washes out whatever passes through it. Four corners, each a named piece of the kit:
@@ -144,8 +146,8 @@ scrolling page it washes out whatever passes through it. Four corners, each a na
   by `src/site/shell/top-row.ts`: a corner wider than the kit's gives way toward the kit's width first,
   then the cluster takes the width the corner leaves and the nav wraps between rooms, never inside a
   room's name, at a pitch that keeps a thumb's 24px between its doors; the two boxes stand at least
-  `--chrome-x` apart, less a half pixel, wider than any backing the corner draws toward the nav. With scripts off a
-  window below 1024 can overlap.
+  `--chrome-x` apart, less a half pixel, wider than any backing the corner draws toward the nav. With scripts off
+  home's window below 1024 can overlap.
 - **The room folio**, top right: the room's name and tagline, with the room's *one* primary control
   under them. One control. The rest of the press is the legend row. A room that widens its folio
   declares its cap as `--folio-cap` over the kit's `--folio-w`, with no width query, and the top row
@@ -156,12 +158,13 @@ scrolling page it washes out whatever passes through it. Four corners, each a na
   why is `handbook/specs/explorer-doctrine.md`'s, under the camera, the gesture and the fit.
 
 Between them: **the slip**, the working panel on the right, which is the mockup's station card grown
-into a desk. It folds away to a bookmark tab on the right edge, and on a phone it is the bottom
-sheet. **The legend row** runs along the bottom and carries the roads out, seated in the gap beside
+into a desk. It folds away to a bookmark tab on the right edge. **The legend row** runs along the bottom and carries the roads out, seated in the gap beside
 the chart folio; where its presses would stack down the page there (more than two lines, or two or
 more presses each alone on its line), it stands above the chart folio instead, from the chrome's
-inset to the Glass or the slip (`placeLegendRow` in `src/site/shared/room-seats.ts`). **Provisional
-until the post-use review:** where the risen row stands.
+inset to the Glass or the slip (`placeLegendRow` in `src/site/shared/room-seats.ts`). **A risen row
+that would come within the gap of the head cluster's foot sheds its note and every head line that
+holds no control** (Alex, 2026-10-06, Issue #762: lean), decided on the row as it stands unshed, so
+the shed never undoes itself. **Provisional until the post-use review:** where the risen row stands.
 
 **The head cluster says where the reader is standing, on every page with a seat in the route tree.**
 Exactly one element on the page carries the current-page mark (`aria-current`): the nav's segment
@@ -172,8 +175,7 @@ so does a page deliberately outside the tree. The trail's links are parchment li
 a dimmer ink, and at every width each clears a thumb's 24px from the cluster's other links and
 controls. **Provisional until the post-use review:** the trail's size step under the nav, its separator glyph, the alias line's wording and
 whether it earns its place, the trail and the nav sharing one ink, the margins that clear
-the targets' spacing, the Gallery's first row given back its gap, the
-trail standing aside on a chart room while the phone sheet is up, and the alias link's
+the targets' spacing, the Gallery's first row given back its gap, and the alias link's
 strengthened underline.
 
 **A document room** is the sheet instead. It keeps the band and the footer because it scrolls, and it
@@ -207,20 +209,19 @@ tracking. A guard sweeps for exactly that.
 **When the reader is zoomed in, or the room has no stage, or the sheet is floored under the chrome,
 the furniture stands on a pool**: a blurred box that follows the cluster, running well past the
 viewport edge on its edge-facing sides so the fade never lands on screen. At rest on a chart fitted
-clear of the chrome, the chrome carries none. The
+clear of the chrome, the chrome carries none. Zoomed, or with no stage, the
 legend row and the room folio take home's crisp panel instead of the blurred pool, so that a chart
-room's corners read the same as home's, corner for corner. Over a floored sheet the strip alone takes
-none: its lines stand on its own panel, and a pool there would lie over the chart folio and the Glass.
-The room folio's panel reaches only a little way toward the nav there.
+room's corners read the same as home's, corner for corner. **Over a floored sheet they stand on the
+cluster's blurred pool instead** (Alex, 2026-10-06, Issue #762: soft): the legend row's pool box ends
+inside the rise gap above the chart folio, so no backing box lies over another piece's lines, while
+its blur reaches a few pixels over the caption's top line, which is why every line there is read as
+it is painted, at 4.5:1 or better (`NS1` in `e2e/suites/corners/short.ts`). Over a floored sheet
+the strip alone takes none: its lines stand on its own panel, and a pool there would lie over the
+chart folio and the Glass. The room folio's pool reaches only a little way toward the nav there.
 
 **The legend row never takes a real padding.** Its seat gives it its width, and the footing that
 looks like padding is the row's own pseudo-element drawn at those insets, so the row's box, which the
 seat and the fit both read, never changes. A real padding on it wraps the roads.
-
-**On a phone the Glass stands down while the bottom sheet is open**, and that is a kit rule rather
-than a page one, so a new chart room inherits it instead of discovering it. Written anywhere else it
-is a copy, and the sweep that looks for copies has to reach every authored sheet, a page's own style
-block and the generated sheets alike.
 
 **The desk notice is a note, never a wall.** A phone that had to shrink the page to fit sees the
 Notice to Travellers: a tilted parchment stamp above the foot of the screen, edged in a dark double
@@ -319,7 +320,7 @@ knowing, including a keyboard focus ring that fell to about 1.0:1.
 **The focus ring is one face**, ratified on #324 and pinned: a control that draws its own is
 conforming, not inventing. It is drawn *outside* the control, so it stands on the surrounding ground
 and is measured against that ground. Where a ring's contrast leans on a footing, it is scoped with
-that footing, and it falls back to the house ink when the piece is docked somewhere paler.
+that footing.
 
 **A refusing press dims by swapping its ground, never by opacity.** Opacity takes the face under the
 floor, where a cream ground under full-strength ink keeps it far above it (`.pc-lay.dim` in
@@ -336,7 +337,7 @@ makes iOS Safari zoom the page on focus.
 
 **The ruled phone width is 390.** 320 is checked, and its squeezes are accepted and recorded rather
 than designed for. **The head cluster and the room's right-hand corner never overlap, at any width
-from 640 up:** a room folio line, a control or a widened corner is written to fit beside the cluster
+from 1024 up on a room, which a narrower window lays out as its 1024 page, and from 640 up on home:** a room folio line, a control or a widened corner is written to fit beside the cluster
 rather than accepted as a squeeze, the top row holds it by script, and the sweep in
 `e2e/suites/corners.ts` holds every page to it. A deviation that is knowingly shipped is recorded with its measurement, not left
 silent, because an unrecorded one reads to the next session as a defect and gets "fixed" back.

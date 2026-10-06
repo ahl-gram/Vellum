@@ -1,5 +1,5 @@
 ---
-// The index slip (#462 document-room rulings 1 to 4): every section with its questions or its terms, read from the page's own source at build (room-sections.ts). Its script binds the fold, the phone sheet, the ink that follows the reader, and the Glossary's find box when the page carries one; one script for both rooms, inlined by Astro.
+// The index slip (#462 document-room rulings 1 to 4): every section with its questions or its terms, read from the page's own source at build (room-sections.ts). Its script binds the fold, the ink that follows the reader, and the Glossary's find box when the page carries one; one script for both rooms, inlined by Astro.
 import Slip from "./Slip.astro";
 import type { IndexSection } from "./room-sections.ts";
 
@@ -27,22 +27,15 @@ const { sections, kind } = Astro.props;
   import { findMarks, sectionEmpty } from "../site/glossary/term-find.ts";
 
   const slip = document.getElementById("index");
-  const narrowQuery = window.matchMedia("(max-width: 900px)");
-  const narrow = () => narrowQuery.matches;
   const folio = document.querySelector(".corner.tr");
   const rootPx = (prop: string) => parseFloat(getComputedStyle(document.documentElement).getPropertyValue(prop));
 
-  // The slip hangs below the room's folio, the chart rooms' seat; a phone's sheet places itself.
+  // The slip hangs below the room's folio, the chart rooms' seat, floored at the root's client height, which a sideways scrollbar shortens where innerHeight does not.
   const place = () => {
     if (slip === null) return;
-    if (narrow()) {
-      slip.style.top = "";
-      slip.style.maxHeight = "";
-      return;
-    }
     const top = (folio?.getBoundingClientRect().bottom ?? 0) + 16;
     slip.style.top = `${top}px`;
-    slip.style.maxHeight = `${window.innerHeight - top - 22}px`;
+    slip.style.maxHeight = `${document.documentElement.clientHeight - top - 22}px`;
   };
 
   if (slip !== null) {
@@ -50,7 +43,6 @@ const { sections, kind } = Astro.props;
       slip,
       fold: slip.querySelector(".slip-fold"),
       tab: document.querySelector(".slip-tab"),
-      handle: slip.querySelector(".slip-handle"),
       onLayout: place,
       after: (run, ms) => { window.setTimeout(run, ms); },
     });
@@ -63,20 +55,13 @@ const { sections, kind } = Astro.props;
       entryRows: byData("[data-for]", "for"),
       // The reading line sits just under the band, where a followed anchor lands its head.
       line: () => rootPx("--band-h") * rootPx("font-size") + 24,
-      keepInView: () => (narrow() ? null : slip.querySelector(".slip-body")),
+      keepInView: () => slip.querySelector(".slip-body"),
     });
     window.addEventListener("scroll", ink, { passive: true });
     window.addEventListener("resize", () => { place(); ink(); });
     document.fonts?.ready.then(place);
     place();
     ink();
-    for (const a of slip.querySelectorAll("a")) {
-      a.addEventListener("click", () => {
-        if (!narrow()) return;
-        slip.classList.remove("open");
-        slip.querySelector(".slip-handle")?.setAttribute("aria-expanded", "false");
-      });
-    }
     const find = document.querySelector<HTMLInputElement>(".find input");
     find?.addEventListener("input", () => {
       for (const li of slip.querySelectorAll<HTMLElement>(".index > li")) {

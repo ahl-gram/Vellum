@@ -83,15 +83,8 @@ figcaption span { font-variant-caps: small-caps; font-size: 0.8rem; letter-spaci
   display: grid; place-items: center; background: var(--parchment-panel);
   font-style: italic; color: var(--ink-faded); }
 .legend { left: 50%; }
-@media (max-width: 900px) {
-  main { padding: calc(var(--band-h) + 0.8rem) 1rem 8rem; }
-  .legend { display: block; }
-}
 @media screen {
   body:has(.trail) main { padding-top: calc(var(--band-h) + 1.2rem + 1rem + var(--trail-gap)); }
-}
-@media screen and (max-width: 900px) {
-  body:has(.trail) main { padding-top: calc(var(--band-h) + 0.8rem + 1rem + var(--trail-gap)); }
 }
 @media print {
   main { padding: 0; max-width: none; }

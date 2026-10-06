@@ -1,7 +1,6 @@
 import type { Payload, SuiteContext } from "../../types.ts";
 import type { DrawerKit } from "./kit.ts";
 import { CARD, DRAWN, DRESS, PP } from "./reads.ts";
-import type { Card } from "./reads.ts";
 
 export async function cd25CardPress({ evaluate, check, settle, go, pinCard, pressCard }: DrawerKit): Promise<void> {
   await go(DRESS);
@@ -66,14 +65,13 @@ export async function cd28PagePress({ evaluate, send, check, sleep, PORT, settle
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/prospect/#seed=42&i=3` });
   for (let i = 0; i < 300; i++) { await sleep(100); if (await evaluate<boolean>(`!!(window.__vellumProspectState && window.__vellumProspectState())`)) break; }
-  const opened = await evaluate<boolean>(`(() => { const s = document.getElementById("note"); if (s && !s.classList.contains("open")) s.querySelector(".slip-handle").click(); return true; })()`);
   // The slip's fold is a transition, and CD28 derives a real pointer target from this press's rect: a fixed sleep either
   // measures a box still moving or waits longer than it needs. Poll it to REST instead, and throw naming the last read.
   const pp = await settle(PP, (d, last) => !!d.press && d.press.shown && !!last && !!last.press && d.press.centre && last.press.centre &&
     d.press.centre.x === last.press.centre.x && d.press.centre.y === last.press.centre.y, "prospect-note-open");
   check(
     "CD28 the Prospect page's press sits on the engraver's note where the room's desk actions belong, answers a real pointer, and does NOT join the roads out, which go somewhere (ruled 2026-09-17, seat C)",
-    !!opened && !!pp.press && pp.press.shown && pp.press.hit === "self" && pp.inNote &&
+    !!pp.press && pp.press.shown && pp.press.hit === "self" && pp.inNote &&
       pp.press.text === "Lay this prospect on the table" && !pp.press.dim && !pp.press.disabled &&
       /table is bare/.test(pp.count || ""),
     JSON.stringify({ press: pp.press, count: pp.count, inNote: pp.inNote, roads: pp.roads }),
@@ -114,7 +112,6 @@ export async function cd34PageRefusals({ evaluate, send, check, sleep, PORT, set
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/prospect/#seed=42&i=3&table=${SIX}` });
   for (let i = 0; i < 300; i++) { await sleep(100); if (await evaluate<boolean>(`!!(window.__vellumProspectState && window.__vellumProspectState())`)) break; }
-  await evaluate(`(() => { const s = document.getElementById("note"); if (s && !s.classList.contains("open")) s.querySelector(".slip-handle").click(); })()`);
   const atCapPage = await settle(PP, (d, last) => !!d.press && d.press.shown && !!last && !!last.press && d.press.centre && last.press.centre &&
     d.press.centre.x === last.press.centre.x && d.press.centre.y === last.press.centre.y, "prospect-note-open-full");
   if (atCapPage.press && atCapPage.press.centre) await clickAt(atCapPage.press.centre.x, atCapPage.press.centre.y);
@@ -180,30 +177,4 @@ export async function cd32MixedFolio({ evaluate, send, check, sleep, PORT }: Sui
       /three sheets drafted/i.test(pfm.bound || ""),
     JSON.stringify(pfm),
   );
-}
-
-// The phone, where the drawer is stood down and the only feedback is the leaf tab and the status pill.
-export async function cd33PhonePress({ send, check, setNarrowViewport, clearMobile, settle, go, pinCard, pressCard }: DrawerKit): Promise<void> {
-  await setNarrowViewport(390, 844);
-  await go(DRESS);
-  await settle(CARD, (d) => d.hits > 1, "chart-drawer-card-390");
-  await pinCard(1);
-  const narrow = await settle(CARD, (d) => d.shown && !!d.press, "chart-drawer-card-press-390");
-  await pressCard(narrow);
-  const said = await settle<Card & { leafTab: string | null; status: string }>(
-    `(() => ({ ...${CARD}, leafTab: (() => { const b = document.getElementById("leaf-table"); return b ? b.textContent : null; })(), status: (document.getElementById("status") || {}).textContent || "" }))()`,
-    (d) => d.cuttings === 1,
-    "chart-drawer-filed-390",
-    DRAWN,
-  );
-  check(
-    "CD33 at the ruled phone width BOTH card actions answer a real thumb, the card does not scroll the page sideways, and a successful press is ANSWERED where a phone reader can see it: the drawer is stood down at narrow, so the leaf tab's tally and the status pill are the whole of the feedback and a press that changed neither would read as nothing happening",
-    narrow.press!.hit === "self" &&
-      narrow.link!.hit === "self" &&
-      said.scrollW === said.innerW && said.cuttings === 1 && said.prospects === 1 &&
-      /^The Table · 1$/.test(said.leafTab || "") && /lies on the table/.test(said.status || ""),
-    JSON.stringify({ press: narrow.press, link: narrow.link, scrollW: said.scrollW, innerW: said.innerW, leafTab: said.leafTab, status: said.status, cuttings: said.cuttings }),
-  );
-  await clearMobile();
-  await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
 }

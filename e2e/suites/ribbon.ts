@@ -8,7 +8,7 @@ type Row = { cls: string; num: string | undefined; strong: string | null; em: st
 type RibbonKit = ReturnType<typeof ribbonKit>;
 
 export async function run(ctx: SuiteContext): Promise<void> {
-  const { setNarrowViewport, clearMobile, consoleErrors, http4xx } = ctx;
+  const { consoleErrors, http4xx } = ctx;
   const errBase = consoleErrors.length;
   const httpBase = http4xx.length;
   // RB6, RB6b, RB9 and RB10 are deliberately not stepped: their own bounded loops return rather than throwing, and their checks already guard on it.
@@ -20,11 +20,6 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await rb6PickedDestination(k);
   await step("RB7", () => rb7SameScroll(k, svg1));
   await step("RB8", () => rb8InkDress(k));
-  await setNarrowViewport(640, 844);
-  await step("RB8b", () => rb8bPhoneDocks(k));
-  // clearMobile stays OUTSIDE every step: the runner compensates for a suite left at phone metrics in onSuiteError, which a contained step no longer reaches.
-  await clearMobile();
-  await step("RB8c", () => rb8cWideAgain(k));
   rb9NoErrors(ctx, errBase, httpBase);
 }
 
@@ -161,24 +156,6 @@ async function rb8InkDress({ check, goto, opened }: RibbonKit): Promise<void> {
   await goto("#seed=42&style=ink");
   const inked = await opened("the ink dress");
   check("RB8 an ink chart unrolls an ink scroll (the two-dress fallback)", inked.dress === "ink", inked.dress);
-}
-
-async function rb8bPhoneDocks({ evaluate, check, goto, opened }: RibbonKit): Promise<void> {
-  await goto("#seed=42");
-  await opened("the phone");
-  const phone = await evaluate<{ journeyIn: string; inSlip: boolean; swapIn: string; froms: number; tos: number; legendIn: string; sheetW: number; vw: number }>(`(()=>{const j=document.getElementById("rb-journey");const swap=document.getElementById("rb-swap");return{journeyIn:j.parentElement.className,inSlip:j.classList.contains("in-slip"),swapIn:swap.parentElement.className,froms:document.querySelectorAll("#rb-from").length,tos:document.querySelectorAll("#rb-to").length,legendIn:document.querySelector(".legend").parentElement.className,sheetW:document.getElementById("sheet").getBoundingClientRect().width,vw:window.innerWidth};})()`);
-  check(
-    "RB8b at 640 (Issue #762 moved it from 390), where the phone layout ships until pull request C, the journey docks into the sheet as one group (its ids single), Turn about stays in the corner, the legend docks too, and the landscape scroll takes the viewport's width",
-    phone.journeyIn === "journey-dock" && phone.inSlip && /folio-controls/.test(phone.swapIn) && phone.froms === 1 && phone.tos === 1 && phone.legendIn === "legend-dock" && Math.abs(phone.sheetW - phone.vw) < 1,
-    JSON.stringify(phone),
-  );
-}
-
-async function rb8cWideAgain({ evaluate, check, goto, opened }: RibbonKit): Promise<void> {
-  await goto("#seed=42");
-  await opened("the wide sheet again");
-  const wide = await evaluate<{ journeyIn: string; inSlip: boolean }>(`(()=>{const j=document.getElementById("rb-journey");return{journeyIn:j.parentElement.className,inSlip:j.classList.contains("in-slip")};})()`);
-  check("RB8c back on a wide sheet the journey stands in the corner again", /folio-controls/.test(wide.journeyIn) && !wide.inSlip, JSON.stringify(wide));
 }
 
 function rb9NoErrors(ctx: SuiteContext, errBase: number, httpBase: number): void {

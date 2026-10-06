@@ -45,10 +45,6 @@ const tagline = "every seed is a world, draw one";
 
 <!-- The Broadside (#270 rulings): the controls grouped by what they do to the WORLD, The Land reshaping the geography and The Hand dressing the same world. Every input keeps its id, events, and redraw semantics exactly as app.ts/controls.ts wire them. -->
 <Slip id="broadside" verb="Make one" title="The Broadside" where="the land, and the hand that dresses it" fold="Fold the broadside away">
-  <Fragment slot="tabs">
-    <button id="leaf-broadside" type="button" aria-selected="true">The Broadside</button>
-    <button id="leaf-table" type="button" aria-selected="false">The Table</button>
-  </Fragment>
   <div class="broadside">
     <div class="panel" role="group" aria-labelledby="grp-land">
       <p class="panel-head archivist-head" id="grp-land">The Land</p>
@@ -131,9 +127,6 @@ const tagline = "every seed is a world, draw one";
       <a href="/glossary/#verso">read more in the glossary</a>
     </div>
   </div>
-  <!-- The phone's Chart Table (#518 ruling 4): the gathered sheets are DOCKED here from the drawer at narrow, so one set of elements has two homes and neither is a copy. -->
-  <div class="table-leaf" id="table-leaf"></div>
-  <div class="legend-dock" id="legend-dock"></div>
 </Slip>
 
 <ChartFolio lines={[["folio-title", "folio-title"], ["folio-sub", "folio-sub"], ["folio-coords", "caption"]]} />

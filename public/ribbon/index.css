@@ -1,4 +1,4 @@
-/* The Wayfarer's Ribbon: a chart room. The furniture is atelier.css's; this sheet seats the scroll in the fitted sheet, the journey in the corner and the phone sheet, and dresses the itinerary. */
+/* The Wayfarer's Ribbon: a chart room. The furniture is atelier.css's; this sheet seats the scroll in the fitted sheet, the journey in the corner, and dresses the itinerary. */
 
 .stage { display: flex; align-items: center; justify-content: center; box-sizing: border-box;
   padding: var(--reserve-top, 8rem) var(--reserve-right, 0px) var(--reserve-bottom, 8rem) 0; }
@@ -30,13 +30,7 @@
 .itinerary li.summit .cr-text em::before { content: "\25B3\00a0"; font-style: normal; color: var(--ink-brown); }
 .itinerary li.branch .cr-text { color: var(--ink-brown); }
 .row-gloss { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.85rem; color: var(--ink-brown); line-height: 1.45; margin: 0.7rem 0 0; text-align: left; }
-.journey-dock:empty { display: none; }
 
-@media (max-width: 900px) {
-  .journey.in-slip { display: grid; grid-template-columns: auto 1fr; gap: 0.45rem 0.6rem; align-items: center; margin-top: 0.7rem; }
-  .journey.in-slip .jl { font-size: 0.85rem; color: var(--ink-brown); text-align: right; }
-  .journey.in-slip select.control { width: 100%; min-width: 0; }
-}
 
 @media print {
   .stage { position: static; padding: 0 !important; display: block; }

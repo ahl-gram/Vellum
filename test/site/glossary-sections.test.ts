@@ -116,7 +116,7 @@ test("no headword is defined twice: homographs run their senses together (#353)"
 
 test("the index slip replaced the hand-authored TOC: the sections are read from the page itself (#353, then #462 ruling 1)", () => {
   assert.ok(!source.includes('class="toc"'), "the dot-row TOC is gone");
-  assert.ok(source.includes('<IndexSlip sections={sections} kind="terms" />'), "the index slip stands in its place, fed from the page's own sections");
+  assert.ok(source.includes('<IndexSlip slot="desk" sections={sections} kind="terms" />'), "the index slip stands in its place, fed from the page's own sections, in the desk layer that holds a scrolling room's chrome on the 1024 page (Issue #762)");
   assert.ok(source.indexOf("<IndexSlip") < source.indexOf('<div class="sheet">'), "and precedes the prose it indexes, so the tab and a reader reach it first");
   assert.match(source, /roomSections\(readFileSync\(fileURLToPath\(import\.meta\.url\), "utf8"\), "term"\)/, "the sections are parsed from THIS file at build");
 });

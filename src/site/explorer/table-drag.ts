@@ -1,4 +1,6 @@
 // The desktop drag (Issue #523 Sub 5 of Issue #401): a mouse carries the committed survey from the dog-ear to the Chart Table's band. The click stays the door; this is the flourish, and touch never drags (Issue #401 ruling 6).
+import { pageX } from "../shared/page-box.ts";
+
 export const DRAG_SLOP_PX = 6;
 export const GRIP_INSET_PX = 10;
 
@@ -36,7 +38,6 @@ export function lengthPx(token: string, remPx: number): number {
 
 export interface TableDragDeps {
   readonly handle: HTMLButtonElement;
-  readonly canDrag: () => boolean;
   readonly ghostUrl: () => string;
   readonly band: () => Band | null;
   readonly reveal: () => () => void;
@@ -59,7 +60,7 @@ function makeGhost(url: string): HTMLImageElement {
 }
 
 function seat(ghostEl: HTMLImageElement, at: Point): void {
-  const s = ghostSeat(at, ghostEl.offsetWidth);
+  const s = ghostSeat({ x: pageX(at.x, window.scrollX), y: at.y }, ghostEl.offsetWidth);
   ghostEl.style.translate = `${s.x}px ${s.y}px`;
 }
 
@@ -68,7 +69,7 @@ function snapBack(deps: TableDragDeps, g: HTMLImageElement, u: string): void {
   const ms = deps.prefersReduce() ? 0 : deps.settleMs();
   if (ms === 0) { done(); return; }
   const rect = deps.handle.isConnected ? deps.handle.getBoundingClientRect() : null;
-  const to = rect ? ghostSeat({ x: rect.right, y: rect.top }, g.offsetWidth) : null;
+  const to = rect ? ghostSeat({ x: pageX(rect.right, window.scrollX), y: rect.top }, g.offsetWidth) : null;
   const frames = to
     ? [{ translate: g.style.translate, scale: "1", opacity: 1 }, { translate: `${to.x}px ${to.y}px`, scale: "0.3", opacity: 0 }]
     : [{ opacity: 1 }, { opacity: 0 }];
@@ -124,7 +125,7 @@ export function bindTableDrag(deps: TableDragDeps): void {
   };
   deps.handle.addEventListener("pointerdown", (e) => {
     dropOwed();
-    if (carry || !grabbable(e) || !deps.canDrag()) return;
+    if (carry || !grabbable(e)) return;
     carry = { start: { x: e.clientX, y: e.clientY }, ghost: null, url: null, restore: null };
     listen(document, "pointermove", onMove as EventListener);
     listen(document, "pointerup", ((up: PointerEvent) => { finish({ x: up.clientX, y: up.clientY }); }) as EventListener);

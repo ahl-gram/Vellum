@@ -2,7 +2,7 @@ import { dropExpectedCancellations } from "../../support/console.ts";
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 
-// The desk notice (Issue #761): a phone shrinks the fixed 1024 page and sees the Notice to Travellers, a tablet at 1024 and a narrow desktop window never do, and Continue anyway is remembered.
+// The desk notice (Issue #761): a phone shrinks the fixed 1024 page and sees the Notice to Travellers, a tablet at 1024 and a narrow desktop window, which lays out the same 1024 page and scrolls sideways over it (Issue #762), never do, and Continue anyway is remembered.
 const KEY = "vellum.desk-notice.v1";
 const PAGE = "/faq/";
 const ELSEWHERE = "/glossary/";
@@ -91,7 +91,8 @@ export async function dnNarrow(k: DeskKit): Promise<void> {
   await setNarrowViewport(390, 844);
   await k.open(PAGE);
   const narrow = await readSettled(k, "the page in a narrow desktop window");
-  check("DN6 a desktop window narrowed to 390, a touchscreen's included, keeps its narrow layout and never sees the notice", narrow.narrow && narrow.scale === 1 && !narrow.shown && narrow.w === 0 && narrow.key === null, JSON.stringify(narrow));
+  const pageW = await k.evaluate<number>(`document.body.getBoundingClientRect().width`);
+  check("DN6 a desktop window narrowed to 390, a touchscreen's included, lays out the 1024 page at its own size, scrolling sideways over it rather than shrinking it, and never sees the notice (Issue #762: the 1024 floor)", narrow.width === 390 && pageW === 1024 && narrow.scale === 1 && !narrow.shown && narrow.w === 0 && narrow.key === null, JSON.stringify({ ...narrow, pageW }));
 }
 
 export type Refusal = { arm: () => Promise<void>; disarm: () => Promise<void> };

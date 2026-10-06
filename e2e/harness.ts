@@ -193,7 +193,8 @@ async function clearMobile(): Promise<void> {
 
 // The default clip is the harness's 1280 width down the whole document, captured beyond the viewport; a suite that passes its own clip is shot INSIDE the viewport, because captureBeyondViewport drops a chart room's left-anchored fixed furniture (the chart folio, the legend row) from the frame (measured 2026-09-03 on /specimen/ at 1280x800: AE 505 between the two modes at the same instant, the right-anchored corners and the slip untouched).
 async function shoot(file: string, clip?: Clip): Promise<void> {
-  const h = await evaluate<number>(`Math.min(16000, Math.ceil(document.body.scrollHeight))`);
+  // The document's height, not the body's: since Issue #762 a staged room's body contains its fixed furniture, so the fog's -30% inset counts in the body's own (1040 at 1280x800, which nothing can scroll), and a capture sized by it photographs past the page.
+  const h = await evaluate<number>(`Math.min(16000, Math.ceil(document.documentElement.scrollHeight))`);
   const r = await send<{ data: string }>("Page.captureScreenshot", {
     format: "png",
     captureBeyondViewport: clip === undefined,

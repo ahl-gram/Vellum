@@ -63,23 +63,7 @@ body { line-height: 1.45; }
   0% { opacity: 0; } 8% { opacity: 0.9; } 68% { opacity: 0.9; } 100% { opacity: 0; }
 }
 
-.hunt-sticky { display: none; }
-.hunt-sticky.rise { animation: stickyRise var(--paper-settle) var(--ease-paper); }
-@keyframes stickyRise {
-  from { transform: translateY(100%); }
-  to   { transform: translateY(0); }
-}
-@media (max-width: 900px) {
-  .hunt-sticky.active {
-    display: block; position: fixed; left: 0; right: 0; bottom: var(--sheet-h, 0px); z-index: 20;
-    background: var(--ink-dark); color: var(--parchment-panel); text-align: center;
-    padding: 0.7rem 1rem; font-weight: 700; letter-spacing: 0.03em;
-    box-shadow: 0 -4px 16px rgb(from var(--chart-ink) r g b / 0.32);
-  }
-  body:has(.slip.open) .hunt-sticky.active { display: none; }
-}
 @media print {
-  .hunt-sticky { display: none !important; }
   #map-viewport { position: static; }
   #map { position: static; padding: 0 !important; transform: none !important; display: block; }
   #sheet { width: auto !important; height: auto !important; box-shadow: none; }

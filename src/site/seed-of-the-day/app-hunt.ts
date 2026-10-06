@@ -77,20 +77,11 @@ function legendExclusions(world: World, svg: SVGSVGElement, proj: Projection): R
   return legendExcluded(world, box, proj.widthPx);
 }
 
-// The panel line is the aria-live region (its textContent swap is what a screen reader announces); the fixed mobile bar mirrors it visual-only so the latest feedback stays in view without scrolling.
-let stickyShown = false;
+// The panel line is the aria-live region: its textContent swap is what a screen reader announces.
 function setHuntStatus(text: string): void {
   const line = $("hunt-status");
   line.textContent = text;
   if (text.length > 0) restart(line, "wet"); // visual-only ink-dry blur
-  const sticky = $("hunt-sticky");
-  const show = text.length > 0;
-  sticky.textContent = text;
-  sticky.classList.toggle("active", show);
-  sticky.hidden = !show;
-  // Slide up only on the hidden -> shown transition, never on every miss; aria-hidden stays true (the bar mirrors the aria-live line above).
-  if (show && !stickyShown) restart(sticky, "rise");
-  stickyShown = show;
 }
 
 function huntClues(world: World, quarry: Readonly<Quarry>, svg: SVGSVGElement, proj: Readonly<Projection>): void {

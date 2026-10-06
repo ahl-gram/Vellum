@@ -22,11 +22,11 @@ const dateline = `${GALLERY_COUNT} charts, from seed ${GALLERY_SEED}`;
 <Fog />
 <div class="grid" set:html={figures}></div>
 
-<RoomFolio room={room} tagline={tagline}>
+<RoomFolio slot="desk" region room={room} tagline={tagline}>
   <p class="dateline">{dateline}</p>
 </RoomFolio>
 
-<nav class="legend" aria-label="The road out">
+<nav class="legend" slot="desk" aria-label="The road out">
   <p class="legend-head">every plate is a road into its own world</p>
   <div class="legend-row">
     <LegendButton gold href="/explorer/" verb="Return to" room="The Explorer" />

@@ -1,4 +1,6 @@
-// The chart room's seats (Issue #462), the measured placements bindRoom runs on every layout: the slip below the folio and above a strip, the legend row centred in the room the chart folio, the Glass and an open slip leave it.
+// The chart room's seats (Issue #462), the measured placements bindRoom runs on every layout: the slip below the folio and above a strip, the legend row centred in the room the chart folio, the Glass and an open slip leave it. Every horizontal read is in page coordinates (page-box.ts), so a layout fired while the 1024 page is scrolled sideways places each piece where it stands unscrolled.
+import { pageBox, pageLeft, pageRight } from "./page-box.ts";
+
 const SLIP_TOP_GAP = 16;
 const SLIP_FLOOR = 22;
 const STRIP_GAP = 12;
@@ -22,16 +24,16 @@ export function textRight(el: Element | null): number | null {
     if (!p.textContent) continue;
     range.selectNodeContents(p);
     const r = range.getBoundingClientRect();
-    if (r.width > 0) right = Math.max(right ?? 0, r.right);
+    if (r.width > 0) right = Math.max(right ?? 0, pageRight(r));
   }
   return right;
 }
 
-/** The slip hangs below the room's folio; a room with a bottom strip (the Reading Room's instrument) floors it at the strip, not the viewport. */
+/** The slip hangs below the room's folio; a room with a bottom strip (the Reading Room's instrument) floors it at the strip, not the page's foot. */
 export function placeSlip(slipEl: HTMLElement, folio: Element | null, strip: Element | null): void {
   const top = (rectOf(folio)?.bottom ?? 0) + SLIP_TOP_GAP;
   const stripRect = rectOf(strip);
-  const floor = stripRect !== null ? stripRect.top - STRIP_GAP : window.innerHeight - SLIP_FLOOR;
+  const floor = stripRect !== null ? stripRect.top - STRIP_GAP : pageBox().h - SLIP_FLOOR;
   slipEl.style.top = `${top}px`;
   slipEl.style.maxHeight = `${floor - top}px`;
 }
@@ -48,9 +50,12 @@ export const GLASS_GAP_REM = 3.4;
 
 export function glassLeft(glass: HTMLElement | null, slipOpen: boolean, slipW: number): number | null {
   if (glass === null) return null;
-  if (!slipOpen) return rectOf(glass)?.left ?? null;
+  if (!slipOpen) {
+    const r = rectOf(glass);
+    return r === null ? null : pageLeft(r);
+  }
   const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
-  return window.innerWidth - slipW - GLASS_GAP_REM * rem - glass.offsetWidth;
+  return pageBox().w - slipW - GLASS_GAP_REM * rem - glass.offsetWidth;
 }
 
 export interface LegendRoom {
@@ -67,20 +72,27 @@ export function pressRowStacks(tops: readonly number[]): boolean {
   return lines > 2 || lines === tops.length;
 }
 
+export function rowSheds(rowTop: number, clusterFoot: number, backingReach = 0): boolean {
+  return rowTop < clusterFoot + Math.max(LEGEND_GAP, backingReach);
+}
+
 // Computed, never read back off the row: its left transitions, and a mid-transition rect reads the old seat (plate read 2026-08-29: a resize left the row over the folio).
 export function placeLegendRow(legendEl: HTMLElement, room: LegendRoom): void {
   const from = legendEl.style.bottom === "" ? legendEl.style.left : "";
+  legendEl.classList.remove("lean");
   Object.assign(legendEl.style, { bottom: "", transform: "", transition: "none" });
-  const chromeX = rectOf(room.chrome)?.left ?? 0;
+  const chrome = rectOf(room.chrome);
+  const chromeX = chrome === null ? 0 : pageLeft(chrome);
   const left = (textRight(room.folio) ?? chromeX) + LEGEND_CLEAR;
-  const bound = Math.min(window.innerWidth - chromeX, room.glass ?? Infinity, room.slip?.left ?? Infinity) - LEGEND_GAP;
+  const bound = Math.min(pageBox().w - chromeX, room.glass ?? Infinity, room.slip === null ? Infinity : pageLeft(room.slip)) - LEGEND_GAP;
   const space = Math.max(0, bound - left);
   const to = `${left + space / 2}px`;
   Object.assign(legendEl.style, { width: "max-content", maxWidth: `${space}px`, left: to });
   const tops = [...legendEl.querySelectorAll<HTMLElement>(".legend-row .legend-btn")].filter((b) => b.offsetWidth > 0).map((b) => b.offsetTop);
   const folio = rectOf(room.folio);
   if (folio !== null && pressRowStacks(tops)) {
-    Object.assign(legendEl.style, { transform: "none", left: `${chromeX}px`, maxWidth: `${Math.max(0, bound - chromeX)}px`, bottom: `${window.innerHeight - folio.top + LEGEND_RISE}px` });
+    Object.assign(legendEl.style, { transform: "none", left: `${chromeX}px`, maxWidth: `${Math.max(0, bound - chromeX)}px`, bottom: `${pageBox().h - folio.top + LEGEND_RISE}px` });
+    if (chrome !== null) legendEl.classList.toggle("lean", rowSheds(legendEl.getBoundingClientRect().top, chrome.bottom, -parseFloat(getComputedStyle(legendEl, "::before").top) || 0));
     return;
   }
   if (from !== "" && from !== to) {
