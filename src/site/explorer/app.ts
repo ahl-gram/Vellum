@@ -22,6 +22,7 @@ import { createLivingChart } from "../living-chart/index.ts";
 import { bindRoom } from "../shared/room.ts";
 import { pageBox } from "../shared/page-box.ts";
 import { makeAnnouncer } from "../shared/announce.ts";
+import { errorText } from "../shared/error-text.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import type { PlaceManifest } from "../../render/place-manifest.ts";
 import type { Survey } from "../../render/survey.ts";
@@ -304,12 +305,12 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
       keepDraw(res, seed, t0);
       landDraw(res, seed, overrides, style, theme, legend, arms, beasts, quiet, isTurn, hadChart, myGen);
     })
-    .catch((err: Error) => {
+    .catch((err: unknown) => {
       if (myGen !== drawGen) return;
       drawing = false;
       versoBtn.disabled = false;
       cancelTurn();
-      status.textContent = "The cartographer spilled the ink: " + err.message;
+      status.textContent = "The cartographer spilled the ink: " + errorText(err);
     });
 }
 

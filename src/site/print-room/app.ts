@@ -7,6 +7,7 @@ import { rasterizeSvg, type RasterizeResult } from "../lib/rasterize.ts";
 import { initBoundAtlas, clearBoundAtlas, enableBind, sheetAspect, type PosterBasis } from "./bound-atlas.ts";
 import { bindPrintRoom, matterAspect, showMatter, showPlate, showProof, writeFolio, type RoomFurniture } from "./seats.ts";
 import { TABLE_KEY } from "../shared/table-address.ts";
+import { errorText } from "../shared/error-text.ts";
 import type { MapType } from "../../terrain/heightfield.ts";
 import type { ClimateBand } from "../../climate/climate.ts";
 import type { StyleName } from "../../render/style.ts";
@@ -196,10 +197,10 @@ function draw(): void {
       refreshOrderControls(); // the new world is on the desk: re-open the counter (unless an order still holds it)
       enableBind();
     })
-    .catch((err: Error) => {
+    .catch((err: unknown) => {
       if (myGen !== drawGen) return;
       drawing = false;
-      status.textContent = "The press jammed: " + err.message;
+      status.textContent = "The press jammed: " + errorText(err);
       // The previous proof is still on the desk and posterBasis still matches it: re-open the order surface, or a worker crash mid-redraw would leave the plates and Bind stuck disabled.
       refreshOrderControls();
       enableBind();
@@ -303,15 +304,15 @@ function orderPoster(key: string): void {
         png = await rasterizeSvg(res.svg, { scale });
       } catch (err) {
         if (myGen !== posterGen) return;
-        posterStatus.textContent = (err as Error).message;
+        posterStatus.textContent = errorText(err);
         return;
       }
       if (myGen !== posterGen) return; // a newer order landed while rasterizing
       pressPng(png, basis, preset);
     })
-    .catch((err: Error) => {
+    .catch((err: unknown) => {
       if (myGen !== posterGen) return;
-      posterStatus.textContent = "The press jammed: " + err.message;
+      posterStatus.textContent = "The press jammed: " + errorText(err);
     })
     .finally(() => orderSettled());
 }

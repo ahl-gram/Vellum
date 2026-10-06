@@ -250,7 +250,7 @@ test("the runner actually uses the selection, the timings and the outcome rule i
   // The call site alone is not the behavior: computing `certified` and never printing it passes every assertion above.
   assert.match(RUNNER_CODE, /certified\.length > 0/, "the runner computes the certified list and never reads it, so no suite is reported as certified at all (#534)");
   // The breaker's own exit is a HARNESS ERROR, so the door it leaves by must print the score, or it does the thing it exists to prevent.
-  const onError = RUNNER_CODE.match(/\.catch\(\(e\) => \{([\s\S]*?)\n {2}\}\);/);
+  const onError = RUNNER_CODE.match(/\.catch\(\(e *\) => \{([\s\S]*?)\n {2}\}\);/);
   assert.ok(onError, "the runner's error path was not found, so the assertion below would read an empty string");
   assert.match(onError[1]!, /runOutcome\(results\)/, "the harness-error path prints no tally, so a run that dies mid-lane reports none of the checks that did run (#534)");
   assert.match(RUNNER_CODE, /runOutcome\(results\)/, "the runner does not use the outcome rule, so 0/0 can pass again");

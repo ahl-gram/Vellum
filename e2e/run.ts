@@ -193,7 +193,7 @@ main()
     cleanup();
     process.exit(outcome.ok ? 0 : 1);
   })
-  .catch((e) => {
+  .catch((e: unknown) => {
     console.error("HARNESS ERROR:", e);
     // The checks that DID run still get their tally: exiting 2 with no score is the thing the streak breaker exists to prevent, and this is the door the breaker itself leaves by.
     if (results.length > 0) console.log(`\n${runOutcome(results).line}`);

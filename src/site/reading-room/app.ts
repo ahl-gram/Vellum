@@ -11,6 +11,7 @@ import { armsBearing, plateForTold, plateSpecsFor, surveyPlateRows, type PlateSp
 import { plateDressFor } from "../explorer/prospect-job.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import { TABLE_KEY } from "../shared/table-address.ts";
+import { errorText } from "../shared/error-text.ts";
 import { parseLive, emitLive, finalizeHash, liveNow, seedFromHash, type Live } from "../explorer/address.ts";
 import { createReadingFrame } from "../reading-frame/index.ts";
 import { bindReadingRoom, drawScale, seatFrame, writeFolio } from "./seats.ts";
@@ -273,14 +274,14 @@ function scheduleArm(res: Readonly<DrawResult>, forSeed: number, armedByLink: bo
   });
 }
 
-function rollBack(err: Readonly<Error>, wasArmed: boolean): void {
+function rollBack(err: unknown, wasArmed: boolean): void {
   // The previous world is still on screen: converge the module state back onto it, or the next park would serialize the failed seed into a shareable wrong address.
   seed = shownSeed;
   seedInput.value = String(shownSeed);
   // A superseding draw that fails would leave a chart with no instrument and no way back (the hash is read once, at boot): re-arm the world actually on screen (a no-op if still armed), and converge the plate state onto it too, since draw() disarmed it at the top for a world that never arrived.
   plateArmed = wasArmed;
   if (!lc.agesState() && lastRes) armRoom(lastRes, shownSeed, undefined);
-  frame.host.statusEl.textContent = "The cartographer spilled the ink: " + err.message;
+  frame.host.statusEl.textContent = "The cartographer spilled the ink: " + errorText(err);
 }
 
 function draw(): void {
@@ -317,7 +318,7 @@ function draw(): void {
       lc.clearAges();
       scheduleArm(res, forSeed, armedByLink, rest);
     })
-    .catch((err: Error) => {
+    .catch((err: unknown) => {
       if (myGen !== drawGen) return;
       rollBack(err, wasArmed);
     });
