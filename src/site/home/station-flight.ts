@@ -16,3 +16,8 @@ export function stationFlightView(
   const s = Math.max(cam.s, fit * STATION_SCALE_FACTOR);
   return camForCenter(anchor.nx, anchor.ny, s, view, sheet, { x: view.w * ANCHOR_X, y: view.h / 2 });
 }
+
+export function revealLeft(scrollX: number, clientWidth: number, left: number, right: number, margin: number): number {
+  const showsRight = Math.max(scrollX, right + margin - clientWidth);
+  return Math.max(0, Math.min(showsRight, left - margin));
+}

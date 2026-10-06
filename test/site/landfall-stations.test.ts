@@ -8,6 +8,7 @@ import { homeStations, stationSpots, unclaimedDots } from "../../src/site/home/s
 import {
   STATION_FLIGHT_SECONDS,
   STATION_SCALE_FACTOR,
+  revealLeft,
   stationFlightView,
 } from "../../src/site/home/station-flight.ts";
 import {
@@ -154,6 +155,19 @@ test("the station flight frames the anchor beside the card, at the mockup's dept
 
   const c = centerFraction(wide, view, SHEET);
   assert.ok(c.fx > anchor.nx, "the framing pushes the anchor left of center, so the card never covers it");
+});
+
+test("UR1 an opened slip on a window narrower than the page takes the least sideways scroll that shows it whole, a margin clear (Alex, 2026-10-06, Issue #762; the slip measured at page 608 to 960)", () => {
+  const near = (got: number, want: number, why: string) => { assert.ok(Math.abs(got - want) < 1e-9, `${why}: got ${got}, want ${want}`); };
+  near(revealLeft(0, 640, 608, 960, 25.6), 345.6, "640: the slip's right edge comes in by the margin");
+  near(revealLeft(0, 800, 608, 960, 25.6), 185.6, "800");
+  near(revealLeft(0, 900, 608, 960, 25.6), 85.6, "900");
+  near(revealLeft(0, 1024, 608, 960, 25.6), 0, "1024: already whole, no scroll");
+  near(revealLeft(0, 560, 608, 960, 25.6), 425.6, "560");
+  near(revealLeft(0, 380, 608, 960, 25.6), 582.4, "380, narrower than the slip and its margins: the slip's left edge stands at the margin");
+  near(revealLeft(346, 640, 608, 960, 25.6), 346, "a slip already in the window leaves the scroll where it is");
+  near(revealLeft(700, 640, 608, 960, 25.6), 582.4, "a slip left of the window brings its left edge in by the margin");
+  near(revealLeft(0, 640, 10, 362, 25.6), 0, "never a scroll below 0");
 });
 
 test("the idle drift breathes at the mockup's numbers and never mutates the camera (#458)", () => {

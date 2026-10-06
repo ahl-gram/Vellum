@@ -1,4 +1,4 @@
-// Home under the 1024 floor (Issue #762 pull request D; Alex, 2026-10-06, issuecomment-6022258449): on a window narrower than the page, a wheel more sideways than up or down scrolls the page, over the chart and over an open slip, and never zooms the chart.
+// Home under the 1024 floor (Issue #762 pull request D; Alex, 2026-10-06, issuecomment-6022258449): on a window narrower than the page, a wheel more sideways than up or down scrolls the page, over the chart and over an open slip, and never zooms the chart; and a station's slip opened there brings itself into the window.
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, Point } from "../../types.ts";
 import type { HomeKit } from "./kit.ts";
@@ -70,6 +70,60 @@ async function openSlip(k: HomeKit, id: string): Promise<Slip> {
   if (at === null || !hit) throw new Error(`the ${id} pip takes no hit at ${JSON.stringify(at)}`);
   await k.clickAt(at.x, at.y);
   return makeSettle(k)(SLIP(id), (d) => d.open, `home floor ${id} slip open`);
+}
+
+type Shown = { open: boolean; sx: number; sy: number; cw: number; slip: [number, number]; pip: number };
+const SHOWN = (id: string): Payload<Shown> => `(() => {
+  const c = document.getElementById("lf-card-${id}"), r = c.getBoundingClientRect(), p = document.querySelector('.lf-station[data-station="${id}"]').getBoundingClientRect();
+  const done = !c.hidden && Number(getComputedStyle(c).opacity) === 1 && c.getAnimations({ subtree: true }).length === 0;
+  return { open: done, sx: scrollX, sy: scrollY, cw: document.documentElement.clientWidth, slip: [Math.round(r.left * 10) / 10, Math.round(r.right * 10) / 10], pip: Math.round((p.left + p.width / 2) * 10) / 10 };
+})()`;
+
+async function clickStation(k: HomeKit, w: number, scrollDown: boolean): Promise<{ id: string; shown: Shown }> {
+  await k.send("Emulation.setDeviceMetricsOverride", { width: w, height: H, deviceScaleFactor: 1, mobile: false });
+  await k.send("Page.navigate", { url: "about:blank" });
+  await k.send("Page.navigate", { url: `http://127.0.0.1:${k.PORT}/` });
+  await makeSettle(k)(VIEW, (d, last) => d.ready && d.cw === w && last !== null && JSON.stringify(d) === JSON.stringify(last), `home reveal open ${w}`, 300);
+  if (scrollDown) await k.evaluate(`window.scrollTo(0, 600)`);
+  const pick = await k.evaluate<{ id: string; x: number; y: number } | null>(`(() => {
+    for (const id of ${JSON.stringify(scrollDown ? ["reading-room", "gallery", "atlas", "explorer"] : ["explorer"])}) {
+      const r = document.querySelector('.lf-station[data-station="' + id + '"]').getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2;
+      const e = document.elementFromPoint(x, y);
+      if (x > 0 && x < innerWidth && y > 0 && y < innerHeight && e && e.closest('.lf-station[data-station="' + id + '"]')) return { id, x: Math.round(x), y: Math.round(y) };
+    }
+    return null;
+  })()`);
+  if (pick === null) throw new Error(`no station pip takes a hit at ${w}x${H}${scrollDown ? " scrolled down" : ""}`);
+  await k.clickAt(pick.x, pick.y);
+  const shown = await makeSettle(k)(SHOWN(pick.id), (d, last) => d.open && last !== null && JSON.stringify(d) === JSON.stringify(last), `home reveal ${pick.id} at ${w}`, 200);
+  await k.pressKey("Escape", "Escape", 27);
+  return { id: pick.id, shown };
+}
+
+export async function h20Reveal(k: HomeKit): Promise<void> {
+  await k.setTouch(false);
+  const faults: string[] = [];
+  const rows: string[] = [];
+  const arms: readonly (readonly [number, string, boolean])[] = [[560, "reduce", false], [640, "reduce", false], [900, "reduce", false], [640, "no-preference", false], [640, "no-preference", true], [1280, "reduce", false]];
+  try {
+    for (const [w, motion, scrollDown] of arms) {
+      await k.send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: motion }] });
+      const { id, shown } = await clickStation(k, w, scrollDown);
+      const at = `${w}x${H} ${motion}${scrollDown ? " scrolled down" : ""} (${id})`;
+      if (shown.slip[0] < 0 || shown.slip[1] > shown.cw) faults.push(`${at}: the slip stands at ${shown.slip.join(" to ")} in a ${shown.cw} window`);
+      if (w >= 593 && (shown.pip < 0 || shown.pip > shown.cw)) faults.push(`${at}: the station's pip left the window, at ${shown.pip}`);
+      if (shown.sy !== 0) faults.push(`${at}: the window ended ${shown.sy} down, not at the stage's top`);
+      if (w >= 1024 && shown.sx !== 0) faults.push(`${at}: a window as wide as the page scrolled sideways by ${shown.sx}`);
+      rows.push(`${at}: scrolled ${shown.sx},${shown.sy}, slip ${shown.slip.join(" to ")}, pip ${shown.pip}`);
+    }
+  } finally {
+    await k.send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
+  }
+  k.check(
+    "H20 a station's slip opened on a window narrower than the page brings itself wholly into the window by a sideways scroll, at 560, 640 and 900 with motion reduced and at 640 with motion on, there also after the reader had scrolled down, the window ending at the stage's top; the station clicked stays in the window from about 593 wide; at 1280 nothing scrolls (Alex, 2026-10-06, Issue #762)",
+    faults.length === 0,
+    `${rows.join(" | ")}${faults.length ? `; ${faults.join("; ")}` : ""}`,
+  );
 }
 
 type Back = { id: string; overflows: boolean; from: number; to: number };

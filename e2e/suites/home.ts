@@ -1,7 +1,7 @@
 // The floating seed chrome (H0-H6, Issue #289 semantics relanded at Issue #470), the ceremony (H7-H13, Issue #457), the failed-bundle doors (H13c, Issue #470), and the stations, cards, and idle drift (H14-H17, Issue #458): the homepage frame at desktop and on a 390px window that lays out the 1024 page (Issue #762), the corner form, the seed form's real promise (the chart number in the baked cartouche IS the seed, so the drawn SVG identifies its world), the veil's arrival, skips in both phases, sitting memory, reduced-motion stories, and the station flights driven by REAL dispatched input; deltas scoped per flow, plumbing shared via support/home.ts (Issue #460).
 import { makeStep } from "../support/step.ts";
 import type { SuiteContext } from "../types.ts";
-import { h19Sideways, h19bOverSlips } from "./home/floor.ts";
+import { h19Sideways, h19bOverSlips, h20Reveal } from "./home/floor.ts";
 import { homeKit } from "./home/kit.ts";
 import type { HomeKit } from "./home/kit.ts";
 import { h0Loads, hVeilDown, h1CornerForm, h2Hook, h4DrawIt, h5Home, h5aRefused, h5bEmptySeed, h6Clean } from "./home/frame.ts";
@@ -36,6 +36,7 @@ async function h19Floor(ctx: SuiteContext, k: HomeKit): Promise<void> {
   try {
     await step("H19", () => h19Sideways(k));
     await step("H19b", () => h19bOverSlips(k));
+    await step("H20", () => h20Reveal(k));
   } finally {
     await ctx.send("Emulation.setEmulatedMedia", { features: [] });
   }
