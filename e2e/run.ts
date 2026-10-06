@@ -12,6 +12,7 @@ import {
   runOutcome,
   suitesNotWhole,
   E2E_SUITE_ORDER,
+  errorText,
 } from "./support/suites.ts";
 import { start, cleanup } from "./harness.ts";
 import { run as runRender } from "./suites/render.ts";
@@ -62,7 +63,7 @@ function fatalOnThrow<T>(fn: () => T): T {
   try {
     return fn();
   } catch (err) {
-    console.error(`FAIL: ${(err as Error).message}`);
+    console.error(`FAIL: ${errorText(err)}`);
     process.exit(1);
   }
 }

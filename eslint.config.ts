@@ -6,8 +6,9 @@ import css from "@eslint/css";
 import cssCommentForm from "./scripts/lint/css-comment-form.ts";
 import tsCommentForm from "./scripts/lint/ts-comment-form.ts";
 import sourceShape from "./scripts/lint/source-shape.ts";
+import errorCast from "./scripts/lint/error-cast.ts";
 
-const vellum = { meta: cssCommentForm.meta, rules: { ...cssCommentForm.rules, ...tsCommentForm.rules, ...sourceShape.rules } };
+const vellum = { meta: cssCommentForm.meta, rules: { ...cssCommentForm.rules, ...tsCommentForm.rules, ...sourceShape.rules, ...errorCast.rules } };
 const TS_ROOTS = ["e2e/**/*.ts", "scripts/**/*.ts", "src/**/*.ts", "test/**/*.ts", "test-support/**/*.ts"];
 
 export default defineConfig(
@@ -136,5 +137,11 @@ export default defineConfig(
     files: ["e2e/**/*.ts"],
     plugins: { vellum },
     rules: { "vellum/e2e-cancellation-roster": "error", "vellum/e2e-console-read-through-drop": "error" },
+  },
+  {
+    name: "Issue #799: no value is cast to Error to read it",
+    files: TS_ROOTS,
+    plugins: { vellum },
+    rules: { "vellum/no-error-cast": "error" },
   },
 );
