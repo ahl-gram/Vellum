@@ -49,6 +49,9 @@ const REFUSED: ReadonlyArray<readonly [string, string]> = [
   ["host", "export const lower = (s: string) => s.toLocaleLowerCase();"],
   ["host", "export const keyedLocale = (n: number) => n[\"toLocaleString\"]();"],
   ["host", "export const tickedLocale = (s: string) => s[`toLocaleUpperCase`]();"],
+  ["host", "const { localeCompare } = String.prototype; export const destructuredLocale = localeCompare;"],
+  ["host", "export const described = Object.getOwnPropertyDescriptor(Number.prototype, \"toLocaleString\");"],
+  ["host", "const LOCALE_KEY = \"toLocaleString\"; export const heldKey = (n: number) => (n as unknown as Record<string, () => string>)[LOCALE_KEY]!();"],
   ["host", "export const where = () => import.meta.url;"],
   ["ambient", "declare const hidden: { now(): number };"],
   ["ambient", "declare function stamped(): number;"],
@@ -73,6 +76,8 @@ const PASSED: readonly string[] = [
   "export const shadowed = (Date: number): number => Date + 1;",
   "export const keys = { Date: 1, performance: 2 }.performance;",
   "export const field = (o: { toLocale: number }) => o.toLocale;",
+  "export type LocaleKey = \"toLocaleString\";",
+  "export const ownMethod = { toLocaleString: (): string => \"the plate's own\" };",
   "export const optional = (x: number) => Math?.floor(x);",
   "export const builtIns = (s: string) => [new Map<string, number>(), new Set<number>(), JSON.stringify([s]), parseInt(s, 10), String(s), Array.from(s), Number(s), Object.keys({}), Boolean(s), Infinity, NaN, undefined, new Error(s), new RangeError(s), new TypeError(s)];",
   "export function Ctor(this: unknown) { return new.target; }",
@@ -87,7 +92,7 @@ const PASSED: readonly string[] = [
 // Restated on purpose, an oracle beside EXACT_MATH and PROSPECT_GLOBALS in scripts/lint/source-shape.ts rather than read from them, so a name wrongly added to either list reds here; every other Math member and every other global this Node holds is planted as refused.
 const EXACT = ["E", "LN10", "LN2", "LOG10E", "LOG2E", "PI", "SQRT1_2", "SQRT2", "abs", "ceil", "clz32", "floor", "fround", "imul", "max", "min", "round", "sign", "sqrt", "trunc"];
 const APPROVED = ["Array", "Boolean", "Error", "Infinity", "JSON", "Map", "Math", "NaN", "Number", "Object", "RangeError", "Set", "String", "TypeError", "parseInt", "undefined"];
-const BROWSER_SAMPLE = ["document", "localStorage", "location", "navigator", "requestAnimationFrame", "self", "window"];
+const BROWSER_SAMPLE = ["caches", "document", "importScripts", "indexedDB", "isSecureContext", "localStorage", "location", "matchMedia", "navigator", "origin", "postMessage", "requestAnimationFrame", "requestIdleCallback", "self", "window"];
 const IDENTIFIER = /^[A-Za-z_$][\w$]*$/;
 const offList = (names: readonly string[], approved: readonly string[]): string[] => [...new Set(names)].filter((name) => !approved.includes(name) && IDENTIFIER.test(name)).sort();
 const OFF_LIST: ReadonlyArray<readonly [string, string]> = [
@@ -96,7 +101,20 @@ const OFF_LIST: ReadonlyArray<readonly [string, string]> = [
 ];
 const ON_LIST = [...EXACT.map((name, i) => `export const onMath${i} = Math.${name};`), ...APPROVED.filter((name) => name !== "Math").map((name, i) => `export const onGlobal${i} = (): unknown => ${name};`)];
 
-const BLIND_SPOTS = "BLIND SPOTS, declared: a module outside src/prospect/, the repo's or a package's, is not read (src/prospect/dress/furniture.ts reaches Math.cos through armsNode in src/render/layers/heraldry.ts, which is why the finished-plate pins are armless), erring toward passing; the Function constructor reached through a value's constructor chain (Object.constructor, [].constructor.constructor), erring toward passing; a host read through a value the rule does not name (new Error().stack, a locale member behind a computed key that is not a string, a built-in whose result follows the engine's Unicode data, such as normalize), erring toward passing; a TypeScript value position read as a type (an instantiation expression), erring toward passing; and Math behind a cast or a non-null mark ((Math as M).floor, Math!.floor), erring toward reporting";
+const ERASED_PLANT = [
+  "import type { XYS as Date } from \"./geometry.ts\";",
+  "import { type XYS as Math } from \"./geometry.ts\";",
+  "import type { XYS as performance } from \"./geometry.ts\";",
+  "import type { XYS } from \"./geometry.ts\";",
+  "export const now = () => Date.now();",
+  "export const sine = (x: number) => Math.sin(x);",
+  "export const floor = (x: number) => Math.floor(x);",
+  "export const perf = () => performance.now();",
+  "export const typed = (p: XYS): XYS => p;",
+];
+const ERASED_READS: Array<[number, string]> = [[5, "host"], [6, "libm"], [8, "host"]];
+
+const BLIND_SPOTS = "BLIND SPOTS, declared: a module outside src/prospect/, the repo's or a package's, is not read (src/prospect/dress/furniture.ts reaches Math.cos through armsNode in src/render/layers/heraldry.ts, which is why the finished-plate pins are armless), erring toward passing; the Function constructor reached through a value's constructor chain (Object.constructor, [].constructor.constructor), erring toward passing; a host read through a value the rule does not name (new Error().stack, a locale member whose name is assembled from pieces, a built-in whose result follows the engine's Unicode data, such as normalize), erring toward passing; a TypeScript value position read as a type (an instantiation expression), erring toward passing; an erased binding other than a declare line or a type-only import (an import alias, which npm run check refuses first, TS1294), erring toward passing; Math behind a cast or a non-null mark ((Math as M).floor, Math!.floor), erring toward reporting; and, of this test's oracle, a browser or worker global this Node lacks and BROWSER_SAMPLE does not name, wrongly approved in PROSPECT_GLOBALS, erring toward passing";
 
 test("the prospect layer refuses libm, the exponent in both forms, Math reached any way but an exact member, every global outside the approved built-ins, the locale members, import.meta, an ambient declaration, a Node module and a computed import, while a type, a key, a shadow, a comment, a string, a package and a relative module pass", async () => {
   const refused = [...REFUSED, ...OFF_LIST];
@@ -104,6 +122,7 @@ test("the prospect layer refuses libm, the exponent in both forms, Math reached 
   const plant = [...refused.map(([, line]) => line), ...PASSED, ...ON_LIST];
   const expected = refused.map(([arm], i): [number, string] => [i + 1, arm]);
   assert.deepEqual(await reports(plant, "src/prospect/compose.ts"), expected, BLIND_SPOTS);
+  assert.deepEqual(await reports(ERASED_PLANT, "src/prospect/compose.ts"), ERASED_READS, "a name bound by a type-only import is erased, so its value read is the global of that name and is judged as one");
 });
 
 const resolvedAt = async (file: string): Promise<unknown> => ((await eslint.calculateConfigForFile(file)) as { rules?: Record<string, unknown> }).rules?.[RULE];

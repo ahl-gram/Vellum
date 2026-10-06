@@ -286,19 +286,25 @@ const PROSPECT_GLOBALS = new Set(["Array", "Boolean", "Error", "Infinity", "JSON
 const LOCALE_MEMBERS = new Set(["localeCompare", "toLocaleDateString", "toLocaleLowerCase", "toLocaleString", "toLocaleTimeString", "toLocaleUpperCase"]);
 const AMBIENT = ["ClassDeclaration", "TSDeclareFunction", "TSEnumDeclaration", "TSModuleDeclaration", "VariableDeclaration"];
 
-const memberKey = (member: Node): string | null =>
-  member.type !== "MemberExpression" ? null : member.computed ? wholeString(member.property as Node) : member.property.type === "Identifier" ? member.property.name : null;
+const namedKey = (key: Node, computed: boolean, names: ReadonlySet<string>): boolean => !computed && key.type === "Identifier" && names.has(key.name);
 const exactMath = (id: Node): boolean => {
   const member = id.parent;
-  return member?.type === "MemberExpression" && !member.computed && EXACT_MATH.has(memberKey(member) ?? "");
+  return member?.type === "MemberExpression" && namedKey(member.property as Node, member.computed, EXACT_MATH);
 };
 const typeQueried = (node: Node | null): boolean => {
   if (node === null) return false;
   const kind = node.type as string;
   return kind === "TSTypeQuery" || (kind === "TSQualifiedName" && typeQueried(node.parent));
 };
+const typeOnly = (def: Scope.Definition): boolean =>
+  def.type === "ImportBinding" && [def.parent, def.node].some((n) => (n as { importKind?: string }).importKind === "type");
+const scopesUnder = (scope: Scope.Scope): Scope.Scope[] => [scope, ...scope.childScopes.flatMap(scopesUnder)];
 const globalReads = (scope: Scope.Scope): Scope.Reference[] =>
-  [...scope.through, ...scope.variables.filter((v) => v.defs.length === 0).flatMap((v) => v.references)].filter((ref) => (ref as { isValueReference?: boolean }).isValueReference !== false);
+  [
+    ...scope.through,
+    ...scope.variables.filter((v) => v.defs.length === 0).flatMap((v) => v.references),
+    ...scopesUnder(scope).flatMap((s) => s.variables).filter((v) => v.defs.length > 0 && v.defs.every(typeOnly)).flatMap((v) => v.references),
+  ].filter((ref) => (ref as { isValueReference?: boolean }).isValueReference !== false);
 const hostModule = (source: Node): boolean => {
   const text = wholeString(source);
   return text === null || isBuiltin(text);
@@ -323,11 +329,17 @@ const prospectLibmClockFree: Rule.RuleModule = {
     const ambient = (node: Node): void => {
       if ((node as { declare?: boolean }).declare === true) report(node, "ambient");
     };
+    const localeString = (node: Node): void => {
+      if (LOCALE_MEMBERS.has(wholeString(node) ?? "") && !inTypePosition(node.parent as Node)) report(node, "host");
+    };
     return {
       ...Object.fromEntries(AMBIENT.map((kind) => [kind, ambient])),
       BinaryExpression: (node) => (node.operator === "**" ? report(node, "power") : undefined),
       AssignmentExpression: (node) => (node.operator === "**=" ? report(node, "power") : undefined),
-      MemberExpression: (node) => (LOCALE_MEMBERS.has(memberKey(node) ?? "") ? report(node, "host") : undefined),
+      MemberExpression: (node) => (namedKey(node.property as Node, node.computed, LOCALE_MEMBERS) ? report(node, "host") : undefined),
+      Property: (node) => (node.parent.type === "ObjectPattern" && namedKey(node.key as Node, node.computed, LOCALE_MEMBERS) ? report(node, "host") : undefined),
+      Literal: localeString,
+      TemplateLiteral: localeString,
       MetaProperty: (node) => (node.meta.name === "import" ? report(node, "host") : undefined),
       ImportDeclaration: (node) => source(node.source as Node),
       ExportAllDeclaration: (node) => source(node.source as Node),
