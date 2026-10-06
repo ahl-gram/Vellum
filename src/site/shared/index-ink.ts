@@ -49,8 +49,10 @@ export function indexInk(p: InkParts): () => void {
     if (box !== null && row !== undefined) {
       const r = row.getBoundingClientRect();
       const b = box.getBoundingClientRect();
-      if (r.top < b.top) box.scrollTop += r.top - b.top;
-      else if (r.bottom > b.bottom) box.scrollTop += r.bottom - b.bottom;
+      const taller = r.bottom - r.top > b.bottom - b.top;
+      if (r.top < b.top && r.bottom > b.bottom) return;
+      if ((r.top < b.top && !taller) || (r.bottom > b.bottom && taller)) box.scrollTop += r.top - b.top;
+      else if (r.top < b.top || r.bottom > b.bottom) box.scrollTop += r.bottom - b.bottom;
     }
   };
   return ink;

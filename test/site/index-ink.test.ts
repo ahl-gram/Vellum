@@ -57,3 +57,17 @@ test("IK1 the inked row is brought into view by scrolling the index's own body a
   assert.deepEqual(intoView, [], "scrolling back up, still no scrollIntoView");
   assert.equal(box.scrollTop, 130, "a row above the body's top scrolls the body up by what it overhangs");
 });
+
+test("IK2 a section row taller than the index's body is aligned by its top once and then left still, the way scrollIntoView's nearest leaves a box that already fills the view, never flipped between its top and its foot on every scroll (the step 11 plate read on Issue #762 pull request C: 59 reversals reading the Q & A down at 1024x400)", () => {
+  const box = { scrollTop: 40, getBoundingClientRect: () => ({ top: 100, bottom: 300 }) as DOMRect } as unknown as HTMLElement;
+  const tall = { id: "a", classList: { toggle: () => false }, scrollIntoView: () => { throw new Error("scrollIntoView"); },
+    getBoundingClientRect: () => { const top = 190 - box.scrollTop; return { top, bottom: top + 300 } as DOMRect; } } as unknown as HTMLElement;
+  const head = { id: "a", getBoundingClientRect: () => ({ top: 60 }) as DOMRect } as unknown as Element;
+  const ink = indexInk({ heads: [head], entries: [], rows: new Map([["a", tall]]), entryRows: new Map(), line: () => 145, keepInView: () => box });
+  const seen: number[] = [];
+  for (let i = 0; i < 4; i++) { ink(); seen.push(box.scrollTop); }
+  assert.deepEqual(seen, [90, 90, 90, 90], "the row's top meets the body's top and stays there");
+  box.scrollTop = 140;
+  ink();
+  assert.equal(box.scrollTop, 140, "a row that already fills the body past both its edges is left where the reader put it");
+});
