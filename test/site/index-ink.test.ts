@@ -52,4 +52,8 @@ test("IK1 the inked row is brought into view by scrolling the index's own body a
   rows.set("b", row("b", 300));
   ink();
   assert.equal(box.scrollTop, 170, "a row already inside the body moves nothing");
+  rows.set("b", row("b", 60));
+  ink();
+  assert.deepEqual(intoView, [], "scrolling back up, still no scrollIntoView");
+  assert.equal(box.scrollTop, 130, "a row above the body's top scrolls the body up by what it overhangs");
 });
