@@ -12,7 +12,8 @@ export { TYPICAL_SCORE };
 export function defaultBackdrop(): ReadonlyArray<number> {
   const mid = (BACKDROP_SAMPLES - 1) / 2;
   return Array.from({ length: BACKDROP_SAMPLES }, (_, i) => {
-    const t = Math.max(0, 1 - ((i - mid) / 48) ** 2);
+    const u = (i - mid) / 48;
+    const t = Math.max(0, 1 - u * u);
     return 0.05 + 0.25 * t * t;
   });
 }

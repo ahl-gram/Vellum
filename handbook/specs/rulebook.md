@@ -285,13 +285,18 @@ comment. This is a convenience index, not their home.
   point from the place manifest (`buildPlaceManifest` in `src/render/place-manifest.ts`); the
   invariant is carried as a comment at the press-origin assignment in
   `src/site/living-chart/chronicle.ts`.
-- **Prospect byte pins:** the plate pins hold only while all of `src/prospect/` stays **libm-free and
-  clock-free**, which is the name of the guard in `test/prospect/dress.test.ts`. **That guard's regex
-  is the list**, and it is longer than the trigonometric calls: do not keep a copy of it here or in
-  your head, read it. `Math.sqrt` is exempt, since IEEE requires it correctly rounded. The guard
-  scans the tree with comments stripped, because two of its modules state the contract in prose, and
-  it asserts a floor on the file count so it cannot pass over an empty scan. Its companion rule is
-  that world-sourced geometry is quantized to three decimals before hashing, far above the
+- **Prospect byte pins:** the plate pins hold only while all of `src/prospect/`, and
+  `test-support/prospect-fixtures.ts`, which builds the pinned inputs, stay **libm-free and
+  clock-free**, and `vellum/prospect-libm-clock-free` (`prospectLibmClockFree` in
+  `scripts/lint/source-shape.ts`) refuses the rest at lint time. **Its approved lists are the list**:
+  `EXACT_MATH`, the `Math` members that are exact or correctly rounded (`Math.sqrt` among them, since
+  IEEE requires it correctly rounded), and `PROSPECT_GLOBALS`, the built-ins that compute from their
+  arguments alone. Do not keep a copy of either here or in your head; read them. A built-in joins
+  `PROSPECT_GLOBALS` only with its reason, in the pull request that needs it. **The rule reads those
+  files alone, never a module they import**, so keep a pinned fixture on paths whose imports from
+  elsewhere are libm-free too: the finished-plate pins in `test/prospect/finished.test.ts` are
+  armless because the arms reach `Math.cos` in `src/render/layers/heraldry/charges.ts`. Its companion
+  rule is that world-sourced geometry is quantized to three decimals before hashing, far above the
   cross-platform drift and far below any real composition change.
 - **Borders (#158):** the border attribute-order invariant is commented at its line; keep it.
 - **The comment citation convention** is `handbook/specs/conventions.md`'s, under how code is cited.

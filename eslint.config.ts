@@ -102,7 +102,7 @@ export default defineConfig(
   },
   {
     name: "Issue #759: the prospect layer and the builder of its pinned fixtures read no clock, no entropy and nothing libm computes",
-    files: [["src/**/*.ts", "src/prospect/**"], "test-support/prospect-fixtures.ts"],
+    files: [["src/**/*.ts", "src/prospect/**"], ["test-support/**/*.ts", "test-support/prospect-fixtures.ts"]],
     plugins: { vellum },
     rules: { "vellum/prospect-libm-clock-free": "error" },
   },
