@@ -76,7 +76,7 @@ export function placeLegendRow(legendEl: HTMLElement, room: LegendRoom): void {
   const bound = Math.min(window.innerWidth - chromeX, room.glass ?? Infinity, room.slip?.left ?? Infinity) - LEGEND_GAP;
   const space = Math.max(0, bound - left);
   const to = `${left + space / 2}px`;
-  Object.assign(legendEl.style, { maxWidth: `${space}px`, left: to });
+  Object.assign(legendEl.style, { width: "max-content", maxWidth: `${space}px`, left: to });
   const tops = [...legendEl.querySelectorAll<HTMLElement>(".legend-row .legend-btn")].filter((b) => b.offsetWidth > 0).map((b) => b.offsetTop);
   const folio = rectOf(room.folio);
   if (folio !== null && pressRowStacks(tops)) {

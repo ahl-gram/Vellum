@@ -15,14 +15,15 @@ const WINDOWS: readonly (readonly [number, number])[] = [[1280, 720], [1024, 768
 const FOLDED_WINDOWS: readonly (readonly [number, number])[] = [[1024, 600], [901, 800]];
 const SHORT = { w: 932, h: 430 };
 export const FLOOR_PLAIN = 4.5;
+// The day's seed on which the Print Room's Press came to rest over its folio at 932x430 folded (2026-10-06), read beside the suite's fixed day (Alex, 2026-10-05, on PR #784).
+const COLLIDED_2026_10_06 = "/print-room/#seed=20261006";
 const KNOWN: readonly { check: "EA1" | "EL1"; fault: string; row: string }[] = [
   { check: "EL1", fault: `/specimen/ at 901x800: p#sb-status.status "the status pill, as a ro" meets aside#specimen.slip`, row: "the handbook/errata/site.md row on the Specimen's status pill over its slip" },
   { check: "EL1", fault: `/specimen/ at 932x430: p#sb-status.status "the status pill, as a ro" meets aside#specimen.slip`, row: "the handbook/errata/site.md row on the Specimen's status pill over its slip" },
   { check: "EL1", fault: `/print-room/ at 932x430: the Press's backing lies over header.chrome`, row: "the handbook/errata/site.md row on the Print Room's risen Press at 932x430" },
+  { check: "EL1", fault: `${COLLIDED_2026_10_06} at 932x430: the Press's backing lies over header.chrome`, row: "the handbook/errata/site.md row on the Print Room's risen Press at 932x430" },
 ];
 const SLIP_TAB_SIBLING = { at: `at ${SHORT.w}x${SHORT.h} folded`, pieces: ["button.slip-tab", "button.chart-drawer-tab"], row: "the handbook/errata/site.md row on the slip's tab at 932x430" };
-// The day's seed on which the Print Room's Press came to rest over its folio at 932x430 folded (2026-10-06), read beside the suite's fixed day (Alex, 2026-10-05, on PR #784).
-const COLLIDED_2026_10_06 = "/print-room/#seed=20261006";
 
 type Box = { x: number; y: number; r: number; b: number };
 type Ink = Box & { piece: number; t: string };

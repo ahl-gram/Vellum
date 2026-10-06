@@ -194,7 +194,7 @@ body.chart-room .stage { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3,
   body.chart-room:has(.slip.open) .where { visibility: hidden; }
   body:has(#map-viewport.zoomed) .corner.tr::before, body.chart-room:not(:has(.stage)) .corner.tr::before { inset: -0.7rem -0.7rem -0.75rem; }
   .legend { display: none; }
-  .legend.in-slip { display: block; position: static; transform: none; margin-top: 0.9rem; animation: none; max-width: none !important; }
+  .legend.in-slip { display: block; position: static; transform: none; margin-top: 0.9rem; animation: none; width: auto !important; max-width: none !important; }
   .legend.in-slip .legend-head { display: none; }
   .legend.in-slip .legend-btn { background: var(--ink-dark); }
   /* Docked on the sheet's parchment the tan hairline reads 2.00:1 (the cream fill, 1.09:1, stays), so it takes ink-brown: 5.64:1 on the sheet, 5.20:1 against the fill. */
