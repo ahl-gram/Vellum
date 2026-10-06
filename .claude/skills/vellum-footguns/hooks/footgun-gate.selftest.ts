@@ -5,10 +5,11 @@
  */
 import { execFileSync } from "node:child_process";
 import { cpSync, mkdirSync, readdirSync, readFileSync, realpathSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { homedir, tmpdir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { decide, gateText, headingCheck, requiredHeadings, statePath, type Decision, type Payload } from "./footgun-gate.ts";
+import { CD_ROWS } from "./bare-cd.fixtures.ts";
 import { CODE_ROWS } from "./markdown-code.fixtures.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -76,6 +77,26 @@ const CODE_FIXTURES: Fixture[] = CODE_ROWS.map(([name, command, bodies, want, ne
   want,
   needle ? filled(needle) : want === "deny" ? "em-dash outside code" : want ? "## Gate 5" : "",
 ]);
+const placed = (text: string): string => text.replaceAll("<ROOT>", ROOT).replaceAll("<LINK>", LINK).replaceAll("<S>", SCRATCH);
+const setProject = (dir: string | undefined): void => { if (dir === undefined) delete process.env.CLAUDE_PROJECT_DIR; else process.env.CLAUDE_PROJECT_DIR = dir; };
+const inProject = (payload: Payload, project: string | undefined) => async (): Promise<Decision> => {
+  const before = process.env.CLAUDE_PROJECT_DIR;
+  const session = `cd-${process.pid}`;
+  setProject(project);
+  try {
+    return await decide({ ...payload, session_id: session });
+  } finally {
+    setProject(before);
+    rmSync(statePath(session), { force: true });
+  }
+};
+const PROJECTS: Record<string, string | undefined> = { "no project": undefined, "project via link": LINK, "project at home": homedir() };
+const NEEDLES: Record<string, string> = { deny: "inside the project", unplaced: "cannot work out", stash: "refs/stash", escape: "inside a backtick string" };
+const CD_FIXTURES: Fixture[] = CD_ROWS.map(([name, command, cwd, want, who]): Fixture => {
+  const agent = who === "subagent" ? { agent_id: "a781" } : who === "with --agent" ? { agent_type: "vellum-implementer" } : {};
+  const project = who !== undefined && who in PROJECTS ? PROJECTS[who] : cwd?.startsWith("<S>") ? SCRATCH : ROOT;
+  return [name, inProject({ ...bash(placed(command), cwd === null ? undefined : placed(cwd)), ...agent }, project), want && "deny", NEEDLES[who ?? ""] ?? (want ? (NEEDLES[want] ?? "") : "")];
+});
 const asContext = (text: string): Decision => ({ hookSpecificOutput: { hookEventName: "PreToolUse", additionalContext: text } });
 // The unlink is what lets the two rows share a session id: the gate is once per session, so without it the second row would see no Gate 5 and read as the warning having swallowed it. The FIXTURES loop's own unlink does not reach a function subject.
 const inRootlessCheckout = (payload: Payload) => async (): Promise<Decision> => {
@@ -160,6 +181,7 @@ const FIXTURES: Fixture[] = [
   ["pr body em-dash across a line continuation denied", bash("gh pr create --title t \\\n  --body 'a — b'"), "deny", "em-dash"],
   ["pr body negated close across a line continuation denied", bash("gh pr create --title t \\\n  --body 'this does not close #518'"), "deny", "CLOSING"],
   ...CODE_FIXTURES,
+  ...CD_FIXTURES,
   ["issue comment negated close allowed", bash("gh issue comment 5 --body 'does not close #3'"), null, ""],
   ["typed -F field is not a body file", bash("gh issue comment 549 -F body=hello"), null, ""],
   ["gh api issue body overwrite denied", bash("gh api repos/o/r/issues/193 -f body='new text'"), "deny", "bare issue or pull-request endpoint"],
@@ -340,9 +362,11 @@ const run = async (): Promise<number> => {
   CODE_ROWS.forEach(([, , bodies], row) => bodies.forEach((body, k) => writeFileSync(join(SCRATCH, codeFile(row, k)), filled(body))));
   mkdirSync(dirname(ROOTLESS_HOOK), { recursive: true });
   cpSync(join(HERE, "footgun-gate.ts"), ROOTLESS_HOOK);
-  cpSync(join(HERE, "markdown-code.ts"), join(dirname(ROOTLESS_HOOK), "markdown-code.ts"));
+  for (const module of ["markdown-code.ts", "bare-cd.ts"]) cpSync(join(HERE, module), join(dirname(ROOTLESS_HOOK), module));
   cpSync(join(HERE, "..", "SKILL.md"), join(ROOTLESS, ".claude", "skills", "vellum-footguns", "SKILL.md"));
   symlinkSync(ROOT, LINK);
+  for (const dir of ["a dir", ".claude/worktrees/orch-779", "out/762/baseline-phone"]) mkdirSync(join(SCRATCH, dir), { recursive: true });
+  symlinkSync(join(SCRATCH, "a dir"), join(SCRATCH, "to-a-dir"));
   for (const label of ["Gate 1", "Gate 2", "Gate 3", "Gate 4", "Gate 5", "Gate 6"]) report(gateText(label).length > 200, `${label} text found in SKILL.md`);
   await sizeChecks(report);
   report(requiredHeadings() !== null, "section names found in .github/PULL_REQUEST_TEMPLATE.md");
