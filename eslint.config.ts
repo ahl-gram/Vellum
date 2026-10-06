@@ -59,6 +59,7 @@ export default defineConfig(
       "@typescript-eslint/no-extraneous-class": "error",
       "@typescript-eslint/prefer-return-this-type": "error",
       "@typescript-eslint/prefer-reduce-type-parameter": "error",
+      "@typescript-eslint/no-invalid-void-type": "error",
     },
   },
   {

@@ -22,6 +22,7 @@ const RULED: Readonly<Record<string, Linter.RuleEntry>> = {
   "@typescript-eslint/no-extraneous-class": "error",
   "@typescript-eslint/prefer-return-this-type": "error",
   "@typescript-eslint/prefer-reduce-type-parameter": "error",
+  "@typescript-eslint/no-invalid-void-type": "error",
 };
 
 type Plant = { lines: readonly string[]; refused: readonly number[] };
@@ -35,6 +36,7 @@ const PLANTS: Readonly<Record<string, Plant>> = {
   "@typescript-eslint/no-extraneous-class": { lines: ["export class Probe { static x = 1; }", "export class Kept { x = 1; }"], refused: [1] },
   "@typescript-eslint/prefer-return-this-type": { lines: ["export class B { x = 1; f(): B { return this; } }", "export class C { x = 1; f(): this { return this; } }"], refused: [1] },
   "@typescript-eslint/prefer-reduce-type-parameter": { lines: ["export const r = [[1], [2]].reduce((a, b) => a.concat(b), [] as number[]);", "export const s = [[1], [2]].reduce<number[]>((a, b) => a.concat(b), []);"], refused: [1] },
+  "@typescript-eslint/no-invalid-void-type": { lines: ["export const v: number | void = 1;", "export const w = (): void => undefined;"], refused: [1] },
 };
 
 const PLANT_AT = WITNESSES["src/**/*.ts"]!;
