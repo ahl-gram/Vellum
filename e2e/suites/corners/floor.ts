@@ -240,12 +240,25 @@ export async function fl5KeyboardDrawer(ctx: SuiteContext): Promise<void> {
 // Paper is narrower than 900, so main's narrow blocks dressed it by accident; with them gone each room says what paper drops itself (the step 11 plate read on Issue #762 pull request C, real PDFs at Letter).
 const PRINTED: Payload<{ tab: string | null; shadow: string | null; pad: number | null }> = `(() => { const t = document.getElementById("chart-drawer-tab"), s = document.querySelector("#sheet"), p = document.querySelector("main .sheet"); return { tab: t ? getComputedStyle(t).display : null, shadow: s ? getComputedStyle(s).boxShadow : null, pad: p ? parseFloat(getComputedStyle(p).paddingLeft) : null }; })()`;
 
+// Only the cascade is read here, so the load waits for the parsed page and nothing else, and a read that lands between documents is taken again (lane C on PR #795 caught one with no document element).
+async function loadSheets(ctx: SuiteContext, page: string): Promise<void> {
+  await size(ctx, 640, 800);
+  await ctx.send("Page.navigate", { url: "about:blank" });
+  await ctx.send("Page.navigate", { url: `http://127.0.0.1:${ctx.PORT}${page}` });
+  for (let i = 0; i < 300; i++) {
+    if (await ctx.evaluate<boolean>(`document.readyState === "complete" && !!document.querySelector("main")`).catch(() => false)) return;
+    await ctx.sleep(50);
+  }
+  throw new Error(`FL6: ${page} never came up`);
+}
+
 export async function fl6Paper(ctx: SuiteContext): Promise<void> {
   await ctx.setTouch(false);
   const faults: string[] = [];
   const rows: string[] = [];
   for (const page of ["/explorer/", "/explorer/portfolio/", "/faq/", "/glossary/"]) {
-    const screen = await open(ctx, page, 640, 800).then(() => ctx.evaluate(PRINTED));
+    await loadSheets(ctx, page);
+    const screen = await ctx.evaluate(PRINTED);
     await size(ctx, 816, 1056);
     await ctx.send("Emulation.setEmulatedMedia", { media: "print" });
     const paper = await ctx.evaluate(PRINTED).finally(() => ctx.send("Emulation.setEmulatedMedia", { media: "", features: [{ name: "prefers-reduced-motion", value: "reduce" }] }));
