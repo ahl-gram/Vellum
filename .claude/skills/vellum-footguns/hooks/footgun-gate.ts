@@ -10,7 +10,7 @@ import { dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type * as TS from "typescript";
 import { bareCdReason } from "./bare-cd.ts";
-import { dueGate, ROSTER_NEW_FILE, UNIT_TEST } from "./gate-routes.ts";
+import { dueGate, ROSTER_NEW_FILE, TEST_HELPER, UNIT_TEST } from "./gate-routes.ts";
 import { proseOf } from "./markdown-code.ts";
 
 export type ToolInput = {
@@ -176,7 +176,7 @@ const checkEdit = async (payload: Payload, sessionId: string): Promise<Decision>
     notes.push(note);
     if (fragment.includes(".click()")) notes.push(CLICK_WARNING);
   }
-  if (payload.tool_name === "Write" && ROSTER_NEW_FILE.test(path) && !UNIT_TEST.test(path) && !existsSync(path)) {
+  if (payload.tool_name === "Write" && ROSTER_NEW_FILE.test(path) && !UNIT_TEST.test(path) && !TEST_HELPER.test(path) && !existsSync(path)) {
     notes.push(gateNote(sessionId, "roster", "Gate 4", `You are about to create ${path}.`));
   }
   const due = dueGate(path, shownGates(sessionId));

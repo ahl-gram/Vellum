@@ -43,9 +43,12 @@ export const ROUTE_ROWS: ReadonlyArray<RouteRow> = [
   ["an earlier gate still wins a path that matches BOTH", "Edit", "src/render/x.css", ".a{}", "context", "## Gate 3"],
   ["site source is not chart work", "Edit", "src/site/explorer/app.ts", "const x = 1;", null, ""],
   ["a cli module other than the rasteriser is not chart work", "Edit", "src/cli/main.ts", "x", null, ""],
+  ["a helper in a test-support folder under e2e still gets gate 2", "Edit", "e2e/support/test-support/never-exists-zz.ts", "x", "context", "## Gate 2", "## Gate 1"],
+  ["a helper in a test-support folder under the renderer still gets gate 6", "Edit", "src/render/test-support/never-exists-zz.ts", "x", "context", "## Gate 6", "## Gate 1"],
+  ["a new helper in a test-support folder under src/site gets gate 1 and no gate 4", "Write", "src/site/test-support/never-exists-zz.ts", "x", "context", "## Gate 1", "## Gate 4"],
+  ["a folder that only ends in test-support gets no gate", "Edit", "a-test-support/never-exists-zz.ts", "x", null, ""],
 ];
 
-// Gate 7's rows (Issue #782): the selftest edits each row's paths in order in one session and judges the last decision.
 export type SequenceRow = readonly [name: string, paths: readonly string[], want: "context" | null, needle: string, absent?: string];
 
 const REPO = "test/repo/never-exists-zz.test.ts";
@@ -65,4 +68,5 @@ export const SEQUENCE_ROWS: ReadonlyArray<SequenceRow> = [
   ["a second edit to a unit test under test/e2e gets nothing, not gate 2", ["test/e2e/never-exists-zz.test.ts", "test/e2e/never-exists-zz.test.ts"], null, ""],
   ["a helper one folder down in test-support gets no gate, as ruled", ["test-support/a-folder/never-exists-zz.ts"], null, ""],
   ["a file in test-support that only begins like a helper gets no gate", ["test-support/never-exists-zz.ts.orig"], null, ""],
+  ["a second edit to a test under a folder that only ends in test gets nothing", ["test/contest/site/never-exists-zz.test.ts", "test/contest/site/never-exists-zz.test.ts"], null, ""],
 ];

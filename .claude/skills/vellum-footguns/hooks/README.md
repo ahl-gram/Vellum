@@ -11,15 +11,16 @@ is ever removed.
 - **Injects a gate once per session**, reading the text from `SKILL.md` so the skill stays the single
   source: Gate 1 on `test/**/*.test.ts`; Gate 2 on `.mjs` under `scripts/`, `out/` and `e2e/`, and on `.ts` under `e2e/` and `out/` (the whole e2e tree: the harness, the runners, the suites, their helpers and the two proof tools; never all of `scripts/**/*.ts`, since the first matching route wins and Gate 6 owns the render scripts); Gate 3 on
   `*.css` and `*.astro`; Gate 4 on a Write that creates a new file under `src/pages/`, `src/site/`,
-  `e2e/suites/*.ts` (a suite, never a file in a suite's folder) or `public/*.css`, never a `*.test.ts`, since a unit test joins no roster and its path can echo one (`test/e2e/suites/`); Gate 5 on `git push` and `gh pr create` / `gh pr edit`;
+  `e2e/suites/*.ts` (a suite, never a file in a suite's folder) or `public/*.css`, never a `*.test.ts` or a file in a `test-support/` folder, since a test or its helper joins no roster and its path can echo one (`test/e2e/suites/`); Gate 5 on `git push` and `gh pr create` / `gh pr edit`;
   Gate 6 on the renderer, `generateWorld`'s transitive closure, the committed artifacts and the
   modules their writers reach. Gate 6's roster was derived by walking those import graphs, so widen
   it the same way rather than by adding paths that look related.
   The routes are `gate-routes.ts`. Each names its gates in order, an edit is read against the first
   route its path matches, and the first of that route's gates this session has not been shown is
-  the one pasted. Every route names one gate but the first: tests under `test/repo/` and
-  `test/site/`, and `test-support/*.ts`, owe Gate 1 and then Gate 7, one per edit, because the two
-  in one note pass the 8,000-character bound the size probes hold (Issue #782).
+  the one pasted. Two routes name two gates, Gate 1 and then Gate 7, one per edit, because the two
+  in one note pass the 8,000-character bound the size probes hold (Issue #782): tests under
+  `test/repo/` and `test/site/`, the first route, and `test-support/*.ts`, the last, so a helper
+  folder inside a directory an earlier route owns keeps that route's gate.
 - **Refuses** (the tool call does not run, the reason is shown). A command is read in COMMAND position
   only: quoted strings and heredoc bodies are blanked before segmenting, segments split on shell
   separators and the `then`/`do`/`else` keywords, a backslash-newline line continuation is joined back
@@ -245,6 +246,10 @@ is ever removed.
   meets Gate 7 only once it exists. And since a subagent shares its parent's `session_id` (below),
   parallel lanes share one record of what was shown: Gate 1 can go to one lane and Gate 7 to
   another. Silence, not refusal, all of it.
+- **A `test-support/` folder anywhere is read as the helpers folder** where no earlier route claims
+  the path, since a route sees a path and not the repository's root, so one nested under
+  `src/site/` would get Gate 1 and Gate 7. None is tracked today, and the error is a paste too many,
+  never one missing.
 - A gate spent on a call the user then rejects is not shown again that session.
 - The once-per-session state is keyed on the hook payload's `session_id`. Measured 2026-09-11 in a
   live dispatch: a subagent's Bash DOES
