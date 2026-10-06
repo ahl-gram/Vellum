@@ -21,6 +21,8 @@ const KNOWN: readonly { check: "EA1" | "EL1"; fault: string; row: string }[] = [
   { check: "EL1", fault: `/print-room/ at 932x430: the Press's backing lies over header.chrome`, row: "the handbook/errata/site.md row on the Print Room's risen Press at 932x430" },
 ];
 const SLIP_TAB_SIBLING = { at: `at ${SHORT.w}x${SHORT.h} folded`, pieces: ["button.slip-tab", "button.chart-drawer-tab"], row: "the handbook/errata/site.md row on the slip's tab at 932x430" };
+// The day's seed on which the Print Room's Press came to rest over its folio at 932x430 folded (2026-10-06), read beside the suite's fixed day (Alex, 2026-10-05, on PR #784).
+const COLLIDED_2026_10_06 = "/print-room/#seed=20261006";
 
 type Box = { x: number; y: number; r: number; b: number };
 type Ink = Box & { piece: number; t: string };
@@ -201,7 +203,7 @@ async function deskReads(ctx: SuiteContext): Promise<{ reads: Read[]; folded: Re
   const reads: Read[] = [];
   const folded: Read[] = [];
   const drifts: string[] = [];
-  for (const page of routesUnder(resolve(REPO, "src/pages"))) {
+  for (const page of [...routesUnder(resolve(REPO, "src/pages")), COLLIDED_2026_10_06]) {
     await size(ctx, DESK.w, DESK.h);
     const first = await open(ctx, page, DESK.w, DESK.h, DESK, "EA");
     if (!first) continue;

@@ -260,10 +260,15 @@ async function co2Control(ctx: SuiteContext): Promise<void> {
   );
 }
 
+// Every chart room's bare visit draws the day's seed (`seedForDate` in `src/world/seed-of-the-day.ts`), so the suite runs on one fixed day and answers the same on every date (Alex, 2026-10-05, on PR #784).
+const FIXED_DAY = Date.UTC(2026, 9, 5, 12);
+const FIXED_CLOCK = `(() => { const Real = Date, shift = ${FIXED_DAY} - Real.now(); globalThis.Date = new Proxy(Real, { construct: (t, a) => (a.length ? new t(...a) : new t(Real.now() + shift)), apply: () => new Real(Real.now() + shift).toString(), get: (t, p) => (p === "now" ? () => Real.now() + shift : Reflect.get(t, p)) }); })()`;
+
 export async function run(ctx: SuiteContext): Promise<void> {
   const step = makeStep(ctx);
   const { send } = ctx;
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
+  const clock = await send<{ identifier: string }>("Page.addScriptToEvaluateOnNewDocument", { source: FIXED_CLOCK });
   try {
     let swept: readonly PageResult[] = [];
     await step("CO1", async () => { swept = await co1Sweep(ctx); });
@@ -280,6 +285,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
     await step("EA4", () => ea4Reads(ctx));
     await step("EA5", () => ea5Lift(ctx));
   } finally {
+    await send("Page.removeScriptToEvaluateOnNewDocument", { identifier: clock.identifier }).catch(() => undefined);
     await send("Emulation.setEmulatedMedia", { media: "", features: [] }).catch(() => undefined);
     await ctx.clearMobile().catch(() => undefined);
     await send("Emulation.setDeviceMetricsOverride", { width: WIDE, height: WIDE_H, deviceScaleFactor: 1, mobile: false }).catch(() => undefined);
