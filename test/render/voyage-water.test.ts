@@ -13,7 +13,7 @@ function survey(rows: string[]): Survey {
   const land = new Uint8Array(gridW * gridH);
   const roadCells: Array<readonly [number, number]> = [];
   rows.forEach((r, y) =>
-    [...r].forEach((c, x) => {
+    r.split("").forEach((c, x) => {
       if (c !== ".") land[x + y * gridW] = 1;
       if (c === "=") roadCells.push([x, y]);
     }),
