@@ -10,7 +10,7 @@ import { dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type * as TS from "typescript";
 import { bareCdReason } from "./bare-cd.ts";
-import { EDIT_GATES, ROSTER_NEW_FILE, UNIT_TEST } from "./gate-routes.ts";
+import { dueGate, ROSTER_NEW_FILE, UNIT_TEST } from "./gate-routes.ts";
 import { proseOf } from "./markdown-code.ts";
 
 export type ToolInput = {
@@ -179,8 +179,8 @@ const checkEdit = async (payload: Payload, sessionId: string): Promise<Decision>
   if (payload.tool_name === "Write" && ROSTER_NEW_FILE.test(path) && !UNIT_TEST.test(path) && !existsSync(path)) {
     notes.push(gateNote(sessionId, "roster", "Gate 4", `You are about to create ${path}.`));
   }
-  const gate = EDIT_GATES.find(([, pattern]) => pattern.test(path));
-  if (gate) notes.push(gateNote(sessionId, gate[0], gate[2], `You are about to edit ${path}.`));
+  const due = dueGate(path, shownGates(sessionId));
+  if (due) notes.push(gateNote(sessionId, due[0], due[1], `You are about to edit ${path}.`));
 
   const kept = notes.filter((n): n is string => Boolean(n));
   return kept.length ? context(kept.join("\n\n")) : null;
