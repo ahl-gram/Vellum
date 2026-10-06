@@ -114,7 +114,7 @@ export const wallReach = (ground: Ground, w: WallSegment): Box => ({
   x0: w.x0 - 4.5, x1: w.x1 + 4.5, y0: groundAt(ground, Math.max(w.x0, Math.min(w.x1, (VIEW_X0 + VIEW_X1) / 2))) - w.h - 12 + LIFT, y1: ground.base + LIFT,
 });
 
-export type Skyline = { readonly horizonYAt: (x: number) => number; readonly hillTopAt: (x: number) => number; readonly townRun: readonly [number, number]; readonly masts: ReadonlyArray<Box>; readonly town: ReadonlyArray<Box> };
+export type Skyline = { readonly horizonYAt: (x: number) => number; readonly hillTopAt: (x: number) => number; readonly chordAt: (x: number) => number; readonly townRun: readonly [number, number]; readonly masts: ReadonlyArray<Box>; readonly town: ReadonlyArray<Box> };
 
 export function skylineOf(g: ProspectGeometry): Skyline {
   const horizon = g.ground.base + 2 + LIFT;
@@ -127,6 +127,7 @@ export function skylineOf(g: ProspectGeometry): Skyline {
   return {
     horizonYAt: crest,
     hillTopAt: (x) => Math.min(crest(x), chord(x)),
+    chordAt: chord,
     townRun: xs.length > 0 ? [Math.min(...xs), Math.max(...xe)] : [260, 260],
     masts: g.foreground.flatMap((f): Box[] => {
       if (f.kind === "mastRow") return f.masts.map((m) => shipRig(m.x, m.hullY, 0.72 + (m.mastH - 42) / 90, m.mastH > 56));

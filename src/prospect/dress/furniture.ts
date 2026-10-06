@@ -164,7 +164,7 @@ export function frameNodes(e: Engraver): SvgNode[] {
   ];
 }
 
-export type HorizonContext = { readonly horizonYAt: (x: number) => number; readonly townRun: readonly [number, number]; readonly masts: ReadonlyArray<Box>; readonly birds: ReadonlyArray<Box>; readonly avoid: ReadonlyArray<Box> };
+export type HorizonContext = { readonly horizonYAt: (x: number) => number; readonly chordAt: (x: number) => number; readonly townRun: readonly [number, number]; readonly masts: ReadonlyArray<Box>; readonly birds: ReadonlyArray<Box>; readonly avoid: ReadonlyArray<Box> };
 
 const overlaps = (a: Box, b: Box): boolean => a.x0 < b.x1 && b.x0 < a.x1 && a.y0 < b.y1 && b.y0 < a.y1;
 
@@ -173,7 +173,10 @@ const lifted = (b: Box, lift: number): Box => ({ ...b, y0: b.y0 - lift, y1: b.y1
 function clearLabel(boxes: ReadonlyArray<Box>, ctx: HorizonContext, placed: ReadonlyArray<Box>): number | null {
   const blocks = [...ctx.masts, ...ctx.birds, ...ctx.avoid, ...placed];
   const clear = (b: Box): boolean => {
-    for (let x = b.x0; x <= b.x1; x += 1) if (b.y1 >= ctx.horizonYAt(x) - 0.5) return false;
+    for (let x = b.x0; x <= b.x1; x += 1) {
+      const chord = ctx.chordAt(x);
+      if (b.y1 >= ctx.horizonYAt(x) - 0.5 || (b.y0 - 0.6 < chord && b.y1 + 0.6 > chord)) return false;
+    }
     return !blocks.some((m) => overlaps(b, m));
   };
   for (let lift = 0; lift <= 40; lift += 1) if (boxes.every((b) => clear(lifted(b, lift)))) return lift;
@@ -188,9 +191,11 @@ function seatAt(e: Engraver, t: RoadTown, n: string, x: number, ctx: HorizonCont
   const name: RunSpec = { text: t.name, x, y: y - 12 * s, size: 6, italic: true, anchor: "middle", fill: e.ink };
   const tag: RunSpec = { text: n, x, y: y - 12 * s - 7, size: 8, italic: true, anchor: "middle", fill: e.ink, halo: { color: e.paper, width: 2.4 } };
   const both = [boxOfRun(name), boxOfRun(tag)].map((k) => ({ x0: k.x0 - 1.2, x1: k.x1 + 1.2, y0: k.y0 - 1.2, y1: k.y1 + 1.2 }));
-  const lift = clearLabel(both, ctx, placed);
+  const glyph = { x0: x - 7 * s - 0.6, x1: x + 7 * s + 0.6, y0: y - 11 * s - 0.6, y1: y + 0.6 };
+  if ([...placed, ...ctx.avoid].some((p) => overlaps(glyph, p))) return null;
+  const lift = clearLabel(both, ctx, [...placed, glyph]);
   if (lift === null) return null;
-  return { x, s, name: { ...name, y: name.y - lift }, tag: { ...tag, y: tag.y - lift }, boxes: both.map((k) => lifted(k, lift)) };
+  return { x, s, name: { ...name, y: name.y - lift }, tag: { ...tag, y: tag.y - lift }, boxes: [...both.map((k) => lifted(k, lift)), glyph] };
 }
 
 function seatLabel(e: Engraver, t: RoadTown, n: string, ctx: HorizonContext, placed: ReadonlyArray<Box>): Seat | null {
