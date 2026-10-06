@@ -144,9 +144,14 @@ make an unqualified rule false. Read the surface, not just the rule.
 - **The wheel has one owner at a time and the handover is explicit.** A scrolled page owns the wheel
   in both directions; the clamp absorbs a finished flick's momentum for `MOMENTUM_ABSORB_MS` and
   then releases mid-stream; the camera re-takes only on a fresh gesture at the top, where fresh means
-  after `GESTURE_BREAK_MS`. The routing is pure in `src/site/home/valve.ts`, which declares both.
+  after `GESTURE_BREAK_MS`. The routing is pure in `src/site/home/valve.ts`, which declares both. A
+  wheel more sideways than up or down, over a page wider than the window, is the page's
+  (`sidewaysToPage` there): the browser scrolls the page by both its parts, and where that leaves the
+  page off its top the scrolled page owns the wheel by the rule above.
 - **A deliberate camera action surfaces the page.** The scrolljacking contract forbids intercepting
-  scroll INPUT; a click that summons the view is the anchor-link class that contract protects.
+  scroll INPUT; a click that summons the view is the anchor-link class that contract protects. On
+  home it also brings the slip the station opens wholly into a window narrower than the page, by the
+  least sideways scroll (`revealLeft` in `src/site/home/station-flight.ts`).
 - **The zoom control is seated as a SIBLING of the stage, so it never rides the chart's own zoom.**
 - **The Explorer's Glass is wired by ID and never queries `[data-zoom]`**: the conductor looks the
   presses up and hands them to `createGlass` as dependencies, so the ids live in
