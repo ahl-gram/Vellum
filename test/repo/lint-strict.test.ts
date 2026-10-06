@@ -34,7 +34,7 @@ const RULED: Readonly<Record<string, Linter.RuleEntry>> = {
 type Plant = { lines: readonly string[]; refused: readonly number[] };
 const PLANTS: Readonly<Record<string, Plant>> = {
   "@typescript-eslint/no-deprecated": { lines: ["export const p = \"abc\".substr(1);", "export const q = \"abc\".slice(1);"], refused: [1] },
-  "@typescript-eslint/return-await": { lines: ["declare function g(): Promise<number>;", "export async function f(): Promise<number> { try { return g(); } catch { return 0; } }", "export async function h(): Promise<number> { try { return await g(); } catch { return 0; } }"], refused: [2] },
+  "@typescript-eslint/return-await": { lines: ["declare function g(): Promise<number>;", "export async function f(): Promise<number> { try { return g(); } catch { return 0; } }", "export async function h(): Promise<number> { try { return await g(); } catch { return 0; } }", "export async function k(): Promise<number> { return await g(); }", "export async function m(): Promise<number> { return g(); }"], refused: [2] },
   "@typescript-eslint/no-non-null-asserted-nullish-coalescing": { lines: ["export const b = (o: { a?: string }): string => o.a! ?? \"x\";", "export const c = (o: { a?: string }): string => o.a ?? \"x\";"], refused: [1] },
   "@typescript-eslint/related-getter-setter-pairs": { lines: ["export class C { y = 1; get x(): string { return \"\"; } set x(v: number) { this.y = v; } }", "export class D { y = 1; get x(): number { return this.y; } set x(v: number) { this.y = v; } }"], refused: [1] },
   "@typescript-eslint/unified-signatures": { lines: ["export function u(a: string): void;", "export function u(a: number): void;", "export function u(a: unknown): void { void a; }"], refused: [2] },
@@ -44,7 +44,7 @@ const PLANTS: Readonly<Record<string, Plant>> = {
   "@typescript-eslint/prefer-reduce-type-parameter": { lines: ["export const r = [[1], [2]].reduce((a, b) => a.concat(b), [] as number[]);", "export const s = [[1], [2]].reduce<number[]>((a, b) => a.concat(b), []);"], refused: [1] },
   "@typescript-eslint/no-invalid-void-type": { lines: ["export const v: number | void = 1;", "export const w = (): void => undefined;"], refused: [1] },
   "@typescript-eslint/no-generated-empty-object-type": { lines: ["type K = { a: 1 };", "export type E = Omit<K, \"a\">;", "export type F = Pick<K, \"a\">;"], refused: [2] },
-  "@typescript-eslint/restrict-template-expressions": { lines: ["declare const u: any;", "declare const n: number | undefined;", "export const t = `${u}`;", "export const s = `${n} ${true} ${/re/}`;"], refused: [3] },
+  "@typescript-eslint/restrict-template-expressions": { lines: ["declare const u: any;", "declare const n: number | undefined;", "export const t = `${u}`;", "export const s = `${n} ${true} ${/re/}`;", "declare const nv: never;", "export const nt = `${nv}`;"], refused: [3, 6] },
   "@typescript-eslint/no-misused-spread": { lines: ["declare const pr: Promise<number>;", "export const cs = [...\"ab\"];", "export const o = { ...pr };", "export const ok = \"ab\".split(\"\");"], refused: [2, 3] },
   "@typescript-eslint/no-unnecessary-template-expression": { lines: ["declare const w: string;", "export const t = `${w}`;", "export const u = `${w}!`;"], refused: [2] },
   "@typescript-eslint/no-unnecessary-type-arguments": { lines: ["declare function fd<T = number>(): T;", "export const z = fd<number>();", "export const y = fd<string>();"], refused: [2] },
@@ -74,7 +74,8 @@ test("the block holding the rules Issue #779 adopted reaches every TypeScript ro
 });
 
 test("the block sets exactly the ruled rules at their ruled values, and no other house block sets one of them, so none is added, dropped or weakened for a subtree unread (Alex, 2026-10-06, Issue #779)", () => {
-  assert.deepEqual(theBlock().rules ?? {}, RULED, "the block's rules are not the ruled set at the ruled values: a rule was added without a ruling, dropped, or weakened by an option. BLIND SPOT, declared, erring toward passing: a change that edits the block and RULED together passes, which is a change to a ruling and shows in its diff");
+  for (const layer of PRESET_LAYERS) assert.equal(blocks.filter((b) => shortName(b) === layer).length, 1, `${layer} names more or fewer than one block, so a house block named like a preset layer would set an adopted rule unread`);
+  assert.deepEqual(theBlock().rules ?? {}, RULED, "the block's rules are not the ruled set at the ruled values: a rule was added without a ruling, dropped, or weakened by an option. BLIND SPOT, declared, erring toward passing: a change that edits the block and RULED together passes here; the plant test catches it for every option a plant exercises, and a rule ruled at bare \"error\" whose options are widened in both places passes everything, which is a change to a ruling and shows in its diff");
   const setters = blocks
     .filter((b) => b.name !== BLOCK && !PRESET_LAYERS.includes(shortName(b)))
     .flatMap((b) => Object.keys(RULED).filter((rule) => Object.hasOwn(b.rules ?? {}, rule)).map((rule) => `${b.name ?? "(unnamed)"}: ${rule}`));
@@ -87,7 +88,7 @@ test("through ESLint itself, every TypeScript witness resolves each adopted rule
   for (const [, file] of typed) {
     const rules = ((await eslint.calculateConfigForFile(file)) as { rules?: Record<string, unknown> }).rules ?? {};
     for (const [rule, entry] of Object.entries(RULED)) {
-      assert.deepEqual(rules[rule], resolvedEntry(entry), `${file}: ${rule} does not resolve at its ruled value, so the block is placed before a layer that sets it, or does not reach this root`);
+      assert.deepEqual(rules[rule], resolvedEntry(entry), `${file}: ${rule} does not resolve at its ruled value through ESLint, so a layer after the block, or one before it setting options the block's entry does not replace, wins here, or the block does not reach this root`);
     }
   }
 });

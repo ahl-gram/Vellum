@@ -201,6 +201,7 @@ test("through ESLint itself, one witness file per ruled glob resolves to rules t
     "ESLint resolves a different config file than the one this guard imports; a .js, .mjs or .cjs config at the root shadows the .ts one",
   );
   for (const [glob, file] of Object.entries(WITNESSES)) {
+    assert.ok(file.startsWith(glob.slice(0, glob.indexOf("**"))) && file.endsWith(glob.slice(glob.lastIndexOf("*") + 1)), `${file}, the witness for ${glob}, lies outside its glob, so it witnesses another root and this one reaches nothing seen`);
     assert.ok(existsSync(join(ROOT, file)), `${file}, the witness for ${glob}, does not exist`);
     assert.equal(await eslint.isPathIgnored(file), false, `${file} is ignored, so ${glob} reaches nothing`);
     const config = (await eslint.calculateConfigForFile(file)) as Resolved;
