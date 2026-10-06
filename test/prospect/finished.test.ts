@@ -164,7 +164,7 @@ function twoQuaysOf(crowded: ProspectGeometry): ProspectGeometry {
   };
 }
 
-test("the key indexes only drawn features, by rank then west to east, at most four", () => {
+test("the key numbers only drawn features, by rank then west to east, at most four of them", () => {
   const harborCapital = composeProspect(
     makeInput({ kind: "capital", harbor: true, foreground: bandOf(["beach", FOREGROUND_SAMPLES]) }),
   );
@@ -172,19 +172,19 @@ test("the key indexes only drawn features, by rank then west to east, at most fo
   assert.ok(kinds.has("quay") && kinds.has("mole"), "premise: the capital fronts quay and mole");
   assert.deepEqual(
     plateKey(harborCapital).map((e) => `${e.letter}. ${e.label}`),
-    ["A. The Keep", "B. The Quay", "C. The Mole"],
+    ["1. The Keep", "2. The Quay", "3. The Mole"],
   );
 
   const crowded = crowdedGeometry();
   assert.deepEqual(
     plateKey(crowded).map((e) => `${e.letter}. ${e.label}`),
-    ["A. The Keep", "B. The Bridge Gate", "C. The Quay", "D. The Mole"],
+    ["1. The Keep", "2. The Bridge Gate", "3. The Quay", "4. The Mole"],
     "rank order wins and the fifth and later features are cut",
   );
 
   const twoQuays = twoQuaysOf(crowded);
   const [west, east] = plateKey(twoQuays);
-  assert.ok(west && east && west.x < east.x, "same rank letters west to east");
+  assert.ok(west?.x != null && east?.x != null && west.x < east.x, "same rank numbered west to east");
 
   assert.deepEqual(plateKey(composeProspect(makeInput({ kind: "hamlet" }))), []);
 });

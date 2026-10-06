@@ -74,6 +74,7 @@ function keyStripNode(c: DressContext, entries: ReadonlyArray<PlateKeyEntry>, y:
 
 function keyTagNodes(c: DressContext, entries: ReadonlyArray<PlateKeyEntry>): SvgNode[] {
   return entries.flatMap((e) => {
+    if (e.x === null || e.y === null) return [];
     const x = r1(Math.max(VIEW_X0 + 8, Math.min(VIEW_X1 - 8, e.x)));
     const y = r1(Math.max(40, e.y));
     const tag = {
