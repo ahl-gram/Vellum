@@ -83,6 +83,44 @@ test("the numero sign is the glyph drawn for Vellum, never the face's N or a com
   assert.match(svg, /href="#pf-n-t"/, "the caps run places the numero's own def");
 });
 
+/** Ink at a point of a glyph, font units with y up: the outline flattened and read even-odd. */
+function inked(d: string, x: number, y: number): boolean {
+  const gx = x / 2, gy = -y / 2;
+  const toks = d.match(/[MQZ]|-?\d+(?:\.\d+)?/g) ?? [];
+  const rings: Array<Array<readonly [number, number]>> = [];
+  let ring: Array<readonly [number, number]> = [];
+  let last: readonly [number, number] = [0, 0];
+  for (let i = 0; i < toks.length; ) {
+    const t = toks[i++];
+    const pt = (): readonly [number, number] => [Number(toks[i++]), Number(toks[i++])];
+    if (t === "M") { last = pt(); ring = [last]; }
+    else if (t === "Q") {
+      const c = pt(), e = pt();
+      for (let k = 1; k <= 6; k++) { const s = k / 6, u = 1 - s; ring.push([u * u * last[0] + 2 * u * s * c[0] + s * s * e[0], u * u * last[1] + 2 * u * s * c[1] + s * s * e[1]]); }
+      last = e;
+    } else { rings.push(ring); ring = []; }
+  }
+  let inside = false;
+  for (const r of rings) for (let i = 0, j = r.length - 1; i < r.length; j = i++) {
+    const [ax, ay] = r[i]!, [bx, by] = r[j]!;
+    if (ay > gy !== by > gy && gx < ((bx - ax) * (gy - ay)) / (by - ay) + ax) inside = !inside;
+  }
+  return inside;
+}
+
+test("the numero is drawn after Menlo's form in the face's ink: hooked uprights, the o low and right on a bar at the baseline (ruling D7)", () => {
+  const d = NUMERO[5];
+  assert.ok(inked(d, 50, 45), "the left upright sweeps out left at its foot");
+  assert.ok(inked(d, 820, 1385), "the right upright curls over right at its top");
+  assert.ok(inked(d, 960, 250) && inked(d, 960, 40), "the o's foot, and the bar under it at the baseline");
+  assert.ok(!inked(d, 960, 150), "the o stands clear of its bar");
+  assert.ok(!inked(d, 1100, 1100) && !inked(d, 960, 900), "nothing raised: the o is low, not at the cap line");
+  assert.ok(NUMERO[2] <= NUMERO[0], "no ink past the sign's own advance");
+  const row = Array.from({ length: 400 }, (_, x) => x).filter((x) => inked(d, x, 700));
+  const stem = (row.at(-1) ?? 0) - (row[0] ?? 0);
+  assert.ok(stem >= 100 && stem <= 130, `the left upright is the face's thin weight (${stem} units against Fell's N about 111)`);
+});
+
 test("every character any world can print, in every culture's own syllables, is in the face its run is set in", () => {
   const syllables = CULTURES.flatMap((c) => [...c.onsets, ...c.nuclei, ...c.codas, ...c.townSuffixes, ...c.riverTemplates, ...c.peakTemplates, ...c.seaTemplates, ...c.lakeTemplates, ...c.forestTemplates, ...c.realmTemplates].map((s) => s.replaceAll("%", "")));
   const words = [...syllables, ...worldNames(Array.from({ length: 24 }, (_, i) => i + 1))];
