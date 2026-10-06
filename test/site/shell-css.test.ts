@@ -334,3 +334,34 @@ test("each lifting surface consumes ITS token, not just a token (#405)", () => {
     }
   }
 });
+
+type CssRule = { readonly media: readonly string[]; readonly selector: string; readonly body: string };
+function cssRules(css: string, media: readonly string[] = []): CssRule[] {
+  const out: CssRule[] = [];
+  for (let i = 0, open = css.indexOf("{"); open >= 0; open = css.indexOf("{", i)) {
+    let close = open + 1;
+    for (let depth = 1; depth > 0 && close < css.length; close++) depth += css[close] === "{" ? 1 : css[close] === "}" ? -1 : 0;
+    const prelude = css.slice(i, open).trim();
+    const body = css.slice(open + 1, close - 1);
+    if (prelude.startsWith("@media")) out.push(...cssRules(body, [...media, prelude]));
+    else if (!prelude.startsWith("@")) out.push({ media, selector: prelude, body });
+    i = close;
+  }
+  return out;
+}
+
+const shellRules = cssRules(layoutStyle().replace(/\/\*[\s\S]*?\*\//g, ""));
+const trailRules = shellRules.filter((r) => /\.(trail|also|where)\b/.test(r.selector));
+const ruleAt = (selector: string, media: readonly string[]): string => {
+  const found = shellRules.filter((r) => r.selector === selector && JSON.stringify(r.media) === JSON.stringify(media));
+  assert.equal(found.length, 1, `exactly one rule ${selector} under ${JSON.stringify(media)}`);
+  return found[0]!.body;
+};
+
+test("the trail is quiet by size and never by a dimmer ink: no rule that dresses it reaches for an ink under the floor on the deep (Issue #668)", () => {
+  assert.ok(trailRules.length >= 10, `the reader found the trail's rules (${trailRules.length}), so the sweep below is not of nothing`);
+  for (const r of trailRules) assert.doesNotMatch(r.body, /--ink-faded|--line-tan/, `${r.selector} wears an ink that reads under 4.5:1 on the deep`);
+  const here = ruleAt('.trail [aria-current="page"], .trail .here', []);
+  assert.match(here, /color:\s*var\(--parchment-bright\)/, "the page's own segment brightens");
+  assert.match(here, /text-decoration:\s*underline/, "and is underlined, never colour alone");
+});

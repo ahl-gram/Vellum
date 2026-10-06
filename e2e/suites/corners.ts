@@ -1,4 +1,4 @@
-// The head cluster against the right-hand corner on every page (Issue #638): each page is resized while loaded, a pixel at a time across the phone band and at every media edge and a stride above it, and no box of the cluster's ink (its text line boxes and its controls) may overlap a box of the corner's. Ink, never a layout box, because a corner's layout box is wider than what it draws.
+// The head cluster against the right-hand corner on every page (Issue #638; Issue #762 pull request B): each page is resized while loaded, at a stride and at every media edge from 640 up, every pixel between two reads that are not a plain shift, and no box of the cluster's ink (its text line boxes and its controls) may overlap a box of the corner's. Ink, never a layout box, because a corner's layout box is wider than what it draws.
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { DISCOVERY_ROUTES } from "../../scripts/generate-discovery.ts";
@@ -8,19 +8,21 @@ import type { Payload, SuiteContext } from "../types.ts";
 import { fillBetween, mediaEdges, meetings, nearest, routesUnder, strideWidths, unreadWidthConditions, verdict, wrapVerdict } from "./corners/geometry.ts";
 import type { Control, CornerRead, Row } from "./corners/geometry.ts";
 import { ea1Phone, ea4Reads, ea5Lift, eaDesk } from "./corners/stage.ts";
+import { el3Docked } from "./corners/dock.ts";
+import { co5Yields, co6Follows, co7Band, co8Floored } from "./corners/top-row.ts";
 
 const REPO = resolve(fileURLToPath(new URL(".", import.meta.url)), "..", "..");
 const PAGE_FLOOR = ["/", "/explorer/", "/explorer/portfolio/", "/faq/", "/gallery/", "/glossary/", "/print-room/", "/prospect/", "/reading-room/", "/ribbon/", "/seed-of-the-day/", "/specimen/"];
 const FOLD = 900;
 const BELOW_WIDE = 1023;
+const YIELD_TOP = 1040;
+const YIELD_MID = 1032;
 const SQUEEZED_ALREADY: Readonly<Record<string, string>> = { "/specimen/": "Issue #741" };
-const PHONE_LO = 320;
-const EVERY_PIXEL_TO = 480;
+const NARROW_LO = 640;
 const WIDE = 1280;
 const STRIDE = 32;
 const PHONE_H = 844;
 const WIDE_H = 800;
-const GALLERY_FORCED_BELOW = 346;
 const MAX_FRAMES = 40;
 
 type PageResult = { readonly page: string; readonly stretches: readonly (readonly Row[])[]; readonly unread: readonly string[]; readonly dateline: string | null; readonly links: readonly string[]; readonly error: string | null };
@@ -133,8 +135,7 @@ async function sweepPage(ctx: SuiteContext, page: string): Promise<PageResult> {
     dateline = await load(ctx, page, FOLD, true);
     const narrowMedia = await ctx.evaluate(MEDIA);
     unread.push(...unreadWidthConditions(narrowMedia));
-    const pixels = Array.from({ length: EVERY_PIXEL_TO - PHONE_LO + 1 }, (_, i) => EVERY_PIXEL_TO - i);
-    stretches.push(await readStretch(ctx, [...strideWidths(FOLD, EVERY_PIXEL_TO + 1, STRIDE, mediaEdges(narrowMedia, EVERY_PIXEL_TO, FOLD)), ...pixels], true));
+    stretches.push(await readStretch(ctx, strideWidths(FOLD, NARROW_LO, STRIDE, mediaEdges(narrowMedia, NARROW_LO - 1, FOLD)), true));
     // Read at the END of each stretch, seconds after the load, so a link the page's script rewrites (the Print Room's road on to the Portfolio waits for the proof) is read as rewritten.
     links.push(...await ctx.evaluate(LINKS));
     const wideDateline = await load(ctx, page, WIDE, false);
@@ -155,18 +156,16 @@ async function co1Sweep(ctx: SuiteContext): Promise<readonly PageResult[]> {
   const results: PageResult[] = [];
   for (const page of pages) results.push(await sweepPage(ctx, page));
   const lines = results.map((r) => {
-    const rules = { forcedBelow: r.page === "/gallery/" ? GALLERY_FORCED_BELOW : null, keepsMotto: r.page === "/" };
     const rows = r.stretches.flat();
     const faults = [
       ...[...new Set(r.unread)].map((text) => `a width condition the edge reader cannot parse: ${text}`),
-      ...rows.map((row) => verdict(row, rules)).filter((v): v is string => v !== null),
+      ...rows.map((row) => verdict(row)).filter((v): v is string => v !== null),
     ];
-    const measured = rows.filter((row) => rules.forcedBelow === null || row.w >= rules.forcedBelow);
-    const close = measured.reduce<{ d: number; w: number }>((best, row) => { const d = nearest(row.read.left, row.read.right); return d < best.d ? { d, w: row.w } : best; }, { d: Infinity, w: 0 });
+    const close = rows.reduce<{ d: number; w: number }>((best, row) => { const d = nearest(row.read.left, row.read.right); return d < best.d ? { d, w: row.w } : best; }, { d: Infinity, w: 0 });
     return { ok: r.error === null && faults.length === 0, text: `${r.page} ${rows.length} widths, nearest ${close.d.toFixed(1)} at ${close.w}${r.dateline ? ` (dateline "${r.dateline}")` : ""}${r.error ? `; ERROR ${r.error}` : ""}${faults.length ? `; ${faults.length} faults: ${faults.slice(0, 4).join("; ")}` : ""}` };
   });
   ctx.check(
-    "CO1 on every page the tree builds, resized while loaded from 320 to 480 a pixel at a time and at both sides of every width media edge its CSS carries and a 32px stride up to 1280, no ink of the head cluster overlaps the ink of the right-hand corner by any amount, both corners carry ink, home keeps its motto, the band covers the cluster, the Seed of the Day writes its own dateline through datelineFor, and the Gallery's too-wide layout below 346 is the only width that lays out wider than set or scrolls sideways (Issue #638; Alex's 2026-09-22 and 2026-10-03 rulings; Issue #672)",
+    "CO1 on every page the tree builds, resized while loaded from 640 to 1280 at a 32px stride and at both sides of every width media edge its CSS carries, every pixel between two reads that are not a plain shift, no ink of the head cluster overlaps the ink of the right-hand corner by any amount, both corners carry ink, every page keeps its motto, the band covers the cluster, nothing lays out wider than set or scrolls sideways, and the Seed of the Day writes its own dateline through datelineFor (Issue #638; Issue #762: re-floored at 640, the motto kept everywhere)",
     missing.length === 0 && lines.every((l) => l.ok),
     `${missing.length ? `pages missing from the tree: ${missing.join(", ")} | ` : ""}${lines.map((l) => l.text).join(" | ")}`,
   );
@@ -202,7 +201,7 @@ async function co4Roads(ctx: SuiteContext, swept: readonly PageResult[]): Promis
   );
 }
 
-// Each control's own width, read by lifting its flex-shrink for one read and putting it back: a row too narrow for its controls shrinks them, and a row that wraps leaves them whole.
+// Each control's own width, read by lifting its flex-shrink for one read and putting it back, its transition held off since under reduced motion the read otherwise returns the 0.01ms transition's start value: a row too narrow for its controls shrinks them, and a row that wraps leaves them whole.
 const CONTROLS: Payload<Control[]> = `(() => {
   const out = [];
   const corner = document.querySelector(".corner.tr.folio-room") || document.querySelector(".lf-seed");
@@ -210,10 +209,12 @@ const CONTROLS: Payload<Control[]> = `(() => {
   for (const c of corner.querySelectorAll("input, button, select, textarea")) {
     const w = c.getBoundingClientRect().width;
     if (!w) continue;
-    const kept = c.style.flexShrink;
+    const kept = c.style.flexShrink, held = c.style.transition;
+    c.style.transition = "none";
     c.style.flexShrink = "0";
     const natural = c.getBoundingClientRect().width;
     c.style.flexShrink = kept;
+    c.style.transition = held;
     out.push({ t: c.tagName.toLowerCase() + (c.id ? "#" + c.id : "." + String(c.className).split(" ")[0]), w, natural });
   }
   return out;
@@ -225,7 +226,8 @@ async function co3Wraps(ctx: SuiteContext): Promise<void> {
   let read = 0;
   for (const page of routesUnder(resolve(REPO, "src/pages"))) {
     await load(ctx, page, BELOW_WIDE, false);
-    for (const w of [BELOW_WIDE, 960, FOLD + 1]) {
+    const yields = await ctx.evaluate<boolean>(`getComputedStyle(document.documentElement).getPropertyValue("--folio-cap").trim() !== ""`);
+    for (const w of [...(yields ? [YIELD_TOP, YIELD_MID] : []), BELOW_WIDE, 960, FOLD + 1]) {
       await readAt(ctx, w, false);
       const controls = await ctx.evaluate(CONTROLS);
       read += controls.length;
@@ -234,44 +236,58 @@ async function co3Wraps(ctx: SuiteContext): Promise<void> {
     rows.push(page);
   }
   ctx.check(
-    "CO3 from the fold to 1023, where a wide room's corner takes the kit's standard width (Alex's 2026-10-03 ruling 4), no control in any page's right-hand corner is squeezed below its own width: the row wraps onto another line instead; the Specimen Book, which squeezes at every width above the fold on main too, is exempt until Issue #741 lands and fails here the day it stops (Issue #638)",
+    "CO3 from the fold to 1023 on every page, and to 1040 on a page whose corner carries its own cap and so gives way toward the kit's width before the nav wraps (Issue #762; Alex's 2026-10-03 ruling 4 on Issue #638), no control in any page's right-hand corner is squeezed below its own width: the row wraps onto another line instead; the Specimen Book, which squeezes at every width above the fold on main too, is exempt until Issue #741 lands and fails here the day it stops (Issue #638)",
     faults.length === 0 && read > 0,
     `${rows.length} pages, ${read} control reads; ${faults.length ? `${faults.length} squeezed: ${faults.slice(0, 6).join("; ")}` : "none squeezed"}`,
   );
 }
 
+// A style outranks the top row's inline writes, and a synthetic resize reruns it: wiring, not a gesture.
+const PIN_CAP = "header.chrome { max-width: none !important; } .corner.tr.folio-room { max-width: 30rem !important; }";
 async function co2Control(ctx: SuiteContext): Promise<void> {
   const { evaluate, check } = ctx;
-  await load(ctx, "/explorer/", PHONE_LO, true);
-  const before = (await readAt(ctx, PHONE_LO, true)).read;
-  await evaluate(`(() => { const s = document.createElement("style"); s.id = "co-control"; s.textContent = "body.room header.chrome .tagline { visibility: visible !important; display: block !important; max-width: none !important; }"; document.head.appendChild(s); return true; })()`);
-  const restored = await evaluate(restAt(PHONE_LO), true);
-  await evaluate(`document.getElementById("co-control").remove()`);
-  const after = await evaluate(restAt(PHONE_LO), true);
-  const [hit] = meetings(restored.left, restored.right);
+  const at = FOLD + 1;
+  await load(ctx, "/ribbon/", at, false);
+  const before = (await readAt(ctx, at, false)).read;
+  await evaluate(`(() => { const s = document.createElement("style"); s.id = "co-control"; s.textContent = ${JSON.stringify(PIN_CAP)}; document.head.appendChild(s); dispatchEvent(new Event("resize")); return true; })()`);
+  const pinned = await evaluate(restAt(at), true);
+  await evaluate(`(() => { document.getElementById("co-control").remove(); dispatchEvent(new Event("resize")); return true; })()`);
+  const after = await evaluate(restAt(at), true);
+  const [hit] = meetings(pinned.left, pinned.right);
   check(
-    "CO2 the same-run control: on the Explorer at 320 the instrument reads the corners clear, reports the motto running under the seed box by 40px or more once a style puts the motto back, and reads them clear again when the style goes (Issue #638)",
+    "CO2 the same-run control: on the Ribbon at 901 the instrument reads the corners clear, reports the nav running under the corner by 40px or more once a style pins the corner at its 30rem cap and the cluster uncapped (57px on main's build), and reads them clear again when the style goes and the top row lays the row out again (Issue #638; Issue #762)",
     meetings(before.left, before.right).length === 0 && !!hit && hit.w >= 40 && meetings(after.left, after.right).length === 0,
-    `before ${meetings(before.left, before.right).length} meetings; restored ${hit ? `"${hit.a}" over "${hit.b}" by ${hit.w.toFixed(1)} x ${hit.h.toFixed(1)}` : "none"}; after ${meetings(after.left, after.right).length} meetings`,
+    `before ${meetings(before.left, before.right).length} meetings; pinned ${hit ? `"${hit.a}" over "${hit.b}" by ${hit.w.toFixed(1)} x ${hit.h.toFixed(1)}` : "none"}; after ${meetings(after.left, after.right).length} meetings`,
   );
 }
+
+// Every chart room's bare visit draws the day's seed (`seedForDate` in `src/world/seed-of-the-day.ts`), so the suite runs on one fixed day and answers the same on every date (Alex, 2026-10-05, on PR #784).
+const FIXED_DAY = Date.UTC(2026, 9, 5, 12);
+const FIXED_CLOCK = `(() => { const Real = Date, shift = ${FIXED_DAY} - Real.now(); globalThis.Date = new Proxy(Real, { construct: (t, a) => (a.length ? new t(...a) : new t(Real.now() + shift)), apply: () => new Real(Real.now() + shift).toString(), get: (t, p) => (p === "now" ? () => Real.now() + shift : Reflect.get(t, p)) }); })()`;
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const step = makeStep(ctx);
   const { send } = ctx;
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
+  const clock = await send<{ identifier: string }>("Page.addScriptToEvaluateOnNewDocument", { source: FIXED_CLOCK });
   try {
     let swept: readonly PageResult[] = [];
     await step("CO1", async () => { swept = await co1Sweep(ctx); });
     await step("CO4", () => co4Roads(ctx, swept));
     await step("CO2", () => co2Control(ctx));
     await step("CO3", () => co3Wraps(ctx));
+    await step("CO5", () => co5Yields(ctx));
+    await step("CO6", () => co6Follows(ctx));
+    await step("CO7", () => co7Band(ctx));
+    await step("CO8", () => co8Floored(ctx));
     await step("EA1", async () => { await ea1Phone(ctx); });
     await ctx.clearMobile();
     await step("EA2, EA3, EL1, EL2", () => eaDesk(ctx));
     await step("EA4", () => ea4Reads(ctx));
     await step("EA5", () => ea5Lift(ctx));
+    await step("EL3", () => el3Docked(ctx));
   } finally {
+    await send("Page.removeScriptToEvaluateOnNewDocument", { identifier: clock.identifier }).catch(() => undefined);
     await send("Emulation.setEmulatedMedia", { media: "", features: [] }).catch(() => undefined);
     await ctx.clearMobile().catch(() => undefined);
     await send("Emulation.setDeviceMetricsOverride", { width: WIDE, height: WIDE_H, deviceScaleFactor: 1, mobile: false }).catch(() => undefined);

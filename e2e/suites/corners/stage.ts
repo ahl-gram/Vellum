@@ -8,18 +8,20 @@ import type { Payload, SuiteContext } from "../../types.ts";
 import { routesUnder } from "./geometry.ts";
 
 const REPO = resolve(fileURLToPath(new URL(".", import.meta.url)), "..", "..", "..");
-const CHART_ROOM_FLOOR = ["/explorer/", "/explorer/portfolio/", "/print-room/", "/prospect/", "/reading-room/", "/ribbon/", "/seed-of-the-day/", "/specimen/"];
+export const CHART_ROOM_FLOOR = ["/explorer/", "/explorer/portfolio/", "/print-room/", "/prospect/", "/reading-room/", "/ribbon/", "/seed-of-the-day/", "/specimen/"];
 const PHONE = { w: 844, h: 390, laidOut: { w: 1024, h: 474 } };
-const DESK = { w: 1280, h: 800 };
+export const DESK = { w: 1280, h: 800 };
 const WINDOWS: readonly (readonly [number, number])[] = [[1280, 720], [1024, 768], [1024, 600], [960, 800], [901, 800], [1024, 474], [932, 430]];
 const FOLDED_WINDOWS: readonly (readonly [number, number])[] = [[1024, 600], [901, 800]];
 const SHORT = { w: 932, h: 430 };
-const FLOOR_PLAIN = 4.5;
+export const FLOOR_PLAIN = 4.5;
+// The day's seed on which the Print Room's Press came to rest over its folio at 932x430 folded (2026-10-06), read beside the suite's fixed day (Alex, 2026-10-05, on PR #784).
+const COLLIDED_2026_10_06 = "/print-room/#seed=20261006";
 const KNOWN: readonly { check: "EA1" | "EL1"; fault: string; row: string }[] = [
   { check: "EL1", fault: `/specimen/ at 901x800: p#sb-status.status "the status pill, as a ro" meets aside#specimen.slip`, row: "the handbook/errata/site.md row on the Specimen's status pill over its slip" },
   { check: "EL1", fault: `/specimen/ at 932x430: p#sb-status.status "the status pill, as a ro" meets aside#specimen.slip`, row: "the handbook/errata/site.md row on the Specimen's status pill over its slip" },
   { check: "EL1", fault: `/print-room/ at 932x430: the Press's backing lies over header.chrome`, row: "the handbook/errata/site.md row on the Print Room's risen Press at 932x430" },
-  { check: "EL1", fault: `/ribbon/ at 932x430: the room folio's backing lies over button.slip-fold`, row: "the handbook/errata/site.md row on the slip left at its old seat when a resize rewraps the room folio" },
+  { check: "EL1", fault: `${COLLIDED_2026_10_06} at 932x430: the Press's backing lies over header.chrome`, row: "the handbook/errata/site.md row on the Print Room's risen Press at 932x430" },
 ];
 const SLIP_TAB_SIBLING = { at: `at ${SHORT.w}x${SHORT.h} folded`, pieces: ["button.slip-tab", "button.chart-drawer-tab"], row: "the handbook/errata/site.md row on the slip's tab at 932x430" };
 
@@ -126,7 +128,7 @@ const known = (all: readonly string[], check: "EA1" | "EL1" | "EL2"): string[] =
 // At rest: the document and its fonts are in, the stage no longer reports a draw in progress (a line ending in an ellipsis), and the fit, the floor and the Press's seat read the same on STILL_READS polls running, since a plate with no draw to wait on (an empty Portfolio) gives no other signal.
 const STILL_READS = 6;
 
-async function rest(ctx: SuiteContext, w: number, h: number, label: string): Promise<Stage | null> {
+export async function rest(ctx: SuiteContext, w: number, h: number, label: string): Promise<Stage | null> {
   const settle = makeSettle(ctx);
   const key = (d: Stage): string => JSON.stringify([d.innerW, d.innerH, d.sheet, d.under, d.presses, d.risen, d.reserveRight, d.drawn]);
   let still = 0;
@@ -202,7 +204,7 @@ async function deskReads(ctx: SuiteContext): Promise<{ reads: Read[]; folded: Re
   const reads: Read[] = [];
   const folded: Read[] = [];
   const drifts: string[] = [];
-  for (const page of routesUnder(resolve(REPO, "src/pages"))) {
+  for (const page of [...routesUnder(resolve(REPO, "src/pages")), COLLIDED_2026_10_06]) {
     await size(ctx, DESK.w, DESK.h);
     const first = await open(ctx, page, DESK.w, DESK.h, DESK, "EA");
     if (!first) continue;
@@ -303,7 +305,7 @@ type Ground = { piece: string; t: string; ratio: number };
 const PIECES = "header.chrome, .corner, .strip, .legend:not(.in-slip)";
 
 // Every text node of the chrome whose box centre stands on the sheet, by piece; decor hidden from assistive technology (the nav's separator dots) is left out, and the ink is the computed colour, so a translucent ancestor reads darker ink than it paints and errs toward passing.
-const GLYPHS_OVER_SHEET: Payload<Glyph[]> = `(() => {
+export const GLYPHS_OVER_SHEET: Payload<Glyph[]> = `(() => {
   const sheet = document.getElementById("sheet").getBoundingClientRect();
   const unseen = (el) => { for (let e = el; e; e = e.parentElement) { const cs = getComputedStyle(e); if (cs.display === "none" || cs.visibility === "hidden" || parseFloat(cs.opacity) === 0) return true; } return false; };
   const name = (root) => root.matches("header.chrome") ? "cluster" : root.matches(".corner.tr") ? "room folio" : root.matches(".corner.bl") ? "chart folio" : root.matches(".corner.br") ? "Glass" : root.matches(".strip") ? "strip" : root.matches(".legend") ? "Press" : "corner";
@@ -335,9 +337,9 @@ const GLYPHS_OVER_SHEET: Payload<Glyph[]> = `(() => {
 })()`;
 
 const HIDE_TEXT = `header.chrome *, .legend *, .corner *, .strip * { color: transparent !important; text-decoration-color: transparent !important; }`;
-const NO_POOLS = `body.stage-under :is(header.chrome, .legend, .corner, .strip)::before { content: none !important; }`;
+export const NO_POOLS = `body.stage-under :is(header.chrome, .legend, .corner, .strip)::before { content: none !important; }`;
 
-async function withStyle<T>(ctx: SuiteContext, id: string, css: string, body: () => Promise<T>): Promise<T> {
+export async function withStyle<T>(ctx: SuiteContext, id: string, css: string, body: () => Promise<T>): Promise<T> {
   await ctx.evaluate(`(() => { const s = document.createElement("style"); s.id = ${JSON.stringify(id)}; s.textContent = ${JSON.stringify(css)}; document.head.appendChild(s); return true; })()`);
   try {
     return await body();
@@ -346,7 +348,7 @@ async function withStyle<T>(ctx: SuiteContext, id: string, css: string, body: ()
   }
 }
 
-async function grounds(ctx: SuiteContext, glyphs: readonly Glyph[]): Promise<Ground[]> {
+export async function grounds(ctx: SuiteContext, glyphs: readonly Glyph[]): Promise<Ground[]> {
   return withStyle(ctx, "ea4-hide", HIDE_TEXT, async () => {
     const out: Ground[] = [];
     for (const g of glyphs) {
@@ -358,7 +360,7 @@ async function grounds(ctx: SuiteContext, glyphs: readonly Glyph[]): Promise<Gro
 }
 
 type Reading = { fixture: string; under: boolean; read: Ground[]; bare: Ground[]; needs: string; witnesses: readonly string[] };
-const worstOf = (gs: readonly Ground[], piece?: string): number => gs.filter((g) => piece === undefined || g.piece === piece).reduce((m, g) => Math.min(m, g.ratio), Infinity);
+export const worstOf = (gs: readonly Ground[], piece?: string): number => gs.filter((g) => piece === undefined || g.piece === piece).reduce((m, g) => Math.min(m, g.ratio), Infinity);
 
 async function readFixture(ctx: SuiteContext, fixture: string, page: string, folded: boolean, needs: string, witnesses: readonly string[]): Promise<Reading> {
   const { w, h } = PHONE.laidOut;

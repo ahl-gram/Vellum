@@ -1,4 +1,4 @@
-// The Chart Table's state (Issue #520 Sub 2 of Issue #401): what the drawer draws and what the Explorer's address carries are the same array, so this half is pure and holds no DOM. `chart-drawer`, never `drawer`: src/site/shell/drawer.ts is the site's phone nav (Issue #520 ruling 2).
+// The Chart Table's state (Issue #520 Sub 2 of Issue #401): what the drawer draws and what the Explorer's address carries are the same array, so this half is pure and holds no DOM. `chart-drawer`, never `drawer` (Issue #520 ruling 2).
 import { TABLE_CAP, emitTable, prospectItemFrom, tableWindow, type TableItem, type SurveyItem, type ProspectItem, type Rung, type TableOverrides } from "../shared/table-address.ts";
 import { LOD_BANDS, type LodBand } from "../../world/lod.ts";
 import { plateDressFor, prospectTitle } from "./prospect-job.ts";

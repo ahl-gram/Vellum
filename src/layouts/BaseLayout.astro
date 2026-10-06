@@ -153,8 +153,7 @@ header.chrome {
   line-height: normal; text-align: left;
   pointer-events: none;
 }
-header.chrome a, header.chrome .rooms-reveal { pointer-events: auto; }
-.rooms-reveal { display: none; }
+header.chrome a { pointer-events: auto; }
 .wordmark { font-size: 2.1rem; letter-spacing: 0.12em; line-height: 1.15; font-weight: 400; margin: 0; }
 .wordmark a { color: var(--parchment-bright); text-decoration: none; }
 .tagline {
@@ -163,6 +162,8 @@ header.chrome a, header.chrome .rooms-reveal { pointer-events: auto; }
 }
 .rooms { font-size: 0.72rem; letter-spacing: 0.14em; color: var(--ink-faded); margin: 0.55rem 0 0; }
 .rooms .sep { margin: 0 0.35em; opacity: 0.7; }
+.rooms .door { white-space: nowrap; }
+.rooms.wrapped { line-height: 1.6rem; }
 .rooms a { color: var(--parchment); text-decoration: none; }
 .rooms a:hover, .rooms a:focus-visible { color: var(--parchment-bright); }
 header.chrome a:focus-visible, footer a:focus-visible { outline-color: var(--parchment-bright); }
@@ -246,77 +247,8 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   border-width: calc(1.5px * var(--fit)); border-radius: calc(4px * var(--fit));
 }
 .desk-notice button.dn-go:focus-visible { outline-width: calc(2px * var(--fit)); outline-offset: calc(2px * var(--fit)); }
-@media (max-width: 720px) {
-  :root { --band-h: 6.4rem; --chrome-x: 1rem; --chrome-y: 0.9rem; }
-  .wordmark { font-size: 1.5rem; }
-  .tagline { font-size: 0.78rem; }
-  body.room { padding: 7rem 1rem 1.2rem; }
-  body.room.chart-room { padding: 0; }
-  :root:has(.band):has(.trail) { --band-h: 7.8rem; }
-}
-@media screen and (max-width: 720px) {
-  body.room:has(.band):has(.trail) { padding-top: calc(var(--band-h) + 0.6rem); }
-}
-@media (max-width: 719px) {
-  body.room header.chrome .tagline { visibility: hidden; }
-}
-@media (max-width: 340px) {
-  header.chrome .wordmark { font-size: 1.3rem; }
-}
-/* The phone doors: the nav folds into a drawer a native checkbox burger reveals, with no bundle, so the doors survive scripts off; src/site/shell/app.ts adds the manners on top. */
-@media (max-width: 900px) {
-  .chrome .rooms {
-    display: block; position: absolute; left: calc(-1 * var(--chrome-x)); top: calc(-1 * var(--chrome-y));
-    box-sizing: border-box; width: min(16rem, 100vw); height: 100vh; height: 100dvh;
-    margin: 0; padding: 0 1.5rem 2rem var(--chrome-x);
-    overflow-y: auto; overscroll-behavior: contain;
-    background: var(--chart-ink);
-    border-right: 1px solid rgb(from var(--line-tan) r g b / 0.3);
-    box-shadow: 0 0 40px rgb(from var(--chart-ink) r g b / 0.6);
-    transform: translateX(-100%); visibility: hidden;
-    transition: transform 0.32s cubic-bezier(0.2, 0.7, 0.3, 1), visibility 0s linear 0.32s;
-    z-index: -1;
-  }
-  .chrome .rooms::before {
-    content: ""; display: block; position: sticky; top: 0; z-index: 1;
-    height: calc(var(--band-h) + 1rem);
-    background: var(--chart-ink);
-  }
-  .rooms-reveal:checked ~ .rooms {
-    transform: none; visibility: visible; pointer-events: auto;
-    transition: transform 0.32s cubic-bezier(0.2, 0.7, 0.3, 1), visibility 0s;
-  }
-  .chrome .rooms .sep { display: none; }
-  .chrome .rooms a, .chrome .rooms [aria-current="page"] {
-    display: block; padding: 0.85rem 0;
-    font-size: 0.95rem; letter-spacing: 0.16em;
-  }
-  body:has(.rooms-reveal:checked) > header.chrome { z-index: 45; }
-  .rooms-reveal {
-    display: inline-block; vertical-align: top; appearance: none; -webkit-appearance: none;
-    width: 1.7rem; height: 1rem; margin: 0.6rem 0 0; padding: 0; border: 0;
-    cursor: pointer;
-    background: repeating-linear-gradient(var(--parchment) 0, var(--parchment) 2px, transparent 2px, transparent 7px);
-  }
-  .rooms-reveal:checked { background: repeating-linear-gradient(var(--parchment-bright) 0, var(--parchment-bright) 2px, transparent 2px, transparent 7px); }
-  .rooms-reveal:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: 4px; }
-  body.room:has(.rooms-reveal:checked)::after {
-    content: ""; position: fixed; inset: var(--band-h) 0 0; z-index: 41; pointer-events: auto;
-    background: rgb(from var(--chart-ink) r g b / 0.45);
-  }
-  body.room:has(.rooms-reveal:checked) [popover]:popover-open { display: none; }
-  :root { --trail-gap: 0.55rem; }
-  body:has(.rooms-reveal:checked) .where {
-    position: fixed; z-index: 46; left: var(--chrome-x); top: calc(var(--band-h) + 0.6rem);
-    width: calc(min(16rem, 100vw) - var(--chrome-x) - 1rem); padding-bottom: 0.25rem;
-    background: var(--chart-ink); pointer-events: auto;
-  }
-  body:has(.rooms-reveal:checked) .trail { margin-top: 0; }
-  body:has(.rooms-reveal:checked) .chrome:has(.trail) .rooms::before { height: calc(var(--band-h) + 3.55rem); }
-}
 @media print {
   .band, header.chrome, .desk-notice.on { display: none; }
-  body.room:has(.rooms-reveal:checked)::after { content: none; }
   body { background: none; }
   body::before { display: none; }
   body.room { padding: 0; }
@@ -331,14 +263,13 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
     ? <p class="wordmark"><a href="/">Vellum</a></p>
     : <h1 class="wordmark"><a href="/">Vellum</a></h1>}
   <p class="tagline">{SITE_TAGLINE}</p>
-  <input type="checkbox" class="rooms-reveal" aria-label="Reveal the rooms nav" />
   <nav class="rooms" aria-label="The rooms">
     {NAV_ITEMS.map((item, i) => (
-      <Fragment>{i > 0 ? <span class="sep" aria-hidden="true">·</span> : ""}{item.href === path ? (
+      <Fragment><span class="door">{item.href === path ? (
         <span aria-current="page">{item.label}</span>
       ) : (
         <a href={item.href}>{item.label}</a>
-      )}</Fragment>
+      )}{i < NAV_ITEMS.length - 1 ? <span class="sep" aria-hidden="true">·</span> : ""}</span>{i < NAV_ITEMS.length - 1 ? <wbr /> : ""}</Fragment>
     ))}
   </nav>
   {trail && <div class="where"><nav class="trail" aria-label="Where you are">{trail.crumbs.map((c, i) => <Fragment>{i > 0 ? <Fragment><span class="way" aria-hidden="true">›</span><wbr /></Fragment> : ""}{i < trail.crumbs.length - 1 ? <a href={c.href}>{c.name}</a> : trail.current ? <span aria-current="page">{c.name}</span> : <span class="here">{c.name}</span>}</Fragment>)}</nav>{trail.also.length > 0 && <p class="also">also reached from {trail.also.map((c, i) => <Fragment>{i > 0 ? " and " : ""}<a href={c.href}>{c.name}</a></Fragment>)}</p>}</div>}

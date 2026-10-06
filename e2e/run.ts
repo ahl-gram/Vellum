@@ -41,7 +41,6 @@ import { run as runRoomVoyageRoute } from "./suites/room-voyage-route.ts";
 import { run as runRunningHead } from "./suites/runninghead.ts";
 import { run as runCluster } from "./suites/cluster.ts";
 import { run as runChartDrawer } from "./suites/chart-drawer.ts";
-import { run as runRoomDrawer } from "./suites/room-drawer.ts";
 import { run as runCorners } from "./suites/corners.ts";
 import { run as runDocumentRooms } from "./suites/document-rooms.ts";
 import { run as runRegionDetail } from "./suites/region-detail.ts";
@@ -119,7 +118,6 @@ const SUITES = {
   "room-address": runRoomAddress,
   "runninghead": runRunningHead,
   "cluster": runCluster,
-  "room-drawer": runRoomDrawer,
   "chart-drawer": runChartDrawer,
   "document-rooms": runDocumentRooms,
   "region-detail": runRegionDetail,
@@ -147,7 +145,7 @@ async function main() {
         false,
         e && e.message ? e.message : String(err),
       );
-      // clearMobile() is a trailing statement in the phone suites, not a finally (suites/cluster.ts, suites/room-drawer.ts, suites/chart-drawer.ts), so a suite that stops at 390x844 hands every later suite in the lane a phone viewport and a cascade of reds that are not defects.
+      // clearMobile() is a trailing statement in the phone suites, not a finally (suites/cluster.ts, suites/chart-drawer.ts), so a suite that stops at 390x844 hands every later suite in the lane a phone viewport and a cascade of reds that are not defects.
       // Bounded, because a browser that dies AFTER the liveness probe leaves this send pending forever: the harness settles a waiter only on the matching reply, so an unbounded reset here is a lane that stalls with nothing to read rather than one that fails.
       await Promise.race([
         ctx.clearMobile().catch(() => {}),

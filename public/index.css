@@ -341,12 +341,6 @@ header.chrome::before {
 }
 
 @media (max-width: 900px) {
-  body:has(.rooms-reveal:checked) .lf-seed { opacity: 0; pointer-events: none; }
-  .lf-seed { transition: opacity 0.32s ease; }
-  body:has(.rooms-reveal:checked) .landfall::before {
-    content: ""; position: absolute; inset: 0; z-index: 41; pointer-events: auto;
-    background: rgb(from var(--chart-ink) r g b / 0.45);
-  }
   body > header.chrome { max-width: calc(100vw - 15rem); }
   .seed-controls .control { width: 4.6rem; }
   .lf-legend, .landfall .stage.cam .lf-legend { display: none; }
@@ -370,11 +364,6 @@ header.chrome::before {
   .lf-shelf { padding: 3rem 1.2rem 3.5rem; }
   .lf-shelf-grid { grid-template-columns: 1fr; gap: 2.6rem; }
   .lf-more { bottom: 1.2rem; }
-}
-/* Print hides the chrome and the drawer with it, but :checked is state and paper widths match the narrow query, so the open state's scrim and the faded panel need their own stand-down. */
-@media print {
-  body:has(.rooms-reveal:checked) .landfall::before { content: none; }
-  body:has(.rooms-reveal:checked) .lf-seed { opacity: 1; }
 }
 
 .landfall .stage:not(.cam) ~ .lf-card:not(.lf-card-how)[hidden] {

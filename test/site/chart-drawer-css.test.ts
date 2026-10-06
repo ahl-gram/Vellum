@@ -28,7 +28,7 @@ test("the Chart Table's sheet stands the leaf tabs down at every width its phone
   assert.notEqual(shown, -1, "and the phone block still raises them");
   assert.ok(
     stood < narrow,
-    "the stand-down is declared BEFORE the phone block: both arms are one class, so the later one wins and a stand-down written after it would take the tabs off the phone instead (the shape test/site/shell-drawer-css.test.ts pins for .rooms-reveal)",
+    "the stand-down is declared BEFORE the phone block: both arms are one class, so the later one wins and a stand-down written after it would take the tabs off the phone instead",
   );
   // The block's own brace-matched close, never just "later in the file" (prover, 2026-09-13).
   let depth = 0;

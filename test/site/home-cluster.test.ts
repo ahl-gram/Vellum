@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-// Home's head cluster (Issue #480; SPEC: the four screenshots on Issue #480 and their captions, the measured baseline on PR #482). The drawer's dress is the shell's, pinned in test/site/shell-drawer-css.test.ts; what stays here is what clears home's own furniture.
+// Home's head cluster (Issue #480; SPEC: the four screenshots on Issue #480 and their captions, the measured baseline on PR #482). What stays here is what clears home's own furniture.
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
@@ -61,27 +61,9 @@ test("the cluster's wash is a soft pool sized by the cluster, not the 46rem slab
   assert.doesNotMatch(narrow, /header\.chrome::before/, "no corner re-anchor under 900: the inset follows the cluster wherever the shell puts it");
 });
 
-test("the chrome's corner offsets are tokens the wash and drawer can follow (#480)", () => {
+test("the chrome's corner offsets are tokens the wash can follow (#480)", () => {
   assert.match(layout, /--chrome-x:\s*1\.6rem;\s*--chrome-y:\s*1\.4rem;/, "the layout declares the desktop offsets once");
   assert.match(layout, /header\.chrome\s*\{[^}]*left:\s*var\(--chrome-x\);\s*top:\s*var\(--chrome-y\);/, "header.chrome consumes them");
-  const phone = mediaBodies(layout, "(max-width: 720px)");
-  assert.match(phone, /--chrome-x:\s*1rem;\s*--chrome-y:\s*0\.9rem;/, "the narrow shell overrides the tokens, not the properties");
-  assert.doesNotMatch(phone, /header\.chrome\s*\{[^}]*left:/, "no literal left/top override survives under 720");
-});
-
-test("while the drawer is open the seed panel steps aside and a scrim stands behind the drawer (#480, screenshot 1)", () => {
-  const aside = rule(narrow, "body:has(.rooms-reveal:checked) .lf-seed");
-  assert.match(aside, /opacity:\s*0/, "the corner panel fades rather than sharing the corner with the doors");
-  assert.match(aside, /pointer-events:\s*none/, "and cannot be tapped blind");
-  const scrim = rule(narrow, "body:has(.rooms-reveal:checked) .landfall::before");
-  assert.match(scrim, /position:\s*absolute;\s*inset:\s*0/, "the scrim is the survey section's own overlay: it rides the page with the drawer and the burger (a fixed scrim stayed behind when a swipe scrolled them away, skeptic finding 4) and is sized by the section, never 100vw");
-  const z = scrim.match(/z-index:\s*(\d+)/);
-  assert.ok(z && Number(z[1]) > 40 && Number(z[1]) < 45, "it covers an open station card (z 40) and sits under the raised chrome (skeptic finding 5)");
-  assert.match(scrim, /pointer-events:\s*auto/, "the stage beneath is not live while the drawer is");
-  assert.doesNotMatch(narrow, /body:has\(\.rooms-reveal:checked\)::after/, "no fixed body scrim remains");
-  const print = mediaBodies(css, "print");
-  assert.match(rule(print, "body:has(.rooms-reveal:checked) .landfall::before"), /content:\s*none/, "print never stamps the scrim: paper widths match the narrow query and :checked is state (skeptic round 2, finding 3)");
-  assert.match(rule(print, "body:has(.rooms-reveal:checked) .lf-seed"), /opacity:\s*1/, "and the seed panel prints whether or not the drawer was open");
 });
 
 test("the cluster yields the seed panel its corner under 900: the mockup's phone input and a cluster width cap (#480, screenshot 1)", () => {
@@ -90,10 +72,3 @@ test("the cluster yields the seed panel its corner under 900: the mockup's phone
   assert.match(rule(narrow, "body > header.chrome"), /max-width:\s*calc\(100vw - 15rem\)/, "the cluster wraps its tagline before it can reach the panel");
 });
 
-test("the wordmark's 340px step is the shell's, one rule every page wears, and home's sheet no longer carries a copy (Issue #480; lifted at its second use, Issue #638)", () => {
-  const shell = liveCss("src/layouts/BaseLayout.astro");
-  const tiny = mediaBodies(shell, "(max-width: 340px)", "src/layouts/BaseLayout.astro");
-  assert.match(rule(tiny, "header.chrome .wordmark"), /font-size:\s*1\.3rem/, "without it the 1.5rem wordmark runs into the Ribbon's room name (4.4px at 320) and the Seed of the Day's dateline at 320 to 324 (the guard prover on Issue #638; home's own seed panel, which it first cleared on PR #482, no longer needs it); header.chrome-qualified so it outranks the layout's 720px .wordmark");
-  assert.doesNotMatch(css, /@media \(max-width: 340px\)/, "home keeps no copy of the shell's step");
-  assert.doesNotMatch(css, /\.wordmark\s*\{[^}]*font-size/, "and sizes no wordmark of its own");
-});

@@ -33,7 +33,7 @@ headless browser actually do, so a green run can be believed.
    readiness wait in the wrong shape, so its caller asserts on the answer; a discarded false burns
    the whole budget and passes having tested nothing. What #534 changed is where the throw lands.
    Wrap the gestures, waits and checks that make up one numbered check in
-   `step("CL5", async () => ...)` (`makeStep` in `e2e/support/step.ts`), and a timeout
+   `step("DN5", async () => ...)` (`makeStep` in `e2e/support/step.ts`), and a timeout
    fails THAT check by its own code, with the wait's label and last read as the payload, while the
    groups after it still run. A throw outside every step is contained one level up by `runSelected`,
    which records it as that suite's own red and runs the rest of the lane. Only a browser that has
