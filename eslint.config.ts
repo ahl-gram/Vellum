@@ -51,6 +51,7 @@ export default defineConfig(
     files: TS_ROOTS,
     rules: {
       "@typescript-eslint/no-deprecated": "error",
+      "@typescript-eslint/return-await": ["error", "error-handling-correctness-only"],
     },
   },
   {
