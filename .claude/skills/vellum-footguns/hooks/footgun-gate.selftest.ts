@@ -5,7 +5,7 @@
  */
 import { execFileSync } from "node:child_process";
 import { cpSync, mkdirSync, readdirSync, readFileSync, realpathSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { homedir, tmpdir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { decide, gateText, headingCheck, requiredHeadings, statePath, type Decision, type Payload } from "./footgun-gate.ts";
@@ -78,23 +78,24 @@ const CODE_FIXTURES: Fixture[] = CODE_ROWS.map(([name, command, bodies, want, ne
   needle ? filled(needle) : want === "deny" ? "em-dash outside code" : want ? "## Gate 5" : "",
 ]);
 const placed = (text: string): string => text.replaceAll("<ROOT>", ROOT).replaceAll("<LINK>", LINK).replaceAll("<S>", SCRATCH);
+const setProject = (dir: string | undefined): void => { if (dir === undefined) delete process.env.CLAUDE_PROJECT_DIR; else process.env.CLAUDE_PROJECT_DIR = dir; };
 const inProject = (payload: Payload, project: string | undefined) => async (): Promise<Decision> => {
   const before = process.env.CLAUDE_PROJECT_DIR;
   const session = `cd-${process.pid}`;
-  if (project === undefined) delete process.env.CLAUDE_PROJECT_DIR;
-  else process.env.CLAUDE_PROJECT_DIR = project;
+  setProject(project);
   try {
     return await decide({ ...payload, session_id: session });
   } finally {
-    if (before === undefined) delete process.env.CLAUDE_PROJECT_DIR;
-    else process.env.CLAUDE_PROJECT_DIR = before;
+    setProject(before);
     rmSync(statePath(session), { force: true });
   }
 };
+const PROJECTS: Record<string, string | undefined> = { "no project": undefined, "project via link": LINK, "project at home": homedir() };
+const NEEDLES = { deny: "inside the project", unplaced: "cannot work out" } as const;
 const CD_FIXTURES: Fixture[] = CD_ROWS.map(([name, command, cwd, want, who]): Fixture => {
-  const payload = { ...bash(placed(command), cwd === null ? undefined : placed(cwd)), ...(who === "subagent" ? { agent_id: "a781" } : {}) };
-  const project = who === "no project" ? undefined : cwd?.startsWith("<S>") ? SCRATCH : ROOT;
-  return [name, inProject(payload, project), want, who === "stash" ? "refs/stash" : want ? "move the main session" : ""];
+  const agent = who === "subagent" ? { agent_id: "a781" } : who === "with --agent" ? { agent_type: "vellum-implementer" } : {};
+  const project = who !== undefined && who in PROJECTS ? PROJECTS[who] : cwd?.startsWith("<S>") ? SCRATCH : ROOT;
+  return [name, inProject({ ...bash(placed(command), cwd === null ? undefined : placed(cwd)), ...agent }, project), want && "deny", who === "stash" ? "refs/stash" : want ? NEEDLES[want] : ""];
 });
 const asContext = (text: string): Decision => ({ hookSpecificOutput: { hookEventName: "PreToolUse", additionalContext: text } });
 // The unlink is what lets the two rows share a session id: the gate is once per session, so without it the second row would see no Gate 5 and read as the warning having swallowed it. The FIXTURES loop's own unlink does not reach a function subject.

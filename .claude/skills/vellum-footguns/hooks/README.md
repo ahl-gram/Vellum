@@ -91,14 +91,15 @@ is ever removed.
   - a bare `cd`, `chdir`, `pushd` or `popd` in the MAIN session that moves it to another directory
     inside the project, worktrees and `out/` included, so that every later relative path, `git` call
     and dispatched agent would run from there (Issue #781). The session is the main one when the
-    payload carries no `agent_id`, which Claude Code sets only for a call from inside a subagent, and
+    payload carries no `agent_id`, which Claude Code sets only for a call from inside a subagent (a
+    main session started with `--agent` carries `agent_type` and is still the main one), and
     a subagent's directory never carries over between calls, so its `cd` is never refused; the review
     agents' sandbox recipes rely on that. `bare-cd.ts` reads the RAW command, because the segmenter
-    splits on `(` and blanks quotes: a mask of the same length blanks escapes, quoted spans, heredoc
-    bodies (in every form, including `cat <<'EOF' > f` and a tab-indented `<<-` terminator, which the
-    hook's own heredoc pattern misses) and comments; its boundaries track subshell depth (`(`, `$(`,
-    `<(` and backticks open one); and only a command at depth zero that no pipe or background `&`
-    ends is read, since zsh, the shell here, runs a pipeline's earlier stages and a background job in
+    splits on `(` and blanks quotes: a mask of the same length blanks escapes, quoted and backtick
+    spans, heredoc bodies (in every form, including `cat <<'EOF' > f` and a tab-indented `<<-`
+    terminator, which the hook's own heredoc pattern misses) and comments; its boundaries track
+    subshell depth (`(`, `$(` and `<(` open one); and only a command at depth zero that no pipe or
+    background `&` ends is read, since zsh, the shell here, runs a pipeline's earlier stages and a background job in
     a subshell and its LAST stage in the session. The target is read raw, unquoted, and resolved
     against the payload's `cwd`. It passes when its real path is the cwd's, so a link to where you
     stand passes; and when it lies outside `CLAUDE_PROJECT_DIR` (its real path when it resolves, its
@@ -106,9 +107,11 @@ is ever removed.
     such a `cd` after the call, which keeps the session-end
     `cd ~/CodeProjects/claude-config && git add -A` working (Alex, 2026-10-05). The project root itself is inside, so a `cd` back to it from
     a worktree is refused, and the reason sends a session that has already moved to Alex for
-    `/cd <path>`. A target it cannot work out is refused (Alex, 2026-10-05): a shell variable, a glob,
-    `cd -`, `popd`, `pushd` with no directory, more than one argument, no `cwd` or one that does not
-    resolve, and every move when `CLAUDE_PROJECT_DIR` is unset. A directory the same call creates is
+    `/cd <path>`. A target it cannot work out is refused (Alex, 2026-10-05): a shell variable, a
+    command substitution, a glob or brace, `cd -`, `popd`, `pushd` with no directory, more than one
+    argument, no `cwd` or one that does not resolve, and every move when `CLAUDE_PROJECT_DIR` is
+    unset. The command word is read past assignments and the precommand words `builtin`, `command`,
+    `time`, `noglob` and `nocorrect`, with any option after them. A directory the same call creates is
     refused, since it is inside and is not the cwd. Each `cd` is judged alone, so a round trip is
     refused at its first leg. The way through is a subshell with a literal path,
     `( cd <path> && ... )`, `git -C <path>`, or an absolute path. It runs after every refusal above,
@@ -139,14 +142,16 @@ is ever removed.
   `CLAUDE_PROJECT_DIR` and not the added set (Alex ruled the outside-project pass on 2026-10-05
   knowing this). The rest are shapes this house does not type by habit, which is the whole of the
   argument for leaving them: an alias or function that changes directory under another name, a
-  sourced script (`source x.sh`, `. x.sh`), `eval cd x`, zsh's `AUTO_CD` (a bare directory name as a
-  command), and quote nesting inside a `$( )` inside double quotes odd enough to end the reader's
+  sourced script (`source x.sh`, `. x.sh`), `eval cd x`, zsh's `repeat 1 cd x`, zsh's `AUTO_CD` (a
+  bare directory name as a command), and quote nesting inside a `$( )` inside double quotes odd enough to end the reader's
   quoted span early. The main-session test rests on Claude Code's documented `agent_id`, seen by no
   run here before this merged: if a main-session payload carried it, the refusal would go silent.
 - **The `cd` reader's other errors are refusals**, each one edit away: a whole list or compound
   command piped or sent to the background (`cd x && y &`, `{ cd x; } | cat`), which runs in a
   subshell, is read at its own boundary; a redirect on a `cd` that stays (`cd . 2>/dev/null`) counts
-  as a second argument; a `case` pattern's `)` inside a subshell closes it early; a `cd` in a call run
+  as a second argument; a double-quoted path holding a backslash is not unescaped and reads as one
+  the reader cannot work out; `command -v cd x` prints a path and moves nothing; a `case` pattern's
+  `)` inside a subshell closes it early; a `cd` in a call run
   with `run_in_background`, whose carry-over is unmeasured; `CDPATH`; a command that fails before its
   end, after which Claude Code's `pwd -P` capture does not run and nothing moves; a path spelled in
   another case on a case-insensitive volume; and `command cd x`, which in zsh runs the external `cd`

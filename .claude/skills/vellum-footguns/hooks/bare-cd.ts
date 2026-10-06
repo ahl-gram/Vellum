@@ -1,12 +1,12 @@
 // The footgun hook's bare `cd` reader (Issue #781): a `cd`, `chdir`, `pushd` or `popd` the main session's own shell would run, and whether it moves the session to another directory inside the project; what it reads and where it errs are in README.md.
 import { realpathSync } from "node:fs";
 import { homedir } from "node:os";
-import { isAbsolute, resolve, sep } from "node:path";
+import { resolve, sep } from "node:path";
 
 const LINE_CONTINUATION = /\\\n/g;
-const LEX = /\\[\s\S]|'[^']*'|"(?:[^"\\]|\\[\s\S])*"|(?<!<)<<(-?)[ \t]*(['"]?)([A-Za-z_]\w*)\2|\n/g;
-const COMMENT = /(^|[\s;&|()])#[^\n]*/g;
-const BOUNDARY = /\n|;|&&|\|\||\||(?<![<>&])&(?![&>])|\(|\)|`|\{(?=\s)|(?<=\s)\}|(?<![\w-])(?:if|then|do|else|elif|while|until|!)(?![\w-])/g;
+const LEX = /\\[\s\S]|'[^']*'|"(?:[^"\\]|\\[\s\S])*"|`(?:[^`\\]|\\[\s\S])*`|(?<!<)<<(-?)[ \t]*(['"]?)([A-Za-z_]\w*)\2|\n/g;
+const COMMENT = /(^|[\s;&|)])#[^\n]*/g;
+const BOUNDARY = /\n|;|&&|\|\||\||(?<![<>])&(?!>)|\(|\)|\{(?=\s)|(?<=\s)\}|(?<![\w-])(?:if|then|do|else|elif|while|until|!)(?!\w)/g;
 const WORD_PART = /'[^']*'|"(?:[^"\\]|\\[\s\S])*"|\\[\s\S]|[^'"\\]+/g;
 const ASSIGNMENT = /^[A-Za-z_][A-Za-z0-9_]*=/;
 const CD_OPTION = /^-[LPeqs@]+$/;
@@ -50,16 +50,14 @@ const mask = (raw: string): string => {
 const topLevel = (masked: string): [number, number][] => {
   const spans: [number, number][] = [];
   let depth = 0;
-  let tick = false;
   let start = 0;
   const close = (end: number, ender: string): void => {
-    if (depth === 0 && !tick && ender !== "|" && ender !== "&") spans.push([start, end]);
+    if (depth === 0 && ender !== "|" && ender !== "&") spans.push([start, end]);
   };
   for (const m of masked.matchAll(BOUNDARY)) {
     close(m.index, m[0]);
     if (m[0] === "(") depth += 1;
     else if (m[0] === ")") depth = Math.max(0, depth - 1);
-    else if (m[0] === "`") tick = !tick;
     start = m.index + m[0].length;
   }
   close(masked.length, "");
@@ -73,8 +71,8 @@ const literal = (raw: string): string | null => {
     seen += part.length;
     if (part.startsWith("'")) out += part.slice(1, -1);
     else if (part.startsWith('"')) {
-      if (/[$`]/.test(part)) return null;
-      out += part.slice(1, -1).replace(/\\([$`"\\\n])/g, "$1");
+      if (/[$`\\]/.test(part)) return null;
+      out += part.slice(1, -1);
     } else if (part.startsWith("\\")) out += part.slice(1);
     else if (/[$`*?[{]/.test(part)) return null;
     else out += part;
@@ -110,21 +108,32 @@ const real = (path: string): string | null => {
   }
 };
 
-const within = (path: string, dir: string): boolean => path === dir || path.startsWith(dir.endsWith(sep) ? dir : dir + sep);
+const within = (path: string, dir: string): boolean => path === dir || path.startsWith(dir + sep);
 
-const outsideProject = (path: string, project: string | undefined): boolean => {
-  if (!project) return false;
-  const roots = [project, real(project)].filter((root): root is string => root !== null);
+const outsideProject = (path: string, project: string): boolean => {
+  const roots = [resolve(project), real(project)].filter((root): root is string => root !== null);
   return !roots.some((root) => within(path, root));
 };
 
 const verdict = (dest: string | null, cwd: string, project: string | undefined): string | null => {
   const here = cwd ? real(cwd) : null;
   if (dest === null || here === null) return "could move the main session to a directory the hook cannot work out";
-  const lexical = isAbsolute(dest) ? resolve(dest) : resolve(cwd, dest);
+  const lexical = resolve(cwd, dest);
   const there = real(lexical) ?? lexical;
   if (there === here) return null;
+  if (!project) return `could move the main session to ${there}, and the hook cannot work out where the project is`;
   return outsideProject(there, project) ? null : `would move the main session to ${there}, inside the project`;
+};
+
+const commandWord = (words: string[]): number => {
+  let afterPrecommand = false;
+  for (let i = 0; i < words.length; i += 1) {
+    const raw = words[i] ?? "";
+    const word = literal(raw);
+    if (word !== null && SKIPPED.has(word)) afterPrecommand = true;
+    else if (!ASSIGNMENT.test(raw) && !(afterPrecommand && raw.startsWith("-"))) return i;
+  }
+  return words.length;
 };
 
 const REASON = (said: string, cwd: string, move: string): string =>
@@ -138,8 +147,7 @@ export const bareCdReason = (command: string, cwd: string, project: string | und
   const masked = mask(raw);
   for (const [start, end] of topLevel(masked)) {
     const words = [...masked.slice(start, end).matchAll(/\S+/g)].map((w) => raw.slice(start + w.index, start + w.index + w[0].length));
-    let i = 0;
-    while (i < words.length && (ASSIGNMENT.test(words[i] ?? "") || SKIPPED.has(words[i] ?? ""))) i += 1;
+    const i = commandWord(words);
     const verb = literal(words[i] ?? "");
     if (verb === null || !VERBS.has(verb)) continue;
     const move = verdict(destination(verb, words.slice(i + 1)), cwd, project);
