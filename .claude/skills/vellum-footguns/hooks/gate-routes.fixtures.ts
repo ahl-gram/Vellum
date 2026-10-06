@@ -64,4 +64,5 @@ export const SEQUENCE_ROWS: ReadonlyArray<SequenceRow> = [
   ["a second edit to a test under test/src/site gets nothing", ["test/src/site/never-exists-zz.test.ts", "test/src/site/never-exists-zz.test.ts"], null, ""],
   ["a second edit to a unit test under test/e2e gets nothing, not gate 2", ["test/e2e/never-exists-zz.test.ts", "test/e2e/never-exists-zz.test.ts"], null, ""],
   ["a helper one folder down in test-support gets no gate, as ruled", ["test-support/a-folder/never-exists-zz.ts"], null, ""],
+  ["a file in test-support that only begins like a helper gets no gate", ["test-support/never-exists-zz.ts.orig"], null, ""],
 ];

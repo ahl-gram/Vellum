@@ -87,6 +87,7 @@ const GATE7_ROWS: ReadonlyArray<readonly [string, string]> = [
   ["a second edit to a test under test/src/site gets nothing", NOTHING],
   ["a second edit to a unit test under test/e2e gets nothing, not gate 2", NOTHING],
   ["a helper one folder down in test-support gets no gate, as ruled", NOTHING],
+  ["a file in test-support that only begins like a helper gets no gate", NOTHING],
 ];
 
 // Written out for the same reason as the roster rows: each is the only guard of its arm of Gate 7's route (Issue #782), and deleting one from the fixture table, weakening its needle or absent text, or dropping Gate 7 from the gate-text loop prints no FAIL.
