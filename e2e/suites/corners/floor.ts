@@ -1,4 +1,4 @@
-// The 1024 floor (Issue #762 pull request C; Alex, 2026-10-06, issuecomment-6010814718): a window narrower than 1024 keeps every room's 1024 layout at full size and scrolls sideways, the scroll reaches every piece, a layout fired while scrolled keeps every piece where it stood, and a room that scrolls down keeps its chrome in view.
+// The 1024 floor (Issue #762 pull request C; Alex, 2026-10-06, issuecomment-6010814718): a window narrower than 1024 keeps every page's 1024 layout at full size and scrolls sideways, the scroll reaches every piece, a layout fired while scrolled keeps every piece where it stood, and a room that scrolls down keeps its chrome in view.
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import { CHART_ROOM_FLOOR, LANDED, rest } from "./stage.ts";
@@ -26,9 +26,10 @@ const PIECES: Payload<Pieces> = `(() => {
   }
   const root = document.documentElement, nav = document.querySelector("header.chrome nav.rooms");
   const navLines = nav ? new Set([...nav.querySelectorAll("a, [aria-current]")].map((d) => Math.round(d.getBoundingClientRect().top))).size : 0;
-  const cam = document.querySelector("#lf-stage.cam #lf-sheet");
-  // On a fresh load home's sheet can report its stage-sized box for a read or two after the camera is written and the page is complete (main's build too, measured 2026-10-06), so the camera counts as laid out only once the box carries its scale.
-  const camera = !document.getElementById("lf-stage") || (!!cam && Math.abs(cam.getBoundingClientRect().width - cam.offsetWidth * new DOMMatrixReadOnly(getComputedStyle(cam).transform).a) < 1);
+  const st = document.querySelector("#lf-stage.cam"), cam = st && st.querySelector("#lf-sheet");
+  // On a fresh load home's sheet can report its stage-sized box after the camera is written and the page is complete (main's build too, and on CI longer, measured 2026-10-06), so the camera counts as laid out only once the sheet's box is the one the page wrote.
+  const wrote = cam && cam.style.transform ? new DOMMatrixReadOnly(cam.style.transform) : null, cr = cam ? cam.getBoundingClientRect() : null, sr = st ? st.getBoundingClientRect() : null;
+  const camera = !document.getElementById("lf-stage") || (!!wrote && Math.abs(cr.width - cam.offsetWidth * wrote.a) < 1 && Math.abs(cr.left - sr.left - wrote.e) < 1 && Math.abs(cr.top - sr.top - wrote.f) < 1);
   return { innerW: innerWidth, innerH: innerHeight, sx, over: root.scrollWidth - root.clientWidth, cw: root.clientWidth, pieces, navLines, ready: document.readyState === "complete" && (!document.fonts || document.fonts.status === "loaded") && camera && ${LANDED} };
 })()`;
 

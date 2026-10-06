@@ -39,6 +39,7 @@ async function h19Floor(ctx: SuiteContext, k: HomeKit): Promise<void> {
     await step("H20", () => h20Reveal(k));
   } finally {
     await ctx.send("Emulation.setEmulatedMedia", { features: [] });
+    await ctx.clearMobile();
   }
 }
 

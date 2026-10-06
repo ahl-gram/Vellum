@@ -7,21 +7,34 @@ const W = 640;
 const H = 800;
 
 type View = { sx: number; sy: number; scale: number; cw: number; ready: boolean };
+// The camera counts only once the sheet's box is the one the page wrote (CI caught home's sheet at its stage-sized box with the camera written, the page complete and the fonts loaded, on main's build too).
 const VIEW: Payload<View> = `(() => {
-  const s = document.getElementById("lf-sheet");
-  const m = s ? new DOMMatrixReadOnly(getComputedStyle(s).transform) : null;
-  const laidOut = !!s && !!m && !!document.querySelector("#lf-stage.cam") && Math.abs(s.getBoundingClientRect().width - s.offsetWidth * m.a) < 1;
-  return { sx: scrollX, sy: scrollY, scale: m ? m.a : NaN, cw: document.documentElement.clientWidth, ready: document.readyState === "complete" && laidOut };
+  if (!document.documentElement || !document.body) return { sx: 0, sy: 0, scale: NaN, cw: 0, ready: false };
+  const s = document.getElementById("lf-sheet"), st = document.querySelector("#lf-stage.cam");
+  const w = s && st && s.style.transform ? new DOMMatrixReadOnly(s.style.transform) : null;
+  const r = s ? s.getBoundingClientRect() : null, sr = st ? st.getBoundingClientRect() : null;
+  const laidOut = !!w && !!r && !!sr && Math.abs(r.width - s.offsetWidth * w.a) < 1 && Math.abs(r.left - sr.left - w.e) < 1 && Math.abs(r.top - sr.top - w.f) < 1;
+  return { sx: scrollX, sy: scrollY, scale: w ? w.a : NaN, cw: document.documentElement.clientWidth, ready: document.readyState === "complete" && laidOut };
 })()`;
 
 const centreOf = (selector: string): Payload<Point | null> => `(() => { const e = document.querySelector(${JSON.stringify(selector)}); if (!e) return null; const r = e.getBoundingClientRect(); return { x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2) }; })()`;
 
-async function openHome(k: HomeKit): Promise<View> {
-  await k.setTouch(false);
-  await k.send("Emulation.setDeviceMetricsOverride", { width: W, height: H, deviceScaleFactor: 1, mobile: false });
+async function landHome(k: HomeKit, w: number): Promise<View> {
+  await k.send("Emulation.setDeviceMetricsOverride", { width: w, height: H, deviceScaleFactor: 1, mobile: false });
   await k.send("Page.navigate", { url: "about:blank" });
   await k.send("Page.navigate", { url: `http://127.0.0.1:${k.PORT}/` });
-  return makeSettle(k)(VIEW, (d, last) => d.ready && d.cw === W && last !== null && JSON.stringify(d) === JSON.stringify(last), "home floor open", 300);
+  let committed = false;
+  for (let i = 0; i < 300 && !committed; i++) {
+    committed = await k.evaluate<boolean>(`location.pathname === "/" && document.readyState === "complete" && !!document.getElementById("lf-stage")`).catch(() => false);
+    if (!committed) await k.sleep(50);
+  }
+  if (!committed) throw new Error(`home never came up at ${w}x${H}`);
+  return makeSettle(k)(VIEW, (d, last) => d.ready && d.cw === w && last !== null && JSON.stringify(d) === JSON.stringify(last), `home floor open ${w}`, 300);
+}
+
+async function openHome(k: HomeKit): Promise<View> {
+  await k.setTouch(false);
+  return landHome(k, W);
 }
 
 async function scrolledTo(k: HomeKit, left: number): Promise<View> {
@@ -75,16 +88,15 @@ async function openSlip(k: HomeKit, id: string): Promise<Slip> {
 
 type Shown = { open: boolean; sx: number; sy: number; cw: number; slip: [number, number]; pip: number };
 const SHOWN = (id: string): Payload<Shown> => `(() => {
-  const c = document.getElementById("lf-card-${id}"), r = c.getBoundingClientRect(), p = document.querySelector('.lf-station[data-station="${id}"]').getBoundingClientRect();
+  const c = document.getElementById("lf-card-${id}");
+  if (!c) return { open: false, sx: 0, sy: 0, cw: 0, slip: [0, 0], pip: 0 };
+  const r = c.getBoundingClientRect(), p = document.querySelector('.lf-station[data-station="${id}"]').getBoundingClientRect();
   const done = !c.hidden && Number(getComputedStyle(c).opacity) === 1 && c.getAnimations({ subtree: true }).length === 0;
   return { open: done, sx: scrollX, sy: scrollY, cw: document.documentElement.clientWidth, slip: [Math.round(r.left * 10) / 10, Math.round(r.right * 10) / 10], pip: Math.round((p.left + p.width / 2) * 10) / 10 };
 })()`;
 
 async function clickStation(k: HomeKit, w: number, scrollDown: boolean): Promise<{ id: string; shown: Shown }> {
-  await k.send("Emulation.setDeviceMetricsOverride", { width: w, height: H, deviceScaleFactor: 1, mobile: false });
-  await k.send("Page.navigate", { url: "about:blank" });
-  await k.send("Page.navigate", { url: `http://127.0.0.1:${k.PORT}/` });
-  await makeSettle(k)(VIEW, (d, last) => d.ready && d.cw === w && last !== null && JSON.stringify(d) === JSON.stringify(last), `home reveal open ${w}`, 300);
+  await landHome(k, w);
   if (scrollDown) await k.evaluate(`window.scrollTo(0, 600)`);
   const pick = await k.evaluate<{ id: string; x: number; y: number } | null>(`(() => {
     for (const id of ${JSON.stringify(scrollDown ? ["reading-room", "gallery", "atlas", "explorer"] : ["explorer"])}) {
