@@ -2,7 +2,7 @@ import type { Rule } from "eslint";
 
 type TypeNode = { type: string; typeName?: { type: string; name?: string }; types?: readonly TypeNode[] };
 
-const ERROR_KINDS = new Set(["Error", "TypeError", "RangeError", "ReferenceError", "SyntaxError", "EvalError", "URIError", "AggregateError"]);
+const ERROR_KINDS = new Set(["Error", "TypeError", "RangeError", "ReferenceError", "SyntaxError", "EvalError", "URIError", "AggregateError", "SuppressedError"]);
 
 const namesErrorKind = (type: TypeNode): boolean =>
   (type.type === "TSTypeReference" && type.typeName?.type === "Identifier" && ERROR_KINDS.has(type.typeName.name ?? "")) ||
