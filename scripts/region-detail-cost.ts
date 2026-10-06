@@ -53,7 +53,7 @@ function neighbours(home: UvWindow): { readonly shared: UvWindow; readonly fresh
 }
 
 function fmt(n: number): string {
-  return `${n.toFixed(0)}`.padStart(6);
+  return n.toFixed(0).padStart(6);
 }
 
 type BandCost = { readonly label: string; readonly bare: number; readonly detail: number };
