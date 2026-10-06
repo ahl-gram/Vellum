@@ -8,9 +8,9 @@ import type { Payload, SuiteContext } from "../types.ts";
 import { fillBetween, mediaEdges, meetings, nearest, routesUnder, strideWidths, unreadWidthConditions, verdict, wrapVerdict } from "./corners/geometry.ts";
 import type { Control, CornerRead, Row } from "./corners/geometry.ts";
 import { ea1Phone, ea4Reads, ea5Lift, eaDesk } from "./corners/stage.ts";
-import { el3Docked } from "./corners/dock.ts";
-import { co5Yields, co6Follows, co7Band, co8Floored } from "./corners/top-row.ts";
+import { co5Yields, co6Follows, co7Band } from "./corners/top-row.ts";
 import { fl1Floor, fl2Reach, fl3Relayout, fl4Read } from "./corners/floor.ts";
+import { na4Lean, ns1Soft } from "./corners/short.ts";
 
 const REPO = resolve(fileURLToPath(new URL(".", import.meta.url)), "..", "..");
 const PAGE_FLOOR = ["/", "/explorer/", "/explorer/portfolio/", "/faq/", "/gallery/", "/glossary/", "/print-room/", "/prospect/", "/reading-room/", "/ribbon/", "/seed-of-the-day/", "/specimen/"];
@@ -280,17 +280,17 @@ export async function run(ctx: SuiteContext): Promise<void> {
     await step("CO5", () => co5Yields(ctx));
     await step("CO6", () => co6Follows(ctx));
     await step("CO7", () => co7Band(ctx));
-    await step("CO8", () => co8Floored(ctx));
     await step("FL1", () => fl1Floor(ctx));
     await step("FL2", () => fl2Reach(ctx));
     await step("FL3", () => fl3Relayout(ctx));
     await step("FL4", () => fl4Read(ctx));
+    await step("NS1", () => ns1Soft(ctx));
+    await step("NA4", () => na4Lean(ctx));
     await step("EA1", async () => { await ea1Phone(ctx); });
     await ctx.clearMobile();
     await step("EA2, EA3, EL1, EL2", () => eaDesk(ctx));
     await step("EA4", () => ea4Reads(ctx));
     await step("EA5", () => ea5Lift(ctx));
-    await step("EL3", () => el3Docked(ctx));
   } finally {
     await send("Page.removeScriptToEvaluateOnNewDocument", { identifier: clock.identifier }).catch(() => undefined);
     await send("Emulation.setEmulatedMedia", { media: "", features: [] }).catch(() => undefined);

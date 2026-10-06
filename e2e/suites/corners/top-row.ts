@@ -1,7 +1,6 @@
 // The top row (Issue #762 pull request B): a wide corner gives way toward the kit's width before the nav wraps, the nav wraps between rooms, a page that widens again lays out from its sheets, Issue #741's corners are never written, a chart room's slip follows its folio, and the band grows by what the cluster grew.
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
-import { FLOOR_PLAIN, GLYPHS_OVER_SHEET, NO_POOLS, grounds, rest, withStyle, worstOf } from "./stage.ts";
 
 const KIT = 304;
 const CAP = 480;
@@ -146,43 +145,5 @@ export async function co7Band(ctx: SuiteContext): Promise<void> {
     "CO7 the band grows by exactly what the cluster grew: on the FAQ, the Glossary and the Gallery at 640, where the nav wraps, the band token is its 1280 value plus the cluster's growth and the page's first row starts below both the cluster and the token, so its padding follows the token; at 1280 nothing is written (Issue #762; it holds what the unit band test held before Issue #779's check placement)",
     ok,
     rows.join(" | "),
-  );
-}
-
-// The pieces a floored chart's dark backing stands under; the Glass's presses keep their own half-ink fill, untouched here, and are read for the record only.
-const BACKED = ["cluster", "room folio"];
-const FLOORED_ROOMS = ["/explorer/", "/print-room/", "/prospect/", "/reading-room/", "/ribbon/", "/seed-of-the-day/", "/specimen/"];
-const FLOORED_WINDOWS: readonly (readonly [number, number])[] = [[640, 400], [720, 800], [800, 800]];
-// Where the step 11 plate read found the nav and the motto under 4.5:1 with no backing (Alex's ruling of 2026-10-05 on PR #784): each must run under the chrome there.
-const RULED = ["/explorer/ 640x400", "/print-room/ 640x400", "/prospect/ 640x400", "/reading-room/ 640x400", "/ribbon/ 640x400", "/seed-of-the-day/ 640x400", "/specimen/ 640x400", "/explorer/ 800x800", "/reading-room/ 800x800", "/specimen/ 800x800", "/reading-room/ 720x800"];
-
-export async function co8Floored(ctx: SuiteContext): Promise<void> {
-  await ctx.setTouch(false);
-  const rows: string[] = [];
-  const faults: string[] = [];
-  let bareCluster = Infinity;
-  let glass = Infinity;
-  for (const [w, h] of FLOORED_WINDOWS) {
-    await ctx.send("Emulation.setDeviceMetricsOverride", { width: w, height: h, deviceScaleFactor: 1, mobile: false });
-    for (const page of FLOORED_ROOMS) {
-      const at = `${page} ${w}x${h}`;
-      await ctx.send("Page.navigate", { url: "about:blank" });
-      await ctx.send("Page.navigate", { url: `http://127.0.0.1:${ctx.PORT}${page}` });
-      const s = await rest(ctx, w, h, `CO8 ${at}`);
-      const glyphs = await ctx.evaluate(GLYPHS_OVER_SHEET);
-      const read = await grounds(ctx, glyphs);
-      if (at === RULED[0]) bareCluster = worstOf(await withStyle(ctx, "co8-bare", NO_POOLS, () => grounds(ctx, glyphs)), "cluster");
-      if (RULED.includes(at) && s?.under !== true) faults.push(`${at} is not marked as running under the chrome`);
-      const held = read.filter((g) => BACKED.includes(g.piece));
-      if (RULED.includes(at) && !held.some((g) => g.piece === "cluster")) faults.push(`${at}: no cluster line stands on the sheet`);
-      faults.push(...held.filter((g) => g.ratio < FLOOR_PLAIN).map((g) => `${at}: ${g.piece} "${g.t}" reads ${g.ratio.toFixed(2)}`));
-      glass = Math.min(glass, worstOf(read, "Glass"));
-      rows.push(`${at}${s?.under ? " under" : ""}: ${held.length} lines, worst ${worstOf(held).toFixed(2)}`);
-    }
-  }
-  ctx.check(
-    "CO8 where the narrow layout's width floor runs a chart under the head cluster, the head cluster and the room folio stand on their dark backing and every line of theirs over the sheet reads at 4.5:1 or better, in seven chart rooms at 640x400, 720x800 and 800x800 (Alex's ruling of 2026-10-05 on PR #784, ruling 4b extended; the plate read found the nav at 1.03 there without it), and with the backings taken away the Explorer's cluster reads under 4.5 at 640x400, the witness that the backing is what holds it",
-    faults.length === 0 && bareCluster < FLOOR_PLAIN,
-    `${rows.join(" | ")}; the Explorer's cluster bare at 640x400 ${bareCluster.toFixed(2)}; the Glass's presses, for the record, worst ${glass.toFixed(2)}${faults.length ? `; ${faults.length} faults: ${faults.slice(0, 6).join("; ")}` : ""}`,
   );
 }

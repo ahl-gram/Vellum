@@ -210,7 +210,6 @@ body.room.chart-room { --room-pad-top: 0px; padding: 0; }
   body.room { min-width: 1024px; box-sizing: border-box; }
   .desk-layer.on { position: sticky; top: 0; z-index: 10; height: 100vh; margin: calc(-1 * var(--room-pad-top)) -2.2rem -100vh; contain: layout; pointer-events: none; }
   body.room.chart-room .desk-layer.on { margin: 0 0 -100vh; }
-  .desk-layer.on > :is(.slip, .legend) { pointer-events: auto; }
 }
 .desk-layer:not(.on) { display: contents; }
 /* The interim desk panel: a room not yet dressed for the deep wears it so nothing ships ink-on-walnut; desk="open" stops the class rendering, so the rule retires itself room by room. */

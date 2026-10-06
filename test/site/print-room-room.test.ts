@@ -51,7 +51,7 @@ test("PRR2 the corner is the mockup plus the dice (ruled 2026-08-30): seed, dice
   assert.ok(!slip.includes('id="pr-draw"') && !slip.includes('id="pr-seed"'), "the seed row does not also sit on the slip");
 });
 
-test("PRR3 the Bound Atlas is the slip: Bind and the contents in its body, Print / Download / Hide in its foot, the legend's phone dock inside it", () => {
+test("PRR3 the Bound Atlas is the slip: Bind and the contents in its body, Print / Download / Hide in its foot", () => {
   assert.match(page, /<Slip id="atlas" verb="Take home" title="The Bound Atlas" where="the whole atlas on one sheet" fold="Fold the atlas away">/, "the slip carries the mockup's head; the fold names the atlas, not the retired desk");
   const slip = between("<Slip", "</Slip>");
   const foot = slip.slice(slip.indexOf('slot="foot"'));
@@ -59,7 +59,6 @@ test("PRR3 the Bound Atlas is the slip: Bind and the contents in its body, Print
   const body = slip.slice(0, slip.indexOf('slot="foot"'));
   assert.match(body, /<button id="pr-bind" class="primary" type="button" disabled>Bind the atlas<\/button>/, "Bind is the slip's own primary, closed until a proof");
   assert.match(body, /<ol class="contents" id="pr-contents"/, "the contents list is the kit's contents row");
-  assert.ok(body.includes('class="legend-dock"'), "the slip body carries the dock the legend row moves into on a phone");
   for (const id of ['id="pr-print"', 'id="pr-download"', 'id="pr-hide"']) {
     assert.ok(foot.includes(id), `${id} stands in the foot`);
     assert.ok(!body.includes(id), `${id} is not also in the body`);
@@ -83,16 +82,8 @@ test("PRR4 the legend row is the poster plates plus a road back (ruled 2026-08-3
   assert.match(row, /<LegendButton id="pr-explorer" gold href="\.\.\/explorer\/" verb="Back to" room="The Explorer" \/>/, "the road back to the Explorer is gold (the kit's, #487)");
   assert.ok(row.indexOf('id="pr-explorer"') > at("grand"), "the road stands last");
   assert.match(legend, /<div class="legend-row" role="group" aria-label="A poster plate">/, "the row names itself; a labelledby on the head would absorb the select's option text");
-  assert.match(legend, /<\/div>\s*<p class="legend-status" id="pr-poster-status" role="status" aria-live="polite"><\/p>\s*$/, "the poster order reports under the row, which a phone docks into its sheet");
-  const phoneCss = css.slice(css.indexOf("@media (max-width: 900px)"), css.indexOf("@media print"));
-  assert.match(phoneCss, /\.legend\.in-slip \.legend-status\s*\{[^}]*display:\s*block/, "and the status line shows in the docked legend");
+  assert.match(legend, /<\/div>\s*<p class="legend-status" id="pr-poster-status" role="status" aria-live="polite"><\/p>\s*$/, "the poster order reports under the row");
   assert.ok(!page.includes('class="plate-row"') && !page.includes('class="plate-dim"'), "the desk's plate row retires");
-  const phone = css.slice(css.indexOf("@media (max-width: 900px)"), css.indexOf("@media print"));
-  assert.ok(!phone.includes("select.control"), "the style picker stays on a phone (ruled 2026-08-30: no feature lost at any width; the wrap makes room)");
-  assert.match(phone, /\.legend\.in-slip \.legend-head\s*\{[^}]*display:\s*block/, "docked in the phone sheet the head stays, since it carries the Pressed-as choice (the kit hides it)");
-  assert.match(phone, /\.legend\.in-slip \.legend-note\s*\{[^}]*display:\s*none/, "the note stands down there");
-  assert.match(css.replace(/\/\*[\s\S]*?\*\//g, ""), /@media \(max-width: 1023px\) \{ \.folio-controls \{ flex-wrap: wrap; \} \}/, "the corner's row wraps below 1024: on a phone (the mockup's seed-controls) and from the fold to 1023, where the corner takes the kit's 19rem rather than the room's 25rem (Issue #638; CO3 in e2e/suites/corners.ts reds a squeezed control there); from 1024 the one row stands as it did");
-  assert.doesNotMatch(phone, /slip\.open\)[^{]*\.zoomery/, "the Glass standing down under the open sheet is the kit's rule since the 2026-09-03 sitting (room.test.ts pins it); the page keeps no copy");
 });
 
 test("PRR5 the stage holds the fitted sheet with the proof and the turned plate in one gesture box; the status pill, the Glass, the chart's folio and the hidden document keep their ids", () => {

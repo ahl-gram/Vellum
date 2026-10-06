@@ -11,9 +11,10 @@ body.chart-room .fog { z-index: 3; }
 
 /* Scoped to body.chart-room: home's landfall stage wears the same .stage class. */
 html:has(body.chart-room) { height: 100%; overflow-y: hidden; }
+/* `clip`, not `hidden`, so the body is no scroll container a focus could scroll on the 1024 page. */
 body.chart-room { height: 100%; overflow: clip; }
-/* The 1024 floor (Alex, 2026-10-06, Issue #762): a staged chart room is the containing block of its fixed furniture, so at a window narrower than the floor every piece lays out on the 1024 page and scrolls sideways with it; `clip`, not `hidden`, so the body is no scroll container a focus could scroll. */
-@media screen { body.chart-room:has(.stage) { contain: layout; } }
+/* In a scrolling room's desk layer (the layout's), which passes the pointer through to the text, the slip and the legend row take it back (FL4 in `e2e/suites/corners/floor.ts`). */
+.desk-layer.on > :is(.slip, .legend) { pointer-events: auto; }
 body.chart-room .stage { position: fixed; inset: 0; z-index: 1; overflow: hidden; }
 body.chart-room .stage .status { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); margin: 0; padding: 0.3rem 0.9rem;
   color: var(--parchment); background: rgb(from var(--chart-ink) r g b / 0.55); z-index: 2; pointer-events: none;
@@ -94,7 +95,7 @@ body:has(.slip.folded) .legend { left: 50%; }
 .legend .legend-row .legend-btn.gold:hover, .legend .legend-row .legend-btn.gold:focus-visible { background: var(--parchment-bright); }
 .legend .legend-row .legend-btn:disabled { opacity: 0.45; cursor: default; transform: none; box-shadow: none; background: rgb(from var(--chart-ink) r g b / 0.5); }
 /* A risen row that would reach the head cluster sheds its note and any head line holding no control (`rowSheds` in `src/site/shared/room-seats.ts`; Alex, 2026-10-06, Issue #762). */
-.legend.lean .legend-note, .legend.lean .legend-head:not(:has(select)) { display: none; }
+.legend.lean > p:not(:has(select), [role="status"]) { display: none; }
 
 .slip { position: fixed; z-index: 20; right: 2rem; top: 9rem; width: var(--slip-w); max-height: calc(100vh - 11rem);
   box-sizing: border-box; display: flex; flex-direction: column;
@@ -143,6 +144,8 @@ body:has(#map-viewport.zoomed) .legend::before, body.stage-under .legend::before
 /* Over a floored sheet the Press and the room folio stand on the cluster's blurred pool, not a hard-edged panel (Alex, 2026-10-06, Issue #762); the Press's box stops inside the rise gap above the chart folio (`LEGEND_RISE` in `src/site/shared/room-seats.ts`) and the folio's keeps its short reach toward the nav, so neither box lies over another piece's lines (`NS1` in `e2e/suites/corners/short.ts`). */
 body.stage-under .legend::before { inset: -1.3rem -0.9rem -0.6rem; background: rgb(from var(--chart-ink) r g b / 0.92); filter: blur(16px); }
 @media screen {
+  /* The 1024 floor (Alex, 2026-10-06, Issue #762): a staged chart room is the containing block of its fixed furniture, so at a window narrower than the floor every piece lays out on the 1024 page and scrolls sideways with it. */
+  body.chart-room:has(.stage) { contain: layout; }
   body:has(#map-viewport.zoomed) .corner.tr::before, body.stage-under .corner.tr::before, body.chart-room:not(:has(.stage)) .corner.tr::before { content: ""; position: absolute; inset: -0.7rem -0.9rem -0.8rem; z-index: -1; pointer-events: none;
     background: linear-gradient(to bottom, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.72)); }
   body.stage-under .corner.tr::before { left: -0.35rem; background: rgb(from var(--chart-ink) r g b / 0.92); filter: blur(16px); }
