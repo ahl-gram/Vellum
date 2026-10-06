@@ -63,11 +63,11 @@ function parchmentOverlay(e: Engraver, suffix: string): SvgNode[] {
   ];
 }
 
-/** What a plate drops when drawn small (ruling D3), read by the image against its own drawn width; the classes carry the plate's suffix so an inline plate cannot reach its page. */
+/** What a plate drops when drawn small (ruling D3), read against the plate's own drawn width: the plate is the container, so an inlined plate reads itself and not the window; the classes carry the plate's suffix so an inline plate cannot reach its page. */
 export const SMALL_WIDTH = 400;
 export const SMALLEST_WIDTH = 240;
 export const smallSizeRule = (suffix: string): string =>
-  `@media (max-width: ${SMALL_WIDTH}px){.pk-${suffix},.pt-${suffix},.pm-${suffix}{display:none}}@media (max-width: ${SMALLEST_WIDTH}px){.pc-${suffix},.pd-${suffix}{display:none}}`;
+  `.pq-${suffix}{container-type:inline-size}@container (max-width: ${SMALL_WIDTH}px){.pk-${suffix},.pt-${suffix},.pm-${suffix}{display:none}}@container (max-width: ${SMALLEST_WIDTH}px){.pc-${suffix},.pd-${suffix}{display:none}}`;
 
 const group = (cls: string, parts: ReadonlyArray<Inked>): SvgNode => el("g", { class: cls }, parts.flatMap((p) => p.nodes));
 
@@ -97,7 +97,7 @@ export function engraveE(style: MapStyle, p: PlateParts): EngravedE {
   const grain = (p.g.seed * 31 + p.g.index * 7) % 9973;
   const width = p.widthPx ?? PLATE_W;
   const node = el("svg", {
-    xmlns: "http://www.w3.org/2000/svg", viewBox: `0 0 ${PLATE_W} ${PLATE_H}`, width: Math.round(width), height: Math.round((width * PLATE_H) / PLATE_W),
+    class: `pq-${p.suffix}`, xmlns: "http://www.w3.org/2000/svg", viewBox: `0 0 ${PLATE_W} ${PLATE_H}`, width: Math.round(width), height: Math.round((width * PLATE_H) / PLATE_W),
     role: "img", "aria-label": `The prospect of ${p.input.name}, chart ${p.input.seed}`,
   }, [
     el("style", {}, [smallSizeRule(p.suffix)]),
