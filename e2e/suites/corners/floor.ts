@@ -16,7 +16,7 @@ const PIECES: Payload<Pieces> = `(() => {
   const sx = scrollX, r1 = (n) => Math.round(n * 10) / 10;
   const box = (e) => { const r = e.getBoundingClientRect(); return r.width === 0 && r.height === 0 ? null : [r1(r.left + sx), r1(r.top), r1(r.width), r1(r.height)]; };
   const pieces = {};
-  for (const s of ["header.chrome", "main", ".corner.tr", ".corner.bl", ".corner.br", ".slip", ".slip-tab", ".legend:not(.in-slip)", ".chart-drawer-tab", "#sheet", ".strip", ".sheet h2"]) {
+  for (const s of ["header.chrome", "main", ".corner.tr", ".corner.bl", ".corner.br", ".slip", ".slip-tab", ".legend", ".chart-drawer-tab", "#sheet", ".strip", ".sheet h2"]) {
     const e = document.querySelector(s);
     const b = e && getComputedStyle(e).visibility !== "hidden" ? box(e) : null;
     if (b) pieces[s] = b;

@@ -1,4 +1,4 @@
-// The top row (Issue #762 pull request B): a wide corner gives way toward the kit's width before the nav wraps, the nav wraps between rooms, a page that widens again lays out from its sheets, Issue #741's corners are never written, a chart room's slip follows its folio, and the band grows by what the cluster grew.
+// The top row (Issue #762 pull request B; re-floored by pull request C, where a room below 1024 lays out its 1024 page): a wide corner gives way toward the kit's width before the nav wraps, home's nav wraps between rooms, a page that widens again lays out from its sheets, Issue #741's corners are never written, a chart room's slip follows its folio, and a room's band and first row hold at the floor.
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 
@@ -69,15 +69,15 @@ export async function co5Yields(ctx: SuiteContext): Promise<void> {
   let wraps = true;
   for (const page of ["/", "/faq/", "/print-room/", "/prospect/", "/ribbon/"]) {
     const r = await open(ctx, page, NARROW);
-    wraps &&= r.navLines >= 2 && r.leadingDots === 0 && r.wrapped && r.boxGap >= 25.6 - 0.5;
+    wraps &&= page === "/" ? r.navLines >= 2 && r.leadingDots === 0 && r.wrapped && r.boxGap >= 25.6 - 0.5 : oneLine(r) && r.boxGap >= 25.6 - 0.5;
     narrow.push(fmt(page, NARROW, r));
   }
   const widened: string[] = [];
   let lays = true;
-  for (const page of ["/faq/", "/ribbon/"]) {
+  for (const page of ["/", "/ribbon/"]) {
     const was = await open(ctx, page, NARROW);
     const now = await at(ctx, 1280, `top-row-widened-${page}`);
-    lays &&= was.wrapped && unwritten(now) && now.navLines === 1;
+    lays &&= (page === "/" ? was.wrapped : was.cornerInline !== "") && unwritten(now) && now.navLines === 1;
     widened.push(`${fmt(page, NARROW, was)} then ${fmt(page, 1280, now)}`);
   }
   for (const w of [960, 1024, 1032]) {
@@ -99,7 +99,7 @@ export async function co5Yields(ctx: SuiteContext): Promise<void> {
   const off = await open(ctx, "/ribbon/", 1024).finally(() => ctx.send("Emulation.setScriptExecutionDisabled", { value: false }));
   const scriptsOff = Math.abs(off.corner.width - CAP) < 0.5 && off.boxGap > 0 && off.cornerInline === "";
   ctx.check(
-    "CO5 the corner gives way before the nav wraps: the Ribbon at 960, 1024 and 1032 keeps its nav on one line, its corner written between the kit's 19rem and its 30rem cap and standing the gap clear, under reduced motion and with motion on, and at 1280 nothing is written; at 640 the nav wraps between rooms on home, the FAQ, the Print Room, the Prospect and the Ribbon, every wrapped line ending on its dot; a page loaded at 640, or the Ribbon at 960, 1024 or 1032 where its corner was written, and widened to 1280 lays out from its sheets again; Issue #741's two corners are never written; and with scripts off the Ribbon's corner stands at its cap, clear, at 1024 (Issue #762)",
+    "CO5 the corner gives way before the nav wraps: the Ribbon at 960, 1024 and 1032 keeps its nav on one line, its corner written between the kit's 19rem and its 30rem cap and standing the gap clear, under reduced motion and with motion on, and at 1280 nothing is written; at 640 home's nav wraps between rooms, every wrapped line ending on its dot, while the FAQ, the Print Room, the Prospect and the Ribbon lay out their 1024 top row on one line, the gap clear; home loaded at 640, or the Ribbon at 640, 960, 1024 or 1032 where its corner was written, and widened to 1280 lays out from its sheets again; Issue #741's two corners are never written; and with scripts off the Ribbon's corner stands at its cap, clear, at 1024 (Issue #762)",
     reduced.ok && moving.ok && wraps && lays && untouched && scriptsOff,
     [...reduced.rows, ...moving.rows, ...narrow, ...widened, ...held, `scripts off ${fmt("/ribbon/", 1024, off)}`].join(" | "),
   );
@@ -108,18 +108,26 @@ export async function co5Yields(ctx: SuiteContext): Promise<void> {
 type Seat = { slipTop: number; reserveTop: number; folioH: number };
 const SEAT: Payload<Seat> = `(() => { const f = document.querySelector("[style*='--reserve-top']"); return { slipTop: document.querySelector(".slip").getBoundingClientRect().top, reserveTop: f ? parseFloat(f.style.getPropertyValue("--reserve-top")) : NaN, folioH: document.querySelector(".corner.tr").getBoundingClientRect().height }; })()`;
 
-// The witness: from 1041 to 901 the Ribbon's folio yields from 480 to 339.6 and rewraps 20px taller (146.6 to 166.6, the step 6 spike on 2026-10-05), which only a refit on the folio's own resize carries to the slip.
+// The witness, deliberate: under the 1024 floor no window rewraps a room's folio (the Ribbon's yields from 480 at 1041 to 462.6 at the floor and keeps its 146.6 height, measured 2026-10-06), so a style narrows it to the kit's 19rem, which rewraps it taller, and only a refit on the folio's own resize carries that to the slip.
+const NARROWED = ".corner.tr.folio-room { max-width: 19rem !important; }";
+const WEAR = `(() => { const s = document.createElement("style"); s.id = "co6-narrowed"; s.textContent = ${JSON.stringify(NARROWED)}; document.documentElement.appendChild(s); return true; })()`;
+
 export async function co6Follows(ctx: SuiteContext): Promise<void> {
   const settle = makeSettle(ctx);
-  const rest = (label: string) => settle(SEAT, (d, last) => last !== null && JSON.stringify(d) === JSON.stringify(last), label);
-  await open(ctx, "/ribbon/", 1041);
+  const rest = (label: string, moved?: Seat) => settle(SEAT, (d, last) => (moved === undefined || d.folioH !== moved.folioH) && last !== null && JSON.stringify(d) === JSON.stringify(last), label);
+  await open(ctx, "/ribbon/", 1280);
   const wide = await rest("co6-wide");
-  await at(ctx, 901, "co6-resized");
-  const resized = await rest("co6-resized-seat");
-  await open(ctx, "/ribbon/", 901);
+  await ctx.evaluate(WEAR);
+  const resized = await rest("co6-narrowed", wide);
+  const early = await ctx.send<{ identifier: string }>("Page.addScriptToEvaluateOnNewDocument", { source: WEAR });
+  try {
+    await open(ctx, "/ribbon/", 1280);
+  } finally {
+    await ctx.send("Page.removeScriptToEvaluateOnNewDocument", { identifier: early.identifier });
+  }
   const fresh = await rest("co6-fresh");
   ctx.check(
-    "CO6 a chart room's slip follows its folio: the Ribbon loaded at 1041 and resized to 901, where the top row rewraps its folio taller, seats its slip and its stage's top reserve where a fresh load at 901 does (Issue #762; the PR #777 slip-seat row)",
+    "CO6 a chart room's slip follows its folio: the Ribbon at 1280 whose folio a style narrows to the kit's 19rem, rewrapping it taller, seats its slip and its stage's top reserve where a fresh load wearing the same style does (Issue #762; the PR #777 slip-seat row; the style since pull request C's floor, under which no window rewraps a room's folio)",
     fresh.folioH - wide.folioH > 10 && Math.abs(resized.slipTop - fresh.slipTop) < 0.5 && Math.abs(resized.reserveTop - fresh.reserveTop) < 0.5,
     JSON.stringify({ wide, resized, fresh }),
   );
@@ -137,12 +145,11 @@ export async function co7Band(ctx: SuiteContext): Promise<void> {
     const wide = await settle(GROUND, (d, last) => last !== null && JSON.stringify(d) === JSON.stringify(last), `co7-${page}-1280`);
     await open(ctx, page, NARROW);
     const narrow = await settle(GROUND, (d, last) => last !== null && JSON.stringify(d) === JSON.stringify(last), `co7-${page}-640`);
-    const growth = narrow.clusterBottom - wide.clusterBottom;
-    ok &&= wide.bandInline === "" && growth > 10 && Math.abs(narrow.band - (wide.band + growth)) < 0.5 && narrow.firstTop >= Math.max(narrow.clusterBottom, narrow.band);
-    rows.push(`${page}: band ${wide.band.toFixed(1)} to ${narrow.band.toFixed(1)} (${narrow.bandInline}), cluster foot ${wide.clusterBottom.toFixed(1)} to ${narrow.clusterBottom.toFixed(1)}, first row at ${narrow.firstTop.toFixed(1)}`);
+    ok &&= [wide, narrow].every((r) => r.bandInline === "" && r.firstTop >= Math.max(r.clusterBottom, r.band)) && Math.abs(narrow.band - wide.band) < 0.5 && Math.abs(narrow.clusterBottom - wide.clusterBottom) < 0.5;
+    rows.push(`${page}: band ${wide.band.toFixed(1)} and ${narrow.band.toFixed(1)}, cluster foot ${wide.clusterBottom.toFixed(1)} and ${narrow.clusterBottom.toFixed(1)}, first row at ${wide.firstTop.toFixed(1)} and ${narrow.firstTop.toFixed(1)}`);
   }
   ctx.check(
-    "CO7 the band grows by exactly what the cluster grew: on the FAQ, the Glossary and the Gallery at 640, where the nav wraps, the band token is its 1280 value plus the cluster's growth and the page's first row starts below both the cluster and the token, so its padding follows the token; at 1280 nothing is written (Issue #762; it holds what the unit band test held before Issue #779's check placement)",
+    "CO7 a room's band and first row hold at the floor: on the FAQ, the Glossary and the Gallery at 1280 and at 640, which lays out the 1024 page, the band token is unwritten and the same, the cluster's foot does not move, and the page's first row starts below both the cluster and the band, so the desk layer that holds the chrome takes no room from the text (Issue #762; it holds what the unit band test held before Issue #779's check placement)",
     ok,
     rows.join(" | "),
   );

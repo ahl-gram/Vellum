@@ -12,8 +12,8 @@ import { cd1DogEar, cd2Lays, cd2bRealPointer, cd23LineLeaves, cd3Refused, cd4Rel
 import { cd44CarryFiles, cd45SnapBack, cd46ReducedCarry, cd47FullCarry } from "./chart-drawer/drag.ts";
 import { cd9NeverTogether, cd12SeatsHold, cd13TabClear, cd18RoadOn } from "./chart-drawer/surfaces.ts";
 import { cd18bRoadCarries, cd19PortfolioDrafts, cd24PortfolioSays, cd20BarePortfolio, cd21PortfolioGlass, cd49PrintRoomRoad, cd50ScriptsOffHome } from "./chart-drawer/portfolio.ts";
-import { cd6PhoneDoor, cd14LeafTabs, cd15TableLeaf, cd16LeafTurnsBack } from "./chart-drawer/phone.ts";
-import { cd25CardPress, cd27CardAtCap, cd28PagePress, cd34PageRefusals, cd31RoundTrip, cd32MixedFolio, cd33PhonePress } from "./chart-drawer/prospect.ts";
+import { cd48TouchHandle, na2DrawerBelowFloor } from "./chart-drawer/floor.ts";
+import { cd25CardPress, cd27CardAtCap, cd28PagePress, cd34PageRefusals, cd31RoundTrip, cd32MixedFolio } from "./chart-drawer/prospect.ts";
 import { cd36GoldPress, cd37BackCached, cd38BackRebuilt, cd39LinkBeatsDevice, cd40EmptySticks, cd41CachedReturn } from "./chart-drawer/homes.ts";
 
 type Step = ReturnType<typeof makeStep>;
@@ -57,7 +57,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
 }
 
 async function cd9Surfaces(kd: DragKit, step: Step, SIX: string): Promise<void> {
-  const { send, setNarrowViewport, clearMobile, go } = kd;
+  const { send, go } = kd;
   // CD9 / CD11 / CD12 (Issue #543, Alex 2026-09-08): the Broadside and the Chart Table are never open together and nothing is lifted onto the chart, because covering the caption and the roads out while leaving the side panel standing made no sense to the reader.
   await step("CD9, CD11, CD12, CD22, CD43", async () => { const withOpen = await cd9NeverTogether(kd, SIX); await cd12SeatsHold(kd, SIX, withOpen); });
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
@@ -75,15 +75,8 @@ async function cd9Surfaces(kd: DragKit, step: Step, SIX: string): Promise<void> 
   // BARE means bare on both homes since Issue #634: a Portfolio the address names no folio for now shows what the device holds (ruling 4), so the six this group just laid would arrive here as a full pile.
   await cd20BarePortfolio(kd);
   await cd21PortfolioGlass(kd);
-  await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
-  // CD6 (Issue #540 Sub 2a): the desktop drawer must never paint below the fold (read at 640 since Issue #762), and the check has to try the door that opens it: `lay()` calls setOpen(true) with no width term, and `.chart-drawer.open` (0,2,0) beat the stand-down's (0,1,0), so once .open landed the drawer displayed at 390 over a reader who could not shut it.
-  await setNarrowViewport(640, 844);
-  await step("CD6, CD48", () => cd6PhoneDoor(kd));
-  await setNarrowViewport(390, 844);
-  await cd14LeafTabs(kd, SIX);
-  await step("CD15, CD17", () => cd15TableLeaf(kd));
-  await cd16LeafTurnsBack(kd);
-  await clearMobile();
+  await step("CD48", () => cd48TouchHandle(kd));
+  await step("NA2", () => na2DrawerBelowFloor(kd));
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
 }
 
@@ -93,7 +86,6 @@ async function cd25CapturesAndHomes(kd: DragKit, step: Step, SIX: string): Promi
   await step("CD27", () => cd27CardAtCap(kd, SIX));
   await step("CD28, CD29, CD34, CD35, CD31", async () => { const two = await cd28PagePress(kd); await cd34PageRefusals(kd, SIX); await cd31RoundTrip(kd, two); });
   await step("CD32", () => cd32MixedFolio(kd));
-  await step("CD33", () => cd33PhonePress(kd));
   // Issue #634: the table's second home, and the four roads the two homes exist for. ONE and TWO are addresses rather than gestures because every check below is about WHERE the table came from, not about the handle that filed it.
   const TWO = `${ONE}_k-p.seed-42.style-antique.i-0.year-1059`;
   const kt = tableKit(kd);

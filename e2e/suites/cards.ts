@@ -37,7 +37,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}))`);
   await pCardShot(ctx, pm);
   const narrowCount = await evaluate<number>(`window.__vellumRunInline({kind:"draw",seed:${NARROW_SEED},overrides:{},render:{style:"antique",widthPx:1500,legend:true}}).manifest.places.length`);
-  await step("P19, P19b", () => p19CardsFit(k, narrowCount));
+  await step("P19", () => p19CardsFit(k, narrowCount));
   await step("P20 to P27", async () => { const open = await p20PinnedTakesPointer(k); await p26TailScrolls(ctx, open); await p23CapHolds(k, open); });
   await step("P24", () => p24NothingToScroll(k));
   const hk = holdKit({ ...ctx, settle });

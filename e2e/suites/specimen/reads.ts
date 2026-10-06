@@ -5,7 +5,7 @@ export const CHART_ASPECT = 1500 / 1157.931;
 export const INK_BROWN = "rgb(107, 90, 64)";
 export const CONTROL_GOLD = "rgb(240, 227, 189)";
 type Box = { x: number; y: number; w: number; h: number; right: number; bottom: number } | null;
-export type Specimen = { st: { state: string; folded: boolean; zoomed: boolean; pill: string } | null; innerW: number; innerH: number; rem: number; chromeX: number; plateLoaded: boolean; plateAspect: number | null; sheet: Box; map: Box; slip: Box; slipVis: string | null; slipDisp: string | null; slipPos: string | null; slipBody: string | null; tabVis: string | null; tabDisp: string | null; folio: Box; chartFolio: Box; chartFolioDisp: string | null; folioRoomPos: string | null; chartFolioText: number | null; glass: Box; glassDisp: string | null; glassOverFolio: [number, number] | null; legend: Box; legendDisp: string | null; legendGround: string | null; legendGroundOn: string | null; legendInSlip: boolean; legendDocked: boolean; folioInset: string[] | null; pool: string | null; poolChrome: string | null; poolGlass: string | null; folioPanel: string | null; folioFilter: string | null; pillDisp: string | null; pillText: string | null; pill: Box; folioLines: boolean[]; crNum: string | null; inked: string | null; unInked: string | null; gold: string | null; disabled: string | null; missDisp: string | null; handleExpanded: string | null; sheetH: string; fog: string | null; vignette: string | null; noX: boolean };
+export type Specimen = { st: { state: string; folded: boolean; zoomed: boolean; pill: string } | null; innerW: number; innerH: number; rem: number; chromeX: number; plateLoaded: boolean; plateAspect: number | null; sheet: Box; map: Box; slip: Box; slipVis: string | null; slipDisp: string | null; slipPos: string | null; slipBody: string | null; tabVis: string | null; tabDisp: string | null; folio: Box; chartFolio: Box; chartFolioDisp: string | null; folioRoomPos: string | null; chartFolioText: number | null; glass: Box; glassDisp: string | null; glassOverFolio: [number, number] | null; legend: Box; legendDisp: string | null; legendGround: string | null; legendGroundOn: string | null; folioInset: string[] | null; pool: string | null; poolChrome: string | null; poolGlass: string | null; folioPanel: string | null; folioFilter: string | null; pillDisp: string | null; pillText: string | null; pill: Box; folioLines: boolean[]; crNum: string | null; inked: string | null; unInked: string | null; gold: string | null; disabled: string | null; missDisp: string | null; fog: string | null; vignette: string | null; noX: boolean };
 export const atFolded = (from: Specimen) => (d: Specimen, p: Specimen | null): boolean => d.slipVis === "hidden" && d.tabVis === "visible" && d.legend!.x !==
   from.legend!.x && !!p &&
   d.legend!.x ===
@@ -16,7 +16,6 @@ export const atFolded = (from: Specimen) => (d: Specimen, p: Specimen | null): b
 export const READ: Payload<Specimen> = `(() => {
   const r = (sel) => { const e = document.querySelector(sel); if (!e) return null; const b = e.getBoundingClientRect(); return { x: b.x, y: b.y, w: b.width, h: b.height, right: b.right, bottom: b.bottom }; };
   const cs = (sel, prop, pseudo) => { const e = document.querySelector(sel); return e ? getComputedStyle(e, pseudo || null)[prop] : null; };
-  const legend = document.querySelector(".legend");
   const plate = document.getElementById("sb-plate");
   const root = getComputedStyle(document.documentElement);
   return {
@@ -31,7 +30,7 @@ export const READ: Payload<Specimen> = `(() => {
     chartFolioText: (() => { const f = document.querySelector(".corner.bl"); if (!f) return null; const range = document.createRange(); let right = null; for (const p of f.querySelectorAll("p")) { if (!p.textContent) continue; range.selectNodeContents(p); const b = range.getBoundingClientRect(); if (b.width > 0) right = Math.max(right ?? 0, b.right); } return right; })(),
     glass: r(".corner.br"), glassDisp: cs(".zoomery", "display"),
     glassOverFolio: (() => { const g = document.querySelector(".corner.br"), f = document.querySelector(".corner.tr"); if (!g || !f) return null; const a = g.getBoundingClientRect(), b = f.getBoundingClientRect(); const w = Math.min(a.right, b.right) - Math.max(a.x, b.x), h = Math.min(a.bottom, b.bottom) - Math.max(a.y, b.y); return w > 0 && h > 0 ? [Math.round(w), Math.round(h)] : null; })(),
-    legend: r(".legend"), legendDisp: cs(".legend", "display"), legendGround: cs(".legend", "backgroundImage", "::before"), legendGroundOn: cs(".legend", "content", "::before"), legendInSlip: !!legend && legend.classList.contains("in-slip"), legendDocked: !!legend && !!legend.parentElement && legend.parentElement.classList.contains("legend-dock"),
+    legend: r(".legend"), legendDisp: cs(".legend", "display"), legendGround: cs(".legend", "backgroundImage", "::before"), legendGroundOn: cs(".legend", "content", "::before"),
 
     folioInset: (() => { const e = document.querySelector(".corner.tr"); if (!e) return null; const c = getComputedStyle(e, "::before"); return [c.top, c.right, c.bottom, c.left]; })(),
     pool: cs(".corner.tr", "content", "::before"), poolChrome: cs("header.chrome", "content", "::before"), poolGlass: cs(".corner.br", "content", "::before"), folioPanel: cs(".corner.tr", "backgroundImage", "::before"), folioFilter: cs(".corner.tr", "filter", "::before"),
@@ -39,8 +38,6 @@ export const READ: Payload<Specimen> = `(() => {
     folioLines: [...document.querySelectorAll(".corner.bl p")].map((p) => p.textContent.length > 0),
     crNum: cs(".contents .cr-num", "color"), inked: cs(".index li.inked", "opacity"), unInked: cs(".index > li:not(.inked)", "opacity"),
     gold: cs(".legend-btn.gold", "background-color"), disabled: cs(".legend-btn:disabled", "opacity"), missDisp: cs(".index .terms a.miss", "display"),
-    handleExpanded: (document.querySelector(".slip-handle") || { getAttribute() { return null; } }).getAttribute("aria-expanded"),
-    sheetH: document.body.style.getPropertyValue("--sheet-h"),
     fog: cs(".fog.a", "display"), vignette: cs(".vignette.top", "display"),
     noX: document.documentElement.scrollWidth <= document.documentElement.clientWidth,
   };

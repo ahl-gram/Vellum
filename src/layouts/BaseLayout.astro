@@ -204,12 +204,12 @@ header.chrome a:focus-visible, footer a:focus-visible { outline-color: var(--par
 /* The rooms stand clear of the band; a chart room has no band to clear. */
 body.room { --room-pad-top: 8.4rem; padding: var(--room-pad-top) 2.2rem 1.6rem; }
 body.room.chart-room { --room-pad-top: 0px; padding: 0; }
-/* The 1024 floor (Alex, 2026-10-06, Issue #762): a room narrower than the floor keeps its 1024 layout at full size and the window scrolls sideways. A px floor, not a viewport-unit one: at a resize event Chrome still resolves `vw` against the old window, so a floor written in `vw` laid the head cluster out against a 640 page on that event (measured 2026-10-06). */
+/* The 1024 floor (Alex, 2026-10-06, Issue #762): a room narrower than the floor keeps its 1024 layout at full size and the window scrolls sideways. A px floor, not a viewport-unit one: under the harness's emulated resize Chrome still resolved `vw` against the old window at the resize event, so a floor written in `vw` laid the head cluster out against a 640 page (measured 2026-10-06). */
 @media screen {
   html:has(body.room) { overflow-x: auto; }
   body.room { min-width: 1024px; box-sizing: border-box; }
-  .desk-layer.on { position: sticky; top: 0; z-index: 10; height: 100vh; margin: calc(-1 * var(--room-pad-top)) -2.2rem -100vh; contain: layout; pointer-events: none; }
-  body.room.chart-room .desk-layer.on { margin: 0 0 -100vh; }
+  .desk-layer.on { position: sticky; top: 0; z-index: 10; height: 100vh; margin: calc(-1 * var(--room-pad-top)) -2.2rem calc(var(--room-pad-top) - 100vh); contain: layout; pointer-events: none; }
+  body.room.chart-room .desk-layer.on { margin-inline: 0; }
 }
 .desk-layer:not(.on) { display: contents; }
 /* The interim desk panel: a room not yet dressed for the deep wears it so nothing ships ink-on-walnut; desk="open" stops the class rendering, so the rule retires itself room by room. */

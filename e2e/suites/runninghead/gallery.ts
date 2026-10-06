@@ -26,17 +26,6 @@ export async function rh10GalleryScrolled({ evaluate, send, check, sleep, visit 
   );
 }
 
-export async function rh10bNarrowFolio({ evaluate, check }: RunningHeadKit, galleryNarrow: boolean): Promise<void> {
-  const gFolio = galleryNarrow ? await evaluate<{ content: string; inset: string[]; rem: number } | null>(`(()=>{const e=document.querySelector(".corner.tr");if(!e)return null;const c=getComputedStyle(e,"::before");
-    return{content:c.content,inset:[c.top,c.right,c.bottom,c.left],rem:parseFloat(getComputedStyle(document.documentElement).fontSize)};})()`) : null;
-  const gWant = gFolio ? [-0.7, -0.7, -0.75, -0.7].map((v) => `${Math.round(v * gFolio.rem * 100) / 100}px`) : null;
-  check(
-    "RH10b at 390 the Gallery's room folio takes the narrow insets too (#531): the stage-less chart room is the second arm that paints this panel, and a repair that carries only the zoomed arm leaves this page on the wide value",
-    !!gFolio && gFolio.content !== "none" && JSON.stringify(gFolio.inset) === JSON.stringify(gWant),
-    JSON.stringify({ ...gFolio, want: gWant }),
-  );
-}
-
 export async function rh10cPrinted({ evaluate, send, check, sleep }: RunningHeadKit, galleryNarrow: boolean): Promise<void> {
   await send("Emulation.setEmulatedMedia", { media: "print" });
   const gPrint = galleryNarrow ? await evaluate<{ content: string; folioPos: string; armed: boolean } | null>(`(()=>{const e=document.querySelector(".corner.tr");if(!e)return null;const c=getComputedStyle(e,"::before");

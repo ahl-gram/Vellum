@@ -7,7 +7,7 @@ import { rr31StripStands, rr35GoverningBudget, rr37Envelope, rr36ChartFills } fr
 import { rr6Survey, rr7Year, rr9Today, rr10CrossLinks } from "./reading-room/addresses.ts";
 import { rr16Colophon, rr17CounterRead, rr18Park, rr20Superseded, rr21Dice, rr22MidPlay } from "./reading-room/colophon.ts";
 import { rr23Usurped, rr24BeforeArm, rr25TearDown } from "./reading-room/arm.ts";
-import { rr34bPhone, rr11bScrubHandles } from "./reading-room/phone.ts";
+import { rr11bScrubHandles } from "./reading-room/scrub.ts";
 import { rr12Clean, rr14Fallback } from "./reading-room/fallback.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
@@ -47,8 +47,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await rr24BeforeArm(k);
   await rr25TearDown(k);
   await rr10CrossLinks(ctx);
-  await rr34bPhone(k, ctx);
-  await rr11bScrubHandles(ctx);
+  await rr11bScrubHandles(k, ctx);
   rr12Clean(ctx, rrErrBase, rrHttpBase);
   await rr14Fallback(ctx);
 }

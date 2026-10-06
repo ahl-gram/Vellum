@@ -9,7 +9,7 @@ import type { RunningHeadKit } from "./runninghead/kit.ts";
 import { DISPLAY_FACE, near, SHELLED } from "./runninghead/reads.ts";
 import type { Head } from "./runninghead/reads.ts";
 import { rh0OneH1, rh1NamesPage, rh2Members, rh3Fixed, rh4OneDress, rh5Leading, rh6Differ, rh9ContrastPins, rhSweep } from "./runninghead/heads.ts";
-import { rh10bNarrowFolio, rh10cPrinted, rh10GalleryScrolled } from "./runninghead/gallery.ts";
+import { rh10cPrinted, rh10GalleryScrolled } from "./runninghead/gallery.ts";
 
 // Reading the producer's own template couples the injected twin to it: rename the class or demote the heading in renderBoundAtlas and RH7 reds instead of drifting.
 const REPO = resolve(fileURLToPath(new URL(".", import.meta.url)), "..", "..");
@@ -38,12 +38,11 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await rh7AtlasTitle(k);
   rh9ContrastPins(ctx, heads, bad);
   await rh10GalleryScrolled(k);
-  // Issue #531: the OTHER painting arm, body.chart-room:not(:has(.stage)), which SB8e's page never matches.
+  // The stageless room on paper at a phone's width (RH10c, RH10d) and at Letter (RH10e); the screen's 1024 floor never reaches print.
   await send("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 1, mobile: false });
   // The Z13 bounce: /gallery/ is already loaded, and visit()'s probe (readyState complete plus a .wordmark) is satisfied by the STALE document, so a same-URL navigate can return before the new one commits.
   await send("Page.navigate", { url: "about:blank" });
   const galleryNarrow = await visit("/gallery/");
-  await rh10bNarrowFolio(k, galleryNarrow);
   await rh10cPrinted(k, galleryNarrow);
   await send("Emulation.clearDeviceMetricsOverride");
 

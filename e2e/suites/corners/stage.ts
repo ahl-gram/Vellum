@@ -5,6 +5,8 @@ import { CHROME_GAP } from "../../../src/site/shared/stage-fit.ts";
 import { sampleRow } from "../../support/pixel.ts";
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
+import { GLYPHS_OVER_SHEET } from "./glyphs.ts";
+import type { Glyph } from "./glyphs.ts";
 import { routesUnder } from "./geometry.ts";
 
 const REPO = resolve(fileURLToPath(new URL(".", import.meta.url)), "..", "..", "..");
@@ -42,7 +44,7 @@ const STAGE: Payload<Stage | { chartRoom: false; ready: boolean }> = `(() => {
   const r1 = (n) => Math.round(n * 10) / 10;
   const box = (b) => ({ x: r1(b.left), y: r1(b.top), r: r1(b.right), b: r1(b.bottom) });
   const frame = document.querySelector("[style*='--reserve-right']");
-  const legend = document.querySelector(".legend:not(.in-slip)");
+  const legend = document.querySelector(".legend");
   const unseen = (el) => { for (let e = el; e; e = e.parentElement) { const cs = getComputedStyle(e); if (cs.display === "none" || cs.visibility === "hidden" || parseFloat(cs.opacity) === 0) return true; } return false; };
   const pieceEls = [];
   const enlist = (e) => { let i = pieceEls.indexOf(e); if (i < 0) { pieceEls.push(e); i = pieceEls.length - 1; } return i; };
@@ -65,7 +67,7 @@ const STAGE: Payload<Stage | { chartRoom: false; ready: boolean }> = `(() => {
   }
   const role = (e) => e.matches("header.chrome") ? "cluster" : e.matches(".corner.tr") ? "room folio" : e.matches(".corner.bl") ? "chart folio" : e.matches(".strip") ? "strip" : e.matches(".legend") ? "Press" : "corner";
   const backings = [];
-  for (const e of document.querySelectorAll("header.chrome, .corner, .strip, .legend:not(.in-slip)")) {
+  for (const e of document.querySelectorAll("header.chrome, .corner, .strip, .legend")) {
     const ps = getComputedStyle(e, "::before");
     if (ps.content === "none" || ps.display === "none" || unseen(e)) continue;
     const eb = e.getBoundingClientRect();
@@ -170,8 +172,9 @@ export async function ea1Phone(ctx: SuiteContext): Promise<StageRun> {
   return { rooms, reads };
 }
 
+// Below 1024 the fold press stands on the 1024 page past the window's right edge, so the window scrolls it into reach first and back to the page's start after.
 async function fold(ctx: SuiteContext): Promise<void> {
-  const at = await ctx.evaluate<{ x: number; y: number } | null>(`(() => { const b = document.querySelector(".slip-fold"); if (!b) return null; const r = b.getBoundingClientRect(); return r.width > 0 ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : null; })()`);
+  const at = await ctx.evaluate<{ x: number; y: number } | null>(`(() => { const b = document.querySelector(".slip-fold"); if (!b) return null; const o = b.getBoundingClientRect(); if (o.right > innerWidth) scrollBy(o.right - innerWidth + 8, 0); const r = b.getBoundingClientRect(); return r.width > 0 && r.right <= innerWidth ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : null; })()`);
   if (!at) throw new Error("the slip has no fold press to take");
   const sheetX: Payload<{ folded: boolean; x: number }> = `({ folded: document.querySelector(".slip").classList.contains("folded"), x: document.getElementById("sheet").getBoundingClientRect().left })`;
   const before = await ctx.evaluate(sheetX);
@@ -181,6 +184,7 @@ async function fold(ctx: SuiteContext): Promise<void> {
   // The fold refits on a timer after its slide (FOLD_SETTLE_MS in src/site/shared/slip.ts), so the read waits for the sheet to leave where it stood, not for the class alone.
   await makeSettle(ctx)(sheetX, (d) => d.folded && Math.abs(d.x - before.x) > 1, "the slip folds and the sheet refits");
   await ctx.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 1 });
+  await ctx.evaluate("window.scrollTo(0, 0)");
 }
 
 // Folded at 932x430, then resized a pixel taller and back twice: the seat must come to rest the same way every time (the cold review of PR #777 found the Prospect and the Seed of the Day flipping between risen and stacked on every layout there).
@@ -265,11 +269,11 @@ export async function eaDesk(ctx: SuiteContext): Promise<void> {
 async function lifted(ctx: SuiteContext, page: string, how: "hover" | "focus"): Promise<{ at: string; lifted: boolean; s: Stage | null }> {
   await size(ctx, DESK.w, DESK.h);
   await open(ctx, page, DESK.w, DESK.h, DESK, `EA5 ${how}`);
-  const press = await ctx.evaluate<{ x: number; y: number } | null>(`(() => { const b = [...document.querySelectorAll(".legend:not(.in-slip) .legend-row .legend-btn")].find((e) => e.getBoundingClientRect().width > 0); if (!b) return null; const r = b.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; })()`);
+  const press = await ctx.evaluate<{ x: number; y: number } | null>(`(() => { const b = [...document.querySelectorAll(".legend .legend-row .legend-btn")].find((e) => e.getBoundingClientRect().width > 0); if (!b) return null; const r = b.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; })()`);
   if (!press) return { at: `${page} ${how}, which shows no Press`, lifted: false, s: null };
   if (how === "hover") await ctx.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: press.x, y: press.y });
-  else await ctx.evaluate(`(() => { const b = [...document.querySelectorAll(".legend:not(.in-slip) .legend-row .legend-btn")].find((e) => e.getBoundingClientRect().width > 0); b.focus({ focusVisible: true }); return true; })()`);
-  const lift: Payload<boolean> = `[...document.querySelectorAll(".legend:not(.in-slip) .legend-row .legend-btn")].some((e) => e.matches(":hover, :focus-visible") && getComputedStyle(e).transform !== "none")`;
+  else await ctx.evaluate(`(() => { const b = [...document.querySelectorAll(".legend .legend-row .legend-btn")].find((e) => e.getBoundingClientRect().width > 0); b.focus({ focusVisible: true }); return true; })()`);
+  const lift: Payload<boolean> = `[...document.querySelectorAll(".legend .legend-row .legend-btn")].some((e) => e.matches(":hover, :focus-visible") && getComputedStyle(e).transform !== "none")`;
   const up = await makeSettle(ctx)(lift, (d) => d, `EA5 ${page} ${how} lifts a press`).catch(() => false);
   await size(ctx, DESK.w, DESK.h - 1);
   const s = await rest(ctx, DESK.w, DESK.h - 1, `EA5 ${page} ${how} relaid`);
@@ -300,41 +304,7 @@ const relative = ([r, g, b]: readonly [number, number, number]): number => 0.212
 const ratio = (a: number, b: number): number => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
 const median = (xs: number[]): number => { const s = [...xs].sort((a, b) => a - b); return s[Math.floor(s.length / 2)]!; };
 
-type Glyph = { piece: string; t: string; ink: [number, number, number]; row: number; x: number; w: number };
 type Ground = { piece: string; t: string; ratio: number };
-const PIECES = "header.chrome, .corner, .strip, .legend:not(.in-slip)";
-
-// Every text node of the chrome whose box centre stands on the sheet, by piece; decor hidden from assistive technology (the nav's separator dots) is left out, and the ink is the computed colour, so a translucent ancestor reads darker ink than it paints and errs toward passing.
-export const GLYPHS_OVER_SHEET: Payload<Glyph[]> = `(() => {
-  const sheet = document.getElementById("sheet").getBoundingClientRect();
-  const unseen = (el) => { for (let e = el; e; e = e.parentElement) { const cs = getComputedStyle(e); if (cs.display === "none" || cs.visibility === "hidden" || parseFloat(cs.opacity) === 0) return true; } return false; };
-  const name = (root) => root.matches("header.chrome") ? "cluster" : root.matches(".corner.tr") ? "room folio" : root.matches(".corner.bl") ? "chart folio" : root.matches(".corner.br") ? "Glass" : root.matches(".strip") ? "strip" : root.matches(".legend") ? "Press" : "corner";
-  const out = [];
-  for (const root of document.querySelectorAll(${JSON.stringify(PIECES)})) {
-    const walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
-    for (let n = walk.nextNode(); n; n = walk.nextNode()) {
-      const el = n.parentElement;
-      if (!n.textContent.trim() || !el || el.closest("[aria-hidden='true'], option, select, script, style") || unseen(el)) continue;
-      const rg = new Range(); rg.selectNodeContents(n);
-      const b = rg.getBoundingClientRect();
-      if (!(b.width > 0)) continue;
-      const cx = b.left + b.width / 2, cy = b.top + b.height / 2;
-      if (cx < sheet.left || cx > sheet.right || cy < sheet.top || cy > sheet.bottom) continue;
-      const m = getComputedStyle(el).color.match(/[0-9.]+/g).map(Number);
-      out.push({ piece: name(root), t: (el.classList.contains("fn") ? "the section mark " : "") + n.textContent.trim().slice(0, 24), ink: [m[0], m[1], m[2]], row: Math.round(cy), x: Math.max(0, Math.floor(b.left)), w: Math.max(1, Math.floor(b.width)) });
-    }
-    for (const input of root.querySelectorAll("input[type=number], input[type=text], input[type=search], input:not([type])")) {
-      if (!input.value || unseen(input)) continue;
-      const b = input.getBoundingClientRect(), cs = getComputedStyle(input);
-      const x = b.left + parseFloat(cs.paddingLeft) + parseFloat(cs.borderLeftWidth), w = b.width - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - parseFloat(cs.borderLeftWidth) - parseFloat(cs.borderRightWidth);
-      const cx = x + w / 2, cy = b.top + b.height / 2;
-      if (!(w > 0) || cx < sheet.left || cx > sheet.right || cy < sheet.top || cy > sheet.bottom) continue;
-      const m = cs.color.match(/[0-9.]+/g).map(Number);
-      out.push({ piece: name(root), t: "the field " + (input.id || input.name || input.type), ink: [m[0], m[1], m[2]], row: Math.round(cy), x: Math.max(0, Math.floor(x)), w: Math.max(1, Math.floor(w)) });
-    }
-  }
-  return out;
-})()`;
 
 const HIDE_TEXT = `header.chrome *, .legend *, .corner *, .strip * { color: transparent !important; text-decoration-color: transparent !important; }`;
 export const NO_POOLS = `body.stage-under :is(header.chrome, .legend, .corner, .strip)::before { content: none !important; }`;

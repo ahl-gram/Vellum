@@ -37,7 +37,7 @@ export async function rr37Envelope({ evaluate, send, check, sleep }: SuiteContex
   // The SURVEY half carries the long prose (its day rows run to ~153 chars against an annal's ~105), so the bar is driven there first: the chronicle half's short last annal reports 100 at every width and the envelope passes vacuously.
   await evaluate(`(()=>{const r=document.querySelector(".rf-range");r.value=r.min;r.dispatchEvent(new Event("input",{bubbles:true}));return null;})()`);
   await sleep(120);
-  const byWidth = [];
+  const byWidth: { w: number; h: number | null; told: string | null; gutter: string | undefined | null }[] = [];
   for (const w of [1024, 900, 768]) {
     await send("Emulation.setDeviceMetricsOverride", { width: w, height: 900, deviceScaleFactor: 1, mobile: false });
     await sleep(250);
@@ -47,11 +47,11 @@ export async function rr37Envelope({ evaluate, send, check, sleep }: SuiteContex
   await send("Emulation.setDeviceMetricsOverride", { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
   await sleep(200);
   check(
-    `RR37 and it stays within the ${WIDE_WORST}px envelope across the widths: the told row stands at 1024 and drops at 900 and below (#462 ruling 6, the phone rule is inclusive at 900)`,
+    `RR37 and it stays within the ${WIDE_WORST}px envelope across the widths: the told row stands at 1024, and at 900 and 768 the strip is the 1024 page's, the told row standing and the height the same (#462 ruling 6; the 1024 floor, Alex, 2026-10-06, Issue #762)`,
     byWidth.length === 3 &&
       byWidth.every((r) => r.h! > 0 &&
         r.h! <= WIDE_WORST) &&
-      byWidth[0]!.told === "flex" && byWidth[1]!.told === "none" && byWidth[2]!.told === "none" &&
+      byWidth.every((r) => r.told === "flex" && Math.abs(r.h! - byWidth[0]!.h!) <= 0.5) &&
       // The witness, same half: the survey row wrapped at 1024 must cost more than it did on one line at 1440, or the envelope bounds nothing.
       byWidth[0]!.h! >
         deskSurvey!.h,
