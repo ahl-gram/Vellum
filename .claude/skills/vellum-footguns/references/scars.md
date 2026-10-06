@@ -169,15 +169,15 @@ the public record that day, and a lesson in it came from a private note.
   width too. Proves Gate 1 item 11's both-sides clause.
 - PR #554: the prover found 10 of 19 arms of Gate 6's roster regex with no fixture, so a typo in any
   of them would have shipped silent; the selftest now generates one row per arm. Proves
-  Gate 1 item 13's per-arm clause.
+  Gate 7 item 1's per-arm clause.
 - PR #631: TP2's `[^}]*`-bounded pattern could not cross a `}`, so a second spelling nesting
   `overrides: {}` between its two fields evaded it, the second guard in that PR blinded by the same
   brace, and the third prover round found a third of the family; call sites are now enumerated on
-  the bare token. Proves Gate 1 item 13's bare-token clause.
+  the bare token. Proves Gate 7 item 1's bare-token clause.
 - PR #380: the ci.yml tier guards checked only that their tokens were present, so a swapped ternary
   (pull requests on the full suite, main merged on smoke) and a lost `!` (smoke forced onto risky
   pull requests) both escaped; the run loop and the pass and fail rule moved where tests execute
-  them, today `runSelected` and `runOutcome` in `e2e/support/suites.ts`. Proves Gate 1 item 17.
+  them, today `runSelected` and `runOutcome` in `e2e/support/suites.ts`. Proves Gate 7 item 3.
   Added by Issue #729: its ci.yml shape regexes, `/&&\s*'smoke'\s*\|\|\s*'full'/` and one on
   `!contains(...)`, left with the logic they pinned, and the PR #380 diff is their only record. The
   cost its body names is the `SUITES` map guard's, a regex over source text, which fails loudly when

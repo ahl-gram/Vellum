@@ -1,7 +1,7 @@
 # footgun-gate.ts
 
-A PreToolUse hook that puts the skill's gates in front of the model at the moment it edits a test,
-a browser-driving script, a stylesheet, or anything that can move a chart or the golden, creates a
+A PreToolUse hook that puts the skill's gates in front of the model at the moment it edits a test
+or a shared test helper, a browser-driving script, a stylesheet, or anything that can move a chart or the golden, creates a
 file that joins a roster, or pushes; and refuses the mechanical never-list outright. It is wired in the repo's `.claude/settings.json`, so it runs in
 every session launched from the Vellum root or a worktree. The skill works without it if that block
 is ever removed.
@@ -15,6 +15,11 @@ is ever removed.
   Gate 6 on the renderer, `generateWorld`'s transitive closure, the committed artifacts and the
   modules their writers reach. Gate 6's roster was derived by walking those import graphs, so widen
   it the same way rather than by adding paths that look related.
+  The routes are `gate-routes.ts`. Each names its gates in order, an edit is read against the first
+  route its path matches, and the first of that route's gates this session has not been shown is
+  the one pasted. Every route names one gate but the first: tests under `test/repo/` and
+  `test/site/`, and `test-support/*.ts`, owe Gate 1 and then Gate 7, one per edit, because the two
+  in one note pass the 8,000-character bound the size probes hold (Issue #782).
 - **Refuses** (the tool call does not run, the reason is shown). A command is read in COMMAND position
   only: quoted strings and heredoc bodies are blanked before segmenting, segments split on shell
   separators and the `then`/`do`/`else` keywords, a backslash-newline line continuation is joined back
@@ -232,6 +237,14 @@ is ever removed.
   is the rule rather than an overreach, since the refusal is about the implicit POST and not about
   the body in particular, and `-X PATCH` or the purpose-built `gh issue` subcommand is the way
   through. Refusal, stated.
+- **Gate 7 is pasted only on its route, and only on the edit after Gate 1.** A test elsewhere that
+  reads the repo's own files never has it pasted; Gate 1's markers at items 13, 15 and 17 name it,
+  and `scripts/lint/` is left off on purpose, since a lint rule is proven by its fixture test under
+  `test/repo/`, which is on the route. On the route, a session's first edit gets Gate 1, so a test
+  written in one Write and never edited again never has Gate 7 pasted, and a test written first
+  meets Gate 7 only once it exists. And since a subagent shares its parent's `session_id` (below),
+  parallel lanes share one record of what was shown: Gate 1 can go to one lane and Gate 7 to
+  another. Silence, not refusal, all of it.
 - A gate spent on a call the user then rejects is not shown again that session.
 - The once-per-session state is keyed on the hook payload's `session_id`. Measured 2026-09-11 in a
   live dispatch: a subagent's Bash DOES
@@ -263,7 +276,10 @@ the number of misses. Every gate's text is asserted non-empty first, so a rename
 `SKILL.md` fails here rather than shipping an empty injection, and the PR template is asserted to
 carry sections and no em-dash, so a template that would prefill an unusable body fails here too.
 The five section names are written out in the fixture table and derived in the hook; that asymmetry
-is deliberate, since fixtures built by reading the template would follow a rename and red nothing. Gate 6's rows are generated one per
+is deliberate, since fixtures built by reading the template would follow a rename and red nothing.
+The routing rows are data in `gate-routes.fixtures.ts`. Gate 7's each edit a list of paths in one
+session and judge the last decision, which is what pins the one-per-edit order and the record the
+routes share. Gate 6's rows are generated one per
 ARM of its roster regex, because a roster is only as strong as its least-swept alternative: the
 prover found 10 of 19 arms carried no fixture, so a typo in any of them would have shipped silent.
 Two of its rows exist for shapes no relative path can reach, an absolute `file_path` (which is what
@@ -274,8 +290,10 @@ command string from `.claude/settings.json` through `sh` with a real, a symlinke
 `test/repo/footgun-gate.test.ts` runs the whole table under `npm test`, so CI runs it on every PR.
 This is the implementer's own table, not an independent prover run. The once-per-session state
 lives at `$TMPDIR/vellum-footguns-<session_id>.json`; delete it to see a gate again. `npm run check`
-types every file here through the tsconfig include, and the selftest copies `markdown-code.ts` and
-`bare-cd.ts` beside the hook in its rootless checkout, since the hook imports both. The cd rows set
+types every file here through the tsconfig include, and the selftest copies `markdown-code.ts`,
+`bare-cd.ts` and `gate-routes.ts` beside the hook in its rootless checkout, since the hook imports
+all three; leave one out and the rootless hook cannot import it, `readDeployed` rethrows, and the
+selftest aborts with no `FAIL` line at all, which still reds `npm test`. The cd rows set
 `CLAUDE_PROJECT_DIR` for themselves and put it back, so a session's own value never reaches one.
 
 ## Cost
@@ -288,6 +306,6 @@ Measured 2026-09-09 on this Mac, ten runs each, through the deployed `sh -c` com
   Neither figure is written here: they move whenever a gate gains a line, nothing sweeps a claim in markdown,
   and the copy that used to sit here went stale twice. This prints each gate's characters and their
   total, which is the aggregate term; divide by about four for tokens:
-  `node --input-type=module -e 'const {gateText}=await import("./.claude/skills/vellum-footguns/hooks/footgun-gate.ts");let t=0;for(const g of ["Gate 1","Gate 2","Gate 3","Gate 4","Gate 5","Gate 6"]){const n=gateText(g).length;t+=n;console.log(g,n);}console.log("TOTAL",t)'`;
+  `node --input-type=module -e 'const {gateText}=await import("./.claude/skills/vellum-footguns/hooks/footgun-gate.ts");let t=0;for(const g of ["Gate 1","Gate 2","Gate 3","Gate 4","Gate 5","Gate 6","Gate 7"]){const n=gateText(g).length;t+=n;console.log(g,n);}console.log("TOTAL",t)'`;
 - every turn of every session in this repo: the skill's `description` line in the system prompt.
   That is the only permanent term, and the reason the description is kept short.
