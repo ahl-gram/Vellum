@@ -52,6 +52,7 @@ export default defineConfig(
     rules: {
       "@typescript-eslint/no-deprecated": "error",
       "@typescript-eslint/return-await": ["error", "error-handling-correctness-only"],
+      "@typescript-eslint/no-non-null-asserted-nullish-coalescing": "error",
     },
   },
   {
