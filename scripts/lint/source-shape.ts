@@ -279,6 +279,22 @@ const contentsRowBuilderOnly: Rule.RuleModule = {
 
 const testNoTestImport = sourceBan("nothing imports a .test.ts: node --test would run that file's tests a second time; share through test-support/ instead", (text) => /\.test\.ts(?:[?#]|$)/.test(text));
 
+const PINS = "the prospect plates are byte-pinned on every platform (handbook/specs/rulebook.md, Prospect byte pins)";
+
+const prospectLibmClockFree: Rule.RuleModule = {
+  meta: {
+    type: "problem",
+    messages: {
+      power: `the prospect layer squares by multiplying: ** and **= are a library power whose last bits differ between platforms, and ${PINS}`,
+      libm: `the prospect layer reads Math only as an exact member written out, one of EXACT_MATH in scripts/lint/source-shape.ts: the rest are libm or entropy, and an alias or a computed key hides which member is read, and ${PINS}`,
+      host: `the prospect layer reads no global but a built-in PROSPECT_GLOBALS in scripts/lint/source-shape.ts approves, no locale member and no import.meta: anything else is a clock, entropy or the host, and ${PINS}; a built-in joins that list with its reason`,
+      module: `the prospect layer imports no Node built-in module and no import() source computed at run time: Node's modules are the host's clock, entropy and files, and ${PINS}`,
+      ambient: `the prospect layer declares no ambient binding: a declare line hides a global from this rule while the erased code still reads it, and ${PINS}`,
+    },
+  },
+  create: () => ({}),
+};
+
 export default {
   rules: {
     "frame-no-id-lookup": frameNoIdLookup,
@@ -291,5 +307,6 @@ export default {
     "template-silent-escape": templateSilentEscape,
     "e2e-cancellation-roster": e2eCancellationRoster,
     "e2e-console-read-through-drop": e2eConsoleReadThroughDrop,
+    "prospect-libm-clock-free": prospectLibmClockFree,
   },
 };
