@@ -10,6 +10,9 @@ import { plateKey } from "../../src/prospect/key.ts";
 import { engravePlate, finishedPlateSvg } from "../../src/prospect/finished.ts";
 import { INNER } from "../../src/prospect/dress/furniture.ts";
 import type { Surroundings } from "../../src/prospect/surroundings.ts";
+import { layoutRun } from "../../src/prospect/letter/letter.ts";
+import { GRID } from "../../src/prospect/letter/face.ts";
+import { renderSvg } from "../../src/render/svg.ts";
 import { bandOf, makeInput } from "../../test-support/prospect-fixtures.ts";
 import { fnv1a } from "../../test-support/dress-svg.ts";
 
@@ -233,12 +236,16 @@ test("the key panel renders when entries exist and is omitted when empty", () =>
   assert.ok(!/aria-label="1\. /.test(bare), "a hamlet with nothing to key draws no panel");
 });
 
-test("a very long name shrinks its title and its cartouche stays inside the inner frame", () => {
+test("a very long name shrinks its title and its cartouche stays inside the inner frame, while a name that fits keeps the round's full title size", () => {
   const name = "Weluarapa-upon-Woaku-by-the-Strand-of-Hakoawelua";
   const plate = engravePlate(makeInput({ name }), STYLES.antique, 1300);
   const cartouche = plate.furniture.cartouche;
   assert.ok(cartouche.length > 0, "the cartouche reports its boxes");
   for (const b of cartouche) assert.ok(b.x0 >= INNER.x0 && b.x1 <= INNER.x1, `a cartouche box runs past the frame: ${JSON.stringify(b)}`);
+  const titleScale = (text: string, svg: string): number => Number(new RegExp(`aria-label="${text}" fill="[^"]*" transform="translate\\([^)]*\\) scale\\(([0-9.e-]+)\\)"`).exec(svg)?.[1]);
+  const full = layoutRun({ text: "TESTHOLM", x: 0, y: 0, size: 13, fill: "#000" }).scale * GRID;
+  assert.ok(Math.abs(titleScale("TESTHOLM", finishedPlateSvg(makeInput({}), STYLES.antique, 1300)) - full) < 1e-5, "a name that fits is set at the round's title size, 13");
+  assert.ok(titleScale(name.toUpperCase(), renderSvg(plate.node)) < full * 0.9, "the long name is set smaller");
 });
 
 test("the two ratified dresses render; the others refuse", () => {

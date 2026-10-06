@@ -1,10 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { STYLES, type MapStyle } from "../../src/render/style.ts";
-import { renderSvg } from "../../src/render/svg.ts";
+import { renderSvg, type SvgNode } from "../../src/render/svg.ts";
 import type { Arms } from "../../src/society/heraldry.ts";
 import { paletteForStyle } from "../../src/render/layers/heraldry.ts";
-import { finishedPlateSvg } from "../../src/prospect/finished.ts";
+import { finishedPlateSvg, finishProspect } from "../../src/prospect/finished.ts";
+import { NO_SURROUNDINGS, type Surroundings } from "../../src/prospect/surroundings.ts";
 import { castFor, figureNodes } from "../../src/prospect/dress/figures.ts";
 import { engraver } from "../../src/prospect/dress/burin.ts";
 import { smallSizeRule, SMALL_WIDTH, SMALLEST_WIDTH } from "../../src/prospect/dress/compose-e.ts";
@@ -28,6 +29,7 @@ test("the people's clothes are cut from the realm's tinctures on the coloured pl
   const palette = paletteForStyle(STYLES.antique);
   assert.ok(dressed(STYLES.antique, ARMS).includes(`fill="${palette.tincture("azure")}"`), "the cloak takes the field's first tincture");
   assert.ok(dressed(STYLES.antique, null).includes(`fill="${palette.tincture("gules")}"`), "a place in no realm wears gules");
+  assert.ok(renderSvg(figureNodes(engraver(STYLES.antique), { kind: "lady", x: 100, y: 250, h: 50, flip: false }, ARMS)).includes(`fill="${palette.tincture("argent")}"`), "the lady wears the field's second tincture");
   const ink = dressed(STYLES.ink, ARMS);
   assert.ok(!ink.includes(`fill="${palette.tincture("azure")}"`) && /fill="none" stroke="[^"]+" stroke-width="0.385"/.test(ink), "the ink dress hatches the cloth instead");
 });
@@ -54,14 +56,26 @@ test("every lettered run stands at 4.5:1 or better on the paper it is set on, in
   }
 });
 
+const ROADS: Surroundings = { ...NO_SURROUNDINGS, roadTowns: [{ index: 1, name: "Haireno", kind: "town", lateral: 0.39, dist: 21 }], roadCount: 2 };
+
 test("a plate drops its detail by its own drawn width: the key, the horizon names and the margin words at the smaller width, the cartouche and the medals too at the smallest (ruling D3)", () => {
-  const svg = finishedPlateSvg(makeInput({ kind: "capital", harbor: true, arms: ARMS }), STYLES.antique, 1300, { idSuffix: "s1" });
+  const opts = { idSuffix: "s1", surroundings: ROADS };
+  const svg = finishedPlateSvg(makeInput({ kind: "capital", harbor: true, arms: ARMS }), STYLES.antique, 1300, opts);
+  const root = finishProspect(makeInput({ kind: "capital", harbor: true, arms: ARMS }), STYLES.antique, 1300, opts);
+  const groupOf = (cls: string): string => {
+    const g = root.children.find((c): c is SvgNode => typeof c !== "string" && c.attrs["class"] === cls);
+    assert.ok(g, `the ${cls} group`);
+    return renderSvg(g);
+  };
+  assert.ok(groupOf("pk-s1").includes('aria-label="1. The Keep"'), "the key group holds the key");
+  assert.ok(groupOf("pt-s1").includes('aria-label="Haireno"'), "the horizon group holds the road town's name");
+  assert.ok(groupOf("pm-s1").includes('aria-label="Septentrio"'), "the margin group holds the cardinal words");
+  assert.ok(groupOf("pc-s1").includes('aria-label="TESTHOLM"'), "the cartouche group holds the name");
+  assert.ok(groupOf("pd-s1").includes('class="vellum-arms"'), "the medal group holds the arms");
   assert.equal([SMALL_WIDTH, SMALLEST_WIDTH].join(" "), "400 240");
   assert.ok(svg.includes(`<style>${smallSizeRule("s1")}</style>`), "the plate carries its own rule");
   assert.equal(smallSizeRule("s1"), "@media (max-width: 400px){.pk-s1,.pt-s1,.pm-s1{display:none}}@media (max-width: 240px){.pc-s1,.pd-s1{display:none}}");
   for (const cls of ["pk", "pt", "pm", "pc", "pd"]) assert.ok(svg.includes(`class="${cls}-s1"`), `the ${cls} group carries its class`);
-  const cartouche = svg.indexOf('class="pc-s1"');
-  assert.ok(cartouche >= 0 && svg.indexOf('aria-label="TESTHOLM"') > cartouche, "the name sits in the group the smallest width stands down");
 });
 
 test("the plate's words survive the engraving as labels on their runs", () => {

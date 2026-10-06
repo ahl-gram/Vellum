@@ -12,7 +12,7 @@ import { plateKey } from "../../src/prospect/key.ts";
 import { renderSvg } from "../../src/render/svg.ts";
 import { UNITS_PER_EM, type FaceName } from "../../src/prospect/letter/face.ts";
 import { NUMERO } from "../../src/prospect/letter/numero.ts";
-import { createLettering, FACES, faceFor, layoutRun, OPTICAL_SCALE, runBox } from "../../src/prospect/letter/letter.ts";
+import { createLettering, FACES, faceFor, layoutRun, OPTICAL_SCALE, runBox, type RunSpec } from "../../src/prospect/letter/letter.ts";
 import { PLATE_FACES, PLATE_FONTS } from "../../scripts/plate-face.ts";
 
 const fonts = new Map<FaceName, fontkit.Font>();
@@ -146,9 +146,13 @@ test("a plate defines each glyph once, under ids that carry its own suffix", () 
   assert.ok(ids.every((id) => id.endsWith("-p7")), JSON.stringify(ids));
 });
 
-test("a run's ink box reads the glyphs' own extents: a descender reaches below the baseline", () => {
-  const flat = runBox({ text: "nun", x: 0, y: 100, size: 10, italic: true, fill: "#000" });
-  const deep = runBox({ text: "nup", x: 0, y: 100, size: 10, italic: true, fill: "#000" });
+test("a run's ink box reads the glyphs' own extents: a descender reaches below the baseline, an ascender above the x-height, and the ink ends inside the advance", () => {
+  const spec = (text: string): RunSpec => ({ text, x: 0, y: 100, size: 10, italic: true, fill: "#000" });
+  const flat = runBox(spec("nun"));
+  const deep = runBox(spec("nup"));
+  const tall = runBox(spec("nul"));
   assert.ok(deep.bottom > flat.bottom + 1, `p descends (${deep.bottom} against ${flat.bottom})`);
+  assert.ok(tall.top < flat.top - 1, `l rises (${tall.top} against ${flat.top})`);
   assert.ok(flat.top < 100 && flat.x1 > flat.x0, "the box has extent");
+  assert.ok(flat.x1 < layoutRun(spec("nun")).width, `the ink ends inside the advance (${flat.x1} against ${layoutRun(spec("nun")).width})`);
 });
