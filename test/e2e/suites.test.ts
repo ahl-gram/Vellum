@@ -136,7 +136,7 @@ test("runSelected times each suite it ran, in the order it ran them", () => {
 
 test("a suite that gives up is contained: the runner is handed the suite's name and the wait's own payload, and the rest of the lane still runs", async () => {
   const ran: string[] = [];
-  const handed: Array<readonly [string, string]> = [];
+  const handed: Array<readonly [string, unknown]> = [];
   const gaveUp = new Error('settle timeout open: {"open":false,"checked":true}');
   const suites = {
     "cluster": () => { ran.push("cluster"); return Promise.reject(gaveUp); },
@@ -144,16 +144,13 @@ test("a suite that gives up is contained: the runner is handed the suite's name 
     "specimen": () => { ran.push("specimen"); return Promise.resolve(); },
   };
   const hooks: E2eRunHooks = {
-    onSuiteError: (name, err) => { handed.push([name, (err as Error).message] as const); },
+    onSuiteError: (name, err) => { handed.push([name, err] as const); },
     alive: () => true,
   };
   const timings = await runSelected(["cluster", "corners", "specimen"], suites, {}, hooks);
   assert.deepEqual(ran, ["cluster", "corners", "specimen"], "one suite giving up took the rest of the lane with it, which is the defect");
-  assert.deepEqual(
-    handed,
-    [["cluster", gaveUp.message]],
-    "the failure did not reach the runner as this suite's, carrying the last read the wait died on",
-  );
+  assert.deepEqual(handed.map(([name]) => name), ["cluster"], "the failure did not reach the runner as this suite's");
+  assert.equal(handed[0]?.[1], gaveUp, "the runner was not handed the wait's own error, whole, so the last read it died on and the stack the runner prints are lost");
   assert.deepEqual(timings.map((t) => t.name), ["cluster", "corners", "specimen"], "the suite that gave up is missing from the timings");
   assert.deepEqual(timings.map((t) => t.aborted === true), [true, false, false], "the timings do not say which suite stopped early, so nothing downstream can withhold its clean bill");
 });

@@ -14,6 +14,7 @@ import {
   splitLaneChunk,
 } from "./support/lanes.ts";
 import type { E2eLane, LaneResult, LaneTally } from "./support/lanes.ts";
+import { errorText } from "./support/suites.ts";
 import type { Readable } from "node:stream";
 
 const HERE = fileURLToPath(new URL(".", import.meta.url));
@@ -23,7 +24,7 @@ let SELECTED;
 try {
   SELECTED = resolveLaneSelection(process.argv.slice(2));
 } catch (err) {
-  console.error(`FAIL: ${(err as Error).message}`);
+  console.error(`FAIL: ${errorText(err)}`);
   process.exit(1);
 }
 

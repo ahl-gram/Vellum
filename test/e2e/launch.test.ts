@@ -109,7 +109,11 @@ function rig(plans: readonly Plan[]) {
   return { deps, events, at, logs, browsers, probes };
 }
 
-const settle = <T>(p: Promise<T>): Promise<{ value?: T; error?: Error }> => p.then((value) => ({ value }), (error: unknown) => ({ error: error as Error }));
+const settle = <T>(p: Promise<T>): Promise<{ value?: T; error?: Error }> =>
+  p.then((value) => ({ value }), (error: unknown) => {
+    assert.ok(error instanceof Error, `the launch rejected with ${String(error)}, which is not an Error`);
+    return { error };
+  });
 
 test("a killed browser's late exit cannot fail the next attempt: the CI shape launches on attempt 2", async () => {
   const r = rig([{ reapMs: 30 }, { upAtProbe: 6 }]);
@@ -247,9 +251,9 @@ test("with no tuning passed, a killed browser that is never gone stops the launc
   mock.timers.enable({ apis: ["setTimeout"] });
   try {
     const r = rig([{ reapMs: null }]);
-    const launch: { error?: Error } = {};
+    const launch: { error?: unknown } = {};
     void launchWithRetry(r.deps).catch((e: unknown) => {
-      launch.error = e as Error;
+      launch.error = e;
     });
     const flush = () => new Promise((res) => setImmediate(res));
     let waited = 0;
@@ -258,7 +262,8 @@ test("with no tuning passed, a killed browser that is never gone stops the launc
       if (launch.error) break;
       mock.timers.tick(25);
     }
-    assert.match(launch.error?.message ?? "", /pid 101, was not gone 5000ms after SIGKILL/);
+    assert.ok(launch.error instanceof Error, `the launch did not reject with an Error: it holds ${String(launch.error)}`);
+    assert.match(launch.error.message, /pid 101, was not gone 5000ms after SIGKILL/);
     assert.equal(waited, 65_000, "the launch did not give up exactly 5s after its 60s wait ended in a kill");
   } finally {
     mock.timers.reset();
