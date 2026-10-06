@@ -224,6 +224,14 @@ nothing fails. **So any surface offering "the road from X" owes a check that X h
 carries that answer.** A non-empty result is not evidence that the asked-for departure was honoured;
 compare the resolved departure against the one you asked for.
 
+**A road's far end need not be a town.** `roadSearch` in `src/society/roads.ts` stops at the first
+cell already on the network, so a road runs from the place it wires to wherever it meets the web,
+often the middle of another road. **A surface naming "the road to X" derives X by a walk over the
+roads, never from a road's endpoint.** `townsReachedFirst` in `src/prospect/surroundings.ts` is the
+strict walk, along each road's own points and stopping at the first settlement on each branch;
+`roadReachable` in `src/itinerary/route.ts` is the lenient one, which floods the road mask by any of
+eight neighbours, so roads that merely touch join, and walks on through every town.
+
 **A ribbon event can sit at a road's exact end**, past the arrival waypoint, where a half-open strip
 filter drops it. `stripFor` in `src/itinerary/dress/layout.ts` tests a half-open interval, so
 `eventSeat` answers null there and the itinerary skips it. A seating surface answers null too rather

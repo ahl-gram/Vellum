@@ -116,7 +116,13 @@ embeds `/gallery/chart-<seed>.svg` and `public/gallery/` is gitignored with noth
 What separates the two halves is that the committed four are stable across deploys and the generated
 trees are re-derived per deploy from a seed that moves. **Adding to the committed list is a
 deliberate decision, not the output of applying a line**, so make it deliberately and add the file
-here. Two tombstones so nobody goes looking: `docs/` retired at #206, and the tsc engine emit retired
+here.
+
+**Committed generated source:** `src/prospect/letter/face-roman.ts`, `face-caps.ts` and
+`face-italic.ts`, the plate face's outline tables (Issue #754). `npm run plate-face` is their single
+writer, from the woff2 files in `design/kit/plate-fonts/`, and `test/prospect/plate-face.test.ts`
+regenerates them and refuses any drift, so a change to those faces, the glyph sets or the simplifier
+owes the script and moves the prospect plate pins. Two tombstones so nobody goes looking: `docs/` retired at #206, and the tsc engine emit retired
 at #260 with its clean-list entry kept deliberately.
 
 **The golden checksum is `1792806240`** (seed 42 realm labels), pinned by
@@ -124,7 +130,8 @@ at #260 with its clean-list entry kept deliberately.
 
 - **A render change that moves any label or path owes a regen**: `npm run charts:regen` and
   `npm run og` (since #205). `charts:regen` single-writes `public/charts`; `og` writes
-  `public/og.png`. A font-subset change additionally owes `npm run icons`. **There is no `site`
+  `public/og.png`. A font-subset change additionally owes `npm run icons`, and a change to the plate
+  face owes `npm run plate-face`. **There is no `site`
   script**; it went at #206.
 - **Verify a regen by diffing the committed charts old against new**, snapshotting them first. The
   **#40 hero drift guard** compares a fresh render against the committed one, so after a regen it is
