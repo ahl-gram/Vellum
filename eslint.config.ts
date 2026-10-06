@@ -55,6 +55,7 @@ export default defineConfig(
       "@typescript-eslint/no-non-null-asserted-nullish-coalescing": "error",
       "@typescript-eslint/related-getter-setter-pairs": "error",
       "@typescript-eslint/unified-signatures": "error",
+      "@typescript-eslint/no-useless-constructor": "error",
     },
   },
   {
