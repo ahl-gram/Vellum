@@ -55,7 +55,10 @@ declaration you write to get there. The checklist form of the same lines is `vel
   containing block and a stacking context. The 1024 floor relies on it, on a staged chart room's body,
   so the fixed furniture lays out on the 1024 page and scrolls sideways with it; and that body clips
   (`overflow: clip`) rather than hides, since an `overflow: hidden` box is a scroll container that a
-  focus moving onto a piece can scroll out from under the reader.
+  focus moving onto a piece can scroll out from under the reader (`FL5` in `e2e/suites/corners/floor.ts`).
+  Their overflow also counts in the element's own `scrollWidth` and `scrollHeight`, so a script that
+  sizes a capture or a scroll by that body reads past anything a reader can reach; read the
+  document's instead.
 - **An affordance gate is `(hover: none) and (pointer: coarse)`, never `(hover: none)` on its own**,
   wherever it is asked, which today is a `matchMedia` call rather than a sheet. A machine with no pointing device at all reports `hover: none`
   together with `pointer: none`, so the bare query matches it too and stands the affordance down
