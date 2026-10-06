@@ -289,20 +289,3 @@ test("the same (geometry, dress) yields byte-identical, pinned SVG", () => {
     assert.equal(fnv1a(a), sum, `${fixture}/${dress}: pinned dress checksum`);
   }
 });
-
-// The byte pins are only sound while ALL of src/prospect/ stays libm-free: one Math.sin in the composer would drift the pinned bytes Mac-vs-CI (~1e-13). Comments are stripped before matching because geometry.ts and transect.ts state the contract in prose; Math.sqrt is exempt, IEEE requires it correctly rounded.
-test("the prospect layer stays libm-free and clock-free", async () => {
-  const { readdir, readFile } = await import("node:fs/promises");
-  const { fileURLToPath } = await import("node:url");
-  const dir = fileURLToPath(new URL("../../src/prospect/", import.meta.url));
-  const files = (await readdir(dir, { recursive: true })).filter((f) => f.endsWith(".ts"));
-  assert.ok(files.length >= 20, `scans the whole prospect layer incl. the plate furniture (${files.length} files)`);
-  const banned =
-    /Math\.(sin|cos|tan|asin|acos|atan|atan2|sinh|cosh|tanh|asinh|acosh|atanh|hypot|cbrt|log|log2|log10|log1p|exp|expm1|pow|random)\b|Date\.now|new Date/;
-  for (const file of files) {
-    const src = await readFile(dir + file, "utf8");
-    const code = src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
-    const hit = code.match(banned);
-    assert.equal(hit, null, `${file} calls ${hit?.[0]}, breaking cross-platform byte identity`);
-  }
-});

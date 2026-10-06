@@ -1,4 +1,4 @@
-/** Inlined shapes, never use/defs, so many plates can share one document without id collisions; no transcendental may run here (the libm guard in test/prospect/dress.test.ts), wiggle comes from the SINE12 literal table. */
+/** Inlined shapes, never use/defs, so many plates can share one document without id collisions. */
 
 import { el, type SvgNode } from "../../render/svg.ts";
 import type { XYS } from "../geometry.ts";
