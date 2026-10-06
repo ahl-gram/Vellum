@@ -61,6 +61,7 @@ export default defineConfig(
       "@typescript-eslint/prefer-reduce-type-parameter": "error",
       "@typescript-eslint/no-invalid-void-type": "error",
       "@typescript-eslint/no-generated-empty-object-type": "error",
+      "@typescript-eslint/restrict-template-expressions": ["error", { allowAny: false, allowBoolean: true, allowNever: false, allowNullish: true, allowNumber: true, allowRegExp: true }],
     },
   },
   {

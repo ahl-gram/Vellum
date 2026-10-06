@@ -24,6 +24,7 @@ const RULED: Readonly<Record<string, Linter.RuleEntry>> = {
   "@typescript-eslint/prefer-reduce-type-parameter": "error",
   "@typescript-eslint/no-invalid-void-type": "error",
   "@typescript-eslint/no-generated-empty-object-type": "error",
+  "@typescript-eslint/restrict-template-expressions": ["error", { allowAny: false, allowBoolean: true, allowNever: false, allowNullish: true, allowNumber: true, allowRegExp: true }],
 };
 
 type Plant = { lines: readonly string[]; refused: readonly number[] };
@@ -39,6 +40,7 @@ const PLANTS: Readonly<Record<string, Plant>> = {
   "@typescript-eslint/prefer-reduce-type-parameter": { lines: ["export const r = [[1], [2]].reduce((a, b) => a.concat(b), [] as number[]);", "export const s = [[1], [2]].reduce<number[]>((a, b) => a.concat(b), []);"], refused: [1] },
   "@typescript-eslint/no-invalid-void-type": { lines: ["export const v: number | void = 1;", "export const w = (): void => undefined;"], refused: [1] },
   "@typescript-eslint/no-generated-empty-object-type": { lines: ["type K = { a: 1 };", "export type E = Omit<K, \"a\">;", "export type F = Pick<K, \"a\">;"], refused: [2] },
+  "@typescript-eslint/restrict-template-expressions": { lines: ["declare const u: any;", "declare const n: number | undefined;", "export const t = `${u}`;", "export const s = `${n} ${true} ${/re/}`;"], refused: [3] },
 };
 
 const PLANT_AT = WITNESSES["src/**/*.ts"]!;
