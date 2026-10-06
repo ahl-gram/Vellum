@@ -1,17 +1,6 @@
-import { el, renderSvg, type SvgNode } from "../../render/svg.ts";
-import type { MapStyle } from "../../render/style.ts";
-import { createRng } from "../../core/rng.ts";
-import {
-  BACK_ROW_RAISE,
-  PLATE_H,
-  PLATE_W,
-  VIEW_X0,
-  VIEW_X1,
-  groundAt,
-  type ForegroundElement,
-  type ProspectGeometry,
-} from "../geometry.ts";
-import { dressContext, r1, type DressContext } from "./context.ts";
+import type { SvgNode } from "../../render/svg.ts";
+import type { ForegroundElement } from "../geometry.ts";
+import type { DressContext } from "./context.ts";
 import {
   beamNodes,
   bird,
@@ -27,9 +16,7 @@ import {
   treePine,
   treeRound,
 } from "./glyphs.ts";
-import { drownedStubNodes, massNodes, wallNodes } from "./buildings.ts";
-import { grassFlicks, groundNodes, ridgeNodes, skyNodes } from "./terrain.ts";
-import { riverBankNodes, waterBandNodes } from "./water.ts";
+import { drownedStubNodes } from "./buildings.ts";
 import {
   beachedHullNodes,
   jettyNodes,
@@ -42,14 +29,6 @@ import {
 import { bridgeNodes, millNodes, weirNodes } from "./rivercraft.ts";
 
 export { PROSPECT_DRESSES, type ProspectDress } from "./context.ts";
-
-export type DressOptions = {
-  readonly idSuffix?: string;
-  readonly engraved?: ReadonlyArray<SvgNode>;
-  readonly furniture?: ReadonlyArray<SvgNode>;
-  readonly ariaLabel?: string;
-  readonly widthPx?: number;
-};
 
 type WorksElement = Extract<
   ForegroundElement,
@@ -132,107 +111,4 @@ function worksNodes(c: DressContext, e: WorksElement): SvgNode[] {
 
 function unreachable(e: never): never {
   throw new RangeError(`no dress for foreground kind ${JSON.stringify(e)}`);
-}
-
-function inkChannels(ink: string): [string, string, string] {
-  if (!/^#[0-9a-fA-F]{6}$/.test(ink)) {
-    throw new RangeError(`ink token ${ink} is not #rrggbb; the grain matrix needs 6-digit hex`);
-  }
-  const ch = (i: number): string => (parseInt(ink.slice(i, i + 2), 16) / 255).toFixed(2);
-  return [ch(1), ch(3), ch(5)];
-}
-
-function parchmentDefs(c: DressContext, suffix: string, grainSeed: number): SvgNode[] {
-  const [r, g, b] = inkChannels(c.ink);
-  return [
-    el("filter", { id: `prospect-parch-${suffix}`, x: "0%", y: "0%", width: "100%", height: "100%" }, [
-      el("feTurbulence", {
-        type: "fractalNoise",
-        baseFrequency: "0.012 0.014",
-        numOctaves: 3,
-        seed: grainSeed,
-        stitchTiles: "stitch",
-      }),
-      el("feColorMatrix", {
-        values: `0 0 0 0 ${r}  0 0 0 0 ${g}  0 0 0 0 ${b}  0.45 0 0 0 0`,
-      }),
-    ]),
-    el("radialGradient", { id: `prospect-vig-${suffix}`, cx: "50%", cy: "48%", r: "72%" }, [
-      el("stop", { offset: "62%", "stop-color": c.ink, "stop-opacity": 0 }),
-      el("stop", { offset: "100%", "stop-color": c.ink, "stop-opacity": 0.16 }),
-    ]),
-  ];
-}
-
-function parchmentOverlay(suffix: string): SvgNode[] {
-  return [
-    el("rect", { x: 0, y: 0, width: PLATE_W, height: PLATE_H, filter: `url(#prospect-parch-${suffix})`, opacity: 0.5 }),
-    el("rect", { x: 0, y: 0, width: PLATE_W, height: PLATE_H, fill: `url(#prospect-vig-${suffix})` }),
-  ];
-}
-
-function massWeight(m: ProspectGeometry["masses"][number]): number {
-  return m.raise >= BACK_ROW_RAISE ? 0.9 : m.form === "keep" ? 1.3 : 1.2;
-}
-
-function backRowEnd(masses: ProspectGeometry["masses"]): number {
-  const splitAt = masses.findIndex((m) => m.raise < BACK_ROW_RAISE);
-  return splitAt === -1 ? masses.length : splitAt;
-}
-
-export function renderProspect(
-  g: ProspectGeometry,
-  style: MapStyle,
-  opts: DressOptions = {},
-): SvgNode {
-  const c = dressContext(style);
-  const suffix = opts.idSuffix ?? `${style.name}-${g.seed}-${g.index}`;
-  const parchment = style.parchmentTexture;
-
-  const rng = createRng(g.seed);
-  const rWaves = rng.fork(`prospect:${g.index}:dress:waves`);
-  const rGrass = rng.fork(`prospect:${g.index}:dress:grass`);
-
-  const split = backRowEnd(g.masses);
-
-  const children: SvgNode[] = [
-    ...(parchment ? parchmentDefs(c, suffix, (g.seed * 31 + g.index * 7) % 9973) : []),
-    el("rect", { x: 0, y: 0, width: PLATE_W, height: PLATE_H, fill: style.paper }),
-    ...(style.name === "ink" ? skyNodes(c) : []),
-    ...(g.ridge ? ridgeNodes(c, g.ridge, g.ground.base) : []),
-    ...groundNodes(c, g.ground, g.water?.kind === "drowned"),
-    ...g.masses.slice(0, split).flatMap((m) => massNodes(c, m, massWeight(m))),
-    ...g.walls.flatMap((w) => wallNodes(c, g.ground, w)),
-    ...g.masses.slice(split).flatMap((m) => massNodes(c, m, massWeight(m))),
-    ...(g.water ? waterBandNodes(c, g.water, rWaves) : []),
-    ...(g.water?.kind === "river" ? riverBankNodes(c, g.water, rGrass) : []),
-    ...g.foreground.flatMap((e) => foregroundNodes(c, e)),
-    ...(g.water === null
-      ? [grassFlicks(c, rGrass, (x) => groundAt(g.ground, x), VIEW_X0 + 14, VIEW_X1 - 14, 12)]
-      : []),
-    ...(opts.engraved ?? []),
-    ...(parchment ? parchmentOverlay(suffix) : []),
-    ...(opts.furniture ?? []),
-  ];
-
-  return el(
-    "svg",
-    {
-      xmlns: "http://www.w3.org/2000/svg",
-      viewBox: `0 0 ${PLATE_W} ${PLATE_H}`,
-      width: Math.round(opts.widthPx ?? PLATE_W),
-      height: Math.round(((opts.widthPx ?? PLATE_W) * PLATE_H) / PLATE_W),
-      role: "img",
-      "aria-label": opts.ariaLabel ?? `An engraved prospect, plate ${r1(g.index)} of seed ${r1(g.seed)}`,
-    },
-    children,
-  );
-}
-
-export function prospectSvg(
-  g: ProspectGeometry,
-  style: MapStyle,
-  opts: DressOptions = {},
-): string {
-  return renderSvg(renderProspect(g, style, opts));
 }

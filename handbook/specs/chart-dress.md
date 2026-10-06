@@ -23,6 +23,12 @@ treat it as the question to ask (what does this dress replace?) rather than as a
 anything else yields antique. That two-dress rule is why a mixed collection reads honestly, and each
 sheet keeps the dress it was drawn in rather than being harmonized to its neighbours.
 
+**The prospect plate's antique is hand-coloured, its ink is plain.** The engraved town (Issue #754)
+lays a limner's washes over its hatching on the antique dress alone: roofs, grass, wood, water, the
+far hills, the people's skin and the cartouche, each a token in the `limner` group on `MapStyle` in
+`src/render/style.ts`, and every other dress carries `limner: null` and draws the plate in line. The
+people's clothes are the realm's tinctures, through the same heraldic palette the arms use.
+
 **The dress gates what the engine will do.** The finer redraft is enabled on the antique dress alone,
 so every collectible survey is antique and the only other dress that can reach a gathered sheet is a
 prospect's pen and ink. A feature that gathers charts inherits that gate whether it means to or not.

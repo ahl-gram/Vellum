@@ -89,7 +89,9 @@ test("prospectResultFor carries the engraver's note: the era, the epithet, the f
   assert.notEqual(res.note, todays(capital), "premise: the fork is not handing every town one note");
   const early = prospectResultFor(world, { index: 1, dress: "antique", year: 300 });
   assert.equal(early.era, "before-founding");
-  assert.deepEqual(early.key, [], "the bare ground has nothing to letter");
+  const town = new Set(["The Keep", "The Bridge Gate", "The Quay", "The Mole", "The Jetty", "The Weir Mill", "The Weir"]);
+  assert.equal(early.key[0]?.label, world.names.sea, "the bare ground keys the sea it stands on");
+  assert.ok(early.key.every((k) => !town.has(k.label) && !k.label.startsWith("The road to ")), "and the world alone: no town and no road yet");
 });
 
 test("prospectResultFor says whether a road leaves the place: yes for a roaded town, no for seed 42's orphan", () => {
