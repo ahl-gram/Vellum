@@ -8,7 +8,7 @@ function mask(rows: string[]) {
   const h = rows.length;
   const w = rows[0]!.length;
   const m = new Uint8Array(w * h);
-  rows.forEach((r, y) => [...r].forEach((c, x) => (m[x + y * w] = c === "#" ? 1 : 0)));
+  rows.forEach((r, y) => r.split("").forEach((c, x) => (m[x + y * w] = c === "#" ? 1 : 0)));
   return { m, w, h };
 }
 

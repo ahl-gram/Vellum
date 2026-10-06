@@ -9,7 +9,7 @@ function pic(rows: string[]) {
   const h = rows.length;
   const w = rows[0]!.length;
   const open = new Uint8Array(w * h);
-  rows.forEach((r, y) => [...r].forEach((c, x) => (open[x + y * w] = c === "#" ? 0 : 1)));
+  rows.forEach((r, y) => r.split("").forEach((c, x) => (open[x + y * w] = c === "#" ? 0 : 1)));
   return { w, h, passable: (c: number) => open[c] === 1 };
 }
 const cell = (w: number) => (x: number, y: number) => x + y * w;

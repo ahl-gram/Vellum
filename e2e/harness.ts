@@ -18,7 +18,7 @@ const httpGet = (url: string): Promise<string> =>
     http
       .get(url, (res) => {
         let d = "";
-        res.on("data", (c) => (d += c));
+        res.on("data", (c: Buffer) => (d += c.toString()));
         res.on("end", () => resolve(d));
       })
       .on("error", reject);
@@ -43,7 +43,7 @@ async function debugPortIdentity(DPORT: number, timeoutMs = 1000): Promise<strin
     const body = await new Promise<string>((res, rej) => {
       const req = http.get(`http://127.0.0.1:${DPORT}/json/version`, { timeout: timeoutMs }, (r) => {
         let d = "";
-        r.on("data", (c) => (d += c));
+        r.on("data", (c: Buffer) => (d += c.toString()));
         r.on("end", () => res(d));
       });
       req.on("timeout", () => req.destroy(new Error("timeout")));

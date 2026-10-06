@@ -7,6 +7,7 @@ import { includeIgnoreFile } from "eslint/config";
 import ts from "typescript";
 import lintConfig from "../../eslint.config.ts";
 import { compileWithVirtual } from "../../test-support/virtual-compile.ts";
+import { WITNESSES } from "../../test-support/lint-witnesses.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const src = (p: string) => readFileSync(join(ROOT, p), "utf8");
@@ -112,14 +113,6 @@ test("the lint config is bounded to the ruled scope, covers all of it, and narro
   assert.deepEqual([...exempt].sort(), DESIGN_EXEMPT, "design/, the one place ruling D admits JavaScript, is not exempted as a whole");
 });
 
-const WITNESSES: Record<string, string> = {
-  "e2e/**/*.ts": "e2e/harness.ts",
-  "public/**/*.css": "public/house.css",
-  "scripts/**/*.ts": "scripts/build-app-bundles.ts",
-  "src/**/*.ts": "src/cli/main.ts",
-  "test-support/**/*.ts": "test-support/element-shim.ts",
-  "test/**/*.ts": "test/repo/lint-wiring.test.ts",
-};
 type Resolved = { rules?: Record<string, unknown>; language?: { defaultLanguageOptions?: unknown }; languageOptions?: { parser?: { meta?: { name?: string } }; tolerant?: unknown }; linterOptions?: { reportUnusedDisableDirectives?: unknown } };
 const severityOf = (rule: unknown): unknown => (Array.isArray(rule) ? rule[0] : rule);
 
@@ -208,6 +201,7 @@ test("through ESLint itself, one witness file per ruled glob resolves to rules t
     "ESLint resolves a different config file than the one this guard imports; a .js, .mjs or .cjs config at the root shadows the .ts one",
   );
   for (const [glob, file] of Object.entries(WITNESSES)) {
+    assert.ok(file.startsWith(glob.slice(0, glob.indexOf("**"))) && file.endsWith(glob.slice(glob.lastIndexOf("*") + 1)), `${file}, the witness for ${glob}, lies outside its glob, so it witnesses another root and this one reaches nothing seen`);
     assert.ok(existsSync(join(ROOT, file)), `${file}, the witness for ${glob}, does not exist`);
     assert.equal(await eslint.isPathIgnored(file), false, `${file} is ignored, so ${glob} reaches nothing`);
     const config = (await eslint.calculateConfigForFile(file)) as Resolved;
@@ -249,7 +243,7 @@ test("no block sets a rule off but typescript-eslint's own two layers and ruling
   assert.deepEqual(
     offs,
     ["Issue #653 ruling D: design/ archives its round tools as they ran: no-restricted-syntax"],
-    "a block of the house config sets a rule off, which takes it back for every file the block matches whether or not a pin names the rule. BLIND SPOTS, declared, both erring toward passing: a rule left at error but weakened by its options, which only the setters tests for TURNED_ON, no-empty and no-param-reassign see in every block, while the witness test pins the size rules, no-floating-promises, no-unnecessary-condition and switch-exhaustiveness-check only at the witness files, so a block over a subtree with no witness in it weakens them unread; and a rule typescript-eslint's own two layers set off, which an upgrade could change unread",
+    "a block of the house config sets a rule off, which takes it back for every file the block matches whether or not a pin names the rule. BLIND SPOTS, declared, both erring toward passing: a rule left at error but weakened by its options, which only the setters tests for TURNED_ON, no-empty and no-param-reassign here and test/repo/lint-strict.test.ts's for the rules Issue #779 adopted see in every block, while the witness test pins the size rules, no-floating-promises, no-unnecessary-condition and switch-exhaustiveness-check only at the witness files, so a block over a subtree with no witness in it weakens them unread; and a rule typescript-eslint's own two layers set off, which an upgrade could change unread",
   );
 });
 
