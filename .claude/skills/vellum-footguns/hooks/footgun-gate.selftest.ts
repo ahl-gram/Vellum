@@ -10,6 +10,7 @@ import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { decide, gateText, headingCheck, requiredHeadings, statePath, type Decision, type Payload } from "./footgun-gate.ts";
 import { CD_ROWS } from "./bare-cd.fixtures.ts";
+import { ROUTE_ROWS } from "./gate-routes.fixtures.ts";
 import { CODE_ROWS } from "./markdown-code.fixtures.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -118,18 +119,7 @@ const templateCheck = (file: string) => async (): Promise<Decision> => {
     ? { hookSpecificOutput: { hookEventName: "PreToolUse", permissionDecision: "deny", permissionDecisionReason: reason } }
     : asContext(warn ?? "");
 };
-const GATE6_ARMS: [string, string][] = [
-  ["render", "src/render/style.ts"], ["world", "src/world/generate.ts"], ["society", "src/society/history.ts"],
-  ["core", "src/core/grid.ts"], ["noise", "src/noise/simplex.ts"], ["terrain", "src/terrain/heightfield.ts"],
-  ["climate", "src/climate/wind.ts"], ["hydrology", "src/hydrology/rivers.ts"],
-  ["atlas/palette", "src/atlas/palette.ts"], ["cli/raster", "src/cli/raster.ts"],
-  ["charts/", "public/charts/chart-42-antique.svg"], ["og.png", "public/og.png"],
-  ["favicon.svg", "public/favicon.svg"], ["apple-touch-icon.png", "public/apple-touch-icon.png"],
-  ["hero-charts", "scripts/hero-charts.ts"], ["regen-hero-charts", "scripts/regen-hero-charts.ts"],
-  ["build-og", "scripts/build-og.ts"], ["build-icons", "scripts/build-icons.ts"],
-  ["glyph-outline", "scripts/glyph-outline.ts"], ["kit-fonts", "scripts/kit-fonts.ts"],
-  ["design/kit/fonts/", "design/kit/fonts/im-fell-english-sc-latin-400-normal.woff2"],
-];
+const ROUTE_FIXTURES: Fixture[] = ROUTE_ROWS.map(([name, tool, path, text, want, needle, absent]): Fixture => [name, edit(tool, placed(path), text), want, needle, absent]);
 
 const FIXTURES: Fixture[] = [
   ["bare stash denied", bash("git stash"), "deny", "shared"],
@@ -271,35 +261,8 @@ const FIXTURES: Fixture[] = [
   ["a single escape in a non-e2e scripts .ts denied", edit("Write", "scripts/lint/x.ts", "const P = `s.split(/\\d/)`;"), "deny", "backtick"],
   ["heredoc into an e2e .ts denied", bash("cat > e2e/support/x.ts <<'EOF'\nconst R = `x.split(/\\s+/)`;\nEOF"), "deny", "backtick"],
   ["String.raw in a .ts is allowed", edit("Write", "e2e/suites/x.ts", "const P = String.raw`s.replace(/\\s+/g, ' ')`;"), "context", "## Gate 2"],
-  ["the lane driver gets gate 2", edit("Edit", "e2e/lanes.ts", "x"), "context", "## Gate 2"],
-  ["the runner gets gate 2", edit("Edit", "e2e/run.ts", "x"), "context", "## Gate 2"],
-  ["a moved e2e helper that was under src/cli gets gate 2", edit("Edit", "e2e/support/suites.ts", "x"), "context", "## Gate 2"],
-  ["the retired runner path under scripts/ gets no gate 2", edit("Edit", "scripts/e2e-lanes.ts", "x"), null, ""],
-  ["a scripts .mjs draft still gets gate 2", edit("Write", "scripts/draft.mjs", "x"), "context", "## Gate 2"],
-  ["an e2e .mjs draft gets gate 2 as well", edit("Write", "e2e/draft.mjs", "x"), "context", "## Gate 2"],
-  ["a unit test under test/e2e gets gate 1, the first match", edit("Edit", "test/e2e/lanes.test.ts", "x"), "context", "## Gate 1"],
   ["a single escape in a unit test under test/e2e is denied too", edit("Write", "test/e2e/x.test.ts", "const P = `s.split(/\\d/)`;"), "deny", "backtick"],
-  ["a non-e2e scripts .ts gets no gate 2", edit("Edit", "scripts/agent-sandbox.ts", "x"), null, ""],
-  ["unit test file gets gate 1", edit("Edit", "test/site/thing.test.ts", "assert.ok(1);"), "context", "## Gate 1"],
-  ["stylesheet gets gate 3", edit("Edit", "public/atelier.css", ".a { color: red }"), "context", "## Gate 3"],
-  ["new page gets gate 4", edit("Write", "src/pages/never-exists-zz/index.astro", "---\n---"), "context", "## Gate 4"],
-  ["a new e2e suite gets gate 4", edit("Write", "e2e/suites/never-exists-zz.ts", "x"), "context", "## Gate 4"],
-  ["a new part in a suite's folder gets gate 2 and no gate 4", edit("Write", "e2e/suites/never-exists-zz/part.ts", "x"), "context", "## Gate 2", "## Gate 4"],
-  ["a new unit test under test/e2e/suites gets gate 1 and no gate 4", edit("Write", "test/e2e/suites/never-exists-zz.test.ts", "x"), "context", "## Gate 1", "## Gate 4"],
-  ["a new unit test under test/src/site gets gate 1 and no gate 4", edit("Write", "test/src/site/never-exists-zz.test.ts", "x"), "context", "## Gate 1", "## Gate 4"],
-  ["a new unit test under test/src/pages gets gate 1 and no gate 4", edit("Write", "test/src/pages/never-exists-zz.test.ts", "x"), "context", "## Gate 1", "## Gate 4"],
-  ["a new unit test on the absolute path a real call passes gets gate 1 and no gate 4", edit("Write", join(ROOT, "test/src/site/never-exists-zz.test.ts"), "x"), "context", "## Gate 1", "## Gate 4"],
-  ["a new unit test beside a suite gets gate 2 and no gate 4", edit("Write", "e2e/suites/never-exists-zz.test.ts", "x"), "context", "## Gate 2", "## Gate 4"],
-  ["a new unit test beside a site module gets no gate at all", edit("Write", "src/site/never-exists-zz.test.ts", "x"), null, ""],
-  ["a new unit test beside a page gets no gate at all", edit("Write", "src/pages/never-exists-zz.test.ts", "x"), null, ""],
-  ["a new suite whose name ends in test still gets gate 4", edit("Write", "e2e/suites/never-exists-latest.ts", "x"), "context", "## Gate 4"],
-  ["a new site module whose name ends in test still gets gate 4", edit("Write", "src/site/a-room/never-exists-contest.ts", "x"), "context", "## Gate 4"],
-  // One fixture per ARM of the Gate 6 regex, because a roster is only as good as its least-swept alternative: the prover found 10 of 19 arms had no fixture, so a typo in any of them shipped silent.
-  ...GATE6_ARMS.map(([arm, path]): Fixture => [`gate 6 arm: ${arm}`, edit("Edit", path, "x"), "context", "## Gate 6"]),
-  ["gate 6 on the ABSOLUTE path a real tool call passes", edit("Edit", join(ROOT, "src/render/style.ts"), "x"), "context", "## Gate 6"],
-  ["an earlier gate still wins a path that matches BOTH", edit("Edit", "src/render/x.css", ".a{}"), "context", "## Gate 3"],
-  ["site source is not chart work", edit("Edit", "src/site/explorer/app.ts", "const x = 1;"), null, ""],
-  ["a cli module other than the rasteriser is not chart work", edit("Edit", "src/cli/main.ts", "x"), null, ""],
+  ...ROUTE_FIXTURES,
   ["deployed: real project dir denies stash pop", deployed(STASH_POP, ROOT), "deny", "shared"],
   ["deployed: symlinked project dir denies stash pop", deployed(STASH_POP, LINK), "deny", "shared"],
   ["deployed: missing project dir exits 0 with no output", deployed(STASH_POP, "/nonexistent"), null, ""],
@@ -362,7 +325,7 @@ const run = async (): Promise<number> => {
   CODE_ROWS.forEach(([, , bodies], row) => bodies.forEach((body, k) => writeFileSync(join(SCRATCH, codeFile(row, k)), filled(body))));
   mkdirSync(dirname(ROOTLESS_HOOK), { recursive: true });
   cpSync(join(HERE, "footgun-gate.ts"), ROOTLESS_HOOK);
-  for (const module of ["markdown-code.ts", "bare-cd.ts"]) cpSync(join(HERE, module), join(dirname(ROOTLESS_HOOK), module));
+  for (const module of ["markdown-code.ts", "bare-cd.ts", "gate-routes.ts"]) cpSync(join(HERE, module), join(dirname(ROOTLESS_HOOK), module));
   cpSync(join(HERE, "..", "SKILL.md"), join(ROOTLESS, ".claude", "skills", "vellum-footguns", "SKILL.md"));
   symlinkSync(ROOT, LINK);
   for (const dir of ["a dir", ".claude/worktrees/orch-779", "out/762/baseline-phone"]) mkdirSync(join(SCRATCH, dir), { recursive: true });
