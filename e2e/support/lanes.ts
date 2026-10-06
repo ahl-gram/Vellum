@@ -62,7 +62,6 @@ export const E2E_LANES: readonly E2eLane[] = [
     name: "D",
     suites: [
       "survey",
-      "room-drawer",
       "chart-drawer",
       "document-rooms",
       "region-detail",

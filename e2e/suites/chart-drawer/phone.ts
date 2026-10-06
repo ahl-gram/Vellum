@@ -13,7 +13,7 @@ export async function cd6PhoneDoor({ evaluate, check, sleep, touch, touchPan, se
   const phoneDrawer = await evaluate<string>(`getComputedStyle(document.getElementById("chart-drawer")).display`);
   const phoneShut = await evaluate<string>(`(() => { const b = document.getElementById("chart-drawer-shut"); const r = b.getBoundingClientRect(); if (r.width < 1) return "no-box"; const h = document.elementFromPoint(Math.round(r.x + r.width / 2), Math.round(r.y + r.height / 2)); return h === b || b.contains(h) ? "reachable" : "eclipsed"; })()`);
   check(
-    "CD6 at 390 the desktop drawer never paints, not even after a real tap on the dog-ear, and the tap FILES the sheet: the handle is the phone's own door into the table and it opens the drawer with no width term, so the stand-down has to cover the OPEN state and not just the resting one (#540; the filing half strengthened at Issue #523, whose drag must leave the tap the door it is)",
+    "CD6 at 640 (Issue #762 moved it from 390), where the phone layout ships until pull request C, the desktop drawer never paints, not even after a real tap on the dog-ear, and the tap FILES the sheet: the handle is the phone's own door into the table and it opens the drawer with no width term, so the stand-down has to cover the OPEN state and not just the resting one (#540; the filing half strengthened at Issue #523, whose drag must leave the tap the door it is)",
     !!phoneEar && !phoneArmed.open && phoneDrawer === "none" && phone.scrollW === phone.innerW && !phone.tabShown && phoneArmed.cuttings === 0 && phone.cuttings === 1,
     JSON.stringify({ tapped: phoneEar, drawerDisplay: phoneDrawer, open: phone.open, shutPress: phoneShut, scrollW: phone.scrollW, innerW: phone.innerW, cuttings: [phoneArmed.cuttings, phone.cuttings] }),
   );
@@ -39,7 +39,7 @@ export async function cd6PhoneDoor({ evaluate, check, sleep, touch, touchPan, se
   await sleep(500);
   const afterPan = await evaluate<Cam>(`window.__vellumZoomState()`);
   check(
-    "CD48 at 390 a touch that begins on the handle neither pans nor zooms the map and never raises a ghost (touch never drags, Issue #401 ruling 6), while a touch that begins beside it on the chart still pans, the control that proves the camera was listening: the first is the ear's stopped touchstart, the second is d3 bound under touch emulation that was active BEFORE the navigate (Issue #523 build item 4)",
+    "CD48 at 640 a touch that begins on the handle neither pans nor zooms the map and never raises a ghost (touch never drags, Issue #401 ruling 6), while a touch that begins beside it on the chart still pans, the control that proves the camera was listening: the first is the ear's stopped touchstart, the second is d3 bound under touch emulation that was active BEFORE the navigate (Issue #523 build item 4)",
     !!earNow && camBefore.k === afterHandle.cam.k && camBefore.x === afterHandle.cam.x && camBefore.y === afterHandle.cam.y &&
       !ghostSeen && !afterHandle.ghost && !afterHandle.drag && afterHandle.cuttings === 1 &&
       !!panFrom && (afterPan.x !== camBefore.x || afterPan.y !== camBefore.y),

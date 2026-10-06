@@ -129,7 +129,7 @@ Scars: #366, #368, #454, #474, #501, #520, #526, #529, #533, #535, #536, #537, #
    **A readiness wait THROWS on timeout; a measurement poll keeps reading and asserts on its LAST
    sample, never its first**, which is whatever was still in flight, and it throws too rather than
    handing back that last read (ruled 2026-09-13, #589). **The throw belongs inside a `step`**: wrap
-   the gestures, waits and checks of one numbered check in `step("CL5", async () => ...)` and a
+   the gestures, waits and checks of one numbered check in `step("DN5", async () => ...)` and a
    timeout fails that check by name
    instead of taking the suite with it (#534). See `handbook/specs/settle-doctrine.md`.
 7. **A wait's break condition demands every conjunct the check asserts.** Navigation commits before
@@ -315,7 +315,7 @@ are copied here.
 - Do not stop mid-build to narrate. A status report with no tool call is a stop, and Alex had to
   type "continue" five times on 2026-09-08. Report at the gate, not between them.
 - A mid-build naming or placement choice (a new file, a new stylesheet, a new key) is Alex's when
-  it is visible in the tree; ask with a menu, once, before writing it (`drawer.ts` was taken and
+  it is visible in the tree; ask with a menu, once, before writing it (drawer.ts was taken and
   `chart-drawer` ruled, #519, 2026-09-07; the drawer's own stylesheet, #520).
 - No edit made after the cold skeptic has finished earns another round, however large; name it in
   the PR body and push (Alex, 2026-09-10 on PR #559 for a one-line edit, 2026-10-03 for every edit).

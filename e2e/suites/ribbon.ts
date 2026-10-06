@@ -20,7 +20,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await rb6PickedDestination(k);
   await step("RB7", () => rb7SameScroll(k, svg1));
   await step("RB8", () => rb8InkDress(k));
-  await setNarrowViewport(390, 844);
+  await setNarrowViewport(640, 844);
   await step("RB8b", () => rb8bPhoneDocks(k));
   // clearMobile stays OUTSIDE every step: the runner compensates for a suite left at phone metrics in onSuiteError, which a contained step no longer reaches.
   await clearMobile();
@@ -168,7 +168,7 @@ async function rb8bPhoneDocks({ evaluate, check, goto, opened }: RibbonKit): Pro
   await opened("the phone");
   const phone = await evaluate<{ journeyIn: string; inSlip: boolean; swapIn: string; froms: number; tos: number; legendIn: string; sheetW: number; vw: number }>(`(()=>{const j=document.getElementById("rb-journey");const swap=document.getElementById("rb-swap");return{journeyIn:j.parentElement.className,inSlip:j.classList.contains("in-slip"),swapIn:swap.parentElement.className,froms:document.querySelectorAll("#rb-from").length,tos:document.querySelectorAll("#rb-to").length,legendIn:document.querySelector(".legend").parentElement.className,sheetW:document.getElementById("sheet").getBoundingClientRect().width,vw:window.innerWidth};})()`);
   check(
-    "RB8b on a phone the journey docks into the sheet as one group (its ids single), Turn about stays in the corner, the legend docks too, and the landscape scroll takes the viewport's width",
+    "RB8b at 640 (Issue #762 moved it from 390), where the phone layout ships until pull request C, the journey docks into the sheet as one group (its ids single), Turn about stays in the corner, the legend docks too, and the landscape scroll takes the viewport's width",
     phone.journeyIn === "journey-dock" && phone.inSlip && /folio-controls/.test(phone.swapIn) && phone.froms === 1 && phone.tos === 1 && phone.legendIn === "legend-dock" && Math.abs(phone.sheetW - phone.vw) < 1,
     JSON.stringify(phone),
   );

@@ -76,8 +76,8 @@ async function cd9Surfaces(kd: DragKit, step: Step, SIX: string): Promise<void> 
   await cd20BarePortfolio(kd);
   await cd21PortfolioGlass(kd);
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
-  // CD6 (Issue #540 Sub 2a): the desktop drawer must never paint at 390, and the check has to try the door that opens it: `lay()` calls setOpen(true) with no width term, and `.chart-drawer.open` (0,2,0) beat the stand-down's (0,1,0), so once .open landed the drawer displayed at 390 over a reader who could not shut it.
-  await setNarrowViewport(390, 844);
+  // CD6 (Issue #540 Sub 2a): the desktop drawer must never paint below the fold (read at 640 since Issue #762), and the check has to try the door that opens it: `lay()` calls setOpen(true) with no width term, and `.chart-drawer.open` (0,2,0) beat the stand-down's (0,1,0), so once .open landed the drawer displayed at 390 over a reader who could not shut it.
+  await setNarrowViewport(640, 844);
   await step("CD6, CD48", () => cd6PhoneDoor(kd));
   await setNarrowViewport(390, 844);
   await cd14LeafTabs(kd, SIX);

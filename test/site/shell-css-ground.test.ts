@@ -48,7 +48,7 @@ test("the chrome passes the hand through: drags over the fixed cluster reach the
   const css = layoutStyle();
   const chrome = css.match(/header\.chrome\s*\{([\s\S]*?)\}/);
   assert.ok(chrome && /pointer-events:\s*none/.test(chrome[1]!), "the chrome container passes pointer events through");
-  assert.match(css, /header\.chrome a,\s*header\.chrome \.rooms-reveal\s*\{[^}]*pointer-events:\s*auto/, "the links and the phone reveal take the hand back");
+  assert.match(css, /header\.chrome a\s*\{[^}]*pointer-events:\s*auto/, "the links take the hand back");
 });
 
 test("print is paper all the way down: the dark ground resets with the chrome it carried (#454 open decision 4, skeptic finding 5)", () => {

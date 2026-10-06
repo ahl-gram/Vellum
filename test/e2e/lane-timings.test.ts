@@ -4,7 +4,7 @@ import { E2E_LANES } from "../../e2e/support/lanes.ts";
 import { E2E_SUITE_ORDER } from "../../e2e/support/suites.ts";
 import type { E2eSuiteName } from "../../e2e/support/suites.ts";
 
-// CI seconds per suite, the median of the runner's own per-suite wall clock in the CI lane logs over main runs 37080729164 to 37168764434 (nine, 2026-10-02 to 2026-10-04; room-drawer six from 7266e12, corners one from PR #777 run 37320076997 after the minimum-size stage group, EA5 and EL2 joined it, cluster one from PR #774 run 37255002357 after the desk notice joined it), read at Issue #743 with `gh api --allow-escape-sequences repos/ahl-gram/Vellum/actions/jobs/<job>/logs` and the lines under `per-suite wall clock`; a new suite enters an estimate and is corrected from its pull request's own lane log.
+// CI seconds per suite, the median of the runner's own per-suite wall clock in the CI lane logs over main runs 37080729164 to 37168764434 (nine, 2026-10-02 to 2026-10-04; corners and cluster one each from PR #784 run 37389275488, after Issue #762's pull request B re-floored the corners sweep at 640 and folded the retired room-drawer suite's trail checks into the cluster suite), read at Issue #743 with `gh api --allow-escape-sequences repos/ahl-gram/Vellum/actions/jobs/<job>/logs` and the lines under `per-suite wall clock`; a new suite enters an estimate and is corrected from its pull request's own lane log.
 const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   "render": 44.7,
   "motion": 3.7,
@@ -31,13 +31,12 @@ const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   "room-voyage-route": 20.3,
   "room-address": 43.1,
   "runninghead": 13.3,
-  "cluster": 16.0,
-  "room-drawer": 30.2,
+  "cluster": 13.7,
   "chart-drawer": 146.5,
   "document-rooms": 8.1,
   "region-detail": 44.2,
   "specimen": 9.3,
-  "corners": 362.5,
+  "corners": 243.1,
 };
 
 const laneSeconds = (suites: readonly E2eSuiteName[]) =>

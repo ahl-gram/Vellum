@@ -50,8 +50,8 @@ type PageSpec = {
   also?: readonly [string, string];
 };
 
-/** The shell's binder, inlined into every page by Astro (Issue #483); stripped before a page's OWN scripts are counted. */
-const SHELL_SCRIPT = /<script type="module">(?:(?!<\/script>)[\s\S])*closesOnScroll(?:(?!<\/script>)[\s\S])*<\/script>/;
+/** The shell's binder, inlined into every page by Astro (Issue #483); stripped before a page's OWN scripts are counted. Keyed on the desk notice's storage key, a string the minifier keeps. */
+const SHELL_SCRIPT = /<script type="module">(?:(?!<\/script>)[\s\S])*vellum\.desk-notice\.v1(?:(?!<\/script>)[\s\S])*<\/script>/;
 
 const PAGES: readonly PageSpec[] = [
   {
@@ -520,16 +520,6 @@ test("the layout ships the cluster's ratified pins: leading, weight, the aria-cu
   }
 });
 
-test("the phone doors: EVERY shelled page renders the rooms reveal ahead of its nav (#461, then #483's option-1 ruling)", () => {
-  for (const p of PAGES) {
-    const html = page(p.route);
-    const reveal = html.indexOf('class="rooms-reveal"');
-    assert.ok(reveal > -1, `${p.route} renders the rooms reveal: one drawer, the same on every page`);
-    assert.match(html, /<input type="checkbox"[^>]*class="rooms-reveal"[^>]*aria-label/, `${p.route}'s reveal is a labelled native checkbox (keyboard-operable with no bundle)`);
-    assert.ok(reveal < html.indexOf('<nav class="rooms"'), `${p.route}'s reveal precedes the nav it reveals (the ~ combinator needs the order)`);
-  }
-});
-
 test("a page whose markup carries the survey sheet passes desk open (#461, the interim rule's converse)", () => {
   // The survey sheet is the BARE <div class="sheet">; the Explorer's chart mount is class="sheet" id="sheet", a different animal (sheet-frame.test.ts keys the same way).
   for (const p of PAGES) {
@@ -719,7 +709,7 @@ test("the shell's own script rides every page, inlined by Astro rather than emit
   for (const p of PAGES) {
     const html = page(p.route);
     const shell = html.match(SHELL_SCRIPT);
-    assert.ok(shell, `${p.route} carries the shell's script: the drawer's manners are the same on every page`);
+    assert.ok(shell, `${p.route} carries the shell's script: the top row and the desk notice are the same on every page`);
     assert.ok(html.indexOf(shell[0]) > html.indexOf(p.chartRoom ? "</main>" : "</footer>"), `${p.route} runs it last, after everything it binds`);
   }
 });

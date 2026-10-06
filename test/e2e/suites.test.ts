@@ -140,21 +140,21 @@ test("a suite that gives up is contained: the runner is handed the suite's name 
   const gaveUp = new Error('settle timeout open: {"open":false,"checked":true}');
   const suites = {
     "cluster": () => { ran.push("cluster"); return Promise.reject(gaveUp); },
-    "room-drawer": () => { ran.push("room-drawer"); return Promise.resolve(); },
+    "corners": () => { ran.push("corners"); return Promise.resolve(); },
     "specimen": () => { ran.push("specimen"); return Promise.resolve(); },
   };
   const hooks: E2eRunHooks = {
     onSuiteError: (name, err) => { handed.push([name, (err as Error).message] as const); },
     alive: () => true,
   };
-  const timings = await runSelected(["cluster", "room-drawer", "specimen"], suites, {}, hooks);
-  assert.deepEqual(ran, ["cluster", "room-drawer", "specimen"], "one suite giving up took the rest of the lane with it, which is the defect");
+  const timings = await runSelected(["cluster", "corners", "specimen"], suites, {}, hooks);
+  assert.deepEqual(ran, ["cluster", "corners", "specimen"], "one suite giving up took the rest of the lane with it, which is the defect");
   assert.deepEqual(
     handed,
     [["cluster", gaveUp.message]],
     "the failure did not reach the runner as this suite's, carrying the last read the wait died on",
   );
-  assert.deepEqual(timings.map((t) => t.name), ["cluster", "room-drawer", "specimen"], "the suite that gave up is missing from the timings");
+  assert.deepEqual(timings.map((t) => t.name), ["cluster", "corners", "specimen"], "the suite that gave up is missing from the timings");
   assert.deepEqual(timings.map((t) => t.aborted === true), [true, false, false], "the timings do not say which suite stopped early, so nothing downstream can withhold its clean bill");
 });
 
