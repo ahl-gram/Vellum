@@ -90,6 +90,7 @@ const GATE7_ROWS: ReadonlyArray<readonly [string, string]> = [
   ["a file in test-support that only begins like a helper gets no gate", NOTHING],
   ["a second edit to a test under a folder that only ends in test gets nothing", NOTHING],
   ["a folder that only ends in test-support gets no gate", NOTHING],
+  ["a new site module in a folder that only ends in test-support still gets gate 4", 'want context with "## Gate 4", got context'],
   ["a helper in a test-support folder under e2e still gets gate 2", 'want context with "## Gate 2" and without "## Gate 1", got context'],
   ["a helper in a test-support folder under the renderer still gets gate 6", 'want context with "## Gate 6" and without "## Gate 1", got context'],
   ["a new helper in a test-support folder under src/site gets gate 1 and no gate 4", 'want context with "## Gate 1" and without "## Gate 4", got context'],

@@ -47,6 +47,7 @@ export const ROUTE_ROWS: ReadonlyArray<RouteRow> = [
   ["a helper in a test-support folder under the renderer still gets gate 6", "Edit", "src/render/test-support/never-exists-zz.ts", "x", "context", "## Gate 6", "## Gate 1"],
   ["a new helper in a test-support folder under src/site gets gate 1 and no gate 4", "Write", "src/site/test-support/never-exists-zz.ts", "x", "context", "## Gate 1", "## Gate 4"],
   ["a folder that only ends in test-support gets no gate", "Edit", "a-test-support/never-exists-zz.ts", "x", null, ""],
+  ["a new site module in a folder that only ends in test-support still gets gate 4", "Write", "src/site/a-test-support/never-exists-zz.ts", "x", "context", "## Gate 4"],
 ];
 
 export type SequenceRow = readonly [name: string, paths: readonly string[], want: "context" | null, needle: string, absent?: string];
