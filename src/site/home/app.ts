@@ -166,7 +166,7 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
     doc: document,
     reduced,
     fly: (visit) =>
-      flyTo(stationFlightView(cam, fit, visit, view(), SHEET, window.innerWidth), reduced() ? 0 : STATION_FLIGHT_SECONDS),
+      flyTo(stationFlightView(cam, fit, visit, view(), SHEET), reduced() ? 0 : STATION_FLIGHT_SECONDS),
   });
 
   new ResizeObserver(() => {
@@ -188,11 +188,11 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
     playCeremony({
       doc: document,
       chart: chart instanceof HTMLImageElement ? chart : null,
-      land: (seconds) => flyTo(landfallView(view(), SHEET, fit, window.innerWidth), seconds),
+      land: (seconds) => flyTo(landfallView(view(), SHEET, fit), seconds),
     });
   } else {
     document.getElementById("lf-veil")?.remove();
-    assign(landfallView(view(), SHEET, fit, window.innerWidth));
+    assign(landfallView(view(), SHEET, fit));
     settle();
   }
   armDrift();

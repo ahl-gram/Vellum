@@ -62,26 +62,12 @@ test("the wide anchorage and the landfall view frame the isle as the mockup's ca
   const wc = centerFraction(wide, view, SHEET);
   assert.ok(Math.abs(wc.fx - 0.5) < 1e-9 && Math.abs(wc.fy - 0.5) < 1e-9, "the anchorage centers the sheet");
 
-  const land = landfallView(view, SHEET, fit, 1280);
-  assert.ok(Math.abs(land.s - fit * 1.72) < 1e-12, "the wide landfall closes to 1.72 of fit");
+  const land = landfallView(view, SHEET, fit);
+  assert.ok(Math.abs(land.s - fit * 1.72) < 1e-12, "the landfall closes to 1.72 of fit");
   const lc = centerFraction(land, view, SHEET);
   assert.ok(Math.abs(lc.fx - 0.51) < 1e-9, "landfall centers the capital's water, fx 0.51");
   assert.ok(Math.abs(lc.fy - 0.485) < 1e-9, "landfall centers the capital's water, fy 0.485");
 
-  const narrow = landfallView(view, SHEET, fit, 899);
-  assert.ok(Math.abs(narrow.s - fit * 1.6) < 1e-12, "under a 900px viewport the landfall stands further off, 1.6 of fit");
-  const at900 = landfallView(view, SHEET, fit, 900);
-  assert.ok(
-    Math.abs(at900.s - fit * 1.6) < 1e-12,
-    "a 900px viewport takes the NARROW framing: the boundary agrees with the station flight's <= 900 and the CSS max-width: 900px, settled by #476 (the mockup disagrees with itself here, < in one site and <= in the other)",
-  );
-  const at901 = landfallView(view, SHEET, fit, 901);
-  assert.ok(Math.abs(at901.s - fit * 1.72) < 1e-12, "901 frames wide: the cut sits between 900 and 901 on every carrier");
-  const boxedWide = landfallView({ w: 880, h: 800 }, SHEET, fitScale({ w: 880, h: 800 }, SHEET), 928);
-  assert.ok(
-    Math.abs(boxedWide.s - fitScale({ w: 880, h: 800 }, SHEET) * 1.72) < 1e-12,
-    "the breakpoint reads the VIEWPORT, not the stage box: a 928px viewport whose boxed stage is 880 still frames wide (the mockup decides on window.innerWidth; PR #467 skeptic finding 1)",
-  );
 });
 
 test("arrival memory: once per sitting, and a blocked storage plays the ceremony every time (#457 ratified 1)", () => {

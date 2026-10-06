@@ -1,11 +1,11 @@
-// The floating seed chrome (H0-H6, Issue #289 semantics relanded at Issue #470), the ceremony (H7-H13, Issue #457), the failed-bundle doors (H13c, Issue #470), and the stations, cards, and idle drift (H14-H17, Issue #458): the homepage frame at desktop and a real 390px viewport, the corner form, the seed form's real promise (the chart number in the baked cartouche IS the seed, so the drawn SVG identifies its world), the veil's arrival, skips in both phases, sitting memory, reduced-motion and narrow-viewport stories, and the station flights driven by REAL dispatched input; deltas scoped per flow, plumbing shared via support/home.ts (Issue #460).
+// The floating seed chrome (H0-H6, Issue #289 semantics relanded at Issue #470), the ceremony (H7-H13, Issue #457), the failed-bundle doors (H13c, Issue #470), and the stations, cards, and idle drift (H14-H17, Issue #458): the homepage frame at desktop and on a 390px window that lays out the 1024 page (Issue #762), the corner form, the seed form's real promise (the chart number in the baked cartouche IS the seed, so the drawn SVG identifies its world), the veil's arrival, skips in both phases, sitting memory, reduced-motion stories, and the station flights driven by REAL dispatched input; deltas scoped per flow, plumbing shared via support/home.ts (Issue #460).
 import type { SuiteContext } from "../types.ts";
 import { homeKit } from "./home/kit.ts";
 import type { HomeKit } from "./home/kit.ts";
-import { h0Loads, hVeilDown, h1CornerForm, h2Hook, h3Narrow, h4DrawIt, h5Home, h5aRefused, h5bEmptySeed, h6Clean } from "./home/frame.ts";
-import { h7aVeil, h7bLandfall, h8KeySkip, h8bHoldSkip, h9CeremonyStandsDown, h12aVeilCovers, h12bNarrowSkip, h18CameraSeat, h11Clean } from "./home/ceremony.ts";
+import { h0Loads, hVeilDown, h1CornerForm, h2Hook, h4DrawIt, h5Home, h5aRefused, h5bEmptySeed, h6Clean } from "./home/frame.ts";
+import { h7aVeil, h7bLandfall, h8KeySkip, h8bHoldSkip, h9CeremonyStandsDown, h12aVeilCovers, h12bSkipOnFloor, h18CameraSeat, h11Clean } from "./home/ceremony.ts";
 import { h13aPrePaint, h13bRelease, h13cDoorsRead, h13cStaticDoors, h13dPrmDoors, h13ePrmNoFlash, h13fNoScriptRead, h13fNoScript } from "./home/doors.ts";
-import { h14aFlight, h14aCardFits, h14bEscape, h14dPipHover, h14cLegend, h16bOpen, h16bBottomSheet, h16cLegendStands, h17Clean } from "./home/stations.ts";
+import { h14aFlight, h14aCardFits, h14bEscape, h14dPipHover, h14cLegend, h17Clean } from "./home/stations.ts";
 import { h15aDrift, h15bWheelStops, h15cRearmed, h15dFlightStops, h16NoDrift } from "./home/drift.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
@@ -18,7 +18,6 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await hVeilDown(k, ready);
   await h1CornerForm(ctx, ready);
   await h2Hook(ctx, ready);
-  await h3Narrow(ctx);
   await h4DrawIt(ctx);
   const backHome = await h5Home(ctx);
   await h5aRefused(ctx, backHome);
@@ -40,7 +39,7 @@ async function h7Ceremony(ctx: SuiteContext, k: HomeKit): Promise<void> {
   await h9CeremonyStandsDown(ctx);
   await setNarrowViewport(390, 844);
   await h12aVeilCovers(ctx);
-  await h12bNarrowSkip(k);
+  await h12bSkipOnFloor(k);
   const seat390 = await camSeat();
   await clearMobile();
   await h18CameraSeat(k, seat390);
@@ -63,7 +62,7 @@ async function h7Ceremony(ctx: SuiteContext, k: HomeKit): Promise<void> {
 }
 
 async function h14Stations(ctx: SuiteContext, k: HomeKit): Promise<void> {
-  const { send, setNarrowViewport, clearMobile, consoleErrors, http4xx } = ctx;
+  const { send, consoleErrors, http4xx } = ctx;
   const { settleHome } = k;
   // Stations, cards, and the drift (Issue #458) at the ratified 1280x800 (the harness's tall default hides the short-viewport collisions the plate-reader measured). Every gesture is REAL dispatched input (Issue #460): pointer capture retargets clicks, so synthetic .click() proves nothing here.
   const errBase3 = consoleErrors.length;
@@ -80,11 +79,5 @@ async function h14Stations(ctx: SuiteContext, k: HomeKit): Promise<void> {
   await h15cRearmed(ctx);
   await h15dFlightStops(k);
   await h16NoDrift(k);
-  await setNarrowViewport(390, 844);
-  const settled16b = await settleHome();
-  const sheetPt = await h16bOpen(k);
-  await h16bBottomSheet(ctx, settled16b, sheetPt);
-  await h16cLegendStands(k);
-  await clearMobile();
   h17Clean(ctx, errBase3, httpBase3);
 }

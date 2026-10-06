@@ -1,4 +1,4 @@
-// The head cluster against the right-hand corner on every page (Issue #638; Issue #762 pull request B): each page is resized while loaded, at a stride and at every media edge from 640 up, every pixel between two reads that are not a plain shift, and no box of the cluster's ink (its text line boxes and its controls) may overlap a box of the corner's. Ink, never a layout box, because a corner's layout box is wider than what it draws.
+// The head cluster against the right-hand corner on every page (Issue #638; Issue #762 pull request B): each page is resized while loaded, at a stride and at every media edge from 1024 up, every pixel between two reads that are not a plain shift, and no box of the cluster's ink (its text line boxes and its controls) may overlap a box of the corner's. Ink, never a layout box, because a corner's layout box is wider than what it draws.
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { DISCOVERY_ROUTES } from "../../scripts/generate-discovery.ts";
@@ -14,16 +14,12 @@ import { na4Lean, ns1Soft } from "./corners/short.ts";
 
 const REPO = resolve(fileURLToPath(new URL(".", import.meta.url)), "..", "..");
 const PAGE_FLOOR = ["/", "/explorer/", "/explorer/portfolio/", "/faq/", "/gallery/", "/glossary/", "/print-room/", "/prospect/", "/reading-room/", "/ribbon/", "/seed-of-the-day/", "/specimen/"];
-const FOLD = 900;
-const BELOW_WIDE = 1023;
 const YIELD_TOP = 1040;
 const YIELD_MID = 1032;
-// A room narrower than this lays out its 1024 page (Alex, 2026-10-06, Issue #762), which FL1 holds piece for piece, so the sweeps read a room from here up and home, not floored until pull request D, from 640.
+// A page narrower than this lays out its 1024 layout (Alex, 2026-10-06, Issue #762), which FL1 holds piece for piece, so the sweeps read every page from here up.
 const ROOM_FLOOR = 1024;
-const NARROW_LO = 640;
 const WIDE = 1280;
 const STRIDE = 32;
-const PHONE_H = 844;
 const WIDE_H = 800;
 const MAX_FRAMES = 40;
 
@@ -58,7 +54,7 @@ const READ = `(() => {
     bandH: document.querySelector(".band") ? r2(parseFloat(root.getPropertyValue("--band-h")) * parseFloat(root.fontSize)) : null };
 })`;
 
-// A read is taken only once the media queries see the width set, a 100vw sentinel matches the width vw resolves against (a vw length is not recomputed until the resizing pauses: measured 2026-10-03 on home's calc(100vw - 15rem) cap, which a one-frame read never applied from 396 down to 320), and two frame reads agree.
+// A read is taken only once the media queries see the width set, a 100vw sentinel matches the width vw resolves against (a vw length is not recomputed until the resizing pauses: measured 2026-10-03 on home's since-removed calc(100vw - 15rem) cap, which a one-frame read never applied from 396 down to 320), and two frame reads agree.
 const restAt = (w: number): Payload<CornerRead> => `new Promise((resolve, reject) => {
   const read = ${READ};
   let last = null, frames = 0;
@@ -92,13 +88,10 @@ const WIDEST_DATELINE: Payload<string> = `(async () => {
   return best;
 })()`;
 
-async function load(ctx: SuiteContext, page: string, w: number, mobile: boolean): Promise<string | null> {
+async function load(ctx: SuiteContext, page: string, w: number): Promise<string | null> {
   const { send, evaluate, sleep, PORT } = ctx;
-  if (mobile) await ctx.setNarrowViewport(w, PHONE_H);
-  else {
-    await ctx.setTouch(false);
-    await send("Emulation.setDeviceMetricsOverride", { width: w, height: WIDE_H, deviceScaleFactor: 1, mobile: false });
-  }
+  await ctx.setTouch(false);
+  await send("Emulation.setDeviceMetricsOverride", { width: w, height: WIDE_H, deviceScaleFactor: 1, mobile: false });
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}${page}` });
   let up = false;
@@ -111,17 +104,17 @@ async function load(ctx: SuiteContext, page: string, w: number, mobile: boolean)
   return page === "/seed-of-the-day/" ? evaluate(WIDEST_DATELINE, true) : null;
 }
 
-async function readAt(ctx: SuiteContext, w: number, mobile: boolean): Promise<Row> {
-  await ctx.send("Emulation.setDeviceMetricsOverride", { width: w, height: mobile ? PHONE_H : WIDE_H, deviceScaleFactor: 1, mobile: false });
+async function readAt(ctx: SuiteContext, w: number): Promise<Row> {
+  await ctx.send("Emulation.setDeviceMetricsOverride", { width: w, height: WIDE_H, deviceScaleFactor: 1, mobile: false });
   return { w, read: await ctx.evaluate(restAt(w), true) };
 }
 
-async function readStretch(ctx: SuiteContext, widths: readonly number[], mobile: boolean): Promise<Row[]> {
+async function readStretch(ctx: SuiteContext, widths: readonly number[]): Promise<Row[]> {
   const rows: Row[] = [];
   let prev: Row | null = null;
   for (const w of widths) {
-    const row = await readAt(ctx, w, mobile);
-    if (prev) for (const fill of fillBetween(prev, row)) rows.push(await readAt(ctx, fill, mobile));
+    const row = await readAt(ctx, w);
+    if (prev) for (const fill of fillBetween(prev, row)) rows.push(await readAt(ctx, fill));
     rows.push(row);
     prev = row;
   }
@@ -133,21 +126,12 @@ async function sweepPage(ctx: SuiteContext, page: string): Promise<PageResult> {
   const unread: string[] = [];
   const links: string[] = [];
   let dateline: string | null = null;
-  const from = page === "/" ? FOLD + 1 : ROOM_FLOOR;
   try {
-    if (page === "/") {
-      dateline = await load(ctx, page, FOLD, true);
-      const narrowMedia = await ctx.evaluate(MEDIA);
-      unread.push(...unreadWidthConditions(narrowMedia));
-      stretches.push(await readStretch(ctx, strideWidths(FOLD, NARROW_LO, STRIDE, mediaEdges(narrowMedia, NARROW_LO - 1, FOLD)), true));
-      // Read at the END of each stretch, seconds after the load, so a link the page's script rewrites (the Print Room's road on to the Portfolio waits for the proof) is read as rewritten.
-      links.push(...await ctx.evaluate(LINKS));
-    }
-    const wideDateline = await load(ctx, page, WIDE, false);
-    if (wideDateline) dateline = dateline === null ? wideDateline : `${dateline}; above the fold ${wideDateline}`;
-    const wideMedia = await ctx.evaluate(MEDIA);
-    unread.push(...unreadWidthConditions(wideMedia));
-    stretches.push(await readStretch(ctx, strideWidths(WIDE, from, STRIDE, mediaEdges(wideMedia, from - 1, WIDE)), false));
+    dateline = await load(ctx, page, WIDE);
+    const media = await ctx.evaluate(MEDIA);
+    unread.push(...unreadWidthConditions(media));
+    stretches.push(await readStretch(ctx, strideWidths(WIDE, ROOM_FLOOR, STRIDE, mediaEdges(media, ROOM_FLOOR - 1, WIDE))));
+    // Read at the END of the stretch, seconds after the load, so a link the page's script rewrites (the Print Room's road on to the Portfolio waits for the proof) is read as rewritten.
     links.push(...await ctx.evaluate(LINKS));
     return { page, stretches, unread, dateline, links, error: null };
   } catch (err) {
@@ -170,7 +154,7 @@ async function co1Sweep(ctx: SuiteContext): Promise<readonly PageResult[]> {
     return { ok: r.error === null && faults.length === 0, text: `${r.page} ${rows.length} widths, nearest ${close.d.toFixed(1)} at ${close.w}${r.dateline ? ` (dateline "${r.dateline}")` : ""}${r.error ? `; ERROR ${r.error}` : ""}${faults.length ? `; ${faults.length} faults: ${faults.slice(0, 4).join("; ")}` : ""}` };
   });
   ctx.check(
-    "CO1 on every page the tree builds, resized while loaded to 1280 at a 32px stride, home from 640 and every room from 1024, below which a room lays out its 1024 page (FL1), and at both sides of every width media edge its CSS carries, every pixel between two reads that are not a plain shift, no ink of the head cluster overlaps the ink of the right-hand corner by any amount, both corners carry ink, every page keeps its motto, the band covers the cluster, nothing lays out wider than set or scrolls sideways, and the Seed of the Day writes its own dateline through datelineFor (Issue #638; Issue #762: re-floored at 640, the motto kept everywhere)",
+    "CO1 on every page the tree builds, resized while loaded to 1280 at a 32px stride, every page from 1024, below which a page lays out its 1024 layout (FL1), and at both sides of every width media edge its CSS carries, every pixel between two reads that are not a plain shift, no ink of the head cluster overlaps the ink of the right-hand corner by any amount, both corners carry ink, every page keeps its motto, the band covers the cluster, nothing lays out wider than set or scrolls sideways, and the Seed of the Day writes its own dateline through datelineFor (Issue #638; Issue #762: re-floored at 1024, the motto kept everywhere)",
     missing.length === 0 && lines.every((l) => l.ok),
     `${missing.length ? `pages missing from the tree: ${missing.join(", ")} | ` : ""}${lines.map((l) => l.text).join(" | ")}`,
   );
@@ -230,11 +214,11 @@ async function co3Wraps(ctx: SuiteContext): Promise<void> {
   const faults: string[] = [];
   let read = 0;
   for (const page of routesUnder(resolve(REPO, "src/pages"))) {
-    await load(ctx, page, page === "/" ? BELOW_WIDE : YIELD_TOP, false);
+    await load(ctx, page, page === "/" ? ROOM_FLOOR : YIELD_TOP);
     const yields = await ctx.evaluate<boolean>(`getComputedStyle(document.documentElement).getPropertyValue("--folio-cap").trim() !== ""`);
-    const widths = [...(yields ? [YIELD_TOP, YIELD_MID] : []), ...(page === "/" ? [BELOW_WIDE, 960, FOLD + 1] : [])];
+    const widths = [...(yields ? [YIELD_TOP, YIELD_MID] : []), ...(page === "/" ? [ROOM_FLOOR] : [])];
     for (const w of widths) {
-      await readAt(ctx, w, false);
+      await readAt(ctx, w);
       const controls = await ctx.evaluate(CONTROLS);
       read += controls.length;
       faults.push(...squeezes(w, controls).map((f) => `${page} ${f}`));
@@ -242,7 +226,7 @@ async function co3Wraps(ctx: SuiteContext): Promise<void> {
     if (widths.length) rows.push(page);
   }
   ctx.check(
-    "CO3 no control in a right-hand corner is squeezed below its own width, the row wrapping onto another line instead: on home from the fold to 1023, and on a page whose corner carries its own cap and so gives way toward the kit's width before the nav wraps, at 1032 and 1040 (Issue #762; Alex's 2026-10-03 ruling 4 on Issue #638); a room below 1024 lays out its 1024 page (FL1), and the Print Room's and the Specimen's corners from 1024 up are Issue #741's (Alex, 2026-10-06, on Issue #762) (Issue #638)",
+    "CO3 no control in a right-hand corner is squeezed below its own width, the row wrapping onto another line instead: on home at 1024, and on a page whose corner carries its own cap and so gives way toward the kit's width before the nav wraps, at 1032 and 1040 (Issue #762; Alex's 2026-10-03 ruling 4 on Issue #638); a page below 1024 lays out its 1024 layout (FL1), and the Print Room's and the Specimen's corners from 1024 up are Issue #741's (Alex, 2026-10-06, on Issue #762) (Issue #638)",
     faults.length === 0 && read > 0,
     `${rows.length} pages, ${read} control reads; ${faults.length ? `${faults.length} squeezed: ${faults.slice(0, 6).join("; ")}` : "none squeezed"}`,
   );
@@ -253,8 +237,8 @@ const PIN_CAP = "header.chrome { max-width: none !important; } .corner.tr.folio-
 async function co2Control(ctx: SuiteContext): Promise<void> {
   const { evaluate, check } = ctx;
   const at = ROOM_FLOOR;
-  await load(ctx, "/ribbon/", at, false);
-  const before = (await readAt(ctx, at, false)).read;
+  await load(ctx, "/ribbon/", at);
+  const before = (await readAt(ctx, at)).read;
   await evaluate(`(() => { const s = document.createElement("style"); s.id = "co-control"; s.textContent = ${JSON.stringify(PIN_CAP)}; document.head.appendChild(s); dispatchEvent(new Event("resize")); return true; })()`);
   const pinned = await evaluate(restAt(at), true);
   await evaluate(`(() => { document.getElementById("co-control").remove(); dispatchEvent(new Event("resize")); return true; })()`);

@@ -156,16 +156,16 @@ export async function h12aVeilCovers({ evaluate, send, check, shoot, sleep, PORT
     await sleep(60);
   }
   check(
-    "H12a at 390px the veil covers the whole viewport, corners included, and nothing scrolls sideways beneath it",
+    "H12a at 390px the veil covers the whole window, corners included, over the 1024 page that lies beneath it (Issue #762)",
     narrow12 !== null && narrow12.corners && narrow12.x === 0 && narrow12.y === 0
       && Math.abs(narrow12.w - 390) < 0.5 && Math.abs(narrow12.h - 844) < 0.5
-      && narrow12.innerWidth === 390 && narrow12.scrollW === 390,
+      && narrow12.innerWidth === 390 && narrow12.scrollW === 1024,
     JSON.stringify(narrow12),
   );
   await shoot("home-veil-390.png");
 }
 
-export async function h12bNarrowSkip({ evaluate, check, sleep, pressKey }: HomeKit): Promise<void> {
+export async function h12bSkipOnFloor({ evaluate, check, sleep, pressKey }: HomeKit): Promise<void> {
   let armed12 = null;
   for (let i = 0; i < 150; i++) {
     try { armed12 = await evaluate(readCam); } catch {}
@@ -173,17 +173,17 @@ export async function h12bNarrowSkip({ evaluate, check, sleep, pressKey }: HomeK
     await sleep(60);
   }
   await pressKey("Escape", "Escape", 27);
-  let narrowLand: Cam | null = null;
+  let land: Cam | null = null;
   for (let i = 0; i < 40; i++) {
-    try { narrowLand = await evaluate(readCam); } catch {}
-    if (atLandfall(narrowLand)) break;
+    try { land = await evaluate(readCam); } catch {}
+    if (atLandfall(land)) break;
     await sleep(60);
   }
+  const stageW = await evaluate<number>(`document.getElementById("lf-stage").getBoundingClientRect().width`);
   check(
-    "H12b the narrow skip lands at the narrow landfall framing (1.6 of fit under a 900px viewport)",
-    anchored(armed12) && atLandfall(narrowLand) && narrowLand!.expected <
-      narrowLand!.fit * 1.65,
-    JSON.stringify({ armed12, narrowLand }),
+    "H12b at 390px the skip lands at the landfall framing of the 1024 stage, 1.72 of its fit (Issue #762)",
+    anchored(armed12) && atLandfall(land) && stageW === 1024,
+    JSON.stringify({ armed12, land, stageW }),
   );
 }
 

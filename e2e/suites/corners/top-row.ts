@@ -1,4 +1,4 @@
-// The top row (Issue #762 pull request B; re-floored by pull request C, where a room below 1024 lays out its 1024 page): a wide corner gives way toward the kit's width before the nav wraps, home's nav wraps between rooms, a page that widens again lays out from its sheets, Issue #741's corners are never written, a chart room's slip follows its folio, and a room's band and first row hold at the floor.
+// The top row (Issue #762 pull request B; re-floored by pull requests C and D, where a page below 1024 lays out its 1024 layout): a wide corner gives way toward the kit's width before the nav wraps, a page that widens again lays out from its sheets, Issue #741's corners are never written, a chart room's slip follows its folio, and a room's band and first row hold at the floor.
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import { LANDED } from "./stage.ts";
@@ -70,17 +70,15 @@ export async function co5Yields(ctx: SuiteContext): Promise<void> {
   let wraps = true;
   for (const page of ["/", "/faq/", "/print-room/", "/prospect/", "/ribbon/"]) {
     const r = await open(ctx, page, NARROW);
-    wraps &&= page === "/" ? r.navLines >= 2 && r.leadingDots === 0 && r.wrapped && r.boxGap >= 25.6 - 0.5 : oneLine(r) && r.boxGap >= 25.6 - 0.5;
+    wraps &&= oneLine(r) && r.boxGap >= 25.6 - 0.5;
     narrow.push(fmt(page, NARROW, r));
   }
   const widened: string[] = [];
   let lays = true;
-  for (const page of ["/", "/ribbon/"]) {
-    const was = await open(ctx, page, NARROW);
-    const now = await at(ctx, 1280, `top-row-widened-${page}`);
-    lays &&= (page === "/" ? was.wrapped : was.cornerInline !== "") && unwritten(now) && now.navLines === 1;
-    widened.push(`${fmt(page, NARROW, was)} then ${fmt(page, 1280, now)}`);
-  }
+  const was = await open(ctx, "/ribbon/", NARROW);
+  const now = await at(ctx, 1280, "top-row-widened-/ribbon/");
+  lays &&= was.cornerInline !== "" && unwritten(now) && now.navLines === 1;
+  widened.push(`${fmt("/ribbon/", NARROW, was)} then ${fmt("/ribbon/", 1280, now)}`);
   for (const w of [960, 1024, 1032]) {
     const was = await open(ctx, "/ribbon/", w);
     const now = await at(ctx, 1280, `top-row-widened-ribbon-${w}`);
@@ -100,7 +98,7 @@ export async function co5Yields(ctx: SuiteContext): Promise<void> {
   const off = await open(ctx, "/ribbon/", 1024).finally(() => ctx.send("Emulation.setScriptExecutionDisabled", { value: false }));
   const scriptsOff = Math.abs(off.corner.width - CAP) < 0.5 && off.boxGap > 0 && off.cornerInline === "";
   ctx.check(
-    "CO5 the corner gives way before the nav wraps: the Ribbon at 960, 1024 and 1032 keeps its nav on one line, its corner written between the kit's 19rem and its 30rem cap and standing the gap clear, under reduced motion and with motion on, and at 1280 nothing is written; at 640 home's nav wraps between rooms, every wrapped line ending on its dot, while the FAQ, the Print Room, the Prospect and the Ribbon lay out their 1024 top row on one line, the gap clear; home loaded at 640, or the Ribbon at 640, 960, 1024 or 1032 where its corner was written, and widened to 1280 lays out from its sheets again; Issue #741's two corners are never written; and with scripts off the Ribbon's corner stands at its cap, clear, at 1024 (Issue #762)",
+    "CO5 the corner gives way before the nav wraps: the Ribbon at 960, 1024 and 1032 keeps its nav on one line, its corner written between the kit's 19rem and its 30rem cap and standing the gap clear, under reduced motion and with motion on, and at 1280 nothing is written; at 640 home, the FAQ, the Print Room, the Prospect and the Ribbon lay out their 1024 top row on one line, the gap clear; the Ribbon loaded at 640, 960, 1024 or 1032, where its corner was written, and widened to 1280 lays out from its sheets again; Issue #741's two corners are never written; and with scripts off the Ribbon's corner stands at its cap, clear, at 1024 (Issue #762)",
     reduced.ok && moving.ok && wraps && lays && untouched && scriptsOff,
     [...reduced.rows, ...moving.rows, ...narrow, ...widened, ...held, `scripts off ${fmt("/ribbon/", 1024, off)}`].join(" | "),
   );

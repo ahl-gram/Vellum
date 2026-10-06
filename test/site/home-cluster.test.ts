@@ -12,33 +12,12 @@ const liveCss = (p: string): string => read(p).replace(/\/\*[\s\S]*?\*\//g, "");
 const css = liveCss("public/index.css");
 const layout = read("src/layouts/BaseLayout.astro");
 
-function mediaBodies(sheet: string, query: string, where = "public/index.css"): string {
-  const bodies: string[] = [];
-  let at = sheet.indexOf(`@media ${query}`);
-  while (at >= 0) {
-    const open = sheet.indexOf("{", at);
-    let depth = 0;
-    for (let i = open; i < sheet.length; i++) {
-      if (sheet[i] === "{") depth++;
-      else if (sheet[i] === "}" && --depth === 0) {
-        bodies.push(sheet.slice(open + 1, i));
-        at = sheet.indexOf(`@media ${query}`, i);
-        break;
-      }
-    }
-    if (depth !== 0) assert.fail(`unbalanced @media ${query} block`);
-  }
-  assert.ok(bodies.length > 0, `${where} carries an @media ${query} block`);
-  return bodies.join("\n");
-}
-
 const rule = (sheet: string, selector: string): string => {
   const m = sheet.match(new RegExp(`(?:^|[}\\n])\\s*${selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*\\{([^}]*)\\}`));
   assert.ok(m, `a rule for ${selector} exists`);
   return m[1]!;
 };
 
-const narrow = mediaBodies(css, "(max-width: 900px)");
 const topLevel = css.replace(/@media[^{]*\{[\s\S]*?\n\}/g, "");
 
 test("the stage never yields its lettering to a drag: user-select none on the whole stage, so a pip drag selects nothing (#480, screenshot 4)", () => {
@@ -58,17 +37,9 @@ test("the cluster's wash is a soft pool sized by the cluster, not the 46rem slab
   assert.match(wash, /filter:\s*blur\((1[6-9]|2[0-8])px\)/, "the edge is a 16 to 28px blur, no clipped edge to see");
   const alpha = wash.match(/background:\s*rgb\(from var\(--chart-ink\) r g b \/ (0\.\d+)\)/);
   assert.ok(alpha && Number(alpha[1]) >= 0.8, "the pool is the chart ink at 0.8 or deeper (the 2026-08-26 plate read measured 1.17:1 for the cluster over the close-in chart with no wash)");
-  assert.doesNotMatch(narrow, /header\.chrome::before/, "no corner re-anchor under 900: the inset follows the cluster wherever the shell puts it");
 });
 
 test("the chrome's corner offsets are tokens the wash can follow (#480)", () => {
   assert.match(layout, /--chrome-x:\s*1\.6rem;\s*--chrome-y:\s*1\.4rem;/, "the layout declares the desktop offsets once");
   assert.match(layout, /header\.chrome\s*\{[^}]*left:\s*var\(--chrome-x\);\s*top:\s*var\(--chrome-y\);/, "header.chrome consumes them");
 });
-
-test("the cluster yields the seed panel its corner under 900: the mockup's phone input and a cluster width cap (#480, screenshot 1)", () => {
-  // Measured 2026-08-28 at 390: the tagline ended at x=172.5 and the panel began at x=153.2; a 360 Android is 30px narrower again.
-  assert.match(rule(narrow, ".seed-controls .control"), /width:\s*4\.6rem/, "the mockup's own phone input width (design/atelier-map/stage.css), which Act I dropped");
-  assert.match(rule(narrow, "body > header.chrome"), /max-width:\s*calc\(100vw - 15rem\)/, "the cluster wraps its tagline before it can reach the panel");
-});
-

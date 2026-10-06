@@ -113,14 +113,6 @@ function assertPanelCss(): void {
   assert.match(scroll[1]!, /overflow-y:\s*auto/, "the prose scrolls inside the slip, never burying the stage");
   assert.match(scroll[1]!, /overscroll-behavior:\s*contain/, "an exhausted scroll never chains to the page under the slip");
 
-  const narrowBlock = css.match(/@media \(max-width: 900px\) \{([\s\S]*?)\n\}/);
-  const narrowHow = narrowBlock && narrowBlock[1]!.match(/\.lf-card-how\s*\{[^}]*max-height:\s*([\d.]+vh)/);
-  assert.ok(narrowHow, "the narrow bottom sheet caps its own height inside the media query");
-  assert.equal(
-    narrowHow[1],
-    "45vh",
-    "the narrow cap is the measured value, not merely present: at 62vh the sheet rose past the flight's 0.36 anchor line and buried the cartouche it had just centered (skeptic round 3, sweep at 390x844)",
-  );
 }
 
 function assertNoscriptReveal(): void {
@@ -243,7 +235,7 @@ test("the slips' positioning box is the stage's (#459 skeptic round 2 finding 6;
   assert.ok(card && /position:\s*absolute/.test(card[1]!), "the slips float out of flow for the same reason (the failed-bundle reveal is the one pinned exception, and it holds only while nothing JS-dependent is on screen)");
   assert.ok(
     card[1]!.includes("max-height: calc(100% - 2rem)") && card[1]!.includes("overflow: hidden"),
-    "the desktop cap replaces the containment the stage's own overflow used to give an over-tall slip: without it a slip escapes the stage box (plate control: 3000px of injected content clamps to landfall minus 2rem with the Enter door still reachable); the narrow block lifts it, pinned in landfall-doors",
+    "the desktop cap replaces the containment the stage's own overflow used to give an over-tall slip: without it a slip escapes the stage box (plate control: 3000px of injected content clamps to landfall minus 2rem with the Enter door still reachable)",
   );
 });
 
@@ -265,12 +257,12 @@ test("the corner chrome passes clicks through and keeps its text on its own grou
   const primary = css.match(/\.lf-seed \.primary \{([^}]*)\}/);
   assert.ok(
     primary && /white-space:\s*nowrap/.test(primary[1]!),
-    "Draw it never wraps: inside the 12rem narrow corner the flex fit broke the phrase across two lines, and nowrap makes the input the flex member that yields (skeptic round 2, visible in the 390 plates)",
+    "Draw it never wraps: nowrap makes the input the flex member that yields (skeptic round 2, visible in the 390 plates)",
   );
   const control = css.match(/\.lf-seed \.control \{([^}]*)\}/);
   assert.ok(
     control && /min-width:\s*0/.test(control[1]!),
-    "and the input CAN yield: flex refuses to shrink an input below its default min-width, so with nowrap alone the row overflowed the panel's left edge by 9.67px at 390 and painted the input over raw map (plate round 3); e2e H3 measures the containment live",
+    "and the input CAN yield: flex refuses to shrink an input below its default min-width, so with nowrap alone the row overflowed the panel's left edge by 9.67px at 390 and painted the input over raw map (plate round 3)",
   );
 });
 
@@ -303,11 +295,6 @@ test("the Notice to Mariners is the mockup's stamp on the deep, and only the sta
   assert.ok(!head[1]!.includes("text-transform"), "title case as written: no transform, the mockup has none");
   const body = css.match(/\.stamp-body \{([^}]*)\}/);
   assert.ok(body && /font-style:\s*italic/.test(body[1]!) && /var\(--ink-faded\)/.test(body[1]!), "the body keeps the mockup's flourish italic in ink-faded");
-  const narrow = css.match(/@media \(max-width: 900px\) \{([\s\S]*?)\n\}/);
-  assert.ok(
-    narrow && /\.notice-stamp[^{]*\{[^}]*display:\s*none/.test(narrow[1]!),
-    "the narrow sheet stands the stamp down, as the mockup does",
-  );
 });
 
 test("the legend row's ground and faces: the seed box's crisp panel under it, parchment on the head and the verb (the 2026-09-03 sitting, rulings 11, 23 and 24 on #454)", () => {

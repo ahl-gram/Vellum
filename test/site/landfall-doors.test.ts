@@ -58,17 +58,6 @@ test("the reveal's to-frame restores exactly what the base zeroed, and the dead 
   for (const decl of ["visibility: visible", "max-height: 100rem", "margin-top: 2rem", "padding: 1.5rem 1.6rem 1.4rem", "border-width: 1px", "outline-width: 3px"]) {
     assert.ok(to[1]!.includes(decl), `the to-frame restores ${decl}`);
   }
-  const narrow = css.match(/@media \(max-width: 900px\) \{\s*@keyframes lf-doors-reveal \{([\s\S]*?)\n {2}\}/);
-  assert.ok(
-    narrow && narrow[1]!.includes("padding: 1.2rem 1.3rem 1.1rem") && narrow[1]!.includes("visibility: visible"),
-    "the narrow override redefines the keyframes AFTER the base (a definition before it in file order never wins), so revealed doors under 900px wear the narrow padding",
-  );
-  const narrowCard = css.match(/@media \(max-width: 900px\) \{([\s\S]*?)\n\}/);
-  const fixedSheet = narrowCard && narrowCard[1]!.match(/\.lf-card\s*\{([^}]*)\}/);
-  assert.ok(
-    fixedSheet && fixedSheet[1]!.includes("max-height: none") && fixedSheet[1]!.includes("overflow: visible"),
-    "the narrow fixed sheets lift the desktop cap: position:fixed makes the % resolve against the VIEWPORT, and on a landscape phone the clip would land exactly on the sheet's Enter door, its only action (skeptic round 2)",
-  );
   assert.match(
     css,
     /\.landfall \.stage:not\(\.cam\) ~ \.lf-card \.lf-card-close \{ display: none; \}/,

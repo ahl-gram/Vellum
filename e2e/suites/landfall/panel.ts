@@ -113,7 +113,7 @@ export async function l7WideClear({ evaluate, check, shoot }: SuiteContext): Pro
 }
 
 export async function l4l8Enters({ check, measureEnters }: LandfallKit): Promise<void> {
-  const desktop8 = await measureEnters("desktop");
+  const desktop8 = await measureEnters();
   const enters = desktop8.boxes;
   const swallowed4 = desktop8.swallowed;
   check(
@@ -126,47 +126,5 @@ export async function l4l8Enters({ check, measureEnters }: LandfallKit): Promise
     "L8 every slip's Enter link is a 44px touch target, measured open (#460 ratification 2)",
     enters.length === 4 && enters.every((b) => b !== null && b.open && b.h >= 44 && b.w >= 44),
     JSON.stringify({ enters }),
-  );
-}
-
-export async function l7bNarrowClear({ evaluate, check, sleep, pressKey, clickAt }: LandfallKit, settled9: Cam | null): Promise<void> {
-  const howPt9 = await evaluate(buttonPoint('.lf-station[data-station="how"]'));
-  if (howPt9 !== null) await clickAt(Math.round(howPt9.x), Math.round(howPt9.y));
-  let narrow6 = null;
-  for (let i = 0; i < 80; i++) {
-    try {
-      narrow6 = await evaluate<{ anchorY: number; sheetTop: number; innerWidth: number } | null>(`(() => {
-        const card = document.getElementById("lf-card-how");
-        const btn = document.querySelector('.lf-station[data-station="how"]');
-        const stage = document.getElementById("lf-stage");
-        const sheet = document.getElementById("lf-sheet");
-        if (!card || !btn || !stage || !sheet) return null;
-        const cs = getComputedStyle(card);
-        if (card.hidden || cs.visibility === "hidden" || Number(cs.opacity) <= 0.95) return null;
-        const sr = stage.getBoundingClientRect();
-        const m = new DOMMatrixReadOnly(getComputedStyle(sheet).transform);
-        const cr = card.getBoundingClientRect();
-        return { anchorY: sr.top + Number(btn.dataset.ny) * 1157.931 * m.a + m.f, sheetTop: cr.top, innerWidth: window.innerWidth };
-      })()`);
-      if (narrow6 !== null) break;
-    } catch {}
-    await sleep(75);
-  }
-  await sleep(700);
-  check(
-    "L7b (arm 6, narrow) at 390 the flown-to anchor rides clear above the bottom sheet",
-    narrow6 !== null && narrow6.innerWidth === 390 && narrow6.anchorY < narrow6.sheetTop,
-    JSON.stringify({ settled9: !!settled9, narrow6 }),
-  );
-  await pressKey("Escape", "Escape", 27);
-  await sleep(500);
-}
-
-export async function l8bNarrowTargets({ check, measureEnters }: LandfallKit): Promise<void> {
-  const narrow8 = await measureEnters("narrow");
-  check(
-    "L8b at 390 the touch targets hold: every Enter link is still 44px under the narrow media rules",
-    narrow8.boxes.length === 4 && narrow8.boxes.every((b) => b !== null && b.open && b.h >= 44 && b.w >= 44),
-    JSON.stringify({ enters390: narrow8.boxes }),
   );
 }

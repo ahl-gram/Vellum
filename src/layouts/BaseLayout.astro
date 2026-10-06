@@ -206,7 +206,7 @@ body.room.chart-room { --room-pad-top: 0px; padding: 0; }
 /* A px floor, not a viewport-unit one: under the harness's emulated resize Chrome still resolved `vw` against the old window at the resize event, so a floor written in `vw` laid the head cluster out against a 640 page (measured 2026-10-06). */
 @media screen {
   html:has(body.room) { overflow-x: auto; }
-  body.room { min-width: 1024px; box-sizing: border-box; }
+  body { min-width: 1024px; box-sizing: border-box; }
   .desk-layer.on { position: sticky; top: 0; z-index: 10; height: 100vh; margin: calc(-1 * var(--room-pad-top)) -2.2rem calc(var(--room-pad-top) - 100vh); contain: layout; pointer-events: none; }
   body.room.chart-room .desk-layer.on { margin-inline: 0; }
 }

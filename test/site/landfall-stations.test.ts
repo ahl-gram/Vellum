@@ -137,37 +137,23 @@ test("the station flight frames the anchor beside the card, at the mockup's dept
 
   const anchor = { nx: 0.3103, ny: 0.5906 };
   const shallow = { x: 0, y: 0, s: fit };
-  const wide = stationFlightView(shallow, fit, anchor, view, SHEET, 1280);
+  const wide = stationFlightView(shallow, fit, anchor, view, SHEET);
   assert.ok(Math.abs(wide.s - fit * STATION_SCALE_FACTOR) < 1e-12, "a shallow camera dives to 2.6 of fit");
   assert.ok(
     Math.abs(anchor.nx * SHEET.w * wide.s + wide.x - view.w * 0.4) < 1e-9,
-    "wide: the anchor sits at 0.4 of the stage width, clear of the card at the right",
+    "the anchor sits at 0.4 of the stage width, clear of the card at the right",
   );
   assert.ok(
     Math.abs(anchor.ny * SHEET.h * wide.s + wide.y - view.h / 2) < 1e-9,
-    "wide: the anchor rides the vertical center",
+    "the anchor rides the vertical center",
   );
 
   const deep = { x: 0, y: 0, s: fit * 4 };
-  const held = stationFlightView(deep, fit, anchor, view, SHEET, 1280);
+  const held = stationFlightView(deep, fit, anchor, view, SHEET);
   assert.ok(Math.abs(held.s - fit * 4) < 1e-12, "a deeper camera keeps its depth, as the mockup's Math.max does");
 
-  const narrow = stationFlightView(shallow, fit, anchor, view, SHEET, 900);
-  assert.ok(
-    Math.abs(anchor.nx * SHEET.w * narrow.s + narrow.x - view.w / 2) < 1e-9,
-    "narrow: the anchor centers, the card lies below",
-  );
-  assert.ok(
-    Math.abs(anchor.ny * SHEET.h * narrow.s + narrow.y - view.h * 0.36) < 1e-9,
-    "narrow: the anchor rises to 0.36 of the stage height, clear of the bottom card",
-  );
-  const justWide = stationFlightView(shallow, fit, anchor, view, SHEET, 901);
-  assert.ok(
-    Math.abs(anchor.nx * SHEET.w * justWide.s + justWide.x - view.w * 0.4) < 1e-9,
-    "the cut is the mockup's v.w <= 900: 901 frames wide, and it reads the VIEWPORT, not the stage box",
-  );
   const c = centerFraction(wide, view, SHEET);
-  assert.ok(c.fx > anchor.nx, "the wide framing pushes the anchor left of center, so the card never covers it");
+  assert.ok(c.fx > anchor.nx, "the framing pushes the anchor left of center, so the card never covers it");
 });
 
 test("the idle drift breathes at the mockup's numbers and never mutates the camera (#458)", () => {
