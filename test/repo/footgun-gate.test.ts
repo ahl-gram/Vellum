@@ -166,6 +166,7 @@ const CD_ROWS: ReadonlyArray<readonly [string, "deny" | "null"]> = [
   ["a brace expansion that climbs back denied", "deny"],
   ["a brace expansion naming two directories denied", "deny"],
   ["a backtick inside double quotes denied", "deny"],
+  ["a backslash inside double quotes denied", "deny"],
   ["an unclosed quote denied", "deny"],
   ["a cd to a command substitution in backticks denied", "deny"],
   ["a cd to the top level in backticks denied", "deny"],

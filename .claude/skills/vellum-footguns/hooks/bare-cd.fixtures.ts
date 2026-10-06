@@ -45,6 +45,7 @@ const UNPLACED: ReadonlyArray<CdRow> = [
   ["a brace expansion that climbs back denied", "cd ./{a,b}/..", "<ROOT>", "unplaced"],
   ["a brace expansion naming two directories denied", "cd {src,test}", "<ROOT>", "unplaced"],
   ["a backtick inside double quotes denied", 'cd "./`x`/.."', "<ROOT>", "unplaced"],
+  ["a backslash inside double quotes denied", 'cd "./a\\b/.."', "<ROOT>", "unplaced"],
   ["an unclosed quote denied", "cd './a/..", "<ROOT>", "unplaced"],
   ["a cd to a command substitution in backticks denied", "cd `pwd`", "<ROOT>", "unplaced"],
   ["a cd to the top level in backticks denied", "cd `git rev-parse --show-toplevel`", "<ROOT>", "unplaced"],
