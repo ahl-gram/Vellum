@@ -2,11 +2,40 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { faceModulePath, faceModuleSource, PLATE_FACES, segmentDistance2, simplify, TOLERANCE } from "../../scripts/plate-face.ts";
-import type { FaceName } from "../../src/prospect/letter/face.ts";
+import { GRID, type FaceName } from "../../src/prospect/letter/face.ts";
+import { FACES } from "../../src/prospect/letter/letter.ts";
 
 test("the committed face tables are exactly what npm run plate-face writes from the kit's plate faces", () => {
   for (const name of Object.keys(PLATE_FACES) as FaceName[]) {
     assert.equal(readFileSync(faceModulePath(name), "utf8"), faceModuleSource(name), `src/prospect/letter/face-${name}.ts is stale or hand-edited: run npm run plate-face`);
+  }
+});
+
+/** Decodes a table outline (relative m, l and z on the grid, y down) into its points, in font units with y up. */
+function decode(d: string): Array<readonly [number, number]> {
+  const pts: Array<readonly [number, number]> = [];
+  let x = 0, y = 0, sx = 0, sy = 0, cmd = "";
+  const toks = d.match(/[mlz]|-?\d+/g) ?? [];
+  for (let i = 0; i < toks.length; ) {
+    const t = toks[i]!;
+    if (/[mlz]/.test(t)) { cmd = t; i++; if (t === "z") { x = sx; y = sy; } continue; }
+    x += Number(toks[i]); y += Number(toks[i + 1]); i += 2;
+    if (cmd === "m") { sx = x; sy = y; cmd = "l"; }
+    pts.push([x * GRID, -y * GRID]);
+  }
+  return pts;
+}
+
+test("every glyph's outline decodes to its own ink box, so no two numbers in the path data run together", () => {
+  for (const face of Object.values(FACES)) {
+    for (const [key, g] of Object.entries(face.glyphs)) {
+      if (g[5] === "") continue;
+      const pts = decode(g[5]);
+      const xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1]);
+      const slack = TOLERANCE + GRID;
+      const off = [Math.min(...xs) - g[1], Math.max(...xs) - g[2], Math.min(...ys) - g[3], Math.max(...ys) - g[4]].map(Math.abs);
+      assert.ok(off.every((o) => o <= slack), `${face.name} ${JSON.stringify(key)}: decoded box is off its record by ${JSON.stringify(off)}`);
+    }
   }
 });
 
