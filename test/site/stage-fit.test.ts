@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { CHROME_GAP, SLIP_CLEARANCE, fitStage } from "../../src/site/shared/stage-fit.ts";
+import { CHROME_GAP, SLIP_CLEARANCE, fitStage, holdsSheet } from "../../src/site/shared/stage-fit.ts";
 
 // Issue #462 chart-room ruling 1: the chart is fitted to the space the chrome leaves, measured off the chrome rects, never guessed.
 
@@ -87,5 +87,12 @@ test("the floor fires below half the room exactly, and a sheet shorter than wide
   assert.equal(portrait.under, true, "a degenerate portrait fit floors too");
   near(portrait.sheet.h, 474 - 28, "height-bound inside the window");
   near(portrait.sheet.w, (474 - 28) * 0.5, "at its own aspect");
+});
+
+test("UH1 a window too small to hold any sheet fits nothing, so the room keeps its last fit and its camera: a full-page capture shrank the viewport to 1x1 for a moment, and the zero sheet it fitted threw a deep camera's centre to the map's corner (Issue #762, CD2b's red)", () => {
+  assert.equal(holdsSheet(fitStage({ ...base, view: { w: 1024, h: 1 }, above: [127], below: [705], beside: 0 })), false, "the 1024 page one pixel tall holds no sheet");
+  assert.equal(holdsSheet(fitStage({ ...base, view: { w: 1, h: 1 }, above: [127], below: [705], beside: 0 })), false, "nor a one-pixel window");
+  assert.equal(holdsSheet(fitStage({ ...base, above: [127], below: [705], beside: 0 })), true, "the 1280x800 desk holds one");
+  assert.equal(holdsSheet(fitStage({ ...base, view: { w: 1024, h: 300 }, above: [127], below: [250], beside: 0 })), true, "a short window floors its sheet and still holds one");
 });
 

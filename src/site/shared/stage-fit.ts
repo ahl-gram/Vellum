@@ -45,3 +45,6 @@ export function fitStage(input: StageInput): StageFit {
   if (w < room / 2) return { reserve: { top: 0, right, bottom: 0 }, sheet: { w: room, h: room / aspect }, under: true };
   return { reserve: { top, right, bottom }, sheet: { w, h: w / aspect }, under: false };
 }
+
+/** A window too small to hold any sheet (a full-page capture shrinks the viewport to one pixel for a moment) fits nothing: the room keeps its last fit and leaves the camera alone. */
+export const holdsSheet = (fit: StageFit): boolean => fit.sheet.w > 0 && fit.sheet.h > 0;

@@ -260,3 +260,22 @@ export async function fl6Paper(ctx: SuiteContext): Promise<void> {
     `${rows.join(" | ")}${faults.length ? `; ${faults.join("; ")}` : ""}`,
   );
 }
+
+// A full-page capture shrinks the viewport to one pixel for a moment, and a layout fired then fitted a zero sheet that threw a deep camera to the map's corner (CD2b's red on this branch, 2 runs in 10 behind the harness's shot); reached here deliberately, by sizing the window to 1x1 and back.
+type Cam = { x: number; y: number; k: number };
+export async function fl7Degenerate(ctx: SuiteContext): Promise<void> {
+  await ctx.setTouch(false);
+  const settle = makeSettle(ctx);
+  const CAM: Payload<Cam & { w: number }> = `(() => { const c = window.__vellumZoomState(); return { x: Math.round(c.x * 10) / 10, y: Math.round(c.y * 10) / 10, k: c.k, w: innerWidth }; })()`;
+  await open(ctx, "/explorer/#seed=42&style=antique&legend=1&arms=0&beasts=0&cx=0.5625&cy=0.4375&k=8", 1280, 800);
+  const before = await settle(CAM, (d, last) => d.w === 1280 && last !== null && JSON.stringify(d) === JSON.stringify(last), "FL7 the camera at rest");
+  await size(ctx, 1, 1);
+  await settle(CAM, (d) => d.w === 1, "FL7 the one-pixel window");
+  await size(ctx, 1280, 800);
+  const after = await settle(CAM, (d, last) => d.w === 1280 && last !== null && JSON.stringify(d) === JSON.stringify(last), "FL7 the camera back at rest");
+  ctx.check(
+    "FL7 a layout on a window too small to hold any sheet (1x1, as a full-page capture sets for a moment) leaves the room and its camera alone: the Explorer at k 8 sized to one pixel and back holds its camera to the pixel (Issue #762)",
+    before.k === 8 && after.k === before.k && Math.abs(after.x - before.x) <= 0.5 && Math.abs(after.y - before.y) <= 0.5,
+    JSON.stringify({ before, after }),
+  );
+}
