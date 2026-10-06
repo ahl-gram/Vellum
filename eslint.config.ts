@@ -60,6 +60,7 @@ export default defineConfig(
       "@typescript-eslint/prefer-return-this-type": "error",
       "@typescript-eslint/prefer-reduce-type-parameter": "error",
       "@typescript-eslint/no-invalid-void-type": "error",
+      "@typescript-eslint/no-generated-empty-object-type": "error",
     },
   },
   {
