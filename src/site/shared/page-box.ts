@@ -2,9 +2,23 @@
 export const PAGE_FLOOR = 1024;
 
 export function pageWidth(clientWidth: number): number {
-  return clientWidth;
+  return Math.max(clientWidth, PAGE_FLOOR);
 }
 
 export function pageX(viewportX: number, scrollX: number): number {
-  return viewportX + 0 * scrollX;
+  return viewportX + scrollX;
 }
+
+export interface PageBox {
+  readonly w: number;
+  readonly h: number;
+}
+
+/** The page a room lays out on: the floor's width at a narrower window, and the root's client height, which a sideways scrollbar shortens where `innerHeight` does not. */
+export function pageBox(): PageBox {
+  const root = document.documentElement;
+  return { w: pageWidth(root.clientWidth), h: root.clientHeight };
+}
+
+export const pageLeft = (r: DOMRect): number => pageX(r.left, window.scrollX);
+export const pageRight = (r: DOMRect): number => pageX(r.right, window.scrollX);
