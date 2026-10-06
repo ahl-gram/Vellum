@@ -72,26 +72,29 @@ test("every row on whether a new unit test joins a roster passes", () => {
   for (const [row, wants] of rows) assert.ok(out.split("\n").includes(`ok   ${row}: ${wants}`), `no passing row "${row}: ${wants}"\n${out}`);
 });
 
-const GATE7_ROWS: ReadonlyArray<readonly [string, "null" | "context"]> = [
-  ["a first edit to a test under test/repo gets gate 1 and not gate 7", "context"],
-  ["a second edit to a test under test/repo gets gate 7 and not gate 1", "context"],
-  ["a second edit to a test under test/site gets gate 7 and not gate 1", "context"],
-  ["a second edit to a test-support helper gets gate 7 and not gate 1", "context"],
-  ["a second edit on the absolute path a real call passes gets gate 7", "context"],
-  ["an edit under test/site after gate 1 was shown for test/render gets gate 7 at once", "context"],
-  ["a third edit to a test under test/repo gets nothing", "null"],
-  ["a second edit to a test under test/render gets nothing", "null"],
-  ["a second edit to a test under test/src/site gets nothing", "null"],
-  ["a second edit to a unit test under test/e2e gets nothing, not gate 2", "null"],
-  ["a helper one folder down in test-support gets no gate, as ruled", "null"],
+const GATE1_NOT_7 = 'want context with "## Gate 1" and without "## Gate 7", got context';
+const GATE7_NOT_1 = 'want context with "## Gate 7" and without "## Gate 1", got context';
+const NOTHING = 'want null with "", got null';
+const GATE7_ROWS: ReadonlyArray<readonly [string, string]> = [
+  ["a first edit to a test under test/repo gets gate 1 and not gate 7", GATE1_NOT_7],
+  ["a second edit to a test under test/repo gets gate 7 and not gate 1", GATE7_NOT_1],
+  ["a second edit to a test under test/site gets gate 7 and not gate 1", GATE7_NOT_1],
+  ["a second edit to a test-support helper gets gate 7 and not gate 1", GATE7_NOT_1],
+  ["a second edit on the absolute path a real call passes gets gate 7", GATE7_NOT_1],
+  ["an edit under test/site after gate 1 was shown for test/render gets gate 7 at once", GATE7_NOT_1],
+  ["a third edit to a test under test/repo gets nothing", NOTHING],
+  ["a second edit to a test under test/render gets nothing", NOTHING],
+  ["a second edit to a test under test/src/site gets nothing", NOTHING],
+  ["a second edit to a unit test under test/e2e gets nothing, not gate 2", NOTHING],
+  ["a helper one folder down in test-support gets no gate, as ruled", NOTHING],
 ];
 
-// Written out for the same reason as the roster rows: each is the only guard of its arm of Gate 7's route (Issue #782), and deleting one from the fixture table, or Gate 7 from the gate-text loop, prints no FAIL.
+// Written out for the same reason as the roster rows: each is the only guard of its arm of Gate 7's route (Issue #782), and deleting one from the fixture table, weakening its needle or absent text, or dropping Gate 7 from the gate-text loop prints no FAIL.
 test("every row on which edits owe Gate 7 passes, with the decision it was written for", () => {
   const out = execFileSync(process.execPath, [SELFTEST], { encoding: "utf8", timeout: BOUND_MS });
   const lines = out.split("\n");
   assert.ok(lines.includes("ok   Gate 7 text found in SKILL.md"), `no passing gate-text row for Gate 7\n${out}`);
-  for (const [row, want] of GATE7_ROWS) assert.ok(lines.some((l) => l.startsWith(`ok   ${row}: want ${want} with `)), `no passing row "${row}" wanting ${want}\n${out}`);
+  for (const [row, wants] of GATE7_ROWS) assert.ok(lines.includes(`ok   ${row}: ${wants}`), `no passing row "${row}: ${wants}"\n${out}`);
 });
 
 const CODE_ROWS: ReadonlyArray<readonly [string, "deny" | "null" | "context"]> = [
