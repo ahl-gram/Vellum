@@ -10,7 +10,7 @@ import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { decide, gateText, headingCheck, requiredHeadings, statePath, type Decision, type Payload } from "./footgun-gate.ts";
 import { CD_ROWS } from "./bare-cd.fixtures.ts";
-import { ROUTE_ROWS } from "./gate-routes.fixtures.ts";
+import { ROUTE_ROWS, SEQUENCE_ROWS } from "./gate-routes.fixtures.ts";
 import { CODE_ROWS } from "./markdown-code.fixtures.ts";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -120,6 +120,16 @@ const templateCheck = (file: string) => async (): Promise<Decision> => {
     : asContext(warn ?? "");
 };
 const ROUTE_FIXTURES: Fixture[] = ROUTE_ROWS.map(([name, tool, path, text, want, needle, absent]): Fixture => [name, edit(tool, placed(path), text), want, needle, absent]);
+const lastOf = (payloads: Payload[], session: string) => async (): Promise<Decision> => {
+  try {
+    let last: Decision = null;
+    for (const payload of payloads) last = await decide({ ...payload, session_id: session });
+    return last;
+  } finally {
+    rmSync(statePath(session), { force: true });
+  }
+};
+const SEQUENCE_FIXTURES: Fixture[] = SEQUENCE_ROWS.map(([name, paths, want, needle, absent]): Fixture => [name, lastOf(paths.map((p) => edit("Edit", placed(p), "x")), `route-${process.pid}-${name}`), want, needle, absent]);
 
 const FIXTURES: Fixture[] = [
   ["bare stash denied", bash("git stash"), "deny", "shared"],
@@ -263,6 +273,7 @@ const FIXTURES: Fixture[] = [
   ["String.raw in a .ts is allowed", edit("Write", "e2e/suites/x.ts", "const P = String.raw`s.replace(/\\s+/g, ' ')`;"), "context", "## Gate 2"],
   ["a single escape in a unit test under test/e2e is denied too", edit("Write", "test/e2e/x.test.ts", "const P = `s.split(/\\d/)`;"), "deny", "backtick"],
   ...ROUTE_FIXTURES,
+  ...SEQUENCE_FIXTURES,
   ["deployed: real project dir denies stash pop", deployed(STASH_POP, ROOT), "deny", "shared"],
   ["deployed: symlinked project dir denies stash pop", deployed(STASH_POP, LINK), "deny", "shared"],
   ["deployed: missing project dir exits 0 with no output", deployed(STASH_POP, "/nonexistent"), null, ""],
@@ -280,9 +291,10 @@ const longestName = (dir: string, suffix: string, recursive: boolean): string =>
     .filter((n) => n.endsWith(suffix))
     .reduce((a, b) => (b.length > a.length ? b : a), "");
 
-const sizeProbes = (test: string, suite: string): [string, Payload, string[]][] => {
+const sizeProbes = (test: string, suite: string): [string, Payload, string[], Payload?][] => {
   return [
     ["a test file", edit("Edit", `${LONG_ROOT}/test/a-directory/${test}`, "x"), ["## Gate 1"]],
+    ["a test that reads the repo, once gate 1 is spent", edit("Edit", `${LONG_ROOT}/test/repo/${test}`, "x"), ["## Gate 7"], edit("Edit", `${LONG_ROOT}/test/render/${test}`, "x")],
     ["a browser-harness unit test that clicks and escapes", edit("Edit", `${LONG_ROOT}/test/e2e/${test}`, NOISY_AND_CLICK), ["## Gate 1", "for wiring only", "double the backslash"]],
     ["a new e2e suite that clicks and escapes", edit("Write", `${LONG_ROOT}/e2e/suites/never-exists-${suite}`, NOISY_AND_CLICK), ["## Gate 4", "## Gate 2", "for wiring only", "double the backslash"]],
     ["a new unit test under a suite-shaped path that clicks and escapes", edit("Write", `${LONG_ROOT}/test/e2e/suites/${test}`, NOISY_AND_CLICK), ["## Gate 1", "for wiring only", "double the backslash"]],
@@ -302,8 +314,9 @@ const sizeChecks = async (report: (ok: boolean, line: string) => void): Promise<
   const probes = sizeProbes(test, suite);
   const quoted = probes.map(([, payload]) => payload.tool_input?.file_path ?? payload.cwd ?? "");
   report(LONG_ROOT.length === 100 && quoted.every((p) => p === LONG_ROOT || p.startsWith(`${LONG_ROOT}/`)), `the size probes' ${quoted.length} quoted paths sit under a root of ${LONG_ROOT.length} characters, naming test files of ${test.length} and suites of ${suite.length} characters`);
-  for (const [name, payload, needles] of probes) {
+  for (const [name, payload, needles, before] of probes) {
     const sessionId = `selftest-size-${process.pid}-${name}`;
+    if (before) await decide({ ...before, session_id: sessionId });
     const text = (await decide({ ...payload, session_id: sessionId }))?.hookSpecificOutput?.additionalContext ?? "";
     rmSync(statePath(sessionId), { force: true });
     const found = needles.filter((n) => text.includes(n));
@@ -330,7 +343,7 @@ const run = async (): Promise<number> => {
   symlinkSync(ROOT, LINK);
   for (const dir of ["a dir", ".claude/worktrees/orch-779", "out/762/baseline-phone"]) mkdirSync(join(SCRATCH, dir), { recursive: true });
   symlinkSync(join(SCRATCH, "a dir"), join(SCRATCH, "to-a-dir"));
-  for (const label of ["Gate 1", "Gate 2", "Gate 3", "Gate 4", "Gate 5", "Gate 6"]) report(gateText(label).length > 200, `${label} text found in SKILL.md`);
+  for (const label of ["Gate 1", "Gate 2", "Gate 3", "Gate 4", "Gate 5", "Gate 6", "Gate 7"]) report(gateText(label).length > 200, `${label} text found in SKILL.md`);
   await sizeChecks(report);
   report(requiredHeadings() !== null, "section names found in .github/PULL_REQUEST_TEMPLATE.md");
   report(!readFileSync(TEMPLATE_PATH, "utf8").includes("—"), "the PR template carries no em-dash to prefill a body with");

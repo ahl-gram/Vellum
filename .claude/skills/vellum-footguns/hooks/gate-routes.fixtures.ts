@@ -44,3 +44,24 @@ export const ROUTE_ROWS: ReadonlyArray<RouteRow> = [
   ["site source is not chart work", "Edit", "src/site/explorer/app.ts", "const x = 1;", null, ""],
   ["a cli module other than the rasteriser is not chart work", "Edit", "src/cli/main.ts", "x", null, ""],
 ];
+
+// Gate 7's rows (Issue #782): the selftest edits each row's paths in order in one session and judges the last decision.
+export type SequenceRow = readonly [name: string, paths: readonly string[], want: "context" | null, needle: string, absent?: string];
+
+const REPO = "test/repo/never-exists-zz.test.ts";
+const SITE = "test/site/never-exists-zz.test.ts";
+const RENDER = "test/render/never-exists-zz.test.ts";
+
+export const SEQUENCE_ROWS: ReadonlyArray<SequenceRow> = [
+  ["a first edit to a test under test/repo gets gate 1 and not gate 7", [REPO], "context", "## Gate 1", "## Gate 7"],
+  ["a second edit to a test under test/repo gets gate 7 and not gate 1", [REPO, REPO], "context", "## Gate 7", "## Gate 1"],
+  ["a second edit to a test under test/site gets gate 7 and not gate 1", [SITE, SITE], "context", "## Gate 7", "## Gate 1"],
+  ["a second edit to a test-support helper gets gate 7 and not gate 1", ["test-support/never-exists-zz.ts", "test-support/never-exists-zz.ts"], "context", "## Gate 7", "## Gate 1"],
+  ["a second edit on the absolute path a real call passes gets gate 7", [`<ROOT>/${SITE}`, `<ROOT>/${SITE}`], "context", "## Gate 7", "## Gate 1"],
+  ["an edit under test/site after gate 1 was shown for test/render gets gate 7 at once", [RENDER, SITE], "context", "## Gate 7", "## Gate 1"],
+  ["a third edit to a test under test/repo gets nothing", [REPO, REPO, REPO], null, ""],
+  ["a second edit to a test under test/render gets nothing", [RENDER, RENDER], null, ""],
+  ["a second edit to a test under test/src/site gets nothing", ["test/src/site/never-exists-zz.test.ts", "test/src/site/never-exists-zz.test.ts"], null, ""],
+  ["a second edit to a unit test under test/e2e gets nothing, not gate 2", ["test/e2e/never-exists-zz.test.ts", "test/e2e/never-exists-zz.test.ts"], null, ""],
+  ["a helper one folder down in test-support gets no gate, as ruled", ["test-support/a-folder/never-exists-zz.ts"], null, ""],
+];
