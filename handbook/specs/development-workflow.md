@@ -19,6 +19,27 @@ Other places carry what this one deliberately does not:
   one; see "The gates are not a step" below.
 - **`CLAUDE.md`** holds process at the keyboard and the local conventions each step assumes.
 
+## The agents, and why each one runs something
+
+**Reading the code misses what running it catches.** A review that reads source text, page structure
+or issue prose passes a test that cannot fail, a layout that only breaks when rendered, and an issue
+whose citations went stale, however many readers it has. So each review agent below RUNS something
+a reader cannot, and its report rests on what that run printed. Dispatch each at its step; its method is
+its definition under `.claude/agents/`.
+
+| agent | step | what it runs | the failure it catches |
+|---|---|---|---|
+| `vellum-spec-recon` | 2 | every path, symbol, test name and count the issue cites, checked by command against the tree, and the open decisions still awaiting Alex | an issue or a plan built on claims the repo no longer bears out, or on a decision nobody asked him |
+| `vellum-plan-skeptic` | 4 | the plan's claims, checked by command, cold, before any code | a wrong approach, a missing case or a false premise, while it is still cheapest to drop |
+| `vellum-plate-reader` | 6, 11 | the built page or chart, rendered in a real browser at real viewports, and measured | a layout, overlap, contrast or motion defect that no test reading the DOM can see |
+| `vellum-guard-prover` | 11, 15 | the behaviour each new or strengthened guard claims to hold, deleted or inverted one at a time in its own tree | a test that stays green when the thing it guards is broken |
+| `vellum-pr-skeptic` | 14 | the pull request, attacked cold in its own sandbox with commands of its own | what the implementing session believed and never checked, against the issue and the house contracts |
+
+`vellum-implementer` is not a reviewer: it takes one issue through this sequence in its own tree, up to
+an open pull request with CI green, and leaves merging and the hand-off to whoever dispatched it, an
+orchestrating session (`handbook/specs/orchestration.md`) or Alex directly. It calls the review agents
+above at their steps.
+
 ## The sequence
 
 **1. Read the issue: the body AND its comments**, through the two `gh api` calls `CLAUDE.md` gives
