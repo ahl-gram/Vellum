@@ -1,5 +1,5 @@
 import { el, type SvgNode } from "../../render/svg.ts";
-import { groundAt, type Ground, type Mass, type WallSegment } from "../geometry.ts";
+import type { Mass } from "../geometry.ts";
 import { r1, stroke, type DressContext } from "./context.ts";
 
 function windowDashes(c: DressContext, m: Mass): SvgNode[] {
@@ -205,42 +205,6 @@ export function massNodes(c: DressContext, m: Mass, weight: number): SvgNode[] {
         ? keepNodes(c, m, weight)
         : verticalNodes(c, m, weight);
   return m.broken ? [...body, footRubble(c, m)] : body;
-}
-
-export function wallNodes(c: DressContext, ground: Ground, w: WallSegment): SvgNode[] {
-  const g = (x: number): number => groundAt(ground, x);
-  const step = 8;
-  const topPts: string[] = [];
-  for (let x = w.x0; x <= w.x1; x += step) topPts.push(`${r1(x)} ${r1(g(x) - w.h)}`);
-  const out: SvgNode[] = [
-    el("path", {
-      d: `M${r1(w.x0)} ${r1(g(w.x0))}L${topPts.join("L")}L${r1(w.x1)} ${r1(g(w.x1))}Z`,
-      fill: c.paper,
-      ...stroke(c, 1.1),
-    }),
-  ];
-  const teeth: string[] = [];
-  for (let x = w.x0 + 3; x < w.x1 - 3; x += 7) {
-    teeth.push(
-      `M${r1(x)} ${r1(g(x) - w.h)}L${r1(x)} ${r1(g(x) - w.h - 2.4)}L${r1(x + 3.4)} ${r1(g(x + 3.4) - w.h - 2.4)}L${r1(x + 3.4)} ${r1(g(x + 3.4) - w.h)}`,
-    );
-  }
-  out.push(el("path", { d: teeth.join(""), fill: "none", ...stroke(c, 0.8) }));
-  if (w.gate) {
-    const cx = (w.x0 + w.x1) / 2;
-    const gb = g(cx);
-    out.push(
-      el("path", {
-        d: `M${r1(cx - 4)} ${r1(gb)}L${r1(cx - 4)} ${r1(gb - 6)}Q${r1(cx)} ${r1(gb - 10)} ${r1(cx + 4)} ${r1(gb - 6)}L${r1(cx + 4)} ${r1(gb)}Z`,
-        fill: c.ink,
-      }),
-    );
-  }
-  if (w.heel !== 0) {
-    const px = (w.x0 + w.x1) / 2;
-    return [el("g", { transform: `rotate(${r1(w.heel)} ${r1(px)} ${r1(g(px))})` }, out)];
-  }
-  return out;
 }
 
 export function drownedStubNodes(

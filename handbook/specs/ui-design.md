@@ -47,6 +47,12 @@ the role variables are declared in `public/fonts.css`:
 stack, and that side is the byte-determinism contract: changing it owes a regen. A guard refuses any
 Fell or Garamond leaking into rendered SVG. Keep the boundary.
 
+**The prospect plate is lettered in neither.** Its words are IM Fell DW Pica, roman, italic and small
+capitals, drawn as outlines from the committed tables under `src/prospect/letter/` (Issue #754), so a
+plate names no font and draws the same on every device. The face has no "№", so the plate's is
+drawn by hand in the face's ink (`src/prospect/letter/numero.ts`). That face is the plate's alone: it is not
+self-hosted, never joins `public/fonts.css`, and its tables are written only by `npm run plate-face`.
+
 Things the Fell faces do that have each cost something:
 
 - **Fell has no bold cut.** Asking for weight 700 gets synthetic bold, which looks like a rendering

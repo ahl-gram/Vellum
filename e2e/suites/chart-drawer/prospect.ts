@@ -1,12 +1,16 @@
 import type { Payload, SuiteContext } from "../../types.ts";
 import type { DrawerKit } from "./kit.ts";
-import { CARD, DRAWN, DRESS, PP } from "./reads.ts";
+import { CARD, DRAWN, DRESS, PP, type Card } from "./reads.ts";
+
+// The card unfurls as it pins, so a press is clicked only once its box has held still across two reads and its centre hits it (run 37504526032 lost a press clicked at a box read once: the flake record's row).
+const pressAtRest = (d: Card, last: Card | null): boolean =>
+  !!d.press && d.press.hit === "self" && !!last?.press && last.press.box.x === d.press.box.x && last.press.box.y === d.press.box.y && last.press.box.w === d.press.box.w && last.press.box.h === d.press.box.h;
 
 export async function cd25CardPress({ evaluate, check, settle, go, pinCard, pressCard }: DrawerKit): Promise<void> {
   await go(DRESS);
   const at = await settle(CARD, (d) => d.hits > 1, "chart-drawer-card");
   await pinCard(1);
-  const armed = await settle(CARD, (d) => d.shown && !!d.press, "chart-drawer-card-press");
+  const armed = await settle(CARD, (d, last) => d.shown && pressAtRest(d, last), "chart-drawer-card-press");
   check(
     "CD25 the place card's two actions stand in ONE row and BOTH answer a real pointer: #place-card is pointer-events: none, so a press that forgets to restore it passes element.click() and is dead to every reader, which is the #520 dog-ear scar exactly (#518 ruling 7)",
     at.hits > 1 && armed.shown && !!armed.press && armed.press.hit === "self" &&
@@ -31,7 +35,7 @@ export async function cd25CardPress({ evaluate, check, settle, go, pinCard, pres
   // The DRAWN world and not the controls: a seed typed without pressing Draw is the reachable way to file a chart nobody drew.
   await evaluate(`(() => { const s = document.getElementById("seed"); s.value = "7"; })()`);
   await pinCard(2);
-  const other = await settle(CARD, (d) => d.shown && !!d.press && d.press.idx === "2", "chart-drawer-card-other");
+  const other = await settle(CARD, (d, last) => d.shown && d.press?.idx === "2" && pressAtRest(d, last), "chart-drawer-card-other");
   await pressCard(other);
   const second = await settle(CARD, (d) => d.cuttings === 2, "chart-drawer-prospect-second");
   check(
@@ -48,7 +52,7 @@ export async function cd27CardAtCap({ evaluate, check, settle, go, pinCard, pres
   await go(`${DRESS}&table=${SIX}`);
   await settle(CARD, (d) => d.hits > 1, "chart-drawer-card-full");
   await pinCard(1);
-  const atCap = await settle(CARD, (d) => d.shown && !!d.press, "chart-drawer-card-cap");
+  const atCap = await settle(CARD, (d, last) => d.shown && pressAtRest(d, last), "chart-drawer-card-cap");
   await pressCard(atCap);
   const after = await evaluate(CARD);
   check(
