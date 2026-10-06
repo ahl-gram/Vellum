@@ -1,4 +1,4 @@
-// The top row (Issue #762 pull request B; re-floored by pull requests C and D, where a page below 1024 lays out its 1024 layout): a wide corner gives way toward the kit's width before the nav wraps, a page that widens again lays out from its sheets, Issue #741's corners are never written, a chart room's slip follows its folio, and a room's band and first row hold at the floor.
+// The top row (Issue #762 pull request B; re-floored by pull requests C and D, where a page below 1024 lays out its 1024 layout): a wide corner gives way toward the kit's width wherever it would run under the nav, a page that widens again lays out from its sheets, Issue #741's corners are never written, a chart room's slip follows its folio, and a room's band and first row hold at the floor.
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import { LANDED } from "./stage.ts";
@@ -9,7 +9,7 @@ const NARROW = 640;
 const H = 800;
 
 type Row = {
-  innerW: number; navLines: number; leadingDots: number; wrapped: boolean;
+  innerW: number; navLines: number;
   cornerInline: string; clusterInline: string; bandInline: string; band: number;
   corner: { left: number; width: number; height: number }; cluster: { right: number; bottom: number }; boxGap: number;
 };
@@ -19,10 +19,9 @@ const ROW: Payload<Row> = `(() => {
   const cluster = document.querySelector("header.chrome"), nav = cluster.querySelector("nav.rooms");
   const corner = document.querySelector(".corner.tr.folio-room") || document.querySelector(".lf-seed");
   const doors = [...nav.querySelectorAll("a, [aria-current]")];
-  const mid = (e) => { const r = e.getBoundingClientRect(); return (r.top + r.bottom) / 2; };
   const tops = new Set(doors.map((d) => Math.round(d.getBoundingClientRect().top)));
   const c = cluster.getBoundingClientRect(), k = corner.getBoundingClientRect();
-  return { innerW: innerWidth, navLines: tops.size, leadingDots: [...nav.querySelectorAll(".sep")].filter((d) => Math.abs(mid(d) - mid(d.previousElementSibling)) > parseFloat(getComputedStyle(nav).lineHeight) / 2).length, wrapped: nav.classList.contains("wrapped"),
+  return { innerW: innerWidth, navLines: tops.size,
     cornerInline: corner.style.maxWidth, clusterInline: cluster.style.maxWidth, bandInline: root.style.getPropertyValue("--band-h"),
     band: parseFloat(getComputedStyle(root).getPropertyValue("--band-h")) * rem,
     corner: { left: k.left, width: k.width, height: k.height }, cluster: { right: c.right, bottom: c.bottom }, boxGap: k.left - c.right };
@@ -43,10 +42,10 @@ async function open(ctx: SuiteContext, page: string, w: number): Promise<Row> {
   return at(ctx, w, `top-row-${page}-${w}`);
 }
 
-const oneLine = (r: Row) => r.navLines === 1 && !r.wrapped && r.clusterInline === "";
+const oneLine = (r: Row) => r.navLines === 1 && r.clusterInline === "";
 const yielded = (r: Row) => r.cornerInline !== "" && r.corner.width > KIT - 0.5 && r.corner.width < CAP;
-const unwritten = (r: Row) => r.cornerInline === "" && r.clusterInline === "" && r.bandInline === "" && !r.wrapped;
-const fmt = (page: string, w: number, r: Row) => `${page}@${w}: lines ${r.navLines}${r.leadingDots ? ` ${r.leadingDots} dots lead a line` : ""} corner ${r.corner.width.toFixed(1)}${r.cornerInline ? ` (${r.cornerInline})` : ""} cluster ${r.clusterInline || "-"} gap ${r.boxGap.toFixed(1)}${r.bandInline ? ` band ${r.bandInline}` : ""}`;
+const unwritten = (r: Row) => r.cornerInline === "" && r.clusterInline === "" && r.bandInline === "";
+const fmt = (page: string, w: number, r: Row) => `${page}@${w}: lines ${r.navLines} corner ${r.corner.width.toFixed(1)}${r.cornerInline ? ` (${r.cornerInline})` : ""} cluster ${r.clusterInline || "-"} gap ${r.boxGap.toFixed(1)}${r.bandInline ? ` band ${r.bandInline}` : ""}`;
 
 async function ribbonYields(ctx: SuiteContext, motion: string): Promise<{ ok: boolean; rows: string[] }> {
   await ctx.send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: motion }] });
@@ -67,10 +66,10 @@ export async function co5Yields(ctx: SuiteContext): Promise<void> {
   const reduced = await ribbonYields(ctx, "reduce");
   const moving = await ribbonYields(ctx, "no-preference").finally(() => ctx.send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] }));
   const narrow: string[] = [];
-  let wraps = true;
+  let lined = true;
   for (const page of ["/", "/faq/", "/print-room/", "/prospect/", "/ribbon/"]) {
     const r = await open(ctx, page, NARROW);
-    wraps &&= oneLine(r) && r.boxGap >= 25.6 - 0.5;
+    lined &&= oneLine(r) && r.boxGap >= 25.6 - 0.5;
     narrow.push(fmt(page, NARROW, r));
   }
   const widened: string[] = [];
@@ -98,8 +97,8 @@ export async function co5Yields(ctx: SuiteContext): Promise<void> {
   const off = await open(ctx, "/ribbon/", 1024).finally(() => ctx.send("Emulation.setScriptExecutionDisabled", { value: false }));
   const scriptsOff = Math.abs(off.corner.width - CAP) < 0.5 && off.boxGap > 0 && off.cornerInline === "";
   ctx.check(
-    "CO5 the corner gives way before the nav wraps: the Ribbon at 960, 1024 and 1032 keeps its nav on one line, its corner written between the kit's 19rem and its 30rem cap and standing the gap clear, under reduced motion and with motion on, and at 1280 nothing is written; at 640 home, the FAQ, the Print Room, the Prospect and the Ribbon lay out their 1024 top row on one line, the gap clear; the Ribbon loaded at 640, 960, 1024 or 1032, where its corner was written, and widened to 1280 lays out from its sheets again; Issue #741's two corners are never written; and with scripts off the Ribbon's corner stands at its cap, clear, at 1024 (Issue #762)",
-    reduced.ok && moving.ok && wraps && lays && untouched && scriptsOff,
+    "CO5 the corner gives way and the nav keeps one line: the Ribbon at 960, 1024 and 1032 keeps its nav on one line, its corner written between the kit's 19rem and its 30rem cap and standing the gap clear, under reduced motion and with motion on, and at 1280 nothing is written; at 640 home, the FAQ, the Print Room, the Prospect and the Ribbon lay out their 1024 top row on one line, the gap clear; the Ribbon loaded at 640, 960, 1024 or 1032, where its corner was written, and widened to 1280 lays out from its sheets again; Issue #741's two corners are never written; and with scripts off the Ribbon's corner stands at its cap, clear, at 1024 (Issue #762)",
+    reduced.ok && moving.ok && lined && lays && untouched && scriptsOff,
     [...reduced.rows, ...moving.rows, ...narrow, ...widened, ...held, `scripts off ${fmt("/ribbon/", 1024, off)}`].join(" | "),
   );
 }

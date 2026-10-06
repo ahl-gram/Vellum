@@ -226,14 +226,14 @@ async function co3Wraps(ctx: SuiteContext): Promise<void> {
     if (widths.length) rows.push(page);
   }
   ctx.check(
-    "CO3 no control in a right-hand corner is squeezed below its own width, the row wrapping onto another line instead: on home at 1024, and on a page whose corner carries its own cap and so gives way toward the kit's width before the nav wraps, at 1032 and 1040 (Issue #762; Alex's 2026-10-03 ruling 4 on Issue #638); a page below 1024 lays out its 1024 layout (FL1), and the Print Room's and the Specimen's corners from 1024 up are Issue #741's (Alex, 2026-10-06, on Issue #762) (Issue #638)",
+    "CO3 no control in a right-hand corner is squeezed below its own width, the row wrapping onto another line instead: on home at 1024, and on a page whose corner carries its own cap and so gives way toward the kit's width, at 1032 and 1040 (Issue #762; Alex's 2026-10-03 ruling 4 on Issue #638); a page below 1024 lays out its 1024 layout (FL1), and the Print Room's and the Specimen's corners from 1024 up are Issue #741's (Alex, 2026-10-06, on Issue #762) (Issue #638)",
     faults.length === 0 && read > 0,
     `${rows.length} pages, ${read} control reads; ${faults.length ? `${faults.length} squeezed: ${faults.slice(0, 6).join("; ")}` : "none squeezed"}`,
   );
 }
 
 // A style outranks the top row's inline writes, and a synthetic resize reruns it: wiring, not a gesture. At the 1024 floor a corner pinned at its cap alone stands 8px clear, so the pin also moves it 6rem in.
-const PIN_CAP = "header.chrome { max-width: none !important; } .corner.tr.folio-room { max-width: 30rem !important; translate: -6rem 0 !important; }";
+const PIN_CAP = ".corner.tr.folio-room { max-width: 30rem !important; translate: -6rem 0 !important; }";
 async function co2Control(ctx: SuiteContext): Promise<void> {
   const { evaluate, check } = ctx;
   const at = ROOM_FLOOR;
@@ -245,7 +245,7 @@ async function co2Control(ctx: SuiteContext): Promise<void> {
   const after = await evaluate(restAt(at), true);
   const [hit] = meetings(pinned.left, pinned.right);
   check(
-    "CO2 the same-run control: on the Ribbon at 1024 the instrument reads the corners clear, reports the nav running under the corner by 40px or more once a style pins the corner at its 30rem cap, moved 6rem in, with the cluster uncapped, and reads them clear again when the style goes and the top row lays the row out again (Issue #638; Issue #762, at the floor since pull request C)",
+    "CO2 the same-run control: on the Ribbon at 1024 the instrument reads the corners clear, reports the nav running under the corner by 40px or more once a style pins the corner at its 30rem cap, moved 6rem in, and reads them clear again when the style goes and the top row lays the row out again (Issue #638; Issue #762, at the floor since pull request C)",
     meetings(before.left, before.right).length === 0 && !!hit && hit.w >= 40 && meetings(after.left, after.right).length === 0,
     `before ${meetings(before.left, before.right).length} meetings; pinned ${hit ? `"${hit.a}" over "${hit.b}" by ${hit.w.toFixed(1)} x ${hit.h.toFixed(1)}` : "none"}; after ${meetings(after.left, after.right).length} meetings`,
   );
