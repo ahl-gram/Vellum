@@ -3,7 +3,6 @@ import type { ProspectInput } from "./input.ts";
 import type { PlateEra } from "./caption.ts";
 import type { Surroundings } from "./surroundings.ts";
 
-/** `letter` is the plate's mark for the entry (a numeral since Issue #754); x and y anchor a composed feature's tag, `town` names the road town a horizon tag stands over. */
 export type PlateKeyEntry = {
   readonly letter: string;
   readonly label: string;
@@ -60,7 +59,6 @@ const lowerThe = (name: string): string => name.replace(/^The /, "the ");
 
 export type KeyContext = { readonly input: ProspectInput; readonly surroundings: Surroundings; readonly era: PlateEra };
 
-/** The world's entries in the round's order (design/prospects-after-braun-hogenberg/mock/furniture.ts, keyLines): the sea, the river, the range, the road towns, the beast, the realm. */
 function worldEntries(g: ProspectGeometry, ctx: KeyContext): Draft[] {
   const { input, surroundings: s, era } = ctx;
   const plain = (label: string): Draft => ({ label, x: null, y: null, town: null });

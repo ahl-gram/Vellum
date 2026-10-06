@@ -63,7 +63,6 @@ function parchmentOverlay(e: Engraver, suffix: string): SvgNode[] {
   ];
 }
 
-/** What a plate drops when drawn small (ruling D3), read against the plate's own drawn width: the plate is the container, so an inlined plate reads itself and not the window; the classes carry the plate's suffix so an inline plate cannot reach its page. */
 export const SMALL_WIDTH = 400;
 export const SMALLEST_WIDTH = 240;
 export const smallSizeRule = (suffix: string): string =>
@@ -76,7 +75,6 @@ function bandText(p: PlateParts): string {
   return p.era === "ruined" ? `founded An. ${p.input.founded}, ${p.caption.epithet}` : `${p.caption.epithet}, founded An. ${p.input.founded}`;
 }
 
-/** Direction E of the Issue #747 round, built (Issue #754): the engraved town from the rise, with its people, under the named plate. */
 export function engraveE(style: MapStyle, p: PlateParts): EngravedE {
   const e = engraver(style);
   const letters = createLettering(p.suffix);

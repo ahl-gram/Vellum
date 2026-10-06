@@ -4,17 +4,14 @@ import type { Rng } from "../../core/rng.ts";
 import type { Pt } from "../geometry.ts";
 import { dressContext, type DressContext } from "./context.ts";
 
-/** The engraver's dress: the prospect dress plus the limner's washes where the dress is hand-coloured (Issue #747, ruling 2). */
 export type Engraver = DressContext & { readonly wash: Limner | null };
 
 export function engraver(style: MapStyle): Engraver {
   return { ...dressContext(style), paper: style.paper, wash: style.limner };
 }
 
-/** A wash where the dress is coloured, the paper where it is not. */
 export const washOr = (e: Engraver, key: keyof Limner): string => e.wash?.[key] ?? e.paper;
 
-/** Small lettering: the soft ink stands under 4.5:1 on the hand-coloured antique's grounds, so there the full ink sets it. */
 export const quietInk = (e: Engraver): string => (e.wash === null ? e.soft : e.ink);
 
 export const r1 = (v: number): number => Math.round(v * 10) / 10;
@@ -28,7 +25,6 @@ export function stroke(e: Engraver, w: number): Record<string, string | number> 
   return { stroke: e.ink, "stroke-width": width(w), "stroke-linecap": "round", "stroke-linejoin": "round" };
 }
 
-/** Parallel hatching clipped to a polygon by scanline against lines y = m x + c (even-odd), with no clipPath, so many plates share a document. */
 export function hatchPolygon(pts: ReadonlyArray<Pt>, slope: number, spacing: number, phase = 0): string {
   if (pts.length < 3) return "";
   const cs = pts.map((p) => p.y - slope * p.x);
@@ -81,7 +77,6 @@ function skySegments(x0: number, x1: number, y: number, gap: number, clouds: Rea
   return segs;
 }
 
-/** The burin sky: horizontal lines dense at the horizon and thinning upward, broken by cloud banks and, higher up, by gaps. */
 export function skyLines(e: Engraver, x0: number, x1: number, yTop: number, yHorizon: number, clouds: ReadonlyArray<Cloud>, rng: Rng): SvgNode[] {
   const parts: string[] = [];
   let y = yHorizon - 1.5;
@@ -100,7 +95,6 @@ export function skyLines(e: Engraver, x0: number, x1: number, yTop: number, yHor
   ];
 }
 
-/** A cloud bank as stacked hooked strokes along its underside and a scalloped crown, after Hispalis. */
 export function cloudBank(e: Engraver, c: Cloud, rng: Rng): SvgNode {
   const parts: string[] = [];
   const lobes = Math.max(3, Math.round(c.w / 22));
@@ -126,7 +120,6 @@ export function cloudBank(e: Engraver, c: Cloud, rng: Rng): SvgNode {
 
 export type Gap = { readonly x0: number; readonly x1: number; readonly y0: number; readonly y1: number };
 
-/** Water as horizontal line work, denser toward the foreground, with white gaps left around hulls. */
 export function waterLines(e: Engraver, x0: number, x1: number, y0: number, y1: number, gaps: ReadonlyArray<Gap>, rng: Rng): SvgNode {
   const parts: string[] = [];
   let y = y0 + 1.2;
@@ -167,7 +160,6 @@ export function yOnPolyline(line: ReadonlyArray<Pt>, x: number): number {
 /** A ridge peaking this close to its right end has no shaded face to hatch: dropped to the horizon, the strip reads as a block (Wailua, seed 7). */
 const SHADED_FACE = 30;
 
-/** A hill as a tonal mass: the shadow side hatched along the fall, a crossing set on the steepest face, the lit side left with sparse dots. */
 export function hillTone(e: Engraver, outline: ReadonlyArray<Pt>, horizon: number, rng: Rng): SvgNode[] {
   let apex = outline[0]!;
   for (const p of outline) if (p.y < apex.y) apex = p;
@@ -199,7 +191,6 @@ export function inside(pts: ReadonlyArray<Pt>, x: number, y: number): boolean {
   return c;
 }
 
-/** Ground hatching that follows a slope: long sweeps parallel to the fall line, with a scatter of grass hooks. */
 export function groundSweep(e: Engraver, outline: ReadonlyArray<Pt>, slope: number, spacing: number, rng: Rng, hooks = 30): SvgNode[] {
   const xs = outline.map((p) => p.x), ys = outline.map((p) => p.y);
   const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
@@ -240,7 +231,6 @@ function palmClump(e: Engraver, x: number, y: number, s: number): SvgNode[] {
   ];
 }
 
-/** Hoefnagel's tree: a scalloped crown, the shadow half hatched, a short trunk; s is the crown's radius. */
 export function treeClump(e: Engraver, x: number, y: number, s: number, rng: Rng, species: "round" | "pine" | "palm" = "round"): SvgNode[] {
   if (species === "pine") return pineClump(e, x, y, s);
   if (species === "palm") return palmClump(e, x, y, s);

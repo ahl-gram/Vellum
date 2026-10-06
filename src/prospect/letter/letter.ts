@@ -102,7 +102,6 @@ export type Lettering = {
   readonly defs: () => SvgNode[];
 };
 
-/** One plate's lettering: each glyph defined once, ids carrying the plate's suffix so several plates can share a document. */
 export function createLettering(suffix: string): Lettering {
   const defined = new Map<string, SvgNode>();
   const idOf = (face: FaceName, key: string, glyph: Glyph): string => {

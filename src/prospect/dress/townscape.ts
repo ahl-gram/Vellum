@@ -234,7 +234,6 @@ function moleEngraved(e: Engraver, m: { readonly rootX: number; readonly headX: 
   ];
 }
 
-/** Everything the engine composes in the foreground, redrawn where the burin changes it and handed back to the engine's own dress where it does not; a ship also hands back the gap the water lines leave around its hull. */
 export function foregroundEngraved(e: Engraver, f: ForegroundElement, rng: Rng): { readonly nodes: SvgNode[]; readonly gaps: Gap[] } {
   const only = (nodes: SvgNode[]): { nodes: SvgNode[]; gaps: Gap[] } => ({ nodes, gaps: [] });
   switch (f.kind) {

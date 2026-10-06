@@ -22,7 +22,6 @@ type Engraving = EngravedE & {
   readonly key: ReadonlyArray<PlateKeyEntry>;
 };
 
-/** The plate and everything it was laid out from: its composition, era, caption and key, and the boxes its picture and furniture ink. */
 export function engravePlate(input: ProspectInput, style: MapStyle, year: number, opts: PlateOptions = {}): Engraving {
   const era = eraFor(input, year);
   const g =

@@ -11,7 +11,6 @@ test("the committed face tables are exactly what npm run plate-face writes from 
   }
 });
 
-/** Decodes a table outline (relative m, l and z on the grid, y down) into its points, in font units with y up. */
 function decode(d: string): Array<readonly [number, number]> {
   const pts: Array<readonly [number, number]> = [];
   let x = 0, y = 0, sx = 0, sy = 0, cmd = "";

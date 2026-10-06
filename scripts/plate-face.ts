@@ -17,7 +17,6 @@ export const PLATE_FACES: Readonly<Record<FaceName, { readonly file: string; rea
   italic: { file: "im-fell-dw-pica-latin-400-italic.woff2", chars: UPPER + UPPER.toLowerCase() + DIGITS + MARKS, symbol: "ITALIC" },
 };
 
-/** The simplification tolerance, in font units: ruling D8's fine outline. */
 export const TOLERANCE = 2;
 const FLATTEN_STEPS = 8;
 
@@ -84,7 +83,6 @@ export function simplify(pts: readonly P[], tolerance: number): P[] {
   return pts.filter((_, i) => keep[i] === 1);
 }
 
-/** Relative polyline path data on the grid, y flipped down. */
 function encode(contours: readonly P[][]): string {
   let s = "";
   let px = 0, py = 0;

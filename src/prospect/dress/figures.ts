@@ -14,7 +14,6 @@ export const FIGURE_WIDTH: Readonly<Record<FigureKind, number>> = {
   gentleman: 22, lady: 22, traveller: 24, fisher: 22, waterbearer: 16, shepherd: 22, rider: 34, dog: 16, sheep: 12, porter: 20, surveyor: 24,
 };
 
-/** Who stands on the rise, read from the place (Issue #747, ruling 3): its kind, its harbour, its roads and its era; the rider rides wherever two roads or more end at the place, as every ruled still shows. */
 export function castFor(kind: ProspectKind, harbor: boolean, roads: number, era: PlateEra): FigureKind[] {
   if (era === "before-founding") return ["surveyor", "dog"];
   if (era === "ruined") return ["traveller", "dog"];
@@ -31,7 +30,6 @@ export function castFor(kind: ProspectKind, harbor: boolean, roads: number, era:
 
 type Cloth = { readonly a: string; readonly b: string };
 
-/** The realm's tinctures, from the heraldic palette the arms themselves are painted in; a place in no realm wears gules and or. */
 function cloth(e: Engraver, arms: Arms | null): Cloth {
   if (e.wash === null) return { a: e.paper, b: e.paper };
   const palette = paletteForStyle(e.style);
@@ -42,7 +40,6 @@ function cloth(e: Engraver, arms: Arms | null): Cloth {
 }
 
 const W = 0.7;
-/** Stroke widths are products of W; rounded so the plate carries 0.385, not the float 0.38499999999999995. */
 const sw = (w: number): number => Math.round(w * 1000) / 1000;
 
 function garment(e: Engraver, pts: ReadonlyArray<Pt>, fill: string, slope: number, spacing: number): SvgNode[] {
@@ -178,7 +175,6 @@ function sheep(e: Engraver): SvgNode[] {
   ];
 }
 
-/** The horse, redrawn from the round's stylised one: an arched neck and a muzzled head, a curved back over the barrel, four legs jointed at knee and hock, a mane and a falling tail. */
 function horse(e: Engraver): SvgNode[] {
   const coat = washOr(e, "horse");
   const body = [{ x: -12.5, y: -16.5 }, { x: -9, y: -19.4 }, { x: -1, y: -18.6 }, { x: 8, y: -19.6 }, { x: 12.4, y: -16.8 }, { x: 12, y: -11 }, { x: 8.4, y: -8.8 }, { x: -8.4, y: -8.8 }, { x: -12.2, y: -11.2 }];

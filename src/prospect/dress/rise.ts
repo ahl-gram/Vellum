@@ -19,7 +19,6 @@ export const SKY_TOP = 92;
 const FIGURE_H = 50;
 const FIGURE_SPAN: readonly [number, number] = [VIEW_X0 + 50, VIEW_X0 + 270];
 const CLOUD_AVOID = [{ x0: 150, x1: 370 }];
-/** The composed birds rise with the town; held in the open sky under the named plate, they clear both the frame (the round's birds straddled it) and the furniture. */
 const BIRD_TOP = 96;
 
 export type Streams = { readonly sky: Rng; readonly town: Rng; readonly water: Rng; readonly rise: Rng; readonly figures: Rng };
@@ -31,7 +30,6 @@ export type Scene = {
   readonly arms: Arms | null;
   readonly roadCount: number;
   readonly beast: boolean;
-  /** Boxes, in plate units, every bird keeps clear of: the key's numbers on the town and the horizon towns' names. */
   readonly clear: ReadonlyArray<Box>;
 };
 
@@ -59,7 +57,6 @@ function ridgeEngraved(e: Engraver, ridge: ReadonlyArray<Pt>, horizon: number, r
 
 type Sky = { readonly obstacles: ReadonlyArray<Box>; readonly topAt: (x: number) => number };
 
-/** The nearest open sky for a flock of n birds anchored at (x0, y) in plate units: clear of every obstacle and above the hills, sideways first, then lifted no higher than the band under the named plate; null where the hills and the town fill the sky. */
 function openSky(x0: number, y: number, n: number, sky: Sky): { readonly x: number; readonly y: number } | null {
   const free = (x: number, yy: number): boolean => {
     const f = flockBox(x, yy, n);
@@ -77,7 +74,6 @@ function openSky(x0: number, y: number, n: number, sky: Sky): { readonly x: numb
 
 type Bird = { readonly x: number; readonly y: number; readonly s: number };
 
-/** Where a composed bird flies once held: under the named plate, in the nearest open sky, or nowhere when there is none. */
 function heldBird(b: Bird, sky: Sky): Bird | null {
   const at = openSky(b.x, Math.max(b.y + LIFT, BIRD_TOP), 2 + Math.floor(b.s * 3), sky);
   return at === null ? null : { x: at.x, y: at.y - LIFT, s: b.s };
@@ -105,24 +101,19 @@ function townNodes(e: Engraver, g: ProspectGeometry, rng: Rng): SvgNode[] {
   ];
 }
 
-/** The ink a flock of n birds reaches from its anchor (birdFlock in src/prospect/dress/burin.ts). */
 export const flockBox = (x: number, y: number, n: number): Box => ({ x0: x - 3, x1: x + 5 * n + 3, y0: y - 3, y1: y + 6 });
 
-/** The ink an engraved ship reaches, hull to pennant, lifted with the town: what a horizon label must clear. */
 export const shipRig = (x: number, y: number, s: number, great: boolean): Box => ({ x0: x - (great ? 19 : 16) * s - 1, x1: x + 16 * s + 1, y0: y + LIFT - 2.5 * s - (great ? 24 : 18) * s * 1.15 - 3.2 * s - 1, y1: y + LIFT + 3 * s });
 
-/** The ink an engraved mass reaches, roof, spire, battlements and pennant included (massNodesEngraved in townscape.ts), lifted with the town. */
 export const massReach = (m: Mass): Box => {
   const up = m.form === "keep" ? 21 : m.form === "tower" ? 3.4 + m.w * 0.55 : m.form === "spire" ? Math.max(12, m.h * 0.55) + 5.4 : 13;
   return { x0: m.x - 2.5, x1: m.x + m.w + 3.5, y0: m.base - m.h - up + LIFT, y1: m.base + LIFT };
 };
 
-/** The ink a wall reaches, its towers capped (wallNodesEngraved in townscape.ts), lifted with the town. */
 export const wallReach = (ground: Ground, w: WallSegment): Box => ({
   x0: w.x0 - 4.5, x1: w.x1 + 4.5, y0: groundAt(ground, Math.max(w.x0, Math.min(w.x1, (VIEW_X0 + VIEW_X1) / 2))) - w.h - 12 + LIFT, y1: ground.base + LIFT,
 });
 
-/** What stands against the sky once the town is lifted, before any bird flies: the hills' crest, the top of their wash, the town's run and ink, the masts. */
 export type Skyline = { readonly horizonYAt: (x: number) => number; readonly hillTopAt: (x: number) => number; readonly townRun: readonly [number, number]; readonly masts: ReadonlyArray<Box>; readonly town: ReadonlyArray<Box> };
 
 export function skylineOf(g: ProspectGeometry): Skyline {
@@ -148,7 +139,6 @@ export function skylineOf(g: ProspectGeometry): Skyline {
 
 export type Vignette = Skyline & { readonly nodes: SvgNode[]; readonly birds: ReadonlyArray<Box> };
 
-/** The engine's composed town and foreground redrawn by the burin and lifted into the upper third, the water deepened to the rise. */
 export function vignette(e: Engraver, scene: Scene, s: Streams): Vignette {
   const g = scene.g;
   const horizon = g.ground.base + 2 + LIFT;
@@ -253,7 +243,6 @@ const SERPENT_RIGHT = 59;
 const SERPENT_Y = 212;
 const SHIP = 1.45;
 
-/** The world's sea beast surfacing in the open bay, three coils and a head, after the serpent the chart draws. */
 function serpentNodes(e: Engraver, x: number, y: number, rng: Rng): SvgNode[] {
   const s = SERPENT;
   const out: SvgNode[] = [];
@@ -271,7 +260,6 @@ function serpentNodes(e: Engraver, x: number, y: number, rng: Rng): SvgNode[] {
 
 export type Picture = { readonly nodes: SvgNode[]; readonly vignette: Vignette; readonly figures: ReadonlyArray<Box>; readonly ship: Box | null; readonly beast: Box | null };
 
-/** The beast takes the free water between the people and the near ship, centred in it; where that gap is too narrow, the ship stands down and the beast takes its water (ruling D4: kept clear of the figures). */
 function seatBeast(figures: ReadonlyArray<Box>, shipX: number | null): { readonly x: number; readonly ship: boolean } {
   const left = Math.max(VIEW_X0, ...figures.map((f) => f.x1)) + 8 + SERPENT_LEFT;
   const right = (shipX === null ? VIEW_X1 - 8 : shipX - 14 * SHIP - 8) - SERPENT_RIGHT;
@@ -281,7 +269,6 @@ function seatBeast(figures: ReadonlyArray<Box>, shipX: number | null): { readonl
 
 const shipBox = (x: number): Box => ({ x0: x - 19 * SHIP, x1: x + 14 * SHIP, y0: WATER_BOTTOM - 26 - 30 * SHIP, y1: WATER_BOTTOM - 26 + 5 * SHIP });
 
-/** The whole picture of E: the meadow, the lifted town and its water, the near ship, the beast, the rise and its people. */
 export function picture(e: Engraver, scene: Scene, s: Streams, beastRng: Rng): Picture {
   const g = scene.g;
   const river = g.water?.kind === "river";

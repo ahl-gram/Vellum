@@ -12,7 +12,6 @@ const CX = PLATE_W / 2;
 export const FRAME_OUTER = 10;
 export const FRAME_INNER = FRAME_OUTER + 4;
 export const INNER: Box = { x0: FRAME_INNER, x1: PLATE_W - FRAME_INNER, y0: FRAME_INNER, y1: PLATE_H - FRAME_INNER };
-/** The bottom line's baseline: high enough that the old-style figures' and a "p"'s descenders clear the inner frame. */
 export const BOTTOM_LINE = PLATE_H - 17.5;
 const TOP_LINE = FRAME_INNER + 7;
 
@@ -31,7 +30,6 @@ function lettered(letters: Lettering, specs: ReadonlyArray<RunSpec>): Inked {
 /** The rightmost reach of a strapwork curl beyond the tablet, as a fraction of the curl: the quadratic's extreme. */
 const CURL_REACH = 1.26;
 
-/** A strapwork panel: a tablet with curled ends and rolled lips, after the Granada and Salzburg cartouches. */
 export function strapwork(e: Engraver, cx: number, cy: number, w: number, h: number, tinted: boolean): Inked {
   const x0 = cx - w / 2, x1 = cx + w / 2, y0 = cy - h / 2, y1 = cy + h / 2;
   const c = Math.min(9, h * 0.45);
@@ -54,7 +52,6 @@ export function titleCartouche(e: Engraver, letters: Lettering, name: string, cy
   return { nodes: [...panel.nodes, ...run.nodes], boxes: [...panel.boxes, ...run.boxes] };
 }
 
-/** The banderole: a ribbon with swallow tails carrying the epithet and the founding, slung under the cartouche. */
 export function banderole(e: Engraver, letters: Lettering, text: string, cy: number): Inked {
   const size = Math.min(8.2, 230 / Math.max(10, text.length * 0.5));
   const spec: RunSpec = { text, x: CX, y: r1(cy + size * 0.34), size, italic: true, anchor: "middle", fill: e.ink };
@@ -76,7 +73,6 @@ export function banderole(e: Engraver, letters: Lettering, text: string, cy: num
 
 const RING: ReadonlyArray<readonly [number, number]> = [[1, 0], [0.866, 0.5], [0.5, 0.866], [0, 1], [-0.5, 0.866], [-0.866, 0.5], [-1, 0], [-0.866, -0.5], [-0.5, -0.866], [0, -1], [0.5, -0.866], [0.866, -0.5]];
 
-/** A laurel wreath of paired leaves around a roundel, tied at the foot. */
 export function wreath(e: Engraver, cx: number, cy: number, r: number): Inked {
   const leaves: string[] = [];
   for (let i = 0; i < 24; i++) {
@@ -105,7 +101,6 @@ export function wreathedArms(e: Engraver, arms: Arms, suffix: string): Inked {
   return { nodes: [...w.nodes, armsNode(arms, 64, ROUNDEL_Y + 1, 24, paletteForStyle(e.style), `${suffix}-wreath`)], boxes: w.boxes };
 }
 
-/** The right-hand roundel, the chart's own mark: "CHART" fitted inside the wreath's leaves, the number, the year. */
 export function chartRoundel(e: Engraver, letters: Lettering, seed: number, year: number): Inked {
   const cx = PLATE_W - 64, cy = ROUNDEL_Y;
   const chart: RunSpec = { text: "CHART", x: cx, y: cy - 4, size: 7, anchor: "middle", spacing: 1.4, fill: e.ink };
@@ -124,7 +119,6 @@ const KEY_SIZE = 6.6;
 const ROW_H = 8.6;
 const MIN_COL = 92;
 
-/** The numbered key in its panel at the rise's lower right, its curls kept inside the inner frame. */
 export function keyPanel(e: Engraver, letters: Lettering, entries: ReadonlyArray<PlateKeyEntry>, riseBottom: number): Inked {
   if (entries.length === 0) return { nodes: [], boxes: [] };
   const cols = entries.length > 4 ? 2 : 1;
@@ -199,7 +193,6 @@ function seatAt(e: Engraver, t: RoadTown, n: string, x: number, ctx: HorizonCont
   return { x, s, name: { ...name, y: name.y - lift }, tag: { ...tag, y: tag.y - lift }, boxes: both.map((k) => lifted(k, lift)) };
 }
 
-/** The nearest seat to a road town's bearing, stepping away from the town's own run, where its name and number clear the hills, the masts, the birds, the furniture and every name seated before it. */
 function seatLabel(e: Engraver, t: RoadTown, n: string, ctx: HorizonContext, placed: ReadonlyArray<Box>): Seat | null {
   const bearing = Math.max(VIEW_X0 + 30, Math.min(VIEW_X1 - 30, CX + t.lateral * 230));
   const pushed = bearing > ctx.townRun[0] - 24 && bearing < ctx.townRun[1] + 24;
@@ -215,7 +208,6 @@ function seatLabel(e: Engraver, t: RoadTown, n: string, ctx: HorizonContext, pla
   return null;
 }
 
-/** The road towns standing on the horizon by their true bearing, pushed clear of the town's own run, each named and numbered for its key entry; a name with no clear seat is left to the key. */
 export function horizonTowns(e: Engraver, letters: Lettering, towns: ReadonlyArray<RoadTown>, entries: ReadonlyArray<PlateKeyEntry>, ctx: HorizonContext): Inked {
   const out: SvgNode[] = [];
   const boxes: Box[] = [];

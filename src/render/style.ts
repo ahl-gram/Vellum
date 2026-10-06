@@ -35,7 +35,6 @@ export type MapStyle = {
   readonly winds: boolean;
   readonly currents: boolean;
   readonly realmTints: ReadonlyArray<string>;
-  /** The hand-colouring on a prospect plate (Issue #754); null where the dress is not coloured. No chart reads it. */
   readonly limner: Limner | null;
 };
 

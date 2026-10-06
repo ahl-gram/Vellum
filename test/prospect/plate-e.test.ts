@@ -34,7 +34,6 @@ test("the people's clothes are cut from the realm's tinctures on the coloured pl
   assert.ok(!ink.includes(`fill="${palette.tincture("azure")}"`) && /fill="none" stroke="[^"]+" stroke-width="0.385"/.test(ink), "the ink dress hatches the cloth instead");
 });
 
-/** WCAG relative luminance and contrast, from #rrggbb. */
 function contrast(a: string, b: string): number {
   const lum = (hex: string): number => {
     const ch = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));

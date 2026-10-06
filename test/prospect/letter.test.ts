@@ -25,7 +25,6 @@ function font(face: FaceName): fontkit.Font {
   return f;
 }
 
-/** The run's advance in font units: a size that cancels the optical scale makes one plate unit one font unit. */
 const unitsWide = (text: string, italic: boolean): number =>
   layoutRun({ text, x: 0, y: 0, size: UNITS_PER_EM / OPTICAL_SCALE[faceFor(text, italic)], italic, fill: "#000" }).width;
 
@@ -83,7 +82,6 @@ test("the numero sign is the glyph drawn for Vellum, never the face's N or a com
   assert.match(svg, /href="#pf-n-t"/, "the caps run places the numero's own def");
 });
 
-/** Ink at a point of a glyph, font units with y up: the outline flattened and read even-odd. */
 function inked(d: string, x: number, y: number): boolean {
   const gx = x / 2, gy = -y / 2;
   const toks = d.match(/[MQZ]|-?\d+(?:\.\d+)?/g) ?? [];

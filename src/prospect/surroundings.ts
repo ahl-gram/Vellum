@@ -26,7 +26,6 @@ const ROAD_TOWNS = 2;
 
 type Site = World["settlements"][number];
 
-/** The settlements a road reaches from this one before any other: along each road's polyline, stopping at the first settlement met. */
 export function townsReachedFirst(world: World, index: number): Set<number> {
   const w = world.elev.w;
   const next = new Map<number, number[]>();
@@ -62,7 +61,6 @@ export function townsReachedFirst(world: World, index: number): Set<number> {
 const ruinedBy = (world: World, i: number, year: number): boolean =>
   world.history.events.some((e) => e.kind === "ruin" && e.settlement === i && e.year <= year);
 
-/** The mock's view cone (design/prospects-after-braun-hogenberg/mock/data.ts), kept only where a road reaches the town first (Issue #754 ruling D1). */
 function roadTowns(world: World, index: number, view: ProspectView, year: number): RoadTown[] {
   const s = world.settlements[index]!;
   if (year < s.founded) return [];

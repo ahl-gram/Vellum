@@ -33,7 +33,6 @@ export function attrsOf(elem: string): Record<string, string> {
   return out;
 }
 
-/** Every outlined solid's d, sorted: paths that fill and carry a stroke. Their shapes are the composition, which the dress may recolour but never redraw. */
 export function outlinedSolids(svg: string): string[] {
   const out: string[] = [];
   for (const m of svg.matchAll(/<path\b[^>]*>/g)) {
@@ -47,7 +46,6 @@ export type Extent = { readonly x0: number; readonly x1: number; readonly y0: nu
 
 const STEP: Readonly<Record<string, number>> = { m: 2, l: 2, h: 1, v: 1, q: 4, c: 6, z: 0 };
 
-/** Every vertex and control point of one path's d, in absolute coordinates. */
 function pathPoints(d: string): Array<readonly [number, number]> {
   const out: Array<readonly [number, number]> = [];
   let cx = 0, cy = 0, sx = 0, sy = 0;
