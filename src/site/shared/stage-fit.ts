@@ -34,6 +34,8 @@ export const SLIP_CLEARANCE = 56;
 
 export const CHROME_GAP = 14;
 
+const OVERRUN = 0.5;
+
 export function fitStage(input: StageInput): StageFit {
   const { view, aspect, gap } = input;
   const top = Math.max(0, ...input.above) + gap;
@@ -45,5 +47,6 @@ export function fitStage(input: StageInput): StageFit {
   if (input.narrow && aspect >= 1) w = Math.max(w, view.w);
   const room = Math.max(0, Math.min(view.w - right - 2 * gap, (view.h - 2 * gap) * aspect));
   if (!input.narrow && w < room / 2) return { reserve: { top: 0, right, bottom: 0 }, sheet: { w: room, h: room / aspect }, under: true };
-  return { reserve: { top, right, bottom }, sheet: { w, h: w / aspect }, under: false };
+  const h = w / aspect;
+  return { reserve: { top, right, bottom }, sheet: { w, h }, under: input.narrow && h > free.h + OVERRUN };
 }
