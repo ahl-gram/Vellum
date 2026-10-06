@@ -95,9 +95,13 @@ function encode(contours: readonly P[][]): string {
     const pts = grid.filter((p, i) => i === 0 || p[0] !== grid[i - 1]![0] || p[1] !== grid[i - 1]![1]);
     if (pts.length < 3) continue;
     s += "m";
-    s += num(pts[0]![0] - px) + num(pts[0]![1] - py);
+    s += num(pts[0]![0] - px);
+    s += num(pts[0]![1] - py);
     s += "l";
-    for (let i = 1; i < pts.length; i++) s += num(pts[i]![0] - pts[i - 1]![0]) + num(pts[i]![1] - pts[i - 1]![1]);
+    for (let i = 1; i < pts.length; i++) {
+      s += num(pts[i]![0] - pts[i - 1]![0]);
+      s += num(pts[i]![1] - pts[i - 1]![1]);
+    }
     s += "z";
     [px, py] = pts[0]!;
   }
