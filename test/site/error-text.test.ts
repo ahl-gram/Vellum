@@ -10,4 +10,7 @@ test("an Error reads as its message alone, so a status line says what went wrong
 test("a rejection that is not an Error reads as its own text, where reading its message would print undefined", () => {
   assert.equal(errorText("boom"), "boom");
   assert.equal(errorText(42), "42");
+  assert.equal(errorText(undefined), "undefined");
+  assert.equal(errorText(null), "null");
+  assert.equal(errorText({ code: 7 }), "[object Object]");
 });
