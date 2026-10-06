@@ -5,10 +5,13 @@ itself: what happens, in what order, and which step may not be skipped. It exist
 were spread across `CLAUDE.md`, four agent files and a skill, and no one place said what came after
 what, so sessions improvised the order and improvised it differently each time.
 
-Four other places carry what this one deliberately does not:
+Other places carry what this one deliberately does not:
 
 - **`handbook/specs/rulebook.md`** holds the durable rules, invariants and working agreements. Where that
   file and this one disagree about a rule, it wins. This file sequences; it does not legislate.
+- **`handbook/specs/orchestration.md`** holds how a session runs several lanes at once, each of which
+  runs this sequence: the briefs, the relay of menus and rulings, merging, and a lane that stalls or
+  loses its tree.
 - **`handbook/specs/conventions.md`** holds how a design decision is made, and how a rule is written down
   once made: where it lives, the voice, the citation form, the comment sweep.
 - **`.claude/skills/vellum-footguns/SKILL.md`** holds the gates, which are keyed to the moment of
@@ -48,9 +51,10 @@ bundle or an inlined script, `handbook/specs/conventions.md` before starting a d
 ruled stills, and before adding or moving a rule, editing a spec, or writing, citing or sweeping a
 comment,
 `handbook/specs/settle-doctrine.md` before any work that writes an e2e wait, settle, or CDP probe, or that
-reads a screenshot, a focus state or a narrow viewport in the harness, and
+reads a screenshot, a focus state or a narrow viewport in the harness,
 `handbook/specs/check-placement.md` before writing a test, a lint rule or a browser check, or moving a rule
-from one to another.
+from one to another, and `handbook/specs/orchestration.md` before dispatching a second lane, or handing
+an issue from one lane to another.
 
 **4. Get a cold read on the plan: `vellum-plan-skeptic`.** Not `vellum-pr-skeptic`, which reviews a
 diff and has none to read at this point. The plan skeptic attacks the plan's assumptions, its
