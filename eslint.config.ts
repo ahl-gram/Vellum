@@ -65,6 +65,7 @@ export default defineConfig(
       "@typescript-eslint/no-misused-spread": "error",
       "@typescript-eslint/no-unnecessary-template-expression": "error",
       "@typescript-eslint/no-unnecessary-type-arguments": "error",
+      "@typescript-eslint/restrict-plus-operands": ["error", { allowAny: false, allowBoolean: false, allowNullish: true, allowNumberAndString: true, allowRegExp: false }],
     },
   },
   {

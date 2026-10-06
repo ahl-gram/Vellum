@@ -28,6 +28,7 @@ const RULED: Readonly<Record<string, Linter.RuleEntry>> = {
   "@typescript-eslint/no-misused-spread": "error",
   "@typescript-eslint/no-unnecessary-template-expression": "error",
   "@typescript-eslint/no-unnecessary-type-arguments": "error",
+  "@typescript-eslint/restrict-plus-operands": ["error", { allowAny: false, allowBoolean: false, allowNullish: true, allowNumberAndString: true, allowRegExp: false }],
 };
 
 type Plant = { lines: readonly string[]; refused: readonly number[] };
@@ -47,6 +48,7 @@ const PLANTS: Readonly<Record<string, Plant>> = {
   "@typescript-eslint/no-misused-spread": { lines: ["declare const pr: Promise<number>;", "export const cs = [...\"ab\"];", "export const o = { ...pr };", "export const ok = \"ab\".split(\"\");"], refused: [2, 3] },
   "@typescript-eslint/no-unnecessary-template-expression": { lines: ["declare const w: string;", "export const t = `${w}`;", "export const u = `${w}!`;"], refused: [2] },
   "@typescript-eslint/no-unnecessary-type-arguments": { lines: ["declare function fd<T = number>(): T;", "export const z = fd<number>();", "export const y = fd<string>();"], refused: [2] },
+  "@typescript-eslint/restrict-plus-operands": { lines: ["declare const a: any;", "declare const m: string | undefined;", "export const p1 = \"x\" + a;", "export const p2 = \"x\" + true;", "export const p3 = \"x\" + /re/;", "export const p4 = \"x\" + 1;", "export const p5 = \"x\" + m;", "let d = \"\";", "d += a;", "export { d };"], refused: [3, 4, 5, 9] },
 };
 
 const PLANT_AT = WITNESSES["src/**/*.ts"]!;
