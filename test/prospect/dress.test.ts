@@ -9,9 +9,9 @@ import { groundAt, type ForegroundElement, type Mass } from "../../src/prospect/
 import { massNodes } from "../../src/prospect/dress/buildings.ts";
 import { foregroundNodes, PROSPECT_DRESSES } from "../../src/prospect/dress/plate.ts";
 import { dressContext } from "../../src/prospect/dress/context.ts";
-import { engraver, pt } from "../../src/prospect/dress/burin.ts";
-import { foregroundEngraved, massNodesEngraved, wallNodesEngraved } from "../../src/prospect/dress/townscape.ts";
-import { LIFT, massReach, wallReach, type Box } from "../../src/prospect/dress/rise.ts";
+import { birdFlock, engraver, hatchNode, pt } from "../../src/prospect/dress/burin.ts";
+import { foregroundEngraved, massNodesEngraved, shipEngraved, wallNodesEngraved } from "../../src/prospect/dress/townscape.ts";
+import { flockBox, LIFT, massReach, shipRig, wallReach, type Box } from "../../src/prospect/dress/rise.ts";
 import { finishedPlateSvg } from "../../src/prospect/finished.ts";
 import { bandOf, makeInput } from "../../test-support/prospect-fixtures.ts";
 import { inkExtent, outlinedSolids, tokenColors } from "../../test-support/dress-svg.ts";
@@ -181,4 +181,26 @@ test("a drowned plate draws no ground line under the flood, where a dry one draw
   assert.equal(composeProspect(drowned).water?.kind, "drowned", "premise: the fixture drowns");
   assert.ok(finishedPlateSvg(dry, STYLES.antique, 1300).includes(lineOf(dry)), "the control: a dry plate draws the line this probe reads");
   for (const style of [STYLES.antique, STYLES.ink]) assert.ok(!finishedPlateSvg(drowned, style, 1300).includes(lineOf(drowned)), `${style.name}: no ground line under the flood`);
+});
+
+test("a flock's box holds every bird it draws, and a ship's rig box holds its masts and pennants from the waterline up, so what keeps clear of the boxes above the water keeps clear of the ink", () => {
+  const e = engraver(STYLES.antique);
+  const STROKE = 0.5;
+  const within = (ink: Box, b: Box, what: string, below = true): void =>
+    assert.ok(ink.x0 - STROKE >= b.x0 && ink.x1 + STROKE <= b.x1 && ink.y0 - STROKE >= b.y0 && (!below || ink.y1 <= b.y1 + STROKE), `${what}: ink ${JSON.stringify(ink)} reaches past ${JSON.stringify(b)}`);
+  for (let k = 0; k < 40; k++) {
+    const n = 2 + (k % 6);
+    within(inkExtent(renderSvg(birdFlock(e, 200, 120, n, createRng(k)))), flockBox(200, 120, n), `a flock of ${n}, draw ${k}`);
+  }
+  for (const s of [0.6, 0.8, 1, 1.15, 1.4]) {
+    for (const great of [false, true]) {
+      const rig = shipRig(200, 150, s, great);
+      within(inkExtent(renderSvg(el("g", {}, shipEngraved(e, 200, 150, s, great, createRng(7))))), { ...rig, y0: rig.y0 - LIFT, y1: rig.y1 - LIFT }, `a ${great ? "great " : ""}ship at ${s}`, false);
+    }
+  }
+});
+
+test("hatching is clipped by its own scanlines and names no clip path, so many plates share one document", () => {
+  const svg = renderSvg(hatchNode(engraver(STYLES.antique), [{ x: 0, y: 0 }, { x: 40, y: 0 }, { x: 30, y: 25 }, { x: 5, y: 30 }], 0.6, 2));
+  assert.ok(svg.includes("<path") && !/clip/i.test(svg), svg.slice(0, 120));
 });

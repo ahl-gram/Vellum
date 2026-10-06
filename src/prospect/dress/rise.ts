@@ -106,10 +106,10 @@ function townNodes(e: Engraver, g: ProspectGeometry, rng: Rng): SvgNode[] {
 }
 
 /** The ink a flock of n birds reaches from its anchor (birdFlock in src/prospect/dress/burin.ts). */
-const flockBox = (x: number, y: number, n: number): Box => ({ x0: x - 3, x1: x + 5 * n + 3, y0: y - 3, y1: y + 6 });
+export const flockBox = (x: number, y: number, n: number): Box => ({ x0: x - 3, x1: x + 5 * n + 3, y0: y - 3, y1: y + 6 });
 
 /** The ink an engraved ship reaches, hull to pennant, lifted with the town: what a horizon label must clear. */
-const shipRig = (x: number, y: number, s: number, great: boolean): Box => ({ x0: x - 16 * s, x1: x + 16 * s, y0: y + LIFT - 2.5 * s - (great ? 24 : 18) * s * 1.15 - 3.2 * s - 1, y1: y + LIFT + 3 * s });
+export const shipRig = (x: number, y: number, s: number, great: boolean): Box => ({ x0: x - (great ? 19 : 16) * s - 1, x1: x + 16 * s + 1, y0: y + LIFT - 2.5 * s - (great ? 24 : 18) * s * 1.15 - 3.2 * s - 1, y1: y + LIFT + 3 * s });
 
 /** The ink an engraved mass reaches, roof, spire, battlements and pennant included (massNodesEngraved in townscape.ts), lifted with the town. */
 export const massReach = (m: Mass): Box => {
