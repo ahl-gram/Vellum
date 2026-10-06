@@ -26,7 +26,9 @@ const PIECES: Payload<Pieces> = `(() => {
   }
   const root = document.documentElement, nav = document.querySelector("header.chrome nav.rooms");
   const navLines = nav ? new Set([...nav.querySelectorAll("a, [aria-current]")].map((d) => Math.round(d.getBoundingClientRect().top))).size : 0;
-  const camera = !document.getElementById("lf-stage") || !!document.querySelector("#lf-stage.cam");
+  const cam = document.querySelector("#lf-stage.cam #lf-sheet");
+  // On a fresh load home's sheet can report its stage-sized box for a read or two after the camera is written and the page is complete (main's build too, measured 2026-10-06), so the camera counts as laid out only once the box carries its scale.
+  const camera = !document.getElementById("lf-stage") || (!!cam && Math.abs(cam.getBoundingClientRect().width - cam.offsetWidth * new DOMMatrixReadOnly(getComputedStyle(cam).transform).a) < 1);
   return { innerW: innerWidth, innerH: innerHeight, sx, over: root.scrollWidth - root.clientWidth, cw: root.clientWidth, pieces, navLines, ready: document.readyState === "complete" && (!document.fonts || document.fonts.status === "loaded") && camera && ${LANDED} };
 })()`;
 

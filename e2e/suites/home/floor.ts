@@ -10,7 +10,8 @@ type View = { sx: number; sy: number; scale: number; cw: number; ready: boolean 
 const VIEW: Payload<View> = `(() => {
   const s = document.getElementById("lf-sheet");
   const m = s ? new DOMMatrixReadOnly(getComputedStyle(s).transform) : null;
-  return { sx: scrollX, sy: scrollY, scale: m ? m.a : NaN, cw: document.documentElement.clientWidth, ready: document.readyState === "complete" && !!document.querySelector("#lf-stage.cam") };
+  const laidOut = !!s && !!m && !!document.querySelector("#lf-stage.cam") && Math.abs(s.getBoundingClientRect().width - s.offsetWidth * m.a) < 1;
+  return { sx: scrollX, sy: scrollY, scale: m ? m.a : NaN, cw: document.documentElement.clientWidth, ready: document.readyState === "complete" && laidOut };
 })()`;
 
 const centreOf = (selector: string): Payload<Point | null> => `(() => { const e = document.querySelector(${JSON.stringify(selector)}); if (!e) return null; const r = e.getBoundingClientRect(); return { x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2) }; })()`;
