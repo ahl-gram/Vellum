@@ -152,6 +152,7 @@ const TEXT: ReadonlyArray<CdRow> = [
   ["a cd after a heredoc whose body opens a quote and a paren denied", "cat <<'EOF' > n.md\nIt's a note (with a paren\nEOF\ncd .claude/worktrees/orch-779 && gh pr view", "<S>", "deny"],
   ["a here-string is not a heredoc", "cat <<<note\ncd src", "<ROOT>", "deny"],
   ["an arithmetic shift is not a heredoc", "echo $((1 << 2))\ncd src", "<ROOT>", "deny"],
+  ["an arithmetic command shifting by a number is not a heredoc", "(( x = 1 << 2 ))\ncd src", "<ROOT>", "deny"],
   ["an arithmetic shift by a name is not a heredoc", "n=1; echo $((1 << n))\ncd src && pwd", "<ROOT>", "deny"],
   ["an apostrophe in a comment does not hide a later cd", "# the sandbox's path\ncd src && jq '.x' a.json", "<ROOT>", "deny"],
   ["a double quote in a comment does not hide a later cd", 'ls # a " mark\ncd src && echo "x"', "<ROOT>", "deny"],

@@ -264,6 +264,7 @@ const CD_ROWS: ReadonlyArray<readonly [string, "deny" | "null"]> = [
   ["a cd after a heredoc whose body opens a quote and a paren denied", "deny"],
   ["a here-string is not a heredoc", "deny"],
   ["an arithmetic shift is not a heredoc", "deny"],
+  ["an arithmetic command shifting by a number is not a heredoc", "deny"],
   ["an arithmetic shift by a name is not a heredoc", "deny"],
   ["an apostrophe in a comment does not hide a later cd", "deny"],
   ["a double quote in a comment does not hide a later cd", "deny"],
