@@ -57,14 +57,14 @@ function ridgeEngraved(e: Engraver, ridge: ReadonlyArray<Pt>, horizon: number, r
   return out;
 }
 
-type Sky = { readonly obstacles: ReadonlyArray<Box>; readonly horizonYAt: (x: number) => number };
+type Sky = { readonly obstacles: ReadonlyArray<Box>; readonly topAt: (x: number) => number };
 
 /** The nearest open sky for a flock of n birds anchored at (x0, y) in plate units: clear of every obstacle and above the hills, sideways first, then lifted no higher than the band under the named plate; null where the hills and the town fill the sky. */
 function openSky(x0: number, y: number, n: number, sky: Sky): { readonly x: number; readonly y: number } | null {
   const free = (x: number, yy: number): boolean => {
     const f = flockBox(x, yy, n);
     if (sky.obstacles.some((c) => f.x0 < c.x1 && c.x0 < f.x1 && f.y0 < c.y1 && c.y0 < f.y1)) return false;
-    for (let px = f.x0; px <= f.x1; px += 1) if (f.y1 >= sky.horizonYAt(px)) return false;
+    for (let px = f.x0; px <= f.x1; px += 1) if (f.y1 >= sky.topAt(px)) return false;
     return true;
   };
   for (let yy = y; yy >= Math.min(y, BIRD_TOP); yy -= 8) {
@@ -154,7 +154,7 @@ export function vignette(e: Engraver, scene: Scene, s: Streams): Vignette {
   const horizon = g.ground.base + 2 + LIFT;
   const clouds = cloudsFor(s.sky, horizon);
   const line = skylineOf(g);
-  const sky: Sky = { obstacles: [...scene.clear, ...line.town, ...line.masts], horizonYAt: line.horizonYAt };
+  const sky: Sky = { obstacles: [...scene.clear, ...line.town, ...line.masts], topAt: line.hillTopAt };
   const foreground = g.foreground.filter((f) => !(scene.beast && f.kind === "seaSerpent")).map((f) => holdBirds(f, sky));
   const engraved = foreground.map((f) => foregroundEngraved(e, f, s.town));
   const gaps: Gap[] = engraved.flatMap((f) => f.gaps).map((h) => ({ ...h, y0: h.y0 + LIFT, y1: h.y1 + LIFT }));
