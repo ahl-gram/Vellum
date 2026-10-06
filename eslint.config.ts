@@ -54,6 +54,7 @@ export default defineConfig(
       "@typescript-eslint/return-await": ["error", "error-handling-correctness-only"],
       "@typescript-eslint/no-non-null-asserted-nullish-coalescing": "error",
       "@typescript-eslint/related-getter-setter-pairs": "error",
+      "@typescript-eslint/unified-signatures": "error",
     },
   },
   {

@@ -17,6 +17,7 @@ const RULED: Readonly<Record<string, Linter.RuleEntry>> = {
   "@typescript-eslint/return-await": ["error", "error-handling-correctness-only"],
   "@typescript-eslint/no-non-null-asserted-nullish-coalescing": "error",
   "@typescript-eslint/related-getter-setter-pairs": "error",
+  "@typescript-eslint/unified-signatures": "error",
 };
 
 type Plant = { lines: readonly string[]; refused: readonly number[] };
@@ -25,6 +26,7 @@ const PLANTS: Readonly<Record<string, Plant>> = {
   "@typescript-eslint/return-await": { lines: ["declare function g(): Promise<number>;", "export async function f(): Promise<number> { try { return g(); } catch { return 0; } }", "export async function h(): Promise<number> { try { return await g(); } catch { return 0; } }"], refused: [2] },
   "@typescript-eslint/no-non-null-asserted-nullish-coalescing": { lines: ["export const b = (o: { a?: string }): string => o.a! ?? \"x\";", "export const c = (o: { a?: string }): string => o.a ?? \"x\";"], refused: [1] },
   "@typescript-eslint/related-getter-setter-pairs": { lines: ["export class C { y = 1; get x(): string { return \"\"; } set x(v: number) { this.y = v; } }", "export class D { y = 1; get x(): number { return this.y; } set x(v: number) { this.y = v; } }"], refused: [1] },
+  "@typescript-eslint/unified-signatures": { lines: ["export function u(a: string): void;", "export function u(a: number): void;", "export function u(a: unknown): void { void a; }"], refused: [2] },
 };
 
 const PLANT_AT = WITNESSES["src/**/*.ts"]!;
