@@ -22,7 +22,8 @@ async function openByTab(kd: DragKit, label: string): Promise<Drawer> {
   return kd.settle(DRAWER, (d, last) => d.open && drawerUp(d, last), label);
 }
 
-// A carry from the ear to a point on the sheet, released there so it snaps back: the ghost is read mid-carry against the pointer, in the window's coordinates, which is what a reader sees.
+// A carry from the ear to a point on the sheet above the drawer's band at both heights, released there so it snaps back: the ghost is read mid-carry against the pointer, in the window's coordinates, which is what a reader sees.
+const ABOVE_BAND = 90;
 async function ghostAt(kd: DragKit, to: Point, label: string) {
   const { mid } = await kd.carry(to);
   const scrollX = await kd.evaluate<number>("window.scrollX");
@@ -46,10 +47,10 @@ export async function na2DrawerBelowFloor(kd: DragKit): Promise<void> {
     await go(`${DRESS}&${DEEP}&table=${ONE}`);
     await settle(READ, atInset, `NA2 the inset at 640x${h}`, DRAWN);
     const ear = await kd.earPoint();
-    const unscrolled = ear && ear.x < 600 ? await ghostAt(kd, { x: Math.max(40, ear.x - 160), y: Math.round(h / 2) }, `NA2 snapped at 640x${h}`) : null;
+    const unscrolled = ear && ear.x < 600 ? await ghostAt(kd, { x: Math.max(40, ear.x - 160), y: ABOVE_BAND }, `NA2 snapped at 640x${h}`) : null;
     await evaluate("window.scrollTo(document.documentElement.scrollWidth, 0)");
     const scrolledEar = await kd.earPoint();
-    const scrolled = scrolledEar && scrolledEar.x > 40 && scrolledEar.x < 640 ? await ghostAt(kd, { x: Math.max(40, scrolledEar.x - 160), y: Math.round(h / 2) }, `NA2 snapped scrolled at 640x${h}`) : null;
+    const scrolled = scrolledEar && scrolledEar.x > 40 && scrolledEar.x < 640 ? await ghostAt(kd, { x: Math.max(40, scrolledEar.x - 160), y: ABOVE_BAND }, `NA2 snapped scrolled at 640x${h}`) : null;
     const before = await evaluate(DRAWER);
     const narrow = await openByTab(kd, `NA2 the drawer at 640x${h}`);
     const at = `640x${h}`;
@@ -66,17 +67,14 @@ export async function na2DrawerBelowFloor(kd: DragKit): Promise<void> {
   );
 }
 
-// CD48 (Issue #523 build item 4), moved to a 1024 tablet when the narrow layout went (Issue #762 pull request C): the tap files first, then the handle's touch drag, the pan control LAST, since a pan at DEEP can recommit the inset and rebuild the ear.
+// CD48 (Issue #523 build item 4), moved to a 1024 tablet when the narrow layout went (Issue #762 pull request C): the handle's touch drag first, the pan control LAST, since a pan at DEEP can recommit the inset and rebuild the ear. No tap files a sheet first, as it did at 640, since at 1024 the filing opens the drawer and folds the Broadside, whose refit moves the camera under the read..
 export async function cd48TouchHandle({ evaluate, check, sleep, touch, touchPan, settle, go, setNarrowViewport, clearMobile, send }: DragKit): Promise<void> {
   await setNarrowViewport(1024, 844);
   await go(`${DRESS}&${DEEP}`);
   await settle(READ, atInset, "chart-drawer-tablet-inset", DRAWN);
   const ear = `(() => { const e = document.querySelector("#map .region-inset .dog-ear"); if (!e) return null; const b = e.getBoundingClientRect(); return { x: Math.round(b.x + b.width * 0.72), y: Math.round(b.y + b.height * 0.28) }; })()`;
-  const tapAt = await evaluate<Point | null>(ear);
-  if (tapAt) { await touch("touchStart", [{ x: tapAt.x, y: tapAt.y, id: 0 }]); await touch("touchEnd", []); }
-  await settle(READ, (d) => d.cuttings === 1 && !!d.ear, "chart-drawer-tablet-filed", DRAWN);
+  const camBefore = await settle<Cam>(`window.__vellumZoomState()`, (d, last) => !!last && d.x === last.x && d.y === last.y && d.k === last.k, "chart-drawer-tablet-camera-rest");
   const earNow = await evaluate<Point | null>(ear);
-  const camBefore = await evaluate<Cam>(`window.__vellumZoomState()`);
   let ghostSeen = false;
   if (earNow) {
     await touch("touchStart", [{ x: earNow.x, y: earNow.y, id: 0 }]);
@@ -97,10 +95,10 @@ export async function cd48TouchHandle({ evaluate, check, sleep, touch, touchPan,
   await clearMobile();
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   check(
-    "CD48 on a 1024 tablet a tap on the dog-ear files the survey, and a touch that begins on the handle neither pans nor zooms the map and never raises a ghost (touch never drags, Issue #401 ruling 6), while a touch that begins beside it on the chart still pans, the control that proves the camera was listening: the first is the ear's stopped touchstart, the second is d3 bound under touch emulation that was active BEFORE the navigate (Issue #523 build item 4; at 1024 since Issue #762)",
-    !!tapAt && !!earNow && camBefore.k === afterHandle.cam.k && camBefore.x === afterHandle.cam.x && camBefore.y === afterHandle.cam.y &&
-      !ghostSeen && !afterHandle.ghost && !afterHandle.drag && afterHandle.cuttings === 1 &&
+    "CD48 on a 1024 tablet a touch that begins on the dog-ear and drags neither pans nor zooms the map, never raises a ghost and files nothing (touch never drags, Issue #401 ruling 6), while a touch that begins beside it on the chart still pans, the control that proves the camera was listening: the first is the ear's stopped touchstart, the second is d3 bound under touch emulation that was active BEFORE the navigate (Issue #523 build item 4; at 1024 since Issue #762)",
+    !!earNow && camBefore.k === afterHandle.cam.k && camBefore.x === afterHandle.cam.x && camBefore.y === afterHandle.cam.y &&
+      !ghostSeen && !afterHandle.ghost && !afterHandle.drag && afterHandle.cuttings === 0 &&
       !!panFrom && (afterPan.x !== camBefore.x || afterPan.y !== camBefore.y),
-    JSON.stringify({ tapAt, ear: earNow, camBefore, afterHandle, ghostSeen, panFrom, afterPan }),
+    JSON.stringify({ ear: earNow, camBefore, afterHandle, ghostSeen, panFrom, afterPan }),
   );
 }

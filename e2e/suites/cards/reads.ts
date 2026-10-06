@@ -4,8 +4,8 @@ import type { Payload } from "../../types.ts";
 export const OVER_BOX_TOLERANCE = 0.5;
 // Seed 4294967295 is the WITNESS that makes this bite: its Kralgov card measured 150.95px past a 247.02px box at 320 and 61.27px past a 301.05px box at 390 on main at 18bacfd. Every place is measured, not that one card, because the defect is a class and a copy change that promotes a different place to the worst would leave a single-card guard green.
 export const NARROW_SEED = 4294967295;
-// Under the 1024 floor (Issue #762) a phone held sideways lays out 1024x474, whose chart box (393 tall) no card on that seed reaches (Kralgov's is 292), so the cap is read on the window short enough to meet it: at 1024x300 the box is 272 and Kralgov's card meets it by 20 (measured 2026-10-06).
-export const CAP_WINDOW = { w: 1024, h: 300 };
+// Under the 1024 floor (Issue #762) a phone held sideways lays out 1024x474, whose chart box (393 tall) no card on that seed reaches (Kralgov's is 292), so the cap is read on a window short enough to meet it, 300 tall, where the box is 272 and Kralgov's card meets it by 20; and wide enough, 1440, that the risen Press does not stand over the card's centre as it does at 1024 (measured 2026-10-06).
+export const CAP_WINDOW = { w: 1440, h: 300 };
 // Focus rather than a pointer, deliberately: focus reaches EVERY mark, including the ones a neighbour's 26px hit covers at rest, and showPlaceCard composes the same card on both paths. Whether a pointer can reach a mark is a different question with its own issue.
 type SweepRow = { want: string; shown: false } | { want: string; got: string | undefined; shown: true; h: number; over: number };
 export type Swept = { error?: undefined; boxW: number; boxH: number; rows: SweepRow[] };

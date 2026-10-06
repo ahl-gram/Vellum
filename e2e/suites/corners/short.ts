@@ -61,14 +61,14 @@ export async function ns1Soft(ctx: SuiteContext): Promise<void> {
       for (const [piece, f] of [["Press", b.press], ["room folio", b.folio]] as const) if (f !== null && !/blur/.test(f)) faults.push(`${at}: the ${piece} stands on a hard-edged panel (${f})`);
       faults.push(...stageFaults({ page, size: `${w}x${h}`, s }).filter((f) => /backing lies over/.test(f)));
       // Two rows in handbook/errata/site.md own what this leaves out, on main as here: the Glass's presses (PR #784, 2.63 to 3.23 over the chart) and the Specimen's disabled press, dimmed by the kit's opacity (PR #777, 3.33 to 3.41).
-      const reads = await painted(ctx, (await ctx.evaluate(GLYPH_LINES_OVER_SHEET)).filter((g) => g.piece !== "Glass" && !g.disabled));
+      const reads = await painted(ctx, (await ctx.evaluate(GLYPH_LINES_OVER_SHEET)).filter((g) => g.piece !== "Glass" && !(page === "/specimen/" && g.disabled)));
       faults.push(...reads.filter((g) => g.ratio < FLOOR_PLAIN).map((g) => `${at}: ${g.piece} "${g.t}" reads ${g.ratio.toFixed(2)} painted`));
       if (page === "/ribbon/") ribbonNav ||= reads.some((g) => g.piece === "cluster" && g.t.startsWith("Glossary"));
       rows.push(`${at} ${reads.length} lines, worst ${Math.min(...reads.map((g) => g.ratio)).toFixed(2)}`);
     }
   }
   ctx.check(
-    "NS1 over a floored chart on a short window (1024x540, 1024x474 and 1024x430) the Press and the room folio stand on the cluster's blurred pool, not a hard-edged panel, no backing lies over another piece's lines, and every chrome line over the sheet but the Glass's and a disabled press's reads 4.5:1 or better as it is painted, in every chart room and the Print Room's named world, the Ribbon's \"Glossary\" beside its corner among them (Alex, 2026-10-06, Issue #762: soft)",
+    "NS1 over a floored chart on a short window (1024x540, 1024x474 and 1024x430) the Press and the room folio stand on the cluster's blurred pool, not a hard-edged panel, no backing lies over another piece's lines, and every chrome line over the sheet but the Glass's and the Specimen's disabled press's reads 4.5:1 or better as it is painted, in every chart room and the Print Room's named world, the Ribbon's \"Glossary\" beside its corner among them (Alex, 2026-10-06, Issue #762: soft)",
     faults.length === 0 && ribbonNav,
     `${rows.join(" | ")}; the Ribbon's Glossary read ${ribbonNav}${faults.length ? `; ${faults.length} faults: ${faults.slice(0, 8).join("; ")}` : ""}`,
   );

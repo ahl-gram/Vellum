@@ -31,6 +31,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
   sb8eInsets(k, leaned);
   await sb5cFooting(k, rest, leaned);
   await sb6RestAgain(k);
+  // SB9b prints a leaned Book; the phone block that used to lean it before here went with the narrow layout (Issue #762).
+  await setState("leaned");
+  await sleep(900);
   await sb9bPrinted(k);
   await sb9PrintIsPaper(k);
   await send("Emulation.clearDeviceMetricsOverride");

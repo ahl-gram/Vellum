@@ -54,14 +54,15 @@ export async function p20PinnedTakesPointer({ evaluate, send, check, settle }: C
 export async function p26TailScrolls({ evaluate, send, check, sleep, wheel }: SuiteContext, open: Pinned): Promise<void> {
   const beforeWheel = await evaluate<{ scrollTop: number; k: number }>(`(() => { const i = document.querySelector("#place-card .pc-inner"); return { scrollTop: +i.scrollTop.toFixed(2), k: window.__vellumZoomState().k }; })()`);
   const onCard = { x: Math.round(open.left + (open.right - open.left) / 2), y: Math.round(open.top + open.h / 2) };
+  const reaches = await evaluate<boolean>(`(() => { const e = document.elementFromPoint(${onCard.x}, ${onCard.y}); return !!e && document.getElementById("place-card").contains(e); })()`);
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: onCard.x, y: onCard.y });
   await sleep(120);
   await wheel(onCard.x, onCard.y, 240);
   await sleep(600);
   const afterWheel = await evaluate<{ scrollTop: number; k: number }>(`(() => { const i = document.querySelector("#place-card .pc-inner"); return { scrollTop: +i.scrollTop.toFixed(2), k: window.__vellumZoomState().k }; })()`);
-  check("P26 a pinned card that HAS a tail holds the wheel and scrolls it, and the camera under it stays put (#633)",
-    afterWheel.scrollTop > beforeWheel.scrollTop + 1 && afterWheel.k === beforeWheel.k,
-    JSON.stringify({ before: beforeWheel, after: afterWheel }));
+  check("P26 a pinned card that HAS a tail holds the wheel and scrolls it, and the camera under it stays put, the wheel aimed where the card itself takes the pointer (#633)",
+    reaches && afterWheel.scrollTop > beforeWheel.scrollTop + 1 && afterWheel.k === beforeWheel.k,
+    JSON.stringify({ reaches, before: beforeWheel, after: afterWheel }));
   await evaluate(`(() => { const i = document.querySelector("#place-card .pc-inner"); i.scrollTop = 0; })()`);
   await sleep(200);
 
@@ -112,11 +113,13 @@ export async function p23CapHolds({ evaluate, send, check, sleep, wheel, settle 
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
 }
 
-export async function p24NothingToScroll({ evaluate, send, check, sleep, wheel, settle, waitReady, setNarrowViewport, PORT }: CardsKit): Promise<void> {
-  await setNarrowViewport(1024, 474);
+export async function p24NothingToScroll({ evaluate, send, check, sleep, wheel, settle, waitReady, setTouch, PORT }: CardsKit): Promise<void> {
+  // A mouse's wheel on a desktop, touch off: with touch emulation on, this zoom left the browser so that the next suite's real clicks missed (chart-drawer after cards, measured 2026-10-06, cause not found).
+  await setTouch(false);
+  await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/#seed=${NARROW_SEED}&style=antique` });
-  if (!(await waitReady())) throw new Error("P24 the explorer never drew at 1024x474");
+  if (!(await waitReady())) throw new Error("P24 the explorer never drew at 1280x800");
   const at = await evaluate<Point>(`(() => { const h = [...document.querySelectorAll(".place-overlay .place-hit")].find((e) => (e.getAttribute("aria-label") || "").split(", ")[0] === "Kralgov"); const b = h.getBoundingClientRect(); return { x: Math.round(b.x + b.width / 2), y: Math.round(b.y + b.height / 2) }; })()`);
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: at.x, y: at.y });
   await send("Input.dispatchMouseEvent", { type: "mousePressed", x: at.x, y: at.y, button: "left", clickCount: 1 });
@@ -127,7 +130,7 @@ export async function p24NothingToScroll({ evaluate, send, check, sleep, wheel, 
           tail: +(i.scrollHeight - i.clientHeight).toFixed(2), pe: getComputedStyle(i).pointerEvents, k: window.__vellumZoomState().k,
           x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2), h: +r.height.toFixed(2) }; })()`,
     (d, last) => d.name === "Kralgov" && d.pinned && !!last && d.h === last.h,
-    "P24 Kralgov pinned at 1024x474",
+    "P24 Kralgov pinned at 1280x800",
   );
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: card.x, y: card.y });
   await sleep(120);
