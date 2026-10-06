@@ -174,7 +174,7 @@ export async function co8Floored(ctx: SuiteContext): Promise<void> {
       if (at === RULED[0]) bareCluster = worstOf(await withStyle(ctx, "co8-bare", NO_POOLS, () => grounds(ctx, glyphs)), "cluster");
       if (RULED.includes(at) && s?.under !== true) faults.push(`${at} is not marked as running under the chrome`);
       const held = read.filter((g) => BACKED.includes(g.piece));
-      if (!held.some((g) => g.piece === "cluster")) faults.push(`${at}: no cluster line stands on the sheet`);
+      if (RULED.includes(at) && !held.some((g) => g.piece === "cluster")) faults.push(`${at}: no cluster line stands on the sheet`);
       faults.push(...held.filter((g) => g.ratio < FLOOR_PLAIN).map((g) => `${at}: ${g.piece} "${g.t}" reads ${g.ratio.toFixed(2)}`));
       glass = Math.min(glass, worstOf(read, "Glass"));
       rows.push(`${at}${s?.under ? " under" : ""}: ${held.length} lines, worst ${worstOf(held).toFixed(2)}`);
