@@ -45,12 +45,10 @@
 .matter-page td.name .former { display: block; white-space: normal; font-weight: 400; font-size: 0.86em; color: var(--ink-brown); text-transform: none; letter-spacing: normal; }
 .matter-page td.note { font-style: italic; color: var(--ink-brown); }
 
-/* The style picker keeps 7.4rem at every width (the kit's would leave "topographic" 4.6rem of box beside the chevron); the room's 25rem folio is scoped to wide sheets because unscoped it beat the kit's 12.5rem phone clamp and the corner never wrapped. */
-@media (min-width: 1024px) { .folio-room { max-width: 25rem; } }
+/* The style picker keeps 7.4rem at every width (the kit's would leave "topographic" 4.6rem of box beside the chevron), in the room's 25rem folio. */
+.folio-room { max-width: 25rem; }
 .folio-controls input.control { width: 5.6rem; }
 .folio-controls select.control { width: 7.4rem; }
-/* The style picker stays at every width (the mockup hid it on a phone; no feature is lost): below 1024, where the corner is the kit's width, the row wraps, seed, then style, then Pull a proof. */
-@media (max-width: 1023px) { .folio-controls { flex-wrap: wrap; } }
 
 .slip .bound-line { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; color: var(--ink-brown); font-size: 0.95rem; line-height: 1.5; margin: 0.7rem 0 0; }
 .slip .bound-line:empty { display: none; }
@@ -99,15 +97,6 @@ body.has-atlas .slip .intro { display: none; }
 #pr-atlas .atlas-head .subtitle { font-style: italic; color: var(--ink-brown); margin: 0; }
 #pr-atlas .atlas-head .chartno { letter-spacing: 0.3em; font-size: 0.8rem; color: var(--ink-faded); margin: 0.5rem 0 0; }
 
-@media (max-width: 900px) {
-  /* Docked in the sheet the head stays: it carries the Pressed-as choice, which the kit's hidden head would take with it; the select takes the house dress on the panel's parchment; the note stands down. */
-  .legend.in-slip .legend-head { display: block; }
-  .legend.in-slip .pressed { color: var(--ink-brown); }
-  .legend.in-slip .legend-status { display: block; color: var(--ink-brown); }
-  .legend.in-slip .legend-head select { color: var(--ink-dark); background-color: var(--control-cream); border-color: var(--ink-dark); }
-  .legend.in-slip .legend-note { display: none; }
-  .plates { margin-left: 0; }
-}
 
 @media print {
   .stage { position: static; padding: 0 !important; display: block; }

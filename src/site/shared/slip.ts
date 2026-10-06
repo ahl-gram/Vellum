@@ -6,16 +6,10 @@ export interface Listens {
   addEventListener(type: string, listener: (e: Event) => void): void;
 }
 
-export interface Expands extends Listens {
-  setAttribute(name: string, value: string): void;
-}
-
 export interface SlipParts {
   readonly slip: Classed;
   readonly fold: Listens | null;
   readonly tab: (Classed & Listens) | null;
-  /** The phone sheet's toggle, a button covering the head. */
-  readonly handle: Expands | null;
   readonly onLayout: () => void;
   readonly after: (run: () => void, ms: number) => void;
 }
@@ -38,10 +32,5 @@ export function bindSlip(p: SlipParts): SlipFold {
   };
   p.fold?.addEventListener("click", () => setFolded(true));
   p.tab?.addEventListener("click", () => setFolded(false));
-  p.handle?.addEventListener("click", () => {
-    const open = p.slip.classList.toggle("open");
-    p.handle?.setAttribute("aria-expanded", String(open));
-    p.onLayout();
-  });
   return { folded: () => p.slip.classList.contains("folded"), setFolded };
 }

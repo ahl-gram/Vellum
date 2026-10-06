@@ -49,8 +49,3 @@
 .contents .row .row-download:is(:hover, :focus-visible) { color: var(--ink-dark); background: none; transform: none; box-shadow: none; }
 .contents .row .row-download:disabled { color: var(--ink-faded); cursor: default; text-decoration: none; }
 
-@media (max-width: 900px) {
-  .contents .row { grid-template-columns: 1.4rem 3.8rem 1fr; }
-  .group-head { flex-direction: column; align-items: flex-start; gap: 0.1rem; }
-  .group-head .gloss { text-align: left; }
-}

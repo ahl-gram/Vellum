@@ -62,12 +62,13 @@ export async function fl1Floor(ctx: SuiteContext): Promise<void> {
   const faults: string[] = [];
   const rows: string[] = [];
   for (const page of ROOMS) {
-    const at800 = await open(ctx, page, FLOOR, 800);
-    const at400 = await resized(ctx, page, FLOOR, 400);
+    const fresh = await open(ctx, page, FLOOR, 800);
     const wide = await resized(ctx, page, 1100, 800);
-    for (const [at, p] of [[`${page} 1024x800`, at800], [`${page} 1024x400`, at400], [`${page} 1100x800`, wide]] as const) if (p.over > TOLERANCE) faults.push(`${at}: scrolls sideways by ${p.over} at or above the floor`);
+    const at800 = await resized(ctx, page, FLOOR, 800);
+    const at400 = await resized(ctx, page, FLOOR, 400);
+    for (const [at, p] of [[`${page} 1024x800`, fresh], [`${page} 1024x400`, at400], [`${page} 1100x800`, wide]] as const) if (p.over > TOLERANCE) faults.push(`${at}: scrolls sideways by ${p.over} at or above the floor`);
     const narrow = await open(ctx, page, 640, 800);
-    faults.push(...overhang(`${page} 640x800`, narrow), ...differences(`${page} 640x800`, narrow, at800));
+    faults.push(...overhang(`${page} 640x800`, narrow), ...differences(`${page} 640x800`, narrow, fresh));
     const n900 = await resized(ctx, page, 900, 800);
     faults.push(...overhang(`${page} 900x800`, n900), ...differences(`${page} 900x800`, n900, at800));
     const short = await resized(ctx, page, 640, 400);
@@ -137,12 +138,14 @@ export async function fl2Reach(ctx: SuiteContext): Promise<void> {
   );
 }
 
-// The witness (measured 2026-10-06 on the step 6 probe): with the page scrolled 384 at 640x800, a resize laid the Explorer's Press out at page x -358 against 26, its viewport x written back as a page one.
+// Every read compared is taken after the same number of layout passes, since the Reading Room's and the Print Room's fits move on the second pass on main's build too (the handbook/errata/site.md rows). The witness (measured 2026-10-06 on the step 6 probe): with the page scrolled 384 at 640x800, a resize laid the Explorer's Press out at page x -358 against 26, its viewport x written back as a page one.
 export async function fl3Relayout(ctx: SuiteContext): Promise<void> {
   await ctx.setTouch(false);
   const faults: string[] = [];
   for (const page of CHART_ROOM_FLOOR) {
-    const rested = await open(ctx, page, 640, 800);
+    await open(ctx, page, 640, 800);
+    await resized(ctx, page, 641, 800);
+    const rested = await resized(ctx, page, 640, 800);
     await ctx.evaluate(`window.scrollTo(100000, 0)`);
     await resized(ctx, page, 641, 800);
     const back = await resized(ctx, page, 640, 800);

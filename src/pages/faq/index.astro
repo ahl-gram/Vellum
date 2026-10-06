@@ -21,10 +21,10 @@ const count = `${indexCount(sections)} questions in ${sections.length} sections`
   desk="open"
 >
 <Fog />
-<RoomFolio room={room} tagline={tagline}>
+<RoomFolio slot="desk" room={room} tagline={tagline}>
   <p class="dateline">{count}</p>
 </RoomFolio>
-<IndexSlip sections={sections} kind="questions" />
+<IndexSlip slot="desk" sections={sections} kind="questions" />
 <div class="sheet">
 <div class="columns">
 <h2 id="about">About Vellum</h2>

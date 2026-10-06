@@ -60,14 +60,6 @@
   to   { opacity: 1; transform: none; }
 }
 
-@media (max-width: 900px) {
-  .strip { padding: 0.4rem 0.8rem 0.6rem; }
-  .tick .lbl { display: none; }
-  .rf-year { min-width: 4.4rem; font-size: 0.85rem; }
-  .rf-play { width: 4.2rem; }
-  .slip { bottom: var(--strip-h, 4.6rem); }
-  .corner.br.zoomery, body:has(.slip.folded) .corner.br.zoomery { bottom: calc(var(--sheet-h, 6rem) + 1rem); }
-}
 
 @media print {
   .strip { display: none !important; }

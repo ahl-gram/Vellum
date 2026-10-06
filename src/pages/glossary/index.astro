@@ -20,13 +20,13 @@ const count = `${indexCount(sections)} terms in ${sections.length} sections`;
   desk="open"
 >
 <Fog />
-<RoomFolio room={room} tagline={tagline}>
+<RoomFolio slot="desk" room={room} tagline={tagline}>
   <div class="folio-controls find" role="search">
     <input class="control" type="search" placeholder="find a term" aria-label="Find a term" autocomplete="off">
   </div>
   <p class="gloss">{count}</p>
 </RoomFolio>
-<IndexSlip sections={sections} kind="terms" />
+<IndexSlip slot="desk" sections={sections} kind="terms" />
 <div class="sheet">
 <div class="columns">
 <p class="intro">Vellum's charts, gazetteer, voyage journal, and realm names

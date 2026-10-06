@@ -64,10 +64,3 @@ a.fn:hover { transform: translateY(var(--raise)) rotate(-0.6deg); }
 .fn-note > a { display: block; margin-top: 0.3rem; font-style: italic;
   font-size: 0.78rem; color: var(--ink-brown); } /* >= 12px rendered: the back-matter link must stay legible */
 
-@media (max-width: 560px) {
-  /* Re-deals to three columns: empty word columns would each still cost a grid gap and unflush the track's left edge. */
-  .broadside .ledger .land-end { display: none; }
-  .broadside .ledger { grid-template-columns: auto 1fr auto; }
-  .broadside .ledger > input[type="range"] { grid-column: 2; }
-  .broadside .ledger > .land-readout { grid-column: 3; }
-}

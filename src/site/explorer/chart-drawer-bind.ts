@@ -21,7 +21,6 @@ export interface ChartDrawerDeps {
   readonly drawThumb?: (item: TableItem) => Promise<{ url: string; title: string } | null>;
   /** The Broadside's fold. Read late: the room is bound after the table (Issue #543, ruled 2026-09-08). */
   readonly broadside?: () => SlipFold | null;
-  readonly relabelLeaf?: (count: number) => void;
   readonly folioHref?: string;
 }
 
@@ -62,7 +61,6 @@ function recount(drawerEls: ChartDrawerEls, deps: ChartDrawerDeps, items: Readon
   drawerEls.count.textContent = countLine(items);
   drawerEls.road.disabled = items.length === 0;
   drawerEls.tab.textContent = tabLine(items);
-  deps.relabelLeaf?.(items.length);
   drawerEls.full.hidden = roomOnTable(items) > 0;
   drawerEls.cuttings.classList.remove("jolt");
 }
