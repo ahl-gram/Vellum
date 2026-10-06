@@ -292,7 +292,7 @@ header.chrome::before {
   max-height: calc(100% - 3rem);
   display: flex; flex-direction: column;
 }
-.lf-card-scroll { overflow-y: auto; overscroll-behavior: contain; min-height: 0; }
+.lf-card-scroll { overflow-y: auto; overscroll-behavior-y: contain; min-height: 0; }
 .lf-card-how .how { font-size: 0.95rem; line-height: 1.55; margin: 0.8rem 0 0; }
 .lf-card-how .underhood { margin: 0.8rem 0 0; }
 .notice-stamp {

@@ -1,4 +1,5 @@
 import { gsap } from "gsap";
+import { overhangOf, sidewaysToPage } from "./valve.ts";
 
 const OPEN_SECONDS = 0.55;
 const OPEN_DELAY_SECONDS = 0.35;
@@ -83,6 +84,21 @@ function anchorOf(doc: Document, id: string): StationVisit | null {
   return Number.isFinite(nx) && Number.isFinite(ny) ? { id, nx, ny } : null;
 }
 
+function guardSlipWheels(doc: Document): void {
+  for (const slip of slips(doc)) {
+    slip.addEventListener(
+      "wheel",
+      (e) => {
+        const scroller = e.target instanceof Element ? e.target.closest(".lf-card-scroll") : null;
+        if (scroller !== null && scroller.scrollHeight > scroller.clientHeight) return;
+        if (sidewaysToPage(e.deltaX, e.deltaY, overhangOf(doc.documentElement))) return;
+        e.preventDefault();
+      },
+      { passive: false },
+    );
+  }
+}
+
 export function bindStations(on: StationBindings): void {
   const { doc } = on;
   let opener: HTMLElement | null = null;
@@ -105,17 +121,7 @@ export function bindStations(on: StationBindings): void {
   for (const btn of doc.querySelectorAll(".lf-card-close")) {
     btn.addEventListener("click", () => close(true));
   }
-  for (const slip of slips(doc)) {
-    slip.addEventListener(
-      "wheel",
-      (e) => {
-        const scroller = e.target instanceof Element ? e.target.closest(".lf-card-scroll") : null;
-        if (scroller !== null && scroller.scrollHeight > scroller.clientHeight) return;
-        e.preventDefault();
-      },
-      { passive: false },
-    );
-  }
+  guardSlipWheels(doc);
   doc.addEventListener("keydown", (e) => {
     if (e.key === "Escape") close(true);
   });

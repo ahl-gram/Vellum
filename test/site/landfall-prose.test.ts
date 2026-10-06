@@ -111,7 +111,7 @@ function assertPanelCss(): void {
   const scroll = css.match(/\.lf-card-scroll \{([^}]*)\}/);
   assert.ok(scroll, ".lf-card-scroll dresses the scroll region");
   assert.match(scroll[1]!, /overflow-y:\s*auto/, "the prose scrolls inside the slip, never burying the stage");
-  assert.match(scroll[1]!, /overscroll-behavior:\s*contain/, "an exhausted scroll never chains to the page under the slip");
+  assert.match(scroll[1]!, /overscroll-behavior-y:\s*contain/, "an exhausted scroll never chains down to the page under the slip, and the sideways axis is left to chain so a sideways wheel still scrolls a page wider than the window (Issue #762)");
 
 }
 

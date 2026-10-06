@@ -40,3 +40,9 @@ export function createValve(breakMs: number = GESTURE_BREAK_MS, absorbMs: number
     return false;
   };
 }
+
+export const overhangOf = (root: Element): number => root.scrollWidth - root.clientWidth;
+
+export function sidewaysToPage(deltaX: number, deltaY: number, overhang: number): boolean {
+  return overhang > 0 && Math.abs(deltaX) > Math.abs(deltaY);
+}

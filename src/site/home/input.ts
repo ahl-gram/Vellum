@@ -3,7 +3,7 @@ export type StageInputHandlers = {
   readonly press: () => void;
   readonly release: () => void;
   /** Returns whether the zoom moved; an unconsumed wheel is left to the page scroll. */
-  readonly wheelZoom: (px: number, py: number, deltaY: number) => boolean;
+  readonly wheelZoom: (px: number, py: number, deltaY: number, deltaX: number) => boolean;
   /** ratio is the spread against the GESTURE START (press), not the previous event, so a clamped half-step can never ratchet the scale. */
   readonly pinch: (px: number, py: number, ratio: number) => void;
   readonly dive: (px: number, py: number) => void;
@@ -59,7 +59,7 @@ function listenStage(stage: HTMLElement, on: StageInputHandlers, local: Local, o
     "wheel",
     (e) => {
       const p = local(e);
-      if (on.wheelZoom(p.x, p.y, e.deltaY)) e.preventDefault();
+      if (on.wheelZoom(p.x, p.y, e.deltaY, e.deltaX)) e.preventDefault();
     },
     { passive: false },
   );

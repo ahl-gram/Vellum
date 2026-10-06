@@ -290,6 +290,7 @@ const STEPPED_GROUPS: Readonly<Record<string, readonly string[]>> = {
     "CD49", "CD50", "CD36", "CD37", "CD38", "CD39", "CD40", "CD41, CD42",
   ],
   "document-rooms": ["IX3", "NA3", "IX8"],
+  "home": ["H19", "H19b"],
   "specimen": ["SB4"],
   "corners": ["CO1", "CO4", "CO2", "CO3", "CO5", "CO6", "CO7", "FL1", "FL2", "FL3", "FL4", "FL5", "FL6", "FL7", "NS1", "NA4", "EA1", "EA2, EA3, EL1, EL2", "EA4", "EA5"],
 };

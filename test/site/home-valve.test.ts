@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { GESTURE_BREAK_MS, MOMENTUM_ABSORB_MS, createValve } from "../../src/site/home/valve.ts";
+import { GESTURE_BREAK_MS, MOMENTUM_ABSORB_MS, createValve, sidewaysToPage } from "../../src/site/home/valve.ts";
 
 // The release valve (Issue #472): the wheel's route between the camera and the page; the spec is the three feel rulings in the 2026-08-27 comment on Issue #472 (a flick that reaches the limit is used up, and coming back up the camera takes a fresh gesture).
 
@@ -105,4 +105,14 @@ test("a gap one tick under the break is the same gesture: the boundary is pinned
   const valve = createValve();
   assert.equal(valve(0, 120, 0, zoomMoves), true);
   assert.equal(valve(GESTURE_BREAK_MS - 1, 120, 0, zoomClamped), true);
+});
+
+test("UW1 a wheel more sideways than up or down is the page's, either way, but only where the page overhangs the window (Alex, 2026-10-06, Issue #762)", () => {
+  assert.equal(sidewaysToPage(120, 6, 384), true, "rightward, drifting down");
+  assert.equal(sidewaysToPage(-120, 6, 384), true, "leftward, the way a reader scrolls back");
+  assert.equal(sidewaysToPage(120, -6, 384), true, "drifting up");
+  assert.equal(sidewaysToPage(6, 120, 384), false, "mostly down stays the camera's");
+  assert.equal(sidewaysToPage(120, 120, 384), false, "a tie stays the camera's");
+  assert.equal(sidewaysToPage(120, 6, 0), false, "a page that does not overhang keeps today's wheel");
+  assert.equal(sidewaysToPage(0, 0, 384), false, "no motion is no one's");
 });
