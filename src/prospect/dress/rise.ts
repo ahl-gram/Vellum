@@ -31,7 +31,7 @@ export type Scene = {
   readonly arms: Arms | null;
   readonly roadCount: number;
   readonly beast: boolean;
-  /** Boxes, in plate units, a composed bird keeps clear of: the key's numbers on the town. */
+  /** Boxes, in plate units, every bird keeps clear of: the key's numbers on the town and the horizon towns' names. */
   readonly clear: ReadonlyArray<Box>;
 };
 
@@ -122,22 +122,35 @@ const wallReach = (g: ProspectGeometry, w: WallSegment): Box => ({
   x0: w.x0 - 4.5, x1: w.x1 + 4.5, y0: groundAt(g.ground, Math.max(w.x0, Math.min(w.x1, (VIEW_X0 + VIEW_X1) / 2))) - w.h - 12 + LIFT, y1: g.ground.base + LIFT,
 });
 
-export type Vignette = { readonly nodes: SvgNode[]; readonly horizonYAt: (x: number) => number; readonly townRun: readonly [number, number]; readonly masts: ReadonlyArray<Box>; readonly birds: ReadonlyArray<Box>; readonly town: ReadonlyArray<Box> };
+/** What stands against the sky once the town is lifted, before any bird flies: the hills' line, the town's run and ink, the masts. */
+export type Skyline = { readonly horizonYAt: (x: number) => number; readonly townRun: readonly [number, number]; readonly masts: ReadonlyArray<Box>; readonly town: ReadonlyArray<Box> };
+
+export function skylineOf(g: ProspectGeometry): Skyline {
+  const horizon = g.ground.base + 2 + LIFT;
+  const ridge = g.ridge;
+  const xs = [...g.masses.map((m) => m.x), ...g.walls.map((w) => w.x0)];
+  const xe = [...g.masses.map((m) => m.x + m.w), ...g.walls.map((w) => w.x1)];
+  return {
+    horizonYAt: (x) => (ridge === null ? horizon : yOnPolyline(ridge, x) + LIFT),
+    townRun: xs.length > 0 ? [Math.min(...xs), Math.max(...xe)] : [260, 260],
+    masts: g.foreground.flatMap((f): Box[] => {
+      if (f.kind === "mastRow") return f.masts.map((m) => shipRig(m.x, m.hullY, 0.72 + (m.mastH - 42) / 90, m.mastH > 56));
+      if (f.kind === "ship") return [shipRig(f.x, f.y + 1, f.s * 1.15, true)];
+      return [];
+    }),
+    town: [...g.masses.map(massReach), ...g.walls.map((w) => wallReach(g, w))],
+  };
+}
+
+export type Vignette = Skyline & { readonly nodes: SvgNode[]; readonly birds: ReadonlyArray<Box> };
 
 /** The engine's composed town and foreground redrawn by the burin and lifted into the upper third, the water deepened to the rise. */
 export function vignette(e: Engraver, scene: Scene, s: Streams): Vignette {
   const g = scene.g;
   const horizon = g.ground.base + 2 + LIFT;
   const clouds = cloudsFor(s.sky, horizon);
-  const ridge = g.ridge;
-  const horizonYAt = (x: number): number => (ridge === null ? horizon : yOnPolyline(ridge, x) + LIFT);
-  const masts = g.foreground.flatMap((f): Box[] => {
-    if (f.kind === "mastRow") return f.masts.map((m) => shipRig(m.x, m.hullY, 0.72 + (m.mastH - 42) / 90, m.mastH > 56));
-    if (f.kind === "ship") return [shipRig(f.x, f.y + 1, f.s * 1.15, true)];
-    return [];
-  });
-  const town = [...g.masses.map(massReach), ...g.walls.map((w) => wallReach(g, w))];
-  const sky: Sky = { obstacles: [...scene.clear, ...town, ...masts], horizonYAt };
+  const line = skylineOf(g);
+  const sky: Sky = { obstacles: [...scene.clear, ...line.town, ...line.masts], horizonYAt: line.horizonYAt };
   const foreground = g.foreground.filter((f) => !(scene.beast && f.kind === "seaSerpent")).map((f) => holdBirds(f, sky));
   const engraved = foreground.map((f) => foregroundEngraved(e, f, s.town));
   const gaps: Gap[] = engraved.flatMap((f) => f.gaps).map((h) => ({ ...h, y0: h.y0 + LIFT, y1: h.y1 + LIFT }));
@@ -156,14 +169,9 @@ export function vignette(e: Engraver, scene: Scene, s: Streams): Vignette {
     ...water,
     el("g", { transform: `translate(0 ${LIFT})` }, [...(nearBand ? groundSweep(e, nearBand, 0.08, 3.2, s.town, 36) : []), ...engraved.flatMap((f) => f.nodes)]),
   ];
-  const xs = [...g.masses.map((m) => m.x), ...g.walls.map((w) => w.x0)];
-  const xe = [...g.masses.map((m) => m.x + m.w), ...g.walls.map((w) => w.x1)];
   return {
+    ...line,
     nodes,
-    horizonYAt,
-    townRun: xs.length > 0 ? [Math.min(...xs), Math.max(...xe)] : [260, 260],
-    masts,
-    town,
     birds: [...(flock === null ? [] : [flockBox(flock.x, flock.y, 5)]), ...foreground.flatMap((f) => (f.kind === "birds" ? f.items.map((b) => flockBox(b.x, b.y + LIFT, 2 + Math.floor(b.s * 3))) : []))],
   };
 }

@@ -7,8 +7,11 @@ import { renderSvg } from "../../src/render/svg.ts";
 import { buildProspectInput } from "../../src/prospect/input.ts";
 import { plateSurroundings } from "../../src/prospect/surroundings.ts";
 import { engravePlate } from "../../src/prospect/finished.ts";
-import { INNER } from "../../src/prospect/dress/furniture.ts";
-import type { Box } from "../../src/prospect/dress/rise.ts";
+import { horizonTowns, INNER } from "../../src/prospect/dress/furniture.ts";
+import { skylineOf, type Box } from "../../src/prospect/dress/rise.ts";
+import { engraver } from "../../src/prospect/dress/burin.ts";
+import { createLettering } from "../../src/prospect/letter/letter.ts";
+import type { Surroundings } from "../../src/prospect/surroundings.ts";
 
 // No byte pins here: world-sourced geometry descends from Math.hypot (the compose-world.test.ts caveat); these are layout claims, read from the boxes the plate reports.
 const worlds = new Map<number, World>();
@@ -20,10 +23,10 @@ function worldFor(seed: number): World {
   return w;
 }
 
+const surroundingsOf = (seed: number, index: number, year?: number): Surroundings => plateSurroundings(worldFor(seed), index, year ?? worldFor(seed).title.year);
 const engrave = (seed: number, index: number, year?: number) => {
   const w = worldFor(seed);
-  const y = year ?? w.title.year;
-  return engravePlate(buildProspectInput(w, index), STYLES.antique, y, { surroundings: plateSurroundings(w, index, y) });
+  return engravePlate(buildProspectInput(w, index), STYLES.antique, year ?? w.title.year, { surroundings: surroundingsOf(seed, index, year) });
 };
 
 const RULED: ReadonlyArray<readonly [number, number, number?]> = [[42, 0], [42, 4], [42, 10], [42, 22], [26, 22], [33, 20], [7, 6], [42, 0, 400]];
@@ -31,9 +34,9 @@ const SWEEP = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 const overlaps = (a: Box, b: Box): boolean => a.x0 < b.x1 && b.x0 < a.x1 && a.y0 < b.y1 && b.y0 < a.y1;
 const inside = (b: Box): boolean => b.x0 >= INNER.x0 && b.x1 <= INNER.x1 && b.y0 >= INNER.y0 && b.y1 <= INNER.y1;
 
-function everyPlate(visit: (label: string, plate: ReturnType<typeof engrave>) => void): void {
-  for (const [seed, index, year] of RULED) visit(`seed ${seed} index ${index}${year === undefined ? "" : ` at An. ${year}`}`, engrave(seed, index, year));
-  for (const seed of SWEEP) worldFor(seed).settlements.forEach((_, i) => visit(`seed ${seed} index ${i}`, engrave(seed, i)));
+function everyPlate(visit: (label: string, plate: ReturnType<typeof engrave>, surroundings: Surroundings) => void): void {
+  for (const [seed, index, year] of RULED) visit(`seed ${seed} index ${index}${year === undefined ? "" : ` at An. ${year}`}`, engrave(seed, index, year), surroundingsOf(seed, index, year));
+  for (const seed of SWEEP) worldFor(seed).settlements.forEach((_, i) => visit(`seed ${seed} index ${i}`, engrave(seed, i), surroundingsOf(seed, i)));
 }
 
 test("every piece of furniture, every lettered run and every bird stays inside the inner frame, every bird flies in open sky clear of the town, the masts and the hills, and no run is left as device text", () => {
@@ -57,8 +60,10 @@ test("every piece of furniture, every lettered run and every bird stays inside t
 
 test("a horizon town's name and number clear every mast and the ridge line under them (the round's \"3 Poalo\" and \"6 Haireno\")", () => {
   let labels = 0;
-  everyPlate((label, plate) => {
+  everyPlate((label, plate, surroundings) => {
     const v = plate.picture.vignette;
+    const unflown = horizonTowns(engraver(STYLES.antique), createLettering("t"), plate.era === "before-founding" ? [] : surroundings.roadTowns, plate.key, { ...skylineOf(plate.g), birds: [] });
+    assert.deepEqual(plate.furniture.towns, unflown.boxes, `${label}: a horizon name stands where the hills and the masts put it; the birds give way to it, never it to them`);
     for (const b of plate.furniture.towns) {
       labels++;
       for (const m of v.masts) assert.ok(!overlaps(b, m), `${label}: a horizon label ${JSON.stringify(b)} crosses a mast ${JSON.stringify(m)}`);

@@ -3,6 +3,7 @@ import type { MapStyle } from "../render/style.ts";
 import { renderSvg, type SvgNode } from "../render/svg.ts";
 import { buildProspectInput, type ProspectInput } from "./input.ts";
 import { composeProspect } from "./compose.ts";
+import type { ProspectGeometry } from "./geometry.ts";
 import { eraFor, plateCaption, type PlateCaption, type PlateEra } from "./caption.ts";
 import { plateKey, type PlateKeyEntry } from "./key.ts";
 import { NO_SURROUNDINGS, plateSurroundings, type Surroundings } from "./surroundings.ts";
@@ -15,12 +16,13 @@ export type PlateOptions = {
 };
 
 type Engraving = EngravedE & {
+  readonly g: ProspectGeometry;
   readonly era: PlateEra;
   readonly caption: PlateCaption;
   readonly key: ReadonlyArray<PlateKeyEntry>;
 };
 
-/** The plate and everything it was laid out from: its era, caption and key, and the boxes its picture and furniture ink. */
+/** The plate and everything it was laid out from: its composition, era, caption and key, and the boxes its picture and furniture ink. */
 export function engravePlate(input: ProspectInput, style: MapStyle, year: number, opts: PlateOptions = {}): Engraving {
   const era = eraFor(input, year);
   const g =
@@ -32,7 +34,7 @@ export function engravePlate(input: ProspectInput, style: MapStyle, year: number
   const key = plateKey(g, { input, surroundings, era });
   const suffix = opts.idSuffix ?? `${style.name}-${g.seed}-${g.index}`;
   const engraved = engraveE(style, { input, g, era, year, caption, key, surroundings, suffix, ...(opts.widthPx === undefined ? {} : { widthPx: opts.widthPx }) });
-  return { ...engraved, era, caption, key };
+  return { ...engraved, g, era, caption, key };
 }
 
 export function finishProspect(input: ProspectInput, style: MapStyle, year: number, opts: PlateOptions = {}): SvgNode {

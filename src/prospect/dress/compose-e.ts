@@ -9,7 +9,7 @@ import type { Surroundings } from "../surroundings.ts";
 import { viewRight, type ProspectView } from "../transect.ts";
 import { createLettering, runBox } from "../letter/letter.ts";
 import { engraver, type Engraver } from "./burin.ts";
-import { LIFT, RISE_BOTTOM, picture, type Box, type Picture } from "./rise.ts";
+import { LIFT, RISE_BOTTOM, picture, skylineOf, type Box, type Picture } from "./rise.ts";
 import { banderole, cardinalWords, chartRoundel, footerLine, frameNodes, horizonTowns, keyPanel, keyTags, tagSpec, titleCartouche, wreathedArms, type Cardinals, type Inked } from "./furniture.ts";
 
 export type PlateParts = {
@@ -83,10 +83,12 @@ export function engraveE(style: MapStyle, p: PlateParts): EngravedE {
   const fork = (name: string) => createRng(p.g.seed).fork(`prospect:${p.g.index}:e:${name}`);
   const standing = p.era !== "before-founding";
   const tags = p.key.flatMap((k) => (k.x === null || k.y === null ? [] : [{ n: k.letter, x: Math.max(VIEW_X0 + 8, Math.min(VIEW_X1 - 8, k.x)), y: Math.max(40, k.y + LIFT) }]));
-  const clear = tags.map((t) => { const b = runBox(tagSpec(e, t)); return { x0: b.x0 - 2, x1: b.x1 + 2, y0: b.top - 2, y1: b.bottom + 2 }; });
+  const roadTowns = standing ? p.surroundings.roadTowns : [];
+  const named = horizonTowns(e, createLettering(p.suffix), roadTowns, p.key, { ...skylineOf(p.g), birds: [] });
+  const clear = [...tags.map((t) => { const b = runBox(tagSpec(e, t)); return { x0: b.x0 - 2, x1: b.x1 + 2, y0: b.top - 2, y1: b.bottom + 2 }; }), ...named.boxes];
   const pic = picture(e, { g: p.g, kind: p.input.kind, era: p.era, arms: p.input.arms, roadCount: p.surroundings.roadCount, beast: p.surroundings.beast !== null, clear },
     { sky: fork("sky"), town: fork("town"), water: fork("water"), rise: fork("rise"), figures: fork("figures") }, fork("beast"));
-  const towns = horizonTowns(e, letters, standing ? p.surroundings.roadTowns : [], p.key, pic.vignette);
+  const towns = horizonTowns(e, letters, roadTowns, p.key, pic.vignette);
   const cartouche = [titleCartouche(e, letters, p.input.name, 44), banderole(e, letters, bandText(p), 70)];
   const medals = [...(standing && p.input.arms !== null ? [wreathedArms(e, p.input.arms, p.suffix)] : []), chartRoundel(e, letters, p.input.seed, p.year)];
   const key = [keyPanel(e, letters, p.key, RISE_BOTTOM), keyTags(e, letters, tags)];

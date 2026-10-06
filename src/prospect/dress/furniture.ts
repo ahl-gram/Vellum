@@ -199,10 +199,11 @@ export function horizonTowns(e: Engraver, letters: Lettering, towns: ReadonlyArr
     const name: RunSpec = { text: t.name, x, y: y - 12 * s, size: 6, italic: true, anchor: "middle", fill: e.ink };
     const tag: RunSpec = { text: entry.letter, x, y: y - 12 * s - 7, size: 8, italic: true, anchor: "middle", fill: e.ink, halo: { color: e.paper, width: 2.4 } };
     const both = [boxOfRun(name), boxOfRun(tag)];
-    const lift = clearLabel({ x0: Math.min(...both.map((b) => b.x0)) - 1, x1: Math.max(...both.map((b) => b.x1)) + 1, y0: Math.min(...both.map((b) => b.y0)), y1: Math.max(...both.map((b) => b.y1)) }, ctx);
+    const label = { x0: Math.min(...both.map((k) => k.x0)) - 1, x1: Math.max(...both.map((k) => k.x1)) + 1, y0: Math.min(...both.map((k) => k.y0)), y1: Math.max(...both.map((k) => k.y1)) };
+    const lift = clearLabel(label, ctx);
     const runs = lettered(letters, [{ ...name, y: name.y - lift }, { ...tag, y: tag.y - lift }]);
     out.push(...runs.nodes);
-    boxes.push(...runs.boxes);
+    boxes.push(...runs.boxes, { ...label, y0: label.y0 - lift, y1: label.y1 - lift });
   });
   return { nodes: out, boxes };
 }

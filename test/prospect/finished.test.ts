@@ -284,15 +284,15 @@ const SURROUNDED: Surroundings = {
 
 // Re-pinned 2026-10-06 for E (Issue #754): armless synthetic fixtures only (the arms spend render/layers/heraldry, whose charges carry libm ancestry), so these bytes cannot drift across platforms. A deliberate plate change re-pins these with the cause named in the commit.
 const PINNED: ReadonlyArray<{ name: string; year: number; style: "antique" | "ink"; sum: number }> = [
-  { name: "harborCapital", year: 1300, style: "antique", sum: 150870279 },
-  { name: "harborCapital", year: 1300, style: "ink", sum: 589594686 },
-  { name: "harborCapital", year: 1040, style: "ink", sum: 752328001 },
-  { name: "ruinedTown", year: 1200, style: "antique", sum: 1305155772 },
-  { name: "ruinedTown", year: 1120, style: "ink", sum: 2747277410 },
-  { name: "riverVillage", year: 1300, style: "antique", sum: 2317616647 },
-  { name: "riverVillage", year: 1300, style: "ink", sum: 3038860025 },
-  { name: "fieldsHamlet", year: 1300, style: "antique", sum: 3041714856 },
-  { name: "fieldsHamlet", year: 1300, style: "ink", sum: 3869592275 },
+  { name: "harborCapital", year: 1300, style: "antique", sum: 122656692 },
+  { name: "harborCapital", year: 1300, style: "ink", sum: 1202263301 },
+  { name: "harborCapital", year: 1040, style: "ink", sum: 2838978936 },
+  { name: "ruinedTown", year: 1200, style: "antique", sum: 3292211798 },
+  { name: "ruinedTown", year: 1120, style: "ink", sum: 1675959428 },
+  { name: "riverVillage", year: 1300, style: "antique", sum: 2741156864 },
+  { name: "riverVillage", year: 1300, style: "ink", sum: 2179978592 },
+  { name: "fieldsHamlet", year: 1300, style: "antique", sum: 2942065285 },
+  { name: "fieldsHamlet", year: 1300, style: "ink", sum: 1795443766 },
 ];
 
 test("finished plates are byte-pinned across the eras and the dresses", () => {
