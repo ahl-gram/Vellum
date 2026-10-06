@@ -10,7 +10,7 @@ import Slip from "../../layouts/Slip.astro";
 
 const room = "The Seed of the Day";
 const tagline = "today's date is the seed";
-// The roads out: the legend row on a wide sheet, docked inside the slip on a phone (room.ts); app.ts stamps today's seed onto them.
+// The roads out: the legend row; app.ts stamps today's seed onto them.
 const roads = [
   { road: "explorer", verb: "Open today's seed in", room: "The Explorer", href: "../explorer/" },
   { road: "reading-room", verb: "Watch today's world in", room: "The Reading Room", href: "../reading-room/" },
@@ -53,13 +53,11 @@ const roads = [
     <button type="button" id="dispatch" hidden>Draft dispatch</button>
     <span class="streak" id="streak"></span>
   </div>
-  <div class="legend-dock"></div>
   <p class="note" slot="foot">The seed is today's date in UTC (YYYYMMDD), so everyone
   sees the same world on the same day. Your streak is kept on this device only: no
   account, no backend.</p>
 </Slip>
 
-<div id="hunt-sticky" class="hunt-sticky" aria-hidden="true" hidden></div>
 
 <ChartFolio lines={[["folio-title", "folio-title"], ["folio-sub", "folio-sub"], ["folio-coords", "folio-coords"], ["folio-note", "folio-note"]]} />
 

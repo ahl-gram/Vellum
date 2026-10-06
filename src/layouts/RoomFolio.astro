@@ -3,10 +3,11 @@
 interface Props {
   room: string;
   tagline: string;
+  region?: boolean;
 }
-const { room, tagline } = Astro.props;
+const { room, tagline, region } = Astro.props;
 ---
-<div class="chrome corner tr folio-room">
+<div class="chrome corner tr folio-room" role={region ? "region" : undefined} aria-label={region ? room : undefined}>
   <h1 class="room-name">{room}</h1>
   <p class="room-tagline">{tagline}</p>
   <slot />

@@ -52,17 +52,15 @@ test("RBR2 the corner is the journey row: the two selects in one movable group, 
   for (const id of ['id="rb-from"', 'id="rb-to"', 'id="rb-swap"']) assert.equal(count(page, id), 1, `${id} appears once in the page`);
 });
 
-test("RBR3 the itinerary is the slip: the journey's phone dock first, the intro, the way league by league in the kit's contents row, the lean gloss, the legend's dock", () => {
+test("RBR3 the itinerary is the slip: the intro, the way league by league in the kit's contents row, the lean gloss", () => {
   assert.match(page, /<Slip id="itinerary" verb="The itinerary" title="The Itinerary" where="[^"]+" fold="Fold the itinerary away">/, "the slip carries the mockup's head; the h2 takes the journey at the draw");
   const slip = between("<Slip", "</Slip>");
-  assert.match(slip, /<div class="journey-dock"><\/div>/, "the dock the selects move into on a phone");
   assert.match(slip, /<p class="intro">Every bridge and ford, every wayside village, every fork signed for the town it leaves for, as the wayfarers' chain measured them\.<\/p>/, "the intro, rewritten short for the slip (the mockup)");
   assert.match(slip, /<p class="itinerary-head"><span>The way, league by league<\/span><\/p>/);
   assert.match(slip, /<ol class="contents itinerary" id="rb-itinerary"><\/ol>/, "the itinerary is the kit's contents row (#487, its fourth use), filled at the draw");
   assert.match(slip, /<p class="row-gloss">A row leans the Glass on that stretch of the road\.<\/p>/);
-  assert.ok(slip.includes('class="legend-dock"'), "the slip body carries the dock the legend row moves into on a phone");
-  const order = ['class="journey-dock"', 'class="intro"', 'class="itinerary-head"', 'id="rb-itinerary"', 'class="row-gloss"', 'class="legend-dock"'].map((m) => slip.indexOf(m));
-  assert.ok(order.every((i, n) => i >= 0 && (n === 0 || i > order[n - 1]!)), "dock, intro, head, rows, gloss, legend dock");
+  const order = ['class="intro"', 'class="itinerary-head"', 'id="rb-itinerary"', 'class="row-gloss"'].map((m) => slip.indexOf(m));
+  assert.ok(order.every((i, n) => i >= 0 && (n === 0 || i > order[n - 1]!)), "intro, head, rows, gloss");
   assert.ok(page.indexOf("</Slip>") < page.indexOf("<ChartFolio"), "the slip precedes the chart's folio in the page");
 });
 
@@ -88,16 +86,13 @@ test("RBR5 the stage holds the fitted sheet with the scroll as the one face in t
   assert.deepEqual(folioLines(), [["folio-title", "folio-title"], ["folio-sub", "folio-sub"], ["folio-coords", "rb-unrolled"]], "the title, the survey line, the unrolling's line");
 });
 
-test("RBR6 seats.ts binds the Glass and the room at the scroll's own aspect, docks the journey with the legend's own mechanism, and leans the Glass on a row; app.ts writes the roads and never scrolls the page", () => {
-  assert.match(seats, /import\s*\{\s*bindRoom, dockLegend, legendSeat, type Room\s*\}\s*from\s*"\.\.\/shared\/room\.ts"/, "the shared room, and its one-node docking for the journey");
+test("RBR6 seats.ts binds the Glass and the room at the scroll's own aspect and leans the Glass on a row; app.ts writes the roads and never scrolls the page", () => {
+  assert.match(seats, /import\s*\{\s*bindRoom, type Room\s*\}\s*from\s*"\.\.\/shared\/room\.ts"/, "the shared room");
   assert.match(seats, /import\s*\{\s*createZoomController\s*\}\s*from\s*"\.\.\/shared\/zoom-controller\.ts"/, "the Glass is the shared controller");
   assert.match(seats, /import\s*\{\s*bindGlassKeys\s*\}\s*from\s*"\.\.\/shared\/glass-keys\.ts"/, "its keys and buttons are the kit's");
   assert.match(seats, /import\s*\{\s*RIBBON_W, RIBBON_H\s*\}\s*from\s*"\.\.\/\.\.\/itinerary\/finished\.ts"/, "the scroll's own size");
   assert.match(seats, /bindRoom\(\{[^}]*aspect: \(\) => RIBBON_W \/ RIBBON_H/, "the fit takes the scroll's aspect explicitly: an img gives the svg scan nothing, and the chart's fallback mis-fits the scroll by 10.6%");
   assert.match(seats, /restore: \(cam\) =>[\s\S]*?\.refit\(/, "the room's refit is the silent one (no settle, no hash)");
-  assert.match(seats, /dockLegend(?:<[^>]*>)?\([^)]*legendSeat\(/, "the journey docks by the legend's seat rule: the slip on a phone, the corner on a wide sheet");
-  assert.match(seats, /legendSeat\(\{ narrow: narrow\.matches, hasSlip: true \}\)/, "with the slip as its seat, since the itinerary IS the slip (hasSlip: false pins the journey to the corner forever; guard-prover round 2)");
-  assert.ok(seats.indexOf('narrow.addEventListener("change", seatJourney)') > 0 && seats.indexOf('narrow.addEventListener("change", seatJourney)') < seats.indexOf("const room = bindRoom("), "the journey's listener is registered BEFORE bindRoom's on the same query, so a live 900px crossing docks first and the kit then measures the corner it left (skeptic round 3)");
   assert.match(read("src/site/ribbon/row-text.ts"), /export function rowText\(/, "the row's text is a DOM-free module a unit test runs (skeptic round 3: regexed source is not a run)");
   assert.match(seats, /export const LEAN_K = 2\.6;/, "the lean's depth is the mockup's 2.6x, one constant");
   assert.match(seats, /lean: \(nx, ny\) => \{[\s\S]*?zoomTo\(transformFromCamera\(\{ cx: nx, cy: ny, k: LEAN_K \}/, "a lean centres the Glass on the row's seat at LEAN_K, through the camera bridge, cx from nx and cy from ny (a swap shipped green past a shape-only regex; skeptic round 2)");
@@ -115,7 +110,7 @@ test("RBR6 seats.ts binds the Glass and the room at the scroll's own aspect, doc
   }
 });
 
-test("RBR7 the css: the sheet fitted to what the chrome leaves, the scroll as the sheet's face, the journey a grid in the phone sheet, the itinerary rows buttons in the text's dress, print standing down", () => {
+test("RBR7 the css: the sheet fitted to what the chrome leaves, the scroll as the sheet's face, the itinerary rows buttons in the text's dress, print standing down", () => {
   assert.match(css, /\.stage\s*\{[^}]*padding:\s*var\(--reserve-top/, "the stage reserves the chrome's edges as padding, measured by room.ts");
   assert.match(css, /#sheet\s*\{[^}]*box-shadow:\s*var\(--stage-shadow\)/, "the sheet rests at the chart-room depth, via the token");
   assert.match(css, /#map-viewport\.zoomable\s*\{[^}]*touch-action:\s*none/, "touch-action:none stays on the gesture box");
@@ -129,8 +124,6 @@ test("RBR7 the css: the sheet fitted to what the chrome leaves, the scroll as th
   assert.match(css, /\.itinerary li\.summit \.cr-text em::before\s*\{[^}]*content:\s*"\\25B3\\00a0"/, "the summit's triangle");
   assert.doesNotMatch(css, /(^|\n)(\.contents )?\.cr-(num|text)\s*\{/, "the page css does not re-dress the kit's row (#302)");
   assert.doesNotMatch(css, /(^|\n)\s*(header|footer|\.plate-figure|\.actions|main)\s*[{,]/, "no rule targets furniture a chart room no longer has");
-  const phone = css.slice(css.indexOf("@media (max-width: 900px)"), css.indexOf("@media print"));
-  assert.match(phone, /\.journey\.in-slip\s*\{[^}]*display:\s*grid/, "docked in the sheet the journey is a labelled grid (the mockup's phone shape)");
   const print = css.match(/@media print\s*\{([\s\S]*)\}\s*$/);
   assert.ok(print, "the page css ends with its print stand-down");
   assert.match(print[1]!, /\.stage\s*\{[^}]*position:\s*static/, "the scroll prints in flow");
@@ -143,7 +136,7 @@ test("RBR8 the corner's select dress is the kit's at its second use (#487): atel
   assert.match(kit, /\.folio-controls select\.control option\s*\{/, "and its options on the panel");
   assert.doesNotMatch(printCss, /\.folio-controls select\.control\s*\{[^}]*appearance/, "the Print Room's copy moved into the kit");
   assert.match(printCss, /\.folio-controls select\.control\s*\{\s*width:\s*7\.4rem;\s*\}/, "but the Print Room keeps its picker's width at (0,2,1), or the kit's phone clamp narrows the ratified picker (skeptic round 2)");
-  const wide = css.slice(0, css.indexOf("@media (max-width: 900px)"));
+  const wide = css.slice(0, css.indexOf("@media print"));
   const selectRules = [...wide.matchAll(/\.folio-controls select\.control\s*\{([^}]*)\}/g)].map((m) => m[1]!);
   assert.ok(selectRules.length >= 1, "the Ribbon sizes its selects");
   for (const body of selectRules) assert.doesNotMatch(body, /appearance|background-image/, "and re-dresses nothing else");

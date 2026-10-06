@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { resolve } from "node:path";
-import { fillBetween, mediaEdges, meetings, MOTTO, nearest, plainShift, routesUnder, squeezes, strideWidths, unreadWidthConditions, verdict, wrapVerdict } from "../../e2e/suites/corners/geometry.ts";
+import { fillBetween, mediaEdges, meetings, MOTTO, nearest, plainShift, routesUnder, squeezes, strideWidths, unreadWidthConditions, verdict } from "../../e2e/suites/corners/geometry.ts";
 import type { Box, CornerRead, Row } from "../../e2e/suites/corners/geometry.ts";
 
 const REPO = resolve(import.meta.dirname, "..", "..");
@@ -101,12 +101,4 @@ test("a corner control is squeezed when it renders narrower than its own width b
   assert.deepEqual(squeezes(1023, [{ t: "input#pr-seed", w: 63.44, natural: 110.78 }, { t: "button#pr-random", w: 38.39, natural: 38.39 }]), ["at 1023 the corner's input#pr-seed is squeezed to 63.4 from its own 110.8"], "the step 11 plate read's figure on the Print Room before its row wrapped");
   assert.equal(squeezes(1023, [{ t: "select#pr-style", w: 117.8, natural: 118.4 }]).length, 1, "six tenths of a pixel short is a squeeze");
   assert.deepEqual(squeezes(1023, [{ t: "button#x", w: 38, natural: 38.5 }]), [], "exactly half a pixel short is rounding");
-});
-
-test("a room that already squeezes is exempt only while it still does, and every other room is held", () => {
-  const exempt = { "/specimen/": "Issue #741" };
-  const squeezed = [{ t: "button#sb-random", w: 22.7, natural: 38.4 }];
-  assert.deepEqual(wrapVerdict("/specimen/", 960, squeezed, exempt), [], "squeezing as filed");
-  assert.deepEqual(wrapVerdict("/specimen/", 960, [{ t: "button#sb-random", w: 38.4, natural: 38.4 }], exempt), ["/specimen/ at 960 no longer squeezes its corner, so Issue #741 has landed and its exemption goes"]);
-  assert.deepEqual(wrapVerdict("/print-room/", 960, squeezed, exempt), ["/print-room/ at 960 the corner's button#sb-random is squeezed to 22.7 from its own 38.4"]);
 });

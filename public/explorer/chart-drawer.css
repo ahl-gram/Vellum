@@ -26,10 +26,10 @@ button.chart-drawer-tab:is(:hover, :focus-visible) { background: var(--ink-dark)
 
 body:has(.chart-drawer.open) .slip-tab { display: none; }
 
-/* Folded, the camera comes home to --chrome-x where the tab stands at z 19 over the corner's z 10, leaving each zoom press a real pointer over 44% of its face; so the camera stands inboard of the tab whenever the Broadside is folded, drawer open or not (a seat that moved with the drawer would be one more thing jumping as it opens), and not below 901px, where the tab is stood down and atelier.css's narrow seat rules. */
-@media (min-width: 901px) {
-  body:has(.slip.folded) .corner.br.zoomery { right: calc(var(--chrome-x) + var(--chart-drawer-tab-w) + 0.6rem); }
-}
+@media print { .chart-drawer, .chart-drawer-tab { display: none; } }
+
+/* Folded, the camera comes home to --chrome-x where the tab stands at z 19 over the corner's z 10, leaving each zoom press a real pointer over 44% of its face; so the camera stands inboard of the tab whenever the Broadside is folded, drawer open or not (a seat that moved with the drawer would be one more thing jumping as it opens). */
+body:has(.slip.folded) .corner.br.zoomery { right: calc(var(--chrome-x) + var(--chart-drawer-tab-w) + 0.6rem); }
 
 .chart-drawer-head { flex: 0 0 var(--chart-drawer-head); display: flex; flex-direction: column; }
 .chart-drawer-head .card-verb { font-family: var(--font-flourish); font-style: italic; color: var(--parchment); font-size: 0.9rem; }
@@ -105,29 +105,4 @@ body.sheet-drag :is(#map-viewport, *) { cursor: grabbing; }
 .dog-ear:is(:hover, :focus-visible) { width: calc(4.1rem / var(--zoom-k, 1)); height: calc(4.1rem / var(--zoom-k, 1)); }
 .dog-ear:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: -2px; }
 
-.sheet-tabs { display: none; }
-.table-leaf { display: none; }
 
-@media (max-width: 900px) {
-  .chart-drawer, .chart-drawer.open, .chart-drawer-tab { display: none; }
-
-  .sheet-tabs { display: flex; gap: 0.4rem; margin: 0.55rem 0 0; position: relative; z-index: 2; }
-  .sheet-tabs button { flex: 1 1 0; font-family: var(--font-display); font-size: 0.82rem; letter-spacing: 0.05em; padding: 0.35rem 0.5rem; border: 1.5px solid var(--ink-brown); border-radius: 4px; background: var(--control-cream); color: var(--ink-brown); cursor: pointer; }
-  .sheet-tabs button[aria-selected="true"] { background: var(--ink-dark); border-color: var(--ink-dark); color: var(--chart-paper); }
-  .slip .slip-head .sheet-tabs button:is(:hover, :focus-visible) { transform: none; box-shadow: none; }
-
-  body.leaf-table .slip .card-where, body.leaf-table .slip-body .broadside { display: none; }
-  body.leaf-table .table-leaf { display: block; }
-  .table-leaf .cuttings { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem 0.9rem; padding: 0.9rem 0 0.4rem; max-width: none; }
-  .table-leaf .cuttings li { rotate: 0deg; margin: 0; flex: none; }
-  .table-leaf .cuttings .label { position: static; rotate: 0deg; max-width: none; box-shadow: none; border: 0; background: none; padding: 0.25rem 0 0; font-size: 0.74rem; }
-  .table-leaf .cuttings .off { right: -0.3rem; top: -0.3rem; }
-  .table-leaf .count { font-variant-caps: small-caps; letter-spacing: 0.08em; font-size: 0.8rem; color: var(--ink-brown); margin: 0.7rem 0 0; }
-
-  body:not(.leaf-table) #table-road-band { display: none; }
-  body.leaf-table .legend-dock .legend { display: none; }
-  .legend-dock #table-road-band { display: flex; flex-direction: column; align-items: stretch; gap: 0.45rem; margin-top: 0.9rem; padding: 0; }
-  .legend-dock #table-road-band .full { color: var(--ink-brown); text-align: center; }
-  .legend-dock #table-road-band .legend-btn.gold { background: var(--control-gold); border-color: var(--ink-brown); }
-  .legend-dock #table-road-band .legend-btn:disabled { background: var(--ink-faded); opacity: 1; }
-}

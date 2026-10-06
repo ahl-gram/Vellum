@@ -1,6 +1,6 @@
 import type { Point, SuiteContext } from "../../types.ts";
 import type { CardsKit } from "./kit.ts";
-import { NARROW_SEED, OVER_BOX_TOLERANCE } from "./reads.ts";
+import { CAP_WINDOW, NARROW_SEED, OVER_BOX_TOLERANCE } from "./reads.ts";
 import type { Swept } from "./reads.ts";
 
 type Pinned = Awaited<ReturnType<typeof p20PinnedTakesPointer>>;
@@ -14,10 +14,8 @@ export async function p19CardsFit({ check, sweepAt }: CardsKit, narrowCount: num
       detail: JSON.stringify({ width, box: `${d.boxW}x${d.boxH}`, places: d.rows.length, of: narrowCount, missed: missed.map((r) => r.want), worst }),
     };
   };
-  const at390 = verdict(await sweepAt(390), 390);
-  check("P19 at the ruled phone width no place card is taller than the chart box it is clamped into (#633)", at390.ok, at390.detail);
-  const at320 = verdict(await sweepAt(320), 320);
-  check("P19b and the same holds at 320, where two cards in three were over the box before this (#633)", at320.ok, at320.detail);
+  const short = verdict(await sweepAt(), CAP_WINDOW.w);
+  check(`P19 at ${CAP_WINDOW.w}x${CAP_WINDOW.h}, the window short enough under the 1024 floor for a card to meet its chart box, no place card is taller than the box it is clamped into (#633; Issue #762)`, short.ok, short.detail);
 }
 
 export async function p20PinnedTakesPointer({ evaluate, send, check, settle }: CardsKit) {
@@ -43,7 +41,7 @@ export async function p20PinnedTakesPointer({ evaluate, send, check, settle }: C
           arrived: typeof i.getAnimations === "function" && i.getAnimations().every((a) => a.playState === "finished"),
           pe: cs.pointerEvents, over: +(i.scrollHeight - i.clientHeight).toFixed(2), top: +r.top.toFixed(2), bottom: +r.bottom.toFixed(2), left: +r.left.toFixed(2), right: +r.right.toFixed(2), w: +r.width.toFixed(2), h: +r.height.toFixed(2) }; })()`,
     (d, last) => d.name === "Kralgov" && d.pinned && d.arrived && !!last && last.name === "Kralgov" && d.h === last.h && d.pe === last.pe,
-    "P20 Kralgov pinned at 320",
+    `P20 Kralgov pinned at ${CAP_WINDOW.w}x${CAP_WINDOW.h}`,
   );
   check("P20 a SHOWN unpinned card does not take the pointer and a pinned scrolling one does, or the card takes it from its own mark (#633)",
     at.shownUnpinned === true && at.restPe === "none" && open.pe === "auto",
@@ -56,14 +54,15 @@ export async function p20PinnedTakesPointer({ evaluate, send, check, settle }: C
 export async function p26TailScrolls({ evaluate, send, check, sleep, wheel }: SuiteContext, open: Pinned): Promise<void> {
   const beforeWheel = await evaluate<{ scrollTop: number; k: number }>(`(() => { const i = document.querySelector("#place-card .pc-inner"); return { scrollTop: +i.scrollTop.toFixed(2), k: window.__vellumZoomState().k }; })()`);
   const onCard = { x: Math.round(open.left + (open.right - open.left) / 2), y: Math.round(open.top + open.h / 2) };
+  const reaches = await evaluate<boolean>(`(() => { const e = document.elementFromPoint(${onCard.x}, ${onCard.y}); return !!e && document.getElementById("place-card").contains(e); })()`);
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: onCard.x, y: onCard.y });
   await sleep(120);
   await wheel(onCard.x, onCard.y, 240);
   await sleep(600);
   const afterWheel = await evaluate<{ scrollTop: number; k: number }>(`(() => { const i = document.querySelector("#place-card .pc-inner"); return { scrollTop: +i.scrollTop.toFixed(2), k: window.__vellumZoomState().k }; })()`);
-  check("P26 a pinned card that HAS a tail holds the wheel and scrolls it, and the camera under it stays put (#633)",
-    afterWheel.scrollTop > beforeWheel.scrollTop + 1 && afterWheel.k === beforeWheel.k,
-    JSON.stringify({ before: beforeWheel, after: afterWheel }));
+  check("P26 a pinned card that HAS a tail holds the wheel and scrolls it, and the camera under it stays put, the wheel aimed where the card itself takes the pointer (#633)",
+    reaches && afterWheel.scrollTop > beforeWheel.scrollTop + 1 && afterWheel.k === beforeWheel.k,
+    JSON.stringify({ reaches, before: beforeWheel, after: afterWheel }));
   await evaluate(`(() => { const i = document.querySelector("#place-card .pc-inner"); i.scrollTop = 0; })()`);
   await sleep(200);
 
@@ -115,10 +114,10 @@ export async function p23CapHolds({ evaluate, send, check, sleep, wheel, settle 
 }
 
 export async function p24NothingToScroll({ evaluate, send, check, sleep, wheel, settle, waitReady, setNarrowViewport, PORT }: CardsKit): Promise<void> {
-  await setNarrowViewport(390, 844);
+  await setNarrowViewport(1280, 800);
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/#seed=${NARROW_SEED}&style=antique` });
-  if (!(await waitReady())) throw new Error("P24 the explorer never drew at 390");
+  if (!(await waitReady())) throw new Error("P24 the explorer never drew at 1280x800");
   const at = await evaluate<Point>(`(() => { const h = [...document.querySelectorAll(".place-overlay .place-hit")].find((e) => (e.getAttribute("aria-label") || "").split(", ")[0] === "Kralgov"); const b = h.getBoundingClientRect(); return { x: Math.round(b.x + b.width / 2), y: Math.round(b.y + b.height / 2) }; })()`);
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: at.x, y: at.y });
   await send("Input.dispatchMouseEvent", { type: "mousePressed", x: at.x, y: at.y, button: "left", clickCount: 1 });
@@ -129,7 +128,7 @@ export async function p24NothingToScroll({ evaluate, send, check, sleep, wheel, 
           tail: +(i.scrollHeight - i.clientHeight).toFixed(2), pe: getComputedStyle(i).pointerEvents, k: window.__vellumZoomState().k,
           x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2), h: +r.height.toFixed(2) }; })()`,
     (d, last) => d.name === "Kralgov" && d.pinned && !!last && d.h === last.h,
-    "P24 Kralgov pinned at 390",
+    "P24 Kralgov pinned at 1280x800",
   );
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: card.x, y: card.y });
   await sleep(120);

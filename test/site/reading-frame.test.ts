@@ -325,7 +325,7 @@ test("#493 the pace stands at the readout's right: three presses 1x 2x 4x in one
   assert.deepEqual(pace.children.map((b) => b.getAttribute("aria-pressed")), ["true", "false", "false"], "and back");
 });
 
-test("#493 the pace's dress: the strip's dark presses in the mockup's measure, the chosen one on parchment, and the group drops on a phone by a strip-scoped rule", () => {
+test("#493 the pace's dress: the strip's dark presses in the mockup's measure, the chosen one on parchment, and the group stands at every width (Issue #762, default D1)", () => {
   const css = read("public/reading-frame.css");
   assert.match(css, /\.rf-pace\s*\{[^}]*flex:\s*none/, "the group keeps its width beside the shrinking bar");
   assert.match(css, /\.rf-pace button\s*\{[^}]*width:\s*1\.9rem;[^}]*height:\s*1\.6rem;/, "the mockup's press");
@@ -333,6 +333,4 @@ test("#493 the pace's dress: the strip's dark presses in the mockup's measure, t
   const pressed = declarationsFor(css, '.rf-instrument-strip .rf-instrument .rf-pace button[aria-pressed="true"]');
   assert.match(pressed, /background:\s*var\(--parchment\)/, "the chosen pace stands on parchment");
   assert.ok(css.indexOf('.rf-pace button[aria-pressed="true"]') > css.indexOf(".rf-pace button:hover"), "written after the hover so a hovered chosen press stays chosen");
-  assert.ok(narrowSelectors(css).includes(".rf-instrument .rf-pace"), "hidden under 900px (the mockup's phone rule), scoped to the strip so the journal allowlist above still holds");
-  assert.match(declarationsFor(css, ".rf-instrument .rf-pace"), /display:\s*none/);
 });

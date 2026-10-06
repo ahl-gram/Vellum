@@ -35,7 +35,6 @@ export async function cd37BackCached({ evaluate, check, sleep, settle, go, STORE
   await evaluate(`window.__cd634 = "warm"`);
   await evaluate(`location.href = "/prospect/" + location.hash + "&i=0"`);
   for (let i = 0; i < 300; i++) { await sleep(100); if (await evaluate<boolean>(`!!(window.__vellumProspectState && window.__vellumProspectState())`)) break; }
-  await evaluate(`(() => { const s = document.getElementById("note"); if (s && !s.classList.contains("open")) s.querySelector(".slip-handle").click(); })()`);
   await sleep(400);
   const lay = await pressById("pp-lay");
   const filed = await settle<{ table: string | null; stored: string | null }>(
@@ -62,7 +61,6 @@ export async function cd38BackRebuilt({ evaluate, check, sleep, settle, go, atEx
   await evaluate(`(() => { window.__cd634 = "cold"; window.addEventListener("unload", () => {}); })()`);
   await evaluate(`location.href = "/prospect/" + location.hash + "&i=0"`);
   for (let i = 0; i < 300; i++) { await sleep(100); if (await evaluate<boolean>(`!!(window.__vellumProspectState && window.__vellumProspectState())`)) break; }
-  await evaluate(`(() => { const s = document.getElementById("note"); if (s && !s.classList.contains("open")) s.querySelector(".slip-handle").click(); })()`);
   await sleep(400);
   await pressById("pp-lay");
   await settle<{ table: string | null }>(

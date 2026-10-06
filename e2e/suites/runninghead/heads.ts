@@ -18,9 +18,9 @@ export async function rhSweep({ evaluate, shoot, visit }: RunningHeadKit) {
 }
 
 export function rh0OneH1({ check }: SuiteContext, heads: Heads, unreachable: string[], bad: Bad): void {
-  const manyH1 = bad((h, r) => h.h1s.length === 1 && (r === "/" ? h.h1s[0]!.inHeader : h.h1s[0]!.inMain));
+  const manyH1 = bad((h, r) => h.h1s.length === 1 && (r === "/" ? h.h1s[0]!.inHeader : !h.h1s[0]!.inHeader && (h.h1s[0]!.inMain || h.h1s[0]!.inFolio)));
   check(
-    "RH0 every shelled page delivers exactly one h1: home's in the cluster, a room's standing in the page (#461 ruling 1)",
+    "RH0 every shelled page delivers exactly one h1: home's in the cluster, a room's standing in the page, in its sheet or its room folio and never in the cluster, the folio riding the desk layer outside main on a room that scrolls down (#461 ruling 1; Issue #762)",
     unreachable.length === 0 && manyH1.length === 0,
     unreachable.length
       ? `unreachable: ${unreachable.join(", ")}`

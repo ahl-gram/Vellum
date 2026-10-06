@@ -133,7 +133,7 @@ const pageSheets = (): Array<readonly [string, string]> => [
 
 test("no page sheet re-dresses a kit class (#487 item 5, the #302 precedent): a seat, a page's own form control inside a component, and a row inked under the page's own state pass; a bare kit selector sets no dress", () => {
   const kit = kitClasses();
-  for (const c of ["slip", "legend-head", "cr-num", "zoom-btn", "in-slip", "folded", "room"]) assert.ok(kit.has(c), `.${c} is the kit's`);
+  for (const c of ["slip", "legend-head", "cr-num", "zoom-btn", "folded", "room"]) assert.ok(kit.has(c), `.${c} is the kit's`);
   for (const c of ["control", "primary", "intro", "status", "chrome", "strip"]) assert.ok(!kit.has(c), `.${c} is not the kit's alone`);
   for (const [name, css] of pageSheets()) assert.deepEqual(redressesIn(css, kit), [], `${name} re-dresses the kit; move the dress onto the page's own element or state, or into atelier.css`);
 });

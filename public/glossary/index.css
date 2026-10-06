@@ -22,7 +22,6 @@ h2, h3 {
 }
 .sheet::before { top: 14px; left: 14px; border-right: none; border-bottom: none; }
 .sheet::after { bottom: 14px; right: 14px; border-left: none; border-top: none; }
-@media (max-width: 600px) { .sheet { outline-offset: 4px; } }
 @keyframes sheet-settle {
   from { box-shadow: 0 30px 80px rgb(from var(--chart-ink) r g b / 0.75); }
 }
@@ -35,11 +34,7 @@ body.room .sheet { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3, 1) bo
 h2 { column-span: all; font-size: 1.25rem; letter-spacing: 0.09em; border-bottom: 1px solid var(--line-tan);
   padding-bottom: 0.3rem; margin: 2.4rem 0 1.1rem; scroll-margin-top: calc(var(--band-h) + 1rem); }
 .columns > h2:first-child { margin-top: 0; }
-@media (max-width: 900px) {
-  body.room main { margin: 0 0 4.2rem; }
-  .columns { column-width: auto; column-count: 1; }
-  .slip .card-where { display: none; }
-}
+@media screen { .sheet { padding-inline: clamp(1.5rem, max(4vw, 40.96px), 4rem); } }
 @media print {
   body.room main { margin: 0; }
   .sheet { background: none; border: 0; outline: 0; box-shadow: none; animation: none; }

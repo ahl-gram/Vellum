@@ -62,6 +62,8 @@ const ogImage = new URL("/og.png", Astro.site).href;
 const ogImageAlt = "The Vellum wordmark and a compass rose on a dark walnut ground, with the chart of seed 42 faint behind.";
 const cardDescription = ogDescription ?? description;
 const trail = trailFor(path);
+const Desk = room ? "div" : Fragment;
+const deskAttrs = room ? { class: Astro.slots.has("desk") ? "desk-layer on" : "desk-layer" } : {};
 ---
 
 <!doctype html>
@@ -180,7 +182,7 @@ header.chrome a:focus-visible, footer a:focus-visible { outline-color: var(--par
 .also a { color: var(--parchment); text-decoration-color: rgb(from var(--parchment) r g b / 0.55); text-underline-offset: 0.25em; }
 :root:has(.band):has(.trail) { --band-h: 10.6rem; }
 @media screen {
-  body.room:has(.band):has(.trail) { padding-top: calc(var(--band-h) + 0.2rem); }
+  body.room:has(.band):has(.trail) { --room-pad-top: calc(var(--band-h) + 0.2rem); }
 }
 .band { position: fixed; inset: 0; z-index: 9; pointer-events: none; }
 .band::before {
@@ -199,8 +201,16 @@ header.chrome a:focus-visible, footer a:focus-visible { outline-color: var(--par
   font-style: italic; color: var(--ink-brown); margin: 0;
 }
 /* The rooms stand clear of the band; a chart room has no band to clear. */
-body.room { padding: 8.4rem 2.2rem 1.6rem; }
-body.room.chart-room { padding: 0; }
+body.room { --room-pad-top: 8.4rem; padding: var(--room-pad-top) 2.2rem 1.6rem; }
+body.room.chart-room { --room-pad-top: 0px; padding: 0; }
+/* A px floor, not a viewport-unit one: under the harness's emulated resize Chrome still resolved `vw` against the old window at the resize event, so a floor written in `vw` laid the head cluster out against a 640 page (measured 2026-10-06). */
+@media screen {
+  html:has(body.room) { overflow-x: auto; }
+  body.room { min-width: 1024px; box-sizing: border-box; }
+  .desk-layer.on { position: sticky; top: 0; z-index: 10; height: 100vh; margin: calc(-1 * var(--room-pad-top)) -2.2rem calc(var(--room-pad-top) - 100vh); contain: layout; pointer-events: none; }
+  body.room.chart-room .desk-layer.on { margin-inline: 0; }
+}
+.desk-layer:not(.on) { display: contents; }
 /* The interim desk panel: a room not yet dressed for the deep wears it so nothing ships ink-on-walnut; desk="open" stops the class rendering, so the rule retires itself room by room. */
 main.desk-panel {
   background: var(--parchment);
@@ -257,6 +267,7 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 </style>
 </head>
 <body class={room ? (chartRoom ? "room chart-room" : "room") : undefined}>
+<Desk {...deskAttrs}>
 {room && !chartRoom && <div class="band" aria-hidden="true"></div>}
 <header class="chrome">
   {room
@@ -275,6 +286,8 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   {trail && <div class="where"><nav class="trail" aria-label="Where you are">{trail.crumbs.map((c, i) => <Fragment>{i > 0 ? <Fragment><span class="way" aria-hidden="true">›</span><wbr /></Fragment> : ""}{i < trail.crumbs.length - 1 ? <a href={c.href}>{c.name}</a> : trail.current ? <span aria-current="page">{c.name}</span> : <span class="here">{c.name}</span>}</Fragment>)}</nav>{trail.also.length > 0 && <p class="also">also reached from {trail.also.map((c, i) => <Fragment>{i > 0 ? " and " : ""}<a href={c.href}>{c.name}</a></Fragment>)}</p>}</div>}
   <slot name="header-extra" />
 </header>
+<slot name="desk" />
+</Desk>
 <main class:list={[room && desk !== "open" && "desk-panel"]}>
 
 <slot />

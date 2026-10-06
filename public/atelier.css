@@ -10,7 +10,9 @@ body.chart-room .fog { z-index: 3; }
 @keyframes fog-drift-b { from { transform: translate(3%, -2%); } to { transform: translate(-5%, 3%); } }
 
 /* Scoped to body.chart-room: home's landfall stage wears the same .stage class. */
-html:has(body.chart-room), body.chart-room { height: 100%; overflow: hidden; }
+html:has(body.chart-room) { height: 100%; overflow-y: hidden; }
+body.chart-room { height: 100%; overflow: clip; }
+.desk-layer.on > :is(.slip, .legend) { pointer-events: auto; }
 body.chart-room .stage { position: fixed; inset: 0; z-index: 1; overflow: hidden; }
 body.chart-room .stage .status { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); margin: 0; padding: 0.3rem 0.9rem;
   color: var(--parchment); background: rgb(from var(--chart-ink) r g b / 0.55); z-index: 2; pointer-events: none;
@@ -82,8 +84,7 @@ body:has(.slip.folded) .legend { left: 50%; }
   padding: 0.4rem 0.9rem 0.35rem; text-align: center; transition: background 0.2s ease, transform var(--paper-quick) var(--ease-paper); }
 /* Four classes deep: the house button hover wash is (0,3,1). */
 .legend .legend-row .legend-btn:hover, .legend .legend-row .legend-btn:focus-visible { background: var(--ink-dark); transform: translateY(var(--raise)); }
-/* The cream ring is for a row on its own dark footing; docked on the sheet's parchment cream reads 1.0:1, so a docked row keeps the house ink-dark ring. */
-.legend:not(.in-slip) .legend-row .legend-btn:focus-visible { outline-color: var(--parchment-bright); }
+.legend .legend-row .legend-btn:focus-visible { outline-color: var(--parchment-bright); }
 .legend-btn .verb { display: block; font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.78rem; color: var(--parchment); }
 .legend-btn .room { display: block; font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); font-size: 0.86rem; letter-spacing: 0.12em; color: var(--parchment); }
 .legend-btn.gold { background: var(--control-gold); }
@@ -91,7 +92,7 @@ body:has(.slip.folded) .legend { left: 50%; }
 .legend-btn.gold .room { color: var(--ink-dark); }
 .legend .legend-row .legend-btn.gold:hover, .legend .legend-row .legend-btn.gold:focus-visible { background: var(--parchment-bright); }
 .legend .legend-row .legend-btn:disabled { opacity: 0.45; cursor: default; transform: none; box-shadow: none; background: rgb(from var(--chart-ink) r g b / 0.5); }
-.legend.in-slip { display: none; }
+.legend.lean > p:not(:has(select), [role="status"]) { display: none; }
 
 .slip { position: fixed; z-index: 20; right: 2rem; top: 9rem; width: var(--slip-w); max-height: calc(100vh - 11rem);
   box-sizing: border-box; display: flex; flex-direction: column;
@@ -103,7 +104,6 @@ body:has(.slip.folded) .legend { left: 50%; }
   transition: transform 0.32s cubic-bezier(0.2, 0.7, 0.3, 1), opacity 0.32s, visibility 0s linear 0.32s; }
 .slip-head { padding: 1.3rem 1.6rem 0.75rem; position: relative; flex: none; }
 .slip-body { padding: 0 1.6rem 1.3rem; overflow-y: auto; overscroll-behavior: contain; flex: 1 1 auto; min-height: 0; }
-.legend-dock:empty { display: none; }
 .slip-foot { flex: none; padding: 0.8rem 1.6rem 1rem; border-top: 1px solid var(--line-faint); }
 .slip .card-verb { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-size: 0.92rem; color: var(--ink-brown); margin: 0; }
 .slip .card-title { font-family: var(--font-display, 'Iowan Old Style', 'Palatino', Georgia, serif); font-weight: 400; font-size: 1.45rem; letter-spacing: 0.06em; line-height: 1.2; margin: 0.1rem 0 0; }
@@ -113,7 +113,6 @@ body:has(.slip.folded) .legend { left: 50%; }
 .slip .intro { text-align: left; font-size: 0.95rem; line-height: 1.5; margin: 0.7rem 0 0; }
 .slip .note { font-size: 0.82rem; color: var(--ink-faded); line-height: 1.45; margin: 0; text-align: left; }
 .slip a { color: var(--ink-dark); }
-.slip-handle { display: none; }
 .slip-fold { position: absolute; right: 0.5rem; top: 0.45rem; appearance: none; border: 0; border-radius: 0; background: none; cursor: pointer;
   font-size: 1.05rem; line-height: 1; color: var(--ink-faded); padding: 0.2rem 0.4rem; }
 /* Four classes deep: the house button hover wash is (0,3,1) and outranks a plain .slip-fold:hover. */
@@ -136,14 +135,15 @@ body.chart-room header.chrome { --pool-top: -4rem; --pool-left: -4rem; }
 body.chart-room .corner.bl { --pool-bottom: -4rem; --pool-left: -4rem; }
 body.chart-room .strip { --pool-bottom: -4rem; --pool-left: -4rem; --pool-right: -4rem; }
 
-/* The legend row's footing is home's .lf-legend panel (public/index.css: its 0.5rem 1.1rem 0.6rem padding, chart ink 0.85 to 0.72 top to bottom), drawn as a ::before at the padding's insets so the row's box, which the seat and the fit read, never changes (a real padding wrapped the Explorer's roads, `BR2` in `e2e/suites/broadside.ts`); the :not(.in-slip) scope is on the painting rule because a docked row goes position:static and its ::before would span the slip. */
-body:has(#map-viewport.zoomed) .legend:not(.in-slip)::before, body.stage-under .legend:not(.in-slip)::before, body.chart-room:not(:has(.stage)) .legend:not(.in-slip)::before { content: ""; position: absolute; inset: -0.5rem -1.1rem -0.6rem; z-index: -1; pointer-events: none;
+/* The legend row's footing is home's .lf-legend panel (public/index.css: its 0.5rem 1.1rem 0.6rem padding, chart ink 0.85 to 0.72 top to bottom), drawn as a ::before at the padding's insets so the row's box, which the seat and the fit read, never changes (a real padding wrapped the Explorer's roads, `BR2` in `e2e/suites/broadside.ts`). */
+body:has(#map-viewport.zoomed) .legend::before, body.stage-under .legend::before, body.chart-room:not(:has(.stage)) .legend::before { content: ""; position: absolute; inset: -0.5rem -1.1rem -0.6rem; z-index: -1; pointer-events: none;
   background: linear-gradient(to bottom, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.72)); }
-body.stage-under .legend:not(.in-slip)::before { left: -0.9rem; right: -0.9rem; }
+body.stage-under .legend::before { inset: -1.3rem -0.9rem -0.6rem; background: rgb(from var(--chart-ink) r g b / 0.92); filter: blur(16px); }
 @media screen {
+  body.chart-room:has(.stage) { contain: layout; }
   body:has(#map-viewport.zoomed) .corner.tr::before, body.stage-under .corner.tr::before, body.chart-room:not(:has(.stage)) .corner.tr::before { content: ""; position: absolute; inset: -0.7rem -0.9rem -0.8rem; z-index: -1; pointer-events: none;
     background: linear-gradient(to bottom, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.72)); }
-  body.stage-under .corner.tr::before { left: -0.35rem; }
+  body.stage-under .corner.tr::before { left: -0.35rem; background: rgb(from var(--chart-ink) r g b / 0.92); filter: blur(16px); }
 }
 
 body.chart-room .stage { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
@@ -177,46 +177,6 @@ body.chart-room .stage { animation: sheet-land 0.55s cubic-bezier(0.2, 0.7, 0.3,
 .contents .cr-text { flex: 1 1 0; min-width: 0; color: var(--ink-annals); }
 .contents .cr-text em { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; color: var(--ink-brown); }
 .contents .cr-text .n { font-variant-caps: small-caps; letter-spacing: 0.06em; color: var(--ink-brown); font-size: 0.85em; }
-
-@media (max-width: 900px) {
-  .folio-room { max-width: 12.5rem; }
-  .folio-room .room-name { font-size: 0.98rem; }
-  .folio-room .room-tagline { display: none; }
-  .folio-room .dateline { font-size: 0.72rem; margin-top: 0.3rem; }
-  .folio-room .gloss { display: none; }
-  .folio-controls .control { width: 6.2rem; padding: 0.3rem 0.4rem; }
-  .folio-controls .dice { display: none; }
-  .folio-controls .primary { padding: 0.3rem 0.7rem; }
-  .vignette { height: 8rem; }
-  .corner.bl { display: none; }
-  .corner.br.zoomery, body:has(.slip.folded) .corner.br.zoomery { right: var(--chrome-x); bottom: calc(var(--sheet-h, 6rem) + 1rem); }
-  body:has(.slip.open) .corner.br.zoomery { display: none; }
-  body.chart-room:has(.slip.open) .where { visibility: hidden; }
-  body:has(#map-viewport.zoomed) .corner.tr::before, body.chart-room:not(:has(.stage)) .corner.tr::before { inset: -0.7rem -0.7rem -0.75rem; }
-  .legend { display: none; }
-  .legend.in-slip { display: block; position: static; transform: none; margin-top: 0.9rem; animation: none; width: auto !important; max-width: none !important; }
-  .legend.in-slip .legend-head { display: none; }
-  .legend.in-slip .legend-btn { background: var(--ink-dark); }
-  /* Docked on the sheet's parchment the tan hairline reads 2.00:1 (the cream fill, 1.09:1, stays), so it takes ink-brown: 5.64:1 on the sheet, 5.20:1 against the fill. */
-  .legend.in-slip .legend-btn.gold { background: var(--control-gold); border-color: var(--ink-brown); }
-  /* Docked on parchment the disabled wash (0.5 ink over a 0.45 element) reads 1.5:1, so a docked disabled press takes a solid faded ink: 3.93:1 as a box against the sheet, under the enabled 9.46:1. */
-  .legend.in-slip .legend-row .legend-btn:disabled { background: var(--ink-faded); opacity: 1; }
-  .slip-tab { display: none; }
-  .slip { right: 0; left: 0; top: auto; bottom: 0; width: 100%; max-height: 72vh; outline-offset: -8px; transition: none; }
-  .slip.folded { opacity: 1; visibility: visible; transform: none; }
-  .slip:not(.open) .slip-body, .slip:not(.open) .slip-foot { display: none; }
-  .slip-head { padding: calc(0.75rem + 3px + 0.55rem) 1.3rem 0.5rem; }
-  /* The handle is a real button covering the head (a keyboard needs a toggle); four classes deep against the house button dress and no lift, since it is invisible. */
-  .slip-handle { display: block; position: absolute; inset: 0; z-index: 1; appearance: none; border: 0; border-radius: 0; background: none; padding: 0; cursor: pointer; }
-  .slip .slip-head .slip-handle:is(:hover, :focus-visible, :active) { background: none; transform: none; box-shadow: none; }
-  /* Pinned to the head's top, not centred: a button centres its content, which put the bar on the title line; the head's top padding reserves its room. */
-  .slip-handle::before { content: ""; position: absolute; top: 0.75rem; left: 50%; translate: -50% 0; width: 2.6rem; height: 3px; background: var(--line-tan); border-radius: 2px; }
-  .slip.open .slip-handle::before { background: var(--ink-faded); }
-  .slip .card-title { font-size: 1.15rem; }
-  .slip-fold { display: none; }
-  .slip-body { padding: 0 1.3rem 1rem; }
-  .slip-foot { padding: 0.7rem 1.3rem 0.9rem; }
-}
 
 @media print {
   .fog, .corner, .slip, .slip-tab, .vignette, .legend, .zoomery, .folio, body.chart-room .stage .status, body.chart-room .stage .warning { display: none !important; }

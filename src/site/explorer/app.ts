@@ -10,7 +10,6 @@ import { emitTable, parseTable, type TableItem } from "../shared/table-address.t
 import { deviceStorage as store, navigationTypeNow, readStoredTable, tableOnArrival, writeStoredTable, TRAVERSAL } from "../shared/table-store.ts";
 import { makeDogEar, surveyItemFrom, refusalLine, thumbJobFor, thumbNames, layPressFace, filingAt, LAY_ON_CARD, type FilingSheet } from "./chart-drawer.ts";
 import { bindChartDrawer } from "./chart-drawer-bind.ts";
-import { bindTableLeaf } from "./table-leaf.ts";
 import { bindTableDrag, bandOf, lengthPx } from "./table-drag.ts";
 import { forwardTarget, prospectTarget } from "./address.ts";
 import { createGlass } from "./glass.ts";
@@ -21,6 +20,7 @@ import { wireSurveyToggle, armOnLanding, deferLandingArm } from "./survey-arm.ts
 import { createTourOrder } from "./tour-order.ts";
 import { createLivingChart } from "../living-chart/index.ts";
 import { bindRoom } from "../shared/room.ts";
+import { pageBox } from "../shared/page-box.ts";
 import { makeAnnouncer } from "../shared/announce.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import type { PlaceManifest } from "../../render/place-manifest.ts";
@@ -34,7 +34,6 @@ import {
   $, seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, beastsChk, landSlider,
   coastSlider, status, mapDiv, mapViewport, sheetEl, innerEl, caption, folioTitle, folioSub, stageEl,
   chartDrawer, chartDrawerTab, chartDrawerShut, chartDrawerCount, chartDrawerFull, cuttings, tableRoad,
-  tableLeaf, leafBroadsideTab, leafTableTab, broadsideSlip, legendDock, tableRoadBand,
   versoEl, versoBtn, agesChk, orderLink, journalLink, hashControls,
 } from "./elements.ts";
 
@@ -57,7 +56,6 @@ let drawing = false;
 function prefersReduce(): boolean {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
-const narrow = window.matchMedia("(max-width: 900px)");
 const token = (name: string): string => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 const tokenMs = (name: string, fallback: number): number => { const v = parseFloat(token(name)); return Number.isFinite(v) ? v : fallback; };
 // The drawer's band is its LAYOUT seat, readable while it is shut and display:none, never its painted rect, which is all zeros shut and mid-slide while open.
@@ -122,7 +120,6 @@ const chartTable = bindChartDrawer({
   cuttings, full: chartDrawerFull, road: tableRoad,
 }, {
   broadside: () => room.broadside,
-  relabelLeaf: (count) => leaf.relabel(count),
   folioHref: "./portfolio/",
   say: announce,
   drawThumb: async (item) => {
@@ -159,7 +156,7 @@ const glass = createGlass({
   buildPlaceOverlay: lc.buildPlaceOverlay,
   reclampCard: lc.reclampCard,
   setCaption: (t) => { caption.textContent = t; },
-  // The chart folio stands down on a phone (the mockup), so a failed survey reports on the status pill, the page's one error channel at every width.
+  // A failed survey reports on the status pill, the page's one error channel.
   setError: (t) => { status.textContent = t; },
   prefersReduce,
   regionEligible,
@@ -172,9 +169,8 @@ const glass = createGlass({
     el.appendChild(ear);
     bindTableDrag({
       handle: ear,
-      canDrag: () => !narrow.matches,
       ghostUrl: () => URL.createObjectURL(new Blob([committed.svg], { type: "image/svg+xml" })),
-      band: () => bandOf(drawerHeightPx(), window.innerHeight),
+      band: () => bandOf(drawerHeightPx(), pageBox().h),
       reveal: () => chartTable.reveal(),
       receiving: (over) => { chartTable.receiving(over); },
       file: (url) => chartTable.lay(item, committed.svg, committed.title, { url }),
@@ -187,14 +183,6 @@ const glass = createGlass({
 });
 
 const room = bindRoom({ frame: stageEl, sheet: sheetEl, camera: { hold: () => glass.cameraNow(), restore: (cam) => glass.refitCamera(cam) } });
-
-const leaf = bindTableLeaf({
-  leaf: tableLeaf, cuttings, count: chartDrawerCount, road: tableRoadBand, dock: legendDock,
-  broadsideTab: leafBroadsideTab, tableTab: leafTableTab, slip: broadsideSlip,
-}, {
-  narrow,
-  onLayout: () => room.layout(),
-});
 
 // The mockup's survey line is the subtitle's tail ("surveyed in the year 1059 of the Cedar Age"), not the cartouche's whole sentence: the folio stays short and leaves the legend row its room.
 function writeFolio(res: { title: string; subtitle: string }, seed: number): void {

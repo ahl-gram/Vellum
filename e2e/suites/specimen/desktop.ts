@@ -97,6 +97,19 @@ export async function sb5eFolioPanel({ check, brightest }: SpecimenKit, rest: Sp
   );
 }
 
+const px531 = (rem: number, v: number) => `${Math.round(v * rem * 100) / 100}px`;
+const same = (a: string[] | null, b: string[] | null) => !!a && !!b && a.length === b.length && a.every((v, i) => v === b[i]);
+
+export function sb8eInsets({ check }: SpecimenKit, leaned: Specimen): void {
+  // Issue #531: the RESOLVED inset, since a value can sit in the stylesheet inert and a text match passes it.
+  const insetWide = [-0.7, -0.9, -0.8, -0.9].map((v) => px531(leaned.rem, v));
+  check(
+    "SB8e leaned at 1280 the folio's panel takes home's base padding, the seed box's own insets (.lf-seed, public/index.css), on the painting arm that gives the pseudo its content (#531; its narrow half went with the narrow layout, Issue #762)",
+    same(leaned.folioInset, insetWide),
+    JSON.stringify({ rem: leaned.rem, at1280: leaned.folioInset, want1280: insetWide }),
+  );
+}
+
 export async function sb5cFooting({ check, brightest }: SpecimenKit, rest: Specimen | null, leaned: Specimen): Promise<void> {
   // Just below the row's box, inside the footing's 0.6rem foot band: the row's own centre is the gold road (227).
   const footing = await brightest(Math.round(leaned.legend!.x +

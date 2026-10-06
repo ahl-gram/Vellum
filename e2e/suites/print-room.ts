@@ -7,7 +7,6 @@ import { pr10PlatesEnable, pr12GrandPoster, pr16Desk, pr28ChartPlate, pr17Png } 
 import { pr20Bind, pr31Turns, pr33BackMatter, pr34Leaned, pr23Download, pr25Hide } from "./print-room/atlas.ts";
 import { pr21BoundPrint, pr21bUnboundPrint } from "./print-room/print.ts";
 import { pr24Redraw, pr24bInFlight, pr24cRebind, pr26Redraw, pr27OrderDuring } from "./print-room/redraw.ts";
-import { pr32Phone } from "./print-room/phone.ts";
 import { pr6Clean, pr8Fallback } from "./print-room/fallback.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
@@ -46,7 +45,6 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await pr24cRebind(ctx);
   await pr25Hide(ctx);
   await pr21bUnboundPrint(ctx);
-  await pr32Phone(ctx);
   await shoot("print-room.png");
   await pr26Redraw(ctx);
   await pr27OrderDuring(ctx);

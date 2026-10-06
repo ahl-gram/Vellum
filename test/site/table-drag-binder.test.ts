@@ -15,6 +15,7 @@ Object.assign(globalThis.document, {
   removeEventListener: (type: string, fn: (e?: unknown) => void) => { docListeners.set(type, (docListeners.get(type) ?? []).filter((f) => f !== fn)); },
 });
 (globalThis as { window?: unknown }).window = {
+  scrollX: 0,
   addEventListener: (type: string, fn: (e?: unknown) => void) => { winListeners.set(type, [...(winListeners.get(type) ?? []), fn]); },
   removeEventListener: (type: string, fn: (e?: unknown) => void) => { winListeners.set(type, (winListeners.get(type) ?? []).filter((f) => f !== fn)); },
 };
@@ -26,14 +27,13 @@ const nextTick = () => new Promise((r) => setTimeout(r, 0));
 const MOUSE = { pointerType: "mouse", button: 0, isPrimary: true };
 const BAND = { top: 552 };
 
-function bound(opts: { file?: boolean; band?: { top: number } | null; canDrag?: boolean; reduce?: boolean; onReveal?: () => void } = {}) {
+function bound(opts: { file?: boolean; band?: { top: number } | null; reduce?: boolean; onReveal?: () => void } = {}) {
   const handle = new El("button") as unknown as HTMLButtonElement & El;
   handle.rect = { left: 660, top: 115, right: 715, bottom: 170 };
   (handle as unknown as { isConnected: boolean }).isConnected = true;
   const calls = { reveal: 0, restore: 0, file: [] as string[], receiving: [] as boolean[], minted: 0 };
   bindTableDrag({
     handle,
-    canDrag: () => opts.canDrag ?? true,
     ghostUrl: () => `blob:ghost-${++calls.minted}`,
     band: () => (opts.band === undefined ? BAND : opts.band),
     reveal: () => { calls.reveal++; opts.onReveal?.(); return () => { calls.restore++; }; },
@@ -111,14 +111,10 @@ test("TD10 one url per carry: a filing adopts it and every other end revokes it,
   assert.equal((docListeners.get("pointermove") ?? []).length, 0, "and no document listener outlives its carry");
 });
 
-test("TD11 a press that is not a mouse's primary button, or where no drawer can show, never begins a carry: no ghost, no url, no listener", () => {
+test("TD11 a press that is not a mouse's primary button never begins a carry: no ghost, no url, no listener", () => {
   const d = bound();
   d.handle.fire("pointerdown", { ...MOUSE, pointerType: "touch", clientX: 700, clientY: 130 });
   assert.equal((docListeners.get("pointermove") ?? []).length, 0, "a touch adds nothing");
-  const narrow = bound({ canDrag: false });
-  narrow.press(700, 130);
-  assert.equal((docListeners.get("pointermove") ?? []).length, 0, "nor a press where the drawer is stood down");
-  assert.equal(narrow.calls.minted, 0);
   const slop = bound();
   slop.press(700, 130); slop.move(703, 132);
   assert.equal(slop.ghost(), null, "and a move under the slop mints no ghost");

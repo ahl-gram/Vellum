@@ -6,12 +6,11 @@ export type Read = { open: boolean; tabText: string | null; tabShown: boolean; c
 export type Cam = { x: number; y: number; k: number };
 type Ghost = { tag: string; src: string; pos: string; pe: string; translate: string; w: number; rotate: string; z: string; inMap: boolean };
 type Carry = { ghost: Ghost | null; drag: boolean; open: boolean; receiving: boolean; folded: boolean; cuttings: number; landing: boolean; landingRuns: number; jolt: boolean; joltRuns: number; sel: number; cursor: string | null; cam: Cam | null; hashTable: string | null; status: string; innerH: number };
-type Surfaces = { open: boolean; folded: boolean; tabShown: boolean; lifted: string[]; seats: Record<string, number>; slipX: number; slipW: number; slipAnims: string[]; lowestOff: number | null; minOffH: number; drawerAnims: string[]; innerH: number; leafTabsDisplay: string | null; leafTabBoxes: number };
+type Surfaces = { open: boolean; folded: boolean; tabShown: boolean; lifted: string[]; seats: Record<string, number>; slipX: number; slipW: number; slipAnims: string[]; lowestOff: number | null; minOffH: number; drawerAnims: string[]; innerH: number };
 type Slides = Pick<Read, "lowestOff" | "minOffH" | "drawerAnims" | "innerH">;
 type Folds = Pick<Surfaces, "slipX" | "slipW" | "slipAnims">;
 type Rested = (d: Surfaces, last: Surfaces | null) => boolean;
 export type Edge = { folded: boolean; tabShown: boolean; overlap: number; buttons: number[] };
-type Leaf = { tabs: { text: string; selected: string | null; press: string | null }[]; leafTabsDisplay: string | null; leafShown: boolean; formShown: boolean; cuttingsInLeaf: boolean; cuttingsShown: boolean; cuttings: number; columns: number; countText: string | null; roadInSlip: boolean; roadPress: string | null; otherRoads: number };
 export type Card = { hits: number; shown: boolean; name: string | null; press: { text: string; dim: boolean; idx?: string; box: { x: number; y: number; w: number; h: number }; hit: string; disabled: boolean } | null; link: { hit: string; inActs: boolean } | null; actsRow: number; pressInActs: boolean; cuttings: number; prospects: number; titles: string[]; subs: string[]; imgs: number; decoded: boolean[]; frames: number; hashTable: string | null; seedBox: string | null; scrollW: number; innerW: number };
 type Pp = { state: { year: number } | null; press: { text: string; dim: boolean; shown: boolean; centre: Point | null; hit: string; disabled: boolean } | null; count: string | null; inNote: boolean; roads: number; chartHref: string | null; hashTable: string | null };
 export type Stored = { stored: string | null };
@@ -110,12 +109,12 @@ export const SURFACES: Payload<Surfaces> = `(() => {
       Math.max(0, Math.min(b.right, sheet.right) - Math.max(b.left, sheet.left)) *
       Math.max(0, Math.min(b.bottom, sheet.bottom) - Math.max(b.top, sheet.top)) > 0;
     const name = (e) => (e.id ? "#" + e.id : "." + String(e.className || e.tagName).trim().split(/\\s+/).join("."));
-    const lifted = [...document.querySelectorAll(".corner.bl.folio, .corner.br.zoomery, .legend:not(.in-slip)")]
+    const lifted = [...document.querySelectorAll(".corner.bl.folio, .corner.br.zoomery, .legend")]
       .filter((e) => { const b = e.getBoundingClientRect(); return b.width > 0.5 && b.height > 0.5 && onSheet(b); })
       .map(name);
     // The seat itself, as a distance up from the foot of the window: the lift wrote a bottom offset, and the room's fit follows
     // the furniture, so a lifted piece can end up clear of a chart that shrank to accommodate it. The seat cannot lie.
-    const seats = Object.fromEntries([...document.querySelectorAll(".corner.bl.folio, .legend:not(.in-slip)")]
+    const seats = Object.fromEntries([...document.querySelectorAll(".corner.bl.folio, .legend")]
       .map((e) => [name(e), +(window.innerHeight - e.getBoundingClientRect().bottom).toFixed(1)]));
     const drawer = document.getElementById("chart-drawer");
     const sb = slip.getBoundingClientRect();
@@ -130,39 +129,6 @@ export const SURFACES: Payload<Surfaces> = `(() => {
       minOffH: offs.length ? Math.min(...offs.map((o) => o.height)) : 0,
       drawerAnims: drawer.getAnimations().map((a) => a.playState),
       innerH: window.innerHeight,
-      // leafTabs*, never tabShown: this payload's tabShown is the Broadside's bookmark tab and READ's is the drawer's edge tab, so a third "tab" would be read as one of those two within the week (#547).
-      leafTabsDisplay: (() => { const t = document.querySelector(".slip-head .sheet-tabs"); return t ? getComputedStyle(t).display : null; })(),
-      leafTabBoxes: [...document.querySelectorAll(".slip-head .sheet-tabs button")].filter((b) => b.getBoundingClientRect().height > 0.5).length,
-    };
-  })()`;
-
-export const LEAF: Payload<Leaf> = `(() => {
-    const tabs = [...document.querySelectorAll(".slip-head .sheet-tabs button")];
-    const name = (e) => (e ? (e.id ? "#" + e.id : "." + String(e.className || e.tagName).trim().split(/\\s+/).join(".")) : null);
-    const press = (b) => { const r = b.getBoundingClientRect(); if (r.width < 1 || r.height < 1) return "no-box";
-      const h = document.elementFromPoint(Math.round(r.x + r.width / 2), Math.round(r.y + r.height / 2));
-      return h === b || b.contains(h) ? "self" : name(h); };
-    const leaf = document.getElementById("table-leaf");
-    const cut = document.getElementById("cuttings");
-    return {
-      tabs: tabs.map((b) => ({ text: (b.textContent || "").replace(/\\s+/g, " ").trim(), selected: b.getAttribute("aria-selected"), press: press(b) })),
-      leafTabsDisplay: (() => { const t = document.querySelector(".slip-head .sheet-tabs"); return t ? getComputedStyle(t).display : null; })(),
-      leafShown: !!leaf && getComputedStyle(leaf).display !== "none",
-      formShown: (() => { const f = document.querySelector(".slip-body .broadside"); return !!f && getComputedStyle(f).display !== "none"; })(),
-      cuttingsInLeaf: !!leaf && !!cut && leaf.contains(cut),
-      cuttingsShown: !!cut && getComputedStyle(cut).display !== "none",
-      cuttings: document.querySelectorAll("#cuttings li").length,
-      columns: (() => { const c = document.getElementById("cuttings"); return c ? getComputedStyle(c).gridTemplateColumns.split(" ").filter(Boolean).length : 0; })(),
-      countText: (() => { const c = document.getElementById("chart-drawer-count"); return c && c.offsetParent !== null ? c.textContent : null; })(),
-      roadInSlip: (() => { const r = document.getElementById("table-road"); const d = document.querySelector(".slip .legend-dock"); return !!r && !!d && d.contains(r); })(),
-      // The sheet's body scrolls, so a road below the fold hit-tests to nothing; bring it into view first, or the check
-      // measures the viewport rather than the control. And an element inside a display:none parent still computes its OWN
-      // display, so "is it shown" has to be read off the rect, not off getComputedStyle.
-      roadPress: (() => { const r = document.getElementById("table-road"); if (!r) return null;
-        r.scrollIntoView({ block: "center" });
-        const b = r.getBoundingClientRect(); if (b.width < 1) return "no-box";
-        const h = document.elementFromPoint(Math.round(b.x + b.width / 2), Math.round(b.y + b.height / 2)); return h === r || r.contains(h) ? "self" : (h ? (h.id || String(h.className)) : "none"); })(),
-      otherRoads: [...document.querySelectorAll(".slip .legend-dock .legend .legend-btn")].filter((b) => b.getBoundingClientRect().width > 0.5 && b.id !== "table-road").length,
     };
   })()`;
 
@@ -204,7 +170,7 @@ export const PP: Payload<Pp> = `(() => {
         press: p ? { text: p.textContent, dim: p.classList.contains("dim"), shown: !!b && b.width > 1, centre, hit: h === p || (p.contains(h)) ? "self" : (h ? (h.id || String(h.className)) : "none"), disabled: p.hasAttribute("disabled") } : null,
         count: (document.getElementById("pp-lay-count") || {}).textContent || null,
         inNote: !!document.querySelector("#note #pp-lay"),
-        roads: [...document.querySelectorAll("#note .legend-dock .legend-btn, .legend .legend-row .legend-btn")].length,
+        roads: [...document.querySelectorAll(".legend .legend-row .legend-btn")].length,
         chartHref: (document.getElementById("pp-chart-link") || {}).getAttribute("href"),
         hashTable: new URLSearchParams(location.hash.slice(1)).get("table"),
       };

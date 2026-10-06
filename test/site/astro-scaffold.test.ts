@@ -591,6 +591,28 @@ test("the head cluster: wordmark, the atelier tagline, then the rooms nav, fixed
   }
 });
 
+const DESK_ROOMS: readonly string[] = ["faq/index.html", "glossary/index.html", "gallery/index.html"];
+
+function roomHeadingStands(route: string, room: string, html: string, firstHeading: number): void {
+  const [headClose, mainOpen, mainClose] = [html.indexOf("</header>"), html.search(/<main\b/), html.indexOf("</main>")];
+  assert.ok(headClose > -1 && mainOpen > headClose && mainClose > mainOpen, `${route} renders the head cluster, then <main>`);
+  const desk = html.includes('<div class="desk-layer on">');
+  assert.equal(desk, DESK_ROOMS.includes(route), `${route} ${desk ? "seats" : "does not seat"} pieces in the desk layer`);
+  const folioOpen = html.lastIndexOf("<div", firstHeading);
+  const folio = html.slice(folioOpen, html.indexOf(">", folioOpen) + 1);
+  assert.ok(folioOpen > -1 && folio.includes("folio-room"), `${route} opens its room folio just before its h1`);
+  if (desk) {
+    assert.ok(firstHeading > headClose && firstHeading < mainOpen, `${route} stands its h1 in the desk layer, after the head cluster and before <main> (Issue #762 call CC20)`);
+    assert.ok(
+      folio.includes('role="region"') && folio.includes(`aria-label="${esc(room)}"`),
+      `${route} stands its h1 in a region named for the room, a landmark of its own (Alex, 2026-10-06, Issue #762 issuecomment-6019508051)`,
+    );
+  } else {
+    assert.ok(firstHeading > mainOpen && firstHeading < mainClose, `${route} keeps its h1 standing in the page (inside <main>)`);
+    assert.ok(!folio.includes('role="region"'), `${route} keeps its folio a plain corner, the page's own landmark around it`);
+  }
+}
+
 test("every page's h1 names the page: the room on room pages, the wordmark on home (#288)", () => {
   const decodeAll = (s: string) => decode(s.replace(/<[^>]*>/g, ""));
   for (const p of PAGES) {
@@ -606,11 +628,7 @@ test("every page's h1 names the page: the room on room pages, the wordmark on ho
     const firstHeading = html.search(/<h[1-6]\b/);
     assert.equal(firstHeading, html.search(/<h1\b/), `${p.route} h1 is the first heading on the page`);
     if (p.room) {
-      const [mainOpen, mainClose] = [html.search(/<main\b/), html.indexOf("</main>")];
-      assert.ok(
-        mainOpen > -1 && firstHeading > mainOpen && firstHeading < mainClose,
-        `${p.route} keeps its h1 standing in the page (inside <main>)`,
-      );
+      roomHeadingStands(p.route, p.room, html, firstHeading);
     } else {
       const [headOpen, headClose] = [html.indexOf('<header class="chrome">'), html.indexOf("</header>")];
       assert.ok(
@@ -649,7 +667,7 @@ test("titles are computed in the layout from the room, never hand-set (#268)", (
       assert.ok(source.includes(`const room = "${p.room}"`), `${p.route} hoists its room to a const`);
       assert.ok(open[1]!.includes("room={room}"), `${p.route} passes the const to the layout`);
       assert.ok(source.includes(`const tagline = "${p.tagline}"`), `${p.route} hoists its tagline to a const`);
-      assert.ok(source.includes("<RoomFolio room={room} tagline={tagline}>"), `${p.route} stands its RoomFolio in the page`);
+      assert.match(source, /<RoomFolio (?:slot="desk" region )?room=\{room\} tagline=\{tagline\}>/, `${p.route} stands its RoomFolio in the page, or as a named region in the desk layer on a room that scrolls down`);
     } else {
       assert.ok(!open[1]!.includes("room="), `${p.route} is home and passes no room`);
     }
@@ -679,7 +697,7 @@ test("the body skeleton pins the shell order: band, cluster, main, footer on the
   for (const p of PAGES) {
     const html = page(p.route);
     if (p.chartRoom) {
-      assert.match(html, /<body class="room chart-room">\s*<header class="chrome">/, `${p.route} is a chart room: no band, the cluster floats over the chart`);
+      assert.match(html, /<body class="room chart-room">\s*<div class="desk-layer(?: on)?">\s*<header class="chrome">/, `${p.route} is a chart room: no band, the cluster floats over the chart`);
       assert.match(
         html,
         new RegExp(String.raw`</main>\s*${NOTICE}\s*<script type="module">[\s\S]*?</script>\s*</body>\s*</html>\s*$`),
@@ -690,8 +708,8 @@ test("the body skeleton pins the shell order: band, cluster, main, footer on the
     if (p.room) {
       assert.match(
         html,
-        /<body class="room">\s*<div class="band" aria-hidden="true"><\/div>\s*<header class="chrome">/,
-        `${p.route} body must open body.room > band > cluster`,
+        /<body class="room">\s*(?:<script type="module">[\s\S]*?<\/script>\s*)?<div class="desk-layer on">\s*<div class="band" aria-hidden="true"><\/div>\s*<header class="chrome">/,
+        `${p.route} body must open body.room > the desk layer > band > cluster, after at most the deferred script of a piece the desk slot seats`,
       );
     } else {
       assert.match(html, /<body>\s*<header class="chrome">/, `${p.route} is home: no band, the cluster floats on the stage`);

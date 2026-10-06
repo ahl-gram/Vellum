@@ -5,6 +5,8 @@ import { CHROME_GAP } from "../../../src/site/shared/stage-fit.ts";
 import { sampleRow } from "../../support/pixel.ts";
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
+import { GLYPHS_OVER_SHEET } from "./glyphs.ts";
+import type { Glyph } from "./glyphs.ts";
 import { routesUnder } from "./geometry.ts";
 
 const REPO = resolve(fileURLToPath(new URL(".", import.meta.url)), "..", "..", "..");
@@ -17,40 +19,40 @@ const SHORT = { w: 932, h: 430 };
 export const FLOOR_PLAIN = 4.5;
 // The day's seed on which the Print Room's Press came to rest over its folio at 932x430 folded (2026-10-06), read beside the suite's fixed day (Alex, 2026-10-05, on PR #784).
 const COLLIDED_2026_10_06 = "/print-room/#seed=20261006";
-const KNOWN: readonly { check: "EA1" | "EL1"; fault: string; row: string }[] = [
-  { check: "EL1", fault: `/specimen/ at 901x800: p#sb-status.status "the status pill, as a ro" meets aside#specimen.slip`, row: "the handbook/errata/site.md row on the Specimen's status pill over its slip" },
-  { check: "EL1", fault: `/specimen/ at 932x430: p#sb-status.status "the status pill, as a ro" meets aside#specimen.slip`, row: "the handbook/errata/site.md row on the Specimen's status pill over its slip" },
-  { check: "EL1", fault: `/print-room/ at 932x430: the Press's backing lies over header.chrome`, row: "the handbook/errata/site.md row on the Print Room's risen Press at 932x430" },
-  { check: "EL1", fault: `${COLLIDED_2026_10_06} at 932x430: the Press's backing lies over header.chrome`, row: "the handbook/errata/site.md row on the Print Room's risen Press at 932x430" },
-];
+// Below 1024 the tab stands on the 1024 page past the window's edge, and the ink is read on the page, so the sibling is seen there too.
 const SLIP_TAB_SIBLING = { at: `at ${SHORT.w}x${SHORT.h} folded`, pieces: ["button.slip-tab", "button.chart-drawer-tab"], row: "the handbook/errata/site.md row on the slip's tab at 932x430" };
 
 type Box = { x: number; y: number; r: number; b: number };
 type Ink = Box & { piece: number; t: string };
 type Backing = Box & { piece: number; role: string };
 type Stage = {
-  chartRoom: true; ready: boolean; drawn: boolean; innerW: number; innerH: number;
+  chartRoom: true; ready: boolean; drawn: boolean; innerW: number; innerH: number; pageW: number;
   sheet: Box; under: boolean; reserveRight: number; presses: Box[]; risen: boolean;
   ink: Ink[]; pieces: string[]; ranks: number[]; contains: [number, number][]; backings: Backing[];
 };
 type Read = { page: string; size: string; s: Stage };
 
+// A room's landing holds its from keyframe until the next rendered frame, reduced motion or not, so a starved runner can hand back two identical reads of a sheet still at 1.004 and 10px low (lane C on PR #795, FL1 on the Glossary); `both` keeps the finished landing listed, so a read after a resize passes at once, and home has none to wait for.
+export const LANDED = `(() => { const a = document.getAnimations().filter((x) => x.animationName === "sheet-land"); return a.every((x) => x.playState === "finished") && (a.length > 0 || !document.body.classList.contains("room")); })()`;
+
 const STAGE: Payload<Stage | { chartRoom: false; ready: boolean }> = `(() => {
-  const ready = document.readyState === "complete" && (!document.fonts || document.fonts.status === "loaded");
+  const loaded = document.readyState === "complete" && (!document.fonts || document.fonts.status === "loaded");
   const sheet = document.getElementById("sheet");
-  if (!document.querySelector("body.chart-room .stage") || !sheet) return { chartRoom: false, ready };
+  if (!document.querySelector("body.chart-room .stage") || !sheet) return { chartRoom: false, ready: loaded };
+  const ready = loaded && ${LANDED};
   const r1 = (n) => Math.round(n * 10) / 10;
   const box = (b) => ({ x: r1(b.left), y: r1(b.top), r: r1(b.right), b: r1(b.bottom) });
   const frame = document.querySelector("[style*='--reserve-right']");
-  const legend = document.querySelector(".legend:not(.in-slip)");
+  const legend = document.querySelector(".legend");
   const unseen = (el) => { for (let e = el; e; e = e.parentElement) { const cs = getComputedStyle(e); if (cs.display === "none" || cs.visibility === "hidden" || parseFloat(cs.opacity) === 0) return true; } return false; };
   const pieceEls = [];
   const enlist = (e) => { let i = pieceEls.indexOf(e); if (i < 0) { pieceEls.push(e); i = pieceEls.length - 1; } return i; };
   const pieceOf = (el) => { for (let e = el; e && e !== document.body; e = e.parentElement) { const p = getComputedStyle(e).position; if (p === "fixed" || p === "absolute" || p === "sticky") return enlist(e); } return -1; };
   const clipOf = (el, b) => { let c = { x: b.left, y: b.top, r: b.right, b: b.bottom }; for (let e = el.parentElement; e && e !== document.body; e = e.parentElement) { const cs = getComputedStyle(e); if (cs.overflowX !== "visible" || cs.overflowY !== "visible") { const q = e.getBoundingClientRect(); c = { x: Math.max(c.x, q.left), y: Math.max(c.y, q.top), r: Math.min(c.r, q.right), b: Math.min(c.b, q.bottom) }; } } return c.r - c.x > 0.5 && c.b - c.y > 0.5 ? c : null; };
   const skip = "svg, noscript, script, style, .desk-notice, #map, .living-chart, .place-hit, #sheet";
+  const pageW = Math.max(innerWidth, document.body.getBoundingClientRect().width);
   const ink = [];
-  const add = (el, b, t) => { const c = clipOf(el, b); const piece = pieceOf(el); if (c && piece >= 0 && c.r > 0 && c.x < innerWidth && c.b > 0 && c.y < innerHeight) ink.push({ ...box({ left: c.x, top: c.y, right: c.r, bottom: c.b }), piece, t }); };
+  const add = (el, b, t) => { const c = clipOf(el, b); const piece = pieceOf(el); if (c && piece >= 0 && c.r > 0 && c.x < pageW && c.b > 0 && c.y < innerHeight) ink.push({ ...box({ left: c.x, top: c.y, right: c.r, bottom: c.b }), piece, t }); };
   const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
   for (let n = walk.nextNode(); n; n = walk.nextNode()) {
     const el = n.parentElement;
@@ -65,7 +67,7 @@ const STAGE: Payload<Stage | { chartRoom: false; ready: boolean }> = `(() => {
   }
   const role = (e) => e.matches("header.chrome") ? "cluster" : e.matches(".corner.tr") ? "room folio" : e.matches(".corner.bl") ? "chart folio" : e.matches(".strip") ? "strip" : e.matches(".legend") ? "Press" : "corner";
   const backings = [];
-  for (const e of document.querySelectorAll("header.chrome, .corner, .strip, .legend:not(.in-slip)")) {
+  for (const e of document.querySelectorAll("header.chrome, .corner, .strip, .legend")) {
     const ps = getComputedStyle(e, "::before");
     if (ps.content === "none" || ps.display === "none" || unseen(e)) continue;
     const eb = e.getBoundingClientRect();
@@ -76,7 +78,7 @@ const STAGE: Payload<Stage | { chartRoom: false; ready: boolean }> = `(() => {
   const order = pieceEls.map((e, i) => i).sort((i, j) => (pieceEls[i].compareDocumentPosition(pieceEls[j]) & Node.DOCUMENT_POSITION_FOLLOWING) ? -1 : 1);
   const ranks = pieceEls.map((e, i) => (parseInt(getComputedStyle(e).zIndex, 10) || 0) * 1000 + order.indexOf(i));
   const status = document.querySelector(".stage .status");
-  return { chartRoom: true, ready, drawn: !status || !status.textContent.trim().endsWith("\\u2026"), innerW: innerWidth, innerH: innerHeight,
+  return { chartRoom: true, ready, drawn: !status || !status.textContent.trim().endsWith("\\u2026"), innerW: innerWidth, innerH: innerHeight, pageW,
     sheet: box(sheet.getBoundingClientRect()), under: document.body.classList.contains("stage-under"),
     reserveRight: frame ? parseFloat(frame.style.getPropertyValue("--reserve-right")) : NaN,
     presses: legend ? [...legend.querySelectorAll(".legend-row .legend-btn")].map((b) => b.getBoundingClientRect()).filter((b) => b.width > 0).map(box) : [],
@@ -102,11 +104,12 @@ export function stageFaults({ page, size, s }: Read): string[] {
   const at = `${page} at ${size}`;
   const w = s.sheet.r - s.sheet.x, h = s.sheet.b - s.sheet.y;
   if (!(w > 0 && h > 0)) return [`${at}: no sheet (${w} x ${h})`];
-  const room = Math.min(s.innerW - s.reserveRight - 2 * CHROME_GAP, (s.innerH - 2 * CHROME_GAP) * (w / h));
+  // The page, not the window: below 1024 a room lays out its 1024 page (Issue #762), read unscrolled so the two share an origin.
+  const room = Math.min(s.pageW - s.reserveRight - 2 * CHROME_GAP, (s.innerH - 2 * CHROME_GAP) * (w / h));
   if (!Number.isFinite(room)) faults.push(`${at}: no reserve read`);
   if (s.under && Math.abs(w - room) > 1) faults.push(`${at}: floored at ${w.toFixed(1)}, not the whole room ${room.toFixed(1)}`);
   if (!s.under && w < room / 2 - 0.5) faults.push(`${at}: the sheet is ${w.toFixed(1)}, under half its room ${room.toFixed(1)}, and not floored`);
-  if (s.under && (s.sheet.x < -0.5 || s.sheet.y < -0.5 || s.sheet.r > s.innerW + 0.5 || s.sheet.b > s.innerH + 0.5)) faults.push(`${at}: the floored sheet leaves the window (${JSON.stringify(s.sheet)})`);
+  if (s.under && (s.sheet.x < -0.5 || s.sheet.y < -0.5 || s.sheet.r > s.pageW + 0.5 || s.sheet.b > s.innerH + 0.5)) faults.push(`${at}: the floored sheet leaves the page (${JSON.stringify(s.sheet)})`);
   const lines = lineCount(s.presses);
   if (s.presses.length >= 2 && (lines > 2 || lines === s.presses.length)) faults.push(`${at}: the Press stacks down the page (${lines} lines for ${s.presses.length} presses)`);
   const nested = (a: number, b: number): boolean => a === b || s.contains.some(([p, q]) => (p === a && q === b) || (p === b && q === a));
@@ -120,10 +123,7 @@ export function stageFaults({ page, size, s }: Read): string[] {
   return faults;
 }
 
-const known = (all: readonly string[], check: "EA1" | "EL1" | "EL2"): string[] => [
-  ...all.filter((f) => !KNOWN.some((m) => f.startsWith(m.fault)) && !(f.includes(SLIP_TAB_SIBLING.at) && SLIP_TAB_SIBLING.pieces.some((p) => f.includes(p)))),
-  ...KNOWN.filter((m) => m.check === check && !all.some((f) => f.startsWith(m.fault))).map((m) => `${m.fault} no longer, so ${m.row} goes`),
-];
+const known = (all: readonly string[]): string[] => all.filter((f) => !(f.includes(SLIP_TAB_SIBLING.at) && SLIP_TAB_SIBLING.pieces.some((p) => f.includes(p))));
 
 // At rest: the document and its fonts are in, the stage no longer reports a draw in progress (a line ending in an ellipsis), and the fit, the floor and the Press's seat read the same on STILL_READS polls running, since a plate with no draw to wait on (an empty Portfolio) gives no other signal.
 const STILL_READS = 6;
@@ -161,7 +161,7 @@ export async function ea1Phone(ctx: SuiteContext): Promise<StageRun> {
   const rooms = reads.map((r) => r.page);
   const missing = CHART_ROOM_FLOOR.filter((p) => !rooms.includes(p));
   const floored = reads.filter((r) => r.s.under).map((r) => r.page);
-  const faults = known(reads.flatMap(stageFaults), "EA1");
+  const faults = known(reads.flatMap(stageFaults));
   ctx.check(
     "EA1 on a phone held sideways (844x390, laid out 1024x474 by the fixed viewport) every chart room keeps at least half the room it could show its sheet in, a floored sheet takes all of it inside the window, the Press never stacks, and no chrome ink meets other chrome ink or lies under another piece's backing; the Explorer and the Print Room floor (39x30 and 0x0 on screen on main)(Issue #762, rulings 4a and 4c)",
     missing.length === 0 && floored.includes("/explorer/") && floored.includes("/print-room/") && faults.length === 0,
@@ -170,8 +170,9 @@ export async function ea1Phone(ctx: SuiteContext): Promise<StageRun> {
   return { rooms, reads };
 }
 
+// Below 1024 the fold press stands on the 1024 page past the window's right edge, so the window scrolls it into reach first and back to the page's start after.
 async function fold(ctx: SuiteContext): Promise<void> {
-  const at = await ctx.evaluate<{ x: number; y: number } | null>(`(() => { const b = document.querySelector(".slip-fold"); if (!b) return null; const r = b.getBoundingClientRect(); return r.width > 0 ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : null; })()`);
+  const at = await ctx.evaluate<{ x: number; y: number } | null>(`(() => { const b = document.querySelector(".slip-fold"); if (!b) return null; const o = b.getBoundingClientRect(); if (o.right > innerWidth) scrollBy(o.right - innerWidth + 8, 0); const r = b.getBoundingClientRect(); return r.width > 0 && r.right <= innerWidth ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : null; })()`);
   if (!at) throw new Error("the slip has no fold press to take");
   const sheetX: Payload<{ folded: boolean; x: number }> = `({ folded: document.querySelector(".slip").classList.contains("folded"), x: document.getElementById("sheet").getBoundingClientRect().left })`;
   const before = await ctx.evaluate(sheetX);
@@ -181,6 +182,7 @@ async function fold(ctx: SuiteContext): Promise<void> {
   // The fold refits on a timer after its slide (FOLD_SETTLE_MS in src/site/shared/slip.ts), so the read waits for the sheet to leave where it stood, not for the class alone.
   await makeSettle(ctx)(sheetX, (d) => d.folded && Math.abs(d.x - before.x) > 1, "the slip folds and the sheet refits");
   await ctx.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 1 });
+  await ctx.evaluate("window.scrollTo(0, 0)");
 }
 
 // Folded at 932x430, then resized a pixel taller and back twice: the seat must come to rest the same way every time (the cold review of PR #777 found the Prospect and the Seed of the Day flipping between risen and stacked on every layout there).
@@ -233,10 +235,10 @@ export async function eaDesk(ctx: SuiteContext): Promise<void> {
   const rooms = [...new Set(reads.map((r) => r.page))];
   const missing = CHART_ROOM_FLOOR.filter((p) => !rooms.includes(p));
   const pick = (page: string, at: string): Stage | undefined => reads.find((r) => r.page === page && r.size === at)?.s;
-  const faults = known(reads.flatMap(stageFaults), "EL1");
+  const faults = known(reads.flatMap(stageFaults));
   const foldedAll = folded.flatMap(stageFaults);
   const siblingSeen = foldedAll.some((f) => SLIP_TAB_SIBLING.pieces.some((p) => f.includes(p)));
-  const foldedFaults = [...known(foldedAll, "EL2"), ...drifts, ...(siblingSeen ? [] : [`no slip tab meets anything at ${SHORT.w}x${SHORT.h} folded, so ${SLIP_TAB_SIBLING.row} goes`])];
+  const foldedFaults = [...known(foldedAll), ...drifts, ...(siblingSeen ? [] : [`no slip tab meets anything at ${SHORT.w}x${SHORT.h} folded, so ${SLIP_TAB_SIBLING.row} goes`])];
   const control = reads.filter((r) => r.size === "1280x800" || r.size === "1280x720");
   const controlFaults = control.filter((r) => r.s.under || r.s.risen).map((r) => `${r.page} at ${r.size}: ${r.s.under ? "floored" : "risen"}`);
   ctx.check(
@@ -250,12 +252,12 @@ export async function eaDesk(ctx: SuiteContext): Promise<void> {
     `${control.length} control reads over ${rooms.length} rooms${missing.length ? `, missing ${missing.join(", ")}` : ""}; ${controlFaults.join("; ") || "none floored or risen"}`,
   );
   ctx.check(
-    "EL1 in every chart room, resized while loaded from 1280x800 through 1280x720, 1024x768, 1024x600, 960x800, 901x800, 1024x474 and 932x430, and on the Explorer with the Broadside folded at 1024x600 and 901x800, the sheet keeps at least half its room (all of it when floored, inside the window), the Press never stacks down the page, and no chrome ink meets other chrome ink or lies under another piece's backing; the Print Room's risen Press over the cluster at 932x430 is a known errata row, exempt by name until it goes (Issue #762)",
+    "EL1 in every chart room, resized while loaded from 1280x800 through 1280x720, 1024x768, 1024x600, 960x800, 901x800, 1024x474 and 932x430, and on the Explorer with the Broadside folded at 1024x600 and 901x800, the sheet keeps at least half its room (all of it when floored, inside the page, which below 1024 is the 1024 page), the Press never stacks down the page, and no chrome ink meets other chrome ink or lies under another piece's backing (Issue #762)",
     missing.length === 0 && reads.length >= CHART_ROOM_FLOOR.length * (WINDOWS.length + 1) && faults.length === 0,
     `${reads.length} reads over ${rooms.length} rooms; ${faults.length ? `${faults.length} faults: ${faults.slice(0, 6).join("; ")}` : "no faults"}`,
   );
   ctx.check(
-    "EL2 in every chart room with a slip, folded at 932x430 and resized a pixel taller and back twice, the seat comes to rest the same way each time and holds EL1's rules; the slip's tab meeting the folio or the Glass there is a sibling on main too, exempt until it goes (Issue #762; the cold review of PR #777)",
+    "EL2 in every chart room with a slip, folded at 932x430 and resized a pixel taller and back twice, the seat comes to rest the same way each time and holds EL1's rules; the slip's tab meeting the folio, the Glass or the drawer's tab there, on the 1024 page that window lays out, is a sibling on main too, exempt until it goes (Issue #762; the cold review of PR #777)",
     folded.length >= 3 * (CHART_ROOM_FLOOR.length - 1) && foldedFaults.length === 0,
     `${folded.length} folded reads; ${foldedFaults.length ? `${foldedFaults.length} faults: ${foldedFaults.slice(0, 6).join("; ")}` : "no faults"}`,
   );
@@ -265,11 +267,11 @@ export async function eaDesk(ctx: SuiteContext): Promise<void> {
 async function lifted(ctx: SuiteContext, page: string, how: "hover" | "focus"): Promise<{ at: string; lifted: boolean; s: Stage | null }> {
   await size(ctx, DESK.w, DESK.h);
   await open(ctx, page, DESK.w, DESK.h, DESK, `EA5 ${how}`);
-  const press = await ctx.evaluate<{ x: number; y: number } | null>(`(() => { const b = [...document.querySelectorAll(".legend:not(.in-slip) .legend-row .legend-btn")].find((e) => e.getBoundingClientRect().width > 0); if (!b) return null; const r = b.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; })()`);
+  const press = await ctx.evaluate<{ x: number; y: number } | null>(`(() => { const b = [...document.querySelectorAll(".legend .legend-row .legend-btn")].find((e) => e.getBoundingClientRect().width > 0); if (!b) return null; const r = b.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; })()`);
   if (!press) return { at: `${page} ${how}, which shows no Press`, lifted: false, s: null };
   if (how === "hover") await ctx.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: press.x, y: press.y });
-  else await ctx.evaluate(`(() => { const b = [...document.querySelectorAll(".legend:not(.in-slip) .legend-row .legend-btn")].find((e) => e.getBoundingClientRect().width > 0); b.focus({ focusVisible: true }); return true; })()`);
-  const lift: Payload<boolean> = `[...document.querySelectorAll(".legend:not(.in-slip) .legend-row .legend-btn")].some((e) => e.matches(":hover, :focus-visible") && getComputedStyle(e).transform !== "none")`;
+  else await ctx.evaluate(`(() => { const b = [...document.querySelectorAll(".legend .legend-row .legend-btn")].find((e) => e.getBoundingClientRect().width > 0); b.focus({ focusVisible: true }); return true; })()`);
+  const lift: Payload<boolean> = `[...document.querySelectorAll(".legend .legend-row .legend-btn")].some((e) => e.matches(":hover, :focus-visible") && getComputedStyle(e).transform !== "none")`;
   const up = await makeSettle(ctx)(lift, (d) => d, `EA5 ${page} ${how} lifts a press`).catch(() => false);
   await size(ctx, DESK.w, DESK.h - 1);
   const s = await rest(ctx, DESK.w, DESK.h - 1, `EA5 ${page} ${how} relaid`);
@@ -300,41 +302,7 @@ const relative = ([r, g, b]: readonly [number, number, number]): number => 0.212
 const ratio = (a: number, b: number): number => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
 const median = (xs: number[]): number => { const s = [...xs].sort((a, b) => a - b); return s[Math.floor(s.length / 2)]!; };
 
-type Glyph = { piece: string; t: string; ink: [number, number, number]; row: number; x: number; w: number };
 type Ground = { piece: string; t: string; ratio: number };
-const PIECES = "header.chrome, .corner, .strip, .legend:not(.in-slip)";
-
-// Every text node of the chrome whose box centre stands on the sheet, by piece; decor hidden from assistive technology (the nav's separator dots) is left out, and the ink is the computed colour, so a translucent ancestor reads darker ink than it paints and errs toward passing.
-export const GLYPHS_OVER_SHEET: Payload<Glyph[]> = `(() => {
-  const sheet = document.getElementById("sheet").getBoundingClientRect();
-  const unseen = (el) => { for (let e = el; e; e = e.parentElement) { const cs = getComputedStyle(e); if (cs.display === "none" || cs.visibility === "hidden" || parseFloat(cs.opacity) === 0) return true; } return false; };
-  const name = (root) => root.matches("header.chrome") ? "cluster" : root.matches(".corner.tr") ? "room folio" : root.matches(".corner.bl") ? "chart folio" : root.matches(".corner.br") ? "Glass" : root.matches(".strip") ? "strip" : root.matches(".legend") ? "Press" : "corner";
-  const out = [];
-  for (const root of document.querySelectorAll(${JSON.stringify(PIECES)})) {
-    const walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
-    for (let n = walk.nextNode(); n; n = walk.nextNode()) {
-      const el = n.parentElement;
-      if (!n.textContent.trim() || !el || el.closest("[aria-hidden='true'], option, select, script, style") || unseen(el)) continue;
-      const rg = new Range(); rg.selectNodeContents(n);
-      const b = rg.getBoundingClientRect();
-      if (!(b.width > 0)) continue;
-      const cx = b.left + b.width / 2, cy = b.top + b.height / 2;
-      if (cx < sheet.left || cx > sheet.right || cy < sheet.top || cy > sheet.bottom) continue;
-      const m = getComputedStyle(el).color.match(/[0-9.]+/g).map(Number);
-      out.push({ piece: name(root), t: (el.classList.contains("fn") ? "the section mark " : "") + n.textContent.trim().slice(0, 24), ink: [m[0], m[1], m[2]], row: Math.round(cy), x: Math.max(0, Math.floor(b.left)), w: Math.max(1, Math.floor(b.width)) });
-    }
-    for (const input of root.querySelectorAll("input[type=number], input[type=text], input[type=search], input:not([type])")) {
-      if (!input.value || unseen(input)) continue;
-      const b = input.getBoundingClientRect(), cs = getComputedStyle(input);
-      const x = b.left + parseFloat(cs.paddingLeft) + parseFloat(cs.borderLeftWidth), w = b.width - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - parseFloat(cs.borderLeftWidth) - parseFloat(cs.borderRightWidth);
-      const cx = x + w / 2, cy = b.top + b.height / 2;
-      if (!(w > 0) || cx < sheet.left || cx > sheet.right || cy < sheet.top || cy > sheet.bottom) continue;
-      const m = cs.color.match(/[0-9.]+/g).map(Number);
-      out.push({ piece: name(root), t: "the field " + (input.id || input.name || input.type), ink: [m[0], m[1], m[2]], row: Math.round(cy), x: Math.max(0, Math.floor(x)), w: Math.max(1, Math.floor(w)) });
-    }
-  }
-  return out;
-})()`;
 
 const HIDE_TEXT = `header.chrome *, .legend *, .corner *, .strip * { color: transparent !important; text-decoration-color: transparent !important; }`;
 export const NO_POOLS = `body.stage-under :is(header.chrome, .legend, .corner, .strip)::before { content: none !important; }`;

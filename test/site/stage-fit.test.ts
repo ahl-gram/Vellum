@@ -1,11 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { CHROME_GAP, SLIP_CLEARANCE, fitStage } from "../../src/site/shared/stage-fit.ts";
+import { CHROME_GAP, SLIP_CLEARANCE, fitStage, holdsSheet } from "../../src/site/shared/stage-fit.ts";
 
 // Issue #462 chart-room ruling 1: the chart is fitted to the space the chrome leaves, measured off the chrome rects, never guessed.
 
 const ASPECT = 1500 / 1157.931;
-const base = { view: { w: 1280, h: 800 }, aspect: ASPECT, gap: 14, narrow: false };
+const base = { view: { w: 1280, h: 800 }, aspect: ASPECT, gap: 14 };
 
 // Issue #463 plate read: at 1680 the keys slip (123px wide, right-aligned under the Glass) ran 17px under the centred sheet, because the reserve knew only the slip. The Glass's left edge bounds the sheet whenever it is handed in.
 test("chrome standing at the right edge (the Glass) widens the reserve past the slip's clearance when it reaches further in", () => {
@@ -35,25 +35,6 @@ test("the sheet keeps the chart's aspect and touches the tighter free edge", () 
   assert.ok(Math.abs(wide.sheet.h - (700 - 100 - 28)) < 1e-9, "a wide free box is height-bound");
   const tall = fitStage({ ...base, view: { w: 600, h: 800 }, above: [100], below: [700], beside: 0 });
   assert.ok(Math.abs(tall.sheet.w - 600) < 1e-9, "a tall free box is width-bound");
-});
-
-test("a narrow sheet fits the viewport's width at least, so a landscape phone pans instead of squinting", () => {
-  const fit = fitStage({ ...base, view: { w: 844, h: 390 }, above: [60], below: [300], beside: 0, narrow: true });
-  assert.equal(fit.sheet.w, 844, "at least the viewport's width");
-  assert.ok(fit.sheet.h > 390 - 60 - 90 - 28, "so it overflows the free height and pans");
-  const still = fitStage({ ...base, view: { w: 844, h: 390 }, above: [60], below: [300], beside: 0 });
-  assert.ok(still.sheet.w < 844, "the same box on a wide sheet keeps the fit");
-});
-
-test("the narrow width floor is a landscape rule: a portrait page fits the free height instead of running under the fixed chrome", () => {
-  const page = fitStage({ ...base, aspect: 0.5, view: { w: 390, h: 844 }, above: [84], below: [738], gap: 8, beside: 0, narrow: true });
-  assert.ok(Math.abs(page.sheet.w / page.sheet.h - 0.5) < 1e-9, "aspect held");
-  assert.ok(page.sheet.h <= 844 - 92 - 114 + 1e-9, "height-bound inside the free box");
-  assert.ok(page.sheet.w < 390, "narrower than the viewport is the price of fitting");
-  const chart = fitStage({ ...base, view: { w: 844, h: 390 }, above: [60], below: [300], beside: 0, narrow: true });
-  assert.equal(chart.sheet.w, 844, "the landscape chart keeps the pan rule");
-  const square = fitStage({ ...base, aspect: 1, view: { w: 390, h: 844 }, above: [600], below: [844], gap: 8, beside: 0, narrow: true });
-  assert.equal(square.sheet.w, 390, "a height-bound square sheet still hits the width floor: the boundary is landscape-inclusive (guard-prover round 2 found the width-bound fixture proved nothing)");
 });
 
 test("no chrome at all leaves the gap alone, and a chrome past the viewport cannot push the floor below it", () => {
@@ -95,7 +76,7 @@ test("a fit that would leave the sheet under half the room it could show it in t
 });
 
 test("the floor fires below half the room exactly, and a sheet shorter than wide is held by the window's height (Issue #762)", () => {
-  const square = { view: { w: 1000, h: 600 }, aspect: 1, gap: 0, narrow: false, beside: 0, above: [0] };
+  const square = { view: { w: 1000, h: 600 }, aspect: 1, gap: 0, beside: 0, above: [0] };
   const atHalf = fitStage({ ...square, below: [300] });
   assert.equal(atHalf.sheet.w, 300, "a sheet at exactly half the 600 room");
   assert.equal(atHalf.under, false, "is left as it is");
@@ -108,22 +89,10 @@ test("the floor fires below half the room exactly, and a sheet shorter than wide
   near(portrait.sheet.w, (474 - 28) * 0.5, "at its own aspect");
 });
 
-// The narrow fit's inputs as bindRoom reads them on this branch's build (measured 2026-10-05, Issue #762 pull request B): the wrapped cluster's foot above, the bottom sheet's head below, no slip beside.
-const narrowFit = (h: number, above: number, sheetTop: number, aspect: number) =>
-  fitStage({ ...base, aspect, view: { w: 640, h }, above: [above], below: [sheetTop], beside: 0, gap: 8, narrow: true });
-
-test("a narrow fit whose width floor runs the sheet past its room says it runs under the chrome, so the chrome stands on its dark backing (Alex, 2026-10-05, on PR #784)", () => {
-  const explorer = narrowFit(400, 164.59, 254.75, ASPECT);
-  near(explorer.sheet.w, 640, "the Explorer at 640x400 keeps the narrow width floor");
-  assert.ok(explorer.sheet.h > 400 - (164.59 + 8) - (400 - 254.75 + 8), "the witness: a sheet taller than the room between the cluster and the bottom sheet");
-  assert.equal(explorer.under, true, "and the fit says it runs under the chrome");
-  const printRoom = narrowFit(800, 164.59, 693.73, 1.2952268987960809);
-  near(printRoom.sheet.w, 640, "the Print Room at 640x800 keeps the narrow width floor too");
-  assert.equal(printRoom.under, false, "but its sheet fits the room between the cluster and the bottom sheet, so it runs under nothing");
+test("UH1 a window too small to hold any sheet fits nothing, so the room keeps its last fit and its camera: a full-page capture shrank the viewport to 1x1 for a moment, and the zero sheet it fitted threw a deep camera's centre to the map's corner (Issue #762, CD2b's red)", () => {
+  assert.equal(holdsSheet(fitStage({ ...base, view: { w: 1024, h: 1 }, above: [127], below: [705], beside: 0 })), false, "the 1024 page one pixel tall holds no sheet");
+  assert.equal(holdsSheet(fitStage({ ...base, view: { w: 1, h: 1 }, above: [127], below: [705], beside: 0 })), false, "nor a one-pixel window");
+  assert.equal(holdsSheet(fitStage({ ...base, above: [127], below: [705], beside: 0 })), true, "the 1280x800 desk holds one");
+  assert.equal(holdsSheet(fitStage({ ...base, view: { w: 1024, h: 300 }, above: [127], below: [250], beside: 0 })), true, "a short window floors its sheet and still holds one");
 });
 
-test("the floor waits on a narrow layout, whose own width floor still stands until Issue #762's pull request C", () => {
-  const narrow = fitStage({ ...base, aspect: 0.5, view: { w: 390, h: 844 }, above: [700], below: [760], gap: 8, beside: 0, narrow: true });
-  assert.equal(narrow.under, false, "no floor on the narrow layout, even for a degenerate portrait fit the width floor leaves alone");
-  near(narrow.sheet.h, 760 - 700 - 16, "the narrow fit as it was");
-});

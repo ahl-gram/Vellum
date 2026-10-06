@@ -98,10 +98,10 @@ body.chart-room .stage { display: flex; align-items: center; justify-content: ce
 .verso-docket, .verso-survey { position: absolute; left: 8%; right: 8%;
   text-align: center; }
 .verso-docket { top: 9%; text-transform: uppercase; letter-spacing: 0.18em;
-  font-size: clamp(0.6rem, 1.4vw, 0.92rem); color: var(--ink-brown);
+  font-size: clamp(0.6rem, max(1.4vw, 14.336px), 0.92rem); color: var(--ink-brown);
   font-variant-numeric: tabular-nums; }
 .verso-survey { top: 17%; font-style: italic; line-height: 1.5;
-  font-size: clamp(0.62rem, 1.5vw, 1rem); color: var(--ink-brown); }
+  font-size: clamp(0.62rem, max(1.5vw, 15.36px), 1rem); color: var(--ink-brown); }
 .verso-stamp { position: absolute; right: 11%; bottom: 12%;
   width: clamp(90px, 17%, 190px); height: auto; opacity: 0.5;
   transform: rotate(-8deg); }
@@ -117,10 +117,7 @@ body.chart-room .stage { display: flex; align-items: center; justify-content: ce
 
 .legend-row a.fn { color: var(--line-tan); align-self: flex-start; margin-left: -0.45rem; }
 .legend-row a.fn:hover, .legend-row a.fn:focus-visible { color: var(--parchment-bright); }
-body.stage-under .legend:not(.in-slip) .legend-row a.fn:not(:hover, :focus-visible) { color: var(--parchment); }
-/* Docked on the sheet's parchment line-tan reads 2.00:1 and the cream 1.10:1 (`BR6c` in `e2e/suites/broadside.ts` reads the resolved colour). */
-.legend.in-slip .legend-row a.fn { color: var(--ink-brown); }
-.legend.in-slip .legend-row a.fn:hover, .legend.in-slip .legend-row a.fn:focus-visible { color: var(--ink-dark); }
+body.stage-under .legend .legend-row a.fn:not(:hover, :focus-visible) { color: var(--parchment); }
 
 @media print {
   .stage { position: static; padding: 0 !important; display: block; }

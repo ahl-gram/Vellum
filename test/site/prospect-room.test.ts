@@ -47,7 +47,7 @@ test("PPR2 the corner is the year control (#494 ruling 2): viewed in the year, t
   assert.match(folio, /<p class="gloss">turn the year back, even to the ground before it rose<\/p>/, "the corner's gloss");
 });
 
-test("PPR3 the engraver's note is the slip (#494 ruling 4): the gazetteer's note, the key to the plate in the kit's contents row, the era line, the legend's phone dock", () => {
+test("PPR3 the engraver's note is the slip (#494 ruling 4): the gazetteer's note, the key to the plate in the kit's contents row, the era line", () => {
   assert.match(page, /<Slip id="note" verb="The engraver's note" title="The Engraver's Note" where="[^"]+" fold="Fold the engraver's note away">/, "the slip carries the mockup's head; the title is the tab's name, the h2 takes the place at the draw");
   const slip = between("<Slip", "</Slip>");
   assert.match(slip, /<p class="note-prose" id="pp-note"><\/p>/, "the note, filled at the draw");
@@ -55,8 +55,7 @@ test("PPR3 the engraver's note is the slip (#494 ruling 4): the gazetteer's note
   assert.match(slip, /<ol class="contents plate-key" id="pp-key"><\/ol>/, "the key is the kit's contents row (#487, its third use)");
   assert.match(slip, /<p class="era" id="pp-era"><\/p>/, "the era line");
   assert.match(slip, /<p class="era-gloss">The same place, chart and year always press the same plate\./, "the intro's one surviving line rides the era (the mockup's seat for it)");
-  assert.ok(slip.includes('class="legend-dock"'), "the slip body carries the dock the legend row moves into on a phone");
-  const order = ['id="pp-note"', 'id="pp-key-head"', 'id="pp-key"', 'id="pp-era"', 'class="era-gloss"', 'class="legend-dock"'].map((m) => slip.indexOf(m));
+  const order = ['id="pp-note"', 'id="pp-key-head"', 'id="pp-key"', 'id="pp-era"', 'class="era-gloss"'].map((m) => slip.indexOf(m));
   assert.ok(order.every((i, n) => i >= 0 && (n === 0 || i > order[n - 1]!)), "note, key head, key, era, gloss, dock");
   assert.ok(page.indexOf("</Slip>") < page.indexOf("<ChartFolio"), "the slip precedes the chart's folio in the page");
 });
@@ -107,7 +106,7 @@ test("PPR6 seats.ts binds the Glass and the room at the plate's own aspect; app.
   }
 });
 
-test("PPR7 the css: the sheet fitted to what the chrome leaves, the plate as the sheet's face, the year label standing down on a phone, print standing down (#462 ruling 10)", () => {
+test("PPR7 the css: the sheet fitted to what the chrome leaves, the plate as the sheet's face, print standing down (#462 ruling 10)", () => {
   assert.match(css, /\.stage\s*\{[^}]*padding:\s*var\(--reserve-top/, "the stage reserves the chrome's edges as padding, measured by room.ts");
   assert.match(css, /#sheet\s*\{[^}]*box-shadow:\s*var\(--stage-shadow\)/, "the sheet rests at the chart-room depth, via the token");
   assert.match(css, /#map-viewport\.zoomable\s*\{[^}]*touch-action:\s*none/, "touch-action:none stays on the gesture box");
@@ -116,8 +115,6 @@ test("PPR7 the css: the sheet fitted to what the chrome leaves, the plate as the
   assert.match(css, /#pp-plate\[hidden\]\s*\{[^}]*display:\s*none/, "hidden stays hidden under the author display");
   assert.doesNotMatch(css, /(^|\n)(\.contents )?\.cr-(num|text)\s*\{/, "the page css does not re-dress the kit's row (#302)");
   assert.doesNotMatch(css, /(^|\n)\s*(header|footer|\.plate-figure|\.actions|main)\s*[{,]/, "no rule targets furniture a chart room no longer has");
-  const phone = css.slice(css.indexOf("@media (max-width: 900px)"), css.indexOf("@media print"));
-  assert.match(phone, /\.year-label\s*\{[^}]*display:\s*none/, "the label stands down on a phone (the mockup); the input keeps its aria-label");
   const print = css.match(/@media print\s*\{([\s\S]*)\}\s*$/);
   assert.ok(print, "the page css ends with its print stand-down");
   assert.match(print[1]!, /\.stage\s*\{[^}]*position:\s*static/, "the plate prints in flow");
@@ -128,7 +125,6 @@ test("PPR7 the css: the sheet fitted to what the chrome leaves, the plate as the
 function assertLayPressWiring(): void {
   const slip = between('<Slip id="note"', "</Slip>");
   assert.match(slip, /<button id="pp-lay" class="pp-lay" type="button">/, "the press stands inside the note, where the room's desk actions belong");
-  assert.ok(slip.indexOf('id="pp-lay"') < slip.indexOf('class="legend-dock"'), "above the docked roads rather than among them");
   const roads = between('<nav class="legend"', "</nav>");
   assert.doesNotMatch(roads, /pp-lay/, "and NOT in the roads out, which go somewhere; a press that acts on the sheet wears the button dress instead");
   // Astro markup cannot import, so the authored literal and the constant the script paints with are pinned EQUAL here or they drift silently.

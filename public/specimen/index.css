@@ -9,9 +9,8 @@
 #map { position: absolute; inset: 0; transform-origin: 0 0; }
 #sb-plate { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 
-/* The corner's state select at the Print Room's width, so "slip folded" is not clipped by the kit's phone clamp; the row wraps on a phone as the Print Room's does. */
+/* The corner's state select at the Print Room's width, so "slip folded" is not clipped beside the chevron. */
 .folio-controls select.control { width: 7.4rem; }
-@media (max-width: 900px) { .folio-controls { flex-wrap: wrap; } }
 
 @media print {
   .stage { position: static; padding: 0 !important; display: block; }
