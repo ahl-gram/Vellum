@@ -107,10 +107,11 @@ function rangeBehind(world: World, s: Site, view: ProspectView): string | null {
 const roadsEndingAt = (world: World, s: Site): number =>
   world.roads.filter((r) => [r.points[0], r.points[r.points.length - 1]].some((p) => p !== undefined && Math.abs(p.x - s.x) <= 1 && Math.abs(p.y - s.y) <= 1)).length;
 
-function beastInBay(world: World, s: Site, view: ProspectView): PlateBeast | null {
+function beastInBay(world: World, s: Site, view: ProspectView, year: number): PlateBeast | null {
   if (!s.harbor) return null;
   const right = viewRight(view);
   const near = world.beasts
+    .filter((b) => b.firstSeen <= year)
     .map((b) => {
       const ox = b.x - s.x, oy = b.y - s.y;
       return { name: b.name, epithet: b.epithet, dist: Math.sqrt(ox * ox + oy * oy), lateral: (ox * right.dx + oy * right.dy) / NEAR, depth: ox * view.dx + oy * view.dy };
@@ -119,6 +120,12 @@ function beastInBay(world: World, s: Site, view: ProspectView): PlateBeast | nul
     .sort((a, b) => a.dist - b.dist)[0];
   return near === undefined ? null : { name: near.name, epithet: near.epithet, lateral: near.lateral };
 }
+
+const realmProclaimedBy = (world: World, s: Site, year: number): boolean => {
+  const realm = world.realms.labels[s.x + s.y * world.elev.w] ?? -1;
+  const rise = world.history.events.find((e) => e.kind === "rise" && e.realm === realm);
+  return rise === undefined || rise.year <= year;
+};
 
 /** World sheets only, like buildProspectInput: what the plate of settlement `index` may truthfully name at `year`. */
 export function plateSurroundings(world: World, index: number, year: number): Surroundings {
@@ -131,7 +138,7 @@ export function plateSurroundings(world: World, index: number, year: number): Su
     rangeName: rangeBehind(world, s, view),
     roadTowns: roadTowns(world, index, view, year),
     roadCount: roadsEndingAt(world, s),
-    beast: beastInBay(world, s, view),
-    realmProclaimed: true,
+    beast: beastInBay(world, s, view, year),
+    realmProclaimed: realmProclaimedBy(world, s, year),
   };
 }

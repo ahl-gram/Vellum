@@ -286,8 +286,8 @@ const SURROUNDED: Surroundings = {
 
 // Re-pinned 2026-10-06 for E (Issue #754): armless synthetic fixtures only (the arms spend render/layers/heraldry, whose charges carry libm ancestry), so these bytes cannot drift across platforms. A deliberate plate change re-pins these with the cause named in the commit.
 const PINNED: ReadonlyArray<{ name: string; year: number; style: "antique" | "ink"; sum: number }> = [
-  { name: "harborCapital", year: 1300, style: "antique", sum: 3636258376 },
-  { name: "harborCapital", year: 1300, style: "ink", sum: 2560969069 },
+  { name: "harborCapital", year: 1300, style: "antique", sum: 1782288422 },
+  { name: "harborCapital", year: 1300, style: "ink", sum: 1277032137 },
   { name: "harborCapital", year: 1040, style: "ink", sum: 1669871168 },
   { name: "ruinedTown", year: 1200, style: "antique", sum: 4087823426 },
   { name: "ruinedTown", year: 1120, style: "ink", sum: 699834108 },
@@ -295,6 +295,8 @@ const PINNED: ReadonlyArray<{ name: string; year: number; style: "antique" | "in
   { name: "riverVillage", year: 1300, style: "ink", sum: 159481560 },
   { name: "fieldsHamlet", year: 1300, style: "antique", sum: 1603591529 },
   { name: "fieldsHamlet", year: 1300, style: "ink", sum: 2085009582 },
+  { name: "drownedVillage", year: 1300, style: "antique", sum: 3771020040 },
+  { name: "drownedVillage", year: 1300, style: "ink", sum: 2915606114 },
 ];
 
 test("finished plates are byte-pinned across the eras and the dresses", () => {
@@ -303,6 +305,7 @@ test("finished plates are byte-pinned across the eras and the dresses", () => {
     ruinedTown: { input: makeInput({ ruined: true, ruinedYear: 1150 }), surroundings: undefined },
     riverVillage: { input: makeInput({ kind: "village", onRiver: true }), surroundings: undefined },
     fieldsHamlet: { input: makeInput({ kind: "hamlet" }), surroundings: undefined },
+    drownedVillage: { input: makeInput({ kind: "village", ruined: true, foreground: bandOf(["marsh", FOREGROUND_SAMPLES]) }), surroundings: undefined },
   };
   assert.ok(PINNED.length >= 8, "the pins cover every fixture in both dresses and the eras");
   for (const { name, year, style, sum } of PINNED) {

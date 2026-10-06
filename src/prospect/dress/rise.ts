@@ -89,7 +89,7 @@ const holdBirds = (f: ForegroundElement, sky: Sky): ForegroundElement =>
 function townNodes(e: Engraver, g: ProspectGeometry, rng: Rng): SvgNode[] {
   const split = ((): number => { const i = g.masses.findIndex((m) => m.raise < BACK_ROW_RAISE); return i === -1 ? g.masses.length : i; })();
   const line = g.ground.line;
-  const ground: SvgNode[] = g.ground.rise > 0
+  const ground: SvgNode[] = g.water?.kind === "drowned" ? [] : g.ground.rise > 0
     ? ((): SvgNode[] => {
         const outline = [{ x: line[0]!.x, y: g.ground.base + 3 }, ...line, { x: line[line.length - 1]!.x, y: g.ground.base + 3 }];
         return [el("path", { d: poly(outline), fill: washOr(e, "grass"), ...stroke(e, 1.1) }), ...groundSweep(e, outline, 0.35, 2.6, rng, 20)];

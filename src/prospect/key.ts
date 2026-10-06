@@ -70,7 +70,7 @@ function worldEntries(g: ProspectGeometry, ctx: KeyContext): Draft[] {
     ...(s.rangeName !== null && g.ridge !== null ? [plain(s.rangeName)] : []),
     ...(era === "before-founding" ? [] : s.roadTowns.map((t, i) => ({ label: `The road to ${t.name}`, x: null, y: null, town: i }))),
     ...(s.beast === null ? [] : [plain(`${s.beast.name}, ${s.beast.epithet}`)]),
-    ...(input.realmName !== null && input.kind !== "capital" ? [plain(`In ${lowerThe(input.realmName)}`)] : []),
+    ...(input.realmName !== null && input.kind !== "capital" && era !== "before-founding" && s.realmProclaimed ? [plain(`In ${lowerThe(input.realmName)}`)] : []),
   ];
 }
 

@@ -84,7 +84,7 @@ export function engraveE(style: MapStyle, p: PlateParts): EngravedE {
   const standing = p.era !== "before-founding";
   const tags = p.key.flatMap((k) => (k.x === null || k.y === null ? [] : [{ n: k.letter, x: Math.max(VIEW_X0 + 8, Math.min(VIEW_X1 - 8, k.x)), y: Math.max(40, k.y + LIFT) }]));
   const cartouche = [titleCartouche(e, letters, p.input.name, 44), banderole(e, letters, bandText(p), 70)];
-  const medals = [...(standing && p.input.arms !== null ? [wreathedArms(e, p.input.arms, p.suffix)] : []), chartRoundel(e, letters, p.input.seed, p.year)];
+  const medals = [...(standing && p.surroundings.realmProclaimed && p.input.arms !== null ? [wreathedArms(e, p.input.arms, p.suffix)] : []), chartRoundel(e, letters, p.input.seed, p.year)];
   const key = [keyPanel(e, letters, p.key, RISE_BOTTOM), keyTags(e, letters, tags)];
   const margin = [cardinalWords(e, letters, cardinalsFor(p.input.view)), footerLine(e, letters, p.caption.yearLine, p.input.seed)];
   const tagClear = tags.map((t) => { const b = runBox(tagSpec(e, t)); return { x0: b.x0 - 2, x1: b.x1 + 2, y0: b.top - 2, y1: b.bottom + 2 }; });

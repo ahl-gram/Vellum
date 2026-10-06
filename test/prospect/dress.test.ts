@@ -9,7 +9,7 @@ import { groundAt, type ForegroundElement, type Mass } from "../../src/prospect/
 import { massNodes } from "../../src/prospect/dress/buildings.ts";
 import { foregroundNodes, PROSPECT_DRESSES } from "../../src/prospect/dress/plate.ts";
 import { dressContext } from "../../src/prospect/dress/context.ts";
-import { engraver } from "../../src/prospect/dress/burin.ts";
+import { engraver, pt } from "../../src/prospect/dress/burin.ts";
 import { foregroundEngraved, massNodesEngraved, wallNodesEngraved } from "../../src/prospect/dress/townscape.ts";
 import { LIFT, massReach, wallReach, type Box } from "../../src/prospect/dress/rise.ts";
 import { finishedPlateSvg } from "../../src/prospect/finished.ts";
@@ -169,4 +169,16 @@ test("a mass's reach, which a bird keeps clear of, holds every mark it engraves,
       }
     }
   }
+});
+
+test("a drowned plate draws no ground line under the flood, where a dry one draws its own", () => {
+  const lineOf = (input: ReturnType<typeof makeInput>): string => {
+    const line = composeProspect(input).ground.line;
+    return `d="M${pt(line[0]!)}L${pt(line[1]!)}`;
+  };
+  const drowned = makeInput({ kind: "village", ruined: true, foreground: bandOf(["marsh", FOREGROUND_SAMPLES]) });
+  const dry = makeInput({ kind: "hamlet" });
+  assert.equal(composeProspect(drowned).water?.kind, "drowned", "premise: the fixture drowns");
+  assert.ok(finishedPlateSvg(dry, STYLES.antique, 1300).includes(lineOf(dry)), "the control: a dry plate draws the line this probe reads");
+  for (const style of [STYLES.antique, STYLES.ink]) assert.ok(!finishedPlateSvg(drowned, style, 1300).includes(lineOf(drowned)), `${style.name}: no ground line under the flood`);
 });
