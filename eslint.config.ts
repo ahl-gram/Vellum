@@ -56,6 +56,7 @@ export default defineConfig(
       "@typescript-eslint/related-getter-setter-pairs": "error",
       "@typescript-eslint/unified-signatures": "error",
       "@typescript-eslint/no-useless-constructor": "error",
+      "@typescript-eslint/no-extraneous-class": "error",
     },
   },
   {
