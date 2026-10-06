@@ -1,4 +1,5 @@
-import type { Rule } from "eslint";
+import type { Rule, Scope } from "eslint";
+import { isBuiltin } from "node:module";
 import { dirname, relative, resolve, sep } from "node:path";
 import { CANCELLATION_PREFIXES } from "../../e2e/support/console.ts";
 
@@ -280,6 +281,28 @@ const contentsRowBuilderOnly: Rule.RuleModule = {
 const testNoTestImport = sourceBan("nothing imports a .test.ts: node --test would run that file's tests a second time; share through test-support/ instead", (text) => /\.test\.ts(?:[?#]|$)/.test(text));
 
 const PINS = "the prospect plates are byte-pinned on every platform (handbook/specs/rulebook.md, Prospect byte pins)";
+const EXACT_MATH = new Set(["E", "LN10", "LN2", "LOG10E", "LOG2E", "PI", "SQRT1_2", "SQRT2", "abs", "ceil", "clz32", "floor", "fround", "imul", "max", "min", "round", "sign", "sqrt", "trunc"]);
+const PROSPECT_GLOBALS = new Set(["Array", "Boolean", "Error", "Infinity", "JSON", "Map", "Math", "NaN", "Number", "Object", "RangeError", "Set", "String", "TypeError", "parseInt", "undefined"]);
+const LOCALE_MEMBERS = new Set(["localeCompare", "toLocaleDateString", "toLocaleLowerCase", "toLocaleString", "toLocaleTimeString", "toLocaleUpperCase"]);
+const AMBIENT = ["ClassDeclaration", "TSDeclareFunction", "TSEnumDeclaration", "TSModuleDeclaration", "VariableDeclaration"];
+
+const memberKey = (member: Node): string | null =>
+  member.type !== "MemberExpression" ? null : member.computed ? wholeString(member.property as Node) : member.property.type === "Identifier" ? member.property.name : null;
+const exactMath = (id: Node): boolean => {
+  const member = id.parent;
+  return member?.type === "MemberExpression" && member.object === id && !member.computed && EXACT_MATH.has(memberKey(member) ?? "");
+};
+const typeQueried = (node: Node | null): boolean => {
+  if (node === null) return false;
+  const kind = node.type as string;
+  return kind === "TSTypeQuery" || (kind === "TSQualifiedName" && typeQueried(node.parent));
+};
+const globalReads = (scope: Scope.Scope): Scope.Reference[] =>
+  [...scope.through, ...scope.variables.filter((v) => v.defs.length === 0).flatMap((v) => v.references)].filter((ref) => (ref as { isValueReference?: boolean }).isValueReference !== false);
+const hostModule = (source: Node): boolean => {
+  const text = wholeString(source);
+  return text === null || isBuiltin(text);
+};
 
 const prospectLibmClockFree: Rule.RuleModule = {
   meta: {
@@ -292,7 +315,34 @@ const prospectLibmClockFree: Rule.RuleModule = {
       ambient: `the prospect layer declares no ambient binding: a declare line hides a global from this rule while the erased code still reads it, and ${PINS}`,
     },
   },
-  create: () => ({}),
+  create(context) {
+    const report = (node: Node, messageId: string): void => context.report({ node, messageId });
+    const source = (node: Node | null | undefined): void => {
+      if (node && hostModule(node)) report(node, "module");
+    };
+    const ambient = (node: Node): void => {
+      if ((node as { declare?: boolean }).declare === true) report(node, "ambient");
+    };
+    return {
+      ...Object.fromEntries(AMBIENT.map((kind) => [kind, ambient])),
+      BinaryExpression: (node) => (node.operator === "**" ? report(node, "power") : undefined),
+      AssignmentExpression: (node) => (node.operator === "**=" ? report(node, "power") : undefined),
+      MemberExpression: (node) => (LOCALE_MEMBERS.has(memberKey(node) ?? "") ? report(node, "host") : undefined),
+      MetaProperty: (node) => (node.meta.name === "import" ? report(node, "host") : undefined),
+      ImportDeclaration: (node) => source(node.source as Node),
+      ExportAllDeclaration: (node) => source(node.source as Node),
+      ExportNamedDeclaration: (node) => source(node.source as Node | null | undefined),
+      ImportExpression: (node) => source(node.source as Node),
+      "Program:exit"(program) {
+        for (const ref of globalReads(context.sourceCode.getScope(program))) {
+          const id = ref.identifier as Node;
+          if (typeQueried(id.parent)) continue;
+          if (!PROSPECT_GLOBALS.has(ref.identifier.name)) report(id, "host");
+          else if (ref.identifier.name === "Math" && !exactMath(id)) report(id, "libm");
+        }
+      },
+    };
+  },
 };
 
 export default {
