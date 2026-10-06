@@ -135,8 +135,8 @@ scrolling page it washes out whatever passes through it. Four corners, each a na
   cluster and the right-hand corner share one top row** on every page, laid out from their own boxes
   by `src/site/shell/top-row.ts`: a corner wider than the kit's gives way toward the kit's width first,
   then the cluster takes the width the corner leaves and the nav wraps between rooms, never inside a
-  room's name, at a pitch that keeps a thumb's 24px between its doors; the two boxes always stand
-  `--chrome-x` apart, wider than any backing the corner draws toward the nav. With scripts off a
+  room's name, at a pitch that keeps a thumb's 24px between its doors; the two boxes stand at least
+  `--chrome-x` apart, less a half pixel, wider than any backing the corner draws toward the nav. With scripts off a
   window below 1024 can overlap.
 - **The room folio**, top right: the room's name and tagline, with the room's *one* primary control
   under them. One control. The rest of the press is the legend row. A room that widens its folio
@@ -173,8 +173,8 @@ replaces a table of contents with an **index slip** that inks the section being 
 view. Folding the index hands the sheet the width, in one smooth settle, and gives it back the same
 way. **The band buys the ground for what the cluster carries**: its height is keyed to the
 cluster's contents, never to a page's name, and raised only on a room that renders a band. When the
-top row wraps the nav, the band token grows by exactly what the cluster grew, on every page that reads
-it.
+top row caps the cluster, the band token grows by exactly what the cap added to the cluster's height,
+on every page that reads it.
 
 **A room's name stands in the corner, not on the sheet.** Exactly one `h1` per page, and it is the
 first heading; the wordmark is the `h1` on home alone, because home is roomless.

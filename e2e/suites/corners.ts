@@ -241,7 +241,7 @@ async function co3Wraps(ctx: SuiteContext): Promise<void> {
   );
 }
 
-// The control undoes the top row by a style that outranks its inline writes, the corner at the Ribbon's 30rem cap and the cluster uncapped, and reruns it by its own resize listener; a synthetic resize is wiring, not a gesture.
+// A style outranks the top row's inline writes, and a synthetic resize reruns it: wiring, not a gesture.
 const PIN_CAP = "header.chrome { max-width: none !important; } .corner.tr.folio-room { max-width: 30rem !important; }";
 async function co2Control(ctx: SuiteContext): Promise<void> {
   const { evaluate, check } = ctx;

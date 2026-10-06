@@ -7,7 +7,6 @@ export interface Span {
 }
 
 export interface Corner extends Span {
-  /** The content max-width the sheets give the corner. */
   readonly cap: number;
   readonly floor: number;
   readonly pad: number;
