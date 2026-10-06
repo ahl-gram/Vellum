@@ -56,7 +56,10 @@ declaration you write to get there. The checklist form of the same lines is `vel
   together with `pointer: none`, so the bare query matches it too and stands the affordance down
   exactly where a keyboard user needs it. Linux headless CI is such a machine (e2e BR4 and BR5 hold the line). The bare query is still the
   right tool for **asking what the environment reports**, which is why an e2e probe uses it to detect
-  whether emulation took effect; the rule is about gating an affordance, not about the query.
+  whether emulation took effect; the rule is about gating an affordance, not about the query. So a
+  check asserts a visibility that depends on the environment only under the matching `matchMedia`
+  condition, and pins the rule's own scoping by reading the CSSOM, which reproduces a failure only
+  CI's machine shows on any machine.
 
 These are about looking rather than the cascade, and belong beside them:
 

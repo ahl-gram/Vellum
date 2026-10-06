@@ -5,7 +5,9 @@ working agreements and rationale that a task board has no field for. How a desig
 made before any of it is scheduled, and how a rule is written down once made, are
 `handbook/specs/conventions.md`'s.
 
-It replaces the body of issue #193, which is now a pointer to this file.
+It replaces the body of issue #193, which is now a pointer to this file. Other issues' citations
+of #193 were deliberately left as they stand and resolve through that pointer, so an old one is not
+drift to report.
 
 Five other places carry what this one deliberately does not:
 
@@ -29,7 +31,8 @@ not assume, `explorer-doctrine.md` the living chart over the baked sheet (the en
 host contract, the camera and gesture, counter-scale, the overlay lifecycle),
 `region-and-voyage.md` its other half (region sheets, level of detail, the voyage),
 `site-architecture.md` how the site is authored, bundled, discovered and shipped,
-`development-workflow.md` the sequence a change moves through, `settle-doctrine.md` how an e2e
+`development-workflow.md` the sequence a change moves through, `orchestration.md` how a session
+runs several lanes of it at once, `settle-doctrine.md` how an e2e
 wait is written and what the harness environment does, and `check-placement.md` which check holds
 which kind of rule.
 
@@ -382,7 +385,8 @@ the generator guarantees), to `handbook/specs/explorer-doctrine.md` (the living 
 overlays), to
 `handbook/specs/region-and-voyage.md` (region sheets, level of detail, the voyage), to
 `handbook/specs/site-architecture.md` (how the site is authored and shipped), to
-`handbook/specs/development-workflow.md` (the order of operations), to `handbook/specs/settle-doctrine.md` (how an e2e
+`handbook/specs/development-workflow.md` (the order of operations), to `handbook/specs/orchestration.md` (running
+several lanes at once), to `handbook/specs/settle-doctrine.md` (how an e2e
 wait is written, and what the harness environment does), to `handbook/specs/check-placement.md` (which
 check holds which kind of rule), and to the flake record at
 `.claude/skills/vellum-footguns/references/flake-record.md` (the CI reds believed to be flakes).

@@ -199,7 +199,8 @@ the public record that day, and a lesson in it came from a private note.
   of it. The general form is PR #576's (Issue #575): a proof resting on several instruments, each
   blind where another sees, loses coverage silently when one is swapped for a better-looking one;
   there a file listing stood in for `git status --porcelain`, the only one of the two that sees a
-  tracked file edited in place, and the proof now runs both.
+  tracked file edited in place, and the proof now runs both. Gate 1 item 21 states that general
+  form, added by Issue #783.
 - Issue #540, PR #545: BR6b's fixed offset landed on the new leaf tabs and read 59 against an
   unchanged ground; it was re-anchored to the docked press's own middle and mutation-proved against
   the pool it was written for. Proves Gate 2 item 4's moved-sample clause.
@@ -250,12 +251,77 @@ the public record that day, and a stated unknown says so.
   was not instrumented, so its list of blockers is indicative. Stands behind
   `handbook/specs/chart-dress.md`'s claim order.
 
+## Behind the lines Issue #783 moved
+
+The incidents behind lines Issue #783 moved out of a private note and into the specs, the gates and
+the agents, one row each with the line it stands behind. Each was checked against the public record
+on 2026-10-06; where that record is a commit on the pull request rather than its body or a comment,
+the row says so, and an incident the record does not show has no row.
+
+- Issue #654 row 8b, PR #720: the plan skeptic's blocking finding was a standing ruling the plan
+  rested on and the issue recorded nowhere (`handbook/plans/654/654-row8b-plan.md`); the
+  orchestrating session then posted it as a comment refining ruling A1. Stands behind
+  `handbook/specs/orchestration.md`'s ruling on the issue before the lane is briefed.
+- Issue #673, Issue #708: a relayed ruling read "code or text this PR wrote or moved and now owns"
+  where the issue's record read "code it did not write"; the lane asked which governed, and Alex
+  ruled that the record's wording does. Stands behind `handbook/specs/orchestration.md`'s relay that
+  quotes the posted comment.
+- Issue #621: the launch wait was ruled at 20 seconds, then 40, then 60 as CI printed slower starts,
+  the last ruling sending back only a measured first start past 60 seconds. Stands behind
+  `handbook/specs/orchestration.md`'s ruled number relayed with its stop condition.
+- Issue #729: the orchestrating session's condition on ruling B was posted labelled as its own and
+  not part of Alex's ruling. The model for `handbook/specs/orchestration.md`'s labelled condition.
+- Issue #708, Issue #668: Alex cleared the orchestrating session to merge one named pull request at a
+  time ("cleared the orchestrator to merge PR #730 once it is ready", and PR #737 "on these
+  rulings"). Stands behind `handbook/specs/orchestration.md`'s clearance covering what it names.
+- PR #715, in its commit `d9a8991`: `handbook/errata/guards.md` conflicted with PR #714 where both
+  appended rows, and both sides' rows were kept in pull request order. Stands behind
+  `handbook/specs/orchestration.md`'s merge order for errata rows.
+- Issue #648: the plan skeptic measured that `npm ci` in a worktree whose `node_modules` is a link
+  empties the link's target, the main checkout's install. Stands behind
+  `.claude/agents/vellum-implementer.md`'s install line and `handbook/specs/orchestration.md`'s
+  dependency mirror.
+- Issue #644: a menu listed commit messages among the places the footgun hook checks, which nothing
+  does; a correction comment named the premise the orchestrating session's error and added a
+  follow-up item. Stands behind `handbook/specs/development-workflow.md` step 6's checked premise.
+- Issue #668: a ruling rested on "desktop unchanged", which nobody had measured, and was re-taken; a
+  later menu's "the other chart rooms do not shrink" was wrong, and the ruling was confirmed again
+  on the corrected premise. Stands behind workflow step 6's measured consequence.
+- PR #608, PR #570: a conflicted `git rebase --continue` strips a commit subject that begins with
+  `#`, and every subject here does; PR #608 records the declined gate candidate's attribution to the
+  branch `487-kit` on 2026-09-02. Stands behind workflow step 10's merge, never a rebase.
+- PR #576, PR #574, Issue #573: a skeptic called a red a flake because "the same `main` sha ran green
+  once", and that green run was the Deploy workflow's, not CI's; a fixed-port warning ("the suite
+  binds 4877") went into an agent definition untested and was false, one of the claims written into
+  doctrine without a command. Stands behind workflow step 10's subagent claim.
+- PR #362: a guard-prover run was stopped at a timebox about half an hour in with nothing written
+  down, and the body records that a run killed at a timebox produces no ledger at all. Stands behind
+  workflow step 11's nudge, never a stop.
+- PR #721, Issue #693: a pull request opened as having no issue was Issue #693's and overrode its
+  ruling; the cold review's blocking finding was fixed with a closing line and dated comments on
+  Issue #693 and Issue #654. Stands behind workflow step 12's search before an issue-less pull
+  request.
+- Issue #426: after the Landfall epic each Ribbon sub got its own dated re-baseline comment, and the
+  rulings went on the epic as one ledger comment. Stands behind the workflow sweep's ledger on the
+  epic.
+- PR #246, in its commit `09c3cfd` (Issue #170): CI's headless Chrome reports `hover: none` with
+  `pointer: none`, so the hide moved to the touch-primary predicate, a declaration-level scoping
+  check reproduced the CI failure locally, and the legend's visibility was asserted only where the
+  environment should show one. Stands behind `handbook/specs/cascade-traps.md`'s corollary to the
+  affordance gate.
+- Issue #621, Issue #622: each was filed on 2026-09-14 by Alex's ruling from the flake record's rows
+  for one check. Stands behind `handbook/specs/settle-doctrine.md` clause 12's filing line.
+- PR #550, Issue #193: re-pointing the other `#193` references was deliberately not done, at Alex's
+  word, and Issue #193 says they still resolve there. Stands behind `handbook/specs/rulebook.md`'s
+  line on old `#193` citations.
+
 ## Where the rules are written down
 
 Where a lesson's rule is written down in this repo, it is in one of these: the gate lines in
 `.claude/skills/vellum-footguns/SKILL.md`, each with its incident; `handbook/specs/settle-doctrine.md`
 (how an e2e wait is written and what the harness does); `handbook/specs/development-workflow.md`
-(what a pull request owes, and in what order); `handbook/specs/conventions.md` (the comment sweep,
+(what a pull request owes, and in what order); `handbook/specs/orchestration.md` (running several
+lanes at once); `handbook/specs/conventions.md` (the comment sweep,
 citations, where a rule lives); `handbook/specs/ui-design.md`'s colour, contrast and legibility
 section (measuring a ground); `handbook/specs/explorer-doctrine.md`,
 `handbook/specs/region-and-voyage.md` and `handbook/specs/chart-dress.md` (the rules the spec-line

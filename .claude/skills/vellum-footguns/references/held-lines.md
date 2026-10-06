@@ -83,6 +83,10 @@ Nothing targets this gate; its one neighbour is under the Never list.
 ## The Never list
 
 - Bring a branch current with `git merge origin/main`, never a rebase: a conflicted `rebase --continue` goes through the editor path, whose cleanup strips every line starting with a number sign, so the subject silently becomes the body's first line. Gate 5 rules the one case that wants a rebase, a squash-merged base. Earns its line when: a merged commit carries the wrong subject.
+
+Noted 2026-10-06: `handbook/specs/development-workflow.md` step 10 now states this as a spec rule, via Issue #783; the gate line still waits for its incident.
+
+- Added 2026-10-06 by Issue #783: never run `npm ci` or `npm install` in a worktree whose `node_modules` is a link to the main checkout's, since it rewrites the install every other lane and sandbox links to, and `npm ci` empties it; `.claude/agents/vellum-implementer.md` carries the rule beside its link step. Earns its line when: a numbered incident on the public record where an install through the link broke another tree's run.
 - The pipe-delimited perl substitution is not held here: it is filed as Issue #607, where the hook refusing it retires the prose.
 
 Noted 2026-09-16, overtaken before the move: shipped in PR #620 (merged 2026-09-14), where `PERL_META_DELIMITER` in `.claude/skills/vellum-footguns/hooks/footgun-gate.ts` refuses the class and `.claude/skills/vellum-footguns/hooks/README.md` documents it; Issue #607 is closed.

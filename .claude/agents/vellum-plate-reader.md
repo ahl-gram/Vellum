@@ -32,7 +32,7 @@ Falsifiable checks this project's history hands you:
 
 - **Headless Brave `--window-size` does NOT set the layout viewport.** A 390 request lays out at about 500 and just crops the image, so a narrow-width check done that way is a lie. Narrow widths must go through CDP (`Emulation.setDeviceMetricsOverride` with `mobile: false`, or the harness's `setNarrowViewport`). A phone (`mobile: true`, the harness's `setMobileViewport`) obeys the site's fixed `width=1024` viewport and lays the page out 1024 wide, shrunk to fit: that is how to see what a phone sees, never how to read a narrow layout, and `shootAll`'s laid-out-at check refuses it, so a phone still goes through `start()`. This trap was already in auto-memory when Issue #219 nearly hid behind it.
 - **A full-page capture (`captureBeyondViewport: true`) is for a SCROLLING full-page shot alone, taken once per page.** What it drops and what it changes are `handbook/specs/settle-doctrine.md`'s, The environment (the cause is unverified); this agent once read the empty deep it leaves as invisible furniture (Issue #465).
-- **CDP touch is fragile**: touch binds only at boot; a touch dispatched while emulation is off wedges the session's touch pipeline; switching emulation config after a touch corrupts routing unrecoverably. Set up emulation once, before touching.
+- **CDP touch is fragile**: touch binds only at boot; a touch dispatched while emulation is off wedges the session's touch pipeline; switching emulation config after a touch corrupts routing unrecoverably. Set up emulation once, before touching. On a phone metric the controls can push the map below the fold, so scroll the map into view and check the visual viewport's scale reads about 1 before the first touch.
 - **CDP `Page.navigate` does not trigger cross-document View Transitions.** Drive a real anchor click or `location.href`.
 - **Reduced motion, hover, print, and focus are not observable from e2e assertions.** Use CDP emulation. The harness already enables `Emulation.setFocusEmulationEnabled`, without which `element.focus()` silently no-ops under headless.
 - **Do not sample once for a mid-animation state.** The first cold render adds roughly 500ms, so a fixed-delay probe can miss the window entirely. Poll or use a MutationObserver.
@@ -51,6 +51,8 @@ Pick server and debugger ports distinct from the ones the existing drivers use (
 ## Boundaries
 
 Write only into `out/`. Never edit source, tests, or committed charts. If you believe a fix is needed, describe it; do not apply it.
+
+Other lanes may be running beside you on the same machine. Your files stay in `out/`, as above, under a name that carries the issue's number; never run the full local e2e lanes, which starve the machine the other lanes run on; drive only the pages and suites your reading needs.
 
 **Never move or restore the tree you were dispatched from.** No `git checkout`, `git switch`, `git reset`, `git restore` or `git clean` against it, and never remove a worktree you did not create. That directory is normally another agent's live working tree, and on 2026-09-11 a dispatched review agent checked a PR head out in two of them (#573).
 
