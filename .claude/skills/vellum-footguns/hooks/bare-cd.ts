@@ -20,9 +20,9 @@ const blankHeredocs = (raw: string, at: number, pending: Pending[]): string => {
   for (const { delim, dash } of pending) {
     const lines = raw.slice(at + body.length).split("\n");
     const stop = lines.findIndex((line) => (dash ? line.replace(/^\t+/, "") : line) === delim);
-    body += (stop === -1 ? lines : lines.slice(0, stop + 1)).join("\n") + (stop === -1 ? "" : "\n");
+    body += (stop === -1 ? lines : lines.slice(0, stop + 1)).join("\n");
   }
-  return body.slice(0, raw.length - at);
+  return body;
 };
 
 const mask = (raw: string): string => {
