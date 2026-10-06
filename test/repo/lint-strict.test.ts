@@ -20,6 +20,7 @@ const RULED: Readonly<Record<string, Linter.RuleEntry>> = {
   "@typescript-eslint/unified-signatures": "error",
   "@typescript-eslint/no-useless-constructor": "error",
   "@typescript-eslint/no-extraneous-class": "error",
+  "@typescript-eslint/prefer-return-this-type": "error",
 };
 
 type Plant = { lines: readonly string[]; refused: readonly number[] };
@@ -31,6 +32,7 @@ const PLANTS: Readonly<Record<string, Plant>> = {
   "@typescript-eslint/unified-signatures": { lines: ["export function u(a: string): void;", "export function u(a: number): void;", "export function u(a: unknown): void { void a; }"], refused: [2] },
   "@typescript-eslint/no-useless-constructor": { lines: ["export class A { x = 1; constructor() {} }", "export class B { x: number; constructor() { this.x = 1; } }"], refused: [1] },
   "@typescript-eslint/no-extraneous-class": { lines: ["export class Probe { static x = 1; }", "export class Kept { x = 1; }"], refused: [1] },
+  "@typescript-eslint/prefer-return-this-type": { lines: ["export class B { x = 1; f(): B { return this; } }", "export class C { x = 1; f(): this { return this; } }"], refused: [1] },
 };
 
 const PLANT_AT = WITNESSES["src/**/*.ts"]!;
