@@ -12,10 +12,14 @@ const PRESET_LAYERS = ["@eslint/js/recommended", "typescript-eslint/eslint-recom
 const blocks: readonly Linter.Config[] = lintConfig;
 const shortName = (b: Linter.Config): string => (b.name ?? "(unnamed)").replace(/^.* > /, "");
 
-const RULED: Readonly<Record<string, Linter.RuleEntry>> = {};
+const RULED: Readonly<Record<string, Linter.RuleEntry>> = {
+  "@typescript-eslint/no-deprecated": "error",
+};
 
 type Plant = { lines: readonly string[]; refused: readonly number[] };
-const PLANTS: Readonly<Record<string, Plant>> = {};
+const PLANTS: Readonly<Record<string, Plant>> = {
+  "@typescript-eslint/no-deprecated": { lines: ["export const p = \"abc\".substr(1);", "export const q = \"abc\".slice(1);"], refused: [1] },
+};
 
 const PLANT_AT = WITNESSES["src/**/*.ts"]!;
 const tsRootGlobs = (): string[] => lintTsRoots().map((r) => `${r}/**/*.ts`).sort();

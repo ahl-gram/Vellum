@@ -49,7 +49,9 @@ export default defineConfig(
   {
     name: "Issue #779: the strict rules adopted one at a time",
     files: TS_ROOTS,
-    rules: {},
+    rules: {
+      "@typescript-eslint/no-deprecated": "error",
+    },
   },
   {
     files: ["public/**/*.css"],
