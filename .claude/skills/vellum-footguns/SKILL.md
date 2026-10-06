@@ -74,31 +74,42 @@ Scars: #49, #124, #270, #275, #295, #320, #353, #358, #360, #363, #380, #383, #3
     breakpoint (Issue #547).
 12. **`test-support/element-shim.ts` does no layout.** Every rect it reports is the one the test
     STATED, so a box computed from it measures the shim and not the code (#387, #388).
-13. **A hand-rolled reader is a guard's blind spot.** A CSS selector reader splits on TOP-LEVEL
-    commas and tests the SUBJECT, the last compound; otherwise an `:is()` arm, an ancestor's
-    pseudo-class and a colon inside an attribute value each drop rules from the sweep (#358). A
-    markup regex allows trailing attributes, and an empty parse never SKIPS a section unless every
-    companion parse is empty too (#353, whose guards went blind when #270 added per-term ids). A regex
-    guard gets one fixture per arm (PR #554) and counts call sites by the bare token, never a
-    `[^}]*` span, which cannot cross a nested brace (PR #631).
+13. Moved to Gate 7 item 1: a hand-rolled reader.
 14. **A test file that imports a module which can exit at import is reported as a PASS.** It dies
     before any `test()` registers and its assertions are simply gone from the tally, with nothing
     saying so, which is the zero-red alarm inverted. A guard for "importing this does no work" SPAWNS
     the module as a child and asserts on stdout (#551, PR #552).
-15. **A scan is keyed on what the DEFECT looks like, never on what the rule says.** The
-    hyphenated-property cut skipped the unhyphenated properties the contract policed, so the sources
-    that could hold the defect were exactly the ones it did not select, and it passed (#360).
+15. Moved to Gate 7 item 2: a scan keyed on the defect.
 16. **A roster a guard checks is exported DATA the guard imports, never a list the guard restates.** A
     hand-copied roster is one-sided by construction: it catches a member removed from the thing it
     checks and can never catch one added and asserted nowhere, and the arithmetic still closes (#320).
-17. **A guard over a config file a test cannot execute pins its SHAPE**, operator order and negation
-    included, proved by INVERTING the config; better, move the logic where a test runs it (PR #380).
+17. Moved to Gate 7 item 3: a guard over a config file.
 18. **A selection rule is guarded on a consequence that differs by WHO was chosen**, proved by
     inverting the selector (PR #410).
 19. **A reference that went through a transform shares the defect's oracle**: also assert against
     the RAW source, on what the transform cannot represent (Issue #443).
 20. **A ratified acceptance gets a driving check beside any pure-function read**
     (PR #631).
+
+## Gate 7: before writing a test that reads the repo's own files
+
+Scars: Issue #270, Issue #353, Issue #358, Issue #360, PR #380, PR #554, PR #631.
+
+Gate 1 binds here too. Whether the check belongs in a unit test at all is
+`handbook/specs/check-placement.md`'s.
+
+1. **A hand-rolled reader is a guard's blind spot.** A CSS selector reader splits on TOP-LEVEL
+    commas and tests the SUBJECT, the last compound; otherwise an `:is()` arm, an ancestor's
+    pseudo-class and a colon inside an attribute value each drop rules from the sweep (#358). A
+    markup regex allows trailing attributes, and an empty parse never SKIPS a section unless every
+    companion parse is empty too (#353, whose guards went blind when #270 added per-term ids). A regex
+    guard gets one fixture per arm (PR #554) and counts call sites by the bare token, never a
+    `[^}]*` span, which cannot cross a nested brace (PR #631).
+2. **A scan is keyed on what the DEFECT looks like, never on what the rule says.** The
+    hyphenated-property cut skipped the unhyphenated properties the contract policed, so the sources
+    that could hold the defect were exactly the ones it did not select, and it passed (#360).
+3. **A guard over a config file a test cannot execute pins its SHAPE**, operator order and negation
+    included, proved by INVERTING the config; better, move the logic where a test runs it (PR #380).
 
 ## Gate 2: before writing an e2e check or a CDP probe
 

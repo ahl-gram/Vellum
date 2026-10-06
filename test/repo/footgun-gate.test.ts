@@ -30,6 +30,7 @@ test("every gate-size probe passes at the 8,000-character limit", () => {
   const out = execFileSync(process.execPath, [SELFTEST], { encoding: "utf8", timeout: BOUND_MS });
   const probes: [string, string][] = [
     ["a test file", "## Gate 1"],
+    ["a test that reads the repo, once gate 1 is spent", "## Gate 7"],
     ["a browser-harness unit test that clicks and escapes", "## Gate 1, for wiring only, double the backslash"],
     ["a new e2e suite that clicks and escapes", "## Gate 4, ## Gate 2, for wiring only, double the backslash"],
     ["a new unit test under a suite-shaped path that clicks and escapes", "## Gate 1, for wiring only, double the backslash"],
@@ -41,7 +42,7 @@ test("every gate-size probe passes at the 8,000-character limit", () => {
     ["a PR body from an unreadable file", "## Gate 5, could not read"],
     ["a shell line that writes a script, kills a browser, pushes and opens a PR", "## Gate 5, could not read, double the backslash, browser profile"],
   ];
-  const named = /^ok {3}the size probes' 11 quoted paths sit under a root of 100 characters, naming test files of (\d+) and suites of (\d+) characters$/m.exec(out);
+  const named = /^ok {3}the size probes' 12 quoted paths sit under a root of 100 characters, naming test files of (\d+) and suites of (\d+) characters$/m.exec(out);
   const longest = (dir: string, suffix: string, recursive: boolean): number =>
     Math.max(...readdirSync(resolve(import.meta.dirname, "..", "..", dir), { recursive, encoding: "utf8" }).map((p) => p.split("/").pop() ?? "").filter((n) => n.endsWith(suffix)).map((n) => n.length));
   assert.deepEqual([Number(named?.[1]), Number(named?.[2])], [longest("test", ".test.ts", true), longest("e2e/suites", ".ts", false)], `the size probes do not name the longest real test file and suite\n${out}`);
@@ -69,6 +70,38 @@ test("every row on whether a new unit test joins a roster passes", () => {
     ["a new site module whose name ends in test still gets gate 4", 'want context with "## Gate 4", got context'],
   ];
   for (const [row, wants] of rows) assert.ok(out.split("\n").includes(`ok   ${row}: ${wants}`), `no passing row "${row}: ${wants}"\n${out}`);
+});
+
+const GATE1_NOT_7 = 'want context with "## Gate 1" and without "## Gate 7", got context';
+const GATE7_NOT_1 = 'want context with "## Gate 7" and without "## Gate 1", got context';
+const NOTHING = 'want null with "", got null';
+const GATE7_ROWS: ReadonlyArray<readonly [string, string]> = [
+  ["a first edit to a test under test/repo gets gate 1 and not gate 7", GATE1_NOT_7],
+  ["a second edit to a test under test/repo gets gate 7 and not gate 1", GATE7_NOT_1],
+  ["a second edit to a test under test/site gets gate 7 and not gate 1", GATE7_NOT_1],
+  ["a second edit to a test-support helper gets gate 7 and not gate 1", GATE7_NOT_1],
+  ["a second edit on the absolute path a real call passes gets gate 7", GATE7_NOT_1],
+  ["an edit under test/site after gate 1 was shown for test/render gets gate 7 at once", GATE7_NOT_1],
+  ["a third edit to a test under test/repo gets nothing", NOTHING],
+  ["a second edit to a test under test/render gets nothing", NOTHING],
+  ["a second edit to a test under test/src/site gets nothing", NOTHING],
+  ["a second edit to a unit test under test/e2e gets nothing, not gate 2", NOTHING],
+  ["a helper one folder down in test-support gets no gate, as ruled", NOTHING],
+  ["a file in test-support that only begins like a helper gets no gate", NOTHING],
+  ["a second edit to a test under a folder that only ends in test gets nothing", NOTHING],
+  ["a folder that only ends in test-support gets no gate", NOTHING],
+  ["a new site module in a folder that only ends in test-support still gets gate 4", 'want context with "## Gate 4", got context'],
+  ["a helper in a test-support folder under e2e still gets gate 2", 'want context with "## Gate 2" and without "## Gate 1", got context'],
+  ["a helper in a test-support folder under the renderer still gets gate 6", 'want context with "## Gate 6" and without "## Gate 1", got context'],
+  ["a new helper in a test-support folder under src/site gets gate 1 and no gate 4", 'want context with "## Gate 1" and without "## Gate 4", got context'],
+];
+
+// Written out for the same reason as the roster rows: each is the only guard of its arm of Gate 7's route (Issue #782), and deleting one from the fixture table, weakening its needle or absent text, or dropping Gate 7 from the gate-text loop prints no FAIL.
+test("every row on which edits owe Gate 7 passes, with the decision it was written for", () => {
+  const out = execFileSync(process.execPath, [SELFTEST], { encoding: "utf8", timeout: BOUND_MS });
+  const lines = out.split("\n");
+  assert.ok(lines.includes("ok   Gate 7 text found in SKILL.md"), `no passing gate-text row for Gate 7\n${out}`);
+  for (const [row, wants] of GATE7_ROWS) assert.ok(lines.includes(`ok   ${row}: ${wants}`), `no passing row "${row}: ${wants}"\n${out}`);
 });
 
 const CODE_ROWS: ReadonlyArray<readonly [string, "deny" | "null" | "context"]> = [

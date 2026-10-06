@@ -51,7 +51,8 @@ instrument the guard belongs in.
   chart, a config the house reads (`eslint.config.ts`, a workflow), or a stylesheet value the
   code's own arithmetic must match (the Glass's seat beside the slip in `test/site/room.test.ts`).
   The test checks what the file holds: a value against the code that must agree with it, or a config's
-  shape. Finding the anchor first (`vellum-footguns` Gate 1) is part of reading the file, not the check.
+  shape. Finding the anchor first (`vellum-footguns` Gate 1) is part of reading the file, not the check,
+  and how such a reader goes blind is `vellum-footguns` Gate 7's.
 - Existing tests that search source text move under this rule as each one is touched.
 
 ## The browser lanes and a plate read

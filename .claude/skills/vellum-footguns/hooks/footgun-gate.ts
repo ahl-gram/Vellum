@@ -10,6 +10,7 @@ import { dirname, isAbsolute, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type * as TS from "typescript";
 import { bareCdReason } from "./bare-cd.ts";
+import { dueGate, ROSTER_NEW_FILE, TEST_HELPER, UNIT_TEST } from "./gate-routes.ts";
 import { proseOf } from "./markdown-code.ts";
 
 export type ToolInput = {
@@ -27,14 +28,6 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const SKILL = resolve(HERE, "..", "SKILL.md");
 const TEMPLATE = resolve(HERE, "..", "..", "..", "..", ".github", "PULL_REQUEST_TEMPLATE.md");
 
-const EDIT_GATES: [string, RegExp, string][] = [
-  ["guard", /(^|\/)test\/.*\.test\.ts$/, "Gate 1"],
-  ["e2e", /(^|\/)(scripts|out|e2e)\/.*\.mjs$|(^|\/)(e2e|out)\/.*\.ts$/, "Gate 2"],
-  ["css", /\.(css|astro)$/, "Gate 3"],
-  ["render", /(^|\/)(src\/(render|world|society|core|noise|terrain|climate|hydrology)\/|src\/(atlas\/palette|cli\/raster)\.ts$|public\/(charts\/|og\.png$|favicon\.svg$|apple-touch-icon\.png$)|design\/kit\/fonts\/|scripts\/(hero-charts|regen-hero-charts|build-og|build-icons|glyph-outline|kit-fonts)\.ts$)/, "Gate 6"], // derived by walking imports, not guessed: src/render, generateWorld's seven-dir closure, the committed artifacts, and every module their writers reach
-];
-const ROSTER_NEW_FILE = /(^|\/)(src\/pages\/|src\/site\/|e2e\/suites\/[^/]+\.ts$|public\/[^/]+\.css$)/;
-const UNIT_TEST = /\.test\.ts$/;
 const BROWSER_SCRIPT = /(^|\/)(scripts|out|e2e)\/.*\.(mjs|ts)$/;
 const REDIRECT_INTO_SCRIPT = /(>>?|\btee\b)\s*["']?\S*(scripts|out|e2e)\/\S*\.(mjs|ts)/;
 const SILENT_ESCAPE = /(?<!\\)\\[sSdDwWbB.]/;
@@ -183,11 +176,11 @@ const checkEdit = async (payload: Payload, sessionId: string): Promise<Decision>
     notes.push(note);
     if (fragment.includes(".click()")) notes.push(CLICK_WARNING);
   }
-  if (payload.tool_name === "Write" && ROSTER_NEW_FILE.test(path) && !UNIT_TEST.test(path) && !existsSync(path)) {
+  if (payload.tool_name === "Write" && ROSTER_NEW_FILE.test(path) && !UNIT_TEST.test(path) && !TEST_HELPER.test(path) && !existsSync(path)) {
     notes.push(gateNote(sessionId, "roster", "Gate 4", `You are about to create ${path}.`));
   }
-  const gate = EDIT_GATES.find(([, pattern]) => pattern.test(path));
-  if (gate) notes.push(gateNote(sessionId, gate[0], gate[2], `You are about to edit ${path}.`));
+  const due = dueGate(path, shownGates(sessionId));
+  if (due) notes.push(gateNote(sessionId, due[0], due[1], `You are about to edit ${path}.`));
 
   const kept = notes.filter((n): n is string => Boolean(n));
   return kept.length ? context(kept.join("\n\n")) : null;
