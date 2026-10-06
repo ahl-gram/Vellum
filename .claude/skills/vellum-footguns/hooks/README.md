@@ -121,7 +121,7 @@ is ever removed.
     refused at its first leg. The way through is a subshell with a literal path,
     `( cd <path> && ... )`, `git -C <path>`, or an absolute path. It runs after every refusal above,
     the escape scan of a script written from the shell included, so nothing it does can hide one,
-    and before the Gate 5 note, so a refused call spends no gate; the rows are `bare-cd.fixtures.ts`;
+    and the rows are `bare-cd.fixtures.ts`;
 - **Warns** (context only, the call runs): `.click()` in a browser-script fragment; a punctuation
   escape inside a template literal; `pkill` aimed at the browser; an unreadable body file; a
   `typescript` package that could not be loaded, which skips the escape scan.
