@@ -116,8 +116,9 @@ test("the numero is drawn after Menlo's form in the face's ink: hooked uprights,
   assert.ok(!inked(d, 960, 150), "the o stands clear of its bar");
   assert.ok(!inked(d, 1100, 1100) && !inked(d, 960, 900), "nothing raised: the o is low, not at the cap line");
   assert.ok(NUMERO[2] <= NUMERO[0], "no ink past the sign's own advance");
-  const row = Array.from({ length: 400 }, (_, x) => x).filter((x) => inked(d, x, 700));
-  const stem = (row.at(-1) ?? 0) - (row[0] ?? 0);
+  const start = Array.from({ length: 400 }, (_, x) => x).find((x) => inked(d, x, 700)) ?? 0;
+  let stem = 0;
+  while (inked(d, start + stem + 1, 700)) stem++;
   assert.ok(stem >= 100 && stem <= 130, `the left upright is the face's thin weight (${stem} units against Fell's N about 111)`);
 });
 
