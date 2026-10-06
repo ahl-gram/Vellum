@@ -123,8 +123,10 @@ stage does not scroll. **The chart keeps a minimum size**: where the chrome woul
 under half the width it could have (the window less an open slip, at the window's full height), the
 sheet takes all of that room instead, centred and wholly inside the window, and runs under the
 chrome; it does not pan at rest, and the reader zooms to see beneath the chrome (`fitStage` in
-`src/site/shared/stage-fit.ts`, which marks the page `stage-under` while it does). **Provisional
-until the post-use review:** the floor's trigger and its size. **A chart room without a stage is the exception and it does scroll**, its
+`src/site/shared/stage-fit.ts`, which marks the page `stage-under` while it does). A narrow window's
+width floor that runs the sheet past the room between the chrome is marked the same, so the chrome
+over it stands on the same dark backing. **Provisional until the post-use review:** the floor's
+trigger and its size. **A chart room without a stage is the exception and it does scroll**, its
 content passing under the fixed chrome, which is why it pools every piece of that chrome rather than
 the cluster alone, and why **it wears no vignettes**: a vignette is a fixed darkening band, and on a
 scrolling page it washes out whatever passes through it. Four corners, each a named piece of the kit:
