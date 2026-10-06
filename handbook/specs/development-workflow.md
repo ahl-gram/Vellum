@@ -77,11 +77,18 @@ Alex's ruling (both of them, in one go) roughly tripled the work from what the s
 defaulted to.
 Do not begin step 8 until he has answered.
 
+**A menu is measured before it goes to him.** A consequence an option states (what moves, what
+stays, what a change costs) is measured first, and a premise about what a tool reads or does is
+checked by running it; a ruling taken on an unmeasured consequence is re-taken when it fails. An
+option about code he cannot picture carries a real before and after from the repo, the file and the
+edit, rather than a description of them.
+
 **When the session running this sequence is a dispatched `vellum-implementer` lane, the menu goes to
 the dispatching session instead**, as the last part of its step 6 report, and the dispatcher puts it
 to Alex in `AskUserQuestion` and relays his rulings back. The STOP is the same; only who holds the
-menu changes, because a subagent's question does not reach Alex. The implementer records the relayed
-rulings on the issue at step 12 exactly as a session would record its own.
+menu changes, because a subagent's question does not reach Alex. The dispatcher posts his answer on
+the issue as he gives it, and the implementer's step 12 record points at that post; how the
+dispatcher relays a menu and its rulings is `handbook/specs/orchestration.md`'s.
 
 **When the ruling is an appearance, the menu carries stills.** A direction described in prose asks
 Alex to picture it and then holds him to what he pictured, which is how a ruling gets made on
@@ -202,6 +209,21 @@ green CI ran against the old main. Merge main locally, run the suite, abort the 
 stays clean for review, and put the combined-state result in the body, because a reviewer reading
 only the branch's CI cannot see it.
 
+**Bring a branch current with `git merge origin/main`, never a rebase.** A rebase that stops on a
+conflict re-commits through the editor, whose cleanup drops every line that starts with `#`, and
+every commit subject here does, so the subject silently becomes the body's first line. Gate 5 item 9
+rules the one case that wants a rebase, a child of a squash-merged base.
+
+**An output file is not evidence that the run you just made wrote it.** Before quoting a figure,
+compare the file's modification time with the run's start and read the command's real exit status,
+never through a pipe that swallows it (or with `pipefail`); confirm one expensive run succeeded
+before starting the next; and a measuring script with any failed row exits non-zero and writes
+nothing, so a stale file cannot pass for a fresh one.
+
+**A subagent's claim is a claim like any other**, a lane's, a skeptic's or a prover's included.
+Relay it with the command behind it, or relay it as the agent's claim; a ledger from a prover
+stopped part way is not evidence until its reds and greens are re-run.
+
 **11. Run the companion agents the work owes.** `vellum-guard-prover` on every new or strengthened
 guard, and step 8's commits have to exist first: it mutates in its own detached worktree at the DISPATCH
 tree's HEAD (built by `scripts/agent-sandbox.ts`, #575), so anything uncommitted is simply not in
@@ -209,6 +231,11 @@ the tree it proves, and its ledger names the sha it proved. `vellum-plate-reader
 deliverable is an appearance, and again here when step 6's menu was ruled from stills, since those
 measured a spike and this run measures what was built. Zero red from the prover is a hole, not a
 pass, and a guard proved unable to bite is deleted rather than shipped.
+
+**Arm a deadline when you dispatch an agent with a budget, and at the deadline nudge it with a
+message, never a stop.** Its only durable output is its final report, so a stopped agent hands back
+a fragment and the round's findings are lost; a message asking it to tear down and report what it
+has keeps them.
 
 **12. Record every call the issue did not rule on, as a dated comment on the issue, before the PR
 is opened.** Not before the push: with step 9 the first push comes early, so the deadline that
@@ -219,12 +246,18 @@ that says what it supersedes.
 
 **A ruling of Alex's is recorded here too, and by you.** He rules in the session, which leaves no
 trace on the issue, and the next reader (or the cold skeptic) sees an issue whose options are still
-marked unruled. That happened on #534.
+marked unruled. That happened on #534. In an orchestrated run the dispatcher posts his rulings on
+the issue in his words as he gives them (`handbook/specs/orchestration.md`), and the lane's comment
+points at that post rather than restating it.
 
 **Not every change has an issue.** A docs or tooling change often opens straight to a PR, which is
 the house norm rather than an omission. The record still has to exist: with no issue, the PR body
 carries the calls and a PR comment carries any ruling of Alex's. "It was decided in chat" is not a
 record, because the cold skeptic at step 14 cannot read chat, and neither can the next session.
+Before opening one, search the open issues for one it would close or whose ruling it would
+override, and read that issue's comments
+(`gh api -X GET search/issues -f q='repo:ahl-gram/Vellum is:open <keywords>'`): a change made as
+issue-less can be exactly the open issue, ruled on a shape the change contradicts.
 
 **13. Open the PR.** `.github/PULL_REQUEST_TEMPLATE.md` is the shape, and the footgun hook refuses a
 body that skips one of its sections. Every line is a claim the skeptic will check. **The body carries
@@ -250,6 +283,11 @@ their own (#575). The other three keep their documented work in the dispatch tre
 write tool at all. That is where Alex looks when the dispatch tree is the main checkout; when it is a
 lane's worktree, whoever dispatched the lane copies the samples across, as step 6 says.
 
+**A review run by any agent outside the house's set, a Workflow script's subagent included, gets a
+read-only toolset.** An agent holding Edit has mutation-tested real source and left its mutants in
+place, and a full suite then passed over them. After any agent that could write has run,
+`grep -rn MUTATION src/ test/`, `git diff` and a fresh test run come before the next commit.
+
 **An agent whose own DEFINITION this pull request changes cannot be trusted to review the change.**
 On PR #576 the cold skeptic reported that its loaded instructions were the pre-PR version while its
 dispatch worktree stood at that branch's head. **WHY is UNVERIFIABLE**: that pull request's own body
@@ -272,7 +310,9 @@ only. A presentation fix made after the plate reader's round is measured by you 
 named the same way. **A finding about this pull request's own work leaves unfixed only when fixing it
 needs a decision of Alex's**: it is then an issue or a `handbook/errata/` row, and the PR body names
 which and why. **A finding it found but did not cause**, a sibling defect in code or text it did not
-write, goes to an issue or a row, as `vellum-footguns` Gate 5 item 7 says. Text a pull request only
+write, goes to an issue or a row, as `vellum-footguns` Gate 5 item 7 says. **An issue is searched for
+before it is filed**, the open issues and `handbook/errata/` both, and a near duplicate is folded into
+the older issue rather than filed beside it. Text a pull request only
 moves, unchanged, keeps its old owner: a defect in moved-verbatim text is the sibling kind, and the pull request fixes it only if it chooses to edit
 that text, which keeps a pure move a pure move. Either way the row lands in the same diff, with the
 reason; a finding left as prose in the body alone is itself a finding. The shape of a row and how
@@ -302,7 +342,8 @@ instructions that would now introduce the defect they were written to prevent. D
 `vellum-spec-recon` once per issue, in parallel, each prompt naming the epic that just closed and
 what it changed. Post each result as a dated re-baseline COMMENT, leaving the body as written, then
 put the open decisions to Alex as a set, because the sequencing between them is usually the real
-question. Anything the sweep itself makes stale is fixed before the comments go up: a pull request
+question. His rulings go on each sub as a dated comment, and once more as one ledger on the epic,
+so the set can be read in one place. Anything the sweep itself makes stale is fixed before the comments go up: a pull request
 merging mid-sweep will otherwise leave drafts saying a spec is not on main.
 
 **A review sitting's own ledger owes a recon too.** The items a sitting must rule on are scattered
