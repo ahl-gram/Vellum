@@ -58,7 +58,7 @@ test("every lettered run stands at 4.5:1 or better on the paper it is set on, in
 
 const ROADS: Surroundings = { ...NO_SURROUNDINGS, roadTowns: [{ index: 1, name: "Haireno", kind: "town", lateral: 0.39, dist: 21 }], roadCount: 2 };
 
-test("a plate drops its detail by its own drawn width: the key, the horizon names and the margin words at the smaller width, the cartouche and the medals too at the smallest (ruling D3)", () => {
+test("a plate drops its detail by its own drawn width, inline or as an image, never the window's: the key, the horizon names and the margin words at the smaller width, the cartouche and the medals too at the smallest (ruling D3)", () => {
   const opts = { idSuffix: "s1", surroundings: ROADS };
   const svg = finishedPlateSvg(makeInput({ kind: "capital", harbor: true, arms: ARMS }), STYLES.antique, 1300, opts);
   const root = finishProspect(makeInput({ kind: "capital", harbor: true, arms: ARMS }), STYLES.antique, 1300, opts);
@@ -74,7 +74,9 @@ test("a plate drops its detail by its own drawn width: the key, the horizon name
   assert.ok(groupOf("pd-s1").includes('class="vellum-arms"'), "the medal group holds the arms");
   assert.equal([SMALL_WIDTH, SMALLEST_WIDTH].join(" "), "400 240");
   assert.ok(svg.includes(`<style>${smallSizeRule("s1")}</style>`), "the plate carries its own rule");
-  assert.equal(smallSizeRule("s1"), "@media (max-width: 400px){.pk-s1,.pt-s1,.pm-s1{display:none}}@media (max-width: 240px){.pc-s1,.pd-s1{display:none}}");
+  assert.equal(smallSizeRule("s1"), ".pq-s1{container-type:inline-size}@container (max-width: 400px){.pk-s1,.pt-s1,.pm-s1{display:none}}@container (max-width: 240px){.pc-s1,.pd-s1{display:none}}");
+  assert.equal(root.attrs["class"], "pq-s1", "the plate itself is the container its rule reads, so an inlined plate reads its own width and not the window");
+  assert.ok(!svg.includes("@media"), "no rule reads the window");
   for (const cls of ["pk", "pt", "pm", "pc", "pd"]) assert.ok(svg.includes(`class="${cls}-s1"`), `the ${cls} group carries its class`);
 });
 
