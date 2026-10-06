@@ -27,6 +27,7 @@ const RULED: Readonly<Record<string, Linter.RuleEntry>> = {
   "@typescript-eslint/restrict-template-expressions": ["error", { allowAny: false, allowBoolean: true, allowNever: false, allowNullish: true, allowNumber: true, allowRegExp: true }],
   "@typescript-eslint/no-misused-spread": "error",
   "@typescript-eslint/no-unnecessary-template-expression": "error",
+  "@typescript-eslint/no-unnecessary-type-arguments": "error",
 };
 
 type Plant = { lines: readonly string[]; refused: readonly number[] };
@@ -45,6 +46,7 @@ const PLANTS: Readonly<Record<string, Plant>> = {
   "@typescript-eslint/restrict-template-expressions": { lines: ["declare const u: any;", "declare const n: number | undefined;", "export const t = `${u}`;", "export const s = `${n} ${true} ${/re/}`;"], refused: [3] },
   "@typescript-eslint/no-misused-spread": { lines: ["declare const pr: Promise<number>;", "export const cs = [...\"ab\"];", "export const o = { ...pr };", "export const ok = \"ab\".split(\"\");"], refused: [2, 3] },
   "@typescript-eslint/no-unnecessary-template-expression": { lines: ["declare const w: string;", "export const t = `${w}`;", "export const u = `${w}!`;"], refused: [2] },
+  "@typescript-eslint/no-unnecessary-type-arguments": { lines: ["declare function fd<T = number>(): T;", "export const z = fd<number>();", "export const y = fd<string>();"], refused: [2] },
 };
 
 const PLANT_AT = WITNESSES["src/**/*.ts"]!;

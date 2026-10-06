@@ -159,7 +159,7 @@ async function takeShot(ctx: SuiteContext, shot: Shot, port: number): Promise<Sh
   const png = await ctx.send<{ data: string }>("Page.captureScreenshot", captureParams(shot, documentHeight));
   mkdirSync(dirname(resolve(shot.out)), { recursive: true });
   writeFileSync(resolve(shot.out), Buffer.from(png.data, "base64"));
-  const probe = shot.probe === undefined ? null : readProbe(await ctx.evaluate<unknown>(shot.probe, true), shot.out);
+  const probe = shot.probe === undefined ? null : readProbe(await ctx.evaluate(shot.probe, true), shot.out);
   const http4xx = withoutFavicon(ctx.http4xx.slice(httpBase));
   return { out: shot.out, url, viewport, probe, http4xx, consoleErrors: dropExpectedCancellations(ctx.consoleErrors.slice(errBase)) };
 }
