@@ -113,7 +113,7 @@ async function pb2CapitalPlate({ send, check, page, opened }: ProspectKit, href:
   check("PB3b the folio names what the place was once called (#49)", /once called Haitani/.test(cap.sub!),
     cap.sub!);
   check(
-    "PB3c the engraver's note is filled: the place as the slip's title, its epithet and founding, Today's card's note for the town, the plate's lettered key, the era line (#494 ruling 4)",
+    "PB3c the engraver's note is filled: the place as the slip's title, its epithet and founding, Today's card's note for the town, the plate's numbered key, the era line (#494 ruling 4)",
     cap.noteTitle === "Laukuwelua" && /^chief port of .+ · founded An\. \d+$/.test(cap.where!) &&
       cap.note!.length > 20 && cap.keyLis === cap.keyRows && cap.keyRows > 0 && !cap.keyHeadHidden && /^Standing · An\. \d+$/.test(
       cap.eraLine!),
@@ -159,6 +159,12 @@ async function pb3eRoomAndPlate({ evaluate, check, sleep, svgOf }: ProspectKit):
     "PB5 the plate is the engine's own engraving of this settlement",
     typeof first === "string" && first.includes('aria-label="The prospect of Laukuwelua, chart 42"'),
     String(first).slice(0, 100),
+  );
+  const slip = await evaluate<string[]>(`[...document.querySelectorAll("#pp-key li")].map((li)=>li.querySelector(".cr-num").textContent+". "+li.querySelector(".cr-text").textContent)`);
+  check(
+    "PB5b the slip's key mirrors the plate's numbered key: the same numerals in order and the same words, each lettered on the plate (Issue #754 ruling D12)",
+    slip.length > 0 && slip.every((row, i) => row.startsWith(`${i + 1}. `) && first.includes(`aria-label="${row}"`)),
+    JSON.stringify(slip),
   );
   return first;
 }
