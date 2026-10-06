@@ -140,12 +140,15 @@ home's line wins for the lane and this file's for the orchestrator.
   time: brief the second lane up front to `git merge origin/main` once the first lands, keep both
   rows in pull request order, re-run check, lint and test, and push. That commit earns no review
   round (`vellum-footguns`, Defaults this repo has already ruled).
-- **A dependency a lane adds** is installed in the lane's own tree (its definition) and reported with
-  its resolved version. Mirror every outstanding lane's dependencies into the main checkout in ONE
-  `npm install --no-save <pkg>@<ver> ...` call, lockfile untouched, so the review sandboxes, which
-  link the main checkout's `node_modules`, can import them; a second `--no-save` install removes the
-  package the first one added. Run it, and the one `npm ci` in the main checkout after the merge, only
-  while no lane or sandbox is running a suite, since every one of them links that install.
+- **A dependency a lane adds or upgrades** is installed in the lane's own tree (its definition) and
+  reported with its resolved version. Mirror every outstanding lane's dependencies into the main
+  checkout in ONE `npm install --no-save <pkg>@<ver> ...` call, lockfile untouched, so the review
+  sandboxes, which link the main checkout's `node_modules`, can import them. Name only what the
+  lanes' `package.json` files name: npm brings each package's pinned family along, and listing that
+  family beside it can make npm refuse the whole call against what is installed. A second
+  `--no-save` install removes the package the first one added. Run it, and the one `npm ci` in the
+  main checkout after the merge, only while no lane or sandbox is running a suite, since every one of
+  them links that install.
 - **A lane's next pull request for the same issue starts on a fresh branch from `origin/main`**,
   never by merging main into a branch whose pull request squash-merged.
 
