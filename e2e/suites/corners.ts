@@ -8,10 +8,8 @@ import { onFixedDay } from "../support/fixed-day.ts";
 import type { Payload, SuiteContext } from "../types.ts";
 import { fillBetween, mediaEdges, meetings, nearest, pageFaults, routesUnder, strideWidths, squeezes } from "./corners/geometry.ts";
 import type { Control, CornerRead, Row } from "./corners/geometry.ts";
-import { ea1Phone, ea4Reads, ea5Lift, eaDesk } from "./stage/stage.ts";
 import { co5Yields, co6Follows, co7Band } from "./corners/top-row.ts";
 import { fl1Floor, fl2Reach, fl3Relayout, fl4Read, fl5KeyboardDrawer, fl6Paper, fl7Degenerate } from "./corners/floor.ts";
-import { na4Lean, ns1Soft } from "./stage/short.ts";
 
 const REPO = resolve(fileURLToPath(new URL(".", import.meta.url)), "..", "..");
 const PAGE_FLOOR = ["/", "/explorer/", "/explorer/portfolio/", "/faq/", "/gallery/", "/glossary/", "/print-room/", "/prospect/", "/reading-room/", "/ribbon/", "/seed-of-the-day/", "/specimen/"];
@@ -284,13 +282,6 @@ export async function run(ctx: SuiteContext): Promise<void> {
       await step("FL5", () => fl5KeyboardDrawer(ctx));
       await step("FL6", () => fl6Paper(ctx));
       await step("FL7", () => fl7Degenerate(ctx));
-      await step("NS1", () => ns1Soft(ctx));
-      await step("NA4", () => na4Lean(ctx));
-      await step("EA1", async () => { await ea1Phone(ctx); });
-      await ctx.clearMobile();
-      await step("EA2, EA3, EL1, EL2", () => eaDesk(ctx));
-      await step("EA4", () => ea4Reads(ctx));
-      await step("EA5", () => ea5Lift(ctx));
     });
   } finally {
     await ctx.clearMobile().catch(() => undefined);

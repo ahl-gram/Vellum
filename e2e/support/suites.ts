@@ -32,6 +32,7 @@ export const E2E_SUITE_ORDER = [
   "region-detail",
   "specimen",
   "corners",
+  "stage",
 ] as const;
 
 export type E2eSuiteName = (typeof E2E_SUITE_ORDER)[number];

@@ -127,8 +127,8 @@ test("ci.yml runs the lane driver, and never sets a suite selection under it", (
   assert.doesNotMatch(CI, /run: npm run test:e2e\s*$/m, "ci.yml still runs the serial single-lane e2e too");
 });
 
-// Each job's worst run in minutes, the larger of this workflow's own runs and a slow-runner prediction from the main runs' slowest per-suite readings, so three fast runners cannot set it low (Issue #743, 2026-10-04: shards 4m08s measured against 3m54s predicted, lanes 7m07s against 6m47s, over the six runs 37181981868 to 37183552447).
-const WORST_JOB_MINUTES: Readonly<Record<string, number>> = { "check-and-test": 4.2, "build-and-e2e": 7.2 };
+// Each job's worst run in minutes, the larger of this workflow's own runs and a slow-runner prediction from the main runs' slowest per-suite readings, so three fast runners cannot set it low (Issue #763, 2026-10-06, over the fourteen runs whose head held Issue #762's pull request D, main 37526087943 to 37541080266 and nine pull request runs: shards 4m46s, lanes 9m18s, lane C before this issue's re-fit, against a slowest re-fitted lane predicted at about 7.5 minutes).
+const WORST_JOB_MINUTES: Readonly<Record<string, number>> = { "check-and-test": 4.8, "build-and-e2e": 9.3 };
 const CAP_HEADROOM = 1.5;
 
 test("every ci.yml job is bounded, so no hung job can hold a runner for hours", () => {
@@ -292,7 +292,8 @@ const STEPPED_GROUPS: Readonly<Record<string, readonly string[]>> = {
   "document-rooms": ["IX3", "NA3", "IX8"],
   "home": ["H19", "H19b", "H20"],
   "specimen": ["SB4"],
-  "corners": ["CO1", "CO4", "CO2", "CO3", "CO5", "CO6", "CO7", "FL1", "FL2", "FL3", "FL4", "FL5", "FL6", "FL7", "NS1", "NA4", "EA1", "EA2, EA3, EL1, EL2", "EA4", "EA5"],
+  "corners": ["CO1", "CO4", "CO2", "CO3", "CO5", "CO6", "CO7", "FL1", "FL2", "FL3", "FL4", "FL5", "FL6", "FL7"],
+  "stage": ["NS1", "NA4", "EA1", "EA2, EA3, EL1, EL2", "EA4", "EA5"],
 };
 
 const SUITE_FILES = E2E_SUITE_ORDER.map((name) => [name, e2eSuitePath(name)] as const);

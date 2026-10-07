@@ -43,6 +43,7 @@ import { run as runRunningHead } from "./suites/runninghead.ts";
 import { run as runCluster } from "./suites/cluster.ts";
 import { run as runChartDrawer } from "./suites/chart-drawer.ts";
 import { run as runCorners } from "./suites/corners.ts";
+import { run as runStage } from "./suites/stage.ts";
 import { run as runDocumentRooms } from "./suites/document-rooms.ts";
 import { run as runRegionDetail } from "./suites/region-detail.ts";
 import { run as runSpecimen } from "./suites/specimen.ts";
@@ -124,6 +125,7 @@ const SUITES = {
   "region-detail": runRegionDetail,
   "specimen": runSpecimen,
   "corners": runCorners,
+  "stage": runStage,
 };
 
 const missing = E2E_SUITE_ORDER.filter((name) => !(SUITES as Partial<typeof SUITES>)[name]);
