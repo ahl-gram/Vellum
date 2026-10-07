@@ -122,5 +122,5 @@ ctx.onmessage = (e) => {
   });
 };
 
-// Handshake: the static imports resolved before the module body ran, so the engine is loaded, the plate's code apart, which a plate job imports when it first needs it.
+// Handshake: the static imports resolved before the module body ran.
 ctx.postMessage({ ready: true });

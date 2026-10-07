@@ -127,7 +127,7 @@ test("the clean never reaches a tracked file: no GENERATED_SUBTREES entry is, or
   assert.deepEqual(reached, [], "a cleaned entry that is or holds a tracked file deletes committed content on every npm test and every build");
 });
 
-// Characterization of the press on a hermetic fixture, one knob per check; the Issue #801 tests at the foot of this file press the real entries.
+// Characterization of the press on a hermetic fixture, one knob per check.
 
 async function withFixture<T>(run: (dir: string) => T | Promise<T>): Promise<T> {
   const dir = mkdtempSync(join(tmpdir(), "vellum-bundle-"));
@@ -180,6 +180,9 @@ const STATIC: ReadonlySet<Edge> = new Set(["static"]);
 const ON_DEMAND: ReadonlySet<Edge> = new Set(["static", "late"]);
 const longestOutline = (face: FaceTable): string => Object.values(face.glyphs).map((g) => g[5]).reduce((a, b) => (b.length > a.length ? b : a));
 const OUTLINES: ReadonlyArray<readonly [string, string]> = [["roman", longestOutline(ROMAN)], ["caps", longestOutline(CAPS)], ["italic", longestOutline(ITALIC)], ["numero", NUMERO[5]]];
+const PLATE_MODULE = /^\/\/#region (src\/prospect\/\S+|src\/atlas\/compose\.ts|src\/site\/explorer\/prospect-job\.ts)$/gm;
+const SHARED_WITH_PAGES: ReadonlySet<string> = new Set(["src/prospect/dress/context.ts", "src/prospect/dress/glyphs.ts"]);
+const JOB_ENTRIES = ["src/site/explorer/prospect-job.ts", "src/atlas/compose.ts", "src/prospect/finished.ts"] as const;
 
 type Pressed = { readonly root: string; readonly twins: readonly string[]; readonly text: (file: string) => string; readonly edges: (file: string) => Edges };
 let pressed: Promise<Pressed> | null = null;
@@ -253,18 +256,22 @@ test("no page downloads the plate's code before it draws a plate, and the page a
   const p = await press();
   const rel = (f: string): string => relative(p.root, f);
   const carrying = (files: Iterable<string>): string[] => [...files].filter((f) => OUTLINES.some(([, outline]) => p.text(f).includes(outline)));
+  const plateModules = (files: Iterable<string>): Set<string> => new Set([...files].flatMap((f) => [...p.text(f).matchAll(PLATE_MODULE)].map((m) => m[1]!)));
   const workers = new Set(p.twins.flatMap((twin) => spawned(p, reach(p, [twin], STATIC))));
   assert.ok(workers.size > 0, "no page spawns the worker, so the worker's half of this guard reads nothing");
   for (const twin of p.twins) {
     const page = reach(p, [twin], STATIC);
     const atLoad = new Set([...page, ...reach(p, spawned(p, page), STATIC)]);
     assert.deepEqual(carrying(atLoad).map(rel), [], `${rel(twin)} downloads the plate's glyph outlines when it opens, before any plate is drawn`);
+    assert.deepEqual([...plateModules(atLoad)].filter((m) => !SHARED_WITH_PAGES.has(m)).sort(), [], `${rel(twin)} downloads the plate's drawing code when it opens, before any plate is drawn`);
     if (spawned(p, page).length === 0) continue;
     const onDemand = reach(p, [twin], ON_DEMAND);
     for (const [face, outline] of OUTLINES) assert.ok([...onDemand].some((f) => p.text(f).includes(outline)), `${rel(twin)} cannot reach the ${face} outlines even on demand, so its backup copy cannot letter a plate`);
+    for (const entry of JOB_ENTRIES) assert.ok(plateModules(onDemand).has(entry), `${rel(twin)} cannot reach ${entry} even on demand, or the press no longer marks its modules, so the drawing-code check above reads nothing`);
   }
   const worker = reach(p, workers, ON_DEMAND);
   for (const [face, outline] of OUTLINES) assert.ok([...worker].some((f) => p.text(f).includes(outline)), `the worker cannot reach the ${face} outlines even on demand`);
+  for (const entry of JOB_ENTRIES) assert.ok(plateModules(worker).has(entry), `the worker cannot reach ${entry} even on demand, or the press no longer marks its modules`);
   for (const f of carrying([...reach(p, p.twins, ON_DEMAND), ...worker])) assert.match(p.text(f), /SIL Open Font License/, `${rel(f)} carries the plate face's outlines without its OFL notice`);
 });
 

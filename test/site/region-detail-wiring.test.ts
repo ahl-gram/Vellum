@@ -11,7 +11,7 @@ import { renderMap, type RenderOptions } from "../../src/render/map-renderer.ts"
 import { recipeFromSvg } from "../../src/render/recipe-meta.ts";
 import { LOD_BANDS, lodWindowFor, type LodBand } from "../../src/world/lod.ts";
 
-// What the Glass dispatches (Issue #400): the bands are the Explorer's own (lod.ts), so these run the real runInline; the worker's own region branch is held to runInline by its source at the foot of this file and proved live by e2e R14, though the worker can be driven in Node through a stand-in for its scope, as `test/site/prospect-job.test.ts` does.
+// What the Glass dispatches (Issue #400): the bands are the Explorer's own (lod.ts), so these run the real runInline; the worker's own region branch is held to runInline by its source at the foot of this file and proved live by e2e R14.
 
 const SEED = 2;
 const CX = 0.5625;
