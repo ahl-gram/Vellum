@@ -39,14 +39,14 @@ test("RBR1 the Ribbon is a chart room: chartRoom on the layout, the RoomFolio in
   }
 });
 
-test("RBR2 the corner is the journey row: the two selects in one movable group, Turn about outside it so it stays in the corner on a phone; every id once (the mockup's duplicate row is a trap for getElementById)", () => {
+test("RBR2 the corner is the journey row: the two selects in one group, Turn about outside it; every id once (the mockup's duplicate row is a trap for getElementById)", () => {
   const folio = between("<RoomFolio", "</RoomFolio>");
   assert.match(folio, /<div class="folio-controls" role="group" aria-label="The journey">/, "the row is the folio's control group");
   const journey = folio.slice(folio.indexOf('<div class="journey" id="rb-journey">'), folio.indexOf("</div>", folio.indexOf('id="rb-journey"')));
   assert.ok(journey.length > 0, "the journey group exists");
   assert.match(journey, /<label class="jl" for="rb-from">setting out from<\/label>\s*<select id="rb-from" class="control" aria-label="setting out from"><\/select>/, "setting out from");
   assert.match(journey, /<label class="jl" for="rb-to">bound for<\/label>\s*<select id="rb-to" class="control" aria-label="bound for"><\/select>/, "bound for");
-  assert.ok(!journey.includes('id="rb-swap"'), "Turn about is not inside the group that docks");
+  assert.ok(!journey.includes('id="rb-swap"'), "Turn about is not inside the journey group");
   assert.match(folio, /<\/div>\s*<button id="rb-swap" class="primary" type="button">Turn about<\/button>/, "Turn about follows the group, the room's primary");
   assert.match(folio, /<p class="gloss">choose where you set out and where you are bound; the surveyor unrolls the way between<\/p>/);
   for (const id of ['id="rb-from"', 'id="rb-to"', 'id="rb-swap"']) assert.equal(count(page, id), 1, `${id} appears once in the page`);
@@ -135,7 +135,7 @@ test("RBR8 the corner's select dress is the kit's at its second use (#487): atel
   assert.match(kit, /\.folio-controls select\.control\s*\{[^}]*appearance:\s*none/, "the kit dresses the corner's select");
   assert.match(kit, /\.folio-controls select\.control option\s*\{/, "and its options on the panel");
   assert.doesNotMatch(printCss, /\.folio-controls select\.control\s*\{[^}]*appearance/, "the Print Room's copy moved into the kit");
-  assert.match(printCss, /\.folio-controls select\.control\s*\{\s*width:\s*7\.4rem;\s*\}/, "but the Print Room keeps its picker's width at (0,2,1), or the kit's phone clamp narrows the ratified picker (skeptic round 2)");
+  assert.match(printCss, /\.folio-controls select\.control\s*\{\s*width:\s*7\.4rem;\s*\}/, "but the Print Room keeps its picker's width at (0,2,1) (skeptic round 2)");
   const wide = css.slice(0, css.indexOf("@media print"));
   const selectRules = [...wide.matchAll(/\.folio-controls select\.control\s*\{([^}]*)\}/g)].map((m) => m[1]!);
   assert.ok(selectRules.length >= 1, "the Ribbon sizes its selects");
