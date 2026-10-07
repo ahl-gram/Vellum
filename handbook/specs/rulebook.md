@@ -78,6 +78,16 @@ features on the site, and the experience should be more visual. The Print Room e
 deliberately moved posters, atlas and PDF off the CLI onto dedicated pages, shrinking the CLI to one
 `chart` verb, which is the reproducibility covenant's proof.
 
+**Desktop only** (Alex, 2026-10-04 and 2026-10-06, Issue #760; worded 2026-10-07, Issue #764). Vellum is made for a desktop, a
+laptop or a large tablet: no layout is built for a window narrower than the one
+`handbook/specs/ui-design.md` lays every page out for, and touch input stays, for the tablets. Two
+costs are accepted with it: a desktop zoomed far enough to go below that width scrolls sideways
+rather than reflowing, and a search engine ranks a page that is not mobile-friendly lower. The way
+back, if Vellum ever courts search traffic, is the home page alone with a device-width viewport and
+a phone-friendly first screen, its notice pointing to the desktop; home's own narrow layout is
+gone, so that screen would be built anew. How a narrower window and a phone are served is
+`handbook/specs/site-architecture.md`'s.
+
 **New interactive surfaces are DESTINATIONS** (the Print Room, the Reading Room #190), not more
 Explorer panels. **One ruled exception** (2026-09-07, the #518 sitting): the Chart Table's drawer
 (#401) is an Explorer-side surface, a drawer sliding out from behind a tab on the right edge holding
@@ -375,8 +385,9 @@ checks against.
   `handbook/specs/site-architecture.md` writes both kinds out. **The nav is a flat top line over a
   tree**, both modeled once as typed data: `NAV_ITEMS` stays flat and is all the nav renders, and a
   room's children are seated under it in `ROUTE_CHILDREN`, which the trail reads. Revisit the top
-  line only on a named trigger: an eighth surface scheduled for it, or three or more wrapped lines
-  at 360px.
+  line only on a named trigger: an eighth surface scheduled for it, or the nav no longer fitting
+  beside the room's corner on its one line at 1024, at the browser's default text size (Alex,
+  2026-10-07, Issue #764).
 - **"Site-shell issues park behind the Scriptorium"** was a working agreement for the duration of that
   migration only. #201 closed 2026-07-23 and the agreement is discharged.
 - **The old comment rule** ("a local invariant belongs in a code comment at the line that breaks") was

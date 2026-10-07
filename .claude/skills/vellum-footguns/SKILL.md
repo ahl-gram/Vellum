@@ -67,7 +67,7 @@ Scars: #49, #124, #270, #275, #295, #320, #353, #358, #360, #363, #380, #383, #3
     child that outlives it written as a SINGLE command, since killing a multi-command child orphans
     its grandchild and leaks a process per firing, pin what reaches the spawn, not what the option
     builder returns, and give a child that reads shared state its own `TMPDIR` (PR #552).
-11. **Narrow-width or column-width work owes a sweep across seeds, never the seed-42 fixture.** Seed
+11. **Column-width work owes a sweep across seeds, never the seed-42 fixture.** Seed
     42 is one of the few clean seeds, which is why a sideways-scroll defect left the suite green
     while other seeds overflowed. Pin the resolved value, not the sheet's text, so flipping it fails
     too (`handbook/specs/check-placement.md`, #49, PR #406). A width-scoped feature is guarded on BOTH sides of its
@@ -197,8 +197,9 @@ This is the checklist; the reasons are not copied here.
 2. **Fix the cascade by restructuring, never by another override.** Scope the painting rule so a
    seventh room inherits the safe default without anyone remembering this defect. If your fix is
    one more override, you are writing the bug that was just fixed.
-3. **Decide HOW you will look before writing the rule.** Then render through CDP at 390 and 1280
-   (`--window-size` does not set the layout viewport) and read the WHOLE frame: rows, wraps, seats,
+3. **Decide HOW you will look before writing the rule.** Then render through CDP at 1024 and 1280,
+   and at 640, where every piece must keep its place on the 1024 page while the window scrolls
+   sideways (Issue #764; `--window-size` does not set the layout viewport), and read the WHOLE frame: rows, wraps, seats,
    the nav, the head, and after every open and close, what the previous state left behind (a
    tooltip, a class, an inline style). The piece you changed is the one place you will look by default.
    A collision is measured on ink, every visible text node's line boxes and each control's own rect,
