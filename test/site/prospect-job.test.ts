@@ -9,7 +9,7 @@ import { STYLES, type StyleName } from "../../src/render/style.ts";
 import type { World } from "../../src/world/types.ts";
 import { plateDressFor } from "../../src/prospect/dress/context.ts";
 import { resolveProspectIndex, prospectResultFor } from "../../src/site/explorer/prospect-job.ts";
-import { runInline, type AtlasJob, type DrawJob, type ProspectJob, type RenderJob } from "../../src/site/explorer/worker-client.ts";
+import { runInline, runJob, type AtlasJob, type DrawJob, type ProspectJob, type RenderJob } from "../../src/site/explorer/worker-client.ts";
 
 const world = generateWorld(defaultRecipe(42));
 const capital = world.settlements.findIndex((s) => s.kind === "capital");
@@ -138,6 +138,20 @@ test("the worker answers in the order it was asked, a plate job waiting on its c
     assert.deepEqual(both.map((a) => a.ok), [true, true], `the ${plate.kind} job or the draw behind it failed: ${both.map((a) => a.error ?? "ok").join(", ")}`);
     assert.deepEqual(answers.map((a) => a.id).filter((id) => id === first.id || id === second.id), [first.id, second.id], `a draw posted behind a ${plate.kind} job was answered first`);
   }
+});
+
+const BROKEN = { ...DRAW, render: undefined } as unknown as RenderJob;
+
+test("a job that fails comes back as its own error and leaves the jobs behind it unharmed, from the worker and from the backup copy (Issue #801)", async () => {
+  await theWorker();
+  const failed = post(BROKEN);
+  const next = post(DRAW);
+  const [bad, good] = await Promise.all([failed.answered, next.answered]);
+  assert.equal(bad.ok, false, "the worker answered a job that threw as if it had drawn");
+  assert.equal(typeof bad.error, "string", "the worker's failure answer carries no error text");
+  assert.equal(good.ok, true, `the job posted behind a failure failed too: ${good.error ?? ""}`);
+  await assert.rejects(runJob(BROKEN), "the backup copy resolved a job that threw");
+  assert.equal((await runJob(DRAW)).ok, true, "a job run by the backup copy after a failed one failed too");
 });
 
 test("the worker and the backup copy answer a plate job alike, byte for byte (Issue #801)", async () => {

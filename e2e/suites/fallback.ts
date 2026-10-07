@@ -24,17 +24,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
     }
     check("B1 fallback: page still renders without the worker", fresh);
     check("B2 fallback: __vellumUsesWorker()===false (inline path taken)", await evaluate<boolean>(`window.__vellumUsesWorker()===false`));
-    await step("B2b", async () => {
-      const fifo = await evaluate<{ before: string[]; after: string[]; order: string[] }>(
-        `(async()=>{const chunks=()=>performance.getEntriesByType("resource").map((e)=>new URL(e.name).pathname).filter((p)=>p.startsWith("/explorer/chunks/"));const before=chunks();const order=[];` +
-          `const p=window.__vellumRunJob({kind:"prospect",seed:42,overrides:{},index:1,dress:"antique",year:null}).then(()=>order.push("prospect"));` +
-          `const d=window.__vellumRunJob({kind:"draw",seed:42,overrides:{},render:{style:"antique",widthPx:1500,legend:true}}).then(()=>order.push("draw"));` +
-          `await Promise.all([p,d]);return{before,after:chunks(),order};})()`,
-        true,
-      );
-      const fetched = fifo.after.filter((p) => !fifo.before.includes(p));
-      check("B2b fallback: a plate job and a draw posted behind it settle in the order posted, the plate's code fetched only then", fifo.order.join() === "prospect,draw" && fetched.length > 0, JSON.stringify({ order: fifo.order, fetched, atBoot: fifo.before.length }));
-    });
+    await step("B2b", () => b2bBackupOrder(ctx));
     await step("B3", async () => {
       await evaluate(`(()=>{document.getElementById("seed").value="42";document.getElementById("theme").value="";document.getElementById("draw").click();})()`);
       await waitSettled("fallback-draw");
@@ -51,4 +41,18 @@ export async function run(ctx: SuiteContext): Promise<void> {
     try { await send("Network.setCacheDisabled", { cacheDisabled: false }); } catch {}
   }
 
+}
+
+async function b2bBackupOrder({ evaluate, check }: SuiteContext): Promise<void> {
+  const fifo = await evaluate<{ atBoot: number; fetched: string[]; order: string[]; bootCarries: string[]; fetchedCarries: string[] }>(
+    `(async()=>{const chunks=()=>performance.getEntriesByType("resource").map((e)=>new URL(e.name).pathname).filter((p)=>p.startsWith("/explorer/chunks/"));const before=chunks();const order=[];` +
+      `const p=window.__vellumRunJob({kind:"prospect",seed:42,overrides:{},index:1,dress:"antique",year:null}).then(()=>order.push("prospect"));` +
+      `const d=window.__vellumRunJob({kind:"draw",seed:42,overrides:{},render:{style:"antique",widthPx:1500,legend:true}}).then(()=>order.push("draw"));` +
+      `await Promise.all([p,d]);const fetched=chunks().filter((c)=>!before.includes(c));` +
+      `const {ROMAN}=await import("./engine/prospect/letter/face-roman.js");const outline=Object.values(ROMAN.glyphs).map((g)=>g[5]).reduce((a,b)=>b.length>a.length?b:a);` +
+      `const carrying=async(paths)=>(await Promise.all(paths.map(async(c)=>((await (await fetch(c)).text()).includes(outline)?c:"")))).filter(Boolean);` +
+      `return{atBoot:before.length,fetched,order,bootCarries:await carrying(before),fetchedCarries:await carrying(fetched)};})()`,
+    true,
+  );
+  check("B2b fallback: a plate job and a draw posted behind it settle in the order posted, the plate's lettering in no file the boot fetched and in one the plate job fetched", fifo.order.join() === "prospect,draw" && fifo.bootCarries.length === 0 && fifo.fetchedCarries.length > 0, JSON.stringify(fifo));
 }
