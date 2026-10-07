@@ -2,6 +2,7 @@
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { DISCOVERY_ROUTES } from "../../scripts/generate-discovery.ts";
+import { PAGE_FLOOR as FLOOR_WIDTH } from "../../src/site/shared/page-box.ts";
 import { makeSettle } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
 import { onFixedDay } from "../support/fixed-day.ts";
@@ -16,7 +17,7 @@ const PAGE_FLOOR = ["/", "/explorer/", "/explorer/portfolio/", "/faq/", "/galler
 const YIELD_TOP = 1040;
 const YIELD_MID = 1032;
 // A page narrower than this lays out its 1024 layout (Alex, 2026-10-06, Issue #762), which FL1 holds piece for piece, so the sweeps read every page from here up.
-const ROOM_FLOOR = 1024;
+const ROOM_FLOOR = FLOOR_WIDTH;
 const WIDE = 1280;
 const STRIDE = 32;
 const WIDE_H = 800;
@@ -137,7 +138,6 @@ async function sweepPage(ctx: SuiteContext, page: string): Promise<PageResult> {
   }
 }
 
-// The same-run control for the width-query half (Gate 2 item 9; the tree carries no width query to fault on): a rule planted on a loaded page must come back through MEDIA and be named by the very fault list CO1 counts.
 const PLANTED = "@media (max-width: 900px) { .co-witness { color: red; } }";
 async function floorControl(ctx: SuiteContext): Promise<{ clean: readonly string[]; planted: readonly string[] }> {
   await load(ctx, "/faq/", WIDE);
@@ -168,7 +168,7 @@ async function co1Sweep(ctx: SuiteContext): Promise<readonly PageResult[]> {
   return results;
 }
 
-/** A discovery route the sweep never opens (the atlas, written by the showcase generator rather than the tree): its links read once the document is complete and they stop changing, and its sheets' width conditions with them. */
+/** A discovery route the sweep never opens (the atlas, written by the showcase generator rather than the tree): its links read once the document is complete and they stop changing. */
 async function linksAtRest(ctx: SuiteContext, page: string): Promise<{ links: readonly string[]; media: readonly string[] }> {
   await ctx.send("Page.navigate", { url: "about:blank" });
   await ctx.send("Page.navigate", { url: `http://127.0.0.1:${ctx.PORT}${page}` });

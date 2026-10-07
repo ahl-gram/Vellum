@@ -1,5 +1,6 @@
 // The 1024 floor (Issue #762 pull request C; Alex, 2026-10-06, issuecomment-6010814718): a window narrower than 1024 keeps every page's 1024 layout at full size and scrolls sideways, the scroll reaches every piece, a layout fired while scrolled keeps every piece where it stood, and a room that scrolls down keeps its chrome in view.
 import { ATLAS_ROUTE } from "../../../scripts/generate-discovery.ts";
+import { PAGE_FLOOR } from "../../../src/site/shared/page-box.ts";
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import { CHART_ROOM_FLOOR, LANDED, rest } from "../stage/stage.ts";
@@ -9,7 +10,8 @@ const ROOMS = [...CHART_ROOM_FLOOR, ...SCROLLING_ROOMS];
 const HOME = "/";
 const SCROLLS_DOWN = [...SCROLLING_ROOMS, HOME];
 export const FLOOR_PAGES = [...ROOMS, HOME, ATLAS_ROUTE];
-const FLOOR = 1024;
+const FLOOR = PAGE_FLOOR;
+const ATLAS_PIECES = ["body.atlas-sheet > header", "body.atlas-sheet > figure", ".atlas-sheet .styles", ".atlas-sheet .themes", "body.atlas-sheet > footer"];
 const TOLERANCE = 0.5;
 
 type Box = [number, number, number, number];
@@ -21,7 +23,7 @@ const PIECES: Payload<Pieces> = `(() => {
   const sx = scrollX, r1 = (n) => Math.round(n * 10) / 10;
   const box = (e) => { const r = e.getBoundingClientRect(); return r.width === 0 && r.height === 0 ? null : [r1(r.left + sx), r1(r.top), r1(r.width), r1(r.height)]; };
   const pieces = {};
-  for (const s of ["header.chrome", "main", ".corner.tr", ".corner.bl", ".corner.br", ".slip", ".slip-tab", ".legend", ".chart-drawer-tab", "#sheet", ".strip", ".sheet h2", "#lf-stage", "#lf-sheet", ".lf-seed", ".lf-legend", "#lf-controls", ".lf-coords", ".notice-stamp", ".lf-shelf", "body.atlas-sheet > header", "body.atlas-sheet > figure", ".atlas-sheet .styles", ".atlas-sheet .themes", "body.atlas-sheet > footer"]) {
+  for (const s of ["header.chrome", "main", ".corner.tr", ".corner.bl", ".corner.br", ".slip", ".slip-tab", ".legend", ".chart-drawer-tab", "#sheet", ".strip", ".sheet h2", "#lf-stage", "#lf-sheet", ".lf-seed", ".lf-legend", "#lf-controls", ".lf-coords", ".notice-stamp", ".lf-shelf", ...${JSON.stringify(ATLAS_PIECES)}]) {
     const e = document.querySelector(s);
     const b = e && getComputedStyle(e).visibility !== "hidden" ? box(e) : null;
     if (b) pieces[s] = b;
@@ -84,6 +86,7 @@ export async function fl1Floor(ctx: SuiteContext): Promise<void> {
   for (const page of FLOOR_PAGES) {
     const fresh = await open(ctx, page, FLOOR, 800);
     if (Object.keys(fresh.pieces).length === 0) faults.push(`${page} 1024x800: no piece read, so every comparison below is empty`);
+    if (page === ATLAS_ROUTE) faults.push(...ATLAS_PIECES.filter((s) => !(s in fresh.pieces)).map((s) => `${page} 1024x800: the atlas piece ${s} was not read`));
     const wide = await resized(ctx, page, 1100, 800);
     const at800 = await resized(ctx, page, FLOOR, 800);
     const at400 = await resized(ctx, page, FLOOR, 400);
