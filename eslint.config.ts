@@ -148,9 +148,7 @@ export default defineConfig(
   {
     name: "Issue #763: no sheet switches layout at a fixed window width at or below the 1024 floor",
     files: ["public/**/*.css"],
-    plugins: { css, vellum },
-    language: "css/css",
-    languageOptions: { tolerant: true },
+    plugins: { vellum },
     rules: { "vellum/css-no-narrow-width": "error" },
   },
   {
