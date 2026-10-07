@@ -1,7 +1,7 @@
 // The 1024 floor (Issue #762 pull request C; Alex, 2026-10-06, issuecomment-6010814718): a window narrower than 1024 keeps every page's 1024 layout at full size and scrolls sideways, the scroll reaches every piece, a layout fired while scrolled keeps every piece where it stood, and a room that scrolls down keeps its chrome in view.
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
-import { CHART_ROOM_FLOOR, LANDED, rest } from "./stage.ts";
+import { CHART_ROOM_FLOOR, LANDED, rest } from "../stage/stage.ts";
 
 const SCROLLING_ROOMS = ["/faq/", "/glossary/", "/gallery/"];
 const ROOMS = [...CHART_ROOM_FLOOR, ...SCROLLING_ROOMS];

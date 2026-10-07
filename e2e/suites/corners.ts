@@ -4,13 +4,14 @@ import { fileURLToPath } from "node:url";
 import { DISCOVERY_ROUTES } from "../../scripts/generate-discovery.ts";
 import { makeSettle } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
+import { onFixedDay } from "../support/fixed-day.ts";
 import type { Payload, SuiteContext } from "../types.ts";
 import { fillBetween, mediaEdges, meetings, nearest, routesUnder, strideWidths, squeezes, unreadWidthConditions, verdict } from "./corners/geometry.ts";
 import type { Control, CornerRead, Row } from "./corners/geometry.ts";
-import { ea1Phone, ea4Reads, ea5Lift, eaDesk } from "./corners/stage.ts";
+import { ea1Phone, ea4Reads, ea5Lift, eaDesk } from "./stage/stage.ts";
 import { co5Yields, co6Follows, co7Band } from "./corners/top-row.ts";
 import { fl1Floor, fl2Reach, fl3Relayout, fl4Read, fl5KeyboardDrawer, fl6Paper, fl7Degenerate } from "./corners/floor.ts";
-import { na4Lean, ns1Soft } from "./corners/short.ts";
+import { na4Lean, ns1Soft } from "./stage/short.ts";
 
 const REPO = resolve(fileURLToPath(new URL(".", import.meta.url)), "..", "..");
 const PAGE_FLOOR = ["/", "/explorer/", "/explorer/portfolio/", "/faq/", "/gallery/", "/glossary/", "/print-room/", "/prospect/", "/reading-room/", "/ribbon/", "/seed-of-the-day/", "/specimen/"];
@@ -251,42 +252,35 @@ async function co2Control(ctx: SuiteContext): Promise<void> {
   );
 }
 
-// Every chart room's bare visit draws the day's seed (`seedForDate` in `src/world/seed-of-the-day.ts`), so the suite runs on one fixed day and answers the same on every date (Alex, 2026-10-05, on PR #784).
-const FIXED_DAY = Date.UTC(2026, 9, 5, 12);
-const FIXED_CLOCK = `(() => { const Real = Date, shift = ${FIXED_DAY} - Real.now(); globalThis.Date = new Proxy(Real, { construct: (t, a) => (a.length ? new t(...a) : new t(Real.now() + shift)), apply: () => new Real(Real.now() + shift).toString(), get: (t, p) => (p === "now" ? () => Real.now() + shift : Reflect.get(t, p)) }); })()`;
-
 export async function run(ctx: SuiteContext): Promise<void> {
   const step = makeStep(ctx);
-  const { send } = ctx;
-  await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
-  const clock = await send<{ identifier: string }>("Page.addScriptToEvaluateOnNewDocument", { source: FIXED_CLOCK });
   try {
-    let swept: readonly PageResult[] = [];
-    await step("CO1", async () => { swept = await co1Sweep(ctx); });
-    await step("CO4", () => co4Roads(ctx, swept));
-    await step("CO2", () => co2Control(ctx));
-    await step("CO3", () => co3Wraps(ctx));
-    await step("CO5", () => co5Yields(ctx));
-    await step("CO6", () => co6Follows(ctx));
-    await step("CO7", () => co7Band(ctx));
-    await step("FL1", () => fl1Floor(ctx));
-    await step("FL2", () => fl2Reach(ctx));
-    await step("FL3", () => fl3Relayout(ctx));
-    await step("FL4", () => fl4Read(ctx));
-    await step("FL5", () => fl5KeyboardDrawer(ctx));
-    await step("FL6", () => fl6Paper(ctx));
-    await step("FL7", () => fl7Degenerate(ctx));
-    await step("NS1", () => ns1Soft(ctx));
-    await step("NA4", () => na4Lean(ctx));
-    await step("EA1", async () => { await ea1Phone(ctx); });
-    await ctx.clearMobile();
-    await step("EA2, EA3, EL1, EL2", () => eaDesk(ctx));
-    await step("EA4", () => ea4Reads(ctx));
-    await step("EA5", () => ea5Lift(ctx));
+    await onFixedDay(ctx, async () => {
+      let swept: readonly PageResult[] = [];
+      await step("CO1", async () => { swept = await co1Sweep(ctx); });
+      await step("CO4", () => co4Roads(ctx, swept));
+      await step("CO2", () => co2Control(ctx));
+      await step("CO3", () => co3Wraps(ctx));
+      await step("CO5", () => co5Yields(ctx));
+      await step("CO6", () => co6Follows(ctx));
+      await step("CO7", () => co7Band(ctx));
+      await step("FL1", () => fl1Floor(ctx));
+      await step("FL2", () => fl2Reach(ctx));
+      await step("FL3", () => fl3Relayout(ctx));
+      await step("FL4", () => fl4Read(ctx));
+      await step("FL5", () => fl5KeyboardDrawer(ctx));
+      await step("FL6", () => fl6Paper(ctx));
+      await step("FL7", () => fl7Degenerate(ctx));
+      await step("NS1", () => ns1Soft(ctx));
+      await step("NA4", () => na4Lean(ctx));
+      await step("EA1", async () => { await ea1Phone(ctx); });
+      await ctx.clearMobile();
+      await step("EA2, EA3, EL1, EL2", () => eaDesk(ctx));
+      await step("EA4", () => ea4Reads(ctx));
+      await step("EA5", () => ea5Lift(ctx));
+    });
   } finally {
-    await send("Page.removeScriptToEvaluateOnNewDocument", { identifier: clock.identifier }).catch(() => undefined);
-    await send("Emulation.setEmulatedMedia", { media: "", features: [] }).catch(() => undefined);
     await ctx.clearMobile().catch(() => undefined);
-    await send("Emulation.setDeviceMetricsOverride", { width: WIDE, height: WIDE_H, deviceScaleFactor: 1, mobile: false }).catch(() => undefined);
+    await ctx.send("Emulation.setDeviceMetricsOverride", { width: WIDE, height: WIDE_H, deviceScaleFactor: 1, mobile: false }).catch(() => undefined);
   }
 }

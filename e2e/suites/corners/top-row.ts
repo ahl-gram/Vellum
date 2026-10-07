@@ -1,7 +1,7 @@
 // The top row (Issue #762 pull request B; re-floored by pull requests C and D, where a page below 1024 lays out its 1024 layout): a wide corner gives way toward the kit's width wherever it would run under the nav, a page that widens again lays out from its sheets, Issue #741's corners are never written, a chart room's slip follows its folio, and a room's band and first row hold at the floor.
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
-import { LANDED } from "./stage.ts";
+import { LANDED } from "../stage/stage.ts";
 
 const KIT = 304;
 const CAP = 480;

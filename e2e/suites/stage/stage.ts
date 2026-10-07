@@ -7,7 +7,7 @@ import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import { GLYPHS_OVER_SHEET } from "./glyphs.ts";
 import type { Glyph } from "./glyphs.ts";
-import { routesUnder } from "./geometry.ts";
+import { routesUnder } from "../corners/geometry.ts";
 
 const REPO = resolve(fileURLToPath(new URL(".", import.meta.url)), "..", "..", "..");
 export const CHART_ROOM_FLOOR = ["/explorer/", "/explorer/portfolio/", "/print-room/", "/prospect/", "/reading-room/", "/ribbon/", "/seed-of-the-day/", "/specimen/"];
