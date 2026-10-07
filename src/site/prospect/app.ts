@@ -1,6 +1,7 @@
 // The Prospect room's controller: resolves the address, pulls the plate through the SHARED render worker as a blob <img> (never inline <svg>: the cross-chart url(#) id rule), and re-engraves in place when the year control asks; the world itself never changes on this page.
 import { runJob, usesWorker, initWorker } from "../explorer/worker-client.ts";
-import { plateDressFor, type PlateDress } from "../explorer/prospect-job.ts";
+import { plateDressFor } from "../../prospect/dress/context.ts";
+import type { PlateDress } from "../explorer/prospect-job.ts";
 import { countLine, layOnTable, layPressFace, LAY_ON_PAGE } from "../explorer/chart-drawer.ts";
 import { emitTable, parseTable, prospectItemFrom, tableHash, type TableItem, type TableOverrides } from "../shared/table-address.ts";
 import { deviceStorage as store, navigationTypeNow, readStoredTable, tableOnArrival, writeStoredTable, TRAVERSAL } from "../shared/table-store.ts";

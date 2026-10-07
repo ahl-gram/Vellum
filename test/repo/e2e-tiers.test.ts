@@ -272,7 +272,7 @@ const STEPPED_GROUPS: Readonly<Record<string, readonly string[]>> = {
   "zoom-gestures": ["ZG2, ZG3, ZG4", "ZG restore"],
   "glass-ceremony": ["G setup", "G restore"],
   "cards": ["P setup", "P19", "P20 to P27", "P24", "P28 to P33", "P30", "P restore"],
-  "fallback": ["B3"],
+  "fallback": ["B2b", "B3"],
   "region-detail": ["RD setup", "RD3, RD4", "RD5", "RD restore"],
   "ribbon": ["RB1 to RB5e", "RB7", "RB8"],
   "prospect": ["PB2 to PB5", "PB6", "PB7 to PB7d", "PB7e", "PB8", "PB9"],

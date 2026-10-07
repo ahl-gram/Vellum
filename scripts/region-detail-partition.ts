@@ -1,4 +1,4 @@
-import { type Field } from "../src/core/grid.ts";
+import type { Field } from "../src/core/grid.ts";
 import { buildHeightfield, type UvWindow } from "../src/terrain/heightfield.ts";
 import { defaultRecipe, generateWorld } from "../src/world/generate.ts";
 import { labelLandmasses } from "../src/world/landmass.ts";
