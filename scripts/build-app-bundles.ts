@@ -64,9 +64,6 @@ export async function bundleAppSurfaces(root: string): Promise<void> {
   } finally {
     await rm(staging, { recursive: true, force: true });
   }
-  for (const { entry, twin } of BUNDLE_ENTRIES) {
-    console.log(`bundled ${entry} -> ${twin}`);
-  }
 }
 
 export async function bundleToString(absEntry: string): Promise<string> {
@@ -96,7 +93,9 @@ export async function bundleToString(absEntry: string): Promise<string> {
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const root = resolve(process.argv[2] ?? "public");
-  bundleAppSurfaces(root).catch((err: unknown) => {
+  bundleAppSurfaces(root).then(() => {
+    for (const { entry, twin } of BUNDLE_ENTRIES) console.log(`bundled ${entry} -> ${twin}`);
+  }).catch((err: unknown) => {
     console.error(err instanceof Error ? err.message : err);
     process.exitCode = 1;
   });
