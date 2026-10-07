@@ -106,7 +106,7 @@ test("a corner control is squeezed when it renders narrower than its own width b
 });
 
 test("a width condition that tells two windows at or below the 1024 floor apart is named, in either form, and one that switches above the floor is not (Issue #763 ruling 2A)", () => {
-  const floored = ["(max-width: 900px)", "(min-width: 901px)", "(max-width: 1023px)", "(min-width: 1024px)", "(width < 1024px)", "(width >= 1024px)", "(1024px <= width)", "(600px <= width <= 900px)", "(max-width: 1023.98px)", "(min-width: 900.02px)", "screen and (width <= 720px)"];
+  const floored = ["(max-width: 900px)", "(min-width: 901px)", "(max-width: 1023px)", "(min-width: 1024px)", "(width < 1024px)", "(width >= 1024px)", "(1024px <= width)", "(600px <= width <= 900px)", "(max-width: 1023.98px)", "(min-width: 900.02px)", "screen and (width <= 720px)", "(min-width: 600px) and (max-width: 1400px)"];
   const above = ["(max-width: 1024px)", "(min-width: 1025px)", "(width < 1025px)", "(width > 1024px)", "(1024px < width)", "(1100px <= width <= 1400px)", "(max-height: 640px)", "print", "(prefers-reduced-motion: reduce)"];
   assert.deepEqual(floorEdges([...floored, ...above], 1024), floored);
   assert.deepEqual(floorEdges(["(min-width: 1024px)"], 1023), [], "the floor is the caller's, not a number of the function's own");
@@ -115,12 +115,14 @@ test("a width condition that tells two windows at or below the 1024 floor apart 
 test("a page's faults are its unreadable width conditions, its conditions that switch at or below the floor and its failed width reads, each named, so CO1 and its control count one list (Issue #763)", () => {
   const ok: Row = room();
   assert.deepEqual(pageFaults(["print", "(min-width: 1280px)"], [ok], 1024), [], "a clean page with a passing read has no fault");
-  const faults = pageFaults(["(max-width: 900px)", "(width <= 45em)", "(max-width: 900px)"], [ok, { w: 380, read: room().read }], 1024);
+  const faults = pageFaults(["(max-width: 900px)", "(width <= 45em)", "(max-width: 900px)", "(width <= 45em)"], [ok, { w: 380, read: room().read }], 1024);
   assert.deepEqual(faults, [
     "a width condition the edge reader cannot parse: (width <= 45em)",
     "a width condition that switches at or below the 1024 floor: (max-width: 900px)",
     "laid out at 390, not 380",
   ], "each kind of fault counted once per condition, in this order");
+  assert.deepEqual(pageFaults(["(min-width: 1050px)"], [], 1100), ["a width condition that switches at or below the 1100 floor: (min-width: 1050px)"], "the floor is the caller's, threaded to the judgement and the line alike");
+  assert.deepEqual(pageFaults(["(min-width: 1050px)"], [], 1024), [], "and the same condition clears a lower floor");
 });
 
 test("FL1 reads every page the site serves, every page the tree builds and every discovery route, the served atlas among them, so a new page joins the floor by existing (Issue #763 ruling 3B)", () => {
