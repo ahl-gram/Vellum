@@ -146,7 +146,9 @@ test("a job that fails comes back as its own error and leaves the jobs behind it
   await theWorker();
   const failed = post(BROKEN);
   const next = post(DRAW);
-  const [bad, good] = await Promise.all([failed.answered, next.answered]);
+  const good = await next.answered;
+  const bad = answers.find((a) => a.id === failed.id);
+  assert.ok(bad, "the worker never answered the job that threw, though it answered the one posted behind it");
   assert.equal(bad.ok, false, "the worker answered a job that threw as if it had drawn");
   assert.equal(typeof bad.error, "string", "the worker's failure answer carries no error text");
   assert.equal(good.ok, true, `the job posted behind a failure failed too: ${good.error ?? ""}`);
