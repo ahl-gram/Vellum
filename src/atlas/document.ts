@@ -105,7 +105,7 @@ h1 { font-weight: 400; color: var(--parchment-bright); }
 .subtitle, .chartno { color: var(--parchment); }
 .atlas-sheet > figure, .atlas-sheet > section { background: var(--parchment-panel); border: 1px solid var(--line-tan);
   outline: 3px double var(--line-faint); outline-offset: 6px; box-shadow: var(--sheet-shadow);
-  padding: 1.8rem clamp(1.25rem, 3vw, 2.75rem) 2.4rem; margin: 2.8rem 0; }
+  padding: 1.8rem clamp(1.25rem, max(3vw, 30.72px), 2.75rem) 2.4rem; margin: 2.8rem 0; }
 .atlas-sheet > section > h2 { margin-top: 0; }
 .atlas-sheet > section:has(> table) { overflow-x: auto; }
 .atlas-sheet .styles { grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); }
