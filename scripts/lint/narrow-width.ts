@@ -75,11 +75,19 @@ const cssNoNarrowWidth: CSSRuleDefinition = {
 };
 
 type Node = Rule.Node;
-const GLOBAL_OBJECTS = new Set(["window", "globalThis", "self"]);
-const WIDTH_READS = new Set(["innerWidth", "outerWidth", "visualViewport.width", "screen.width", "screen.availWidth", "document.documentElement.clientWidth", "document.documentElement.offsetWidth", "document.body.clientWidth", "document.body.offsetWidth"]);
+const GLOBAL_OBJECTS = new Set(["window", "globalThis", "self", "top", "parent", "frames", "document.defaultView"]);
+const ROOT_BOXES = ["document.documentElement", "document.body", "document.scrollingElement"];
+const WIDTH_READS = new Set(["innerWidth", "outerWidth", "visualViewport.width", "screen.width", "screen.availWidth", ...ROOT_BOXES.flatMap((box) => [`${box}.clientWidth`, `${box}.offsetWidth`, `${box}.getBoundingClientRect().width`])]);
 const COMPARISONS: Readonly<Record<string, Op>> = { "<": "<", "<=": "<=", ">": ">", ">=": ">=", "==": "=", "===": "=", "!=": "=", "!==": "=" };
 
-const unwrap = (node: Node): Node => (node.type === "ChainExpression" || (node.type as string) === "TSNonNullExpression" ? unwrap((node as unknown as { expression: Node }).expression) : node);
+const WRAPPERS: ReadonlySet<string> = new Set(["ChainExpression", "TSNonNullExpression", "TSAsExpression", "TSSatisfiesExpression", "TSTypeAssertion"]);
+const unwrap = (node: Node): Node => (WRAPPERS.has(node.type) ? unwrap((node as unknown as { expression: Node }).expression) : node);
+
+const keyOf = (node: Node & { type: "MemberExpression" }): string | null => {
+  const key = node.property as Node;
+  if (!node.computed) return key.type === "Identifier" ? key.name : null;
+  return key.type === "Literal" && typeof key.value === "string" ? key.value : null;
+};
 
 const isGlobal = (context: Rule.RuleContext, id: Node): boolean => {
   for (let scope: Scope.Scope | null = context.sourceCode.getScope(id); scope; scope = scope.upper) {
@@ -92,10 +100,15 @@ const isGlobal = (context: Rule.RuleContext, id: Node): boolean => {
 const globalPath = (context: Rule.RuleContext, raw: Node): string | null => {
   const node = unwrap(raw);
   if (node.type === "Identifier") return isGlobal(context, node) ? node.name : null;
-  if (node.type !== "MemberExpression" || node.computed || node.property.type !== "Identifier") return null;
-  const head = globalPath(context, node.object as Node);
-  if (head === null) return null;
-  return GLOBAL_OBJECTS.has(head) ? node.property.name : `${head}.${node.property.name}`;
+  if (node.type === "CallExpression") {
+    const callee = node.arguments.length === 0 ? globalPath(context, node.callee as Node) : null;
+    return callee === null ? null : `${callee}()`;
+  }
+  if (node.type !== "MemberExpression") return null;
+  const key = keyOf(node);
+  const head = key === null ? null : globalPath(context, node.object as Node);
+  if (head === null || key === null) return null;
+  return GLOBAL_OBJECTS.has(head) ? key : `${head}.${key}`;
 };
 
 type Services = { program: ts.Program; esTreeNodeToTSNodeMap: { get(node: unknown): ts.Node } };
@@ -118,6 +131,16 @@ const stringOf = (context: Rule.RuleContext, node: Node): string | null => {
   return type?.isStringLiteral() ? type.value : null;
 };
 
+/** The query a call hands matchMedia, directly or through .call or .apply: undefined where the call is not to matchMedia, null where the query cannot be read. */
+const mediaQueryOf = (context: Rule.RuleContext, node: Node & { type: "CallExpression" }): Node | null | undefined => {
+  const callee = unwrap(node.callee as Node);
+  if (globalPath(context, callee) === "matchMedia") return (node.arguments[0] as Node | undefined) ?? undefined;
+  if (callee.type !== "MemberExpression" || globalPath(context, callee.object as Node) !== "matchMedia") return undefined;
+  const how = keyOf(callee);
+  if (how === "call") return (node.arguments[1] as Node | undefined) ?? null;
+  return how === "apply" || how === "bind" ? null : undefined;
+};
+
 const queryFaults = (query: string): Faults => {
   try {
     return mediaFaults(parse(query, { context: "mediaQueryList" }));
@@ -131,8 +154,9 @@ const noNarrowWidth: Rule.RuleModule = {
   create(context) {
     return {
       CallExpression(node) {
-        if (globalPath(context, node.callee as Node) !== "matchMedia" || node.arguments.length === 0) return;
-        const query = stringOf(context, node.arguments[0] as Node);
+        const asked = mediaQueryOf(context, node);
+        if (asked === undefined) return;
+        const query = asked === null ? null : stringOf(context, asked);
         if (query === null) {
           context.report({ node, messageId: "unread", data: { floor: String(PAGE_FLOOR) } });
           return;

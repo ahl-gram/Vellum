@@ -86,6 +86,20 @@ const TS_PLANT: Plant = [
   ["export const sa = (): boolean => window.visualViewport?.width < 900;", REFUSE],
   ["export const sb = (): boolean => document.documentElement.offsetWidth < 900;", REFUSE],
   ["export const sc = (): boolean => document.body.offsetWidth < 900;", REFUSE],
+  ["export const sd = (): boolean => document.documentElement[\"clientWidth\"] < 900;", REFUSE],
+  ["export const se = (): boolean => window[\"innerWidth\"] < 900;", REFUSE],
+  ["export const sf = (): boolean => (window.innerWidth satisfies number) <= 1023;", REFUSE],
+  ["export const sg = (): boolean => document.scrollingElement!.clientWidth < 900;", REFUSE],
+  ["export const sh = (): boolean => document.documentElement.getBoundingClientRect().width < 900;", REFUSE],
+  ["export const si = (): boolean => window.top!.innerWidth < 900;", REFUSE],
+  ["export const sj = (): boolean => parent.innerWidth < 900;", REFUSE],
+  ["export const sk = (): boolean => document.defaultView!.matchMedia(\"(max-width: 900px)\").matches;", REFUSE],
+  ["export const sl = (): boolean => window.matchMedia.call(window, \"(max-width: 900px)\").matches;", REFUSE],
+  ["export const sm = (): boolean => matchMedia.apply(window, [\"(max-width: 900px)\"]).matches;", REFUSE],
+  ["export const sn = (): ((q: string) => MediaQueryList) => matchMedia.bind(window);", REFUSE],
+  ["export const so = (): boolean => window.matchMedia.call(window, \"(prefers-reduced-motion: reduce)\").matches;", PASS],
+  ["export const sp = (el: HTMLElement): boolean => el.getBoundingClientRect().width < 900;", PASS],
+  ["const KEY = \"innerWidth\"; export const sq = (): boolean => window[KEY] < 900;", PASS],
   ["export const t = (): boolean => screen.width < 900;", REFUSE],
   ["export const u = (): boolean => window.screen.availWidth < 1024;", REFUSE],
   ["export const v = (): boolean => outerWidth < 900;", REFUSE],
@@ -103,7 +117,7 @@ const TS_PLANT: Plant = [
 ];
 
 const refusedLines = (plant: Plant): number[] => plant.flatMap(([, refused], i) => (refused ? [i + 1] : []));
-const BLIND_SPOTS = "BLIND SPOTS, declared, each erring toward passing (a handbook/errata/guards.md row; Alex ruled them out of the guard's reach, Issue #763 ruling 2A): a length that shrinks with the window (vw and its kin, or a Math.min or Math.max of a width read against a constant), a comparison with a value the checker cannot fold, a width read stored in a variable first, height, the window's shape (orientation, aspect-ratio), a box's own size (@container, an element's clientWidth), a matchMedia in an .astro inline script, which this lint never reads";
+const BLIND_SPOTS = "BLIND SPOTS, declared, each erring toward passing (the PR #807 row in handbook/errata/guards.md; outside the guard as the plan Issue #763 ruling 2A was taken on listed them, the ruling itself naming a length that shrinks with the window, a height, the window's shape and a box's own size): a length that shrinks with the window (vw and its kin, or a Math.min or Math.max of a width read against a constant), a comparison with a value the checker cannot fold, a width read or a matchMedia stored in a variable first, a computed key the checker cannot read as a literal, height, the window's shape (orientation, aspect-ratio), a box's own size (@container, an element's clientWidth or rect), a ResizeObserver on the root, <source media> and sizes, a matchMedia in an .astro inline script, which this lint never reads";
 
 const lintPlant = async (plant: Plant, filePath: string, rule: string): Promise<number[]> => {
   const [result] = await eslint.lintText(plant.map(([line]) => line).join("\n"), { filePath: join(ROOT, filePath) });
