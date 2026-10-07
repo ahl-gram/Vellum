@@ -162,7 +162,7 @@ function drawerJolt(drawerEls: ChartDrawerEls, rows: ReadonlyMap<string, Row>) {
     drawerEls.cuttings.classList.remove("jolt");
     disarmJolt();
   };
-  return { onScreen, joltWhenStill, clearCeremonies };
+  return { joltWhenStill, clearCeremonies };
 }
 
 function drawerFill(deps: ChartDrawerDeps, items: Items, rows: ReadonlyMap<string, Row>, render: () => void, art: ReadonlyMap<string, string>, pictureOf: (item: TableItem) => HTMLElement, titleOf: ItemText, putArt: Put, putName: Put) {
@@ -221,7 +221,7 @@ function drawerOpen(drawerEls: ChartDrawerEls, deps: ChartDrawerDeps, clearCerem
   return { setOpen };
 }
 
-function drawerLay(drawerEls: ChartDrawerEls, deps: ChartDrawerDeps, items: Items, setOpen: (open: boolean) => void, joltWhenStill: (wasOpen: boolean) => void, putArt: Put, putName: Put, setLanding: (next: string | null) => void, commit: (next: ReadonlyArray<TableItem>) => void, onScreen: () => boolean, rows: ReadonlyMap<string, Row>, titleOf: ItemText) {
+function drawerLay(drawerEls: ChartDrawerEls, deps: ChartDrawerDeps, items: Items, setOpen: (open: boolean) => void, joltWhenStill: (wasOpen: boolean) => void, putArt: Put, putName: Put, setLanding: (next: string | null) => void, commit: (next: ReadonlyArray<TableItem>) => void, titleOf: ItemText) {
   function lay(item: TableItem, svg: string | null, title?: string, ready?: { readonly url: string }): boolean {
     const laid = layOnTable(items(), item);
     if (laid.refused) {
@@ -237,8 +237,6 @@ function drawerLay(drawerEls: ChartDrawerEls, deps: ChartDrawerDeps, items: Item
     setLanding(keyOf(item));
     commit(laid.items);
     setOpen(true);
-    // Checked AFTER the open, not before: from a shut drawer the cutting is built display:none and the open in the same tick is what starts its settle; a list still off screen here is the phone's docked leaf, where a queued ceremony would replay when the leaf is next shown.
-    if (!onScreen()) rows.get(keyOf(item))?.li.classList.remove("landing");
     deps.say(`${titleOf(item)} lies on the table · ${countLine(laid.items)}`);
     return true;
   }
@@ -271,11 +269,11 @@ function drawerTable(drawerEls: ChartDrawerEls, items: Items, setOpen: (open: bo
 export function bindChartDrawer(drawerEls: ChartDrawerEls, deps: ChartDrawerDeps) {
   const { art, titleOf, pictureOf, forget, putArt, putName } = drawerArt();
   const { rows, render, commit, items, setItems, setLanding } = drawerCuttings(drawerEls, deps, titleOf, pictureOf, forget);
-  const { onScreen, joltWhenStill, clearCeremonies } = drawerJolt(drawerEls, rows);
+  const { joltWhenStill, clearCeremonies } = drawerJolt(drawerEls, rows);
   drawerEls.cuttings.addEventListener("animationend", (e) => { if (e.target === drawerEls.cuttings) drawerEls.cuttings.classList.remove("jolt"); });
   const { fill } = drawerFill(deps, items, rows, render, art, pictureOf, titleOf, putArt, putName);
   const { setOpen } = drawerOpen(drawerEls, deps, clearCeremonies, fill);
-  const { lay } = drawerLay(drawerEls, deps, items, setOpen, joltWhenStill, putArt, putName, setLanding, commit, onScreen, rows, titleOf);
+  const { lay } = drawerLay(drawerEls, deps, items, setOpen, joltWhenStill, putArt, putName, setLanding, commit, titleOf);
   const { reveal, receiving, restore, state, isFull, holds } = drawerTable(drawerEls, items, setOpen, forget, setItems, render, fill);
 
   drawerEls.tab.addEventListener("click", () => setOpen(true, true));

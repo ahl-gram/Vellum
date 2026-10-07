@@ -74,17 +74,6 @@ test("CT13 the settle retires on the cutting's OWN animation end and not on its 
   assert.equal(landing(li), false, "the sheet's own end retires the class");
 });
 
-test("CT13b a ceremony plays only where the sheets are on screen: a lay into a list with no rect (the phone, its leaf away) leaves no `landing`, and the pill still answers", () => {
-  const away = drawer({ onScreen: false });
-  away.table.lay(survey(1), SVG, "one");
-  assert.equal(lis(away.cuttings).length, 1, "the sheet is on the table either way");
-  assert.equal(landing(lis(away.cuttings)[0]!), false, "but nothing is queued to settle later when the leaf is next shown");
-  assert.match(away.said[0] ?? "", /lies on the table/, "the pill is the phone's answer");
-  const shown = drawer();
-  shown.table.lay(survey(1), SVG, "one");
-  assert.equal(landing(lis(shown.cuttings)[0]!), true, "the same lay with the list on screen settles");
-});
-
 test("CT14 a refusal at the cap jolts the sheets on the table, a duplicate does not, and the next render takes the jolt off", () => {
   const { table, cuttings, said } = drawer();
   table.restore(fill(TABLE_CAP));
