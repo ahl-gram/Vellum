@@ -133,6 +133,7 @@ type PendingJob = {
   readonly reject: (err: Error) => void;
 };
 const pending = new Map<number, PendingJob>();
+let inlineAnswering: Promise<unknown> = Promise.resolve();
 
 function onJobMessage(e: MessageEvent<WorkerResponse>): void {
   const d = e.data;
@@ -223,12 +224,14 @@ export function runJob(msg: RenderJob): Promise<JobResult> {
     });
   }
   // No worker: defer a macrotask so the status line paints before the main thread blocks on the inline render.
-  return new Promise((resolve, reject) => {
+  const next = inlineAnswering.then(() => new Promise<JobResult>((resolve, reject) => {
     setTimeout(() => {
       try { resolve(runInline(msg)); }
       catch (err) { reject(err instanceof Error ? err : new Error(String(err))); }
     }, 0);
-  });
+  }));
+  inlineAnswering = next.catch(() => undefined);
+  return next;
 }
 
 export function usesWorker(): boolean {
