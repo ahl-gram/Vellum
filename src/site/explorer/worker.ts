@@ -3,9 +3,7 @@ import { renderMap } from "../../render/map-renderer.ts";
 import { buildPlaceManifest } from "../../render/place-manifest.ts";
 import { buildSurvey } from "../../render/survey.ts";
 import { generateRegionWorld, regionDetailLevel, regionTitle } from "../../world/region.ts";
-import { composeAtlas } from "../../atlas/compose.ts";
 import { serializableAtlas } from "./serializable-atlas.ts";
-import { prospectResultFor } from "./prospect-job.ts";
 import { ribbonResultFor } from "./ribbon-job.ts";
 import { tourOrderFor } from "./tour-job.ts";
 import { worldFor } from "./world-cache.ts";
@@ -63,8 +61,10 @@ function answerRegion(msg: Job<"region">): void {
   });
 }
 
-function answerAtlas(msg: Job<"atlas">): void {
+async function answerAtlas(msg: Job<"atlas">): Promise<void> {
+  const assembly = import("../../atlas/compose.ts");
   const { world } = worldFor(msg.seed, msg.overrides);
+  const { composeAtlas } = await assembly;
   ctx.postMessage({
     id: msg.id,
     ok: true,
@@ -72,8 +72,10 @@ function answerAtlas(msg: Job<"atlas">): void {
   });
 }
 
-function answerProspect(msg: Job<"prospect">): void {
+async function answerProspect(msg: Job<"prospect">): Promise<void> {
+  const engraver = import("./prospect-job.ts");
   const { world } = worldFor(msg.seed, msg.overrides);
+  const { prospectResultFor } = await engraver;
   ctx.postMessage({ id: msg.id, ok: true, ...prospectResultFor(world, msg) });
 }
 
@@ -86,39 +88,39 @@ function answerTour(msg: Job<"tour">): void {
   ctx.postMessage({ id: msg.id, ok: true, order: tourOrderFor(msg) });
 }
 
+function answer(msg: WorkerRequest): Promise<void> | undefined {
+  switch (msg.kind) {
+    case "draw": {
+      answerDraw(msg);
+      break;
+    }
+    case "region": {
+      answerRegion(msg);
+      break;
+    }
+    case "atlas":
+      return answerAtlas(msg);
+    case "prospect":
+      return answerProspect(msg);
+    case "ribbon": {
+      answerRibbon(msg);
+      break;
+    }
+    case "tour": {
+      answerTour(msg);
+      break;
+    }
+  }
+  return undefined;
+}
+
+let answering: Promise<void> = Promise.resolve();
 ctx.onmessage = (e) => {
   const msg = e.data;
-  try {
-    switch (msg.kind) {
-      case "draw": {
-        answerDraw(msg);
-        break;
-      }
-      case "region": {
-        answerRegion(msg);
-        break;
-      }
-      case "atlas": {
-        answerAtlas(msg);
-        break;
-      }
-      case "prospect": {
-        answerProspect(msg);
-        break;
-      }
-      case "ribbon": {
-        answerRibbon(msg);
-        break;
-      }
-      case "tour": {
-        answerTour(msg);
-        break;
-      }
-    }
-  } catch (err) {
+  answering = answering.then(() => answer(msg)).catch((err: unknown) => {
     ctx.postMessage({ id: msg.id, ok: false, error: ((err as { message?: string } | null) && (err as { message?: string }).message) || String(err) });
-  }
+  });
 };
 
-// Handshake: the static imports resolved before the module body ran, so the engine is loaded.
+// Handshake: the static imports resolved before the module body ran, so the engine is loaded, the plate's code apart, which a plate job imports when it first needs it.
 ctx.postMessage({ ready: true });

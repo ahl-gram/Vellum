@@ -1,7 +1,8 @@
 // The Wayfarer's Ribbon room's controller: resolves the address, pulls the scroll through the SHARED render worker as a blob <img> (never inline <svg>: the cross-chart url(#) id rule), and redraws in place when the traveller picks a new journey; the world itself never changes on this page.
 import { runJob, usesWorker, initWorker } from "../explorer/worker-client.ts";
 import { errorText } from "../shared/error-text.ts";
-import { plateDressFor, type PlateDress } from "../explorer/prospect-job.ts";
+import { plateDressFor } from "../../prospect/dress/context.ts";
+import type { PlateDress } from "../explorer/prospect-job.ts";
 import { parseRibbonAddress, chartTarget, journeyHash, prospectTarget } from "./address.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import { bindRibbonRoom, markLeaned, showPlate, writeFolio, writeItinerary, type RoomFurniture } from "./seats.ts";

@@ -8,7 +8,7 @@ import { createRoomArm } from "./arm.ts";
 import { createProspectStage } from "./prospect-stage.ts";
 import { storyBeats, type StoryBeat } from "./beats.ts";
 import { armsBearing, plateForTold, plateSpecsFor, surveyPlateRows, type PlateSpec } from "./told-plate.ts";
-import { plateDressFor } from "../explorer/prospect-job.ts";
+import { plateDressFor } from "../../prospect/dress/context.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import { TABLE_KEY } from "../shared/table-address.ts";
 import { errorText } from "../shared/error-text.ts";

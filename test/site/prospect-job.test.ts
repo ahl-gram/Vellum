@@ -7,11 +7,9 @@ import { createLoreWriter } from "../../src/society/lore.ts";
 import { roadMask, roadReachable } from "../../src/itinerary/route.ts";
 import { STYLES, type StyleName } from "../../src/render/style.ts";
 import type { World } from "../../src/world/types.ts";
-import {
-  plateDressFor,
-  resolveProspectIndex,
-  prospectResultFor,
-} from "../../src/site/explorer/prospect-job.ts";
+import { plateDressFor } from "../../src/prospect/dress/context.ts";
+import { resolveProspectIndex, prospectResultFor } from "../../src/site/explorer/prospect-job.ts";
+import { runInline, type AtlasJob, type DrawJob, type ProspectJob, type RenderJob } from "../../src/site/explorer/worker-client.ts";
 
 const world = generateWorld(defaultRecipe(42));
 const capital = world.settlements.findIndex((s) => s.kind === "capital");
@@ -101,4 +99,51 @@ test("prospectResultFor says whether a road leaves the place: yes for a roaded t
   assert.equal(prospectResultFor(world, { index: 1, dress: "antique", year: null }).roads, true);
   assert.equal(prospectResultFor(world, { index: orphan, dress: "antique", year: null }).roads, false);
   assert.equal(prospectResultFor(world, { index: capital, dress: "antique", year: null }).roads, true, "the capital is the road network's root");
+});
+
+type Answer = { readonly id?: number; readonly ready?: boolean; readonly ok?: boolean; readonly error?: string };
+const answers: Answer[] = [];
+const waiting = new Map<number, (a: Answer) => void>();
+const scope: { onmessage: ((e: { data: RenderJob & { id: number } }) => void) | null; postMessage: (m: Answer) => void } = {
+  onmessage: null,
+  postMessage: (m) => {
+    answers.push(m);
+    if (m.id !== undefined) waiting.get(m.id)?.(m);
+  },
+};
+let booted: Promise<void> | null = null;
+const theWorker = (): Promise<void> =>
+  (booted ??= (async () => {
+    Object.assign(globalThis, { self: scope });
+    await import("../../src/site/explorer/worker.ts");
+    assert.deepEqual(answers[0], { ready: true }, "the worker did not hand-shake through the stand-in for its scope, so every answer read below would be read from nothing");
+  })());
+let lastId = 0;
+const post = (job: RenderJob): { readonly id: number; readonly answered: Promise<Answer> } => {
+  const id = ++lastId;
+  const answered = new Promise<Answer>((settle) => waiting.set(id, settle));
+  scope.onmessage!({ data: { ...job, id } });
+  return { id, answered };
+};
+const PROSPECT: ProspectJob = { kind: "prospect", seed: 42, overrides: {}, index: 1, dress: "ink", year: 300 };
+const ATLAS: AtlasJob = { kind: "atlas", seed: 42, overrides: {}, width: 1500, bannerStyle: "ink" };
+const DRAW: DrawJob = { kind: "draw", seed: 42, overrides: {}, render: { style: "antique", widthPx: 1500, legend: true } };
+
+test("the worker answers in the order it was asked, a plate job waiting on its code included (Issue #801)", async () => {
+  await theWorker();
+  for (const plate of [PROSPECT, ATLAS]) {
+    const first = post(plate);
+    const second = post(DRAW);
+    const both = await Promise.all([first.answered, second.answered]);
+    assert.deepEqual(both.map((a) => a.ok), [true, true], `the ${plate.kind} job or the draw behind it failed: ${both.map((a) => a.error ?? "ok").join(", ")}`);
+    assert.deepEqual(answers.map((a) => a.id).filter((id) => id === first.id || id === second.id), [first.id, second.id], `a draw posted behind a ${plate.kind} job was answered first`);
+  }
+});
+
+test("the worker and the backup copy answer a plate job alike, byte for byte (Issue #801)", async () => {
+  await theWorker();
+  for (const plate of [PROSPECT, ATLAS]) {
+    const { id, answered } = post(plate);
+    assert.deepEqual(await answered, { id, ...(await runInline(plate)) }, `the worker's ${plate.kind} answer differs from the backup copy's`);
+  }
 });

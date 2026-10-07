@@ -267,3 +267,13 @@ test("no page downloads the plate's code before it draws a plate, and the page a
   for (const [face, outline] of OUTLINES) assert.ok([...worker].some((f) => p.text(f).includes(outline)), `the worker cannot reach the ${face} outlines even on demand`);
   for (const f of carrying([...reach(p, p.twins, ON_DEMAND), ...worker])) assert.match(p.text(f), /SIL Open Font License/, `${rel(f)} carries the plate face's outlines without its OFL notice`);
 });
+
+test("the worker's build and the pages' build share no file, so neither overwrites a file of the other's (Issue #801)", async () => {
+  const p = await press();
+  const pages = reach(p, p.twins, ON_DEMAND);
+  const workers = spawned(p, pages);
+  assert.ok(workers.length > 0, "no page spawns the worker, so there is no second build to keep apart");
+  const worker = reach(p, workers, ON_DEMAND);
+  assert.ok(worker.size > 1, "the worker reaches no file beyond its own bundle, so nothing here could collide and this guard reads nothing");
+  assert.deepEqual([...pages].filter((f) => worker.has(f)).map((f) => relative(p.root, f)), [], "a file is reached from both builds: the press lets one build's file overwrite the other's of the same name, so one side now runs the other's code");
+});

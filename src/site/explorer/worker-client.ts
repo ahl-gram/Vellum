@@ -3,9 +3,8 @@ import { renderMap, type RenderOptions } from "../../render/map-renderer.ts";
 import { buildPlaceManifest, type PlaceManifest } from "../../render/place-manifest.ts";
 import { buildSurvey, type Survey } from "../../render/survey.ts";
 import { generateRegionWorld, regionDetailLevel, regionTitle } from "../../world/region.ts";
-import { composeAtlas } from "../../atlas/compose.ts";
 import { serializableAtlas } from "./serializable-atlas.ts";
-import { prospectResultFor, type PlateDress, type ProspectPlateResult } from "./prospect-job.ts";
+import type { PlateDress, ProspectPlateResult } from "./prospect-job.ts";
 import { ribbonResultFor, type RibbonPlateData } from "./ribbon-job.ts";
 import { tourOrderFor } from "./tour-job.ts";
 import { worldFor } from "./world-cache.ts";
@@ -145,14 +144,25 @@ function onJobMessage(e: MessageEvent<WorkerResponse>): void {
   else p.reject(new Error(d.error || "worker error"));
 }
 
+async function inlinePlate(msg: AtlasJob | ProspectJob): Promise<AtlasResult | ProspectResult> {
+  const { world } = worldFor(msg.seed, msg.overrides);
+  if (msg.kind === "prospect") {
+    const { prospectResultFor } = await import("./prospect-job.ts");
+    return { ok: true, ...prospectResultFor(world, msg) };
+  }
+  const { composeAtlas } = await import("../../atlas/compose.ts");
+  return { ok: true, atlas: serializableAtlas(composeAtlas(world, { width: msg.width, bannerStyle: msg.bannerStyle })) };
+}
+
 export function runInline(msg: DrawJob): DrawResult;
 export function runInline(msg: RegionJob): RegionResult;
-export function runInline(msg: AtlasJob): AtlasResult;
-export function runInline(msg: ProspectJob): ProspectResult;
+export function runInline(msg: AtlasJob): Promise<AtlasResult>;
+export function runInline(msg: ProspectJob): Promise<ProspectResult>;
 export function runInline(msg: RibbonJob): RibbonResult;
 export function runInline(msg: TourJob): TourResult;
-export function runInline(msg: RenderJob): JobResult;
-export function runInline(msg: RenderJob): JobResult {
+export function runInline(msg: RenderJob): JobResult | Promise<JobResult>;
+export function runInline(msg: RenderJob): JobResult | Promise<JobResult> {
+  if (msg.kind === "atlas" || msg.kind === "prospect") return inlinePlate(msg);
   if (msg.kind === "tour") return { ok: true, order: tourOrderFor(msg) };
   if (msg.kind === "draw") {
     const { world } = worldFor(msg.seed, msg.overrides);
@@ -191,16 +201,8 @@ export function runInline(msg: RenderJob): JobResult {
       cached,
     };
   }
-  if (msg.kind === "prospect") {
-    const { world } = worldFor(msg.seed, msg.overrides);
-    return { ok: true, ...prospectResultFor(world, msg) };
-  }
-  if (msg.kind === "ribbon") {
-    const { world } = worldFor(msg.seed, msg.overrides);
-    return { ok: true, ...ribbonResultFor(world, msg) };
-  }
   const { world } = worldFor(msg.seed, msg.overrides);
-  return { ok: true, atlas: serializableAtlas(composeAtlas(world, { width: msg.width, bannerStyle: msg.bannerStyle })) };
+  return { ok: true, ...ribbonResultFor(world, msg) };
 }
 
 export function runJob(msg: DrawJob): Promise<DrawResult>;

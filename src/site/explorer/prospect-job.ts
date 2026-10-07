@@ -1,5 +1,5 @@
 // The prospect job's engine glue, shared by ./worker.ts and runInline in ./worker-client.ts so the two transports cannot drift apart.
-import { type ProspectDress, plateDressFor } from "../../prospect/dress/context.ts";
+import type { ProspectDress } from "../../prospect/dress/context.ts";
 import { engravedProspectPlate } from "../../prospect/finished.ts";
 import { createRng } from "../../core/rng.ts";
 import { createLoreWriter } from "../../society/lore.ts";
@@ -9,10 +9,6 @@ import { STYLES } from "../../render/style.ts";
 import type { World } from "../../world/types.ts";
 
 export type PlateDress = ProspectDress;
-export { plateDressFor };
-
-/** One spelling of a plate's name for both site surfaces that show one, the Prospect's folio and the Chart Table's cutting; a prospect job's own `title` is the WORLD's, so neither can take it from the result. */
-export const prospectTitle = (name: string): string => `The Prospect of ${name}`;
 
 export function resolveProspectIndex(world: World, index: number | null): number {
   if (index != null && Number.isInteger(index) && index >= 0 && index < world.settlements.length) {

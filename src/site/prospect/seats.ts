@@ -5,8 +5,7 @@ import { bindRoom, type Room } from "../shared/room.ts";
 import { contentsRow } from "../shared/contents-row.ts";
 import { cameraFromTransform, transformFromCamera } from "../explorer/camera.ts";
 import { PLATE_W, PLATE_H } from "../../prospect/geometry.ts";
-import { eraLine, subLine, whereLine } from "./note-lines.ts";
-import { prospectTitle } from "../explorer/prospect-job.ts";
+import { eraLine, prospectTitle, subLine, whereLine } from "./note-lines.ts";
 import type { PlateDress, ProspectPlateResult } from "../explorer/prospect-job.ts";
 
 export interface RoomFurniture {

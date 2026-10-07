@@ -51,7 +51,7 @@ const pressConfig = (outDir: string): InlineConfig => ({
     // The worker chunk must be an ES module (it is spawned { type: "module" }); Vite's default worker format is iife.
     format: "es",
     rollupOptions: {
-      output: { ...OUTPUT, entryFileNames: "explorer/worker.bundle.js" },
+      output: { ...OUTPUT, entryFileNames: "explorer/worker.bundle.js", chunkFileNames: "explorer/chunks/worker/[name].js" },
     },
   },
 });
