@@ -71,6 +71,7 @@ export default defineConfig(
       "@typescript-eslint/use-unknown-in-catch-callback-variable": "error",
       "@typescript-eslint/no-confusing-void-expression": ["error", { ignoreArrowShorthand: true, ignoreVoidOperator: false, ignoreVoidReturningFunctions: false }],
       "@typescript-eslint/no-useless-default-assignment": "error",
+      "@typescript-eslint/no-import-type-side-effects": "error",
     },
   },
   {

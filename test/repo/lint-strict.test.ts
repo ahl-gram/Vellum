@@ -32,6 +32,7 @@ const RULED: Readonly<Record<string, Linter.RuleEntry>> = {
   "@typescript-eslint/use-unknown-in-catch-callback-variable": "error",
   "@typescript-eslint/no-confusing-void-expression": ["error", { ignoreArrowShorthand: true, ignoreVoidOperator: false, ignoreVoidReturningFunctions: false }],
   "@typescript-eslint/no-useless-default-assignment": "error",
+  "@typescript-eslint/no-import-type-side-effects": "error",
 };
 
 type Plant = { lines: readonly string[]; refused: readonly number[] };
@@ -55,6 +56,7 @@ const PLANTS: Readonly<Record<string, Plant>> = {
   "@typescript-eslint/use-unknown-in-catch-callback-variable": { lines: ["declare const pr: Promise<number>;", "export const a = pr.catch((e: Error) => e.message);", "export const b = pr.catch((e) => String(e));", "export const c = pr.then((n) => n, (e: Error) => e.message);", "export const d = pr.catch((e: unknown) => String(e));", "export const f = pr.then((n) => n, (e: unknown) => String(e));"], refused: [2, 3, 4] },
   "@typescript-eslint/no-confusing-void-expression": { lines: ["declare function g(): void;", "export function r(c: boolean): void { if (c) return g(); g(); }", "export function v(): void { void g(); }", "export const x = [g()];", "export const h = (): void => g();", "export function s(c: boolean): void { if (c) { g(); return; } g(); }"], refused: [2, 3, 4] },
   "@typescript-eslint/no-useless-default-assignment": { lines: ["type Req = (a: number) => number;", "type Opt = (a?: number) => number;", "export const r: Req = (a = 1) => a;", "export const o: Opt = (a = 1) => a;"], refused: [3] },
+  "@typescript-eslint/no-import-type-side-effects": { lines: ["import { type ParsedPath } from \"node:path\";", "import type { FormatInputPathObject } from \"node:path\";", "import { type PlatformPath, sep } from \"node:path\";", "export type P = ParsedPath | FormatInputPathObject | PlatformPath;", "export const s = sep;"], refused: [1] },
 };
 
 const PLANT_AT = WITNESSES["src/**/*.ts"]!;

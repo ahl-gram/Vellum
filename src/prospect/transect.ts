@@ -1,6 +1,6 @@
 /** Reads the SAME heightfield the chart draws, in grid space: x east, y south (see Winds in world/types.ts). */
 
-import { type Field } from "../core/grid.ts";
+import type { Field } from "../core/grid.ts";
 import { clamp } from "../core/math.ts";
 
 export type ProspectView = {
