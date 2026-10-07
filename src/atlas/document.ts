@@ -111,6 +111,7 @@ h1 { font-weight: 400; color: var(--parchment-bright); }
 .atlas-sheet .styles { grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); }
 .atlas-sheet .themes { grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr)); }
 footer { color: var(--line-tan); }
+@media screen { html { min-width: 1024px; } }
 @media print {
   body { background: none; }
   body::before { display: none; }

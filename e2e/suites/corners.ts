@@ -6,7 +6,7 @@ import { makeSettle } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
 import { onFixedDay } from "../support/fixed-day.ts";
 import type { Payload, SuiteContext } from "../types.ts";
-import { fillBetween, mediaEdges, meetings, nearest, routesUnder, strideWidths, squeezes, unreadWidthConditions, verdict } from "./corners/geometry.ts";
+import { fillBetween, mediaEdges, meetings, nearest, pageFaults, routesUnder, strideWidths, squeezes } from "./corners/geometry.ts";
 import type { Control, CornerRead, Row } from "./corners/geometry.ts";
 import { ea1Phone, ea4Reads, ea5Lift, eaDesk } from "./stage/stage.ts";
 import { co5Yields, co6Follows, co7Band } from "./corners/top-row.ts";
@@ -24,7 +24,7 @@ const STRIDE = 32;
 const WIDE_H = 800;
 const MAX_FRAMES = 40;
 
-type PageResult = { readonly page: string; readonly stretches: readonly (readonly Row[])[]; readonly unread: readonly string[]; readonly dateline: string | null; readonly links: readonly string[]; readonly error: string | null };
+type PageResult = { readonly page: string; readonly stretches: readonly (readonly Row[])[]; readonly media: readonly string[]; readonly dateline: string | null; readonly links: readonly string[]; readonly error: string | null };
 
 const LINKS: Payload<string[]> = `[...document.querySelectorAll("a[href]")].map((a) => a.href).filter((h) => h.startsWith(location.origin + "/")).map((h) => new URL(h).pathname)`;
 
@@ -71,7 +71,7 @@ const restAt = (w: number): Payload<CornerRead> => `new Promise((resolve, reject
   requestAnimationFrame(tick);
 })`;
 
-const MEDIA: Payload<string[]> = `(() => { const out = []; const walk = (rules) => { for (const r of rules) { if (r instanceof CSSMediaRule) out.push(r.media.mediaText); if (r.cssRules) walk(r.cssRules); } }; for (const s of document.styleSheets) { try { walk(s.cssRules); } catch {} } return out; })()`;
+const MEDIA: Payload<string[]> = `(() => { const out = []; const sheet = (s) => { if (s.media.mediaText) out.push(s.media.mediaText); try { walk(s.cssRules); } catch {} }; const walk = (rules) => { for (const r of rules) { if (r instanceof CSSMediaRule) out.push(r.media.mediaText); if (r instanceof CSSImportRule) { if (r.media.mediaText) out.push(r.media.mediaText); if (r.styleSheet) sheet(r.styleSheet); } if (r.cssRules) walk(r.cssRules); } }; for (const s of document.styleSheets) sheet(s); return out; })()`;
 
 // The page's own dateline must be datelineFor's for today (or yesterday, across a UTC midnight) before the sweep swaps in the widest one.
 const WIDEST_DATELINE: Payload<string> = `(async () => {
@@ -124,20 +124,30 @@ async function readStretch(ctx: SuiteContext, widths: readonly number[]): Promis
 
 async function sweepPage(ctx: SuiteContext, page: string): Promise<PageResult> {
   const stretches: Row[][] = [];
-  const unread: string[] = [];
+  const media: string[] = [];
   const links: string[] = [];
   let dateline: string | null = null;
   try {
     dateline = await load(ctx, page, WIDE);
-    const media = await ctx.evaluate(MEDIA);
-    unread.push(...unreadWidthConditions(media));
+    media.push(...await ctx.evaluate(MEDIA));
     stretches.push(await readStretch(ctx, strideWidths(WIDE, ROOM_FLOOR, STRIDE, mediaEdges(media, ROOM_FLOOR - 1, WIDE))));
     // Read at the END of the stretch, seconds after the load, so a link the page's script rewrites (the Print Room's road on to the Portfolio waits for the proof) is read as rewritten.
     links.push(...await ctx.evaluate(LINKS));
-    return { page, stretches, unread, dateline, links, error: null };
+    return { page, stretches, media, dateline, links, error: null };
   } catch (err) {
-    return { page, stretches, unread, dateline, links, error: err instanceof Error ? err.message.slice(0, 400) : String(err) };
+    return { page, stretches, media, dateline, links, error: err instanceof Error ? err.message.slice(0, 400) : String(err) };
   }
+}
+
+// The same-run control for the width-query half (Gate 2 item 9; the tree carries no width query to fault on): a rule planted on a loaded page must come back through MEDIA and be named by the very fault list CO1 counts.
+const PLANTED = "@media (max-width: 900px) { .co-witness { color: red; } }";
+async function floorControl(ctx: SuiteContext): Promise<{ clean: readonly string[]; planted: readonly string[] }> {
+  await load(ctx, "/faq/", WIDE);
+  const clean = pageFaults(await ctx.evaluate(MEDIA), [], ROOM_FLOOR);
+  await ctx.evaluate(`(() => { const s = document.createElement("style"); s.id = "co-floor-control"; s.textContent = ${JSON.stringify(PLANTED)}; document.head.appendChild(s); return true; })()`);
+  const planted = pageFaults(await ctx.evaluate(MEDIA), [], ROOM_FLOOR);
+  await ctx.evaluate(`(() => { document.getElementById("co-floor-control").remove(); return true; })()`);
+  return { clean, planted };
 }
 
 async function co1Sweep(ctx: SuiteContext): Promise<readonly PageResult[]> {
@@ -147,35 +157,38 @@ async function co1Sweep(ctx: SuiteContext): Promise<readonly PageResult[]> {
   for (const page of pages) results.push(await sweepPage(ctx, page));
   const lines = results.map((r) => {
     const rows = r.stretches.flat();
-    const faults = [
-      ...[...new Set(r.unread)].map((text) => `a width condition the edge reader cannot parse: ${text}`),
-      ...rows.map((row) => verdict(row)).filter((v): v is string => v !== null),
-    ];
+    const faults = pageFaults(r.media, rows, ROOM_FLOOR);
     const close = rows.reduce<{ d: number; w: number }>((best, row) => { const d = nearest(row.read.left, row.read.right); return d < best.d ? { d, w: row.w } : best; }, { d: Infinity, w: 0 });
     return { ok: r.error === null && faults.length === 0, text: `${r.page} ${rows.length} widths, nearest ${close.d.toFixed(1)} at ${close.w}${r.dateline ? ` (dateline "${r.dateline}")` : ""}${r.error ? `; ERROR ${r.error}` : ""}${faults.length ? `; ${faults.length} faults: ${faults.slice(0, 4).join("; ")}` : ""}` };
   });
+  const control = await floorControl(ctx);
   ctx.check(
-    "CO1 on every page the tree builds, resized while loaded to 1280 at a 32px stride, every page from 1024, below which a page lays out its 1024 layout (FL1), and at both sides of every width media edge its CSS carries, every pixel between two reads that are not a plain shift, no ink of the head cluster overlaps the ink of the right-hand corner by any amount, both corners carry ink, every page keeps its motto, the band covers the cluster, nothing lays out wider than set or scrolls sideways, and the Seed of the Day writes its own dateline through datelineFor (Issue #638; Issue #762: re-floored at 1024, the motto kept everywhere)",
-    missing.length === 0 && lines.every((l) => l.ok),
-    `${missing.length ? `pages missing from the tree: ${missing.join(", ")} | ` : ""}${lines.map((l) => l.text).join(" | ")}`,
+    "CO1 on every page the tree builds, resized while loaded to 1280 at a 32px stride, every page from 1024, below which a page lays out its 1024 layout (FL1), and at both sides of every width media edge its CSS carries, every pixel between two reads that are not a plain shift, no ink of the head cluster overlaps the ink of the right-hand corner by any amount, both corners carry ink, every page keeps its motto, the band covers the cluster, nothing lays out wider than set or scrolls sideways, and the Seed of the Day writes its own dateline through datelineFor (Issue #638; Issue #762: re-floored at 1024, the motto kept everywhere); and no sheet any page loads, its own media list included, carries a width condition that switches at or below the 1024 floor, which a rule planted at 900 on the FAQ shows the same fault list naming (Issue #763 ruling 2A)",
+    missing.length === 0 && lines.every((l) => l.ok) && control.clean.length === 0 && control.planted.some((f) => f.includes("(max-width: 900px)")),
+    `${missing.length ? `pages missing from the tree: ${missing.join(", ")} | ` : ""}${lines.map((l) => l.text).join(" | ")} | control: clean ${JSON.stringify(control.clean)}, planted ${JSON.stringify(control.planted)}`,
   );
   return results;
 }
 
-/** A discovery route the sweep never opens (the atlas, written by the showcase generator rather than the tree): its links read once the document is complete and they stop changing. */
-async function linksAtRest(ctx: SuiteContext, page: string): Promise<readonly string[]> {
+/** A discovery route the sweep never opens (the atlas, written by the showcase generator rather than the tree): its links read once the document is complete and they stop changing, and its sheets' width conditions with them. */
+async function linksAtRest(ctx: SuiteContext, page: string): Promise<{ links: readonly string[]; media: readonly string[] }> {
   await ctx.send("Page.navigate", { url: "about:blank" });
   await ctx.send("Page.navigate", { url: `http://127.0.0.1:${ctx.PORT}${page}` });
-  const read: Payload<{ ready: string; links: string[] }> = `({ ready: document.readyState, links: ${LINKS} })`;
+  const read: Payload<{ ready: string; links: string[]; media: string[] }> = `({ ready: document.readyState, links: ${LINKS}, media: ${MEDIA} })`;
   const rest = await makeSettle(ctx)(read, (d, last) => d.ready === "complete" && !!last && last.ready === "complete" && JSON.stringify(last.links) === JSON.stringify(d.links), `corners-links-${page}`, 200);
-  return rest.links;
+  return { links: rest.links, media: rest.media };
 }
 
 // Blind spots, each erring toward a miss: a link a script writes later than its page's sweep is read in its authored form; a button that navigates is not a link (the Chart Table's road is walked by CD18b); and with scripts on, a link inside <noscript> is not an element at all (the scaffold test's resolver and its scripts-off pin, and CD50, read the Portfolio's).
 async function co4Roads(ctx: SuiteContext, swept: readonly PageResult[]): Promise<void> {
   const unswept = DISCOVERY_ROUTES.filter((route) => !swept.some((r) => r.page === route));
   const read: { page: string; links: readonly string[] }[] = [...swept];
-  for (const page of unswept) read.push({ page, links: await linksAtRest(ctx, page) });
+  const floorFaults: string[] = [];
+  for (const page of unswept) {
+    const { links, media } = await linksAtRest(ctx, page);
+    read.push({ page, links });
+    floorFaults.push(...pageFaults(media, [], ROOM_FLOOR).map((f) => `${page}: ${f}`));
+  }
   const from = new Map<string, string[]>();
   for (const r of read) for (const path of r.links) from.set(path, [...(from.get(path) ?? []), r.page]);
   const bare = read.filter((r) => r.links.length === 0).map((r) => r.page);
@@ -185,9 +198,9 @@ async function co4Roads(ctx: SuiteContext, swept: readonly PageResult[]): Promis
     if (status !== 200) dead.push(`${path} answers ${status}, linked from ${[...new Set(pages)].join(", ")}`);
   }
   ctx.check(
-    "CO4 every link on every page the site serves, the tree's and every discovery route's (the atlas among them), read where it resolves once the page's scripts have run, opens a page that answers: a road written as a short relative path, or rewritten by a script, breaks silently otherwise (Issue #669, ruled 2026-10-04)",
-    swept.length > 0 && unswept.length > 0 && bare.length === 0 && dead.length === 0,
-    `${read.length} pages (${unswept.join(", ")} beyond the sweep), ${from.size} distinct paths${bare.length ? `; no links read on ${bare.join(", ")}` : ""}${dead.length ? `; ${dead.join("; ")}` : ""}`,
+    "CO4 every link on every page the site serves, the tree's and every discovery route's (the atlas among them), read where it resolves once the page's scripts have run, opens a page that answers: a road written as a short relative path, or rewritten by a script, breaks silently otherwise (Issue #669, ruled 2026-10-04); and no sheet a discovery route beyond the sweep loads carries a width condition that switches at or below the 1024 floor, or one CO1's reader cannot parse (Issue #763 ruling 2A)",
+    swept.length > 0 && unswept.length > 0 && bare.length === 0 && dead.length === 0 && floorFaults.length === 0,
+    `${read.length} pages (${unswept.join(", ")} beyond the sweep), ${from.size} distinct paths${bare.length ? `; no links read on ${bare.join(", ")}` : ""}${dead.length ? `; ${dead.join("; ")}` : ""}${floorFaults.length ? `; ${floorFaults.join("; ")}` : ""}`,
   );
 }
 

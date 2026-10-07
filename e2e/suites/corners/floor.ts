@@ -1,4 +1,5 @@
 // The 1024 floor (Issue #762 pull request C; Alex, 2026-10-06, issuecomment-6010814718): a window narrower than 1024 keeps every page's 1024 layout at full size and scrolls sideways, the scroll reaches every piece, a layout fired while scrolled keeps every piece where it stood, and a room that scrolls down keeps its chrome in view.
+import { ATLAS_ROUTE } from "../../../scripts/generate-discovery.ts";
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import { CHART_ROOM_FLOOR, LANDED, rest } from "../stage/stage.ts";
@@ -7,6 +8,7 @@ const SCROLLING_ROOMS = ["/faq/", "/glossary/", "/gallery/"];
 const ROOMS = [...CHART_ROOM_FLOOR, ...SCROLLING_ROOMS];
 const HOME = "/";
 const SCROLLS_DOWN = [...SCROLLING_ROOMS, HOME];
+export const FLOOR_PAGES = [...ROOMS, HOME, ATLAS_ROUTE];
 const FLOOR = 1024;
 const TOLERANCE = 0.5;
 
@@ -19,7 +21,7 @@ const PIECES: Payload<Pieces> = `(() => {
   const sx = scrollX, r1 = (n) => Math.round(n * 10) / 10;
   const box = (e) => { const r = e.getBoundingClientRect(); return r.width === 0 && r.height === 0 ? null : [r1(r.left + sx), r1(r.top), r1(r.width), r1(r.height)]; };
   const pieces = {};
-  for (const s of ["header.chrome", "main", ".corner.tr", ".corner.bl", ".corner.br", ".slip", ".slip-tab", ".legend", ".chart-drawer-tab", "#sheet", ".strip", ".sheet h2", "#lf-stage", "#lf-sheet", ".lf-seed", ".lf-legend", "#lf-controls", ".lf-coords", ".notice-stamp", ".lf-shelf"]) {
+  for (const s of ["header.chrome", "main", ".corner.tr", ".corner.bl", ".corner.br", ".slip", ".slip-tab", ".legend", ".chart-drawer-tab", "#sheet", ".strip", ".sheet h2", "#lf-stage", "#lf-sheet", ".lf-seed", ".lf-legend", "#lf-controls", ".lf-coords", ".notice-stamp", ".lf-shelf", "body.atlas-sheet > header", "body.atlas-sheet > figure", ".atlas-sheet .styles", ".atlas-sheet .themes", "body.atlas-sheet > footer"]) {
     const e = document.querySelector(s);
     const b = e && getComputedStyle(e).visibility !== "hidden" ? box(e) : null;
     if (b) pieces[s] = b;
@@ -45,7 +47,7 @@ async function load(ctx: SuiteContext, page: string, w: number, h: number): Prom
   await size(ctx, w, h);
   await ctx.send("Page.navigate", { url: "about:blank" });
   await ctx.send("Page.navigate", { url: `http://127.0.0.1:${ctx.PORT}${page}` });
-  const committed = `location.pathname === ${JSON.stringify(page.split("#")[0])} && document.readyState === "complete" && !!document.querySelector("main")`;
+  const committed = `location.pathname === ${JSON.stringify(page.split("#")[0])} && document.readyState === "complete" && !!document.querySelector("main, body.atlas-sheet")`;
   for (let i = 0; i < 300; i++) {
     if (await ctx.evaluate<boolean>(committed).catch(() => false)) return;
     await ctx.sleep(50);
@@ -79,8 +81,9 @@ export async function fl1Floor(ctx: SuiteContext): Promise<void> {
   await ctx.setTouch(false);
   const faults: string[] = [];
   const rows: string[] = [];
-  for (const page of [...ROOMS, HOME]) {
+  for (const page of FLOOR_PAGES) {
     const fresh = await open(ctx, page, FLOOR, 800);
+    if (Object.keys(fresh.pieces).length === 0) faults.push(`${page} 1024x800: no piece read, so every comparison below is empty`);
     const wide = await resized(ctx, page, 1100, 800);
     const at800 = await resized(ctx, page, FLOOR, 800);
     const at400 = await resized(ctx, page, FLOOR, 400);
@@ -99,7 +102,7 @@ export async function fl1Floor(ctx: SuiteContext): Promise<void> {
     rows.push(`${page} ${Object.keys(at800.pieces).length} pieces, overhang ${narrow.over} at 640`);
   }
   ctx.check(
-    "FL1 a window narrower than 1024 lays out every page's 1024 layout at full size and scrolls sideways by exactly the page's overhang: every piece of chrome, the sheet and the main column (on home its stage, its camera's sheet, its seed panel, legend, Glass, bearing line, stamp and shelf) stand where they stand at 1024 of the same height, freshly loaded at 640x800 and resized to 900x800 and 640x400, the pages that scroll down at 400x800 too with their nav on one line; and no page scrolls sideways at 1024 or 1100 (Alex, 2026-10-06, on Issue #762)",
+    "FL1 a window narrower than 1024 lays out every page's 1024 layout at full size and scrolls sideways by exactly the page's overhang: every piece of chrome, the sheet and the main column (on home its stage, its camera's sheet, its seed panel, legend, Glass, bearing line, stamp and shelf) stand where they stand at 1024 of the same height, and on the served atlas, outside the tree, its head, hero plate, two plate grids and foot (Issue #763 ruling 3B), freshly loaded at 640x800 and resized to 900x800 and 640x400, the pages that scroll down at 400x800 too with their nav on one line; and no page scrolls sideways at 1024 or 1100 (Alex, 2026-10-06, on Issue #762)",
     faults.length === 0,
     `${rows.join(" | ")}${faults.length ? `; ${faults.length} faults: ${faults.slice(0, 8).join("; ")}` : ""}`,
   );

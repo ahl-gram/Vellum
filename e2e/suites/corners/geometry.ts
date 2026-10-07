@@ -55,6 +55,18 @@ export function unreadWidthConditions(conditions: readonly string[]): string[] {
   return conditions.filter((text) => COMPARISONS.reduce((rest, { re }) => rest.replace(re, ""), text).includes("width"));
 }
 
+export function floorEdges(conditions: readonly string[], floor: number): string[] {
+  return conditions.filter((text) => COMPARISONS.some(({ re, read }) => [...text.matchAll(re)].some((m) => sides(...read(m))[1] <= floor)));
+}
+
+export function pageFaults(media: readonly string[], rows: readonly Row[], floor: number): string[] {
+  return [
+    ...[...new Set(unreadWidthConditions(media))].map((text) => `a width condition the edge reader cannot parse: ${text}`),
+    ...[...new Set(floorEdges(media, floor))].map((text) => `a width condition that switches at or below the ${floor} floor: ${text}`),
+    ...rows.map((row) => verdict(row)).filter((v): v is string => v !== null),
+  ];
+}
+
 export function meetings(left: readonly Box[], right: readonly Box[]): Meeting[] {
   const out: Meeting[] = [];
   for (const a of left) for (const b of right) {
