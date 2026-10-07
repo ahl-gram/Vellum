@@ -123,16 +123,16 @@ test("a page that runs a live chart app is framed by its head box, home and the 
   assert.equal(modeOf("/atlas/"), "full", "the Atlas is a document");
 });
 
-test("every page is shot at a desktop and a narrow desktop viewport, under the archive's file names (a phone obeys the fixed 1024 viewport since Issue #761, so the 390 row is the narrow layout a zoomed desktop still gets)", () => {
+test("every page is shot at a desktop window and at 1024, the narrowest the site is laid out for, under the archive's file names (Issue #764 ruling 1A: a narrower window keeps the 1024 page and scrolls sideways, so a 390 shot photographed its left edge)", () => {
   const plan = planSweep(["/", "/atlas/", "/explorer/", "/explorer/portfolio/", "/specimen/"], "out/s");
   const byName = new Map(plan.map((s) => [s.name, s]));
   assert.deepEqual([...byName.keys()].sort(), [
-    "atlas-1280.png", "atlas-390.png", "explorer-1280-head.png", "explorer-390-head.png",
-    "explorerportfolio-1280-head.png", "explorerportfolio-390-head.png", "home-1280.png", "home-390.png", "specimen-1280.png", "specimen-390.png",
+    "atlas-1024.png", "atlas-1280.png", "explorer-1024-head.png", "explorer-1280-head.png",
+    "explorerportfolio-1024-head.png", "explorerportfolio-1280-head.png", "home-1024.png", "home-1280.png", "specimen-1024.png", "specimen-1280.png",
   ]);
   for (const s of plan) {
     assert.equal(s.mobile, false, `${s.name} mobile`);
-    assert.equal(s.height, s.width === 390 ? 844 : 800, `${s.name} height`);
+    assert.equal(s.height, s.width === 1024 ? 768 : 800, `${s.name} height`);
     assert.equal(s.full, s.mode === "full", `${s.name} full`);
     assert.equal(s.waitMs, s.mode === "head" ? 4500 : 2500, `${s.name} wait`);
     assert.equal(s.script, PIN, `${s.name} pins the caption`);
@@ -144,7 +144,7 @@ test("every page is shot at a desktop and a narrow desktop viewport, under the a
   }
   assert.equal(BAND, 122, "the head cluster's band, as the archive clipped it");
   assert.throws(() => planSweep(["/a/b/", "/ab/"], "out/s"), /\/a\/b\/ and \/ab\/ would both be shot as ab-1280\.png/);
-  assert.equal(byName.get("explorer-390-head.png")?.url, "/explorer/");
+  assert.equal(byName.get("explorer-1024-head.png")?.url, "/explorer/");
 });
 
 test("the sweep's probe reads the document element's box under the archive's keys", () => {
