@@ -213,7 +213,7 @@ room's corners read the same as home's, corner for corner. **Over a floored shee
 cluster's blurred pool instead** (Alex, 2026-10-06, Issue #762: soft): the legend row's pool box ends
 inside the rise gap above the chart folio, so no backing box lies over another piece's lines, while
 its blur reaches a few pixels over the caption's top line, which is why every line there is read as
-it is painted, at 4.5:1 or better (`NS1` in `e2e/suites/corners/short.ts`). Over a floored sheet
+it is painted, at 4.5:1 or better (`NS1` in `e2e/suites/stage/short.ts`). Over a floored sheet
 the strip alone takes none: its lines stand on its own panel, and a pool there would lie over the
 chart folio and the Glass. The room folio's pool reaches only a little way toward the nav there.
 

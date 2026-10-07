@@ -7,8 +7,9 @@ import cssCommentForm from "./scripts/lint/css-comment-form.ts";
 import tsCommentForm from "./scripts/lint/ts-comment-form.ts";
 import sourceShape from "./scripts/lint/source-shape.ts";
 import errorCast from "./scripts/lint/error-cast.ts";
+import narrowWidth from "./scripts/lint/narrow-width.ts";
 
-const vellum = { meta: cssCommentForm.meta, rules: { ...cssCommentForm.rules, ...tsCommentForm.rules, ...sourceShape.rules, ...errorCast.rules } };
+const vellum = { meta: cssCommentForm.meta, rules: { ...cssCommentForm.rules, ...tsCommentForm.rules, ...sourceShape.rules, ...errorCast.rules, ...narrowWidth.rules } };
 const TS_ROOTS = ["e2e/**/*.ts", "scripts/**/*.ts", "src/**/*.ts", "test/**/*.ts", "test-support/**/*.ts"];
 
 export default defineConfig(
@@ -143,5 +144,17 @@ export default defineConfig(
     files: TS_ROOTS,
     plugins: { vellum },
     rules: { "vellum/no-error-cast": "error" },
+  },
+  {
+    name: "Issue #763: no sheet switches layout at a fixed window width at or below the 1024 floor",
+    files: ["public/**/*.css"],
+    plugins: { vellum },
+    rules: { "vellum/css-no-narrow-width": "error" },
+  },
+  {
+    name: "Issue #763: no script switches layout at a fixed window width at or below the 1024 floor",
+    files: ["src/**/*.ts"],
+    plugins: { vellum },
+    rules: { "vellum/no-narrow-width": "error" },
   },
 );

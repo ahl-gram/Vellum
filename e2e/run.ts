@@ -43,6 +43,7 @@ import { run as runRunningHead } from "./suites/runninghead.ts";
 import { run as runCluster } from "./suites/cluster.ts";
 import { run as runChartDrawer } from "./suites/chart-drawer.ts";
 import { run as runCorners } from "./suites/corners.ts";
+import { run as runStage } from "./suites/stage.ts";
 import { run as runDocumentRooms } from "./suites/document-rooms.ts";
 import { run as runRegionDetail } from "./suites/region-detail.ts";
 import { run as runSpecimen } from "./suites/specimen.ts";
@@ -124,6 +125,7 @@ const SUITES = {
   "region-detail": runRegionDetail,
   "specimen": runSpecimen,
   "corners": runCorners,
+  "stage": runStage,
 };
 
 const missing = E2E_SUITE_ORDER.filter((name) => !(SUITES as Partial<typeof SUITES>)[name]);
@@ -146,7 +148,7 @@ async function main() {
         false,
         e && e.message ? e.message : String(err),
       );
-      // clearMobile() is a trailing statement in the phone suites, not a finally (suites/cluster.ts, suites/chart-drawer.ts), so a suite that stops at 390x844 hands every later suite in the lane a phone viewport and a cascade of reds that are not defects.
+      // clearMobile() is a trailing statement in the suites that emulate a phone or a touch window, not a finally (suites/cluster.ts at 390x844, suites/chart-drawer.ts at 1024x844), so a suite that stops there hands every later suite in the lane that viewport and a cascade of reds that are not defects.
       // Bounded, because a browser that dies AFTER the liveness probe leaves this send pending forever: the harness settles a waiter only on the matching reply, so an unbounded reset here is a lane that stalls with nothing to read rather than one that fails.
       await Promise.race([
         ctx.clearMobile().catch(() => {}),

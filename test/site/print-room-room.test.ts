@@ -98,7 +98,7 @@ test("PRR5 the stage holds the fitted sheet with the proof and the turned plate 
   assert.ok(page.includes("<Glass />"), "the Glass is the kit's corner cluster (#487; its presses carry data-zoom for the shared keys binding, atelier-kit.test.ts)");
   const lines = folioLines();
   assert.deepEqual(lines, [["folio-title", "folio-title"], ["folio-sub plate-line", "pr-plate-line"], ["folio-sub", "folio-sub"]], "the chart's folio: the world's name, the line naming the plate on the sheet, the survey line");
-  assert.ok(!lines.some(([, id]) => id === "pr-poster-status"), "the poster order does not report in the chart's folio: the kit hides that corner on a phone, where the plates are still tappable (skeptic on PR #496)");
+  assert.ok(!lines.some(([, id]) => id === "pr-poster-status"), "the poster order does not report in the chart's folio (skeptic on PR #496)");
   assert.match(page, /<div id="pr-atlas" class="atlas-sheet"><\/div>/, "the hidden document stays the Print / Download source");
   assert.ok(page.indexOf('id="pr-atlas"') > page.indexOf("<Glass />"), "the document follows the furniture");
 });
@@ -174,7 +174,7 @@ test("PRR10 the page's dress: the inner lays out once at the measure's own 900px
   assert.match(measure[1]!, /font-size:\s*16px/);
   assert.match(measure[1]!, /visibility:\s*hidden/, "invisible but laid out; display:none would measure nothing");
   assert.doesNotMatch(measure[1]!, /display:\s*none/);
-  assert.match(measure[1]!, /position:\s*absolute/, "the 900px box is out of flow, or a phone scrolls sideways (#219's class)");
+  assert.match(measure[1]!, /position:\s*absolute/, "the 900px box is out of flow (#219's class)");
   assert.match(measure[1]!, /left:\s*-\d+px/, "and off screen");
   assert.match(css, /\.matter-page\s*\{[^}]*box-sizing:\s*border-box/, "the shared dress carries the page's own padding, so the measure includes it");
   assert.match(css, /#pr-page\[hidden\]\s*\{[^}]*display:\s*none/, "the hidden page face is gone, like its siblings");

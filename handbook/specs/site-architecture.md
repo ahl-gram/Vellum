@@ -90,8 +90,16 @@ symbol and path so the reader goes and looks.
   arm of `atlasHead` in `src/atlas/document.ts`), carries the same tag; the offline download keeps its
   own, since its bytes are pinned. A desktop browser ignores the tag, so a narrowed or zoomed desktop
   window lays out at its own width: every page below 1024 keeps its 1024 layout at full size and the
-  window scrolls sideways over it (the `min-width` on `body` in `BaseLayout.astro`, Issue #762).
-  `test/site/astro-scaffold.test.ts` and `test/atlas/document.test.ts` hold the tag.
+  window scrolls sideways over it (the `min-width` on `body` in `BaseLayout.astro`, Issue #762, and on
+  the served atlas's `html` in `src/atlas/document.ts`, Issue #763).
+  `test/site/astro-scaffold.test.ts` and `test/atlas/document.test.ts` hold the tag, and `FL1` in
+  `e2e/suites/corners/floor.ts` holds every served page to the floor. **No rule switches the layout at
+  a fixed window width at or below the floor**, in a sheet or a script: `vellum/css-no-narrow-width`
+  refuses one in a sheet under `public/`, `vellum/no-narrow-width` in a TypeScript file under `src/`
+  (both in `scripts/lint/narrow-width.ts`), and `CO1` in `e2e/suites/corners.ts` in any sheet a built
+  page loads, an `.astro` page's `<style>` included. A script inside an `.astro` page reaches none of
+  them. A length that shrinks with the window, a height, the window's shape and a box's own size
+  are outside the rule.
 - **The shell dresses once.** Every shared shell rule lives in `BaseLayout.astro`'s
   `<style is:global>` block, and a page's own sheet carries page-specific rules only.
 - **Sheet order is a contract.** The layout links the root sheets, then the shared sheets a page
