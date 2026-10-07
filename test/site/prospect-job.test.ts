@@ -153,7 +153,7 @@ test("a job that fails comes back as its own error and leaves the jobs behind it
   assert.equal(typeof bad.error, "string", "the worker's failure answer carries no error text");
   assert.equal(good.ok, true, `the job posted behind a failure failed too: ${good.error ?? ""}`);
   await assert.rejects(runJob(BROKEN), "the backup copy resolved a job that threw");
-  assert.equal((await runJob(DRAW)).ok, true, "a job run by the backup copy after a failed one failed too");
+  assert.equal(await runJob(DRAW).then((r) => r.ok, (err: unknown) => String(err)), true, "a job run by the backup copy after a failed one failed too");
 });
 
 test("the worker and the backup copy answer a plate job alike, byte for byte (Issue #801)", async () => {
