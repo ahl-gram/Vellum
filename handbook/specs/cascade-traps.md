@@ -51,7 +51,8 @@ declaration you write to get there. The checklist form of the same lines is `vel
   and clipping overflow at the root does not stop that, while a desktop window scrolls sideways past
   the page (`FL1` in `e2e/suites/corners/floor.ts` refuses that on a page at rest). In a staged chart
   room, whose body clips (the `contain: layout` trap below), it is cut off at the body's edge in
-  silence: no overflow read sees it, so read the box's own rect against the body's. Cap the box.
+  silence: the root's overflow read does not see it, so read the box's own rect against the body's.
+  Cap the box.
 - **When an engine-dressing rule is the one losing, the opt-out may not be written in the host's own
   sheet.** `handbook/specs/explorer-doctrine.md` rules that engine dressing is edited in the one shared sheet
   and never in a host's, so the repair belongs to the rule that is losing.

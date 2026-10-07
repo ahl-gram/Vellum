@@ -333,9 +333,10 @@ Glass, whose translucency is load-bearing over a chart.
 **A control's font size does not go below 16px in the corner chrome**, because a smaller input font
 makes iOS Safari zoom the page on focus.
 
-**Every page is laid out for 1024 wide and up, and nothing is designed for a narrower window**, a
-desktop window zoomed until it is narrower than 1024 included: what a narrower window and a phone get
-is `handbook/specs/site-architecture.md`'s, and a room's half is "The room and its furniture" above.
+**On screen every page is laid out for 1024 wide and up, and nothing is designed for a narrower
+window**, a desktop window zoomed until it is narrower than 1024 included: what a narrower window
+and a phone get is `handbook/specs/site-architecture.md`'s, and a room's half is "The room and its
+furniture" above.
 **The head cluster and the room's right-hand corner never overlap, at any width from 1024 up:** a
 room folio line, a control or a widened corner is written to fit beside the cluster rather than
 accepted as a squeeze, the top row holds it by script, and the sweep in `e2e/suites/corners.ts`
