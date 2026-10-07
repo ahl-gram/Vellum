@@ -274,6 +274,15 @@ precisely, because a token that falls outside it looks identical at the point of
   directory and copied into `public/`; shared chunks take fixed names with no hashes; one worker
   chunk serves the surfaces that spawn it. `publicDir` is false in each press config, guarded, since
   a truthy value copies `public/` into itself.
+- **A job that draws a plate loads the plate's code on demand.** Today those are
+  `prospectResultFor` in `src/site/explorer/prospect-job.ts` and `composeAtlas` in
+  `src/atlas/compose.ts`: a page and the worker reach them only through `import()`, so a page that
+  draws no plate downloads none of the plate's code, and a new job kind that draws one joins them.
+  Import anything else from such a module with `import type`, since a `type` specifier inside braces
+  keeps the import and the module with it (`no-import-type-side-effects` in `eslint.config.ts`
+  refuses that form). The worker's own chunks land in `explorer/chunks/worker/`, apart from the
+  page's, because the press lets the two builds overwrite a chunk of the same name without a word.
+  `test/site/app-bundles.test.ts` holds the split and the separation.
 - **`npm run check` is three passes, and code that runs where no page does may not name the page.**
   `tsconfig.json` checks every TypeScript root with the browser libraries. `tsconfig.engine.json`
   checks every `.ts` under `src/` outside `src/site/` without the DOM libraries: the generator, the
