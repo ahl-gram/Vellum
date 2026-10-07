@@ -9,12 +9,13 @@ Read this file before writing or moving CSS, and before reading a rendered frame
 declaration you write to get there. The checklist form of the same lines is `vellum-footguns` Gate
 3, which points here rather than copying the reasons.
 
-- **A media query adds no specificity.** A narrow-width override written at a bare class loses to any
-  wider-specificity rule outside the block, however far above it that rule sits.
+- **A media query adds no specificity.** An override inside a media block (print, reduced motion, a
+  short window) written at a bare class loses to any wider-specificity rule outside the block, however
+  far above it that rule sits.
 - **The arms of a selector list rank independently.** Scoping one arm of a two-arm painting rule is
   scoping neither, and a repair that carries one arm will pass a guard written for the other.
 - **The best fix is often no media query at all.** Ask whether the state you are dressing already
-  implies the width. An override scoped on the docked state alone wins outright and fights nothing.
+  implies the condition: an override scoped on that state alone wins outright and fights nothing.
 - **The layout's inline style block renders after the page stylesheet**, so a page override of a shell
   rule needs higher specificity or it silently does nothing. Equal specificity is not enough.
 - **A rule carrying an id cannot be beaten by a plain class.** Change that rule's own variables.
@@ -23,10 +24,12 @@ declaration you write to get there. The checklist form of the same lines is `vel
   transform joins the exclusions or reuses the excluded class.
 - **An author `display` beats the user-agent `[hidden]` rule**, so on a piece that declares its own
   display, setting the `hidden` attribute does nothing at all. Hide it through style.
-- **A docked piece reparents and goes static**, so an absolutely positioned pseudo-element on it
-  resolves against whatever fixed ancestor it lands in and can span a whole sheet.
+- **A piece a script moves to another parent takes that parent's positioning**: where it goes static
+  there, an absolutely positioned pseudo-element on it resolves against whatever positioned ancestor
+  it lands in and can span a whole sheet. `seatFrame` in `src/site/reading-room/seats.ts` moves the
+  Reading Room's parts this way at boot.
 - **A flex item defaults to `min-width: auto` and refuses to shrink below its content width**, so a
-  control row overflows a narrow viewport while every rule in it reads as correct. Zero the item's
+  control row overflows its box while every rule in it reads as correct. Zero the item's
   own minimum; where the row still cannot fit, let it wrap as well. A range input is the usual
   culprit, because its intrinsic width is far wider than it looks.
 - **A percentage max-height dies inside an auto grid track.** Containment without script is an
@@ -36,15 +39,20 @@ declaration you write to get there. The checklist form of the same lines is `vel
   container's padding with a negative margin does not stick it at the top; the browser slides it to
   the content-box top, over the first items. Make the cap the spacer itself, with no padding above
   it, and hit-test the items rather than reading their rects, because the rects still look right.
-- **A full-bleed absolutely positioned handle kills anything authored beneath it.** A handle laid
-  over a whole sheet head is dead to a real touch for every control in that head, so such a control
-  takes its own stacking layer.
+- **A full-bleed absolutely positioned layer kills anything authored beneath it.** Laid over a
+  panel's head, it leaves every control in that head dead to a real touch, so such a control takes
+  its own stacking layer.
 - **A shown popover renders in the TOP LAYER, which no z-index reaches**, so a scrim cannot dim one.
   Popovers stand down with the scrim instead.
 - **The head cluster pins its own line-height**, because a page sheet sets the body's for reading and
   the cluster must not inherit it.
-- **An absolutely positioned box wider than a phone viewport makes the browser widen the LAYOUT
-  viewport to fit it**, and clipping overflow at the root does not stop that sizing. Cap the box.
+- **An absolutely positioned box wider than the 1024 page fails two ways, by the body it lands in.**
+  On a page that scrolls, a phone's or a tablet's browser shrinks the whole page further to fit it,
+  and clipping overflow at the root does not stop that, while a desktop window scrolls sideways past
+  the page (`FL1` in `e2e/suites/corners/floor.ts` refuses that on a page at rest). In a staged chart
+  room, whose body clips (the `contain: layout` trap below), it is cut off at the body's edge in
+  silence: the root's overflow read does not see it, so read the box's own rect against the body's.
+  Cap the box.
 - **When an engine-dressing rule is the one losing, the opt-out may not be written in the host's own
   sheet.** `handbook/specs/explorer-doctrine.md` rules that engine dressing is edited in the one shared sheet
   and never in a host's, so the repair belongs to the rule that is losing.
@@ -76,9 +84,9 @@ declaration you write to get there. The checklist form of the same lines is `vel
 
 These are about looking rather than the cascade, and belong beside them:
 
-- **Structural tests cannot see layout.** A stylesheet that scrolled a 320px phone sideways passed the
-  full unit suite, the full e2e suite and a twenty-two agent adversarial review, because every
-  assertion read file text or DOM shape. Render it and measure it.
+- **Structural tests cannot see layout.** A stylesheet that scrolled a page sideways at a width it was
+  meant to fit passed the full unit suite, the full e2e suite and a twenty-two agent adversarial
+  review, because every assertion read file text or DOM shape. Render it and measure it.
 - **Read the whole frame of an after-shot**, not the piece you changed. A row that wrapped, a seat that
   moved, a control that fell off the edge: the eye goes to the target and reads past them.
 
