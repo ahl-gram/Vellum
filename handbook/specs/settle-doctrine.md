@@ -178,7 +178,7 @@ section points there rather than restating it.
   The imperative is Gate 2's "run the probe's control in the same run".
 - **Two builds are compared by the sweep, row by row, against two runs of the unchanged build.**
   `node scripts/design/oracle.ts <dist> <out> [label]` shoots every page of a built site at 1280x800
-  and at a 390x844 narrow desktop window: a page that runs a live chart app as its head box, the Specimen Book
+  and at 1024x768, the narrowest the site is laid out for: a page that runs a live chart app as its head box, the Specimen Book
   as one screen, every other page whole down to 16000px, with motion reduced unless `--motion` is
   passed; below that cap only the page height the probe records is compared. Shoot the
   unchanged build twice and the branch once, all on one date, since the Seed of the Day's head box
