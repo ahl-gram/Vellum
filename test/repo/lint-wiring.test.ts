@@ -146,7 +146,7 @@ function pinCorrectness(file: string, typed: boolean, rules: Record<string, unkn
   }
 }
 
-const CSS_FORM_RULES = ["vellum/css-comment-one-line", "vellum/css-comment-no-em-dash", "vellum/css-comment-issue-form", "vellum/css-comment-no-js-module"];
+const CSS_FORM_RULES = ["vellum/css-comment-one-line", "vellum/css-comment-no-em-dash", "vellum/css-comment-issue-form", "vellum/css-comment-no-js-module", "vellum/css-no-narrow-width"];
 const TURNED_ON = [
   "@typescript-eslint/no-unnecessary-type-assertion",
   "@typescript-eslint/no-unsafe-argument",
@@ -189,7 +189,7 @@ function pinCss(file: string, config: Resolved, rules: Record<string, unknown>):
   for (const rule of CSS_FORM_RULES) {
     assert.deepEqual(rules[rule], [2], `${file}: ${rule} does not resolve at error with no options (CSS form, Issue #648)`);
   }
-  assert.deepEqual(Object.keys(rules).filter((r) => severityOf(rules[r]) !== 0).sort(), [...CSS_FORM_RULES].sort(), `${file}: a rule other than the comment-form rules reaches the sheets (CSS form, Issue #648, Issue #675)`);
+  assert.deepEqual(Object.keys(rules).filter((r) => severityOf(rules[r]) !== 0).sort(), [...CSS_FORM_RULES].sort(), `${file}: a rule other than the comment-form rules and the narrow-width rule reaches the sheets (CSS form, Issue #648, Issue #675, Issue #763)`);
 }
 
 test("through ESLint itself, one witness file per ruled glob resolves to rules that reach it, and the root config resolves to none", async () => {
