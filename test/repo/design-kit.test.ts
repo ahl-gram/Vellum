@@ -126,7 +126,7 @@ test("a page that runs a live chart app is framed by its head box, home and the 
 test("every page is shot at a desktop window and at 1024, the narrowest the site is laid out for, under the archive's file names (Issue #764 ruling 1A: a narrower window keeps the 1024 page and scrolls sideways, so a 390 shot photographed its left edge)", () => {
   const plan = planSweep(["/", "/atlas/", "/explorer/", "/explorer/portfolio/", "/specimen/"], "out/s");
   const byName = new Map(plan.map((s) => [s.name, s]));
-  assert.deepEqual([...byName.keys()].sort(), [
+  assert.deepEqual(plan.map((s) => s.name).sort(), [
     "atlas-1024.png", "atlas-1280.png", "explorer-1024-head.png", "explorer-1280-head.png",
     "explorerportfolio-1024-head.png", "explorerportfolio-1280-head.png", "home-1024.png", "home-1280.png", "specimen-1024.png", "specimen-1280.png",
   ]);
