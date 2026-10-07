@@ -30,7 +30,7 @@ export default defineConfig(
     rules: { "no-restricted-syntax": "off" },
   },
   {
-    files: ["src/**/*.ts", "scripts/**/*.ts", "e2e/**/*.ts", "test/**/*.ts", "test-support/**/*.ts"],
+    files: TS_ROOTS,
     extends: [js.configs.recommended, tseslint.configs.recommendedTypeChecked],
     languageOptions: { parserOptions: { projectService: true, tsconfigRootDir: import.meta.dirname } },
     rules: {
@@ -75,6 +75,7 @@ export default defineConfig(
     },
   },
   {
+    name: "the house's rules on every stylesheet",
     files: ["public/**/*.css"],
     plugins: { css, vellum },
     language: "css/css",
@@ -84,13 +85,20 @@ export default defineConfig(
       "vellum/css-comment-no-em-dash": "error",
       "vellum/css-comment-one-line": "error",
       "vellum/css-comment-no-js-module": "error",
+      "vellum/css-no-narrow-width": "error",
     },
   },
   {
-    name: "Issue #675: the house's rules on every TypeScript root",
+    name: "the house's rules on every TypeScript root",
     files: TS_ROOTS,
     plugins: { vellum },
-    rules: { "vellum/ts-comment-no-js-module": "error", "vellum/ts-comment-issue-form": "error", "vellum/template-silent-escape": "error" },
+    rules: {
+      "vellum/ts-comment-no-js-module": "error",
+      "vellum/ts-comment-issue-form": "error",
+      "vellum/template-silent-escape": "error",
+      "vellum/test-no-test-import": "error",
+      "vellum/no-error-cast": "error",
+    },
   },
   {
     name: "Issue #675: the living-chart engine takes its elements from the host",
@@ -99,10 +107,10 @@ export default defineConfig(
     rules: { "vellum/engine-no-id-lookup": "error" },
   },
   {
-    name: "Issue #675: a worker spawn in the site keeps the form the bundler reads",
+    name: "the house's rules on every site script",
     files: [["src/**/*.ts", "src/site/**"]],
     plugins: { vellum },
-    rules: { "vellum/worker-spawn-static": "error" },
+    rules: { "vellum/worker-spawn-static": "error", "vellum/contents-row-builder-only": "error" },
   },
   {
     name: "Issue #728: the reading frame looks nothing up by id and imports nothing from the Explorer",
@@ -117,18 +125,6 @@ export default defineConfig(
     rules: { "vellum/explorer-no-glass-keys": "error" },
   },
   {
-    name: "Issue #728: the contents row is built in one place",
-    files: [["src/**/*.ts", "src/site/**"]],
-    plugins: { vellum },
-    rules: { "vellum/contents-row-builder-only": "error" },
-  },
-  {
-    name: "Issue #728: nothing imports a test file",
-    files: TS_ROOTS,
-    plugins: { vellum },
-    rules: { "vellum/test-no-test-import": "error" },
-  },
-  {
     name: "Issue #759: the prospect layer and the builder of its pinned fixtures read no clock, no entropy and nothing libm computes",
     files: [["src/**/*.ts", "src/prospect/**"], ["test-support/**/*.ts", "test-support/prospect-fixtures.ts"]],
     plugins: { vellum },
@@ -139,18 +135,6 @@ export default defineConfig(
     files: ["e2e/**/*.ts"],
     plugins: { vellum },
     rules: { "vellum/e2e-cancellation-roster": "error", "vellum/e2e-console-read-through-drop": "error" },
-  },
-  {
-    name: "Issue #799: no value is cast to Error to read it",
-    files: TS_ROOTS,
-    plugins: { vellum },
-    rules: { "vellum/no-error-cast": "error" },
-  },
-  {
-    name: "Issue #763: no sheet switches layout at a fixed window width at or below the 1024 floor",
-    files: ["public/**/*.css"],
-    plugins: { vellum },
-    rules: { "vellum/css-no-narrow-width": "error" },
   },
   {
     name: "Issue #763: no script switches layout at a fixed window width at or below the 1024 floor",

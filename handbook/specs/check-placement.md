@@ -32,8 +32,10 @@ instrument the guard belongs in.
   false. The rule sets are the ones `eslint.config.ts` extends plus the rules it names, and the lint
   fails on any warning. A stricter rule joins one at a time, with
   its count of findings measured over the tree.
-- **A new house rule lives in `scripts/lint/`** and is wired in `eslint.config.ts` in a block named for
-  the issue that ruled it. It is proven by its own test, which runs ESLint over a fixture the rule must
+- **A new house rule lives in `scripts/lint/`** and is wired in `eslint.config.ts` in the block that
+  already reaches the same files with the same plugins, or, where none does, in a new block named for
+  what it covers (one that names a single file also cites the issue that admitted it, which
+  `test/repo/lint-wiring.test.ts` requires); the rule's file and git keep the issue that ruled it. It is proven by its own test, which runs ESLint over a fixture the rule must
   refuse and one it must pass (`test/repo/source-shape.test.ts` carries the form). A rule with no
   fixture it refuses is a rule nobody has seen fire.
 - **A switched-off check is a skip**, and the accepted skips are `handbook/specs/rulebook.md`'s list.
