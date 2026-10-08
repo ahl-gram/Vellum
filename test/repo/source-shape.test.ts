@@ -18,6 +18,7 @@ const FRAME_IMPORTS = "vellum/frame-no-explorer-import";
 const GLASS = "vellum/explorer-no-glass-keys";
 const CONTENTS = "vellum/contents-row-builder-only";
 const TEST_IMPORTS = "vellum/test-no-test-import";
+const SPLIT_FILE_RULE = "vellum/split-arguments-by-name";
 
 const houseReports = async (lines: readonly string[], path: string): Promise<Array<[string, number]>> => {
   const [result] = await eslint.lintText(lines.join("\n"), { filePath: join(ROOT, path) });
@@ -27,7 +28,7 @@ const houseReports = async (lines: readonly string[], path: string): Promise<Arr
     `the plant at ${path} does not parse, so no rule read it`,
   );
   return result!.messages
-    .filter((m) => m.ruleId?.startsWith("vellum/"))
+    .filter((m) => m.ruleId?.startsWith("vellum/") && m.ruleId !== SPLIT_FILE_RULE)
     .map((m): [string, number] => [m.ruleId!, m.line]);
 };
 const at = (rule: string, lines: readonly number[]): Array<[string, number]> => lines.map((line) => [rule, line]);

@@ -504,11 +504,6 @@
       "count": 1
     }
   },
-  "test/site/hunt-zoom.test.ts": {
-    "max-lines-per-function": {
-      "count": 1
-    }
-  },
   "test/site/living-chart-css.test.ts": {
     "max-lines-per-function": {
       "count": 1

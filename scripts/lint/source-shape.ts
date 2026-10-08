@@ -6,7 +6,7 @@ import { CANCELLATION_PREFIXES } from "../../e2e/support/console.ts";
 type Node = Rule.Node;
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
-const repoPath = (file: string): string => relative(ROOT, file).split(sep).join("/");
+export const repoPath = (file: string): string => relative(ROOT, file).split(sep).join("/");
 const problem = (message: string): Rule.RuleMetaData => ({ type: "problem", messages: { found: message } });
 
 const ID_LOOKUP = "getElementById";
@@ -80,7 +80,8 @@ const isModuleOptions = (node: Node | undefined): boolean => {
   );
 };
 
-const inTypePosition = (parent: Node): boolean => parent.type.startsWith("TS") && !VALUE_WRAPPERS.has(parent.type);
+export const inTypePosition = (parent: Node): boolean =>
+  parent.type.startsWith("TS") && !VALUE_WRAPPERS.has(parent.type);
 
 const constructsOrTests = (id: Node, parent: Node): boolean =>
   (parent.type === "NewExpression" && parent.callee === id) ||
@@ -312,7 +313,7 @@ const boundToCreateRequire = (context: Rule.RuleContext, callee: Node): boolean 
 const isLoader = (context: Rule.RuleContext, callee: Node): boolean =>
   isName(callee, "require") || isCreateRequireCall(callee) || boundToCreateRequire(context, callee);
 
-const isModuleSource = (context: Rule.RuleContext, node: Node): boolean => {
+export const isModuleSource = (context: Rule.RuleContext, node: Node): boolean => {
   for (let child: Node = node, parent = node.parent; parent !== null; child = parent, parent = parent.parent) {
     if (DECLARES_SOURCE.has(parent.type)) return (parent as unknown as { source: unknown }).source === child;
     if (parent.type === "ImportExpression" && parent.source === child) return true;
@@ -333,7 +334,7 @@ const isModuleSource = (context: Rule.RuleContext, node: Node): boolean => {
   return false;
 };
 
-const stringText = (node: Node): string | null =>
+export const stringText = (node: Node): string | null =>
   node.type === "Literal" && typeof node.value === "string"
     ? node.value
     : node.type === "TemplateElement"
@@ -356,7 +357,7 @@ const stringJudge = (
   return { Literal: judge, TemplateElement: judge };
 };
 
-const sourceBan = (
+export const sourceBan = (
   message: string,
   asSource: (text: string) => boolean,
   anywhere: (text: string) => boolean = never,

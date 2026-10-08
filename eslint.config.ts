@@ -9,9 +9,18 @@ import sourceShape from "./scripts/lint/source-shape.ts";
 import errorCast from "./scripts/lint/error-cast.ts";
 import narrowWidth from "./scripts/lint/narrow-width.ts";
 import e2eScriptsOff from "./scripts/lint/e2e-scripts-off.ts";
+import importBounds from "./scripts/lint/import-bounds.ts";
+import siteShape from "./scripts/lint/site-shape.ts";
+import paramExcuse from "./scripts/lint/param-excuse.ts";
+import commentCitation from "./scripts/lint/comment-citation.ts";
+import splitArguments, { OLDER_CALLS, SPLIT_FILES } from "./scripts/lint/split-arguments.ts";
 
-const vellum = { meta: cssCommentForm.meta, rules: { ...cssCommentForm.rules, ...tsCommentForm.rules, ...sourceShape.rules, ...errorCast.rules, ...narrowWidth.rules, ...e2eScriptsOff.rules } };
+const vellum = { meta: cssCommentForm.meta, rules: { ...cssCommentForm.rules, ...tsCommentForm.rules, ...sourceShape.rules, ...errorCast.rules, ...narrowWidth.rules, ...e2eScriptsOff.rules, ...importBounds.rules, ...siteShape.rules, ...paramExcuse.rules, ...commentCitation.rules, ...splitArguments.rules } };
 const TS_ROOTS = ["e2e/**/*.ts", "scripts/**/*.ts", "src/**/*.ts", "test/**/*.ts", "test-support/**/*.ts"];
+const PAGE_ELEMENT_PARAMETERS = ["drawerEls", "ghostEl", "innerEl", "legendEl", "logEls", "mapEl", "noteEl", "pillEl", "roomEls", "sheetEl", "slipEl", "statusEl", "targetEl", "viewportEl"];
+const site = (...paths: string[]): string[][] => paths.map((path) => ["src/**/*.ts", path]);
+const HOME_PURE = ["drift.ts", "station-flight.ts", "stations.ts", "camera.ts", "ceremony.ts", "coords.ts", "valve.ts"];
+const PURE_MESSAGE = "a pure module of home reads no document, no window and no global object they hang from: app.ts owns the page, and these run under node --test (Issue #458)";
 
 export default defineConfig(
   includeIgnoreFile(fileURLToPath(new URL(".gitignore", import.meta.url)), "the .gitignore: build output, generated trees and scratch"),
@@ -39,7 +48,7 @@ export default defineConfig(
       "max-lines": ["error", { max: 400, skipBlankLines: true, skipComments: true }],
       "max-lines-per-function": ["error", { max: 50, skipBlankLines: true, skipComments: true }],
       "no-empty": ["error", { allowEmptyCatch: true }],
-      "no-param-reassign": ["error", { props: true, ignorePropertyModificationsFor: ["drawerEls", "ghostEl", "innerEl", "legendEl", "logEls", "mapEl", "noteEl", "pillEl", "roomEls", "sheetEl", "slipEl", "statusEl", "targetEl", "viewportEl"] }],
+      "no-param-reassign": ["error", { props: true, ignorePropertyModificationsFor: PAGE_ELEMENT_PARAMETERS }],
       "@typescript-eslint/no-floating-promises": [
         "error",
         { allowForKnownSafeCalls: [{ from: "package", package: "node:test", name: ["test", "suite"] }] },
@@ -87,6 +96,7 @@ export default defineConfig(
       "vellum/css-comment-one-line": "error",
       "vellum/css-comment-no-js-module": "error",
       "vellum/css-no-narrow-width": "error",
+      "vellum/css-comment-citation-resolves": "error",
     },
   },
   {
@@ -99,6 +109,8 @@ export default defineConfig(
       "vellum/template-silent-escape": "error",
       "vellum/test-no-test-import": "error",
       "vellum/no-error-cast": "error",
+      "vellum/ts-comment-citation-resolves": "error",
+      "vellum/param-excuse-holds-element": ["error", { names: PAGE_ELEMENT_PARAMETERS }],
     },
   },
   {
@@ -111,7 +123,67 @@ export default defineConfig(
     name: "the house's rules on every site script",
     files: [["src/**/*.ts", "src/site/**"]],
     plugins: { vellum },
-    rules: { "vellum/worker-spawn-static": "error", "vellum/contents-row-builder-only": "error" },
+    rules: {
+      "vellum/worker-spawn-static": "error",
+      "vellum/contents-row-builder-only": "error",
+      "vellum/prospect-item-through-builder": "error",
+    },
+  },
+  {
+    name: "the house's rules on world generation",
+    files: site("src/world/**", "src/society/**", "src/hydrology/**", "src/core/**", "src/terrain/**", "src/climate/**", "src/noise/**"),
+    plugins: { vellum },
+    rules: { "vellum/world-no-philology": "error" },
+  },
+  {
+    name: "Issue #124: the philologist's glass",
+    files: site("src/society/philology.ts"),
+    plugins: { vellum },
+    rules: { "vellum/philology-no-entropy": "error" },
+  },
+  {
+    name: "the house's rules on home's modules",
+    files: site("src/site/home/**"),
+    plugins: { vellum },
+    rules: { "vellum/home-client-no-engine": "error" },
+  },
+  {
+    name: "Issue #458: home's pure modules",
+    files: site(...HOME_PURE.map((file) => `src/site/home/${file}`)),
+    rules: {
+      "no-restricted-globals": [
+        "error",
+        ...["document", "window", "globalThis", "self"].map((name) => ({ name, message: PURE_MESSAGE })),
+      ],
+      "no-restricted-properties": [
+        "error",
+        ...["document", "window"].map((property) => ({ property, message: PURE_MESSAGE })),
+      ],
+    },
+  },
+  {
+    name: "the house's rules on the Hunt's modules",
+    files: site("src/site/seed-of-the-day/**"),
+    plugins: { vellum },
+    rules: { "vellum/hunt-fixed-world": "error" },
+  },
+  {
+    name: "the house's rules on the chart rooms' modules",
+    files: site("src/site/reading-room/**", "src/site/reading-frame/**", "src/site/print-room/**", "src/site/prospect/**", "src/site/ribbon/**"),
+    plugins: { vellum },
+    rules: { "vellum/room-no-scroll": "error" },
+  },
+  {
+    name: "Issue #311: the prospect stage",
+    files: site("src/site/reading-room/prospect-stage.ts"),
+    plugins: { vellum },
+    rules: { "vellum/stage-no-status": "error" },
+  },
+  {
+    name: "Issue #654: the split builders",
+    files: site(...SPLIT_FILES),
+    plugins: { vellum },
+    rules: { "vellum/split-arguments-by-name": ["error", { excused: OLDER_CALLS }] },
   },
   {
     name: "Issue #728: the reading frame looks nothing up by id and imports nothing from the Explorer",

@@ -195,8 +195,7 @@ other way, which is what earns them a section of their own.
   `new Worker(new URL("./worker.ts", import.meta.url), { type: "module" })`, written out in full at
   the call. The bundler rewrites only the statically analyzable form, so hoisting the target into a
   variable or a parameter emits no worker chunk and kills the worker at runtime for every surface
-  that runs a job through that client. It is held by a file-specific pin in
-  `test/site/app-bundles.test.ts`, by `vellum/worker-spawn-static` (`scripts/lint/source-shape.ts`),
+  that runs a job through that client. It is held by `vellum/worker-spawn-static` (`scripts/lint/source-shape.ts`),
   which `npm run lint` runs over `src/site`, holding every bare `new Worker` and `new SharedWorker`
   to the static form and refusing a worker constructor reached any other way (through a member, a
   variable, an alias or a string naming it; the name assembled from pieces still passes), and by a

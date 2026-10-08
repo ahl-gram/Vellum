@@ -1,7 +1,5 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
 import { CULTURES } from "../../src/society/names.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { segmentName, glossName, tongueName } from "../../src/society/philology.ts";
@@ -156,18 +154,6 @@ test("glossName is pure: the same name reads the same way every time", () => {
   const a = glossName("Laukuwelua", "oromi");
   const b = glossName("Laukuwelua", "oromi");
   assert.deepEqual(a, b);
-});
-
-test("the world generator never reaches for the glass, so a lexicon edit cannot re-roll a world", () => {
-  const src = (p: string) => readFileSync(fileURLToPath(new URL(`../../${p}`, import.meta.url)), "utf8");
-  for (const file of ["src/world/generate.ts", "src/society/names.ts"]) {
-    assert.doesNotMatch(src(file), /philology/, `${file} imports the philologist's glass`);
-  }
-  assert.doesNotMatch(
-    src("src/society/philology.ts"),
-    /\brng\b|Math\.random/,
-    "philology.ts reached for a source of randomness",
-  );
 });
 
 test("tongueName names each of the ten speeches from its culture id", () => {
