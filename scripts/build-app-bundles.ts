@@ -74,7 +74,7 @@ export const stringConfig = (absEntry: string): InlineConfig => ({
   configFile: false,
   logLevel: "silent",
   root: dirname(absEntry),
-  publicDir: "public",
+  publicDir: false,
   build: {
     write: false,
     target: "esnext",

@@ -2,7 +2,7 @@
 import { applyTourOrder, buildVoyagePlan, reorderPlanByTravel, type VoyagePlan } from "../../render/voyage.ts";
 import { prepareVoyageRouter, type LegMode, type RoutedLeg, type VoyageRouter } from "../../render/voyage-route.ts";
 import type { WaterSpan } from "../../render/voyage-water.ts";
-import { createProjection, type Projection } from "../../render/transform.ts";
+import { createProjection, marginFor, type Projection } from "../../render/transform.ts";
 import {
   buildLegGeometry,
   netFacing,
@@ -189,7 +189,7 @@ export function createSessionBuilder(deps: SessionBuilderDeps) {
     const { plan, routed } = routedPlan(manifest, survey, straight, seed, quiet, orderItinerary);
 
     const wPx = manifest.widthPx;
-    const proj = createProjection(survey.gridW, survey.gridH, wPx, Math.round(wPx * 0.05));
+    const proj = createProjection(survey.gridW, survey.gridH, wPx, marginFor(wPx));
     const { legs, cumMs, totalMs } = projectedLegs(routed, proj);
 
     const byIdx = new Map(manifest.places.map((p) => [p.idx, p]));

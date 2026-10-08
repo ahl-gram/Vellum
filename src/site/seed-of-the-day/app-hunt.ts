@@ -11,7 +11,7 @@ import {
 } from "../../world/daily-hunt.ts";
 import { renderReveal } from "./reveal.ts";
 import { huntDispatch, type Miss } from "./app-dispatch.ts";
-import { createProjection, type Projection } from "../../render/transform.ts";
+import { createProjection, marginFor, type Projection } from "../../render/transform.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import type { World } from "../../world/types.ts";
 
@@ -26,7 +26,7 @@ function restart(el: HTMLElement | null, cls: string): void {
 }
 
 const STORE_KEY = "vellum.hunt.v1";
-export const MARGIN = Math.round(1500 * 0.05);
+export const MARGIN = marginFor(1500);
 
 const BAND_PROSE = {
   hot: "Hot. You are all but upon it.",
