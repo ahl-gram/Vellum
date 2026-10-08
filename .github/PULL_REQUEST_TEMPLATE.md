@@ -19,7 +19,7 @@ Closes #NNN
 
 - unit: `npm test` (`<pass count from the log>`)
 - e2e: `<suite names run locally>`; NOT run: `<the rest>`, CI runs them
-- `npm run check`
+- `npm run check`, `npm run lint`, `npm run format:check`
 
 ## Records
 

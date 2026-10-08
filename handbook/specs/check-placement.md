@@ -30,8 +30,9 @@ belongs in.
 - **One pass can leave a member chain unsettled.** Run `npm run format` again until
   `npm run format:check` passes.
 - **A Prettier upgrade is a reformat.** `prettier` is pinned to an exact version, and a new one
-  lands in a commit of its own that `.git-blame-ignore-revs` names, which needs that commit's sha on
-  main and so a merge that is not a squash.
+  lands as a reformat commit of its own. `.git-blame-ignore-revs` can name such a commit only once
+  its sha is on main, which a squash merge does not keep; how that pull request merges is Alex's
+  ruling on it.
 
 ## The type checker
 

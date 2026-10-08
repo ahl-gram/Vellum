@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
+import { isDeepStrictEqual } from "node:util";
 import * as prettier from "prettier";
 import formatConfig from "../../prettier.config.ts";
 import { PLATE_FACES, faceModulePath } from "../../scripts/plate-face.ts";
@@ -29,26 +30,35 @@ const RULED_IGNORE = [
 ];
 const IGNORE_PATH = [join(ROOT, ".gitignore"), join(ROOT, ".prettierignore")];
 
+const tracked = (): string[] => {
+  const listing = spawnSync("git", ["ls-files", "-z"], { cwd: ROOT, encoding: "utf8", timeout: 30_000 });
+  assert.equal(listing.status, 0, `git ls-files failed: ${listing.stderr}`);
+  return listing.stdout.split("\0").filter(Boolean);
+};
+
 const formats = async (file: string): Promise<boolean> => {
   const info = await prettier.getFileInfo(join(ROOT, file), { ignorePath: IGNORE_PATH });
   return !info.ignored && info.inferredParser !== null;
 };
 
-test("the ruled config is the one Prettier reads at a witness in every root it formats, an .editorconfig included (Alex, 2026-10-07, Issue #779)", async () => {
-  const witnesses = Object.values(WITNESSES);
-  assert.ok(
-    witnesses.includes("public/house.css") && witnesses.length > 1,
-    "the lint witnesses name no sheet or no script, so this guard reads too little",
-  );
+test("the ruled config is the one Prettier reads for every file it formats, so no nested config or .editorconfig the CLI obeys changes a subtree (Alex, 2026-10-07, Issue #779)", async () => {
   assert.deepEqual(formatConfig, RULED_CONFIG, "prettier.config.ts does not export the ruled options");
-  for (const file of witnesses) {
-    assert.deepEqual(
-      await prettier.resolveConfig(join(ROOT, file), { editorconfig: true }),
-      RULED_CONFIG,
-      `${file}: Prettier resolves options other than the ruled ones, from prettier.config.ts or an .editorconfig the CLI also obeys`,
-    );
-    assert.ok(await formats(file), `${file} is not formatted: it is ignored, or Prettier infers no parser for it`);
+  const formatted: string[] = [];
+  for (const file of tracked()) if (await formats(file)) formatted.push(file);
+  assert.ok(
+    Object.values(WITNESSES).every((w) => formatted.includes(w)),
+    "a lint witness is not formatted, so this sweep reads less than the lint does",
+  );
+  const off: string[] = [];
+  for (const file of formatted) {
+    const config = await prettier.resolveConfig(join(ROOT, file), { editorconfig: true });
+    if (!isDeepStrictEqual(config, RULED_CONFIG)) off.push(`${file}: ${JSON.stringify(config)}`);
   }
+  assert.deepEqual(
+    off,
+    [],
+    "Prettier resolves options other than the ruled ones for these files, from a config file or an .editorconfig nearer to them than prettier.config.ts",
+  );
 });
 
 test(".prettierignore is exactly the ruled list (Alex, 2026-10-07, Issue #779)", () => {
@@ -62,20 +72,18 @@ test(".prettierignore is exactly the ruled list (Alex, 2026-10-07, Issue #779)",
 });
 
 test("through Prettier itself, a tracked file is formatted exactly when it is TypeScript under a lint root or a sheet under public/, the plate face tables aside (Alex, 2026-10-07, Issue #779)", async () => {
-  const listing = spawnSync("git", ["ls-files", "-z"], { cwd: ROOT, encoding: "utf8", timeout: 30_000 });
-  assert.equal(listing.status, 0, `git ls-files failed: ${listing.stderr}`);
-  const tracked = listing.stdout.split("\0").filter(Boolean);
+  const files = tracked();
   const roots = lintTsRoots();
   const faces = (Object.keys(PLATE_FACES) as FaceName[]).map((name) => relative(ROOT, faceModulePath(name)));
   assert.ok(
-    roots.length > 0 && SITE_SHEETS.length > 0 && faces.every((f) => tracked.includes(f)),
+    roots.length > 0 && SITE_SHEETS.length > 0 && faces.every((f) => files.includes(f)),
     "the roots, the sheets or the face tables read empty or wrong, so the expectation below is degenerate",
   );
   const ruled = (file: string): boolean =>
     !faces.includes(file) &&
     ((file.endsWith(".ts") && roots.some((r) => file.startsWith(`${r}/`))) || SITE_SHEETS.includes(file));
   const wrong: string[] = [];
-  for (const file of tracked)
+  for (const file of files)
     if ((await formats(file)) !== ruled(file)) wrong.push(`${ruled(file) ? "not formatted" : "formatted"}: ${file}`);
   assert.deepEqual(
     wrong,

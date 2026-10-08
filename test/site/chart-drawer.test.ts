@@ -467,8 +467,13 @@ test("CT9 the table is written to the device when the reader CHANGES it and re-s
     /import \{\s*deviceStorage as store,[^}]*\} from "\.\.\/shared\/table-store\.ts";/,
     "this page names its own device instead of taking the one the store module exports and tests, so it can be wired to nothing with every assertion here green",
   );
-  const onChange = app.slice(app.indexOf("onChange:"), app.indexOf("\n    },", app.indexOf("onChange:")));
-  assert.ok(onChange.length > 20, "the onChange handler was not found, so the assertion below reads an empty slice");
+  const changeAt = app.indexOf("onChange:");
+  const changeEnd = app.indexOf("\n    },", changeAt);
+  assert.ok(
+    changeAt !== -1 && changeEnd !== -1,
+    "the onChange handler or its closing brace was not found, so the slice below reads nothing or runs to the end of the file",
+  );
+  const onChange = app.slice(changeAt, changeEnd);
   assert.match(
     onChange,
     /writeStoredTable\(store, laid\)/,

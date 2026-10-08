@@ -332,14 +332,15 @@ comment. This is a convenience index, not their home.
 inline directive that switches a check off at a line or a file: an `eslint-disable` comment in any
 form, an inline `eslint` rule setting, a `@ts-expect-error`, `@ts-ignore` or `@ts-nocheck`, or a
 `prettier-ignore` comment, which switches the formatter off for the code after it; an entry for one
-names `prettier-ignore` as its rule. Fix the code rather than add one. Where the code cannot be fixed, put the skip to Alex; the pull request
-that adds it adds its entry here, and the one that removes it removes the entry. A marker stays at
-its line exactly as written, with no reason beside it: the reason is the entry.
+names `prettier-ignore` as its rule. Fix the code rather than add one. Where the code cannot be
+fixed, put the skip to Alex; the pull request that adds it adds its entry here, and the one that
+removes it removes the entry. A marker stays at its line exactly as written, with no reason beside
+it: the reason is the entry.
 
 **`test/repo/ts-comment-form.test.ts` holds the tree to this list.** It reads every inline directive
 in the linted tree through ESLint's own parser, the rule-off form included, and every
-`prettier-ignore` comment in the form Prettier obeys, and reds on a skip no
-entry names and on an entry no skip answers. It reads an entry's bold lead only: the FIRST
+`prettier-ignore` comment in the form Prettier obeys, and reds on a skip no entry names and on an
+entry no skip answers. It reads an entry's bold lead only: the FIRST
 backticked token there is the rule, and every backticked path there is a file it is skipped in, so
 write a new entry in that shape. It matches an entry by file and rule, never by line or form, so it
 cannot tell an accepted line skip from the same rule switched off for the whole file; hold that
@@ -380,10 +381,12 @@ functions over `max-lines-per-function` and files over `max-lines` the one-time 
 left, in every TypeScript root, `e2e/` included, and nothing joins it: a new overrun fails the lint,
 and ESLint also fails on an entry no longer needed, so the change that splits an overrun runs
 `npx eslint --flag unstable_native_nodejs_ts_config --prune-suppressions .` and commits the smaller
-list. It names only those two rules over tracked files, which `test/repo/lint-config.test.ts`
-holds. It counts per file and rule, so it cannot see a listed function grow, nor a new overrun in a
-file whose other overrun is split in the same change; review holds those. Issue #814 splits the code
-until the list is empty, and then the file, this paragraph and its guard go.
+list. `test/repo/lint-config.test.ts` holds it to those two rules over tracked files, and to its
+counts at the reformat (`LIST_AT_REFORMAT`), so no file joins it and no count grows; the change that
+splits an overrun lowers that file's ceiling there too. It counts overruns, not sizes, so it cannot
+see a listed file or function grow while already over its cap, nor a new overrun in a file whose
+other overrun is split in the same change; review holds those. Issue #814 splits the code until the
+list is empty, and then the file, this paragraph and its guards go.
 
 ## The comment sweep
 

@@ -207,8 +207,8 @@ being enforced while you work on it.
 
 **10. Verify locally, and name the command for every claim.** The unit suite, the type check, the
 lint, the format check, the e2e suites the change touches, and the evidence run that demonstrates
-the acceptance. "Delivered",
-"one line" and "that will be fast" are predictions until a command's output says otherwise. Where a
+the acceptance. "Delivered", "one line" and "that will be fast" are predictions until a command's
+output says otherwise. Where a
 claim genuinely cannot be run down, mark it UNVERIFIABLE, the word `vellum-spec-recon` already uses,
 and do not coin a second one. **A measured table that exists only in `out/` is copied into a PR
 comment with the harness that produced it**, because `out/` is gitignored and nothing else holds

@@ -469,11 +469,6 @@
       "count": 1
     }
   },
-  "test/repo/ts-comment-form.test.ts": {
-    "max-lines-per-function": {
-      "count": 1
-    }
-  },
   "test/site/app-bundles.test.ts": {
     "max-lines-per-function": {
       "count": 1
