@@ -75,7 +75,7 @@ test("the archivist's label, two tiers (#324 decision 5, candidate B)", () => {
 
 test("the control idiom: cream, 1.5px ink-dark, 4px, one primary (#324)", () => {
   const css = house();
-  const base = ruleOf(css, /input\[type="number"\], select, button/);
+  const base = ruleOf(css, /input\[type="number"\],\s*select,\s*button/);
   assert.match(base, /background:\s*var\(--control-cream\)/);
   assert.match(base, /border:\s*1\.5px solid var\(--ink-dark\)/);
   assert.match(base, /border-radius:\s*4px/);

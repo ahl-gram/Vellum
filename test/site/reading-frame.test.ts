@@ -344,7 +344,7 @@ test("#493 the pace's dress: the strip's dark presses in the mockup's measure, t
   assert.match(css, /\.rf-pace button\s*\{[^}]*width:\s*1\.9rem;[^}]*height:\s*1\.6rem;/, "the mockup's press");
   assert.match(
     css,
-    /\.rf-instrument-strip \.rf-instrument \.rf-pace button:hover, \.rf-instrument-strip \.rf-instrument \.rf-pace button:focus-visible\s*\{/,
+    /\.rf-instrument-strip \.rf-instrument \.rf-pace button:hover,\s*\.rf-instrument-strip \.rf-instrument \.rf-pace button:focus-visible\s*\{/,
     "four classes deep against the house hover wash, as Play is",
   );
   const pressed = declarationsFor(css, '.rf-instrument-strip .rf-instrument .rf-pace button[aria-pressed="true"]');

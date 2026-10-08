@@ -284,7 +284,7 @@ test("the two Fell faces travel inside the card as data: @font-face rules, no Ga
   const css = OG_FONT_FACES.map((face) => {
     assert.match(
       declared,
-      new RegExp(`font-family: '${face.family}';\\s*font-style: ${face.style};`),
+      new RegExp(`font-family: "${face.family}";\\s*font-style: ${face.style};`),
       `${face.family} ${face.style} is a face fonts.css serves`,
     );
     const b64 = readFileSync(join(KIT_FONTS, face.file)).toString("base64");

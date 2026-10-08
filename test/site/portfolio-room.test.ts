@@ -52,7 +52,7 @@ test("PFR1 the Portfolio says when the worker did not start: the notice stands i
   );
   assert.match(
     css,
-    /\.stage \.warning\[hidden\] \{ display: none; \}/,
+    /\.stage \.warning\[hidden\] \{\s*display: none;\s*\}/,
     "the four carry this line with it, so a page sheet that seats the notice cannot leave it showing on every load",
   );
 });

@@ -303,7 +303,7 @@ test("the corner chrome passes clicks through and keeps its text on its own grou
   );
   assert.match(
     seed[1]!,
-    /background: linear-gradient\(to bottom, rgb\(from var\(--chart-ink\) r g b \/ 0\.85\), rgb\(from var\(--chart-ink\) r g b \/ 0\.72\)\);/,
+    /background: linear-gradient\(\s*to bottom,\s*rgb\(from var\(--chart-ink\) r g b \/ 0\.85\),\s*rgb\(from var\(--chart-ink\) r g b \/ 0\.72\)\s*\);/,
     "the wash is pinned whole, both alphas: past a fade-to-transparent the gloss measured 1.46:1 over bare chart, and under ~0.7 ink no permitted text color clears the 4.5:1 small-text floor (plate-reader 2026-08-24)",
   );
   const gloss = css.match(/\.seed-gloss \{([^}]*)\}/);
@@ -379,9 +379,13 @@ test("the legend row's ground and faces: the seed box's crisp panel under it, pa
   const legendRow = css.match(/\.lf-legend \{([^}]*)\}/);
   assert.ok(
     legendRow &&
-      legendRow[1]!.includes(
-        "background: linear-gradient(to bottom, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.72));",
-      ),
+      legendRow[1]!
+        .replace(/\s+/g, " ")
+        .replace(/\( /g, "(")
+        .replace(/ \)/g, ")")
+        .includes(
+          "background: linear-gradient(to bottom, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.72));",
+        ),
     "the legend row stands on the seed box's crisp panel, not the fade: the head line at the fade's clear top measured 1.0:1 in ink-faded and 1.76:1 in parchment over the chart, 6.04:1 on the panel (plate read 2026-09-03; the sitting's ruling 23 on #454)",
   );
   const legendVerb = css.match(/\.lf-legend-verb \{([^}]*)\}/);

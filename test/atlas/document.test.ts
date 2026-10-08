@@ -193,12 +193,8 @@ async function runPlateScript(html: string, plates: number) {
   };
   const fetchStub = (src: string) => Promise.resolve({ blob: () => Promise.resolve({ src }) });
   const urlStub = { createObjectURL: (b: { src: string }) => `blob:vellum/${b.src.slice(-6)}` };
-  (new Function("document", "fetch", "URL", "console", body[1]!) as (...args: unknown[]) => void)(
-    doc,
-    fetchStub,
-    urlStub,
-    { warn() {} },
-  ); // eslint-disable-line @typescript-eslint/no-implied-eval
+  const run = new Function("document", "fetch", "URL", "console", body[1]!) as (...args: unknown[]) => void; // eslint-disable-line @typescript-eslint/no-implied-eval
+  run(doc, fetchStub, urlStub, { warn() {} });
   await new Promise((r) => setTimeout(r, 0));
   return { imgs, queried };
 }

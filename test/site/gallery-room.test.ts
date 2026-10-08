@@ -144,7 +144,7 @@ test("GR6 the css: twelve sheets at the house depth on the deep, captions letter
   // The pool is the kit's for the class, not the page's for the cluster alone: without it the corner and the legend row read 2.26:1 and 2.0:1 over the pale plates (plate read 2026-09-02).
   assert.doesNotMatch(css, /header\.chrome/, "the page does not pool its own cluster");
   const pool = kit.match(
-    /\n([^\n]*body\.chart-room:not\(:has\(\.stage\)\) :is\(header\.chrome, \.corner\.bl\)::before[^{]*)\{([^}]*)\}/,
+    /\n((?:[^\n{}]*,\n)*[^\n]*body\.chart-room:not\(:has\(\.stage\)\) :is\(header\.chrome, \.corner\.bl\)::before[^{]*)\{([^}]*)\}/,
   );
   assert.ok(pool, "the kit pools the cluster and the chart folio of a stage-less chart room");
   assert.match(
@@ -157,7 +157,9 @@ test("GR6 the css: twelve sheets at the house depth on the deep, captions letter
     /body:has\(#map-viewport\.zoomed\) :is\(header\.chrome, \.corner\.bl, \.strip\)::before/,
     "one rule with the zoomed rooms' pool, so the two cannot drift",
   );
-  const panel = kit.match(/\n([^\n]*body\.chart-room:not\(:has\(\.stage\)\) \.corner\.tr::before[^{]*)\{([^}]*)\}/);
+  const panel = kit.match(
+    /\n((?:[^\n{}]*,\n)*[^\n]*body\.chart-room:not\(:has\(\.stage\)\) \.corner\.tr::before[^{]*)\{([^}]*)\}/,
+  );
   assert.ok(panel, "the kit gives a stage-less room's folio home's seed box");
   assert.match(
     panel[1]!,
@@ -166,11 +168,13 @@ test("GR6 the css: twelve sheets at the house depth on the deep, captions letter
   );
   assert.match(
     panel[2]!,
-    /inset:\s*-0\.7rem -0\.9rem -0\.8rem;[^}]*linear-gradient\(to bottom, rgb\(from var\(--chart-ink\) r g b \/ 0\.85\), rgb\(from var\(--chart-ink\) r g b \/ 0\.72\)\)/,
+    /inset:\s*-0\.7rem -0\.9rem -0\.8rem;[^}]*linear-gradient\(\s*to bottom,\s*rgb\(from var\(--chart-ink\) r g b \/ 0\.85\),\s*rgb\(from var\(--chart-ink\) r g b \/ 0\.72\)\s*\)/,
     "home's own box: its padding as the insets, chart ink 0.85 to 0.72, no blur (public/index.css .lf-seed)",
   );
   assert.doesNotMatch(panel[2]!, /filter/, "a crisp panel, not the pool");
-  const footing = kit.match(/\n([^\n]*body\.chart-room:not\(:has\(\.stage\)\) \.legend::before[^{]*)\{([^}]*)\}/);
+  const footing = kit.match(
+    /\n((?:[^\n{}]*,\n)*[^\n]*body\.chart-room:not\(:has\(\.stage\)\) \.legend::before[^{]*)\{([^}]*)\}/,
+  );
   assert.ok(footing, "the kit gives a stage-less room's legend row home's footing");
   assert.match(
     footing[1]!,
@@ -179,7 +183,7 @@ test("GR6 the css: twelve sheets at the house depth on the deep, captions letter
   );
   assert.match(
     footing[2]!,
-    /inset:\s*-0\.5rem -1\.1rem -0\.6rem;[^}]*linear-gradient\(to bottom, rgb\(from var\(--chart-ink\) r g b \/ 0\.85\), rgb\(from var\(--chart-ink\) r g b \/ 0\.72\)\)/,
+    /inset:\s*-0\.5rem -1\.1rem -0\.6rem;[^}]*linear-gradient\(\s*to bottom,\s*rgb\(from var\(--chart-ink\) r g b \/ 0\.85\),\s*rgb\(from var\(--chart-ink\) r g b \/ 0\.72\)\s*\)/,
     "home's own footing: its padding as the insets, the seed box's crisp panel (public/index.css .lf-legend; the fade left at the 2026-09-03 sitting, ruling 23)",
   );
   assert.doesNotMatch(css, /\/\*/, "the shipped sheet carries no prose (public/gallery/index.css ships it verbatim)");

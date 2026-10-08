@@ -84,7 +84,7 @@ test("the reveal's to-frame restores exactly what the base zeroed, and the dead 
   }
   assert.match(
     css,
-    /\.landfall \.stage:not\(\.cam\) ~ \.lf-card \.lf-card-close \{ display: none; \}/,
+    /\.landfall \.stage:not\(\.cam\) ~ \.lf-card \.lf-card-close \{\s*display: none;\s*\}/,
     "a revealed door hides its close button: without the bundle nothing listens to it",
   );
 });
@@ -108,7 +108,10 @@ test("reduced motion keeps the 10s window: the house prm blanket is out-specifie
     blanket && /animation-delay:\s*0s !important/.test(blanket[1]!),
     "motion.css's prm blanket still zeroes every animation-delay: that blanket is WHY the reveal owes its own exemption; if the blanket ever retires, retire the exemption with it",
   );
-  const prm = css.match(/@media \(prefers-reduced-motion: reduce\) \{([\s\S]*?)\n\}/g)?.join("\n") ?? "";
+  const prm = (css.match(/@media \(prefers-reduced-motion: reduce\) \{([\s\S]*?)\n\}/g)?.join("\n") ?? "").replace(
+    /\s+/g,
+    " ",
+  );
   assert.ok(
     prm.includes(
       ".landfall .stage:not(.cam) ~ .lf-card:not(.lf-card-how)[hidden] { animation: lf-doors-reveal 0s linear 10s forwards !important; }",

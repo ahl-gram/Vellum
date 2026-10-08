@@ -83,7 +83,8 @@ const faceOf = (block: string): string => {
   const get = (prop: string): string => block.match(new RegExp(`${prop}:\\s*([^;]+);`))?.[1]?.trim() ?? "";
   return [get("font-family"), get("font-style"), get("font-weight"), get("font-display"), get("src")].join(" | ");
 };
-const facesIn = (css: string): string[] => [...css.matchAll(FACE)].map(([, block]) => faceOf(block!));
+const facesIn = (css: string): string[] =>
+  [...css.matchAll(FACE)].map(([, block]) => faceOf(block!.replaceAll("'", '"')));
 
 test("every face the site serves is a file in the kit, and the kit's own sheet declares the same faces for a design round", async () => {
   const site = facesIn(await readText("public/fonts.css"));
@@ -91,7 +92,7 @@ test("every face the site serves is a file in the kit, and the kit's own sheet d
   assert.equal(site.length, WOFF2.length, "public/fonts.css should declare one face per woff2");
   for (const face of site) {
     assert.match(face, /\| swap \|/, `${face} must use font-display: swap`);
-    const file = face.match(/url\('\/fonts\/([^']+)'\)/)?.[1];
+    const file = face.match(/url\("\/fonts\/([^"]+)"\)/)?.[1];
     assert.ok(file !== undefined, `${face} does not load from /fonts/`);
     assert.ok(
       existsSync(root(`design/kit/fonts/${file}`)),
@@ -100,7 +101,7 @@ test("every face the site serves is a file in the kit, and the kit's own sheet d
   }
   assert.deepEqual(
     kit,
-    site.map((face) => face.replace("url('/fonts/", "url('fonts/")),
+    site.map((face) => face.replace('url("/fonts/', 'url("fonts/')),
     "design/kit/fonts.css should declare the site's faces with URLs relative to the kit",
   );
 });

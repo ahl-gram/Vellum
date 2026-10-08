@@ -6,6 +6,7 @@ import { resolve } from "node:path";
 // The Atelier Kit (Issue #487): the markup shapes the rooms pasted are components in src/layouts/ and no page carries a copy; the built html is pinned in astro-scaffold.test.ts.
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
+const flat = (css: string): string => css.replace(/\s+/g, " ").replace(/\( /g, "(").replace(/ \)/g, ")");
 const pages = globSync("src/pages/**/index.astro", { cwd: REPO }).sort();
 const rooms = pages.filter((p) => p !== "src/pages/index.astro");
 const CHART_ROOMS = [
@@ -166,10 +167,10 @@ test("AK7 the camera's press is home's face everywhere (#505, ruled 2026-09-02):
     /border-radius|padding|display:\s*flex/,
     "no radius override (everyone gets the house's rounding), no flex centring for a text glyph",
   );
-  assert.match(press, /transition:\s*background 0\.2s ease, color 0\.2s ease;/, "the mockup's ease");
+  assert.match(press, /transition:\s*background 0\.2s ease,\s*color 0\.2s ease;/, "the mockup's ease");
   assert.match(
     css,
-    /\.zoomery\.corner \.zoom-btn:hover, \.zoomery\.corner \.zoom-btn:focus-visible\s*\{[^}]*background:\s*var\(--ink-dark\);\s*color:\s*var\(--parchment-bright\)/,
+    /\.zoomery\.corner \.zoom-btn:hover,\s*\.zoomery\.corner \.zoom-btn:focus-visible\s*\{[^}]*background:\s*var\(--ink-dark\);\s*color:\s*var\(--parchment-bright\)/,
     "four classes deep against the house wash: what repairs home's hover",
   );
   assert.doesNotMatch(css, /zoom-keys/, "the keys slip retired everywhere");
@@ -219,7 +220,7 @@ test("AK8 home seats the kit's camera itself (#505, ruled 2026-09-02: home keeps
   );
   assert.match(
     css,
-    /#lf-controls button \{ touch-action: pan-y; \}/,
+    /#lf-controls button \{\s*touch-action: pan-y;\s*\}/,
     "the touch-action line the presses carried (#475) stays",
   );
   const app = read("src/site/home/app.ts");
@@ -240,7 +241,7 @@ test("AK7 the legend row is ONE face on home and in the kit: the seed box's cris
     ["the kit's legend row .legend::before", kit.match(/\.legend::before[^{]*\{([^}]*)\}/)],
   ];
   for (const [name, m] of wearers)
-    assert.ok(m && m[1]!.includes(`background: ${panel};`), `${name} stands on the one panel`);
+    assert.ok(m && flat(m[1]!).includes(`background: ${panel};`), `${name} stands on the one panel`);
   const homeVerb = home.match(/\.lf-legend-verb \{([^}]*)\}/);
   const kitVerb = kit.match(/\.legend-btn \.verb \{([^}]*)\}/);
   assert.ok(homeVerb && /color:\s*var\(--parchment\)/.test(homeVerb[1]!), "home's verb wears parchment");

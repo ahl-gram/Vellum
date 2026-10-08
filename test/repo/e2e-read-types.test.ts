@@ -32,11 +32,7 @@ const settledReadFixtures = async (settle: ReturnType<typeof makeSettle>): Promi
   const r = await settle(`({ open: true })`, (d: { open: boolean; count: number }) => d.open, "open");
   void r;
   // @ts-expect-error nor can the previous read the predicate is handed
-  const s = await settle(
-    `({ open: true })`,
-    (d, last: { open: boolean } | null) => last !== null && d.open === last.open,
-    "still",
-  );
+  const s = await settle(`({ open: true })`, (d, last: { open: boolean } | null) => d.open === last?.open, "still");
   void s;
 };
 void settledReadFixtures;

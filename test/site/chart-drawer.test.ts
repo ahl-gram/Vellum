@@ -389,7 +389,10 @@ test("CT7c the Explorer assigns that sheet beside the OVERLAY it describes, whic
   assert.ok(params, "landDraw is gone, so the argument check below reads nothing");
   assert.deepEqual(
     calls[0],
-    params[1]!.split(",").map((p) => p.split(":")[0]!.trim()),
+    params[1]!
+      .split(",")
+      .map((p) => p.split(":")[0]!.trim())
+      .filter(Boolean),
     "a landing path is handed something other than the drawn world's own value under its own name, which is where a constant style would now stand in, with every field of the sheet above still reading `style`",
   );
 });
@@ -461,10 +464,11 @@ test("CT9 the table is written to the device when the reader CHANGES it and re-s
   // `store` is the SHARED binding, not one this file rolled for itself: table-store.test.ts drives that binding against the real global, which is what makes every `readStoredTable(store)` below mean something a test has seen (guard-prover round 3).
   assert.match(
     app,
-    /import \{ deviceStorage as store,[^}]*\} from "\.\.\/shared\/table-store\.ts";/,
+    /import \{\s*deviceStorage as store,[^}]*\} from "\.\.\/shared\/table-store\.ts";/,
     "this page names its own device instead of taking the one the store module exports and tests, so it can be wired to nothing with every assertion here green",
   );
-  const onChange = app.slice(app.indexOf("onChange:"), app.indexOf("\n", app.indexOf("onChange:")));
+  const onChange = app.slice(app.indexOf("onChange:"), app.indexOf("\n    },", app.indexOf("onChange:")));
+  assert.ok(onChange.length > 20, "the onChange handler was not found, so the assertion below reads an empty slice");
   assert.match(
     onChange,
     /writeStoredTable\(store, laid\)/,
@@ -524,7 +528,7 @@ test("CT10 a re-seat that lands mid-draw asks for ANOTHER pass, and a sheet that
   assert.ok(fill.length > 60, "the fill was not found, so the assertions below read an empty slice");
   assert.match(
     fill,
-    /if \(drawing\) \{ refill = true; return; \}/,
+    /if \(drawing\) \{\s*refill = true;\s*return;\s*\}/,
     "a re-seat that lands while a thumbnail is in flight is DROPPED again, and its sheets keep a drawing frame until the reader shuts the drawer and opens it, which is the whole reason the flag exists",
   );
   assert.match(
@@ -535,7 +539,7 @@ test("CT10 a re-seat that lands mid-draw asks for ANOTHER pass, and a sheet that
   // The other half of that window, which nothing claimed until the cold review's round 3: the sheet can LEAVE while its picture is being drawn, and the url then lands under a key no cutting carries, so nothing ever revokes it.
   assert.match(
     fill,
-    /if \(!items\(\)\.some\(\(live\) => keyOf\(live\) === keyOf\(item\)\)\) \{ URL\.revokeObjectURL\(drawn\.url\); continue; \}/,
+    /if \(!items\(\)\.some\(\(live\) => keyOf\(live\) === keyOf\(item\)\)\) \{\s*URL\.revokeObjectURL\(drawn\.url\);\s*continue;\s*\}/,
     "a picture that finishes drawing for a sheet that already left is filed rather than revoked, which leaks one blob url per departed sheet per re-seat mid-draw",
   );
   const restore = src.slice(src.indexOf("restore(next:"), src.indexOf("\n  }\n", src.indexOf("restore(next:")));

@@ -42,7 +42,7 @@ const ciJobBlocks = (): ReadonlyArray<{ id: string; lines: readonly string[] }> 
 const runnerSuiteKeys = (): string[] => {
   const block = RUNNER_CODE.match(/const SUITES = \{([\s\S]*?)\n\};/);
   assert.ok(block, "the runner's SUITES map was not found; this guard is reading the wrong shape");
-  return [...block[1]!.matchAll(/^\s*"([\w-]+)":/gm)].map((m) => m[1]!);
+  return [...block[1]!.matchAll(/^\s*"?([\w-]+)"?:/gm)].map((m) => m[1]!);
 };
 
 test("E2E_SUITE_ORDER is exactly the runner's SUITES map, in the same order", () => {
@@ -57,7 +57,7 @@ test("each suite name maps to the run function imported from its own file", () =
   if (!block) throw new Error("the runner's SUITES map was not found");
   const body = block[1]!;
   for (const name of E2E_SUITE_ORDER) {
-    const wired = body.match(new RegExp(`"${name}":\\s*(\\w+)`));
+    const wired = body.match(new RegExp(`^\\s*"?${name}"?:\\s*(\\w+)`, "m"));
     if (!wired) throw new Error(`${name} has no SUITES entry`);
     assert.equal(wired[1], aliasFor.get(name), `${name} is wired to the wrong run function`);
   }
@@ -541,7 +541,7 @@ test("CD50 turns page scripts back on from its own step's promise, so a scripts-
   );
   assert.match(
     suite,
-    /const scriptsBackOn = async \(\) => \{ try \{ await kt\.send\("Emulation\.setScriptExecutionDisabled", \{ value: false \}\); \} catch \{\} \};/,
+    /const scriptsBackOn = async \(\) => \{\s*try \{\s*await kt\.send\("Emulation\.setScriptExecutionDisabled", \{ value: false \}\);\s*\} catch \{\}\s*\};/,
     "scriptsBackOn no longer switches page scripts back on",
   );
 });

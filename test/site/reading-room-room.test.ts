@@ -179,7 +179,7 @@ test("RR-room 6 the css: the strip fixed at the bottom, the sheet at the chart-r
 test("RR-room 7 the pace is the room's to wire (#493): app.ts binds each of the frame's presses to the engine's setPace and the frame's mark, and the address never carries it (ruled 2026-09-02)", () => {
   assert.match(
     app,
-    /for \(const \[k, btn\] of frame\.paceButtons\) btn\.addEventListener\("click", \(\) => \{ lc\.setPace\(k\); frame\.markPace\(k\); \}\);/,
+    /for \(const \[k, btn\] of frame\.paceButtons\)\s*btn\.addEventListener\("click", \(\) => \{\s*lc\.setPace\(k\);\s*frame\.markPace\(k\);\s*\}\);/,
     "one listener per press, the engine first, then the strip's face",
   );
   assert.doesNotMatch(app, /"pace"/, "no hash key: a reload or a shared address plays at the default");
@@ -189,7 +189,7 @@ test("RR-room 7 the pace is the room's to wire (#493): app.ts binds each of the 
 test("RR-room 8 under reduced motion the pace group hides (#493, ruled 2026-09-02): the engine's Play is a still frame there; the rule is the room's, since the frame's sheet carries no reduced-motion block of its own", () => {
   assert.match(
     css,
-    /@media \(prefers-reduced-motion: reduce\)\s*\{\s*\.rf-instrument \.rf-pace \{ display: none; \}\s*\}/,
+    /@media \(prefers-reduced-motion: reduce\)\s*\{\s*\.rf-instrument \.rf-pace \{\s*display: none;\s*\}\s*\}/,
   );
   assert.doesNotMatch(frameCss, /prefers-reduced-motion/, "and not the frame's (motion.css owns the collapse)");
 });
