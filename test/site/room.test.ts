@@ -4,6 +4,7 @@ import { globSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { GLASS_GAP_REM, pressRowStacks, rowSheds } from "../../src/site/shared/room-seats.ts";
 import { bindRoom } from "../../src/site/shared/room.ts";
+import { CHROME_GAP } from "../../src/site/shared/stage-fit.ts";
 import { El } from "../../test-support/element-shim.ts";
 
 test("the Glass's computed seat beside an open slip is the sheet's own arithmetic (atelier.css: --slip-w + 2rem + 1.4rem)", () => {
@@ -152,7 +153,6 @@ test("the kit gives the stage's status pill its fade, keyed to the class so ever
   }
 });
 
-// The legend row's width follows the folio's text extent (placeLegendRow), and a narrower row wraps taller; the fit bounds the sheet by the row's top, so the row is seated first or the fit reads a row that is about to grow (plate read 2026-08-30 on Issue #463: the Print Room's sheet over a freshly wrapped row until the next layout).
 class WrappingLegend extends El {
   override getBoundingClientRect() {
     const top = this.style.left ? 500 : 760;
@@ -160,6 +160,7 @@ class WrappingLegend extends El {
   }
 }
 
+// The legend row's width follows the folio's text extent (placeLegendRow), and a narrower row wraps taller; the fit bounds the sheet by the row's top, so the row is seated first or the fit reads a row that is about to grow (plate read 2026-08-30 on Issue #463: the Print Room's sheet over a freshly wrapped row until the next layout).
 test("bindRoom seats the legend row before it fits the sheet", () => {
   const g = globalThis as Record<string, unknown>;
   const names = ["document", "window", "ResizeObserver"] as const;
@@ -185,7 +186,7 @@ test("bindRoom seats the legend row before it fits the sheet", () => {
     room.layout();
     assert.equal(
       frame.style.getPropertyValue("--reserve-bottom"),
-      `${800 - 500 + 14}px`,
+      `${800 - 500 + CHROME_GAP}px`,
       "the first layout fits the sheet above the seated row's top, not the top it had before it was seated",
     );
   } finally {

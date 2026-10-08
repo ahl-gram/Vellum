@@ -1,12 +1,11 @@
 import { defaultRecipe, generateWorld } from "../src/world/generate.ts";
 import type { Quarry } from "../src/world/daily-hunt.ts";
-import { createProjection } from "../src/render/transform.ts";
+import { createProjection, marginFor } from "../src/render/transform.ts";
 import { renderMap } from "../src/render/map-renderer.ts";
 import type { World } from "../src/world/types.ts";
 import { glyphGate, labelGate, TERRAIN_RADIUS, type TerrainBand } from "./daily-hunt-geometry.ts";
 
-// Mirrors the margin `huntProjection` in `src/site/seed-of-the-day/app-hunt.ts` projects with (renderMap's default).
-const MARGIN = Math.round(1500 * 0.045);
+const MARGIN = marginFor(1500);
 
 export const DAILY_SEEDS = Array.from({ length: 30 }, (_, i) => 20260601 + i);
 export const DAILY: ReadonlyArray<World> = DAILY_SEEDS.map((s) => generateWorld(defaultRecipe(s)));

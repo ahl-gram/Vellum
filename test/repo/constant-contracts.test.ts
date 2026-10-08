@@ -77,6 +77,7 @@ test("RV4 passes a mark that tips to MAX_TILT and fails one a step past it, the 
   assert.equal(await rv4(MAX_TILT + 0.01), false, `a mark past MAX_TILT (${MAX_TILT}) passes RV4`);
 });
 
+// Blind spot, declared: setupHunt's own call of huntProjection runs in no unit test, and e2e hunt stayed green with that call projecting at a margin of 60 (measured 2026-10-08).
 test("the Hunt projects onto the chart renderMap drew: every town stands where the chart put it", async () => {
   const { realWorld } = await import("../../test-support/living-chart-hosts.ts");
   const { manifest, world } = await realWorld();

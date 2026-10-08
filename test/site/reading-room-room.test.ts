@@ -138,6 +138,8 @@ test("RR-room 5 seats.ts binds the shared room, the Glass and its keys, seats ea
 });
 
 test("RR-room 5b seatFrame seats the frame's parts: chart and status in the stage; strip, slip AND its tab inside the panel the engine hides, since a part seated outside it stands through every teardown; log and plate in the slip", async () => {
+  const g = globalThis as Record<string, unknown>;
+  const [had, prior] = ["document" in g, g.document];
   installShim();
   try {
     const [{ createReadingFrame }, { createProspectStage }, { seatFrame }] = await Promise.all([
@@ -166,6 +168,8 @@ test("RR-room 5b seatFrame seats the frame's parts: chart and status in the stag
     const panel = frame.host.scrubber.panel as unknown as El;
     for (const part of ["strip", "slip", "tab"])
       assert.equal(room[part]!.parentNode, panel, `the ${part} stands in the panel`);
+    const seated = panel.children.filter((c) => c === room.strip || c === room.slip || c === room.tab);
+    assert.deepEqual(seated, [room.strip, room.slip, room.tab], "in the order the panel is read: strip, slip, tab");
     assert.equal(parentOf(frame.host.mapEl), room.viewport, "the chart in the stage's viewport");
     assert.equal(parentOf(frame.host.statusEl), room.stage, "the status in the stage");
     assert.equal(parentOf(frame.strip), room.strip, "the frame's strip in the room's");
@@ -177,7 +181,8 @@ test("RR-room 5b seatFrame seats the frame's parts: chart and status in the stag
     assert.equal(well?.parentNode, rangeStood, "and the well stands where the range stood");
     assert.equal(room.scale!.parentNode, well, "beside the scale");
   } finally {
-    delete (globalThis as Record<string, unknown>).document;
+    if (had) g.document = prior;
+    else delete g.document;
   }
 });
 

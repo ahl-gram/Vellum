@@ -30,8 +30,8 @@ import {
 import { emitTableKey } from "../../src/site/explorer/address.ts";
 
 const REPO = resolve(import.meta.dirname, "..", "..");
-type SameKeys<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false;
 import type { ProspectJob, ProspectResult, RegionResult } from "../../src/site/explorer/worker-client.ts";
+type SameKeys<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false;
 
 // The Chart Table's state (Issue #520 Sub 2), pure and apart from the DOM: what the drawer draws and what the address carries are both this array. The surface is `chart-drawer` and never `drawer` (Issue #520 ruling 2).
 const survey = (lx: number): SurveyItem => ({
@@ -322,7 +322,7 @@ test("CT7 the sheet a filing is made from carries its own present year, so a wor
   const oneYear: SameKeys<keyof FilingSheet, "seed" | "overrides" | "style" | "presentYear"> = true;
   assert.ok(
     oneYear,
-    "the filing sheet grew a member, and a second year is two independently-assignable years, the skew this shape exists to make unrepresentable",
+    "held by the type checker, not this run: a FilingSheet member beyond these four fails npm run check here, since a second year is the skew this shape exists to make unrepresentable",
   );
   assert.notEqual(
     emitTable([filedFrom({ ...sheet, presentYear: 809 })]),
@@ -507,7 +507,6 @@ test("CT9 the table is written to the device when the reader CHANGES it and re-s
 });
 
 test("CT10 the sheets a re-seat drops are read against the table it brings, so every departed sheet's picture is named for revoking (#634; the drawer's own passes are chart-drawer-ceremony.test.ts's)", () => {
-  // The set it is built from is the hazard: built from the outgoing table it answers "nothing left" for every re-seat.
   const before = [survey(1), survey(2), survey(3)];
   assert.deepEqual(
     sheetsThatLeft(before, [survey(1), survey(3)]).map((i) => emitTable([i])),
