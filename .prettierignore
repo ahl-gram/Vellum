@@ -1,0 +1,11 @@
+*.*
+!*.css
+!*.ts
+/*
+!/e2e/
+!/public/
+!/scripts/
+!/src/
+!/test/
+!/test-support/
+src/prospect/letter/face-*.ts

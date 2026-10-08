@@ -4,7 +4,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join, relative, resolve, sep } from "node:path";
 import { ESLint, type Rule } from "eslint";
 import { includeIgnoreFile } from "eslint/config";
-import css from "@eslint/css";
+import css, { type CSSRuleDefinition } from "@eslint/css";
 import tseslint from "typescript-eslint";
 import * as prettier from "prettier";
 import { lintTsRoots } from "../../test-support/lint-roots.ts";
@@ -151,6 +151,27 @@ const nocheckAnyCase: Rule.RuleModule = {
   }),
 };
 
+const isPrettierIgnore = (value: string): boolean => value.trim() === "prettier-ignore";
+const PRETTIER_IGNORE = "collector/prettier-ignore";
+const prettierIgnore: Rule.RuleModule = {
+  meta: { type: "problem", messages: { found: "prettier-ignore" } },
+  create: (context) => ({
+    Program() {
+      for (const comment of context.sourceCode.getAllComments()) if (isPrettierIgnore(comment.value)) context.report({ loc: comment.loc!, messageId: "found" });
+    },
+  }),
+};
+const SHEET_PRETTIER_IGNORE = "collector/sheet-prettier-ignore";
+const sheetPrettierIgnore: CSSRuleDefinition = {
+  meta: { type: "problem", messages: { found: "prettier-ignore" } },
+  create: (context) => ({
+    StyleSheet() {
+      for (const comment of context.sourceCode.comments ?? []) if (comment.loc && isPrettierIgnore(comment.value)) context.report({ loc: comment.loc, messageId: "found" });
+    },
+  }),
+};
+const collectorPlugin = { rules: { "ts-nocheck-any-case": nocheckAnyCase, "prettier-ignore": prettierIgnore, "sheet-prettier-ignore": sheetPrettierIgnore } };
+
 const collector = new ESLint({
   cwd: ROOT,
   overrideConfigFile: true,
@@ -159,11 +180,18 @@ const collector = new ESLint({
     {
       files: ["**/*.ts"],
       languageOptions: { parser: tseslint.parser },
-      plugins: { "@typescript-eslint": tseslint.plugin, collector: { rules: { "ts-nocheck-any-case": nocheckAnyCase } } },
+      plugins: { "@typescript-eslint": tseslint.plugin, collector: collectorPlugin },
       linterOptions: { noInlineConfig: true, reportUnusedDisableDirectives: "off" },
-      rules: { "@typescript-eslint/ban-ts-comment": ["error", { "ts-expect-error": true, "ts-ignore": true, "ts-nocheck": false, "ts-check": false }], [NOCHECK]: "error" },
+      rules: { "@typescript-eslint/ban-ts-comment": ["error", { "ts-expect-error": true, "ts-ignore": true, "ts-nocheck": false, "ts-check": false }], [NOCHECK]: "error", [PRETTIER_IGNORE]: "error" },
     },
-    { files: ["**/*.css"], plugins: { css }, language: "css/css", languageOptions: { tolerant: true }, linterOptions: { noInlineConfig: true, reportUnusedDisableDirectives: "off" } },
+    {
+      files: ["**/*.css"],
+      plugins: { css, collector: collectorPlugin },
+      language: "css/css",
+      languageOptions: { tolerant: true },
+      linterOptions: { noInlineConfig: true, reportUnusedDisableDirectives: "off" },
+      rules: { [SHEET_PRETTIER_IGNORE]: "error" },
+    },
   ],
 });
 
@@ -188,6 +216,7 @@ const skipsIn = (results: readonly ESLint.LintResult[]): string[] =>
       if (inline) return directiveRules(inline[1]!).map((rule) => `${file} ${rule}`);
       if (m.ruleId === "@typescript-eslint/ban-ts-comment") return [`${file} ${tsDirective(m)}`];
       if (m.ruleId === NOCHECK) return [`${file} @ts-nocheck`];
+      if (m.ruleId === PRETTIER_IGNORE || m.ruleId === SHEET_PRETTIER_IGNORE) return [`${file} prettier-ignore`];
       return [`${file} (unread: ${m.ruleId ?? "parse"} ${m.message})`];
     });
   });

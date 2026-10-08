@@ -1,3 +1,3 @@
 import type { Config } from "prettier";
 
-export default {} satisfies Config;
+export default { printWidth: 120 } satisfies Config;
