@@ -1,5 +1,6 @@
 import type { Payload, SuiteContext } from "../../types.ts";
 import { makeSettle } from "../../support/settle.ts";
+import { withScriptsOff } from "../../support/scripts-off.ts";
 import type { DrawerKit, TableKit } from "./kit.ts";
 import { DRAWN, DRESS, ONE } from "./reads.ts";
 
@@ -64,23 +65,24 @@ export async function cd50ScriptsOffHome({
   PORT,
   clickAt,
 }: TableKit): Promise<void> {
-  await send("Emulation.setScriptExecutionDisabled", { value: true });
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/portfolio/` });
-  // At rest means the document complete and the road still across two reads: read while the page is still interactive, the road sits unstyled at the top right (measured 2026-10-04: 1038,27 at interactive, 809,455 from 100ms on), and a press there lands nowhere.
-  const road = await settle<{ x: number; y: number; hit: boolean; href: string | null; ready: string } | null>(
-    `(() => { const a = document.querySelector(".stage noscript a"); if (!a) return null; a.scrollIntoView({ block: "center" }); const b = a.getBoundingClientRect(); if (b.width < 1) return null; const x = Math.round(b.x + b.width / 2), y = Math.round(b.y + b.height / 2); const h = document.elementFromPoint(x, y); return { x, y, hit: h === a || a.contains(h), href: a.getAttribute("href"), ready: document.readyState }; })()`,
-    (d, last) => d.ready === "complete" && !!last && last.x === d.x && last.y === d.y,
-    "chart-drawer-scripts-off-road",
-    DRAWN,
-  );
-  await clickAt(road.x, road.y);
-  const arrived = await arrivalFrom({ evaluate, sleep }, "/explorer/portfolio/");
-  check(
-    "CD50 with scripts off, the Portfolio's notice still has a road home that answers a REAL press and lands on the Explorer, the parent the page now sits under (Issue #669)",
-    road.hit && arrived.path === "/explorer/" && arrived.room === "The Explorer",
-    JSON.stringify({ road, arrived }),
-  );
+  await withScriptsOff(send, async () => {
+    await send("Page.navigate", { url: "about:blank" });
+    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/portfolio/` });
+    // At rest means the document complete and the road still across two reads: read while the page is still interactive, the road sits unstyled at the top right (measured 2026-10-04: 1038,27 at interactive, 809,455 from 100ms on), and a press there lands nowhere.
+    const road = await settle<{ x: number; y: number; hit: boolean; href: string | null; ready: string } | null>(
+      `(() => { const a = document.querySelector(".stage noscript a"); if (!a) return null; a.scrollIntoView({ block: "center" }); const b = a.getBoundingClientRect(); if (b.width < 1) return null; const x = Math.round(b.x + b.width / 2), y = Math.round(b.y + b.height / 2); const h = document.elementFromPoint(x, y); return { x, y, hit: h === a || a.contains(h), href: a.getAttribute("href"), ready: document.readyState }; })()`,
+      (d, last) => d.ready === "complete" && !!last && last.x === d.x && last.y === d.y,
+      "chart-drawer-scripts-off-road",
+      DRAWN,
+    );
+    await clickAt(road.x, road.y);
+    const arrived = await arrivalFrom({ evaluate, sleep }, "/explorer/portfolio/");
+    check(
+      "CD50 with scripts off, the Portfolio's notice still has a road home that answers a REAL press and lands on the Explorer, the parent the page now sits under (Issue #669)",
+      road.hit && arrived.path === "/explorer/" && arrived.room === "The Explorer",
+      JSON.stringify({ road, arrived }),
+    );
+  });
 }
 
 export async function cd18bRoadCarries({ evaluate, check, sleep, clickAt }: DrawerKit, SIX: string): Promise<void> {

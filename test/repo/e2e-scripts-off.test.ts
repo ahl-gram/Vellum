@@ -60,7 +60,7 @@ const reported = async (path: string): Promise<number[]> => {
 test("no e2e file names the scripts-off switch but its one helper, which always turns scripts back on (Issue #779)", async () => {
   assert.ok(REFUSED.length > 0 && REFUSED.length < PLANT.length, "the plant cannot tell the rule from its negation");
   assert.deepEqual(await reported("e2e/suites/document-rooms.ts"), REFUSED, BLIND_SPOT);
-  assert.deepEqual(await reported("e2e/suites/nested/deeper/part.ts"), REFUSED, "a suite folder written tomorrow");
+  assert.deepEqual(await reported("e2e/support/settle.ts"), REFUSED, "a support module that is not the helper");
   assert.deepEqual(await reported(HELPER), [], "the helper itself is refused the switch it exists to hold");
 });
 

@@ -27,7 +27,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("DN5", () => dnTablet(desk));
   await step("DN6", () => dnNarrow(desk));
   await step("DN7", () => dnRefused(desk));
-  await step("DN4", () => dnContinue(desk)).finally(desk.forget);
+  await step("DN4", () => dnContinue(desk));
 
   await clearMobile();
   const trail = trailKit(ctx);

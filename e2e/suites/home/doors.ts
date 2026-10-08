@@ -1,4 +1,5 @@
 import type { SuiteContext } from "../../types.ts";
+import { withScriptsOff } from "../../support/scripts-off.ts";
 import { doorShown } from "./reads.ts";
 
 type Doors = Awaited<ReturnType<typeof h13cDoorsRead>>;
@@ -166,24 +167,24 @@ export async function h13ePrmNoFlash({ evaluate, send, check, sleep, PORT }: Sui
 
 export async function h13fNoScriptRead({ evaluate, send, sleep, PORT }: SuiteContext) {
   // The round-2 blocker's live proof: script execution OFF plus reduced motion is the one visitor class where the noscript stand-down must out-cascade the prm exemption (both !important, specificity tied, document order decides).
-  await send("Emulation.setScriptExecutionDisabled", { value: true });
-  let nojs = null;
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
-  for (let i = 0; i < 90; i++) {
-    try {
-      nojs = await evaluate<{ navShown: boolean; howShown: boolean; door: boolean } | null>(`(() => {
-        const nav = document.querySelector(".lf-noscript-rooms");
-        const how = document.getElementById("lf-card-how");
-        if (nav === null || how === null) return null;
-        return { navShown: nav.offsetParent !== null, howShown: how.offsetParent !== null && getComputedStyle(how).visibility === "visible", door: ${doorShown} };
-      })()`);
-    } catch {}
-    if (nojs !== null && nojs.door) break;
-    await sleep(150);
-  }
-  await send("Emulation.setScriptExecutionDisabled", { value: false });
-  return nojs;
+  return withScriptsOff(send, async () => {
+    let nojs = null;
+    await send("Page.navigate", { url: "about:blank" });
+    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
+    for (let i = 0; i < 90; i++) {
+      try {
+        nojs = await evaluate<{ navShown: boolean; howShown: boolean; door: boolean } | null>(`(() => {
+          const nav = document.querySelector(".lf-noscript-rooms");
+          const how = document.getElementById("lf-card-how");
+          if (nav === null || how === null) return null;
+          return { navShown: nav.offsetParent !== null, howShown: how.offsetParent !== null && getComputedStyle(how).visibility === "visible", door: ${doorShown} };
+        })()`);
+      } catch {}
+      if (nojs !== null && nojs.door) break;
+      await sleep(150);
+    }
+    return nojs;
+  });
 }
 
 export function h13fNoScript({ check }: SuiteContext, nojs: NoJs): void {

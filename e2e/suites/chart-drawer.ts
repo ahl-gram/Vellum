@@ -141,12 +141,7 @@ async function cd25CapturesAndHomes(kd: DragKit, step: Step, SIX: string): Promi
   const TWO = `${ONE}_k-p.seed-42.style-antique.i-0.year-1059`;
   const kt = tableKit(kd);
   await step("CD49", () => cd49PrintRoomRoad(kt));
-  const scriptsBackOn = async () => {
-    try {
-      await kt.send("Emulation.setScriptExecutionDisabled", { value: false });
-    } catch {}
-  };
-  await step("CD50", () => cd50ScriptsOffHome(kt)).finally(scriptsBackOn);
+  await step("CD50", () => cd50ScriptsOffHome(kt));
   await step("CD36", () => cd36GoldPress(kt));
   await step("CD37", () => cd37BackCached(kt));
   await step("CD38", () => cd38BackRebuilt(kt));

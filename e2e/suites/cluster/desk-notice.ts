@@ -151,10 +151,14 @@ export async function dnNarrow(k: DeskKit): Promise<void> {
 }
 
 export async function withStorageRefused<T>({ send }: Pick<SuiteContext, "send">, body: () => Promise<T>): Promise<T> {
-  await send<{ identifier: string }>("Page.addScriptToEvaluateOnNewDocument", {
+  const { identifier } = await send<{ identifier: string }>("Page.addScriptToEvaluateOnNewDocument", {
     source: `Storage.prototype.getItem = () => { throw new DOMException("refused", "SecurityError"); }; Storage.prototype.setItem = () => { throw new DOMException("refused", "QuotaExceededError"); };`,
   });
-  return body();
+  try {
+    return await body();
+  } finally {
+    await send("Page.removeScriptToEvaluateOnNewDocument", { identifier }).catch(() => undefined);
+  }
 }
 
 export async function dnRefused(k: DeskKit): Promise<void> {
@@ -177,20 +181,24 @@ export async function dnContinue(k: DeskKit): Promise<void> {
   const { check, touch, setMobileViewport } = k;
   await setMobileViewport(390, 844);
   await k.forget();
-  await k.open(PAGE);
-  const before = await readSettled(k, "the page before the tap");
-  await touch("touchStart", [{ x: before.tap.x, y: before.tap.y, id: 0 }]);
-  await touch("touchEnd", []);
-  const after = await k.settle(READ, (d) => !d.shown || d.key !== null, "the tap handled");
-  await k.open(ELSEWHERE);
-  const next = await readSettled(k, "the next page after Continue anyway");
-  check(
-    "DN4 a real tap on Continue anyway hides the notice and remembers it: the next page does not show it",
-    after.w === 0 && after.key === "1" && !next.shown && next.key === "1",
-    JSON.stringify({
-      tap: before.tap,
-      after: { w: after.w, key: after.key },
-      next: { shown: next.shown, key: next.key },
-    }),
-  );
+  try {
+    await k.open(PAGE);
+    const before = await readSettled(k, "the page before the tap");
+    await touch("touchStart", [{ x: before.tap.x, y: before.tap.y, id: 0 }]);
+    await touch("touchEnd", []);
+    const after = await k.settle(READ, (d) => !d.shown || d.key !== null, "the tap handled");
+    await k.open(ELSEWHERE);
+    const next = await readSettled(k, "the next page after Continue anyway");
+    check(
+      "DN4 a real tap on Continue anyway hides the notice and remembers it: the next page does not show it",
+      after.w === 0 && after.key === "1" && !next.shown && next.key === "1",
+      JSON.stringify({
+        tap: before.tap,
+        after: { w: after.w, key: after.key },
+        next: { shown: next.shown, key: next.key },
+      }),
+    );
+  } finally {
+    await k.forget();
+  }
 }
