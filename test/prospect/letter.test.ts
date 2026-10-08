@@ -12,7 +12,15 @@ import { plateKey } from "../../src/prospect/key.ts";
 import { renderSvg } from "../../src/render/svg.ts";
 import { UNITS_PER_EM, type FaceName } from "../../src/prospect/letter/face.ts";
 import { NUMERO } from "../../src/prospect/letter/numero.ts";
-import { createLettering, FACES, faceFor, layoutRun, OPTICAL_SCALE, runBox, type RunSpec } from "../../src/prospect/letter/letter.ts";
+import {
+  createLettering,
+  FACES,
+  faceFor,
+  layoutRun,
+  OPTICAL_SCALE,
+  runBox,
+  type RunSpec,
+} from "../../src/prospect/letter/letter.ts";
 import { PLATE_FACES, PLATE_FONTS } from "../../scripts/plate-face.ts";
 
 const fonts = new Map<FaceName, fontkit.Font>();
@@ -26,7 +34,8 @@ function font(face: FaceName): fontkit.Font {
 }
 
 const unitsWide = (text: string, italic: boolean): number =>
-  layoutRun({ text, x: 0, y: 0, size: UNITS_PER_EM / OPTICAL_SCALE[faceFor(text, italic)], italic, fill: "#000" }).width;
+  layoutRun({ text, x: 0, y: 0, size: UNITS_PER_EM / OPTICAL_SCALE[faceFor(text, italic)], italic, fill: "#000" })
+    .width;
 
 function worldNames(seeds: readonly number[]): string[] {
   const out: string[] = [];
@@ -40,7 +49,10 @@ function worldNames(seeds: readonly number[]): string[] {
       out.push(s.name, ...(s.formerName === undefined ? [] : [s.formerName]));
       const input = buildProspectInput(w, i);
       const g = composeProspect(input);
-      out.push(plateCaption(input, g, "standing", w.title.year, w.names.sea).epithet, ...plateKey(g).map((k) => k.label));
+      out.push(
+        plateCaption(input, g, "standing", w.title.year, w.names.sea).epithet,
+        ...plateKey(g).map((k) => k.label),
+      );
       if (s.ruined) out.push(plateCaption(input, g, "ruined", w.title.year, w.names.sea).epithet);
     });
   }
@@ -55,22 +67,43 @@ test("the face rule: italic runs set in the italic, all-capital runs in the smal
 });
 
 test("runs lay out exactly as the face itself does: its kerning and its ligatures, measured against fontkit over real plate text", () => {
-  const corpus = [...worldNames([1, 2, 3, 42]), "chief port of the Chiefdom of Rekekoa, founded An. 451", "the ground where Laukuwelua will rise · An. 400", "Officina affluent fiddle", "Meridies Septentrio Oriens Occidens"];
+  const corpus = [
+    ...worldNames([1, 2, 3, 42]),
+    "chief port of the Chiefdom of Rekekoa, founded An. 451",
+    "the ground where Laukuwelua will rise · An. 400",
+    "Officina affluent fiddle",
+    "Meridies Septentrio Oriens Occidens",
+  ];
   let kerned = 0;
   for (const text of corpus) {
-    const expect = font("italic").layout(text, { calt: false }).positions.reduce((s, p) => s + p.xAdvance, 0);
+    const expect = font("italic")
+      .layout(text, { calt: false })
+      .positions.reduce((s, p) => s + p.xAdvance, 0);
     assert.equal(unitsWide(text, true), expect, `italic ${JSON.stringify(text)}`);
     const caps = text.toUpperCase().replace(/[^A-Z0-9 ,.\-·]/g, "");
-    const capsExpect = font("caps").layout(caps, { calt: false }).positions.reduce((s, p) => s + p.xAdvance, 0);
+    const capsExpect = font("caps")
+      .layout(caps, { calt: false })
+      .positions.reduce((s, p) => s + p.xAdvance, 0);
     assert.equal(unitsWide(caps, false), capsExpect, `caps ${JSON.stringify(caps)}`);
-    if (capsExpect !== Array.from(caps).reduce((s, c) => s + font("caps").glyphForCodePoint(c.codePointAt(0) ?? 0).advanceWidth, 0)) kerned++;
+    if (
+      capsExpect !==
+      Array.from(caps).reduce((s, c) => s + font("caps").glyphForCodePoint(c.codePointAt(0) ?? 0).advanceWidth, 0)
+    )
+      kerned++;
   }
-  assert.ok(kerned > corpus.length / 2, `premise: the caps face kerns most of these runs (${kerned} of ${corpus.length})`);
+  assert.ok(
+    kerned > corpus.length / 2,
+    `premise: the caps face kerns most of these runs (${kerned} of ${corpus.length})`,
+  );
 });
 
 test("the italic ligatures set as one glyph", () => {
   for (const lig of ["fi", "fl", "ff", "ffi", "ffl"]) {
-    assert.equal(layoutRun({ text: lig, x: 0, y: 0, size: 10, italic: true, fill: "#000" }).glyphs.length, 1, `${lig} ligates`);
+    assert.equal(
+      layoutRun({ text: lig, x: 0, y: 0, size: 10, italic: true, fill: "#000" }).glyphs.length,
+      1,
+      `${lig} ligates`,
+    );
   }
 });
 
@@ -83,26 +116,42 @@ test("the numero sign is the glyph drawn for Vellum, never the face's N or a com
 });
 
 function inked(d: string, x: number, y: number): boolean {
-  const gx = x / 2, gy = -y / 2;
+  const gx = x / 2,
+    gy = -y / 2;
   const toks = d.match(/[MQZ]|-?\d+(?:\.\d+)?/g) ?? [];
   const rings: Array<Array<readonly [number, number]>> = [];
   let ring: Array<readonly [number, number]> = [];
   let last: readonly [number, number] = [0, 0];
-  for (let i = 0; i < toks.length; ) {
+  for (let i = 0; i < toks.length;) {
     const t = toks[i++];
     const pt = (): readonly [number, number] => [Number(toks[i++]), Number(toks[i++])];
-    if (t === "M") { last = pt(); ring = [last]; }
-    else if (t === "Q") {
-      const c = pt(), e = pt();
-      for (let k = 1; k <= 6; k++) { const s = k / 6, u = 1 - s; ring.push([u * u * last[0] + 2 * u * s * c[0] + s * s * e[0], u * u * last[1] + 2 * u * s * c[1] + s * s * e[1]]); }
+    if (t === "M") {
+      last = pt();
+      ring = [last];
+    } else if (t === "Q") {
+      const c = pt(),
+        e = pt();
+      for (let k = 1; k <= 6; k++) {
+        const s = k / 6,
+          u = 1 - s;
+        ring.push([
+          u * u * last[0] + 2 * u * s * c[0] + s * s * e[0],
+          u * u * last[1] + 2 * u * s * c[1] + s * s * e[1],
+        ]);
+      }
       last = e;
-    } else { rings.push(ring); ring = []; }
+    } else {
+      rings.push(ring);
+      ring = [];
+    }
   }
   let inside = false;
-  for (const r of rings) for (let i = 0, j = r.length - 1; i < r.length; j = i++) {
-    const [ax, ay] = r[i]!, [bx, by] = r[j]!;
-    if (ay > gy !== by > gy && gx < ((bx - ax) * (gy - ay)) / (by - ay) + ax) inside = !inside;
-  }
+  for (const r of rings)
+    for (let i = 0, j = r.length - 1; i < r.length; j = i++) {
+      const [ax, ay] = r[i]!,
+        [bx, by] = r[j]!;
+      if (ay > gy !== by > gy && gx < ((bx - ax) * (gy - ay)) / (by - ay) + ax) inside = !inside;
+    }
   return inside;
 }
 
@@ -117,16 +166,38 @@ test("the numero is drawn after Menlo's form in the face's ink: hooked uprights,
   const start = Array.from({ length: 400 }, (_, x) => x).find((x) => inked(d, x, 700)) ?? 0;
   let stem = 0;
   while (inked(d, start + stem + 1, 700)) stem++;
-  assert.ok(stem >= 100 && stem <= 130, `the left upright is the face's thin weight (${stem} units against Fell's N about 111)`);
+  assert.ok(
+    stem >= 100 && stem <= 130,
+    `the left upright is the face's thin weight (${stem} units against Fell's N about 111)`,
+  );
 });
 
 test("every character any world can print, in every culture's own syllables, is in the face its run is set in", () => {
-  const syllables = CULTURES.flatMap((c) => [...c.onsets, ...c.nuclei, ...c.codas, ...c.townSuffixes, ...c.riverTemplates, ...c.peakTemplates, ...c.seaTemplates, ...c.lakeTemplates, ...c.forestTemplates, ...c.realmTemplates].map((s) => s.replaceAll("%", "")));
+  const syllables = CULTURES.flatMap((c) =>
+    [
+      ...c.onsets,
+      ...c.nuclei,
+      ...c.codas,
+      ...c.townSuffixes,
+      ...c.riverTemplates,
+      ...c.peakTemplates,
+      ...c.seaTemplates,
+      ...c.lakeTemplates,
+      ...c.forestTemplates,
+      ...c.realmTemplates,
+    ].map((s) => s.replaceAll("%", "")),
+  );
   const words = [...syllables, ...worldNames(Array.from({ length: 24 }, (_, i) => i + 1))];
   for (const word of words) {
     const proper = word.charAt(0).toUpperCase() + word.slice(1);
-    assert.doesNotThrow(() => layoutRun({ text: proper, x: 0, y: 0, size: 6, italic: true, fill: "#000" }), `italic ${JSON.stringify(proper)}`);
-    assert.doesNotThrow(() => layoutRun({ text: proper.toUpperCase(), x: 0, y: 0, size: 6, fill: "#000" }), `caps ${JSON.stringify(proper.toUpperCase())}`);
+    assert.doesNotThrow(
+      () => layoutRun({ text: proper, x: 0, y: 0, size: 6, italic: true, fill: "#000" }),
+      `italic ${JSON.stringify(proper)}`,
+    );
+    assert.doesNotThrow(
+      () => layoutRun({ text: proper.toUpperCase(), x: 0, y: 0, size: 6, fill: "#000" }),
+      `caps ${JSON.stringify(proper.toUpperCase())}`,
+    );
   }
 });
 
@@ -141,7 +212,10 @@ test("a plate defines each glyph once, under ids that carry its own suffix", () 
   const ids = letters.defs().map((d) => String(d.attrs.id));
   assert.equal(new Set(ids).size, ids.length, "no glyph defined twice");
   assert.equal(ids.length, new Set("NanawotaniNailo").size, "one def per distinct glyph");
-  assert.ok(ids.every((id) => id.endsWith("-p7")), JSON.stringify(ids));
+  assert.ok(
+    ids.every((id) => id.endsWith("-p7")),
+    JSON.stringify(ids),
+  );
 });
 
 test("a run's ink box reads the glyphs' own extents: a descender reaches below the baseline, an ascender above the x-height, and the ink ends inside the advance", () => {
@@ -152,5 +226,8 @@ test("a run's ink box reads the glyphs' own extents: a descender reaches below t
   assert.ok(deep.bottom > flat.bottom + 1, `p descends (${deep.bottom} against ${flat.bottom})`);
   assert.ok(tall.top < flat.top - 1, `l rises (${tall.top} against ${flat.top})`);
   assert.ok(flat.top < 100 && flat.x1 > flat.x0, "the box has extent");
-  assert.ok(flat.x1 < layoutRun(spec("nun")).width, `the ink ends inside the advance (${flat.x1} against ${layoutRun(spec("nun")).width})`);
+  assert.ok(
+    flat.x1 < layoutRun(spec("nun")).width,
+    `the ink ends inside the advance (${flat.x1} against ${layoutRun(spec("nun")).width})`,
+  );
 });

@@ -32,8 +32,7 @@ function regionAt(world: World, window: UvWindow, band: LodBand, detail: boolean
   });
 }
 
-const sameWindow = (a: UvWindow, b: UvWindow): boolean =>
-  Math.abs(a.u0 - b.u0) < 1e-9 && Math.abs(a.v0 - b.v0) < 1e-9;
+const sameWindow = (a: UvWindow, b: UvWindow): boolean => Math.abs(a.u0 - b.u0) < 1e-9 && Math.abs(a.v0 - b.v0) < 1e-9;
 
 const DEEPEST = LOD_BANDS[LOD_BANDS.length - 1] as LodBand;
 const STEP = DEEPEST.sizeUV / 8; // the lattice step quantizeCenter snaps to

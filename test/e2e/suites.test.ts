@@ -42,7 +42,14 @@ test("an explicit list is returned in canonical runner order, never request orde
     const [a, b] = [E2E_SUITE_ORDER[i]!, E2E_SUITE_ORDER[i + 1]!];
     const { names } = resolveSuiteSelection({ [E2E_SUITES_VAR]: `${b},${a}` });
     // Membership can legitimately grow, so assert rank ordering rather than an exact pair.
-    assert.deepEqual(names.map(rank), names.map(rank).slice().sort((x, y) => x - y), `${b},${a} out of order`);
+    assert.deepEqual(
+      names.map(rank),
+      names
+        .map(rank)
+        .slice()
+        .sort((x, y) => x - y),
+      `${b},${a} out of order`,
+    );
     assert.equal(new Set(names).size, names.length, `${b},${a} duplicated a suite`);
     for (const want of [a, b]) assert.ok(names.includes(want), `${b},${a} dropped ${want}`);
   }
@@ -96,7 +103,13 @@ test("runSelected runs the selected suites, in the order given, and nothing else
   // Guards the escaping mutation: a loop over E2E_SUITE_ORDER passes every other selection test.
   const ran: string[] = [];
   const suites = Object.fromEntries(
-    E2E_SUITE_ORDER.map((n) => [n, () => { ran.push(n); return Promise.resolve(); }]),
+    E2E_SUITE_ORDER.map((n) => [
+      n,
+      () => {
+        ran.push(n);
+        return Promise.resolve();
+      },
+    ]),
   );
   return (async () => {
     const picked = canonical(SMOKE_SUITES);
@@ -109,7 +122,20 @@ test("runSelected runs the selected suites, in the order given, and nothing else
 test("runSelected hands every suite the same ctx, and refuses a name the runner cannot run", async () => {
   const ctx = { marker: 42 };
   const seen: unknown[] = [];
-  await runSelected(["render", "health"], { render: (c) => { seen.push(c); return Promise.resolve(); }, health: (c) => { seen.push(c); return Promise.resolve(); } }, ctx);
+  await runSelected(
+    ["render", "health"],
+    {
+      render: (c) => {
+        seen.push(c);
+        return Promise.resolve();
+      },
+      health: (c) => {
+        seen.push(c);
+        return Promise.resolve();
+      },
+    },
+    ctx,
+  );
   assert.deepEqual(seen, [ctx, ctx]);
   await assert.rejects(() => runSelected(["render"], {}, {}), /no suite named render/);
 });
@@ -129,8 +155,15 @@ test("runSelected times each suite it ran, in the order it ran them", () => {
   const suites = Object.fromEntries(E2E_SUITE_ORDER.map((n) => [n, async () => {}]));
   return (async () => {
     const timings = await runSelected(["render", "health", "hunt"], suites, {}, { now });
-    assert.deepEqual(timings.map((t) => t.name), ["render", "health", "hunt"]);
-    assert.deepEqual(timings.map((t) => t.ms), [5, 7, 1], "a suite's time is its own, not the elapsed total");
+    assert.deepEqual(
+      timings.map((t) => t.name),
+      ["render", "health", "hunt"],
+    );
+    assert.deepEqual(
+      timings.map((t) => t.ms),
+      [5, 7, 1],
+      "a suite's time is its own, not the elapsed total",
+    );
   })();
 });
 
@@ -139,27 +172,64 @@ test("a suite that gives up is contained: the runner is handed the suite's name 
   const handed: Array<readonly [string, unknown]> = [];
   const gaveUp = new Error('settle timeout open: {"open":false,"checked":true}');
   const suites = {
-    "cluster": () => { ran.push("cluster"); return Promise.reject(gaveUp); },
-    "corners": () => { ran.push("corners"); return Promise.resolve(); },
-    "specimen": () => { ran.push("specimen"); return Promise.resolve(); },
+    cluster: () => {
+      ran.push("cluster");
+      return Promise.reject(gaveUp);
+    },
+    corners: () => {
+      ran.push("corners");
+      return Promise.resolve();
+    },
+    specimen: () => {
+      ran.push("specimen");
+      return Promise.resolve();
+    },
   };
   const hooks: E2eRunHooks = {
-    onSuiteError: (name, err) => { handed.push([name, err] as const); },
+    onSuiteError: (name, err) => {
+      handed.push([name, err] as const);
+    },
     alive: () => true,
   };
   const timings = await runSelected(["cluster", "corners", "specimen"], suites, {}, hooks);
-  assert.deepEqual(ran, ["cluster", "corners", "specimen"], "one suite giving up took the rest of the lane with it, which is the defect");
-  assert.deepEqual(handed.map(([name]) => name), ["cluster"], "the failure did not reach the runner as this suite's");
-  assert.equal(handed[0]?.[1], gaveUp, "the runner was not handed the wait's own error, whole, so the last read it died on and the stack the runner prints are lost");
-  assert.deepEqual(timings.map((t) => t.name), ["cluster", "corners", "specimen"], "the suite that gave up is missing from the timings");
-  assert.deepEqual(timings.map((t) => t.aborted === true), [true, false, false], "the timings do not say which suite stopped early, so nothing downstream can withhold its clean bill");
+  assert.deepEqual(
+    ran,
+    ["cluster", "corners", "specimen"],
+    "one suite giving up took the rest of the lane with it, which is the defect",
+  );
+  assert.deepEqual(
+    handed.map(([name]) => name),
+    ["cluster"],
+    "the failure did not reach the runner as this suite's",
+  );
+  assert.equal(
+    handed[0]?.[1],
+    gaveUp,
+    "the runner was not handed the wait's own error, whole, so the last read it died on and the stack the runner prints are lost",
+  );
+  assert.deepEqual(
+    timings.map((t) => t.name),
+    ["cluster", "corners", "specimen"],
+    "the suite that gave up is missing from the timings",
+  );
+  assert.deepEqual(
+    timings.map((t) => t.aborted === true),
+    [true, false, false],
+    "the timings do not say which suite stopped early, so nothing downstream can withhold its clean bill",
+  );
 });
 
 test("a caller that passes NO hooks keeps the old contract: the throw comes straight back out", async () => {
   const ran: string[] = [];
   const suites = {
-    "cluster": () => { ran.push("cluster"); return Promise.reject(new Error("gave up with nobody to hand it to")); },
-    "specimen": () => { ran.push("specimen"); return Promise.resolve(); },
+    cluster: () => {
+      ran.push("cluster");
+      return Promise.reject(new Error("gave up with nobody to hand it to"));
+    },
+    specimen: () => {
+      ran.push("specimen");
+      return Promise.resolve();
+    },
   };
   await assert.rejects(
     () => runSelected(["cluster", "specimen"], suites, {}),
@@ -173,14 +243,28 @@ test("a suite that gives up with the browser GONE is still a harness error, so t
   const ran: string[] = [];
   const handed: string[] = [];
   const suites = {
-    "cluster": () => { ran.push("cluster"); return Promise.reject(new Error("eval exception: the socket closed")); },
-    "specimen": () => { ran.push("specimen"); return Promise.resolve(); },
+    cluster: () => {
+      ran.push("cluster");
+      return Promise.reject(new Error("eval exception: the socket closed"));
+    },
+    specimen: () => {
+      ran.push("specimen");
+      return Promise.resolve();
+    },
   };
   await assert.rejects(
-    () => runSelected(["cluster", "specimen"], suites, {}, {
-      onSuiteError: (name) => { handed.push(name); },
-      alive: () => Promise.resolve(false),
-    }),
+    () =>
+      runSelected(
+        ["cluster", "specimen"],
+        suites,
+        {},
+        {
+          onSuiteError: (name) => {
+            handed.push(name);
+          },
+          alive: () => Promise.resolve(false),
+        },
+      ),
     /the socket closed/,
     "a dead browser was swallowed as a product failure instead of reaching the runner's harness-error exit",
   );
@@ -192,13 +276,36 @@ test("three suites in a row giving up is a broken run, not three defects: it deg
   const ran: string[] = [];
   const handed: string[] = [];
   const names = E2E_SUITE_ORDER.slice(0, 5);
-  const suites = Object.fromEntries(names.map((n) => [n, () => { ran.push(n); return Promise.reject(new Error(`gave up in ${n}`)); }]));
+  const suites = Object.fromEntries(
+    names.map((n) => [
+      n,
+      () => {
+        ran.push(n);
+        return Promise.reject(new Error(`gave up in ${n}`));
+      },
+    ]),
+  );
   await assert.rejects(
-    () => runSelected(names, suites, {}, { onSuiteError: (name) => { handed.push(name); }, alive: () => true }),
+    () =>
+      runSelected(
+        names,
+        suites,
+        {},
+        {
+          onSuiteError: (name) => {
+            handed.push(name);
+          },
+          alive: () => true,
+        },
+      ),
     /in a row/,
     "an unbounded cascade of aborted suites ran on, which a CI cap kills with no tally printed at all",
   );
-  assert.deepEqual(handed, [names[0], names[1]], "the run gave up on a different count than the three in a row it claims");
+  assert.deepEqual(
+    handed,
+    [names[0], names[1]],
+    "the run gave up on a different count than the three in a row it claims",
+  );
   assert.deepEqual(ran, names.slice(0, 3), "the lane ran past the suite that tripped the breaker");
 });
 
@@ -208,17 +315,37 @@ test("the breaker counts suites IN A ROW: a suite that passes between two that g
   const suites = Object.fromEntries(
     names.map((n, i) => [n, () => (i % 2 === 0 ? Promise.reject(new Error(`gave up in ${n}`)) : Promise.resolve())]),
   );
-  const timings = await runSelected(names, suites, {}, { onSuiteError: (name) => { handed.push(name); }, alive: () => true });
-  assert.deepEqual(handed, [names[0], names[2], names[4]], "three scattered failures tripped a breaker that is meant to catch three in a row");
-  assert.deepEqual(timings.map((t) => t.aborted === true), [true, false, true, false, true]);
+  const timings = await runSelected(
+    names,
+    suites,
+    {},
+    {
+      onSuiteError: (name) => {
+        handed.push(name);
+      },
+      alive: () => true,
+    },
+  );
+  assert.deepEqual(
+    handed,
+    [names[0], names[2], names[4]],
+    "three scattered failures tripped a breaker that is meant to catch three in a row",
+  );
+  assert.deepEqual(
+    timings.map((t) => t.aborted === true),
+    [true, false, true, false, true],
+  );
 });
 
 test("a suite that RAN TO ITS END with a check group skipped is recorded as such, and only the suite the skip happened in", async () => {
   const skipped: string[] = [];
   const suites = {
-    "render": async () => {},
-    "motion": () => { skipped.push("D1, D2"); return Promise.resolve(); },
-    "turn": async () => {},
+    render: async () => {},
+    motion: () => {
+      skipped.push("D1, D2");
+      return Promise.resolve();
+    },
+    turn: async () => {},
   };
   const timings = await runSelected(["render", "motion", "turn"], suites, {}, { skippedGroups: () => skipped });
   assert.deepEqual(
@@ -226,7 +353,11 @@ test("a suite that RAN TO ITS END with a check group skipped is recorded as such
     [[], ["D1, D2"], []],
     "the skip was read as a running total rather than this suite's own delta, so every suite after the first skip inherits it (or none is recorded at all)",
   );
-  assert.deepEqual(timings.map((t) => t.aborted === true), [false, false, false], "a suite that ran to its end was recorded as having stopped early");
+  assert.deepEqual(
+    timings.map((t) => t.aborted === true),
+    [false, false, false],
+    "a suite that ran to its end was recorded as having stopped early",
+  );
 });
 
 test("a run that did not run whole is every suite that stopped early AND every suite that skipped a check group", () => {
@@ -249,8 +380,16 @@ test("health certifies no suite that stopped early, since a suite that gave up h
     ["render"],
     "a suite that stopped early is still reported as console/network certified",
   );
-  assert.deepEqual(suitesCertifiedByHealth(["render", "motion", "health", "hunt"]), ["render", "motion"], "nothing gave up, so the certification is unchanged");
-  assert.deepEqual(suitesCertifiedByHealth(["render", "motion", "health"], ["render", "motion"]), [], "every suite before health gave up, so health certifies nothing");
+  assert.deepEqual(
+    suitesCertifiedByHealth(["render", "motion", "health", "hunt"]),
+    ["render", "motion"],
+    "nothing gave up, so the certification is unchanged",
+  );
+  assert.deepEqual(
+    suitesCertifiedByHealth(["render", "motion", "health"], ["render", "motion"]),
+    [],
+    "every suite before health gave up, so health certifies nothing",
+  );
 });
 
 test("the timing table ranks suites by cost and totals them, so a split can be measured", () => {

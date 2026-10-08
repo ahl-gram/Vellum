@@ -79,7 +79,10 @@ test("a branch's caption names its town, with no fork to drift", () => {
 });
 
 test("waypoints dedupe to one event per settlement, and both ends are flagged as endpoints", () => {
-  for (const [seed, dest] of [[15, "Svidsvikov"], [42, "Homaitani"]] as const) {
+  for (const [seed, dest] of [
+    [15, "Svidsvikov"],
+    [42, "Homaitani"],
+  ] as const) {
     const { input } = journey(seed, dest);
     const waypoints = only(input, "waypoint");
     const indices = waypoints.map((w) => w.index);
@@ -92,7 +95,10 @@ test("waypoints dedupe to one event per settlement, and both ends are flagged as
 });
 
 test("events arrive in the order the road meets them, and every one sits on the road", () => {
-  for (const [seed, dest] of [[15, "Svidsvikov"], [42, "Homaitani"]] as const) {
+  for (const [seed, dest] of [
+    [15, "Svidsvikov"],
+    [42, "Homaitani"],
+  ] as const) {
     const { input } = journey(seed, dest);
     assert.ok(input.events.length > 3, `seed ${seed} finds events to order`);
     for (let i = 1; i < input.events.length; i++) {

@@ -13,9 +13,7 @@ export const DAILY: ReadonlyArray<World> = DAILY_SEEDS.map((s) => generateWorld(
 const OFFGRID: ReadonlyArray<World> = [1, 7, 12345].map((s) => generateWorld(defaultRecipe(s)));
 export const SWEEP: ReadonlyArray<World> = [...DAILY, ...OFFGRID];
 
-export const SWEEP_SVGS: ReadonlyArray<string> = SWEEP.map((w) =>
-  renderMap(w, { style: "antique", legend: true }),
-);
+export const SWEEP_SVGS: ReadonlyArray<string> = SWEEP.map((w) => renderMap(w, { style: "antique", legend: true }));
 
 export type Gates = {
   readonly isLabeled: (name: string) => boolean;
@@ -26,11 +24,6 @@ export function gatesFor(world: World, q: Quarry, markup: string): Gates {
   const proj = createProjection(world.elev.w, world.elev.h, 1500, MARGIN);
   return {
     isLabeled: labelGate(markup),
-    hasGlyphNear: glyphGate(
-      markup,
-      proj.px(q.settlement.x),
-      proj.py(q.settlement.y),
-      TERRAIN_RADIUS * proj.scale,
-    ),
+    hasGlyphNear: glyphGate(markup, proj.px(q.settlement.x), proj.py(q.settlement.y), TERRAIN_RADIUS * proj.scale),
   };
 }

@@ -4,9 +4,38 @@ import type { SuiteContext } from "../types.ts";
 import { h19Sideways, h19bOverSlips, h20Reveal } from "./home/floor.ts";
 import { homeKit } from "./home/kit.ts";
 import type { HomeKit } from "./home/kit.ts";
-import { h0Loads, hVeilDown, h1CornerForm, h2Hook, h4DrawIt, h5Home, h5aRefused, h5bEmptySeed, h6Clean } from "./home/frame.ts";
-import { h7aVeil, h7bLandfall, h8KeySkip, h8bHoldSkip, h9CeremonyStandsDown, h12aVeilCovers, h12bSkipOnFloor, h18CameraSeat, h11Clean } from "./home/ceremony.ts";
-import { h13aPrePaint, h13bRelease, h13cDoorsRead, h13cStaticDoors, h13dPrmDoors, h13ePrmNoFlash, h13fNoScriptRead, h13fNoScript } from "./home/doors.ts";
+import {
+  h0Loads,
+  hVeilDown,
+  h1CornerForm,
+  h2Hook,
+  h4DrawIt,
+  h5Home,
+  h5aRefused,
+  h5bEmptySeed,
+  h6Clean,
+} from "./home/frame.ts";
+import {
+  h7aVeil,
+  h7bLandfall,
+  h8KeySkip,
+  h8bHoldSkip,
+  h9CeremonyStandsDown,
+  h12aVeilCovers,
+  h12bSkipOnFloor,
+  h18CameraSeat,
+  h11Clean,
+} from "./home/ceremony.ts";
+import {
+  h13aPrePaint,
+  h13bRelease,
+  h13cDoorsRead,
+  h13cStaticDoors,
+  h13dPrmDoors,
+  h13ePrmNoFlash,
+  h13fNoScriptRead,
+  h13fNoScript,
+} from "./home/doors.ts";
 import { h14aFlight, h14aCardFits, h14bEscape, h14dPipHover, h14cLegend, h17Clean } from "./home/stations.ts";
 import { h15aDrift, h15bWheelStops, h15cRearmed, h15dFlightStops, h16NoDrift } from "./home/drift.ts";
 

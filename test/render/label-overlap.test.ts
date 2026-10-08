@@ -27,15 +27,9 @@ for (const { seed, chart } of CASES) {
     assert.ok(realms.length > 0, "realm names should be on the chart");
 
     const rangePoly = glyphPoly(range);
-    const collisions = realms
-      .filter((r) => polysOverlap(glyphPoly(r), rangePoly))
-      .map((r) => r.text);
+    const collisions = realms.filter((r) => polysOverlap(glyphPoly(r), rangePoly)).map((r) => r.text);
 
-    assert.deepEqual(
-      collisions,
-      [],
-      `realm names overlapping "${rangeName}": ${collisions.join(", ") || "(none)"}`,
-    );
+    assert.deepEqual(collisions, [], `realm names overlapping "${rangeName}": ${collisions.join(", ") || "(none)"}`);
   });
 }
 
@@ -136,13 +130,18 @@ test("no seed-16 river buries a caps settlement name (honest caps claim, #195)",
   const riverNames = new Set(world.names.rivers.values());
   const rivers = nodes.filter((n) => riverNames.has(n.text));
   assert.ok(rivers.length > 0, "fixture drift: seed 16 draws no river labels");
-  assert.ok(nodes.some((n) => n.text === "AELEIGLADE"), "fixture drift: seed 16 no longer labels AELEIGLADE");
+  assert.ok(
+    nodes.some((n) => n.text === "AELEIGLADE"),
+    "fixture drift: seed 16 no longer labels AELEIGLADE",
+  );
   const others = nodes.filter((n) => !riverNames.has(n.text));
   const collisions: string[] = [];
   for (const r of rivers) {
     for (const o of others) {
       if (overlapFraction(glyphPoly(r), glyphPoly(o)) >= RIVER_OVERLAP_THRESHOLD) {
-        collisions.push(`"${r.text}" over "${o.text}" @ ${Math.round(overlapFraction(glyphPoly(r), glyphPoly(o)) * 100)}%`);
+        collisions.push(
+          `"${r.text}" over "${o.text}" @ ${Math.round(overlapFraction(glyphPoly(r), glyphPoly(o)) * 100)}%`,
+        );
       }
     }
   }

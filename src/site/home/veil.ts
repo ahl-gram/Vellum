@@ -58,7 +58,12 @@ export type CeremonyOptions = {
   readonly random?: () => number;
 };
 
-function ceremonySkip(doc: Document, veil: Readonly<{ root: HTMLElement; status: Element | null }>, stopSounding: () => void, opts: Readonly<CeremonyOptions>) {
+function ceremonySkip(
+  doc: Document,
+  veil: Readonly<{ root: HTMLElement; status: Element | null }>,
+  stopSounding: () => void,
+  opts: Readonly<CeremonyOptions>,
+) {
   let over = false;
   let holdTimer: ReturnType<typeof setTimeout> | undefined;
   let gateTimer: ReturnType<typeof setTimeout> | undefined;
@@ -77,8 +82,12 @@ function ceremonySkip(doc: Document, veil: Readonly<{ root: HTMLElement; status:
     veil.root.remove();
     opts.land(0);
   };
-  const setHoldTimer = (next: ReturnType<typeof setTimeout> | undefined): void => { holdTimer = next; };
-  const setGateTimer = (next: ReturnType<typeof setTimeout> | undefined): void => { gateTimer = next; };
+  const setHoldTimer = (next: ReturnType<typeof setTimeout> | undefined): void => {
+    holdTimer = next;
+  };
+  const setGateTimer = (next: ReturnType<typeof setTimeout> | undefined): void => {
+    gateTimer = next;
+  };
   return { over: (): boolean => over, setHoldTimer, setGateTimer, unlisten, skip };
 }
 

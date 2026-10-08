@@ -62,20 +62,34 @@ async function assertDebugPortFree(DPORT: number): Promise<void> {
   if (conflict) throw new Error(conflict);
 }
 
-let server: import("node:http").Server | undefined, brave: BrowserProcess | undefined, ws: WebSocket | undefined, userDataDir: string | undefined;
+let server: import("node:http").Server | undefined,
+  brave: BrowserProcess | undefined,
+  ws: WebSocket | undefined,
+  userDataDir: string | undefined;
 let OUT_DIR = "";
 export function cleanup(): void {
-  try { ws?.close(); } catch {}
-  try { brave?.kill("SIGKILL"); } catch {}
-  try { server?.close(); } catch {}
+  try {
+    ws?.close();
+  } catch {}
+  try {
+    brave?.kill("SIGKILL");
+  } catch {}
+  try {
+    server?.close();
+  } catch {}
   // rmSync, not the promise rm: cleanup() is synchronous and every caller exits right after it, so an unawaited promise
   // never lands and the profile survives. Measured 2026-09-08: 446 leaked profiles, 20GB, which starved the machine until
   // a full lane stalled mid-suite with no failure to show for it.
-  try { if (userDataDir) rmSync(userDataDir, { recursive: true, force: true }); } catch {}
+  try {
+    if (userDataDir) rmSync(userDataDir, { recursive: true, force: true });
+  } catch {}
 }
 
 async function probePageTarget(DPORT: number): Promise<{ webSocketDebuggerUrl: string }> {
-  const list = JSON.parse(await httpGet(`http://127.0.0.1:${DPORT}/json`)) as { type: string; webSocketDebuggerUrl?: string }[];
+  const list = JSON.parse(await httpGet(`http://127.0.0.1:${DPORT}/json`)) as {
+    type: string;
+    webSocketDebuggerUrl?: string;
+  }[];
   const page = list.find((t) => t.type === "page" && t.webSocketDebuggerUrl);
   if (page) return page as { type: string; webSocketDebuggerUrl: string };
   throw new Error(`/json had ${list.length} targets, none a page`);
@@ -91,7 +105,10 @@ function send<T = unknown>(method: string, params: Record<string, unknown> = {})
   });
 }
 async function evaluate<T = unknown>(expression: Payload<T>, awaitPromise = false): Promise<NoInfer<T>> {
-  const r = await send<{ result: { value: T }; exceptionDetails?: { text: string; exception?: { description?: string } } }>("Runtime.evaluate", { expression, awaitPromise, returnByValue: true });
+  const r = await send<{
+    result: { value: T };
+    exceptionDetails?: { text: string; exception?: { description?: string } };
+  }>("Runtime.evaluate", { expression, awaitPromise, returnByValue: true });
   if (r.exceptionDetails) {
     throw new Error("eval exception: " + (r.exceptionDetails.exception?.description || r.exceptionDetails.text));
   }
@@ -101,7 +118,10 @@ async function evaluate<T = unknown>(expression: Payload<T>, awaitPromise = fals
 // 5s is 100x the headroom a settle leaves: it polls evaluate every 50ms right up to the moment it throws, so a page that just failed a wait has been answering within 50ms. The direction it errs is toward calling a WEDGED page dead, which is the exit 2 such a page already produced.
 const ALIVE_TIMEOUT_MS = 5000;
 function alive(): Promise<boolean> {
-  const answered = evaluate<number>("1").then(() => true, () => false);
+  const answered = evaluate<number>("1").then(
+    () => true,
+    () => false,
+  );
   const gaveUp = new Promise<boolean>((resolve) => setTimeout(() => resolve(false), ALIVE_TIMEOUT_MS).unref());
   return Promise.race([answered, gaveUp]);
 }
@@ -110,7 +130,10 @@ async function axDescription(selector: string): Promise<string | null> {
   const doc = await send<{ root: { nodeId: number } }>("DOM.getDocument", { depth: -1 });
   const { nodeId } = await send<{ nodeId: number }>("DOM.querySelector", { nodeId: doc.root.nodeId, selector });
   if (!nodeId) return null;
-  const ax = await send<{ nodes: { role?: { value: string }; description?: { value: string } }[] }>("Accessibility.getPartialAXTree", { nodeId, fetchRelatives: false });
+  const ax = await send<{ nodes: { role?: { value: string }; description?: { value: string } }[] }>(
+    "Accessibility.getPartialAXTree",
+    { nodeId, fetchRelatives: false },
+  );
   const node = ax.nodes.find((n) => n.role && n.role.value === "button");
   return node && node.description ? node.description.value : null;
 }
@@ -128,7 +151,12 @@ async function waitSettled(label = ""): Promise<void> {
 }
 async function waitReady(): Promise<boolean> {
   for (let i = 0; i < 200; i++) {
-    if (await evaluate<boolean>(`typeof window.__vellumUsesWorker==="function" && !!document.querySelector("#map svg") && document.getElementById("status").textContent===""`)) return true;
+    if (
+      await evaluate<boolean>(
+        `typeof window.__vellumUsesWorker==="function" && !!document.querySelector("#map svg") && document.getElementById("status").textContent===""`,
+      )
+    )
+      return true;
     await sleep(75);
   }
   return false;
@@ -136,13 +164,20 @@ async function waitReady(): Promise<boolean> {
 // A turn clears "Drafting..." immediately, so waitSettled resolves MID-turn; waitTurned waits for the leaf to LAND, and armTurnWatch records whether .sheet ever carried .turning (a real 3D turn vs an instant swap).
 async function waitTurned(label = ""): Promise<void> {
   for (let i = 0; i < 240; i++) {
-    if (await evaluate<boolean>(`(()=>{const s=document.getElementById("status").textContent;const t=document.querySelector(".sheet.turning");return s==="" && !t && !!document.querySelector("#map svg");})()`)) return;
+    if (
+      await evaluate<boolean>(
+        `(()=>{const s=document.getElementById("status").textContent;const t=document.querySelector(".sheet.turning");return s==="" && !t && !!document.querySelector("#map svg");})()`,
+      )
+    )
+      return;
     await sleep(50);
   }
   throw new Error("waitTurned timeout " + label);
 }
 function armTurnWatch(): Promise<unknown> {
-  return evaluate<boolean>(`(()=>{window.__turned=false;if(window.__turnMo)window.__turnMo.disconnect();window.__turnMo=new MutationObserver(()=>{if(document.querySelector(".sheet.turning"))window.__turned=true;});window.__turnMo.observe(document.getElementById("sheet"),{subtree:true,attributes:true,attributeFilter:["class"]});return true;})()`);
+  return evaluate<boolean>(
+    `(()=>{window.__turned=false;if(window.__turnMo)window.__turnMo.disconnect();window.__turnMo=new MutationObserver(()=>{if(document.querySelector(".sheet.turning"))window.__turned=true;});window.__turnMo.observe(document.getElementById("sheet"),{subtree:true,attributes:true,attributeFilter:["class"]});return true;})()`,
+  );
 }
 
 // Real browser input, not synthetic DOM events. d3-zoom binds touch listeners only if navigator.maxTouchPoints is truthy at bind time, so setTouch()/setMobileViewport() must be in effect BEFORE the navigate that boots the page.
@@ -166,9 +201,16 @@ async function touchPan(x0: number, y0: number, x1: number, y1: number): Promise
 
 // One move suffices: d3 sets k to k_old * (to/from) about the centroid, scaling against the touchstart spread rather than incrementally.
 async function pinch(cx: number, cy: number, from: number, to: number): Promise<void> {
-  const s = from / 2, e = to / 2;
-  await touch("touchStart", [{ x: cx - s, y: cy, id: 0 }, { x: cx + s, y: cy, id: 1 }]);
-  await touch("touchMove", [{ x: cx - e, y: cy, id: 0 }, { x: cx + e, y: cy, id: 1 }]);
+  const s = from / 2,
+    e = to / 2;
+  await touch("touchStart", [
+    { x: cx - s, y: cy, id: 0 },
+    { x: cx + s, y: cy, id: 1 },
+  ]);
+  await touch("touchMove", [
+    { x: cx - e, y: cy, id: 0 },
+    { x: cx + e, y: cy, id: 1 },
+  ]);
   await touch("touchEnd", []);
 }
 
@@ -227,7 +269,11 @@ async function spawnBrowser(browser: string, DPORT: number): Promise<LaunchAttem
   return { child, discard: () => rm(dir, { recursive: true, force: true }).catch(() => {}) };
 }
 
-export async function launchBrowser(browser: string, DPORT: number, tuning?: LaunchTuning): Promise<{ webSocketDebuggerUrl: string }> {
+export async function launchBrowser(
+  browser: string,
+  DPORT: number,
+  tuning?: LaunchTuning,
+): Promise<{ webSocketDebuggerUrl: string }> {
   return launchWithRetry(
     {
       preflight: () => assertDebugPortFree(DPORT),
@@ -249,7 +295,9 @@ function onCdpMessage(ev: MessageEvent, consoleErrors: string[], http4xx: string
     return;
   }
   if (m.method === "Runtime.exceptionThrown") {
-    consoleErrors.push("EXCEPTION: " + (m.params.exceptionDetails?.exception?.description || m.params.exceptionDetails?.text));
+    consoleErrors.push(
+      "EXCEPTION: " + (m.params.exceptionDetails?.exception?.description || m.params.exceptionDetails?.text),
+    );
   } else if (m.method === "Runtime.consoleAPICalled" && m.params.type === "error") {
     consoleErrors.push("console.error: " + JSON.stringify(m.params.args.map((a: { value: unknown }) => a.value)));
   } else if (m.method === "Log.entryAdded" && m.params.entry.level === "error") {
@@ -261,7 +309,18 @@ function onCdpMessage(ev: MessageEvent, consoleErrors: string[], http4xx: string
 }
 
 // results/consoleErrors/http4xx/skippedGroups are pushed to BY REFERENCE (the ws handler, check and makeStep hold them) so the runner's trailing tally sees them.
-export async function start({ browser, SITE, OUT, PORT, DPORT, PAGE, results, consoleErrors, http4xx, skippedGroups }: StartOptions): Promise<SuiteContext> {
+export async function start({
+  browser,
+  SITE,
+  OUT,
+  PORT,
+  DPORT,
+  PAGE,
+  results,
+  consoleErrors,
+  http4xx,
+  skippedGroups,
+}: StartOptions): Promise<SuiteContext> {
   OUT_DIR = OUT;
   await mkdir(OUT, { recursive: true });
   server = await startServer(SITE, PORT);
@@ -280,16 +339,39 @@ export async function start({ browser, SITE, OUT, PORT, DPORT, PAGE, results, co
   await send("DOM.enable");
   await send("Accessibility.enable");
   // Treat the headless page as focused so element.focus() fires real events and :focus-visible applies; without this the keyboard-focus card path silently no-ops under --headless. Best-effort: older builds may not support it.
-  try { await send("Emulation.setFocusEmulationEnabled", { enabled: true }); } catch {}
+  try {
+    await send("Emulation.setFocusEmulationEnabled", { enabled: true });
+  } catch {}
   await send("Page.navigate", { url: PAGE });
   const check = (name: string, ok: unknown, detail = ""): void => {
     results.push({ name, ok: !!ok });
     console.log(`${ok ? "PASS" : "FAIL"}  ${name}${detail ? "  — " + detail : ""}`);
   };
   return {
-    evaluate, send, check, shoot, sleep, alive,
-    waitSettled, waitReady, waitTurned, armTurnWatch, axDescription,
-    wheel, touch, touchPan, pinch, setTouch, setMobileViewport, setNarrowViewport, clearMobile,
-    serverState, cleanup, consoleErrors, http4xx, skippedGroups, PORT,
+    evaluate,
+    send,
+    check,
+    shoot,
+    sleep,
+    alive,
+    waitSettled,
+    waitReady,
+    waitTurned,
+    armTurnWatch,
+    axDescription,
+    wheel,
+    touch,
+    touchPan,
+    pinch,
+    setTouch,
+    setMobileViewport,
+    setNarrowViewport,
+    clearMobile,
+    serverState,
+    cleanup,
+    consoleErrors,
+    http4xx,
+    skippedGroups,
+    PORT,
   };
 }

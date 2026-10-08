@@ -1,6 +1,16 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { MATTER_KEYS, PAGE_MEASURE_WIDTH, PAGE_MIN_HEIGHT, isMatterKey, matterLine, matterPage, matterTitle, pageAspect, type MatterSource } from "../../src/site/print-room/matter-markup.ts";
+import {
+  MATTER_KEYS,
+  PAGE_MEASURE_WIDTH,
+  PAGE_MIN_HEIGHT,
+  isMatterKey,
+  matterLine,
+  matterPage,
+  matterTitle,
+  pageAspect,
+  type MatterSource,
+} from "../../src/site/print-room/matter-markup.ts";
 
 const ATLAS: MatterSource = {
   title: "Weship & Sons",
@@ -34,7 +44,10 @@ test("the page sets the document head over the named section's own html, the tit
   const page = matterPage("gazetteer", ATLAS);
   assert.match(page, /^<p class="page-head">VELLUM · THE BOUND ATLAS OF Weship &amp; Sons · CHART № 42<\/p>/);
   assert.ok(page.endsWith(ATLAS.gazetteerHtml), "the section html rides verbatim under the head");
-  assert.ok(!page.includes("Banners of the Realms") && !page.includes("Chronicle</h2>"), "only the named section turns");
+  assert.ok(
+    !page.includes("Banners of the Realms") && !page.includes("Chronicle</h2>"),
+    "only the named section turns",
+  );
   assert.match(matterPage("banners", ATLAS), /Banners of the Realms/);
   assert.match(matterPage("chronicle", ATLAS), /class="chronicle"/);
 });

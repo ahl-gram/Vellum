@@ -14,7 +14,12 @@ function carriedTintPaths(ctx: RenderCtx, carried: CarriedRings): SvgNode[] {
   return carried.map(({ realm, rings }) =>
     el("path", {
       d: rings
-        .map((r) => pathFrom(r.map(([x, y]) => [proj.px(x), proj.py(y)] as const), true))
+        .map((r) =>
+          pathFrom(
+            r.map(([x, y]) => [proj.px(x), proj.py(y)] as const),
+            true,
+          ),
+        )
         .join(""),
       fill: style.realmTints[ctx.realmTint[realm] as number] as string,
       "fill-opacity": style.name === "topographic" ? 0.16 : 0.11,
@@ -27,9 +32,7 @@ function realmTintPath(ctx: RenderCtx, realm: number): SvgNode | null {
   const { world, proj, style } = ctx;
   const { labels } = world.realms;
   const { w, h } = world.elev;
-  const indicator = createField(w, h, (x, y) =>
-    labels[x + y * w] === realm ? 1 : 0,
-  );
+  const indicator = createField(w, h, (x, y) => (labels[x + y * w] === realm ? 1 : 0));
   const soft = boxBlur(indicator, 3);
   const rings = marchingSquares(soft, 0.5)
     .filter((c) => c.closed)
@@ -37,7 +40,10 @@ function realmTintPath(ctx: RenderCtx, realm: number): SvgNode | null {
   if (rings.length === 0) return null;
   const d = rings
     .map((r) =>
-      pathFrom(r.map(([x, y]) => [proj.px(x), proj.py(y)] as const), true),
+      pathFrom(
+        r.map(([x, y]) => [proj.px(x), proj.py(y)] as const),
+        true,
+      ),
     )
     .join("");
   return el("path", {
@@ -92,7 +98,14 @@ export function realmBordersLayer(ctx: RenderCtx): SvgNode | null {
       "g",
       { id: "layer-realm-borders" },
       carried.map((chain) =>
-        borderPathNode(pathFrom(chain.map(([x, y]) => [proj.px(x), proj.py(y)] as const), false), style, k),
+        borderPathNode(
+          pathFrom(
+            chain.map(([x, y]) => [proj.px(x), proj.py(y)] as const),
+            false,
+          ),
+          style,
+          k,
+        ),
       ),
     );
   }
@@ -101,9 +114,7 @@ export function realmBordersLayer(ctx: RenderCtx): SvgNode | null {
   if (segs.length === 0) return null;
 
   const chains = chainBorderSegments(segs).map((chain) =>
-    chaikinSmooth(chain, false, 2).map(
-      ([x, y]) => [proj.px(x), proj.py(y)] as const,
-    ),
+    chaikinSmooth(chain, false, 2).map(([x, y]) => [proj.px(x), proj.py(y)] as const),
   );
 
   return el(

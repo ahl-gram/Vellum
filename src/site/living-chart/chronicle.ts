@@ -64,7 +64,9 @@ function chroniclePaint() {
     return { year: scrub.year, min: scrub.range.min, max: scrub.range.max };
   }
 
-  const setScrub = (next: ScrubState | null): void => { scrub = next; };
+  const setScrub = (next: ScrubState | null): void => {
+    scrub = next;
+  };
   return { scrub: (): ScrubState | null => scrub, setScrub, paintYear, scrubTo, scrubSnapToPresent, scrubState };
 }
 

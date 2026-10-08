@@ -75,8 +75,16 @@ test("the bar-less ages driver delegates EXACTLY the two chart-side teardowns (#
     return [...chronicle.calls, ...voyage.calls];
   };
 
-  assert.deepEqual(ledger((a) => a.clearAges()), ["clearScrub", "clearVoyage"], "clearAges clears both chambers");
-  assert.deepEqual(ledger((a) => a.exitAges()), ["exitScrub", "exitVoyage"], "exitAges exits both chambers");
+  assert.deepEqual(
+    ledger((a) => a.clearAges()),
+    ["clearScrub", "clearVoyage"],
+    "clearAges clears both chambers",
+  );
+  assert.deepEqual(
+    ledger((a) => a.exitAges()),
+    ["exitScrub", "exitVoyage"],
+    "exitAges exits both chambers",
+  );
 
   // syncSinkAtRest is here on purpose: index.ts gates it behind isActive(), so on a bar-less engine it must not acquire a dead delegation.
   for (const [name, drive] of [
@@ -211,7 +219,15 @@ test("the bar-less journal keeps the survey's prose and reports no rendered rows
   const { log, rows } = panel.buildLogPanel(
     [
       { idx: 0, name: "Aelmoor", kind: "town", founded: 300, arrivalMode: null, inlandHandoff: false, legLength: 0 },
-      { idx: 1, name: "Cairn Hollow", kind: "town", founded: 420, arrivalMode: "road", inlandHandoff: false, legLength: 44 },
+      {
+        idx: 1,
+        name: "Cairn Hollow",
+        kind: "town",
+        founded: 420,
+        arrivalMode: "road",
+        inlandHandoff: false,
+        legLength: 44,
+      },
     ],
     1059,
     42,
@@ -243,8 +259,24 @@ test("the bar-less journal's log is identical to the rendering panel's (#319)", 
 
   // The stand-in re-states the real panel's argument normalization (seed >>> 0, subtitle || ""); nothing else pins that parity.
   const ports = [
-    { idx: 0, name: "Aelmoor", kind: "town" as const, founded: 300, arrivalMode: null, inlandHandoff: false, legLength: 0 },
-    { idx: 1, name: "Cairn Hollow", kind: "town" as const, founded: 420, arrivalMode: "road" as const, inlandHandoff: false, legLength: 44 },
+    {
+      idx: 0,
+      name: "Aelmoor",
+      kind: "town" as const,
+      founded: 300,
+      arrivalMode: null,
+      inlandHandoff: false,
+      legLength: 0,
+    },
+    {
+      idx: 1,
+      name: "Cairn Hollow",
+      kind: "town" as const,
+      founded: 420,
+      arrivalMode: "road" as const,
+      inlandHandoff: false,
+      legLength: 44,
+    },
   ];
   const real = createVoyageLogPanel({
     panel: new El("div") as unknown as HTMLElement,

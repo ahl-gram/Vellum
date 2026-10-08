@@ -4,7 +4,6 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { FADING, SAY_FADE_MS, SAY_HOLD_MS, makeAnnouncer } from "../../src/site/shared/announce.ts";
 
-
 const fakePill = () => {
   const events: string[] = [];
   const classes = new Set<string>();
@@ -12,12 +11,22 @@ const fakePill = () => {
   return {
     events,
     has: (token: string): boolean => classes.has(token),
-    get textContent(): string | null { return text; },
-    set textContent(next: string | null) { text = next ?? ""; events.push(text === "" ? "clear" : `write ${text}`); },
+    get textContent(): string | null {
+      return text;
+    },
+    set textContent(next: string | null) {
+      text = next ?? "";
+      events.push(text === "" ? "clear" : `write ${text}`);
+    },
     classList: {
-      add: (token: string): void => { classes.add(token); events.push(`+${token}`); },
+      add: (token: string): void => {
+        classes.add(token);
+        events.push(`+${token}`);
+      },
       // Only a removal that removed something is recorded, or every write would log one and the order assertion below would read its own noise.
-      remove: (token: string): void => { if (classes.delete(token)) events.push(`-${token}`); },
+      remove: (token: string): void => {
+        if (classes.delete(token)) events.push(`-${token}`);
+      },
     },
   };
 };
@@ -26,8 +35,13 @@ const clock = () => {
   const pending = new Map<number, { run: () => void; ms: number }>();
   let id = 0;
   return {
-    after: (run: () => void, ms: number): number => { pending.set(++id, { run, ms }); return id; },
-    cancel: (timer: number): void => { pending.delete(timer); },
+    after: (run: () => void, ms: number): number => {
+      pending.set(++id, { run, ms });
+      return id;
+    },
+    cancel: (timer: number): void => {
+      pending.delete(timer);
+    },
     waiting: (): number => pending.size,
     delays: (): number[] => [...pending.values()].map((p) => p.ms),
     fire: (): void => {
@@ -143,7 +157,10 @@ test("every room that announces on a status pill announces through the one annou
     const flat = readFileSync(resolve(REPO, path), "utf8").replace(/\s+/g, " ");
     assert.match(flat, /from "\.\.\/shared\/announce\.ts"/, `${path} does not reach the shared announcer at all`);
     const built = flat.match(new RegExp(`const (\\w+) = makeAnnouncer\\(${pill}, \\{`));
-    assert.ok(built, `${path} imports the announcer and builds nothing over its pill, so its announcements never leave the chart`);
+    assert.ok(
+      built,
+      `${path} imports the announcer and builds nothing over its pill, so its announcements never leave the chart`,
+    );
     assert.ok(
       built[1] === "say" || new RegExp(`say: ${built[1]}\\b`).test(flat),
       `${path} builds an announcer called ${built[1]} and never hands it over as the say, which passes every other assertion here and leaves the line standing`,
@@ -158,9 +175,28 @@ test("every room that announces on a status pill announces through the one annou
 
 // Nothing in the browser can tell the two writers apart: CD24 reads the line and the pill's fade, and both look identical whichever one put the line there.
 test("the Portfolio's ruled announcement goes through the announcer and its progress line does not (#547 ruling 4)", () => {
-  const flat = readFileSync(resolve(import.meta.dirname, "..", "..", "src/site/portfolio/app.ts"), "utf8").replace(/\s+/g, " ");
-  assert.match(flat, /say\([^;]*is on top/, "the sheet brought up is ANNOUNCED, so it leaves the chart the way the Chart Table's line does");
-  assert.doesNotMatch(flat, /tell\([^;]*is on top/, "and never written bare, which would leave it standing over the chart forever");
-  assert.match(flat, /tell\([^;]*draftedLine/, "while the drafting count is written bare, or a sheet slower than the hold blanks the stage mid-draft");
-  assert.doesNotMatch(flat, /say\([^;]*draftedLine/, "and never announced, or it goes while the drafting is still running");
+  const flat = readFileSync(resolve(import.meta.dirname, "..", "..", "src/site/portfolio/app.ts"), "utf8").replace(
+    /\s+/g,
+    " ",
+  );
+  assert.match(
+    flat,
+    /say\([^;]*is on top/,
+    "the sheet brought up is ANNOUNCED, so it leaves the chart the way the Chart Table's line does",
+  );
+  assert.doesNotMatch(
+    flat,
+    /tell\([^;]*is on top/,
+    "and never written bare, which would leave it standing over the chart forever",
+  );
+  assert.match(
+    flat,
+    /tell\([^;]*draftedLine/,
+    "while the drafting count is written bare, or a sheet slower than the hold blanks the stage mid-draft",
+  );
+  assert.doesNotMatch(
+    flat,
+    /say\([^;]*draftedLine/,
+    "and never announced, or it goes while the drafting is still running",
+  );
 });

@@ -47,25 +47,13 @@ export function partitionRealms(
   const bridged = opts.barrier
     ? fillBarrierStrandedLand(flooded, elev, seaLevel, slope, riverCells, landmassIds, settlements, seats)
     : flooded;
-  const labels = attachSeatlessLandmasses(
-    bridged,
-    landmassIds,
-    sizes.length,
-    elev,
-    seaLevel,
-    seats,
-    settlements,
-  );
+  const labels = attachSeatlessLandmasses(bridged, landmassIds, sizes.length, elev, seaLevel, seats, settlements);
 
   return { labels, seats };
 }
 
 function landmassBudget(sizes: ReadonlyArray<number>, n: number, lm: number): number {
-  return clamp(
-    Math.round(((sizes[lm] as number) / n) * REALM_LAND_DIVISOR),
-    1,
-    MAX_REALMS_PER_LANDMASS,
-  );
+  return clamp(Math.round(((sizes[lm] as number) / n) * REALM_LAND_DIVISOR), 1, MAX_REALMS_PER_LANDMASS);
 }
 
 function realmBearingLandmasses(
@@ -144,9 +132,7 @@ function pickTownSeats(
   budget: number,
   seeded: ReadonlyArray<number>,
 ): number[] {
-  const towns = settlements
-    .map((s, i) => ({ s, i }))
-    .filter(({ s }) => s.kind === "town" && lmOf(s) === lm);
+  const towns = settlements.map((s, i) => ({ s, i })).filter(({ s }) => s.kind === "town" && lmOf(s) === lm);
   const chosen = [...seeded];
   while (chosen.length < budget) {
     let best = -1;
@@ -181,10 +167,7 @@ function topSettlementOnLandmass(
   let bestY = Infinity;
   settlements.forEach((s, i) => {
     if (lmOf(s) !== lm) return;
-    if (
-      s.score > bestScore ||
-      (s.score === bestScore && (s.x < bestX || (s.x === bestX && s.y < bestY)))
-    ) {
+    if (s.score > bestScore || (s.score === bestScore && (s.x < bestX || (s.x === bestX && s.y < bestY)))) {
       best = i;
       bestScore = s.score;
       bestX = s.x;
@@ -215,23 +198,21 @@ function realmSeeds(
   return { labels, dist, isSeatCell, cells };
 }
 
-function cutsBarrierCorner(barrier: Uint8Array | undefined, x: number, y: number, dx: number, dy: number, w: number): boolean {
+function cutsBarrierCorner(
+  barrier: Uint8Array | undefined,
+  x: number,
+  y: number,
+  dx: number,
+  dy: number,
+  w: number,
+): boolean {
   return (
-    barrier !== undefined &&
-    dx !== 0 &&
-    dy !== 0 &&
-    barrier[x + dx + y * w] === 1 &&
-    barrier[x + (y + dy) * w] === 1
+    barrier !== undefined && dx !== 0 && dy !== 0 && barrier[x + dx + y * w] === 1 && barrier[x + (y + dy) * w] === 1
   );
 }
 
 function realmStepCost(stepDist: number, slope: Field, riverCells: Uint8Array, ni: number): number {
-  return (
-    stepDist *
-    (1 +
-      (slope.data[ni] as number) * SLOPE_WEIGHT +
-      (riverCells[ni] === 1 ? RIVER_WEIGHT : 0))
-  );
+  return stepDist * (1 + (slope.data[ni] as number) * SLOPE_WEIGHT + (riverCells[ni] === 1 ? RIVER_WEIGHT : 0));
 }
 
 function floodRealms(
@@ -299,11 +280,7 @@ function fillBarrierStrandedLand(
   }
   let stranded = false;
   for (let i = 0; i < n; i++) {
-    if (
-      (data[i] as number) > seaLevel &&
-      (flooded[i] as number) < 0 &&
-      seatedLm.has(landmassIds[i] as number)
-    ) {
+    if ((data[i] as number) > seaLevel && (flooded[i] as number) < 0 && seatedLm.has(landmassIds[i] as number)) {
       stranded = true;
       break;
     }

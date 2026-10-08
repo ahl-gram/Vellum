@@ -55,14 +55,16 @@ function itineraryRows(input: RibbonInput): ReadonlyArray<RibbonRow> {
   return input.events.flatMap((e) => {
     const seat = eventSeat(layout, e.dist);
     if (seat === null) return [];
-    return [{
-      kind: e.kind,
-      leagues: e.dist / CELLS_PER_LEAGUE,
-      text: eventCaption(e, rng),
-      ...(e.kind === "waypoint" ? { tier: e.tier, index: e.index } : {}),
-      nx: seat.sx / RIBBON_W,
-      ny: seat.sy / RIBBON_H,
-    }];
+    return [
+      {
+        kind: e.kind,
+        leagues: e.dist / CELLS_PER_LEAGUE,
+        text: eventCaption(e, rng),
+        ...(e.kind === "waypoint" ? { tier: e.tier, index: e.index } : {}),
+        nx: seat.sx / RIBBON_W,
+        ny: seat.sy / RIBBON_H,
+      },
+    ];
   });
 }
 
@@ -70,7 +72,12 @@ function validIndex(world: World, i: number | null): number | null {
   return i != null && Number.isInteger(i) && i >= 0 && i < world.settlements.length ? i : null;
 }
 
-function farthestReachable(world: World, mask: Uint8Array, from: number, reachable: ReadonlyArray<number>): number | null {
+function farthestReachable(
+  world: World,
+  mask: Uint8Array,
+  from: number,
+  reachable: ReadonlyArray<number>,
+): number | null {
   let best: number | null = null;
   let bestLen = -1;
   for (const i of reachable) {
@@ -114,7 +121,12 @@ export function ribbonResultFor(world: World, spec: RibbonSpec): RibbonPlateData
     year: input.year,
     realm: input.realmName,
     events: itineraryRows(input),
-    options: world.settlements.map((s, i) => ({ i, name: s.name, kind: s.kind, roads: roadReachable(world, mask, i).length > 0 })),
+    options: world.settlements.map((s, i) => ({
+      i,
+      name: s.name,
+      kind: s.kind,
+      roads: roadReachable(world, mask, i).length > 0,
+    })),
     reachable,
   };
 }

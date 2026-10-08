@@ -63,7 +63,9 @@ test("the file-head block is the comment nothing but whitespace precedes; a rule
 });
 
 test("the sheets parse tolerant: a syntax css-tree does not know is not a lint error, and the comments past it are still read", async () => {
-  assert.deepEqual(await lintSheet(".a { width: if(style(--x: 1): 2px; else: 3px); }\n/* see #12 */\n"), [[ISSUE_FORM, 2]]);
+  assert.deepEqual(await lintSheet(".a { width: if(style(--x: 1): 2px; else: 3px); }\n/* see #12 */\n"), [
+    [ISSUE_FORM, 2],
+  ]);
 });
 
 const walk = (dir: string): string[] =>
@@ -78,6 +80,8 @@ test("every sheet under public/ that the lint reads satisfies the comment-form r
   const sheets = onDisk.filter((_, i) => !unread[i]);
   assert.ok(sheets.length >= 19, `the population is ${sheets.length} sheets; the tracked set is 19`);
   const results = await eslint.lintFiles(sheets);
-  const offenders = results.flatMap((r) => r.messages.map((m) => `${r.filePath.slice(ROOT.length + 1)}:${m.line} ${m.ruleId ?? "fatal"}`));
+  const offenders = results.flatMap((r) =>
+    r.messages.map((m) => `${r.filePath.slice(ROOT.length + 1)}:${m.line} ${m.ruleId ?? "fatal"}`),
+  );
   assert.deepEqual(offenders, []);
 });

@@ -30,11 +30,7 @@ const HABITAT: Record<Treatment, string> = {
 
 const lowerThe = (name: string): string => name.replace(/^The /, "the ");
 
-function standingEpithet(
-  input: ProspectInput,
-  g: ProspectGeometry,
-  seaName: string | null,
-): string {
+function standingEpithet(input: ProspectInput, g: ProspectGeometry, seaName: string | null): string {
   const habitat = HABITAT[treatmentFor(input.foreground)];
   const kinds = new Set(g.foreground.map((e) => e.kind));
   const sea = seaName === null ? "the sea" : lowerThe(seaName);
@@ -43,13 +39,9 @@ function standingEpithet(
       if (input.realmName === null) {
         return input.harbor ? `a chief city upon ${sea}` : `a chief city ${habitat}`;
       }
-      return input.harbor
-        ? `chief port of ${lowerThe(input.realmName)}`
-        : `chief city of ${lowerThe(input.realmName)}`;
+      return input.harbor ? `chief port of ${lowerThe(input.realmName)}` : `chief city of ${lowerThe(input.realmName)}`;
     case "seat":
-      return input.realmName === null
-        ? `a high seat ${habitat}`
-        : `seat of ${lowerThe(input.realmName)}`;
+      return input.realmName === null ? `a high seat ${habitat}` : `seat of ${lowerThe(input.realmName)}`;
     case "town":
       if (kinds.has("bridge")) return "a bridge town upon the river";
       if (input.harbor) return `a harbour town upon ${sea}`;

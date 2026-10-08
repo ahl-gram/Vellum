@@ -4,7 +4,14 @@ import { compareSources, inTree, movedTo, moveJudge, pairUp } from "../../e2e/po
 
 const SUITE_BEFORE = "scripts/e2e/suite-x.ts";
 const SUITE_AFTER = "e2e/suites/x.ts";
-const HEAD_FILES = new Set(["e2e/support/step.ts", "e2e/support/settle.ts", "e2e/support/home.ts", "e2e/support/room.ts", "e2e/harness.ts", "src/cli/raster.ts"]);
+const HEAD_FILES = new Set([
+  "e2e/support/step.ts",
+  "e2e/support/settle.ts",
+  "e2e/support/home.ts",
+  "e2e/support/room.ts",
+  "e2e/harness.ts",
+  "src/cli/raster.ts",
+]);
 const exists = (p: string) => HEAD_FILES.has(p);
 const judge = moveJudge(SUITE_BEFORE, SUITE_AFTER, exists);
 
@@ -22,7 +29,10 @@ const MOVED = BASE.replace('"./step-support.ts"', '"../support/step.ts"');
 
 const port = (edit: (s: string) => string) => compareSources(BASE, edit(MOVED), judge);
 const swap = (from: string, to: string) => (s: string) => {
-  assert.ok(s.includes(from), `the fixture has no ${from} to swap, so this case would compare the moved file with itself`);
+  assert.ok(
+    s.includes(from),
+    `the fixture has no ${from} to swap, so this case would compare the moved file with itself`,
+  );
   return s.replace(from, to);
 };
 
@@ -34,16 +44,29 @@ test("a suite moved into the grouped layout, its import re-spelled to reach the 
   assert.equal(got.literalDiffs, 0);
   assert.equal(got.tokens[0], got.tokens[1]);
   assert.ok(got.tokens[0] > 60, `read only ${got.tokens[0]} tokens, so the fixture is not being parsed`);
-  assert.equal(got.literals[0], 7, "the fixture's literals were not all counted: the specifier, the runner name, the evaluate template, the check name, the regex, and the detail template's head and tail");
+  assert.equal(
+    got.literals[0],
+    7,
+    "the fixture's literals were not all counted: the specifier, the runner name, the evaluate template, the check name, the regex, and the detail template's head and tail",
+  );
 });
 
 test("a folder part's specifiers to a support module and to the harness, each climbing one level further, are renames", () => {
-  const before = 'import { stage } from "../home-support.ts";\nimport { start } from "../harness.ts";\nexport const k = stage(start);';
-  const after = 'import { stage } from "../../support/home.ts";\nimport { start } from "../../harness.ts";\nexport const k = stage(start);';
+  const before =
+    'import { stage } from "../home-support.ts";\nimport { start } from "../harness.ts";\nexport const k = stage(start);';
+  const after =
+    'import { stage } from "../../support/home.ts";\nimport { start } from "../../harness.ts";\nexport const k = stage(start);';
   const got = compareSources(before, after, moveJudge("scripts/e2e/home/kit.ts", "e2e/suites/home/kit.ts", exists));
-  assert.deepEqual(got.renames, ['"../home-support.ts" -> "../../support/home.ts"', '"../harness.ts" -> "../../harness.ts"']);
+  assert.deepEqual(got.renames, [
+    '"../home-support.ts" -> "../../support/home.ts"',
+    '"../harness.ts" -> "../../harness.ts"',
+  ]);
   assert.deepEqual(got.edits, []);
-  const wrong = compareSources(before, after.replace("support/home.ts", "support/room.ts"), moveJudge("scripts/e2e/home/kit.ts", "e2e/suites/home/kit.ts", exists));
+  const wrong = compareSources(
+    before,
+    after.replace("support/home.ts", "support/room.ts"),
+    moveJudge("scripts/e2e/home/kit.ts", "e2e/suites/home/kit.ts", exists),
+  );
   assert.equal(wrong.edits.length, 1, "a specifier re-spelled to reach a different moved module was not an edit");
 });
 
@@ -51,7 +74,11 @@ test("a relative specifier whose text did not change is still judged by what it 
   const before = 'import { findBrowser } from "../../src/cli/raster.ts";\nexport const b = findBrowser();';
   const kept = compareSources(before, before, moveJudge("scripts/e2e/harness.ts", "e2e/harness.ts", exists));
   assert.equal(kept.edits.length, 1, "the unchanged text now climbs out of the repo, and it read as the same module");
-  const fixed = compareSources(before, before.replace("../../src/", "../src/"), moveJudge("scripts/e2e/harness.ts", "e2e/harness.ts", exists));
+  const fixed = compareSources(
+    before,
+    before.replace("../../src/", "../src/"),
+    moveJudge("scripts/e2e/harness.ts", "e2e/harness.ts", exists),
+  );
   assert.deepEqual(fixed.edits, []);
   assert.deepEqual(fixed.renames, ['"../../src/cli/raster.ts" -> "../src/cli/raster.ts"']);
 });
@@ -84,7 +111,12 @@ const EDITS: [string, string, string, boolean][] = [
   ["a changed regex", "/\\d+/", "/d+/", true],
   ["a runner renamed in a string that is not an import", '"e2e-explorer.ts"', '"run.ts"', true],
   ["a specifier re-spelled to reach a different moved module", '"../support/step.ts"', '"../support/settle.ts"', true],
-  ["a specifier re-spelled to reach a module that does not exist", '"../support/step.ts"', '"../support/steps.ts"', true],
+  [
+    "a specifier re-spelled to reach a module that does not exist",
+    '"../support/step.ts"',
+    '"../support/steps.ts"',
+    true,
+  ],
   ["a specifier left at its old spelling", '"../support/step.ts"', '"./step-support.ts"', false],
 ];
 const STEP_RENAME = '"./step-support.ts" -> "../support/step.ts"';
@@ -92,7 +124,11 @@ for (const [name, from, to, literal] of EDITS) {
   test(`${name} is a runtime edit, never a rename`, () => {
     const got = port(swap(from, to));
     assert.equal(got.edits.length, 1, `want one runtime edit, got ${JSON.stringify(got.edits)}`);
-    assert.deepEqual(got.renames, from.includes("support/step") ? [] : [STEP_RENAME], "a runtime edit was classed as a rename, or the untouched specifier's rename was lost");
+    assert.deepEqual(
+      got.renames,
+      from.includes("support/step") ? [] : [STEP_RENAME],
+      "a runtime edit was classed as a rename, or the untouched specifier's rename was lost",
+    );
     assert.equal(got.literalDiffs, literal ? 1 : 0);
   });
 }
@@ -107,7 +143,10 @@ test("a line break that changes the syntax tree with the same tokens is an edit,
   const before = "function f(a, b) {\n  return a && b.c;\n}";
   const asi = compareSources(before, "function f(a, b) {\n  return\n    a && b.c;\n}", judge);
   assert.equal(asi.tokens[0], asi.tokens[1], "the fixture should keep every token and change only the tree");
-  assert.ok(asi.edits.length > 0, "a return split from its value (a semicolon inserted, the value never returned) was not reported");
+  assert.ok(
+    asi.edits.length > 0,
+    "a return split from its value (a semicolon inserted, the value never returned) was not reported",
+  );
   const reflow = compareSources(before, "function f(a, b) {\n  return a &&\n    b.c;\n}", judge);
   assert.deepEqual(reflow.edits, []);
 });
@@ -153,7 +192,16 @@ const LAYOUT: [string, string][] = [
   ["e2e/support/step.ts", "e2e/support/step.ts"],
   ["test/e2e/lanes.test.ts", "test/e2e/lanes.test.ts"],
 ];
-const OUTSIDE = ["scripts/build-og.ts", "scripts/lint/css-comment-form.ts", "src/cli/main.ts", "src/cli/raster.ts", "test/cli/main.test.ts", "test/repo/e2e-tiers.test.ts", "scripts/e2e/other.ts", "scripts/e2e/x/left.mjs"];
+const OUTSIDE = [
+  "scripts/build-og.ts",
+  "scripts/lint/css-comment-form.ts",
+  "src/cli/main.ts",
+  "src/cli/raster.ts",
+  "test/cli/main.test.ts",
+  "test/repo/e2e-tiers.test.ts",
+  "scripts/e2e/other.ts",
+  "scripts/e2e/x/left.mjs",
+];
 
 test("the ruled layout sends each kind of e2e file to its home, keeps a file already there, and claims nothing else (Issue #679)", () => {
   for (const [from, to] of LAYOUT) assert.equal(movedTo(from), to, from);
@@ -163,32 +211,63 @@ test("the ruled layout sends each kind of e2e file to its home, keeps a file alr
 test("the tree the proof reads is every e2e file in either layout, and a file in it that no rule places is reported rather than dropped", () => {
   for (const [from] of LAYOUT) assert.ok(inTree(from), from);
   for (const path of ["scripts/e2e/other.ts", "scripts/e2e/x/left.mjs"]) assert.ok(inTree(path), path);
-  for (const path of ["scripts/build-og.ts", "scripts/lint/css-comment-form.ts", "src/cli/main.ts", "test/cli/main.test.ts", "test/repo/e2e-tiers.test.ts"]) assert.equal(inTree(path), false, path);
+  for (const path of [
+    "scripts/build-og.ts",
+    "scripts/lint/css-comment-form.ts",
+    "src/cli/main.ts",
+    "test/cli/main.test.ts",
+    "test/repo/e2e-tiers.test.ts",
+  ])
+    assert.equal(inTree(path), false, path);
   const got = pairUp(["scripts/e2e/other.ts", "scripts/e2e/harness.ts"], ["e2e/harness.ts"]);
   assert.deepEqual(got.unmapped, ["scripts/e2e/other.ts"]);
   assert.deepEqual(got.pairs, [["scripts/e2e/harness.ts", "e2e/harness.ts"]]);
 });
 
 const OLD_LAYOUT = [
-  "scripts/e2e-explorer.ts", "scripts/e2e-lanes.ts", "scripts/e2e-split-proof.ts",
-  "scripts/e2e/harness.ts", "scripts/e2e/types.ts", "scripts/e2e/site-server.ts",
-  "scripts/e2e/home-support.ts", "scripts/e2e/room-support.ts", "scripts/e2e/step-support.ts",
-  "scripts/e2e/suite-home.ts", "scripts/e2e/suite-zoom.ts", "scripts/e2e/suite-zoom-gestures.ts",
-  "scripts/e2e/home/kit.ts", "scripts/e2e/home/reads.ts", "scripts/e2e/zoom/kit.ts", "scripts/e2e/zoom/reads.ts",
-  "src/cli/e2e-lanes.ts", "src/cli/e2e-suites.ts", "src/cli/browser-policy.ts",
-  "test/cli/e2e-lanes.test.ts", "test/cli/e2e-suites.test.ts", "test/cli/browser-policy.test.ts",
+  "scripts/e2e-explorer.ts",
+  "scripts/e2e-lanes.ts",
+  "scripts/e2e-split-proof.ts",
+  "scripts/e2e/harness.ts",
+  "scripts/e2e/types.ts",
+  "scripts/e2e/site-server.ts",
+  "scripts/e2e/home-support.ts",
+  "scripts/e2e/room-support.ts",
+  "scripts/e2e/step-support.ts",
+  "scripts/e2e/suite-home.ts",
+  "scripts/e2e/suite-zoom.ts",
+  "scripts/e2e/suite-zoom-gestures.ts",
+  "scripts/e2e/home/kit.ts",
+  "scripts/e2e/home/reads.ts",
+  "scripts/e2e/zoom/kit.ts",
+  "scripts/e2e/zoom/reads.ts",
+  "src/cli/e2e-lanes.ts",
+  "src/cli/e2e-suites.ts",
+  "src/cli/browser-policy.ts",
+  "test/cli/e2e-lanes.test.ts",
+  "test/cli/e2e-suites.test.ts",
+  "test/cli/browser-policy.test.ts",
 ];
 
 test("no two files of the old layout land on one path, so every pair the proof compares is one file before and after", () => {
   const targets = OLD_LAYOUT.map(movedTo);
-  assert.ok(targets.every((t) => t !== null), `a file of the old layout has no rule: ${OLD_LAYOUT.filter((p) => movedTo(p) === null).join(", ")}`);
+  assert.ok(
+    targets.every((t) => t !== null),
+    `a file of the old layout has no rule: ${OLD_LAYOUT.filter((p) => movedTo(p) === null).join(", ")}`,
+  );
   assert.equal(new Set(targets).size, OLD_LAYOUT.length, "two files of the old layout move to one path");
 });
 
 test("pairing reports a file whose target is absent as gone, a head file no base reaches as new, and two bases on one target as a failure", () => {
-  const got = pairUp(["scripts/e2e/suite-home.ts", "scripts/e2e/suite-zoom.ts"], ["e2e/suites/home.ts", "e2e/suites/extra.ts"]);
+  const got = pairUp(
+    ["scripts/e2e/suite-home.ts", "scripts/e2e/suite-zoom.ts"],
+    ["e2e/suites/home.ts", "e2e/suites/extra.ts"],
+  );
   assert.deepEqual(got.pairs, [["scripts/e2e/suite-home.ts", "e2e/suites/home.ts"]]);
   assert.deepEqual(got.gone, ["scripts/e2e/suite-zoom.ts"]);
   assert.deepEqual(got.added, ["e2e/suites/extra.ts"]);
-  assert.throws(() => pairUp(["scripts/e2e/harness.ts", "e2e/harness.ts"], ["e2e/harness.ts"]), /both move to e2e\/harness\.ts/);
+  assert.throws(
+    () => pairUp(["scripts/e2e/harness.ts", "e2e/harness.ts"], ["e2e/harness.ts"]),
+    /both move to e2e\/harness\.ts/,
+  );
 });

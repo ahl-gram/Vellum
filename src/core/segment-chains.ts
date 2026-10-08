@@ -2,8 +2,7 @@ export type Seg = readonly [number, number, number, number];
 export type ChainPoint = [number, number];
 
 export function chainBorderSegments(segs: ReadonlyArray<Seg>): ChainPoint[][] {
-  const key = (x: number, y: number): string =>
-    `${Math.round(x * 4)},${Math.round(y * 4)}`;
+  const key = (x: number, y: number): string => `${Math.round(x * 4)},${Math.round(y * 4)}`;
   const touching = new Map<string, number[]>();
   segs.forEach((s, i) => {
     for (const k of [key(s[0], s[1]), key(s[2], s[3])]) {
@@ -20,7 +19,10 @@ export function chainBorderSegments(segs: ReadonlyArray<Seg>): ChainPoint[][] {
     if (used[i]) continue;
     used[i] = 1;
     const s = segs[i] as Seg;
-    const chain: ChainPoint[] = [[s[0], s[1]], [s[2], s[3]]];
+    const chain: ChainPoint[] = [
+      [s[0], s[1]],
+      [s[2], s[3]],
+    ];
 
     for (const end of [1, 0] as const) {
       for (;;) {

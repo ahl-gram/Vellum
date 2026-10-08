@@ -60,27 +60,49 @@ function onPress(h: Hold, idx: number, onCard: boolean, detail: number): Hold {
 
 export function nextHold(h: Hold, i: HoldInput): Hold {
   switch (i.kind) {
-    case "enter": return onEnter(h, i.idx, i.onCard);
-    case "leave": return onLeave(h, i.idx, i.onCard);
-    case "move": return onMove(h, i.onCard);
-    case "expire": return onExpire(h, i.onCard);
-    case "press": return onPress(h, i.idx, i.onCard, i.detail);
-    case "pressOpen": return h.shown < 0 || i.onCard ? h : close(h);
-    case "focus": return i.fromPointer || h.shown === i.idx ? h : { ...h, shown: i.idx, pinned: false, waiting: false, onCard: false };
-    case "blur": return i.intoCard || h.pinned || i.idx !== h.shown ? h : close(h);
-    case "focusOut": return i.staysNear || h.pinned ? h : close(h);
-    case "dismiss": return close(h);
+    case "enter":
+      return onEnter(h, i.idx, i.onCard);
+    case "leave":
+      return onLeave(h, i.idx, i.onCard);
+    case "move":
+      return onMove(h, i.onCard);
+    case "expire":
+      return onExpire(h, i.onCard);
+    case "press":
+      return onPress(h, i.idx, i.onCard, i.detail);
+    case "pressOpen":
+      return h.shown < 0 || i.onCard ? h : close(h);
+    case "focus":
+      return i.fromPointer || h.shown === i.idx
+        ? h
+        : { ...h, shown: i.idx, pinned: false, waiting: false, onCard: false };
+    case "blur":
+      return i.intoCard || h.pinned || i.idx !== h.shown ? h : close(h);
+    case "focusOut":
+      return i.staysNear || h.pinned ? h : close(h);
+    case "dismiss":
+      return close(h);
   }
 }
 
-export type HitBox = { readonly idx: number; readonly left: number; readonly top: number; readonly right: number; readonly bottom: number };
+export type HitBox = {
+  readonly idx: number;
+  readonly left: number;
+  readonly top: number;
+  readonly right: number;
+  readonly bottom: number;
+};
 
 export function nearestMark(p: { readonly x: number; readonly y: number }, boxes: ReadonlyArray<HitBox>): number {
-  let best = -1, bestD = Infinity;
+  let best = -1,
+    bestD = Infinity;
   for (const b of boxes) {
     if (p.x < b.left || p.x > b.right || p.y < b.top || p.y > b.bottom) continue;
     const d = Math.hypot(p.x - (b.left + b.right) / 2, p.y - (b.top + b.bottom) / 2);
-    if (d < bestD) { bestD = d; best = b.idx; }
+    if (d < bestD) {
+      bestD = d;
+      best = b.idx;
+    }
   }
   return best;
 }
@@ -93,7 +115,9 @@ export function pressMark(): { markPress: () => void; takePress: () => boolean }
   return {
     markPress: () => {
       marked = true;
-      setTimeout(() => { marked = false; }, 0);
+      setTimeout(() => {
+        marked = false;
+      }, 0);
     },
     takePress: () => {
       const was = marked;
@@ -103,7 +127,8 @@ export function pressMark(): { markPress: () => void; takePress: () => boolean }
   };
 }
 
-export const isHit = (node: unknown): node is HTMLElement => (node as Partial<Element> | null)?.classList?.contains("place-hit") === true;
+export const isHit = (node: unknown): node is HTMLElement =>
+  (node as Partial<Element> | null)?.classList?.contains("place-hit") === true;
 
 export interface PointerDeps {
   feed(input: HoldInput): void;
@@ -122,7 +147,9 @@ export function pointerTrack(w: PointerDeps) {
     w.feed({ kind: "enter", idx: owner, onCard: w.inside(p) });
   };
   return {
-    enter: (e: Event, idx: number): void => { enter(w.point(e), idx); },
+    enter: (e: Event, idx: number): void => {
+      enter(w.point(e), idx);
+    },
     leave: (e: MouseEvent): void => {
       const to = e.relatedTarget;
       if (isHit(to) && to.dataset["idx"] === String(owner)) return;
@@ -136,15 +163,20 @@ export function pointerTrack(w: PointerDeps) {
       w.feed({ kind: "leave", idx: owner, onCard: w.inside(p) });
       enter(p, owner);
     },
-    down: (e: Event): void => { downAt = w.point(e); },
+    down: (e: Event): void => {
+      downAt = w.point(e);
+    },
     press: (e: MouseEvent, idx: number): { idx: number; detail: number; onCard: boolean } => {
       const detail = e.detail || 0;
       const p = detail > 0 ? w.point(e) : null;
-      const at = detail > 0 ? downAt ?? p : null;
+      const at = detail > 0 ? (downAt ?? p) : null;
       downAt = null;
       return { idx: p ? w.resolve(p, idx) : idx, detail, onCard: w.inside(at) };
     },
-    reset: (): void => { owner = -1; downAt = null; },
+    reset: (): void => {
+      owner = -1;
+      downAt = null;
+    },
   };
 }
 
@@ -157,10 +189,22 @@ export interface HitWiring {
 }
 
 export function wireHit(hit: HTMLElement, idx: number, w: HitWiring): void {
-  hit.addEventListener("mouseenter", (e) => { w.track.enter(e, idx); });
-  hit.addEventListener("mouseleave", (e) => { w.track.leave(e); });
-  hit.addEventListener("mousedown", () => { w.markPress(); });
-  hit.addEventListener("focus", () => { w.feed({ kind: "focus", idx, fromPointer: w.takePress() }); });
-  hit.addEventListener("blur", (e) => { w.feed({ kind: "blur", idx, intoCard: w.inCard(e.relatedTarget) }); });
-  hit.addEventListener("click", (e) => { w.feed({ kind: "press", ...w.track.press(e, idx) }); });
+  hit.addEventListener("mouseenter", (e) => {
+    w.track.enter(e, idx);
+  });
+  hit.addEventListener("mouseleave", (e) => {
+    w.track.leave(e);
+  });
+  hit.addEventListener("mousedown", () => {
+    w.markPress();
+  });
+  hit.addEventListener("focus", () => {
+    w.feed({ kind: "focus", idx, fromPointer: w.takePress() });
+  });
+  hit.addEventListener("blur", (e) => {
+    w.feed({ kind: "blur", idx, intoCard: w.inCard(e.relatedTarget) });
+  });
+  hit.addEventListener("click", (e) => {
+    w.feed({ kind: "press", ...w.track.press(e, idx) });
+  });
 }

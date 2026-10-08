@@ -3,7 +3,11 @@ import type { SuiteContext } from "../../types.ts";
 
 export async function sv8NoYear({ evaluate, check }: SuiteContext): Promise<void> {
   const sv8 = await evaluate<boolean>(`location.hash.includes("year=")`);
-  check("SV8 the Explorer's writer never emitted year= across every path this suite drove", sv8 === false, `hash=${await evaluate<string>(`location.hash`)}`);
+  check(
+    "SV8 the Explorer's writer never emitted year= across every path this suite drove",
+    sv8 === false,
+    `hash=${await evaluate<string>(`location.hash`)}`,
+  );
 }
 
 export function sv11Clean(ctx: SuiteContext, errBase: number, httpBase: number): void {

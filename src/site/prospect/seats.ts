@@ -40,10 +40,21 @@ export function bindProspectRoom(roomEls: RoomFurniture): Sheet {
   zoom.attach();
   bindGlassKeys(roomEls.viewport, zoom);
   const box = () => ({ W: roomEls.viewport.clientWidth || 1, H: roomEls.viewport.clientHeight || 1 });
-  const room = bindRoom({ frame: roomEls.stage, sheet: roomEls.sheet, aspect: () => PLATE_W / PLATE_H, camera: {
-    hold: () => { const { W, H } = box(); return cameraFromTransform(zoom.getState(), W, H); },
-    restore: (cam) => { const { W, H } = box(); zoom.refit(transformFromCamera(cam, W, H)); },
-  } });
+  const room = bindRoom({
+    frame: roomEls.stage,
+    sheet: roomEls.sheet,
+    aspect: () => PLATE_W / PLATE_H,
+    camera: {
+      hold: () => {
+        const { W, H } = box();
+        return cameraFromTransform(zoom.getState(), W, H);
+      },
+      restore: (cam) => {
+        const { W, H } = box();
+        zoom.refit(transformFromCamera(cam, W, H));
+      },
+    },
+  });
   return { room, rebase: () => zoom.rebase() };
 }
 

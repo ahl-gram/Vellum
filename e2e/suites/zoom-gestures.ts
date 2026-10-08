@@ -28,7 +28,10 @@ function gesturesKit(ctx: SuiteContext) {
     await evaluate(`window.__vellumSetRedraftEnabled(false)`);
     await waitSettled(label);
   }
-  const vpRect = () => evaluate<{ L: number; T: number; W: number; H: number }>(`(()=>{const v=document.getElementById("map-viewport");const r=v.getBoundingClientRect();return{L:r.left,T:r.top,W:v.clientWidth,H:v.clientHeight};})()`);
+  const vpRect = () =>
+    evaluate<{ L: number; T: number; W: number; H: number }>(
+      `(()=>{const v=document.getElementById("map-viewport");const r=v.getBoundingClientRect();return{L:r.left,T:r.top,W:v.clientWidth,H:v.clientHeight};})()`,
+    );
   const state = () => evaluate<{ k: number; x: number; y: number }>(`window.__vellumZoomState()`);
   return { ...ctx, reloadHome, vpRect, state };
 }
@@ -36,7 +39,8 @@ function gesturesKit(ctx: SuiteContext) {
 async function zg1WheelZooms({ evaluate, check, shoot, sleep, wheel, vpRect, state }: GesturesKit): Promise<void> {
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
   let r = await vpRect();
-  const px = Math.round(r.W * 0.3), py = Math.round(r.H * 0.5);
+  const px = Math.round(r.W * 0.3),
+    py = Math.round(r.H * 0.5);
   await wheel(r.L + px, r.T + py, -240);
   await sleep(80);
   const zg1 = await state();
@@ -58,17 +62,29 @@ async function zg1WheelZooms({ evaluate, check, shoot, sleep, wheel, vpRect, sta
   );
 }
 
-async function zg2TouchGestures({ evaluate, check, shoot, sleep, pinch, touchPan, reloadHome, vpRect, state }: GesturesKit): Promise<void> {
+async function zg2TouchGestures({
+  evaluate,
+  check,
+  shoot,
+  sleep,
+  pinch,
+  touchPan,
+  reloadHome,
+  vpRect,
+  state,
+}: GesturesKit): Promise<void> {
   await reloadHome("gesture-mobile-boot");
   await zg2aTablet(evaluate, check);
   const touchAction = await evaluate<string>(`getComputedStyle(document.getElementById("map-viewport")).touchAction`);
   const scaleAtBoot = await evaluate<number>(`visualViewport.scale`);
-  const scrollToMap = () => evaluate<undefined>(`document.getElementById("map-viewport").scrollIntoView({block:"center"})`);
+  const scrollToMap = () =>
+    evaluate<undefined>(`document.getElementById("map-viewport").scrollIntoView({block:"center"})`);
   await scrollToMap();
   await sleep(60);
 
   let r = await vpRect();
-  let cx = Math.round(r.L + r.W * 0.5), cy = Math.round(r.T + r.H * 0.5);
+  let cx = Math.round(r.L + r.W * 0.5),
+    cy = Math.round(r.T + r.H * 0.5);
   await pinch(cx, cy, 70, 170);
   await sleep(100);
   const zg2 = await state();
@@ -93,12 +109,15 @@ async function zg2TouchGestures({ evaluate, check, shoot, sleep, pinch, touchPan
   await scrollToMap();
   await sleep(60);
   r = await vpRect();
-  cx = Math.round(r.L + r.W * 0.5); cy = Math.round(r.T + r.H * 0.5);
+  cx = Math.round(r.L + r.W * 0.5);
+  cy = Math.round(r.T + r.H * 0.5);
   const scrollBefore = await evaluate<number>(`window.scrollY`);
   await pinch(cx, cy, 70, 180);
   await sleep(100);
   const zg4 = await state();
-  const page = await evaluate<{ scrolled: number; vs: number }>(`({scrolled:(window.scrollY - ${scrollBefore}), vs:visualViewport.scale})`);
+  const page = await evaluate<{ scrolled: number; vs: number }>(
+    `({scrolled:(window.scrollY - ${scrollBefore}), vs:visualViewport.scale})`,
+  );
   check(
     "ZG4 a pinch under mobile viewport zooms the map without page pinch-zoom (AC2 touch-action wiring)",
     touchAction === "none" && Math.abs(scaleAtBoot - 1) < 0.01 && zg4.k > 1.3 && Math.abs(page.vs - 1) < 0.01,
@@ -108,7 +127,9 @@ async function zg2TouchGestures({ evaluate, check, shoot, sleep, pinch, touchPan
 }
 
 async function zg2aTablet(evaluate: GesturesKit["evaluate"], check: GesturesKit["check"]): Promise<void> {
-  const tablet = await evaluate<{ width: number; scale: number; coarse: boolean }>(`({width:document.documentElement.clientWidth,scale:visualViewport.scale,coarse:matchMedia("(hover: none) and (pointer: coarse)").matches})`);
+  const tablet = await evaluate<{ width: number; scale: number; coarse: boolean }>(
+    `({width:document.documentElement.clientWidth,scale:visualViewport.scale,coarse:matchMedia("(hover: none) and (pointer: coarse)").matches})`,
+  );
   check(
     "ZG2a the touch block runs on a tablet at the 1024 floor (Issue #761): the page lays out 1024 wide at scale 1 under a coarse pointer",
     tablet.width === 1024 && tablet.scale === 1 && tablet.coarse,
@@ -119,6 +140,8 @@ async function zg2aTablet(evaluate: GesturesKit["evaluate"], check: GesturesKit[
 async function zgRestore({ evaluate, waitSettled, reloadHome }: GesturesKit): Promise<void> {
   await reloadHome("gesture-restore");
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
-  await evaluate(`(()=>{const c=document.getElementById("ages");if(c&&c.checked){c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));}document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`);
+  await evaluate(
+    `(()=>{const c=document.getElementById("ages");if(c&&c.checked){c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));}document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`,
+  );
   await waitSettled("post-gesture-restore");
 }

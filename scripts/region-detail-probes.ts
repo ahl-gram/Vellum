@@ -30,7 +30,13 @@ function sweepWindows(count: CountWindow): void {
       Math.hypot(b.x - capital.x, b.y - capital.y) > Math.hypot(a.x - capital.x, a.y - capital.y) ? b : a,
     );
     for (const anchor of [capital, far]) {
-      count(world, `atlas ${ATLAS_SIZE}`, windowAround(world, anchor, ATLAS_SIZE), world.recipe.gridW, world.recipe.gridH);
+      count(
+        world,
+        `atlas ${ATLAS_SIZE}`,
+        windowAround(world, anchor, ATLAS_SIZE),
+        world.recipe.gridW,
+        world.recipe.gridH,
+      );
     }
   }
 }
@@ -44,7 +50,12 @@ function counterfactual(): void {
   const count: CountWindow = (world, label, window, gridW, gridH) => {
     const worldAspect = (world.recipe.gridW - 1) / (world.recipe.gridH - 1);
     const elev = buildHeightfield({
-      seed: world.recipe.seed, gridW, gridH, mapType: world.recipe.mapType, window, worldAspect,
+      seed: world.recipe.seed,
+      gridW,
+      gridH,
+      mapType: world.recipe.mapType,
+      window,
+      worldAspect,
     });
     const du = window.u1 - window.u0;
     const dv = window.v1 - window.v0;
@@ -83,7 +94,9 @@ function counterfactual(): void {
 
   for (const line of rescued) console.log(`rescued: ${line}`);
   for (const [k, v] of [...tally].sort()) {
-    console.log(`${k} radius=${v.radius} landingOnWater=${v.onWater} rescuedByTheNewRadius=${v.rescued} droppedEitherWay=${v.lostAnyway}`);
+    console.log(
+      `${k} radius=${v.radius} landingOnWater=${v.onWater} rescuedByTheNewRadius=${v.rescued} droppedEitherWay=${v.lostAnyway}`,
+    );
   }
 }
 
@@ -101,7 +114,13 @@ function mouthMechanism(): void {
     const worldField = buildHeightfield({ seed, gridW: 320, gridH: 240, mapType: world.recipe.mapType, worldAspect });
     const surface = parentSurfaceOnWindow(worldField, FULL_WINDOW, window, 320, 240);
     const chained = buildChainedField({
-      seed, mapType: world.recipe.mapType, window, gridW: 320, gridH: 240, worldAspect, seaLevel: world.seaLevel,
+      seed,
+      mapType: world.recipe.mapType,
+      window,
+      gridW: 320,
+      gridH: 240,
+      worldAspect,
+      seaLevel: world.seaLevel,
     });
     const d = (v: number): string => (v - world.seaLevel).toFixed(5);
     console.log(

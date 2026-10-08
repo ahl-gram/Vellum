@@ -33,15 +33,32 @@ test("every slip stands outside #lf-stage, a later sibling the ~ combinator can 
   const firstCard = section.indexOf('class="lf-card"');
   assert.ok(firstCard >= 0, "the station slips mount");
   for (let at = firstCard; at >= 0; at = section.indexOf('class="lf-card', at + 1)) {
-    assert.ok(at > closeAt, "no slip may live inside the stage: stage gestures must never see one, and the failed-bundle reveal must escape the stage's overflow clip");
+    assert.ok(
+      at > closeAt,
+      "no slip may live inside the stage: stage gestures must never see one, and the failed-bundle reveal must escape the stage's overflow clip",
+    );
   }
 });
 
 test("the failed-bundle reveal is pinned whole: selector polarity, the flow dress, and the pre-reveal invisibility (#470)", () => {
   const rule = css.match(/\.landfall \.stage:not\(\.cam\) ~ \.lf-card:not\(\.lf-card-how\)\[hidden\] \{([^}]*)\}/);
-  assert.ok(rule, "the reveal keys on .stage:not(.cam) ~ .lf-card:not(.lf-card-how)[hidden]: :not(.cam) is the whole predicate (an inverted .cam would reveal on every healthy load), [hidden] keeps it off any slip the bundle opened, and the how panel is excluded (the ratification names the four station slips)");
-  for (const decl of ["display: block", "position: static", "visibility: hidden", "max-height: 0", "padding: 0", "border-width: 0", "margin: 0 auto"]) {
-    assert.ok(rule[1]!.includes(decl), `the failed-state base carries ${decl}: display flips immediately (an animation never starts on a display:none element), while zeroed height, margin, padding and border keep the pre-reveal page byte-identical in layout (a 2rem base margin held .landfall 128px taller than the stage on every load until .cam, skeptic round 1)`);
+  assert.ok(
+    rule,
+    "the reveal keys on .stage:not(.cam) ~ .lf-card:not(.lf-card-how)[hidden]: :not(.cam) is the whole predicate (an inverted .cam would reveal on every healthy load), [hidden] keeps it off any slip the bundle opened, and the how panel is excluded (the ratification names the four station slips)",
+  );
+  for (const decl of [
+    "display: block",
+    "position: static",
+    "visibility: hidden",
+    "max-height: 0",
+    "padding: 0",
+    "border-width: 0",
+    "margin: 0 auto",
+  ]) {
+    assert.ok(
+      rule[1]!.includes(decl),
+      `the failed-state base carries ${decl}: display flips immediately (an animation never starts on a display:none element), while zeroed height, margin, padding and border keep the pre-reveal page byte-identical in layout (a 2rem base margin held .landfall 128px taller than the stage on every load until .cam, skeptic round 1)`,
+    );
   }
   assert.match(
     rule[1]!,
@@ -55,7 +72,14 @@ test("the reveal's to-frame restores exactly what the base zeroed, and the dead 
   assert.ok(frames, "the reveal keyframes exist");
   const to = frames[1]!.match(/to \{([^}]*)\}/);
   assert.ok(to, "with a 0s duration only the to-frame matters");
-  for (const decl of ["visibility: visible", "max-height: 100rem", "margin-top: 2rem", "padding: 1.5rem 1.6rem 1.4rem", "border-width: 1px", "outline-width: 3px"]) {
+  for (const decl of [
+    "visibility: visible",
+    "max-height: 100rem",
+    "margin-top: 2rem",
+    "padding: 1.5rem 1.6rem 1.4rem",
+    "border-width: 1px",
+    "outline-width: 3px",
+  ]) {
     assert.ok(to[1]!.includes(decl), `the to-frame restores ${decl}`);
   }
   assert.match(
@@ -70,7 +94,11 @@ test("the 10s window is the veil's own, derived not duplicated by hand (#470)", 
   assert.ok(delay, "the reveal names its delay");
   const veil = astro.match(/if \(v\.dataset\.adopted === undefined\) v\.remove\(\); \}, (\d+)\);/);
   assert.ok(veil, "the veil's self-release timeout is readable");
-  assert.equal(Number(delay[1]) * 1000, Number(veil[1]), "the doors and the unadopted veil share one self-release window (ratified 2026-08-24): a page whose veil just lifted must show its doors in the same breath, so a change to either constant must move both");
+  assert.equal(
+    Number(delay[1]) * 1000,
+    Number(veil[1]),
+    "the doors and the unadopted veil share one self-release window (ratified 2026-08-24): a page whose veil just lifted must show its doors in the same breath, so a change to either constant must move both",
+  );
 });
 
 test("reduced motion keeps the 10s window: the house prm blanket is out-specified, not obeyed (#470 skeptic round 1)", () => {
@@ -93,7 +121,9 @@ test("a no-JS visitor keeps the noscript doors alone: the reveal stands down ins
   const noscript = astro.match(/<noscript>[\s\S]*?<\/noscript>/);
   assert.ok(noscript, "the noscript block exists");
   assert.ok(
-    noscript[0].includes(".landfall .stage:not(.cam) ~ .lf-card:not(.lf-card-how)[hidden] { animation: none !important; }"),
+    noscript[0].includes(
+      ".landfall .stage:not(.cam) ~ .lf-card:not(.lf-card-how)[hidden] { animation: none !important; }",
+    ),
     "script-off never reaches .cam, so without this the slips would reveal at 10s on top of the noscript nav's own plain doors; the !important is load-bearing (skeptic round 2): the prm exemption in index.css is !important, author-important beats author-normal before order is ever consulted, so only an important noscript rule reaches the specificity tie that lets document order decide in its favour",
   );
 });

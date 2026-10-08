@@ -23,11 +23,14 @@ interface WorldPlates {
   readonly cache: Map<string, Promise<BoundPlate>>;
 }
 
-interface StageEls { readonly root: HTMLElement; readonly link: HTMLAnchorElement; readonly img: HTMLImageElement }
+interface StageEls {
+  readonly root: HTMLElement;
+  readonly link: HTMLAnchorElement;
+  readonly img: HTMLImageElement;
+}
 
 function blobSeams(opts: Readonly<ProspectStageOpts>) {
-  const toUrl =
-    opts.toUrl ?? ((svg: string) => URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" })));
+  const toUrl = opts.toUrl ?? ((svg: string) => URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" })));
   const revokeUrl = opts.revokeUrl ?? ((url: string) => URL.revokeObjectURL(url));
   return { toUrl, revokeUrl };
 }
@@ -69,11 +72,20 @@ function stageShown(stageEls: StageEls) {
     shown = null;
     root.hidden = true;
   }
-  const setShown = (next: string | null): void => { shown = next; };
+  const setShown = (next: string | null): void => {
+    shown = next;
+  };
   return { shown: (): string | null => shown, setShown, hide };
 }
 
-function stageWorld(toUrl: (svg: string) => string, revokeUrl: (url: string) => void, stageEls: StageEls, shown: () => string | null, setShown: (next: string | null) => void, hide: () => void) {
+function stageWorld(
+  toUrl: (svg: string) => string,
+  revokeUrl: (url: string) => void,
+  stageEls: StageEls,
+  shown: () => string | null,
+  setShown: (next: string | null) => void,
+  hide: () => void,
+) {
   let world: WorldPlates | null = null;
 
   function plateFor(w: WorldPlates, spec: PlateSpec): Promise<BoundPlate> {
@@ -117,7 +129,9 @@ function stageWorld(toUrl: (svg: string) => string, revokeUrl: (url: string) => 
         if (world === w && shown() === key) hide();
       });
   }
-  const bindWorld = (next: WorldPlates | null): void => { world = next; };
+  const bindWorld = (next: WorldPlates | null): void => {
+    world = next;
+  };
   return { world: (): WorldPlates | null => world, bindWorld, prefetch, show };
 }
 
@@ -128,10 +142,7 @@ export function createProspectStage(opts: ProspectStageOpts = {}) {
   const { shown, setShown, hide } = stageShown(stageEls);
   const { world, bindWorld, prefetch, show } = stageWorld(toUrl, revokeUrl, stageEls, shown, setShown, hide);
 
-  function setWorld(
-    fetchPlate: (spec: PlateSpec) => Promise<PlateResult>,
-    hrefFor: (spec: PlateSpec) => string,
-  ): void {
+  function setWorld(fetchPlate: (spec: PlateSpec) => Promise<PlateResult>, hrefFor: (spec: PlateSpec) => string): void {
     const prior = world();
     bindWorld({ fetchPlate, hrefFor, cache: new Map() });
     hide();

@@ -44,7 +44,8 @@ function wireCoast(deps: Readonly<ControlsDeps>): void {
 }
 
 export function wireControls(deps: ControlsDeps): void {
-  const { seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, beastsChk, landSlider, touched, draw } = deps;
+  const { seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, beastsChk, landSlider, touched, draw } =
+    deps;
 
   let landDebounce: ReturnType<typeof setTimeout> | 0 = 0;
 

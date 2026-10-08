@@ -75,20 +75,14 @@ function transects(
 }
 
 function prospectKind(world: World, s: Site, index: number): ProspectKind {
-  return s.kind === "capital"
-    ? "capital"
-    : world.realms.seats.includes(index)
-      ? "seat"
-      : s.kind;
+  return s.kind === "capital" ? "capital" : world.realms.seats.includes(index) ? "seat" : s.kind;
 }
 
 /** World sheets only: a region world carries no realm labels, arms, or chronicle, so a region-sourced input would silently degrade; region insets must resolve those through the parent world. */
 export function buildProspectInput(world: World, index: number): ProspectInput {
   const s = world.settlements[index];
   if (s === undefined) {
-    throw new RangeError(
-      `settlement index ${index} out of range 0..${world.settlements.length - 1}`,
-    );
+    throw new RangeError(`settlement index ${index} out of range 0..${world.settlements.length - 1}`);
   }
   const { elev, seaLevel } = world;
   const span = minMax(elev).max - seaLevel || 1;
@@ -99,9 +93,7 @@ export function buildProspectInput(world: World, index: number): ProspectInput {
 
   const realm = world.realms.labels[s.x + s.y * elev.w] ?? -1;
   const kind = prospectKind(world, s, index);
-  const ruinEvent = world.history.events.find(
-    (e) => e.kind === "ruin" && e.settlement === index,
-  );
+  const ruinEvent = world.history.events.find((e) => e.kind === "ruin" && e.settlement === index);
 
   return {
     seed: world.recipe.seed,

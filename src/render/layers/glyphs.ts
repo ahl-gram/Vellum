@@ -67,11 +67,7 @@ type GlyphCands = {
 function glyphZoom(world: World): number {
   const { w } = world.elev;
   return world.region
-    ? Math.sqrt(
-        (w - 1) /
-          ((world.region.window.u1 - world.region.window.u0) *
-            (world.region.worldGridW - 1)),
-      )
+    ? Math.sqrt((w - 1) / ((world.region.window.u1 - world.region.window.u0) * (world.region.worldGridW - 1)))
     : 1;
 }
 
@@ -132,14 +128,16 @@ function glyphVariants(world: World, grng: Rng, picked: GlyphCands, size: number
   const glyphs: Glyph[] = [];
   for (const c of picked.mtn) {
     glyphs.push({
-      x: c.x, y: c.y,
+      x: c.x,
+      y: c.y,
       symbol: grng.pick(["gl-mtn-1", "gl-mtn-2", "gl-mtn-3"]),
       scale: (0.85 + c.rel * 0.8 + grng.range(-0.08, 0.08)) * size,
     });
   }
   for (const c of picked.hill) {
     glyphs.push({
-      x: c.x, y: c.y,
+      x: c.x,
+      y: c.y,
       symbol: grng.pick(["gl-hill-1", "gl-hill-2"]),
       scale: (0.7 + c.rel * 0.5 + grng.range(-0.06, 0.06)) * size,
     });
@@ -167,14 +165,16 @@ function glyphUses(glyphs: ReadonlyArray<Glyph>): SvgNode {
   return el(
     "g",
     { id: "layer-glyphs" },
-    [...glyphs].sort((a, b) => a.y - b.y).map((g) =>
-      el("use", {
-        href: `#${g.symbol}`,
-        x: 0,
-        y: 0,
-        transform: `translate(${g.x.toFixed(1)} ${g.y.toFixed(1)}) scale(${g.scale.toFixed(2)})`,
-      }),
-    ),
+    [...glyphs]
+      .sort((a, b) => a.y - b.y)
+      .map((g) =>
+        el("use", {
+          href: `#${g.symbol}`,
+          x: 0,
+          y: 0,
+          transform: `translate(${g.x.toFixed(1)} ${g.y.toFixed(1)}) scale(${g.scale.toFixed(2)})`,
+        }),
+      ),
   );
 }
 

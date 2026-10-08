@@ -6,7 +6,8 @@ import { join, resolve } from "node:path";
 export const BOUND_MS = 30_000;
 export const SCRIPT = resolve(import.meta.dirname, "..", "scripts", "agent-sandbox.ts");
 
-export const git = (args: string[], cwd: string): string => execFileSync("git", args, { cwd, encoding: "utf8", timeout: BOUND_MS }).trim();
+export const git = (args: string[], cwd: string): string =>
+  execFileSync("git", args, { cwd, encoding: "utf8", timeout: BOUND_MS }).trim();
 
 export const withRepo = (body: (main: string, linked: string) => void): void => {
   const made = mkdtempSync(join(tmpdir(), "agent-sandbox-"));
@@ -31,6 +32,10 @@ export const withRepo = (body: (main: string, linked: string) => void): void => 
 };
 
 export const cli = (args: string[], cwd: string): { status: number; out: string; err: string } => {
-  const r: { status: number | null; stdout: string | undefined; stderr: string | undefined } = spawnSync(process.execPath, [SCRIPT, ...args], { cwd, encoding: "utf8", timeout: BOUND_MS });
+  const r: { status: number | null; stdout: string | undefined; stderr: string | undefined } = spawnSync(
+    process.execPath,
+    [SCRIPT, ...args],
+    { cwd, encoding: "utf8", timeout: BOUND_MS },
+  );
   return { status: r.status ?? -1, out: r.stdout ?? "", err: r.stderr ?? "" };
 };

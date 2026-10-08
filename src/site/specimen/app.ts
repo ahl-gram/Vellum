@@ -34,10 +34,21 @@ const zoom = createZoomController({
 zoom.attach();
 bindGlassKeys(viewport, zoom);
 const box = () => ({ W: viewport.clientWidth || 1, H: viewport.clientHeight || 1 });
-const room = bindRoom({ frame: document.querySelector<HTMLElement>(".stage")!, sheet: $("sheet"), aspect: () => (plate.naturalWidth > 0 ? plate.naturalWidth / plate.naturalHeight : null), camera: {
-  hold: () => { const { W, H } = box(); return cameraFromTransform(zoom.getState(), W, H); },
-  restore: (cam) => { const { W, H } = box(); zoom.refit(transformFromCamera(cam, W, H)); },
-} });
+const room = bindRoom({
+  frame: document.querySelector<HTMLElement>(".stage")!,
+  sheet: $("sheet"),
+  aspect: () => (plate.naturalWidth > 0 ? plate.naturalWidth / plate.naturalHeight : null),
+  camera: {
+    hold: () => {
+      const { W, H } = box();
+      return cameraFromTransform(zoom.getState(), W, H);
+    },
+    restore: (cam) => {
+      const { W, H } = box();
+      zoom.refit(transformFromCamera(cam, W, H));
+    },
+  },
+});
 
 // The folio is written before the first layout: the legend row is placed from the folio's text (room-seats.ts), as a room lays out after its draw.
 $("folio-title").textContent = `The Specimen Book · Chart № ${$<HTMLInputElement>("sb-seed").value}`;
@@ -64,4 +75,9 @@ $("sb-report").addEventListener("click", () => {
   pill.textContent = empty ? PILL_TEXT : "";
   $("sb-report").textContent = empty ? "Empty the pill" : "Fill the pill";
 });
-window.__vellumSpecimenState = () => ({ state: stateSel.value, folded: folded(), zoomed: viewport.classList.contains("zoomed"), pill: pill.textContent });
+window.__vellumSpecimenState = () => ({
+  state: stateSel.value,
+  folded: folded(),
+  zoomed: viewport.classList.contains("zoomed"),
+  pill: pill.textContent,
+});

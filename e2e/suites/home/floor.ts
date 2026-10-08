@@ -17,7 +17,8 @@ const VIEW: Payload<View> = `(() => {
   return { sx: scrollX, sy: scrollY, scale: w ? w.a : NaN, cw: document.documentElement.clientWidth, ready: document.readyState === "complete" && laidOut };
 })()`;
 
-const centreOf = (selector: string): Payload<Point | null> => `(() => { const e = document.querySelector(${JSON.stringify(selector)}); if (!e) return null; const r = e.getBoundingClientRect(); return { x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2) }; })()`;
+const centreOf = (selector: string): Payload<Point | null> =>
+  `(() => { const e = document.querySelector(${JSON.stringify(selector)}); if (!e) return null; const r = e.getBoundingClientRect(); return { x: Math.round(r.left + r.width / 2), y: Math.round(r.top + r.height / 2) }; })()`;
 
 async function landHome(k: HomeKit, w: number): Promise<View> {
   await k.send("Emulation.setDeviceMetricsOverride", { width: w, height: H, deviceScaleFactor: 1, mobile: false });
@@ -25,11 +26,20 @@ async function landHome(k: HomeKit, w: number): Promise<View> {
   await k.send("Page.navigate", { url: `http://127.0.0.1:${k.PORT}/` });
   let committed = false;
   for (let i = 0; i < 300 && !committed; i++) {
-    committed = await k.evaluate<boolean>(`location.pathname === "/" && document.readyState === "complete" && !!document.getElementById("lf-stage")`).catch(() => false);
+    committed = await k
+      .evaluate<boolean>(
+        `location.pathname === "/" && document.readyState === "complete" && !!document.getElementById("lf-stage")`,
+      )
+      .catch(() => false);
     if (!committed) await k.sleep(50);
   }
   if (!committed) throw new Error(`home never came up at ${w}x${H}`);
-  return makeSettle(k)(VIEW, (d, last) => d.ready && d.cw === w && last !== null && JSON.stringify(d) === JSON.stringify(last), `home floor open ${w}`, 300);
+  return makeSettle(k)(
+    VIEW,
+    (d, last) => d.ready && d.cw === w && last !== null && JSON.stringify(d) === JSON.stringify(last),
+    `home floor open ${w}`,
+    300,
+  );
 }
 
 async function openHome(k: HomeKit): Promise<View> {
@@ -39,7 +49,11 @@ async function openHome(k: HomeKit): Promise<View> {
 
 async function scrolledTo(k: HomeKit, left: number): Promise<View> {
   await k.evaluate(`window.scrollTo(${left}, 0)`);
-  return makeSettle(k)(VIEW, (d, last) => d.sx === left && d.sy === 0 && last !== null && JSON.stringify(d) === JSON.stringify(last), `home floor at ${left}`);
+  return makeSettle(k)(
+    VIEW,
+    (d, last) => d.sx === left && d.sy === 0 && last !== null && JSON.stringify(d) === JSON.stringify(last),
+    `home floor at ${left}`,
+  );
 }
 
 async function wheelled(k: HomeKit, at: Point, dx: number, dy: number, before: View): Promise<View> {
@@ -47,7 +61,12 @@ async function wheelled(k: HomeKit, at: Point, dx: number, dy: number, before: V
     await k.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: at.x, y: at.y });
     await k.send("Input.dispatchMouseEvent", { type: "mouseWheel", x: at.x, y: at.y, deltaX: dx, deltaY: dy });
   }
-  return makeSettle(k)(VIEW, (d, last) => (d.sx !== before.sx || d.scale !== before.scale) && last !== null && JSON.stringify(d) === JSON.stringify(last), `home floor wheel ${dx},${dy}`);
+  return makeSettle(k)(
+    VIEW,
+    (d, last) =>
+      (d.sx !== before.sx || d.scale !== before.scale) && last !== null && JSON.stringify(d) === JSON.stringify(last),
+    `home floor wheel ${dx},${dy}`,
+  );
 }
 
 export async function h19Sideways(k: HomeKit): Promise<void> {
@@ -55,11 +74,17 @@ export async function h19Sideways(k: HomeKit): Promise<void> {
   const at = { x: W / 2, y: H / 2 };
   const rows: string[] = [];
   const faults: string[] = [];
-  for (const [dx, dy, from] of [[120, 6, 0], [120, -6, 0], [-120, 6, 300]] as const) {
+  for (const [dx, dy, from] of [
+    [120, 6, 0],
+    [120, -6, 0],
+    [-120, 6, 300],
+  ] as const) {
     const before = await scrolledTo(k, from);
     const after = await wheelled(k, at, dx, dy, before);
-    if (Math.sign(after.sx - before.sx) !== Math.sign(dx)) faults.push(`a wheel of ${dx},${dy} from ${from} left the page at ${after.sx}`);
-    if (after.scale !== before.scale) faults.push(`a wheel of ${dx},${dy} zoomed the chart from ${before.scale} to ${after.scale}`);
+    if (Math.sign(after.sx - before.sx) !== Math.sign(dx))
+      faults.push(`a wheel of ${dx},${dy} from ${from} left the page at ${after.sx}`);
+    if (after.scale !== before.scale)
+      faults.push(`a wheel of ${dx},${dy} zoomed the chart from ${before.scale} to ${after.scale}`);
     rows.push(`${dx},${dy} from ${from}: scrolled to ${after.sx},${after.sy}, scale ${after.scale}`);
   }
   const top = await scrolledTo(k, 0);
@@ -73,14 +98,21 @@ export async function h19Sideways(k: HomeKit): Promise<void> {
 }
 
 type Slip = { open: boolean; overflows: boolean };
-const SLIP = (id: string): Payload<Slip> => `(() => { const c = document.getElementById("lf-card-${id}"); const s = c ? c.querySelector(".lf-card-scroll") : null; return { open: !!c && !c.hidden && Number(getComputedStyle(c).opacity) === 1, overflows: !!s && s.scrollHeight > s.clientHeight }; })()`;
+const SLIP = (id: string): Payload<Slip> =>
+  `(() => { const c = document.getElementById("lf-card-${id}"); const s = c ? c.querySelector(".lf-card-scroll") : null; return { open: !!c && !c.hidden && Number(getComputedStyle(c).opacity) === 1, overflows: !!s && s.scrollHeight > s.clientHeight }; })()`;
 
 async function openSlip(k: HomeKit, id: string): Promise<Slip> {
   const pip = `.lf-station[data-station="${id}"]`;
-  const left = await k.evaluate<number>(`(() => { const r = document.querySelector('${pip}').getBoundingClientRect(), root = document.documentElement; return Math.min(root.scrollWidth - root.clientWidth, Math.max(0, Math.round(r.left + r.width / 2 + scrollX - ${W / 2}))); })()`);
+  const left = await k.evaluate<number>(
+    `(() => { const r = document.querySelector('${pip}').getBoundingClientRect(), root = document.documentElement; return Math.min(root.scrollWidth - root.clientWidth, Math.max(0, Math.round(r.left + r.width / 2 + scrollX - ${W / 2}))); })()`,
+  );
   await scrolledTo(k, left);
   const at = await k.evaluate(centreOf(pip));
-  const hit = at !== null && await k.evaluate<boolean>(`(() => { const e = document.elementFromPoint(${at.x}, ${at.y}); return !!e && !!e.closest('${pip}'); })()`);
+  const hit =
+    at !== null &&
+    (await k.evaluate<boolean>(
+      `(() => { const e = document.elementFromPoint(${at.x}, ${at.y}); return !!e && !!e.closest('${pip}'); })()`,
+    ));
   if (at === null || !hit) throw new Error(`the ${id} pip takes no hit at ${JSON.stringify(at)}`);
   await k.clickAt(at.x, at.y);
   return makeSettle(k)(SLIP(id), (d) => d.open, `home floor ${id} slip open`);
@@ -108,7 +140,12 @@ async function clickStation(k: HomeKit, w: number, scrollDown: boolean): Promise
   })()`);
   if (pick === null) throw new Error(`no station pip takes a hit at ${w}x${H}${scrollDown ? " scrolled down" : ""}`);
   await k.clickAt(pick.x, pick.y);
-  const shown = await makeSettle(k)(SHOWN(pick.id), (d, last) => d.open && last !== null && JSON.stringify(d) === JSON.stringify(last), `home reveal ${pick.id} at ${w}`, 200);
+  const shown = await makeSettle(k)(
+    SHOWN(pick.id),
+    (d, last) => d.open && last !== null && JSON.stringify(d) === JSON.stringify(last),
+    `home reveal ${pick.id} at ${w}`,
+    200,
+  );
   await k.pressKey("Escape", "Escape", 27);
   return { id: pick.id, shown };
 }
@@ -117,16 +154,26 @@ export async function h20Reveal(k: HomeKit): Promise<void> {
   await k.setTouch(false);
   const faults: string[] = [];
   const rows: string[] = [];
-  const arms: readonly (readonly [number, string, boolean])[] = [[560, "reduce", false], [640, "reduce", false], [900, "reduce", false], [640, "no-preference", false], [640, "no-preference", true], [1280, "reduce", false]];
+  const arms: readonly (readonly [number, string, boolean])[] = [
+    [560, "reduce", false],
+    [640, "reduce", false],
+    [900, "reduce", false],
+    [640, "no-preference", false],
+    [640, "no-preference", true],
+    [1280, "reduce", false],
+  ];
   try {
     for (const [w, motion, scrollDown] of arms) {
       await k.send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: motion }] });
       const { id, shown } = await clickStation(k, w, scrollDown);
       const at = `${w}x${H} ${motion}${scrollDown ? " scrolled down" : ""} (${id})`;
-      if (shown.slip[0] < 0 || shown.slip[1] > shown.cw) faults.push(`${at}: the slip stands at ${shown.slip.join(" to ")} in a ${shown.cw} window`);
-      if (w >= 593 && (shown.pip < 0 || shown.pip > shown.cw)) faults.push(`${at}: the station's pip left the window, at ${shown.pip}`);
+      if (shown.slip[0] < 0 || shown.slip[1] > shown.cw)
+        faults.push(`${at}: the slip stands at ${shown.slip.join(" to ")} in a ${shown.cw} window`);
+      if (w >= 593 && (shown.pip < 0 || shown.pip > shown.cw))
+        faults.push(`${at}: the station's pip left the window, at ${shown.pip}`);
       if (shown.sy !== 0) faults.push(`${at}: the window ended ${shown.sy} down, not at the stage's top`);
-      if (w >= 1024 && shown.sx !== 0) faults.push(`${at}: a window as wide as the page scrolled sideways by ${shown.sx}`);
+      if (w >= 1024 && shown.sx !== 0)
+        faults.push(`${at}: a window as wide as the page scrolled sideways by ${shown.sx}`);
       rows.push(`${at}: scrolled ${shown.sx},${shown.sy}, slip ${shown.slip.join(" to ")}, pip ${shown.pip}`);
     }
   } finally {

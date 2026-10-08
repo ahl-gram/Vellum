@@ -24,10 +24,18 @@ test("every settlement in real worlds engraves in both dresses, purely and dress
     const w = worldFor(seed);
     w.settlements.forEach((_, i) => {
       const antique = prospectPlate(w, i, STYLES.antique, w.title.year);
-      assert.equal(antique, prospectPlate(w, i, STYLES.antique, w.title.year), `seed ${seed} index ${i}: render is pure`);
+      assert.equal(
+        antique,
+        prospectPlate(w, i, STYLES.antique, w.title.year),
+        `seed ${seed} index ${i}: render is pure`,
+      );
       const a = outlinedSolids(antique);
       assert.ok(a.length > 40, `seed ${seed} index ${i}: the plate draws its solids (${a.length})`);
-      assert.deepEqual(a, outlinedSolids(prospectPlate(w, i, STYLES.ink, w.title.year)), `seed ${seed} index ${i}: composition is dress-invariant`);
+      assert.deepEqual(
+        a,
+        outlinedSolids(prospectPlate(w, i, STYLES.ink, w.title.year)),
+        `seed ${seed} index ${i}: composition is dress-invariant`,
+      );
     });
   }
 });

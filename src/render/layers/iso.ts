@@ -1,10 +1,5 @@
 import { minMax, type Field } from "../../core/grid.ts";
-import {
-  chaikinSmooth,
-  marchingSquares,
-  type Contour,
-  type Point,
-} from "../../terrain/contours.ts";
+import { chaikinSmooth, marchingSquares, type Contour, type Point } from "../../terrain/contours.ts";
 import type { World } from "../../world/types.ts";
 import type { RenderCtx } from "../context.ts";
 import type { MapStyle } from "../style.ts";
@@ -46,7 +41,10 @@ export function isoStroke(theme: string, style: MapStyle): IsoStroke {
 }
 
 function ringExtent(points: ReadonlyArray<Point>): number {
-  let minx = Infinity, miny = Infinity, maxx = -Infinity, maxy = -Infinity;
+  let minx = Infinity,
+    miny = Infinity,
+    maxx = -Infinity,
+    maxy = -Infinity;
   for (const [x, y] of points) {
     if (x < minx) minx = x;
     if (x > maxx) maxx = x;
@@ -63,9 +61,7 @@ export function isolines(field: Field, levels: number): IsolineSet[] {
   const sets: IsolineSet[] = [];
   for (let i = 1; i <= levels; i++) {
     const value = min + (i / (levels + 1)) * span;
-    const contours = marchingSquares(field, value).filter(
-      (c) => !c.closed || ringExtent(c.points) >= MIN_RING_CELLS,
-    );
+    const contours = marchingSquares(field, value).filter((c) => !c.closed || ringExtent(c.points) >= MIN_RING_CELLS);
     if (contours.length === 0) continue;
     sets.push({ value, contours });
   }
@@ -86,9 +82,7 @@ export function isoLayer(ctx: RenderCtx): SvgNode | null {
       d: contours
         .map((c) =>
           pathFrom(
-            chaikinSmooth(c.points, c.closed, 2).map(
-              ([x, y]) => [proj.px(x), proj.py(y)] as const,
-            ),
+            chaikinSmooth(c.points, c.closed, 2).map(([x, y]) => [proj.px(x), proj.py(y)] as const),
             c.closed,
           ),
         )
@@ -102,9 +96,7 @@ export function isoLayer(ctx: RenderCtx): SvgNode | null {
 
   const coastD = ctx.coastRings.map((r) => pathFrom(r, true)).join("");
   return el("g", { id: "layer-iso" }, [
-    el("clipPath", { id: "iso-clip" }, [
-      el("path", { d: coastD, "clip-rule": "evenodd" }),
-    ]),
+    el("clipPath", { id: "iso-clip" }, [el("path", { d: coastD, "clip-rule": "evenodd" })]),
     el("g", { "clip-path": "url(#iso-clip)" }, lines),
   ]);
 }

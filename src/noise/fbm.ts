@@ -33,12 +33,7 @@ export const OCTAVE_OFFSETS: ReadonlyArray<readonly [number, number]> = [
 
 const OCTAVE_SEED_STEP = 1013904223;
 
-export function fbm2(
-  x: number,
-  y: number,
-  seed: number,
-  opts: FbmDetailOptions = {},
-): number {
+export function fbm2(x: number, y: number, seed: number, opts: FbmDetailOptions = {}): number {
   const { octaves = 5, lacunarity = 2, gain = 0.5 } = opts;
   const normOctaves = opts.normOctaves ?? octaves;
   let amp = 1;
@@ -46,13 +41,8 @@ export function fbm2(
   let sum = 0;
   let norm = 0;
   for (let o = 0; o < octaves; o++) {
-    const [ox, oy] = OCTAVE_OFFSETS[o % OCTAVE_OFFSETS.length] as readonly [
-      number,
-      number,
-    ];
-    sum +=
-      amp *
-      gradientNoise2(x * freq + ox, y * freq + oy, seed + o * OCTAVE_SEED_STEP);
+    const [ox, oy] = OCTAVE_OFFSETS[o % OCTAVE_OFFSETS.length] as readonly [number, number];
+    sum += amp * gradientNoise2(x * freq + ox, y * freq + oy, seed + o * OCTAVE_SEED_STEP);
     if (o < normOctaves) norm += amp;
     amp *= gain;
     freq *= lacunarity;
@@ -60,27 +50,15 @@ export function fbm2(
   return sum / norm;
 }
 
-export function ridged2(
-  x: number,
-  y: number,
-  seed: number,
-  opts: FbmOptions = {},
-): number {
+export function ridged2(x: number, y: number, seed: number, opts: FbmOptions = {}): number {
   const { octaves = 4, lacunarity = 2, gain = 0.5 } = opts;
   let amp = 1;
   let freq = 1;
   let sum = 0;
   let norm = 0;
   for (let o = 0; o < octaves; o++) {
-    const [ox, oy] = OCTAVE_OFFSETS[o % OCTAVE_OFFSETS.length] as readonly [
-      number,
-      number,
-    ];
-    const n = gradientNoise2(
-      x * freq + ox,
-      y * freq + oy,
-      seed + o * OCTAVE_SEED_STEP,
-    );
+    const [ox, oy] = OCTAVE_OFFSETS[o % OCTAVE_OFFSETS.length] as readonly [number, number];
+    const n = gradientNoise2(x * freq + ox, y * freq + oy, seed + o * OCTAVE_SEED_STEP);
     const r = 1 - Math.min(1, Math.abs(n));
     sum += amp * r * r;
     norm += amp;
@@ -90,12 +68,7 @@ export function ridged2(
   return sum / norm;
 }
 
-export function warped2(
-  x: number,
-  y: number,
-  seed: number,
-  opts: WarpOptions = {},
-): number {
+export function warped2(x: number, y: number, seed: number, opts: WarpOptions = {}): number {
   const { warpStrength = 0.35, ...fbmOpts } = opts;
   if (warpStrength === 0) return fbm2(x, y, seed, fbmOpts);
   const wx = fbm2(x + 5.2, y + 1.3, (seed ^ 0x5f356495) >>> 0, { octaves: 4 });

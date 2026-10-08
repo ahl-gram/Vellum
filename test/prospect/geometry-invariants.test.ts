@@ -62,10 +62,7 @@ test("the grounding check bites on a floated or uncovered mass", () => {
       i === backIdx ? { ...m, x: VIEW_X0 + 1, base: groundingBase(g, VIEW_X0 + 1, m) } : m,
     ),
   };
-  assert.ok(
-    groundingViolations(escaped).length > 0,
-    "a raised mass outside the front cover is reported",
-  );
+  assert.ok(groundingViolations(escaped).length > 0, "a raised mass outside the front cover is reported");
 });
 
 /** Base that keeps the moved mass on the ground function, so the uncovered case fails on COVER alone, not incidentally on the ground equation. */

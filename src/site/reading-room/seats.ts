@@ -35,7 +35,10 @@ export function seatFrame(frame: ReadingFrame, plate: ProspectStage, roomEls: Ro
 }
 
 // The Glass, geometric only (no card to counter-scale: every hit is inert here), the kit's keys, and the room's fit; the strip's height seats the chart folio and the Glass above it (--strip-h) and bounds the fit, holding its last value while the panel is down.
-export function bindReadingRoom(frame: ReadingFrame, roomEls: RoomFurniture): { readonly room: Room; readonly rebase: () => void } {
+export function bindReadingRoom(
+  frame: ReadingFrame,
+  roomEls: RoomFurniture,
+): { readonly room: Room; readonly rebase: () => void } {
   const zoom = createZoomController({
     viewportEl: roomEls.viewport,
     targetEl: frame.host.mapEl,
@@ -44,7 +47,11 @@ export function bindReadingRoom(frame: ReadingFrame, roomEls: RoomFurniture): { 
   });
   zoom.attach();
   bindGlassKeys(roomEls.viewport, zoom);
-  const room = bindRoom({ frame: roomEls.stage, sheet: roomEls.sheet, camera: { hold: () => zoom.getState(), restore: (state) => zoom.refit(state) } });
+  const room = bindRoom({
+    frame: roomEls.stage,
+    sheet: roomEls.sheet,
+    camera: { hold: () => zoom.getState(), restore: (state) => zoom.refit(state) },
+  });
   let stripH = 0;
   new ResizeObserver(() => {
     const h = roomEls.strip.offsetHeight;

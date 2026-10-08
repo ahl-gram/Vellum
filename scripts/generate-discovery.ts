@@ -30,7 +30,8 @@ export interface RouteEntry {
 export const ROUTE_ENTRIES: Readonly<Record<string, RouteEntry | undefined>> = {
   [HOME_ROUTE]: {
     title: "Vellum",
-    blurb: "The atelier's front door: what Vellum is, the four chart styles shown side by side, and a seed to start from.",
+    blurb:
+      "The atelier's front door: what Vellum is, the four chart styles shown side by side, and a seed to start from.",
   },
   "/seed-of-the-day/": {
     title: "The Seed of the Day",
@@ -42,7 +43,8 @@ export const ROUTE_ENTRIES: Readonly<Record<string, RouteEntry | undefined>> = {
   },
   "/reading-room/": {
     title: "The Reading Room",
-    blurb: "Watch any seed's world live: the founding voyage sails its survey, then the recorded ages turn, on one continuous timeline.",
+    blurb:
+      "Watch any seed's world live: the founding voyage sails its survey, then the recorded ages turn, on one continuous timeline.",
   },
   "/print-room/": {
     title: "The Print Room",
@@ -54,11 +56,13 @@ export const ROUTE_ENTRIES: Readonly<Record<string, RouteEntry | undefined>> = {
   },
   "/faq/": {
     title: "Questions & Answers",
-    blurb: "How Vellum works: seeds and determinism, terrain and rivers, climate and chart styles, and how to reproduce a map.",
+    blurb:
+      "How Vellum works: seeds and determinism, terrain and rivers, climate and chart styles, and how to reproduce a map.",
   },
   "/glossary/": {
     title: "The Glossary",
-    blurb: "The cartography, heraldry, and geography vocabulary printed on the charts, in the gazetteer, and across the realm names.",
+    blurb:
+      "The cartography, heraldry, and geography vocabulary printed on the charts, in the gazetteer, and across the realm names.",
   },
   [ATLAS_ROUTE]: {
     title: "The Atlas",
@@ -66,15 +70,18 @@ export const ROUTE_ENTRIES: Readonly<Record<string, RouteEntry | undefined>> = {
   },
   [PROSPECT_ROUTE]: {
     title: "The Prospect",
-    blurb: "Any settlement's engraved townscape plate, opened from its place card in the Explorer and addressed by chart, place, and year.",
+    blurb:
+      "Any settlement's engraved townscape plate, opened from its place card in the Explorer and addressed by chart, place, and year.",
   },
   [PORTFOLIO_ROUTE]: {
     title: "The Portfolio",
-    blurb: "The regional surveys you gathered at the Chart Table, drafted again here from their own chart numbers, each one downloading as its engraving.",
+    blurb:
+      "The regional surveys you gathered at the Chart Table, drafted again here from their own chart numbers, each one downloading as its engraving.",
   },
   [RIBBON_ROUTE]: {
     title: "The Wayfarer's Ribbon",
-    blurb: "Any road journey unrolled as an itinerary strip chart: the way drawn league by league up the scroll, with a compass turning to keep true north.",
+    blurb:
+      "Any road journey unrolled as an itinerary strip chart: the way drawn league by league up the scroll, with a compass turning to keep true north.",
   },
 };
 

@@ -8,7 +8,9 @@ export function readingRoomKit(ctx: SuiteContext) {
   const boot = async () => {
     for (let i = 0; i < 200; i++) {
       let ok = null;
-      try { ok = await evaluate<boolean>(`typeof window.__vellumReadingRoomUsesWorker === "function"`); } catch {}
+      try {
+        ok = await evaluate<boolean>(`typeof window.__vellumReadingRoomUsesWorker === "function"`);
+      } catch {}
       if (ok) return true;
       await sleep(75);
     }
@@ -18,7 +20,11 @@ export function readingRoomKit(ctx: SuiteContext) {
   const settled = async () => {
     for (let i = 0; i < 300; i++) {
       let s = null;
-      try { s = await evaluate<{ svg: boolean; status: string | undefined }>(`({svg:!!document.querySelector(".rf-chart svg"),status:(document.querySelector(".rf-status")||{}).textContent})`); } catch {}
+      try {
+        s = await evaluate<{ svg: boolean; status: string | undefined }>(
+          `({svg:!!document.querySelector(".rf-chart svg"),status:(document.querySelector(".rf-status")||{}).textContent})`,
+        );
+      } catch {}
       if (s && s.svg && s.status === "") return true;
       await sleep(50);
     }
@@ -27,8 +33,17 @@ export function readingRoomKit(ctx: SuiteContext) {
   const plateShown = async (hrefTail?: string) => {
     for (let i = 0; i < 160; i++) {
       let s = null;
-      try { s = await evaluate(stageRead); } catch {}
-      if (s && s.hidden === false && s.src && s.src.startsWith("blob:") && (!hrefTail || (s.href || "").endsWith(hrefTail))) return s;
+      try {
+        s = await evaluate(stageRead);
+      } catch {}
+      if (
+        s &&
+        s.hidden === false &&
+        s.src &&
+        s.src.startsWith("blob:") &&
+        (!hrefTail || (s.href || "").endsWith(hrefTail))
+      )
+        return s;
       await sleep(50);
     }
     return null;
@@ -38,7 +53,9 @@ export function readingRoomKit(ctx: SuiteContext) {
     let saw = 0;
     for (let i = 0; i < ms / 50; i++) {
       let s = null;
-      try { s = await evaluate(stageRead); } catch {}
+      try {
+        s = await evaluate(stageRead);
+      } catch {}
       if (s === null) return { missing: true, sampled: saw };
       saw++;
       if (s.hidden === false || (s.src || "").startsWith("blob:")) return s;

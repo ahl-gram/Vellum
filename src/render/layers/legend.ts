@@ -68,9 +68,7 @@ function settlementRows(world: World): Row[] {
   const rows: Row[] = [];
   const tiers = new Set(world.settlements.map((s) => s.kind));
   if (tiers.has("capital")) rows.push({ icon: { kind: "settlement", tier: "capital" }, label: "Capital" });
-  const seatDrawn = world.realms.seats.some(
-    (i) => i >= 0 && world.settlements[i]?.kind !== "capital",
-  );
+  const seatDrawn = world.realms.seats.some((i) => i >= 0 && world.settlements[i]?.kind !== "capital");
   if (seatDrawn) rows.push({ icon: { kind: "settlement", tier: "seat" }, label: "Realm seat" });
   if (tiers.has("town")) rows.push({ icon: { kind: "settlement", tier: "town" }, label: "Town" });
   if (tiers.has("village")) rows.push({ icon: { kind: "settlement", tier: "village" }, label: "Village" });
@@ -183,15 +181,30 @@ export function legendLayer(ctx: RenderCtx, plan: LegendPlan): SvgNode {
 
   const children: SvgNode[] = [
     el("rect", {
-      x: box.x, y: box.y, width: box.w, height: box.h, rx: 3 * k,
-      fill: style.paper, "fill-opacity": 0.82,
-      stroke: style.inkSoft, "stroke-width": 0.8 * k, "stroke-opacity": 0.6,
+      x: box.x,
+      y: box.y,
+      width: box.w,
+      height: box.h,
+      rx: 3 * k,
+      fill: style.paper,
+      "fill-opacity": 0.82,
+      stroke: style.inkSoft,
+      "stroke-width": 0.8 * k,
+      "stroke-opacity": 0.6,
     }),
-    el("text", {
-      x: box.x + m.pad, y: box.y + m.pad + m.titleFs, "text-anchor": "start",
-      "font-family": style.fontFamily, "font-size": m.titleFs.toFixed(1),
-      "letter-spacing": (2 * k).toFixed(1), fill: style.inkSoft,
-    }, ["KEY"]),
+    el(
+      "text",
+      {
+        x: box.x + m.pad,
+        y: box.y + m.pad + m.titleFs,
+        "text-anchor": "start",
+        "font-family": style.fontFamily,
+        "font-size": m.titleFs.toFixed(1),
+        "letter-spacing": (2 * k).toFixed(1),
+        fill: style.inkSoft,
+      },
+      ["KEY"],
+    ),
   ];
 
   const rowTop = box.y + m.pad + m.titleFs + m.titleGap;
@@ -201,21 +214,35 @@ export function legendLayer(ctx: RenderCtx, plan: LegendPlan): SvgNode {
     const cy = rowTop + i * m.rowH + m.rowH / 2;
     children.push(iconNode(row.icon, iconCx, cy, ctx));
     children.push(
-      el("text", {
-        x: textX, y: cy + m.labelFs * 0.34, "text-anchor": "start",
-        "font-family": style.fontFamily, "font-size": m.labelFs.toFixed(1),
-        fill: style.labelColor,
-      }, [row.label]),
+      el(
+        "text",
+        {
+          x: textX,
+          y: cy + m.labelFs * 0.34,
+          "text-anchor": "start",
+          "font-family": style.fontFamily,
+          "font-size": m.labelFs.toFixed(1),
+          fill: style.labelColor,
+        },
+        [row.label],
+      ),
     );
   });
 
   children.push(
-    el("text", {
-      x: box.x + m.pad, y: rowTop + rows.length * m.rowH + m.noteGap + m.noteFs * 0.3,
-      "text-anchor": "start",
-      "font-family": style.fontFamily, "font-size": m.noteFs.toFixed(1),
-      "font-style": "italic", fill: style.inkSoft,
-    }, [note]),
+    el(
+      "text",
+      {
+        x: box.x + m.pad,
+        y: rowTop + rows.length * m.rowH + m.noteGap + m.noteFs * 0.3,
+        "text-anchor": "start",
+        "font-family": style.fontFamily,
+        "font-size": m.noteFs.toFixed(1),
+        "font-style": "italic",
+        fill: style.inkSoft,
+      },
+      [note],
+    ),
   );
 
   return el("g", { id: "layer-legend" }, children);

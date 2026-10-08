@@ -30,12 +30,13 @@ type Scene = {
 
 function beforeFoundingGeometry(base: GeometryBase, scene: Scene, rDecor: Rng): ProspectGeometry {
   const { input, treatment, sea, river, water } = scene;
-  const land = sea || river
-    ? []
-    : composeLandDressing(treatment, input.kind, base.ground, rDecor, {
-        built: false,
-        frontRow: [],
-      });
+  const land =
+    sea || river
+      ? []
+      : composeLandDressing(treatment, input.kind, base.ground, rDecor, {
+          built: false,
+          frontRow: [],
+        });
   return {
     ...base,
     water,
@@ -56,7 +57,13 @@ function drownedGeometry(base: GeometryBase, rDecor: Rng): ProspectGeometry {
   };
 }
 
-function townForeground(scene: Scene, base: GeometryBase, town: Townscape, rDecor: Rng, rDelight: Rng): ForegroundElement[] {
+function townForeground(
+  scene: Scene,
+  base: GeometryBase,
+  town: Townscape,
+  rDecor: Rng,
+  rDelight: Rng,
+): ForegroundElement[] {
   const { input, treatment, sea, river, water } = scene;
   const ground = base.ground;
   const foreground: ForegroundElement[] = [];
@@ -71,9 +78,7 @@ function townForeground(scene: Scene, base: GeometryBase, town: Townscape, rDeco
   if (sea) foreground.push(...composeSeaFront(input.kind, input.ruined, water!, rDecor));
   if (river) foreground.push(...composeRiverFront(input.kind, input.ruined, water!, rDecor));
   if (input.ruined) {
-    foreground.push(
-      ...composeCollapseField(ground, town.front, town.runX0, town.runX1, rDecor),
-    );
+    foreground.push(...composeCollapseField(ground, town.front, town.runX0, town.runX1, rDecor));
   }
   if (sea && !input.ruined && rDelight.next() < SERPENT_ODDS) {
     foreground.push({ kind: "seaSerpent", x: VIEW_X0 + 74, y: water!.y0 + 24, s: 0.55 });
@@ -83,10 +88,7 @@ function townForeground(scene: Scene, base: GeometryBase, town: Townscape, rDeco
   return foreground;
 }
 
-export function composeProspect(
-  input: ProspectInput,
-  opts: ComposeOptions = {},
-): ProspectGeometry {
+export function composeProspect(input: ProspectInput, opts: ComposeOptions = {}): ProspectGeometry {
   const era = opts.era ?? "standing";
   const treatment = treatmentFor(input.foreground);
   const ground = buildGround(input);
@@ -106,14 +108,7 @@ export function composeProspect(
   if (era === "before-founding") return beforeFoundingGeometry(base, scene, rDecor);
   if (input.ruined && treatment === "marsh" && !sea) return drownedGeometry(base, rDecor);
 
-  const town = composeTownscape(
-    input.kind,
-    input.score,
-    input.ruined,
-    treatment === "marsh",
-    ground,
-    rGeo,
-  );
+  const town = composeTownscape(input.kind, input.score, input.ruined, treatment === "marsh", ground, rGeo);
   const foreground = townForeground(scene, base, town, rDecor, rDelight);
   return { ...base, water, masses: town.masses, walls: town.walls, foreground };
 }

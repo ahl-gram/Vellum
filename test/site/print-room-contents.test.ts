@@ -11,7 +11,12 @@ const ref = (key: string, title: string) => ({ key, title, href: `blob:http://12
 const DATA: ContentsData = {
   hero: ref("antique", "The world chart, drawn in the antique manner"),
   draughtings: [ref("topographic", "Topographic"), ref("ink", "Pen & ink"), ref("nautical", "Nautical")],
-  themes: [ref("theme-vegetation", "Vegetation"), ref("theme-climate", "Temperature"), ref("theme-moisture", "Rainfall"), ref("theme-population", "Population")],
+  themes: [
+    ref("theme-vegetation", "Vegetation"),
+    ref("theme-climate", "Temperature"),
+    ref("theme-moisture", "Rainfall"),
+    ref("theme-population", "Population"),
+  ],
   regions: [ref("region-1", "The Environs of Laukuwelua"), ref("region-2", "The Environs of Toatauhe")],
   prospects: [ref("prospect-capital", "The Prospect of Laukuwelua")],
   counts: { arms: 6, entries: 41, places: 30 },
@@ -24,10 +29,21 @@ test("unbound, the eleven rows stand in the mockup's words with no plates and no
   const html = contentsRows(null);
   const li = rows(html);
   assert.equal(li.length, 11, "eleven rows, i to xi");
-  assert.deepEqual(li.map((r) => /<span class="cr-num">([ivx]+)<\/span>/.exec(r)?.[1]), ["i", "ii", "iii", "iv", "v", "vi", "vii", "viii", "ix", "x", "xi"]);
-  assert.deepEqual(li.slice(2, 6).map((r) => /A thematic survey of <em>([a-z]+)<\/em>/.exec(r)?.[1]), ["vegetation", "temperature", "rainfall", "population"], "iii to vi, one survey each, in the atlas's own order");
+  assert.deepEqual(
+    li.map((r) => /<span class="cr-num">([ivx]+)<\/span>/.exec(r)?.[1]),
+    ["i", "ii", "iii", "iv", "v", "vi", "vii", "viii", "ix", "x", "xi"],
+  );
+  assert.deepEqual(
+    li.slice(2, 6).map((r) => /A thematic survey of <em>([a-z]+)<\/em>/.exec(r)?.[1]),
+    ["vegetation", "temperature", "rainfall", "population"],
+    "iii to vi, one survey each, in the atlas's own order",
+  );
   assert.match(li[0]!, /^<li>/, "nothing of the atlas is on the sheet yet");
-  assert.match(li[0]!, /The chart, drawn in the <em>antique<\/em> manner/, "the atlas's first plate is the antique chart by construction, never 'as proofed' (the proof may be another style, skeptic round 2)");
+  assert.match(
+    li[0]!,
+    /The chart, drawn in the <em>antique<\/em> manner/,
+    "the atlas's first plate is the antique chart by construction, never 'as proofed' (the proof may be another style, skeptic round 2)",
+  );
   assert.match(li[6]!, /Regional surveys, two close-ins/);
   assert.match(li[7]!, /The prospect of the capital/);
   assert.doesNotMatch(html, /class="plates"|class="turn"|data-plate=/, "nothing to turn to yet");
@@ -37,21 +53,79 @@ test("bound, every plate is a turn and a thumbnail, the regions and the prospect
   const html = contentsRows(DATA);
   const li = rows(html);
   assert.equal(li.length, 11);
-  assert.match(li[0]!, /<button class="turn" type="button" data-plate="antique">The chart, drawn in the <em>antique<\/em> manner<\/button>/);
-  assert.match(li[1]!, /Other draughtings: <button class="turn" type="button" data-plate="topographic"><em>topographic<\/em><\/button>, <button class="turn" type="button" data-plate="ink"><em>pen &amp; ink<\/em><\/button>, <button class="turn" type="button" data-plate="nautical"><em>nautical<\/em><\/button>/);
-  assert.match(li[2]!, /^<li class="on"><span class="cr-num">iii<\/span><span class="cr-text"><button class="turn here" type="button" data-plate="theme-vegetation">A thematic survey of <em>vegetation<\/em><\/button><\/span><div class="plates"><figure data-plate="theme-vegetation" class="here">/, "a survey's row is its turn, then its one thumbnail");
-  assert.match(li[3]!, /<span class="cr-num">iv<\/span><span class="cr-text"><button class="turn" type="button" data-plate="theme-climate">A thematic survey of <em>temperature<\/em><\/button><\/span><div class="plates"><figure data-plate="theme-climate"><button/);
-  assert.match(li[4]!, /<span class="cr-num">v<\/span>.*data-plate="theme-moisture">A thematic survey of <em>rainfall<\/em>/);
-  assert.match(li[5]!, /<span class="cr-num">vi<\/span>.*data-plate="theme-population">A thematic survey of <em>population<\/em>/);
-  assert.match(li[6]!, /Regional surveys: <button class="turn" type="button" data-plate="region-1"><em>The Environs of Laukuwelua<\/em><\/button>, <button[^>]*data-plate="region-2"><em>The Environs of Toatauhe<\/em><\/button>/);
-  assert.match(li[7]!, /<button class="turn" type="button" data-plate="prospect-capital">The prospect of <em>Laukuwelua<\/em><\/button>/);
-  assert.match(li[8]!, /<button class="turn" type="button" data-plate="banners">The banners of every realm<\/button> <span class="n">&middot; 6 arms<\/span>/);
-  assert.match(li[9]!, /<button class="turn" type="button" data-plate="chronicle">The chronicle<\/button> <span class="n">&middot; 41 entries<\/span>/);
-  assert.match(li[10]!, /<button class="turn" type="button" data-plate="gazetteer">The gazetteer<\/button> <span class="n">&middot; 30 places<\/span>/);
+  assert.match(
+    li[0]!,
+    /<button class="turn" type="button" data-plate="antique">The chart, drawn in the <em>antique<\/em> manner<\/button>/,
+  );
+  assert.match(
+    li[1]!,
+    /Other draughtings: <button class="turn" type="button" data-plate="topographic"><em>topographic<\/em><\/button>, <button class="turn" type="button" data-plate="ink"><em>pen &amp; ink<\/em><\/button>, <button class="turn" type="button" data-plate="nautical"><em>nautical<\/em><\/button>/,
+  );
+  assert.match(
+    li[2]!,
+    /^<li class="on"><span class="cr-num">iii<\/span><span class="cr-text"><button class="turn here" type="button" data-plate="theme-vegetation">A thematic survey of <em>vegetation<\/em><\/button><\/span><div class="plates"><figure data-plate="theme-vegetation" class="here">/,
+    "a survey's row is its turn, then its one thumbnail",
+  );
+  assert.match(
+    li[3]!,
+    /<span class="cr-num">iv<\/span><span class="cr-text"><button class="turn" type="button" data-plate="theme-climate">A thematic survey of <em>temperature<\/em><\/button><\/span><div class="plates"><figure data-plate="theme-climate"><button/,
+  );
+  assert.match(
+    li[4]!,
+    /<span class="cr-num">v<\/span>.*data-plate="theme-moisture">A thematic survey of <em>rainfall<\/em>/,
+  );
+  assert.match(
+    li[5]!,
+    /<span class="cr-num">vi<\/span>.*data-plate="theme-population">A thematic survey of <em>population<\/em>/,
+  );
+  assert.match(
+    li[6]!,
+    /Regional surveys: <button class="turn" type="button" data-plate="region-1"><em>The Environs of Laukuwelua<\/em><\/button>, <button[^>]*data-plate="region-2"><em>The Environs of Toatauhe<\/em><\/button>/,
+  );
+  assert.match(
+    li[7]!,
+    /<button class="turn" type="button" data-plate="prospect-capital">The prospect of <em>Laukuwelua<\/em><\/button>/,
+  );
+  assert.match(
+    li[8]!,
+    /<button class="turn" type="button" data-plate="banners">The banners of every realm<\/button> <span class="n">&middot; 6 arms<\/span>/,
+  );
+  assert.match(
+    li[9]!,
+    /<button class="turn" type="button" data-plate="chronicle">The chronicle<\/button> <span class="n">&middot; 41 entries<\/span>/,
+  );
+  assert.match(
+    li[10]!,
+    /<button class="turn" type="button" data-plate="gazetteer">The gazetteer<\/button> <span class="n">&middot; 30 places<\/span>/,
+  );
   const figures = [...html.matchAll(/<figure[^>]*data-plate="([^"]+)"/g)].map((m) => m[1]);
-  assert.deepEqual(figures, ["antique", "topographic", "ink", "nautical", "theme-vegetation", "theme-climate", "theme-moisture", "theme-population", "region-1", "region-2", "prospect-capital"], "eleven thumbnails under their rows");
-  assert.match(html, /<figure data-plate="theme-vegetation" class="here"><button class="thumb" type="button" data-plate="theme-vegetation" aria-label="Turn to Vegetation"><img src="blob:http:\/\/127\.0\.0\.1:4173\/theme-vegetation" alt=""><\/button><figcaption>Vegetation<\/figcaption><\/figure>/, "a thumbnail is a button on the plate's own blob");
-  assert.equal((html.match(/class="(?:turn )?here"/g) ?? []).length, 2, "the plate on the sheet is inked once as a turn and once as a thumbnail");
+  assert.deepEqual(
+    figures,
+    [
+      "antique",
+      "topographic",
+      "ink",
+      "nautical",
+      "theme-vegetation",
+      "theme-climate",
+      "theme-moisture",
+      "theme-population",
+      "region-1",
+      "region-2",
+      "prospect-capital",
+    ],
+    "eleven thumbnails under their rows",
+  );
+  assert.match(
+    html,
+    /<figure data-plate="theme-vegetation" class="here"><button class="thumb" type="button" data-plate="theme-vegetation" aria-label="Turn to Vegetation"><img src="blob:http:\/\/127\.0\.0\.1:4173\/theme-vegetation" alt=""><\/button><figcaption>Vegetation<\/figcaption><\/figure>/,
+    "a thumbnail is a button on the plate's own blob",
+  );
+  assert.equal(
+    (html.match(/class="(?:turn )?here"/g) ?? []).length,
+    2,
+    "the plate on the sheet is inked once as a turn and once as a thumbnail",
+  );
   assert.match(li[0]!, /^<li>/, "the proof's row is not on");
   assert.match(li[3]!, /^<li>/, "nor the next survey's");
 });
@@ -74,11 +148,19 @@ test("a matter section without content offers no turn: no arms and no history le
   assert.doesNotMatch(li[9]!, /<button/);
   assert.match(li[8]!, /The banners of every realm <span class="n">&middot; 0 arms<\/span>/);
   assert.match(li[9]!, /The chronicle <span class="n">&middot; 0 entries<\/span>/);
-  assert.match(li[10]!, /<button class="turn" type="button" data-plate="gazetteer">The gazetteer<\/button> <span class="n">&middot; 0 places<\/span>/, "the gazetteer's table stands even with nothing in it");
+  assert.match(
+    li[10]!,
+    /<button class="turn" type="button" data-plate="gazetteer">The gazetteer<\/button> <span class="n">&middot; 0 places<\/span>/,
+    "the gazetteer's table stands even with nothing in it",
+  );
 });
 
 test("every value the host hands in is escaped: a title with markup stays text, an href stays inside its attribute", () => {
-  const html = contentsRows({ ...DATA, regions: [{ key: "region-1", title: `The Environs of <script>`, href: `x" onerror="alert(1)` }], here: null });
+  const html = contentsRows({
+    ...DATA,
+    regions: [{ key: "region-1", title: `The Environs of <script>`, href: `x" onerror="alert(1)` }],
+    here: null,
+  });
   assert.doesNotMatch(html, /<script>/);
   assert.doesNotMatch(html, /onerror="/);
   assert.match(html, /<em>The Environs of &lt;script&gt;<\/em>/);
@@ -98,26 +180,53 @@ test("the counts read the atlas's own html: banner figures, chronicle entries, g
 test("the counts match the world the atlas was composed from (seed 42): its arms, its chronicle's events, its settlements", () => {
   const world = generateWorld(defaultRecipe(42));
   const atlas = composeAtlas(world, { width: 400 });
-  assert.deepEqual(plateCounts(atlas), { arms: world.arms.length, entries: world.history.events.length, places: world.settlements.length });
-  assert.ok(world.arms.length > 0 && world.history.events.length > 0 && world.settlements.length > 0, "the witness world has all three");
+  assert.deepEqual(plateCounts(atlas), {
+    arms: world.arms.length,
+    entries: world.history.events.length,
+    places: world.settlements.length,
+  });
+  assert.ok(
+    world.arms.length > 0 && world.history.events.length > 0 && world.settlements.length > 0,
+    "the witness world has all three",
+  );
 });
 
 test("a plate's aspect reads its viewBox, then its width and height, and is null with neither (the prospect plate is 520x384, not the chart's 1500x1157.931)", () => {
-  assert.equal(plateAspect(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 384" width="520" height="384">`), 520 / 384);
-  assert.equal(plateAspect(`<svg viewBox="0 0 520 384" width="999" height="999">`), 520 / 384, "the viewBox wins over a disagreeing width and height (guard-prover round 2 found the agreeing fixture pinned nothing)");
+  assert.equal(
+    plateAspect(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 384" width="520" height="384">`),
+    520 / 384,
+  );
+  assert.equal(
+    plateAspect(`<svg viewBox="0 0 520 384" width="999" height="999">`),
+    520 / 384,
+    "the viewBox wins over a disagreeing width and height (guard-prover round 2 found the agreeing fixture pinned nothing)",
+  );
   assert.equal(plateAspect(`<svg width="1500" height="1157.931">`), 1500 / 1157.931);
   assert.equal(plateAspect(`<svg viewBox="0 0 0 10">`), null, "a degenerate box is no aspect");
   assert.equal(plateAspect(`<svg>`), null);
 });
 
 test("the folio's plate line names the plate by its row's numeral and reads the title mid-sentence; each thematic survey has its own (#465 ruling 7)", () => {
-  assert.equal(plateLine("hero", "The world chart, drawn in the antique manner"), "plate i of the bound atlas · the world chart, drawn in the antique manner");
+  assert.equal(
+    plateLine("hero", "The world chart, drawn in the antique manner"),
+    "plate i of the bound atlas · the world chart, drawn in the antique manner",
+  );
   assert.equal(plateLine("draughting", "Pen & ink"), "plate ii of the bound atlas · drawn in the pen & ink manner");
   assert.equal(plateLine("theme", "Vegetation", 0), "plate iii of the bound atlas · a thematic survey of vegetation");
   assert.equal(plateLine("theme", "Temperature", 1), "plate iv of the bound atlas · a thematic survey of temperature");
   assert.equal(plateLine("theme", "Rainfall", 2), "plate v of the bound atlas · a thematic survey of rainfall");
   assert.equal(plateLine("theme", "Population", 3), "plate vi of the bound atlas · a thematic survey of population");
-  assert.equal(plateLine("region", "The Environs of Laukuwelua"), "plate vii of the bound atlas · a regional survey, the environs of Laukuwelua");
-  assert.equal(plateLine("prospect", "The Prospect of Laukuwelua"), "plate viii of the bound atlas · the prospect of Laukuwelua");
-  assert.throws(() => numeralOf(NUMERALS.length), RangeError, "a row past the table throws rather than printing an arabic numeral among the romans");
+  assert.equal(
+    plateLine("region", "The Environs of Laukuwelua"),
+    "plate vii of the bound atlas · a regional survey, the environs of Laukuwelua",
+  );
+  assert.equal(
+    plateLine("prospect", "The Prospect of Laukuwelua"),
+    "plate viii of the bound atlas · the prospect of Laukuwelua",
+  );
+  assert.throws(
+    () => numeralOf(NUMERALS.length),
+    RangeError,
+    "a row past the table throws rather than printing an arabic numeral among the romans",
+  );
 });

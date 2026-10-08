@@ -10,7 +10,9 @@ export const makeRoom = (ctx: Pick<SuiteContext, "evaluate" | "send" | "sleep" |
   const boot = async (): Promise<boolean> => {
     for (let i = 0; i < 200; i++) {
       let ok: unknown = null;
-      try { ok = await evaluate<boolean>(`typeof window.__vellumReadingRoomUsesWorker === "function"`); } catch {}
+      try {
+        ok = await evaluate<boolean>(`typeof window.__vellumReadingRoomUsesWorker === "function"`);
+      } catch {}
       if (ok) return true;
       await sleep(75);
     }
@@ -21,7 +23,11 @@ export const makeRoom = (ctx: Pick<SuiteContext, "evaluate" | "send" | "sleep" |
   const settled = async (): Promise<boolean> => {
     for (let i = 0; i < 300; i++) {
       let s: { svg: boolean; status?: string } | null = null;
-      try { s = await evaluate<{ svg: boolean; status?: string }>(`({svg:!!document.querySelector(".rf-chart svg"),status:(document.querySelector(".rf-status")||{}).textContent})`); } catch {}
+      try {
+        s = await evaluate<{ svg: boolean; status?: string }>(
+          `({svg:!!document.querySelector(".rf-chart svg"),status:(document.querySelector(".rf-status")||{}).textContent})`,
+        );
+      } catch {}
       if (s && s.svg && s.status === "") return true;
       await sleep(50);
     }
@@ -44,14 +50,22 @@ export const makeBar = (ctx: Pick<SuiteContext, "evaluate">) => {
   const { evaluate } = ctx;
   return {
     setYear: (y: number) =>
-      evaluate<number | null>(`(()=>{const s=document.querySelector(".rf-range");const a=window.__vellumAgesState();const yy=Math.max(${y},a.min+1);s.value=String(Number(s.max)/2+(yy-a.min));s.dispatchEvent(new Event("input",{bubbles:true}));return window.__vellumAgesState().year;})()`),
+      evaluate<number | null>(
+        `(()=>{const s=document.querySelector(".rf-range");const a=window.__vellumAgesState();const yy=Math.max(${y},a.min+1);s.value=String(Number(s.max)/2+(yy-a.min));s.dispatchEvent(new Event("input",{bubbles:true}));return window.__vellumAgesState().year;})()`,
+      ),
     yearNow: () => evaluate<number | null>(`window.__vellumAgesState().year`),
     groupVis: (idx: number) =>
-      evaluate<string>(`(()=>{const g=document.querySelector('.rf-chart #layer-settlements g.settlement[data-idx="${idx}"]');return g?(getComputedStyle(g).display==="none"?"hidden":"shown"):"(no-el)";})()`),
+      evaluate<string>(
+        `(()=>{const g=document.querySelector('.rf-chart #layer-settlements g.settlement[data-idx="${idx}"]');return g?(getComputedStyle(g).display==="none"?"hidden":"shown"):"(no-el)";})()`,
+      ),
     roadsDisp: () =>
-      evaluate<string>(`(()=>{const r=document.querySelector('.rf-chart #layer-roads');return r?getComputedStyle(r).display:"(no-el)";})()`),
+      evaluate<string>(
+        `(()=>{const r=document.querySelector('.rf-chart #layer-roads');return r?getComputedStyle(r).display:"(no-el)";})()`,
+      ),
     visibleGroups: () =>
-      evaluate<number>(`[...document.querySelectorAll('.rf-chart #layer-settlements g.settlement')].filter((g)=>getComputedStyle(g).display!=="none").length`),
+      evaluate<number>(
+        `[...document.querySelectorAll('.rf-chart #layer-settlements g.settlement')].filter((g)=>getComputedStyle(g).display!=="none").length`,
+      ),
     // Issue #526: the sweep's own frame clock. The year is read synchronously inside the rAF callback so every sample carries the SAME pairing lag, which a rate fit cancels as an offset; a year read on a wall-clock timer instead carries a frame of quantization at each end, and that is what made the old RS30 read 2.76 to 4.31 on unchanged code.
     startSweepSamples: () =>
       evaluate<boolean>(`(()=>{window.__sweep={s:[],stop:false};
@@ -60,14 +74,29 @@ export const makeBar = (ctx: Pick<SuiteContext, "evaluate">) => {
           if(!window.__sweep.stop)requestAnimationFrame(step);};
         requestAnimationFrame(step);return true;})()`),
     stopSweepSamples: () =>
-      evaluate<{ t: number; year: number; pace: number }[]>(`(()=>{window.__sweep.stop=true;return window.__sweep.s;})()`),
+      evaluate<{ t: number; year: number; pace: number }[]>(
+        `(()=>{window.__sweep.stop=true;return window.__sweep.s;})()`,
+      ),
     playLabel: () => evaluate<string>(`document.querySelector(".rf-play").textContent`),
     clickPlay: () => evaluate<undefined>(`document.querySelector(".rf-play").click()`),
   };
 };
 
 export const scrubFacts = (evaluate: Evaluate, seed: number) =>
-  evaluate<{ count: number; present: number; minFounded: number; earlyIdx: number; earlyFounded: number; lateIdx: number; lateFounded: number; lateNx: number; lateNy: number; ruinIdx: number; ruinYear: number | null; ruinFounded: number | null }>(`(()=>{
+  evaluate<{
+    count: number;
+    present: number;
+    minFounded: number;
+    earlyIdx: number;
+    earlyFounded: number;
+    lateIdx: number;
+    lateFounded: number;
+    lateNx: number;
+    lateNy: number;
+    ruinIdx: number;
+    ruinYear: number | null;
+    ruinFounded: number | null;
+  }>(`(()=>{
     const r=window.__vellumRunInline({kind:"draw",seed:${seed},overrides:{},render:{style:"antique",widthPx:1500,legend:true}});
     const places=r.manifest.places,events=r.manifest.events,present=r.manifest.presentYear;
     const minFounded=Math.min(...places.map((p)=>p.founded));
@@ -93,11 +122,7 @@ export const scopedHealth = (ctx: Pick<SuiteContext, "check" | "consoleErrors" |
     check: (label: string): void => {
       const errDelta = dropExpectedCancellations(consoleErrors.slice(errBase));
       const httpDelta = http4xx.slice(httpBase).filter((u) => !/favicon/i.test(u));
-      check(
-        label,
-        errDelta.length === 0 && httpDelta.length === 0,
-        [...errDelta, ...httpDelta].join(" | ") || "clean",
-      );
+      check(label, errDelta.length === 0 && httpDelta.length === 0, [...errDelta, ...httpDelta].join(" | ") || "clean");
     },
   };
 };

@@ -10,7 +10,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
 
   // null, never "": V1b below is outside every step and reads this, and `docket.includes("")` is TRUE, so an empty hoist would let a skipped "V setup" pass V1b's title clause vacuously.
   let vTitle: string | null = null;
-  await step("V setup", async () => { vTitle = await vSetup(k); });
+  await step("V setup", async () => {
+    vTitle = await vSetup(k);
+  });
   await step("V0", () => v0TurnDisables(k));
   await v1FlipsToVerso(k, vTitle);
   await step("V2", () => v2RedrawWhileFlipped(k));
@@ -24,26 +26,43 @@ export async function run(ctx: SuiteContext): Promise<void> {
 function versoKit(ctx: SuiteContext) {
   const { evaluate, sleep } = ctx;
   const waitFlip3dGone = async (label: string): Promise<void> => {
-    for (let i = 0; i < 50; i++) { if (await evaluate<boolean>(`!document.querySelector(".sheet.flip3d")`)) return; await sleep(60); }
+    for (let i = 0; i < 50; i++) {
+      if (await evaluate<boolean>(`!document.querySelector(".sheet.flip3d")`)) return;
+      await sleep(60);
+    }
     throw new Error("waitFlip3dGone timeout " + label);
   };
   // A settle under the flipped sheet updates the HIDDEN recto: poll a chart attribute rather than waitSettled, which watches the visible recto.
   const waitRectoAttr = async (attr: string, val: string, label: string): Promise<void> => {
-    for (let i = 0; i < 120; i++) { if (await evaluate<boolean>(`document.querySelector("#map svg") && document.querySelector("#map svg").getAttribute("${attr}")==="${val}"`)) return; await sleep(50); }
+    for (let i = 0; i < 120; i++) {
+      if (
+        await evaluate<boolean>(
+          `document.querySelector("#map svg") && document.querySelector("#map svg").getAttribute("${attr}")==="${val}"`,
+        )
+      )
+        return;
+      await sleep(50);
+    }
     throw new Error("waitRectoAttr timeout " + label);
   };
   return { ...ctx, waitFlip3dGone, waitRectoAttr };
 }
 
 async function vSetup({ evaluate, waitSettled }: VersoKit): Promise<string> {
-  await evaluate(`(()=>{const chk=document.getElementById("ages");if(chk.checked){chk.checked=false;chk.dispatchEvent(new Event("change",{bubbles:true}));}document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`);
+  await evaluate(
+    `(()=>{const chk=document.getElementById("ages");if(chk.checked){chk.checked=false;chk.dispatchEvent(new Event("change",{bubbles:true}));}document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`,
+  );
   await waitSettled("verso-base");
-  const vTitle = await evaluate<string>(`window.__vellumRunInline({kind:"draw",seed:42,overrides:{},render:{style:"antique",widthPx:1500,legend:true}}).title`);
+  const vTitle = await evaluate<string>(
+    `window.__vellumRunInline({kind:"draw",seed:42,overrides:{},render:{style:"antique",widthPx:1500,legend:true}}).title`,
+  );
   return vTitle;
 }
 
 async function v0TurnDisables({ evaluate, check, waitSettled }: VersoKit): Promise<void> {
-  const v0 = await evaluate<{ dis: boolean }>(`(()=>{document.getElementById("seed").value="101";document.getElementById("draw").click();const dis=document.getElementById("verso-turn").disabled;return{dis};})()`);
+  const v0 = await evaluate<{ dis: boolean }>(
+    `(()=>{document.getElementById("seed").value="101";document.getElementById("draw").click();const dis=document.getElementById("verso-turn").disabled;return{dis};})()`,
+  );
   check("V0 the Turn button disables the instant a draw starts", v0.dis === true, JSON.stringify(v0));
   await waitSettled("verso-v0");
   await evaluate(`(()=>{document.getElementById("seed").value="42";document.getElementById("draw").click();})()`);
@@ -53,10 +72,41 @@ async function v0TurnDisables({ evaluate, check, waitSettled }: VersoKit): Promi
 async function v1FlipsToVerso({ evaluate, check, shoot, sleep }: VersoKit, vTitle: string | null): Promise<void> {
   await evaluate(`document.getElementById("verso-turn").click()`);
   await sleep(80);
-  const v1 = await evaluate<{ versoed: boolean; flip3d: boolean; ghost: boolean; ghostBlob: boolean; docket: string; survey: number; stamp: boolean; vis: string; label: string }>(`(()=>{const sh=document.getElementById("sheet");const g=document.querySelector("#verso .verso-ghost");return{versoed:sh.classList.contains("versoed"),flip3d:sh.classList.contains("flip3d"),ghost:!!g,ghostBlob:!!(g&&/^blob:/.test(g.src)),docket:(document.querySelector("#verso .verso-docket")||{}).textContent||"",survey:((document.querySelector("#verso .verso-survey")||{}).textContent||"").length,stamp:!!document.querySelector("#verso .verso-stamp"),vis:getComputedStyle(document.getElementById("verso")).visibility,label:document.querySelector("#verso-turn .room").textContent};})()`);
-  check("V1 Turn the sheet flips to the verso (.versoed + .flip3d, #verso visible, ghost/docket/survey/stamp present)", v1.versoed && v1.flip3d && v1.ghost && v1.ghostBlob && v1.stamp && v1.survey > 0 && v1.vis === "visible" && v1.label === "Back", JSON.stringify({ ...v1, docket: v1.docket.slice(0, 40) }));
-  check("V1b the docket reads the drawn chart number and title", v1.docket.startsWith("CHART № 42 · ") && v1.docket.includes(vTitle!) && v1.docket.includes("Year"), JSON.stringify({ docket: v1.docket }));
-  check("V1c the docket names the capital's former name (#49)", v1.docket.includes("Laukuwelua (once Haitani)"), JSON.stringify({ docket: v1.docket }));
+  const v1 = await evaluate<{
+    versoed: boolean;
+    flip3d: boolean;
+    ghost: boolean;
+    ghostBlob: boolean;
+    docket: string;
+    survey: number;
+    stamp: boolean;
+    vis: string;
+    label: string;
+  }>(
+    `(()=>{const sh=document.getElementById("sheet");const g=document.querySelector("#verso .verso-ghost");return{versoed:sh.classList.contains("versoed"),flip3d:sh.classList.contains("flip3d"),ghost:!!g,ghostBlob:!!(g&&/^blob:/.test(g.src)),docket:(document.querySelector("#verso .verso-docket")||{}).textContent||"",survey:((document.querySelector("#verso .verso-survey")||{}).textContent||"").length,stamp:!!document.querySelector("#verso .verso-stamp"),vis:getComputedStyle(document.getElementById("verso")).visibility,label:document.querySelector("#verso-turn .room").textContent};})()`,
+  );
+  check(
+    "V1 Turn the sheet flips to the verso (.versoed + .flip3d, #verso visible, ghost/docket/survey/stamp present)",
+    v1.versoed &&
+      v1.flip3d &&
+      v1.ghost &&
+      v1.ghostBlob &&
+      v1.stamp &&
+      v1.survey > 0 &&
+      v1.vis === "visible" &&
+      v1.label === "Back",
+    JSON.stringify({ ...v1, docket: v1.docket.slice(0, 40) }),
+  );
+  check(
+    "V1b the docket reads the drawn chart number and title",
+    v1.docket.startsWith("CHART № 42 · ") && v1.docket.includes(vTitle!) && v1.docket.includes("Year"),
+    JSON.stringify({ docket: v1.docket }),
+  );
+  check(
+    "V1c the docket names the capital's former name (#49)",
+    v1.docket.includes("Laukuwelua (once Haitani)"),
+    JSON.stringify({ docket: v1.docket }),
+  );
   await sleep(1300); // let the 1.2s flip land before the screenshot
   await shoot("explorer-verso.png");
 }
@@ -66,18 +116,50 @@ async function v2RedrawWhileFlipped({ evaluate, check, sleep, waitRectoAttr }: V
   await evaluate(`(()=>{document.getElementById("seed").value="100";document.getElementById("draw").click();})()`);
   await waitRectoAttr("data-vellum-seed", "100", "verso-rebuild-seed");
   await sleep(60);
-  const v2 = await evaluate<{ versoed: boolean; flip3d: boolean; docket: string; rectoSeed: string | null; ghostChanged: boolean }>(`(()=>{const sh=document.getElementById("sheet");return{versoed:sh.classList.contains("versoed"),flip3d:sh.classList.contains("flip3d"),docket:(document.querySelector("#verso .verso-docket")||{}).textContent||"",rectoSeed:document.querySelector("#map svg").getAttribute("data-vellum-seed"),ghostChanged:document.querySelector("#verso .verso-ghost").src!==${JSON.stringify(ghostSrcBefore)}};})()`);
-  check("V2 a redraw while flipped stays on the verso and rebuilds it (docket tracks the new world, recto updated underneath)", v2.versoed && v2.flip3d && v2.docket.startsWith("CHART № 100 · ") && v2.rectoSeed === "100" && v2.ghostChanged, JSON.stringify({ ...v2, docket: v2.docket.slice(0, 24) }));
+  const v2 = await evaluate<{
+    versoed: boolean;
+    flip3d: boolean;
+    docket: string;
+    rectoSeed: string | null;
+    ghostChanged: boolean;
+  }>(
+    `(()=>{const sh=document.getElementById("sheet");return{versoed:sh.classList.contains("versoed"),flip3d:sh.classList.contains("flip3d"),docket:(document.querySelector("#verso .verso-docket")||{}).textContent||"",rectoSeed:document.querySelector("#map svg").getAttribute("data-vellum-seed"),ghostChanged:document.querySelector("#verso .verso-ghost").src!==${JSON.stringify(ghostSrcBefore)}};})()`,
+  );
+  check(
+    "V2 a redraw while flipped stays on the verso and rebuilds it (docket tracks the new world, recto updated underneath)",
+    v2.versoed && v2.flip3d && v2.docket.startsWith("CHART № 100 · ") && v2.rectoSeed === "100" && v2.ghostChanged,
+    JSON.stringify({ ...v2, docket: v2.docket.slice(0, 24) }),
+  );
 }
 
 async function v3RestyleWhileFlipped({ evaluate, check, sleep, armTurnWatch, waitRectoAttr }: VersoKit): Promise<void> {
   await armTurnWatch();
   const ghostSrcV3 = await evaluate<string>(`document.querySelector("#verso .verso-ghost").src`);
-  await evaluate(`(()=>{const s=document.getElementById("style");s.value="ink";s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  await evaluate(
+    `(()=>{const s=document.getElementById("style");s.value="ink";s.dispatchEvent(new Event("change",{bubbles:true}));})()`,
+  );
   await waitRectoAttr("data-vellum-style", "ink", "verso-restyle");
   await sleep(80); // __turned is sticky: a (wrong) turn would already have flagged it
-  const v3 = await evaluate<{ turned: boolean; turning: boolean; back: number; versoed: boolean; ghostChanged: boolean; rectoStyle: string | null }>(`(()=>{const sh=document.getElementById("sheet");return{turned:window.__turned,turning:!!document.querySelector(".sheet.turning"),back:document.querySelectorAll(".sheet-back").length,versoed:sh.classList.contains("versoed"),ghostChanged:document.querySelector("#verso .verso-ghost").src!==${JSON.stringify(ghostSrcV3)},rectoStyle:document.querySelector("#map svg").getAttribute("data-vellum-style")};})()`);
-  check("V3 a style change while flipped rebuilds in place and never turns (no .turning, no back face, still on the verso)", v3.turned === false && v3.turning === false && v3.back === 0 && v3.versoed && v3.ghostChanged && v3.rectoStyle === "ink", JSON.stringify(v3));
+  const v3 = await evaluate<{
+    turned: boolean;
+    turning: boolean;
+    back: number;
+    versoed: boolean;
+    ghostChanged: boolean;
+    rectoStyle: string | null;
+  }>(
+    `(()=>{const sh=document.getElementById("sheet");return{turned:window.__turned,turning:!!document.querySelector(".sheet.turning"),back:document.querySelectorAll(".sheet-back").length,versoed:sh.classList.contains("versoed"),ghostChanged:document.querySelector("#verso .verso-ghost").src!==${JSON.stringify(ghostSrcV3)},rectoStyle:document.querySelector("#map svg").getAttribute("data-vellum-style")};})()`,
+  );
+  check(
+    "V3 a style change while flipped rebuilds in place and never turns (no .turning, no back face, still on the verso)",
+    v3.turned === false &&
+      v3.turning === false &&
+      v3.back === 0 &&
+      v3.versoed &&
+      v3.ghostChanged &&
+      v3.rectoStyle === "ink",
+    JSON.stringify(v3),
+  );
 }
 
 async function v4LeavesVerso({ evaluate, check }: VersoKit): Promise<void> {
@@ -89,24 +171,68 @@ async function v4LeavesVerso({ evaluate, check }: VersoKit): Promise<void> {
 async function v4bFlipBack({ evaluate, check, sleep, waitFlip3dGone }: VersoKit): Promise<void> {
   await waitFlip3dGone("verso-flip-back");
   await sleep(60);
-  const v4 = await evaluate<{ versoed: boolean; flip3d: boolean; perspective: string; map: boolean; hits: number; vVis: string; label: string }>(`(()=>{const sh=document.getElementById("sheet");return{versoed:sh.classList.contains("versoed"),flip3d:sh.classList.contains("flip3d"),perspective:getComputedStyle(sh).perspective,map:!!document.querySelector("#map svg"),hits:document.querySelectorAll("#map .place-hit").length,vVis:getComputedStyle(document.getElementById("verso")).visibility,label:document.querySelector("#verso-turn .room").textContent};})()`);
-  check("V4b flip-back restores recto byte-parity: 3D context torn down (perspective:none), overlay intact, verso hidden", !v4.versoed && !v4.flip3d && v4.perspective === "none" && v4.map && v4.hits > 0 && v4.vVis === "hidden" && v4.label === "The Sheet", JSON.stringify(v4));
+  const v4 = await evaluate<{
+    versoed: boolean;
+    flip3d: boolean;
+    perspective: string;
+    map: boolean;
+    hits: number;
+    vVis: string;
+    label: string;
+  }>(
+    `(()=>{const sh=document.getElementById("sheet");return{versoed:sh.classList.contains("versoed"),flip3d:sh.classList.contains("flip3d"),perspective:getComputedStyle(sh).perspective,map:!!document.querySelector("#map svg"),hits:document.querySelectorAll("#map .place-hit").length,vVis:getComputedStyle(document.getElementById("verso")).visibility,label:document.querySelector("#verso-turn .room").textContent};})()`,
+  );
+  check(
+    "V4b flip-back restores recto byte-parity: 3D context torn down (perspective:none), overlay intact, verso hidden",
+    !v4.versoed &&
+      !v4.flip3d &&
+      v4.perspective === "none" &&
+      v4.map &&
+      v4.hits > 0 &&
+      v4.vVis === "hidden" &&
+      v4.label === "The Sheet",
+    JSON.stringify(v4),
+  );
 }
 
 async function v5TurnOwnsSheet({ evaluate, check, sleep, waitSettled, waitTurned }: VersoKit): Promise<void> {
-  await evaluate(`(()=>{document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("draw").click();})()`);
+  await evaluate(
+    `(()=>{document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("draw").click();})()`,
+  );
   await waitSettled("v5-base");
-  await evaluate(`(()=>{const s=document.getElementById("style");s.value="ink";s.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  await evaluate(
+    `(()=>{const s=document.getElementById("style");s.value="ink";s.dispatchEvent(new Event("change",{bubbles:true}));})()`,
+  );
   let v5live = false;
-  for (let i = 0; i < 80; i++) { if (await evaluate<boolean>(`!!document.querySelector(".sheet.turning")`)) { v5live = true; break; } await sleep(25); }
-  const v5mid = await evaluate<{ versoed: boolean; flip3d: boolean }>(`(()=>{document.getElementById("verso-turn").click();const sh=document.getElementById("sheet");return{versoed:sh.classList.contains("versoed"),flip3d:sh.classList.contains("flip3d")};})()`);
-  check("V5 a flip attempt during a LIVE style-turn is ignored (the turn owns the sheet)", v5live && v5mid.versoed === false && v5mid.flip3d === false, JSON.stringify({ v5live, ...v5mid }));
+  for (let i = 0; i < 80; i++) {
+    if (await evaluate<boolean>(`!!document.querySelector(".sheet.turning")`)) {
+      v5live = true;
+      break;
+    }
+    await sleep(25);
+  }
+  const v5mid = await evaluate<{ versoed: boolean; flip3d: boolean }>(
+    `(()=>{document.getElementById("verso-turn").click();const sh=document.getElementById("sheet");return{versoed:sh.classList.contains("versoed"),flip3d:sh.classList.contains("flip3d")};})()`,
+  );
+  check(
+    "V5 a flip attempt during a LIVE style-turn is ignored (the turn owns the sheet)",
+    v5live && v5mid.versoed === false && v5mid.flip3d === false,
+    JSON.stringify({ v5live, ...v5mid }),
+  );
   await waitTurned("v5-turn-lands");
-  const v5 = await evaluate<{ style: string | null; versoed: boolean; svgCount: number; back: number }>(`(()=>{const svg=document.querySelector("#map svg");const sh=document.getElementById("sheet");return{style:svg?svg.getAttribute("data-vellum-style"):null,versoed:sh.classList.contains("versoed"),svgCount:document.querySelectorAll("#map svg").length,back:document.querySelectorAll(".sheet-back").length};})()`);
-  check("V5b the turn still lands re-dressed and un-flipped after the ignored click", v5.style === "ink" && v5.versoed === false && v5.svgCount === 1 && v5.back === 0, JSON.stringify(v5));
+  const v5 = await evaluate<{ style: string | null; versoed: boolean; svgCount: number; back: number }>(
+    `(()=>{const svg=document.querySelector("#map svg");const sh=document.getElementById("sheet");return{style:svg?svg.getAttribute("data-vellum-style"):null,versoed:sh.classList.contains("versoed"),svgCount:document.querySelectorAll("#map svg").length,back:document.querySelectorAll(".sheet-back").length};})()`,
+  );
+  check(
+    "V5b the turn still lands re-dressed and un-flipped after the ignored click",
+    v5.style === "ink" && v5.versoed === false && v5.svgCount === 1 && v5.back === 0,
+    JSON.stringify(v5),
+  );
 }
 
 async function vRestore({ evaluate, waitSettled }: VersoKit): Promise<void> {
-  await evaluate(`(()=>{document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("draw").click();})()`);
+  await evaluate(
+    `(()=>{document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("draw").click();})()`,
+  );
   await waitSettled("post-turn-restore");
 }

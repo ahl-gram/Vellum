@@ -62,14 +62,9 @@ function gazetteerHtml(world: World): string {
     .map((i) => {
       const s = world.settlements[i]!;
       const realmId = world.realms.labels[s.x + s.y * world.elev.w] as number;
-      const realm =
-        realmId >= 0 && world.names.realms.length > 0
-          ? (world.names.realms[realmId] ?? "—")
-          : "—";
+      const realm = realmId >= 0 && world.names.realms.length > 0 ? (world.names.realms[realmId] ?? "—") : "—";
       const note = notes.get(i)!;
-      const former = s.formerName
-        ? `<span class="former">Once called ${escapeXml(s.formerName)}.</span>`
-        : "";
+      const former = s.formerName ? `<span class="former">Once called ${escapeXml(s.formerName)}.</span>` : "";
       return `<tr>
   <td class="name ${s.kind}">${escapeXml(s.name)}${former}</td>
   <td>${KIND_LABEL[s.kind]}</td>
@@ -81,9 +76,7 @@ function gazetteerHtml(world: World): string {
 
   const realmLines =
     world.names.realms.length > 1
-      ? `<p class="realms">${world.names.realms
-          .map((r) => escapeXml(lore.realmNote(r)))
-          .join(" ")}</p>`
+      ? `<p class="realms">${world.names.realms.map((r) => escapeXml(lore.realmNote(r))).join(" ")}</p>`
       : "";
 
   return `<section>
@@ -126,12 +119,7 @@ ${banners}
 function chronicleHtml(world: World): string {
   const events = world.history.events;
   if (events.length === 0) return "";
-  const items = events
-    .map(
-      (e) =>
-        `<li><span class="year">${e.year}</span> ${escapeXml(e.text)}</li>`,
-    )
-    .join("\n");
+  const items = events.map((e) => `<li><span class="year">${e.year}</span> ${escapeXml(e.text)}</li>`).join("\n");
   return `<section>
 <h2>Chronicle</h2>
 <p class="chronicle-intro">A brief history of ${escapeXml(world.title.title)}, in the years before the present survey.</p>
@@ -150,10 +138,7 @@ function regionPlates(world: World, width: number): AtlasPlate[] {
   const towns = world.settlements.filter((s) => s.kind === "town");
   if (towns.length > 0) {
     const far = towns.reduce((a, b) =>
-      Math.hypot(b.x - capital.x, b.y - capital.y) >
-      Math.hypot(a.x - capital.x, a.y - capital.y)
-        ? b
-        : a,
+      Math.hypot(b.x - capital.x, b.y - capital.y) > Math.hypot(a.x - capital.x, a.y - capital.y) ? b : a,
     );
     targets.push({ anchor: far, label: `The Environs of ${far.name}` });
   }
@@ -185,10 +170,7 @@ export function prospectPlates(world: World, bannerStyle: StyleName, width: numb
   ];
 }
 
-export function composeAtlas(
-  world: World,
-  opts: { width?: number; bannerStyle?: StyleName } = {},
-): AtlasComposition {
+export function composeAtlas(world: World, opts: { width?: number; bannerStyle?: StyleName } = {}): AtlasComposition {
   const width = opts.width ?? 1500;
   const bannerStyle = opts.bannerStyle ?? "antique";
   const hero: AtlasPlate = {

@@ -123,22 +123,44 @@ test("zoomTarget clamps the scale BEFORE anchoring, so the cursor point never dr
   assert.equal(clamped.s, MAX_SCALE, "the notch that crosses the ceiling clamps");
   const before = under(nearCeiling);
   const after = under(clamped);
-  assert.ok(Math.abs(after.fx - before.fx) < 1e-9, "the sheet fraction under the cursor is unchanged through the clamp");
+  assert.ok(
+    Math.abs(after.fx - before.fx) < 1e-9,
+    "the sheet fraction under the cursor is unchanged through the clamp",
+  );
   assert.ok(Math.abs(after.fy - before.fy) < 1e-9, "same for fy");
 
   const floor = { ...camForCenter(0.5, 0.5, fit * MIN_FIT_FACTOR, view, SHEET) };
   const pastFloor = zoomTarget(floor, 0.5, at, view, SHEET, fit);
   assert.ok(Math.abs(pastFloor.s - fit * MIN_FIT_FACTOR) < 1e-12, "scale holds at the floor");
-  assert.ok(Math.abs(pastFloor.x - floor.x) < 1e-9, "x holds at the floor: repeated wheel events cannot walk the sheet");
+  assert.ok(
+    Math.abs(pastFloor.x - floor.x) < 1e-9,
+    "x holds at the floor: repeated wheel events cannot walk the sheet",
+  );
   assert.ok(Math.abs(pastFloor.y - floor.y) < 1e-9, "y holds at the floor");
 });
 
 test("the client bundle never imports the engine: stage-data stays build-time only (#456 skeptic finding 8)", () => {
-  for (const mod of ["app.ts", "camera.ts", "cards.ts", "ceremony.ts", "coords.ts", "drift.ts", "input.ts", "station-flight.ts", "veil.ts"]) {
+  for (const mod of [
+    "app.ts",
+    "camera.ts",
+    "cards.ts",
+    "ceremony.ts",
+    "coords.ts",
+    "drift.ts",
+    "input.ts",
+    "station-flight.ts",
+    "veil.ts",
+  ]) {
     const src = read(`src/site/home/${mod}`);
-    assert.ok(!src.includes("stage-data"), `src/site/home/${mod} must not import stage-data (the engine graph rides in with it)`);
+    assert.ok(
+      !src.includes("stage-data"),
+      `src/site/home/${mod} must not import stage-data (the engine graph rides in with it)`,
+    );
     assert.ok(!src.includes("world/generate"), `src/site/home/${mod} must not import the engine directly`);
-    assert.ok(!src.includes("./stations.ts"), `src/site/home/${mod} must not import the station roster (stage-data rides in with it, #458)`);
+    assert.ok(
+      !src.includes("./stations.ts"),
+      `src/site/home/${mod} must not import the station roster (stage-data rides in with it, #458)`,
+    );
   }
 });
 
@@ -165,5 +187,9 @@ test("the press, the cleaner, and .gitignore all carry the home twin (#455)", as
     "BUNDLE_ENTRIES carries the home entry with its root twin",
   );
   assert.ok(read(".gitignore").split("\n").includes("public/app.bundle.js"), ".gitignore carries the root twin");
-  assert.match(read("scripts/clean-public-generated.ts"), /^\s*"app\.bundle\.js",\s*$/m, "the cleaner sweeps the root twin");
+  assert.match(
+    read("scripts/clean-public-generated.ts"),
+    /^\s*"app\.bundle\.js",\s*$/m,
+    "the cleaner sweeps the root twin",
+  );
 });

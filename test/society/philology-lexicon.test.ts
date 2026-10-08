@@ -39,9 +39,12 @@ test("the lexicon glosses nothing the grammar cannot produce, so a typo cannot h
     const lex = PHILOLOGY_LEXICON[culture.id];
     if (!lex) continue;
     const inv = inventories(culture.id);
-    for (const root of Object.keys(lex.onsets)) if (!inv.onsets.includes(root)) strays.push(`${culture.id} onset ${root}`);
-    for (const root of Object.keys(lex.codas)) if (!inv.codas.includes(root)) strays.push(`${culture.id} coda -${root}`);
-    for (const root of Object.keys(lex.suffixes)) if (!inv.suffixes.includes(root)) strays.push(`${culture.id} suffix -${root}`);
+    for (const root of Object.keys(lex.onsets))
+      if (!inv.onsets.includes(root)) strays.push(`${culture.id} onset ${root}`);
+    for (const root of Object.keys(lex.codas))
+      if (!inv.codas.includes(root)) strays.push(`${culture.id} coda -${root}`);
+    for (const root of Object.keys(lex.suffixes))
+      if (!inv.suffixes.includes(root)) strays.push(`${culture.id} suffix -${root}`);
   }
   assert.deepEqual(strays, [], `${strays.length} entries gloss a root no culture can utter`);
 });
@@ -65,7 +68,11 @@ test("the three scholars' footnotes #124 asks for are still in the lexicon", () 
 test("a gloss cannot grow until the card it prints on becomes a column", () => {
   // The card is a 16rem sheet, so a gloss's length is the card's height; measured after trimming: median 85, p90 123, max 167.
   for (const [id, lex] of Object.entries(PHILOLOGY_LEXICON)) {
-    for (const [kind, table] of [["onset", lex.onsets], ["coda", lex.codas], ["suffix", lex.suffixes]] as const) {
+    for (const [kind, table] of [
+      ["onset", lex.onsets],
+      ["coda", lex.codas],
+      ["suffix", lex.suffixes],
+    ] as const) {
       for (const [root, gloss] of Object.entries(table)) {
         assert.ok(gloss.length <= 72, `${id} ${kind} ${root} is ${gloss.length} chars: "${gloss}"`);
       }
@@ -75,7 +82,11 @@ test("a gloss cannot grow until the card it prints on becomes a column", () => {
 
 test("no gloss is blank, and none carries an em-dash", () => {
   for (const [id, lex] of Object.entries(PHILOLOGY_LEXICON)) {
-    for (const [kind, table] of [["onset", lex.onsets], ["coda", lex.codas], ["suffix", lex.suffixes]] as const) {
+    for (const [kind, table] of [
+      ["onset", lex.onsets],
+      ["coda", lex.codas],
+      ["suffix", lex.suffixes],
+    ] as const) {
       for (const [root, gloss] of Object.entries(table)) {
         assert.ok(gloss.trim().length > 0, `${id} ${kind} ${root} glosses blank`);
         assert.ok(!gloss.includes("—"), `${id} ${kind} ${root} carries an em-dash`);

@@ -7,13 +7,23 @@ import { findMarks, sectionEmpty } from "../../src/site/glossary/term-find.ts";
 const names = ["Cartouche", "Colophon", "Rhumb line", "Surveyor's glass"];
 
 test("a query marks the names containing it as hits and the rest as misses, whatever the case", () => {
-  assert.deepEqual(findMarks(names, "GLASS").map((m) => m.hit), [false, false, false, true]);
-  assert.deepEqual(findMarks(names, "co").map((m) => m.miss), [true, false, true, true], "Colophon alone carries \"co\"");
+  assert.deepEqual(
+    findMarks(names, "GLASS").map((m) => m.hit),
+    [false, false, false, true],
+  );
+  assert.deepEqual(
+    findMarks(names, "co").map((m) => m.miss),
+    [true, false, true, true],
+    'Colophon alone carries "co"',
+  );
 });
 
 test("an empty or blank query clears every mark, so the whole index stands again", () => {
   for (const q of ["", "   "]) {
-    assert.ok(findMarks(names, q).every((m) => !m.hit && !m.miss), `"${q}" marks nothing`);
+    assert.ok(
+      findMarks(names, q).every((m) => !m.hit && !m.miss),
+      `"${q}" marks nothing`,
+    );
     assert.equal(sectionEmpty(findMarks(names, q), q), false, "and folds no section");
   }
 });

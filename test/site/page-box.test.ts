@@ -2,7 +2,6 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { PAGE_FLOOR, pageWidth, pageX } from "../../src/site/shared/page-box.ts";
 
-
 test("UF1 the page is never narrower than the floor, and is the window from the floor up", () => {
   assert.equal(PAGE_FLOOR, 1024);
   assert.equal(pageWidth(640), 1024, "a 640 window lays out the 1024 page");

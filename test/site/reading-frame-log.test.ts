@@ -133,16 +133,8 @@ test("one canonical row rule covers the one arrived-state (#219; collapsed at #2
       `the retired .${stale} selector must not linger after the #220 collapse`,
     );
   }
-  assert.match(
-    css,
-    /\.prologue\b/,
-    "the surveyor's prologue voice (#220's Overture) is dressed in the frame css",
-  );
-  assert.match(
-    css,
-    /\.cr-year/,
-    "the frame dresses the shared .cr-year column the engine's builders already emit",
-  );
+  assert.match(css, /\.prologue\b/, "the surveyor's prologue voice (#220's Overture) is dressed in the frame css");
+  assert.match(css, /\.cr-year/, "the frame dresses the shared .cr-year column the engine's builders already emit");
   assert.match(css, /\.cr-text/, "and the shared .cr-text column");
 });
 

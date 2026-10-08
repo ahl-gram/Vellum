@@ -2,10 +2,22 @@ import type { Rule } from "eslint";
 
 type TypeNode = { type: string; typeName?: { type: string; name?: string }; types?: readonly TypeNode[] };
 
-const ERROR_KINDS = new Set(["Error", "TypeError", "RangeError", "ReferenceError", "SyntaxError", "EvalError", "URIError", "AggregateError", "SuppressedError"]);
+const ERROR_KINDS = new Set([
+  "Error",
+  "TypeError",
+  "RangeError",
+  "ReferenceError",
+  "SyntaxError",
+  "EvalError",
+  "URIError",
+  "AggregateError",
+  "SuppressedError",
+]);
 
 const namesErrorKind = (type: TypeNode): boolean =>
-  (type.type === "TSTypeReference" && type.typeName?.type === "Identifier" && ERROR_KINDS.has(type.typeName.name ?? "")) ||
+  (type.type === "TSTypeReference" &&
+    type.typeName?.type === "Identifier" &&
+    ERROR_KINDS.has(type.typeName.name ?? "")) ||
   ((type.type === "TSUnionType" || type.type === "TSIntersectionType") && (type.types ?? []).some(namesErrorKind));
 
 const noErrorCast: Rule.RuleModule = {
@@ -17,7 +29,8 @@ const noErrorCast: Rule.RuleModule = {
   },
   create(context) {
     const judge = (node: Rule.Node): void => {
-      if (namesErrorKind((node as unknown as { typeAnnotation: TypeNode }).typeAnnotation)) context.report({ node, messageId: "cast" });
+      if (namesErrorKind((node as unknown as { typeAnnotation: TypeNode }).typeAnnotation))
+        context.report({ node, messageId: "cast" });
     };
     return { TSAsExpression: judge, TSTypeAssertion: judge };
   },

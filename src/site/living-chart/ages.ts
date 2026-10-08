@@ -12,13 +12,7 @@ import {
   type Chamber,
   type DetentDrag,
 } from "../../render/ages-track.ts";
-import {
-  SWEEP_MS,
-  sweepYearAt,
-  sweepElapsedAt,
-  eventIsPast,
-  type YearRange,
-} from "../../render/chronicle-scrubber.ts";
+import { SWEEP_MS, sweepYearAt, sweepElapsedAt, eventIsPast, type YearRange } from "../../render/chronicle-scrubber.ts";
 import { tAtElapsed, elapsedAtT } from "../../render/voyage-geometry.ts";
 import { DEFAULT_PACE, anchorAt, repaced, storyAt, type Pace, type SweepAnchor } from "./pace.ts";
 import type { Chronicle } from "./chronicle.ts";
@@ -60,7 +54,18 @@ function prefersReduce(): boolean {
 
 // eslint-disable-next-line max-lines-per-function
 export function createAges(deps: AgesDeps) {
-  const { panel, playBtn, range: rangeEl, readout: readoutEl, strip: stripEl, onPark, onAgesTold, overlay, chronicle, voyage } = deps;
+  const {
+    panel,
+    playBtn,
+    range: rangeEl,
+    readout: readoutEl,
+    strip: stripEl,
+    onPark,
+    onAgesTold,
+    overlay,
+    chronicle,
+    voyage,
+  } = deps;
 
   let ages: AgesSession | null = null;
   let pace: Pace = DEFAULT_PACE;
@@ -170,8 +175,7 @@ export function createAges(deps: AgesDeps) {
     panel.hidden = false;
     setPlayLabel(false);
     const rawRest: AgesPos =
-      opts.rest ??
-      (priorChamber === "survey" ? { chamber: "survey", t: 1 } : { chamber: "ages", year: range.max });
+      opts.rest ?? (priorChamber === "survey" ? { chamber: "survey", t: 1 } : { chamber: "ages", year: range.max });
     const rest: AgesPos =
       rawRest.chamber === "ages"
         ? { chamber: "ages", year: Math.max(range.min, Math.min(range.max, Math.round(rawRest.year))) }
@@ -242,8 +246,7 @@ export function createAges(deps: AgesDeps) {
     const sched = voyage.internals.schedule();
     const cumMs = sched ? sched.cumMs : [0];
     const surveyMs = sched ? sched.totalMs : 0;
-    const elapsed0 =
-      pos.chamber === "survey" ? elapsedAtT(cumMs, pos.t) : surveyMs + sweepElapsedAt(range, pos.year);
+    const elapsed0 = pos.chamber === "survey" ? elapsedAtT(cumMs, pos.t) : surveyMs + sweepElapsedAt(range, pos.year);
     const totalMs = surveyMs + SWEEP_MS;
     ages.anchor = anchorAt(performance.now(), elapsed0, pace);
     ages.playing = true;
@@ -296,10 +299,7 @@ export function createAges(deps: AgesDeps) {
     if (!ages) return;
     if (ages.playing) pause();
     const range = rangeOf();
-    paintPos(
-      { chamber: "ages", year: Math.max(range.min, Math.min(range.max, Math.round(year))) },
-      { postLog: false },
-    );
+    paintPos({ chamber: "ages", year: Math.max(range.min, Math.min(range.max, Math.round(year))) }, { postLog: false });
     syncSinkAtRest();
   }
 

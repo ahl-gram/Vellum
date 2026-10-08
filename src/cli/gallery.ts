@@ -35,12 +35,7 @@ export function galleryCards(startSeed: number, count: number): readonly Gallery
   if (memo) return memo;
   const cards = gallerySeeds(startSeed, count).map((seed) => {
     const world = generateWorld(defaultRecipe(seed));
-    const proj = createProjection(
-      world.elev.w,
-      world.elev.h,
-      GALLERY_PLATE_WIDTH,
-      marginFor(GALLERY_PLATE_WIDTH),
-    );
+    const proj = createProjection(world.elev.w, world.elev.h, GALLERY_PLATE_WIDTH, marginFor(GALLERY_PLATE_WIDTH));
     return {
       seed,
       file: `chart-${seed}.svg`,

@@ -58,34 +58,44 @@ function serpentNode(style: MapStyle, k: number, at: { readonly x: number; reado
   const s = 1.5 * k;
   const { x, y } = at;
   const stroke = {
-    stroke: style.ink, "stroke-width": (1.5 * k).toFixed(2),
-    "stroke-linecap": "round" as const, "stroke-linejoin": "round" as const,
+    stroke: style.ink,
+    "stroke-width": (1.5 * k).toFixed(2),
+    "stroke-linecap": "round" as const,
+    "stroke-linejoin": "round" as const,
   };
   return el("g", { id: "sea-serpent", opacity: 0.85 }, [
     el("path", {
       d: `M${x - 34 * s} ${y}l${-6 * s} ${-7 * s}m${6 * s} ${7 * s}l${-8 * s} ${-2 * s}`,
-      fill: "none", ...stroke,
+      fill: "none",
+      ...stroke,
     }),
     el("path", {
       d: `M${x - 32 * s} ${y}q${7 * s} ${-13 * s} ${14 * s} 0`,
-      fill: style.paper, ...stroke,
+      fill: style.paper,
+      ...stroke,
     }),
     el("path", {
       d: `M${x - 14 * s} ${y}q${7 * s} ${-16 * s} ${14 * s} 0`,
-      fill: style.paper, ...stroke,
+      fill: style.paper,
+      ...stroke,
     }),
     el("path", {
       d: `M${x + 4 * s} ${y}q${2 * s} ${-12 * s} ${8 * s} ${-13 * s}q${7 * s} ${-1.4 * s} ${7 * s} ${4 * s}q0 ${3.4 * s} ${-5 * s} ${2.6 * s}l${2 * s} ${2.4 * s}`,
-      fill: style.paper, ...stroke,
+      fill: style.paper,
+      ...stroke,
     }),
     el("circle", {
-      cx: (x + 14.6 * s).toFixed(1), cy: (y - 10.4 * s).toFixed(1),
-      r: (0.9 * k).toFixed(2), fill: style.ink,
+      cx: (x + 14.6 * s).toFixed(1),
+      cy: (y - 10.4 * s).toFixed(1),
+      r: (0.9 * k).toFixed(2),
+      fill: style.ink,
     }),
     el("path", {
       d: `M${x - 38 * s} ${y + 4 * s}h${10 * s}m${6 * s} 0h${12 * s}m${8 * s} 0h${10 * s}`,
-      fill: "none", stroke: style.inkSoft,
-      "stroke-width": (0.8 * k).toFixed(2), "stroke-opacity": 0.55,
+      fill: "none",
+      stroke: style.inkSoft,
+      "stroke-width": (0.8 * k).toFixed(2),
+      "stroke-opacity": 0.55,
     }),
   ]);
 }
@@ -94,22 +104,27 @@ function shipNode(style: MapStyle, k: number, at: { readonly x: number; readonly
   const s = 1.25 * k;
   const { x, y } = at;
   const stroke = {
-    stroke: style.ink, "stroke-width": (1.4 * k).toFixed(2),
-    "stroke-linecap": "round" as const, "stroke-linejoin": "round" as const,
+    stroke: style.ink,
+    "stroke-width": (1.4 * k).toFixed(2),
+    "stroke-linecap": "round" as const,
+    "stroke-linejoin": "round" as const,
   };
   return el("g", { id: "sea-ship", opacity: 0.85 }, [
     el("path", {
       d: `M${x - 13 * s} ${y - 2 * s}q${13 * s} ${7 * s} ${26 * s} 0l${-3 * s} ${-2.4 * s}h${-20 * s}Z`,
-      fill: style.paper, ...stroke,
+      fill: style.paper,
+      ...stroke,
     }),
     el("path", { d: `M${x} ${y - 4.4 * s}V${y - 22 * s}`, fill: "none", ...stroke }),
     el("path", {
       d: `M${x} ${y - 21 * s}q${-11 * s} ${7 * s} 0 ${15 * s}Z`,
-      fill: style.paper, ...stroke,
+      fill: style.paper,
+      ...stroke,
     }),
     el("path", {
       d: `M${x + 1.4 * s} ${y - 20 * s}q${8 * s} ${6 * s} ${1 * s} ${13 * s}Z`,
-      fill: style.paper, ...stroke,
+      fill: style.paper,
+      ...stroke,
     }),
     el("path", {
       d: `M${x} ${y - 22 * s}l${5 * s} ${1.8 * s}l${-5 * s} ${1.8 * s}Z`,
@@ -117,8 +132,10 @@ function shipNode(style: MapStyle, k: number, at: { readonly x: number; readonly
     }),
     el("path", {
       d: `M${x - 18 * s} ${y + 3 * s}h${8 * s}m${5 * s} 0h${10 * s}m${4 * s} 0h${7 * s}`,
-      fill: "none", stroke: style.inkSoft,
-      "stroke-width": (0.8 * k).toFixed(2), "stroke-opacity": 0.55,
+      fill: "none",
+      stroke: style.inkSoft,
+      "stroke-width": (0.8 * k).toFixed(2),
+      "stroke-opacity": 0.55,
     }),
   ]);
 }
@@ -128,12 +145,7 @@ function claimSpot(
   o: { x: number; y: number } | undefined,
   half: number,
 ): { x: number; y: number } | undefined {
-  return o && ctx.labels.tryClaim(
-    { x: o.x - half, y: o.y - half, w: half * 2, h: half * 2 },
-    6,
-  )
-    ? o
-    : undefined;
+  return o && ctx.labels.tryClaim({ x: o.x - half, y: o.y - half, w: half * 2, h: half * 2 }, 6) ? o : undefined;
 }
 
 export function seaDecorLayer(
@@ -162,19 +174,18 @@ export function seaDecorLayer(
   const open = openSeaSpots(ctx, clearOf);
   const waves = waveNodes(style, k, drng, open);
 
-  const deepSpots = open
-    .filter((o) => o.d >= 8 && o.edgeOk && clearOf(o.x, o.y, 90 * k))
-    .sort((a, b) => b.d - a.d);
-  const serpentAt = decor.serpent === false
-    ? undefined
-    : claimSpot(ctx, deepSpots.find((o) => clearOf(o.x, o.y, 90 * k)), 60 * k);
+  const deepSpots = open.filter((o) => o.d >= 8 && o.edgeOk && clearOf(o.x, o.y, 90 * k)).sort((a, b) => b.d - a.d);
+  const serpentAt =
+    decor.serpent === false
+      ? undefined
+      : claimSpot(
+          ctx,
+          deepSpots.find((o) => clearOf(o.x, o.y, 90 * k)),
+          60 * k,
+        );
   const shipAt = claimSpot(
     ctx,
-    deepSpots.find(
-      (o) =>
-        !serpentAt ||
-        Math.hypot(o.x - serpentAt.x, o.y - serpentAt.y) > 260 * k,
-    ),
+    deepSpots.find((o) => !serpentAt || Math.hypot(o.x - serpentAt.x, o.y - serpentAt.y) > 260 * k),
     45 * k,
   );
 

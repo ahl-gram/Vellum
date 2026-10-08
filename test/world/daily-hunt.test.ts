@@ -14,11 +14,7 @@ import {
 import { createProjection } from "../../src/render/transform.ts";
 import { buildClueFacts } from "../../src/world/daily-hunt-clue-facts.ts";
 import type { World } from "../../src/world/types.ts";
-import {
-  expectedLeadAxis,
-  mustQuarry,
-  villagePoolSize,
-} from "../../test-support/daily-hunt-geometry.ts";
+import { expectedLeadAxis, mustQuarry, villagePoolSize } from "../../test-support/daily-hunt-geometry.ts";
 import { DAILY_SEEDS, DAILY, SWEEP, SWEEP_SVGS, gatesFor } from "../../test-support/daily-hunt-sweep.ts";
 
 test("chooseQuarry is deterministic across independent constructions of a seed", () => {
@@ -153,9 +149,7 @@ test("the leading compass line is never the strictly less decisive axis (#333's 
   SWEEP.forEach((world, wi) => {
     const q = mustQuarry(world);
     const gates = gatesFor(world, q, SWEEP_SVGS[wi]!);
-    const lead = buildClues(world, q, gates).filter(
-      (c) => c.kind === "ew" || c.kind === "ns",
-    )[0]!;
+    const lead = buildClues(world, q, gates).filter((c) => c.kind === "ew" || c.kind === "ns")[0]!;
     const want = expectedLeadAxis(world, q.settlement.x, q.settlement.y);
     if (want !== null) {
       assert.equal(lead.kind, want, `seed ${world.recipe.seed} leads with the decisive axis`);
@@ -173,10 +167,7 @@ test("days the decisive axis already led are untouched: the coin is still drawn"
 
   assert.equal(sig(DAILY[0]!), "ew:east | onriver: | near:Sahi | road:track | terrain:forest");
   assert.equal(sig(DAILY[3]!), "ew:west | near:Nepai | road:track | realm:Greater Hoaro");
-  assert.equal(
-    sig(DAILY[5]!),
-    "ns:south | near:Tseyama | road:track | realm:The Shogunate of Gaicha | terrain:forest",
-  );
+  assert.equal(sig(DAILY[5]!), "ns:south | near:Tseyama | road:track | realm:The Shogunate of Gaicha | terrain:forest");
 });
 
 test("classifyDistanceBand is monotonic and a direct hit is never cold", () => {
@@ -235,9 +226,7 @@ test("a ruined quarry reveals its abandonment event verbatim", () => {
   });
   assert.ok(ruined, "expected a swept world whose quarry is a ruin with a surviving event");
   const q = chooseQuarry(ruined)!;
-  const event = ruined.history.events.find(
-    (e) => e.kind === "ruin" && e.settlement === q.idx,
-  );
+  const event = ruined.history.events.find((e) => e.kind === "ruin" && e.settlement === q.idx);
   assert.ok(event, "a ruined quarry has a matching ruin event");
   const r = revealLore(ruined, q);
   assert.equal(r.line, event.text, "surfaces the chronicle's abandonment line");
@@ -264,10 +253,7 @@ test("chooseQuarry falls back to the full pool when exclusion would empty it", (
 test("chooseQuarry is deterministic for a given exclusion set", () => {
   const world = SWEEP.find((w) => villagePoolSize(w) >= 2)!;
   const ex = new Set([chooseQuarry(world)!.idx]);
-  assert.equal(
-    chooseQuarry(world, { exclude: ex })!.idx,
-    chooseQuarry(world, { exclude: ex })!.idx,
-  );
+  assert.equal(chooseQuarry(world, { exclude: ex })!.idx, chooseQuarry(world, { exclude: ex })!.idx);
 });
 
 test("legendExcluded flags settlements under the box and spares those outside it", () => {
@@ -282,7 +268,6 @@ test("legendExcluded flags settlements under the box and spares those outside it
   assert.ok(!legendExcluded(world, corner, widthPx).has(0), "a settlement clear of the box is spared");
   assert.equal(legendExcluded(world, null, widthPx).size, 0, "no legend box excludes nothing");
 });
-
 
 const clickWorld = {
   elev: { w: 100, h: 100 },

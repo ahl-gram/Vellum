@@ -14,12 +14,7 @@ export type Projection = {
   py(y: number): number;
 };
 
-export function createProjection(
-  gridW: number,
-  gridH: number,
-  widthPx: number,
-  margin: number,
-): Projection {
+export function createProjection(gridW: number, gridH: number, widthPx: number, margin: number): Projection {
   const scale = (widthPx - 2 * margin) / (gridW - 1);
   const heightPx = 2 * margin + (gridH - 1) * scale;
   return {

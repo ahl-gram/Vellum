@@ -1,8 +1,4 @@
-export function largestBlob(
-  w: number,
-  h: number,
-  predicate: (i: number) => boolean,
-): number[] {
+export function largestBlob(w: number, h: number, predicate: (i: number) => boolean): number[] {
   const seen = new Uint8Array(w * h);
   let best: number[] = [];
   for (let start = 0; start < w * h; start++) {
@@ -15,7 +11,12 @@ export function largestBlob(
       blob.push(i);
       const gx = i % w;
       const gy = (i / w) | 0;
-      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {
+      for (const [dx, dy] of [
+        [1, 0],
+        [-1, 0],
+        [0, 1],
+        [0, -1],
+      ] as const) {
         const nx = gx + dx;
         const ny = gy + dy;
         if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;

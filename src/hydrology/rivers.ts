@@ -20,11 +20,7 @@ export type RiverOptions = {
 };
 
 /** Callers guarantee a non-empty landAcc. */
-export function riverThreshold(
-  landAcc: readonly number[],
-  quantileQ = 0.985,
-  minAcc = 8,
-): number {
+export function riverThreshold(landAcc: readonly number[], quantileQ = 0.985, minAcc = 8): number {
   return Math.max(quantile(landAcc, quantileQ), minAcc);
 }
 
@@ -49,13 +45,17 @@ function riverMask(elev: Field, flow: FlowResult, seaLevel: number, opts: RiverO
 
   const isRiver = new Uint8Array(n);
   for (let i = 0; i < n; i++) {
-    isRiver[i] =
-      (data[i] as number) > seaLevel && (acc[i] as number) >= threshold ? 1 : 0;
+    isRiver[i] = (data[i] as number) > seaLevel && (acc[i] as number) >= threshold ? 1 : 0;
   }
   return isRiver;
 }
 
-function riverGraph(elev: Field, dir: Int32Array, seaLevel: number, isRiver: Uint8Array): { children: Map<number, number[]>; mouths: number[] } {
+function riverGraph(
+  elev: Field,
+  dir: Int32Array,
+  seaLevel: number,
+  isRiver: Uint8Array,
+): { children: Map<number, number[]>; mouths: number[] } {
   const { data } = elev;
   const n = data.length;
   const children = new Map<number, number[]>();
@@ -129,12 +129,7 @@ function traceRivers(
   return rivers;
 }
 
-export function extractRivers(
-  elev: Field,
-  flow: FlowResult,
-  seaLevel: number,
-  opts: RiverOptions = {},
-): River[] {
+export function extractRivers(elev: Field, flow: FlowResult, seaLevel: number, opts: RiverOptions = {}): River[] {
   const { minLength = 3 } = opts;
   const isRiver = riverMask(elev, flow, seaLevel, opts);
   if (isRiver === null) return [];

@@ -41,30 +41,66 @@ test("PRR1 the Print Room is a chart room: chartRoom on the layout, the RoomFoli
 
 test("PRR2 the corner is the mockup plus the dice (ruled 2026-08-30): seed, dice, style and Pull a proof in the folio's control row", () => {
   const folio = between("<RoomFolio", "</RoomFolio>");
-  assert.match(folio, /<div class="folio-controls" role="group" aria-label="[^"]+">/, "the row is the folio's control group");
-  assert.match(folio, /<input id="pr-seed" class="control" type="number" min="0" max="4294967295" step="1"/, "the seed input keeps its id and takes the corner's dress");
-  assert.match(folio, /<button id="pr-random" class="dice" type="button"[^>]*aria-label="Random seed">/, "the dice stays (the Reading Room kept its own)");
+  assert.match(
+    folio,
+    /<div class="folio-controls" role="group" aria-label="[^"]+">/,
+    "the row is the folio's control group",
+  );
+  assert.match(
+    folio,
+    /<input id="pr-seed" class="control" type="number" min="0" max="4294967295" step="1"/,
+    "the seed input keeps its id and takes the corner's dress",
+  );
+  assert.match(
+    folio,
+    /<button id="pr-random" class="dice" type="button"[^>]*aria-label="Random seed">/,
+    "the dice stays (the Reading Room kept its own)",
+  );
   assert.match(folio, /<select id="pr-style" class="control"/, "the style picker takes the corner's dress");
-  assert.match(folio, /<button id="pr-draw" class="primary" type="button">Pull a proof<\/button>/, "Pull a proof is the room's primary");
-  assert.ok(folio.indexOf('id="pr-seed"') < folio.indexOf('id="pr-random"') && folio.indexOf('id="pr-random"') < folio.indexOf('id="pr-style"') && folio.indexOf('id="pr-style"') < folio.indexOf('id="pr-draw"'), "seed, dice, style, primary: the mockup's order with the dice beside the seed");
+  assert.match(
+    folio,
+    /<button id="pr-draw" class="primary" type="button">Pull a proof<\/button>/,
+    "Pull a proof is the room's primary",
+  );
+  assert.ok(
+    folio.indexOf('id="pr-seed"') < folio.indexOf('id="pr-random"') &&
+      folio.indexOf('id="pr-random"') < folio.indexOf('id="pr-style"') &&
+      folio.indexOf('id="pr-style"') < folio.indexOf('id="pr-draw"'),
+    "seed, dice, style, primary: the mockup's order with the dice beside the seed",
+  );
   const slip = between("<Slip", "</Slip>");
-  assert.ok(!slip.includes('id="pr-draw"') && !slip.includes('id="pr-seed"'), "the seed row does not also sit on the slip");
+  assert.ok(
+    !slip.includes('id="pr-draw"') && !slip.includes('id="pr-seed"'),
+    "the seed row does not also sit on the slip",
+  );
 });
 
 test("PRR3 the Bound Atlas is the slip: Bind and the contents in its body, Print / Download / Hide in its foot", () => {
-  assert.match(page, /<Slip id="atlas" verb="Take home" title="The Bound Atlas" where="the whole atlas on one sheet" fold="Fold the atlas away">/, "the slip carries the mockup's head; the fold names the atlas, not the retired desk");
+  assert.match(
+    page,
+    /<Slip id="atlas" verb="Take home" title="The Bound Atlas" where="the whole atlas on one sheet" fold="Fold the atlas away">/,
+    "the slip carries the mockup's head; the fold names the atlas, not the retired desk",
+  );
   const slip = between("<Slip", "</Slip>");
   const foot = slip.slice(slip.indexOf('slot="foot"'));
   assert.ok(foot.length > 0, "the slip has a foot");
   const body = slip.slice(0, slip.indexOf('slot="foot"'));
-  assert.match(body, /<button id="pr-bind" class="primary" type="button" disabled>Bind the atlas<\/button>/, "Bind is the slip's own primary, closed until a proof");
+  assert.match(
+    body,
+    /<button id="pr-bind" class="primary" type="button" disabled>Bind the atlas<\/button>/,
+    "Bind is the slip's own primary, closed until a proof",
+  );
   assert.match(body, /<ol class="contents" id="pr-contents"/, "the contents list is the kit's contents row");
   for (const id of ['id="pr-print"', 'id="pr-download"', 'id="pr-hide"']) {
     assert.ok(foot.includes(id), `${id} stands in the foot`);
     assert.ok(!body.includes(id), `${id} is not also in the body`);
   }
   assert.ok(!page.includes("about 20 MB"), "no unmeasured size in the copy (the download reports its own)");
-  assert.match(css, /body\.has-atlas \.slip \.intro\s*\{[^}]*display:\s*none/, "bound, the bound line replaces the intro (the mockup)");
+  assert.match(
+    css,
+    /body\.has-atlas \.slip \.intro\s*\{[^}]*display:\s*none/,
+    "bound, the bound line replaces the intro (the mockup)",
+  );
   assert.ok(page.indexOf("</Slip>") < page.indexOf("<ChartFolio"), "the slip precedes the chart's folio in the page");
 });
 
@@ -73,16 +109,39 @@ test("PRR4 the legend row is the poster plates plus a road back (ruled 2026-08-3
   assert.match(legend, /<nav class="legend" aria-label="A poster plate">/, "the row is named for the plates");
   const head = legend.slice(legend.indexOf('class="legend-head"'), legend.indexOf('class="legend-row"'));
   assert.match(head, /<select id="pr-format"/, "Pressed-as stands in the legend's head");
-  assert.match(head, /<p class="legend-note">The engraving is exact at any size;/, "the caveat is one dim line between the head and the row");
+  assert.match(
+    head,
+    /<p class="legend-note">The engraving is exact at any size;/,
+    "the caveat is one dim line between the head and the row",
+  );
   assert.ok(head.indexOf('id="pr-format"') < head.indexOf('class="legend-note"'), "the caveat follows the head");
   const row = legend.slice(legend.indexOf('class="legend-row"'));
   const at = (key: string) => row.indexOf(`data-poster="${key}"`);
-  assert.ok(at("chart") >= 0 && at("chart") < at("desk") && at("desk") < at("wall") && at("wall") < at("grand"), "chart, desk, wall, grand: ascending width");
-  assert.match(row, /<button class="legend-btn" type="button" data-poster="chart" disabled><span class="verb dim">1500 px<\/span><span class="room">Chart<\/span><\/button>/, "a plate is a legend button, its width the verb, closed until a proof");
-  assert.match(row, /<LegendButton id="pr-explorer" gold href="\.\.\/explorer\/" verb="Back to" room="The Explorer" \/>/, "the road back to the Explorer is gold (the kit's, #487)");
+  assert.ok(
+    at("chart") >= 0 && at("chart") < at("desk") && at("desk") < at("wall") && at("wall") < at("grand"),
+    "chart, desk, wall, grand: ascending width",
+  );
+  assert.match(
+    row,
+    /<button class="legend-btn" type="button" data-poster="chart" disabled><span class="verb dim">1500 px<\/span><span class="room">Chart<\/span><\/button>/,
+    "a plate is a legend button, its width the verb, closed until a proof",
+  );
+  assert.match(
+    row,
+    /<LegendButton id="pr-explorer" gold href="\.\.\/explorer\/" verb="Back to" room="The Explorer" \/>/,
+    "the road back to the Explorer is gold (the kit's, #487)",
+  );
   assert.ok(row.indexOf('id="pr-explorer"') > at("grand"), "the road stands last");
-  assert.match(legend, /<div class="legend-row" role="group" aria-label="A poster plate">/, "the row names itself; a labelledby on the head would absorb the select's option text");
-  assert.match(legend, /<\/div>\s*<p class="legend-status" id="pr-poster-status" role="status" aria-live="polite"><\/p>\s*$/, "the poster order reports under the row");
+  assert.match(
+    legend,
+    /<div class="legend-row" role="group" aria-label="A poster plate">/,
+    "the row names itself; a labelledby on the head would absorb the select's option text",
+  );
+  assert.match(
+    legend,
+    /<\/div>\s*<p class="legend-status" id="pr-poster-status" role="status" aria-live="polite"><\/p>\s*$/,
+    "the poster order reports under the row",
+  );
   assert.ok(!page.includes('class="plate-row"') && !page.includes('class="plate-dim"'), "the desk's plate row retires");
 });
 
@@ -93,68 +152,177 @@ test("PRR5 the stage holds the fitted sheet with the proof and the turned plate 
     "the kit's stage (#487): its gesture box's transform target holds the proof, the turned plate and the back matter's page (#497)",
   );
   const stage = between("<ChartStage", "<Vignettes />");
-  assert.match(stage, /<p class="status" id="pr-status" role="status" aria-live="polite"><\/p>/, "the status line keeps its id (the suite's settle probe) and is the stage's pill");
+  assert.match(
+    stage,
+    /<p class="status" id="pr-status" role="status" aria-live="polite"><\/p>/,
+    "the status line keeps its id (the suite's settle probe) and is the stage's pill",
+  );
   assert.match(stage, /<p id="pr-warning" class="warning" hidden>/, "the inline-fallback warning stands in the stage");
-  assert.ok(page.includes("<Glass />"), "the Glass is the kit's corner cluster (#487; its presses carry data-zoom for the shared keys binding, atelier-kit.test.ts)");
+  assert.ok(
+    page.includes("<Glass />"),
+    "the Glass is the kit's corner cluster (#487; its presses carry data-zoom for the shared keys binding, atelier-kit.test.ts)",
+  );
   const lines = folioLines();
-  assert.deepEqual(lines, [["folio-title", "folio-title"], ["folio-sub plate-line", "pr-plate-line"], ["folio-sub", "folio-sub"]], "the chart's folio: the world's name, the line naming the plate on the sheet, the survey line");
-  assert.ok(!lines.some(([, id]) => id === "pr-poster-status"), "the poster order does not report in the chart's folio (skeptic on PR #496)");
-  assert.match(page, /<div id="pr-atlas" class="atlas-sheet"><\/div>/, "the hidden document stays the Print / Download source");
+  assert.deepEqual(
+    lines,
+    [
+      ["folio-title", "folio-title"],
+      ["folio-sub plate-line", "pr-plate-line"],
+      ["folio-sub", "folio-sub"],
+    ],
+    "the chart's folio: the world's name, the line naming the plate on the sheet, the survey line",
+  );
+  assert.ok(
+    !lines.some(([, id]) => id === "pr-poster-status"),
+    "the poster order does not report in the chart's folio (skeptic on PR #496)",
+  );
+  assert.match(
+    page,
+    /<div id="pr-atlas" class="atlas-sheet"><\/div>/,
+    "the hidden document stays the Print / Download source",
+  );
   assert.ok(page.indexOf('id="pr-atlas"') > page.indexOf("<Glass />"), "the document follows the furniture");
 });
 
 test("PRR6 seats.ts binds the Glass and the room with the turned plate's own aspect; app.ts refits once the folio is written; nothing scrolls the page (the #494 ruling)", () => {
   assert.match(seats, /import\s*\{\s*bindRoom, type Room\s*\}\s*from\s*"\.\.\/shared\/room\.ts"/, "the shared room");
-  assert.match(seats, /import\s*\{\s*createZoomController\s*\}\s*from\s*"\.\.\/shared\/zoom-controller\.ts"/, "the Glass is the shared controller");
-  assert.match(seats, /import\s*\{\s*bindGlassKeys\s*\}\s*from\s*"\.\.\/shared\/glass-keys\.ts"/, "its keys and buttons are the kit's");
-  assert.match(seats, /bindRoom\(\{[^}]*aspect/, "the room takes the sheet's aspect from the seats (a turned plate is an <img>, so the svg scan finds the hidden proof, not the plate)");
-  assert.match(seats, /restore: \(cam\) =>[\s\S]*?\.refit\(/, "the room's refit is the silent one (no settle, no hash)");
+  assert.match(
+    seats,
+    /import\s*\{\s*createZoomController\s*\}\s*from\s*"\.\.\/shared\/zoom-controller\.ts"/,
+    "the Glass is the shared controller",
+  );
+  assert.match(
+    seats,
+    /import\s*\{\s*bindGlassKeys\s*\}\s*from\s*"\.\.\/shared\/glass-keys\.ts"/,
+    "its keys and buttons are the kit's",
+  );
+  assert.match(
+    seats,
+    /bindRoom\(\{[^}]*aspect/,
+    "the room takes the sheet's aspect from the seats (a turned plate is an <img>, so the svg scan finds the hidden proof, not the plate)",
+  );
+  assert.match(
+    seats,
+    /restore: \(cam\) =>[\s\S]*?\.refit\(/,
+    "the room's refit is the silent one (no settle, no hash)",
+  );
   assert.match(room, /readonly aspect\?: \(\) => number \| null;/, "room.ts takes an optional aspect override");
   assert.match(room, /parts\.aspect\?\.\(\) \?\? svgAspect\(\)/, "and consults it before the svg scan");
   const settle = app.slice(app.indexOf("preview.innerHTML = res.svg;"), app.indexOf("enableBind();"));
-  assert.ok(settle.includes("writeFolio(") && settle.includes("room.layout()"), "the settle path writes the folio and refits");
-  assert.ok(settle.indexOf("room.layout()") > settle.indexOf("writeFolio("), "the refit follows the folio write, since the fit measures the folio's rect");
-  for (const [name, src] of [["app.ts", app], ["bound-atlas.ts", atlas], ["seats.ts", seats]] as const) {
-    assert.doesNotMatch(src, /scrollIntoView|window\.scrollTo|\.scrollTop\s*=/, `${name} moves the page; the atlas turns on the stage instead (ruled 2026-08-30 on #494)`);
+  assert.ok(
+    settle.includes("writeFolio(") && settle.includes("room.layout()"),
+    "the settle path writes the folio and refits",
+  );
+  assert.ok(
+    settle.indexOf("room.layout()") > settle.indexOf("writeFolio("),
+    "the refit follows the folio write, since the fit measures the folio's rect",
+  );
+  for (const [name, src] of [
+    ["app.ts", app],
+    ["bound-atlas.ts", atlas],
+    ["seats.ts", seats],
+  ] as const) {
+    assert.doesNotMatch(
+      src,
+      /scrollIntoView|window\.scrollTo|\.scrollTop\s*=/,
+      `${name} moves the page; the atlas turns on the stage instead (ruled 2026-08-30 on #494)`,
+    );
   }
   assert.match(atlas, /turnTo\(/, "the atlas turns a plate onto the sheet");
   const bind = atlas.slice(atlas.indexOf("function bindAtlas"), atlas.indexOf("function printAtlas"));
-  assert.ok(bind.indexOf("revokeObjectURL") > bind.indexOf("renderBoundAtlas(res.atlas)"), "a re-bind revokes the previous plates only after the new ones are on the page (a click mid-bind turned a revoked blob, skeptic on PR #496)");
-  assert.match(bind, /if \(lastAtlas !== null\) setDeliveryEnabled\(true\)/, "a failed re-bind leaves the previous atlas deliverable");
-  assert.match(atlas, /\.focus\(\{ preventScroll: true \}\)/, "a turn re-renders the index, so its successor control takes the focus back without moving the page");
+  assert.ok(
+    bind.indexOf("revokeObjectURL") > bind.indexOf("renderBoundAtlas(res.atlas)"),
+    "a re-bind revokes the previous plates only after the new ones are on the page (a click mid-bind turned a revoked blob, skeptic on PR #496)",
+  );
+  assert.match(
+    bind,
+    /if \(lastAtlas !== null\) setDeliveryEnabled\(true\)/,
+    "a failed re-bind leaves the previous atlas deliverable",
+  );
+  assert.match(
+    atlas,
+    /\.focus\(\{ preventScroll: true \}\)/,
+    "a turn re-renders the index, so its successor control takes the focus back without moving the page",
+  );
 });
 
 test("PRR7 the css: the sheet fitted to what the chrome leaves, the hidden document off screen, print fixed in this sub (ruled 2026-08-30): the atlas one plate per page when bound, the proof otherwise", () => {
-  assert.match(css, /\.stage\s*\{[^}]*padding:\s*var\(--reserve-top/, "the stage reserves the chrome's edges as padding, measured by room.ts");
-  assert.match(css, /#sheet\s*\{[^}]*box-shadow:\s*var\(--stage-shadow\)/, "the sheet rests at the chart-room depth, via the token");
-  assert.match(css, /#map-viewport\.zoomable\s*\{[^}]*touch-action:\s*none/, "touch-action:none stays on the gesture box");
+  assert.match(
+    css,
+    /\.stage\s*\{[^}]*padding:\s*var\(--reserve-top/,
+    "the stage reserves the chrome's edges as padding, measured by room.ts",
+  );
+  assert.match(
+    css,
+    /#sheet\s*\{[^}]*box-shadow:\s*var\(--stage-shadow\)/,
+    "the sheet rests at the chart-room depth, via the token",
+  );
+  assert.match(
+    css,
+    /#map-viewport\.zoomable\s*\{[^}]*touch-action:\s*none/,
+    "touch-action:none stays on the gesture box",
+  );
   assert.match(css, /#map\s*\{[^}]*transform-origin:\s*0\s+0/, "#map keeps the top-left pivot");
   assert.match(css, /@media screen\s*\{[^}]*#pr-atlas\s*\{[^}]*display:\s*none/, "the hidden document is off screen");
-  assert.ok(!/max-width:\s*1000px/.test(css) && !css.includes(".order-desk") && !css.includes(".offering"), "the desk's column and cards are gone: the chart is the room");
+  assert.ok(
+    !/max-width:\s*1000px/.test(css) && !css.includes(".order-desk") && !css.includes(".offering"),
+    "the desk's column and cards are gone: the chart is the room",
+  );
   const print = css.match(/@media print\s*\{([\s\S]*)\}\s*$/);
   assert.ok(print, "the page css ends with its print stand-down");
   assert.match(print[1]!, /\.stage\s*\{[^}]*position:\s*static/, "unbound, the proof prints in flow");
   assert.match(print[1]!, /#map\s*\{[^}]*transform:\s*none\s*!important/, "unzoomed");
-  assert.match(print[1]!, /body\.has-atlas \.stage\s*\{[^}]*display:\s*none\s*!important/, "bound, the stage prints as nothing");
+  assert.match(
+    print[1]!,
+    /body\.has-atlas \.stage\s*\{[^}]*display:\s*none\s*!important/,
+    "bound, the stage prints as nothing",
+  );
   assert.match(print[1]!, /body\.has-atlas #pr-atlas\s*\{[^}]*display:\s*block/, "and the document prints");
-  assert.match(print[1]!, /body\.has-atlas \.corner\.folio-room\s*\{[^}]*display:\s*none\s*!important/, "the atlas's own head leads, not the room's name");
+  assert.match(
+    print[1]!,
+    /body\.has-atlas \.corner\.folio-room\s*\{[^}]*display:\s*none\s*!important/,
+    "the atlas's own head leads, not the room's name",
+  );
   assert.match(print[1]!, /break-after:\s*page/, "one plate per page");
-  assert.doesNotMatch(print[1]!, /> header|\.room-head|> footer|\.order-desk|\.counter/, "no rule targets furniture a chart room no longer has");
+  assert.doesNotMatch(
+    print[1]!,
+    /> header|\.room-head|> footer|\.order-desk|\.counter/,
+    "no rule targets furniture a chart room no longer has",
+  );
 });
 
 test("PRR9 the back matter is the sheet's third face (#497, seat p): seats.ts turns and measures the page, the other faces put it away, app.ts asks the page for the aspect first, bound-atlas routes the matter keys", () => {
-  assert.match(page, /<div id="pr-page" class="page" hidden>\s*<div id="pr-page-inner" class="page-inner matter-page"><\/div>\s*<\/div>/, "the page face and its inner, dressed by the shared matter class");
-  assert.match(page, /<div id="pr-page-measure" class="page-measure matter-page" aria-hidden="true"><\/div>/, "the hidden measure box wears the same dress, so the measured height is the displayed height");
+  assert.match(
+    page,
+    /<div id="pr-page" class="page" hidden>\s*<div id="pr-page-inner" class="page-inner matter-page"><\/div>\s*<\/div>/,
+    "the page face and its inner, dressed by the shared matter class",
+  );
+  assert.match(
+    page,
+    /<div id="pr-page-measure" class="page-measure matter-page" aria-hidden="true"><\/div>/,
+    "the hidden measure box wears the same dress, so the measured height is the displayed height",
+  );
   assert.match(seats, /export function showMatter\(/, "seats.ts turns the page onto the stage");
   assert.match(seats, /export function matterAspect\(/, "and serves the measured aspect while the page is up");
   const proof = seats.slice(seats.indexOf("export function showProof"), seats.indexOf("export function showPlate"));
   const plate = seats.slice(seats.indexOf("export function showPlate"), seats.indexOf("export function showMatter"));
-  for (const [name, src] of [["showProof", proof], ["showPlate", plate]] as const) {
+  for (const [name, src] of [
+    ["showProof", proof],
+    ["showPlate", plate],
+  ] as const) {
     assert.match(src, /\.page\.hidden = true/, `${name} puts the page away`);
     assert.match(src, /restoreLabel\(roomEls\)/, `${name} restores the gesture box's own label`);
   }
-  assert.match(seats, /A page of the bound atlas: \$\{matter\.title\}/, "the page face names itself to the gesture box (the proof's label is stale for a table)");
-  assert.match(app, /matterAspect\(furniture\) \?\? sheetAspect\(\)/, "the room's aspect asks the page first, then the turned plate");
+  assert.match(
+    seats,
+    /A page of the bound atlas: \$\{matter\.title\}/,
+    "the page face names itself to the gesture box (the proof's label is stale for a table)",
+  );
+  assert.match(
+    app,
+    /matterAspect\(furniture\) \?\? sheetAspect\(\)/,
+    "the room's aspect asks the page first, then the turned plate",
+  );
   assert.match(atlas, /isMatterKey\(/, "turnTo routes the matter keys");
   assert.match(atlas, /showMatter\(/, "to the page face");
   assert.match(atlas, /matterLine\(/, "with the folio's line");
@@ -164,7 +332,11 @@ test("PRR10 the page's dress: the inner lays out once at the measure's own 900px
   const inner = css.match(/#pr-page \.page-inner\s*\{([^}]*)\}/);
   assert.ok(inner, "the inner has its rule");
   assert.match(inner[1]!, /width:\s*900px/, "the inner is the measure box's own layout");
-  assert.match(inner[1]!, /font-size:\s*16px/, "at the measure's base, so the measured height is the displayed geometry (re-laying out at the sheet's font drifted 19px of line rounding at 390)");
+  assert.match(
+    inner[1]!,
+    /font-size:\s*16px/,
+    "at the measure's base, so the measured height is the displayed geometry (re-laying out at the sheet's font drifted 19px of line rounding at 390)",
+  );
   assert.match(inner[1]!, /transform-origin:\s*0 0/, "scaled from the corner");
   assert.match(seats, /new ResizeObserver\(/, "seats.ts tracks the page's fitted size");
   assert.match(seats, /clientWidth \/ PAGE_MEASURE_WIDTH/, "and scales the inner by the one reference width");
@@ -176,7 +348,11 @@ test("PRR10 the page's dress: the inner lays out once at the measure's own 900px
   assert.doesNotMatch(measure[1]!, /display:\s*none/);
   assert.match(measure[1]!, /position:\s*absolute/, "the 900px box is out of flow (#219's class)");
   assert.match(measure[1]!, /left:\s*-\d+px/, "and off screen");
-  assert.match(css, /\.matter-page\s*\{[^}]*box-sizing:\s*border-box/, "the shared dress carries the page's own padding, so the measure includes it");
+  assert.match(
+    css,
+    /\.matter-page\s*\{[^}]*box-sizing:\s*border-box/,
+    "the shared dress carries the page's own padding, so the measure includes it",
+  );
   assert.match(css, /#pr-page\[hidden\]\s*\{[^}]*display:\s*none/, "the hidden page face is gone, like its siblings");
   assert.match(css, /#pr-page\s*\{[^}]*overflow:\s*hidden/, "the page clips its own slack");
 });
@@ -185,7 +361,11 @@ test("PRR8 the contents row is the kit's (#487, second use of the dated-row idio
   for (const sel of [".contents", ".cr-num", ".cr-text"]) {
     assert.ok(kit.includes(sel), `atelier.css dresses ${sel}`);
   }
-  assert.doesNotMatch(css, /(^|\n)(\.contents )?\.cr-(num|text)\s*\{/, "the page css does not re-dress the kit's row (#302); only the inked row's colour is its own");
+  assert.doesNotMatch(
+    css,
+    /(^|\n)(\.contents )?\.cr-(num|text)\s*\{/,
+    "the page css does not re-dress the kit's row (#302); only the inked row's colour is its own",
+  );
   assert.match(css, /\.contents li\.on/, "the page inks the row whose plate is on the sheet");
   assert.match(css, /\.plates/, "and seats the thumbnails");
 });
@@ -193,25 +373,60 @@ test("PRR8 the contents row is the kit's (#487, second use of the dated-row idio
 test("PRR11 the way to the Portfolio stands in the Bound Atlas slip and not in the room's legend row (#521 ruling 2)", () => {
   // The slip closes on </Slip> here: Slip.astro renders the <aside>, so a slice bounded on </aside> finds nothing, runs to the end of the file, and carries the whole legend with it.
   const slip = between('id="atlas"', "</Slip>");
-  assert.match(slip, /<a id="pr-portfolio" href="\.\.\/explorer\/portfolio\/">The Portfolio<\/a>/, "the Bound Atlas slip carries the way in, to the Portfolio's address under the Explorer (Issue #669)");
+  assert.match(
+    slip,
+    /<a id="pr-portfolio" href="\.\.\/explorer\/portfolio\/">The Portfolio<\/a>/,
+    "the Bound Atlas slip carries the way in, to the Portfolio's address under the Explorer (Issue #669)",
+  );
   const row = between('class="legend-row"', "</nav>");
-  assert.doesNotMatch(row, /portfolio/, "the legend row keeps the ruled shape: the poster sizes, then the one gold road back to the Explorer");
+  assert.doesNotMatch(
+    row,
+    /portfolio/,
+    "the legend row keeps the ruled shape: the poster sizes, then the one gold road back to the Explorer",
+  );
 });
 
 test("PRR-table the Print Room carries a gathering THROUGH rather than dropping it: the Explorer's gold road here hands over the whole address, table key and all (#634, ruled 2026-09-19)", () => {
   // The road in is live and gold today, which the issue got wrong and a recon caught: draw() in the Explorer calls
   // syncHash() and builds orderLink.href from that same hash on the very next line. Before this, every draw here
   // rebuilt the address from a vocabulary with no table in it and the gathering died on the first proof.
-  assert.match(app, /carried\.table = p\.get\(TABLE_KEY\)/, "the incoming table is no longer read, so a reader who presses Take to The Print Room loses the whole gathering on this page's first draw");
+  assert.match(
+    app,
+    /carried\.table = p\.get\(TABLE_KEY\)/,
+    "the incoming table is no longer read, so a reader who presses Take to The Print Room loses the whole gathering on this page's first draw",
+  );
   const writer = app.slice(app.indexOf("function writeHash("), app.indexOf("\n}", app.indexOf("function writeHash(")));
   assert.ok(writer.length > 100, "writeHash was not found, so the assertions below read an empty slice");
-  assert.match(writer, /if \(carried\.table !== null\) p\.set\(TABLE_KEY, carried\.table\)/, "the one address writer here drops the table again, and it runs on EVERY draw including the boot one");
-  assert.match(writer, /road\.href = "\.\.\/explorer\/#" \+ p\.toString\(\)/, "and the road back is no longer built from that same address, so the two can disagree");
+  assert.match(
+    writer,
+    /if \(carried\.table !== null\) p\.set\(TABLE_KEY, carried\.table\)/,
+    "the one address writer here drops the table again, and it runs on EVERY draw including the boot one",
+  );
+  assert.match(
+    writer,
+    /road\.href = "\.\.\/explorer\/#" \+ p\.toString\(\)/,
+    "and the road back is no longer built from that same address, so the two can disagree",
+  );
   // The same whole address the road back to the Explorer is built from, and for the same reason: handing the folio page the sheets alone sends the reader's press BACK from it to the seed of the day, which is Issue #634 defect 1 one room over (the cold review on PR #635).
-  assert.match(writer, /folioRoad\.href = "\.\.\/explorer\/portfolio\/#" \+ p\.toString\(\);/,"the road on to The Portfolio carries less than this page's own address, or goes to the Portfolio's old address beside this page (Issue #669), so the gathering, the world or the page is lost on the way");
-  assert.equal((app.match(/folioRoad\.href\s*=/g) ?? []).length, 1, "the folio road is written in more than one place, and the last write is the one the reader presses");
+  assert.match(
+    writer,
+    /folioRoad\.href = "\.\.\/explorer\/portfolio\/#" \+ p\.toString\(\);/,
+    "the road on to The Portfolio carries less than this page's own address, or goes to the Portfolio's old address beside this page (Issue #669), so the gathering, the world or the page is lost on the way",
+  );
+  assert.equal(
+    (app.match(/folioRoad\.href\s*=/g) ?? []).length,
+    1,
+    "the folio road is written in more than one place, and the last write is the one the reader presses",
+  );
   // The BINDING, checked against the page rather than restated here: the script can look up an id this page does not author, `folioRoad` is then null, and the `if (folioRoad)` guard swallows every write in silence with the assertions above all green (guard-prover round 3). The id is read out of the script and looked for in the markup, so the two cannot drift apart in either direction.
   const bind = app.match(/const folioRoad = document\.getElementById\("([^"]+)"\)/);
-  assert.ok(bind, "the folio road is no longer looked up by id at all, so this check has nothing to compare against the page");
-  assert.match(page, new RegExp(`<a id="${bind[1]}"`), `the script binds the folio road to id ${JSON.stringify(bind[1])} and this page authors no such anchor, so the road is bound to null and every href write is swallowed`);
+  assert.ok(
+    bind,
+    "the folio road is no longer looked up by id at all, so this check has nothing to compare against the page",
+  );
+  assert.match(
+    page,
+    new RegExp(`<a id="${bind[1]}"`),
+    `the script binds the folio road to id ${JSON.stringify(bind[1])} and this page authors no such anchor, so the road is bound to null and every href write is swallowed`,
+  );
 });

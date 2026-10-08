@@ -25,8 +25,7 @@ export function moundRise(siteRel: number): number {
 }
 
 export function buildGround(input: ProspectInput): Ground {
-  const base =
-    input.onRiver && !input.harbor ? BASE_GROUND - RIVER_BANK_DROP : BASE_GROUND;
+  const base = input.onRiver && !input.harbor ? BASE_GROUND - RIVER_BANK_DROP : BASE_GROUND;
   const rise = moundRise(input.siteRel);
   const shape = { base, rise };
   const line: Pt[] = [];

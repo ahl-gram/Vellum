@@ -12,7 +12,23 @@ export async function h14aFlight({ evaluate, sleep, clickAt }: HomeKit) {
   let visited = null;
   for (let i = 0; i < 80; i++) {
     try {
-      visited = await evaluate<{ scale: number; fit: number; anchorX: number; anchorY: number; stageW: number; stageH: number; open: boolean; contained: boolean; anchorClear: boolean; enterReach: boolean; closeReach: boolean; controlsReach: boolean; title: string | null; enter: string | null; arms: number } | null>(`(() => {
+      visited = await evaluate<{
+        scale: number;
+        fit: number;
+        anchorX: number;
+        anchorY: number;
+        stageW: number;
+        stageH: number;
+        open: boolean;
+        contained: boolean;
+        anchorClear: boolean;
+        enterReach: boolean;
+        closeReach: boolean;
+        controlsReach: boolean;
+        title: string | null;
+        enter: string | null;
+        arms: number;
+      } | null>(`(() => {
         const stage = document.getElementById("lf-stage");
         const sheet = document.getElementById("lf-sheet");
         const btn = document.querySelector('.lf-station[data-station="atlas"]');
@@ -52,13 +68,27 @@ export async function h14aFlight({ evaluate, sleep, clickAt }: HomeKit) {
   return { atlasPt, visited };
 }
 
-export async function h14aCardFits({ check, shoot }: SuiteContext, settled14: Cam | null, atlasPt: Flight["atlasPt"], visited: Flight["visited"]): Promise<void> {
+export async function h14aCardFits(
+  { check, shoot }: SuiteContext,
+  settled14: Cam | null,
+  atlasPt: Flight["atlasPt"],
+  visited: Flight["visited"],
+): Promise<void> {
   check(
     "H14a a real click on the Atlas station flies the camera to 2.6 of fit, the anchor at 0.4 of the stage clear of the slip, the slip whole inside the stage with its enter, close, and the zoom controls all under the hand, arms aboard",
-    visited !== null && visited.open && Math.abs(visited.scale - visited.fit * 2.6) < 1e-3
-      && Math.abs(visited.anchorX - visited.stageW * 0.4) < 2 && Math.abs(visited.anchorY - visited.stageH / 2) < 2
-      && visited.contained && visited.anchorClear && visited.enterReach && visited.closeReach && visited.controlsReach
-      && visited.title === "The Atlas of Rahai" && visited.enter === "atlas/" && visited.arms === 3,
+    visited !== null &&
+      visited.open &&
+      Math.abs(visited.scale - visited.fit * 2.6) < 1e-3 &&
+      Math.abs(visited.anchorX - visited.stageW * 0.4) < 2 &&
+      Math.abs(visited.anchorY - visited.stageH / 2) < 2 &&
+      visited.contained &&
+      visited.anchorClear &&
+      visited.enterReach &&
+      visited.closeReach &&
+      visited.controlsReach &&
+      visited.title === "The Atlas of Rahai" &&
+      visited.enter === "atlas/" &&
+      visited.arms === 3,
     JSON.stringify({ settled14: !!settled14, atlasPt, visited }),
   );
   await shoot("home-station-card.png");
@@ -68,7 +98,9 @@ export async function h14bEscape({ evaluate, check, sleep, pressKey }: HomeKit):
   await pressKey("Escape", "Escape", 27);
   let closed14 = null;
   for (let i = 0; i < 30; i++) {
-    try { closed14 = await evaluate<boolean>(`document.getElementById("lf-card-atlas").hidden`); } catch {}
+    try {
+      closed14 = await evaluate<boolean>(`document.getElementById("lf-card-atlas").hidden`);
+    } catch {}
     if (closed14 === true) break;
     await sleep(75);
   }
@@ -92,17 +124,24 @@ export async function h14dPipHover({ evaluate, send, check, sleep, pressKey }: H
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 20, y: 20, button: "none" });
   await sleep(450);
   const pipRest = await evaluate(pipBox);
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: Math.round(pipRest.cx), y: Math.round(pipRest.cy), button: "none" });
+  await send("Input.dispatchMouseEvent", {
+    type: "mouseMoved",
+    x: Math.round(pipRest.cx),
+    y: Math.round(pipRest.cy),
+    button: "none",
+  });
   await sleep(450);
   const pipHover = await evaluate(pipBox);
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 20, y: 20, button: "none" });
   await sleep(450);
   check(
     "H14d a real hover keeps the pip on its anchor at its size, its button square unpainted, while the glyph grows the mockup's quarter",
-    Math.abs(pipHover.cx - pipRest.cx) < 0.5 && Math.abs(pipHover.cy - pipRest.cy) < 0.5
-      && Math.abs(pipHover.w - pipRest.w) < 0.5 && Math.abs(pipRest.w - 34) < 0.5
-      && Math.abs(pipHover.glyphW / pipRest.glyphW - 1.25) < 0.02
-      && pipHover.btnBg === "rgba(0, 0, 0, 0)",
+    Math.abs(pipHover.cx - pipRest.cx) < 0.5 &&
+      Math.abs(pipHover.cy - pipRest.cy) < 0.5 &&
+      Math.abs(pipHover.w - pipRest.w) < 0.5 &&
+      Math.abs(pipRest.w - 34) < 0.5 &&
+      Math.abs(pipHover.glyphW / pipRest.glyphW - 1.25) < 0.02 &&
+      pipHover.btnBg === "rgba(0, 0, 0, 0)",
     JSON.stringify({ pipRest, pipHover }),
   );
 }

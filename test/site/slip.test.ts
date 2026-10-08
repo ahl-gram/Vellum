@@ -19,8 +19,12 @@ const classed = () => {
   const set = new Set<string>();
   return {
     classList: {
-      add: (c: string) => { set.add(c); },
-      remove: (c: string) => { set.delete(c); },
+      add: (c: string) => {
+        set.add(c);
+      },
+      remove: (c: string) => {
+        set.delete(c);
+      },
       toggle: (c: string) => (set.has(c) ? (set.delete(c), false) : (set.add(c), true)),
       contains: (c: string) => set.has(c),
     },
@@ -36,9 +40,15 @@ const fixture = () => {
   const layouts: number[] = [];
   const pending: Array<{ run: () => void; ms: number }> = [];
   bindSlip({
-    slip, fold: fold.on, tab,
-    onLayout: () => { layouts.push(Date.now()); },
-    after: (run, ms) => { pending.push({ run, ms }); },
+    slip,
+    fold: fold.on,
+    tab,
+    onLayout: () => {
+      layouts.push(Date.now());
+    },
+    after: (run, ms) => {
+      pending.push({ run, ms });
+    },
   });
   return { slip, tab, tabEvents, fold, layouts, pending };
 };
@@ -60,4 +70,3 @@ test("a fold relays the room's layout only after the transition has settled", ()
   f.pending[0]!.run();
   assert.equal(f.layouts.length, 1, "then the room re-measures once");
 });
-

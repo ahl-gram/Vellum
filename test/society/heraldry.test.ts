@@ -2,13 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createRng } from "../../src/core/rng.ts";
 import { CULTURES } from "../../src/society/names.ts";
-import {
-  blazonRealms,
-  obeysTinctureRule,
-  isMetal,
-  CULTURE_CHARGES,
-  type Arms,
-} from "../../src/society/heraldry.ts";
+import { blazonRealms, obeysTinctureRule, isMetal, CULTURE_CHARGES, type Arms } from "../../src/society/heraldry.ts";
 
 // The rule-of-tincture checker re-derives validity independently (from isMetal + structure), NOT by re-running the generator, so the across-seeds sweep is a genuine property check rather than a tautology.
 
@@ -95,10 +89,7 @@ test("every realm's arms obeys the rule of tincture across seeds and cultures", 
     for (const culture of CULTURES) {
       const arms = blazonRealms(culture, 5, createRng(seed).fork("heraldry"));
       for (const a of arms) {
-        assert.ok(
-          obeysTinctureRule(a),
-          `seed ${seed} ${culture.id}: ${JSON.stringify(a)}`,
-        );
+        assert.ok(obeysTinctureRule(a), `seed ${seed} ${culture.id}: ${JSON.stringify(a)}`);
       }
     }
   }
@@ -106,10 +97,7 @@ test("every realm's arms obeys the rule of tincture across seeds and cultures", 
 
 test("mobile charges are drawn only from the culture's own charge set", () => {
   for (const culture of CULTURES) {
-    assert.ok(
-      (CULTURE_CHARGES[culture.id]?.length ?? 0) > 0,
-      `${culture.id} has no charge set`,
-    );
+    assert.ok((CULTURE_CHARGES[culture.id]?.length ?? 0) > 0, `${culture.id} has no charge set`);
   }
   for (let seed = 0; seed < 60; seed++) {
     for (const culture of CULTURES) {

@@ -14,8 +14,20 @@ export type RibbonEvent =
       readonly tier: SettlementKind;
       readonly endpoint: boolean;
     }
-  | { readonly kind: "crossing"; readonly dist: number; readonly k: number; readonly name: string | null; readonly major: boolean }
-  | { readonly kind: "branch"; readonly dist: number; readonly k: number; readonly side: -1 | 1; readonly toName: string }
+  | {
+      readonly kind: "crossing";
+      readonly dist: number;
+      readonly k: number;
+      readonly name: string | null;
+      readonly major: boolean;
+    }
+  | {
+      readonly kind: "branch";
+      readonly dist: number;
+      readonly k: number;
+      readonly side: -1 | 1;
+      readonly toName: string;
+    }
   | { readonly kind: "summit"; readonly dist: number; readonly k: number; readonly rel: number };
 
 const MAX_BRANCHES = 10;
@@ -65,11 +77,7 @@ function waypointEvents(
   return out;
 }
 
-function crossingEvents(
-  world: World,
-  chain: ReadonlyArray<number>,
-  dists: ReadonlyArray<number>,
-): RibbonEvent[] {
+function crossingEvents(world: World, chain: ReadonlyArray<number>, dists: ReadonlyArray<number>): RibbonEvent[] {
   const rivers = riverIndexByCell(world);
   const out: RibbonEvent[] = [];
   let runStart = -1;
@@ -121,7 +129,13 @@ function branchEvents(
         if (!mask[n] || chainSet.has(n)) continue;
         if (cheb(w, n, chain[k - 1] as number) <= 1 || cheb(w, n, chain[k + 1] as number) <= 1) continue;
         if (k - lastK < 4) continue;
-        const walked = bfsPath(w, h, n, (g) => settlementByCell.has(g), (g) => mask[g] === 1 && !chainSet.has(g));
+        const walked = bfsPath(
+          w,
+          h,
+          n,
+          (g) => settlementByCell.has(g),
+          (g) => mask[g] === 1 && !chainSet.has(g),
+        );
         if (!walked) continue;
         const destIdx = settlementByCell.get(walked[walked.length - 1] as number);
         if (destIdx === undefined || onRoute.has(destIdx)) continue;
@@ -150,13 +164,8 @@ function travelDir(chain: ReadonlyArray<number>, w: number, k: number): { x: num
   return { x: dx / len, y: dy / len };
 }
 
-function summitEvent(
-  world: World,
-  chain: ReadonlyArray<number>,
-  dists: ReadonlyArray<number>,
-): RibbonEvent | null {
-  const rel = (c: number): number =>
-    (world.elev.data[c] as number - world.seaLevel) / (1 - world.seaLevel);
+function summitEvent(world: World, chain: ReadonlyArray<number>, dists: ReadonlyArray<number>): RibbonEvent | null {
+  const rel = (c: number): number => ((world.elev.data[c] as number) - world.seaLevel) / (1 - world.seaLevel);
   let bestK = -1;
   let bestRel = -Infinity;
   for (let k = 5; k < chain.length - 5; k++) {

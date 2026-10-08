@@ -38,10 +38,16 @@ export async function l5HowOpens({ evaluate, check, sleep, clickAt }: LandfallKi
   return how;
 }
 
-export async function l5bArrowScrolls({ evaluate, check, sleep, pressKey, scrollY }: LandfallKit, how: How, y5: number): Promise<void> {
+export async function l5bArrowScrolls(
+  { evaluate, check, sleep, pressKey, scrollY }: LandfallKit,
+  how: How,
+  y5: number,
+): Promise<void> {
   await pressKey("ArrowDown", "ArrowDown", 40);
   await sleep(200);
-  const arrowed = await evaluate<number | null>(`document.querySelector("#lf-card-how .lf-card-scroll")?.scrollTop ?? null`);
+  const arrowed = await evaluate<number | null>(
+    `document.querySelector("#lf-card-how .lf-card-scroll")?.scrollTop ?? null`,
+  );
   check(
     "L5b ArrowDown scrolls the prose at once, the page unmoved",
     how !== null && arrowed !== null && arrowed > how.scrollTop && (await scrollY()) === y5,
@@ -49,37 +55,60 @@ export async function l5bArrowScrolls({ evaluate, check, sleep, pressKey, scroll
   );
 }
 
-export async function l2ProseScrolls({ evaluate, check, sleep, scrollY, centerOf, camScale, wheelAt }: LandfallKit, y5: number) {
+export async function l2ProseScrolls(
+  { evaluate, check, sleep, scrollY, centerOf, camScale, wheelAt }: LandfallKit,
+  y5: number,
+) {
   const proseBox = await centerOf("#lf-card-how .lf-card-scroll");
-  const closeBox0 = await evaluate<number[] | null>(`(() => { const el = document.querySelector("#lf-card-how .lf-card-close"); if (!el) return null; const r = el.getBoundingClientRect(); return [r.x, r.y, r.width, r.height]; })()`);
+  const closeBox0 = await evaluate<number[] | null>(
+    `(() => { const el = document.querySelector("#lf-card-how .lf-card-close"); if (!el) return null; const r = el.getBoundingClientRect(); return [r.x, r.y, r.width, r.height]; })()`,
+  );
   const scale2a = await camScale();
   let prose = null;
   for (let i = 0; i < 30 && proseBox !== null; i++) {
     await wheelAt(proseBox, 240);
     await sleep(90);
-    prose = await evaluate<{ top: number; max: number } | null>(`(() => { const s = document.querySelector("#lf-card-how .lf-card-scroll"); if (!s) return null; return { top: s.scrollTop, max: s.scrollHeight - s.clientHeight }; })()`);
+    prose = await evaluate<{ top: number; max: number } | null>(
+      `(() => { const s = document.querySelector("#lf-card-how .lf-card-scroll"); if (!s) return null; return { top: s.scrollTop, max: s.scrollHeight - s.clientHeight }; })()`,
+    );
     if (prose === null || prose.top >= prose.max - 0.5) break;
   }
   const after2 = { scale: await camScale(), y: await scrollY() };
   check(
     "L2 (arm 1) wheel over the prose scrolls it to its end: no zoom step, no page scroll",
-    prose !== null && prose.top >= prose.max - 0.5 && after2.y === y5
-      && scale2a !== null && after2.scale !== null && Math.abs(after2.scale / scale2a - 1) < 0.005,
+    prose !== null &&
+      prose.top >= prose.max - 0.5 &&
+      after2.y === y5 &&
+      scale2a !== null &&
+      after2.scale !== null &&
+      Math.abs(after2.scale / scale2a - 1) < 0.005,
     JSON.stringify({ prose, scale2a, after2 }),
   );
   return closeBox0;
 }
 
-export async function l6HeadStays({ evaluate, check, scrollY }: LandfallKit, closeBox0: number[] | null, y5: number): Promise<void> {
-  const closeBox1 = await evaluate<number[] | null>(`(() => { const el = document.querySelector("#lf-card-how .lf-card-close"); if (!el) return null; const r = el.getBoundingClientRect(); return [r.x, r.y, r.width, r.height]; })()`);
+export async function l6HeadStays(
+  { evaluate, check, scrollY }: LandfallKit,
+  closeBox0: number[] | null,
+  y5: number,
+): Promise<void> {
+  const closeBox1 = await evaluate<number[] | null>(
+    `(() => { const el = document.querySelector("#lf-card-how .lf-card-close"); if (!el) return null; const r = el.getBoundingClientRect(); return [r.x, r.y, r.width, r.height]; })()`,
+  );
   check(
     "L6 (arm 5) the head never scrolls away: the close button's box is unchanged after the prose reaches its end, overscroll contained",
-    closeBox0 !== null && closeBox1 !== null && JSON.stringify(closeBox0) === JSON.stringify(closeBox1) && (await scrollY()) === y5,
+    closeBox0 !== null &&
+      closeBox1 !== null &&
+      JSON.stringify(closeBox0) === JSON.stringify(closeBox1) &&
+      (await scrollY()) === y5,
     JSON.stringify({ closeBox0, closeBox1 }),
   );
 }
 
-export async function l3HeadSwallows({ check, sleep, scrollY, centerOf, camScale, wheelAt }: LandfallKit, y5: number): Promise<void> {
+export async function l3HeadSwallows(
+  { check, sleep, scrollY, centerOf, camScale, wheelAt }: LandfallKit,
+  y5: number,
+): Promise<void> {
   const headBox = await centerOf("#lf-card-how .lf-card-title");
   const scale3a = await camScale();
   await wheelAt(headBox, 120);
@@ -87,7 +116,11 @@ export async function l3HeadSwallows({ check, sleep, scrollY, centerOf, camScale
   const after3 = { scale: await camScale(), y: await scrollY() };
   check(
     "L3 (arm 2) wheel over the panel's non-scrolling head is swallowed whole: no page scroll, no zoom step (the round-2 regression scrolled 120px a tick here)",
-    headBox !== null && after3.y === y5 && scale3a !== null && after3.scale !== null && Math.abs(after3.scale / scale3a - 1) < 0.005,
+    headBox !== null &&
+      after3.y === y5 &&
+      scale3a !== null &&
+      after3.scale !== null &&
+      Math.abs(after3.scale / scale3a - 1) < 0.005,
     JSON.stringify({ scale3a, after3 }),
   );
 }
@@ -118,8 +151,11 @@ export async function l4l8Enters({ check, measureEnters }: LandfallKit): Promise
   const swallowed4 = desktop8.swallowed;
   check(
     "L4 (arm 3) wheel over an open station card is swallowed: no page scroll, no zoom step",
-    swallowed4 !== null && swallowed4.y === swallowed4.yA
-      && swallowed4.sA !== null && swallowed4.scale !== null && Math.abs(swallowed4.scale / swallowed4.sA - 1) < 0.005,
+    swallowed4 !== null &&
+      swallowed4.y === swallowed4.yA &&
+      swallowed4.sA !== null &&
+      swallowed4.scale !== null &&
+      Math.abs(swallowed4.scale / swallowed4.sA - 1) < 0.005,
     JSON.stringify({ swallowed4 }),
   );
   check(

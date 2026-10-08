@@ -108,10 +108,7 @@ test("seed 99's Mialiscove to Con, the journey that first drew off the sheet, st
   assert.ok(from >= 0 && to >= 0, "seed 99 still names both ends of the reference journey");
   const input = buildRibbonInput(world, from, to);
   assert.ok(input, "and still joins them by road");
-  assert.ok(
-    STRIP_PAD / layoutRibbon(input).pxPerCell < 0.75,
-    "it is still short enough to be the case that broke",
-  );
+  assert.ok(STRIP_PAD / layoutRibbon(input).pxPerCell < 0.75, "it is still short enough to be the case that broke");
   const { worst, where } = overshootOf(input);
   assert.ok(worst <= TOLERANCE, `worst ${worst.toFixed(2)}px: ${where}`);
 });

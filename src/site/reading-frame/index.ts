@@ -78,19 +78,30 @@ function framePace() {
   pace.className = "rf-pace";
   pace.setAttribute("role", "group");
   pace.setAttribute("aria-label", "The pace");
-  const paceButtons = new Map<Pace, HTMLButtonElement>(PACES.map((k) => {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.dataset.pace = String(k);
-    b.textContent = `${k}\u00d7`;
-    b.setAttribute("aria-pressed", String(k === DEFAULT_PACE));
-    return [k, b];
-  }));
+  const paceButtons = new Map<Pace, HTMLButtonElement>(
+    PACES.map((k) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.dataset.pace = String(k);
+      b.textContent = `${k}\u00d7`;
+      b.setAttribute("aria-pressed", String(k === DEFAULT_PACE));
+      return [k, b];
+    }),
+  );
   pace.append(...paceButtons.values());
   return { pace, paceButtons };
 }
 
-function frameHost(chart: HTMLElement, status: HTMLElement, agesPanel: HTMLElement, playBtn: HTMLButtonElement, range: HTMLInputElement, year: HTMLElement, log: Readonly<DatedLog>, opts: Readonly<ReadingFrameOpts>) {
+function frameHost(
+  chart: HTMLElement,
+  status: HTMLElement,
+  agesPanel: HTMLElement,
+  playBtn: HTMLButtonElement,
+  range: HTMLInputElement,
+  year: HTMLElement,
+  log: Readonly<DatedLog>,
+  opts: Readonly<ReadingFrameOpts>,
+) {
   // LivingChartHost.scrubber is optional; this frame ALWAYS builds one and says so in its own type, so the room's frame.host.scrubber reads need no narrowing.
   const host: LivingChartHost & { scrubber: ScrubberRefs } = {
     mapEl: chart,

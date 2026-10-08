@@ -1,6 +1,14 @@
 import type { LandfallKit } from "./kit.ts";
 
-export async function l10NoScriptGet({ evaluate, send, check, sleep, PORT, clickAt, centerOf }: LandfallKit): Promise<void> {
+export async function l10NoScriptGet({
+  evaluate,
+  send,
+  check,
+  sleep,
+  PORT,
+  clickAt,
+  centerOf,
+}: LandfallKit): Promise<void> {
   // L10/L11: the seed form's no-JS GET fallback (Issue #454: "no-JS GET fallback degrading to today's world"), then the JS-on control proving the Explorer ignores the query (bare visit and ?seed=777 visit must show the SAME seed; comparing to 777's absence would flake the day the daily seed IS 777).
   await send("Emulation.setScriptExecutionDisabled", { value: true });
   await send("Page.navigate", { url: "about:blank" });
@@ -28,7 +36,9 @@ export async function l10NoScriptGet({ evaluate, send, check, sleep, PORT, click
   let nojs = null;
   for (let i = 0; i < 120 && drawPt !== null; i++) {
     try {
-      nojs = await evaluate<{ path: string; search: string; hash: string; h1: string | null }>(`({ path: location.pathname, search: location.search, hash: location.hash, h1: document.querySelector("h1")?.textContent ?? null })`);
+      nojs = await evaluate<{ path: string; search: string; hash: string; h1: string | null }>(
+        `({ path: location.pathname, search: location.search, hash: location.hash, h1: document.querySelector("h1")?.textContent ?? null })`,
+      );
       // The break must demand everything the check asserts: navigation COMMITS before the document parses, so a path-only break snapshots h1 null on a slow machine (CI 2026-08-25, locally unreproducible).
       if (nojs.path === "/explorer/" && (nojs.h1 ?? "").includes("Explorer")) break;
     } catch {}
@@ -37,7 +47,12 @@ export async function l10NoScriptGet({ evaluate, send, check, sleep, PORT, click
   await send("Emulation.setScriptExecutionDisabled", { value: false });
   check(
     "L10 scripts off, the seed form still delivers: a real click submits the native GET to explorer/?seed=777, no hash, the Explorer shell standing",
-    formReady === true && nojs !== null && nojs.path === "/explorer/" && nojs.search === "?seed=777" && nojs.hash === "" && (nojs.h1 ?? "").includes("Explorer"),
+    formReady === true &&
+      nojs !== null &&
+      nojs.path === "/explorer/" &&
+      nojs.search === "?seed=777" &&
+      nojs.hash === "" &&
+      (nojs.h1 ?? "").includes("Explorer"),
     JSON.stringify({ formReady, drawPt, nojs }),
   );
 }

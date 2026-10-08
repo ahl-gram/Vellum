@@ -51,10 +51,7 @@ test("the chronicle fragment lists the world's dated events in order", () => {
   const items = (atlas.chronicleHtml.match(/<li>/g) ?? []).length;
   assert.equal(items, world.history.events.length);
   for (const e of world.history.events) {
-    assert.ok(
-      atlas.chronicleHtml.includes(`<span class="year">${e.year}</span>`),
-      `year ${e.year} present`,
-    );
+    assert.ok(atlas.chronicleHtml.includes(`<span class="year">${e.year}</span>`), `year ${e.year} present`);
   }
 });
 
@@ -71,7 +68,10 @@ test("the banners fragment carries one banner per realm seat", () => {
 test("#25 banners default to colour, and hatch only when bannerStyle is ink", () => {
   const world = generateWorld(defaultRecipe(42));
   assert.ok(!composeAtlas(world).bannersHtml.includes("<pattern"), "default banners are colour");
-  assert.ok(!composeAtlas(world, { bannerStyle: "nautical" }).bannersHtml.includes("<pattern"), "colour styles stay solid");
+  assert.ok(
+    !composeAtlas(world, { bannerStyle: "nautical" }).bannersHtml.includes("<pattern"),
+    "colour styles stay solid",
+  );
   const ink = composeAtlas(world, { bannerStyle: "ink" }).bannersHtml;
   assert.ok(ink.includes("<pattern"), "ink banners hatch the field");
   const ids = [...ink.matchAll(/<pattern id="([^"]+)"/g)].map((m) => m[1]);
@@ -151,19 +151,34 @@ test("composeAtlas is deterministic for a seed", () => {
 });
 
 const unescape = (s: string): string =>
-  s.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
+  s
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&");
 
 // The walk the notes are written in IS the printed order (a writer's prose depends on call order), so the order is what keeps the bound atlas's gazetteer byte-stable; the expectation is derived with the test's own rank map, never read back from the composer.
 test("the gazetteer's rows run capital, then the towns, then the villages, each rank alphabetical", () => {
   const world = generateWorld(defaultRecipe(42));
   const html = composeAtlas(world).gazetteerHtml;
-  const rows = [...html.matchAll(/<td class="name (\w+)">([^<]*)/g)].map((m) => ({ kind: m[1]!, name: unescape(m[2]!) }));
+  const rows = [...html.matchAll(/<td class="name (\w+)">([^<]*)/g)].map((m) => ({
+    kind: m[1]!,
+    name: unescape(m[2]!),
+  }));
   const RANK: Record<string, number> = { capital: 0, town: 1, village: 2, hamlet: 3 };
   const expected = world.settlements
     .map((s) => ({ kind: s.kind, name: s.name }))
     .sort((a, b) => RANK[a.kind]! - RANK[b.kind]! || a.name.localeCompare(b.name));
-  assert.ok(rows.some((r) => r.kind === "town") && rows.some((r) => r.kind === "village"), "premise: seed 42 has more than one rank to order");
-  assert.notDeepEqual(rows.map((r) => r.name), world.settlements.map((s) => s.name), "premise: the index order differs from the rank order, or this pin proves nothing");
+  assert.ok(
+    rows.some((r) => r.kind === "town") && rows.some((r) => r.kind === "village"),
+    "premise: seed 42 has more than one rank to order",
+  );
+  assert.notDeepEqual(
+    rows.map((r) => r.name),
+    world.settlements.map((s) => s.name),
+    "premise: the index order differs from the rank order, or this pin proves nothing",
+  );
   assert.deepEqual(rows, expected);
 });
 

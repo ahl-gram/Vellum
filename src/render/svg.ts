@@ -28,9 +28,7 @@ export function renderSvg(node: SvgNode): string {
   if (node.children.length === 0) {
     return `<${node.tag}${attrs}/>`;
   }
-  const inner = node.children
-    .map((c) => (typeof c === "string" ? escapeXml(c) : renderSvg(c)))
-    .join("");
+  const inner = node.children.map((c) => (typeof c === "string" ? escapeXml(c) : renderSvg(c))).join("");
   return `<${node.tag}${attrs}>${inner}</${node.tag}>`;
 }
 
@@ -40,10 +38,7 @@ function fmt(n: number): string {
   return String(r);
 }
 
-export function pathFrom(
-  points: ReadonlyArray<readonly [number, number]>,
-  closed: boolean,
-): string {
+export function pathFrom(points: ReadonlyArray<readonly [number, number]>, closed: boolean): string {
   if (points.length === 0) return "";
   let d = `M${fmt((points[0] as readonly [number, number])[0])} ${fmt((points[0] as readonly [number, number])[1])}`;
   for (let i = 1; i < points.length; i++) {

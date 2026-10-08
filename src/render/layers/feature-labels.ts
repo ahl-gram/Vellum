@@ -2,7 +2,17 @@ import { BIOMES } from "../../climate/biomes.ts";
 import { clamp } from "../../core/math.ts";
 import { chaikinSmooth } from "../../terrain/contours.ts";
 import { el, type SvgNode } from "../svg.ts";
-import { centroidOf, principalAngle, rotatedRect, rotatedSpanBoxes, spacedTextBox, textBox, WIDTH_FACTOR, type Box, type Pt } from "../geometry.ts";
+import {
+  centroidOf,
+  principalAngle,
+  rotatedRect,
+  rotatedSpanBoxes,
+  spacedTextBox,
+  textBox,
+  WIDTH_FACTOR,
+  type Box,
+  type Pt,
+} from "../geometry.ts";
 import { interiorProbes } from "./label-probes.ts";
 import { largestBlob } from "../blobs.ts";
 import type { RenderCtx } from "../context.ts";
@@ -66,7 +76,9 @@ function seaLabelNodes(ctx: RenderCtx): SvgNode[] {
         el(
           "text",
           {
-            x: cand.px, y: cand.py, "text-anchor": "middle",
+            x: cand.px,
+            y: cand.py,
+            "text-anchor": "middle",
             "font-family": style.fontFamilyTitle,
             "font-size": fs.toFixed(1),
             "font-style": "italic",
@@ -136,7 +148,12 @@ function rangeLabelNodes(ctx: RenderCtx): SvgNode[] {
   if (blob.length < 10) return [];
   const fit = placeRangeLabel(ctx, range, blob);
   if (fit === undefined) return [];
-  const { angle, padX, padY, at: { x: placedX, y: placedY, fs } } = fit;
+  const {
+    angle,
+    padX,
+    padY,
+    at: { x: placedX, y: placedY, fs },
+  } = fit;
   const box = spacedTextBox(placedX, placedY, range, fs, 3 * k, WIDTH_FACTOR.caps);
   const spin = `rotate(${angle.toFixed(1)} ${placedX.toFixed(1)} ${placedY.toFixed(1)})`;
   return [
@@ -154,7 +171,9 @@ function rangeLabelNodes(ctx: RenderCtx): SvgNode[] {
     el(
       "text",
       {
-        x: placedX, y: placedY, "text-anchor": "middle",
+        x: placedX,
+        y: placedY,
+        "text-anchor": "middle",
         transform: spin,
         "font-family": style.fontFamily,
         "font-size": fs.toFixed(1),
@@ -257,7 +276,9 @@ function lakeLabelNodes(ctx: RenderCtx): SvgNode[] {
       el(
         "text",
         {
-          x: lx, y: placedY, "text-anchor": "middle",
+          x: lx,
+          y: placedY,
+          "text-anchor": "middle",
           "font-family": style.fontFamily,
           "font-size": fs.toFixed(1),
           "font-style": "italic",
@@ -285,15 +306,15 @@ function forestLabelNodes(ctx: RenderCtx): SvgNode[] {
   }));
   const c = centroidOf(pts);
   const fs = 12.5 * k;
-  const placedY = offsetCandidates(c.y, k).find((cy) =>
-    labels.tryClaim(textBox(c.x, cy, forest, fs, "middle"), 4),
-  );
+  const placedY = offsetCandidates(c.y, k).find((cy) => labels.tryClaim(textBox(c.x, cy, forest, fs, "middle"), 4));
   if (placedY === undefined) return [];
   return [
     el(
       "text",
       {
-        x: c.x, y: placedY, "text-anchor": "middle",
+        x: c.x,
+        y: placedY,
+        "text-anchor": "middle",
         "font-family": style.fontFamily,
         "font-size": fs.toFixed(1),
         "font-style": "italic",
@@ -333,7 +354,9 @@ export function featureLabelsLayer(ctx: RenderCtx): {
       el(
         "text",
         {
-          x: placedX, y: placedY, "text-anchor": "middle",
+          x: placedX,
+          y: placedY,
+          "text-anchor": "middle",
           "font-family": style.fontFamilyTitle,
           "font-size": fs.toFixed(1),
           // Only the font size feeds tryClaim, so changing it could unplace a label.
@@ -353,5 +376,9 @@ export function featureLabelsLayer(ctx: RenderCtx): {
     ...forestLabelNodes(ctx),
   ];
 
-  return { defs: [], node: el("g", { id: "layer-feature-labels" }, nodes), realmAnchors: placedRealms.map((p) => p.anchor) };
+  return {
+    defs: [],
+    node: el("g", { id: "layer-feature-labels" }, nodes),
+    realmAnchors: placedRealms.map((p) => p.anchor),
+  };
 }

@@ -56,10 +56,7 @@ test("road endpoints touch settlements or other roads", () => {
     const last = road.points[road.points.length - 1]!;
     for (const end of [first, last]) {
       const key = `${end.x},${end.y}`;
-      assert.ok(
-        anchors.has(key) || roadCells.has(key),
-        `dangling road end at ${key}`,
-      );
+      assert.ok(anchors.has(key) || roadCells.has(key), `dangling road end at ${key}`);
     }
   }
 });

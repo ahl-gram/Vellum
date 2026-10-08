@@ -33,8 +33,7 @@ const result = (over: Partial<LaneResult> & { name: string }): LaneResult => ({
   ...over,
 });
 
-const everyLane = (over: Partial<LaneResult> = {}) =>
-  E2E_LANES.map((lane) => result({ name: lane.name, ...over }));
+const everyLane = (over: Partial<LaneResult> = {}) => E2E_LANES.map((lane) => result({ name: lane.name, ...over }));
 
 const withLane = (name: string, over: Partial<LaneResult>) =>
   E2E_LANES.map((lane) => result({ name: lane.name, ...(lane.name === name ? over : {}) }));
@@ -81,22 +80,36 @@ test("splitting into lanes costs no console/network certification", () => {
 test("each lane runs its suites in the runner's canonical order", () => {
   for (const lane of E2E_LANES) {
     const ranks = lane.suites.map((s) => E2E_SUITE_ORDER.indexOf(s));
-    assert.deepEqual(ranks, ranks.slice().sort((a, b) => a - b), `lane ${lane.name} is out of runner order`);
+    assert.deepEqual(
+      ranks,
+      ranks.slice().sort((a, b) => a - b),
+      `lane ${lane.name} is out of runner order`,
+    );
   }
 });
 
 test("a suite that depends on its predecessor's page runs directly after it, and no suite that opens on the home page runs directly after home", () => {
   // Blind spot, erring toward passing: this reads the lanes only, and the full serial tier runs E2E_SUITE_ORDER, where landfall follows home (a handbook/errata/guards.md row).
-  assert.ok(Object.keys(NEEDS_PREDECESSOR).length > 0 && OPENS_ON_HOME.length > 0, "an ordering roster is empty, so the sweep below checks nothing");
+  assert.ok(
+    Object.keys(NEEDS_PREDECESSOR).length > 0 && OPENS_ON_HOME.length > 0,
+    "an ordering roster is empty, so the sweep below checks nothing",
+  );
   for (const lane of E2E_LANES) {
     for (const [i, suite] of lane.suites.entries()) {
       const before = i === 0 ? null : lane.suites[i - 1]!;
       const needs = NEEDS_PREDECESSOR[suite];
       if (needs !== undefined) {
-        assert.equal(before, needs, `lane ${lane.name} runs ${suite} after ${before ?? "nothing, on the harness's boot page"}, but it depends on the page ${needs} leaves`);
+        assert.equal(
+          before,
+          needs,
+          `lane ${lane.name} runs ${suite} after ${before ?? "nothing, on the harness's boot page"}, but it depends on the page ${needs} leaves`,
+        );
       }
       if (before === "home") {
-        assert.ok(!OPENS_ON_HOME.includes(suite), `lane ${lane.name} runs ${suite} directly after home, so its first navigate to / returns on home's stale document`);
+        assert.ok(
+          !OPENS_ON_HOME.includes(suite),
+          `lane ${lane.name} runs ${suite} directly after home, so its first navigate to / returns on home's stale document`,
+        );
       }
     }
   }
@@ -105,14 +118,26 @@ test("a suite that depends on its predecessor's page runs directly after it, and
 test("no lane is empty, since an empty lane's child is handed an empty selection and the runner reads that as the whole suite", () => {
   for (const lane of E2E_LANES) {
     const selection = resolveSuiteSelection(laneChildEnv(lane, {}));
-    assert.equal(selection.tier, "custom", `lane ${lane.name} resolves to the ${selection.tier} tier, so its runner runs ${selection.names.length} suites rather than its own`);
-    assert.deepEqual(selection.names, lane.suites, `lane ${lane.name}'s runner would run ${selection.names.join(", ")}, not the lane's own suites`);
+    assert.equal(
+      selection.tier,
+      "custom",
+      `lane ${lane.name} resolves to the ${selection.tier} tier, so its runner runs ${selection.names.length} suites rather than its own`,
+    );
+    assert.deepEqual(
+      selection.names,
+      lane.suites,
+      `lane ${lane.name}'s runner would run ${selection.names.join(", ")}, not the lane's own suites`,
+    );
   }
 });
 
 test("the lanes never share a name, a port, a debug port, or an output directory", () => {
   const names = E2E_LANES.map((l) => l.name);
-  assert.equal(new Set(names).size, names.length, `two lanes share a name (${names.join(", ")}), so --lane picks one of them and the other runs in no job at all`);
+  assert.equal(
+    new Set(names).size,
+    names.length,
+    `two lanes share a name (${names.join(", ")}), so --lane picks one of them and the other runs in no job at all`,
+  );
   const ports = E2E_LANES.map((l) => l.port);
   const dports = E2E_LANES.map((l) => l.dport);
   const outs = ports.map(e2eOutSubdir);
@@ -144,8 +169,14 @@ test("--lane names one lane and no flag names every lane", () => {
     "a driver run with no flag no longer runs every lane",
   );
   for (const lane of E2E_LANES) {
-    assert.deepEqual(resolveLaneSelection([LANE_FLAG, lane.name]).map((l) => l.name), [lane.name]);
-    assert.deepEqual(resolveLaneSelection([`${LANE_FLAG}=${lane.name}`]).map((l) => l.name), [lane.name]);
+    assert.deepEqual(
+      resolveLaneSelection([LANE_FLAG, lane.name]).map((l) => l.name),
+      [lane.name],
+    );
+    assert.deepEqual(
+      resolveLaneSelection([`${LANE_FLAG}=${lane.name}`]).map((l) => l.name),
+      [lane.name],
+    );
   }
   const picked = resolveLaneSelection([LANE_FLAG, E2E_LANES[1]!.name])[0]!;
   assert.equal(picked, E2E_LANES[1], "the selected lane is not the roster's own entry");
@@ -200,8 +231,16 @@ test("every line a one-lane run can print says how much of the suite it was", ()
   const alone = (over: Partial<LaneResult>) => laneOutcome([result({ name: lane.name, ...over })], [lane]).line;
   const both = (over: Partial<LaneResult>) => laneOutcome(everyLane(over)).line;
   const qualifier = new RegExp(`1 of ${E2E_LANES.length} lanes`);
-  for (const [what, over] of [["passed", {}], ["skipped", { skipped: true }], ["failed", { code: 1 }]] as const) {
-    assert.match(alone(over), qualifier, `a one-lane run that ${what} does not say it ran one lane of ${E2E_LANES.length}`);
+  for (const [what, over] of [
+    ["passed", {}],
+    ["skipped", { skipped: true }],
+    ["failed", { code: 1 }],
+  ] as const) {
+    assert.match(
+      alone(over),
+      qualifier,
+      `a one-lane run that ${what} does not say it ran one lane of ${E2E_LANES.length}`,
+    );
     assert.doesNotMatch(both(over), qualifier, `a run of every lane that ${what} claims to be a single shard`);
     // Beside the count and not instead of it: the count is blind to a whole run claiming "2 of 2 lanes, not the full suite", which is the shape the prover reached by making the scope phrase unconditional (2026-09-14).
     assert.doesNotMatch(
@@ -242,17 +281,31 @@ test("a lane failing fails the run and the line says which lane", () => {
   }
   const all = laneOutcome(everyLane({ code: 1 }));
   assert.equal(all.ok, false);
-  assert.match(all.line, new RegExp(`LANE ${E2E_LANES.map((l) => l.name).join(" and ")} FAILED`), "the line does not name every failing lane");
+  assert.match(
+    all.line,
+    new RegExp(`LANE ${E2E_LANES.map((l) => l.name).join(" and ")} FAILED`),
+    "the line does not name every failing lane",
+  );
 });
 
 test("a harness error is reported as its own category, not as a failed check", () => {
   for (const lane of E2E_LANES) {
     const crashed = laneOutcome(withLane(lane.name, { code: 2 }));
     assert.equal(crashed.ok, false, `lane ${lane.name}'s harness error did not fail the run`);
-    assert.ok(crashed.line.includes(`${lane.name} HARNESS ERROR (exit 2)`), `exit 2 on lane ${lane.name} is a harness error, not a failed check, and the line does not say so: ${crashed.line}`);
+    assert.ok(
+      crashed.line.includes(`${lane.name} HARNESS ERROR (exit 2)`),
+      `exit 2 on lane ${lane.name} is a harness error, not a failed check, and the line does not say so: ${crashed.line}`,
+    );
     const failed = laneOutcome(withLane(lane.name, { code: 1 })).line;
-    assert.ok(failed.includes(`${lane.name} failed (exit 1)`), `exit 1 on lane ${lane.name} is a failed check, and the line does not say so: ${failed}`);
-    assert.doesNotMatch(failed, /HARNESS ERROR/, `exit 1 on lane ${lane.name} reads as a harness error, so a red check looks like infrastructure`);
+    assert.ok(
+      failed.includes(`${lane.name} failed (exit 1)`),
+      `exit 1 on lane ${lane.name} is a failed check, and the line does not say so: ${failed}`,
+    );
+    assert.doesNotMatch(
+      failed,
+      /HARNESS ERROR/,
+      `exit 1 on lane ${lane.name} reads as a harness error, so a red check looks like infrastructure`,
+    );
   }
 });
 
@@ -265,7 +318,11 @@ test("a selection of no lanes fails, and a lane nobody selected cannot report in
   const nothingAsked = laneOutcome([result({ name: E2E_LANES[0]!.name })], []);
   assert.equal(nothingAsked.ok, false, "a run asked for no lanes at all reported a pass");
   // Its own message, not just ok false: every result is a stray when nothing was selected, so the stray refusal below would catch this case too and a test reading only the verdict cannot tell which fired.
-  assert.match(nothingAsked.line, /no lanes were selected/, "an empty selection is reported as something other than an empty selection");
+  assert.match(
+    nothingAsked.line,
+    /no lanes were selected/,
+    "an empty selection is reported as something other than an empty selection",
+  );
   assert.doesNotMatch(nothingAsked.line, /0 of/, "the line offers a count where it should refuse the run");
 
   const stray = laneOutcome(everyLane(), [E2E_LANES[1]!]);
@@ -280,7 +337,11 @@ test("a lane that never reported fails the run, so half the suite cannot pass as
     assert.equal(partial.ok, false, `a run of lane ${lane.name} alone reported a pass`);
     assert.match(partial.line, /never reported/, "the line must say a lane is missing, not just fail");
     for (const absent of E2E_LANES.filter((l) => l.name !== lane.name)) {
-      assert.match(partial.line, new RegExp(`lane .*${absent.name}`), `the line does not name absent lane ${absent.name}`);
+      assert.match(
+        partial.line,
+        new RegExp(`lane .*${absent.name}`),
+        `the line does not name absent lane ${absent.name}`,
+      );
     }
   }
   assert.equal(laneOutcome(everyLane()).ok, true, "every lane reporting green must still pass");
@@ -290,12 +351,19 @@ test("the combined line states the check total the acceptance criterion names", 
   // Built from runOutcome, not a hand-written format: a reworded tally would silently report no counts.
   assert.deepEqual(laneCheckTally(runOutcome([{ ok: true }, { ok: true }]).line), { passed: 2, total: 2 });
   assert.deepEqual(laneCheckTally(runOutcome([{ ok: true }, { ok: false }]).line), { passed: 1, total: 2 });
-  assert.equal(laneCheckTally("shot -> out/e2e/explorer.png (1584px tall)"), null, "only the outcome line carries a tally");
+  assert.equal(
+    laneCheckTally("shot -> out/e2e/explorer.png (1584px tall)"),
+    null,
+    "only the outcome line carries a tally",
+  );
   assert.equal(laneCheckTally("PASS  R1 the chart draws"), null);
 
   const counted = laneOutcome(everyLane({ tally: { passed: 99, total: 100 } }));
   const n = E2E_LANES.length;
-  assert.ok(counted.line.includes(`${99 * n}/${100 * n} checks`), `the lanes' passes and totals must each be summed onto the combined line: ${counted.line}`);
+  assert.ok(
+    counted.line.includes(`${99 * n}/${100 * n} checks`),
+    `the lanes' passes and totals must each be summed onto the combined line: ${counted.line}`,
+  );
   assert.match(laneOutcome(everyLane()).line, /ALL LANES PASS/, "a run with no tally read must still report");
   assert.doesNotMatch(laneOutcome(everyLane()).line, /checks/, "no tally read means no invented count");
 });
@@ -314,10 +382,7 @@ test("a lane's output is split into whole lines, across chunk boundaries and at 
 
 test("the skip line the driver watches for is the one the runner actually prints", () => {
   // Read as source: a machine with a browser never takes this path, and a reworded SKIP would silently turn an empty run green.
-  const runner = readFileSync(
-    join(import.meta.dirname, "..", "..", "e2e", "run.ts"),
-    "utf8",
-  );
+  const runner = readFileSync(join(import.meta.dirname, "..", "..", "e2e", "run.ts"), "utf8");
   const printed = runner.match(/"(SKIP:[^"]*)"/);
   assert.ok(printed, "the runner no longer prints a SKIP: line, so the driver watches for nothing");
   assert.ok(laneLineIsSkip(printed[1]!), `the driver does not recognise the runner's own ${printed[1]}`);
@@ -329,7 +394,11 @@ test("lanes that skipped for want of a browser never read as a pass", () => {
   // The single-lane runner exits 0 when it skips, so the lanes do too; only the LINE can say so.
   const skipped = laneOutcome(everyLane({ skipped: true }));
   assert.doesNotMatch(skipped.line, /ALL LANES PASS/, "a fully skipped run must not read as a pass");
-  assert.match(skipped.line, new RegExp(`LANE ${E2E_LANES.map((l) => l.name).join(" and ")} SKIPPED`), "the line does not name every skipped lane");
+  assert.match(
+    skipped.line,
+    new RegExp(`LANE ${E2E_LANES.map((l) => l.name).join(" and ")} SKIPPED`),
+    "the line does not name every skipped lane",
+  );
 
   for (const lane of E2E_LANES) {
     const one = laneOutcome(withLane(lane.name, { skipped: true }));

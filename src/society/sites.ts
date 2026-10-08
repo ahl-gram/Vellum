@@ -138,8 +138,7 @@ function pickSettlements(candidates: ReadonlyArray<Candidate>, maxTowns: number,
   const farEnough = (c: Candidate, minDist: number): boolean =>
     placed.every((p) => Math.hypot(p.x - c.x, p.y - c.y) >= minDist);
 
-  const capital =
-    candidates.find((c) => c.harbor || c.onRiver) ?? candidates[0];
+  const capital = candidates.find((c) => c.harbor || c.onRiver) ?? candidates[0];
   if (!capital) return [];
   placed.push({ ...capital, kind: "capital" });
 

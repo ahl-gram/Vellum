@@ -12,8 +12,7 @@ import type { Settlement } from "../../src/society/sites.ts";
 
 const SEA = 0.5;
 type Rect = { x0: number; y0: number; x1: number; y1: number };
-const inRect = (x: number, y: number, r: Rect) =>
-  x >= r.x0 && x <= r.x1 && y >= r.y0 && y <= r.y1;
+const inRect = (x: number, y: number, r: Rect) => x >= r.x0 && x <= r.x1 && y >= r.y0 && y <= r.y1;
 
 function land(w: number, h: number, rects: ReadonlyArray<Rect>) {
   return createField(w, h, (x, y) => (rects.some((r) => inRect(x, y, r)) ? 1 : 0));
@@ -166,7 +165,12 @@ test("#309: realm webs sharing a landmass are joined into one component by a roy
   assert.equal(ids.size, 1, "the two realm webs never meet: no royal trunk joins them");
 });
 
-function longestShadowRun(points: ReadonlyArray<{ x: number; y: number }>, cells: Set<number>, near: (cells: Set<number>, x: number, y: number) => boolean, W: number): number {
+function longestShadowRun(
+  points: ReadonlyArray<{ x: number; y: number }>,
+  cells: Set<number>,
+  near: (cells: Set<number>, x: number, y: number) => boolean,
+  W: number,
+): number {
   let run = 0;
   let best = 0;
   for (const p of points) {
@@ -204,10 +208,7 @@ test("#309: no road shadows another; a royal trunk rides its home web out of tow
       for (let b = 0; b < w.roads.length; b++) {
         if (a === b || groupOf(w.roads[a]!) === groupOf(w.roads[b]!)) continue;
         const best = longestShadowRun(w.roads[a]!.points, cellSets[b]!, near, W);
-        assert.ok(
-          best < 15,
-          `seed ${seed}: road ${a} shadows road ${b} for ${best} cells without touching it`,
-        );
+        assert.ok(best < 15, `seed ${seed}: road ${a} shadows road ${b} for ${best} cells without touching it`);
       }
     }
   }

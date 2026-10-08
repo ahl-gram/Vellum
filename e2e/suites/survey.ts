@@ -6,7 +6,16 @@ import { surveyKit } from "./survey/kit.ts";
 import { sv1Boots, sv2FirstArm, sv2bAtRest, sv2cReArm, sv2dInsideBeat, sv2eInFlight, sv2fBare } from "./survey/arm.ts";
 import { sv2gSecondArm, sv2hPluralExit, sv2iBuildsOnce, sv2jTurnLanding } from "./survey/mount.ts";
 import { sv2pDrawBeat, sv2pSwapThenInk, sv2mStyleInBeat, sv2oVersoDraw } from "./survey/beat.ts";
-import { sv3Untick, sv4DeepLink, sv5Forwards, sv5bVerbatim, sv5cBadYear, sv5dBothKeys, sv6VersoMirrors, sv7Journal } from "./survey/links.ts";
+import {
+  sv3Untick,
+  sv4DeepLink,
+  sv5Forwards,
+  sv5bVerbatim,
+  sv5cBadYear,
+  sv5dBothKeys,
+  sv6VersoMirrors,
+  sv7Journal,
+} from "./survey/links.ts";
 import { sv9NoSeams, sv10TurnKeepsTrack, sv2nReducedSwap } from "./survey/turn.ts";
 import { sv8NoYear, sv11Clean } from "./survey/closing.ts";
 
@@ -19,7 +28,11 @@ export async function run(ctx: SuiteContext): Promise<void> {
   // SV2f, SV5, SV5b, SV7, SV8 and the closing seams are deliberately not stepped: nothing in them waits.
   const step = makeStep(ctx);
   await step("SV1", () => sv1Boots(k));
-  await step("SV2 to SV2c", async () => { const firstInkMs = await sv2FirstArm(k); await sv2bAtRest(ctx); await sv2cReArm(k, firstInkMs); });
+  await step("SV2 to SV2c", async () => {
+    const firstInkMs = await sv2FirstArm(k);
+    await sv2bAtRest(ctx);
+    await sv2cReArm(k, firstInkMs);
+  });
   await step("SV2d", () => sv2dInsideBeat(k));
   await step("SV2e", () => sv2eInFlight(k));
   await sv2fBare(ctx);
@@ -27,7 +40,10 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("SV2h", () => sv2hPluralExit(k));
   await step("SV2i", () => sv2iBuildsOnce(k));
   await step("SV2j", () => sv2jTurnLanding(k));
-  await step("SV2p", async () => { await sv2pDrawBeat(k); await sv2pSwapThenInk(ctx); });
+  await step("SV2p", async () => {
+    await sv2pDrawBeat(k);
+    await sv2pSwapThenInk(ctx);
+  });
   await step("SV2m", () => sv2mStyleInBeat(k));
   await step("SV2o", () => sv2oVersoDraw(k));
   await step("SV3", () => sv3Untick(k));

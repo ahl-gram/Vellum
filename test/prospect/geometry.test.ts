@@ -2,12 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import type { ProspectKind } from "../../src/prospect/input.ts";
 import { BACKDROP_SAMPLES } from "../../src/prospect/transect.ts";
-import {
-  TYPICAL_SCORE,
-  band,
-  bandOf,
-  makeInput,
-} from "../../test-support/prospect-fixtures.ts";
+import { TYPICAL_SCORE, band, bandOf, makeInput } from "../../test-support/prospect-fixtures.ts";
 import { composeProspect } from "../../src/prospect/compose.ts";
 import {
   BASE_GROUND,
@@ -23,9 +18,7 @@ function els<K extends ForegroundElement["kind"]>(
   g: ProspectGeometry,
   kind: K,
 ): Array<Extract<ForegroundElement, { kind: K }>> {
-  return g.foreground.filter(
-    (e): e is Extract<ForegroundElement, { kind: K }> => e.kind === kind,
-  );
+  return g.foreground.filter((e): e is Extract<ForegroundElement, { kind: K }> => e.kind === kind);
 }
 
 function one<K extends ForegroundElement["kind"]>(
@@ -42,39 +35,19 @@ function tallest(g: ProspectGeometry): number {
   return Math.max(...g.masses.map((m) => m.h));
 }
 
-const verticals = (g: ProspectGeometry): Mass[] =>
-  g.masses.filter((m) => m.form === "spire" || m.form === "tower");
-const keeps = (g: ProspectGeometry): Mass[] =>
-  g.masses.filter((m) => m.form === "keep");
+const verticals = (g: ProspectGeometry): Mass[] => g.masses.filter((m) => m.form === "spire" || m.form === "tower");
+const keeps = (g: ProspectGeometry): Mass[] => g.masses.filter((m) => m.form === "keep");
 
 test("the five-tier ladder drives mass count and height", () => {
   const byKind = Object.fromEntries(
-    (Object.keys(TYPICAL_SCORE) as ProspectKind[]).map((kind) => [
-      kind,
-      composeProspect(makeInput({ kind })),
-    ]),
+    (Object.keys(TYPICAL_SCORE) as ProspectKind[]).map((kind) => [kind, composeProspect(makeInput({ kind }))]),
   ) as Record<ProspectKind, ProspectGeometry>;
 
-  assert.ok(
-    byKind.capital.masses.length > byKind.town.masses.length,
-    "capital composes denser than town",
-  );
-  assert.ok(
-    byKind.town.masses.length > byKind.village.masses.length,
-    "town composes denser than village",
-  );
-  assert.ok(
-    byKind.village.masses.length > byKind.hamlet.masses.length,
-    "village composes denser than hamlet",
-  );
-  assert.ok(
-    byKind.capital.masses.length > byKind.seat.masses.length,
-    "capital composes denser than seat",
-  );
-  assert.ok(
-    tallest(byKind.capital) > tallest(byKind.village),
-    "capital composes taller than village",
-  );
+  assert.ok(byKind.capital.masses.length > byKind.town.masses.length, "capital composes denser than town");
+  assert.ok(byKind.town.masses.length > byKind.village.masses.length, "town composes denser than village");
+  assert.ok(byKind.village.masses.length > byKind.hamlet.masses.length, "village composes denser than hamlet");
+  assert.ok(byKind.capital.masses.length > byKind.seat.masses.length, "capital composes denser than seat");
+  assert.ok(tallest(byKind.capital) > tallest(byKind.village), "capital composes taller than village");
 
   assert.equal(keeps(byKind.capital).length, 1, "capital raises a keep");
   assert.equal(keeps(byKind.seat).length, 1, "seat raises a keep");
@@ -90,7 +63,10 @@ test("the five-tier ladder drives mass count and height", () => {
 
   for (const kind of ["capital", "seat", "town"] as const) {
     assert.ok(byKind[kind].walls.length >= 1, `${kind} is walled`);
-    assert.ok(byKind[kind].walls.some((w) => w.gate), `${kind} wall has a gate`);
+    assert.ok(
+      byKind[kind].walls.some((w) => w.gate),
+      `${kind} wall has a gate`,
+    );
   }
   assert.equal(byKind.village.walls.length, 0, "village is unwalled");
   assert.equal(byKind.hamlet.walls.length, 0, "hamlet is unwalled");
@@ -237,9 +213,7 @@ test("marsh villages stand on stilts", () => {
 });
 
 test("high ground composes the seat hill and the backdrop ridge", () => {
-  const flat = composeProspect(
-    makeInput({ siteRel: 0.1, backdrop: Array(BACKDROP_SAMPLES).fill(0.1) }),
-  );
+  const flat = composeProspect(makeInput({ siteRel: 0.1, backdrop: Array(BACKDROP_SAMPLES).fill(0.1) }));
   assert.equal(flat.ground.rise, 0, "lowland stands on flat ground");
   assert.equal(flat.ridge, null, "a flat backdrop draws no ridge");
 
@@ -247,9 +221,7 @@ test("high ground composes the seat hill and the backdrop ridge", () => {
     const t = Math.abs(i - (BACKDROP_SAMPLES - 1) / 2) / ((BACKDROP_SAMPLES - 1) / 2);
     return 0.6 + 0.3 * (1 - t) - 0.6 * t;
   });
-  const seat = composeProspect(
-    makeInput({ kind: "seat", siteRel: 0.6, backdrop: humped }),
-  );
+  const seat = composeProspect(makeInput({ kind: "seat", siteRel: 0.6, backdrop: humped }));
   // Issue #237 GO condition 5: a mountain seat stands on a filled hill mass.
   assert.ok(seat.ground.rise > 0, "the seat hill rises");
   assert.ok(seat.ridge !== null, "terrain behind the site draws the ridge");
@@ -260,17 +232,23 @@ test("high ground composes the seat hill and the backdrop ridge", () => {
 
 test("a ruin composes a field of collapse, not just broken rooflines", () => {
   const g = composeProspect(makeInput({ kind: "town", ruined: true, ruinedYear: 1361 }));
-  assert.ok(g.masses.some((m) => m.broken), "broken silhouettes stand in the ruin");
+  assert.ok(
+    g.masses.some((m) => m.broken),
+    "broken silhouettes stand in the ruin",
+  );
   assert.ok(one(g, "rubble").stones.length >= 6, "rubble strews the ground");
   assert.ok(one(g, "beams").items.length >= 2, "fallen beams lean on the stumps");
-  assert.ok(
-    els(g, "trees").length + els(g, "marshTufts").length >= 2,
-    "greenery reclaims the floors",
-  );
+  assert.ok(els(g, "trees").length + els(g, "marshTufts").length >= 2, "greenery reclaims the floors");
   assert.equal(one(g, "birds").items.length, 6, "birds circle the ruin");
   assert.equal(g.walls.length, 2, "the wall breaks to two stubs");
-  assert.ok(g.walls.some((w) => w.heel !== 0), "one stub heels over");
-  assert.ok(g.walls.every((w) => !w.gate), "no gate survives");
+  assert.ok(
+    g.walls.some((w) => w.heel !== 0),
+    "one stub heels over",
+  );
+  assert.ok(
+    g.walls.every((w) => !w.gate),
+    "no gate survives",
+  );
 });
 
 test("a ruined port keeps its masonry and loses its craft", () => {
@@ -284,27 +262,37 @@ test("a ruined port keeps its masonry and loses its craft", () => {
 });
 
 test("a drowned fen village sinks beneath the water sheet", () => {
-  const g = composeProspect(
-    makeInput({ kind: "village", ruined: true, foreground: band("marsh") }),
-  );
+  const g = composeProspect(makeInput({ kind: "village", ruined: true, foreground: band("marsh") }));
   assert.equal(g.masses.length, 0, "the skyline is drowned");
   assert.equal(g.water!.kind, "drowned");
   const stubs = one(g, "drownedStubs");
   assert.ok(stubs.stubs.length >= 2, "stubs still stand in the water");
-  assert.ok(stubs.stubs.some((s) => s.tilt !== 0), "one stub leans");
+  assert.ok(
+    stubs.stubs.some((s) => s.tilt !== 0),
+    "one stub leans",
+  );
 });
 
 test("before founding the ground is empty", () => {
-  const g = composeProspect(
-    makeInput({ kind: "town", harbor: true }),
-    { era: "before-founding" },
-  );
+  const g = composeProspect(makeInput({ kind: "town", harbor: true }), { era: "before-founding" });
   assert.equal(g.masses.length, 0);
   assert.equal(g.walls.length, 0);
   assert.ok(g.water, "the sea was always there");
   const made = new Set([
-    "quay", "mastRow", "ship", "mole", "beachedHulls", "jetty", "nets",
-    "bridge", "weir", "mill", "stilts", "rubble", "beams", "drownedStubs",
+    "quay",
+    "mastRow",
+    "ship",
+    "mole",
+    "beachedHulls",
+    "jetty",
+    "nets",
+    "bridge",
+    "weir",
+    "mill",
+    "stilts",
+    "rubble",
+    "beams",
+    "drownedStubs",
     "fieldRows",
   ]);
   assert.ok(
@@ -319,18 +307,16 @@ test("before founding the land wears only its natural dressing", () => {
   assert.equal(els(fields, "fieldRows").length, 0, "no furrows before the plow");
   assert.ok(els(fields, "trees").length >= 1, "the trees were always there");
 
-  const fen = composeProspect(
-    makeInput({ kind: "village", foreground: band("marsh") }),
-    { era: "before-founding" },
-  );
+  const fen = composeProspect(makeInput({ kind: "village", foreground: band("marsh") }), { era: "before-founding" });
   assert.equal(els(fen, "stilts").length, 0, "no stilts before the houses");
   assert.ok(one(fen, "marshTufts").items.length >= 6, "the fen keeps its tufts");
 });
 
 test("a ruined skyline shows ruin even when every draw comes up intact", () => {
   // Measured 2026-08-10: at seed 7321 every per-mass broken draw comes up intact for a ruined hamlet (~1 in 13,500), so only composeTownscape's insurance breaks the tallest front mass.
-  const g = composeProspect(
-    makeInput({ kind: "hamlet", ruined: true, ruinedYear: 1361, seed: 7321 }),
+  const g = composeProspect(makeInput({ kind: "hamlet", ruined: true, ruinedYear: 1361, seed: 7321 }));
+  assert.ok(
+    g.masses.some((m) => m.broken),
+    "the insurance breaks a mass",
   );
-  assert.ok(g.masses.some((m) => m.broken), "the insurance breaks a mass");
 });

@@ -1,6 +1,23 @@
 import type { Payload } from "../../types.ts";
 
-export type Matter = { ratio: number; aspect: number; pageHidden: boolean; turnedHidden: boolean; proofHidden: boolean; on: string | undefined; here: string | undefined; line: string; head: string; places: number; measureEmpty: boolean; scrollY: number; fits: number; innerW: number; noX: boolean; label: string | null };
+export type Matter = {
+  ratio: number;
+  aspect: number;
+  pageHidden: boolean;
+  turnedHidden: boolean;
+  proofHidden: boolean;
+  on: string | undefined;
+  here: string | undefined;
+  line: string;
+  head: string;
+  places: number;
+  measureEmpty: boolean;
+  scrollY: number;
+  fits: number;
+  innerW: number;
+  noX: boolean;
+  label: string | null;
+};
 type AtlasFit = { scrollW: number; clientW: number; plates: number; maxRight: number; atlasPadL: string };
 export type Warning = { disp: string; pos: string; w: number; hidden: boolean };
 

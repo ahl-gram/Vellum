@@ -41,7 +41,11 @@ const bytes = (file: string): Buffer => readFileSync(file);
 test("mutate changes the one line it names and leaves every other line byte for byte", () => {
   withSandbox(({ linked, wt }) => {
     mutate(NAME, "a.txt", 2, "same", "diff", linked);
-    assert.equal(readFileSync(join(wt, "a.txt"), "utf8"), "same 1\ndiff 2\nsame 3\n", "mutate changed some other line, none, or the named line from another line's text: three lines wearing one anchor are the PR #510 shape, where a match-based edit lands on every wearer at once");
+    assert.equal(
+      readFileSync(join(wt, "a.txt"), "utf8"),
+      "same 1\ndiff 2\nsame 3\n",
+      "mutate changed some other line, none, or the named line from another line's text: three lines wearing one anchor are the PR #510 shape, where a match-based edit lands on every wearer at once",
+    );
   });
 });
 
@@ -55,8 +59,16 @@ test("mutate refuses an anchor that is not on its line exactly once, a no-op, an
       [2, "", "x", /empty/],
     ];
     for (const [line, from, to, why] of refusals) {
-      assert.throws(() => mutate(NAME, "b.txt", line, from, to, linked), why, `mutate accepted ${JSON.stringify(from)} on line ${line}`);
-      assert.deepEqual(bytes(join(wt, "b.txt")), before, `the refused mutation of ${JSON.stringify(from)} on line ${line} still wrote the file`);
+      assert.throws(
+        () => mutate(NAME, "b.txt", line, from, to, linked),
+        why,
+        `mutate accepted ${JSON.stringify(from)} on line ${line}`,
+      );
+      assert.deepEqual(
+        bytes(join(wt, "b.txt")),
+        before,
+        `the refused mutation of ${JSON.stringify(from)} on line ${line} still wrote the file`,
+      );
     }
   });
 });
@@ -73,7 +85,11 @@ test("the commands read the sandbox's whole commit from a subdirectory of the di
     const deep = join(linked, "deep", "er");
     mkdirSync(deep, { recursive: true });
     mutate(NAME, "a.txt", 1, "same", "diff", linked);
-    assert.deepEqual(status(NAME, deep), ["a.txt"], "status run below the dispatch tree's root read only that directory of the commit, and reported a mutated tree as clean");
+    assert.deepEqual(
+      status(NAME, deep),
+      ["a.txt"],
+      "status run below the dispatch tree's root read only that directory of the commit, and reported a mutated tree as clean",
+    );
     assert.deepEqual(restore(NAME, ["a.txt"], deep), ["a.txt"]);
     assert.equal(readFileSync(join(wt, "a.txt"), "utf8"), "same 1\nsame 2\nsame 3\n");
     mutate(NAME, "b.txt", 4, "keep", "lose", deep);
@@ -85,7 +101,11 @@ test("mutate takes the anchor and the replacement literally", () => {
   withSandbox(({ linked, wt }) => {
     mutate(NAME, "b.txt", 3, "a.b", "A.B", linked);
     mutate(NAME, "b.txt", 4, "keep", "$&$1", linked);
-    assert.equal(readFileSync(join(wt, "b.txt"), "utf8"), "a + a\nab\naxb A.B\n$&$1\n", "the anchor was read as a pattern (a.b also matches axb) or the replacement's $& and $1 were expanded");
+    assert.equal(
+      readFileSync(join(wt, "b.txt"), "utf8"),
+      "a + a\nab\naxb A.B\n$&$1\n",
+      "the anchor was read as a pattern (a.b also matches axb) or the replacement's $& and $1 were expanded",
+    );
   });
 });
 
@@ -97,7 +117,11 @@ test("mutate and restore refuse a skeptic sandbox and any path that is not a reg
       assert.throws(() => mutate("skeptic-mutate", "a.txt", 1, "same", "diff", linked), /not a guard-\* sandbox/);
       assert.throws(() => restore("skeptic-mutate", ["a.txt"], linked), /not a guard-\* sandbox/);
       assert.throws(() => status("skeptic-mutate", linked), /not a guard-\* sandbox/);
-      assert.equal(readFileSync(join(skeptic, "a.txt"), "utf8"), "same 1\nsame 2\nsame 3\n", "mutate wrote into a skeptic's sandbox, which is read-only");
+      assert.equal(
+        readFileSync(join(skeptic, "a.txt"), "utf8"),
+        "same 1\nsame 2\nsame 3\n",
+        "mutate wrote into a skeptic's sandbox, which is read-only",
+      );
     } finally {
       teardown("skeptic-mutate", linked);
     }
@@ -110,8 +134,16 @@ test("mutate and restore refuse a skeptic sandbox and any path that is not a reg
     ];
     for (const [path, from, target] of untracked) {
       const before = bytes(target);
-      assert.throws(() => mutate(NAME, path, 1, from, "X", linked), /not a regular file tracked at/, `mutate did not refuse ${path} on the tracked-file check`);
-      assert.throws(() => restore(NAME, [path], linked), /not a regular file tracked at/, `restore did not refuse ${path} on the tracked-file check`);
+      assert.throws(
+        () => mutate(NAME, path, 1, from, "X", linked),
+        /not a regular file tracked at/,
+        `mutate did not refuse ${path} on the tracked-file check`,
+      );
+      assert.throws(
+        () => restore(NAME, [path], linked),
+        /not a regular file tracked at/,
+        `restore did not refuse ${path} on the tracked-file check`,
+      );
       assert.deepEqual(bytes(target), before, `mutate or restore of ${path} wrote ${target}`);
     }
     renameSync(join(wt, "d"), join(wt, "d-real"));
@@ -120,9 +152,21 @@ test("mutate and restore refuse a skeptic sandbox and any path that is not a reg
     assert.throws(() => restore(NAME, ["d/g.txt"], linked), /outside the sandbox/);
     rmSync(join(wt, "c.txt"));
     symlinkSync(join(main, "outside", "g.txt"), join(wt, "c.txt"));
-    assert.throws(() => mutate(NAME, "c.txt", 1, "outer", "X", linked), /outside the sandbox/, "a tracked regular file swapped for a symlink on disk was written through");
-    assert.throws(() => restore(NAME, ["c.txt"], linked), /outside the sandbox/, "restore wrote through a tracked regular file swapped for a symlink on disk");
-    assert.equal(readFileSync(join(main, "outside", "g.txt"), "utf8"), "outer\n", "a write followed a symlinked directory out of the sandbox, into a tree it does not own");
+    assert.throws(
+      () => mutate(NAME, "c.txt", 1, "outer", "X", linked),
+      /outside the sandbox/,
+      "a tracked regular file swapped for a symlink on disk was written through",
+    );
+    assert.throws(
+      () => restore(NAME, ["c.txt"], linked),
+      /outside the sandbox/,
+      "restore wrote through a tracked regular file swapped for a symlink on disk",
+    );
+    assert.equal(
+      readFileSync(join(main, "outside", "g.txt"), "utf8"),
+      "outer\n",
+      "a write followed a symlinked directory out of the sandbox, into a tree it does not own",
+    );
   });
 });
 
@@ -132,13 +176,29 @@ test("restore writes back the bytes at the sandbox's own commit, not the dispatc
     const wt = create("guard-restore", c1, linked);
     try {
       const before = bytes(join(wt, "f.txt"));
-      assert.equal(before.toString(), "one\n", "the fixture sandbox is not at c1, so this asserts nothing about which commit restore reads");
-      assert.deepEqual(status("guard-restore", linked), [], "a fresh sandbox at c1 read as changed: status compared it against the dispatch tree's commit, which holds two");
+      assert.equal(
+        before.toString(),
+        "one\n",
+        "the fixture sandbox is not at c1, so this asserts nothing about which commit restore reads",
+      );
+      assert.deepEqual(
+        status("guard-restore", linked),
+        [],
+        "a fresh sandbox at c1 read as changed: status compared it against the dispatch tree's commit, which holds two",
+      );
       mutate("guard-restore", "f.txt", 1, "one", "uno", linked);
-      assert.notDeepEqual(bytes(join(wt, "f.txt")), before, "mutate did not change the file, so the restore below proves nothing");
+      assert.notDeepEqual(
+        bytes(join(wt, "f.txt")),
+        before,
+        "mutate did not change the file, so the restore below proves nothing",
+      );
       assert.deepEqual(status("guard-restore", linked), ["f.txt"]);
       assert.deepEqual(restore("guard-restore", ["f.txt"], linked), ["f.txt"]);
-      assert.deepEqual(bytes(join(wt, "f.txt")), before, "restore did not bring back the sandbox commit's bytes: the dispatch tree's commit holds two, and a trimming read drops the newline");
+      assert.deepEqual(
+        bytes(join(wt, "f.txt")),
+        before,
+        "restore did not bring back the sandbox commit's bytes: the dispatch tree's commit holds two, and a trimming read drops the newline",
+      );
       assert.deepEqual(status("guard-restore", linked), []);
     } finally {
       teardown("guard-restore", linked);
@@ -164,12 +224,20 @@ test("restore puts back every path it is handed, binary bytes included", () => {
 
 test("status lists every tracked file whose bytes differ from the commit, however it changed, and nothing once restored", () => {
   withSandbox(({ linked, wt }) => {
-    assert.deepEqual(status(NAME, linked), [], "a fresh sandbox reads as changed, so status cannot tell a restored tree from a mutated one");
+    assert.deepEqual(
+      status(NAME, linked),
+      [],
+      "a fresh sandbox reads as changed, so status cannot tell a restored tree from a mutated one",
+    );
     mutate(NAME, "a.txt", 3, "same", "diff", linked);
     assert.deepEqual(status(NAME, linked), ["a.txt"], "status did not show the mutation that just landed");
     writeFileSync(join(wt, "c.txt"), "if (bad) return;\nok");
     rmSync(join(wt, "d", "g.txt"));
-    assert.deepEqual(status(NAME, linked), ["a.txt", "c.txt", "d/g.txt"], "status missed a change mutate never made: a dropped final newline, or a deleted file");
+    assert.deepEqual(
+      status(NAME, linked),
+      ["a.txt", "c.txt", "d/g.txt"],
+      "status missed a change mutate never made: a dropped final newline, or a deleted file",
+    );
     restore(NAME, ["a.txt", "c.txt", "d/g.txt"], linked);
     assert.deepEqual(status(NAME, linked), [], "status still reads a restored tree as changed");
   });
@@ -180,9 +248,17 @@ test("the CLI runs mutate, status and restore, deletes with an empty replacement
     const changed = cli(["mutate", NAME, "c.txt", "1", "if (bad) return;", ""], linked);
     assert.equal(changed.status, 0, `mutate exited ${changed.status}: ${changed.err}`);
     assert.match(changed.out, /c\.txt:1/, "mutate did not print the line it changed");
-    assert.equal(readFileSync(join(wt, "c.txt"), "utf8"), "\nok\n", "an empty replacement did not delete the anchor, which is how a guard clause is removed");
+    assert.equal(
+      readFileSync(join(wt, "c.txt"), "utf8"),
+      "\nok\n",
+      "an empty replacement did not delete the anchor, which is how a guard clause is removed",
+    );
     const dirty = cli(["status", NAME], linked);
-    assert.equal(dirty.status, 1, "status exited 0 with a changed file, so a caller reading the exit code sees a clean tree");
+    assert.equal(
+      dirty.status,
+      1,
+      "status exited 0 with a changed file, so a caller reading the exit code sees a clean tree",
+    );
     assert.equal(dirty.out, "c.txt\n");
     const back = cli(["restore", NAME, "c.txt"], linked);
     assert.equal(back.status, 0, `restore exited ${back.status}: ${back.err}`);
@@ -190,7 +266,10 @@ test("the CLI runs mutate, status and restore, deletes with an empty replacement
     const clean = cli(["status", NAME], linked);
     assert.equal(clean.status, 0);
     assert.equal(clean.out, "");
-    for (const args of [["mutate", NAME, "a.txt", "2", "same"], ["restore", NAME]]) {
+    for (const args of [
+      ["mutate", NAME, "a.txt", "2", "same"],
+      ["restore", NAME],
+    ]) {
       const r = cli(args, linked);
       assert.equal(r.status, 1, `${args.join(" ")} exited 0`);
       assert.match(r.err, /usage/, `${args.join(" ")} printed no usage`);

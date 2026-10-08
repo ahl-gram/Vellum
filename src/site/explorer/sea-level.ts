@@ -8,12 +8,9 @@ const landReadout = document.getElementById("land-readout") as HTMLElement;
 const LAND_MIN = 0.1;
 const LAND_MAX = 0.7;
 
-export const clampLand = (f: number): number =>
-  Math.min(LAND_MAX, Math.max(LAND_MIN, f));
-export const sliderToLand = (v: string | number): number =>
-  clampLand(Number(v) / 1000);
-export const landToSlider = (f: number): number =>
-  Math.round(clampLand(f) * 1000);
+export const clampLand = (f: number): number => Math.min(LAND_MAX, Math.max(LAND_MIN, f));
+export const sliderToLand = (v: string | number): number => clampLand(Number(v) / 1000);
+export const landToSlider = (f: number): number => Math.round(clampLand(f) * 1000);
 
 export function updateLandReadout(): void {
   const pct = Math.round(sliderToLand(landSlider.value) * 100);
@@ -22,9 +19,6 @@ export function updateLandReadout(): void {
 }
 
 // Display-only: park the slider at the world's natural waterline. Must NOT mutate the overrides passed to the worker (auto mode sends no landFraction override).
-export function syncAutoSlider(
-  seed: number,
-  overrides: Partial<WorldRecipe>,
-): void {
+export function syncAutoSlider(seed: number, overrides: Partial<WorldRecipe>): void {
   landSlider.value = String(landToSlider(defaultRecipe(seed, overrides).landFraction));
 }

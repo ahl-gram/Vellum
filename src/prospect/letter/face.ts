@@ -3,7 +3,14 @@ export const GRID = 2;
 
 export type FaceName = "roman" | "caps" | "italic";
 
-export type Glyph = readonly [advance: number, xMin: number, xMax: number, yMin: number, yMax: number, gridPathYDown: string];
+export type Glyph = readonly [
+  advance: number,
+  xMin: number,
+  xMax: number,
+  yMin: number,
+  yMax: number,
+  gridPathYDown: string,
+];
 
 export type FaceTable = {
   readonly name: FaceName;

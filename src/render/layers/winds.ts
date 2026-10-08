@@ -13,9 +13,7 @@ function windSpots(ctx: RenderCtx, avoid: ReadonlyArray<Box>): Spot[] {
   const k = proj.widthPx / 1500;
   const { w, h } = world.elev;
   const clear = (px: number, py: number): boolean =>
-    avoid.every(
-      (b) => !boxesOverlap(b, { x: px - 30, y: py - 30, w: 60, h: 60 }, 8),
-    );
+    avoid.every((b) => !boxesOverlap(b, { x: px - 30, y: py - 30, w: 60, h: 60 }, 8));
 
   const spots: Spot[] = [];
   for (let gy = 4; gy < h - 4; gy += 3) {
@@ -26,8 +24,10 @@ function windSpots(ctx: RenderCtx, avoid: ReadonlyArray<Box>): Spot[] {
       const px = proj.px(gx);
       const py = proj.py(gy);
       const edge = Math.min(
-        px - proj.margin, py - proj.margin,
-        proj.widthPx - proj.margin - px, proj.heightPx - proj.margin - py,
+        px - proj.margin,
+        py - proj.margin,
+        proj.widthPx - proj.margin - px,
+        proj.heightPx - proj.margin - py,
       );
       if (edge < 50 * k || !clear(px, py)) continue;
       spots.push({ x: px, y: py });
@@ -71,11 +71,7 @@ function windArrow(style: MapStyle, k: number, wrng: Rng, prevailing: number, sp
   });
 }
 
-export function windsLayer(
-  ctx: RenderCtx,
-  cartouche: CartouchePlan,
-  compass: CompassPlan | null,
-): SvgNode | null {
+export function windsLayer(ctx: RenderCtx, cartouche: CartouchePlan, compass: CompassPlan | null): SvgNode | null {
   const { style, world, proj, rng } = ctx;
   if (!style.winds) return null;
   const k = proj.widthPx / 1500;
@@ -132,9 +128,7 @@ export function windStreamsLayer(ctx: RenderCtx): SvgNode | null {
 
   const coastD = ctx.coastRings.map((r) => pathFrom(r, true)).join("");
   return el("g", { id: "layer-wind-streams" }, [
-    el("clipPath", { id: "wind-streams-clip" }, [
-      el("path", { d: coastD, "clip-rule": "evenodd" }),
-    ]),
+    el("clipPath", { id: "wind-streams-clip" }, [el("path", { d: coastD, "clip-rule": "evenodd" })]),
     el("g", { "clip-path": "url(#wind-streams-clip)" }, streaks),
   ]);
 }

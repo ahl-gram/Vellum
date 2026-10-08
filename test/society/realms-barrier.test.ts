@@ -9,7 +9,12 @@ import type { Settlement } from "../../src/society/sites.ts";
 const SEA = 0.5;
 const allLand = (w: number, h: number) => createField(w, h, () => 1);
 const settle = (x: number, y: number, kind: Settlement["kind"], score = 1): Settlement => ({
-  x, y, kind, harbor: false, onRiver: false, score,
+  x,
+  y,
+  kind,
+  harbor: false,
+  onRiver: false,
+  score,
 });
 const noRivers = (w: number, h: number) => new Uint8Array(w * h);
 function vBarrier(w: number, h: number, col: number, y0 = 0, y1 = h - 1): Uint8Array {
@@ -25,7 +30,9 @@ function diagBarrier(w: number, h: number): Uint8Array {
 const at = (labels: Int16Array, x: number, y: number, w: number) => labels[x + y * w] as number;
 
 test("#140 a major-river barrier is the frontier: it walls a realm off from land it would otherwise win", () => {
-  const W = 60, H = 20, ROW = 10;
+  const W = 60,
+    H = 20,
+    ROW = 10;
   const elev = allLand(W, H);
   const settlements = [settle(8, ROW, "capital"), settle(52, ROW, "town")];
   // barrier well inside realm 0's natural territory (a plain flood's bisector sits ~x=30)
@@ -41,7 +48,9 @@ test("#140 a major-river barrier is the frontier: it walls a realm off from land
 });
 
 test("#140 control: without the barrier that same land is realm 0 (the flip is caused by the barrier)", () => {
-  const W = 60, H = 20, ROW = 10;
+  const W = 60,
+    H = 20,
+    ROW = 10;
   const elev = allLand(W, H);
   const settlements = [settle(8, ROW, "capital"), settle(52, ROW, "town")];
   const realms = partitionRealms(elev, SEA, noRivers(W, H), settlements);
@@ -51,7 +60,8 @@ test("#140 control: without the barrier that same land is realm 0 (the flip is c
 });
 
 test("#140 no land is stranded: a barrier that seals off a seatless region is still fully assigned", () => {
-  const W = 60, H = 20;
+  const W = 60,
+    H = 20;
   const elev = allLand(W, H);
   // both seats LEFT of a full-height barrier -> the right region has no seat and is walled off
   const settlements = [settle(8, 10, "capital"), settle(38, 10, "town")];
@@ -62,7 +72,8 @@ test("#140 no land is stranded: a barrier that seals off a seatless region is st
 });
 
 test("#140 a seat sitting on a barrier cell still governs a full realm (seat exemption)", () => {
-  const W = 60, H = 20;
+  const W = 60,
+    H = 20;
   const elev = allLand(W, H);
   const settlements = [settle(8, 10, "capital"), settle(38, 10, "town")];
   const realms = partitionRealms(elev, SEA, noRivers(W, H), settlements, { barrier: vBarrier(W, H, 38) });
@@ -75,7 +86,8 @@ test("#140 a seat sitting on a barrier cell still governs a full realm (seat exe
 });
 
 test("#140 the diagonal-slip guard stops a flood leaking across a diagonal river", () => {
-  const W = 30, H = 30;
+  const W = 30,
+    H = 30;
   const elev = allLand(W, H);
   // Asymmetric seats so the cost bisector does NOT coincide with the diagonal: (14,0) is in the town's triangle yet Euclidean-nearer the capital (hypot 24.7 > 24), so only the barrier + slip-guard keep it the town's.
   const settlements = [settle(1, 4, "capital"), settle(25, 10, "town")];
@@ -83,15 +95,19 @@ test("#140 the diagonal-slip guard stops a flood leaking across a diagonal river
   const townRealm = at(withBarrier.labels, 25, 10, W);
   const capitalRealm = at(withBarrier.labels, 1, 4, W);
   assert.notEqual(townRealm, capitalRealm);
-  assert.equal(at(withBarrier.labels, 14, 0, W), townRealm,
-    "the slip-guard walls the capital's flood out of the town's triangle");
+  assert.equal(
+    at(withBarrier.labels, 14, 0, W),
+    townRealm,
+    "the slip-guard walls the capital's flood out of the town's triangle",
+  );
   const bare = partitionRealms(elev, SEA, noRivers(W, H), settlements);
-  assert.equal(at(bare.labels, 14, 0, W), at(bare.labels, 1, 4, W),
-    "without the barrier the capital wins (14,0)");
+  assert.equal(at(bare.labels, 14, 0, W), at(bare.labels, 1, 4, W), "without the barrier the capital wins (14,0)");
 });
 
 test("#140 the fill backfills only stranded (-1) land, never a cell the barrier already placed", () => {
-  const W = 64, H = 20, ROW = 10;
+  const W = 64,
+    H = 20,
+    ROW = 10;
   const elev = allLand(W, H);
   const settlements = [settle(8, ROW, "capital"), settle(40, ROW, "town")];
   // Col 20 reshapes the frontier; col 50 strands the seatless east, forcing the barrier-free backfill.
@@ -106,7 +122,8 @@ test("#140 the fill backfills only stranded (-1) land, never a cell the barrier 
 });
 
 test("#140 the barrier partition is deterministic", () => {
-  const W = 60, H = 20;
+  const W = 60,
+    H = 20;
   const elev = allLand(W, H);
   const settlements = [settle(8, 10, "capital"), settle(52, 10, "town")];
   const a = partitionRealms(elev, SEA, noRivers(W, H), settlements, { barrier: vBarrier(W, H, 20) });

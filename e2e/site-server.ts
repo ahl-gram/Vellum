@@ -34,42 +34,41 @@ function serveEngineModule(pathname: string, res: import("node:http").ServerResp
     return true;
   }
   return readFile(tsPath, "utf8").then((source) => {
-    const js = stripTypeScriptTypes(source, { mode: "strip" }).replace(
-      /(["'])(\.\.?\/[^"']+)\.ts\1/g,
-      "$1$2.js$1",
-    );
+    const js = stripTypeScriptTypes(source, { mode: "strip" }).replace(/(["'])(\.\.?\/[^"']+)\.ts\1/g, "$1$2.js$1");
     res.writeHead(200, { "content-type": MIME[".js"] }).end(js);
     return true;
   });
 }
 
 export function startServer(SITE: string, PORT: number): Promise<import("node:http").Server> {
-  const server = createServer((req, res) => { void (async () => {
-    try {
-      const url = new URL(req.url!, "http://127.0.0.1");
-      let pathname = decodeURIComponent(url.pathname);
-      if (serverState.blockWorker && BLOCKED_WORKERS.has(pathname)) {
-        res.writeHead(404).end("worker blocked for fallback test");
-        return;
+  const server = createServer((req, res) => {
+    void (async () => {
+      try {
+        const url = new URL(req.url!, "http://127.0.0.1");
+        let pathname = decodeURIComponent(url.pathname);
+        if (serverState.blockWorker && BLOCKED_WORKERS.has(pathname)) {
+          res.writeHead(404).end("worker blocked for fallback test");
+          return;
+        }
+        if (await serveEngineModule(pathname, res)) return;
+        if (pathname.endsWith("/")) pathname += "index.html";
+        const filePath = resolve(SITE, "." + pathname);
+        if (filePath !== SITE && !filePath.startsWith(SITE + sep)) {
+          res.writeHead(403).end("forbidden");
+          return;
+        }
+        if (!existsSync(filePath)) {
+          res.writeHead(404).end("not found");
+          return;
+        }
+        const body = await readFile(filePath);
+        res.writeHead(200, { "content-type": MIME[extname(filePath)] ?? "application/octet-stream" });
+        res.end(body);
+      } catch (err) {
+        res.writeHead(500).end(String(err));
       }
-      if (await serveEngineModule(pathname, res)) return;
-      if (pathname.endsWith("/")) pathname += "index.html";
-      const filePath = resolve(SITE, "." + pathname);
-      if (filePath !== SITE && !filePath.startsWith(SITE + sep)) {
-        res.writeHead(403).end("forbidden");
-        return;
-      }
-      if (!existsSync(filePath)) {
-        res.writeHead(404).end("not found");
-        return;
-      }
-      const body = await readFile(filePath);
-      res.writeHead(200, { "content-type": MIME[extname(filePath)] ?? "application/octet-stream" });
-      res.end(body);
-    } catch (err) {
-      res.writeHead(500).end(String(err));
-    }
-  })(); });
+    })();
+  });
   return new Promise((res, rej) => {
     server.on("error", (err: NodeJS.ErrnoException) =>
       rej(

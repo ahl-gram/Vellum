@@ -3,10 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-const homeSource = readFileSync(
-  fileURLToPath(new URL("../../src/pages/index.astro", import.meta.url)),
-  "utf8",
-);
+const homeSource = readFileSync(fileURLToPath(new URL("../../src/pages/index.astro", import.meta.url)), "utf8");
 
 test("the Go Deeper section is retired; its copy lives on the station slips (#459)", () => {
   assert.ok(!homeSource.includes("Go Deeper"), "the old section must stay gone");

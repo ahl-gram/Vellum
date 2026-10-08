@@ -117,9 +117,15 @@ function answer(msg: WorkerRequest): Promise<void> | undefined {
 let answering: Promise<void> = Promise.resolve();
 ctx.onmessage = (e) => {
   const msg = e.data;
-  answering = answering.then(() => answer(msg)).catch((err: unknown) => {
-    ctx.postMessage({ id: msg.id, ok: false, error: ((err as { message?: string } | null) && (err as { message?: string }).message) || String(err) });
-  });
+  answering = answering
+    .then(() => answer(msg))
+    .catch((err: unknown) => {
+      ctx.postMessage({
+        id: msg.id,
+        ok: false,
+        error: ((err as { message?: string } | null) && (err as { message?: string }).message) || String(err),
+      });
+    });
 };
 
 // Handshake: the static imports resolved before the module body ran.

@@ -9,24 +9,53 @@ import { El, installShim } from "../../test-support/element-shim.ts";
 installShim();
 
 const survey = (lx: number): SurveyItem => ({
-  kind: "survey", seed: 42, overrides: {}, rung: 2, lx, ly: 3,
-  style: "antique", legend: true, arms: false, beasts: false, theme: null,
+  kind: "survey",
+  seed: 42,
+  overrides: {},
+  rung: 2,
+  lx,
+  ly: 3,
+  style: "antique",
+  legend: true,
+  arms: false,
+  beasts: false,
+  theme: null,
 });
 const fill = (n: number): TableItem[] => Array.from({ length: n }, (_, i) => survey(i));
-const SVG = "<svg xmlns=\"http://www.w3.org/2000/svg\"></svg>";
+const SVG = '<svg xmlns="http://www.w3.org/2000/svg"></svg>';
 
-function drawer(opts: { onScreen?: boolean; drawThumb?: (item: TableItem) => Promise<{ url: string; title: string } | null> } = {}) {
+function drawer(
+  opts: { onScreen?: boolean; drawThumb?: (item: TableItem) => Promise<{ url: string; title: string } | null> } = {},
+) {
   const el = (tag: string) => new El(tag);
   const cuttings = el("ol");
-  cuttings.rect = opts.onScreen === false ? { left: 0, top: 0, right: 0, bottom: 0 } : { left: 251, top: 567, right: 1077, bottom: 785 };
+  cuttings.rect =
+    opts.onScreen === false
+      ? { left: 0, top: 0, right: 0, bottom: 0 }
+      : { left: 251, top: 567, right: 1077, bottom: 785 };
   const root = el("div");
-  root.rect = opts.onScreen === false ? { left: 0, top: 0, right: 0, bottom: 0 } : { left: 0, top: 552, right: 1280, bottom: 800 };
+  root.rect =
+    opts.onScreen === false
+      ? { left: 0, top: 0, right: 0, bottom: 0 }
+      : { left: 0, top: 552, right: 1280, bottom: 800 };
   const said: string[] = [];
   const changes: number[] = [];
-  const els = { root, tab: el("button"), shut: el("button"), count: el("p"), cuttings, full: el("p"), road: el("button") };
+  const els = {
+    root,
+    tab: el("button"),
+    shut: el("button"),
+    count: el("p"),
+    cuttings,
+    full: el("p"),
+    road: el("button"),
+  };
   const deps = {
-    say: (line: string) => { said.push(line); },
-    onChange: (items: ReadonlyArray<TableItem>) => { changes.push(items.length); },
+    say: (line: string) => {
+      said.push(line);
+    },
+    onChange: (items: ReadonlyArray<TableItem>) => {
+      changes.push(items.length);
+    },
     ...(opts.drawThumb ? { drawThumb: opts.drawThumb } : {}),
   };
   const table = bindChartDrawer(els as unknown as Parameters<typeof bindChartDrawer>[0], deps);
@@ -90,7 +119,11 @@ test("CT14 a refusal at the cap jolts the sheets on the table, a duplicate does 
   table.lay(survey(99), SVG, "seventh");
   assert.equal(cuttings.classList.contains("jolt"), true);
   table.restore(fill(1));
-  assert.equal(cuttings.classList.contains("jolt"), false, "the deterministic half: a render clears it whether or not the end event ever fired");
+  assert.equal(
+    cuttings.classList.contains("jolt"),
+    false,
+    "the deterministic half: a render clears it whether or not the end event ever fired",
+  );
 });
 
 test("CT14b the jolt, like the settle, is dropped rather than queued when the sheets are off screen", () => {
@@ -106,7 +139,11 @@ test("CT14c a refusal at the cap from a SHUT drawer plays the dip once the drawe
   assert.equal(shut.els.root.classList.contains("open"), false, "shut before the refusal");
   shut.table.lay(survey(99), SVG, "seventh");
   assert.equal(shut.els.root.classList.contains("open"), true, "the refusal opens the drawer, which starts its slide");
-  assert.equal(shut.cuttings.classList.contains("jolt"), false, "the sheets do not dip while the drawer is still rising");
+  assert.equal(
+    shut.cuttings.classList.contains("jolt"),
+    false,
+    "the sheets do not dip while the drawer is still rising",
+  );
   shut.els.root.fire("animationend", { target: shut.els.root });
   assert.equal(shut.cuttings.classList.contains("jolt"), true, "they dip once the drawer has arrived");
   const open = drawer();
@@ -127,11 +164,19 @@ test("CT14d a shut inside a ceremony clears it rather than leaving it armed: dis
   table.restore(fill(TABLE_CAP));
   els.shut.fire("click");
   table.lay(survey(99), SVG, "seventh");
-  assert.equal(els.root.classList.contains("open"), true, "a refusal from shut opens the drawer and arms the dip on its slide");
+  assert.equal(
+    els.root.classList.contains("open"),
+    true,
+    "a refusal from shut opens the drawer and arms the dip on its slide",
+  );
   els.shut.fire("click");
   els.tab.fire("click");
   els.root.fire("animationend", { target: els.root });
-  assert.equal(cuttings.classList.contains("jolt"), false, "a shut inside that slide dropped the armed dip, so the next plain open's slide end dips nothing");
+  assert.equal(
+    cuttings.classList.contains("jolt"),
+    false,
+    "a shut inside that slide dropped the armed dip, so the next plain open's slide end dips nothing",
+  );
   table.lay(survey(99), SVG, "seventh");
   assert.equal(cuttings.classList.contains("jolt"), true, "dipping");
   els.shut.fire("click");
@@ -143,19 +188,36 @@ test("CT10b a re-seat that drops sheets revokes every departed sheet's picture a
   const realMint = URL.createObjectURL.bind(URL);
   const realRevoke = URL.revokeObjectURL.bind(URL);
   let minted = 0;
-  URL.createObjectURL = (blob: Blob) => { void blob; return `blob:minted-${minted++}`; };
-  URL.revokeObjectURL = (url: string) => { revoked.push(url); };
+  URL.createObjectURL = (blob: Blob) => {
+    void blob;
+    return `blob:minted-${minted++}`;
+  };
+  URL.revokeObjectURL = (url: string) => {
+    revoked.push(url);
+  };
   try {
     const { table } = drawer();
     assert.equal(table.lay(survey(1), SVG, "one"), true);
     assert.equal(table.lay(survey(2), SVG, "two"), true);
     assert.equal(table.lay(survey(3), SVG, "three"), true);
-    assert.equal(minted, 3, "each laid sheet minted its own picture, so the revokes below have three urls to tell apart");
+    assert.equal(
+      minted,
+      3,
+      "each laid sheet minted its own picture, so the revokes below have three urls to tell apart",
+    );
     table.restore([survey(1), survey(2), survey(3)]);
     assert.deepEqual(revoked, [], "a re-seat that keeps every sheet drops no picture");
     table.restore([survey(2)]);
-    assert.deepEqual([...revoked].sort(), ["blob:minted-0", "blob:minted-2"], "every sheet that left takes its picture with it, and the one that stayed keeps its own");
-    assert.deepEqual(table.state().map((item) => (item.kind === "survey" ? item.lx : -1)), [2], "and the table holds exactly what the re-seat kept");
+    assert.deepEqual(
+      [...revoked].sort(),
+      ["blob:minted-0", "blob:minted-2"],
+      "every sheet that left takes its picture with it, and the one that stayed keeps its own",
+    );
+    assert.deepEqual(
+      table.state().map((item) => (item.kind === "survey" ? item.lx : -1)),
+      [2],
+      "and the table holds exactly what the re-seat kept",
+    );
   } finally {
     URL.createObjectURL = realMint;
     URL.revokeObjectURL = realRevoke;
@@ -165,11 +227,20 @@ test("CT10b a re-seat that drops sheets revokes every departed sheet's picture a
 test("CT15 a lay handed a ready url (the drag's ghost) adopts it and mints none; a lay handed only the svg mints one", () => {
   const minted: string[] = [];
   const real = URL.createObjectURL.bind(URL);
-  URL.createObjectURL = (blob: Blob) => { const u = `blob:minted-${minted.length}`; minted.push(u); void blob; return u; };
+  URL.createObjectURL = (blob: Blob) => {
+    const u = `blob:minted-${minted.length}`;
+    minted.push(u);
+    void blob;
+    return u;
+  };
   try {
     const { table, cuttings } = drawer();
     assert.equal(table.lay(survey(1), SVG, "one", { url: "blob:ghost" }), true);
-    assert.equal(minted.length, 0, "the ghost's url IS the cutting's; a second url per drag is the leak the issue names");
+    assert.equal(
+      minted.length,
+      0,
+      "the ghost's url IS the cutting's; a second url per drag is the leak the issue names",
+    );
     const img = lis(cuttings)[0]!.children.find((c): c is El & { src?: string } => c.tagName === "IMG");
     assert.equal(img?.src, "blob:ghost");
     assert.equal(table.lay(survey(2), SVG, "two"), true);
@@ -190,25 +261,43 @@ test("CT16 reveal() opens a shut drawer and hands back the function that shuts i
   assert.equal(els.root.classList.contains("open"), true, "a filing leaves it open (Issue #520, the filing gesture)");
   const noop = table.reveal();
   noop();
-  assert.equal(els.root.classList.contains("open"), true, "a drawer that was open before the grab stays open after a snap-back");
+  assert.equal(
+    els.root.classList.contains("open"),
+    true,
+    "a drawer that was open before the grab stays open after a snap-back",
+  );
 });
 
 test("CT17 a thumbnail arriving for a recovered sheet is patched into its cutting in place: the li keeps its identity, the reserved frame becomes the picture, and the title follows; a settle in flight is not rebuilt out from under it", async () => {
   let resolveThumb: (v: { url: string; title: string } | null) => void = () => {};
-  const drawThumb = () => new Promise<{ url: string; title: string } | null>((r) => { resolveThumb = r; });
+  const drawThumb = () =>
+    new Promise<{ url: string; title: string } | null>((r) => {
+      resolveThumb = r;
+    });
   const { table, cuttings, els } = drawer({ drawThumb });
   table.restore([survey(1)]);
   const before = lis(cuttings)[0]!;
-  assert.ok(before.children.some((c) => c.classList.contains("awaited")), "a recovered sheet holds a reserved frame");
+  assert.ok(
+    before.children.some((c) => c.classList.contains("awaited")),
+    "a recovered sheet holds a reserved frame",
+  );
   els.tab.fire("click");
   await Promise.resolve();
   resolveThumb({ url: "blob:drawn", title: "The Environs of Somewhere" });
   await new Promise((r) => setTimeout(r, 0));
   const after = lis(cuttings)[0]!;
   assert.equal(after, before, "the same element: a rebuild would end any settle playing on it");
-  assert.equal(after.children.some((c) => c.classList.contains("awaited")), false, "the frame is gone");
+  assert.equal(
+    after.children.some((c) => c.classList.contains("awaited")),
+    false,
+    "the frame is gone",
+  );
   const img = after.children.find((c): c is El & { src?: string } => c.tagName === "IMG");
   assert.equal(img?.src, "blob:drawn", "and the picture stands in its place");
   const title = after.children.find((c) => c.classList.contains("label"))?.children.find((c) => c.tagName === "B");
-  assert.equal(title?.textContent, "The Environs of Somewhere", "named from the drawn title, no longer the chart number");
+  assert.equal(
+    title?.textContent,
+    "The Environs of Somewhere",
+    "named from the drawn title, no longer the chart number",
+  );
 });

@@ -38,9 +38,23 @@ async function raWorld({ evaluate }: SuiteContext, room: Room) {
   return { sm, midYear };
 }
 
-async function ra1Restores({ evaluate, check, shoot }: SuiteContext, room: Room, sm: World["sm"], midYear: number): Promise<void> {
+async function ra1Restores(
+  { evaluate, check, shoot }: SuiteContext,
+  room: Room,
+  sm: World["sm"],
+  midYear: number,
+): Promise<void> {
   const ra1ok = await room.goto(`#seed=42&style=antique&year=${midYear}`);
-  const ra1 = await evaluate<{ panelShown: boolean; val: number | null; chamber: string; readout: string; roads: string; vis: number; status: string; play: string }>(`(()=>{
+  const ra1 = await evaluate<{
+    panelShown: boolean;
+    val: number | null;
+    chamber: string;
+    readout: string;
+    roads: string;
+    vis: number;
+    status: string;
+    play: string;
+  }>(`(()=>{
     const roads=document.querySelector('.rf-chart #layer-roads');
     const vis=[...document.querySelectorAll('.rf-chart #layer-settlements g.settlement')].filter((g)=>getComputedStyle(g).display!=="none").length;
     const a=window.__vellumAgesState();
@@ -52,9 +66,16 @@ async function ra1Restores({ evaluate, check, shoot }: SuiteContext, room: Room,
   })()`);
   check(
     "RA1 a year=N deep link restores the ages chamber at rest on that year, world and all",
-    ra1ok && ra1.panelShown && ra1.chamber === "ages" && ra1.val === midYear &&
-      ra1.readout === `year ${midYear}` && ra1.roads === "none" &&
-      ra1.vis > 0 && ra1.vis < sm.count && ra1.status === "" && ra1.play === "Play",
+    ra1ok &&
+      ra1.panelShown &&
+      ra1.chamber === "ages" &&
+      ra1.val === midYear &&
+      ra1.readout === `year ${midYear}` &&
+      ra1.roads === "none" &&
+      ra1.vis > 0 &&
+      ra1.vis < sm.count &&
+      ra1.status === "" &&
+      ra1.play === "Play",
     JSON.stringify({ ra1, midYear, count: sm.count }),
   );
   await shoot("reading-room-address-year.png");
@@ -62,7 +83,11 @@ async function ra1Restores({ evaluate, check, shoot }: SuiteContext, room: Room,
 
 async function ra2Clamps({ evaluate, check }: SuiteContext, room: Room, sm: World["sm"]): Promise<void> {
   await room.goto("#seed=42&style=antique&year=999999");
-  const ra2 = await evaluate<{ year: number | null; readout: string; hashYear: string | null }>(`(()=>{const a=window.__vellumAgesState();
+  const ra2 = await evaluate<{
+    year: number | null;
+    readout: string;
+    hashYear: string | null;
+  }>(`(()=>{const a=window.__vellumAgesState();
     return{year:a?a.year:-1,readout:document.querySelector(".rf-year").textContent,
       hashYear:new URLSearchParams(location.hash.slice(1)).get("year")};})()`);
   check(
@@ -75,7 +100,19 @@ async function ra2Clamps({ evaluate, check }: SuiteContext, room: Room, sm: Worl
 async function ra3Survey({ evaluate, check, shoot }: SuiteContext, room: Room): Promise<void> {
   // The empty status line is the discriminating clause: an applyVoyage restore would post the completion summary and hang the settle; only the silent rearm path leaves it "".
   await room.goto("#seed=42&style=antique&survey");
-  const ra3 = await evaluate<{ chamber: string; t: number | null; ports: number; first: string; last: string; pts: number; logged: number; rows: number; visible: boolean; status: string; hash: string }>(`(()=>{
+  const ra3 = await evaluate<{
+    chamber: string;
+    t: number | null;
+    ports: number;
+    first: string;
+    last: string;
+    pts: number;
+    logged: number;
+    rows: number;
+    visible: boolean;
+    status: string;
+    hash: string;
+  }>(`(()=>{
     const raw=document.querySelector(".voyage-track").getAttribute("points").trim().split(" ");
     const log=window.__vellumVoyageLog();
     const plan=window.__vellumVoyagePlan();
@@ -87,22 +124,41 @@ async function ra3Survey({ evaluate, check, shoot }: SuiteContext, room: Room): 
   })()`);
   check(
     "RA3 a bare survey deep link restores the survey chamber at rest on the closed track, silently",
-    ra3.chamber === "survey" && ra3.t === 1 && ra3.ports > 1 && ra3.first === ra3.last &&
-      ra3.pts > ra3.ports && ra3.visible && ra3.logged === ra3.rows && ra3.rows > 1 &&
-      ra3.status === "" && /(^|&)survey(&|$)/.test(ra3.hash) && !ra3.hash.includes("survey="),
+    ra3.chamber === "survey" &&
+      ra3.t === 1 &&
+      ra3.ports > 1 &&
+      ra3.first === ra3.last &&
+      ra3.pts > ra3.ports &&
+      ra3.visible &&
+      ra3.logged === ra3.rows &&
+      ra3.rows > 1 &&
+      ra3.status === "" &&
+      /(^|&)survey(&|$)/.test(ra3.hash) &&
+      !ra3.hash.includes("survey="),
     JSON.stringify(ra3),
   );
   await shoot("reading-room-address-survey.png");
 }
 
-async function ra4Ignored({ evaluate, check }: SuiteContext, room: Room, sm: World["sm"], midYear: number): Promise<void> {
+async function ra4Ignored(
+  { evaluate, check }: SuiteContext,
+  room: Room,
+  sm: World["sm"],
+  midYear: number,
+): Promise<void> {
   await room.goto(`#seed=42&style=antique&survey&year=${midYear}`);
-  const ra4 = await evaluate<{ chamber: string; year: number | null; hash: string }>(`(()=>{const a=window.__vellumAgesState();
+  const ra4 = await evaluate<{
+    chamber: string;
+    year: number | null;
+    hash: string;
+  }>(`(()=>{const a=window.__vellumAgesState();
     return{chamber:a?a.chamber:"",year:a?a.year:-1,hash:location.hash.slice(1)};})()`);
   check(
     "RA4 a link carrying both survey and year=N is ignored whole: the room parks at its default present rest",
-    ra4.chamber === "ages" && ra4.year === sm.present &&
-      !/(^|&)survey(=|&|$)/.test(ra4.hash) && new URLSearchParams(ra4.hash).get("year") === String(sm.present),
+    ra4.chamber === "ages" &&
+      ra4.year === sm.present &&
+      !/(^|&)survey(=|&|$)/.test(ra4.hash) &&
+      new URLSearchParams(ra4.hash).get("year") === String(sm.present),
     JSON.stringify({ ra4, present: sm.present }),
   );
 }
@@ -119,7 +175,11 @@ async function ra5AutoPark({ evaluate, check, sleep }: SuiteContext, sm: World["
   })()`);
   let ra5parked = null;
   for (let i = 0; i < 120; i++) {
-    ra5parked = await evaluate<{ val: number | null; play: string; year: string | null }>(`(()=>({val:window.__vellumAgesState().year,
+    ra5parked = await evaluate<{
+      val: number | null;
+      play: string;
+      year: string | null;
+    }>(`(()=>({val:window.__vellumAgesState().year,
       play:document.querySelector(".rf-play").textContent,
       year:new URLSearchParams(location.hash.slice(1)).get("year")}))()`);
     if (ra5parked.play === "Play" && ra5parked.val === sm.present) break;
@@ -128,7 +188,9 @@ async function ra5AutoPark({ evaluate, check, sleep }: SuiteContext, sm: World["
   check(
     "RA5 Play's auto-park at the present re-writes the address (no stale pre-Play year)",
     new URLSearchParams(ra5set).get("year") === String(midYear) &&
-      !!ra5parked && ra5parked.val === sm.present && ra5parked.year === String(sm.present),
+      !!ra5parked &&
+      ra5parked.val === sm.present &&
+      ra5parked.year === String(sm.present),
     JSON.stringify({ ra5set, ra5parked, present: sm.present }),
   );
 }
@@ -136,7 +198,12 @@ async function ra5AutoPark({ evaluate, check, sleep }: SuiteContext, sm: World["
 async function ra6Reduced({ evaluate, send, check }: SuiteContext, room: Room, midYear: number): Promise<void> {
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
   await room.goto(`#seed=42&style=antique&year=${midYear}`);
-  const ra6 = await evaluate<{ val: number | null; playing: boolean; play: string; status: string }>(`(()=>({val:window.__vellumAgesState().year,
+  const ra6 = await evaluate<{
+    val: number | null;
+    playing: boolean;
+    play: string;
+    status: string;
+  }>(`(()=>({val:window.__vellumAgesState().year,
     playing:window.__vellumAgesState().playing,
     play:document.querySelector(".rf-play").textContent,
     status:document.querySelector(".rf-status").textContent}))()`);
@@ -151,19 +218,36 @@ async function ra6Reduced({ evaluate, send, check }: SuiteContext, room: Room, m
 async function ra7Counter({ evaluate, check, sleep }: SuiteContext, room: Room, midYear: number): Promise<void> {
   await room.goto(`#seed=42&style=antique&year=${midYear}`);
   const ra7pre = await evaluate<string | null>(`new URLSearchParams(location.hash.slice(1)).get("year")`);
-  await evaluate(`(()=>{const c=document.querySelector(".rr-colophon");c.querySelector("input").value="100";c.querySelector(".rr-read").click();})()`);
+  await evaluate(
+    `(()=>{const c=document.querySelector(".rr-colophon");c.querySelector("input").value="100";c.querySelector(".rr-read").click();})()`,
+  );
   let ra7 = null;
   for (let i = 0; i < 300; i++) {
     let s = null;
     try {
-      s = await evaluate<{ seed: number; status: string | undefined; chamber: string | null; year: number | null; max: number | null; hash: string }>(`(()=>{const st=window.__vellumReadingRoomState();const a=window.__vellumAgesState();return{seed:st.seed,status:(document.querySelector(".rf-status")||{}).textContent,chamber:a&&a.chamber,year:a&&a.year,max:a&&a.max,hash:location.hash.slice(1)};})()`);
+      s = await evaluate<{
+        seed: number;
+        status: string | undefined;
+        chamber: string | null;
+        year: number | null;
+        max: number | null;
+        hash: string;
+      }>(
+        `(()=>{const st=window.__vellumReadingRoomState();const a=window.__vellumAgesState();return{seed:st.seed,status:(document.querySelector(".rf-status")||{}).textContent,chamber:a&&a.chamber,year:a&&a.year,max:a&&a.max,hash:location.hash.slice(1)};})()`,
+      );
     } catch {}
-    if (s && s.status === "" && s.seed === 100) { ra7 = s; break; }
+    if (s && s.status === "" && s.seed === 100) {
+      ra7 = s;
+      break;
+    }
     await sleep(50);
   }
   check(
     "RA7 a counter draw re-addresses to the NEW world's own present, never the old link's year",
-    ra7pre === String(midYear) && !!ra7 && ra7.chamber === "ages" && ra7.year === ra7.max &&
+    ra7pre === String(midYear) &&
+      !!ra7 &&
+      ra7.chamber === "ages" &&
+      ra7.year === ra7.max &&
       new URLSearchParams(ra7.hash).get("year") === String(ra7.max) &&
       /(^|&)seed=100(&|$)/.test(ra7.hash),
     JSON.stringify({ ra7pre, ra7 }),

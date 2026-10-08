@@ -84,15 +84,32 @@ export function placeLegendRow(legendEl: HTMLElement, room: LegendRoom): void {
   const chrome = rectOf(room.chrome);
   const chromeX = chrome === null ? 0 : pageLeft(chrome);
   const left = (textRight(room.folio) ?? chromeX) + LEGEND_CLEAR;
-  const bound = Math.min(pageBox().w - chromeX, room.glass ?? Infinity, room.slip === null ? Infinity : pageLeft(room.slip)) - LEGEND_GAP;
+  const bound =
+    Math.min(pageBox().w - chromeX, room.glass ?? Infinity, room.slip === null ? Infinity : pageLeft(room.slip)) -
+    LEGEND_GAP;
   const space = Math.max(0, bound - left);
   const to = `${left + space / 2}px`;
   Object.assign(legendEl.style, { width: "max-content", maxWidth: `${space}px`, left: to });
-  const tops = [...legendEl.querySelectorAll<HTMLElement>(".legend-row .legend-btn")].filter((b) => b.offsetWidth > 0).map((b) => b.offsetTop);
+  const tops = [...legendEl.querySelectorAll<HTMLElement>(".legend-row .legend-btn")]
+    .filter((b) => b.offsetWidth > 0)
+    .map((b) => b.offsetTop);
   const folio = rectOf(room.folio);
   if (folio !== null && pressRowStacks(tops)) {
-    Object.assign(legendEl.style, { transform: "none", left: `${chromeX}px`, maxWidth: `${Math.max(0, bound - chromeX)}px`, bottom: `${pageBox().h - folio.top + LEGEND_RISE}px` });
-    if (chrome !== null) legendEl.classList.toggle("lean", rowSheds(legendEl.getBoundingClientRect().top, chrome.bottom, -parseFloat(getComputedStyle(legendEl, "::before").top) || 0));
+    Object.assign(legendEl.style, {
+      transform: "none",
+      left: `${chromeX}px`,
+      maxWidth: `${Math.max(0, bound - chromeX)}px`,
+      bottom: `${pageBox().h - folio.top + LEGEND_RISE}px`,
+    });
+    if (chrome !== null)
+      legendEl.classList.toggle(
+        "lean",
+        rowSheds(
+          legendEl.getBoundingClientRect().top,
+          chrome.bottom,
+          -parseFloat(getComputedStyle(legendEl, "::before").top) || 0,
+        ),
+      );
     return;
   }
   if (from !== "" && from !== to) {

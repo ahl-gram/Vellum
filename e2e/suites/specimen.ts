@@ -4,7 +4,17 @@ import { makeSettle } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
 import type { SuiteContext } from "../types.ts";
 import { specimenKit } from "./specimen/kit.ts";
-import { sb1Boots, sb4Folded, sb5Leaned, sb5bEdgesDark, sb5dGlassBare, sb5eFolioPanel, sb8eInsets, sb5cFooting, sb6RestAgain } from "./specimen/desktop.ts";
+import {
+  sb1Boots,
+  sb4Folded,
+  sb5Leaned,
+  sb5bEdgesDark,
+  sb5dGlassBare,
+  sb5eFolioPanel,
+  sb8eInsets,
+  sb5cFooting,
+  sb6RestAgain,
+} from "./specimen/desktop.ts";
 import { sb9bPrinted, sb9PrintIsPaper, sb9dNoScript } from "./specimen/print.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {

@@ -19,9 +19,16 @@ test("the engraved plate is prospectPlate's bytes with the key, the era and the 
   assert.equal(e.svg, prospectPlate(w42, 0, STYLES.antique, present), "no ink of its own");
   assert.equal(e.era, "standing");
   const g = composeProspect({ ...input, ruined: false });
-  assert.deepEqual(e.key, plateKey(g, { input, surroundings, era: "standing" }), "the key names what the standing plate drew and the world around it");
+  assert.deepEqual(
+    e.key,
+    plateKey(g, { input, surroundings, era: "standing" }),
+    "the key names what the standing plate drew and the world around it",
+  );
   assert.deepEqual(e.caption, plateCaption(input, g, "standing", present, w42.names.sea));
-  assert.ok(e.key.some((k) => k.label.startsWith("The road to ")), "premise: the capital's key names its roads");
+  assert.ok(
+    e.key.some((k) => k.label.startsWith("The road to ")),
+    "premise: the capital's key names its roads",
+  );
   assert.match(e.caption.epithet, /chief port of /, "premise: the capital's epithet");
 });
 
@@ -29,8 +36,16 @@ test("before the founding the key is the bare ground's, the world alone, never t
   const input = buildProspectInput(w42, 0);
   const year = input.founded - 1;
   const surroundings = plateSurroundings(w42, 0, year);
-  const bare = plateKey(composeProspect(input, { era: "before-founding" }), { input, surroundings, era: "before-founding" });
-  assert.deepEqual(bare.map((k) => k.label), [w42.names.sea, "The Waters of Lalo"], "the sea and the river, as the An. 400 still keys them");
+  const bare = plateKey(composeProspect(input, { era: "before-founding" }), {
+    input,
+    surroundings,
+    era: "before-founding",
+  });
+  assert.deepEqual(
+    bare.map((k) => k.label),
+    [w42.names.sea, "The Waters of Lalo"],
+    "the sea and the river, as the An. 400 still keys them",
+  );
   const e = engravedProspectPlate(w42, 0, STYLES.antique, year);
   assert.equal(e.era, "before-founding");
   assert.deepEqual(e.key, bare, "the key follows the era the plate was drawn in");
@@ -45,7 +60,11 @@ test("a ruined place at the present engraves as ruined: the era, the epithet and
   const e = engravedProspectPlate(w42, i, STYLES.ink, present);
   assert.equal(e.era, eraFor(input, present));
   assert.equal(e.era, "ruined");
-  assert.deepEqual(e.key, plateKey(composeProspect(input), { input, surroundings: plateSurroundings(w42, i, present), era: "ruined" }), "the ruined composition's key");
+  assert.deepEqual(
+    e.key,
+    plateKey(composeProspect(input), { input, surroundings: plateSurroundings(w42, i, present), era: "ruined" }),
+    "the ruined composition's key",
+  );
   assert.equal(e.svg, prospectPlate(w42, i, STYLES.ink, present));
   assert.match(e.caption.epithet, /ruined|thrown down|lost to the waters/);
 });

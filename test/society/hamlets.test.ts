@@ -36,10 +36,7 @@ function richWindow(): UvWindow {
     if (!best || n > best.n) best = { win, n };
   }
   assert.ok(best, "the world has settlements to anchor a window on");
-  assert.ok(
-    best.n >= 3,
-    `some deepest-band window grows a healthy crop of hamlets (best had ${best.n})`,
-  );
+  assert.ok(best.n >= 3, `some deepest-band window grows a healthy crop of hamlets (best had ${best.n})`);
   cachedRich = best.win;
   return best.win;
 }
@@ -72,11 +69,7 @@ test("hamletName is deterministic and draws past a taken name", () => {
     first,
     "the same rng stream yields the same name",
   );
-  const second = hamletName(
-    createRng(7).fork("hamlet-name-test"),
-    culture,
-    new Set([first.toLowerCase()]),
-  );
+  const second = hamletName(createRng(7).fork("hamlet-name-test"), culture, new Set([first.toLowerCase()]));
   assert.ok(second, "a single collision does not exhaust the namespace");
   assert.notEqual(second.toLowerCase(), first.toLowerCase(), "the taken name is never returned");
 });
@@ -99,8 +92,7 @@ test("candidates are window-independent: a shared lattice point is identical in 
   const du = DEEP;
   const inset = 0.02; // the same open-window inset region.ts applies to settlements
   const inB = (u: number, v: number): boolean =>
-    u >= winB.u0 + du * inset && u <= winB.u1 - du * inset &&
-    v >= winB.v0 + du * inset && v <= winB.v1 - du * inset;
+    u >= winB.u0 + du * inset && u <= winB.u1 - du * inset && v >= winB.v0 + du * inset && v <= winB.v1 - du * inset;
   const shared = a.filter((c) => inB(c.u, c.v));
   assert.ok(shared.length >= 1, "the windows overlap on at least one candidate");
   const byPoint = new Map(b.map((c) => [`${c.u},${c.v}`, c]));
@@ -129,27 +121,19 @@ test("candidates obey the placeSettlements screens on the base world", () => {
     const e = world.elev.data[i] as number;
     assert.ok(e > world.seaLevel, `${c.name} stands on base-world land`);
     const biome = world.biomes[i] as number;
-    assert.ok(
-      biome !== BIOMES.snow && biome !== BIOMES.alpine,
-      `${c.name} avoids snow and alpine ground`,
-    );
+    assert.ok(biome !== BIOMES.snow && biome !== BIOMES.alpine, `${c.name} avoids snow and alpine ground`);
     assert.ok((e - world.seaLevel) / span <= 0.6, `${c.name} keeps to the settled elevation band`);
     assert.ok(
-      wx >= EDGE_MARGIN && wy >= EDGE_MARGIN &&
-        wx < gridW - EDGE_MARGIN && wy < gridH - EDGE_MARGIN,
+      wx >= EDGE_MARGIN && wy >= EDGE_MARGIN && wx < gridW - EDGE_MARGIN && wy < gridH - EDGE_MARGIN,
       `${c.name} keeps the world-border margin`,
     );
     for (const s of world.settlements) {
       assert.ok(
-        Math.hypot(s.x - c.u * (gridW - 1), s.y - c.v * (gridH - 1)) >=
-          HAMLET_SPACING_WORLD_CELLS,
+        Math.hypot(s.x - c.u * (gridW - 1), s.y - c.v * (gridH - 1)) >= HAMLET_SPACING_WORLD_CELLS,
         `${c.name} keeps its distance from ${s.name}`,
       );
     }
-    assert.ok(
-      c.founded >= 1 && c.founded < world.title.year,
-      `${c.name} was founded within the world's history`,
-    );
+    assert.ok(c.founded >= 1 && c.founded < world.title.year, `${c.name} was founded within the world's history`);
   }
 });
 
@@ -166,7 +150,10 @@ test("no candidate name collides with any world-sheet name for the seed", () => 
 test("placeHamlets projects candidates onto region land, appended by the region pipeline", () => {
   const win = richWindow();
   const region = generateRegionWorld(world, {
-    window: win, gridW: 320, gridH: 240, title: "Hamlet Environs",
+    window: win,
+    gridW: 320,
+    gridH: 240,
+    title: "Hamlet Environs",
   });
   const hamlets = region.settlements.filter((s) => s.kind === "hamlet");
   assert.ok(hamlets.length >= 3, "the deepest survey grows hamlets");
@@ -208,7 +195,10 @@ test("a deepest survey is byte-identical when regenerated from scratch", () => {
 test("hamlet marks are smaller than the village dot and label at the smallest size", () => {
   const win = richWindow();
   const region = generateRegionWorld(world, {
-    window: win, gridW: 320, gridH: 240, title: "Hamlet Environs",
+    window: win,
+    gridW: 320,
+    gridH: 240,
+    title: "Hamlet Environs",
   });
   const svg = renderMap(region, { style: "antique" });
   const groups = [...svg.matchAll(/<g class="settlement" data-idx="\d+" data-tier="hamlet"[^>]*>(.*?)<\/g>/gs)];
@@ -223,7 +213,10 @@ test("hamlet marks are smaller than the village dot and label at the smallest si
 test("label pressure drops hamlet labels first and never force-places them (#171)", () => {
   const win = richWindow();
   const region = generateRegionWorld(world, {
-    window: win, gridW: 320, gridH: 240, title: "Crowded Environs",
+    window: win,
+    gridW: 320,
+    gridH: 240,
+    title: "Crowded Environs",
   });
   const svg = renderMap(region, { style: "antique" });
 
@@ -259,10 +252,7 @@ function labeledSizes(regionSvg: string, layerStart: number): Array<{ tier: keyo
   const marks = [...layer.matchAll(/<g class="settlement" data-idx="\d+" data-tier="([a-z]+)"[^>]*>/g)];
   const labeled: Array<{ tier: keyof typeof FONT_SIZE; fs: number }> = [];
   marks.forEach((m, i) => {
-    const body = layer.slice(
-      m.index + m[0].length,
-      i + 1 < marks.length ? marks[i + 1]!.index : undefined,
-    );
+    const body = layer.slice(m.index + m[0].length, i + 1 < marks.length ? marks[i + 1]!.index : undefined);
     const fs = body.match(/<text[^>]*font-size="([\d.]+)"/);
     if (fs) labeled.push({ tier: m[1] as keyof typeof FONT_SIZE, fs: Number(fs[1]) });
   });
@@ -272,7 +262,10 @@ function labeledSizes(regionSvg: string, layerStart: number): Array<{ tier: keyo
 test("region sheets set settlement labels larger; world sheets keep their type (readability)", () => {
   const win = richWindow();
   const region = generateRegionWorld(world, {
-    window: win, gridW: 320, gridH: 240, title: "Legible Environs",
+    window: win,
+    gridW: 320,
+    gridH: 240,
+    title: "Legible Environs",
   });
   const regionSvg = renderMap(region, { style: "antique" });
   const worldSvg = renderMap(world, { style: "antique" });
@@ -305,23 +298,26 @@ test("region sheets set settlement labels larger; world sheets keep their type (
   assert.ok(REGION_FONT_SIZE.hamlet >= 12.5, "hamlet type is laptop-legible at display scale");
 
   // The world sheet is untouched: data-tier is region-only, so read the world label size off any village text.
-  const worldVillage = worldSvg.match(
-    new RegExp(`<text[^>]*font-size="${FONT_SIZE.village}"`),
-  );
+  const worldVillage = worldSvg.match(new RegExp(`<text[^>]*font-size="${FONT_SIZE.village}"`));
   assert.ok(worldVillage, "world villages keep their base type (golden-locked)");
 });
 
 test("the legend keys a Hamlet row only on sheets that contain hamlets", () => {
   const win = richWindow();
   const region = generateRegionWorld(world, {
-    window: win, gridW: 320, gridH: 240, title: "Hamlet Environs",
+    window: win,
+    gridW: 320,
+    gridH: 240,
+    title: "Hamlet Environs",
   });
   const withHamlets = renderMap(region, { style: "antique", legend: true });
   assert.ok(withHamlets.includes(">Hamlet<"), "the deepest survey keys its hamlets");
 
   const shallow = generateRegionWorld(world, {
     window: windowAround(world, world.settlements[0]!, 0.3),
-    gridW: 320, gridH: 240, title: "Shallow Environs",
+    gridW: 320,
+    gridH: 240,
+    title: "Shallow Environs",
   });
   const without = renderMap(shallow, { style: "antique", legend: true });
   assert.ok(!without.includes(">Hamlet<"), "a shallower survey keys no hamlet row");

@@ -22,7 +22,13 @@ function key(x: number, y: number): string {
   return `${Math.round(x * 1e6)},${Math.round(y * 1e6)}`;
 }
 
-function cellSegments(x: number, y: number, corners: readonly [number, number, number, number], idx: number, iso: number): Seg[] {
+function cellSegments(
+  x: number,
+  y: number,
+  corners: readonly [number, number, number, number],
+  idx: number,
+  iso: number,
+): Seg[] {
   const [a, b, c, d] = corners;
   const segs: Seg[] = [];
 
@@ -36,28 +42,64 @@ function cellSegments(x: number, y: number, corners: readonly [number, number, n
   };
 
   switch (idx) {
-    case 1: add(bottom, left); break;
-    case 2: add(right, bottom); break;
-    case 3: add(right, left); break;
-    case 4: add(top, right); break;
+    case 1:
+      add(bottom, left);
+      break;
+    case 2:
+      add(right, bottom);
+      break;
+    case 3:
+      add(right, left);
+      break;
+    case 4:
+      add(top, right);
+      break;
     case 5: {
       const center = (a + b + c + d) / 4;
-      if (center > iso) { add(top, left); add(bottom, right); } else { add(top, right); add(bottom, left); }
+      if (center > iso) {
+        add(top, left);
+        add(bottom, right);
+      } else {
+        add(top, right);
+        add(bottom, left);
+      }
       break;
     }
-    case 6: add(top, bottom); break;
-    case 7: add(top, left); break;
-    case 8: add(left, top); break;
-    case 9: add(bottom, top); break;
+    case 6:
+      add(top, bottom);
+      break;
+    case 7:
+      add(top, left);
+      break;
+    case 8:
+      add(left, top);
+      break;
+    case 9:
+      add(bottom, top);
+      break;
     case 10: {
       const center = (a + b + c + d) / 4;
-      if (center > iso) { add(right, top); add(left, bottom); } else { add(left, top); add(right, bottom); }
+      if (center > iso) {
+        add(right, top);
+        add(left, bottom);
+      } else {
+        add(left, top);
+        add(right, bottom);
+      }
       break;
     }
-    case 11: add(right, top); break;
-    case 12: add(left, right); break;
-    case 13: add(bottom, right); break;
-    case 14: add(left, bottom); break;
+    case 11:
+      add(right, top);
+      break;
+    case 12:
+      add(left, right);
+      break;
+    case 13:
+      add(bottom, right);
+      break;
+    case 14:
+      add(left, bottom);
+      break;
   }
   return segs;
 }
@@ -73,8 +115,7 @@ export function marchingSquares(field: Field, iso: number): Contour[] {
       const c = data[x + 1 + (y + 1) * w] as number;
       const d = data[x + (y + 1) * w] as number;
 
-      const idx =
-        (a > iso ? 8 : 0) | (b > iso ? 4 : 0) | (c > iso ? 2 : 0) | (d > iso ? 1 : 0);
+      const idx = (a > iso ? 8 : 0) | (b > iso ? 4 : 0) | (c > iso ? 2 : 0) | (d > iso ? 1 : 0);
       if (idx === 0 || idx === 15) continue;
       for (const s of cellSegments(x, y, [a, b, c, d], idx, iso)) segs.push(s);
     }
@@ -122,7 +163,10 @@ function createChainWalker(segs: ReadonlyArray<Seg>): (i: number) => Contour | n
   const used = new Uint8Array(segs.length);
 
   const walkForward = (first: Seg): { points: Point[]; closed: boolean } => {
-    const points: Point[] = [[first[0], first[1]], [first[2], first[3]]];
+    const points: Point[] = [
+      [first[0], first[1]],
+      [first[2], first[3]],
+    ];
     const startKey = key(first[0], first[1]);
     let endKey = key(first[2], first[3]);
     while (endKey !== startKey) {
@@ -202,8 +246,7 @@ function boundaryFrame(w: number, h: number, eps: number): BoundaryFrame {
 
   const cornersBetween = (from: number, to: number): Point[] => {
     const span = mod(to - from);
-    return CORNERS
-      .map(([tc, pt]) => ({ delta: mod(tc - from), pt }))
+    return CORNERS.map(([tc, pt]) => ({ delta: mod(tc - from), pt }))
       .filter(({ delta }) => delta > eps && delta < span - eps)
       .sort((a, b) => a.delta - b.delta)
       .map(({ pt }) => pt);
@@ -233,18 +276,16 @@ function nearestOpenStart(
   return { bestJ, bestDelta };
 }
 
-export function closeChainsOnBoundary(
-  contours: ReadonlyArray<Contour>,
-  w: number,
-  h: number,
-): Contour[] {
+export function closeChainsOnBoundary(contours: ReadonlyArray<Contour>, w: number, h: number): Contour[] {
   const frame = boundaryFrame(w, h, 1e-4);
   const { tOf, mod, cornersBetween } = frame;
 
-  const out: Contour[] = contours.filter((c) => c.closed).map((c) => ({
-    points: [...c.points],
-    closed: true,
-  }));
+  const out: Contour[] = contours
+    .filter((c) => c.closed)
+    .map((c) => ({
+      points: [...c.points],
+      closed: true,
+    }));
   const open = contours.filter((c) => !c.closed);
   const used = new Array<boolean>(open.length).fill(false);
 
@@ -280,9 +321,4 @@ export function closedIsoRings(field: Field, iso: number): Contour[] {
   return closeChainsOnBoundary(marchingSquares(field, iso), field.w, field.h);
 }
 
-export {
-  chaikinSmooth,
-  chaikinSmoothPinned,
-  coastSmoothingIterations,
-  ringArea,
-} from "./polyline.ts";
+export { chaikinSmooth, chaikinSmoothPinned, coastSmoothingIterations, ringArea } from "./polyline.ts";

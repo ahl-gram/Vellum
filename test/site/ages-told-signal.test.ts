@@ -167,8 +167,16 @@ test("buildAnnals writes the chronicler's block INTO the strip it is given: the 
   assert.equal(strip.children.length, EVENTS.length + 1, "the head and one row per event, in the strip handed over");
   assert.equal(strip.children[0]!.className, "annals-head");
   assert.equal(strip.children[0]!.textContent, "Here follow the annals of these waters");
-  assert.deepEqual(strip.children.slice(1).map((li) => li.children[0]!.textContent), EVENTS.map((e) => String(e.year)), "the year spans in the events' order");
-  assert.equal(strip.children[1]!.children[1]!.children[0]!.className, "cr-dc", "the first row's text opens with its initial");
+  assert.deepEqual(
+    strip.children.slice(1).map((li) => li.children[0]!.textContent),
+    EVENTS.map((e) => String(e.year)),
+    "the year spans in the events' order",
+  );
+  assert.equal(
+    strip.children[1]!.children[1]!.children[0]!.className,
+    "cr-dc",
+    "the first row's text opens with its initial",
+  );
   assert.equal(strip.children[1]!.children[1]!.textContent, EVENTS[0]!.text, "and reads whole");
   assert.equal(strip.children[2]!.children[1]!.textContent, EVENTS[1]!.text, "a later row is plain text");
 });

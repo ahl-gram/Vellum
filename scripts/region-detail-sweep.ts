@@ -15,8 +15,12 @@ const sum = (rows: ReadonlyArray<WindowResult>, pick: (r: WindowResult) => numbe
 function report(rows: ReadonlyArray<WindowResult>): string {
   const lines: string[] = [];
   const arms = [false, true];
-  lines.push("hamlets are placed only on band-3-sized windows, so bands 1 and 2 print candidates against 0 placed by design");
-  lines.push("band  detail  windows  settl exp/placed/dropped  seatsLost  hamlets cand/placed/onWater  rivers/endingOnLand  roads/cellsOnWater  land  biomeMismatch/sharedLand  snowAlpine region vs parent  realmless over parentLand/parentSea  landOverParentSea  parentLandDrowned/parentLand  worldFused/lost/masses  maxElev");
+  lines.push(
+    "hamlets are placed only on band-3-sized windows, so bands 1 and 2 print candidates against 0 placed by design",
+  );
+  lines.push(
+    "band  detail  windows  settl exp/placed/dropped  seatsLost  hamlets cand/placed/onWater  rivers/endingOnLand  roads/cellsOnWater  land  biomeMismatch/sharedLand  snowAlpine region vs parent  realmless over parentLand/parentSea  landOverParentSea  parentLandDrowned/parentLand  worldFused/lost/masses  maxElev",
+  );
   for (const band of [1, 2, 3]) {
     for (const detail of arms) {
       const rs = rows.filter((r) => r.band === band && r.detail === detail);
@@ -32,18 +36,28 @@ function report(rows: ReadonlyArray<WindowResult>): string {
           String(band).padStart(4),
           (detail ? "on " : "off").padStart(7),
           String(rs.length).padStart(8),
-          `${sum(rs, (r) => r.settlementsExpected)}/${sum(rs, (r) => r.settlementsPlaced)}/${sum(rs, (r) => r.settlementsDropped)}`.padStart(21),
+          `${sum(rs, (r) => r.settlementsExpected)}/${sum(rs, (r) => r.settlementsPlaced)}/${sum(rs, (r) => r.settlementsDropped)}`.padStart(
+            21,
+          ),
           String(sum(rs, (r) => r.seatsLost)).padStart(10),
-          `${sum(rs, (r) => r.hamletCandidates)}/${sum(rs, (r) => r.hamletsPlaced)}/${sum(rs, (r) => r.hamletsOnWater)}`.padStart(24),
+          `${sum(rs, (r) => r.hamletCandidates)}/${sum(rs, (r) => r.hamletsPlaced)}/${sum(rs, (r) => r.hamletsOnWater)}`.padStart(
+            24,
+          ),
           `${sum(rs, (r) => r.rivers)}/${sum(rs, (r) => r.riversEndingOnLand)}`.padStart(20),
           `${sum(rs, (r) => r.roads)}/${sum(rs, (r) => r.roadCellsOnWater)}`.padStart(19),
           String(land).padStart(7),
           `${sum(rs, (r) => r.biomeMismatchOnSharedLand)}/${shared}`.padStart(25),
-          `${land === 0 ? "0" : ((snow / land) * 100).toFixed(2)}% vs ${parentLand === 0 ? "0" : ((psnow / parentLand) * 100).toFixed(2)}%`.padStart(26),
+          `${land === 0 ? "0" : ((snow / land) * 100).toFixed(2)}% vs ${parentLand === 0 ? "0" : ((psnow / parentLand) * 100).toFixed(2)}%`.padStart(
+            26,
+          ),
           `${sum(rs, (r) => r.realmlessOverParentLand)}/${sum(rs, (r) => r.realmlessOverParentSea)}`.padStart(36),
-          `${sum(rs, (r) => r.landOverParentSea)} (${land === 0 ? "0" : ((sum(rs, (r) => r.landOverParentSea) / land) * 100).toFixed(2)}%)`.padStart(20),
+          `${sum(rs, (r) => r.landOverParentSea)} (${land === 0 ? "0" : ((sum(rs, (r) => r.landOverParentSea) / land) * 100).toFixed(2)}%)`.padStart(
+            20,
+          ),
           `${sum(rs, (r) => r.parentLandDrownedInRegion)}/${sum(rs, (r) => r.parentLandCells)}`.padStart(29),
-          `${sum(rs, (r) => r.worldFusedPairs)}/${sum(rs, (r) => r.worldMassesLost)}/${sum(rs, (r) => r.worldMassesInWindow)}`.padStart(23),
+          `${sum(rs, (r) => r.worldFusedPairs)}/${sum(rs, (r) => r.worldMassesLost)}/${sum(rs, (r) => r.worldMassesInWindow)}`.padStart(
+            23,
+          ),
           (sum(rs, (r) => r.regionMaxElev) / rs.length).toFixed(4).padStart(9),
         ].join(""),
       );
@@ -85,11 +99,7 @@ async function main(): Promise<void> {
 
   await mkdir(resolve("out"), { recursive: true });
   await writeFile(resolve("out/region-detail-sweep.json"), JSON.stringify(rows, null, 1), "utf8");
-  await writeFile(
-    resolve("out/region-detail-sweep-rivers.json"),
-    JSON.stringify(failures, null, 1),
-    "utf8",
-  );
+  await writeFile(resolve("out/region-detail-sweep-rivers.json"), JSON.stringify(failures, null, 1), "utf8");
   const table = report(rows);
   await writeFile(resolve("out/region-detail-sweep.txt"), `${table}\n`, "utf8");
   console.log(table);

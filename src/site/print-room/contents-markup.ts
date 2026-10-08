@@ -67,18 +67,48 @@ export function contentsRows(atlas: ContentsData | null): string {
     return row(i, key === here, text);
   };
   return [
-    row(SECTION_ROW.hero, on([atlas.hero]), turn(atlas.hero, here, "The chart, drawn in the <em>antique</em> manner"), plates([atlas.hero], here)),
-    row(SECTION_ROW.draughting, on(atlas.draughtings), `Other draughtings: ${named(atlas.draughtings, here, lower)}`, plates(atlas.draughtings, here)),
-    ...atlas.themes.map((p, i) => row(plateRow("theme", i), on([p]), turn(p, here, survey(lower(p))), plates([p], here))),
-    row(SECTION_ROW.region, on(atlas.regions), atlas.regions.length > 0 ? `Regional surveys: ${named(atlas.regions, here, (p) => p.title)}` : "Regional surveys: none for this world", plates(atlas.regions, here)),
-    row(SECTION_ROW.prospect, on(atlas.prospects), atlas.prospects.length > 0 ? atlas.prospects.map((p) => turn(p, here, `The prospect of <em>${escapeXml(capitalOf(p))}</em>`)).join(", ") : "The prospect of the capital: none for this world", plates(atlas.prospects, here)),
+    row(
+      SECTION_ROW.hero,
+      on([atlas.hero]),
+      turn(atlas.hero, here, "The chart, drawn in the <em>antique</em> manner"),
+      plates([atlas.hero], here),
+    ),
+    row(
+      SECTION_ROW.draughting,
+      on(atlas.draughtings),
+      `Other draughtings: ${named(atlas.draughtings, here, lower)}`,
+      plates(atlas.draughtings, here),
+    ),
+    ...atlas.themes.map((p, i) =>
+      row(plateRow("theme", i), on([p]), turn(p, here, survey(lower(p))), plates([p], here)),
+    ),
+    row(
+      SECTION_ROW.region,
+      on(atlas.regions),
+      atlas.regions.length > 0
+        ? `Regional surveys: ${named(atlas.regions, here, (p) => p.title)}`
+        : "Regional surveys: none for this world",
+      plates(atlas.regions, here),
+    ),
+    row(
+      SECTION_ROW.prospect,
+      on(atlas.prospects),
+      atlas.prospects.length > 0
+        ? atlas.prospects.map((p) => turn(p, here, `The prospect of <em>${escapeXml(capitalOf(p))}</em>`)).join(", ")
+        : "The prospect of the capital: none for this world",
+      plates(atlas.prospects, here),
+    ),
     matter(MATTER_ROW.banners, "banners", atlas.counts.arms, "arms", atlas.counts.arms > 0),
     matter(MATTER_ROW.chronicle, "chronicle", atlas.counts.entries, "entries", atlas.counts.entries > 0),
     matter(MATTER_ROW.gazetteer, "gazetteer", atlas.counts.places, "places", true),
   ].join("\n");
 }
 
-export function plateCounts(html: { readonly bannersHtml: string; readonly chronicleHtml: string; readonly gazetteerHtml: string }): ContentsCounts {
+export function plateCounts(html: {
+  readonly bannersHtml: string;
+  readonly chronicleHtml: string;
+  readonly gazetteerHtml: string;
+}): ContentsCounts {
   const n = (s: string, re: RegExp): number => (s.match(re) ?? []).length;
   return {
     arms: n(html.bannersHtml, /<figure class="banner"/g),
@@ -87,7 +117,8 @@ export function plateCounts(html: { readonly bannersHtml: string; readonly chron
   };
 }
 
-const lowerNoun = (title: string): string => title.replace(/^The (\w+) of /, (_, noun: string) => `the ${noun.toLowerCase()} of `);
+const lowerNoun = (title: string): string =>
+  title.replace(/^The (\w+) of /, (_, noun: string) => `the ${noun.toLowerCase()} of `);
 
 export function plateLine(section: PlateSection, title: string, ordinal = 0): string {
   const what: Record<PlateSection, string> = {

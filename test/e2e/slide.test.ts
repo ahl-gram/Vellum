@@ -10,7 +10,12 @@ import {
 } from "../../e2e/support/slide.ts";
 
 // Every fixture below is a read measured through CDP on 2026-09-13 at 1280x800, seed 42, the CD7 hash, named with the moment it came from.
-const slide = (pos: number, size: number, anims: readonly string[]): SlideRead => ({ pos, size, anims, viewportH: 800 });
+const slide = (pos: number, size: number, anims: readonly string[]): SlideRead => ({
+  pos,
+  size,
+  anims,
+  viewportH: 800,
+});
 
 // The drawer SHUT: display:none, so every rect is zero and getAnimations() is empty.
 const SHUT = slide(0, 0, []);
@@ -45,7 +50,10 @@ test("a mixed animation list is not rest", () => {
 
 test("the rested drawer IS rest, jitter and all, so the clauses above cannot all be a bare false", () => {
   assert.equal(slideRested(RESTED_B, RESTED_A), true);
-  assert.ok(Math.abs(RESTED_B.pos - RESTED_A.pos) <= MOTION_STILL_PX, "the fixture pair must sit inside the tolerance it is pinning");
+  assert.ok(
+    Math.abs(RESTED_B.pos - RESTED_A.pos) <= MOTION_STILL_PX,
+    "the fixture pair must sit inside the tolerance it is pinning",
+  );
 });
 
 // The three below were produced in a real browser on 2026-09-13 by the one named perturbation each clause defends against, then measured.
@@ -56,7 +64,10 @@ const NO_ANIMATION = slide(584.59, 22.39, []);
 test("a panel with a real box and NO animation is never rest, however still it looks", () => {
   // [].every() is vacuously TRUE, so without the length conjunct a panel that simply has no slide reads as arrived.
   assert.equal(slideRested(NO_ANIMATION, NO_ANIMATION), false);
-  assert.ok(NO_ANIMATION.size > 0, "the fixture must clear the size clause, or it proves nothing about the animation one");
+  assert.ok(
+    NO_ANIMATION.size > 0,
+    "the fixture must clear the size clause, or it proves nothing about the animation one",
+  );
 });
 
 // Produced with a keyframe whose `to` is translateY(100%), so the slide finishes with the panel still parked.
@@ -64,7 +75,10 @@ const FINISHED_BELOW_FOLD = slide(832.59, 22.39, ["finished"]);
 
 test("a slide that FINISHED with the panel still below the fold is not rest", () => {
   assert.equal(slideRested(FINISHED_BELOW_FOLD, FINISHED_BELOW_FOLD), false);
-  assert.ok(FINISHED_BELOW_FOLD.anims.every((s) => s === "finished"), "the fixture must clear the animation clause, or it proves nothing about the viewport one");
+  assert.ok(
+    FINISHED_BELOW_FOLD.anims.every((s) => s === "finished"),
+    "the fixture must clear the animation clause, or it proves nothing about the viewport one",
+  );
 });
 
 // Produced by moving the drawer with `bottom: 40px !important` AFTER its slide had finished: both reads are all-finished, 40px apart.
@@ -73,7 +87,10 @@ const MOVED_WHILE_FINISHED_B = slide(544.59, 22.39, ["finished"]);
 
 test("a panel still travelling under something that is not an animation is not rest", () => {
   assert.equal(slideRested(MOVED_WHILE_FINISHED_B, MOVED_WHILE_FINISHED_A), false);
-  assert.ok(Math.abs(MOVED_WHILE_FINISHED_B.pos - MOVED_WHILE_FINISHED_A.pos) > MOTION_STILL_PX, "the fixture pair must sit outside the tolerance it is pinning");
+  assert.ok(
+    Math.abs(MOVED_WHILE_FINISHED_B.pos - MOVED_WHILE_FINISHED_A.pos) > MOTION_STILL_PX,
+    "the fixture pair must sit outside the tolerance it is pinning",
+  );
 });
 
 const fold = (pos: number, anims: readonly string[]): MotionRead => ({ pos, size: 384, anims });
@@ -94,7 +111,10 @@ test("the fold has not left where it began at the instant of the gesture, though
 
 test("a panel that never moved is not rest, which is the whole point of carrying the pre-gesture read", () => {
   assert.equal(foldRested(UNFOLDED, UNFOLDED, UNFOLDED), false);
-  assert.ok(Math.abs(UNFOLDED.pos - UNFOLDED.pos) <= MOTION_MOVED_PX, "the fixture must sit inside the departure bound it is pinning");
+  assert.ok(
+    Math.abs(UNFOLDED.pos - UNFOLDED.pos) <= MOTION_MOVED_PX,
+    "the fixture must sit inside the departure bound it is pinning",
+  );
 });
 
 test("a fold still travelling is not rest", () => {

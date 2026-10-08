@@ -3,14 +3,18 @@ import { inflateSync } from "node:zlib";
 
 const paeth = (a: number, b: number, c: number): number => {
   const p = a + b - c;
-  const pa = Math.abs(p - a), pb = Math.abs(p - b), pc = Math.abs(p - c);
+  const pa = Math.abs(p - a),
+    pb = Math.abs(p - b),
+    pc = Math.abs(p - c);
   return pa <= pb && pa <= pc ? a : pb <= pc ? b : c;
 };
 
 // The first row of a PNG, unfiltered against an all-zero row above (there is none).
 export function decodeFirstRow(png: Buffer): [number, number, number][] {
   let at = 8;
-  let width = 0, channels: number | undefined = 0, depth = 0;
+  let width = 0,
+    channels: number | undefined = 0,
+    depth = 0;
   const idat: Buffer[] = [];
   while (at < png.length) {
     const len = png.readUInt32BE(at);
@@ -24,7 +28,8 @@ export function decodeFirstRow(png: Buffer): [number, number, number][] {
     else if (type === "IEND") break;
     at += 12 + len;
   }
-  if (depth !== 8 || !channels) throw new Error(`pixel-support decodes 8-bit PNGs only (depth ${depth}, channels ${channels})`);
+  if (depth !== 8 || !channels)
+    throw new Error(`pixel-support decodes 8-bit PNGs only (depth ${depth}, channels ${channels})`);
   const raw = inflateSync(Buffer.concat(idat));
   const filter = raw[0];
   const row = Buffer.from(raw.subarray(1, 1 + width * channels));
@@ -39,13 +44,26 @@ export function decodeFirstRow(png: Buffer): [number, number, number][] {
 }
 
 // The clip the browser wants is the page's, not the viewport's, so the scroll is added here (a scrolled page read blank frames until the 2026-09-03 sitting, ruling 6).
-export async function sampleRow(send: (method: string, params?: Record<string, unknown>) => Promise<unknown>, x: number, y: number, width: number): Promise<[number, number, number][]> {
-  const s = await send("Runtime.evaluate", { expression: "[window.scrollX, window.scrollY]", returnByValue: true }) as { result?: { value?: unknown }; exceptionDetails?: { text?: string } };
+export async function sampleRow(
+  send: (method: string, params?: Record<string, unknown>) => Promise<unknown>,
+  x: number,
+  y: number,
+  width: number,
+): Promise<[number, number, number][]> {
+  const s = (await send("Runtime.evaluate", {
+    expression: "[window.scrollX, window.scrollY]",
+    returnByValue: true,
+  })) as { result?: { value?: unknown }; exceptionDetails?: { text?: string } };
   const v = s.result ? s.result.value : undefined;
-  if (s.exceptionDetails) throw new Error(`sampleRow could not read the page's scroll: ${s.exceptionDetails.text || "exception"}`);
-  if (!Array.isArray(v) || v.length !== 2 || !v.every(Number.isFinite)) throw new Error(`sampleRow could not read the page's scroll: ${JSON.stringify(v)}`);
+  if (s.exceptionDetails)
+    throw new Error(`sampleRow could not read the page's scroll: ${s.exceptionDetails.text || "exception"}`);
+  if (!Array.isArray(v) || v.length !== 2 || !v.every(Number.isFinite))
+    throw new Error(`sampleRow could not read the page's scroll: ${JSON.stringify(v)}`);
   const [sx, sy] = v as [number, number];
-  const r = await send("Page.captureScreenshot", { format: "png", clip: { x: x + sx, y: y + sy, width, height: 1, scale: 1 } }) as { data: string };
+  const r = (await send("Page.captureScreenshot", {
+    format: "png",
+    clip: { x: x + sx, y: y + sy, width, height: 1, scale: 1 },
+  })) as { data: string };
   return decodeFirstRow(Buffer.from(r.data, "base64"));
 }
 

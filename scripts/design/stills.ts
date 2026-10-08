@@ -9,14 +9,31 @@ import { fileURLToPath } from "node:url";
 const MAGICK_TIMEOUT_MS = 120_000;
 
 export const stillArgs = (from: string, to: string): string[] => [
-  from, "-colors", "256", "-define", "png:exclude-chunks=date", "+set", "date:create", "+set", "date:modify", `PNG8:${to}`,
+  from,
+  "-colors",
+  "256",
+  "-define",
+  "png:exclude-chunks=date",
+  "+set",
+  "date:create",
+  "+set",
+  "date:modify",
+  `PNG8:${to}`,
 ];
 
 function makeStills(from: string, to: string, names: readonly string[] = []): string[] {
-  const chosen = names.length > 0 ? names.map((n) => `${n}.png`) : readdirSync(from).filter((f) => f.endsWith(".png")).sort();
+  const chosen =
+    names.length > 0
+      ? names.map((n) => `${n}.png`)
+      : readdirSync(from)
+          .filter((f) => f.endsWith(".png"))
+          .sort();
   mkdirSync(to, { recursive: true });
   for (const file of chosen) {
-    const r = spawnSync("magick", stillArgs(join(from, file), join(to, file)), { encoding: "utf8", timeout: MAGICK_TIMEOUT_MS });
+    const r = spawnSync("magick", stillArgs(join(from, file), join(to, file)), {
+      encoding: "utf8",
+      timeout: MAGICK_TIMEOUT_MS,
+    });
     if (r.error) throw r.error;
     if (r.status !== 0) throw new Error(`magick could not reduce ${file} (${r.status}): ${r.stderr}`);
   }

@@ -38,12 +38,7 @@ export function nearestNamed(
 }
 
 export function nearestNamedRiver(world: World, x: number, y: number) {
-  return nearestNamed(
-    world.names.rivers.entries(),
-    (i) => world.rivers[i]?.points ?? [],
-    x,
-    y,
-  );
+  return nearestNamed(world.names.rivers.entries(), (i) => world.rivers[i]?.points ?? [], x, y);
 }
 
 export function nearestNamedLake(world: World, x: number, y: number) {
@@ -93,7 +88,6 @@ export function villagePoolSize(world: World): number {
   const seats = new Set(world.realms.seats);
   return world.settlements.filter((s, i) => s.kind === "village" && !seats.has(i)).length;
 }
-
 
 // Mirrors GLYPH_MTN_REL and GLYPH_HILL_REL in src/render/layers/glyphs.ts, and CELLS_PER_LEAGUE in src/render/layers/scalebar.ts.
 export const MIRROR_MTN_REL = 0.5;
@@ -174,10 +168,7 @@ export function roadState(world: World, x: number, y: number): RoadState {
 }
 
 /** Nearest capital / realm seat / town: the tiers whose labels essentially always win placement space. */
-export function nearestAnchor(
-  world: World,
-  exceptIdx: number,
-): { name: string; dist: number; idx: number } | null {
+export function nearestAnchor(world: World, exceptIdx: number): { name: string; dist: number; idx: number } | null {
   const seats = new Set(world.realms.seats);
   const from = world.settlements[exceptIdx];
   if (!from) return null;
@@ -192,9 +183,7 @@ export function nearestAnchor(
 }
 
 /** Mirrors chooseQuarry's base pool: non-seat villages, with its fallbacks. */
-export function quarryPoolMirror(
-  world: World,
-): Array<{ s: World["settlements"][number]; idx: number }> {
+export function quarryPoolMirror(world: World): Array<{ s: World["settlements"][number]; idx: number }> {
   const seats = new Set(world.realms.seats);
   const indexed = world.settlements.map((s, idx) => ({ s, idx }));
   const villages = indexed.filter(({ s, idx }) => s.kind === "village" && !seats.has(idx));
@@ -231,10 +220,7 @@ export function clueHoldsAt(
     case "near": {
       const anchor = world.settlements.find((a) => a.name === clue.subject);
       if (!anchor || clue.leagues === undefined) return false;
-      return (
-        Math.hypot(anchor.x - s.x, anchor.y - s.y) <=
-        clue.leagues * MIRROR_CELLS_PER_LEAGUE + 1e-9
-      );
+      return Math.hypot(anchor.x - s.x, anchor.y - s.y) <= clue.leagues * MIRROR_CELLS_PER_LEAGUE + 1e-9;
     }
   }
 }
@@ -261,7 +247,6 @@ function namedFeatureWithin(
   return d <= NEAR + 1e-9;
 }
 
-
 /** Mirrors `isLabeled` in `src/site/seed-of-the-day/app-hunt.ts`: a label emits as ">Name<", and capital and seat labels render .toUpperCase(), so both spellings count as printed. */
 export function labelGate(markup: string): (name: string) => boolean {
   return (name) => markup.includes(`>${name}<`) || markup.includes(`>${name.toUpperCase()}<`);
@@ -276,9 +261,7 @@ export const GLYPH_PREFIX: Record<TerrainBand, string> = {
   dunes: "gl-dune",
 };
 
-export function drawnGlyphs(
-  markup: string,
-): Array<{ symbol: string; x: number; y: number }> {
+export function drawnGlyphs(markup: string): Array<{ symbol: string; x: number; y: number }> {
   const out: Array<{ symbol: string; x: number; y: number }> = [];
   for (const tag of markup.matchAll(/<use [^>]*>/g)) {
     const href = /href="#(gl-[a-z0-9-]+)"/.exec(tag[0]);
@@ -288,17 +271,10 @@ export function drawnGlyphs(
   return out;
 }
 
-export function glyphGate(
-  markup: string,
-  qpx: number,
-  qpy: number,
-  radiusPx: number,
-): (band: TerrainBand) => boolean {
+export function glyphGate(markup: string, qpx: number, qpy: number, radiusPx: number): (band: TerrainBand) => boolean {
   const glyphs = drawnGlyphs(markup);
   return (band) =>
-    glyphs.some(
-      (g) => g.symbol.startsWith(GLYPH_PREFIX[band]) && Math.hypot(g.x - qpx, g.y - qpy) <= radiusPx,
-    );
+    glyphs.some((g) => g.symbol.startsWith(GLYPH_PREFIX[band]) && Math.hypot(g.x - qpx, g.y - qpy) <= radiusPx);
 }
 
 /** The exact prose per (kind, subject), so a swapped text-table entry cannot ship a false line. */
@@ -375,9 +351,7 @@ export function truthfulCandidates(
   out.push({ kind: "road", subject: roadState(world, x, y) });
   const anchor = nearestAnchor(world, q.idx);
   if (anchor) {
-    const leagues = LEAGUE_LADDER.find(
-      (b) => anchor.dist <= b * MIRROR_CELLS_PER_LEAGUE,
-    );
+    const leagues = LEAGUE_LADDER.find((b) => anchor.dist <= b * MIRROR_CELLS_PER_LEAGUE);
     if (leagues !== undefined) out.push({ kind: "near", subject: anchor.name, leagues });
   }
   return out;

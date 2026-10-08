@@ -24,16 +24,37 @@ export async function run(ctx: SuiteContext): Promise<void> {
 
 async function rs18Silent({ evaluate, check }: SuiteContext, setYear: Bar["setYear"], sm: Facts): Promise<void> {
   await setYear(sm.present);
-  const inkedCount = () => evaluate<number>(`document.querySelectorAll('.rf-chart #layer-settlements g.settlement[data-ink]').length`);
+  const inkedCount = () =>
+    evaluate<number>(`document.querySelectorAll('.rf-chart #layer-settlements g.settlement[data-ink]').length`);
 
   const rs18 = await inkedCount();
-  check("RS18 the park is silent: every glyph is up and none carries an ink grade (#155)", rs18 === 0, `${rs18} groups inked at the park`);
+  check(
+    "RS18 the park is silent: every glyph is up and none carries an ink grade (#155)",
+    rs18 === 0,
+    `${rs18} groups inked at the park`,
+  );
 }
 
 async function rs19Stamp({ evaluate, check }: SuiteContext, setYear: Bar["setYear"], sm: Facts): Promise<void> {
   if (sm.lateIdx >= 0) {
     await setYear(sm.lateFounded - 1);
-    const rs19 = await evaluate<Found | { found: true; hasMark: true; ink: string | null; disp: string; name: string; dur: string; box: string; wantX: number; wantY: number; gotX: number; gotY: number; others: number }>(`(()=>{
+    const rs19 = await evaluate<
+      | Found
+      | {
+          found: true;
+          hasMark: true;
+          ink: string | null;
+          disp: string;
+          name: string;
+          dur: string;
+          box: string;
+          wantX: number;
+          wantY: number;
+          gotX: number;
+          gotY: number;
+          others: number;
+        }
+    >(`(()=>{
       const s=document.querySelector(".rf-range");const ax=window.__vellumAgesState();s.value=String(Number(s.max)/2+(${sm.lateFounded}-ax.min));s.dispatchEvent(new Event("input",{bubbles:true}));
       const g=document.querySelector('.rf-chart #layer-settlements g.settlement[data-idx="${sm.lateIdx}"]');
       if(!g)return{found:false};
@@ -47,11 +68,19 @@ async function rs19Stamp({ evaluate, check }: SuiteContext, setYear: Bar["setYea
         wantX:${sm.lateNx}*vb.width,wantY:${sm.lateNy}*vb.height,gotX:o[0],gotY:o[1],
         others:document.querySelectorAll('.rf-chart #layer-settlements g.settlement[data-ink]').length};
     })()`);
-    const onPoint = rs19.found && rs19.hasMark && Math.abs(rs19.gotX - rs19.wantX) < 0.05 && Math.abs(rs19.gotY - rs19.wantY) < 0.05;
+    const onPoint =
+      rs19.found && rs19.hasMark && Math.abs(rs19.gotX - rs19.wantX) < 0.05 && Math.abs(rs19.gotY - rs19.wantY) < 0.05;
     check(
       "RS19 crossing a founding stamps that town: data-ink=founding, inkStamp at --paper about the town point",
-      rs19.found && rs19.hasMark && rs19.ink === "founding" && rs19.disp !== "none" &&
-        rs19.name === "inkStamp" && rs19.dur.includes("0.26") && rs19.box === "view-box" && onPoint && rs19.others >= 1,
+      rs19.found &&
+        rs19.hasMark &&
+        rs19.ink === "founding" &&
+        rs19.disp !== "none" &&
+        rs19.name === "inkStamp" &&
+        rs19.dur.includes("0.26") &&
+        rs19.box === "view-box" &&
+        onPoint &&
+        rs19.others >= 1,
       JSON.stringify(rs19),
     );
   } else {
@@ -61,7 +90,9 @@ async function rs19Stamp({ evaluate, check }: SuiteContext, setYear: Bar["setYea
 
 async function rs20Dries({ evaluate, check }: SuiteContext, setYear: Bar["setYear"], sm: Facts): Promise<void> {
   await setYear(sm.minFounded);
-  const rs20 = await evaluate<{ inked: number; labelled: false } | { inked: number; labelled: true; name: string; dur: string; delay: string }>(`(()=>{
+  const rs20 = await evaluate<
+    { inked: number; labelled: false } | { inked: number; labelled: true; name: string; dur: string; delay: string }
+  >(`(()=>{
     const s=document.querySelector(".rf-range");const ax=window.__vellumAgesState();s.value=String(Number(s.max)/2+(${sm.present}-ax.min));s.dispatchEvent(new Event("input",{bubbles:true}));
     const inked=[...document.querySelectorAll('.rf-chart #layer-settlements g.settlement[data-ink]')];
     const withLabel=inked.find((g)=>g.querySelector(":scope > text"));
@@ -71,7 +102,11 @@ async function rs20Dries({ evaluate, check }: SuiteContext, setYear: Bar["setYea
   })()`);
   check(
     "RS20 a revealed town's NAME dries in one quick beat behind its mark (#155)",
-    rs20.inked > 0 && rs20.labelled && rs20.name === "dryingInk" && rs20.dur.includes("0.18") && rs20.delay.includes("0.18"),
+    rs20.inked > 0 &&
+      rs20.labelled &&
+      rs20.name === "dryingInk" &&
+      rs20.dur.includes("0.18") &&
+      rs20.delay.includes("0.18"),
     JSON.stringify(rs20),
   );
 }
@@ -79,7 +114,9 @@ async function rs20Dries({ evaluate, check }: SuiteContext, setYear: Bar["setYea
 async function rs21Ruin({ evaluate, check }: SuiteContext, setYear: Bar["setYear"], sm: Facts): Promise<void> {
   if (sm.ruinIdx >= 0) {
     await setYear(sm.ruinYear! - 1);
-    const rs21 = await evaluate<Found | { found: true; hasMark: true; ink: string | null; disp: string; name: string; dur: string }>(`(()=>{
+    const rs21 = await evaluate<
+      Found | { found: true; hasMark: true; ink: string | null; disp: string; name: string; dur: string }
+    >(`(()=>{
       const s=document.querySelector(".rf-range");const ax=window.__vellumAgesState();s.value=String(Number(s.max)/2+(${sm.ruinYear}-ax.min));s.dispatchEvent(new Event("input",{bubbles:true}));
       const g=document.querySelector('.rf-chart #layer-settlements g.settlement[data-idx="${sm.ruinIdx}"]');
       if(!g)return{found:false};
@@ -91,8 +128,12 @@ async function rs21Ruin({ evaluate, check }: SuiteContext, setYear: Bar["setYear
     })()`);
     check(
       "RS21 a ruin inks in at its FALL year with dryingInk, never the stamp (#155)",
-      rs21.found && rs21.hasMark && rs21.ink === "ruin" && rs21.disp !== "none" &&
-        rs21.name === "dryingInk" && rs21.dur.includes("0.26"),
+      rs21.found &&
+        rs21.hasMark &&
+        rs21.ink === "ruin" &&
+        rs21.disp !== "none" &&
+        rs21.name === "dryingInk" &&
+        rs21.dur.includes("0.26"),
       JSON.stringify(rs21),
     );
   } else {
@@ -103,7 +144,13 @@ async function rs21Ruin({ evaluate, check }: SuiteContext, setYear: Bar["setYear
 async function rs22Press({ evaluate, check }: SuiteContext, setYear: Bar["setYear"], sm: Facts): Promise<void> {
   // Ground truth via the chart's own getScreenCTM, never a .place-hit box (the overlay is sized to the mount while the chart renders a few px wider, and the press would scale that ~1.2px offset into a phantom error); the sub-pixel tolerance is deliberate, the defect this guards is 1.03px at k=1.
   await setYear(sm.minFounded);
-  const rs22 = await evaluate<{ groups: number; measured: number; castles: number; worst: number; worstAt: string }>(`(()=>{
+  const rs22 = await evaluate<{
+    groups: number;
+    measured: number;
+    castles: number;
+    worst: number;
+    worstAt: string;
+  }>(`(()=>{
     const s=document.querySelector(".rf-range");const ax=window.__vellumAgesState();s.value=String(Number(s.max)/2+(${sm.present}-ax.min));s.dispatchEvent(new Event("input",{bubbles:true}));
     const man=window.__vellumRunInline({kind:"draw",seed:42,overrides:{},render:{style:"antique",widthPx:1500,legend:true}}).manifest;
     const pt=new Map(man.places.map((p)=>[String(p.idx),p]));

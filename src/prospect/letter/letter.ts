@@ -105,7 +105,10 @@ export type Lettering = {
 export function createLettering(suffix: string): Lettering {
   const defined = new Map<string, SvgNode>();
   const idOf = (face: FaceName, key: string, glyph: Glyph): string => {
-    const id = key === NUMERO_KEY ? `pf-n-${suffix}` : `pf-${face[0] ?? ""}${Object.keys(FACES[face].glyphs).indexOf(key)}-${suffix}`;
+    const id =
+      key === NUMERO_KEY
+        ? `pf-n-${suffix}`
+        : `pf-${face[0] ?? ""}${Object.keys(FACES[face].glyphs).indexOf(key)}-${suffix}`;
     if (!defined.has(id)) defined.set(id, el("path", { id, d: glyph[5] }));
     return id;
   };
@@ -116,9 +119,28 @@ export function createLettering(suffix: string): Lettering {
       .filter((g) => g.glyph[5] !== "")
       .map((g) => el("use", { href: `#${idOf(layout.face, g.key, g.glyph)}`, x: r1(g.at / GRID) }));
     const transform = `translate(${r2(layout.x0)} ${r2(spec.y)}) scale(${r6(k)})`;
-    const ink = el("g", { "aria-label": spec.text, fill: spec.fill, ...(spec.opacity === undefined ? {} : { "fill-opacity": spec.opacity }), transform }, uses);
+    const ink = el(
+      "g",
+      {
+        "aria-label": spec.text,
+        fill: spec.fill,
+        ...(spec.opacity === undefined ? {} : { "fill-opacity": spec.opacity }),
+        transform,
+      },
+      uses,
+    );
     if (spec.halo === undefined) return ink;
-    const halo = el("g", { fill: spec.halo.color, stroke: spec.halo.color, "stroke-width": r2(spec.halo.width / k), "stroke-linejoin": "round", transform }, uses);
+    const halo = el(
+      "g",
+      {
+        fill: spec.halo.color,
+        stroke: spec.halo.color,
+        "stroke-width": r2(spec.halo.width / k),
+        "stroke-linejoin": "round",
+        transform,
+      },
+      uses,
+    );
     return el("g", {}, [halo, ink]);
   };
   return { run, defs: () => [...defined.values()] };

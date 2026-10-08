@@ -36,7 +36,10 @@ const atlasCss = (): string => {
     chronicleHtml: "",
     gazetteerHtml: "",
   };
-  return [styleBlocksIn(atlasDocument(data, () => "")), styleBlocksIn(atlasDocument(data, () => "", { anchor: true, motion: true }))].join("\n");
+  return [
+    styleBlocksIn(atlasDocument(data, () => "")),
+    styleBlocksIn(atlasDocument(data, () => "", { anchor: true, motion: true })),
+  ].join("\n");
 };
 
 const SRC_CSS: Readonly<Record<(typeof SRC_CSS_FILES)[number], () => string>> = {
@@ -55,8 +58,7 @@ const authoredSheets = (): ReadonlyArray<readonly [string, string]> => [
 const withoutComments = (source: string): string =>
   source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
 
-const HYPHENATED_DECLARATION =
-  /\{[^{}]*(?:^|[\s;{])(?:-{0,2}[a-z][a-z0-9]*(?:-[a-z0-9]+)+)\s*:\s*[^{};]*;/m;
+const HYPHENATED_DECLARATION = /\{[^{}]*(?:^|[\s;{])(?:-{0,2}[a-z][a-z0-9]*(?:-[a-z0-9]+)+)\s*:\s*[^{};]*;/m;
 
 /** A file matching ANY of these joins the roster: one hit is enough, because a fingerprint only has to be right about the FILE, and extraction there is exact. */
 const CSS_FINGERPRINTS: ReadonlyArray<readonly [string, (source: string) => boolean]> = [
@@ -183,7 +185,12 @@ const inlineBlocksIn = (css: string): string[] => {
   const found = new Set<string>();
   for (const m of bare.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
     for (const selector of selectorsIn(m[1]!)) {
-      if (subjectOf(selector).replace(/\[[^\]]*\]/g, "").includes(":")) continue;
+      if (
+        subjectOf(selector)
+          .replace(/\[[^\]]*\]/g, "")
+          .includes(":")
+      )
+        continue;
       if (settled(css, selector)["display"] === "inline-block") found.add(selector);
     }
   }
@@ -191,11 +198,7 @@ const inlineBlocksIn = (css: string): string[] => {
 };
 
 const sweptBoxes = (): Set<string> =>
-  new Set(
-    authoredSheets().flatMap(([key, css]) =>
-      inlineBlocksIn(css).map((selector) => `${key} :: ${selector}`),
-    ),
-  );
+  new Set(authoredSheets().flatMap(([key, css]) => inlineBlocksIn(css).map((selector) => `${key} :: ${selector}`)));
 
 test("an inline-block in a marker-bearing list keeps its bullet on line one (#358)", () => {
   for (const [file, css] of authoredSheets()) {
@@ -226,19 +229,14 @@ test("every marker-list exemption still names a live inline-block (#358)", () =>
 });
 
 test("the sweep's selector reader survives the house's :is() and :not() forms (#358)", () => {
-  assert.deepEqual(selectorsIn(":is(.toc, .gazetteer) a, .faq a"), [
-    ":is(.toc, .gazetteer) a",
-    ".faq a",
-  ]);
+  assert.deepEqual(selectorsIn(":is(.toc, .gazetteer) a, .faq a"), [":is(.toc, .gazetteer) a", ".faq a"]);
   assert.equal(subjectOf(":is(.toc, .gazetteer) a"), "a", "a functional pseudo-class is not a combinator");
   assert.equal(subjectOf(".toc li:first-child a"), "a", "the subject is the element the rule lands on");
   assert.equal(subjectOf(".broadside .seal::before"), ".seal::before", "a pseudo-element IS the subject");
 });
 
 test("every tip allowlisted or parked still names a live tip (#360)", () => {
-  const swept = new Set(
-    authoredSheets().flatMap(([key, css]) => hoverTipsIn(css).map((s) => `${key} :: ${s}`)),
-  );
+  const swept = new Set(authoredSheets().flatMap(([key, css]) => hoverTipsIn(css).map((s) => `${key} :: ${s}`)));
   for (const key of [...TIPPING_LINKS, ...CHART_INSTRUMENTS, ...TIPS_AWAITING_A_RULING]) {
     assert.ok(
       swept.has(key),
@@ -317,11 +315,7 @@ function assertScanIgnoresNonCss(): void {
     "and the `;` terminator is what rejects a comma-separated one; this is the case " +
       "that makes it more than decoration, so do not relax it to accept a comma",
   );
-  assert.deepEqual(
-    fingerprintsOf("function f() { const a: string = b; }"),
-    [],
-    "a type annotation carries no hyphen",
-  );
+  assert.deepEqual(fingerprintsOf("function f() { const a: string = b; }"), [], "a type annotation carries no hyphen");
   assert.deepEqual(
     fingerprintsOf("cli --style <style> writes a chart"),
     [],

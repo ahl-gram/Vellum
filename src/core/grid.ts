@@ -36,11 +36,7 @@ function wrap(w: number, h: number, data: Float64Array): Field {
   };
 }
 
-export function createField(
-  w: number,
-  h: number,
-  fill?: (x: number, y: number) => number,
-): Field {
+export function createField(w: number, h: number, fill?: (x: number, y: number) => number): Field {
   const data = new Float64Array(w * h);
   if (fill) {
     for (let y = 0; y < h; y++) {
@@ -59,10 +55,7 @@ export function fieldFrom(w: number, h: number, data: Float64Array): Field {
   return wrap(w, h, Float64Array.from(data));
 }
 
-export function mapField(
-  f: Field,
-  fn: (v: number, x: number, y: number) => number,
-): Field {
+export function mapField(f: Field, fn: (v: number, x: number, y: number) => number): Field {
   const data = new Float64Array(f.w * f.h);
   for (let y = 0; y < f.h; y++) {
     for (let x = 0; x < f.w; x++) {
@@ -83,16 +76,10 @@ export function minMax(f: Field): { min: number; max: number } {
   return { min, max };
 }
 
-export function quantile(
-  values: Float64Array | readonly number[],
-  q: number,
-): number {
+export function quantile(values: Float64Array | readonly number[], q: number): number {
   const sorted = Float64Array.from(values).sort();
   if (sorted.length === 0) throw new RangeError("quantile of empty set");
-  const i = Math.min(
-    sorted.length - 1,
-    Math.max(0, Math.floor(q * (sorted.length - 1))),
-  );
+  const i = Math.min(sorted.length - 1, Math.max(0, Math.floor(q * (sorted.length - 1))));
   return sorted[i] as number;
 }
 

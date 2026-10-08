@@ -15,12 +15,14 @@ function flatIsland(w: number, h: number, elevation = 0.15) {
 }
 
 test("computeClimate honors an explicit elevSpan (region temperature continuity, #162)", () => {
-  const w = 20, h = 20, sea = 0.2;
+  const w = 20,
+    h = 20,
+    sea = 0.2;
   // local max is 0.6 (span 0.4); the parent world's span is larger.
   const elev = createField(w, h, (x) => 0.2 + 0.4 * (x / (w - 1)));
   const local = computeClimate(elev, sea, 1, { windDir: 0 });
   const world = computeClimate(elev, sea, 1, { windDir: 0, elevSpan: 1.2 });
-  const hi = (w - 1) + 0 * w; // the tallest column
+  const hi = w - 1 + 0 * w; // the tallest column
   const lo = 0 + 0 * w; // at the waterline, above == 0, so the span cannot matter
   assert.ok(
     (world.temperature.data[hi] as number) > (local.temperature.data[hi] as number),

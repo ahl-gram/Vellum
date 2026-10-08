@@ -4,12 +4,7 @@ import { generateWorld, defaultRecipe } from "../../src/world/generate.ts";
 import type { World } from "../../src/world/types.ts";
 import { buildProspectInput } from "../../src/prospect/input.ts";
 import { composeProspect } from "../../src/prospect/compose.ts";
-import {
-  PLATE_H,
-  VIEW_X0,
-  VIEW_X1,
-  groundingViolations,
-} from "../../src/prospect/geometry.ts";
+import { PLATE_H, VIEW_X0, VIEW_X1, groundingViolations } from "../../src/prospect/geometry.ts";
 
 const worlds = new Map<number, World>();
 function worldFor(seed: number): World {
@@ -30,10 +25,7 @@ test("every settlement in real worlds composes grounded, in-frame geometry", () 
       assert.deepEqual(groundingViolations(g), [], `seed ${seed} index ${i} grounded`);
       assert.ok(g.masses.length > 0 || input.ruined, `seed ${seed} index ${i} has a skyline`);
       for (const m of g.masses) {
-        assert.ok(
-          m.x >= VIEW_X0 - 2 && m.x + m.w <= VIEW_X1 + 2,
-          `seed ${seed} index ${i}: mass in view`,
-        );
+        assert.ok(m.x >= VIEW_X0 - 2 && m.x + m.w <= VIEW_X1 + 2, `seed ${seed} index ${i}: mass in view`);
         assert.ok(m.base - m.h > 0 && m.base < PLATE_H, `seed ${seed} index ${i}: mass in plate`);
       }
       if (input.harbor && !input.ruined) {
@@ -53,9 +45,7 @@ function quantize(v: unknown): unknown {
   if (typeof v === "number") return q(v);
   if (Array.isArray(v)) return v.map(quantize);
   if (v !== null && typeof v === "object") {
-    return Object.fromEntries(
-      Object.entries(v).map(([k, val]) => [k, quantize(val)]),
-    );
+    return Object.fromEntries(Object.entries(v).map(([k, val]) => [k, quantize(val)]));
   }
   return v;
 }
@@ -81,11 +71,7 @@ const PINNED: ReadonlyArray<{ seed: number; index: number; sum: number }> = [
 test("pinned geometry checksums freeze the grammar's frozen mappings", () => {
   for (const { seed, index, sum } of PINNED) {
     const g = composeProspect(buildProspectInput(worldFor(seed), index));
-    assert.equal(
-      fnv1a(JSON.stringify(quantize(g))),
-      sum,
-      `geometry checksum for seed ${seed} index ${index}`,
-    );
+    assert.equal(fnv1a(JSON.stringify(quantize(g))), sum, `geometry checksum for seed ${seed} index ${index}`);
   }
 });
 

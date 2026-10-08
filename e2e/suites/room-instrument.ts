@@ -3,7 +3,16 @@ import { scrubFacts, scopedHealth } from "../support/room.ts";
 import type { SuiteContext } from "../types.ts";
 import { instrumentKit } from "./room-instrument/kit.ts";
 import { rs0Boots, rs1State, rs2Seams, rs3Parks, rs4AllShown, rs5Scrub, rs7Ruin } from "./room-instrument/scrub.ts";
-import { rs8Sweeps, rs10Drag, rs11Forward, rs12Pause, rs14Glyphs, rs15Slide, rs16Strip, rs17Story } from "./room-instrument/sweep.ts";
+import {
+  rs8Sweeps,
+  rs10Drag,
+  rs11Forward,
+  rs12Pause,
+  rs14Glyphs,
+  rs15Slide,
+  rs16Strip,
+  rs17Story,
+} from "./room-instrument/sweep.ts";
 import { rs23OtherWorld, rs26Unfurl, rs27NoReplay, rs28Cancel } from "./room-instrument/arrival.ts";
 import { rs29Pace, rs30Rate } from "./room-instrument/pace.ts";
 

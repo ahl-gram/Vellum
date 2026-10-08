@@ -107,17 +107,52 @@ test("the roles are worn: page markup carries the shared classes (#324)", () => 
     assert.match(read(file), pattern, `${file}: ${what}`);
   };
   wears("src/pages/index.astro", /<button[^>]*class="[^"]*primary/, "Draw it joins the primary idiom");
-  wears("src/pages/index.astro", /<input id="seed-input" class="control"/,
-    "the seed input opts into the idiom (type=text for the iOS numeric keypad, so the attribute selector cannot see it)");
-  wears("src/pages/gallery/index.astro", /<p class="dateline">\{dateline\}<\/p>/, "the gallery's count is the folio corner's line");
+  wears(
+    "src/pages/index.astro",
+    /<input id="seed-input" class="control"/,
+    "the seed input opts into the idiom (type=text for the iOS numeric keypad, so the attribute selector cannot see it)",
+  );
+  wears(
+    "src/pages/gallery/index.astro",
+    /<p class="dateline">\{dateline\}<\/p>/,
+    "the gallery's count is the folio corner's line",
+  );
   wears("src/pages/seed-of-the-day/index.astro", /class="[^"]*hunt-intro intro/, "the hunt intro is an intro");
-  wears("src/pages/seed-of-the-day/index.astro", /<p class="dateline" id="dateline">/, "the dateline is the folio corner's line");
-  wears("src/pages/seed-of-the-day/index.astro", /<LegendButton road=\{r\.road\}/, "the roads out are legend buttons (the kit's, #487)");
-  wears("src/pages/print-room/index.astro", /<button class="legend-btn" type="button" data-poster=/, "the poster plates are legend buttons");
-  wears("src/pages/print-room/index.astro", /<button id="pr-draw" class="primary"/, "Pull a proof is the room's primary");
-  wears("src/pages/explorer/index.astro", /class="panel-head archivist-head"/, "the Broadside group heads are standing heads");
-  wears("src/pages/faq/index.astro", /<p class="dateline">\{count\}<\/p>/, "the question count is the folio corner's line");
-  wears("src/pages/glossary/index.astro", /<input class="control" type="search"/, "the find box opts into the control idiom");
+  wears(
+    "src/pages/seed-of-the-day/index.astro",
+    /<p class="dateline" id="dateline">/,
+    "the dateline is the folio corner's line",
+  );
+  wears(
+    "src/pages/seed-of-the-day/index.astro",
+    /<LegendButton road=\{r\.road\}/,
+    "the roads out are legend buttons (the kit's, #487)",
+  );
+  wears(
+    "src/pages/print-room/index.astro",
+    /<button class="legend-btn" type="button" data-poster=/,
+    "the poster plates are legend buttons",
+  );
+  wears(
+    "src/pages/print-room/index.astro",
+    /<button id="pr-draw" class="primary"/,
+    "Pull a proof is the room's primary",
+  );
+  wears(
+    "src/pages/explorer/index.astro",
+    /class="panel-head archivist-head"/,
+    "the Broadside group heads are standing heads",
+  );
+  wears(
+    "src/pages/faq/index.astro",
+    /<p class="dateline">\{count\}<\/p>/,
+    "the question count is the folio corner's line",
+  );
+  wears(
+    "src/pages/glossary/index.astro",
+    /<input class="control" type="search"/,
+    "the find box opts into the control idiom",
+  );
 });
 
 test("home's flourish family survives the section removals (#324, reshaped at #459 then #470)", () => {
@@ -136,10 +171,7 @@ test("home's flourish family survives the section removals (#324, reshaped at #4
 });
 
 test("the old page-local skins are gone: no sheet but the house sheet dresses the controls (#324, Issue #709)", () => {
-  assert.ok(
-    !/border-radius:\s*2px/.test(read("public/index.css")),
-    "the seedrow's 2px corners joined the idiom",
-  );
+  assert.ok(!/border-radius:\s*2px/.test(read("public/index.css")), "the seedrow's 2px corners joined the idiom");
   for (const sheet of sheetsSweptBy({ "public/house.css": "the house sheet is where the control skin is written" })) {
     assert.ok(
       !/select,\s*button[^{]*\{[^}]*background/.test(read(sheet)),
@@ -170,8 +202,10 @@ test("the chart quotations equal the render constants they quote (#324)", async 
   // The render side is byte-identity domain: read here, never changed.
   const { SITE_PALETTE } = await import("../../src/atlas/palette.ts");
   const { STYLES } = await import("../../src/render/style.ts");
-  assert.equal(SITE_PALETTE["--chart-paper"], STYLES.antique.paper,
-    "--chart-paper quotes the antique chart's paper");
-  assert.equal(SITE_PALETTE["--chart-ink"], STYLES.antique.labelColor,
-    "--chart-ink quotes the chart's lettering ink (the shadow ink everywhere)");
+  assert.equal(SITE_PALETTE["--chart-paper"], STYLES.antique.paper, "--chart-paper quotes the antique chart's paper");
+  assert.equal(
+    SITE_PALETTE["--chart-ink"],
+    STYLES.antique.labelColor,
+    "--chart-ink quotes the chart's lettering ink (the shadow ink everywhere)",
+  );
 });

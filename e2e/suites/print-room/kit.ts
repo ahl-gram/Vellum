@@ -6,12 +6,30 @@ export type PrintRoomKit = ReturnType<typeof printRoomKit>;
 export function printRoomKit(ctx: SuiteContext) {
   const { evaluate, sleep } = ctx;
   async function orderPng(format: string, plate: string) {
-    await evaluate(`(()=>{window.__vellumLastPng=undefined;document.getElementById("pr-format").value="${format}";document.querySelector('[data-poster="${plate}"]').click();})()`);
+    await evaluate(
+      `(()=>{window.__vellumLastPng=undefined;document.getElementById("pr-format").value="${format}";document.querySelector('[data-poster="${plate}"]').click();})()`,
+    );
     let png = null;
     for (let i = 0; i < 300; i++) {
       let s = null;
-      try { s = await evaluate<{ type: string; size: number; width: number; height: number; scale: number; clamped: boolean; filename: string; status: string } | null>(`(()=>{const p=window.__vellumLastPng;return p?{type:p.type,size:p.size,width:p.width,height:p.height,scale:p.scale,clamped:p.clamped,filename:p.filename,status:document.getElementById("pr-poster-status").textContent}:null;})()`); } catch {}
-      if (s) { png = s; break; }
+      try {
+        s = await evaluate<{
+          type: string;
+          size: number;
+          width: number;
+          height: number;
+          scale: number;
+          clamped: boolean;
+          filename: string;
+          status: string;
+        } | null>(
+          `(()=>{const p=window.__vellumLastPng;return p?{type:p.type,size:p.size,width:p.width,height:p.height,scale:p.scale,clamped:p.clamped,filename:p.filename,status:document.getElementById("pr-poster-status").textContent}:null;})()`,
+        );
+      } catch {}
+      if (s) {
+        png = s;
+        break;
+      }
       await sleep(50);
     }
     return png;

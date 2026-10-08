@@ -123,9 +123,7 @@ footer { color: var(--line-tan); }
 
 // Style plates carry the world- prefix the CLI has always written; theme/region keys already read theme-* / region-*, so they stand alone.
 export function atlasPlateFilename(plate: { key: string }, section: PlateSection): string {
-  return section === "hero" || section === "draughting"
-    ? `world-${plate.key}.svg`
-    : `${plate.key}.svg`;
+  return section === "hero" || section === "draughting" ? `world-${plate.key}.svg` : `${plate.key}.svg`;
 }
 
 // Base64 over a UTF-8 byte view (not btoa(svg)) so a non-ASCII world title survives, chunked so a multi-megabyte plate never overflows the argument stack.

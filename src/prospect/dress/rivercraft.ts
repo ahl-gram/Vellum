@@ -101,8 +101,7 @@ const SPOKES: ReadonlyArray<readonly [number, number]> = [
 export function millNodes(c: DressContext, m: Mill): SvgNode[] {
   const { cx, cy, r } = m.wheel;
   const spokes = SPOKES.map(
-    ([dx, dy]) =>
-      `M${r1(cx - dx * r)} ${r1(cy - dy * r)}L${r1(cx + dx * r)} ${r1(cy + dy * r)}`,
+    ([dx, dy]) => `M${r1(cx - dx * r)} ${r1(cy - dy * r)}L${r1(cx + dx * r)} ${r1(cy + dy * r)}`,
   ).join("");
   return [
     ...massNodes(c, m.house, 1.2),

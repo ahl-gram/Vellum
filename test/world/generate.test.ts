@@ -52,9 +52,7 @@ test("generateWorld produces a coherent, fully-named world", () => {
 });
 
 test("citystate worlds form a single realm around the free city", () => {
-  const world = generateWorld(
-    defaultRecipe(42, { mapType: "citystate", gridW: 160, gridH: 120 }),
-  );
+  const world = generateWorld(defaultRecipe(42, { mapType: "citystate", gridW: 160, gridH: 120 }));
   assert.equal(world.realms.seats.length, 1, "one realm only");
   assert.equal(world.names.realms.length, 0, "no rival realm names");
   assert.equal(world.settlements.filter((s) => s.kind === "capital").length, 1);

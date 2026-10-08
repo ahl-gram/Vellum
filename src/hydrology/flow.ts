@@ -79,7 +79,13 @@ function flowDirections(elev: Field, seaLevel: number, fill: Float64Array): Int3
   return dir;
 }
 
-function accumulate(elev: Field, seaLevel: number, fill: Float64Array, dir: Int32Array, rain?: Float64Array): Float64Array {
+function accumulate(
+  elev: Field,
+  seaLevel: number,
+  fill: Float64Array,
+  dir: Int32Array,
+  rain?: Float64Array,
+): Float64Array {
   const { data } = elev;
   const n = data.length;
   const acc = new Float64Array(n);
@@ -96,11 +102,7 @@ function accumulate(elev: Field, seaLevel: number, fill: Float64Array, dir: Int3
   return acc;
 }
 
-export function computeFlow(
-  elev: Field,
-  seaLevel: number,
-  rain?: Float64Array,
-): FlowResult {
+export function computeFlow(elev: Field, seaLevel: number, rain?: Float64Array): FlowResult {
   const fill = priorityFill(elev, seaLevel);
   const dir = flowDirections(elev, seaLevel, fill);
   const acc = accumulate(elev, seaLevel, fill, dir, rain);

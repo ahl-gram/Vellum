@@ -93,7 +93,10 @@ export function resolveSuiteSelection(env: E2eSuiteEnv): E2eSelection {
   if (text === "" || FULL_WORDS.has(text)) return { names: E2E_SUITE_ORDER.slice(), tier: "full" };
   if (text === "smoke") return { names: canonicalise(new Set(SMOKE_SUITES)), tier: "smoke" };
 
-  const requested = text.split(",").map((part) => part.trim()).filter((part) => part !== "");
+  const requested = text
+    .split(",")
+    .map((part) => part.trim())
+    .filter((part) => part !== "");
   const unknown = requested.filter((name) => !E2E_SUITE_ORDER.includes(name as E2eSuiteName));
   if (unknown.length > 0) {
     throw new Error(
@@ -212,7 +215,10 @@ export function formatSuiteTimings(timings: readonly E2eSuiteTiming[]): readonly
 export function runOutcome(results: readonly E2eCheckResult[]): E2eOutcome {
   if (results.length === 0) return { ok: false, line: "FAIL: no checks ran, so this run proves nothing." };
   const passed = results.filter((r) => r.ok).length;
-  return { ok: passed === results.length, line: `${passed === results.length ? "ALL PASS" : "SOME FAILED"}  (${passed}/${results.length})` };
+  return {
+    ok: passed === results.length,
+    line: `${passed === results.length ? "ALL PASS" : "SOME FAILED"}  (${passed}/${results.length})`,
+  };
 }
 
 export function suitesNotWhole(timings: readonly E2eSuiteTiming[]): readonly E2eSuiteName[] {

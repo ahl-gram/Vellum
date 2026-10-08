@@ -167,11 +167,7 @@ function placeBeast(
   return placed ? beastNode(ctx, beast, ext, placed, i) : null;
 }
 
-export function beastsLayer(
-  ctx: RenderCtx,
-  cartouche: CartouchePlan,
-  compass: CompassPlan | null,
-): SvgNode | null {
+export function beastsLayer(ctx: RenderCtx, cartouche: CartouchePlan, compass: CompassPlan | null): SvgNode | null {
   const { style, world } = ctx;
   if (!style.seaDecorations || world.beasts.length === 0) return null;
 

@@ -9,14 +9,32 @@ export type Verdict = { readonly same: boolean; readonly lines: readonly string[
 export type FamilyFile = { readonly path: string; readonly text: string };
 type Fn = ts.FunctionDeclaration | ts.ArrowFunction | ts.FunctionExpression;
 type Flat = { sequence: string[]; helpers: Map<string, string[]>; constants: string[]; module: string[] };
-type Family = { readonly sfs: readonly ts.SourceFile[]; readonly fns: ReadonlyMap<string, Fn>; readonly inline: ReadonlySet<string>; readonly through: Set<ts.CallExpression> };
+type Family = {
+  readonly sfs: readonly ts.SourceFile[];
+  readonly fns: ReadonlyMap<string, Fn>;
+  readonly inline: ReadonlySet<string>;
+  readonly through: Set<ts.CallExpression>;
+};
 
-const DROPPED = new Set([ts.SyntaxKind.ConstKeyword, ts.SyntaxKind.LetKeyword, ts.SyntaxKind.VarKeyword, ts.SyntaxKind.ExportKeyword]);
+const DROPPED = new Set([
+  ts.SyntaxKind.ConstKeyword,
+  ts.SyntaxKind.LetKeyword,
+  ts.SyntaxKind.VarKeyword,
+  ts.SyntaxKind.ExportKeyword,
+]);
 const NOTE = new RegExp(String.raw`^\s*\/\/ @ts-` + "expect-error\\b");
 const CONDITION = ["no-unnecessary", "condition"].join("-");
 
-const parse = (text: string): ts.SourceFile => ts.createSourceFile("family.js", stripTypeScriptTypes(text, { mode: "strip" }), ts.ScriptTarget.Latest, true, ts.ScriptKind.JS);
-const isFn = (n: ts.Node | undefined): n is Fn => !!n && (ts.isFunctionDeclaration(n) || ts.isArrowFunction(n) || ts.isFunctionExpression(n));
+const parse = (text: string): ts.SourceFile =>
+  ts.createSourceFile(
+    "family.js",
+    stripTypeScriptTypes(text, { mode: "strip" }),
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.JS,
+  );
+const isFn = (n: ts.Node | undefined): n is Fn =>
+  !!n && (ts.isFunctionDeclaration(n) || ts.isArrowFunction(n) || ts.isFunctionExpression(n));
 
 const fnName = (n: Fn): string | null => {
   if (ts.isFunctionDeclaration(n)) return n.name?.text ?? null;
@@ -34,43 +52,79 @@ function functionsOf(sfs: readonly ts.SourceFile[]): Map<string, Fn> {
   return out;
 }
 
-const unwrap = (e: ts.Expression): ts.Expression => (ts.isAwaitExpression(e) || ts.isParenthesizedExpression(e) ? unwrap(e.expression) : e);
+const unwrap = (e: ts.Expression): ts.Expression =>
+  ts.isAwaitExpression(e) || ts.isParenthesizedExpression(e) ? unwrap(e.expression) : e;
 const tokens = (n: ts.Node): string => {
   const kids = n.getChildren();
   if (kids.length === 0) return DROPPED.has(n.kind) ? "" : n.getText();
-  return kids.map(tokens).filter((x) => x !== "").join(" ");
+  return kids
+    .map(tokens)
+    .filter((x) => x !== "")
+    .join(" ");
 };
 const isNameBag = (e: ts.Node): boolean =>
-  ts.isObjectLiteralExpression(e) && e.properties.every((p) => ts.isShorthandPropertyAssignment(p) || (ts.isSpreadAssignment(p) && ts.isIdentifier(p.expression)));
+  ts.isObjectLiteralExpression(e) &&
+  e.properties.every(
+    (p) => ts.isShorthandPropertyAssignment(p) || (ts.isSpreadAssignment(p) && ts.isIdentifier(p.expression)),
+  );
 
 const bindsByName = (args: readonly ts.Expression[], fn: Fn): boolean =>
-  args.length === fn.parameters.length && fn.parameters.every((p, i) => {
+  args.length === fn.parameters.length &&
+  fn.parameters.every((p, i) => {
     const a = args[i];
     if (!a || p.initializer || p.dotDotDotToken) return false;
     if (ts.isIdentifier(p.name)) return (ts.isIdentifier(a) && a.text === p.name.text) || isNameBag(a);
-    const shorthand = ts.isObjectBindingPattern(p.name) && p.name.elements.every((el) => !el.propertyName && !el.initializer && !el.dotDotDotToken && ts.isIdentifier(el.name));
+    const shorthand =
+      ts.isObjectBindingPattern(p.name) &&
+      p.name.elements.every(
+        (el) => !el.propertyName && !el.initializer && !el.dotDotDotToken && ts.isIdentifier(el.name),
+      );
     return shorthand && (ts.isIdentifier(a) || isNameBag(a));
   });
 
 const spreadsOwnParameter = (e: ts.Expression, fn: Fn): boolean =>
-  ts.isObjectLiteralExpression(e) && e.properties.some((p) => ts.isSpreadAssignment(p) && ts.isIdentifier(p.expression) && fn.parameters.some((q) => ts.isIdentifier(q.name) && q.name.text === p.expression.getText()));
+  ts.isObjectLiteralExpression(e) &&
+  e.properties.some(
+    (p) =>
+      ts.isSpreadAssignment(p) &&
+      ts.isIdentifier(p.expression) &&
+      fn.parameters.some((q) => ts.isIdentifier(q.name) && q.name.text === p.expression.getText()),
+  );
 
 const handsBack = (fn: Fn, target: ts.Node | undefined): boolean => {
   if (target === undefined) return true;
   const statements = fn.body && ts.isBlock(fn.body) ? fn.body.statements : [];
   const last = statements.at(-1);
-  if (!last || !ts.isReturnStatement(last) || !last.expression || trailing(statements).length === statements.length) return false;
-  return tokens(last.expression) === tokens(target) || (ts.isIdentifier(target) && isNameBag(last.expression) && spreadsOwnParameter(last.expression, fn));
+  if (!last || !ts.isReturnStatement(last) || !last.expression || trailing(statements).length === statements.length)
+    return false;
+  return (
+    tokens(last.expression) === tokens(target) ||
+    (ts.isIdentifier(target) && isNameBag(last.expression) && spreadsOwnParameter(last.expression, fn))
+  );
 };
 
 const isAsync = (fn: Fn): boolean => (ts.getModifiers(fn) ?? []).some((m) => m.kind === ts.SyntaxKind.AsyncKeyword);
-const isAwaited = (e: ts.Expression): boolean => ts.isAwaitExpression(e) || (ts.isParenthesizedExpression(e) && isAwaited(e.expression));
+const isAwaited = (e: ts.Expression): boolean =>
+  ts.isAwaitExpression(e) || (ts.isParenthesizedExpression(e) && isAwaited(e.expression));
 
-function throughCall(e: ts.Expression | undefined, target: ts.Node | undefined, fam: Family, awaitOwed: boolean): Fn | undefined {
+function throughCall(
+  e: ts.Expression | undefined,
+  target: ts.Node | undefined,
+  fam: Family,
+  awaitOwed: boolean,
+): Fn | undefined {
   const call = e ? unwrap(e) : undefined;
-  if (!e || !call || !ts.isCallExpression(call) || !ts.isIdentifier(call.expression) || !fam.inline.has(call.expression.text)) return undefined;
+  if (
+    !e ||
+    !call ||
+    !ts.isCallExpression(call) ||
+    !ts.isIdentifier(call.expression) ||
+    !fam.inline.has(call.expression.text)
+  )
+    return undefined;
   const fn = fam.fns.get(call.expression.text);
-  if (!fn || !bindsByName(call.arguments, fn) || !handsBack(fn, target) || (awaitOwed && isAsync(fn) && !isAwaited(e))) return undefined;
+  if (!fn || !bindsByName(call.arguments, fn) || !handsBack(fn, target) || (awaitOwed && isAsync(fn) && !isAwaited(e)))
+    return undefined;
   fam.through.add(call);
   return fn;
 }
@@ -83,19 +137,34 @@ const isPrimitive = (e: ts.Expression | undefined): boolean => {
 };
 
 const isShorthandDestructure = (s: ts.VariableStatement): boolean =>
-  s.declarationList.declarations.every((d) => ts.isObjectBindingPattern(d.name) && !!d.initializer && ts.isIdentifier(d.initializer) &&
-    d.name.elements.every((el) => !el.propertyName && !el.initializer && !el.dotDotDotToken && ts.isIdentifier(el.name)));
+  s.declarationList.declarations.every(
+    (d) =>
+      ts.isObjectBindingPattern(d.name) &&
+      !!d.initializer &&
+      ts.isIdentifier(d.initializer) &&
+      d.name.elements.every(
+        (el) => !el.propertyName && !el.initializer && !el.dotDotDotToken && ts.isIdentifier(el.name),
+      ),
+  );
 
-function printer(fam: Family): { text: (n: ts.Node, elide: boolean, blocks: ts.Block[]) => string; body: (fn: Fn) => string } {
+function printer(fam: Family): {
+  text: (n: ts.Node, elide: boolean, blocks: ts.Block[]) => string;
+  body: (fn: Fn) => string;
+} {
   const text = (n: ts.Node, elide: boolean, blocks: ts.Block[]): string => {
     if (elide && ts.isBlock(n)) {
       blocks.push(n);
       return "{…}";
     }
-    const target = ts.isArrowFunction(n) && !ts.isBlock(n.body) ? throughCall(n.body, undefined, fam, false) : undefined;
+    const target =
+      ts.isArrowFunction(n) && !ts.isBlock(n.body) ? throughCall(n.body, undefined, fam, false) : undefined;
     const kids = n.getChildren();
     if (kids.length === 0) return DROPPED.has(n.kind) ? "" : n.getText();
-    const parts = kids.map((k) => (target && ts.isArrowFunction(n) && k === n.body ? body(target) : text(k, elide && (ts.isStatement(k) || ts.isCatchClause(k) || ts.isBlock(k)), blocks)));
+    const parts = kids.map((k) =>
+      target && ts.isArrowFunction(n) && k === n.body
+        ? body(target)
+        : text(k, elide && (ts.isStatement(k) || ts.isCatchClause(k) || ts.isBlock(k)), blocks),
+    );
     return parts.filter((p) => p !== "").join(" ");
   };
   const body = (fn: Fn): string => {
@@ -109,7 +178,11 @@ function printer(fam: Family): { text: (n: ts.Node, elide: boolean, blocks: ts.B
 const trailing = (statements: readonly ts.Statement[]): readonly ts.Statement[] => {
   const last = statements.at(-1);
   if (!last || !ts.isReturnStatement(last) || !last.expression) return statements;
-  const acts = (n: ts.Node): boolean => ts.isCallExpression(n) || ts.isAwaitExpression(n) || ts.isNewExpression(n) || (ts.forEachChild(n, (k) => acts(k) || undefined) ?? false);
+  const acts = (n: ts.Node): boolean =>
+    ts.isCallExpression(n) ||
+    ts.isAwaitExpression(n) ||
+    ts.isNewExpression(n) ||
+    (ts.forEachChild(n, (k) => acts(k) || undefined) ?? false);
   return acts(last.expression) ? statements : statements.slice(0, -1);
 };
 
@@ -117,7 +190,11 @@ const stepOf = (s: ts.Statement): { label: string; chain: string[]; cb: ts.Expre
   if (!ts.isExpressionStatement(s)) return null;
   const chain: string[] = [];
   let e = unwrap(s.expression);
-  while (ts.isCallExpression(e) && ts.isPropertyAccessExpression(e.expression) && ts.isCallExpression(e.expression.expression)) {
+  while (
+    ts.isCallExpression(e) &&
+    ts.isPropertyAccessExpression(e.expression) &&
+    ts.isCallExpression(e.expression.expression)
+  ) {
     chain.unshift(`.${e.expression.name.text}(${e.arguments.map((a) => a.getText()).join(", ")})`);
     e = e.expression.expression;
   }
@@ -130,13 +207,23 @@ const stepOf = (s: ts.Statement): { label: string; chain: string[]; cb: ts.Expre
 function inlinedCall(s: ts.Statement, fam: Family): Fn | undefined {
   if (ts.isExpressionStatement(s)) {
     const x = s.expression;
-    return ts.isBinaryExpression(x) && x.operatorToken.kind === ts.SyntaxKind.EqualsToken ? throughCall(x.right, x.left, fam, true) : throughCall(x, undefined, fam, true);
+    return ts.isBinaryExpression(x) && x.operatorToken.kind === ts.SyntaxKind.EqualsToken
+      ? throughCall(x.right, x.left, fam, true)
+      : throughCall(x, undefined, fam, true);
   }
-  const only = ts.isVariableStatement(s) && s.declarationList.declarations.length === 1 ? s.declarationList.declarations[0] : undefined;
+  const only =
+    ts.isVariableStatement(s) && s.declarationList.declarations.length === 1
+      ? s.declarationList.declarations[0]
+      : undefined;
   return only ? throughCall(only.initializer, only.name, fam, true) : undefined;
 }
 
-type Walker = { readonly fam: Family; readonly flat: Flat; readonly text: (n: ts.Node, elide: boolean, blocks: ts.Block[]) => string; walk: (statements: readonly ts.Statement[], stack: ReadonlySet<Fn>) => void };
+type Walker = {
+  readonly fam: Family;
+  readonly flat: Flat;
+  readonly text: (n: ts.Node, elide: boolean, blocks: ts.Block[]) => string;
+  walk: (statements: readonly ts.Statement[], stack: ReadonlySet<Fn>) => void;
+};
 
 function helper(w: Walker, name: string, fn: Fn): void {
   const sub: Flat = { sequence: [], helpers: w.flat.helpers, constants: w.flat.constants, module: w.flat.module };
@@ -147,7 +234,11 @@ function helper(w: Walker, name: string, fn: Fn): void {
 
 function declaration(w: Walker, s: ts.Statement): boolean {
   if (ts.isImportDeclaration(s) || ts.isExportDeclaration(s) || ts.isEmptyStatement(s)) return true;
-  const fn = ts.isFunctionDeclaration(s) ? s : ts.isVariableStatement(s) && s.declarationList.declarations.length === 1 ? s.declarationList.declarations[0]?.initializer : undefined;
+  const fn = ts.isFunctionDeclaration(s)
+    ? s
+    : ts.isVariableStatement(s) && s.declarationList.declarations.length === 1
+      ? s.declarationList.declarations[0]?.initializer
+      : undefined;
   if (isFn(fn) && (ts.isFunctionDeclaration(s) || fn.parent.parent.parent === s)) {
     const name = fnName(fn);
     if (name !== null && name !== "run" && !w.fam.inline.has(name)) helper(w, name, fn);
@@ -155,7 +246,9 @@ function declaration(w: Walker, s: ts.Statement): boolean {
   }
   if (!ts.isVariableStatement(s)) return false;
   if (isShorthandDestructure(s)) return true;
-  const constant = (s.declarationList.flags & ts.NodeFlags.Const) !== 0 && s.declarationList.declarations.every((d) => ts.isIdentifier(d.name) && isPrimitive(d.initializer));
+  const constant =
+    (s.declarationList.flags & ts.NodeFlags.Const) !== 0 &&
+    s.declarationList.declarations.every((d) => ts.isIdentifier(d.name) && isPrimitive(d.initializer));
   if (!(ts.isSourceFile(s.parent) || isFn(s.parent.parent)) || !constant) return false;
   w.flat.constants.push(w.text(s, false, []));
   return true;
@@ -171,7 +264,8 @@ function callback(w: Walker, cb: ts.Expression, stack: ReadonlySet<Fn>): void {
     return;
   }
   const target = throughCall(cb.body, undefined, w.fam, false);
-  if (target?.body && ts.isBlock(target.body) && !stack.has(target)) w.walk(trailing(target.body.statements), new Set([...stack, target]));
+  if (target?.body && ts.isBlock(target.body) && !stack.has(target))
+    w.walk(trailing(target.body.statements), new Set([...stack, target]));
   else w.flat.sequence.push(w.text(cb.body, false, []));
 }
 
@@ -227,17 +321,27 @@ function unread(fam: Family): string[] {
   const visit = (n: ts.Node): void => {
     const name = isFn(n) ? fnName(n) : null;
     if (name !== null && fam.inline.has(name)) declaredTimes.set(name, (declaredTimes.get(name) ?? 0) + 1);
-    if (ts.isCallExpression(n) && ts.isIdentifier(n.expression) && fam.inline.has(n.expression.text) && !fam.through.has(n)) out.push(`a call to ${n.expression.text}, a function the split made, is not read through: ${short(tokens(n))}`);
+    if (
+      ts.isCallExpression(n) &&
+      ts.isIdentifier(n.expression) &&
+      fam.inline.has(n.expression.text) &&
+      !fam.through.has(n)
+    )
+      out.push(`a call to ${n.expression.text}, a function the split made, is not read through: ${short(tokens(n))}`);
     ts.forEachChild(n, visit);
   };
   fam.sfs.forEach(visit);
-  for (const [name, times] of declaredTimes) if (times > 1) out.push(`${name}, a function the split made, is declared ${times} times`);
-  for (const name of fam.inline) if (![...fam.through].some((c) => ts.isIdentifier(c.expression) && c.expression.text === name)) out.push(`${name}, a function the split made, is never read through`);
+  for (const [name, times] of declaredTimes)
+    if (times > 1) out.push(`${name}, a function the split made, is declared ${times} times`);
+  for (const name of fam.inline)
+    if (![...fam.through].some((c) => ts.isIdentifier(c.expression) && c.expression.text === name))
+      out.push(`${name}, a function the split made, is never read through`);
   return out;
 }
 
 const declared = (texts: readonly string[]): Set<string> => new Set(functionsOf(texts.map(parse)).keys());
-const counted = (xs: readonly string[]): Map<string, number> => xs.reduce((m, x) => m.set(x, (m.get(x) ?? 0) + 1), new Map<string, number>());
+const counted = (xs: readonly string[]): Map<string, number> =>
+  xs.reduce((m, x) => m.set(x, (m.get(x) ?? 0) + 1), new Map<string, number>());
 const surplus = (a: readonly string[], b: readonly string[]): string[] => {
   const cb = counted(b);
   return [...counted(a)].flatMap(([k, n]) => Array.from({ length: Math.max(0, n - (cb.get(k) ?? 0)) }, () => k));
@@ -247,7 +351,11 @@ const short = (s: string): string => (s.length > 160 ? `${s.slice(0, 157)}...` :
 function sequenceLines(where: string, a: readonly string[], b: readonly string[]): string[] {
   const at = Array.from({ length: Math.max(a.length, b.length) }, (_, i) => i).find((i) => a[i] !== b[i]);
   if (at === undefined) return [];
-  return [`${where} diverges at statement ${at + 1} of ${a.length} -> ${b.length}`, `  base: ${short(a[at] ?? "(end)")}`, `  head: ${short(b[at] ?? "(end)")}`];
+  return [
+    `${where} diverges at statement ${at + 1} of ${a.length} -> ${b.length}`,
+    `  base: ${short(a[at] ?? "(end)")}`,
+    `  head: ${short(b[at] ?? "(end)")}`,
+  ];
 }
 
 function helperLines(a: ReadonlyMap<string, string[]>, b: ReadonlyMap<string, string[]>): string[] {
@@ -260,20 +368,36 @@ function helperLines(a: ReadonlyMap<string, string[]>, b: ReadonlyMap<string, st
   });
 }
 
-const moduleOf = (path: string, spec: string): string => (spec.startsWith(".") ? posix.normalize(posix.join(posix.dirname(path), spec)) : spec);
+const moduleOf = (path: string, spec: string): string =>
+  spec.startsWith(".") ? posix.normalize(posix.join(posix.dirname(path), spec)) : spec;
 
 function renamedInside(files: readonly FamilyFile[]): string[] {
   const own = new Set(files.map((x) => posix.normalize(x.path)));
-  return files.flatMap(({ path, text }) => parse(text).statements.flatMap((s) => {
-    const inside = ts.isImportDeclaration(s) && ts.isStringLiteral(s.moduleSpecifier) && own.has(moduleOf(path, s.moduleSpecifier.text));
-    const named = inside ? s.importClause?.namedBindings : ts.isExportDeclaration(s) ? s.exportClause : undefined;
-    const elements = named && (ts.isNamedImports(named) || ts.isNamedExports(named)) ? named.elements : [];
-    const defaults = [
-      ...(inside && s.importClause?.name ? [`${path} imports a default as ${s.importClause.name.text} inside the family`] : []),
-      ...(ts.isExportAssignment(s) || (ts.canHaveModifiers(s) && (ts.getModifiers(s) ?? []).some((m) => m.kind === ts.SyntaxKind.DefaultKeyword)) ? [`${path} exports a default inside the family`] : []),
-    ];
-    return [...defaults, ...elements.filter((el) => el.propertyName && el.propertyName.getText() !== el.name.text).map((el) => `${path} renames ${el.propertyName?.getText()} to ${el.name.text} inside the family`)];
-  }));
+  return files.flatMap(({ path, text }) =>
+    parse(text).statements.flatMap((s) => {
+      const inside =
+        ts.isImportDeclaration(s) &&
+        ts.isStringLiteral(s.moduleSpecifier) &&
+        own.has(moduleOf(path, s.moduleSpecifier.text));
+      const named = inside ? s.importClause?.namedBindings : ts.isExportDeclaration(s) ? s.exportClause : undefined;
+      const elements = named && (ts.isNamedImports(named) || ts.isNamedExports(named)) ? named.elements : [];
+      const defaults = [
+        ...(inside && s.importClause?.name
+          ? [`${path} imports a default as ${s.importClause.name.text} inside the family`]
+          : []),
+        ...(ts.isExportAssignment(s) ||
+        (ts.canHaveModifiers(s) && (ts.getModifiers(s) ?? []).some((m) => m.kind === ts.SyntaxKind.DefaultKeyword))
+          ? [`${path} exports a default inside the family`]
+          : []),
+      ];
+      return [
+        ...defaults,
+        ...elements
+          .filter((el) => el.propertyName && el.propertyName.getText() !== el.name.text)
+          .map((el) => `${path} renames ${el.propertyName?.getText()} to ${el.name.text} inside the family`),
+      ];
+    }),
+  );
 }
 
 function imports(files: readonly FamilyFile[]): string[] {
@@ -289,7 +413,9 @@ function imports(files: readonly FamilyFile[]): string[] {
       const bound = [
         ...(clause?.name ? [`${clause.name.text} = default`] : []),
         ...(named && ts.isNamespaceImport(named) ? [`${named.name.text} = *`] : []),
-        ...(named && ts.isNamedImports(named) ? named.elements.map((el) => `${el.name.text} = ${(el.propertyName ?? el.name).getText()}`) : []),
+        ...(named && ts.isNamedImports(named)
+          ? named.elements.map((el) => `${el.name.text} = ${(el.propertyName ?? el.name).getText()}`)
+          : []),
       ];
       for (const b of bound.length > 0 ? bound : ["(for its effect)"]) out.add(`${b} from ${from}`);
     }
@@ -337,17 +463,25 @@ export function familyOf(path: string): string {
 
 const ROOT = resolve(import.meta.dirname, "..");
 const GIT_TIMEOUT_MS = 30_000;
-const git = (args: string[]): string => execFileSync("git", args, { cwd: ROOT, encoding: "utf8", timeout: GIT_TIMEOUT_MS, maxBuffer: 64 * 1024 * 1024 });
+const git = (args: string[]): string =>
+  execFileSync("git", args, { cwd: ROOT, encoding: "utf8", timeout: GIT_TIMEOUT_MS, maxBuffer: 64 * 1024 * 1024 });
 const inTree = (path: string): boolean => /^e2e\/.+\.ts$/.test(path) && path !== "e2e/split-proof.ts";
 
 function headPaths(): string[] {
-  return readdirSync(join(ROOT, "e2e"), { recursive: true, encoding: "utf8" }).map((f) => `e2e/${f.split(sep).join("/")}`).filter(inTree).filter((p) => existsSync(join(ROOT, p))).sort();
+  return readdirSync(join(ROOT, "e2e"), { recursive: true, encoding: "utf8" })
+    .map((f) => `e2e/${f.split(sep).join("/")}`)
+    .filter(inTree)
+    .filter((p) => existsSync(join(ROOT, p)))
+    .sort();
 }
 
 function main(base: string): number {
   const basePaths = git(["ls-tree", "-r", "--name-only", base, "--", "e2e"]).split("\n").filter(inTree).sort();
   const now = headPaths();
-  if (basePaths.length < 30 || now.length < 30) throw new Error(`read ${basePaths.length} files at ${base} and ${now.length} in the tree, so this is not the e2e tree`);
+  if (basePaths.length < 30 || now.length < 30)
+    throw new Error(
+      `read ${basePaths.length} files at ${base} and ${now.length} in the tree, so this is not the e2e tree`,
+    );
   const families = new Map<string, { before: FamilyFile[]; after: FamilyFile[] }>();
   const family = (k: string) => families.get(k) ?? families.set(k, { before: [], after: [] }).get(k)!;
   for (const p of basePaths) family(familyOf(p)).before.push({ path: p, text: git(["show", `${base}:${p}`]) });
@@ -363,7 +497,9 @@ function main(base: string): number {
     console.log(`${v.same ? "same" : "DIFF"}  ${k}: ${f.before.length} -> ${f.after.length} files`);
     for (const line of v.lines) console.log(`      ${line}`);
   }
-  console.log(`\n${families.size} families against ${base}: ${differ} differ in a statement, its order, the step it runs under, what a group is handed or hands back, a function body, a constant, an import, a type note or a condition marker`);
+  console.log(
+    `\n${families.size} families against ${base}: ${differ} differ in a statement, its order, the step it runs under, what a group is handed or hands back, a function body, a constant, an import, a type note or a condition marker`,
+  );
   return differ === 0 ? 0 : 1;
 }
 

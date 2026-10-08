@@ -17,7 +17,6 @@ import { bandWindows } from "./region-detail-sweep-windows.ts";
 
 /** Issue #443's measurement half: the world chart's OWN partition across three arms, so the anti-merge claim and the vanishing-landmass census reproduce from one command. Committed, not left in out/, because this epic has lost its evidence twice. `before` rebuilds what Issue #397 and Issue #398 shipped, an UNGATED bilinear floor rejected against that same blurred max, so no revert is needed. Costs minutes; the unit-scale claims are in test/world/detail-chain-world.test.ts. */
 
-
 function gridForWindow(win: UvWindow): { gridW: number; gridH: number } {
   const size = win.u1 - win.u0;
   const b = LOD_BANDS.find((x) => Math.abs(x.sizeUV - size) < 1e-9) ?? LOD_BANDS[0]!;
@@ -30,14 +29,25 @@ function buildOldField(spec: ChainSpec, cache: Map<string, Field>): Field {
   const hit = cache.get(key);
   if (hit !== undefined) return hit;
   const bare = buildHeightfield({
-    seed: spec.seed, gridW: spec.gridW, gridH: spec.gridH, mapType: spec.mapType,
-    window: spec.window, worldAspect: spec.worldAspect, detail: detailForWindow(spec.window),
+    seed: spec.seed,
+    gridW: spec.gridW,
+    gridH: spec.gridH,
+    mapType: spec.mapType,
+    window: spec.window,
+    worldAspect: spec.worldAspect,
+    detail: detailForWindow(spec.window),
   });
   const ancestors = ancestorWindows(spec.window);
   let out = bare;
   if (ancestors.length > 0) {
     const surfaces = ancestors.map((aw) =>
-      parentSurfaceOnWindow(buildOldField({ ...spec, window: aw, ...gridForWindow(aw) }, cache), aw, spec.window, spec.gridW, spec.gridH),
+      parentSurfaceOnWindow(
+        buildOldField({ ...spec, window: aw, ...gridForWindow(aw) }, cache),
+        aw,
+        spec.window,
+        spec.gridW,
+        spec.gridH,
+      ),
     );
     const coarse = maxOfSurfaces(surfaces, spec.gridW, spec.gridH);
     out = rejectBridges(coarse, coarse, floorToParent(bare, coarse), spec.seaLevel);
@@ -86,10 +96,16 @@ function census(world: World, field: Field, window: UvWindow, worldIds: Int32Arr
       if (wid < 0) continue;
       present.set(wid, (present.get(wid) ?? 0) + 1);
       const rid = ids[i] as number;
-      if (rid < 0) { drowned++; continue; }
+      if (rid < 0) {
+        drowned++;
+        continue;
+      }
       alive.add(wid);
       let s = coveredBy.get(rid);
-      if (s === undefined) { s = new Set(); coveredBy.set(rid, s); }
+      if (s === undefined) {
+        s = new Set();
+        coveredBy.set(rid, s);
+      }
       s.add(wid);
     }
   }
@@ -111,7 +127,11 @@ function tally(
   for (const [id, cells] of present) {
     if (alive.has(id)) continue;
     lost.push({
-      seed, band, arm, window, id,
+      seed,
+      band,
+      arm,
+      window,
+      id,
       worldCells: worldSizes[id] as number,
       regionCellsInWindow: cells,
     });
@@ -144,15 +164,27 @@ for (const seed of SEEDS) {
     const row = rows.get(idx) as Record<Arm, Tally>;
     for (const win of bandWindows(band)) {
       const spec: ChainSpec = {
-        seed, mapType: world.recipe.mapType, window: win,
-        gridW: band.gridW, gridH: band.gridH, worldAspect, seaLevel: world.seaLevel,
+        seed,
+        mapType: world.recipe.mapType,
+        window: win,
+        gridW: band.gridW,
+        gridH: band.gridH,
+        worldAspect,
+        seaLevel: world.seaLevel,
       };
       // The SHIPPED bare arm takes no `detail` at all, matching region.ts for detail:false; passing the octaves here would measure an arm nothing draws.
       const arms: ReadonlyArray<readonly [Arm, Field]> = [
-        ["bare", buildHeightfield({
-          seed, gridW: band.gridW, gridH: band.gridH, mapType: world.recipe.mapType,
-          window: win, worldAspect,
-        })],
+        [
+          "bare",
+          buildHeightfield({
+            seed,
+            gridW: band.gridW,
+            gridH: band.gridH,
+            mapType: world.recipe.mapType,
+            window: win,
+            worldAspect,
+          }),
+        ],
         ["before", buildOldField(spec, oldCache)],
         ["after", buildChainedField(spec, newCache)],
       ];
@@ -185,6 +217,6 @@ console.log("\nevery world landmass that loses all its land, with the footprint 
 for (const l of lost.sort((a, b) => a.band - b.band || a.seed - b.seed || a.id - b.id)) {
   console.log(
     `  band ${l.band} ${l.arm.padEnd(6)} seed ${String(l.seed).padStart(2)} window ${l.window.u0.toFixed(3)},${l.window.v0.toFixed(3)}` +
-    ` id ${String(l.id).padStart(3)}: ${l.worldCells} world cells, ${l.regionCellsInWindow} region cells in window`,
+      ` id ${String(l.id).padStart(3)}: ${l.worldCells} world cells, ${l.regionCellsInWindow} region cells in window`,
   );
 }

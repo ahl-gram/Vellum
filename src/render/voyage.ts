@@ -38,15 +38,15 @@ function logLineFor(place: PlaceMark, presentYear: number, isOrigin: boolean): s
   return `Year ${presentYear}: we came to ${place.name}, a ${noun} standing since ${place.founded}.`;
 }
 
-export function buildVoyagePlan(
-  places: ReadonlyArray<PlaceMark>,
-  presentYear: number,
-): VoyagePlan {
+export function buildVoyagePlan(places: ReadonlyArray<PlaceMark>, presentYear: number): VoyagePlan {
   const origin = places.find((p) => p.kind === "capital");
   if (!origin) return EMPTY_PLAN;
 
   const survey = places.filter((p) => p.idx === origin.idx || !p.ruined);
-  const order = orderTour(survey.map((p) => ({ idx: p.idx, x: p.nx, y: p.ny })), origin.idx);
+  const order = orderTour(
+    survey.map((p) => ({ idx: p.idx, x: p.nx, y: p.ny })),
+    origin.idx,
+  );
   const byIdx = new Map(places.map((p) => [p.idx, p]));
   const visited: PlaceMark[] = order.map((idx) => byIdx.get(idx)!);
 
@@ -79,7 +79,13 @@ export function applyTourOrder(plan: VoyagePlan, order: ReadonlyArray<number>): 
 
 export function reorderPlanByTravel(plan: VoyagePlan, d: (a: number, b: number) => number): VoyagePlan {
   if (plan.ports.length <= 2) return plan;
-  return applyTourOrder(plan, refineTour(plan.ports.map((p) => p.idx), d));
+  return applyTourOrder(
+    plan,
+    refineTour(
+      plan.ports.map((p) => p.idx),
+      d,
+    ),
+  );
 }
 
 export function logEntryCount(plan: VoyagePlan): number {

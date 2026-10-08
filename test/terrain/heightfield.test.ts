@@ -93,11 +93,12 @@ test("heightfield is resolution-consistent (same world coords, same value)", () 
   const coarse = buildHeightfield(RECIPE);
   const fine = buildHeightfield({ ...RECIPE, gridW: 159, gridH: 119 });
   // (x, y) on coarse grid ↔ (2x, 2y) on fine grid: identical uv
-  for (const [x, y] of [[10, 10], [40, 30], [70, 50]] as const) {
-    assert.ok(
-      Math.abs(coarse.at(x, y) - fine.at(2 * x, 2 * y)) < 1e-12,
-      `resolution divergence at ${x},${y}`,
-    );
+  for (const [x, y] of [
+    [10, 10],
+    [40, 30],
+    [70, 50],
+  ] as const) {
+    assert.ok(Math.abs(coarse.at(x, y) - fine.at(2 * x, 2 * y)) < 1e-12, `resolution divergence at ${x},${y}`);
   }
 });
 
@@ -107,10 +108,7 @@ test("sea level hits the requested land fraction", () => {
     const sea = pickSeaLevel(f, target);
     const mask = landMask(f, sea);
     const actual = landFractionOf(mask);
-    assert.ok(
-      Math.abs(actual - target) < 0.04,
-      `target ${target}, got ${actual}`,
-    );
+    assert.ok(Math.abs(actual - target) < 0.04, `target ${target}, got ${actual}`);
   }
 });
 
@@ -175,10 +173,7 @@ test("generateWorld survives the full slider landFraction band on every map type
     for (const mapType of MAP_TYPES) {
       for (const landFraction of [0.1, 0.7]) {
         const world = generateWorld(defaultRecipe(seed, { mapType, landFraction }));
-        assert.ok(
-          world.settlements.length > 0,
-          `seed ${seed} ${mapType} land ${landFraction}: no settlements`,
-        );
+        assert.ok(world.settlements.length > 0, `seed ${seed} ${mapType} land ${landFraction}: no settlements`);
       }
     }
   }
@@ -189,10 +184,7 @@ test("generateWorld survives the full coast-warp slider band on every map type (
     for (const mapType of MAP_TYPES) {
       for (const coastWarp of [0, 1]) {
         const world = generateWorld(defaultRecipe(seed, { mapType, coastWarp }));
-        assert.ok(
-          world.settlements.length > 0,
-          `seed ${seed} ${mapType} warp ${coastWarp}: no settlements`,
-        );
+        assert.ok(world.settlements.length > 0, `seed ${seed} ${mapType} warp ${coastWarp}: no settlements`);
       }
     }
   }

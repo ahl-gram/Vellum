@@ -122,7 +122,6 @@ test("lodWindowFor clamps a centre near the world edge inside the sheet", () => 
   assert.ok(Math.abs(hi.v0 - (0.99 - size)) < 1e-12, "bottom edge clamps to 0.99-size");
 });
 
-
 // Margin fractions kept simple for arithmetic-by-eye; the identities hold for any margins, and the real 1500px-sheet values are proven in place-manifest.
 const M = { mx: 0.05, my: 0.06 };
 

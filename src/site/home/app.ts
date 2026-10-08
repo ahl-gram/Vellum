@@ -166,8 +166,7 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
   bindStations({
     doc: document,
     reduced,
-    fly: (visit) =>
-      flyTo(stationFlightView(cam, fit, visit, view(), SHEET), reduced() ? 0 : STATION_FLIGHT_SECONDS),
+    fly: (visit) => flyTo(stationFlightView(cam, fit, visit, view(), SHEET), reduced() ? 0 : STATION_FLIGHT_SECONDS),
   });
 
   new ResizeObserver(() => {

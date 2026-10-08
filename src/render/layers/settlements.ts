@@ -33,12 +33,7 @@ export type LabelCandidate = {
   readonly anchor: LabelAnchor;
 };
 
-export function labelCandidates(
-  px: number,
-  py: number,
-  fs: number,
-  gap: number,
-): LabelCandidate[] {
+export function labelCandidates(px: number, py: number, fs: number, gap: number): LabelCandidate[] {
   return [
     { x: px + gap, y: py + fs * 0.34, anchor: "start" },
     { x: px - gap, y: py + fs * 0.34, anchor: "end" },
@@ -52,12 +47,7 @@ export function labelCandidates(
 }
 
 /** Reused by the legend so the map mark and its key row match. */
-export function settlementGlyph(
-  tier: SettlementTier,
-  px: number,
-  py: number,
-  ctx: RenderCtx,
-): SvgNode {
+export function settlementGlyph(tier: SettlementTier, px: number, py: number, ctx: RenderCtx): SvgNode {
   const { style } = ctx;
   const k = ctx.proj.widthPx / 1500;
   if (tier === "capital" || tier === "seat") {
@@ -70,19 +60,31 @@ export function settlementGlyph(
   }
   if (tier === "town") {
     return el("circle", {
-      cx: px, cy: py, r: 3.4 * k,
-      fill: style.ink, stroke: style.labelHalo, "stroke-width": 1.2 * k,
+      cx: px,
+      cy: py,
+      r: 3.4 * k,
+      fill: style.ink,
+      stroke: style.labelHalo,
+      "stroke-width": 1.2 * k,
     });
   }
   if (tier === "hamlet") {
     return el("circle", {
-      cx: px, cy: py, r: 1.5 * k,
-      fill: style.ink, stroke: style.labelHalo, "stroke-width": 0.8 * k,
+      cx: px,
+      cy: py,
+      r: 1.5 * k,
+      fill: style.ink,
+      stroke: style.labelHalo,
+      "stroke-width": 0.8 * k,
     });
   }
   return el("circle", {
-    cx: px, cy: py, r: 2.3 * k,
-    fill: style.labelHalo, stroke: style.ink, "stroke-width": 1.3 * k,
+    cx: px,
+    cy: py,
+    r: 2.3 * k,
+    fill: style.labelHalo,
+    stroke: style.ink,
+    "stroke-width": 1.3 * k,
   });
 }
 
@@ -92,20 +94,18 @@ function starInCircle(px: number, py: number, ks: number, ctx: RenderCtx): SvgNo
   const star = starPath(px, py, r * 0.62, 5);
   return el("g", {}, [
     el("circle", {
-      cx: px, cy: py, r,
-      fill: style.labelHalo, stroke: style.ink, "stroke-width": 1.6 * ks,
+      cx: px,
+      cy: py,
+      r,
+      fill: style.labelHalo,
+      stroke: style.ink,
+      "stroke-width": 1.6 * ks,
     }),
     el("path", { d: star, fill: style.ink }),
   ]);
 }
 
-function seatHalo(
-  px: number,
-  py: number,
-  tier: SettlementTier,
-  color: string,
-  ctx: RenderCtx,
-): SvgNode {
+function seatHalo(px: number, py: number, tier: SettlementTier, color: string, ctx: RenderCtx): SvgNode {
   const { style } = ctx;
   const k = ctx.proj.widthPx / 1500;
   const ks = k * (tier === "capital" ? CAPITAL_GLYPH_SCALE : SEAT_GLYPH_SCALE);
@@ -114,8 +114,11 @@ function seatHalo(
   const cy = castle ? py - 3.5 * ks : py;
   return el("circle", {
     class: "seat-halo",
-    cx: px.toFixed(2), cy: cy.toFixed(2), r: r.toFixed(2),
-    fill: color, "fill-opacity": String(HALO_OPACITY),
+    cx: px.toFixed(2),
+    cy: cy.toFixed(2),
+    r: r.toFixed(2),
+    fill: color,
+    "fill-opacity": String(HALO_OPACITY),
   });
 }
 
@@ -131,24 +134,20 @@ export function ruinGlyph(px: number, py: number, ctx: RenderCtx): SvgNode {
     `L${px + 2.7 * s} ${py - 4.2 * s}` +
     `L${px + 2.7 * s} ${py}Z`;
   const slit =
-    `M${px - 2 * s} ${py}L${px - 2 * s} ${py - 3.4 * s}` +
-    `L${px - 1 * s} ${py - 3.4 * s}L${px - 1 * s} ${py}Z`;
+    `M${px - 2 * s} ${py}L${px - 2 * s} ${py - 3.4 * s}` + `L${px - 1 * s} ${py - 3.4 * s}L${px - 1 * s} ${py}Z`;
   return el("g", { class: "ruin" }, [
     el("path", {
-      d, fill: style.labelHalo, stroke: style.ink,
-      "stroke-width": 1.2 * s, "stroke-linejoin": "round",
+      d,
+      fill: style.labelHalo,
+      stroke: style.ink,
+      "stroke-width": 1.2 * s,
+      "stroke-linejoin": "round",
     }),
     el("path", { d: slit, fill: style.ink }),
   ]);
 }
 
-function castleGlyph(
-  px: number,
-  py: number,
-  k: number,
-  ink: string,
-  paper: string,
-): SvgNode {
+function castleGlyph(px: number, py: number, k: number, ink: string, paper: string): SvgNode {
   const s = k;
   const d =
     `M${px - 5.5 * s} ${py}` +
@@ -162,8 +161,11 @@ function castleGlyph(
     `Q${px} ${py - 3.8 * s} ${px + 1.2 * s} ${py - 2.4 * s}L${px + 1.2 * s} ${py}Z`;
   return el("g", {}, [
     el("path", {
-      d, fill: paper, stroke: ink,
-      "stroke-width": 1.2 * k, "stroke-linejoin": "round",
+      d,
+      fill: paper,
+      stroke: ink,
+      "stroke-width": 1.2 * k,
+      "stroke-linejoin": "round",
     }),
     el("path", { d: door, fill: ink }),
   ]);
@@ -197,14 +199,19 @@ function labelNode(
   return el(
     "text",
     {
-      x, y, "text-anchor": anchor,
+      x,
+      y,
+      "text-anchor": anchor,
       "font-family": style.fontFamily,
       "font-size": fs.toFixed(1),
       ...(tier === "capital" ? { "font-weight": "bold", "letter-spacing": "0.8" } : {}),
       ...(tier === "seat" ? { "letter-spacing": "0.5" } : {}),
       ...(ruined ? { "font-style": "italic", "fill-opacity": "0.7" } : {}),
-      fill: style.labelColor, stroke: style.labelHalo,
-      "stroke-width": 2.8 * k, "paint-order": "stroke", "stroke-linejoin": "round",
+      fill: style.labelColor,
+      stroke: style.labelHalo,
+      "stroke-width": 2.8 * k,
+      "paint-order": "stroke",
+      "stroke-linejoin": "round",
     },
     [display],
   );
@@ -239,8 +246,7 @@ function placeSettlementLabel(
   const sized = world.region !== undefined ? REGION_FONT_SIZE : FONT_SIZE;
   const fs = sized[tier] * k;
   const gap =
-    (tier === "capital" ? 11 : tier === "seat" ? 8 : tier === "hamlet" ? 5 : 7) *
-    (sized[tier] / FONT_SIZE[tier]) * k;
+    (tier === "capital" ? 11 : tier === "seat" ? 8 : tier === "hamlet" ? 5 : 7) * (sized[tier] / FONT_SIZE[tier]) * k;
   const upper = tier === "capital" || tier === "seat";
   const text = s.name;
   const display = upper ? text.toUpperCase() : text;
@@ -288,9 +294,7 @@ function settlementGroup(
     {
       class: "settlement",
       "data-idx": String(i),
-      ...(world.region !== undefined
-        ? { "data-tier": tier, "data-name": s.name }
-        : {}),
+      ...(world.region !== undefined ? { "data-tier": tier, "data-name": s.name } : {}),
     },
     group,
   );
@@ -299,8 +303,7 @@ function settlementGroup(
 export function settlementsLayer(ctx: RenderCtx): SvgNode {
   const { world, style } = ctx;
   const { ordered, seatRealm } = settlementOrder(world);
-  const showHalo =
-    style.politicalTints && world.realms.seats.length > 1 && world.region === undefined;
+  const showHalo = style.politicalTints && world.realms.seats.length > 1 && world.region === undefined;
 
   return el(
     "g",

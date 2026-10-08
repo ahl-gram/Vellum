@@ -7,7 +7,8 @@ type Zoom = { k: number; x: number; y: number };
 type HuntKit = ReturnType<typeof huntKit>;
 type Quarry = Awaited<ReturnType<typeof huntQuarry>>;
 type Guess = Awaited<ReturnType<HuntKit["clickHunt"]>>;
-const bandRank = (s: string) => (/^Hot/.test(s) ? 3 : /^Warmer/.test(s) ? 2 : /^Cool/.test(s) ? 1 : /^Cold/.test(s) ? 0 : -1);
+const bandRank = (s: string) =>
+  /^Hot/.test(s) ? 3 : /^Warmer/.test(s) ? 2 : /^Cool/.test(s) ? 1 : /^Cold/.test(s) ? 0 : -1;
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { consoleErrors, PORT } = ctx;
@@ -34,19 +35,42 @@ export async function run(ctx: SuiteContext): Promise<void> {
 
 function huntKit(ctx: SuiteContext) {
   const { evaluate, send } = ctx;
-  const clickHunt = (f: Frac) => evaluate<{ status: string; solved: boolean }>(`(()=>{const svg=document.querySelector("#map svg");const r=svg.getBoundingClientRect();svg.dispatchEvent(new MouseEvent("click",{clientX:r.left+${f.fx}*r.width,clientY:r.top+${f.fy}*r.height,bubbles:true}));return{status:document.getElementById("hunt-status").textContent,solved:document.getElementById("map").classList.contains("solved")};})()`);
+  const clickHunt = (f: Frac) =>
+    evaluate<{ status: string; solved: boolean }>(
+      `(()=>{const svg=document.querySelector("#map svg");const r=svg.getBoundingClientRect();svg.dispatchEvent(new MouseEvent("click",{clientX:r.left+${f.fx}*r.width,clientY:r.top+${f.fy}*r.height,bubbles:true}));return{status:document.getElementById("hunt-status").textContent,solved:document.getElementById("map").classList.contains("solved")};})()`,
+    );
   const mouseTap = async (x: number, y: number) => {
     await send("Input.dispatchMouseEvent", { type: "mousePressed", x, y, button: "left", buttons: 1, clickCount: 1 });
     await send("Input.dispatchMouseEvent", { type: "mouseReleased", x, y, button: "left", buttons: 0, clickCount: 1 });
   };
   const mouseDrag = async (x0: number, y0: number, x1: number, y1: number) => {
-    await send("Input.dispatchMouseEvent", { type: "mousePressed", x: x0, y: y0, button: "left", buttons: 1, clickCount: 1 });
-    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: Math.round((x0 + x1) / 2), y: Math.round((y0 + y1) / 2), buttons: 1 });
+    await send("Input.dispatchMouseEvent", {
+      type: "mousePressed",
+      x: x0,
+      y: y0,
+      button: "left",
+      buttons: 1,
+      clickCount: 1,
+    });
+    await send("Input.dispatchMouseEvent", {
+      type: "mouseMoved",
+      x: Math.round((x0 + x1) / 2),
+      y: Math.round((y0 + y1) / 2),
+      buttons: 1,
+    });
     await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: x1, y: y1, buttons: 1 });
-    await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: x1, y: y1, button: "left", buttons: 0, clickCount: 1 });
+    await send("Input.dispatchMouseEvent", {
+      type: "mouseReleased",
+      x: x1,
+      y: y1,
+      button: "left",
+      buttons: 0,
+      clickCount: 1,
+    });
   };
   // The MISS tap frames the CAPITAL, never a viewport corner: classifyClick snaps to the nearest settlement with no distance cap, and the old farthest-corner scan was a per-day lottery that solved the hunt on linux CI (Issue #304). Since Issue #462 the sheet is fitted inside the stage, so the point is read off the svg's OWN rect at home, never as a fraction of the viewport.
-  const framePoint = (k: number, fx: number, fy: number) => evaluate<{ px: number; py: number; cx: number; cy: number; state: Zoom }>(`(()=>{
+  const framePoint = (k: number, fx: number, fy: number) =>
+    evaluate<{ px: number; py: number; cx: number; cy: number; state: Zoom }>(`(()=>{
     const vp=document.getElementById("map-viewport"),W=vp.clientWidth,H=vp.clientHeight,k=${k};
     window.__vellumZoomTo({k:1,x:0,y:0});
     const svg=document.querySelector("#map svg"),home=svg.getBoundingClientRect(),vr=vp.getBoundingClientRect();
@@ -60,27 +84,50 @@ function huntKit(ctx: SuiteContext) {
 }
 
 async function h1Opens({ evaluate, send, check, sleep }: SuiteContext, HUNT_PAGE: string): Promise<void> {
-  try { await evaluate(`localStorage.removeItem("vellum.hunt.v1")`); } catch {}
+  try {
+    await evaluate(`localStorage.removeItem("vellum.hunt.v1")`);
+  } catch {}
   await send("Page.navigate", { url: HUNT_PAGE });
   let huntReady = false;
   for (let i = 0; i < 200; i++) {
     // evaluate can land in a context destroyed by the in-flight navigation; swallow and retry.
     let s = null;
-    try { s = await evaluate<{ hunt: boolean | null; clues: number; map: boolean }>(`(()=>{const h=document.getElementById("hunt");const c=document.getElementById("clues");return{hunt:h&&!h.hidden,clues:c?c.children.length:0,map:!!document.querySelector("#map svg")};})()`); } catch {}
-    if (s && s.hunt && s.clues >= 3 && s.map) { huntReady = true; break; }
+    try {
+      s = await evaluate<{ hunt: boolean | null; clues: number; map: boolean }>(
+        `(()=>{const h=document.getElementById("hunt");const c=document.getElementById("clues");return{hunt:h&&!h.hidden,clues:c?c.children.length:0,map:!!document.querySelector("#map svg")};})()`,
+      );
+    } catch {}
+    if (s && s.hunt && s.clues >= 3 && s.map) {
+      huntReady = true;
+      break;
+    }
     await sleep(75);
   }
   check("H1 seed-of-the-day hunt card appears with >=3 clues over a rendered map", huntReady);
 }
 
 async function h2Clues({ evaluate, check }: SuiteContext): Promise<void> {
-  const clueText = await evaluate<string>(`Array.from(document.getElementById("clues").children).map((li)=>li.textContent).join(" | ")`);
+  const clueText = await evaluate<string>(
+    `Array.from(document.getElementById("clues").children).map((li)=>li.textContent).join(" | ")`,
+  );
   check("H2 clues never disclose ruin/abandon wording", !/ruin|abandon/i.test(clueText));
 }
 
 async function huntQuarry({ evaluate }: SuiteContext) {
   // Click targets are derived from the browser's OWN world via dynamic import, immune to any node-side date assumption; this is the only coverage of the click -> projection-inversion -> nearest-settlement snap.
-  const tgt = await evaluate<{ seed: number; name: string; formerName: string | null; hit: Frac; miss: Frac; missName: string; legFrac: { x0: number; y0: number; x1: number; y1: number } | null; wpx: number; hpx: number; scale: number }>(`(async()=>{
+  const tgt = await evaluate<{
+    seed: number;
+    name: string;
+    formerName: string | null;
+    hit: Frac;
+    miss: Frac;
+    missName: string;
+    legFrac: { x0: number; y0: number; x1: number; y1: number } | null;
+    wpx: number;
+    hpx: number;
+    scale: number;
+  }>(
+    `(async()=>{
     const {defaultRecipe,generateWorld}=await import("../explorer/engine/world/generate.js");
     const {chooseQuarry,legendExcluded}=await import("../explorer/engine/world/daily-hunt.js");
     const {createProjection}=await import("../explorer/engine/render/transform.js");
@@ -102,7 +149,9 @@ async function huntQuarry({ evaluate }: SuiteContext) {
     const cap=world.settlements.find((s)=>s.kind==="capital")??world.settlements[0];
     const frac=(s)=>({fx:proj.px(s.x)/proj.widthPx,fy:proj.py(s.y)/proj.heightPx});
     return{seed,name:q.settlement.name,formerName:q.settlement.formerName??null,hit:frac(q.settlement),miss:frac(cap),missName:cap.name,legFrac,wpx:proj.widthPx,hpx:proj.heightPx,scale:proj.scale};
-  })()`, true);
+  })()`,
+    true,
+  );
   return tgt;
 }
 
@@ -110,12 +159,13 @@ async function h3Miss({ evaluate, check, clickHunt }: HuntKit, tgt: Quarry): Pro
   const miss = await clickHunt(tgt.miss);
   check(
     "H3 a miss anchors the selected town to the click, reports warmer/colder prose, and does not solve (#327)",
-    miss.status.length > 0 && !miss.solved && /You mark /.test(miss.status) &&
-      !/warmest sounding/.test(miss.status),
+    miss.status.length > 0 && !miss.solved && /You mark /.test(miss.status) && !/warmest sounding/.test(miss.status),
     JSON.stringify(miss),
   );
 
-  const snd = await evaluate<{ dots: number; inSvg: boolean; pe: string | null }>(`(()=>{const d=document.querySelector("#map .sounding-dot");return{dots:document.querySelectorAll("#map .sounding-dot").length,inSvg:!!document.querySelector("#map svg .sounding-dot"),pe:d?getComputedStyle(d).pointerEvents:null};})()`);
+  const snd = await evaluate<{ dots: number; inSvg: boolean; pe: string | null }>(
+    `(()=>{const d=document.querySelector("#map .sounding-dot");return{dots:document.querySelectorAll("#map .sounding-dot").length,inSvg:!!document.querySelector("#map svg .sounding-dot"),pe:d?getComputedStyle(d).pointerEvents:null};})()`,
+  );
   check(
     "H3c a miss drops a pointer-transparent sounding over the map, never inside the SVG",
     snd.dots >= 1 && !snd.inSvg && snd.pe === "none",
@@ -126,11 +176,16 @@ async function h3Miss({ evaluate, check, clickHunt }: HuntKit, tgt: Quarry): Pro
 
 async function h3bWarmer({ check, clickHunt }: HuntKit, tgt: Quarry, miss: Guess): Promise<void> {
   // The probe sits at 0.4 of the way, NOT halfway: the exact midpoint ties capital vs quarry and float noise in the rect roundtrip can snap it to the quarry (~1 day in 5), silently solving and vacating H4's coverage.
-  const near = { fx: tgt.miss.fx + 0.4 * (tgt.hit.fx - tgt.miss.fx), fy: tgt.miss.fy + 0.4 * (tgt.hit.fy - tgt.miss.fy) };
+  const near = {
+    fx: tgt.miss.fx + 0.4 * (tgt.hit.fx - tgt.miss.fx),
+    fy: tgt.miss.fy + 0.4 * (tgt.hit.fy - tgt.miss.fy),
+  };
   const nearMiss = await clickHunt(near);
   check(
     "H3b a click nearer the quarry never reads colder than a far click, and a new warmest stays silent (#327)",
-    !nearMiss.solved && bandRank(nearMiss.status) >= bandRank(miss.status) && bandRank(nearMiss.status) >= 0 &&
+    !nearMiss.solved &&
+      bandRank(nearMiss.status) >= bandRank(miss.status) &&
+      bandRank(nearMiss.status) >= 0 &&
       !/warmest sounding/.test(nearMiss.status),
     JSON.stringify({ far: miss.status, near: nearMiss.status }),
   );
@@ -151,17 +206,47 @@ async function h3bWarmer({ check, clickHunt }: HuntKit, tgt: Quarry, miss: Guess
 
 async function h4Solves({ evaluate, check, clickHunt }: HuntKit, tgt: Quarry): Promise<void> {
   const won = await clickHunt(tgt.hit);
-  check("H4 clicking the quarry snaps to it and solves the hunt", won.solved === true && /found it/i.test(won.status), JSON.stringify(won));
+  check(
+    "H4 clicking the quarry snaps to it and solves the hunt",
+    won.solved === true && /found it/i.test(won.status),
+    JSON.stringify(won),
+  );
 
-  const post = await evaluate<{ reveal: boolean | null; revealText: string; star: boolean; share: boolean | null; streak: string; ls: string | null }>(`(()=>{const rev=document.getElementById("reveal");const star=document.querySelector("#map .hunt-star");const share=document.getElementById("share");return{reveal:rev&&!rev.hidden,revealText:rev?rev.textContent:"",star:!!star,share:share&&!share.hidden,streak:document.getElementById("streak").textContent,ls:localStorage.getItem("vellum.hunt.v1")};})()`);
-  check("H5 reveal names the found place and its founding year", post.reveal && post.revealText.includes(tgt.name) && /founded in the year/i.test(post.revealText), post.revealText.slice(0, 80));
-  check("H5b the reveal names what the place was once called, or says nothing (#49)",
+  const post = await evaluate<{
+    reveal: boolean | null;
+    revealText: string;
+    star: boolean;
+    share: boolean | null;
+    streak: string;
+    ls: string | null;
+  }>(
+    `(()=>{const rev=document.getElementById("reveal");const star=document.querySelector("#map .hunt-star");const share=document.getElementById("share");return{reveal:rev&&!rev.hidden,revealText:rev?rev.textContent:"",star:!!star,share:share&&!share.hidden,streak:document.getElementById("streak").textContent,ls:localStorage.getItem("vellum.hunt.v1")};})()`,
+  );
+  check(
+    "H5 reveal names the found place and its founding year",
+    post.reveal && post.revealText.includes(tgt.name) && /founded in the year/i.test(post.revealText),
+    post.revealText.slice(0, 80),
+  );
+  check(
+    "H5b the reveal names what the place was once called, or says nothing (#49)",
     tgt.formerName ? post.revealText.includes(`Once called ${tgt.formerName}.`) : !/Once called/.test(post.revealText),
-    JSON.stringify({ formerName: tgt.formerName ?? null, text: post.revealText.slice(0, 120) }));
+    JSON.stringify({ formerName: tgt.formerName ?? null, text: post.revealText.slice(0, 120) }),
+  );
   check("H6 a win marker overlays the map and the Share button appears", post.star && post.share);
-  check("H7 streak + localStorage persist, keyed on the day's seed", /Streak: 1 day/.test(post.streak) && new RegExp(`"solved":${tgt.seed},"streak":1`).test(post.ls || ""), `${post.streak} | ${post.ls}`);
+  check(
+    "H7 streak + localStorage persist, keyed on the day's seed",
+    /Streak: 1 day/.test(post.streak) && new RegExp(`"solved":${tgt.seed},"streak":1`).test(post.ls || ""),
+    `${post.streak} | ${post.ls}`,
+  );
 
-  const wire = await evaluate<{ starStamp: boolean; starAnim: string | null; revUnfurl: boolean; revAnim: string | null }>(`(()=>{const s=document.querySelector("#map .hunt-star");const rev=document.getElementById("reveal");return{starStamp:!!(s&&s.classList.contains("stamp")),starAnim:s?getComputedStyle(s).animationName:null,revUnfurl:!!(rev&&rev.classList.contains("unfurl")),revAnim:rev?getComputedStyle(rev).animationName:null};})()`);
+  const wire = await evaluate<{
+    starStamp: boolean;
+    starAnim: string | null;
+    revUnfurl: boolean;
+    revAnim: string | null;
+  }>(
+    `(()=>{const s=document.querySelector("#map .hunt-star");const rev=document.getElementById("reveal");return{starStamp:!!(s&&s.classList.contains("stamp")),starAnim:s?getComputedStyle(s).animationName:null,revUnfurl:!!(rev&&rev.classList.contains("unfurl")),revAnim:rev?getComputedStyle(rev).animationName:null};})()`,
+  );
   check(
     "H6b a live solve wires the win ceremony (star stamps in, reveal unfurls)",
     wire.starStamp && wire.starAnim === "huntStarIn" && wire.revUnfurl && wire.revAnim === "paperUnfurl",
@@ -201,7 +286,8 @@ async function hd1Dispatch({ evaluate, check, shoot }: SuiteContext, tgt: Quarry
       g.includes("Quarry taken in 4 soundings") &&
       g.includes(`CHART № ${tgt.seed}`) &&
       gridOk &&
-      g.includes("style=") && !g.includes("class="),
+      g.includes("style=") &&
+      !g.includes("class="),
     JSON.stringify({
       hasFn: disp.hasFn,
       seedKept: d.includes(`data-vellum-seed="${tgt.seed}"`),
@@ -210,7 +296,11 @@ async function hd1Dispatch({ evaluate, check, shoot }: SuiteContext, tgt: Quarry
       star: /data-dispatch-star/.test(g),
       caption: g.includes("Quarry taken in 4 soundings"),
       chartNo: g.includes(`CHART № ${tgt.seed}`),
-      gridOk, cx, cy, expX: tgt.miss.fx * tgt.wpx, expY: tgt.miss.fy * tgt.hpx,
+      gridOk,
+      cx,
+      cy,
+      expX: tgt.miss.fx * tgt.wpx,
+      expY: tgt.miss.fy * tgt.hpx,
       inline: g.includes("style=") && !g.includes("class="),
     }),
   );
@@ -222,20 +312,43 @@ async function h8Reload({ evaluate, send, check, sleep }: SuiteContext, HUNT_PAG
   let huntRestored = false;
   for (let i = 0; i < 200; i++) {
     let s = null;
-    try { s = await evaluate<{ star: boolean; solved: boolean; ls: string | null }>(`(()=>{const star=document.querySelector("#map .hunt-star");const solved=document.getElementById("map").classList.contains("solved");return{star:!!star,solved,ls:localStorage.getItem("vellum.hunt.v1")};})()`); } catch {}
-    if (s && s.star && s.solved) { huntRestored = /"streak":1/.test(s.ls || ""); break; }
+    try {
+      s = await evaluate<{ star: boolean; solved: boolean; ls: string | null }>(
+        `(()=>{const star=document.querySelector("#map .hunt-star");const solved=document.getElementById("map").classList.contains("solved");return{star:!!star,solved,ls:localStorage.getItem("vellum.hunt.v1")};})()`,
+      );
+    } catch {}
+    if (s && s.star && s.solved) {
+      huntRestored = /"streak":1/.test(s.ls || "");
+      break;
+    }
     await sleep(75);
   }
   check("H8 reload restores the solved state without inflating the streak", huntRestored);
 
-  const still = await evaluate<{ star: boolean; stamp: boolean; starAnim: string | null; revShown: boolean; unfurl: boolean; revAnim: string | null }>(`(()=>{const s=document.querySelector("#map .hunt-star");const rev=document.getElementById("reveal");return{star:!!s,stamp:!!(s&&s.classList.contains("stamp")),starAnim:s?getComputedStyle(s).animationName:null,revShown:!!(rev&&!rev.hidden),unfurl:!!(rev&&rev.classList.contains("unfurl")),revAnim:rev?getComputedStyle(rev).animationName:null};})()`);
+  const still = await evaluate<{
+    star: boolean;
+    stamp: boolean;
+    starAnim: string | null;
+    revShown: boolean;
+    unfurl: boolean;
+    revAnim: string | null;
+  }>(
+    `(()=>{const s=document.querySelector("#map .hunt-star");const rev=document.getElementById("reveal");return{star:!!s,stamp:!!(s&&s.classList.contains("stamp")),starAnim:s?getComputedStyle(s).animationName:null,revShown:!!(rev&&!rev.hidden),unfurl:!!(rev&&rev.classList.contains("unfurl")),revAnim:rev?getComputedStyle(rev).animationName:null};})()`,
+  );
   check(
     "H8b a solved-day reload is still: star + reveal restored without replaying the win ceremony",
-    still.star && !still.stamp && still.starAnim === "none" && still.revShown && !still.unfurl && still.revAnim === "none",
+    still.star &&
+      !still.stamp &&
+      still.starAnim === "none" &&
+      still.revShown &&
+      !still.unfurl &&
+      still.revAnim === "none",
     JSON.stringify(still),
   );
 
-  const dispRestored = await evaluate<{ exists: boolean; hidden: boolean }>(`(()=>{const b=document.getElementById("dispatch");return{exists:!!b,hidden:b?b.hidden:false};})()`);
+  const dispRestored = await evaluate<{ exists: boolean; hidden: boolean }>(
+    `(()=>{const b=document.getElementById("dispatch");return{exists:!!b,hidden:b?b.hidden:false};})()`,
+  );
   check(
     "HD3 a restored solve never offers the dispatch: button present but hidden (#123)",
     dispRestored.exists && dispRestored.hidden === true,
@@ -245,20 +358,35 @@ async function h8Reload({ evaluate, send, check, sleep }: SuiteContext, HUNT_PAG
 
 async function hg0Boots({ evaluate, send, check, sleep }: SuiteContext, HUNT_PAGE: string): Promise<void> {
   // HG uses REAL CDP mouse input so d3-zoom's own click-distance handling runs: a clean tap (no move) fires the guess click, a moved drag suppresses the trailing click.
-  try { await evaluate(`localStorage.removeItem("vellum.hunt.v1")`); } catch {}
+  try {
+    await evaluate(`localStorage.removeItem("vellum.hunt.v1")`);
+  } catch {}
   await send("Page.navigate", { url: HUNT_PAGE });
   let hgReady = false;
   for (let i = 0; i < 200; i++) {
     let s = null;
-    try { s = await evaluate<{ hunt: boolean | null; map: boolean; hook: boolean }>(`(()=>{const h=document.getElementById("hunt");return{hunt:h&&!h.hidden,map:!!document.querySelector("#map svg"),hook:typeof window.__vellumZoomTo==="function"};})()`); } catch {}
-    if (s && s.hunt && s.map && s.hook) { hgReady = true; break; }
+    try {
+      s = await evaluate<{ hunt: boolean | null; map: boolean; hook: boolean }>(
+        `(()=>{const h=document.getElementById("hunt");return{hunt:h&&!h.hidden,map:!!document.querySelector("#map svg"),hook:typeof window.__vellumZoomTo==="function"};})()`,
+      );
+    } catch {}
+    if (s && s.hunt && s.map && s.hook) {
+      hgReady = true;
+      break;
+    }
     await sleep(75);
   }
   check("HG0 the Hunt boots with the shared zoom controller wired (__vellumZoomTo present)", hgReady);
 }
 
 async function hg1Zoom({ evaluate, check }: SuiteContext): Promise<void> {
-  const hg1 = await evaluate<{ idle: { inline: string; matrix: string; zoomed: boolean; zoomable: boolean; touch: string }; s: Zoom; matrix: string; origin: string; zoomed: boolean }>(`(()=>{
+  const hg1 = await evaluate<{
+    idle: { inline: string; matrix: string; zoomed: boolean; zoomable: boolean; touch: string };
+    s: Zoom;
+    matrix: string;
+    origin: string;
+    zoomed: boolean;
+  }>(`(()=>{
     const vp=document.getElementById("map-viewport"),m=document.getElementById("map");
     const idle={inline:m.style.transform,matrix:getComputedStyle(m).transform,zoomed:vp.classList.contains("zoomed"),zoomable:vp.classList.contains("zoomable"),touch:getComputedStyle(vp).touchAction};
     window.__vellumZoomTo({k:3,x:-20,y:-15});
@@ -267,30 +395,46 @@ async function hg1Zoom({ evaluate, check }: SuiteContext): Promise<void> {
   })()`);
   check(
     "HG1 geometric zoom like the Explorer: idle byte-identical at home, .zoomable/touch-action on, zoomTo lands the matrix",
-    hg1.idle.inline === "" && hg1.idle.matrix === "none" && hg1.idle.zoomed === false &&
-      hg1.idle.zoomable === true && hg1.idle.touch === "none" &&
-      hg1.matrix === "matrix(3, 0, 0, 3, -20, -15)" && hg1.origin === "0px 0px" && hg1.zoomed === true &&
-      hg1.s.k === 3 && hg1.s.x === -20 && hg1.s.y === -15,
+    hg1.idle.inline === "" &&
+      hg1.idle.matrix === "none" &&
+      hg1.idle.zoomed === false &&
+      hg1.idle.zoomable === true &&
+      hg1.idle.touch === "none" &&
+      hg1.matrix === "matrix(3, 0, 0, 3, -20, -15)" &&
+      hg1.origin === "0px 0px" &&
+      hg1.zoomed === true &&
+      hg1.s.k === 3 &&
+      hg1.s.x === -20 &&
+      hg1.s.y === -15,
     JSON.stringify(hg1),
   );
 }
 
-async function hg2Taps({ evaluate, check, sleep, mouseTap, mouseDrag, framePoint }: HuntKit, tgt: Quarry): Promise<void> {
+async function hg2Taps(
+  { evaluate, check, sleep, mouseTap, mouseDrag, framePoint }: HuntKit,
+  tgt: Quarry,
+): Promise<void> {
   const fr = await framePoint(2, tgt.miss.fx, tgt.miss.fy);
 
   await mouseTap(fr.px, fr.py);
   await sleep(80);
-  const hg2 = await evaluate<{ dots: number; inSvg: boolean; solved: boolean; status: string }>(`(()=>{const d=document.querySelector("#map .sounding-dot");return{dots:document.querySelectorAll("#map .sounding-dot").length,inSvg:!!document.querySelector("#map svg .sounding-dot"),solved:document.getElementById("map").classList.contains("solved"),status:document.getElementById("hunt-status").textContent};})()`);
+  const hg2 = await evaluate<{ dots: number; inSvg: boolean; solved: boolean; status: string }>(
+    `(()=>{const d=document.querySelector("#map .sounding-dot");return{dots:document.querySelectorAll("#map .sounding-dot").length,inSvg:!!document.querySelector("#map svg .sounding-dot"),solved:document.getElementById("map").classList.contains("solved"),status:document.getElementById("hunt-status").textContent};})()`,
+  );
   check(
     "HG2 a miss tap while zoomed drops a sounding at the tapped spot over #map, and does not solve (AC2)",
     hg2.dots >= 1 && !hg2.inSvg && !hg2.solved && hg2.status.length > 0,
     JSON.stringify(hg2),
   );
 
-  const before = await evaluate<{ solved: boolean; status: string; dots: number }>(`(()=>({solved:document.getElementById("map").classList.contains("solved"),status:document.getElementById("hunt-status").textContent,dots:document.querySelectorAll("#map .sounding-dot").length}))()`);
+  const before = await evaluate<{ solved: boolean; status: string; dots: number }>(
+    `(()=>({solved:document.getElementById("map").classList.contains("solved"),status:document.getElementById("hunt-status").textContent,dots:document.querySelectorAll("#map .sounding-dot").length}))()`,
+  );
   await mouseDrag(fr.cx, fr.cy, fr.cx + 150, fr.cy + 95);
   await sleep(100);
-  const after = await evaluate<{ solved: boolean; status: string; dots: number }>(`(()=>({solved:document.getElementById("map").classList.contains("solved"),status:document.getElementById("hunt-status").textContent,dots:document.querySelectorAll("#map .sounding-dot").length}))()`);
+  const after = await evaluate<{ solved: boolean; status: string; dots: number }>(
+    `(()=>({solved:document.getElementById("map").classList.contains("solved"),status:document.getElementById("hunt-status").textContent,dots:document.querySelectorAll("#map .sounding-dot").length}))()`,
+  );
   check(
     "HG3 a drag-pan while zoomed never registers as a guess (AC2: not solved, warmth + soundings unchanged)",
     after.solved === false && after.status === before.status && after.dots === before.dots,
@@ -302,7 +446,9 @@ async function hg4Solves({ evaluate, check, shoot, sleep, mouseTap, framePoint }
   const fr2 = await framePoint(2, tgt.hit.fx, tgt.hit.fy);
   await mouseTap(fr2.px, fr2.py);
   await sleep(120);
-  const hg4 = await evaluate<{ solved: boolean; status: string; star: boolean }>(`(()=>({solved:document.getElementById("map").classList.contains("solved"),status:document.getElementById("hunt-status").textContent,star:!!document.querySelector("#map .hunt-star")}))()`);
+  const hg4 = await evaluate<{ solved: boolean; status: string; star: boolean }>(
+    `(()=>({solved:document.getElementById("map").classList.contains("solved"),status:document.getElementById("hunt-status").textContent,star:!!document.querySelector("#map .hunt-star")}))()`,
+  );
   check(
     "HG4 a guess tap resolves to the correct settlement while zoomed (AC2: solves at k=2 via a real tap)",
     hg4.solved === true && /found it/i.test(hg4.status) && hg4.star === true,
@@ -315,15 +461,25 @@ async function hg4Solves({ evaluate, check, shoot, sleep, mouseTap, framePoint }
 function h9Clean(ctx: SuiteContext, huntErrBase: number): void {
   const { check, consoleErrors } = ctx;
   const huntErrs = dropExpectedCancellations(consoleErrors.slice(huntErrBase));
-  check("H9 the hunt run logged no JS exceptions or console errors", huntErrs.length === 0, huntErrs.join(" | ") || "clean");
+  check(
+    "H9 the hunt run logged no JS exceptions or console errors",
+    huntErrs.length === 0,
+    huntErrs.join(" | ") || "clean",
+  );
 }
 
 function h10LegendClear({ check }: SuiteContext, tgt: Quarry): void {
   const hitInLegend =
     !!tgt.legFrac &&
-    tgt.hit.fx >= tgt.legFrac.x0 && tgt.hit.fx <= tgt.legFrac.x1 &&
-    tgt.hit.fy >= tgt.legFrac.y0 && tgt.hit.fy <= tgt.legFrac.y1;
-  check("H10 the day's quarry sits clear of the rendered legend", !!tgt.legFrac && !hitInLegend, JSON.stringify({ leg: tgt.legFrac, hit: tgt.hit }));
+    tgt.hit.fx >= tgt.legFrac.x0 &&
+    tgt.hit.fx <= tgt.legFrac.x1 &&
+    tgt.hit.fy >= tgt.legFrac.y0 &&
+    tgt.hit.fy <= tgt.legFrac.y1;
+  check(
+    "H10 the day's quarry sits clear of the rendered legend",
+    !!tgt.legFrac && !hitInLegend,
+    JSON.stringify({ leg: tgt.legFrac, hit: tgt.hit }),
+  );
 }
 
 async function h11Labels({ evaluate, check }: SuiteContext): Promise<void> {
@@ -344,7 +500,11 @@ async function h11Labels({ evaluate, check }: SuiteContext): Promise<void> {
     const missing=names.filter((n)=>!html.includes(">"+n+"<")&&!html.includes(">"+n.toUpperCase()+"<"));
     return{count:names.length,missing};
   })()`);
-  check("H11 every displayed river/lake/near clue names something the chart labeled", labelCheck.missing.length === 0, JSON.stringify(labelCheck));
+  check(
+    "H11 every displayed river/lake/near clue names something the chart labeled",
+    labelCheck.missing.length === 0,
+    JSON.stringify(labelCheck),
+  );
 }
 
 async function h12Terrain({ evaluate, check }: SuiteContext, tgt: Quarry): Promise<void> {
@@ -370,5 +530,9 @@ async function h12Terrain({ evaluate, check }: SuiteContext, tgt: Quarry): Promi
     const missing=bands.filter((p)=>!uses.some((u)=>u.href.startsWith("#"+p)&&Math.hypot(u.x-qx,u.y-qy)<=radius));
     return{count:bands.length,missing};
   })()`);
-  check("H12 every displayed terrain clue has its glyphs drawn near the quarry", terrainCheck.missing.length === 0, JSON.stringify(terrainCheck));
+  check(
+    "H12 every displayed terrain clue has its glyphs drawn near the quarry",
+    terrainCheck.missing.length === 0,
+    JSON.stringify(terrainCheck),
+  );
 }

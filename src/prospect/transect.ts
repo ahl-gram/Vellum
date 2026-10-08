@@ -40,12 +40,7 @@ function normalize(dx: number, dy: number): ProspectView | null {
   return { dx: z(dx / len), dy: z(dy / len) };
 }
 
-function seawardDirection(
-  elev: Field,
-  seaLevel: number,
-  x: number,
-  y: number,
-): ProspectView | null {
+function seawardDirection(elev: Field, seaLevel: number, x: number, y: number): ProspectView | null {
   let sx = 0;
   let sy = 0;
   for (let oy = -SEA_SEARCH_RADIUS; oy <= SEA_SEARCH_RADIUS; oy++) {

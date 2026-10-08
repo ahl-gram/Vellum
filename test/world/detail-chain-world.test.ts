@@ -13,11 +13,7 @@ import { buildHeightfield, type UvWindow } from "../../src/terrain/heightfield.t
 import { pickSeaLevel } from "../../src/terrain/sealevel.ts";
 import { defaultRecipe } from "../../src/world/generate.ts";
 import { parentCellsOnWindow } from "../../src/terrain/detail-guarantees.ts";
-import {
-  parentFusion,
-  parentMassesLost,
-  parentPartitionOnWindow,
-} from "../../test-support/parent-partition.ts";
+import { parentFusion, parentMassesLost, parentPartitionOnWindow } from "../../test-support/parent-partition.ts";
 
 /** Measured against the world chart's own partition, where detail-chain.test.ts measures against the chain's blurred reference. */
 
@@ -125,6 +121,10 @@ test("the chain raises no cell that every ancestor and the survey alike draw as 
       if ((c.chained.data[i] as number) > c.sea) raised++;
     }
     assert.ok(candidates > 10000, `seed ${seed}: only ${candidates} all-water cells checked`);
-    assert.equal(raised, 0, `seed ${seed} window ${cx},${cy}: the chain raised ${raised} cells no ancestor charts as land`);
+    assert.equal(
+      raised,
+      0,
+      `seed ${seed} window ${cx},${cy}: the chain raised ${raised} cells no ancestor charts as land`,
+    );
   }
 });

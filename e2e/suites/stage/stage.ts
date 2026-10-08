@@ -10,25 +10,62 @@ import type { Glyph } from "./glyphs.ts";
 import { routesUnder } from "../corners/geometry.ts";
 
 const REPO = resolve(fileURLToPath(new URL(".", import.meta.url)), "..", "..", "..");
-export const CHART_ROOM_FLOOR = ["/explorer/", "/explorer/portfolio/", "/print-room/", "/prospect/", "/reading-room/", "/ribbon/", "/seed-of-the-day/", "/specimen/"];
+export const CHART_ROOM_FLOOR = [
+  "/explorer/",
+  "/explorer/portfolio/",
+  "/print-room/",
+  "/prospect/",
+  "/reading-room/",
+  "/ribbon/",
+  "/seed-of-the-day/",
+  "/specimen/",
+];
 const PHONE = { w: 844, h: 390, laidOut: { w: 1024, h: 474 } };
 export const DESK = { w: 1280, h: 800 };
-const WINDOWS: readonly (readonly [number, number])[] = [[1280, 720], [1024, 768], [1024, 600], [960, 800], [901, 800], [1024, 474], [932, 430]];
-const FOLDED_WINDOWS: readonly (readonly [number, number])[] = [[1024, 600], [901, 800]];
+const WINDOWS: readonly (readonly [number, number])[] = [
+  [1280, 720],
+  [1024, 768],
+  [1024, 600],
+  [960, 800],
+  [901, 800],
+  [1024, 474],
+  [932, 430],
+];
+const FOLDED_WINDOWS: readonly (readonly [number, number])[] = [
+  [1024, 600],
+  [901, 800],
+];
 const SHORT = { w: 932, h: 430 };
 export const FLOOR_PLAIN = 4.5;
 // The day's seed on which the Print Room's Press came to rest over its folio at 932x430 folded (2026-10-06), read beside the suite's fixed day (Alex, 2026-10-05, on PR #784).
 const COLLIDED_2026_10_06 = "/print-room/#seed=20261006";
 // Below 1024 the tab stands on the 1024 page past the window's edge, and the ink is read on the page, so the sibling is seen there too.
-const SLIP_TAB_SIBLING = { at: `at ${SHORT.w}x${SHORT.h} folded`, pieces: ["button.slip-tab", "button.chart-drawer-tab"], row: "the handbook/errata/site.md row on the slip's tab at 932x430" };
+const SLIP_TAB_SIBLING = {
+  at: `at ${SHORT.w}x${SHORT.h} folded`,
+  pieces: ["button.slip-tab", "button.chart-drawer-tab"],
+  row: "the handbook/errata/site.md row on the slip's tab at 932x430",
+};
 
 type Box = { x: number; y: number; r: number; b: number };
 type Ink = Box & { piece: number; t: string };
 type Backing = Box & { piece: number; role: string };
 type Stage = {
-  chartRoom: true; ready: boolean; drawn: boolean; innerW: number; innerH: number; pageW: number;
-  sheet: Box; under: boolean; reserveRight: number; presses: Box[]; risen: boolean;
-  ink: Ink[]; pieces: string[]; ranks: number[]; contains: [number, number][]; backings: Backing[];
+  chartRoom: true;
+  ready: boolean;
+  drawn: boolean;
+  innerW: number;
+  innerH: number;
+  pageW: number;
+  sheet: Box;
+  under: boolean;
+  reserveRight: number;
+  presses: Box[];
+  risen: boolean;
+  ink: Ink[];
+  pieces: string[];
+  ranks: number[];
+  contains: [number, number][];
+  backings: Backing[];
 };
 type Read = { page: string; size: string; s: Stage };
 
@@ -86,7 +123,8 @@ const STAGE: Payload<Stage | { chartRoom: false; ready: boolean }> = `(() => {
     ink, pieces: pieceEls.map((e) => e.tagName.toLowerCase() + (e.id ? "#" + e.id : "") + (typeof e.className === "string" && e.className ? "." + e.className.trim().split(" ").slice(0, 2).join(".") : "")), ranks, contains, backings };
 })()`;
 
-const meets = (a: Box, b: Box): boolean => Math.min(a.r, b.r) - Math.max(a.x, b.x) > 0.5 && Math.min(a.b, b.b) - Math.max(a.y, b.y) > 0.5;
+const meets = (a: Box, b: Box): boolean =>
+  Math.min(a.r, b.r) - Math.max(a.x, b.x) > 0.5 && Math.min(a.b, b.b) - Math.max(a.y, b.y) > 0.5;
 
 // The check's own reading of a stack, independent of `pressRowStacks`: presses whose boxes share any height stand on one line.
 export function lineCount(presses: readonly Box[]): number {
@@ -102,52 +140,78 @@ export function lineCount(presses: readonly Box[]): number {
 export function stageFaults({ page, size, s }: Read): string[] {
   const faults: string[] = [];
   const at = `${page} at ${size}`;
-  const w = s.sheet.r - s.sheet.x, h = s.sheet.b - s.sheet.y;
+  const w = s.sheet.r - s.sheet.x,
+    h = s.sheet.b - s.sheet.y;
   if (!(w > 0 && h > 0)) return [`${at}: no sheet (${w} x ${h})`];
   // The page, not the window: below 1024 a room lays out its 1024 page (Issue #762), read unscrolled so the two share an origin.
   const room = Math.min(s.pageW - s.reserveRight - 2 * CHROME_GAP, (s.innerH - 2 * CHROME_GAP) * (w / h));
   if (!Number.isFinite(room)) faults.push(`${at}: no reserve read`);
-  if (s.under && Math.abs(w - room) > 1) faults.push(`${at}: floored at ${w.toFixed(1)}, not the whole room ${room.toFixed(1)}`);
-  if (!s.under && w < room / 2 - 0.5) faults.push(`${at}: the sheet is ${w.toFixed(1)}, under half its room ${room.toFixed(1)}, and not floored`);
-  if (s.under && (s.sheet.x < -0.5 || s.sheet.y < -0.5 || s.sheet.r > s.pageW + 0.5 || s.sheet.b > s.innerH + 0.5)) faults.push(`${at}: the floored sheet leaves the page (${JSON.stringify(s.sheet)})`);
+  if (s.under && Math.abs(w - room) > 1)
+    faults.push(`${at}: floored at ${w.toFixed(1)}, not the whole room ${room.toFixed(1)}`);
+  if (!s.under && w < room / 2 - 0.5)
+    faults.push(`${at}: the sheet is ${w.toFixed(1)}, under half its room ${room.toFixed(1)}, and not floored`);
+  if (s.under && (s.sheet.x < -0.5 || s.sheet.y < -0.5 || s.sheet.r > s.pageW + 0.5 || s.sheet.b > s.innerH + 0.5))
+    faults.push(`${at}: the floored sheet leaves the page (${JSON.stringify(s.sheet)})`);
   const lines = lineCount(s.presses);
-  if (s.presses.length >= 2 && (lines > 2 || lines === s.presses.length)) faults.push(`${at}: the Press stacks down the page (${lines} lines for ${s.presses.length} presses)`);
-  const nested = (a: number, b: number): boolean => a === b || s.contains.some(([p, q]) => (p === a && q === b) || (p === b && q === a));
-  for (let i = 0; i < s.ink.length; i++) for (let j = i + 1; j < s.ink.length; j++) {
-    const a = s.ink[i]!, b = s.ink[j]!;
-    if (!nested(a.piece, b.piece) && meets(a, b)) faults.push(`${at}: ${s.pieces[a.piece]} "${a.t}" meets ${s.pieces[b.piece]} "${b.t}"`);
-  }
-  for (const k of s.backings) for (const b of s.ink) {
-    if (!nested(k.piece, b.piece) && s.ranks[k.piece]! > s.ranks[b.piece]! && meets(k, b)) faults.push(`${at}: the ${k.role}'s backing lies over ${s.pieces[b.piece]} "${b.t}"`);
-  }
+  if (s.presses.length >= 2 && (lines > 2 || lines === s.presses.length))
+    faults.push(`${at}: the Press stacks down the page (${lines} lines for ${s.presses.length} presses)`);
+  const nested = (a: number, b: number): boolean =>
+    a === b || s.contains.some(([p, q]) => (p === a && q === b) || (p === b && q === a));
+  for (let i = 0; i < s.ink.length; i++)
+    for (let j = i + 1; j < s.ink.length; j++) {
+      const a = s.ink[i]!,
+        b = s.ink[j]!;
+      if (!nested(a.piece, b.piece) && meets(a, b))
+        faults.push(`${at}: ${s.pieces[a.piece]} "${a.t}" meets ${s.pieces[b.piece]} "${b.t}"`);
+    }
+  for (const k of s.backings)
+    for (const b of s.ink) {
+      if (!nested(k.piece, b.piece) && s.ranks[k.piece]! > s.ranks[b.piece]! && meets(k, b))
+        faults.push(`${at}: the ${k.role}'s backing lies over ${s.pieces[b.piece]} "${b.t}"`);
+    }
   return faults;
 }
 
-const known = (all: readonly string[]): string[] => all.filter((f) => !(f.includes(SLIP_TAB_SIBLING.at) && SLIP_TAB_SIBLING.pieces.some((p) => f.includes(p))));
+const known = (all: readonly string[]): string[] =>
+  all.filter((f) => !(f.includes(SLIP_TAB_SIBLING.at) && SLIP_TAB_SIBLING.pieces.some((p) => f.includes(p))));
 
 // At rest: the document and its fonts are in, the stage no longer reports a draw in progress (a line ending in an ellipsis), and the fit, the floor and the Press's seat read the same on STILL_READS polls running, since a plate with no draw to wait on (an empty Portfolio) gives no other signal.
 const STILL_READS = 6;
 
 export async function rest(ctx: SuiteContext, w: number, h: number, label: string): Promise<Stage | null> {
   const settle = makeSettle(ctx);
-  const key = (d: Stage): string => JSON.stringify([d.innerW, d.innerH, d.sheet, d.under, d.presses, d.risen, d.reserveRight, d.drawn]);
+  const key = (d: Stage): string =>
+    JSON.stringify([d.innerW, d.innerH, d.sheet, d.under, d.presses, d.risen, d.reserveRight, d.drawn]);
   let still = 0;
-  const got = await settle(STAGE, (d, last) => {
-    if (!d.ready) return false;
-    if (!d.chartRoom) return true;
-    still = last?.chartRoom && key(d) === key(last) ? still + 1 : 0;
-    return d.innerW === w && d.innerH === h && d.drawn && still >= STILL_READS;
-  }, `stage ${label}`, 300);
+  const got = await settle(
+    STAGE,
+    (d, last) => {
+      if (!d.ready) return false;
+      if (!d.chartRoom) return true;
+      still = last?.chartRoom && key(d) === key(last) ? still + 1 : 0;
+      return d.innerW === w && d.innerH === h && d.drawn && still >= STILL_READS;
+    },
+    `stage ${label}`,
+    300,
+  );
   return got.chartRoom ? got : null;
 }
 
-async function open(ctx: SuiteContext, page: string, w: number, h: number, laidOut: { w: number; h: number }, label: string): Promise<Stage | null> {
+async function open(
+  ctx: SuiteContext,
+  page: string,
+  w: number,
+  h: number,
+  laidOut: { w: number; h: number },
+  label: string,
+): Promise<Stage | null> {
   await ctx.send("Page.navigate", { url: "about:blank" });
   await ctx.send("Page.navigate", { url: `http://127.0.0.1:${ctx.PORT}${page}` });
   return rest(ctx, laidOut.w, laidOut.h, `${label} ${page} ${w}x${h}`);
 }
 
-const size = (ctx: SuiteContext, w: number, h: number): Promise<unknown> => ctx.send("Emulation.setDeviceMetricsOverride", { width: w, height: h, deviceScaleFactor: 1, mobile: false });
+const size = (ctx: SuiteContext, w: number, h: number): Promise<unknown> =>
+  ctx.send("Emulation.setDeviceMetricsOverride", { width: w, height: h, deviceScaleFactor: 1, mobile: false });
 
 export type StageRun = { rooms: string[]; reads: Read[] };
 
@@ -172,13 +236,22 @@ export async function ea1Phone(ctx: SuiteContext): Promise<StageRun> {
 
 // Below 1024 the fold press stands on the 1024 page past the window's right edge, so the window scrolls it into reach first and back to the page's start after.
 async function fold(ctx: SuiteContext): Promise<void> {
-  const at = await ctx.evaluate<{ x: number; y: number } | null>(`(() => { const b = document.querySelector(".slip-fold"); if (!b) return null; const o = b.getBoundingClientRect(); if (o.right > innerWidth) scrollBy(o.right - innerWidth + 8, 0); const r = b.getBoundingClientRect(); return r.width > 0 && r.right <= innerWidth ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : null; })()`);
+  const at = await ctx.evaluate<{ x: number; y: number } | null>(
+    `(() => { const b = document.querySelector(".slip-fold"); if (!b) return null; const o = b.getBoundingClientRect(); if (o.right > innerWidth) scrollBy(o.right - innerWidth + 8, 0); const r = b.getBoundingClientRect(); return r.width > 0 && r.right <= innerWidth ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : null; })()`,
+  );
   if (!at) throw new Error("the slip has no fold press to take");
-  const sheetX: Payload<{ folded: boolean; x: number }> = `({ folded: document.querySelector(".slip").classList.contains("folded"), x: document.getElementById("sheet").getBoundingClientRect().left })`;
+  const sheetX: Payload<{ folded: boolean; x: number }> =
+    `({ folded: document.querySelector(".slip").classList.contains("folded"), x: document.getElementById("sheet").getBoundingClientRect().left })`;
   const before = await ctx.evaluate(sheetX);
   await ctx.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: at.x, y: at.y });
   await ctx.send("Input.dispatchMouseEvent", { type: "mousePressed", x: at.x, y: at.y, button: "left", clickCount: 1 });
-  await ctx.send("Input.dispatchMouseEvent", { type: "mouseReleased", x: at.x, y: at.y, button: "left", clickCount: 1 });
+  await ctx.send("Input.dispatchMouseEvent", {
+    type: "mouseReleased",
+    x: at.x,
+    y: at.y,
+    button: "left",
+    clickCount: 1,
+  });
   // The fold refits on a timer after its slide (FOLD_SETTLE_MS in src/site/shared/slip.ts), so the read waits for the sheet to leave where it stood, not for the class alone.
   await makeSettle(ctx)(sheetX, (d) => d.folded && Math.abs(d.x - before.x) > 1, "the slip folds and the sheet refits");
   await ctx.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 1 });
@@ -198,7 +271,13 @@ async function foldedShort(ctx: SuiteContext, page: string): Promise<{ reads: Re
     if (s && h === SHORT.h) reads.push({ page, size: `${SHORT.w}x${SHORT.h} folded`, s });
   }
   const seats = [...new Set(reads.map((r) => JSON.stringify([r.s.risen, r.s.presses, r.s.sheet])))];
-  return { reads, drift: seats.length > 1 ? `${page} folded at ${SHORT.w}x${SHORT.h} comes to rest ${seats.length} ways: ${seats.join(" / ")}` : null };
+  return {
+    reads,
+    drift:
+      seats.length > 1
+        ? `${page} folded at ${SHORT.w}x${SHORT.h} comes to rest ${seats.length} ways: ${seats.join(" / ")}`
+        : null,
+  };
 }
 
 async function deskReads(ctx: SuiteContext): Promise<{ reads: Read[]; folded: Read[]; drifts: string[] }> {
@@ -238,12 +317,24 @@ export async function eaDesk(ctx: SuiteContext): Promise<void> {
   const faults = known(reads.flatMap(stageFaults));
   const foldedAll = folded.flatMap(stageFaults);
   const siblingSeen = foldedAll.some((f) => SLIP_TAB_SIBLING.pieces.some((p) => f.includes(p)));
-  const foldedFaults = [...known(foldedAll), ...drifts, ...(siblingSeen ? [] : [`no slip tab meets anything at ${SHORT.w}x${SHORT.h} folded, so ${SLIP_TAB_SIBLING.row} goes`])];
+  const foldedFaults = [
+    ...known(foldedAll),
+    ...drifts,
+    ...(siblingSeen
+      ? []
+      : [`no slip tab meets anything at ${SHORT.w}x${SHORT.h} folded, so ${SLIP_TAB_SIBLING.row} goes`]),
+  ];
   const control = reads.filter((r) => r.size === "1280x800" || r.size === "1280x720");
-  const controlFaults = control.filter((r) => r.s.under || r.s.risen).map((r) => `${r.page} at ${r.size}: ${r.s.under ? "floored" : "risen"}`);
+  const controlFaults = control
+    .filter((r) => r.s.under || r.s.risen)
+    .map((r) => `${r.page} at ${r.size}: ${r.s.under ? "floored" : "risen"}`);
   ctx.check(
     "EA2 on a short laptop window (1024x600) the Print Room floors to the whole room and the Explorer keeps more than half its own, the Press standing above the chart folio (210.5 wide on main), and at 1024x474 the Explorer and the Print Room floor (Issue #762, ruling 4a)",
-    pick("/print-room/", "1024x600")?.under === true && pick("/explorer/", "1024x600")?.under === false && pick("/explorer/", "1024x600")?.risen === true && pick("/explorer/", "1024x474")?.under === true && pick("/print-room/", "1024x474")?.under === true,
+    pick("/print-room/", "1024x600")?.under === true &&
+      pick("/explorer/", "1024x600")?.under === false &&
+      pick("/explorer/", "1024x600")?.risen === true &&
+      pick("/explorer/", "1024x474")?.under === true &&
+      pick("/print-room/", "1024x474")?.under === true,
     `print-room 1024x600 ${JSON.stringify(pick("/print-room/", "1024x600")?.sheet)} under ${pick("/print-room/", "1024x600")?.under}; explorer 1024x600 ${JSON.stringify(pick("/explorer/", "1024x600")?.sheet)} under ${pick("/explorer/", "1024x600")?.under} risen ${pick("/explorer/", "1024x600")?.risen}`,
   );
   ctx.check(
@@ -264,26 +355,38 @@ export async function eaDesk(ctx: SuiteContext): Promise<void> {
 }
 
 // A press lifted by hover or keyboard focus while the room lays out must not count as a line of its own (the cold review of PR #777: the row rose at 1280x800 and stayed risen).
-async function lifted(ctx: SuiteContext, page: string, how: "hover" | "focus"): Promise<{ at: string; lifted: boolean; s: Stage | null }> {
+async function lifted(
+  ctx: SuiteContext,
+  page: string,
+  how: "hover" | "focus",
+): Promise<{ at: string; lifted: boolean; s: Stage | null }> {
   await size(ctx, DESK.w, DESK.h);
   await open(ctx, page, DESK.w, DESK.h, DESK, `EA5 ${how}`);
-  const press = await ctx.evaluate<{ x: number; y: number } | null>(`(() => { const b = [...document.querySelectorAll(".legend .legend-row .legend-btn")].find((e) => e.getBoundingClientRect().width > 0); if (!b) return null; const r = b.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; })()`);
+  const press = await ctx.evaluate<{ x: number; y: number } | null>(
+    `(() => { const b = [...document.querySelectorAll(".legend .legend-row .legend-btn")].find((e) => e.getBoundingClientRect().width > 0); if (!b) return null; const r = b.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; })()`,
+  );
   if (!press) return { at: `${page} ${how}, which shows no Press`, lifted: false, s: null };
   if (how === "hover") await ctx.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: press.x, y: press.y });
-  else await ctx.evaluate(`(() => { const b = [...document.querySelectorAll(".legend .legend-row .legend-btn")].find((e) => e.getBoundingClientRect().width > 0); b.focus({ focusVisible: true }); return true; })()`);
+  else
+    await ctx.evaluate(
+      `(() => { const b = [...document.querySelectorAll(".legend .legend-row .legend-btn")].find((e) => e.getBoundingClientRect().width > 0); b.focus({ focusVisible: true }); return true; })()`,
+    );
   const lift: Payload<boolean> = `[...document.querySelectorAll(".legend .legend-row .legend-btn")].some((e) => e.matches(":hover, :focus-visible") && getComputedStyle(e).transform !== "none")`;
   const up = await makeSettle(ctx)(lift, (d) => d, `EA5 ${page} ${how} lifts a press`).catch(() => false);
   await size(ctx, DESK.w, DESK.h - 1);
   const s = await rest(ctx, DESK.w, DESK.h - 1, `EA5 ${page} ${how} relaid`);
   await ctx.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 1 });
-  await ctx.evaluate(`(() => { if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); return true; })()`);
+  await ctx.evaluate(
+    `(() => { if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); return true; })()`,
+  );
   return { at: `${page} ${how}`, lifted: up, s };
 }
 
 export async function ea5Lift(ctx: SuiteContext): Promise<void> {
   await ctx.setTouch(false);
   const runs: { at: string; lifted: boolean; s: Stage | null }[] = [];
-  for (const page of CHART_ROOM_FLOOR) for (const how of ["hover", "focus"] as const) runs.push(await lifted(ctx, page, how));
+  for (const page of CHART_ROOM_FLOOR)
+    for (const how of ["hover", "focus"] as const) runs.push(await lifted(ctx, page, how));
   const faults = runs.flatMap((r) => [
     ...(r.lifted || r.at.endsWith("no Press") ? [] : [`${r.at}: no press lifted, so the read proves nothing there`]),
     ...(r.s?.risen ? [`${r.at}: the Press rose at 1280x799 with a press lifted`] : []),
@@ -297,10 +400,17 @@ export async function ea5Lift(ctx: SuiteContext): Promise<void> {
   );
 }
 
-const channel = (v: number): number => { const c = v / 255; return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; };
-const relative = ([r, g, b]: readonly [number, number, number]): number => 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+const channel = (v: number): number => {
+  const c = v / 255;
+  return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+};
+const relative = ([r, g, b]: readonly [number, number, number]): number =>
+  0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
 const ratio = (a: number, b: number): number => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
-const median = (xs: number[]): number => { const s = [...xs].sort((a, b) => a - b); return s[Math.floor(s.length / 2)]!; };
+const median = (xs: number[]): number => {
+  const s = [...xs].sort((a, b) => a - b);
+  return s[Math.floor(s.length / 2)]!;
+};
 
 type Ground = { piece: string; t: string; ratio: number };
 
@@ -308,7 +418,9 @@ const HIDE_TEXT = `header.chrome *, .legend *, .corner *, .strip * { color: tran
 export const NO_POOLS = `body.stage-under :is(header.chrome, .legend, .corner, .strip)::before { content: none !important; }`;
 
 export async function withStyle<T>(ctx: SuiteContext, id: string, css: string, body: () => Promise<T>): Promise<T> {
-  await ctx.evaluate(`(() => { const s = document.createElement("style"); s.id = ${JSON.stringify(id)}; s.textContent = ${JSON.stringify(css)}; document.head.appendChild(s); return true; })()`);
+  await ctx.evaluate(
+    `(() => { const s = document.createElement("style"); s.id = ${JSON.stringify(id)}; s.textContent = ${JSON.stringify(css)}; document.head.appendChild(s); return true; })()`,
+  );
   try {
     return await body();
   } finally {
@@ -327,10 +439,25 @@ export async function grounds(ctx: SuiteContext, glyphs: readonly Glyph[]): Prom
   });
 }
 
-type Reading = { fixture: string; under: boolean; read: Ground[]; bare: Ground[]; needs: string; witnesses: readonly string[] };
-export const worstOf = (gs: readonly Ground[], piece?: string): number => gs.filter((g) => piece === undefined || g.piece === piece).reduce((m, g) => Math.min(m, g.ratio), Infinity);
+type Reading = {
+  fixture: string;
+  under: boolean;
+  read: Ground[];
+  bare: Ground[];
+  needs: string;
+  witnesses: readonly string[];
+};
+export const worstOf = (gs: readonly Ground[], piece?: string): number =>
+  gs.filter((g) => piece === undefined || g.piece === piece).reduce((m, g) => Math.min(m, g.ratio), Infinity);
 
-async function readFixture(ctx: SuiteContext, fixture: string, page: string, folded: boolean, needs: string, witnesses: readonly string[]): Promise<Reading> {
+async function readFixture(
+  ctx: SuiteContext,
+  fixture: string,
+  page: string,
+  folded: boolean,
+  needs: string,
+  witnesses: readonly string[],
+): Promise<Reading> {
   const { w, h } = PHONE.laidOut;
   const s = await open(ctx, page, w, h, PHONE.laidOut, `EA4 ${fixture}`);
   let under = s?.under === true;
@@ -347,7 +474,12 @@ async function readFixture(ctx: SuiteContext, fixture: string, page: string, fol
 // The room folio and the strip wear no pool over a floored sheet: their lines stand on their own fields and panel (7.86 and 9.10 with every pool taken away, measured 2026-10-05), so only the cluster's, the chart folio's and the Press's pools are witnessed here.
 export async function ea4Reads(ctx: SuiteContext): Promise<void> {
   await ctx.setTouch(false);
-  await ctx.send("Emulation.setDeviceMetricsOverride", { width: PHONE.laidOut.w, height: PHONE.laidOut.h, deviceScaleFactor: 1, mobile: false });
+  await ctx.send("Emulation.setDeviceMetricsOverride", {
+    width: PHONE.laidOut.w,
+    height: PHONE.laidOut.h,
+    deviceScaleFactor: 1,
+    mobile: false,
+  });
   const readings = [
     await readFixture(ctx, "the Explorer", "/explorer/", false, "Press", ["cluster", "chart folio", "Press"]),
     await readFixture(ctx, "the Print Room, its slip folded", "/print-room/", true, "room folio", []),
@@ -356,13 +488,27 @@ export async function ea4Reads(ctx: SuiteContext): Promise<void> {
   const faults = readings.flatMap((r) => [
     ...(r.under ? [] : [`${r.fixture} is not floored`]),
     ...(r.read.some((g) => g.piece === r.needs) ? [] : [`${r.fixture} has no ${r.needs} line on the sheet`]),
-    ...r.read.filter((g) => g.ratio < FLOOR_PLAIN).map((g) => `${r.fixture}: ${g.piece} "${g.t}" reads ${g.ratio.toFixed(2)}`),
-    ...r.witnesses.filter((p) => !(worstOf(r.bare, p) < FLOOR_PLAIN)).map((p) => `${r.fixture}: the ${p} reads ${worstOf(r.bare, p).toFixed(2)} with the pools taken away, so the read cannot see its pool fail`),
+    ...r.read
+      .filter((g) => g.ratio < FLOOR_PLAIN)
+      .map((g) => `${r.fixture}: ${g.piece} "${g.t}" reads ${g.ratio.toFixed(2)}`),
+    ...r.witnesses
+      .filter((p) => !(worstOf(r.bare, p) < FLOOR_PLAIN))
+      .map(
+        (p) =>
+          `${r.fixture}: the ${p} reads ${worstOf(r.bare, p).toFixed(2)} with the pools taken away, so the read cannot see its pool fail`,
+      ),
   ]);
   const mark = readings[0]!.read.find((g) => g.t.startsWith("the section mark"));
   ctx.check(
     "EA4 over a floored chart at 1024x474 every chrome line whose glyphs stand on the sheet, a field's value among them, reads at 4.5:1 or better against the ground under it: on the Explorer (the section mark beside the Press among them), on the Print Room with its slip folded (the room folio over the sheet) and in the Reading Room (its strip over the sheet); on the Explorer the cluster, the chart folio and the Press each read under 4.5:1 in the same run with the pools taken away, so the read can see each of their pools fail (Issue #762, ruling 4b; the mark read 3.44 at the second plate sitting)",
     !!mark && faults.length === 0,
-    readings.map((r) => `${r.fixture}: ${r.read.length} lines, worst ${worstOf(r.read).toFixed(2)}${r.witnesses.map((p) => `, ${p} bare ${worstOf(r.bare, p).toFixed(2)}`).join("")}`).join("; ") + (mark ? `; the section mark ${mark.ratio.toFixed(2)}` : "; no section mark read") + (faults.length ? `; ${faults.slice(0, 6).join("; ")}` : ""),
+    readings
+      .map(
+        (r) =>
+          `${r.fixture}: ${r.read.length} lines, worst ${worstOf(r.read).toFixed(2)}${r.witnesses.map((p) => `, ${p} bare ${worstOf(r.bare, p).toFixed(2)}`).join("")}`,
+      )
+      .join("; ") +
+      (mark ? `; the section mark ${mark.ratio.toFixed(2)}` : "; no section mark read") +
+      (faults.length ? `; ${faults.slice(0, 6).join("; ")}` : ""),
   );
 }

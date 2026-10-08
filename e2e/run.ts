@@ -81,8 +81,7 @@ if (!browser) {
     process.exit(1);
   }
   console.log(
-    "SKIP: no Chromium-family browser found, skipping Explorer e2e " +
-      "(install Brave/Chrome or set VELLUM_BROWSER).",
+    "SKIP: no Chromium-family browser found, skipping Explorer e2e " + "(install Brave/Chrome or set VELLUM_BROWSER).",
   );
   process.exit(0);
 }
@@ -94,38 +93,38 @@ const skippedGroups: string[] = [];
 
 // Key order IS the run order, and it is load-bearing: render asserts the pristine bare-visit boot, and the health checkpoint (N1/N2) asserts accumulated console/network state from everything before it. A selection is filtered to this order, never run in the order it was requested.
 const SUITES = {
-  "render": runRender,
-  "motion": runMotion,
-  "turn": runTurn,
-  "verso": runVerso,
-  "zoom": runZoom,
+  render: runRender,
+  motion: runMotion,
+  turn: runTurn,
+  verso: runVerso,
+  zoom: runZoom,
   "zoom-gestures": runZoomGestures,
   "glass-ceremony": runGlassCeremony,
-  "cards": runCards,
-  "health": runHealth,
-  "fallback": runFallback,
-  "hunt": runHunt,
+  cards: runCards,
+  health: runHealth,
+  fallback: runFallback,
+  hunt: runHunt,
   "print-room": runPrintRoom,
-  "prospect": runProspect,
-  "ribbon": runRibbon,
-  "home": runHome,
-  "landfall": runLandfall,
-  "survey": runSurvey,
-  "broadside": runBroadside,
+  prospect: runProspect,
+  ribbon: runRibbon,
+  home: runHome,
+  landfall: runLandfall,
+  survey: runSurvey,
+  broadside: runBroadside,
   "reading-room": runReadingRoom,
   "room-instrument": runRoomInstrument,
   "room-ink": runRoomInk,
   "room-voyage": runRoomVoyage,
   "room-voyage-route": runRoomVoyageRoute,
   "room-address": runRoomAddress,
-  "runninghead": runRunningHead,
-  "cluster": runCluster,
+  runninghead: runRunningHead,
+  cluster: runCluster,
   "chart-drawer": runChartDrawer,
   "document-rooms": runDocumentRooms,
   "region-detail": runRegionDetail,
-  "specimen": runSpecimen,
-  "corners": runCorners,
-  "stage": runStage,
+  specimen: runSpecimen,
+  corners: runCorners,
+  stage: runStage,
 };
 
 const missing = E2E_SUITE_ORDER.filter((name) => !(SUITES as Partial<typeof SUITES>)[name]);
@@ -135,7 +134,18 @@ if (missing.length > 0) {
 }
 
 async function main() {
-  const ctx = await start({ browser: browser!, SITE, OUT, PORT, DPORT, PAGE, results, consoleErrors, http4xx, skippedGroups });
+  const ctx = await start({
+    browser: browser!,
+    SITE,
+    OUT,
+    PORT,
+    DPORT,
+    PAGE,
+    results,
+    consoleErrors,
+    http4xx,
+    skippedGroups,
+  });
   return runSelected(SELECTED, SUITES, ctx, {
     alive: ctx.alive,
     skippedGroups: () => skippedGroups,
@@ -171,7 +181,10 @@ main()
           `The checks after the failure in each never ran, so this run proves less than a whole one.`,
       );
     }
-    const partial = timings.filter((t): t is E2eSuiteTiming & { readonly skipped: readonly string[] } => !t.aborted && t.skipped !== undefined && t.skipped.length > 0);
+    const partial = timings.filter(
+      (t): t is E2eSuiteTiming & { readonly skipped: readonly string[] } =>
+        !t.aborted && t.skipped !== undefined && t.skipped.length > 0,
+    );
     if (partial.length > 0) {
       console.log(
         `\n${partial.length} suite${partial.length > 1 ? "s" : ""} skipped a check group: ` +

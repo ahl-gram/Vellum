@@ -5,13 +5,64 @@ export const CHART_ASPECT = 1500 / 1157.931;
 export const INK_BROWN = "rgb(107, 90, 64)";
 export const CONTROL_GOLD = "rgb(240, 227, 189)";
 type Box = { x: number; y: number; w: number; h: number; right: number; bottom: number } | null;
-export type Specimen = { st: { state: string; folded: boolean; zoomed: boolean; pill: string } | null; innerW: number; innerH: number; rem: number; chromeX: number; plateLoaded: boolean; plateAspect: number | null; sheet: Box; map: Box; slip: Box; slipVis: string | null; slipDisp: string | null; slipPos: string | null; slipBody: string | null; tabVis: string | null; tabDisp: string | null; folio: Box; chartFolio: Box; chartFolioDisp: string | null; folioRoomPos: string | null; chartFolioText: number | null; glass: Box; glassDisp: string | null; glassOverFolio: [number, number] | null; legend: Box; legendDisp: string | null; legendGround: string | null; legendGroundOn: string | null; folioInset: string[] | null; pool: string | null; poolChrome: string | null; poolGlass: string | null; folioPanel: string | null; folioFilter: string | null; pillDisp: string | null; pillText: string | null; pill: Box; folioLines: boolean[]; crNum: string | null; inked: string | null; unInked: string | null; gold: string | null; disabled: string | null; missDisp: string | null; fog: string | null; vignette: string | null; noX: boolean };
-export const atFolded = (from: Specimen) => (d: Specimen, p: Specimen | null): boolean => d.slipVis === "hidden" && d.tabVis === "visible" && d.legend!.x !==
-  from.legend!.x && !!p &&
-  d.legend!.x ===
-  p.legend!.x &&
-  d.glass!.right ===
-  p.glass!.right;
+export type Specimen = {
+  st: { state: string; folded: boolean; zoomed: boolean; pill: string } | null;
+  innerW: number;
+  innerH: number;
+  rem: number;
+  chromeX: number;
+  plateLoaded: boolean;
+  plateAspect: number | null;
+  sheet: Box;
+  map: Box;
+  slip: Box;
+  slipVis: string | null;
+  slipDisp: string | null;
+  slipPos: string | null;
+  slipBody: string | null;
+  tabVis: string | null;
+  tabDisp: string | null;
+  folio: Box;
+  chartFolio: Box;
+  chartFolioDisp: string | null;
+  folioRoomPos: string | null;
+  chartFolioText: number | null;
+  glass: Box;
+  glassDisp: string | null;
+  glassOverFolio: [number, number] | null;
+  legend: Box;
+  legendDisp: string | null;
+  legendGround: string | null;
+  legendGroundOn: string | null;
+  folioInset: string[] | null;
+  pool: string | null;
+  poolChrome: string | null;
+  poolGlass: string | null;
+  folioPanel: string | null;
+  folioFilter: string | null;
+  pillDisp: string | null;
+  pillText: string | null;
+  pill: Box;
+  folioLines: boolean[];
+  crNum: string | null;
+  inked: string | null;
+  unInked: string | null;
+  gold: string | null;
+  disabled: string | null;
+  missDisp: string | null;
+  fog: string | null;
+  vignette: string | null;
+  noX: boolean;
+};
+export const atFolded =
+  (from: Specimen) =>
+  (d: Specimen, p: Specimen | null): boolean =>
+    d.slipVis === "hidden" &&
+    d.tabVis === "visible" &&
+    d.legend!.x !== from.legend!.x &&
+    !!p &&
+    d.legend!.x === p.legend!.x &&
+    d.glass!.right === p.glass!.right;
 
 export const READ: Payload<Specimen> = `(() => {
   const r = (sel) => { const e = document.querySelector(sel); if (!e) return null; const b = e.getBoundingClientRect(); return { x: b.x, y: b.y, w: b.width, h: b.height, right: b.right, bottom: b.bottom }; };
@@ -43,7 +94,10 @@ export const READ: Payload<Specimen> = `(() => {
   };
 })()`;
 
-export const NOSCRIPT_READ: Payload<{ present: false; pill: { disp: string; w: number } | null } | { present: true; disp: string; w: number; text: number; pill: { disp: string; w: number } | null }> = `(() => {
+export const NOSCRIPT_READ: Payload<
+  | { present: false; pill: { disp: string; w: number } | null }
+  | { present: true; disp: string; w: number; text: number; pill: { disp: string; w: number } | null }
+> = `(() => {
   const n = document.querySelector(".stage noscript .status");
   const p = document.getElementById("sb-status");
   const box = (e) => { const b = e.getBoundingClientRect(); return { disp: getComputedStyle(e).display, w: Math.round(b.width * 100) / 100 }; };

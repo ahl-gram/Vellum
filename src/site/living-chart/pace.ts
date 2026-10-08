@@ -8,8 +8,12 @@ export interface SweepAnchor {
   readonly floor: number;
 }
 
-export const anchorAt = (now: number, elapsed0: number, pace: number): SweepAnchor => ({ begin: now - elapsed0 / pace, floor: elapsed0 });
+export const anchorAt = (now: number, elapsed0: number, pace: number): SweepAnchor => ({
+  begin: now - elapsed0 / pace,
+  floor: elapsed0,
+});
 
 export const storyAt = (a: SweepAnchor, now: number, pace: number): number => Math.max((now - a.begin) * pace, a.floor);
 
-export const repaced = (a: SweepAnchor, now: number, pace: number, next: number): SweepAnchor => anchorAt(now, storyAt(a, now, pace), next);
+export const repaced = (a: SweepAnchor, now: number, pace: number, next: number): SweepAnchor =>
+  anchorAt(now, storyAt(a, now, pace), next);

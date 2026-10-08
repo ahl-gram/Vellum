@@ -41,11 +41,7 @@ const stubs = (l: RoutedLeg): { from: number; to: number } => {
 };
 
 // The western port stands 5 cells from its shore, the eastern 2; the straight embark jump is the chain's first segment, so the stub lengths are exact.
-const inlandRows = [
-  "#####..........##",
-  "#####..........##",
-  "#####..........##",
-];
+const inlandRows = ["#####..........##", "#####..........##", "#####..........##"];
 
 test("an inland port's sea leg knows where the water is: the span excludes both overland stubs", () => {
   const s = survey(inlandRows);
@@ -71,24 +67,20 @@ test("the reverse leg mirrors the span: the long stub swaps ends with the direct
 });
 
 test("a coastal crossing has a span too, but its cell-or-two stubs are no handoff", () => {
-  const s = survey([
-    "##..........##",
-    "##..........##",
-    "##..........##",
-  ]);
+  const s = survey(["##..........##", "##..........##", "##..........##"]);
   const [routed] = routeVoyage([leg(0, 1)], [site(0, 1, 1), site(1, 12, 1)], s);
   assert.equal(routed!.mode, "sea");
   assert.ok(routed!.water, "coastal crossings still carry the span (the swap just hugs the port)");
   const st = stubs(routed!);
-  assert.ok(st.from < INLAND_STUB_CELLS && st.to < INLAND_STUB_CELLS, `stubs ${st.from}/${st.to} stay under the handoff bar`);
+  assert.ok(
+    st.from < INLAND_STUB_CELLS && st.to < INLAND_STUB_CELLS,
+    `stubs ${st.from}/${st.to} stay under the handoff bar`,
+  );
   assert.equal(routed!.inlandHandoff, false, "a coastal crossing is not an inland handoff");
 });
 
 test("road and straight legs never carry a water span", () => {
-  const road = survey([
-    "====",
-    "####",
-  ]);
+  const road = survey(["====", "####"]);
   const [r1] = routeVoyage([leg(0, 1)], [site(0, 0, 0), site(1, 3, 0)], road);
   assert.equal(r1!.mode, "road");
   assert.equal(r1!.water, null);

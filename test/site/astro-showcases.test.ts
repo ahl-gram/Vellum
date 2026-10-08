@@ -54,7 +54,11 @@ test("generateShowcases writes the atlas and gallery a deploy expects", { timeou
   assert.ok(atlasHtml.includes('href="/fonts.css"'), "atlas links the root-absolute fonts.css it hard-depends on");
   assert.ok(atlasHtml.includes('href="/motion.css"'), "atlas links the root-absolute motion.css it hard-depends on");
   const atlasSvgs = readdirSync(join(tmp, "atlas")).filter((f) => f.endsWith(".svg"));
-  assert.equal(atlasSvgs.length, 11, "atlas should hold 11 SVGs (hero + 3 draughtings + 4 themes + 2 regions + the capital's prospect, #412)");
+  assert.equal(
+    atlasSvgs.length,
+    11,
+    "atlas should hold 11 SVGs (hero + 3 draughtings + 4 themes + 2 regions + the capital's prospect, #412)",
+  );
   assert.ok(atlasSvgs.includes("prospect-capital.svg"), "the capital's prospect plate is written (#412)");
   assert.ok(
     atlasHtml.includes("The Isle of Rahai: a Vellum atlas"),
@@ -70,35 +74,47 @@ test("generateShowcases writes the atlas and gallery a deploy expects", { timeou
   rmSync(tmp, { recursive: true, force: true });
 });
 
-test("the no-arg CLI generates into ./public relative to CWD (the exact astro:generate invocation)", { timeout: 180_000 }, () => {
-  const scratch = root("out/test-showcases-cli");
-  rmSync(scratch, { recursive: true, force: true });
-  mkdirSync(scratch, { recursive: true });
-  execFileSync(process.execPath, [root("scripts/generate-showcases.ts")], { cwd: scratch });
-  assert.ok(existsSync(join(scratch, "public", "atlas", "index.html")), "the CLI should write <cwd>/public/atlas");
-  assert.ok(existsSync(join(scratch, "public", "gallery", "index.css")), "the CLI should write <cwd>/public/gallery");
-  rmSync(scratch, { recursive: true, force: true });
-});
+test(
+  "the no-arg CLI generates into ./public relative to CWD (the exact astro:generate invocation)",
+  { timeout: 180_000 },
+  () => {
+    const scratch = root("out/test-showcases-cli");
+    rmSync(scratch, { recursive: true, force: true });
+    mkdirSync(scratch, { recursive: true });
+    execFileSync(process.execPath, [root("scripts/generate-showcases.ts")], { cwd: scratch });
+    assert.ok(existsSync(join(scratch, "public", "atlas", "index.html")), "the CLI should write <cwd>/public/atlas");
+    assert.ok(existsSync(join(scratch, "public", "gallery", "index.css")), "the CLI should write <cwd>/public/gallery");
+    rmSync(scratch, { recursive: true, force: true });
+  },
+);
 
 test("charts:regen writes the single committed charts dir (docs/ retired at Sub 5)", () => {
   assert.deepEqual([...HERO_CHART_DIRS], ["public/charts"]);
 });
 
-test("regenHeroCharts writes the committed golden set, identically, into every charts dir", { timeout: 120_000 }, async () => {
-  const tmpA = root("out/test-charts-a");
-  const tmpB = root("out/test-charts-b");
-  for (const t of [tmpA, tmpB]) rmSync(t, { recursive: true, force: true });
-  await regenHeroCharts([tmpA, tmpB]);
+test(
+  "regenHeroCharts writes the committed golden set, identically, into every charts dir",
+  { timeout: 120_000 },
+  async () => {
+    const tmpA = root("out/test-charts-a");
+    const tmpB = root("out/test-charts-b");
+    for (const t of [tmpA, tmpB]) rmSync(t, { recursive: true, force: true });
+    await regenHeroCharts([tmpA, tmpB]);
 
-  const committed = readdirSync(root("public/charts")).filter((f) => f.endsWith(".svg")).sort();
-  for (const dir of [tmpA, tmpB]) {
-    const written = readdirSync(dir).filter((f) => f.endsWith(".svg")).sort();
-    assert.deepEqual(written, committed, "the successor must write exactly the committed golden filenames");
-  }
-  for (const name of committed) {
-    const a = readFileSync(join(tmpA, name), "utf8");
-    assert.ok(a.startsWith("<svg") || a.startsWith("<?xml"), `${name} should be an SVG document`);
-    assert.equal(a, readFileSync(join(tmpB, name), "utf8"), `${name} must be identical across charts dirs`);
-  }
-  for (const t of [tmpA, tmpB]) rmSync(t, { recursive: true, force: true });
-});
+    const committed = readdirSync(root("public/charts"))
+      .filter((f) => f.endsWith(".svg"))
+      .sort();
+    for (const dir of [tmpA, tmpB]) {
+      const written = readdirSync(dir)
+        .filter((f) => f.endsWith(".svg"))
+        .sort();
+      assert.deepEqual(written, committed, "the successor must write exactly the committed golden filenames");
+    }
+    for (const name of committed) {
+      const a = readFileSync(join(tmpA, name), "utf8");
+      assert.ok(a.startsWith("<svg") || a.startsWith("<?xml"), `${name} should be an SVG document`);
+      assert.equal(a, readFileSync(join(tmpB, name), "utf8"), `${name} must be identical across charts dirs`);
+    }
+    for (const t of [tmpA, tmpB]) rmSync(t, { recursive: true, force: true });
+  },
+);

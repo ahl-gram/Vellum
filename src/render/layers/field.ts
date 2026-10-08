@@ -4,10 +4,20 @@ import type { RenderCtx } from "../context.ts";
 import type { World } from "../../world/types.ts";
 import type { MapStyle, StyleName } from "../style.ts";
 import {
-  BIOME_COLORS, BIOME_INK_LEVEL, VEG_INK_RAMP, VEGETATION_DEFAULT, VEGETATION_GROUPS,
-  TEMP_BANDS, TEMP_RAMPS, TEMP_KEY,
-  MOIST_BANDS, MOIST_RAMPS, MOIST_KEY,
-  POP_LEVELS, POP_RAMPS, POP_LABELS,
+  BIOME_COLORS,
+  BIOME_INK_LEVEL,
+  VEG_INK_RAMP,
+  VEGETATION_DEFAULT,
+  VEGETATION_GROUPS,
+  TEMP_BANDS,
+  TEMP_RAMPS,
+  TEMP_KEY,
+  MOIST_BANDS,
+  MOIST_RAMPS,
+  MOIST_KEY,
+  POP_LEVELS,
+  POP_RAMPS,
+  POP_LABELS,
 } from "./field-palettes.ts";
 
 export type ThemeName = "vegetation" | "climate" | "moisture" | "population";
@@ -23,8 +33,7 @@ export type ThemeSpec = {
   readonly isoLabel?: string;
 };
 
-const isOcean = (world: World, i: number): boolean =>
-  (world.biomes[i] as number) === BIOMES.ocean;
+const isOcean = (world: World, i: number): boolean => (world.biomes[i] as number) === BIOMES.ocean;
 
 function band(value: number, n: number): number {
   return Math.max(0, Math.min(n - 1, Math.floor(value * n)));
@@ -32,20 +41,17 @@ function band(value: number, n: number): number {
 
 const VEGETATION: ThemeSpec = {
   name: "vegetation",
-  cellClass: (world) => (i) =>
-    isOcean(world, i) ? null : (world.biomes[i] as number),
+  cellClass: (world) => (i) => (isOcean(world, i) ? null : (world.biomes[i] as number)),
   color: (cls, style) =>
     style.name === "ink"
       ? (VEG_INK_RAMP[BIOME_INK_LEVEL[cls] ?? 3] as string)
       : (BIOME_COLORS[cls] ?? VEGETATION_DEFAULT),
   legendRows: (world, style) => {
     const present = new Set<number>(world.biomes);
-    return VEGETATION_GROUPS.filter((g) => g.ids.some((id) => present.has(id))).map(
-      (g) => ({
-        color: style.name === "ink" ? (VEG_INK_RAMP[g.inkLevel] as string) : g.color,
-        label: g.label,
-      }),
-    );
+    return VEGETATION_GROUPS.filter((g) => g.ids.some((id) => present.has(id))).map((g) => ({
+      color: style.name === "ink" ? (VEG_INK_RAMP[g.inkLevel] as string) : g.color,
+      label: g.label,
+    }));
   },
   note: "land coloured by biome",
 };
@@ -69,8 +75,7 @@ function scalarTheme(
       const colors = ramps[style.name];
       return colors[cls] ?? (colors[colors.length - 1] as string);
     },
-    legendRows: (_world, style) =>
-      key.map(([i, label]) => ({ color: ramps[style.name][i] as string, label })),
+    legendRows: (_world, style) => key.map(([i, label]) => ({ color: ramps[style.name][i] as string, label })),
     note,
     isoLabel,
   };
@@ -79,7 +84,9 @@ function scalarTheme(
 const CLIMATE = scalarTheme(
   "climate",
   (world) => world.climate.temperature.data,
-  TEMP_BANDS, TEMP_RAMPS, TEMP_KEY,
+  TEMP_BANDS,
+  TEMP_RAMPS,
+  TEMP_KEY,
   "warm to cool, by latitude & height",
   "Isotherm",
 );
@@ -87,7 +94,9 @@ const CLIMATE = scalarTheme(
 const MOISTURE = scalarTheme(
   "moisture",
   (world) => world.climate.moisture.data,
-  MOIST_BANDS, MOIST_RAMPS, MOIST_KEY,
+  MOIST_BANDS,
+  MOIST_RAMPS,
+  MOIST_KEY,
   "dry to wet rainfall; streaks mark the prevailing wind",
   "Isohyet",
 );
@@ -109,9 +118,7 @@ function realmDensityLevels(world: World): number[] {
     const r = labels[s.x + s.y * w] as number;
     if (r >= 0) weight[r] = (weight[r] as number) + (POP_WEIGHT[s.kind] ?? 1);
   }
-  const density = weight.map((wt, i) =>
-    (area[i] as number) > 0 ? wt / (area[i] as number) : 0,
-  );
+  const density = weight.map((wt, i) => ((area[i] as number) > 0 ? wt / (area[i] as number) : 0));
   if (R === 1) return [Math.floor(POP_LEVELS / 2)];
   const dmin = Math.min(...density);
   const dmax = Math.max(...density);
@@ -133,8 +140,7 @@ const POPULATION: ThemeSpec = {
     const colors = POP_RAMPS[style.name];
     return colors[cls] ?? (colors[colors.length - 1] as string);
   },
-  legendRows: (_world, style) =>
-    POP_LABELS.map((label, i) => ({ color: POP_RAMPS[style.name][i] as string, label })),
+  legendRows: (_world, style) => POP_LABELS.map((label, i) => ({ color: POP_RAMPS[style.name][i] as string, label })),
   note: "realms shaded by settlement density",
 };
 
@@ -188,9 +194,7 @@ export function fieldLayer(ctx: RenderCtx): SvgNode | null {
   const rects = fieldRects(ctx, theme);
 
   const coastD = ctx.coastRings.map((r) => pathFrom(r, true)).join("");
-  const clipPath = el("clipPath", { id: "field-clip" }, [
-    el("path", { d: coastD, "clip-rule": "evenodd" }),
-  ]);
+  const clipPath = el("clipPath", { id: "field-clip" }, [el("path", { d: coastD, "clip-rule": "evenodd" })]);
 
   return el("g", { id: "layer-field" }, [
     clipPath,

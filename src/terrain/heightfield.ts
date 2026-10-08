@@ -124,12 +124,10 @@ function coastDistance(u: number, v: number, s: TerrainSettings): number {
   const dy = (v - 0.5) * 2;
   let d = Math.hypot(dx, dy);
   if (coastWarp !== 0) {
-    const wx = fbm2(
-      u * COAST_WARP_SCALE * aspect,
-      v * COAST_WARP_SCALE,
-      (seed ^ COAST_SEED_SALT_X) >>> 0,
-      { octaves: COAST_WARP_OCTAVES + detail, normOctaves: COAST_WARP_OCTAVES },
-    );
+    const wx = fbm2(u * COAST_WARP_SCALE * aspect, v * COAST_WARP_SCALE, (seed ^ COAST_SEED_SALT_X) >>> 0, {
+      octaves: COAST_WARP_OCTAVES + detail,
+      normOctaves: COAST_WARP_OCTAVES,
+    });
     const wy = fbm2(
       u * COAST_WARP_SCALE * aspect + 41.7,
       v * COAST_WARP_SCALE + 17.3,
@@ -153,12 +151,7 @@ function elevationAt(u: number, v: number, s: TerrainSettings): number {
   });
   const e01 = (base + 1) / 2;
 
-  const ridge = ridged2(
-    nx * 1.8 + 31.4,
-    ny * 1.8 + 27.2,
-    (seed ^ RIDGE_SEED_SALT) >>> 0,
-    { octaves: 5 },
-  );
+  const ridge = ridged2(nx * 1.8 + 31.4, ny * 1.8 + 27.2, (seed ^ RIDGE_SEED_SALT) >>> 0, { octaves: 5 });
   const ridgeMask = smoothstep(0.52, 0.78, e01);
   let e = e01 + ridgedWeight * ridge * ridgeMask;
 

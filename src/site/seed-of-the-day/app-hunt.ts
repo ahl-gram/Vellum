@@ -7,7 +7,8 @@ import {
   revealLore,
   TERRAIN_RADIUS,
   type Quarry,
-  type TerrainBand } from "../../world/daily-hunt.ts";
+  type TerrainBand,
+} from "../../world/daily-hunt.ts";
 import { renderReveal } from "./reveal.ts";
 import { huntDispatch, type Miss } from "./app-dispatch.ts";
 import { createProjection, type Projection } from "../../render/transform.ts";
@@ -88,8 +89,7 @@ function huntClues(world: World, quarry: Readonly<Quarry>, svg: SVGSVGElement, p
   // The rendered SVG is the source of truth for what was drawn: the findability gates read it and run BEFORE selection (Issue #335), so a clue never cites a name or terrain the player cannot find.
   // A label emits as ">Name<" except capital and seat labels, which `settlementsLayer` in `src/render/layers/settlements.ts` renders .toUpperCase(), so both spellings are checked.
   const markup = svg.outerHTML;
-  const isLabeled = (name: string) =>
-    markup.includes(`>${name}<`) || markup.includes(`>${name.toUpperCase()}<`);
+  const isLabeled = (name: string) => markup.includes(`>${name}<`) || markup.includes(`>${name.toUpperCase()}<`);
   // Only DRAWN glyphs count (the glyph field shuffles and caps its candidates): parse the glyph layer's <use> translates back to render-pixel space and test against the quarry.
   const glyphs = Array.from(svg.querySelectorAll("#layer-glyphs use")).flatMap((u) => {
     const m = /translate\((-?[\d.]+) (-?[\d.]+)\)/.exec(u.getAttribute("transform") ?? "");
@@ -106,9 +106,7 @@ function huntClues(world: World, quarry: Readonly<Quarry>, svg: SVGSVGElement, p
   const qpy = proj.py(quarry.settlement.y);
   const hasGlyphNear = (band: TerrainBand) =>
     glyphs.some(
-      (g) =>
-        g.href.startsWith(GLYPH_PREFIX[band]) &&
-        Math.hypot(g.x - qpx, g.y - qpy) <= TERRAIN_RADIUS * proj.scale,
+      (g) => g.href.startsWith(GLYPH_PREFIX[band]) && Math.hypot(g.x - qpx, g.y - qpy) <= TERRAIN_RADIUS * proj.scale,
     );
   const list = $("clues");
   list.replaceChildren();
@@ -193,9 +191,19 @@ function clickGrid(ev: MouseEvent, svg: SVGSVGElement, proj: Readonly<Projection
   return { gx, gy };
 }
 
-type Tally = { guesses: () => number; missRoute: ReadonlyArray<Miss>; bumpGuesses: () => void; pushMissRoute: (item: Miss) => void; win: (fromClick: boolean) => void };
+type Tally = {
+  guesses: () => number;
+  missRoute: ReadonlyArray<Miss>;
+  bumpGuesses: () => void;
+  pushMissRoute: (item: Miss) => void;
+  win: (fromClick: boolean) => void;
+};
 
-function huntTally(placeStar: (ceremony: boolean) => void, showReveal: (ceremony: boolean) => void, updateStreak: () => void): Tally {
+function huntTally(
+  placeStar: (ceremony: boolean) => void,
+  showReveal: (ceremony: boolean) => void,
+  updateStreak: () => void,
+): Tally {
   let guesses = 0;
   const missRoute: { gx: number; gy: number }[] = []; // each miss as {gx,gy} in GRID space, re-projected at draft time
 
@@ -212,12 +220,27 @@ function huntTally(placeStar: (ceremony: boolean) => void, showReveal: (ceremony
     updateStreak();
     if (fromClick) restart($("streak"), "stamp"); // the streak stamps on increment
   };
-  const bumpGuesses = (): void => { guesses++; };
-  const pushMissRoute = (item: Miss): void => { missRoute.push(item); };
+  const bumpGuesses = (): void => {
+    guesses++;
+  };
+  const pushMissRoute = (item: Miss): void => {
+    missRoute.push(item);
+  };
   return { guesses: (): number => guesses, missRoute, bumpGuesses, pushMissRoute, win };
 }
 
-function huntGuess(world: World, quarry: Readonly<Quarry>, svg: SVGSVGElement, proj: Readonly<Projection>, seed: number, recordSolve: () => void, win: (fromClick: boolean) => void, spawnSounding: (clientX: number, clientY: number) => void, bumpGuesses: () => void, pushMissRoute: (item: Miss) => void) {
+function huntGuess(
+  world: World,
+  quarry: Readonly<Quarry>,
+  svg: SVGSVGElement,
+  proj: Readonly<Projection>,
+  seed: number,
+  recordSolve: () => void,
+  win: (fromClick: boolean) => void,
+  spawnSounding: (clientX: number, clientY: number) => void,
+  bumpGuesses: () => void,
+  pushMissRoute: (item: Miss) => void,
+) {
   // The session's warmest sounding (smallest click-to-quarry distance), so a colder miss can point back at it; ties keep the earlier one, forgotten on reload.
   let warmest: { readonly dist: number; readonly name: string } | null = null;
 
@@ -320,6 +343,17 @@ export function setupHunt(world: World, seed: number): void {
 
   const mapEl = $("sheet");
   const { spawnSounding } = huntSounding(mapEl);
-  const { onClick } = huntGuess(world, quarry, svg, proj, seed, recordSolve, win, spawnSounding, bumpGuesses, pushMissRoute);
+  const { onClick } = huntGuess(
+    world,
+    quarry,
+    svg,
+    proj,
+    seed,
+    recordSolve,
+    win,
+    spawnSounding,
+    bumpGuesses,
+    pushMissRoute,
+  );
   svg.addEventListener("click", onClick);
 }

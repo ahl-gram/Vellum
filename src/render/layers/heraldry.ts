@@ -20,35 +20,26 @@ export function armsNode(
   const g = geom(cx, cy, size);
   const d = shieldPath(g);
   const clipId = `vellum-arms-${idSuffix}`;
-  const fieldTinctures = arms.division === "plain"
-    ? [arms.field[0]!]
-    : [arms.field[0]!, arms.field[1]!];
-  const fieldFill = pal.hatch
-    ? (t: Tincture) => pal.hatch!.fill(t, idSuffix)
-    : (t: Tincture) => pal.tincture(t);
+  const fieldTinctures = arms.division === "plain" ? [arms.field[0]!] : [arms.field[0]!, arms.field[1]!];
+  const fieldFill = pal.hatch ? (t: Tincture) => pal.hatch!.fill(t, idSuffix) : (t: Tincture) => pal.tincture(t);
   const defs = pal.hatch ? pal.hatch.defs(fieldTinctures, g.w, idSuffix) : [];
   const body: SvgNode[] = [];
   if (defs.length > 0) body.push(el("defs", {}, defs));
   body.push(
     el("clipPath", { id: clipId }, [el("path", { d })]),
-    el("g", { "clip-path": `url(#${clipId})` }, [
-      ...fieldNodes(arms, g, fieldFill),
-      ...chargeNodes(arms, g, pal),
-    ]),
+    el("g", { "clip-path": `url(#${clipId})` }, [...fieldNodes(arms, g, fieldFill), ...chargeNodes(arms, g, pal)]),
     el("path", {
-      d, fill: "none", stroke: pal.outline,
-      "stroke-width": n(g.w * 0.045), "stroke-linejoin": "round",
+      d,
+      fill: "none",
+      stroke: pal.outline,
+      "stroke-width": n(g.w * 0.045),
+      "stroke-linejoin": "round",
     }),
   );
   return el("g", { class: "vellum-arms" }, body);
 }
 
-export function armsSvgDocument(
-  arms: Arms,
-  size: number,
-  pal: ArmsPalette,
-  idSuffix: string,
-): string {
+export function armsSvgDocument(arms: Arms, size: number, pal: ArmsPalette, idSuffix: string): string {
   const pad = size * 0.08;
   const w = size + 2 * pad;
   const h = size * 1.18 + 2 * pad;
@@ -89,10 +80,7 @@ export function armsPlacements(
   return out;
 }
 
-export function heraldryLayer(
-  ctx: RenderCtx,
-  anchors: ReadonlyArray<RealmAnchor>,
-): SvgNode | null {
+export function heraldryLayer(ctx: RenderCtx, anchors: ReadonlyArray<RealmAnchor>): SvgNode | null {
   const { world, style, proj, labels } = ctx;
   if (world.arms.length === 0) return null;
   const k = proj.widthPx / 1500;
@@ -112,8 +100,14 @@ export function heraldryLayer(
     const dx = a.halfW + gap + size / 2;
     const dy = a.halfH + gap + sh / 2;
     const dirs: ReadonlyArray<readonly [number, number]> = [
-      [0, -1], [-1, 0], [1, 0], [0, 1], // N, W, E, S
-      [-1, -1], [1, -1], [-1, 1], [1, 1], // NW, NE, SW, SE
+      [0, -1],
+      [-1, 0],
+      [1, 0],
+      [0, 1], // N, W, E, S
+      [-1, -1],
+      [1, -1],
+      [-1, 1],
+      [1, 1], // NW, NE, SW, SE
     ];
     const candidates: Array<readonly [number, number]> = [];
     for (const reach of [1, 1.9, 2.8]) {

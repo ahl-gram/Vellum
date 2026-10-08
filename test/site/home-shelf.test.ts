@@ -42,10 +42,18 @@ test("the plates keep their streaming manners (#329, revived with the markup it 
   const imgs = [...shelf.matchAll(/<img\b[^>]*>/g)].map((m) => m[0]);
   assert.equal(imgs.length, 3, "three plate images");
   for (const img of imgs) {
-    assert.match(img, /loading="lazy"/, "the #329 lazy attribute rides the markup (Chrome's lazy threshold still fetches just-below-fold plates, so this pins the contract, not a deferral)");
+    assert.match(
+      img,
+      /loading="lazy"/,
+      "the #329 lazy attribute rides the markup (Chrome's lazy threshold still fetches just-below-fold plates, so this pins the contract, not a deferral)",
+    );
     assert.match(img, /fetchpriority="low"/, "a plate must not outrank a clicked room's HTML while it streams");
     assert.match(img, /class="plate"/, "the plate wears motion.css's lift, the tip-affordance KNOWN entry");
-    assert.match(img, /width="1500" height="1158"/, "intrinsic size holds the shelf's layout while a lazy plate streams");
+    assert.match(
+      img,
+      /width="1500" height="1158"/,
+      "intrinsic size holds the shelf's layout while a lazy plate streams",
+    );
     assert.match(img, /alt="[^"]+"/, "every plate names its style");
   }
 });
@@ -66,12 +74,23 @@ test("the scroll hint pulses only at full pull-back (#472, 2026-08-28 ruling): i
   const stageAt = astro.indexOf('id="lf-stage"');
   const legendAt = astro.indexOf('class="lf-legend"');
   const hintAt = astro.indexOf('class="lf-more"');
-  assert.ok(stageAt >= 0 && hintAt > stageAt && hintAt < legendAt, "the hint lives inside the stage, so it rides the page and never joins the landfall-prose sibling ledger");
+  assert.ok(
+    stageAt >= 0 && hintAt > stageAt && hintAt < legendAt,
+    "the hint lives inside the stage, so it rides the page and never joins the landfall-prose sibling ledger",
+  );
   const hintTag = astro.slice(astro.lastIndexOf("<", hintAt), astro.indexOf(">", hintAt) + 1);
-  assert.match(hintTag, /aria-hidden="true"/, "the hint is decorative: the shelf is plain flow for a screen reader already");
+  assert.match(
+    hintTag,
+    /aria-hidden="true"/,
+    "the hint is decorative: the shelf is plain flow for a screen reader already",
+  );
   const base = css.match(/\.lf-more \{([^}]*)\}/);
   assert.ok(base !== null && /opacity:\s*0/.test(base[1]!), "the hint rests invisible");
-  assert.match(base[1]!, /color: var\(--parchment\)/, "parchment tier: line-tan measured 4.03 on the deep (RH9a), under the 4.5 bar");
+  assert.match(
+    base[1]!,
+    /color: var\(--parchment\)/,
+    "parchment tier: line-tan measured 4.03 on the deep (RH9a), under the 4.5 bar",
+  );
   assert.match(
     css,
     /\.landfall \.stage\.cam\.stood-off \.lf-more \{[^}]*opacity:\s*1/,
@@ -81,7 +100,10 @@ test("the scroll hint pulses only at full pull-back (#472, 2026-08-28 ruling): i
 
 test("nothing home loads locks the document's scroll (#472 retired the #461 body lock; the class, not the instance: every sheet home links, plus the inline style blocks)", () => {
   const inline = (p: string): string =>
-    [...read(p).matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join("\n").replace(/\/\*[\s\S]*?\*\//g, "");
+    [...read(p).matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)]
+      .map((m) => m[1])
+      .join("\n")
+      .replace(/\/\*[\s\S]*?\*\//g, "");
   // At-rule preludes are stripped first: split("}") alone hands an @media-first rule the prelude as its selector, and the sweep goes blind to it.
   const flatten = (cssText: string): string => cssText.replace(/@[^{}]*\{/g, "");
   const sources: ReadonlyArray<readonly [string, string]> = [

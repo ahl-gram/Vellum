@@ -1,5 +1,15 @@
 // The Chart Table's state (Issue #520 Sub 2 of Issue #401): what the drawer draws and what the Explorer's address carries are the same array, so this half is pure and holds no DOM. `chart-drawer`, never `drawer` (Issue #520 ruling 2).
-import { TABLE_CAP, emitTable, prospectItemFrom, tableWindow, type TableItem, type SurveyItem, type ProspectItem, type Rung, type TableOverrides } from "../shared/table-address.ts";
+import {
+  TABLE_CAP,
+  emitTable,
+  prospectItemFrom,
+  tableWindow,
+  type TableItem,
+  type SurveyItem,
+  type ProspectItem,
+  type Rung,
+  type TableOverrides,
+} from "../shared/table-address.ts";
 import { LOD_BANDS, type LodBand } from "../../world/lod.ts";
 import { plateDressFor } from "../../prospect/dress/context.ts";
 import { prospectTitle } from "../prospect/note-lines.ts";
@@ -50,9 +60,19 @@ export interface FilingSheet {
 }
 
 // The skew this shape forbids is not hypothetical: a world and a year passed as two arguments went out of step for the length of a sheet turn, and again indefinitely after an ABORTED one, because `finish` in ./sheet-turn.ts drops the `turning` class on both paths and resolves on only one. Gating on that class caught the first and not the second; one value cannot skew on any path.
-export function filingAt(at: { readonly turning: boolean; readonly sheet: FilingSheet | null; readonly index: number }): ProspectItem | null {
+export function filingAt(at: {
+  readonly turning: boolean;
+  readonly sheet: FilingSheet | null;
+  readonly index: number;
+}): ProspectItem | null {
   if (at.turning || !at.sheet) return null;
-  return prospectItemFrom({ seed: at.sheet.seed, overrides: at.sheet.overrides, style: at.sheet.style, index: at.index, year: at.sheet.presentYear });
+  return prospectItemFrom({
+    seed: at.sheet.seed,
+    overrides: at.sheet.overrides,
+    style: at.sheet.style,
+    index: at.index,
+    year: at.sheet.presentYear,
+  });
 }
 
 /** The card's resting face, ruled from the still `design/chart-table/stills/explorer-1280-card.png`. */
@@ -78,7 +98,10 @@ export function roomOnTable(items: ReadonlyArray<TableItem>): number {
   return Math.max(0, TABLE_CAP - items.length);
 }
 
-export function sheetsThatLeft(before: ReadonlyArray<TableItem>, after: ReadonlyArray<TableItem>): ReadonlyArray<TableItem> {
+export function sheetsThatLeft(
+  before: ReadonlyArray<TableItem>,
+  after: ReadonlyArray<TableItem>,
+): ReadonlyArray<TableItem> {
   const staying = new Set(after.map((item) => emitTable([item])));
   return before.filter((item) => !staying.has(emitTable([item])));
 }
@@ -95,8 +118,13 @@ export function subOf(item: TableItem): string {
   return `band ${item.rung}, ${dressOf(item.style)}`;
 }
 
-export function thumbNames(res: RegionResult | ProspectResult): { readonly title: string; readonly worldTitle: string } {
-  return "name" in res ? { title: prospectTitle(res.name), worldTitle: res.title } : { title: res.title, worldTitle: res.worldTitle };
+export function thumbNames(res: RegionResult | ProspectResult): {
+  readonly title: string;
+  readonly worldTitle: string;
+} {
+  return "name" in res
+    ? { title: prospectTitle(res.name), worldTitle: res.title }
+    : { title: res.title, worldTitle: res.worldTitle };
 }
 
 export function surveyItemFrom(c: {
@@ -109,7 +137,11 @@ export function surveyItemFrom(c: {
   if (!c.seat || c.band < 1 || c.band > 3 || !c.render.style) return null;
   const o = c.overrides ?? {};
   return {
-    kind: "survey", seed: c.seed, rung: c.band as Rung, lx: c.seat.lx, ly: c.seat.ly,
+    kind: "survey",
+    seed: c.seed,
+    rung: c.band as Rung,
+    lx: c.seat.lx,
+    ly: c.seat.ly,
     overrides: {
       ...(o.mapType ? { mapType: o.mapType } : {}),
       ...(o.band ? { band: o.band } : {}),
@@ -117,7 +149,9 @@ export function surveyItemFrom(c: {
       ...(typeof o.coastWarp === "number" ? { coastWarp: o.coastWarp } : {}),
     },
     style: c.render.style,
-    legend: c.render.legend !== false, arms: c.render.arms === true, beasts: c.render.beasts === true,
+    legend: c.render.legend !== false,
+    arms: c.render.arms === true,
+    beasts: c.render.beasts === true,
     theme: c.render.theme ?? null,
   };
 }
@@ -126,15 +160,31 @@ export function surveyItemFrom(c: {
 export function thumbJobFor(item: TableItem): RegionJob | ProspectJob {
   if (item.kind === "prospect") {
     return {
-      kind: "prospect", seed: item.seed, overrides: item.overrides,
-      index: item.index, dress: plateDressFor(item.style), year: item.year,
+      kind: "prospect",
+      seed: item.seed,
+      overrides: item.overrides,
+      index: item.index,
+      dress: plateDressFor(item.style),
+      year: item.year,
     };
   }
   const band = LOD_BANDS[item.rung] as LodBand;
   return {
-    kind: "region", seed: item.seed, overrides: item.overrides,
-    window: tableWindow(item), gridW: band.gridW, gridH: band.gridH, band: item.rung,
-    render: { style: item.style, widthPx: 1500, legend: item.legend, arms: item.arms, beasts: item.beasts, theme: item.theme ?? undefined },
+    kind: "region",
+    seed: item.seed,
+    overrides: item.overrides,
+    window: tableWindow(item),
+    gridW: band.gridW,
+    gridH: band.gridH,
+    band: item.rung,
+    render: {
+      style: item.style,
+      widthPx: 1500,
+      legend: item.legend,
+      arms: item.arms,
+      beasts: item.beasts,
+      theme: item.theme ?? undefined,
+    },
   };
 }
 
@@ -150,6 +200,9 @@ export function makeDogEar(label: string, k: number, onLay: () => void): HTMLBut
   for (const ev of ["mousedown", "dblclick", "wheel", "touchstart"]) {
     b.addEventListener(ev, (e) => e.stopPropagation());
   }
-  b.addEventListener("click", (e) => { e.preventDefault(); onLay(); });
+  b.addEventListener("click", (e) => {
+    e.preventDefault();
+    onLay();
+  });
   return b;
 }

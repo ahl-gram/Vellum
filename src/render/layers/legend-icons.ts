@@ -39,7 +39,9 @@ function markIcon(icon: MarkIcon, cx: number, cy: number, ctx: RenderCtx): SvgNo
     case "river":
       return el("path", {
         d: `M${(cx - 9 * k).toFixed(1)} ${cy.toFixed(1)}Q${cx.toFixed(1)} ${(cy - 3 * k).toFixed(1)} ${(cx + 9 * k).toFixed(1)} ${cy.toFixed(1)}`,
-        fill: "none", stroke: style.river, "stroke-width": (2.3 * k).toFixed(1),
+        fill: "none",
+        stroke: style.river,
+        "stroke-width": (2.3 * k).toFixed(1),
         "stroke-linecap": "round",
       });
     case "road": {
@@ -50,18 +52,24 @@ function markIcon(icon: MarkIcon, cx: number, cy: number, ctx: RenderCtx): SvgNo
       if (style.name === "topographic") {
         return el("g", {}, [
           el("path", {
-            d, fill: "none", stroke: style.paper,
+            d,
+            fill: "none",
+            stroke: style.paper,
             "stroke-width": ((trunk ? 3.2 : 2.2) * k).toFixed(1),
             "stroke-linecap": "round",
           }),
           el("path", {
-            d, fill: "none", stroke: style.road,
+            d,
+            fill: "none",
+            stroke: style.road,
             "stroke-width": ((trunk ? 1.7 : 1.0) * k).toFixed(1),
           }),
         ]);
       }
       return el("path", {
-        d, fill: "none", stroke: style.road,
+        d,
+        fill: "none",
+        stroke: style.road,
         "stroke-width": ((trunk ? 1.5 : 1.0) * k).toFixed(1),
         "stroke-dasharray": trunk
           ? `${(5 * k).toFixed(1)} ${(3.5 * k).toFixed(1)}`
@@ -78,8 +86,13 @@ function areaIcon(icon: AreaIcon, cx: number, cy: number, ctx: RenderCtx): SvgNo
   switch (icon.kind) {
     case "realm":
       return el("rect", {
-        x: cx - 9 * k, y: cy - 6 * k, width: 18 * k, height: 12 * k, rx: 2 * k,
-        fill: style.realmTints[0] as string, "fill-opacity": 0.5,
+        x: cx - 9 * k,
+        y: cy - 6 * k,
+        width: 18 * k,
+        height: 12 * k,
+        rx: 2 * k,
+        fill: style.realmTints[0] as string,
+        "fill-opacity": 0.5,
         stroke: style.name === "topographic" ? style.ink : style.road,
         "stroke-width": 1.1 * k,
         "stroke-dasharray": `${(1.4 * k).toFixed(1)} ${(2.6 * k).toFixed(1)}`,
@@ -88,10 +101,15 @@ function areaIcon(icon: AreaIcon, cx: number, cy: number, ctx: RenderCtx): SvgNo
       const stops = style.hypsometric ?? [];
       const n = stops.length;
       const segW = (20 * k) / Math.max(1, n);
-      return el("g", {},
+      return el(
+        "g",
+        {},
         stops.map((s, i) =>
           el("rect", {
-            x: cx - 10 * k + i * segW, y: cy - 4 * k, width: segW + 0.5, height: 8 * k,
+            x: cx - 10 * k + i * segW,
+            y: cy - 4 * k,
+            width: segW + 0.5,
+            height: 8 * k,
             fill: s.color,
           }),
         ),
@@ -100,22 +118,32 @@ function areaIcon(icon: AreaIcon, cx: number, cy: number, ctx: RenderCtx): SvgNo
     case "contour":
       return el("path", {
         d: `M${(cx - 10 * k).toFixed(1)} ${(cy + 2 * k).toFixed(1)}Q${(cx - 3 * k).toFixed(1)} ${(cy - 4 * k).toFixed(1)} ${cx.toFixed(1)} ${cy.toFixed(1)}Q${(cx + 4 * k).toFixed(1)} ${(cy + 3 * k).toFixed(1)} ${(cx + 10 * k).toFixed(1)} ${(cy - 2 * k).toFixed(1)}`,
-        fill: "none", stroke: style.contourStroke ?? style.inkSoft,
+        fill: "none",
+        stroke: style.contourStroke ?? style.inkSoft,
         "stroke-width": (0.9 * k).toFixed(1),
       });
     case "iso": {
       const s = isoStroke(ctx.theme ?? "", style);
       return el("path", {
         d: `M${(cx - 10 * k).toFixed(1)} ${(cy + 2 * k).toFixed(1)}Q${(cx - 3 * k).toFixed(1)} ${(cy - 4 * k).toFixed(1)} ${cx.toFixed(1)} ${cy.toFixed(1)}Q${(cx + 4 * k).toFixed(1)} ${(cy + 3 * k).toFixed(1)} ${(cx + 10 * k).toFixed(1)} ${(cy - 2 * k).toFixed(1)}`,
-        fill: "none", stroke: s.color, "stroke-width": (s.width * k).toFixed(2),
-        "stroke-opacity": s.opacity, "stroke-linecap": "round",
+        fill: "none",
+        stroke: s.color,
+        "stroke-width": (s.width * k).toFixed(2),
+        "stroke-opacity": s.opacity,
+        "stroke-linecap": "round",
       });
     }
     case "swatch":
       return el("rect", {
-        x: cx - 9 * k, y: cy - 6 * k, width: 18 * k, height: 12 * k, rx: 1.5 * k,
+        x: cx - 9 * k,
+        y: cy - 6 * k,
+        width: 18 * k,
+        height: 12 * k,
+        rx: 1.5 * k,
         fill: icon.color,
-        stroke: style.inkSoft, "stroke-width": 0.6 * k, "stroke-opacity": 0.5,
+        stroke: style.inkSoft,
+        "stroke-width": 0.6 * k,
+        "stroke-opacity": 0.5,
       });
   }
 }
@@ -125,17 +153,28 @@ function seaIcon(icon: SeaIcon, cx: number, cy: number, ctx: RenderCtx): SvgNode
   const k = ctx.proj.widthPx / 1500;
   switch (icon.kind) {
     case "sounding":
-      return el("text", {
-        x: cx, y: cy + 3 * k, "text-anchor": "middle",
-        "font-family": style.fontFamily, "font-size": (10 * k).toFixed(1),
-        "font-style": "italic", fill: style.ink, "fill-opacity": 0.7,
-      }, ["5"]);
+      return el(
+        "text",
+        {
+          x: cx,
+          y: cy + 3 * k,
+          "text-anchor": "middle",
+          "font-family": style.fontFamily,
+          "font-size": (10 * k).toFixed(1),
+          "font-style": "italic",
+          fill: style.ink,
+          "fill-opacity": 0.7,
+        },
+        ["5"],
+      );
     case "rock": {
       const s = 3.2 * k;
       return el("g", {}, [
         el("path", {
           d: `M${(cx - s).toFixed(1)} ${cy.toFixed(1)}H${(cx + s).toFixed(1)}M${cx.toFixed(1)} ${(cy - s).toFixed(1)}V${(cy + s).toFixed(1)}`,
-          stroke: style.ink, "stroke-width": (0.9 * k).toFixed(1), "stroke-opacity": 0.7,
+          stroke: style.ink,
+          "stroke-width": (0.9 * k).toFixed(1),
+          "stroke-opacity": 0.7,
         }),
         el("circle", { cx, cy, r: 0.9 * k, fill: style.ink, "fill-opacity": 0.7 }),
       ]);
@@ -145,12 +184,16 @@ function seaIcon(icon: SeaIcon, cx: number, cy: number, ctx: RenderCtx): SvgNode
       const x2 = cx + 10 * k;
       const hl = 5 * k;
       return el("path", {
-        d: `M${x1.toFixed(1)} ${cy.toFixed(1)}L${x2.toFixed(1)} ${cy.toFixed(1)}` +
+        d:
+          `M${x1.toFixed(1)} ${cy.toFixed(1)}L${x2.toFixed(1)} ${cy.toFixed(1)}` +
           `M${x2.toFixed(1)} ${cy.toFixed(1)}L${(x2 - hl).toFixed(1)} ${(cy - hl).toFixed(1)}` +
           `M${x2.toFixed(1)} ${cy.toFixed(1)}L${(x2 - hl).toFixed(1)} ${(cy + hl).toFixed(1)}` +
-          `M${x1.toFixed(1)} ${cy.toFixed(1)}L${(x1).toFixed(1)} ${(cy - 4 * k).toFixed(1)}`,
-        fill: "none", stroke: style.inkSoft, "stroke-width": (1.1 * k).toFixed(1),
-        "stroke-opacity": 0.7, "stroke-linecap": "round",
+          `M${x1.toFixed(1)} ${cy.toFixed(1)}L${x1.toFixed(1)} ${(cy - 4 * k).toFixed(1)}`,
+        fill: "none",
+        stroke: style.inkSoft,
+        "stroke-width": (1.1 * k).toFixed(1),
+        "stroke-opacity": 0.7,
+        "stroke-linecap": "round",
       });
     }
     case "current": {
@@ -163,8 +206,11 @@ function seaIcon(icon: SeaIcon, cx: number, cy: number, ctx: RenderCtx): SvgNode
           `M${x1.toFixed(1)} ${(cy + 3 * k).toFixed(1)}Q${cx.toFixed(1)} ${(cy - 5 * k).toFixed(1)} ${x2.toFixed(1)} ${(cy + 2 * k).toFixed(1)}` +
           `M${cx.toFixed(1)} ${(cy - 1.5 * k).toFixed(1)}L${(cx - Math.cos(a) * hl).toFixed(1)} ${(cy - 1.5 * k - Math.sin(a) * hl).toFixed(1)}` +
           `M${cx.toFixed(1)} ${(cy - 1.5 * k).toFixed(1)}L${(cx - Math.cos(a) * hl).toFixed(1)} ${(cy - 1.5 * k + Math.sin(a) * hl).toFixed(1)}`,
-        fill: "none", stroke: style.inkSoft, "stroke-width": (1.0 * k).toFixed(1),
-        "stroke-opacity": 0.6, "stroke-linecap": "round",
+        fill: "none",
+        stroke: style.inkSoft,
+        "stroke-width": (1.0 * k).toFixed(1),
+        "stroke-opacity": 0.6,
+        "stroke-linecap": "round",
       });
     }
   }

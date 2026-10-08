@@ -16,13 +16,7 @@ function fade(t: number): number {
   return t * t * t * (t * (t * 6 - 15) + 10);
 }
 
-function cornerDot(
-  cx: number,
-  cy: number,
-  dx: number,
-  dy: number,
-  seed: number,
-): number {
+function cornerDot(cx: number, cy: number, dx: number, dy: number, seed: number): number {
   const angle = (hash2(cx, cy, seed) / 4294967296) * TAU;
   return Math.cos(angle) * dx + Math.sin(angle) * dy;
 }

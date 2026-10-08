@@ -5,7 +5,15 @@ import { sampleRow } from "../../support/pixel.ts";
 
 type Box = { x: number; y: number; w: number; h: number; right: number; bottom: number };
 type Target = Box & { t: string; hit: boolean };
-type Trail = { path: string; whereVisibility: string | null; links: Target[]; navLinks: Target[]; linkColor: string | null; hereColor: string | null; hereLine: string | null };
+type Trail = {
+  path: string;
+  whereVisibility: string | null;
+  links: Target[];
+  navLinks: Target[];
+  linkColor: string | null;
+  hereColor: string | null;
+  hereLine: string | null;
+};
 export type TrailKit = SuiteContext & { settle: ReturnType<typeof makeSettle>; goto: (path: string) => Promise<void> };
 
 const NARROW = 640;
@@ -13,25 +21,35 @@ const PARCHMENT = "rgb(239, 230, 207)";
 const PARCHMENT_BRIGHT = "rgb(255, 247, 228)";
 
 type Rgb = readonly [number, number, number];
-const channel = (c: number) => { const s = c / 255; return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4; };
+const channel = (c: number) => {
+  const s = c / 255;
+  return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+};
 const lum = ([r, g, b]: Rgb) => 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
 const contrast = (a: Rgb, b: Rgb) => (Math.max(lum(a), lum(b)) + 0.05) / (Math.min(lum(a), lum(b)) + 0.05);
 const median = (xs: number[]) => [...xs].sort((p, q) => p - q)[Math.floor(xs.length / 2)] ?? NaN;
 const parseColour = (css: string): { rgb: Rgb; alpha: number } => {
   const srgb = css.match(/^color\(srgb ([\d.]+) ([\d.]+) ([\d.]+)(?: \/ ([\d.]+))?\)$/);
-  if (srgb) return { rgb: [Number(srgb[1]) * 255, Number(srgb[2]) * 255, Number(srgb[3]) * 255], alpha: Number(srgb[4] ?? 1) };
+  if (srgb)
+    return { rgb: [Number(srgb[1]) * 255, Number(srgb[2]) * 255, Number(srgb[3]) * 255], alpha: Number(srgb[4] ?? 1) };
   const rgba = css.match(/^rgba?\(([\d.]+), ([\d.]+), ([\d.]+)(?:, ([\d.]+))?\)$/);
   if (rgba) return { rgb: [Number(rgba[1]), Number(rgba[2]), Number(rgba[3])], alpha: Number(rgba[4] ?? 1) };
   return { rgb: [NaN, NaN, NaN], alpha: NaN };
 };
 
 async function underlineContrast(k: TrailKit): Promise<number> {
-  const u = await k.evaluate<{ colour: string; line: string; x: number; w: number; bottom: number } | null>(`(() => { const a = document.querySelector("header.chrome .also a"); if (!a) return null; const b = a.getBoundingClientRect(); const cs = getComputedStyle(a); return { colour: cs.textDecorationColor, line: cs.textDecorationLine, x: b.x, w: b.width, bottom: b.bottom }; })()`);
+  const u = await k.evaluate<{ colour: string; line: string; x: number; w: number; bottom: number } | null>(
+    `(() => { const a = document.querySelector("header.chrome .also a"); if (!a) return null; const b = a.getBoundingClientRect(); const cs = getComputedStyle(a); return { colour: cs.textDecorationColor, line: cs.textDecorationLine, x: b.x, w: b.width, bottom: b.bottom }; })()`,
+  );
   if (!u || !u.line.split(" ").includes("underline")) return NaN;
   const row = await sampleRow(k.send, Math.round(u.x), Math.round(u.bottom + 3), Math.max(1, Math.round(u.w)));
   const ground: Rgb = [median(row.map((p) => p[0])), median(row.map((p) => p[1])), median(row.map((p) => p[2]))];
   const { rgb, alpha } = parseColour(u.colour);
-  const ink: Rgb = [rgb[0] * alpha + ground[0] * (1 - alpha), rgb[1] * alpha + ground[1] * (1 - alpha), rgb[2] * alpha + ground[2] * (1 - alpha)];
+  const ink: Rgb = [
+    rgb[0] * alpha + ground[0] * (1 - alpha),
+    rgb[1] * alpha + ground[1] * (1 - alpha),
+    rgb[2] * alpha + ground[2] * (1 - alpha),
+  ];
   return contrast(ink, ground);
 }
 
@@ -59,11 +77,21 @@ export function trailKit(ctx: SuiteContext): TrailKit {
 }
 
 const centre = (b: Box) => ({ x: b.x + b.w / 2, y: b.y + b.h / 2 });
-const toBox = (p: { x: number; y: number }, b: Box) => Math.hypot(Math.max(b.x - p.x, 0, p.x - b.right), Math.max(b.y - p.y, 0, p.y - b.bottom));
-const spacing = (ts: readonly Box[]): number[] => ts.map((a, i) => Math.min(...ts.filter((_, j) => j !== i).map((b) => {
-  const small = b.w < 24 || b.h < 24;
-  return small ? Math.hypot(centre(a).x - centre(b).x, centre(a).y - centre(b).y) - 24 : toBox(centre(a), b) - 12;
-})));
+const toBox = (p: { x: number; y: number }, b: Box) =>
+  Math.hypot(Math.max(b.x - p.x, 0, p.x - b.right), Math.max(b.y - p.y, 0, p.y - b.bottom));
+const spacing = (ts: readonly Box[]): number[] =>
+  ts.map((a, i) =>
+    Math.min(
+      ...ts
+        .filter((_, j) => j !== i)
+        .map((b) => {
+          const small = b.w < 24 || b.h < 24;
+          return small
+            ? Math.hypot(centre(a).x - centre(b).x, centre(a).y - centre(b).y) - 24
+            : toBox(centre(a), b) - 12;
+        }),
+    ),
+  );
 
 export async function dr11Wide(k: TrailKit): Promise<void> {
   const { send, evaluate, check } = k;
@@ -75,10 +103,18 @@ export async function dr11Wide(k: TrailKit): Promise<void> {
       await k.goto(page);
       const d = await evaluate(READ);
       const margins = spacing([...d.links, ...d.navLinks]);
-      const good = d.links.length > 0 && d.navLinks.length > 0 && d.links.every((l) => l.hit) && margins.every((m) => m >= 0)
-        && d.linkColor === PARCHMENT && d.hereColor === PARCHMENT_BRIGHT && d.hereLine === "underline";
+      const good =
+        d.links.length > 0 &&
+        d.navLinks.length > 0 &&
+        d.links.every((l) => l.hit) &&
+        margins.every((m) => m >= 0) &&
+        d.linkColor === PARCHMENT &&
+        d.hereColor === PARCHMENT_BRIGHT &&
+        d.hereLine === "underline";
       ok &&= good;
-      rows.push(`${width} ${page}: ${d.links.map((l) => `${l.t}=${l.hit}`).join(",")} spacing ${margins.map((m) => m.toFixed(2)).join(",")} link ${d.linkColor} here ${d.hereColor} ${d.hereLine}`);
+      rows.push(
+        `${width} ${page}: ${d.links.map((l) => `${l.t}=${l.hit}`).join(",")} spacing ${margins.map((m) => m.toFixed(2)).join(",")} link ${d.linkColor} here ${d.hereColor} ${d.hereLine}`,
+      );
     }
   }
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
@@ -100,7 +136,9 @@ export async function dr11Wide(k: TrailKit): Promise<void> {
 
 async function arrived({ evaluate, sleep }: TrailKit, path: string): Promise<boolean> {
   for (let i = 0; i < 200; i++) {
-    const at = await evaluate<string | null>(`document.readyState === "complete" ? location.pathname : null`).catch(() => null);
+    const at = await evaluate<string | null>(`document.readyState === "complete" ? location.pathname : null`).catch(
+      () => null,
+    );
     if (at === path) return true;
     await sleep(50);
   }
@@ -138,8 +176,14 @@ export async function dr13Gallery(k: TrailKit): Promise<void> {
   for (const width of [1280, NARROW] as const) {
     if (width === NARROW) await setNarrowViewport(NARROW, 844);
     await k.goto("/gallery/");
-    await k.settle(`(() => { const a = document.querySelector(".grid")?.getAnimations() ?? []; return a.length > 0 && a.every((x) => x.playState === "finished"); })()`, (done) => done === true, "the Gallery's grid has landed");
-    const gap = await evaluate<number>(`document.querySelector(".grid figure").getBoundingClientRect().top - document.querySelector("header.chrome").getBoundingClientRect().bottom`);
+    await k.settle(
+      `(() => { const a = document.querySelector(".grid")?.getAnimations() ?? []; return a.length > 0 && a.every((x) => x.playState === "finished"); })()`,
+      (done) => done === true,
+      "the Gallery's grid has landed",
+    );
+    const gap = await evaluate<number>(
+      `document.querySelector(".grid figure").getBoundingClientRect().top - document.querySelector("header.chrome").getBoundingClientRect().bottom`,
+    );
     rows.push({ width, gap });
   }
   await clearMobile();

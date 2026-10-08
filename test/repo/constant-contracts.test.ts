@@ -19,7 +19,13 @@ const ROOT = resolve(import.meta.dirname, "..", "..");
 const src = (p: string) => readFileSync(join(ROOT, p), "utf8");
 // Truncate each line at // so no comment, full-line or trailing, can count as code; naive about strings, which is fine since neither guarded file carries // inside a literal.
 const codeOnly = (code: string) =>
-  code.split("\n").map((l) => { const i = l.indexOf("//"); return i === -1 ? l : l.slice(0, i); }).join("\n");
+  code
+    .split("\n")
+    .map((l) => {
+      const i = l.indexOf("//");
+      return i === -1 ? l : l.slice(0, i);
+    })
+    .join("\n");
 const walk = (dir: string): string[] =>
   readdirSync(join(ROOT, dir), { withFileTypes: true }).flatMap((e) =>
     e.isDirectory() ? walk(join(dir, e.name)) : e.name.endsWith(".ts") ? [join(dir, e.name)] : [],
@@ -73,7 +79,11 @@ const marginMirror = (code: string, re: RegExp, where: string) => {
   const m = codeOnly(code).match(re);
   assert.ok(m, `margin expression not found in ${where}`);
   if (m[1] === "MARGIN_FRACTION") {
-    assert.match(code, /import \{[^}]*\bMARGIN_FRACTION\b[^}]*\} from "[^"]*render\/transform(\.ts)?"/, `${where} must import MARGIN_FRACTION from render/transform`);
+    assert.match(
+      code,
+      /import \{[^}]*\bMARGIN_FRACTION\b[^}]*\} from "[^"]*render\/transform(\.ts)?"/,
+      `${where} must import MARGIN_FRACTION from render/transform`,
+    );
     assert.doesNotMatch(code, /\b(const|let|var)\s+MARGIN_FRACTION\b/, `${where} must not rebind MARGIN_FRACTION`);
   } else {
     assert.equal(Number(m[1]), MARGIN_FRACTION, where);

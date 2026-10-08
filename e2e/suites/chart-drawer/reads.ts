@@ -2,17 +2,122 @@ import { slideRested, foldRested } from "../../support/slide.ts";
 import type { Payload, Point } from "../../types.ts";
 
 type Rect = { x: number; y: number; w: number; h: number; right: number; bottom: number };
-export type Read = { open: boolean; tabText: string | null; tabShown: boolean; count: string | null; cuttings: number; imgs: number; frames: number; titles: string[]; decoded: boolean[]; offs: number; offsReachable: number; offRects: { y: number; h: number }[]; lowestOff: number | null; minOffH: number; drawerAnims: string[]; slideMs: string | null; innerH: number; fullShown: boolean; roadDisabled: boolean; ear: { label: string | null; rect: Rect } | null; insetRect: Rect | null; insetSvgs: number; lastSvgIsSurvey: boolean; status: string; statusFadeMs: string | null; hashTable: string | null; rawHash: string; path: string; scrollW: number; innerW: number };
+export type Read = {
+  open: boolean;
+  tabText: string | null;
+  tabShown: boolean;
+  count: string | null;
+  cuttings: number;
+  imgs: number;
+  frames: number;
+  titles: string[];
+  decoded: boolean[];
+  offs: number;
+  offsReachable: number;
+  offRects: { y: number; h: number }[];
+  lowestOff: number | null;
+  minOffH: number;
+  drawerAnims: string[];
+  slideMs: string | null;
+  innerH: number;
+  fullShown: boolean;
+  roadDisabled: boolean;
+  ear: { label: string | null; rect: Rect } | null;
+  insetRect: Rect | null;
+  insetSvgs: number;
+  lastSvgIsSurvey: boolean;
+  status: string;
+  statusFadeMs: string | null;
+  hashTable: string | null;
+  rawHash: string;
+  path: string;
+  scrollW: number;
+  innerW: number;
+};
 export type Cam = { x: number; y: number; k: number };
-type Ghost = { tag: string; src: string; pos: string; pe: string; translate: string; w: number; rotate: string; z: string; inMap: boolean };
-type Carry = { ghost: Ghost | null; drag: boolean; open: boolean; receiving: boolean; folded: boolean; cuttings: number; landing: boolean; landingRuns: number; jolt: boolean; joltRuns: number; sel: number; cursor: string | null; cam: Cam | null; hashTable: string | null; status: string; innerH: number };
-type Surfaces = { open: boolean; folded: boolean; tabShown: boolean; lifted: string[]; seats: Record<string, number>; slipX: number; slipW: number; slipAnims: string[]; lowestOff: number | null; minOffH: number; drawerAnims: string[]; innerH: number };
+type Ghost = {
+  tag: string;
+  src: string;
+  pos: string;
+  pe: string;
+  translate: string;
+  w: number;
+  rotate: string;
+  z: string;
+  inMap: boolean;
+};
+type Carry = {
+  ghost: Ghost | null;
+  drag: boolean;
+  open: boolean;
+  receiving: boolean;
+  folded: boolean;
+  cuttings: number;
+  landing: boolean;
+  landingRuns: number;
+  jolt: boolean;
+  joltRuns: number;
+  sel: number;
+  cursor: string | null;
+  cam: Cam | null;
+  hashTable: string | null;
+  status: string;
+  innerH: number;
+};
+type Surfaces = {
+  open: boolean;
+  folded: boolean;
+  tabShown: boolean;
+  lifted: string[];
+  seats: Record<string, number>;
+  slipX: number;
+  slipW: number;
+  slipAnims: string[];
+  lowestOff: number | null;
+  minOffH: number;
+  drawerAnims: string[];
+  innerH: number;
+};
 type Slides = Pick<Read, "lowestOff" | "minOffH" | "drawerAnims" | "innerH">;
 type Folds = Pick<Surfaces, "slipX" | "slipW" | "slipAnims">;
 type Rested = (d: Surfaces, last: Surfaces | null) => boolean;
 export type Edge = { folded: boolean; tabShown: boolean; overlap: number; buttons: number[] };
-export type Card = { hits: number; shown: boolean; name: string | null; press: { text: string; dim: boolean; idx?: string; box: { x: number; y: number; w: number; h: number }; hit: string; disabled: boolean } | null; link: { hit: string; inActs: boolean } | null; actsRow: number; pressInActs: boolean; cuttings: number; prospects: number; titles: string[]; subs: string[]; imgs: number; decoded: boolean[]; frames: number; hashTable: string | null; seedBox: string | null; scrollW: number; innerW: number };
-type Pp = { state: { year: number } | null; press: { text: string; dim: boolean; shown: boolean; centre: Point | null; hit: string; disabled: boolean } | null; count: string | null; inNote: boolean; roads: number; chartHref: string | null; hashTable: string | null };
+export type Card = {
+  hits: number;
+  shown: boolean;
+  name: string | null;
+  press: {
+    text: string;
+    dim: boolean;
+    idx?: string;
+    box: { x: number; y: number; w: number; h: number };
+    hit: string;
+    disabled: boolean;
+  } | null;
+  link: { hit: string; inActs: boolean } | null;
+  actsRow: number;
+  pressInActs: boolean;
+  cuttings: number;
+  prospects: number;
+  titles: string[];
+  subs: string[];
+  imgs: number;
+  decoded: boolean[];
+  frames: number;
+  hashTable: string | null;
+  seedBox: string | null;
+  scrollW: number;
+  innerW: number;
+};
+type Pp = {
+  state: { year: number } | null;
+  press: { text: string; dim: boolean; shown: boolean; centre: Point | null; hit: string; disabled: boolean } | null;
+  count: string | null;
+  inNote: boolean;
+  roads: number;
+  chartHref: string | null;
+  hashTable: string | null;
+};
 export type Stored = { stored: string | null };
 export type Back = Read & Stored & { marker: string | null; navType: string | null };
 
@@ -65,11 +170,14 @@ export const READ: Payload<Read> = `(() => {
 export const DRAWN = 400;
 export const atInset = (d: Read) => !!d.ear && d.insetSvgs === 1;
 // No buttons at all reports pos at the viewport edge, not 0: 0 is inside the fold and would leave `size` alone rejecting a shut drawer.
-const asSlide = (d: Slides | null) => (d ? { pos: d.lowestOff === null ? d.innerH : d.lowestOff, size: d.minOffH, anims: d.drawerAnims, viewportH: d.innerH } : null);
+const asSlide = (d: Slides | null) =>
+  d
+    ? { pos: d.lowestOff === null ? d.innerH : d.lowestOff, size: d.minOffH, anims: d.drawerAnims, viewportH: d.innerH }
+    : null;
 export const drawerUp = (d: Slides, last: Slides | null) => slideRested(asSlide(d)!, asSlide(last));
 const asFold = (d: Folds | null) => (d ? { pos: d.slipX, size: d.slipW, anims: d.slipAnims } : null);
-export const slipTravelled = (from: Folds) => (d: Folds, last: Folds | null) => foldRested(asFold(d)!, asFold(last),
-  asFold(from)!);
+export const slipTravelled = (from: Folds) => (d: Folds, last: Folds | null) =>
+  foldRested(asFold(d)!, asFold(last), asFold(from)!);
 export const both = (a: Rested, b: Rested) => (d: Surfaces, last: Surfaces | null) => a(d, last) && b(d, last);
 
 export const CARRY: Payload<Carry> = `(() => {
@@ -94,12 +202,16 @@ export const CARRY: Payload<Carry> = `(() => {
       innerH: window.innerHeight,
     };
   })()`;
-export const sameCam = (a: Cam | null, b: Cam | null) => !!a && !!b && a.k === b.k && Math.abs(a.x - b.x) < 0.5 && Math.abs(a.y - b.y) < 0.5;
-export const atRest = (d: Carry, last: Carry | null) => !!last && !d.ghost && !d.landing && sameCam(d.cam, last.cam) && d.cuttings === last.cuttings;
+export const sameCam = (a: Cam | null, b: Cam | null) =>
+  !!a && !!b && a.k === b.k && Math.abs(a.x - b.x) < 0.5 && Math.abs(a.y - b.y) < 0.5;
+export const atRest = (d: Carry, last: Carry | null) =>
+  !!last && !d.ghost && !d.landing && sameCam(d.cam, last.cam) && d.cuttings === last.cuttings;
 // The settle's declared duration, read the CD23 way: the class is put on a scratch cutting with transitions suppressed, the cascade's answer is read, and the class comes off again.
-export const DURATION: Payload<string | null> = `(() => { const li = document.querySelector("#cuttings li"); if (!li) return null; li.classList.add("landing"); const v = getComputedStyle(li).animationDuration; li.classList.remove("landing"); return v; })()`;
+export const DURATION: Payload<string | null> =
+  `(() => { const li = document.querySelector("#cuttings li"); if (!li) return null; li.classList.add("landing"); const v = getComputedStyle(li).animationDuration; li.classList.remove("landing"); return v; })()`;
 // The slip at rest with the drawer shut and the Broadside folded: the fold's own transition has ended and the room layout it schedules has had its 340ms.
-export const FOLDREST: Payload<{ folded: boolean; open: boolean; slipX: number; anims: string[] }> = `(() => { const s = document.querySelector(".slip"); return { folded: s.classList.contains("folded"), open: document.getElementById("chart-drawer").classList.contains("open"), slipX: +s.getBoundingClientRect().x.toFixed(2), anims: s.getAnimations().map((a) => a.playState) }; })()`;
+export const FOLDREST: Payload<{ folded: boolean; open: boolean; slipX: number; anims: string[] }> =
+  `(() => { const s = document.querySelector(".slip"); return { folded: s.classList.contains("folded"), open: document.getElementById("chart-drawer").classList.contains("open"), slipX: +s.getBoundingClientRect().x.toFixed(2), anims: s.getAnimations().map((a) => a.playState) }; })()`;
 
 export const SURFACES: Payload<Surfaces> = `(() => {
     const slip = document.querySelector(".slip");

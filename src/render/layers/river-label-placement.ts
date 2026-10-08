@@ -6,11 +6,7 @@ export type RiverLabelPlacement = {
   readonly angleDeg: number;
 };
 
-function reachTurn(
-  pts: ReadonlyArray<readonly [number, number]>,
-  i: number,
-  j: number,
-): number {
+function reachTurn(pts: ReadonlyArray<readonly [number, number]>, i: number, j: number): number {
   let turn = 0;
   for (let m = i + 1; m < j; m++) {
     const a1 = Math.atan2(pts[m]![1] - pts[m - 1]![1], pts[m]![0] - pts[m - 1]![0]);
@@ -28,8 +24,7 @@ type ReachWindow = { i: number; j: number; turn: number; center: number };
 function cumulativeLengths(pts: Pts): number[] {
   const cum: number[] = [0];
   for (let i = 1; i < pts.length; i++) {
-    cum[i] = (cum[i - 1] as number) +
-      Math.hypot(pts[i]![0] - pts[i - 1]![0], pts[i]![1] - pts[i - 1]![1]);
+    cum[i] = (cum[i - 1] as number) + Math.hypot(pts[i]![0] - pts[i - 1]![0], pts[i]![1] - pts[i - 1]![1]);
   }
   return cum;
 }
@@ -58,7 +53,8 @@ function reachWindows(pts: Pts, cum: ReadonlyArray<number>, targetLen: number): 
     while (j < pts.length && (cum[j] as number) - (cum[i] as number) < targetLen) j++;
     if (j >= pts.length) break;
     wins.push({
-      i, j,
+      i,
+      j,
       turn: reachTurn(pts, i, j),
       center: ((cum[i] as number) + (cum[j] as number)) / 2,
     });

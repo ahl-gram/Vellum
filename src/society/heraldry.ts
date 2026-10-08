@@ -12,23 +12,29 @@ export type Tincture =
   | "vert" // green
   | "purpure"; // purple
 
-export type Division =
-  | "plain"
-  | "perPale"
-  | "perFess"
-  | "perBend"
-  | "perChevron"
-  | "quarterly";
+export type Division = "plain" | "perPale" | "perFess" | "perBend" | "perChevron" | "quarterly";
 
 export type Ordinary = "cross" | "pale" | "fess" | "bend" | "chevron";
 
 export type MobileCharge =
-  | "ship" | "anchor" | "trident"
-  | "axe" | "raven" | "mountain"
-  | "sun" | "crescent" | "scimitar"
-  | "oak" | "leaf" | "star"
-  | "wave" | "fish" | "turtle"
-  | "tower" | "sword" | "flame";
+  | "ship"
+  | "anchor"
+  | "trident"
+  | "axe"
+  | "raven"
+  | "mountain"
+  | "sun"
+  | "crescent"
+  | "scimitar"
+  | "oak"
+  | "leaf"
+  | "star"
+  | "wave"
+  | "fish"
+  | "turtle"
+  | "tower"
+  | "sword"
+  | "flame";
 
 export type ChargeSpec =
   | { readonly kind: "ordinary"; readonly ordinary: Ordinary; readonly tincture: Tincture }

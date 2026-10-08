@@ -48,9 +48,7 @@ export function marshTuft(c: DressContext, p: XYS): SvgNode {
 }
 
 export function dune(c: DressContext, p: XYS): SvgNode {
-  return placed(p.x, p.y, p.s, [
-    el("path", { d: "M-6 0Q-2 -3 2 0M2 -1Q5 -3 7 -1", fill: "none", ...stroke(c, 0.8) }),
-  ]);
+  return placed(p.x, p.y, p.s, [el("path", { d: "M-6 0Q-2 -3 2 0M2 -1Q5 -3 7 -1", fill: "none", ...stroke(c, 0.8) })]);
 }
 
 export function bird(c: DressContext, p: XYS): SvgNode {
@@ -128,10 +126,7 @@ export function beamNodes(
 /** sin(k*PI/6) for k = 0..11 as literals: the furrows' wiggle without a libm call. */
 const SINE12 = [0, 0.5, 0.866, 1, 0.866, 0.5, 0, -0.5, -0.866, -1, -0.866, -0.5];
 
-export function fieldRowNodes(
-  c: DressContext,
-  rows: ReadonlyArray<{ y: number; x0: number; x1: number }>,
-): SvgNode {
+export function fieldRowNodes(c: DressContext, rows: ReadonlyArray<{ y: number; x0: number; x1: number }>): SvgNode {
   const dashes: string[] = [];
   for (const row of rows) {
     let i = 0;
@@ -148,10 +143,7 @@ export function fieldRowNodes(
   });
 }
 
-export function scrubRowNodes(
-  c: DressContext,
-  rows: ReadonlyArray<{ y: number; x0: number; x1: number }>,
-): SvgNode {
+export function scrubRowNodes(c: DressContext, rows: ReadonlyArray<{ y: number; x0: number; x1: number }>): SvgNode {
   const dashes: string[] = [];
   for (const row of rows) {
     for (let x = row.x0; x < row.x1; x += 15) dashes.push(`M${r1(x)} ${r1(row.y)}h7`);

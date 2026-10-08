@@ -12,11 +12,7 @@ export function ringArea(points: ReadonlyArray<Point>): number {
 }
 
 /** Do NOT swap the 0.75/0.25 arithmetic for core/math.ts lerp(): (1-t)*a+t*b and a+(b-a)*t disagree by 1 ULP on ~12% of inputs, enough to flip a 2-decimal SVG coordinate and move every committed coastline, and neither tsc, the golden checksum, nor the drift guard (TOL 0.05) would catch it. */
-export function chaikinSmooth(
-  points: ReadonlyArray<Point>,
-  closed: boolean,
-  iterations = 2,
-): Point[] {
+export function chaikinSmooth(points: ReadonlyArray<Point>, closed: boolean, iterations = 2): Point[] {
   let cur: Point[] = [...points];
   for (let it = 0; it < iterations; it++) {
     const next: Point[] = [];

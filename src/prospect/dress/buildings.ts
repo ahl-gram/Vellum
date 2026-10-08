@@ -8,22 +8,12 @@ function windowDashes(c: DressContext, m: Mass): SvgNode[] {
   const out: SvgNode[] = [];
   for (let i = 0; i < cols; i++) {
     const wx = m.x + m.w * (cols === 1 ? 0.5 : 0.3 + i * 0.4);
-    out.push(
-      el("rect", { x: r1(wx - 0.7), y: r1(m.base - m.h * 0.62), width: 1.4, height: 2.6, fill: c.ink }),
-    );
+    out.push(el("rect", { x: r1(wx - 0.7), y: r1(m.base - m.h * 0.62), width: 1.4, height: 2.6, fill: c.ink }));
   }
   return out;
 }
 
-function roofHatch(
-  parts: string[],
-  x0: number,
-  y0: number,
-  dx: number,
-  dy: number,
-  n: number,
-  step: number,
-): void {
+function roofHatch(parts: string[], x0: number, y0: number, dx: number, dy: number, n: number, step: number): void {
   for (let i = 0; i < n; i++) {
     parts.push(`M${r1(x0 + i * step)} ${r1(y0 + i * step * 0.14)}l${r1(dx)} ${r1(dy)}`);
   }

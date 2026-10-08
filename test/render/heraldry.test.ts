@@ -2,12 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { el, renderSvg } from "../../src/render/svg.ts";
 import { STYLES } from "../../src/render/style.ts";
-import {
-  armsNode,
-  armsPlacements,
-  armsSvgDocument,
-  paletteForStyle,
-} from "../../src/render/layers/heraldry.ts";
+import { armsNode, armsPlacements, armsSvgDocument, paletteForStyle } from "../../src/render/layers/heraldry.ts";
 import { CULTURE_CHARGES, type Arms, type Tincture } from "../../src/society/heraldry.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
@@ -136,7 +131,10 @@ test("armsPlacements covers every realm: labelled realms keep their anchor, unla
   type Args = Parameters<typeof armsPlacements>;
   const out = armsPlacements(world as unknown as Args[0], anchors, proj as unknown as Args[2], 1);
   assert.equal(out.length, 3, "every realm gets a placement, not just labelled ones");
-  assert.deepEqual(out.map((p) => p.realm), [0, 1, 2]);
+  assert.deepEqual(
+    out.map((p) => p.realm),
+    [0, 1, 2],
+  );
   assert.equal(out.find((p) => p.realm === 1)!.cx, 111, "labelled realm keeps its label anchor");
   const r0 = out.find((p) => p.realm === 0)!; // seat[0]=settlement 4 at (40,20) -> px 41, py 22
   assert.equal(r0.cx, 41);
@@ -190,7 +188,6 @@ test("a side-placed shield clears its realm label's all-caps text (no covered le
     );
   }
 });
-
 
 const ALL_TINCTURES: Tincture[] = ["or", "argent", "gules", "azure", "sable", "vert", "purpure"];
 
@@ -252,7 +249,9 @@ test("#25 ink hatch marks follow the Petra Sancta engraving convention per tinct
 test("#25 every ink hatch tile has an opaque paper base (no bleed-through)", () => {
   const doc = armsSvgDocument(
     { division: "perBend", field: ["vert", "or"], charge: null },
-    SIZE, paletteForStyle(STYLES.ink), "d",
+    SIZE,
+    paletteForStyle(STYLES.ink),
+    "d",
   );
   assert.ok(doc.includes("url(#hatch-vert-d)") && doc.includes("url(#hatch-or-d)"), "both regions hatched");
   for (const t of ["vert", "or"] as Tincture[]) {

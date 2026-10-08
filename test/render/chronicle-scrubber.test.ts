@@ -110,7 +110,6 @@ test("glyphVisibleAt: a ruined town follows state-begins - hidden through its li
   assert.equal(glyphVisibleAt(mark, 800), true, "and stays a ruin");
 });
 
-
 test("glyphRevealedBetween: true only on the frame that crosses a founding (#155)", () => {
   const m = { idx: 0, nx: 0.5, ny: 0.5, founded: 300, ruinYear: null };
   assert.equal(glyphRevealedBetween(m, 299, 300), true, "the crossing frame is the ink-in beat");
@@ -235,7 +234,6 @@ test("integration: over seed 42's whole timeline every mark inks in exactly once
   const grades = new Set(marks.map(inkGradeFor));
   assert.deepEqual([...grades].sort(), ["founding", "ruin"]);
 });
-
 
 test("sweepElapsedAt round-trips every year through sweepYearAt exactly", () => {
   const range = { min: 300, max: 1100 };

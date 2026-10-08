@@ -3,15 +3,82 @@ import type { MapType } from "../terrain/heightfield.ts";
 import { editDistanceWithin1 } from "../core/text.ts";
 
 export const ENGLISH_BLOCKLIST = new Set<string>([
-  "main", "deep", "reach", "run", "rest", "sand", "land", "band",
-  "mine", "mane", "mare", "more", "core", "bore", "sore", "lore", "gore",
-  "moan", "moor", "lord", "word", "ward", "born", "corn", "horn", "worn",
-  "barn", "darn", "yarn", "men", "man", "sun", "son", "sin", "din", "den",
-  "don", "dun", "ten", "tin", "tan", "ton", "ran", "van", "wan", "mist",
-  "mast", "most", "last", "lost", "cost", "rust", "dust", "must", "fast",
-  "vast", "then", "than", "thin", "dell", "hall", "hill", "well", "bell",
-  "tell", "sell", "fell", "mark", "dark", "lark", "bark", "stark", "stork",
-  "mom", "dad", "bra",
+  "main",
+  "deep",
+  "reach",
+  "run",
+  "rest",
+  "sand",
+  "land",
+  "band",
+  "mine",
+  "mane",
+  "mare",
+  "more",
+  "core",
+  "bore",
+  "sore",
+  "lore",
+  "gore",
+  "moan",
+  "moor",
+  "lord",
+  "word",
+  "ward",
+  "born",
+  "corn",
+  "horn",
+  "worn",
+  "barn",
+  "darn",
+  "yarn",
+  "men",
+  "man",
+  "sun",
+  "son",
+  "sin",
+  "din",
+  "den",
+  "don",
+  "dun",
+  "ten",
+  "tin",
+  "tan",
+  "ton",
+  "ran",
+  "van",
+  "wan",
+  "mist",
+  "mast",
+  "most",
+  "last",
+  "lost",
+  "cost",
+  "rust",
+  "dust",
+  "must",
+  "fast",
+  "vast",
+  "then",
+  "than",
+  "thin",
+  "dell",
+  "hall",
+  "hill",
+  "well",
+  "bell",
+  "tell",
+  "sell",
+  "fell",
+  "mark",
+  "dark",
+  "lark",
+  "bark",
+  "stark",
+  "stork",
+  "mom",
+  "dad",
+  "bra",
 ]);
 
 function isShortPrefix(a: string, b: string): boolean {
@@ -22,8 +89,7 @@ function isShortPrefix(a: string, b: string): boolean {
 
 export function isStandaloneSlot(template: string): boolean {
   const i = template.indexOf("%");
-  const isLetter = (c: string | undefined): boolean =>
-    c !== undefined && /[a-z]/i.test(c);
+  const isLetter = (c: string | undefined): boolean => c !== undefined && /[a-z]/i.test(c);
   return !isLetter(template[i - 1]) && !isLetter(template[i + 1]);
 }
 
@@ -143,7 +209,30 @@ export const CULTURES: readonly Culture[] = [
   },
   {
     id: "zoryan", // a Slavic culture: -grad and -ov, limans, birch taigas
-    onsets: ["v", "z", "r", "d", "b", "g", "k", "s", "m", "n", "l", "p", "vl", "gr", "dr", "sk", "st", "br", "tr", "kr", "sv", "zv"],
+    onsets: [
+      "v",
+      "z",
+      "r",
+      "d",
+      "b",
+      "g",
+      "k",
+      "s",
+      "m",
+      "n",
+      "l",
+      "p",
+      "vl",
+      "gr",
+      "dr",
+      "sk",
+      "st",
+      "br",
+      "tr",
+      "kr",
+      "sv",
+      "zv",
+    ],
     nuclei: ["a", "o", "e", "i", "u", "y"],
     // Single-consonant codas only: cluster codas met the cluster onsets and stacked into unpronounceable piles.
     codas: ["", "r", "n", "d", "l", "k"],
@@ -194,15 +283,7 @@ export function isNearExisting(stem: string, taken: Iterable<string>): boolean {
   return false;
 }
 
-export type NameKind =
-  | "settlement"
-  | "river"
-  | "peak"
-  | "sea"
-  | "lake"
-  | "forest"
-  | "realm"
-  | "bare";
+export type NameKind = "settlement" | "river" | "peak" | "sea" | "lake" | "forest" | "realm" | "bare";
 
 export type Namer = {
   readonly culture: Culture;
@@ -310,8 +391,18 @@ export function createNamer(rng: Rng, culture: Culture): Namer {
 }
 
 const TITLE_ADJECTIVES = [
-  "Sundered", "Verdant", "Gilded", "Mistbound", "Amber", "Whispering",
-  "Salt-Worn", "Untamed", "Drowned", "Shining", "Storm-Held", "Quiet",
+  "Sundered",
+  "Verdant",
+  "Gilded",
+  "Mistbound",
+  "Amber",
+  "Whispering",
+  "Salt-Worn",
+  "Untamed",
+  "Drowned",
+  "Shining",
+  "Storm-Held",
+  "Quiet",
 ];
 
 const AGES = ["Lantern", "Ember", "Tide", "Crane", "Iron", "Pale", "Cedar"];
@@ -329,19 +420,11 @@ export type MapTitle = {
   readonly year: number;
 };
 
-export function makeMapTitle(
-  rng: Rng,
-  culture: Culture,
-  mapType: MapType,
-  baseOverride?: string,
-): MapTitle {
+export function makeMapTitle(rng: Rng, culture: Culture, mapType: MapType, baseOverride?: string): MapTitle {
   const namer = createNamer(rng.fork("title-base"), culture);
   const base = baseOverride ?? namer.name("bare");
   const pattern = rng.pick(TITLE_PATTERNS[mapType]);
-  const title = pattern
-    .replace("@", rng.pick(TITLE_ADJECTIVES))
-    .replace("%", base)
-    .replace(" ,", ",");
+  const title = pattern.replace("@", rng.pick(TITLE_ADJECTIVES)).replace("%", base).replace(" ,", ",");
   const year = 200 + rng.int(1100);
   const age = rng.pick(AGES);
   const surveyor = createNamer(rng.fork("surveyor"), culture).name("bare");

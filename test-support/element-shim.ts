@@ -4,7 +4,12 @@
 function styleBag() {
   const bag: Record<string, string> = {};
   return Object.defineProperties(bag, {
-    setProperty: { value: (name: string, value: string): void => { bag[name] = String(value); }, enumerable: false },
+    setProperty: {
+      value: (name: string, value: string): void => {
+        bag[name] = String(value);
+      },
+      enumerable: false,
+    },
     getPropertyValue: { value: (name: string): string => bag[name] ?? "", enumerable: false },
   }) as Record<string, string> & {
     setProperty(name: string, value: string): void;
@@ -39,8 +44,12 @@ export class El {
   getBoundingClientRect() {
     return { ...this.rect, width: this.rect.right - this.rect.left, height: this.rect.bottom - this.rect.top };
   }
-  get offsetWidth(): number { return this.rect.right - this.rect.left; }
-  get offsetHeight(): number { return this.rect.bottom - this.rect.top; }
+  get offsetWidth(): number {
+    return this.rect.right - this.rect.left;
+  }
+  get offsetHeight(): number {
+    return this.rect.bottom - this.rect.top;
+  }
 
   /** No bubbling: nothing under test depends on it. */
   fire(type: string, e?: unknown): void {
@@ -48,10 +57,18 @@ export class El {
   }
 
   // id reflects to the ATTRIBUTE so the no-ids guard can see a stray el.id assignment.
-  get id(): string { return this.attrs.get("id") ?? ""; }
-  set id(v: string) { this.attrs.set("id", String(v)); }
-  get className(): string { return [...this.classes].join(" "); }
-  set className(v: string) { this.classes = new Set(v.split(/\s+/).filter(Boolean)); }
+  get id(): string {
+    return this.attrs.get("id") ?? "";
+  }
+  set id(v: string) {
+    this.attrs.set("id", String(v));
+  }
+  get className(): string {
+    return [...this.classes].join(" ");
+  }
+  set className(v: string) {
+    this.classes = new Set(v.split(/\s+/).filter(Boolean));
+  }
   get classList() {
     const set = this.classes;
     const toggle = (c: string, on?: boolean): boolean => {
@@ -74,7 +91,9 @@ export class El {
     this.children = [];
     this.#text = String(v);
   }
-  get parentElement(): El | null { return this.parentNode; }
+  get parentElement(): El | null {
+    return this.parentNode;
+  }
   /** As in the DOM, a node inserted somewhere leaves wherever it was first. */
   #adopt(kids: El[]): void {
     for (const k of kids) {
@@ -88,8 +107,12 @@ export class El {
     p.#adopt(kids);
     p.children.splice(p.children.indexOf(this) + offset, 0, ...kids);
   }
-  before(...kids: El[]): void { this.#insertBeside(0, kids); }
-  after(...kids: El[]): void { this.#insertBeside(1, kids); }
+  before(...kids: El[]): void {
+    this.#insertBeside(0, kids);
+  }
+  after(...kids: El[]): void {
+    this.#insertBeside(1, kids);
+  }
   append(...kids: El[]): void {
     this.#adopt(kids);
     this.children.push(...kids);
@@ -104,20 +127,35 @@ export class El {
     this.#adopt(kids);
     this.children = [...kids];
   }
-  setAttribute(name: string, v: string): void { this.attrs.set(name, String(v)); }
-  getAttribute(name: string): string | null { return this.attrs.get(name) ?? null; }
-  removeAttribute(name: string): void { this.attrs.delete(name); }
+  setAttribute(name: string, v: string): void {
+    this.attrs.set(name, String(v));
+  }
+  getAttribute(name: string): string | null {
+    return this.attrs.get(name) ?? null;
+  }
+  removeAttribute(name: string): void {
+    this.attrs.delete(name);
+  }
   addEventListener(type: string, handler?: (e?: unknown) => void): void {
     this.listeners.push(type);
     if (handler) this.handlers.set(type, [...(this.handlers.get(type) ?? []), handler]);
   }
   removeEventListener(type: string, handler: (e?: unknown) => void): void {
-    this.handlers.set(type, (this.handlers.get(type) ?? []).filter((h) => h !== handler));
+    this.handlers.set(
+      type,
+      (this.handlers.get(type) ?? []).filter((h) => h !== handler),
+    );
   }
-  querySelector(): El | null { return null; }
-  querySelectorAll(): El[] { return []; }
+  querySelector(): El | null {
+    return null;
+  }
+  querySelectorAll(): El[] {
+    return [];
+  }
   focused = false;
-  focus(): void { this.focused = true; }
+  focus(): void {
+    this.focused = true;
+  }
   remove(): void {
     const p = this.parentNode;
     if (!p) return;

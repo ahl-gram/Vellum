@@ -12,18 +12,17 @@ test("the prevailing wind is a deterministic world property in [0, 2pi)", () => 
   // Pin the provenance: the named fork, never the parent stream; a parent-stream draw would silently re-roll the moment any earlier draw is inserted.
   assert.equal(
     a.winds.dir,
-    createRng(42).fork("winds").range(0, Math.PI * 2),
+    createRng(42)
+      .fork("winds")
+      .range(0, Math.PI * 2),
     "wind comes from the named fork, not the parent stream",
   );
 });
 
 test("different seeds roll different winds", () => {
-  const dirs = new Set(
-    [42, 7, 123, 20260701].map((s) => generateWorld(defaultRecipe(s)).winds.dir),
-  );
+  const dirs = new Set([42, 7, 123, 20260701].map((s) => generateWorld(defaultRecipe(s)).winds.dir));
   assert.ok(dirs.size >= 3, `winds vary across seeds (got ${dirs.size} distinct)`);
 });
-
 
 test("the nautical arrows read the world's wind", () => {
   const world = generateWorld(defaultRecipe(42));
@@ -32,11 +31,7 @@ test("the nautical arrows read the world's wind", () => {
     winds: { dir: (world.winds.dir + Math.PI / 2) % (Math.PI * 2) },
   };
   const svg = renderMap(world, { style: "nautical" });
-  assert.notEqual(
-    svg,
-    renderMap(rotated, { style: "nautical" }),
-    "rotating world.winds turns the arrows",
-  );
+  assert.notEqual(svg, renderMap(rotated, { style: "nautical" }), "rotating world.winds turns the arrows");
   assert.equal(
     svg,
     renderMap({ ...world, winds: { dir: world.winds.dir } }, { style: "nautical" }),

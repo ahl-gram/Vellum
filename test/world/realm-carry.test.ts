@@ -3,12 +3,7 @@ import assert from "node:assert/strict";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { generateRegionWorld, windowAround } from "../../src/world/region.ts";
 import { LOD_BANDS, lodWindowFor, quantizeCenter } from "../../src/world/lod.ts";
-import {
-  growRealmLabels,
-  mapRingsToWindow,
-  realmCarryRings,
-  REALM_REACH_CAP,
-} from "../../src/world/realm-carry.ts";
+import { growRealmLabels, mapRingsToWindow, realmCarryRings, REALM_REACH_CAP } from "../../src/world/realm-carry.ts";
 import type { RealmRings } from "../../src/world/realm-carry.ts";
 import type { World } from "../../src/world/types.ts";
 
@@ -28,10 +23,22 @@ const isSeaOf = (world: World): ((i: number) => boolean) => {
   return (i) => (data[i] as number) <= sl;
 };
 
-function touchesOwnLandAt(grown: ArrayLike<number>, isSea: (i: number) => boolean, w: number, h: number, x: number, y: number): boolean {
+function touchesOwnLandAt(
+  grown: ArrayLike<number>,
+  isSea: (i: number) => boolean,
+  w: number,
+  h: number,
+  x: number,
+  y: number,
+): boolean {
   const i = x + y * w;
   let touchesOwnLand = false;
-  for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {
+  for (const [dx, dy] of [
+    [1, 0],
+    [-1, 0],
+    [0, 1],
+    [0, -1],
+  ] as const) {
     const nx = x + dx;
     const ny = y + dy;
     if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;
@@ -44,11 +51,7 @@ function touchesOwnLandAt(grown: ArrayLike<number>, isSea: (i: number) => boolea
 const capitalWindow = (world: World, band: number) => {
   const capital = world.settlements.find((s) => s.kind === "capital") ?? world.settlements[0]!;
   const size = LOD_BANDS[band]!.sizeUV;
-  const q = quantizeCenter(
-    capital.x / (world.recipe.gridW - 1),
-    capital.y / (world.recipe.gridH - 1),
-    size,
-  );
+  const q = quantizeCenter(capital.x / (world.recipe.gridW - 1), capital.y / (world.recipe.gridH - 1), size);
   return lodWindowFor(q.cx, q.cy, size);
 };
 
@@ -105,7 +108,11 @@ test("a realm-less island's land stays bare even inside another realm's reach (#
   const grown = growRealmLabels(labels, (i) => !land.has(i), w, h);
   for (let y = 0; y < h; y++) {
     for (const x of [5, 6]) {
-      assert.equal(grown[x + y * w], -1, `realm-less island cell (${x},${y}) was tinted into realm ${grown[x + y * w]}`);
+      assert.equal(
+        grown[x + y * w],
+        -1,
+        `realm-less island cell (${x},${y}) was tinted into realm ${grown[x + y * w]}`,
+      );
     }
     assert.ok(grown[3 + y * w]! >= 0, "the strait sea between them should be claimed");
   }
@@ -135,8 +142,14 @@ test("the parent rings and their window mapping are deterministic and non-empty 
     [window.u0 * (pw - 1), window.v1 * (ph - 1)],
   ] as const;
   const mapped = mapRingsToWindow([{ realm: 0, rings: [cornerRing] }], window, pw, ph, 320, 240)[0]!.rings[0]!;
-  assert.ok(Math.abs(mapped[0]![0] - 0) < 1e-9 && Math.abs(mapped[0]![1] - 0) < 1e-9, `the window's origin corner must land on the region grid origin, got (${mapped[0]![0]}, ${mapped[0]![1]})`);
-  assert.ok(Math.abs(mapped[2]![0] - 319) < 1e-9 && Math.abs(mapped[2]![1] - 239) < 1e-9, `the window's far corner must land on (319, 239), got (${mapped[2]![0]}, ${mapped[2]![1]})`);
+  assert.ok(
+    Math.abs(mapped[0]![0] - 0) < 1e-9 && Math.abs(mapped[0]![1] - 0) < 1e-9,
+    `the window's origin corner must land on the region grid origin, got (${mapped[0]![0]}, ${mapped[0]![1]})`,
+  );
+  assert.ok(
+    Math.abs(mapped[2]![0] - 319) < 1e-9 && Math.abs(mapped[2]![1] - 239) < 1e-9,
+    `the window's far corner must land on (319, 239), got (${mapped[2]![0]}, ${mapped[2]![1]})`,
+  );
 });
 
 test("the sea floor holds everywhere: a grown shore cell sits inside its realm's parent ring (#423)", () => {
@@ -161,7 +174,10 @@ test("the sea floor holds everywhere: a grown shore cell sits inside its realm's
         );
       }
     }
-    assert.ok(shoreCells > 100, `seed ${seed}: the shore sweep covered only ${shoreCells} cells; the contract went unexercised`);
+    assert.ok(
+      shoreCells > 100,
+      `seed ${seed}: the shore sweep covered only ${shoreCells} cells; the contract went unexercised`,
+    );
   }
 });
 
@@ -176,12 +192,11 @@ test("generateRegionWorld carries labels, names, rings and the parent label fiel
   let labelled = 0;
   for (const v of region.realms.labels) if (v >= 0) labelled++;
   assert.ok(labelled > 0, "the region's realm labels should carry the projected parent labels");
-  assert.deepEqual(
-    region.names.realms,
-    world.names.realms,
-    "the region should carry the parent's realm names",
+  assert.deepEqual(region.names.realms, world.names.realms, "the region should carry the parent's realm names");
+  assert.ok(
+    region.region?.realmRings && region.region.realmRings.length > 0,
+    "the region should carry mapped realm rings",
   );
-  assert.ok(region.region?.realmRings && region.region.realmRings.length > 0, "the region should carry mapped realm rings");
   assert.ok(region.region.realmBorders, "the region should carry the parent's border chains");
   assert.ok(region.region.parentRealmLabels, "the region should carry the parent's label field for tint assignment");
   assert.equal(region.region.worldGridH, world.recipe.gridH, "the parent grid height rides beside worldGridW");
@@ -233,19 +248,25 @@ const borderWindow = (world: World, band: number) => {
   return null; // island realms: no land border exists, so there is no border window to sweep
 };
 
-const boundaryAdjacentOf = (grown: ArrayLike<number>, pw: number, ph: number) => (wx: number, wy: number, owner: number): boolean => {
-  for (let dy = -1; dy <= 1; dy++) {
-    for (let dx = -1; dx <= 1; dx++) {
-      const nx = wx + dx;
-      const ny = wy + dy;
-      if (nx < 0 || nx >= pw || ny < 0 || ny >= ph) return true;
-      if (grown[nx + ny * pw] !== owner) return true;
+const boundaryAdjacentOf =
+  (grown: ArrayLike<number>, pw: number, ph: number) =>
+  (wx: number, wy: number, owner: number): boolean => {
+    for (let dy = -1; dy <= 1; dy++) {
+      for (let dx = -1; dx <= 1; dx++) {
+        const nx = wx + dx;
+        const ny = wy + dy;
+        if (nx < 0 || nx >= pw || ny < 0 || ny >= ph) return true;
+        if (grown[nx + ny * pw] !== owner) return true;
+      }
     }
-  }
-  return false;
-};
+    return false;
+  };
 
-const tintAt = (masks: ReadonlyMap<number, ArrayLike<number>>, i: number, owner: number): { insideOwn: boolean; insideOther: boolean } => {
+const tintAt = (
+  masks: ReadonlyMap<number, ArrayLike<number>>,
+  i: number,
+  owner: number,
+): { insideOwn: boolean; insideOther: boolean } => {
   let insideOwn = false;
   let insideOther = false;
   for (const [realm, mask] of masks) {
@@ -323,15 +344,29 @@ test("the collar guard: no bare shoreline, no interior miss, jitter only on seam
   }
   windows.push([42, "b2border", borderWindow(worldFor(42), 2)!]);
   windows.push([15, "b2", capitalWindow(worldFor(15), 2)]);
-  assert.ok(borderWindows >= 3, "the sweep must cover several genuine land-border windows or the seam claims are unexercised");
+  assert.ok(
+    borderWindows >= 3,
+    "the sweep must cover several genuine land-border windows or the seam claims are unexercised",
+  );
 
   for (const [seed, name, window] of windows) {
     const label = `seed ${seed} ${name}`;
     const { landCells, bare, interiorMiss, seamJitter, bareTinted } = collarSweep(seed, label, window);
-    assert.equal(bare, 0, `${label}: ${bare} land cells on parent-sea ground carry NO tint at all; this is the shoreline collar the growth exists to prevent`);
-    assert.equal(interiorMiss, 0, `${label}: ${interiorMiss} cells in a realm's interior disagree with the rings; that is a mapping or growth defect, not seam jitter`);
+    assert.equal(
+      bare,
+      0,
+      `${label}: ${bare} land cells on parent-sea ground carry NO tint at all; this is the shoreline collar the growth exists to prevent`,
+    );
+    assert.equal(
+      interiorMiss,
+      0,
+      `${label}: ${interiorMiss} cells in a realm's interior disagree with the rings; that is a mapping or growth defect, not seam jitter`,
+    );
     assert.equal(bareTinted, 0, `${label}: ${bareTinted} realm-less land cells are tinted (category B must stay bare)`);
     // Ceiling measured 2026-08-20 across this sweep: max 0.87% (seed 2, band-3 border window). A coarse backstop only: sub-cell affine drift hides under it, which is why the determinism test corner-pins the mapping exactly.
-    assert.ok(seamJitter / landCells < 0.02, `${label}: seam jitter ${seamJitter}/${landCells} exceeds 2%; the rings have moved off the labels`);
+    assert.ok(
+      seamJitter / landCells < 0.02,
+      `${label}: seam jitter ${seamJitter}/${landCells} exceeds 2%; the rings have moved off the labels`,
+    );
   }
 });

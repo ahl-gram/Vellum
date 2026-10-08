@@ -3,7 +3,30 @@ import { makeStep } from "../support/step.ts";
 import { dropExpectedCancellations } from "../support/console.ts";
 import type { Payload, SuiteContext } from "../types.ts";
 
-type Ribbon = { seed: number; from: number; to: number; leagues: number; dress: string; stRows: number; blob: boolean; shown: boolean; status: string | null; title: string | null; sub: string | null; unrolled: string | null; chart: string | null; prospect: string | null; prospectVerb: string | null; slipTitle: string | null; where: string | null; rows: number; toName: string | null; fromOptions: number[]; prospectShown: boolean; hash: string };
+type Ribbon = {
+  seed: number;
+  from: number;
+  to: number;
+  leagues: number;
+  dress: string;
+  stRows: number;
+  blob: boolean;
+  shown: boolean;
+  status: string | null;
+  title: string | null;
+  sub: string | null;
+  unrolled: string | null;
+  chart: string | null;
+  prospect: string | null;
+  prospectVerb: string | null;
+  slipTitle: string | null;
+  where: string | null;
+  rows: number;
+  toName: string | null;
+  fromOptions: number[];
+  prospectShown: boolean;
+  hash: string;
+};
 type Row = { cls: string; num: string | undefined; strong: string | null; em: string | null; button: boolean };
 type RibbonKit = ReturnType<typeof ribbonKit>;
 
@@ -16,7 +39,11 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const k = ribbonKit(ctx);
 
   let svg1: string | null = null;
-  await step("RB1 to RB5e", async () => { const first = await rb1SetsOut(k); svg1 = await rb5PressedPlate(k); await rb5bTheSlip(k, first); });
+  await step("RB1 to RB5e", async () => {
+    const first = await rb1SetsOut(k);
+    svg1 = await rb5PressedPlate(k);
+    await rb5bTheSlip(k, first);
+  });
   await rb6PickedDestination(k);
   await step("RB7", () => rb7SameScroll(k, svg1));
   await step("RB8", () => rb8InkDress(k));
@@ -31,7 +58,9 @@ function ribbonKit(ctx: SuiteContext) {
     await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/faq/` });
     for (let i = 0; i < 100; i++) {
       let away = null;
-      try { away = await evaluate<boolean>(`!document.getElementById("rb-plate")`); } catch {}
+      try {
+        away = await evaluate<boolean>(`!document.getElementById("rb-plate")`);
+      } catch {}
       if (away) break;
       await sleep(50);
     }
@@ -42,7 +71,9 @@ function ribbonKit(ctx: SuiteContext) {
   const opened = async (label: string) => {
     for (let i = 0; i < 200; i++) {
       let s = null;
-      try { s = await state(); } catch {}
+      try {
+        s = await state();
+      } catch {}
       if (s && s.blob && s.status === "") return s;
       await sleep(75);
     }
@@ -60,12 +91,15 @@ async function rb1SetsOut({ evaluate, send, check, page, opened }: RibbonKit): P
     first.seed === 42 && first.from === 0 && first.leagues > 0 && first.shown,
     JSON.stringify({ from: first.from, to: first.to, leagues: first.leagues }),
   );
-  check("RB2 the render worker serves the page (no silent inline fallback)", await evaluate<boolean>(`window.__vellumRibbonUsesWorker() === true`));
+  check(
+    "RB2 the render worker serves the page (no silent inline fallback)",
+    await evaluate<boolean>(`window.__vellumRibbonUsesWorker() === true`),
+  );
   check(
     "RB3 the chart's folio names the journey, its world, its length and its dress",
-    /^Laukuwelua to .+ · Chart № 42$/.test(first.title!) && /^The Isle of Rahai · the road as the wayfarers' chain measured it, An\. \d+$/.test(
-      first.sub!) && /^unrolled in \d+ms · \d+ leagues · antique$/.test(
-      first.unrolled!),
+    /^Laukuwelua to .+ · Chart № 42$/.test(first.title!) &&
+      /^The Isle of Rahai · the road as the wayfarers' chain measured it, An\. \d+$/.test(first.sub!) &&
+      /^unrolled in \d+ms · \d+ leagues · antique$/.test(first.unrolled!),
     JSON.stringify({ title: first.title, sub: first.sub, unrolled: first.unrolled }),
   );
   check(
@@ -87,11 +121,33 @@ async function rb5PressedPlate({ check, svgOf }: RibbonKit): Promise<string> {
 }
 
 async function rb5bTheSlip({ evaluate, check, sleep }: RibbonKit, first: Ribbon): Promise<void> {
-  const rows = await evaluate<{ first: Row | null; last: Row | null; buttons: boolean }>(`(()=>{const lis=[...document.querySelectorAll("#rb-itinerary li")];const read=(li)=>({cls:li.className,num:(li.querySelector(".cr-num")||{}).textContent,strong:(li.querySelector("strong")||{}).textContent||null,em:(li.querySelector("em")||{}).textContent||null,button:!!li.querySelector("button.lean")});return{first:lis.length?read(lis[0]):null,last:lis.length?read(lis[lis.length-1]):null,buttons:lis.every((li)=>!!li.querySelector("button.lean"))};})()`);
+  const rows = await evaluate<{ first: Row | null; last: Row | null; buttons: boolean }>(
+    `(()=>{const lis=[...document.querySelectorAll("#rb-itinerary li")];const read=(li)=>({cls:li.className,num:(li.querySelector(".cr-num")||{}).textContent,strong:(li.querySelector("strong")||{}).textContent||null,em:(li.querySelector("em")||{}).textContent||null,button:!!li.querySelector("button.lean")});return{first:lis.length?read(lis[0]):null,last:lis.length?read(lis[lis.length-1]):null,buttons:lis.every((li)=>!!li.querySelector("button.lean"))};})()`,
+  );
   check(
     "RB5b the itinerary fills the slip: one row per event, the departure first as the capital at 0 leagues, the arrival last, every row a lean button; the slip's head names the journey",
-    first.rows === first.stRows && first.rows >= 4 && rows.first && rows.first.cls === "waypoint" && rows.first.num === "0" && rows.first.strong === "Laukuwelua" && rows.first.em === "the capital" && rows.last && rows.last.cls === "waypoint" && rows.last.strong === first.toName && rows.buttons && first.slipTitle === `Laukuwelua to ${first.toName}` && /^\d+ leagues · in .+ · An\. \d+$/.test(first.where!),
-    JSON.stringify({ rows: first.rows, stRows: first.stRows, first: rows.first, last: rows.last, slipTitle: first.slipTitle, where: first.where, toName: first.toName }),
+    first.rows === first.stRows &&
+      first.rows >= 4 &&
+      rows.first &&
+      rows.first.cls === "waypoint" &&
+      rows.first.num === "0" &&
+      rows.first.strong === "Laukuwelua" &&
+      rows.first.em === "the capital" &&
+      rows.last &&
+      rows.last.cls === "waypoint" &&
+      rows.last.strong === first.toName &&
+      rows.buttons &&
+      first.slipTitle === `Laukuwelua to ${first.toName}` &&
+      /^\d+ leagues · in .+ · An\. \d+$/.test(first.where!),
+    JSON.stringify({
+      rows: first.rows,
+      stRows: first.stRows,
+      first: rows.first,
+      last: rows.last,
+      slipTitle: first.slipTitle,
+      where: first.where,
+      toName: first.toName,
+    }),
   );
   check(
     "RB5e setting out from offers only places a road leaves: seed 42's orphan Tewetulua (24) is not among them (#494)",
@@ -101,36 +157,72 @@ async function rb5bTheSlip({ evaluate, check, sleep }: RibbonKit, first: Ribbon)
   await evaluate(`document.querySelectorAll("#rb-itinerary li .lean")[2].click()`);
   let leaned = null;
   for (let i = 0; i < 60; i++) {
-    try { leaned = await evaluate<{ zoomed: boolean; k: number; on: number; cx: number; cy: number; nx: number; ny: number }>(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;const t=getComputedStyle(document.getElementById("map")).transform;const m=/matrix\\(([^,]+),[^,]+,[^,]+,[^,]+,([^,]+),([^)]+)\\)/.exec(t);const k=m?Number(m[1]):1,x=m?Number(m[2]):0,y=m?Number(m[3]):0;const lis=[...document.querySelectorAll("#rb-itinerary li")];const on=lis.findIndex((li)=>li.classList.contains("on"));const row=lis[2];return{zoomed:vp.classList.contains("zoomed"),k,on,cx:(W/2-x)/(k*W),cy:(H/2-y)/(k*H),nx:Number(row.dataset.nx),ny:Number(row.dataset.ny)};})()`); } catch {}
+    try {
+      leaned = await evaluate<{
+        zoomed: boolean;
+        k: number;
+        on: number;
+        cx: number;
+        cy: number;
+        nx: number;
+        ny: number;
+      }>(
+        `(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;const t=getComputedStyle(document.getElementById("map")).transform;const m=/matrix\\(([^,]+),[^,]+,[^,]+,[^,]+,([^,]+),([^)]+)\\)/.exec(t);const k=m?Number(m[1]):1,x=m?Number(m[2]):0,y=m?Number(m[3]):0;const lis=[...document.querySelectorAll("#rb-itinerary li")];const on=lis.findIndex((li)=>li.classList.contains("on"));const row=lis[2];return{zoomed:vp.classList.contains("zoomed"),k,on,cx:(W/2-x)/(k*W),cy:(H/2-y)/(k*H),nx:Number(row.dataset.nx),ny:Number(row.dataset.ny)};})()`,
+      );
+    } catch {}
     if (leaned && leaned.zoomed && Math.abs(leaned.k - 2.6) < 0.02) break;
     await sleep(50);
   }
   check(
     "RB5c a row leans the Glass on its stretch: the sheet magnifies to the mockup's 2.6x, centred on the row's own seat, and the row is marked",
-    !!leaned && leaned.zoomed && Math.abs(leaned.k - 2.6) < 0.02 && leaned.on === 2 && Math.abs(leaned.cx - leaned.nx) < 1e-3 && Math.abs(leaned.cy - leaned.ny) < 1e-3,
+    !!leaned &&
+      leaned.zoomed &&
+      Math.abs(leaned.k - 2.6) < 0.02 &&
+      leaned.on === 2 &&
+      Math.abs(leaned.cx - leaned.nx) < 1e-3 &&
+      Math.abs(leaned.cy - leaned.ny) < 1e-3,
     JSON.stringify(leaned),
   );
-  await evaluate(`document.getElementById("map-viewport").dispatchEvent(new KeyboardEvent("keydown",{key:"0",bubbles:true}))`);
+  await evaluate(
+    `document.getElementById("map-viewport").dispatchEvent(new KeyboardEvent("keydown",{key:"0",bubbles:true}))`,
+  );
   for (let i = 0; i < 60; i++) {
     let home = null;
-    try { home = await evaluate<boolean>(`!document.getElementById("map-viewport").classList.contains("zoomed")`); } catch {}
+    try {
+      home = await evaluate<boolean>(`!document.getElementById("map-viewport").classList.contains("zoomed")`);
+    } catch {}
     if (home) break;
     await sleep(50);
   }
   check(
     "RB5d the roads out: the Explorer sheds the journey's keys, the Prospect takes the same world with the road's end as its town (#494 ruling 3)",
-    first.chart === "/explorer/#seed=42" && first.prospect === `/prospect/#seed=42&i=${first.to}` && first.prospectVerb === `See ${first.toName} in` && first.prospectShown,
-    JSON.stringify({ chart: first.chart, prospect: first.prospect, verb: first.prospectVerb, shown: first.prospectShown }),
+    first.chart === "/explorer/#seed=42" &&
+      first.prospect === `/prospect/#seed=42&i=${first.to}` &&
+      first.prospectVerb === `See ${first.toName} in` &&
+      first.prospectShown,
+    JSON.stringify({
+      chart: first.chart,
+      prospect: first.prospect,
+      verb: first.prospectVerb,
+      shown: first.prospectShown,
+    }),
   );
 }
 
 async function rb6PickedDestination({ evaluate, check, sleep, state }: RibbonKit): Promise<void> {
-  const picked = await evaluate<number | null>(`(()=>{const sel=document.getElementById("rb-to");const cur=sel.value;const opt=[...sel.options].find(o=>o.value!==cur);if(!opt)return null;sel.value=opt.value;sel.dispatchEvent(new Event("change"));return Number(opt.value);})()`);
+  const picked = await evaluate<number | null>(
+    `(()=>{const sel=document.getElementById("rb-to");const cur=sel.value;const opt=[...sel.options].find(o=>o.value!==cur);if(!opt)return null;sel.value=opt.value;sel.dispatchEvent(new Event("change"));return Number(opt.value);})()`,
+  );
   let redrawn = null;
   for (let i = 0; i < 200; i++) {
     let s = null;
-    try { s = await state(); } catch {}
-    if (s && s.to === picked && s.status === "") { redrawn = s; break; }
+    try {
+      s = await state();
+    } catch {}
+    if (s && s.to === picked && s.status === "") {
+      redrawn = s;
+      break;
+    }
     await sleep(75);
   }
   check(
@@ -140,7 +232,11 @@ async function rb6PickedDestination({ evaluate, check, sleep, state }: RibbonKit
   );
   check(
     "RB6b the redraw refills the slip and re-aims the prospect road at the new destination",
-    redrawn !== null && redrawn.rows === redrawn.stRows && redrawn.rows >= 2 && redrawn.prospect === `/prospect/#seed=42&i=${picked}` && redrawn.slipTitle === `Laukuwelua to ${redrawn.toName}`,
+    redrawn !== null &&
+      redrawn.rows === redrawn.stRows &&
+      redrawn.rows >= 2 &&
+      redrawn.prospect === `/prospect/#seed=42&i=${picked}` &&
+      redrawn.slipTitle === `Laukuwelua to ${redrawn.toName}`,
     JSON.stringify(redrawn && { rows: redrawn.rows, prospect: redrawn.prospect, slipTitle: redrawn.slipTitle }),
   );
 }
@@ -149,7 +245,11 @@ async function rb7SameScroll({ check, goto, opened, svgOf }: RibbonKit, svg1: st
   await goto("#seed=42");
   await opened("the same address, fresh visit");
   const svg2 = await svgOf();
-  check("RB7 the same address presses a byte-identical scroll", svg1 === svg2, `first ${String(svg1).length}b, second ${String(svg2).length}b`);
+  check(
+    "RB7 the same address presses a byte-identical scroll",
+    svg1 === svg2,
+    `first ${String(svg1).length}b, second ${String(svg2).length}b`,
+  );
 }
 
 async function rb8InkDress({ check, goto, opened }: RibbonKit): Promise<void> {

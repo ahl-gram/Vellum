@@ -73,7 +73,12 @@ function makeCycler(rng: Rng, pool: readonly string[]): () => string {
 
 type YearAt = (f: number) => number;
 
-function foundingYears(settlements: ReadonlyArray<SettlementCore>, rng: Rng, yearAt: YearAt, presentYear: number): number[] {
+function foundingYears(
+  settlements: ReadonlyArray<SettlementCore>,
+  rng: Rng,
+  yearAt: YearAt,
+  presentYear: number,
+): number[] {
   return settlements.map((s) => {
     const base = s.kind === "capital" ? 0.02 : s.kind === "town" ? 0.3 : 0.55;
     const f = base + rng.next() * 0.3;
@@ -83,14 +88,16 @@ function foundingYears(settlements: ReadonlyArray<SettlementCore>, rng: Rng, yea
 
 function ruinPicks(settlements: ReadonlyArray<SettlementCore>, seats: ReadonlyArray<number>, rng: Rng): number[] {
   const seatSet = new Set(seats);
-  const villageIdxs = settlements
-    .map((_, i) => i)
-    .filter((i) => settlements[i]!.kind === "village" && !seatSet.has(i));
+  const villageIdxs = settlements.map((_, i) => i).filter((i) => settlements[i]!.kind === "village" && !seatSet.has(i));
   const ruinCount = Math.max(0, Math.min(2, Math.floor(villageIdxs.length / 6)));
   return rng.shuffled(villageIdxs).slice(0, ruinCount);
 }
 
-function foundingEvents(settlements: ReadonlyArray<SettlementCore>, founded: ReadonlyArray<number>, founding: () => string): HistoricalEvent[] {
+function foundingEvents(
+  settlements: ReadonlyArray<SettlementCore>,
+  founded: ReadonlyArray<number>,
+  founding: () => string,
+): HistoricalEvent[] {
   const capIdx = settlements.findIndex((s) => s.kind === "capital");
   const townIdxs = settlements
     .map((_, i) => i)
@@ -106,7 +113,12 @@ function foundingEvents(settlements: ReadonlyArray<SettlementCore>, founded: Rea
   }));
 }
 
-function riseEvents(realmNames: ReadonlyArray<string>, rng: Rng, yearAt: YearAt, rise: () => string): HistoricalEvent[] {
+function riseEvents(
+  realmNames: ReadonlyArray<string>,
+  rng: Rng,
+  yearAt: YearAt,
+  rise: () => string,
+): HistoricalEvent[] {
   const events: HistoricalEvent[] = [];
   realmNames.forEach((rn, realmId) => {
     if (rng.next() < 0.7) {
@@ -150,10 +162,7 @@ function ruinEvents(
 ): HistoricalEvent[] {
   return ruinedIdx.map((i) => {
     const fy = founded[i]!;
-    const ay = Math.min(
-      presentYear - 1,
-      Math.round(fy + (presentYear - fy) * (0.4 + rng.next() * 0.5)),
-    );
+    const ay = Math.min(presentYear - 1, Math.round(fy + (presentYear - fy) * (0.4 + rng.next() * 0.5)));
     return {
       year: ay,
       kind: "ruin" as const,
@@ -168,8 +177,7 @@ export function simulateHistory(input: HistoryInput, rng: Rng): HistoryResult {
 
   const span = Math.min(900, Math.max(150, Math.round(presentYear * 0.7)));
   const epochStart = presentYear - span;
-  const yearAt = (f: number): number =>
-    Math.round(epochStart + Math.max(0, Math.min(1, f)) * span);
+  const yearAt = (f: number): number => Math.round(epochStart + Math.max(0, Math.min(1, f)) * span);
 
   const founded = foundingYears(settlements, rng, yearAt, presentYear);
 

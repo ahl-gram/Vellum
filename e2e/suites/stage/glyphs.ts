@@ -1,7 +1,15 @@
 // The chrome's text over the chart, piece by piece, for the contrast reads over a floored sheet (EA4 in stage.ts, NS1 in short.ts).
 import type { Payload } from "../../types.ts";
 
-export type Glyph = { piece: string; t: string; ink: [number, number, number]; row: number; x: number; w: number; disabled: boolean };
+export type Glyph = {
+  piece: string;
+  t: string;
+  ink: [number, number, number];
+  row: number;
+  x: number;
+  w: number;
+  disabled: boolean;
+};
 const PIECES = "header.chrome, .corner, .strip, .legend";
 
 // Every text node of the chrome whose box centre stands on the sheet, by piece; decor hidden from assistive technology (the nav's separator dots) is left out, and the ink is the computed colour, so a translucent ancestor reads darker ink than it paints and errs toward passing.

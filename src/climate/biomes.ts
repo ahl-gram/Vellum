@@ -57,12 +57,7 @@ function landBiome(rel: number, t: number, m: number): BiomeId {
   return BIOMES.jungle;
 }
 
-export function classifyBiomes(
-  elev: Field,
-  seaLevel: number,
-  climate: Climate,
-  elevSpan?: number,
-): Uint8Array {
+export function classifyBiomes(elev: Field, seaLevel: number, climate: Climate, elevSpan?: number): Uint8Array {
   const { data } = elev;
   const out = new Uint8Array(data.length);
 
@@ -81,11 +76,7 @@ export function classifyBiomes(
       continue;
     }
     const rel = (e - seaLevel) / span;
-    out[i] = landBiome(
-      rel,
-      climate.temperature.data[i] as number,
-      climate.moisture.data[i] as number,
-    );
+    out[i] = landBiome(rel, climate.temperature.data[i] as number, climate.moisture.data[i] as number);
   }
   return out;
 }

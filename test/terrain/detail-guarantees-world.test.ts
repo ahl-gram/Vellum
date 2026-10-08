@@ -14,11 +14,7 @@ import {
   rejectBridges,
 } from "../../src/terrain/detail-guarantees.ts";
 import { cellSegmentEdgePairs, fusingSaddles } from "../../test-support/saddle-probe.ts";
-import {
-  parentFusion,
-  parentMassesLost,
-  parentPartitionOnWindow,
-} from "../../test-support/parent-partition.ts";
+import { parentFusion, parentMassesLost, parentPartitionOnWindow } from "../../test-support/parent-partition.ts";
 
 const FULL = { u0: 0, v0: 0, u1: 1, v1: 1 } as const;
 const CW = 96;
@@ -112,7 +108,12 @@ function fusedCells(wc: WindowCase, field: Field): number {
 }
 
 // The floor covers a cell where the parent's OWN cell is land AND its interpolated surface still stands above the waterline; where only the interpolation rises, the parent charts water and the child may draw water.
-function assertFloorAndCount(wc: WindowCase, seed: number, cx: number, cy: number): { parentLandCells: number; drownedNoFloor: number } {
+function assertFloorAndCount(
+  wc: WindowCase,
+  seed: number,
+  cx: number,
+  cy: number,
+): { parentLandCells: number; drownedNoFloor: number } {
   let drownedNoFloor = 0;
   let parentLandCells = 0;
   for (let i = 0; i < CW * CH; i++) {
@@ -224,7 +225,11 @@ test("saddle census: the seed-42 world chart's three hairline picture-fuses, dra
   const { fusing } = fusingSaddles(c.parent, c.sea);
   assert.deepEqual(
     fusing.map((f) => [f.x, f.y]),
-    [[143, 76], [119, 103], [243, 103]],
+    [
+      [143, 76],
+      [119, 103],
+      [243, 103],
+    ],
     "the seed-42 world chart census moved",
   );
   const { ids, sizes } = labelLandmasses(c.parent, c.sea);
@@ -237,10 +242,16 @@ test("saddle census: the seed-42 world chart's three hairline picture-fuses, dra
       [gx === f.x ? "left" : "right", gy === f.y ? "top" : "bottom"].sort().join("|"),
     );
     for (const le of landEdges) {
-      assert.ok(!pairs.includes(le), `saddle ${f.x},${f.y}: the drawn coast cut off a land corner, so it no longer bridges`);
+      assert.ok(
+        !pairs.includes(le),
+        `saddle ${f.x},${f.y}: the drawn coast cut off a land corner, so it no longer bridges`,
+      );
     }
     const cornerSizes = [p1, p2].map(([gx, gy]) => sizes[ids[gx + gy * 320] as number] as number);
-    assert.ok(Math.min(...cornerSizes) <= 3, `saddle ${f.x},${f.y}: expected an islet-bump, got sizes ${cornerSizes.join(",")}`);
+    assert.ok(
+      Math.min(...cornerSizes) <= 3,
+      `saddle ${f.x},${f.y}: expected an islet-bump, got sizes ${cornerSizes.join(",")}`,
+    );
   }
 });
 

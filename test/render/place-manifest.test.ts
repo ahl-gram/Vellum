@@ -55,14 +55,8 @@ test("nx/ny reproduce renderMap's projected pixel coords for seed 42", () => {
     const s = world.settlements[i]!;
     const px = p.nx * m.widthPx;
     const py = p.ny * m.heightPx;
-    assert.ok(
-      Math.abs(px - expectedPx(s.x)) < EPS,
-      `place ${i} px: got ${px}, want ${expectedPx(s.x)}`,
-    );
-    assert.ok(
-      Math.abs(py - expectedPy(s.y)) < EPS,
-      `place ${i} py: got ${py}, want ${expectedPy(s.y)}`,
-    );
+    assert.ok(Math.abs(px - expectedPx(s.x)) < EPS, `place ${i} px: got ${px}, want ${expectedPx(s.x)}`);
+    assert.ok(Math.abs(py - expectedPy(s.y)) < EPS, `place ${i} py: got ${py}, want ${expectedPy(s.y)}`);
   });
 });
 

@@ -13,16 +13,8 @@ function smoothWeighted(pts: ReadonlyArray<Wpt>, iterations: number): Wpt[] {
       const p = cur[i] as Wpt;
       const q = cur[i + 1] as Wpt;
       next.push(
-        [
-          0.75 * p[0] + 0.25 * q[0],
-          0.75 * p[1] + 0.25 * q[1],
-          0.75 * p[2] + 0.25 * q[2],
-        ],
-        [
-          0.25 * p[0] + 0.75 * q[0],
-          0.25 * p[1] + 0.75 * q[1],
-          0.25 * p[2] + 0.75 * q[2],
-        ],
+        [0.75 * p[0] + 0.25 * q[0], 0.75 * p[1] + 0.25 * q[1], 0.75 * p[2] + 0.25 * q[2]],
+        [0.25 * p[0] + 0.75 * q[0], 0.25 * p[1] + 0.75 * q[1], 0.25 * p[2] + 0.75 * q[2]],
       );
     }
     next.push(cur[cur.length - 1] as Wpt);
@@ -52,7 +44,10 @@ export function riversLayer(ctx: RenderCtx): SvgNode {
       const w = (slice[Math.floor(slice.length / 2)] as Wpt)[2];
       segs.push(
         el("path", {
-          d: pathFrom(slice.map(([x, y]) => [x, y] as const), false),
+          d: pathFrom(
+            slice.map(([x, y]) => [x, y] as const),
+            false,
+          ),
           fill: "none",
           stroke: style.river,
           "stroke-width": w,

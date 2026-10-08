@@ -33,10 +33,7 @@ export type HamletCandidate = {
   readonly founded: number;
 };
 
-export function nameSetOf(
-  settlements: ReadonlyArray<NamedSettlement>,
-  n: FeatureNames,
-): Set<string> {
+export function nameSetOf(settlements: ReadonlyArray<NamedSettlement>, n: FeatureNames): Set<string> {
   const taken = new Set<string>();
   for (const s of settlements) {
     taken.add(s.name.toLowerCase());
@@ -56,11 +53,7 @@ export function worldNameSet(world: World): Set<string> {
 }
 
 /** Null when the namespace is too tight: the point is dropped, never renamed, or retry order would break window-independence. */
-export function hamletName(
-  rng: Rng,
-  culture: Culture,
-  taken: ReadonlySet<string>,
-): string | null {
+export function hamletName(rng: Rng, culture: Culture, taken: ReadonlySet<string>): string | null {
   const namer = createNamer(rng, culture);
   for (let i = 0; i < NAME_DRAWS; i++) {
     const name = namer.name("settlement");
@@ -105,10 +98,7 @@ type HamletGround = { readonly slope: Field; readonly span: number };
 function hamletSite(world: World, ground: HamletGround, wx: number, wy: number): number | null {
   const { gridW, gridH } = world.recipe;
   const { data } = world.elev;
-  if (
-    wx < EDGE_MARGIN || wy < EDGE_MARGIN ||
-    wx >= gridW - EDGE_MARGIN || wy >= gridH - EDGE_MARGIN
-  ) {
+  if (wx < EDGE_MARGIN || wy < EDGE_MARGIN || wx >= gridW - EDGE_MARGIN || wy >= gridH - EDGE_MARGIN) {
     return null;
   }
   const i = wx + wy * gridW;
@@ -118,10 +108,7 @@ function hamletSite(world: World, ground: HamletGround, wx: number, wy: number):
   if (biome === BIOMES.snow || biome === BIOMES.alpine) return null;
   if ((e - world.seaLevel) / ground.span > MAX_ELEV_BAND) return null;
 
-  return (
-    (1 - Math.min(1, (ground.slope.data[i] as number) * 8)) +
-    (BIOME_APPEAL[biome] ?? 0.3)
-  );
+  return 1 - Math.min(1, (ground.slope.data[i] as number) * 8) + (BIOME_APPEAL[biome] ?? 0.3);
 }
 
 function shoreAndRiver(world: World, wx: number, wy: number): { harbor: boolean; onRiver: boolean } {
@@ -164,9 +151,7 @@ function hamletAt(
   if (score === null || roll >= DENSITY * score) return null;
 
   const tooNear = world.settlements.some(
-    (s) =>
-      Math.hypot(s.x - u * (gridW - 1), s.y - v * (gridH - 1)) <
-      HAMLET_SPACING_WORLD_CELLS,
+    (s) => Math.hypot(s.x - u * (gridW - 1), s.y - v * (gridH - 1)) < HAMLET_SPACING_WORLD_CELLS,
   );
   if (tooNear) return null;
 
@@ -176,8 +161,7 @@ function hamletAt(
   if (name === null) return null;
 
   const presentYear = world.title.year;
-  const founded =
-    presentYear - 8 - r.fork("age").int(Math.max(1, Math.min(240, presentYear - 16)));
+  const founded = presentYear - 8 - r.fork("age").int(Math.max(1, Math.min(240, presentYear - 16)));
 
   return { u, v, name, harbor, onRiver, score, founded };
 }
@@ -205,12 +189,7 @@ export function hamletCandidates(world: World, window: UvWindow): HamletCandidat
   return out;
 }
 
-export function placeHamlets(
-  world: World,
-  window: UvWindow,
-  elev: Field,
-  seaLevel: number,
-): NamedSettlement[] {
+export function placeHamlets(world: World, window: UvWindow, elev: Field, seaLevel: number): NamedSettlement[] {
   const candidates = hamletCandidates(world, window);
   if (candidates.length === 0) return [];
   const gridW = elev.w;

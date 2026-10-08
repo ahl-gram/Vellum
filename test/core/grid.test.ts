@@ -1,14 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import {
-  createField,
-  mapField,
-  minMax,
-  normalized,
-  quantile,
-  NEIGHBORS_4,
-  NEIGHBORS_8,
-} from "../../src/core/grid.ts";
+import { createField, mapField, minMax, normalized, quantile, NEIGHBORS_4, NEIGHBORS_8 } from "../../src/core/grid.ts";
 
 test("createField fills via (x, y) callback in row-major order", () => {
   const f = createField(4, 3, (x, y) => x + y * 10);

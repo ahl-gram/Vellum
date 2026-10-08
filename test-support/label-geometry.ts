@@ -7,9 +7,7 @@ export const CAPS_WIDTH_FACTOR = 0.72;
 export const MIXED_WIDTH_FACTOR = 0.56;
 
 function autoWidthFactor(text: string): number {
-  return text === text.toUpperCase() && /[A-Za-z]/.test(text)
-    ? CAPS_WIDTH_FACTOR
-    : MIXED_WIDTH_FACTOR;
+  return text === text.toUpperCase() && /[A-Za-z]/.test(text) ? CAPS_WIDTH_FACTOR : MIXED_WIDTH_FACTOR;
 }
 
 export type LabelNode = {

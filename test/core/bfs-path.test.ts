@@ -28,11 +28,7 @@ test("start === goal yields the single-cell chain", () => {
 });
 
 test("routes around a wall instead of through it", () => {
-  const { w, h, passable } = pic([
-    "..#..",
-    "..#..",
-    ".....",
-  ]);
+  const { w, h, passable } = pic(["..#..", "..#..", "....."]);
   const at = cell(w);
   const path = bfsPath(w, h, at(0, 0), (c) => c === at(4, 0), passable)!;
   assert.ok(path, "a route exists around the wall");
@@ -45,13 +41,7 @@ test("routes around a wall instead of through it", () => {
 });
 
 test("returns null when the goal is unreachable (an enclosed island)", () => {
-  const { w, h, passable } = pic([
-    ".....",
-    ".###.",
-    ".#.#.",
-    ".###.",
-    ".....",
-  ]);
+  const { w, h, passable } = pic([".....", ".###.", ".#.#.", ".###.", "....."]);
   const at = cell(w);
   const path = bfsPath(w, h, at(0, 0), (c) => c === at(2, 2), passable);
   assert.equal(path, null);
@@ -59,13 +49,22 @@ test("returns null when the goal is unreachable (an enclosed island)", () => {
 
 test("returns null when the goal predicate matches nothing", () => {
   const { w, h, passable } = pic(["..", ".."]);
-  assert.equal(bfsPath(w, h, 0, () => false, passable), null);
+  assert.equal(
+    bfsPath(w, h, 0, () => false, passable),
+    null,
+  );
 });
 
 test("an impassable start still reaches a goal it already stands on", () => {
   // The sea-leg launch calls this from a LAND port with a sea-only passability test, so the start must be allowed to sit off the passable set.
   const { w, h } = pic(["..", ".."]);
-  const path = bfsPath(w, h, 0, (c) => c === 0, () => false);
+  const path = bfsPath(
+    w,
+    h,
+    0,
+    (c) => c === 0,
+    () => false,
+  );
   assert.deepEqual(path, [0]);
 });
 
@@ -84,11 +83,7 @@ test("finds the NEAREST goal when several match (first-discovered wins)", () => 
 });
 
 test("consecutive cells in the chain are always 8-adjacent (a legal grid step)", () => {
-  const { w, h, passable } = pic([
-    ".....",
-    ".###.",
-    ".....",
-  ]);
+  const { w, h, passable } = pic([".....", ".###.", "....."]);
   const at = cell(w);
   const path = bfsPath(w, h, at(0, 0), (c) => c === at(4, 2), passable)!;
   for (let i = 1; i < path.length; i++) {
@@ -100,11 +95,7 @@ test("consecutive cells in the chain are always 8-adjacent (a legal grid step)",
 });
 
 test("deterministic: the same inputs reconstruct the byte-identical chain", () => {
-  const { w, h, passable } = pic([
-    ".....",
-    "..#..",
-    ".....",
-  ]);
+  const { w, h, passable } = pic([".....", "..#..", "....."]);
   const at = cell(w);
   const a = bfsPath(w, h, at(0, 0), (c) => c === at(4, 2), passable);
   const b = bfsPath(w, h, at(0, 0), (c) => c === at(4, 2), passable);

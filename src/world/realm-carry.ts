@@ -60,9 +60,7 @@ export function realmBorderChains(world: World): ReadonlyArray<RealmRing> {
   if (cached) return cached;
   const { w, h } = world.elev;
   const segs = labelBorderSegments(world.realms.labels, w, h);
-  const chains = chainBorderSegments(segs).map(
-    (chain) => chaikinSmooth(chain, false, 2) as RealmRing,
-  );
+  const chains = chainBorderSegments(segs).map((chain) => chaikinSmooth(chain, false, 2) as RealmRing);
   borderCache.set(world, chains);
   return chains;
 }
@@ -75,14 +73,7 @@ export function mapChainsToWindow(
   gridW: number,
   gridH: number,
 ): ReadonlyArray<RealmRing> {
-  const mapped = mapRingsToWindow(
-    [{ realm: 0, rings: chains }],
-    window,
-    parentW,
-    parentH,
-    gridW,
-    gridH,
-  );
+  const mapped = mapRingsToWindow([{ realm: 0, rings: chains }], window, parentW, parentH, gridW, gridH);
   return mapped[0]?.rings ?? [];
 }
 
@@ -92,12 +83,7 @@ export function realmCarryRings(world: World): RealmRings {
   const { w, h } = world.elev;
   const { data } = world.elev;
   const sl = world.seaLevel;
-  const grown = growRealmLabels(
-    world.realms.labels,
-    (i) => (data[i] as number) <= sl,
-    w,
-    h,
-  );
+  const grown = growRealmLabels(world.realms.labels, (i) => (data[i] as number) <= sl, w, h);
   const out: Array<{ realm: number; rings: RealmRing[] }> = [];
   for (let realm = 0; realm < world.realms.seats.length; realm++) {
     const indicator = createField(w, h, (x, y) => (grown[x + y * w] === realm ? 1 : 0));

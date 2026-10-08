@@ -6,22 +6,9 @@ import type { NamedSettlement, World } from "./types.ts";
 
 /** Pure functions of a finished World, never imported by generate.ts; randomness comes only from createRng(seed).fork("daily-hunt"), so no world-generation stream reshuffles and no chart byte changes. */
 
-export {
-  buildClues,
-  type Clue,
-  type ClueKind,
-} from "./daily-hunt-clues.ts";
-export {
-  TERRAIN_RADIUS,
-  type ClueFindability,
-  type TerrainBand,
-} from "./daily-hunt-clue-facts.ts";
-export {
-  classifyClick,
-  classifyDistanceBand,
-  type ClickFeedback,
-  type DistanceBand,
-} from "./daily-hunt-click.ts";
+export { buildClues, type Clue, type ClueKind } from "./daily-hunt-clues.ts";
+export { TERRAIN_RADIUS, type ClueFindability, type TerrainBand } from "./daily-hunt-clue-facts.ts";
+export { classifyClick, classifyDistanceBand, type ClickFeedback, type DistanceBand } from "./daily-hunt-click.ts";
 
 export type Quarry = {
   readonly idx: number;
@@ -43,10 +30,7 @@ export type Reveal = {
   readonly line: string;
 };
 
-export function chooseQuarry(
-  world: World,
-  opts: { exclude?: ReadonlySet<number> } = {},
-): Quarry | null {
+export function chooseQuarry(world: World, opts: { exclude?: ReadonlySet<number> } = {}): Quarry | null {
   const { exclude } = opts;
   const base = quarryPool(world);
   if (base.length === 0) return null;
@@ -58,11 +42,7 @@ export function chooseQuarry(
   return { idx: chosen.idx, settlement: chosen.s };
 }
 
-export function legendExcluded(
-  world: World,
-  legendBox: LegendBox | null,
-  widthPx = 1500,
-): ReadonlySet<number> {
+export function legendExcluded(world: World, legendBox: LegendBox | null, widthPx = 1500): ReadonlySet<number> {
   const out = new Set<number>();
   if (!legendBox) return out;
   const proj = createProjection(world.elev.w, world.elev.h, widthPx, Math.round(widthPx * 0.045));
@@ -89,12 +69,8 @@ export function revealFormerLine(r: Reveal): string | null {
 export function revealLore(world: World, quarry: Quarry): Reveal {
   const s = quarry.settlement;
   if (s.ruined) {
-    const event = world.history.events.find(
-      (e) => e.kind === "ruin" && e.settlement === quarry.idx,
-    );
-    const line = event
-      ? event.text
-      : `${s.name} is marked on older charts, yet no living hand keeps its survey.`;
+    const event = world.history.events.find((e) => e.kind === "ruin" && e.settlement === quarry.idx);
+    const line = event ? event.text : `${s.name} is marked on older charts, yet no living hand keeps its survey.`;
     return { name: s.name, founded: s.founded, line };
   }
   const lore = createLoreWriter(world, createRng(world.recipe.seed).fork("daily-hunt-lore"));

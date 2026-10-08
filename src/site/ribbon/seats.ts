@@ -41,20 +41,39 @@ export function bindRibbonRoom(roomEls: RoomFurniture): Sheet {
   zoom.attach();
   bindGlassKeys(roomEls.viewport, zoom);
   const box = () => ({ W: roomEls.viewport.clientWidth || 1, H: roomEls.viewport.clientHeight || 1 });
-  const room = bindRoom({ frame: roomEls.stage, sheet: roomEls.sheet, aspect: () => RIBBON_W / RIBBON_H, camera: {
-    hold: () => { const { W, H } = box(); return cameraFromTransform(zoom.getState(), W, H); },
-    restore: (cam) => { const { W, H } = box(); zoom.refit(transformFromCamera(cam, W, H)); },
-  } });
+  const room = bindRoom({
+    frame: roomEls.stage,
+    sheet: roomEls.sheet,
+    aspect: () => RIBBON_W / RIBBON_H,
+    camera: {
+      hold: () => {
+        const { W, H } = box();
+        return cameraFromTransform(zoom.getState(), W, H);
+      },
+      restore: (cam) => {
+        const { W, H } = box();
+        zoom.refit(transformFromCamera(cam, W, H));
+      },
+    },
+  });
   return {
     room,
     rebase: () => zoom.rebase(),
-    lean: (nx, ny) => { const { W, H } = box(); zoom.zoomTo(transformFromCamera({ cx: nx, cy: ny, k: LEAN_K }, W, H)); },
+    lean: (nx, ny) => {
+      const { W, H } = box();
+      zoom.zoomTo(transformFromCamera({ cx: nx, cy: ny, k: LEAN_K }, W, H));
+    },
   };
 }
 
 type Facts = Omit<RibbonPlateData, "svg" | "options" | "reachable">;
 
-export function showPlate(roomEls: RoomFurniture, res: Pick<Facts, "fromName" | "toName">, seed: number, url: string): void {
+export function showPlate(
+  roomEls: RoomFurniture,
+  res: Pick<Facts, "fromName" | "toName">,
+  seed: number,
+  url: string,
+): void {
   roomEls.plate.src = url;
   roomEls.plate.alt = `The road from ${res.fromName} to ${res.toName}, chart ${seed}`;
   roomEls.plate.hidden = false;
@@ -91,7 +110,11 @@ function rowNode(r: RibbonRow, onLean: (row: RibbonRow, li: HTMLLIElement) => vo
   return li;
 }
 
-export function writeItinerary(roomEls: RoomFurniture, res: Facts, onLean: (row: RibbonRow, li: HTMLLIElement) => void): void {
+export function writeItinerary(
+  roomEls: RoomFurniture,
+  res: Facts,
+  onLean: (row: RibbonRow, li: HTMLLIElement) => void,
+): void {
   roomEls.slipTitle.textContent = `${res.fromName} to ${res.toName}`;
   roomEls.slipWhere.textContent = `${Math.round(res.leagues)} leagues · in ${res.realm ?? res.title} · An. ${res.year}`;
   roomEls.itinerary.replaceChildren(...res.events.map((r) => rowNode(r, onLean)));

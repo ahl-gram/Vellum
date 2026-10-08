@@ -1,66 +1,183 @@
 /* The Broadside: the Explorer's control sheet on the slip; the voice is house.css's, the slip's dress atelier.css's, only the ledger's geometry and its own dressings live here. */
 
-.broadside .panel { padding: 0.35rem 0 0.55rem; min-width: 0; }
-.broadside .panel + .panel { border-top: 1px solid var(--line-tan); margin-top: 0.5rem; padding-top: 0.9rem; }
-.broadside .panel-head { margin: 0; }
+.broadside .panel {
+  padding: 0.35rem 0 0.55rem;
+  min-width: 0;
+}
+.broadside .panel + .panel {
+  border-top: 1px solid var(--line-tan);
+  margin-top: 0.5rem;
+  padding-top: 0.9rem;
+}
+.broadside .panel-head {
+  margin: 0;
+}
 .broadside .panel-gloss {
-  font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
-  font-style: italic; font-size: 0.85rem; color: var(--ink-brown);
+  font-family: var(--font-flourish, "Iowan Old Style", "Palatino", Georgia, serif);
+  font-style: italic;
+  font-size: 0.85rem;
+  color: var(--ink-brown);
   margin: 0.1rem 0 0.55rem;
 }
 
 /* Five columns: label, endpoint word, track, endpoint word, readout. Ordinary controls span the last four (.l-ctl); slider rows sit on the grid itself so both tracks share the one track column and land twin-length (`BR1b` in `e2e/suites/broadside.ts`). */
-.broadside .ledger { display: grid; grid-template-columns: auto auto 1fr auto auto;
-  gap: 0.5rem 0.6rem; align-items: center; }
-.broadside .l-label { grid-column: 1; text-align: right; white-space: nowrap; }
-.broadside .l-label label { font-size: 0.85rem; letter-spacing: 0.05em; color: var(--ink-brown); }
-.broadside .l-ctl { grid-column: 2 / -1; display: flex; align-items: center; gap: 0.5rem; min-width: 0; }
+.broadside .ledger {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto auto;
+  gap: 0.5rem 0.6rem;
+  align-items: center;
+}
+.broadside .l-label {
+  grid-column: 1;
+  text-align: right;
+  white-space: nowrap;
+}
+.broadside .l-label label {
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  color: var(--ink-brown);
+}
+.broadside .l-ctl {
+  grid-column: 2 / -1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
 .broadside .l-ctl > select,
-.broadside .l-ctl > input[type="number"] { flex: 1; min-width: 0; }
+.broadside .l-ctl > input[type="number"] {
+  flex: 1;
+  min-width: 0;
+}
 /* Columns pinned explicitly: auto-placement would re-deal the row when the endpoint words drop out at 560px. */
-.broadside .ledger > .land-end-min { grid-column: 2; justify-self: end; }
-.broadside .ledger > input[type="range"] { grid-column: 3; width: 100%; min-width: 4rem;
-  accent-color: var(--ink-dark); margin: 0; }
-.broadside .ledger > .land-end-max { grid-column: 4; }
-.broadside .ledger > .land-readout { grid-column: 5; }
-.land-end { font-size: 0.72rem; font-style: italic; color: var(--ink-faded); white-space: nowrap; }
+.broadside .ledger > .land-end-min {
+  grid-column: 2;
+  justify-self: end;
+}
+.broadside .ledger > input[type="range"] {
+  grid-column: 3;
+  width: 100%;
+  min-width: 4rem;
+  accent-color: var(--ink-dark);
+  margin: 0;
+}
+.broadside .ledger > .land-end-max {
+  grid-column: 4;
+}
+.broadside .ledger > .land-readout {
+  grid-column: 5;
+}
+.land-end {
+  font-size: 0.72rem;
+  font-style: italic;
+  color: var(--ink-faded);
+  white-space: nowrap;
+}
 /* Reserved readout width: "34% land" and "warp 0.55" must never push their neighbours as they change length. */
-.land-readout { font-style: italic; color: var(--ink-brown); font-size: 0.85rem;
-  font-variant-numeric: tabular-nums; min-width: 4.6rem; text-align: right; }
+.land-readout {
+  font-style: italic;
+  color: var(--ink-brown);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  min-width: 4.6rem;
+  text-align: right;
+}
 
 /* The checkbox hides by opacity, not display, so assistive tech still reaches it; the check mark fills a reserved ::before slot so state reads by shape as well as fill. */
-.broadside .seals { flex-wrap: wrap; }
-.broadside label.check.seal { display: inline-flex; align-items: center; gap: 0.35rem;
-  cursor: pointer; user-select: none;
-  font-size: 0.85rem; letter-spacing: 0.05em;
-  border: 1.5px solid var(--ink-brown); border-radius: 4px; padding: 0.28rem 0.6rem;
-  background: var(--control-cream); color: var(--ink-brown); }
-.broadside label.check.seal:hover { background: var(--parchment-bright); }
-.broadside .seal input { position: absolute; opacity: 0; width: 1px; height: 1px; }
-.broadside .seal::before { content: ""; width: 0.72em; display: inline-block; }
-.broadside .seal:has(input:checked) { background: var(--ink-dark);
-  border-color: var(--ink-dark); color: var(--chart-paper); }
+.broadside .seals {
+  flex-wrap: wrap;
+}
+.broadside label.check.seal {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  border: 1.5px solid var(--ink-brown);
+  border-radius: 4px;
+  padding: 0.28rem 0.6rem;
+  background: var(--control-cream);
+  color: var(--ink-brown);
+}
+.broadside label.check.seal:hover {
+  background: var(--parchment-bright);
+}
+.broadside .seal input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+.broadside .seal::before {
+  content: "";
+  width: 0.72em;
+  display: inline-block;
+}
+.broadside .seal:has(input:checked) {
+  background: var(--ink-dark);
+  border-color: var(--ink-dark);
+  color: var(--chart-paper);
+}
 /* Without this the unchecked hover's bright cream would outrank the dark fill and wash the label out light-on-light right after the click. */
-.broadside label.check.seal:has(input:checked):hover { background: var(--ink-press);
-  border-color: var(--ink-press); }
-.broadside .seal:has(input:checked)::before { content: "\2713"; }
-.broadside .seal:has(input:focus-visible) { outline: 2px solid var(--ink-dark); outline-offset: 2px; }
+.broadside label.check.seal:has(input:checked):hover {
+  background: var(--ink-press);
+  border-color: var(--ink-press);
+}
+.broadside .seal:has(input:checked)::before {
+  content: "\2713";
+}
+.broadside .seal:has(input:focus-visible) {
+  outline: 2px solid var(--ink-dark);
+  outline-offset: 2px;
+}
 
-a.fn { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif);
-  text-decoration: none; color: var(--ink-brown);
-  font-size: 0.95em; vertical-align: super; line-height: 0; padding: 0 0.15em;
-  display: inline-block; } /* a transformable box, for the tip below: an inline box takes no transform */
-a.fn:hover, a.fn:focus-visible { color: var(--ink-dark); }
-a.fn:hover { transform: translateY(var(--raise)) rotate(-0.6deg); }
+a.fn {
+  font-family: var(--font-flourish, "Iowan Old Style", "Palatino", Georgia, serif);
+  text-decoration: none;
+  color: var(--ink-brown);
+  font-size: 0.95em;
+  vertical-align: super;
+  line-height: 0;
+  padding: 0 0.15em;
+  display: inline-block;
+} /* a transformable box, for the tip below: an inline box takes no transform */
+a.fn:hover,
+a.fn:focus-visible {
+  color: var(--ink-dark);
+}
+a.fn:hover {
+  transform: translateY(var(--raise)) rotate(-0.6deg);
+}
 /* Native popover (the UA [popover] rule keeps it display:none until shown); position fixed because static CSS cannot place a top-layer box relative to an anchor, so `place` in `src/site/explorer/footnotes.ts` seats it at show time. */
-.fn-note { position: fixed; margin: 0; inset: auto; width: 15.5rem;
+.fn-note {
+  position: fixed;
+  margin: 0;
+  inset: auto;
+  width: 15.5rem;
   transform: rotate(-0.4deg);
-  background: var(--parchment-panel); border: 1px solid var(--line-tan);
+  background: var(--parchment-panel);
+  border: 1px solid var(--line-tan);
   box-shadow: 0 4px 14px rgb(from var(--chart-ink) r g b / 0.18);
   padding: 0.6rem 0.75rem 0.65rem;
-  font-size: 0.8rem; line-height: 1.45; color: var(--ink-dark); }
-.fn-note .fn-head { display: block; font-variant: small-caps; letter-spacing: 0.08em;
-  color: var(--ink-faded); font-size: 0.82rem; font-weight: 400; margin-bottom: 0.2rem; }
-.fn-note > a { display: block; margin-top: 0.3rem; font-style: italic;
-  font-size: 0.78rem; color: var(--ink-brown); } /* >= 12px rendered: the back-matter link must stay legible */
-
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--ink-dark);
+}
+.fn-note .fn-head {
+  display: block;
+  font-variant: small-caps;
+  letter-spacing: 0.08em;
+  color: var(--ink-faded);
+  font-size: 0.82rem;
+  font-weight: 400;
+  margin-bottom: 0.2rem;
+}
+.fn-note > a {
+  display: block;
+  margin-top: 0.3rem;
+  font-style: italic;
+  font-size: 0.78rem;
+  color: var(--ink-brown);
+} /* >= 12px rendered: the back-matter link must stay legible */

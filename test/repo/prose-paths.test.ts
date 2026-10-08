@@ -22,7 +22,10 @@ const git = (args: string[], input?: string) =>
   spawnSync("git", args, { cwd: REPO, encoding: "utf8", input, timeout: GIT_TIMEOUT_MS });
 
 const listing = git(["ls-files", "-z"]);
-if (listing.status !== 0) throw new Error(`git ls-files failed (${listing.status}, ${listing.error ?? listing.stderr}): the tracked set would be empty or partial`);
+if (listing.status !== 0)
+  throw new Error(
+    `git ls-files failed (${listing.status}, ${listing.error ?? listing.stderr}): the tracked set would be empty or partial`,
+  );
 const tracked: ReadonlyArray<string> = listing.stdout.split("\0").filter(Boolean);
 const extensions: ReadonlySet<string> = new Set(tracked.map((f) => extname(f).slice(1)).filter(Boolean));
 const byBasename: ReadonlyMap<string, ReadonlyArray<string>> = new Map(
@@ -54,7 +57,8 @@ function citationsIn(file: string): ReadonlyArray<Citation> {
 
 function localVerdict(dir: string, path: string): string | true | null {
   if (isPlaceholder(path) || MEMORY_PREFIX.test(basename(path))) return true;
-  if (!insideRepo(resolve(REPO, path)) || !insideRepo(resolve(REPO, dir, path))) return `\`${path}\`, which leaves the repo`;
+  if (!insideRepo(resolve(REPO, path)) || !insideRepo(resolve(REPO, dir, path)))
+    return `\`${path}\`, which leaves the repo`;
   if (existsSync(resolve(REPO, path)) || existsSync(resolve(REPO, dir, path))) return true;
   return null;
 }
@@ -69,7 +73,8 @@ function gitIgnored(paths: ReadonlyArray<string>): ReadonlySet<string> {
 
 function remoteVerdict(dir: string, path: string, served: boolean, ignored: ReadonlySet<string>): string | null {
   if (ignored.has(path)) return null;
-  if (served) return `\`/${path.slice(SERVED_ROOT.length + 1)}\`, which is not served: ${path} neither exists nor is gitignored`;
+  if (served)
+    return `\`/${path.slice(SERVED_ROOT.length + 1)}\`, which is not served: ${path} neither exists nor is gitignored`;
   const namesakes = byBasename.get(path) ?? [];
   if (!path.includes("/") && namesakes.length === 1) return null;
   const by = path.includes("/") ? "" : `, nor as a unique basename (matches ${namesakes.length} tracked files)`;
@@ -85,8 +90,7 @@ function resolveCitations(citations: ReadonlyArray<Citation>): ReadonlyArray<Ver
   const ignored = gitIgnored([...new Set(staged.filter((s) => s.local === null).map((s) => s.path))]);
   return staged.map(({ citation, served, path, local }) => ({
     citation,
-    finding:
-      local === true ? null : local ?? remoteVerdict(dirname(citation.file), path, served, ignored),
+    finding: local === true ? null : (local ?? remoteVerdict(dirname(citation.file), path, served, ignored)),
   }));
 }
 
@@ -98,17 +102,23 @@ test("every backticked file path in the prose roots resolves", () => {
     const files = walkMarkdown(root);
     return { root, files: files.length, citations: files.flatMap(citationsIn) };
   });
-  for (const { root, files } of perRoot) assert.ok(files > 0, `${root} yielded no markdown: the walk is broken, or the root has none and leaves PROSE_ROOTS`);
+  for (const { root, files } of perRoot)
+    assert.ok(
+      files > 0,
+      `${root} yielded no markdown: the walk is broken, or the root has none and leaves PROSE_ROOTS`,
+    );
   const citations = perRoot.flatMap((r) => r.citations);
   assert.ok(citations.length > 0, "no backticked path in any root: the extraction or the reader is broken");
-  for (const ext of EXTENSION_FLOOR) assert.ok(extensions.has(ext), `no tracked .${ext} file: the derived extension set shrank`);
+  for (const ext of EXTENSION_FLOOR)
+    assert.ok(extensions.has(ext), `no tracked .${ext} file: the derived extension set shrank`);
   const findings = findingsOf(resolveCitations(citations));
   assert.deepEqual(
     findings,
     [],
     `${findings.length} backticked path(s) in prose do not resolve. A backticked path claims the file is in the repo or ` +
       `deliberately kept out of it: fix the path, cite a generated file with its directory, write a retired file or ` +
-      `an example name without backticks, and a file outside this repo at its real home under ~.\n  ` + findings.join("\n  "),
+      `an example name without backticks, and a file outside this repo at its real home under ~.\n  ` +
+      findings.join("\n  "),
   );
 });
 
@@ -122,13 +132,29 @@ test("each resolution rule has a live witness, and each finding class has one", 
 
   absent("references/flake-record.md");
   absent("handbook/specs/references/flake-record.md");
-  assert.match(verdict("handbook/specs", "references/flake-record.md") ?? "", /resolves neither/, "PR #618's round 2, the incident");
+  assert.match(
+    verdict("handbook/specs", "references/flake-record.md") ?? "",
+    /resolves neither/,
+    "PR #618's round 2, the incident",
+  );
   absent("hooks");
-  assert.match(verdict(".", "hooks/README.md") ?? "", /resolves neither/, "CLAUDE.md's dangler, skill-relative from the root");
+  assert.match(
+    verdict(".", "hooks/README.md") ?? "",
+    /resolves neither/,
+    "CLAUDE.md's dangler, skill-relative from the root",
+  );
   assert.ok((byBasename.get("index.css")?.length ?? 0) > 1, "the ambiguous-basename witness needs namesakes");
-  assert.match(verdict("handbook/specs", "index.css") ?? "", /matches \d+ tracked files/, "a bare name several files carry");
+  assert.match(
+    verdict("handbook/specs", "index.css") ?? "",
+    /matches \d+ tracked files/,
+    "a bare name several files carry",
+  );
   assert.equal(byBasename.get("no-such-file.ts"), undefined);
-  assert.match(verdict("handbook/specs", "no-such-file.ts") ?? "", /matches 0 tracked files/, "a bare name nothing carries");
+  assert.match(
+    verdict("handbook/specs", "no-such-file.ts") ?? "",
+    /matches 0 tracked files/,
+    "a bare name nothing carries",
+  );
   assert.ok(existsSync(resolve(REPO, "CLAUDE.md")), "the .. witness leaves the repo despite resolving to a real file");
   assert.match(verdict("handbook/specs", "../../CLAUDE.md") ?? "", /leaves the repo/);
   absent("public/no-such.css");
@@ -137,14 +163,22 @@ test("each resolution rule has a live witness, and each finding class has one", 
   absent("references/scars.md");
   assert.equal(verdict(skill, "references/scars.md"), null, "relative to the citing directory");
   absent("handbook/specs/test/repo/comment-citations.test.ts");
-  assert.equal(verdict("handbook/specs", "test/repo/comment-citations.test.ts"), null, "from the repo root, a slashed path no basename rule can save");
+  assert.equal(
+    verdict("handbook/specs", "test/repo/comment-citations.test.ts"),
+    null,
+    "from the repo root, a slashed path no basename rule can save",
+  );
   assert.equal(byBasename.get("comment-citations.test.ts")?.length, 1);
   absent("handbook/specs/comment-citations.test.ts");
   assert.equal(verdict("handbook/specs", "comment-citations.test.ts"), null, "a unique basename");
   absent("out/no-such-probe.mjs");
   assert.equal(verdict(".", "out/no-such-probe.mjs"), null, "gitignored by design, on no one's disk");
   absent("public/explorer/chunks/no-such.js");
-  assert.equal(verdict("handbook/specs", "/explorer/chunks/no-such.js"), null, "a served address the repo keeps out of git");
+  assert.equal(
+    verdict("handbook/specs", "/explorer/chunks/no-such.js"),
+    null,
+    "a served address the repo keeps out of git",
+  );
   assert.ok(existsSync(resolve(REPO, "public/living-chart.css")));
   assert.equal(verdict("handbook/specs", "/living-chart.css"), null, "a served address that exists");
   for (const name of ["project_vellum.md", "reference_x.md", "N-plan.md", ".test.ts"]) {

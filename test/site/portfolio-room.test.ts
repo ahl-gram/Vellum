@@ -27,18 +27,52 @@ const at = (needle: string): number => {
 test("PFR1 the Portfolio says when the worker did not start: the notice stands in the stage and the page raises it on the inline fallback, the way the Print Room, the Prospect, the Ribbon and the Reading Room each do", () => {
   const stage = between("<ChartStage", "<Vignettes />");
   assert.match(stage, /<p id="pf-warning" class="warning" hidden>/, "the inline-fallback warning stands in the stage");
-  assert.match(app, /import \{[^}]*\busesWorker\b[^}]*\} from "\.\.\/explorer\/worker-client\.ts"/, "the page asks the worker client which path it took");
-  assert.match(app, /if \(!usesWorker\(\)\) warning\.hidden = false;/, "and raises the notice when the sheets fell back to the main thread");
-  assert.ok(at("await initWorker()") < at("if (!usesWorker())"), "the client knows which path it took only once the worker has been tried");
-  assert.ok(at("if (!usesWorker())") < at("await draft()"), "and the notice is up BEFORE the drafting that would freeze the tab, which is the moment it is about");
-  assert.match(css, /\.stage \.warning \{[^}]*position: absolute/, "and the page seats it over the sheet the way the other four do; with no rule of its own it stands beside the sheet as a second flex item and shoves the fitted sheet off centre");
-  assert.match(css, /\.stage \.warning\[hidden\] \{ display: none; \}/, "the four carry this line with it, so a page sheet that seats the notice cannot leave it showing on every load");
+  assert.match(
+    app,
+    /import \{[^}]*\busesWorker\b[^}]*\} from "\.\.\/explorer\/worker-client\.ts"/,
+    "the page asks the worker client which path it took",
+  );
+  assert.match(
+    app,
+    /if \(!usesWorker\(\)\) warning\.hidden = false;/,
+    "and raises the notice when the sheets fell back to the main thread",
+  );
+  assert.ok(
+    at("await initWorker()") < at("if (!usesWorker())"),
+    "the client knows which path it took only once the worker has been tried",
+  );
+  assert.ok(
+    at("if (!usesWorker())") < at("await draft()"),
+    "and the notice is up BEFORE the drafting that would freeze the tab, which is the moment it is about",
+  );
+  assert.match(
+    css,
+    /\.stage \.warning \{[^}]*position: absolute/,
+    "and the page seats it over the sheet the way the other four do; with no rule of its own it stands beside the sheet as a second flex item and shoves the fitted sheet off centre",
+  );
+  assert.match(
+    css,
+    /\.stage \.warning\[hidden\] \{ display: none; \}/,
+    "the four carry this line with it, so a page sheet that seats the notice cannot leave it showing on every load",
+  );
 });
 
 test("PFR2 the slip's where-line follows the gathering in both states: a bare Portfolio must not keep the Astro literal promising sheets over a line that says none were gathered", () => {
-  assert.match(page, /where="the sheets gathered at the Explorer"/, "the literal the page ships with, which is only ever true of a gathering that arrived");
-  assert.match(app, /if \(whereLine\) whereLine\.textContent = gatheredLine\(items\.length\);/, "so the page writes the line whatever the tally");
-  assert.doesNotMatch(app, /whereLine && items\.length/, "no length guard: gatheredLine(0) already carries the bare voice, 'no sheets gathered at the Explorer'");
+  assert.match(
+    page,
+    /where="the sheets gathered at the Explorer"/,
+    "the literal the page ships with, which is only ever true of a gathering that arrived",
+  );
+  assert.match(
+    app,
+    /if \(whereLine\) whereLine\.textContent = gatheredLine\(items\.length\);/,
+    "so the page writes the line whatever the tally",
+  );
+  assert.doesNotMatch(
+    app,
+    /whereLine && items\.length/,
+    "no length guard: gatheredLine(0) already carries the bare voice, 'no sheets gathered at the Explorer'",
+  );
 });
 
 test("PFR3 every gathered sheet drafts, so nothing in the page skips a sheet by KIND and the presses stand down only on a bare portfolio (#522, superseding #521 ruling 3)", () => {
@@ -56,13 +90,21 @@ test("PFR3 every gathered sheet drafts, so nothing in the page skips a sheet by 
     ["if (!sheet) continue;"],
     "the drafting loop skips a sheet for exactly one reason, a seat the index does not hold; a kind-based skip in any spelling is the bug #521 ruling 3 held open and this sub closes",
   );
-  assert.doesNotMatch(loop, /\bitem\.kind\s*(===|!==)/, "and the loop never branches on the ITEM's kind at all; the narrowing it does need is on the JOB's");
+  assert.doesNotMatch(
+    loop,
+    /\bitem\.kind\s*(===|!==)/,
+    "and the loop never branches on the ITEM's kind at all; the narrowing it does need is on the JOB's",
+  );
   // The slice above is the DRAFTING loop only, and the prover put the same bug in `bringUp` and shipped it green: a
   // kind-gated early exit anywhere in the page keeps a prospect out of the pile just as effectively. So the whole file is
   // swept for that one shape. `showTop`, `rowFor` and `nameOf` legitimately branch on kind for their label text and are
   // untouched by this, because none of them returns on it.
   const kindExits = (app.match(/\n\s*if \([^)]*\bkind\b[^)]*\)\s*(return|continue)\b/g) ?? []).map((s) => s.trim());
-  assert.deepEqual(kindExits, [], "a kind-gated early return or continue anywhere in the page holds one sheet kind out of the pile, which is the reserved place #521 ruling 3 kept and this sub closes");
+  assert.deepEqual(
+    kindExits,
+    [],
+    "a kind-gated early return or continue anywhere in the page holds one sheet kind out of the pile, which is the reserved place #521 ruling 3 kept and this sub closes",
+  );
 });
 
 test("PFR4 the Portfolio's road home is built from the address it is SHOWING, and a folio the address does not name is the device's (#634, ruled 2026-09-19)", () => {
@@ -70,17 +112,40 @@ test("PFR4 the Portfolio's road home is built from the address it is SHOWING, an
   // literally and this page keeps it: the rewrite is a runtime one, which is the Prospect and Ribbon pattern.
   const road = at("pf-explorer");
   const hrefAt = app.indexOf("href", road);
-  assert.ok(hrefAt > road, "nothing assigns the road's href after it is looked up, so the press back is the Astro literal and loses the whole gathering (#634 defect 1)");
+  assert.ok(
+    hrefAt > road,
+    "nothing assigns the road's href after it is looked up, so the press back is the Astro literal and loses the whole gathering (#634 defect 1)",
+  );
   // Both calls are anchored WHOLE rather than by their tokens. The guard-prover's round 1 on this branch put the address and the device the wrong way round as arguments and put "" in place of the sheets, and two unordered assert.match calls passed both mutations while the ruled precedence was inverted and the gathering dropped.
   const line = app.slice(road, app.indexOf("\n", hrefAt));
-  assert.match(line, /roadHome\.href = "\.\.\/" \+ tableHash\(location\.hash, emitTable\(items\)\);/,"the road home is no longer the parent this page sits under (Issue #669) plus this page's own address and the sheets it is showing, so a reader who presses it loses the chart they gathered from, the sheets, or both");
+  assert.match(
+    line,
+    /roadHome\.href = "\.\.\/" \+ tableHash\(location\.hash, emitTable\(items\)\);/,
+    "the road home is no longer the parent this page sits under (Issue #669) plus this page's own address and the sheets it is showing, so a reader who presses it loses the chart they gathered from, the sheets, or both",
+  );
   // COUNTED, because an anchored slice ends where it ends: a second assignment just past this line overwrites the first with the bare fallback and every regex above still passes (guard-prover round 2).
-  assert.equal((app.match(/roadHome\.href\s*=/g) ?? []).length, 1, "the road home is written in more than one place, and the last write is the one the reader presses");
+  assert.equal(
+    (app.match(/roadHome\.href\s*=/g) ?? []).length,
+    1,
+    "the road home is written in more than one place, and the last write is the one the reader presses",
+  );
   // The shared binding, which table-store.test.ts drives against the real global (guard-prover round 3).
-  assert.match(app, /import \{ deviceStorage as store,[^}]*\} from "\.\.\/shared\/table-store\.ts";/, "this page names its own device instead of taking the one the store module exports and tests, so it can be wired to nothing with every assertion here green");
+  assert.match(
+    app,
+    /import \{ deviceStorage as store,[^}]*\} from "\.\.\/shared\/table-store\.ts";/,
+    "this page names its own device instead of taking the one the store module exports and tests, so it can be wired to nothing with every assertion here green",
+  );
   const arrival = at("folioOnArrival(");
   const call = app.slice(arrival, app.indexOf("\n", arrival));
-  assert.match(call, /folioOnArrival\(parseTable\(location\.hash\), readStoredTable\(store\)\)/, "this folio's contents no longer come from the address FIRST and the device second (#634 rulings 1 and 4): swapped, a shared link stops reproducing exactly; dropped, the Print Room's own road here reaches a bare pile");
+  assert.match(
+    call,
+    /folioOnArrival\(parseTable\(location\.hash\), readStoredTable\(store\)\)/,
+    "this folio's contents no longer come from the address FIRST and the device second (#634 rulings 1 and 4): swapped, a shared link stops reproducing exactly; dropped, the Print Room's own road here reaches a bare pile",
+  );
   // The ABSENCE is the claim: this page's address IS its content, so it takes the precedence WITHOUT the traversal term. The message says what the term would do here and not what a cached Back does, which is a separate thing this page has no arm for at all (the cold review's round 3 on PR #635 caught the first wording claiming more than it could).
-  assert.doesNotMatch(app, /tableOnArrival\(|navigationTypeNow\(/, "the folio page took the gathering surfaces' rule, whose traversal term would hand a reader arriving at a shared folio by Back or Forward their OWN table in place of the folio the address names");
+  assert.doesNotMatch(
+    app,
+    /tableOnArrival\(|navigationTypeNow\(/,
+    "the folio page took the gathering surfaces' rule, whose traversal term would hand a reader arriving at a shared folio by Back or Forward their OWN table in place of the folio the address names",
+  );
 });

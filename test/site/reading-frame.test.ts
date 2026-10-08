@@ -50,8 +50,21 @@ test("the frame mounts and hands the engine a complete host (#219, the first non
 
   const { createLivingChart } = await import("../../src/site/living-chart/index.ts");
   const lc = createLivingChart(host);
-  for (const method of ["applyAges", "agesState", "applyScrub", "scrubTo", "applyVoyage", "voyagePaintAt", "scrubState", "destroy"]) {
-    assert.equal(typeof (lc as Record<string, unknown>)[method], "function", `the engine drives the frame: ${method}()`);
+  for (const method of [
+    "applyAges",
+    "agesState",
+    "applyScrub",
+    "scrubTo",
+    "applyVoyage",
+    "voyagePaintAt",
+    "scrubState",
+    "destroy",
+  ]) {
+    assert.equal(
+      typeof (lc as Record<string, unknown>)[method],
+      "function",
+      `the engine drives the frame: ${method}()`,
+    );
   }
 });
 
@@ -71,7 +84,10 @@ test("#442 the bar and the live row share ONE wrapper, inside the panel, above t
   const strip = frame.strip as unknown as El;
 
   assert.equal(strip.className, "rf-instrument-strip");
-  assert.ok(walk(panel).includes(strip), "the strip nests inside the panel the engine hides, so a teardown takes it too");
+  assert.ok(
+    walk(panel).includes(strip),
+    "the strip nests inside the panel the engine hides, so a teardown takes it too",
+  );
   assert.deepEqual(
     strip.children.map((c) => c.className),
     ["rf-instrument", "rf-told"],
@@ -82,7 +98,11 @@ test("#442 the bar and the live row share ONE wrapper, inside the panel, above t
     ["rf-instrument-strip", "rf-log"],
     "and the wrapper sits above the one journal",
   );
-  assert.equal((frame.told as unknown as El).hidden, true, "the live row rests hidden: a plain arrival tells nothing yet");
+  assert.equal(
+    (frame.told as unknown as El).hidden,
+    true,
+    "the live row rests hidden: a plain arrival tells nothing yet",
+  );
   assert.equal(
     (frame.told as unknown as El).getAttribute("aria-hidden"),
     "true",
@@ -98,23 +118,35 @@ test("#442 setTold mirrors either half's row, and clears rather than lingering",
 
   frame.setTold({ chamber: "survey", row: 3, index: 7, day: 61, text: "we came to Theril." });
   assert.equal(told.hidden, false);
-  assert.deepEqual(parts(), [
-    { cls: "cr-year", text: "day 61" },
-    { cls: "cr-text", text: "we came to Theril." },
-  ], "the survey half counts days, the gutter the prologue rows already use");
+  assert.deepEqual(
+    parts(),
+    [
+      { cls: "cr-year", text: "day 61" },
+      { cls: "cr-text", text: "we came to Theril." },
+    ],
+    "the survey half counts days, the gutter the prologue rows already use",
+  );
 
   frame.setTold({ chamber: "ages", year: 900, text: "Gamma fell to ruin." });
-  assert.deepEqual(parts(), [
-    { cls: "cr-year", text: "900" },
-    { cls: "cr-text", text: "Gamma fell to ruin." },
-  ], "the chronicle half carries the annal's year");
+  assert.deepEqual(
+    parts(),
+    [
+      { cls: "cr-year", text: "900" },
+      { cls: "cr-text", text: "Gamma fell to ruin." },
+    ],
+    "the chronicle half carries the annal's year",
+  );
 
   frame.setTold(null);
   assert.equal(told.hidden, true, "nothing told, nothing shown");
-  assert.deepEqual(parts(), [
-    { cls: "cr-year", text: "" },
-    { cls: "cr-text", text: "" },
-  ], "and the prose is cleared, so a hidden row holds no stale world's line");
+  assert.deepEqual(
+    parts(),
+    [
+      { cls: "cr-year", text: "" },
+      { cls: "cr-text", text: "" },
+    ],
+    "and the prose is cleared, so a hidden row holds no stale world's line",
+  );
 });
 
 test("#442 the live row is a MIRROR: it never writes into the journal the engine owns", async () => {
@@ -144,8 +176,16 @@ test("#463 (#462 ruling 6) the wrapper is the strip's column with the told row a
   const css = read("public/reading-frame.css");
   const wrapper = declarationsFor(css, ".rf-instrument-strip");
   assert.ok(wrapper, "the wrapper carries a rule of its own");
-  assert.match(wrapper, /flex-direction:\s*column-reverse/, "the row being told stands above the bar (the frame builds them bar-first)");
-  assert.doesNotMatch(wrapper, /position:\s*(sticky|fixed)/, "where the strip stands is the host's (the #442 sticky shape retired)");
+  assert.match(
+    wrapper,
+    /flex-direction:\s*column-reverse/,
+    "the row being told stands above the bar (the frame builds them bar-first)",
+  );
+  assert.doesNotMatch(
+    wrapper,
+    /position:\s*(sticky|fixed)/,
+    "where the strip stands is the host's (the #442 sticky shape retired)",
+  );
   assert.doesNotMatch(wrapper, /transform|animation/, "and it is never transformed");
 
   // The polarity a presence check cannot see: the arrival animation must stay on the INNER bar. Both halves, so moving it onto the wrapper fails here rather than at a rendered probe.
@@ -154,11 +194,7 @@ test("#463 (#462 ruling 6) the wrapper is the strip's column with the told row a
     /\.rf-arrival \.rf-instrument\s*\{[^}]*animation:\s*paperUnfurl/,
     "the unfurl still transforms .rf-instrument",
   );
-  assert.doesNotMatch(
-    css,
-    /\.rf-arrival \.rf-instrument-strip\b/,
-    "and never the sticky wrapper itself",
-  );
+  assert.doesNotMatch(css, /\.rf-arrival \.rf-instrument-strip\b/, "and never the sticky wrapper itself");
 });
 
 test("#442 the mirror takes its SOURCE's voice: roman for an annal, the surveyor's italic for a day row", async () => {
@@ -169,7 +205,11 @@ test("#442 the mirror takes its SOURCE's voice: roman for an annal, the surveyor
   frame.setTold({ chamber: "survey", row: 3, index: 7, day: 61, text: "we came to Theril." });
   assert.equal(told.classes.has("prologue"), true, "a day row is the surveyor's hand, the class the journal uses");
   frame.setTold({ chamber: "ages", year: 900, text: "Gamma fell to ruin." });
-  assert.equal(told.classes.has("prologue"), false, "an annal is the chronicler's, and must not inherit the survey voice");
+  assert.equal(
+    told.classes.has("prologue"),
+    false,
+    "an annal is the chronicler's, and must not inherit the survey voice",
+  );
   frame.setTold(null);
 
   const css = read("public/reading-frame.css");
@@ -189,9 +229,17 @@ test("#442 the live row takes the shared gutter idiom and refuses the drop cap",
   const css = read("public/reading-frame.css");
   const told = declarationsFor(css, ".rf-told");
   assert.ok(told, "the live row carries a rule of its own");
-  assert.match(declarationsFor(css, ".rf-told .cr-text"), /color:\s*var\(--parchment-bright\)/, "the row is written in the strip's ink: it stands on the deep since #463, not on a panel");
+  assert.match(
+    declarationsFor(css, ".rf-told .cr-text"),
+    /color:\s*var\(--parchment-bright\)/,
+    "the row is written in the strip's ink: it stands on the deep since #463, not on a panel",
+  );
   assert.ok(declarationsFor(css, ".rf-told .cr-year"), "it dresses the shared gutter column");
-  assert.match(declarationsFor(css, ".rf-told[hidden]"), /display:\s*none/, "hidden means gone, not merely transparent");
+  assert.match(
+    declarationsFor(css, ".rf-told[hidden]"),
+    /display:\s*none/,
+    "hidden means gone, not merely transparent",
+  );
   assert.doesNotMatch(css, /\.rf-told[^{]*\.cr-dc/, "the 2.1em initial never reaches the strip");
   assert.doesNotMatch(told, /max-height|overflow/, "the live row is one row, never a scroller of its own");
 });
@@ -259,28 +307,50 @@ test("#493 the pace stands at the readout's right: three presses 1x 2x 4x in one
   const { createReadingFrame } = await import("../../src/site/reading-frame/index.ts");
   const frame = createReadingFrame(el());
   const instrument = (frame.strip as unknown as El).children[0]!;
-  assert.deepEqual(instrument.children.map((c) => c.className), ["rf-play", "rf-range ages-range", "rf-year", "rf-pace"], "Play, the bar, the readout, the pace");
+  assert.deepEqual(
+    instrument.children.map((c) => c.className),
+    ["rf-play", "rf-range ages-range", "rf-year", "rf-pace"],
+    "Play, the bar, the readout, the pace",
+  );
   const pace = instrument.children[3]!;
   assert.equal(pace.getAttribute("role"), "group");
   assert.equal(pace.getAttribute("aria-label"), "The pace");
   assert.deepEqual(
     pace.children.map((b) => [b.tagName, b.textContent, b.dataset.pace, b.getAttribute("aria-pressed")]),
-    [["BUTTON", "1×", "1", "true"], ["BUTTON", "2×", "2", "false"], ["BUTTON", "4×", "4", "false"]],
+    [
+      ["BUTTON", "1×", "1", "true"],
+      ["BUTTON", "2×", "2", "false"],
+      ["BUTTON", "4×", "4", "false"],
+    ],
     "the mockup's three presses, the default (1x, ruled 2026-09-02) pressed",
   );
   assert.deepEqual([...frame.paceButtons.keys()], [1, 2, 4], "the room reaches each press by its pace");
   frame.markPace(4);
-  assert.deepEqual(pace.children.map((b) => b.getAttribute("aria-pressed")), ["false", "false", "true"]);
+  assert.deepEqual(
+    pace.children.map((b) => b.getAttribute("aria-pressed")),
+    ["false", "false", "true"],
+  );
   frame.markPace(1);
-  assert.deepEqual(pace.children.map((b) => b.getAttribute("aria-pressed")), ["true", "false", "false"], "and back");
+  assert.deepEqual(
+    pace.children.map((b) => b.getAttribute("aria-pressed")),
+    ["true", "false", "false"],
+    "and back",
+  );
 });
 
 test("#493 the pace's dress: the strip's dark presses in the mockup's measure, the chosen one on parchment, and the group stands at every width (Issue #762, default D1)", () => {
   const css = read("public/reading-frame.css");
   assert.match(css, /\.rf-pace\s*\{[^}]*flex:\s*none/, "the group keeps its width beside the shrinking bar");
   assert.match(css, /\.rf-pace button\s*\{[^}]*width:\s*1\.9rem;[^}]*height:\s*1\.6rem;/, "the mockup's press");
-  assert.match(css, /\.rf-instrument-strip \.rf-instrument \.rf-pace button:hover, \.rf-instrument-strip \.rf-instrument \.rf-pace button:focus-visible\s*\{/, "four classes deep against the house hover wash, as Play is");
+  assert.match(
+    css,
+    /\.rf-instrument-strip \.rf-instrument \.rf-pace button:hover, \.rf-instrument-strip \.rf-instrument \.rf-pace button:focus-visible\s*\{/,
+    "four classes deep against the house hover wash, as Play is",
+  );
   const pressed = declarationsFor(css, '.rf-instrument-strip .rf-instrument .rf-pace button[aria-pressed="true"]');
   assert.match(pressed, /background:\s*var\(--parchment\)/, "the chosen pace stands on parchment");
-  assert.ok(css.indexOf('.rf-pace button[aria-pressed="true"]') > css.indexOf(".rf-pace button:hover"), "written after the hover so a hovered chosen press stays chosen");
+  assert.ok(
+    css.indexOf('.rf-pace button[aria-pressed="true"]') > css.indexOf(".rf-pace button:hover"),
+    "written after the hover so a hovered chosen press stays chosen",
+  );
 });

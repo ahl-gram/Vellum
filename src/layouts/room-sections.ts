@@ -14,7 +14,13 @@ export interface IndexSection {
 export type EntryClass = "q" | "term";
 
 const decode = (s: string): string =>
-  s.replace(/<[^>]+>/g, "").replace(/&amp;/g, "&").replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/\s+/g, " ").trim();
+  s
+    .replace(/<[^>]+>/g, "")
+    .replace(/&amp;/g, "&")
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/\s+/g, " ")
+    .trim();
 
 const attr = (attrs: string, name: string): string | undefined =>
   new RegExp(`(?:^|\\s)${name}="([^"]*)"`).exec(attrs)?.[1];
@@ -33,7 +39,8 @@ export function roomSections(source: string, entryClass: EntryClass): readonly I
       .filter(([, attrs]) => attr(attrs!, "class")?.split(/\s+/).includes(entryClass))
       .map(([, attrs, text]) => {
         const entryId = attr(attrs!, "id");
-        if (entryId === undefined) throw new Error(`the ${entryClass} "${decode(text!)}" under "${decode(head[2]!)}" has no id for the index`);
+        if (entryId === undefined)
+          throw new Error(`the ${entryClass} "${decode(text!)}" under "${decode(head[2]!)}" has no id for the index`);
         return { id: entryId, text: decode(text!) };
       });
     sections.push({ id, title: decode(head[2]!), entries });

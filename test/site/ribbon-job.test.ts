@@ -41,7 +41,11 @@ test("every option says whether a road leaves it, and seed 42's one road-orphan 
     assert.equal(o.roads, roadReachable(world, mask, o.i).length > 0, `${o.name} (${o.i})`);
   }
   assert.equal(res.options[stranded]!.roads, false);
-  assert.equal(res.options.filter((o) => !o.roads).length, 1, "measured 2026-09-01: Tewetulua (24) is the one orphan of seed 42, so a from-select of every settlement offers exactly one lie");
+  assert.equal(
+    res.options.filter((o) => !o.roads).length,
+    1,
+    "measured 2026-09-01: Tewetulua (24) is the one orphan of seed 42, so a from-select of every settlement offers exactly one lie",
+  );
 });
 
 test("an invalid `from` falls back to the capital rather than refusing the page", () => {
@@ -126,7 +130,10 @@ test("ribbonResultFor carries the itinerary: every drawn event with its league m
     } else {
       assert.ok(!("tier" in row) && !("index" in row), "only a waypoint names a place");
     }
-    assert.ok(Math.abs(row.nx - seat.sx / RIBBON_W) < 1e-9 && Math.abs(row.ny - seat.sy / RIBBON_H) < 1e-9, `row ${i} is seated where the plate drew it`);
+    assert.ok(
+      Math.abs(row.nx - seat.sx / RIBBON_W) < 1e-9 && Math.abs(row.ny - seat.sy / RIBBON_H) < 1e-9,
+      `row ${i} is seated where the plate drew it`,
+    );
     assert.ok(row.nx > 0 && row.nx < 1 && row.ny > 0 && row.ny < 1, "a seat is a fraction of the plate");
   });
   const seats = new Set(res.events.map((r) => `${r.nx.toFixed(4)},${r.ny.toFixed(4)}`));
@@ -144,12 +151,18 @@ test("the itinerary lists only what the scroll drew: every row's caption words s
   assert.equal(undrawn[0]!.kind, "crossing", "premise: it is the end-of-road crossing the skeptic found");
   assert.equal(res.events.length, input.events.length - 1, "the undrawn event gets no row");
   // Waypoint names are set in capitals on the plate, so the comparison is case-blind.
-  const text = [...res.svg.matchAll(/>([^<]+)</g)].map((m) => m[1]).join(" ").toUpperCase();
+  const text = [...res.svg.matchAll(/>([^<]+)</g)]
+    .map((m) => m[1])
+    .join(" ")
+    .toUpperCase();
   for (const row of res.events) {
     for (const word of row.text.split(/\s+/).filter((w) => /^[A-Za-z]{4,}$/.test(w))) {
       assert.ok(text.includes(word.toUpperCase()), `the scroll prints "${word}" from the row "${row.text}"`);
     }
   }
   const dropped = undrawn[0]!;
-  assert.ok(dropped.name !== null && !text.includes(dropped.name.toUpperCase()), `premise: the scroll does not print the dropped crossing's river, ${String(dropped.name)}`);
+  assert.ok(
+    dropped.name !== null && !text.includes(dropped.name.toUpperCase()),
+    `premise: the scroll does not print the dropped crossing's river, ${String(dropped.name)}`,
+  );
 });

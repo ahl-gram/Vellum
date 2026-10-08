@@ -57,13 +57,21 @@ async function builderWith(tourOrder?: {
 test("#373 the builder takes its travel order from the injected source", async () => {
   const { manifest, survey } = await realWorld();
   const wanted = reversedTour(portsOf(manifest));
-  assert.notDeepEqual(wanted, travelOrderOf(manifest, survey), "the fixture order really is not what the matrix computes");
+  assert.notDeepEqual(
+    wanted,
+    travelOrderOf(manifest, survey),
+    "the fixture order really is not what the matrix computes",
+  );
 
   const { sessions } = await builderWith({ get: () => wanted });
   const session = sessions.build(manifest, survey, SEED, SUBTITLE);
 
   assert.ok(session, "the fixture world routes a survey");
-  assert.deepEqual(session.plan.ports.map((p) => p.idx), wanted, "the source's order is the one the session sails");
+  assert.deepEqual(
+    session.plan.ports.map((p) => p.idx),
+    wanted,
+    "the source's order is the one the session sails",
+  );
 });
 
 test("#373 the source is asked with THIS build's seed, survey and straight-line port set", async () => {
@@ -121,7 +129,11 @@ test("#373 a quiet build DOES take a ready order: a drag release inherits the ca
   const session = sessions.build(manifest, survey, SEED, SUBTITLE, true);
 
   assert.ok(session);
-  assert.deepEqual(session.plan.ports.map((p) => p.idx), wanted, "quiet skips the COMPUTE, not the answer");
+  assert.deepEqual(
+    session.plan.ports.map((p) => p.idx),
+    wanted,
+    "quiet skips the COMPUTE, not the answer",
+  );
 });
 
 test("#373 the off-thread job returns the order the inline computation would have", async () => {
@@ -159,7 +171,11 @@ test("#373 the adopted order is CACHED, so a later quiet rebuild still sails it"
 
   assert.ok(again);
   // Dropping the builder's own cache write escaped every other case here, because they all re-read a live source; a quiet rebuild is the one that cannot fall back and recompute.
-  assert.deepEqual(again.plan.ports.map((p) => p.idx), wanted, "the order outlives the source that supplied it");
+  assert.deepEqual(
+    again.plan.ports.map((p) => p.idx),
+    wanted,
+    "the order outlives the source that supplied it",
+  );
 });
 
 /** A tour-order module over a fake transport: `answer` decides what the "worker" returns for a job. release() settles EVERY job outstanding, so a lost dedupe fails an assertion instead of hanging the suite on a job nobody can answer. */
@@ -172,11 +188,19 @@ function tourHarness(answer: (ports: ReadonlyArray<number>) => ReadonlyArray<num
       const out = answer(job.ports);
       const settle = out instanceof Error ? Promise.reject(out) : Promise.resolve({ ok: true as const, order: out });
       return new Promise((resolve, reject) => {
-        waiting.push(() => { settle.then(resolve, reject); });
+        waiting.push(() => {
+          settle.then(resolve, reject);
+        });
       });
     },
   });
-  return { orders, jobs, release: () => { for (const r of waiting.splice(0)) r(); } };
+  return {
+    orders,
+    jobs,
+    release: () => {
+      for (const r of waiting.splice(0)) r();
+    },
+  };
 }
 
 test("#373 a primed order reaches the builder: the host and the engine agree on the key", async () => {
@@ -193,7 +217,11 @@ test("#373 a primed order reaches the builder: the host and the engine agree on 
 
   assert.ok(session);
   // Deliberately NOT the travel order: were the host's key to disagree with the engine's inputs, get() would miss and the builder would compute the REAL order, which no assertion against the real order could tell from a hit.
-  assert.deepEqual(session.plan.ports.map((p) => p.idx), wanted, "the primed order, not one the engine computed");
+  assert.deepEqual(
+    session.plan.ports.map((p) => p.idx),
+    wanted,
+    "the primed order, not one the engine computed",
+  );
 });
 
 test("#373 nothing is cached until the job lands", async () => {
@@ -294,10 +322,26 @@ test("#373 a world with no manifest asks the worker for nothing", async () => {
 /** A hand-built manifest with `n` ports: the real seed-42 world has 24 and cannot reach the short circuit. */
 function portsManifest(n: number): PlaceManifest {
   const places = Array.from({ length: n }, (_, idx) => ({
-    idx, name: `P${idx}`, kind: idx === 0 ? "capital" : "town", founded: 1, ruined: false,
-    seat: idx === 0, nx: 0.1 * idx, ny: 0.1 * idx, gx: 10 * idx, gy: 10 * idx,
+    idx,
+    name: `P${idx}`,
+    kind: idx === 0 ? "capital" : "town",
+    founded: 1,
+    ruined: false,
+    seat: idx === 0,
+    nx: 0.1 * idx,
+    ny: 0.1 * idx,
+    gx: 10 * idx,
+    gy: 10 * idx,
   }));
-  return { places, events: [], cultureId: "x", presentYear: 100, widthPx: 1500, heightPx: 1000, marginPx: 67 } as unknown as PlaceManifest;
+  return {
+    places,
+    events: [],
+    cultureId: "x",
+    presentYear: 100,
+    widthPx: 1500,
+    heightPx: 1000,
+    marginPx: 67,
+  } as unknown as PlaceManifest;
 }
 
 test("#373 a two-port world asks the worker for nothing, and a three-port world does ask", async () => {
@@ -323,6 +367,14 @@ test("#373 a worker that never answers at all does not hold the arm for ever", a
     new Promise((resolve) => setTimeout(() => resolve("hung"), 500)),
   ]);
 
-  assert.equal(outcome, "settled", "a worker that stops answering fires no onerror, and the arm waiting on this would leave the sheet bare for good");
-  assert.equal(orders.get(SEED, survey, portsOf(manifest)), null, "nothing held, so the builder computes the order inline");
+  assert.equal(
+    outcome,
+    "settled",
+    "a worker that stops answering fires no onerror, and the arm waiting on this would leave the sheet bare for good",
+  );
+  assert.equal(
+    orders.get(SEED, survey, portsOf(manifest)),
+    null,
+    "nothing held, so the builder computes the order inline",
+  );
 });

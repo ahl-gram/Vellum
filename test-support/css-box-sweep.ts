@@ -4,7 +4,8 @@ export interface WideningRule {
   readonly declarations: Readonly<Record<string, string>>;
 }
 
-const WIDENS = /^(border|border-(width|style)|border-(left|right|inline|inline-start|inline-end)(-(width|style))?|padding|padding-(left|right|inline|inline-start|inline-end))$/;
+const WIDENS =
+  /^(border|border-(width|style)|border-(left|right|inline|inline-start|inline-end)(-(width|style))?|padding|padding-(left|right|inline|inline-start|inline-end))$/;
 
 const ZERO = /^(0|none|0px|0rem|0%)$/;
 
@@ -12,13 +13,19 @@ const FULL = /^[0-9.]+%$/;
 
 const declarationsIn = (body: string): Record<string, string> =>
   Object.fromEntries(
-    body.split(";").map((d) => d.split(":")).filter((p) => p.length >= 2)
+    body
+      .split(";")
+      .map((d) => d.split(":"))
+      .filter((p) => p.length >= 2)
       .map(([k, ...v]) => [k!.trim().toLowerCase(), v.join(":").trim()]),
   );
 
 export function fullWidthWideningRules(css: string): readonly WideningRule[] {
   return [...css.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}]+)\{([^{}]*)\}/g)]
     .map((m) => ({ selector: m[1]!.trim().replace(/\s+/g, " "), declarations: declarationsIn(m[2]!) }))
-    .filter((rule) => (FULL.test(rule.declarations["width"] ?? "") || FULL.test(rule.declarations["inline-size"] ?? ""))
-      && Object.entries(rule.declarations).some(([prop, value]) => WIDENS.test(prop) && !ZERO.test(value)));
+    .filter(
+      (rule) =>
+        (FULL.test(rule.declarations["width"] ?? "") || FULL.test(rule.declarations["inline-size"] ?? "")) &&
+        Object.entries(rule.declarations).some(([prop, value]) => WIDENS.test(prop) && !ZERO.test(value)),
+    );
 }

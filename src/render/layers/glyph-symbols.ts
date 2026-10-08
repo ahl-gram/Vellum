@@ -39,7 +39,8 @@ function groundSymbols(paper: string, stroke: Stroke): SvgNode[] {
       el("path", { d: "M0 0L0 -3.4", fill: "none", ...stroke(0.9) }),
       el("path", {
         d: "M-3.4 -5.4Q-3.4 -8.8 0 -8.8Q3.4 -8.8 3.4 -5.4Q3.4 -2.6 0 -3.2Q-3.4 -2.6 -3.4 -5.4Z",
-        fill: paper, ...stroke(0.9),
+        fill: paper,
+        ...stroke(0.9),
       }),
     ]),
     el("symbol", { id: "gl-tree-pine", overflow: "visible" }, [
@@ -50,13 +51,15 @@ function groundSymbols(paper: string, stroke: Stroke): SvgNode[] {
       el("path", { d: "M0 0Q1 -4 0.6 -7", fill: "none", ...stroke(1.0) }),
       el("path", {
         d: "M0.6 -7Q-3.4 -8.4 -5 -6M0.6 -7Q-1.4 -10.4 -3.8 -10.6M0.6 -7Q2.2 -10 5 -9.4M0.6 -7Q4 -7.6 5.6 -5.4",
-        fill: "none", ...stroke(0.9),
+        fill: "none",
+        ...stroke(0.9),
       }),
     ]),
     el("symbol", { id: "gl-marsh", overflow: "visible" }, [
       el("path", {
         d: "M-6 0H6M-4 -2.4H4M-2 -4.6H2M0 -4.6L0 -7M-1.6 -5L-2.6 -7M1.6 -5L2.6 -7",
-        fill: "none", ...stroke(0.8),
+        fill: "none",
+        ...stroke(0.8),
       }),
     ]),
     el("symbol", { id: "gl-dune", overflow: "visible" }, [

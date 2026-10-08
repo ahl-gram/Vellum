@@ -5,7 +5,14 @@ import { stripRead } from "./reading-room/reads.ts";
 import { rr0Boots, rr4AtRest, rr26BareVisit, rr29Play } from "./reading-room/arrival.ts";
 import { rr31StripStands, rr35GoverningBudget, rr37Envelope, rr36ChartFills } from "./reading-room/desk.ts";
 import { rr6Survey, rr7Year, rr9Today, rr10CrossLinks } from "./reading-room/addresses.ts";
-import { rr16Colophon, rr17CounterRead, rr18Park, rr20Superseded, rr21Dice, rr22MidPlay } from "./reading-room/colophon.ts";
+import {
+  rr16Colophon,
+  rr17CounterRead,
+  rr18Park,
+  rr20Superseded,
+  rr21Dice,
+  rr22MidPlay,
+} from "./reading-room/colophon.ts";
 import { rr23Usurped, rr24BeforeArm, rr25TearDown } from "./reading-room/arm.ts";
 import { rr11bScrubHandles } from "./reading-room/scrub.ts";
 import { rr12Clean, rr14Fallback } from "./reading-room/fallback.ts";
@@ -24,7 +31,18 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await send("Emulation.setDeviceMetricsOverride", { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
   await sleep(200);
   const deskRest = await evaluate(stripRead);
-  const room = await evaluate<{ page: number; vh: number; chartW: number; chartH: number; ratio: number; fillsSheet: boolean; topClear: number; bottomClear: number }>(`(()=>{const s=document.querySelector(".rf-chart svg[data-vellum-style]");const r=s?s.getBoundingClientRect():{width:0,height:0,top:0,bottom:0};const b=document.getElementById("sheet").getBoundingClientRect();const strip=document.querySelector(".strip").getBoundingClientRect();const tr=document.querySelector(".corner.tr").getBoundingClientRect();return{page:document.documentElement.scrollHeight,vh:window.innerHeight,chartW:Math.round(r.width),chartH:Math.round(r.height),ratio:r.width?r.height/r.width:0,fillsSheet:Math.abs(r.width-b.width)<1&&Math.abs(r.height-b.height)<1,topClear:Math.round(r.top-tr.bottom),bottomClear:Math.round(strip.top-r.bottom)};})()`);
+  const room = await evaluate<{
+    page: number;
+    vh: number;
+    chartW: number;
+    chartH: number;
+    ratio: number;
+    fillsSheet: boolean;
+    topClear: number;
+    bottomClear: number;
+  }>(
+    `(()=>{const s=document.querySelector(".rf-chart svg[data-vellum-style]");const r=s?s.getBoundingClientRect():{width:0,height:0,top:0,bottom:0};const b=document.getElementById("sheet").getBoundingClientRect();const strip=document.querySelector(".strip").getBoundingClientRect();const tr=document.querySelector(".corner.tr").getBoundingClientRect();return{page:document.documentElement.scrollHeight,vh:window.innerHeight,chartW:Math.round(r.width),chartH:Math.round(r.height),ratio:r.width?r.height/r.width:0,fillsSheet:Math.abs(r.width-b.width)<1&&Math.abs(r.height-b.height)<1,topClear:Math.round(r.top-tr.bottom),bottomClear:Math.round(strip.top-r.bottom)};})()`,
+  );
   await rr31StripStands(ctx, deskRest, room);
   const deskSurvey = await rr35GoverningBudget(ctx, deskRest);
   await rr37Envelope(ctx, deskSurvey);

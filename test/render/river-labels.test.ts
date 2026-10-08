@@ -51,7 +51,14 @@ test("reachPlacements offers several spread candidates along a long river", () =
 
 test("reachPlacements returns [] for a degenerate river and one reach for a short one", () => {
   assert.deepEqual(reachPlacements([[5, 5]], 40), []);
-  const shortRiver = reachPlacements([[0, 0], [10, 0], [20, 0]], 40); // total 20 < 40
+  const shortRiver = reachPlacements(
+    [
+      [0, 0],
+      [10, 0],
+      [20, 0],
+    ],
+    40,
+  ); // total 20 < 40
   assert.equal(shortRiver.length, 1, "a course shorter than the label gets one whole-reach candidate");
 });
 
@@ -59,15 +66,9 @@ test("reachPlacements returns [] for a degenerate river and one reach for a shor
 test("a crowded named river recovers a label via an alternative reach", () => {
   const world = generateWorld(defaultRecipe(20260701, {}));
   assert.ok(world.names.rivers.size > 0, "fixture names rivers");
-  assert.ok(
-    [...world.names.rivers.values()].includes("The Silver Lathfi"),
-    "fixture still names The Silver Lathfi",
-  );
+  assert.ok([...world.names.rivers.values()].includes("The Silver Lathfi"), "fixture still names The Silver Lathfi");
   const svg = renderMap(world, { style: "antique", legend: true });
-  assert.ok(
-    svg.includes(">The Silver Lathfi<"),
-    "the crowded river now carries a visible label",
-  );
+  assert.ok(svg.includes(">The Silver Lathfi<"), "the crowded river now carries a visible label");
 });
 
 // River labels are the only chart element that emits <tspan dy=...>, so counting those counts labels.

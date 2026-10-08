@@ -10,13 +10,7 @@ test("a mountain-range label gets a paper casing so it reads over dense glyphs",
   assert.ok(world.names.range, "fixture seed must produce a range name");
   for (const style of ["antique", "ink", "topographic"] as const) {
     const svg = renderMap(world, { style });
-    assert.ok(
-      svg.includes(world.names.range.toUpperCase()),
-      `${style}: range label should render`,
-    );
-    assert.ok(
-      svg.includes('class="range-casing"'),
-      `${style}: range label needs a casing plate behind it`,
-    );
+    assert.ok(svg.includes(world.names.range.toUpperCase()), `${style}: range label should render`);
+    assert.ok(svg.includes('class="range-casing"'), `${style}: range label needs a casing plate behind it`);
   }
 });

@@ -28,14 +28,54 @@ function svgEl(tag: string, attrs: Record<string, string | number>, text?: strin
 
 function buildStamp(): SVGElement {
   const svg = svgEl("svg", {
-    class: "verso-stamp", viewBox: "0 0 200 120", "aria-hidden": "true", focusable: "false",
+    class: "verso-stamp",
+    viewBox: "0 0 200 120",
+    "aria-hidden": "true",
+    focusable: "false",
   });
   svg.append(
     svgEl("ellipse", { cx: 100, cy: 60, rx: 94, ry: 52, fill: "none", stroke: "#7a3b2c", "stroke-width": 3 }),
     svgEl("ellipse", { cx: 100, cy: 60, rx: 82, ry: 42, fill: "none", stroke: "#7a3b2c", "stroke-width": 1.4 }),
-    svgEl("text", { x: 100, y: 45, "text-anchor": "middle", "font-family": "Georgia, serif", "font-size": 19, "letter-spacing": 2, fill: "#7a3b2c" }, "VELLUM"),
-    svgEl("text", { x: 100, y: 69, "text-anchor": "middle", "font-family": "Georgia, serif", "font-size": 12, "letter-spacing": 3, fill: "#7a3b2c" }, "SURVEY OFFICE"),
-    svgEl("text", { x: 100, y: 90, "text-anchor": "middle", "font-family": "Georgia, serif", "font-size": 10, "font-style": "italic", "letter-spacing": 1, fill: "#7a3b2c" }, "registered"),
+    svgEl(
+      "text",
+      {
+        x: 100,
+        y: 45,
+        "text-anchor": "middle",
+        "font-family": "Georgia, serif",
+        "font-size": 19,
+        "letter-spacing": 2,
+        fill: "#7a3b2c",
+      },
+      "VELLUM",
+    ),
+    svgEl(
+      "text",
+      {
+        x: 100,
+        y: 69,
+        "text-anchor": "middle",
+        "font-family": "Georgia, serif",
+        "font-size": 12,
+        "letter-spacing": 3,
+        fill: "#7a3b2c",
+      },
+      "SURVEY OFFICE",
+    ),
+    svgEl(
+      "text",
+      {
+        x: 100,
+        y: 90,
+        "text-anchor": "middle",
+        "font-family": "Georgia, serif",
+        "font-size": 10,
+        "font-style": "italic",
+        "letter-spacing": 1,
+        fill: "#7a3b2c",
+      },
+      "registered",
+    ),
   );
   return svg;
 }
@@ -48,7 +88,12 @@ export function renderVerso(
   versoEl: HTMLElement,
   { svg, docket, surveyor }: { svg: string; docket: string; surveyor: string },
 ): void {
-  if (ghostUrl) { try { URL.revokeObjectURL(ghostUrl); } catch {} ghostUrl = ""; }
+  if (ghostUrl) {
+    try {
+      URL.revokeObjectURL(ghostUrl);
+    } catch {}
+    ghostUrl = "";
+  }
   ghostUrl = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
   const ghost = document.createElement("img");
   ghost.className = "verso-ghost";
@@ -84,12 +129,18 @@ export function rebuildVerso(
 
 // INVARIANT: never rebuild the ghost Blob to refresh the track (renderVerso is the only place allowed to churn one; re-blobbing costs ~1 MB per redraw); the layer sits directly after the ghost so it paints over the bleed-through but under the docket, attribution and stamp.
 export function paintVersoTrack(versoEl: HTMLElement, points: string, viewBox: string): void {
-  if (!points) { clearVersoTrack(versoEl); return; }
+  if (!points) {
+    clearVersoTrack(versoEl);
+    return;
+  }
   let layer = versoEl.querySelector(".verso-track-layer");
   if (!layer) {
     layer = svgEl("svg", {
-      class: "verso-track-layer", viewBox, preserveAspectRatio: "none",
-      "aria-hidden": "true", focusable: "false",
+      class: "verso-track-layer",
+      viewBox,
+      preserveAspectRatio: "none",
+      "aria-hidden": "true",
+      focusable: "false",
     });
     layer.append(svgEl("polyline", { class: "verso-track" }));
     const ghost = versoEl.querySelector(".verso-ghost");
@@ -110,7 +161,10 @@ export function isFlipped(sheetEl: HTMLElement): boolean {
 }
 
 export function toggleFlip(sheetEl: HTMLElement): boolean {
-  if (isFlipped(sheetEl)) { flipToRecto(sheetEl); return false; }
+  if (isFlipped(sheetEl)) {
+    flipToRecto(sheetEl);
+    return false;
+  }
   flipToVerso(sheetEl);
   return true;
 }

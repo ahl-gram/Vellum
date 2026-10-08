@@ -3,7 +3,6 @@ import assert from "node:assert/strict";
 import { rotatedSpanBoxes, spacedTextBox, WIDTH_FACTOR, type Box } from "../../src/render/geometry.ts";
 import { createLabelArena } from "../../src/render/context.ts";
 
-
 test("the caps factor is wider than mixed case, and lives in exactly one place", () => {
   assert.ok((WIDTH_FACTOR.caps as number) > WIDTH_FACTOR.mixed, "capitals are the wider glyphs");
   assert.equal(WIDTH_FACTOR.mixed, 0.56, "the historical mixed-case factor is unchanged");
@@ -57,7 +56,11 @@ test("a rotated span still covers both ends of the run", () => {
   });
   for (const corner of [spin(0, 0), spin(200, 20)]) {
     const covered = spans.some(
-      (s) => corner.x >= s.x - 1e-6 && corner.x <= s.x + s.w + 1e-6 && corner.y >= s.y - 1e-6 && corner.y <= s.y + s.h + 1e-6,
+      (s) =>
+        corner.x >= s.x - 1e-6 &&
+        corner.x <= s.x + s.w + 1e-6 &&
+        corner.y >= s.y - 1e-6 &&
+        corner.y <= s.y + s.h + 1e-6,
     );
     assert.ok(covered, `rotated corner (${corner.x.toFixed(1)}, ${corner.y.toFixed(1)}) must be reserved`);
   }

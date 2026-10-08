@@ -38,7 +38,20 @@ function voyageKit(ctx: SuiteContext) {
   // Issue #120: the mark is a ship on sea legs and a rider on road legs; reading .voyage-ship unconditionally throws on the ~94% of legs that ride.
   const markFn = `const mark=()=>{const s=document.querySelector(".rf-chart .voyage-ship");const r=document.querySelector(".rf-chart .voyage-rider");return (s&&s.getAttribute("display")!=="none")?s:r;};`;
   const stepTo = (n: number) =>
-    evaluate<{ status: string; tf: string | null; glyph: string | null; pts: number; first: string; last: string; logged: number; rows: number; visible: boolean; lastText: string }>(`(()=>{${markFn}window.__vellumVoyageStepTo(${n});const m=mark();const t=m?m.getAttribute("transform"):"";const glyph=m?m.getAttribute("class"):"";const raw=document.querySelector(".voyage-track").getAttribute("points").trim().split(" ");const log=window.__vellumVoyageLog();return{status:document.querySelector(".rf-status").textContent,tf:t,glyph,pts:raw.length,first:raw[0],last:raw[raw.length-1],logged:log?log.logged:-1,rows:log?log.rows:-1,visible:!!(log&&log.visible),lastText:log&&log.logged>0?log.entries[log.logged-1].text:""};})()`);
+    evaluate<{
+      status: string;
+      tf: string | null;
+      glyph: string | null;
+      pts: number;
+      first: string;
+      last: string;
+      logged: number;
+      rows: number;
+      visible: boolean;
+      lastText: string;
+    }>(
+      `(()=>{${markFn}window.__vellumVoyageStepTo(${n});const m=mark();const t=m?m.getAttribute("transform"):"";const glyph=m?m.getAttribute("class"):"";const raw=document.querySelector(".voyage-track").getAttribute("points").trim().split(" ");const log=window.__vellumVoyageLog();return{status:document.querySelector(".rf-status").textContent,tf:t,glyph,pts:raw.length,first:raw[0],last:raw[raw.length-1],logged:log?log.logged:-1,rows:log?log.rows:-1,visible:!!(log&&log.visible),lastText:log&&log.logged>0?log.entries[log.logged-1].text:""};})()`,
+    );
   return { ...ctx, stepTo };
 }
 
@@ -54,7 +67,16 @@ async function rw1Armed({ evaluate, check }: SuiteContext): Promise<void> {
     return {capitalIdx:capital?capital.idx:-1,count:r.manifest.places.length};
   })()`);
 
-  const rw1 = await evaluate<{ hasOverlay: boolean; ports: number; firstIdx: number; chamber: string; year: number | null; max: number; annals: number; annalsInked: number }>(`(()=>{
+  const rw1 = await evaluate<{
+    hasOverlay: boolean;
+    ports: number;
+    firstIdx: number;
+    chamber: string;
+    year: number | null;
+    max: number;
+    annals: number;
+    annalsInked: number;
+  }>(`(()=>{
     const ov=document.querySelector(".rf-chart .voyage-overlay");
     const plan=window.__vellumVoyagePlan();
     const a=window.__vellumAgesState();
@@ -65,15 +87,26 @@ async function rw1Armed({ evaluate, check }: SuiteContext): Promise<void> {
   })()`);
   check(
     "RW1 armed at the present: overlay built, plan starts at the capital, annals told",
-    rw1.hasOverlay && rw1.ports > 1 && rw1.firstIdx === vm.capitalIdx &&
-      rw1.chamber === "ages" && rw1.year === rw1.max &&
-      rw1.annals > 0 && rw1.annalsInked === rw1.annals,
+    rw1.hasOverlay &&
+      rw1.ports > 1 &&
+      rw1.firstIdx === vm.capitalIdx &&
+      rw1.chamber === "ages" &&
+      rw1.year === rw1.max &&
+      rw1.annals > 0 &&
+      rw1.annalsInked === rw1.annals,
     JSON.stringify(rw1) + ` capital=${vm.capitalIdx}`,
   );
 }
 
 async function rw2Manuscript({ evaluate, check }: SuiteContext): Promise<void> {
-  const rw2 = await evaluate<{ heads: number; headAfterPrologue: boolean; strict: boolean; firstDays: string[]; proDc: boolean; annDc: boolean }>(`(()=>{
+  const rw2 = await evaluate<{
+    heads: number;
+    headAfterPrologue: boolean;
+    strict: boolean;
+    firstDays: string[];
+    proDc: boolean;
+    annDc: boolean;
+  }>(`(()=>{
     const lis=[...document.querySelectorAll(".rf-log-strip li")];
     const heads=lis.filter((li)=>li.classList.contains("annals-head"));
     const headIdx=lis.indexOf(heads[0]);
@@ -93,7 +126,13 @@ async function rw2Manuscript({ evaluate, check }: SuiteContext): Promise<void> {
 }
 
 async function rw3Leftward({ evaluate, check }: SuiteContext): Promise<void> {
-  const rw3 = await evaluate<{ chamber: string; t: number | null; readout: string; overlayVisible: boolean; annalsInked: number }>(`(()=>{
+  const rw3 = await evaluate<{
+    chamber: string;
+    t: number | null;
+    readout: string;
+    overlayVisible: boolean;
+    annalsInked: number;
+  }>(`(()=>{
     const s=document.querySelector(".rf-range");
     s.value=String(Number(s.max)/2);
     s.dispatchEvent(new Event("input",{bubbles:true}));
@@ -106,14 +145,19 @@ async function rw3Leftward({ evaluate, check }: SuiteContext): Promise<void> {
   })()`);
   check(
     "RW3 the seam crossed leftward: survey chamber at t=1, track shown, word readout, annals dim",
-    rw3.chamber === "survey" && rw3.t === 1 && rw3.readout === "the survey" &&
-      rw3.overlayVisible && rw3.annalsInked === 0,
+    rw3.chamber === "survey" &&
+      rw3.t === 1 &&
+      rw3.readout === "the survey" &&
+      rw3.overlayVisible &&
+      rw3.annalsInked === 0,
     JSON.stringify(rw3),
   );
 }
 
 async function rwVoyagePlan({ evaluate }: SuiteContext) {
-  const plan = await evaluate<{ ports: { idx: number; logLine: string }[]; legs: number }>(`(()=>{const p=window.__vellumVoyagePlan();return{ports:p.ports.map((x)=>({idx:x.idx,logLine:x.logLine})),legs:p.legs.length};})()`);
+  const plan = await evaluate<{ ports: { idx: number; logLine: string }[]; legs: number }>(
+    `(()=>{const p=window.__vellumVoyagePlan();return{ports:p.ports.map((x)=>({idx:x.idx,logLine:x.logLine})),legs:p.legs.length};})()`,
+  );
   // Issue #275: legs === ports and the LAST leg is the one home, so legs-1 lands on the final distinct port and stepping to legs itself is the homecoming (t=1).
   const lastPort = plan.legs - 1;
   const homeStep = plan.legs;
@@ -141,11 +185,18 @@ async function rw5MidPort({ check, stepTo }: VoyageKit, midPort: number, s0: Sto
   );
 }
 
-async function rw6LastPort({ check, stepTo }: VoyageKit, plan: Plan["plan"], lastPort: number, entries: number): Promise<Stop> {
+async function rw6LastPort(
+  { check, stepTo }: VoyageKit,
+  plan: Plan["plan"],
+  lastPort: number,
+  entries: number,
+): Promise<Stop> {
   const sLast = await stepTo(lastPort);
   check(
     "RW6 step to the last port: every port is logged, but the survey has not come home yet",
-    sLast.logged === plan.ports.length && sLast.logged < entries && sLast.status === "" &&
+    sLast.logged === plan.ports.length &&
+      sLast.logged < entries &&
+      sLast.status === "" &&
       sLast.pts > plan.ports.length,
     JSON.stringify({ last: lastPort, sLast, ports: plan.ports.length, entries }),
   );
@@ -156,8 +207,10 @@ async function rw7Home({ check, stepTo }: VoyageKit, homeStep: number, entries: 
   const sHome = await stepTo(homeStep);
   check(
     "RW7 the survey sails home: the homecoming closes the log and the track is a closed circuit",
-    sHome.logged === entries && sHome.lastText.includes("whence we set out") &&
-      sHome.status.startsWith("The survey is charted") && sHome.first === sHome.last &&
+    sHome.logged === entries &&
+      sHome.lastText.includes("whence we set out") &&
+      sHome.status.startsWith("The survey is charted") &&
+      sHome.first === sHome.last &&
       sHome.pts > sLast.pts,
     JSON.stringify({ home: homeStep, sHome, entries }),
   );
@@ -180,11 +233,23 @@ async function rw9Sibling({ evaluate, check }: SuiteContext): Promise<void> {
     return{chart:!!chart,trackInChart:chart?!!chart.querySelector(".voyage-track"):false,
       trackInOverlay:overlay?!!overlay.querySelector(".voyage-track"):false};
   })()`);
-  check("RW9 the track is a sibling overlay, never inside the baked chart", rw9.chart && !rw9.trackInChart && rw9.trackInOverlay, JSON.stringify(rw9));
+  check(
+    "RW9 the track is a sibling overlay, never inside the baked chart",
+    rw9.chart && !rw9.trackInChart && rw9.trackInOverlay,
+    JSON.stringify(rw9),
+  );
 }
 
 async function rw10Rightward({ evaluate, check }: SuiteContext, presentShown: number): Promise<void> {
-  const rw10 = await evaluate<{ chamber: string; year: number | null; min: number; readout: string; overlayHidden: boolean; shown: number; panelShown: boolean }>(`(()=>{
+  const rw10 = await evaluate<{
+    chamber: string;
+    year: number | null;
+    min: number;
+    readout: string;
+    overlayHidden: boolean;
+    shown: number;
+    panelShown: boolean;
+  }>(`(()=>{
     const s=document.querySelector(".rf-range");
     s.value=String(Number(s.max)/2);
     s.dispatchEvent(new Event("input",{bubbles:true}));
@@ -200,14 +265,24 @@ async function rw10Rightward({ evaluate, check }: SuiteContext, presentShown: nu
   })()`);
   check(
     "RW10 the seam crossed rightward: ages chamber at the first years, track gone, year readout",
-    rw10.chamber === "ages" && rw10.year === rw10.min + 1 && /^year \d+$/.test(rw10.readout) &&
-      rw10.overlayHidden && rw10.shown < presentShown && rw10.panelShown,
+    rw10.chamber === "ages" &&
+      rw10.year === rw10.min + 1 &&
+      /^year \d+$/.test(rw10.readout) &&
+      rw10.overlayHidden &&
+      rw10.shown < presentShown &&
+      rw10.panelShown,
     JSON.stringify(rw10) + ` present=${presentShown}`,
   );
 }
 
 async function rw11Reverses({ evaluate, check }: SuiteContext, presentShown: number): Promise<void> {
-  const rw11 = await evaluate<{ chamber: string; t: number | null; readout: string; overlayVisible: boolean; shown: number }>(`(()=>{
+  const rw11 = await evaluate<{
+    chamber: string;
+    t: number | null;
+    readout: string;
+    overlayVisible: boolean;
+    shown: number;
+  }>(`(()=>{
     const s=document.querySelector(".rf-range");
     s.value=String(Number(s.max)/2);
     s.dispatchEvent(new Event("input",{bubbles:true}));
@@ -219,8 +294,11 @@ async function rw11Reverses({ evaluate, check }: SuiteContext, presentShown: num
   })()`);
   check(
     "RW11 the crossing reverses: back at the seam the survey chamber restores the present world",
-    rw11.chamber === "survey" && rw11.t === 1 && rw11.readout === "the survey" &&
-      rw11.overlayVisible && rw11.shown === presentShown,
+    rw11.chamber === "survey" &&
+      rw11.t === 1 &&
+      rw11.readout === "the survey" &&
+      rw11.overlayVisible &&
+      rw11.shown === presentShown,
     JSON.stringify(rw11) + ` present=${presentShown}`,
   );
 }
@@ -228,20 +306,45 @@ async function rw11Reverses({ evaluate, check }: SuiteContext, presentShown: num
 async function rw12Detent({ evaluate, send, check }: SuiteContext): Promise<void> {
   // The moves carry button:"left" DELIBERATELY: Chromium's native slider drag ignores a move whose button is "none", so the thumb would never follow and the detent would have nothing to hold.
   await evaluate(`(()=>{document.querySelector(".rf-range").scrollIntoView({block:"center"});})()`);
-  const bar = await evaluate<{ x: number; y: number; w: number; h: number }>(`(()=>{const s=document.querySelector(".rf-range");const r=s.getBoundingClientRect();return{x:r.x,y:r.y,w:r.width,h:r.height};})()`);
+  const bar = await evaluate<{ x: number; y: number; w: number; h: number }>(
+    `(()=>{const s=document.querySelector(".rf-range");const r=s.getBoundingClientRect();return{x:r.x,y:r.y,w:r.width,h:r.height};})()`,
+  );
   const TH = 16; // the .ages-range thumb width (living-chart.css)
   const xAt = (u: number) => Math.round(bar.x + TH / 2 + u * (bar.w - TH));
   const yMid = Math.round(bar.y + bar.h / 2);
-  await send("Input.dispatchMouseEvent", { type: "mousePressed", x: xAt(0.4), y: yMid, button: "left", buttons: 1, clickCount: 1 });
+  await send("Input.dispatchMouseEvent", {
+    type: "mousePressed",
+    x: xAt(0.4),
+    y: yMid,
+    button: "left",
+    buttons: 1,
+    clickCount: 1,
+  });
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: xAt(0.52), y: yMid, button: "left", buttons: 1 });
-  const held = await evaluate<{ u: number; held: boolean; chamber: string; readout: string }>(`(()=>{const a=window.__vellumAgesState();return{u:a.u,held:a.held,chamber:a.chamber,readout:document.querySelector(".rf-year").textContent};})()`);
+  const held = await evaluate<{ u: number; held: boolean; chamber: string; readout: string }>(
+    `(()=>{const a=window.__vellumAgesState();return{u:a.u,held:a.held,chamber:a.chamber,readout:document.querySelector(".rf-year").textContent};})()`,
+  );
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: xAt(0.6), y: yMid, button: "left", buttons: 1 });
-  await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: xAt(0.6), y: yMid, button: "left", buttons: 0, clickCount: 1 });
-  const escaped = await evaluate<{ u: number; held: boolean; chamber: string }>(`(()=>{const a=window.__vellumAgesState();return{u:a.u,held:a.held,chamber:a.chamber};})()`);
+  await send("Input.dispatchMouseEvent", {
+    type: "mouseReleased",
+    x: xAt(0.6),
+    y: yMid,
+    button: "left",
+    buttons: 0,
+    clickCount: 1,
+  });
+  const escaped = await evaluate<{ u: number; held: boolean; chamber: string }>(
+    `(()=>{const a=window.__vellumAgesState();return{u:a.u,held:a.held,chamber:a.chamber};})()`,
+  );
   check(
     "RW12 the hard detent: a drag holds at the seam inside the band and releases past it",
-    held.held === true && held.u === 0.5 && held.chamber === "survey" && held.readout === "the survey" &&
-      escaped.held === false && escaped.chamber === "ages" && escaped.u > 0.55,
+    held.held === true &&
+      held.u === 0.5 &&
+      held.chamber === "survey" &&
+      held.readout === "the survey" &&
+      escaped.held === false &&
+      escaped.chamber === "ages" &&
+      escaped.u > 0.55,
     JSON.stringify({ held, escaped }),
   );
 }
@@ -253,11 +356,17 @@ async function rw13Sweeps({ evaluate, check, sleep }: SuiteContext): Promise<voi
     s.dispatchEvent(new Event("input",{bubbles:true}));
     document.querySelector(".rf-play").click();
   })()`);
-  let sawSurveyPlaying = false, crossed = null;
+  let sawSurveyPlaying = false,
+    crossed = null;
   for (let i = 0; i < 60; i++) {
-    const st = await evaluate<{ chamber: string; playing: boolean; lbl: string }>(`(()=>{const a=window.__vellumAgesState();return{chamber:a.chamber,playing:a.playing,lbl:document.querySelector(".rf-play").textContent};})()`);
+    const st = await evaluate<{ chamber: string; playing: boolean; lbl: string }>(
+      `(()=>{const a=window.__vellumAgesState();return{chamber:a.chamber,playing:a.playing,lbl:document.querySelector(".rf-play").textContent};})()`,
+    );
     if (st.chamber === "survey" && st.playing) sawSurveyPlaying = true;
-    if (st.chamber === "ages") { crossed = st; break; }
+    if (st.chamber === "ages") {
+      crossed = st;
+      break;
+    }
     await sleep(100);
   }
   await evaluate(`(()=>{const b=document.querySelector(".rf-play");if(b.textContent==="Pause")b.click();})()`);

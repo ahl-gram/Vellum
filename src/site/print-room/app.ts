@@ -2,10 +2,26 @@
 import { runJob, usesWorker, initWorker, type DrawResult } from "../explorer/worker-client.ts";
 import { startArrival } from "../explorer/draw-ceremony.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
-import { POSTER_PRESETS, CHART_PRESET, clampPosterWidth, posterFilename, posterPngFilename, chartFilename, type PosterPreset } from "./poster-presets.ts";
+import {
+  POSTER_PRESETS,
+  CHART_PRESET,
+  clampPosterWidth,
+  posterFilename,
+  posterPngFilename,
+  chartFilename,
+  type PosterPreset,
+} from "./poster-presets.ts";
 import { rasterizeSvg, type RasterizeResult } from "../lib/rasterize.ts";
 import { initBoundAtlas, clearBoundAtlas, enableBind, sheetAspect, type PosterBasis } from "./bound-atlas.ts";
-import { bindPrintRoom, matterAspect, showMatter, showPlate, showProof, writeFolio, type RoomFurniture } from "./seats.ts";
+import {
+  bindPrintRoom,
+  matterAspect,
+  showMatter,
+  showPlate,
+  showProof,
+  writeFolio,
+  type RoomFurniture,
+} from "./seats.ts";
 import { TABLE_KEY } from "../shared/table-address.ts";
 import { errorText } from "../shared/error-text.ts";
 import type { MapType } from "../../terrain/heightfield.ts";
@@ -176,7 +192,14 @@ function draw(): void {
     kind: "draw",
     seed,
     overrides,
-    render: { style, widthPx: PREVIEW_WIDTH, legend: carried.legend, arms: carried.arms, beasts: carried.beasts, theme: carried.theme || undefined },
+    render: {
+      style,
+      widthPx: PREVIEW_WIDTH,
+      legend: carried.legend,
+      arms: carried.arms,
+      beasts: carried.beasts,
+      theme: carried.theme || undefined,
+    },
   })
     .then((res) => {
       if (myGen !== drawGen) return;
@@ -192,7 +215,15 @@ function draw(): void {
       lastSeed = seed;
       lastTitle = res.title;
       // overrides is built fresh per draw and never mutated, so holding the reference is safe.
-      posterBasis = { seed, style, overrides, legend: carried.legend, arms: carried.arms, beasts: carried.beasts, theme: carried.theme || undefined };
+      posterBasis = {
+        seed,
+        style,
+        overrides,
+        legend: carried.legend,
+        arms: carried.arms,
+        beasts: carried.beasts,
+        theme: carried.theme || undefined,
+      };
       drawing = false;
       refreshOrderControls(); // the new world is on the desk: re-open the counter (unless an order still holds it)
       enableBind();
@@ -208,9 +239,14 @@ function draw(): void {
 }
 
 $("pr-draw").addEventListener("click", draw);
-seedInput.addEventListener("keydown", (e) => { if (e.key === "Enter") draw(); });
+seedInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") draw();
+});
 styleSel.addEventListener("change", draw);
-$("pr-random").addEventListener("click", () => { seedInput.value = String(randomSeed()); draw(); });
+$("pr-random").addEventListener("click", () => {
+  seedInput.value = String(randomSeed());
+  draw();
+});
 // A fresh Pressed-as choice makes a pulled plate's status stale, so dismiss it; an in-flight order keeps its line (its completion rewrites it either way).
 formatSel.addEventListener("change", () => {
   if (!ordering) posterStatus.textContent = "";
@@ -243,7 +279,13 @@ function orderShape(preset: Readonly<PosterPreset>): { isChart: boolean; format:
   return { isChart, format, width };
 }
 
-function pullSvg(res: Readonly<DrawResult>, basis: Readonly<PosterBasis>, isChart: boolean, width: number, preset: Readonly<PosterPreset>): void {
+function pullSvg(
+  res: Readonly<DrawResult>,
+  basis: Readonly<PosterBasis>,
+  isChart: boolean,
+  width: number,
+  preset: Readonly<PosterPreset>,
+): void {
   // The chart reuses the Explorer's exact artifact name (byte-parity by construction: same worker, same draw kind, same widthPx); the posters keep width-stamped names.
   const filename = isChart
     ? chartFilename(basis.seed, basis.style, res.title)
@@ -259,9 +301,15 @@ function pressPng(png: Readonly<RasterizeResult>, basis: Readonly<PosterBasis>, 
   const filename = posterPngFilename(basis.seed, basis.style, png.width);
   downloadBlob(png.blob, filename);
   window.__vellumLastPng = {
-    filename, type: png.blob.type, size: png.blob.size,
-    width: png.width, height: png.height, scale: png.scale, clamped: png.clamped,
-    seed: basis.seed, style: basis.style,
+    filename,
+    type: png.blob.type,
+    size: png.blob.size,
+    width: png.width,
+    height: png.height,
+    scale: png.scale,
+    clamped: png.clamped,
+    seed: basis.seed,
+    style: basis.style,
   };
   posterStatus.textContent = png.clamped
     ? `${preset.label} plate pressed at reduced resolution to fit this browser: ${filename}`
@@ -289,7 +337,14 @@ function orderPoster(key: string): void {
     kind: "draw",
     seed: basis.seed,
     overrides: basis.overrides,
-    render: { style: basis.style, widthPx: width, legend: basis.legend, arms: basis.arms, beasts: basis.beasts, theme: basis.theme },
+    render: {
+      style: basis.style,
+      widthPx: width,
+      legend: basis.legend,
+      arms: basis.arms,
+      beasts: basis.beasts,
+      theme: basis.theme,
+    },
   })
     .then(async (res) => {
       if (myGen !== posterGen) return;
@@ -322,9 +377,21 @@ for (const b of plateButtons) b.addEventListener("click", () => orderPoster(b.da
 await initWorker();
 // getBasis reads the LIVE posterBasis at click time, the same snapshot the poster order uses.
 initBoundAtlas(() => posterBasis, {
-  showProof: () => { showProof(furniture); sheet.rebase(); sheet.room.layout(); },
-  showPlate: (plate) => { showPlate(furniture, plate); sheet.rebase(); sheet.room.layout(); },
-  showMatter: (matter) => { showMatter(furniture, matter); sheet.rebase(); sheet.room.layout(); },
+  showProof: () => {
+    showProof(furniture);
+    sheet.rebase();
+    sheet.room.layout();
+  },
+  showPlate: (plate) => {
+    showPlate(furniture, plate);
+    sheet.rebase();
+    sheet.room.layout();
+  },
+  showMatter: (matter) => {
+    showMatter(furniture, matter);
+    sheet.rebase();
+    sheet.room.layout();
+  },
 });
 window.__vellumPrintRoomUsesWorker = usesWorker;
 window.__vellumPrintRoomState = () => ({ seed: lastSeed, title: lastTitle });

@@ -23,19 +23,14 @@ const worldFor = (seed: number): World => {
 };
 
 const renamed = (w: World): ReadonlyArray<{ name: string; formerName: string }> =>
-  w.settlements.flatMap((s) =>
-    s.formerName === undefined ? [] : [{ name: s.name, formerName: s.formerName }],
-  );
+  w.settlements.flatMap((s) => (s.formerName === undefined ? [] : [{ name: s.name, formerName: s.formerName }]));
 
 test("a world carries at least one former name, and not everything is renamed", () => {
   for (const seed of SEEDS) {
     const w = worldFor(seed);
     const marks = renamed(w);
     assert.ok(marks.length > 0, `seed ${seed} renamed nothing`);
-    assert.ok(
-      marks.length < w.settlements.length,
-      `seed ${seed} renamed every settlement; "a few" is the ruling`,
-    );
+    assert.ok(marks.length < w.settlements.length, `seed ${seed} renamed every settlement; "a few" is the ruling`);
   }
 });
 
@@ -52,10 +47,7 @@ test("a former name is a different word, colliding with nothing else on the char
     const taken = currentNames(w);
     for (const { name, formerName } of renamed(w)) {
       const stem = formerName.toLowerCase();
-      assert.ok(
-        !taken.has(stem),
-        `seed ${seed}: former name ${formerName} is already a name in this world`,
-      );
+      assert.ok(!taken.has(stem), `seed ${seed}: former name ${formerName} is already a name in this world`);
       assert.ok(
         !editDistanceWithin1(name.toLowerCase(), stem),
         `seed ${seed}: ${name} once called ${formerName} reads as a typo, not a renaming`,
@@ -85,17 +77,25 @@ test("ruined towns keep the card they have: no former name", () => {
 test("capitals and realm seats are eligible", () => {
   const ranked = SEEDS.map(worldFor).flatMap((w) => {
     const seats = new Set(w.realms.seats);
-    return w.settlements.filter(
-      (s, i) => s.formerName !== undefined && (s.kind === "capital" || seats.has(i)),
-    );
+    return w.settlements.filter((s, i) => s.formerName !== undefined && (s.kind === "capital" || seats.has(i)));
   });
   assert.ok(ranked.length > 0, "no capital or realm seat carried a former name in any seed");
 });
 
 // MEASURED per seed. A bound (<= 4) is unfalsifiable here: every seed either clamps to MAX or sits under it, so raising SHARE to 1.0 moves the real counts and a bound still passes. The exact count reds instead: seeds 3 and 13 have 19 living settlements and take 3.
 const RENAME_COUNT: ReadonlyArray<readonly [number, number]> = [
-  [1, 4], [2, 4], [3, 3], [5, 4], [7, 4], [11, 4],
-  [13, 3], [17, 4], [19, 4], [23, 4], [42, 4], [99, 4],
+  [1, 4],
+  [2, 4],
+  [3, 3],
+  [5, 4],
+  [7, 4],
+  [11, 4],
+  [13, 3],
+  [17, 4],
+  [19, 4],
+  [23, 4],
+  [42, 4],
+  [99, 4],
 ];
 
 test("each seed renames exactly this many", () => {
@@ -111,7 +111,10 @@ test("the cap holds however many places are eligible", () => {
 });
 
 test("the floor holds when almost nothing is eligible", () => {
-  const few = [{ name: "Only", ruined: false }, { name: "Gone", ruined: true }];
+  const few = [
+    { name: "Only", ruined: false },
+    { name: "Gone", ruined: true },
+  ];
   const got = assignFormerNames(few, CULTURES[0] as Culture, createRng(3).fork("renames"), new Set());
   assert.equal(got.size, 1, "one living settlement should still be renameable");
 });
@@ -151,10 +154,7 @@ test("a former name yields to a NEAR duplicate, not only an exact one", () => {
   const free = drawWith(new Set());
   const near = free.map((n) => `${n.slice(0, -1)}x`.toLowerCase());
   for (const name of drawWith(new Set(near))) {
-    assert.ok(
-      !isNearExisting(name.toLowerCase(), near),
-      `${name} reads as a typo of a name already on the chart`,
-    );
+    assert.ok(!isNearExisting(name.toLowerCase(), near), `${name} reads as a typo of a name already on the chart`);
   }
 });
 
@@ -163,10 +163,7 @@ test("a former name reserves the word against hamlet naming", () => {
     const w = worldFor(seed);
     const taken = worldNameSet(w);
     for (const { formerName } of renamed(w)) {
-      assert.ok(
-        taken.has(formerName.toLowerCase()),
-        `seed ${seed}: ${formerName} is free for a hamlet to take`,
-      );
+      assert.ok(taken.has(formerName.toLowerCase()), `seed ${seed}: ${formerName} is free for a hamlet to take`);
     }
   }
 });
@@ -177,10 +174,7 @@ test("no former name reaches the rendered chart, in any style", () => {
     for (const style of ["antique", "ink", "nautical", "topographic"] as const) {
       const svg = renderMap(w, { style, widthPx: 1200, legend: true });
       for (const { formerName } of renamed(w)) {
-        assert.ok(
-          !svg.includes(formerName),
-          `seed ${seed} ${style}: ${formerName} printed on the chart`,
-        );
+        assert.ok(!svg.includes(formerName), `seed ${seed} ${style}: ${formerName} printed on the chart`);
       }
     }
   }

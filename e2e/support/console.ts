@@ -12,4 +12,6 @@ export const OUR_OWN_REASONS = [
 ];
 
 export const dropExpectedCancellations = (errs: readonly string[]): string[] =>
-  errs.filter((e) => !(CANCELLATION_PREFIXES.some((p) => e.includes(p)) && !OUR_OWN_REASONS.some((r) => e.includes(r))));
+  errs.filter(
+    (e) => !(CANCELLATION_PREFIXES.some((p) => e.includes(p)) && !OUR_OWN_REASONS.some((r) => e.includes(r))),
+  );

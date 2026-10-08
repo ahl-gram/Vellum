@@ -45,11 +45,18 @@ if (!findBrowser()) {
     );
     process.exit(1);
   }
-  console.log("SKIP: no Chromium-family browser found, skipping the Explorer e2e lanes (install Brave/Chrome or set VELLUM_BROWSER).");
+  console.log(
+    "SKIP: no Chromium-family browser found, skipping the Explorer e2e lanes (install Brave/Chrome or set VELLUM_BROWSER).",
+  );
   process.exit(0);
 }
 
-function streamLines(stream: Readable, prefix: string, sink: (line: string) => void, onLine: (line: string) => void): void {
+function streamLines(
+  stream: Readable,
+  prefix: string,
+  sink: (line: string) => void,
+  onLine: (line: string) => void,
+): void {
   let rest = "";
   stream.setEncoding("utf8");
   const emit = (line: string) => {
@@ -83,7 +90,8 @@ function runLane(lane: E2eLane): Promise<LaneResult> {
     streamLines(child.stdout, prefix, (l) => console.log(l), readLine);
     streamLines(child.stderr, prefix, (l) => console.error(l), readLine);
     // A null code is a signal or a failed spawn, so the lane reported no outcome at all: harness failure (2), not failed check (1).
-    const done = (code: number | null) => settle({ name: lane.name, code: code ?? 2, ms: performance.now() - started, skipped, tally });
+    const done = (code: number | null) =>
+      settle({ name: lane.name, code: code ?? 2, ms: performance.now() - started, skipped, tally });
     child.on("error", (err) => {
       console.error(`${prefix} FAIL: lane could not start: ${err.message}`);
       done(2);

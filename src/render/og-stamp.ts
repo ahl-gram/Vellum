@@ -5,7 +5,13 @@ export const OG_STAMP_KEYWORD = "vellum-card";
 const CHART_MARKER = "<chart/>";
 const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 
-type Chunk = { readonly type: string; readonly start: number; readonly end: number; readonly data: Buffer; readonly crcOk: boolean };
+type Chunk = {
+  readonly type: string;
+  readonly start: number;
+  readonly end: number;
+  readonly data: Buffer;
+  readonly crcOk: boolean;
+};
 
 function chartSpan(card: string): { open: number; close: number } {
   const at = card.indexOf("data-vellum-seed=");
@@ -31,7 +37,9 @@ function chartSpan(card: string): { open: number; close: number } {
 
 export function cardStamp(card: string): string {
   const { open, close } = chartSpan(card);
-  return createHash("sha256").update(card.slice(0, open) + CHART_MARKER + card.slice(close)).digest("hex");
+  return createHash("sha256")
+    .update(card.slice(0, open) + CHART_MARKER + card.slice(close))
+    .digest("hex");
 }
 
 function* chunks(png: Buffer): Generator<Chunk> {
@@ -82,6 +90,9 @@ export function stampPng(png: Uint8Array, stamp: string): Buffer {
   const bare = stripStamps(png);
   const [ihdr] = chunks(bare);
   if (ihdr?.type !== "IHDR") throw new Error("PNG does not open with IHDR");
-  const text = chunk("tEXt", Buffer.concat([Buffer.from(OG_STAMP_KEYWORD, "latin1"), Buffer.from([0]), Buffer.from(stamp, "latin1")]));
+  const text = chunk(
+    "tEXt",
+    Buffer.concat([Buffer.from(OG_STAMP_KEYWORD, "latin1"), Buffer.from([0]), Buffer.from(stamp, "latin1")]),
+  );
   return Buffer.concat([bare.subarray(0, ihdr.end), text, bare.subarray(ihdr.end)]);
 }

@@ -18,9 +18,11 @@ export const MATTER_ROW = {
   gazetteer: SECTION_ROW.prospect + 3,
 } as const;
 
-export const plateRow = (section: PlateSection, ordinal = 0): number => SECTION_ROW[section] + (section === "theme" ? ordinal : 0);
+export const plateRow = (section: PlateSection, ordinal = 0): number =>
+  SECTION_ROW[section] + (section === "theme" ? ordinal : 0);
 export const numeralOf = (row: number): string => {
   const numeral = NUMERALS[row];
-  if (numeral === undefined) throw new RangeError(`the contents run to ${NUMERALS.length} rows; row ${row + 1} has no numeral`);
+  if (numeral === undefined)
+    throw new RangeError(`the contents run to ${NUMERALS.length} rows; row ${row + 1} has no numeral`);
   return numeral;
 };

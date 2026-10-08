@@ -80,7 +80,7 @@ let bindGen = 0;
 let binding = false;
 
 export function sheetAspect(): number | null {
-  return here === null ? null : plates.get(here)?.aspect ?? null;
+  return here === null ? null : (plates.get(here)?.aspect ?? null);
 }
 
 function setDeliveryEnabled(on: boolean): void {
@@ -94,7 +94,11 @@ function renderContents(): void {
     contents.innerHTML = contentsRows(null);
     return;
   }
-  const refs = (ps: ReadonlyArray<AtlasPlate>): PlateRef[] => ps.flatMap((p) => { const b = plates.get(p.key); return b ? [b.plate] : []; });
+  const refs = (ps: ReadonlyArray<AtlasPlate>): PlateRef[] =>
+    ps.flatMap((p) => {
+      const b = plates.get(p.key);
+      return b ? [b.plate] : [];
+    });
   contents.innerHTML = contentsRows({
     hero: plates.get(lastAtlas.hero.key)!.plate,
     draughtings: refs(lastAtlas.draughtings),
@@ -215,7 +219,11 @@ function bindAtlas(): void {
       bindBtn.textContent = "Bind it again";
       status.innerHTML = `The atlas of <strong>${escapeXml(res.atlas.title)}</strong> is bound: ${plates.size} plates, the chronicle and the gazetteer, from the proof on the desk.`;
       turnTo(res.atlas.hero.key);
-      window.__vellumBoundAtlas = { seed: res.atlas.seed, title: res.atlas.title, figures: atlasDiv.querySelectorAll("figure").length };
+      window.__vellumBoundAtlas = {
+        seed: res.atlas.seed,
+        title: res.atlas.title,
+        figures: atlasDiv.querySelectorAll("figure").length,
+      };
     })
     .catch((err: unknown) => {
       if (myGen !== bindGen) return;

@@ -53,17 +53,12 @@ function validateStyle(s: string): StyleName {
   if (s === "antique" || s === "topographic" || s === "ink" || s === "nautical") {
     return s;
   }
-  throw new Error(
-    `unknown style "${s}" (use antique | topographic | ink | nautical)`,
-  );
+  throw new Error(`unknown style "${s}" (use antique | topographic | ink | nautical)`);
 }
 
 function validateType(s: string | undefined): MapType | undefined {
   if (s === undefined) return undefined;
-  if (
-    s === "island" || s === "archipelago" || s === "continent" ||
-    s === "citystate"
-  ) {
+  if (s === "island" || s === "archipelago" || s === "continent" || s === "citystate") {
     return s;
   }
   throw new Error(`unknown map type "${s}"`);
@@ -80,9 +75,7 @@ function validateTheme(s: string | undefined): ThemeName | undefined {
   if (s === "vegetation" || s === "climate" || s === "moisture" || s === "population") {
     return s;
   }
-  throw new Error(
-    `unknown theme "${s}" (use vegetation | climate | moisture | population)`,
-  );
+  throw new Error(`unknown theme "${s}" (use vegetation | climate | moisture | population)`);
 }
 
 async function writeOut(path: string, content: string): Promise<void> {
@@ -123,10 +116,7 @@ type ChartArgs = ReturnType<typeof parseChartArgs>;
 const num = (s: string): number => (s.trim() === "" ? Number.NaN : Number(s));
 
 export function chartOptions(values: ChartArgs) {
-  const seed =
-    values.seed !== undefined
-      ? Number(values.seed) >>> 0
-      : (Date.now() % 0xffffffff) >>> 0;
+  const seed = values.seed !== undefined ? Number(values.seed) >>> 0 : (Date.now() % 0xffffffff) >>> 0;
   if (values.seed !== undefined && !Number.isFinite(num(values.seed))) {
     throw new Error(`--seed must be a number, got "${values.seed}"`);
   }
@@ -142,8 +132,7 @@ export function chartOptions(values: ChartArgs) {
   if (landFraction !== undefined && (!Number.isFinite(landFraction) || landFraction < 0.1 || landFraction > 0.7)) {
     throw new Error("--land must be between 0.1 and 0.7");
   }
-  const coastWarp =
-    values["coast-warp"] !== undefined ? num(values["coast-warp"]) : undefined;
+  const coastWarp = values["coast-warp"] !== undefined ? num(values["coast-warp"]) : undefined;
   if (coastWarp !== undefined && (!Number.isFinite(coastWarp) || coastWarp < 0 || coastWarp > 1)) {
     throw new Error("--coast-warp must be between 0 and 1");
   }
@@ -166,18 +155,28 @@ function chartRecipe(o: ChartOptions) {
   });
 }
 
-async function drawChart(values: ChartArgs, o: ChartOptions, recipe: ReturnType<typeof chartRecipe>, style: StyleName): Promise<string> {
+async function drawChart(
+  values: ChartArgs,
+  o: ChartOptions,
+  recipe: ReturnType<typeof chartRecipe>,
+  style: StyleName,
+): Promise<string> {
   const t0 = performance.now();
   const world = generateWorld(recipe);
   const t1 = performance.now();
-  const svg = renderMap(world, { widthPx: o.widthPx, style, legend: values.legend, arms: values.arms, beasts: values.beasts, theme: o.theme });
+  const svg = renderMap(world, {
+    widthPx: o.widthPx,
+    style,
+    legend: values.legend,
+    arms: values.arms,
+    beasts: values.beasts,
+    theme: o.theme,
+  });
   const t2 = performance.now();
   const out = resolve(values.out ?? `out/chart-${o.seed}-${style}.svg`);
   await writeOut(out, svg);
   console.log(`seed ${o.seed} · ${recipe.mapType} · ${world.title.title}`);
-  console.log(
-    `world ${(t1 - t0).toFixed(0)}ms · render ${(t2 - t1).toFixed(0)}ms · ${out}`,
-  );
+  console.log(`world ${(t1 - t0).toFixed(0)}ms · render ${(t2 - t1).toFixed(0)}ms · ${out}`);
   return out;
 }
 
@@ -190,9 +189,7 @@ async function rasterizeChart(out: string, scale: number): Promise<void> {
   const pngOut = out.replace(/\.svg$/, ".png");
   const t3 = performance.now();
   await rasterizeSvg(browser, out, pngOut, scale);
-  console.log(
-    `png ${(performance.now() - t3).toFixed(0)}ms · scale ${scale} · ${pngOut}`,
-  );
+  console.log(`png ${(performance.now() - t3).toFixed(0)}ms · scale ${scale} · ${pngOut}`);
 }
 
 export async function main(argv: string[]): Promise<void> {

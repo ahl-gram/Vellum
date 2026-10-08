@@ -11,12 +11,7 @@ export function roadMask(world: World): Uint8Array {
   return mask;
 }
 
-export function roadWalk(
-  world: World,
-  mask: Uint8Array,
-  fromIdx: number,
-  toIdx: number,
-): number[] | null {
+export function roadWalk(world: World, mask: Uint8Array, fromIdx: number, toIdx: number): number[] | null {
   const w = world.elev.w;
   const from = world.settlements[fromIdx];
   const to = world.settlements[toIdx];

@@ -17,10 +17,7 @@ export function heroChartSvgs(): Map<string, string> {
   }
   const armsPalette = paletteForStyle(STYLES.antique);
   for (let i = 0; i < hero.arms.length; i++) {
-    out.set(
-      `arms-${HERO_SEED}-${i}.svg`,
-      armsSvgDocument(hero.arms[i]!, ARMS_SIZE, armsPalette, `hero${i}`),
-    );
+    out.set(`arms-${HERO_SEED}-${i}.svg`, armsSvgDocument(hero.arms[i]!, ARMS_SIZE, armsPalette, `hero${i}`));
   }
   return out;
 }

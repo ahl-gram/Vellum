@@ -32,7 +32,17 @@ export function engravePlate(input: ProspectInput, style: MapStyle, year: number
   const caption = plateCaption(input, g, era, year, surroundings.seaName);
   const key = plateKey(g, { input, surroundings, era });
   const suffix = opts.idSuffix ?? `${style.name}-${g.seed}-${g.index}`;
-  const engraved = engraveE(style, { input, g, era, year, caption, key, surroundings, suffix, ...(opts.widthPx === undefined ? {} : { widthPx: opts.widthPx }) });
+  const engraved = engraveE(style, {
+    input,
+    g,
+    era,
+    year,
+    caption,
+    key,
+    surroundings,
+    suffix,
+    ...(opts.widthPx === undefined ? {} : { widthPx: opts.widthPx }),
+  });
   return { ...engraved, g, era, caption, key };
 }
 
@@ -47,13 +57,20 @@ export type EngravedProspect = {
   readonly key: ReadonlyArray<PlateKeyEntry>;
 };
 
-export function engraveProspect(input: ProspectInput, style: MapStyle, year: number, opts: PlateOptions = {}): EngravedProspect {
+export function engraveProspect(
+  input: ProspectInput,
+  style: MapStyle,
+  year: number,
+  opts: PlateOptions = {},
+): EngravedProspect {
   const { node, era, caption, key } = engravePlate(input, style, year, opts);
   return { svg: renderSvg(node), era, caption, key };
 }
 
 export function engravedProspectPlate(world: World, index: number, style: MapStyle, year: number): EngravedProspect {
-  return engraveProspect(buildProspectInput(world, index), style, year, { surroundings: plateSurroundings(world, index, year) });
+  return engraveProspect(buildProspectInput(world, index), style, year, {
+    surroundings: plateSurroundings(world, index, year),
+  });
 }
 
 export function finishedPlateSvg(input: ProspectInput, style: MapStyle, year: number, opts: PlateOptions = {}): string {

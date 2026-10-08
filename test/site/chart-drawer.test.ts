@@ -2,8 +2,30 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { layOnTable, takeOffTable, roomOnTable, countLine, tabLine, refusalLine, subOf, thumbJobFor, thumbNames, layPressFace, filingAt, sheetsThatLeft, LAY_ON_CARD, LAY_ON_PAGE } from "../../src/site/explorer/chart-drawer.ts";
-import { TABLE_CAP, TABLE_KEY, emitTable, type ProspectItem, type SurveyItem, type TableItem } from "../../src/site/shared/table-address.ts";
+import {
+  layOnTable,
+  takeOffTable,
+  roomOnTable,
+  countLine,
+  tabLine,
+  refusalLine,
+  subOf,
+  thumbJobFor,
+  thumbNames,
+  layPressFace,
+  filingAt,
+  sheetsThatLeft,
+  LAY_ON_CARD,
+  LAY_ON_PAGE,
+} from "../../src/site/explorer/chart-drawer.ts";
+import {
+  TABLE_CAP,
+  TABLE_KEY,
+  emitTable,
+  type ProspectItem,
+  type SurveyItem,
+  type TableItem,
+} from "../../src/site/shared/table-address.ts";
 import { emitTableKey } from "../../src/site/explorer/address.ts";
 
 const REPO = resolve(import.meta.dirname, "..", "..");
@@ -11,8 +33,17 @@ import type { ProspectJob, ProspectResult, RegionResult } from "../../src/site/e
 
 // The Chart Table's state (Issue #520 Sub 2), pure and apart from the DOM: what the drawer draws and what the address carries are both this array. The surface is `chart-drawer` and never `drawer` (Issue #520 ruling 2).
 const survey = (lx: number): SurveyItem => ({
-  kind: "survey", seed: 42, overrides: {}, rung: 2, lx, ly: 3,
-  style: "antique", legend: true, arms: false, beasts: false, theme: null,
+  kind: "survey",
+  seed: 42,
+  overrides: {},
+  rung: 2,
+  lx,
+  ly: 3,
+  style: "antique",
+  legend: true,
+  arms: false,
+  beasts: false,
+  theme: null,
 });
 const fill = (n: number): TableItem[] => Array.from({ length: n }, (_, i) => survey(i));
 
@@ -40,7 +71,10 @@ test("a cutting comes off by its seat, and only that one (#520)", () => {
   const three = fill(3);
   const after = takeOffTable(three, 1);
   assert.equal(after.length, 2);
-  assert.deepEqual(after.map((i) => (i as SurveyItem).lx), [0, 2]);
+  assert.deepEqual(
+    after.map((i) => (i as SurveyItem).lx),
+    [0, 2],
+  );
   assert.equal(three.length, 3, "the caller's array is never mutated");
 });
 
@@ -75,7 +109,11 @@ test("an empty table writes no key, and a laid one writes the grammar's (#520 ru
 
   const one = new URLSearchParams("seed=42");
   emitTableKey(one, fill(1));
-  assert.equal(one.get(TABLE_KEY), emitTable(fill(1)), "ONE sheet is the commonest table and is written like any other: the emptiness gate is exactly zero");
+  assert.equal(
+    one.get(TABLE_KEY),
+    emitTable(fill(1)),
+    "ONE sheet is the commonest table and is written like any other: the emptiness gate is exactly zero",
+  );
 });
 
 // Issue #518 ruling 6 (period voice): the wordings are provisional until Sub 5's post-use re-review.
@@ -158,7 +196,13 @@ test("a full table refusing a sheet it ALREADY holds says so, not that it is ful
 
 // Issue #522 Sub 4: a prospect draws its own plate, which is what Issue #518 ruling 7 calls "the plate itself in its own dress".
 const prospect = (over: Partial<ProspectItem> = {}): ProspectItem => ({
-  kind: "prospect", seed: 42, overrides: {}, style: "ink", index: 3, year: 1059, ...over,
+  kind: "prospect",
+  seed: 42,
+  overrides: {},
+  style: "ink",
+  index: 3,
+  year: 1059,
+  ...over,
 });
 
 test("CT1 thumbJobFor hands a prospect its own job, dressed as the ADDRESS states, so an ink chart's cutting is an ink plate (#522, #237)", () => {
@@ -185,7 +229,12 @@ test("CT2 thumbJobFor hands EVERY table item a job, so no kind can be left draft
 test("CT3 thumbNames takes a prospect's name from the TOWN and its world line from the job's own title, which is the world's (#522)", () => {
   const prospectRes = { ok: true, name: "Paukilua", title: "The Isle of Rahai", svg: "" } as unknown as ProspectResult;
   assert.deepEqual(thumbNames(prospectRes), { title: "The Prospect of Paukilua", worldTitle: "The Isle of Rahai" });
-  const regionRes = { ok: true, title: "The Environs of Nurunui", worldTitle: "The Isle of Rahai", svg: "" } as unknown as RegionResult;
+  const regionRes = {
+    ok: true,
+    title: "The Environs of Nurunui",
+    worldTitle: "The Isle of Rahai",
+    svg: "",
+  } as unknown as RegionResult;
   assert.deepEqual(
     thumbNames(regionRes),
     { title: "The Environs of Nurunui", worldTitle: "The Isle of Rahai" },
@@ -197,19 +246,38 @@ test("CT4 a prospect's cutting names the dress the PLATE is drawn in, so a hand-
   assert.equal(subOf(prospect()), "a prospect, pen & ink, 1059");
   assert.equal(subOf(prospect({ style: "antique" })), "a prospect, antique, 1059");
   // parseTable accepts all four chart styles, and plateDressFor sends these two to the antique plate.
-  assert.equal(subOf(prospect({ style: "nautical" })), "a prospect, antique, 1059", "nautical draws antique, so it reads antique");
+  assert.equal(
+    subOf(prospect({ style: "nautical" })),
+    "a prospect, antique, 1059",
+    "nautical draws antique, so it reads antique",
+  );
   assert.equal(subOf(prospect({ style: "topographic" })), "a prospect, antique, 1059");
   assert.equal(subOf(survey(1)), "band 2, antique", "a survey's line is unchanged");
 });
 
 test("CT6 the card's press wears the two ruled faces, and a table that is BOTH full and already holding this plate says the more useful of the two true things (#518 ruling 7, Alex 2026-09-17, and #520's own precedence scar)", () => {
-  assert.deepEqual(layPressFace({ holds: false, full: false }, LAY_ON_CARD), { label: "Lay the prospect on the table", refuses: false });
-  assert.deepEqual(layPressFace({ holds: false, full: false }, LAY_ON_PAGE), { label: "Lay this prospect on the table", refuses: false },
-    "the page's resting face is its own, ruled from the rendered variant: THIS plate rather than a place on a chart");
-  assert.deepEqual(layPressFace({ holds: false, full: true }, LAY_ON_CARD), { label: "No room on the table", refuses: true });
-  assert.deepEqual(layPressFace({ holds: false, full: true }, LAY_ON_PAGE), { label: "No room on the table", refuses: true },
-    "and both surfaces refuse in the SAME words, since they refuse for the same reason");
-  assert.deepEqual(layPressFace({ holds: true, full: false }, LAY_ON_CARD), { label: "Already on the table", refuses: true });
+  assert.deepEqual(layPressFace({ holds: false, full: false }, LAY_ON_CARD), {
+    label: "Lay the prospect on the table",
+    refuses: false,
+  });
+  assert.deepEqual(
+    layPressFace({ holds: false, full: false }, LAY_ON_PAGE),
+    { label: "Lay this prospect on the table", refuses: false },
+    "the page's resting face is its own, ruled from the rendered variant: THIS plate rather than a place on a chart",
+  );
+  assert.deepEqual(layPressFace({ holds: false, full: true }, LAY_ON_CARD), {
+    label: "No room on the table",
+    refuses: true,
+  });
+  assert.deepEqual(
+    layPressFace({ holds: false, full: true }, LAY_ON_PAGE),
+    { label: "No room on the table", refuses: true },
+    "and both surfaces refuse in the SAME words, since they refuse for the same reason",
+  );
+  assert.deepEqual(layPressFace({ holds: true, full: false }, LAY_ON_CARD), {
+    label: "Already on the table",
+    refuses: true,
+  });
   // layOnTable answers "already" before "full" for exactly this reason: the reader can act on the first and not on the second.
   assert.deepEqual(
     layPressFace({ holds: true, full: true }, LAY_ON_CARD),
@@ -229,23 +297,53 @@ test("CT7 the sheet a filing is made from carries its own present year, so a wor
   const sheet = { seed: 42, overrides: {}, style: "ink", presentYear: 1059 } as const;
   const filed = filingAt({ turning: false, sheet, index: 3 });
   assert.ok(filed, "a settled sheet files");
-  assert.deepEqual([filed.seed, filed.year, filed.index], [42, 1059, 3], "and it files that sheet's world at that sheet's year");
+  assert.deepEqual(
+    [filed.seed, filed.year, filed.index],
+    [42, 1059, 3],
+    "and it files that sheet's world at that sheet's year",
+  );
   assert.equal(filingAt({ turning: false, sheet: null, index: 3 }), null, "nothing before the first draw lands");
   assert.equal(filingAt({ turning: true, sheet, index: 3 }), null, "and nothing while the sheet is mid-flip");
   const src = readFileSync(resolve(REPO, "src/site/explorer/chart-drawer.ts"), "utf8");
-  const iface = src.slice(src.indexOf("interface FilingSheet {"), src.indexOf("}", src.indexOf("interface FilingSheet {")));
+  const iface = src.slice(
+    src.indexOf("interface FilingSheet {"),
+    src.indexOf("}", src.indexOf("interface FilingSheet {")),
+  );
   const members = [...iface.matchAll(/^\s*(?:readonly\s+)?([A-Za-z]+)\??:/gm)].map((m) => m[1]).sort();
-  assert.deepEqual(members, ["overrides", "presentYear", "seed", "style"], "the filing sheet grew a member, and a second field is a second place a year can live");
-  assert.equal(members.filter((m) => /year/i.test(m)).length, 1, "two year-ish members are two independently-assignable years, which is the skew this shape exists to make unrepresentable");
-  const call = src.slice(src.indexOf("prospectItemFrom({", src.indexOf("export function filingAt")), src.indexOf("});", src.indexOf("export function filingAt")));
+  assert.deepEqual(
+    members,
+    ["overrides", "presentYear", "seed", "style"],
+    "the filing sheet grew a member, and a second field is a second place a year can live",
+  );
+  assert.equal(
+    members.filter((m) => /year/i.test(m)).length,
+    1,
+    "two year-ish members are two independently-assignable years, which is the skew this shape exists to make unrepresentable",
+  );
+  const call = src.slice(
+    src.indexOf("prospectItemFrom({", src.indexOf("export function filingAt")),
+    src.indexOf("});", src.indexOf("export function filingAt")),
+  );
   const fields = [...call.matchAll(/(\w+):\s*([^,}]+)/g)];
-  assert.equal(fields.length, 5, "the gate's call no longer reads as the five fields a prospect item takes, so the loop below is sweeping nothing");
+  assert.equal(
+    fields.length,
+    5,
+    "the gate's call no longer reads as the five fields a prospect item takes, so the loop below is sweeping nothing",
+  );
   for (const [, field, value] of fields) {
-    assert.match(value!.trim(), field === "index" ? /^at\.index$/ : /^at\.sheet\.\w+$/, `${field} reaches past the one sheet, so the filing no longer describes a single chart`);
+    assert.match(
+      value!.trim(),
+      field === "index" ? /^at\.index$/ : /^at\.sheet\.\w+$/,
+      `${field} reaches past the one sheet, so the filing no longer describes a single chart`,
+    );
   }
   const other = filingAt({ turning: false, sheet: { ...sheet, presentYear: 809 }, index: 3 });
   assert.ok(other);
-  assert.notEqual(emitTable([other]), emitTable([filed]), "two charts' presents are two distinct sheets, which is why they may not be mixed");
+  assert.notEqual(
+    emitTable([other]),
+    emitTable([filed]),
+    "two charts' presents are two distinct sheets, which is why they may not be mixed",
+  );
 });
 
 test("CT7c the Explorer assigns that sheet beside the OVERLAY it describes, which is what keeps an aborted turn consistent rather than skewed (#631 round 3)", () => {
@@ -253,37 +351,85 @@ test("CT7c the Explorer assigns that sheet beside the OVERLAY it describes, whic
   const builds = [...src.matchAll(/lc\.buildPlaceOverlay\(res\.manifest\);\n(\s*)([^\n]*)/g)].map((m) => m[2]!);
   assert.ok(builds.length >= 2, "both draw paths build the overlay, or this guard reads fewer than it thinks");
   for (const next of builds) {
-    assert.match(next, /^lastSheet = \{/, "the line after an overlay build is not the sheet assignment, so the hit targets on screen and the world the card files from can drift apart");
-    assert.doesNotMatch(next, /lastManifest/, "a year read from the module's own lastManifest is the second, independently-moving source this shape exists to remove, and a `!` defeats a check that spells the whole path");
+    assert.match(
+      next,
+      /^lastSheet = \{/,
+      "the line after an overlay build is not the sheet assignment, so the hit targets on screen and the world the card files from can drift apart",
+    );
+    assert.doesNotMatch(
+      next,
+      /lastManifest/,
+      "a year read from the module's own lastManifest is the second, independently-moving source this shape exists to remove, and a `!` defeats a check that spells the whole path",
+    );
     // The YEAR axis was guarded and the WORLD axis was not, so a hard-coded `style` in the turn branch (reached only by the style-change path) filed an antique-dressed prospect over an ink chart with the suite green. Every field is pinned, not merely the year.
-    const fields = next.slice(next.indexOf("{") + 1, next.lastIndexOf("}")).split(",").map((f) => f.trim()).filter(Boolean);
-    assert.deepEqual(fields, ["seed", "overrides", "style", "presentYear: res.manifest.presentYear"], "the sheet is built from something other than the drawn world's own seed, overrides and style and that same manifest's year, so a filing can name a different chart than the one the reader is looking at");
+    const fields = next
+      .slice(next.indexOf("{") + 1, next.lastIndexOf("}"))
+      .split(",")
+      .map((f) => f.trim())
+      .filter(Boolean);
+    assert.deepEqual(
+      fields,
+      ["seed", "overrides", "style", "presentYear: res.manifest.presentYear"],
+      "the sheet is built from something other than the drawn world's own seed, overrides and style and that same manifest's year, so a filing can name a different chart than the one the reader is looking at",
+    );
   }
-  assert.equal((src.match(/presentYear: res\.manifest\.presentYear/g) ?? []).length, builds.length, "one build's year is read from the manifest it was built from and another's is not, which is the drift with one of the two doors left open");
+  assert.equal(
+    (src.match(/presentYear: res\.manifest\.presentYear/g) ?? []).length,
+    builds.length,
+    "one build's year is read from the manifest it was built from and another's is not, which is the drift with one of the two doors left open",
+  );
   // Read as text, so a local shadowing one of these names above the call passes it.
   const calls = [...src.matchAll(/^\s*landDraw\(([^)]*)\);$/gm)].map((m) => m[1]!.split(",").map((a) => a.trim()));
-  assert.equal(calls.length, 1, "the landing paths are reached from some number of places other than the one draw, so the arguments pinned below are not the ones every landing takes");
+  assert.equal(
+    calls.length,
+    1,
+    "the landing paths are reached from some number of places other than the one draw, so the arguments pinned below are not the ones every landing takes",
+  );
   const params = /function landDraw\(([^)]*)\)/.exec(src);
   assert.ok(params, "landDraw is gone, so the argument check below reads nothing");
-  assert.deepEqual(calls[0], params[1]!.split(",").map((p) => p.split(":")[0]!.trim()), "a landing path is handed something other than the drawn world's own value under its own name, which is where a constant style would now stand in, with every field of the sheet above still reading `style`");
+  assert.deepEqual(
+    calls[0],
+    params[1]!.split(",").map((p) => p.split(":")[0]!.trim()),
+    "a landing path is handed something other than the drawn world's own value under its own name, which is where a constant style would now stand in, with every field of the sheet above still reading `style`",
+  );
 });
 
 test("CT7b the Explorer passes the REAL turn flag into the gate, so the pure refusal above cannot be fed a constant (#631)", () => {
   const app = readFileSync(resolve(REPO, "src/site/explorer/app.ts"), "utf8")
-    .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/\/\/[^\n]*/g, "");
   const sites = [...app.matchAll(/filingAt\(/g)].map((m) => m.index);
-  assert.equal(sites.length, 1, "a second call site is a second answer to the same question, and reading only the first leaves it unguarded");
+  assert.equal(
+    sites.length,
+    1,
+    "a second call site is a second answer to the same question, and reading only the first leaves it unguarded",
+  );
   const at = sites[0];
   const call = app.slice(at, app.indexOf("})", at));
-  assert.match(call, /turning:\s*sheetEl\.classList\.contains\("turning"\)/, "the gate is fed a literal or a stale flag instead of the sheet's own state; `turning` is the class runTurn brackets the window with");
-  assert.doesNotMatch(call, /turning:\s*(false|true)\b/, "a constant here disables the refusal while every unit assertion above stays green");
+  assert.match(
+    call,
+    /turning:\s*sheetEl\.classList\.contains\("turning"\)/,
+    "the gate is fed a literal or a stale flag instead of the sheet's own state; `turning` is the class runTurn brackets the window with",
+  );
+  assert.doesNotMatch(
+    call,
+    /turning:\s*(false|true)\b/,
+    "a constant here disables the refusal while every unit assertion above stays green",
+  );
   // The window is closed upstream too, and that line had no reader until a mutation deleted it and shipped green: the
   // card belongs to the chart being replaced, so a draw drops it BEFORE it rebases and swaps the sheet under it.
   const at2 = app.indexOf("function draw(opts");
   assert.notEqual(at2, -1, "draw() is gone, so the ordering assertion below reads an empty slice");
   const draw = app.slice(at2, app.indexOf("\n}", at2));
-  assert.match(draw, /lc\.hideCard\(\);/, "a pinned card outlives the chart it names, and its hit targets then point at the OUTGOING world's places for the length of the turn");
-  assert.ok(draw.indexOf("lc.hideCard();") < draw.indexOf("glass.rebase();"), "and it is dropped before the rebase, so nothing reads it in between");
+  assert.match(
+    draw,
+    /lc\.hideCard\(\);/,
+    "a pinned card outlives the chart it names, and its hit targets then point at the OUTGOING world's places for the length of the turn",
+  );
+  assert.ok(
+    draw.indexOf("lc.hideCard();") < draw.indexOf("glass.rebase();"),
+    "and it is dropped before the rebase, so nothing reads it in between",
+  );
 });
 
 test("CT8 the road to the Portfolio carries the Explorer's WHOLE address, not the table key alone (#634 ruling 3, 2026-09-19)", () => {
@@ -297,31 +443,77 @@ test("CT8 the road to the Portfolio carries the Explorer's WHOLE address, not th
     /window\.location\.href = `\$\{deps\.folioHref[^`]*\$\{tableHash\(window\.location\.hash, emitTable\(items\(\)\)\)\}`;/,
     "the road no longer NAVIGATES to this page's own address plus the table: computing it and going somewhere else is the same defect as never computing it, and it is what #634 measured losing the world",
   );
-  assert.doesNotMatch(handler, /#\$\{TABLE_KEY\}=/, "the key-only form is back; it is what #634 defect 1 measured losing the world");
+  assert.doesNotMatch(
+    handler,
+    /#\$\{TABLE_KEY\}=/,
+    "the key-only form is back; it is what #634 defect 1 measured losing the world",
+  );
   // The fallback literal sits inside the wildcard above, so it needs its own pin (guard-prover round 2).
-  assert.match(handler, /deps\.folioHref \?\? "\.\/portfolio\/"/, "the road's fallback destination changed: it is the Portfolio under the Explorer (Issue #669), trailing slash and all");
+  assert.match(
+    handler,
+    /deps\.folioHref \?\? "\.\/portfolio\/"/,
+    "the road's fallback destination changed: it is the Portfolio under the Explorer (Issue #669), trailing slash and all",
+  );
 });
 
 test("CT9 the table is written to the device when the reader CHANGES it and re-seated on a cached return, which are the only two roads #634 leaves (ruled 2026-09-19)", () => {
   const app = readFileSync(resolve(REPO, "src/site/explorer/app.ts"), "utf8");
   // `store` is the SHARED binding, not one this file rolled for itself: table-store.test.ts drives that binding against the real global, which is what makes every `readStoredTable(store)` below mean something a test has seen (guard-prover round 3).
-  assert.match(app, /import \{ deviceStorage as store,[^}]*\} from "\.\.\/shared\/table-store\.ts";/, "this page names its own device instead of taking the one the store module exports and tests, so it can be wired to nothing with every assertion here green");
+  assert.match(
+    app,
+    /import \{ deviceStorage as store,[^}]*\} from "\.\.\/shared\/table-store\.ts";/,
+    "this page names its own device instead of taking the one the store module exports and tests, so it can be wired to nothing with every assertion here green",
+  );
   const onChange = app.slice(app.indexOf("onChange:"), app.indexOf("\n", app.indexOf("onChange:")));
-  assert.match(onChange, /writeStoredTable\(store, laid\)/, "a lay or a take no longer reaches the device, so the gathering exists only in the address again and the Back button loses it");
+  assert.match(
+    onChange,
+    /writeStoredTable\(store, laid\)/,
+    "a lay or a take no longer reaches the device, so the gathering exists only in the address again and the Back button loses it",
+  );
   // Two restore sites by design, the boot and the cached return, so each is anchored on its own input rather than on whichever comes first in the file.
   const sites = [...app.matchAll(/chartTable\.restore\(/g)].map((m) => m.index);
-  assert.equal(sites.length, 2, "the Explorer seats the table in some number of places other than the two #634 leaves, and this guard is then reading one of them at random");
+  assert.equal(
+    sites.length,
+    2,
+    "the Explorer seats the table in some number of places other than the two #634 leaves, and this guard is then reading one of them at random",
+  );
   const bootAt = app.indexOf("chartTable.restore(tableOnArrival");
-  assert.notEqual(bootAt, -1, "the boot no longer asks the ruled precedence, so either a link stops winning or a Back stops being told from an arrival");
+  assert.notEqual(
+    bootAt,
+    -1,
+    "the boot no longer asks the ruled precedence, so either a link stops winning or a Back stops being told from an arrival",
+  );
   const boot = app.slice(bootAt, app.indexOf("\n", bootAt));
-  assert.match(boot, /tableOnArrival\(hashed\.table, readStoredTable\(store\), navigationTypeNow\(\)\)/, "the boot's precedence is asked with something other than this page's address, this device and this navigation's own type");
-  const show = app.slice(app.indexOf('addEventListener("pageshow"'), app.indexOf("\n});", app.indexOf('addEventListener("pageshow"')));
-  assert.ok(show.length > 40, "the pageshow listener is gone, and with it the ONLY road into a page the browser served from its cache: no boot code runs there at all");
-  assert.match(show, /if \(!e\.persisted\) return;/, "the listener acts on a fresh load as well as a cached one, so it fights the boot's own precedence instead of being the restore's only reader");
+  assert.match(
+    boot,
+    /tableOnArrival\(hashed\.table, readStoredTable\(store\), navigationTypeNow\(\)\)/,
+    "the boot's precedence is asked with something other than this page's address, this device and this navigation's own type",
+  );
+  const show = app.slice(
+    app.indexOf('addEventListener("pageshow"'),
+    app.indexOf("\n});", app.indexOf('addEventListener("pageshow"')),
+  );
+  assert.ok(
+    show.length > 40,
+    "the pageshow listener is gone, and with it the ONLY road into a page the browser served from its cache: no boot code runs there at all",
+  );
+  assert.match(
+    show,
+    /if \(!e\.persisted\) return;/,
+    "the listener acts on a fresh load as well as a cached one, so it fights the boot's own precedence instead of being the restore's only reader",
+  );
   // What `held` is BUILT FROM, not only what happens to it: the prover's round 1 set it to the drawer's own current state, which re-seats the drawer with what it already holds and reads as a restore while restoring nothing. The SHARED rule and not a hand-rolled one. The first version of this guard pinned `readStoredTable(store) ?? []`, which is the rule with its qualifier dropped: a device holding nothing then emptied the drawer on the very gesture meant to keep it, and this assertion cemented the defect (the cold review on PR #635).
-  assert.match(show, /const held = tableOnArrival\(parseTable\(location\.hash\), readStoredTable\(store\), TRAVERSAL\);/, "the cached return re-seats the drawer from something other than the ruled precedence, and a hand-rolled one drops the qualifier that keeps a reader with nothing stored from losing their table");
+  assert.match(
+    show,
+    /const held = tableOnArrival\(parseTable\(location\.hash\), readStoredTable\(store\), TRAVERSAL\);/,
+    "the cached return re-seats the drawer from something other than the ruled precedence, and a hand-rolled one drops the qualifier that keeps a reader with nothing stored from losing their table",
+  );
   // The skip is pinned BY ITS OPERATOR: inverting it reads as a harmless optimisation and skips precisely when a restore is owed, which is the feature inverted with nothing else in the file changed (guard-prover round 2).
-  assert.match(show, /if \(emitTable\(held\) === emitTable\(chartTable\.state\(\)\)\) return;/, "the no-op skip on a cached return is gone or inverted, and inverted it does nothing exactly when the device and the drawer disagree");
+  assert.match(
+    show,
+    /if \(emitTable\(held\) === emitTable\(chartTable\.state\(\)\)\) return;/,
+    "the no-op skip on a cached return is gone or inverted, and inverted it does nothing exactly when the device and the drawer disagree",
+  );
   assert.match(show, /chartTable\.restore\(held\)/, "and it never re-seats the drawer with what it read");
   assert.match(show, /syncHash\(\)/, "and it leaves the address disagreeing with the drawer it just changed");
 });
@@ -330,20 +522,48 @@ test("CT10 a re-seat that lands mid-draw asks for ANOTHER pass, and a sheet that
   const src = readFileSync(resolve(REPO, "src/site/explorer/chart-drawer-bind.ts"), "utf8");
   const fill = src.slice(src.indexOf("const fill = async"), src.indexOf("\n  };", src.indexOf("const fill = async")));
   assert.ok(fill.length > 60, "the fill was not found, so the assertions below read an empty slice");
-  assert.match(fill, /if \(drawing\) \{ refill = true; return; \}/, "a re-seat that lands while a thumbnail is in flight is DROPPED again, and its sheets keep a drawing frame until the reader shuts the drawer and opens it, which is the whole reason the flag exists");
-  assert.match(fill, /do \{[\s\S]*\} while \(refill\)/, "and the flag is set but never acted on, which is the same thing one step later");
+  assert.match(
+    fill,
+    /if \(drawing\) \{ refill = true; return; \}/,
+    "a re-seat that lands while a thumbnail is in flight is DROPPED again, and its sheets keep a drawing frame until the reader shuts the drawer and opens it, which is the whole reason the flag exists",
+  );
+  assert.match(
+    fill,
+    /do \{[\s\S]*\} while \(refill\)/,
+    "and the flag is set but never acted on, which is the same thing one step later",
+  );
   // The other half of that window, which nothing claimed until the cold review's round 3: the sheet can LEAVE while its picture is being drawn, and the url then lands under a key no cutting carries, so nothing ever revokes it.
-  assert.match(fill, /if \(!items\(\)\.some\(\(live\) => keyOf\(live\) === keyOf\(item\)\)\) \{ URL\.revokeObjectURL\(drawn\.url\); continue; \}/, "a picture that finishes drawing for a sheet that already left is filed rather than revoked, which leaks one blob url per departed sheet per re-seat mid-draw");
+  assert.match(
+    fill,
+    /if \(!items\(\)\.some\(\(live\) => keyOf\(live\) === keyOf\(item\)\)\) \{ URL\.revokeObjectURL\(drawn\.url\); continue; \}/,
+    "a picture that finishes drawing for a sheet that already left is filed rather than revoked, which leaks one blob url per departed sheet per re-seat mid-draw",
+  );
   const restore = src.slice(src.indexOf("restore(next:"), src.indexOf("\n  }\n", src.indexOf("restore(next:")));
   assert.ok(restore.length > 60, "restore was not found, so the assertions below read an empty slice");
-  assert.match(restore, /for \(const gone of sheetsThatLeft\(items\(\), kept\)\) forget\(gone\);/, "a sheet that leaves on a cached return keeps its blob url, and this path now runs on every return rather than once at boot, so they accumulate one per re-seat");
+  assert.match(
+    restore,
+    /for \(const gone of sheetsThatLeft\(items\(\), kept\)\) forget\(gone\);/,
+    "a sheet that leaves on a cached return keeps its blob url, and this path now runs on every return rather than once at boot, so they accumulate one per re-seat",
+  );
   // The set it is built from is the hazard, so it is BEHAVIOUR here and not a regex: built from the outgoing table it answers "nothing left" for every re-seat, and the line's text is identical.
   const before = [survey(1), survey(2), survey(3)];
-  assert.deepEqual(sheetsThatLeft(before, [survey(1), survey(3)]).map((i) => emitTable([i])), [emitTable([survey(2)])], "the middle sheet left and was not named, so its picture is never revoked");
-  assert.deepEqual(sheetsThatLeft(before, before), [], "nothing left, so nothing is forgotten and a redraw does not churn the urls it already made");
+  assert.deepEqual(
+    sheetsThatLeft(before, [survey(1), survey(3)]).map((i) => emitTable([i])),
+    [emitTable([survey(2)])],
+    "the middle sheet left and was not named, so its picture is never revoked",
+  );
+  assert.deepEqual(
+    sheetsThatLeft(before, before),
+    [],
+    "nothing left, so nothing is forgotten and a redraw does not churn the urls it already made",
+  );
   assert.deepEqual(sheetsThatLeft(before, []).length, 3, "an emptied table drops every picture");
   assert.deepEqual(sheetsThatLeft([], before), [], "and an arrival into a bare drawer forgets nothing");
-  assert.match(restore, /if \(drawerEls\.root\.classList\.contains\("open"\)\) void fill\(\);/, "a drawer standing OPEN when the table is re-seated never draws what arrived");
+  assert.match(
+    restore,
+    /if \(drawerEls\.root\.classList\.contains\("open"\)\) void fill\(\);/,
+    "a drawer standing OPEN when the table is re-seated never draws what arrived",
+  );
 });
 
 test("CT11 EVERY road out that carries this page's address is rebuilt by the one hash writer, never by the draw (#634, the cold review's round 3 on PR #635)", () => {
@@ -356,9 +576,16 @@ test("CT11 EVERY road out that carries this page's address is rebuilt by the one
   assert.notEqual(at, -1, "the one hash writer is gone, so this guard has nothing to check the roads against");
   const sync = app.slice(at, app.indexOf("\n}", at));
   const roads = [...app.matchAll(/^\s*(?:if \([^)]*\) )?(\w+)\.href = [^\n]*location\.hash[^\n]*$/gm)].map((m) => m[1]);
-  assert.ok(roads.length >= 2, `this scan found ${roads.length} address-carrying roads in app.ts and the page has at least the Reading Room's and the Print Room's, so it is reading the wrong shape`);
+  assert.ok(
+    roads.length >= 2,
+    `this scan found ${roads.length} address-carrying roads in app.ts and the page has at least the Reading Room's and the Print Room's, so it is reading the wrong shape`,
+  );
   for (const road of new Set(roads)) {
-    assert.match(sync, new RegExp(`\\b${road}\\.href = `), `${road} carries this page's address but is not rebuilt when the address changes, so it points at the table as it stood at the last draw`);
+    assert.match(
+      sync,
+      new RegExp(`\\b${road}\\.href = `),
+      `${road} carries this page's address but is not rebuilt when the address changes, so it points at the table as it stood at the last draw`,
+    );
   }
 });
 
@@ -366,6 +593,10 @@ test("CT5 a prospect refused as a duplicate is refused in its OWN noun, and the 
   assert.equal(refusalLine("already"), "this survey is already on the table", "the survey line is unchanged");
   assert.equal(refusalLine("already", "survey"), "this survey is already on the table");
   assert.equal(refusalLine("already", "prospect"), "this prospect is already on the table");
-  assert.equal(refusalLine("full"), "the table is full: six sheets lie on it", "the cap line names no kind and is unchanged");
+  assert.equal(
+    refusalLine("full"),
+    "the table is full: six sheets lie on it",
+    "the cap line names no kind and is unchanged",
+  );
   assert.equal(refusalLine("full", "prospect"), "the table is full: six sheets lie on it");
 });

@@ -27,7 +27,12 @@ const LABEL: Record<Rank, string> = {
 const MAX_FEATURES = 4;
 const MAX_ENTRIES = 8;
 
-type Draft = { readonly label: string; readonly x: number | null; readonly y: number | null; readonly town: number | null };
+type Draft = {
+  readonly label: string;
+  readonly x: number | null;
+  readonly y: number | null;
+  readonly town: number | null;
+};
 
 function composedFeatures(g: ProspectGeometry): Draft[] {
   const found: Array<{ readonly rank: Rank; readonly x: number; readonly y: number }> = [];
@@ -66,9 +71,13 @@ function worldEntries(g: ProspectGeometry, ctx: KeyContext): Draft[] {
     ...(input.harbor && s.seaName !== null ? [plain(s.seaName)] : []),
     ...(s.riverName === null ? [] : [plain(s.riverName)]),
     ...(s.rangeName !== null && g.ridge !== null ? [plain(s.rangeName)] : []),
-    ...(era === "before-founding" ? [] : s.roadTowns.map((t, i) => ({ label: `The road to ${t.name}`, x: null, y: null, town: i }))),
+    ...(era === "before-founding"
+      ? []
+      : s.roadTowns.map((t, i) => ({ label: `The road to ${t.name}`, x: null, y: null, town: i }))),
     ...(s.beast === null ? [] : [plain(`${s.beast.name}, ${s.beast.epithet}`)]),
-    ...(input.realmName !== null && input.kind !== "capital" && era !== "before-founding" && s.realmProclaimed ? [plain(`In ${lowerThe(input.realmName)}`)] : []),
+    ...(input.realmName !== null && input.kind !== "capital" && era !== "before-founding" && s.realmProclaimed
+      ? [plain(`In ${lowerThe(input.realmName)}`)]
+      : []),
   ];
 }
 

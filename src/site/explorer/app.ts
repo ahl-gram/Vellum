@@ -7,8 +7,25 @@ import { sliderToCoast, updateCoastReadout, parkCoastDefault } from "./coast-war
 import { startArrival } from "./draw-ceremony.ts";
 import { readHash, writeHash } from "./hash-sync.ts";
 import { emitTable, parseTable, type TableItem } from "../shared/table-address.ts";
-import { deviceStorage as store, navigationTypeNow, readStoredTable, tableOnArrival, writeStoredTable, TRAVERSAL } from "../shared/table-store.ts";
-import { makeDogEar, surveyItemFrom, refusalLine, thumbJobFor, thumbNames, layPressFace, filingAt, LAY_ON_CARD, type FilingSheet } from "./chart-drawer.ts";
+import {
+  deviceStorage as store,
+  navigationTypeNow,
+  readStoredTable,
+  tableOnArrival,
+  writeStoredTable,
+  TRAVERSAL,
+} from "../shared/table-store.ts";
+import {
+  makeDogEar,
+  surveyItemFrom,
+  refusalLine,
+  thumbJobFor,
+  thumbNames,
+  layPressFace,
+  filingAt,
+  LAY_ON_CARD,
+  type FilingSheet,
+} from "./chart-drawer.ts";
 import { bindChartDrawer } from "./chart-drawer-bind.ts";
 import { bindTableDrag, bandOf, lengthPx } from "./table-drag.ts";
 import { forwardTarget, prospectTarget } from "./address.ts";
@@ -32,10 +49,39 @@ import type { StyleName } from "../../render/style.ts";
 import type { ThemeName } from "../../render/layers/field.ts";
 import type { Camera } from "./camera.ts";
 import {
-  $, seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, beastsChk, landSlider,
-  coastSlider, status, mapDiv, mapViewport, sheetEl, innerEl, caption, folioTitle, folioSub, stageEl,
-  chartDrawer, chartDrawerTab, chartDrawerShut, chartDrawerCount, chartDrawerFull, cuttings, tableRoad,
-  versoEl, versoBtn, agesChk, orderLink, journalLink, hashControls,
+  $,
+  seedInput,
+  styleSel,
+  typeSel,
+  bandSel,
+  themeSel,
+  legendChk,
+  armsChk,
+  beastsChk,
+  landSlider,
+  coastSlider,
+  status,
+  mapDiv,
+  mapViewport,
+  sheetEl,
+  innerEl,
+  caption,
+  folioTitle,
+  folioSub,
+  stageEl,
+  chartDrawer,
+  chartDrawerTab,
+  chartDrawerShut,
+  chartDrawerCount,
+  chartDrawerFull,
+  cuttings,
+  tableRoad,
+  versoEl,
+  versoBtn,
+  agesChk,
+  orderLink,
+  journalLink,
+  hashControls,
 } from "./elements.ts";
 
 let lastSvg = "";
@@ -58,9 +104,16 @@ function prefersReduce(): boolean {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 const token = (name: string): string => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-const tokenMs = (name: string, fallback: number): number => { const v = parseFloat(token(name)); return Number.isFinite(v) ? v : fallback; };
+const tokenMs = (name: string, fallback: number): number => {
+  const v = parseFloat(token(name));
+  return Number.isFinite(v) ? v : fallback;
+};
 // The drawer's band is its LAYOUT seat, readable while it is shut and display:none, never its painted rect, which is all zeros shut and mid-slide while open.
-const drawerHeightPx = (): number => lengthPx(getComputedStyle(chartDrawer).getPropertyValue("--chart-drawer-h"), parseFloat(getComputedStyle(document.documentElement).fontSize));
+const drawerHeightPx = (): number =>
+  lengthPx(
+    getComputedStyle(chartDrawer).getPropertyValue("--chart-drawer-h"),
+    parseFloat(getComputedStyle(document.documentElement).fontSize),
+  );
 
 const tourOrder = createTourOrder({ runJob });
 
@@ -75,7 +128,9 @@ const lc = createLivingChart({
   layProspect: {
     state: (idx) => {
       const item = prospectAt(idx);
-      return item ? layPressFace({ holds: chartTable.holds(item), full: chartTable.isFull() }, LAY_ON_CARD) : { label: LAY_ON_CARD, refuses: true };
+      return item
+        ? layPressFace({ holds: chartTable.holds(item), full: chartTable.isFull() }, LAY_ON_CARD)
+        : { label: LAY_ON_CARD, refuses: true };
     },
     lay: (idx) => {
       const item = prospectAt(idx);
@@ -100,7 +155,11 @@ function regionEligible(): boolean {
 }
 // What the handle SAYS depends on the table, which changes under it, so the label is recomputed rather than baked once at the commit.
 const earLabel = (item: TableItem): string =>
-  chartTable.holds(item) ? refusalLine("already") : chartTable.isFull() ? refusalLine("full") : "lay this survey on the table";
+  chartTable.holds(item)
+    ? refusalLine("already")
+    : chartTable.isFull()
+      ? refusalLine("full")
+      : "lay this survey on the table";
 const relabelEar = (): void => {
   const ear = document.querySelector<HTMLButtonElement>("#map .region-inset .dog-ear");
   const committed = glass.committedSurvey();
@@ -113,23 +172,38 @@ const relabelEar = (): void => {
 
 const announce = makeAnnouncer(status, {
   after: (run, ms) => window.setTimeout(run, ms),
-  cancel: (timer) => { window.clearTimeout(timer); },
+  cancel: (timer) => {
+    window.clearTimeout(timer);
+  },
 });
 
-const chartTable = bindChartDrawer({
-  root: chartDrawer, tab: chartDrawerTab, shut: chartDrawerShut, count: chartDrawerCount,
-  cuttings, full: chartDrawerFull, road: tableRoad,
-}, {
-  broadside: () => room.broadside,
-  folioHref: "./portfolio/",
-  say: announce,
-  drawThumb: async (item) => {
-    const res = await runJob(thumbJobFor(item)).catch(() => null);
-    if (!res) return null;
-    return { url: URL.createObjectURL(new Blob([res.svg], { type: "image/svg+xml" })), title: thumbNames(res).title };
+const chartTable = bindChartDrawer(
+  {
+    root: chartDrawer,
+    tab: chartDrawerTab,
+    shut: chartDrawerShut,
+    count: chartDrawerCount,
+    cuttings,
+    full: chartDrawerFull,
+    road: tableRoad,
   },
-  onChange: (laid) => { writeStoredTable(store, laid); syncHash(); relabelEar(); lc.relabelLay(); },
-});
+  {
+    broadside: () => room.broadside,
+    folioHref: "./portfolio/",
+    say: announce,
+    drawThumb: async (item) => {
+      const res = await runJob(thumbJobFor(item)).catch(() => null);
+      if (!res) return null;
+      return { url: URL.createObjectURL(new Blob([res.svg], { type: "image/svg+xml" })), title: thumbNames(res).title };
+    },
+    onChange: (laid) => {
+      writeStoredTable(store, laid);
+      syncHash();
+      relabelEar();
+      lc.relabelLay();
+    },
+  },
+);
 
 // The one road no boot code can see: a page served from the browser's back/forward cache runs none at all (Issue #634, measured 2026-09-19).
 window.addEventListener("pageshow", (e) => {
@@ -143,8 +217,14 @@ window.addEventListener("pageshow", (e) => {
 });
 // Issue #165/Issue #169/Issue #192: the ONE hash writer, every trigger funnels through here; Issue #321: the box IS the flag and the Explorer never authors year=.
 function syncHash(): void {
-  writeHash(hashControls, touched.land, touched.coast, glass.cameraNow(),
-    agesChk.checked ? { kind: "survey" } : null, chartTable.state());
+  writeHash(
+    hashControls,
+    touched.land,
+    touched.coast,
+    glass.cameraNow(),
+    agesChk.checked ? { kind: "survey" } : null,
+    chartTable.state(),
+  );
   journalLink.href = "/reading-room/" + (location.hash || "");
   // Rebuilt HERE and not in draw(): laying, taking and a cached return all move the address without drawing anything, and a road left behind hands on the table as it stood at the last draw (measured resurrecting a sheet the reader had taken off, the cold review's round 3 on PR #635).
   orderLink.href = "../print-room/" + (location.hash || "");
@@ -156,9 +236,13 @@ const glass = createGlass({
   runJob,
   buildPlaceOverlay: lc.buildPlaceOverlay,
   reclampCard: lc.reclampCard,
-  setCaption: (t) => { caption.textContent = t; },
+  setCaption: (t) => {
+    caption.textContent = t;
+  },
   // A failed survey reports on the status pill, the page's one error channel.
-  setError: (t) => { status.textContent = t; },
+  setError: (t) => {
+    status.textContent = t;
+  },
   prefersReduce,
   regionEligible,
   syncHash,
@@ -166,14 +250,18 @@ const glass = createGlass({
     const committed = glass.committedSurvey();
     const item = committed ? surveyItemFrom(committed) : null;
     if (!item || !committed) return;
-    const ear = makeDogEar(earLabel(item), glass.cameraNow().k, () => { chartTable.lay(item, committed.svg, committed.title); });
+    const ear = makeDogEar(earLabel(item), glass.cameraNow().k, () => {
+      chartTable.lay(item, committed.svg, committed.title);
+    });
     el.appendChild(ear);
     bindTableDrag({
       handle: ear,
       ghostUrl: () => URL.createObjectURL(new Blob([committed.svg], { type: "image/svg+xml" })),
       band: () => bandOf(drawerHeightPx(), pageBox().h),
       reveal: () => chartTable.reveal(),
-      receiving: (over) => { chartTable.receiving(over); },
+      receiving: (over) => {
+        chartTable.receiving(over);
+      },
       file: (url) => chartTable.lay(item, committed.svg, committed.title, { url }),
       prefersReduce,
       settleMs: () => tokenMs("--paper-settle", 340),
@@ -183,7 +271,11 @@ const glass = createGlass({
   buttons: { zoomIn: $("zoom-in"), zoomOut: $("zoom-out"), reset: $("zoom-reset"), cluster: $("zoom-controls") },
 });
 
-const room = bindRoom({ frame: stageEl, sheet: sheetEl, camera: { hold: () => glass.cameraNow(), restore: (cam) => glass.refitCamera(cam) } });
+const room = bindRoom({
+  frame: stageEl,
+  sheet: sheetEl,
+  camera: { hold: () => glass.cameraNow(), restore: (cam) => glass.refitCamera(cam) },
+});
 
 // The mockup's survey line is the subtitle's tail ("surveyed in the year 1059 of the Cedar Age"), not the cartouche's whole sentence: the folio stays short and leaves the legend row its room.
 function writeFolio(res: { title: string; subtitle: string }, seed: number): void {
@@ -230,7 +322,20 @@ function keepDraw(res: DrawResult, seed: number, t0: number): void {
   caption.textContent = `${res.mapType} · ${res.band} · drawn in ${ms}ms`;
 }
 
-function landDraw(res: DrawResult, seed: number, overrides: Readonly<DrawOverrides>, style: StyleName, theme: ThemeName | "", legend: boolean, arms: boolean, beasts: boolean, quiet: boolean, isTurn: boolean, hadChart: boolean, myGen: number): void {
+function landDraw(
+  res: DrawResult,
+  seed: number,
+  overrides: Readonly<DrawOverrides>,
+  style: StyleName,
+  theme: ThemeName | "",
+  legend: boolean,
+  arms: boolean,
+  beasts: boolean,
+  quiet: boolean,
+  isTurn: boolean,
+  hadChart: boolean,
+  myGen: number,
+): void {
   const flipped = isFlipped(sheetEl);
   const deferArm = deferLandingArm(quiet, flipped);
   if (shouldTurn({ isTurn, reduceMotion: prefersReduce(), usesWorker: usesWorker(), hasChart: hadChart, flipped })) {
@@ -240,10 +345,20 @@ function landDraw(res: DrawResult, seed: number, overrides: Readonly<DrawOverrid
       lc.buildPlaceOverlay(res.manifest);
       lastSheet = { seed, overrides, style, presentYear: res.manifest.presentYear };
       room.layout();
-      armOnLanding({ arm: surveyArm, armed: agesChk.checked, defer: deferArm, clear: lc.clearAges,
-        rearm: () => lc.rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet }) });
+      armOnLanding({
+        arm: surveyArm,
+        armed: agesChk.checked,
+        defer: deferArm,
+        clear: lc.clearAges,
+        rearm: () => lc.rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet }),
+      });
       glass.syncZoom();
-      glass.setWorld({ seed, overrides, render: { style, widthPx: 1500, legend, arms, beasts, theme: theme || undefined }, manifest: res.manifest });
+      glass.setWorld({
+        seed,
+        overrides,
+        render: { style, widthPx: 1500, legend, arms, beasts, theme: theme || undefined },
+        manifest: res.manifest,
+      });
       syncHash();
     });
   } else {
@@ -252,11 +367,21 @@ function landDraw(res: DrawResult, seed: number, overrides: Readonly<DrawOverrid
     lastSheet = { seed, overrides, style, presentYear: res.manifest.presentYear };
     room.layout();
     if (!quiet) startArrival(mapDiv.querySelector("svg"));
-    armOnLanding({ arm: surveyArm, armed: agesChk.checked, defer: deferArm, clear: lc.clearAges,
-      rearm: () => lc.rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet }) });
+    armOnLanding({
+      arm: surveyArm,
+      armed: agesChk.checked,
+      defer: deferArm,
+      clear: lc.clearAges,
+      rearm: () => lc.rearmVoyage(res.manifest, res.survey, seed, res.subtitle, { quiet }),
+    });
     glass.syncZoom();
     // Issue #169: record this world sheet BEFORE a deep-link camera is applied, so the settle that camera triggers redrafts over the SAME base world.
-    glass.setWorld({ seed, overrides, render: { style, widthPx: 1500, legend, arms, beasts, theme: theme || undefined }, manifest: res.manifest });
+    glass.setWorld({
+      seed,
+      overrides,
+      render: { style, widthPx: 1500, legend, arms, beasts, theme: theme || undefined },
+      manifest: res.manifest,
+    });
     syncHash();
     if (pendingCamera) {
       const cam = pendingCamera;
@@ -315,10 +440,22 @@ function draw(opts?: { quiet?: boolean; turn?: boolean }): void {
 }
 
 wireControls({
-  seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, beastsChk, landSlider, coastSlider,
-  drawBtn: $("draw"), randomBtn: $("random"),
-  touched, draw,
-  onDocKeydown: lc.onDocKeydown, onDocClick: lc.onDocClick,
+  seedInput,
+  styleSel,
+  typeSel,
+  bandSel,
+  themeSel,
+  legendChk,
+  armsChk,
+  beastsChk,
+  landSlider,
+  coastSlider,
+  drawBtn: $("draw"),
+  randomBtn: $("random"),
+  touched,
+  draw,
+  onDocKeydown: lc.onDocKeydown,
+  onDocClick: lc.onDocClick,
 });
 wireFootnotes();
 
@@ -336,8 +473,13 @@ versoBtn.addEventListener("click", () => {
 const surveyArm = wireSurveyToggle({
   box: agesChk,
   worldGen: () => drawGen,
-  home: () => { glass.homeToWorld(); glass.reset(); },
-  arm: () => { lc.rearmVoyage(lastManifest, lastSurvey, lastSeed, lastSubtitle); },
+  home: () => {
+    glass.homeToWorld();
+    glass.reset();
+  },
+  arm: () => {
+    lc.rearmVoyage(lastManifest, lastSurvey, lastSeed, lastSubtitle);
+  },
   prime: () => tourOrder.prime(lastManifest, lastSurvey, lastSeed),
   exit: lc.exitAges,
   syncHash,
@@ -349,8 +491,13 @@ if (fwd) {
 } else {
   await initWorker();
   installExplorerHooks({
-    glass, usesWorker, runJob, runInline,
-    setRedraftEnabled: (v) => { redraftEnabled = !!v; },
+    glass,
+    usesWorker,
+    runJob,
+    runInline,
+    setRedraftEnabled: (v) => {
+      redraftEnabled = !!v;
+    },
   });
 
   seedInput.value = String(seedForDate(new Date()));

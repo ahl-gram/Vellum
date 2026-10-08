@@ -6,6 +6,10 @@ export function run(ctx: SuiteContext): Promise<void> {
   const errs = dropExpectedCancellations(consoleErrors);
   check("N1 no JS exceptions or console errors", errs.length === 0, errs.join(" | ") || "clean");
   const bad4xx = http4xx.filter((u) => !/favicon/i.test(u));
-  check("N2 only the benign favicon 4xx (no real missing resources)", bad4xx.length === 0, http4xx.length ? http4xx.join(", ") : "no 4xx at all");
+  check(
+    "N2 only the benign favicon 4xx (no real missing resources)",
+    bad4xx.length === 0,
+    http4xx.length ? http4xx.join(", ") : "no 4xx at all",
+  );
   return Promise.resolve();
 }

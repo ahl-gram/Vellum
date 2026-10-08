@@ -6,13 +6,7 @@ const ANCHOR_X = 0.4;
 
 export type StationAnchor = { readonly nx: number; readonly ny: number };
 
-export function stationFlightView(
-  cam: Cam,
-  fit: number,
-  anchor: StationAnchor,
-  view: Box,
-  sheet: Box,
-): Cam {
+export function stationFlightView(cam: Cam, fit: number, anchor: StationAnchor, view: Box, sheet: Box): Cam {
   const s = Math.max(cam.s, fit * STATION_SCALE_FACTOR);
   return camForCenter(anchor.nx, anchor.ny, s, view, sheet, { x: view.w * ANCHOR_X, y: view.h / 2 });
 }

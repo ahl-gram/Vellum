@@ -4,8 +4,22 @@ const AT_HOME_LEAGUES = 3;
 export type Capital = { readonly name: string; readonly nx: number; readonly ny: number };
 
 const WINDS = [
-  "N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
-  "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW",
+  "N",
+  "NNE",
+  "NE",
+  "ENE",
+  "E",
+  "ESE",
+  "SE",
+  "SSE",
+  "S",
+  "SSW",
+  "SW",
+  "WSW",
+  "W",
+  "WNW",
+  "NW",
+  "NNW",
 ] as const;
 
 export function bearingLine(fx: number, fy: number, capital: Capital, aspect: number): string {

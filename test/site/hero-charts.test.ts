@@ -30,7 +30,9 @@ test("committed public/charts heroes match a fresh src/ render (structure exact,
     );
   }
   if (worstAbs > 0) {
-    console.log(`hero-charts drift guard: max cross-render numeric Δ = ${worstAbs.toExponential(2)}px (tol ${DRIFT_TOL})`);
+    console.log(
+      `hero-charts drift guard: max cross-render numeric Δ = ${worstAbs.toExponential(2)}px (tol ${DRIFT_TOL})`,
+    );
   }
 });
 

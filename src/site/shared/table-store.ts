@@ -19,8 +19,7 @@ export function writeStoredTable(getStorage: () => Storage, items: ReadonlyArray
     const store = getStorage();
     if (items.length === 0) store.removeItem(TABLE_STORE_KEY);
     else store.setItem(TABLE_STORE_KEY, emitTable(items));
-  } catch {
-  }
+  } catch {}
 }
 
 export function navigationType(getEntries: () => ReadonlyArray<{ readonly type?: string }>): string {
@@ -33,8 +32,11 @@ export function navigationType(getEntries: () => ReadonlyArray<{ readonly type?:
 }
 
 export const navigationTypeNow = (): string =>
-  navigationType(() =>
-    (typeof performance === "undefined" ? [] : performance.getEntriesByType("navigation")) as ReadonlyArray<{ type?: string }>,
+  navigationType(
+    () =>
+      (typeof performance === "undefined" ? [] : performance.getEntriesByType("navigation")) as ReadonlyArray<{
+        type?: string;
+      }>,
   );
 
 /** The browser's own word for a history traversal, and what a CACHED return is even though its navigation entry still reads `navigate`, which is why a restore passes it rather than reading it. */

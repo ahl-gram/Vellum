@@ -88,22 +88,26 @@ export function shipNodes(c: DressContext, x: number, y: number, s: number): Svg
         ...sk,
       }),
       el("path", { d: `M${r1(x)} ${r1(y - 4.4 * s)}V${r1(y - 22 * s)}`, fill: "none", ...sk }),
-      el("path", { d: `M${r1(x)} ${r1(y - 21 * s)}q${r1(-11 * s)} ${r1(7 * s)} 0 ${r1(15 * s)}Z`, fill: c.paper, ...sk }),
+      el("path", {
+        d: `M${r1(x)} ${r1(y - 21 * s)}q${r1(-11 * s)} ${r1(7 * s)} 0 ${r1(15 * s)}Z`,
+        fill: c.paper,
+        ...sk,
+      }),
       el("path", {
         d: `M${r1(x + 1.4 * s)} ${r1(y - 20 * s)}q${r1(8 * s)} ${r1(6 * s)} ${r1(1 * s)} ${r1(13 * s)}Z`,
         fill: c.paper,
         ...sk,
       }),
-      el("path", { d: `M${r1(x)} ${r1(y - 22 * s)}l${r1(5 * s)} ${r1(1.8 * s)}l${r1(-5 * s)} ${r1(1.8 * s)}Z`, fill: c.ink }),
+      el("path", {
+        d: `M${r1(x)} ${r1(y - 22 * s)}l${r1(5 * s)} ${r1(1.8 * s)}l${r1(-5 * s)} ${r1(1.8 * s)}Z`,
+        fill: c.ink,
+      }),
       rippleDash(c, x - 18 * s, y + 3 * s, s),
     ]),
   ];
 }
 
-export function moleNodes(
-  c: DressContext,
-  m: { rootX: number; headX: number; headY: number },
-): SvgNode[] {
+export function moleNodes(c: DressContext, m: { rootX: number; headX: number; headY: number }): SvgNode[] {
   const { rootX, headX: mx, headY } = m;
   const shore = headY - 10;
   return [

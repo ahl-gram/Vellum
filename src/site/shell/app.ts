@@ -6,5 +6,10 @@ bindTopRow();
 
 const notice = document.querySelector<HTMLElement>(".desk-notice");
 if (notice !== null && window.visualViewport !== null) {
-  bindNotice({ classList: notice.classList, style: notice.style, button: notice.querySelector("button") }, window.visualViewport, window.innerHeight, () => localStorage);
+  bindNotice(
+    { classList: notice.classList, style: notice.style, button: notice.querySelector("button") },
+    window.visualViewport,
+    window.innerHeight,
+    () => localStorage,
+  );
 }

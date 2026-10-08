@@ -32,10 +32,20 @@ export function surveyKit(ctx: SuiteContext) {
     throw new Error("waitBeat timeout " + label);
   };
 
-  const setBox = (on: boolean) => evaluate<undefined>(`(()=>{const c=document.getElementById("ages");
+  const setBox = (on: boolean) =>
+    evaluate<undefined>(`(()=>{const c=document.getElementById("ages");
     c.checked=${on};c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
 
-  const tick = (on: boolean, into: string) => evaluate<{ checked: boolean; handlerMs: number; inked: boolean; overlays: number; hash: string; status: string; href: string | null }>(`(()=>{
+  const tick = (on: boolean, into: string) =>
+    evaluate<{
+      checked: boolean;
+      handlerMs: number;
+      inked: boolean;
+      overlays: number;
+      hash: string;
+      status: string;
+      href: string | null;
+    }>(`(()=>{
     const c=document.getElementById("ages");window.${into}=null;const t0=performance.now();
     c.checked=${on};c.dispatchEvent(new Event("change",{bubbles:true}));
     const handlerMs=performance.now()-t0;

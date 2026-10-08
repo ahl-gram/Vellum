@@ -83,9 +83,16 @@ test("ATLAS_SHEET_CSS: the shared inner CSS, scoped under .atlas-sheet, is the d
 
 test("#565 the atlas plates count their border inside their width, so a host that hands the sheet the whole page box prints them inside it: measured in the Print Room's bound atlas under print emulation on 2026-09-11, 818 on 816 and 392 on 390 with main and #pr-atlas both at padding 0", () => {
   const swept = fullWidthWideningRules(ATLAS_SHEET_CSS);
-  assert.ok(swept.some((rule) => rule.selector === ".atlas-sheet figure img"), `the plates are the rule this sweep is for; it selected ${JSON.stringify(swept.map((r) => r.selector))}`);
+  assert.ok(
+    swept.some((rule) => rule.selector === ".atlas-sheet figure img"),
+    `the plates are the rule this sweep is for; it selected ${JSON.stringify(swept.map((r) => r.selector))}`,
+  );
   for (const rule of swept) {
-    assert.equal(rule.declarations["box-sizing"], "border-box", `${rule.selector} takes a percentage width and a border or side padding, so it runs past its host's page box unless its border counts inside its width`);
+    assert.equal(
+      rule.declarations["box-sizing"],
+      "border-box",
+      `${rule.selector} takes a percentage width and a border or side padding, so it runs past its host's page box unless its border counts inside its width`,
+    );
   }
 });
 
@@ -147,8 +154,12 @@ class StubNode {
   target = "";
   rel = "";
   tag: string;
-  constructor(tag: string) { this.tag = tag; }
-  get parentNode(): StubNode | null { return parents.get(this) ?? null; }
+  constructor(tag: string) {
+    this.tag = tag;
+  }
+  get parentNode(): StubNode | null {
+    return parents.get(this) ?? null;
+  }
   insertBefore(node: StubNode, ref: StubNode): void {
     parents.set(node, this);
     this.children.splice(this.children.indexOf(ref), 0, node);
@@ -174,12 +185,20 @@ async function runPlateScript(html: string, plates: number) {
   });
   const queried: string[] = [];
   const doc = {
-    querySelectorAll: (sel: string) => { queried.push(sel); return imgs; },
+    querySelectorAll: (sel: string) => {
+      queried.push(sel);
+      return imgs;
+    },
     createElement: (tag: string) => new StubNode(tag),
   };
   const fetchStub = (src: string) => Promise.resolve({ blob: () => Promise.resolve({ src }) });
   const urlStub = { createObjectURL: (b: { src: string }) => `blob:vellum/${b.src.slice(-6)}` };
-  (new Function("document", "fetch", "URL", "console", body[1]!) as (...args: unknown[]) => void)(doc, fetchStub, urlStub, { warn() {} }); // eslint-disable-line @typescript-eslint/no-implied-eval
+  (new Function("document", "fetch", "URL", "console", body[1]!) as (...args: unknown[]) => void)(
+    doc,
+    fetchStub,
+    urlStub,
+    { warn() {} },
+  ); // eslint-disable-line @typescript-eslint/no-implied-eval
   await new Promise((r) => setTimeout(r, 0));
   return { imgs, queried };
 }
@@ -203,7 +222,11 @@ test("data-URI mode: running the document's own script really links every plate 
   // Scope derived, not pinned: a consistent rename stays green here, but a script reaching for a class the document never emits reds.
   const scope = queried[0]!.match(/^\.([\w-]+)\s/)?.[1];
   assert.ok(scope, "the plate query must be scoped to a class");
-  assert.match(html, new RegExp(`<body class="[^"]*\\b${scope}\\b`), "the script's scope must be the class the document emits");
+  assert.match(
+    html,
+    new RegExp(`<body class="[^"]*\\b${scope}\\b`),
+    "the script's scope must be the class the document emits",
+  );
   assert.equal((html.match(/<figure><img /g) ?? []).length, 6, "every plate img is a direct figure child");
 
   assert.equal(
@@ -245,7 +268,11 @@ const served = () => atlasDocument(fixture(), (p, s) => atlasPlateFilename(p, s)
 const download = () => atlasDocument(fixture(), (p) => svgToDataUri(p.svg), { anchor: false, motion: false });
 
 test("#464 the download is byte-identical to the paper artifact it was before the screen dress (pinned digest)", () => {
-  assert.equal(createHash("sha256").update(download()).digest("hex"), DOWNLOAD_SHA256, "the download changed by a byte: the screen dress may only reach the served page");
+  assert.equal(
+    createHash("sha256").update(download()).digest("hex"),
+    DOWNLOAD_SHA256,
+    "the download changed by a byte: the screen dress may only reach the served page",
+  );
 });
 
 test("Issue #761 the served page lays out at the site's fixed 1024 viewport; the download keeps its own head (the digest above holds it)", () => {
@@ -257,22 +284,51 @@ test("Issue #761 the served page lays out at the site's fixed 1024 viewport; the
 test("#464 the served page takes the deep with its sections on parchment sheets; the download carries none of that dress", () => {
   const page = served();
   const file = download();
-  for (const mark of ["--the-deep:", "body::before", ".atlas-sheet > figure, .atlas-sheet > section", "--sheet-shadow:"]) {
+  for (const mark of [
+    "--the-deep:",
+    "body::before",
+    ".atlas-sheet > figure, .atlas-sheet > section",
+    "--sheet-shadow:",
+  ]) {
     assert.ok(page.includes(mark), `the served page carries ${mark}`);
     assert.ok(!file.includes(mark), `the download carries no ${mark}`);
   }
-  assert.doesNotMatch(page, /class="chrome"|class="rooms"|atelier\.css|house\.css/, "the atlas keeps its own small header and footer: no head cluster, out of the nav (#202)");
+  assert.doesNotMatch(
+    page,
+    /class="chrome"|class="rooms"|atelier\.css|house\.css/,
+    "the atlas keeps its own small header and footer: no head cluster, out of the nav (#202)",
+  );
   assert.match(page, /<header>\s*<h1>/, "its own header stands");
   assert.match(page, /<footer>DRAWN BY VELLUM/, "its own footer stands");
-  assert.match(page, /\.atlas-sheet > section:has\(> table\)\s*\{[^}]*overflow-x:\s*auto/, "the gazetteer's sheet scrolls its table inside: its min-content floor measured 364px against a 390 viewport (plate read 2026-09-02)");
+  assert.match(
+    page,
+    /\.atlas-sheet > section:has\(> table\)\s*\{[^}]*overflow-x:\s*auto/,
+    "the gazetteer's sheet scrolls its table inside: its min-content floor measured 364px against a 390 viewport (plate read 2026-09-02)",
+  );
   const screenDress = page.slice(page.indexOf("--the-deep:"));
-  assert.match(screenDress, /\.atlas-sheet \.styles\s*\{\s*grid-template-columns:\s*repeat\(auto-fit, minmax\(min\(280px, 100%\), 1fr\)\)/, "the draughtings' column floor is capped to the sheet");
-  assert.match(screenDress, /\.atlas-sheet \.themes\s*\{\s*grid-template-columns:\s*repeat\(auto-fit, minmax\(min\(360px, 100%\), 1fr\)\)/, "the themes' column floor is capped to the sheet: it measured 405px against a 390 viewport (plate read 2026-09-02, round 2)");
+  assert.match(
+    screenDress,
+    /\.atlas-sheet \.styles\s*\{\s*grid-template-columns:\s*repeat\(auto-fit, minmax\(min\(280px, 100%\), 1fr\)\)/,
+    "the draughtings' column floor is capped to the sheet",
+  );
+  assert.match(
+    screenDress,
+    /\.atlas-sheet \.themes\s*\{\s*grid-template-columns:\s*repeat\(auto-fit, minmax\(min\(360px, 100%\), 1fr\)\)/,
+    "the themes' column floor is capped to the sheet: it measured 405px against a 390 viewport (plate read 2026-09-02, round 2)",
+  );
   const screen = page.slice(page.indexOf("--the-deep:"), page.indexOf("</style>"));
   // The base rule is pinned OUTSIDE the print block: a print-only override would keep the selector's string alive while the deep was never painted.
   const base = screen.slice(0, screen.indexOf("@media print"));
-  assert.match(base, /body::before\s*\{[^}]*position:\s*fixed;[^}]*background:\s*var\(--the-deep\)/, "the deep is painted by the fixed body::before layer, the layout's own mechanism");
-  assert.match(screen, /@media print\s*\{[^]*body::before\s*\{[^}]*display:\s*none/, "print is paper: the deep stands down on paper");
+  assert.match(
+    base,
+    /body::before\s*\{[^}]*position:\s*fixed;[^}]*background:\s*var\(--the-deep\)/,
+    "the deep is painted by the fixed body::before layer, the layout's own mechanism",
+  );
+  assert.match(
+    screen,
+    /@media print\s*\{[^]*body::before\s*\{[^}]*display:\s*none/,
+    "print is paper: the deep stands down on paper",
+  );
 });
 
 test("#464 the served atlas declares the deep and the sheet depth exactly as BaseLayout does (the three-place join's shape: one value, pinned equal)", () => {

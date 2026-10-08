@@ -14,10 +14,7 @@ export type RegionRecipe = {
 // Kept local: render is browser-bundled, and a shared src/version.ts would widen that graph for one string.
 export const ENGINE_VERSION = "0.1.0";
 
-export function recipeAttrs(
-  world: World,
-  styleName: StyleName,
-): Record<string, string | number> {
+export function recipeAttrs(world: World, styleName: StyleName): Record<string, string | number> {
   const r = world.recipe;
   return {
     "data-vellum-version": ENGINE_VERSION,
@@ -28,17 +25,11 @@ export function recipeAttrs(
     "data-vellum-grid-w": r.gridW,
     "data-vellum-grid-h": r.gridH,
     "data-vellum-style": styleName,
-    ...(r.coastWarp !== undefined
-      ? { "data-vellum-coast-warp": r.coastWarp }
-      : {}),
+    ...(r.coastWarp !== undefined ? { "data-vellum-coast-warp": r.coastWarp } : {}),
   };
 }
 
-export function recipeMetadataNode(
-  world: World,
-  styleName: StyleName,
-  regionRecipe?: RegionRecipe,
-): SvgNode {
+export function recipeMetadataNode(world: World, styleName: StyleName, regionRecipe?: RegionRecipe): SvgNode {
   const r = world.recipe;
   const coast = r.coastWarp !== undefined ? ` coast=${r.coastWarp}` : "";
   const summary =
@@ -48,9 +39,7 @@ export function recipeMetadataNode(
   return el("metadata", {}, [summary]);
 }
 
-export function regionRecipeAttrs(
-  rr: RegionRecipe,
-): Record<string, string | number> {
+export function regionRecipeAttrs(rr: RegionRecipe): Record<string, string | number> {
   return {
     "data-vellum-region-u0": rr.window.u0,
     "data-vellum-region-v0": rr.window.v0,

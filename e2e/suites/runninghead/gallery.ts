@@ -10,7 +10,11 @@ export async function rh10GalleryScrolled({ evaluate, send, check, sleep, visit 
   type GalleryRead = { sh: number; y: number; plate: Point | null; loaded: boolean };
   let scrolled: GalleryRead | null = null;
   for (let i = 0; i < 100 && galleryUp; i++) {
-    scrolled = JSON.parse(await evaluate<string>(`(() => { const sh = document.documentElement.scrollHeight; window.scrollTo(0, Math.min(1200, sh - innerHeight)); const imgs = [...document.querySelectorAll(".grid img")]; const b = imgs.map((el) => el.getBoundingClientRect()).find((r) => r.top > 100 && r.bottom < innerHeight - 20 && r.width > 100); return JSON.stringify({ sh, y: scrollY, plate: b ? { x: Math.round(b.x + b.width / 2), y: Math.round(b.y + b.height / 2) } : null, loaded: imgs.length > 0 && imgs.every((el) => el.complete && el.naturalWidth > 0) }); })()`)) as GalleryRead;
+    scrolled = JSON.parse(
+      await evaluate<string>(
+        `(() => { const sh = document.documentElement.scrollHeight; window.scrollTo(0, Math.min(1200, sh - innerHeight)); const imgs = [...document.querySelectorAll(".grid img")]; const b = imgs.map((el) => el.getBoundingClientRect()).find((r) => r.top > 100 && r.bottom < innerHeight - 20 && r.width > 100); return JSON.stringify({ sh, y: scrollY, plate: b ? { x: Math.round(b.x + b.width / 2), y: Math.round(b.y + b.height / 2) } : null, loaded: imgs.length > 0 && imgs.every((el) => el.complete && el.naturalWidth > 0) }); })()`,
+      ),
+    ) as GalleryRead;
     if (scrolled.plate && scrolled.loaded) break;
     await sleep(100);
   }
@@ -22,14 +26,29 @@ export async function rh10GalleryScrolled({ evaluate, send, check, sleep, visit 
   check(
     "RH10 the pixel helper reads the Gallery scrolled past a screen: a plate's centre bright (49 on the unfixed clip, 210 fixed) and the corner dark (the pool or the deep, either far from a plate) at one scroll state, which no blank frame is (the sitting's ruling 6, 2026-09-03)",
     !!scrolled && scrolled.y >= 800 && plateLum > 120 && cornerLum > 15 && cornerLum < 90,
-    JSON.stringify({ y: scrolled && scrolled.y, sh: scrolled && scrolled.sh, plate: scrolled && scrolled.plate, plateLum, cornerLum }),
+    JSON.stringify({
+      y: scrolled && scrolled.y,
+      sh: scrolled && scrolled.sh,
+      plate: scrolled && scrolled.plate,
+      plateLum,
+      cornerLum,
+    }),
   );
 }
 
-export async function rh10cPrinted({ evaluate, send, check, sleep }: RunningHeadKit, galleryNarrow: boolean): Promise<void> {
+export async function rh10cPrinted(
+  { evaluate, send, check, sleep }: RunningHeadKit,
+  galleryNarrow: boolean,
+): Promise<void> {
   await send("Emulation.setEmulatedMedia", { media: "print" });
-  const gPrint = galleryNarrow ? await evaluate<{ content: string; folioPos: string; armed: boolean } | null>(`(()=>{const e=document.querySelector(".corner.tr");if(!e)return null;const c=getComputedStyle(e,"::before");
-    return{content:c.content,folioPos:getComputedStyle(e).position,armed:document.body.classList.contains("chart-room")&&!document.querySelector(".stage")};})()`) : null;
+  const gPrint = galleryNarrow
+    ? await evaluate<{
+        content: string;
+        folioPos: string;
+        armed: boolean;
+      } | null>(`(()=>{const e=document.querySelector(".corner.tr");if(!e)return null;const c=getComputedStyle(e,"::before");
+    return{content:c.content,folioPos:getComputedStyle(e).position,armed:document.body.classList.contains("chart-room")&&!document.querySelector(".stage")};})()`)
+    : null;
   type Fit = { scrollW: number; clientW: number; plates: number; maxRight: number; mainPadL: string };
   const FIT_READ: Payload<Fit> = `(()=>{const d=document.documentElement;const m=document.querySelector("main");const imgs=[...document.querySelectorAll(".grid img")];
     return{scrollW:d.scrollWidth,clientW:d.clientWidth,plates:imgs.length,maxRight:imgs.length?Math.round(Math.max(...imgs.map((el)=>el.getBoundingClientRect().right))):-1,mainPadL:m?getComputedStyle(m).paddingLeft:"absent"};})()`;
@@ -55,12 +74,22 @@ export async function rh10cPrinted({ evaluate, send, check, sleep }: RunningHead
   );
   check(
     "RH10d printed at 390x844 the Gallery fits its page: the widest plate's right edge lands ON the page's right edge and the document scrolls nowhere sideways (#565, 392 on 390 unfixed, a content-box plate at width 100% plus its 1px border). main's resolved side padding is the control, 16px on screen and 0 under the print block, and the plate reaching the edge is what keeps the fit from passing on a collapsed grid",
-    !!gFit && gFit.mainPadL === "0px" && gFit.clientW === 390 && gFit.plates > 0 && gFit.scrollW === gFit.clientW && gFit.maxRight === gFit.clientW,
+    !!gFit &&
+      gFit.mainPadL === "0px" &&
+      gFit.clientW === 390 &&
+      gFit.plates > 0 &&
+      gFit.scrollW === gFit.clientW &&
+      gFit.maxRight === gFit.clientW,
     JSON.stringify(gFit),
   );
   check(
     "RH10e printed at 816x1056, a Letter page at 96dpi, the same holds across the two-column grid (818 on 816 unfixed: the defect is not width-specific, #565's 2026-09-11 comment). clientW 816 says the resize landed, so this cannot pass at the narrow width",
-    !!gFitLetter && gFitLetter.mainPadL === "0px" && gFitLetter.clientW === 816 && gFitLetter.plates > 0 && gFitLetter.scrollW === gFitLetter.clientW && gFitLetter.maxRight === gFitLetter.clientW,
+    !!gFitLetter &&
+      gFitLetter.mainPadL === "0px" &&
+      gFitLetter.clientW === 816 &&
+      gFitLetter.plates > 0 &&
+      gFitLetter.scrollW === gFitLetter.clientW &&
+      gFitLetter.maxRight === gFitLetter.clientW,
     JSON.stringify(gFitLetter),
   );
 }

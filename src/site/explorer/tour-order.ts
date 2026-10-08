@@ -36,13 +36,20 @@ export function createTourOrder(deps: TourOrderDeps) {
     const job = deps
       .runJob({ kind: "tour", seed, sites, survey, ports })
       .then(
-        (res) => { held = { key, order: res.order }; },
+        (res) => {
+          held = { key, order: res.order };
+        },
         () => {},
       )
-      .then(() => { if (pending && pending.key === key) pending = null; });
+      .then(() => {
+        if (pending && pending.key === key) pending = null;
+      });
     const run = new Promise<void>((resolve) => {
       const timer = setTimeout(resolve, timeoutMs);
-      void job.then(() => { clearTimeout(timer); resolve(); });
+      void job.then(() => {
+        clearTimeout(timer);
+        resolve();
+      });
     });
     pending = { key, run };
     return run;

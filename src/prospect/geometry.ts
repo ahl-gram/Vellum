@@ -53,8 +53,14 @@ export type WaterKind = "sea" | "river" | "drowned";
 export type Water = { readonly kind: WaterKind; readonly y0: number; readonly y1: number };
 
 export type ForegroundElement =
-  | { readonly kind: "fieldRows"; readonly rows: ReadonlyArray<{ readonly y: number; readonly x0: number; readonly x1: number }> }
-  | { readonly kind: "scrubRows"; readonly rows: ReadonlyArray<{ readonly y: number; readonly x0: number; readonly x1: number }> }
+  | {
+      readonly kind: "fieldRows";
+      readonly rows: ReadonlyArray<{ readonly y: number; readonly x0: number; readonly x1: number }>;
+    }
+  | {
+      readonly kind: "scrubRows";
+      readonly rows: ReadonlyArray<{ readonly y: number; readonly x0: number; readonly x1: number }>;
+    }
   | { readonly kind: "trees"; readonly species: "round" | "pine" | "palm"; readonly items: ReadonlyArray<XYS> }
   | { readonly kind: "marshTufts"; readonly items: ReadonlyArray<XYS> }
   | { readonly kind: "dunes"; readonly items: ReadonlyArray<XYS> }
@@ -69,11 +75,24 @@ export type ForegroundElement =
       readonly steps: { readonly x: number; readonly y: number; readonly count: number };
       readonly arcade: { readonly x0: number; readonly x1: number; readonly arches: number };
     }
-  | { readonly kind: "mastRow"; readonly masts: ReadonlyArray<{ readonly x: number; readonly hullY: number; readonly mastH: number }> }
+  | {
+      readonly kind: "mastRow";
+      readonly masts: ReadonlyArray<{ readonly x: number; readonly hullY: number; readonly mastH: number }>;
+    }
   | { readonly kind: "ship"; readonly x: number; readonly y: number; readonly s: number }
   | { readonly kind: "mole"; readonly rootX: number; readonly headX: number; readonly headY: number }
-  | { readonly kind: "beachedHulls"; readonly hulls: ReadonlyArray<{ readonly x: number; readonly y: number; readonly tilt: number }> }
-  | { readonly kind: "jetty"; readonly x0: number; readonly y0: number; readonly x1: number; readonly y1: number; readonly posts: ReadonlyArray<Pt> }
+  | {
+      readonly kind: "beachedHulls";
+      readonly hulls: ReadonlyArray<{ readonly x: number; readonly y: number; readonly tilt: number }>;
+    }
+  | {
+      readonly kind: "jetty";
+      readonly x0: number;
+      readonly y0: number;
+      readonly x1: number;
+      readonly y1: number;
+      readonly posts: ReadonlyArray<Pt>;
+    }
   | { readonly kind: "nets"; readonly x: number; readonly y: number }
   | {
       readonly kind: "bridge";
@@ -85,10 +104,31 @@ export type ForegroundElement =
       readonly gateTower: Mass;
     }
   | { readonly kind: "weir"; readonly x0: number; readonly x1: number; readonly y: number }
-  | { readonly kind: "mill"; readonly house: Mass; readonly wheel: { readonly cx: number; readonly cy: number; readonly r: number } }
+  | {
+      readonly kind: "mill";
+      readonly house: Mass;
+      readonly wheel: { readonly cx: number; readonly cy: number; readonly r: number };
+    }
   | { readonly kind: "rubble"; readonly stones: ReadonlyArray<XYS> }
-  | { readonly kind: "beams"; readonly items: ReadonlyArray<{ readonly x: number; readonly y: number; readonly dx: number; readonly dy: number }> }
-  | { readonly kind: "drownedStubs"; readonly stubs: ReadonlyArray<{ readonly x: number; readonly w: number; readonly h: number; readonly base: number; readonly tilt: number }> }
+  | {
+      readonly kind: "beams";
+      readonly items: ReadonlyArray<{
+        readonly x: number;
+        readonly y: number;
+        readonly dx: number;
+        readonly dy: number;
+      }>;
+    }
+  | {
+      readonly kind: "drownedStubs";
+      readonly stubs: ReadonlyArray<{
+        readonly x: number;
+        readonly w: number;
+        readonly h: number;
+        readonly base: number;
+        readonly tilt: number;
+      }>;
+    }
   | { readonly kind: "birds"; readonly items: ReadonlyArray<XYS> }
   | { readonly kind: "seaSerpent"; readonly x: number; readonly y: number; readonly s: number };
 

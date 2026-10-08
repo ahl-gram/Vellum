@@ -74,18 +74,17 @@ function rockNodes(style: MapStyle, k: number, rockPicked: ReadonlyArray<Spot>):
         "stroke-opacity": 0.7,
       }),
       el("circle", {
-        cx: r.x.toFixed(1), cy: r.y.toFixed(1), r: (0.8 * k).toFixed(2),
-        fill: style.ink, "fill-opacity": 0.7,
+        cx: r.x.toFixed(1),
+        cy: r.y.toFixed(1),
+        r: (0.8 * k).toFixed(2),
+        fill: style.ink,
+        "fill-opacity": 0.7,
       }),
     ];
   });
 }
 
-export function soundingsLayer(
-  ctx: RenderCtx,
-  cartouche: CartouchePlan,
-  compass: CompassPlan | null,
-): SvgNode | null {
+export function soundingsLayer(ctx: RenderCtx, cartouche: CartouchePlan, compass: CompassPlan | null): SvgNode | null {
   const { style, proj, rng } = ctx;
   if (!style.soundings) return null;
   const k = proj.widthPx / 1500;

@@ -36,26 +36,39 @@ interface Drawn {
 const items = folioOnArrival(parseTable(location.hash), readStoredTable(store));
 const roadHome = document.getElementById("pf-explorer") as HTMLAnchorElement | null;
 if (roadHome) roadHome.href = "../" + tableHash(location.hash, emitTable(items));
-const sheets: Drawn[] = items.map((item, at) => ({ item, at, title: `Chart № ${item.seed}`, worldTitle: "", svg: null, url: null }));
+const sheets: Drawn[] = items.map((item, at) => ({
+  item,
+  at,
+  title: `Chart № ${item.seed}`,
+  worldTitle: "",
+  svg: null,
+  url: null,
+}));
 let top = 0;
 
 const drawnCount = (): number => sheets.filter((s) => s.svg !== null).length;
 
 const say = makeAnnouncer(status, {
   after: (run, ms) => window.setTimeout(run, ms),
-  cancel: (timer) => { window.clearTimeout(timer); },
+  cancel: (timer) => {
+    window.clearTimeout(timer);
+  },
 });
-const tell = (line: string): void => { status.textContent = line; };
+const tell = (line: string): void => {
+  status.textContent = line;
+};
 
 /** The pile's depth, as papers behind the top sheet; the mockup shows the stack and not a count. */
 const layPile = (): void => {
   const beneath = Math.max(0, sheets.length - 1);
-  pile.replaceChildren(...Array.from({ length: Math.min(beneath, 5) }, (_, i) => {
-    const p = document.createElement("div");
-    p.className = "leaf";
-    p.style.setProperty("--depth", String(i + 1));
-    return p;
-  }));
+  pile.replaceChildren(
+    ...Array.from({ length: Math.min(beneath, 5) }, (_, i) => {
+      const p = document.createElement("div");
+      p.className = "leaf";
+      p.style.setProperty("--depth", String(i + 1));
+      return p;
+    }),
+  );
 };
 
 const showTop = (): void => {
@@ -64,12 +77,14 @@ const showTop = (): void => {
   sheetBox.innerHTML = sheet.svg ?? "";
   room.layout();
   folioTitle.textContent = sheetLine(sheet.title, top + 1, sheets.length);
-  folioSub.textContent = sheet.item.kind === "survey"
-    ? `a regional survey at band ${sheet.item.rung}, ${sheet.item.style} · from ${sheet.worldTitle || `chart № ${sheet.item.seed}`}, chart № ${sheet.item.seed}`
-    : `${subOf(sheet.item)} · from ${sheet.worldTitle || `chart № ${sheet.item.seed}`}, chart № ${sheet.item.seed}`;
+  folioSub.textContent =
+    sheet.item.kind === "survey"
+      ? `a regional survey at band ${sheet.item.rung}, ${sheet.item.style} · from ${sheet.worldTitle || `chart № ${sheet.item.seed}`}, chart № ${sheet.item.seed}`
+      : `${subOf(sheet.item)} · from ${sheet.worldTitle || `chart № ${sheet.item.seed}`}, chart № ${sheet.item.seed}`;
   folioCoords.textContent = beneathLine(sheets.length - 1 - top);
   download.disabled = sheet.svg === null;
-  for (const row of contents.querySelectorAll(".row")) row.classList.toggle("up", Number((row as HTMLElement).dataset["at"]) === top);
+  for (const row of contents.querySelectorAll(".row"))
+    row.classList.toggle("up", Number((row as HTMLElement).dataset["at"]) === top);
 };
 
 const bringUp = (at: number): void => {
@@ -160,12 +175,17 @@ const rows = (): void => {
 const retitle = (): void => {
   const groups = groupByWorld(items);
   bound.replaceChildren();
-  bound.textContent = items.length === 0
-    ? BARE_LINE
-    : boundLine(groups.map((g) => ({
-        name: g.entries.map((e) => sheets[e.at]).find((sheet) => !!sheet?.worldTitle)?.worldTitle || `chart № ${g.seed}`,
-        count: g.entries.length,
-      })));
+  bound.textContent =
+    items.length === 0
+      ? BARE_LINE
+      : boundLine(
+          groups.map((g) => ({
+            name:
+              g.entries.map((e) => sheets[e.at]).find((sheet) => !!sheet?.worldTitle)?.worldTitle ||
+              `chart № ${g.seed}`,
+            count: g.entries.length,
+          })),
+        );
   const stamp = draftedLine(drawnCount(), sheets.length);
   if (items.length > 0 && stamp) {
     const el = document.createElement("span");
@@ -194,7 +214,10 @@ const draft = async (): Promise<void> => {
       }
       rows();
       retitle();
-      if (at === top || drawnCount() === 1) { if (sheets[top]?.svg === null) top = at; showTop(); }
+      if (at === top || drawnCount() === 1) {
+        if (sheets[top]?.svg === null) top = at;
+        showTop();
+      }
       tell(draftedLine(drawnCount(), sheets.length));
     }
   }
@@ -216,7 +239,11 @@ const room = bindRoom({
   frame: document.querySelector(".stage") as HTMLElement,
   sheet: document.getElementById("sheet") as HTMLElement,
   camera: { hold: () => zoomController.getState(), restore: (t) => zoomController.refit(t) },
-  aspect: () => { const svg = sheetBox.querySelector("svg"); const vb = svg?.viewBox.baseVal; return vb && vb.width > 0 && vb.height > 0 ? vb.width / vb.height : null; },
+  aspect: () => {
+    const svg = sheetBox.querySelector("svg");
+    const vb = svg?.viewBox.baseVal;
+    return vb && vb.width > 0 && vb.height > 0 ? vb.width / vb.height : null;
+  },
 });
 
 const start = async (): Promise<void> => {
@@ -233,8 +260,13 @@ const start = async (): Promise<void> => {
     say("");
     return;
   }
-  next.addEventListener("click", () => { bringUp((top + 1) % sheets.length); });
-  download.addEventListener("click", () => { const sheet = sheets[top]; if (sheet) takeHome(sheet); });
+  next.addEventListener("click", () => {
+    bringUp((top + 1) % sheets.length);
+  });
+  download.addEventListener("click", () => {
+    const sheet = sheets[top];
+    if (sheet) takeHome(sheet);
+  });
   await initWorker();
   if (!usesWorker()) warning.hidden = false;
   await draft();
@@ -243,7 +275,9 @@ const start = async (): Promise<void> => {
 void start();
 
 declare global {
-  interface Window { __vellumPortfolio?: () => { items: number; drawn: number; top: number; key: string | null } }
+  interface Window {
+    __vellumPortfolio?: () => { items: number; drawn: number; top: number; key: string | null };
+  }
 }
 window.__vellumPortfolio = () => ({
   items: sheets.length,

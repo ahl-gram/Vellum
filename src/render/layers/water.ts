@@ -7,7 +7,10 @@ import type { Projection } from "../transform.ts";
 function ringsPath(proj: Projection, rings: ReadonlyArray<ReadonlyArray<readonly [number, number]>>): string {
   return rings
     .map((r) =>
-      pathFrom(r.map(([x, y]) => [proj.px(x), proj.py(y)] as const), true),
+      pathFrom(
+        r.map(([x, y]) => [proj.px(x), proj.py(y)] as const),
+        true,
+      ),
     )
     .join("");
 }
@@ -23,9 +26,7 @@ function deepBandPaths(ctx: RenderCtx): SvgNode[] {
   ];
   for (const band of bands) {
     const iso = world.seaLevel - band.frac * below;
-    const rings = closedIsoRings(world.elev, iso).map((c) =>
-      chaikinSmooth(c.points, true, 1),
-    );
+    const rings = closedIsoRings(world.elev, iso).map((c) => chaikinSmooth(c.points, true, 1));
     if (rings.length === 0) continue;
     paths.push(
       el("path", {
@@ -43,9 +44,7 @@ function shoalPaths(ctx: RenderCtx, shoalTint: string): SvgNode[] {
   const { proj, style, world } = ctx;
   const { min } = minMax(world.elev);
   const iso = world.seaLevel - 0.08 * (world.seaLevel - min);
-  const rings = closedIsoRings(world.elev, iso).map((c) =>
-    chaikinSmooth(c.points, true, 2),
-  );
+  const rings = closedIsoRings(world.elev, iso).map((c) => chaikinSmooth(c.points, true, 2));
   if (rings.length === 0) return [];
   const d = ringsPath(proj, rings);
   return [

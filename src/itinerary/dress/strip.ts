@@ -20,7 +20,15 @@ function frame(c: DressContext, s: StripLayout): SvgNode[] {
   return [
     el("rect", { x: s.x0, y: s.y0, width: s.w, height: s.h, fill: STRIP_LIFT, "fill-opacity": STRIP_LIFT_OPACITY }),
     el("rect", { x: s.x0, y: s.y0, width: s.w, height: s.h, fill: "none", stroke: c.ink, "stroke-width": 1.1 }),
-    el("rect", { x: s.x0 + 3, y: s.y0 + 3, width: s.w - 6, height: s.h - 6, fill: "none", stroke: c.soft, "stroke-width": 0.5 }),
+    el("rect", {
+      x: s.x0 + 3,
+      y: s.y0 + 3,
+      width: s.w - 6,
+      height: s.h - 6,
+      fill: "none",
+      stroke: c.soft,
+      "stroke-width": 0.5,
+    }),
   ];
 }
 
@@ -48,14 +56,16 @@ function roadAngleDeg(strip: StripLayout, dist: number): number {
 function roadNodes(c: DressContext, input: RibbonInput, strip: StripLayout): SvgNode[] {
   const nodes: SvgNode[] = [];
   for (const off of [-ROAD_HALF, ROAD_HALF]) {
-    nodes.push(el("path", {
-      d: offsetPath(strip.pts, off),
-      fill: "none",
-      stroke: c.style.road,
-      "stroke-width": 1.1,
-      "stroke-dasharray": "0.2 3.4",
-      "stroke-linecap": "round",
-    }));
+    nodes.push(
+      el("path", {
+        d: offsetPath(strip.pts, off),
+        fill: "none",
+        stroke: c.style.road,
+        "stroke-width": 1.1,
+        "stroke-dasharray": "0.2 3.4",
+        "stroke-linecap": "round",
+      }),
+    );
   }
   const solidSpan = Math.min(2.2, 30 / strip.pxPerCell);
   for (const e of input.events) {
@@ -69,12 +79,14 @@ function roadNodes(c: DressContext, input: RibbonInput, strip: StripLayout): Svg
     for (const off of [-ROAD_HALF, ROAD_HALF]) {
       const nx = (-dy / len) * off;
       const ny = (dx / len) * off;
-      nodes.push(el("path", {
-        d: `M${r1(a.sx + nx)} ${r1(a.sy + ny)}L${r1(b.sx + nx)} ${r1(b.sy + ny)}`,
-        fill: "none",
-        stroke: c.style.road,
-        "stroke-width": 1.2,
-      }));
+      nodes.push(
+        el("path", {
+          d: `M${r1(a.sx + nx)} ${r1(a.sy + ny)}L${r1(b.sx + nx)} ${r1(b.sy + ny)}`,
+          fill: "none",
+          stroke: c.style.road,
+          "stroke-width": 1.2,
+        }),
+      );
     }
   }
   return nodes;
@@ -88,13 +100,19 @@ function leagueDots(c: DressContext, strip: StripLayout): SvgNode[] {
     const p = stripPos(strip, l * CELLS_PER_LEAGUE);
     nodes.push(el("circle", { cx: r1(p.sx), cy: r1(p.sy), r: 1.4, fill: c.ink }));
     if (l % 5 === 0) {
-      nodes.push(el("text", {
-        x: r1(p.sx + 5.5),
-        y: r1(p.sy + 2.4),
-        "font-family": c.style.fontFamily,
-        "font-size": 7,
-        fill: c.soft,
-      }, [String(l)]));
+      nodes.push(
+        el(
+          "text",
+          {
+            x: r1(p.sx + 5.5),
+            y: r1(p.sy + 2.4),
+            "font-family": c.style.fontFamily,
+            "font-size": 7,
+            fill: c.soft,
+          },
+          [String(l)],
+        ),
+      );
     }
   }
   return nodes;
@@ -168,16 +186,20 @@ function captionNodes(
   for (const line of lines) {
     dy += line.size + 1.2;
     out.push(
-      el("text", {
-        x: r1(anchorX),
-        y: r1(y + dy - 1.2),
-        "text-anchor": side < 0 ? "end" : "start",
-        "font-family": c.style.fontFamily,
-        "font-size": line.size,
-        "font-style": line.caps ? "normal" : "italic",
-        ...(line.caps ? { "letter-spacing": 0.8 } : {}),
-        fill: c.ink,
-      }, [line.caps ? line.text.toUpperCase() : line.text]),
+      el(
+        "text",
+        {
+          x: r1(anchorX),
+          y: r1(y + dy - 1.2),
+          "text-anchor": side < 0 ? "end" : "start",
+          "font-family": c.style.fontFamily,
+          "font-size": line.size,
+          "font-style": line.caps ? "normal" : "italic",
+          ...(line.caps ? { "letter-spacing": 0.8 } : {}),
+          fill: c.ink,
+        },
+        [line.caps ? line.text.toUpperCase() : line.text],
+      ),
     );
   }
   return { nodes: [...laid.nodes, ...out], track: { ...laid.track, [key]: y - 4 } };
@@ -193,7 +215,14 @@ function riverBand(c: DressContext, strip: StripLayout, sy: number, tiltDeg: num
   }
   return el("g", { transform: `rotate(${r1(tiltDeg)} ${r1((x0 + x1) / 2)} ${r1(sy)})` }, [
     el("path", { d, fill: "none", stroke: c.style.river, "stroke-width": 2.1, "stroke-opacity": 0.85 }),
-    el("path", { d, fill: "none", stroke: c.style.river, "stroke-width": 0.7, "stroke-opacity": 0.5, transform: "translate(0 2.6)" }),
+    el("path", {
+      d,
+      fill: "none",
+      stroke: c.style.river,
+      "stroke-width": 0.7,
+      "stroke-opacity": 0.5,
+      transform: "translate(0 2.6)",
+    }),
   ]);
 }
 
@@ -210,7 +239,10 @@ function eventNodes(c: DressContext, input: RibbonInput, strip: StripLayout, rng
         nodes.push(settlementCluster(c, p.sx, p.sy - 1, e.tier));
         const lines: CaptionLine[] = e.endpoint
           ? [{ text: caption, caps: true, size: 10.5 }]
-          : [{ text: caption, caps: true, size: 8.6 }, { text: tierTag(e.tier), size: 7.6 }];
+          : [
+              { text: caption, caps: true, size: 8.6 },
+              { text: tierTag(e.tier), size: 7.6 },
+            ];
         laid = captionNodes(c, strip, p.sx, p.sy, freeSide, lines, laid);
         break;
       }
@@ -225,14 +257,16 @@ function eventNodes(c: DressContext, input: RibbonInput, strip: StripLayout, rng
       case "branch": {
         const endX = p.sx + e.side * 20;
         const endY = p.sy - 9;
-        nodes.push(el("path", {
-          d: `M${r1(p.sx)} ${r1(p.sy)}Q${r1(p.sx + e.side * 12)} ${r1(p.sy - 2)} ${r1(endX)} ${r1(endY)}`,
-          fill: "none",
-          stroke: c.style.road,
-          "stroke-width": 0.9,
-          "stroke-dasharray": "0.2 3",
-          "stroke-linecap": "round",
-        }));
+        nodes.push(
+          el("path", {
+            d: `M${r1(p.sx)} ${r1(p.sy)}Q${r1(p.sx + e.side * 12)} ${r1(p.sy - 2)} ${r1(endX)} ${r1(endY)}`,
+            fill: "none",
+            stroke: c.style.road,
+            "stroke-width": 0.9,
+            "stroke-dasharray": "0.2 3",
+            "stroke-linecap": "round",
+          }),
+        );
         laid = captionNodes(c, strip, endX, endY, e.side, [{ text: caption }], laid);
         break;
       }
@@ -250,15 +284,19 @@ function continuation(c: DressContext, strip: StripLayout, isLast: boolean): Svg
   if (isLast) return [];
   const leagues = Math.round(strip.d1 / CELLS_PER_LEAGUE);
   return [
-    el("text", {
-      x: r1(strip.x0 + strip.w / 2),
-      y: r1(strip.y0 + 12),
-      "text-anchor": "middle",
-      "font-family": c.style.fontFamily,
-      "font-size": 7.5,
-      "font-style": "italic",
-      fill: c.soft,
-    }, [`· ${leagues} leagues ·`]),
+    el(
+      "text",
+      {
+        x: r1(strip.x0 + strip.w / 2),
+        y: r1(strip.y0 + 12),
+        "text-anchor": "middle",
+        "font-family": c.style.fontFamily,
+        "font-size": 7.5,
+        "font-style": "italic",
+        fill: c.soft,
+      },
+      [`· ${leagues} leagues ·`],
+    ),
   ];
 }
 

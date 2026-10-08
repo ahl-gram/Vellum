@@ -16,7 +16,15 @@ import {
   type ProspectItem,
   type TableItem,
 } from "../../src/site/shared/table-address.ts";
-import { LATTICE_DIVISIONS, LOD_BANDS, decideSettle, lodWindowFor, plotUvFromSheet, FULL_WINDOW, type LodBand } from "../../src/world/lod.ts";
+import {
+  LATTICE_DIVISIONS,
+  LOD_BANDS,
+  decideSettle,
+  lodWindowFor,
+  plotUvFromSheet,
+  FULL_WINDOW,
+  type LodBand,
+} from "../../src/world/lod.ts";
 import { finalizeHash } from "../../src/site/explorer/address.ts";
 import { SURVEY, PROSPECT, survey, prospect, hashOf } from "../../test-support/table-address-fixtures.ts";
 
@@ -48,7 +56,9 @@ test("parseTable: no table key is null, an empty one is an empty table (the host
 });
 
 test("parseTable: absent optional fields stay absent, never defaulted (the overrides are presence-gated in app.ts)", () => {
-  const [item] = parseTable(hashOf("k-s.seed-7.style-antique.legend-1.arms-1.beasts-0.rung-1.lx-8.ly-8")) as [SurveyItem];
+  const [item] = parseTable(hashOf("k-s.seed-7.style-antique.legend-1.arms-1.beasts-0.rung-1.lx-8.ly-8")) as [
+    SurveyItem,
+  ];
   assert.deepEqual(item.overrides, {}, "no type, band, land or coast means the world's own, not a stated default");
   assert.equal(item.theme, null, "no theme is the plain sheet");
   const [p] = parseTable(hashOf("k-p.seed-7.style-ink")) as [ProspectItem];
@@ -106,11 +116,19 @@ test("the cap refuses the seventh sheet in both directions; the wording belongs 
   assert.equal(emitTable(seven).split("_").length, TABLE_CAP, "emit lays only six");
   const parsed = parseTable(hashOf(seven.map((s) => emitTable([s])).join("_"))) as ReadonlyArray<TableItem>;
   assert.equal(parsed.length, TABLE_CAP, "parse takes only six");
-  assert.deepEqual(parsed.map((i) => i.seed), [0, 1, 2, 3, 4, 5], "the six kept are the first six, in order");
+  assert.deepEqual(
+    parsed.map((i) => i.seed),
+    [0, 1, 2, 3, 4, 5],
+    "the six kept are the first six, in order",
+  );
 });
 
 test("a malformed item is dropped on its own; the rest of the folio survives", () => {
-  for (const folio of [`${SURVEY}_nonsense_${PROSPECT}`, `nonsense_${SURVEY}_${PROSPECT}`, `${SURVEY}_${PROSPECT}_nonsense`]) {
+  for (const folio of [
+    `${SURVEY}_nonsense_${PROSPECT}`,
+    `nonsense_${SURVEY}_${PROSPECT}`,
+    `${SURVEY}_${PROSPECT}_nonsense`,
+  ]) {
     assert.deepEqual(parseTable(hashOf(folio)), [survey, prospect], `the neighbours are not punished for it: ${folio}`);
   }
   for (const bad of [
@@ -149,9 +167,13 @@ test("the allowlists refuse a crafted recipe value by dropping the item, never b
 });
 
 test("land and coast clamp to the engine's range, the way every other host clamps them", () => {
-  const wide = parseTable(hashOf("k-s.seed-42.land-9999.coast-500.style-antique.legend-1.arms-0.beasts-0.rung-2.lx-1.ly-1")) as [SurveyItem];
+  const wide = parseTable(
+    hashOf("k-s.seed-42.land-9999.coast-500.style-antique.legend-1.arms-0.beasts-0.rung-2.lx-1.ly-1"),
+  ) as [SurveyItem];
   assert.deepEqual(wide[0].overrides, { landFraction: 0.7, coastWarp: 1 });
-  const low = parseTable(hashOf("k-s.seed-42.land-10.coast-0.style-antique.legend-1.arms-0.beasts-0.rung-2.lx-1.ly-1")) as [SurveyItem];
+  const low = parseTable(
+    hashOf("k-s.seed-42.land-10.coast-0.style-antique.legend-1.arms-0.beasts-0.rung-2.lx-1.ly-1"),
+  ) as [SurveyItem];
   assert.deepEqual(low[0].overrides, { landFraction: 0.1, coastWarp: 0 });
 });
 
@@ -179,7 +201,9 @@ test("the rung is the Glass's, 1 to 3: band 0 is a world sheet and no survey at 
     );
   }
   for (const rung of [1, 2, 3]) {
-    const parsed = parseTable(hashOf(`k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-${rung}.lx-1.ly-1`)) as [SurveyItem];
+    const parsed = parseTable(hashOf(`k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-${rung}.lx-1.ly-1`)) as [
+      SurveyItem,
+    ];
     assert.equal(parsed[0].rung, rung);
   }
 });
@@ -190,9 +214,15 @@ test("a lattice index off the lattice drops the item (the centre must name a rea
     const max = LATTICE_DIVISIONS / size;
     // Both axes, both directions: a guard that only watches lx is half a guard.
     for (const off of [`lx-${max + 1}.ly-1`, `lx--1.ly-1`, `lx-1.ly-${max + 1}`, `lx-1.ly--1`]) {
-      assert.deepEqual(parseTable(hashOf(`k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-${rung}.${off}`)), [], off);
+      assert.deepEqual(
+        parseTable(hashOf(`k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-${rung}.${off}`)),
+        [],
+        off,
+      );
     }
-    const edge = parseTable(hashOf(`k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-${rung}.lx-${max}.ly-0`)) as [SurveyItem];
+    const edge = parseTable(
+      hashOf(`k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-${rung}.lx-${max}.ly-0`),
+    ) as [SurveyItem];
     assert.equal(edge[0].lx, max, `index ${max} is the last real lattice step at rung ${rung}`);
   }
 });
@@ -226,7 +256,9 @@ test("THE LATTICE CONTRACT: a filed survey redraws the very window the Glass com
           const lattice = latticeFromCentre(camera.cx, camera.cy, band.index);
           assert.notEqual(lattice, null, `the Glass settled at ${camera.cx},${camera.cy} but the grammar refused it`);
           const filed = parseTable(
-            hashOf(emitTable([{ ...survey, overrides: {}, rung: band.index as Rung, lx: lattice!.lx, ly: lattice!.ly }])),
+            hashOf(
+              emitTable([{ ...survey, overrides: {}, rung: band.index as Rung, lx: lattice!.lx, ly: lattice!.ly }]),
+            ),
           ) as [SurveyItem];
           assert.deepEqual(
             tableWindow(filed[0]),
@@ -239,8 +271,14 @@ test("THE LATTICE CONTRACT: a filed survey redraws the very window the Glass com
     }
   }
   assert.ok(checked > 100, `the sweep must actually sweep; it checked ${checked}`);
-  assert.ok(offGrid > 100, `and it must sweep BETWEEN the lattice points, where the rounding shows; it checked ${offGrid}`);
-  assert.ok(atEdge > 0 && offGrid < checked, `and it must reach the top lattice index, where the window clamps; ${atEdge} edge cameras of ${checked}`);
+  assert.ok(
+    offGrid > 100,
+    `and it must sweep BETWEEN the lattice points, where the rounding shows; it checked ${offGrid}`,
+  );
+  assert.ok(
+    atEdge > 0 && offGrid < checked,
+    `and it must reach the top lattice index, where the window clamps; ${atEdge} edge cameras of ${checked}`,
+  );
 });
 
 test("latticeFromCentre refuses a centre that is not a settle, and a rung that is not the Glass's", () => {
@@ -257,9 +295,23 @@ test("groupByWorld orders for Sub 3's drafting: one run per world, worlds in fir
   const c = { ...survey, seed: 1, overrides: {}, lx: 3 };
   const groups = groupByWorld([a, b, c]);
   assert.equal(groups.length, 2, "two worlds, not three");
-  assert.deepEqual(groups.map((g) => g.entries.map((e) => e.at)), [[0, 2], [1]], "seed 1 first, and it keeps both its sheets");
-  assert.deepEqual(groups[0]!.entries.map((e) => e.item), [a, c]);
-  assert.deepEqual(groups.map((g) => [g.seed, g.overrides]), [[1, {}], [2, {}]], "each group names its own world, so Sub 3 calls worldFor without reaching into an entry");
+  assert.deepEqual(
+    groups.map((g) => g.entries.map((e) => e.at)),
+    [[0, 2], [1]],
+    "seed 1 first, and it keeps both its sheets",
+  );
+  assert.deepEqual(
+    groups[0]!.entries.map((e) => e.item),
+    [a, c],
+  );
+  assert.deepEqual(
+    groups.map((g) => [g.seed, g.overrides]),
+    [
+      [1, {}],
+      [2, {}],
+    ],
+    "each group names its own world, so Sub 3 calls worldFor without reaching into an entry",
+  );
 });
 
 test("groupByWorld groups on the world the address states, so a key order cannot split one world in two", () => {
@@ -275,7 +327,9 @@ test("the allowlists mirror the Explorer's own selects, or a link the Explorer c
   const optionsOf = (id: string): string[] => {
     const sel = new RegExp(`<select id="${id}">([\\s\\S]*?)</select>`).exec(page);
     assert.ok(sel, `the Explorer still has a #${id} select`);
-    return [...(sel[1] as string).matchAll(/<option value="([^"]*)"/g)].map((m) => m[1] as string).filter((v) => v !== "");
+    return [...(sel[1] as string).matchAll(/<option value="([^"]*)"/g)]
+      .map((m) => m[1] as string)
+      .filter((v) => v !== "");
   };
   for (const [id, field, sample] of [
     ["style", "style", "k-s.seed-42.style-VALUE.legend-1.arms-0.beasts-0.rung-2.lx-1.ly-1"],
@@ -298,14 +352,27 @@ test("legend and arms ride as the Explorer writes them, 1 or 0, and nothing else
   assert.deepEqual([on[0].legend, on[0].arms], [true, true]);
   const off = parseTable(hashOf("k-s.seed-42.style-antique.legend-0.arms-0.beasts-0.rung-2.lx-1.ly-1")) as [SurveyItem];
   assert.deepEqual([off[0].legend, off[0].arms], [false, false]);
-  assert.deepEqual(parseTable(hashOf("k-s.seed-42.style-antique.legend-yes.arms-0.beasts-0.rung-2.lx-1.ly-1")), [], "a stated but unreadable seal drops the item");
+  assert.deepEqual(
+    parseTable(hashOf("k-s.seed-42.style-antique.legend-yes.arms-0.beasts-0.rung-2.lx-1.ly-1")),
+    [],
+    "a stated but unreadable seal drops the item",
+  );
 });
 
 // The address encodes the window as (rung, lattice centre) and there is no honest way back from the window, so the seat is taken at the settle; swept from the SHEET camera the Glass reports over EVERY seat, because at rung 1 lodWindowFor clamps hard enough that neighbouring seats share a window byte for byte and three chosen cameras let a window-midpoint shortcut pass.
 test("every lattice seat round-trips through the settle it came from (#520)", () => {
   const m = { mx: 0.045, my: 0.045 };
   const toSheet = (plot: number, margin: number): number => plot * (1 - 2 * margin) + margin;
-  const dress = { kind: "survey", seed: 42, overrides: {}, style: "antique", legend: true, arms: false, beasts: false, theme: null } as const;
+  const dress = {
+    kind: "survey",
+    seed: 42,
+    overrides: {},
+    style: "antique",
+    legend: true,
+    arms: false,
+    beasts: false,
+    theme: null,
+  } as const;
   for (const rung of [1, 2, 3] as const) {
     const band = LOD_BANDS[rung] as LodBand;
     const step = band.sizeUV / LATTICE_DIVISIONS;
@@ -315,10 +382,18 @@ test("every lattice seat round-trips through the settle it came from (#520)", ()
       for (let ly = 0; ly <= max; ly++) {
         const cam = { cx: toSheet(lx * step, m.mx), cy: toSheet(ly * step, m.my), k: band.k };
         const seat = latticeFromSettle(cam, m, rung);
-        assert.deepEqual(seat, { lx, ly }, `rung ${rung} seat (${lx},${ly}): the settle must name the seat it landed on`);
+        assert.deepEqual(
+          seat,
+          { lx, ly },
+          `rung ${rung} seat (${lx},${ly}): the settle must name the seat it landed on`,
+        );
         const decision = decideSettle({ camera: plotUvFromSheet(cam, m), currentWindow: FULL_WINDOW, currentBand: 0 });
         assert.equal(decision.action, "region");
-        assert.deepEqual(tableWindow({ ...dress, rung, lx, ly }), decision.window, `rung ${rung} seat (${lx},${ly}): the address must rebuild the settle's own window`);
+        assert.deepEqual(
+          tableWindow({ ...dress, rung, lx, ly }),
+          decision.window,
+          `rung ${rung} seat (${lx},${ly}): the address must rebuild the settle's own window`,
+        );
         checked++;
       }
     }
@@ -329,15 +404,32 @@ test("every lattice seat round-trips through the settle it came from (#520)", ()
 // The control: the raw sheet-fraction camera is the wrong space, and the seat it names must differ, or the sweep above proves nothing about the conversion latticeFromSettle owns. Measured 2026-09-07 at every rung.
 test("the sheet-fraction camera names a different seat, which is why the conversion is not the caller's (#520)", () => {
   const m = { mx: 0.045, my: 0.045 };
-  for (const [rung, c] of [[1, 0.220], [2, 0.200], [3, 0.200]] as const) {
+  for (const [rung, c] of [
+    [1, 0.22],
+    [2, 0.2],
+    [3, 0.2],
+  ] as const) {
     const cam = { cx: c, cy: c, k: (LOD_BANDS[rung] as LodBand).k };
-    assert.notDeepEqual(latticeFromSettle(cam, m, rung), latticeFromCentre(cam.cx, cam.cy, rung), `rung ${rung}: the two spaces must disagree at ${c}`);
+    assert.notDeepEqual(
+      latticeFromSettle(cam, m, rung),
+      latticeFromCentre(cam.cx, cam.cy, rung),
+      `rung ${rung}: the two spaces must disagree at ${c}`,
+    );
   }
 });
 
 // The witness that makes the guard above bite. Measured 2026-09-07: at rung 3, 1200 of 4225 seats rebuild a DIFFERENT window from their own window's midpoint; rungs 1 and 2 have none, so a guard sampling only those two cannot see the hazard.
 test("the window's own midpoint is NOT a way back to its seat (#520, the 1200 of 4225)", () => {
-  const dress = { kind: "survey", seed: 42, overrides: {}, style: "antique", legend: true, arms: false, beasts: false, theme: null } as const;
+  const dress = {
+    kind: "survey",
+    seed: 42,
+    overrides: {},
+    style: "antique",
+    legend: true,
+    arms: false,
+    beasts: false,
+    theme: null,
+  } as const;
   const band = LOD_BANDS[3] as LodBand;
   const max = Math.round(LATTICE_DIVISIONS / band.sizeUV);
   let lossy = 0;
@@ -353,5 +445,9 @@ test("the window's own midpoint is NOT a way back to its seat (#520, the 1200 of
   // The named witness, so the count above is not the only thing standing between this and a vacuous pass.
   const edge = tableWindow({ ...dress, rung: 3, lx: 0, ly: 0 });
   const midSeat = latticeFromCentre((edge.u0 + edge.u1) / 2, (edge.v0 + edge.v1) / 2, 3);
-  assert.notDeepEqual(midSeat, { lx: 0, ly: 0 }, "band 3 seat (0,0) is the clamped edge case: its midpoint names a different seat");
+  assert.notDeepEqual(
+    midSeat,
+    { lx: 0, ly: 0 },
+    "band 3 seat (0,0) is the clamped edge case: its midpoint names a different seat",
+  );
 });

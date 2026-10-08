@@ -13,14 +13,7 @@ import {
   type XYS,
 } from "./geometry.ts";
 
-export type Treatment =
-  | "fields"
-  | "forest"
-  | "pines"
-  | "palms"
-  | "strand"
-  | "marsh"
-  | "scrub";
+export type Treatment = "fields" | "forest" | "pines" | "palms" | "strand" | "marsh" | "scrub";
 
 const TREATMENT_OF: Record<BiomeName, Treatment | null> = {
   ocean: null,
@@ -41,15 +34,7 @@ const TREATMENT_OF: Record<BiomeName, Treatment | null> = {
   snow: "scrub",
 };
 
-const PRIORITY: ReadonlyArray<Treatment> = [
-  "marsh",
-  "forest",
-  "pines",
-  "palms",
-  "strand",
-  "scrub",
-  "fields",
-];
+const PRIORITY: ReadonlyArray<Treatment> = ["marsh", "forest", "pines", "palms", "strand", "scrub", "fields"];
 
 export function treatmentFor(band: ReadonlyArray<BiomeName>): Treatment {
   const counts = new Map<Treatment, number>();
@@ -72,11 +57,7 @@ export function treatmentFor(band: ReadonlyArray<BiomeName>): Treatment {
 const cxOf = (): number => (VIEW_X0 + VIEW_X1) / 2;
 const width = (): number => VIEW_X1 - VIEW_X0;
 
-function scatter(
-  rng: Rng,
-  count: number,
-  make: (r: Rng, i: number) => XYS,
-): XYS[] {
+function scatter(rng: Rng, count: number, make: (r: Rng, i: number) => XYS): XYS[] {
   return Array.from({ length: count }, (_, i) => make(rng, i));
 }
 
@@ -115,23 +96,27 @@ function woodDressing(treatment: "forest" | "pines", cx: number, base: number, r
     y: base + 12 + r.next() * 22,
     s: 1.9 + r.next() * 0.9,
   }));
-  return [{
-    kind: "trees",
-    species: treatment === "pines" ? "pine" : "round",
-    items: [...back, ...frontTrees],
-  }];
+  return [
+    {
+      kind: "trees",
+      species: treatment === "pines" ? "pine" : "round",
+      items: [...back, ...frontTrees],
+    },
+  ];
 }
 
 function palmsDressing(cx: number, base: number, rng: Rng): ForegroundElement[] {
-  return [{
-    kind: "trees",
-    species: "palm",
-    items: scatter(rng, 6, (r, i) => ({
-      x: cx + (i % 2 === 0 ? -1 : 1) * (88 + r.next() * 60),
-      y: base + (i < 3 ? -2 : 8) + r.next() * 6,
-      s: 2.1 + r.next() * 0.5,
-    })),
-  }];
+  return [
+    {
+      kind: "trees",
+      species: "palm",
+      items: scatter(rng, 6, (r, i) => ({
+        x: cx + (i % 2 === 0 ? -1 : 1) * (88 + r.next() * 60),
+        y: base + (i < 3 ? -2 : 8) + r.next() * 6,
+        s: 2.1 + r.next() * 0.5,
+      })),
+    },
+  ];
 }
 
 function strandDressing(cx: number, base: number, rng: Rng): ForegroundElement[] {
@@ -292,12 +277,7 @@ function beachFront(kind: ProspectKind, cx: number, shore: number): ForegroundEl
   return out;
 }
 
-export function composeSeaFront(
-  kind: ProspectKind,
-  ruined: boolean,
-  water: Water,
-  rng: Rng,
-): ForegroundElement[] {
+export function composeSeaFront(kind: ProspectKind, ruined: boolean, water: Water, rng: Rng): ForegroundElement[] {
   const cx = cxOf();
   const shore = water.y0;
   if (kind === "capital" || kind === "seat" || kind === "town") {
@@ -307,12 +287,7 @@ export function composeSeaFront(
   return ruined ? [] : beachFront(kind, cx, shore);
 }
 
-export function composeRiverFront(
-  kind: ProspectKind,
-  ruined: boolean,
-  water: Water,
-  rng: Rng,
-): ForegroundElement[] {
+export function composeRiverFront(kind: ProspectKind, ruined: boolean, water: Water, rng: Rng): ForegroundElement[] {
   void rng;
   const cx = cxOf();
   const out: ForegroundElement[] = [];

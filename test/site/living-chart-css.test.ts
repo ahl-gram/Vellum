@@ -23,7 +23,9 @@ const soleRule = (css: string, selector: string): string => {
   return blocks[0]![0];
 };
 const codeOf = (path: string): string =>
-  read(path).replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+  read(path)
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/\/\/[^\n]*/g, "");
 
 // The nodes place-overlay.ts, voyage-session.ts and chronicle.ts create or tag, matched as literal substrings of the sheet so a rename on either side fails here first.
 const ENGINE_RULES = [
@@ -88,9 +90,13 @@ test("the hit divides by --zoom-k once, on the element; the ring pseudos stay pl
 test("the town raised over an overlapping neighbour stays below the card it opens (#632)", () => {
   const css = read(SHEET);
   const z = (selector: string) => Number((soleRule(css, selector).match(/z-index:\s*(-?\d+)/) ?? [])[1]);
-  const raised = z(".place-hit.pc-near"), card = z("#place-card");
+  const raised = z(".place-hit.pc-near"),
+    card = z("#place-card");
   assert.ok(Number.isFinite(raised) && Number.isFinite(card), `both declare a z-index (${raised}, ${card})`);
-  assert.ok(raised > 0 && raised < card, `a raised town paints over its neighbours (${raised} > 0) and under the card (${raised} < ${card})`);
+  assert.ok(
+    raised > 0 && raised < card,
+    `a raised town paints over its neighbours (${raised} > 0) and under the card (${raised} < ${card})`,
+  );
 });
 
 // ENGINE_RULES matches a bare selector as a SUBSTRING, and a compound selector sharing it keeps the substring alive: the
@@ -99,27 +105,65 @@ test("the town raised over an overlapping neighbour stays below the card it open
 test("the card's action row and its filing press are dressed by a rule of their OWN, not merely spelled somewhere in the sheet (#522)", () => {
   const css = read(SHEET);
   const acts = soleRule(css, ".pc-acts");
-  assert.match(acts, /display:\s*flex/, ".pc-acts is not laid out as a row, so the two actions stack on the cascade's default");
-  assert.match(acts, /gap:/, "and it owns the gap between them; its members set none, or the flex gap doubles the space above the prose");
+  assert.match(
+    acts,
+    /display:\s*flex/,
+    ".pc-acts is not laid out as a row, so the two actions stack on the cascade's default",
+  );
+  assert.match(
+    acts,
+    /gap:/,
+    "and it owns the gap between them; its members set none, or the flex gap doubles the space above the prose",
+  );
   const lay = soleRule(css, ".pc-lay");
-  assert.match(lay, /background:\s*var\(--control-gold\)/, "the press loses the ruled gold the sitting drew (#518 ruling 7)");
-  assert.match(lay, /pointer-events:\s*auto/, "and without this it is dead to a real pointer, since #place-card is pointer-events: none");
+  assert.match(
+    lay,
+    /background:\s*var\(--control-gold\)/,
+    "the press loses the ruled gold the sitting drew (#518 ruling 7)",
+  );
+  assert.match(
+    lay,
+    /pointer-events:\s*auto/,
+    "and without this it is dead to a real pointer, since #place-card is pointer-events: none",
+  );
   // The press acts on the sheet and goes nowhere, so it must NOT wear the navigation tip; tip-affordance.test.ts sweeps the class, this names the piece.
-  assert.doesNotMatch(css.slice(css.indexOf(".pc-lay")), /^\.pc-lay[^{]*:hover[^{]*\{[^}]*rotate\(/m, "the press took the navigation tip, which promises it goes somewhere");
+  assert.doesNotMatch(
+    css.slice(css.indexOf(".pc-lay")),
+    /^\.pc-lay[^{]*:hover[^{]*\{[^}]*rotate\(/m,
+    "the press took the navigation tip, which promises it goes somewhere",
+  );
   const dim = soleRule(css, ".pc-lay.dim");
-  assert.doesNotMatch(dim, /opacity/, "the refusing press dims by OPACITY, which fails the measured contrast floor; it dims by losing the gold for the standard cream");
-  assert.match(dim, /background:\s*var\(--control-cream\)/, "and it must actually change ground, or it does not read as refusing at all");
+  assert.doesNotMatch(
+    dim,
+    /opacity/,
+    "the refusing press dims by OPACITY, which fails the measured contrast floor; it dims by losing the gold for the standard cream",
+  );
+  assert.match(
+    dim,
+    /background:\s*var\(--control-cream\)/,
+    "and it must actually change ground, or it does not read as refusing at all",
+  );
   // A soleRule read cannot see a HIGHER-specificity rule elsewhere in the sheet taking a property back, and one did: the
   // (1,2,0) hover hold restored the full-strength border on a refusing press under pointer AND keyboard focus, which is
   // the half ruling 3's reasoning turns on. So every property the dim sets is re-asserted in the deeper rule.
   const held = css.match(/#place-card \.pc-lay\.dim:hover[^{]*\{[^}]*\}/);
   assert.ok(held, "the dim has no hold against the hover rule above it, so a pointer undoes it");
   // Keying the hold on :hover alone left the KEYBOARD half unguarded, and `#place-card .pc-lay:focus-visible` at (1,2,0) beats `.pc-lay.dim` at (0,2,0), so a focused refusing press would light back up.
-  assert.match(held[0].slice(0, held[0].indexOf("{")), /:focus-visible/, "the hold covers the pointer and not the keyboard, and ruling 3 turns on the reader who arrives by Tab meeting the press and hearing why");
+  assert.match(
+    held[0].slice(0, held[0].indexOf("{")),
+    /:focus-visible/,
+    "the hold covers the pointer and not the keyboard, and ruling 3 turns on the reader who arrives by Tab meeting the press and hearing why",
+  );
   // A bare `includes` reads one declaration's name inside another's: "border-color:" already contains "color:", so a `color` added to the dim and forgotten in the hold measured as held.
-  const heldDecls = held[0].slice(held[0].indexOf("{") + 1).split(";").map((d) => d.trim());
+  const heldDecls = held[0]
+    .slice(held[0].indexOf("{") + 1)
+    .split(";")
+    .map((d) => d.trim());
   for (const prop of [...dim.matchAll(/(\b[a-z-]+):/g)].map((m) => m[1]).filter((p) => p !== "dim")) {
-    assert.ok(heldDecls.some((d) => d.startsWith(`${prop}:`)), `the dim sets ${prop} and the hover hold does not re-assert it, so hovering or focusing a refusing press restores it`);
+    assert.ok(
+      heldDecls.some((d) => d.startsWith(`${prop}:`)),
+      `the dim sets ${prop} and the hover hold does not re-assert it, so hovering or focusing a refusing press restores it`,
+    );
   }
 });
 
@@ -128,7 +172,10 @@ test("the philologist's note is dressed, visible, and named the same on both sid
   const css = read(SHEET);
   const tongue = soleRule(css, ".pc-tongue");
   assert.match(tongue, /border-top:/, ".pc-tongue lost the hairline that sets the note apart");
-  for (const [selector, rule] of [[".pc-tongue", tongue], [".pc-roots", soleRule(css, ".pc-roots")]] as const) {
+  for (const [selector, rule] of [
+    [".pc-tongue", tongue],
+    [".pc-roots", soleRule(css, ".pc-roots")],
+  ] as const) {
     assert.doesNotMatch(rule, /display:\s*none/, `${selector} is dressed but hidden`);
   }
   const overlay = codeOf("src/site/living-chart/place-overlay.ts");
@@ -169,8 +216,15 @@ test("every card variant reads the clamp, and reads it INSIDE the counter-scale 
     for (const prop of ["--pc-dx", "--pc-dy"]) {
       assert.ok(t.includes(prop), `${selector} never reads ${prop}, so that variant of the card cannot clamp`);
     }
-    assert.ok(t.startsWith("scale(calc(1 / var(--zoom-k, 1))) translate("), `${selector} does not lead with its counter-scale`);
-    assert.equal(t.split("translate(").length - 1, 1, `${selector} carries a second translate, and one of them is outside the counter-scale`);
+    assert.ok(
+      t.startsWith("scale(calc(1 / var(--zoom-k, 1))) translate("),
+      `${selector} does not lead with its counter-scale`,
+    );
+    assert.equal(
+      t.split("translate(").length - 1,
+      1,
+      `${selector} carries a second translate, and one of them is outside the counter-scale`,
+    );
     assert.equal(t.split("scale(").length - 1, 1, `${selector} carries a second scale`);
   }
   const overlay = codeOf("src/site/living-chart/place-overlay.ts");
