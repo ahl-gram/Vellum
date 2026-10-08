@@ -42,14 +42,8 @@ test("the hand-coded public/ shells retired with the re-shell (#254): routes and
   }
 });
 
-test("the worker spawn is the static import-URL form Vite owns (#208, TS source since #260)", () => {
+test("the retired spawn target stays retired and both pages start the worker; vellum/worker-spawn-static holds the spawn's form (#208, TS source since #260)", () => {
   const ts = read("src/site/explorer/worker-client.ts");
-  // Vite only rewrites a STATICALLY ANALYZABLE new Worker(new URL(...)); a variable spawn target would emit no worker chunk and 404 at runtime, so the literal form is contractual.
-  assert.match(
-    ts,
-    /new Worker\(new URL\("\.\/worker\.ts", import\.meta\.url\), \{ type: "module" \}\)/,
-    "worker-client must spawn via the static import-URL form",
-  );
   assert.doesNotMatch(ts, /workerUrl/, "the parameterized spawn target retired with the twin arrangement");
   assert.match(read("src/site/explorer/app.ts"), /await initWorker\(\);/);
   const printRoom = read("src/site/print-room/app.ts");

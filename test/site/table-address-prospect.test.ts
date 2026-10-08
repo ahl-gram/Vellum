@@ -27,10 +27,7 @@ test("TP1 prospectItemFrom normalises the dress through plateDressFor, so the pl
   assert.equal(prospectItemFrom({ ...at, style: "nautical" })?.style, "antique");
 });
 
-// A same-inputs compare through ONE builder is a tautology: it cannot tell a normalising builder from a
-// pass-through one, because both doors get the same answer either way. What can actually diverge is a door
-// that builds its own literal, so the guard is that BOTH doors route through the builder.
-test("TP2 both capture points route through prospectItemFrom rather than building a literal: sameSheet is byte equality on the emitted item, so a second builder would seat one plate twice and miscount the cap (#522)", () => {
+test("TP2 both capture points reach prospectItemFrom; vellum/prospect-item-through-builder refuses a literal of their own (#522)", () => {
   const strip = (p: string): string =>
     readFileSync(resolve(REPO, p), "utf8")
       .replace(/\/\*[\s\S]*?\*\//g, "")
@@ -50,16 +47,6 @@ test("TP2 both capture points route through prospectItemFrom rather than buildin
       src,
       /\b(prospectItemFrom|filingAt)\b/,
       `${door} does not reach the one builder, so its spelling of a prospect can drift from the other door's`,
-    );
-    // Keyed on what the DEFECT looks like, not on the words: a table ITEM literal pairs the kind with the item's own
-    // `style`, where the prospect JOB literal both doors legitimately write pairs it with `dress`.
-    // Tolerates ONE level of nested braces between the two fields: the first version stopped at any `}`, so a literal
-    // carrying `overrides: {}` between them evaded it entirely while the exact-variable form was caught. A bare closer
-    // still ends the match, which is what keeps the prospect JOB literal (no `style`) out of it.
-    assert.doesNotMatch(
-      src,
-      /kind:\s*"prospect"(?:[^{}]|\{[^}]*\})*\bstyle:/,
-      `${door} writes its own prospect ITEM literal beside the builder, which is the second spelling this guard exists to refuse`,
     );
   }
 });

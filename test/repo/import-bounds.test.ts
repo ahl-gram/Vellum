@@ -62,8 +62,12 @@ test("home's client modules import nothing build-time, and the build-time pair i
     "// imports ./stage-data.ts, named in a comment",
   ];
   const rule = ["vellum/home-client-no-engine"];
-  assert.deepEqual(await reports(plant, "src/site/home/camera.ts", rule), [1, 2, 3, 4]);
-  assert.deepEqual(await reports(plant, "src/site/home/valve.ts", rule), [1, 2, 3, 4], "a module the old list missed");
+  assert.deepEqual(await reports(plant, "src/site/home/camera.ts", rule), [1, 2, 3, 4, 5]);
+  assert.deepEqual(
+    await reports(plant, "src/site/home/valve.ts", rule),
+    [1, 2, 3, 4, 5],
+    "a module the old list missed",
+  );
   for (const exempt of ["src/site/home/stage-data.ts", "src/site/home/stations.ts"])
     assert.deepEqual(await reports(plant, exempt, rule), [], `${exempt} is the build-time pair`);
 });

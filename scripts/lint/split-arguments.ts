@@ -1,4 +1,5 @@
 import type { Rule } from "eslint";
+import { repoPath } from "./source-shape.ts";
 
 export const SPLIT_FILES: readonly string[] = [
   "src/site/explorer/app.ts",
@@ -54,6 +55,19 @@ export const OLDER_CALLS: Readonly<Record<string, readonly string[]>> = {
   ],
 };
 
+type Node = Rule.Node;
+const collapse = (text: string): string => text.replace(/\s+/g, " ").trim();
+
+function paramName(param: Node, text: string): string {
+  if (param.type === "Identifier") return param.name;
+  if (param.type === "AssignmentPattern") return paramName(param.left as Node, text);
+  if (param.type === "RestElement") return paramName(param.argument as Node, text);
+  const typed = param as Node & { range: [number, number]; typeAnnotation?: { range: [number, number] } };
+  const inner = (param as unknown as { parameter?: Node }).parameter;
+  if (inner) return paramName(inner, text);
+  return text.slice(typed.range[0], typed.typeAnnotation ? typed.typeAnnotation.range[0] : typed.range[1]).trim();
+}
+
 const splitArgumentsByName: Rule.RuleModule = {
   meta: {
     type: "problem",
@@ -67,9 +81,50 @@ const splitArgumentsByName: Rule.RuleModule = {
         additionalProperties: false,
       },
     ],
-    messages: { found: "stub" },
+    messages: {
+      swapped:
+        "{{call}} hands ({{args}}) for its parameters ({{params}}): a split builder hands each value under the name of the parameter it lands in, so two values of one type cannot trade places with the type check green (Issue #654)",
+      stale:
+        "the excused call {{call}} is no longer found as written in this file, so the excuse is stale or the call was edited (Alex, Issue #654 comment 5939656565, decision B)",
+      idle: "this file is on the split builders' list but hands nothing to a function of its own, so the list is stale (Issue #654)",
+    },
   },
-  create: () => ({}),
+  create(context) {
+    const options = context.options[0] as { excused: Record<string, string[]> };
+    const excused = [...(options.excused[repoPath(context.filename)] ?? [])];
+    const text = context.sourceCode.text;
+    const parts = new Map<string, string[]>();
+    let handed = 0;
+    return {
+      Program(program) {
+        for (const st of program.body as Node[])
+          if (st.type === "FunctionDeclaration")
+            parts.set(
+              st.id.name,
+              st.params.map((q) => paramName(q as Node, text)),
+            );
+      },
+      CallExpression(node) {
+        const params = node.callee.type === "Identifier" ? parts.get(node.callee.name) : undefined;
+        if (!params || node.arguments.length === 0) return;
+        handed++;
+        const args = node.arguments.map((a) => context.sourceCode.getText(a));
+        const call = `${(node.callee as { name: string }).name}(${args.map(collapse).join(", ")})`;
+        const at = excused.indexOf(call);
+        if (at !== -1) excused.splice(at, 1);
+        else if (args.length !== params.length || args.some((a, i) => a !== params[i]))
+          context.report({
+            node,
+            messageId: "swapped",
+            data: { call: (node.callee as { name: string }).name, args: args.join(", "), params: params.join(", ") },
+          });
+      },
+      "Program:exit"(program) {
+        for (const call of excused) context.report({ node: program, messageId: "stale", data: { call } });
+        if (handed === 0) context.report({ node: program, messageId: "idle" });
+      },
+    };
+  },
 };
 
 export default { rules: { "split-arguments-by-name": splitArgumentsByName } };

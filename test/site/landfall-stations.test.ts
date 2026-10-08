@@ -285,14 +285,10 @@ test("the station dress is the mockup's: pulse, diamond glyph, at-sea round, red
   );
 });
 
-test("app.ts flies the stations and breathes the drift; the pure modules stay clean of the DOM (#458)", () => {
+test("app.ts flies the stations and breathes the drift (#458)", () => {
   const app = read("src/site/home/app.ts");
   assert.match(app, /stationFlightView/, "station flights use the pure framing");
   assert.match(app, /driftTarget/, "the drift tween aims at the pure target");
   assert.match(app, /IDLE_DELAY_MS/, "the idle timer keeps the ratified delay");
   assert.match(app, /bindStations/, "the cards module owns the card DOM");
-  for (const mod of ["drift.ts", "station-flight.ts", "stations.ts"]) {
-    const src = read(`src/site/home/${mod}`);
-    assert.ok(!/document|window/.test(src), `src/site/home/${mod} stays pure`);
-  }
 });

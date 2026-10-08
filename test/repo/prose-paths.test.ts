@@ -4,7 +4,7 @@ import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { basename, dirname, extname, join, relative, resolve } from "node:path";
 
-// A backticked file path in prose claims the file is in the repo or deliberately kept out of it (Issue #624). Like its sibling comment-citations.test.ts this guard checks the path and never the claim around it, and it errs toward a miss or a reword, never a silent wrong directory. Misses: the forms the extraction test pins as never extracted; a placeholder that happens to exist, a memory-prefixed name that is not a memory file, a gitignored path nobody has on disk, and a relative or unique-basename hit that is the wrong file of that name; a span wrapped across a line, which is not joined; code files under the prose roots, read by neither guard; and a wrong-case or untracked-draft citation, which existsSync accepts on a Mac and CI's Linux checkout does not (green here, red there, never silent). False positives, reworded when they land: a backticked path inside a fenced block, extracted like any other; a unique basename the day a namesake lands; a dotted word whose extension some tracked file happens to carry (`index.html`, an extension tracked only under design/), read as a citation.
+// A backticked file path in prose claims the file is in the repo or deliberately kept out of it (Issue #624). Like its sibling, the comment citation rules in scripts/lint/comment-citation.ts, this guard checks the path and never the claim around it, and it errs toward a miss or a reword, never a silent wrong directory. Misses: the forms the extraction test pins as never extracted; a placeholder that happens to exist, a memory-prefixed name that is not a memory file, a gitignored path nobody has on disk, and a relative or unique-basename hit that is the wrong file of that name; a span wrapped across a line, which is not joined; code files under the prose roots, read by neither guard; and a wrong-case or untracked-draft citation, which existsSync accepts on a Mac and CI's Linux checkout does not (green here, red there, never silent). False positives, reworded when they land: a backticked path inside a fenced block, extracted like any other; a unique basename the day a namesake lands; a dotted word whose extension some tracked file happens to carry (`index.html`, an extension tracked only under design/), read as a citation.
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 const PROSE_ROOTS = ["handbook/specs", ".claude/skills", ".claude/agents", "CLAUDE.md", "README.md", ".github"];
@@ -162,15 +162,15 @@ test("each resolution rule has a live witness, and each finding class has one", 
 
   absent("references/scars.md");
   assert.equal(verdict(skill, "references/scars.md"), null, "relative to the citing directory");
-  absent("handbook/specs/test/repo/comment-citations.test.ts");
+  absent("handbook/specs/test/repo/lint-roots.test.ts");
   assert.equal(
-    verdict("handbook/specs", "test/repo/comment-citations.test.ts"),
+    verdict("handbook/specs", "test/repo/lint-roots.test.ts"),
     null,
     "from the repo root, a slashed path no basename rule can save",
   );
-  assert.equal(byBasename.get("comment-citations.test.ts")?.length, 1);
-  absent("handbook/specs/comment-citations.test.ts");
-  assert.equal(verdict("handbook/specs", "comment-citations.test.ts"), null, "a unique basename");
+  assert.equal(byBasename.get("lint-roots.test.ts")?.length, 1);
+  absent("handbook/specs/lint-roots.test.ts");
+  assert.equal(verdict("handbook/specs", "lint-roots.test.ts"), null, "a unique basename");
   absent("out/no-such-probe.mjs");
   assert.equal(verdict(".", "out/no-such-probe.mjs"), null, "gitignored by design, on no one's disk");
   absent("public/explorer/chunks/no-such.js");

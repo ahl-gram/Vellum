@@ -195,11 +195,11 @@ a file and a line. A symbol survives code moving and breaks on a rename or a del
 exactly when a citation should fail, while a line number drifts silently onto unrelated code. Use
 the FULL repo-relative path even for a sibling in the same directory, because basenames repeat
 under `src/` and the ambiguity is day one rather than drift.
-`test/repo/comment-citations.test.ts` enforces it **for code comments only**: it reads `.ts` and
-`.mjs` under the code roots plus `.css` under `public/`, and reaches neither `handbook/specs/` nor
-`.claude/`, so of a citation written in prose like this one only the PATH half is checked, by
-`test/repo/prose-paths.test.ts`, and the symbol half by hand or not at all. These
-behaviours of the comment guard are deliberate rather
+Two lint rules in `scripts/lint/comment-citation.ts` enforce it **for code comments only**:
+`vellum/ts-comment-citation-resolves` on every TypeScript root and `vellum/css-comment-citation-resolves`
+on the sheets under `public/`. They reach neither `handbook/specs/` nor `.claude/`, so of a citation
+written in prose like this one only the PATH half is checked, by `test/repo/prose-paths.test.ts`, and
+the symbol half by hand or not at all. These behaviours of the comment guard are deliberate rather
 than rough edges: it matches a symbol that APPEARS in the file, not one declared there, because a
 citation properly points at a call site; and it matches JOINED runs of comment lines, not single
 lines, because a citation long enough to wrap is invisible to a line matcher and the guard would

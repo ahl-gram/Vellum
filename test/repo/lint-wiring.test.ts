@@ -1,12 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
-import { join, relative, resolve } from "node:path";
+import { join, resolve } from "node:path";
 import { ESLint, type Linter } from "eslint";
 import { includeIgnoreFile } from "eslint/config";
 import ts from "typescript";
 import lintConfig from "../../eslint.config.ts";
-import { compileWithVirtual } from "../../test-support/virtual-compile.ts";
 import { WITNESSES } from "../../test-support/lint-witnesses.ts";
 import { ciJob } from "../../test-support/ci-job.ts";
 
@@ -230,6 +229,7 @@ const CSS_FORM_RULES = [
   "vellum/css-comment-issue-form",
   "vellum/css-comment-no-js-module",
   "vellum/css-no-narrow-width",
+  "vellum/css-comment-citation-resolves",
 ];
 const TURNED_ON = [
   "@typescript-eslint/no-unnecessary-type-assertion",
@@ -292,7 +292,7 @@ function pinJavaScript(file: string, typed: boolean, config: Resolved, rules: Re
   assert.deepEqual(
     rules["no-param-reassign"],
     [2, PARAM_REASSIGN],
-    `${file}: no-param-reassign does not resolve at error with property writes on and exactly the page-element parameter names excused; Alex ruled that only a write into a page element is accepted, excused by one list of names used for nothing else, so a new parameter holding a page element takes a name from the list or joins it here and in eslint.config.ts, with the names guard below as the check, and any other write returns a new value instead (Alex, 2026-09-26, Issue #654 rulings 4 and 5)`,
+    `${file}: no-param-reassign does not resolve at error with property writes on and exactly the page-element parameter names excused; Alex ruled that only a write into a page element is accepted, excused by one list of names used for nothing else, so a new parameter holding a page element takes a name from the list or joins it here and in eslint.config.ts, with vellum/param-excuse-holds-element as the check that it holds one, and any other write returns a new value instead (Alex, 2026-09-26, Issue #654 rulings 4 and 5)`,
   );
   assert.deepEqual(
     rules["no-empty"],
@@ -357,7 +357,7 @@ function pinCss(file: string, config: Resolved, rules: Record<string, unknown>):
       .filter((r) => severityOf(rules[r]) !== 0)
       .sort(),
     [...CSS_FORM_RULES].sort(),
-    `${file}: a rule other than the comment-form rules and the narrow-width rule reaches the sheets (CSS form, Issue #648, Issue #675, Issue #763)`,
+    `${file}: a rule other than the comment-form rules, the narrow-width rule and the citation rule reaches the sheets (CSS form, Issue #648, Issue #675, Issue #763, Issue #779)`,
   );
 }
 
@@ -495,98 +495,40 @@ async function excusedNames(): Promise<Set<string>> {
   return new Set(option?.ignorePropertyModificationsFor ?? []);
 }
 
-const ARM_WITNESSES = join(ROOT, "test/repo/names-guard-witnesses.virtual.ts");
-const ARM_WITNESS_SOURCE =
-  "export function witnesses(element: HTMLElement | null, inputShaped: { value: string }, readonlyRecord: { readonly a: HTMLElement }, nullableRecord: { readonly a: HTMLElement | null }, stateRecord: { n: number }, optionalMember: { id: string; n?: number }, withState: HTMLElement & { n: number }, indexed: { readonly a: HTMLElement; [k: string]: HTMLElement }, mutableRecord: { a: HTMLElement }, memberless: object): void {}\n";
-
-function compileWithWitnesses(roots: readonly string[]): ts.Program {
-  const config = ts.getParsedCommandLineOfConfigFile(
-    join(ROOT, "tsconfig.json"),
-    {},
-    { ...ts.sys, onUnRecoverableConfigFileDiagnostic: () => undefined },
-  );
-  assert.ok(config, "tsconfig.json did not parse");
-  return compileWithVirtual(config.options, roots, new Map([[ARM_WITNESSES, ARM_WITNESS_SOURCE]]));
-}
-
-function pageElementTest(program: ts.Program): (t: ts.Type) => boolean {
-  const checker = program.getTypeChecker();
-  const inScope = checker.getSymbolsInScope(program.getSourceFile(ARM_WITNESSES)!, ts.SymbolFlags.Interface);
-  const dom = (name: string): ts.Type =>
-    checker.getDeclaredTypeOfSymbol(
-      inScope.find((s) => s.name === name) ??
-        assert.fail(`the DOM library declares no ${name}, so this guard cannot tell an element from anything else`),
-    );
-  const [element, input] = [dom("Element"), dom("HTMLInputElement")];
-  const fromDom = (p: ts.Type): boolean =>
-    checker.isTypeAssignableTo(p, element) &&
-    (p.getSymbol()?.declarations ?? []).some((d) => program.isSourceFileDefaultLibrary(d.getSourceFile()));
-  const isElement = (t: ts.Type): boolean => {
-    const own = checker.getNonNullableType(t);
-    return (own.isUnion() ? own.types : [own]).every(fromDom);
-  };
-  const readonlyMember = (m: ts.Symbol): boolean =>
-    (m.declarations ?? []).length > 0 &&
-    (m.declarations ?? []).every((d) => (ts.getCombinedModifierFlags(d) & ts.ModifierFlags.Readonly) !== 0);
-  return (t) => {
-    const own = checker.getNonNullableType(t);
-    const members = own.getProperties();
-    const elementShaped =
-      checker.isTypeAssignableTo(input, own) && members.every((m) => input.getProperty(m.name) !== undefined);
-    return (
-      isElement(own) ||
-      (members.length > 0 &&
-        checker.getIndexInfosOfType(own).length === 0 &&
-        (elementShaped || members.every((m) => readonlyMember(m) && isElement(checker.getTypeOfSymbol(m)))))
-    );
-  };
-}
-
-test("every parameter bearing a name no-param-reassign excuses holds a page element, and every excused name is borne, so the excuse reaches no state record (Alex, 2026-09-26, Issue #654 rulings 4 and 5)", async () => {
+test("every name no-param-reassign excuses is borne by a parameter somewhere, so no excuse is left behind after its parameter was renamed away (Alex, 2026-09-26, Issue #654 rulings 4 and 5; what each bearer holds is vellum/param-excuse-holds-element's)", async () => {
   const excused = await excusedNames();
   assert.ok(
     excused.size > 0,
     "no-param-reassign excuses no parameter name, so this guard has nothing to check; ruling 5 excuses the page-element parameters by name",
   );
-  const hitFiles = LINT_TS_ROOTS.flatMap(tsUnder).filter(
-    (f) =>
-      parameterBindings(ts.createSourceFile(f, readFileSync(f, "utf8"), ts.ScriptTarget.Latest, true), excused).length >
-      0,
+  const borne = new Set(
+    LINT_TS_ROOTS.flatMap(tsUnder).flatMap((f) =>
+      parameterBindings(ts.createSourceFile(f, readFileSync(f, "utf8"), ts.ScriptTarget.Latest, true), excused).map(
+        (id) => id.text,
+      ),
+    ),
   );
-  assert.ok(hitFiles.length > 0, "no parameter bears an excused name");
-  const program = compileWithWitnesses(hitFiles);
-  const checker = program.getTypeChecker();
-  const holdsElements = pageElementTest(program);
-  const admitted = parameterBindings(program.getSourceFile(ARM_WITNESSES)!)
-    .filter((id) => holdsElements(checker.getTypeAtLocation(id)))
-    .map((id) => id.text);
-  assert.deepEqual(
-    admitted,
-    ["element", "inputShaped", "readonlyRecord", "nullableRecord"],
-    "the guard's arms no longer admit exactly an element, an input-shaped type and a record of read-only elements among its witnesses: an arm stopped refusing what it must, or began refusing what it must admit",
-  );
-  const borne = new Set<string>();
-  const offenders: string[] = [];
-  for (const file of hitFiles) {
-    const sf = program.getSourceFile(file)!;
-    for (const id of parameterBindings(sf, excused)) {
-      borne.add(id.text);
-      const t = checker.getTypeAtLocation(id);
-      if (!holdsElements(t))
-        offenders.push(
-          `${relative(ROOT, file)}:${sf.getLineAndCharacterOfPosition(id.getStart(sf)).line + 1} ${id.text}: ${checker.typeToString(t)}`,
-        );
-    }
-  }
   assert.deepEqual(
     [...excused].filter((n) => !borne.has(n)),
     [],
     "no-param-reassign excuses a name no parameter bears, an excuse left behind after its parameter was renamed away",
   );
+});
+
+const PRESETS = /^(@eslint\/js|typescript-eslint)\//;
+const RULING_D_PAIR = [REFUSAL, DESIGN];
+
+test("no rule is set by two of the house's own blocks, since the later block's options replace the earlier one's for every file both reach and nothing reds (Issue #779, measured: home lost a refused import pattern that way)", () => {
+  const house = blocks.filter((b) => !PRESETS.test(shortName(b)) && !RULING_D_PAIR.includes(b.name ?? ""));
+  assert.ok(house.length > 5, "the house's own blocks were not found, so this guard reads nothing");
+  const setters = new Map<string, string[]>();
+  for (const block of house)
+    for (const rule of Object.keys(block.rules ?? {}))
+      setters.set(rule, [...(setters.get(rule) ?? []), shortName(block)]);
   assert.deepEqual(
-    offenders,
+    [...setters].filter(([, by]) => by.length > 1).map(([rule, by]) => `${rule}: ${by.join(" and ")}`),
     [],
-    "a parameter bearing an excused name holds something other than a page element (a type the DOM library declares), an element-shaped type, or a record of read-only page elements, so a write into it goes unseen by no-param-reassign; rename it, or return a new value instead of writing (Issue #654 rulings 4 and 5). DECLARED, with their directions: an element-shaped type is one a DOM input element satisfies whose every member an input element also carries, so any record made only of such members ({ value: string }, { hidden: boolean }, { width: number; height: number }) passes, erring toward passing, a handbook/errata/guards.md row; a type with no members at all (object, {}) and a type parameter constrained to an element (T extends HTMLElement) fail, erring toward failing",
+    "a rule is set by two house blocks: set it once, in the one block that reaches every file it should, or give each block's subtree its own rule",
   );
 });
 
