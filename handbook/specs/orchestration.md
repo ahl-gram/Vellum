@@ -115,8 +115,9 @@ home's line wins for the lane and this file's for the orchestrator.
   pull request or per named group of lanes, and a clearance covers what it names: a pull request or
   a lane outside it goes back to him.
 - **Before a merge, the pull request's one review round has run and its fixes are in** (workflow
-  step 15). Read every commit after that round yourself, since nothing reviewed it, and say so in the
-  report. Where main moved under the branch, the lane runs workflow step 10's combined-state check
+  step 15). The lane's own ready report, naming the head sha, is what says so; green CI and a commit
+  headed "after the review" do not (Issue #821). Read every commit after that round yourself, since
+  nothing reviewed it, and say so in the report. Where main moved under the branch, the lane runs workflow step 10's combined-state check
   first: `main`'s required checks do not require a branch to be current, so the merged state is not
   the state CI ran.
 - **For a refactor, a moved proof or a new guard, run a check of your own before the merge.** Build a
