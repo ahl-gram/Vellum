@@ -141,11 +141,11 @@ export const markdown = (text: string, anchors: Anchors): string => {
   return html.join("\n");
 };
 
+const LEADING_HEADING = /^\s*#{1,6}[ \t]+([^\n]*)(?:\n|$)/;
+
 export const notesTitle = (notes: string | null): string | null => {
-  const first = notes
-    ?.split("\n")
-    .map((l) => l.trim())
-    .find((l) => l !== "");
-  if (!first) return null;
-  return first.replace(/^#+\s*/, "").replace(/[*`]/g, "");
+  const title = notes === null ? undefined : LEADING_HEADING.exec(notes)?.[1]?.replace(/[*`]/g, "").trim();
+  return title ? title : null;
 };
+
+export const notesBody = (notes: string): string => notes.replace(LEADING_HEADING, "");

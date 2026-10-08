@@ -89,7 +89,7 @@ const plain = (item: Item, id: string): string => {
 export const listed = (item: Item, id: string): string => {
   if (item.kind === "link")
     return `<li id="${id}"><span class="mono">${escapeHtml(item.rel)}</span> <span class="size">a link to ${escapeHtml(item.target ?? "?")}, not followed</span></li>`;
-  const note = item.kind === "site" ? ` <span class="size">a page of its own</span>` : size(item);
+  const note = item.kind === "site" ? ` <span class="size">opens alone</span>` : size(item);
   return `<li id="${id}"><a href="${href(item.rel)}">${escapeHtml(item.rel)}</a>${note}</li>`;
 };
 

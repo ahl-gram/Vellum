@@ -15,6 +15,7 @@ export interface Item {
 export interface Section {
   readonly rel: string;
   readonly items: readonly Item[];
+  readonly site: boolean;
 }
 
 export interface Delivery {
@@ -103,14 +104,35 @@ const kindOf = (abs: string, size: number): Kind => {
   return looksLikeText(abs, size) ? "log" : "other";
 };
 
-export const isOwnPage = (abs: string): boolean =>
-  existsSync(abs) && readHead(abs, 1024).toString("utf8").includes(MARK);
+const isFile = (abs: string): boolean => {
+  try {
+    return lstatSync(abs).isFile();
+  } catch {
+    return false;
+  }
+};
 
-const itemAt = (root: string, rel: string, kind?: Kind): Item => {
+const isLink = (abs: string): boolean => {
+  try {
+    return lstatSync(abs).isSymbolicLink();
+  } catch {
+    return false;
+  }
+};
+
+export type PageState = "none" | "own" | "foreign";
+
+export const pageState = (abs: string): PageState => {
+  if (!existsSync(abs) && !isLink(abs)) return "none";
+  return isFile(abs) && readHead(abs, 1024).toString("utf8").includes(MARK) ? "own" : "foreign";
+};
+
+const itemAt = (root: string, rel: string, inSite: boolean): Item => {
   const abs = join(root, rel);
   const stat = lstatSync(abs);
   if (stat.isSymbolicLink()) return { rel, abs, kind: "link", size: 0, mtime: stat.mtimeMs, target: readlinkSync(abs) };
-  return { rel, abs, kind: kind ?? kindOf(abs, stat.size), size: stat.size, mtime: stat.mtimeMs };
+  const kind = kindOf(abs, stat.size);
+  return { rel, abs, kind: inSite && kind === "page" ? "site" : kind, size: stat.size, mtime: stat.mtimeMs };
 };
 
 interface Entries {
@@ -134,26 +156,22 @@ const entriesOf = (abs: string): Entries => {
   };
 };
 
-const walkSection = (root: string, rel: string): Section[] => {
+const walkSection = (root: string, rel: string, inSite: boolean): Section[] => {
   const here = join(root, rel);
   const { files, dirs } = entriesOf(here);
   const atRoot = rel === "";
-  const sites = dirs.filter((name) => existsSync(join(here, name, PAGE)));
-  const items = [
-    ...files
-      .filter((name) => !(atRoot && (name === PAGE || name === NOTES)))
-      .map((name) => itemAt(root, join(rel, name))),
-    ...sites.map((name) => itemAt(root, join(rel, name, PAGE), "site")),
-  ];
-  const below = dirs.filter((name) => !sites.includes(name)).flatMap((name) => walkSection(root, join(rel, name)));
-  return [{ rel, items }, ...below];
+  const site = inSite || (!atRoot && files.includes(PAGE));
+  const skipped = atRoot ? [PAGE, ...(isFile(join(here, NOTES)) ? [NOTES] : [])] : [];
+  const items = files.filter((name) => !skipped.includes(name)).map((name) => itemAt(root, join(rel, name), site));
+  const below = dirs.flatMap((name) => walkSection(root, join(rel, name), site));
+  return [{ rel, items, site }, ...below];
 };
 
 export const walkDelivery = (dir: string, name: string): Delivery => {
-  const sections = walkSection(dir, "").filter((s) => s.items.length > 0);
+  const sections = walkSection(dir, "", false).filter((s) => s.items.length > 0);
   const items = sections.flatMap((s) => s.items);
   const notesAt = join(dir, NOTES);
-  const notes = existsSync(notesAt) ? readFileSync(notesAt, "utf8") : null;
+  const notes = isFile(notesAt) ? readFileSync(notesAt, "utf8") : null;
   const notesTime = notes === null ? 0 : lstatSync(notesAt).mtimeMs;
   const newest = items.reduce((max, i) => Math.max(max, i.mtime), notesTime);
   return { dir, name, notes, sections, newest, total: items.length };

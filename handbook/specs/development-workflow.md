@@ -145,8 +145,9 @@ itself. Copy before the spike goes, because `out/` is gitignored and nothing els
 **A delivery to Alex is one folder with a page.** Whatever goes to him in `out/` (stills, plates,
 candidate pages, measured tables) lands in one folder directly inside `out/`, named for its issue:
 `out/<issue>/`, or `out/<issue>-<what>/` where one issue delivers more than once. Whoever fills the
-folder writes `out/<issue>/notes.md` beside its files, saying what to look at first and which menu
-option each file shows; a file name written there links to that file on the page. The delivery ends
+folder writes `out/<issue>/notes.md` beside its files, opening with a `#` heading line that titles
+the page, then saying what to look at first and which menu option each file shows; a file name
+written there links to that file on the page. The delivery ends
 with `npm run delivery -- out/<issue>`, which writes `out/<issue>/index.html` presenting every file in
 the folder and rebuilds `out/index.html`, the list of deliveries, newest first. The reply names both
 pages by absolute path beside the files themselves, and nothing opens a browser. A dispatcher copying

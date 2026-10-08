@@ -1,5 +1,5 @@
 import { basename } from "node:path";
-import { escapeHtml, markdown, notesTitle, type Anchors } from "./markdown.ts";
+import { escapeHtml, markdown, notesBody, notesTitle, type Anchors } from "./markdown.ts";
 import { listed, renderItem, TEXT_CAP } from "./render-item.ts";
 import { STYLE } from "./style.ts";
 import { MARK, NOTES, type Delivery, type Item, type Kind, type Section } from "./walk.ts";
@@ -19,7 +19,7 @@ const NOUNS: Readonly<Record<Kind, readonly [string, string]>> = {
   text: ["text", "texts"],
   log: ["log", "logs"],
   code: ["script", "scripts"],
-  site: ["folder with its own page", "folders with their own pages"],
+  site: ["page opened alone", "pages opened alone"],
   link: ["symbolic link", "symbolic links"],
   other: ["other file", "other files"],
 };
@@ -36,6 +36,7 @@ export const stamp = (ms: number): string => {
   return `${d.getFullYear()}-${two(d.getMonth() + 1)}-${two(d.getDate())} ${two(d.getHours())}:${two(d.getMinutes())}`;
 };
 
+// The mark stays above the style block: `pageState` in `scripts/delivery/walk.ts` looks for it in a page's first kilobyte only.
 export const head = (title: string): string => `<!doctype html>
 <html lang="en">
 <head>
@@ -101,8 +102,9 @@ const sectionHtml = (section: Section, placed: readonly Placed[], anchors: Ancho
   const pictures = shown(["picture"]);
   const links = placed.filter((p) => !p.full).map((p) => listed(p.item, p.id));
   const heading = section.rel === "" ? root : `${section.rel}/`;
+  const site = section.site ? `<span class="size">a folder with its own page: its pages open alone</span>` : "";
   return [
-    `<section class="folder"><h2><span class="mono">${escapeHtml(heading)}</span></h2>`,
+    `<section class="folder"><h2><span class="mono">${escapeHtml(heading)}</span>${site}</h2>`,
     pictures ? `<div class="pictures">${pictures}</div>` : "",
     shown(["page", "table", "json", "text", "log", "code"]),
     links.length > 0 ? `<ul class="others">${links.join("")}</ul>` : "",
@@ -113,7 +115,8 @@ const sectionHtml = (section: Section, placed: readonly Placed[], anchors: Ancho
 const notesHtml = (notes: string | null, anchors: Anchors): string => {
   if (notes === null)
     return `<div class="panel notes missing">No ${NOTES} in this folder. Whoever delivers writes one: what to look at, and which menu option each file belongs to.</div>`;
-  return `<div class="panel notes">${markdown(notes.replace(/^\s*#\s+[^\n]*\n/, ""), anchors)}</div>`;
+  const body = notesBody(notes);
+  return body.trim() === "" ? "" : `<div class="panel notes">${markdown(body, anchors)}</div>`;
 };
 
 const contentsHtml = (placed: readonly Placed[]): string => {

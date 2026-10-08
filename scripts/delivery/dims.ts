@@ -33,7 +33,7 @@ const jpeg = (buf: Buffer): Dims | null => {
 };
 
 const svgNumber = (tag: string, name: string): number | null => {
-  const match = new RegExp(`\\b${name}="([0-9.]+)(px)?"`).exec(tag);
+  const match = new RegExp(`(?<![\\w-])${name}="([0-9.]+)(px)?"`).exec(tag);
   return match?.[1] ? Number(match[1]) : null;
 };
 

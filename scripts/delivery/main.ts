@@ -3,7 +3,7 @@ import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { indexPage } from "./index-page.ts";
 import { deliveryPage } from "./page.ts";
-import { NOTES, PAGE, isOwnPage, walkDelivery } from "./walk.ts";
+import { NOTES, PAGE, pageState, walkDelivery } from "./walk.ts";
 
 interface Outcome {
   readonly out: string | null;
@@ -17,24 +17,36 @@ const isCheckoutOut = (dir: string): boolean =>
   basename(dir) === "out" && existsSync(join(dirname(dir), "package.json"));
 
 const foreign = (page: string): string | null =>
-  existsSync(page) && !isOwnPage(page)
-    ? `${page} was not written by npm run delivery; move it aside and run again`
+  pageState(page) === "foreign"
+    ? `${page} was not written by npm run delivery (or is a link or a folder); move it aside and run again`
     : null;
+
+const reason = (error: unknown): string => (error instanceof Error ? error.message : "an error with no message");
+
+const outOf = (dir: string): Outcome => {
+  if (!existsSync(dir) || !statSync(dir).isDirectory()) return { out: null, refused: `${dir} is not a folder` };
+  const out = dirname(realpathSync(dir));
+  return isCheckoutOut(out)
+    ? { out, refused: null }
+    : { out: null, refused: `${dir} does not sit directly in the out/ folder of a checkout` };
+};
 
 const writeFolder = (arg: string): Outcome => {
   const dir = resolve(TYPED_FROM, arg);
-  if (!existsSync(dir) || !statSync(dir).isDirectory()) return { out: null, refused: `${dir} is not a folder` };
-  const out = dirname(realpathSync(dir));
-  if (!isCheckoutOut(out))
-    return { out: null, refused: `${dir} does not sit directly in the out/ folder of a checkout` };
-  const page = join(dir, PAGE);
-  const refused = foreign(page);
+  const { out, refused } = outOf(dir);
   if (refused) return { out, refused };
-  const delivery = walkDelivery(dir, basename(dir));
-  if (delivery.notes === null) console.warn(`${dir} has no ${NOTES}; its page says so where the notes go`);
-  writeFileSync(page, deliveryPage(delivery));
-  console.log(page);
-  return { out, refused: null };
+  const page = join(dir, PAGE);
+  try {
+    const foreignPage = foreign(page);
+    if (foreignPage) return { out, refused: foreignPage };
+    const delivery = walkDelivery(dir, basename(dir));
+    if (delivery.notes === null) console.warn(`${dir} has no ${NOTES}; its page says so where the notes go`);
+    writeFileSync(page, deliveryPage(delivery));
+    console.log(page);
+    return { out, refused: null };
+  } catch (error) {
+    return { out, refused: `${dir} was not given a page: ${reason(error)}` };
+  }
 };
 
 const writeList = (out: string): boolean => {

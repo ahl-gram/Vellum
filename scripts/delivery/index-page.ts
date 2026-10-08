@@ -1,9 +1,9 @@
-import { existsSync, readdirSync, statSync } from "node:fs";
+import { readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { escapeHtml, notesTitle } from "./markdown.ts";
 import { countsText, head, stamp } from "./page.ts";
 import { href } from "./render-item.ts";
-import { PAGE, byName, isOwnPage, walkDelivery, type Delivery, type Item } from "./walk.ts";
+import { PAGE, byName, pageState, walkDelivery, type Delivery, type Item } from "./walk.ts";
 
 interface Pageless {
   readonly name: string;
@@ -14,12 +14,15 @@ interface Pageless {
 const isMissing = (error: unknown): boolean =>
   error instanceof Error && "code" in error && (error.code === "ENOENT" || error.code === "ENOTDIR");
 
-const unlessGone = <T>(read: () => T): T | null => {
+const orSkipped = <T>(folder: string, read: () => T): T | null => {
   try {
     return read();
   } catch (error) {
-    if (isMissing(error)) return null;
-    throw error;
+    if (!isMissing(error))
+      console.warn(
+        `${folder} is left out of the list: ${error instanceof Error ? error.message : "an error with no message"}`,
+      );
+    return null;
   }
 };
 
@@ -45,7 +48,7 @@ const deliveryRow = (d: Delivery): string => {
 
 const pagelessRow = (r: Pageless): string => {
   const target = r.handBuilt ? `${href(r.name)}/${PAGE}` : `${href(r.name)}/`;
-  const note = r.handBuilt ? " (its own page)" : "";
+  const note = r.handBuilt ? " (holds an index.html this command did not write)" : "";
   return `<li><a href="${target}">${escapeHtml(r.name)}/</a>${note} ${stamp(r.mtime)}</li>`;
 };
 
@@ -55,10 +58,10 @@ const pagelessHtml = (rows: readonly Pageless[]): string =>
     : `<details class="pageless"><summary>${rows.length} older folders with no page from this command</summary><ul>${rows.map(pagelessRow).join("")}</ul></details>`;
 
 const readFolder = (out: string, name: string): Delivery | Pageless | null =>
-  unlessGone(() => {
-    const page = join(out, name, PAGE);
-    if (isOwnPage(page)) return walkDelivery(join(out, name), name);
-    return { name, mtime: statSync(join(out, name)).mtimeMs, handBuilt: existsSync(page) };
+  orSkipped(join(out, name), () => {
+    const state = pageState(join(out, name, PAGE));
+    if (state === "own") return walkDelivery(join(out, name), name);
+    return { name, mtime: statSync(join(out, name)).mtimeMs, handBuilt: state === "foreign" };
   });
 
 export const indexPage = (out: string): string => {
