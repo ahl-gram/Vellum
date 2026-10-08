@@ -115,10 +115,13 @@ home's line wins for the lane and this file's for the orchestrator.
   pull request or per named group of lanes, and a clearance covers what it names: a pull request or
   a lane outside it goes back to him.
 - **Before a merge, the pull request's one review round has run and its fixes are in** (workflow
-  step 15). Read every commit after that round yourself, since nothing reviewed it, and say so in the
-  report. Where main moved under the branch, the lane runs workflow step 10's combined-state check
-  first: `main`'s required checks do not require a branch to be current, so the merged state is not
-  the state CI ran.
+  step 15). What says so is the lane's final report, the one its definition's "When to stop" lists,
+  carrying the head sha and the skeptic's findings with what was done about each; that sha is the
+  one the merge's `--match-head-commit` takes. Never your own reading of the branch's commits, its
+  body or CI. Read every commit after that round yourself, since nothing reviewed it, and say so in
+  your report to Alex. Where main moved under the branch, the lane runs workflow step 10's
+  combined-state check first: `main`'s required checks do not require a branch to be current, so the
+  merged state is not the state CI ran.
 - **For a refactor, a moved proof or a new guard, run a check of your own before the merge.** Build a
   detached tree at the pull request's head (`git -C <main checkout> worktree add --detach <path>
   <sha>`, `node_modules` linked by path as `scripts/agent-sandbox.ts` does), run the lane's proof and
