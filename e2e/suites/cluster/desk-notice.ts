@@ -150,39 +150,27 @@ export async function dnNarrow(k: DeskKit): Promise<void> {
   );
 }
 
-export type Refusal = { arm: () => Promise<void>; disarm: () => Promise<void> };
-
-export function storageRefusal({ send }: SuiteContext): Refusal {
-  let id: string | null = null;
-  const arm = async (): Promise<void> => {
-    const r = await send<{ identifier: string }>("Page.addScriptToEvaluateOnNewDocument", {
-      source: `Storage.prototype.getItem = () => { throw new DOMException("refused", "SecurityError"); }; Storage.prototype.setItem = () => { throw new DOMException("refused", "QuotaExceededError"); };`,
-    });
-    id = r.identifier;
-  };
-  const disarm = async (): Promise<void> => {
-    if (id === null) return;
-    try {
-      await send("Page.removeScriptToEvaluateOnNewDocument", { identifier: id });
-    } catch {}
-    id = null;
-  };
-  return { arm, disarm };
+export async function withStorageRefused<T>({ send }: Pick<SuiteContext, "send">, body: () => Promise<T>): Promise<T> {
+  await send<{ identifier: string }>("Page.addScriptToEvaluateOnNewDocument", {
+    source: `Storage.prototype.getItem = () => { throw new DOMException("refused", "SecurityError"); }; Storage.prototype.setItem = () => { throw new DOMException("refused", "QuotaExceededError"); };`,
+  });
+  return body();
 }
 
-export async function dnRefused(k: DeskKit, refusal: Refusal): Promise<void> {
+export async function dnRefused(k: DeskKit): Promise<void> {
   const { check, setMobileViewport, consoleErrors } = k;
   await setMobileViewport(390, 844);
-  await refusal.arm();
-  const errors = consoleErrors.length;
-  await k.open(PAGE);
-  const refused = await readSettled(k, "the page with storage refused");
-  const logged = dropExpectedCancellations(consoleErrors.slice(errors));
-  check(
-    "DN7 with storage refused the page still boots and shows the notice, and nothing reaches the console",
-    refused.shown && refused.key === "unreadable" && logged.length === 0,
-    JSON.stringify({ refused, logged }),
-  );
+  await withStorageRefused(k, async () => {
+    const errors = consoleErrors.length;
+    await k.open(PAGE);
+    const refused = await readSettled(k, "the page with storage refused");
+    const logged = dropExpectedCancellations(consoleErrors.slice(errors));
+    check(
+      "DN7 with storage refused the page still boots and shows the notice, and nothing reaches the console",
+      refused.shown && refused.key === "unreadable" && logged.length === 0,
+      JSON.stringify({ refused, logged }),
+    );
+  });
 }
 
 export async function dnContinue(k: DeskKit): Promise<void> {

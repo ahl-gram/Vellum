@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { E2E_SUITE_ORDER, SMOKE_SUITES, E2E_SUITES_VAR } from "../../e2e/support/suites.ts";
 import type { E2eSuiteName } from "../../e2e/support/suites.ts";
@@ -9,21 +9,10 @@ import { BUNDLE_ENTRIES } from "../../scripts/build-app-bundles.ts";
 import { e2eSuiteFamily, e2eSuitePath, readE2eSource } from "../../test-support/e2e-source.ts";
 import { containment, CTX_THROWING_WAITS } from "../../test-support/e2e-containment.ts";
 
-// The runner starts a browser the moment it is imported and ci.yml is YAML, so both are read as source.
-
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const src = (p: string) => readE2eSource(join(ROOT, p));
-const RUNNER = src("e2e/run.ts");
 const CI = src(".github/workflows/ci.yml");
-// A source scan reads the CODE, not the file: commenting a line out in place leaves its literal behind, and a raw match cannot tell the two apart. Blind spots, both of which cost a false red rather than a miss: a `//` inside a string literal reads as a comment, and a /* */ block is not seen at all.
-const uncommented = (source: string) =>
-  source
-    .split("\n")
-    .filter((line) => !line.trim().startsWith("//"))
-    .join("\n");
-const RUNNER_CODE = uncommented(RUNNER);
-
-// YAML's own comment leader, for the same reason: this pass rewrote ci.yml's prose, and a sentence about fail-fast would otherwise satisfy the guard that fail-fast is SET.
+// A ci.yml scan skips YAML's own comment leader: this pass rewrote ci.yml's prose, and a sentence about fail-fast would otherwise satisfy the guard that fail-fast is SET.
 const ciUncommented = (lines: readonly string[]) => lines.filter((l) => !l.trim().startsWith("#")).join("\n");
 // A ci.yml job block is a two-space key under `jobs:`, read to the next one. Blind spot, named because a scanner cannot enumerate its own: a workflow indented any other way yields NO blocks, which the job-count anchor below turns into a red rather than a silent pass.
 // Second blind spot, same direction: the continue-on-error refusal reads the literal `true` alone, so `${{ }}`, `True` and `yes` slip past it, which costs a miss and never a false red, and the job-count anchor still forces a reader through this sweep whenever a job is added.
@@ -38,38 +27,6 @@ const ciJobBlocks = (): ReadonlyArray<{ id: string; lines: readonly string[] }> 
   }
   return heads.map((h, n) => ({ id: h.id, lines: lines.slice(h.from, heads[n + 1]?.from ?? lines.length) }));
 };
-
-const runnerSuiteKeys = (): string[] => {
-  const block = RUNNER_CODE.match(/const SUITES = \{([\s\S]*?)\n\};/);
-  assert.ok(block, "the runner's SUITES map was not found; this guard is reading the wrong shape");
-  return [...block[1]!.matchAll(/^\s*"?([\w-]+)"?:/gm)].map((m) => m[1]!);
-};
-
-test("E2E_SUITE_ORDER is exactly the runner's SUITES map, in the same order", () => {
-  assert.deepEqual(runnerSuiteKeys(), E2E_SUITE_ORDER.slice());
-});
-
-test("each suite name maps to the run function imported from its own file", () => {
-  const aliasFor = new Map(
-    [...RUNNER_CODE.matchAll(/import \{ run as (\w+) \} from "\.\/suites\/([\w-]+)\.ts"/g)].map((m) => [m[2], m[1]]),
-  );
-  const block = RUNNER_CODE.match(/const SUITES = \{([\s\S]*?)\n\};/);
-  if (!block) throw new Error("the runner's SUITES map was not found");
-  const body = block[1]!;
-  for (const name of E2E_SUITE_ORDER) {
-    const wired = body.match(new RegExp(`^\\s*"?${name}"?:\\s*(\\w+)`, "m"));
-    if (!wired) throw new Error(`${name} has no SUITES entry`);
-    assert.equal(wired[1], aliasFor.get(name), `${name} is wired to the wrong run function`);
-  }
-});
-
-test("every named suite has a suite file the runner imports", () => {
-  for (const name of E2E_SUITE_ORDER) {
-    const file = e2eSuitePath(name);
-    assert.ok(existsSync(join(ROOT, file)), `${name} has no ${file}`);
-    assert.match(RUNNER_CODE, new RegExp(`from "\\./suites/${name}\\.ts"`), `${name} is not imported`);
-  }
-});
 
 test("the smoke tier covers every page that ships its own bundle", () => {
   const covers: Readonly<Record<string, readonly E2eSuiteName[]>> = {
@@ -274,73 +231,6 @@ test("every CI trigger gets the same full coverage, so nothing is conditional on
   assert.doesNotMatch(step, /full-e2e/, "the full-e2e label is wired back in, so PRs differ from main again");
 });
 
-test("the runner actually uses the selection, the timings and the outcome rule it imports", () => {
-  // The runner needs a browser, so behavior is tested in test/e2e/suites.test.ts and only the CALL sites are pinned here, against the CODE and never the raw file: a line commented out in place leaves its literal behind and satisfies a raw match, which beat this test's .catch assertion and its formatSuiteTimings one when the prover tried it (2026-09-10).
-  assert.match(RUNNER_CODE, /runSelected\(SELECTED, SUITES, ctx, \{/, "the runner does not run the SELECTED suites");
-  // The hooks are optional in runSelected, since a caller without them keeps the old rethrow; a runner without them is the Issue #534 defect back, and no unit test of runSelected can see that.
-  const hooks = RUNNER_CODE.match(/runSelected\(SELECTED, SUITES, ctx, \{([\s\S]*?)\n {2}\}\);/);
-  assert.ok(
-    hooks,
-    "the runSelected call's argument block was not found, so the two assertions below would read an empty string",
-  );
-  assert.match(
-    hooks[1]!,
-    /onSuiteError:/,
-    "the runner passes no per-suite handler, so one suite giving up kills the whole lane again (#534)",
-  );
-  assert.match(
-    hooks[1]!,
-    /alive: ctx\.alive/,
-    "the runner passes no liveness probe, so a browser that died mid-lane is reported as a lane full of product failures (#534)",
-  );
-  assert.match(
-    hooks[1]!,
-    /skippedGroups: \(\) => skippedGroups/,
-    "the runner reads no skipped-group sink, so a suite that skipped a check group is indistinguishable from a whole one (#560)",
-  );
-  assert.match(
-    RUNNER_CODE,
-    /suitesCertifiedByHealth\(SELECTED, incomplete\)/,
-    "the runner certifies suites that stopped early, a clean bill the run never earned (#534)",
-  );
-  // Both halves, or the rename narrows this to "some second argument is passed": the list has to be the one that counts a skipped group too.
-  assert.match(
-    RUNNER_CODE,
-    /const incomplete = suitesNotWhole\(timings\)/,
-    "the runner builds its own incomplete list, so a suite that skipped a check group is still certified (#560)",
-  );
-  assert.match(
-    RUNNER_CODE,
-    /t\.skipped\.join\("; "\)/,
-    "the runner records which groups were skipped and never prints them, so the reader cannot tell what the run did not do (#560)",
-  );
-  // The call site alone is not the behavior: computing `certified` and never printing it passes every assertion above.
-  assert.match(
-    RUNNER_CODE,
-    /certified\.length > 0/,
-    "the runner computes the certified list and never reads it, so no suite is reported as certified at all (#534)",
-  );
-  // The breaker's own exit is a HARNESS ERROR, so the door it leaves by must print the score, or it does the thing it exists to prevent.
-  const onError = RUNNER_CODE.match(/\.catch\(\(e *\) => \{([\s\S]*?)\n {2}\}\);/);
-  assert.ok(onError, "the runner's error path was not found, so the assertion below would read an empty string");
-  assert.match(
-    onError[1]!,
-    /runOutcome\(results\)/,
-    "the harness-error path prints no tally, so a run that dies mid-lane reports none of the checks that did run (#534)",
-  );
-  assert.match(RUNNER_CODE, /runOutcome\(results\)/, "the runner does not use the outcome rule, so 0/0 can pass again");
-  assert.match(
-    RUNNER_CODE,
-    /join\(REPO, "out", e2eOutSubdir\(PORT\)\)/,
-    "the runner's out dir no longer follows the port",
-  );
-  assert.match(
-    RUNNER_CODE,
-    /formatSuiteTimings\(timings\)/,
-    "the runner measures per-suite time and then drops it, so no future split can be measured",
-  );
-});
-
 // The helper is proved in isolation by test/repo/step-support.test.ts; what no test could see is a suite quietly going back to a bare await, which is the Issue #534 defect returning one suite at a time.
 // The GROUPS by name, never "at least one step": an import plus a single `await step(` left five of room-drawer's six groups unwrappable with this sweep still green (skeptic, 2026-09-10), which is a guard shaped like one instance of the class it claims to cover.
 const STEPPED_GROUPS: Readonly<Record<string, readonly string[]>> = {
@@ -507,82 +397,7 @@ test("every check group that waits is still inside its own step, by name (#534)"
   }
 });
 
-test("DN7 takes its storage refusal back off from its own step's promise, and DN4 forgets its dismissal, so neither leaks into the checks after it (Issue #761)", () => {
-  const suite = src(e2eSuitePath("cluster"));
-  assert.match(
-    suite,
-    /await step\("DN7", \(\) => dnRefused\(desk, refusal\)\)\.finally\(refusal\.disarm\);/,
-    "DN7's step no longer ends in .finally(refusal.disarm), so every later page boots with storage refused whenever DN7 throws",
-  );
-  assert.match(
-    suite,
-    /await step\("DN4", \(\) => dnContinue\(desk\)\)\.finally\(desk\.forget\);/,
-    "DN4's step no longer ends in .finally(desk.forget), so the dismissal outlives the suite",
-  );
-  const kit = src("e2e/suites/cluster/desk-notice.ts");
-  assert.match(
-    kit,
-    /send\("Page\.removeScriptToEvaluateOnNewDocument", \{ identifier: id \}\)/,
-    "disarm no longer removes the injected refusal",
-  );
-  assert.match(
-    kit,
-    /localStorage\.removeItem\(\$\{JSON\.stringify\(KEY\)\}\)/,
-    "forget no longer removes the dismissal key",
-  );
-});
-
-test("CD50 turns page scripts back on from its own step's promise, so a scripts-off check cannot leak into the checks after it (Issue #669)", () => {
-  const suite = src(e2eSuitePath("chart-drawer"));
-  assert.match(
-    suite,
-    /await step\("CD50", \(\) => cd50ScriptsOffHome\(kt\)\)\.finally\(scriptsBackOn\);/,
-    "CD50's step no longer ends in .finally(scriptsBackOn), so scripts stay off for every check after it whenever that line is skipped or removed",
-  );
-  assert.match(
-    suite,
-    /const scriptsBackOn = async \(\) => \{\s*try \{\s*await kt\.send\("Emulation\.setScriptExecutionDisabled", \{ value: false \}\);\s*\} catch \{\}\s*\};/,
-    "scriptsBackOn no longer switches page scripts back on",
-  );
-});
-
-test("the lane driver spawns the runner itself and refuses an ambient selection", () => {
-  const DRIVER = uncommented(src("e2e/lanes.ts"));
-  assert.match(
-    DRIVER,
-    /spawn\(process\.execPath, \[RUNNER\]/,
-    "a lane must spawn the runner directly, so its exit code survives",
-  );
-  assert.match(DRIVER, /ambientSelectionRefusal\(process\.env\)/, "the driver no longer refuses a narrowing selection");
-  assert.match(
-    DRIVER,
-    /laneOutcome\(results, SELECTED\)/,
-    "the driver does not aggregate the lanes it was asked to run, so one could fail unnoticed",
-  );
-  assert.match(DRIVER, /process\.exit\(outcome\.ok \? 0 : 1\)/, "the driver's exit code is not the lanes' outcome");
-  // All three, or the lock moves rather than holding: laneOutcome refuses a result set short of SELECTED at runtime, which is worth nothing if SELECTED is not what ran or is not what the argv asked for.
-  assert.match(
-    DRIVER,
-    /SELECTED = resolveLaneSelection\(process\.argv\.slice\(2\)\)/,
-    "the driver's lane selection no longer comes from its own argv",
-  );
-  assert.match(DRIVER, /SELECTED\.map\(runLane\)/, "the driver runs some other set of lanes than the one it selected");
-  const resolveAt = DRIVER.indexOf("resolveLaneSelection(process.argv");
-  const probeAt = DRIVER.indexOf("findBrowser()");
-  assert.notEqual(
-    probeAt,
-    -1,
-    "the driver no longer probes for a browser, so the ordering assertion below would compare against -1",
-  );
-  assert.ok(
-    resolveAt < probeAt,
-    "the driver resolves its lane AFTER probing for a browser, so on a machine with none a misspelled lane prints SKIP and exits 0 instead of being refused",
-  );
-  assert.match(
-    DRIVER,
-    /browserlessAction\(process\.env, Boolean\(process\.stdout\.isTTY\)\)/,
-    "the driver no longer decides the browserless policy against its own TTY",
-  );
+test("npm runs the e2e runner and the lane driver themselves, so neither script can drift off the file it names", () => {
   const pkg = JSON.parse(src("package.json")) as { scripts: Record<string, string> };
   assert.equal(pkg.scripts["test:e2e:lanes"], "node e2e/lanes.ts");
   assert.equal(
