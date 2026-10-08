@@ -323,7 +323,7 @@ precisely, because a token that falls outside it looks identical at the point of
   computes an expected value in-browser and dodges cross-engine float drift. It is e2e only; the
   deploy artifact carries none of it, and a test that proves the artifact carries none of it exists.
 - **CI is parallel jobs on the same triggers**, one per unit shard, each running the typecheck, the
-  lint and its own slice of the unit files, and one per browser lane, each of which builds `dist/` and
+  lint, the format check and its own slice of the unit files, and one per browser lane, each of which builds `dist/` and
   runs that single lane on a runner of its own. A pull request therefore waits for the LONGEST job,
   not the sum, and the repeated install and build are the price of that. Every lane rebuilds rather
   than downloading a shared artifact, and prints a hash of its own `dist/` so a disagreement between

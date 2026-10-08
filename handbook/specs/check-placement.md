@@ -1,16 +1,37 @@
 # Which check holds a rule
 
-The house has four instruments, and a rule belongs in the cheapest one that can see it. Read this
-file before writing a test, a lint rule or a browser check, and before moving a rule from one
-instrument to another. How a guard is proven to bite is `vellum-footguns` Gate 1's; this file is which
-instrument the guard belongs in.
+The house has four instruments, and a rule belongs in the cheapest one that can see it, beside a
+formatter that settles layout so none of them spends anything on it. Read this file before writing
+a test, a lint rule or a browser check, and before moving a rule from one instrument to another. How
+a guard is proven to bite is `vellum-footguns` Gate 1's; this file is which instrument the guard
+belongs in.
 
 | instrument | command | what it can see |
 |---|---|---|
+| the formatter | `npm run format:check` (`npm run format` writes) | layout alone: where a line breaks, indentation, quotes, commas |
 | the type checker | `npm run check` | what a type can say: shapes, absence, an unhandled case |
 | the lint | `npm run lint` | what the code SAYS, read from its syntax tree without running it |
 | the unit suite | `npm test` | what the code DOES, run in Node with inputs |
 | the browser lanes and a plate read | `npm run test:e2e:lanes`, `vellum-plate-reader` | what the page COMPUTES: the cascade, layout, motion, pixels |
+
+## The formatter
+
+- **Prettier owns layout** in every TypeScript file under the lint's roots and every sheet under
+  `public/`, at the print width in `prettier.config.ts` with every other option at Prettier's
+  default. Run `npm run format` before committing; the Format step in CI runs
+  `npm run format:check` on every shard. No lint rule or test holds a rule about layout.
+- **What it leaves out is `.prettierignore`'s, pinned exactly by `test/repo/format.test.ts`**:
+  everything outside the five TypeScript roots and `public/`, so the archives under `design/` and
+  `handbook/plans/` and the house's prose keep their own layout; every kind but TypeScript and CSS
+  inside them, so the pages under `src/pages/` keep the markup they ship near-verbatim
+  (`handbook/specs/site-architecture.md`); and the plate face tables, whose bytes
+  `npm run plate-face` writes and a test pins.
+- **A `prettier-ignore` comment is a skip**, on `handbook/specs/rulebook.md`'s list like any other.
+- **One pass can leave a member chain unsettled.** Run `npm run format` again until
+  `npm run format:check` passes.
+- **A Prettier upgrade is a reformat.** `prettier` is pinned to an exact version, and a new one
+  lands in a commit of its own that `.git-blame-ignore-revs` names, which needs that commit's sha on
+  main and so a merge that is not a squash.
 
 ## The type checker
 
@@ -67,5 +88,6 @@ instrument the guard belongs in.
 
 ## Order
 
-CI runs the type checker and the lint before the unit suite, and the browser lanes in jobs of their
-own (`.github/workflows/ci.yml`), so a type or lint red is the first and cheapest red to read.
+CI runs the type checker, the lint and the format check before the unit suite, and the browser
+lanes in jobs of their own (`.github/workflows/ci.yml`), so a type, lint or layout red is the first
+and cheapest red to read.
