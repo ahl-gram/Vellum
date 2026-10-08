@@ -6,9 +6,9 @@ import ts from "typescript";
 import { MAX_TILT } from "../../src/render/voyage-geometry.ts";
 import { RDP_EPSILON, COAST_EMBARK_MAX } from "../../src/render/voyage-route.ts";
 import { INLAND_STUB_CELLS } from "../../src/render/voyage-water.ts";
-import { marginFor } from "../../src/render/transform.ts";
-import { MARGIN } from "../../src/site/seed-of-the-day/app-hunt.ts";
-import { RV4_TILT_CEILING } from "../../e2e/suites/room-voyage-route.ts";
+import { huntProjection } from "../../src/site/seed-of-the-day/app-hunt.ts";
+import { rv4TiltAndFacing } from "../../e2e/suites/room-voyage-route.ts";
+import type { SuiteContext } from "../../e2e/types.ts";
 import { stringConfig } from "../../scripts/build-app-bundles.ts";
 import { BACKDROP_SAMPLES, FOREGROUND_SAMPLES } from "../../src/prospect/transect.ts";
 import { LOD_BANDS } from "../../src/world/lod.ts";
@@ -61,15 +61,35 @@ test("the 24 Mpx budget clears every poster at x1 and clamps exactly Wall and Gr
   assert.deepEqual(clampedAt2, ["wall", "grand"]);
 });
 
-test("the e2e RV4 tilt ceiling tracks MAX_TILT", () => {
-  assert.ok(
-    (RV4_TILT_CEILING as number) > MAX_TILT && RV4_TILT_CEILING - MAX_TILT < 0.001,
-    `ceiling ${RV4_TILT_CEILING}, MAX_TILT ${MAX_TILT}`,
-  );
+test("RV4 passes a mark that tips to MAX_TILT and fails one a step past it, the page reading the tilt to two decimals", async () => {
+  const rv4 = async (maxTilt: number): Promise<boolean> => {
+    const seen: Array<readonly [string, boolean]> = [];
+    const page = { evaluate: () => Promise.resolve({ maxTilt, flips: 0, naiveFlips: 3, legIdx: 0, worstNaive: 3 }) };
+    const check = (name: string, ok: boolean) => {
+      seen.push([name, ok]);
+    };
+    await rv4TiltAndFacing({ ...page, check } as unknown as SuiteContext);
+    const verdict = seen.find(([name]) => name.startsWith("RV4 "));
+    assert.ok(verdict, "RV4 made no check");
+    return verdict[1];
+  };
+  assert.equal(await rv4(MAX_TILT), true, `a mark at MAX_TILT (${MAX_TILT}) fails RV4`);
+  assert.equal(await rv4(MAX_TILT + 0.01), false, `a mark past MAX_TILT (${MAX_TILT}) passes RV4`);
 });
 
-test("seed-of-the-day's MARGIN is renderMap's margin at the Hunt's 1500 px", () => {
-  assert.equal(MARGIN, marginFor(1500));
+test("the Hunt projects onto the chart renderMap drew: every town stands where the chart put it", async () => {
+  const { realWorld } = await import("../../test-support/living-chart-hosts.ts");
+  const { manifest, world } = await realWorld();
+  const proj = huntProjection(world);
+  assert.equal(proj.heightPx, manifest.heightPx, "the Hunt's sheet is not the chart's height");
+  for (const place of manifest.places) {
+    const town = world.settlements[place.idx]!;
+    const at = { x: proj.px(town.x), y: proj.py(town.y) };
+    assert.ok(
+      Math.abs(at.x - place.nx * manifest.widthPx) < 1e-9 && Math.abs(at.y - place.ny * manifest.heightPx) < 1e-9,
+      `the Hunt puts ${place.name} at ${JSON.stringify(at)}, off the town the chart drew`,
+    );
+  }
 });
 
 test("the voyage session projects onto the chart renderMap drew: its origin stands on the origin town, at two widths", async () => {

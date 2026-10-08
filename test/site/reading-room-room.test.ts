@@ -160,6 +160,7 @@ test("RR-room 5b seatFrame seats the frame's parts: chart and status in the stag
       "folioSub",
     ];
     const room = Object.fromEntries(parts.map((part) => [part, new El("div")])) as Record<string, El>;
+    const rangeStood = (frame.host.scrubber.range as unknown as El).parentNode;
     seatFrame(frame, plate, room as unknown as RoomFurniture);
     const parentOf = (node: unknown) => (node as El).parentNode;
     const panel = frame.host.scrubber.panel as unknown as El;
@@ -172,6 +173,8 @@ test("RR-room 5b seatFrame seats the frame's parts: chart and status in the stag
     assert.equal(parentOf(frame.log.panel), room.journalDock, "and the log beside it");
     const well = parentOf(frame.host.scrubber.range);
     assert.ok(well?.classes.has("scale-well"), "the range stands in the scale's well");
+    assert.ok(rangeStood, "the frame built its range inside its own tree");
+    assert.equal(well?.parentNode, rangeStood, "and the well stands where the range stood");
     assert.equal(room.scale!.parentNode, well, "beside the scale");
   } finally {
     delete (globalThis as Record<string, unknown>).document;

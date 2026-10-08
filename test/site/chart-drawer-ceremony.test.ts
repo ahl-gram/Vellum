@@ -346,6 +346,12 @@ test("CT10d a picture that finishes for a sheet that left while it drew is revok
     const img = lis(cuttings)[0]!.children.find((c): c is El & { src?: string } => c.tagName === "IMG");
     assert.equal(img?.src, "blob:two", "which wears its own picture");
     assert.deepEqual(revoked, ["blob:late"], "and keeps it");
+    table.restore([survey(1), survey(2)]);
+    assert.deepEqual(
+      lxs(),
+      [1, 2, 1],
+      "and the departed sheet laid again is drawn afresh, not shown from a url already let go",
+    );
   } finally {
     URL.revokeObjectURL = realRevoke;
   }

@@ -83,13 +83,14 @@ test("the retired near-miss inks never reappear (#269 review, item 4)", () => {
 
 test("the composers dress from the same palette (#269 review follow-up)", async () => {
   // The generated atlas and gallery cannot render through BaseLayout (the single-file download links nothing external), so each declares the tokens in its own :root.
-  const { GALLERY_PAGE_CSS } = await import("../../src/cli/gallery.ts");
-  const gallery = GALLERY_PAGE_CSS.toLowerCase();
+  const { GALLERY_PAGE_CSS, cardFigureHtml } = await import("../../src/cli/gallery.ts");
+  const card = { seed: 7, file: "c.svg", title: "T", mapType: "island", band: "temperate", width: 9, height: 7 };
+  const gallery = `${GALLERY_PAGE_CSS}\n${cardFigureHtml(card)}`.toLowerCase();
   for (const [name, hex] of Object.entries(TOKENS)) {
-    assert.ok(!gallery.includes(hex), `the gallery sheet carries raw ${hex}; consume var(${name})`);
+    assert.ok(!gallery.includes(hex), `the gallery carries raw ${hex}; consume var(${name})`);
   }
   for (const hex of RETIRED_INKS) {
-    assert.ok(!gallery.includes(hex), `the gallery sheet carries retired ink ${hex}; use var(--ink-dark)`);
+    assert.ok(!gallery.includes(hex), `the gallery carries retired ink ${hex}; use var(--ink-dark)`);
   }
 
   const { SITE_PALETTE } = await import("../../src/atlas/palette.ts");

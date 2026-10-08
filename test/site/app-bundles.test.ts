@@ -135,7 +135,7 @@ test("the Portfolio's twin is cleaned and ignored at its address under the Explo
   );
 });
 
-test("every twin the press writes is cleaned and ignored at its own address, so no twin can be committed or left stale (#208)", async () => {
+test("every app page's twin is cleaned and ignored at its own address, so none can be committed or left stale (#208)", async () => {
   const [{ BUNDLE_ENTRIES }, { GENERATED_SUBTREES }] = await Promise.all([
     import("../../scripts/build-app-bundles.ts"),
     import("../../scripts/clean-public-generated.ts"),

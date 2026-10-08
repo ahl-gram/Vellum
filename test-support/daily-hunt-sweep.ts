@@ -5,7 +5,7 @@ import { renderMap } from "../src/render/map-renderer.ts";
 import type { World } from "../src/world/types.ts";
 import { glyphGate, labelGate, TERRAIN_RADIUS, type TerrainBand } from "./daily-hunt-geometry.ts";
 
-// Mirrors `MARGIN` in `src/site/seed-of-the-day/app-hunt.ts` (renderMap's default).
+// Mirrors the margin `huntProjection` in `src/site/seed-of-the-day/app-hunt.ts` projects with (renderMap's default).
 const MARGIN = Math.round(1500 * 0.045);
 
 export const DAILY_SEEDS = Array.from({ length: 30 }, (_, i) => 20260601 + i);
