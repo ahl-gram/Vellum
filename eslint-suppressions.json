@@ -1,0 +1,569 @@
+{
+  "e2e/harness.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "e2e/split-proof.ts": {
+    "max-lines": {
+      "count": 1
+    }
+  },
+  "e2e/suites/cards/cap.ts": {
+    "max-lines-per-function": {
+      "count": 3
+    }
+  },
+  "e2e/suites/cards/hold.ts": {
+    "max-lines": {
+      "count": 1
+    },
+    "max-lines-per-function": {
+      "count": 2
+    }
+  },
+  "e2e/suites/cards/overlay.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "e2e/suites/chart-drawer/drag.ts": {
+    "max-lines-per-function": {
+      "count": 2
+    }
+  },
+  "e2e/suites/chart-drawer/floor.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "e2e/suites/chart-drawer/homes.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "e2e/suites/chart-drawer/prospect.ts": {
+    "max-lines-per-function": {
+      "count": 4
+    }
+  },
+  "e2e/suites/corners/floor.ts": {
+    "max-lines": {
+      "count": 1
+    }
+  },
+  "e2e/suites/document-rooms.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "e2e/suites/fallback.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "e2e/suites/glass-ceremony.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "e2e/suites/home/stations.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "e2e/suites/hunt.ts": {
+    "max-lines": {
+      "count": 1
+    }
+  },
+  "e2e/suites/landfall/clamps.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "e2e/suites/landfall/controls.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "e2e/suites/landfall/kit.ts": {
+    "max-lines-per-function": {
+      "count": 2
+    }
+  },
+  "e2e/suites/landfall/page.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "e2e/suites/landfall/seed.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "e2e/suites/landfall/touch.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "e2e/suites/motion.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "e2e/suites/print-room/atlas.ts": {
+    "max-lines-per-function": {
+      "count": 3
+    }
+  },
+  "e2e/suites/print-room/link.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "e2e/suites/print-room/plates.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "e2e/suites/print-room/print.ts": {
+    "max-lines-per-function": {
+      "count": 2
+    }
+  },
+  "e2e/suites/print-room/redraw.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "e2e/suites/prospect.ts": {
+    "max-lines": {
+      "count": 1
+    },
+    "max-lines-per-function": {
+      "count": 3
+    }
+  },
+  "e2e/suites/reading-room/arm.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "e2e/suites/reading-room/colophon.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "e2e/suites/reading-room/kit.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "e2e/suites/render.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "e2e/suites/ribbon.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "e2e/suites/room-ink.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "e2e/suites/room-voyage-route.ts": {
+    "max-lines-per-function": {
+      "count": 2
+    }
+  },
+  "e2e/suites/runninghead/gallery.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "e2e/suites/specimen/desktop.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "e2e/suites/stage/short.ts": {
+    "max-lines-per-function": {
+      "count": 2
+    }
+  },
+  "e2e/suites/stage/stage.ts": {
+    "max-lines": {
+      "count": 1
+    }
+  },
+  "e2e/suites/survey/beat.ts": {
+    "max-lines-per-function": {
+      "count": 3
+    }
+  },
+  "e2e/suites/survey/mount.ts": {
+    "max-lines-per-function": {
+      "count": 2
+    }
+  },
+  "e2e/suites/survey/turn.ts": {
+    "max-lines-per-function": {
+      "count": 2
+    }
+  },
+  "e2e/suites/turn.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "e2e/suites/zoom-gestures.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "e2e/suites/zoom/bands.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "e2e/suites/zoom/kit.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "e2e/suites/zoom/resets.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "e2e/support/pace.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "scripts/lint/source-shape.ts": {
+    "max-lines": {
+      "count": 1
+    }
+  },
+  "scripts/region-detail-probes.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "scripts/region-detail-sweep-measure.ts": {
+    "max-lines-per-function": {
+      "count": 2
+    }
+  },
+  "scripts/region-detail-sweep.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "src/itinerary/dress/plate.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "src/itinerary/dress/strip.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "src/itinerary/events.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "src/prospect/dress/compose-e.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "src/prospect/dress/figures.ts": {
+    "max-lines": {
+      "count": 1
+    }
+  },
+  "src/prospect/dress/furniture.ts": {
+    "max-lines": {
+      "count": 1
+    }
+  },
+  "src/prospect/dress/rise.ts": {
+    "max-lines": {
+      "count": 1
+    },
+    "max-lines-per-function": {
+      "count": 2
+    }
+  },
+  "src/prospect/dress/townscape.ts": {
+    "max-lines": {
+      "count": 1
+    },
+    "max-lines-per-function": {
+      "count": 6
+    }
+  },
+  "src/render/layers/feature-labels.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "src/render/layers/frame.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "src/render/layers/legend-icons.ts": {
+    "max-lines-per-function": {
+      "count": 3
+    }
+  },
+  "src/render/layers/legend.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "src/site/explorer/app.ts": {
+    "max-lines": {
+      "count": 1
+    },
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "src/site/explorer/chart-drawer-bind.ts": {
+    "max-lines-per-function": {
+      "count": 2
+    }
+  },
+  "src/site/explorer/lod-controller.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "src/site/explorer/sheet-turn.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "src/site/explorer/table-drag.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "src/site/explorer/verso.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "src/site/living-chart/place-overlay.ts": {
+    "max-lines": {
+      "count": 1
+    },
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "src/site/print-room/app.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "src/site/print-room/contents-markup.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "src/site/reading-room/prospect-stage.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "src/society/names.ts": {
+    "max-lines": {
+      "count": 1
+    }
+  },
+  "src/terrain/contours.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "test/e2e/launch.test.ts": {
+    "max-lines": {
+      "count": 1
+    }
+  },
+  "test/e2e/suites.test.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "test/prospect/plate-e-world.test.ts": {
+    "max-lines-per-function": {
+      "count": 2
+    }
+  },
+  "test/repo/agent-sandbox-mutate.test.ts": {
+    "max-lines-per-function": {
+      "count": 2
+    }
+  },
+  "test/repo/agent-sandbox.test.ts": {
+    "max-lines": {
+      "count": 1
+    }
+  },
+  "test/repo/design-kit.test.ts": {
+    "max-lines": {
+      "count": 1
+    }
+  },
+  "test/repo/e2e-split-proof.test.ts": {
+    "max-lines": {
+      "count": 1
+    },
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "test/repo/e2e-tiers.test.ts": {
+    "max-lines": {
+      "count": 1
+    },
+    "max-lines-per-function": {
+      "count": 2
+    }
+  },
+  "test/repo/footgun-gate.test.ts": {
+    "max-lines": {
+      "count": 1
+    }
+  },
+  "test/repo/lint-wiring.test.ts": {
+    "max-lines": {
+      "count": 1
+    },
+    "max-lines-per-function": {
+      "count": 2
+    }
+  },
+  "test/repo/prose-paths.test.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "test/repo/source-shape.test.ts": {
+    "max-lines": {
+      "count": 1
+    },
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "test/repo/ts-comment-form.test.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "test/site/app-bundles.test.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "test/site/astro-scaffold.test.ts": {
+    "max-lines-per-function": {
+      "count": 2
+    }
+  },
+  "test/site/atelier-kit.test.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "test/site/chart-drawer.test.ts": {
+    "max-lines": {
+      "count": 1
+    },
+    "max-lines-per-function": {
+      "count": 2
+    }
+  },
+  "test/site/contents-row.test.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "test/site/gallery-room.test.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "test/site/house-style.test.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "test/site/hunt-zoom.test.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "test/site/living-chart-css.test.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "test/site/living-chart-no-bar-card.test.ts": {
+    "max-lines": {
+      "count": 1
+    },
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "test/site/print-room-contents.test.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "test/site/print-room-room.test.ts": {
+    "max-lines": {
+      "count": 1
+    },
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "test/site/prospect-room.test.ts": {
+    "max-lines": {
+      "count": 1
+    },
+    "max-lines-per-function": {
+      "count": 2
+    }
+  },
+  "test/site/ribbon-room.test.ts": {
+    "max-lines-per-function": {
+      "count": 2
+    }
+  },
+  "test/site/room.test.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "test/site/table-address.test.ts": {
+    "max-lines": {
+      "count": 1
+    }
+  }
+}
