@@ -7,19 +7,16 @@ import { rulesIn } from "../../test-support/shell-css-rules.ts";
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 const read = (p: string) => readFileSync(root(p), "utf8");
 
-const layoutStyle = () => {
-  const m = read("src/layouts/BaseLayout.astro").match(/<style is:global>([\s\S]*?)<\/style>/);
-  assert.ok(m, "BaseLayout.astro should carry the global shell <style>");
-  return m[1]!;
-};
+const layoutStyle = () => read("public/shell.css");
 
 test("the walnut deep: one declaration, the vignette over the lit walnut, consumed by ground and band alike (#461 ruling 2)", () => {
   // The deep (ruled 2026-08-25): the mockup's own body deep, token-derived, declared ONCE as --the-deep so the fixed ground layer and the running band can never drift apart.
   const css = layoutStyle();
   const deep = css.match(/--the-deep:\s*([\s\S]*?);/);
   assert.ok(deep, "the layout style should declare --the-deep once");
-  const vignette = deep[1]!.search(/radial-gradient\(120% 90% at 50% 30%,\s*rgb\(from var\(--ink-dark\) r g b \/ 0\)/);
-  const walnut = deep[1]!.search(
+  const value = deep[1]!.replace(/\s+/g, " ").replace(/\( /g, "(").replace(/ \)/g, ")");
+  const vignette = value.search(/radial-gradient\(120% 90% at 50% 30%,\s*rgb\(from var\(--ink-dark\) r g b \/ 0\)/);
+  const walnut = value.search(
     /radial-gradient\(80% 70% at 30% 20%,\s*color-mix\(in srgb, var\(--ink-dark\) 90%, var\(--parchment\) 10%\) 0%,\s*var\(--ink-dark\) 55%,\s*var\(--chart-ink\) 100%\)/,
   );
   assert.ok(vignette > -1, "the deep's darkening vignette is present");

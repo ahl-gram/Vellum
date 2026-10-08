@@ -124,9 +124,13 @@ test("a no-JS visitor keeps the noscript doors alone: the reveal stands down ins
   const noscript = astro.match(/<noscript>[\s\S]*?<\/noscript>/);
   assert.ok(noscript, "the noscript block exists");
   assert.ok(
-    noscript[0].includes(
-      ".landfall .stage:not(.cam) ~ .lf-card:not(.lf-card-how)[hidden] { animation: none !important; }",
-    ),
+    noscript[0].includes('<link rel="stylesheet" href="home-noscript.css">'),
+    "the noscript block links its sheet",
+  );
+  assert.ok(
+    read("public/home-noscript.css")
+      .replace(/\s+/g, " ")
+      .includes(".landfall .stage:not(.cam) ~ .lf-card:not(.lf-card-how)[hidden] { animation: none !important; }"),
     "script-off never reaches .cam, so without this the slips would reveal at 10s on top of the noscript nav's own plain doors; the !important is load-bearing (skeptic round 2): the prm exemption in index.css is !important, author-important beats author-normal before order is ever consulted, so only an important noscript rule reaches the specificity tie that lets document order decide in its favour",
   );
 });

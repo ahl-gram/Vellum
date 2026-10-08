@@ -327,10 +327,10 @@ test("#464 the served page takes the deep with its sections on parchment sheets;
   );
 });
 
-test("#464 the served atlas declares the deep and the sheet depth exactly as BaseLayout does (the three-place join's shape: one value, pinned equal)", () => {
-  const layout = readFileSync(new URL("../../src/layouts/BaseLayout.astro", import.meta.url), "utf8");
+test("#464 the served atlas declares the deep and the sheet depth exactly as public/shell.css does (the three-place join's shape: one value, pinned equal)", () => {
+  const layout = readFileSync(new URL("../../public/shell.css", import.meta.url), "utf8");
   const page = served();
-  const norm = (s: string) => s.replace(/\s+/g, " ").trim();
+  const norm = (s: string) => s.replace(/\s+/g, " ").replace(/\( /g, "(").replace(/ \)/g, ")").trim();
   for (const token of ["--the-deep", "--sheet-shadow"]) {
     const re = new RegExp(`${token}:\\s*([\\s\\S]*?);`);
     const a = layout.match(re);

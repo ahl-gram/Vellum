@@ -99,19 +99,17 @@ test("the scroll hint pulses only at full pull-back (#472, 2026-08-28 ruling): i
 });
 
 test("nothing home loads locks the document's scroll (#472 retired the #461 body lock; the class, not the instance: every sheet home links, plus the inline style blocks)", () => {
-  const inline = (p: string): string =>
-    [...read(p).matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)]
-      .map((m) => m[1])
-      .join("\n")
-      .replace(/\/\*[\s\S]*?\*\//g, "");
   // At-rule preludes are stripped first: split("}") alone hands an @media-first rule the prelude as its selector, and the sweep goes blind to it.
   const flatten = (cssText: string): string => cssText.replace(/@[^{}]*\{/g, "");
   const sources: ReadonlyArray<readonly [string, string]> = [
-    ...["public/index.css", "public/house.css", "public/motion.css", "public/fonts.css"].map(
-      (p) => [p, liveCss(p)] as const,
-    ),
-    ["src/pages/index.astro inline styles", inline("src/pages/index.astro")] as const,
-    ["src/layouts/BaseLayout.astro inline styles", inline("src/layouts/BaseLayout.astro")] as const,
+    ...[
+      "public/index.css",
+      "public/house.css",
+      "public/motion.css",
+      "public/fonts.css",
+      "public/shell.css",
+      "public/home-noscript.css",
+    ].map((p) => [p, liveCss(p)] as const),
   ];
   for (const [name, cssText] of sources) {
     for (const rule of flatten(cssText).split("}")) {

@@ -173,12 +173,8 @@ const withoutMedia = (css: string): string => {
 };
 
 test("the layout stops a phone browser enlarging text inside the 1024 page (its effect on a real phone is UNVERIFIABLE under emulation, so the declaration is the pin)", () => {
-  const layout = readFileSync(resolve(import.meta.dirname, "..", "..", "src/layouts/BaseLayout.astro"), "utf8");
-  const open = layout.indexOf("<style is:global>");
-  assert.notEqual(open, -1, "the layout carries its global style block");
-  const screenRules = withoutMedia(
-    layout.slice(open, layout.indexOf("</style>", open)).replace(/\/\*[\s\S]*?\*\//g, ""),
-  );
+  const shell = readFileSync(resolve(import.meta.dirname, "..", "..", "public/shell.css"), "utf8");
+  const screenRules = withoutMedia(shell.replace(/\/\*[\s\S]*?\*\//g, ""));
   assert.match(
     screenRules,
     /^html\s*\{[^}]*-webkit-text-size-adjust:\s*100%;[^}]*\btext-size-adjust:\s*100%;/m,

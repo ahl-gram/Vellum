@@ -563,51 +563,45 @@ test("one page mark per page across nav and trail: one on every page in the tree
 });
 
 test("the layout ships the cluster's ratified pins: leading, weight, the aria-current span (#461)", () => {
-  for (const p of PAGES) {
-    const head = headOf(page(p.route));
-    const style = head.match(/<style[^>]*>([\s\S]*?)<\/style>/);
-    assert.ok(style, `${p.route} should inline the shell <style>`);
-    // The inlined shell CSS arrives minified, so tolerate .72rem and bare attr values.
-    const css = style[1]!;
-    assert.match(
-      css,
-      /\.rooms\s*\{[^}]*font-size:\s*0?\.72rem/,
-      "one nav font size everywhere (the mockup's 0.72rem cluster nav)",
-    );
-    assert.match(
-      css,
-      /\.rooms\s+\[aria-current=(?:"page"|page)\]\s*\{[^}]*display:\s*inline-block/,
-      "the current label joins motion.css's inline-block rule so a multi-word label cannot wrap mid-label",
-    );
-    // The you-are-here marker never relies on color alone (Issue #268, re-ratified at Issue #461): brightened AND underlined.
-    assert.match(
-      css,
-      /\.rooms\s+\[aria-current=(?:"page"|page)\]\s*\{[^}]*color:\s*var\(--parchment-bright\)/,
-      "the current label brightens against the deep",
-    );
-    assert.match(
-      css,
-      /\.rooms\s+\[aria-current=(?:"page"|page)\]\s*\{[^}]*text-decoration(?:-line)?:\s*underline/,
-      "the current label is underlined",
-    );
-    // Issue #461's second addendum: the cluster pins its own line-height rather than inheriting the page's reading leading.
-    assert.match(
-      css,
-      /(?:header\.chrome|\.chrome)\s*\{[^}]*line-height:\s*normal/,
-      "the cluster pins line-height normal so the page's 1.6 cannot inflate its gaps",
-    );
-    assert.match(css, /\.wordmark\s*\{[^}]*line-height:\s*1\.15/, "the wordmark pins the mockup's 1.15");
-    assert.match(css, /\.wordmark\s*\{[^}]*letter-spacing:\s*0?\.12em/, "the wordmark wears the mockup's tracking");
-    assert.match(
-      css,
-      /\.wordmark\s*\{[^}]*font-weight:\s*400/,
-      "the wordmark pins the cluster's 400 against the h1 UA bold",
-    );
-    assert.match(css, /\.room-name\s*\{[^}]*font-weight:\s*400/, "the room name pins 400 against its h1's UA bold");
-    assert.ok(!css.includes(".head-rule"), "the folio's double rule retired with the band (#461 ruling 1)");
-    assert.ok(!css.includes(".manicule"), "the manicule retired with the folio nav (#461 ruling 1)");
-    assert.ok(!css.includes(".topnav"), "the folio topnav retired; the cluster's .rooms nav replaced it");
-  }
+  const css = readFileSync(join(outDir, "shell.css"), "utf8");
+  assert.match(
+    css,
+    /\.rooms\s*\{[^}]*font-size:\s*0?\.72rem/,
+    "one nav font size everywhere (the mockup's 0.72rem cluster nav)",
+  );
+  assert.match(
+    css,
+    /\.rooms\s+\[aria-current=(?:"page"|page)\]\s*\{[^}]*display:\s*inline-block/,
+    "the current label joins motion.css's inline-block rule so a multi-word label cannot wrap mid-label",
+  );
+  // The you-are-here marker never relies on color alone (Issue #268, re-ratified at Issue #461): brightened AND underlined.
+  assert.match(
+    css,
+    /\.rooms\s+\[aria-current=(?:"page"|page)\]\s*\{[^}]*color:\s*var\(--parchment-bright\)/,
+    "the current label brightens against the deep",
+  );
+  assert.match(
+    css,
+    /\.rooms\s+\[aria-current=(?:"page"|page)\]\s*\{[^}]*text-decoration(?:-line)?:\s*underline/,
+    "the current label is underlined",
+  );
+  // Issue #461's second addendum: the cluster pins its own line-height rather than inheriting the page's reading leading.
+  assert.match(
+    css,
+    /(?:header\.chrome|\.chrome)\s*\{[^}]*line-height:\s*normal/,
+    "the cluster pins line-height normal so the page's 1.6 cannot inflate its gaps",
+  );
+  assert.match(css, /\.wordmark\s*\{[^}]*line-height:\s*1\.15/, "the wordmark pins the mockup's 1.15");
+  assert.match(css, /\.wordmark\s*\{[^}]*letter-spacing:\s*0?\.12em/, "the wordmark wears the mockup's tracking");
+  assert.match(
+    css,
+    /\.wordmark\s*\{[^}]*font-weight:\s*400/,
+    "the wordmark pins the cluster's 400 against the h1 UA bold",
+  );
+  assert.match(css, /\.room-name\s*\{[^}]*font-weight:\s*400/, "the room name pins 400 against its h1's UA bold");
+  assert.ok(!css.includes(".head-rule"), "the folio's double rule retired with the band (#461 ruling 1)");
+  assert.ok(!css.includes(".manicule"), "the manicule retired with the folio nav (#461 ruling 1)");
+  assert.ok(!css.includes(".topnav"), "the folio topnav retired; the cluster's .rooms nav replaced it");
 });
 
 test("a page whose markup carries the survey sheet passes desk open (#461, the interim rule's converse)", () => {

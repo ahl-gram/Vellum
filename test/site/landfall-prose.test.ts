@@ -142,8 +142,12 @@ function assertNoscriptReveal(): void {
     noscript,
     "a no-JS visitor still reads the prose (skeptic finding 4: the pip and panel only exist under .cam)",
   );
+  assert.ok(
+    noscript[0].includes('<link rel="stylesheet" href="home-noscript.css">'),
+    "the noscript block links its sheet",
+  );
   assert.match(
-    noscript[0],
+    read("public/home-noscript.css"),
     /#lf-card-how\[hidden\]\s*\{[^}]*display:\s*block/,
     "the no-JS reveal targets the hidden attribute itself, flowing the panel statically",
   );
