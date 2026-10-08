@@ -181,15 +181,14 @@ test("home mounts the stage, maps the manifest marks, and loads its bundle twin 
 });
 
 test("the press, the cleaner, and .gitignore all carry the home twin (#455)", async () => {
-  const { BUNDLE_ENTRIES } = await import("../../scripts/build-app-bundles.ts");
+  const [{ BUNDLE_ENTRIES }, { GENERATED_SUBTREES }] = await Promise.all([
+    import("../../scripts/build-app-bundles.ts"),
+    import("../../scripts/clean-public-generated.ts"),
+  ]);
   assert.ok(
     BUNDLE_ENTRIES.some((e) => e.entry === "src/site/home/app.ts" && e.twin === "app.bundle.js"),
     "BUNDLE_ENTRIES carries the home entry with its root twin",
   );
   assert.ok(read(".gitignore").split("\n").includes("public/app.bundle.js"), ".gitignore carries the root twin");
-  assert.match(
-    read("scripts/clean-public-generated.ts"),
-    /^\s*"app\.bundle\.js",\s*$/m,
-    "the cleaner sweeps the root twin",
-  );
+  assert.ok(GENERATED_SUBTREES.includes("app.bundle.js"), "the cleaner sweeps the root twin");
 });

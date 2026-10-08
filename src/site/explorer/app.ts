@@ -189,7 +189,6 @@ const chartTable = bindChartDrawer(
   },
   {
     broadside: () => room.broadside,
-    folioHref: "./portfolio/",
     say: announce,
     drawThumb: async (item) => {
       const res = await runJob(thumbJobFor(item)).catch(() => null);

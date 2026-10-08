@@ -11,7 +11,7 @@ import {
 } from "../../world/daily-hunt.ts";
 import { renderReveal } from "./reveal.ts";
 import { huntDispatch, type Miss } from "./app-dispatch.ts";
-import { createProjection, type Projection } from "../../render/transform.ts";
+import { createProjection, marginFor, type Projection } from "../../render/transform.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
 import type { World } from "../../world/types.ts";
 
@@ -26,7 +26,8 @@ function restart(el: HTMLElement | null, cls: string): void {
 }
 
 const STORE_KEY = "vellum.hunt.v1";
-const MARGIN = Math.round(1500 * 0.045);
+export const huntProjection = (world: World): Projection =>
+  createProjection(world.elev.w, world.elev.h, 1500, marginFor(1500));
 
 const BAND_PROSE = {
   hot: "Hot. You are all but upon it.",
@@ -186,8 +187,8 @@ function clickGrid(ev: MouseEvent, svg: SVGSVGElement, proj: Readonly<Projection
   const rect = svg.getBoundingClientRect();
   const px = ((ev.clientX - rect.left) / rect.width) * proj.widthPx;
   const py = ((ev.clientY - rect.top) / rect.height) * proj.heightPx;
-  const gx = (px - MARGIN) / proj.scale;
-  const gy = (py - MARGIN) / proj.scale;
+  const gx = (px - proj.margin) / proj.scale;
+  const gy = (py - proj.margin) / proj.scale;
   return { gx, gy };
 }
 
@@ -317,7 +318,7 @@ export function setupHunt(world: World, seed: number): void {
   const svg = $("sheet").querySelector("svg");
   if (!svg) return;
 
-  const proj = createProjection(world.elev.w, world.elev.h, 1500, MARGIN);
+  const proj = huntProjection(world);
   const quarry = chooseQuarry(world, { exclude: legendExclusions(world, svg, proj) });
   if (!quarry) return;
 

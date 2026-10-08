@@ -6,26 +6,20 @@ import ts from "typescript";
 import { MAX_TILT } from "../../src/render/voyage-geometry.ts";
 import { RDP_EPSILON, COAST_EMBARK_MAX } from "../../src/render/voyage-route.ts";
 import { INLAND_STUB_CELLS } from "../../src/render/voyage-water.ts";
-import { MARGIN_FRACTION } from "../../src/render/transform.ts";
+import { huntProjection } from "../../src/site/seed-of-the-day/app-hunt.ts";
+import { rv4TiltAndFacing } from "../../e2e/suites/room-voyage-route.ts";
+import type { SuiteContext } from "../../e2e/types.ts";
+import { stringConfig } from "../../scripts/build-app-bundles.ts";
 import { BACKDROP_SAMPLES, FOREGROUND_SAMPLES } from "../../src/prospect/transect.ts";
 import { LOD_BANDS } from "../../src/world/lod.ts";
 import { defaultRecipe } from "../../src/world/generate.ts";
 import { POSTER_PRESETS } from "../../src/site/print-room/poster-presets.ts";
 import { MAX_PIXELS, fitScaleToBudget } from "../../src/site/lib/rasterize.ts";
 
-// Constant contracts that span files: each pair must move together; where the far side is an e2e script or a DOM-bound page module, this suite reads it as source.
+// Constant contracts that span files: each pair must move together.
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const src = (p: string) => readFileSync(join(ROOT, p), "utf8");
-// Truncate each line at // so no comment, full-line or trailing, can count as code; naive about strings, which is fine since neither guarded file carries // inside a literal.
-const codeOnly = (code: string) =>
-  code
-    .split("\n")
-    .map((l) => {
-      const i = l.indexOf("//");
-      return i === -1 ? l : l.slice(0, i);
-    })
-    .join("\n");
 const walk = (dir: string): string[] =>
   readdirSync(join(ROOT, dir), { withFileTypes: true }).flatMap((e) =>
     e.isDirectory() ? walk(join(dir, e.name)) : e.name.endsWith(".ts") ? [join(dir, e.name)] : [],
@@ -67,37 +61,59 @@ test("the 24 Mpx budget clears every poster at x1 and clamps exactly Wall and Gr
   assert.deepEqual(clampedAt2, ["wall", "grand"]);
 });
 
-test("the e2e RV4 tilt ceiling tracks MAX_TILT", () => {
-  const m = src("e2e/suites/room-voyage-route.ts").match(/maxTilt <= ([\d.]+)/);
-  assert.ok(m, "RV4 ceiling not found in e2e/suites/room-voyage-route.ts");
-  const ceiling = Number(m[1]);
-  assert.ok(ceiling > MAX_TILT && ceiling - MAX_TILT < 0.001, `ceiling ${ceiling}, MAX_TILT ${MAX_TILT}`);
+test("RV4 passes a mark that tips to MAX_TILT and fails one a step past it, the page reading the tilt to two decimals", async () => {
+  const rv4 = async (maxTilt: number): Promise<boolean> => {
+    const seen: Array<readonly [string, boolean]> = [];
+    const page = { evaluate: () => Promise.resolve({ maxTilt, flips: 0, naiveFlips: 3, legIdx: 0, worstNaive: 3 }) };
+    const check = (name: string, ok: boolean) => {
+      seen.push([name, ok]);
+    };
+    await rv4TiltAndFacing({ ...page, check } as unknown as SuiteContext);
+    const verdict = seen.find(([name]) => name.startsWith("RV4 "));
+    assert.ok(verdict, "RV4 made no check");
+    return verdict[1];
+  };
+  assert.equal(await rv4(MAX_TILT), true, `a mark at MAX_TILT (${MAX_TILT}) fails RV4`);
+  assert.equal(await rv4(MAX_TILT + 0.01), false, `a mark past MAX_TILT (${MAX_TILT}) passes RV4`);
 });
 
-// The margin mirrors accept either the duplicated literal (which must equal MARGIN_FRACTION) or the imported constant itself; the identifier form only counts if the file imports it from render/transform and never rebinds the name.
-const marginMirror = (code: string, re: RegExp, where: string) => {
-  const m = codeOnly(code).match(re);
-  assert.ok(m, `margin expression not found in ${where}`);
-  if (m[1] === "MARGIN_FRACTION") {
-    assert.match(
-      code,
-      /import \{[^}]*\bMARGIN_FRACTION\b[^}]*\} from "[^"]*render\/transform(\.ts)?"/,
-      `${where} must import MARGIN_FRACTION from render/transform`,
+// Blind spot, declared: setupHunt's own call of huntProjection runs in no unit test, and e2e hunt stayed green with that call projecting at a margin of 60 (measured 2026-10-08).
+test("the Hunt projects onto the chart renderMap drew: every town stands where the chart put it", async () => {
+  const { realWorld } = await import("../../test-support/living-chart-hosts.ts");
+  const { manifest, world } = await realWorld();
+  const proj = huntProjection(world);
+  assert.equal(proj.heightPx, manifest.heightPx, "the Hunt's sheet is not the chart's height");
+  for (const place of manifest.places) {
+    const town = world.settlements[place.idx]!;
+    const at = { x: proj.px(town.x), y: proj.py(town.y) };
+    assert.ok(
+      Math.abs(at.x - place.nx * manifest.widthPx) < 1e-9 && Math.abs(at.y - place.ny * manifest.heightPx) < 1e-9,
+      `the Hunt puts ${place.name} at ${JSON.stringify(at)}, off the town the chart drew`,
     );
-    assert.doesNotMatch(code, /\b(const|let|var)\s+MARGIN_FRACTION\b/, `${where} must not rebind MARGIN_FRACTION`);
-  } else {
-    assert.equal(Number(m[1]), MARGIN_FRACTION, where);
   }
-};
-
-test("seed-of-the-day's MARGIN mirrors renderMap's margin fraction", () => {
-  const code = src("src/site/seed-of-the-day/app-hunt.ts");
-  marginMirror(code, /const MARGIN = Math\.round\(1500 \* ([\d.]+|MARGIN_FRACTION)\)/, "seed-of-the-day/app-hunt.ts");
 });
 
-test("the voyage session's projection margin mirrors renderMap's margin fraction", () => {
-  const code = src("src/site/living-chart/voyage-session.ts");
-  marginMirror(code, /Math\.round\(wPx \* ([\d.]+|MARGIN_FRACTION)\)/, "voyage-session.ts");
+test("the voyage session projects onto the chart renderMap drew: its origin stands on the origin town, at two widths", async () => {
+  const [{ createSessionBuilder }, { barlessLogPanel }, { realWorld, stackedMount }, { buildPlaceManifest }] =
+    await Promise.all([
+      import("../../src/site/living-chart/voyage-session.ts"),
+      import("../../src/site/living-chart/no-bar.ts"),
+      import("../../test-support/living-chart-hosts.ts"),
+      import("../../src/render/place-manifest.ts"),
+    ]);
+  const { manifest, survey, world } = await realWorld();
+  for (const chart of [manifest, buildPlaceManifest(world, 1200)]) {
+    const sessions = createSessionBuilder({ mapEl: stackedMount().el, logPanel: barlessLogPanel() });
+    const session = sessions.build(chart, survey, 42, "as surveyed");
+    assert.ok(session, `seed 42 routes no voyage at ${chart.widthPx} px, so the comparison below reads nothing`);
+    const origin = chart.places.find((p) => p.idx === session.plan.ports[0]!.idx);
+    assert.ok(origin, "the voyage's first port is no place on the chart");
+    const at = { x: origin.nx * chart.widthPx, y: origin.ny * chart.heightPx };
+    assert.ok(
+      Math.abs(session.originPt.x - at.x) < 1e-9 && Math.abs(session.originPt.y - at.y) < 1e-9,
+      `at ${chart.widthPx} px the voyage starts at ${JSON.stringify(session.originPt)}, the chart drew its town at ${JSON.stringify(at)}`,
+    );
+  }
 });
 
 const workerSpawns = (file: string): number => {
@@ -115,9 +131,6 @@ test("a worker spawn stands under src/site, so vellum/worker-spawn-static has a 
   assert.ok(spawns >= 1, "no worker spawn stands under src/site, so the lint rule on its form passes over nothing");
 });
 
-test("every publicDir in the press config is false", () => {
-  const code = codeOnly(src("scripts/build-app-bundles.ts"));
-  const hits = code.match(/publicDir:\s*\S+/g) ?? [];
-  assert.ok(hits.length >= 2, "expected both press configs to set publicDir");
-  for (const hit of hits) assert.match(hit, /^publicDir: false[,)}\s]?$/);
+test("the string build keeps public/ out of its config, though it writes nothing a run could see", () => {
+  assert.equal(stringConfig("/tmp/entry.ts").publicDir, false);
 });

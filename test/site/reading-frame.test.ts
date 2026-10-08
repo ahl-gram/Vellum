@@ -68,6 +68,14 @@ test("the frame mounts and hands the engine a complete host (#219, the first non
   }
 });
 
+test("the reading frame's chart mount carries the engine's class beside its own, for any host that mounts it (#302)", async () => {
+  const { createReadingFrame } = await import("../../src/site/reading-frame/index.ts");
+  const frame = createReadingFrame(new El("div") as unknown as HTMLElement);
+  const mapEl = frame.host.mapEl as unknown as El;
+  assert.ok(mapEl.classes.has("rf-chart"), "the mount keeps the frame's own class");
+  assert.ok(mapEl.classes.has("living-chart"), "and carries living-chart beside it");
+});
+
 test("#402/#442 the frame forwards onAgesTold to the scrubber host beside onPark", async () => {
   const { createReadingFrame } = await import("../../src/site/reading-frame/index.ts");
   const onAgesTold = (): void => {};

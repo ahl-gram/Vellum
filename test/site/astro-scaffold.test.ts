@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { join, relative } from "node:path";
 import { NAV_ITEMS, ROUTE_NAMES } from "../../src/layouts/nav.ts";
 import { cleanPublicGenerated } from "../../scripts/clean-public-generated.ts";
+import { PORTFOLIO_ROUTE } from "../../scripts/generate-discovery.ts";
 
 // The Astro scaffold and shared layout (Issue #203; SPEC: the ratified 2026-07-21 comment on Issue #202). Builds once into out/test-astro-build (gitignored) and asserts on the rendered output plus the committed sources.
 
@@ -1039,17 +1040,18 @@ test("every road out names its destination by that route's name in the tree (Iss
   assert.equal(roads, Object.values(ROADS).flat().length, "every road on the ROADS roster was read");
 });
 
-test("the Chart Table's road names the page it goes to by that route's name in the tree, though it is a button the sweep above never reads (Issue #669, ruled 2026-10-04)", () => {
-  const folio = /folioHref: "([^"]+)"/.exec(readFileSync(root("src/site/explorer/app.ts"), "utf8"));
-  assert.ok(folio, "the Explorer no longer hands the table road a folioHref, so this check has no destination to read");
+test("the Chart Table's road names the page it goes to by that route's name in the tree, though it is a button the sweep above never reads (Issue #669, ruled 2026-10-04; CT18 holds where the road goes)", () => {
   const room =
     /<button id="table-road"[^>]*><span class="verb">[^<]*<\/span><span class="room">([^<]+)<\/span><\/button>/.exec(
       page("explorer/index.html"),
     );
   assert.ok(room, "the built Explorer carries no table road in the kit's two-line shape");
-  const route = new URL(folio[1]!, "https://v.test/explorer/").pathname;
-  assert.notEqual(ROUTE_NAMES[route], undefined, `the table road goes to ${route}, which the tree does not name`);
-  assert.equal(decode(room[1]!), ROUTE_NAMES[route], `the table road goes to ${route} and calls it something else`);
+  assert.notEqual(ROUTE_NAMES[PORTFOLIO_ROUTE], undefined, "the tree does not name the Portfolio's route");
+  assert.equal(
+    decode(room[1]!),
+    ROUTE_NAMES[PORTFOLIO_ROUTE],
+    "the table road goes to the Portfolio and calls it something else",
+  );
 });
 
 test("the Portfolio's scripts-off road goes home to the Explorer as ../, the form its gold road takes (Issue #669)", () => {

@@ -15,6 +15,7 @@ import {
   layPressFace,
   filingAt,
   sheetsThatLeft,
+  type FilingSheet,
   LAY_ON_CARD,
   LAY_ON_PAGE,
 } from "../../src/site/explorer/chart-drawer.ts";
@@ -30,6 +31,7 @@ import { emitTableKey } from "../../src/site/explorer/address.ts";
 
 const REPO = resolve(import.meta.dirname, "..", "..");
 import type { ProspectJob, ProspectResult, RegionResult } from "../../src/site/explorer/worker-client.ts";
+type SameKeys<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false;
 
 // The Chart Table's state (Issue #520 Sub 2), pure and apart from the DOM: what the drawer draws and what the address carries are both this array. The surface is `chart-drawer` and never `drawer` (Issue #520 ruling 2).
 const survey = (lx: number): SurveyItem => ({
@@ -294,53 +296,36 @@ test("CT6 the card's press wears the two ruled faces, and a table that is BOTH f
 // so a gate on that class left the skew reachable indefinitely. `filingAt` now takes ONE value, so no caller can express
 // the skew and no test needs to assert what happens when it does.
 test("CT7 the sheet a filing is made from carries its own present year, so a world and a year can never be paired from different charts (#522, both cold review rounds on PR #631)", () => {
-  const sheet = { seed: 42, overrides: {}, style: "ink", presentYear: 1059 } as const;
-  const filed = filingAt({ turning: false, sheet, index: 3 });
-  assert.ok(filed, "a settled sheet files");
+  const sheet: FilingSheet = { seed: 42, overrides: {}, style: "ink", presentYear: 1059 };
+  const filedFrom = (from: FilingSheet, index = 3) => {
+    const filed = filingAt({ turning: false, sheet: from, index });
+    assert.ok(filed, "a settled sheet files");
+    return filed;
+  };
+  const filed = filedFrom(sheet);
   assert.deepEqual(
-    [filed.seed, filed.year, filed.index],
-    [42, 1059, 3],
+    [filed.seed, filed.overrides, filed.style, filed.year, filed.index],
+    [42, {}, "ink", 1059, 3],
     "and it files that sheet's world at that sheet's year",
   );
   assert.equal(filingAt({ turning: false, sheet: null, index: 3 }), null, "nothing before the first draw lands");
   assert.equal(filingAt({ turning: true, sheet, index: 3 }), null, "and nothing while the sheet is mid-flip");
-  const src = readFileSync(resolve(REPO, "src/site/explorer/chart-drawer.ts"), "utf8");
-  const iface = src.slice(
-    src.indexOf("interface FilingSheet {"),
-    src.indexOf("}", src.indexOf("interface FilingSheet {")),
-  );
-  const members = [...iface.matchAll(/^\s*(?:readonly\s+)?([A-Za-z]+)\??:/gm)].map((m) => m[1]).sort();
+  assert.equal(filedFrom({ ...sheet, seed: 43 }).seed, 43, "the seed is the sheet's own");
   assert.deepEqual(
-    members,
-    ["overrides", "presentYear", "seed", "style"],
-    "the filing sheet grew a member, and a second field is a second place a year can live",
+    filedFrom({ ...sheet, overrides: { mapType: "island" } }).overrides,
+    { mapType: "island" },
+    "so are its overrides",
   );
-  assert.equal(
-    members.filter((m) => /year/i.test(m)).length,
-    1,
-    "two year-ish members are two independently-assignable years, which is the skew this shape exists to make unrepresentable",
+  assert.equal(filedFrom({ ...sheet, style: "antique" }).style, "antique", "and its dress");
+  assert.equal(filedFrom({ ...sheet, presentYear: 809 }).year, 809, "and its present year");
+  assert.equal(filedFrom(sheet, 5).index, 5, "and the index is the one asked for");
+  const oneYear: SameKeys<keyof FilingSheet, "seed" | "overrides" | "style" | "presentYear"> = true;
+  assert.ok(
+    oneYear,
+    "held by the type checker, not this run: a FilingSheet member beyond these four fails npm run check here, since a second year is the skew this shape exists to make unrepresentable",
   );
-  const call = src.slice(
-    src.indexOf("prospectItemFrom({", src.indexOf("export function filingAt")),
-    src.indexOf("});", src.indexOf("export function filingAt")),
-  );
-  const fields = [...call.matchAll(/(\w+):\s*([^,}]+)/g)];
-  assert.equal(
-    fields.length,
-    5,
-    "the gate's call no longer reads as the five fields a prospect item takes, so the loop below is sweeping nothing",
-  );
-  for (const [, field, value] of fields) {
-    assert.match(
-      value!.trim(),
-      field === "index" ? /^at\.index$/ : /^at\.sheet\.\w+$/,
-      `${field} reaches past the one sheet, so the filing no longer describes a single chart`,
-    );
-  }
-  const other = filingAt({ turning: false, sheet: { ...sheet, presentYear: 809 }, index: 3 });
-  assert.ok(other);
   assert.notEqual(
-    emitTable([other]),
+    emitTable([filedFrom({ ...sheet, presentYear: 809 })]),
     emitTable([filed]),
     "two charts' presents are two distinct sheets, which is why they may not be mixed",
   );
@@ -521,34 +506,7 @@ test("CT9 the table is written to the device when the reader CHANGES it and re-s
   assert.match(show, /syncHash\(\)/, "and it leaves the address disagreeing with the drawer it just changed");
 });
 
-test("CT10 a re-seat that lands mid-draw asks for ANOTHER pass, and a sheet that leaves takes its picture with it (#634, the two behaviours restore() gained when it stopped running once at boot)", () => {
-  const src = readFileSync(resolve(REPO, "src/site/explorer/chart-drawer-bind.ts"), "utf8");
-  const fill = src.slice(src.indexOf("const fill = async"), src.indexOf("\n  };", src.indexOf("const fill = async")));
-  assert.ok(fill.length > 60, "the fill was not found, so the assertions below read an empty slice");
-  assert.match(
-    fill,
-    /if \(drawing\) \{\s*refill = true;\s*return;\s*\}/,
-    "a re-seat that lands while a thumbnail is in flight is DROPPED again, and its sheets keep a drawing frame until the reader shuts the drawer and opens it, which is the whole reason the flag exists",
-  );
-  assert.match(
-    fill,
-    /do \{[\s\S]*\} while \(refill\)/,
-    "and the flag is set but never acted on, which is the same thing one step later",
-  );
-  // The other half of that window, which nothing claimed until the cold review's round 3: the sheet can LEAVE while its picture is being drawn, and the url then lands under a key no cutting carries, so nothing ever revokes it.
-  assert.match(
-    fill,
-    /if \(!items\(\)\.some\(\(live\) => keyOf\(live\) === keyOf\(item\)\)\) \{\s*URL\.revokeObjectURL\(drawn\.url\);\s*continue;\s*\}/,
-    "a picture that finishes drawing for a sheet that already left is filed rather than revoked, which leaks one blob url per departed sheet per re-seat mid-draw",
-  );
-  const restore = src.slice(src.indexOf("restore(next:"), src.indexOf("\n  }\n", src.indexOf("restore(next:")));
-  assert.ok(restore.length > 60, "restore was not found, so the assertions below read an empty slice");
-  assert.match(
-    restore,
-    /for \(const gone of sheetsThatLeft\(items\(\), kept\)\) forget\(gone\);/,
-    "a sheet that leaves on a cached return keeps its blob url, and this path now runs on every return rather than once at boot, so they accumulate one per re-seat",
-  );
-  // The set it is built from is the hazard, so it is BEHAVIOUR here and not a regex: built from the outgoing table it answers "nothing left" for every re-seat, and the line's text is identical.
+test("CT10 the sheets a re-seat drops are read against the table it brings, so every departed sheet's picture is named for revoking (#634; the drawer's own passes are chart-drawer-ceremony.test.ts's)", () => {
   const before = [survey(1), survey(2), survey(3)];
   assert.deepEqual(
     sheetsThatLeft(before, [survey(1), survey(3)]).map((i) => emitTable([i])),
@@ -562,11 +520,6 @@ test("CT10 a re-seat that lands mid-draw asks for ANOTHER pass, and a sheet that
   );
   assert.deepEqual(sheetsThatLeft(before, []).length, 3, "an emptied table drops every picture");
   assert.deepEqual(sheetsThatLeft([], before), [], "and an arrival into a bare drawer forgets nothing");
-  assert.match(
-    restore,
-    /if \(drawerEls\.root\.classList\.contains\("open"\)\) void fill\(\);/,
-    "a drawer standing OPEN when the table is re-seated never draws what arrived",
-  );
 });
 
 test("CT11 EVERY road out that carries this page's address is rebuilt by the one hash writer, never by the draw (#634, the cold review's round 3 on PR #635)", () => {

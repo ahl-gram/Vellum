@@ -2,6 +2,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { El, installShim } from "../../test-support/element-shim.ts";
+import type { RoomFurniture } from "../../src/site/reading-room/seats.ts";
 
 // The Reading Room is a chart room on the Issue #462 pattern (Issue #463): the chart full-bleed on the deep, the name and its one control top right, the Journal on a slip that scrolls, the dated log's instrument as a bottom strip, no band, no footer, no roads out.
 const REPO = resolve(import.meta.dirname, "..", "..");
@@ -105,7 +107,7 @@ test("RR-room 4 the stage holds the fitted sheet and the gesture box the frame's
   );
 });
 
-test("RR-room 5 seats.ts seats the frame's parts: chart and status in the stage; strip, slip AND its tab inside the panel the engine hides; log and plate in the slip; the Glass and the room bound", () => {
+test("RR-room 5 seats.ts binds the shared room, the Glass and its keys, seats each slip-side part once, and refits silently", () => {
   assert.match(seats, /import\s*\{\s*bindRoom, type Room\s*\}\s*from\s*"\.\.\/shared\/room\.ts"/, "the shared room");
   assert.match(
     seats,
@@ -118,12 +120,6 @@ test("RR-room 5 seats.ts seats the frame's parts: chart and status in the stage;
     "its keys and buttons are the kit's",
   );
   assert.match(app, /seatFrame\(frame, stage, furniture\)/, "app.ts seats the frame once, before binding the room");
-  // All three slip-side nodes in the ONE append, and none appended anywhere else: a part seated outside the panel stands through every teardown.
-  assert.match(
-    seats,
-    /scrubber\.panel\.append\(roomEls\.strip, roomEls\.slip, roomEls\.tab\)/,
-    "the strip, the slip and its tab move INTO the panel together",
-  );
   for (const node of ["roomEls.strip", "roomEls.slip", "roomEls.tab"]) {
     const found = [
       ...(seats + app).matchAll(
@@ -139,6 +135,55 @@ test("RR-room 5 seats.ts seats the frame's parts: chart and status in the stage;
   );
   assert.match(app, /room\.layout\(\)/, "the room refits once the chart lands");
   assert.match(seats, /renderScale\(|scaleTicks\(/, "the scale is drawn from the world's days and years");
+});
+
+test("RR-room 5b seatFrame seats the frame's parts: chart and status in the stage; strip, slip AND its tab inside the panel the engine hides, since a part seated outside it stands through every teardown; log and plate in the slip", async () => {
+  const g = globalThis as Record<string, unknown>;
+  const [had, prior] = ["document" in g, g.document];
+  installShim();
+  try {
+    const [{ createReadingFrame }, { createProspectStage }, { seatFrame }] = await Promise.all([
+      import("../../src/site/reading-frame/index.ts"),
+      import("../../src/site/reading-room/prospect-stage.ts"),
+      import("../../src/site/reading-room/seats.ts"),
+    ]);
+    const frame = createReadingFrame(new El("div") as unknown as HTMLElement);
+    const plate = createProspectStage();
+    const parts = [
+      "stage",
+      "sheet",
+      "viewport",
+      "strip",
+      "scale",
+      "slip",
+      "tab",
+      "journalDock",
+      "folioTitle",
+      "folioSub",
+    ];
+    const room = Object.fromEntries(parts.map((part) => [part, new El("div")])) as Record<string, El>;
+    const rangeStood = (frame.host.scrubber.range as unknown as El).parentNode;
+    seatFrame(frame, plate, room as unknown as RoomFurniture);
+    const parentOf = (node: unknown) => (node as El).parentNode;
+    const panel = frame.host.scrubber.panel as unknown as El;
+    for (const part of ["strip", "slip", "tab"])
+      assert.equal(room[part]!.parentNode, panel, `the ${part} stands in the panel`);
+    const seated = panel.children.filter((c) => c === room.strip || c === room.slip || c === room.tab);
+    assert.deepEqual(seated, [room.strip, room.slip, room.tab], "in the order the panel is read: strip, slip, tab");
+    assert.equal(parentOf(frame.host.mapEl), room.viewport, "the chart in the stage's viewport");
+    assert.equal(parentOf(frame.host.statusEl), room.stage, "the status in the stage");
+    assert.equal(parentOf(frame.strip), room.strip, "the frame's strip in the room's");
+    assert.equal(parentOf(plate.root), room.journalDock, "the plate in the slip");
+    assert.equal(parentOf(frame.log.panel), room.journalDock, "and the log beside it");
+    const well = parentOf(frame.host.scrubber.range);
+    assert.ok(well?.classes.has("scale-well"), "the range stands in the scale's well");
+    assert.ok(rangeStood, "the frame built its range inside its own tree");
+    assert.equal(well?.parentNode, rangeStood, "and the well stands where the range stood");
+    assert.equal(room.scale!.parentNode, well, "beside the scale");
+  } finally {
+    if (had) g.document = prior;
+    else delete g.document;
+  }
 });
 
 test("RR-room 6 the css: the strip fixed at the bottom, the sheet at the chart-room depth, the frame's sticky shape retired, print standing down", () => {

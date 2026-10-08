@@ -1,4 +1,4 @@
-// Room voyage-route e2e (RV1-RV12, Issue #320 Sub 3): W17-W28 re-hosted on the Reading Room, the only host that can still run them. RV4 is the ONLY numeric guard on MAX_TILT anywhere (a 24 -> 30 mutation leaves every unit test green and reds only RV4); RV3/RV9/RV10 guard showMark's Issue #181 wiring, which has no unit coverage.
+// Room voyage-route e2e (RV1-RV12, Issue #320 Sub 3): W17-W28 re-hosted on the Reading Room, the only host that can still run them. RV4 is the only check that a drawn mark keeps under MAX_TILT; RV3/RV9/RV10 guard showMark's Issue #181 wiring, which has no unit coverage.
 import { makeRoom, scopedHealth } from "../support/room.ts";
 import type { SuiteContext } from "../types.ts";
 
@@ -124,7 +124,7 @@ async function rv3ShipOrRider({ evaluate, check }: SuiteContext): Promise<void> 
   );
 }
 
-async function rv4TiltAndFacing({ evaluate, check }: SuiteContext): Promise<void> {
+export async function rv4TiltAndFacing({ evaluate, check }: SuiteContext): Promise<void> {
   // Samples come from voyagePaintAt (stepTo lands only ON ports, never mid-leg where the tilt varies); the anti-flicker leg is selected by the metric ASSERTED, never by index, which once left this passing on a tie.
   const rv45 = await evaluate<{
     maxTilt: number;

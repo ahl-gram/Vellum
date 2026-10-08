@@ -3,6 +3,7 @@ import type { LivingChart } from "../src/site/living-chart/index.ts";
 import type { VoyageLogPanel } from "../src/site/living-chart/voyage-log-panel.ts";
 import type { PlaceManifest } from "../src/render/place-manifest.ts";
 import type { Survey } from "../src/render/survey.ts";
+import type { World } from "../src/world/types.ts";
 import type { El } from "./element-shim.ts";
 
 /** The engine's whole public surface; the suites pin the SAME list for both host shapes. */
@@ -174,9 +175,9 @@ export function recordingBar(): { bar: Record<string, unknown>; writes: string[]
 }
 
 // A REAL seed-42 world: a synthetic grid would route zero legs and pass proving nothing; the ~1.5s generation is paid once, lazily, and the world is never mutated.
-let world42: { manifest: PlaceManifest; survey: Survey } | null = null;
+let world42: { manifest: PlaceManifest; survey: Survey; world: World } | null = null;
 
-export async function realWorld(): Promise<{ manifest: PlaceManifest; survey: Survey }> {
+export async function realWorld(): Promise<{ manifest: PlaceManifest; survey: Survey; world: World }> {
   if (world42) return world42;
   const [{ installShim }, { defaultRecipe, generateWorld }, { buildPlaceManifest }, { buildSurvey }] =
     await Promise.all([
@@ -188,6 +189,7 @@ export async function realWorld(): Promise<{ manifest: PlaceManifest; survey: Su
   installShim();
   const world = generateWorld(defaultRecipe(42));
   world42 = {
+    world,
     manifest: buildPlaceManifest(world, 1500),
     survey: buildSurvey(world.elev, world.seaLevel, world.roads),
   };

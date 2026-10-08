@@ -263,7 +263,6 @@ function drawerFill(
           if (art.has(keyOf(item))) continue;
           const drawn = await deps.drawThumb(item);
           if (!drawn) continue;
-          // The sheet may have LEFT while its picture was drawing, a window only a re-seat mid-draw opens, and its url is then filed under a key no cutting carries so nothing would ever revoke it.
           if (!items().some((live) => keyOf(live) === keyOf(item))) {
             URL.revokeObjectURL(drawn.url);
             continue;
