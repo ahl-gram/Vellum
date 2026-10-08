@@ -25,7 +25,7 @@ test("the runner's map, the runner and the lane driver each load in a fresh proc
   }
 });
 
-test("npm's runner refuses a misspelled suite with exit 1 before it ever looks for a browser", () => {
+test("npm's runner refuses a misspelled suite with exit 1", () => {
   const child = node([join(ROOT, "e2e", "run.ts")], {
     ...without("VELLUM_E2E_SUITES"),
     VELLUM_E2E_SUITES: "no-such-suite",
@@ -34,7 +34,7 @@ test("npm's runner refuses a misspelled suite with exit 1 before it ever looks f
   assert.match(child.stderr, /^FAIL: VELLUM_E2E_SUITES names a suite that does not exist: no-such-suite\./);
 });
 
-test("npm's lane driver refuses a lane that does not exist with exit 1 before it ever looks for a browser", () => {
+test("npm's lane driver refuses a lane that does not exist with exit 1", () => {
   const child = node([join(ROOT, "e2e", "lanes.ts"), "--lane", "Q"], without("VELLUM_E2E_SUITES"));
   assert.equal(child.status, 1, child.stdout + child.stderr);
   assert.match(child.stderr, /^FAIL: --lane "Q" names a lane that does not exist/);

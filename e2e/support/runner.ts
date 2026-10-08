@@ -42,7 +42,6 @@ export const BROWSERLESS_FAIL =
   "VELLUM_ALLOW_NO_BROWSER=1 to skip on purpose.";
 export const RUNNER_SKIP_LINE =
   "SKIP: no Chromium-family browser found, skipping Explorer e2e (install Brave/Chrome or set VELLUM_BROWSER).";
-// Bounded, because a browser that dies AFTER the liveness probe leaves this send pending forever: the harness settles a waiter only on the matching reply, so an unbounded reset here is a lane that stalls with nothing to read rather than one that fails.
 export const RESET_BOUND_MS = 5000;
 
 type Plan = Omit<StartOptions, "browser" | keyof Accumulators> & {
@@ -51,9 +50,7 @@ type Plan = Omit<StartOptions, "browser" | keyof Accumulators> & {
 };
 
 function plan(env: EnvLike): Plan {
-  // Serves the built dist/ so the e2e validates exactly what gets published (VELLUM_SITE_DIR overrides; run `npm run build` first).
   const SITE = env["VELLUM_SITE_DIR"] ? resolve(env["VELLUM_SITE_DIR"]) : join(REPO, "dist");
-  // Issue #339: VELLUM_E2E_PORT / VELLUM_E2E_DPORT (defaults 8765 / 9222) let two checkouts run side by side; a bad value fails here rather than falling back, since a silent fallback puts both lanes back on the same port.
   const { PORT, DPORT } = resolveE2ePorts(env);
   const OUT = join(REPO, "out", e2eOutSubdir(PORT));
   const PAGE = `http://127.0.0.1:${PORT}/explorer/`;
@@ -85,7 +82,6 @@ export function runnerHooks<C extends RunnerContext>(
     alive: ctx.alive,
     skippedGroups: () => accumulators.skippedGroups,
     onSuiteError: async (name, failure) => {
-      // The WHOLE error, not just its message: a mid-suite TypeError's stack is what HARNESS ERROR used to print, and a report that drops it would be worse reading than the crash it replaces.
       err(`  ${name} stopped early:`, failure);
       const e = failure as { message?: string } | null | undefined;
       ctx.check(
@@ -93,7 +89,6 @@ export function runnerHooks<C extends RunnerContext>(
         false,
         e && e.message ? e.message : String(failure),
       );
-      // clearMobile() is a trailing statement in the suites that emulate a phone or a touch window, not a finally (suites/cluster.ts at 390x844, suites/chart-drawer.ts at 1024x844), so a suite that stops there hands every later suite in the lane that viewport and a cascade of reds that are not defects.
       await Promise.race([
         ctx.clearMobile().catch(() => {}),
         new Promise((settle) => setTimeout(settle, boundMs).unref()),
@@ -142,7 +137,6 @@ export function reportLines(
   return lines;
 }
 
-// The checks that DID run still get their tally: exiting 2 with no score is the thing the streak breaker exists to prevent, and this is the door the breaker itself leaves by.
 export function harnessErrorLines(results: readonly E2eCheckResult[]): readonly string[] {
   return results.length > 0 ? [`\n${runOutcome(results).line}`] : [];
 }

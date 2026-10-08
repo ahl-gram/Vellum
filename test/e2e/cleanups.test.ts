@@ -37,13 +37,17 @@ test("withScriptsOff turns page scripts off for its body and back on after it, a
   assert.deepEqual(scriptsSwitches(failing.sent), [true, false]);
 });
 
-test("a restore the browser refuses leaves the body's own error, or its value, in place", async () => {
+test("a restore the browser refuses keeps the body's own error when the body failed, and fails the run when it passed", async () => {
   const refusing = recorder((s) => s.method === SCRIPTS && s.params?.["value"] === false);
   await assert.rejects(
     withScriptsOff(refusing.send, () => Promise.reject(new Error("the body's own error"))),
     /the body's own error/,
   );
-  assert.equal(await withScriptsOff(refusing.send, () => Promise.resolve(7)), 7);
+  await assert.rejects(
+    withScriptsOff(refusing.send, () => Promise.resolve(7)),
+    /Emulation.setScriptExecutionDisabled refused/,
+    "scripts may still be off for every check after this one, and the run said nothing",
+  );
 });
 
 test("CD50's check turns page scripts back on itself when it fails part way, so no later check inherits them off", async () => {

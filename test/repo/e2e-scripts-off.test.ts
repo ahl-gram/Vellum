@@ -46,10 +46,14 @@ const PLANT: ReadonlyArray<readonly [string, boolean]> = [
     'export const h = (ctx: SuiteContext) => ctx.send("Emulation." + "setScriptExecutionDisabled", { value: true });',
     PASS,
   ],
+  [
+    'import { SWITCH } from "../../test-support/cdp-methods.ts"; export const j = (ctx: SuiteContext) => ctx.send(SWITCH);',
+    PASS,
+  ],
 ];
 const REFUSED = PLANT.flatMap(([, refused], i) => (refused ? [i + 1] : []));
 const BLIND_SPOT =
-  "BLIND SPOT, declared, erring toward passing: the method's name assembled from pieces (the last plant line), which no syntax read can resolve";
+  "BLIND SPOTS, declared, each erring toward passing: the method's name assembled from pieces, and the whole name held in a binding the file never spells, such as a constant imported from a file the rule does not read (the last two plant lines); no syntax read of the one file can resolve either";
 
 const reported = async (path: string): Promise<number[]> => {
   const [result] = await eslint.lintText(PLANT.map(([line]) => line).join("\n"), { filePath: join(ROOT, path) });

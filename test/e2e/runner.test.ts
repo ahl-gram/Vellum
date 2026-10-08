@@ -62,6 +62,7 @@ const fakeSuites = (ctx: Ctx, acc: Accumulators, ran: E2eSuiteName[], run: Suite
 function rig(env: EnvLike, run: SuiteBody = () => {}) {
   const accumulators: Accumulators = { results: [], consoleErrors: [], http4xx: [], skippedGroups: [] };
   const out: string[] = [];
+  const errParts: unknown[][] = [];
   const err: string[] = [];
   const ran: E2eSuiteName[] = [];
   const started: StartOptions[] = [];
@@ -96,9 +97,12 @@ function rig(env: EnvLike, run: SuiteBody = () => {}) {
     suites,
     accumulators,
     out: (line) => out.push(line),
-    err: (...parts) => err.push(parts.map(String).join(" ")),
+    err: (...parts) => {
+      errParts.push(parts);
+      err.push(parts.map(String).join(" "));
+    },
   };
-  return { io, out, err, ran, started, probes, accumulators, details };
+  return { io, out, err, errParts, ran, started, probes, accumulators, details };
 }
 
 test("each suite in the runner's map is the run its own file exports, so no name is wired to a sibling's suite", async () => {
@@ -149,8 +153,9 @@ test("a suite that throws reds its own check, has its viewport reset, and the la
   noExit(t);
   const env = { VELLUM_E2E_SUITES: "health,prospect" };
   const [first, second] = resolveSuiteSelection(env).names;
-  const { io, ran, probes, accumulators, details, err } = rig(env, (name) => {
-    if (name === first) throw new Error("boom");
+  const boom = new Error("boom");
+  const { io, ran, probes, accumulators, details, errParts } = rig(env, (name) => {
+    if (name === first) throw boom;
   });
   assert.equal(await runE2e(io), 1);
   assert.deepEqual(ran, [first, second]);
@@ -159,8 +164,8 @@ test("a suite that throws reds its own check, has its viewport reset, and the la
   assert.match(accumulators.results[at]?.name ?? "", new RegExp(`^${first} stopped early`));
   assert.equal(details[at], "boom", "the red check does not carry the error that stopped the suite");
   assert.ok(
-    err.some((l) => l.startsWith(`  ${first} stopped early:`) && l.includes("boom")),
-    JSON.stringify(err),
+    errParts.some(([lead, failure]) => lead === `  ${first} stopped early:` && failure === boom),
+    "stderr does not get the whole error, stack and all, beside the suite that stopped",
   );
 });
 

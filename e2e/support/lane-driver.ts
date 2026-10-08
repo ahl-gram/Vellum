@@ -84,7 +84,6 @@ function runLane(lane: E2eLane, io: LaneDriverIo): Promise<LaneResult> {
     const prefix = `[${lane.name}]`;
     streamLines(child.stdout, prefix, io.out, readLine);
     streamLines(child.stderr, prefix, io.err, readLine);
-    // A null code is a signal or a failed spawn, so the lane reported no outcome at all: harness failure (2), not failed check (1).
     const done = (code: number | null) =>
       settle({ name: lane.name, code: code ?? 2, ms: performance.now() - started, skipped, tally });
     child.on("error", (err) => {
@@ -108,7 +107,6 @@ export async function runLanes(io: LaneDriverIo): Promise<number> {
     io.err(`FAIL: ${refusal}`);
     return 1;
   }
-  // Piped stdio hides the TTY from a child, so the policy is resolved HERE or a browserless local run hard-fails where `npm run test:e2e` skips.
   if (!io.findBrowser()) return browserlessExit(io.env, io.isTTY, LANES_SKIP_LINE, io);
   for (const lane of selected) {
     io.out(

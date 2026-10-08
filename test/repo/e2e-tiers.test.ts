@@ -12,7 +12,7 @@ import { containment, CTX_THROWING_WAITS } from "../../test-support/e2e-containm
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const src = (p: string) => readE2eSource(join(ROOT, p));
 const CI = src(".github/workflows/ci.yml");
-// A ci.yml scan skips YAML's own comment leader: this pass rewrote ci.yml's prose, and a sentence about fail-fast would otherwise satisfy the guard that fail-fast is SET.
+// A ci.yml scan skips YAML's own comment leader, or a sentence about fail-fast in the workflow's prose would satisfy the guard that fail-fast is SET.
 const ciUncommented = (lines: readonly string[]) => lines.filter((l) => !l.trim().startsWith("#")).join("\n");
 // A ci.yml job block is a two-space key under `jobs:`, read to the next one. Blind spot, named because a scanner cannot enumerate its own: a workflow indented any other way yields NO blocks, which the job-count anchor below turns into a red rather than a silent pass.
 // Second blind spot, same direction: the continue-on-error refusal reads the literal `true` alone, so `${{ }}`, `True` and `yes` slip past it, which costs a miss and never a false red, and the job-count anchor still forces a reader through this sweep whenever a job is added.
