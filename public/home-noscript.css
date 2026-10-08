@@ -1,0 +1,18 @@
+/* Home with scripts off: the how-it-was-made slip shown in flow and the doors' reveal stood down, linked from inside home's noscript so it loads only then. */
+#lf-card-how[hidden] {
+  display: block;
+  position: static;
+  width: auto;
+  max-width: 46rem;
+  max-height: none;
+  margin: 2rem auto 0;
+}
+#lf-card-how .lf-card-close {
+  display: none;
+}
+#lf-card-how .lf-card-scroll {
+  overflow-y: visible;
+}
+.landfall .stage:not(.cam) ~ .lf-card:not(.lf-card-how)[hidden] {
+  animation: none !important;
+}
