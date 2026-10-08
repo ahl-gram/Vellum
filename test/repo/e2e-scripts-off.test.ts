@@ -39,6 +39,10 @@ const PLANT: ReadonlyArray<readonly [string, boolean]> = [
   ['export const f = "scripts go off through Emulation.setScriptExecutionDisabled\'s one helper";', PASS],
   ['export const g = (ctx: SuiteContext) => ctx.send("Emulation.setEmulatedMedia", { media: "print" });', PASS],
   [
+    'const s = "x"; export const i = (ctx: SuiteContext) => ctx.send(`Emulation.setScriptExecutionDisabled${s}`);',
+    PASS,
+  ],
+  [
     'export const h = (ctx: SuiteContext) => ctx.send("Emulation." + "setScriptExecutionDisabled", { value: true });',
     PASS,
   ],

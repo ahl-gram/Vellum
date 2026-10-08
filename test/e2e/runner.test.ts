@@ -44,32 +44,41 @@ const noExit = (t: TestContext): void => {
   });
 };
 
-function rig(env: EnvLike, run: (name: E2eSuiteName, acc: Accumulators) => void = () => {}) {
+type SuiteBody = (name: E2eSuiteName, acc: Accumulators) => void;
+
+const fakeSuites = (ctx: Ctx, acc: Accumulators, ran: E2eSuiteName[], run: SuiteBody) =>
+  Object.fromEntries(
+    E2E_SUITE_ORDER.map((name) => [
+      name,
+      () => {
+        ran.push(name);
+        run(name, acc);
+        ctx.check(`${name} passed`, true);
+        return Promise.resolve();
+      },
+    ]),
+  );
+
+function rig(env: EnvLike, run: SuiteBody = () => {}) {
   const accumulators: Accumulators = { results: [], consoleErrors: [], http4xx: [], skippedGroups: [] };
   const out: string[] = [];
   const err: string[] = [];
   const ran: E2eSuiteName[] = [];
   const started: StartOptions[] = [];
   const probes = { browser: 0, resets: 0, cleanups: 0, alive: true };
+  const details: (string | undefined)[] = [];
   const ctx: Ctx = {
-    check: (name, ok) => accumulators.results.push({ name, ok: Boolean(ok) }),
+    check: (name, ok, detail) => {
+      accumulators.results.push({ name, ok: Boolean(ok) });
+      details.push(detail);
+    },
     alive: () => Promise.resolve(probes.alive),
     clearMobile: () => {
       probes.resets++;
       return Promise.resolve();
     },
   };
-  const suites = Object.fromEntries(
-    E2E_SUITE_ORDER.map((name) => [
-      name,
-      () => {
-        ran.push(name);
-        run(name, accumulators);
-        ctx.check(`${name} passed`, true);
-        return Promise.resolve();
-      },
-    ]),
-  );
+  const suites = fakeSuites(ctx, accumulators, ran, run);
   const io: RunnerIo<Ctx> = {
     env,
     isTTY: false,
@@ -89,7 +98,7 @@ function rig(env: EnvLike, run: (name: E2eSuiteName, acc: Accumulators) => void 
     out: (line) => out.push(line),
     err: (...parts) => err.push(parts.map(String).join(" ")),
   };
-  return { io, out, err, ran, started, probes, accumulators };
+  return { io, out, err, ran, started, probes, accumulators, details };
 }
 
 test("each suite in the runner's map is the run its own file exports, so no name is wired to a sibling's suite", async () => {
@@ -140,14 +149,19 @@ test("a suite that throws reds its own check, has its viewport reset, and the la
   noExit(t);
   const env = { VELLUM_E2E_SUITES: "health,prospect" };
   const [first, second] = resolveSuiteSelection(env).names;
-  const { io, ran, probes, accumulators } = rig(env, (name) => {
+  const { io, ran, probes, accumulators, details, err } = rig(env, (name) => {
     if (name === first) throw new Error("boom");
   });
   assert.equal(await runE2e(io), 1);
   assert.deepEqual(ran, [first, second]);
   assert.equal(probes.resets, 1);
-  const red = accumulators.results.find((r) => !r.ok);
-  assert.match(red?.name ?? "", new RegExp(`^${first} stopped early`));
+  const at = accumulators.results.findIndex((r) => !r.ok);
+  assert.match(accumulators.results[at]?.name ?? "", new RegExp(`^${first} stopped early`));
+  assert.equal(details[at], "boom", "the red check does not carry the error that stopped the suite");
+  assert.ok(
+    err.some((l) => l.startsWith(`  ${first} stopped early:`) && l.includes("boom")),
+    JSON.stringify(err),
+  );
 });
 
 test("the viewport reset after a suite stops is bounded, so a reset that never settles cannot stall the lane", async () => {
@@ -160,6 +174,30 @@ test("the viewport reset after a suite stops is bounded, so a reset that never s
   const outcome = await Promise.race([Promise.resolve(handler("render", new Error("x"))).then(() => "done"), stalled]);
   clearTimeout(guard);
   assert.equal(outcome, "done");
+});
+
+test("a lane whose viewport reset never settles waits five seconds for it, then goes on", async (t) => {
+  noExit(t);
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const { io } = rig({ VELLUM_E2E_SUITES: "health" }, () => {
+    throw new Error("boom");
+  });
+  const stuck: RunnerIo<Ctx> = {
+    ...io,
+    start: async (options) => ({ ...(await io.start(options)), clearMobile: () => new Promise<void>(() => {}) }),
+  };
+  const turn = () => new Promise((settle) => setImmediate(settle));
+  let code: number | undefined;
+  const running = runE2e(stuck).then((c) => {
+    code = c;
+  });
+  await turn();
+  t.mock.timers.tick(4999);
+  await turn();
+  assert.equal(code, undefined, "the lane gave up on the viewport reset before five seconds");
+  t.mock.timers.tick(1);
+  await running;
+  assert.equal(code, 1);
 });
 
 test("a browser that died with its suite ends the run as a harness error, exit 2, with the tally of what did run", async (t) => {
@@ -176,6 +214,7 @@ test("a browser that died with its suite ends the run as a harness error, exit 2
   assert.equal(await runE2e(io), 2);
   assert.match(err.join("\n"), /^HARNESS ERROR:/m);
   assert.ok(out.includes("\nALL PASS  (1/1)"), `the checks that ran got no tally: ${JSON.stringify(out)}`);
+  assert.equal(probes.cleanups, 1, "a harness error left the browser and its profile behind");
 });
 
 test("the harness-error tally is printed when any check ran and not when none did", () => {
@@ -228,6 +267,40 @@ test("the report names the timings, a suite that stopped early and the tier, and
   assert.ok(
     !reportLines([{ name: "render", ms: 1 }], ["render"], "full").some((l) => l.startsWith("\ntier:")),
     "a full run names a tier",
+  );
+});
+
+test("a suite that stopped early is reported once, as stopped, even when it skipped a group first; and the counts agree in number", () => {
+  const both = reportLines([{ name: "motion", ms: 1, aborted: true, skipped: ["M3"] }], ["motion"], "full");
+  assert.ok(!both.some((l) => l.includes("skipped a check group")), JSON.stringify(both));
+  const two = reportLines(
+    [
+      { name: "render", ms: 1, aborted: true },
+      { name: "motion", ms: 1, aborted: true },
+      { name: "turn", ms: 1, skipped: ["T1"] },
+      { name: "verso", ms: 1, skipped: ["V2"] },
+    ],
+    ["render", "motion", "turn", "verso"],
+    "full",
+  );
+  assert.ok(
+    two.some((l) => l.startsWith("\n2 suites stopped early: render, motion.")),
+    JSON.stringify(two),
+  );
+  assert.ok(
+    two.some((l) => l.startsWith("\n2 suites skipped a check group: turn (T1), verso (V2).")),
+    JSON.stringify(two),
+  );
+});
+
+test("the health line says when N1/N2 did not run, and when nothing preceded them", () => {
+  assert.equal(
+    reportLines([{ name: "render", ms: 1 }], ["render"], "custom").at(-1),
+    "  N1/N2 did not run, so nothing here carries a console/network clean bill.",
+  );
+  assert.equal(
+    reportLines([{ name: "health", ms: 1 }], ["health"], "custom").at(-1),
+    "  N1/N2 ran, but nothing preceded them, so they certify no suite.",
   );
 });
 

@@ -31,18 +31,25 @@ const noExit = (t: TestContext): void => {
   });
 };
 
-function child(lines: readonly string[], code: number | null): LaneChild {
+type Script = { out?: readonly string[]; err?: readonly string[]; code?: number | null; fail?: string };
+
+function child(script: Script): LaneChild {
   const stdout = new PassThrough();
   const stderr = new PassThrough();
   const emitter = new EventEmitter();
   let open = 2;
-  const ended = () => {
-    if (--open === 0) emitter.emit("close", code);
+  const finished = () => {
+    if (--open === 0) setImmediate(() => emitter.emit("close", script.code === undefined ? 0 : script.code));
   };
-  stdout.on("end", ended);
-  stderr.on("end", ended);
+  stdout.on("finish", finished);
+  stderr.on("finish", finished);
   setImmediate(() => {
-    for (const line of lines) stdout.write(`${line}\n`);
+    if (script.fail !== undefined) {
+      emitter.emit("error", new Error(script.fail));
+      return;
+    }
+    for (const line of script.out ?? []) stdout.write(`${line}\n`);
+    for (const line of script.err ?? []) stderr.write(`${line}\n`);
     stdout.end();
     stderr.end();
   });
@@ -52,7 +59,7 @@ function child(lines: readonly string[], code: number | null): LaneChild {
 function rig(
   argv: readonly string[],
   env: EnvLike = {},
-  outcome: (lane: string) => [string[], number | null] = () => [["ALL PASS  (1/1)"], 0],
+  script: (lane: string) => Script = () => ({ out: ["ALL PASS  (1/1)"], code: 0 }),
 ) {
   const out: string[] = [];
   const err: string[] = [];
@@ -69,8 +76,7 @@ function rig(
     spawn: (command, args, options) => {
       spawned.push({ command, args, env: options.env, stdio: options.stdio });
       const lane = E2E_LANES.find((l) => String(l.port) === options.env["VELLUM_E2E_PORT"])?.name ?? "?";
-      const [lines, code] = outcome(lane);
-      return child(lines, code);
+      return child(script(lane));
     },
     out: (line) => out.push(line),
     err: (line) => err.push(line),
@@ -105,11 +111,35 @@ test("with no browser the driver's own terminal decides: an interactive run skip
   assert.equal(await runLanes({ ...unattended.io, findBrowser: () => null }), 1);
   assert.match(unattended.err.join("\n"), /^FAIL: no Chromium-family browser was found/);
   assert.equal(quiet.spawned.length + unattended.spawned.length, 0);
+  const allowed = rig([], { VELLUM_ALLOW_NO_BROWSER: "1" });
+  assert.equal(
+    await runLanes({ ...allowed.io, findBrowser: () => null }),
+    0,
+    "the driver ignores its own VELLUM_ALLOW_NO_BROWSER",
+  );
+  const required = rig([], { VELLUM_REQUIRE_BROWSER: "1" });
+  assert.equal(
+    await runLanes({ ...required.io, findBrowser: () => null, isTTY: true }),
+    1,
+    "the driver ignores its own VELLUM_REQUIRE_BROWSER",
+  );
+  assert.ok(!laneLineIsSkip("PASS  R1 the chart draws"), "a passing check reads as a skip");
+  assert.ok(!laneLineIsSkip("  SKIP: indented"), "a mention of a skip reads as the runner's own line");
+});
+
+test("a lane that cannot start fails the run with its reason, and a lane's stderr reaches the driver's, prefixed", async (t) => {
+  noExit(t);
+  const lost = rig(["--lane", "A"], {}, () => ({ fail: "spawn ENOENT" }));
+  assert.equal(await runLanes(lost.io), 1);
+  assert.ok(lost.err.includes("[A] FAIL: lane could not start: spawn ENOENT"), JSON.stringify(lost.err));
+  const noisy = rig(["--lane", "A"], {}, () => ({ out: ["ALL PASS  (1/1)"], err: ["a warning"], code: 0 }));
+  assert.equal(await runLanes(noisy.io), 0);
+  assert.ok(noisy.err.includes("[A] a warning"), JSON.stringify(noisy.err));
 });
 
 test("each selected lane spawns this Node on the runner's own file, with that lane's suites and ports", async (t) => {
   noExit(t);
-  const { io, spawned } = rig(["--lane", "C"]);
+  const { io, spawned } = rig(["--lane", "C"], { VELLUM_BROWSER: "/x/brave" });
   assert.equal(await runLanes(io), 0);
   const lane = E2E_LANES.find((l) => l.name === "C")!;
   assert.equal(spawned.length, 1);
@@ -119,6 +149,11 @@ test("each selected lane spawns this Node on the runner's own file, with that la
   assert.deepEqual(spawned[0]!.stdio, ["ignore", "pipe", "pipe"]);
   assert.equal(spawned[0]!.env["VELLUM_E2E_SUITES"], lane.suites.join(","));
   assert.equal(spawned[0]!.env["VELLUM_E2E_DPORT"], String(lane.dport));
+  assert.equal(
+    spawned[0]!.env["VELLUM_BROWSER"],
+    "/x/brave",
+    "the lane child does not inherit the driver's environment",
+  );
 });
 
 test("no lane argument runs every lane, and a lane argument runs that lane alone", async (t) => {
@@ -141,17 +176,28 @@ test("the exit code is the lanes' outcome: a red or killed lane fails the run, a
   noExit(t);
   const green = rig(["--lane", "A"]);
   assert.equal(await runLanes(green.io), 0);
+  const laneA = E2E_LANES.find((l) => l.name === "A")!;
+  assert.equal(
+    green.out[0],
+    `lane A: ${laneA.suites.length} suites on port ${laneA.port}/${laneA.dport}: ${laneA.suites.join(", ")}`,
+  );
   assert.ok(green.out.includes("[A] ALL PASS  (1/1)"), JSON.stringify(green.out));
-  const red = rig(["--lane", "A"], {}, () => [["SOME FAILED  (1/2)"], 1]);
+  assert.match(
+    green.out.at(-1) ?? "",
+    /^\nLANE A PASS {2}\(1 of 4 lanes, not the full suite; 1\/1 checks;/,
+    JSON.stringify(green.out),
+  );
+  const red = rig(["--lane", "A"], {}, () => ({ out: ["SOME FAILED  (1/2)"], code: 1 }));
   assert.equal(await runLanes(red.io), 1);
-  const skipped = rig(["--lane", "A"], {}, () => [["SKIP: no browser"], 0]);
+  assert.match(red.out.at(-1) ?? "", /1\/2 checks;/, JSON.stringify(red.out));
+  const skipped = rig(["--lane", "A"], {}, () => ({ out: ["SKIP: no browser"], code: 0 }));
   assert.equal(await runLanes(skipped.io), 0);
   assert.match(
     skipped.out.at(-1) ?? "",
     /^\nLANE A SKIPPED, so this run proves less than a pass/,
     JSON.stringify(skipped.out),
   );
-  const killed = rig(["--lane", "A"], {}, () => [[], null]);
+  const killed = rig(["--lane", "A"], {}, () => ({ code: null }));
   assert.equal(await runLanes(killed.io), 1);
 });
 

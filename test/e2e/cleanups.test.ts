@@ -3,8 +3,9 @@ import assert from "node:assert/strict";
 import { withScriptsOff } from "../../e2e/support/scripts-off.ts";
 import { cd50ScriptsOffHome } from "../../e2e/suites/chart-drawer/portfolio.ts";
 import type { TableKit } from "../../e2e/suites/chart-drawer/kit.ts";
-import { dnContinue, dnRefused } from "../../e2e/suites/cluster/desk-notice.ts";
+import { deskKit, dnContinue, dnRefused } from "../../e2e/suites/cluster/desk-notice.ts";
 import type { DeskKit } from "../../e2e/suites/cluster/desk-notice.ts";
+import type { SuiteContext } from "../../e2e/types.ts";
 
 const SCRIPTS = "Emulation.setScriptExecutionDisabled";
 type Sent = { method: string; params?: Record<string, unknown> };
@@ -97,4 +98,42 @@ test("DN4's check forgets the dismissal itself when it fails part way, so the no
   } as unknown as DeskKit;
   await assert.rejects(dnContinue(kit), /settle timeout/);
   assert.deepEqual(steps, ["forget", "open", "forget"]);
+});
+
+test("withScriptsOff keeps scripts off until its body has settled, not merely started", async () => {
+  const { sent, send } = recorder();
+  let during: unknown[] = [];
+  await withScriptsOff(send, async () => {
+    await new Promise((settle) => setImmediate(settle));
+    during = scriptsSwitches(sent);
+  });
+  assert.deepEqual(during, [true], "scripts came back on while the body was still running");
+});
+
+test("DN7's check keeps its own failure when the browser refuses to take the refusal back off", async () => {
+  const { send } = recorder((s) => s.method === "Page.removeScriptToEvaluateOnNewDocument");
+  const kit = {
+    send,
+    check: () => {},
+    setMobileViewport: () => Promise.resolve(),
+    consoleErrors: [],
+    open: () => Promise.reject(new Error("navigation failed")),
+  } as unknown as DeskKit;
+  await assert.rejects(dnRefused(kit), /navigation failed/);
+});
+
+test("the desk kit's forget removes the notice's own key from the page's storage", async () => {
+  const { send } = recorder();
+  const evaluated: string[] = [];
+  const ctx = {
+    send,
+    evaluate: (expression: string) => {
+      evaluated.push(expression);
+      return Promise.resolve("complete");
+    },
+    sleep: () => Promise.resolve(),
+    PORT: 8765,
+  } as unknown as SuiteContext;
+  await deskKit(ctx).forget();
+  assert.ok(evaluated.includes(`localStorage.removeItem("vellum.desk-notice.v1")`), JSON.stringify(evaluated));
 });
