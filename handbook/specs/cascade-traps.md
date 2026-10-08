@@ -16,7 +16,7 @@ declaration you write to get there. The checklist form of the same lines is `vel
   scoping neither, and a repair that carries one arm will pass a guard written for the other.
 - **The best fix is often no media query at all.** Ask whether the state you are dressing already
   implies the condition: an override scoped on that state alone wins outright and fights nothing.
-- **The layout's inline style block renders after the page stylesheet**, so a page override of a shell
+- **The shell sheet, `public/shell.css`, loads after the page stylesheet**, so a page override of a shell
   rule needs higher specificity or it silently does nothing. Equal specificity is not enough.
 - **A rule carrying an id cannot be beaten by a plain class.** Change that rule's own variables.
 - **The house sheets dress every button.** Their hover wash sits three classes deep, so a chrome hover

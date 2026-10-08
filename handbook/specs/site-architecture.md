@@ -89,33 +89,35 @@ symbol and path so the reader goes and looks.
   arm of `atlasHead` in `src/atlas/document.ts`), carries the same tag; the offline download keeps its
   own, since its bytes are pinned. A desktop browser ignores the tag, so a narrowed or zoomed desktop
   window lays out at its own width: every page below 1024 keeps its 1024 layout at full size and the
-  window scrolls sideways over it (the `min-width` on `body` in `BaseLayout.astro`, Issue #762, and on
+  window scrolls sideways over it (the `min-width` on `body` in `public/shell.css`, Issue #762, and on
   the served atlas's `html` in `src/atlas/document.ts`, Issue #763).
   `test/site/astro-scaffold.test.ts` and `test/atlas/document.test.ts` hold the tag, and `FL1` in
   `e2e/suites/corners/floor.ts` holds every served page to the floor. **No rule switches the layout at
   a fixed window width at or below the floor**, in a sheet or a script: `vellum/css-no-narrow-width`
   refuses one in a sheet under `public/`, `vellum/no-narrow-width` in a TypeScript file under `src/`
   (both in `scripts/lint/narrow-width.ts`), and `CO1` in `e2e/suites/corners.ts` in any sheet a built
-  page loads, an `.astro` page's `<style>` included. A script inside an `.astro` page reaches none of
-  them. A length that shrinks with the window, a height, the window's shape and a box's own size
+  page loads. A script inside an `.astro` page reaches none of them. A length that shrinks with the window, a height, the window's shape and a box's own size
   are outside the rule.
-- **The shell dresses once.** Every shared shell rule lives in `BaseLayout.astro`'s
-  `<style is:global>` block, and a page's own sheet carries page-specific rules only.
+- **The shell dresses once.** Every shared shell rule lives in `public/shell.css`, and a page's own
+  sheet carries page-specific rules only. A page carries no `<style>` of its own: its CSS lives in a
+  sheet under `public/`, where the stylesheet lint reads it (Alex, Issue #779 comment 6067462530);
+  home's scripts-off rules are `public/home-noscript.css`, linked from inside its `<noscript>`.
 - **Sheet order is a contract.** The layout links the root sheets, then the shared sheets a page
   opts into through its `extraCss` prop, then the page's own `public/**/index.css`, so a page keeps
   the last word on its own layout. An `extraCss` href is validated at render and THROWS unless it is
-  root-absolute. The layout's inline `<style>` renders after the page sheet's link, which is why a
+  root-absolute. The layout links `public/shell.css` last, after the page sheet, which is why a
   page override of a shell rule needs higher specificity; that trap belongs to
-  `handbook/specs/cascade-traps.md` and is not restated here.
+  `handbook/specs/cascade-traps.md` and is not restated here, and `test/site/astro-scaffold.test.ts`
+  holds the order in every built head.
 - **Authored CSS hides in more places than `public/`.** A sweep written against `public/` alone
   misses every source in `src/` and passes. **The repo keeps its own roster of those**,
-  `SRC_CSS_FILES` in `test-support/site-sheets.ts`, including a page that carries its own style
-  block and a card whose faces are built rather than authored, and `SRC_CSS` in
+  `SRC_CSS_FILES` in `test-support/site-sheets.ts`, including a card whose faces are built rather
+  than authored, and `SRC_CSS` in
   `test/site/tip-affordance.test.ts` pairs each with a way to get its CSS as a string, typed against
   that list so neither can hold a source the other lacks. Read that roster rather than any list
-  written in prose, this one included: the sources are of several shapes (a layout's global block,
-  a constant written verbatim to a generated sheet, constants that only exist once the document is
-  composed) and each needs its own way in.
+  written in prose, this one included: the sources are of several shapes (a constant written
+  verbatim to a generated sheet, constants that only exist once the document is composed) and each
+  needs its own way in.
 - **Link form is scoped, and the flat rule is false.** Root-absolute is the form for the links the
   SHELL owns: the `NAV_ITEMS` hrefs, which are root-absolute trailing-slash directory form by their
   own interface contract, the root and shared sheets, the icons and fonts, and the discovery routes.
@@ -178,8 +180,8 @@ SVG remains the byte-faithful artifact.
   one built page. Where byte identity matters, hand the text through as literal markup rather than
   through an expression.
 - **CSS that travels as a STRING keeps its comments, and they ship as public page bytes.** The
-  distinction is whether the build's CSS pipeline ever sees it. The layout's global block is
-  minified into the page and its comments are stripped. `ATLAS_SHEET_CSS` in `src/atlas/document.ts`
+  distinction is whether the build's CSS pipeline ever sees it. A sheet under `public/` is copied as
+  written, comments included, so the same holds for it. `ATLAS_SHEET_CSS` in `src/atlas/document.ts`
   is a string: interpolated into the generated atlas document, and assigned to a style element's
   text content at runtime by the Print Room's bundled code. Neither path is minified, so prose
   written there is visible in the live page source and greppable by anyone, and a placeholder string
@@ -242,21 +244,21 @@ other way, which is what earns them a section of their own.
 precisely, because a token that falls outside it looks identical at the point of use.
 
 - **A colour goes in BOTH places, which is `ui-design.md`'s own wording**: declared once in
-  `BaseLayout.astro`'s global style and mirrored in `SITE_PALETTE` in `src/atlas/palette.ts`. The
+  `public/shell.css` and mirrored in `SITE_PALETTE` in `src/atlas/palette.ts`. The
   guard is a `deepEqual` against `TOKENS` in `test/site/shell-css.test.ts`, so the ratified roster is
   a third place the pair is measured against. The phrase "the three-place join" belongs to
   `test/atlas/document.test.ts`, which uses it in its own title for the arrangement below, and is not
   `ui-design.md`'s wording for the colour rule.
 - **The rule for what is outside is a DERIVATION, not a list.** `SITE_PALETTE` carries flat
   name-to-hex colours only, so a token whose value is not a flat hex is not in the join. Where it
-  lives is then wherever declares it: the layout's global style holds the deep, the depth shadows
+  lives is then wherever declares it: `public/shell.css` holds the deep, the depth shadows
   and the room-furniture lengths; `public/fonts.css` and `public/motion.css` declare their
   own; and a page sheet may declare one in its own `:root`, where the SAME token name legitimately
   holds a different value on different pages. Check the declaration, not a remembered home.
 - **A self-contained generated document declares its own copy, in one of two shapes.** The atlas
   declares the deep and the sheet depth in a screen-dress constant inside `src/atlas/document.ts`,
   which is module-local and reached by composing the document rather than by importing a symbol, and
-  `test/atlas/document.test.ts` pins those declarations EQUAL to the layout's. For the motion timings
+  `test/atlas/document.test.ts` pins those declarations EQUAL to the shell sheet's. For the motion timings
   it uses the other shape, an inline `var()` fallback carrying a literal, because the standalone
   download links no motion sheet. **Nothing pins those literals, so that shape drifts silently**;
   prefer the pinned one, and if you use the fallback shape, know that a change to the sheet will not

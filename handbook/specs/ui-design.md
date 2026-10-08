@@ -72,7 +72,7 @@ download links no stylesheet of ours, so with the variables undefined it still l
 
 ## The palette, by role
 
-Every colour is a named token, declared once in the layout and mirrored for the generated documents.
+Every colour is a named token, declared once in `public/shell.css` and mirrored for the generated documents.
 The roles are what to design against:
 
 **Inks.** `--ink-dark` is the dark walnut of borders, buttons, prose and emphasis. `--ink-brown` is

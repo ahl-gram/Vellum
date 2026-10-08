@@ -33,7 +33,7 @@ export default defineConfig({
   site: "https://www.vellumworlds.com",
   // Every internal link and og:url is trailing-slash directory form (constraint 8).
   trailingSlash: "always",
-  // The migrated pages' markup must stay near-verbatim (no minification drift), and nothing on this site may be fingerprinted: no whitespace minification, and the layout's small shell <style> inlines instead of emitting a fingerprinted sheet.
+  // The migrated pages' markup must stay near-verbatim (no minification drift), and nothing on this site may be fingerprinted: no whitespace minification, and any <style> Astro processes inlines instead of emitting a fingerprinted sheet (the shell itself is public/shell.css since Issue #779).
   compressHTML: false,
   build: { inlineStylesheets: "always" },
   vite: { plugins: [publicDirIndexes()] },

@@ -393,9 +393,17 @@ test("each rendered head carries the canonical meta with the ratified prop fan-o
     const motion = head.indexOf('<link rel="stylesheet" href="/motion.css">');
     const pageCss = head.indexOf('<link rel="stylesheet" href="index.css">');
     assert.ok(fonts >= 0 && motion > fonts && pageCss > motion, `${p.route} stylesheet links keep today's order`);
+  }
+});
+
+test("every built head links public/shell.css after its own sheet, the place the layout's inline style held, so a page rule still needs higher specificity to override the shell (handbook/specs/cascade-traps.md)", () => {
+  for (const p of PAGES) {
+    const head = headOf(page(p.route));
+    const pageCss = head.indexOf('<link rel="stylesheet" href="index.css">');
+    assert.ok(pageCss >= 0, `${p.route} links its own sheet`);
     assert.ok(
       head.indexOf('<link rel="stylesheet" href="/shell.css">') > pageCss,
-      `${p.route} links public/shell.css after its own sheet, the place the layout's inline style held, so a page rule still needs higher specificity to override the shell (handbook/specs/cascade-traps.md)`,
+      `${p.route} links public/shell.css after index.css`,
     );
   }
 });
