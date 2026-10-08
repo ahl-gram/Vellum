@@ -52,6 +52,7 @@ const BODY = [
   "  await (async () => { await ctx.waitSettled(); })();",
   "  const rec = async (n: number): Promise<void> => { if (n > 0) await rec(n - 1); };",
   "  await rec(1);",
+  "  const c1: () => Promise<void> = c2; const c2: () => Promise<void> = c1; await c1();",
   '  await step("F", async function () { await ctx.waitSettled(); });',
   "  const pause = makeSettle(ctx);",
   '  await pause("x" as never, () => true, "y");',
@@ -64,7 +65,7 @@ const at = (lines: readonly number[]): number[] => lines.map((n) => n + HEAD.len
 test("in a suite's own run, a wait or a throw that can fail stands inside a step, the thrower read through the type checker into a support module, a part file or a destructured kit member (Issue #560)", async () => {
   assert.deepEqual(
     await reports([...HEAD, ...BODY], "e2e/suites/health.ts"),
-    at([1, 3, 4, 6, 8, 10, 12, 15, 16, 17, 19, 21, 22, 27, 28]),
+    at([1, 3, 4, 6, 8, 10, 12, 15, 16, 17, 19, 21, 22, 28, 29]),
     "BLIND SPOTS, declared, each with its direction: a function-typed member of a hand-written type, evaluate among them, is not followed (a miss); nor a function passed by reference, as to .then(fn) (a miss); nor .call and .bind (a miss); nor a new expression (a miss); a member read that throws on a missing value is no call (a miss, the PR #680, #681, #682 and #725 rows' class); a step reached by any name but step is not a step (a false red)",
   );
 });
@@ -72,7 +73,7 @@ test("in a suite's own run, a wait or a throw that can fail stands inside a step
 test("each lint run reads its own program: the same plant at a second suite reports the same lines (Issue #560)", async () => {
   assert.deepEqual(
     await reports([...HEAD, ...BODY], "e2e/suites/cluster.ts"),
-    at([1, 3, 4, 6, 8, 10, 12, 15, 16, 17, 19, 21, 22, 27, 28]),
+    at([1, 3, 4, 6, 8, 10, 12, 15, 16, 17, 19, 21, 22, 28, 29]),
   );
 });
 
