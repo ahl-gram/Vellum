@@ -49,7 +49,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await r14Region(ctx);
 }
 
-async function r0ToR4Worker({ evaluate, check, waitReady }: SuiteContext): Promise<void> {
+export async function r0ToR4Worker({ evaluate, check, waitReady }: SuiteContext): Promise<void> {
   check("R0 page loaded + initial auto-draw rendered", await waitReady());
   const r0b = await evaluate<{ seed: string; expected: string }>(
     `(async()=>{const {seedForDate}=await import("./engine/world/seed-of-the-day.js");return{seed:document.getElementById("seed").value,expected:String(seedForDate(new Date()))};})()`,

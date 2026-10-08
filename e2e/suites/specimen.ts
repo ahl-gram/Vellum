@@ -20,7 +20,6 @@ import { sb9bPrinted, sb9PrintIsPaper, sb9dNoScript } from "./specimen/print.ts"
 export async function run(ctx: SuiteContext): Promise<void> {
   const { send, sleep } = ctx;
   const settle = makeSettle(ctx);
-  // SB4 is the one group here that waits on a transition, so it is the one that is stepped (Issue #534).
   const step = makeStep(ctx);
   const gate = scopedHealth(ctx);
   const k = specimenKit({ ...ctx, settle });
@@ -30,16 +29,18 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const rest = await goto();
   await sb1Boots(k, rest);
   await step("SB4", () => sb4Folded(k, rest));
-  await setState("leaned");
-  await sleep(900);
-  const leaned = await read();
-  sb5Leaned(k, leaned);
-  const interior = await brightest(200, 24);
-  await sb5bEdgesDark(k, interior);
-  await sb5dGlassBare(k, leaned, interior);
-  await sb5eFolioPanel(k, rest, leaned);
-  sb8eInsets(k, leaned);
-  await sb5cFooting(k, rest, leaned);
+  await step("SB5", async () => {
+    await setState("leaned");
+    await sleep(900);
+    const leaned = await read();
+    sb5Leaned(k, leaned);
+    const interior = await brightest(200, 24);
+    await sb5bEdgesDark(k, interior);
+    await sb5dGlassBare(k, leaned, interior);
+    await sb5eFolioPanel(k, rest, leaned);
+    sb8eInsets(k, leaned);
+    await sb5cFooting(k, rest, leaned);
+  });
   await sb6RestAgain(k);
   // SB9b prints a leaned Book; the phone block that used to lean it before here went with the narrow layout (Issue #762).
   await setState("leaned");

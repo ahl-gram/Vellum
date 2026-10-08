@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { resolve } from "node:path";
 import { dropExpectedCancellations } from "../support/console.ts";
+import { makeStep } from "../support/step.ts";
 import type { SuiteContext } from "../types.ts";
 import { runningHeadKit } from "./runninghead/kit.ts";
 import type { RunningHeadKit } from "./runninghead/kit.ts";
@@ -33,6 +34,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const { send, consoleErrors, http4xx } = ctx;
   const errBase = consoleErrors.length;
   const httpBase = http4xx.length;
+  const step = makeStep(ctx);
   const k = runningHeadKit(ctx);
   const { visit } = k;
 
@@ -47,7 +49,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   rh6Differ(ctx, heads, prose);
   await rh7AtlasTitle(k);
   rh9ContrastPins(ctx, heads, bad);
-  await rh10GalleryScrolled(k);
+  await step("RH10", () => rh10GalleryScrolled(k));
   // The stageless room on paper at a phone's width (RH10c, RH10d) and at Letter (RH10e); the screen's 1024 floor never reaches print.
   await send("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 1, mobile: false });
   // The Z13 bounce: /gallery/ is already loaded, and visit()'s probe (readyState complete plus a .wordmark) is satisfied by the STALE document, so a same-URL navigate can return before the new one commits.

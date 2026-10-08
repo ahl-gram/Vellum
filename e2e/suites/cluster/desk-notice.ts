@@ -36,13 +36,9 @@ const READ: Payload<Notice> = `(() => {
     tap: { x: Math.round(cx - vv.offsetLeft), y: Math.round(cy - vv.offsetTop) } };
 })()`;
 
-export type DeskKit = SuiteContext & {
-  settle: ReturnType<typeof makeSettle>;
-  open: (path: string) => Promise<void>;
-  forget: () => Promise<void>;
-};
+export type DeskKit = ReturnType<typeof deskKit>;
 
-export function deskKit(ctx: SuiteContext): DeskKit {
+export function deskKit(ctx: SuiteContext) {
   const { send, evaluate, PORT } = ctx;
   const settle = makeSettle(ctx);
   const open = async (path: string): Promise<void> => {

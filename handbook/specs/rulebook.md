@@ -371,9 +371,9 @@ line yourself. A type-check skip passes only where the "Not skips" line below na
 **Not skips:** the `@ts-expect-error` lines in `test/repo/e2e-read-types.test.ts`, each a negative
 type test asserting the checker rejects a shape; directive text inside a string in a test fixture;
 and the element parameters `no-param-reassign` lets a function write through, a scope set in
-`eslint.config.ts` rather than a skip at a line. **The e2e tree carries no inline skip at all**, and
-`test/repo/e2e-type-notes.test.ts` holds it there: a read it doubts is written with a non-null mark
-or a real check.
+`eslint.config.ts` rather than a skip at a line. **The e2e tree carries no inline skip at all**, which
+the accepted list holds by naming no e2e file: a read it doubts is written with a non-null mark or a
+real check.
 
 **One list stands outside the inline form: `eslint-suppressions.json`** (Alex, 2026-10-07,
 Issue #779). ESLint writes it and applies it on every lint run. It records, file by file, how many
