@@ -66,10 +66,10 @@ test("smoke keeps the three suites that cover the worker and its fallback", () =
   }
 });
 
-function standIn(live: boolean) {
+function standIn(hook: string, live: boolean) {
   const seen = new Map<string, boolean>();
-  const writes: boolean[] = [];
-  const window = { __vellumUsesWorker: () => live, __vellumReadingRoomUsesWorker: () => live };
+  const log: Array<boolean | "navigate"> = [];
+  const window = { [hook]: () => live };
   const ctx = {
     evaluate: async (payload: string): Promise<unknown> => {
       try {
@@ -82,7 +82,10 @@ function standIn(live: boolean) {
       const id = name.split(" ")[0]!;
       if (!seen.has(id)) seen.set(id, ok);
     },
-    send: () => Promise.resolve({}),
+    send: (method: string) => {
+      if (method === "Page.reload" || method === "Page.navigate") log.push("navigate");
+      return Promise.resolve({});
+    },
     sleep: () => Promise.resolve(),
     waitReady: () => Promise.resolve(true),
     waitSettled: () => Promise.resolve(),
@@ -93,14 +96,14 @@ function standIn(live: boolean) {
     PORT: 0,
     serverState: {
       get blockWorker(): boolean {
-        return writes.at(-1) ?? false;
+        return log.findLast((entry) => entry !== "navigate") ?? false;
       },
       set blockWorker(v: boolean) {
-        writes.push(v);
+        log.push(v);
       },
     },
   };
-  return { ctx: ctx as unknown as SuiteContext, seen, writes };
+  return { ctx: ctx as unknown as SuiteContext, seen, log };
 }
 const ranOver = async (run: () => Promise<void>): Promise<void> => {
   try {
@@ -110,22 +113,24 @@ const ranOver = async (run: () => Promise<void>): Promise<void> => {
 
 test("R1 and RR1 pass a page whose worker is live and fail one whose worker is dead, read as the page reads them (census row 1, run over a stand-in page)", async () => {
   for (const live of [true, false]) {
-    const explorer = standIn(live);
+    const explorer = standIn("__vellumUsesWorker", live);
     await ranOver(() => r0ToR4Worker(explorer.ctx));
     assert.equal(explorer.seen.get("R1"), live, `R1 with the worker ${live ? "live" : "dead"}`);
-    const room = standIn(live);
+    const room = standIn("__vellumReadingRoomUsesWorker", live);
     await ranOver(() => rr0Boots(readingRoomKit(room.ctx)));
     assert.equal(room.seen.get("RR1"), live, `RR1 with the worker ${live ? "live" : "dead"}`);
   }
 });
 
 test("both fallback checks tell the server to refuse the worker before they read the page (census row 1, run over a stand-in page)", async () => {
-  const explorer = standIn(false);
+  const refusedFirst = (log: ReadonlyArray<boolean | "navigate">): boolean =>
+    log.includes(true) && log.indexOf(true) < log.indexOf("navigate");
+  const explorer = standIn("__vellumUsesWorker", false);
   await ranOver(() => fallback(explorer.ctx));
-  assert.ok(explorer.writes.includes(true), "the Explorer's fallback never refuses the worker, so it tests the worker");
-  const room = standIn(false);
+  assert.ok(refusedFirst(explorer.log), "the Explorer's fallback does not refuse the worker before it loads the page");
+  const room = standIn("__vellumReadingRoomUsesWorker", false);
   await ranOver(() => rr14Fallback(room.ctx));
-  assert.ok(room.writes.includes(true), "the Reading Room's fallback never refuses the worker, so it tests the worker");
+  assert.ok(refusedFirst(room.log), "the Reading Room's fallback does not refuse the worker before it loads the page");
 });
 
 test("the smoke tier stays materially cheaper than the full suite", () => {
@@ -293,9 +298,9 @@ test("the harness hands out exactly the two throwing waits vellum/e2e-throw-insi
   const harness = src("e2e/harness.ts").split("\n");
   const found = harness
     .map((line, i) => ({ line, i }))
-    .filter(({ line }) => /^async function wait\w+\(/.test(line))
+    .filter(({ line }) => /^(?:async function wait\w+\(|(?:export )?const wait\w+ = async)/.test(line))
     .filter(({ i }) => harness.slice(i, i + 12).some((l) => /throw new Error\("wait/.test(l)))
-    .map(({ line }) => line.replace(/^async function (wait\w+)\(.*$/, "$1"));
+    .map(({ line }) => line.replace(/^(?:async function |(?:export )?const )(wait\w+)\W.*$/, "$1"));
   assert.deepEqual(
     found,
     CTX_THROWING_WAITS.filter((w) => w !== "settle"),
@@ -368,6 +373,7 @@ test("a suite's family is its suite file and every TypeScript file in its own fo
       "e2e/suites/zoom-gestures/checks.ts",
       "e2e/support/zoom.ts",
       "e2e/zoom.ts",
+      "e2e/suites/health.ts",
     ].forEach(plant);
     assert.deepEqual(e2eSuiteFamily(root, "zoom"), [
       "e2e/suites/zoom.ts",
@@ -378,6 +384,11 @@ test("a suite's family is its suite file and every TypeScript file in its own fo
       "e2e/suites/zoom-gestures.ts",
       "e2e/suites/zoom-gestures/checks.ts",
     ]);
+    assert.deepEqual(
+      e2eSuiteFamily(root, "health"),
+      ["e2e/suites/health.ts"],
+      "a suite with no folder is its file alone",
+    );
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

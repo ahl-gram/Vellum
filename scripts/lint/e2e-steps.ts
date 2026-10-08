@@ -82,6 +82,11 @@ const isOriginThrow = (n: ts.Node): boolean => {
   return true;
 };
 
+const bareExpression = (e: ts.Expression): ts.Expression =>
+  ts.isParenthesizedExpression(e) || ts.isAsExpression(e) || ts.isNonNullExpression(e)
+    ? bareExpression(e.expression)
+    : e;
+
 class Throwers {
   readonly #memo = new Map<ts.Node, boolean>();
   readonly #checker: ts.TypeChecker;
@@ -89,28 +94,55 @@ class Throwers {
     this.#checker = checker;
   }
 
-  #functionsOf(decl: ts.Declaration): ts.FunctionLikeDeclaration[] {
+  #declared(at: ts.Node, seen: Set<ts.Node>): ts.FunctionLikeDeclaration[] {
+    let symbol = this.#checker.getSymbolAtLocation(at);
+    if (symbol && symbol.flags & ts.SymbolFlags.Alias) symbol = this.#checker.getAliasedSymbol(symbol);
+    return (symbol?.declarations ?? []).flatMap((d) => this.#functionsOf(d, seen));
+  }
+
+  #valueOf(e: ts.Expression, seen: Set<ts.Node>): ts.FunctionLikeDeclaration[] {
+    const value = bareExpression(e);
+    if (isFunctionLike(value)) return [value];
+    if (ts.isIdentifier(value)) return this.#declared(value, seen);
+    if (ts.isCallExpression(value)) return this.#results(value, seen);
+    return [];
+  }
+
+  #results(call: ts.CallExpression, seen: Set<ts.Node>): ts.FunctionLikeDeclaration[] {
+    return this.#callees(call, seen).flatMap((fn) => {
+      if (!fn.body) return [];
+      if (!ts.isBlock(fn.body)) return this.#valueOf(fn.body, seen);
+      const out: ts.FunctionLikeDeclaration[] = [];
+      ownNodes(fn.body, (n) => {
+        if (ts.isReturnStatement(n) && n.expression) out.push(...this.#valueOf(n.expression, seen));
+      });
+      return out;
+    });
+  }
+
+  #functionsOf(decl: ts.Declaration, seen: Set<ts.Node>): ts.FunctionLikeDeclaration[] {
+    if (seen.has(decl)) return [];
+    seen.add(decl);
     if (isFunctionLike(decl)) return [decl];
     if ((ts.isVariableDeclaration(decl) || ts.isPropertyAssignment(decl)) && decl.initializer)
-      return isFunctionLike(decl.initializer) ? [decl.initializer] : [];
+      return this.#valueOf(decl.initializer, seen);
     if (ts.isShorthandPropertyAssignment(decl))
       return (this.#checker.getShorthandAssignmentValueSymbol(decl)?.declarations ?? []).flatMap((d) =>
-        this.#functionsOf(d),
+        this.#functionsOf(d, seen),
       );
     if (ts.isBindingElement(decl)) {
       const key = decl.propertyName ?? decl.name;
       if (!ts.isIdentifier(key)) return [];
       const property = this.#checker.getTypeAtLocation(decl.parent).getProperty(key.text);
-      return (property?.declarations ?? []).flatMap((d) => this.#functionsOf(d));
+      return (property?.declarations ?? []).flatMap((d) => this.#functionsOf(d, seen));
     }
     return [];
   }
 
-  #targets(call: ts.CallExpression): ts.FunctionLikeDeclaration[] {
-    const at = ts.isPropertyAccessExpression(call.expression) ? call.expression.name : call.expression;
-    let symbol = this.#checker.getSymbolAtLocation(at);
-    if (symbol && symbol.flags & ts.SymbolFlags.Alias) symbol = this.#checker.getAliasedSymbol(symbol);
-    return (symbol?.declarations ?? []).flatMap((d) => this.#functionsOf(d));
+  #callees(call: ts.CallExpression, seen: Set<ts.Node>): ts.FunctionLikeDeclaration[] {
+    const callee = bareExpression(call.expression);
+    if (ts.isCallExpression(callee)) return this.#results(callee, seen);
+    return this.#declared(ts.isPropertyAccessExpression(callee) ? callee.name : callee, seen);
   }
 
   #throws(fn: ts.FunctionLikeDeclaration): boolean {
@@ -128,7 +160,7 @@ class Throwers {
 
   throwing(call: ts.CallExpression): boolean {
     if (CTX_THROWING_WAITS.includes(calleeName(call) ?? "")) return true;
-    return this.#targets(call).some((fn) => this.#throws(fn));
+    return this.#callees(call, new Set()).some((fn) => this.#throws(fn));
   }
 }
 
