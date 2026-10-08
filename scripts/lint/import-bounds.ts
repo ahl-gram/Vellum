@@ -40,6 +40,10 @@ const sourcesJudged = (
   };
   return { Literal: judge, TemplateElement: judge };
 };
+export const globalReferences = (scope: Scope.Scope): Scope.Reference[] => [
+  ...scope.through,
+  ...scope.variables.filter((v) => v.defs.length === 0).flatMap((v) => v.references),
+];
 const climb = (node: Node): Node => (node.parent && WRAPPERS.has(node.parent.type) ? climb(node.parent) : node);
 
 const isGlass = (file: string): boolean => /^src\/society\/philology[\w-]*\.ts$/.test(repoPath(file));
@@ -68,12 +72,13 @@ const isMathName = (node: Node): boolean =>
   !inTypePosition(node.parent) &&
   !(node.parent.type === "MemberExpression" && node.parent.property === node && !node.parent.computed) &&
   !(node.parent.type === "Property" && node.parent.key === node && !node.parent.computed);
+const CLOCKS = new Set(["crypto", "Date", "performance"]);
 const philologyNoEntropy: Rule.RuleModule = {
   meta: {
     type: "problem",
     messages: {
       found:
-        "the philologist's glass reads no source of randomness, no rng by any name or path and no Math.random, so the same name always reads the same way (Issue #124)",
+        "the philologist's glass reads no source of randomness and no clock, no rng by any name or path, no Math.random, crypto, Date or performance, so the same name always reads the same way (Issue #124)",
     },
   },
   create(context) {
@@ -87,6 +92,11 @@ const philologyNoEntropy: Rule.RuleModule = {
       MemberExpression(node) {
         if (memberName(node) === "random" && isMath(node.object as Node)) found(node);
         if (memberName(node) === "Math" && heldElsewhere(node)) found(node);
+        if (CLOCKS.has(memberName(node) ?? "")) found(node);
+      },
+      "Program:exit"(program) {
+        for (const ref of globalReferences(context.sourceCode.getScope(program)))
+          if (CLOCKS.has(ref.identifier.name)) found(ref.identifier as Node);
       },
     };
   },
@@ -227,6 +237,12 @@ const huntFixedWorld: Rule.RuleModule = {
     },
   },
   create(context) {
+    const held = (node: Node): void => {
+      const text = literalText(node);
+      const seat: Node | null = node.parent;
+      if (text !== null && HELD.test(text) && FINER.test(text) && !SOURCE_SEATS.has(seat?.type ?? ""))
+        context.report({ node, messageId: "finer" });
+    };
     const finer = (node: Node): void => {
       if (finerSources(node).some((text) => FINER.test(text))) context.report({ node, messageId: "finer" });
     };
@@ -240,11 +256,8 @@ const huntFixedWorld: Rule.RuleModule = {
       },
       NewExpression: finer,
       CallExpression: finer,
-      Literal: (node) => {
-        const text = literalText(node);
-        if (text !== null && HELD.test(text) && FINER.test(text) && !SOURCE_SEATS.has(node.parent.type))
-          context.report({ node, messageId: "finer" });
-      },
+      Literal: held,
+      TemplateLiteral: held,
       "Program:exit"(program) {
         for (const node of controllerRefusals(context, program as Node)) context.report({ node, messageId: "hook" });
       },

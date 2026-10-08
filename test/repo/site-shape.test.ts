@@ -44,6 +44,11 @@ const SCROLL_PLANT = [
   "export const i = (el: Element): void => { el.scrollTop++; };",
   "export const j = (): void => scrollTo(0, 0);",
   "export const k = (): void => window.scroll({ top: 0 });",
+  "export const l = (el: Element): void => el.scrollIntoView.call(el);",
+  "export const m = (el: Element): void => { const go = el.scrollIntoView.bind(el); go(); };",
+  "export const n = (el: Element): void => Reflect.apply(el.scrollIntoView, el, []);",
+  "export const o = (el: Element & { scrollIntoViewIfNeeded(): void }): void => el.scrollIntoViewIfNeeded();",
+  "export const p = scrollTo;",
 ];
 
 test("no chart room moves the reading position: no scroll call and no scroll write, a read admitted (Issue #442 decision 4)", async () => {
@@ -55,7 +60,11 @@ test("no chart room moves the reading position: no scroll call and no scroll wri
     "src/site/prospect/app.ts",
     "src/site/ribbon/app.ts",
   ])
-    assert.deepEqual(await reports(SCROLL_PLANT, room, rule), [1, 2, 3, 4, 5, 7, 8, 10, 11, 12], room);
+    assert.deepEqual(
+      await reports(SCROLL_PLANT, room, rule),
+      [1, 2, 3, 4, 5, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17],
+      `${room}. BLIND SPOTS, declared, erring toward passing: a focus() that scrolls its element into view, a jump through location.hash, a scroll offset written through Object.assign or under a key assembled from pieces`,
+    );
   assert.deepEqual(await reports(SCROLL_PLANT, "src/site/explorer/app.ts", rule), [], "the Explorer is no chart room");
 });
 

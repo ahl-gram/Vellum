@@ -1,6 +1,6 @@
 import type { Rule } from "eslint";
 import { inTypePosition, repoPath, stringText } from "./source-shape.ts";
-import { bare, keyName, literalText, memberName } from "./import-bounds.ts";
+import { bare, globalReferences, keyName, literalText, memberName } from "./import-bounds.ts";
 
 type Node = Rule.Node;
 
@@ -28,8 +28,8 @@ const prospectItemThroughBuilder: Rule.RuleModule = {
   },
 };
 
-const SCROLL_CALLS = new Set(["scroll", "scrollIntoView", "scrollTo", "scrollBy"]);
-const SCROLL_GLOBALS = new Set(["scroll", "scrollTo", "scrollBy"]);
+const SCROLL_METHODS = new Set(["scroll", "scrollBy", "scrollIntoView", "scrollIntoViewIfNeeded", "scrollTo"]);
+const SCROLL_GLOBALS = new Set(["scroll", "scrollBy", "scrollTo"]);
 const SCROLL_WRITES = new Set(["scrollTop", "scrollLeft"]);
 const roomNoScroll: Rule.RuleModule = {
   meta: problem(
@@ -41,10 +41,12 @@ const roomNoScroll: Rule.RuleModule = {
       if (SCROLL_WRITES.has(memberName(bare(target)) ?? "")) found(target);
     };
     return {
-      CallExpression(node) {
-        const callee = bare(node.callee as Node);
-        if (SCROLL_CALLS.has(memberName(callee) ?? "")) found(node);
-        else if (callee.type === "Identifier" && SCROLL_GLOBALS.has(callee.name)) found(node);
+      MemberExpression(node) {
+        if (SCROLL_METHODS.has(memberName(node) ?? "")) found(node);
+      },
+      "Program:exit"(program) {
+        for (const ref of globalReferences(context.sourceCode.getScope(program)))
+          if (SCROLL_GLOBALS.has(ref.identifier.name)) found(ref.identifier as Node);
       },
       AssignmentExpression: (node) => written(node.left as Node),
       UpdateExpression: (node) => written(node.argument as Node),

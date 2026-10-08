@@ -22,7 +22,6 @@ export const SPLIT_FILES: readonly string[] = [
   "src/site/seed-of-the-day/app-dispatch.ts",
 ];
 
-// Older calls that hand values on under other names, excused as written (Alex, Issue #654 comment 5939656565, decision B).
 export const OLDER_CALLS: Readonly<Record<string, readonly string[]>> = {
   "src/site/home/veil.ts": ["startSounding(veil.status, opts.random ?? Math.random)"],
   "src/site/print-room/app.ts": [

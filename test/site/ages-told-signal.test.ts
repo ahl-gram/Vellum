@@ -111,7 +111,7 @@ test("#442 the signal is ONE message: the payload switches chamber, it never dou
   const oneSignal: SameKeys<Extract<keyof ScrubberRefs, `onAges${string}`>, "onAgesTold"> = true;
   assert.ok(
     oneSignal,
-    "held by the type checker, not this run: a second onAges member of ScrubberRefs fails npm run check here",
+    "held by the type checker, not this run: a second onAges member of ScrubberRefs fails npm run check here. BLIND SPOT, declared, erring toward passing: a second channel added under a name that does not start with onAges",
   );
 });
 

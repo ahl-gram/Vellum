@@ -130,8 +130,8 @@ export default defineConfig(
     },
   },
   {
-    name: "the house's rules on the world and its society",
-    files: site("src/world/**", "src/society/**"),
+    name: "the house's rules on world generation",
+    files: site("src/world/**", "src/society/**", "src/hydrology/**", "src/core/**", "src/terrain/**", "src/climate/**", "src/noise/**"),
     plugins: { vellum },
     rules: { "vellum/world-no-philology": "error" },
   },
@@ -154,6 +154,10 @@ export default defineConfig(
       "no-restricted-globals": [
         "error",
         ...["document", "window", "globalThis", "self"].map((name) => ({ name, message: PURE_MESSAGE })),
+      ],
+      "no-restricted-properties": [
+        "error",
+        ...["document", "window"].map((property) => ({ property, message: PURE_MESSAGE })),
       ],
     },
   },

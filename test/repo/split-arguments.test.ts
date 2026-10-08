@@ -29,7 +29,11 @@ test("a split builder hands each value to its own file's parts under the name of
     "function scaled(view: number, scale = 1): number { return view * scale; }",
     "export function short(view: number): number { return scaled(view); }",
   ];
-  assert.deepEqual(await reports(plant, "src/site/explorer/hash-sync.ts"), [3, 4, 7]);
+  assert.deepEqual(
+    await reports(plant, "src/site/explorer/hash-sync.ts"),
+    [3, 4, 7],
+    "BLIND SPOTS, declared, each erring toward passing: a module-level const arrow (a handbook/errata/guards.md row), an exported function, a function declared inside another (`plateFor` in `src/site/reading-room/prospect-stage.ts` is handed `world` for `w`), a call of a method rather than a bare name, a call through an alias, a shadowing local, and any file off the list (58 calls in 15 other files under src/site hand values on under other names)",
+  );
 });
 
 test("a file on the list that hands nothing to a part of its own reds, so the list cannot go stale (Issue #654)", async () => {

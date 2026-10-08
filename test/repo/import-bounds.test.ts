@@ -32,13 +32,25 @@ test("world generation reaches the philologist's glass by no module source, stat
   assert.deepEqual(
     await reports(PHILOLOGY_IMPORTS, "src/world/generate.ts", rule),
     [1, 2, 3, 4, 8],
-    "BLIND SPOT, declared, erring toward passing: a specifier assembled at run time from pieces none of which names the glass",
+    "BLIND SPOTS, declared, erring toward passing: a specifier assembled at run time from pieces (a piece may name the glass, as `philology` does, without the path the rule reads), and a module that reaches the glass through another, as `src/render/place-card.ts` imports it",
   );
   assert.deepEqual(
     await reports(PHILOLOGY_IMPORTS, "src/society/names.ts", rule),
     [1, 2, 3, 4, 8],
     "the society's half",
   );
+  for (const closure of [
+    "src/hydrology/basins.ts",
+    "src/core/bfs-distance.ts",
+    "src/terrain/contours.ts",
+    "src/climate/biomes.ts",
+    "src/noise/fbm.ts",
+  ])
+    assert.deepEqual(
+      await reports(PHILOLOGY_IMPORTS, closure, rule),
+      [1, 2, 3, 4, 8],
+      `${closure}, in generateWorld's closure`,
+    );
   assert.deepEqual(await reports(PHILOLOGY_IMPORTS, "src/society/philology.ts", rule), [], "the glass itself");
   assert.deepEqual(await reports(PHILOLOGY_IMPORTS, "src/render/place-card.ts", rule), [], "the card reads it");
 });
@@ -57,9 +69,12 @@ test("the philologist's glass reads no source of randomness: no rng by any name 
     "const { random } = Math;",
     "const M = globalThis.Math; export const h = (): number => M.random();",
     "export const i = { Math: 1 };",
+    "export const j = (): string => crypto.randomUUID();",
+    "export const k = (): number => Date.now();",
+    "export const l = (): number => globalThis.performance.now();",
   ];
   const rule = ["vellum/philology-no-entropy"];
-  assert.deepEqual(await reports(plant, "src/society/philology.ts", rule), [1, 2, 3, 4, 5, 5, 6, 10, 11]);
+  assert.deepEqual(await reports(plant, "src/society/philology.ts", rule), [1, 2, 3, 4, 5, 5, 6, 10, 11, 13, 14, 15]);
   assert.deepEqual(await reports(plant, "src/society/names.ts", rule), [], "the rule reaches the glass alone");
 });
 
@@ -97,8 +112,9 @@ test("home's pure modules read no document and no window, however the global is 
     "export const d = (): unknown => self.window;",
     "export const e = 1;",
     "const g = globalThis; export const t = g.document.title;",
+    "export const u = (): string => parent.document.title;",
   ];
-  const rules = ["no-restricted-globals"];
+  const rules = ["no-restricted-globals", "no-restricted-properties"];
   for (const pure of [
     "drift.ts",
     "station-flight.ts",
@@ -108,7 +124,11 @@ test("home's pure modules read no document and no window, however the global is 
     "coords.ts",
     "valve.ts",
   ])
-    assert.deepEqual(await reports(plant, `src/site/home/${pure}`, rules), [1, 2, 3, 4, 6], pure);
+    assert.deepEqual(
+      await reports(plant, `src/site/home/${pure}`, rules),
+      [1, 2, 3, 3, 4, 4, 6, 6, 7],
+      `${pure}. BLIND SPOT, declared, erring toward passing: a bare global the page gives (matchMedia, innerWidth, requestAnimationFrame, location, navigator, localStorage), which names neither document nor window; node --test runs these modules and throws on one it reaches`,
+    );
   assert.deepEqual(await reports(plant, "src/site/home/app.ts", rules), [], "the conductor owns the DOM");
 });
 
@@ -139,12 +159,13 @@ const HUNT_PLANT = [
   'export * from "../shared/zoom-controller.ts";',
   'export const r = new SharedWorker("./region-worker.ts");',
   'const spec = "../explorer/lod-controller.ts"; export const s = () => import(spec);',
+  "const held = `../explorer/region-detail.ts`; export const t = () => import(held);",
 ];
 
 test("the Hunt stays a fixed world: no module source naming a finer survey, a region or a worker, and its zoom controller takes no redraft hook in any form this rule cannot read (Issue #161)", async () => {
   assert.deepEqual(
     await reports(HUNT_PLANT, "src/site/seed-of-the-day/app.ts", ["vellum/hunt-fixed-world"]),
-    [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 23, 24, 25, 26],
+    [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 23, 24, 25, 26, 27],
     "BLIND SPOTS, declared, erring toward passing: a specifier assembled at run time from pieces, and a module whose name hides what it imports (the import closure, a handbook/errata/guards.md row)",
   );
   assert.deepEqual(

@@ -45,8 +45,10 @@ test("every citation in a sheet's comment resolves the same way", async () => {
     ".a { color: red; }",
     "/* `zzNoSuchSymbolHere` in `public/house.css` */",
     "/* `atlasDocument` in `src/atlas/nowhere.ts` */",
+    "/* a citation that wraps, `atlasDocument` in */",
+    "/* `src/atlas/nowhere.ts` */",
   ];
-  assert.deepEqual(await reports(plant, "public/house.css", "vellum/css-comment-citation-resolves"), [3, 4]);
+  assert.deepEqual(await reports(plant, "public/house.css", "vellum/css-comment-citation-resolves"), [3, 4, 5]);
 });
 
 test("the citation form reads a path under every root the lint reads and under public/, with each extension a citation names, so no citation there goes unchecked (Issue #679)", async () => {
