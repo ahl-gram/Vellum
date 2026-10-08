@@ -20,7 +20,7 @@ const TS_ROOTS = ["e2e/**/*.ts", "scripts/**/*.ts", "src/**/*.ts", "test/**/*.ts
 const PAGE_ELEMENT_PARAMETERS = ["drawerEls", "ghostEl", "innerEl", "legendEl", "logEls", "mapEl", "noteEl", "pillEl", "roomEls", "sheetEl", "slipEl", "statusEl", "targetEl", "viewportEl"];
 const site = (...paths: string[]): string[][] => paths.map((path) => ["src/**/*.ts", path]);
 const HOME_PURE = ["drift.ts", "station-flight.ts", "stations.ts", "camera.ts", "ceremony.ts", "coords.ts", "valve.ts"];
-const PURE_MESSAGE = "a pure module of home reads no document and no window: app.ts owns the page, and these run under node --test (Issue #458)";
+const PURE_MESSAGE = "a pure module of home reads no document, no window and no global object they hang from: app.ts owns the page, and these run under node --test (Issue #458)";
 
 export default defineConfig(
   includeIgnoreFile(fileURLToPath(new URL(".gitignore", import.meta.url)), "the .gitignore: build output, generated trees and scratch"),
@@ -151,12 +151,9 @@ export default defineConfig(
     name: "Issue #458: home's pure modules",
     files: site(...HOME_PURE.map((file) => `src/site/home/${file}`)),
     rules: {
-      "no-restricted-globals": ["error", { name: "document", message: PURE_MESSAGE }, { name: "window", message: PURE_MESSAGE }],
-      "no-restricted-properties": [
+      "no-restricted-globals": [
         "error",
-        ...["globalThis", "self"].flatMap((object) =>
-          ["document", "window"].map((property) => ({ object, property, message: PURE_MESSAGE })),
-        ),
+        ...["document", "window", "globalThis", "self"].map((name) => ({ name, message: PURE_MESSAGE })),
       ],
     },
   },

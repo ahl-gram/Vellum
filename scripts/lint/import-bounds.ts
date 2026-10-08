@@ -27,20 +27,26 @@ export const memberName = (node: Node): string | null => {
 export const keyName = (p: { key: unknown; computed: boolean }): string | null =>
   !p.computed && (p.key as Node).type === "Identifier" ? (p.key as { name: string }).name : literalText(p.key as Node);
 
-const sourcesJudged = (context: Rule.RuleContext, refused: (source: string) => boolean): Rule.RuleListener => {
+const sourcesJudged = (
+  context: Rule.RuleContext,
+  refused: (source: string) => boolean,
+  anywhere: (text: string) => boolean = () => false,
+): Rule.RuleListener => {
   const judge = (node: Node): void => {
     const text = stringText(node);
     const at = node.type === "TemplateElement" ? node.parent : node;
     if (text === null || inTypePosition(at.parent ?? at)) return;
-    if (refused(text) && isModuleSource(context, at)) context.report({ node, messageId: "found" });
+    if ((refused(text) && isModuleSource(context, at)) || anywhere(text)) context.report({ node, messageId: "found" });
   };
   return { Literal: judge, TemplateElement: judge };
 };
+const climb = (node: Node): Node => (node.parent && WRAPPERS.has(node.parent.type) ? climb(node.parent) : node);
 
 const isGlass = (file: string): boolean => /^src\/society\/philology[\w-]*\.ts$/.test(repoPath(file));
 const philologyBan = sourceBan(
   "world generation never reaches for the philologist's glass, so a lexicon edit cannot re-roll a world (Issue #124)",
   (text) => text.includes("philology"),
+  (text) => /philology[\w-]*\.ts\b/.test(text),
 );
 const worldNoPhilology: Rule.RuleModule = {
   meta: philologyBan.meta,
@@ -51,6 +57,17 @@ const isMath = (node: Node): boolean => {
   const object = bare(node);
   return (object.type === "Identifier" && object.name === "Math") || memberName(object) === "Math";
 };
+const heldElsewhere = (value: Node): boolean => {
+  const top = climb(value);
+  const p: Node | null = top.parent;
+  return !(p?.type === "MemberExpression" && p.object === top);
+};
+const isMathName = (node: Node): boolean =>
+  node.type === "Identifier" &&
+  node.name === "Math" &&
+  !inTypePosition(node.parent) &&
+  !(node.parent.type === "MemberExpression" && node.parent.property === node && !node.parent.computed) &&
+  !(node.parent.type === "Property" && node.parent.key === node && !node.parent.computed);
 const philologyNoEntropy: Rule.RuleModule = {
   meta: {
     type: "problem",
@@ -65,18 +82,11 @@ const philologyNoEntropy: Rule.RuleModule = {
       ...sourcesJudged(context, (text) => /\brng\b/.test(text)),
       Identifier(node) {
         if (node.name === "rng" && !inTypePosition(node.parent)) found(node);
+        if (isMathName(node) && heldElsewhere(node)) found(node);
       },
       MemberExpression(node) {
         if (memberName(node) === "random" && isMath(node.object as Node)) found(node);
-      },
-      VariableDeclarator(node) {
-        const keys = node.id.type === "ObjectPattern" ? node.id.properties : [];
-        if (
-          node.init &&
-          isMath(node.init as Node) &&
-          keys.some((p) => p.type === "Property" && keyName(p) === "random")
-        )
-          found(node);
+        if (memberName(node) === "Math" && heldElsewhere(node)) found(node);
       },
     };
   },
@@ -98,11 +108,21 @@ const homeClientNoEngine: Rule.RuleModule = {
       const target = repoPath(resolve(dirname(context.filename), text));
       return BUILD_TIME.has(target) || target.startsWith("src/world/") || target.startsWith("src/render/");
     };
-    return sourcesJudged(context, engine);
+    return sourcesJudged(context, engine, (text) => text.endsWith(".ts") && engine(text));
   },
 };
 
 const FINER = /lod|region|worker/i;
+const HELD = /^\.{1,2}\/.*\.ts$/;
+const SOURCE_SEATS = new Set([
+  "ArrayExpression",
+  "CallExpression",
+  "ExportAllDeclaration",
+  "ExportNamedDeclaration",
+  "ImportDeclaration",
+  "ImportExpression",
+  "NewExpression",
+]);
 const CONSTRUCTORS = new Set(["URL", "Worker", "SharedWorker"]);
 const HOOKS = new Set(["onSettle", "onApply"]);
 const FACTORY = "createZoomController";
@@ -137,8 +157,6 @@ function finerSources(node: Node): string[] {
     return literals(node.arguments as Node[]);
   return [];
 }
-
-const climb = (node: Node): Node => (node.parent && WRAPPERS.has(node.parent.type) ? climb(node.parent) : node);
 
 type Use = { kind: "call"; options: Node | undefined } | { kind: "alias"; declarator: Node } | { kind: "refused" };
 function useOf(ref: Node): Use {
@@ -222,6 +240,11 @@ const huntFixedWorld: Rule.RuleModule = {
       },
       NewExpression: finer,
       CallExpression: finer,
+      Literal: (node) => {
+        const text = literalText(node);
+        if (text !== null && HELD.test(text) && FINER.test(text) && !SOURCE_SEATS.has(node.parent.type))
+          context.report({ node, messageId: "finer" });
+      },
       "Program:exit"(program) {
         for (const node of controllerRefusals(context, program as Node)) context.report({ node, messageId: "hook" });
       },

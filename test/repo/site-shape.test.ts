@@ -41,6 +41,9 @@ const SCROLL_PLANT = [
   "export const g = (el?: Element): void => el?.scrollIntoView();",
   'export const h = (el: Element): void => el["scrollIntoView"]();',
   "// scrollIntoView, named in a comment",
+  "export const i = (el: Element): void => { el.scrollTop++; };",
+  "export const j = (): void => scrollTo(0, 0);",
+  "export const k = (): void => window.scroll({ top: 0 });",
 ];
 
 test("no chart room moves the reading position: no scroll call and no scroll write, a read admitted (Issue #442 decision 4)", async () => {
@@ -52,7 +55,7 @@ test("no chart room moves the reading position: no scroll call and no scroll wri
     "src/site/prospect/app.ts",
     "src/site/ribbon/app.ts",
   ])
-    assert.deepEqual(await reports(SCROLL_PLANT, room, rule), [1, 2, 3, 4, 5, 7, 8], room);
+    assert.deepEqual(await reports(SCROLL_PLANT, room, rule), [1, 2, 3, 4, 5, 7, 8, 10, 11, 12], room);
   assert.deepEqual(await reports(SCROLL_PLANT, "src/site/explorer/app.ts", rule), [], "the Explorer is no chart room");
 });
 

@@ -24,12 +24,21 @@ const PHILOLOGY_IMPORTS = [
   "// the philology module, named in a comment",
   'export const c = "philology, named in prose";',
   'import { tongueName } from "../society/names.ts";',
+  'const spec = "../society/philology.ts"; export const load = () => import(spec);',
 ];
 
-test("world generation reaches the philologist's glass by no module source, static, dynamic or by URL, and a mention is not a reach (Issue #124)", async () => {
+test("world generation reaches the philologist's glass by no module source, static, dynamic, by URL or held in a string, and a mention is not a reach (Issue #124)", async () => {
   const rule = ["vellum/world-no-philology"];
-  assert.deepEqual(await reports(PHILOLOGY_IMPORTS, "src/world/generate.ts", rule), [1, 2, 3, 4]);
-  assert.deepEqual(await reports(PHILOLOGY_IMPORTS, "src/society/names.ts", rule), [1, 2, 3, 4], "the society's half");
+  assert.deepEqual(
+    await reports(PHILOLOGY_IMPORTS, "src/world/generate.ts", rule),
+    [1, 2, 3, 4, 8],
+    "BLIND SPOT, declared, erring toward passing: a specifier assembled at run time from pieces none of which names the glass",
+  );
+  assert.deepEqual(
+    await reports(PHILOLOGY_IMPORTS, "src/society/names.ts", rule),
+    [1, 2, 3, 4, 8],
+    "the society's half",
+  );
   assert.deepEqual(await reports(PHILOLOGY_IMPORTS, "src/society/philology.ts", rule), [], "the glass itself");
   assert.deepEqual(await reports(PHILOLOGY_IMPORTS, "src/render/place-card.ts", rule), [], "the card reads it");
 });
@@ -45,9 +54,12 @@ test("the philologist's glass reads no source of randomness: no rng by any name 
     "export const f = Math.floor(2.5);",
     "// rng and Math.random, named in a comment",
     'export const g = "rng";',
+    "const { random } = Math;",
+    "const M = globalThis.Math; export const h = (): number => M.random();",
+    "export const i = { Math: 1 };",
   ];
   const rule = ["vellum/philology-no-entropy"];
-  assert.deepEqual(await reports(plant, "src/society/philology.ts", rule), [1, 2, 3, 4, 5, 5, 6]);
+  assert.deepEqual(await reports(plant, "src/society/philology.ts", rule), [1, 2, 3, 4, 5, 5, 6, 10, 11]);
   assert.deepEqual(await reports(plant, "src/society/names.ts", rule), [], "the rule reaches the glass alone");
 });
 
@@ -60,12 +72,17 @@ test("home's client modules import nothing build-time, and the build-time pair i
     'import type { World } from "../../world/types.ts";',
     'import { clamp } from "./camera-math.ts";',
     "// imports ./stage-data.ts, named in a comment",
+    'const m = "./stage-data.ts"; export const load = () => import(m);',
   ];
   const rule = ["vellum/home-client-no-engine"];
-  assert.deepEqual(await reports(plant, "src/site/home/camera.ts", rule), [1, 2, 3, 4, 5]);
+  assert.deepEqual(
+    await reports(plant, "src/site/home/camera.ts", rule),
+    [1, 2, 3, 4, 5, 8],
+    "BLIND SPOTS, declared, erring toward passing: a specifier assembled at run time from pieces, and a module whose name hides that it imports the engine",
+  );
   assert.deepEqual(
     await reports(plant, "src/site/home/valve.ts", rule),
-    [1, 2, 3, 4, 5],
+    [1, 2, 3, 4, 5, 8],
     "a module the old list missed",
   );
   for (const exempt of ["src/site/home/stage-data.ts", "src/site/home/stations.ts"])
@@ -79,8 +96,9 @@ test("home's pure modules read no document and no window, however the global is 
     "export const c = (): string => globalThis.document.title;",
     "export const d = (): unknown => self.window;",
     "export const e = 1;",
+    "const g = globalThis; export const t = g.document.title;",
   ];
-  const rules = ["no-restricted-globals", "no-restricted-properties"];
+  const rules = ["no-restricted-globals"];
   for (const pure of [
     "drift.ts",
     "station-flight.ts",
@@ -90,7 +108,7 @@ test("home's pure modules read no document and no window, however the global is 
     "coords.ts",
     "valve.ts",
   ])
-    assert.deepEqual(await reports(plant, `src/site/home/${pure}`, rules), [1, 2, 3, 4], pure);
+    assert.deepEqual(await reports(plant, `src/site/home/${pure}`, rules), [1, 2, 3, 4, 6], pure);
   assert.deepEqual(await reports(plant, "src/site/home/app.ts", rules), [], "the conductor owns the DOM");
 });
 
@@ -117,12 +135,17 @@ const HUNT_PLANT = [
   "// a comment naming ../explorer/lod-controller.ts",
   'export const o = "a region, named in prose";',
   "export const p = def;",
+  'export const q = () => import("../shared/zoom-controller.ts");',
+  'export * from "../shared/zoom-controller.ts";',
+  'export const r = new SharedWorker("./region-worker.ts");',
+  'const spec = "../explorer/lod-controller.ts"; export const s = () => import(spec);',
 ];
 
 test("the Hunt stays a fixed world: no module source naming a finer survey, a region or a worker, and its zoom controller takes no redraft hook in any form this rule cannot read (Issue #161)", async () => {
   assert.deepEqual(
     await reports(HUNT_PLANT, "src/site/seed-of-the-day/app.ts", ["vellum/hunt-fixed-world"]),
-    [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
+    [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 23, 24, 25, 26],
+    "BLIND SPOTS, declared, erring toward passing: a specifier assembled at run time from pieces, and a module whose name hides what it imports (the import closure, a handbook/errata/guards.md row)",
   );
   assert.deepEqual(
     await reports(HUNT_PLANT, "src/site/explorer/app.ts", ["vellum/hunt-fixed-world"]),

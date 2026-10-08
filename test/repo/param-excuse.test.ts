@@ -21,6 +21,8 @@ test("a parameter bearing a name no-param-reassign excuses holds a page element,
     "export function j(slipEl: { readonly a: HTMLElement; [k: string]: HTMLElement }): void { void slipEl; }",
     "export function k(targetEl: { readonly a: HTMLElement | null }): void { void targetEl; }",
     "export function l(viewportEl: { id: string; n?: number }): void { void viewportEl; }",
+    "export const m = (statusEl: { n: number }): void => { void statusEl; };",
+    "export function n(statusEl: { n: number } = { n: 1 }): void { void statusEl; }",
   ];
   const [result] = await eslint.lintText(plant.join("\n"), { filePath: join(ROOT, "src/site/home/veil.ts") });
   assert.deepEqual(
@@ -30,7 +32,7 @@ test("a parameter bearing a name no-param-reassign excuses holds a page element,
   );
   assert.deepEqual(
     result!.messages.filter((m) => m.ruleId === RULE).map((m) => m.line),
-    [2, 4, 5, 7, 10, 12],
+    [2, 4, 5, 7, 10, 12, 13, 14],
     "DECLARED, with their directions: an element-shaped type is one a DOM input element satisfies whose every member an input element also carries, so any record made only of such members ({ value: string }) passes, erring toward passing, a handbook/errata/guards.md row; a type with no members at all (object, {}) and a type parameter constrained to an element (T extends HTMLElement) fail, erring toward failing",
   );
 });

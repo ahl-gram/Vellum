@@ -28,7 +28,8 @@ const prospectItemThroughBuilder: Rule.RuleModule = {
   },
 };
 
-const SCROLL_CALLS = new Set(["scrollIntoView", "scrollTo", "scrollBy"]);
+const SCROLL_CALLS = new Set(["scroll", "scrollIntoView", "scrollTo", "scrollBy"]);
+const SCROLL_GLOBALS = new Set(["scroll", "scrollTo", "scrollBy"]);
 const SCROLL_WRITES = new Set(["scrollTop", "scrollLeft"]);
 const roomNoScroll: Rule.RuleModule = {
   meta: problem(
@@ -43,8 +44,7 @@ const roomNoScroll: Rule.RuleModule = {
       CallExpression(node) {
         const callee = bare(node.callee as Node);
         if (SCROLL_CALLS.has(memberName(callee) ?? "")) found(node);
-        else if (callee.type === "Identifier" && (callee.name === "scrollTo" || callee.name === "scrollBy"))
-          found(node);
+        else if (callee.type === "Identifier" && SCROLL_GLOBALS.has(callee.name)) found(node);
       },
       AssignmentExpression: (node) => written(node.left as Node),
       UpdateExpression: (node) => written(node.argument as Node),

@@ -1,5 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { globSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { ESLint } from "eslint";
 import { OLDER_CALLS, SPLIT_FILES } from "../../scripts/lint/split-arguments.ts";
@@ -25,8 +26,10 @@ test("a split builder hands each value to its own file's parts under the name of
     "export function swapped(view: number, scale: number): number { return part(scale, view); }",
     "export function literal(view: number): number { return part(view, 2); }",
     "export function exported(a: number): number { return whole(a, a); }",
+    "function scaled(view: number, scale = 1): number { return view * scale; }",
+    "export function short(view: number): number { return scaled(view); }",
   ];
-  assert.deepEqual(await reports(plant, "src/site/explorer/hash-sync.ts"), [3, 4]);
+  assert.deepEqual(await reports(plant, "src/site/explorer/hash-sync.ts"), [3, 4, 7]);
 });
 
 test("a file on the list that hands nothing to a part of its own reds, so the list cannot go stale (Issue #654)", async () => {
@@ -57,17 +60,12 @@ test("an older call is excused by its exact text, and an excuse whose call is go
   );
 });
 
-test("every file with an excuse is on the list, and the rule reaches exactly the list", async () => {
+test("every file with an excuse is on the list, and the rule reaches exactly the list, no site script more or less", async () => {
   for (const file of Object.keys(OLDER_CALLS)) assert.ok(SPLIT_FILES.includes(file), `${file} is excused but unlisted`);
-  for (const file of SPLIT_FILES) {
-    const rules = ((await eslint.calculateConfigForFile(join(ROOT, file))) as { rules?: Record<string, unknown> })
-      .rules;
-    assert.ok(rules?.[RULE], `${file} is on the list, but the rule does not reach it`);
+  const reached: string[] = [];
+  for (const file of globSync("src/site/**/*.ts", { cwd: ROOT })) {
+    const config = (await eslint.calculateConfigForFile(join(ROOT, file))) as { rules?: Record<string, unknown> };
+    if (config.rules?.[RULE]) reached.push(file);
   }
-  const off = (
-    (await eslint.calculateConfigForFile(join(ROOT, "src/site/explorer/elements.ts"))) as {
-      rules?: Record<string, unknown>;
-    }
-  ).rules;
-  assert.equal(off?.[RULE], undefined, "a file off the list is not read");
+  assert.deepEqual(reached.sort(), [...SPLIT_FILES].sort());
 });

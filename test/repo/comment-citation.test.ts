@@ -49,11 +49,30 @@ test("every citation in a sheet's comment resolves the same way", async () => {
   assert.deepEqual(await reports(plant, "public/house.css", "vellum/css-comment-citation-resolves"), [3, 4]);
 });
 
-test("the citation form reads a path under every root the lint reads and under public/, so no citation there goes unchecked (Issue #679)", () => {
+test("the citation form reads a path under every root the lint reads and under public/, with each extension a citation names, so no citation there goes unchecked (Issue #679)", async () => {
+  const roots = [...lintTsRoots(), "public"];
   assert.deepEqual(
-    lintTsRoots().filter((r) => !CITED_ROOTS.includes(r)),
+    roots.filter((r) => !CITED_ROOTS.includes(r)),
     [],
     "the lint reads a root the citation form never names",
   );
-  assert.ok(CITED_ROOTS.includes("public"), "a citation into a sheet under public/ is not read");
+  const plant = roots.flatMap((r) =>
+    ["ts", "mjs", "astro", "css"].map((ext) => `// \`zzNoSuchSymbol\` in \`${r}/no/such.${ext}\``),
+  );
+  assert.deepEqual(
+    await reports(plant, "src/atlas/document.ts", "vellum/ts-comment-citation-resolves"),
+    plant.map((_, i) => i + 1),
+    "a citation under one of these roots or with one of these extensions is not read at all, so it is never checked",
+  );
+});
+
+test("comments join into one run only when each stands on its own line and the next follows on the very next line", async () => {
+  const plant = [
+    "export const a = 1; // a trailing `atlasDocument` in",
+    "export const b = 2; // `src/atlas/nowhere.ts`, a second trailing comment",
+    "// an own-line `atlasDocument` in",
+    "",
+    "// `src/atlas/nowhere.ts`, after a blank line",
+  ];
+  assert.deepEqual(await reports(plant, "src/atlas/document.ts", "vellum/ts-comment-citation-resolves"), []);
 });
