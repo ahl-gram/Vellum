@@ -9,7 +9,7 @@ const scriptsOffThroughHelper: Rule.RuleModule = {
   meta: {
     type: "problem",
     messages: {
-      found: `an e2e file turns page scripts off only through withScriptsOff in ${HELPER}, which turns them back on in its own finally, so no check can leave every check after it with scripts off (Issue #779)`,
+      found: `an e2e file turns page scripts off only through withScriptsOff in ${HELPER}, which always turns them back on, so no check can leave every check after it with scripts off (Issue #779)`,
     },
   },
   create(context) {
