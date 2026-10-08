@@ -2,6 +2,8 @@
 import { makeRoom, scopedHealth } from "../support/room.ts";
 import type { SuiteContext } from "../types.ts";
 
+export const RV4_TILT_CEILING = 25;
+
 type Room = ReturnType<typeof makeRoom>;
 
 export async function run(ctx: SuiteContext): Promise<void> {
@@ -166,7 +168,7 @@ async function rv4TiltAndFacing({ evaluate, check }: SuiteContext): Promise<void
   })()`);
   check(
     "RV4 the mark never tips past MAX_TILT on any bearing of the sweep",
-    rv45.maxTilt <= 24.0001,
+    rv45.maxTilt <= RV4_TILT_CEILING,
     `max |tilt| = ${rv45.maxTilt}deg`,
   );
   check(

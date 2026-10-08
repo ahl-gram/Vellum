@@ -2,7 +2,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFile, rm } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 import { join, relative } from "node:path";
 import { copyKitFonts, KIT_FONTS } from "../../scripts/kit-fonts.ts";
@@ -10,6 +11,8 @@ import { GENERATED_SUBTREES } from "../../scripts/clean-public-generated.ts";
 import { atlasDocument, atlasPlateFilename, type AtlasDocumentData } from "../../src/atlas/document.ts";
 import { buildGallery } from "../../src/cli/gallery.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
+import { STYLES } from "../../src/render/style.ts";
+import { startServer } from "../../e2e/site-server.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 
 // The Punchcutter's Case (Issue #228): three self-hosted OFL faces for the site chrome; the charts' own SVG lettering is out of scope, so no chart byte moves.
@@ -224,19 +227,31 @@ test("the gallery page css defers the sub's voice to the house intro role (#324)
 });
 
 test("the e2e harness serves .woff2 with a real font MIME (no false-positive fallback)", async () => {
-  const text = await readText("e2e/site-server.ts");
-  assert.match(text, /["']\.woff2["']\s*:\s*["']font\/woff2/, "the harness MIME map should serve .woff2 as font/woff2");
+  const site = mkdtempSync(join(tmpdir(), "vellum-woff2-"));
+  writeFileSync(join(site, "face.woff2"), "wOF2");
+  const server = await startServer(site, 0);
+  try {
+    const address = server.address();
+    assert.ok(address !== null && typeof address === "object", "the server listens on a port");
+    const res = await fetch(`http://127.0.0.1:${address.port}/face.woff2`);
+    await res.arrayBuffer();
+    assert.equal(res.status, 200);
+    assert.equal(res.headers.get("content-type"), "font/woff2", "the harness should serve .woff2 as font/woff2");
+  } finally {
+    await new Promise((done) => server.close(done));
+    rmSync(site, { recursive: true, force: true });
+  }
 });
 
 test("boundary: the chart SVG lettering is untouched by the site's Punchcutter faces", () => {
   const svg = renderMap(generateWorld(defaultRecipe(42)), { style: "antique", widthPx: 480 });
   assert.doesNotMatch(svg, /IM Fell|EB Garamond/, "chart <text> must not adopt the site chrome faces");
 
-  const style = readFileSync(root("src/render/style.ts"), "utf8");
-  assert.match(
-    style,
-    /fontFamily:\s*"'Iowan Old Style'/,
+  assert.ok(
+    STYLES.antique.fontFamily.startsWith("'Iowan Old Style'"),
     "the SVG font stack stays the Iowan serif (byte-determinism)",
   );
-  assert.doesNotMatch(style, /IM Fell|EB Garamond/, "no site-chrome face should leak into the SVG style");
+  for (const [name, style] of Object.entries(STYLES)) {
+    assert.doesNotMatch(JSON.stringify(style), /IM Fell|EB Garamond/, `no site-chrome face should leak into ${name}`);
+  }
 });

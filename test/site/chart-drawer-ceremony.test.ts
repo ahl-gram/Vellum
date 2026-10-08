@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { bindChartDrawer } from "../../src/site/explorer/chart-drawer-bind.ts";
 import { TABLE_CAP, type SurveyItem, type TableItem } from "../../src/site/shared/table-address.ts";
 import { El, installShim } from "../../test-support/element-shim.ts";
+import { PORTFOLIO_ROUTE } from "../../scripts/generate-discovery.ts";
 
 // The ceremony half of the Chart Table (Issue #523 Sub 5 of Issue #401): the settle on a laid cutting, the jolt at the cap, the ghost's url adopted on a drag-drop, the drawer revealed for a carry and put back, and a thumbnail patched into its cutting in place. The drawer BUILDS DOM, so the element shim stands in for the environment, never the module under test; every rect is the one the test states.
 
@@ -62,6 +63,16 @@ function drawer(
   return { table, els, said, changes, cuttings };
 }
 const lis = (cuttings: El): El[] => cuttings.children;
+type Drawn = { url: string; title: string } | null;
+function thumbs() {
+  const asked: Array<{ readonly lx: number; readonly done: (drawn: Drawn) => void }> = [];
+  const drawThumb = (item: TableItem) =>
+    new Promise<Drawn>((done) => {
+      asked.push({ lx: item.kind === "survey" ? item.lx : -1, done });
+    });
+  return { asked, drawThumb, lxs: () => asked.map((a) => a.lx) };
+}
+const turn = () => new Promise((r) => setTimeout(r, 0));
 const landing = (li: El): boolean => li.classList.contains("landing");
 
 test("CT12 a lay marks exactly the laid cutting `landing`, once: a second lay marks the second and the first is bare again", () => {
@@ -183,7 +194,7 @@ test("CT14d a shut inside a ceremony clears it rather than leaving it armed: dis
   assert.equal(cuttings.classList.contains("jolt"), false, "a shut mid-dip takes the jolt off too");
 });
 
-test("CT10b a re-seat that drops sheets revokes every departed sheet's picture and no other, and the table then holds what it kept (#634, the leak CT10 reads as text)", () => {
+test("CT10b a re-seat that drops sheets revokes every departed sheet's picture and no other, and the table then holds what it kept (#634)", () => {
   const revoked: string[] = [];
   const realMint = URL.createObjectURL.bind(URL);
   const realRevoke = URL.revokeObjectURL.bind(URL);
@@ -300,4 +311,71 @@ test("CT17 a thumbnail arriving for a recovered sheet is patched into its cuttin
     "The Environs of Somewhere",
     "named from the drawn title, no longer the chart number",
   );
+});
+
+test("CT10c a re-seat that lands while a picture is drawing asks for ANOTHER pass, so the sheet it brought is drawn rather than left in its frame (#634)", async () => {
+  const { asked, drawThumb, lxs } = thumbs();
+  const { table, els } = drawer({ drawThumb });
+  table.restore([survey(1)]);
+  els.tab.fire("click");
+  assert.deepEqual(lxs(), [1], "the opening draws the one recovered sheet");
+  table.restore([survey(1), survey(2)]);
+  asked[0]!.done({ url: "blob:one", title: "one" });
+  await turn();
+  assert.deepEqual(lxs(), [1, 2], "the sheet that arrived mid-draw is drawn once the pass in flight ends");
+});
+
+test("CT10d a picture that finishes for a sheet that left while it drew is revoked, never filed under a key no cutting carries (#634, the cold review's round 3)", async () => {
+  const revoked: string[] = [];
+  const realRevoke = URL.revokeObjectURL.bind(URL);
+  URL.revokeObjectURL = (url: string) => {
+    revoked.push(url);
+  };
+  try {
+    const { asked, drawThumb, lxs } = thumbs();
+    const { table, els, cuttings } = drawer({ drawThumb });
+    table.restore([survey(1), survey(2)]);
+    els.tab.fire("click");
+    table.restore([survey(2)]);
+    asked[0]!.done({ url: "blob:late", title: "one" });
+    await turn();
+    assert.deepEqual(revoked, ["blob:late"], "the departed sheet's picture is let go");
+    assert.deepEqual(lxs(), [1, 2], "and the pass goes on to the sheet that stayed");
+    asked[1]!.done({ url: "blob:two", title: "two" });
+    await turn();
+    const img = lis(cuttings)[0]!.children.find((c): c is El & { src?: string } => c.tagName === "IMG");
+    assert.equal(img?.src, "blob:two", "which wears its own picture");
+    assert.deepEqual(revoked, ["blob:late"], "and keeps it");
+  } finally {
+    URL.revokeObjectURL = realRevoke;
+  }
+});
+
+test("CT10e a re-seat on a drawer standing open draws what arrived, and one on a shut drawer leaves it for the opening (#634; drawing deferred to the first opening, ruled 2026-09-07)", async () => {
+  const { asked, drawThumb, lxs } = thumbs();
+  const { table, els } = drawer({ drawThumb });
+  table.restore([survey(1)]);
+  assert.deepEqual(lxs(), [], "a shut drawer draws nothing");
+  els.tab.fire("click");
+  asked[0]!.done({ url: "blob:one", title: "one" });
+  await turn();
+  table.restore([survey(1), survey(3)]);
+  assert.deepEqual(lxs(), [1, 3], "the open drawer draws the sheet the re-seat brought");
+});
+
+test("CT18 the road carries the table to the route the tree names the Portfolio (Issue #669)", () => {
+  const g = globalThis as Record<string, unknown>;
+  const had = "window" in g;
+  const saved = g.window;
+  const location = { hash: "#seed=42", href: "" };
+  g.window = { location };
+  try {
+    const { table, els } = drawer();
+    table.restore([survey(1)]);
+    els.road.fire("click");
+    assert.equal(new URL(location.href, "https://v.test/explorer/").pathname, PORTFOLIO_ROUTE);
+  } finally {
+    if (had) g.window = saved;
+    else delete g.window;
+  }
 });

@@ -26,7 +26,7 @@ function restart(el: HTMLElement | null, cls: string): void {
 }
 
 const STORE_KEY = "vellum.hunt.v1";
-const MARGIN = Math.round(1500 * 0.045);
+export const MARGIN = Math.round(1500 * 0.05);
 
 const BAND_PROSE = {
   hot: "Hot. You are all but upon it.",

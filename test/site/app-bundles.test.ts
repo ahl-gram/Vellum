@@ -135,6 +135,18 @@ test("the Portfolio's twin is cleaned and ignored at its address under the Explo
   );
 });
 
+test("every twin the press writes is cleaned and ignored at its own address, so no twin can be committed or left stale (#208)", async () => {
+  const [{ BUNDLE_ENTRIES }, { GENERATED_SUBTREES }] = await Promise.all([
+    import("../../scripts/build-app-bundles.ts"),
+    import("../../scripts/clean-public-generated.ts"),
+  ]);
+  const ignored = read(".gitignore").split("\n");
+  for (const { twin } of BUNDLE_ENTRIES) {
+    assert.ok(GENERATED_SUBTREES.includes(twin), `GENERATED_SUBTREES must include ${twin}`);
+    assert.ok(ignored.includes(`public/${twin}`), `.gitignore should carry the exact line public/${twin}`);
+  }
+});
+
 test("the clean never reaches a tracked file: no GENERATED_SUBTREES entry is, or holds, a path git tracks under public/ (Issue #669)", async () => {
   const { GENERATED_SUBTREES } = await import("../../scripts/clean-public-generated.ts");
   const tracked = execFileSync("git", ["ls-files", "public"], { cwd: REPO, encoding: "utf8", timeout: 30_000 })
@@ -381,5 +393,23 @@ test("the worker's build and the pages' build share no file, so neither overwrit
     [...pages].filter((f) => worker.has(f)).map((f) => relative(p.root, f)),
     [],
     "a file is reached from both builds: the press lets one build's file overwrite the other's of the same name, so one side now runs the other's code",
+  );
+});
+
+test("the press lands only what it built: no tracked file of public/ is copied into the root it builds into (#208)", async () => {
+  const p = await press();
+  const tracked = execFileSync("git", ["ls-files", "public"], { cwd: REPO, encoding: "utf8", timeout: 30_000 })
+    .split("\n")
+    .filter(Boolean);
+  assert.ok(tracked.length > 0, "git lists no tracked file under public/, so the sweep below reads nothing");
+  assert.deepEqual(
+    p.twins.filter((twin) => !existsSync(twin)).map((twin) => relative(p.root, twin)),
+    [],
+    "the press landed no twin, so an empty root would pass the sweep below",
+  );
+  assert.deepEqual(
+    tracked.filter((f) => existsSync(join(p.root, relative("public", f)))),
+    [],
+    "the press copied public/ into the root it builds into, over the tracked files a build would serve",
   );
 });

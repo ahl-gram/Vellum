@@ -4,6 +4,8 @@ import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { NAV_ITEMS } from "../../src/layouts/nav.ts";
 import { DISCOVERY_ROUTES } from "../../scripts/generate-discovery.ts";
+import { BUNDLE_ENTRIES } from "../../scripts/build-app-bundles.ts";
+import { GENERATED_SUBTREES } from "../../scripts/clean-public-generated.ts";
 
 // The Specimen Book (Issue #487 item 4, cut at Issue #465 ruling 6): the kit's oracle and the live sitting's bench.
 const REPO = resolve(import.meta.dirname, "..", "..");
@@ -58,14 +60,17 @@ test("SB2 the page stands every kit component from the kit, in every state the d
   assert.match(src, /<select id="sb-state" class="control"/, "the room's one live control: the state");
 });
 
-test("SB3 the conductor is a bundle twin like every chart room's, wired through the kit's own binders", () => {
+test("SB3 the conductor is a bundle twin like every chart room's: pressed, cleaned and ignored", () => {
+  assert.ok(
+    BUNDLE_ENTRIES.some((e) => e.entry === "src/site/specimen/app.ts" && e.twin === "specimen/app.bundle.js"),
+    "the press bundles the conductor into its twin",
+  );
+  assert.ok(GENERATED_SUBTREES.includes("specimen/app.bundle.js"), "the cleaner sweeps the twin");
+  assert.match(read(".gitignore"), /^public\/specimen\/app\.bundle\.js$/m);
+});
+
+test("SB3b the conductor is wired through the kit's own binders, and the page loads its twin as is", () => {
   const app = read("src/site/specimen/app.ts");
   for (const m of ["bindRoom", "createZoomController", "bindGlassKeys"]) assert.ok(app.includes(m), `app.ts uses ${m}`);
-  assert.match(
-    read("scripts/build-app-bundles.ts"),
-    /\{ entry: "src\/site\/specimen\/app\.ts", twin: "specimen\/app\.bundle\.js" \}/,
-  );
-  assert.match(read("scripts/clean-public-generated.ts"), /"specimen\/app\.bundle\.js"/);
-  assert.match(read(".gitignore"), /^public\/specimen\/app\.bundle\.js$/m);
   assert.match(read(PAGE), /<script type="module" src="\.\/app\.bundle\.js" is:inline><\/script>/);
 });

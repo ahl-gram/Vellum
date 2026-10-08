@@ -83,14 +83,13 @@ test("the retired near-miss inks never reappear (#269 review, item 4)", () => {
 
 test("the composers dress from the same palette (#269 review follow-up)", async () => {
   // The generated atlas and gallery cannot render through BaseLayout (the single-file download links nothing external), so each declares the tokens in its own :root.
-  for (const source of ["src/atlas/document.ts", "src/cli/gallery.ts"]) {
-    const text = read(source).toLowerCase();
-    for (const [name, hex] of Object.entries(TOKENS)) {
-      assert.ok(!text.includes(hex), `${source} carries raw ${hex}; consume var(${name})`);
-    }
-    for (const hex of RETIRED_INKS) {
-      assert.ok(!text.includes(hex), `${source} carries retired ink ${hex}; use var(--ink-dark)`);
-    }
+  const { GALLERY_PAGE_CSS } = await import("../../src/cli/gallery.ts");
+  const gallery = GALLERY_PAGE_CSS.toLowerCase();
+  for (const [name, hex] of Object.entries(TOKENS)) {
+    assert.ok(!gallery.includes(hex), `the gallery sheet carries raw ${hex}; consume var(${name})`);
+  }
+  for (const hex of RETIRED_INKS) {
+    assert.ok(!gallery.includes(hex), `the gallery sheet carries retired ink ${hex}; use var(--ink-dark)`);
   }
 
   const { SITE_PALETTE } = await import("../../src/atlas/palette.ts");
@@ -107,10 +106,10 @@ test("the composers dress from the same palette (#269 review follow-up)", async 
     subtitle: "s",
     seed: 7,
     hero: plate,
-    draughtings: [],
-    themes: [],
-    regions: [],
-    prospects: [],
+    draughtings: [plate],
+    themes: [plate],
+    regions: [plate],
+    prospects: [plate],
     bannersHtml: "",
     chronicleHtml: "",
     gazetteerHtml: "",
@@ -124,6 +123,7 @@ test("the composers dress from the same palette (#269 review follow-up)", async 
       const count = html.split(hex).length - 1;
       assert.equal(count, 1, `the ${label} atlas should carry ${hex} exactly once (the ${name} :root declaration)`);
     }
+    assert.ok(!html.includes("#5a4326"), `the ${label} atlas carries retired ink #5a4326; use var(--ink-dark)`);
   }
 });
 

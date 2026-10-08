@@ -189,7 +189,7 @@ export function createSessionBuilder(deps: SessionBuilderDeps) {
     const { plan, routed } = routedPlan(manifest, survey, straight, seed, quiet, orderItinerary);
 
     const wPx = manifest.widthPx;
-    const proj = createProjection(survey.gridW, survey.gridH, wPx, Math.round(wPx * 0.045));
+    const proj = createProjection(survey.gridW, survey.gridH, wPx, Math.round(wPx * 0.05));
     const { legs, cumMs, totalMs } = projectedLegs(routed, proj);
 
     const byIdx = new Map(manifest.places.map((p) => [p.idx, p]));

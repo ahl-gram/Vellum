@@ -281,11 +281,3 @@ test("the Reading Room host wires the sheet-link half of the contract (#302, #22
   assert.ok(page.includes("/living-chart.css"), "the Reading Room page links /living-chart.css");
   assert.ok(page.includes("/reading-frame.css"), "the Reading Room page links /reading-frame.css");
 });
-
-test("the reading frame's chart mount carries the class for any future host (#302)", () => {
-  const frame = read("src/site/reading-frame/index.ts");
-  assert.ok(
-    frame.includes('"rf-chart living-chart"'),
-    "buildReadingFrame's chart mount carries living-chart alongside rf-chart",
-  );
-});

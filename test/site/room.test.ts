@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 import { globSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { GLASS_GAP_REM, pressRowStacks, rowSheds } from "../../src/site/shared/room-seats.ts";
+import { bindRoom } from "../../src/site/shared/room.ts";
+import { El } from "../../test-support/element-shim.ts";
 
 test("the Glass's computed seat beside an open slip is the sheet's own arithmetic (atelier.css: --slip-w + 2rem + 1.4rem)", () => {
   const css = readFileSync(resolve(import.meta.dirname, "..", "..", "public/atelier.css"), "utf8");
@@ -151,17 +153,47 @@ test("the kit gives the stage's status pill its fade, keyed to the class so ever
 });
 
 // The legend row's width follows the folio's text extent (placeLegendRow), and a narrower row wraps taller; the fit bounds the sheet by the row's top, so the row is seated first or the fit reads a row that is about to grow (plate read 2026-08-30 on Issue #463: the Print Room's sheet over a freshly wrapped row until the next layout).
+class WrappingLegend extends El {
+  override getBoundingClientRect() {
+    const top = this.style.left ? 500 : 760;
+    return { left: 0, right: 600, top, bottom: top + 40, width: 600, height: 40 };
+  }
+}
+
 test("bindRoom seats the legend row before it fits the sheet", () => {
-  const room = readFileSync(resolve(import.meta.dirname, "..", "..", "src/site/shared/room.ts"), "utf8");
-  const layout = room.slice(room.indexOf("const layout = () => {"), room.indexOf("camera.restore(held);"));
-  assert.ok(
-    layout.includes("placeLegendRow(") && layout.includes("fitRoom("),
-    "the layout both seats the row and fits the sheet",
-  );
-  assert.ok(
-    layout.indexOf("placeLegendRow(") < layout.indexOf("fitRoom("),
-    "the row is seated before the fit reads its top",
-  );
+  const g = globalThis as Record<string, unknown>;
+  const names = ["document", "window", "ResizeObserver"] as const;
+  const saved = names.map((n) => [n, n in g, g[n]] as const);
+  const legend = new WrappingLegend("nav");
+  g.document = {
+    querySelector: (sel: string) => (sel === ".legend" ? legend : null),
+    documentElement: { clientWidth: 1280, clientHeight: 800 },
+    body: new El("body"),
+  };
+  g.window = { addEventListener: () => {}, scrollX: 0 };
+  g.ResizeObserver = class {
+    observe() {}
+  };
+  try {
+    const frame = new El("div");
+    const room = bindRoom({
+      frame: frame as unknown as HTMLElement,
+      sheet: new El("div") as unknown as HTMLElement,
+      camera: { hold: () => null, restore: () => {} },
+      aspect: () => 1.5,
+    });
+    room.layout();
+    assert.equal(
+      frame.style.getPropertyValue("--reserve-bottom"),
+      `${800 - 500 + 14}px`,
+      "the first layout fits the sheet above the seated row's top, not the top it had before it was seated",
+    );
+  } finally {
+    for (const [n, had, v] of saved) {
+      if (had) g[n] = v;
+      else delete g[n];
+    }
+  }
 });
 
 test("the Press stacks when its presses take more than two lines, or two or more stand each alone; one or two shared lines do not (Issue #762)", () => {

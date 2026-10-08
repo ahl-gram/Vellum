@@ -70,21 +70,23 @@ export async function bundleAppSurfaces(root: string): Promise<void> {
   }
 }
 
+export const stringConfig = (absEntry: string): InlineConfig => ({
+  configFile: false,
+  logLevel: "silent",
+  root: dirname(absEntry),
+  publicDir: "public",
+  build: {
+    write: false,
+    target: "esnext",
+    minify: false,
+    sourcemap: false,
+    modulePreload: false,
+    rollupOptions: { input: absEntry, output: { format: "es" } },
+  },
+});
+
 export async function bundleToString(absEntry: string): Promise<string> {
-  const res = await build({
-    configFile: false,
-    logLevel: "silent",
-    root: dirname(absEntry),
-    publicDir: false,
-    build: {
-      write: false,
-      target: "esnext",
-      minify: false,
-      sourcemap: false,
-      modulePreload: false,
-      rollupOptions: { input: absEntry, output: { format: "es" } },
-    },
-  });
+  const res = await build(stringConfig(absEntry));
   const outputs = Array.isArray(res) ? res : [res];
   for (const out of outputs) {
     if (!("output" in out)) continue;

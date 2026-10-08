@@ -113,6 +113,10 @@ export class El {
   after(...kids: El[]): void {
     this.#insertBeside(1, kids);
   }
+  replaceWith(...kids: El[]): void {
+    this.#insertBeside(0, kids);
+    this.remove();
+  }
   append(...kids: El[]): void {
     this.#adopt(kids);
     this.children.push(...kids);
