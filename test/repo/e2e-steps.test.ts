@@ -90,6 +90,31 @@ test("each lint run reads its own program: the same plant at a second suite repo
   assert.deepEqual(await reports([...HEAD, ...BODY], "e2e/suites/cluster.ts"), REPORTED);
 });
 
+test("each report names what its call reaches for", async () => {
+  const plant = [
+    'import type { SuiteContext } from "../types.ts";',
+    "export async function run(ctx: SuiteContext): Promise<void> {",
+    "  const local = async (): Promise<void> => { await ctx.waitSettled(); };",
+    "  await local();",
+    "  await ctx.waitTurned();",
+    '  await ctx["waitSettled"]();',
+    "  await (ctx.PORT > 0 ? local : local)();",
+    '  if (ctx.PORT < 0) throw new Error("x");',
+    "}",
+  ];
+  const [result] = await eslint.lintText(plant.join("\n"), { filePath: join(ROOT, "e2e/suites/health.ts") });
+  assert.deepEqual(
+    result!.messages.filter((m) => m.ruleId === RULE).map((m) => m.message.split(" outside every step")[0]),
+    [
+      "a suite calls local, which can throw,",
+      "a suite calls waitTurned, which can throw,",
+      "a suite calls waitSettled, which can throw,",
+      "a suite calls a function, which can throw,",
+      "a suite throws",
+    ],
+  );
+});
+
 test("a run written as a const arrow is a run", async () => {
   const plant = [
     'import type { SuiteContext } from "../types.ts";',
