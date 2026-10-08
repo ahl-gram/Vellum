@@ -40,8 +40,6 @@ export function sheetsSweptBy(exclusions: Readonly<Record<string, string>>): Rea
 }
 
 export const SRC_CSS_FILES = [
-  "src/layouts/BaseLayout.astro",
-  "src/pages/index.astro",
   "src/cli/gallery.ts",
   "src/atlas/document.ts",
   "src/render/og-card.ts",
