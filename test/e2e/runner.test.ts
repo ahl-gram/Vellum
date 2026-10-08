@@ -44,7 +44,7 @@ const noExit = (t: TestContext): void => {
   });
 };
 
-function rig(env: EnvLike, run: (name: E2eSuiteName, acc: Accumulators) => Promise<void> = async () => {}) {
+function rig(env: EnvLike, run: (name: E2eSuiteName, acc: Accumulators) => void = () => {}) {
   const accumulators: Accumulators = { results: [], consoleErrors: [], http4xx: [], skippedGroups: [] };
   const out: string[] = [];
   const err: string[] = [];
@@ -62,10 +62,11 @@ function rig(env: EnvLike, run: (name: E2eSuiteName, acc: Accumulators) => Promi
   const suites = Object.fromEntries(
     E2E_SUITE_ORDER.map((name) => [
       name,
-      async () => {
+      () => {
         ran.push(name);
-        await run(name, accumulators);
+        run(name, accumulators);
         ctx.check(`${name} passed`, true);
+        return Promise.resolve();
       },
     ]),
   );
@@ -132,14 +133,14 @@ test("the runner serves the repo's own dist/ and writes under its out/ by port, 
   const moved = rig({ VELLUM_E2E_SUITES: "health", VELLUM_E2E_PORT: "8801", VELLUM_SITE_DIR: "/tmp/site-x" });
   await runE2e(moved.io);
   assert.equal(moved.started[0]?.SITE, "/tmp/site-x");
-  assert.equal(moved.started[0]?.OUT, join(ROOT, "out", "e2e-8801"));
+  assert.equal(moved.started[0].OUT, join(ROOT, "out", "e2e-8801"));
 });
 
 test("a suite that throws reds its own check, has its viewport reset, and the lane goes on to the next suite", async (t) => {
   noExit(t);
   const env = { VELLUM_E2E_SUITES: "health,prospect" };
   const [first, second] = resolveSuiteSelection(env).names;
-  const { io, ran, probes, accumulators } = rig(env, async (name) => {
+  const { io, ran, probes, accumulators } = rig(env, (name) => {
     if (name === first) throw new Error("boom");
   });
   assert.equal(await runE2e(io), 1);
@@ -165,7 +166,7 @@ test("a browser that died with its suite ends the run as a harness error, exit 2
   noExit(t);
   const env = { VELLUM_E2E_SUITES: "health,prospect" };
   const [first] = resolveSuiteSelection(env).names;
-  const { io, out, err, probes } = rig(env, async (name, acc) => {
+  const { io, out, err, probes } = rig(env, (name, acc) => {
     acc.results.push({ name: "an earlier check", ok: true });
     if (name === first) {
       probes.alive = false;
@@ -185,7 +186,7 @@ test("the harness-error tally is printed when any check ran and not when none di
 test("a group a suite skipped reaches the report, and the health checkpoint does not certify that suite", async (t) => {
   noExit(t);
   const env = { VELLUM_E2E_SUITES: "render,health" };
-  const { io, out } = rig(env, async (name, acc) => {
+  const { io, out } = rig(env, (name, acc) => {
     if (name === "render") acc.skippedGroups.push("R9");
   });
   await runE2e(io);
@@ -236,7 +237,7 @@ test("the outcome is the last line, and the code is 0 only when every check pass
   assert.equal(await runE2e(clean.io), 0);
   assert.equal(clean.out.at(-1), "\nALL PASS  (1/1)");
   assert.equal(clean.probes.cleanups, 1);
-  const failing = rig({ VELLUM_E2E_SUITES: "health" }, async (_name, acc) => {
+  const failing = rig({ VELLUM_E2E_SUITES: "health" }, (_name, acc) => {
     acc.results.push({ name: "a red", ok: false });
   });
   assert.equal(await runE2e(failing.io), 1);

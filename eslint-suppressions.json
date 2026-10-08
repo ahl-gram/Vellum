@@ -436,11 +436,8 @@
     }
   },
   "test/repo/e2e-tiers.test.ts": {
-    "max-lines": {
-      "count": 1
-    },
     "max-lines-per-function": {
-      "count": 2
+      "count": 1
     }
   },
   "test/repo/footgun-gate.test.ts": {

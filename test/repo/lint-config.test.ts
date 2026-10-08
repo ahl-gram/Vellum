@@ -129,7 +129,7 @@ const LIST_AT_REFORMAT: Readonly<Record<string, readonly [number, number]>> = {
   "test/repo/agent-sandbox.test.ts": [1, 0],
   "test/repo/design-kit.test.ts": [1, 0],
   "test/repo/e2e-split-proof.test.ts": [1, 1],
-  "test/repo/e2e-tiers.test.ts": [1, 2],
+  "test/repo/e2e-tiers.test.ts": [0, 1],
   "test/repo/footgun-gate.test.ts": [1, 0],
   "test/repo/lint-wiring.test.ts": [1, 2],
   "test/repo/prose-paths.test.ts": [0, 1],

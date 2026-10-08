@@ -97,7 +97,7 @@ headless browser actually do, so a green run can be believed.
     starts on whatever page is current, so the last navigation waits for readiness instead of
     returning mid-boot, or a suite that reads the page it expects without navigating of its own goes
     red in lane order and green alone. The VIEWPORT is the runner's job, not the suite's:
-    `onSuiteError` in `e2e/run.ts` races the mobile-emulation reset against a timeout
+    `onSuiteError` in `e2e/support/runner.ts` races the mobile-emulation reset against a timeout
     on the error path, and the race is bounded precisely because a browser that dies after the
     liveness probe would leave that send pending forever, which is the one path where the next suite
     does inherit a phone viewport. Depend on the suite, not on the rescue. **Attribute a lane-order
@@ -128,8 +128,8 @@ section points there rather than restating it.
   a real dispatched input event, then reads what the opened tab actually holds; anything else the
   browser gates on user activation is measured under a gesture the same way before its result is
   trusted.
-- **The harness serves the BUILT site.** `e2e/run.ts` serves `dist/`, with
-  `VELLUM_SITE_DIR` as the override, and `dist/` does not exist in a fresh checkout. A change under
+- **The harness serves the BUILT site.** The runner (`runE2e` in `e2e/support/runner.ts`) serves
+  `dist/`, with `VELLUM_SITE_DIR` as the override, and `dist/` does not exist in a fresh checkout. A change under
   `public/` is invisible to every suite until the build runs again. Two causes put a run on a stale
   build and this file ranks neither: that one, and an orphaned browser still holding the debug port,
   whose conflict message in `e2e/support/ports.ts` says in its own words that the run would report

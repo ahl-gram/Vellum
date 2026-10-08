@@ -6,7 +6,6 @@ import {
   ambientSelectionRefusal,
   laneCheckTally,
   laneChildEnv,
-  laneLineIsSkip,
   laneOutcome,
   resolveLaneSelection,
   splitLaneChunk,

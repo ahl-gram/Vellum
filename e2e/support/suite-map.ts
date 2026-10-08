@@ -35,8 +35,8 @@ import { run as runSpecimen } from "../suites/specimen.ts";
 
 export const SUITES = {
   render: runRender,
-  motion: runTurn,
-  turn: runMotion,
+  motion: runMotion,
+  turn: runTurn,
   verso: runVerso,
   zoom: runZoom,
   "zoom-gestures": runZoomGestures,

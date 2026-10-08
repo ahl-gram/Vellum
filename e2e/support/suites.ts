@@ -1,5 +1,6 @@
 export const E2E_SUITES_VAR = "VELLUM_E2E_SUITES";
 
+// This order IS the run order, and it is load-bearing: render asserts the pristine bare-visit boot, and the health checkpoint (N1/N2) asserts the console and network state everything before it left. A selection is filtered to this order, never run in the order it was requested.
 export const E2E_SUITE_ORDER = [
   "render",
   "motion",

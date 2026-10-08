@@ -75,8 +75,8 @@ symbol and path so the reader goes and looks.
   `PAGES` in `test/site/astro-scaffold.test.ts`; `BUNDLE_ENTRIES` in `scripts/build-app-bundles.ts`;
   `GENERATED_SUBTREES` in `scripts/clean-public-generated.ts`; `ROUTE_ENTRIES` and
   `DISCOVERY_ROUTES` in `scripts/generate-discovery.ts`. A new suite additionally joins `E2E_SUITE_ORDER`
-  (`e2e/support/suites.ts`), the runner's `SUITES` map (`e2e/run.ts`), `E2E_LANES`
-  (`e2e/support/lanes.ts`), `MEASURED_SECONDS` (`test/e2e/lane-timings.test.ts`, CI seconds: an
+  (`e2e/support/suites.ts`), the runner's `SUITES` map (`e2e/support/suite-map.ts`, which the type
+  check holds to `E2E_SUITE_ORDER`), `E2E_LANES` (`e2e/support/lanes.ts`), `MEASURED_SECONDS` (`test/e2e/lane-timings.test.ts`, CI seconds: an
   estimate first, corrected from its pull request's own lane log) and `STEPPED_GROUPS`
   in `test/repo/e2e-tiers.test.ts` if it steps, and `NEEDS_PREDECESSOR` or `OPENS_ON_HOME`
   (`e2e/support/suites.ts`) if it reads the page the suite before it leaves or navigates first to

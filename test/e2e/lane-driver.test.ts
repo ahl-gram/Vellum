@@ -52,7 +52,7 @@ function child(lines: readonly string[], code: number | null): LaneChild {
 function rig(
   argv: readonly string[],
   env: EnvLike = {},
-  outcome: (lane: string) => [string[], number] = () => [["ALL PASS  (1/1)"], 0],
+  outcome: (lane: string) => [string[], number | null] = () => [["ALL PASS  (1/1)"], 0],
 ) {
   const out: string[] = [];
   const err: string[] = [];
@@ -137,7 +137,7 @@ test("no lane argument runs every lane, and a lane argument runs that lane alone
   );
 });
 
-test("the exit code is the lanes' outcome: a red lane fails the run, and a lane that only skipped never reads as a pass", async (t) => {
+test("the exit code is the lanes' outcome: a red or killed lane fails the run, and a lane that only skipped never reads as a pass", async (t) => {
   noExit(t);
   const green = rig(["--lane", "A"]);
   assert.equal(await runLanes(green.io), 0);
@@ -145,7 +145,12 @@ test("the exit code is the lanes' outcome: a red lane fails the run, and a lane 
   const red = rig(["--lane", "A"], {}, () => [["SOME FAILED  (1/2)"], 1]);
   assert.equal(await runLanes(red.io), 1);
   const skipped = rig(["--lane", "A"], {}, () => [["SKIP: no browser"], 0]);
-  assert.equal(await runLanes(skipped.io), 1);
+  assert.equal(await runLanes(skipped.io), 0);
+  assert.match(
+    skipped.out.at(-1) ?? "",
+    /^\nLANE A SKIPPED, so this run proves less than a pass/,
+    JSON.stringify(skipped.out),
+  );
   const killed = rig(["--lane", "A"], {}, () => [[], null]);
   assert.equal(await runLanes(killed.io), 1);
 });
@@ -164,7 +169,7 @@ test("the process binding reads the real argv, environment and terminal", async 
     for (const k of BROWSERLESS) delete process.env[k];
     assert.equal(await runLanesFromProcess(deps), 1);
     assert.match(errors.join("\n"), /--lane "Q" names a lane that does not exist/);
-    argv.mockImplementation([process.execPath, "e2e/lanes.ts"]);
+    argv.mock.mockImplementation([process.execPath, "e2e/lanes.ts"]);
     process.env["VELLUM_E2E_SUITES"] = "render";
     assert.equal(await runLanesFromProcess(deps), 1);
     assert.match(errors.join("\n"), /VELLUM_E2E_SUITES/);
