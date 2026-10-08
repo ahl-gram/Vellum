@@ -53,7 +53,7 @@ Pick server and debugger ports distinct from the ones the existing drivers use (
 
 Write only into `out/`. Never edit source, tests, or committed charts. If you believe a fix is needed, describe it; do not apply it.
 
-Other lanes may be running beside you on the same machine. Your files stay in `out/`, as above, under a name that carries the issue's number; never run the full local e2e lanes, which starve the machine the other lanes run on; drive only the pages and suites your reading needs.
+Other lanes may be running beside you on the same machine. Your files go in one folder in `out/` named for the issue (`out/<issue>/`, or `out/<issue>-<what>/` beside an earlier delivery), which you end by writing its notes and giving it its page, as `handbook/specs/development-workflow.md` step 6 says; never run the full local e2e lanes, which starve the machine the other lanes run on; drive only the pages and suites your reading needs.
 
 **Never move or restore the tree you were dispatched from.** No `git checkout`, `git switch`, `git reset`, `git restore` or `git clean` against it, and never remove a worktree you did not create. That directory is normally another agent's live working tree, and on 2026-09-11 a dispatched review agent checked a PR head out in two of them (#573).
 
@@ -63,6 +63,6 @@ Lead with what you measured and what it says, then the file list. For every acce
 
 **A step 6 sitting has no acceptance criteria yet**, because Alex has not ruled: the deliverable there is a COMPARISON. Report each arm against the control on the same measurements, say which arm wins each and by how much, and name what each arm costs the reader. Do not recommend one; the ruling is his. The spike you render is uncommitted by design, so build and serve the working tree as usual and do not ask for a commit.
 
-Name every file you wrote, with its path under `out/`, so Alex can open it. Give ABSOLUTE paths when you are dispatched inside a worktree, since its `out/` is not the one he opens. That list is half the deliverable.
+Name the folder's page and every file you wrote, with its path under `out/`, so Alex can open it. Give ABSOLUTE paths when you are dispatched inside a worktree, since its `out/` is not the one he opens. That list is half the deliverable.
 
 No em-dashes in anything you write, except inside inline backticks or a fenced code block.

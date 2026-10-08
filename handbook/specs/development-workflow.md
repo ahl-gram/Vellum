@@ -142,6 +142,19 @@ to the MAIN checkout's `out/` before putting the menu; a dispatched lane cannot 
 tree, so it reports absolute paths and its dispatcher copies them, the same way it holds the menu
 itself. Copy before the spike goes, because `out/` is gitignored and nothing else holds them.
 
+**A delivery to Alex is one folder with a page.** Whatever goes to him in `out/` (stills, plates,
+candidate pages, measured tables) lands in one folder directly inside `out/`, named for its issue:
+`out/<issue>/`, or `out/<issue>-<what>/` where one issue delivers more than once. Whoever fills the
+folder writes `out/<issue>/notes.md` beside its files, opening with a `#` heading line that titles
+the page, then saying what to look at first and which menu option each file shows; a file name
+written there links to that file on the page. The delivery ends
+with `npm run delivery -- out/<issue>`, which writes `out/<issue>/index.html` presenting every file in
+the folder and rebuilds `out/index.html`, the list of deliveries, newest first. The reply names both
+pages by absolute path beside the files themselves, and nothing opens a browser. A dispatcher copying
+a lane's folder across copies it with its files' times kept (`cp -Rp`, since the page dates a
+delivery by its newest file) and runs the command again in the main checkout, which is what puts the
+folder in the list Alex opens.
+
 **A harness-isolated agent's tree goes when its run ends, `out/` included, unless git sees a change
 in it.** The harness removes an `isolation: worktree` agent's tree at the end of its run when
 `git status --porcelain --untracked-files=normal` prints nothing and no commit is ahead of where the
@@ -149,7 +162,7 @@ tree was made, and the gitignored `out/` never prints there. So an agent that wo
 harness tree but whose only deliverable is files under `out/`, such as a design round or a
 measurement, is dispatched WITHOUT isolation, by a session standing in the main checkout:
 - The dispatcher builds its tree with `git -C <main checkout> worktree add --detach <main checkout>/.claude/worktrees/<name> origin/main` and links `node_modules` into it by path, with no `cd`, as `scripts/agent-sandbox.ts` does.
-- The agent writes straight to the main checkout's `out/<issue>/`, and names the sha it ran at.
+- The agent writes straight to the main checkout's `out/<issue>/`, names the sha it ran at, and gives the folder its page by running `node scripts/delivery/main.ts` from its own tree with the folder's absolute path.
 - The dispatcher removes the tree once the stills have been ruled.
 
 A dispatcher fenced inside a worktree, an implementer lane or an EnterWorktree session, hands such an
@@ -303,7 +316,7 @@ suite run there deletes the generated assets under `public/` (Alex, 2026-09-12);
 their own (#575). The other three keep their documented work in the dispatch tree, `vellum-plate-reader`'s
 `out/` samples included, because its own boundary writes only into `out/` and the other two hold no
 write tool at all. That is where Alex looks when the dispatch tree is the main checkout; when it is a
-lane's worktree, whoever dispatched the lane copies the samples across, as step 6 says.
+lane's worktree, whoever dispatched the lane copies the samples across and gives them their page, as step 6 says.
 
 **A review run by any agent outside the house's set, a Workflow script's subagent included, gets a
 read-only toolset.** An agent holding Edit has mutation-tested real source and left its mutants in

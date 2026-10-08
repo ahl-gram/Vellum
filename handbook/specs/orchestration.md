@@ -167,8 +167,8 @@ home's line wins for the lane and this file's for the orchestrator.
   scratch tools, and runs recon and the plan skeptic on its own pull request's row, as workflow
   step 8's plan per pull request implies.
 - **Retire a lane's tree once its last pull request has merged and it has reported.** Copy its `out/`
-  first: `git worktree remove` deletes the gitignored `out/`, and `git status --porcelain` reports
-  nothing there. The harness locks the tree to the session's own process, so unlock it once the lane
+  first, giving each delivery folder copied its page as workflow step 6 says: `git worktree remove`
+  deletes the gitignored `out/`, and `git status --porcelain` reports nothing there. The harness locks the tree to the session's own process, so unlock it once the lane
   has reported (`git -C <main checkout> worktree unlock <path>`), remove the `node_modules` link,
   then `git -C <main checkout> worktree remove --force <path>`.
 - **Stop the finished review agents a retired lane dispatched.** They stay in the session's agent
