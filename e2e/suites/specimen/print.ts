@@ -1,3 +1,4 @@
+import { withScriptsOff } from "../../support/scripts-off.ts";
 import { NOSCRIPT_READ, PAGE } from "./reads.ts";
 import type { SpecimenKit } from "./kit.ts";
 
@@ -76,32 +77,33 @@ export async function sb9PrintIsPaper({ send, check, sleep, setState, read }: Sp
 }
 
 export async function sb9dNoScript({ evaluate, send, check, sleep, PORT }: SpecimenKit): Promise<void> {
-  // The boot hook never arrives with scripting off, so the poll waits on the notice itself rather than on goto()'s state read; the restore is a finally because a throw between here and it would hand the next suite a browser with no JavaScript, which runSelected keeps running into.
+  // The boot hook never arrives with scripting off, so the poll waits on the notice itself rather than on goto()'s state read.
   type Notice =
     | { present: false; pill: { disp: string; w: number } | null }
     | { present: true; disp: string; w: number; text: number; pill: { disp: string; w: number } | null };
-  let noJsScreen: Notice | null = null;
-  let noJsPrint: Notice | undefined;
+  let noJsScreen: Notice | null;
+  let noJsPrint: Notice;
   try {
-    await send("Emulation.setScriptExecutionDisabled", { value: true });
-    await send("Page.navigate", { url: "about:blank" });
-    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}${PAGE}` });
-    for (let i = 0; i < 200; i++) {
-      let s: Notice | null = null;
-      try {
-        s = await evaluate(NOSCRIPT_READ);
-      } catch {}
-      if (s && s.present && s.w > 0) {
-        noJsScreen = s;
-        break;
+    ({ noJsScreen, noJsPrint } = await withScriptsOff(send, async () => {
+      let screen: Notice | null = null;
+      await send("Page.navigate", { url: "about:blank" });
+      await send("Page.navigate", { url: `http://127.0.0.1:${PORT}${PAGE}` });
+      for (let i = 0; i < 200; i++) {
+        let s: Notice | null = null;
+        try {
+          s = await evaluate(NOSCRIPT_READ);
+        } catch {}
+        if (s && s.present && s.w > 0) {
+          screen = s;
+          break;
+        }
+        await sleep(50);
       }
-      await sleep(50);
-    }
-    await send("Emulation.setEmulatedMedia", { media: "print" });
-    noJsPrint = await evaluate(NOSCRIPT_READ);
+      await send("Emulation.setEmulatedMedia", { media: "print" });
+      return { noJsScreen: screen, noJsPrint: await evaluate(NOSCRIPT_READ) };
+    }));
   } finally {
     await send("Emulation.setEmulatedMedia", { media: "" });
-    await send("Emulation.setScriptExecutionDisabled", { value: false });
   }
   check(
     "SB9d with SCRIPT EXECUTION DISABLED, the other half of #566's ruling: the scripts-off notice is in the DOM at all only here, and on paper it goes with the pill, both of them gone, box and all; on screen in the same state both stand filled, which is the control that says scripting really was off and the notice really rendered",

@@ -150,59 +150,55 @@ export async function dnNarrow(k: DeskKit): Promise<void> {
   );
 }
 
-export type Refusal = { arm: () => Promise<void>; disarm: () => Promise<void> };
-
-export function storageRefusal({ send }: SuiteContext): Refusal {
-  let id: string | null = null;
-  const arm = async (): Promise<void> => {
-    const r = await send<{ identifier: string }>("Page.addScriptToEvaluateOnNewDocument", {
-      source: `Storage.prototype.getItem = () => { throw new DOMException("refused", "SecurityError"); }; Storage.prototype.setItem = () => { throw new DOMException("refused", "QuotaExceededError"); };`,
-    });
-    id = r.identifier;
-  };
-  const disarm = async (): Promise<void> => {
-    if (id === null) return;
-    try {
-      await send("Page.removeScriptToEvaluateOnNewDocument", { identifier: id });
-    } catch {}
-    id = null;
-  };
-  return { arm, disarm };
+export async function withStorageRefused<T>({ send }: Pick<SuiteContext, "send">, body: () => Promise<T>): Promise<T> {
+  const { identifier } = await send<{ identifier: string }>("Page.addScriptToEvaluateOnNewDocument", {
+    source: `Storage.prototype.getItem = () => { throw new DOMException("refused", "SecurityError"); }; Storage.prototype.setItem = () => { throw new DOMException("refused", "QuotaExceededError"); };`,
+  });
+  try {
+    return await body();
+  } finally {
+    await send("Page.removeScriptToEvaluateOnNewDocument", { identifier }).catch(() => undefined);
+  }
 }
 
-export async function dnRefused(k: DeskKit, refusal: Refusal): Promise<void> {
+export async function dnRefused(k: DeskKit): Promise<void> {
   const { check, setMobileViewport, consoleErrors } = k;
   await setMobileViewport(390, 844);
-  await refusal.arm();
-  const errors = consoleErrors.length;
-  await k.open(PAGE);
-  const refused = await readSettled(k, "the page with storage refused");
-  const logged = dropExpectedCancellations(consoleErrors.slice(errors));
-  check(
-    "DN7 with storage refused the page still boots and shows the notice, and nothing reaches the console",
-    refused.shown && refused.key === "unreadable" && logged.length === 0,
-    JSON.stringify({ refused, logged }),
-  );
+  await withStorageRefused(k, async () => {
+    const errors = consoleErrors.length;
+    await k.open(PAGE);
+    const refused = await readSettled(k, "the page with storage refused");
+    const logged = dropExpectedCancellations(consoleErrors.slice(errors));
+    check(
+      "DN7 with storage refused the page still boots and shows the notice, and nothing reaches the console",
+      refused.shown && refused.key === "unreadable" && logged.length === 0,
+      JSON.stringify({ refused, logged }),
+    );
+  });
 }
 
 export async function dnContinue(k: DeskKit): Promise<void> {
   const { check, touch, setMobileViewport } = k;
   await setMobileViewport(390, 844);
   await k.forget();
-  await k.open(PAGE);
-  const before = await readSettled(k, "the page before the tap");
-  await touch("touchStart", [{ x: before.tap.x, y: before.tap.y, id: 0 }]);
-  await touch("touchEnd", []);
-  const after = await k.settle(READ, (d) => !d.shown || d.key !== null, "the tap handled");
-  await k.open(ELSEWHERE);
-  const next = await readSettled(k, "the next page after Continue anyway");
-  check(
-    "DN4 a real tap on Continue anyway hides the notice and remembers it: the next page does not show it",
-    after.w === 0 && after.key === "1" && !next.shown && next.key === "1",
-    JSON.stringify({
-      tap: before.tap,
-      after: { w: after.w, key: after.key },
-      next: { shown: next.shown, key: next.key },
-    }),
-  );
+  try {
+    await k.open(PAGE);
+    const before = await readSettled(k, "the page before the tap");
+    await touch("touchStart", [{ x: before.tap.x, y: before.tap.y, id: 0 }]);
+    await touch("touchEnd", []);
+    const after = await k.settle(READ, (d) => !d.shown || d.key !== null, "the tap handled");
+    await k.open(ELSEWHERE);
+    const next = await readSettled(k, "the next page after Continue anyway");
+    check(
+      "DN4 a real tap on Continue anyway hides the notice and remembers it: the next page does not show it",
+      after.w === 0 && after.key === "1" && !next.shown && next.key === "1",
+      JSON.stringify({
+        tap: before.tap,
+        after: { w: after.w, key: after.key },
+        next: { shown: next.shown, key: next.key },
+      }),
+    );
+  } finally {
+    await k.forget();
+  }
 }

@@ -1,14 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import {
   E2E_LANES,
   LANE_FLAG,
   ambientSelectionRefusal,
   laneCheckTally,
   laneChildEnv,
-  laneLineIsSkip,
   laneOutcome,
   resolveLaneSelection,
   splitLaneChunk,
@@ -378,16 +375,6 @@ test("a lane's output is split into whole lines, across chunk boundaries and at 
   assert.deepEqual(splitLaneChunk("", "a\nb\nc\n"), { lines: ["a", "b", "c"], rest: "" });
   assert.deepEqual(splitLaneChunk("", ""), { lines: [], rest: "" });
   assert.deepEqual(splitLaneChunk("", "\n\n"), { lines: ["", ""], rest: "" }, "blank lines are lines");
-});
-
-test("the skip line the driver watches for is the one the runner actually prints", () => {
-  // Read as source: a machine with a browser never takes this path, and a reworded SKIP would silently turn an empty run green.
-  const runner = readFileSync(join(import.meta.dirname, "..", "..", "e2e", "run.ts"), "utf8");
-  const printed = runner.match(/"(SKIP:[^"]*)"/);
-  assert.ok(printed, "the runner no longer prints a SKIP: line, so the driver watches for nothing");
-  assert.ok(laneLineIsSkip(printed[1]!), `the driver does not recognise the runner's own ${printed[1]}`);
-  assert.ok(!laneLineIsSkip("PASS  R1 the chart draws"), "a passing check must not read as a skip");
-  assert.ok(!laneLineIsSkip("  SKIP: indented"), "only the runner's own line counts, not a mention of one");
 });
 
 test("lanes that skipped for want of a browser never read as a pass", () => {

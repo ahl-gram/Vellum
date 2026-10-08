@@ -1,6 +1,7 @@
 // The document rooms' index slip (Issue #462 Landfall Sub 7, document-room rulings 1 to 4): the index is server-rendered from the page's own sections, inks the section being read, folds to hand the sheet the width, stands beside the 1024 page in a narrower window (Issue #762), and on the Glossary narrows to the term names typed. Every geometry is MEASURED; the scripts-off arm carries its control.
 import { scopedHealth } from "../support/room.ts";
 import { makeSettle } from "../support/settle.ts";
+import { withScriptsOff } from "../support/scripts-off.ts";
 import { makeStep } from "../support/step.ts";
 import type { Payload, SuiteContext } from "../types.ts";
 
@@ -316,13 +317,14 @@ async function na3Floor(k: DocRoomsKit): Promise<void> {
 }
 
 async function ix6NoScript({ evaluate, send, check, goto }: DocRoomsKit): Promise<void> {
-  await send("Emulation.setScriptExecutionDisabled", { value: true });
-  await goto(GLOSSARY);
-  const noJs = await evaluate(READ);
-  const noJsLink = await evaluate<{ href: string | null; target: boolean }>(
-    `(() => { const a = document.querySelector("#index .terms a"); return { href: a.getAttribute("href"), target: !!document.querySelector(a.getAttribute("href")) }; })()`,
-  );
-  await send("Emulation.setScriptExecutionDisabled", { value: false });
+  const { noJs, noJsLink } = await withScriptsOff(send, async () => {
+    await goto(GLOSSARY);
+    const read = await evaluate(READ);
+    const link = await evaluate<{ href: string | null; target: boolean }>(
+      `(() => { const a = document.querySelector("#index .terms a"); return { href: a.getAttribute("href"), target: !!document.querySelector(a.getAttribute("href")) }; })()`,
+    );
+    return { noJs: read, noJsLink: link };
+  });
   check(
     "IX6 with SCRIPT EXECUTION DISABLED the index still stands, every section and term server-rendered with a real anchor, and NO row is inked: the ink is the control, since the binder alone sets it and every other term here is equally true with scripts on (#462 ruling 1, the no-JS floor)",
     JSON.stringify(noJs.rows) === JSON.stringify(noJs.h2s) &&

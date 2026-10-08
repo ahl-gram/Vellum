@@ -2,7 +2,7 @@
 import { makeStage, makeMouse, readCam, atLandfall } from "../support/home.ts";
 import { makeStep } from "../support/step.ts";
 import type { Payload, SuiteContext } from "../types.ts";
-import { deskKit, dnContinue, dnNarrow, dnPhone, dnRefused, dnTablet, storageRefusal } from "./cluster/desk-notice.ts";
+import { deskKit, dnContinue, dnNarrow, dnPhone, dnRefused, dnTablet } from "./cluster/desk-notice.ts";
 import { dr11Wide, dr12Print, dr13Gallery, trailKit } from "./cluster/trail.ts";
 
 type Rect = { x: number; y: number; w: number; h: number; right: number; bottom: number };
@@ -23,12 +23,11 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await cl2Selection(ctx);
 
   const desk = deskKit(ctx);
-  const refusal = storageRefusal(ctx);
   await step("DN1, DN2, DN3, DN9, DN3r", () => dnPhone(desk));
   await step("DN5", () => dnTablet(desk));
   await step("DN6", () => dnNarrow(desk));
-  await step("DN7", () => dnRefused(desk, refusal)).finally(refusal.disarm);
-  await step("DN4", () => dnContinue(desk)).finally(desk.forget);
+  await step("DN7", () => dnRefused(desk));
+  await step("DN4", () => dnContinue(desk));
 
   await clearMobile();
   const trail = trailKit(ctx);

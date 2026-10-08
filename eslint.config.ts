@@ -8,8 +8,9 @@ import tsCommentForm from "./scripts/lint/ts-comment-form.ts";
 import sourceShape from "./scripts/lint/source-shape.ts";
 import errorCast from "./scripts/lint/error-cast.ts";
 import narrowWidth from "./scripts/lint/narrow-width.ts";
+import e2eScriptsOff from "./scripts/lint/e2e-scripts-off.ts";
 
-const vellum = { meta: cssCommentForm.meta, rules: { ...cssCommentForm.rules, ...tsCommentForm.rules, ...sourceShape.rules, ...errorCast.rules, ...narrowWidth.rules } };
+const vellum = { meta: cssCommentForm.meta, rules: { ...cssCommentForm.rules, ...tsCommentForm.rules, ...sourceShape.rules, ...errorCast.rules, ...narrowWidth.rules, ...e2eScriptsOff.rules } };
 const TS_ROOTS = ["e2e/**/*.ts", "scripts/**/*.ts", "src/**/*.ts", "test/**/*.ts", "test-support/**/*.ts"];
 
 export default defineConfig(
@@ -131,10 +132,10 @@ export default defineConfig(
     rules: { "vellum/prospect-libm-clock-free": "error" },
   },
   {
-    name: "Issue #675: the e2e console filter has one roster, and every read goes through it",
+    name: "the house's rules on every e2e script",
     files: ["e2e/**/*.ts"],
     plugins: { vellum },
-    rules: { "vellum/e2e-cancellation-roster": "error", "vellum/e2e-console-read-through-drop": "error" },
+    rules: { "vellum/e2e-cancellation-roster": "error", "vellum/e2e-console-read-through-drop": "error", "vellum/e2e-scripts-off-through-helper": "error" },
   },
   {
     name: "Issue #763: no script switches layout at a fixed window width at or below the 1024 floor",
