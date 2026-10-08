@@ -40,8 +40,14 @@ const calleeName = (call: ts.CallExpression): string | null => {
   const c = call.expression;
   if (ts.isIdentifier(c)) return c.text;
   if (ts.isPropertyAccessExpression(c)) return c.name.text;
+  if (ts.isElementAccessExpression(c) && ts.isStringLiteralLike(c.argumentExpression)) return c.argumentExpression.text;
   return null;
 };
+
+const isSeed = (name: ts.Node | undefined): boolean =>
+  name !== undefined &&
+  (ts.isIdentifier(name) || ts.isStringLiteralLike(name)) &&
+  CTX_THROWING_WAITS.includes(name.text);
 
 const containsThrow = (node: ts.Node): boolean => {
   let found = false;
@@ -89,6 +95,8 @@ const bareExpression = (e: ts.Expression): ts.Expression =>
 
 class Throwers {
   readonly #memo = new Map<ts.Node, boolean>();
+  readonly #open = new Map<ts.Node, number>();
+  #reach = Infinity;
   readonly #checker: ts.TypeChecker;
   constructor(checker: ts.TypeChecker) {
     this.#checker = checker;
@@ -105,7 +113,23 @@ class Throwers {
     if (isFunctionLike(value)) return [value];
     if (ts.isIdentifier(value)) return this.#declared(value, seen);
     if (ts.isCallExpression(value)) return this.#results(value, seen);
+    if (ts.isConditionalExpression(value))
+      return [...this.#valueOf(value.whenTrue, seen), ...this.#valueOf(value.whenFalse, seen)];
     return [];
+  }
+
+  #seeded(e: ts.Expression, seen: Set<ts.Node>): boolean {
+    const value = bareExpression(e);
+    if (ts.isPropertyAccessExpression(value)) return isSeed(value.name);
+    if (ts.isElementAccessExpression(value)) return isSeed(value.argumentExpression);
+    if (!ts.isIdentifier(value)) return false;
+    if (isSeed(value)) return true;
+    return (this.#checker.getSymbolAtLocation(value)?.declarations ?? []).some((d) => {
+      if (seen.has(d)) return false;
+      seen.add(d);
+      if (ts.isBindingElement(d)) return isSeed(d.propertyName ?? d.name);
+      return ts.isVariableDeclaration(d) && d.initializer !== undefined && this.#seeded(d.initializer, seen);
+    });
   }
 
   #results(call: ts.CallExpression, seen: Set<ts.Node>): ts.FunctionLikeDeclaration[] {
@@ -141,26 +165,42 @@ class Throwers {
 
   #callees(call: ts.CallExpression, seen: Set<ts.Node>): ts.FunctionLikeDeclaration[] {
     const callee = bareExpression(call.expression);
-    if (ts.isCallExpression(callee)) return this.#results(callee, seen);
-    return this.#declared(ts.isPropertyAccessExpression(callee) ? callee.name : callee, seen);
+    if (ts.isPropertyAccessExpression(callee)) return this.#declared(callee.name, seen);
+    if (ts.isElementAccessExpression(callee)) return this.#declared(callee.argumentExpression, seen);
+    return isFunctionLike(callee) ? [] : this.#valueOf(callee, seen);
   }
 
-  #throws(fn: ts.FunctionLikeDeclaration): boolean {
-    const known = this.#memo.get(fn);
-    if (known !== undefined) return known;
-    this.#memo.set(fn, false);
+  #bodyThrows(fn: ts.FunctionLikeDeclaration): boolean {
     let found = false;
     if (fn.body)
       ownNodes(fn.body, (n) => {
         if (!found && (isOriginThrow(n) || (ts.isCallExpression(n) && this.throwing(n)))) found = true;
       });
-    this.#memo.set(fn, found);
+    return found;
+  }
+
+  #throws(fn: ts.FunctionLikeDeclaration): boolean {
+    const known = this.#memo.get(fn);
+    if (known !== undefined) return known;
+    const open = this.#open.get(fn);
+    if (open !== undefined) {
+      this.#reach = Math.min(this.#reach, open);
+      return false;
+    }
+    const depth = this.#open.size;
+    this.#open.set(fn, depth);
+    const outer = this.#reach;
+    this.#reach = Infinity;
+    const found = this.#bodyThrows(fn);
+    this.#open.delete(fn);
+    const settled = found || this.#reach >= depth;
+    if (settled) this.#memo.set(fn, found);
+    this.#reach = Math.min(outer, settled ? Infinity : this.#reach);
     return found;
   }
 
   throwing(call: ts.CallExpression): boolean {
-    if (CTX_THROWING_WAITS.includes(calleeName(call) ?? "")) return true;
-    return this.#callees(call, new Set()).some((fn) => this.#throws(fn));
+    return this.#seeded(call.expression, new Set()) || this.#callees(call, new Set()).some((fn) => this.#throws(fn));
   }
 }
 

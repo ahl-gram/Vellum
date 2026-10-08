@@ -41,7 +41,9 @@ headless browser actually do, so a green run can be believed.
    infrastructure. **Since #560 every throwing wait in every suite is inside a step**, held by
    `vellum/e2e-throw-inside-step` (`scripts/lint/e2e-steps.ts`), which follows each call in a suite's
    own run through the type checker into the file that defines it, a support module included, so a
-   new wait outside a step reds the lint. A suite that skips a group is no longer certified by N1/N2 either:
+   new wait outside a step, and outside a `try` whose `catch` swallows it, reds the lint in every
+   form but the blind spots its test declares, each
+   with its direction, in `test/repo/e2e-steps.test.ts`. A suite that skips a group is no longer certified by N1/N2 either:
    it ran to its end having exercised fewer interactions, which is not the clean bill health gives.
 5. **The predicate requires the geometry to have LEFT where it began.** Stillness at the start is
    indistinguishable from stillness at the end. Record the starting rect and demand a departure

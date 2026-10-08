@@ -58,24 +58,36 @@ const BODY = [
   '  await pause("x" as never, () => true, "y");',
   '  await makeSettle(ctx)("x" as never, () => true, "y");',
   '  try { await ctx.send("x", {}); } catch (e) { [0].forEach(() => { throw e; }); }',
+  '  await ctx["waitSettled"]();',
+  "  const { waitSettled: w } = ctx;",
+  "  await w();",
+  "  const held = ctx.waitTurned;",
+  "  await held();",
+  "  await (ctx.PORT > 0 ? local : async (): Promise<void> => {})();",
+  '  await desk["open"]("/");',
+  '  const ta = async (n: number): Promise<void> => { if (n > 0) await tb(n - 1); throw new Error("x"); };',
+  "  const tb = async (n: number): Promise<void> => { if (n > 0) await tc(n - 1); };",
+  "  const tc = async (n: number): Promise<void> => { if (n > 0) await ta(n - 1); };",
+  "  await ta(1);",
+  "  await tb(1);",
+  "  await tc(1);",
   '  await ctx.evaluate("1");',
   "}",
 ];
-const at = (lines: readonly number[]): number[] => lines.map((n) => n + HEAD.length);
+const REPORTED = [1, 3, 4, 6, 8, 10, 12, 15, 16, 17, 19, 21, 22, 28, 29, 30, 31, 33, 35, 36, 37, 41, 42, 43].map(
+  (n) => n + HEAD.length,
+);
 
 test("in a suite's own run, a wait or a throw that can fail stands inside a step, the thrower read through the type checker into a support module, a part file or a destructured kit member (Issue #560)", async () => {
   assert.deepEqual(
     await reports([...HEAD, ...BODY], "e2e/suites/health.ts"),
-    at([1, 3, 4, 6, 8, 10, 12, 15, 16, 17, 19, 21, 22, 28, 29, 30]),
-    "BLIND SPOTS, declared, each with its direction: a function-typed member of a hand-written type, evaluate among them, is not followed (a miss); nor a function passed by reference, as to .then(fn) (a miss); nor .call and .bind (a miss); nor a new expression (a miss); a member read that throws on a missing value is no call (a miss, the PR #680, #681, #682 and #725 rows' class); a step reached by any name but step is not a step (a false red)",
+    REPORTED,
+    "BLIND SPOTS, declared, each with its direction: a function-typed member of a hand-written type, evaluate among them, is not followed (a miss); nor a function passed by reference, as to .then(fn) (a miss); nor .call and .bind (a miss); nor a new expression (a miss); nor a function reassigned after its declaration (a miss); nor a callee built by any operator but ?: (a miss); a member read that throws on a missing value is no call (a miss, the PR #680, #681, #682 and #725 rows' class); a step reached by any name but step is not a step (a false red); a function handed to a call that runs it later, as setTimeout does, is read as run in place (a false red); a rejection swallowed by .catch is not read as contained, as a swallowing try is (a false red)",
   );
 });
 
 test("each lint run reads its own program: the same plant at a second suite reports the same lines (Issue #560)", async () => {
-  assert.deepEqual(
-    await reports([...HEAD, ...BODY], "e2e/suites/cluster.ts"),
-    at([1, 3, 4, 6, 8, 10, 12, 15, 16, 17, 19, 21, 22, 28, 29, 30]),
-  );
+  assert.deepEqual(await reports([...HEAD, ...BODY], "e2e/suites/cluster.ts"), REPORTED);
 });
 
 test("a run written as a const arrow is a run", async () => {
@@ -88,13 +100,15 @@ test("a run written as a const arrow is a run", async () => {
   assert.deepEqual(await reports(plant, "e2e/suites/health.ts"), [3]);
 });
 
-test("a suite's top level is its own region too, and a file outside e2e/suites/ is not read", async () => {
+test("a suite's top level and a part file's are their own regions too, and a file outside e2e/suites/ is not read", async () => {
   const plant = [
     'import type { SuiteContext } from "../types.ts";',
     "declare const ctx: SuiteContext;",
     "await ctx.waitSettled();",
   ];
   assert.deepEqual(await reports(plant, "e2e/suites/health.ts"), [3]);
+  const part = ['import type { SuiteContext } from "../../types.ts";', ...plant.slice(1)];
+  assert.deepEqual(await reports(part, "e2e/suites/cluster/trail.ts"), [3], "a part file is read as a suite is");
   assert.deepEqual(
     await reports(plant, "e2e/support/room.ts"),
     [],

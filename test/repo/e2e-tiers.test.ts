@@ -130,7 +130,10 @@ test("both fallback checks tell the server to refuse the worker before they read
   assert.ok(refusedFirst(explorer.log), "the Explorer's fallback does not refuse the worker before it loads the page");
   const room = standIn("__vellumReadingRoomUsesWorker", false);
   await ranOver(() => rr14Fallback(room.ctx));
-  assert.ok(refusedFirst(room.log), "the Reading Room's fallback does not refuse the worker before it loads the page");
+  assert.ok(
+    refusedFirst(room.log),
+    "the Reading Room's fallback does not refuse the worker before it loads the page, read as before its first navigation, so a refusal moved to between about:blank and the room reds too (a false red, the safe direction)",
+  );
 });
 
 test("the smoke tier stays materially cheaper than the full suite", () => {

@@ -14,7 +14,7 @@ export const readE2eSource = (path: string): string => {
   return path.endsWith(".ts") ? stripTypeScriptTypes(text, { mode: "strip" }) : text;
 };
 
-export const e2eSuitePath = (name: string): string => `e2e/suites/${name}.ts`;
+const e2eSuitePath = (name: string): string => `e2e/suites/${name}.ts`;
 
 export const e2eSuiteFamily = (root: string, name: string): string[] => {
   const folder = join(root, "e2e", "suites", name);
