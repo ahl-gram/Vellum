@@ -6,6 +6,7 @@ import { ESLint, type Rule } from "eslint";
 import { includeIgnoreFile } from "eslint/config";
 import css from "@eslint/css";
 import tseslint from "typescript-eslint";
+import * as prettier from "prettier";
 import { lintTsRoots } from "../../test-support/lint-roots.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
@@ -191,7 +192,7 @@ const skipsIn = (results: readonly ESLint.LintResult[]): string[] =>
     });
   });
 
-test("the skip collector reads every directive form through ESLint's own parser, the rule-off form included, and nothing inside a string", async () => {
+test("the skip collector reads every directive form through ESLint's own parser, the rule-off form included, Prettier's ignore comment in exactly the forms Prettier obeys (Alex, 2026-10-07, Issue #779), and nothing inside a string", async () => {
   const plant = [
     "// eslint-disable-next-line max-lines-per-function",
     "export const a = 1; // eslint-disable-line @typescript-eslint/no-unnecessary-condition",
@@ -204,14 +205,25 @@ test("the skip collector reads every directive form through ESLint's own parser,
     "export const c = \"// eslint-disable-line no-console\";",
     "// @TS-NOCHECK, which the type checker obeys in any case",
     "export const d = \"// @ts-nocheck\";",
+    "// prettier-ignore",
+    "export const e = [1,2];",
+    "/* prettier-ignore */",
+    "export const f = [3,4];",
+    "// prettier-ignore, which Prettier does not obey",
+    "export const g = [5,6];",
+    "export const h = \"// prettier-ignore\";",
   ].join("\n");
   const at = "src/cli/main.ts";
   assert.deepEqual(skipsIn(await collector.lintText(plant, { filePath: join(ROOT, at) })), [
-    "max-lines-per-function", "no-unnecessary-condition", "max-lines", "(every rule)", "no-console", "no-debugger", "@ts-expect-error", "@ts-ignore", "@ts-nocheck",
+    "max-lines-per-function", "no-unnecessary-condition", "max-lines", "(every rule)", "no-console", "no-debugger", "@ts-expect-error", "@ts-ignore", "@ts-nocheck", "prettier-ignore", "prettier-ignore",
   ].map((s) => `${at} ${s}`));
+  const formatted = await prettier.format(plant, { filepath: join(ROOT, at) });
+  assert.deepEqual(["[1,2]", "[3,4]", "[5, 6]"].map((s) => formatted.includes(s)), [true, true, true], "Prettier no longer obeys exactly the two ignore forms the collector reads, and formats the near miss");
   const sheet = "public/house.css";
-  const sheetPlant = "/* eslint-disable vellum/css-comment-one-line */\n.a { color: red; } /* eslint-disable-line vellum/css-comment-issue-form */\n";
-  assert.deepEqual(skipsIn(await collector.lintText(sheetPlant, { filePath: join(ROOT, sheet) })), [`${sheet} vellum/css-comment-one-line`, `${sheet} vellum/css-comment-issue-form`]);
+  const sheetPlant = "/* eslint-disable vellum/css-comment-one-line */\n.a { color: red; } /* eslint-disable-line vellum/css-comment-issue-form */\n/* prettier-ignore */\n.b{color:blue}\n/* prettier-ignore, which Prettier does not obey */\n.c{color:green}\n";
+  assert.deepEqual(skipsIn(await collector.lintText(sheetPlant, { filePath: join(ROOT, sheet) })), [`${sheet} vellum/css-comment-one-line`, `${sheet} vellum/css-comment-issue-form`, `${sheet} prettier-ignore`]);
+  const sheetFormatted = await prettier.format(sheetPlant, { filepath: join(ROOT, sheet) });
+  assert.deepEqual([".b{color:blue}", ".c {\n  color: green;\n}"].map((s) => sheetFormatted.includes(s)), [true, true], "Prettier no longer obeys exactly the ignore form the collector reads in a sheet, and formats the near miss");
 });
 
 test("every lint and type-check skip in the linted tree is an entry in the rulebook's accepted list, and every entry is a skip in the tree (Issue #654 ruling D, Issue #675)", async () => {

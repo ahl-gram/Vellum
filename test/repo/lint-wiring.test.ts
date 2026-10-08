@@ -8,6 +8,7 @@ import ts from "typescript";
 import lintConfig from "../../eslint.config.ts";
 import { compileWithVirtual } from "../../test-support/virtual-compile.ts";
 import { WITNESSES } from "../../test-support/lint-witnesses.ts";
+import { ciJob } from "../../test-support/ci-job.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const src = (p: string) => readFileSync(join(ROOT, p), "utf8");
@@ -28,17 +29,6 @@ const RULED_ROOTS = LINT_SCOPE.map((g) => {
 });
 const isNamedFile = (g: string): boolean =>
   !/[*?[{]/.test(g) && RULED_ROOTS.some(({ root, ext }) => g.startsWith(root) && g.endsWith(ext));
-
-const ciJob = (id: string): string => {
-  const lines = src(".github/workflows/ci.yml").split("\n");
-  const head = lines.findIndex((l) => new RegExp(`^ {2}${id}:\\s*$`).test(l));
-  assert.notEqual(head, -1, `ci.yml has no ${id} job at two-space indent, so this reader is looking at the wrong shape`);
-  const next = lines.findIndex((l, i) => i > head && /^ {2}[A-Za-z0-9_-]+:\s*$/.test(l));
-  return lines
-    .slice(head, next === -1 ? lines.length : next)
-    .filter((l) => !l.trim().startsWith("#"))
-    .join("\n");
-};
 
 const designExemption = (block: Linter.Config): readonly string[] => {
   const name = block.name ?? "(unnamed)";
@@ -173,8 +163,8 @@ function pinJavaScript(file: string, typed: boolean, config: Resolved, rules: Re
   assert.deepEqual(rules["no-param-reassign"], [2, PARAM_REASSIGN], `${file}: no-param-reassign does not resolve at error with property writes on and exactly the page-element parameter names excused; Alex ruled that only a write into a page element is accepted, excused by one list of names used for nothing else, so a new parameter holding a page element takes a name from the list or joins it here and in eslint.config.ts, with the names guard below as the check, and any other write returns a new value instead (Alex, 2026-09-26, Issue #654 rulings 4 and 5)`);
   assert.deepEqual(rules["no-empty"], typed ? [2, { allowEmptyCatch: true }] : undefined, `${file}: no-empty does not resolve at error with only the empty catch admitted (Alex, 2026-09-26, Issue #654 ruling 9)`);
   assert.equal(on("@typescript-eslint/prefer-readonly"), typed ? 2 : undefined, `${file}: prefer-readonly does not resolve at error (Immutability, Issue #648)`);
-  assert.deepEqual(rules["max-lines"], [2, 400], `${file}: max-lines does not resolve at error with the ruled physical-line ceiling (Size, Issue #648)`);
-  assert.deepEqual(rules["max-lines-per-function"], [2, 50], `${file}: max-lines-per-function does not resolve at error with the ruled ceiling (Size, Issue #648)`);
+  assert.deepEqual(rules["max-lines"], [2, { max: 400, skipBlankLines: true, skipComments: true }], `${file}: max-lines does not resolve at error with the ruled ceiling of 400 lines of code, blank and comment lines skipped (Size, Issue #648; the skips Alex, 2026-10-07, Issue #779)`);
+  assert.deepEqual(rules["max-lines-per-function"], [2, { max: 50, skipBlankLines: true, skipComments: true }], `${file}: max-lines-per-function does not resolve at error with the ruled ceiling of 50 lines of code, blank and comment lines skipped (Size, Issue #648; the skips Alex, 2026-10-07, Issue #779)`);
   assert.deepEqual(rules["max-depth"], [2, 4], `${file}: max-depth does not resolve at error with the ruled depth (Size, Issue #648)`);
   pinCorrectness(file, typed, rules);
   for (const rule of CSS_FORM_RULES) {
