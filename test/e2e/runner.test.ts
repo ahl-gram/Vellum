@@ -196,8 +196,10 @@ test("a lane whose viewport reset never settles waits five seconds for it, then 
   await turn();
   assert.equal(code, undefined, "the lane gave up on the viewport reset before five seconds");
   t.mock.timers.tick(1);
+  await turn();
+  await turn();
+  assert.equal(code, 1, "the lane was still waiting on the viewport reset after five seconds");
   await running;
-  assert.equal(code, 1);
 });
 
 test("a browser that died with its suite ends the run as a harness error, exit 2, with the tally of what did run", async (t) => {
