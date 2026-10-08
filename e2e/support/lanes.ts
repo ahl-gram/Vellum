@@ -49,24 +49,13 @@ export const E2E_LANES: readonly E2eLane[] = [
   },
   {
     name: "C",
-    suites: [
-      "home",
-      "room-instrument",
-      "specimen",
-      "corners",
-    ],
+    suites: ["home", "room-instrument", "specimen", "corners"],
     port: DEFAULT_E2E_PORT + 2,
     dport: DEFAULT_E2E_DPORT + 2,
   },
   {
     name: "D",
-    suites: [
-      "landfall",
-      "survey",
-      "chart-drawer",
-      "document-rooms",
-      "region-detail",
-    ],
+    suites: ["landfall", "survey", "chart-drawer", "document-rooms", "region-detail"],
     port: DEFAULT_E2E_PORT + 3,
     dport: DEFAULT_E2E_DPORT + 3,
   },
@@ -100,9 +89,7 @@ export function resolveLaneSelection(argv: readonly string[]): readonly E2eLane[
   }
   const wanted = asked[0]!;
   if (wanted === "") {
-    throw new Error(
-      `${LANE_FLAG} was given no lane name. Name one of ${names}, or drop the flag to run every lane.`,
-    );
+    throw new Error(`${LANE_FLAG} was given no lane name. Name one of ${names}, or drop the flag to run every lane.`);
   }
   const lane = E2E_LANES.find((l) => l.name === wanted);
   if (!lane) {
@@ -126,9 +113,7 @@ export interface LaneResult {
 }
 
 export function laneChildEnv(lane: E2eLane, base: E2eSuiteEnv): Record<string, string> {
-  const inherited = Object.fromEntries(
-    Object.entries(base).filter(([, v]) => v !== undefined) as [string, string][],
-  );
+  const inherited = Object.fromEntries(Object.entries(base).filter(([, v]) => v !== undefined) as [string, string][]);
   return {
     ...inherited,
     [E2E_SUITES_VAR]: lane.suites.join(","),
@@ -187,10 +172,7 @@ const laneDetail = (r: LaneResult): string => {
   return `${r.name} ${r.skipped ? "SKIPPED" : "ok"} ${took}`;
 };
 
-export function laneOutcome(
-  results: readonly LaneResult[],
-  selected: readonly E2eLane[] = E2E_LANES,
-): E2eOutcome {
+export function laneOutcome(results: readonly LaneResult[], selected: readonly E2eLane[] = E2E_LANES): E2eOutcome {
   if (results.length === 0) return { ok: false, line: "FAIL: no lanes ran, so this run proves nothing." };
   if (selected.length === 0) {
     return { ok: false, line: "FAIL: no lanes were selected, so this run was asked to prove nothing." };

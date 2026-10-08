@@ -24,12 +24,7 @@ type Clearance = {
 
 type Seat = { px: number; py: number; open: number };
 
-function compassClearance(
-  ctx: RenderCtx,
-  cartouche: CartouchePlan,
-  scalebarBox: Box,
-  legendBox?: Box,
-): Clearance {
+function compassClearance(ctx: RenderCtx, cartouche: CartouchePlan, scalebarBox: Box, legendBox?: Box): Clearance {
   const { proj } = ctx;
   const k = proj.widthPx / 1500;
 
@@ -42,10 +37,7 @@ function compassClearance(
 
   const clears = (px: number, py: number, rr: number): boolean => {
     const margin = proj.margin;
-    const edge = Math.min(
-      px - margin, py - margin,
-      proj.widthPx - margin - px, proj.heightPx - margin - py,
-    );
+    const edge = Math.min(px - margin, py - margin, proj.widthPx - margin - px, proj.heightPx - margin - py);
     if (edge < rr + 14 * k) return false;
     const box = boxAt(px, py, rr);
     if (boxesOverlap(box, scalebarBox, 8 * k)) return false;
@@ -161,7 +153,9 @@ function compassPetals(style: MapStyle, plan: CompassPlan, k: number): SvgNode[]
       }),
       el("path", {
         d: `M${cx} ${cy}L${rightX.toFixed(1)} ${rightY.toFixed(1)}L${tipX.toFixed(1)} ${tipY.toFixed(1)}Z`,
-        fill: style.paper, stroke: style.ink, "stroke-width": 0.8 * k,
+        fill: style.paper,
+        stroke: style.ink,
+        "stroke-width": 0.8 * k,
       }),
     );
   }
@@ -176,19 +170,31 @@ export function compassLayer(ctx: RenderCtx, plan: CompassPlan): SvgNode {
 
   return el("g", { id: "layer-compass", opacity: 0.92 }, [
     el("circle", {
-      cx, cy, r: r * 0.99, fill: "none",
-      stroke: style.ink, "stroke-width": 0.8 * k, "stroke-opacity": 0.5,
+      cx,
+      cy,
+      r: r * 0.99,
+      fill: "none",
+      stroke: style.ink,
+      "stroke-width": 0.8 * k,
+      "stroke-opacity": 0.5,
     }),
     el("circle", {
-      cx, cy, r: r * 0.62, fill: "none",
-      stroke: style.ink, "stroke-width": 0.7 * k, "stroke-opacity": 0.45,
+      cx,
+      cy,
+      r: r * 0.62,
+      fill: "none",
+      stroke: style.ink,
+      "stroke-width": 0.7 * k,
+      "stroke-opacity": 0.45,
     }),
     ...petals,
     el("circle", { cx, cy, r: 2.6 * k, fill: style.ink }),
     el(
       "text",
       {
-        x: cx, y: cy - r - 7 * k, "text-anchor": "middle",
+        x: cx,
+        y: cy - r - 7 * k,
+        "text-anchor": "middle",
         "font-family": style.fontFamilyTitle,
         "font-size": (17 * k).toFixed(1),
         fill: style.ink,
@@ -208,9 +214,12 @@ export function rhumbLayer(ctx: RenderCtx, plan: CompassPlan): SvgNode | null {
     const a = (i * Math.PI) / 8;
     rays.push(
       el("line", {
-        x1: cx, y1: cy,
-        x2: cx + reach * Math.cos(a), y2: cy + reach * Math.sin(a),
-        stroke: style.ink, "stroke-width": 0.7,
+        x1: cx,
+        y1: cy,
+        x2: cx + reach * Math.cos(a),
+        y2: cy + reach * Math.sin(a),
+        stroke: style.ink,
+        "stroke-width": 0.7,
         "stroke-opacity": i % 4 === 0 ? 0.09 : 0.05,
       }),
     );

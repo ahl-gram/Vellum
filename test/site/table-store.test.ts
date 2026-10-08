@@ -1,12 +1,31 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readStoredTable, writeStoredTable, tableOnArrival, folioOnArrival, navigationType, navigationTypeNow, deviceStorage, TABLE_STORE_KEY, TRAVERSAL } from "../../src/site/shared/table-store.ts";
+import {
+  readStoredTable,
+  writeStoredTable,
+  tableOnArrival,
+  folioOnArrival,
+  navigationType,
+  navigationTypeNow,
+  deviceStorage,
+  TABLE_STORE_KEY,
+  TRAVERSAL,
+} from "../../src/site/shared/table-store.ts";
 import { emitTable, parseTable, type SurveyItem, type TableItem } from "../../src/site/shared/table-address.ts";
 
 // The Chart Table's second home (Issue #634, ruled 2026-09-18 and 2026-09-19): the address decides an ARRIVAL and the device decides a RETURN. The store is injected rather than reached for, the way firstArrival/markArrival take theirs in src/site/home/ceremony.ts, so the precedence is provable here instead of only in a browser.
 const survey = (lx: number): SurveyItem => ({
-  kind: "survey", seed: 42, overrides: {}, rung: 2, lx, ly: 3,
-  style: "antique", legend: true, arms: false, beasts: false, theme: null,
+  kind: "survey",
+  seed: 42,
+  overrides: {},
+  rung: 2,
+  lx,
+  ly: 3,
+  style: "antique",
+  legend: true,
+  arms: false,
+  beasts: false,
+  theme: null,
 });
 const fill = (n: number): TableItem[] => Array.from({ length: n }, (_, i) => survey(i));
 
@@ -39,7 +58,10 @@ class FakeStore {
     return Object.keys(this.held).length;
   }
 }
-const asStorage = (fake: FakeStore): (() => Storage) => () => fake;
+const asStorage =
+  (fake: FakeStore): (() => Storage) =>
+  () =>
+    fake;
 
 const shut: () => Storage = () => {
   throw new Error("storage is disabled in this browsing mode");
@@ -75,8 +97,16 @@ test("TS5 a back arrival with NOTHING on the device still takes the address it l
   const carried = fill(1);
   assert.equal(emitTable(tableOnArrival(carried, null, "back_forward")), emitTable(carried));
   // The case the cold review on PR #635 found shipped as a total loss: the two restore paths hand-rolled this rule without its qualifier, so a reader whose device holds nothing had the drawer EMPTIED by the gesture meant to keep it. Driven here at the rule, whose hosts are pinned to it by name in chart-drawer.test.ts and prospect-room.test.ts.
-  assert.equal(tableOnArrival(carried, null, TRAVERSAL).length, 1, "a traversal with an empty device seats nothing, which empties the table of every reader whose storage is blocked and of everyone who arrived on a shared link");
-  assert.equal(readStoredTable(shut), null, "and the unreadable store this stands for reads as null, not as an empty table");
+  assert.equal(
+    tableOnArrival(carried, null, TRAVERSAL).length,
+    1,
+    "a traversal with an empty device seats nothing, which empties the table of every reader whose storage is blocked and of everyone who arrived on a shared link",
+  );
+  assert.equal(
+    readStoredTable(shut),
+    null,
+    "and the unreadable store this stands for reads as null, not as an empty table",
+  );
 });
 
 test("TS15 a traversal takes the device WHOSEVER folio the entry carries, which is ruled and not incidental (#634, ruled 2026-09-19)", () => {
@@ -87,8 +117,16 @@ test("TS15 a traversal takes the device WHOSEVER folio the entry carries, which 
   // The fixture here is DISJOINT on purpose: the alternative returns the address's folio and this test reds.
   const theirs = [survey(7), survey(8)];
   const mine = [survey(1), survey(2)];
-  assert.equal(emitTable(tableOnArrival(theirs, mine, TRAVERSAL)), emitTable(mine), "a traversal into someone else's folio shows their folio, which is the rejected reading of ruling 2 and not what was ruled");
-  assert.equal(new Set([...theirs, ...mine].map((i) => emitTable([i]))).size, 4, "the two tables share a sheet, so this fixture no longer tells the ruling from the alternative");
+  assert.equal(
+    emitTable(tableOnArrival(theirs, mine, TRAVERSAL)),
+    emitTable(mine),
+    "a traversal into someone else's folio shows their folio, which is the rejected reading of ruling 2 and not what was ruled",
+  );
+  assert.equal(
+    new Set([...theirs, ...mine].map((i) => emitTable([i]))).size,
+    4,
+    "the two tables share a sheet, so this fixture no longer tells the ruling from the alternative",
+  );
   // And the ordinary arrival at that same link is untouched by the ruling: theirs, exactly as sent.
   assert.equal(emitTable(tableOnArrival(theirs, mine, "navigate")), emitTable(theirs));
 });
@@ -96,8 +134,16 @@ test("TS15 a traversal takes the device WHOSEVER folio the entry carries, which 
 test("TS14 a page whose ADDRESS is its content takes the same precedence WITHOUT the traversal term (#634, the Portfolio)", () => {
   const carried = fill(1);
   const stored = fill(2);
-  assert.equal(emitTable(folioOnArrival(carried, stored)), emitTable(carried), "a folio the address names is that folio, whatever this device holds");
-  assert.equal(emitTable(folioOnArrival(null, stored)), emitTable(stored), "and a page arrived at with no folio named shows what the device holds");
+  assert.equal(
+    emitTable(folioOnArrival(carried, stored)),
+    emitTable(carried),
+    "a folio the address names is that folio, whatever this device holds",
+  );
+  assert.equal(
+    emitTable(folioOnArrival(null, stored)),
+    emitTable(stored),
+    "and a page arrived at with no folio named shows what the device holds",
+  );
   assert.deepEqual(folioOnArrival(null, null), []);
   assert.deepEqual(folioOnArrival([], stored), [], "a present but empty key is a bare folio here too");
   // The whole point of the second entry point: one gesture, one answer, whether or not the browser cached the page.
@@ -106,7 +152,11 @@ test("TS14 a page whose ADDRESS is its content takes the same precedence WITHOUT
     emitTable(tableOnArrival(carried, stored, "navigate")),
     "the folio rule and an ordinary arrival must agree, or the Portfolio answers a Back differently from a fresh open",
   );
-  assert.notEqual(emitTable(folioOnArrival(carried, stored)), emitTable(tableOnArrival(carried, stored, TRAVERSAL)), "and it is genuinely the traversal term that is being left out, not a synonym for the same call");
+  assert.notEqual(
+    emitTable(folioOnArrival(carried, stored)),
+    emitTable(tableOnArrival(carried, stored, TRAVERSAL)),
+    "and it is genuinely the traversal term that is being left out, not a synonym for the same call",
+  );
 });
 
 test("TS6 a RELOAD is an arrival and not a traversal, so the address wins (#634 ruling 1: a link, a bookmark, a typed address and a reload all take the address)", () => {
@@ -119,22 +169,36 @@ test("TS7 emptying the table REMOVES the key rather than storing an empty one, o
   writeStoredTable(asStorage(fake), fill(2));
   assert.equal(readStoredTable(asStorage(fake))?.length, 2);
   writeStoredTable(asStorage(fake), []);
-  assert.ok(fake.calls.includes(`remove ${TABLE_STORE_KEY}`), `an empty table was stored rather than removed: ${fake.calls.join(", ")}`);
-  assert.equal(readStoredTable(asStorage(fake)), null, "an emptied table reads back as a table, so a keyless arrival would resurrect it");
+  assert.ok(
+    fake.calls.includes(`remove ${TABLE_STORE_KEY}`),
+    `an empty table was stored rather than removed: ${fake.calls.join(", ")}`,
+  );
+  assert.equal(
+    readStoredTable(asStorage(fake)),
+    null,
+    "an emptied table reads back as a table, so a keyless arrival would resurrect it",
+  );
   // The whole point of the removal: what a keyless arrival then does.
   assert.deepEqual(tableOnArrival(null, readStoredTable(asStorage(fake)), "navigate"), []);
 });
 
 test("TS8 the device holds the table in the ONE grammar, byte for byte (#634)", () => {
   const fake = new FakeStore();
-  const items = [...fill(2), { kind: "prospect", seed: 42, overrides: {}, style: "antique", index: 3, year: 1059 } as TableItem];
+  const items = [
+    ...fill(2),
+    { kind: "prospect", seed: 42, overrides: {}, style: "antique", index: 3, year: 1059 } as TableItem,
+  ];
   writeStoredTable(asStorage(fake), items);
   assert.equal(emitTable(readStoredTable(asStorage(fake)) ?? []), emitTable(items));
 });
 
 test("TS9 a store that refuses to answer leaves the page working (#634, the private-mode path src/site/home/ceremony.ts already keeps)", () => {
   assert.doesNotThrow(() => writeStoredTable(shut, fill(2)));
-  assert.equal(readStoredTable(shut), null, "an unreadable store must read as 'the address decides', never throw into the boot");
+  assert.equal(
+    readStoredTable(shut),
+    null,
+    "an unreadable store must read as 'the address decides', never throw into the boot",
+  );
 });
 
 test("TS10 a corrupt stored value reads as a bare table rather than throwing (#634)", () => {
@@ -143,12 +207,35 @@ test("TS10 a corrupt stored value reads as a bare table rather than throwing (#6
 });
 
 test("TS11 the navigation type is read from the browser's own entry, and defaults to an arrival when there is none (#634)", () => {
-  assert.equal(navigationType(() => [{ type: "back_forward" }]), "back_forward");
-  assert.equal(navigationType(() => [{ type: "reload" }]), "reload");
-  assert.equal(navigationType(() => []), "navigate", "a browser that reports no navigation entry must fall back to the address, never to the device");
-  assert.equal(navigationType(() => [{ type: "" }]), "navigate", "an entry whose type is the empty string is not a navigation type, and reading it as one would compare it against back_forward forever");
-  assert.equal(navigationType(() => [{}]), "navigate", "nor is an entry with no type at all");
-  assert.equal(navigationType(() => { throw new Error("no performance entries here"); }), "navigate");
+  assert.equal(
+    navigationType(() => [{ type: "back_forward" }]),
+    "back_forward",
+  );
+  assert.equal(
+    navigationType(() => [{ type: "reload" }]),
+    "reload",
+  );
+  assert.equal(
+    navigationType(() => []),
+    "navigate",
+    "a browser that reports no navigation entry must fall back to the address, never to the device",
+  );
+  assert.equal(
+    navigationType(() => [{ type: "" }]),
+    "navigate",
+    "an entry whose type is the empty string is not a navigation type, and reading it as one would compare it against back_forward forever",
+  );
+  assert.equal(
+    navigationType(() => [{}]),
+    "navigate",
+    "nor is an entry with no type at all",
+  );
+  assert.equal(
+    navigationType(() => {
+      throw new Error("no performance entries here");
+    }),
+    "navigate",
+  );
 });
 
 test("TS13 the device every host reaches for is THE device, named once (#634, guard-prover round 3)", () => {
@@ -159,7 +246,11 @@ test("TS13 the device every host reaches for is THE device, named once (#634, gu
   const fake = new FakeStore();
   try {
     Object.defineProperty(globalThis, "localStorage", { value: fake, configurable: true, writable: true });
-    assert.equal(deviceStorage(), fake, "the device binding does not resolve to this browser's own localStorage, so every host could be reading and writing something no reader will ever see again");
+    assert.equal(
+      deviceStorage(),
+      fake,
+      "the device binding does not resolve to this browser's own localStorage, so every host could be reading and writing something no reader will ever see again",
+    );
     writeStoredTable(deviceStorage, fill(1));
     assert.ok(fake.calls.includes(`set ${TABLE_STORE_KEY}`), "and a write through it reaches nothing");
   } finally {
@@ -172,11 +263,19 @@ test("TS12 the browser SEAM reads the real navigation entry, so the reading ever
   // Without this the injectable above is the only thing proved, and the wrapper could hand back a constant while every other test here stayed green and back/forward detection quietly died on all four hosts at once (guard-prover round 2).
   const real = Object.getOwnPropertyDescriptor(globalThis, "performance");
   const stub = (entries: ReadonlyArray<{ type?: string }>): void => {
-    Object.defineProperty(globalThis, "performance", { value: { getEntriesByType: () => entries }, configurable: true, writable: true });
+    Object.defineProperty(globalThis, "performance", {
+      value: { getEntriesByType: () => entries },
+      configurable: true,
+      writable: true,
+    });
   };
   try {
     stub([{ type: "back_forward" }]);
-    assert.equal(navigationTypeNow(), "back_forward", "the seam does not read the browser's own navigation entry, so a return is indistinguishable from an arrival on every page");
+    assert.equal(
+      navigationTypeNow(),
+      "back_forward",
+      "the seam does not read the browser's own navigation entry, so a return is indistinguishable from an arrival on every page",
+    );
     stub([{ type: "reload" }]);
     assert.equal(navigationTypeNow(), "reload", "and it hands back a constant rather than what the browser said");
     stub([]);

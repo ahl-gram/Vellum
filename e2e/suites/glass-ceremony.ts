@@ -45,39 +45,71 @@ function glassKit(ctx: SuiteContext) {
     }
     return await st();
   };
-  const rgn = () => evaluate<{ band: number; redrafts: number; committed: boolean; title: string | null }>(`window.__vellumRegion()`);
+  const rgn = () =>
+    evaluate<{ band: number; redrafts: number; committed: boolean; title: string | null }>(`window.__vellumRegion()`);
   const enterAt = (k: number, cu: number, cv: number) =>
-    evaluate<undefined>(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:${k},x:W/2-(${cu})*${k}*W,y:H/2-(${cv})*${k}*H});})()`);
+    evaluate<undefined>(
+      `(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:${k},x:W/2-(${cu})*${k}*W,y:H/2-(${cv})*${k}*H});})()`,
+    );
   const waitRedraft = async (prev: number, wantBand: number) => {
     // 15s, not 4s (the same note at `waitRedraft` in `e2e/suites/zoom/kit.ts`): Issue #400's detailed draw outran the old budget on CI and G6 read band 2. The waiter also demands the band its caller asserts: a stale in-flight survey (G8's glide debounce) can commit FIRST and increment redrafts at the wrong band (CI 2026-08-25).
-    for (let i = 0; i < 375; i++) { const s = await rgn(); if (s.redrafts > prev && s.band === wantBand) return s; await sleep(40); }
+    for (let i = 0; i < 375; i++) {
+      const s = await rgn();
+      if (s.redrafts > prev && s.band === wantBand) return s;
+      await sleep(40);
+    }
     return await rgn();
   };
   return { ...ctx, settleK, settleHome, rgn, enterAt, waitRedraft };
 }
 
 async function gSetup({ evaluate, waitSettled }: GlassKit): Promise<void> {
-  await evaluate(`(()=>{for(const id of ["ages"]){const c=document.getElementById(id);if(c.checked){c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));}}document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`);
+  await evaluate(
+    `(()=>{for(const id of ["ages"]){const c=document.getElementById(id);if(c.checked){c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));}}document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`,
+  );
   await waitSettled("glass-ceremony-base");
   await evaluate(`window.__vellumSetRedraftEnabled(false)`);
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
 }
 
 async function g1Cluster({ evaluate, check }: GlassKit): Promise<void> {
-  const g1 = await evaluate<{ grpAria: string | null; order: string; zin: Btn; zout: Btn; zreset: Btn; keys: boolean; radius: string; size: number }>(`(()=>{const grp=document.getElementById("zoom-controls");const btn=(id)=>{const b=document.getElementById(id);return{title:b.getAttribute("title"),aria:b.getAttribute("aria-label"),svg:!!b.querySelector("svg"),text:(b.textContent||"").trim()};};const zin=document.getElementById("zoom-in");return{grpAria:grp.getAttribute("aria-label"),order:[...grp.querySelectorAll("button")].map((b)=>b.id).join(","),zin:btn("zoom-in"),zout:btn("zoom-out"),zreset:btn("zoom-reset"),keys:!!grp.querySelector(".zoom-keys"),radius:getComputedStyle(zin).borderRadius,size:zin.getBoundingClientRect().width};})()`);
+  const g1 = await evaluate<{
+    grpAria: string | null;
+    order: string;
+    zin: Btn;
+    zout: Btn;
+    zreset: Btn;
+    keys: boolean;
+    radius: string;
+    size: number;
+  }>(
+    `(()=>{const grp=document.getElementById("zoom-controls");const btn=(id)=>{const b=document.getElementById(id);return{title:b.getAttribute("title"),aria:b.getAttribute("aria-label"),svg:!!b.querySelector("svg"),text:(b.textContent||"").trim()};};const zin=document.getElementById("zoom-in");return{grpAria:grp.getAttribute("aria-label"),order:[...grp.querySelectorAll("button")].map((b)=>b.id).join(","),zin:btn("zoom-in"),zout:btn("zoom-out"),zreset:btn("zoom-reset"),keys:!!grp.querySelector(".zoom-keys"),radius:getComputedStyle(zin).borderRadius,size:zin.getBoundingClientRect().width};})()`,
+  );
   check(
     "G1 the cluster is home's camera (#505, ruled 2026-09-02): Camera; in, out, the whole sheet as text glyphs in home's voice; no tooltips, no engraved glyphs, no keys slip; the house's rounding at 2.2rem",
-    g1.grpAria === "Camera" && g1.order === "zoom-in,zoom-out,zoom-reset" &&
-      g1.zin.aria === "Draw nearer" && g1.zin.text === "+" && !g1.zin.svg && g1.zin.title === null &&
-      g1.zout.aria === "Stand off" && g1.zout.text === "\u2212" && !g1.zout.svg &&
-      g1.zreset.aria === "The whole sheet" && g1.zreset.text === "\u2302" && !g1.zreset.svg &&
-      !g1.keys && g1.radius === "4px" && Math.abs(g1.size - 35.2) < 0.5,
+    g1.grpAria === "Camera" &&
+      g1.order === "zoom-in,zoom-out,zoom-reset" &&
+      g1.zin.aria === "Draw nearer" &&
+      g1.zin.text === "+" &&
+      !g1.zin.svg &&
+      g1.zin.title === null &&
+      g1.zout.aria === "Stand off" &&
+      g1.zout.text === "\u2212" &&
+      !g1.zout.svg &&
+      g1.zreset.aria === "The whole sheet" &&
+      g1.zreset.text === "\u2302" &&
+      !g1.zreset.svg &&
+      !g1.keys &&
+      g1.radius === "4px" &&
+      Math.abs(g1.size - 35.2) < 0.5,
     JSON.stringify(g1),
   );
 }
 
 async function g2aGlides({ evaluate, check, settleK }: GlassKit): Promise<void> {
-  const g2aNow = await evaluate<number>(`(()=>{document.getElementById("zoom-in").click();return window.__vellumZoomState().k;})()`);
+  const g2aNow = await evaluate<number>(
+    `(()=>{document.getElementById("zoom-in").click();return window.__vellumZoomState().k;})()`,
+  );
   const g2aEnd = await settleK(1.4);
   check(
     "G2a a zoom button glides: mid-flight short of the step, settles exactly at 1.4 (#170 voiced glide)",
@@ -113,20 +145,29 @@ async function g2bCompounds({ evaluate, check, settleK }: GlassKit): Promise<voi
 
 async function g2cKeys({ evaluate, check, sleep, settleK, settleHome }: GlassKit): Promise<void> {
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
-  await evaluate(`(()=>{const vp=document.getElementById("map-viewport");vp.focus();vp.dispatchEvent(new KeyboardEvent("keydown",{key:"+",bubbles:true}));})()`);
+  await evaluate(
+    `(()=>{const vp=document.getElementById("map-viewport");vp.focus();vp.dispatchEvent(new KeyboardEvent("keydown",{key:"+",bubbles:true}));})()`,
+  );
   const g2cIn = await settleK(1.4);
   await sleep(400); // let the settle debounce write cx/cy/k so the drop below is observable
-  await evaluate(`(()=>{const vp=document.getElementById("map-viewport");vp.dispatchEvent(new KeyboardEvent("keydown",{key:"0",bubbles:true}));})()`);
+  await evaluate(
+    `(()=>{const vp=document.getElementById("map-viewport");vp.dispatchEvent(new KeyboardEvent("keydown",{key:"0",bubbles:true}));})()`,
+  );
   const g2cHome = await settleHome();
   let g2cHash: { cx: string | null; k: string | null } | null = null;
   for (let i = 0; i < 50; i++) {
-    g2cHash = await evaluate<{ cx: string | null; k: string | null }>(`(()=>{const p=new URLSearchParams(location.hash.slice(1));return{cx:p.get("cx"),k:p.get("k")};})()`);
+    g2cHash = await evaluate<{ cx: string | null; k: string | null }>(
+      `(()=>{const p=new URLSearchParams(location.hash.slice(1));return{cx:p.get("cx"),k:p.get("k")};})()`,
+    );
     if (g2cHash.cx === null && g2cHash.k === null) break;
     await sleep(40);
   }
   check(
     "G2c the keys glide too; 0 glides home and the hash drops cx/cy/k at the landing (#170)",
-    Math.abs(g2cIn.k - 1.4) < 1e-6 && g2cHome.k === 1 && g2cHome.x === 0 && g2cHome.y === 0 &&
+    Math.abs(g2cIn.k - 1.4) < 1e-6 &&
+      g2cHome.k === 1 &&
+      g2cHome.x === 0 &&
+      g2cHome.y === 0 &&
       g2cHash!.cx === null &&
       g2cHash!.k === null,
     `in=${g2cIn.k} home=${JSON.stringify(g2cHome)} hash=${JSON.stringify(g2cHash)}`,
@@ -157,7 +198,21 @@ async function g4InksIn({ evaluate, check, shoot, sleep, rgn, enterAt, waitRedra
   const before4 = (await rgn()).redrafts;
   await enterAt(2, 0.5, 0.5);
   const s4 = await waitRedraft(before4, 1);
-  const g4 = await evaluate<{ svg: false } | { svg: true; redrafting: boolean; dashed: boolean; drawLen: boolean; dryCount: number; dryNames: string[]; dryAllNew: boolean; dryTiers: string[]; persistingCount: number; persistingStill: boolean }>(`(()=>{
+  const g4 = await evaluate<
+    | { svg: false }
+    | {
+        svg: true;
+        redrafting: boolean;
+        dashed: boolean;
+        drawLen: boolean;
+        dryCount: number;
+        dryNames: string[];
+        dryAllNew: boolean;
+        dryTiers: string[];
+        persistingCount: number;
+        persistingStill: boolean;
+      }
+  >(`(()=>{
     const worldTexts=new Set([...document.querySelectorAll("#map > svg g.settlement text")].map(t=>t.textContent));
     const inset=document.querySelector("#map .region-inset");
     const svg=inset?inset.querySelector("svg"):null;
@@ -177,8 +232,15 @@ async function g4InksIn({ evaluate, check, shoot, sleep, rgn, enterAt, waitRedra
   })()`);
   check(
     "G4 the redraft inks in: .redrafting + dashed coast at commit; only newly labeled names tagged .dry-in, persisting names untouched (#170 AC1)",
-    s4.band === 1 && g4.svg && g4.redrafting && g4.dashed && g4.drawLen &&
-      g4.dryCount > 0 && g4.dryAllNew && g4.persistingCount > 0 && g4.persistingStill,
+    s4.band === 1 &&
+      g4.svg &&
+      g4.redrafting &&
+      g4.dashed &&
+      g4.drawLen &&
+      g4.dryCount > 0 &&
+      g4.dryAllNew &&
+      g4.persistingCount > 0 &&
+      g4.persistingStill,
     `band=${s4.band} ${JSON.stringify(g4)} (expected dry-in exactly ["Lokai"] at seed 42)`,
   );
   await shoot("explorer-sub9-redraft-inking.png");
@@ -187,13 +249,16 @@ async function g4InksIn({ evaluate, check, shoot, sleep, rgn, enterAt, waitRedra
 }
 
 async function g4bSettles({ evaluate, check, shoot }: GlassKit): Promise<void> {
-  const g4b = await evaluate<{ dash: string; drawLen: string; running: number }>(`(async()=>{
+  const g4b = await evaluate<{ dash: string; drawLen: string; running: number }>(
+    `(async()=>{
     const svg=document.querySelector("#map .region-inset svg");
     await Promise.all(svg.getAnimations({subtree:true}).map(a=>a.finished.catch(()=>{})));
     const coast=svg.querySelector("#layer-land path");
     return{dash:coast?coast.style.strokeDasharray:"(no coast)",drawLen:coast?coast.style.getPropertyValue("--draw-len"):"",
       running:svg.getAnimations({subtree:true}).filter(a=>a.playState==="running").length};
-  })()`, true);
+  })()`,
+    true,
+  );
   check(
     "G4b the redraft ceremony settles pristine: dash + --draw-len removed on animationend, none running (#170)",
     !g4b.dash && !g4b.drawLen && g4b.running === 0,
@@ -250,13 +315,17 @@ async function g8WholeSheet({ evaluate, check, sleep, settleHome }: GlassKit): P
   const g8cam = await settleHome();
   let g8: { band: number; committed: boolean; insets: number; hits: number; cx: string | null } | null = null;
   for (let i = 0; i < 50; i++) {
-    g8 = await evaluate<{ band: number; committed: boolean; insets: number; hits: number; cx: string | null }>(`(()=>{const s=window.__vellumRegion();const p=new URLSearchParams(location.hash.slice(1));return{band:s.band,committed:s.committed,insets:document.querySelectorAll("#map .region-inset").length,hits:document.querySelectorAll("#map .place-hit").length,cx:p.get("cx")};})()`);
+    g8 = await evaluate<{ band: number; committed: boolean; insets: number; hits: number; cx: string | null }>(
+      `(()=>{const s=window.__vellumRegion();const p=new URLSearchParams(location.hash.slice(1));return{band:s.band,committed:s.committed,insets:document.querySelectorAll("#map .region-inset").length,hits:document.querySelectorAll("#map .place-hit").length,cx:p.get("cx")};})()`,
+    );
     if (g8.insets === 0 && g8.cx === null) break;
     await sleep(40);
   }
   check(
     "G8 the whole sheet returns on one press: glide home, inset faded off, hash clean, world overlay back (#170; home's voice since #505)",
-    g8cam.k === 1 && g8cam.x === 0 && g8cam.y === 0 &&
+    g8cam.k === 1 &&
+      g8cam.x === 0 &&
+      g8cam.y === 0 &&
       g8!.band === 0 &&
       g8!.committed === false &&
       g8!.insets === 0 &&
@@ -278,7 +347,9 @@ async function g6ReducedCeremony({ evaluate, send, check, sleep, rgn, enterAt, w
   const before6 = (await rgn()).redrafts;
   await enterAt(2, 0.5, 0.5);
   const s6 = await waitRedraft(before6, 1);
-  const g6 = await evaluate<{ svg: false } | { svg: true; redrafting: boolean; dashed: boolean; dry: number; hits: number }>(`(()=>{
+  const g6 = await evaluate<
+    { svg: false } | { svg: true; redrafting: boolean; dashed: boolean; dry: number; hits: number }
+  >(`(()=>{
     const svg=document.querySelector("#map .region-inset svg");
     if(!svg)return{svg:false};
     const coast=svg.querySelector("#layer-land path");
@@ -287,8 +358,13 @@ async function g6ReducedCeremony({ evaluate, send, check, sleep, rgn, enterAt, w
   })()`);
   check(
     "G6 reduced motion collapses the ceremony to an instant swap with zero functional loss (#170 AC2)",
-    s6.band === 1 && /^The Environs of .+/.test(s6.title || "") && g6.svg &&
-      g6.redrafting === false && g6.dashed === false && g6.dry === 0 && g6.hits > 0,
+    s6.band === 1 &&
+      /^The Environs of .+/.test(s6.title || "") &&
+      g6.svg &&
+      g6.redrafting === false &&
+      g6.dashed === false &&
+      g6.dry === 0 &&
+      g6.hits > 0,
     `band=${s6.band} title=${JSON.stringify(s6.title)} ${JSON.stringify(g6)}`,
   );
   await send("Emulation.setEmulatedMedia", { features: [] });
@@ -298,6 +374,8 @@ async function gRestore({ evaluate, waitSettled, settleHome }: GlassKit): Promis
   await evaluate(`document.getElementById("zoom-reset").click()`);
   await settleHome();
   await evaluate(`window.__vellumSetRedraftEnabled(false)`);
-  await evaluate(`(()=>{document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`);
+  await evaluate(
+    `(()=>{document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`,
+  );
   await waitSettled("glass-ceremony-restore");
 }

@@ -1,5 +1,10 @@
 // The Living Chart engine: everything the site animates over a baked chart (story cards, the chronicle scrubber, the voyage), behind one host-agnostic boundary. The host hands its elements in and construction only stores the refs; the baked chart string is never mutated for export.
-import { createPlaceOverlay, type BuildPlaceOverlayOpts, type LayProspectHost, type PlaceOverlay } from "./place-overlay.ts";
+import {
+  createPlaceOverlay,
+  type BuildPlaceOverlayOpts,
+  type LayProspectHost,
+  type PlaceOverlay,
+} from "./place-overlay.ts";
 import { createChronicle, type Chronicle } from "./chronicle.ts";
 import { createVoyage, type RestingTrackSink, type Voyage } from "./voyage.ts";
 import type { TourOrderSource } from "./voyage-session.ts";
@@ -40,7 +45,12 @@ export interface LivingChartHost {
   tourOrder?: TourOrderSource;
 }
 
-function agesFor(bar: Readonly<ScrubberRefs> | undefined, overlay: Readonly<PlaceOverlay>, chronicle: Readonly<Chronicle>, voyage: Readonly<Voyage>): Ages {
+function agesFor(
+  bar: Readonly<ScrubberRefs> | undefined,
+  overlay: Readonly<PlaceOverlay>,
+  chronicle: Readonly<Chronicle>,
+  voyage: Readonly<Voyage>,
+): Ages {
   return bar
     ? createAges({
         panel: bar.panel,
@@ -141,9 +151,7 @@ export function createLivingChart(host: LivingChartHost) {
     overlay: { data: () => overlay.data(), hideCard: () => overlay.hideCard() },
   });
   const bar = host.scrubber;
-  const logPanel = bar
-    ? createVoyageLogPanel({ panel: bar.panel, sig: bar.sig, strip: bar.strip })
-    : barlessLogPanel();
+  const logPanel = bar ? createVoyageLogPanel({ panel: bar.panel, sig: bar.sig, strip: bar.strip }) : barlessLogPanel();
   const voyage = createVoyage({
     mapEl: host.mapEl,
     statusEl: host.statusEl,

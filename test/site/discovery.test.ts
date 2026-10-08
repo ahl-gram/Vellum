@@ -33,7 +33,11 @@ test("the route set is NAV_ITEMS plus the five routes the nav omits: home, the a
     [HOME_ROUTE, ...NAV_ITEMS.map((i) => i.href), ATLAS_ROUTE, PROSPECT_ROUTE, RIBBON_ROUTE, PORTFOLIO_ROUTE],
     "the routes are derived, never restated: home, the nav in its order, then the atlas, the prospect, the ribbon, and the Portfolio",
   );
-  assert.equal(DISCOVERY_ROUTES.length, NAV_ITEMS.length + 5, "seven nav items plus home, the atlas, the prospect, the ribbon, and the Portfolio");
+  assert.equal(
+    DISCOVERY_ROUTES.length,
+    NAV_ITEMS.length + 5,
+    "seven nav items plus home, the atlas, the prospect, the ribbon, and the Portfolio",
+  );
   assert.equal(new Set(DISCOVERY_ROUTES).size, DISCOVERY_ROUTES.length, "no route may be listed twice");
   for (const route of DISCOVERY_ROUTES) {
     assert.match(route, /^\/([a-z0-9-]+\/)*$/, `${route} must be root-absolute trailing-slash form (constraint 8)`);
@@ -79,7 +83,10 @@ test("sitemap.xml lists every route, absolute against the site, and nothing else
 test("the Portfolio is discovered at its address under the Explorer, and the sitemap no longer names the old one (Issue #669)", () => {
   assert.equal(PORTFOLIO_ROUTE, "/explorer/portfolio/");
   const xml = sitemapXml(TEST_SITE);
-  assert.ok(xml.includes(`<loc>${abs("/explorer/portfolio/")}</loc>`), "the sitemap lists the Portfolio where it lives");
+  assert.ok(
+    xml.includes(`<loc>${abs("/explorer/portfolio/")}</loc>`),
+    "the sitemap lists the Portfolio where it lives",
+  );
   assert.ok(!xml.includes("print-room/portfolio"), "the sitemap still sends a crawler to the Portfolio's old address");
 });
 

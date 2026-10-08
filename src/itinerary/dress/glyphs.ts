@@ -5,14 +5,24 @@ import { placed } from "../../prospect/dress/glyphs.ts";
 export function hillProfile(c: DressContext, x: number, y: number, s: number): SvgNode {
   return placed(x, y, s, [
     el("path", { d: "M-8 0Q-3 -7 0 -7.6Q4 -7 8 0", fill: c.paper, ...stroke(c, 0.9) }),
-    el("path", { d: "M-4.6 -3.4Q-2.6 -5.6 -0.6 -6M-5.8 -1.6Q-4.4 -3.4 -2.8 -4.4", fill: "none", stroke: c.soft, "stroke-width": 0.6 }),
+    el("path", {
+      d: "M-4.6 -3.4Q-2.6 -5.6 -0.6 -6M-5.8 -1.6Q-4.4 -3.4 -2.8 -4.4",
+      fill: "none",
+      stroke: c.soft,
+      "stroke-width": 0.6,
+    }),
   ]);
 }
 
 export function mountainProfile(c: DressContext, x: number, y: number, s: number): SvgNode {
   return placed(x, y, s, [
     el("path", { d: "M-9 0L-3.4 -10L-0.6 -6.4L2.2 -12L9 0", fill: c.paper, ...stroke(c, 1.0) }),
-    el("path", { d: "M-3.4 -10L-3 -6.8M2.2 -12L2.8 -8.2M0 -4Q-2 -2.4 -4.4 -1.6", fill: "none", stroke: c.soft, "stroke-width": 0.6 }),
+    el("path", {
+      d: "M-3.4 -10L-3 -6.8M2.2 -12L2.8 -8.2M0 -4Q-2 -2.4 -4.4 -1.6",
+      fill: "none",
+      stroke: c.soft,
+      "stroke-width": 0.6,
+    }),
   ]);
 }
 

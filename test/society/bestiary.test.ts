@@ -31,10 +31,7 @@ test("every beast haunts genuine border-connected deep sea", () => {
   assert.equal(world.beasts.length, 1, "a chart carries at most one beast, and seed 42 has the water for it");
   for (const b of world.beasts) {
     assert.equal(mask[b.x + b.y * w], 1, `${b.name} haunts a lake or dry land`);
-    assert.ok(
-      (world.oceanDist[b.x + b.y * w] as number) >= 8,
-      `${b.name} haunts water too near the coast`,
-    );
+    assert.ok((world.oceanDist[b.x + b.y * w] as number) >= 8, `${b.name} haunts water too near the coast`);
     assert.ok(b.x >= 10 && b.x < w - 10 && b.y >= 10 && b.y < h - 10, `${b.name} haunts the neat line`);
   }
 });

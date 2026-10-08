@@ -16,5 +16,7 @@ export function whereLine(r: Pick<Facts, "era" | "epithet" | "founded">): string
 }
 
 export function subLine(r: Pick<Facts, "title" | "formerName">): string {
-  return r.formerName ? `${r.title} · once called ${r.formerName}` : `${r.title} · drawn side-on from the town's own ground`;
+  return r.formerName
+    ? `${r.title} · once called ${r.formerName}`
+    : `${r.title} · drawn side-on from the town's own ground`;
 }

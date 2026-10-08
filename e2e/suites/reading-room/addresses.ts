@@ -3,15 +3,26 @@ import type { SuiteContext } from "../../types.ts";
 import type { ReadingRoomKit } from "./kit.ts";
 import { agesRead, stripRead } from "./reads.ts";
 
-export async function rr6Survey({ evaluate, send, check, boot, settled, plateShown, PORT }: ReadingRoomKit): Promise<void> {
+export async function rr6Survey({
+  evaluate,
+  send,
+  check,
+  boot,
+  settled,
+  plateShown,
+  PORT,
+}: ReadingRoomKit): Promise<void> {
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/reading-room/#seed=42&survey` });
   check("RR6a the survey address boots and settles", (await boot()) && (await settled()));
   const survey = await evaluate(agesRead);
   check(
     "RR6 bare `survey` lands at rest in the survey chamber, and the flag round-trips bare",
-    !!survey.ages && survey.ages.chamber === "survey" && survey.play === "Play" &&
-      /(^|#|&)survey(&|$)/.test(survey.hash) && !/survey=/.test(survey.hash),
+    !!survey.ages &&
+      survey.ages.chamber === "survey" &&
+      survey.play === "Play" &&
+      /(^|#|&)survey(&|$)/.test(survey.hash) &&
+      !/survey=/.test(survey.hash),
     JSON.stringify(survey),
   );
 
@@ -19,8 +30,10 @@ export async function rr6Survey({ evaluate, send, check, boot, settled, plateSho
   const surveyPlate = await plateShown();
   check(
     "RR32 a bare `survey` link arrives showing the capital's plate, at the present (#442)",
-    !!surveyPlate && surveyPlate.href === "/prospect/#seed=42&style=antique&i=0&year=1059" &&
-      /Laukuwelua/.test(surveyPlate.alt || "") && /year 1059/.test(surveyPlate.alt || ""),
+    !!surveyPlate &&
+      surveyPlate.href === "/prospect/#seed=42&style=antique&i=0&year=1059" &&
+      /Laukuwelua/.test(surveyPlate.alt || "") &&
+      /year 1059/.test(surveyPlate.alt || ""),
     JSON.stringify(surveyPlate),
   );
   const surveyStrip = await evaluate(stripRead);
@@ -31,26 +44,41 @@ export async function rr6Survey({ evaluate, send, check, boot, settled, plateSho
   );
 }
 
-export async function rr7Year({ evaluate, send, check, boot, settled, plateShown, PORT }: ReadingRoomKit): Promise<void> {
+export async function rr7Year({
+  evaluate,
+  send,
+  check,
+  boot,
+  settled,
+  plateShown,
+  PORT,
+}: ReadingRoomKit): Promise<void> {
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/reading-room/#seed=42&year=650` });
   check("RR7a the year address boots and settles", (await boot()) && (await settled()));
   const year = await evaluate(agesRead);
   check(
     "RR7 year=650 lands at rest in the ages chamber at 650, round-tripped into the hash",
-    !!year.ages && year.ages.chamber === "ages" && year.ages.year === 650 &&
-      year.play === "Play" && /year=650(&|$)/.test(year.hash),
+    !!year.ages &&
+      year.ages.chamber === "ages" &&
+      year.ages.year === 650 &&
+      year.play === "Play" &&
+      /year=650(&|$)/.test(year.hash),
     JSON.stringify(year),
   );
 
   const plate650 = await plateShown();
   check(
     "RR27 at year 650 the stage holds the latest crossed beat, Lamahai's founding (#402)",
-    !!plate650 && plate650.href === "/prospect/#seed=42&style=antique&i=6&year=597" && /Lamahai/.test(plate650.alt || ""),
+    !!plate650 &&
+      plate650.href === "/prospect/#seed=42&style=antique&i=6&year=597" &&
+      /Lamahai/.test(plate650.alt || ""),
     JSON.stringify(plate650),
   );
 
-  const scrubbed = await evaluate<{ chamber: string | null; hash: string }>(`(()=>{const r=document.querySelector(".rf-range");r.value=r.min;r.dispatchEvent(new Event("input",{bubbles:true}));r.dispatchEvent(new Event("change",{bubbles:true}));const a=window.__vellumReadingRoomAges();return{chamber:a&&a.chamber,hash:location.hash};})()`);
+  const scrubbed = await evaluate<{ chamber: string | null; hash: string }>(
+    `(()=>{const r=document.querySelector(".rf-range");r.value=r.min;r.dispatchEvent(new Event("input",{bubbles:true}));r.dispatchEvent(new Event("change",{bubbles:true}));const a=window.__vellumReadingRoomAges();return{chamber:a&&a.chamber,hash:location.hash};})()`,
+  );
   check(
     "RR8 a manual scrub to the survey half re-serializes the address on release",
     scrubbed.chamber === "survey" && /(^|#|&)survey(&|$)/.test(scrubbed.hash) && !/year=/.test(scrubbed.hash),
@@ -76,9 +104,14 @@ export async function rr9Today({ evaluate, send, check, sleep, boot, PORT }: Rea
     for (let i = 0; i < 160; i++) {
       let s = null;
       try {
-        s = await evaluate<{ svg: boolean; status: string | undefined; seed: number }>(`(()=>{const st=window.__vellumReadingRoomState();return{svg:!!document.querySelector(".rf-chart svg"),status:(document.querySelector(".rf-status")||{}).textContent,seed:st.seed};})()`);
+        s = await evaluate<{ svg: boolean; status: string | undefined; seed: number }>(
+          `(()=>{const st=window.__vellumReadingRoomState();return{svg:!!document.querySelector(".rf-chart svg"),status:(document.querySelector(".rf-status")||{}).textContent,seed:st.seed};})()`,
+        );
       } catch {}
-      if (s && s.svg && s.status === "") { bare = s; break; }
+      if (s && s.svg && s.status === "") {
+        bare = s;
+        break;
+      }
       await sleep(50);
     }
   }
@@ -94,16 +127,28 @@ export async function rr10CrossLinks({ evaluate, send, check, sleep, PORT }: Sui
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
   let card = null;
   for (let i = 0; i < 120; i++) {
-    try { card = await evaluate<{ verb: string | null; enter: string | null } | null>(`(()=>{const a=document.getElementById("lf-card-reading-room");if(!a)return null;const v=a.querySelector(".lf-card-verb");const e=a.querySelector(".lf-card-enter");return{verb:v?v.textContent:null,enter:e?e.getAttribute("href"):null};})()`); } catch {}
+    try {
+      card = await evaluate<{ verb: string | null; enter: string | null } | null>(
+        `(()=>{const a=document.getElementById("lf-card-reading-room");if(!a)return null;const v=a.querySelector(".lf-card-verb");const e=a.querySelector(".lf-card-enter");return{verb:v?v.textContent:null,enter:e?e.getAttribute("href"):null};})()`,
+      );
+    } catch {}
     if (card) break;
     await sleep(50);
   }
-  check("RR10a the home station slip invites Watch one into the room (#459: the Go Deeper card retired)", !!card && card.verb === "Watch one" && card.enter === "reading-room/", JSON.stringify(card));
+  check(
+    "RR10a the home station slip invites Watch one into the room (#459: the Go Deeper card retired)",
+    !!card && card.verb === "Watch one" && card.enter === "reading-room/",
+    JSON.stringify(card),
+  );
   const linkBefore = seedForDate(new Date());
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/seed-of-the-day/` });
   let watch = null;
   for (let i = 0; i < 160; i++) {
-    try { watch = await evaluate<{ href: string } | null>(`(()=>{const a=document.querySelector('a[data-road="reading-room"]');return a&&/#seed=\\d+/.test(a.getAttribute("href"))?{href:a.getAttribute("href")}:null;})()`); } catch {}
+    try {
+      watch = await evaluate<{ href: string } | null>(
+        `(()=>{const a=document.querySelector('a[data-road="reading-room"]');return a&&/#seed=\\d+/.test(a.getAttribute("href"))?{href:a.getAttribute("href")}:null;})()`,
+      );
+    } catch {}
     if (watch) break;
     await sleep(50);
   }
@@ -111,7 +156,9 @@ export async function rr10CrossLinks({ evaluate, send, check, sleep, PORT }: Sui
   const watchSeed = watch ? Number((watch.href.match(/#seed=(\d+)$/) || [])[1]) : null;
   check(
     "RR10b the Today page cross-links the room with today's seed pinned",
-    !!watch && /^\.\.\/reading-room\/#seed=\d+$/.test(watch.href) && (watchSeed === linkBefore || watchSeed === linkAfter),
+    !!watch &&
+      /^\.\.\/reading-room\/#seed=\d+$/.test(watch.href) &&
+      (watchSeed === linkBefore || watchSeed === linkAfter),
     JSON.stringify({ watch, linkBefore, linkAfter }),
   );
 }

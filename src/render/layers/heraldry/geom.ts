@@ -22,7 +22,11 @@ export function geom(cx: number, cy: number, size: number): Geom {
   const h = size * 1.18;
   const half = w / 2;
   return {
-    cx, cy, w, h, half,
+    cx,
+    cy,
+    w,
+    h,
+    half,
     x0: cx - half,
     x1: cx + half,
     top: cy - h / 2,
@@ -45,7 +49,10 @@ export function shieldPath(g: Geom): string {
 
 export function fieldNodes(arms: Arms, g: Geom, fieldFill: (t: Tincture) => string): SvgNode[] {
   const base = el("rect", {
-    x: n(g.x0), y: n(g.top), width: n(g.w), height: n(g.h),
+    x: n(g.x0),
+    y: n(g.top),
+    width: n(g.w),
+    height: n(g.h),
     fill: fieldFill(arms.field[0]!),
   });
   if (arms.division === "plain") return [base];

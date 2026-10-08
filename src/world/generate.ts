@@ -41,10 +41,7 @@ const LAND_FRACTION: Record<MapType, number> = {
   citystate: 0.3,
 };
 
-function weightedPick<T>(
-  pairs: ReadonlyArray<readonly [T, number]>,
-  roll: number,
-): T {
+function weightedPick<T>(pairs: ReadonlyArray<readonly [T, number]>, roll: number): T {
   let acc = 0;
   for (const [value, weight] of pairs) {
     acc += weight;
@@ -53,10 +50,7 @@ function weightedPick<T>(
   return (pairs[pairs.length - 1] as readonly [T, number])[0];
 }
 
-export function defaultRecipe(
-  seed: number,
-  overrides: Partial<WorldRecipe> = {},
-): WorldRecipe {
+export function defaultRecipe(seed: number, overrides: Partial<WorldRecipe> = {}): WorldRecipe {
   const rng = createRng(seed).fork("recipe");
   const rolledType = weightedPick(MAP_TYPE_WEIGHTS, rng.next());
   const rolledBand = weightedPick(BAND_WEIGHTS, rng.next());
@@ -79,7 +73,6 @@ function stripUndefined<T extends object>(obj: T): Partial<T> {
   }
   return out as Partial<T>;
 }
-
 
 function terrainStage(recipe: WorldRecipe, rng: Rng): { elev: Field; seaLevel: number; winds: Winds } {
   const { seed, gridW, gridH, mapType } = recipe;
@@ -251,21 +244,13 @@ function featureNames(
     range: hasRange ? namer.name("peak") : null,
     forest: landCells > 0 && forestCells / landCells > 0.06 ? namer.name("forest") : null,
     lakes,
-    realms:
-      realms.seats.length > 1
-        ? realms.seats.map(() => namer.name("realm"))
-        : [],
+    realms: realms.seats.length > 1 ? realms.seats.map(() => namer.name("realm")) : [],
   };
 }
 
 function worldTitle(rng: Rng, culture: Culture, mapType: MapType, named: ReadonlyArray<SettlementCore>): MapTitle {
   const capitalName = named.find((s) => s.kind === "capital")?.name;
-  return makeMapTitle(
-    rng.fork("title"),
-    culture,
-    mapType,
-    mapType === "citystate" ? capitalName : undefined,
-  );
+  return makeMapTitle(rng.fork("title"), culture, mapType, mapType === "citystate" ? capitalName : undefined);
 }
 
 function worldHistory(
@@ -290,12 +275,7 @@ function worldHistory(
     founded: history.founded[i] as number,
     ruined: history.ruined[i] as boolean,
   }));
-  const formerNames = assignFormerNames(
-    dated,
-    culture,
-    rng.fork("renames"),
-    nameSetOf(dated, names),
-  );
+  const formerNames = assignFormerNames(dated, culture, rng.fork("renames"), nameSetOf(dated, names));
   const settled = dated.map((s, i) => {
     const formerName = formerNames.get(i);
     return formerName === undefined ? s : { ...s, formerName };
@@ -304,16 +284,19 @@ function worldHistory(
 }
 
 function oceanDistance(elev: Field, seaLevel: number, gridW: number, gridH: number): Float64Array {
-  return bfsDistance(gridW, gridH, (x, y) =>
-    (elev.data[x + y * gridW] as number) > seaLevel,
-  );
+  return bfsDistance(gridW, gridH, (x, y) => (elev.data[x + y * gridW] as number) > seaLevel);
 }
 
 function worldBestiary(
   ground: Ground,
   recipe: WorldRecipe,
   oceanDist: Float64Array,
-  lore: { readonly culture: Culture; readonly settled: ReadonlyArray<NamedSettlement>; readonly presentYear: number; readonly names: FeatureNames },
+  lore: {
+    readonly culture: Culture;
+    readonly settled: ReadonlyArray<NamedSettlement>;
+    readonly presentYear: number;
+    readonly names: FeatureNames;
+  },
   rng: Rng,
 ): ReadonlyArray<SeaBeast> {
   const { gridW, gridH } = recipe;

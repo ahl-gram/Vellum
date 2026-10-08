@@ -1,19 +1,36 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { BARE_LINE, beneathLine, boundLine, draftedLine, gatheredLine, roman, sheetLine } from "../../src/site/portfolio/folio-lines.ts";
+import {
+  BARE_LINE,
+  beneathLine,
+  boundLine,
+  draftedLine,
+  gatheredLine,
+  roman,
+  sheetLine,
+} from "../../src/site/portfolio/folio-lines.ts";
 
 // The wording is the mockup's, quoted from design/chart-table/folio.tpl.html, so each of these is a spec line and not a snapshot of whatever the code happens to say.
 test("PF1 the bound line reads as the mockup writes it: the first run names the sheets, the rest carry the figure alone, and the whole sentence opens with a capital", () => {
   assert.equal(
-    boundLine([{ name: "The Isle of Rahai", count: 5 }, { name: "The Quiet Isles of Tri", count: 1 }]),
+    boundLine([
+      { name: "The Isle of Rahai", count: 5 },
+      { name: "The Quiet Isles of Tri", count: 1 },
+    ]),
     "Five sheets from The Isle of Rahai and one from The Quiet Isles of Tri, each drafted here again from its chart's number.",
   );
-  assert.equal(boundLine([{ name: "The Isle of Rahai", count: 6 }]), "Six sheets from The Isle of Rahai, each drafted here again from its chart's number.");
+  assert.equal(
+    boundLine([{ name: "The Isle of Rahai", count: 6 }]),
+    "Six sheets from The Isle of Rahai, each drafted here again from its chart's number.",
+  );
   assert.equal(boundLine([]), "");
 });
 
 test("PF2 one sheet is not 'each': a single gathered sheet drops the plural pronoun, and takes the singular noun with it", () => {
-  assert.equal(boundLine([{ name: "The Isle of Rahai", count: 1 }]), "One sheet from The Isle of Rahai, drafted here again from its chart's number.");
+  assert.equal(
+    boundLine([{ name: "The Isle of Rahai", count: 1 }]),
+    "One sheet from The Isle of Rahai, drafted here again from its chart's number.",
+  );
 });
 
 test("PF3 the drafting stamp counts in the mockup's own form, 'four of six drafted', with no noun between the figures", () => {

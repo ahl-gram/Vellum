@@ -34,12 +34,7 @@ export function svgDimensions(svg: string): { width: number; height: number } {
   return { width: Number(m[1]), height: Number(m[2]) };
 }
 
-export async function rasterizeSvg(
-  browser: string,
-  svgPath: string,
-  pngPath: string,
-  scale = 2,
-): Promise<void> {
+export async function rasterizeSvg(browser: string, svgPath: string, pngPath: string, scale = 2): Promise<void> {
   const svg = readFileSync(svgPath, "utf8");
   const { width, height } = svgDimensions(svg);
   await execFileAsync(browser, [

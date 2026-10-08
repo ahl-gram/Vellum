@@ -78,7 +78,8 @@ export function compareRows(manifests: Manifests, measure: Measure): Row[] {
     const [a, b, br] = [byName[0]!.get(name), byName[1]!.get(name), byName[2]!.get(name)];
     const present = [a !== undefined, b !== undefined, br !== undefined] as const;
     const errors = [...(br?.http4xx ?? []), ...(br?.consoleErrors ?? [])];
-    if (a === undefined || b === undefined || br === undefined) return { name, present, control: null, branch: null, errors };
+    if (a === undefined || b === undefined || br === undefined)
+      return { name, present, control: null, branch: null, errors };
     const pair = (x: ManifestEntry, y: ManifestEntry, from: 0 | 1, to: 1 | 2): number =>
       (x.probe ?? null) === (y.probe ?? null) ? measure(from, to, name) : Number.POSITIVE_INFINITY;
     const control = pair(a, b, 0, 1);
@@ -88,26 +89,41 @@ export function compareRows(manifests: Manifests, measure: Measure): Row[] {
 
 export function parseCompareArgs(args: readonly string[]): readonly [string, string, string] {
   const [a, b, branch, ...extra] = args;
-  if (a === undefined || b === undefined || branch === undefined || extra.length > 0 || args.some((x) => x.startsWith("-"))) {
+  if (
+    a === undefined ||
+    b === undefined ||
+    branch === undefined ||
+    extra.length > 0 ||
+    args.some((x) => x.startsWith("-"))
+  ) {
     throw new Error("usage: node scripts/design/compare.ts <control-a> <control-b> <branch>");
   }
   const [ra, rb, rbr] = [resolve(a), resolve(b), resolve(branch)];
   if (ra === rb) throw new Error(`${a} is both controls, so every row would trust itself`);
-  if (rbr === ra || rbr === rb) throw new Error(`${branch} is the branch and a control, so every trusted row would match itself`);
+  if (rbr === ra || rbr === rb)
+    throw new Error(`${branch} is the branch and a control, so every trusted row would match itself`);
   return [a, b, branch];
 }
 
 const manifestOf = (dir: string): ManifestEntry[] =>
-  existsSync(join(dir, "manifest.json")) ? (JSON.parse(readFileSync(join(dir, "manifest.json"), "utf8")) as ManifestEntry[]) : [];
+  existsSync(join(dir, "manifest.json"))
+    ? (JSON.parse(readFileSync(join(dir, "manifest.json"), "utf8")) as ManifestEntry[])
+    : [];
 
-export const measureIn = (dirs: readonly [string, string, string], pair: (a: string, b: string) => number): Measure =>
-  (from, to, name) => pair(join(dirs[from], name), join(dirs[to], name));
+export const measureIn =
+  (dirs: readonly [string, string, string], pair: (a: string, b: string) => number): Measure =>
+  (from, to, name) =>
+    pair(join(dirs[from], name), join(dirs[to], name));
 
 function compareSweeps(controlA: string, controlB: string, branch: string): Row[] {
-  return compareRows([manifestOf(controlA), manifestOf(controlB), manifestOf(branch)], measureIn([controlA, controlB, branch], ae));
+  return compareRows(
+    [manifestOf(controlA), manifestOf(controlB), manifestOf(branch)],
+    measureIn([controlA, controlB, branch], ae),
+  );
 }
 
-const shown = (ae: number | null): string => (ae === null ? "-" : ae === Number.POSITIVE_INFINITY ? "size or layout differs" : String(ae));
+const shown = (ae: number | null): string =>
+  ae === null ? "-" : ae === Number.POSITIVE_INFINITY ? "size or layout differs" : String(ae);
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   let dirs: readonly [string, string, string];
@@ -120,7 +136,10 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     process.exit(2);
   }
   const rows = compareSweeps(...dirs);
-  for (const r of rows) console.log(`${verdictOf(r).padEnd(9)} ${r.name}  control ${shown(r.control)}  branch ${shown(r.branch)}${r.errors.length > 0 ? `  ${r.errors.join(" | ")}` : ""}`);
+  for (const r of rows)
+    console.log(
+      `${verdictOf(r).padEnd(9)} ${r.name}  control ${shown(r.control)}  branch ${shown(r.branch)}${r.errors.length > 0 ? `  ${r.errors.join(" | ")}` : ""}`,
+    );
   const trusted = rows.filter((r) => ["same", "differs"].includes(verdictOf(r))).length;
   console.log(`${rows.length} rows, ${trusted} trusted`);
   process.exitCode = failed(rows) ? 1 : 0;

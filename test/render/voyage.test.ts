@@ -60,15 +60,18 @@ test("the tour does not cross itself on a ring layout nearest-neighbour would ta
   const o = (a: PlaceMark, b: PlaceMark, c: PlaceMark) =>
     Math.sign((b.nx - a.nx) * (c.ny - a.ny) - (b.ny - a.ny) * (c.nx - a.nx));
   const crosses = (a: PlaceMark, b: PlaceMark, c: PlaceMark, d: PlaceMark) =>
-    o(a, b, c) !== o(a, b, d) && o(c, d, a) !== o(c, d, b) &&
-    o(a, b, c) !== 0 && o(a, b, d) !== 0 && o(c, d, a) !== 0 && o(c, d, b) !== 0;
+    o(a, b, c) !== o(a, b, d) &&
+    o(c, d, a) !== o(c, d, b) &&
+    o(a, b, c) !== 0 &&
+    o(a, b, d) !== 0 &&
+    o(c, d, a) !== 0 &&
+    o(c, d, b) !== 0;
   const legs = plan.legs.map((l) => [at.get(l.fromIdx)!, at.get(l.toIdx)!] as const);
   for (let i = 0; i < legs.length; i++) {
     for (let j = i + 2; j < legs.length; j++) {
       // leg 0 and the closing leg share a port, the one adjacent-pair exclusion
       if (i === 0 && j === legs.length - 1) continue;
-      assert.ok(!crosses(legs[i]![0], legs[i]![1], legs[j]![0], legs[j]![1]),
-        `legs ${i} and ${j} cross`);
+      assert.ok(!crosses(legs[i]![0], legs[i]![1], legs[j]![0], legs[j]![1]), `legs ${i} and ${j} cross`);
     }
   }
 });
@@ -91,7 +94,10 @@ test("legs close the tour into a round trip: the last leg sails home to the capi
 
 test("a two-port survey sails out and back, not out alone", () => {
   const plan = buildVoyagePlan([capital, townA], 1059);
-  assert.deepEqual(plan.ports.map((p) => p.idx), [0, 1]);
+  assert.deepEqual(
+    plan.ports.map((p) => p.idx),
+    [0, 1],
+  );
   assert.deepEqual(plan.legs, [
     { fromIdx: 0, toIdx: 1 },
     { fromIdx: 1, toIdx: 0 },
@@ -191,20 +197,29 @@ test("does not mutate the caller's places array (immutability rule)", () => {
 });
 
 /** A symmetric distance oracle from a sparse pair map; throws on an unknown pair. */
-const matrixD = (m: Record<string, number>) => (a: number, b: number): number => {
-  const v = m[a < b ? `${a}:${b}` : `${b}:${a}`];
-  if (v === undefined) throw new Error(`no distance for ${a}:${b}`);
-  return v;
-};
+const matrixD =
+  (m: Record<string, number>) =>
+  (a: number, b: number): number => {
+    const v = m[a < b ? `${a}:${b}` : `${b}:${a}`];
+    if (v === undefined) throw new Error(`no distance for ${a}:${b}`);
+    return v;
+  };
 
 // The straight-line plan visits 0,1,3,2; the oracle puts a strait between A(1) and C(3), so the true miles prefer 0,1,2,3.
 const straitD = matrixD({ "0:1": 1, "1:3": 10, "2:3": 1, "1:2": 2, "0:3": 4, "0:2": 3 });
 
 test("reorderPlanByTravel adopts the cheaper itinerary the travel distances reveal", () => {
   const plan = buildVoyagePlan(lineWorld, 1059);
-  assert.deepEqual(plan.ports.map((p) => p.idx), [0, 1, 3, 2], "fixture premise: straight-line order");
+  assert.deepEqual(
+    plan.ports.map((p) => p.idx),
+    [0, 1, 3, 2],
+    "fixture premise: straight-line order",
+  );
   const re = reorderPlanByTravel(plan, straitD);
-  assert.deepEqual(re.ports.map((p) => p.idx), [0, 1, 2, 3]);
+  assert.deepEqual(
+    re.ports.map((p) => p.idx),
+    [0, 1, 2, 3],
+  );
   assert.deepEqual(re.legs, [
     { fromIdx: 0, toIdx: 1 },
     { fromIdx: 1, toIdx: 2 },
@@ -216,7 +231,10 @@ test("reorderPlanByTravel adopts the cheaper itinerary the travel distances reve
 test("applyTourOrder: rebuilds legs to the new order and keeps each port's own log line", () => {
   const plan = buildVoyagePlan(lineWorld, 1059);
   const re = applyTourOrder(plan, [0, 2, 3, 1]);
-  assert.deepEqual(re.ports.map((p) => p.idx), [0, 2, 3, 1]);
+  assert.deepEqual(
+    re.ports.map((p) => p.idx),
+    [0, 2, 3, 1],
+  );
   assert.deepEqual(re.legs, [
     { fromIdx: 0, toIdx: 2 },
     { fromIdx: 2, toIdx: 3 },
@@ -242,7 +260,11 @@ test("reorderPlanByTravel: deterministic and does not mutate the given plan", ()
   const a = reorderPlanByTravel(plan, straitD);
   const b = reorderPlanByTravel(plan, straitD);
   assert.deepEqual(a, b);
-  assert.deepEqual(plan.ports.map((p) => p.idx), [0, 1, 3, 2], "the given plan changed");
+  assert.deepEqual(
+    plan.ports.map((p) => p.idx),
+    [0, 1, 3, 2],
+    "the given plan changed",
+  );
 });
 
 test("reorderPlanByTravel: empty and one-port plans come back unchanged", () => {
@@ -261,11 +283,7 @@ test("#442 toldRow is the LAST row revealLog inks, which is arrived - 1 at every
     const arrived = frameAt(legCount, step / 20).arrived;
     const inked = Array.from({ length: rows }, (_, i) => i < arrived);
     const lastInked = inked.lastIndexOf(true);
-    assert.equal(
-      toldRow(arrived, rows),
-      lastInked,
-      `at arrived=${arrived} the told row must be the last inked one`,
-    );
+    assert.equal(toldRow(arrived, rows), lastInked, `at arrived=${arrived} the told row must be the last inked one`);
   }
 });
 

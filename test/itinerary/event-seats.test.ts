@@ -18,7 +18,11 @@ test("stripFor picks the strip whose span holds the distance, the low end closed
   assert.equal(stripFor(layout, second.d0 - 1e-9)?.index, 0);
   assert.equal(stripFor(layout, (second.d0 + second.d1) / 2)?.index, 1);
   assert.equal(stripFor(layout, 0)?.index, 0);
-  assert.equal(stripFor(layout, last.d1), null, "the last strip's end is open: the plate draws no event there (skeptic on PR #500: a crossing at the road's very end was listed and never drawn)");
+  assert.equal(
+    stripFor(layout, last.d1),
+    null,
+    "the last strip's end is open: the plate draws no event there (skeptic on PR #500: a crossing at the road's very end was listed and never drawn)",
+  );
   assert.equal(eventSeat(layout, last.d1), null);
 });
 
@@ -29,17 +33,32 @@ test("every drawn event of the default road seats inside its own strip's box, th
     const strip = stripFor(layout, e.dist);
     const p = eventSeat(layout, e.dist);
     assert.ok(strip !== null && p !== null, `${e.kind} at ${e.dist.toFixed(1)} is drawn on the default road`);
-    assert.ok(p.sx >= strip.x0 - 1e-6 && p.sx <= strip.x0 + strip.w + 1e-6, `${e.kind} at ${e.dist.toFixed(1)} sits inside strip ${strip.index}'s width`);
-    assert.ok(p.sy >= strip.y0 - 1e-6 && p.sy <= strip.y0 + strip.h + 1e-6, `${e.kind} at ${e.dist.toFixed(1)} sits inside strip ${strip.index}'s height`);
+    assert.ok(
+      p.sx >= strip.x0 - 1e-6 && p.sx <= strip.x0 + strip.w + 1e-6,
+      `${e.kind} at ${e.dist.toFixed(1)} sits inside strip ${strip.index}'s width`,
+    );
+    assert.ok(
+      p.sy >= strip.y0 - 1e-6 && p.sy <= strip.y0 + strip.h + 1e-6,
+      `${e.kind} at ${e.dist.toFixed(1)} sits inside strip ${strip.index}'s height`,
+    );
   }
   const first = events[0]!;
   const final = events[events.length - 1]!;
   assert.equal(first.dist, 0, "premise: the road begins at the departure");
-  assert.ok(final.kind === "waypoint" && final.endpoint && final.index === input.toIdx, "premise: the last event is the arrival");
-  assert.ok(input.totalCells - final.dist < 2, "premise: the arrival is seated within a cell or so of the road's end (the waypoint takes the first chain cell beside the town)");
+  assert.ok(
+    final.kind === "waypoint" && final.endpoint && final.index === input.toIdx,
+    "premise: the last event is the arrival",
+  );
+  assert.ok(
+    input.totalCells - final.dist < 2,
+    "premise: the arrival is seated within a cell or so of the road's end (the waypoint takes the first chain cell beside the town)",
+  );
   const dep = eventSeat(layout, first.dist)!;
   const arr = eventSeat(layout, final.dist)!;
-  assert.ok(dep.sy > layout.strips[0]!.y0 + layout.strips[0]!.h / 2, "the departure is low on the first strip (the road reads up the scroll)");
+  assert.ok(
+    dep.sy > layout.strips[0]!.y0 + layout.strips[0]!.h / 2,
+    "the departure is low on the first strip (the road reads up the scroll)",
+  );
   assert.ok(arr.sx > dep.sx, "the arrival stands on a later strip, to the right");
   assert.ok(arr.sy < last.y0 + last.h / 2, "and high on it");
 });

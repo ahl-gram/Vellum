@@ -36,10 +36,7 @@ test("current streamlines stay over open water (no land overlap)", () => {
 
 test("tracing is deterministic", () => {
   const [gx, gy] = seeds[0]!;
-  assert.deepEqual(
-    traceStreamline(world, gx, gy, noiseSeed),
-    traceStreamline(world, gx, gy, noiseSeed),
-  );
+  assert.deepEqual(traceStreamline(world, gx, gy, noiseSeed), traceStreamline(world, gx, gy, noiseSeed));
 });
 
 test("the nautical render (currents included) is byte-identical per seed", () => {

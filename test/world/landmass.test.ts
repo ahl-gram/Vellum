@@ -16,19 +16,11 @@ function fieldFromRows(rows: string[]): Field {
   return fieldFrom(w, h, data);
 }
 
-const idAt = (labels: { ids: Int32Array }, w: number, x: number, y: number) =>
-  labels.ids[x + y * w] as number;
+const idAt = (labels: { ids: Int32Array }, w: number, x: number, y: number) => labels.ids[x + y * w] as number;
 
 test("labels three separate islands with correct first-seen ids and sizes", () => {
   // Three fully isolated islands: (0,0) size 3, cols 3-4 size 4, (2,5) size 1.
-  const rows = [
-    "##....",
-    "#.....",
-    "...##.",
-    "...##.",
-    "......",
-    "..#...",
-  ];
+  const rows = ["##....", "#.....", "...##.", "...##.", "......", "..#..."];
   const w = rows[0]!.length;
   const out = labelLandmasses(fieldFromRows(rows), 0);
 
@@ -43,16 +35,18 @@ test("labels three separate islands with correct first-seen ids and sizes", () =
   assert.equal(idAt(out, w, 0, 1), 0);
   assert.equal(idAt(out, w, 4, 3), 1);
 
-  const land = rows.join("").split("").filter((c) => c === "#").length;
-  assert.equal([...out.sizes].reduce((a, b) => a + b, 0), land);
+  const land = rows
+    .join("")
+    .split("")
+    .filter((c) => c === "#").length;
+  assert.equal(
+    [...out.sizes].reduce((a, b) => a + b, 0),
+    land,
+  );
 });
 
 test("ocean cells are -1, not landmass 0 (Int16Array zero-fill trap)", () => {
-  const rows = [
-    "#..",
-    "...",
-    "...",
-  ];
+  const rows = ["#..", "...", "..."];
   const w = rows[0]!.length;
   const out = labelLandmasses(fieldFromRows(rows), 0);
   assert.equal(idAt(out, w, 0, 0), 0, "the lone island is landmass 0");
@@ -62,12 +56,7 @@ test("ocean cells are -1, not landmass 0 (Int16Array zero-fill trap)", () => {
 
 test("4-connectivity: corner-touching cells are separate landmasses", () => {
   // Land at (1,1) and (2,2) share no land 4-neighbour, so 4-connectivity yields two ids (8-connectivity would give 1).
-  const rows = [
-    "....",
-    ".#..",
-    "..#.",
-    "....",
-  ];
+  const rows = ["....", ".#..", "..#.", "...."];
   const w = rows[0]!.length;
   const out = labelLandmasses(fieldFromRows(rows), 0);
   assert.equal(out.sizes.length, 2, "diagonal gap is not bridged");

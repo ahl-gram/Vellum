@@ -54,12 +54,7 @@ function rainAt(path: Float64Array, supplyIn: number, seaLevel: number, elevSpan
   }
 }
 
-export function computeWindMoisture(
-  elev: Field,
-  seaLevel: number,
-  windDir: number,
-  offGridSea = true,
-): Float64Array {
+export function computeWindMoisture(elev: Field, seaLevel: number, windDir: number, offGridSea = true): Float64Array {
   const { w, h, data } = elev;
 
   let maxElev = -Infinity;

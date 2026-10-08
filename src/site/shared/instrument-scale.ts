@@ -27,7 +27,7 @@ export function scaleTicks({ days, years }: ScaleInput): ScaleTick[] {
   ticks.push({ kind: "seam", u: SEAM });
   if (years !== null) {
     const span = Math.max(1, years.max - years.min);
-    const at = (y: number) => SEAM + (1 - SEAM) * (y - years.min) / span;
+    const at = (y: number) => SEAM + ((1 - SEAM) * (y - years.min)) / span;
     for (let y = Math.ceil((years.min + 1) / CENTURY) * CENTURY; y < years.max; y += CENTURY) {
       const u = at(y);
       const crowded = u - SEAM < LABEL_GAP_U || 1 - u < LABEL_GAP_U;
@@ -38,7 +38,8 @@ export function scaleTicks({ days, years }: ScaleInput): ScaleTick[] {
   return ticks;
 }
 
-const STAR = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 1l1.8 7.2L19 10l-7.2 1.8L10 19l-1.8-7.2L1 10l7.2-1.8z"/><path d="M10 5.5l.9 3.6 3.6.9-3.6.9-.9 3.6-.9-3.6L5.5 10l3.6-.9z" fill="currentColor" stroke="none"/></svg>';
+const STAR =
+  '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 1l1.8 7.2L19 10l-7.2 1.8L10 19l-1.8-7.2L1 10l7.2-1.8z"/><path d="M10 5.5l.9 3.6 3.6.9-3.6.9-.9 3.6-.9-3.6L5.5 10l3.6-.9z" fill="currentColor" stroke="none"/></svg>';
 
 /** Lay the ticks along the scale element by style.left; labels land via textContent, the star is the one fixed markup; the first day and the last year hug their ends, the last day stands on the seam and its label keeps left of the star. */
 export function renderScale(el: HTMLElement, ticks: readonly ScaleTick[]): void {

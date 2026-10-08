@@ -38,12 +38,18 @@ function paeth(a: number, b: number, c: number): number {
 
 function predictor(filter: number, a: number, b: number, c: number): number {
   switch (filter) {
-    case 0: return 0;
-    case 1: return a;
-    case 2: return b;
-    case 3: return (a + b) >> 1;
-    case 4: return paeth(a, b, c);
-    default: throw new Error(`unknown PNG filter type ${filter}`);
+    case 0:
+      return 0;
+    case 1:
+      return a;
+    case 2:
+      return b;
+    case 3:
+      return (a + b) >> 1;
+    case 4:
+      return paeth(a, b, c);
+    default:
+      throw new Error(`unknown PNG filter type ${filter}`);
   }
 }
 
@@ -81,7 +87,8 @@ export function decodePng(bytes: Buffer): DecodedPng {
   const idat = Buffer.concat(list.filter((c) => c.type === "IDAT").map((c) => c.data));
   const pixels = unfilter(inflateSync(idat), width, height, bpp);
   const pixel = (x: number, y: number): Rgb => {
-    if (x < 0 || y < 0 || x >= width || y >= height) throw new RangeError(`pixel (${x}, ${y}) is outside ${width}x${height}`);
+    if (x < 0 || y < 0 || x >= width || y >= height)
+      throw new RangeError(`pixel (${x}, ${y}) is outside ${width}x${height}`);
     const i = (y * width + x) * bpp;
     return [pixels[i] ?? 0, pixels[i + 1] ?? 0, pixels[i + 2] ?? 0];
   };

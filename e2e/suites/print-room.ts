@@ -13,7 +13,8 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const { send, shoot, consoleErrors, http4xx, PORT } = ctx;
   const k = printRoomKit(ctx);
   const orderHref = await prlLink(ctx);
-  const hashPart = orderHref && orderHref.includes("#") ? orderHref.slice(orderHref.indexOf("#")) : "#seed=42&style=antique&legend=1";
+  const hashPart =
+    orderHref && orderHref.includes("#") ? orderHref.slice(orderHref.indexOf("#")) : "#seed=42&style=antique&legend=1";
   const PR_PAGE = `http://127.0.0.1:${PORT}/print-room/${hashPart}`;
   await send("Page.navigate", { url: PR_PAGE });
   // The health bases are captured AFTER the navigate so the pages loaded before this one are not charged to PR6/PR7: this load's own worker, engine and asset requests still fire after navigate() resolves, so they stay inside the window.
@@ -26,8 +27,13 @@ export async function run(ctx: SuiteContext): Promise<void> {
   // about:blank first, here and at every re-entry below: a navigate that differs only in the hash is same-document and never re-bootstraps the page.
   await prbBare(ctx);
   // Downloads are denied for the rest of the run so every a.click() below runs the full blob path with no headless disk write; a denied blob download is not HTTP, so it adds no 4xx and no console error and PR6/PR7 stay clean.
-  try { await send("Browser.setDownloadBehavior", { behavior: "deny" }); }
-  catch { try { await send("Page.setDownloadBehavior", { behavior: "deny" }); } catch {} }
+  try {
+    await send("Browser.setDownloadBehavior", { behavior: "deny" });
+  } catch {
+    try {
+      await send("Page.setDownloadBehavior", { behavior: "deny" });
+    } catch {}
+  }
   await pr10PlatesEnable(ctx);
   await pr12GrandPoster(ctx);
   await pr16Desk(ctx);

@@ -57,7 +57,12 @@ type ClimateFrame = {
   readonly map: WindowMap;
 };
 
-function temperatureField(elev: Field, frame: ClimateFrame, band: { base: number; latSpan: number }, elevSpan: number): Field {
+function temperatureField(
+  elev: Field,
+  frame: ClimateFrame,
+  band: { base: number; latSpan: number },
+  elevSpan: number,
+): Field {
   const { w, h, data } = elev;
   const { seaLevel, seed, aspect, map } = frame;
   const { toU, toV } = map;
@@ -74,7 +79,12 @@ function temperatureField(elev: Field, frame: ClimateFrame, band: { base: number
   });
 }
 
-function moistureField(elev: Field, frame: ClimateFrame, windRain: Float64Array, riverDist: Float64Array | null): Field {
+function moistureField(
+  elev: Field,
+  frame: ClimateFrame,
+  windRain: Float64Array,
+  riverDist: Float64Array | null,
+): Field {
   const { w, h } = elev;
   const { seed, aspect, map } = frame;
   const { toU, toV } = map;
@@ -89,19 +99,12 @@ function moistureField(elev: Field, frame: ClimateFrame, windRain: Float64Array,
         0.22;
     const i = x + y * w;
     const windBonus = 0.5 * (windRain[i] as number) - 0.06;
-    const riverBonus = riverDist
-      ? 0.3 * (1 - smoothstep(0, 6, riverDist[i] as number))
-      : 0;
+    const riverBonus = riverDist ? 0.3 * (1 - smoothstep(0, 6, riverDist[i] as number)) : 0;
     return clamp(base + windBonus + riverBonus, 0, 1);
   });
 }
 
-export function computeClimate(
-  elev: Field,
-  seaLevel: number,
-  seed: number,
-  opts: ClimateOptions,
-): Climate {
+export function computeClimate(elev: Field, seaLevel: number, seed: number, opts: ClimateOptions): Climate {
   const { w, h } = elev;
   const band = BANDS[opts.band ?? "temperate"];
   const aspect = opts.worldAspect ?? (w - 1) / (h - 1);
@@ -113,9 +116,7 @@ export function computeClimate(
   const windRain = computeWindMoisture(elev, seaLevel, opts.windDir, !opts.window);
 
   const riverCells = opts.riverCells;
-  const riverDist = riverCells
-    ? bfsDistance(w, h, (x, y) => riverCells[x + y * w] === 1)
-    : null;
+  const riverDist = riverCells ? bfsDistance(w, h, (x, y) => riverCells[x + y * w] === 1) : null;
 
   const moisture = moistureField(elev, frame, windRain, riverDist);
 

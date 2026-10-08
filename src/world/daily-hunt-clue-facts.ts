@@ -101,17 +101,15 @@ function settlementCandidates(s: NamedSettlement): ClueCandidate[] {
 function realmCandidate(world: World, x: number, y: number): ClueCandidate[] {
   const realm = realmNameAt(world, x, y);
   if (!realm) return [];
-  return [{
-    clue: { kind: "realm", subject: realm, text: `It answers to ${realm}.` },
-    holds: (e) => realmNameAt(world, e.s.x, e.s.y) === realm,
-  }];
+  return [
+    {
+      clue: { kind: "realm", subject: realm, text: `It answers to ${realm}.` },
+      holds: (e) => realmNameAt(world, e.s.x, e.s.y) === realm,
+    },
+  ];
 }
 
-export function buildClueFacts(
-  world: World,
-  quarry: Quarry,
-  findable: ClueFindability = {},
-): ClueFacts {
+export function buildClueFacts(world: World, quarry: Quarry, findable: ClueFindability = {}): ClueFacts {
   const s = quarry.settlement;
   const { x, y } = s;
   const pool = quarryPool(world);
@@ -140,13 +138,7 @@ function offCenter(extent: number, v: number): number {
   return Math.abs(v - (extent - 1) / 2) / (extent - 1);
 }
 
-function leadCandidate(
-  world: World,
-  x: number,
-  y: number,
-  ew: ClueCandidate,
-  ns: ClueCandidate,
-): ClueCandidate | null {
+function leadCandidate(world: World, x: number, y: number, ew: ClueCandidate, ns: ClueCandidate): ClueCandidate | null {
   const dx = offCenter(world.elev.w, x);
   const dy = offCenter(world.elev.h, y);
   return dx === dy ? null : dx > dy ? ew : ns;
@@ -206,12 +198,7 @@ const TERRAIN_TEXT: Record<TerrainBand, string> = {
   dunes: "Desert sands lie hard by its bounds.",
 };
 
-function terrainCounts(
-  world: World,
-  span: number,
-  x: number,
-  y: number,
-): Record<TerrainBand, number> {
+function terrainCounts(world: World, span: number, x: number, y: number): Record<TerrainBand, number> {
   const { w, h, data } = world.elev;
   const sea = world.seaLevel;
   const counts: Record<TerrainBand, number> = {
@@ -242,11 +229,7 @@ function terrainCounts(
   return counts;
 }
 
-function terrainCandidates(
-  world: World,
-  x: number,
-  y: number,
-): Array<ClueCandidate & { readonly band: TerrainBand }> {
+function terrainCandidates(world: World, x: number, y: number): Array<ClueCandidate & { readonly band: TerrainBand }> {
   let max = -Infinity;
   for (const e of world.elev.data) max = Math.max(max, e);
   const span = Math.max(1e-9, max - world.seaLevel);
@@ -331,8 +314,7 @@ function nearCandidate(world: World, quarry: Quarry): ClueCandidate | null {
       leagues,
       text: `It lies within ${leagues} leagues of ${anchor.name}.`,
     },
-    holds: (e) =>
-      Math.hypot(anchor.x - e.s.x, anchor.y - e.s.y) <= leagues * CELLS_PER_LEAGUE,
+    holds: (e) => Math.hypot(anchor.x - e.s.x, anchor.y - e.s.y) <= leagues * CELLS_PER_LEAGUE,
   };
 }
 
@@ -344,11 +326,7 @@ function riverDist(world: World, riverIdx: number, x: number, y: number): number
   return d;
 }
 
-function nearestNamedRiver(
-  world: World,
-  x: number,
-  y: number,
-): { i: number; name: string; dist: number } | null {
+function nearestNamedRiver(world: World, x: number, y: number): { i: number; name: string; dist: number } | null {
   let best: { i: number; name: string; dist: number } | null = null;
   for (const [i, name] of world.names.rivers) {
     const d = riverDist(world, i, x, y);

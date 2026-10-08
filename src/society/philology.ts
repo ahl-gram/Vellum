@@ -39,12 +39,15 @@ type Inventory = {
 
 const byId = new Map(CULTURES.map((c) => [c.id, c]));
 const INVENTORIES: ReadonlyMap<string, Inventory> = new Map(
-  CULTURES.map((c) => [c.id, {
-    onsets: [...new Set(c.onsets)],
-    nuclei: [...new Set(c.nuclei)],
-    codas: [...new Set(c.codas)],
-    suffixes: [...new Set(c.townSuffixes)].filter((s) => s !== ""),
-  }]),
+  CULTURES.map((c) => [
+    c.id,
+    {
+      onsets: [...new Set(c.onsets)],
+      nuclei: [...new Set(c.nuclei)],
+      codas: [...new Set(c.codas)],
+      suffixes: [...new Set(c.townSuffixes)].filter((s) => s !== ""),
+    },
+  ]),
 );
 
 export function cultureById(id: string): Culture | undefined {

@@ -54,7 +54,10 @@ test("#442 a realm seat swaps the plate even though its kind is not capital", ()
   assert.equal(rows[3]?.index, 7, "and it is the seat's own plate");
   // The polarity: with the seat unarmed the same route holds the capital the whole way, so this assertion cannot pass by accident.
   const capitalOnly = surveyPlateRows(PORTS, (i) => i === 0, PRESENT);
-  assert.deepEqual(capitalOnly.map((r) => r?.index ?? null), [0, 0, 0, 0, 0, 0, 0]);
+  assert.deepEqual(
+    capitalOnly.map((r) => r?.index ?? null),
+    [0, 0, 0, 0, 0, 0, 0],
+  );
 });
 
 test("#442 a town, village or hamlet arrival does NOT swap the plate", () => {

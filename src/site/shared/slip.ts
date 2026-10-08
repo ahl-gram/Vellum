@@ -1,5 +1,10 @@
 export interface Classed {
-  readonly classList: { add(c: string): void; remove(c: string): void; toggle(c: string): boolean; contains(c: string): boolean };
+  readonly classList: {
+    add(c: string): void;
+    remove(c: string): void;
+    toggle(c: string): boolean;
+    contains(c: string): boolean;
+  };
 }
 
 export interface Listens {

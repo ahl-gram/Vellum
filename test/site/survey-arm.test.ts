@@ -1,7 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
-  createSurveyArm, afterNextPaint, armOnLanding, wireSurveyToggle, deferLandingArm,
+  createSurveyArm,
+  afterNextPaint,
+  armOnLanding,
+  wireSurveyToggle,
+  deferLandingArm,
 } from "../../src/site/explorer/survey-arm.ts";
 
 // The survey tick's session build (measured 895-1207ms) ran inside the change handler, blocking the tick's paint (Issue #300); the fix yields a frame first and this scheduler owns the window that opens. DOM-free: the yield is an injected afterPaint, the live browser yield is proven by e2e suite-survey SV2/SV2c/SV2d.
@@ -10,8 +14,12 @@ import {
 function paintQueue() {
   const queued: Array<() => void> = [];
   return {
-    afterPaint: (run: () => void): void => { queued.push(run); },
-    paint: (): void => { for (const run of queued.splice(0)) run(); },
+    afterPaint: (run: () => void): void => {
+      queued.push(run);
+    },
+    paint: (): void => {
+      for (const run of queued.splice(0)) run();
+    },
   };
 }
 
@@ -23,14 +31,22 @@ function harness() {
     afterPaint: q.afterPaint,
     isArmed: () => state.armed,
     worldGen: () => state.worldGen,
-    arm: () => { state.builds++; },
+    arm: () => {
+      state.builds++;
+    },
   });
-  const land = (opts: { defer?: boolean } = {}) => armOnLanding({
-    arm, armed: state.armed,
-    rearm: () => { state.landings++; },
-    clear: () => { state.clears++; },
-    ...opts,
-  });
+  const land = (opts: { defer?: boolean } = {}) =>
+    armOnLanding({
+      arm,
+      armed: state.armed,
+      rearm: () => {
+        state.landings++;
+      },
+      clear: () => {
+        state.clears++;
+      },
+      ...opts,
+    });
   return { ...q, state, arm, land };
 }
 
@@ -168,9 +184,17 @@ function fakeBox() {
   let handler: (() => void) | null = null;
   const box = {
     checked: false,
-    addEventListener: (type: string, fn: () => void): void => { if (type === "change") handler = fn; },
+    addEventListener: (type: string, fn: () => void): void => {
+      if (type === "change") handler = fn;
+    },
   };
-  return { box, change: (to: boolean): void => { box.checked = to; if (handler) handler(); } };
+  return {
+    box,
+    change: (to: boolean): void => {
+      box.checked = to;
+      if (handler) handler();
+    },
+  };
 }
 
 function toggleHarness() {
@@ -182,10 +206,22 @@ function toggleHarness() {
   const slot = wireSurveyToggle({
     box: f.box as unknown as HTMLInputElement,
     worldGen: () => 0,
-    home: () => { calls.home++; order.push("home"); },
-    arm: () => { calls.arm++; order.push("arm"); },
-    exit: () => { calls.exit++; order.push("exit"); },
-    syncHash: () => { calls.syncHash++; order.push("syncHash"); },
+    home: () => {
+      calls.home++;
+      order.push("home");
+    },
+    arm: () => {
+      calls.arm++;
+      order.push("arm");
+    },
+    exit: () => {
+      calls.exit++;
+      order.push("exit");
+    },
+    syncHash: () => {
+      calls.syncHash++;
+      order.push("syncHash");
+    },
     afterPaint: q.afterPaint,
   });
   return { ...q, calls, order, slot, change: f.change };
@@ -223,7 +259,14 @@ test("#366 the slot it hands back is the one the landings arm through", () => {
   const h = toggleHarness();
   let landed = 0;
   h.change(true); // a tick still waiting on its frame
-  armOnLanding({ arm: h.slot, armed: true, rearm: () => { landed++; }, clear: () => {} });
+  armOnLanding({
+    arm: h.slot,
+    armed: true,
+    rearm: () => {
+      landed++;
+    },
+    clear: () => {},
+  });
   h.paint();
   // A fresh scheduler here would let both arms fire; app.ts leans on this when it passes the slot to both landing paths.
   assert.equal(h.calls.arm, 0, "the tick's arm is superseded by the landing");
@@ -260,11 +303,19 @@ test("#300 afterNextPaint hops a frame AND a task: a bare rAF would block the pa
   const realTimeout = globalThis.setTimeout;
   let frame: (() => void) | null = null;
   let task: (() => void) | null = null;
-  (globalThis as Record<string, unknown>).requestAnimationFrame = (fn: () => void) => { frame = fn; return 1; };
-  (globalThis as Record<string, unknown>).setTimeout = (fn: () => void) => { task = fn; return 0; };
+  (globalThis as Record<string, unknown>).requestAnimationFrame = (fn: () => void) => {
+    frame = fn;
+    return 1;
+  };
+  (globalThis as Record<string, unknown>).setTimeout = (fn: () => void) => {
+    task = fn;
+    return 0;
+  };
   try {
     let ran = 0;
-    afterNextPaint(() => { ran++; });
+    afterNextPaint(() => {
+      ran++;
+    });
     assert.equal(ran, 0, "nothing runs in the caller's own turn");
     assert.ok(frame, "a frame is requested");
     (frame as unknown as () => void)();

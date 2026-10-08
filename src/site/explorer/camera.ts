@@ -12,18 +12,10 @@ export interface Camera {
   k: number;
 }
 
-export function cameraFromTransform(
-  t: CameraTransform,
-  W: number,
-  H: number,
-): Camera {
+export function cameraFromTransform(t: CameraTransform, W: number, H: number): Camera {
   return { cx: (W / 2 - t.x) / (t.k * W), cy: (H / 2 - t.y) / (t.k * H), k: t.k };
 }
 
-export function transformFromCamera(
-  c: Camera,
-  W: number,
-  H: number,
-): CameraTransform {
+export function transformFromCamera(c: Camera, W: number, H: number): CameraTransform {
   return { x: W / 2 - c.cx * c.k * W, y: H / 2 - c.cy * c.k * H, k: c.k };
 }

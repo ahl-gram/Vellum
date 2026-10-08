@@ -5,12 +5,7 @@ export type Centroid = { readonly x: number; readonly y: number };
 
 export const BASE_TINTS = 5;
 
-export function realmCentroids(
-  labels: Int16Array,
-  w: number,
-  h: number,
-  count: number,
-): Centroid[] {
+export function realmCentroids(labels: Int16Array, w: number, h: number, count: number): Centroid[] {
   const sx = new Float64Array(count);
   const sy = new Float64Array(count);
   const cnt = new Float64Array(count);
@@ -32,12 +27,7 @@ export function realmCentroids(
   return out;
 }
 
-export function realmAdjacency(
-  labels: Int16Array,
-  w: number,
-  h: number,
-  count: number,
-): Set<number>[] {
+export function realmAdjacency(labels: Int16Array, w: number, h: number, count: number): Set<number>[] {
   const adj: Set<number>[] = Array.from({ length: count }, () => new Set<number>());
   for (let y = 0; y < h; y++) {
     for (let x = 0; x < w; x++) {
@@ -62,8 +52,7 @@ export function realmAdjacency(
   return adj;
 }
 
-const dist2 = (a: Centroid, b: Centroid): number =>
-  (a.x - b.x) ** 2 + (a.y - b.y) ** 2;
+const dist2 = (a: Centroid, b: Centroid): number => (a.x - b.x) ** 2 + (a.y - b.y) ** 2;
 
 type Conflict = readonly (readonly boolean[])[];
 
@@ -139,9 +128,7 @@ export function assignRealmTints(
   const near = confusionDist * confusionDist;
   const neigh = tintNeighbours(centroids, adjacency, near);
 
-  const order = Array.from({ length: n }, (_, i) => i).sort(
-    (a, b) => neigh[b]!.size - neigh[a]!.size || a - b,
-  );
+  const order = Array.from({ length: n }, (_, i) => i).sort((a, b) => neigh[b]!.size - neigh[a]!.size || a - b);
 
   const color = new Array<number>(n).fill(-1);
   for (const r of order) color[r] = pickTint(r, neigh[r]!, color, conflict, centroids);
@@ -149,13 +136,7 @@ export function assignRealmTints(
   return color;
 }
 
-export function realmTintIndices(
-  labels: Int16Array,
-  w: number,
-  h: number,
-  count: number,
-  style: MapStyle,
-): number[] {
+export function realmTintIndices(labels: Int16Array, w: number, h: number, count: number, style: MapStyle): number[] {
   if (count <= BASE_TINTS) return Array.from({ length: count }, (_, i) => i);
   const opacity = style.name === "topographic" ? 0.16 : 0.11;
   const conflict = washConflictMatrix(style.realmTints, style.paper, opacity);

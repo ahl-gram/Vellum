@@ -1,24 +1,10 @@
 import { createRng } from "../core/rng.ts";
-import {
-  buildClueFacts,
-  type ClueCandidate,
-  type ClueFindability,
-} from "./daily-hunt-clue-facts.ts";
+import { buildClueFacts, type ClueCandidate, type ClueFindability } from "./daily-hunt-clue-facts.ts";
 import type { Quarry } from "./daily-hunt.ts";
 import type { World } from "./types.ts";
 
 export type ClueKind =
-  | "framing"
-  | "ew"
-  | "ns"
-  | "river"
-  | "lake"
-  | "coast"
-  | "onriver"
-  | "realm"
-  | "terrain"
-  | "road"
-  | "near";
+  "framing" | "ew" | "ns" | "river" | "lake" | "coast" | "onriver" | "realm" | "terrain" | "road" | "near";
 
 /** subject carries the geometric fact (and leagues the quoted bound) so truth can be verified without parsing prose. */
 export type Clue = {
@@ -42,11 +28,7 @@ const FRAMING: Clue = {
     "unnamed in these notes. Read the lines, then find it.",
 };
 
-export function buildClues(
-  world: World,
-  quarry: Quarry,
-  findable: ClueFindability = {},
-): Clue[] {
+export function buildClues(world: World, quarry: Quarry, findable: ClueFindability = {}): Clue[] {
   const facts = buildClueFacts(world, quarry, findable);
   const rng = createRng(world.recipe.seed).fork("daily-hunt-clues");
 
@@ -74,4 +56,3 @@ export function buildClues(
 
   return [FRAMING, ...chosen.map((c) => c.clue)];
 }
-

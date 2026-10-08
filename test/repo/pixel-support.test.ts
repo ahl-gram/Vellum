@@ -17,7 +17,11 @@ test("sampleRow takes a VIEWPORT point and asks the browser for the PAGE point: 
   const shot = calls.find(([m]) => m === "Page.captureScreenshot");
   assert.ok(shot, "a screenshot was taken");
   const clip = (shot[1] as { clip: { x: number; y: number; width: number; height: number } }).clip;
-  assert.deepEqual({ x: clip.x, y: clip.y }, { x: 43, y: 1260 }, "the clip is the viewport point plus the page's scroll");
+  assert.deepEqual(
+    { x: clip.x, y: clip.y },
+    { x: 43, y: 1260 },
+    "the clip is the viewport point plus the page's scroll",
+  );
   assert.deepEqual({ w: clip.width, h: clip.height }, { w: 1, h: 1 });
 });
 
@@ -33,14 +37,25 @@ test("sampleRow on an unscrolled page asks for the same point it was given (the 
 });
 
 test("sampleRow never falls back to the viewport clip: a scroll read that throws in the page, or comes back in another shape, is an error, not a silent [0, 0] (skeptic on PR #510)", async () => {
-  for (const answer of [{ result: { type: "undefined" }, exceptionDetails: { text: "boom" } }, {}, { result: { value: [3] } }, { result: { value: "3,1200" } }]) {
+  for (const answer of [
+    { result: { type: "undefined" }, exceptionDetails: { text: "boom" } },
+    {},
+    { result: { value: [3] } },
+    { result: { value: "3,1200" } },
+  ]) {
     let shot = false;
     const send = (method: string) => {
       if (method === "Runtime.evaluate") return Promise.resolve(answer);
       shot = true;
       return Promise.resolve({ data: PNG_1x1 });
     };
-    await assert.rejects(async () => { await sampleRow(send, 40, 60, 1); }, /could not read the page's scroll/, JSON.stringify(answer));
+    await assert.rejects(
+      async () => {
+        await sampleRow(send, 40, 60, 1);
+      },
+      /could not read the page's scroll/,
+      JSON.stringify(answer),
+    );
     assert.equal(shot, false, "no screenshot is taken on a failed scroll read");
   }
 });

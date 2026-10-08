@@ -74,7 +74,10 @@ test("shuffled returns a permutation without mutating input", () => {
   const result = rng.shuffled(original);
   assert.deepEqual(original, frozen, "input array was mutated");
   assert.notEqual(result, original, "must return a new array");
-  assert.deepEqual([...result].sort((a, b) => a - b), frozen);
+  assert.deepEqual(
+    [...result].sort((a, b) => a - b),
+    frozen,
+  );
 });
 
 test("shuffled is deterministic per seed", () => {

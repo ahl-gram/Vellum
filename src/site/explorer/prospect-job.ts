@@ -46,7 +46,9 @@ export interface ProspectPlateResult {
 }
 
 const settlementNote = (world: World, index: number): string =>
-  createLoreWriter(world, createRng(world.recipe.seed).fork("seed-of-the-day")).settlementNote(world.settlements[index]!);
+  createLoreWriter(world, createRng(world.recipe.seed).fork("seed-of-the-day")).settlementNote(
+    world.settlements[index]!,
+  );
 
 export function prospectResultFor(world: World, spec: ProspectSpec): ProspectPlateResult {
   const index = resolveProspectIndex(world, spec.index);

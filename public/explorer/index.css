@@ -1,47 +1,102 @@
 /* The Explorer: a chart room. The furniture is atelier.css's; this sheet keeps the stage's own layout, the Glass's clip, the region inset, the turn and the verso. */
 /* The Broadside's five-column ledger needs the wider slip, a deviation from the kit's 22rem. */
-:root { --slip-w: 24rem; }
+:root {
+  --slip-w: 24rem;
+}
 
-body.chart-room .stage { display: flex; align-items: center; justify-content: center; box-sizing: border-box;
-  padding: var(--reserve-top, 8rem) var(--reserve-right, 0px) var(--reserve-bottom, 8rem) 0; }
-#sheet { position: relative; flex: none; width: 0; height: 0; box-shadow: var(--stage-shadow); }
-.sheet-inner { position: relative; width: 100%; height: 100%; }
+body.chart-room .stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: var(--reserve-top, 8rem) var(--reserve-right, 0px) var(--reserve-bottom, 8rem) 0;
+}
+#sheet {
+  position: relative;
+  flex: none;
+  width: 0;
+  height: 0;
+  box-shadow: var(--stage-shadow);
+}
+.sheet-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
 /* The Glass's gesture box is the sheet, so d3's extent, the camera's cx and cy and the region survey's window all read sheet fractions; transform-origin 0 0 matches d3-zoom's screen-space math, and the stage clips the magnified sheet. */
-#map-viewport { position: absolute; inset: 0; cursor: grab; }
-#map-viewport:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: -3px; }
+#map-viewport {
+  position: absolute;
+  inset: 0;
+  cursor: grab;
+}
+#map-viewport:focus-visible {
+  outline: 2px solid var(--parchment-bright);
+  outline-offset: -3px;
+}
 /* d3-zoom does not set touch-action; without none the browser's native pan and pinch preempt the gesture. */
-#map-viewport.zoomable { touch-action: none; }
-#map { position: absolute; inset: 0; transform-origin: 0 0; }
+#map-viewport.zoomable {
+  touch-action: none;
+}
+#map {
+  position: absolute;
+  inset: 0;
+  transform-origin: 0 0;
+}
 /* [data-vellum-style] scopes this to renderer-stamped charts; unqualified it also sized the survey-track svg. */
-#map svg[data-vellum-style] { width: 100%; height: 100%; display: block; }
+#map svg[data-vellum-style] {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
 
 .region-inset {
-  position: absolute; pointer-events: none;
-  opacity: 0; transition: opacity var(--fade, 200ms) ease;
+  position: absolute;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--fade, 200ms) ease;
 }
-.region-inset.in { opacity: 1; }
+.region-inset.in {
+  opacity: 1;
+}
 /* width and height 100%, not auto, pin the inset svg to its computed box so no rounding gap opens at the window edge. */
 #map .region-inset svg {
-  width: 100%; height: 100%;
-  border: 0; box-shadow: 0 2px 9px rgb(from var(--chart-ink) r g b / 0.35);
+  width: 100%;
+  height: 100%;
+  border: 0;
+  box-shadow: 0 2px 9px rgb(from var(--chart-ink) r g b / 0.35);
 }
-@media (prefers-reduced-motion: reduce) { .region-inset { transition-duration: 0ms; } }
+@media (prefers-reduced-motion: reduce) {
+  .region-inset {
+    transition-duration: 0ms;
+  }
+}
 
 .survey-pencil {
-  position: absolute; pointer-events: none;
+  position: absolute;
+  pointer-events: none;
   border: 2px dashed rgb(from var(--ink-dark) r g b / 0.55);
   background: rgb(from var(--ink-dark) r g b / 0.04);
   animation: survey-pencil-breathe 1.2s ease-in-out infinite;
 }
 @keyframes survey-pencil-breathe {
-  0%, 100% { opacity: 0.9; }
-  50% { opacity: 0.45; }
+  0%,
+  100% {
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 0.45;
+  }
 }
-@media (prefers-reduced-motion: reduce) { .survey-pencil { animation: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .survey-pencil {
+    animation: none;
+  }
+}
 
 #map .region-inset svg.redrafting #layer-land path {
-  animation: inkDraw var(--redraft-draw, 600ms) var(--ease-paper) both,
-             washDry var(--redraft-dry, 450ms) var(--ease-paper) 200ms both;
+  animation:
+    inkDraw var(--redraft-draw, 600ms) var(--ease-paper) both,
+    washDry var(--redraft-dry, 450ms) var(--ease-paper) 200ms both;
 }
 #map .region-inset svg.redrafting #layer-waterlines {
   animation: dryingInk var(--redraft-dry, 450ms) var(--ease-paper) 150ms both;
@@ -58,73 +113,170 @@ body.chart-room .stage { display: flex; align-items: center; justify-content: ce
 }
 
 /* The 3D context is inert at rest (byte parity between turns); the turn is WAAPI, so its reduced-motion twin is `shouldTurn` in `src/site/explorer/sheet-turn.ts`, not motion.css. */
-.sheet.turning { perspective: 2200px; }
-.sheet-inner.turning { transform-style: preserve-3d; }
-/* backface-visibility must sit on #map-viewport, the direct preserve-3d child: #map renders flattened into it, so it is the viewport's facing that flips out of view. */
-.sheet-inner.turning #map-viewport { backface-visibility: hidden; }
-.sheet-back {
-  position: absolute; inset: 0;
-  backface-visibility: hidden; transform: rotateY(180deg);
+.sheet.turning {
+  perspective: 2200px;
 }
-.sheet-back img { width: 100%; height: 100%; display: block; }
+.sheet-inner.turning {
+  transform-style: preserve-3d;
+}
+/* backface-visibility must sit on #map-viewport, the direct preserve-3d child: #map renders flattened into it, so it is the viewport's facing that flips out of view. */
+.sheet-inner.turning #map-viewport {
+  backface-visibility: hidden;
+}
+.sheet-back {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  transform: rotateY(180deg);
+}
+.sheet-back img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
 
 /* Scoped off while .turning, so the WAAPI turn and this transition never drive the transform at once. */
 .sheet:not(.turning) .sheet-inner {
   transition: transform var(--verso-turn, 1200ms) var(--ease-turn, ease-in-out);
 }
-.sheet.flip3d { perspective: 2200px; }
-.sheet.flip3d .sheet-inner { transform-style: preserve-3d; }
-.sheet.flip3d #map-viewport { backface-visibility: hidden; }
-.sheet.versoed .sheet-inner { transform: rotateY(-180deg); }
+.sheet.flip3d {
+  perspective: 2200px;
+}
+.sheet.flip3d .sheet-inner {
+  transform-style: preserve-3d;
+}
+.sheet.flip3d #map-viewport {
+  backface-visibility: hidden;
+}
+.sheet.versoed .sheet-inner {
+  transform: rotateY(-180deg);
+}
 
 /* Hidden at rest with visibility, not a 3D trick, so the 3D context can stay off between flips. */
 #verso {
-  position: absolute; inset: 0;
+  position: absolute;
+  inset: 0;
   visibility: hidden;
-  backface-visibility: hidden; transform: rotateY(180deg);
-  background: var(--parchment-deep); color: var(--ink-dark);
+  backface-visibility: hidden;
+  transform: rotateY(180deg);
+  background: var(--parchment-deep);
+  color: var(--ink-dark);
   overflow: hidden;
 }
-.sheet.flip3d #verso { visibility: visible; }
-.verso-ghost { display: block; width: 100%; height: 100%;
-  transform: scaleX(-1); opacity: 0.1; filter: blur(1.2px); }
+.sheet.flip3d #verso {
+  visibility: visible;
+}
+.verso-ghost {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform: scaleX(-1);
+  opacity: 0.1;
+  filter: blur(1.2px);
+}
 /* Shares the ghost's box and its scaleX(-1) centre or the track misregisters with the coastline; opacity 0.26 because a 3px dotted stroke at the ghost's 0.1 disappears. */
-.verso-track-layer { position: absolute; inset: 0; width: 100%; height: 100%;
-  pointer-events: none; transform: scaleX(-1);
-  opacity: 0.26; filter: blur(1.1px); overflow: visible; }
-.verso-track { fill: none; stroke: var(--ink-dark); stroke-width: 3;
-  stroke-dasharray: 2 7; stroke-linecap: round; stroke-linejoin: round;
-  vector-effect: non-scaling-stroke; }
-.verso-docket, .verso-survey { position: absolute; left: 8%; right: 8%;
-  text-align: center; }
-.verso-docket { top: 9%; text-transform: uppercase; letter-spacing: 0.18em;
-  font-size: clamp(0.6rem, max(1.4vw, 14.336px), 0.92rem); color: var(--ink-brown);
-  font-variant-numeric: tabular-nums; }
-.verso-survey { top: 17%; font-style: italic; line-height: 1.5;
-  font-size: clamp(0.62rem, max(1.5vw, 15.36px), 1rem); color: var(--ink-brown); }
-.verso-stamp { position: absolute; right: 11%; bottom: 12%;
-  width: clamp(90px, 17%, 190px); height: auto; opacity: 0.5;
-  transform: rotate(-8deg); }
+.verso-track-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  transform: scaleX(-1);
+  opacity: 0.26;
+  filter: blur(1.1px);
+  overflow: visible;
+}
+.verso-track {
+  fill: none;
+  stroke: var(--ink-dark);
+  stroke-width: 3;
+  stroke-dasharray: 2 7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.verso-docket,
+.verso-survey {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  text-align: center;
+}
+.verso-docket {
+  top: 9%;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: clamp(0.6rem, max(1.4vw, 14.336px), 0.92rem);
+  color: var(--ink-brown);
+  font-variant-numeric: tabular-nums;
+}
+.verso-survey {
+  top: 17%;
+  font-style: italic;
+  line-height: 1.5;
+  font-size: clamp(0.62rem, max(1.5vw, 15.36px), 1rem);
+  color: var(--ink-brown);
+}
+.verso-stamp {
+  position: absolute;
+  right: 11%;
+  bottom: 12%;
+  width: clamp(90px, 17%, 190px);
+  height: auto;
+  opacity: 0.5;
+  transform: rotate(-8deg);
+}
 
-#map svg.arriving { animation: paperSettle var(--paper-settle) var(--ease-paper) both; }
+#map svg.arriving {
+  animation: paperSettle var(--paper-settle) var(--ease-paper) both;
+}
 #map svg.arriving #layer-land path {
-  animation: inkDraw var(--ink-draw) var(--ease-paper) both,
-             washDry var(--ink-dry) var(--ease-paper) 400ms both;
+  animation:
+    inkDraw var(--ink-draw) var(--ease-paper) both,
+    washDry var(--ink-dry) var(--ease-paper) 400ms both;
 }
 #map svg.arriving #layer-waterlines {
   animation: dryingInk var(--ink-dry) var(--ease-paper) 300ms both;
 }
 
-.legend-row a.fn { color: var(--line-tan); align-self: flex-start; margin-left: -0.45rem; }
-.legend-row a.fn:hover, .legend-row a.fn:focus-visible { color: var(--parchment-bright); }
-body.stage-under .legend .legend-row a.fn:not(:hover, :focus-visible) { color: var(--parchment); }
+.legend-row a.fn {
+  color: var(--line-tan);
+  align-self: flex-start;
+  margin-left: -0.45rem;
+}
+.legend-row a.fn:hover,
+.legend-row a.fn:focus-visible {
+  color: var(--parchment-bright);
+}
+body.stage-under .legend .legend-row a.fn:not(:hover, :focus-visible) {
+  color: var(--parchment);
+}
 
 @media print {
-  .stage { position: static; padding: 0 !important; display: block; }
-  #sheet { width: auto !important; height: auto !important; box-shadow: none; }
-  .sheet-inner { height: auto; }
-  #map-viewport { position: static; }
-  #map { position: static; transform: none !important; }
-  #map svg[data-vellum-style] { height: auto; }
-  #verso { display: none; }
+  .stage {
+    position: static;
+    padding: 0 !important;
+    display: block;
+  }
+  #sheet {
+    width: auto !important;
+    height: auto !important;
+    box-shadow: none;
+  }
+  .sheet-inner {
+    height: auto;
+  }
+  #map-viewport {
+    position: static;
+  }
+  #map {
+    position: static;
+    transform: none !important;
+  }
+  #map svg[data-vellum-style] {
+    height: auto;
+  }
+  #verso {
+    display: none;
+  }
 }

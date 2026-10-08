@@ -53,10 +53,7 @@ test("'smell of' notes never use a non-aromatic good", () => {
     const m = note.match(/smell of (.+?) and old rope/);
     if (m) {
       const good = m[1] as string;
-      assert.ok(
-        !NON_AROMATIC.includes(good),
-        `"smell of ${good}" is not aromatic — in: ${note}`,
-      );
+      assert.ok(!NON_AROMATIC.includes(good), `"smell of ${good}" is not aromatic — in: ${note}`);
     }
   }
 });
@@ -79,7 +76,6 @@ test("lore is deterministic for a given seed", () => {
     assert.equal(a.settlementNote(harbor(i)), b.settlementNote(harbor(i)));
   }
 });
-
 
 test("gazetteer notes reference the world's history (ruins + dated foundings)", () => {
   const w = generateWorld(defaultRecipe(42));

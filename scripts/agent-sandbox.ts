@@ -23,7 +23,9 @@ const git = (args: string[], cwd: string): string => gitBytes(args, cwd).toStrin
 
 export const validateName = (name: string): string => {
   if (!SANDBOX_NAME.test(name)) {
-    throw new Error(`sandbox name ${JSON.stringify(name)} is outside the guard-* and skeptic-* namespace this script may address. Note what that does and does not buy: it keeps the script inside the sandbox namespace, so it cannot reach a session's own worktree, but it is a namespace and not provenance, so a concurrent review agent's sandbox of the same shape is still addressable.`);
+    throw new Error(
+      `sandbox name ${JSON.stringify(name)} is outside the guard-* and skeptic-* namespace this script may address. Note what that does and does not buy: it keeps the script inside the sandbox namespace, so it cannot reach a session's own worktree, but it is a namespace and not provenance, so a concurrent review agent's sandbox of the same shape is still addressable.`,
+    );
   }
   return name;
 };
@@ -33,13 +35,19 @@ export const resolveRoot = (cwd: string = process.cwd()): string =>
 
 export const resolveTree = (cwd: string = process.cwd()): string => git(["rev-parse", "--show-toplevel"], cwd);
 
-export const sandboxPath = (root: string, name: string): string => join(root, ".claude", "worktrees", validateName(name));
+export const sandboxPath = (root: string, name: string): string =>
+  join(root, ".claude", "worktrees", validateName(name));
 
 export const readHead = (cwd: string = process.cwd()): string => git(["rev-parse", "HEAD"], cwd);
 
 const haveCommit = (root: string, sha: string): boolean => {
   try {
-    execFileSync("git", ["cat-file", "-e", `${sha}^{commit}`], { cwd: root, encoding: "utf8", timeout: GIT_TIMEOUT_MS, stdio: ["ignore", "ignore", "ignore"] });
+    execFileSync("git", ["cat-file", "-e", `${sha}^{commit}`], {
+      cwd: root,
+      encoding: "utf8",
+      timeout: GIT_TIMEOUT_MS,
+      stdio: ["ignore", "ignore", "ignore"],
+    });
     return true;
   } catch {
     return false;
@@ -61,7 +69,9 @@ const run = (plan: Plan, root: string, wt: string): void => {
 export const create = (name: string, sha?: string, cwd: string = process.cwd()): string => {
   validateName(name);
   if (name.startsWith("skeptic-") && !sha) {
-    throw new Error("a skeptic-* sandbox requires an explicit sha: the PR head is resolved per round, and defaulting to this tree's HEAD would attribute a whole report to a commit that was never run (#575)");
+    throw new Error(
+      "a skeptic-* sandbox requires an explicit sha: the PR head is resolved per round, and defaulting to this tree's HEAD would attribute a whole report to a commit that was never run (#575)",
+    );
   }
   const at = sha ?? readHead(cwd);
   const root = resolveRoot(cwd);
@@ -79,7 +89,9 @@ export const teardown = (name: string, cwd: string = process.cwd()): void => {
 export const listing = (dir: string): string[] => {
   const out: string[] = [];
   const walk = (at: string): void => {
-    for (const entry of readdirSync(at, { withFileTypes: true }).sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0))) {
+    for (const entry of readdirSync(at, { withFileTypes: true }).sort((a, b) =>
+      a.name < b.name ? -1 : a.name > b.name ? 1 : 0,
+    )) {
       if (SKIP.has(entry.name)) continue;
       const full = join(at, entry.name);
       if (relative(dir, full) === SANDBOX_ROOT) continue;
@@ -112,7 +124,9 @@ export const snapshot = (out: string, cwd: string = process.cwd()): number => {
 
 const guardSandbox = (name: string, cwd: string): string => {
   if (!validateName(name).startsWith("guard-")) {
-    throw new Error(`${name} is not a guard-* sandbox: only the guard prover changes or compares a sandbox's files, and a skeptic's sandbox is read-only`);
+    throw new Error(
+      `${name} is not a guard-* sandbox: only the guard prover changes or compares a sandbox's files, and a skeptic's sandbox is read-only`,
+    );
   }
   return sandboxPath(resolveRoot(cwd), name);
 };
@@ -122,7 +136,9 @@ const sandboxCommit = (wt: string): string => {
   const dir = pointer?.[1];
   const head = dir ? readFileSync(join(resolve(wt, dir), "HEAD"), "utf8").trim() : "";
   if (!/^[0-9a-f]{40,64}$/.test(head)) {
-    throw new Error(`${wt} is not a sandbox at a detached commit (its HEAD reads ${JSON.stringify(head)}), so there is no commit to compare against or restore from`);
+    throw new Error(
+      `${wt} is not a sandbox at a detached commit (its HEAD reads ${JSON.stringify(head)}), so there is no commit to compare against or restore from`,
+    );
   }
   return head;
 };
@@ -130,7 +146,9 @@ const sandboxCommit = (wt: string): string => {
 const trackedFile = (sha: string, path: string, cwd: string): string => {
   const rel = normalize(path);
   const outside = isAbsolute(rel) || rel === ".." || rel.startsWith(`..${sep}`);
-  const [entry = ""] = outside ? [] : gitBytes(["ls-tree", "--full-tree", "-z", sha, "--", rel], cwd).toString("utf8").split("\0");
+  const [entry = ""] = outside
+    ? []
+    : gitBytes(["ls-tree", "--full-tree", "-z", sha, "--", rel], cwd).toString("utf8").split("\0");
   if (entry.slice(entry.indexOf("\t") + 1) !== rel || !REGULAR_MODES.has(entry.split(" ")[0] ?? "")) {
     throw new Error(`${path} is not a regular file tracked at ${sha}, so the sandbox could not put it back`);
   }
@@ -141,25 +159,44 @@ const containedFile = (wt: string, rel: string): string => {
   const file = join(wt, rel);
   const link = lstatSync(file, { throwIfNoEntry: false })?.isSymbolicLink() ?? false;
   if (link || !`${realpathSync(dirname(file))}${sep}`.startsWith(`${realpathSync(wt)}${sep}`)) {
-    throw new Error(`${rel} leads outside the sandbox through a symlink, so writing it would change a tree the sandbox does not own`);
+    throw new Error(
+      `${rel} leads outside the sandbox through a symlink, so writing it would change a tree the sandbox does not own`,
+    );
   }
   return file;
 };
 
-export const mutate = (name: string, path: string, line: number, from: string, to: string, cwd: string = process.cwd()): string => {
+export const mutate = (
+  name: string,
+  path: string,
+  line: number,
+  from: string,
+  to: string,
+  cwd: string = process.cwd(),
+): string => {
   const wt = guardSandbox(name, cwd);
   const rel = trackedFile(sandboxCommit(wt), path, cwd);
   const file = containedFile(wt, rel);
   if (from === "") throw new Error("the anchor is empty, and an empty anchor matches between every character");
-  if (from === to) throw new Error(`the anchor and the replacement are the same, so the mutation changes nothing and its green run would read as a HOLE`);
+  if (from === to)
+    throw new Error(
+      `the anchor and the replacement are the same, so the mutation changes nothing and its green run would read as a HOLE`,
+    );
   const raw = readFileSync(file);
   const text = raw.toString("utf8");
-  if (!Buffer.from(text, "utf8").equals(raw)) throw new Error(`${rel} is not valid UTF-8, so rewriting it would change bytes on lines the mutation does not name`);
+  if (!Buffer.from(text, "utf8").equals(raw))
+    throw new Error(
+      `${rel} is not valid UTF-8, so rewriting it would change bytes on lines the mutation does not name`,
+    );
   const lines = text.split("\n");
-  if (!Number.isInteger(line) || line < 1 || line > lines.length) throw new Error(`line ${line} is not a line of ${rel}, which has ${lines.length}`);
+  if (!Number.isInteger(line) || line < 1 || line > lines.length)
+    throw new Error(`line ${line} is not a line of ${rel}, which has ${lines.length}`);
   const before = lines[line - 1] ?? "";
   const count = before.split(from).length - 1;
-  if (count !== 1) throw new Error(`${rel}:${line} holds ${JSON.stringify(from)} ${count} times, not once, so the mutation would not name one site`);
+  if (count !== 1)
+    throw new Error(
+      `${rel}:${line} holds ${JSON.stringify(from)} ${count} times, not once, so the mutation would not name one site`,
+    );
   const after = before.replace(from, () => to);
   writeFileSync(file, [...lines.slice(0, line - 1), after, ...lines.slice(line)].join("\n"));
   return `${rel}:${line}\n- ${before}\n+ ${after}`;
@@ -184,17 +221,23 @@ const differs = (wt: string, entry: string): boolean => {
   const stat = lstatSync(file, { throwIfNoEntry: false });
   if (!stat || !(stat.isFile() || stat.isSymbolicLink())) return true;
   const bytes = stat.isSymbolicLink() ? Buffer.from(readlinkSync(file)) : readFileSync(file);
-  const hash = createHash(id.length === 64 ? "sha256" : "sha1").update(`blob ${bytes.length}\0`).update(bytes);
+  const hash = createHash(id.length === 64 ? "sha256" : "sha1")
+    .update(`blob ${bytes.length}\0`)
+    .update(bytes);
   return hash.digest("hex") !== id;
 };
 
 export const status = (name: string, cwd: string = process.cwd()): string[] => {
   const wt = guardSandbox(name, cwd);
-  const entries = gitBytes(["ls-tree", "--full-tree", "-r", "-z", sandboxCommit(wt)], cwd).toString("utf8").split("\0").filter((e) => e !== "");
+  const entries = gitBytes(["ls-tree", "--full-tree", "-r", "-z", sandboxCommit(wt)], cwd)
+    .toString("utf8")
+    .split("\0")
+    .filter((e) => e !== "");
   return entries.filter((entry) => differs(wt, entry)).map((entry) => entry.slice(entry.indexOf("\t") + 1));
 };
 
-const USAGE = "usage: agent-sandbox create <name> [sha] | teardown <name> | snapshot <outfile> | list | mutate <name> <path> <line> <from> <to> | restore <name> <path>... | status <name>";
+const USAGE =
+  "usage: agent-sandbox create <name> [sha] | teardown <name> | snapshot <outfile> | list | mutate <name> <path> <line> <from> <to> | restore <name> <path>... | status <name>";
 
 export const main = (argv: string[]): number => {
   const [command, first = "", second, line = "", from = "", to = ""] = argv;

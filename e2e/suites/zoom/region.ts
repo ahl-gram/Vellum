@@ -4,7 +4,19 @@ import type { Cam } from "./reads.ts";
 
 export async function z15RegionCrop({ evaluate, check }: SuiteContext): Promise<void> {
   // The crop is proven by projected-settlement COUNT: integer counts are immune to the cross-engine float drift that bars an SVG byte compare here.
-  const z15 = await evaluate<{ ok: boolean; hasSvg: boolean; stamped: boolean; regionSheet: boolean; windowEcho: boolean; bandEcho: boolean; parsed: boolean; manifestOk: boolean; isCrop: boolean; places: number; worldPlaces: number }>(
+  const z15 = await evaluate<{
+    ok: boolean;
+    hasSvg: boolean;
+    stamped: boolean;
+    regionSheet: boolean;
+    windowEcho: boolean;
+    bandEcho: boolean;
+    parsed: boolean;
+    manifestOk: boolean;
+    isCrop: boolean;
+    places: number;
+    worldPlaces: number;
+  }>(
     `(async()=>{const win={u0:0.375,v0:0.375,u1:0.625,v1:0.625};` +
       `const r=await window.__vellumRunJob({kind:"region",seed:42,overrides:{},window:win,band:2,gridW:320,gridH:240,title:"Survey",render:{style:"antique",widthPx:1500,legend:true}});` +
       `const w=await window.__vellumRunJob({kind:"draw",seed:42,overrides:{},render:{style:"antique",widthPx:1500,legend:true}});` +
@@ -19,13 +31,29 @@ export async function z15RegionCrop({ evaluate, check }: SuiteContext): Promise<
   );
   check(
     "Z15 a region job returns a stamped regional CROP of the world (AC1: subset of places, finer terrain unit-tested + in out/)",
-    z15.ok && z15.hasSvg && z15.stamped && z15.regionSheet && z15.windowEcho && z15.bandEcho && z15.parsed && z15.manifestOk && z15.isCrop,
+    z15.ok &&
+      z15.hasSvg &&
+      z15.stamped &&
+      z15.regionSheet &&
+      z15.windowEcho &&
+      z15.bandEcho &&
+      z15.parsed &&
+      z15.manifestOk &&
+      z15.isCrop,
     JSON.stringify(z15),
   );
 }
 
 export async function z16CacheHit({ evaluate, check }: SuiteContext): Promise<void> {
-  const z16 = await evaluate<{ aOk: boolean; bOk: boolean; aCached: boolean; bCached: boolean; sameSvg: boolean; ta: number; tb: number }>(
+  const z16 = await evaluate<{
+    aOk: boolean;
+    bOk: boolean;
+    aCached: boolean;
+    bCached: boolean;
+    sameSvg: boolean;
+    ta: number;
+    tb: number;
+  }>(
     `(async()=>{await window.__vellumRunJob({kind:"draw",seed:117,overrides:{},render:{style:"antique",widthPx:1500}});` +
       `const win={u0:0.375,v0:0.375,u1:0.625,v1:0.625};` +
       `const mk=()=>({kind:"region",seed:918273,overrides:{},window:win,band:2,gridW:320,gridH:240,title:"Survey",render:{style:"antique",widthPx:1500}});` +
@@ -40,7 +68,18 @@ export async function z16CacheHit({ evaluate, check }: SuiteContext): Promise<vo
   );
 }
 
-export async function z17Inset({ evaluate, check, shoot, sleep, rgn, goHome, enterAt, waitRedraft, captionMs, insetView }: ZoomKit): Promise<void> {
+export async function z17Inset({
+  evaluate,
+  check,
+  shoot,
+  sleep,
+  rgn,
+  goHome,
+  enterAt,
+  waitRedraft,
+  captionMs,
+  insetView,
+}: ZoomKit): Promise<void> {
   // Warm up first: Z15/Z16 left another seed in the worker's single-entry world cache and the first region gen pays one-time JIT, so a cold run would not log the steady-state redraft ms.
   const warm0 = (await rgn()).redrafts;
   await enterAt(2, 0.4, 0.4);
@@ -53,15 +92,26 @@ export async function z17Inset({ evaluate, check, shoot, sleep, rgn, goHome, ent
   // The CAMERA is read at the commit, which is what this check is named for (a settle must not move it); the inset geometry cannot be, because insetView reads the FIRST .region-inset and during a crossing that is the OUTGOING sheet (Issue #400's held chain cache lands this band-1 draw in ~300ms, mid-crossfade, and the outgoing sheet is torn down only on the incoming's transitionend with a 700ms fallback), so geometry is read once the pair has resolved, and a pair left mounted for good still fails on the count.
   const atCommit = await insetView();
   let view17 = atCommit;
-  for (let i = 0; i < 50 && view17.insets !== 1; i++) { await sleep(40); view17 = await insetView(); }
+  for (let i = 0; i < 50 && view17.insets !== 1; i++) {
+    await sleep(40);
+    view17 = await insetView();
+  }
   const W17 = await evaluate<number>(`document.getElementById("map-viewport").clientWidth`);
   check(
     "Z17 a settle redrafts one finer survey as an inset; the camera does not move at the commit (AC1)",
-    s17.band === 1 && s17.committed === true && /^The Environs of .+/.test(s17.title || "") &&
-      s17.redrafts === before17 + 1 && view17.worldMounted && view17.insets === 1 && view17.stamped &&
-      Math.abs(view17.insetLeft - 25) < 0.01 && Math.abs(view17.insetW - 50) < 0.01 &&
-      view17.hits > 0 && /drawn in \d+ms/.test(view17.caption) &&
-      atCommit.zk === 2 && Math.abs(atCommit.zx - -W17 / 2) < 0.5,
+    s17.band === 1 &&
+      s17.committed === true &&
+      /^The Environs of .+/.test(s17.title || "") &&
+      s17.redrafts === before17 + 1 &&
+      view17.worldMounted &&
+      view17.insets === 1 &&
+      view17.stamped &&
+      Math.abs(view17.insetLeft - 25) < 0.01 &&
+      Math.abs(view17.insetW - 50) < 0.01 &&
+      view17.hits > 0 &&
+      /drawn in \d+ms/.test(view17.caption) &&
+      atCommit.zk === 2 &&
+      Math.abs(atCommit.zx - -W17 / 2) < 0.5,
     `${JSON.stringify(s17)} inset=${view17.insets}(at commit ${atCommit.insets})@${view17.insetLeft}%/${view17.insetW}% stamped=${view17.stamped} world=${view17.worldMounted} ` +
       `hits=${view17.hits} camera k=${atCommit.zk} x=${atCommit.zx} (expected ${-W17 / 2}) settle->sheet=${drawMs17}ms (AC3 target ~400ms desktop)`,
   );
@@ -90,9 +140,11 @@ export async function z18Pan({ evaluate, check, sleep, rgn, goHome, enterAt, wai
   const pannedTo = -0.34 * W18; // x = W/2 - 0.42*2*W
   check(
     "Z18 pan works at a committed band and re-drafts only on a new quantized window (AC2 + review quirk 1)",
-    same18.redrafts === enter18.redrafts && new18.redrafts === same18.redrafts + 1 &&
+    same18.redrafts === enter18.redrafts &&
+      new18.redrafts === same18.redrafts + 1 &&
       JSON.stringify(new18.window) !== JSON.stringify(enter18.window) &&
-      new18.band === 1 && Math.abs(pan18.x - pannedTo) < 0.5,
+      new18.band === 1 &&
+      Math.abs(pan18.x - pannedTo) < 0.5,
     `A=${JSON.stringify(enter18.window)} inWindow=${same18.redrafts}(==${enter18.redrafts}) B=${JSON.stringify(new18.window)} ` +
       `pan x=${pan18.x} (expected ${pannedTo}, a dead pan would sit at ${-0.5 * W18})`,
   );
@@ -131,7 +183,16 @@ export async function z19bSupersession({ evaluate, check, sleep, rgn, goHome, en
   );
 }
 
-export async function z20ZoomOutDrops({ evaluate, check, sleep, rgn, goHome, enterAt, waitRedraft, insetView }: ZoomKit): Promise<void> {
+export async function z20ZoomOutDrops({
+  evaluate,
+  check,
+  sleep,
+  rgn,
+  goHome,
+  enterAt,
+  waitRedraft,
+  insetView,
+}: ZoomKit): Promise<void> {
   await goHome();
   const before20 = (await rgn()).redrafts;
   await enterAt(2, 0.5, 0.5);
@@ -139,19 +200,40 @@ export async function z20ZoomOutDrops({ evaluate, check, sleep, rgn, goHome, ent
   const regionCommitted = reg20.committed === true && reg20.band === 1 && /^The Environs of .+/.test(reg20.title || "");
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`); // under the 0/1 down-cross
   let world20 = reg20;
-  for (let i = 0; i < 100; i++) { world20 = await rgn(); if (world20.band === 0) break; await sleep(40); }
+  for (let i = 0; i < 100; i++) {
+    world20 = await rgn();
+    if (world20.band === 0) break;
+    await sleep(40);
+  }
   let gone20 = -1; // the inset teardown trails the revert by the fade; poll it to zero
-  for (let i = 0; i < 50; i++) { gone20 = await evaluate<number>(`document.querySelectorAll("#map .region-inset").length`); if (gone20 === 0) break; await sleep(40); }
+  for (let i = 0; i < 50; i++) {
+    gone20 = await evaluate<number>(`document.querySelectorAll("#map .region-inset").length`);
+    if (gone20 === 0) break;
+    await sleep(40);
+  }
   const worldView = await insetView();
   check(
     "Z20 a zoom-out drops the inset over the always-present world sheet (committed state reverts, camera un-snapped)",
-    regionCommitted && world20.band === 0 && world20.committed === false && gone20 === 0 &&
-      worldView.worldMounted && worldView.hits > 0 && worldView.zk === 1,
+    regionCommitted &&
+      world20.band === 0 &&
+      world20.committed === false &&
+      gone20 === 0 &&
+      worldView.worldMounted &&
+      worldView.hits > 0 &&
+      worldView.zk === 1,
     `committedRegion=${regionCommitted} -> band=${world20.band} committed=${world20.committed} insets=${gone20} world=${worldView.worldMounted} hits=${worldView.hits} k=${worldView.zk}`,
   );
 }
 
-export async function z20bReducedMotion({ evaluate, send, check, rgn, goHome, enterAt, waitRedraft }: ZoomKit): Promise<void> {
+export async function z20bReducedMotion({
+  evaluate,
+  send,
+  check,
+  rgn,
+  goHome,
+  enterAt,
+  waitRedraft,
+}: ZoomKit): Promise<void> {
   await goHome();
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
   const beforeRm = (await rgn()).redrafts;
@@ -169,7 +251,15 @@ export async function z20bReducedMotion({ evaluate, send, check, rgn, goHome, en
   await send("Emulation.setEmulatedMedia", { features: [] });
 }
 
-export async function z20cThrottle({ send, check, rgn, goHome, enterAt, waitRedraft, captionMs }: ZoomKit): Promise<void> {
+export async function z20cThrottle({
+  send,
+  check,
+  rgn,
+  goHome,
+  enterAt,
+  waitRedraft,
+  captionMs,
+}: ZoomKit): Promise<void> {
   // CDP's setCPUThrottlingRate does NOT slow the Web Worker, so this mainly proves the redraft never blocks the main thread; the ms is corroboration.
   await goHome();
   await send("Emulation.setCPUThrottlingRate", { rate: 4 });

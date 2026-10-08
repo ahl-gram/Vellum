@@ -21,13 +21,7 @@ export type SeaBeast = {
 const KINDS: ReadonlyArray<BeastKind> = ["serpent", "whale", "kraken"];
 
 const EPITHETS: Record<BeastKind, readonly string[]> = {
-  serpent: [
-    "the Deep Worm",
-    "the Long Coil",
-    "the Eater of Anchors",
-    "Old Winding",
-    "the Knot in the Tide",
-  ],
+  serpent: ["the Deep Worm", "the Long Coil", "the Eater of Anchors", "Old Winding", "the Knot in the Tide"],
   whale: [
     "the Island that Swims",
     "the Grey Titan",
@@ -98,9 +92,7 @@ function nearestPort(haunt: Haunt, settlements: ReadonlyArray<Settled>): Settled
     list.length === 0
       ? undefined
       : list.reduce((a, b) =>
-          Math.hypot(b.x - haunt.x, b.y - haunt.y) < Math.hypot(a.x - haunt.x, a.y - haunt.y)
-            ? b
-            : a,
+          Math.hypot(b.x - haunt.x, b.y - haunt.y) < Math.hypot(a.x - haunt.x, a.y - haunt.y) ? b : a,
         );
   return by(settlements.filter((s) => s.harbor)) ?? by(settlements);
 }

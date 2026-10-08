@@ -2,7 +2,15 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { bindNotice, DESK_NOTICE_KEY, dismiss, dismissed, noticeDue, type NoticeHost, type NoticeView } from "../../src/site/shell/desk-notice.ts";
+import {
+  bindNotice,
+  DESK_NOTICE_KEY,
+  dismiss,
+  dismissed,
+  noticeDue,
+  type NoticeHost,
+  type NoticeView,
+} from "../../src/site/shell/desk-notice.ts";
 
 // The desk notice (Issue #761): a phone that had to shrink the 1024 page to fit sees a note, once per browser; the scale and height fixtures are the ones measured under emulation on 2026-10-04 (plan, measurement 4), the boundary ones exact binary fractions so float error cannot decide them.
 
@@ -14,12 +22,20 @@ test("a phone held either way had to shrink the page and is under 1024 tall: the
 test("the screen's height is read against 1024 exactly, after rounding to the pixel the browser reported", () => {
   assert.equal(noticeDue(0.5, 2048), false, "exactly 1024 tall is the floor itself: no notice");
   assert.equal(noticeDue(0.5, 2046), true, "1023 tall is under it");
-  assert.equal(noticeDue(0.75, 1365), false, "a 768x1024 tablet upright, emulated with no browser toolbar, reads 1023.75 from a rounded innerHeight, which is 1024");
+  assert.equal(
+    noticeDue(0.75, 1365),
+    false,
+    "a 768x1024 tablet upright, emulated with no browser toolbar, reads 1023.75 from a rounded innerHeight, which is 1024",
+  );
   assert.equal(noticeDue(0.25, 4093), true, "1023.25 is 1023 to the pixel, under the floor");
 });
 
 test("a page the browser did not shrink never takes the notice, however short the window", () => {
-  assert.equal(noticeDue(1, 844), false, "a desktop window narrowed to 390 (zoom, or the harness's narrow viewport) is at scale 1");
+  assert.equal(
+    noticeDue(1, 844),
+    false,
+    "a desktop window narrowed to 390 (zoom, or the harness's narrow viewport) is at scale 1",
+  );
   assert.equal(noticeDue(1, 768), false, "a 1024x768 tablet lays the page out at scale 1");
   assert.equal(noticeDue(1.15234375, 712), false, "an 1180x820 tablet enlarges the page");
 });
@@ -36,16 +52,27 @@ const store = (initial: Record<string, string> = {}) => {
   } as unknown as Storage;
   return { items, get: () => storage };
 };
-const refusing = (): Storage => ({
-  getItem: () => { throw new Error("SecurityError"); },
-  setItem: () => { throw new Error("QuotaExceededError"); },
-}) as unknown as Storage;
-const unreachable = (): Storage => { throw new Error("SecurityError: localStorage is not available"); };
+const refusing = (): Storage =>
+  ({
+    getItem: () => {
+      throw new Error("SecurityError");
+    },
+    setItem: () => {
+      throw new Error("QuotaExceededError");
+    },
+  }) as unknown as Storage;
+const unreachable = (): Storage => {
+  throw new Error("SecurityError: localStorage is not available");
+};
 
 test("the dismissal is remembered under its own key, and only that key counts", () => {
   assert.equal(dismissed(store().get), false, "a fresh browser has not dismissed it");
   assert.equal(dismissed(store({ [DESK_NOTICE_KEY]: "1" }).get), true, "the key present means dismissed");
-  assert.equal(dismissed(store({ "vellum.table.v1": "1", "vellum-landfall-arrived": "1" }).get), false, "another key is not this one");
+  assert.equal(
+    dismissed(store({ "vellum.table.v1": "1", "vellum-landfall-arrived": "1" }).get),
+    false,
+    "another key is not this one",
+  );
   const s = store();
   dismiss(s.get);
   assert.equal(s.items.get(DESK_NOTICE_KEY), "1", "dismissing writes the key");
@@ -66,14 +93,38 @@ const host = () => {
   const notice: NoticeHost = {
     classList: { add: (n) => void classes.add(n), remove: (n) => void classes.delete(n) },
     style: { setProperty: (n, v) => void props.set(n, v) },
-    button: { addEventListener: (type, fn) => { if (type === "click") press = fn; } },
+    button: {
+      addEventListener: (type, fn) => {
+        if (type === "click") press = fn;
+      },
+    },
   };
-  return { notice, classes, props, press: () => { assert.ok(press, "the button listens for a press"); press(); } };
+  return {
+    notice,
+    classes,
+    props,
+    press: () => {
+      assert.ok(press, "the button listens for a press");
+      press();
+    },
+  };
 };
 const viewOf = (scale: number) => {
   let resize: (() => void) | null = null;
-  const view = { scale, addEventListener: (type: string, fn: () => void) => { if (type === "resize") resize = fn; } } as NoticeView & { scale: number };
-  return { view, turn: (next: number) => { view.scale = next; assert.ok(resize, "the notice listens for the viewport resizing"); resize(); } };
+  const view = {
+    scale,
+    addEventListener: (type: string, fn: () => void) => {
+      if (type === "resize") resize = fn;
+    },
+  } as NoticeView & { scale: number };
+  return {
+    view,
+    turn: (next: number) => {
+      view.scale = next;
+      assert.ok(resize, "the notice listens for the viewport resizing");
+      resize();
+    },
+  };
 };
 
 test("on a phone the notice shows, sized for the screen it is shown on, and re-sized when the phone turns", () => {
@@ -106,10 +157,15 @@ test("where the notice is not due, nothing is shown or sized", () => {
 });
 
 const withoutMedia = (css: string): string => {
-  let out = "", at = 0;
+  let out = "",
+    at = 0;
   for (let m = css.indexOf("@media", at); m !== -1; m = css.indexOf("@media", at)) {
-    let depth = 0, i = css.indexOf("{", m);
-    for (; i < css.length; i++) { if (css[i] === "{") depth++; else if (css[i] === "}" && --depth === 0) break; }
+    let depth = 0,
+      i = css.indexOf("{", m);
+    for (; i < css.length; i++) {
+      if (css[i] === "{") depth++;
+      else if (css[i] === "}" && --depth === 0) break;
+    }
     out += css.slice(at, m);
     at = i + 1;
   }
@@ -120,6 +176,12 @@ test("the layout stops a phone browser enlarging text inside the 1024 page (its 
   const layout = readFileSync(resolve(import.meta.dirname, "..", "..", "src/layouts/BaseLayout.astro"), "utf8");
   const open = layout.indexOf("<style is:global>");
   assert.notEqual(open, -1, "the layout carries its global style block");
-  const screenRules = withoutMedia(layout.slice(open, layout.indexOf("</style>", open)).replace(/\/\*[\s\S]*?\*\//g, ""));
-  assert.match(screenRules, /^html\s*\{[^}]*-webkit-text-size-adjust:\s*100%;[^}]*\btext-size-adjust:\s*100%;/m, "declared on html, outside every comment and every media block");
+  const screenRules = withoutMedia(
+    layout.slice(open, layout.indexOf("</style>", open)).replace(/\/\*[\s\S]*?\*\//g, ""),
+  );
+  assert.match(
+    screenRules,
+    /^html\s*\{[^}]*-webkit-text-size-adjust:\s*100%;[^}]*\btext-size-adjust:\s*100%;/m,
+    "declared on html, outside every comment and every media block",
+  );
 });

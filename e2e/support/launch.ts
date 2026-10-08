@@ -33,7 +33,13 @@ export interface LaunchTuning {
 
 // killGraceMs is a cap on a hang, not a budget: the one kill measured on a GitHub runner was gone 8ms after SIGKILL (PR #735's CI, 2026-10-02), and the old loop's 0.13s retries put every earlier one under about 130ms.
 // polls x pollMs is a 60s wait, about 1.7 times the slowest start measured on a GitHub runner, as Alex ruled on Issue #621 (2026-10-02): attempt 1 up in 0.7, 1.2, 6.2, 7.2, 7.4, 7.5, 7.6, 8.5, 9.8, 20.4, 24.5, 28.0 and 35.7s, and one past 20s whose retry came up in 9.4s (PR #735's CI).
-export const LAUNCH_TUNING: LaunchTuning = { attempts: 3, polls: 480, pollMs: 125, killGraceMs: 5000, retryPauseMs: 2000 };
+export const LAUNCH_TUNING: LaunchTuning = {
+  attempts: 3,
+  polls: 480,
+  pollMs: 125,
+  killGraceMs: 5000,
+  retryPauseMs: 2000,
+};
 
 const OUTPUT_CHARS = 2000;
 
@@ -104,15 +110,28 @@ const outputOf = (life: Life): string => life.output().slice(0, OUTPUT_CHARS) ||
 
 type Outcome<T> = { readonly target: T } | { readonly failure: string };
 
-async function spawnAttempt<T>(deps: LaunchDeps<T>, tuning: LaunchTuning, attempt: number, earlier: readonly string[]): Promise<LaunchAttempt> {
+async function spawnAttempt<T>(
+  deps: LaunchDeps<T>,
+  tuning: LaunchTuning,
+  attempt: number,
+  earlier: readonly string[],
+): Promise<LaunchAttempt> {
   try {
     return await deps.spawn(attempt);
   } catch (err) {
-    throw new Error(`browser launch attempt ${attempt}/${tuning.attempts} could not start a browser: ${messageOf(err)}\n${earlier.join("\n")}`, { cause: err });
+    throw new Error(
+      `browser launch attempt ${attempt}/${tuning.attempts} could not start a browser: ${messageOf(err)}\n${earlier.join("\n")}`,
+      { cause: err },
+    );
   }
 }
 
-async function attemptOnce<T>(deps: LaunchDeps<T>, tuning: LaunchTuning, attempt: number, earlier: readonly string[]): Promise<Outcome<T>> {
+async function attemptOnce<T>(
+  deps: LaunchDeps<T>,
+  tuning: LaunchTuning,
+  attempt: number,
+  earlier: readonly string[],
+): Promise<Outcome<T>> {
   const started = Date.now();
   const spawned = await spawnAttempt(deps, tuning, attempt, earlier);
   const child = spawned.child;
@@ -126,10 +145,16 @@ async function attemptOnce<T>(deps: LaunchDeps<T>, tuning: LaunchTuning, attempt
     const reason = messageOf(err);
     const stopped = await stop(child, life, tuning.killGraceMs);
     const failure = `${head}: ${reason}; ${stopped ?? `was not gone ${tuning.killGraceMs}ms after SIGKILL`}\n--- browser output, attempt ${attempt} ---\n${outputOf(life)}`;
-    if (stopped === null) throw new Error(`browser launch ${head}, was not gone ${tuning.killGraceMs}ms after SIGKILL, so no further attempt can own the debug port\n${[...earlier, failure].join("\n")}`, { cause: err });
+    if (stopped === null)
+      throw new Error(
+        `browser launch ${head}, was not gone ${tuning.killGraceMs}ms after SIGKILL, so no further attempt can own the debug port\n${[...earlier, failure].join("\n")}`,
+        { cause: err },
+      );
     await spawned.discard();
     if (attempt === tuning.attempts) return { failure };
-    deps.log(`  e2e: browser launch attempt ${attempt}/${tuning.attempts} exposed no devtools target: ${reason}; pid ${child.pid ?? "none"}, ${stopped}; retrying with a fresh profile in ${tuning.retryPauseMs}ms...`);
+    deps.log(
+      `  e2e: browser launch attempt ${attempt}/${tuning.attempts} exposed no devtools target: ${reason}; pid ${child.pid ?? "none"}, ${stopped}; retrying with a fresh profile in ${tuning.retryPauseMs}ms...`,
+    );
     await sleep(tuning.retryPauseMs);
     return { failure };
   }

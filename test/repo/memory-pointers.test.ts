@@ -10,17 +10,43 @@ const REPO = resolve(import.meta.dirname, "..", "..");
 const ROOTS = [".claude/agents", ".claude/skills"];
 // 2026-10-04: this git ls-files answers in under 10 ms on a Mac; thirty seconds is a cap on a hang, not a budget.
 const GIT_TIMEOUT_MS = 30_000;
-const ADDRESS = /\b(?:feedback|project|reference|user)_(?:[a-z][a-z0-9_]*|\*)|\[\[(?:feedback|project|reference|user)-[a-z0-9-]+\]\]|MEMORY\.md|\.claude\/projects|\b[Mm]emory\//g;
-const MENTION = /auto(?:- ?| )?memory|private(?:- ?| )memory|alex['’]s memory|memory file|memory folder|memory director/gi;
+const ADDRESS =
+  /\b(?:feedback|project|reference|user)_(?:[a-z][a-z0-9_]*|\*)|\[\[(?:feedback|project|reference|user)-[a-z0-9-]+\]\]|MEMORY\.md|\.claude\/projects|\b[Mm]emory\//g;
+const MENTION =
+  /auto(?:- ?| )?memory|private(?:- ?| )memory|alex['’]s memory|memory file|memory folder|memory director/gi;
 
-type Kept = { readonly file: string; readonly phrase: string; readonly why: "forbids reading it" | "history" | "rule of thumb" };
+type Kept = {
+  readonly file: string;
+  readonly phrase: string;
+  readonly why: "forbids reading it" | "history" | "rule of thumb";
+};
 
 const KEPT: ReadonlyArray<Kept> = [
-  { file: ".claude/agents/vellum-plan-skeptic.md", phrase: "an auto-memory pointer once sent six subagents", why: "history" },
-  { file: ".claude/agents/vellum-plan-skeptic.md", phrase: "or the auto-memory files. They carry the planning session's framing", why: "forbids reading it" },
-  { file: ".claude/agents/vellum-pr-skeptic.md", phrase: "or the auto-memory files. They carry the implementing session's framing", why: "forbids reading it" },
-  { file: ".claude/agents/vellum-plate-reader.md", phrase: "This trap was already in auto-memory when", why: "history" },
-  { file: ".claude/agents/vellum-spec-recon.md", phrase: "Auto-memory is a pointer, not a citation.", why: "rule of thumb" },
+  {
+    file: ".claude/agents/vellum-plan-skeptic.md",
+    phrase: "an auto-memory pointer once sent six subagents",
+    why: "history",
+  },
+  {
+    file: ".claude/agents/vellum-plan-skeptic.md",
+    phrase: "or the auto-memory files. They carry the planning session's framing",
+    why: "forbids reading it",
+  },
+  {
+    file: ".claude/agents/vellum-pr-skeptic.md",
+    phrase: "or the auto-memory files. They carry the implementing session's framing",
+    why: "forbids reading it",
+  },
+  {
+    file: ".claude/agents/vellum-plate-reader.md",
+    phrase: "This trap was already in auto-memory when",
+    why: "history",
+  },
+  {
+    file: ".claude/agents/vellum-spec-recon.md",
+    phrase: "Auto-memory is a pointer, not a citation.",
+    why: "rule of thumb",
+  },
   { file: ".claude/skills/vellum-footguns/references/scars.md", phrase: "moved out of private memory", why: "history" },
 ];
 
@@ -29,7 +55,8 @@ const near = (text: string, at: number): string => text.slice(Math.max(0, at - 4
 
 function spansOf(text: string, phrase: string): ReadonlyArray<readonly [number, number]> {
   const spans: Array<readonly [number, number]> = [];
-  for (let at = text.indexOf(phrase); at !== -1; at = text.indexOf(phrase, at + 1)) spans.push([at, at + phrase.length]);
+  for (let at = text.indexOf(phrase); at !== -1; at = text.indexOf(phrase, at + 1))
+    spans.push([at, at + phrase.length]);
   return spans;
 }
 
@@ -37,7 +64,9 @@ function findingsIn(file: string, raw: string, kept: ReadonlyArray<Kept> = KEPT)
   const text = fold(raw);
   const spans = kept.filter((k) => k.file === file).flatMap((k) => spansOf(text, k.phrase));
   const inside = (from: number, to: number): boolean => spans.some(([start, end]) => start <= from && to <= end);
-  const addresses = [...text.matchAll(ADDRESS)].map((m) => `${file} names ${m[0]}, an address in the private memory: "${near(text, m.index)}"`);
+  const addresses = [...text.matchAll(ADDRESS)].map(
+    (m) => `${file} names ${m[0]}, an address in the private memory: "${near(text, m.index)}"`,
+  );
   const loose = [...text.matchAll(MENTION)]
     .filter((m) => !inside(m.index, m.index + m[0].length))
     .map((m) => `${file} names the memory store outside every kept line: "${near(text, m.index)}"`);
@@ -45,21 +74,30 @@ function findingsIn(file: string, raw: string, kept: ReadonlyArray<Kept> = KEPT)
 }
 
 function trackedUnderRoots(): ReadonlyArray<string> {
-  const listing = spawnSync("git", ["ls-files", "-z", "--", ...ROOTS], { cwd: REPO, encoding: "utf8", timeout: GIT_TIMEOUT_MS });
+  const listing = spawnSync("git", ["ls-files", "-z", "--", ...ROOTS], {
+    cwd: REPO,
+    encoding: "utf8",
+    timeout: GIT_TIMEOUT_MS,
+  });
   assert.equal(listing.status, 0, `git ls-files failed: ${listing.error?.message ?? listing.stderr}`);
   return listing.stdout.split("\0").filter(Boolean);
 }
 
 test("no agent or skill file names an address in the private memory, or names the store outside its kept lines", () => {
   const files = trackedUnderRoots();
-  for (const root of ROOTS) assert.ok(files.some((f) => f.startsWith(`${root}/`)), `${root} yielded no tracked file: the listing is broken`);
+  for (const root of ROOTS)
+    assert.ok(
+      files.some((f) => f.startsWith(`${root}/`)),
+      `${root} yielded no tracked file: the listing is broken`,
+    );
   const findings = files.flatMap((f) => findingsIn(f, readFileSync(resolve(REPO, f), "utf8")));
   assert.deepEqual(
     findings,
     [],
     `${findings.length} memory reference(s) under ${ROOTS.join(" and ")}. Write the content into its tracked home and point there ` +
       `(handbook/specs/conventions.md, "Where a rule lives"); a line that only forbids reading the store, records history or states ` +
-      `a rule of thumb about it names the store, never a file in it, and joins KEPT.\n  ` + findings.join("\n  "),
+      `a rule of thumb about it names the store, never a file in it, and joins KEPT.\n  ` +
+      findings.join("\n  "),
   );
 });
 
@@ -67,7 +105,11 @@ test("every kept phrase is still in its file and names the store", () => {
   const files = new Set(trackedUnderRoots());
   for (const { file, phrase, why } of KEPT) {
     assert.ok(files.has(file), `${file} is not a tracked file under ${ROOTS.join(" or ")}`);
-    assert.notEqual(fold(readFileSync(resolve(REPO, file), "utf8")).indexOf(phrase), -1, `${file}: the kept line "${phrase}" (${why}) is gone, so its KEPT row goes too`);
+    assert.notEqual(
+      fold(readFileSync(resolve(REPO, file), "utf8")).indexOf(phrase),
+      -1,
+      `${file}: the kept line "${phrase}" (${why}) is gone, so its KEPT row goes too`,
+    );
     assert.match(phrase, new RegExp(MENTION.source, "i"), `"${phrase}" names no store, so it keeps nothing`);
   }
 });
@@ -98,7 +140,7 @@ const REAIMED = [
   },
   {
     file: ".claude/agents/vellum-plate-reader.md",
-    text: "**Measurements and named files, never \"it looks right.\"** Alex sees only what you relay and what lands on disk (`feedback_show_visual_artifacts`).",
+    text: '**Measurements and named files, never "it looks right."** Alex sees only what you relay and what lands on disk (`feedback_show_visual_artifacts`).',
     arms: { address: true, mention: false },
   },
 ] as const;
@@ -162,6 +204,10 @@ const PASSED: ReadonlyArray<readonly [string, string]> = [
 test("each arm refuses its own form, a kept phrase keeps only its own words in its own file, and the near misses pass", () => {
   for (const [file, text] of REFUSED) assert.notDeepEqual(findingsIn(file, text), [], `${file}: "${text}" passes`);
   const naming = "it was once in `feedback_x.md`, in the private memory";
-  assert.notDeepEqual(findingsIn(OUTSIDE, naming, [{ file: OUTSIDE, phrase: naming, why: "history" }]), [], "a kept phrase excused the memory file it names");
+  assert.notDeepEqual(
+    findingsIn(OUTSIDE, naming, [{ file: OUTSIDE, phrase: naming, why: "history" }]),
+    [],
+    "a kept phrase excused the memory file it names",
+  );
   for (const [file, text] of PASSED) assert.deepEqual(findingsIn(file, text), [], `${file}: "${text}"`);
 });

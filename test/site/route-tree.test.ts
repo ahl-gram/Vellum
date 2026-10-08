@@ -16,20 +16,89 @@ const UNSEATED = ["/", "/specimen/", "/atlas/"];
 
 type Want = { crumbs: [string, string][]; current: boolean; also: [string, string][] };
 const TRAILS: Record<string, Want> = {
-  "/seed-of-the-day/": { crumbs: [["Vellum", "/"], ["The Seed of the Day", "/seed-of-the-day/"]], current: false, also: [] },
-  "/explorer/": { crumbs: [["Vellum", "/"], ["The Explorer", "/explorer/"]], current: false, also: [] },
-  "/reading-room/": { crumbs: [["Vellum", "/"], ["The Reading Room", "/reading-room/"]], current: false, also: [] },
-  "/print-room/": { crumbs: [["Vellum", "/"], ["The Print Room", "/print-room/"]], current: false, also: [] },
-  "/gallery/": { crumbs: [["Vellum", "/"], ["The Gallery", "/gallery/"]], current: false, also: [] },
-  "/faq/": { crumbs: [["Vellum", "/"], ["Questions & Answers", "/faq/"]], current: false, also: [] },
-  "/glossary/": { crumbs: [["Vellum", "/"], ["The Glossary", "/glossary/"]], current: false, also: [] },
+  "/seed-of-the-day/": {
+    crumbs: [
+      ["Vellum", "/"],
+      ["The Seed of the Day", "/seed-of-the-day/"],
+    ],
+    current: false,
+    also: [],
+  },
+  "/explorer/": {
+    crumbs: [
+      ["Vellum", "/"],
+      ["The Explorer", "/explorer/"],
+    ],
+    current: false,
+    also: [],
+  },
+  "/reading-room/": {
+    crumbs: [
+      ["Vellum", "/"],
+      ["The Reading Room", "/reading-room/"],
+    ],
+    current: false,
+    also: [],
+  },
+  "/print-room/": {
+    crumbs: [
+      ["Vellum", "/"],
+      ["The Print Room", "/print-room/"],
+    ],
+    current: false,
+    also: [],
+  },
+  "/gallery/": {
+    crumbs: [
+      ["Vellum", "/"],
+      ["The Gallery", "/gallery/"],
+    ],
+    current: false,
+    also: [],
+  },
+  "/faq/": {
+    crumbs: [
+      ["Vellum", "/"],
+      ["Questions & Answers", "/faq/"],
+    ],
+    current: false,
+    also: [],
+  },
+  "/glossary/": {
+    crumbs: [
+      ["Vellum", "/"],
+      ["The Glossary", "/glossary/"],
+    ],
+    current: false,
+    also: [],
+  },
   "/prospect/": {
-    crumbs: [["Vellum", "/"], ["The Explorer", "/explorer/"], ["The Prospect", "/prospect/"]],
+    crumbs: [
+      ["Vellum", "/"],
+      ["The Explorer", "/explorer/"],
+      ["The Prospect", "/prospect/"],
+    ],
     current: true,
     also: [["The Reading Room", "/reading-room/"]],
   },
-  "/ribbon/": { crumbs: [["Vellum", "/"], ["The Explorer", "/explorer/"], ["The Wayfarer's Ribbon", "/ribbon/"]], current: true, also: [] },
-  "/explorer/portfolio/": { crumbs: [["Vellum", "/"], ["The Explorer", "/explorer/"], ["The Portfolio", "/explorer/portfolio/"]], current: true, also: [] },
+  "/ribbon/": {
+    crumbs: [
+      ["Vellum", "/"],
+      ["The Explorer", "/explorer/"],
+      ["The Wayfarer's Ribbon", "/ribbon/"],
+    ],
+    current: true,
+    also: [],
+  },
+  "/explorer/portfolio/": {
+    crumbs: [
+      ["Vellum", "/"],
+      ["The Explorer", "/explorer/"],
+      ["The Portfolio", "/explorer/portfolio/"],
+    ],
+    current: true,
+    also: [],
+  },
 };
 
 test("the tree's top line IS the nav: every nav route is seated at the top, and home, the Specimen and the atlas have no seat", () => {
@@ -38,13 +107,18 @@ test("the tree's top line IS the nav: every nav route is seated at the top, and 
 });
 
 test("a route's seat is its FIRST appearance: the Prospect hangs off the Explorer, not off the Reading Room that also carries it", () => {
-  assert.ok(ROUTE_CHILDREN["/reading-room/"]?.includes("/prospect/"), "precondition: the Reading Room carries the Prospect too, or the first-appearance rule is untested");
-  for (const child of UNDER_THE_EXPLORER) assert.equal(seatOf(child), "/explorer/", `${child} is seated under the Explorer`);
+  assert.ok(
+    ROUTE_CHILDREN["/reading-room/"]?.includes("/prospect/"),
+    "precondition: the Reading Room carries the Prospect too, or the first-appearance rule is untested",
+  );
+  for (const child of UNDER_THE_EXPLORER)
+    assert.equal(seatOf(child), "/explorer/", `${child} is seated under the Explorer`);
 });
 
 test("an alias is every later appearance: the Prospect alone has one, the Reading Room", () => {
   assert.deepEqual(aliasesOf("/prospect/"), ["/reading-room/"]);
-  for (const route of SEATED.filter((r) => r !== "/prospect/")) assert.deepEqual(aliasesOf(route), [], `${route} has no alias`);
+  for (const route of SEATED.filter((r) => r !== "/prospect/"))
+    assert.deepEqual(aliasesOf(route), [], `${route} has no alias`);
 });
 
 test("every seated route's trail runs from Vellum down to the page; home, the Specimen and the atlas draw none", () => {
@@ -52,9 +126,17 @@ test("every seated route's trail runs from Vellum down to the page; home, the Sp
   for (const [route, want] of Object.entries(TRAILS)) {
     const got = trailFor(route);
     assert.ok(got, `${route} draws a trail`);
-    assert.deepEqual(got.crumbs.map((c) => [c.name, c.href]), want.crumbs, `${route} crumbs`);
+    assert.deepEqual(
+      got.crumbs.map((c) => [c.name, c.href]),
+      want.crumbs,
+      `${route} crumbs`,
+    );
     assert.equal(got.current, want.current, `${route} carries the page mark exactly when the nav cannot`);
-    assert.deepEqual(got.also.map((c) => [c.name, c.href]), want.also, `${route} also reached from`);
+    assert.deepEqual(
+      got.also.map((c) => [c.name, c.href]),
+      want.also,
+      `${route} also reached from`,
+    );
   }
   for (const route of UNSEATED) assert.equal(trailFor(route), null, `${route} draws no trail`);
 });
@@ -74,20 +156,48 @@ test("one source of names: every seat and the root is named, nothing else is, an
 });
 
 test("the tree and discovery agree: every discovery route but home and the atlas is seated, and every seat is discoverable", () => {
-  assert.deepEqual(DISCOVERY_ROUTES.filter((r) => seatOf(r) === undefined).sort(), [ATLAS_ROUTE, HOME_ROUTE].sort(), "a new destination is seated or named beside the atlas here");
-  for (const route of Object.values(ROUTE_CHILDREN).flat()) assert.ok(DISCOVERY_ROUTES.includes(route), `${route} is seated, so it is discoverable`);
+  assert.deepEqual(
+    DISCOVERY_ROUTES.filter((r) => seatOf(r) === undefined).sort(),
+    [ATLAS_ROUTE, HOME_ROUTE].sort(),
+    "a new destination is seated or named beside the atlas here",
+  );
+  for (const route of Object.values(ROUTE_CHILDREN).flat())
+    assert.ok(DISCOVERY_ROUTES.includes(route), `${route} is seated, so it is discoverable`);
 });
 
 test("every route the tree names is a page", () => {
-  const named = [...NAV_ITEMS.map((i) => i.href), ...Object.keys(ROUTE_CHILDREN), ...Object.values(ROUTE_CHILDREN).flat()];
+  const named = [
+    ...NAV_ITEMS.map((i) => i.href),
+    ...Object.keys(ROUTE_CHILDREN),
+    ...Object.values(ROUTE_CHILDREN).flat(),
+  ];
   assert.ok(named.length > NAV_ITEMS.length, "precondition: the tree seats children, or this reads the nav alone");
-  for (const route of named) assert.ok(existsSync(root(`src/pages${route}index.astro`)), `src/pages${route}index.astro exists`);
+  for (const route of named)
+    assert.ok(existsSync(root(`src/pages${route}index.astro`)), `src/pages${route}index.astro exists`);
 });
 
 test("no shipped file names the Portfolio's old address but the tombstone that cleans it (Issue #669)", () => {
-  const files = execFileSync("git", ["ls-files", "src", "scripts", "e2e", "public"], { cwd: root(""), encoding: "utf8", timeout: 30_000 }).split("\n").filter(Boolean);
-  assert.ok(files.includes("src/site/explorer/app.ts") && files.includes("public/house.css"), "precondition: git listed the shipped trees, or this scan reads nothing");
+  const files = execFileSync("git", ["ls-files", "src", "scripts", "e2e", "public"], {
+    cwd: root(""),
+    encoding: "utf8",
+    timeout: 30_000,
+  })
+    .split("\n")
+    .filter(Boolean);
+  assert.ok(
+    files.includes("src/site/explorer/app.ts") && files.includes("public/house.css"),
+    "precondition: git listed the shipped trees, or this scan reads nothing",
+  );
   // Blind spot, erring toward a miss: a RELATIVE road to the old address never spells it out, which the built-page resolver, the road pins and the e2e walks cover instead.
-  const hits = files.flatMap((f) => readFileSync(root(f), "utf8").split("\n").filter((line) => line.includes("print-room/portfolio")).map((line) => `${f}: ${line.trim()}`));
-  assert.deepEqual(hits, ['scripts/clean-public-generated.ts: "print-room/portfolio/app.bundle.js",'], "only the tombstone in GENERATED_SUBTREES may name the Portfolio's old address; anything else is a road to a page that no longer exists");
+  const hits = files.flatMap((f) =>
+    readFileSync(root(f), "utf8")
+      .split("\n")
+      .filter((line) => line.includes("print-room/portfolio"))
+      .map((line) => `${f}: ${line.trim()}`),
+  );
+  assert.deepEqual(
+    hits,
+    ['scripts/clean-public-generated.ts: "print-room/portfolio/app.bundle.js",'],
+    "only the tombstone in GENERATED_SUBTREES may name the Portfolio's old address; anything else is a road to a page that no longer exists",
+  );
 });

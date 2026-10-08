@@ -41,7 +41,10 @@ test("puddles below the minimum size are ignored", () => {
 });
 
 test("lakes sort by area, largest first", () => {
-  const f = basin(40, 30, [[10, 15, 3], [30, 15, 1]]);
+  const f = basin(40, 30, [
+    [10, 15, 3],
+    [30, 15, 1],
+  ]);
   const lakes = findLakes(f, 0, 4);
   assert.equal(lakes.length, 2);
   assert.ok(lakes[0]!.area > lakes[1]!.area);

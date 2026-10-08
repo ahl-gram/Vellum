@@ -14,8 +14,7 @@ type Point = { x: number; y: number };
 type Local = (e: { clientX: number; clientY: number }) => Point;
 
 // Capturing the pointer retargets the CLICK to the stage, so a MOUSE gesture must never begin on a control or the buttons go dead (synthetic .click() bypasses capture, which is why probes missed it); touch pointers are never captured, so their gestures may begin on controls and a tap still delivers its click (Issue #475 ruling 2).
-const onControl = (e: Event) =>
-  e.target instanceof Element && e.target.closest("button, a, input, select") !== null;
+const onControl = (e: Event) => e.target instanceof Element && e.target.closest("button, a, input, select") !== null;
 
 function stageLocal(stage: HTMLElement) {
   const local = (e: { clientX: number; clientY: number }) => {
@@ -48,9 +47,15 @@ function stagePinch(pointers: ReadonlyMap<number, Point>, on: StageInputHandlers
     if (pinchStart > 0 && d > 0) on.pinch(p.x, p.y, d / pinchStart);
     mid = m;
   };
-  const setPinchStart = (next: number): void => { pinchStart = next; };
-  const setMid = (next: Point | null): void => { mid = next; };
-  const setFrame = (next: number): void => { frame = next; };
+  const setPinchStart = (next: number): void => {
+    pinchStart = next;
+  };
+  const setMid = (next: Point | null): void => {
+    mid = next;
+  };
+  const setFrame = (next: number): void => {
+    frame = next;
+  };
   return { anchor, step, frame: (): number => frame, setFrame, setPinchStart, setMid };
 }
 

@@ -35,8 +35,8 @@ export default defineConfig(
     languageOptions: { parserOptions: { projectService: true, tsconfigRootDir: import.meta.dirname } },
     rules: {
       "max-depth": ["error", 4],
-      "max-lines": ["error", 400],
-      "max-lines-per-function": ["error", 50],
+      "max-lines": ["error", { max: 400, skipBlankLines: true, skipComments: true }],
+      "max-lines-per-function": ["error", { max: 50, skipBlankLines: true, skipComments: true }],
       "no-empty": ["error", { allowEmptyCatch: true }],
       "no-param-reassign": ["error", { props: true, ignorePropertyModificationsFor: ["drawerEls", "ghostEl", "innerEl", "legendEl", "logEls", "mapEl", "noteEl", "pillEl", "roomEls", "sheetEl", "slipEl", "statusEl", "targetEl", "viewportEl"] }],
       "@typescript-eslint/no-floating-promises": [

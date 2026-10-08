@@ -139,8 +139,10 @@ function projectSettlements(
     const u = s.x / (recipe.gridW - 1);
     const v = s.y / (recipe.gridH - 1);
     if (
-      u < window.u0 + du * inset || u > window.u1 - du * inset ||
-      v < window.v0 + dv * inset || v > window.v1 - dv * inset
+      u < window.u0 + du * inset ||
+      u > window.u1 - du * inset ||
+      v < window.v0 + dv * inset ||
+      v > window.v1 - dv * inset
     ) {
       return;
     }
@@ -253,22 +255,8 @@ function regionCarry(g: RegionGrid, seaGate: Uint8Array): NonNullable<World["reg
     worldGridW: recipe.gridW,
     worldGridH: recipe.gridH,
     seaGate,
-    realmRings: mapRingsToWindow(
-      realmCarryRings(world),
-      window,
-      recipe.gridW,
-      recipe.gridH,
-      gridW,
-      gridH,
-    ),
-    realmBorders: mapChainsToWindow(
-      realmBorderChains(world),
-      window,
-      recipe.gridW,
-      recipe.gridH,
-      gridW,
-      gridH,
-    ),
+    realmRings: mapRingsToWindow(realmCarryRings(world), window, recipe.gridW, recipe.gridH, gridW, gridH),
+    realmBorders: mapChainsToWindow(realmBorderChains(world), window, recipe.gridW, recipe.gridH, gridW, gridH),
     parentRealmLabels: world.realms.labels,
   };
 }
@@ -287,8 +275,7 @@ function regionPeople(
   const roads = buildRoads(elev, seaLevel, riverCells, settlements, { labels: roadLabels, seats });
 
   const deepestSizeUV = (LOD_BANDS[LOD_BANDS.length - 1] as (typeof LOD_BANDS)[number]).sizeUV;
-  const hamlets =
-    window.u1 - window.u0 <= deepestSizeUV + 1e-9 ? placeHamlets(world, window, elev, seaLevel) : [];
+  const hamlets = window.u1 - window.u0 <= deepestSizeUV + 1e-9 ? placeHamlets(world, window, elev, seaLevel) : [];
   const peopled = hamlets.length > 0 ? [...settlements, ...hamlets] : settlements;
   return { peopled, roads, roadLabels, seats };
 }
@@ -307,9 +294,7 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
 
   const { peopled, roads, roadLabels, seats } = regionPeople(g, spec, { elev, seaLevel, riverCells });
 
-  const oceanDist = bfsDistance(gridW, gridH, (x, y) =>
-    (elev.data[x + y * gridW] as number) > seaLevel,
-  );
+  const oceanDist = bfsDistance(gridW, gridH, (x, y) => (elev.data[x + y * gridW] as number) > seaLevel);
 
   return {
     recipe: { ...recipe, gridW, gridH },
@@ -335,11 +320,7 @@ export function generateRegionWorld(world: World, spec: RegionSpec): World {
   };
 }
 
-export function windowAround(
-  world: World,
-  s: { x: number; y: number },
-  size: number,
-): UvWindow {
+export function windowAround(world: World, s: { x: number; y: number }, size: number): UvWindow {
   const u = s.x / (world.recipe.gridW - 1);
   const v = s.y / (world.recipe.gridH - 1);
   const half = size / 2;

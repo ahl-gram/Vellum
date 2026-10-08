@@ -24,8 +24,16 @@ export async function h15aDrift({ evaluate, check, sleep }: SuiteContext): Promi
 }
 
 export async function h15bWheelStops({ evaluate, send, check, sleep }: SuiteContext): Promise<void> {
-  const stagePt = await evaluate<{ x: number; y: number }>(`(() => { const r = document.getElementById("lf-stage").getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`);
-  await send("Input.dispatchMouseEvent", { type: "mouseWheel", x: Math.round(stagePt.x), y: Math.round(stagePt.y), deltaX: 0, deltaY: -120 });
+  const stagePt = await evaluate<{ x: number; y: number }>(
+    `(() => { const r = document.getElementById("lf-stage").getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`,
+  );
+  await send("Input.dispatchMouseEvent", {
+    type: "mouseWheel",
+    x: Math.round(stagePt.x),
+    y: Math.round(stagePt.y),
+    deltaX: 0,
+    deltaY: -120,
+  });
   await sleep(400);
   const still1 = await evaluate(readXform);
   await sleep(900);

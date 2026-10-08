@@ -64,7 +64,10 @@ test("watershedDivides ignores basins below the area gate", () => {
   const basins = basinsFrom(ids);
   // gate at 20% of 18 land cells = 3.6; only basin 0 (15 cells) clears it -> <2 major
   const div = watershedDivides(basins, w, h, 0.2);
-  assert.ok(div.every((v) => v === 0), "a single major basin has no divide");
+  assert.ok(
+    div.every((v) => v === 0),
+    "a single major basin has no divide",
+  );
 });
 
 test("basins are deterministic on a real island, ocean is -1", () => {

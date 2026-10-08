@@ -4,11 +4,7 @@ import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { generateRegionWorld, windowAround } from "../../src/world/region.ts";
 import { coastRingsGrid } from "../../src/render/coast.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
-import {
-  chaikinSmooth,
-  closedIsoRings,
-  type Point,
-} from "../../src/terrain/contours.ts";
+import { chaikinSmooth, closedIsoRings, type Point } from "../../src/terrain/contours.ts";
 import type { World } from "../../src/world/types.ts";
 
 // The metric is self-consistent in GRID space (no rasterizer, no golden): a small residual survives even with no smoothing (the half-cell iso quantization), so the contract is that pinning lands near that floor.
@@ -23,7 +19,7 @@ function drawnAsLand(rings: ReadonlyArray<ReadonlyArray<Point>>, px: number, py:
       const b = ring[j] as Point;
       const ay = a[1];
       const by = b[1];
-      if ((ay > py) !== (by > py)) {
+      if (ay > py !== by > py) {
         const x = ((b[0] - a[0]) * (py - ay)) / (by - ay) + a[0];
         if (px < x) inside = !inside;
       }
@@ -50,15 +46,12 @@ function phantomSeaFraction(world: World, rings: ReadonlyArray<ReadonlyArray<Poi
 }
 
 function plainRings(world: World, iters: number): Point[][] {
-  return closedIsoRings(world.elev, world.seaLevel).map((c) =>
-    chaikinSmooth(c.points, true, iters),
-  );
+  return closedIsoRings(world.elev, world.seaLevel).map((c) => chaikinSmooth(c.points, true, iters));
 }
 
 function capitalRegion(seed: number, size = 0.38): World {
   const world = generateWorld(defaultRecipe(seed));
-  const capital =
-    world.settlements.find((s) => s.kind === "capital") ?? world.settlements[0]!;
+  const capital = world.settlements.find((s) => s.kind === "capital") ?? world.settlements[0]!;
   return generateRegionWorld(world, {
     window: windowAround(world, capital, size),
     gridW: world.recipe.gridW,
@@ -76,8 +69,14 @@ test("pinned region coast recovers the smoothing-induced phantom sea (#223)", ()
   const floor = phantomSeaFraction(region, plainRings(region, 0)); // no smoothing
 
   assert.ok(plain > 0.03, `expected plain smoothing to show real phantom sea, got ${(plain * 100).toFixed(1)}%`);
-  assert.ok(pinned < plain / 3, `pinned ${(pinned * 100).toFixed(1)}% must be < plain/3 ${((plain / 3) * 100).toFixed(1)}%`);
-  assert.ok(pinned <= floor + 0.005, `pinned ${(pinned * 100).toFixed(1)}% must sit near the floor ${(floor * 100).toFixed(1)}%`);
+  assert.ok(
+    pinned < plain / 3,
+    `pinned ${(pinned * 100).toFixed(1)}% must be < plain/3 ${((plain / 3) * 100).toFixed(1)}%`,
+  );
+  assert.ok(
+    pinned <= floor + 0.005,
+    `pinned ${(pinned * 100).toFixed(1)}% must sit near the floor ${(floor * 100).toFixed(1)}%`,
+  );
 });
 
 test("pinned region coast holds across seeds and an edge-clamped window (#223)", () => {
@@ -89,9 +88,15 @@ test("pinned region coast holds across seeds and an edge-clamped window (#223)",
   for (const [label, region] of cases) {
     const plain = phantomSeaFraction(region, plainRings(region, COAST_ITERS));
     const pinned = phantomSeaFraction(region, coastRingsGrid(region, COAST_ITERS));
-    assert.ok(pinned <= plain, `${label}: pinning must never add phantom sea (${(pinned * 100).toFixed(1)}% vs ${(plain * 100).toFixed(1)}%)`);
+    assert.ok(
+      pinned <= plain,
+      `${label}: pinning must never add phantom sea (${(pinned * 100).toFixed(1)}% vs ${(plain * 100).toFixed(1)}%)`,
+    );
     if (plain > 0.03) {
-      assert.ok(pinned < plain / 2, `${label}: pinned ${(pinned * 100).toFixed(1)}% must beat plain/2 ${((plain / 2) * 100).toFixed(1)}%`);
+      assert.ok(
+        pinned < plain / 2,
+        `${label}: pinned ${(pinned * 100).toFixed(1)}% must beat plain/2 ${((plain / 2) * 100).toFixed(1)}%`,
+      );
     }
   }
 });

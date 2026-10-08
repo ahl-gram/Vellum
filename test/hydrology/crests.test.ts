@@ -10,7 +10,8 @@ import { computeBasins, watershedDivides } from "../../src/hydrology/basins.ts";
 // The LOOSE elevation gate keeps a divide only where it runs through the top half of land elevation (quantile ~0.5); it does NOT select "only the biggest ranges", MAJOR_BASIN_FRACTION already does.
 
 const SEA = 0.5;
-const W = 6, H = 3;
+const W = 6,
+  H = 3;
 
 // Land rises with x (0.60..0.85, identical rows, all 18 cells land); sorted, the median (index floor(0.5*17)=8) is 0.70, so the LOOSE gate keeps x >= 2 and drops x=0,1.
 const risingLand = () => createField(W, H, (x) => 0.6 + x * 0.05);
@@ -45,12 +46,16 @@ test("#141 the gate is deterministic", () => {
 test("#141 with no land the gate keeps nothing (no threshold to clear)", () => {
   const allOcean = createField(W, H, () => 0.2); // every cell <= SEA
   const gated = gateDivideElevation(divideAt([1, 2, 3, 4]), allOcean, SEA, 0.5);
-  assert.ok(gated.every((v) => v === 0), "a landless field yields an empty crest mask");
+  assert.ok(
+    gated.every((v) => v === 0),
+    "a landless field yields an empty crest mask",
+  );
 });
 
 test("#141 mountainCrests on a real island: the gate drops below-median divides, keeps the crest", () => {
   // Seed 16: 213 major divides, 38 below the land median, so crest < divides bites the wiring (a gate-disconnected mutation makes crest == divides). Seed 7, the obvious pick, has EVERY divide above median, so the gate is a no-op there and that mutation slips the whole suite.
-  const gw = 120, gh = 90;
+  const gw = 120,
+    gh = 90;
   const f = buildHeightfield({ seed: 16, gridW: gw, gridH: gh, mapType: "island" });
   const sea = pickSeaLevel(f, 0.35);
   const flow = computeFlow(f, sea);
@@ -59,7 +64,8 @@ test("#141 mountainCrests on a real island: the gate drops below-median divides,
 
   const land = [...f.data].filter((v) => v > sea);
   const median = quantile(land, 0.5);
-  let crestCount = 0, divideCount = 0;
+  let crestCount = 0,
+    divideCount = 0;
   for (let i = 0; i < f.data.length; i++) {
     if (divides[i]) divideCount++;
     if (crest[i]) {

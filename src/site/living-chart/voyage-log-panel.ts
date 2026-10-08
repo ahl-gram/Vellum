@@ -46,7 +46,7 @@ export function createVoyageLogPanel(logEls: VoyageLogHost) {
     subtitle: string,
     homecoming?: VoyageHomecoming | null,
   ): { log: VoyageLog; rows: HTMLLIElement[] } {
-    const log = buildVoyageLog(logPorts, presentYear, (seed >>> 0), subtitle || "", homecoming);
+    const log = buildVoyageLog(logPorts, presentYear, seed >>> 0, subtitle || "", homecoming);
     logEls.sig.textContent = log.attribution;
     const rows = log.entries.map((e, i) => journalRow(e, i));
     logEls.strip.replaceChildren(...rows);

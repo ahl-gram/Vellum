@@ -44,8 +44,16 @@ const seedInput = q<HTMLInputElement>(".rr-colophon input");
 const diceBtn = q<HTMLButtonElement>(".rr-dice");
 const readBtn = q<HTMLButtonElement>(".rr-read");
 const furniture = {
-  stage: q(".stage"), sheet: $("sheet"), viewport: $("map-viewport"), strip: q(".strip"), scale: q(".scale"),
-  slip: $("journal"), tab: q(".slip-tab"), journalDock: q(".journal-dock"), folioTitle: $("folio-title"), folioSub: $("folio-sub"),
+  stage: q(".stage"),
+  sheet: $("sheet"),
+  viewport: $("map-viewport"),
+  strip: q(".strip"),
+  scale: q(".scale"),
+  slip: $("journal"),
+  tab: q(".slip-tab"),
+  journalDock: q(".journal-dock"),
+  folioTitle: $("folio-title"),
+  folioSub: $("folio-sub"),
 };
 
 // Roughly 3x the slowest matrix measured on CI (2.1s), against the Explorer's 20s: the instrument IS this surface, so a dead worker must not hold the unfurl back for twenty seconds, and a timeout costs a main-thread block, never a different itinerary (voyage-session.ts orderItinerary computes the SAME order inline).
@@ -168,7 +176,11 @@ function rowsForSurvey(): ReadonlyArray<PlateSpec | null> {
   if (!plates) return [];
   const log = lc.voyageLog();
   if (!log) return [];
-  surveyRows = surveyPlateRows(log.entries.map((e) => e.idx), plates.hasArms, plates.presentYear);
+  surveyRows = surveyPlateRows(
+    log.entries.map((e) => e.idx),
+    plates.hasArms,
+    plates.presentYear,
+  );
   return surveyRows;
 }
 
@@ -243,7 +255,11 @@ function landChart(res: Readonly<DrawResult>): void {
   shownSeed = seed;
 }
 
-function bindPlates(res: Readonly<DrawResult>, forSeed: number, overrides: Readonly<ReturnType<typeof recipeOverrides>>): void {
+function bindPlates(
+  res: Readonly<DrawResult>,
+  forSeed: number,
+  overrides: Readonly<ReturnType<typeof recipeOverrides>>,
+): void {
   // The stage's world binds in lockstep with lastRes, so the failure path's re-arm can never paint one world's plate over another's chart; prefetch is the arm's step.
   const dress = plateDressFor(style);
   plates = {
@@ -254,13 +270,20 @@ function bindPlates(res: Readonly<DrawResult>, forSeed: number, overrides: Reado
   surveyRows = null;
   stage.setWorld(
     (s) =>
-      runJob({ kind: "prospect", seed: forSeed, overrides, index: s.index, dress, year: s.year })
-        .then((r) => ({ svg: r.svg, name: r.name })),
+      runJob({ kind: "prospect", seed: forSeed, overrides, index: s.index, dress, year: s.year }).then((r) => ({
+        svg: r.svg,
+        name: r.name,
+      })),
     (s) => prospectHrefFor(forSeed, s),
   );
 }
 
-function scheduleArm(res: Readonly<DrawResult>, forSeed: number, armedByLink: boolean, rest: AgesPos | undefined): void {
+function scheduleArm(
+  res: Readonly<DrawResult>,
+  forSeed: number,
+  armedByLink: boolean,
+  rest: AgesPos | undefined,
+): void {
   // Both halves close over THIS draw's res, never module state, so an arm landing late cannot meet another world's chart.
   roomArm.schedule({
     prime: () => tourOrder.prime(res.manifest, res.survey, forSeed),
@@ -303,7 +326,14 @@ function draw(): void {
     kind: "draw",
     seed,
     overrides,
-    render: { style, widthPx: 1500, legend: carried.legend, arms: carried.arms, beasts: carried.beasts, theme: carried.theme || undefined },
+    render: {
+      style,
+      widthPx: 1500,
+      legend: carried.legend,
+      arms: carried.arms,
+      beasts: carried.beasts,
+      theme: carried.theme || undefined,
+    },
   })
     .then((res) => {
       if (myGen !== drawGen) return;
@@ -333,10 +363,20 @@ function readSeed(): void {
 }
 
 // Play and a slider move are the two gestures that ask for a picture; the paint each one triggers is what reveals it, so nothing here forces a show.
-frame.host.scrubber.playBtn.addEventListener("click", () => { armPlate(); lc.togglePlay(); });
+frame.host.scrubber.playBtn.addEventListener("click", () => {
+  armPlate();
+  lc.togglePlay();
+});
 // A pace press is not a story gesture (no plate, no hash).
-for (const [k, btn] of frame.paceButtons) btn.addEventListener("click", () => { lc.setPace(k); frame.markPace(k); });
-frame.host.scrubber.range.addEventListener("input", () => { armPlate(); lc.onManualScrub(); });
+for (const [k, btn] of frame.paceButtons)
+  btn.addEventListener("click", () => {
+    lc.setPace(k);
+    frame.markPace(k);
+  });
+frame.host.scrubber.range.addEventListener("input", () => {
+  armPlate();
+  lc.onManualScrub();
+});
 frame.host.scrubber.range.addEventListener("change", syncHash);
 frame.host.scrubber.range.addEventListener("pointerdown", lc.agesDragStart);
 frame.host.scrubber.range.addEventListener("pointerup", lc.agesDragEnd);
@@ -357,7 +397,9 @@ shownSeed = seed; // a boot failure rolls back to the boot world itself
 draw();
 // Wired after the first draw() so a click can never reach a worker still shaking hands.
 readBtn.addEventListener("click", readSeed);
-seedInput.addEventListener("keydown", (e) => { if (e.key === "Enter") readSeed(); });
+seedInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") readSeed();
+});
 diceBtn.addEventListener("click", () => {
   seedInput.value = String(Math.floor(Math.random() * 0xffffffff));
   readSeed();

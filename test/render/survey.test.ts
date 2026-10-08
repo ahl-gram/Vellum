@@ -31,11 +31,25 @@ test("land is indexed x + y * gridW (row-major), matching the elevation field", 
 
 test("roads become grid-space [x,y] polylines, order and points preserved", () => {
   const roads: Road[] = [
-    { rank: "trunk", points: [{ x: 1, y: 2 }, { x: 2, y: 2 }, { x: 3, y: 3 }] },
+    {
+      rank: "trunk",
+      points: [
+        { x: 1, y: 2 },
+        { x: 2, y: 2 },
+        { x: 3, y: 3 },
+      ],
+    },
     { rank: "lane", points: [{ x: 9, y: 9 }] },
   ];
   const s = buildSurvey(field(2, 2, [1, 1, 1, 1]), 0, roads);
-  assert.deepEqual(s.roads, [[[1, 2], [2, 2], [3, 3]], [[9, 9]]]);
+  assert.deepEqual(s.roads, [
+    [
+      [1, 2],
+      [2, 2],
+      [3, 3],
+    ],
+    [[9, 9]],
+  ]);
 });
 
 test("a world with no roads yields an empty roads array, not a crash", () => {
@@ -78,17 +92,46 @@ const road = (pts: Array<[number, number]>): Road => ({ rank: "lane", points: pt
 
 test("surveyFingerprint: equal for two independently built identical surveys", () => {
   const elev = field(3, 2, [0.2, 0.6, 0.9, 0.2, 0.9, 0.2]);
-  const a = surveyFingerprint(buildSurvey(elev, 0.5, [road([[1, 0], [2, 0]])]));
-  const b = surveyFingerprint(buildSurvey(elev, 0.5, [road([[1, 0], [2, 0]])]));
+  const a = surveyFingerprint(
+    buildSurvey(elev, 0.5, [
+      road([
+        [1, 0],
+        [2, 0],
+      ]),
+    ]),
+  );
+  const b = surveyFingerprint(
+    buildSurvey(elev, 0.5, [
+      road([
+        [1, 0],
+        [2, 0],
+      ]),
+    ]),
+  );
   assert.equal(a, b);
 });
 
 test("surveyFingerprint: a flipped land cell or a moved road cell changes it", () => {
   const elev = field(3, 2, [0.2, 0.6, 0.9, 0.2, 0.9, 0.2]);
-  const roads = [road([[1, 0], [2, 0]])];
+  const roads = [
+    road([
+      [1, 0],
+      [2, 0],
+    ]),
+  ];
   const base = surveyFingerprint(buildSurvey(elev, 0.5, roads));
   // Raising the waterline past 0.6 drowns cell (1,0): the land mask differs.
   assert.notEqual(surveyFingerprint(buildSurvey(elev, 0.7, roads)), base);
   // Same land, one road vertex moved: the road facts differ.
-  assert.notEqual(surveyFingerprint(buildSurvey(elev, 0.5, [road([[1, 0], [1, 1]])])), base);
+  assert.notEqual(
+    surveyFingerprint(
+      buildSurvey(elev, 0.5, [
+        road([
+          [1, 0],
+          [1, 1],
+        ]),
+      ]),
+    ),
+    base,
+  );
 });

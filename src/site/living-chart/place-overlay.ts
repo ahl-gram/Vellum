@@ -1,8 +1,27 @@
 // The story cards: a per-draw layer of invisible hit-targets over the baked chart feeding one reused parchment card. Card text is composed client-side from the manifest (composePlaceCard), never createLoreWriter, whose order-dependent prose would diverge from the gazetteer for the same town.
-import { composePlaceCard, placeAriaLabel, cardSide, clampOffset, type CardBox, type PlaceCard } from "../../render/place-card.ts";
+import {
+  composePlaceCard,
+  placeAriaLabel,
+  cardSide,
+  clampOffset,
+  type CardBox,
+  type PlaceCard,
+} from "../../render/place-card.ts";
 import type { PlaceManifest, PlaceMark } from "../../render/place-manifest.ts";
 import type { HistoricalEvent } from "../../society/history.ts";
-import { CLOSED, HOLD_GRACE_MS, isHit, nearestMark, nextHold, pointerTrack, pressMark, wireHit, type Hold, type HoldInput, type Point } from "./place-card-hold.ts";
+import {
+  CLOSED,
+  HOLD_GRACE_MS,
+  isHit,
+  nearestMark,
+  nextHold,
+  pointerTrack,
+  pressMark,
+  wireHit,
+  type Hold,
+  type HoldInput,
+  type Point,
+} from "./place-card-hold.ts";
 
 interface PlaceOverlayState {
   card: HTMLDivElement;
@@ -87,12 +106,24 @@ function cardShell() {
   const inner = document.createElement("div");
   inner.className = "pc-inner";
   // Issue #633: d3-zoom is bound on the host's viewport, an ANCESTOR of the card carrying touch-action: none, so without this a drag or a wheel over the card reaches the camera and the card never scrolls; measured with a CDP touch pan, which cannot see a touch-action line at all and still read scrollTop 0 to 0. Whether a real thumb scrolls it is UNVERIFIABLE in this harness.
-  for (const ev of ["touchstart", "touchmove", "wheel"]) inner.addEventListener(ev, (e) => { if (inner.scrollHeight - inner.clientHeight > 1) e.stopPropagation(); }, { passive: true });
+  for (const ev of ["touchstart", "touchmove", "wheel"])
+    inner.addEventListener(
+      ev,
+      (e) => {
+        if (inner.scrollHeight - inner.clientHeight > 1) e.stopPropagation();
+      },
+      { passive: true },
+    );
   card.appendChild(inner);
   return { card, inner };
 }
 
-function cardActs(inner: HTMLDivElement, opts: Readonly<BuildPlaceOverlayOpts> | undefined, prospectHref: PlaceOverlayDeps["prospectHref"], layProspect: Readonly<LayProspectHost> | undefined) {
+function cardActs(
+  inner: HTMLDivElement,
+  opts: Readonly<BuildPlaceOverlayOpts> | undefined,
+  prospectHref: PlaceOverlayDeps["prospectHref"],
+  layProspect: Readonly<LayProspectHost> | undefined,
+) {
   // Both card actions are world-sheet only: a region manifest renumbers its places (Issue #242), so an inset's index names a different settlement.
   const onWorldSheet = !(opts && opts.box);
   let prospectLink: HTMLAnchorElement | null = null;
@@ -145,7 +176,10 @@ function fillCardInner(innerEl: HTMLElement, card: PlaceCard, acts: HTMLElement 
   derivation.className = "pc-roots";
   derivation.textContent = card.derivationLine;
   tail.push(tongue, derivation);
-  if (!acts) { innerEl.append(...head, ...tail); return; }
+  if (!acts) {
+    innerEl.append(...head, ...tail);
+    return;
+  }
   acts.before(...head);
   acts.after(...tail);
 }
@@ -174,7 +208,8 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
   let timer: ReturnType<typeof setTimeout> | null = null;
   let last: Point = { x: Number.NaN, y: Number.NaN };
   let watching: Document | null = null;
-  let near: HTMLElement | null = null, own: HTMLElement | null = null;
+  let near: HTMLElement | null = null,
+    own: HTMLElement | null = null;
 
   function showPlaceCard(idx: number): boolean {
     if (!placeOverlay || isSuppressed()) return false; // the hover card is suppressed while scrubbing
@@ -259,7 +294,9 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     if (over !== hold.onCard) feed({ kind: "move", onCard: over });
   }
 
-  const onDown = (e: Event): void => { track.down(e); };
+  const onDown = (e: Event): void => {
+    track.down(e);
+  };
 
   function syncWatch(): void {
     const doc = (mapEl as { ownerDocument?: Document | null }).ownerDocument ?? null;
@@ -286,26 +323,37 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     const prev = hold;
     hold = nextHold(prev, input);
     seatCard(po, hold);
-    if (hold.shown >= 0 && (hold.shown !== prev.shown || hold.pinned !== prev.pinned) && !showPlaceCard(hold.shown)) hold = { ...CLOSED, hovered: hold.hovered };
+    if (hold.shown >= 0 && (hold.shown !== prev.shown || hold.pinned !== prev.pinned) && !showPlaceCard(hold.shown))
+      hold = { ...CLOSED, hovered: hold.hovered };
     if (hold.shown < 0) {
       po.card.hidden = true;
       seatCard(po, hold);
     }
     if (hold.waiting && !timer) timer = setTimeout(expire, HOLD_GRACE_MS);
-    else if (!hold.waiting && timer) { clearTimeout(timer); timer = null; }
+    else if (!hold.waiting && timer) {
+      clearTimeout(timer);
+      timer = null;
+    }
     syncWatch();
     if (po.card.parentElement) po.card.parentElement.classList.toggle("pc-over", hold.shown >= 0 && hold.onCard);
-    own = tag("pc-own", own, hold.shown >= 0 ? po.hits[hold.shown] ?? null : null);
+    own = tag("pc-own", own, hold.shown >= 0 ? (po.hits[hold.shown] ?? null) : null);
   }
 
-  const hidePlaceCard = (): void => { feed({ kind: "dismiss" }); };
+  const hidePlaceCard = (): void => {
+    feed({ kind: "dismiss" });
+  };
 
   function raise(idx: number): void {
-    near = tag("pc-near", near, placeOverlay && idx >= 0 ? placeOverlay.hits[idx] ?? null : null);
+    near = tag("pc-near", near, placeOverlay && idx >= 0 ? (placeOverlay.hits[idx] ?? null) : null);
   }
 
   function resolve(p: Point, idx: number): number {
-    const boxes = placeOverlay ? placeOverlay.hits.map((h, i) => { const r = h.getBoundingClientRect(); return { idx: i, left: r.left, top: r.top, right: r.right, bottom: r.bottom }; }) : [];
+    const boxes = placeOverlay
+      ? placeOverlay.hits.map((h, i) => {
+          const r = h.getBoundingClientRect();
+          return { idx: i, left: r.left, top: r.top, right: r.right, bottom: r.bottom };
+        })
+      : [];
     const at = nearestMark(p, boxes);
     return at >= 0 ? at : idx;
   }
@@ -361,7 +409,19 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
       overlay.appendChild(hit);
       return hit;
     });
-    placeOverlay = { card, inner, hits, places: manifest.places, events: manifest.events, cultureId: manifest.cultureId, presentYear: manifest.presentYear, currentIdx: -1, prospectLink, acts, layPress };
+    placeOverlay = {
+      card,
+      inner,
+      hits,
+      places: manifest.places,
+      events: manifest.events,
+      cultureId: manifest.cultureId,
+      presentYear: manifest.presentYear,
+      currentIdx: -1,
+      prospectLink,
+      acts,
+      layPress,
+    };
     overlay.appendChild(card);
     mapEl.appendChild(overlay);
     if (preserveName != null) {
@@ -393,7 +453,16 @@ export function createPlaceOverlay(deps: PlaceOverlayDeps) {
     placeOverlay = null;
   }
 
-  return { buildPlaceOverlay, onDocKeydown, onDocClick, hideCard: hidePlaceCard, reclampCard, relabelLay, data, teardown };
+  return {
+    buildPlaceOverlay,
+    onDocKeydown,
+    onDocClick,
+    hideCard: hidePlaceCard,
+    reclampCard,
+    relabelLay,
+    data,
+    teardown,
+  };
 }
 
 export type PlaceOverlay = ReturnType<typeof createPlaceOverlay>;

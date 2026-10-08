@@ -61,19 +61,14 @@ export function parentCellsOnWindow(
   return createField(w, h, (x, y) => {
     const p = parentCoords(parent, parentWindow, childWindow, w, h, x, y);
     if (p === null) return NaN;
-    return parent.at(
-      Math.min(Math.round(p.px), parent.w - 1),
-      Math.min(Math.round(p.py), parent.h - 1),
-    );
+    return parent.at(Math.min(Math.round(p.px), parent.w - 1), Math.min(Math.round(p.py), parent.h - 1));
   });
 }
 
 /** The parent's cell decides WHETHER it floors, its interpolated surface decides how high. Ungated, the surface rises over a one-cell strait and fills a one-cell basin, inventing land the parent never had (Issue #443). */
 export function gateToParentLand(surface: Field, cells: Field, seaLevel: number): Field {
   if (surface.w !== cells.w || surface.h !== cells.h) {
-    throw new RangeError(
-      `gateToParentLand: field sizes differ (${surface.w}x${surface.h} vs ${cells.w}x${cells.h})`,
-    );
+    throw new RangeError(`gateToParentLand: field sizes differ (${surface.w}x${surface.h} vs ${cells.w}x${cells.h})`);
   }
   const data = new Float64Array(surface.data.length);
   for (let i = 0; i < data.length; i++) {
@@ -97,19 +92,19 @@ export function floorToParent(fine: Field, parentSurface: Field): Field {
   return fieldFrom(fine.w, fine.h, data);
 }
 
-function shoresTouched(
-  gainIds: Int32Array,
-  coarseIds: Int32Array,
-  w: number,
-  h: number,
-): Map<number, Set<number>> {
+function shoresTouched(gainIds: Int32Array, coarseIds: Int32Array, w: number, h: number): Map<number, Set<number>> {
   const touched = new Map<number, Set<number>>();
   for (let i = 0; i < w * h; i++) {
     const gid = gainIds[i] as number;
     if (gid === -1) continue;
     const x = i % w;
     const y = (i / w) | 0;
-    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {
+    for (const [dx, dy] of [
+      [1, 0],
+      [-1, 0],
+      [0, 1],
+      [0, -1],
+    ] as const) {
       const nx = x + dx;
       const ny = y + dy;
       if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;
@@ -126,16 +121,9 @@ function shoresTouched(
   return touched;
 }
 
-export function rejectBridges(
-  coarse: Field,
-  immovable: Field,
-  fine: Field,
-  seaLevel: number,
-): Field {
+export function rejectBridges(coarse: Field, immovable: Field, fine: Field, seaLevel: number): Field {
   if (coarse.w !== fine.w || coarse.h !== fine.h) {
-    throw new RangeError(
-      `rejectBridges: field sizes differ (${coarse.w}x${coarse.h} vs ${fine.w}x${fine.h})`,
-    );
+    throw new RangeError(`rejectBridges: field sizes differ (${coarse.w}x${coarse.h} vs ${fine.w}x${fine.h})`);
   }
   if (immovable.w !== fine.w || immovable.h !== fine.h) {
     throw new RangeError(

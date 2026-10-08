@@ -1,6 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { realWorld, recordingLogPanel, recordingSink, recordingStatus, stackedMount } from "../../test-support/living-chart-hosts.ts";
+import {
+  realWorld,
+  recordingLogPanel,
+  recordingSink,
+  recordingStatus,
+  stackedMount,
+} from "../../test-support/living-chart-hosts.ts";
 
 // What the session builder does to the MOUNT (Issue #364): the wipe of every .voyage-overlay immediately before the unconditional append, asserted from the mount's own side via stackedMount's ordered ledger (three wrong forms of that line survived e2e SV2g/SV2h); and what the ENGINE does to the mount when that build bails (Issue #371), which no arm path can reach through the UI.
 
@@ -74,8 +80,16 @@ test("#371 a re-arm whose build bails strips every surface, and posts nothing", 
 
   assert.deepEqual(mount.ledger, BAILED, "a bailing re-arm drops every overlay the mount holds and appends nothing");
   assert.deepEqual(calls, ["clear"], "the ink stays on the back of the sheet after the front was scraped");
-  assert.deepEqual(journal, ["hide"], "the journal is the surface this issue is named for, and it outlives the mount wipe");
-  assert.deepEqual(status, [], "the bail wrote to the status line, and the host's whole settle signal is that line staying empty");
+  assert.deepEqual(
+    journal,
+    ["hide"],
+    "the journal is the surface this issue is named for, and it outlives the mount wipe",
+  );
+  assert.deepEqual(
+    status,
+    [],
+    "the bail wrote to the status line, and the host's whole settle signal is that line staying empty",
+  );
 });
 
 test("#371 a QUIET bail wipes the recto and leaves the verso frozen", async () => {
@@ -110,7 +124,11 @@ test("#371 a bail after a real arm scrapes the world that was resting there", as
 
   assert.match(calls[armed - 1] as string, /^paint:/, "the fixture never armed, so the bail has nothing to scrape");
   assert.deepEqual(calls.slice(armed), ["clear"], "the previous world's track is still on the back of the sheet");
-  assert.deepEqual(journal.filter((c) => c === "hide"), ["hide"], "its journal hides exactly once, at the bail");
+  assert.deepEqual(
+    journal.filter((c) => c === "hide"),
+    ["hide"],
+    "its journal hides exactly once, at the bail",
+  );
 });
 
 test("#371 control: a re-arm that BUILDS still appends, and the wipe is the builder's", async () => {

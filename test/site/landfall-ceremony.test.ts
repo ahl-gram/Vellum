@@ -67,7 +67,6 @@ test("the wide anchorage and the landfall view frame the isle as the mockup's ca
   const lc = centerFraction(land, view, SHEET);
   assert.ok(Math.abs(lc.fx - 0.51) < 1e-9, "landfall centers the capital's water, fx 0.51");
   assert.ok(Math.abs(lc.fy - 0.485) < 1e-9, "landfall centers the capital's water, fy 0.485");
-
 });
 
 test("arrival memory: once per sitting, and a blocked storage plays the ceremony every time (#457 ratified 1)", () => {
@@ -77,9 +76,17 @@ test("arrival memory: once per sitting, and a blocked storage plays the ceremony
     setItem: (k: string, v: string) => void backing.set(k, v),
   } as Storage;
 
-  assert.equal(firstArrival(() => fake), true, "an absent value is a first arrival");
+  assert.equal(
+    firstArrival(() => fake),
+    true,
+    "an absent value is a first arrival",
+  );
   markArrival(() => fake);
-  assert.equal(firstArrival(() => fake), false, "a marked sitting does not replay");
+  assert.equal(
+    firstArrival(() => fake),
+    false,
+    "a marked sitting does not replay",
+  );
   assert.equal(backing.has(ARRIVED_KEY), true, "the mark is stored under the exported key");
 
   const denied = () => {
@@ -114,14 +121,25 @@ test("the veil ships as no static element yet dresses first paint: a pre-paint i
     !/veil-wordmark|class="veil"|id="lf-veil"/.test(markup),
     "no veil ELEMENT in the page markup; without JS there is nothing to trap behind",
   );
-  assert.match(astro, /veilMarkup\(\)/, "the inline script's markup is the one veilMarkup() source, interpolated at build");
+  assert.match(
+    astro,
+    /veilMarkup\(\)/,
+    "the inline script's markup is the one veilMarkup() source, interpolated at build",
+  );
   assert.match(astro, /ARRIVED_KEY/, "the inline predicate reads the same sessionStorage key the module marks");
   assert.match(astro, /prefers-reduced-motion/, "the inline predicate gives reduced motion no veil at all");
   const scriptAt = astro.indexOf("define:vars");
-  assert.ok(scriptAt > -1 && scriptAt < astro.indexOf('class="landfall"'), "the veil script parses BEFORE the stage, so first paint already wears the deep");
+  assert.ok(
+    scriptAt > -1 && scriptAt < astro.indexOf('class="landfall"'),
+    "the veil script parses BEFORE the stage, so first paint already wears the deep",
+  );
   assert.match(astro, /dataset\.adopted/, "an unadopted veil releases itself: a failed bundle can never trap the page");
   const veil = read("src/site/home/veil.ts");
-  assert.match(veil, /getElementById\("lf-veil"\)/, "playCeremony adopts the pre-paint veil instead of injecting a twin");
+  assert.match(
+    veil,
+    /getElementById\("lf-veil"\)/,
+    "playCeremony adopts the pre-paint veil instead of injecting a twin",
+  );
   assert.match(veil, /dataset\.adopted/, "adoption is marked, standing the safety release down");
 });
 

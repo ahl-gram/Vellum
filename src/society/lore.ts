@@ -160,7 +160,11 @@ function createFreshPick(rng: Rng): FreshPick {
   };
 }
 
-function createFill(freshPick: FreshPick, aromatic: readonly string[], cargo: readonly string[]): (template: string) => string {
+function createFill(
+  freshPick: FreshPick,
+  aromatic: readonly string[],
+  cargo: readonly string[],
+): (template: string) => string {
   return (template: string): string => {
     let out = template;
     if (out.includes("%a")) out = out.replace("%a", freshPick(aromatic));

@@ -140,7 +140,14 @@ export function buildOgCard(chartSvg: string, opts: OgCardOptions = {}): string 
     `<defs>${faces}${deepGradient()}</defs>` +
     `<rect width="${OG_WIDTH}" height="${OG_HEIGHT}" fill="url(#veil-deep)"/>` +
     ghostChart(chartSvg) +
-    line(wordmark, WORDMARK.y, WORDMARK.size, FONT_DISPLAY, PARCHMENT_BRIGHT, ` letter-spacing="${(WORDMARK.size * WORDMARK.track).toFixed(2)}"`) +
+    line(
+      wordmark,
+      WORDMARK.y,
+      WORDMARK.size,
+      FONT_DISPLAY,
+      PARCHMENT_BRIGHT,
+      ` letter-spacing="${(WORDMARK.size * WORDMARK.track).toFixed(2)}"`,
+    ) +
     line(tagline, TAGLINE.y, TAGLINE.size, FONT_FLOURISH, PARCHMENT, ` font-style="italic"`) +
     settledRose() +
     hook.map((text, i) => hookLine(text, i)).join("") +

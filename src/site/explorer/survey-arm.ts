@@ -10,16 +10,20 @@ export interface SurveyArmDeps {
 export function createSurveyArm(deps: SurveyArmDeps) {
   let gen = 0;
 
-  const live = (mine: number, world: number): boolean =>
-    mine === gen && world === deps.worldGen() && deps.isArmed();
+  const live = (mine: number, world: number): boolean => mine === gen && world === deps.worldGen() && deps.isArmed();
 
   function schedule(run: () => void = deps.arm): void {
     const mine = ++gen;
     const world = deps.worldGen();
     deps.afterPaint(() => {
       if (!live(mine, world)) return;
-      if (!deps.prime) { run(); return; }
-      const armIfLive = () => { if (live(mine, world)) run(); };
+      if (!deps.prime) {
+        run();
+        return;
+      }
+      const armIfLive = () => {
+        if (live(mine, world)) run();
+      };
       void deps.prime().then(armIfLive, armIfLive);
     });
   }
@@ -54,8 +58,13 @@ export function wireSurveyToggle(deps: SurveyToggleDeps): SurveyArm {
     ...(deps.prime ? { prime: deps.prime } : {}),
   });
   deps.box.addEventListener("change", () => {
-    if (deps.box.checked) { deps.home(); arm.schedule(); }
-    else { arm.cancel(); deps.exit(); }
+    if (deps.box.checked) {
+      deps.home();
+      arm.schedule();
+    } else {
+      arm.cancel();
+      deps.exit();
+    }
     deps.syncHash();
   });
   return arm;
@@ -74,12 +83,22 @@ export function deferLandingArm(quiet: boolean, flipped: boolean): boolean {
 }
 
 export function armOnLanding(o: LandingArm): void {
-  if (!o.armed) { o.arm.cancel(); o.clear(); return; }
-  if (o.defer === false) { o.arm.cancel(); o.rearm(); return; }
+  if (!o.armed) {
+    o.arm.cancel();
+    o.clear();
+    return;
+  }
+  if (o.defer === false) {
+    o.arm.cancel();
+    o.rearm();
+    return;
+  }
   o.arm.schedule(o.rearm);
 }
 
 // rAF first on purpose: a backgrounded tab suspends rAF, so a hidden tick or deep link arms on the reader's first look instead of blocking ~1s on ink nobody is looking at.
 export function afterNextPaint(run: () => void): void {
-  requestAnimationFrame(() => { setTimeout(run, 0); });
+  requestAnimationFrame(() => {
+    setTimeout(run, 0);
+  });
 }

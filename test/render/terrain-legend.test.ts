@@ -25,24 +25,36 @@ function centerCtx(centerElev: number, centerBiome: number, span = 1): RenderCtx
 test("terrainGlyphsPresent mirrors the glyph layer's relief gates", () => {
   // rel in (0.34, 0.5] -> hill, regardless of biome
   assert.deepEqual(terrainGlyphsPresent(centerCtx(0.4, BIOMES.grassland)), {
-    hill: true, marsh: false, dune: false,
+    hill: true,
+    marsh: false,
+    dune: false,
   });
   // rel > 0.5 is a mountain, which the key always lists separately -> none here
   assert.deepEqual(terrainGlyphsPresent(centerCtx(0.7, BIOMES.grassland)), {
-    hill: false, marsh: false, dune: false,
+    hill: false,
+    marsh: false,
+    dune: false,
   });
   assert.deepEqual(terrainGlyphsPresent(centerCtx(0.1, BIOMES.marsh)), {
-    hill: false, marsh: true, dune: false,
+    hill: false,
+    marsh: true,
+    dune: false,
   });
   assert.deepEqual(terrainGlyphsPresent(centerCtx(0.1, BIOMES.desert)), {
-    hill: false, marsh: false, dune: true,
+    hill: false,
+    marsh: false,
+    dune: true,
   });
   assert.deepEqual(terrainGlyphsPresent(centerCtx(0.1, BIOMES.grassland)), {
-    hill: false, marsh: false, dune: false,
+    hill: false,
+    marsh: false,
+    dune: false,
   });
   // elevSpan scales the threshold: 0.8 over a span of 2 is rel 0.4 -> hill
   assert.deepEqual(terrainGlyphsPresent(centerCtx(0.8, BIOMES.grassland, 2)), {
-    hill: true, marsh: false, dune: false,
+    hill: true,
+    marsh: false,
+    dune: false,
   });
 });
 
@@ -83,9 +95,7 @@ test("the key lists Dunes when the map carries desert", () => {
   const world = generateWorld(defaultRecipe(42, {}));
   const arid: World = {
     ...world,
-    biomes: Uint8Array.from(world.biomes, (b) =>
-      b === BIOMES.grassland ? BIOMES.desert : b,
-    ),
+    biomes: Uint8Array.from(world.biomes, (b) => (b === BIOMES.grassland ? BIOMES.desert : b)),
   };
   assert.ok(terrainGlyphsPresent(glyphCtx(arid, "antique")).dune, "expected dune cells");
   const labels = planLegend(glyphCtx(arid, "antique"), [])!.rows.map((r) => r.label);
@@ -96,9 +106,7 @@ test("the key omits Marsh when the map has none", () => {
   const world = generateWorld(defaultRecipe(42, {}));
   const drained: World = {
     ...world,
-    biomes: Uint8Array.from(world.biomes, (b) =>
-      b === BIOMES.marsh ? BIOMES.grassland : b,
-    ),
+    biomes: Uint8Array.from(world.biomes, (b) => (b === BIOMES.marsh ? BIOMES.grassland : b)),
   };
   const labels = planLegend(glyphCtx(drained, "antique"), [])!.rows.map((r) => r.label);
   assert.ok(!labels.includes("Marsh"), "no marsh cells should drop the Marsh row");
@@ -115,9 +123,7 @@ test("the added terrain rows keep the key inside the frame", () => {
       const { box } = plan;
       const m = ctx.proj.margin;
       assert.ok(
-        box.x >= m && box.y >= m &&
-          box.x + box.w <= ctx.proj.widthPx - m &&
-          box.y + box.h <= ctx.proj.heightPx - m,
+        box.x >= m && box.y >= m && box.x + box.w <= ctx.proj.widthPx - m && box.y + box.h <= ctx.proj.heightPx - m,
         `legend off-frame (seed ${seed}, ${name})`,
       );
     }

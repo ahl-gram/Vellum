@@ -11,17 +11,35 @@ const winListeners = new Map<string, Array<(e?: unknown) => void>>();
 const body = new El("body");
 Object.assign(globalThis.document, {
   body,
-  addEventListener: (type: string, fn: (e?: unknown) => void) => { docListeners.set(type, [...(docListeners.get(type) ?? []), fn]); },
-  removeEventListener: (type: string, fn: (e?: unknown) => void) => { docListeners.set(type, (docListeners.get(type) ?? []).filter((f) => f !== fn)); },
+  addEventListener: (type: string, fn: (e?: unknown) => void) => {
+    docListeners.set(type, [...(docListeners.get(type) ?? []), fn]);
+  },
+  removeEventListener: (type: string, fn: (e?: unknown) => void) => {
+    docListeners.set(
+      type,
+      (docListeners.get(type) ?? []).filter((f) => f !== fn),
+    );
+  },
 });
 (globalThis as { window?: unknown }).window = {
   scrollX: 0,
-  addEventListener: (type: string, fn: (e?: unknown) => void) => { winListeners.set(type, [...(winListeners.get(type) ?? []), fn]); },
-  removeEventListener: (type: string, fn: (e?: unknown) => void) => { winListeners.set(type, (winListeners.get(type) ?? []).filter((f) => f !== fn)); },
+  addEventListener: (type: string, fn: (e?: unknown) => void) => {
+    winListeners.set(type, [...(winListeners.get(type) ?? []), fn]);
+  },
+  removeEventListener: (type: string, fn: (e?: unknown) => void) => {
+    winListeners.set(
+      type,
+      (winListeners.get(type) ?? []).filter((f) => f !== fn),
+    );
+  },
 };
-const fireDoc = (type: string, e: unknown) => { for (const fn of [...(docListeners.get(type) ?? [])]) fn(e); };
+const fireDoc = (type: string, e: unknown) => {
+  for (const fn of [...(docListeners.get(type) ?? [])]) fn(e);
+};
 const revoked: string[] = [];
-URL.revokeObjectURL = (u: string) => { revoked.push(u); };
+URL.revokeObjectURL = (u: string) => {
+  revoked.push(u);
+};
 const nextTick = () => new Promise((r) => setTimeout(r, 0));
 
 const MOUSE = { pointerType: "mouse", button: 0, isPrimary: true };
@@ -36,9 +54,20 @@ function bound(opts: { file?: boolean; band?: { top: number } | null; reduce?: b
     handle,
     ghostUrl: () => `blob:ghost-${++calls.minted}`,
     band: () => (opts.band === undefined ? BAND : opts.band),
-    reveal: () => { calls.reveal++; opts.onReveal?.(); return () => { calls.restore++; }; },
-    receiving: (over) => { calls.receiving.push(over); },
-    file: (url) => { calls.file.push(url); return opts.file ?? true; },
+    reveal: () => {
+      calls.reveal++;
+      opts.onReveal?.();
+      return () => {
+        calls.restore++;
+      };
+    },
+    receiving: (over) => {
+      calls.receiving.push(over);
+    },
+    file: (url) => {
+      calls.file.push(url);
+      return opts.file ?? true;
+    },
     prefersReduce: () => opts.reduce ?? true,
     settleMs: () => 340,
     settleEase: () => "cubic-bezier(0.22, 0.61, 0.36, 1)",
@@ -47,33 +76,57 @@ function bound(opts: { file?: boolean; band?: { top: number } | null; reduce?: b
   const press = (x: number, y: number) => handle.fire("pointerdown", { ...MOUSE, clientX: x, clientY: y });
   const move = (x: number, y: number) => fireDoc("pointermove", { clientX: x, clientY: y });
   const up = (x: number, y: number) => fireDoc("pointerup", { clientX: x, clientY: y });
-  const click = () => { const e = { stopped: false, prevented: false, stopImmediatePropagation() { this.stopped = true; }, preventDefault() { this.prevented = true; } }; handle.fire("click", e); return e; };
+  const click = () => {
+    const e = {
+      stopped: false,
+      prevented: false,
+      stopImmediatePropagation() {
+        this.stopped = true;
+      },
+      preventDefault() {
+        this.prevented = true;
+      },
+    };
+    handle.fire("click", e);
+    return e;
+  };
   return { handle, calls, ghost, press, move, up, click, revoked };
 }
 
 test("TD8 the swallow is scoped to the click of its own release: a carry released AWAY from the ear leaves the next keyboard activation of the still-focused ear alive, and only a release ON the ear swallows the click that follows it (the cold review's finding 1 on PR #663)", async () => {
   const d = bound();
-  d.press(700, 130); d.move(640, 680); d.up(640, 680);
+  d.press(700, 130);
+  d.move(640, 680);
+  d.up(640, 680);
   assert.equal(d.calls.file.length, 1, "released in the band, filed");
   await nextTick();
   assert.equal(d.click().stopped, false, "Enter on the ear after a filing is an honest click");
-  d.press(700, 130); d.move(640, 300); d.up(640, 300);
+  d.press(700, 130);
+  d.move(640, 300);
+  d.up(640, 300);
   await nextTick();
   assert.equal(d.click().stopped, false, "and after a snap-back too");
-  d.press(700, 130); d.move(690, 140); d.up(700, 130);
+  d.press(700, 130);
+  d.move(690, 140);
+  d.up(700, 130);
   assert.equal(d.click().stopped, true, "a jiggle released on the ear swallows the click the release fires");
   assert.equal(d.click().stopped, false, "once");
 });
 
 test("TD9 the drawer is revealed as the carry ENTERS the band and put back on a snap, never on a filing and never on a refused filing (D4 ruled 2026-09-21; the lane's call 4)", () => {
   const d = bound();
-  d.press(700, 130); d.move(640, 300);
+  d.press(700, 130);
+  d.move(640, 300);
   assert.equal(d.calls.reveal, 0, "over the chart the drawer stays shut");
   d.move(640, 680);
   assert.equal(d.calls.reveal, 1, "entering the band opens it");
   assert.deepEqual(d.calls.receiving.slice(-2), [false, true], "with the drop cue");
   d.move(660, 700);
-  assert.equal(d.calls.reveal, 1, "a second move still inside the band does not reveal again (the prover's round 2 hole)");
+  assert.equal(
+    d.calls.reveal,
+    1,
+    "a second move still inside the band does not reveal again (the prover's round 2 hole)",
+  );
   d.move(640, 300);
   assert.equal(d.calls.reveal, 1, "backing out does not open it twice");
   d.move(640, 690);
@@ -82,11 +135,15 @@ test("TD9 the drawer is revealed as the carry ENTERS the band and put back on a 
   d.up(640, 300);
   assert.equal(d.calls.restore, 1, "a snap puts it back");
   assert.equal(d.calls.file.length, 0);
-  d.press(700, 130); d.move(640, 680); d.up(640, 680);
+  d.press(700, 130);
+  d.move(640, 680);
+  d.up(640, 680);
   assert.equal(d.calls.file.length, 1);
   assert.equal(d.calls.restore, 1, "a filing leaves the drawer open");
   const refused = bound({ file: false });
-  refused.press(700, 130); refused.move(640, 680); refused.up(640, 680);
+  refused.press(700, 130);
+  refused.move(640, 680);
+  refused.up(640, 680);
   assert.equal(refused.calls.file.length, 1);
   assert.equal(refused.calls.restore, 0, "a refused drop leaves it where lay put it");
   assert.equal(refused.ghost(), null, "and the ghost snapped back rather than being stranded");
@@ -95,18 +152,32 @@ test("TD9 the drawer is revealed as the carry ENTERS the band and put back on a 
 test("TD10 one url per carry: a filing adopts it and every other end revokes it, whether the pointer is released, cancelled, the window loses focus or Escape is pressed", () => {
   const d = bound();
   revoked.length = 0;
-  d.press(700, 130); d.move(640, 680); d.up(640, 680);
+  d.press(700, 130);
+  d.move(640, 680);
+  d.up(640, 680);
   assert.deepEqual(d.calls.file, ["blob:ghost-1"], "the ghost's url is the one handed to lay");
   assert.equal(d.revoked.length, 0, "adopted, not revoked");
-  d.press(700, 130); d.move(640, 300); d.up(640, 300);
+  d.press(700, 130);
+  d.move(640, 300);
+  d.up(640, 300);
   assert.equal(d.revoked.at(-1), "blob:ghost-2", "a snap revokes");
-  d.press(700, 130); d.move(640, 300); fireDoc("pointercancel", {});
+  d.press(700, 130);
+  d.move(640, 300);
+  fireDoc("pointercancel", {});
   assert.equal(d.revoked.at(-1), "blob:ghost-3", "a cancel revokes");
-  d.press(700, 130); d.move(640, 300); for (const fn of [...(winListeners.get("blur") ?? [])]) fn({});
+  d.press(700, 130);
+  d.move(640, 300);
+  for (const fn of [...(winListeners.get("blur") ?? [])]) fn({});
   assert.equal(d.revoked.at(-1), "blob:ghost-4", "losing the window revokes");
-  d.press(700, 130); d.move(640, 300); fireDoc("keydown", { key: "Escape" });
+  d.press(700, 130);
+  d.move(640, 300);
+  fireDoc("keydown", { key: "Escape" });
   assert.equal(d.revoked.at(-1), "blob:ghost-5", "Escape revokes");
-  assert.deepEqual(d.calls.receiving.slice(-3), [false, false, false], "and each cancelled end took the drop cue off the drawer (the prover named this unswept)");
+  assert.deepEqual(
+    d.calls.receiving.slice(-3),
+    [false, false, false],
+    "and each cancelled end took the drop cue off the drawer (the prover named this unswept)",
+  );
   assert.equal(d.ghost(), null, "and no ghost is left on the body");
   assert.equal((docListeners.get("pointermove") ?? []).length, 0, "and no document listener outlives its carry");
 });
@@ -116,7 +187,8 @@ test("TD11 a press that is not a mouse's primary button never begins a carry: no
   d.handle.fire("pointerdown", { ...MOUSE, pointerType: "touch", clientX: 700, clientY: 130 });
   assert.equal((docListeners.get("pointermove") ?? []).length, 0, "a touch adds nothing");
   const slop = bound();
-  slop.press(700, 130); slop.move(703, 132);
+  slop.press(700, 130);
+  slop.move(703, 132);
   assert.equal(slop.ghost(), null, "and a move under the slop mints no ghost");
   slop.up(703, 132);
   assert.equal(slop.calls.minted, 0);
@@ -126,22 +198,38 @@ test("TD12 the drawer's height token is read by its unit, so a band computed fro
   assert.equal(lengthPx("15.5rem", 16), 248);
   assert.equal(lengthPx("248px", 16), 248);
   assert.equal(lengthPx("  15.5rem ", 20), 310, "the root font size scales a rem");
-  assert.equal(Number.isNaN(lengthPx("calc(100vh - 2rem)", 16)), true, "a length this reader cannot resolve is NaN, which bandOf reads as no band");
+  assert.equal(
+    Number.isNaN(lengthPx("calc(100vh - 2rem)", 16)),
+    true,
+    "a length this reader cannot resolve is NaN, which bandOf reads as no band",
+  );
   assert.equal(Number.isNaN(lengthPx("", 16)), true);
-  for (const other of ["50%", "20vh", "2em", "248"]) assert.equal(Number.isNaN(lengthPx(other, 16)), true, `${other} is not a unit this reader resolves, so it is no band rather than a wrong one`);
+  for (const other of ["50%", "20vh", "2em", "248"])
+    assert.equal(
+      Number.isNaN(lengthPx(other, 16)),
+      true,
+      `${other} is not a unit this reader resolves, so it is no band rather than a wrong one`,
+    );
 });
 
 test("TD13 a snap-back with motion flies to the ear's corner, and an ear that has left the page by then fades where it is rather than flying to an all-zero rect (the lane's call 6)", async () => {
   const frames: unknown[][] = [];
-  (El.prototype as unknown as { animate: (f: unknown[]) => { finished: Promise<void> } }).animate = (f) => { frames.push(f); return { finished: Promise.resolve() }; };
+  (El.prototype as unknown as { animate: (f: unknown[]) => { finished: Promise<void> } }).animate = (f) => {
+    frames.push(f);
+    return { finished: Promise.resolve() };
+  };
   try {
     const d = bound({ reduce: false });
-    d.press(700, 130); d.move(640, 300); d.up(640, 300);
+    d.press(700, 130);
+    d.move(640, 300);
+    d.up(640, 300);
     assert.equal(frames.length, 1, "with motion the snap-back is an animation");
     assert.ok("translate" in (frames[0]![1] as object), "flying to the ear's seat");
     assert.match(String((frames[0]![1] as { translate: string }).translate), /^\d+(\.\d+)?px/, "a real destination");
     (d.handle as unknown as { isConnected: boolean }).isConnected = false;
-    d.press(700, 130); d.move(640, 300); d.up(640, 300);
+    d.press(700, 130);
+    d.move(640, 300);
+    d.up(640, 300);
     assert.equal(frames.length, 2);
     assert.equal("translate" in (frames[1]![1] as object), false, "a detached ear gets a fade in place, no flight");
     await Promise.resolve();
@@ -153,47 +241,79 @@ test("TD13 a snap-back with motion flies to the ear's corner, and an ear that ha
 
 test("TD14 a cancelled carry (Escape, a lost window, a cancelled pointer) still swallows the click of ITS eventual release on the ear, and a fresh press afterwards drops that pending swallow so an honest click files (the cold review's finding 3 on PR #663)", async () => {
   const d = bound();
-  d.press(700, 130); d.move(706, 136); fireDoc("keydown", { key: "Escape" });
+  d.press(700, 130);
+  d.move(706, 136);
+  fireDoc("keydown", { key: "Escape" });
   assert.equal(d.ghost(), null, "Escape ended the carry");
   await nextTick();
   d.up(700, 130);
-  assert.equal(d.click().stopped, true, "the release the reader still owes fires a click on the ear, and it is swallowed");
+  assert.equal(
+    d.click().stopped,
+    true,
+    "the release the reader still owes fires a click on the ear, and it is swallowed",
+  );
   await nextTick();
   assert.equal(d.click().stopped, false, "once");
-  d.press(700, 130); d.move(706, 136); for (const fn of [...(winListeners.get("blur") ?? [])]) fn({});
+  d.press(700, 130);
+  d.move(706, 136);
+  for (const fn of [...(winListeners.get("blur") ?? [])]) fn({});
   await nextTick();
-  d.press(700, 130); d.up(700, 130);
-  assert.equal(d.click().stopped, false, "a release that never reached the page (the window was lost) leaves no swallow for the next honest press and click");
+  d.press(700, 130);
+  d.up(700, 130);
+  assert.equal(
+    d.click().stopped,
+    false,
+    "a release that never reached the page (the window was lost) leaves no swallow for the next honest press and click",
+  );
 });
 
 test("TD15 a carry ended from inside its own move (the reveal it calls firing Escape) stays ended, so the next press begins a carry of its own (the cold review's round 3 finding 1 on PR #694)", async () => {
   const d = bound({ onReveal: () => fireDoc("keydown", { key: "Escape" }) });
-  d.press(700, 130); d.move(640, 680);
+  d.press(700, 130);
+  d.move(640, 680);
   assert.equal(d.calls.minted, 1, "the first carry lifted its ghost and entered the band");
   assert.equal(d.ghost(), null, "Escape inside the reveal ended it");
   await nextTick();
-  d.press(700, 130); d.move(640, 300);
-  assert.equal(d.calls.minted, 2, "the next press begins a new carry with a ghost of its own, where a carry brought back after its end refuses every later press");
+  d.press(700, 130);
+  d.move(640, 300);
+  assert.equal(
+    d.calls.minted,
+    2,
+    "the next press begins a new carry with a ghost of its own, where a carry brought back after its end refuses every later press",
+  );
   fireDoc("keydown", { key: "Escape" });
 });
 
 test("TD16 a move that lifts the ghost and enters the band in one event reveals the drawer once and keeps that reveal, so leaving and re-entering does not reveal again and a snap puts it back once (the guard-prover's round 3 on PR #694)", () => {
   const d = bound();
-  d.press(700, 130); d.move(640, 680);
+  d.press(700, 130);
+  d.move(640, 680);
   assert.equal(d.calls.reveal, 1, "one move lifted the ghost and entered the band");
-  d.move(640, 300); d.move(640, 690);
+  d.move(640, 300);
+  d.move(640, 690);
   assert.equal(d.calls.reveal, 1, "the carry kept its reveal, so re-entering the band does not open the drawer twice");
-  d.move(640, 300); d.up(640, 300);
+  d.move(640, 300);
+  d.up(640, 300);
   assert.equal(d.calls.restore, 1, "and the snap puts it back once");
 });
 
 test("TD17 a carry that ends inside its own move and is replaced there by a new press leaves the new carry alone, since the old move's late write reaches only the carry it began with (the guard-prover's round 3 on PR #694)", async () => {
   const ref: { d?: ReturnType<typeof bound> } = {};
-  const d = bound({ onReveal: () => { fireDoc("keydown", { key: "Escape" }); ref.d?.press(700, 130); } });
+  const d = bound({
+    onReveal: () => {
+      fireDoc("keydown", { key: "Escape" });
+      ref.d?.press(700, 130);
+    },
+  });
   ref.d = d;
-  d.press(700, 130); d.move(640, 680);
+  d.press(700, 130);
+  d.move(640, 680);
   d.move(640, 300);
-  assert.equal(d.calls.minted, 2, "the new press's first move lifts a ghost of its own, where the old move's late write had put the ended carry back over it");
+  assert.equal(
+    d.calls.minted,
+    2,
+    "the new press's first move lifts a ghost of its own, where the old move's late write had put the ended carry back over it",
+  );
   fireDoc("keydown", { key: "Escape" });
   await nextTick();
 });

@@ -4,11 +4,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { CULTURES } from "../../src/society/names.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
-import {
-  segmentName,
-  glossName,
-  tongueName,
-} from "../../src/society/philology.ts";
+import { segmentName, glossName, tongueName } from "../../src/society/philology.ts";
 import { composeDerivation } from "../../src/render/place-card.ts";
 
 // A re-parse of a settlement name against the grammar that made it: pure, no rng, never imported by generate.ts.
@@ -21,7 +17,11 @@ test("segmentName splits a suffixed oromi name at its onsets and lifts the town 
   assert.equal(seg.repair, "");
   assert.deepEqual(
     seg.syllables.map((s) => [s.onset, s.nucleus, s.coda]),
-    [["l", "au", ""], ["k", "u", ""], ["w", "e", ""]],
+    [
+      ["l", "au", ""],
+      ["k", "u", ""],
+      ["w", "e", ""],
+    ],
   );
   assert.deepEqual(seg.chunks.slice(), ["lau", "ku", "we", "lua"]);
 });
@@ -70,7 +70,10 @@ test("the repair is a LAST resort: two readings that tie are decided for the let
   const seg = segmentName("Deingan", "ordai");
   assert.ok(seg, "Deingan is grammatical ordai");
   assert.equal(seg.repair, "");
-  assert.deepEqual(seg.syllables.map((s) => s.coda), ["n"]);
+  assert.deepEqual(
+    seg.syllables.map((s) => s.coda),
+    ["n"],
+  );
 });
 
 test("a vowel-initial suffix never leaves a bare consonant standing as a syllable", () => {
@@ -160,7 +163,11 @@ test("the world generator never reaches for the glass, so a lexicon edit cannot 
   for (const file of ["src/world/generate.ts", "src/society/names.ts"]) {
     assert.doesNotMatch(src(file), /philology/, `${file} imports the philologist's glass`);
   }
-  assert.doesNotMatch(src("src/society/philology.ts"), /\brng\b|Math\.random/, "philology.ts reached for a source of randomness");
+  assert.doesNotMatch(
+    src("src/society/philology.ts"),
+    /\brng\b|Math\.random/,
+    "philology.ts reached for a source of randomness",
+  );
 });
 
 test("tongueName names each of the ten speeches from its culture id", () => {
@@ -220,12 +227,7 @@ test("all ten tongues are exercised by a real world, not only by the lexicon's o
   assert.deepEqual(missing, [], `no world in seeds 1-60 speaks ${missing.join(", ")}`);
   for (const id of spoken) {
     const world = CORPUS.find((w) => w.cultureId === id)!;
-    const glossed = world.names
-      .map((n) => glossName(n, id))
-      .filter((g) => g !== null && g.roots.length >= 2);
-    assert.ok(
-      glossed.length > 0,
-      `seed ${world.seed} (${id}) produced no settlement name with more than one root`,
-    );
+    const glossed = world.names.map((n) => glossName(n, id)).filter((g) => g !== null && g.roots.length >= 2);
+    assert.ok(glossed.length > 0, `seed ${world.seed} (${id}) produced no settlement name with more than one root`);
   }
 });

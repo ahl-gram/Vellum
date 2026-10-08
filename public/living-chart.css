@@ -1,101 +1,230 @@
 /* Living-chart engine overlay dressing, host-agnostic. Host contract, both halves or the overlays render undressed: link /living-chart.css and put class="living-chart" on the chart mount handed to the engine. */
 
 /* The .place-hit reset is load-bearing: a host's own button styling would otherwise paint opaque boxes over each map glyph and break idle parity. */
-.place-overlay { position: absolute; inset: 0; pointer-events: none; }
+.place-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
 .place-hit {
   position: absolute;
   /* The whole hit divides by --zoom-k (published on .place-overlay, never the mount) so the target holds its 26px at every depth; the (,1) fallback keeps non-zooming hosts untouched. */
   transform: translate(-50%, -50%) scale(calc(1 / var(--zoom-k, 1)));
-  width: 26px; height: 26px; box-sizing: border-box;
-  background: transparent; border: 0; border-radius: 0; padding: 0;
-  pointer-events: auto; cursor: pointer;
+  width: 26px;
+  height: 26px;
+  box-sizing: border-box;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  pointer-events: auto;
+  cursor: pointer;
 }
 /* The ring rides ::after (the scrub dot is ::before) so the .place-hit element keeps its zero-transition reset (`P2c` in `e2e/suites/cards/overlay.ts`) and idle parity holds. */
 .place-hit::after {
-  content: ""; position: absolute; inset: 0; margin: auto;
-  width: 20px; height: 20px; border-radius: 50%; box-sizing: border-box;
-  border: 2px solid var(--ink-dark); pointer-events: none;
-  opacity: 0; transform: scale(0.85);
-  transition: opacity var(--paper-quick) var(--ease-paper),
-              transform var(--paper-quick) var(--ease-paper);
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  box-sizing: border-box;
+  border: 2px solid var(--ink-dark);
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0.85);
+  transition:
+    opacity var(--paper-quick) var(--ease-paper),
+    transform var(--paper-quick) var(--ease-paper);
 }
 /* No zoom division of its own: the element carries it, and a second would shrink the ring k-fold below its 20px. The ring rides the town the overlay resolved under the pointer, not :hover, which the browser recomputes only on the pointer's next move after a raise (measured 2026-10-04, Issue #750). */
-.place-hit.pc-near::after, .place-hit:focus-visible::after {
-  opacity: 1; transform: scale(1);
+.place-hit.pc-near::after,
+.place-hit:focus-visible::after {
+  opacity: 1;
+  transform: scale(1);
 }
-.place-hit.pc-near { z-index: 1; }
-.place-overlay.pc-over .place-hit:not(.pc-own) { cursor: default; }
+.place-hit.pc-near {
+  z-index: 1;
+}
+.place-overlay.pc-over .place-hit:not(.pc-own) {
+  cursor: default;
+}
 /* The clamp rides inside the counter-scaled translate: the mount carries the Glass's scale(k), so a nudge ahead of scale(1/k) composes as k times itself, exactly right at k=1 and wrong at every other depth, which no unit test can catch. */
 /* --zoom-k is published on the card itself, never the mount, which would re-rasterize the baked labels every frame; the origin sits on the corner the card is anchored by, so the gap at the mark holds a constant screen distance at every depth. */
 #place-card {
-  position: absolute; z-index: 5; width: 16rem; pointer-events: none;
-  left: calc(var(--pc-nx, 0) * 100%); top: calc(var(--pc-ny, 0) * 100%);
+  position: absolute;
+  z-index: 5;
+  width: 16rem;
+  pointer-events: none;
+  left: calc(var(--pc-nx, 0) * 100%);
+  top: calc(var(--pc-ny, 0) * 100%);
   transform-origin: 0 0;
-  transform: scale(calc(1 / var(--zoom-k, 1)))
-    translate(calc(10px + var(--pc-dx, 0px)), calc(10px + var(--pc-dy, 0px)));
+  transform: scale(calc(1 / var(--zoom-k, 1))) translate(calc(10px + var(--pc-dx, 0px)), calc(10px + var(--pc-dy, 0px)));
 }
 /* id plus attribute beats the id-only rule above, so [hidden] really hides. */
-#place-card[hidden] { display: none; }
+#place-card[hidden] {
+  display: none;
+}
 /* A flipped card is anchored on the side it flips toward, so shrink-to-fit measures the room it will occupy: anchored on the mark's side, a town at nx 0.72 got a column as wide as the 28% gap it was flipping away from, a 97px ribbon 478px tall inside a 266px chart. */
-#place-card.flip-h { left: auto; right: calc(100% - var(--pc-nx, 0) * 100%);
+#place-card.flip-h {
+  left: auto;
+  right: calc(100% - var(--pc-nx, 0) * 100%);
   transform-origin: 100% 0;
   transform: scale(calc(1 / var(--zoom-k, 1)))
-    translate(calc(-10px + var(--pc-dx, 0px)), calc(10px + var(--pc-dy, 0px))); }
-#place-card.flip-v { transform: scale(calc(1 / var(--zoom-k, 1)))
-  translate(calc(10px + var(--pc-dx, 0px)), calc(-100% - 10px + var(--pc-dy, 0px))); }
-#place-card.flip-h.flip-v { transform-origin: 100% 0;
+    translate(calc(-10px + var(--pc-dx, 0px)), calc(10px + var(--pc-dy, 0px)));
+}
+#place-card.flip-v {
   transform: scale(calc(1 / var(--zoom-k, 1)))
-    translate(calc(-10px + var(--pc-dx, 0px)), calc(-100% - 10px + var(--pc-dy, 0px))); }
+    translate(calc(10px + var(--pc-dx, 0px)), calc(-100% - 10px + var(--pc-dy, 0px)));
+}
+#place-card.flip-h.flip-v {
+  transform-origin: 100% 0;
+  transform: scale(calc(1 / var(--zoom-k, 1)))
+    translate(calc(-10px + var(--pc-dx, 0px)), calc(-100% - 10px + var(--pc-dy, 0px)));
+}
 .pc-inner {
-  box-sizing: border-box; max-height: var(--pc-maxh, none);
-  overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y;
-  background: var(--control-cream); color: var(--ink-dark);
-  border: 1px solid var(--ink-dark); border-radius: 4px;
+  box-sizing: border-box;
+  max-height: var(--pc-maxh, none);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  background: var(--control-cream);
+  color: var(--ink-dark);
+  border: 1px solid var(--ink-dark);
+  border-radius: 4px;
   box-shadow: 0 8px 22px rgb(from var(--chart-ink) r g b / 0.28);
-  padding: 0.6rem 0.75rem; font-size: 0.9rem; line-height: 1.35;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.9rem;
+  line-height: 1.35;
   transform-origin: top center;
   animation: paperUnfurl var(--unfurl-quick) var(--ease-unfurl) both;
 }
-#place-card.flip-v .pc-inner { transform-origin: bottom center; }
-#place-card.pinned .pc-inner { animation-duration: var(--unfurl); }
-#place-card.pinned.pc-scrolls .pc-inner { pointer-events: auto; }
+#place-card.flip-v .pc-inner {
+  transform-origin: bottom center;
+}
+#place-card.pinned .pc-inner {
+  animation-duration: var(--unfurl);
+}
+#place-card.pinned.pc-scrolls .pc-inner {
+  pointer-events: auto;
+}
 /* The focus ring is drawn inside the card on its own cream: outside, over a live chart, it read 1.02:1. */
-#place-card .pc-inner:focus-visible { outline: 2px solid var(--ink-dark); outline-offset: -2px; }
-.pc-name { display: block; font-size: 1rem; letter-spacing: 0.02em; }
-.pc-rank { display: block; font-style: italic; color: var(--ink-brown); font-size: 0.82rem;
-  letter-spacing: 0.06em; text-transform: uppercase; margin-top: 0.1rem; }
-.pc-founded { display: block; margin-top: 0.35rem; font-variant-numeric: tabular-nums; }
-.pc-former { display: block; margin-top: 0.15rem; font-size: 0.9em; color: var(--ink-brown); }
-.pc-tale { margin: 0.4rem 0 0; font-style: italic; color: var(--ink-tale); }
+#place-card .pc-inner:focus-visible {
+  outline: 2px solid var(--ink-dark);
+  outline-offset: -2px;
+}
+.pc-name {
+  display: block;
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+}
+.pc-rank {
+  display: block;
+  font-style: italic;
+  color: var(--ink-brown);
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-top: 0.1rem;
+}
+.pc-founded {
+  display: block;
+  margin-top: 0.35rem;
+  font-variant-numeric: tabular-nums;
+}
+.pc-former {
+  display: block;
+  margin-top: 0.15rem;
+  font-size: 0.9em;
+  color: var(--ink-brown);
+}
+.pc-tale {
+  margin: 0.4rem 0 0;
+  font-style: italic;
+  color: var(--ink-tale);
+}
 /* One row for the card's actions; the row owns the gap above the prose and its members none, or the flex gap doubles it. */
-.pc-acts { display: flex; flex-direction: column; align-items: flex-start; gap: 0.3rem; margin-top: 0.45rem; }
+.pc-acts {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.3rem;
+  margin-top: 0.45rem;
+}
 /* The card's road to the prospect page; pointer-events restored because the card box is pointer-events: none. */
-.pc-prospect { display: inline-block; vertical-align: top; margin-top: 0;
-  padding: 0.16rem 0.55rem; pointer-events: auto;
-  font-size: 0.82rem; letter-spacing: 0.03em; text-decoration: none;
-  color: var(--ink-dark); background: var(--control-gold);
-  border: 1px solid var(--line-tan); border-radius: 4px;
-  transition: transform 160ms ease, border-color 160ms ease; }
-.pc-prospect:hover, .pc-prospect:focus-visible { border-color: var(--ink-brown);
-  transform: translateY(var(--raise)) rotate(-0.6deg); }
+.pc-prospect {
+  display: inline-block;
+  vertical-align: top;
+  margin-top: 0;
+  padding: 0.16rem 0.55rem;
+  pointer-events: auto;
+  font-size: 0.82rem;
+  letter-spacing: 0.03em;
+  text-decoration: none;
+  color: var(--ink-dark);
+  background: var(--control-gold);
+  border: 1px solid var(--line-tan);
+  border-radius: 4px;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease;
+}
+.pc-prospect:hover,
+.pc-prospect:focus-visible {
+  border-color: var(--ink-brown);
+  transform: translateY(var(--raise)) rotate(-0.6deg);
+}
 /* The filing press acts on the sheet and goes nowhere, so it wears the button dress (motion.css's lift), not the navigation tip's rotate. */
-.pc-lay { padding: 0.16rem 0.55rem; pointer-events: auto;
-  font-family: var(--font-display); font-size: 0.82rem; letter-spacing: 0.03em; text-align: left;
-  color: var(--ink-dark); background: var(--control-gold);
-  border: 1px solid var(--line-tan); border-radius: 4px; }
+.pc-lay {
+  padding: 0.16rem 0.55rem;
+  pointer-events: auto;
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  letter-spacing: 0.03em;
+  text-align: left;
+  color: var(--ink-dark);
+  background: var(--control-gold);
+  border: 1px solid var(--line-tan);
+  border-radius: 4px;
+}
 /* The house wash `button:not(.lf-station):not(.place-hit):hover` in public/house.css is (0,3,1) and would flash this press cream; #place-card is engine-created, so (1,2,0) holds the gold without keying on a host's id. */
-#place-card .pc-lay:hover, #place-card .pc-lay:focus-visible { background: var(--control-gold); border-color: var(--ink-brown); }
+#place-card .pc-lay:hover,
+#place-card .pc-lay:focus-visible {
+  background: var(--control-gold);
+  border-color: var(--ink-brown);
+}
 /* The hover hold above is (1,2,0) and would restore the gold and the full border on a refusing press, so every property the dim sets is re-asserted one class deeper. */
-#place-card .pc-lay.dim:hover, #place-card .pc-lay.dim:focus-visible { background: var(--control-cream); border-color: var(--line-faint); }
+#place-card .pc-lay.dim:hover,
+#place-card .pc-lay.dim:focus-visible {
+  background: var(--control-cream);
+  border-color: var(--line-faint);
+}
 /* Dims by ground, never by opacity: opacity took this face from 8.72:1 to 2.76:1 against the 4.5:1 floor, where cream holds 9.89:1; a deviation from the still's "dims". */
-.pc-lay.dim { background: var(--control-cream); border-color: var(--line-faint); }
-.pc-tongue { display: block; margin: 0.45rem 0 0; padding-top: 0.4rem;
+.pc-lay.dim {
+  background: var(--control-cream);
+  border-color: var(--line-faint);
+}
+.pc-tongue {
+  display: block;
+  margin: 0.45rem 0 0;
+  padding-top: 0.4rem;
   border-top: 1px solid rgb(from var(--ink-dark) r g b / 0.22);
-  font-size: 0.8rem; color: var(--ink-brown); }
-.pc-roots { margin: 0.15rem 0 0; font-size: 0.78rem; line-height: 1.3;
-  font-style: italic; color: var(--ink-tale); }
+  font-size: 0.8rem;
+  color: var(--ink-brown);
+}
+.pc-roots {
+  margin: 0.15rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.3;
+  font-style: italic;
+  color: var(--ink-tale);
+}
 
-.place-overlay.scrub .place-hit { pointer-events: none; cursor: default; }
+.place-overlay.scrub .place-hit {
+  pointer-events: none;
+  cursor: default;
+}
 /* Animations ride the children, never the group, whose box spans halo, glyph and label; the origin is per-element data written inline by `applyScrub` in `src/site/living-chart/chronicle.ts` because a profile glyph stands on its point while a plan glyph centres on it (`RS22` in `e2e/suites/room-ink.ts` reads the town point staying fixed). */
 .living-chart g.settlement[data-ink="founding"] > :not(text) {
   animation: inkStamp var(--paper) var(--ease-paper) both;
@@ -108,36 +237,101 @@
 }
 
 /* A sibling svg, never inside the chart, so Download stays byte-identical; its reduced-motion twin is `prefersReduce` in `src/site/living-chart/voyage.ts`; no shadow rule here on purpose, the hosts' qualified mount rules carry it and a bare .voyage-overlay opt-out (0,1,0) would lose to them (1,0,1). */
-.voyage-overlay { position: absolute; inset: 0; width: 100%; height: 100%;
-  pointer-events: none; z-index: 3; overflow: visible; }
-.voyage-track { fill: none; stroke: var(--ink-dark); stroke-width: 3;
-  stroke-dasharray: 2 7; stroke-linecap: round; stroke-linejoin: round;
-  vector-effect: non-scaling-stroke; opacity: 0.95; }
-.voyage-ship path, .voyage-rider path { fill: var(--parchment-panel); stroke: var(--ink-dark); stroke-width: 1.5;
-  stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
-.voyage-ship .rig { fill: none; stroke: var(--ink-dark); stroke-width: 1.1;
-  vector-effect: non-scaling-stroke; }
-.voyage-ship .detail, .voyage-rider .detail, .voyage-rider .tail { fill: none;
-  stroke: var(--ink-dark); stroke-linecap: round; vector-effect: non-scaling-stroke; }
-.voyage-ship .detail, .voyage-rider .detail { stroke-width: 0.8; }
-.voyage-rider .tail { stroke-width: 1.4; }
-.voyage-rider .leg { fill: none; stroke: var(--ink-dark); stroke-width: 1.2;
-  stroke-linecap: round; vector-effect: non-scaling-stroke; }
-.voyage-ship .ink, .voyage-rider .ink { fill: var(--ink-dark); stroke: none; }
+.voyage-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 3;
+  overflow: visible;
+}
+.voyage-track {
+  fill: none;
+  stroke: var(--ink-dark);
+  stroke-width: 3;
+  stroke-dasharray: 2 7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  opacity: 0.95;
+}
+.voyage-ship path,
+.voyage-rider path {
+  fill: var(--parchment-panel);
+  stroke: var(--ink-dark);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.voyage-ship .rig {
+  fill: none;
+  stroke: var(--ink-dark);
+  stroke-width: 1.1;
+  vector-effect: non-scaling-stroke;
+}
+.voyage-ship .detail,
+.voyage-rider .detail,
+.voyage-rider .tail {
+  fill: none;
+  stroke: var(--ink-dark);
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.voyage-ship .detail,
+.voyage-rider .detail {
+  stroke-width: 0.8;
+}
+.voyage-rider .tail {
+  stroke-width: 1.4;
+}
+.voyage-rider .leg {
+  fill: none;
+  stroke: var(--ink-dark);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.voyage-ship .ink,
+.voyage-rider .ink {
+  fill: var(--ink-dark);
+  stroke: none;
+}
 
 /* The background layers paint the instrument (threshold post, its two caps, hatched survey half, plain ages half) on a 24px box whose middle 10px band is the track; appearance none so both hosts render the same. */
-.ages-range { appearance: none; -webkit-appearance: none; height: 24px;
-  margin: 0; background:
+.ages-range {
+  appearance: none;
+  -webkit-appearance: none;
+  height: 24px;
+  margin: 0;
+  background:
     linear-gradient(var(--ink-dark), var(--ink-dark)) 50% 0 / 6px 2px no-repeat,
     linear-gradient(var(--ink-dark), var(--ink-dark)) 50% 100% / 6px 2px no-repeat,
     linear-gradient(var(--ink-dark), var(--ink-dark)) 50% 50% / 2px 24px no-repeat,
-    repeating-linear-gradient(45deg, var(--parchment-deep) 0 4px,
-      rgb(from var(--line-tan) r g b / 0.45) 4px 6px) 0 50% / 50% 10px no-repeat,
-    linear-gradient(var(--parchment-deep), var(--parchment-deep)) 100% 50% / 50% 10px no-repeat; }
-.ages-range:focus-visible { outline: 2px solid var(--ink-dark); outline-offset: 2px; }
-.ages-range::-webkit-slider-thumb { -webkit-appearance: none; appearance: none;
-  width: 16px; height: 16px; border-radius: 50%; background: var(--ink-dark);
-  border: 2px solid var(--parchment-bright); box-shadow: 0 0 0 1px var(--ink-dark); }
-.ages-range::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%;
-  background: var(--ink-dark); border: 2px solid var(--parchment-bright);
-  box-shadow: 0 0 0 1px var(--ink-dark); }
+    repeating-linear-gradient(45deg, var(--parchment-deep) 0 4px, rgb(from var(--line-tan) r g b / 0.45) 4px 6px) 0
+      50% / 50% 10px no-repeat,
+    linear-gradient(var(--parchment-deep), var(--parchment-deep)) 100% 50% / 50% 10px no-repeat;
+}
+.ages-range:focus-visible {
+  outline: 2px solid var(--ink-dark);
+  outline-offset: 2px;
+}
+.ages-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--ink-dark);
+  border: 2px solid var(--parchment-bright);
+  box-shadow: 0 0 0 1px var(--ink-dark);
+}
+.ages-range::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--ink-dark);
+  border: 2px solid var(--parchment-bright);
+  box-shadow: 0 0 0 1px var(--ink-dark);
+}

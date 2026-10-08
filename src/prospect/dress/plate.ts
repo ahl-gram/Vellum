@@ -17,22 +17,30 @@ import {
   treeRound,
 } from "./glyphs.ts";
 import { drownedStubNodes } from "./buildings.ts";
-import {
-  beachedHullNodes,
-  jettyNodes,
-  mastRowNodes,
-  moleNodes,
-  netNodes,
-  quayNodes,
-  shipNodes,
-} from "./harbor.ts";
+import { beachedHullNodes, jettyNodes, mastRowNodes, moleNodes, netNodes, quayNodes, shipNodes } from "./harbor.ts";
 import { bridgeNodes, millNodes, weirNodes } from "./rivercraft.ts";
 
 export { PROSPECT_DRESSES, type ProspectDress } from "./context.ts";
 
 type WorksElement = Extract<
   ForegroundElement,
-  { kind: "stilts" | "quay" | "mastRow" | "ship" | "mole" | "beachedHulls" | "jetty" | "nets" | "bridge" | "weir" | "mill" | "rubble" | "beams" | "drownedStubs" }
+  {
+    kind:
+      | "stilts"
+      | "quay"
+      | "mastRow"
+      | "ship"
+      | "mole"
+      | "beachedHulls"
+      | "jetty"
+      | "nets"
+      | "bridge"
+      | "weir"
+      | "mill"
+      | "rubble"
+      | "beams"
+      | "drownedStubs";
+  }
 >;
 
 /** Exhaustive on purpose: a new foreground kind without a dress breaks the build here, not silently on a blank plate. */

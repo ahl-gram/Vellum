@@ -89,7 +89,10 @@ test("a region sheet names the realm the window sits in (#423)", () => {
 test("the legend's realm row reaches region sheets (#423 lifts the #162 gate)", () => {
   const capital = world42.settlements.find((s) => s.kind === "capital")!;
   const svg = regionSvg(world42, windowAt(world42, capital.x, capital.y, 1), true);
-  assert.ok(svg.includes("Realm &amp; border") || svg.includes("Realm & border"), "the legend should list the realm row");
+  assert.ok(
+    svg.includes("Realm &amp; border") || svg.includes("Realm & border"),
+    "the legend should list the realm row",
+  );
 });
 
 test("the world sheet's realm layers are untouched: no clip wrapper, label-derived paths (#423)", () => {

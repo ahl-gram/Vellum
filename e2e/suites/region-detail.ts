@@ -30,9 +30,15 @@ function regionKit(ctx: SuiteContext) {
 
   const rgn = () => evaluate<{ redrafts: number; band: number }>(`window.__vellumRegion()`);
   const enterAt = (k: number, cu: number, cv: number) =>
-    evaluate<undefined>(`(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:${k},x:W/2-(${cu})*${k}*W,y:H/2-(${cv})*${k}*H});})()`);
+    evaluate<undefined>(
+      `(()=>{const vp=document.getElementById("map-viewport");const W=vp.clientWidth,H=vp.clientHeight;window.__vellumZoomTo({k:${k},x:W/2-(${cu})*${k}*W,y:H/2-(${cv})*${k}*H});})()`,
+    );
   const waitRedraft = async (prev: number) => {
-    for (let i = 0; i < 375; i++) { const s = await rgn(); if (s.redrafts > prev) return s; await sleep(40); }
+    for (let i = 0; i < 375; i++) {
+      const s = await rgn();
+      if (s.redrafts > prev) return s;
+      await sleep(40);
+    }
     return await rgn();
   };
   const waitInset = async () => {
@@ -50,7 +56,9 @@ function regionKit(ctx: SuiteContext) {
         `u1:+s.getAttribute("data-vellum-region-u1"),v1:+s.getAttribute("data-vellum-region-v1")};})()`,
     );
   const captionMs = () =>
-    evaluate<number>(`(()=>{const m=(document.getElementById("caption").textContent||"").match(/drawn in (\\d+)ms/);return m?+m[1]:-1;})()`);
+    evaluate<number>(
+      `(()=>{const m=(document.getElementById("caption").textContent||"").match(/drawn in (\\d+)ms/);return m?+m[1]:-1;})()`,
+    );
   return { ...ctx, LINK, rgn, enterAt, waitRedraft, waitInset, insetDigest, captionMs };
 }
 
@@ -79,7 +87,11 @@ async function rd0WorldSheet({ evaluate, check }: RegionKit): Promise<void> {
 async function rd1Ladder({ check, shoot, rgn, enterAt, waitRedraft, waitInset, insetDigest, captionMs }: RegionKit) {
   const ladder: ({ band: number; reported: number; ms: number } & Partial<Inset>)[] = [];
   let redrafts = (await rgn()).redrafts;
-  for (const [band, k] of [[1, 2], [2, 4], [3, 8]] as const) {
+  for (const [band, k] of [
+    [1, 2],
+    [2, 4],
+    [3, 8],
+  ] as const) {
     await enterAt(k, 0.5625, 0.4375);
     const settled = await waitRedraft(redrafts);
     await waitInset();
@@ -125,7 +137,24 @@ async function rd2CoastGains({ evaluate, check }: RegionKit, deepest: Ladder[num
 }
 
 // RD3: two camera routes to one window must commit the same bytes, and the reload is load-bearing: zoom-reset never drops the worker, so the held chain cache would hand the second descent the FIRST one's own field and the check could not fail. RD4 shares the step because it compares against RD3's own digest.
-async function rd3SameBytes(ctx: SuiteContext, { evaluate, check, waitReady, waitSettled, LINK, rgn, enterAt, waitRedraft, waitInset, insetDigest, captionMs }: RegionKit, ladder: Ladder, deepest: Ladder[number]): Promise<void> {
+async function rd3SameBytes(
+  ctx: SuiteContext,
+  {
+    evaluate,
+    check,
+    waitReady,
+    waitSettled,
+    LINK,
+    rgn,
+    enterAt,
+    waitRedraft,
+    waitInset,
+    insetDigest,
+    captionMs,
+  }: RegionKit,
+  ladder: Ladder,
+  deepest: Ladder[number],
+): Promise<void> {
   await ctx.send("Page.navigate", { url: "about:blank" });
   await ctx.send("Page.navigate", { url: LINK.replace(/&cx=[^&]*&cy=[^&]*&k=[^&]*$/, "") });
   await waitReady();
@@ -156,7 +185,10 @@ async function rd3SameBytes(ctx: SuiteContext, { evaluate, check, waitReady, wai
   );
 }
 
-async function rd5SharedLink(ctx: SuiteContext, { check, shoot, waitReady, waitSettled, LINK, waitInset, insetDigest }: RegionKit): Promise<void> {
+async function rd5SharedLink(
+  ctx: SuiteContext,
+  { check, shoot, waitReady, waitSettled, LINK, waitInset, insetDigest }: RegionKit,
+): Promise<void> {
   const linked = [];
   for (let visit = 0; visit < 2; visit++) {
     await ctx.send("Page.navigate", { url: "about:blank" });

@@ -1,11 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createField } from "../../src/core/grid.ts";
-import {
-  BIOMES,
-  biomeName,
-  classifyBiomes,
-} from "../../src/climate/biomes.ts";
+import { BIOMES, biomeName, classifyBiomes } from "../../src/climate/biomes.ts";
 import { computeClimate } from "../../src/climate/climate.ts";
 import { buildHeightfield } from "../../src/terrain/heightfield.ts";
 import { pickSeaLevel } from "../../src/terrain/sealevel.ts";
@@ -26,7 +22,9 @@ function classifyOne(elevRel: number, temp: number, moist: number): number {
 }
 
 test("classifyBiomes honors an explicit elevSpan (region snow-band continuity, #162)", () => {
-  const w = 4, h = 4, sea = 0.2;
+  const w = 4,
+    h = 4,
+    sea = 0.2;
   const elev = createField(w, h, (x) => (x === 3 ? 1.0 : 0.3)); // one tall column
   const climate = {
     temperature: createField(w, h, () => 0.5), // cool enough to admit snow/alpine

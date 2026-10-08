@@ -11,14 +11,31 @@ export function bindGlassKeys(viewport: HTMLElement, zoom: ZoomController): void
     const W = viewport.clientWidth;
     const H = viewport.clientHeight;
     switch (e.key) {
-      case "+": case "=": zoom.glideBy(ZOOM_STEP); break;
-      case "-": case "_": zoom.glideBy(1 / ZOOM_STEP); break;
-      case "ArrowLeft": zoom.panBy(W * PAN_FRACTION, 0); break;
-      case "ArrowRight": zoom.panBy(-W * PAN_FRACTION, 0); break;
-      case "ArrowUp": zoom.panBy(0, H * PAN_FRACTION); break;
-      case "ArrowDown": zoom.panBy(0, -H * PAN_FRACTION); break;
-      case "0": zoom.glideHome(); break;
-      default: return;
+      case "+":
+      case "=":
+        zoom.glideBy(ZOOM_STEP);
+        break;
+      case "-":
+      case "_":
+        zoom.glideBy(1 / ZOOM_STEP);
+        break;
+      case "ArrowLeft":
+        zoom.panBy(W * PAN_FRACTION, 0);
+        break;
+      case "ArrowRight":
+        zoom.panBy(-W * PAN_FRACTION, 0);
+        break;
+      case "ArrowUp":
+        zoom.panBy(0, H * PAN_FRACTION);
+        break;
+      case "ArrowDown":
+        zoom.panBy(0, -H * PAN_FRACTION);
+        break;
+      case "0":
+        zoom.glideHome();
+        break;
+      default:
+        return;
     }
     e.preventDefault();
   });

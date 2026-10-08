@@ -210,13 +210,7 @@ function kraken(x: number, y: number, k: number, style: MapStyle): SvgNode[] {
   ];
 }
 
-export function beastGlyph(
-  kind: BeastKind,
-  x: number,
-  y: number,
-  k: number,
-  style: MapStyle,
-): SvgNode[] {
+export function beastGlyph(kind: BeastKind, x: number, y: number, k: number, style: MapStyle): SvgNode[] {
   switch (kind) {
     case "serpent":
       return serpent(x, y, k, style);
@@ -228,7 +222,10 @@ export function beastGlyph(
 }
 
 /** Half-extents of the drawn glyph around (x, y), for arena claims and clearance checks. */
-export function beastExtents(kind: BeastKind, k: number): { readonly halfW: number; readonly up: number; readonly down: number } {
+export function beastExtents(
+  kind: BeastKind,
+  k: number,
+): { readonly halfW: number; readonly up: number; readonly down: number } {
   const s = SCALE[kind] * k;
   switch (kind) {
     case "serpent":

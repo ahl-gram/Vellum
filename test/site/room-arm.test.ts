@@ -8,8 +8,12 @@ import { createRoomArm } from "../../src/site/reading-room/arm.ts";
 function paintQueue() {
   const queued: Array<() => void> = [];
   return {
-    afterPaint: (run: () => void): void => { queued.push(run); },
-    paint: (): void => { for (const run of queued.splice(0)) run(); },
+    afterPaint: (run: () => void): void => {
+      queued.push(run);
+    },
+    paint: (): void => {
+      for (const run of queued.splice(0)) run();
+    },
   };
 }
 
@@ -21,10 +25,17 @@ function heldPrime() {
     calls: () => calls,
     prime: (): Promise<void> => {
       calls++;
-      return new Promise<void>((resolve) => { waiting.push(resolve); });
+      return new Promise<void>((resolve) => {
+        waiting.push(resolve);
+      });
     },
-    settle: (): void => { for (const r of waiting.splice(0)) r(); },
-    flush: (): Promise<void> => Promise.resolve().then(() => {}).then(() => {}),
+    settle: (): void => {
+      for (const r of waiting.splice(0)) r();
+    },
+    flush: (): Promise<void> =>
+      Promise.resolve()
+        .then(() => {})
+        .then(() => {}),
   };
 }
 
@@ -33,7 +44,13 @@ function harness() {
   const held = heldPrime();
   const state = { worldGen: 0, arms: 0 };
   const arm = createRoomArm({ afterPaint: q.afterPaint, worldGen: () => state.worldGen });
-  const schedule = () => arm.schedule({ prime: held.prime, arm: () => { state.arms++; } });
+  const schedule = () =>
+    arm.schedule({
+      prime: held.prime,
+      arm: () => {
+        state.arms++;
+      },
+    });
   return { ...q, ...held, state, arm, schedule };
 }
 
@@ -102,10 +119,14 @@ test("#418 a prime that REJECTS still arms: the room falls back to the inline or
 
   arm.schedule({
     prime: () => Promise.reject(new Error("the render worker crashed")),
-    arm: () => { arms++; },
+    arm: () => {
+      arms++;
+    },
   });
   q.paint();
-  await Promise.resolve().then(() => {}).then(() => {});
+  await Promise.resolve()
+    .then(() => {})
+    .then(() => {});
 
   // A one-sided .then leaves the room bare for good AND raises an unhandled rejection.
   assert.equal(arms, 1, "a dead source degrades to the inline computation, it does not cancel the room");

@@ -11,8 +11,7 @@ import type { Settlement } from "../../src/society/sites.ts";
 
 const SEA = 0.5;
 type Rect = { x0: number; y0: number; x1: number; y1: number };
-const inRect = (x: number, y: number, r: Rect) =>
-  x >= r.x0 && x <= r.x1 && y >= r.y0 && y <= r.y1;
+const inRect = (x: number, y: number, r: Rect) => x >= r.x0 && x <= r.x1 && y >= r.y0 && y <= r.y1;
 
 function land(w: number, h: number, rects: ReadonlyArray<Rect>) {
   return createField(w, h, (x, y) => (rects.some((r) => inRect(x, y, r)) ? 1 : 0));
@@ -67,8 +66,14 @@ test("#78/#79 antique's 8-realm pigeonhole reuses a tint on a far pair, never a 
   let first = true;
   // 8 islands spread so the proximity graph is colourable and far pairs exist
   const centers: Array<[number, number]> = [
-    [20, 40], [60, 40], [100, 40], [140, 40],
-    [20, 110], [60, 110], [100, 110], [140, 110],
+    [20, 40],
+    [60, 40],
+    [100, 40],
+    [140, 40],
+    [20, 110],
+    [60, 110],
+    [100, 110],
+    [140, 110],
   ];
   for (const [cx, cy] of centers) {
     rects.push({ x0: cx - 6, y0: cy - 6, x1: cx + 5, y1: cy + 5 });

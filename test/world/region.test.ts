@@ -38,9 +38,7 @@ test("region world keeps the parent's waterline and terrain", () => {
 
 test("region projects world realm seats to region indices (no town-dot downgrade, #162)", () => {
   assert.ok(bigWorld.realms.seats.length > 1, "fixture is multi-realm");
-  const seatIdx = bigWorld.realms.seats.find(
-    (si) => bigWorld.settlements[si]!.kind !== "capital",
-  )!;
+  const seatIdx = bigWorld.realms.seats.find((si) => bigWorld.settlements[si]!.kind !== "capital")!;
   const seat = bigWorld.settlements[seatIdx]!;
   const region = generateRegionWorld(bigWorld, {
     window: windowAround(bigWorld, seat, 0.3),
@@ -48,11 +46,7 @@ test("region projects world realm seats to region indices (no town-dot downgrade
     gridH: 240,
     title: "Seat Environs",
   });
-  assert.equal(
-    region.realms.seats.length,
-    bigWorld.realms.seats.length,
-    "seats array keeps its realm-id indexing",
-  );
+  assert.equal(region.realms.seats.length, bigWorld.realms.seats.length, "seats array keeps its realm-id indexing");
   assert.ok(
     region.realms.seats.every((i) => i === -1 || (i >= 0 && i < region.settlements.length)),
     "every projected seat is a valid region index or the -1 sentinel",
@@ -64,9 +58,7 @@ test("region projects world realm seats to region indices (no town-dot downgrade
 });
 
 test("a region seat renders a castle glyph with no political halo (AC #162)", () => {
-  const seatIdx = bigWorld.realms.seats.find(
-    (si) => bigWorld.settlements[si]!.kind !== "capital",
-  )!;
+  const seatIdx = bigWorld.realms.seats.find((si) => bigWorld.settlements[si]!.kind !== "capital")!;
   const seat = bigWorld.settlements[seatIdx]!;
   const region = generateRegionWorld(bigWorld, {
     window: windowAround(bigWorld, seat, 0.3),
@@ -89,7 +81,8 @@ test("region temperature is continuous with the world via the parent elevSpan (A
     title: "Lowland Environs",
   });
   const seaLevel = bigWorld.seaLevel;
-  let worldMax = -Infinity, localMax = -Infinity;
+  let worldMax = -Infinity,
+    localMax = -Infinity;
   for (const v of bigWorld.elev.data) worldMax = Math.max(worldMax, v);
   for (const v of region.elev.data) localMax = Math.max(localMax, v);
   const worldSpan = Math.max(1e-9, worldMax - seaLevel);
@@ -115,10 +108,14 @@ test("region biomes are continuous with the world via the parent elevSpan (AC #1
   // An inland highland window: under its own local span every hilltop would read snow/alpine; the climate unit tests pass even if region.ts forgets to thread elevSpan, this does not.
   const win = { u0: 0.15, v0: 0.22, u1: 0.31, v1: 0.38 };
   const region = generateRegionWorld(bigWorld, {
-    window: win, gridW: 320, gridH: 240, title: "Highland Environs",
+    window: win,
+    gridW: 320,
+    gridH: 240,
+    title: "Highland Environs",
   });
   const seaLevel = bigWorld.seaLevel;
-  let worldMax = -Infinity, localMax = -Infinity;
+  let worldMax = -Infinity,
+    localMax = -Infinity;
   for (const v of bigWorld.elev.data) worldMax = Math.max(worldMax, v);
   for (const v of region.elev.data) localMax = Math.max(localMax, v);
   const worldSpan = Math.max(1e-9, worldMax - seaLevel);
@@ -150,7 +147,10 @@ function deepestHamletWindow(): { win: ReturnType<typeof windowAround>; n: numbe
   for (const s of bigWorld.settlements) {
     const win = windowAround(bigWorld, s, 0.125);
     const region = generateRegionWorld(bigWorld, {
-      window: win, gridW: 320, gridH: 240, title: "Deep Environs",
+      window: win,
+      gridW: 320,
+      gridH: 240,
+      title: "Deep Environs",
     });
     const n = region.settlements.filter((x) => x.kind === "hamlet").length;
     if (!best || n > best.n) best = { win, n };
@@ -163,7 +163,10 @@ test("only the deepest band grows hamlets; they never seat a realm or take a roa
   assert.ok(best && best.n >= 3, `a deepest window grows hamlets (best had ${best?.n})`);
 
   const deep = generateRegionWorld(bigWorld, {
-    window: best.win, gridW: 320, gridH: 240, title: "Deep Environs",
+    window: best.win,
+    gridW: 320,
+    gridH: 240,
+    title: "Deep Environs",
   });
   const hamlets = deep.settlements.filter((s) => s.kind === "hamlet");
 
@@ -188,18 +191,12 @@ test("only the deepest band grows hamlets; they never seat a realm or take a roa
   const cu = (best.win.u0 + best.win.u1) / 2;
   const cv = (best.win.v0 + best.win.v1) / 2;
   const shallow = generateRegionWorld(bigWorld, {
-    window: windowAround(
-      bigWorld,
-      { x: cu * (bigWorld.recipe.gridW - 1), y: cv * (bigWorld.recipe.gridH - 1) },
-      0.25,
-    ),
-    gridW: 320, gridH: 240, title: "Shallow Environs",
+    window: windowAround(bigWorld, { x: cu * (bigWorld.recipe.gridW - 1), y: cv * (bigWorld.recipe.gridH - 1) }, 0.25),
+    gridW: 320,
+    gridH: 240,
+    title: "Shallow Environs",
   });
-  assert.equal(
-    shallow.settlements.filter((s) => s.kind === "hamlet").length,
-    0,
-    "band 2 grows no hamlets",
-  );
+  assert.equal(shallow.settlements.filter((s) => s.kind === "hamlet").length, 0, "band 2 grows no hamlets");
 });
 
 test("a world sheet never carries a hamlet, in kind or in ink (#171)", () => {
@@ -277,10 +274,7 @@ test("#309: a survey window holding no capital still grows its roads", () => {
   const capital = bigWorld.settlements.find((s) => s.kind === "capital")!;
   const byFar = bigWorld.settlements
     .filter((s) => s.kind === "town")
-    .sort(
-      (a, b) =>
-        Math.hypot(b.x - capital.x, b.y - capital.y) - Math.hypot(a.x - capital.x, a.y - capital.y),
-    );
+    .sort((a, b) => Math.hypot(b.x - capital.x, b.y - capital.y) - Math.hypot(a.x - capital.x, a.y - capital.y));
   let region = null;
   for (const town of byFar) {
     const win = windowAround(bigWorld, town, 0.28);

@@ -57,7 +57,9 @@ function fitRoom({ frame, sheet: sheetEl, aspect, slipW, glassL }: FitParts): bo
 }
 
 function refitOnChrome(layout: () => void): void {
-  const observer = new ResizeObserver(() => { layout(); });
+  const observer = new ResizeObserver(() => {
+    layout();
+  });
   for (const el of [q("header.chrome"), q(".corner.tr")]) if (el !== null) observer.observe(el);
 }
 
@@ -70,7 +72,9 @@ export function bindRoom<Held>(parts: RoomParts<Held>): Room {
   const legend = q(".legend");
 
   const svgAspect = () => {
-    const vb = (sheet.querySelector<SVGSVGElement>("svg[data-vellum-style]") ?? sheet.querySelector<SVGSVGElement>("svg"))?.viewBox.baseVal;
+    const vb = (
+      sheet.querySelector<SVGSVGElement>("svg[data-vellum-style]") ?? sheet.querySelector<SVGSVGElement>("svg")
+    )?.viewBox.baseVal;
     return vb !== undefined && vb.width > 0 && vb.height > 0 ? vb.width / vb.height : FALLBACK_ASPECT;
   };
   const aspect = () => parts.aspect?.() ?? svgAspect();
@@ -83,7 +87,13 @@ export function bindRoom<Held>(parts: RoomParts<Held>): Room {
     const slipOpen = slip !== null && !slip.classList.contains("folded");
     const slipW = slipOpen ? slipWidth(slipRect) : 0;
     const glassL = glassLeft(q(".corner.br"), slipOpen, slipW);
-    if (legend !== null) placeLegendRow(legend, { folio: q(".corner.bl"), chrome: q("header.chrome"), glass: glassL, slip: slipOpen ? slipRect : null });
+    if (legend !== null)
+      placeLegendRow(legend, {
+        folio: q(".corner.bl"),
+        chrome: q("header.chrome"),
+        glass: glassL,
+        slip: slipOpen ? slipRect : null,
+      });
     if (fitRoom({ frame, sheet, aspect: aspect(), slipW, glassL })) camera.restore(held);
   };
 
@@ -94,7 +104,9 @@ export function bindRoom<Held>(parts: RoomParts<Held>): Room {
       fold: slip.querySelector(".slip-fold"),
       tab: q(".slip-tab"),
       onLayout: layout,
-      after: (run, ms) => { window.setTimeout(run, ms); },
+      after: (run, ms) => {
+        window.setTimeout(run, ms);
+      },
     });
   }
   window.addEventListener("resize", layout);

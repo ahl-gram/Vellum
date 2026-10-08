@@ -1,10 +1,5 @@
 // The voyage session builder: everything that PREPARES a survey before a frame paints (plan + tour order, routed geometry, projection, the log rows, the overlay svg); voyage.ts animates the record this builds.
-import {
-  applyTourOrder,
-  buildVoyagePlan,
-  reorderPlanByTravel,
-  type VoyagePlan,
-} from "../../render/voyage.ts";
+import { applyTourOrder, buildVoyagePlan, reorderPlanByTravel, type VoyagePlan } from "../../render/voyage.ts";
 import { prepareVoyageRouter, type LegMode, type RoutedLeg, type VoyageRouter } from "../../render/voyage-route.ts";
 import type { WaterSpan } from "../../render/voyage-water.ts";
 import { createProjection, type Projection } from "../../render/transform.ts";
@@ -133,7 +128,10 @@ function sessionLog(
   const logPorts = plan.ports.map((port, i) => {
     const pm = byIdx.get(port.idx)!;
     return {
-      idx: pm.idx, name: pm.name, kind: pm.kind, founded: pm.founded,
+      idx: pm.idx,
+      name: pm.name,
+      kind: pm.kind,
+      founded: pm.founded,
       arrivalMode: i === 0 ? null : routed[i - 1]!.mode,
       inlandHandoff: i === 0 ? false : routed[i - 1]!.inlandHandoff,
       // Issue #312: GRID-space leg length (routed points are pre-projection), so the day counts are world-derived and never move with the render width.
@@ -147,7 +145,11 @@ function sessionLog(
     seed,
     subtitle,
     closing
-      ? { arrivalMode: closing.mode, inlandHandoff: closing.inlandHandoff, legLength: buildLegGeometry(closing.points).total }
+      ? {
+          arrivalMode: closing.mode,
+          inlandHandoff: closing.inlandHandoff,
+          legLength: buildLegGeometry(closing.points).total,
+        }
       : null,
   );
 }

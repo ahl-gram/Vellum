@@ -3,7 +3,36 @@ import { makeStep } from "../support/step.ts";
 import { dropExpectedCancellations } from "../support/console.ts";
 import type { Payload, SuiteContext } from "../types.ts";
 
-type Prospect = { seed: number; index: number; year: number; presentYear: number; name: string; dress: string; era: string; keyRows: number; roads: boolean; svgLength: number; blob: boolean; shown: boolean; status: string | null; title: string | null; sub: string | null; pressed: string | null; chart: string | null; ribbon: string | null; ribbonVerb: string | null; ribbonShown: boolean; yearField: string; eraLine: string | null; noteTitle: string | null; where: string | null; note: string | null; keyLis: number; keyHeadHidden: boolean; hash: string };
+type Prospect = {
+  seed: number;
+  index: number;
+  year: number;
+  presentYear: number;
+  name: string;
+  dress: string;
+  era: string;
+  keyRows: number;
+  roads: boolean;
+  svgLength: number;
+  blob: boolean;
+  shown: boolean;
+  status: string | null;
+  title: string | null;
+  sub: string | null;
+  pressed: string | null;
+  chart: string | null;
+  ribbon: string | null;
+  ribbonVerb: string | null;
+  ribbonShown: boolean;
+  yearField: string;
+  eraLine: string | null;
+  noteTitle: string | null;
+  where: string | null;
+  note: string | null;
+  keyLis: number;
+  keyHeadHidden: boolean;
+  hash: string;
+};
 
 type ProspectKit = ReturnType<typeof prospectKit>;
 
@@ -19,7 +48,10 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const httpBase = http4xx.length;
 
   let first: string | null = null;
-  await step("PB2 to PB5", async () => { await pb2CapitalPlate(k, href); first = await pb3eRoomAndPlate(k); });
+  await step("PB2 to PB5", async () => {
+    await pb2CapitalPlate(k, href);
+    first = await pb3eRoomAndPlate(k);
+  });
   await step("PB6", () => pb6SameAddress(k, first));
   await step("PB7 to PB7d", () => pb7YearFilter(k));
   await step("PB7e", () => pb7eOrphan(k));
@@ -37,7 +69,9 @@ function prospectKit(ctx: SuiteContext) {
     // Poll for the hop COMMITTING, never a fixed sleep: until the prospect DOM is gone, a poll below could read the OLD document's settled state.
     for (let i = 0; i < 100; i++) {
       let away = null;
-      try { away = await evaluate<boolean>(`!document.getElementById("pp-plate")`); } catch {}
+      try {
+        away = await evaluate<boolean>(`!document.getElementById("pp-plate")`);
+      } catch {}
       if (away) break;
       await sleep(50);
     }
@@ -48,7 +82,9 @@ function prospectKit(ctx: SuiteContext) {
   const opened = async (label: string) => {
     for (let i = 0; i < 200; i++) {
       let s = null;
-      try { s = await state(); } catch {}
+      try {
+        s = await state();
+      } catch {}
       if (s && s.blob && s.status === "") return s;
       await sleep(75);
     }
@@ -63,15 +99,26 @@ async function pb1WayIn({ evaluate, send, check, sleep, PORT }: SuiteContext): P
   let exReady = false;
   for (let i = 0; i < 200; i++) {
     let ok = null;
-    try { ok = await evaluate<boolean>(`typeof window.__vellumUsesWorker==="function" && !!document.querySelector("#map svg") && document.getElementById("status").textContent===""`); } catch {}
-    if (ok) { exReady = true; break; }
+    try {
+      ok = await evaluate<boolean>(
+        `typeof window.__vellumUsesWorker==="function" && !!document.querySelector("#map svg") && document.getElementById("status").textContent===""`,
+      );
+    } catch {}
+    if (ok) {
+      exReady = true;
+      break;
+    }
     await sleep(75);
   }
   let href: string | null = null;
   if (exReady) {
     await evaluate(`document.querySelector('.place-hit[data-idx="0"]').click()`);
     for (let i = 0; i < 40; i++) {
-      try { href = await evaluate<string | null>(`(()=>{const a=document.querySelector('#place-card .pc-prospect');return a?a.getAttribute('href'):null;})()`); } catch {}
+      try {
+        href = await evaluate<string | null>(
+          `(()=>{const a=document.querySelector('#place-card .pc-prospect');return a?a.getAttribute('href'):null;})()`,
+        );
+      } catch {}
       if (href) break;
       await sleep(50);
     }
@@ -86,7 +133,11 @@ async function pb1WayIn({ evaluate, send, check, sleep, PORT }: SuiteContext): P
   if (exReady) {
     await evaluate(`document.querySelector('.place-hit[data-idx="1"]').click()`);
     for (let i = 0; i < 40; i++) {
-      try { href1 = await evaluate<string | null>(`(()=>{const a=document.querySelector('#place-card .pc-prospect');return a?a.getAttribute('href'):null;})()`); } catch {}
+      try {
+        href1 = await evaluate<string | null>(
+          `(()=>{const a=document.querySelector('#place-card .pc-prospect');return a?a.getAttribute('href'):null;})()`,
+        );
+      } catch {}
       if (href1 && /&i=1$/.test(href1)) break;
       await sleep(50);
     }
@@ -96,7 +147,9 @@ async function pb1WayIn({ evaluate, send, check, sleep, PORT }: SuiteContext): P
 }
 
 async function pb2CapitalPlate({ send, check, page, opened }: ProspectKit, href: string | null): Promise<void> {
-  await send("Page.navigate", { url: page(href && href.includes("#") ? href.slice(href.indexOf("#")) : "#seed=42&i=0") });
+  await send("Page.navigate", {
+    url: page(href && href.includes("#") ? href.slice(href.indexOf("#")) : "#seed=42&i=0"),
+  });
   const cap = await opened("the card's own link");
   check(
     "PB2 the card's link opens the capital's plate (seed 42 == Laukuwelua)",
@@ -105,54 +158,105 @@ async function pb2CapitalPlate({ send, check, page, opened }: ProspectKit, href:
   );
   check(
     "PB3 the chart's folio names the place, the chart and its world",
-    /^The Prospect of Laukuwelua · Chart № 42$/.test(cap.title!) && /The Isle of Rahai/.test(
-      cap.sub!) && /^pressed in \d+ms · antique$/.test(
-      cap.pressed!),
+    /^The Prospect of Laukuwelua · Chart № 42$/.test(cap.title!) &&
+      /The Isle of Rahai/.test(cap.sub!) &&
+      /^pressed in \d+ms · antique$/.test(cap.pressed!),
     JSON.stringify({ title: cap.title, sub: cap.sub, pressed: cap.pressed }),
   );
-  check("PB3b the folio names what the place was once called (#49)", /once called Haitani/.test(cap.sub!),
-    cap.sub!);
+  check("PB3b the folio names what the place was once called (#49)", /once called Haitani/.test(cap.sub!), cap.sub!);
   check(
     "PB3c the engraver's note is filled: the place as the slip's title, its epithet and founding, Today's card's note for the town, the plate's numbered key, the era line (#494 ruling 4)",
-    cap.noteTitle === "Laukuwelua" && /^chief port of .+ · founded An\. \d+$/.test(cap.where!) &&
-      cap.note!.length > 20 && cap.keyLis === cap.keyRows && cap.keyRows > 0 && !cap.keyHeadHidden && /^Standing · An\. \d+$/.test(
-      cap.eraLine!),
-    JSON.stringify({ noteTitle: cap.noteTitle, where: cap.where, noteLen: cap.note!.length, keyLis: cap.keyLis, keyRows: cap.keyRows, eraLine: cap.eraLine }),
+    cap.noteTitle === "Laukuwelua" &&
+      /^chief port of .+ · founded An\. \d+$/.test(cap.where!) &&
+      cap.note!.length > 20 &&
+      cap.keyLis === cap.keyRows &&
+      cap.keyRows > 0 &&
+      !cap.keyHeadHidden &&
+      /^Standing · An\. \d+$/.test(cap.eraLine!),
+    JSON.stringify({
+      noteTitle: cap.noteTitle,
+      where: cap.where,
+      noteLen: cap.note!.length,
+      keyLis: cap.keyLis,
+      keyRows: cap.keyRows,
+      eraLine: cap.eraLine,
+    }),
   );
   check(
     "PB3d the roads out: the Explorer keeps the world's keys and sheds the page's own; the Ribbon takes the same world with this town as its departure (#494 ruling 3)",
-    cap.chart!.startsWith("/explorer/#seed=42") && !/(^|&)i=/.test(
-      cap.chart!.slice(
-      cap.chart!.indexOf("#") + 1)) && cap.ribbon === "/ribbon/#" +
-      cap.chart!.slice("/explorer/#".length) + "&a=0" && /^Take the road from Laukuwelua in$/.test(
-      cap.ribbonVerb!) && cap.roads === true && cap.ribbonShown,
-    JSON.stringify({ chart: cap.chart, ribbon: cap.ribbon, verb: cap.ribbonVerb, roads: cap.roads, shown: cap.ribbonShown }),
+    cap.chart!.startsWith("/explorer/#seed=42") &&
+      !/(^|&)i=/.test(cap.chart!.slice(cap.chart!.indexOf("#") + 1)) &&
+      cap.ribbon === "/ribbon/#" + cap.chart!.slice("/explorer/#".length) + "&a=0" &&
+      /^Take the road from Laukuwelua in$/.test(cap.ribbonVerb!) &&
+      cap.roads === true &&
+      cap.ribbonShown,
+    JSON.stringify({
+      chart: cap.chart,
+      ribbon: cap.ribbon,
+      verb: cap.ribbonVerb,
+      roads: cap.roads,
+      shown: cap.ribbonShown,
+    }),
   );
 }
 
 async function pb3eRoomAndPlate({ evaluate, check, sleep, svgOf }: ProspectKit): Promise<string> {
-  const room = await evaluate<{ chartRoom: boolean; footer: boolean; band: boolean; w: number; h: number; pw: number; ph: number; aspect: number }>(`(()=>{const s=document.getElementById("sheet").getBoundingClientRect();const p=document.getElementById("pp-plate").getBoundingClientRect();return{chartRoom:document.body.classList.contains("chart-room"),footer:!!document.querySelector("footer"),band:!!document.querySelector(".band"),w:s.width,h:s.height,pw:p.width,ph:p.height,aspect:s.width/s.height};})()`);
+  const room = await evaluate<{
+    chartRoom: boolean;
+    footer: boolean;
+    band: boolean;
+    w: number;
+    h: number;
+    pw: number;
+    ph: number;
+    aspect: number;
+  }>(
+    `(()=>{const s=document.getElementById("sheet").getBoundingClientRect();const p=document.getElementById("pp-plate").getBoundingClientRect();return{chartRoom:document.body.classList.contains("chart-room"),footer:!!document.querySelector("footer"),band:!!document.querySelector(".band"),w:s.width,h:s.height,pw:p.width,ph:p.height,aspect:s.width/s.height};})()`,
+  );
   check(
     "PB3e the room: chart-room body, no band, no footer, the sheet fitted at the plate's own 520:384 and the plate filling it",
-    room.chartRoom && !room.footer && !room.band && room.w > 200 && Math.abs(room.aspect - 520 / 384) < 0.01 && Math.abs(room.pw - room.w) < 1 && Math.abs(room.ph - room.h) < 1,
+    room.chartRoom &&
+      !room.footer &&
+      !room.band &&
+      room.w > 200 &&
+      Math.abs(room.aspect - 520 / 384) < 0.01 &&
+      Math.abs(room.pw - room.w) < 1 &&
+      Math.abs(room.ph - room.h) < 1,
     JSON.stringify(room),
   );
-  await evaluate(`(()=>{const vp=document.getElementById("map-viewport");vp.focus();vp.dispatchEvent(new KeyboardEvent("keydown",{key:"+",bubbles:true}));})()`);
+  await evaluate(
+    `(()=>{const vp=document.getElementById("map-viewport");vp.focus();vp.dispatchEvent(new KeyboardEvent("keydown",{key:"+",bubbles:true}));})()`,
+  );
   let leaned = null;
   for (let i = 0; i < 60; i++) {
-    try { leaned = await evaluate<{ zoomed: boolean; k: number }>(`(()=>{const vp=document.getElementById("map-viewport");const t=getComputedStyle(document.getElementById("map")).transform;const m=/matrix\\(([^,]+),/.exec(t);return{zoomed:vp.classList.contains("zoomed"),k:m?Number(m[1]):1};})()`); } catch {}
+    try {
+      leaned = await evaluate<{ zoomed: boolean; k: number }>(
+        `(()=>{const vp=document.getElementById("map-viewport");const t=getComputedStyle(document.getElementById("map")).transform;const m=/matrix\\(([^,]+),/.exec(t);return{zoomed:vp.classList.contains("zoomed"),k:m?Number(m[1]):1};})()`,
+      );
+    } catch {}
     if (leaned && leaned.zoomed && leaned.k > 1.3) break;
     await sleep(50);
   }
-  check("PB3f the Glass leans on the plate (+ magnifies the sheet, the kit's keys)", !!leaned && leaned.zoomed && leaned.k > 1.3, JSON.stringify(leaned));
-  await evaluate(`document.getElementById("map-viewport").dispatchEvent(new KeyboardEvent("keydown",{key:"0",bubbles:true}))`);
+  check(
+    "PB3f the Glass leans on the plate (+ magnifies the sheet, the kit's keys)",
+    !!leaned && leaned.zoomed && leaned.k > 1.3,
+    JSON.stringify(leaned),
+  );
+  await evaluate(
+    `document.getElementById("map-viewport").dispatchEvent(new KeyboardEvent("keydown",{key:"0",bubbles:true}))`,
+  );
   for (let i = 0; i < 60; i++) {
     let home = null;
-    try { home = await evaluate<boolean>(`!document.getElementById("map-viewport").classList.contains("zoomed")`); } catch {}
+    try {
+      home = await evaluate<boolean>(`!document.getElementById("map-viewport").classList.contains("zoomed")`);
+    } catch {}
     if (home) break;
     await sleep(50);
   }
-  check("PB4 the render worker serves the page (no silent inline fallback)", await evaluate<boolean>(`window.__vellumProspectUsesWorker() === true`));
+  check(
+    "PB4 the render worker serves the page (no silent inline fallback)",
+    await evaluate<boolean>(`window.__vellumProspectUsesWorker() === true`),
+  );
 
   const first = await svgOf();
   check(
@@ -160,7 +264,9 @@ async function pb3eRoomAndPlate({ evaluate, check, sleep, svgOf }: ProspectKit):
     typeof first === "string" && first.includes('aria-label="The prospect of Laukuwelua, chart 42"'),
     String(first).slice(0, 100),
   );
-  const slip = await evaluate<string[]>(`[...document.querySelectorAll("#pp-key li")].map((li)=>li.querySelector(".cr-num").textContent+". "+li.querySelector(".cr-text").textContent)`);
+  const slip = await evaluate<string[]>(
+    `[...document.querySelectorAll("#pp-key li")].map((li)=>li.querySelector(".cr-num").textContent+". "+li.querySelector(".cr-text").textContent)`,
+  );
   check(
     "PB5b the slip's key mirrors the plate's numbered key: the same numerals in order and the same words, each lettered on the plate (Issue #754 ruling D12)",
     slip.length > 0 && slip.every((row, i) => row.startsWith(`${i + 1}. `) && first.includes(`aria-label="${row}"`)),
@@ -173,7 +279,11 @@ async function pb6SameAddress({ check, goto, opened, svgOf }: ProspectKit, first
   await goto("#seed=42&i=0");
   await opened("the same address, fresh visit");
   const second = await svgOf();
-  check("PB6 the same address presses a byte-identical plate", first === second, `first ${String(first).length}b, second ${String(second).length}b`);
+  check(
+    "PB6 the same address presses a byte-identical plate",
+    first === second,
+    `first ${String(first).length}b, second ${String(second).length}b`,
+  );
 }
 
 async function pb7YearFilter({ evaluate, check, sleep, goto, opened, state, svgOf }: ProspectKit): Promise<void> {
@@ -185,41 +295,95 @@ async function pb7YearFilter({ evaluate, check, sleep, goto, opened, state, svgO
   const ground = await svgOf();
   check(
     "PB7 the year is a chronicle filter: the standing town at the present, the bare ground before its founding",
-    /aria-label="PAUKILUA"/.test(standing) && !/will rise/.test(standing) && /will rise/.test(ground) && early.year === 300,
+    /aria-label="PAUKILUA"/.test(standing) &&
+      !/will rise/.test(standing) &&
+      /will rise/.test(ground) &&
+      early.year === 300,
     JSON.stringify({ year: early.year, presentYear: early.presentYear }),
   );
   check(
     "PB7b a viewed year reads in the year control and the era line, the bare ground keys the world alone (Issue #754 ruling D12), and the Explorer link sheds the page's own keys",
-    early.yearField === "300" && early.eraLine === "Before the founding · An. 300" && early.era === "before-founding" && early.keyRows > 0 && early.keyLis === early.keyRows && !early.keyHeadHidden && /will rise · An\. 300$/.test(early.where!) && !/founded/.test(
-      early.where!) && early.chart === "/explorer/#seed=42",
-    JSON.stringify({ yearField: early.yearField, eraLine: early.eraLine, keyRows: early.keyRows, keyLis: early.keyLis, keyHeadHidden: early.keyHeadHidden, where: early.where, chart: early.chart }),
+    early.yearField === "300" &&
+      early.eraLine === "Before the founding · An. 300" &&
+      early.era === "before-founding" &&
+      early.keyRows > 0 &&
+      early.keyLis === early.keyRows &&
+      !early.keyHeadHidden &&
+      /will rise · An\. 300$/.test(early.where!) &&
+      !/founded/.test(early.where!) &&
+      early.chart === "/explorer/#seed=42",
+    JSON.stringify({
+      yearField: early.yearField,
+      eraLine: early.eraLine,
+      keyRows: early.keyRows,
+      keyLis: early.keyLis,
+      keyHeadHidden: early.keyHeadHidden,
+      where: early.where,
+      chart: early.chart,
+    }),
   );
 
-  await evaluate(`(()=>{document.getElementById("pp-year").value=${JSON.stringify(String(early.presentYear))};document.getElementById("pp-year-form").requestSubmit();})()`);
+  await evaluate(
+    `(()=>{document.getElementById("pp-year").value=${JSON.stringify(String(early.presentYear))};document.getElementById("pp-year-form").requestSubmit();})()`,
+  );
   let engraved: Prospect | null = null;
   for (let i = 0; i < 200; i++) {
     let s = null;
-    try { s = await state(); } catch {}
-    if (s && s.year === early.presentYear && s.status === "") { engraved = s; break; }
+    try {
+      s = await state();
+    } catch {}
+    if (s && s.year === early.presentYear && s.status === "") {
+      engraved = s;
+      break;
+    }
     await sleep(75);
   }
   const reEngraved = engraved ? await svgOf() : null;
   check(
     "PB7c Engrave re-engraves in place: the present year's plate is byte-identical to a fresh visit's, the era and key return, the address gains year= and keeps i=",
-    !!engraved && reEngraved === standing && engraved.era === "standing" && engraved.keyRows > 0 && new RegExp(`(^|&)year=${early.presentYear}(&|$)`).test(engraved.hash.slice(1)) && /(^|&)i=1(&|$)/.test(engraved.hash.slice(1)) && engraved.index === 1,
-    JSON.stringify(engraved && { year: engraved.year, era: engraved.era, keyRows: engraved.keyRows, hash: engraved.hash, same: reEngraved === standing }),
+    !!engraved &&
+      reEngraved === standing &&
+      engraved.era === "standing" &&
+      engraved.keyRows > 0 &&
+      new RegExp(`(^|&)year=${early.presentYear}(&|$)`).test(engraved.hash.slice(1)) &&
+      /(^|&)i=1(&|$)/.test(engraved.hash.slice(1)) &&
+      engraved.index === 1,
+    JSON.stringify(
+      engraved && {
+        year: engraved.year,
+        era: engraved.era,
+        keyRows: engraved.keyRows,
+        hash: engraved.hash,
+        same: reEngraved === standing,
+      },
+    ),
   );
   // Garbage is refused IN PLACE by the control's own digits pattern (home's seed-input precedent): the browser never fires submit.
-  const garbage = await evaluate<boolean>(`(()=>{const y=document.getElementById("pp-year");y.value="abc";const valid=y.checkValidity();document.getElementById("pp-year-form").requestSubmit();return valid;})()`);
+  const garbage = await evaluate<boolean>(
+    `(()=>{const y=document.getElementById("pp-year");y.value="abc";const valid=y.checkValidity();document.getElementById("pp-year-form").requestSubmit();return valid;})()`,
+  );
   await sleep(300);
   const refused = await state();
-  await evaluate(`(()=>{document.getElementById("pp-year").value="";document.getElementById("pp-year-form").requestSubmit();})()`);
+  await evaluate(
+    `(()=>{document.getElementById("pp-year").value="";document.getElementById("pp-year-form").requestSubmit();})()`,
+  );
   await sleep(300);
   const emptied = await state();
   check(
     "PB7d a year that is not a year is refused: garbage fails the control's pattern and nothing is re-engraved; an emptied field returns to the plate's year",
-    garbage === false && !!refused && refused.year === early.presentYear && refused.status === "" && refused.svgLength === engraved!.svgLength && !!emptied && emptied.yearField === String(early.presentYear) && emptied.year === early.presentYear,
-    JSON.stringify({ garbageValid: garbage, refused: refused && { yearField: refused.yearField, year: refused.year }, emptied: emptied && { yearField: emptied.yearField, year: emptied.year } }),
+    garbage === false &&
+      !!refused &&
+      refused.year === early.presentYear &&
+      refused.status === "" &&
+      refused.svgLength === engraved!.svgLength &&
+      !!emptied &&
+      emptied.yearField === String(early.presentYear) &&
+      emptied.year === early.presentYear,
+    JSON.stringify({
+      garbageValid: garbage,
+      refused: refused && { yearField: refused.yearField, year: refused.year },
+      emptied: emptied && { yearField: emptied.yearField, year: emptied.year },
+    }),
   );
 }
 
@@ -229,7 +393,12 @@ async function pb7eOrphan({ check, goto, opened }: ProspectKit): Promise<void> {
   const orphan = await opened("the road-orphan");
   check(
     "PB7e a town no road leaves offers no road in the Ribbon: the plate and the note stand, the road out stands down, the Explorer road stays",
-    orphan.name === "Tewetulua" && orphan.roads === false && !orphan.ribbonShown && orphan.shown && orphan.noteTitle === "Tewetulua" && orphan.chart === "/explorer/#seed=42",
+    orphan.name === "Tewetulua" &&
+      orphan.roads === false &&
+      !orphan.ribbonShown &&
+      orphan.shown &&
+      orphan.noteTitle === "Tewetulua" &&
+      orphan.chart === "/explorer/#seed=42",
     JSON.stringify({ name: orphan.name, roads: orphan.roads, shown: orphan.ribbonShown, chart: orphan.chart }),
   );
 }
@@ -244,7 +413,10 @@ async function pb8TwoDress({ check, goto, opened, svgOf }: ProspectKit): Promise
   check(
     "PB8 the two-dress fallback holds: a nautical chart opens an antique plate, an ink chart an ink plate (#237)",
     // The dress rides the plate's own id suffix (`${style.name}-${seed}-${index}`), so the BYTES witness it, not just the state hook.
-    dropped.dress === "antique" && /-antique-42-0/.test(nauticalSvg) && inked.dress === "ink" && /-ink-42-0/.test(inkSvg),
+    dropped.dress === "antique" &&
+      /-antique-42-0/.test(nauticalSvg) &&
+      inked.dress === "ink" &&
+      /-ink-42-0/.test(inkSvg),
     JSON.stringify({ nautical: dropped.dress, ink: inked.dress }),
   );
 }
@@ -252,12 +424,20 @@ async function pb8TwoDress({ check, goto, opened, svgOf }: ProspectKit): Promise
 async function pb9BareVisit({ check, goto, opened }: ProspectKit): Promise<void> {
   await goto("");
   const bare = await opened("the bare visit");
-  check("PB9 a bare visit opens today's capital prospect", bare.blob && bare.name.length > 0, JSON.stringify({ name: bare.name, seed: bare.seed }));
+  check(
+    "PB9 a bare visit opens today's capital prospect",
+    bare.blob && bare.name.length > 0,
+    JSON.stringify({ name: bare.name, seed: bare.seed }),
+  );
 }
 
 function pb10NoErrors(ctx: SuiteContext, errBase: number, httpBase: number): void {
   const { check, consoleErrors, http4xx } = ctx;
   const errDelta = dropExpectedCancellations(consoleErrors.slice(errBase));
   check("PB10 no console errors across the prospect checks", errDelta.length === 0, errDelta.join(" | "));
-  check("PB11 no HTTP 4xx across the prospect checks", http4xx.length === httpBase, http4xx.slice(httpBase).join(" | "));
+  check(
+    "PB11 no HTTP 4xx across the prospect checks",
+    http4xx.length === httpBase,
+    http4xx.slice(httpBase).join(" | "),
+  );
 }

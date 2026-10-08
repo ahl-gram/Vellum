@@ -20,23 +20,22 @@ export function ribbonSvgFor(input: RibbonInput, styleName: StyleName): string {
   const style = STYLES[styleName];
   const c = ribbonDress(style);
   const rng = createRng(input.seed).fork(`ribbon-${input.fromIdx}-${input.toIdx}`);
-  const root = el("svg", {
-    xmlns: "http://www.w3.org/2000/svg",
-    width: RIBBON_W,
-    height: RIBBON_H,
-    viewBox: `0 0 ${RIBBON_W} ${RIBBON_H}`,
-    role: "img",
-    "aria-label": ribbonAria(input),
-  }, [renderRibbon(c, input, rng)]);
+  const root = el(
+    "svg",
+    {
+      xmlns: "http://www.w3.org/2000/svg",
+      width: RIBBON_W,
+      height: RIBBON_H,
+      viewBox: `0 0 ${RIBBON_W} ${RIBBON_H}`,
+      role: "img",
+      "aria-label": ribbonAria(input),
+    },
+    [renderRibbon(c, input, rng)],
+  );
   return renderSvg(root);
 }
 
-export function ribbonPlate(
-  world: World,
-  fromIdx: number,
-  toIdx: number,
-  styleName: StyleName,
-): string | null {
+export function ribbonPlate(world: World, fromIdx: number, toIdx: number, styleName: StyleName): string | null {
   const input = buildRibbonInput(world, fromIdx, toIdx);
   if (input === null) return null;
   return ribbonSvgFor(input, styleName);

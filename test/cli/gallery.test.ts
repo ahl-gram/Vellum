@@ -17,11 +17,7 @@ test("a gallery card is the same world as the canonical chart for that seed", as
       style: "antique",
       widthPx: 900,
     });
-    assert.equal(
-      card,
-      canonical,
-      "gallery card should match `chart --seed N` (same default grid)",
-    );
+    assert.equal(card, canonical, "gallery card should match `chart --seed N` (same default grid)");
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
@@ -44,7 +40,11 @@ test("a card's figure reserves its frame: img dims mirror the rendered svg root 
 
 test("the waiting frame says Drafting… until the plate covers it (#329)", () => {
   assert.match(GALLERY_PAGE_CSS, /\.grid a\s*\{[^}]*position:\s*relative/, "the frame anchors its label");
-  assert.match(GALLERY_PAGE_CSS, /\.grid a::before\s*\{[^}]*content:\s*"Drafting…"/, "the label speaks the drafting voice");
+  assert.match(
+    GALLERY_PAGE_CSS,
+    /\.grid a::before\s*\{[^}]*content:\s*"Drafting…"/,
+    "the label speaks the drafting voice",
+  );
   assert.match(GALLERY_PAGE_CSS, /\.grid a::before\s*\{[^}]*z-index:\s*-1/, "the loaded plate paints over its label");
 });
 
@@ -59,11 +59,7 @@ test("the gallery stays in the motion folio: its tiles tip under the hand on the
       /figure img:hover\s*\{[^}]*transform:[^}]*rotate/,
       "gallery tiles should tip (a rotate) under the hand",
     );
-    assert.match(
-      css,
-      /var\(--paper\)/,
-      "the tip rides the motion desk's shared timing token",
-    );
+    assert.match(css, /var\(--paper\)/, "the tip rides the motion desk's shared timing token");
   } finally {
     await rm(dir, { recursive: true, force: true });
   }

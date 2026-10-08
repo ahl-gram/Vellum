@@ -25,11 +25,7 @@ for (const { seed, chart, dropped } of CASES) {
     );
 
     const missing = world.names.realms.filter((n) => !isLabelled(svg, n));
-    assert.deepEqual(
-      missing,
-      [],
-      `unlabelled realms on seed ${seed}: ${missing.join(", ") || "(none)"}`,
-    );
+    assert.deepEqual(missing, [], `unlabelled realms on seed ${seed}: ${missing.join(", ") || "(none)"}`);
   });
 }
 

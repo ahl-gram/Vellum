@@ -1,8 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import {
-  createSurveyArm, armOnLanding, wireSurveyToggle,
-} from "../../src/site/explorer/survey-arm.ts";
+import { createSurveyArm, armOnLanding, wireSurveyToggle } from "../../src/site/explorer/survey-arm.ts";
 
 // The second wait (Issue #373): the Issue #184 travel matrix moved to the render worker, so between the paint and the arm the slot holds for an off-thread order; every Issue #300/Issue #366 guard in survey-arm.test.ts is re-read on the far side, never captured, because ~1s is long enough for the box, the world, or both to move.
 
@@ -10,8 +8,12 @@ import {
 function paintQueue() {
   const queued: Array<() => void> = [];
   return {
-    afterPaint: (run: () => void): void => { queued.push(run); },
-    paint: (): void => { for (const run of queued.splice(0)) run(); },
+    afterPaint: (run: () => void): void => {
+      queued.push(run);
+    },
+    paint: (): void => {
+      for (const run of queued.splice(0)) run();
+    },
   };
 }
 
@@ -23,10 +25,17 @@ function heldPrime() {
     calls: () => calls,
     prime: (): Promise<void> => {
       calls++;
-      return new Promise<void>((resolve) => { waiting.push(resolve); });
+      return new Promise<void>((resolve) => {
+        waiting.push(resolve);
+      });
     },
-    settle: (): void => { for (const r of waiting.splice(0)) r(); },
-    flush: (): Promise<void> => Promise.resolve().then(() => {}).then(() => {}),
+    settle: (): void => {
+      for (const r of waiting.splice(0)) r();
+    },
+    flush: (): Promise<void> =>
+      Promise.resolve()
+        .then(() => {})
+        .then(() => {}),
   };
 }
 
@@ -38,15 +47,23 @@ function waitingHarness() {
     afterPaint: q.afterPaint,
     isArmed: () => state.armed,
     worldGen: () => state.worldGen,
-    arm: () => { state.builds++; },
+    arm: () => {
+      state.builds++;
+    },
     prime: held.prime,
   });
-  const land = (opts: { defer?: boolean } = {}) => armOnLanding({
-    arm, armed: state.armed,
-    rearm: () => { state.landings++; },
-    clear: () => { state.clears++; },
-    ...opts,
-  });
+  const land = (opts: { defer?: boolean } = {}) =>
+    armOnLanding({
+      arm,
+      armed: state.armed,
+      rearm: () => {
+        state.landings++;
+      },
+      clear: () => {
+        state.clears++;
+      },
+      ...opts,
+    });
   return { ...q, ...held, state, arm, land };
 }
 
@@ -135,13 +152,17 @@ test("#373 a prime that REJECTS still arms: the survey falls back to the inline 
     afterPaint: q.afterPaint,
     isArmed: () => true,
     worldGen: () => 0,
-    arm: () => { builds++; },
+    arm: () => {
+      builds++;
+    },
     prime: () => Promise.reject(new Error("the render worker crashed")),
   });
 
   arm.schedule();
   q.paint();
-  await Promise.resolve().then(() => {}).then(() => {});
+  await Promise.resolve()
+    .then(() => {})
+    .then(() => {});
 
   // A one-sided .then here leaves the sheet permanently bare AND raises an unhandled rejection, and no other test in this file would notice either.
   assert.equal(builds, 1, "a dead source degrades to the inline computation, it does not cancel the survey");
@@ -154,7 +175,9 @@ test("#373 with no off-thread source at all, every arm is synchronous", () => {
     afterPaint: q.afterPaint,
     isArmed: () => true,
     worldGen: () => 0,
-    arm: () => { builds++; },
+    arm: () => {
+      builds++;
+    },
   });
 
   arm.schedule();
@@ -167,9 +190,17 @@ function fakeBox() {
   let handler: (() => void) | null = null;
   const box = {
     checked: false,
-    addEventListener: (type: string, fn: () => void): void => { if (type === "change") handler = fn; },
+    addEventListener: (type: string, fn: () => void): void => {
+      if (type === "change") handler = fn;
+    },
   };
-  return { box, change: (to: boolean): void => { box.checked = to; if (handler) handler(); } };
+  return {
+    box,
+    change: (to: boolean): void => {
+      box.checked = to;
+      if (handler) handler();
+    },
+  };
 }
 
 test("#373 the tick's arm waits for the order the box's own wiring was handed", async () => {
@@ -180,7 +211,12 @@ test("#373 the tick's arm waits for the order the box's own wiring was handed", 
   wireSurveyToggle({
     box: f.box as unknown as HTMLInputElement,
     worldGen: () => 0,
-    home: () => {}, arm: () => { armed++; }, exit: () => {}, syncHash: () => {},
+    home: () => {},
+    arm: () => {
+      armed++;
+    },
+    exit: () => {},
+    syncHash: () => {},
     prime: held.prime,
     afterPaint: q.afterPaint,
   });

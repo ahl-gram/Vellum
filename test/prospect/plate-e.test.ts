@@ -14,29 +14,66 @@ import { makeInput } from "../../test-support/prospect-fixtures.ts";
 const ARMS: Arms = { division: "perPale", field: ["azure", "argent"], charge: null };
 
 test("the cast stands as the round drew it: kind, harbour, roads and era, the rider wherever two roads or more end at the place", () => {
-  assert.deepEqual(castFor("capital", true, 3, "standing"), ["gentleman", "lady", "porter", "rider", "dog"], "the capital, three roads");
-  assert.deepEqual(castFor("town", true, 2, "standing"), ["gentleman", "lady", "porter", "rider", "dog"], "Nailo, two roads");
-  assert.deepEqual(castFor("town", false, 1, "standing"), ["gentleman", "lady", "shepherd", "dog"], "an inland town, one road");
+  assert.deepEqual(
+    castFor("capital", true, 3, "standing"),
+    ["gentleman", "lady", "porter", "rider", "dog"],
+    "the capital, three roads",
+  );
+  assert.deepEqual(
+    castFor("town", true, 2, "standing"),
+    ["gentleman", "lady", "porter", "rider", "dog"],
+    "Nailo, two roads",
+  );
+  assert.deepEqual(
+    castFor("town", false, 1, "standing"),
+    ["gentleman", "lady", "shepherd", "dog"],
+    "an inland town, one road",
+  );
   assert.deepEqual(castFor("village", true, 1, "standing"), ["fisher", "waterbearer", "dog"], "Lokai, one road");
-  assert.deepEqual(castFor("village", false, 2, "standing"), ["shepherd", "waterbearer", "rider", "sheep", "sheep"], "Voorea, two roads");
+  assert.deepEqual(
+    castFor("village", false, 2, "standing"),
+    ["shepherd", "waterbearer", "rider", "sheep", "sheep"],
+    "Voorea, two roads",
+  );
   assert.deepEqual(castFor("hamlet", false, 0, "standing"), ["shepherd", "sheep", "sheep"]);
   assert.deepEqual(castFor("village", true, 1, "ruined"), ["traveller", "dog"], "Homaitani, ruined");
-  assert.deepEqual(castFor("capital", true, 3, "before-founding"), ["surveyor", "dog"], "the ground before the founding");
+  assert.deepEqual(
+    castFor("capital", true, 3, "before-founding"),
+    ["surveyor", "dog"],
+    "the ground before the founding",
+  );
 });
 
 test("the people's clothes are cut from the realm's tinctures on the coloured plate, and hatched on the ink", () => {
-  const dressed = (style: MapStyle, arms: Arms | null): string => renderSvg(figureNodes(engraver(style), { kind: "gentleman", x: 100, y: 250, h: 50, flip: false }, arms));
+  const dressed = (style: MapStyle, arms: Arms | null): string =>
+    renderSvg(figureNodes(engraver(style), { kind: "gentleman", x: 100, y: 250, h: 50, flip: false }, arms));
   const palette = paletteForStyle(STYLES.antique);
-  assert.ok(dressed(STYLES.antique, ARMS).includes(`fill="${palette.tincture("azure")}"`), "the cloak takes the field's first tincture");
-  assert.ok(dressed(STYLES.antique, null).includes(`fill="${palette.tincture("gules")}"`), "a place in no realm wears gules");
-  assert.ok(renderSvg(figureNodes(engraver(STYLES.antique), { kind: "lady", x: 100, y: 250, h: 50, flip: false }, ARMS)).includes(`fill="${palette.tincture("argent")}"`), "the lady wears the field's second tincture");
+  assert.ok(
+    dressed(STYLES.antique, ARMS).includes(`fill="${palette.tincture("azure")}"`),
+    "the cloak takes the field's first tincture",
+  );
+  assert.ok(
+    dressed(STYLES.antique, null).includes(`fill="${palette.tincture("gules")}"`),
+    "a place in no realm wears gules",
+  );
+  assert.ok(
+    renderSvg(
+      figureNodes(engraver(STYLES.antique), { kind: "lady", x: 100, y: 250, h: 50, flip: false }, ARMS),
+    ).includes(`fill="${palette.tincture("argent")}"`),
+    "the lady wears the field's second tincture",
+  );
   const ink = dressed(STYLES.ink, ARMS);
-  assert.ok(!ink.includes(`fill="${palette.tincture("azure")}"`) && /fill="none" stroke="[^"]+" stroke-width="0.385"/.test(ink), "the ink dress hatches the cloth instead");
+  assert.ok(
+    !ink.includes(`fill="${palette.tincture("azure")}"`) && /fill="none" stroke="[^"]+" stroke-width="0.385"/.test(ink),
+    "the ink dress hatches the cloth instead",
+  );
 });
 
 function contrast(a: string, b: string): number {
   const lum = (hex: string): number => {
-    const ch = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+    const ch = [1, 3, 5]
+      .map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
+      .map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
     return 0.2126 * ch[0]! + 0.7152 * ch[1]! + 0.0722 * ch[2]!;
   };
   const [hi, lo] = [lum(a), lum(b)].sort((p, q) => q - p);
@@ -55,7 +92,11 @@ test("every lettered run stands at 4.5:1 or better on the paper it is set on, in
   }
 });
 
-const ROADS: Surroundings = { ...NO_SURROUNDINGS, roadTowns: [{ index: 1, name: "Haireno", kind: "town", lateral: 0.39, dist: 21 }], roadCount: 2 };
+const ROADS: Surroundings = {
+  ...NO_SURROUNDINGS,
+  roadTowns: [{ index: 1, name: "Haireno", kind: "town", lateral: 0.39, dist: 21 }],
+  roadCount: 2,
+};
 
 test("a plate drops its detail by its own drawn width, inline or as an image, never the window's: the key, the horizon names and the margin words at the smaller width, the cartouche and the medals too at the smallest (ruling D3)", () => {
   const opts = { idSuffix: "s1", surroundings: ROADS };
@@ -73,15 +114,36 @@ test("a plate drops its detail by its own drawn width, inline or as an image, ne
   assert.ok(groupOf("pd-s1").includes('class="vellum-arms"'), "the medal group holds the arms");
   assert.equal([SMALL_WIDTH, SMALLEST_WIDTH].join(" "), "400 240");
   assert.ok(svg.includes(`<style>${smallSizeRule("s1")}</style>`), "the plate carries its own rule");
-  assert.equal(smallSizeRule("s1"), ".pq-s1{container-type:inline-size}@container (max-width: 400px){.pk-s1,.pt-s1,.pm-s1{display:none}}@container (max-width: 240px){.pc-s1,.pd-s1{display:none}}");
-  assert.equal(root.attrs["class"], "pq-s1", "the plate itself is the container its rule reads, so an inlined plate reads its own width and not the window");
+  assert.equal(
+    smallSizeRule("s1"),
+    ".pq-s1{container-type:inline-size}@container (max-width: 400px){.pk-s1,.pt-s1,.pm-s1{display:none}}@container (max-width: 240px){.pc-s1,.pd-s1{display:none}}",
+  );
+  assert.equal(
+    root.attrs["class"],
+    "pq-s1",
+    "the plate itself is the container its rule reads, so an inlined plate reads its own width and not the window",
+  );
   assert.ok(!svg.includes("@media"), "no rule reads the window");
-  for (const cls of ["pk", "pt", "pm", "pc", "pd"]) assert.ok(svg.includes(`class="${cls}-s1"`), `the ${cls} group carries its class`);
+  for (const cls of ["pk", "pt", "pm", "pc", "pd"])
+    assert.ok(svg.includes(`class="${cls}-s1"`), `the ${cls} group carries its class`);
 });
 
 test("the plate's words survive the engraving as labels on their runs", () => {
-  const svg = finishedPlateSvg(makeInput({ kind: "capital", harbor: true, realmName: "The Chiefdom of Rekekoa" }), STYLES.antique, 1300);
-  for (const words of ["TESTHOLM", "chief port of the Chiefdom of Rekekoa, founded An. 1100", "CHART", "№ 4242", "An. 1300", "FOUNDED AN. 1100 · VELLUM · CHART № 4242", "Septentrio", "Meridies"]) {
+  const svg = finishedPlateSvg(
+    makeInput({ kind: "capital", harbor: true, realmName: "The Chiefdom of Rekekoa" }),
+    STYLES.antique,
+    1300,
+  );
+  for (const words of [
+    "TESTHOLM",
+    "chief port of the Chiefdom of Rekekoa, founded An. 1100",
+    "CHART",
+    "№ 4242",
+    "An. 1300",
+    "FOUNDED AN. 1100 · VELLUM · CHART № 4242",
+    "Septentrio",
+    "Meridies",
+  ]) {
     assert.ok(svg.includes(`aria-label="${words}"`), `the plate keeps ${JSON.stringify(words)}`);
   }
 });

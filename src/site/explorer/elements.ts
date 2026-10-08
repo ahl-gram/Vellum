@@ -32,4 +32,15 @@ export const agesChk = $<HTMLInputElement>("ages"); // the survey toggle (Issue 
 export const orderLink = $<HTMLAnchorElement>("order-plates"); // Issue #133: "Take to the Print Room", href kept current in draw()
 export const journalLink = $<HTMLAnchorElement>("journal-link"); // Issue #270 ruling 2: the always-visible journal button; href kept current beside the hash write
 
-export const hashControls = { seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, beastsChk, landSlider, coastSlider };
+export const hashControls = {
+  seedInput,
+  styleSel,
+  typeSel,
+  bandSel,
+  themeSel,
+  legendChk,
+  armsChk,
+  beastsChk,
+  landSlider,
+  coastSlider,
+};

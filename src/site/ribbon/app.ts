@@ -103,10 +103,21 @@ function draw(from: number | null, to: number | null): void {
       prospectVerb.textContent = `See ${res.toName} in`;
       prospectLink.style.display = "";
       writeFolio(furniture, res, seed, dress, Math.round(performance.now() - t0));
-      writeItinerary(furniture, res, (row, li) => { sheet.lean(row.nx, row.ny); markLeaned(furniture, li); });
+      writeItinerary(furniture, res, (row, li) => {
+        sheet.lean(row.nx, row.ny);
+        markLeaned(furniture, li);
+      });
       status.textContent = "";
       sheet.room.layout();
-      last = { seed, from: res.fromIdx, to: res.toIdx, leagues: res.leagues, dress, rows: res.events.length, svgLength: res.svg.length };
+      last = {
+        seed,
+        from: res.fromIdx,
+        to: res.toIdx,
+        leagues: res.leagues,
+        dress,
+        rows: res.events.length,
+        svgLength: res.svg.length,
+      };
     })
     .catch((err: unknown) => {
       if (myGen !== drawGen) return;

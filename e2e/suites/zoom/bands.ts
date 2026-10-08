@@ -3,14 +3,30 @@ import type { ZoomKit } from "./kit.ts";
 type Target21 = Awaited<ReturnType<typeof z21Target>>;
 type Deep21 = Awaited<ReturnType<typeof z21Hamlets>>;
 
-export async function z20dInkDrops({ evaluate, check, waitInked, rgn, goHome, enterAt, waitRedraft }: ZoomKit): Promise<void> {
+export async function z20dInkDrops({
+  evaluate,
+  check,
+  waitInked,
+  rgn,
+  goHome,
+  enterAt,
+  waitRedraft,
+}: ZoomKit): Promise<void> {
   await goHome();
   const before20d = (await rgn()).redrafts;
   await enterAt(2, 0.5, 0.5);
   await waitRedraft(before20d);
-  await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  await evaluate(
+    `(()=>{const c=document.getElementById("ages");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));})()`,
+  );
   await waitInked("z20d-survey-ink"); // Issue #300: the ink lands a beat after the tick, so wait for it rather than sleeping
-  const chron = await evaluate<{ band: number; committed: boolean; noStamp: boolean; insets: number; trackShown: boolean }>(
+  const chron = await evaluate<{
+    band: number;
+    committed: boolean;
+    noStamp: boolean;
+    insets: number;
+    trackShown: boolean;
+  }>(
     `(()=>{const s=window.__vellumRegion();const svg=document.querySelector("#map > svg");` +
       `return{band:s.band,committed:s.committed,noStamp:!!svg&&!svg.hasAttribute("data-vellum-region-u0"),` +
       `insets:document.querySelectorAll("#map .region-inset").length,trackShown:!!document.querySelector("#map .voyage-overlay .voyage-track")};})()`,
@@ -20,10 +36,20 @@ export async function z20dInkDrops({ evaluate, check, waitInked, rgn, goHome, en
     chron.band === 0 && chron.committed === false && chron.noStamp && chron.insets === 0 && chron.trackShown,
     JSON.stringify(chron),
   );
-  await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  await evaluate(
+    `(()=>{const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`,
+  );
 }
 
-export async function z20eCardSurvives({ evaluate, check, sleep, rgn, goHome, enterAt, waitRedraft }: ZoomKit): Promise<void> {
+export async function z20eCardSurvives({
+  evaluate,
+  check,
+  sleep,
+  rgn,
+  goHome,
+  enterAt,
+  waitRedraft,
+}: ZoomKit): Promise<void> {
   await goHome();
   const before20e = (await rgn()).redrafts;
   await enterAt(2, 0.5, 0.5);
@@ -54,7 +80,15 @@ export async function z20eCardSurvives({ evaluate, check, sleep, rgn, goHome, en
   await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape"}))`);
 }
 
-export async function z20fStepsDown({ check, sleep, rgn, goHome, enterAt, waitRedraft, insetView }: ZoomKit): Promise<void> {
+export async function z20fStepsDown({
+  check,
+  sleep,
+  rgn,
+  goHome,
+  enterAt,
+  waitRedraft,
+  insetView,
+}: ZoomKit): Promise<void> {
   await goHome();
   const before20f = (await rgn()).redrafts;
   await enterAt(8, 0.5, 0.5);
@@ -62,21 +96,40 @@ export async function z20fStepsDown({ check, sleep, rgn, goHome, enterAt, waitRe
   await enterAt(4, 0.5, 0.5);
   const step20f = await waitRedraft(deep20f.redrafts);
   let view20f = await insetView();
-  for (let i = 0; i < 50 && view20f.insets !== 1; i++) { await sleep(40); view20f = await insetView(); }
+  for (let i = 0; i < 50 && view20f.insets !== 1; i++) {
+    await sleep(40);
+    view20f = await insetView();
+  }
   check(
     "Z20f a partial zoom-out steps down ONE band in place: inset swaps, world sheet visible, camera un-snapped (review quirk 3)",
-    deep20f.band === 3 && step20f.band === 2 && step20f.committed === true &&
-      view20f.insets === 1 && view20f.stamped && view20f.worldMounted && view20f.zk === 4,
+    deep20f.band === 3 &&
+      step20f.band === 2 &&
+      step20f.committed === true &&
+      view20f.insets === 1 &&
+      view20f.stamped &&
+      view20f.worldMounted &&
+      view20f.zk === 4,
     `band ${deep20f.band}->${step20f.band} insets=${view20f.insets} world=${view20f.worldMounted} k=${view20f.zk} (expected 4)`,
   );
 }
 
-export async function z20gInkBlocks({ evaluate, check, sleep, waitInked, rgn, goHome, enterAt, waitRedraft }: ZoomKit): Promise<void> {
+export async function z20gInkBlocks({
+  evaluate,
+  check,
+  sleep,
+  waitInked,
+  rgn,
+  goHome,
+  enterAt,
+  waitRedraft,
+}: ZoomKit): Promise<void> {
   await goHome();
   const before20g = (await rgn()).redrafts;
   await enterAt(2, 0.5, 0.5);
   const reg20g = await waitRedraft(before20g);
-  await evaluate(`(()=>{const v=document.getElementById("ages");v.checked=true;v.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  await evaluate(
+    `(()=>{const v=document.getElementById("ages");v.checked=true;v.dispatchEvent(new Event("change",{bubbles:true}));})()`,
+  );
   await waitInked("z20g-survey-ink"); // Issue #300: as Z20d, the ink is a beat behind the tick
   const von = await evaluate<{ band: number; committed: boolean; insets: number; track: boolean; k: number }>(
     `(()=>{const s=window.__vellumRegion();return{band:s.band,committed:s.committed,` +
@@ -86,11 +139,18 @@ export async function z20gInkBlocks({ evaluate, check, sleep, waitInked, rgn, go
   await enterAt(2, 0.35, 0.35); // a settle while the track is inked: must NOT redraft
   await sleep(600); // past the debounce + any would-be dispatch
   const vsettle = await rgn();
-  await evaluate(`(()=>{const v=document.getElementById("ages");v.checked=false;v.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  await evaluate(
+    `(()=>{const v=document.getElementById("ages");v.checked=false;v.dispatchEvent(new Event("change",{bubbles:true}));})()`,
+  );
   check(
     "Z20g the survey ink drops the inset, homes the camera on arming (ratified 2026-07-26), and blocks the redraft",
-    von.band === 0 && von.committed === false && von.insets === 0 && von.track && von.k === 1 &&
-      vsettle.redrafts === reg20g.redrafts && vsettle.band === 0,
+    von.band === 0 &&
+      von.committed === false &&
+      von.insets === 0 &&
+      von.track &&
+      von.k === 1 &&
+      vsettle.redrafts === reg20g.redrafts &&
+      vsettle.band === 0,
     `on-toggle ${JSON.stringify(von)} settleWhileInked redrafts=${vsettle.redrafts}(==${reg20g.redrafts}) band=${vsettle.band}`,
   );
 }
@@ -116,14 +176,27 @@ export async function z21Target({ evaluate, goHome }: ZoomKit) {
   return target21;
 }
 
-export async function z21Hamlets({ evaluate, check, shoot, sleep, rgn, enterAt, waitRedraft, insetView }: ZoomKit, target21: Target21) {
+export async function z21Hamlets(
+  { evaluate, check, shoot, sleep, rgn, enterAt, waitRedraft, insetView }: ZoomKit,
+  target21: Target21,
+) {
   const before21 = (await rgn()).redrafts;
   await enterAt(8, target21.cx, target21.cy);
   const deep21 = await waitRedraft(before21);
   let view21 = await insetView();
-  for (let i = 0; i < 50 && view21.insets !== 1; i++) { await sleep(40); view21 = await insetView(); }
+  for (let i = 0; i < 50 && view21.insets !== 1; i++) {
+    await sleep(40);
+    view21 = await insetView();
+  }
   await shoot("explorer-hamlets-band3.png");
-  const dom21 = await evaluate<{ err?: "no inset"; hamlets?: number; expected?: number; ordered?: boolean; outside?: number; namesMatch?: boolean }>(
+  const dom21 = await evaluate<{
+    err?: "no inset";
+    hamlets?: number;
+    expected?: number;
+    ordered?: boolean;
+    outside?: number;
+    namesMatch?: boolean;
+  }>(
     `(async()=>{const isvg=document.querySelector("#map .region-inset svg");if(!isvg)return{err:"no inset"};` +
       `const win={u0:+isvg.getAttribute("data-vellum-region-u0"),v0:+isvg.getAttribute("data-vellum-region-v0"),` +
       `u1:+isvg.getAttribute("data-vellum-region-u1"),v1:+isvg.getAttribute("data-vellum-region-v1")};` +
@@ -144,19 +217,30 @@ export async function z21Hamlets({ evaluate, check, shoot, sleep, rgn, enterAt, 
   );
   check(
     "Z21 hamlets: the deepest band grows the smallest tier, engine count/name parity over the stamped window, tier order held",
-    deep21.band === 3 && dom21.hamlets! >= 3 && dom21.hamlets === dom21.expected &&
-      dom21.namesMatch && dom21.ordered && dom21.outside === 0,
+    deep21.band === 3 &&
+      dom21.hamlets! >= 3 &&
+      dom21.hamlets === dom21.expected &&
+      dom21.namesMatch &&
+      dom21.ordered &&
+      dom21.outside === 0,
     `band=${deep21.band} dom=${dom21.hamlets} engine=${dom21.expected} ordered=${dom21.ordered} ` +
       `namesMatch=${dom21.namesMatch} worldSheetHamlets=${dom21.outside} (scouted n=${target21.n})`,
   );
   return deep21;
 }
 
-export async function z21bOneBandUp({ evaluate, check, sleep, enterAt, waitRedraft, insetView }: ZoomKit, target21: Target21, deep21: Deep21): Promise<void> {
+export async function z21bOneBandUp(
+  { evaluate, check, sleep, enterAt, waitRedraft, insetView }: ZoomKit,
+  target21: Target21,
+  deep21: Deep21,
+): Promise<void> {
   await enterAt(4, target21.cx, target21.cy);
   const step21 = await waitRedraft(deep21.redrafts);
   let view21b = await insetView();
-  for (let i = 0; i < 50 && view21b.insets !== 1; i++) { await sleep(40); view21b = await insetView(); }
+  for (let i = 0; i < 50 && view21b.insets !== 1; i++) {
+    await sleep(40);
+    view21b = await insetView();
+  }
   const shallow21 = await evaluate<number>(
     `(()=>{const isvg=document.querySelector("#map .region-inset svg");` +
       `return isvg?isvg.querySelectorAll('g.settlement[data-tier="hamlet"]').length:-1;})()`,
@@ -173,6 +257,8 @@ export async function zRestore({ evaluate, waitSettled, goHome }: ZoomKit): Prom
   await evaluate(`window.__vellumSetRedraftEnabled(false)`); // Issue #169: geometric-only again for the suites that follow
 
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
-  await evaluate(`(()=>{const c=document.getElementById("ages");if(c.checked){c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));}document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`);
+  await evaluate(
+    `(()=>{const c=document.getElementById("ages");if(c.checked){c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));}document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`,
+  );
   await waitSettled("post-zoom-restore");
 }

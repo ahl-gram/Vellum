@@ -74,7 +74,16 @@ function veilRose(): string {
 
 function mix(a: string, b: string, wa: number): string {
   const ch = (h: string, i: number) => parseInt(h.slice(i, i + 2), 16);
-  return "#" + [1, 3, 5].map((i) => Math.round(ch(a, i) * wa + ch(b, i) * (1 - wa)).toString(16).padStart(2, "0")).join("");
+  return (
+    "#" +
+    [1, 3, 5]
+      .map((i) =>
+        Math.round(ch(a, i) * wa + ch(b, i) * (1 - wa))
+          .toString(16)
+          .padStart(2, "0"),
+      )
+      .join("")
+  );
 }
 
 function luminance(hex: string): number {
@@ -112,7 +121,10 @@ test("the ground is the veil's walnut deep, painted first, its hexes the site pa
   assert.equal(attr(firstRect, "width"), "1200");
   assert.equal(attr(firstRect, "height"), "630");
   assert.equal(attr(firstRect, "fill"), "url(#veil-deep)");
-  assert.ok(!card.includes(`<rect width="1200" height="630" fill="${token("parchment")}"`), "the parchment sheet is no longer the ground");
+  assert.ok(
+    !card.includes(`<rect width="1200" height="630" fill="${token("parchment")}"`),
+    "the parchment sheet is no longer the ground",
+  );
   const gradient = /<radialGradient\b[^>]*id="veil-deep"[^>]*>([\s\S]*?)<\/radialGradient>/.exec(card);
   assert.ok(gradient, "the deep is a radial gradient");
   const stops = [...gradient[1]!.matchAll(/stop-color="([^"]+)"/g)].map((m) => m[1]);
@@ -127,7 +139,11 @@ test("the wordmark is typed Vellum, centred, in IM Fell English SC alone (a fail
   assert.equal(attr(tag, "x"), "600");
   assert.equal(attr(tag, "text-anchor"), "middle");
   assert.equal(attr(tag, "font-family"), SC_FACE, "the SC face with no fallback stack behind it");
-  assert.equal(attr(tag, "letter-spacing"), (num(tag, "font-size") * 0.14).toFixed(2), "letter-spacing is the veil's 0.14em, two decimals");
+  assert.equal(
+    attr(tag, "letter-spacing"),
+    (num(tag, "font-size") * 0.14).toFixed(2),
+    "letter-spacing is the veil's 0.14em, two decimals",
+  );
 });
 
 test("the tagline sits beneath the wordmark in IM Fell English italic alone", () => {
@@ -150,7 +166,10 @@ test("the rose is the veil's own markup, once, settled: rings drawn, rays faded 
   for (const circle of [...source.matchAll(/cx="60" cy="60" r="[^"]+"/g)].map((m) => m[0])) {
     assert.ok(rose.includes(circle), `the card's rose keeps the veil's circle ${circle}`);
   }
-  assert.ok(!rose.includes("stroke-dashoffset") && !rose.includes("stroke-dasharray"), "settled: the rings are fully drawn");
+  assert.ok(
+    !rose.includes("stroke-dashoffset") && !rose.includes("stroke-dasharray"),
+    "settled: the rings are fully drawn",
+  );
   const needle = /<path\b[^>]*d="M60 18 L66 60 L60 102 L54 60 Z"[^>]*>/.exec(rose)?.[0] ?? "";
   assert.equal(attr(needle, "transform"), "rotate(16 60 60)", "the needle rests where needle-settle ends");
   assert.equal(attr(needle, "fill"), token("parchment"));
@@ -186,14 +205,21 @@ test("the seed-42 chart is ghosted full-bleed behind the lettering, once", () =>
 
 test("the foot line is the homepage hook, as written, in spaced small caps, broken where the page breaks it", () => {
   assert.deepEqual(OG_HOOK_LINES, ["Give Vellum a number.", "It gives you back a world."]);
-  assert.ok(read("src/pages/index.astro").includes(OG_HOOK_LINES.join("<br>")), "the card breaks the hook where the homepage does, and its words are the page's");
+  assert.ok(
+    read("src/pages/index.astro").includes(OG_HOOK_LINES.join("<br>")),
+    "the card breaks the hook where the homepage does, and its words are the page's",
+  );
   assert.ok(!card.includes("GIVE VELLUM"), "the hook is not uppercased: the SC face sets the small caps");
   const lines = OG_HOOK_LINES.map((l) => textTag(card, l));
   for (const tag of lines) {
     assert.equal(attr(tag, "x"), "600");
     assert.equal(attr(tag, "text-anchor"), "middle");
     assert.equal(attr(tag, "font-family"), SC_FACE, "the hook wears the SC face alone");
-    assert.equal(attr(tag, "letter-spacing"), (num(tag, "font-size") * 0.3).toFixed(2), "spaced: the veil-status 0.3em, two decimals");
+    assert.equal(
+      attr(tag, "letter-spacing"),
+      (num(tag, "font-size") * 0.3).toFixed(2),
+      "spaced: the veil-status 0.3em, two decimals",
+    );
   }
   assert.ok(num(lines[1]!, "y") > num(lines[0]!, "y"), "the second line sits below the first");
 });
@@ -217,7 +243,11 @@ test("every line clears WCAG against the deep's lightest stop, with and without 
   const stop = lightestStop(card);
   assert.match(stop, /^#[0-9a-f]{6}$/, "the deep's first stop is a hex");
   const washed = mix(token("chart-paper"), stop, num(nestedSvgTag(card, 'data-vellum-seed="42"'), "opacity"));
-  const floors: ReadonlyArray<readonly [string, number]> = [[OG_WORDMARK, 3], [OG_TAGLINE, 4.5], ...OG_HOOK_LINES.map((l) => [l, 4.5] as const)];
+  const floors: ReadonlyArray<readonly [string, number]> = [
+    [OG_WORDMARK, 3],
+    [OG_TAGLINE, 4.5],
+    ...OG_HOOK_LINES.map((l) => [l, 4.5] as const),
+  ];
   for (const [content, floor] of floors) {
     const ink = attr(textTag(card, content), "fill")!;
     for (const ground of [stop, washed]) {
@@ -229,28 +259,44 @@ test("every line clears WCAG against the deep's lightest stop, with and without 
 
 test("legible at feed width: the tagline's x-height and the hook's small caps clear 8 rows at 500 wide (#490 round 2)", () => {
   const tagline = atFeed(num(textTag(card, OG_TAGLINE), "font-size"), FELL_ITALIC_X_HEIGHT);
-  assert.ok(tagline >= LEGIBLE_ROWS, `tagline x-height at ${FEED_WIDTH} wide: ${tagline.toFixed(2)}px, floor ${LEGIBLE_ROWS}px`);
+  assert.ok(
+    tagline >= LEGIBLE_ROWS,
+    `tagline x-height at ${FEED_WIDTH} wide: ${tagline.toFixed(2)}px, floor ${LEGIBLE_ROWS}px`,
+  );
   for (const line of OG_HOOK_LINES) {
     const caps = atFeed(num(textTag(card, line), "font-size"), FELL_SC_SMALL_CAP);
-    assert.ok(caps >= LEGIBLE_ROWS, `hook small caps at ${FEED_WIDTH} wide: ${caps.toFixed(2)}px, floor ${LEGIBLE_ROWS}px`);
+    assert.ok(
+      caps >= LEGIBLE_ROWS,
+      `hook small caps at ${FEED_WIDTH} wide: ${caps.toFixed(2)}px, floor ${LEGIBLE_ROWS}px`,
+    );
   }
 });
 
 test("the two Fell faces travel inside the card as data: @font-face rules, no Garamond", () => {
   assert.deepEqual(
     OG_FONT_FACES.map((f) => [f.family, f.style]),
-    [["IM Fell English SC", "normal"], ["IM Fell English", "italic"]],
+    [
+      ["IM Fell English SC", "normal"],
+      ["IM Fell English", "italic"],
+    ],
   );
   const declared = read("public/fonts.css");
   const css = OG_FONT_FACES.map((face) => {
-    assert.match(declared, new RegExp(`font-family: '${face.family}';\\s*font-style: ${face.style};`), `${face.family} ${face.style} is a face fonts.css serves`);
+    assert.match(
+      declared,
+      new RegExp(`font-family: "${face.family}";\\s*font-style: ${face.style};`),
+      `${face.family} ${face.style} is a face fonts.css serves`,
+    );
     const b64 = readFileSync(join(KIT_FONTS, face.file)).toString("base64");
     const rule = fontFaceCss(face, b64);
     assert.match(rule, /^@font-face\s*\{/);
     assert.match(rule, new RegExp(`font-family:\\s*'${face.family}';`));
     assert.match(rule, new RegExp(`font-style:\\s*${face.style};`));
     assert.match(rule, /font-weight:\s*400;/);
-    assert.ok(rule.includes(`url(data:font/woff2;base64,${b64}) format("woff2")`), `${face.file} rides along as a data: url`);
+    assert.ok(
+      rule.includes(`url(data:font/woff2;base64,${b64}) format("woff2")`),
+      `${face.file} rides along as a data: url`,
+    );
     return rule;
   }).join("\n");
   const embedded = buildOgCard(chart, { fontCss: css });
@@ -264,6 +310,9 @@ test("the two Fell faces travel inside the card as data: @font-face rules, no Ga
 test("the card copy contains no em-dash (published-copy rule)", () => {
   assert.ok(!card.includes("—"), "OG card copy must not contain em-dashes");
   const custom = buildOgCard(chart, { tagline: "a tagline", footnote: ["a footnote", "a second"] });
-  assert.ok(custom.includes(">a tagline<") && custom.includes(">a footnote<") && custom.includes(">a second<"), "the copy options still override");
+  assert.ok(
+    custom.includes(">a tagline<") && custom.includes(">a footnote<") && custom.includes(">a second<"),
+    "the copy options still override",
+  );
   assert.ok(!custom.includes("—"));
 });

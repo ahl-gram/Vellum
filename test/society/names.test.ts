@@ -1,13 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createRng } from "../../src/core/rng.ts";
-import {
-  CULTURES,
-  ENGLISH_BLOCKLIST,
-  createNamer,
-  isStandaloneSlot,
-  makeMapTitle,
-} from "../../src/society/names.ts";
+import { CULTURES, ENGLISH_BLOCKLIST, createNamer, isStandaloneSlot, makeMapTitle } from "../../src/society/names.ts";
 
 test("there are at least four distinct cultures", () => {
   assert.ok(CULTURES.length >= 4);
@@ -66,7 +60,8 @@ test("some settlement names carry a culture suffix", () => {
 
 // Independent full Levenshtein (not the implementation's early-exit check), so the test cannot share a bug with the screen it guards.
 function levenshtein(a: string, b: string): number {
-  const m = a.length, n = b.length;
+  const m = a.length,
+    n = b.length;
   const dp = Array.from({ length: m + 1 }, (_, i) => [i, ...Array<number>(n).fill(0)]);
   for (let j = 0; j <= n; j++) dp[0]![j] = j;
   for (let i = 1; i <= m; i++) {
@@ -83,10 +78,7 @@ function assertNoNearDuplicates(bases: ReadonlyArray<string>, culture: (typeof C
     for (let j = i + 1; j < bases.length; j++) {
       // Roman-numeral fallbacks ("kara ii") are exempt: the numeral disambiguates a genuinely tight namespace.
       if (/ [ivx]+$/.test(bases[i]!) || / [ivx]+$/.test(bases[j]!)) continue;
-      assert.ok(
-        levenshtein(bases[i]!, bases[j]!) >= 2,
-        `${culture.id} seed ${seed}: "${bases[i]}" ~ "${bases[j]}"`,
-      );
+      assert.ok(levenshtein(bases[i]!, bases[j]!) >= 2, `${culture.id} seed ${seed}: "${bases[i]}" ~ "${bases[j]}"`);
     }
   }
 }
@@ -122,10 +114,7 @@ test("a standalone-slot base is never a blocklisted word", () => {
       const namer = createNamer(createRng(seed).fork("names"), culture);
       for (let i = 0; i < 40; i++) {
         const base = namer.name("bare").toLowerCase();
-        assert.ok(
-          !ENGLISH_BLOCKLIST.has(base),
-          `${culture.id} seed ${seed}: standalone base "${base}"`,
-        );
+        assert.ok(!ENGLISH_BLOCKLIST.has(base), `${culture.id} seed ${seed}: standalone base "${base}"`);
       }
     }
   }

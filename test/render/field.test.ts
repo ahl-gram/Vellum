@@ -94,9 +94,7 @@ test("each theme's fill palette differs between two distinct styles", () => {
   // Antique and ink are the universal pair (ink a monochrome wash for every theme, antique a chromatic ramp); vegetation is shared across the colored styles, pinned in the next test.
   for (const theme of THEME_NAMES) {
     const spec = THEMES[theme];
-    const samples = theme === "vegetation"
-      ? [BIOMES.temperateForest, BIOMES.desert, BIOMES.grassland]
-      : [0, 3, 6];
+    const samples = theme === "vegetation" ? [BIOMES.temperateForest, BIOMES.desert, BIOMES.grassland] : [0, 3, 6];
     const antique = samples.map((c) => spec.color(c, STYLES.antique));
     const ink = samples.map((c) => spec.color(c, STYLES.ink));
     assert.notDeepEqual(antique, ink, `${theme}: antique and ink fills are identical`);
@@ -115,9 +113,21 @@ test("colored styles differ for scalar themes but share the vegetation palette",
   const veg = THEMES.vegetation;
   const samples = [BIOMES.temperateForest, BIOMES.desert, BIOMES.grassland, BIOMES.snow];
   const antique = samples.map((c) => veg.color(c, STYLES.antique));
-  assert.deepEqual(samples.map((c) => veg.color(c, STYLES.topographic)), antique, "topographic shares the antique biome palette");
-  assert.deepEqual(samples.map((c) => veg.color(c, STYLES.nautical)), antique, "nautical shares the antique biome palette");
-  assert.notDeepEqual(samples.map((c) => veg.color(c, STYLES.ink)), antique, "ink rebins biomes to a monochrome wash");
+  assert.deepEqual(
+    samples.map((c) => veg.color(c, STYLES.topographic)),
+    antique,
+    "topographic shares the antique biome palette",
+  );
+  assert.deepEqual(
+    samples.map((c) => veg.color(c, STYLES.nautical)),
+    antique,
+    "nautical shares the antique biome palette",
+  );
+  assert.notDeepEqual(
+    samples.map((c) => veg.color(c, STYLES.ink)),
+    antique,
+    "ink rebins biomes to a monochrome wash",
+  );
 });
 
 test("antique theme palettes stay byte-identical (full interpolated ramps pinned)", () => {
@@ -125,16 +135,32 @@ test("antique theme palettes stay byte-identical (full interpolated ramps pinned
   const fills = (theme: ThemeName, n: number) =>
     Array.from({ length: n }, (_, i) => THEMES[theme].color(i, STYLES.antique));
   assert.deepEqual(fills("climate", 12), [
-    "#7d96b6", "#8da5b3", "#9db4b0", "#acc0ab", "#b9c4a0", "#c6c895",
-    "#cfc489", "#d2b87c", "#d5ac70", "#cf9966", "#c6845c", "#bd6f53",
+    "#7d96b6",
+    "#8da5b3",
+    "#9db4b0",
+    "#acc0ab",
+    "#b9c4a0",
+    "#c6c895",
+    "#cfc489",
+    "#d2b87c",
+    "#d5ac70",
+    "#cf9966",
+    "#c6845c",
+    "#bd6f53",
   ]);
   assert.deepEqual(fills("moisture", 10), [
-    "#d8c592", "#d0c68e", "#c9c78a", "#bac387", "#a8be85",
-    "#95b786", "#82ae8b", "#71a490", "#669a95", "#5b8f9a",
+    "#d8c592",
+    "#d0c68e",
+    "#c9c78a",
+    "#bac387",
+    "#a8be85",
+    "#95b786",
+    "#82ae8b",
+    "#71a490",
+    "#669a95",
+    "#5b8f9a",
   ]);
-  assert.deepEqual(fills("population", 5), [
-    "#e7ddc1", "#d4c198", "#bfa375", "#a58257", "#855f3e",
-  ]);
+  assert.deepEqual(fills("population", 5), ["#e7ddc1", "#d4c198", "#bfa375", "#a58257", "#855f3e"]);
   assert.equal(THEMES.vegetation.color(BIOMES.rainforest, STYLES.antique), "#56823f");
   assert.equal(THEMES.vegetation.color(BIOMES.desert, STYLES.antique), "#e0cd9a");
 });

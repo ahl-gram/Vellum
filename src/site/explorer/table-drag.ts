@@ -4,10 +4,19 @@ import { pageX } from "../shared/page-box.ts";
 export const DRAG_SLOP_PX = 6;
 export const GRIP_INSET_PX = 10;
 
-export interface Point { readonly x: number; readonly y: number }
-export interface Band { readonly top: number }
+export interface Point {
+  readonly x: number;
+  readonly y: number;
+}
+export interface Band {
+  readonly top: number;
+}
 
-export function grabbable(p: { readonly pointerType: string; readonly button: number; readonly isPrimary: boolean }): boolean {
+export function grabbable(p: {
+  readonly pointerType: string;
+  readonly button: number;
+  readonly isPrimary: boolean;
+}): boolean {
   return p.pointerType === "mouse" && p.button === 0 && p.isPrimary;
 }
 
@@ -28,7 +37,6 @@ export function bandOf(drawerHeight: number, viewportHeight: number): Band | nul
   return { top: viewportHeight - drawerHeight };
 }
 
-
 export function lengthPx(token: string, remPx: number): number {
   const t = token.trim();
   if (/^-?\d*\.?\d+rem$/.test(t)) return parseFloat(t) * remPx;
@@ -48,7 +56,12 @@ export interface TableDragDeps {
   readonly settleEase: () => string;
 }
 
-interface Carry { readonly start: Point; readonly ghost: HTMLImageElement | null; readonly url: string | null; readonly restore: (() => void) | null }
+interface Carry {
+  readonly start: Point;
+  readonly ghost: HTMLImageElement | null;
+  readonly url: string | null;
+  readonly restore: (() => void) | null;
+}
 
 function makeGhost(url: string): HTMLImageElement {
   const ghost = document.createElement("img");
@@ -65,13 +78,22 @@ function seat(ghostEl: HTMLImageElement, at: Point): void {
 }
 
 function snapBack(deps: TableDragDeps, g: HTMLImageElement, u: string): void {
-  const done = (): void => { g.remove(); URL.revokeObjectURL(u); };
+  const done = (): void => {
+    g.remove();
+    URL.revokeObjectURL(u);
+  };
   const ms = deps.prefersReduce() ? 0 : deps.settleMs();
-  if (ms === 0) { done(); return; }
+  if (ms === 0) {
+    done();
+    return;
+  }
   const rect = deps.handle.isConnected ? deps.handle.getBoundingClientRect() : null;
   const to = rect ? ghostSeat({ x: pageX(rect.right, window.scrollX), y: rect.top }, g.offsetWidth) : null;
   const frames = to
-    ? [{ translate: g.style.translate, scale: "1", opacity: 1 }, { translate: `${to.x}px ${to.y}px`, scale: "0.3", opacity: 0 }]
+    ? [
+        { translate: g.style.translate, scale: "1", opacity: 1 },
+        { translate: `${to.x}px ${to.y}px`, scale: "0.3", opacity: 0 },
+      ]
     : [{ opacity: 1 }, { opacity: 0 }];
   g.animate(frames, { duration: ms, easing: deps.settleEase(), fill: "forwards" }).finished.then(done, done);
 }
@@ -99,44 +121,79 @@ export function bindTableDrag(deps: TableDragDeps): void {
   let dragged = false;
   let owed: EventListener | null = null;
   const bound: Array<readonly [EventTarget, string, EventListener]> = [];
-  const listen = (target: EventTarget, type: string, fn: EventListener): void => { target.addEventListener(type, fn); bound.push([target, type, fn]); };
+  const listen = (target: EventTarget, type: string, fn: EventListener): void => {
+    target.addEventListener(type, fn);
+    bound.push([target, type, fn]);
+  };
   const unlisten = (): void => {
     for (const [target, type, fn] of bound.splice(0)) target.removeEventListener(type, fn);
     document.body.classList.remove("sheet-drag");
     deps.receiving(false);
   };
-  const swallowThisRelease = (): void => { dragged = true; setTimeout(() => { dragged = false; }, 0); };
-  const dropOwed = (): void => { if (owed) document.removeEventListener("pointerup", owed); owed = null; };
+  const swallowThisRelease = (): void => {
+    dragged = true;
+    setTimeout(() => {
+      dragged = false;
+    }, 0);
+  };
+  const dropOwed = (): void => {
+    if (owed) document.removeEventListener("pointerup", owed);
+    owed = null;
+  };
   const finish = (at: Point | null): void => {
     const c = carry;
     carry = null;
     unlisten();
     if (!c?.ghost || !c.url) return;
     if (at) swallowThisRelease();
-    else { owed = () => { dropOwed(); swallowThisRelease(); }; document.addEventListener("pointerup", owed); }
+    else {
+      owed = () => {
+        dropOwed();
+        swallowThisRelease();
+      };
+      document.addEventListener("pointerup", owed);
+    }
     const filed = at !== null && dropOutcome(at, deps.band()) === "file";
-    if (filed && deps.file(c.url)) { c.ghost.remove(); return; }
+    if (filed && deps.file(c.url)) {
+      c.ghost.remove();
+      return;
+    }
     snapBack(deps, c.ghost, c.url);
     if (!filed) c.restore?.();
   };
   const onMove = (e: PointerEvent): void => {
     let held = carry;
-    if (held) moveCarry(deps, held, { x: e.clientX, y: e.clientY }, (next) => { if (carry === held) carry = held = next; });
+    if (held)
+      moveCarry(deps, held, { x: e.clientX, y: e.clientY }, (next) => {
+        if (carry === held) carry = held = next;
+      });
   };
   deps.handle.addEventListener("pointerdown", (e) => {
     dropOwed();
     if (carry || !grabbable(e)) return;
     carry = { start: { x: e.clientX, y: e.clientY }, ghost: null, url: null, restore: null };
     listen(document, "pointermove", onMove as EventListener);
-    listen(document, "pointerup", ((up: PointerEvent) => { finish({ x: up.clientX, y: up.clientY }); }) as EventListener);
-    listen(document, "pointercancel", () => { finish(null); });
-    listen(document, "keydown", ((k: KeyboardEvent) => { if (k.key === "Escape") finish(null); }) as EventListener);
-    listen(window, "blur", () => { finish(null); });
+    listen(document, "pointerup", ((up: PointerEvent) => {
+      finish({ x: up.clientX, y: up.clientY });
+    }) as EventListener);
+    listen(document, "pointercancel", () => {
+      finish(null);
+    });
+    listen(document, "keydown", ((k: KeyboardEvent) => {
+      if (k.key === "Escape") finish(null);
+    }) as EventListener);
+    listen(window, "blur", () => {
+      finish(null);
+    });
   });
-  deps.handle.addEventListener("click", (e) => {
-    if (!dragged) return;
-    dragged = false;
-    e.stopImmediatePropagation();
-    e.preventDefault();
-  }, { capture: true });
+  deps.handle.addEventListener(
+    "click",
+    (e) => {
+      if (!dragged) return;
+      dragged = false;
+      e.stopImmediatePropagation();
+      e.preventDefault();
+    },
+    { capture: true },
+  );
 }

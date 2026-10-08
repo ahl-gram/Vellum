@@ -17,9 +17,7 @@ function properlyCross(a: TourPoint, b: TourPoint, c: TourPoint, d: TourPoint): 
 /** Crossings among non-adjacent legs of the CLOSED tour; leg 0 and the closing leg share a port, the one wraparound exclusion. */
 function crossings(order: number[], byIdx: Map<number, TourPoint>): number {
   if (order.length < 3) return 0; // a 2-port cycle retraces one segment; nothing to cross
-  const legs = order.map(
-    (idx, i) => [byIdx.get(idx)!, byIdx.get(order[(i + 1) % order.length]!)!] as const,
-  );
+  const legs = order.map((idx, i) => [byIdx.get(idx)!, byIdx.get(order[(i + 1) % order.length]!)!] as const);
   let n = 0;
   for (let i = 0; i < legs.length; i++) {
     for (let j = i + 2; j < legs.length; j++) {
@@ -52,7 +50,10 @@ test("the tour starts at the given capital", () => {
 
 test("the tour visits every port exactly once", () => {
   const order = orderTour(diamond, 0);
-  assert.deepEqual([...order].sort((a, b) => a - b), [0, 1, 2, 3, 4]);
+  assert.deepEqual(
+    [...order].sort((a, b) => a - b),
+    [0, 1, 2, 3, 4],
+  );
 });
 
 test("an inland town is a detour, not a reordering of the coastal ring", () => {
@@ -72,15 +73,16 @@ test("an inland town is a detour, not a reordering of the coastal ring", () => {
     const s = v.indexOf(arr[0]!);
     return v.slice(s).concat(v.slice(0, s));
   };
-  const isRing = JSON.stringify(corners) === JSON.stringify(rot(corners, ccw)) ||
+  const isRing =
+    JSON.stringify(corners) === JSON.stringify(rot(corners, ccw)) ||
     JSON.stringify(corners) === JSON.stringify(rot(corners, cw));
   assert.ok(isRing, `corners ${corners.join(",")} are not in ring order`);
 });
 
 test("no crossings on a scattered pseudo-random cloud (100 points, several seeds)", () => {
   for (let seed = 1; seed <= 8; seed++) {
-    let s = seed * 2654435761 >>> 0;
-    const rnd = () => ((s = (s * 1103515245 + 12345) >>> 0) / 0xffffffff);
+    let s = (seed * 2654435761) >>> 0;
+    const rnd = () => (s = (s * 1103515245 + 12345) >>> 0) / 0xffffffff;
     const pts: TourPoint[] = [];
     for (let i = 0; i < 40; i++) pts.push(p(i, rnd(), rnd()));
     const order = orderTour(pts, 0);
@@ -114,11 +116,13 @@ test("does not mutate the caller's points array", () => {
 });
 
 /** A symmetric distance oracle from a sparse pair map; throws on an unknown pair. */
-const matrixD = (m: Record<string, number>) => (a: number, b: number): number => {
-  const v = m[a < b ? `${a}:${b}` : `${b}:${a}`];
-  if (v === undefined) throw new Error(`no distance for ${a}:${b}`);
-  return v;
-};
+const matrixD =
+  (m: Record<string, number>) =>
+  (a: number, b: number): number => {
+    const v = m[a < b ? `${a}:${b}` : `${b}:${a}`];
+    if (v === undefined) throw new Error(`no distance for ${a}:${b}`);
+    return v;
+  };
 
 /** The CLOSED tour's cost: every consecutive pair plus the closing leg home. */
 const tourCost = (path: ReadonlyArray<number>, d: (a: number, b: number) => number): number => {
@@ -153,14 +157,18 @@ test("refineTour: the cycle's orientation is canonical, so a tie never flips the
 test("refineTour: never worse than the given order, start pinned, set preserved", () => {
   for (let seed = 1; seed <= 6; seed++) {
     let s = (seed * 2654435761) >>> 0;
-    const rnd = () => ((s = (s * 1103515245 + 12345) >>> 0) / 0xffffffff);
+    const rnd = () => (s = (s * 1103515245 + 12345) >>> 0) / 0xffffffff;
     const m: Record<string, number> = {};
     for (let a = 0; a < 8; a++) for (let b = a + 1; b < 8; b++) m[`${a}:${b}`] = 1 + rnd() * 9;
     const d = matrixD(m);
     const path = [0, 1, 2, 3, 4, 5, 6, 7];
     const refined = refineTour(path, d);
     assert.equal(refined[0], 0, `seed ${seed}: start moved`);
-    assert.deepEqual([...refined].sort((x, y) => x - y), path, `seed ${seed}: set changed`);
+    assert.deepEqual(
+      [...refined].sort((x, y) => x - y),
+      path,
+      `seed ${seed}: set changed`,
+    );
     assert.ok(
       tourCost(refined, d) <= tourCost(path, d) + 1e-9,
       `seed ${seed}: refined ${tourCost(refined, d)} costs more than given ${tourCost(path, d)}`,

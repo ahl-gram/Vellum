@@ -83,7 +83,11 @@ test("detail is keyed off the window, never the grid: same window + detail, fine
     window: BAND3_WINDOW,
     detail: 3,
   });
-  for (const [x, y] of [[10, 10], [40, 30], [70, 50]] as const) {
+  for (const [x, y] of [
+    [10, 10],
+    [40, 30],
+    [70, 50],
+  ] as const) {
     assert.ok(
       Math.abs(coarse.at(x, y) - fine.at(2 * x, 2 * y)) < 1e-12,
       `resolution divergence at ${x},${y} under detail 3`,
@@ -114,10 +118,7 @@ test("ridged2's octave count is independent of the detail level (#396)", () => {
     checked++;
     const t0 = (r0.data[i] as number) - m0;
     const t3 = (r3.data[i] as number) - m3;
-    assert.ok(
-      Math.abs(t3 - t0) < 1e-12,
-      `ridge contribution moved with the detail level at cell ${i}: ${t0} -> ${t3}`,
-    );
+    assert.ok(Math.abs(t3 - t0) < 1e-12, `ridge contribution moved with the detail level at cell ${i}: ${t0} -> ${t3}`);
   }
   assert.ok(checked >= 50, `too few mask-saturated cells to prove anything: ${checked}`);
 });
@@ -133,10 +134,7 @@ test("the detail extension and its pinned normalizer are wired at every call sit
     [34, 3, 0.4224098194943221],
   ];
   for (const [x, y, v] of PINS) {
-    assert.ok(
-      Math.abs(f.at(x, y) - v) < 1e-9,
-      `pinned cell ${x},${y} moved: ${f.at(x, y)} vs ${v}`,
-    );
+    assert.ok(Math.abs(f.at(x, y) - v) < 1e-9, `pinned cell ${x},${y} moved: ${f.at(x, y)} vs ${v}`);
   }
 });
 

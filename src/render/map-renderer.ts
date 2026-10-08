@@ -65,11 +65,7 @@ const THEME_LEADS: Record<ThemeName, string> = {
   population: "Population map",
 };
 
-function describeChart(
-  world: World,
-  styleName: StyleName,
-  theme: ThemeName | undefined,
-): string {
+function describeChart(world: World, styleName: StyleName, theme: ThemeName | undefined): string {
   const noun = TYPE_NOUNS[world.recipe.mapType];
   const article = /^[aeiou]/.test(noun) ? "an" : "a";
   const lead = theme ? THEME_LEADS[theme] : `${STYLE_ADJECTIVES[styleName]} chart`;
@@ -85,12 +81,14 @@ function projectedCoastRings(world: World, proj: Projection): ReadonlyArray<PxRi
     const mid = world.elev.at(world.elev.w >> 1, world.elev.h >> 1);
     if (mid > world.seaLevel) {
       const m = proj.margin;
-      return [[
-        [m, m],
-        [proj.widthPx - m, m],
-        [proj.widthPx - m, proj.heightPx - m],
-        [m, proj.heightPx - m],
-      ]];
+      return [
+        [
+          [m, m],
+          [proj.widthPx - m, m],
+          [proj.widthPx - m, proj.heightPx - m],
+          [m, proj.heightPx - m],
+        ],
+      ];
     }
   }
   return coastRings;
@@ -119,13 +117,7 @@ function renderContext(
           world.realms.seats.length,
           style,
         )
-      : realmTintIndices(
-          world.realms.labels,
-          world.elev.w,
-          world.elev.h,
-          world.realms.seats.length,
-          style,
-        ),
+      : realmTintIndices(world.realms.labels, world.elev.w, world.elev.h, world.realms.seats.length, style),
     labels: createLabelArena(),
     theme,
   };
@@ -143,9 +135,7 @@ function planFurniture(ctx: RenderCtx, opts: RenderOptions): ChartPlans {
   ctx.labels.claim(cartouchePlan.rect);
   const scalebarPlan = planScalebar(ctx);
   ctx.labels.claim(scalebarPlan.box);
-  const legendPlan = opts.legend
-    ? planLegend(ctx, [cartouchePlan.rect, scalebarPlan.box])
-    : null;
+  const legendPlan = opts.legend ? planLegend(ctx, [cartouchePlan.rect, scalebarPlan.box]) : null;
   if (legendPlan) ctx.labels.claim(legendPlan.box);
   const compassPlan = planCompass(ctx, cartouchePlan, scalebarPlan.box, legendPlan?.box);
   if (compassPlan) ctx.labels.claim(compassPlan.box);
@@ -171,9 +161,7 @@ function labelledLayers(ctx: RenderCtx, plans: ChartPlans, opts: RenderOptions):
 }
 
 function clipRegionLand(world: World, node: SvgNode): SvgNode {
-  return world.region
-    ? el("g", { "clip-path": "url(#region-land-clip)" }, [node])
-    : node;
+  return world.region ? el("g", { "clip-path": "url(#region-land-clip)" }, [node]) : node;
 }
 
 function clipRegionLandMaybe(world: World, node: SvgNode | null): SvgNode | null {
@@ -278,8 +266,10 @@ function chartRoot(ctx: RenderCtx, opts: RenderOptions, body: ChartBody): SvgNod
       ...(reproducible ? [recipeMetadataNode(world, style.name, opts.regionRecipe)] : []),
       defs,
       el("rect", {
-        x: 0, y: 0,
-        width: proj.widthPx, height: proj.heightPx,
+        x: 0,
+        y: 0,
+        width: proj.widthPx,
+        height: proj.heightPx,
         fill: style.paper,
       }),
       el(

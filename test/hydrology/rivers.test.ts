@@ -23,9 +23,7 @@ test("valley produces a main river reaching the ocean", () => {
   const rivers = extractRivers(f, flow, sea, { quantileQ: 0.8, minAcc: 3 });
   assert.ok(rivers.length >= 1, "expected at least one river");
 
-  const main = rivers.reduce((a, b) =>
-    b.points.length > a.points.length ? b : a,
-  );
+  const main = rivers.reduce((a, b) => (b.points.length > a.points.length ? b : a));
   assert.equal(main.endsInOcean, true);
   const last = main.points[main.points.length - 1]!;
   assert.equal(last.x, 5);
@@ -39,10 +37,7 @@ test("accumulation is non-decreasing from head to mouth", () => {
   const rivers = extractRivers(f, flow, sea, { quantileQ: 0.8, minAcc: 3 });
   for (const r of rivers) {
     for (let i = 1; i < r.points.length; i++) {
-      assert.ok(
-        r.points[i]!.acc >= r.points[i - 1]!.acc - 1e-9,
-        "acc must grow downstream",
-      );
+      assert.ok(r.points[i]!.acc >= r.points[i - 1]!.acc - 1e-9, "acc must grow downstream");
     }
   }
 });
@@ -61,10 +56,7 @@ test("tributaries end at a junction point shared with another river", () => {
   }
   for (const t of tribs) {
     const last = t.points[t.points.length - 1]!;
-    assert.ok(
-      allPoints.has(`${last.x},${last.y}`),
-      "junction must lie on the network",
-    );
+    assert.ok(allPoints.has(`${last.x},${last.y}`), "junction must lie on the network");
   }
 });
 

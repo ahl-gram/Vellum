@@ -1,22 +1,58 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, readlinkSync, realpathSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readlinkSync,
+  realpathSync,
+  renameSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { create, createPlan, listing, readHead, resolveRoot, resolveTree, sandboxPath, sandboxes, snapshot, teardown, teardownPlan, validateName } from "../../scripts/agent-sandbox.ts";
+import {
+  create,
+  createPlan,
+  listing,
+  readHead,
+  resolveRoot,
+  resolveTree,
+  sandboxPath,
+  sandboxes,
+  snapshot,
+  teardown,
+  teardownPlan,
+  validateName,
+} from "../../scripts/agent-sandbox.ts";
 import { cli, git, withRepo } from "../../test-support/sandbox-repo.ts";
 
 test("resolveRoot returns the main checkout from inside a linked worktree", () => {
   withRepo((main, linked) => {
-    assert.notEqual(git(["rev-parse", "HEAD"], main), git(["rev-parse", "HEAD"], linked), "the fixture must diverge, or this asserts nothing");
-    assert.equal(resolveRoot(linked), main, "resolveRoot returned the worktree, so a sandbox built from it lands at the wrong depth and the node_modules link breaks");
+    assert.notEqual(
+      git(["rev-parse", "HEAD"], main),
+      git(["rev-parse", "HEAD"], linked),
+      "the fixture must diverge, or this asserts nothing",
+    );
+    assert.equal(
+      resolveRoot(linked),
+      main,
+      "resolveRoot returned the worktree, so a sandbox built from it lands at the wrong depth and the node_modules link breaks",
+    );
     assert.equal(resolveRoot(main), main);
   });
 });
 
 test("readHead reads the commit of the tree it is given, not the main checkout's", () => {
   withRepo((main, linked) => {
-    assert.equal(readHead(linked), git(["rev-parse", "HEAD"], linked), "readHead read some other tree's HEAD, which is #575 exactly");
+    assert.equal(
+      readHead(linked),
+      git(["rev-parse", "HEAD"], linked),
+      "readHead read some other tree's HEAD, which is #575 exactly",
+    );
     assert.notEqual(readHead(linked), readHead(main));
   });
 });
@@ -25,8 +61,24 @@ test("validateName accepts the two sandbox prefixes and refuses everything else"
   for (const good of ["guard-575", "guard-575-r2", "skeptic-576-r1", "guard-a.b_c-1"]) {
     assert.equal(validateName(good), good, `${good} is a legitimate sandbox name`);
   }
-  for (const bad of ["", "575", "other-session", "agent-a3a1b384d6375057d", "probe-1", "guard", "guard-", "../escape", "guard-../..", "/abs/path", "guard x", "Guard-1"]) {
-    assert.throws(() => validateName(bad), `${bad} was accepted, so the script can address a worktree it did not create`);
+  for (const bad of [
+    "",
+    "575",
+    "other-session",
+    "agent-a3a1b384d6375057d",
+    "probe-1",
+    "guard",
+    "guard-",
+    "../escape",
+    "guard-../..",
+    "/abs/path",
+    "guard x",
+    "Guard-1",
+  ]) {
+    assert.throws(
+      () => validateName(bad),
+      `${bad} was accepted, so the script can address a worktree it did not create`,
+    );
   }
 });
 
@@ -44,7 +96,11 @@ test("create requires an explicit commit for a skeptic sandbox and defaults one 
     );
     const wt = create("guard-1", undefined, linked);
     try {
-      assert.equal(git(["rev-parse", "HEAD"], wt), readHead(linked), "the guard sandbox was not built at the dispatch tree's commit");
+      assert.equal(
+        git(["rev-parse", "HEAD"], wt),
+        readHead(linked),
+        "the guard sandbox was not built at the dispatch tree's commit",
+      );
     } finally {
       git(["-C", main, "worktree", "remove", "--force", wt], main);
     }
@@ -59,7 +115,11 @@ test("teardown removes the sandbox and its registration, and leaves the dispatch
     assert.match(git(["worktree", "list"], main), /guard-teardown/, "the sandbox was not registered");
     teardown("guard-teardown", linked);
     assert.equal(existsSync(wt), false, "the sandbox directory survived teardown");
-    assert.doesNotMatch(git(["worktree", "list"], main), /guard-teardown/, "the registration survived teardown, which is what a leaked sandbox looks like");
+    assert.doesNotMatch(
+      git(["worktree", "list"], main),
+      /guard-teardown/,
+      "the registration survived teardown, which is what a leaked sandbox looks like",
+    );
     assert.deepEqual(listing(linked), before, "teardown changed the dispatch tree");
   });
 });
@@ -71,24 +131,51 @@ test("listing skips the directories the residue proof must not walk, and sees th
     mkdirSync(join(linked, "sub"), { recursive: true });
     writeFileSync(join(linked, "sub", "kept.txt"), "x\n");
     const found = listing(linked);
-    assert.ok(found.includes(join("sub", "kept.txt")), "listing missed a real file, so the residue proof would miss real residue");
+    assert.ok(
+      found.includes(join("sub", "kept.txt")),
+      "listing missed a real file, so the residue proof would miss real residue",
+    );
     assert.ok(found.includes("f.txt"), "listing missed a tracked file at the root");
-    assert.equal(found.some((f) => f.startsWith("node_modules")), false, "listing walked node_modules, which makes the residue diff enormous and useless");
-    assert.equal(found.some((f) => f.startsWith(".git")), false, "listing walked .git, whose churn is not residue");
+    assert.equal(
+      found.some((f) => f.startsWith("node_modules")),
+      false,
+      "listing walked node_modules, which makes the residue diff enormous and useless",
+    );
+    assert.equal(
+      found.some((f) => f.startsWith(".git")),
+      false,
+      "listing walked .git, whose churn is not residue",
+    );
   });
 });
 
 test("createPlan fetches only when the commit is absent, and links node_modules three levels up", () => {
   const local = createPlan("/r/.claude/worktrees/guard-1", "abc", true);
   const remote = createPlan("/r/.claude/worktrees/guard-1", "abc", false);
-  assert.deepEqual(local.git.filter((c) => c[0] === "fetch"), [], "a fetch was issued for a commit already present, which reaches the network on every guard run");
-  assert.deepEqual(remote.git.filter((c) => c[0] === "fetch"), [["fetch", "origin"]], "no fetch was issued for a commit that is not local yet, so worktree add fails on a sha the skeptic just resolved");
+  assert.deepEqual(
+    local.git.filter((c) => c[0] === "fetch"),
+    [],
+    "a fetch was issued for a commit already present, which reaches the network on every guard run",
+  );
+  assert.deepEqual(
+    remote.git.filter((c) => c[0] === "fetch"),
+    [["fetch", "origin"]],
+    "no fetch was issued for a commit that is not local yet, so worktree add fails on a sha the skeptic just resolved",
+  );
   assert.ok(
     local.git.some((c) => c[0] === "worktree" && c[1] === "add" && c.includes("--detach") && c.includes("abc")),
     "the plan does not build a detached worktree at the requested sha",
   );
-  assert.deepEqual(remote.git.map((c) => c[0]), ["fetch", "worktree"], "the fetch must come BEFORE the worktree add, or add runs against a sha that is not local yet");
-  assert.equal(local.link, join("..", "..", "..", "node_modules"), "the node_modules link is missing or not the three-levels-up relative form that a sandbox at root/.claude/worktrees/<name> needs");
+  assert.deepEqual(
+    remote.git.map((c) => c[0]),
+    ["fetch", "worktree"],
+    "the fetch must come BEFORE the worktree add, or add runs against a sha that is not local yet",
+  );
+  assert.equal(
+    local.link,
+    join("..", "..", "..", "node_modules"),
+    "the node_modules link is missing or not the three-levels-up relative form that a sandbox at root/.claude/worktrees/<name> needs",
+  );
 });
 
 test("teardownPlan removes its own worktree and never prunes", () => {
@@ -106,15 +193,27 @@ test("teardownPlan removes its own worktree and never prunes", () => {
 
 test("resolveTree is the tree you are standing in, not the main checkout", () => {
   withRepo((main, linked) => {
-    assert.equal(resolveTree(linked), linked, "resolveTree returned the main checkout, so a residue snapshot taken from a worktree would list the wrong tree");
-    assert.equal(resolveRoot(linked), main, "resolveRoot and resolveTree must differ from inside a linked worktree, or one of them is wrong");
+    assert.equal(
+      resolveTree(linked),
+      linked,
+      "resolveTree returned the main checkout, so a residue snapshot taken from a worktree would list the wrong tree",
+    );
+    assert.equal(
+      resolveRoot(linked),
+      main,
+      "resolveRoot and resolveTree must differ from inside a linked worktree, or one of them is wrong",
+    );
   });
 });
 
 test("listing returns its rows in a stable sorted order", () => {
   withRepo((main, linked) => {
     for (const n of ["c.txt", "a.txt", "b.txt"]) writeFileSync(join(linked, n), "x\n");
-    assert.deepEqual(listing(linked), ["a.txt", "b.txt", "c.txt", "f.txt"], "listing is unsorted or missed a file, so a residue diff reports spurious reorderings as residue");
+    assert.deepEqual(
+      listing(linked),
+      ["a.txt", "b.txt", "c.txt", "f.txt"],
+      "listing is unsorted or missed a file, so a residue diff reports spurious reorderings as residue",
+    );
   });
 });
 
@@ -124,13 +223,21 @@ test("the CLI prints the sandbox path alone on stdout, so WT=$(...) captures a u
     try {
       assert.equal(made.status, 0, `create exited ${made.status}: ${made.err}`);
       const printed = made.out.trim();
-      assert.equal(printed.split("\n").length, 1, `stdout carried ${made.out.split("\n").length} lines, so WT=$(...) captures something that is not a path`);
+      assert.equal(
+        printed.split("\n").length,
+        1,
+        `stdout carried ${made.out.split("\n").length} lines, so WT=$(...) captures something that is not a path`,
+      );
       assert.ok(existsSync(printed), `the printed path ${printed} does not exist`);
       assert.equal(printed, join(main, ".claude", "worktrees", "guard-cli"));
     } finally {
       cli(["teardown", "guard-cli"], linked);
     }
-    assert.equal(existsSync(join(main, ".claude", "worktrees", "guard-cli")), false, "the CLI teardown left the sandbox behind");
+    assert.equal(
+      existsSync(join(main, ".claude", "worktrees", "guard-cli")),
+      false,
+      "the CLI teardown left the sandbox behind",
+    );
   });
 });
 
@@ -138,7 +245,11 @@ test("the CLI reports a refused name and a missing argument as a failure, not si
   withRepo((main, linked) => {
     const bad = cli(["create", "other-session"], linked);
     assert.equal(bad.status, 1, "a refused sandbox name exited 0, so a caller would read failure as success");
-    assert.match(bad.err, /namespace/, "the refusal reached stdout or was swallowed instead of being explained on stderr");
+    assert.match(
+      bad.err,
+      /namespace/,
+      "the refusal reached stdout or was swallowed instead of being explained on stderr",
+    );
     const none = cli([], linked);
     assert.equal(none.status, 1, "no arguments exited 0");
     assert.match(none.err, /usage/, "no usage line was printed");
@@ -153,7 +264,10 @@ test("the CLI snapshot lists the dispatch tree even when run from a subdirectory
     const r = cli(["snapshot", out], join(linked, "deep", "er"));
     assert.equal(r.status, 0, `snapshot exited ${r.status}: ${r.err}`);
     const rows = readFileSync(out, "utf8").trim().split("\n");
-    assert.ok(rows.includes("f.txt"), "the snapshot did not reach the dispatch tree root, so it listed the subdirectory it was run from");
+    assert.ok(
+      rows.includes("f.txt"),
+      "the snapshot did not reach the dispatch tree root, so it listed the subdirectory it was run from",
+    );
     assert.ok(rows.includes(join("deep", "er", "kept.txt")), "the snapshot missed a nested file");
   });
 });
@@ -186,12 +300,22 @@ test("create leaves a node_modules symlink that actually resolves", () => {
     writeFileSync(join(main, "node_modules", "dep.js"), "x\n");
     const wt = create("guard-link", undefined, linked);
     try {
-      assert.equal(readlinkSync(join(wt, "node_modules")), join("..", "..", "..", "node_modules"), "the symlink is missing or not the relative form");
-      assert.ok(statSync(join(wt, "node_modules", "dep.js")).isFile(), "the symlink does not resolve to the root's node_modules, so every suite run in the sandbox fails on missing dependencies");
+      assert.equal(
+        readlinkSync(join(wt, "node_modules")),
+        join("..", "..", "..", "node_modules"),
+        "the symlink is missing or not the relative form",
+      );
+      assert.ok(
+        statSync(join(wt, "node_modules", "dep.js")).isFile(),
+        "the symlink does not resolve to the root's node_modules, so every suite run in the sandbox fails on missing dependencies",
+      );
     } finally {
       teardown("guard-link", linked);
     }
-    assert.ok(statSync(join(main, "node_modules", "dep.js")).isFile(), "teardown followed the symlink and removed the root's real node_modules, which is the hazard the old rm -f line existed for");
+    assert.ok(
+      statSync(join(main, "node_modules", "dep.js")).isFile(),
+      "teardown followed the symlink and removed the root's real node_modules, which is the hazard the old rm -f line existed for",
+    );
   });
 });
 
@@ -199,7 +323,11 @@ test("listing skips the sandbox root, so a sandbox is never its own residue", ()
   withRepo((main, linked) => {
     mkdirSync(join(linked, ".claude", "worktrees", "guard-x"), { recursive: true });
     writeFileSync(join(linked, ".claude", "worktrees", "guard-x", "f.txt"), "x\n");
-    assert.equal(listing(linked).some((f) => f.startsWith(join(".claude", "worktrees"))), false, "listing walked the sandbox root, so an agent's own sandbox shows up as residue in its own proof");
+    assert.equal(
+      listing(linked).some((f) => f.startsWith(join(".claude", "worktrees"))),
+      false,
+      "listing walked the sandbox root, so an agent's own sandbox shows up as residue in its own proof",
+    );
   });
 });
 
@@ -214,7 +342,11 @@ test("create refuses a bad name before it touches git at all", () => {
 test("the CLI refuses a skeptic sandbox with no sha and says why", () => {
   withRepo((main, linked) => {
     const r = cli(["create", "skeptic-1"], linked);
-    assert.equal(r.status, 1, "a skeptic sandbox with no sha exited 0, so a whole report would be attributed to a commit never run (#575)");
+    assert.equal(
+      r.status,
+      1,
+      "a skeptic sandbox with no sha exited 0, so a whole report would be attributed to a commit never run (#575)",
+    );
     assert.match(r.err, /sha/, "the refusal did not explain that the sha is required");
   });
 });
@@ -224,7 +356,11 @@ test("snapshot lists the tree it is given, not the process cwd", () => {
     const out = join(main, "snap-explicit.txt");
     const rows = snapshot(out, linked);
     assert.ok(rows > 0, "snapshot listed nothing");
-    assert.deepEqual(readFileSync(out, "utf8").trim().split("\n"), listing(linked), "snapshot wrote a listing of some other tree than the cwd it was handed");
+    assert.deepEqual(
+      readFileSync(out, "utf8").trim().split("\n"),
+      listing(linked),
+      "snapshot wrote a listing of some other tree than the cwd it was handed",
+    );
   });
 });
 
@@ -262,10 +398,18 @@ const hasCommit = (cwd: string, sha: string): boolean => {
 
 test("create fetches a commit that is not local yet, then builds the sandbox at it", () => {
   withRemote((clone, sha) => {
-    assert.equal(hasCommit(clone, sha), false, "the fixture already has the commit, so this asserts nothing about fetching");
+    assert.equal(
+      hasCommit(clone, sha),
+      false,
+      "the fixture already has the commit, so this asserts nothing about fetching",
+    );
     const wt = create("skeptic-fetch", sha, clone);
     try {
-      assert.equal(git(["rev-parse", "HEAD"], wt), sha, "the sandbox was not built at the requested commit, so a runner that drops the fetch would leave the skeptic reviewing whatever it could reach");
+      assert.equal(
+        git(["rev-parse", "HEAD"], wt),
+        sha,
+        "the sandbox was not built at the requested commit, so a runner that drops the fetch would leave the skeptic reviewing whatever it could reach",
+      );
     } finally {
       teardown("skeptic-fetch", clone);
     }
@@ -275,8 +419,15 @@ test("create fetches a commit that is not local yet, then builds the sandbox at 
 test("sandboxes lists an orphaned sandbox directory that neither snapshot nor worktree list can see", () => {
   withRepo((main, linked) => {
     mkdirSync(join(main, ".claude", "worktrees", "guard-orphan"), { recursive: true });
-    assert.doesNotMatch(git(["worktree", "list"], main), /guard-orphan/, "the fixture orphan is registered, so this asserts nothing about the gap");
-    assert.ok(sandboxes(linked).includes("guard-orphan"), "an unregistered sandbox directory is invisible to the residue proof, so a bare prune's aftermath would pass as clean");
+    assert.doesNotMatch(
+      git(["worktree", "list"], main),
+      /guard-orphan/,
+      "the fixture orphan is registered, so this asserts nothing about the gap",
+    );
+    assert.ok(
+      sandboxes(linked).includes("guard-orphan"),
+      "an unregistered sandbox directory is invisible to the residue proof, so a bare prune's aftermath would pass as clean",
+    );
     create("guard-listed", undefined, linked);
     try {
       assert.ok(sandboxes(linked).includes("guard-listed"));
@@ -291,14 +442,20 @@ test("listing skips only the sandbox root, not any directory that happens to be 
   withRepo((main, linked) => {
     mkdirSync(join(linked, "src", "worktrees"), { recursive: true });
     writeFileSync(join(linked, "src", "worktrees", "real.ts"), "x\n");
-    assert.ok(listing(linked).includes(join("src", "worktrees", "real.ts")), "a source directory named worktrees was skipped, so residue there would be invisible");
+    assert.ok(
+      listing(linked).includes(join("src", "worktrees", "real.ts")),
+      "a source directory named worktrees was skipped, so residue there would be invisible",
+    );
   });
 });
 
 test("sandboxes throws outside a repository instead of reporting an empty, clean-looking list", () => {
   const made = mkdtempSync(join(tmpdir(), "agent-sandbox-notgit-"));
   try {
-    assert.throws(() => sandboxes(made), "sandboxes returned a list from a directory that is not a repository, so a broken run would pass the residue proof as clean");
+    assert.throws(
+      () => sandboxes(made),
+      "sandboxes returned a list from a directory that is not a repository, so a broken run would pass the residue proof as clean",
+    );
   } finally {
     rmSync(made, { recursive: true, force: true });
   }
@@ -316,7 +473,11 @@ test("the CLI does not print a fatal line on the success path when the sha must 
     const r = cli(["create", "skeptic-quiet", sha], clone);
     try {
       assert.equal(r.status, 0, `create exited ${r.status}: ${r.err}`);
-      assert.doesNotMatch(r.err, /fatal/, "git's fatal: from the missing-commit probe reached stderr on a run that then succeeded, which trains an agent to read fatal lines as noise");
+      assert.doesNotMatch(
+        r.err,
+        /fatal/,
+        "git's fatal: from the missing-commit probe reached stderr on a run that then succeeded, which trains an agent to read fatal lines as noise",
+      );
     } finally {
       cli(["teardown", "skeptic-quiet"], clone);
     }

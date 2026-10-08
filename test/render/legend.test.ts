@@ -74,10 +74,7 @@ test("the legend stays in frame and clears the other furniture", () => {
         `legend off the right/bottom edge (seed ${seed}, ${name})`,
       );
       for (const r of reserved) {
-        assert.ok(
-          !boxesOverlap(box, r),
-          `legend overlaps other furniture (seed ${seed}, ${name})`,
-        );
+        assert.ok(!boxesOverlap(box, r), `legend overlaps other furniture (seed ${seed}, ${name})`);
       }
     }
   }
@@ -96,24 +93,39 @@ test("a themed legend keys its theme alone: no row a style adds of its own reach
   const styles = Object.keys(STYLES) as StyleName[];
   const duneWorld = generateWorld(defaultRecipe(6, { gridW: 160, gridH: 120 }));
   for (const w of [world, duneWorld]) {
-    const labels = (style: StyleName, theme?: ThemeName): string[] => planLegend({ ...ctxFor(w, style), theme }, [])?.rows.map((r) => r.label) ?? [];
+    const labels = (style: StyleName, theme?: ThemeName): string[] =>
+      planLegend({ ...ctxFor(w, style), theme }, [])?.rows.map((r) => r.label) ?? [];
     const common = styles.map((s) => labels(s)).reduce((a, b) => a.filter((l) => b.includes(l)));
-    if (w === duneWorld) assert.ok(labels("antique").includes("Dunes"), "seed 6 no longer keys dunes, so the dune row is checked nowhere");
+    if (w === duneWorld)
+      assert.ok(labels("antique").includes("Dunes"), "seed 6 no longer keys dunes, so the dune row is checked nowhere");
     for (const style of styles) {
       const own = labels(style).filter((l) => !common.includes(l));
-      assert.ok(own.length > 0, `${style} adds no row of its own to the unthemed legend, so the themed checks below would pass without looking`);
+      assert.ok(
+        own.length > 0,
+        `${style} adds no row of its own to the unthemed legend, so the themed checks below would pass without looking`,
+      );
       for (const theme of Object.keys(THEMES) as ThemeName[]) {
         const themeRows = [...THEMES[theme].legendRows(w, STYLES[style]).map((r) => r.label), THEMES[theme].isoLabel];
         const leaked = labels(style, theme).filter((l) => own.includes(l) && !themeRows.includes(l));
-        assert.deepEqual(leaked, [], `seed ${w.recipe.seed}: ${style} under the ${theme} theme keys the style's own rows beside the theme's`);
+        assert.deepEqual(
+          leaked,
+          [],
+          `seed ${w.recipe.seed}: ${style} under the ${theme} theme keys the style's own rows beside the theme's`,
+        );
       }
     }
   }
 });
 
 test("the key lists roads by rank, and only when present", () => {
-  assert.ok(world.roads.some((r) => r.rank === "trunk"), "fixture should have trunk roads");
-  assert.ok(world.roads.some((r) => r.rank === "lane"), "fixture should have lane roads");
+  assert.ok(
+    world.roads.some((r) => r.rank === "trunk"),
+    "fixture should have trunk roads",
+  );
+  assert.ok(
+    world.roads.some((r) => r.rank === "lane"),
+    "fixture should have lane roads",
+  );
 
   const labels = (w: World): string[] => {
     const plan = planLegend(ctxFor(w, "antique"), []);

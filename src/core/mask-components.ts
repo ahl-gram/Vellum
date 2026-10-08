@@ -3,12 +3,7 @@ const DY_8: ReadonlyArray<number> = [-1, -1, -1, 0, 0, 1, 1, 1];
 const DX_4: ReadonlyArray<number> = [0, -1, 1, 0];
 const DY_4: ReadonlyArray<number> = [-1, 0, 0, 1];
 
-export function labelComponents(
-  mask: Uint8Array,
-  w: number,
-  h: number,
-  connectivity: 4 | 8 = 4,
-): Int32Array {
+export function labelComponents(mask: Uint8Array, w: number, h: number, connectivity: 4 | 8 = 4): Int32Array {
   const n = w * h;
   const ids = new Int32Array(n).fill(-1);
   let next = 0;

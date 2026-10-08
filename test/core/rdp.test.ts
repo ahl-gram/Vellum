@@ -38,7 +38,11 @@ test("never adds a vertex, and every kept vertex came from the input", () => {
   const pts = [p(0, 0), p(1, 3), p(2, 0), p(3, 4), p(4, 0)];
   const out = simplifyPath(pts, 0.75);
   assert.ok(out.length <= pts.length);
-  for (const q of out) assert.ok(pts.some((r) => r.x === q.x && r.y === q.y), `${JSON.stringify(q)} is invented`);
+  for (const q of out)
+    assert.ok(
+      pts.some((r) => r.x === q.x && r.y === q.y),
+      `${JSON.stringify(q)} is invented`,
+    );
 });
 
 test("degenerate inputs pass through untouched", () => {

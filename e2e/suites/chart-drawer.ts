@@ -8,13 +8,45 @@ import { drawerKit, dragKit, tableKit } from "./chart-drawer/kit.ts";
 import type { DragKit } from "./chart-drawer/kit.ts";
 import { DRESS, ONE } from "./chart-drawer/reads.ts";
 import type { Edge, Read } from "./chart-drawer/reads.ts";
-import { cd1DogEar, cd2Lays, cd2bRealPointer, cd23LineLeaves, cd3Refused, cd4Reload, cd5CuttingOff, cd7Cap, cd8Home } from "./chart-drawer/desk.ts";
+import {
+  cd1DogEar,
+  cd2Lays,
+  cd2bRealPointer,
+  cd23LineLeaves,
+  cd3Refused,
+  cd4Reload,
+  cd5CuttingOff,
+  cd7Cap,
+  cd8Home,
+} from "./chart-drawer/desk.ts";
 import { cd44CarryFiles, cd45SnapBack, cd46ReducedCarry, cd47FullCarry } from "./chart-drawer/drag.ts";
 import { cd9NeverTogether, cd12SeatsHold, cd13TabClear, cd18RoadOn } from "./chart-drawer/surfaces.ts";
-import { cd18bRoadCarries, cd19PortfolioDrafts, cd24PortfolioSays, cd20BarePortfolio, cd21PortfolioGlass, cd49PrintRoomRoad, cd50ScriptsOffHome } from "./chart-drawer/portfolio.ts";
+import {
+  cd18bRoadCarries,
+  cd19PortfolioDrafts,
+  cd24PortfolioSays,
+  cd20BarePortfolio,
+  cd21PortfolioGlass,
+  cd49PrintRoomRoad,
+  cd50ScriptsOffHome,
+} from "./chart-drawer/portfolio.ts";
 import { cd48TouchHandle, na2DrawerBelowFloor } from "./chart-drawer/floor.ts";
-import { cd25CardPress, cd27CardAtCap, cd28PagePress, cd34PageRefusals, cd31RoundTrip, cd32MixedFolio } from "./chart-drawer/prospect.ts";
-import { cd36GoldPress, cd37BackCached, cd38BackRebuilt, cd39LinkBeatsDevice, cd40EmptySticks, cd41CachedReturn } from "./chart-drawer/homes.ts";
+import {
+  cd25CardPress,
+  cd27CardAtCap,
+  cd28PagePress,
+  cd34PageRefusals,
+  cd31RoundTrip,
+  cd32MixedFolio,
+} from "./chart-drawer/prospect.ts";
+import {
+  cd36GoldPress,
+  cd37BackCached,
+  cd38BackRebuilt,
+  cd39LinkBeatsDevice,
+  cd40EmptySticks,
+  cd41CachedReturn,
+} from "./chart-drawer/homes.ts";
 
 type Step = ReturnType<typeof makeStep>;
 
@@ -30,7 +62,11 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("CD1", () => cd1DogEar(k));
   // The one read that crosses a step: CD4 reloads the address CD2 wrote, so if CD2 never laid a sheet, CD4 fails as CD4 rather than passing against a table nobody filled.
   let laid: Read | null = null;
-  await step("CD2, CD2b, CD2c", async () => { const earAt = await clickEar(); laid = await cd2Lays(k); await cd2bRealPointer(k, earAt); });
+  await step("CD2, CD2b, CD2c", async () => {
+    const earAt = await clickEar();
+    laid = await cd2Lays(k);
+    await cd2bRealPointer(k, earAt);
+  });
   // A FLOOR, never a ceiling: a slow runner delays the clear and can only push this up, where a wall-clock ceiling on a runner-dependent measurement is RS30's own scar. 1s under the ruled hold covers the press, the read and the probe that stand between the announcement and the clock starting; the number moves with the constant, and the literal 8000 is pinned in test/site/announce.test.ts.
   const HOLD_FLOOR = SAY_HOLD_MS - 1000;
   await step("CD23", () => cd23LineLeaves(k, HOLD_FLOOR));
@@ -43,8 +79,16 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("CD46", () => cd46ReducedCarry(kd));
   await step("CD4", () => cd4Reload(kd, laid));
   await step("CD5", () => cd5CuttingOff(kd));
-  const SIX = ["rung-1.lx-4.ly-4", "rung-1.lx-3.ly-3", "rung-2.lx-5.ly-5", "rung-2.lx-6.ly-6", "rung-3.lx-11.ly-11", "rung-3.lx-12.ly-12"]
-    .map((seat) => `k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.${seat}`).join("_");
+  const SIX = [
+    "rung-1.lx-4.ly-4",
+    "rung-1.lx-3.ly-3",
+    "rung-2.lx-5.ly-5",
+    "rung-2.lx-6.ly-6",
+    "rung-3.lx-11.ly-11",
+    "rung-3.lx-12.ly-12",
+  ]
+    .map((seat) => `k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.${seat}`)
+    .join("_");
   await step("CD7, CD7b, CD7c", () => cd7Cap(kd, SIX));
   await step("CD47", () => cd47FullCarry(kd));
   await step("CD8", () => cd8Home(kd));
@@ -59,7 +103,10 @@ export async function run(ctx: SuiteContext): Promise<void> {
 async function cd9Surfaces(kd: DragKit, step: Step, SIX: string): Promise<void> {
   const { send, go } = kd;
   // CD9 / CD11 / CD12 (Issue #543, Alex 2026-09-08): the Broadside and the Chart Table are never open together and nothing is lifted onto the chart, because covering the caption and the roads out while leaving the side panel standing made no sense to the reader.
-  await step("CD9, CD11, CD12, CD22, CD43", async () => { const withOpen = await cd9NeverTogether(kd, SIX); await cd12SeatsHold(kd, SIX, withOpen); });
+  await step("CD9, CD11, CD12, CD22, CD43", async () => {
+    const withOpen = await cd9NeverTogether(kd, SIX);
+    await cd12SeatsHold(kd, SIX, withOpen);
+  });
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   const edge: Record<string, Edge> = {};
   await step("CD13", () => cd13TabClear({ ...kd, edge }));
@@ -84,13 +131,21 @@ async function cd25CapturesAndHomes(kd: DragKit, step: Step, SIX: string): Promi
   // Issue #522 Sub 4: the two capture points for a prospect, and the mixed folio they make.
   await step("CD25, CD26, CD30", () => cd25CardPress(kd));
   await step("CD27", () => cd27CardAtCap(kd, SIX));
-  await step("CD28, CD29, CD34, CD35, CD31", async () => { const two = await cd28PagePress(kd); await cd34PageRefusals(kd, SIX); await cd31RoundTrip(kd, two); });
+  await step("CD28, CD29, CD34, CD35, CD31", async () => {
+    const two = await cd28PagePress(kd);
+    await cd34PageRefusals(kd, SIX);
+    await cd31RoundTrip(kd, two);
+  });
   await step("CD32", () => cd32MixedFolio(kd));
   // Issue #634: the table's second home, and the four roads the two homes exist for. ONE and TWO are addresses rather than gestures because every check below is about WHERE the table came from, not about the handle that filed it.
   const TWO = `${ONE}_k-p.seed-42.style-antique.i-0.year-1059`;
   const kt = tableKit(kd);
   await step("CD49", () => cd49PrintRoomRoad(kt));
-  const scriptsBackOn = async () => { try { await kt.send("Emulation.setScriptExecutionDisabled", { value: false }); } catch {} };
+  const scriptsBackOn = async () => {
+    try {
+      await kt.send("Emulation.setScriptExecutionDisabled", { value: false });
+    } catch {}
+  };
   await step("CD50", () => cd50ScriptsOffHome(kt)).finally(scriptsBackOn);
   await step("CD36", () => cd36GoldPress(kt));
   await step("CD37", () => cd37BackCached(kt));

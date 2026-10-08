@@ -19,10 +19,7 @@ function landmassOf(w: ReturnType<typeof generateWorld>) {
 
 test("#79 archipelago (seed 9) yields more than the collapsed 2 realms", () => {
   const w = generateWorld(defaultRecipe(9));
-  assert.ok(
-    w.realms.seats.length > 2,
-    `expected >2 realms on the Kost Archipelago, got ${w.realms.seats.length}`,
-  );
+  assert.ok(w.realms.seats.length > 2, `expected >2 realms on the Kost Archipelago, got ${w.realms.seats.length}`);
 });
 
 test("#79 archipelago has at least one island realm (seat off the mainland)", () => {

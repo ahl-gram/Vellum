@@ -27,7 +27,10 @@ export async function h7aVeil({ evaluate, send, check, shoot, sleep, PORT }: Sui
   }
   check(
     "H7a a first arrival raises the veil: wordmark, rose, and the sounding line counting fathoms",
-    veiled !== null && veiled.rose && veiled.wordmark === "Vellum" && /^Sounding · \d+ fathom$/.test(veiled.status ?? ""),
+    veiled !== null &&
+      veiled.rose &&
+      veiled.wordmark === "Vellum" &&
+      /^Sounding · \d+ fathom$/.test(veiled.status ?? ""),
     JSON.stringify(veiled),
   );
   await shoot("home-veil.png");
@@ -36,7 +39,9 @@ export async function h7aVeil({ evaluate, send, check, shoot, sleep, PORT }: Sui
 export async function h7bLandfall({ evaluate, check, shoot, sleep }: SuiteContext): Promise<void> {
   let landed7 = null;
   for (let i = 0; i < 160; i++) {
-    try { landed7 = await evaluate(readCam); } catch {}
+    try {
+      landed7 = await evaluate(readCam);
+    } catch {}
     if (atLandfall(landed7)) break;
     await sleep(75);
   }
@@ -54,7 +59,9 @@ export async function h8KeySkip({ evaluate, send, check, sleep, PORT, pressKey }
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
   let before8 = null;
   for (let i = 0; i < 150; i++) {
-    try { before8 = await evaluate(readCam); } catch {}
+    try {
+      before8 = await evaluate(readCam);
+    } catch {}
     if (anchored(before8)) break;
     await sleep(60);
   }
@@ -62,7 +69,9 @@ export async function h8KeySkip({ evaluate, send, check, sleep, PORT, pressKey }
   await pressKey("Escape", "Escape", 27);
   await sleep(120);
   let skipped = null;
-  try { skipped = await evaluate(readCam); } catch {}
+  try {
+    skipped = await evaluate(readCam);
+  } catch {}
   check(
     "H8 a real key skips the sounding: the veil is gone at once and the camera jumps from the anchorage to its destination",
     anchored8 && atLandfall(skipped),
@@ -75,7 +84,9 @@ export async function h8bHoldSkip({ evaluate, send, check, sleep, PORT, pressKey
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
   let at8b = null;
   for (let i = 0; i < 400; i++) {
-    try { at8b = await evaluate(readCam); } catch {}
+    try {
+      at8b = await evaluate(readCam);
+    } catch {}
     if (at8b !== null && at8b.veil && at8b.status === "Landfall") break;
     await sleep(25);
   }
@@ -83,13 +94,17 @@ export async function h8bHoldSkip({ evaluate, send, check, sleep, PORT, pressKey
   await pressKey("Escape", "Escape", 27);
   await sleep(120);
   let after8b = null;
-  try { after8b = await evaluate(readCam); } catch {}
+  try {
+    after8b = await evaluate(readCam);
+  } catch {}
   // The skip must CANCEL the armed hold timer, not just close the veil: move the camera with a real "+" zoom, then prove no phantom lift flies it back (guard-prover round 2: land(0)'s deletion went red here, but an uncancelled holdTimer escaped, because its stray flight targets the destination the camera already holds and only a moved camera can see it).
   await evaluate(`document.getElementById("lf-stage").focus()`);
   await pressKey("+", "Equal", 187);
   await sleep(1400);
   let zoomed8b = null;
-  try { zoomed8b = await evaluate(readCam); } catch {}
+  try {
+    zoomed8b = await evaluate(readCam);
+  } catch {}
   const zoomHeld = zoomed8b !== null && !zoomed8b.veil && Math.abs(zoomed8b.scale - zoomed8b.expected * 1.5) < 1e-3;
   check(
     "H8b a real key during the Landfall hold jumps straight to the settled view, and the cancelled ceremony never steals the camera back from a later gesture",
@@ -105,7 +120,9 @@ export async function h9CeremonyStandsDown({ evaluate, send, check, sleep, PORT 
   let returning = null;
   let sawVeil9 = false;
   for (let i = 0; i < 200; i++) {
-    try { returning = await evaluate(readCam); } catch {}
+    try {
+      returning = await evaluate(readCam);
+    } catch {}
     if (returning !== null && returning.veil) sawVeil9 = true;
     if (atLandfall(returning)) break;
     await sleep(75);
@@ -123,7 +140,9 @@ export async function h9CeremonyStandsDown({ evaluate, send, check, sleep, PORT 
   let reduced10 = null;
   let sawVeil10 = false;
   for (let i = 0; i < 200; i++) {
-    try { reduced10 = await evaluate(readCam); } catch {}
+    try {
+      reduced10 = await evaluate(readCam);
+    } catch {}
     if (reduced10 !== null && reduced10.veil) sawVeil10 = true;
     if (atLandfall(reduced10)) break;
     await sleep(75);
@@ -142,7 +161,15 @@ export async function h12aVeilCovers({ evaluate, send, check, shoot, sleep, PORT
   let narrow12 = null;
   for (let i = 0; i < 100; i++) {
     try {
-      narrow12 = await evaluate<{ w: number; h: number; x: number; y: number; corners: boolean; innerWidth: number; scrollW: number } | null>(`(() => {
+      narrow12 = await evaluate<{
+        w: number;
+        h: number;
+        x: number;
+        y: number;
+        corners: boolean;
+        innerWidth: number;
+        scrollW: number;
+      } | null>(`(() => {
         const v = document.getElementById("lf-veil");
         if (!v) return null;
         const r = v.getBoundingClientRect();
@@ -157,9 +184,14 @@ export async function h12aVeilCovers({ evaluate, send, check, shoot, sleep, PORT
   }
   check(
     "H12a at 390px the veil covers the whole window, corners included, over the 1024 page that lies beneath it (Issue #762)",
-    narrow12 !== null && narrow12.corners && narrow12.x === 0 && narrow12.y === 0
-      && Math.abs(narrow12.w - 390) < 0.5 && Math.abs(narrow12.h - 844) < 0.5
-      && narrow12.innerWidth === 390 && narrow12.scrollW === 1024,
+    narrow12 !== null &&
+      narrow12.corners &&
+      narrow12.x === 0 &&
+      narrow12.y === 0 &&
+      Math.abs(narrow12.w - 390) < 0.5 &&
+      Math.abs(narrow12.h - 844) < 0.5 &&
+      narrow12.innerWidth === 390 &&
+      narrow12.scrollW === 1024,
     JSON.stringify(narrow12),
   );
   await shoot("home-veil-390.png");
@@ -168,14 +200,18 @@ export async function h12aVeilCovers({ evaluate, send, check, shoot, sleep, PORT
 export async function h12bSkipOnFloor({ evaluate, check, sleep, pressKey }: HomeKit): Promise<void> {
   let armed12 = null;
   for (let i = 0; i < 150; i++) {
-    try { armed12 = await evaluate(readCam); } catch {}
+    try {
+      armed12 = await evaluate(readCam);
+    } catch {}
     if (anchored(armed12)) break;
     await sleep(60);
   }
   await pressKey("Escape", "Escape", 27);
   let land: Cam | null = null;
   for (let i = 0; i < 40; i++) {
-    try { land = await evaluate(readCam); } catch {}
+    try {
+      land = await evaluate(readCam);
+    } catch {}
     if (atLandfall(land)) break;
     await sleep(60);
   }
@@ -187,20 +223,34 @@ export async function h12bSkipOnFloor({ evaluate, check, sleep, pressKey }: Home
   );
 }
 
-export async function h18CameraSeat({ evaluate, send, check, sleep, PORT, camSeat }: HomeKit, seat390: Seat | null): Promise<void> {
+export async function h18CameraSeat(
+  { evaluate, send, check, sleep, PORT, camSeat }: HomeKit,
+  seat390: Seat | null,
+): Promise<void> {
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
   let seatWide: Seat | null = null;
-  for (let i = 0; i < 120; i++) { try { seatWide = await camSeat(); } catch {} if (seatWide) break; await sleep(50); }
+  for (let i = 0; i < 120; i++) {
+    try {
+      seatWide = await camSeat();
+    } catch {}
+    if (seatWide) break;
+    await sleep(50);
+  }
   await evaluate(`window.scrollTo(0, 600)`);
   await sleep(80);
-  const camScrolled = await evaluate<{ top: number; y: number }>(`(() => { const r = document.getElementById("lf-controls").getBoundingClientRect(); return { top: r.top, y: scrollY }; })()`);
+  const camScrolled = await evaluate<{ top: number; y: number }>(
+    `(() => { const r = document.getElementById("lf-controls").getBoundingClientRect(); return { top: r.top, y: scrollY }; })()`,
+  );
   await evaluate(`window.scrollTo(0, 0)`);
   check(
     "H18 the camera's seat is home's own (#505): absolute in the stage, 1.6rem from its right edge and 1.4rem up at the wide sheet and at 390, no depth, no ink-in, the container taking the pointer, and it scrolls away with the stage",
-    seatOk(seatWide) && seatOk(seat390) && seatWide!.vw >= 1024 &&
-      seat390!.vw === 390 && camScrolled.y > 0 && Math.abs((
-      seatWide!.top - camScrolled.top) - camScrolled.y) < 2,
+    seatOk(seatWide) &&
+      seatOk(seat390) &&
+      seatWide!.vw >= 1024 &&
+      seat390!.vw === 390 &&
+      camScrolled.y > 0 &&
+      Math.abs(seatWide!.top - camScrolled.top - camScrolled.y) < 2,
     JSON.stringify({ seatWide, seat390, camScrolled }),
   );
 }

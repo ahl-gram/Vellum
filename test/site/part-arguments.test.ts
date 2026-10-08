@@ -35,8 +35,18 @@ const OLDER_CALLS: Readonly<Record<string, readonly string[]>> = {
     "downloadBlob(png.blob, filename)",
     "orderPoster(b.dataset.poster as string)",
   ],
-  "src/site/reading-room/app.ts": ["onTold(t)", "prospectHrefFor(forSeed, s)", "armRoom(lastRes, shownSeed, undefined)", "restFor(pendingLive)"],
-  "src/site/seed-of-the-day/app.ts": ['dryIn($("folio-title"), "120ms")', 'dryIn($("folio-sub"), "260ms")', 'dryIn($("folio-coords"), "320ms")', 'dryIn($("folio-note"), "400ms")'],
+  "src/site/reading-room/app.ts": [
+    "onTold(t)",
+    "prospectHrefFor(forSeed, s)",
+    "armRoom(lastRes, shownSeed, undefined)",
+    "restFor(pendingLive)",
+  ],
+  "src/site/seed-of-the-day/app.ts": [
+    'dryIn($("folio-title"), "120ms")',
+    'dryIn($("folio-sub"), "260ms")',
+    'dryIn($("folio-coords"), "320ms")',
+    'dryIn($("folio-note"), "400ms")',
+  ],
   "src/site/seed-of-the-day/app-hunt.ts": [
     'restart(line, "wet")',
     "prevSeed(seed)",
@@ -56,14 +66,28 @@ function handOffs(file: string): { site: string; call: string; args: string[]; p
   const sf = ts.createSourceFile(file, readFileSync(resolve(REPO, file), "utf8"), ts.ScriptTarget.Latest, true);
   const local = new Map<string, string[]>();
   for (const st of sf.statements) {
-    if (!ts.isFunctionDeclaration(st) || !st.name || st.modifiers?.some((m) => m.kind === ts.SyntaxKind.ExportKeyword)) continue;
-    local.set(st.name.text, st.parameters.map((p) => p.name.getText(sf)));
+    if (!ts.isFunctionDeclaration(st) || !st.name || st.modifiers?.some((m) => m.kind === ts.SyntaxKind.ExportKeyword))
+      continue;
+    local.set(
+      st.name.text,
+      st.parameters.map((p) => p.name.getText(sf)),
+    );
   }
   const found: { site: string; call: string; args: string[]; params: string[] }[] = [];
   const visit = (n: ts.Node): void => {
-    if (ts.isCallExpression(n) && ts.isIdentifier(n.expression) && local.has(n.expression.text) && n.arguments.length > 0) {
+    if (
+      ts.isCallExpression(n) &&
+      ts.isIdentifier(n.expression) &&
+      local.has(n.expression.text) &&
+      n.arguments.length > 0
+    ) {
       const args = n.arguments.map((a) => a.getText(sf));
-      found.push({ site: `${file}:${sf.getLineAndCharacterOfPosition(n.getStart()).line + 1} ${n.expression.text}`, call: `${n.expression.text}(${args.map(collapse).join(", ")})`, args, params: local.get(n.expression.text)! });
+      found.push({
+        site: `${file}:${sf.getLineAndCharacterOfPosition(n.getStart()).line + 1} ${n.expression.text}`,
+        call: `${n.expression.text}(${args.map(collapse).join(", ")})`,
+        args,
+        params: local.get(n.expression.text)!,
+      });
     }
     ts.forEachChild(n, visit);
   };
@@ -72,10 +96,14 @@ function handOffs(file: string): { site: string; call: string; args: string[]; p
 }
 
 test("every part and helper the site's split builders were cut into is handed each value under the name of the parameter it lands in, so two values of one type cannot trade places with the type check green; the older calls that do not are excused by their exact text", () => {
-  for (const file of Object.keys(OLDER_CALLS)) assert.ok(SPLIT_FILES.includes(file), `${file} has excused calls but is not on the list this guard reads`);
+  for (const file of Object.keys(OLDER_CALLS))
+    assert.ok(SPLIT_FILES.includes(file), `${file} has excused calls but is not on the list this guard reads`);
   for (const file of SPLIT_FILES) {
     const calls = handOffs(file);
-    assert.ok(calls.length > 0, `${file} hands nothing to a function of its own, so this guard reads nothing there and the list above is stale`);
+    assert.ok(
+      calls.length > 0,
+      `${file} hands nothing to a function of its own, so this guard reads nothing there and the list above is stale`,
+    );
     const excused = [...(OLDER_CALLS[file] ?? [])];
     for (const { site, call, args, params } of calls) {
       const at = excused.indexOf(call);
@@ -83,8 +111,16 @@ test("every part and helper the site's split builders were cut into is handed ea
         excused.splice(at, 1);
         continue;
       }
-      assert.deepEqual(args, params, `${site} is handed (${args.join(", ")}) for its parameters (${params.join(", ")}); a value under another name, or a literal, is how a swapped element or timer passes the type check`);
+      assert.deepEqual(
+        args,
+        params,
+        `${site} is handed (${args.join(", ")}) for its parameters (${params.join(", ")}); a value under another name, or a literal, is how a swapped element or timer passes the type check`,
+      );
     }
-    assert.deepEqual(excused, [], `${file}: these excused calls are no longer found as written, so the excuse list is stale or an excused call was edited`);
+    assert.deepEqual(
+      excused,
+      [],
+      `${file}: these excused calls are no longer found as written, so the excuse list is stale or an excused call was edited`,
+    );
   }
 });

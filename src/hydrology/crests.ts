@@ -6,12 +6,7 @@ const MAJOR_BASIN_FRACTION = 0.03;
 
 const CREST_ELEV_QUANTILE = 0.5;
 
-export function gateDivideElevation(
-  divides: Uint8Array,
-  elev: Field,
-  seaLevel: number,
-  q: number,
-): Uint8Array {
+export function gateDivideElevation(divides: Uint8Array, elev: Field, seaLevel: number, q: number): Uint8Array {
   const { data } = elev;
   const threshold = landElevationQuantile(data, seaLevel, q);
   const out = new Uint8Array(divides.length);
@@ -28,11 +23,7 @@ export function mountainCrests(elev: Field, flow: FlowResult, seaLevel: number):
   return gateDivideElevation(divides, elev, seaLevel, CREST_ELEV_QUANTILE);
 }
 
-function landElevationQuantile(
-  data: Float64Array,
-  seaLevel: number,
-  q: number,
-): number {
+function landElevationQuantile(data: Float64Array, seaLevel: number, q: number): number {
   const land: number[] = [];
   for (let i = 0; i < data.length; i++) {
     const v = data[i] as number;

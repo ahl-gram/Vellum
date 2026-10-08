@@ -1,7 +1,14 @@
 // The live-state keys of the Explorer hash, pure and DOM-free (the live plumbing is the e2e suite-survey's and the room-hosted RA suite's). Ratified vocabulary (the 2026-07-26 comment on Issue #192): two mutually exclusive keys, a bare `survey` flag and `year=N`; the writer emits exactly one of them, or neither.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { parseLive, emitLive, finalizeHash, liveNow, forwardTarget, prospectTarget } from "../../src/site/explorer/address.ts";
+import {
+  parseLive,
+  emitLive,
+  finalizeHash,
+  liveNow,
+  forwardTarget,
+  prospectTarget,
+} from "../../src/site/explorer/address.ts";
 
 const P = (s: string) => new URLSearchParams(s);
 
@@ -73,26 +80,17 @@ test("the grammar round-trips: parse(finalize(emit(live))) === live", () => {
 });
 
 test("liveNow: a survey-chamber rest addresses the bare survey (#220)", () => {
-  assert.deepEqual(
-    liveNow({ ages: true, chamber: "survey", year: null, pending: null }),
-    { kind: "survey" },
-  );
+  assert.deepEqual(liveNow({ ages: true, chamber: "survey", year: null, pending: null }), { kind: "survey" });
 });
 
 test("liveNow: an ages-chamber rest with a known year addresses that year (#220)", () => {
-  assert.deepEqual(
-    liveNow({ ages: true, chamber: "ages", year: 812, pending: null }),
-    { kind: "year", year: 812 },
-  );
+  assert.deepEqual(liveNow({ ages: true, chamber: "ages", year: 812, pending: null }), { kind: "year", year: 812 });
 });
 
 test("liveNow: while the arm lags the gesture, the restored key survives as the fallback (#220)", () => {
   const pending = { kind: "year", year: 640 } as const;
   assert.deepEqual(liveNow({ ages: true, chamber: null, year: null, pending }), pending);
-  assert.deepEqual(
-    liveNow({ ages: true, chamber: null, year: null, pending: { kind: "survey" } }),
-    { kind: "survey" },
-  );
+  assert.deepEqual(liveNow({ ages: true, chamber: null, year: null, pending: { kind: "survey" } }), { kind: "survey" });
 });
 
 test("liveNow: an unknowable state or a disarmed instrument emits nothing", () => {
@@ -117,10 +115,7 @@ test("forwardTarget: a valid year=N link forwards to the Reading Room, hash verb
     "/reading-room/#seed=7&style=ink&year=1&cx=0.5100&cy=0.4900&k=3.0000",
   );
   // A bare flag re-serializes as `flag=` and %20 as `+`, so only a non-canonical rider can see re-serialization.
-  assert.equal(
-    forwardTarget("#seed=42&year=814&flag&note=a%20b"),
-    "/reading-room/#seed=42&year=814&flag&note=a%20b",
-  );
+  assert.equal(forwardTarget("#seed=42&year=814&flag&note=a%20b"), "/reading-room/#seed=42&year=814&flag&note=a%20b");
 });
 
 test("forwardTarget: a survey link is the Explorer's own address and stays", () => {

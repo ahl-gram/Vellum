@@ -25,10 +25,7 @@ for (const page of PAGES) {
     ] as const) {
       assert.ok(re.test(sheet[1]!), `${page.css} sheet keeps ${what}`);
     }
-    assert.ok(
-      /\.sheet::before/.test(css) && /\.sheet::after/.test(css),
-      `${page.css} keeps its corner ticks`,
-    );
+    assert.ok(/\.sheet::before/.test(css) && /\.sheet::after/.test(css), `${page.css} keeps its corner ticks`);
     assert.ok(
       !/main\s*\{[^}]*outline/.test(css),
       `${page.css} must not frame main (that would put the running head on the sheet)`,

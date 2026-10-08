@@ -54,15 +54,11 @@ test("the snap stays inside the grid at a corner", () => {
 
 test("the tie-break holds at the radii production uses, not only at radius 1", () => {
   // Equidistant pairs: two devices drawing one window must break the tie identically (lod.ts).
-  const both = createField(32, 32, (x, y) =>
-    (x === 20 && y === 19) || (x === 19 && y === 20) ? 1 : -1,
-  );
+  const both = createField(32, 32, (x, y) => ((x === 20 && y === 19) || (x === 19 && y === 20) ? 1 : -1));
   for (const radius of [5, 8]) {
     assert.deepEqual(snapToLand(both, SEA, 16, 16, radius), { x: 20, y: 19 }, `radius ${radius}`);
   }
-  const mirrored = createField(32, 32, (x, y) =>
-    (x === 12 && y === 19) || (x === 19 && y === 12) ? 1 : -1,
-  );
+  const mirrored = createField(32, 32, (x, y) => ((x === 12 && y === 19) || (x === 19 && y === 12) ? 1 : -1));
   assert.deepEqual(
     snapToLand(mirrored, SEA, 16, 16, 8),
     { x: 12, y: 19 },

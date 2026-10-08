@@ -3,8 +3,22 @@ import { runJob, usesWorker, initWorker } from "../explorer/worker-client.ts";
 import { plateDressFor } from "../../prospect/dress/context.ts";
 import type { PlateDress } from "../explorer/prospect-job.ts";
 import { countLine, layOnTable, layPressFace, LAY_ON_PAGE } from "../explorer/chart-drawer.ts";
-import { emitTable, parseTable, prospectItemFrom, tableHash, type TableItem, type TableOverrides } from "../shared/table-address.ts";
-import { deviceStorage as store, navigationTypeNow, readStoredTable, tableOnArrival, writeStoredTable, TRAVERSAL } from "../shared/table-store.ts";
+import {
+  emitTable,
+  parseTable,
+  prospectItemFrom,
+  tableHash,
+  type TableItem,
+  type TableOverrides,
+} from "../shared/table-address.ts";
+import {
+  deviceStorage as store,
+  navigationTypeNow,
+  readStoredTable,
+  tableOnArrival,
+  writeStoredTable,
+  TRAVERSAL,
+} from "../shared/table-store.ts";
 import { errorText } from "../shared/error-text.ts";
 import { parseProspectAddress, chartTarget, parseYear, ribbonTarget, yearHash } from "./address.ts";
 import { seedForDate } from "../../world/seed-of-the-day.ts";
@@ -77,7 +91,9 @@ window.__vellumProspectState = () => last;
 const seated = (items: ReadonlyArray<TableItem>): ReadonlyArray<TableItem> =>
   items.reduce<ReadonlyArray<TableItem>>((kept, item) => layOnTable(kept, item).items, []);
 
-let table: ReadonlyArray<TableItem> = seated(tableOnArrival(parseTable(location.hash), readStoredTable(store), navigationTypeNow()));
+let table: ReadonlyArray<TableItem> = seated(
+  tableOnArrival(parseTable(location.hash), readStoredTable(store), navigationTypeNow()),
+);
 
 /** Built from the DRAWN plate, never the address: `addr.index` may be null and would emit no `i`, colliding with a hand-typed capital, and the year is the one actually pressed. */
 function filedItem(): TableItem | null {

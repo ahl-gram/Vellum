@@ -7,7 +7,8 @@ export const NARROW_SEED = 4294967295;
 // Under the 1024 floor (Issue #762) a phone held sideways lays out 1024x474, whose chart box (393 tall) no card on that seed reaches (Kralgov's is 292), so the cap is read on a window short enough to meet it, 300 tall, where the box is 272 and Kralgov's card meets it by 20; and wide enough, 1440, that the risen Press does not stand over the card's centre as it does at 1024 (measured 2026-10-06).
 export const CAP_WINDOW = { w: 1440, h: 300 };
 // Focus rather than a pointer, deliberately: focus reaches EVERY mark, including the ones a neighbour's 26px hit covers at rest, and showPlaceCard composes the same card on both paths. Whether a pointer can reach a mark is a different question with its own issue.
-type SweepRow = { want: string; shown: false } | { want: string; got: string | undefined; shown: true; h: number; over: number };
+type SweepRow =
+  { want: string; shown: false } | { want: string; got: string | undefined; shown: true; h: number; over: number };
 export type Swept = { error?: undefined; boxW: number; boxH: number; rows: SweepRow[] };
 export const SWEEP: Payload<{ error: "no map-viewport" } | Swept> = `(() => {
     const vp = document.getElementById("map-viewport");

@@ -1,10 +1,6 @@
 export type Pt = { readonly x: number; readonly y: number };
 
-export function prunePoints<T extends Pt>(
-  candidates: ReadonlyArray<T>,
-  minDist: number,
-  cap: number,
-): T[] {
+export function prunePoints<T extends Pt>(candidates: ReadonlyArray<T>, minDist: number, cap: number): T[] {
   const accepted: T[] = [];
   const d2 = minDist * minDist;
   for (const c of candidates) {
@@ -58,12 +54,7 @@ export type Box = {
 };
 
 export function boxesOverlap(a: Box, b: Box, pad = 0): boolean {
-  return (
-    a.x - pad < b.x + b.w &&
-    a.x + a.w + pad > b.x &&
-    a.y - pad < b.y + b.h &&
-    a.y + a.h + pad > b.y
-  );
+  return a.x - pad < b.x + b.w && a.x + a.w + pad > b.x && a.y - pad < b.y + b.h && a.y + a.h + pad > b.y;
 }
 
 export function textBox(
@@ -98,13 +89,7 @@ export function spacedTextBox(
   return { x: x - w / 2, y: y - fontSize, w, h: fontSize * 1.2 };
 }
 
-export function rotatedSpanBoxes(
-  box: Box,
-  degrees: number,
-  originX: number,
-  originY: number,
-  segments = 6,
-): Box[] {
+export function rotatedSpanBoxes(box: Box, degrees: number, originX: number, originY: number, segments = 6): Box[] {
   const a = (degrees * Math.PI) / 180;
   const cos = Math.cos(a);
   const sin = Math.sin(a);
@@ -137,7 +122,12 @@ export function rotatedRect(box: Box, degrees: number, originX: number, originY:
     x: originX + (px - originX) * cos - (py - originY) * sin,
     y: originY + (px - originX) * sin + (py - originY) * cos,
   });
-  return [spin(box.x, box.y), spin(box.x + box.w, box.y), spin(box.x + box.w, box.y + box.h), spin(box.x, box.y + box.h)];
+  return [
+    spin(box.x, box.y),
+    spin(box.x + box.w, box.y),
+    spin(box.x + box.w, box.y + box.h),
+    spin(box.x, box.y + box.h),
+  ];
 }
 
 function shoelaceArea(pts: ReadonlyArray<Pt>): number {
@@ -151,7 +141,10 @@ function shoelaceArea(pts: ReadonlyArray<Pt>): number {
 }
 
 export function polyBoxOverlapFraction(poly: ReadonlyArray<Pt>, box: Box): number {
-  const x0 = box.x, x1 = box.x + box.w, y0 = box.y, y1 = box.y + box.h;
+  const x0 = box.x,
+    x1 = box.x + box.w,
+    y0 = box.y,
+    y1 = box.y + box.h;
   const lerp = (a: Pt, b: Pt, t: number): Pt => ({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t });
   const edges: Array<{ inside: (p: Pt) => boolean; cut: (a: Pt, b: Pt) => Pt }> = [
     { inside: (p) => p.x >= x0, cut: (a, b) => lerp(a, b, (x0 - a.x) / (b.x - a.x)) },

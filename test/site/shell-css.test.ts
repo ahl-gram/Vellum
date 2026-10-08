@@ -46,11 +46,7 @@ const layoutStyle = () => {
 test("BaseLayout declares the four palette tokens at their ratified values (#263)", () => {
   const css = layoutStyle();
   for (const [name, hex] of Object.entries(TOKENS)) {
-    assert.match(
-      css,
-      new RegExp(`${name}:\\s*${hex}`),
-      `the layout style should declare ${name}: ${hex}`,
-    );
+    assert.match(css, new RegExp(`${name}:\\s*${hex}`), `the layout style should declare ${name}: ${hex}`);
   }
 });
 
@@ -58,10 +54,7 @@ test("no tokenized hex survives raw: pages consume the vars, the layout declares
   for (const page of SITE_SHEETS) {
     const css = read(page).toLowerCase();
     for (const [name, hex] of Object.entries(TOKENS)) {
-      assert.ok(
-        !css.includes(hex),
-        `${page} still carries raw ${hex}; it should consume var(${name})`,
-      );
+      assert.ok(!css.includes(hex), `${page} still carries raw ${hex}; it should consume var(${name})`);
     }
   }
   const layout = layoutStyle().toLowerCase();
@@ -81,7 +74,8 @@ test("the retired near-miss inks never reappear (#269 review, item 4)", () => {
   const layout = read("src/layouts/BaseLayout.astro").toLowerCase();
   assert.ok(!layout.includes("#5a4326"), "the layout carries retired ink #5a4326");
   assert.equal(
-    layout.split("#3d2f1f").length - 1, 1,
+    layout.split("#3d2f1f").length - 1,
+    1,
     "the layout should carry #3d2f1f exactly once, as the --chart-ink declaration",
   );
   assert.match(layout, /--chart-ink:\s*#3d2f1f/, "#3d2f1f's one home is the --chart-ink token");
@@ -109,9 +103,17 @@ test("the composers dress from the same palette (#269 review follow-up)", async 
   const { atlasDocument, atlasPlateFilename } = await import("../../src/atlas/document.ts");
   const plate = { key: "antique", title: "hero", svg: "<svg></svg>" };
   const fixture = {
-    title: "T", subtitle: "s", seed: 7,
-    hero: plate, draughtings: [], themes: [], regions: [], prospects: [],
-    bannersHtml: "", chronicleHtml: "", gazetteerHtml: "",
+    title: "T",
+    subtitle: "s",
+    seed: 7,
+    hero: plate,
+    draughtings: [],
+    themes: [],
+    regions: [],
+    prospects: [],
+    bannersHtml: "",
+    chronicleHtml: "",
+    gazetteerHtml: "",
   };
   for (const [label, opts] of [
     ["deployed", { anchor: true, motion: true }],
@@ -129,11 +131,7 @@ test("drift guard: every var() consumed without a fallback is declared (#263)", 
   // Consumptions WITH a fallback are excluded: they define their own undeclared behavior (the atlas-download font degradation relies on exactly that).
   const { paletteRootCss } = await import("../../src/atlas/palette.ts");
   const declared = new Set<string>();
-  const declarationSources = [
-    ...SITE_SHEETS.map(read),
-    layoutStyle(),
-    paletteRootCss(),
-  ];
+  const declarationSources = [...SITE_SHEETS.map(read), layoutStyle(), paletteRootCss()];
   for (const text of declarationSources) {
     for (const m of text.matchAll(/(--[a-zA-Z0-9-]+)\s*:/g)) declared.add(m[1]!);
   }
@@ -181,7 +179,11 @@ test("the stage shadow is declared once and consumed as a var: the chart-room de
     1,
     "the layout should carry the stage-shadow geometry exactly once (the token declaration)",
   );
-  assert.match(layoutStyle(), /--stage-shadow:\s*0 18px 60px rgb\(from var\(--chart-ink\) r g b \/ 0\.55\);/, "the token is the mockup's own dress");
+  assert.match(
+    layoutStyle(),
+    /--stage-shadow:\s*0 18px 60px rgb\(from var\(--chart-ink\) r g b \/ 0\.55\);/,
+    "the token is the mockup's own dress",
+  );
 });
 
 // The hover raise and press are house values (Issue #405), named in motion.css's :root, the one sheet both the site pages and the standalone atlas page load.
@@ -196,13 +198,11 @@ test("motion.css declares each raise/press token once, at its ratified value (#4
   const css = read("public/motion.css");
   for (const [name, value] of RAISE_TOKENS) {
     assert.equal(
-      css.split(`${name}: ${value};`).length - 1, 1,
+      css.split(`${name}: ${value};`).length - 1,
+      1,
       `motion.css should declare ${name}: ${value}; exactly once`,
     );
-    assert.equal(
-      css.split(`${name}:`).length - 1, 1,
-      `${name} should have exactly one declaration in motion.css`,
-    );
+    assert.equal(css.split(`${name}:`).length - 1, 1, `${name} should have exactly one declaration in motion.css`);
   }
 });
 
@@ -227,7 +227,9 @@ test("the plate dress rests flat and tips on hover (#130, the consumer is now pr
 test("the wordmark tips under the hand on room pages, and stays still on home (#289)", () => {
   const css = read("public/motion.css");
   // Keyed on .wordmark, not h1 (Issue #288): on a room page the h1 is the room name with no link to tip, so keying on h1 would silently select nothing.
-  const hover = css.match(/body:has\(\.room-name\) \.wordmark a:hover,\s*body:has\(\.room-name\) \.wordmark a:focus-visible\s*\{([^}]*)\}/);
+  const hover = css.match(
+    /body:has\(\.room-name\) \.wordmark a:hover,\s*body:has\(\.room-name\) \.wordmark a:focus-visible\s*\{([^}]*)\}/,
+  );
   assert.ok(hover, "the room-scoped wordmark hover rule should exist in motion.css");
   assert.ok(
     /rotate\(/.test(hover[1]!) && /translateY\(/.test(hover[1]!),
@@ -254,9 +256,17 @@ const atlasStyleBlocks = async (): Promise<string> => {
   const plate = { key: "antique", title: "hero", svg: "<svg></svg>" };
   const html = atlasDocument(
     {
-      title: "T", subtitle: "s", seed: 7,
-      hero: plate, draughtings: [], themes: [], regions: [], prospects: [],
-      bannersHtml: "", chronicleHtml: "", gazetteerHtml: "",
+      title: "T",
+      subtitle: "s",
+      seed: 7,
+      hero: plate,
+      draughtings: [],
+      themes: [],
+      regions: [],
+      prospects: [],
+      bannersHtml: "",
+      chronicleHtml: "",
+      gazetteerHtml: "",
     },
     (p, s) => atlasPlateFilename(p, s),
     { anchor: true, motion: true },
@@ -270,7 +280,10 @@ test("no hover or active rule states a lift as a px literal: the raise is a toke
   const sheets: Array<[string, string]> = [
     ...SITE_SHEETS.map((p): [string, string] => [p, read(p)]),
     ["BaseLayout <style is:global>", layoutStyle()],
-    ["src/pages/index.astro <style>", [...read("src/pages/index.astro").matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join("\n")],
+    [
+      "src/pages/index.astro <style>",
+      [...read("src/pages/index.astro").matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join("\n"),
+    ],
     ["src/cli/gallery.ts", GALLERY_PAGE_CSS],
     ["src/atlas/document.ts", await atlasStyleBlocks()],
   ];
@@ -280,9 +293,7 @@ test("no hover or active rule states a lift as a px literal: the raise is a toke
       for (const m of body.matchAll(/translateY\(([^)]*)\)/g)) {
         const arg = m[1]!.trim();
         if (arg === "0" || arg.startsWith("var(")) continue;
-        const sanctioned = selector
-          .split(",")
-          .every((arm) => SANCTIONED_LIFTS[arm.trim()] === arg);
+        const sanctioned = selector.split(",").every((arm) => SANCTIONED_LIFTS[arm.trim()] === arg);
         assert.ok(
           sanctioned,
           `${name}: "${selector}" lifts by the literal ${arg}; ` +
@@ -307,8 +318,18 @@ test("#402 the prospect reveal releases its transform: fill backwards, never bot
 
 // Identity, not presence: the sweep proves a lift is SOME token; this pins WHICH one each consumer uses.
 const TOKEN_CONSUMERS: ReadonlyArray<{ file: string; arm: string; lift: string; shadow?: string }> = [
-  { file: "public/motion.css", arm: "button:not(.lf-station):not(.place-hit):hover", lift: "--raise", shadow: "--raise-shadow" },
-  { file: "public/motion.css", arm: "button:not(.lf-station):not(.place-hit):active", lift: "--press", shadow: "--press-shadow" },
+  {
+    file: "public/motion.css",
+    arm: "button:not(.lf-station):not(.place-hit):hover",
+    lift: "--raise",
+    shadow: "--raise-shadow",
+  },
+  {
+    file: "public/motion.css",
+    arm: "button:not(.lf-station):not(.place-hit):active",
+    lift: "--press",
+    shadow: "--press-shadow",
+  },
   { file: "public/motion.css", arm: ".rooms a:hover", lift: "--raise" },
   { file: "public/motion.css", arm: "body:has(.room-name) .wordmark a:hover", lift: "--raise" },
   { file: "public/living-chart.css", arm: ".pc-prospect:hover", lift: "--raise" },
@@ -317,7 +338,10 @@ const TOKEN_CONSUMERS: ReadonlyArray<{ file: string; arm: string; lift: string; 
 test("each lifting surface consumes ITS token, not just a token (#405)", () => {
   for (const { file, arm, lift, shadow } of TOKEN_CONSUMERS) {
     const rule = rulesIn(read(file)).find((r) =>
-      r.selector.split(",").map((s) => s.trim().replace(/\s+/g, " ")).includes(arm),
+      r.selector
+        .split(",")
+        .map((s) => s.trim().replace(/\s+/g, " "))
+        .includes(arm),
     );
     assert.ok(rule, `${file} should carry a rule selecting ${arm}`);
     assert.match(
@@ -326,11 +350,7 @@ test("each lifting surface consumes ITS token, not just a token (#405)", () => {
       `${arm} should lift by var(${lift})`,
     );
     if (shadow) {
-      assert.match(
-        rule.body,
-        new RegExp(`box-shadow:\\s*var\\(${shadow}\\)`),
-        `${arm} should cast var(${shadow})`,
-      );
+      assert.match(rule.body, new RegExp(`box-shadow:\\s*var\\(${shadow}\\)`), `${arm} should cast var(${shadow})`);
     }
   }
 });
@@ -340,7 +360,8 @@ function cssRules(css: string, media: readonly string[] = []): CssRule[] {
   const out: CssRule[] = [];
   for (let i = 0, open = css.indexOf("{"); open >= 0; open = css.indexOf("{", i)) {
     let close = open + 1;
-    for (let depth = 1; depth > 0 && close < css.length; close++) depth += css[close] === "{" ? 1 : css[close] === "}" ? -1 : 0;
+    for (let depth = 1; depth > 0 && close < css.length; close++)
+      depth += css[close] === "{" ? 1 : css[close] === "}" ? -1 : 0;
     const prelude = css.slice(i, open).trim();
     const body = css.slice(open + 1, close - 1);
     if (prelude.startsWith("@media")) out.push(...cssRules(body, [...media, prelude]));
@@ -359,8 +380,16 @@ const ruleAt = (selector: string, media: readonly string[]): string => {
 };
 
 test("the trail is quiet by size and never by a dimmer ink: no rule that dresses it reaches for an ink under the floor on the deep (Issue #668)", () => {
-  assert.ok(trailRules.length >= 10, `the reader found the trail's rules (${trailRules.length}), so the sweep below is not of nothing`);
-  for (const r of trailRules) assert.doesNotMatch(r.body, /--ink-faded|--line-tan/, `${r.selector} wears an ink that reads under 4.5:1 on the deep`);
+  assert.ok(
+    trailRules.length >= 10,
+    `the reader found the trail's rules (${trailRules.length}), so the sweep below is not of nothing`,
+  );
+  for (const r of trailRules)
+    assert.doesNotMatch(
+      r.body,
+      /--ink-faded|--line-tan/,
+      `${r.selector} wears an ink that reads under 4.5:1 on the deep`,
+    );
   const here = ruleAt('.trail [aria-current="page"], .trail .here', []);
   assert.match(here, /color:\s*var\(--parchment-bright\)/, "the page's own segment brightens");
   assert.match(here, /text-decoration:\s*underline/, "and is underlined, never colour alone");

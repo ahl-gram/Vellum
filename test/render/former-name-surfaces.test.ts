@@ -56,11 +56,7 @@ test("the gazetteer prints the former name, escaped, once per renamed place", ()
   const html = composeAtlas(world).gazetteerHtml;
   for (const s of withFormer) {
     const line = `Once called ${s.formerName}.`;
-    assert.equal(
-      html.split(line).length - 1,
-      1,
-      `gazetteer should carry "${line}" exactly once`,
-    );
+    assert.equal(html.split(line).length - 1, 1, `gazetteer should carry "${line}" exactly once`);
   }
   assert.equal(
     html.split('<span class="former">').length - 1,
@@ -75,9 +71,7 @@ test("the gazetteer escapes a former name that carries markup", () => {
   const idx = world.settlements.findIndex((s) => s.formerName !== undefined);
   const injected = {
     ...world,
-    settlements: world.settlements.map((s, i) =>
-      i === idx ? { ...s, formerName: hostile } : s,
-    ),
+    settlements: world.settlements.map((s, i) => (i === idx ? { ...s, formerName: hostile } : s)),
   };
   const html = composeAtlas(injected).gazetteerHtml;
   assert.ok(html.includes("Ash &amp; &lt;Ford&gt;"), "former name was not escaped");

@@ -19,13 +19,28 @@ export async function l1jHint({ evaluate, check, sleep, wheelAt, freshGesture, r
   }
   check(
     "L1j the scroll hint pulses at full pull-back and stands down the moment the camera draws nearer (#472, 2026-08-28 ruling)",
-    hintOn !== null && hintOn.op === "1" && hintOn.stood === true
-      && hintOff !== null && hintOff.op === "0" && hintOff.stood === false,
+    hintOn !== null &&
+      hintOn.op === "1" &&
+      hintOn.stood === true &&
+      hintOff !== null &&
+      hintOff.op === "0" &&
+      hintOff.stood === false,
     JSON.stringify({ hintOn, hintOff }),
   );
 }
 
-export async function l1kSurfaces({ evaluate, check, sleep, pressKey, clickAt, camNow, scrollY, centerOf, scrollToTop, scrollToFloor }: LandfallKit): Promise<void> {
+export async function l1kSurfaces({
+  evaluate,
+  check,
+  sleep,
+  pressKey,
+  clickAt,
+  camNow,
+  scrollY,
+  centerOf,
+  scrollToTop,
+  scrollToFloor,
+}: LandfallKit): Promise<void> {
   await scrollToFloor();
   const surfCamBefore = await camNow();
   // centerOf, never buttonPoint: buttonPoint scrollIntoViews the stage first, which un-scrolls the page and dissolves the very trap this arm exists to pin (the instruments' remnant is reachable down there).
@@ -36,7 +51,10 @@ export async function l1kSurfaces({ evaluate, check, sleep, pressKey, clickAt, c
     await sleep(100);
     const y = await scrollY();
     const cam = await camNow();
-    if (y === 0 && surfCamBefore !== null && cam !== null && cam.scale > surfCamBefore.scale * 1.05) { surfaced = { y, cam }; break; }
+    if (y === 0 && surfCamBefore !== null && cam !== null && cam.scale > surfCamBefore.scale * 1.05) {
+      surfaced = { y, cam };
+      break;
+    }
   }
   await scrollToFloor();
   const legendPt = await centerOf(String.raw`.lf-legend-btn[data-station="gallery"]`);
@@ -45,8 +63,13 @@ export async function l1kSurfaces({ evaluate, check, sleep, pressKey, clickAt, c
   for (let i = 0; i < 25; i++) {
     await sleep(100);
     const y = await scrollY();
-    const open = await evaluate<boolean | null>(`(() => { const c = document.getElementById("lf-card-gallery"); return c ? !c.hidden : null; })()`);
-    if (y === 0 && open === true) { surfacedCard = { y, open }; break; }
+    const open = await evaluate<boolean | null>(
+      `(() => { const c = document.getElementById("lf-card-gallery"); return c ? !c.hidden : null; })()`,
+    );
+    if (y === 0 && open === true) {
+      surfacedCard = { y, open };
+      break;
+    }
   }
   await pressKey("Escape", "Escape", 27);
   await sleep(300);
@@ -58,7 +81,17 @@ export async function l1kSurfaces({ evaluate, check, sleep, pressKey, clickAt, c
   await scrollToTop();
 }
 
-export async function l1fScrolledPage({ evaluate, check, sleep, lastWheel, camNow, scrollY, wheelAt, scrollToTop, freshGesture }: LandfallKit): Promise<void> {
+export async function l1fScrolledPage({
+  evaluate,
+  check,
+  sleep,
+  lastWheel,
+  camNow,
+  scrollY,
+  wheelAt,
+  scrollToTop,
+  freshGesture,
+}: LandfallKit): Promise<void> {
   await scrollToTop();
   await evaluate(`window.scrollTo(0, 240)`);
   await sleep(200);
@@ -71,7 +104,10 @@ export async function l1fScrolledPage({ evaluate, check, sleep, lastWheel, camNo
   for (let i = 0; i < 20; i++) {
     await sleep(100);
     const y = await scrollY();
-    if (y < yMid) { backUp = { prevented: await lastWheel(), cam: await camNow(), y }; break; }
+    if (y < yMid) {
+      backUp = { prevented: await lastWheel(), cam: await camNow(), y };
+      break;
+    }
   }
   await freshGesture();
   const topCamBefore = await camNow();
@@ -81,20 +117,40 @@ export async function l1fScrolledPage({ evaluate, check, sleep, lastWheel, camNo
   check(
     "L1f over the scrolled page a wheel-up scrolls the page and never zooms; back at the top, a fresh wheel-up is the camera's again",
     // Drift-sized stillness (2%, L9a's), not 1%: the idle drift breathes the scale +-1.5% and the reads straddle a wheel-scroll poll of up to 2s, while a wheel step is 21%; lane A's length moved this fixture against the 9s idle delay again at Issue #463 (CI red twice, green locally).
-    yMid > 0 && backUp !== null && backUp.prevented === false && midCamBefore !== null
-      && Math.abs(backUp.cam!.scale / midCamBefore.scale - 1) < 0.02 && backUp.y < yMid
-      && topCamBefore !== null && topZoom !== null && topZoom.scale > topCamBefore.scale * 1.05,
+    yMid > 0 &&
+      backUp !== null &&
+      backUp.prevented === false &&
+      midCamBefore !== null &&
+      Math.abs(backUp.cam!.scale / midCamBefore.scale - 1) < 0.02 &&
+      backUp.y < yMid &&
+      topCamBefore !== null &&
+      topZoom !== null &&
+      topZoom.scale > topCamBefore.scale * 1.05,
     JSON.stringify({ yMid, backUp, topCamBefore, topZoom }),
   );
 }
 
-export async function l1gKeys({ evaluate, check, sleep, camNow, scrollY, scrollToTop, freshGesture, pressNav }: LandfallKit): Promise<void> {
+export async function l1gKeys({
+  evaluate,
+  check,
+  sleep,
+  camNow,
+  scrollY,
+  scrollToTop,
+  freshGesture,
+  pressNav,
+}: LandfallKit): Promise<void> {
   await freshGesture();
   await evaluate(`document.getElementById("lf-stage")?.focus()`);
   const keyCamBefore = await camNow();
   const keyRuns: { label: string; y0: number; y: number; ok: boolean }[] = [];
   // Every down-key starts from the top or it can find itself already parked on the page floor (End certified nothing from y=610, round 5).
-  const keyScroll = async (label: string, setupY: number, fire: () => Promise<void>, moved: (y: number, y0: number) => boolean) => {
+  const keyScroll = async (
+    label: string,
+    setupY: number,
+    fire: () => Promise<void>,
+    moved: (y: number, y0: number) => boolean,
+  ) => {
     for (let i = 0; i < 20; i++) {
       await evaluate(`window.scrollTo(0, ${setupY})`);
       await sleep(100);
@@ -106,33 +162,49 @@ export async function l1gKeys({ evaluate, check, sleep, camNow, scrollY, scrollT
     for (let i = 0; i < 20; i++) {
       await sleep(100);
       const y = await scrollY();
-      if (moved(y, y0)) { keyRuns.push({ label, y0, y, ok: true }); return; }
+      if (moved(y, y0)) {
+        keyRuns.push({ label, y0, y, ok: true });
+        return;
+      }
     }
     keyRuns.push({ label, y0, y: await scrollY(), ok: false });
   };
   await keyScroll("Space", 0, () => pressNav(" ", "Space", 32, " "), down);
   await keyScroll("PageDown", 0, () => pressNav("PageDown", "PageDown", 34), down);
   await keyScroll("End", 0, () => pressNav("End", "End", 35), down);
-  await keyScroll("Home", 300, () => pressNav("Home", "Home", 36), (y, y0) => y < y0 && y === 0);
+  await keyScroll(
+    "Home",
+    300,
+    () => pressNav("Home", "Home", 36),
+    (y, y0) => y < y0 && y === 0,
+  );
   await keyScroll("ArrowDown", 0, () => pressNav("ArrowDown", "ArrowDown", 40), down);
   const keyCam = await camNow();
   check(
     "L1g the keyboard CLASS on the focused stage stays native, never intercepted, whatever the camera state: Space, PgDn, End, Home, and ArrowDown all scroll and the camera never moves (#472 contract; #481 skeptic finding 5)",
-    keyRuns.every((r) => r.ok) && keyCamBefore !== null && keyCam !== null
-      && Math.abs(keyCam.scale / keyCamBefore.scale - 1) < 0.01,
+    keyRuns.every((r) => r.ok) &&
+      keyCamBefore !== null &&
+      keyCam !== null &&
+      Math.abs(keyCam.scale / keyCamBefore.scale - 1) < 0.01,
     JSON.stringify({ keyRuns, keyCamBefore, keyCam }),
   );
   await scrollToTop();
 }
 
-export async function l1hDrift({ evaluate, check, sleep, lastWheel, camNow, scrollY, wheelAt, scrollToTop }: LandfallKit, pt: Point | null): Promise<void> {
+export async function l1hDrift(
+  { evaluate, check, sleep, lastWheel, camNow, scrollY, wheelAt, scrollToTop }: LandfallKit,
+  pt: Point | null,
+): Promise<void> {
   // L1h's fixture PROVES the drift wandered before flicking, or it certifies nothing (a reduced-motion lane never drifts).
   let floor2 = await camNow();
   for (let i = 0; i < 24 && pt !== null; i++) {
     await wheelAt(pt, 480);
     await sleep(90);
     const next = await camNow();
-    if (next !== null && floor2 !== null && Math.abs(next.scale - floor2.scale) < 1e-9) { floor2 = next; break; }
+    if (next !== null && floor2 !== null && Math.abs(next.scale - floor2.scale) < 1e-9) {
+      floor2 = next;
+      break;
+    }
     floor2 = next;
   }
   await scrollToTop();
@@ -141,7 +213,10 @@ export async function l1hDrift({ evaluate, check, sleep, lastWheel, camNow, scro
   for (let i = 0; i < 56; i++) {
     await sleep(250);
     const c = await camNow();
-    if (c !== null && floor2 !== null && Math.abs(c.scale - floor2.scale) > 1e-5) { drifted = c; break; }
+    if (c !== null && floor2 !== null && Math.abs(c.scale - floor2.scale) > 1e-5) {
+      drifted = c;
+      break;
+    }
   }
   await evaluate(`window.__lfWheel = []`);
   await wheelAt(await evaluate(stagePoint), 240);
@@ -149,7 +224,10 @@ export async function l1hDrift({ evaluate, check, sleep, lastWheel, camNow, scro
   for (let i = 0; i < 20; i++) {
     await sleep(100);
     const y = await scrollY();
-    if (y > 0) { afterDrift = { prevented: await lastWheel(), y }; break; }
+    if (y > 0) {
+      afterDrift = { prevented: await lastWheel(), y };
+      break;
+    }
   }
   check(
     "L1h a fresh flick at the stand-off clamp still releases after the idle drift has wandered: the ±1.5% snap-back is ambient, not a consumed zoom (#481 skeptic finding 1)",

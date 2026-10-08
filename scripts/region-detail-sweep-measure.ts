@@ -66,8 +66,10 @@ function expectedProjections(world: World, window: UvWindow): number {
     const u = s.x / (world.recipe.gridW - 1);
     const v = s.y / (world.recipe.gridH - 1);
     if (
-      u < window.u0 + du * INSET || u > window.u1 - du * INSET ||
-      v < window.v0 + dv * INSET || v > window.v1 - dv * INSET
+      u < window.u0 + du * INSET ||
+      u > window.u1 - du * INSET ||
+      v < window.v0 + dv * INSET ||
+      v > window.v1 - dv * INSET
     ) {
       continue;
     }
@@ -79,14 +81,9 @@ function expectedProjections(world: World, window: UvWindow): number {
 const CONFLUENCE_TOL = 2; // anchorRegionRivers' own SHADOW_RADIUS: how near a drawn river counts as meeting it
 
 /** A river may legitimately stop at the window edge (cropped) or on another river (a confluence, which anchorRegionRivers itself judges within SHADOW_RADIUS). Anything else that stops on dry land in the interior is a river that failed to reach the sea. */
-function riversEndingOnLand(
-  region: World,
-  rivers: ReadonlyArray<River>,
-  tol: number,
-): number[] {
+function riversEndingOnLand(region: World, rivers: ReadonlyArray<River>, tol: number): number[] {
   const { w, h } = region.elev;
-  const cellsOf = (r: River): Set<number> =>
-    new Set(r.points.map((p) => Math.round(p.x) + Math.round(p.y) * w));
+  const cellsOf = (r: River): Set<number> => new Set(r.points.map((p) => Math.round(p.x) + Math.round(p.y) * w));
   const all = rivers.map(cellsOf);
   const nearAnother = (self: number, x: number, y: number): boolean => {
     for (let dy = -CONFLUENCE_TOL; dy <= CONFLUENCE_TOL; dy++) {
@@ -145,13 +142,18 @@ function seatsInWindow(world: World, window: UvWindow): number {
     const u = s.x / (world.recipe.gridW - 1);
     const v = s.y / (world.recipe.gridH - 1);
     return (
-      u >= window.u0 + du * INSET && u <= window.u1 - du * INSET &&
-      v >= window.v0 + dv * INSET && v <= window.v1 - dv * INSET
+      u >= window.u0 + du * INSET &&
+      u <= window.u1 - du * INSET &&
+      v >= window.v0 + dv * INSET &&
+      v <= window.v1 - dv * INSET
     );
   }).length;
 }
 
-function networkCounts(region: World, gridW: number): { hamletsOnWater: number; roadCellsOnWater: number; settlementsOffRoadNetwork: number } {
+function networkCounts(
+  region: World,
+  gridW: number,
+): { hamletsOnWater: number; roadCellsOnWater: number; settlementsOffRoadNetwork: number } {
   const { data } = region.elev;
   const sea = region.seaLevel;
   let hamletsOnWater = 0;
@@ -168,13 +170,17 @@ function networkCounts(region: World, gridW: number): { hamletsOnWater: number; 
   for (const road of region.roads) {
     for (const p of road.points) onRoad.add(p.x + p.y * gridW);
   }
-  const settlementsOffRoadNetwork = region.settlements.filter(
-    (s) => !onRoad.has(s.x + s.y * gridW),
-  ).length;
+  const settlementsOffRoadNetwork = region.settlements.filter((s) => !onRoad.has(s.x + s.y * gridW)).length;
   return { hamletsOnWater, roadCellsOnWater, settlementsOffRoadNetwork };
 }
 
-function massCoverage(world: World, region: World, window: UvWindow, gridW: number, gridH: number): { fusedPairs: number; lost: number; inWindow: number } {
+function massCoverage(
+  world: World,
+  region: World,
+  window: UvWindow,
+  gridW: number,
+  gridH: number,
+): { fusedPairs: number; lost: number; inWindow: number } {
   const worldIds = labelLandmasses(world.elev, world.seaLevel).ids;
   const regionIds = labelLandmasses(region.elev, region.seaLevel).ids;
   const coveredBy = new Map<number, Set<number>>();
@@ -257,10 +263,27 @@ function landTally(world: World, region: World, window: UvWindow, gridW: number,
       }
     }
   }
-  return { landCells, sharedLandCells, biomeMismatch, snowAlpine, parentLand, parentSnowAlpine, parentLandDrowned, realmlessOverParentLand, realmlessOverParentSea, landOverParentSea };
+  return {
+    landCells,
+    sharedLandCells,
+    biomeMismatch,
+    snowAlpine,
+    parentLand,
+    parentSnowAlpine,
+    parentLandDrowned,
+    realmlessOverParentLand,
+    realmlessOverParentSea,
+    landOverParentSea,
+  };
 }
 
-function riverFailures(world: World, region: World, band: LodBand, window: UvWindow, badRivers: ReadonlyArray<number>): RiverFailure[] {
+function riverFailures(
+  world: World,
+  region: World,
+  band: LodBand,
+  window: UvWindow,
+  badRivers: ReadonlyArray<number>,
+): RiverFailure[] {
   const { gridW, gridH } = band;
   const { data } = region.elev;
   return badRivers.map((i) => {
@@ -309,7 +332,11 @@ export function measure(
   const net = networkCounts(region, band.gridW);
   const masses = massCoverage(world, region, window, band.gridW, band.gridH);
   const land = landTally(world, region, window, band.gridW, band.gridH);
-  const badRivers = riversEndingOnLand(region, region.rivers, landSnapRadius(band.gridW, window, world.recipe.gridW) + 1);
+  const badRivers = riversEndingOnLand(
+    region,
+    region.rivers,
+    landSnapRadius(band.gridW, window, world.recipe.gridW) + 1,
+  );
   const row: WindowResult = {
     seed: world.recipe.seed,
     band: band.index,

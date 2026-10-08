@@ -11,7 +11,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
     await onFixedDay(ctx, async () => {
       await step("NS1", () => ns1Soft(ctx));
       await step("NA4", () => na4Lean(ctx));
-      await step("EA1", async () => { await ea1Phone(ctx); });
+      await step("EA1", async () => {
+        await ea1Phone(ctx);
+      });
       await ctx.clearMobile();
       await step("EA2, EA3, EL1, EL2", () => eaDesk(ctx));
       await step("EA4", () => ea4Reads(ctx));
@@ -19,6 +21,13 @@ export async function run(ctx: SuiteContext): Promise<void> {
     });
   } finally {
     await ctx.clearMobile().catch(() => undefined);
-    await ctx.send("Emulation.setDeviceMetricsOverride", { width: DESK.w, height: DESK.h, deviceScaleFactor: 1, mobile: false }).catch(() => undefined);
+    await ctx
+      .send("Emulation.setDeviceMetricsOverride", {
+        width: DESK.w,
+        height: DESK.h,
+        deviceScaleFactor: 1,
+        mobile: false,
+      })
+      .catch(() => undefined);
   }
 }

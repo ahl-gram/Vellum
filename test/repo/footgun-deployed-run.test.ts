@@ -34,7 +34,10 @@ test("a reading child's decision is still parsed", () => {
 // Reads what reaches the spawn rather than what the option builder returns, because the seam between them is where the cap goes missing without any child noticing: drop the default, or forward `timeout ?? 0`, and all three spawns above run uncapped while the witness below stays green on its own argument. Both mutations typecheck, so `npm run check` does not catch either.
 test("bounded hands the spawn BOUND_MS by default, and an explicit cap when given one", () => {
   const seen: number[] = [];
-  const probe: Spawn = (_file, _args, options) => { seen.push(options.timeout); return ""; };
+  const probe: Spawn = (_file, _args, options) => {
+    seen.push(options.timeout);
+    return "";
+  };
   bounded("exit 0", "x", undefined, probe);
   bounded("exit 0", "x", 5, probe);
   assert.deepEqual(seen, [BOUND_MS, 5]);
@@ -48,20 +51,47 @@ test("a child that outlives the bound fails by name instead of hanging the lane"
 
 test("EPIPE with a clean exit and no output reads as no decision", () => {
   const err = Object.assign(new Error("spawnSync sh EPIPE"), { code: "EPIPE", status: 0, stdout: "" });
-  assert.equal(readDeployed(() => { throw err; }), null);
+  assert.equal(
+    readDeployed(() => {
+      throw err;
+    }),
+    null,
+  );
 });
 
 test("EPIPE with a FAILING exit code still throws", () => {
   const err = Object.assign(new Error("spawnSync sh EPIPE"), { code: "EPIPE", status: 1, stdout: "" });
-  assert.throws(() => readDeployed(() => { throw err; }), /EPIPE/);
+  assert.throws(
+    () =>
+      readDeployed(() => {
+        throw err;
+      }),
+    /EPIPE/,
+  );
 });
 
 test("EPIPE after the hook already printed a decision still throws", () => {
-  const err = Object.assign(new Error("spawnSync sh EPIPE"), { code: "EPIPE", status: 0, stdout: '{"hookSpecificOutput":{}}' });
-  assert.throws(() => readDeployed(() => { throw err; }), /EPIPE/);
+  const err = Object.assign(new Error("spawnSync sh EPIPE"), {
+    code: "EPIPE",
+    status: 0,
+    stdout: '{"hookSpecificOutput":{}}',
+  });
+  assert.throws(
+    () =>
+      readDeployed(() => {
+        throw err;
+      }),
+    /EPIPE/,
+  );
 });
 
 test("an error that is not EPIPE still throws", () => {
   const err = Object.assign(new Error("spawnSync sh ENOENT"), { code: "ENOENT", status: 0, stdout: "" });
-  assert.throws(() => readDeployed(() => { throw err; }), /ENOENT/);
+  assert.throws(
+    () =>
+      readDeployed(() => {
+        throw err;
+      }),
+    /ENOENT/,
+  );
 });

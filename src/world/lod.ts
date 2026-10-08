@@ -42,11 +42,7 @@ export function bandFor(k: number, currentBand?: number): number {
 
 export const LATTICE_DIVISIONS = 8;
 
-export function quantizeCenter(
-  cx: number,
-  cy: number,
-  sizeUV: number,
-): { readonly cx: number; readonly cy: number } {
+export function quantizeCenter(cx: number, cy: number, sizeUV: number): { readonly cx: number; readonly cy: number } {
   const step = sizeUV / LATTICE_DIVISIONS;
   return {
     cx: Math.round(cx / step) * step,

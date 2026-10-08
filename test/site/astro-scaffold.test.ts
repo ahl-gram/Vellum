@@ -51,7 +51,8 @@ type PageSpec = {
 };
 
 /** The shell's binder, inlined into every page by Astro (Issue #483); stripped before a page's OWN scripts are counted. Keyed on the desk notice's storage key, a string the minifier keeps. */
-const SHELL_SCRIPT = /<script type="module">(?:(?!<\/script>)[\s\S])*vellum\.desk-notice\.v1(?:(?!<\/script>)[\s\S])*<\/script>/;
+const SHELL_SCRIPT =
+  /<script type="module">(?:(?!<\/script>)[\s\S])*vellum\.desk-notice\.v1(?:(?!<\/script>)[\s\S])*<\/script>/;
 
 const PAGES: readonly PageSpec[] = [
   {
@@ -71,7 +72,10 @@ const PAGES: readonly PageSpec[] = [
     route: "faq/index.html",
     dir: "/faq/",
     current: "Q & A",
-    trail: [["Vellum", "/"], ["Questions & Answers", "/faq/"]],
+    trail: [
+      ["Vellum", "/"],
+      ["Questions & Answers", "/faq/"],
+    ],
     room: "Questions & Answers",
     title: "Questions & Answers · Vellum",
     ogTitle: "Questions and Answers · Vellum",
@@ -84,7 +88,10 @@ const PAGES: readonly PageSpec[] = [
     route: "glossary/index.html",
     dir: "/glossary/",
     current: "Glossary",
-    trail: [["Vellum", "/"], ["The Glossary", "/glossary/"]],
+    trail: [
+      ["Vellum", "/"],
+      ["The Glossary", "/glossary/"],
+    ],
     room: "The Glossary",
     title: "The Glossary · Vellum",
     ogTitle: "The Glossary · Vellum",
@@ -97,7 +104,10 @@ const PAGES: readonly PageSpec[] = [
     route: "explorer/index.html",
     dir: "/explorer/",
     current: "Explorer",
-    trail: [["Vellum", "/"], ["The Explorer", "/explorer/"]],
+    trail: [
+      ["Vellum", "/"],
+      ["The Explorer", "/explorer/"],
+    ],
     room: "The Explorer",
     title: "The Explorer · Vellum",
     ogTitle: "The Explorer · Vellum",
@@ -110,7 +120,10 @@ const PAGES: readonly PageSpec[] = [
     route: "print-room/index.html",
     dir: "/print-room/",
     current: "Print Room",
-    trail: [["Vellum", "/"], ["The Print Room", "/print-room/"]],
+    trail: [
+      ["Vellum", "/"],
+      ["The Print Room", "/print-room/"],
+    ],
     room: "The Print Room",
     title: "The Print Room · Vellum",
     ogTitle: "The Print Room · Vellum",
@@ -123,7 +136,11 @@ const PAGES: readonly PageSpec[] = [
   {
     route: "explorer/portfolio/index.html",
     dir: "/explorer/portfolio/",
-    trail: [["Vellum", "/"], ["The Explorer", "/explorer/"], ["The Portfolio", "/explorer/portfolio/"]],
+    trail: [
+      ["Vellum", "/"],
+      ["The Explorer", "/explorer/"],
+      ["The Portfolio", "/explorer/portfolio/"],
+    ],
     room: "The Portfolio",
     title: "The Portfolio · Vellum",
     ogTitle: "The Portfolio · Vellum",
@@ -137,7 +154,10 @@ const PAGES: readonly PageSpec[] = [
     route: "reading-room/index.html",
     dir: "/reading-room/",
     current: "Reading Room",
-    trail: [["Vellum", "/"], ["The Reading Room", "/reading-room/"]],
+    trail: [
+      ["Vellum", "/"],
+      ["The Reading Room", "/reading-room/"],
+    ],
     room: "The Reading Room",
     title: "The Reading Room · Vellum",
     ogTitle: "The Reading Room · Vellum",
@@ -151,7 +171,10 @@ const PAGES: readonly PageSpec[] = [
     route: "seed-of-the-day/index.html",
     dir: "/seed-of-the-day/",
     current: "Today",
-    trail: [["Vellum", "/"], ["The Seed of the Day", "/seed-of-the-day/"]],
+    trail: [
+      ["Vellum", "/"],
+      ["The Seed of the Day", "/seed-of-the-day/"],
+    ],
     room: "The Seed of the Day",
     title: "The Seed of the Day · Vellum",
     ogTitle: "The Seed of the Day · Vellum",
@@ -166,7 +189,11 @@ const PAGES: readonly PageSpec[] = [
   {
     route: "prospect/index.html",
     dir: "/prospect/",
-    trail: [["Vellum", "/"], ["The Explorer", "/explorer/"], ["The Prospect", "/prospect/"]],
+    trail: [
+      ["Vellum", "/"],
+      ["The Explorer", "/explorer/"],
+      ["The Prospect", "/prospect/"],
+    ],
     also: ["The Reading Room", "/reading-room/"],
     room: "The Prospect",
     title: "The Prospect · Vellum",
@@ -180,7 +207,11 @@ const PAGES: readonly PageSpec[] = [
   {
     route: "ribbon/index.html",
     dir: "/ribbon/",
-    trail: [["Vellum", "/"], ["The Explorer", "/explorer/"], ["The Wayfarer's Ribbon", "/ribbon/"]],
+    trail: [
+      ["Vellum", "/"],
+      ["The Explorer", "/explorer/"],
+      ["The Wayfarer's Ribbon", "/ribbon/"],
+    ],
     room: "The Wayfarer's Ribbon",
     title: "The Wayfarer's Ribbon · Vellum",
     ogTitle: "The Wayfarer's Ribbon · Vellum",
@@ -194,12 +225,14 @@ const PAGES: readonly PageSpec[] = [
     route: "gallery/index.html",
     dir: "/gallery/",
     current: "Gallery",
-    trail: [["Vellum", "/"], ["The Gallery", "/gallery/"]],
+    trail: [
+      ["Vellum", "/"],
+      ["The Gallery", "/gallery/"],
+    ],
     room: "The Gallery",
     title: "The Gallery · Vellum",
     ogTitle: "The Gallery · Vellum",
-    description:
-      "A contact sheet of twelve imaginary worlds, drawn by Vellum as antique charts and hung for viewing.",
+    description: "A contact sheet of twelve imaginary worlds, drawn by Vellum as antique charts and hung for viewing.",
     tagline: "a dozen worlds, hung for viewing",
     chartRoom: true,
   },
@@ -209,7 +242,8 @@ const PAGES: readonly PageSpec[] = [
     room: "The Specimen Book",
     title: "The Specimen Book · Vellum",
     ogTitle: "The Specimen Book · Vellum",
-    description: "The Atelier Kit's specimen book: every piece of the room furniture at its seat, in every state, for the closing review's eye.",
+    description:
+      "The Atelier Kit's specimen book: every piece of the room furniture at its seat, in every state, for the closing review's eye.",
     tagline: "the kit, every piece in every state",
     scriptSrc: "./app.bundle.js",
     chartRoom: true,
@@ -265,7 +299,11 @@ test("astro.config keeps the contractual shape (site, trailing slash, no fingerp
   const config = (await import("../../astro.config.ts")).default;
   assert.equal(config.site, "https://www.vellumworlds.com", "site drives og:url and must stay the custom domain");
   assert.equal(config.trailingSlash, "always", "every internal URL is trailing-slash directory form");
-  assert.equal(config.compressHTML, false, "the migrated pages' markup must stay unminified (near-verbatim discipline)");
+  assert.equal(
+    config.compressHTML,
+    false,
+    "the migrated pages' markup must stay unminified (near-verbatim discipline)",
+  );
   assert.equal(config.build?.inlineStylesheets, "always", "the shell style must inline, never a fingerprinted file");
   assert.ok(!("base" in config), "base must stay the default '/' (root-absolute assets break otherwise)");
   assert.ok(!("outDir" in config), "outDir must stay the default ./dist (deploy.yml uploads path: dist)");
@@ -291,7 +329,16 @@ test("the shell is authored exactly once: pages carry no header/nav/footer/meta 
   for (const p of PAGES) {
     const source = readFileSync(root(`src/pages/${p.route.replace("index.html", "index.astro")}`), "utf8");
     // Meta-attribute forms: a bare "og:" false-positives on prose ("log:").
-    for (const marker of ["<footer", 'class="rooms"', 'property="og:', 'name="twitter:', "<title", "<header", "<html", "<head"]) {
+    for (const marker of [
+      "<footer",
+      'class="rooms"',
+      'property="og:',
+      'name="twitter:',
+      "<title",
+      "<header",
+      "<html",
+      "<head",
+    ]) {
       assert.ok(!source.includes(marker), `${p.route} source should not duplicate the shell (found ${marker})`);
     }
   }
@@ -317,10 +364,18 @@ test("each rendered head carries the canonical meta with the ratified prop fan-o
       ["property", "og:image", "https://www.vellumworlds.com/og.png"],
       ["property", "og:image:width", "1200"],
       ["property", "og:image:height", "630"],
-      ["property", "og:image:alt", "The Vellum wordmark and a compass rose on a dark walnut ground, with the chart of seed 42 faint behind."],
+      [
+        "property",
+        "og:image:alt",
+        "The Vellum wordmark and a compass rose on a dark walnut ground, with the chart of seed 42 faint behind.",
+      ],
       ["name", "twitter:card", "summary_large_image"],
       ["name", "twitter:image", "https://www.vellumworlds.com/og.png"],
-      ["name", "twitter:image:alt", "The Vellum wordmark and a compass rose on a dark walnut ground, with the chart of seed 42 faint behind."],
+      [
+        "name",
+        "twitter:image:alt",
+        "The Vellum wordmark and a compass rose on a dark walnut ground, with the chart of seed 42 faint behind.",
+      ],
     ] as const) {
       assert.equal(metaContent(head, attr, key), want, `${p.route} ${attr}=${key}`);
     }
@@ -368,9 +423,16 @@ test("no head member arrives beyond the canonical set (nothing injected, nothing
       return m ? `${m[1]}:${m[2]}` : `unrecognized: ${attrs}`;
     });
     const expected = new Set([...expectedMeta, ...(p.noindex ? ["name:robots"] : [])]);
-    assert.deepEqual(new Set(seen), expected, `${p.route} meta set should be exactly the canonical one${p.noindex ? " plus robots noindex (#465)" : ""}`);
+    assert.deepEqual(
+      new Set(seen),
+      expected,
+      `${p.route} meta set should be exactly the canonical one${p.noindex ? " plus robots noindex (#465)" : ""}`,
+    );
     assert.equal(seen.length, expected.size, `${p.route} should carry no duplicate meta`);
-    assert.ok(!/<link(?![^>]*(?:rel="icon"|rel="apple-touch-icon"|rel="stylesheet"|rel="prefetch"))/.test(head), `${p.route} has only icon/apple-touch-icon/stylesheet/prefetch links`);
+    assert.ok(
+      !/<link(?![^>]*(?:rel="icon"|rel="apple-touch-icon"|rel="stylesheet"|rel="prefetch"))/.test(head),
+      `${p.route} has only icon/apple-touch-icon/stylesheet/prefetch links`,
+    );
     assert.ok(!head.includes("canonical"), "no canonical tags exist today and the layout must not invent them");
   }
 });
@@ -395,11 +457,7 @@ test("the canonical nav renders the typed items flat, root-absolute, one aria-cu
     assert.equal(navs.length, 1, `${p.route} should have exactly one rooms nav (semantic <nav>)`);
     const nav = navs[0]![1]!;
 
-    const parts = [
-      ...nav.matchAll(
-        /<a href="([^"]+)">([^<]+)<\/a>|<span aria-current="page">([^<]+)<\/span>/g,
-      ),
-    ];
+    const parts = [...nav.matchAll(/<a href="([^"]+)">([^<]+)<\/a>|<span aria-current="page">([^<]+)<\/span>/g)];
     assert.deepEqual(
       parts.map((m) => decode(m[2] ?? m[3]!)),
       NAV_ITEMS.map((i) => i.label),
@@ -435,22 +493,45 @@ test("the trail names the path from Vellum to the page on every page in the tree
     const trails = [...html.matchAll(TRAIL)];
     if (!p.trail) {
       assert.equal(trails.length, 0, `${p.route} has no seat in the tree, so it draws no trail`);
-      for (const piece of ['class="where"', 'class="trail"', 'class="also"']) assert.ok(!html.includes(piece), `${p.route} carries no ${piece}`);
+      for (const piece of ['class="where"', 'class="trail"', 'class="also"'])
+        assert.ok(!html.includes(piece), `${p.route} carries no ${piece}`);
       continue;
     }
     assert.equal(trails.length, 1, `${p.route} draws exactly one trail`);
     const [whole, inner = ""] = trails[0]!;
     const navEnd = html.indexOf("</nav>", html.indexOf('<nav class="rooms"'));
     assert.notEqual(navEnd, -1, `${p.route} has its rooms nav`);
-    assert.ok(html.indexOf(whole) > navEnd && html.indexOf(whole) < html.indexOf("</header>"), `${p.route} seats the trail in the cluster after the rooms nav and outside it, so the doors reads never meet it`);
+    assert.ok(
+      html.indexOf(whole) > navEnd && html.indexOf(whole) < html.indexOf("</header>"),
+      `${p.route} seats the trail in the cluster after the rooms nav and outside it, so the doors reads never meet it`,
+    );
     const segments = [...inner.matchAll(SEGMENT)];
-    assert.equal(inner.replace(SEGMENT, "").replace(WAY, ""), "", `${p.route}'s trail holds segments and hidden way-marks and nothing else: ${inner}`);
-    assert.equal(inner.split('<span class="way" aria-hidden="true">').length - 1, segments.length - 1, `${p.route}'s segments are parted by hidden way-marks`);
-    assert.deepEqual(segments.map((m) => [decode(m[2] ?? m[4]!), m[1] ?? p.dir]), p.trail, `${p.route}'s trail, root-absolute`);
-    assert.ok(segments.slice(0, -1).every((m) => m[1] !== undefined), `${p.route}: every segment above the page is a link`);
+    assert.equal(
+      inner.replace(SEGMENT, "").replace(WAY, ""),
+      "",
+      `${p.route}'s trail holds segments and hidden way-marks and nothing else: ${inner}`,
+    );
+    assert.equal(
+      inner.split('<span class="way" aria-hidden="true">').length - 1,
+      segments.length - 1,
+      `${p.route}'s segments are parted by hidden way-marks`,
+    );
+    assert.deepEqual(
+      segments.map((m) => [decode(m[2] ?? m[4]!), m[1] ?? p.dir]),
+      p.trail,
+      `${p.route}'s trail, root-absolute`,
+    );
+    assert.ok(
+      segments.slice(0, -1).every((m) => m[1] !== undefined),
+      `${p.route}: every segment above the page is a link`,
+    );
     const last = segments.at(-1)!;
     assert.equal(last[1], undefined, `${p.route}: the page you stand on is not somewhere to go`);
-    assert.equal(last[3], p.current ? 'class="here"' : 'aria-current="page"', `${p.route}: the trail carries the page mark exactly when the nav does not`);
+    assert.equal(
+      last[3],
+      p.current ? 'class="here"' : 'aria-current="page"',
+      `${p.route}: the trail carries the page mark exactly when the nav does not`,
+    );
     assert.equal(decode(last[4]!), p.room, `${p.route}: the trail ends at the page's own room`);
   }
 });
@@ -512,7 +593,11 @@ test("the layout ships the cluster's ratified pins: leading, weight, the aria-cu
     );
     assert.match(css, /\.wordmark\s*\{[^}]*line-height:\s*1\.15/, "the wordmark pins the mockup's 1.15");
     assert.match(css, /\.wordmark\s*\{[^}]*letter-spacing:\s*0?\.12em/, "the wordmark wears the mockup's tracking");
-    assert.match(css, /\.wordmark\s*\{[^}]*font-weight:\s*400/, "the wordmark pins the cluster's 400 against the h1 UA bold");
+    assert.match(
+      css,
+      /\.wordmark\s*\{[^}]*font-weight:\s*400/,
+      "the wordmark pins the cluster's 400 against the h1 UA bold",
+    );
     assert.match(css, /\.room-name\s*\{[^}]*font-weight:\s*400/, "the room name pins 400 against its h1's UA bold");
     assert.ok(!css.includes(".head-rule"), "the folio's double rule retired with the band (#461 ruling 1)");
     assert.ok(!css.includes(".manicule"), "the manicule retired with the folio nav (#461 ruling 1)");
@@ -555,10 +640,7 @@ function assertRoomOrHomeHead(html: string, p: PageSpec): void {
     );
   } else {
     // Match the markup form, not the bare class: the shell css mentions .room-name on every page.
-    assert.ok(
-      !html.includes('<h1 class="room-name">'),
-      `${p.route} is home: the atelier is not a room`,
-    );
+    assert.ok(!html.includes('<h1 class="room-name">'), `${p.route} is home: the atelier is not a room`);
     assert.ok(
       !html.includes('class="band"'),
       `${p.route} is home: the full-bleed stage needs no band (nothing scrolls beneath the cluster)`,
@@ -581,13 +663,19 @@ test("the head cluster: wordmark, the atelier tagline, then the rooms nav, fixed
     const [head, tag, nav] = ['<header class="chrome">', 'class="tagline"', '<nav class="rooms"'].map((m) =>
       html.indexOf(m),
     ) as [number, number, number];
-    assert.ok(head > -1 && head < tag && tag < nav, `${p.route} keeps the cluster order: wordmark head, tagline, rooms nav`);
+    assert.ok(
+      head > -1 && head < tag && tag < nav,
+      `${p.route} keeps the cluster order: wordmark head, tagline, rooms nav`,
+    );
     for (const gone of ['class="running-head"', 'class="head-rule"', 'class="topnav"']) {
       assert.ok(!html.includes(gone), `${p.route}: the folio ${gone} retired with the cluster (#461)`);
     }
   }
   for (const gone of ['class="lede"', 'class="seedline"', 'class="cartouche"', 'class="banners"', 'class="grid3"']) {
-    assert.ok(!page("index.html").includes(gone), `home retired its ${gone} section (#289 hero, then the #470 below-stage removals)`);
+    assert.ok(
+      !page("index.html").includes(gone),
+      `home retired its ${gone} section (#289 hero, then the #470 below-stage removals)`,
+    );
   }
 });
 
@@ -595,21 +683,37 @@ const DESK_ROOMS: readonly string[] = ["faq/index.html", "glossary/index.html", 
 
 function roomHeadingStands(route: string, room: string, html: string, firstHeading: number): void {
   const [headClose, mainOpen, mainClose] = [html.indexOf("</header>"), html.search(/<main\b/), html.indexOf("</main>")];
-  assert.ok(headClose > -1 && mainOpen > headClose && mainClose > mainOpen, `${route} renders the head cluster, then <main>`);
+  assert.ok(
+    headClose > -1 && mainOpen > headClose && mainClose > mainOpen,
+    `${route} renders the head cluster, then <main>`,
+  );
   const desk = html.includes('<div class="desk-layer on">');
-  assert.equal(desk, DESK_ROOMS.includes(route), `${route} ${desk ? "seats" : "does not seat"} pieces in the desk layer`);
+  assert.equal(
+    desk,
+    DESK_ROOMS.includes(route),
+    `${route} ${desk ? "seats" : "does not seat"} pieces in the desk layer`,
+  );
   const folioOpen = html.lastIndexOf("<div", firstHeading);
   const folio = html.slice(folioOpen, html.indexOf(">", folioOpen) + 1);
   assert.ok(folioOpen > -1 && folio.includes("folio-room"), `${route} opens its room folio just before its h1`);
   if (desk) {
-    assert.ok(firstHeading > headClose && firstHeading < mainOpen, `${route} stands its h1 in the desk layer, after the head cluster and before <main> (Issue #762 call CC20)`);
+    assert.ok(
+      firstHeading > headClose && firstHeading < mainOpen,
+      `${route} stands its h1 in the desk layer, after the head cluster and before <main> (Issue #762 call CC20)`,
+    );
     assert.ok(
       folio.includes('role="region"') && folio.includes(`aria-label="${esc(room)}"`),
       `${route} stands its h1 in a region named for the room, a landmark of its own (Alex, 2026-10-06, Issue #762 issuecomment-6019508051)`,
     );
   } else {
-    assert.ok(firstHeading > mainOpen && firstHeading < mainClose, `${route} keeps its h1 standing in the page (inside <main>)`);
-    assert.ok(!folio.includes('role="region"'), `${route} keeps its folio a plain corner, the page's own landmark around it`);
+    assert.ok(
+      firstHeading > mainOpen && firstHeading < mainClose,
+      `${route} keeps its h1 standing in the page (inside <main>)`,
+    );
+    assert.ok(
+      !folio.includes('role="region"'),
+      `${route} keeps its folio a plain corner, the page's own landmark around it`,
+    );
   }
 }
 
@@ -667,7 +771,11 @@ test("titles are computed in the layout from the room, never hand-set (#268)", (
       assert.ok(source.includes(`const room = "${p.room}"`), `${p.route} hoists its room to a const`);
       assert.ok(open[1]!.includes("room={room}"), `${p.route} passes the const to the layout`);
       assert.ok(source.includes(`const tagline = "${p.tagline}"`), `${p.route} hoists its tagline to a const`);
-      assert.match(source, /<RoomFolio (?:slot="desk" region )?room=\{room\} tagline=\{tagline\}>/, `${p.route} stands its RoomFolio in the page, or as a named region in the desk layer on a room that scrolls down`);
+      assert.match(
+        source,
+        /<RoomFolio (?:slot="desk" region )?room=\{room\} tagline=\{tagline\}>/,
+        `${p.route} stands its RoomFolio in the page, or as a named region in the desk layer on a room that scrolls down`,
+      );
     } else {
       assert.ok(!open[1]!.includes("room="), `${p.route} is home and passes no room`);
     }
@@ -697,7 +805,11 @@ test("the body skeleton pins the shell order: band, cluster, main, footer on the
   for (const p of PAGES) {
     const html = page(p.route);
     if (p.chartRoom) {
-      assert.match(html, /<body class="room chart-room">\s*<div class="desk-layer(?: on)?">\s*<header class="chrome">/, `${p.route} is a chart room: no band, the cluster floats over the chart`);
+      assert.match(
+        html,
+        /<body class="room chart-room">\s*<div class="desk-layer(?: on)?">\s*<header class="chrome">/,
+        `${p.route} is a chart room: no band, the cluster floats over the chart`,
+      );
       assert.match(
         html,
         new RegExp(String.raw`</main>\s*${NOTICE}\s*<script type="module">[\s\S]*?</script>\s*</body>\s*</html>\s*$`),
@@ -712,11 +824,17 @@ test("the body skeleton pins the shell order: band, cluster, main, footer on the
         `${p.route} body must open body.room > the desk layer > band > cluster, after at most the deferred script of a piece the desk slot seats`,
       );
     } else {
-      assert.match(html, /<body>\s*<header class="chrome">/, `${p.route} is home: no band, the cluster floats on the stage`);
+      assert.match(
+        html,
+        /<body>\s*<header class="chrome">/,
+        `${p.route} is home: no band, the cluster floats on the stage`,
+      );
     }
     assert.match(
       html,
-      new RegExp(String.raw`</main>\s*<footer>[\s\S]*?</footer>\s*${NOTICE}\s*<script type="module">[\s\S]*?</script>\s*</body>\s*</html>\s*$`),
+      new RegExp(
+        String.raw`</main>\s*<footer>[\s\S]*?</footer>\s*${NOTICE}\s*<script type="module">[\s\S]*?</script>\s*</body>\s*</html>\s*$`,
+      ),
       `${p.route} must close main, then the footer on the deep, then the desk notice, then the shell's own script, then body and html with nothing after`,
     );
   }
@@ -727,8 +845,14 @@ test("the shell's own script rides every page, inlined by Astro rather than emit
   for (const p of PAGES) {
     const html = page(p.route);
     const shell = html.match(SHELL_SCRIPT);
-    assert.ok(shell, `${p.route} carries the shell's script: the top row and the desk notice are the same on every page`);
-    assert.ok(html.indexOf(shell[0]) > html.indexOf(p.chartRoom ? "</main>" : "</footer>"), `${p.route} runs it last, after everything it binds`);
+    assert.ok(
+      shell,
+      `${p.route} carries the shell's script: the top row and the desk notice are the same on every page`,
+    );
+    assert.ok(
+      html.indexOf(shell[0]) > html.indexOf(p.chartRoom ? "</main>" : "</footer>"),
+      `${p.route} runs it last, after everything it binds`,
+    );
   }
 });
 
@@ -738,13 +862,23 @@ test("each app page keeps its bundle-twin module script, rendered verbatim insid
     if (p.pageScript !== undefined) {
       const html = ownScripts(p.route);
       const scripts = [...html.matchAll(/<script\b[^>]*>/g)].map((m) => m[0]);
-      assert.deepEqual(scripts, ['<script type="module">'], `${p.route} carries exactly one script of its own, inlined by Astro`);
+      assert.deepEqual(
+        scripts,
+        ['<script type="module">'],
+        `${p.route} carries exactly one script of its own, inlined by Astro`,
+      );
       assert.match(html, p.pageScript, `${p.route}'s script binds the index`);
-      assert.ok(html.indexOf("<script") < html.indexOf("<footer>"), `${p.route} script renders inside <main>, before the footer`);
+      assert.ok(
+        html.indexOf("<script") < html.indexOf("<footer>"),
+        `${p.route} script renders inside <main>, before the footer`,
+      );
       continue;
     }
     if (p.scriptSrc === undefined && p.inlineScript === undefined) {
-      assert.ok(!ownScripts(p.route).includes("<script"), `${p.route} is a content page and ships no script of its own`);
+      assert.ok(
+        !ownScripts(p.route).includes("<script"),
+        `${p.route} is a content page and ships no script of its own`,
+      );
       continue;
     }
     const html = ownScripts(p.route);
@@ -754,50 +888,76 @@ test("each app page keeps its bundle-twin module script, rendered verbatim insid
       assert.equal(scripts.length, expected, `${p.route} carries exactly ${expected} script(s)`);
       assert.ok(html.includes(p.inlineScript), `${p.route} script targets ${p.inlineScript}`);
       if (p.prePaintScript !== undefined) {
-        assert.ok(html.includes(p.prePaintScript), `${p.route} carries the pre-paint veil script (${p.prePaintScript})`);
+        assert.ok(
+          html.includes(p.prePaintScript),
+          `${p.route} carries the pre-paint veil script (${p.prePaintScript})`,
+        );
         assert.ok(
           html.indexOf(p.prePaintScript) < html.indexOf('class="landfall"'),
           `${p.route}'s pre-paint script parses before the stage, so first paint wears the veil`,
         );
       }
-      assert.ok(html.indexOf("<script") < html.indexOf("<footer>"), `${p.route} script renders inside <main>, before the footer`);
+      assert.ok(
+        html.indexOf("<script") < html.indexOf("<footer>"),
+        `${p.route} script renders inside <main>, before the footer`,
+      );
       if (p.scriptSrc === undefined) {
         assert.ok(!html.includes('type="module"'), `${p.route} ships no module bundle, only the inline intercept`);
         continue;
       }
     }
     assert.ok(html.includes(tag), `${p.route} should load its bundle twin via ${tag}`);
-    assert.ok(html.indexOf(tag) < html.indexOf(p.chartRoom ? "</main>" : "<footer>"), `${p.route} script renders inside <main>`);
+    assert.ok(
+      html.indexOf(tag) < html.indexOf(p.chartRoom ? "</main>" : "<footer>"),
+      `${p.route} script renders inside <main>`,
+    );
     assert.doesNotMatch(html, /src="(\.\/)?app\.js"/, `${p.route} must not load the raw ESM entry`);
   }
 });
 
 // Measured 2026-09-02 against the Issue #464 build: home, the FAQ, the Gallery, the Glossary and the atlas byte-identical; the Print Room, the Reading Room and Today identical after collapsing whitespace between tags; the Prospect and the Ribbon the same plus one apostrophe entity each (Astro escapes a prop's text); the Explorer the same plus data-zoom on its three presses, which nothing on that page reads.
 const KIT_FOG = '<div class="fog a" aria-hidden="true"></div><div class="fog b" aria-hidden="true"></div>';
-const KIT_VIGNETTES = '<div class="vignette top" aria-hidden="true"></div><div class="vignette bottom" aria-hidden="true"></div>';
+const KIT_VIGNETTES =
+  '<div class="vignette top" aria-hidden="true"></div><div class="vignette bottom" aria-hidden="true"></div>';
 const KIT_GLASS = (id: string) => `<div class="chrome corner br zoomery"${id} role="group" aria-label="Camera">
   <button id="zoom-in" class="zoom-btn" type="button" data-zoom="in" aria-label="Draw nearer">+</button>
   <button id="zoom-out" class="zoom-btn" type="button" data-zoom="out" aria-label="Stand off">&minus;</button>
   <button id="zoom-reset" class="zoom-btn" type="button" data-zoom="fit" aria-label="The whole sheet">&#8962;</button>
 </div>`;
-const KIT_STAGE = (label: string) => `<div class="stage">\n  <div class="sheet" id="sheet"><div id="map-viewport" tabindex="0" role="application" aria-label="${label}"><div id="map">`;
+const KIT_STAGE = (label: string) =>
+  `<div class="stage">\n  <div class="sheet" id="sheet"><div id="map-viewport" tabindex="0" role="application" aria-label="${label}"><div id="map">`;
 const STAGES: ReadonlyArray<readonly [string, string]> = [
   ["print-room/index.html", "The proof. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet."],
   ["prospect/index.html", "The plate. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet."],
   ["ribbon/index.html", "The scroll. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet."],
   ["specimen/index.html", "The specimen sheet. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet."],
-  ["explorer/portfolio/index.html", "The sheet on top. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet."],
+  [
+    "explorer/portfolio/index.html",
+    "The sheet on top. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet.",
+  ],
 ];
 type Road = { id?: string; gold?: true; road?: string; href: string; verbId?: string };
 /** Every road out on the site, by page and in order, LITERAL: the id, the gold, the data-road stamp and the verb's id are what the pages' scripts and the suites read, and a roster taken from the source it is compared against would be circular (skeptic on PR #502). A page absent here renders no road. */
 const ROADS: Record<string, ReadonlyArray<Road>> = {
-  "explorer/index.html": [{ id: "order-plates", gold: true, href: "../print-room/" }, { id: "journal-link", gold: true, href: "/reading-room/" }],
+  "explorer/index.html": [
+    { id: "order-plates", gold: true, href: "../print-room/" },
+    { id: "journal-link", gold: true, href: "/reading-room/" },
+  ],
   "print-room/index.html": [{ id: "pr-explorer", gold: true, href: "../explorer/" }],
   // Issue #521 ruling 1: C's picture with A's words. Two of the row's three are BUTTONS acting on this page and not roads out: Download goes through a blob the way the Print Room's does, and Bring up turns the pile. The way in from the Print Room is the Bound Atlas slip (ruling 2), not a road back.
   "explorer/portfolio/index.html": [{ id: "pf-explorer", gold: true, href: "../" }],
-  "prospect/index.html": [{ id: "pp-chart-link", gold: true, href: "/explorer/" }, { id: "pp-ribbon-link", href: "/ribbon/", verbId: "pp-ribbon-verb" }],
-  "ribbon/index.html": [{ id: "rb-chart-link", gold: true, href: "/explorer/" }, { id: "rb-prospect-link", href: "/prospect/", verbId: "rb-prospect-verb" }],
-  "seed-of-the-day/index.html": [{ road: "explorer", href: "../explorer/" }, { road: "reading-room", href: "../reading-room/" }],
+  "prospect/index.html": [
+    { id: "pp-chart-link", gold: true, href: "/explorer/" },
+    { id: "pp-ribbon-link", href: "/ribbon/", verbId: "pp-ribbon-verb" },
+  ],
+  "ribbon/index.html": [
+    { id: "rb-chart-link", gold: true, href: "/explorer/" },
+    { id: "rb-prospect-link", href: "/prospect/", verbId: "rb-prospect-verb" },
+  ],
+  "seed-of-the-day/index.html": [
+    { road: "explorer", href: "../explorer/" },
+    { road: "reading-room", href: "../reading-room/" },
+  ],
   "gallery/index.html": [{ gold: true, href: "/explorer/" }],
   "specimen/index.html": [{ href: "/explorer/" }, { gold: true, href: "/gallery/" }],
 };
@@ -812,7 +972,10 @@ test("the kit's lifted shapes render one shape on every page that wears them: th
   for (const p of chartRooms) {
     assert.equal(page(p.route).split(KIT_VIGNETTES).length - 1, 1, `${p.route} wears the vignette pair once`);
   }
-  assert.ok(!page("gallery/index.html").includes('class="vignette'), "the Gallery wears no vignettes (#464: its captions scroll through a fixed band)");
+  assert.ok(
+    !page("gallery/index.html").includes('class="vignette'),
+    "the Gallery wears no vignettes (#464: its captions scroll through a fixed band)",
+  );
   for (const p of chartRooms) {
     const html = page(p.route);
     const glass = KIT_GLASS(p.dir === "/explorer/" ? ' id="zoom-controls"' : "");
@@ -820,28 +983,53 @@ test("the kit's lifted shapes render one shape on every page that wears them: th
     const folio = html.match(/<div class="chrome corner bl folio">([\s\S]*?)<\/div>/);
     assert.ok(folio, `${p.route} carries the chart folio`);
     const lines = folio[1]!.trim();
-    assert.match(lines, /^(<p class="[\w -]+" id="[\w-]+"><\/p>)+$/, `${p.route}'s folio holds nothing but its lines: ${lines}`);
-    assert.match(lines, /^<p class="folio-title" id="folio-title"><\/p>/, `${p.route}'s folio leads with the world's name`);
+    assert.match(
+      lines,
+      /^(<p class="[\w -]+" id="[\w-]+"><\/p>)+$/,
+      `${p.route}'s folio holds nothing but its lines: ${lines}`,
+    );
+    assert.match(
+      lines,
+      /^<p class="folio-title" id="folio-title"><\/p>/,
+      `${p.route}'s folio leads with the world's name`,
+    );
   }
   assert.ok(!page("index.html").includes(KIT_FOG), "home keeps its own stage dress (#461)");
-  assert.ok(page("index.html").includes(KIT_GLASS(' id="lf-controls"')), "home carries the kit's camera (#505), seated by its own id");
+  assert.ok(
+    page("index.html").includes(KIT_GLASS(' id="lf-controls"')),
+    "home carries the kit's camera (#505), seated by its own id",
+  );
   for (const [route, label] of STAGES) {
     const html = page(route);
-    assert.ok(html.includes(KIT_STAGE(label)), `${route} carries the kit's stage: sheet > a keyboard-reachable gesture box > the transform target, named for the room`);
+    assert.ok(
+      html.includes(KIT_STAGE(label)),
+      `${route} carries the kit's stage: sheet > a keyboard-reachable gesture box > the transform target, named for the room`,
+    );
     const stage = html.slice(html.indexOf('<div class="stage">'), html.indexOf('<div class="vignette top"'));
-    assert.ok(stage.indexOf("</div></div></div>") < stage.indexOf('<p class="status"'), `${route}'s status pill follows the sheet inside the stage`);
+    assert.ok(
+      stage.indexOf("</div></div></div>") < stage.indexOf('<p class="status"'),
+      `${route}'s status pill follows the sheet inside the stage`,
+    );
     assert.ok(stage.includes("<noscript>"), `${route}'s scripts-off notice stands inside the stage`);
   }
   for (const p of PAGES) {
-    const got = [...page(p.route).matchAll(/<a[^>]*class="legend-btn[^"]*"[^>]*><span class="verb"[^>]*>/g)].map((m) => m[0]);
-    assert.deepEqual(got, (ROADS[p.route] ?? []).map(roadOpening), `${p.route}'s roads out, in order, as the kit renders them`);
+    const got = [...page(p.route).matchAll(/<a[^>]*class="legend-btn[^"]*"[^>]*><span class="verb"[^>]*>/g)].map(
+      (m) => m[0],
+    );
+    assert.deepEqual(
+      got,
+      (ROADS[p.route] ?? []).map(roadOpening),
+      `${p.route}'s roads out, in order, as the kit renders them`,
+    );
   }
 });
 
 test("every road out names its destination by that route's name in the tree (Issue #668)", () => {
   let roads = 0;
   for (const p of PAGES) {
-    for (const m of page(p.route).matchAll(/<a\b[^>]*\bclass="legend-btn[^"]*"[^>]*\bhref="([^"]+)"[^>]*><span class="verb"[^>]*>[^<]*<\/span><span class="room">([^<]+)<\/span><\/a>/g)) {
+    for (const m of page(p.route).matchAll(
+      /<a\b[^>]*\bclass="legend-btn[^"]*"[^>]*\bhref="([^"]+)"[^>]*><span class="verb"[^>]*>[^<]*<\/span><span class="room">([^<]+)<\/span><\/a>/g,
+    )) {
       roads++;
       const route = new URL(m[1]!, `https://v.test${p.dir}`).pathname;
       assert.notEqual(ROUTE_NAMES[route], undefined, `${p.route}'s road to ${route} goes to a named route`);
@@ -854,7 +1042,10 @@ test("every road out names its destination by that route's name in the tree (Iss
 test("the Chart Table's road names the page it goes to by that route's name in the tree, though it is a button the sweep above never reads (Issue #669, ruled 2026-10-04)", () => {
   const folio = /folioHref: "([^"]+)"/.exec(readFileSync(root("src/site/explorer/app.ts"), "utf8"));
   assert.ok(folio, "the Explorer no longer hands the table road a folioHref, so this check has no destination to read");
-  const room = /<button id="table-road"[^>]*><span class="verb">[^<]*<\/span><span class="room">([^<]+)<\/span><\/button>/.exec(page("explorer/index.html"));
+  const room =
+    /<button id="table-road"[^>]*><span class="verb">[^<]*<\/span><span class="room">([^<]+)<\/span><\/button>/.exec(
+      page("explorer/index.html"),
+    );
   assert.ok(room, "the built Explorer carries no table road in the kit's two-line shape");
   const route = new URL(folio[1]!, "https://v.test/explorer/").pathname;
   assert.notEqual(ROUTE_NAMES[route], undefined, `the table road goes to ${route}, which the tree does not name`);
@@ -864,10 +1055,18 @@ test("the Chart Table's road names the page it goes to by that route's name in t
 test("the Portfolio's scripts-off road goes home to the Explorer as ../, the form its gold road takes (Issue #669)", () => {
   const html = page("explorer/portfolio/index.html");
   const at = html.indexOf('<div class="stage">');
-  assert.notEqual(at, -1, "the Portfolio's stage was not found, so the notice below would be read from anywhere on the page");
+  assert.notEqual(
+    at,
+    -1,
+    "the Portfolio's stage was not found, so the notice below would be read from anywhere on the page",
+  );
   const notice = html.slice(at).match(/<noscript>([\s\S]*?)<\/noscript>/);
   assert.ok(notice, "the Portfolio's stage carries its scripts-off notice");
-  assert.match(notice[1]!, /<a href="\.\.\/">Explorer<\/a>/, "the scripts-off road home is not ../, the parent the page now sits under");
+  assert.match(
+    notice[1]!,
+    /<a href="\.\.\/">Explorer<\/a>/,
+    "the scripts-off road home is not ../, the parent the page now sits under",
+  );
 });
 
 test("the seed form floats on the stage as the mockup's corner chrome, its ratified semantics whole (#470, was the #289 cartouche hero)", () => {
@@ -888,12 +1087,24 @@ test("the seed form floats on the stage as the mockup's corner chrome, its ratif
     assert.ok(next > at, `the floating seed form keeps its order at ${marker}`);
     at = next;
   }
-  assert.ok(at < html.indexOf("</section>", html.indexOf('class="landfall"')), "the form rides the landfall section: the map is the page now");
+  assert.ok(
+    at < html.indexOf("</section>", html.indexOf('class="landfall"')),
+    "the form rides the landfall section: the map is the page now",
+  );
   const form = html.slice(html.indexOf("<form"), html.indexOf("</form>"));
-  assert.ok(form.includes('action="explorer/"') && form.includes('method="get"'), "the no-JS GET fallback survives the move");
+  assert.ok(
+    form.includes('action="explorer/"') && form.includes('method="get"'),
+    "the no-JS GET fallback survives the move",
+  );
   assert.ok(form.includes('name="seed"'), "the fallback still names its query");
-  assert.ok(form.includes('pattern="[0-9]*"') && form.includes('inputmode="numeric"'), "the digits-only pattern and keypad survive the move");
-  assert.ok(!html.includes('class="flourish'), "the cartouche frame retired with its section: the corner chrome is the mockup's, unframed");
+  assert.ok(
+    form.includes('pattern="[0-9]*"') && form.includes('inputmode="numeric"'),
+    "the digits-only pattern and keypad survive the move",
+  );
+  assert.ok(
+    !html.includes('class="flourish'),
+    "the cartouche frame retired with its section: the corner chrome is the mockup's, unframed",
+  );
 });
 
 test("the Notice stamps the deep before the panel's prose; the count is ten (#289, reshaped at #459)", () => {
@@ -969,21 +1180,30 @@ test("the deploy artifact serves no raw app source, no .d.ts, and no engine emit
   await walk(outDir);
   assert.ok(!existsSync(join(outDir, "explorer", "engine")), "no /explorer/engine/ tree may ship");
   const offenders = files.filter(
-    (f) => (f.endsWith(".js") && !f.endsWith(".bundle.js") && !f.startsWith(join("explorer", "chunks") + "/")) || f.endsWith(".d.ts"),
+    (f) =>
+      (f.endsWith(".js") && !f.endsWith(".bundle.js") && !f.startsWith(join("explorer", "chunks") + "/")) ||
+      f.endsWith(".d.ts"),
   );
   assert.deepEqual(offenders, [], "no raw .js source or .d.ts may reach the artifact");
 });
 
 test("the charts and arms the home page embeds all resolve in public/charts", () => {
   const embeds = [...page("index.html").matchAll(/src="(charts\/[^"]+)"/g)].map(([, u]) => u);
-  assert.equal(new Set(embeds).size, 7, "home embeds 7 committed goldens (the stage chart + 3 arms + the shelf's 3 plates, revived at #472)");
+  assert.equal(
+    new Set(embeds).size,
+    7,
+    "home embeds 7 committed goldens (the stage chart + 3 arms + the shelf's 3 plates, revived at #472)",
+  );
   for (const embed of embeds) {
     assert.ok(existsSync(root(`public/${embed}`)), `public/${embed} should exist`);
   }
 });
 
 test("the deploy build IS the Astro build (Sub 5 cutover, #206)", async () => {
-  const pkg = JSON.parse(await readFile(root("package.json"), "utf8")) as { scripts: Record<string, string>; engines?: { node?: string } };
+  const pkg = JSON.parse(await readFile(root("package.json"), "utf8")) as {
+    scripts: Record<string, string>;
+    engines?: { node?: string };
+  };
   assert.equal(pkg.scripts.site, undefined, "npm run site stays retired");
   assert.equal(
     pkg.scripts.build,

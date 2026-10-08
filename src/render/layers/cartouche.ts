@@ -25,7 +25,12 @@ function wrapText(text: string, maxChars: number): string[] {
   return lines;
 }
 
-function cornerLandFraction(ctx: RenderCtx, c: { readonly x: number; readonly y: number }, width: number, height: number): number {
+function cornerLandFraction(
+  ctx: RenderCtx,
+  c: { readonly x: number; readonly y: number },
+  width: number,
+  height: number,
+): number {
   const { proj, world } = ctx;
   const m = proj.margin;
   const { w, data } = world.elev;
@@ -83,13 +88,24 @@ function cartoucheFrame(style: MapStyle, rect: Box, k: number): SvgNode[] {
   const { x, y, w, h } = rect;
   return [
     el("rect", {
-      x, y, width: w, height: h, rx: 3 * k,
-      fill: style.paper, stroke: style.ink, "stroke-width": 2.2 * k,
+      x,
+      y,
+      width: w,
+      height: h,
+      rx: 3 * k,
+      fill: style.paper,
+      stroke: style.ink,
+      "stroke-width": 2.2 * k,
       "fill-opacity": 0.94,
     }),
     el("rect", {
-      x: x + 5 * k, y: y + 5 * k, width: w - 10 * k, height: h - 10 * k,
-      fill: "none", stroke: style.ink, "stroke-width": 0.8 * k,
+      x: x + 5 * k,
+      y: y + 5 * k,
+      width: w - 10 * k,
+      height: h - 10 * k,
+      fill: "none",
+      stroke: style.ink,
+      "stroke-width": 0.8 * k,
     }),
     ...(["tl", "tr", "bl", "br"] as const).map((c) => {
       const fx = c.includes("l") ? x + 5 * k : x + w - 5 * k;
@@ -98,7 +114,9 @@ function cartoucheFrame(style: MapStyle, rect: Box, k: number): SvgNode[] {
       const sy = c.startsWith("t") ? 1 : -1;
       return el("path", {
         d: `M${fx + sx * 14 * k} ${fy}Q${fx} ${fy} ${fx} ${fy + sy * 14 * k}`,
-        fill: "none", stroke: style.ink, "stroke-width": 1.8 * k,
+        fill: "none",
+        stroke: style.ink,
+        "stroke-width": 1.8 * k,
       });
     }),
   ];
@@ -109,8 +127,12 @@ function cartoucheRule(style: MapStyle, rect: Box, k: number): SvgNode[] {
   const cx = x + w / 2;
   return [
     el("line", {
-      x1: cx - w * 0.3, y1: y + 46 * k, x2: cx + w * 0.3, y2: y + 46 * k,
-      stroke: style.ink, "stroke-width": 0.9 * k,
+      x1: cx - w * 0.3,
+      y1: y + 46 * k,
+      x2: cx + w * 0.3,
+      y2: y + 46 * k,
+      stroke: style.ink,
+      "stroke-width": 0.9 * k,
     }),
     el("path", {
       d: `M${cx} ${y + 42.4 * k}L${cx + 3.6 * k} ${y + 46 * k}L${cx} ${y + 49.6 * k}L${cx - 3.6 * k} ${y + 46 * k}Z`,
@@ -129,7 +151,9 @@ function cartoucheText(ctx: RenderCtx, plan: CartouchePlan, k: number): SvgNode[
     el(
       "text",
       {
-        x: cx, y: y + 34 * k, "text-anchor": "middle",
+        x: cx,
+        y: y + 34 * k,
+        "text-anchor": "middle",
         "font-family": style.fontFamilyTitle,
         "font-size": titleFs.toFixed(1),
         "letter-spacing": (1.4 * k).toFixed(1),
@@ -142,7 +166,9 @@ function cartoucheText(ctx: RenderCtx, plan: CartouchePlan, k: number): SvgNode[
       el(
         "text",
         {
-          x: cx, y: y + (64 + i * 15) * k, "text-anchor": "middle",
+          x: cx,
+          y: y + (64 + i * 15) * k,
+          "text-anchor": "middle",
           "font-family": style.fontFamily,
           "font-size": (10.5 * k).toFixed(1),
           "font-style": "italic",
@@ -154,7 +180,9 @@ function cartoucheText(ctx: RenderCtx, plan: CartouchePlan, k: number): SvgNode[
     el(
       "text",
       {
-        x: cx, y: y + h - 11 * k, "text-anchor": "middle",
+        x: cx,
+        y: y + h - 11 * k,
+        "text-anchor": "middle",
         "font-family": style.fontFamily,
         "font-size": (9 * k).toFixed(1),
         "letter-spacing": (1.8 * k).toFixed(1),

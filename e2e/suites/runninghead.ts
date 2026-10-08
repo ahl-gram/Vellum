@@ -8,7 +8,17 @@ import { runningHeadKit } from "./runninghead/kit.ts";
 import type { RunningHeadKit } from "./runninghead/kit.ts";
 import { DISPLAY_FACE, near, SHELLED } from "./runninghead/reads.ts";
 import type { Head } from "./runninghead/reads.ts";
-import { rh0OneH1, rh1NamesPage, rh2Members, rh3Fixed, rh4OneDress, rh5Leading, rh6Differ, rh9ContrastPins, rhSweep } from "./runninghead/heads.ts";
+import {
+  rh0OneH1,
+  rh1NamesPage,
+  rh2Members,
+  rh3Fixed,
+  rh4OneDress,
+  rh5Leading,
+  rh6Differ,
+  rh9ContrastPins,
+  rhSweep,
+} from "./runninghead/heads.ts";
 import { rh10cPrinted, rh10GalleryScrolled } from "./runninghead/gallery.ts";
 
 // Reading the producer's own template couples the injected twin to it: rename the class or demote the heading in renderBoundAtlas and RH7 reds instead of drifting.
@@ -55,7 +65,8 @@ async function rh7AtlasTitle({ evaluate, check, visit }: RunningHeadKit): Promis
   type AtlasRead = { family: string; size: number; hidden: boolean } | null;
   let atlas: AtlasRead = null;
   if (await visit("/print-room/")) {
-    atlas = JSON.parse(await evaluate<string>(`(() => {
+    atlas = JSON.parse(
+      await evaluate<string>(`(() => {
       const d = document.getElementById("pr-atlas");
       if (!d) return JSON.stringify(null);
       d.innerHTML = '<header class="atlas-head print-only">' +
@@ -64,7 +75,8 @@ async function rh7AtlasTitle({ evaluate, check, visit }: RunningHeadKit): Promis
       const cs = getComputedStyle(h1);
       return JSON.stringify({ family: cs.fontFamily, size: parseFloat(cs.fontSize),
         hidden: getComputedStyle(h1.parentElement).display === "none" });
-    })()`)) as AtlasRead;
+    })()`),
+    ) as AtlasRead;
   }
   check(
     "RH7 the Print Room's bound-atlas title resolves to the display face (unreachable by any screenshot), and the producer still emits that markup",
@@ -84,6 +96,7 @@ async function rh8Clean(ctx: SuiteContext, errBase: number, httpBase: number): P
   check(
     "RH8 the running-head sweep is clean (no console errors, no new 4xx) and the Explorer base is restored",
     errDelta.length === 0 && httpDelta.length === 0 && restored,
-    [...errDelta, ...httpDelta].join(" | ") || (restored ? "clean, Explorer restored" : "clean, but the Explorer did not settle"),
+    [...errDelta, ...httpDelta].join(" | ") ||
+      (restored ? "clean, Explorer restored" : "clean, but the Explorer did not settle"),
   );
 }

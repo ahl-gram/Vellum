@@ -34,22 +34,47 @@ test("CC3 the settle is a keyframe on `transform`, composing over the cutting's 
   const steps = [...land.matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((m) => m[2]!);
   assert.ok(steps.length >= 2, "at least a from and a to");
   for (const step of steps) {
-    assert.match(step, /\btransform\s*:/, "every step writes transform, which composes over the seat's rotate: and the lift's translate:/rotate:");
-    assert.doesNotMatch(step, /(^|[\s;])(rotate|translate|scale)\s*:/, "no step writes an individual property: with a both fill that pins the seat at `to` and kills the ruled hover lift (Issue #520, 2026-09-08 ruling 2) for the class's life");
+    assert.match(
+      step,
+      /\btransform\s*:/,
+      "every step writes transform, which composes over the seat's rotate: and the lift's translate:/rotate:",
+    );
+    assert.doesNotMatch(
+      step,
+      /(^|[\s;])(rotate|translate|scale)\s*:/,
+      "no step writes an individual property: with a both fill that pins the seat at `to` and kills the ruled hover lift (Issue #520, 2026-09-08 ruling 2) for the class's life",
+    );
   }
-  assert.match(steps.at(-1)!, /transform\s*:\s*none/, "the last step is the identity, or the both fill leaves the sheet where the settle ended");
+  assert.match(
+    steps.at(-1)!,
+    /transform\s*:\s*none/,
+    "the last step is the identity, or the both fill leaves the sheet where the settle ended",
+  );
   for (const [selector, body] of rulesOf(css)) {
-    if (/rotate\(/.test(body)) assert.doesNotMatch(selector, /:hover/, `${selector} tips on hover; the settle's rotate is scoped to the landing class (Issue #289's sweep is the other side of this pin)`);
+    if (/rotate\(/.test(body))
+      assert.doesNotMatch(
+        selector,
+        /:hover/,
+        `${selector} tips on hover; the settle's rotate is scoped to the landing class (Issue #289's sweep is the other side of this pin)`,
+      );
   }
   const landing = rulesOf(css).find(([s]) => s === ".cuttings li.landing");
   assert.ok(landing, "the class rule exists");
-  assert.match(landing[1], /animation\s*:\s*cutting-land\s+var\(--paper-settle\)\s+var\(--ease-paper\)\s+both/, "timed by the shared tokens with a both fill, the motion.css idiom");
+  assert.match(
+    landing[1],
+    /animation\s*:\s*cutting-land\s+var\(--paper-settle\)\s+var\(--ease-paper\)\s+both/,
+    "timed by the shared tokens with a both fill, the motion.css idiom",
+  );
   const shadow = keyframesOf(css, "cutting-shadow");
   assert.ok(shadow, "the shadow flattens by its own keyframes on the img");
   assert.match(shadow, /to\s*\{[^}]*box-shadow\s*:\s*var\(--cutting-shadow\)/, "the shadow's rest is the TOKEN");
   const img = rulesOf(css).find(([s]) => s === ".cuttings img");
   assert.ok(img, "the static img rule exists");
-  assert.match(img[1], /box-shadow\s*:\s*var\(--cutting-shadow\)/, "and the static rest reads the same token, so the both fill and the rest cannot drift apart");
+  assert.match(
+    img[1],
+    /box-shadow\s*:\s*var\(--cutting-shadow\)/,
+    "and the static rest reads the same token, so the both fill and the rest cannot drift apart",
+  );
 });
 
 test("CC4 the jolt is a keyframe on the cuttings list and never on the drawer root, whose animation shorthand carries the slide: a second animation there would restart the slide when the class left (Issue #523, D3 ruled 2026-09-21)", () => {
@@ -58,6 +83,14 @@ test("CC4 the jolt is a keyframe on the cuttings list and never on the drawer ro
   assert.ok(jolt, "the jolt rule exists on the list");
   assert.match(jolt[1], /animation\s*:\s*cutting-jolt\b/);
   assert.ok(keyframesOf(css, "cutting-jolt"), "and its keyframes exist");
-  const onRoot = rulesOf(css).filter(([s, body]) => s.split(",").some((arm) => /\.chart-drawer\b/.test(arm) && !/\.cuttings/.test(arm)) && /\banimation\s*:/.test(body));
-  assert.deepEqual(onRoot.map(([s, body]) => [s, /chart-drawer-up/.test(body)]), [[".chart-drawer", true]], "exactly one animation reaches the drawer root, its own slide");
+  const onRoot = rulesOf(css).filter(
+    ([s, body]) =>
+      s.split(",").some((arm) => /\.chart-drawer\b/.test(arm) && !/\.cuttings/.test(arm)) &&
+      /\banimation\s*:/.test(body),
+  );
+  assert.deepEqual(
+    onRoot.map(([s, body]) => [s, /chart-drawer-up/.test(body)]),
+    [[".chart-drawer", true]],
+    "exactly one animation reaches the drawer root, its own slide",
+  );
 });

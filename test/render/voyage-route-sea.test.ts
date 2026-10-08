@@ -10,13 +10,7 @@ import { survey, site, leg, isLand, realWorld } from "../../test-support/voyage-
 
 test("ports on different landmasses: mode is sea and the interior runs over water", () => {
   // The headland at x=4 forces the sea route to arc north; the detour is far wider than RDP's 0.75-cell tolerance, so the interior vertices survive simplification and the assertion has teeth.
-  const s = survey([
-    "#.......#",
-    "#.......#",
-    "#...#...#",
-    "#...#...#",
-    "#...#...#",
-  ]);
+  const s = survey(["#.......#", "#.......#", "#...#...#", "#...#...#", "#...#...#"]);
   const routed = routeVoyage([leg(0, 1)], [site(0, 0, 4), site(1, 8, 4)], s);
   assert.equal(routed[0]!.mode, "sea");
   const pts = routed[0]!.points;
@@ -27,21 +21,13 @@ test("ports on different landmasses: mode is sea and the interior runs over wate
 });
 
 test("a corner-touching pinch is two landmasses, and the 8-connected sea walk threads it", () => {
-  const s = survey([
-    "##..",
-    ".#..",
-    "..#.",
-    "..##",
-  ]);
+  const s = survey(["##..", ".#..", "..#.", "..##"]);
   const routed = routeVoyage([leg(0, 1)], [site(0, 0, 0), site(1, 3, 3)], s);
   assert.equal(routed[0]!.mode, "sea");
 });
 
 test("an island port unreachable by road takes a sea leg, not a straight one", () => {
-  const s = survey([
-    "==..#",
-    "==..#",
-  ]);
+  const s = survey(["==..#", "==..#"]);
   const routed = routeVoyage([leg(0, 1)], [site(0, 0, 0), site(1, 4, 0)], s);
   assert.equal(routed[0]!.mode, "sea");
 });
@@ -77,11 +63,7 @@ test("a same-landmass coastal shortcut puts to sea over a short OVERLAND stub, n
 
 test("a port whose nearest water is an inland pond still launches into the shared sea", () => {
   // Ocean is columns 1..4; the pond is the single sealed cell (6,1), the Thilthoport case from seed 526413615.
-  const s = survey([
-    "#....###",
-    "#....#.#",
-    "#....###",
-  ]);
+  const s = survey(["#....###", "#....#.#", "#....###"]);
   assert.equal(s.land[6 + 1 * 8], 0, "the pond is water");
   const routed = routeVoyage([leg(0, 1)], [site(0, 0, 1), site(1, 6, 0)], s);
   const l = routed[0]!;
@@ -100,7 +82,11 @@ test("on real worlds, EVERY cross-landmass leg sails, never degrading to a strai
     const plan = buildVoyagePlan(manifest.places, manifest.presentYear);
     const s = buildSurvey(world.elev, world.seaLevel, world.roads);
     const comp = labelComponents(s.land, s.gridW, s.gridH);
-    const routed = routeVoyage(plan.legs, manifest.places.map((p) => ({ idx: p.idx, x: p.gx, y: p.gy })), s);
+    const routed = routeVoyage(
+      plan.legs,
+      manifest.places.map((p) => ({ idx: p.idx, x: p.gx, y: p.gy })),
+      s,
+    );
     const byIdx = new Map(manifest.places.map((p) => [p.idx, p]));
     for (const l of routed) {
       const a = byIdx.get(l.fromIdx)!;
@@ -113,38 +99,20 @@ test("on real worlds, EVERY cross-landmass leg sails, never degrading to a strai
 
 test("a coastal leg SAILS when its road loops far around a bay", () => {
   // A tall pond walled by a ring road; the ports sit mid-height on opposite shores: the road runs ~2x the long way, the sea cuts straight across.
-  const s = survey([
-    "=====",
-    "=...=",
-    "=...=",
-    "=...=",
-    "=...=",
-    "=...=",
-    "=====",
-  ]);
+  const s = survey(["=====", "=...=", "=...=", "=...=", "=...=", "=...=", "====="]);
   const routed = routeVoyage([leg(0, 1)], [site(0, 0, 3), site(1, 4, 3)], s);
   assert.equal(routed[0]!.mode, "sea", "the survey should sail the shortcut, not ride the long road");
   for (const p of routed[0]!.points.slice(1, -1)) assert.ok(!isLand(s, p), `vertex ${p.x},${p.y} on land`);
 });
 
 test("a coastal leg RIDES when the road is direct (no backtrack to shortcut)", () => {
-  const s = survey([
-    "=====",
-    ".....",
-  ]);
+  const s = survey(["=====", "....."]);
   const routed = routeVoyage([leg(0, 1)], [site(0, 0, 0), site(1, 4, 0)], s);
   assert.equal(routed[0]!.mode, "road");
 });
 
 test("an inland port does not sail: only coastal legs take the shortcut", () => {
-  const s = survey([
-    "=======",
-    "=.....#",
-    "=.....#",
-    "=======",
-    "#######",
-    "###=###",
-  ]);
+  const s = survey(["=======", "=.....#", "=.....#", "=======", "#######", "###=###"]);
   // A on the pond shore (coastal), B deep in the solid block at the bottom (inland)
   const routed = routeVoyage([leg(0, 1)], [site(0, 0, 1), site(1, 3, 5)], s);
   assert.notEqual(routed[0]!.mode, "sea", "an inland port cannot sail a coastal shortcut");
@@ -152,11 +120,7 @@ test("an inland port does not sail: only coastal legs take the shortcut", () => 
 
 test("the sail threshold is a coastal shortcut, not every coastal hop (rides at ~1.35x)", () => {
   // The road detour is only ~1.35x the sail: below the 1.5x bar, so it still rides; guards the sail rule from swallowing ordinary coastal roads.
-  const s = survey([
-    "=====",
-    "=...=",
-    "=====",
-  ]);
+  const s = survey(["=====", "=...=", "====="]);
   const routed = routeVoyage([leg(0, 1)], [site(0, 0, 1), site(1, 4, 1)], s);
   assert.equal(routed[0]!.mode, "road", "a mild detour still rides");
 });

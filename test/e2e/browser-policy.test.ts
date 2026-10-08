@@ -2,7 +2,6 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { browserlessAction } from "../../e2e/support/browser-policy.ts";
 
-
 test("unattended run with no browser fails instead of skipping", () => {
   assert.equal(browserlessAction({}, false), "fail");
 });
@@ -24,10 +23,7 @@ test("VELLUM_ALLOW_NO_BROWSER is the escape hatch for a deliberate headless skip
 });
 
 test("contradictory flags resolve to fail: silence is the dangerous outcome", () => {
-  assert.equal(
-    browserlessAction({ VELLUM_REQUIRE_BROWSER: "1", VELLUM_ALLOW_NO_BROWSER: "1" }, false),
-    "fail",
-  );
+  assert.equal(browserlessAction({ VELLUM_REQUIRE_BROWSER: "1", VELLUM_ALLOW_NO_BROWSER: "1" }, false), "fail");
 });
 
 // process.env yields "" for FOO=, and an empty opt-out must not quietly disarm the guard it looks like it is setting.

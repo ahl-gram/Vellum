@@ -32,7 +32,7 @@ const settledReadFixtures = async (settle: ReturnType<typeof makeSettle>): Promi
   const r = await settle(`({ open: true })`, (d: { open: boolean; count: number }) => d.open, "open");
   void r;
   // @ts-expect-error nor can the previous read the predicate is handed
-  const s = await settle(`({ open: true })`, (d, last: { open: boolean } | null) => last !== null && d.open === last.open, "still");
+  const s = await settle(`({ open: true })`, (d, last: { open: boolean } | null) => d.open === last?.open, "still");
   void s;
 };
 void settledReadFixtures;
@@ -58,14 +58,21 @@ test("a settle hands back the first read its predicate accepts, and polls past a
   assert.deepEqual(got, { n: 2 });
   assert.deepEqual(seen, [1, 2], "the predicate was asked about the null read, or asked after it had already accepted");
   assert.equal(asked.length, 3);
-  assert.ok(asked.every((e) => e === "READ"), "the settle evaluated something other than the read it was given");
+  assert.ok(
+    asked.every((e) => e === "READ"),
+    "the settle evaluated something other than the read it was given",
+  );
   assert.deepEqual(slept, [50, 50], "the poll does not sleep its 50ms between reads");
 });
 
 test("a settle hands the predicate the PREVIOUS read, so a rest with no fixed end can ask for stillness", async () => {
   const { settle } = reading([{ n: 1 }, { n: 4 }, { n: 4 }]);
   const lasts: ({ n: number } | null)[] = [];
-  const got = await settle<{ n: number }>("READ", (d, last) => (lasts.push(last), last !== null && d.n === last.n), "still");
+  const got = await settle<{ n: number }>(
+    "READ",
+    (d, last) => (lasts.push(last), last !== null && d.n === last.n),
+    "still",
+  );
   assert.deepEqual(got, { n: 4 });
   assert.deepEqual(lasts, [null, { n: 1 }, { n: 4 }]);
 });
@@ -83,7 +90,11 @@ const REPO = resolve(import.meta.dirname, "..", "..");
 const READ_NAMES = new Set(["evaluate", "settle"]);
 
 function e2eProgram(extra: ReadonlyMap<string, string> = new Map()): ts.Program {
-  const config = ts.getParsedCommandLineOfConfigFile(join(REPO, "tsconfig.json"), {}, { ...ts.sys, onUnRecoverableConfigFileDiagnostic: () => undefined });
+  const config = ts.getParsedCommandLineOfConfigFile(
+    join(REPO, "tsconfig.json"),
+    {},
+    { ...ts.sys, onUnRecoverableConfigFileDiagnostic: () => undefined },
+  );
   assert.ok(config, "tsconfig.json did not parse");
   return compileWithVirtual(config.options, e2eSourcePaths(REPO), extra);
 }
@@ -94,23 +105,40 @@ function knownDeclarations(program: ts.Program): { readers: readonly ts.Node[]; 
     assert.ok(sf, `e2e/${file} is not in the program`);
     return sf.statements;
   };
-  const aliased = (file: string, name: string) => statements(file).find((s): s is ts.TypeAliasDeclaration => ts.isTypeAliasDeclaration(s) && s.name.text === name)?.type;
-  const declared = (file: string, name: string) => statements(file).find((s): s is ts.FunctionDeclaration => ts.isFunctionDeclaration(s) && s.name?.text === name);
+  const aliased = (file: string, name: string) =>
+    statements(file).find((s): s is ts.TypeAliasDeclaration => ts.isTypeAliasDeclaration(s) && s.name.text === name)
+      ?.type;
+  const declared = (file: string, name: string) =>
+    statements(file).find((s): s is ts.FunctionDeclaration => ts.isFunctionDeclaration(s) && s.name?.text === name);
   const evaluateType = aliased("types.ts", "Evaluate");
   const harnessEvaluate = declared("harness.ts", "evaluate");
-  const settleArrow = declared("support/settle.ts", "makeSettle")?.body?.statements.find(ts.isReturnStatement)?.expression;
+  const settleArrow = declared("support/settle.ts", "makeSettle")?.body?.statements.find(
+    ts.isReturnStatement,
+  )?.expression;
   const sendType = aliased("types.ts", "Send");
   const harnessSend = declared("harness.ts", "send");
-  assert.ok(evaluateType && ts.isFunctionTypeNode(evaluateType), "types.ts no longer declares Evaluate as a function type, so this scan knows no context read");
+  assert.ok(
+    evaluateType && ts.isFunctionTypeNode(evaluateType),
+    "types.ts no longer declares Evaluate as a function type, so this scan knows no context read",
+  );
   assert.ok(harnessEvaluate, "harness.ts no longer declares its own evaluate, so this scan knows no harness read");
-  assert.ok(settleArrow && ts.isArrowFunction(settleArrow), "makeSettle no longer returns an arrow, so this scan knows no settle");
-  assert.ok(sendType && ts.isFunctionTypeNode(sendType) && harnessSend, "types.ts's Send or the harness's send moved, so this scan would read every send as a helper");
+  assert.ok(
+    settleArrow && ts.isArrowFunction(settleArrow),
+    "makeSettle no longer returns an arrow, so this scan knows no settle",
+  );
+  assert.ok(
+    sendType && ts.isFunctionTypeNode(sendType) && harnessSend,
+    "types.ts's Send or the harness's send moved, so this scan would read every send as a helper",
+  );
   return { readers: [evaluateType, harnessEvaluate, settleArrow], senders: [sendType, harnessSend] };
 }
 
 const bare = (checker: ts.TypeChecker, t: ts.Type): boolean =>
   (t.flags & (ts.TypeFlags.Any | ts.TypeFlags.Unknown | ts.TypeFlags.Never)) !== 0 ||
-  ((t.flags & (ts.TypeFlags.Object | ts.TypeFlags.NonPrimitive)) !== 0 && checker.getPropertiesOfType(t).length === 0 && checker.getIndexInfosOfType(t).length === 0 && t.getCallSignatures().length === 0);
+  ((t.flags & (ts.TypeFlags.Object | ts.TypeFlags.NonPrimitive)) !== 0 &&
+    checker.getPropertiesOfType(t).length === 0 &&
+    checker.getIndexInfosOfType(t).length === 0 &&
+    t.getCallSignatures().length === 0);
 const unshaped = (checker: ts.TypeChecker, t: ts.Type | undefined): boolean =>
   t === undefined || (t.isUnion() ? t.types : [t]).some((m) => bare(checker, m));
 const keptValue = (call: ts.CallExpression): ts.Expression | undefined => {
@@ -119,7 +147,11 @@ const keptValue = (call: ts.CallExpression): ts.Expression | undefined => {
   return ts.isExpressionStatement(n.parent) || ts.isVoidExpression(n.parent) ? undefined : n;
 };
 const calleeName = (call: ts.CallExpression): string =>
-  ts.isIdentifier(call.expression) ? call.expression.text : ts.isPropertyAccessExpression(call.expression) ? call.expression.name.text : "";
+  ts.isIdentifier(call.expression)
+    ? call.expression.text
+    : ts.isPropertyAccessExpression(call.expression)
+      ? call.expression.name.text
+      : "";
 
 function shapeScan(program: ts.Program, paths: readonly string[]): { perReader: number[]; findings: string[] } {
   const checker = program.getTypeChecker();
@@ -132,7 +164,11 @@ function shapeScan(program: ts.Program, paths: readonly string[]): { perReader: 
     const which = declaration ? readers.indexOf(declaration) : -1;
     const name = calleeName(call);
     const named = READ_NAMES.has(name);
-    const helper = declaration !== undefined && tree.has(resolve(declaration.getSourceFile().fileName)) && name !== "send" && !senders.includes(declaration);
+    const helper =
+      declaration !== undefined &&
+      tree.has(resolve(declaration.getSourceFile().fileName)) &&
+      name !== "send" &&
+      !senders.includes(declaration);
     if (which === -1 && !named && !helper) return;
     if (which !== -1) perReader[which]! += 1;
     if (which === -1 && named && (declaration?.typeParameters?.length ?? 0) > 0) {
@@ -142,14 +178,20 @@ function shapeScan(program: ts.Program, paths: readonly string[]): { perReader: 
     const kept = keptValue(call);
     if (!kept) return;
     const castAtBoundary = which === -1 && named && ts.isAsExpression(kept.parent);
-    const value = castAtBoundary ? checker.getTypeAtLocation(kept.parent) : checker.getAwaitedType(checker.getTypeAtLocation(call));
-    if (unshaped(checker, value)) findings.push(`${where}: ${name || "a read"} keeps ${value ? checker.typeToString(value) : "a type the checker cannot await"}`);
+    const value = castAtBoundary
+      ? checker.getTypeAtLocation(kept.parent)
+      : checker.getAwaitedType(checker.getTypeAtLocation(call));
+    if (unshaped(checker, value))
+      findings.push(
+        `${where}: ${name || "a read"} keeps ${value ? checker.typeToString(value) : "a type the checker cannot await"}`,
+      );
   };
   for (const path of paths) {
     const sf = program.getSourceFile(path);
     assert.ok(sf, `${path} is not in the program`);
     const visit = (node: ts.Node): void => {
-      if (ts.isCallExpression(node)) judge(node, `${relative(REPO, path)}:${sf.getLineAndCharacterOfPosition(node.getStart()).line + 1}`);
+      if (ts.isCallExpression(node))
+        judge(node, `${relative(REPO, path)}:${sf.getLineAndCharacterOfPosition(node.getStart()).line + 1}`);
       ts.forEachChild(node, visit);
     };
     visit(sf);
@@ -219,16 +261,29 @@ const SHAPE_FIXTURE = [
 
 test("the shape scan passes a read that states its shape or discards its value, and reports every kept read whose shape is unknown, any or empty, whether reached by name, alias, context, wrapper, chain or condition, a cast in place of a type argument, a helper that launders or erases the shape, or a shape of never or of a type that awaits itself", () => {
   const path = join(REPO, "e2e", "__shape-fixture__.ts");
-  assert.equal(existsSync(path), false, "the fixture's name is a real file, so the scan below would read the disk instead");
+  assert.equal(
+    existsSync(path),
+    false,
+    "the fixture's name is a real file, so the scan below would read the disk instead",
+  );
   const { findings } = shapeScan(e2eProgram(new Map([[path, SHAPE_FIXTURE.join("\n")]])), [path]);
-  const flagged = SHAPE_FIXTURE.flatMap((line, i) => (line.endsWith("// flagged") ? [`${relative(REPO, path)}:${i + 1}`] : []));
+  const flagged = SHAPE_FIXTURE.flatMap((line, i) =>
+    line.endsWith("// flagged") ? [`${relative(REPO, path)}:${i + 1}`] : [],
+  );
   assert.equal(flagged.length, 20);
-  assert.deepEqual(findings.map((f) => f.slice(0, f.indexOf(": "))), flagged, findings.join("\n"));
+  assert.deepEqual(
+    findings.map((f) => f.slice(0, f.indexOf(": "))),
+    flagged,
+    findings.join("\n"),
+  );
 });
 
 test("every evaluate and settle in the e2e tree whose value is kept states its shape, through a type argument or a typed Payload, and so does every helper declared in the tree that hands one on (Alex's ruling of 2026-09-23 on Issue #653)", () => {
   const { perReader, findings } = shapeScan(e2eProgram(), e2eSourcePaths(REPO));
-  assert.ok(perReader.every((n) => n > 0), `the scan reached the context's Evaluate, the harness's evaluate and the settle ${perReader.join(", ")} times, so one of them is not the declaration the tree calls`);
+  assert.ok(
+    perReader.every((n) => n > 0),
+    `the scan reached the context's Evaluate, the harness's evaluate and the settle ${perReader.join(", ")} times, so one of them is not the declaration the tree calls`,
+  );
   assert.deepEqual(
     findings,
     [],

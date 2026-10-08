@@ -41,7 +41,10 @@ test("the favicon root is 32 square and the touch icon 180 square, integer width
     [buildTouchIcon(SQUARE), TOUCH_ICON_SIZE],
   ] as const) {
     assert.deepEqual(svgDimensions(svg), { width: size, height: size });
-    assert.match(rootTag(svg), /^<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg" width="\d+" height="\d+" viewBox="0 0 32 32"/);
+    assert.match(
+      rootTag(svg),
+      /^<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg" width="\d+" height="\d+" viewBox="0 0 32 32"/,
+    );
     assert.ok(svg.endsWith("</svg>\n"), "the document ends with a newline");
   }
   assert.equal(FAVICON_SIZE, 32);
@@ -104,7 +107,10 @@ test("the hairline is drawn in font units so it scales with the letter to the ra
   const p = letterPlacement(SQUARE, PUNCHCUTTER_TILE);
   const [letter] = tags(buildFavicon(SQUARE), "path") as [string];
   const drawn = num(letter, "stroke-width") * p.scale;
-  assert.ok(Math.abs(drawn - PUNCHCUTTER_TILE.hairline) < 1e-3, `stroke-width times scale is the hairline to its 3-decimal rounding: ${drawn}`);
+  assert.ok(
+    Math.abs(drawn - PUNCHCUTTER_TILE.hairline) < 1e-3,
+    `stroke-width times scale is the hairline to its 3-decimal rounding: ${drawn}`,
+  );
   assert.equal(attr(letter, "stroke-linejoin"), "round");
 });
 
@@ -133,7 +139,11 @@ test("the touch icon is the favicon's markup on a full-bleed walnut ground, the 
   assert.equal(attr(ground, "fill"), WALNUT);
   assert.equal(attr(ground, "stroke"), undefined);
   const body = (svg: string) => svg.slice(svg.indexOf(">") + 1);
-  assert.equal(body(touch).replace(`${ground}\n`, ""), body(favicon), "everything under the root is the favicon's, ground aside");
+  assert.equal(
+    body(touch).replace(`${ground}\n`, ""),
+    body(favicon),
+    "everything under the root is the favicon's, ground aside",
+  );
 });
 
 test("the shipped Fell SC small-cap v: the face, the em, the bbox, and squarer than the cap", () => {
@@ -144,7 +154,10 @@ test("the shipped Fell SC small-cap v: the face, the em, the bbox, and squarer t
   assert.match(small.path, /^M[-\d. LQZ]+$/, "absolute M/L/Q/Z commands in font units");
   const cap = readGlyphOutline(FELL_SC_WOFF2, CAP_V);
   const aspect = (g: GlyphOutline) => (g.bbox.maxX - g.bbox.minX) / (g.bbox.maxY - g.bbox.minY);
-  assert.ok(aspect(small) > aspect(cap), `the small cap is the wider letter for its size: ${aspect(small)} vs ${aspect(cap)}`);
+  assert.ok(
+    aspect(small) > aspect(cap),
+    `the small cap is the wider letter for its size: ${aspect(small)} vs ${aspect(cap)}`,
+  );
 });
 
 test("public/favicon.svg is byte for byte what npm run icons cuts from the shipped woff2 (the drift guard)", () => {
@@ -172,7 +185,12 @@ test("public/apple-touch-icon.png is the committed SVG's mark: walnut corners, t
   assert.equal(png.width, TOUCH_ICON_SIZE);
   assert.equal(png.height, TOUCH_ICON_SIZE);
   const last = TOUCH_ICON_SIZE - 1;
-  for (const [x, y] of [[0, 0], [last, 0], [0, last], [last, last]] as const) {
+  for (const [x, y] of [
+    [0, 0],
+    [last, 0],
+    [0, last],
+    [last, last],
+  ] as const) {
     assert.equal(hexOf(png.pixel(x, y)), WALNUT, `corner (${x}, ${y}) is the full-bleed ground`);
   }
   const counts = new Map<string, number>();
@@ -184,7 +202,10 @@ test("public/apple-touch-icon.png is the committed SVG's mark: walnut corners, t
   }
   const share = (hex: string) => (counts.get(hex) ?? 0) / (png.width * png.height);
   const coverage = share(WALNUT) + share(PARCHMENT) + share(TAN);
-  assert.ok(coverage >= PALETTE_COVERAGE_FLOOR, `palette coverage ${coverage.toFixed(3)} is below ${PALETTE_COVERAGE_FLOOR}`);
+  assert.ok(
+    coverage >= PALETTE_COVERAGE_FLOOR,
+    `palette coverage ${coverage.toFixed(3)} is below ${PALETTE_COVERAGE_FLOOR}`,
+  );
   assert.ok(share(PARCHMENT) >= PARCHMENT_SHARE_FLOOR, `the letter's parchment covers ${share(PARCHMENT).toFixed(3)}`);
   assert.ok(share(TAN) >= TAN_SHARE_FLOOR, `the keyline's tan covers ${share(TAN).toFixed(3)}`);
 });

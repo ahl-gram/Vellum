@@ -11,7 +11,6 @@ import type { Box } from "../../src/render/geometry.ts";
 import type { CartouchePlan } from "../../src/render/layers/cartouche.ts";
 import type { World } from "../../src/world/types.ts";
 
-
 const WIDTH = 1500;
 const MARGIN = Math.round(WIDTH * 0.045);
 
@@ -37,10 +36,12 @@ function gxOf(cx: number, elev: Field): number {
   return Math.round((cx - MARGIN) / scale);
 }
 
-const cart = (rect: Box): CartouchePlan => ({ rect } as unknown as CartouchePlan);
+const cart = (rect: Box): CartouchePlan => ({ rect }) as unknown as CartouchePlan;
 
 test("#103 the compass sits in the sea, not an inland lake", () => {
-  const W = 64, H = 48, sea = 0;
+  const W = 64,
+    H = 48,
+    sea = 0;
   // Left band = border-connected sea; the landlocked block is a lake with deeper oceanDist and the water FARTHEST from the cartouche, where distance-from-title scoring drops the rose.
   const isSea = (x: number) => x <= 10;
   const isLake = (x: number, y: number) => x >= 38 && x <= 58 && y >= 10 && y <= 38;
@@ -48,19 +49,21 @@ test("#103 the compass sits in the sea, not an inland lake", () => {
   const ctx = synthCtx(elev, sea);
 
   const plan = planCompass(ctx, cart({ x: 80, y: 70, w: 260, h: 110 }), {
-    x: 1100, y: 1000, w: 200, h: 34,
+    x: 1100,
+    y: 1000,
+    w: 200,
+    h: 34,
   });
 
   assert.ok(plan, "expected a compass to be placed");
   const gx = gxOf(plan.cx, elev);
-  assert.ok(
-    gx <= 12,
-    `compass landed at column ${gx}; expected the coastal sea (<=12), not the lake (~48)`,
-  );
+  assert.ok(gx <= 12, `compass landed at column ${gx}; expected the coastal sea (<=12), not the lake (~48)`);
 });
 
 test("#104 the compass prefers open sea over a cramped inlet farther from the title", () => {
-  const W = 64, H = 48, sea = 0;
+  const W = 64,
+    H = 48,
+    sea = 0;
   // Deep open sea near the cartouche, a shallow pocket farthest from it: the old distance-from-cartouche scoring lands in the cramped pocket.
   const isDeep = (x: number, y: number) => x >= 42 && y >= 10 && y <= 30;
   const isInlet = (x: number, y: number) => x <= 10 && y >= 30;
@@ -68,31 +71,28 @@ test("#104 the compass prefers open sea over a cramped inlet farther from the ti
   const ctx = synthCtx(elev, sea);
 
   const plan = planCompass(ctx, cart({ x: 1150, y: 70, w: 280, h: 110 }), {
-    x: 80, y: 80, w: 200, h: 34,
+    x: 80,
+    y: 80,
+    w: 200,
+    h: 34,
   });
 
   assert.ok(plan, "expected a compass to be placed");
   const gx = gxOf(plan.cx, elev);
-  assert.ok(
-    gx >= 30,
-    `compass landed at column ${gx}; expected the open sea (>=42), not the far inlet (~4)`,
-  );
+  assert.ok(gx >= 30, `compass landed at column ${gx}; expected the open sea (>=42), not the far inlet (~4)`);
 });
 
 test("#104 the compass keeps clear of the legend", () => {
-  const W = 64, H = 48, sea = 0;
+  const W = 64,
+    H = 48,
+    sea = 0;
   // The legend sits over the sea's deepest (south-east) water, exactly where the compass would otherwise want to be.
   const isSea = (x: number, y: number) => x >= 28 && y >= 14;
   const elev = createField(W, H, (x, y) => (isSea(x, y) ? -1 : 1));
   const ctx = synthCtx(elev, sea);
   const legendBox: Box = { x: 1140, y: 840, w: 230, h: 200 };
 
-  const plan = planCompass(
-    ctx,
-    cart({ x: 80, y: 70, w: 260, h: 110 }),
-    { x: 80, y: 200, w: 200, h: 34 },
-    legendBox,
-  );
+  const plan = planCompass(ctx, cart({ x: 80, y: 70, w: 260, h: 110 }), { x: 80, y: 200, w: 200, h: 34 }, legendBox);
 
   assert.ok(plan, "expected a compass to be placed");
   assert.ok(

@@ -2,7 +2,6 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { labelComponents } from "../../src/core/mask-components.ts";
 
-
 /** '#' set, '.' clear. */
 function mask(rows: string[]) {
   const h = rows.length;

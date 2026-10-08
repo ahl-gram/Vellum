@@ -8,11 +8,23 @@ import ts from "typescript";
 import lintConfig from "../../eslint.config.ts";
 import { compileWithVirtual } from "../../test-support/virtual-compile.ts";
 import { WITNESSES } from "../../test-support/lint-witnesses.ts";
+import { ciJob } from "../../test-support/ci-job.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const src = (p: string) => readFileSync(join(ROOT, p), "utf8");
 
-const LINT_SCOPE = ["**/*.cjs", "**/*.js", "**/*.jsx", "**/*.mjs", "e2e/**/*.ts", "public/**/*.css", "scripts/**/*.ts", "src/**/*.ts", "test-support/**/*.ts", "test/**/*.ts"];
+const LINT_SCOPE = [
+  "**/*.cjs",
+  "**/*.js",
+  "**/*.jsx",
+  "**/*.mjs",
+  "e2e/**/*.ts",
+  "public/**/*.css",
+  "scripts/**/*.ts",
+  "src/**/*.ts",
+  "test-support/**/*.ts",
+  "test/**/*.ts",
+];
 const REFUSED = LINT_SCOPE.filter((g) => g.startsWith("**/"));
 const DESIGN_EXEMPT = ["design/**/*.cjs", "design/**/*.js", "design/**/*.jsx", "design/**/*.mjs"];
 const LINT_SCRIPT = "eslint --flag unstable_native_nodejs_ts_config --max-warnings 0 .";
@@ -29,51 +41,86 @@ const RULED_ROOTS = LINT_SCOPE.map((g) => {
 const isNamedFile = (g: string): boolean =>
   !/[*?[{]/.test(g) && RULED_ROOTS.some(({ root, ext }) => g.startsWith(root) && g.endsWith(ext));
 
-const ciJob = (id: string): string => {
-  const lines = src(".github/workflows/ci.yml").split("\n");
-  const head = lines.findIndex((l) => new RegExp(`^ {2}${id}:\\s*$`).test(l));
-  assert.notEqual(head, -1, `ci.yml has no ${id} job at two-space indent, so this reader is looking at the wrong shape`);
-  const next = lines.findIndex((l, i) => i > head && /^ {2}[A-Za-z0-9_-]+:\s*$/.test(l));
-  return lines
-    .slice(head, next === -1 ? lines.length : next)
-    .filter((l) => !l.trim().startsWith("#"))
-    .join("\n");
-};
-
 const designExemption = (block: Linter.Config): readonly string[] => {
   const name = block.name ?? "(unnamed)";
   const designed = (block.files ?? []).flat().filter((g) => DESIGN_EXEMPT.includes(g));
   if (designed.length === 0) return designed;
-  assert.match(name, /Issue #653/, `config block ${name} exempts design/ with no name citing the ruling that admitted it (Issue #653 ruling D)`);
+  assert.match(
+    name,
+    /Issue #653/,
+    `config block ${name} exempts design/ with no name citing the ruling that admitted it (Issue #653 ruling D)`,
+  );
   assert.deepEqual(block.files, DESIGN_EXEMPT, `config block ${name} exempts design/ alongside something else`);
-  assert.deepEqual(Object.keys(block).sort(), ["files", "linterOptions", "name", "rules"], `config block ${name} does more than turn the one rule off for design/`);
-  assert.deepEqual(block.rules, { "no-restricted-syntax": "off" }, `config block ${name} turns off more, or other, than the JavaScript refusal for design/ (Issue #653 ruling D)`);
-  assert.deepEqual(block.linterOptions, { noInlineConfig: false, reportUnusedDisableDirectives: "off" }, `config block ${name} does not give design/ back its own inline directives, so a round tool carrying one reds the lint`);
+  assert.deepEqual(
+    Object.keys(block).sort(),
+    ["files", "linterOptions", "name", "rules"],
+    `config block ${name} does more than turn the one rule off for design/`,
+  );
+  assert.deepEqual(
+    block.rules,
+    { "no-restricted-syntax": "off" },
+    `config block ${name} turns off more, or other, than the JavaScript refusal for design/ (Issue #653 ruling D)`,
+  );
+  assert.deepEqual(
+    block.linterOptions,
+    { noInlineConfig: false, reportUnusedDisableDirectives: "off" },
+    `config block ${name} does not give design/ back its own inline directives, so a round tool carrying one reds the lint`,
+  );
   return designed;
 };
 
 const REFUSAL = "Issue #653 ruling D: no JavaScript source anywhere";
 const DESIGN = "Issue #653 ruling D: design/ archives its round tools as they ran";
-const relaxes = (block: Linter.Config): boolean => Object.hasOwn(block.rules ?? {}, "no-restricted-syntax") || Object.hasOwn(block.linterOptions ?? {}, "noInlineConfig");
+const relaxes = (block: Linter.Config): boolean =>
+  Object.hasOwn(block.rules ?? {}, "no-restricted-syntax") ||
+  Object.hasOwn(block.linterOptions ?? {}, "noInlineConfig");
 
 test("no block but the refusal and the design/ exemption can relax the JavaScript refusal, and the refusal admits no inline directive (Issue #653 ruling D)", () => {
-  assert.deepEqual(blocks.filter(relaxes).map((b) => b.name), [REFUSAL, DESIGN], "a block other than the refusal and the design/ exemption sets no-restricted-syntax or noInlineConfig, so it can relax the refusal for whatever it matches; ruling D names design/ as the single exemption");
+  assert.deepEqual(
+    blocks.filter(relaxes).map((b) => b.name),
+    [REFUSAL, DESIGN],
+    "a block other than the refusal and the design/ exemption sets no-restricted-syntax or noInlineConfig, so it can relax the refusal for whatever it matches; ruling D names design/ as the single exemption",
+  );
   const refusal = blocks.find((b) => b.name === REFUSAL);
   assert.ok(refusal, `no block is named ${REFUSAL}, so this guard is reading the wrong config`);
   assert.deepEqual(refusal.files, REFUSED, "the refusal does not reach exactly the four JavaScript extensions");
-  assert.deepEqual(refusal.linterOptions, { noInlineConfig: true }, "the refusal honours inline directives, so one comment line in a JavaScript file silences it");
-  assert.deepEqual(Object.keys(refusal.rules ?? {}), ["no-restricted-syntax"], "the refusal block carries a rule besides the refusal");
+  assert.deepEqual(
+    refusal.linterOptions,
+    { noInlineConfig: true },
+    "the refusal honours inline directives, so one comment line in a JavaScript file silences it",
+  );
+  assert.deepEqual(
+    Object.keys(refusal.rules ?? {}),
+    ["no-restricted-syntax"],
+    "the refusal block carries a rule besides the refusal",
+  );
   const [severity, option] = refusal.rules?.["no-restricted-syntax"] as [string, { selector: string }];
-  assert.deepEqual([severity, option.selector], ["error", "Program"], "the refusal does not report every program at error");
+  assert.deepEqual(
+    [severity, option.selector],
+    ["error", "Program"],
+    "the refusal does not report every program at error",
+  );
 });
 
 test("the lint config is bounded to the ruled scope, covers all of it, and narrows it nowhere", () => {
   assert.ok(blocks.length > 0, "the config exports no blocks, so this guard is reading the wrong thing");
   const covered = new Set<string>();
   const ignoring = blocks.filter((block) => "ignores" in block);
-  assert.equal(ignoring.length, 1, `${ignoring.length} config blocks carry ignores; the walk is eslint . (Issue #653 ruling D), and the one block allowed to unlint files is the .gitignore's own, since an exemption is a rule-level block by name (Issue #648)`);
-  assert.deepEqual(Object.keys(ignoring[0]!).filter((k) => k !== "name"), ["ignores"], "the ignores block also carries files, rules or options, so it is not the .gitignore's global ignore");
-  assert.deepEqual(ignoring[0]!.ignores, GITIGNORED, "the ignores block is not exactly what includeIgnoreFile reads out of the root .gitignore, so it unlints something git tracks");
+  assert.equal(
+    ignoring.length,
+    1,
+    `${ignoring.length} config blocks carry ignores; the walk is eslint . (Issue #653 ruling D), and the one block allowed to unlint files is the .gitignore's own, since an exemption is a rule-level block by name (Issue #648)`,
+  );
+  assert.deepEqual(
+    Object.keys(ignoring[0]!).filter((k) => k !== "name"),
+    ["ignores"],
+    "the ignores block also carries files, rules or options, so it is not the .gitignore's global ignore",
+  );
+  assert.deepEqual(
+    ignoring[0]!.ignores,
+    GITIGNORED,
+    "the ignores block is not exactly what includeIgnoreFile reads out of the root .gitignore, so it unlints something git tracks",
+  );
   const exempt = new Set<string>();
   for (const block of blocks.filter((b) => !("ignores" in b))) {
     const name = block.name ?? "(unnamed)";
@@ -97,7 +144,10 @@ test("the lint config is bounded to the ruled scope, covers all of it, and narro
         `config block ${name} matches ${JSON.stringify(entry)}, which is neither a ruled glob nor a file named under a ruled root with its ruled extension`,
       );
       for (const file of named) {
-        assert.ok(existsSync(join(ROOT, file)), `config block ${name} names ${file}, which does not exist, so its exemption is stale`);
+        assert.ok(
+          existsSync(join(ROOT, file)),
+          `config block ${name} names ${file}, which does not exist, so its exemption is stale`,
+        );
       }
       if (named.length > 0) {
         assert.match(
@@ -109,11 +159,24 @@ test("the lint config is bounded to the ruled scope, covers all of it, and narro
       for (const glob of anchors) covered.add(glob);
     }
   }
-  assert.deepEqual([...covered].sort(), LINT_SCOPE, "the lint scope and the ruled scope (Issue #648, and Issue #653 ruling D for JavaScript) differ");
-  assert.deepEqual([...exempt].sort(), DESIGN_EXEMPT, "design/, the one place ruling D admits JavaScript, is not exempted as a whole");
+  assert.deepEqual(
+    [...covered].sort(),
+    LINT_SCOPE,
+    "the lint scope and the ruled scope (Issue #648, and Issue #653 ruling D for JavaScript) differ",
+  );
+  assert.deepEqual(
+    [...exempt].sort(),
+    DESIGN_EXEMPT,
+    "design/, the one place ruling D admits JavaScript, is not exempted as a whole",
+  );
 });
 
-type Resolved = { rules?: Record<string, unknown>; language?: { defaultLanguageOptions?: unknown }; languageOptions?: { parser?: { meta?: { name?: string } }; tolerant?: unknown }; linterOptions?: { reportUnusedDisableDirectives?: unknown } };
+type Resolved = {
+  rules?: Record<string, unknown>;
+  language?: { defaultLanguageOptions?: unknown };
+  languageOptions?: { parser?: { meta?: { name?: string } }; tolerant?: unknown };
+  linterOptions?: { reportUnusedDisableDirectives?: unknown };
+};
 const severityOf = (rule: unknown): unknown => (Array.isArray(rule) ? rule[0] : rule);
 
 const NODE_TEST_ALLOWANCE = [{ from: "package", package: "node:test", name: ["test", "suite"] }];
@@ -135,18 +198,39 @@ function pinCorrectness(file: string, typed: boolean, rules: Record<string, unkn
     typed ? [2, { allowForKnownSafeCalls: NODE_TEST_ALLOWANCE }] : undefined,
     `${file}: no-floating-promises does not resolve at error with exactly the node:test allowance (Correctness, Issue #648)`,
   );
-  for (const rule of ["@typescript-eslint/switch-exhaustiveness-check", "@typescript-eslint/no-unnecessary-condition"]) {
-    assert.deepEqual(rules[rule], typed ? [2] : undefined, `${file}: ${rule} does not resolve at error with no options (Correctness, Issue #648)`);
+  for (const rule of [
+    "@typescript-eslint/switch-exhaustiveness-check",
+    "@typescript-eslint/no-unnecessary-condition",
+  ]) {
+    assert.deepEqual(
+      rules[rule],
+      typed ? [2] : undefined,
+      `${file}: ${rule} does not resolve at error with no options (Correctness, Issue #648)`,
+    );
   }
   for (const rule of CORRECTNESS_TS_ONLY) {
-    assert.equal(severityOf(rules[rule]), typed ? 2 : undefined, `${file}: ${rule} does not resolve at error (Correctness, Issue #648)`);
+    assert.equal(
+      severityOf(rules[rule]),
+      typed ? 2 : undefined,
+      `${file}: ${rule} does not resolve at error (Correctness, Issue #648)`,
+    );
   }
   for (const rule of CORRECTNESS_BOTH) {
-    assert.equal(severityOf(rules[rule]), 2, `${file}: ${rule} does not resolve at error in both blocks (Correctness, Issue #648)`);
+    assert.equal(
+      severityOf(rules[rule]),
+      2,
+      `${file}: ${rule} does not resolve at error in both blocks (Correctness, Issue #648)`,
+    );
   }
 }
 
-const CSS_FORM_RULES = ["vellum/css-comment-one-line", "vellum/css-comment-no-em-dash", "vellum/css-comment-issue-form", "vellum/css-comment-no-js-module", "vellum/css-no-narrow-width"];
+const CSS_FORM_RULES = [
+  "vellum/css-comment-one-line",
+  "vellum/css-comment-no-em-dash",
+  "vellum/css-comment-issue-form",
+  "vellum/css-comment-no-js-module",
+  "vellum/css-no-narrow-width",
+];
 const TURNED_ON = [
   "@typescript-eslint/no-unnecessary-type-assertion",
   "@typescript-eslint/no-unsafe-argument",
@@ -156,44 +240,133 @@ const TURNED_ON = [
   "@typescript-eslint/no-unused-vars",
   "@typescript-eslint/require-await",
 ];
-const PAGE_ELEMENT_PARAMETERS = ["drawerEls", "ghostEl", "innerEl", "legendEl", "logEls", "mapEl", "noteEl", "pillEl", "roomEls", "sheetEl", "slipEl", "statusEl", "targetEl", "viewportEl"];
+const PAGE_ELEMENT_PARAMETERS = [
+  "drawerEls",
+  "ghostEl",
+  "innerEl",
+  "legendEl",
+  "logEls",
+  "mapEl",
+  "noteEl",
+  "pillEl",
+  "roomEls",
+  "sheetEl",
+  "slipEl",
+  "statusEl",
+  "targetEl",
+  "viewportEl",
+];
 const PARAM_REASSIGN = { props: true, ignorePropertyModificationsFor: PAGE_ELEMENT_PARAMETERS };
 
 function pinJavaScript(file: string, typed: boolean, config: Resolved, rules: Record<string, unknown>): void {
   const on = (rule: string): unknown => severityOf(rules[rule]);
-  assert.equal(config.languageOptions?.parser?.meta?.name, typed ? "typescript-eslint/parser" : undefined, `${file} resolves to the wrong parser`);
-  assert.equal(on("@typescript-eslint/no-misused-promises"), typed ? 2 : undefined, `${file}: the roster rule this PR ticks does not resolve at error`);
-  assert.equal(on("@typescript-eslint/no-explicit-any"), typed ? 2 : undefined, `${file}: no-explicit-any does not resolve at error`);
+  assert.equal(
+    config.languageOptions?.parser?.meta?.name,
+    typed ? "typescript-eslint/parser" : undefined,
+    `${file} resolves to the wrong parser`,
+  );
+  assert.equal(
+    on("@typescript-eslint/no-misused-promises"),
+    typed ? 2 : undefined,
+    `${file}: the roster rule this PR ticks does not resolve at error`,
+  );
+  assert.equal(
+    on("@typescript-eslint/no-explicit-any"),
+    typed ? 2 : undefined,
+    `${file}: no-explicit-any does not resolve at error`,
+  );
   for (const rule of TURNED_ON) {
-    assert.deepEqual(rules[rule], typed ? [2] : undefined, `${file}: ${rule} does not resolve at error with no options; the config set it off while its violations stood, and Issue #654 turned it on with them fixed`);
+    assert.deepEqual(
+      rules[rule],
+      typed ? [2] : undefined,
+      `${file}: ${rule} does not resolve at error with no options; the config set it off while its violations stood, and Issue #654 turned it on with them fixed`,
+    );
   }
-  assert.equal(on("no-undef"), typed ? 0 : 2, `${file}: the core layer is missing or the TypeScript override layer was not applied`);
+  assert.equal(
+    on("no-undef"),
+    typed ? 0 : 2,
+    `${file}: the core layer is missing or the TypeScript override layer was not applied`,
+  );
   assert.equal(on("no-debugger"), 2, `${file}: the core recommended rules do not reach it`);
   assert.equal(on("prefer-const"), 2, `${file}: prefer-const does not resolve at error (Immutability, Issue #648)`);
-  assert.deepEqual(rules["no-param-reassign"], [2, PARAM_REASSIGN], `${file}: no-param-reassign does not resolve at error with property writes on and exactly the page-element parameter names excused; Alex ruled that only a write into a page element is accepted, excused by one list of names used for nothing else, so a new parameter holding a page element takes a name from the list or joins it here and in eslint.config.ts, with the names guard below as the check, and any other write returns a new value instead (Alex, 2026-09-26, Issue #654 rulings 4 and 5)`);
-  assert.deepEqual(rules["no-empty"], typed ? [2, { allowEmptyCatch: true }] : undefined, `${file}: no-empty does not resolve at error with only the empty catch admitted (Alex, 2026-09-26, Issue #654 ruling 9)`);
-  assert.equal(on("@typescript-eslint/prefer-readonly"), typed ? 2 : undefined, `${file}: prefer-readonly does not resolve at error (Immutability, Issue #648)`);
-  assert.deepEqual(rules["max-lines"], [2, 400], `${file}: max-lines does not resolve at error with the ruled physical-line ceiling (Size, Issue #648)`);
-  assert.deepEqual(rules["max-lines-per-function"], [2, 50], `${file}: max-lines-per-function does not resolve at error with the ruled ceiling (Size, Issue #648)`);
-  assert.deepEqual(rules["max-depth"], [2, 4], `${file}: max-depth does not resolve at error with the ruled depth (Size, Issue #648)`);
+  assert.deepEqual(
+    rules["no-param-reassign"],
+    [2, PARAM_REASSIGN],
+    `${file}: no-param-reassign does not resolve at error with property writes on and exactly the page-element parameter names excused; Alex ruled that only a write into a page element is accepted, excused by one list of names used for nothing else, so a new parameter holding a page element takes a name from the list or joins it here and in eslint.config.ts, with the names guard below as the check, and any other write returns a new value instead (Alex, 2026-09-26, Issue #654 rulings 4 and 5)`,
+  );
+  assert.deepEqual(
+    rules["no-empty"],
+    typed ? [2, { allowEmptyCatch: true }] : undefined,
+    `${file}: no-empty does not resolve at error with only the empty catch admitted (Alex, 2026-09-26, Issue #654 ruling 9)`,
+  );
+  assert.equal(
+    on("@typescript-eslint/prefer-readonly"),
+    typed ? 2 : undefined,
+    `${file}: prefer-readonly does not resolve at error (Immutability, Issue #648)`,
+  );
+  assert.deepEqual(
+    rules["max-lines"],
+    [2, { max: 400, skipBlankLines: true, skipComments: true }],
+    `${file}: max-lines does not resolve at error with the ruled ceiling of 400 lines of code, blank and comment lines skipped (Size, Issue #648; the skips Alex, 2026-10-07, Issue #779)`,
+  );
+  assert.deepEqual(
+    rules["max-lines-per-function"],
+    [2, { max: 50, skipBlankLines: true, skipComments: true }],
+    `${file}: max-lines-per-function does not resolve at error with the ruled ceiling of 50 lines of code, blank and comment lines skipped (Size, Issue #648; the skips Alex, 2026-10-07, Issue #779)`,
+  );
+  assert.deepEqual(
+    rules["max-depth"],
+    [2, 4],
+    `${file}: max-depth does not resolve at error with the ruled depth (Size, Issue #648)`,
+  );
   pinCorrectness(file, typed, rules);
   for (const rule of CSS_FORM_RULES) {
-    assert.equal(rules[rule], undefined, `${file}: ${rule} is a rule for the sheets and must not resolve on a script (CSS form, Issue #648)`);
+    assert.equal(
+      rules[rule],
+      undefined,
+      `${file}: ${rule} is a rule for the sheets and must not resolve on a script (CSS form, Issue #648)`,
+    );
   }
 }
 
 function pinCss(file: string, config: Resolved, rules: Record<string, unknown>): void {
-  assert.equal(config.languageOptions?.parser, undefined, `${file} resolves a JavaScript parser instead of the CSS language`);
-  assert.deepEqual(config.language?.defaultLanguageOptions, { tolerant: false }, `${file} does not resolve to @eslint/css's language (CSS form, Issue #648)`);
-  assert.equal(config.languageOptions?.tolerant, true, `${file}: the sheets parse strict, so a syntax css-tree does not know reds the lint; the family ruled tolerant (Alex's delegation, 2026-09-21, Issue #648)`);
+  assert.equal(
+    config.languageOptions?.parser,
+    undefined,
+    `${file} resolves a JavaScript parser instead of the CSS language`,
+  );
+  assert.deepEqual(
+    config.language?.defaultLanguageOptions,
+    { tolerant: false },
+    `${file} does not resolve to @eslint/css's language (CSS form, Issue #648)`,
+  );
+  assert.equal(
+    config.languageOptions?.tolerant,
+    true,
+    `${file}: the sheets parse strict, so a syntax css-tree does not know reds the lint; the family ruled tolerant (Alex's delegation, 2026-09-21, Issue #648)`,
+  );
   for (const rule of CSS_FORM_RULES) {
-    assert.deepEqual(rules[rule], [2], `${file}: ${rule} does not resolve at error with no options (CSS form, Issue #648)`);
+    assert.deepEqual(
+      rules[rule],
+      [2],
+      `${file}: ${rule} does not resolve at error with no options (CSS form, Issue #648)`,
+    );
   }
-  assert.deepEqual(Object.keys(rules).filter((r) => severityOf(rules[r]) !== 0).sort(), [...CSS_FORM_RULES].sort(), `${file}: a rule other than the comment-form rules and the narrow-width rule reaches the sheets (CSS form, Issue #648, Issue #675, Issue #763)`);
+  assert.deepEqual(
+    Object.keys(rules)
+      .filter((r) => severityOf(rules[r]) !== 0)
+      .sort(),
+    [...CSS_FORM_RULES].sort(),
+    `${file}: a rule other than the comment-form rules and the narrow-width rule reaches the sheets (CSS form, Issue #648, Issue #675, Issue #763)`,
+  );
 }
 
 test("through ESLint itself, one witness file per ruled glob resolves to rules that reach it, and the root config resolves to none", async () => {
-  assert.deepEqual(Object.keys(WITNESSES).sort(), LINT_SCOPE.filter((g) => !REFUSED.includes(g)), "every ruled glob that carries rules needs a witness file here; the refused JavaScript globs have none by design, and the test below is their witness");
+  assert.deepEqual(
+    Object.keys(WITNESSES).sort(),
+    LINT_SCOPE.filter((g) => !REFUSED.includes(g)),
+    "every ruled glob that carries rules needs a witness file here; the refused JavaScript globs have none by design, and the test below is their witness",
+  );
   const eslint = new ESLint({ cwd: ROOT, flags: ["unstable_native_nodejs_ts_config"] });
   assert.equal(
     await eslint.findConfigFile("src/cli/main.ts"),
@@ -201,7 +374,10 @@ test("through ESLint itself, one witness file per ruled glob resolves to rules t
     "ESLint resolves a different config file than the one this guard imports; a .js, .mjs or .cjs config at the root shadows the .ts one",
   );
   for (const [glob, file] of Object.entries(WITNESSES)) {
-    assert.ok(file.startsWith(glob.slice(0, glob.indexOf("**"))) && file.endsWith(glob.slice(glob.lastIndexOf("*") + 1)), `${file}, the witness for ${glob}, lies outside its glob, so it witnesses another root and this one reaches nothing seen`);
+    assert.ok(
+      file.startsWith(glob.slice(0, glob.indexOf("**"))) && file.endsWith(glob.slice(glob.lastIndexOf("*") + 1)),
+      `${file}, the witness for ${glob}, lies outside its glob, so it witnesses another root and this one reaches nothing seen`,
+    );
     assert.ok(existsSync(join(ROOT, file)), `${file}, the witness for ${glob}, does not exist`);
     assert.equal(await eslint.isPathIgnored(file), false, `${file} is ignored, so ${glob} reaches nothing`);
     const config = (await eslint.calculateConfigForFile(file)) as Resolved;
@@ -210,14 +386,25 @@ test("through ESLint itself, one witness file per ruled glob resolves to rules t
     if (glob.endsWith(".css")) pinCss(file, config, rules);
     else pinJavaScript(file, glob.endsWith(".ts"), config, rules);
     const report = config.linterOptions?.reportUnusedDisableDirectives;
-    assert.ok([1, 2, "warn", "error"].includes(report as never), `${file}: an unused disable directive is not reported (${String(report)}), so a stale exemption is silent`);
+    assert.ok(
+      [1, 2, "warn", "error"].includes(report as never),
+      `${file}: an unused disable directive is not reported (${String(report)}), so a stale exemption is silent`,
+    );
   }
-  assert.equal(await eslint.isPathIgnored("eslint.config.ts"), true, "the root config lints itself, so the scope leaked past the ruled roots");
+  assert.equal(
+    await eslint.isPathIgnored("eslint.config.ts"),
+    true,
+    "the root config lints itself, so the scope leaked past the ruled roots",
+  );
 });
 
 test("only typescript-eslint's recommended-type-checked block sets a rule Issue #654 turned on, each at error, and it reaches every TypeScript root unnarrowed with no ignores, so no block can take one back by setting it or by narrowing the preset", () => {
   const PRESET = "typescript-eslint/recommended-type-checked";
-  const setters = blocks.flatMap((b) => TURNED_ON.filter((rule) => Object.hasOwn(b.rules ?? {}, rule)).map((rule) => `${shortName(b)}: ${rule} = ${JSON.stringify(b.rules?.[rule])}`));
+  const setters = blocks.flatMap((b) =>
+    TURNED_ON.filter((rule) => Object.hasOwn(b.rules ?? {}, rule)).map(
+      (rule) => `${shortName(b)}: ${rule} = ${JSON.stringify(b.rules?.[rule])}`,
+    ),
+  );
   assert.deepEqual(
     setters,
     TURNED_ON.map((rule) => `${PRESET}: ${rule} = "error"`),
@@ -230,16 +417,29 @@ test("only typescript-eslint's recommended-type-checked block sets a rule Issue 
     LINT_SCOPE.filter((g) => g.endsWith(".ts")),
     "the preset that sets these rules does not reach exactly the TypeScript roots: the block that extends it has changed its own files, and a narrowing (a conjunct such as src/**/*.ts with src/cli/**) takes the rules back for everything it dropped",
   );
-  assert.equal(preset[0]!.ignores, undefined, "the preset carries an ignores key, which takes the rules back for whatever it excludes while its files still name the roots");
+  assert.equal(
+    preset[0]!.ignores,
+    undefined,
+    "the preset carries an ignores key, which takes the rules back for whatever it excludes while its files still name the roots",
+  );
 });
 
 test("no block sets a rule off but typescript-eslint's own two layers and ruling D's design/ block, so the house config takes no rule back once Issue #654 has turned each on", () => {
   const PRESET_LAYERS = ["typescript-eslint/eslint-recommended", "typescript-eslint/recommended-type-checked"];
-  for (const layer of PRESET_LAYERS) assert.equal(blocks.filter((b) => shortName(b) === layer).length, 1, `${layer} names more or fewer than one block, so a house block named like it would pass unread`);
+  for (const layer of PRESET_LAYERS)
+    assert.equal(
+      blocks.filter((b) => shortName(b) === layer).length,
+      1,
+      `${layer} names more or fewer than one block, so a house block named like it would pass unread`,
+    );
   const isOff = (v: unknown): boolean => v === "off" || v === 0 || (Array.isArray(v) && (v[0] === "off" || v[0] === 0));
   const offs = blocks
     .filter((b) => !PRESET_LAYERS.includes(shortName(b)))
-    .flatMap((b) => Object.entries(b.rules ?? {}).filter(([, v]) => isOff(v)).map(([rule]) => `${b.name ?? "(unnamed)"}: ${rule}`));
+    .flatMap((b) =>
+      Object.entries(b.rules ?? {})
+        .filter(([, v]) => isOff(v))
+        .map(([rule]) => `${b.name ?? "(unnamed)"}: ${rule}`),
+    );
   assert.deepEqual(
     offs,
     ["Issue #653 ruling D: design/ archives its round tools as they ran: no-restricted-syntax"],
@@ -248,7 +448,9 @@ test("no block sets a rule off but typescript-eslint's own two layers and ruling
 });
 
 test("only the core recommended layer and the TypeScript block set no-empty, the second with the empty catch Alex ruled in, so no block can take it back for a subtree or a named file (Issue #654 ruling 9)", () => {
-  const setters = blocks.filter((b) => Object.hasOwn(b.rules ?? {}, "no-empty")).map((b) => `${(b.name ?? "(unnamed)").replace(/^.* > /, "")}: ${JSON.stringify(b.rules?.["no-empty"])}`);
+  const setters = blocks
+    .filter((b) => Object.hasOwn(b.rules ?? {}, "no-empty"))
+    .map((b) => `${(b.name ?? "(unnamed)").replace(/^.* > /, "")}: ${JSON.stringify(b.rules?.["no-empty"])}`);
   assert.deepEqual(
     setters,
     ['@eslint/js/recommended: "error"', '(unnamed): ["error",{"allowEmptyCatch":true}]'],
@@ -257,17 +459,29 @@ test("only the core recommended layer and the TypeScript block set no-empty, the
 });
 
 test("only the TypeScript block sets no-param-reassign, with property writes on and exactly the ruled names excused, so no block can narrow it for a subtree or a named file (Issue #654 rulings 4 and 5)", () => {
-  const setters = blocks.filter((b) => Object.hasOwn(b.rules ?? {}, "no-param-reassign")).map((b) => `${shortName(b)}: ${JSON.stringify(b.rules?.["no-param-reassign"])}`);
-  assert.deepEqual(setters, [`(unnamed): ${JSON.stringify(["error", PARAM_REASSIGN])}`], "a block other than the TypeScript block sets no-param-reassign, or that block's options are not the ruled ones, and a block over a subtree or one named file can take property writes back off or excuse another name there while every witness still resolves the ruled options");
+  const setters = blocks
+    .filter((b) => Object.hasOwn(b.rules ?? {}, "no-param-reassign"))
+    .map((b) => `${shortName(b)}: ${JSON.stringify(b.rules?.["no-param-reassign"])}`);
+  assert.deepEqual(
+    setters,
+    [`(unnamed): ${JSON.stringify(["error", PARAM_REASSIGN])}`],
+    "a block other than the TypeScript block sets no-param-reassign, or that block's options are not the ruled ones, and a block over a subtree or one named file can take property writes back off or excuse another name there while every witness still resolves the ruled options",
+  );
 });
 
 const LINT_TS_ROOTS = ["e2e", "scripts", "src", "test", "test-support"];
 const tsUnder = (dir: string): string[] =>
-  readdirSync(join(ROOT, dir), { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? tsUnder(join(dir, e.name)) : e.name.endsWith(".ts") ? [join(ROOT, dir, e.name)] : []));
-const bindingNames = (b: ts.BindingName): ts.Identifier[] => (ts.isIdentifier(b) ? [b] : b.elements.flatMap((e) => (ts.isOmittedExpression(e) ? [] : bindingNames(e.name))));
+  readdirSync(join(ROOT, dir), { withFileTypes: true }).flatMap((e) =>
+    e.isDirectory() ? tsUnder(join(dir, e.name)) : e.name.endsWith(".ts") ? [join(ROOT, dir, e.name)] : [],
+  );
+const bindingNames = (b: ts.BindingName): ts.Identifier[] =>
+  ts.isIdentifier(b) ? [b] : b.elements.flatMap((e) => (ts.isOmittedExpression(e) ? [] : bindingNames(e.name)));
 function parameterBindings(sf: ts.SourceFile, names?: ReadonlySet<string>): ts.Identifier[] {
   const out: ts.Identifier[] = [];
-  const visit = (n: ts.Node): void => { if (ts.isParameter(n)) out.push(...bindingNames(n.name).filter((id) => !names || names.has(id.text))); ts.forEachChild(n, visit); };
+  const visit = (n: ts.Node): void => {
+    if (ts.isParameter(n)) out.push(...bindingNames(n.name).filter((id) => !names || names.has(id.text)));
+    ts.forEachChild(n, visit);
+  };
   visit(sf);
   return out;
 }
@@ -275,15 +489,22 @@ function parameterBindings(sf: ts.SourceFile, names?: ReadonlySet<string>): ts.I
 async function excusedNames(): Promise<Set<string>> {
   const eslint = new ESLint({ cwd: ROOT, flags: ["unstable_native_nodejs_ts_config"] });
   const resolved = (await eslint.calculateConfigForFile(WITNESSES["src/**/*.ts"]!)) as Resolved;
-  const option = (resolved.rules?.["no-param-reassign"] as [number, { ignorePropertyModificationsFor?: string[] }?] | undefined)?.[1];
+  const option = (
+    resolved.rules?.["no-param-reassign"] as [number, { ignorePropertyModificationsFor?: string[] }?] | undefined
+  )?.[1];
   return new Set(option?.ignorePropertyModificationsFor ?? []);
 }
 
 const ARM_WITNESSES = join(ROOT, "test/repo/names-guard-witnesses.virtual.ts");
-const ARM_WITNESS_SOURCE = "export function witnesses(element: HTMLElement | null, inputShaped: { value: string }, readonlyRecord: { readonly a: HTMLElement }, nullableRecord: { readonly a: HTMLElement | null }, stateRecord: { n: number }, optionalMember: { id: string; n?: number }, withState: HTMLElement & { n: number }, indexed: { readonly a: HTMLElement; [k: string]: HTMLElement }, mutableRecord: { a: HTMLElement }, memberless: object): void {}\n";
+const ARM_WITNESS_SOURCE =
+  "export function witnesses(element: HTMLElement | null, inputShaped: { value: string }, readonlyRecord: { readonly a: HTMLElement }, nullableRecord: { readonly a: HTMLElement | null }, stateRecord: { n: number }, optionalMember: { id: string; n?: number }, withState: HTMLElement & { n: number }, indexed: { readonly a: HTMLElement; [k: string]: HTMLElement }, mutableRecord: { a: HTMLElement }, memberless: object): void {}\n";
 
 function compileWithWitnesses(roots: readonly string[]): ts.Program {
-  const config = ts.getParsedCommandLineOfConfigFile(join(ROOT, "tsconfig.json"), {}, { ...ts.sys, onUnRecoverableConfigFileDiagnostic: () => undefined });
+  const config = ts.getParsedCommandLineOfConfigFile(
+    join(ROOT, "tsconfig.json"),
+    {},
+    { ...ts.sys, onUnRecoverableConfigFileDiagnostic: () => undefined },
+  );
   assert.ok(config, "tsconfig.json did not parse");
   return compileWithVirtual(config.options, roots, new Map([[ARM_WITNESSES, ARM_WITNESS_SOURCE]]));
 }
@@ -291,29 +512,59 @@ function compileWithWitnesses(roots: readonly string[]): ts.Program {
 function pageElementTest(program: ts.Program): (t: ts.Type) => boolean {
   const checker = program.getTypeChecker();
   const inScope = checker.getSymbolsInScope(program.getSourceFile(ARM_WITNESSES)!, ts.SymbolFlags.Interface);
-  const dom = (name: string): ts.Type => checker.getDeclaredTypeOfSymbol(inScope.find((s) => s.name === name) ?? assert.fail(`the DOM library declares no ${name}, so this guard cannot tell an element from anything else`));
+  const dom = (name: string): ts.Type =>
+    checker.getDeclaredTypeOfSymbol(
+      inScope.find((s) => s.name === name) ??
+        assert.fail(`the DOM library declares no ${name}, so this guard cannot tell an element from anything else`),
+    );
   const [element, input] = [dom("Element"), dom("HTMLInputElement")];
-  const fromDom = (p: ts.Type): boolean => checker.isTypeAssignableTo(p, element) && (p.getSymbol()?.declarations ?? []).some((d) => program.isSourceFileDefaultLibrary(d.getSourceFile()));
-  const isElement = (t: ts.Type): boolean => { const own = checker.getNonNullableType(t); return (own.isUnion() ? own.types : [own]).every(fromDom); };
-  const readonlyMember = (m: ts.Symbol): boolean => (m.declarations ?? []).length > 0 && (m.declarations ?? []).every((d) => (ts.getCombinedModifierFlags(d) & ts.ModifierFlags.Readonly) !== 0);
+  const fromDom = (p: ts.Type): boolean =>
+    checker.isTypeAssignableTo(p, element) &&
+    (p.getSymbol()?.declarations ?? []).some((d) => program.isSourceFileDefaultLibrary(d.getSourceFile()));
+  const isElement = (t: ts.Type): boolean => {
+    const own = checker.getNonNullableType(t);
+    return (own.isUnion() ? own.types : [own]).every(fromDom);
+  };
+  const readonlyMember = (m: ts.Symbol): boolean =>
+    (m.declarations ?? []).length > 0 &&
+    (m.declarations ?? []).every((d) => (ts.getCombinedModifierFlags(d) & ts.ModifierFlags.Readonly) !== 0);
   return (t) => {
     const own = checker.getNonNullableType(t);
     const members = own.getProperties();
-    const elementShaped = checker.isTypeAssignableTo(input, own) && members.every((m) => input.getProperty(m.name) !== undefined);
-    return isElement(own) || (members.length > 0 && checker.getIndexInfosOfType(own).length === 0 && (elementShaped || members.every((m) => readonlyMember(m) && isElement(checker.getTypeOfSymbol(m)))));
+    const elementShaped =
+      checker.isTypeAssignableTo(input, own) && members.every((m) => input.getProperty(m.name) !== undefined);
+    return (
+      isElement(own) ||
+      (members.length > 0 &&
+        checker.getIndexInfosOfType(own).length === 0 &&
+        (elementShaped || members.every((m) => readonlyMember(m) && isElement(checker.getTypeOfSymbol(m)))))
+    );
   };
 }
 
 test("every parameter bearing a name no-param-reassign excuses holds a page element, and every excused name is borne, so the excuse reaches no state record (Alex, 2026-09-26, Issue #654 rulings 4 and 5)", async () => {
   const excused = await excusedNames();
-  assert.ok(excused.size > 0, "no-param-reassign excuses no parameter name, so this guard has nothing to check; ruling 5 excuses the page-element parameters by name");
-  const hitFiles = LINT_TS_ROOTS.flatMap(tsUnder).filter((f) => parameterBindings(ts.createSourceFile(f, readFileSync(f, "utf8"), ts.ScriptTarget.Latest, true), excused).length > 0);
+  assert.ok(
+    excused.size > 0,
+    "no-param-reassign excuses no parameter name, so this guard has nothing to check; ruling 5 excuses the page-element parameters by name",
+  );
+  const hitFiles = LINT_TS_ROOTS.flatMap(tsUnder).filter(
+    (f) =>
+      parameterBindings(ts.createSourceFile(f, readFileSync(f, "utf8"), ts.ScriptTarget.Latest, true), excused).length >
+      0,
+  );
   assert.ok(hitFiles.length > 0, "no parameter bears an excused name");
   const program = compileWithWitnesses(hitFiles);
   const checker = program.getTypeChecker();
   const holdsElements = pageElementTest(program);
-  const admitted = parameterBindings(program.getSourceFile(ARM_WITNESSES)!).filter((id) => holdsElements(checker.getTypeAtLocation(id))).map((id) => id.text);
-  assert.deepEqual(admitted, ["element", "inputShaped", "readonlyRecord", "nullableRecord"], "the guard's arms no longer admit exactly an element, an input-shaped type and a record of read-only elements among its witnesses: an arm stopped refusing what it must, or began refusing what it must admit");
+  const admitted = parameterBindings(program.getSourceFile(ARM_WITNESSES)!)
+    .filter((id) => holdsElements(checker.getTypeAtLocation(id)))
+    .map((id) => id.text);
+  assert.deepEqual(
+    admitted,
+    ["element", "inputShaped", "readonlyRecord", "nullableRecord"],
+    "the guard's arms no longer admit exactly an element, an input-shaped type and a record of read-only elements among its witnesses: an arm stopped refusing what it must, or began refusing what it must admit",
+  );
   const borne = new Set<string>();
   const offenders: string[] = [];
   for (const file of hitFiles) {
@@ -321,18 +572,52 @@ test("every parameter bearing a name no-param-reassign excuses holds a page elem
     for (const id of parameterBindings(sf, excused)) {
       borne.add(id.text);
       const t = checker.getTypeAtLocation(id);
-      if (!holdsElements(t)) offenders.push(`${relative(ROOT, file)}:${sf.getLineAndCharacterOfPosition(id.getStart(sf)).line + 1} ${id.text}: ${checker.typeToString(t)}`);
+      if (!holdsElements(t))
+        offenders.push(
+          `${relative(ROOT, file)}:${sf.getLineAndCharacterOfPosition(id.getStart(sf)).line + 1} ${id.text}: ${checker.typeToString(t)}`,
+        );
     }
   }
-  assert.deepEqual([...excused].filter((n) => !borne.has(n)), [], "no-param-reassign excuses a name no parameter bears, an excuse left behind after its parameter was renamed away");
-  assert.deepEqual(offenders, [], "a parameter bearing an excused name holds something other than a page element (a type the DOM library declares), an element-shaped type, or a record of read-only page elements, so a write into it goes unseen by no-param-reassign; rename it, or return a new value instead of writing (Issue #654 rulings 4 and 5). DECLARED, with their directions: an element-shaped type is one a DOM input element satisfies whose every member an input element also carries, so any record made only of such members ({ value: string }, { hidden: boolean }, { width: number; height: number }) passes, erring toward passing, a handbook/errata/guards.md row; a type with no members at all (object, {}) and a type parameter constrained to an element (T extends HTMLElement) fail, erring toward failing");
+  assert.deepEqual(
+    [...excused].filter((n) => !borne.has(n)),
+    [],
+    "no-param-reassign excuses a name no parameter bears, an excuse left behind after its parameter was renamed away",
+  );
+  assert.deepEqual(
+    offenders,
+    [],
+    "a parameter bearing an excused name holds something other than a page element (a type the DOM library declares), an element-shaped type, or a record of read-only page elements, so a write into it goes unseen by no-param-reassign; rename it, or return a new value instead of writing (Issue #654 rulings 4 and 5). DECLARED, with their directions: an element-shaped type is one a DOM input element satisfies whose every member an input element also carries, so any record made only of such members ({ value: string }, { hidden: boolean }, { width: number; height: number }) passes, erring toward passing, a handbook/errata/guards.md row; a type with no members at all (object, {}) and a type parameter constrained to an element (T extends HTMLElement) fail, erring toward failing",
+  );
 });
 
-const JS_REFUSED = ["x.js", "src/x.js", "scripts/x.mjs", "e2e/x.mjs", "test/x.cjs", "test-support/x.js", "public/x.js", ".claude/x.mjs", "x.jsx", "src/site/x.jsx"];
+const JS_REFUSED = [
+  "x.js",
+  "src/x.js",
+  "scripts/x.mjs",
+  "e2e/x.mjs",
+  "test/x.cjs",
+  "test-support/x.js",
+  "public/x.js",
+  ".claude/x.mjs",
+  "x.jsx",
+  "src/site/x.jsx",
+];
 const JS_ADMITTED = ["design/x.mjs", "design/round/x.js", "design/x.cjs", "design/round/x.jsx"];
-const JS_UNREAD = ["out/x.mjs", "out/probe/x.js", "dist/x.js", "public/explorer/app.bundle.js", "public/atlas/x.js", ".claude/worktrees/w/scripts/x.mjs", "node_modules/x/index.js"];
+const JS_UNREAD = [
+  "out/x.mjs",
+  "out/probe/x.js",
+  "dist/x.js",
+  "public/explorer/app.bundle.js",
+  "public/atlas/x.js",
+  ".claude/worktrees/w/scripts/x.mjs",
+  "node_modules/x/index.js",
+];
 const sourceFor = (path: string): string =>
-  path.endsWith(".jsx") ? "export const A = () => <b>x</b>;\n" : path.endsWith(".cjs") ? "module.exports = 1;\n" : "export const a = 1;\n";
+  path.endsWith(".jsx")
+    ? "export const A = () => <b>x</b>;\n"
+    : path.endsWith(".cjs")
+      ? "module.exports = 1;\n"
+      : "export const a = 1;\n";
 const DIRECTIVES = [
   "/* eslint-disable */\n",
   "/* eslint-disable no-restricted-syntax */\n",
@@ -346,17 +631,44 @@ test("through ESLint itself, a JavaScript file anywhere outside design/ is refus
   const verdict = async (path: string, lead = ""): Promise<string> => {
     if (await eslint.isPathIgnored(path)) return "unread";
     const [result] = await eslint.lintText(lead + sourceFor(path), { filePath: join(ROOT, path) });
-    const refused = result!.messages.some((m) => m.ruleId === "no-restricted-syntax" && m.severity === 2 && m.message.startsWith("JavaScript is not written here"));
-    return refused ? "refused" : result!.messages.length === 0 ? "admitted" : result!.messages.map((m) => `${m.ruleId ?? "parse"}: ${m.message}`).join(" | ");
+    const refused = result!.messages.some(
+      (m) =>
+        m.ruleId === "no-restricted-syntax" &&
+        m.severity === 2 &&
+        m.message.startsWith("JavaScript is not written here"),
+    );
+    return refused
+      ? "refused"
+      : result!.messages.length === 0
+        ? "admitted"
+        : result!.messages.map((m) => `${m.ruleId ?? "parse"}: ${m.message}`).join(" | ");
   };
-  for (const path of JS_REFUSED) assert.equal(await verdict(path), "refused", `${path} is not refused, so a JavaScript file there would lint green`);
+  for (const path of JS_REFUSED)
+    assert.equal(await verdict(path), "refused", `${path} is not refused, so a JavaScript file there would lint green`);
   for (const lead of DIRECTIVES) {
-    assert.equal(await verdict("src/x.mjs", lead), "refused", `a file opening ${JSON.stringify(lead)} escapes the refusal, so one comment line admits JavaScript anywhere`);
-    assert.equal(await verdict("design/round/x.mjs", lead), "admitted", `a design/ file opening ${JSON.stringify(lead)} is not admitted, though design/ is the one exemption ruling D names`);
+    assert.equal(
+      await verdict("src/x.mjs", lead),
+      "refused",
+      `a file opening ${JSON.stringify(lead)} escapes the refusal, so one comment line admits JavaScript anywhere`,
+    );
+    assert.equal(
+      await verdict("design/round/x.mjs", lead),
+      "admitted",
+      `a design/ file opening ${JSON.stringify(lead)} is not admitted, though design/ is the one exemption ruling D names`,
+    );
   }
-  for (const path of JS_ADMITTED) assert.equal(await verdict(path), "admitted", `${path} is not admitted, though design/ is the one exemption ruling D names`);
+  for (const path of JS_ADMITTED)
+    assert.equal(
+      await verdict(path),
+      "admitted",
+      `${path} is not admitted, though design/ is the one exemption ruling D names`,
+    );
   for (const path of JS_UNREAD) {
-    assert.equal(await verdict(path), "unread", `${path} is read, so gitignored build output or scratch trips the JavaScript refusal. BLIND SPOTS, declared: the unread set is whatever the root .gitignore ignores, and test/repo/lint-config.test.ts refuses any tracked file under it; a nested .gitignore and .git/info/exclude are not read, so a file only they ignore is refused, erring toward refusing, as is an untracked file no ignore file covers; an upper-case extension (X.JS) matches no JavaScript glob and is never read, erring toward passing; test/repo/lint-config.test.ts refuses a processor on any block; and a file that does not parse is refused by its parse error rather than by this rule's message`);
+    assert.equal(
+      await verdict(path),
+      "unread",
+      `${path} is read, so gitignored build output or scratch trips the JavaScript refusal. BLIND SPOTS, declared: the unread set is whatever the root .gitignore ignores, and test/repo/lint-config.test.ts refuses any tracked file under it; a nested .gitignore and .git/info/exclude are not read, so a file only they ignore is refused, erring toward refusing, as is an untracked file no ignore file covers; an upper-case extension (X.JS) matches no JavaScript glob and is never read, erring toward passing; test/repo/lint-config.test.ts refuses a processor on any block; and a file that does not parse is refused by its parse error rather than by this rule's message`,
+    );
   }
 });
 
@@ -367,8 +679,15 @@ test("npm run lint is the native-loader ESLint over the whole tree, with a warni
 
 test("npm run check is tsc over tsconfig.json, which turns on noUncheckedIndexedAccess (Issue #654 ruling 1), then over tsconfig.engine.json and tsconfig.worker.json (Issue #710), and ci.yml's check-and-test job runs it as a real step, so every pull request is held to all three passes", () => {
   const pkg = JSON.parse(src("package.json")) as { scripts: Record<string, string> };
-  assert.equal(pkg.scripts["check"], "tsc --noEmit && tsc --noEmit -p tsconfig.engine.json && tsc --noEmit -p tsconfig.worker.json");
-  const config = ts.getParsedCommandLineOfConfigFile(join(ROOT, "tsconfig.json"), {}, { ...ts.sys, onUnRecoverableConfigFileDiagnostic: () => undefined });
+  assert.equal(
+    pkg.scripts["check"],
+    "tsc --noEmit && tsc --noEmit -p tsconfig.engine.json && tsc --noEmit -p tsconfig.worker.json",
+  );
+  const config = ts.getParsedCommandLineOfConfigFile(
+    join(ROOT, "tsconfig.json"),
+    {},
+    { ...ts.sys, onUnRecoverableConfigFileDiagnostic: () => undefined },
+  );
   assert.ok(config, "tsconfig.json did not parse");
   assert.equal(config.options.noUncheckedIndexedAccess, true);
   assert.match(

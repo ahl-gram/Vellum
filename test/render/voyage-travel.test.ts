@@ -31,7 +31,10 @@ const isle = realWorld(526413615);
 
 test("prepareVoyageRouter: route matches routeVoyage leg for leg (one code path)", () => {
   const router = prepareVoyageRouter(isle.sites, isle.s);
-  assert.deepEqual(isle.plan.legs.map((l) => router.route(l)), routeVoyage(isle.plan.legs, isle.sites, isle.s));
+  assert.deepEqual(
+    isle.plan.legs.map((l) => router.route(l)),
+    routeVoyage(isle.plan.legs, isle.sites, isle.s),
+  );
 });
 
 test("legLength: symmetric, and measures the routed miles rather than the crow's flight", () => {
@@ -61,19 +64,21 @@ test("legLength: deterministic across two prepared routers", () => {
   }
 });
 
-const nearSeaOf = (w: number, h: number, land: ArrayLike<number>) => (p: Pt): boolean => {
-  const cx = Math.round(p.x);
-  const cy = Math.round(p.y);
-  for (let dy = -2; dy <= 2; dy++) {
-    for (let dx = -2; dx <= 2; dx++) {
-      const x = cx + dx;
-      const y = cy + dy;
-      if (x < 0 || x >= w || y < 0 || y >= h) continue;
-      if (land[x + y * w] === 0 && Math.hypot(p.x - x, p.y - y) <= 1.3) return true;
+const nearSeaOf =
+  (w: number, h: number, land: ArrayLike<number>) =>
+  (p: Pt): boolean => {
+    const cx = Math.round(p.x);
+    const cy = Math.round(p.y);
+    for (let dy = -2; dy <= 2; dy++) {
+      for (let dx = -2; dx <= 2; dx++) {
+        const x = cx + dx;
+        const y = cy + dy;
+        if (x < 0 || x >= w || y < 0 || y >= h) continue;
+        if (land[x + y * w] === 0 && Math.hypot(p.x - x, p.y - y) <= 1.3) return true;
+      }
     }
-  }
-  return false;
-};
+    return false;
+  };
 
 test("water span (#181): sea legs carry the span, coastal stubs stay short, and the pond-decoy port is the isle's one genuine inland handoff", () => {
   const router = prepareVoyageRouter(isle.sites, isle.s);

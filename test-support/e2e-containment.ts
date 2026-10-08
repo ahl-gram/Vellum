@@ -4,7 +4,11 @@ export const CTX_THROWING_WAITS: readonly string[] = ["waitSettled", "waitTurned
 
 export type FamilyFile = { readonly path: string; readonly text: string };
 export type Breach = { readonly at: string; readonly name: string };
-export type Containment = { readonly breaches: readonly Breach[]; readonly throwingCalls: number; readonly steps: readonly string[] };
+export type Containment = {
+  readonly breaches: readonly Breach[];
+  readonly throwingCalls: number;
+  readonly steps: readonly string[];
+};
 
 type Parsed = { readonly path: string; readonly sf: ts.SourceFile };
 type Region = { readonly node: ts.Node; readonly file: Parsed };
@@ -14,7 +18,8 @@ const isFunction = (n: ts.Node): n is ts.FunctionLikeDeclaration =>
 
 const stepLabel = (n: ts.Node): string | null => {
   const call = n.parent;
-  if (!(ts.isArrowFunction(n) || ts.isFunctionExpression(n)) || !ts.isCallExpression(call) || call.arguments[1] !== n) return null;
+  if (!(ts.isArrowFunction(n) || ts.isFunctionExpression(n)) || !ts.isCallExpression(call) || call.arguments[1] !== n)
+    return null;
   if (!ts.isIdentifier(call.expression) || call.expression.text !== "step") return null;
   const label = call.arguments[0];
   return label && ts.isStringLiteralLike(label) ? label.text : "(step)";
@@ -22,10 +27,12 @@ const stepLabel = (n: ts.Node): string | null => {
 
 const functionName = (n: ts.Node): string | null => {
   if (!isFunction(n)) return null;
-  if (ts.isFunctionDeclaration(n) || ts.isMethodDeclaration(n)) return n.name && (ts.isIdentifier(n.name) || ts.isStringLiteral(n.name)) ? n.name.text : null;
+  if (ts.isFunctionDeclaration(n) || ts.isMethodDeclaration(n))
+    return n.name && (ts.isIdentifier(n.name) || ts.isStringLiteral(n.name)) ? n.name.text : null;
   const p = n.parent;
   if (ts.isVariableDeclaration(p) && p.initializer === n && ts.isIdentifier(p.name)) return p.name.text;
-  if (ts.isPropertyAssignment(p) && p.initializer === n && (ts.isIdentifier(p.name) || ts.isStringLiteral(p.name))) return p.name.text;
+  if (ts.isPropertyAssignment(p) && p.initializer === n && (ts.isIdentifier(p.name) || ts.isStringLiteral(p.name)))
+    return p.name.text;
   return null;
 };
 
@@ -78,7 +85,7 @@ function throwers(named: ReadonlyMap<string, readonly Region[]>): ReadonlySet<st
     });
     return found;
   };
-  for (let grew = true; grew; ) {
+  for (let grew = true; grew;) {
     grew = false;
     for (const [name, regions] of named) {
       if (throwing.has(name) || !regions.some((r) => throwsIn(r.node))) continue;
@@ -104,7 +111,10 @@ function breachesIn(roots: readonly Region[], throwing: ReadonlySet<string>): Br
 
 // Blind spots, each with its direction: a function reached through an alias, a computed key, `.call` or `.bind`, or passed as a value (to `.finally`, `.then`, a callback), is not read as called, a miss; a function made by assignment (`later = async () => ...`) is no named function, so its body counts where it is written and a call to it is not read as a thrower, a miss (no instance today); two functions sharing a name in one family are read as one, a false red; a factory's returned anonymous function is read as part of the factory, so building it outside a step is a false red and calling its product outside a step after building it inside one is a miss (every factory in the tree is imported today, so the last clause covers them); a step reached by any name but `step` is not a step, a false red; a thrower in a shared support module is not seeded, a miss (the PR #572 errata row).
 export function containment(files: readonly FamilyFile[]): Containment {
-  const parsed: Parsed[] = files.map(({ path, text }) => ({ path, sf: ts.createSourceFile(path, text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS) }));
+  const parsed: Parsed[] = files.map(({ path, text }) => ({
+    path,
+    sf: ts.createSourceFile(path, text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS),
+  }));
   const { named, roots, steps } = survey(parsed);
   const throwing = throwers(named);
   let throwingCalls = 0;

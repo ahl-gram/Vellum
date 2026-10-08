@@ -57,10 +57,7 @@ function checkTerrainClue(world: World, x: number, y: number, clue: Clue): void 
   const counts = terrainCounts(world, x, y);
   const band = clue.subject as TerrainBand;
   assert.ok(band in counts, `terrain subject ${clue.subject} is a known band`);
-  assert.ok(
-    counts[band] >= TERRAIN_MIN,
-    `enough ${band} glyph cells near the quarry (${counts[band]})`,
-  );
+  assert.ok(counts[band] >= TERRAIN_MIN, `enough ${band} glyph cells near the quarry (${counts[band]})`);
 }
 
 function checkNearClue(world: World, q: Quarry, clue: Clue): void {
@@ -108,11 +105,7 @@ function checkClueGeometry(world: World, q: Quarry, clue: Clue): void {
       checkTerrainClue(world, x, y, clue);
       break;
     case "road":
-      assert.equal(
-        clue.subject,
-        roadState(world, x, y),
-        "road clue matches the network's true state at the quarry",
-      );
+      assert.equal(clue.subject, roadState(world, x, y), "road clue matches the network's true state at the quarry");
       break;
     case "near":
       checkNearClue(world, q, clue);
@@ -192,10 +185,7 @@ test("buildClues falls to exactly the three-line floor on a featureless quarry",
   } as unknown as World;
   const quarry: Quarry = { idx: 0, settlement: quarrySettlement as Quarry["settlement"] };
   const clues = buildClues(featureless, quarry);
-  assert.ok(
-    clues.length >= 3,
-    `expected at least the three-line floor; got ${clues.map((c) => c.kind).join(",")}`,
-  );
+  assert.ok(clues.length >= 3, `expected at least the three-line floor; got ${clues.map((c) => c.kind).join(",")}`);
   assert.equal(clues[0]!.kind, "framing", "the framing line opens the list");
   const kinds = clues.map((c) => c.kind);
   assert.ok(kinds.includes("ew") || kinds.includes("ns"), "a compass anchor survives the floor");
@@ -239,9 +229,7 @@ test("each day's DELIVERED clues narrow the field to <= 3 villages, or nothing u
     const gates = gatesFor(world, q, SWEEP_SVGS[wi]!);
     const clues = buildClues(world, q, gates);
     const pool = quarryPoolMirror(world);
-    const remaining = pool.filter(({ s }) =>
-      clues.every((c) => clueHoldsAt(world, c, s)),
-    );
+    const remaining = pool.filter(({ s }) => clues.every((c) => clueHoldsAt(world, c, s)));
     assert.ok(
       remaining.some(({ idx }) => idx === q.idx),
       `the quarry itself stays consistent with every clue (seed ${world.recipe.seed})`,

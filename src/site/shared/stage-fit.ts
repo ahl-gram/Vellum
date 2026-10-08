@@ -37,7 +37,10 @@ export function fitStage(input: StageInput): StageFit {
   const top = Math.max(0, ...input.above) + gap;
   const floor = Math.min(view.h, ...input.below);
   const bottom = view.h - floor + gap;
-  const right = Math.max(input.beside > 0 ? input.beside + SLIP_CLEARANCE : 0, ...(input.right ?? []).map((left) => view.w - left + gap));
+  const right = Math.max(
+    input.beside > 0 ? input.beside + SLIP_CLEARANCE : 0,
+    ...(input.right ?? []).map((left) => view.w - left + gap),
+  );
   const free = { w: Math.max(0, view.w - right), h: Math.max(0, view.h - top - bottom) };
   const w = Math.min(free.w, free.h * aspect);
   const room = Math.max(0, Math.min(view.w - right - 2 * gap, (view.h - 2 * gap) * aspect));

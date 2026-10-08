@@ -51,10 +51,21 @@ export function bindPrintRoom(roomEls: RoomFurniture, aspect: () => number | nul
   zoom.attach();
   bindGlassKeys(roomEls.viewport, zoom);
   const box = () => ({ W: roomEls.viewport.clientWidth || 1, H: roomEls.viewport.clientHeight || 1 });
-  const room = bindRoom({ frame: roomEls.stage, sheet: roomEls.sheet, aspect, camera: {
-    hold: () => { const { W, H } = box(); return cameraFromTransform(zoom.getState(), W, H); },
-    restore: (cam) => { const { W, H } = box(); zoom.refit(transformFromCamera(cam, W, H)); },
-  } });
+  const room = bindRoom({
+    frame: roomEls.stage,
+    sheet: roomEls.sheet,
+    aspect,
+    camera: {
+      hold: () => {
+        const { W, H } = box();
+        return cameraFromTransform(zoom.getState(), W, H);
+      },
+      restore: (cam) => {
+        const { W, H } = box();
+        zoom.refit(transformFromCamera(cam, W, H));
+      },
+    },
+  });
   return { room, rebase: () => zoom.rebase() };
 }
 
@@ -105,7 +116,10 @@ export function showMatter(roomEls: RoomFurniture, matter: Matter): void {
   roomEls.preview.hidden = true;
   roomEls.plateLine.textContent = matter.line;
   roomEls.viewport.dataset.baseLabel ??= roomEls.viewport.getAttribute("aria-label") ?? "";
-  roomEls.viewport.setAttribute("aria-label", `A page of the bound atlas: ${matter.title}. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet.`);
+  roomEls.viewport.setAttribute(
+    "aria-label",
+    `A page of the bound atlas: ${matter.title}. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet.`,
+  );
 }
 
 function restoreLabel(roomEls: RoomFurniture): void {

@@ -99,7 +99,11 @@ for (const [i, [flag, args, message]] of REFUSALS.entries()) {
   test(`chart refuses ${args.map((a) => JSON.stringify(a)).join(" ")} with "${message}", drawing nothing`, async (t) => {
     t.after(() => rm(TMP, { recursive: true, force: true }));
     await assert.rejects(() => draw([...SMALL, ...args], `refused-${flag}-${i}`), { message });
-    await assert.rejects(() => access(`${TMP}/refused-${flag}-${i}.svg`), { code: "ENOENT" }, "a refused flag writes no chart");
+    await assert.rejects(
+      () => access(`${TMP}/refused-${flag}-${i}.svg`),
+      { code: "ENOENT" },
+      "a refused flag writes no chart",
+    );
   });
 }
 
@@ -122,7 +126,11 @@ test("chart refuses a flag it does not know", async (t) => {
 
 test("an empty --scale means the default scale, 2", () => {
   assert.equal(chartOptions(parseChartArgs(["--scale", ""])).scale, 2);
-  assert.equal(chartOptions(parseChartArgs(["--scale", "3"])).scale, 3, "a given scale is read, so the default is not a hardcode");
+  assert.equal(
+    chartOptions(parseChartArgs(["--scale", "3"])).scale,
+    3,
+    "a given scale is read, so the default is not a hardcode",
+  );
 });
 
 test("every string flag that can refuse a value has a refusal row", () => {
@@ -130,7 +138,10 @@ test("every string flag that can refuse a value has a refusal row", () => {
   assert.ok(BOOLEAN_FLAGS.length > 0, "the roster sweep read no switches");
   for (const flag of STRING_FLAGS.filter((f) => f !== "out")) {
     const named = (arg: string | undefined): boolean => arg === `--${flag}` || (arg?.startsWith(`--${flag}=`) ?? false);
-    assert.ok(REFUSALS.some(([f, args]) => f === flag && named(args[0])), `--${flag} has no refusal row`);
+    assert.ok(
+      REFUSALS.some(([f, args]) => f === flag && named(args[0])),
+      `--${flag} has no refusal row`,
+    );
   }
 });
 

@@ -53,10 +53,7 @@ test("placeRank calls a non-capital realm seat a Realm Seat, not a Town", () => 
 
 test("placeRank calls a hamlet a Hamlet (#171)", () => {
   assert.equal(placeRank(mark({ kind: "hamlet" })), "Hamlet");
-  assert.equal(
-    placeAriaLabel(mark({ name: "Weki", kind: "hamlet" })),
-    "Weki, Hamlet",
-  );
+  assert.equal(placeAriaLabel(mark({ name: "Weki", kind: "hamlet" })), "Weki, Hamlet");
 });
 
 test("placeRank ranks capital above seat: realm 0's seat IS the grand capital", () => {
@@ -66,14 +63,8 @@ test("placeRank ranks capital above seat: realm 0's seat IS the grand capital", 
 
 test("placeAriaLabel is name + rank, so a ruin announces as it renders", () => {
   assert.equal(placeAriaLabel(mark({ name: "Caersan", kind: "capital" })), "Caersan, Capital");
-  assert.equal(
-    placeAriaLabel(mark({ name: "Dunmarrow", kind: "town", seat: true })),
-    "Dunmarrow, Realm Seat",
-  );
-  assert.equal(
-    placeAriaLabel(mark({ name: "Homaitani", kind: "village", ruined: true })),
-    "Homaitani, Ruin",
-  );
+  assert.equal(placeAriaLabel(mark({ name: "Dunmarrow", kind: "town", seat: true })), "Dunmarrow, Realm Seat");
+  assert.equal(placeAriaLabel(mark({ name: "Homaitani", kind: "village", ruined: true })), "Homaitani, Ruin");
 });
 
 test("composePlaceCard: a living town shows name/rank/founding and no tale", () => {
@@ -93,7 +84,11 @@ test("composePlaceCard: a ruin shows its abandonment tale, not its founding text
     ev({ kind: "war", settlement: 5, year: 500, text: "An unrelated war." }),
     ev({ kind: "ruin", settlement: 2, year: 600, text: "Homaitani was abandoned to the gulls." }),
   ];
-  const card = composePlaceCard(mark({ idx: 2, name: "Homaitani", kind: "village", ruined: true, founded: 400 }), events, "oromi");
+  const card = composePlaceCard(
+    mark({ idx: 2, name: "Homaitani", kind: "village", ruined: true, founded: 400 }),
+    events,
+    "oromi",
+  );
   assert.equal(card.tale, "Homaitani was abandoned to the gulls.");
   assert.notEqual(card.tale, "The hearths of Homaitani were first lit.", "must not surface the founding text");
   assert.equal(card.rank, "Ruin");
@@ -164,8 +159,8 @@ test("the hedge is drawn from the name, so a card reads the same way every time 
   const once = composeDerivation("Naukoa", "oromi");
   assert.deepEqual(composeDerivation("Naukoa", "oromi"), once);
   const hedges = new Set(
-    ["Naukoa", "Weki", "Paukilua", "Laukuwelua", "Laihoanui"].map(
-      (n) => composeDerivation(n, "oromi").derivationLine.split(". ").at(-1),
+    ["Naukoa", "Weki", "Paukilua", "Laukuwelua", "Laihoanui"].map((n) =>
+      composeDerivation(n, "oromi").derivationLine.split(". ").at(-1),
     ),
   );
   assert.ok(hedges.size > 1, `five names all hedge the same way: ${[...hedges].join(" / ")}`);

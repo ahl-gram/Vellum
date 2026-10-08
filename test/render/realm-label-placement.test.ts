@@ -2,10 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createProjection } from "../../src/render/transform.ts";
 import { centroidOf, type Box } from "../../src/render/geometry.ts";
-import {
-  placeRealmLabel,
-  type RealmLabelArena,
-} from "../../src/render/layers/realm-label-placement.ts";
+import { placeRealmLabel, type RealmLabelArena } from "../../src/render/layers/realm-label-placement.ts";
 
 // Stage 1 is the historical five-candidate vertical ladder and must win whenever it can (so the committed charts do not move); stage 2 searches the realm's heartland; stage 3 forces the label in and claims its box.
 const GRID_W = 40;
@@ -29,8 +26,13 @@ function openArena(): RealmLabelArena & { tries: Box[]; forced: Box[] } {
   return {
     tries,
     forced,
-    tryClaim(box) { tries.push(box); return true; },
-    claim(box) { forced.push(box); },
+    tryClaim(box) {
+      tries.push(box);
+      return true;
+    },
+    claim(box) {
+      forced.push(box);
+    },
   };
 }
 
@@ -41,8 +43,13 @@ function stubbornArena(refusals: number): RealmLabelArena & { tries: Box[]; forc
   return {
     tries,
     forced,
-    tryClaim(box) { tries.push(box); return n++ >= refusals; },
-    claim(box) { forced.push(box); },
+    tryClaim(box) {
+      tries.push(box);
+      return n++ >= refusals;
+    },
+    claim(box) {
+      forced.push(box);
+    },
   };
 }
 
@@ -99,8 +106,12 @@ test("stage 3: when nothing is free the label is FORCED in, and its box is claim
   const c = centroidOfBlob(blob);
   const arena: RealmLabelArena & { forced: Box[] } = {
     forced: [],
-    tryClaim() { return false; }, // a chart with no room anywhere
-    claim(box) { this.forced.push(box); },
+    tryClaim() {
+      return false;
+    }, // a chart with no room anywhere
+    claim(box) {
+      this.forced.push(box);
+    },
   };
 
   const p = placeRealmLabel({ ...base, blob, centroid: c, yCandidates: [c.y], arena });

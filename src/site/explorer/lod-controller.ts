@@ -62,7 +62,14 @@ export function createLodController(deps: Deps) {
 
   let world: WorldContext | null = null;
 
-  let inset: { el: HTMLDivElement; svg: string; band: number; window: UvWindow; title: string; seat: { lx: number; ly: number } | null } | null = null;
+  let inset: {
+    el: HTMLDivElement;
+    svg: string;
+    band: number;
+    window: UvWindow;
+    title: string;
+    seat: { lx: number; ly: number } | null;
+  } | null = null;
 
   let pencil: HTMLDivElement | null = null;
 
@@ -126,7 +133,13 @@ export function createLodController(deps: Deps) {
   }
 
   // The outgoing inset is torn down only once the incoming is fully opaque, so the reader never sees a gap frame.
-  function commitInset(band: number, window: UvWindow, seat: { lx: number; ly: number } | null, res: RegionJobResult, ms: string): void {
+  function commitInset(
+    band: number,
+    window: UvWindow,
+    seat: { lx: number; ly: number } | null,
+    res: RegionJobResult,
+    ms: string,
+  ): void {
     const rect = insetSheetRect(window, margins());
     const reduce = prefersReduce();
     const prevLabeled = reduce ? null : prevLabeledNames();
@@ -199,7 +212,9 @@ export function createLodController(deps: Deps) {
         if (myGen !== regionGen) return;
         hidePencil();
         const e = err as { message?: string } | null | undefined;
-        (deps.setError ?? setCaption)("The cartographer spilled the ink: " + (e && e.message ? e.message : String(err)));
+        (deps.setError ?? setCaption)(
+          "The cartographer spilled the ink: " + (e && e.message ? e.message : String(err)),
+        );
       });
   }
 
@@ -238,7 +253,10 @@ export function createLodController(deps: Deps) {
         currentBand,
       });
       if (decision.action === "noop") return;
-      if (decision.action === "world") { revertToWorld(); return; }
+      if (decision.action === "world") {
+        revertToWorld();
+        return;
+      }
       dispatchRegion(decision.band, decision.window, latticeFromSettle(cam, margins(), decision.band));
     },
 
@@ -284,9 +302,25 @@ export function createLodController(deps: Deps) {
     },
 
     /** The committed survey as the table's grammar states it, snapshotted so a settle mid-gesture cannot swap the sheet under the reader's hand. Null at the bare world sheet. The centre is the settle's own. */
-    committedSurvey(): { seed: number; overrides: Partial<WorldRecipe> | undefined; render: RenderOptions; band: number; seat: { lx: number; ly: number } | null; title: string; svg: string } | null {
+    committedSurvey(): {
+      seed: number;
+      overrides: Partial<WorldRecipe> | undefined;
+      render: RenderOptions;
+      band: number;
+      seat: { lx: number; ly: number } | null;
+      title: string;
+      svg: string;
+    } | null {
       if (!inset || !world) return null;
-      return { seed: world.seed, overrides: world.overrides, render: world.render, band: inset.band, seat: inset.seat, title: inset.title, svg: inset.svg };
+      return {
+        seed: world.seed,
+        overrides: world.overrides,
+        render: world.render,
+        band: inset.band,
+        seat: inset.seat,
+        title: inset.title,
+        svg: inset.svg,
+      };
     },
 
     state() {

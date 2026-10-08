@@ -17,10 +17,7 @@ const TOL = 5e-4;
 test("the sheet-height literals match their derivation across every carrier (#476)", () => {
   const derived = homeStage().sheetH;
   assert.ok(Number.isFinite(derived) && derived > 0, "the manifest derivation yields a real height");
-  assert.ok(
-    Math.abs(SHEET.h - derived) < TOL,
-    `camera SHEET.h ${SHEET.h} drifted from the derivation ${derived}`,
-  );
+  assert.ok(Math.abs(SHEET.h - derived) < TOL, `camera SHEET.h ${SHEET.h} drifted from the derivation ${derived}`);
 
   const carriers = [
     "public/index.css",

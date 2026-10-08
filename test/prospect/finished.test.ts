@@ -81,10 +81,7 @@ test("a ruined era keeps the founding in the year line and carries the ruin in t
   const ruinCases: Array<[Parameters<typeof makeInput>[0], string]> = [
     [{ kind: "town" }, "ruined An. 1150"],
     [{ kind: "capital" }, "thrown down An. 1150"],
-    [
-      { kind: "village", foreground: bandOf(["marsh", FOREGROUND_SAMPLES]) },
-      "lost to the waters An. 1150",
-    ],
+    [{ kind: "village", foreground: bandOf(["marsh", FOREGROUND_SAMPLES]) }, "lost to the waters An. 1150"],
   ];
   for (const [overrides, epithet] of ruinCases) {
     const input = makeInput({ ...overrides, ruined: true, ruinedYear: 1150 });
@@ -214,24 +211,45 @@ test("the finished plate honors the year in ground and lettering", () => {
 
 test("every place in a realm hangs the realm's arms in its wreath, from its founding (ruling D2, which overrules Issue #237's capitals and seats)", () => {
   for (const kind of ["capital", "seat", "town", "village", "hamlet"] as const) {
-    assert.ok(finishedPlateSvg(makeInput({ kind, arms: ARMS }), STYLES.antique, 1300).includes('class="vellum-arms"'), `a ${kind} hangs its realm's arms`);
+    assert.ok(
+      finishedPlateSvg(makeInput({ kind, arms: ARMS }), STYLES.antique, 1300).includes('class="vellum-arms"'),
+      `a ${kind} hangs its realm's arms`,
+    );
   }
-  assert.ok(!finishedPlateSvg(makeInput({ kind: "capital", arms: ARMS }), STYLES.antique, 1040).includes('class="vellum-arms"'), "no realm yet, no arms");
-  assert.ok(!finishedPlateSvg(makeInput({ kind: "town", arms: null }), STYLES.antique, 1300).includes('class="vellum-arms"'), "no realm, no arms");
-  assert.ok(!finishedPlateSvg(makeInput({ kind: "town", arms: ARMS }), STYLES.antique, 1300, { surroundings: { ...NO_SURROUNDINGS, realmProclaimed: false } }).includes('class="vellum-arms"'), "a realm not yet proclaimed hangs no arms");
+  assert.ok(
+    !finishedPlateSvg(makeInput({ kind: "capital", arms: ARMS }), STYLES.antique, 1040).includes('class="vellum-arms"'),
+    "no realm yet, no arms",
+  );
+  assert.ok(
+    !finishedPlateSvg(makeInput({ kind: "town", arms: null }), STYLES.antique, 1300).includes('class="vellum-arms"'),
+    "no realm, no arms",
+  );
+  assert.ok(
+    !finishedPlateSvg(makeInput({ kind: "town", arms: ARMS }), STYLES.antique, 1300, {
+      surroundings: { ...NO_SURROUNDINGS, realmProclaimed: false },
+    }).includes('class="vellum-arms"'),
+    "a realm not yet proclaimed hangs no arms",
+  );
 });
 
 test("the plate wears its named furniture: the name alone in the cartouche, the epithet and founding on the banderole, the footer, the double frame", () => {
   const capital = finishedPlateSvg(makeInput({ kind: "capital", harbor: true }), STYLES.antique, 1300);
   assert.ok(capital.includes('aria-label="TESTHOLM"'), "the cartouche holds the name alone");
-  assert.ok(capital.includes('aria-label="chief port of Testrealm, founded An. 1100"'), "the banderole carries the epithet and the founding");
+  assert.ok(
+    capital.includes('aria-label="chief port of Testrealm, founded An. 1100"'),
+    "the banderole carries the epithet and the founding",
+  );
   assert.ok(capital.includes('aria-label="FOUNDED AN. 1100 · VELLUM · CHART № 4242"'), "the footer");
   assert.ok(capital.includes('width="500"') && capital.includes('width="492"'), "the double-rule frame");
   assert.ok(!/<text\b/.test(capital), "every run is engraved, none left as device text");
 });
 
 test("the key panel renders when entries exist and is omitted when empty", () => {
-  const keyed = finishedPlateSvg(makeInput({ kind: "capital", harbor: true, foreground: bandOf(["beach", FOREGROUND_SAMPLES]) }), STYLES.antique, 1300);
+  const keyed = finishedPlateSvg(
+    makeInput({ kind: "capital", harbor: true, foreground: bandOf(["beach", FOREGROUND_SAMPLES]) }),
+    STYLES.antique,
+    1300,
+  );
   assert.ok(keyed.includes('aria-label="1. The Keep"'), "the panel numbers the keep");
   const bare = finishedPlateSvg(makeInput({ kind: "hamlet", realmName: null }), STYLES.antique, 1300);
   assert.ok(!/aria-label="1\. /.test(bare), "a hamlet with nothing to key draws no panel");
@@ -242,10 +260,19 @@ test("a very long name shrinks its title and its cartouche stays inside the inne
   const plate = engravePlate(makeInput({ name }), STYLES.antique, 1300);
   const cartouche = plate.furniture.cartouche;
   assert.ok(cartouche.length > 0, "the cartouche reports its boxes");
-  for (const b of cartouche) assert.ok(b.x0 >= INNER.x0 && b.x1 <= INNER.x1, `a cartouche box runs past the frame: ${JSON.stringify(b)}`);
-  const titleScale = (text: string, svg: string): number => Number(new RegExp(`aria-label="${text}" fill="[^"]*" transform="translate\\([^)]*\\) scale\\(([0-9.e-]+)\\)"`).exec(svg)?.[1]);
+  for (const b of cartouche)
+    assert.ok(b.x0 >= INNER.x0 && b.x1 <= INNER.x1, `a cartouche box runs past the frame: ${JSON.stringify(b)}`);
+  const titleScale = (text: string, svg: string): number =>
+    Number(
+      new RegExp(`aria-label="${text}" fill="[^"]*" transform="translate\\([^)]*\\) scale\\(([0-9.e-]+)\\)"`).exec(
+        svg,
+      )?.[1],
+    );
   const full = layoutRun({ text: "TESTHOLM", x: 0, y: 0, size: 13, fill: "#000" }).scale * GRID;
-  assert.ok(Math.abs(titleScale("TESTHOLM", finishedPlateSvg(makeInput({}), STYLES.antique, 1300)) - full) < 1e-5, "a name that fits is set at the round's title size, 13");
+  assert.ok(
+    Math.abs(titleScale("TESTHOLM", finishedPlateSvg(makeInput({}), STYLES.antique, 1300)) - full) < 1e-5,
+    "a name that fits is set at the round's title size, 13",
+  );
   assert.ok(titleScale(name.toUpperCase(), renderSvg(plate.node)) < full * 0.9, "the long name is set smaller");
 });
 
@@ -260,8 +287,8 @@ test("the two ratified dresses render; the others refuse", () => {
 test("the picture lies under the parchment grain; the named furniture rides above it", () => {
   const antique = finishedPlateSvg(makeInput({}), STYLES.antique, 1300);
   const rise = antique.indexOf(`fill="${STYLES.antique.limner!.grassDeep}"`);
-  const grain = antique.indexOf("filter=\"url(#prospect-parch-");
-  const furniture = antique.indexOf("class=\"pc-");
+  const grain = antique.indexOf('filter="url(#prospect-parch-');
+  const furniture = antique.indexOf('class="pc-');
   assert.ok(rise >= 0 && grain >= 0 && furniture >= 0, JSON.stringify({ rise, grain, furniture }));
   assert.ok(rise < grain && grain < furniture, "the rise, then the grain, then the cartouche");
 });
@@ -269,7 +296,11 @@ test("the picture lies under the parchment grain; the named furniture rides abov
 test("the same finished tuple renders byte-identically", () => {
   const input = makeInput({ kind: "capital", harbor: true, arms: ARMS });
   for (const style of [STYLES.antique, STYLES.ink]) {
-    assert.equal(finishedPlateSvg(input, style, 1300), finishedPlateSvg(input, style, 1300), `${style.name}: the finish is pure`);
+    assert.equal(
+      finishedPlateSvg(input, style, 1300),
+      finishedPlateSvg(input, style, 1300),
+      `${style.name}: the finish is pure`,
+    );
   }
 });
 
@@ -278,7 +309,10 @@ const SURROUNDED: Surroundings = {
   seaName: "The Great Woaku",
   riverName: "The Waters of Lalo",
   rangeName: null,
-  roadTowns: [{ index: 1, name: "Haireno", kind: "town", lateral: 0.39, dist: 21 }, { index: 2, name: "Nanawotani", kind: "village", lateral: -0.5, dist: 30 }],
+  roadTowns: [
+    { index: 1, name: "Haireno", kind: "town", lateral: 0.39, dist: 21 },
+    { index: 2, name: "Nanawotani", kind: "village", lateral: -0.5, dist: 30 },
+  ],
   roadCount: 3,
   beast: { name: "Kaipu", epithet: "the Weed That Wakes", lateral: -0.2 },
   realmProclaimed: true,
@@ -301,16 +335,27 @@ const PINNED: ReadonlyArray<{ name: string; year: number; style: "antique" | "in
 
 test("finished plates are byte-pinned across the eras and the dresses", () => {
   const fixtures = {
-    harborCapital: { input: makeInput({ kind: "capital", harbor: true, foreground: bandOf(["beach", FOREGROUND_SAMPLES]) }), surroundings: SURROUNDED },
+    harborCapital: {
+      input: makeInput({ kind: "capital", harbor: true, foreground: bandOf(["beach", FOREGROUND_SAMPLES]) }),
+      surroundings: SURROUNDED,
+    },
     ruinedTown: { input: makeInput({ ruined: true, ruinedYear: 1150 }), surroundings: undefined },
     riverVillage: { input: makeInput({ kind: "village", onRiver: true }), surroundings: undefined },
     fieldsHamlet: { input: makeInput({ kind: "hamlet" }), surroundings: undefined },
-    drownedVillage: { input: makeInput({ kind: "village", ruined: true, foreground: bandOf(["marsh", FOREGROUND_SAMPLES]) }), surroundings: undefined },
+    drownedVillage: {
+      input: makeInput({ kind: "village", ruined: true, foreground: bandOf(["marsh", FOREGROUND_SAMPLES]) }),
+      surroundings: undefined,
+    },
   };
   assert.ok(PINNED.length >= 8, "the pins cover every fixture in both dresses and the eras");
   for (const { name, year, style, sum } of PINNED) {
     const fx = fixtures[name as keyof typeof fixtures];
-    const svg = finishedPlateSvg(fx.input, STYLES[style], year, fx.surroundings === undefined ? {} : { surroundings: fx.surroundings });
+    const svg = finishedPlateSvg(
+      fx.input,
+      STYLES[style],
+      year,
+      fx.surroundings === undefined ? {} : { surroundings: fx.surroundings },
+    );
     assert.equal(fnv1a(svg), sum, `${name}/${style}/An. ${year}: pinned plate checksum`);
   }
 });

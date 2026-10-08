@@ -9,7 +9,14 @@ import { STYLES, type StyleName } from "../../src/render/style.ts";
 import type { World } from "../../src/world/types.ts";
 import { plateDressFor } from "../../src/prospect/dress/context.ts";
 import { resolveProspectIndex, prospectResultFor } from "../../src/site/explorer/prospect-job.ts";
-import { runInline, runJob, type AtlasJob, type DrawJob, type ProspectJob, type RenderJob } from "../../src/site/explorer/worker-client.ts";
+import {
+  runInline,
+  runJob,
+  type AtlasJob,
+  type DrawJob,
+  type ProspectJob,
+  type RenderJob,
+} from "../../src/site/explorer/worker-client.ts";
 
 const world = generateWorld(defaultRecipe(42));
 const capital = world.settlements.findIndex((s) => s.kind === "capital");
@@ -79,17 +86,37 @@ test("prospectResultFor carries the engraver's note: the era, the epithet, the f
   assert.equal(res.era, e.era);
   assert.equal(res.epithet, e.caption.epithet);
   assert.equal(res.founded, world.settlements[1]!.founded);
-  assert.deepEqual(res.key, e.key.map((k) => ({ letter: k.letter, label: k.label })), "the key rows, letter and label only (the plate keeps the coordinates)");
+  assert.deepEqual(
+    res.key,
+    e.key.map((k) => ({ letter: k.letter, label: k.label })),
+    "the key rows, letter and label only (the plate keeps the coordinates)",
+  );
   assert.ok(res.key.length > 0, "premise: the plate has a key to list");
-  const todays = (i: number) => createLoreWriter(world, createRng(42).fork("seed-of-the-day")).settlementNote(world.settlements[i]!);
+  const todays = (i: number) =>
+    createLoreWriter(world, createRng(42).fork("seed-of-the-day")).settlementNote(world.settlements[i]!);
   assert.equal(res.note, todays(1));
-  assert.equal(prospectResultFor(world, { index: capital, dress: "antique", year: null }).note, todays(capital), "the capital's note is the line Today's card shows for this seed");
+  assert.equal(
+    prospectResultFor(world, { index: capital, dress: "antique", year: null }).note,
+    todays(capital),
+    "the capital's note is the line Today's card shows for this seed",
+  );
   assert.notEqual(res.note, todays(capital), "premise: the fork is not handing every town one note");
   const early = prospectResultFor(world, { index: 1, dress: "antique", year: 300 });
   assert.equal(early.era, "before-founding");
-  const town = new Set(["The Keep", "The Bridge Gate", "The Quay", "The Mole", "The Jetty", "The Weir Mill", "The Weir"]);
+  const town = new Set([
+    "The Keep",
+    "The Bridge Gate",
+    "The Quay",
+    "The Mole",
+    "The Jetty",
+    "The Weir Mill",
+    "The Weir",
+  ]);
   assert.equal(early.key[0]?.label, world.names.sea, "the bare ground keys the sea it stands on");
-  assert.ok(early.key.every((k) => !town.has(k.label) && !k.label.startsWith("The road to ")), "and the world alone: no town and no road yet");
+  assert.ok(
+    early.key.every((k) => !town.has(k.label) && !k.label.startsWith("The road to ")),
+    "and the world alone: no town and no road yet",
+  );
 });
 
 test("prospectResultFor says whether a road leaves the place: yes for a roaded town, no for seed 42's orphan", () => {
@@ -98,13 +125,20 @@ test("prospectResultFor says whether a road leaves the place: yes for a roaded t
   assert.ok(orphan >= 0, "premise: seed 42 has a settlement no road leaves");
   assert.equal(prospectResultFor(world, { index: 1, dress: "antique", year: null }).roads, true);
   assert.equal(prospectResultFor(world, { index: orphan, dress: "antique", year: null }).roads, false);
-  assert.equal(prospectResultFor(world, { index: capital, dress: "antique", year: null }).roads, true, "the capital is the road network's root");
+  assert.equal(
+    prospectResultFor(world, { index: capital, dress: "antique", year: null }).roads,
+    true,
+    "the capital is the road network's root",
+  );
 });
 
 type Answer = { readonly id?: number; readonly ready?: boolean; readonly ok?: boolean; readonly error?: string };
 const answers: Answer[] = [];
 const waiting = new Map<number, (a: Answer) => void>();
-const scope: { onmessage: ((e: { data: RenderJob & { id: number } }) => void) | null; postMessage: (m: Answer) => void } = {
+const scope: {
+  onmessage: ((e: { data: RenderJob & { id: number } }) => void) | null;
+  postMessage: (m: Answer) => void;
+} = {
   onmessage: null,
   postMessage: (m) => {
     answers.push(m);
@@ -116,7 +150,11 @@ const theWorker = (): Promise<void> =>
   (booted ??= (async () => {
     Object.assign(globalThis, { self: scope });
     await import("../../src/site/explorer/worker.ts");
-    assert.deepEqual(answers[0], { ready: true }, "the worker did not hand-shake through the stand-in for its scope, so every answer read below would be read from nothing");
+    assert.deepEqual(
+      answers[0],
+      { ready: true },
+      "the worker did not hand-shake through the stand-in for its scope, so every answer read below would be read from nothing",
+    );
   })());
 let lastId = 0;
 const post = (job: RenderJob): { readonly id: number; readonly answered: Promise<Answer> } => {
@@ -127,7 +165,12 @@ const post = (job: RenderJob): { readonly id: number; readonly answered: Promise
 };
 const PROSPECT: ProspectJob = { kind: "prospect", seed: 42, overrides: {}, index: 1, dress: "ink", year: 300 };
 const ATLAS: AtlasJob = { kind: "atlas", seed: 42, overrides: {}, width: 1500, bannerStyle: "ink" };
-const DRAW: DrawJob = { kind: "draw", seed: 42, overrides: {}, render: { style: "antique", widthPx: 1500, legend: true } };
+const DRAW: DrawJob = {
+  kind: "draw",
+  seed: 42,
+  overrides: {},
+  render: { style: "antique", widthPx: 1500, legend: true },
+};
 
 test("the worker answers in the order it was asked, a plate job waiting on its code included (Issue #801)", async () => {
   await theWorker();
@@ -135,8 +178,16 @@ test("the worker answers in the order it was asked, a plate job waiting on its c
     const first = post(plate);
     const second = post(DRAW);
     const both = await Promise.all([first.answered, second.answered]);
-    assert.deepEqual(both.map((a) => a.ok), [true, true], `the ${plate.kind} job or the draw behind it failed: ${both.map((a) => a.error ?? "ok").join(", ")}`);
-    assert.deepEqual(answers.map((a) => a.id).filter((id) => id === first.id || id === second.id), [first.id, second.id], `a draw posted behind a ${plate.kind} job was answered first`);
+    assert.deepEqual(
+      both.map((a) => a.ok),
+      [true, true],
+      `the ${plate.kind} job or the draw behind it failed: ${both.map((a) => a.error ?? "ok").join(", ")}`,
+    );
+    assert.deepEqual(
+      answers.map((a) => a.id).filter((id) => id === first.id || id === second.id),
+      [first.id, second.id],
+      `a draw posted behind a ${plate.kind} job was answered first`,
+    );
   }
 });
 
@@ -153,13 +204,24 @@ test("a job that fails comes back as its own error and leaves the jobs behind it
   assert.equal(typeof bad.error, "string", "the worker's failure answer carries no error text");
   assert.equal(good.ok, true, `the job posted behind a failure failed too: ${good.error ?? ""}`);
   await assert.rejects(runJob(BROKEN), "the backup copy resolved a job that threw");
-  assert.equal(await runJob(DRAW).then((r) => r.ok, (err: unknown) => String(err)), true, "a job run by the backup copy after a failed one failed too");
+  assert.equal(
+    await runJob(DRAW).then(
+      (r) => r.ok,
+      (err: unknown) => String(err),
+    ),
+    true,
+    "a job run by the backup copy after a failed one failed too",
+  );
 });
 
 test("the worker and the backup copy answer a plate job alike, byte for byte (Issue #801)", async () => {
   await theWorker();
   for (const plate of [PROSPECT, ATLAS]) {
     const { id, answered } = post(plate);
-    assert.deepEqual(await answered, { id, ...(await runInline(plate)) }, `the worker's ${plate.kind} answer differs from the backup copy's`);
+    assert.deepEqual(
+      await answered,
+      { id, ...(await runInline(plate)) },
+      `the worker's ${plate.kind} answer differs from the backup copy's`,
+    );
   }
 });

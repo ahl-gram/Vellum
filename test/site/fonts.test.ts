@@ -63,9 +63,17 @@ test("the self-hosted woff2 files and their OFL license live in design/kit/fonts
   // OFL 1.1 requires the copyright + license accompany the redistributed fonts.
   const ofl = readFileSync(root("design/kit/fonts/OFL.txt"), "utf8");
   assert.match(ofl, /Open Font License/, "design/kit/fonts/OFL.txt should carry the OFL text");
-  assert.equal(relative(root(""), KIT_FONTS), join("design", "kit", "fonts"), "every reader of the faces takes this path");
+  assert.equal(
+    relative(root(""), KIT_FONTS),
+    join("design", "kit", "fonts"),
+    "every reader of the faces takes this path",
+  );
   // 2026-10-02: this git ls-files answers in under 10 ms on a Mac; thirty seconds is a cap on a hang, not a budget.
-  const tracked = spawnSync("git", ["ls-files", "--", "public/fonts"], { cwd: root(""), encoding: "utf8", timeout: 30_000 });
+  const tracked = spawnSync("git", ["ls-files", "--", "public/fonts"], {
+    cwd: root(""),
+    encoding: "utf8",
+    timeout: 30_000,
+  });
   assert.equal(tracked.status, 0, `git ls-files failed: ${tracked.stderr}`);
   assert.equal(tracked.stdout, "", "public/fonts/ is generated from the kit, so git tracks nothing there");
 });
@@ -75,7 +83,8 @@ const faceOf = (block: string): string => {
   const get = (prop: string): string => block.match(new RegExp(`${prop}:\\s*([^;]+);`))?.[1]?.trim() ?? "";
   return [get("font-family"), get("font-style"), get("font-weight"), get("font-display"), get("src")].join(" | ");
 };
-const facesIn = (css: string): string[] => [...css.matchAll(FACE)].map(([, block]) => faceOf(block!));
+const facesIn = (css: string): string[] =>
+  [...css.matchAll(FACE)].map(([, block]) => faceOf(block!.replaceAll("'", '"')));
 
 test("every face the site serves is a file in the kit, and the kit's own sheet declares the same faces for a design round", async () => {
   const site = facesIn(await readText("public/fonts.css"));
@@ -83,11 +92,18 @@ test("every face the site serves is a file in the kit, and the kit's own sheet d
   assert.equal(site.length, WOFF2.length, "public/fonts.css should declare one face per woff2");
   for (const face of site) {
     assert.match(face, /\| swap \|/, `${face} must use font-display: swap`);
-    const file = face.match(/url\('\/fonts\/([^']+)'\)/)?.[1];
+    const file = face.match(/url\("\/fonts\/([^"]+)"\)/)?.[1];
     assert.ok(file !== undefined, `${face} does not load from /fonts/`);
-    assert.ok(existsSync(root(`design/kit/fonts/${file}`)), `${file} is served at /fonts/ but is not in design/kit/fonts/`);
+    assert.ok(
+      existsSync(root(`design/kit/fonts/${file}`)),
+      `${file} is served at /fonts/ but is not in design/kit/fonts/`,
+    );
   }
-  assert.deepEqual(kit, site.map((face) => face.replace("url('/fonts/", "url('fonts/")), "design/kit/fonts.css should declare the site's faces with URLs relative to the kit");
+  assert.deepEqual(
+    kit,
+    site.map((face) => face.replace('url("/fonts/', 'url("fonts/')),
+    "design/kit/fonts.css should declare the site's faces with URLs relative to the kit",
+  );
 });
 
 test("the build copies every file of the kit into the site's fonts, byte for byte", async () => {
@@ -102,16 +118,31 @@ test("the build copies every file of the kit into the site's fonts, byte for byt
     assert.ok(existsSync(join(dir, "public", "fonts")), "the copy wrote no public/fonts/");
     const copied = readdirSync(join(dir, "public", "fonts")).sort();
     assert.deepEqual(copied, ["OFL.txt", "face.woff2"]);
-    for (const f of copied) assert.deepEqual(readFileSync(join(dir, "public", "fonts", f)), readFileSync(join(from, f)), f);
+    for (const f of copied)
+      assert.deepEqual(readFileSync(join(dir, "public", "fonts", f)), readFileSync(join(from, f)), f);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
-  assert.ok(GENERATED_SUBTREES.includes("fonts"), "public/fonts/ is generated, so the clean before regeneration owns it");
+  assert.ok(
+    GENERATED_SUBTREES.includes("fonts"),
+    "public/fonts/ is generated, so the clean before regeneration owns it",
+  );
   // 2026-10-02: this git check-ignore answers in under 10 ms on a Mac; thirty seconds is a cap on a hang, not a budget.
   const generated = ["OFL.txt", ...WOFF2].map((f) => `public/fonts/${f}`);
-  const ignored = spawnSync("git", ["check-ignore", "--no-index", "--", ...generated], { cwd: root(""), encoding: "utf8", timeout: 30_000 });
-  assert.ok(ignored.status === 0 || ignored.status === 1, `git check-ignore failed (${ignored.status}): ${ignored.stderr}`);
-  assert.deepEqual(ignored.stdout.split("\n").filter(Boolean).sort(), [...generated].sort(), "git does not ignore every generated face, so one could be committed beside the kit's");
+  const ignored = spawnSync("git", ["check-ignore", "--no-index", "--", ...generated], {
+    cwd: root(""),
+    encoding: "utf8",
+    timeout: 30_000,
+  });
+  assert.ok(
+    ignored.status === 0 || ignored.status === 1,
+    `git check-ignore failed (${ignored.status}): ${ignored.stderr}`,
+  );
+  assert.deepEqual(
+    ignored.stdout.split("\n").filter(Boolean).sort(),
+    [...generated].sort(),
+    "git does not ignore every generated face, so one could be committed beside the kit's",
+  );
 });
 
 test("npm run astro:generate's fonts step copies the real kit into the public directory it is given", () => {
@@ -122,7 +153,8 @@ test("npm run astro:generate's fonts step copies the real kit into the public di
     const run = spawnSync("node", ["scripts/kit-fonts.ts", dir], { cwd: root(""), encoding: "utf8", timeout: 60_000 });
     assert.equal(run.status, 0, `the step failed: ${run.stderr}`);
     assert.deepEqual(readdirSync(join(dir, "fonts")).sort(), ["OFL.txt", ...WOFF2].sort());
-    for (const f of WOFF2) assert.deepEqual(readFileSync(join(dir, "fonts", f)), readFileSync(root(`design/kit/fonts/${f}`)), f);
+    for (const f of WOFF2)
+      assert.deepEqual(readFileSync(join(dir, "fonts", f)), readFileSync(root(`design/kit/fonts/${f}`)), f);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
@@ -132,11 +164,7 @@ test("every page shell in the folio links /fonts.css (root-absolute, like /motio
   for (const page of AUTHORED_PAGES) {
     const html = await readText(page);
     assert.ok(html.length > 0, `${page} should exist`);
-    assert.match(
-      html,
-      /<link rel="stylesheet" href="\/fonts\.css">/,
-      `${page} should link the shared /fonts.css`,
-    );
+    assert.match(html, /<link rel="stylesheet" href="\/fonts\.css">/, `${page} should link the shared /fonts.css`);
   }
 });
 
@@ -185,7 +213,10 @@ test("the gallery page css defers the sub's voice to the house intro role (#324)
   try {
     await buildGallery(100, { count: 1, out: dir });
     const css = await readFile(join(dir, "index.css"), "utf8").catch(() => "");
-    assert.ok(!/p\.sub[^{]*\{[^}]*font-family/.test(css), "the sub's voice belongs to /house.css, not the generated css");
+    assert.ok(
+      !/p\.sub[^{]*\{[^}]*font-family/.test(css),
+      "the sub's voice belongs to /house.css, not the generated css",
+    );
     assert.ok(!existsSync(join(dir, "index.html")), "buildGallery must not write the standalone shell anymore");
   } finally {
     await rm(dir, { recursive: true, force: true });
@@ -202,6 +233,10 @@ test("boundary: the chart SVG lettering is untouched by the site's Punchcutter f
   assert.doesNotMatch(svg, /IM Fell|EB Garamond/, "chart <text> must not adopt the site chrome faces");
 
   const style = readFileSync(root("src/render/style.ts"), "utf8");
-  assert.match(style, /fontFamily:\s*"'Iowan Old Style'/, "the SVG font stack stays the Iowan serif (byte-determinism)");
+  assert.match(
+    style,
+    /fontFamily:\s*"'Iowan Old Style'/,
+    "the SVG font stack stays the Iowan serif (byte-determinism)",
+  );
   assert.doesNotMatch(style, /IM Fell|EB Garamond/, "no site-chrome face should leak into the SVG style");
 });

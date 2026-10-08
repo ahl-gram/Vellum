@@ -116,8 +116,12 @@ test("deterministic per seed: same inputs, same log", () => {
 
 test("varies across seeds: a different seed changes the flavor", () => {
   // Long enough that flavor draws several times, so two seeds almost certainly diverge on at least one clause.
-  const long = [origin, ...Array.from({ length: 8 }, (_, i) =>
-    port({ idx: i + 1, name: `Port${i + 1}`, kind: "village", founded: 800 + i, arrivalMode: "road" }))];
+  const long = [
+    origin,
+    ...Array.from({ length: 8 }, (_, i) =>
+      port({ idx: i + 1, name: `Port${i + 1}`, kind: "village", founded: 800 + i, arrivalMode: "road" }),
+    ),
+  ];
   const a = buildVoyageLog(long, 1059, 42, SUBTITLE).entries.map((e) => e.text);
   const b = buildVoyageLog(long, 1059, 99, SUBTITLE).entries.map((e) => e.text);
   assert.notDeepEqual(a, b, "different seeds must yield different journals");
@@ -127,10 +131,16 @@ test("no flavor repeats within one voyage until the pool is exhausted", () => {
   // Identical road ports, so entries differ ONLY by drawn flavor; the first LAND_ARRIVALS.length arrivals must be distinct, and one more forces a wrap rather than a throw.
   const n = LAND_ARRIVALS.length;
   const clones = (count: number) =>
-    Array.from({ length: count }, (_, i) => port({ idx: i + 1, name: "Same", kind: "town", founded: 500, arrivalMode: "road" }));
-  const exact = buildVoyageLog([origin, ...clones(n)], 1059, 42, SUBTITLE).entries.slice(1).map((e) => e.text);
+    Array.from({ length: count }, (_, i) =>
+      port({ idx: i + 1, name: "Same", kind: "town", founded: 500, arrivalMode: "road" }),
+    );
+  const exact = buildVoyageLog([origin, ...clones(n)], 1059, 42, SUBTITLE)
+    .entries.slice(1)
+    .map((e) => e.text);
   assert.equal(new Set(exact).size, n, "no repeat before the pool is exhausted");
-  const over = buildVoyageLog([origin, ...clones(n + 1)], 1059, 42, SUBTITLE).entries.slice(1).map((e) => e.text);
+  const over = buildVoyageLog([origin, ...clones(n + 1)], 1059, 42, SUBTITLE)
+    .entries.slice(1)
+    .map((e) => e.text);
   assert.equal(new Set(over).size, n, "the (n+1)th arrival reuses a phrase, so the cycler wraps");
 });
 
@@ -145,7 +155,14 @@ test("pools are non-trivial and em-dash free (authored copy sanity)", () => {
 // The inland handoff narrative (Issue #181, ratified 2026-07-24).
 
 test("an inland handoff reads as the full ride-sail-ride narrative", () => {
-  const handoff = port({ idx: 2, name: "Meamere", kind: "village", founded: 420, arrivalMode: "sea", inlandHandoff: true });
+  const handoff = port({
+    idx: 2,
+    name: "Meamere",
+    kind: "village",
+    founded: 420,
+    arrivalMode: "sea",
+    inlandHandoff: true,
+  });
   const log = buildVoyageLog([origin, roadTown, handoff], 1059, 42, SUBTITLE);
   const text = log.entries[2]!.text;
   assert.match(
@@ -154,19 +171,36 @@ test("an inland handoff reads as the full ride-sail-ride narrative", () => {
     `the ratified three-part shape: "${text}"`,
   );
   assert.ok(!text.includes("made sail"), `a handoff never reads as a plain sail: "${text}"`);
-  assert.ok(HANDOFF_CLOSINGS.some((c) => text.includes(c)), `the closing comes from the pool: "${text}"`);
+  assert.ok(
+    HANDOFF_CLOSINGS.some((c) => text.includes(c)),
+    `the closing comes from the pool: "${text}"`,
+  );
 });
 
 test("the narrative names the PREVIOUS port: the ride to the coast departs where the survey last stood", () => {
   const other = port({ idx: 5, name: "Farhold", kind: "town", founded: 700, arrivalMode: "road" });
-  const handoff = port({ idx: 2, name: "Meamere", kind: "village", founded: 420, arrivalMode: "sea", inlandHandoff: true });
+  const handoff = port({
+    idx: 2,
+    name: "Meamere",
+    kind: "village",
+    founded: 420,
+    arrivalMode: "sea",
+    inlandHandoff: true,
+  });
   const log = buildVoyageLog([origin, other, handoff], 1059, 42, SUBTITLE);
   const text = log.entries[2]!.text;
   assert.ok(text.includes("rode from Farhold"), `the ride departs the previous port: "${text}"`);
 });
 
 test("only a sea arrival can hand off: the flag on a road leg still reads as a ride", () => {
-  const rode = port({ idx: 1, name: "Haireno", kind: "village", founded: 860, arrivalMode: "road", inlandHandoff: true });
+  const rode = port({
+    idx: 1,
+    name: "Haireno",
+    kind: "village",
+    founded: 860,
+    arrivalMode: "road",
+    inlandHandoff: true,
+  });
   const log = buildVoyageLog([origin, rode], 1059, 42, SUBTITLE);
   const text = log.entries[1]!.text;
   assert.ok(text.includes("rode on"), `a road arrival rides: "${text}"`);
@@ -176,8 +210,11 @@ test("only a sea arrival can hand off: the flag on a road leg still reads as a r
 test("handoff closings cycle without repeating until the pool is exhausted", () => {
   const n = HANDOFF_CLOSINGS.length;
   const handoffs = Array.from({ length: n }, (_, i) =>
-    port({ idx: i + 1, name: "Same", kind: "town", founded: 500, arrivalMode: "sea", inlandHandoff: true }));
-  const texts = buildVoyageLog([origin, ...handoffs], 1059, 42, SUBTITLE).entries.slice(1).map((e) => e.text);
+    port({ idx: i + 1, name: "Same", kind: "town", founded: 500, arrivalMode: "sea", inlandHandoff: true }),
+  );
+  const texts = buildVoyageLog([origin, ...handoffs], 1059, 42, SUBTITLE)
+    .entries.slice(1)
+    .map((e) => e.text);
   for (const text of texts) assert.ok(text.includes("took ship"), `every handoff narrates: "${text}"`);
   assert.equal(new Set(texts).size, n, "each handoff draws a fresh closing until the pool empties");
 });
@@ -238,7 +275,10 @@ test("a degraded straight closing leg comes home overland, never under sail", ()
   const text = log.entries[log.entries.length - 1]!.text;
   assert.ok(text.includes("overland"), `a straight homecoming presses overland: "${text}"`);
   assert.ok(!text.includes("made sail"), `it must never sail: "${text}"`);
-  assert.ok(LAND_HOMECOMINGS.some((c) => text.includes(c)), `land register: "${text}"`);
+  assert.ok(
+    LAND_HOMECOMINGS.some((c) => text.includes(c)),
+    `land register: "${text}"`,
+  );
 });
 
 test("a homecoming that hands off inland keeps #181's three-part ride-sail-ride shape", () => {
@@ -254,7 +294,10 @@ test("a homecoming that hands off inland keeps #181's three-part ride-sail-ride 
     `the ride departs the LAST port and lands below the capital: "${text}"`,
   );
   assert.ok(!text.includes("made sail"), `a handoff never reads as a plain sail: "${text}"`);
-  assert.ok(HANDOFF_CLOSINGS.some((c) => text.includes(c)), `the closing comes from the pool: "${text}"`);
+  assert.ok(
+    HANDOFF_CLOSINGS.some((c) => text.includes(c)),
+    `the closing comes from the pool: "${text}"`,
+  );
 });
 
 test("the homecoming draws off the same forked stream: deterministic per seed, varying across seeds", () => {
@@ -322,7 +365,10 @@ test("days are STRICTLY increasing: back-to-back short hops never share a day", 
     port({ idx: 3, name: "C", legLength: 1 }),
   ];
   const log = buildVoyageLog(hops, 1059, 42, SUBTITLE);
-  assert.deepEqual(log.entries.map((e) => e.day), [1, 2, 3, 4]);
+  assert.deepEqual(
+    log.entries.map((e) => e.day),
+    [1, 2, 3, 4],
+  );
 });
 
 test("the bump never outruns a real distance: a later long leg still lands on its computed day", () => {
@@ -347,7 +393,10 @@ test("the homecoming is dated after the last port, by its own leg", () => {
 test("days are a pure function of the legs: seeds move the flavor, never the calendar", () => {
   const a = buildVoyageLog(smallSurvey, 1059, 42, SUBTITLE, homeBySea);
   const b = buildVoyageLog(smallSurvey, 1059, 99, SUBTITLE, homeBySea);
-  assert.deepEqual(a.entries.map((e) => e.day), b.entries.map((e) => e.day));
+  assert.deepEqual(
+    a.entries.map((e) => e.day),
+    b.entries.map((e) => e.day),
+  );
 });
 
 test("every entry still carries the survey year in its data: only the display moved to days", () => {

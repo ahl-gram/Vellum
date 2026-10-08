@@ -7,15 +7,44 @@ import type { El } from "./element-shim.ts";
 
 /** The engine's whole public surface; the suites pin the SAME list for both host shapes. */
 export const API = [
-  "buildPlaceOverlay", "onDocKeydown", "onDocClick", "reclampCard", "relabelLay", "hideCard",
-  "applyAges", "rearmAges", "exitAges", "clearAges",
-  "agesSnapToRest", "agesState", "agesDragStart", "agesDragEnd",
-  "applyScrub", "exitScrub", "clearScrub", "cancelScrubRaf",
-  "pauseScrub", "togglePlay", "setPace", "onManualScrub", "scrubTo",
-  "scrubSnapToPresent", "scrubState",
-  "applyVoyage", "rearmVoyage", "exitVoyage", "clearVoyage", "cancelVoyageRaf",
-  "voyageSnapToRest", "voyageStepTo", "voyagePaintAt",
-  "voyagePlan", "voyageLog", "voyageDays", "voyageLegGeometry", "syncRestingTrack",
+  "buildPlaceOverlay",
+  "onDocKeydown",
+  "onDocClick",
+  "reclampCard",
+  "relabelLay",
+  "hideCard",
+  "applyAges",
+  "rearmAges",
+  "exitAges",
+  "clearAges",
+  "agesSnapToRest",
+  "agesState",
+  "agesDragStart",
+  "agesDragEnd",
+  "applyScrub",
+  "exitScrub",
+  "clearScrub",
+  "cancelScrubRaf",
+  "pauseScrub",
+  "togglePlay",
+  "setPace",
+  "onManualScrub",
+  "scrubTo",
+  "scrubSnapToPresent",
+  "scrubState",
+  "applyVoyage",
+  "rearmVoyage",
+  "exitVoyage",
+  "clearVoyage",
+  "cancelVoyageRaf",
+  "voyageSnapToRest",
+  "voyageStepTo",
+  "voyagePaintAt",
+  "voyagePlan",
+  "voyageLog",
+  "voyageDays",
+  "voyageLegGeometry",
+  "syncRestingTrack",
   "destroy",
 ] as const;
 
@@ -26,8 +55,12 @@ export const bareEl = (): HTMLElement => ({}) as unknown as HTMLElement;
 export function recordingStatus(): { el: HTMLElement; writes: string[] } {
   const writes: string[] = [];
   const el = {
-    get textContent(): string { return writes[writes.length - 1] ?? ""; },
-    set textContent(v: string) { writes.push(v); },
+    get textContent(): string {
+      return writes[writes.length - 1] ?? "";
+    },
+    set textContent(v: string) {
+      writes.push(v);
+    },
   };
   return { el: el as unknown as HTMLElement, writes };
 }
@@ -110,7 +143,7 @@ export function recordingSink(): {
 export function recordingChamber(): { calls: string[]; as<T>(): T } {
   const calls: string[] = [];
   const proxy = new Proxy({}, { get: (_t, prop: string) => () => calls.push(prop) });
-  return { calls, as: <T,>() => proxy as T };
+  return { calls, as: <T>() => proxy as T };
 }
 
 /** A scrubber whose elements record writes: enough to tell the REAL instrument and journal from the no-DOM stand-ins. */
@@ -161,12 +194,10 @@ export async function realWorld(): Promise<{ manifest: PlaceManifest; survey: Su
   return world42;
 }
 
-export async function barlessHost(
-  opts?: {
-    prospectHref?: (idx: number) => string;
-    layProspect?: { state: (idx: number) => { label: string; refuses: boolean }; lay: (idx: number) => void };
-  },
-): Promise<{ lc: LivingChart; mount: El; calls: string[] }> {
+export async function barlessHost(opts?: {
+  prospectHref?: (idx: number) => string;
+  layProspect?: { state: (idx: number) => { label: string; refuses: boolean }; lay: (idx: number) => void };
+}): Promise<{ lc: LivingChart; mount: El; calls: string[] }> {
   const [{ El }, { createLivingChart }] = await Promise.all([
     import("./element-shim.ts"),
     import("../src/site/living-chart/index.ts"),

@@ -152,7 +152,10 @@ async function inlinePlate(msg: AtlasJob | ProspectJob): Promise<AtlasResult | P
     return { ok: true, ...prospectResultFor(world, msg) };
   }
   const { composeAtlas } = await import("../../atlas/compose.ts");
-  return { ok: true, atlas: serializableAtlas(composeAtlas(world, { width: msg.width, bannerStyle: msg.bannerStyle })) };
+  return {
+    ok: true,
+    atlas: serializableAtlas(composeAtlas(world, { width: msg.width, bannerStyle: msg.bannerStyle })),
+  };
 }
 
 export function runInline(msg: DrawJob): DrawResult;
@@ -224,12 +227,18 @@ export function runJob(msg: RenderJob): Promise<JobResult> {
     });
   }
   // No worker: defer a macrotask so the status line paints before the main thread blocks on the inline render.
-  const next = inlineAnswering.then(() => new Promise<JobResult>((resolve, reject) => {
-    setTimeout(() => {
-      try { resolve(runInline(msg)); }
-      catch (err) { reject(err instanceof Error ? err : new Error(String(err))); }
-    }, 0);
-  }));
+  const next = inlineAnswering.then(
+    () =>
+      new Promise<JobResult>((resolve, reject) => {
+        setTimeout(() => {
+          try {
+            resolve(runInline(msg));
+          } catch (err) {
+            reject(err instanceof Error ? err : new Error(String(err)));
+          }
+        }, 0);
+      }),
+  );
   inlineAnswering = next.catch(() => undefined);
   return next;
 }
@@ -251,7 +260,9 @@ function connect(): Promise<Worker | null> {
     const fail = () => {
       if (settled) return;
       settled = true;
-      try { w.terminate(); } catch {}
+      try {
+        w.terminate();
+      } catch {}
       resolve(null);
     };
     const timer = setTimeout(fail, 4000);

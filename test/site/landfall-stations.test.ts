@@ -109,7 +109,14 @@ test("the slips are the sole home of the encounter copy, pinned verbatim (#459, 
     gallery:
       "Twelve worlds from twelve seeds: archipelagos, islands, and continents, each with its own name, realms, and coastline.",
   };
-  assert.deepEqual(Object.keys(copy).sort(), stations.map((s) => s.id).slice().sort(), "every station's copy is pinned");
+  assert.deepEqual(
+    Object.keys(copy).sort(),
+    stations
+      .map((s) => s.id)
+      .slice()
+      .sort(),
+    "every station's copy is pinned",
+  );
   for (const s of stations) {
     assert.equal(normalize(s.prose), copy[s.id], `${s.id}: the slip speaks the ratified copy, word for word`);
   }
@@ -158,13 +165,19 @@ test("the station flight frames the anchor beside the card, at the mockup's dept
 });
 
 test("UR1 an opened slip on a window narrower than the page takes the least sideways scroll that shows it whole, a margin clear (Alex, 2026-10-06, Issue #762; the slip measured at page 608 to 960)", () => {
-  const near = (got: number, want: number, why: string) => { assert.ok(Math.abs(got - want) < 1e-9, `${why}: got ${got}, want ${want}`); };
+  const near = (got: number, want: number, why: string) => {
+    assert.ok(Math.abs(got - want) < 1e-9, `${why}: got ${got}, want ${want}`);
+  };
   near(revealLeft(0, 640, 608, 960, 25.6), 345.6, "640: the slip's right edge comes in by the margin");
   near(revealLeft(0, 800, 608, 960, 25.6), 185.6, "800");
   near(revealLeft(0, 900, 608, 960, 25.6), 85.6, "900");
   near(revealLeft(0, 1024, 608, 960, 25.6), 0, "1024: already whole, no scroll");
   near(revealLeft(0, 560, 608, 960, 25.6), 425.6, "560");
-  near(revealLeft(0, 380, 608, 960, 25.6), 582.4, "380, narrower than the slip and its margins: the slip's left edge stands at the margin");
+  near(
+    revealLeft(0, 380, 608, 960, 25.6),
+    582.4,
+    "380, narrower than the slip and its margins: the slip's left edge stands at the margin",
+  );
   near(revealLeft(346, 640, 608, 960, 25.6), 346, "a slip already in the window leaves the scroll where it is");
   near(revealLeft(700, 640, 608, 960, 25.6), 582.4, "a slip left of the window brings its left edge in by the margin");
   near(revealLeft(0, 640, 10, 362, 25.6), 0, "never a scroll below 0");
@@ -189,12 +202,22 @@ test("the drift never breathes the marks layer open: a camera parked under the c
   const fit = 1;
   const justUnder = { x: 0, y: 0, s: fit * 1.55 * 0.995 };
   const held = driftTarget(justUnder, fit);
-  assert.equal(held.s, justUnder.s, "a breath that would cross 1.55 of fit pans without swelling, so the dots never pulse in and out");
+  assert.equal(
+    held.s,
+    justUnder.s,
+    "a breath that would cross 1.55 of fit pans without swelling, so the dots never pulse in and out",
+  );
   assert.equal(held.x, 14, "the pan half of the breath survives");
   const clear = { x: 0, y: 0, s: fit * 1.55 * 0.9 };
-  assert.ok(Math.abs(driftTarget(clear, fit).s - clear.s * 1.015) < 1e-12, "a camera clear of the threshold still swells");
+  assert.ok(
+    Math.abs(driftTarget(clear, fit).s - clear.s * 1.015) < 1e-12,
+    "a camera clear of the threshold still swells",
+  );
   const above = { x: 0, y: 0, s: fit * 1.6 };
-  assert.ok(Math.abs(driftTarget(above, fit).s - above.s * 1.015) < 1e-12, "a camera already close-in swells too: 1.015 up cannot cross back down");
+  assert.ok(
+    Math.abs(driftTarget(above, fit).s - above.s * 1.015) < 1e-12,
+    "a camera already close-in swells too: 1.015 up cannot cross back down",
+  );
 });
 
 test("home mounts the stations outside the dot layer's aria shroud, with the legend and four slips (#458)", () => {
@@ -221,7 +244,11 @@ test("home mounts the stations outside the dot layer's aria shroud, with the leg
 
 test("the hidden attribute is re-asserted where the slips could lose it (#458, the Sub 1 inert-hidden lesson)", () => {
   const css = liveCss("public/index.css");
-  assert.match(css, /\.lf-card\[hidden\]\s*\{\s*display:\s*none/, "a hidden slip stays hidden whatever .lf-card declares");
+  assert.match(
+    css,
+    /\.lf-card\[hidden\]\s*\{\s*display:\s*none/,
+    "a hidden slip stays hidden whatever .lf-card declares",
+  );
 });
 
 test("the station dress is the mockup's: pulse, diamond glyph, at-sea round, reduced-motion still (#458)", () => {
@@ -230,7 +257,10 @@ test("the station dress is the mockup's: pulse, diamond glyph, at-sea round, red
   assert.match(css, /@keyframes lf-station-pulse/, "the pulse ring breathes");
   assert.match(css, /\.lf-station\.at-sea/, "the at-sea station drops the diamond");
   const legend = css.match(/\.lf-legend \{([^}]*)\}/);
-  assert.ok(legend && /pointer-events:\s*none/.test(legend[1]!), "the legend chrome passes clicks through to the station beneath (plate-reader: the head swallowed the Reading Room icon's click)");
+  assert.ok(
+    legend && /pointer-events:\s*none/.test(legend[1]!),
+    "the legend chrome passes clicks through to the station beneath (plate-reader: the head swallowed the Reading Room icon's click)",
+  );
   const legendBtn = css.match(/\.lf-legend-btn \{([^}]*)\}/);
   assert.ok(legendBtn && /pointer-events:\s*auto/.test(legendBtn[1]!), "the legend's buttons take their clicks back");
   const reduced = css.match(/@media \(prefers-reduced-motion: reduce\) \{([\s\S]*?)\n\}/g)?.join("\n") ?? "";

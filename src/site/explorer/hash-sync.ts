@@ -100,7 +100,8 @@ export function writeHash(
   live?: Live | null,
   table?: ReadonlyArray<TableItem> | null,
 ): void {
-  const { seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, beastsChk, landSlider, coastSlider } = controls;
+  const { seedInput, styleSel, typeSel, bandSel, themeSel, legendChk, armsChk, beastsChk, landSlider, coastSlider } =
+    controls;
   const params = new URLSearchParams();
   params.set("seed", seedInput.value);
   params.set("style", styleSel.value);

@@ -20,8 +20,12 @@ function cardOf(nodes: El[]): { card: El; inner: El } {
     const dx = parseFloat(card.style.getPropertyValue("--pc-dx")) || 0;
     const dy = parseFloat(card.style.getPropertyValue("--pc-dy")) || 0;
     return {
-      left: base.left + dx, right: base.right + dx, top: base.top + dy, bottom: base.bottom + dy,
-      width: base.right - base.left, height: base.bottom - base.top,
+      left: base.left + dx,
+      right: base.right + dx,
+      top: base.top + dy,
+      bottom: base.bottom + dy,
+      width: base.right - base.left,
+      height: base.bottom - base.top,
     };
   };
   return { card, inner };
@@ -107,7 +111,11 @@ test("#387/#388 an open card is re-measured on demand, so a stale nudge cannot o
   overlay.reclampCard();
 
   assert.deepEqual(opened, { dx: "0px", dy: "0px" }, "the card fitted the box it was opened against");
-  assert.deepEqual(published(card), { dx: "0px", dy: "-40px" }, "the box moved under an open card and the nudge did not follow");
+  assert.deepEqual(
+    published(card),
+    { dx: "0px", dy: "-40px" },
+    "the box moved under an open card and the nudge did not follow",
+  );
 });
 
 test("#387/#388 re-clamping a card nobody opened does nothing at all", async () => {

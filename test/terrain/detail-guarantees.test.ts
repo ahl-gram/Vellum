@@ -35,11 +35,20 @@ function landmassCount(f: Field, seaLevel: number): number {
 test("the parent surface is sampled bilinearly, not nearest neighbour (#397)", () => {
   const ramp = createField(3, 3, (x) => x);
   const surface = parentSurfaceOnWindow(ramp, FULL, FULL, 5, 5);
-  assert.ok(Math.abs(surface.at(1, 1) - 0.5) < 1e-12, `expected the halfway sample to interpolate to 0.5, got ${surface.at(1, 1)}`);
-  assert.ok(Math.abs(surface.at(3, 2) - 1.5) < 1e-12, `expected 1.5 at the three-quarter sample, got ${surface.at(3, 2)}`);
+  assert.ok(
+    Math.abs(surface.at(1, 1) - 0.5) < 1e-12,
+    `expected the halfway sample to interpolate to 0.5, got ${surface.at(1, 1)}`,
+  );
+  assert.ok(
+    Math.abs(surface.at(3, 2) - 1.5) < 1e-12,
+    `expected 1.5 at the three-quarter sample, got ${surface.at(3, 2)}`,
+  );
   const vramp = createField(3, 3, (_x, y) => 10 * y);
   const vsurface = parentSurfaceOnWindow(vramp, FULL, FULL, 5, 5);
-  assert.ok(Math.abs(vsurface.at(2, 1) - 5) < 1e-12, `expected 5 at the vertical halfway sample, got ${vsurface.at(2, 1)}`);
+  assert.ok(
+    Math.abs(vsurface.at(2, 1) - 5) < 1e-12,
+    `expected 5 at the vertical halfway sample, got ${vsurface.at(2, 1)}`,
+  );
   const quarter = parentSurfaceOnWindow(ramp, FULL, { u0: 0, v0: 0, u1: 0.5, v1: 0.5 }, 3, 3);
   assert.equal(quarter.at(0, 0), ramp.at(0, 0));
   assert.ok(Math.abs(quarter.at(2, 2) - 1) < 1e-12, "child window corner must land on the parent's interpolated value");
@@ -63,7 +72,14 @@ test("the floor only ever raises, and leaves uncovered cells alone (#397)", () =
   assert.equal(out.at(0, 1), 0.9, "a cell above the parent surface must keep its own value");
   assert.equal(out.at(1, 1), 0.2, "an uncovered cell must keep the fine value");
   assert.deepEqual(Array.from(fine.data), [0.1, -0.4, 0.9, 0.2], "floorToParent must not mutate its input");
-  assert.throws(() => floorToParent(fine, createField(3, 2, () => 0)), RangeError);
+  assert.throws(
+    () =>
+      floorToParent(
+        fine,
+        createField(3, 2, () => 0),
+      ),
+    RangeError,
+  );
 });
 
 test("rejectBridges keeps new islets and spurs, rejects bridges whole (#397)", () => {
@@ -90,48 +106,30 @@ test("rejectBridges keeps new islets and spurs, rejects bridges whole (#397)", (
   assert.ok(out.at(4, 5) > SEA, "a new islet touching no shore must be kept");
   for (const x of [3, 4, 5]) {
     assert.ok(out.at(x, 3) < SEA, `bridge-component cell ${x},3 must go back to sea`);
-    assert.ok(Math.abs(out.at(x, 3) - (SEA - BRIDGE_REJECT_EPS)) < 1e-15, `a rejected cell sits just under the waterline, got ${out.at(x, 3)}`);
+    assert.ok(
+      Math.abs(out.at(x, 3) - (SEA - BRIDGE_REJECT_EPS)) < 1e-15,
+      `a rejected cell sits just under the waterline, got ${out.at(x, 3)}`,
+    );
   }
   assert.equal(landmassCount(out, SEA), 3, "two shores and the new islet, never a fused pair");
   assert.equal(landmassCount(coarse, SEA), 2);
 });
 
 test("a diagonal touch is not a bridge under 4-connectivity (#397)", () => {
-  const coarse = fieldFromRows([
-    "......",
-    ".##...",
-    ".##...",
-    "....#.",
-    "......",
-  ]);
-  const fine = fieldFromRows([
-    "......",
-    ".##...",
-    ".###..",
-    "....#.",
-    "......",
-  ]);
+  const coarse = fieldFromRows(["......", ".##...", ".##...", "....#.", "......"]);
+  const fine = fieldFromRows(["......", ".##...", ".###..", "....#.", "......"]);
   const out = rejectBridges(coarse, coarse, fine, SEA);
-  assert.ok(out.at(3, 2) > SEA, "a gained cell diagonal to a second landmass touches only one shore under 4-connectivity");
+  assert.ok(
+    out.at(3, 2) > SEA,
+    "a gained cell diagonal to a second landmass touches only one shore under 4-connectivity",
+  );
   assert.equal(landmassCount(out, SEA), 2, "the diagonal pair must stay two landmasses in the adjusted field");
 });
 
 test("two diagonal spurs are two one-touch components, never one bridge (#397)", () => {
   // An 8-connected labelling of the gained mask fuses these two spurs into one two-touch component and drowns both; the spur-to-landmass diagonal is pinned above.
-  const coarse = fieldFromRows([
-    "......",
-    "......",
-    ".#....",
-    "....#.",
-    "......",
-  ]);
-  const fine = fieldFromRows([
-    "......",
-    "......",
-    ".##...",
-    "...##.",
-    "......",
-  ]);
+  const coarse = fieldFromRows(["......", "......", ".#....", "....#.", "......"]);
+  const fine = fieldFromRows(["......", "......", ".##...", "...##.", "......"]);
   const out = rejectBridges(coarse, coarse, fine, SEA);
   assert.ok(out.at(2, 2) > SEA, "a spur off the left shore must survive its diagonal neighbour spur");
   assert.ok(out.at(3, 3) > SEA, "a spur off the right shore must survive its diagonal neighbour spur");
@@ -139,18 +137,8 @@ test("two diagonal spurs are two one-touch components, never one bridge (#397)",
 });
 
 test("rejectBridges rejects the whole bridging component, spur and neck alike (#397)", () => {
-  const coarse = fieldFromRows([
-    "........",
-    ".#....#.",
-    ".#....#.",
-    "........",
-  ]);
-  const fine = fieldFromRows([
-    "........",
-    ".######.",
-    ".#....#.",
-    "........",
-  ]);
+  const coarse = fieldFromRows(["........", ".#....#.", ".#....#.", "........"]);
+  const fine = fieldFromRows(["........", ".######.", ".#....#.", "........"]);
   const out = rejectBridges(coarse, coarse, fine, SEA);
   for (const x of [2, 3, 4, 5]) {
     assert.ok(out.at(x, 1) < SEA, `bridging component cell ${x},1 must be rejected with its neck, not trimmed`);
@@ -163,7 +151,11 @@ test("land gained over an uncovered coarse cell is still gained land (#397)", ()
   const coarse = fieldFrom(5, 1, Float64Array.from([0.5, -0.5, NaN, -0.5, 0.5]));
   const fine = fieldFrom(5, 1, Float64Array.from([0.5, 0.4, 0.4, 0.4, 0.5]));
   const out = rejectBridges(coarse, coarse, fine, SEA);
-  assert.equal(landmassCount(coarse, SEA), 2, "the uncovered cell reads as sea to labelLandmasses, so the shores start apart");
+  assert.equal(
+    landmassCount(coarse, SEA),
+    2,
+    "the uncovered cell reads as sea to labelLandmasses, so the shores start apart",
+  );
   assert.equal(landmassCount(out, SEA), 2, "a bridge running through an uncovered cell must still be rejected");
   for (const x of [1, 2, 3]) {
     assert.ok(out.at(x, 0) < SEA, `bridge cell ${x},0 must go back to sea even where the parent surface is NaN`);
@@ -171,11 +163,7 @@ test("land gained over an uncovered coarse cell is still gained land (#397)", ()
 });
 
 test("rejectBridges leaves coarse land untouched and never mutates its inputs (#397)", () => {
-  const coarse = fieldFromRows([
-    ".....",
-    ".##..",
-    ".....",
-  ]);
+  const coarse = fieldFromRows([".....", ".##..", "....."]);
   const fine = fieldFrom(5, 3, Float64Array.from(coarse.data));
   fine.data[1 + 1 * 5] = 0.9;
   fine.data[3 + 1 * 5] = 0.4;
@@ -184,8 +172,26 @@ test("rejectBridges leaves coarse land untouched and never mutates its inputs (#
   assert.equal(out.at(1, 1), 0.9, "a coarse-land cell keeps the fine value exactly");
   assert.ok(out.at(3, 1) > SEA, "a spur must be kept");
   assert.deepEqual(Array.from(fine.data), fineCopy, "rejectBridges must not mutate its input");
-  assert.throws(() => rejectBridges(coarse, coarse, createField(4, 3, () => 0), SEA), RangeError);
-  assert.throws(() => rejectBridges(coarse, createField(4, 3, () => 0), fine, SEA), RangeError);
+  assert.throws(
+    () =>
+      rejectBridges(
+        coarse,
+        coarse,
+        createField(4, 3, () => 0),
+        SEA,
+      ),
+    RangeError,
+  );
+  assert.throws(
+    () =>
+      rejectBridges(
+        coarse,
+        createField(4, 3, () => 0),
+        fine,
+        SEA,
+      ),
+    RangeError,
+  );
 });
 
 test("a saddle the drawn coast bridges can still split in the landmass array (#397)", () => {
@@ -241,7 +247,10 @@ test("the parent's own cell travels unblurred, nearest neighbour (#443)", () => 
   assert.equal(cells.at(1, 1), 1, "a child cell nearest parent column 1 must read that cell, not the interpolated 0.5");
   assert.equal(cells.at(0, 0), 0);
   const inner = { u0: 0.25, v0: 0.25, u1: 0.75, v1: 0.75 } as const;
-  assert.ok(Number.isNaN(parentCellsOnWindow(ramp, inner, FULL, 5, 5).at(0, 0)), "an uncovered child cell must stay NaN");
+  assert.ok(
+    Number.isNaN(parentCellsOnWindow(ramp, inner, FULL, 5, 5).at(0, 0)),
+    "an uncovered child cell must stay NaN",
+  );
 });
 
 test("a strait one cell wide in the parent stays open in the child (#443)", () => {
@@ -279,16 +288,8 @@ test("a fine-field bridge across a one-cell parent strait is rejected (#443)", (
 });
 
 test("rejection never takes land the world chart itself holds (#443)", () => {
-  const coarse = fieldFromRows([
-    ".....",
-    ".#.#.",
-    ".....",
-  ]);
-  const world = fieldFromRows([
-    ".....",
-    ".###.",
-    ".....",
-  ]);
+  const coarse = fieldFromRows([".....", ".#.#.", "....."]);
+  const world = fieldFromRows([".....", ".###.", "....."]);
   const fine = fieldFrom(5, 3, Float64Array.from(world.data));
   assert.ok(
     rejectBridges(coarse, coarse, fine, SEA).at(2, 1) < SEA,

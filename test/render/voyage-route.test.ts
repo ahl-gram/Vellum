@@ -6,12 +6,7 @@ import { survey, site, leg, isLand, realWorld } from "../../test-support/voyage-
 const cellsOf = (l: RoutedLeg) => l.points.map((p) => `${p.x},${p.y}`);
 
 test("both ports on the road network: mode is road and every vertex is a road cell", () => {
-  const s = survey([
-    "====",
-    "###=",
-    "###=",
-    "###=",
-  ]);
+  const s = survey(["====", "###=", "###=", "###="]);
   const roadSet = new Set(s.roads.flat().map(([x, y]) => `${x},${y}`));
   const routed = routeVoyage([leg(0, 1)], [site(0, 0, 0), site(1, 3, 3)], s);
   assert.equal(routed.length, 1);
@@ -20,11 +15,7 @@ test("both ports on the road network: mode is road and every vertex is a road ce
 });
 
 test("a road leg walks around water, never across it", () => {
-  const s = survey([
-    "=====",
-    "=...=",
-    "=====",
-  ]);
+  const s = survey(["=====", "=...=", "====="]);
   const routed = routeVoyage([leg(0, 1)], [site(0, 0, 1), site(1, 4, 1)], s);
   assert.equal(routed[0]!.mode, "road");
   for (const p of routed[0]!.points) assert.ok(isLand(s, p), `vertex ${p.x},${p.y} sits on water`);
@@ -34,33 +25,29 @@ test("no capital means no roads, so every leg falls back to a straight line", ()
   const s = survey(["#####", "#####"]);
   const routed = routeVoyage([leg(0, 1)], [site(0, 0, 0), site(1, 4, 1)], s);
   assert.equal(routed[0]!.mode, "straight");
-  assert.deepEqual(routed[0]!.points, [{ x: 0, y: 0 }, { x: 4, y: 1 }]);
+  assert.deepEqual(routed[0]!.points, [
+    { x: 0, y: 0 },
+    { x: 4, y: 1 },
+  ]);
 });
 
 test("a port off the road network takes road-to-nearest, then a straight hop", () => {
-  const s = survey([
-    "====#",
-    "#####",
-    "#####",
-  ]);
+  const s = survey(["====#", "#####", "#####"]);
   const routed = routeVoyage([leg(0, 1)], [site(0, 0, 0), site(1, 4, 2)], s);
   const l = routed[0]!;
   assert.equal(l.mode, "straight", "an off-network endpoint is not an honest road leg");
   assert.deepEqual(l.points[0], { x: 0, y: 0 });
   assert.deepEqual(l.points[l.points.length - 1], { x: 4, y: 2 });
   const roadSet = new Set(s.roads.flat().map(([x, y]) => `${x},${y}`));
-  assert.ok(l.points.some((p) => roadSet.has(`${p.x},${p.y}`)), "never touched the road");
+  assert.ok(
+    l.points.some((p) => roadSet.has(`${p.x},${p.y}`)),
+    "never touched the road",
+  );
 });
 
 test("an off-network port joins the road along the shore, never chording across the bay (#298)", () => {
   // No generated world exercises this branch, so this picture is its only guard.
-  const s = survey([
-    "=####",
-    "....#",
-    "....#",
-    "....#",
-    "#####",
-  ]);
+  const s = survey(["=####", "....#", "....#", "....#", "#####"]);
   const routed = routeVoyage([leg(0, 1)], [site(0, 0, 0), site(1, 0, 4)], s);
   const l = routed[0]!;
   assert.equal(l.mode, "straight");
@@ -118,7 +105,7 @@ test("every leg begins at its from-port and ends at its to-port, exactly", () =>
 });
 
 test("deterministic: identical inputs route to identical geometry", () => {
-  const s = survey(["=====", "#...#", "=====" ]);
+  const s = survey(["=====", "#...#", "====="]);
   const sites = [site(0, 0, 0), site(1, 4, 2)];
   const a = routeVoyage([leg(0, 1)], sites, s);
   const b = routeVoyage([leg(0, 1)], sites, s);
@@ -174,20 +161,22 @@ test("every real leg is deterministic across two independent routings", () => {
   assert.deepEqual(a, b);
 });
 
-const nearestOf = (s: ReturnType<typeof realWorld>["s"]) => (x: number, y: number, ok: (c: number) => boolean): number => {
-  let best = Infinity;
-  const cx = Math.round(x);
-  const cy = Math.round(y);
-  for (let dy = -3; dy <= 3; dy++) {
-    for (let dx = -3; dx <= 3; dx++) {
-      const gx = cx + dx;
-      const gy = cy + dy;
-      if (gx < 0 || gx >= s.gridW || gy < 0 || gy >= s.gridH) continue;
-      if (ok(gx + gy * s.gridW)) best = Math.min(best, Math.hypot(x - gx, y - gy));
+const nearestOf =
+  (s: ReturnType<typeof realWorld>["s"]) =>
+  (x: number, y: number, ok: (c: number) => boolean): number => {
+    let best = Infinity;
+    const cx = Math.round(x);
+    const cy = Math.round(y);
+    for (let dy = -3; dy <= 3; dy++) {
+      for (let dx = -3; dx <= 3; dx++) {
+        const gx = cx + dx;
+        const gy = cy + dy;
+        if (gx < 0 || gx >= s.gridW || gy < 0 || gy >= s.gridH) continue;
+        if (ok(gx + gy * s.gridW)) best = Math.min(best, Math.hypot(x - gx, y - gy));
+      }
     }
-  }
-  return best;
-};
+    return best;
+  };
 
 test("a simplified leg never strays past the tolerance from terrain of its own kind", () => {
   // Vertices are on-terrain by construction (RDP only removes vertices), so the question is the chords. BOUND = RDP_EPSILON + 0.5 (a cell-boundary point is half a cell from either centre); measured worst case over seeds 1..40: 1.000 road, 0.902 sea.

@@ -10,7 +10,12 @@ test("gradient noise is deterministic", () => {
 });
 
 test("gradient noise is exactly zero at integer lattice points", () => {
-  for (const [x, y] of [[0, 0], [5, 3], [-7, 2], [100, -50]] as const) {
+  for (const [x, y] of [
+    [0, 0],
+    [5, 3],
+    [-7, 2],
+    [100, -50],
+  ] as const) {
     assert.equal(gradientNoise2(x, y, 7), 0);
   }
 });
@@ -36,12 +41,9 @@ test("gradient noise is continuous", () => {
 
 test("gradient noise is non-constant with real variance", () => {
   const rng = createRng(3);
-  const samples = Array.from({ length: 500 }, () =>
-    gradientNoise2(rng.range(0, 40) + 0.5, rng.range(0, 40) + 0.5, 5),
-  );
+  const samples = Array.from({ length: 500 }, () => gradientNoise2(rng.range(0, 40) + 0.5, rng.range(0, 40) + 0.5, 5));
   const mean = samples.reduce((a, b) => a + b, 0) / samples.length;
-  const variance =
-    samples.reduce((a, b) => a + (b - mean) ** 2, 0) / samples.length;
+  const variance = samples.reduce((a, b) => a + (b - mean) ** 2, 0) / samples.length;
   assert.ok(variance > 0.01, `variance too small: ${variance}`);
 });
 
@@ -108,14 +110,8 @@ test("normOctaves defaults to octaves: explicit pin is bit-identical to omitted 
   for (let i = 0; i < 100; i++) {
     const x = rng.range(-30, 30);
     const y = rng.range(-30, 30);
-    assert.equal(
-      fbm2(x, y, 17, { octaves: 5, normOctaves: 5 }),
-      fbm2(x, y, 17, { octaves: 5 }),
-    );
-    assert.equal(
-      fbm2(x, y, 17, { octaves: 6, normOctaves: 6 }),
-      fbm2(x, y, 17, { octaves: 6 }),
-    );
+    assert.equal(fbm2(x, y, 17, { octaves: 5, normOctaves: 5 }), fbm2(x, y, 17, { octaves: 5 }));
+    assert.equal(fbm2(x, y, 17, { octaves: 6, normOctaves: 6 }), fbm2(x, y, 17, { octaves: 6 }));
   }
 });
 

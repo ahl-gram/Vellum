@@ -6,7 +6,15 @@ import type { LandfallKit } from "./landfall/kit.ts";
 import { stagePoint } from "./landfall/reads.ts";
 import { l1aConsumed, l1bCloseClamp, l1cNotDeadZone, l1dStandOff, l1dReleased, l1eAbsorbed } from "./landfall/wheel.ts";
 import { l1jHint, l1kSurfaces, l1fScrolledPage, l1gKeys, l1hDrift, l1iCluster } from "./landfall/page.ts";
-import { l5HowOpens, l5bArrowScrolls, l2ProseScrolls, l6HeadStays, l3HeadSwallows, l7WideClear, l4l8Enters } from "./landfall/panel.ts";
+import {
+  l5HowOpens,
+  l5bArrowScrolls,
+  l2ProseScrolls,
+  l6HeadStays,
+  l3HeadSwallows,
+  l7WideClear,
+  l4l8Enters,
+} from "./landfall/panel.ts";
 import { l9aOneFinger, l9bPinch, l9cTwoFingerPan } from "./landfall/touch.ts";
 import { l9dCeiling, l9d2Debt, l9eFloor } from "./landfall/clamps.ts";
 import { l9fPipGestures, l9hControlTap } from "./landfall/controls.ts";

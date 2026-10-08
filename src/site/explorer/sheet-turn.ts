@@ -35,26 +35,53 @@ function turnFace(back: HTMLDivElement, blobUrl: string): void {
 }
 
 function turnAnimation(innerEl: HTMLElement, durationMs: number, easing: string): Animation {
-  return innerEl.animate(
-    [{ transform: "rotateY(0deg)" }, { transform: "rotateY(-180deg)" }],
-    { duration: durationMs, easing, fill: "forwards" },
-  );
+  return innerEl.animate([{ transform: "rotateY(0deg)" }, { transform: "rotateY(-180deg)" }], {
+    duration: durationMs,
+    easing,
+    fill: "forwards",
+  });
 }
 
-function turnFallback(sheetEl: HTMLElement, innerEl: HTMLElement, mapEl: HTMLElement, newSvg: string, back: HTMLDivElement | null, blobUrl: string, resolve: () => void): void {
-  try { sheetEl.classList.remove("turning"); innerEl.classList.remove("turning"); } catch {}
+function turnFallback(
+  sheetEl: HTMLElement,
+  innerEl: HTMLElement,
+  mapEl: HTMLElement,
+  newSvg: string,
+  back: HTMLDivElement | null,
+  blobUrl: string,
+  resolve: () => void,
+): void {
+  try {
+    sheetEl.classList.remove("turning");
+    innerEl.classList.remove("turning");
+  } catch {}
   if (back && back.parentNode) back.remove();
-  if (blobUrl) { try { URL.revokeObjectURL(blobUrl); } catch {} }
+  if (blobUrl) {
+    try {
+      URL.revokeObjectURL(blobUrl);
+    } catch {}
+  }
   active = null;
   mapEl.innerHTML = newSvg;
   resolve();
 }
 
 /** Turn the sheet, re-dressing #map when the leaf lands. Resolves ONLY on a real landing (the caller then rebuilds the overlay); a superseding cancelTurn() aborts it and the promise stays pending forever. It NEVER rejects: an unbuildable 3D scaffold degrades to an instant swap and resolves, so the caller needs no .catch. */
-export function runTurn(
-  { sheetEl, innerEl, mapEl, newSvg, durationMs, easing }:
-  { sheetEl: HTMLElement; innerEl: HTMLElement; mapEl: HTMLElement; newSvg: string; durationMs: number; easing: string },
-): Promise<void> {
+export function runTurn({
+  sheetEl,
+  innerEl,
+  mapEl,
+  newSvg,
+  durationMs,
+  easing,
+}: {
+  sheetEl: HTMLElement;
+  innerEl: HTMLElement;
+  mapEl: HTMLElement;
+  newSvg: string;
+  durationMs: number;
+  easing: string;
+}): Promise<void> {
   cancelTurn();
   return new Promise<void>((resolve) => {
     let blobUrl = "";
@@ -78,7 +105,9 @@ export function runTurn(
         if (settled) return;
         settled = true;
         if (commit) mapEl.innerHTML = newSvg;
-        try { anim.cancel(); } catch {} // drop the forwards-fill; leaf returns to rotateY(0)
+        try {
+          anim.cancel();
+        } catch {} // drop the forwards-fill; leaf returns to rotateY(0)
         sheetEl.classList.remove("turning");
         innerEl.classList.remove("turning");
         innerEl.style.transform = "";

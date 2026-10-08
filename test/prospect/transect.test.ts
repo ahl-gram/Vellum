@@ -1,12 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createField } from "../../src/core/grid.ts";
-import {
-  sampleBilinear,
-  viewDirection,
-  viewRight,
-  linePoints,
-} from "../../src/prospect/transect.ts";
+import { sampleBilinear, viewDirection, viewRight, linePoints } from "../../src/prospect/transect.ts";
 
 test("bilinear sampling reproduces a planar field exactly", () => {
   const f = createField(8, 6, (x, y) => 2 + 3 * x - 5 * y);
@@ -17,10 +12,7 @@ test("bilinear sampling reproduces a planar field exactly", () => {
     [3.5, 4.999],
   ] as const) {
     const expected = 2 + 3 * x - 5 * y;
-    assert.ok(
-      Math.abs(sampleBilinear(f, x, y) - expected) < 1e-9,
-      `plane at (${x}, ${y})`,
-    );
+    assert.ok(Math.abs(sampleBilinear(f, x, y) - expected) < 1e-9, `plane at (${x}, ${y})`);
   }
 });
 

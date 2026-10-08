@@ -10,8 +10,7 @@ import {
 } from "../../src/terrain/contours.ts";
 
 type Pt = readonly [number, number];
-const has = (pts: ReadonlyArray<Pt>, p: Pt): boolean =>
-  pts.some(([x, y]) => x === p[0] && y === p[1]);
+const has = (pts: ReadonlyArray<Pt>, p: Pt): boolean => pts.some(([x, y]) => x === p[0] && y === p[1]);
 
 test("uniform fields produce no contours", () => {
   const low = createField(5, 5, () => 0);
@@ -75,9 +74,7 @@ test("saddle cell resolves into two separate chains", () => {
 });
 
 test("two separate peaks produce two rings", () => {
-  const f = createField(9, 5, (x, y) =>
-    (x === 2 && y === 2) || (x === 6 && y === 2) ? 1 : 0,
-  );
+  const f = createField(9, 5, (x, y) => ((x === 2 && y === 2) || (x === 6 && y === 2) ? 1 : 0));
   const contours = marchingSquares(f, 0.5);
   assert.equal(contours.length, 2);
   assert.ok(contours.every((c) => c.closed));
@@ -96,7 +93,11 @@ test("contours contain no NaN and are deterministic", () => {
 });
 
 test("chaikin smoothing preserves endpoints of open chains", () => {
-  const pts: Array<readonly [number, number]> = [[0, 0], [5, 0], [5, 5]];
+  const pts: Array<readonly [number, number]> = [
+    [0, 0],
+    [5, 0],
+    [5, 5],
+  ];
   const smoothed = chaikinSmooth(pts, false, 2);
   assert.deepEqual(smoothed[0], [0, 0]);
   assert.deepEqual(smoothed[smoothed.length - 1], [5, 5]);
@@ -104,7 +105,12 @@ test("chaikin smoothing preserves endpoints of open chains", () => {
 });
 
 test("chaikin smoothing of closed ring stays within original bounds", () => {
-  const square: Array<readonly [number, number]> = [[0, 0], [4, 0], [4, 4], [0, 4]];
+  const square: Array<readonly [number, number]> = [
+    [0, 0],
+    [4, 0],
+    [4, 4],
+    [0, 4],
+  ];
   const smoothed = chaikinSmooth(square, true, 3);
   for (const [x, y] of smoothed) {
     assert.ok(x >= 0 && x <= 4 && y >= 0 && y <= 4);
@@ -113,14 +119,24 @@ test("chaikin smoothing of closed ring stays within original bounds", () => {
 });
 
 test("ringArea computes the shoelace area", () => {
-  const square: Array<readonly [number, number]> = [[0, 0], [2, 0], [2, 2], [0, 2]];
+  const square: Array<readonly [number, number]> = [
+    [0, 0],
+    [2, 0],
+    [2, 2],
+    [0, 2],
+  ];
   assert.equal(Math.abs(ringArea(square)), 4);
   const reversed = [...square].reverse();
   assert.equal(ringArea(square), -ringArea(reversed));
 });
 
 test("pinned chaikin holds pinned corners sharp while free corners round (#223)", () => {
-  const square: Pt[] = [[0, 0], [4, 0], [4, 4], [0, 4]];
+  const square: Pt[] = [
+    [0, 0],
+    [4, 0],
+    [4, 4],
+    [0, 4],
+  ];
   const pinned = (p: Pt): boolean => p[1] === 0;
   const out = chaikinSmoothPinned(square, 3, pinned);
   assert.ok(has(out, [0, 0]), "pinned corner (0,0) must be preserved exactly");
@@ -133,7 +149,12 @@ test("pinned chaikin holds pinned corners sharp while free corners round (#223)"
 });
 
 test("pinned chaikin with everything pinned is the ring itself (#223)", () => {
-  const square: Pt[] = [[0, 0], [4, 0], [4, 4], [0, 4]];
+  const square: Pt[] = [
+    [0, 0],
+    [4, 0],
+    [4, 4],
+    [0, 4],
+  ];
   const out = chaikinSmoothPinned(square, 3, () => true);
   for (const c of square) assert.ok(has(out, c), `pinned vertex ${c[0]},${c[1]} must survive`);
   assert.ok(out.length <= square.length + 1, "all-pinned ring gains no cut points");
@@ -141,7 +162,12 @@ test("pinned chaikin with everything pinned is the ring itself (#223)", () => {
 
 test("pinned chaikin with nothing pinned equals plain chaikin (#223)", () => {
   // The free-point arithmetic must be the exact 0.75/0.25 form plain uses, so a no-pin ring renders byte-identically (the ULP invariant).
-  const ring: Pt[] = [[1, 0], [5, 1], [4, 6], [0, 5]];
+  const ring: Pt[] = [
+    [1, 0],
+    [5, 1],
+    [4, 6],
+    [0, 5],
+  ];
   const plain = chaikinSmooth(ring, true, 2);
   const pinned = chaikinSmoothPinned(ring, 2, () => false);
   assert.deepEqual(pinned, plain);

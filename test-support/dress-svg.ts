@@ -10,9 +10,17 @@ const TINCTURES: ReadonlyArray<Tincture> = ["or", "argent", "gules", "azure", "s
 export function tokenColors(s: MapStyle): Set<string> {
   const palette = paletteForStyle(s);
   return new Set(
-    [s.paper, s.ink, s.inkSoft, s.ocean, s.waterline, s.coastStroke, s.land, ...Object.values(s.limner ?? {}), ...TINCTURES.map((t) => palette.tincture(t))].map((c) =>
-      c.toLowerCase(),
-    ),
+    [
+      s.paper,
+      s.ink,
+      s.inkSoft,
+      s.ocean,
+      s.waterline,
+      s.coastStroke,
+      s.land,
+      ...Object.values(s.limner ?? {}),
+      ...TINCTURES.map((t) => palette.tincture(t)),
+    ].map((c) => c.toLowerCase()),
   );
 }
 
@@ -48,12 +56,16 @@ const STEP: Readonly<Record<string, number>> = { m: 2, l: 2, h: 1, v: 1, q: 4, c
 
 function pathPoints(d: string): Array<readonly [number, number]> {
   const out: Array<readonly [number, number]> = [];
-  let cx = 0, cy = 0, sx = 0, sy = 0;
+  let cx = 0,
+    cy = 0,
+    sx = 0,
+    sy = 0;
   const one = (k: string, rel: boolean, v: ReadonlyArray<number>, first: boolean): void => {
     if (k === "h") cx = rel ? cx + (v[0] ?? 0) : (v[0] ?? 0);
     else if (k === "v") cy = rel ? cy + (v[0] ?? 0) : (v[0] ?? 0);
     else {
-      for (let j = 0; j + 2 < v.length; j += 2) out.push([rel ? cx + (v[j] ?? 0) : (v[j] ?? 0), rel ? cy + (v[j + 1] ?? 0) : (v[j + 1] ?? 0)]);
+      for (let j = 0; j + 2 < v.length; j += 2)
+        out.push([rel ? cx + (v[j] ?? 0) : (v[j] ?? 0), rel ? cy + (v[j + 1] ?? 0) : (v[j + 1] ?? 0)]);
       cx = rel ? cx + (v[v.length - 2] ?? 0) : (v[v.length - 2] ?? 0);
       cy = rel ? cy + (v[v.length - 1] ?? 0) : (v[v.length - 1] ?? 0);
     }

@@ -35,22 +35,24 @@ function scannedFiles(): string[] {
 function commentLines(file: string): ReadonlyArray<readonly [number, string]> {
   const out: Array<readonly [number, string]> = [];
   let inBlock = false;
-  readFileSync(file, "utf8").split("\n").forEach((raw, i) => {
-    const line = raw.trim();
-    if (inBlock) {
-      out.push([i + 1, line]);
-      if (line.includes("*/")) inBlock = false;
-      return;
-    }
-    if (line.startsWith("//")) {
-      out.push([i + 1, line]);
-      return;
-    }
-    if (line.startsWith("/*")) {
-      out.push([i + 1, line]);
-      if (!line.includes("*/")) inBlock = true;
-    }
-  });
+  readFileSync(file, "utf8")
+    .split("\n")
+    .forEach((raw, i) => {
+      const line = raw.trim();
+      if (inBlock) {
+        out.push([i + 1, line]);
+        if (line.includes("*/")) inBlock = false;
+        return;
+      }
+      if (line.startsWith("//")) {
+        out.push([i + 1, line]);
+        return;
+      }
+      if (line.startsWith("/*")) {
+        out.push([i + 1, line]);
+        if (!line.includes("*/")) inBlock = true;
+      }
+    });
   return out;
 }
 
@@ -66,7 +68,10 @@ function commentRuns(file: string): ReadonlyArray<readonly [number, string]> {
     parts = [];
   };
   for (const [n, text] of lines) {
-    const body = text.replace(/^\/\*+|^\*+\/?|^\/\/+/, "").replace(/\*\/$/, "").trim();
+    const body = text
+      .replace(/^\/\*+|^\*+\/?|^\/\/+/, "")
+      .replace(/\*\/$/, "")
+      .trim();
     if (start > 0 && n !== start + parts.length) flush();
     if (start < 0) start = n;
     parts.push(body);
@@ -79,11 +84,22 @@ const rel = (file: string): string => file.slice(REPO.length + 1);
 
 test("this guard reads every root the lint reads, and its citation form reads a path under each of them and under public/, so no citation there goes unchecked (Issue #679)", () => {
   const lintRoots = lintTsRoots();
-  assert.ok(lintRoots.includes("src"), `read the lint's TypeScript roots as [${lintRoots.join(", ")}], so that reader has lost the config's shape`);
-  assert.deepEqual(lintRoots.filter((r) => !CODE_ROOTS.includes(r)), [], "the lint reads a root this guard never walks, so a stale citation in a comment there stays green");
+  assert.ok(
+    lintRoots.includes("src"),
+    `read the lint's TypeScript roots as [${lintRoots.join(", ")}], so that reader has lost the config's shape`,
+  );
+  assert.deepEqual(
+    lintRoots.filter((r) => !CODE_ROOTS.includes(r)),
+    [],
+    "the lint reads a root this guard never walks, so a stale citation in a comment there stays green",
+  );
   for (const [root, ext] of [...CODE_ROOTS.map((r) => [r, "ts"] as const), ["public", "css"] as const]) {
     const read = [...`\`sym\` in \`${root}/x/y.${ext}\``.matchAll(CITATION)].map((m) => m[2]);
-    assert.deepEqual(read, [`${root}/x/y.${ext}`], `a citation into ${root}/ is not read at all, so it is never checked`);
+    assert.deepEqual(
+      read,
+      [`${root}/x/y.${ext}`],
+      `a citation into ${root}/ is not read at all, so it is never checked`,
+    );
   }
 });
 
@@ -103,6 +119,7 @@ test("every `symbol` in `path` citation resolves: the file exists and names the 
     failures,
     [],
     `${failures.length} citation(s) no longer resolve. The form is \`symbol\` in \`repo/relative/path\`; ` +
-      `fix the symbol or the path, and do not fall back to a line number.\n  ` + failures.join("\n  "),
+      `fix the symbol or the path, and do not fall back to a line number.\n  ` +
+      failures.join("\n  "),
   );
 });

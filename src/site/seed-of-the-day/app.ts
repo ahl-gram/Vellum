@@ -50,10 +50,20 @@ zoomController.attach();
 // The chart room around the controller; the sheet is fitted once the chart is drawn.
 // The FRAMING is held across a refit, never the raw transform (the RoomCamera contract; the Explorer holds cameraNow the same way).
 const viewportBox = () => ({ W: $("map-viewport").clientWidth || 1, H: $("map-viewport").clientHeight || 1 });
-const room = bindRoom({ frame: $("map"), sheet: $("sheet"), camera: {
-  hold: () => { const { W, H } = viewportBox(); return cameraFromTransform(zoomController.getState(), W, H); },
-  restore: (cam) => { const { W, H } = viewportBox(); zoomController.refit(transformFromCamera(cam, W, H)); },
-} });
+const room = bindRoom({
+  frame: $("map"),
+  sheet: $("sheet"),
+  camera: {
+    hold: () => {
+      const { W, H } = viewportBox();
+      return cameraFromTransform(zoomController.getState(), W, H);
+    },
+    restore: (cam) => {
+      const { W, H } = viewportBox();
+      zoomController.refit(transformFromCamera(cam, W, H));
+    },
+  },
+});
 bindGlassKeys($("map-viewport"), zoomController);
 // Deterministic zoom hooks for the e2e, mirroring the Explorer's.
 window.__vellumZoomTo = (t) => zoomController.zoomTo(t);
@@ -77,10 +87,10 @@ setTimeout(() => {
     dryIn($("folio-sub"), "260ms");
     $("folio-sub").textContent = world.title.subtitle;
     dryIn($("folio-coords"), "320ms");
-    $("folio-coords").textContent = `Chart № ${seed} · ${world.recipe.mapType === "archipelago" ? "an" : "a"} ${world.recipe.mapType}, ${world.recipe.band}`;
+    $("folio-coords").textContent =
+      `Chart № ${seed} · ${world.recipe.mapType === "archipelago" ? "an" : "a"} ${world.recipe.mapType}, ${world.recipe.band}`;
 
-    const capital =
-      world.settlements.find((s) => s.kind === "capital") ?? world.settlements[0];
+    const capital = world.settlements.find((s) => s.kind === "capital") ?? world.settlements[0];
     if (capital) {
       const lore = createLoreWriter(world, createRng(seed).fork("seed-of-the-day"));
       dryIn($("folio-note"), "400ms");
@@ -94,4 +104,3 @@ setTimeout(() => {
     $("status").textContent = "The cartographer spilled the ink: " + errorText(err);
   }
 }, 0);
-

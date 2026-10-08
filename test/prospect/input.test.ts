@@ -65,17 +65,9 @@ test("a prospect input is deterministic and serializable byte for byte", () => {
       const pa = buildProspectInput(a, i);
       const pb = buildProspectInput(b, i);
       assert.deepEqual(pa, pb, `seed ${seed} index ${i} deep-equal`);
-      assert.equal(
-        JSON.stringify(pa),
-        JSON.stringify(pb),
-        `seed ${seed} index ${i} byte-identical`,
-      );
+      assert.equal(JSON.stringify(pa), JSON.stringify(pb), `seed ${seed} index ${i} byte-identical`);
       // strict deepEqual distinguishes -0 from 0, catching any -0 component JSON would silently flatten.
-      assert.deepEqual(
-        JSON.parse(JSON.stringify(pa)),
-        pa,
-        `seed ${seed} index ${i} survives a JSON round trip`,
-      );
+      assert.deepEqual(JSON.parse(JSON.stringify(pa)), pa, `seed ${seed} index ${i} survives a JSON round trip`);
     }
   }
 });
@@ -105,11 +97,7 @@ const PINNED: ReadonlyArray<{ seed: number; index: number; sum: number }> = [
 test("pinned prospect checksums over several seeds and indices", () => {
   for (const { seed, index, sum } of PINNED) {
     const p = buildProspectInput(worldFor(seed), index);
-    assert.equal(
-      fnv1a(JSON.stringify(pinProjection(p))),
-      sum,
-      `checksum for seed ${seed} index ${index}`,
-    );
+    assert.equal(fnv1a(JSON.stringify(pinProjection(p))), sum, `checksum for seed ${seed} index ${index}`);
   }
 });
 
@@ -126,8 +114,7 @@ test("settlement attributes and realm identity flow through", () => {
       assert.equal(p.harbor, s.harbor);
       assert.equal(p.onRiver, s.onRiver);
       assert.equal(p.founded, s.founded);
-      const expectedKind =
-        s.kind === "capital" ? "capital" : seats.has(i) ? "seat" : s.kind;
+      const expectedKind = s.kind === "capital" ? "capital" : seats.has(i) ? "seat" : s.kind;
       assert.equal(p.kind, expectedKind, `seed ${seed} index ${i} kind`);
       const realm = w.realms.labels[s.x + s.y * w.elev.w];
       assert.equal(p.realm, realm, `seed ${seed} index ${i} realm id`);
@@ -150,9 +137,7 @@ test("chronicle facts flow through and stay year-agnostic", () => {
     w.settlements.forEach((s, i) => {
       const p = buildProspectInput(w, i);
       assert.equal(p.ruined, s.ruined);
-      const event = w.history.events.find(
-        (e) => e.kind === "ruin" && e.settlement === i,
-      );
+      const event = w.history.events.find((e) => e.kind === "ruin" && e.settlement === i);
       if (s.ruined) {
         ruinsSeen++;
         if (event) {
@@ -198,14 +183,8 @@ test("the backdrop is the chart's own terrain behind the site", () => {
     );
     // Same oracle for the foreground center, indexed independently into the bare biome array, so the sign of "in front" cannot flip either.
     const fmid = (FOREGROUND_SAMPLES - 1) / 2;
-    const fx = Math.min(
-      Math.max(Math.round(s.x - FOREGROUND_OFFSET * p.view.dx), 0),
-      w.elev.w - 1,
-    );
-    const fy = Math.min(
-      Math.max(Math.round(s.y - FOREGROUND_OFFSET * p.view.dy), 0),
-      w.elev.h - 1,
-    );
+    const fx = Math.min(Math.max(Math.round(s.x - FOREGROUND_OFFSET * p.view.dx), 0), w.elev.w - 1);
+    const fy = Math.min(Math.max(Math.round(s.y - FOREGROUND_OFFSET * p.view.dy), 0), w.elev.h - 1);
     assert.equal(
       p.foreground[fmid],
       biomeName(w.biomes[fx + fy * w.elev.w] as number),
@@ -235,20 +214,14 @@ test("the adaptive vantage points the right way", () => {
         const r = GRADIENT_RADIUS;
         const behind = bilinear(w, s.x + r * p.view.dx, s.y + r * p.view.dy);
         const front = bilinear(w, s.x - r * p.view.dx, s.y - r * p.view.dy);
-        assert.ok(
-          behind >= front,
-          `seed ${seed} index ${i}: inland ground climbs behind the site`,
-        );
+        assert.ok(behind >= front, `seed ${seed} index ${i}: inland ground climbs behind the site`);
       }
     });
   }
   assert.ok(harbors >= 100, `sweep saw ${harbors} harbors`);
   assert.ok(inland >= 1, `sweep saw ${inland} inland sites`);
   // Pinned near the measured constant (293/305 = 0.961), not a loose lean: a regression flipping even a tenth of the vantages must go red.
-  assert.ok(
-    harborsFacingSea / harbors > 0.95,
-    `harbors face the sea: ${harborsFacingSea}/${harbors}`,
-  );
+  assert.ok(harborsFacingSea / harbors > 0.95, `harbors face the sea: ${harborsFacingSea}/${harbors}`);
 });
 
 test("an out-of-range settlement index throws", () => {

@@ -32,11 +32,7 @@ test("all four styles tier the seat glyph (decision B)", () => {
   for (const style of ALL_STYLES) {
     const svg = renderMap(multi, { style });
     assert.equal(count(svg, 'class="settlement-capital"'), 1, `${style}: one grand capital`);
-    assert.equal(
-      count(svg, 'class="settlement-seat"'),
-      multi.realms.seats.length - 1,
-      `${style}: seats tiered`,
-    );
+    assert.equal(count(svg, 'class="settlement-seat"'), multi.realms.seats.length - 1, `${style}: seats tiered`);
   }
 });
 
@@ -51,10 +47,7 @@ test("seats are haloed in their realm tint only under political-tint styles", ()
     const fills = [...svg.matchAll(/class="seat-halo"[^>]*?\bfill="([^"]+)"/g)].map((m) => m[1]);
     assert.equal(fills.length, multi.realms.seats.length, `${style}: each halo carries a fill`);
     for (const f of fills) {
-      assert.ok(
-        STYLES[style].realmTints.includes(f!),
-        `${style}: halo fill ${f} is a realm tint`,
-      );
+      assert.ok(STYLES[style].realmTints.includes(f!), `${style}: halo fill ${f} is a realm tint`);
     }
   }
   for (const style of ["ink", "nautical"] as const) {
@@ -96,8 +89,7 @@ test("the legend gains a Realm seat key only when multi-realm (decision C)", () 
 const SETTLE_TIER_RANK: Record<string, number> = { capital: 0, seat: 1, town: 2, village: 3 };
 function expectedGroupOrder(w: typeof multi): number[] {
   const seats = new Set(w.realms.seats);
-  const tierOf = (kind: string, i: number): string =>
-    kind === "capital" ? "capital" : seats.has(i) ? "seat" : kind;
+  const tierOf = (kind: string, i: number): string => (kind === "capital" ? "capital" : seats.has(i) ? "seat" : kind);
   // A stable sort by tier rank, mirroring settlementsLayer: within a tier the original world-index order is kept, so equal ranks stay ascending.
   return w.settlements
     .map((s, i) => ({ i, rank: SETTLE_TIER_RANK[tierOf(s.kind, i)]! }))
@@ -109,7 +101,11 @@ test("every settlement is wrapped in an addressable g.settlement carrying its WO
   const svg = renderMap(multi, { style: "antique" });
   const seq = [...svg.matchAll(/<g class="settlement" data-idx="(\d+)">/g)].map((m) => Number(m[1]));
   assert.equal(seq.length, multi.settlements.length, "one wrapper per settlement");
-  assert.deepEqual(seq, expectedGroupOrder(multi), "data-idx follows the world-index space, in tier-sorted document order");
+  assert.deepEqual(
+    seq,
+    expectedGroupOrder(multi),
+    "data-idx follows the world-index space, in tier-sorted document order",
+  );
 });
 
 test("region sheets stamp data-tier/data-name; world sheets stay golden-clean (#162)", () => {
@@ -127,17 +123,16 @@ test("region sheets stamp data-tier/data-name; world sheets stay golden-clean (#
   const regionSvg = renderMap(region, { style: "antique" });
   assert.ok(count(regionSvg, "data-tier=") > 0, "region sheets stamp data-tier for Sub 9");
   assert.ok(count(regionSvg, "data-name=") > 0, "region sheets stamp data-name for Sub 9");
-  assert.ok(
-    regionSvg.includes(`data-name="${cap.name}"`),
-    "the projected capital's name is stamped on its wrapper",
-  );
+  assert.ok(regionSvg.includes(`data-name="${cap.name}"`), "the projected capital's name is stamped on its wrapper");
 });
 
 test("g.settlement data-idx aligns with the manifest place idx space, in every style (#93)", () => {
   const manifestIdx = [...buildPlaceManifest(multi, 1500).places.map((p) => p.idx)].sort((a, b) => a - b);
   for (const style of ALL_STYLES) {
     const svg = renderMap(multi, { style });
-    const ids = [...svg.matchAll(/<g class="settlement" data-idx="(\d+)">/g)].map((m) => Number(m[1])).sort((a, b) => a - b);
+    const ids = [...svg.matchAll(/<g class="settlement" data-idx="(\d+)">/g)]
+      .map((m) => Number(m[1]))
+      .sort((a, b) => a - b);
     assert.deepEqual(ids, manifestIdx, `${style}: the addressable glyph groups share the manifest's index space`);
   }
 });

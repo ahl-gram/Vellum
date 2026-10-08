@@ -1,17 +1,30 @@
 import type { Facts, InstrumentKit } from "./kit.ts";
 
-export async function rs8Sweeps({ evaluate, check, sleep, setYear, roadsDisp }: InstrumentKit, sm: Facts): Promise<void> {
+export async function rs8Sweeps(
+  { evaluate, check, sleep, setYear, roadsDisp }: InstrumentKit,
+  sm: Facts,
+): Promise<void> {
   const rs8start = await setYear(sm.minFounded);
-  const startLabel = await evaluate<string>(`(()=>{document.querySelector(".rf-play").click();return document.querySelector(".rf-play").textContent;})()`);
-  let prev = -Infinity, mono = true, ended = false, lastYear = null, sawInterior = false;
+  const startLabel = await evaluate<string>(
+    `(()=>{document.querySelector(".rf-play").click();return document.querySelector(".rf-play").textContent;})()`,
+  );
+  let prev = -Infinity,
+    mono = true,
+    ended = false,
+    lastYear = null,
+    sawInterior = false;
   for (let i = 0; i < 130; i++) {
-    const st = await evaluate<{ y: number | null; lbl: string }>(`({y:window.__vellumAgesState().year,lbl:document.querySelector(".rf-play").textContent})`);
+    const st = await evaluate<{ y: number | null; lbl: string }>(
+      `({y:window.__vellumAgesState().year,lbl:document.querySelector(".rf-play").textContent})`,
+    );
     if (st.y! < prev) mono = false;
-    if (st.y! >
-      rs8start! &&
-      st.y! < sm.present) sawInterior = true;
-    prev = st.y!; lastYear = st.y;
-    if (st.lbl === "Play") { ended = true; break; }
+    if (st.y! > rs8start! && st.y! < sm.present) sawInterior = true;
+    prev = st.y!;
+    lastYear = st.y;
+    if (st.lbl === "Play") {
+      ended = true;
+      break;
+    }
     await sleep(110);
   }
   check(
@@ -23,7 +36,10 @@ export async function rs8Sweeps({ evaluate, check, sleep, setYear, roadsDisp }: 
   check("RS9 roads return at the end-of-Play present park", rs9roads !== "none", `roads=${rs9roads}`);
 }
 
-export async function rs10Drag({ evaluate, check, sleep, setYear, yearNow, clickPlay }: InstrumentKit, sm: Facts): Promise<void> {
+export async function rs10Drag(
+  { evaluate, check, sleep, setYear, yearNow, clickPlay }: InstrumentKit,
+  sm: Facts,
+): Promise<void> {
   await setYear(sm.minFounded);
   await clickPlay();
   await sleep(220);
@@ -43,17 +59,19 @@ export async function rs10Drag({ evaluate, check, sleep, setYear, yearNow, click
   );
 }
 
-export async function rs11Forward({ check, sleep, setYear, yearNow, clickPlay }: InstrumentKit, sm: Facts): Promise<void> {
+export async function rs11Forward(
+  { check, sleep, setYear, yearNow, clickPlay }: InstrumentKit,
+  sm: Facts,
+): Promise<void> {
   const rs11mid = Math.floor((sm.minFounded + sm.present) / 2);
   await setYear(rs11mid);
   await clickPlay();
-  let rs11min = Infinity, rs11max = -Infinity;
+  let rs11min = Infinity,
+    rs11max = -Infinity;
   for (let i = 0; i < 6; i++) {
     const y = await yearNow();
-    if (y! < rs11min)
-      rs11min = y!;
-    if (y! > rs11max)
-      rs11max = y!;
+    if (y! < rs11min) rs11min = y!;
+    if (y! > rs11max) rs11max = y!;
     await sleep(70);
   }
   check(
@@ -63,11 +81,16 @@ export async function rs11Forward({ check, sleep, setYear, yearNow, clickPlay }:
   );
 }
 
-export async function rs12Pause({ evaluate, check, sleep, setYear, yearNow, clickPlay }: InstrumentKit, sm: Facts): Promise<void> {
+export async function rs12Pause(
+  { evaluate, check, sleep, setYear, yearNow, clickPlay }: InstrumentKit,
+  sm: Facts,
+): Promise<void> {
   await setYear(sm.minFounded);
   await clickPlay();
   await sleep(700);
-  const frozen = await evaluate<{ year: number | null; lbl: string }>(`(()=>{document.querySelector(".rf-play").click();return{year:window.__vellumAgesState().year,lbl:document.querySelector(".rf-play").textContent};})()`);
+  const frozen = await evaluate<{ year: number | null; lbl: string }>(
+    `(()=>{document.querySelector(".rf-play").click();return{year:window.__vellumAgesState().year,lbl:document.querySelector(".rf-play").textContent};})()`,
+  );
   await sleep(260);
   const stillFrozen = await yearNow();
   await clickPlay();
@@ -77,13 +100,13 @@ export async function rs12Pause({ evaluate, check, sleep, setYear, yearNow, clic
   const resumed = await yearNow();
   check(
     "RS12 the Pause button freezes mid-sweep; Play resumes from the frozen year (not min/present)",
-    frozen.lbl === "Play" && frozen.year! > sm.minFounded &&
+    frozen.lbl === "Play" &&
+      frozen.year! > sm.minFounded &&
       frozen.year! < sm.present &&
-      stillFrozen === frozen.year && resumedEarly! >=
-        frozen.year! &&
-      resumed! >
-        frozen.year! &&
-        resumed! <= sm.present,
+      stillFrozen === frozen.year &&
+      resumedEarly! >= frozen.year! &&
+      resumed! > frozen.year! &&
+      resumed! <= sm.present,
     `frozen=${frozen.year} early=${resumedEarly} resumed=${resumed} min=${sm.minFounded} present=${sm.present}`,
   );
 }
@@ -94,7 +117,11 @@ export async function rs14Glyphs({ evaluate, check }: InstrumentKit): Promise<vo
     return{hasGlyph:!!(g&&g.querySelector("path, circle, text")),
       dataStateHits:document.querySelectorAll(".place-hit[data-state]").length};
   })()`);
-  check("RS14 the sweep shows real glyphs, not dots (no data-state dots remain)", rs14.hasGlyph && rs14.dataStateHits === 0, JSON.stringify(rs14));
+  check(
+    "RS14 the sweep shows real glyphs, not dots (no data-state dots remain)",
+    rs14.hasGlyph && rs14.dataStateHits === 0,
+    JSON.stringify(rs14),
+  );
 }
 
 export async function rs15Slide({ evaluate, check }: InstrumentKit): Promise<void> {
@@ -107,21 +134,39 @@ export async function rs15Slide({ evaluate, check }: InstrumentKit): Promise<voi
     if(!had)li.classList.remove("inked");
     return{li:true,prop,pastTf};
   })()`);
-  check("RS15 journal inked-rows slide (transform in the transition + an indent)", rs15.li && rs15.prop.includes("transform") && rs15.pastTf !== "none", JSON.stringify(rs15));
+  check(
+    "RS15 journal inked-rows slide (transform in the transition + an indent)",
+    rs15.li && rs15.prop.includes("transform") && rs15.pastTf !== "none",
+    JSON.stringify(rs15),
+  );
 }
 
 export async function rs16Strip({ evaluate, check }: InstrumentKit): Promise<void> {
-  const rs16 = await evaluate<{ rows: number; scrollH: number; clientH: number }>(`(()=>{const s=document.querySelector(".rf-log-strip");return{rows:s.querySelectorAll("li").length,scrollH:s.scrollHeight,clientH:s.clientHeight};})()`);
-  check("RS16 the journal strip shows every entry without scrolling (#93 Part 2)", rs16.rows > 0 && rs16.scrollH <= rs16.clientH + 1, JSON.stringify(rs16));
+  const rs16 = await evaluate<{ rows: number; scrollH: number; clientH: number }>(
+    `(()=>{const s=document.querySelector(".rf-log-strip");return{rows:s.querySelectorAll("li").length,scrollH:s.scrollHeight,clientH:s.clientHeight};})()`,
+  );
+  check(
+    "RS16 the journal strip shows every entry without scrolling (#93 Part 2)",
+    rs16.rows > 0 && rs16.scrollH <= rs16.clientH + 1,
+    JSON.stringify(rs16),
+  );
 }
 
-export async function rs17Story({ evaluate, check, sleep, setYear, clickPlay }: InstrumentKit, sm: Facts): Promise<void> {
+export async function rs17Story(
+  { evaluate, check, sleep, setYear, clickPlay }: InstrumentKit,
+  sm: Facts,
+): Promise<void> {
   await setYear(sm.present);
   await clickPlay();
   let rs17open = null;
   for (let i = 0; i < 40; i++) {
-    const st = await evaluate<{ chamber: string; t: number | null; playing: boolean; readout: string }>(`(()=>{const a=window.__vellumAgesState();return{chamber:a.chamber,t:a.t,playing:a.playing,readout:document.querySelector(".rf-year").textContent};})()`);
-    if (st.chamber === "survey") { rs17open = st; break; }
+    const st = await evaluate<{ chamber: string; t: number | null; playing: boolean; readout: string }>(
+      `(()=>{const a=window.__vellumAgesState();return{chamber:a.chamber,t:a.t,playing:a.playing,readout:document.querySelector(".rf-year").textContent};})()`,
+    );
+    if (st.chamber === "survey") {
+      rs17open = st;
+      break;
+    }
     await sleep(50);
   }
   await evaluate(`(()=>{const b=document.querySelector(".rf-play");if(b.textContent==="Pause")b.click();})()`);

@@ -9,7 +9,8 @@ type Rect = { x: number; y: number; w: number; h: number; right: number; bottom:
 type Stage = ReturnType<typeof makeStage>;
 
 const REM = 16;
-const rectOf = (sel: string): Payload<Rect | null> => `(() => { const e = document.querySelector(${JSON.stringify(sel)}); if (!e) return null; const r = e.getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height, right: r.right, bottom: r.bottom }; })()`;
+const rectOf = (sel: string): Payload<Rect | null> =>
+  `(() => { const e = document.querySelector(${JSON.stringify(sel)}); if (!e) return null; const r = e.getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height, right: r.right, bottom: r.bottom }; })()`;
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { send, clearMobile, waitReady, PORT } = ctx;
@@ -45,7 +46,14 @@ export async function run(ctx: SuiteContext): Promise<void> {
 async function cl1Wash({ evaluate, check }: SuiteContext, settleHome: Stage["settleHome"]): Promise<void> {
   const cam = await settleHome();
 
-  const wash = await evaluate<{ filter: string; bg: string; image: string; box: { left: number; top: number; right: number; bottom: number }; nav: { right: number; bottom: number }; cluster: { right: number; bottom: number; left: number; top: number } }>(`(() => {
+  const wash = await evaluate<{
+    filter: string;
+    bg: string;
+    image: string;
+    box: { left: number; top: number; right: number; bottom: number };
+    nav: { right: number; bottom: number };
+    cluster: { right: number; bottom: number; left: number; top: number };
+  }>(`(() => {
     const chrome = document.querySelector("header.chrome");
     const cs = getComputedStyle(chrome, "::before");
     const c = chrome.getBoundingClientRect();
@@ -55,13 +63,21 @@ async function cl1Wash({ evaluate, check }: SuiteContext, settleHome: Stage["set
       box: { left: c.left + px(cs.left), top: c.top + px(cs.top), right: c.right - px(cs.right), bottom: c.bottom - px(cs.bottom) },
       nav: { right: nav.right, bottom: nav.bottom }, cluster: { right: c.right, bottom: c.bottom, left: c.left, top: c.top } };
   })()`);
-  const alpha = parseFloat((wash.bg.match(/\/\s*([\d.]+)\)/) || wash.bg.match(/rgba\([^)]*,\s*([\d.]+)\)/) || [])[1] ?? "1");
+  const alpha = parseFloat(
+    (wash.bg.match(/\/\s*([\d.]+)\)/) || wash.bg.match(/rgba\([^)]*,\s*([\d.]+)\)/) || [])[1] ?? "1",
+  );
   check(
     "CL1 the cluster's wash is a soft pool sized by the cluster: it ends 1.5 to 3rem past the nav's right and bottom, blurred, at 0.8 ink or deeper, no gradient box (#480 screenshot 3; the slab measured 736x272 against a nav ending at 510x102)",
-    !!cam && wash.image === "none" && /blur\(/.test(wash.filter) && alpha >= 0.8
-      && wash.box.right - wash.nav.right >= 1.5 * REM && wash.box.right - wash.nav.right <= 3 * REM
-      && wash.box.bottom - wash.nav.bottom >= 1.5 * REM && wash.box.bottom - wash.nav.bottom <= 3 * REM
-      && wash.box.left <= -2 * REM && wash.box.top <= -2 * REM,
+    !!cam &&
+      wash.image === "none" &&
+      /blur\(/.test(wash.filter) &&
+      alpha >= 0.8 &&
+      wash.box.right - wash.nav.right >= 1.5 * REM &&
+      wash.box.right - wash.nav.right <= 3 * REM &&
+      wash.box.bottom - wash.nav.bottom >= 1.5 * REM &&
+      wash.box.bottom - wash.nav.bottom <= 3 * REM &&
+      wash.box.left <= -2 * REM &&
+      wash.box.top <= -2 * REM,
     JSON.stringify({ cam: !!cam, wash, alpha }),
   );
 }
@@ -71,14 +87,23 @@ async function cl2Selection(ctx: SuiteContext): Promise<void> {
   const { dragAcross } = makeMouse(ctx);
   // The rect is read only once the camera is at landfall (CI once pressed on the wordmark from a stale rect), and the press point must hit-test into the stage (the name slip itself is pointer-events: none, so the press lands on the sheet beneath it, which is the baseline's own path): a drag that begins outside the stage proves nothing about it.
   let settled = null;
-  for (let i = 0; i < 80 && !atLandfall(settled); i++) { settled = await evaluate(readCam); if (!atLandfall(settled)) await sleep(75); }
+  for (let i = 0; i < 80 && !atLandfall(settled); i++) {
+    settled = await evaluate(readCam);
+    if (!atLandfall(settled)) await sleep(75);
+  }
   await evaluate(`getSelection().removeAllRanges()`);
   const slip = await evaluate(rectOf('.lf-station[data-station="explorer"] .lf-station-name'));
   const pressAt = slip ? { x: slip.x + 4, y: slip.y + slip.h / 2 } : null;
-  const startsOnStage = pressAt ? await evaluate<boolean>(`(() => { const e = document.elementFromPoint(${pressAt.x}, ${pressAt.y}); return !!e && !!e.closest("#lf-stage"); })()`) : false;
+  const startsOnStage = pressAt
+    ? await evaluate<boolean>(
+        `(() => { const e = document.elementFromPoint(${pressAt.x}, ${pressAt.y}); return !!e && !!e.closest("#lf-stage"); })()`,
+      )
+    : false;
   if (pressAt) await dragAcross(pressAt, 200, 160);
   const pipSelection = await evaluate<string>(`getSelection().toString()`);
-  await evaluate(`getSelection().removeAllRanges(); document.querySelector(".lf-shelf-grid figcaption").scrollIntoView({ block: "center" })`);
+  await evaluate(
+    `getSelection().removeAllRanges(); document.querySelector(".lf-shelf-grid figcaption").scrollIntoView({ block: "center" })`,
+  );
   await sleep(200);
   const caption = await evaluate(rectOf(".lf-shelf-grid figcaption"));
   if (caption) await dragAcross({ x: caption.x + 2, y: caption.y + caption.h / 2 }, caption.w - 4, 0);
@@ -86,7 +111,14 @@ async function cl2Selection(ctx: SuiteContext): Promise<void> {
   check(
     "CL2 a mouse drag that begins on a station name selects nothing, while the SAME drag across a shelf caption still selects its text, so the probe can select and the stage alone opts out (#480 screenshot 4; the baseline drag selected every place name)",
     atLandfall(settled) && startsOnStage && caption !== null && pipSelection === "" && controlSelection.length > 0,
-    JSON.stringify({ settled: atLandfall(settled), startsOnStage, slip, caption: !!caption, pipSelection: pipSelection.slice(0, 60), controlSelection }),
+    JSON.stringify({
+      settled: atLandfall(settled),
+      startsOnStage,
+      slip,
+      caption: !!caption,
+      pipSelection: pipSelection.slice(0, 60),
+      controlSelection,
+    }),
   );
   await shoot("cluster-wash-1280.png");
 }

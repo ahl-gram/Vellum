@@ -6,11 +6,7 @@ export type Cell = { readonly x: number; readonly y: number };
 type Offset = readonly [number, number];
 
 /** Fine cells per parent cell. A coast can crenellate anywhere inside one parent cell as the Glass descends, so that is how far a settlement charted on the parent's shore may have to walk to find the region's. */
-export function landSnapRadius(
-  gridW: number,
-  window: UvWindow,
-  worldGridW: number,
-): number {
+export function landSnapRadius(gridW: number, window: UvWindow, worldGridW: number): number {
   const du = window.u1 - window.u0;
   if (!(du > 0) || worldGridW < 2 || gridW < 2) return 1;
   return Math.max(1, Math.round((gridW - 1) / (du * (worldGridW - 1))));
@@ -41,13 +37,7 @@ function offsetsWithin(radius: number): ReadonlyArray<Offset> {
   return frozen;
 }
 
-export function snapToLand(
-  elev: Field,
-  seaLevel: number,
-  gx: number,
-  gy: number,
-  radius: number,
-): Cell | null {
+export function snapToLand(elev: Field, seaLevel: number, gx: number, gy: number, radius: number): Cell | null {
   const { w, h, data } = elev;
   if (gx < 0 || gx >= w || gy < 0 || gy >= h) return null;
   if ((data[gx + gy * w] as number) > seaLevel) return { x: gx, y: gy };

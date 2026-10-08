@@ -144,7 +144,10 @@ export function createVoyage(deps: VoyageDeps) {
 
   function syncRestingTrack(): void {
     if (!restingTrackSink) return;
-    if (!voyage) { restingTrackSink.clear(); return; }
+    if (!voyage) {
+      restingTrackSink.clear();
+      return;
+    }
     restingTrackSink.paint(
       voyage.trackEl.getAttribute("points") as string,
       voyage.svg.getAttribute("viewBox") as string,

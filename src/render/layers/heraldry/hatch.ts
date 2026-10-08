@@ -48,9 +48,19 @@ function tile(t: Tincture, w: number, suffix: string, paper: string, ink: string
       ]);
     }
     case "bend": // "\": the main corner-to-corner line tiles seamlessly; two neighbours fill the corners
-      return el("pattern", attrs, [base(s), line(`M0 0L${s} ${s}`), line(`M${n(-s)} 0L0 ${s}`), line(`M0 ${n(-s)}L${s} 0`)]);
+      return el("pattern", attrs, [
+        base(s),
+        line(`M0 0L${s} ${s}`),
+        line(`M${n(-s)} 0L0 ${s}`),
+        line(`M0 ${n(-s)}L${s} 0`),
+      ]);
     case "bendSinister": // "/"
-      return el("pattern", attrs, [base(s), line(`M0 ${s}L${s} 0`), line(`M0 0L${n(-s)} ${s}`), line(`M${s} ${s}L${n(2 * s)} 0`)]);
+      return el("pattern", attrs, [
+        base(s),
+        line(`M0 ${s}L${s} 0`),
+        line(`M0 0L${n(-s)} ${s}`),
+        line(`M${s} ${s}L${n(2 * s)} 0`),
+      ]);
   }
 }
 

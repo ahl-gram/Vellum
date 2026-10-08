@@ -12,8 +12,7 @@ export function detentEscapeU(trackPx: number): number {
 export type Chamber = "survey" | "ages";
 
 export type AgesPos =
-  | { readonly chamber: "survey"; readonly t: number }
-  | { readonly chamber: "ages"; readonly year: number };
+  { readonly chamber: "survey"; readonly t: number } | { readonly chamber: "ages"; readonly year: number };
 
 export function posAt(u: number, range: YearRange, side?: Chamber): AgesPos {
   const c = Math.max(0, Math.min(1, u));

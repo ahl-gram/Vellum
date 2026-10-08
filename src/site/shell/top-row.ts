@@ -29,7 +29,11 @@ const remOf = (style: CSSStyleDeclaration, prop: string): number => parseFloat(s
 function cornerOf(el: Styled, floorPx: number): Corner {
   const r = el.getBoundingClientRect();
   const cs = getComputedStyle(el);
-  const pad = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight) + parseFloat(cs.borderLeftWidth) + parseFloat(cs.borderRightWidth);
+  const pad =
+    parseFloat(cs.paddingLeft) +
+    parseFloat(cs.paddingRight) +
+    parseFloat(cs.borderLeftWidth) +
+    parseFloat(cs.borderRightWidth);
   const cap = parseFloat(cs.maxWidth) || r.width - pad;
   return { left: r.left, right: r.right, cap, floor: Math.min(cap, floorPx), pad };
 }
@@ -40,7 +44,11 @@ function layRow(cluster: Styled, corner: Styled): void {
   const rootStyle = getComputedStyle(document.documentElement);
   const rootPx = parseFloat(rootStyle.fontSize);
   const gap = remOf(rootStyle, "--chrome-x") * rootPx;
-  const width = cornerWidth(cluster.getBoundingClientRect(), cornerOf(corner, remOf(rootStyle, "--folio-w") * rootPx), gap);
+  const width = cornerWidth(
+    cluster.getBoundingClientRect(),
+    cornerOf(corner, remOf(rootStyle, "--folio-w") * rootPx),
+    gap,
+  );
   if (width !== null) corner.style.setProperty("max-width", `${width}px`);
   corner.style.removeProperty("transition");
 }
@@ -49,7 +57,9 @@ export function bindTopRow(): void {
   const cluster = document.querySelector<HTMLElement>("header.chrome");
   const corner = document.querySelector<HTMLElement>(".corner.tr.folio-room");
   if (cluster === null || corner === null) return;
-  const lay = (): void => { layRow(cluster, corner); };
+  const lay = (): void => {
+    layRow(cluster, corner);
+  };
   lay();
   window.addEventListener("resize", lay);
   void document.fonts.ready.then(lay);

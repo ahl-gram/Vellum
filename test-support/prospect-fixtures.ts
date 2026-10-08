@@ -19,9 +19,7 @@ export function defaultBackdrop(): ReadonlyArray<number> {
 }
 
 /** Build a foreground band from runs; throws unless the runs total exactly FOREGROUND_SAMPLES, so a band cannot silently thin. */
-export function bandOf(
-  ...runs: ReadonlyArray<readonly [BiomeName, number]>
-): ReadonlyArray<BiomeName> {
+export function bandOf(...runs: ReadonlyArray<readonly [BiomeName, number]>): ReadonlyArray<BiomeName> {
   const out: BiomeName[] = [];
   for (const [name, count] of runs) {
     for (let i = 0; i < count; i++) out.push(name);

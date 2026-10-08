@@ -23,12 +23,7 @@ export interface ScaleFit {
   clamped: boolean;
 }
 
-export function fitScaleToBudget(
-  width: number,
-  height: number,
-  requestedScale: number,
-  maxPixels: number,
-): ScaleFit {
+export function fitScaleToBudget(width: number, height: number, requestedScale: number, maxPixels: number): ScaleFit {
   const area = width * height;
   if (!Number.isFinite(area) || area <= 0 || !Number.isFinite(maxPixels) || maxPixels <= 0) {
     return { scale: requestedScale, clamped: false };
@@ -64,10 +59,7 @@ export interface RasterizeResult {
 }
 
 // Resolves the whole result object, not a bare Blob, precisely because the clamp flag has to reach the UI; every failure path rejects with an in-voice message.
-export async function rasterizeSvg(
-  svgString: string,
-  opts: RasterizeOptions = {},
-): Promise<RasterizeResult> {
+export async function rasterizeSvg(svgString: string, opts: RasterizeOptions = {}): Promise<RasterizeResult> {
   const requestedScale = Number(opts.scale) > 0 ? Number(opts.scale) : 1;
   const maxPixels = Number(opts.maxPixels) > 0 ? Number(opts.maxPixels) : MAX_PIXELS;
   const { width, height } = readSvgSize(svgString);

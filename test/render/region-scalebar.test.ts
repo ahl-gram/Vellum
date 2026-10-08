@@ -12,7 +12,6 @@ import type { SvgNode } from "../../src/render/svg.ts";
 import type { UvWindow } from "../../src/terrain/heightfield.ts";
 import type { World } from "../../src/world/types.ts";
 
-
 const WIDTH = 1500;
 const MARGIN = marginFor(WIDTH); // 68
 const PLOT_RIGHT = WIDTH - MARGIN; // 1432, the inner frame edge
@@ -90,17 +89,17 @@ test("#249: region scale-bar tick labels stay whole numbers (no fractional mid t
   for (const band of LOD_BANDS) {
     if (!band.isRegion) continue;
     for (const t of numericTicks(regionOfBand(band.sizeUV))) {
-      assert.ok(
-        Number.isInteger(Number(t.value)),
-        `band ${band.index} emitted a fractional tick label "${t.value}"`,
-      );
+      assert.ok(Number.isInteger(Number(t.value)), `band ${band.index} emitted a fractional tick label "${t.value}"`);
     }
   }
 });
 
 test("#249 guard: the world sheet scale bar is unchanged (goldens safe)", () => {
   const ticks = numericTicks(world);
-  assert.deepEqual(ticks.map((t) => t.value), ["0", "10", "20"]);
+  assert.deepEqual(
+    ticks.map((t) => t.value),
+    ["0", "10", "20"],
+  );
   for (let i = 1; i < ticks.length; i++) {
     assert.ok(ticks[i]!.x > ticks[i - 1]!.x, "world ticks must ascend in x");
   }

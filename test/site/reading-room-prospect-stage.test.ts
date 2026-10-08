@@ -23,7 +23,13 @@ function declarationsFor(css: string, selector: string): string {
   const src = css.replace(/\/\*[\s\S]*?\*\//g, "");
   const out: string[] = [];
   for (const m of src.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
-    if (m[1]!.split(",").map((s) => s.trim()).includes(selector)) out.push(m[2]!);
+    if (
+      m[1]!
+        .split(",")
+        .map((s) => s.trim())
+        .includes(selector)
+    )
+      out.push(m[2]!);
   }
   return out.join("\n");
 }
@@ -169,7 +175,10 @@ test("#402 a late fetch from a superseded world is dropped, not painted", async 
   stage.setWorld(slow, (s) => `/prospect/#i=${s.index}`);
   stage.show(BEAT);
 
-  stage.setWorld(() => Promise.resolve({ svg: "svg-new", name: "New" }), (s) => `/#${s.index}`);
+  stage.setWorld(
+    () => Promise.resolve({ svg: "svg-new", name: "New" }),
+    (s) => `/#${s.index}`,
+  );
   release({ svg: "svg-old", name: "Old" });
   await tick();
   await tick();
@@ -198,8 +207,16 @@ test("#442 the unfurl uses a BACKWARDS fill, so the plate's hover lift survives 
   // rotateX(0deg) in the opening frame satisfies a presence check while producing a plain fade, so the OPENING angle has to be non-zero.
   const from = keyframes.match(/from\s*\{[^}]*\}/)?.[0] ?? "";
   const openingAngle = Number(/rotateX\((-?[\d.]+)deg\)/.exec(from)?.[1] ?? "0");
-  assert.notEqual(openingAngle, 0, `the unfurl opens at a real angle, not a fade dressed as one (got ${openingAngle}deg)`);
+  assert.notEqual(
+    openingAngle,
+    0,
+    `the unfurl opens at a real angle, not a fade dressed as one (got ${openingAngle}deg)`,
+  );
   assert.ok(Math.abs(openingAngle) > 20, `and an angle you can see, not a token one (got ${openingAngle}deg)`);
   assert.match(rule, /transform-origin:\s*top center/, "anchored at the top edge, the way paperUnfurl's consumers are");
-  assert.match(css, /\.rr-prospect a:hover img[^{]*\{[^}]*transform:/, "and the hover lift is a transform that must win");
+  assert.match(
+    css,
+    /\.rr-prospect a:hover img[^{]*\{[^}]*transform:/,
+    "and the hover lift is a transform that must win",
+  );
 });

@@ -24,7 +24,12 @@ function createWaterFlood(elev: Field, seaLevel: number): WaterFlood {
       if (collect) collect.push(i);
       const x = i % w;
       const y = (i / w) | 0;
-      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {
+      for (const [dx, dy] of [
+        [1, 0],
+        [-1, 0],
+        [0, 1],
+        [0, -1],
+      ] as const) {
         const nx = x + dx;
         const ny = y + dy;
         if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;
@@ -74,11 +79,7 @@ function lakeRecords(w: number, h: number, water: WaterFlood, minCells: number):
   return lakes;
 }
 
-export function findLakes(
-  elev: Field,
-  seaLevel: number,
-  minCells = 12,
-): Lake[] {
+export function findLakes(elev: Field, seaLevel: number, minCells = 12): Lake[] {
   const { w, h } = elev;
   const water = createWaterFlood(elev, seaLevel);
   const lakes = lakeRecords(w, h, water, minCells);

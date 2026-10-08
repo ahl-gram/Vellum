@@ -7,8 +7,13 @@ export async function h0Loads({ evaluate, check, sleep }: SuiteContext) {
   let ready = false;
   for (let i = 0; i < 100; i++) {
     let ok = null;
-    try { ok = await evaluate<boolean>(`document.readyState === "complete" && !!document.getElementById("seed-form")`); } catch {}
-    if (ok) { ready = true; break; }
+    try {
+      ok = await evaluate<boolean>(`document.readyState === "complete" && !!document.getElementById("seed-form")`);
+    } catch {}
+    if (ok) {
+      ready = true;
+      break;
+    }
     await sleep(75);
   }
   check("H0 the homepage loads with the seed form present", ready, "readyState complete + #seed-form");
@@ -22,14 +27,24 @@ export async function hVeilDown({ evaluate, sleep, pressKey }: HomeKit, ready: b
       await pressKey("Escape", "Escape", 27);
       await sleep(150);
       let up = true;
-      try { up = await evaluate<boolean>(`!!document.getElementById("lf-veil")`); } catch {}
+      try {
+        up = await evaluate<boolean>(`!!document.getElementById("lf-veil")`);
+      } catch {}
       if (!up) break;
     }
   }
 }
 
 export async function h1CornerForm({ evaluate, check }: SuiteContext, ready: boolean): Promise<void> {
-  const frame = ready ? await evaluate<{ pos: string; right: number; top: number; inside: boolean; gold: string | null; doorsHidden: boolean } | null>(`(() => {
+  const frame = ready
+    ? await evaluate<{
+        pos: string;
+        right: number;
+        top: number;
+        inside: boolean;
+        gold: string | null;
+        doorsHidden: boolean;
+      } | null>(`(() => {
     const form = document.getElementById("seed-form");
     const stage = document.getElementById("lf-stage");
     if (!form || !stage) return null;
@@ -44,27 +59,40 @@ export async function h1CornerForm({ evaluate, check }: SuiteContext, ready: boo
         const c = document.getElementById("lf-card-" + id);
         return c !== null && c.offsetParent === null;
       }) };
-  })()`) : null;
+  })()`)
+    : null;
   check(
     "H1 the seed form floats as the mockup's corner chrome: absolute in the stage's top-right, the gold Draw it, and no door slip showing on a healthy load",
-    !!frame && frame.pos === "absolute" && frame.inside && frame.right > 10 && frame.right < 60
-      && frame.top > 10 && frame.top < 60 && controlGold(frame.gold) && frame.doorsHidden,
+    !!frame &&
+      frame.pos === "absolute" &&
+      frame.inside &&
+      frame.right > 10 &&
+      frame.right < 60 &&
+      frame.top > 10 &&
+      frame.top < 60 &&
+      controlGold(frame.gold) &&
+      frame.doorsHidden,
     JSON.stringify(frame),
   );
 }
 
 export async function h2Hook({ evaluate, check, shoot }: SuiteContext, ready: boolean): Promise<void> {
-  const hero = ready ? await evaluate<{ hook: string | null; seed: string | null; lineStyle: string | null }>(`(() => {
+  const hero = ready
+    ? await evaluate<{ hook: string | null; seed: string | null; lineStyle: string | null }>(`(() => {
     const hook = document.querySelector(".lf-seed .seed-hook");
     const input = document.getElementById("seed-input");
     const line = document.querySelector(".lf-seed .seed-gloss");
     return { hook: hook ? hook.innerText : null, seed: input ? input.value : null,
       lineStyle: line ? getComputedStyle(line).fontStyle : null };
-  })()`) : null;
+  })()`)
+    : null;
   check(
     "H2 the hook reads as ratified, the seed input is prefilled 42, the gloss is italic",
-    !!hero && /Give Vellum a number\./.test(hero.hook!) && /It gives you back a world\./.test(
-      hero.hook!) && hero.seed === "42" && hero.lineStyle === "italic",
+    !!hero &&
+      /Give Vellum a number\./.test(hero.hook!) &&
+      /It gives you back a world\./.test(hero.hook!) &&
+      hero.seed === "42" &&
+      hero.lineStyle === "italic",
     JSON.stringify(hero),
   );
   await shoot("home-seed-chrome.png");
@@ -75,8 +103,13 @@ export async function h4DrawIt({ evaluate, send, check, shoot, sleep, PORT }: Su
   let ready = false;
   for (let i = 0; i < 100; i++) {
     let ok = null;
-    try { ok = await evaluate<boolean>(`document.readyState === "complete" && !!document.getElementById("seed-form")`); } catch {}
-    if (ok) { ready = true; break; }
+    try {
+      ok = await evaluate<boolean>(`document.readyState === "complete" && !!document.getElementById("seed-form")`);
+    } catch {}
+    if (ok) {
+      ready = true;
+      break;
+    }
     await sleep(75);
   }
 
@@ -117,8 +150,13 @@ export async function h5Home({ evaluate, send, sleep, PORT }: SuiteContext) {
   let backHome = false;
   for (let i = 0; i < 100; i++) {
     let ok = null;
-    try { ok = await evaluate<boolean>(`document.readyState === "complete" && !!document.getElementById("seed-form")`); } catch {}
-    if (ok) { backHome = true; break; }
+    try {
+      ok = await evaluate<boolean>(`document.readyState === "complete" && !!document.getElementById("seed-form")`);
+    } catch {}
+    if (ok) {
+      backHome = true;
+      break;
+    }
     await sleep(75);
   }
   return backHome;
@@ -138,7 +176,9 @@ export async function h5aRefused({ evaluate, check, sleep }: SuiteContext, backH
       await sleep(600);
       const stayed = await evaluate<boolean>(`location.pathname === "/" && !!document.getElementById("seed-form")`);
       refused = { ...refused, stayed };
-    } catch { refused = null; }
+    } catch {
+      refused = null;
+    }
   }
   check(
     "H5a garbage input is refused in place by the pattern (native hint, no navigation)",

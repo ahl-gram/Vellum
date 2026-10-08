@@ -1,13 +1,7 @@
 import type { Field } from "../core/grid.ts";
 import { clamp } from "../core/math.ts";
 import type { FlowResult } from "../hydrology/flow.ts";
-import {
-  extractRivers,
-  isMajorRiver,
-  riverThreshold,
-  type River,
-  type RiverPoint,
-} from "../hydrology/rivers.ts";
+import { extractRivers, isMajorRiver, riverThreshold, type River, type RiverPoint } from "../hydrology/rivers.ts";
 import type { UvWindow } from "../terrain/heightfield.ts";
 import type { World } from "./types.ts";
 
@@ -47,13 +41,7 @@ function worldRiverThreshold(world: World): number {
   return riverThreshold(landAcc); // default quantile 0.985, minAcc 8 (matches generateWorld)
 }
 
-function projectWorldMajors(
-  world: World,
-  window: UvWindow,
-  gridW: number,
-  gridH: number,
-  density: number,
-): River[] {
+function projectWorldMajors(world: World, window: UvWindow, gridW: number, gridH: number, density: number): River[] {
   const Ww = world.recipe.gridW;
   const Wh = world.recipe.gridH;
   const du = window.u1 - window.u0;
@@ -177,13 +165,7 @@ export function anchorRegionRivers(
   flow: FlowResult,
   seaLevel: number,
 ): River[] {
-  const density = regionDensityRatio(
-    world.recipe.gridW,
-    world.recipe.gridH,
-    window,
-    gridW,
-    gridH,
-  );
+  const density = regionDensityRatio(world.recipe.gridW, world.recipe.gridH, window, gridW, gridH);
   const absoluteThreshold = worldRiverThreshold(world) * density;
   const extracted = extractRivers(elev, flow, seaLevel, { absoluteThreshold });
 

@@ -2,7 +2,13 @@
 import { readdirSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 
-export type Box = { readonly x: number; readonly y: number; readonly r: number; readonly b: number; readonly t: string };
+export type Box = {
+  readonly x: number;
+  readonly y: number;
+  readonly r: number;
+  readonly b: number;
+  readonly t: string;
+};
 export type CornerRead = {
   readonly innerW: number;
   readonly clientW: number;
@@ -47,51 +53,66 @@ function sides(op: string, n: number): [number, number] {
 }
 
 export function mediaEdges(conditions: readonly string[], above: number, upTo: number): number[] {
-  const all = conditions.flatMap((text) => COMPARISONS.flatMap(({ re, read }) => [...text.matchAll(re)].flatMap((m) => sides(...read(m)))));
+  const all = conditions.flatMap((text) =>
+    COMPARISONS.flatMap(({ re, read }) => [...text.matchAll(re)].flatMap((m) => sides(...read(m)))),
+  );
   return [...new Set(all.filter((w) => w > above && w <= upTo))].sort((a, b) => b - a);
 }
 
 export function unreadWidthConditions(conditions: readonly string[]): string[] {
-  return conditions.filter((text) => COMPARISONS.reduce((rest, { re }) => rest.replace(re, ""), text).includes("width"));
+  return conditions.filter((text) =>
+    COMPARISONS.reduce((rest, { re }) => rest.replace(re, ""), text).includes("width"),
+  );
 }
 
 export function floorEdges(conditions: readonly string[], floor: number): string[] {
-  return conditions.filter((text) => COMPARISONS.some(({ re, read }) => [...text.matchAll(re)].some((m) => sides(...read(m))[1] <= floor)));
+  return conditions.filter((text) =>
+    COMPARISONS.some(({ re, read }) => [...text.matchAll(re)].some((m) => sides(...read(m))[1] <= floor)),
+  );
 }
 
 export function pageFaults(media: readonly string[], rows: readonly Row[], floor: number): string[] {
   return [
-    ...[...new Set(unreadWidthConditions(media))].map((text) => `a width condition the edge reader cannot parse: ${text}`),
-    ...[...new Set(floorEdges(media, floor))].map((text) => `a width condition that switches at or below the ${floor} floor: ${text}`),
+    ...[...new Set(unreadWidthConditions(media))].map(
+      (text) => `a width condition the edge reader cannot parse: ${text}`,
+    ),
+    ...[...new Set(floorEdges(media, floor))].map(
+      (text) => `a width condition that switches at or below the ${floor} floor: ${text}`,
+    ),
     ...rows.map((row) => verdict(row)).filter((v): v is string => v !== null),
   ];
 }
 
 export function meetings(left: readonly Box[], right: readonly Box[]): Meeting[] {
   const out: Meeting[] = [];
-  for (const a of left) for (const b of right) {
-    const w = Math.min(a.r, b.r) - Math.max(a.x, b.x);
-    const h = Math.min(a.b, b.b) - Math.max(a.y, b.y);
-    if (w > 0 && h > 0) out.push({ w, h, a: a.t, b: b.t });
-  }
+  for (const a of left)
+    for (const b of right) {
+      const w = Math.min(a.r, b.r) - Math.max(a.x, b.x);
+      const h = Math.min(a.b, b.b) - Math.max(a.y, b.y);
+      if (w > 0 && h > 0) out.push({ w, h, a: a.t, b: b.t });
+    }
   return out.sort((p, q) => q.w * q.h - p.w * p.h);
 }
 
 export function nearest(left: readonly Box[], right: readonly Box[]): number {
   let best = Infinity;
-  for (const a of left) for (const b of right) {
-    const dx = Math.max(a.x - b.r, b.x - a.r, 0);
-    const dy = Math.max(a.y - b.b, b.y - a.b, 0);
-    best = Math.min(best, Math.hypot(dx, dy));
-  }
+  for (const a of left)
+    for (const b of right) {
+      const dx = Math.max(a.x - b.r, b.x - a.r, 0);
+      const dy = Math.max(a.y - b.b, b.y - a.b, 0);
+      best = Math.min(best, Math.hypot(dx, dy));
+    }
   return best;
 }
 
 const SHIFT_TOLERANCE = 0.05;
 const same = (p: readonly Box[], q: readonly Box[], dx: number): boolean =>
-  p.length === q.length && p.every((a, i) => {
+  p.length === q.length &&
+  p.every((a, i) => {
     const b = q[i]!;
-    return a.t === b.t && [a.x + dx - b.x, a.r + dx - b.r, a.y - b.y, a.b - b.b].every((d) => Math.abs(d) <= SHIFT_TOLERANCE);
+    return (
+      a.t === b.t && [a.x + dx - b.x, a.r + dx - b.r, a.y - b.y, a.b - b.b].every((d) => Math.abs(d) <= SHIFT_TOLERANCE)
+    );
   });
 
 export function plainShift(wider: CornerRead, narrower: CornerRead): boolean {
@@ -113,16 +134,20 @@ export function strideWidths(hi: number, lo: number, stride: number, edges: read
 export function verdict({ w, read }: Row): string | null {
   if (read.innerW !== w) return `laid out at ${read.innerW}, not ${w}`;
   if (read.scrollW > w) return `at ${w} the page scrolls sideways to ${read.scrollW}`;
-  if (read.left.length < 2 || read.right.length < 1) return `at ${w} the read found ${read.left.length} cluster and ${read.right.length} corner inks`;
+  if (read.left.length < 2 || read.right.length < 1)
+    return `at ${w} the read found ${read.left.length} cluster and ${read.right.length} corner inks`;
   if (!read.left.some((b) => b.t.startsWith(MOTTO))) return `at ${w} the motto is gone`;
   const [m] = meetings(read.left, read.right);
   if (m) return `at ${w} "${m.a}" meets "${m.b}" by ${m.w.toFixed(1)} x ${m.h.toFixed(1)}`;
-  if (read.bandH !== null && read.clusterBottom > read.bandH) return `at ${w} the cluster ends at ${read.clusterBottom}, past the band's ${read.bandH}`;
+  if (read.bandH !== null && read.clusterBottom > read.bandH)
+    return `at ${w} the cluster ends at ${read.clusterBottom}, past the band's ${read.bandH}`;
   return null;
 }
 
 export type Control = { readonly t: string; readonly w: number; readonly natural: number };
 
 export function squeezes(w: number, controls: readonly Control[]): string[] {
-  return controls.filter((c) => c.w < c.natural - 0.5).map((c) => `at ${w} the corner's ${c.t} is squeezed to ${c.w.toFixed(1)} from its own ${c.natural.toFixed(1)}`);
+  return controls
+    .filter((c) => c.w < c.natural - 0.5)
+    .map((c) => `at ${w} the corner's ${c.t} is squeezed to ${c.w.toFixed(1)} from its own ${c.natural.toFixed(1)}`);
 }

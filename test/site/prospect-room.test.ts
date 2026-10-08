@@ -39,24 +39,65 @@ test("PPR1 the Prospect is a chart room: chartRoom on the layout, the RoomFolio 
 
 test("PPR2 the corner is the year control (#494 ruling 2): viewed in the year, the year, Engrave", () => {
   const folio = between("<RoomFolio", "</RoomFolio>");
-  assert.match(folio, /<form class="folio-controls" id="pp-year-form" aria-label="[^"]+">/, "the control row is a form, so Enter engraves");
-  assert.match(folio, /<label class="year-label" for="pp-year">viewed in the year<\/label>/, "the label names the control");
-  assert.match(folio, /<input id="pp-year" class="control" type="text" inputmode="numeric" pattern="\[0-9\]\*" autocomplete="off">/, "text with a numeric keypad and a digits pattern (home's seed input, the iOS precedent); no aria-label, so the visible label IS the accessible name (WCAG 2.5.3; a display:none label still names its control)");
-  assert.match(folio, /<button id="pp-engrave" class="primary" type="submit">Engrave<\/button>/, "Engrave is the room's primary");
-  assert.ok(folio.indexOf('for="pp-year"') < folio.indexOf('id="pp-year"') && folio.indexOf('id="pp-year"') < folio.indexOf('id="pp-engrave"'), "label, year, Engrave");
-  assert.match(folio, /<p class="gloss">turn the year back, even to the ground before it rose<\/p>/, "the corner's gloss");
+  assert.match(
+    folio,
+    /<form class="folio-controls" id="pp-year-form" aria-label="[^"]+">/,
+    "the control row is a form, so Enter engraves",
+  );
+  assert.match(
+    folio,
+    /<label class="year-label" for="pp-year">viewed in the year<\/label>/,
+    "the label names the control",
+  );
+  assert.match(
+    folio,
+    /<input id="pp-year" class="control" type="text" inputmode="numeric" pattern="\[0-9\]\*" autocomplete="off">/,
+    "text with a numeric keypad and a digits pattern (home's seed input, the iOS precedent); no aria-label, so the visible label IS the accessible name (WCAG 2.5.3; a display:none label still names its control)",
+  );
+  assert.match(
+    folio,
+    /<button id="pp-engrave" class="primary" type="submit">Engrave<\/button>/,
+    "Engrave is the room's primary",
+  );
+  assert.ok(
+    folio.indexOf('for="pp-year"') < folio.indexOf('id="pp-year"') &&
+      folio.indexOf('id="pp-year"') < folio.indexOf('id="pp-engrave"'),
+    "label, year, Engrave",
+  );
+  assert.match(
+    folio,
+    /<p class="gloss">turn the year back, even to the ground before it rose<\/p>/,
+    "the corner's gloss",
+  );
 });
 
 test("PPR3 the engraver's note is the slip (#494 ruling 4): the gazetteer's note, the key to the plate in the kit's contents row, the era line", () => {
-  assert.match(page, /<Slip id="note" verb="The engraver's note" title="The Engraver's Note" where="[^"]+" fold="Fold the engraver's note away">/, "the slip carries the mockup's head; the title is the tab's name, the h2 takes the place at the draw");
+  assert.match(
+    page,
+    /<Slip id="note" verb="The engraver's note" title="The Engraver's Note" where="[^"]+" fold="Fold the engraver's note away">/,
+    "the slip carries the mockup's head; the title is the tab's name, the h2 takes the place at the draw",
+  );
   const slip = between("<Slip", "</Slip>");
   assert.match(slip, /<p class="note-prose" id="pp-note"><\/p>/, "the note, filled at the draw");
   assert.match(slip, /<p class="key-head" id="pp-key-head">The key to the plate<\/p>/, "the key's head");
-  assert.match(slip, /<ol class="contents plate-key" id="pp-key"><\/ol>/, "the key is the kit's contents row (#487, its third use)");
+  assert.match(
+    slip,
+    /<ol class="contents plate-key" id="pp-key"><\/ol>/,
+    "the key is the kit's contents row (#487, its third use)",
+  );
   assert.match(slip, /<p class="era" id="pp-era"><\/p>/, "the era line");
-  assert.match(slip, /<p class="era-gloss">The same place, chart and year always press the same plate\./, "the intro's one surviving line rides the era (the mockup's seat for it)");
-  const order = ['id="pp-note"', 'id="pp-key-head"', 'id="pp-key"', 'id="pp-era"', 'class="era-gloss"'].map((m) => slip.indexOf(m));
-  assert.ok(order.every((i, n) => i >= 0 && (n === 0 || i > order[n - 1]!)), "note, key head, key, era, gloss, dock");
+  assert.match(
+    slip,
+    /<p class="era-gloss">The same place, chart and year always press the same plate\./,
+    "the intro's one surviving line rides the era (the mockup's seat for it)",
+  );
+  const order = ['id="pp-note"', 'id="pp-key-head"', 'id="pp-key"', 'id="pp-era"', 'class="era-gloss"'].map((m) =>
+    slip.indexOf(m),
+  );
+  assert.ok(
+    order.every((i, n) => i >= 0 && (n === 0 || i > order[n - 1]!)),
+    "note, key head, key, era, gloss, dock",
+  );
   assert.ok(page.indexOf("</Slip>") < page.indexOf("<ChartFolio"), "the slip precedes the chart's folio in the page");
 });
 
@@ -64,8 +105,16 @@ test("PPR4 the legend row is the roads out (#494 ruling 3): the Explorer in gold
   const legend = between('<nav class="legend"', "</nav>");
   assert.match(legend, /<nav class="legend" aria-label="The roads out">/);
   assert.match(legend, /<p class="legend-head">The roads out<\/p>/);
-  assert.match(legend, /<LegendButton id="pp-chart-link" gold href="\/explorer\/" verb="Return to" room="The Explorer" \/>/, "the road back keeps the id the suite reads, in gold (the kit's, #487)");
-  assert.match(legend, /<LegendButton id="pp-ribbon-link" href="\/ribbon\/" verbId="pp-ribbon-verb" verb="[^"]*" room="The Wayfarer's Ribbon" \/>/, "the road out to the Ribbon, its verb naming the town at the draw");
+  assert.match(
+    legend,
+    /<LegendButton id="pp-chart-link" gold href="\/explorer\/" verb="Return to" room="The Explorer" \/>/,
+    "the road back keeps the id the suite reads, in gold (the kit's, #487)",
+  );
+  assert.match(
+    legend,
+    /<LegendButton id="pp-ribbon-link" href="\/ribbon\/" verbId="pp-ribbon-verb" verb="[^"]*" room="The Wayfarer's Ribbon" \/>/,
+    "the road out to the Ribbon, its verb naming the town at the draw",
+  );
   assert.ok(legend.indexOf('id="pp-chart-link"') < legend.indexOf('id="pp-ribbon-link"'), "the gold road first");
 });
 
@@ -76,45 +125,125 @@ test("PPR5 the stage holds the fitted sheet with the plate as the one face in th
     "the kit's stage (#487): its gesture box's transform target holds the plate (a blob img, never inline svg)",
   );
   const stage = between("<ChartStage", "<Vignettes />");
-  assert.match(stage, /<p class="status" id="pp-status" role="status" aria-live="polite"><\/p>/, "the status line keeps its id (the suite's settle probe) and is the stage's pill");
+  assert.match(
+    stage,
+    /<p class="status" id="pp-status" role="status" aria-live="polite"><\/p>/,
+    "the status line keeps its id (the suite's settle probe) and is the stage's pill",
+  );
   assert.match(stage, /<p id="pp-warning" class="warning" hidden>/, "the inline-fallback warning stands in the stage");
   assert.match(stage, /<noscript>/, "scripts off is said in the stage");
-  assert.ok(page.includes("<Glass />"), "the Glass is the kit's corner cluster (#487; its presses carry data-zoom for the shared keys binding, atelier-kit.test.ts)");
-  assert.deepEqual(folioLines(), [["folio-title", "folio-title"], ["folio-sub", "folio-sub"], ["folio-coords", "pp-pressed"]], "the plate's title line, the world's line, the pressing's line");
+  assert.ok(
+    page.includes("<Glass />"),
+    "the Glass is the kit's corner cluster (#487; its presses carry data-zoom for the shared keys binding, atelier-kit.test.ts)",
+  );
+  assert.deepEqual(
+    folioLines(),
+    [
+      ["folio-title", "folio-title"],
+      ["folio-sub", "folio-sub"],
+      ["folio-coords", "pp-pressed"],
+    ],
+    "the plate's title line, the world's line, the pressing's line",
+  );
 });
 
 test("PPR6 seats.ts binds the Glass and the room at the plate's own aspect; app.ts redraws in place for the year, writes the address and the roads, refits after the folio, and never scrolls the page", () => {
   assert.match(seats, /import\s*\{\s*bindRoom, type Room\s*\}\s*from\s*"\.\.\/shared\/room\.ts"/, "the shared room");
-  assert.match(seats, /import\s*\{\s*createZoomController\s*\}\s*from\s*"\.\.\/shared\/zoom-controller\.ts"/, "the Glass is the shared controller");
-  assert.match(seats, /import\s*\{\s*bindGlassKeys\s*\}\s*from\s*"\.\.\/shared\/glass-keys\.ts"/, "its keys and buttons are the kit's");
-  assert.match(seats, /import\s*\{\s*PLATE_W, PLATE_H\s*\}\s*from\s*"\.\.\/\.\.\/prospect\/geometry\.ts"/, "the plate's own size");
-  assert.match(seats, /bindRoom\(\{[^}]*aspect: \(\) => PLATE_W \/ PLATE_H/, "the fit takes the plate's aspect explicitly: an img gives the svg scan nothing, and the chart's fallback mis-fits the plate by 4.5%");
-  assert.match(seats, /restore: \(cam\) =>[\s\S]*?\.refit\(/, "the room's refit is the silent one (no settle, no hash)");
+  assert.match(
+    seats,
+    /import\s*\{\s*createZoomController\s*\}\s*from\s*"\.\.\/shared\/zoom-controller\.ts"/,
+    "the Glass is the shared controller",
+  );
+  assert.match(
+    seats,
+    /import\s*\{\s*bindGlassKeys\s*\}\s*from\s*"\.\.\/shared\/glass-keys\.ts"/,
+    "its keys and buttons are the kit's",
+  );
+  assert.match(
+    seats,
+    /import\s*\{\s*PLATE_W, PLATE_H\s*\}\s*from\s*"\.\.\/\.\.\/prospect\/geometry\.ts"/,
+    "the plate's own size",
+  );
+  assert.match(
+    seats,
+    /bindRoom\(\{[^}]*aspect: \(\) => PLATE_W \/ PLATE_H/,
+    "the fit takes the plate's aspect explicitly: an img gives the svg scan nothing, and the chart's fallback mis-fits the plate by 4.5%",
+  );
+  assert.match(
+    seats,
+    /restore: \(cam\) =>[\s\S]*?\.refit\(/,
+    "the room's refit is the silent one (no settle, no hash)",
+  );
   assert.match(app, /yearHash\(location\.hash, /, "an Engrave writes the year into the address");
   assert.match(app, /ribbonTarget\(location\.hash, /, "the road to the Ribbon carries the world and the town");
   assert.match(app, /chartTarget\(location\.hash\)/, "the road back sheds the page's own keys (PB7b)");
-  assert.match(app, /parseYear\(/, "the control reads the year through parseYear, the one grammar the address reads year= with");
-  assert.match(app, /ribbonLink\.style\.display = res\.roads \? "" : "none"/, "the Ribbon's road stands only where a road leaves the town, by display (the kit's .legend-btn display makes hidden inert)");
-  assert.match(app.slice(0, app.indexOf("await initWorker()")), /ribbonLink\.style\.display = "none"/, "and stands down until the first plate resolves the town");
+  assert.match(
+    app,
+    /parseYear\(/,
+    "the control reads the year through parseYear, the one grammar the address reads year= with",
+  );
+  assert.match(
+    app,
+    /ribbonLink\.style\.display = res\.roads \? "" : "none"/,
+    "the Ribbon's road stands only where a road leaves the town, by display (the kit's .legend-btn display makes hidden inert)",
+  );
+  assert.match(
+    app.slice(0, app.indexOf("await initWorker()")),
+    /ribbonLink\.style\.display = "none"/,
+    "and stands down until the first plate resolves the town",
+  );
   assert.match(app, /addEventListener\("submit"/, "Engrave is the form's submit");
   const settle = app.slice(app.indexOf("showPlate("), app.indexOf("last = {"));
-  assert.ok(settle.includes("writeFolio(") && settle.includes("room.layout()"), "the settle path writes the folio and refits");
-  assert.ok(settle.indexOf("room.layout()") > settle.indexOf("writeFolio("), "the refit follows the folio write, since the fit measures the folio's rect");
+  assert.ok(
+    settle.includes("writeFolio(") && settle.includes("room.layout()"),
+    "the settle path writes the folio and refits",
+  );
+  assert.ok(
+    settle.indexOf("room.layout()") > settle.indexOf("writeFolio("),
+    "the refit follows the folio write, since the fit measures the folio's rect",
+  );
   assert.match(app, /revokeObjectURL\(/, "a redraw revokes the previous plate's blob (the Ribbon's discipline)");
-  for (const [name, src] of [["app.ts", app], ["seats.ts", seats]] as const) {
+  for (const [name, src] of [
+    ["app.ts", app],
+    ["seats.ts", seats],
+  ] as const) {
     assert.doesNotMatch(src, /scrollIntoView|window\.scrollTo|\.scrollTop\s*=/, `${name} moves the page`);
   }
 });
 
 test("PPR7 the css: the sheet fitted to what the chrome leaves, the plate as the sheet's face, print standing down (#462 ruling 10)", () => {
-  assert.match(css, /\.stage\s*\{[^}]*padding:\s*var\(--reserve-top/, "the stage reserves the chrome's edges as padding, measured by room.ts");
-  assert.match(css, /#sheet\s*\{[^}]*box-shadow:\s*var\(--stage-shadow\)/, "the sheet rests at the chart-room depth, via the token");
-  assert.match(css, /#map-viewport\.zoomable\s*\{[^}]*touch-action:\s*none/, "touch-action:none stays on the gesture box");
+  assert.match(
+    css,
+    /\.stage\s*\{[^}]*padding:\s*var\(--reserve-top/,
+    "the stage reserves the chrome's edges as padding, measured by room.ts",
+  );
+  assert.match(
+    css,
+    /#sheet\s*\{[^}]*box-shadow:\s*var\(--stage-shadow\)/,
+    "the sheet rests at the chart-room depth, via the token",
+  );
+  assert.match(
+    css,
+    /#map-viewport\.zoomable\s*\{[^}]*touch-action:\s*none/,
+    "touch-action:none stays on the gesture box",
+  );
   assert.match(css, /#map\s*\{[^}]*transform-origin:\s*0\s+0/, "#map keeps the top-left pivot");
-  assert.match(css, /#pp-plate\s*\{[^}]*position:\s*absolute;[^}]*inset:\s*0;[^}]*width:\s*100%;[^}]*height:\s*100%/, "the plate fills the sheet");
+  assert.match(
+    css,
+    /#pp-plate\s*\{[^}]*position:\s*absolute;[^}]*inset:\s*0;[^}]*width:\s*100%;[^}]*height:\s*100%/,
+    "the plate fills the sheet",
+  );
   assert.match(css, /#pp-plate\[hidden\]\s*\{[^}]*display:\s*none/, "hidden stays hidden under the author display");
-  assert.doesNotMatch(css, /(^|\n)(\.contents )?\.cr-(num|text)\s*\{/, "the page css does not re-dress the kit's row (#302)");
-  assert.doesNotMatch(css, /(^|\n)\s*(header|footer|\.plate-figure|\.actions|main)\s*[{,]/, "no rule targets furniture a chart room no longer has");
+  assert.doesNotMatch(
+    css,
+    /(^|\n)(\.contents )?\.cr-(num|text)\s*\{/,
+    "the page css does not re-dress the kit's row (#302)",
+  );
+  assert.doesNotMatch(
+    css,
+    /(^|\n)\s*(header|footer|\.plate-figure|\.actions|main)\s*[{,]/,
+    "no rule targets furniture a chart room no longer has",
+  );
   const print = css.match(/@media print\s*\{([\s\S]*)\}\s*$/);
   assert.ok(print, "the page css ends with its print stand-down");
   assert.match(print[1]!, /\.stage\s*\{[^}]*position:\s*static/, "the plate prints in flow");
@@ -124,55 +253,126 @@ test("PPR7 the css: the sheet fitted to what the chrome leaves, the plate as the
 
 function assertLayPressWiring(): void {
   const slip = between('<Slip id="note"', "</Slip>");
-  assert.match(slip, /<button id="pp-lay" class="pp-lay" type="button">/, "the press stands inside the note, where the room's desk actions belong");
+  assert.match(
+    slip,
+    /<button id="pp-lay" class="pp-lay" type="button">/,
+    "the press stands inside the note, where the room's desk actions belong",
+  );
   const roads = between('<nav class="legend"', "</nav>");
-  assert.doesNotMatch(roads, /pp-lay/, "and NOT in the roads out, which go somewhere; a press that acts on the sheet wears the button dress instead");
+  assert.doesNotMatch(
+    roads,
+    /pp-lay/,
+    "and NOT in the roads out, which go somewhere; a press that acts on the sheet wears the button dress instead",
+  );
   // Astro markup cannot import, so the authored literal and the constant the script paints with are pinned EQUAL here or they drift silently.
-  assert.ok(slip.includes(`>${LAY_ON_PAGE}</button>`), `the authored face is not ${JSON.stringify(LAY_ON_PAGE)}, so the press changes wording the instant the script paints it`);
+  assert.ok(
+    slip.includes(`>${LAY_ON_PAGE}</button>`),
+    `the authored face is not ${JSON.stringify(LAY_ON_PAGE)}, so the press changes wording the instant the script paints it`,
+  );
   assert.match(app, /\bLAY_ON_PAGE\b/, "the script paints from the constant rather than its own literal");
   // The filing handler itself, which no unit test read until the prover deleted half of it and shipped green.
   const from = app.indexOf('layPress.addEventListener("click"');
   assert.notEqual(from, -1, "the press is no longer wired, so the assertions below read an empty slice");
   const handler = app.slice(from, app.indexOf("\n});", from));
-  assert.match(handler, /\blayOnTable\(/, "a raw append would drop the seventh sheet silently, since emitTable and parseTable both slice at the cap");
+  assert.match(
+    handler,
+    /\blayOnTable\(/,
+    "a raw append would drop the seventh sheet silently, since emitTable and parseTable both slice at the cap",
+  );
   // A dead call satisfies the token above: the gate earns its place only if its ANSWER is what the page keeps, and only if a refusal stops the write.
-  assert.match(handler, /\btable = laid\.items\b/, "the gate's answer is discarded and the table is built some other way, so the dedupe and the cap decide nothing here");
-  assert.ok(handler.indexOf("laid.refused") < handler.indexOf("table = laid.items"), "the refusal is read after the table has already moved, so a refused filing still writes");
+  assert.match(
+    handler,
+    /\btable = laid\.items\b/,
+    "the gate's answer is discarded and the table is built some other way, so the dedupe and the cap decide nothing here",
+  );
+  assert.ok(
+    handler.indexOf("laid.refused") < handler.indexOf("table = laid.items"),
+    "the refusal is read after the table has already moved, so a refused filing still writes",
+  );
   assert.match(handler, /chartLink\.href = chartTarget\(/, "the way home carries the table it just gained");
-  assert.match(handler, /ribbonLink\.href = ribbonTarget\(/, "and so does the road to the Ribbon: each href is built once per draw, so a road left unrefreshed carries the table as it stood BEFORE this filing");
+  assert.match(
+    handler,
+    /ribbonLink\.href = ribbonTarget\(/,
+    "and so does the road to the Ribbon: each href is built once per draw, so a road left unrefreshed carries the table as it stood BEFORE this filing",
+  );
   // The boot table, likewise unread until a mutation removed the gate and shipped green.
   const prologue = app.slice(app.indexOf("const addr = parseProspectAddress"), app.indexOf("function filedItem"));
   // Issue #634 gave the boot table a second source, so the gate moved one hop into `seated` and is asserted in two steps rather than one: that the boot table is built by it, and that it IS the gate.
-  assert.match(prologue, /let table[^;]*=\s*seated\(/, "the page's boot table skips the dedupe gate restore() runs, so a shared link carrying one sheet twice leaves this page's tally and cap disagreeing with the Explorer's over one address");
-  const seated = prologue.slice(prologue.indexOf("const seated ="), prologue.indexOf(";", prologue.indexOf("const seated =")));
+  assert.match(
+    prologue,
+    /let table[^;]*=\s*seated\(/,
+    "the page's boot table skips the dedupe gate restore() runs, so a shared link carrying one sheet twice leaves this page's tally and cap disagreeing with the Explorer's over one address",
+  );
+  const seated = prologue.slice(
+    prologue.indexOf("const seated ="),
+    prologue.indexOf(";", prologue.indexOf("const seated =")),
+  );
   // The gate's ANSWER, not a call to it: the prover's round 1 discarded the return inside this reduce and appended
   // unconditionally, which keeps the token and defeats the dedupe and the cap exactly as deleting it would.
-  assert.match(seated, /\(kept, item\) => layOnTable\(kept, item\)\.items/, "the boot table's own builder calls the dedupe gate and throws its answer away, which is the same defect one hop further out");
-  assert.match(prologue, /tableOnArrival\(parseTable\(location\.hash\), readStoredTable\(store\), navigationTypeNow\(\)\)/, "the page's boot table no longer asks the ruled precedence (#634, 2026-09-19), so this page and the Explorer can disagree about the same gathering");
+  assert.match(
+    seated,
+    /\(kept, item\) => layOnTable\(kept, item\)\.items/,
+    "the boot table's own builder calls the dedupe gate and throws its answer away, which is the same defect one hop further out",
+  );
+  assert.match(
+    prologue,
+    /tableOnArrival\(parseTable\(location\.hash\), readStoredTable\(store\), navigationTypeNow\(\)\)/,
+    "the page's boot table no longer asks the ruled precedence (#634, 2026-09-19), so this page and the Explorer can disagree about the same gathering",
+  );
   assert.doesNotMatch(app, /"Lay (this|the) prospect on the table"/, "and writes no second copy of the wording");
 }
 
 function assertLayPressDress(): void {
-  assert.match(css, /\.pp-lay\.dim\s*\{[^}]*background:\s*var\(--control-cream\)/, "the refusing face dims by losing the featured gold, keeping its ink at full strength");
-  assert.doesNotMatch(css, /\.pp-lay\.dim\s*\{[^}]*opacity/, "and never by opacity, which fails the measured contrast floor");
+  assert.match(
+    css,
+    /\.pp-lay\.dim\s*\{[^}]*background:\s*var\(--control-cream\)/,
+    "the refusing face dims by losing the featured gold, keeping its ink at full strength",
+  );
+  assert.doesNotMatch(
+    css,
+    /\.pp-lay\.dim\s*\{[^}]*opacity/,
+    "and never by opacity, which fails the measured contrast floor",
+  );
   const dimHold = css.match(/#note \.pp-lay\.dim:hover[^{]*\{[^}]*\}/);
   assert.ok(dimHold, "the dim has no hold against the hover rule above it, so a pointer undoes it");
-  assert.match(dimHold[0].slice(0, dimHold[0].indexOf("{")), /:focus-visible/, "the hold covers the pointer and not the keyboard, and ruling 3 turns on the reader who arrives by Tab meeting the press and hearing why");
+  assert.match(
+    dimHold[0].slice(0, dimHold[0].indexOf("{")),
+    /:focus-visible/,
+    "the hold covers the pointer and not the keyboard, and ruling 3 turns on the reader who arrives by Tab meeting the press and hearing why",
+  );
   const dimRule = css.match(/\.pp-lay\.dim\s*\{[^}]*\}/)?.[0] ?? "";
-  const heldDecls = dimHold[0].slice(dimHold[0].indexOf("{") + 1).split(";").map((d) => d.trim());
+  const heldDecls = dimHold[0]
+    .slice(dimHold[0].indexOf("{") + 1)
+    .split(";")
+    .map((d) => d.trim());
   for (const prop of [...dimRule.matchAll(/(\b[a-z-]+):/g)].map((m) => m[1])) {
-    assert.ok(heldDecls.some((d) => d.startsWith(`${prop}:`)), `the dim sets ${prop} and the (1,2,0) hover rule does not re-assert it, so a pointer or a keyboard focus restores it on a refusing press`);
+    assert.ok(
+      heldDecls.some((d) => d.startsWith(`${prop}:`)),
+      `the dim sets ${prop} and the (1,2,0) hover rule does not re-assert it, so a pointer or a keyboard focus restores it on a refusing press`,
+    );
   }
   // The press's OWN rule, not merely its dim: the card's side took this guard at PR #631 round 1 because a bare-substring
   // roster could not see the primary block deleted, and this is the same class on the mirror surface. Without it the
   // ruled featured gold can be removed here with every markup and e2e assertion still green.
   const rule = css.match(/(^|\n)\.pp-lay\s*\{[^}]*\}/g) ?? [];
   assert.equal(rule.length, 1, "public/prospect/index.css declares .pp-lay's own rule once, or the last one wins");
-  assert.match(rule[0], /background:\s*var\(--control-gold\)/, "the page's press loses the featured gold the sitting ruled");
-  assert.match(rule[0], /font-family:\s*var\(--font-display/, "and the display face that makes it read as a press rather than prose");
+  assert.match(
+    rule[0],
+    /background:\s*var\(--control-gold\)/,
+    "the page's press loses the featured gold the sitting ruled",
+  );
+  assert.match(
+    rule[0],
+    /font-family:\s*var\(--font-display/,
+    "and the display face that makes it read as a press rather than prose",
+  );
   const file = css.match(/(^|\n)\.pp-file\s*\{[^}]*\}/g) ?? [];
   assert.equal(file.length, 1);
-  assert.match(file[0], /display:\s*flex/, "the press and its tally stack as a column, which is what the ruled variant showed");
+  assert.match(
+    file[0],
+    /display:\s*flex/,
+    "the press and its tally stack as a column, which is what the ruled variant showed",
+  );
   assert.doesNotMatch(app, /layPress\.disabled/, "and it is never disabled: that drops it out of the tab order");
 }
 
@@ -183,20 +383,51 @@ test("PR-lay the page's filing press sits ON the engraver's note and not among t
 
 test("PR-table this page keeps the table's SECOND home too, on both roads the Explorer keeps it on (#634, ruled 2026-09-19)", () => {
   // The whole of this check exists because the wiring is DUPLICATED at two hosts and only the Explorer's half was guarded: the guard-prover's round 2 deleted this page's device write, and then its entire pageshow listener, with every other test in the set green. That is Issue #634's own defect recurring one level down, in the tests. `store` is the SHARED binding, which table-store.test.ts drives against the real global (guard-prover round 3).
-  assert.match(app, /import \{ deviceStorage as store,[^}]*\} from "\.\.\/shared\/table-store\.ts";/, "this page names its own device instead of taking the one the store module exports and tests, so it can be wired to nothing with every assertion here green");
+  assert.match(
+    app,
+    /import \{\s*deviceStorage as store,[^}]*\} from "\.\.\/shared\/table-store\.ts";/,
+    "this page names its own device instead of taking the one the store module exports and tests, so it can be wired to nothing with every assertion here green",
+  );
   const from = app.indexOf('layPress.addEventListener("click"');
   assert.notEqual(from, -1, "the filing press has no handler, so this guard reads the whole file");
   const handler = app.slice(from, app.indexOf("\n});", from));
-  assert.match(handler, /writeStoredTable\(store, table\)/, "a sheet filed here never reaches the device, so the Explorer's own Back button loses it, which is the defect #634 was filed for");
-  assert.ok(handler.indexOf("writeStoredTable") < handler.indexOf("history.replaceState"), "the device is written after the address, which is a second order to keep in step for no reason");
+  assert.match(
+    handler,
+    /writeStoredTable\(store, table\)/,
+    "a sheet filed here never reaches the device, so the Explorer's own Back button loses it, which is the defect #634 was filed for",
+  );
+  assert.ok(
+    handler.indexOf("writeStoredTable") < handler.indexOf("history.replaceState"),
+    "the device is written after the address, which is a second order to keep in step for no reason",
+  );
   const showAt = app.indexOf('window.addEventListener("pageshow"');
-  assert.notEqual(showAt, -1, "this page has no pageshow listener, and a page served from the browser's cache runs NO boot code, so nothing at all would bring its table up to date");
+  assert.notEqual(
+    showAt,
+    -1,
+    "this page has no pageshow listener, and a page served from the browser's cache runs NO boot code, so nothing at all would bring its table up to date",
+  );
   const show = app.slice(showAt, app.indexOf("\n});", showAt));
-  assert.match(show, /if \(!e\.persisted\) return;/, "the listener acts on a fresh load as well as a cached one, so it fights the boot's own precedence instead of being the restore's only reader");
+  assert.match(
+    show,
+    /if \(!e\.persisted\) return;/,
+    "the listener acts on a fresh load as well as a cached one, so it fights the boot's own precedence instead of being the restore's only reader",
+  );
   // The SHARED rule, for the reason the Explorer's own guard gives: the first version of this pinned the rule with its qualifier dropped (the cold review on PR #635).
-  assert.match(show, /const held = seated\(tableOnArrival\(parseTable\(location\.hash\), readStoredTable\(store\), TRAVERSAL\)\);/, "the cached return re-seats this page from something other than the ruled precedence, or through something other than the gate every other seat here goes through");
-  assert.match(show, /if \(emitTable\(held\) === emitTable\(table\)\) return;/, "the no-op skip is gone or inverted, and inverted it does nothing exactly when the device and this page disagree");
+  assert.match(
+    show,
+    /const held = seated\(tableOnArrival\(parseTable\(location\.hash\), readStoredTable\(store\), TRAVERSAL\)\);/,
+    "the cached return re-seats this page from something other than the ruled precedence, or through something other than the gate every other seat here goes through",
+  );
+  assert.match(
+    show,
+    /if \(emitTable\(held\) === emitTable\(table\)\) return;/,
+    "the no-op skip is gone or inverted, and inverted it does nothing exactly when the device and this page disagree",
+  );
   assert.match(show, /table = held;/, "the listener reads the device and never keeps what it read");
-  assert.match(show, /history\.replaceState\(null, "", tableHash\(location\.hash, emitTable\(table\)\)\)/, "and it leaves this page's own address disagreeing with the table it just took");
+  assert.match(
+    show,
+    /history\.replaceState\(null, "", tableHash\(location\.hash, emitTable\(table\)\)\)/,
+    "and it leaves this page's own address disagreeing with the table it just took",
+  );
   assert.match(show, /paintLay\(\)/, "and the press's own face is left saying what was true before the return");
 });

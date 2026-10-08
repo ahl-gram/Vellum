@@ -8,7 +8,18 @@ export async function rs0Boots({ check, room }: InstrumentKit): Promise<void> {
 
 export async function rs1State({ evaluate, check }: InstrumentKit): Promise<void> {
   // At a present park t is null BY DESIGN (agesState's chamber contract); a check demanding a number there would pin a bug.
-  const state = await evaluate<{ chamber: string; t: number | null; year: number | null; u: number; seamU: number; held: boolean; playing: boolean; pace: number; min: number; max: number } | null>(`window.__vellumReadingRoomAges()`);
+  const state = await evaluate<{
+    chamber: string;
+    t: number | null;
+    year: number | null;
+    u: number;
+    seamU: number;
+    held: boolean;
+    playing: boolean;
+    pace: number;
+    min: number;
+    max: number;
+  } | null>(`window.__vellumReadingRoomAges()`);
   check(
     "RS1 the room publishes the whole instrument state (u, held, min, max, playing, seamU), not just chamber+year",
     !!state &&
@@ -33,14 +44,22 @@ export async function rs2Seams({ evaluate, check }: InstrumentKit): Promise<void
   })()`);
   check(
     `RS2 the room publishes every seam installHostHooks installs (${HOST_HOOK_NAMES.length} of them, derived from the installer)`,
-    Object.keys(surface).length === HOST_HOOK_NAMES.length &&
-      Object.values(surface).every((t) => t === "function"),
+    Object.keys(surface).length === HOST_HOOK_NAMES.length && Object.values(surface).every((t) => t === "function"),
     JSON.stringify(surface),
   );
 }
 
 export async function rs3Parks({ evaluate, check }: InstrumentKit, sm: Facts): Promise<void> {
-  const rs3 = await evaluate<{ panelShown: boolean; setDisp: string; roadsDisp: string; min: number; max: number; val: number; year: number | null; chamber: string }>(`(()=>{
+  const rs3 = await evaluate<{
+    panelShown: boolean;
+    setDisp: string;
+    roadsDisp: string;
+    min: number;
+    max: number;
+    val: number;
+    year: number | null;
+    chamber: string;
+  }>(`(()=>{
     const panel=document.querySelector(".rf-ages");
     const set=document.querySelector(".rf-chart #layer-settlements");
     const roads=document.querySelector(".rf-chart #layer-roads");
@@ -53,19 +72,31 @@ export async function rs3Parks({ evaluate, check }: InstrumentKit, sm: Facts): P
   })()`);
   check(
     "RS3 the room parks armed at the present: glyph layer + roads visible, the bar at the far right",
-    rs3.panelShown && rs3.setDisp !== "none" && rs3.roadsDisp !== "none" &&
-      rs3.min === 0 && rs3.max === 2 * Math.max(1, sm.present - sm.minFounded) &&
-      rs3.val === rs3.max && rs3.chamber === "ages" && rs3.year === sm.present,
+    rs3.panelShown &&
+      rs3.setDisp !== "none" &&
+      rs3.roadsDisp !== "none" &&
+      rs3.min === 0 &&
+      rs3.max === 2 * Math.max(1, sm.present - sm.minFounded) &&
+      rs3.val === rs3.max &&
+      rs3.chamber === "ages" &&
+      rs3.year === sm.present,
     JSON.stringify(rs3),
   );
 }
 
 export async function rs4AllShown({ check, visibleGroups }: InstrumentKit, sm: Facts): Promise<void> {
   const rs4visible = await visibleGroups();
-  check("RS4 parked at the present year: every settlement glyph is shown", rs4visible === sm.count, `${rs4visible} visible groups vs ${sm.count} places`);
+  check(
+    "RS4 parked at the present year: every settlement glyph is shown",
+    rs4visible === sm.count,
+    `${rs4visible} visible groups vs ${sm.count} places`,
+  );
 }
 
-export async function rs5Scrub({ check, setYear, groupVis, roadsDisp, visibleGroups }: InstrumentKit, sm: Facts): Promise<void> {
+export async function rs5Scrub(
+  { check, setYear, groupVis, roadsDisp, visibleGroups }: InstrumentKit,
+  sm: Facts,
+): Promise<void> {
   await setYear(sm.earlyFounded);
   const rs5early = await groupVis(sm.earlyIdx);
   const rs5late = sm.lateIdx >= 0 ? await groupVis(sm.lateIdx) : "hidden";
@@ -85,8 +116,7 @@ export async function rs5Scrub({ check, setYear, groupVis, roadsDisp, visibleGro
 
 export async function rs7Ruin({ check, setYear, groupVis }: InstrumentKit, sm: Facts): Promise<void> {
   if (sm.ruinIdx >= 0) {
-    await setYear(Math.floor((sm.ruinFounded! +
-      sm.ruinYear!) / 2));
+    await setYear(Math.floor((sm.ruinFounded! + sm.ruinYear!) / 2));
     const before = await groupVis(sm.ruinIdx);
     await setYear(sm.ruinYear!);
     const after = await groupVis(sm.ruinIdx);

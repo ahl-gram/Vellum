@@ -23,7 +23,12 @@ export function labelLandmasses(elev: Field, seaLevel: number): LandmassLabels {
       count++;
       const gx = i % w;
       const gy = (i / w) | 0;
-      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {
+      for (const [dx, dy] of [
+        [1, 0],
+        [-1, 0],
+        [0, 1],
+        [0, -1],
+      ] as const) {
         const nx = gx + dx;
         const ny = gy + dy;
         if (nx < 0 || nx >= w || ny < 0 || ny >= h) continue;

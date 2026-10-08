@@ -10,9 +10,7 @@ export const MAX_SWEEP_MS = 26000;
 
 export function legDurations(lengths: ReadonlyArray<number>): number[] {
   if (lengths.length === 0) return [];
-  const raw = lengths.map((len) =>
-    Math.max(MIN_LEG_MS, PACE_MS_PER_UNIT * Math.pow(Math.max(len, 0), PACE_EXP)),
-  );
+  const raw = lengths.map((len) => Math.max(MIN_LEG_MS, PACE_MS_PER_UNIT * Math.pow(Math.max(len, 0), PACE_EXP)));
   const total = raw.reduce((a, b) => a + b, 0);
   if (total > MAX_SWEEP_MS) {
     const k = MAX_SWEEP_MS / total;
@@ -108,12 +106,7 @@ export function tiltFor(dx: number, dy: number): number {
   return -MAX_TILT * climb;
 }
 
-export function resolveFacing(
-  dx: number,
-  len: number,
-  prevFacing: Facing,
-  deadband: number = FACING_DEADBAND,
-): Facing {
+export function resolveFacing(dx: number, len: number, prevFacing: Facing, deadband: number = FACING_DEADBAND): Facing {
   if (len === 0) return prevFacing;
   const eastness = dx / len;
   if (eastness > deadband) return 1;

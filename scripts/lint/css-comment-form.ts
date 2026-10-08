@@ -11,18 +11,22 @@ const isHead = (text: string, comment: Placed): boolean => text.slice(0, comment
 
 // A # followed by digits, not preceded by "issue" or "pr" (either case, singular or plural) and one space, and not followed by a hex letter; whitespace is collapsed first so a head block may wrap between the word and the number.
 const BARE_NUMBER = /(?<!\b(?:issue|issues|pr|prs) )#\d+(?![0-9a-f])/gi;
-export const bareNumbers = (text: string): string[] => [...text.replace(/\s+/g, " ").matchAll(BARE_NUMBER)].map((m) => m[0]);
+export const bareNumbers = (text: string): string[] =>
+  [...text.replace(/\s+/g, " ").matchAll(BARE_NUMBER)].map((m) => m[0]);
 
 const oneLine: CSSRuleDefinition = {
   meta: {
     type: "problem",
-    messages: { multi: "a mid-file CSS comment is one physical line; only the file-head block may span several (Issue #648)" },
+    messages: {
+      multi: "a mid-file CSS comment is one physical line; only the file-head block may span several (Issue #648)",
+    },
   },
   create(context) {
     return {
       StyleSheet() {
         for (const c of placed(context.sourceCode.comments)) {
-          if (c.loc.start.line !== c.loc.end.line && !isHead(context.sourceCode.text, c)) context.report({ loc: c.loc, messageId: "multi" });
+          if (c.loc.start.line !== c.loc.end.line && !isHead(context.sourceCode.text, c))
+            context.report({ loc: c.loc, messageId: "multi" });
         }
       },
     };
@@ -43,7 +47,10 @@ const noEmDash: CSSRuleDefinition = {
 };
 
 const issueForm: CSSRuleDefinition = {
-  meta: { type: "problem", messages: { bare: "write Issue #N or PR #N in a CSS comment, never a bare #N (Issue #648)" } },
+  meta: {
+    type: "problem",
+    messages: { bare: "write Issue #N or PR #N in a CSS comment, never a bare #N (Issue #648)" },
+  },
   create(context) {
     return {
       StyleSheet() {
@@ -57,10 +64,16 @@ const issueForm: CSSRuleDefinition = {
 
 const JS_NAME = /\b[A-Za-z][\w.-]*\.js\b/g;
 const BUILD_TWIN = /(^|\.)bundle\.js$/;
-export const jsModuleNames = (text: string): string[] => [...new Set(text.match(JS_NAME) ?? [])].filter((name) => !BUILD_TWIN.test(name));
+export const jsModuleNames = (text: string): string[] =>
+  [...new Set(text.match(JS_NAME) ?? [])].filter((name) => !BUILD_TWIN.test(name));
 
 const noJsModule: CSSRuleDefinition = {
-  meta: { type: "problem", messages: { js: "a CSS comment names \"{{name}}\", a .js module: only the *.bundle.js twins are built, so name the .ts module or its successor (Issue #675)" } },
+  meta: {
+    type: "problem",
+    messages: {
+      js: 'a CSS comment names "{{name}}", a .js module: only the *.bundle.js twins are built, so name the .ts module or its successor (Issue #675)',
+    },
+  },
   create(context) {
     return {
       StyleSheet() {
@@ -74,5 +87,10 @@ const noJsModule: CSSRuleDefinition = {
 
 export default {
   meta: { name: "vellum" },
-  rules: { "css-comment-one-line": oneLine, "css-comment-no-em-dash": noEmDash, "css-comment-issue-form": issueForm, "css-comment-no-js-module": noJsModule },
+  rules: {
+    "css-comment-one-line": oneLine,
+    "css-comment-no-em-dash": noEmDash,
+    "css-comment-issue-form": issueForm,
+    "css-comment-no-js-module": noJsModule,
+  },
 };

@@ -22,12 +22,7 @@ test("no sources gives all Infinity", () => {
 
 test("impassable cells block propagation and stay Infinity", () => {
   // wall down column x=1 separates source at x=0 from x=2
-  const d = bfsDistance(
-    3,
-    3,
-    (x, y) => x === 0 && y === 1,
-    { passable: (x) => x !== 1 },
-  );
+  const d = bfsDistance(3, 3, (x, y) => x === 0 && y === 1, { passable: (x) => x !== 1 });
   assert.equal(d[0 + 1 * 3], 0);
   assert.equal(d[1 + 1 * 3], Infinity, "wall must remain Infinity");
   assert.equal(d[2 + 1 * 3], Infinity, "beyond wall is unreachable");

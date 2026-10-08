@@ -15,8 +15,11 @@ export async function sv3Untick({ evaluate, check, goto, waitInked }: SurveyKit)
     })()`);
   check(
     "SV3 unticking clears the track and drops the flag; the journal href follows the write",
-    !sv3.track && !/survey/.test(sv3.hash) && !/year=/.test(sv3.hash) &&
-      sv3.href === "/reading-room/" + sv3.hash && sv3.status === "",
+    !sv3.track &&
+      !/survey/.test(sv3.hash) &&
+      !/year=/.test(sv3.hash) &&
+      sv3.href === "/reading-room/" + sv3.hash &&
+      sv3.status === "",
     JSON.stringify(sv3),
   );
 }
@@ -25,7 +28,14 @@ export async function sv4DeepLink({ evaluate, check, goto, waitInked }: SurveyKi
   await goto("#seed=42&style=antique&survey", "survey-restore");
   // waitSettled keys on #status, which the settle clears BEFORE the deferred arm (Issue #366): wait for the ink, never read in the settle's shadow.
   await waitInked("survey-restore-ink");
-  const sv4 = await evaluate<{ checked: boolean; vertices: number; overlays: number; hash: string; status: string; href: string | null }>(`(()=>{
+  const sv4 = await evaluate<{
+    checked: boolean;
+    vertices: number;
+    overlays: number;
+    hash: string;
+    status: string;
+    href: string | null;
+  }>(`(()=>{
       const t=document.querySelector("#map .voyage-overlay .voyage-track");
       return{checked:document.getElementById("ages").checked,
         vertices:t?(t.getAttribute("points")||"").trim().split(/\\s+/).length:0,
@@ -35,8 +45,11 @@ export async function sv4DeepLink({ evaluate, check, goto, waitInked }: SurveyKi
     })()`);
   check(
     "SV4 a survey deep link restores ticked, resting on the completed track, silently",
-    sv4.checked && sv4.vertices > 10 && sv4.overlays === 1 &&
-      /(^|&)survey(&|$)/.test(sv4.hash.slice(1)) && sv4.status === "" &&
+    sv4.checked &&
+      sv4.vertices > 10 &&
+      sv4.overlays === 1 &&
+      /(^|&)survey(&|$)/.test(sv4.hash.slice(1)) &&
+      sv4.status === "" &&
       sv4.href === "/reading-room/" + sv4.hash,
     JSON.stringify(sv4),
   );
@@ -49,13 +62,23 @@ export async function sv5Forwards({ evaluate, send, check, sleep, EXP }: SurveyK
   let landed = false;
   for (let i = 0; i < 200; i++) {
     let p = null;
-    try { p = await evaluate<string>(`location.pathname`); } catch {}
-    if (p === "/reading-room/") { landed = true; break; }
+    try {
+      p = await evaluate<string>(`location.pathname`);
+    } catch {}
+    if (p === "/reading-room/") {
+      landed = true;
+      break;
+    }
     await sleep(50);
   }
   const roomUp = landed && (await room.boot()) && (await room.settled());
   const sv5 = roomUp
-    ? await evaluate<{ hash: boolean; chamber: string; year: number | null; seed: number }>(`(()=>{const a=window.__vellumReadingRoomAges();
+    ? await evaluate<{
+        hash: boolean;
+        chamber: string;
+        year: number | null;
+        seed: number;
+      }>(`(()=>{const a=window.__vellumReadingRoomAges();
         return{hash:location.hash.startsWith("#seed=42&style=antique&legend=1&arms=0"),
           chamber:a?a.chamber:"",year:a?a.year:-1,
           seed:window.__vellumReadingRoomState().seed};})()`)
@@ -74,8 +97,13 @@ export async function sv5bVerbatim({ evaluate, send, check, sleep, EXP }: Survey
   let landedB = false;
   for (let i = 0; i < 200; i++) {
     let p = null;
-    try { p = await evaluate<string>(`location.pathname`); } catch {}
-    if (p === "/reading-room/") { landedB = true; break; }
+    try {
+      p = await evaluate<string>(`location.pathname`);
+    } catch {}
+    if (p === "/reading-room/") {
+      landedB = true;
+      break;
+    }
     await sleep(50);
   }
   const hashB = landedB ? await evaluate<string>(`location.hash`) : "";
@@ -88,7 +116,9 @@ export async function sv5bVerbatim({ evaluate, send, check, sleep, EXP }: Survey
 
 export async function sv5cBadYear({ evaluate, check, goto }: SurveyKit): Promise<void> {
   await goto("#seed=42&style=antique&year=abc", "survey-badyear");
-  const sv5c = await evaluate<{ path: string; checked: boolean; svg: boolean }>(`({path:location.pathname,checked:document.getElementById("ages").checked,svg:!!document.querySelector("#map svg")})`);
+  const sv5c = await evaluate<{ path: string; checked: boolean; svg: boolean }>(
+    `({path:location.pathname,checked:document.getElementById("ages").checked,svg:!!document.querySelector("#map svg")})`,
+  );
   check(
     "SV5c a malformed year stays in the Explorer, ignored, and the chart draws",
     sv5c.path === "/explorer/" && !sv5c.checked && sv5c.svg,
@@ -100,7 +130,9 @@ export async function sv5dBothKeys({ evaluate, check, goto, waitBeat }: SurveyKi
   await goto("#seed=42&style=antique&survey&year=1030", "survey-bothkeys");
   await evaluate(`(()=>{window.__beat=false;requestAnimationFrame(()=>setTimeout(()=>{window.__beat=true;},0));})()`);
   await waitBeat("survey-bothkeys-beat");
-  const sv5d = await evaluate<{ path: string; checked: boolean; track: boolean }>(`({path:location.pathname,checked:document.getElementById("ages").checked,track:!!document.querySelector("#map .voyage-overlay")})`);
+  const sv5d = await evaluate<{ path: string; checked: boolean; track: boolean }>(
+    `({path:location.pathname,checked:document.getElementById("ages").checked,track:!!document.querySelector("#map .voyage-overlay")})`,
+  );
   check(
     "SV5d the both-keys set stays in the Explorer and arms nothing (ignored whole)",
     sv5d.path === "/explorer/" && !sv5d.checked && !sv5d.track,
@@ -132,7 +164,11 @@ export async function sv7Journal({ evaluate, send, check, PORT }: SuiteContext, 
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}${sv7href}` });
   const sv7up = (await room.boot()) && (await room.settled());
   const sv7 = sv7up
-    ? await evaluate<{ seed: number; chamber: string; t: number | null }>(`(()=>{const a=window.__vellumReadingRoomAges();
+    ? await evaluate<{
+        seed: number;
+        chamber: string;
+        t: number | null;
+      }>(`(()=>{const a=window.__vellumReadingRoomAges();
         return{seed:window.__vellumReadingRoomState().seed,chamber:a?a.chamber:"",t:a?a.t:-1};})()`)
     : { seed: -1, chamber: "", t: -1 };
   check(

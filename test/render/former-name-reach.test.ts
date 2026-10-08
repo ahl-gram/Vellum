@@ -19,8 +19,7 @@ const worldFor = (seed: number): World => {
 
 const SEEDS = [1, 3, 7, 42];
 
-const renamedIdx = (w: World): number =>
-  w.settlements.findIndex((s) => s.formerName !== undefined);
+const renamedIdx = (w: World): number => w.settlements.findIndex((s) => s.formerName !== undefined);
 
 test("the Daily Hunt reveal names what the quarry used to be called", () => {
   for (const seed of SEEDS) {
@@ -56,8 +55,10 @@ test("the reveal's ruin branch drops a former name even if the data carried one"
 });
 
 test("the Hunt reveal line uses ruling 4's exact form, shared with the card", () => {
-  assert.equal(revealFormerLine({ name: "Poalo", founded: 400, line: "x", formerName: "Kautana" }),
-    "Once called Kautana.");
+  assert.equal(
+    revealFormerLine({ name: "Poalo", founded: 400, line: "x", formerName: "Kautana" }),
+    "Once called Kautana.",
+  );
   assert.equal(revealFormerLine({ name: "Poalo", founded: 400, line: "x" }), null);
 });
 

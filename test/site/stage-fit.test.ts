@@ -10,10 +10,18 @@ const base = { view: { w: 1280, h: 800 }, aspect: ASPECT, gap: 14 };
 // Issue #463 plate read: at 1680 the keys slip (123px wide, right-aligned under the Glass) ran 17px under the centred sheet, because the reserve knew only the slip. The Glass's left edge bounds the sheet whenever it is handed in.
 test("chrome standing at the right edge (the Glass) widens the reserve past the slip's clearance when it reaches further in", () => {
   const withGlass = fitStage({ ...base, above: [100], below: [700], beside: 384, right: [790] });
-  assert.equal(withGlass.reserve.right, 1280 - 790 + 14, "the Glass's left edge plus the gap, since that reaches further in than the slip's clearance");
+  assert.equal(
+    withGlass.reserve.right,
+    1280 - 790 + 14,
+    "the Glass's left edge plus the gap, since that reaches further in than the slip's clearance",
+  );
   const glassClear = fitStage({ ...base, above: [100], below: [700], beside: 384, right: [1100] });
   assert.equal(glassClear.reserve.right, 384 + SLIP_CLEARANCE, "a Glass inside the clearance changes nothing");
-  assert.equal(fitStage({ ...base, above: [100], below: [700], beside: 0, right: [] }).reserve.right, 0, "no slip, no Glass beside it: no reserve");
+  assert.equal(
+    fitStage({ ...base, above: [100], below: [700], beside: 0, right: [] }).reserve.right,
+    0,
+    "no slip, no Glass beside it: no reserve",
+  );
 });
 
 test("the reserves are the chrome's own edges plus the gap: the lowest bottom above, the highest top below", () => {
@@ -47,8 +55,17 @@ test("no chrome at all leaves the gap alone, and a chrome past the viewport cann
 
 // The Explorer's own chrome as bindRoom reads it on a build of main, the Broadside open (measured 2026-10-05, Issue #762): the cluster and the folio above, the chart folio and the Press below, the slip beside, the Glass's left edge.
 const explorer = (w: number, h: number, folio: number, press: number, glass: number) =>
-  fitStage({ ...base, gap: CHROME_GAP, view: { w, h }, above: [127.41, 130.73], below: [folio, press], beside: 384, right: [glass] });
-const near = (actual: number, expected: number, what: string) => assert.ok(Math.abs(actual - expected) < 0.05, `${what}: ${actual}, not ${expected}`);
+  fitStage({
+    ...base,
+    gap: CHROME_GAP,
+    view: { w, h },
+    above: [127.41, 130.73],
+    below: [folio, press],
+    beside: 384,
+    right: [glass],
+  });
+const near = (actual: number, expected: number, what: string) =>
+  assert.ok(Math.abs(actual - expected) < 0.05, `${what}: ${actual}, not ${expected}`);
 
 test("a fit the chrome leaves healthy is untouched: the sheet, the reserves and no floor (Issue #762)", () => {
   const wide = explorer(1280, 800, 705.7, 639.77, 806.6);
@@ -59,7 +76,15 @@ test("a fit the chrome leaves healthy is untouched: the sheet, the reserves and 
   const tablet = explorer(1024, 768, 673.7, 489.23, 550.6);
   near(tablet.sheet.w, 428.13, "the Explorer at 1024x768 keeps its fitted sheet");
   assert.equal(tablet.under, false, "and runs under nothing");
-  const print = fitStage({ ...base, view: { w: 1280, h: 720 }, aspect: 1.2952268987960809, above: [127.41, 131.73], below: [643.7, 486.08], beside: 352, right: [838.6] });
+  const print = fitStage({
+    ...base,
+    view: { w: 1280, h: 720 },
+    aspect: 1.2952268987960809,
+    above: [127.41, 131.73],
+    below: [643.7, 486.08],
+    beside: 352,
+    right: [838.6],
+  });
   near(print.sheet.w, 422.69, "the Print Room at 1280x720, within 25px of the trigger, keeps its fitted sheet");
   assert.equal(print.under, false, "and runs under nothing");
 });
@@ -67,12 +92,19 @@ test("a fit the chrome leaves healthy is untouched: the sheet, the reserves and 
 test("a fit that would leave the sheet under half the room it could show it in takes that whole room, under the chrome (Issue #762, ruling 4a)", () => {
   const phone = explorer(1024, 474, 379.7, 195.23, 550.6);
   near(phone.reserve.right, 487.4, "the open slip's reserve (the Glass's edge) is kept");
-  near(phone.sheet.w, 1024 - 487.4 - 28, "the sheet takes the width beside the slip, less a gap each side (47.28 before the floor)");
+  near(
+    phone.sheet.w,
+    1024 - 487.4 - 28,
+    "the sheet takes the width beside the slip, less a gap each side (47.28 before the floor)",
+  );
   near(phone.sheet.h, phone.sheet.w / ASPECT, "at the chart's aspect");
   assert.equal(phone.reserve.top, 0, "the floored sheet is centred in the window's full height");
   assert.equal(phone.reserve.bottom, 0, "under the chrome above and below it");
   assert.equal(phone.under, true, "and the fit says it runs under the chrome");
-  assert.ok(phone.sheet.h + 28 <= 474 + 1e-9 && phone.sheet.w + phone.reserve.right + 28 <= 1024 + 1e-9, "the whole sheet stays inside the window");
+  assert.ok(
+    phone.sheet.h + 28 <= 474 + 1e-9 && phone.sheet.w + phone.reserve.right + 28 <= 1024 + 1e-9,
+    "the whole sheet stays inside the window",
+  );
 });
 
 test("the floor fires below half the room exactly, and a sheet shorter than wide is held by the window's height (Issue #762)", () => {
@@ -90,9 +122,24 @@ test("the floor fires below half the room exactly, and a sheet shorter than wide
 });
 
 test("UH1 a window too small to hold any sheet fits nothing, so the room keeps its last fit and its camera: a full-page capture shrank the viewport to 1x1 for a moment, and the zero sheet it fitted threw a deep camera's centre to the map's corner (Issue #762, CD2b's red)", () => {
-  assert.equal(holdsSheet(fitStage({ ...base, view: { w: 1024, h: 1 }, above: [127], below: [705], beside: 0 })), false, "the 1024 page one pixel tall holds no sheet");
-  assert.equal(holdsSheet(fitStage({ ...base, view: { w: 1, h: 1 }, above: [127], below: [705], beside: 0 })), false, "nor a one-pixel window");
-  assert.equal(holdsSheet(fitStage({ ...base, above: [127], below: [705], beside: 0 })), true, "the 1280x800 desk holds one");
-  assert.equal(holdsSheet(fitStage({ ...base, view: { w: 1024, h: 300 }, above: [127], below: [250], beside: 0 })), true, "a short window floors its sheet and still holds one");
+  assert.equal(
+    holdsSheet(fitStage({ ...base, view: { w: 1024, h: 1 }, above: [127], below: [705], beside: 0 })),
+    false,
+    "the 1024 page one pixel tall holds no sheet",
+  );
+  assert.equal(
+    holdsSheet(fitStage({ ...base, view: { w: 1, h: 1 }, above: [127], below: [705], beside: 0 })),
+    false,
+    "nor a one-pixel window",
+  );
+  assert.equal(
+    holdsSheet(fitStage({ ...base, above: [127], below: [705], beside: 0 })),
+    true,
+    "the 1280x800 desk holds one",
+  );
+  assert.equal(
+    holdsSheet(fitStage({ ...base, view: { w: 1024, h: 300 }, above: [127], below: [250], beside: 0 })),
+    true,
+    "a short window floors its sheet and still holds one",
+  );
 });
-

@@ -15,7 +15,10 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const errBase = consoleErrors.length;
   const httpBase = http4xx.length;
 
-  await step("BR1 to BR1c", async () => { await br1Groups(k); await br1cLegendClears(k); });
+  await step("BR1 to BR1c", async () => {
+    await br1Groups(k);
+    await br1cLegendClears(k);
+  });
   await step("BR2", () => br2JournalPeer(k));
   await br3Seal(k);
   await br4Notes(k);
@@ -67,7 +70,10 @@ async function br1Groups({ evaluate, check, goto, EXP }: BroadsideKit): Promise<
     })()`);
   check(
     "BR1 every control sits in its wiring-truth group: the seed row in the folio, Land and Hand on the slip, the Press as the legend row",
-    br1.wrong.length === 0 && br1.heads[0] === "The Land" && br1.heads[1] === "The Hand" && /^The Press\b/.test(br1.heads[2] || ""),
+    br1.wrong.length === 0 &&
+      br1.heads[0] === "The Land" &&
+      br1.heads[1] === "The Hand" &&
+      /^The Press\b/.test(br1.heads[2] || ""),
     JSON.stringify(br1),
   );
 
@@ -89,12 +95,13 @@ async function br1cLegendClears({ evaluate, send, check, sleep }: BroadsideKit):
       const lg=r(".legend"),bl=r(".corner.bl"),sl=r("#broadside"),gl=r(".corner.br"),sh=r("#sheet");
       const range=document.createRange();let text=0;for(const p of document.querySelectorAll(".corner.bl p")){if(!p.textContent)continue;range.selectNodeContents(p);text=Math.max(text,range.getBoundingClientRect().right);}
       return{lg,bl,sl,gl,sh,folioText:Math.round(text),w:innerWidth,h:innerHeight};})()`;
-  const legendClear = (m: Room): boolean => !!m.lg && m.lg.l >= m.folioText + 16 && m.lg.r <= m.sl!.l - 8 && m.lg.r <=
-    m.gl!.l - 8 &&
-    m.sh!.r <=
-      m.gl!.l - 8 &&
-      m.sh!.b <= Math.min(
-      m.bl!.t, m.lg.t) - 8;
+  const legendClear = (m: Room): boolean =>
+    !!m.lg &&
+    m.lg.l >= m.folioText + 16 &&
+    m.lg.r <= m.sl!.l - 8 &&
+    m.lg.r <= m.gl!.l - 8 &&
+    m.sh!.r <= m.gl!.l - 8 &&
+    m.sh!.b <= Math.min(m.bl!.t, m.lg.t) - 8;
   await sleep(400); // the row's left transitions 0.32s to its measured seat; a read mid-flight is the old seat
   const at1280 = await evaluate(legendRoom);
   await send("Emulation.setDeviceMetricsOverride", { width: 1680, height: 900, deviceScaleFactor: 1, mobile: false });
@@ -115,26 +122,49 @@ async function br1cLegendClears({ evaluate, send, check, sleep }: BroadsideKit):
 async function br2JournalPeer({ evaluate, check, waitInked }: BroadsideKit): Promise<void> {
   // Tick, wait-for-ink, and untick are three separate turns (Issue #300): inside ONE evaluate the yield cancels the arm before it builds, so `during` would be measured on a never-armed sheet.
   const at = `((el)=>({shown:el.getClientRects().length>0,top:Math.round(el.getBoundingClientRect().top)}))`;
-  const before = await evaluate<{ j: { shown: boolean; top: number }; o: { shown: boolean; top: number }; cls: boolean }>(`(()=>{
+  const before = await evaluate<{
+    j: { shown: boolean; top: number };
+    o: { shown: boolean; top: number };
+    cls: boolean;
+  }>(`(()=>{
       const j=document.getElementById("journal-link"),o=document.getElementById("order-plates");const at=${at};
       return{j:at(j),o:at(o),cls:j.className===o.className&&j.classList.contains("legend-btn")};
     })()`);
-  await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
+  await evaluate(
+    `(()=>{const c=document.getElementById("ages");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));})()`,
+  );
   await waitInked("br2-survey-ink");
-  const during = await evaluate<{ shown: boolean; top: number }>(`(()=>{const at=${at};return at(document.getElementById("journal-link"));})()`);
-  await evaluate(`(()=>{const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`);
-  const after = await evaluate<{ shown: boolean; top: number }>(`(()=>{const at=${at};return at(document.getElementById("journal-link"));})()`);
+  const during = await evaluate<{ shown: boolean; top: number }>(
+    `(()=>{const at=${at};return at(document.getElementById("journal-link"));})()`,
+  );
+  await evaluate(
+    `(()=>{const c=document.getElementById("ages");c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));})()`,
+  );
+  const after = await evaluate<{ shown: boolean; top: number }>(
+    `(()=>{const at=${at};return at(document.getElementById("journal-link"));})()`,
+  );
   const br2 = { before, during, after, sameRow: before.j.top === before.o.top };
   check(
     "BR2 the journal button is the print link's steady gold peer: same row, standing through tick and untick",
-    br2.before.cls && br2.sameRow && br2.before.j.shown && br2.during.shown && br2.after.shown &&
-      br2.before.j.top === br2.during.top && br2.during.top === br2.after.top,
+    br2.before.cls &&
+      br2.sameRow &&
+      br2.before.j.shown &&
+      br2.during.shown &&
+      br2.after.shown &&
+      br2.before.j.top === br2.during.top &&
+      br2.during.top === br2.after.top,
     JSON.stringify(br2),
   );
 }
 
 async function br3Seal({ evaluate, check }: BroadsideKit): Promise<void> {
-  const br3 = await evaluate<{ off: { mark: string; bg: string }; on: { mark: string; bg: string; checked: boolean; hash: string }; back: { mark: string; bg: string; checked: boolean }; isSeal: boolean; type: string }>(`(()=>{
+  const br3 = await evaluate<{
+    off: { mark: string; bg: string };
+    on: { mark: string; bg: string; checked: boolean; hash: string };
+    back: { mark: string; bg: string; checked: boolean };
+    isSeal: boolean;
+    type: string;
+  }>(`(()=>{
     const box=document.getElementById("ages");const lbl=box.closest("label");
     const face=()=>({mark:getComputedStyle(lbl,"::before").content,bg:getComputedStyle(lbl).backgroundColor});
     const off=face();
@@ -146,10 +176,15 @@ async function br3Seal({ evaluate, check }: BroadsideKit): Promise<void> {
   })()`);
   check(
     "BR3 a seal label click toggles its real checkbox and the countersign (check mark + fill) follows",
-    br3.isSeal && br3.type === "checkbox" &&
-      br3.on.checked === true && br3.back.checked === false &&
-      !br3.off.mark.includes("✓") && br3.on.mark.includes("✓") && !br3.back.mark.includes("✓") &&
-      br3.off.bg !== br3.on.bg && /(^|&)survey(&|$)/.test(br3.on.hash.slice(1)),
+    br3.isSeal &&
+      br3.type === "checkbox" &&
+      br3.on.checked === true &&
+      br3.back.checked === false &&
+      !br3.off.mark.includes("✓") &&
+      br3.on.mark.includes("✓") &&
+      !br3.back.mark.includes("✓") &&
+      br3.off.bg !== br3.on.bg &&
+      /(^|&)survey(&|$)/.test(br3.on.hash.slice(1)),
     JSON.stringify(br3),
   );
 }
@@ -188,7 +223,11 @@ async function br5Hover({ evaluate, send, check, sleep }: BroadsideKit): Promise
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 4, y: 4 });
   await sleep(80);
   const awayClosed = await evaluate<boolean>(`!document.getElementById("note-coast-warp").matches(":popover-open")`);
-  check("BR5 the note shows under a real hover and hides when the pointer leaves", overOpen && awayClosed, JSON.stringify({ overOpen, awayClosed }));
+  check(
+    "BR5 the note shows under a real hover and hides when the pointer leaves",
+    overOpen && awayClosed,
+    JSON.stringify({ overOpen, awayClosed }),
+  );
 }
 
 async function br6Tap({ evaluate, check, sleep, touch, setNarrowViewport, clearMobile }: BroadsideKit): Promise<void> {
@@ -208,7 +247,12 @@ async function br6Tap({ evaluate, check, sleep, touch, setNarrowViewport, clearM
     await sleep(500); // past the tap-dismiss window, and past any pending navigation's commit
     return true;
   };
-  const probe = () => evaluate<{ stayed: boolean; open: boolean; hasLink: boolean }>(`(()=>{const n=document.getElementById("note-survey");
+  const probe = () =>
+    evaluate<{
+      stayed: boolean;
+      open: boolean;
+      hasLink: boolean;
+    }>(`(()=>{const n=document.getElementById("note-survey");
     return{stayed:location.pathname==="/explorer/",open:!!n&&n.matches(":popover-open"),
       hasLink:!!document.querySelector('#note-survey a[href="/glossary/#survey"]')};})()`);
   const tapped1 = await tapAt();
@@ -218,8 +262,14 @@ async function br6Tap({ evaluate, check, sleep, touch, setNarrowViewport, clearM
   await clearMobile();
   check(
     "BR6 under hover:none, on a 1024 tablet since the narrow layout went (Issue #762), a real tap opens the note without navigating and a second tap closes it",
-    emulated && tapped1 && tapped2 && afterTap1.open && afterTap1.stayed && afterTap1.hasLink &&
-      !afterTap2.open && afterTap2.stayed,
+    emulated &&
+      tapped1 &&
+      tapped2 &&
+      afterTap1.open &&
+      afterTap1.stayed &&
+      afterTap1.hasLink &&
+      !afterTap2.open &&
+      afterTap2.stayed,
     JSON.stringify({ emulated, tapped1, tapped2, afterTap1, afterTap2 }),
   );
 }

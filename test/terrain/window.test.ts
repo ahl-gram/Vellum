@@ -2,11 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { buildHeightfield } from "../../src/terrain/heightfield.ts";
 import { createField } from "../../src/core/grid.ts";
-import {
-  closeChainsOnBoundary,
-  marchingSquares,
-  ringArea,
-} from "../../src/terrain/contours.ts";
+import { closeChainsOnBoundary, marchingSquares, ringArea } from "../../src/terrain/contours.ts";
 
 test("uv-window sampling matches the full world exactly", () => {
   const full = buildHeightfield({ seed: 42, gridW: 161, gridH: 121, mapType: "island" });
@@ -19,13 +15,15 @@ test("uv-window sampling matches the full world exactly", () => {
     window: { u0: 0.25, v0: 0.25, u1: 0.75, v1: 0.75 },
     worldAspect,
   });
-  for (const [rx, ry] of [[0, 0], [40, 30], [80, 60], [20, 45]] as const) {
+  for (const [rx, ry] of [
+    [0, 0],
+    [40, 30],
+    [80, 60],
+    [20, 45],
+  ] as const) {
     const fx = 40 + rx;
     const fy = 30 + ry;
-    assert.ok(
-      Math.abs(region.at(rx, ry) - full.at(fx, fy)) < 1e-12,
-      `window mismatch at ${rx},${ry}`,
-    );
+    assert.ok(Math.abs(region.at(rx, ry) - full.at(fx, fy)) < 1e-12, `window mismatch at ${rx},${ry}`);
   }
 });
 

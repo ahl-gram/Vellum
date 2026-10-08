@@ -42,8 +42,7 @@ const namedTest = (f: string) => {
   return stem === "test" || folded.startsWith("test-") || /[._-]test$/.test(folded);
 };
 const collectedByNode = (f: string) => loadedByNode(f) && (inTestDir(f) || namedTest(f));
-const collectedOutside = (files: string[]) =>
-  files.filter((f) => collectedByNode(f) && !f.startsWith("test/")).sort();
+const collectedOutside = (files: string[]) => files.filter((f) => collectedByNode(f) && !f.startsWith("test/")).sort();
 
 const repoFiles = filesUnder(ROOT);
 const testDirFiles = repoFiles.filter((f) => f.startsWith("test/"));
@@ -177,7 +176,11 @@ test("the guard's outside-test/ composition names a nested test/ module and a by
     "node_modules/p/test.ts",
   ];
   withSeededTree(seeded, (dir) => {
-    assert.deepEqual(collectedOutside(filesUnder(dir)), ["src/foo_test.ts", "src/x/test/helper.ts", "test-support/test-helpers.ts"]);
+    assert.deepEqual(collectedOutside(filesUnder(dir)), [
+      "src/foo_test.ts",
+      "src/x/test/helper.ts",
+      "test-support/test-helpers.ts",
+    ]);
   });
 });
 
@@ -205,7 +208,10 @@ test("every file node --test loads under test/ is a .test.ts, so none is a phant
 });
 
 test("every file node --test collects lives under test/, where the runner is aimed", () => {
-  assert.ok(repoFiles.includes("package.json"), "the walk did not reach the repo root; this guard is reading the wrong tree");
+  assert.ok(
+    repoFiles.includes("package.json"),
+    "the walk did not reach the repo root; this guard is reading the wrong tree",
+  );
   const matched = repoFiles.filter(collectedByNode);
   assert.ok(matched.length > 100, `matched only ${matched.length} files; this guard is reading the wrong tree`);
   const outside = collectedOutside(repoFiles);

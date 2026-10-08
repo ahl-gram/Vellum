@@ -16,7 +16,12 @@ import { buildHeightfield, type UvWindow } from "../../src/terrain/heightfield.t
 import { pickSeaLevel } from "../../src/terrain/sealevel.ts";
 import { defaultRecipe } from "../../src/world/generate.ts";
 import { labelLandmasses } from "../../src/world/landmass.ts";
-import { floorToParent, parentCellsOnWindow, parentSurfaceOnWindow, rejectBridges } from "../../src/terrain/detail-guarantees.ts";
+import {
+  floorToParent,
+  parentCellsOnWindow,
+  parentSurfaceOnWindow,
+  rejectBridges,
+} from "../../src/terrain/detail-guarantees.ts";
 import { SEED, recipe, WORLD_ASPECT, windowsEqual } from "../../test-support/detail-chain-fixtures.ts";
 
 const world = buildHeightfield({ seed: SEED, gridW: 320, gridH: 240, mapType: recipe.mapType });
@@ -99,15 +104,13 @@ function walkRoute(route: ReadonlyArray<Camera>): Array<{ band: number; window: 
   return visited;
 }
 
-function cellsDifferingFromRoutedParent(endA: UvWindow, routedParent: UvWindow, fa: ReturnType<typeof buildChainedField>): number {
+function cellsDifferingFromRoutedParent(
+  endA: UvWindow,
+  routedParent: UvWindow,
+  fa: ReturnType<typeof buildChainedField>,
+): number {
   const bare = bareFieldFor(endA, fa.w, fa.h);
-  const routedSurface = parentSurfaceOnWindow(
-    buildChainedField(specFor(routedParent)),
-    routedParent,
-    endA,
-    fa.w,
-    fa.h,
-  );
+  const routedSurface = parentSurfaceOnWindow(buildChainedField(specFor(routedParent)), routedParent, endA, fa.w, fa.h);
   const routedField = rejectBridges(routedSurface, routedSurface, floorToParent(bare, routedSurface), SEA);
   let differing = 0;
   for (let i = 0; i < routedField.data.length; i++) {
@@ -120,7 +123,7 @@ test("two zoom routes to the same window produce a byte-identical field (#398)",
   // Same environment, so this comparison is exact by design; the float-drift rule bans byte comparison ACROSS environments only.
   const target = { cx: 0.53, cy: 0.42, k: 8 };
   const routeA = [{ cx: 0.53, cy: 0.42, k: 1 }, { cx: 0.53, cy: 0.42, k: 2.6 }, { cx: 0.53, cy: 0.42, k: 5.2 }, target];
-  const routeB = [{ cx: 0.12, cy: 0.87, k: 1 }, { cx: 0.12, cy: 0.87, k: 6.5 }, { cx: 0.30, cy: 0.60, k: 6.5 }, target];
+  const routeB = [{ cx: 0.12, cy: 0.87, k: 1 }, { cx: 0.12, cy: 0.87, k: 6.5 }, { cx: 0.3, cy: 0.6, k: 6.5 }, target];
   const a = walkRoute(routeA);
   const b = walkRoute(routeB);
   assert.equal(a.at(-1)?.band, 3, "route A did not land at band 3");
@@ -285,11 +288,7 @@ test("the cache serves siblings and never confuses two detail levels (#398)", ()
   assert.ok(!windowsEqual(sibling, win), "the fixture sibling is the same window");
   const missesBeforeSibling = cache.misses;
   buildChainedField(specFor(sibling), cache);
-  assert.equal(
-    cache.misses - missesBeforeSibling,
-    1,
-    "a sibling sharing its parent must build only itself",
-  );
+  assert.equal(cache.misses - missesBeforeSibling, 1, "a sibling sharing its parent must build only itself");
 
   const a = chainCacheKey(specFor(win));
   const coarser = lodWindowFor(0.5, 0.4375, 0.25);
@@ -299,17 +298,9 @@ test("the cache serves siblings and never confuses two detail levels (#398)", ()
     "the fixture windows must actually differ in detail level",
   );
   assert.notEqual(chainCacheKey(specFor(coarser)), a, "two detail levels share one cache key");
-  assert.notEqual(
-    chainCacheKey(specFor(win, { coastWarp: 1 })),
-    a,
-    "a different coast warp shares one cache key",
-  );
+  assert.notEqual(chainCacheKey(specFor(win, { coastWarp: 1 })), a, "a different coast warp shares one cache key");
   assert.notEqual(chainCacheKey(specFor(sibling)), a, "two windows of one size share a cache key");
-  assert.notEqual(
-    chainCacheKey(specFor(win, { gridW: 160, gridH: 120 })),
-    a,
-    "two grids share one cache key",
-  );
+  assert.notEqual(chainCacheKey(specFor(win, { gridW: 160, gridH: 120 })), a, "two grids share one cache key");
 });
 
 test("maxOfSurfaces takes the highest ancestor and abstains where none covers (#398)", () => {

@@ -50,10 +50,7 @@ export function placeAriaLabel(mark: PlaceMark): string {
   return `${mark.name}, ${placeRank(mark)}`;
 }
 
-export function cardSide(
-  nx: number,
-  ny: number,
-): { h: "left" | "right"; v: "above" | "below" } {
+export function cardSide(nx: number, ny: number): { h: "left" | "right"; v: "above" | "below" } {
   return { h: nx > 0.5 ? "left" : "right", v: ny > 0.5 ? "above" : "below" };
 }
 

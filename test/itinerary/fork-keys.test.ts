@@ -31,11 +31,7 @@ function sampleAt(dist: number, biome: number): RibbonSample {
   };
 }
 
-function inputWith(
-  events: ReadonlyArray<RibbonEvent>,
-  totalCells: number,
-  biome: number,
-): RibbonInput {
+function inputWith(events: ReadonlyArray<RibbonEvent>, totalCells: number, biome: number): RibbonInput {
   const samples: RibbonSample[] = [];
   for (let d = 0; d <= 40; d++) samples.push(sampleAt(d, biome));
   samples.push(sampleAt(totalCells, biome));

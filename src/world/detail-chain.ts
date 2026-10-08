@@ -1,10 +1,5 @@
 import { fieldFrom, type Field } from "../core/grid.ts";
-import {
-  buildHeightfield,
-  MAX_DETAIL,
-  type MapType,
-  type UvWindow,
-} from "../terrain/heightfield.ts";
+import { buildHeightfield, MAX_DETAIL, type MapType, type UvWindow } from "../terrain/heightfield.ts";
 import {
   floorToParent,
   gateToParentLand,
@@ -66,8 +61,12 @@ export function chainCacheKey(spec: ChainSpec): string {
   return [
     spec.seed,
     spec.mapType,
-    w.u0, w.v0, w.u1, w.v1,
-    spec.gridW, spec.gridH,
+    w.u0,
+    w.v0,
+    w.u1,
+    w.v1,
+    spec.gridW,
+    spec.gridH,
     spec.worldAspect,
     spec.seaLevel,
     spec.coastWarp ?? "-",
@@ -147,9 +146,7 @@ export function buildChainedField(spec: ChainSpec, cache: ChainCache = createCha
   const ancestors = ancestorWindows(spec.window);
   let out = bare;
   if (ancestors.length > 0) {
-    const fields = ancestors.map((w) =>
-      buildChainedField({ ...spec, window: w, ...gridForWindow(w) }, cache),
-    );
+    const fields = ancestors.map((w) => buildChainedField({ ...spec, window: w, ...gridForWindow(w) }, cache));
     const surfaces = fields.map((f, i) =>
       parentSurfaceOnWindow(f, ancestors[i] as UvWindow, spec.window, spec.gridW, spec.gridH),
     );

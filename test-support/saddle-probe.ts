@@ -20,12 +20,19 @@ export function fusingSaddles(field: Field, seaLevel: number): { saddleCells: nu
       const b = data[x + 1 + y * w] as number;
       const c = data[x + 1 + (y + 1) * w] as number;
       const d = data[x + (y + 1) * w] as number;
-      const idx =
-        (a > seaLevel ? 8 : 0) | (b > seaLevel ? 4 : 0) | (c > seaLevel ? 2 : 0) | (d > seaLevel ? 1 : 0);
+      const idx = (a > seaLevel ? 8 : 0) | (b > seaLevel ? 4 : 0) | (c > seaLevel ? 2 : 0) | (d > seaLevel ? 1 : 0);
       if (idx !== 5 && idx !== 10) continue;
       saddleCells++;
       const corners: readonly [readonly [number, number], readonly [number, number]] =
-        idx === 10 ? [[x, y], [x + 1, y + 1]] : [[x + 1, y], [x, y + 1]];
+        idx === 10
+          ? [
+              [x, y],
+              [x + 1, y + 1],
+            ]
+          : [
+              [x + 1, y],
+              [x, y + 1],
+            ];
       const [p1, p2] = corners;
       if (ids[p1[0] + p1[1] * w] === ids[p2[0] + p2[1] * w]) continue;
       if ((a + b + c + d) / 4 > seaLevel) fusing.push({ x, y, landCorners: corners });
@@ -35,11 +42,7 @@ export function fusingSaddles(field: Field, seaLevel: number): { saddleCells: nu
 }
 
 /** Sorted edge-pair labels ("bottom|left" etc) of the marching-squares segments emitted inside one cell, read from real contour output so a resolution change in contours.ts is visible to the guards. */
-export function cellSegmentEdgePairs(
-  contours: ReadonlyArray<Contour>,
-  cx: number,
-  cy: number,
-): string[] {
+export function cellSegmentEdgePairs(contours: ReadonlyArray<Contour>, cx: number, cy: number): string[] {
   const pairs: string[] = [];
   for (const contour of contours) {
     for (let i = 0; i + 1 < contour.points.length; i++) {

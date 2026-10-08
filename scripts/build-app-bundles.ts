@@ -51,7 +51,11 @@ const pressConfig = (outDir: string): InlineConfig => ({
     // The worker chunk must be an ES module (it is spawned { type: "module" }); Vite's default worker format is iife.
     format: "es",
     rollupOptions: {
-      output: { ...OUTPUT, entryFileNames: "explorer/worker.bundle.js", chunkFileNames: "explorer/chunks/worker/[name].js" },
+      output: {
+        ...OUTPUT,
+        entryFileNames: "explorer/worker.bundle.js",
+        chunkFileNames: "explorer/chunks/worker/[name].js",
+      },
     },
   },
 });
@@ -93,10 +97,12 @@ export async function bundleToString(absEntry: string): Promise<string> {
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const root = resolve(process.argv[2] ?? "public");
-  bundleAppSurfaces(root).then(() => {
-    for (const { entry, twin } of BUNDLE_ENTRIES) console.log(`bundled ${entry} -> ${twin}`);
-  }).catch((err: unknown) => {
-    console.error(err instanceof Error ? err.message : err);
-    process.exitCode = 1;
-  });
+  bundleAppSurfaces(root)
+    .then(() => {
+      for (const { entry, twin } of BUNDLE_ENTRIES) console.log(`bundled ${entry} -> ${twin}`);
+    })
+    .catch((err: unknown) => {
+      console.error(err instanceof Error ? err.message : err);
+      process.exitCode = 1;
+    });
 }

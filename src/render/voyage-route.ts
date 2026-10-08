@@ -123,8 +123,7 @@ function createRoute(byIdx: SitesByIdx, survey: Survey, walkLeg: WalkLeg): Voyag
     const { mode, cells } = walkLeg(cellOf(a), cellOf(b));
     const chain = dedupe(cells);
     const points = simplifyPath(chain.map(toPt), RDP_EPSILON);
-    const span =
-      mode === "sea" ? waterSpanOf(chain, points, isSea, w) : { water: null, inlandHandoff: false };
+    const span = mode === "sea" ? waterSpanOf(chain, points, isSea, w) : { water: null, inlandHandoff: false };
     return { ...leg, mode, points, water: span.water, inlandHandoff: span.inlandHandoff };
   };
 }

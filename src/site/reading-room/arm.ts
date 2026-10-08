@@ -19,7 +19,9 @@ export function createRoomArm(deps: RoomArmDeps) {
     const live = (): boolean => world === deps.worldGen();
     deps.afterPaint(() => {
       if (!live()) return;
-      const armIfLive = (): void => { if (live()) draw.arm(); };
+      const armIfLive = (): void => {
+        if (live()) draw.arm();
+      };
       void draw.prime().then(armIfLive, armIfLive);
     });
   }

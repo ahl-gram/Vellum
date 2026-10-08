@@ -43,7 +43,20 @@ function station(
   at: { readonly nx: number; readonly ny: number },
   extra: Partial<Pick<Station, "legendName" | "arms" | "sea">> = {},
 ): Station {
-  return { id, name, legendName: name, verb, where, href, prose: PROSE[id]!, arms: false, sea: false, nx: at.nx, ny: at.ny, ...extra };
+  return {
+    id,
+    name,
+    legendName: name,
+    verb,
+    where,
+    href,
+    prose: PROSE[id]!,
+    arms: false,
+    sea: false,
+    nx: at.nx,
+    ny: at.ny,
+    ...extra,
+  };
 }
 
 export function homeStations(): ReadonlyArray<Station> {
@@ -52,16 +65,42 @@ export function homeStations(): ReadonlyArray<Station> {
   const weki = mooring("Weki");
   return [
     station("explorer", "The Explorer", "Make one", `at ${capital.name}, the capital`, "explorer/", capital),
-    station("reading-room", "The Reading Room", "Watch one", `off ${lamahai.name}, on the southern shore`, "reading-room/", lamahai),
-    station("atlas", "The Atlas of Rahai", "Read one", `at ${weki.name}, a seat of the west`, "atlas/", weki, { legendName: "The Atlas", arms: true }),
-    station("gallery", "A Gallery of Worlds", "Browse many", "in open water, beyond the survey", "gallery/", { nx: GALLERY_NX, ny: GALLERY_NY }, { sea: true }),
+    station(
+      "reading-room",
+      "The Reading Room",
+      "Watch one",
+      `off ${lamahai.name}, on the southern shore`,
+      "reading-room/",
+      lamahai,
+    ),
+    station("atlas", "The Atlas of Rahai", "Read one", `at ${weki.name}, a seat of the west`, "atlas/", weki, {
+      legendName: "The Atlas",
+      arms: true,
+    }),
+    station(
+      "gallery",
+      "A Gallery of Worlds",
+      "Browse many",
+      "in open water, beyond the survey",
+      "gallery/",
+      { nx: GALLERY_NX, ny: GALLERY_NY },
+      { sea: true },
+    ),
   ];
 }
 
 export type Pip = Pick<Station, "id" | "name" | "verb" | "where" | "sea" | "nx" | "ny">;
 
 export function howStation(): Pip {
-  return { id: "how", name: "How It Works", verb: "See how", where: "at the title cartouche", sea: true, nx: 0.7847, ny: 0.1779 };
+  return {
+    id: "how",
+    name: "How It Works",
+    verb: "See how",
+    where: "at the title cartouche",
+    sea: true,
+    nx: 0.7847,
+    ny: 0.1779,
+  };
 }
 
 const spotKey = (nx: number, ny: number): string => `${nx},${ny}`;

@@ -44,7 +44,13 @@ function leaguesTotal(isRegion: boolean, pxPerLeague: number, target: number): n
   return total;
 }
 
-type Bar = { readonly x0: number; readonly y0: number; readonly barW: number; readonly barH: number; readonly k: number };
+type Bar = {
+  readonly x0: number;
+  readonly y0: number;
+  readonly barW: number;
+  readonly barH: number;
+  readonly k: number;
+};
 
 function scalebarCells(style: MapStyle, bar: Bar): SvgNode[] {
   const { x0, y0, barW, barH, k } = bar;
@@ -54,9 +60,13 @@ function scalebarCells(style: MapStyle, bar: Bar): SvgNode[] {
   for (let i = 0; i < segments; i++) {
     cells.push(
       el("rect", {
-        x: x0 + i * segW, y: y0, width: segW, height: barH,
+        x: x0 + i * segW,
+        y: y0,
+        width: segW,
+        height: barH,
         fill: i % 2 === 0 ? style.ink : style.paper,
-        stroke: style.ink, "stroke-width": 1 * k,
+        stroke: style.ink,
+        "stroke-width": 1 * k,
       }),
     );
   }
@@ -68,8 +78,11 @@ function scalebarLabel(style: MapStyle, bar: Bar, lx: number, value: number): Sv
   return el(
     "text",
     {
-      x: lx, y: y0 + barH + 11 * k, "text-anchor": "middle",
-      "font-family": style.fontFamily, "font-size": (9.5 * k).toFixed(1),
+      x: lx,
+      y: y0 + barH + 11 * k,
+      "text-anchor": "middle",
+      "font-family": style.fontFamily,
+      "font-size": (9.5 * k).toFixed(1),
       fill: style.ink,
     },
     [String(value)],
@@ -80,9 +93,7 @@ export function scalebarLayer(ctx: RenderCtx, plan: ScalebarPlan): SvgNode {
   const { style, proj, world } = ctx;
   const k = proj.widthPx / 1500;
   const worldCellsPerCell = world.region
-    ? ((world.region.window.u1 - world.region.window.u0) *
-        (world.region.worldGridW - 1)) /
-      (world.elev.w - 1)
+    ? ((world.region.window.u1 - world.region.window.u0) * (world.region.worldGridW - 1)) / (world.elev.w - 1)
     : 1;
   const pxPerLeague = (proj.scale / worldCellsPerCell) * CELLS_PER_LEAGUE;
   const target = 200 * k;
@@ -98,16 +109,24 @@ export function scalebarLayer(ctx: RenderCtx, plan: ScalebarPlan): SvgNode {
 
   return el("g", { id: "layer-scalebar" }, [
     el("rect", {
-      x: plan.box.x - 8 * k, y: plan.box.y - 4 * k,
-      width: plan.box.w + 16 * k, height: plan.box.h + 8 * k,
-      fill: style.paper, "fill-opacity": 0.72, rx: 3 * k,
+      x: plan.box.x - 8 * k,
+      y: plan.box.y - 4 * k,
+      width: plan.box.w + 16 * k,
+      height: plan.box.h + 8 * k,
+      fill: style.paper,
+      "fill-opacity": 0.72,
+      rx: 3 * k,
     }),
     el(
       "text",
       {
-        x: x0 + barW / 2, y: y0 - 6 * k, "text-anchor": "middle",
-        "font-family": style.fontFamily, "font-size": (10.5 * k).toFixed(1),
-        "font-style": "italic", fill: style.ink,
+        x: x0 + barW / 2,
+        y: y0 - 6 * k,
+        "text-anchor": "middle",
+        "font-family": style.fontFamily,
+        "font-size": (10.5 * k).toFixed(1),
+        "font-style": "italic",
+        fill: style.ink,
       },
       ["Leagues"],
     ),

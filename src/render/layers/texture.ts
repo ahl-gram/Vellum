@@ -30,11 +30,18 @@ export function textureOverlay(ctx: RenderCtx): SvgNode | null {
   const { proj } = ctx;
   return el("g", { id: "layer-texture" }, [
     el("rect", {
-      x: 0, y: 0, width: proj.widthPx, height: proj.heightPx,
-      filter: "url(#parchment)", opacity: 0.5,
+      x: 0,
+      y: 0,
+      width: proj.widthPx,
+      height: proj.heightPx,
+      filter: "url(#parchment)",
+      opacity: 0.5,
     }),
     el("rect", {
-      x: 0, y: 0, width: proj.widthPx, height: proj.heightPx,
+      x: 0,
+      y: 0,
+      width: proj.widthPx,
+      height: proj.heightPx,
       fill: "url(#vignette)",
     }),
   ]);

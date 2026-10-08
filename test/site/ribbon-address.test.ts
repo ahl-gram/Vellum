@@ -90,5 +90,9 @@ test("prospectTarget sees the road's end in the Prospect: a and b dropped, i= th
   );
   assert.equal(prospectTarget("", 3), "/prospect/#i=3");
   assert.equal(prospectTarget("#a=1&band=polar&b=2", 2), "/prospect/#band=polar&i=2");
-  assert.equal(prospectTarget("#seed=42&i=9&year=300&a=1&b=2", 2), "/prospect/#seed=42&i=2", "a hand-shared hash already carrying the Prospect's keys loses them, or the first i= wins on parse (skeptic on PR #500)");
+  assert.equal(
+    prospectTarget("#seed=42&i=9&year=300&a=1&b=2", 2),
+    "/prospect/#seed=42&i=2",
+    "a hand-shared hash already carrying the Prospect's keys loses them, or the first i= wins on parse (skeptic on PR #500)",
+  );
 });

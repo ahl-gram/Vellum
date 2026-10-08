@@ -15,7 +15,21 @@ export async function pSetup({ evaluate, waitSettled }: SuiteContext): Promise<v
 }
 
 export async function pManifest({ evaluate }: SuiteContext) {
-  const pm = await evaluate<{ count: number; cap: number; capName: string; capFounded: number; ruinIdx: number; ruinName: string | null; tale: string | null; seatIdx: number; seatName: string | null; capSeat: boolean; formerIdx: number; formerName: string | null; plainIdx: number }>(`(()=>{
+  const pm = await evaluate<{
+    count: number;
+    cap: number;
+    capName: string;
+    capFounded: number;
+    ruinIdx: number;
+    ruinName: string | null;
+    tale: string | null;
+    seatIdx: number;
+    seatName: string | null;
+    capSeat: boolean;
+    formerIdx: number;
+    formerName: string | null;
+    plainIdx: number;
+  }>(`(()=>{
     const r=window.__vellumRunInline({kind:"draw",seed:42,overrides:{},render:{style:"antique",widthPx:1500,legend:true}});
     const places=r.manifest.places;
     const cap=places.findIndex((p)=>p.kind==="capital");
@@ -30,31 +44,90 @@ export async function pManifest({ evaluate }: SuiteContext) {
 }
 
 export async function p1Overlay({ evaluate, check }: SuiteContext, pm: Manifest): Promise<void> {
-  const p1 = await evaluate<{ ov: boolean; hits: number; card: boolean }>(`(()=>{const ov=document.querySelector("#map .place-overlay");const hits=document.querySelectorAll("#map .place-hit").length;const card=!!document.getElementById("place-card");return{ov:!!ov,hits,card};})()`);
-  check("P1 overlay built: one hit-target per place + a card host", p1.ov && p1.card && p1.hits === pm.count, `${p1.hits} hits vs ${pm.count} places`);
+  const p1 = await evaluate<{ ov: boolean; hits: number; card: boolean }>(
+    `(()=>{const ov=document.querySelector("#map .place-overlay");const hits=document.querySelectorAll("#map .place-hit").length;const card=!!document.getElementById("place-card");return{ov:!!ov,hits,card};})()`,
+  );
+  check(
+    "P1 overlay built: one hit-target per place + a card host",
+    p1.ov && p1.card && p1.hits === pm.count,
+    `${p1.hits} hits vs ${pm.count} places`,
+  );
 }
 
 export async function p2Idle({ evaluate, check }: SuiteContext): Promise<void> {
-  const p2 = await evaluate<{ cardHidden: boolean; bg: string; bw: string; ovPe: string; hitPe: string }>(`(()=>{const c=document.getElementById("place-card");const h=document.querySelector(".place-hit");const cs=getComputedStyle(h);const os=getComputedStyle(document.querySelector(".place-overlay"));return{cardHidden:c.hidden===true,bg:cs.backgroundColor,bw:cs.borderTopWidth,ovPe:os.pointerEvents,hitPe:cs.pointerEvents};})()`);
-  check("P2 idle: card hidden + hits transparent/borderless (no global-button leak)", p2.cardHidden && p2.bg === "rgba(0, 0, 0, 0)" && p2.bw === "0px", JSON.stringify(p2));
-  check("P3 pointer-events: overlay none, hits auto (rest of page stays live)", p2.ovPe === "none" && p2.hitPe === "auto", `ov=${p2.ovPe} hit=${p2.hitPe}`);
+  const p2 = await evaluate<{ cardHidden: boolean; bg: string; bw: string; ovPe: string; hitPe: string }>(
+    `(()=>{const c=document.getElementById("place-card");const h=document.querySelector(".place-hit");const cs=getComputedStyle(h);const os=getComputedStyle(document.querySelector(".place-overlay"));return{cardHidden:c.hidden===true,bg:cs.backgroundColor,bw:cs.borderTopWidth,ovPe:os.pointerEvents,hitPe:cs.pointerEvents};})()`,
+  );
+  check(
+    "P2 idle: card hidden + hits transparent/borderless (no global-button leak)",
+    p2.cardHidden && p2.bg === "rgba(0, 0, 0, 0)" && p2.bw === "0px",
+    JSON.stringify(p2),
+  );
+  check(
+    "P3 pointer-events: overlay none, hits auto (rest of page stays live)",
+    p2.ovPe === "none" && p2.hitPe === "auto",
+    `ov=${p2.ovPe} hit=${p2.hitPe}`,
+  );
 }
 
 export async function p2bPressLift({ evaluate, check }: SuiteContext): Promise<void> {
   // P2 is idle-only, so a dropped :not(.place-hit) exclusion would leave it green; this P2b/P2c pair is the guard that actually bites that mutation.
-  const p2m = await evaluate<{ btn: string; hit: string }>(`(()=>{const b=getComputedStyle(document.getElementById("draw")).transitionDuration;const h=getComputedStyle(document.querySelector(".place-hit")).transitionDuration;return{btn:b,hit:h};})()`);
-  check("P2b press/lift reaches buttons (motion.css loaded + applied)", p2m.btn.includes("0.18s"), `#draw transition-duration=${p2m.btn}`);
-  check("P2c press/lift does NOT reach .place-hit (exclusion holds)", p2m.hit === "0s", `.place-hit transition-duration=${p2m.hit}`);
+  const p2m = await evaluate<{ btn: string; hit: string }>(
+    `(()=>{const b=getComputedStyle(document.getElementById("draw")).transitionDuration;const h=getComputedStyle(document.querySelector(".place-hit")).transitionDuration;return{btn:b,hit:h};})()`,
+  );
+  check(
+    "P2b press/lift reaches buttons (motion.css loaded + applied)",
+    p2m.btn.includes("0.18s"),
+    `#draw transition-duration=${p2m.btn}`,
+  );
+  check(
+    "P2c press/lift does NOT reach .place-hit (exclusion holds)",
+    p2m.hit === "0s",
+    `.place-hit transition-duration=${p2m.hit}`,
+  );
 }
 
 export async function p4Capital({ evaluate, check, shoot, sleep }: SuiteContext, pm: Manifest): Promise<void> {
-  const p4 = await evaluate<{ hidden: boolean; aria: string | null; name: string | undefined; rank: string | undefined; founded: string | undefined; tale: boolean }>(`(()=>{const hit=document.querySelector('.place-hit[data-idx="'+${pm.cap}+'"]');hit.focus();const c=document.getElementById("place-card");return{hidden:c.hidden,aria:hit.getAttribute("aria-label"),name:(c.querySelector(".pc-name")||{}).textContent,rank:(c.querySelector(".pc-rank")||{}).textContent,founded:(c.querySelector(".pc-founded")||{}).textContent,tale:!!c.querySelector(".pc-tale")};})()`);
-  check("P4 focus a capital: card shows name + Capital + founding year, no tale", p4.hidden === false && p4.name === pm.capName && p4.rank === "Capital" && p4.founded === "Founded in the year " + pm.capFounded + "." && p4.tale === false, JSON.stringify(p4));
+  const p4 = await evaluate<{
+    hidden: boolean;
+    aria: string | null;
+    name: string | undefined;
+    rank: string | undefined;
+    founded: string | undefined;
+    tale: boolean;
+  }>(
+    `(()=>{const hit=document.querySelector('.place-hit[data-idx="'+${pm.cap}+'"]');hit.focus();const c=document.getElementById("place-card");return{hidden:c.hidden,aria:hit.getAttribute("aria-label"),name:(c.querySelector(".pc-name")||{}).textContent,rank:(c.querySelector(".pc-rank")||{}).textContent,founded:(c.querySelector(".pc-founded")||{}).textContent,tale:!!c.querySelector(".pc-tale")};})()`,
+  );
+  check(
+    "P4 focus a capital: card shows name + Capital + founding year, no tale",
+    p4.hidden === false &&
+      p4.name === pm.capName &&
+      p4.rank === "Capital" &&
+      p4.founded === "Founded in the year " + pm.capFounded + "." &&
+      p4.tale === false,
+    JSON.stringify(p4),
+  );
   check("P5 hit aria-label is name + rank (matches the card)", p4.aria === pm.capName + ", Capital", `aria=${p4.aria}`);
 
   if (pm.seatIdx >= 0) {
-    const p5b = await evaluate<{ hidden: boolean; name: string | undefined; rank: string | undefined; aria: string | null; tale: boolean }>(`(()=>{const hit=document.querySelector('.place-hit[data-idx="'+${pm.seatIdx}+'"]');hit.focus();const c=document.getElementById("place-card");return{hidden:c.hidden,name:(c.querySelector(".pc-name")||{}).textContent,rank:(c.querySelector(".pc-rank")||{}).textContent,aria:hit.getAttribute("aria-label"),tale:!!c.querySelector(".pc-tale")};})()`);
-    check("P5b focus a realm seat: rank 'Realm Seat', aria matches, no tale", p5b.hidden === false && p5b.rank === "Realm Seat" && p5b.name === pm.seatName && p5b.aria === pm.seatName + ", Realm Seat" && p5b.tale === false, JSON.stringify(p5b));
+    const p5b = await evaluate<{
+      hidden: boolean;
+      name: string | undefined;
+      rank: string | undefined;
+      aria: string | null;
+      tale: boolean;
+    }>(
+      `(()=>{const hit=document.querySelector('.place-hit[data-idx="'+${pm.seatIdx}+'"]');hit.focus();const c=document.getElementById("place-card");return{hidden:c.hidden,name:(c.querySelector(".pc-name")||{}).textContent,rank:(c.querySelector(".pc-rank")||{}).textContent,aria:hit.getAttribute("aria-label"),tale:!!c.querySelector(".pc-tale")};})()`,
+    );
+    check(
+      "P5b focus a realm seat: rank 'Realm Seat', aria matches, no tale",
+      p5b.hidden === false &&
+        p5b.rank === "Realm Seat" &&
+        p5b.name === pm.seatName &&
+        p5b.aria === pm.seatName + ", Realm Seat" &&
+        p5b.tale === false,
+      JSON.stringify(p5b),
+    );
     // Wait out paperUnfurl before shooting: the card mounts at the animation's first keyframe (fill both), so an immediate shot catches it at zero scale and shows no card at all.
     await evaluate(`(()=>{document.querySelector('.place-hit[data-idx="'+${pm.seatIdx}+'"]').click();})()`);
     await sleep(500);
@@ -63,13 +136,23 @@ export async function p4Capital({ evaluate, check, shoot, sleep }: SuiteContext,
   } else {
     check("P5b seed 42 has a non-capital realm seat to show", false, "no seat in manifest");
   }
-  check("P5c the grand capital carries seat===true yet still ranks Capital", pm.capSeat === true && p4.rank === "Capital", `capSeat=${pm.capSeat} rank=${p4.rank}`);
+  check(
+    "P5c the grand capital carries seat===true yet still ranks Capital",
+    pm.capSeat === true && p4.rank === "Capital",
+    `capSeat=${pm.capSeat} rank=${p4.rank}`,
+  );
 }
 
 export async function p6Ruin({ evaluate, check }: SuiteContext, pm: Manifest): Promise<void> {
   if (pm.ruinIdx >= 0) {
-    const p6 = await evaluate<{ rank: string | undefined; aria: string | null; tale: string | undefined }>(`(()=>{const hit=document.querySelector('.place-hit[data-idx="'+${pm.ruinIdx}+'"]');hit.focus();const c=document.getElementById("place-card");return{rank:(c.querySelector(".pc-rank")||{}).textContent,aria:hit.getAttribute("aria-label"),tale:(c.querySelector(".pc-tale")||{}).textContent};})()`);
-    check("P6 focus a ruin: rank Ruin, aria 'name, Ruin', and the abandonment tale", p6.rank === "Ruin" && p6.aria === pm.ruinName + ", Ruin" && p6.tale === pm.tale, JSON.stringify(p6));
+    const p6 = await evaluate<{ rank: string | undefined; aria: string | null; tale: string | undefined }>(
+      `(()=>{const hit=document.querySelector('.place-hit[data-idx="'+${pm.ruinIdx}+'"]');hit.focus();const c=document.getElementById("place-card");return{rank:(c.querySelector(".pc-rank")||{}).textContent,aria:hit.getAttribute("aria-label"),tale:(c.querySelector(".pc-tale")||{}).textContent};})()`,
+    );
+    check(
+      "P6 focus a ruin: rank Ruin, aria 'name, Ruin', and the abandonment tale",
+      p6.rank === "Ruin" && p6.aria === pm.ruinName + ", Ruin" && p6.tale === pm.tale,
+      JSON.stringify(p6),
+    );
   } else {
     check("P6 seed 42 has a ruin to show", false, "no ruin in manifest");
   }
@@ -77,29 +160,55 @@ export async function p6Ruin({ evaluate, check }: SuiteContext, pm: Manifest): P
 
 export async function p7Tooltip({ evaluate, check }: SuiteContext, pm: Manifest): Promise<void> {
   // No aria-live on purpose: a populate-while-hidden region announces unreliably and would double up with the aria-describedby path.
-  const p7 = await evaluate<{ role: string | null; live: string | null; desc: string | null }>(`(()=>{const c=document.getElementById("place-card");const hit=document.querySelector('.place-hit[data-idx="'+${pm.cap}+'"]');return{role:c.getAttribute("role"),live:c.getAttribute("aria-live"),desc:hit.getAttribute("aria-describedby")};})()`);
-  check("P7 role=tooltip, hit aria-describedby=place-card, no aria-live", p7.role === "tooltip" && p7.desc === "place-card" && p7.live === null, JSON.stringify(p7));
+  const p7 = await evaluate<{ role: string | null; live: string | null; desc: string | null }>(
+    `(()=>{const c=document.getElementById("place-card");const hit=document.querySelector('.place-hit[data-idx="'+${pm.cap}+'"]');return{role:c.getAttribute("role"),live:c.getAttribute("aria-live"),desc:hit.getAttribute("aria-describedby")};})()`,
+  );
+  check(
+    "P7 role=tooltip, hit aria-describedby=place-card, no aria-live",
+    p7.role === "tooltip" && p7.desc === "place-card" && p7.live === null,
+    JSON.stringify(p7),
+  );
 }
 
 export async function p8TapPins({ evaluate, check }: SuiteContext, pm: Manifest): Promise<void> {
-  const p8 = await evaluate<{ startHidden: boolean; opened: boolean; survived: boolean; closed: boolean }>(`(()=>{if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}));const c=document.getElementById("place-card");const startHidden=c.hidden;const hit=document.querySelector('.place-hit[data-idx="'+${pm.cap}+'"]');hit.click();const opened=!c.hidden;hit.dispatchEvent(new MouseEvent("mouseleave",{bubbles:true}));const survived=!c.hidden;document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}));const closed=c.hidden;return{startHidden,opened,survived,closed};})()`);
-  check("P8 tap opens+pins from closed, survives mouseleave, Escape dismisses", p8.startHidden === true && p8.opened && p8.survived && p8.closed, JSON.stringify(p8));
+  const p8 = await evaluate<{ startHidden: boolean; opened: boolean; survived: boolean; closed: boolean }>(
+    `(()=>{if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}));const c=document.getElementById("place-card");const startHidden=c.hidden;const hit=document.querySelector('.place-hit[data-idx="'+${pm.cap}+'"]');hit.click();const opened=!c.hidden;hit.dispatchEvent(new MouseEvent("mouseleave",{bubbles:true}));const survived=!c.hidden;document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}));const closed=c.hidden;return{startHidden,opened,survived,closed};})()`,
+  );
+  check(
+    "P8 tap opens+pins from closed, survives mouseleave, Escape dismisses",
+    p8.startHidden === true && p8.opened && p8.survived && p8.closed,
+    JSON.stringify(p8),
+  );
 }
 
 export async function p10Focus({ evaluate, check }: SuiteContext, pm: Manifest): Promise<void> {
-  const p10 = await evaluate<{ shown: boolean; gone: boolean }>(`(()=>{const c=document.getElementById("place-card");const hit=document.querySelector('.place-hit[data-idx="'+${pm.cap}+'"]');hit.focus();const shown=!c.hidden;hit.blur();const gone=c.hidden;return{shown,gone};})()`);
+  const p10 = await evaluate<{ shown: boolean; gone: boolean }>(
+    `(()=>{const c=document.getElementById("place-card");const hit=document.querySelector('.place-hit[data-idx="'+${pm.cap}+'"]');hit.focus();const shown=!c.hidden;hit.blur();const gone=c.hidden;return{shown,gone};})()`,
+  );
   check("P10 unpinned: focus shows, blur dismisses", p10.shown && p10.gone, JSON.stringify(p10));
 }
 
 export async function p11OutsideClick({ evaluate, check }: SuiteContext, pm: Manifest): Promise<void> {
-  const p11 = await evaluate<{ pinnedOpen: boolean; dismissed: boolean }>(`(()=>{const c=document.getElementById("place-card");const hit=document.querySelector('.place-hit[data-idx="'+${pm.cap}+'"]');hit.click();const pinnedOpen=!c.hidden;document.body.dispatchEvent(new MouseEvent("click",{bubbles:true}));const dismissed=c.hidden;return{pinnedOpen,dismissed};})()`);
-  check("P11 outside-click (off any mark) dismisses a pinned card", p11.pinnedOpen && p11.dismissed, JSON.stringify(p11));
+  const p11 = await evaluate<{ pinnedOpen: boolean; dismissed: boolean }>(
+    `(()=>{const c=document.getElementById("place-card");const hit=document.querySelector('.place-hit[data-idx="'+${pm.cap}+'"]');hit.click();const pinnedOpen=!c.hidden;document.body.dispatchEvent(new MouseEvent("click",{bubbles:true}));const dismissed=c.hidden;return{pinnedOpen,dismissed};})()`,
+  );
+  check(
+    "P11 outside-click (off any mark) dismisses a pinned card",
+    p11.pinnedOpen && p11.dismissed,
+    JSON.stringify(p11),
+  );
 }
 
 export async function p12PinSwitch({ evaluate, check }: SuiteContext, pm: Manifest): Promise<void> {
   if (pm.ruinIdx >= 0) {
-    const p12 = await evaluate<{ pinnedA: string | null | undefined; afterB: string | null | undefined }>(`(()=>{const c=document.getElementById("place-card");const A=document.querySelector('.place-hit[data-idx="'+${pm.cap}+'"]');const B=document.querySelector('.place-hit[data-idx="'+${pm.ruinIdx}+'"]');A.focus();A.click();const pinnedA=!c.hidden?(c.querySelector(".pc-name")||{}).textContent:null;B.focus();B.click();const afterB=!c.hidden?(c.querySelector(".pc-name")||{}).textContent:null;document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}));return{pinnedA,afterB};})()`);
-    check("P12 pin-switch: pin A then activate B switches to B (not dismiss)", p12.pinnedA === pm.capName && p12.afterB === pm.ruinName, JSON.stringify(p12));
+    const p12 = await evaluate<{ pinnedA: string | null | undefined; afterB: string | null | undefined }>(
+      `(()=>{const c=document.getElementById("place-card");const A=document.querySelector('.place-hit[data-idx="'+${pm.cap}+'"]');const B=document.querySelector('.place-hit[data-idx="'+${pm.ruinIdx}+'"]');A.focus();A.click();const pinnedA=!c.hidden?(c.querySelector(".pc-name")||{}).textContent:null;B.focus();B.click();const afterB=!c.hidden?(c.querySelector(".pc-name")||{}).textContent:null;document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}));return{pinnedA,afterB};})()`,
+    );
+    check(
+      "P12 pin-switch: pin A then activate B switches to B (not dismiss)",
+      p12.pinnedA === pm.capName && p12.afterB === pm.ruinName,
+      JSON.stringify(p12),
+    );
   } else {
     check("P12 pin-switch: seed 42 has a second place to switch to", false, "no ruin in manifest");
   }
@@ -107,16 +216,33 @@ export async function p12PinSwitch({ evaluate, check }: SuiteContext, pm: Manife
 
 export async function p13AxDescription({ evaluate, check, axDescription }: SuiteContext, pm: Manifest): Promise<void> {
   if (pm.ruinIdx >= 0) {
-    await evaluate(`(()=>{if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();document.querySelector('.place-hit[data-idx="'+${pm.ruinIdx}+'"]').focus();})()`);
+    await evaluate(
+      `(()=>{if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();document.querySelector('.place-hit[data-idx="'+${pm.ruinIdx}+'"]').focus();})()`,
+    );
     const axDesc = await axDescription(`.place-hit[data-idx="${pm.ruinIdx}"]`);
-    const readable = !!axDesc && axDesc.includes(pm.ruinName + " ") && axDesc.includes("Founded in the year") && axDesc.includes(pm.tale!);
-    check("P13 card body reachable as a readable AX description (founding + tale, separated)", readable, JSON.stringify(axDesc));
+    const readable =
+      !!axDesc &&
+      axDesc.includes(pm.ruinName + " ") &&
+      axDesc.includes("Founded in the year") &&
+      axDesc.includes(pm.tale!);
+    check(
+      "P13 card body reachable as a readable AX description (founding + tale, separated)",
+      readable,
+      JSON.stringify(axDesc),
+    );
     await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}))`);
   }
 }
 
 export async function p14Unfurl({ evaluate, check }: SuiteContext, pm: Manifest): Promise<void> {
-  const p14 = await evaluate<{ hoverName: string | null; hoverDur: number | null; pinName: string | null; pinDur: number | null; pinnedAtHover: boolean; pinnedAtPin: boolean }>(`(()=>{
+  const p14 = await evaluate<{
+    hoverName: string | null;
+    hoverDur: number | null;
+    pinName: string | null;
+    pinDur: number | null;
+    pinnedAtHover: boolean;
+    pinnedAtPin: boolean;
+  }>(`(()=>{
     const c = document.getElementById("place-card");
     if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();
     document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}));
@@ -137,28 +263,41 @@ export async function p14Unfurl({ evaluate, check }: SuiteContext, pm: Manifest)
     document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}));
     return {hoverName,hoverDur,pinName,pinDur,pinnedAtHover,pinnedAtPin};
   })()`);
-  check("P14 card unfurl wired: .pc-inner runs paperUnfurl, pinned grade > hover grade, .pinned only on pin",
-    p14.hoverName === "paperUnfurl" && p14.pinName === "paperUnfurl" &&
-    p14.pinnedAtHover === false && p14.pinnedAtPin === true &&
-    Number.isFinite(p14.pinDur) && Number.isFinite(p14.hoverDur) &&
-    p14.pinDur! >
-    p14.hoverDur!,
-    JSON.stringify(p14));
+  check(
+    "P14 card unfurl wired: .pc-inner runs paperUnfurl, pinned grade > hover grade, .pinned only on pin",
+    p14.hoverName === "paperUnfurl" &&
+      p14.pinName === "paperUnfurl" &&
+      p14.pinnedAtHover === false &&
+      p14.pinnedAtPin === true &&
+      Number.isFinite(p14.pinDur) &&
+      Number.isFinite(p14.hoverDur) &&
+      p14.pinDur! > p14.hoverDur!,
+    JSON.stringify(p14),
+  );
 }
 
 export async function p15RealHover({ evaluate, send, check, sleep }: SuiteContext, pm: Manifest): Promise<void> {
   // A synthetic mouseenter does not set the CSS :hover state, so P15 drives a REAL CDP mouse move; it is the only check that sees the hit under actual hover.
-  const p15c = await evaluate<Point>(`(()=>{const h=document.querySelector('.place-hit[data-idx="'+${pm.cap}+'"]');h.scrollIntoView({block:"center"});const r=h.getBoundingClientRect();return{x:Math.round(r.x+r.width/2),y:Math.round(r.y+r.height/2)};})()`);
+  const p15c = await evaluate<Point>(
+    `(()=>{const h=document.querySelector('.place-hit[data-idx="'+${pm.cap}+'"]');h.scrollIntoView({block:"center"});const r=h.getBoundingClientRect();return{x:Math.round(r.x+r.width/2),y:Math.round(r.y+r.height/2)};})()`,
+  );
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 5, y: 5, buttons: 0 });
   await sleep(40);
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: p15c.x, y: p15c.y, buttons: 0 });
   // Poll, never sleep: ringOp is read to 2dp so it tolerates 0.005, and this is the same ring Z8b reads in suite-zoom, where a fixed wait with four times the slack still went red under Issue #381's second lane.
-  const readP15 = () => evaluate<{ bg: string; bw: string; ringOp: string }>(`(()=>{const h=document.querySelector('.place-hit[data-idx="'+${pm.cap}+'"]');const cs=getComputedStyle(h);const ring=getComputedStyle(h,"::after");return{bg:cs.backgroundColor,bw:cs.borderTopWidth,ringOp:Number(ring.opacity).toFixed(2)};})()`);
+  const readP15 = () =>
+    evaluate<{ bg: string; bw: string; ringOp: string }>(
+      `(()=>{const h=document.querySelector('.place-hit[data-idx="'+${pm.cap}+'"]');const cs=getComputedStyle(h);const ring=getComputedStyle(h,"::after");return{bg:cs.backgroundColor,bw:cs.borderTopWidth,ringOp:Number(ring.opacity).toFixed(2)};})()`,
+    );
   let p15 = await readP15();
   for (let i = 0; i < 60 && p15.ringOp !== "1.00"; i++) {
     await sleep(50);
     p15 = await readP15();
   }
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 5, y: 5, buttons: 0 });
-  check("P15 hover keeps the hit transparent + borderless (no button:hover box) and grows the ring", p15.bg === "rgba(0, 0, 0, 0)" && p15.bw === "0px" && p15.ringOp === "1.00", JSON.stringify(p15));
+  check(
+    "P15 hover keeps the hit transparent + borderless (no button:hover box) and grows the ring",
+    p15.bg === "rgba(0, 0, 0, 0)" && p15.bw === "0px" && p15.ringOp === "1.00",
+    JSON.stringify(p15),
+  );
 }

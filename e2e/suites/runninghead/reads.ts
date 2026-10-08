@@ -1,7 +1,19 @@
 import type { Payload } from "../../types.ts";
 
 // LITERAL on purpose: home is not a nav item, /ribbon/ and /prospect/ are shelled rooms outside the nav, /atlas/ is generated and carries no shell, and a page dropping out of the nav must not silently drop out of this guard.
-export const SHELLED = ["/", "/explorer/", "/print-room/", "/reading-room/", "/gallery/", "/faq/", "/glossary/", "/seed-of-the-day/", "/prospect/", "/ribbon/", "/specimen/"];
+export const SHELLED = [
+  "/",
+  "/explorer/",
+  "/print-room/",
+  "/reading-room/",
+  "/gallery/",
+  "/faq/",
+  "/glossary/",
+  "/seed-of-the-day/",
+  "/prospect/",
+  "/ribbon/",
+  "/specimen/",
+];
 
 // MEASURED split: /, /explorer/, /gallery/ leave body leading normal, every other page sets 1.6; RH6 needs PROSE and APP to differ in body leading or it proves nothing.
 export const PROSE = "/faq/";
@@ -27,8 +39,28 @@ const HOME_HEAD = {
   roomTagline: null,
 };
 // Sub 7 (Issue #462): a converted room stands its name in the RoomFolio corner (1.32rem, the corner's own leading), measured 2026-08-29 against the built dist; a CHART room renders no footer (ruling 9).
-export const FOLIO = ["/seed-of-the-day/", "/faq/", "/glossary/", "/explorer/", "/reading-room/", "/print-room/", "/prospect/", "/ribbon/", "/gallery/", "/specimen/"];
-export const CHART = ["/seed-of-the-day/", "/explorer/", "/reading-room/", "/print-room/", "/prospect/", "/ribbon/", "/gallery/", "/specimen/"];
+export const FOLIO = [
+  "/seed-of-the-day/",
+  "/faq/",
+  "/glossary/",
+  "/explorer/",
+  "/reading-room/",
+  "/print-room/",
+  "/prospect/",
+  "/ribbon/",
+  "/gallery/",
+  "/specimen/",
+];
+export const CHART = [
+  "/seed-of-the-day/",
+  "/explorer/",
+  "/reading-room/",
+  "/print-room/",
+  "/prospect/",
+  "/ribbon/",
+  "/gallery/",
+  "/specimen/",
+];
 const FOLIO_HEAD = {
   ...ROOM_HEAD,
   roomName: { tag: "H1", weight: "400", size: 21.12, tracking: 2.9568, face: DISPLAY_FACE },
@@ -41,8 +73,25 @@ export const MEMBERS = ["wordmark", "tagline", "rooms", "roomName", "roomTagline
 // The second addendum on Issue #461: the cluster pins its OWN leading (wordmark 1.15, the rest normal) and never inherits the page's reading 1.6; the room head pins 1.6 and never inherits an app page's normal. Both polarities are asserted per page in RH5.
 export const CLUSTER_NORMAL = ["tagline", "rooms", "footer"] as const;
 export const HEAD_LEADED = ["roomName", "roomTagline"] as const;
-type Member = { tag: string; weight: string; size: number; family: string; tracking: string; lineHeight: string; ratio: number; position: string; color: string } | null;
-export type Head = { chromeWash: { content: string; backgroundColor: string; filter: string } | null; chromePosition: string | null; chromeBottom: number | null; bandClip: string | null; h1s: { classes: string[]; inHeader: boolean; inMain: boolean; inFolio: boolean }[]; bodyLineHeight: string } & Record<(typeof MEMBERS)[number], Member>;
+type Member = {
+  tag: string;
+  weight: string;
+  size: number;
+  family: string;
+  tracking: string;
+  lineHeight: string;
+  ratio: number;
+  position: string;
+  color: string;
+} | null;
+export type Head = {
+  chromeWash: { content: string; backgroundColor: string; filter: string } | null;
+  chromePosition: string | null;
+  chromeBottom: number | null;
+  bandClip: string | null;
+  h1s: { classes: string[]; inHeader: boolean; inMain: boolean; inFolio: boolean }[];
+  bodyLineHeight: string;
+} & Record<(typeof MEMBERS)[number], Member>;
 type Want = { tag: string; weight: string; size: number; tracking: number | null; face: RegExp } | null;
 export type Heads = Record<string, Head | undefined>;
 export type Bad = (pred: (h: Head, r: string) => boolean) => string[];
@@ -75,12 +124,15 @@ export const HEAD_READ: Payload<string> = `(() => {
   });
 })()`;
 
-export const near = (got: number | undefined, want: number | undefined): boolean => Math.abs(got! -
-  want!) < 0.01;
+export const near = (got: number | undefined, want: number | undefined): boolean => Math.abs(got! - want!) < 0.01;
 export const matches = (m: Member | undefined, want: Want): boolean => {
   if (want === null) return m === null;
   if (!m) return false;
-  return m.tag === want.tag && m.weight === want.weight && near(m.size, want.size) &&
+  return (
+    m.tag === want.tag &&
+    m.weight === want.weight &&
+    near(m.size, want.size) &&
     want.face.test(m.family) &&
-    (want.tracking === null ? m.tracking === "normal" : near(parseFloat(m.tracking), want.tracking));
+    (want.tracking === null ? m.tracking === "normal" : near(parseFloat(m.tracking), want.tracking))
+  );
 };

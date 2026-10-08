@@ -30,7 +30,13 @@ test("firstDifference reads from cell 0: the routing defect it guards diverges t
   const a = createField(2, 1, (x) => (x === 0 ? 1 : 5));
   const b = createField(2, 1, () => 5);
   assert.match(firstDifference(a, b) ?? "", /^cell 0,0:/);
-  assert.equal(firstDifference(a, createField(2, 1, (x) => (x === 0 ? 1 : 5))), null);
+  assert.equal(
+    firstDifference(
+      a,
+      createField(2, 1, (x) => (x === 0 ? 1 : 5)),
+    ),
+    null,
+  );
 });
 
 test("with no detail asked for, the region draws exactly the bare heightfield it always did", () => {
@@ -103,20 +109,13 @@ test("a settlement a few cells offshore is walked to the new shore, not dropped"
   assert.ok(target, "the fixture window has a cell in the old blind spot");
   const doctored = townsAt(world, [{ ...target, name: "Testholm" }]);
   const town = doctored.settlements[0]!;
-  const projX = Math.round(
-    ((town.x / (world.recipe.gridW - 1) - window.u0) / (window.u1 - window.u0)) * 319,
-  );
-  const projY = Math.round(
-    ((town.y / (world.recipe.gridH - 1) - window.v0) / (window.v1 - window.v0)) * 239,
-  );
+  const projX = Math.round(((town.x / (world.recipe.gridW - 1) - window.u0) / (window.u1 - window.u0)) * 319);
+  const projY = Math.round(((town.y / (world.recipe.gridH - 1) - window.v0) / (window.v1 - window.v0)) * 239);
   const region = generateRegionWorld(doctored, spec);
   const towns = region.settlements.filter((s) => s.kind !== "hamlet");
   assert.equal(towns.length, 1, "the settlement survives the projection");
   const placed = towns[0]!;
-  assert.ok(
-    (region.elev.data[placed.x + placed.y * 320] as number) > region.seaLevel,
-    "and it stands on land",
-  );
+  assert.ok((region.elev.data[placed.x + placed.y * 320] as number) > region.seaLevel, "and it stands on land");
   assert.ok(
     Math.max(Math.abs(placed.x - projX), Math.abs(placed.y - projY)) <= 8,
     "within one parent cell of where the world chart put it",
@@ -141,11 +140,7 @@ test("a settlement with no shore in reach is named in a warning, never dropped i
       ]),
       spec,
     );
-    assert.equal(
-      region.settlements.filter((s) => s.kind !== "hamlet").length,
-      0,
-      "both really were dropped",
-    );
+    assert.equal(region.settlements.filter((s) => s.kind !== "hamlet").length, 0, "both really were dropped");
   } finally {
     console.warn = original;
   }

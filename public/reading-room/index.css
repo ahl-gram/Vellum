@@ -1,74 +1,225 @@
 /* The Reading Room: a chart room. The furniture is atelier.css's, the frame's dress reading-frame.css's and the engine's living-chart.css's; this sheet seats the chart in the stage, the instrument on the bottom strip and the journal in the slip. */
 
-.stage { display: flex; align-items: center; justify-content: center; box-sizing: border-box;
-  padding: var(--reserve-top, 8rem) var(--reserve-right, 0px) var(--reserve-bottom, 8rem) 0; }
-#sheet { position: relative; flex: none; width: 0; height: 0; box-shadow: var(--stage-shadow); }
-#map-viewport { position: absolute; inset: 0; cursor: grab; }
-#map-viewport:focus-visible { outline: 2px solid var(--parchment-bright); outline-offset: -3px; }
-#map-viewport.zoomable { touch-action: none; }
-#map-viewport .rf-chart { position: absolute; inset: 0; transform-origin: 0 0; }
-.stage .warning { position: absolute; left: 50%; top: calc(50% + 2.8rem); transform: translateX(-50%); max-width: 30rem; z-index: 2; margin: 0; }
-.stage .warning[hidden] { display: none; }
+.stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: var(--reserve-top, 8rem) var(--reserve-right, 0px) var(--reserve-bottom, 8rem) 0;
+}
+#sheet {
+  position: relative;
+  flex: none;
+  width: 0;
+  height: 0;
+  box-shadow: var(--stage-shadow);
+}
+#map-viewport {
+  position: absolute;
+  inset: 0;
+  cursor: grab;
+}
+#map-viewport:focus-visible {
+  outline: 2px solid var(--parchment-bright);
+  outline-offset: -3px;
+}
+#map-viewport.zoomable {
+  touch-action: none;
+}
+#map-viewport .rf-chart {
+  position: absolute;
+  inset: 0;
+  transform-origin: 0 0;
+}
+.stage .warning {
+  position: absolute;
+  left: 50%;
+  top: calc(50% + 2.8rem);
+  transform: translateX(-50%);
+  max-width: 30rem;
+  z-index: 2;
+  margin: 0;
+}
+.stage .warning[hidden] {
+  display: none;
+}
 
 /* Without these mount-scoped rules the arrival ceremony never plays and the inline stroke-dasharray `startArrival` in `src/site/explorer/draw-ceremony.ts` writes is never cleaned off the live coastline. */
-.rf-chart svg.arriving { animation: paperSettle var(--paper-settle) var(--ease-paper) both; }
+.rf-chart svg.arriving {
+  animation: paperSettle var(--paper-settle) var(--ease-paper) both;
+}
 .rf-chart svg.arriving #layer-land path {
-  animation: inkDraw var(--ink-draw) var(--ease-paper) both,
-             washDry var(--ink-dry) var(--ease-paper) 400ms both;
+  animation:
+    inkDraw var(--ink-draw) var(--ease-paper) both,
+    washDry var(--ink-dry) var(--ease-paper) 400ms both;
 }
 .rf-chart svg.arriving #layer-waterlines {
   animation: dryingInk var(--ink-dry) var(--ease-paper) 300ms both;
 }
 
-.corner.bl.folio { bottom: calc(var(--strip-h, 7.6rem) + 1rem); }
-.corner.br.zoomery, body:has(.slip.folded) .corner.br.zoomery { bottom: calc(var(--strip-h, 7.6rem) + 1rem); }
+.corner.bl.folio {
+  bottom: calc(var(--strip-h, 7.6rem) + 1rem);
+}
+.corner.br.zoomery,
+body:has(.slip.folded) .corner.br.zoomery {
+  bottom: calc(var(--strip-h, 7.6rem) + 1rem);
+}
 
-.strip { position: fixed; left: 0; right: 0; bottom: 0; z-index: 12; padding: 0.55rem var(--chrome-x) 0.9rem;
-  background: linear-gradient(to top, rgb(from var(--chart-ink) r g b / 0.9), rgb(from var(--chart-ink) r g b / 0.6) 60%, transparent);
-  animation: ink-in 0.5s 0.18s ease-out both; }
-.scale-well { position: relative; flex: 1 1 8rem; min-width: 0; display: flex; flex-direction: column; margin-top: 0.15rem; }
+.strip {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 12;
+  padding: 0.55rem var(--chrome-x) 0.9rem;
+  background: linear-gradient(
+    to top,
+    rgb(from var(--chart-ink) r g b / 0.9),
+    rgb(from var(--chart-ink) r g b / 0.6) 60%,
+    transparent
+  );
+  animation: ink-in 0.5s 0.18s ease-out both;
+}
+.scale-well {
+  position: relative;
+  flex: 1 1 8rem;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  margin-top: 0.15rem;
+}
 /* flex: none, because the well is a column: the row rule's 8rem basis would become the bar's height (151px strips). */
-.scale-well .rf-range { flex: none; width: 100%; }
+.scale-well .rf-range {
+  flex: none;
+  width: 100%;
+}
 /* Inset by the thumb's radius: the 16px thumb in living-chart.css and `detentEscapeU` in `src/site/living-chart/ages.ts` at width - 16, so u=0 and u=1 stand under the thumb's centre at its ends. */
-.scale { position: relative; height: 1.3rem; margin: 0 8px; }
-.tick { position: absolute; top: 0; width: 1px; height: 6px; background: var(--line-tan); transform: translateX(-0.5px); }
-.tick.day { background: var(--parchment); }
-.tick .lbl { position: absolute; top: 7px; left: 0; transform: translateX(-50%); white-space: nowrap;
-  font-variant-caps: small-caps; font-variant-numeric: tabular-nums; font-size: 0.72rem; letter-spacing: 0.06em; color: var(--line-tan); }
-.tick.day .lbl { font-family: var(--font-flourish, 'Iowan Old Style', 'Palatino', Georgia, serif); font-style: italic; font-variant-caps: normal; color: var(--parchment); }
-.tick.day.first .lbl { transform: none; }
-.tick.day.last .lbl { transform: translateX(calc(-100% - 14px)); }
-.tick.year.last .lbl { transform: translateX(-100%); }
-.seam { position: absolute; top: -0.4rem; transform: translateX(-50%); width: 18px; height: 18px; }
-.seam svg { width: 18px; height: 18px; fill: var(--parchment); stroke: var(--chart-ink); stroke-width: 0.6; }
+.scale {
+  position: relative;
+  height: 1.3rem;
+  margin: 0 8px;
+}
+.tick {
+  position: absolute;
+  top: 0;
+  width: 1px;
+  height: 6px;
+  background: var(--line-tan);
+  transform: translateX(-0.5px);
+}
+.tick.day {
+  background: var(--parchment);
+}
+.tick .lbl {
+  position: absolute;
+  top: 7px;
+  left: 0;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-variant-caps: small-caps;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--line-tan);
+}
+.tick.day .lbl {
+  font-family: var(--font-flourish, "Iowan Old Style", "Palatino", Georgia, serif);
+  font-style: italic;
+  font-variant-caps: normal;
+  color: var(--parchment);
+}
+.tick.day.first .lbl {
+  transform: none;
+}
+.tick.day.last .lbl {
+  transform: translateX(calc(-100% - 14px));
+}
+.tick.year.last .lbl {
+  transform: translateX(-100%);
+}
+.seam {
+  position: absolute;
+  top: -0.4rem;
+  transform: translateX(-50%);
+  width: 18px;
+  height: 18px;
+}
+.seam svg {
+  width: 18px;
+  height: 18px;
+  fill: var(--parchment);
+  stroke: var(--chart-ink);
+  stroke-width: 0.6;
+}
 
-.rr-prospect { margin: 0.7rem 0 0.9rem; }
-.rr-prospect a { display: block; }
+.rr-prospect {
+  margin: 0.7rem 0 0.9rem;
+}
+.rr-prospect a {
+  display: block;
+}
 /* The fill stays backwards and the resting keyframe releases the transform, or the final frame would pin at animation-cascade priority and silently kill the hover lift below. */
-.rr-prospect img { width: 100%; height: auto; display: block;
+.rr-prospect img {
+  width: 100%;
+  height: auto;
+  display: block;
   transform-origin: top center;
   border: 1px solid var(--line-tan);
   box-shadow: 0 4px 14px rgb(from var(--chart-ink) r g b / 0.12);
   animation: prospectUnfurl var(--unfurl) var(--ease-unfurl) backwards;
-  transition: transform 0.26s var(--ease-paper), box-shadow 0.26s var(--ease-paper); }
-.rr-prospect a:hover img, .rr-prospect a:focus-visible img {
+  transition:
+    transform 0.26s var(--ease-paper),
+    box-shadow 0.26s var(--ease-paper);
+}
+.rr-prospect a:hover img,
+.rr-prospect a:focus-visible img {
   transform: translateY(var(--raise)) rotate(-0.5deg);
-  box-shadow: var(--raise-shadow); }
+  box-shadow: var(--raise-shadow);
+}
 @keyframes prospectUnfurl {
-  from { opacity: 0; transform: perspective(900px) rotateX(-58deg); }
-  72%  { opacity: 1; transform: perspective(900px) rotateX(6deg); }
-  to   { opacity: 1; transform: none; }
+  from {
+    opacity: 0;
+    transform: perspective(900px) rotateX(-58deg);
+  }
+  72% {
+    opacity: 1;
+    transform: perspective(900px) rotateX(6deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
-
 @media print {
-  .strip { display: none !important; }
-  .stage { position: static; padding: 0 !important; display: block; }
-  #sheet { width: auto !important; height: auto !important; box-shadow: none; }
-  #map-viewport { position: static; }
-  #map-viewport .rf-chart { position: static; transform: none !important; }
-  .rf-chart svg[data-vellum-style] { height: auto; }
+  .strip {
+    display: none !important;
+  }
+  .stage {
+    position: static;
+    padding: 0 !important;
+    display: block;
+  }
+  #sheet {
+    width: auto !important;
+    height: auto !important;
+    box-shadow: none;
+  }
+  #map-viewport {
+    position: static;
+  }
+  #map-viewport .rf-chart {
+    position: static;
+    transform: none !important;
+  }
+  .rf-chart svg[data-vellum-style] {
+    height: auto;
+  }
 }
 
 /* Under reduced motion the engine's Play is a still frame (`prefersReduce` in `src/site/living-chart/ages.ts`), so there is no pace to choose; the room's rule, since reading-frame.css carries no reduced-motion block and motion.css owns the collapse. */
-@media (prefers-reduced-motion: reduce) { .rf-instrument .rf-pace { display: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .rf-instrument .rf-pace {
+    display: none;
+  }
+}

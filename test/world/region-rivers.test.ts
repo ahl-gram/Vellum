@@ -10,7 +10,11 @@ import type { FlowResult } from "../../src/hydrology/flow.ts";
 const SEA = 0;
 
 /** A 1D chute running east: every land cell drains to its neighbour, the tail is water. */
-function chute(w: number, h: number, waterFrom: number): {
+function chute(
+  w: number,
+  h: number,
+  waterFrom: number,
+): {
   elev: ReturnType<typeof createField>;
   flow: FlowResult;
 } {
@@ -24,20 +28,26 @@ function chute(w: number, h: number, waterFrom: number): {
 
 test("a mouth already in water is left exactly as the parent drew it", () => {
   const { elev, flow } = chute(20, 4, 10);
-  const points = [{ x: 8, y: 1, acc: 5 }, { x: 10, y: 1, acc: 5 }];
+  const points = [
+    { x: 8, y: 1, acc: 5 },
+    { x: 10, y: 1, acc: 5 },
+  ];
   assert.deepEqual(extendMouthToWater(points, elev, flow, SEA, 12), points);
 });
 
 test("a mouth stranded on new land follows the region's own drainage to the waterline", () => {
   const { elev, flow } = chute(20, 4, 10);
-  const points = [{ x: 5, y: 1, acc: 5 }, { x: 6, y: 1, acc: 5 }];
+  const points = [
+    { x: 5, y: 1, acc: 5 },
+    { x: 6, y: 1, acc: 5 },
+  ];
   const out = extendMouthToWater(points, elev, flow, SEA, 12);
   assert.deepEqual(
     out.map((p) => p.x),
     [5, 6, 7, 8, 9, 10],
     "the run walks downhill until it reaches water, and stops there",
   );
-  assert.ok((elev.data[(out[out.length - 1]!.x) + 1 * 20] as number) <= SEA, "it ends in water");
+  assert.ok((elev.data[out[out.length - 1]!.x + 1 * 20] as number) <= SEA, "it ends in water");
 });
 
 test("a cell exactly at the waterline counts as water, and the walk stops there", () => {
@@ -55,12 +65,19 @@ test("a cell exactly at the waterline counts as water, and the walk stops there"
     fill: new Float64Array(w * h),
   };
   const out = extendMouthToWater([{ x: 6, y: 1, acc: 5 }], elev, flow, SEA, 12);
-  assert.deepEqual(out.map((p) => p.x), [6, 7, 8, 9], "it halts on the cell that sits at sea level");
+  assert.deepEqual(
+    out.map((p) => p.x),
+    [6, 7, 8, 9],
+    "it halts on the cell that sits at sea level",
+  );
 });
 
 test("a mouth with no water within reach is left alone rather than dragged across the sheet", () => {
   const { elev, flow } = chute(20, 4, 19);
-  const points = [{ x: 1, y: 1, acc: 5 }, { x: 2, y: 1, acc: 5 }];
+  const points = [
+    { x: 1, y: 1, acc: 5 },
+    { x: 2, y: 1, acc: 5 },
+  ];
   assert.deepEqual(extendMouthToWater(points, elev, flow, SEA, 4), points);
 });
 
@@ -76,9 +93,7 @@ test("on the detailed field no region river stops on interior dry land (seed 2, 
     detail: true,
   });
   const w = region.elev.w;
-  const cells = region.rivers.map(
-    (r) => new Set(r.points.map((p) => Math.round(p.x) + Math.round(p.y) * w)),
-  );
+  const cells = region.rivers.map((r) => new Set(r.points.map((p) => Math.round(p.x) + Math.round(p.y) * w)));
   const tol = 5; // the band's fine-cells-per-parent-cell, plus one
   const stranded = region.rivers.filter((river, i) => {
     const last = river.points[river.points.length - 1]!;

@@ -3,15 +3,13 @@ import type { StyleName } from "../style.ts";
 
 function hexToRgb(hex: string): [number, number, number] {
   const h = hex.replace("#", "");
-  return [
-    parseInt(h.slice(0, 2), 16),
-    parseInt(h.slice(2, 4), 16),
-    parseInt(h.slice(4, 6), 16),
-  ];
+  return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
 }
 
 function toHex(n: number): string {
-  return Math.round(Math.max(0, Math.min(255, n))).toString(16).padStart(2, "0");
+  return Math.round(Math.max(0, Math.min(255, n)))
+    .toString(16)
+    .padStart(2, "0");
 }
 
 function ramp(anchors: ReadonlyArray<string>, n: number): string[] {
@@ -24,15 +22,13 @@ function ramp(anchors: ReadonlyArray<string>, n: number): string[] {
     const f = seg - lo;
     const a = rgb[lo] as [number, number, number];
     const b = rgb[lo + 1] as [number, number, number];
-    out.push(
-      `#${toHex(a[0] + (b[0] - a[0]) * f)}${toHex(a[1] + (b[1] - a[1]) * f)}${toHex(a[2] + (b[2] - a[2]) * f)}`,
-    );
+    out.push(`#${toHex(a[0] + (b[0] - a[0]) * f)}${toHex(a[1] + (b[1] - a[1]) * f)}${toHex(a[2] + (b[2] - a[2]) * f)}`);
   }
   return out;
 }
 
 type ByStyle<T> = Record<StyleName, T>;
-const byStyle = <T,>(f: (s: StyleName) => T): ByStyle<T> => ({
+const byStyle = <T>(f: (s: StyleName) => T): ByStyle<T> => ({
   antique: f("antique"),
   topographic: f("topographic"),
   ink: f("ink"),
@@ -51,7 +47,11 @@ const TEMP_ANCHORS: ByStyle<readonly string[]> = {
 };
 export const TEMP_RAMPS: ByStyle<string[]> = byStyle((s) => ramp(TEMP_ANCHORS[s], TEMP_BANDS));
 export const TEMP_KEY: ReadonlyArray<[number, string]> = [
-  [0, "Cold"], [3, "Cool"], [6, "Temperate"], [9, "Warm"], [11, "Hot"],
+  [0, "Cold"],
+  [3, "Cool"],
+  [6, "Temperate"],
+  [9, "Warm"],
+  [11, "Hot"],
 ];
 
 export const MOIST_BANDS = 10;
@@ -63,7 +63,11 @@ const MOIST_ANCHORS: ByStyle<readonly string[]> = {
 };
 export const MOIST_RAMPS: ByStyle<string[]> = byStyle((s) => ramp(MOIST_ANCHORS[s], MOIST_BANDS));
 export const MOIST_KEY: ReadonlyArray<[number, string]> = [
-  [0, "Arid"], [3, "Dry"], [5, "Moderate"], [7, "Humid"], [9, "Wet"],
+  [0, "Arid"],
+  [3, "Dry"],
+  [5, "Moderate"],
+  [7, "Humid"],
+  [9, "Wet"],
 ];
 
 export const POP_LEVELS = 5;
@@ -101,8 +105,18 @@ export const VEGETATION_GROUPS: ReadonlyArray<{
   readonly inkLevel: number;
   readonly ids: ReadonlyArray<number>;
 }> = [
-  { label: "Forest", color: "#6f8d6c", inkLevel: 5, ids: [BIOMES.temperateForest, BIOMES.rainforest, BIOMES.taiga, BIOMES.tropicalForest, BIOMES.jungle] },
-  { label: "Grass & steppe", color: "#b3c07c", inkLevel: 3, ids: [BIOMES.grassland, BIOMES.steppe, BIOMES.savanna, BIOMES.shrubland] },
+  {
+    label: "Forest",
+    color: "#6f8d6c",
+    inkLevel: 5,
+    ids: [BIOMES.temperateForest, BIOMES.rainforest, BIOMES.taiga, BIOMES.tropicalForest, BIOMES.jungle],
+  },
+  {
+    label: "Grass & steppe",
+    color: "#b3c07c",
+    inkLevel: 3,
+    ids: [BIOMES.grassland, BIOMES.steppe, BIOMES.savanna, BIOMES.shrubland],
+  },
   { label: "Desert", color: "#e0cd9a", inkLevel: 1, ids: [BIOMES.desert] },
   { label: "Wetland & shore", color: "#9fae74", inkLevel: 4, ids: [BIOMES.marsh, BIOMES.beach] },
   { label: "Tundra & alpine", color: "#cbcab9", inkLevel: 2, ids: [BIOMES.tundra, BIOMES.alpine] },

@@ -26,7 +26,10 @@ test("GR1 the Gallery is a chart room: chartRoom on the layout, the RoomFolio in
   assert.ok(open, "the page renders through BaseLayout");
   assert.match(open[1]!, /\bchartRoom\b/, "the Gallery passes chartRoom (no band, no footer)");
   assert.ok(!open[1]!.includes("desk="), "the interim desk retires with the conversion");
-  assert.ok(page.includes('<RoomFolio slot="desk" region room={room} tagline={tagline}>'), "the room's name stands in the folio corner, in the desk layer that holds a scrolling room's chrome on the 1024 page (Issue #762)");
+  assert.ok(
+    page.includes('<RoomFolio slot="desk" region room={room} tagline={tagline}>'),
+    "the room's name stands in the folio corner, in the desk layer that holds a scrolling room's chrome on the 1024 page (Issue #762)",
+  );
   assert.ok(!page.includes("<RoomHead"), "the RoomHead on the sheet retires with the conversion");
   assert.ok(!page.includes('class="sub intro"'), "the intro line retires; its fact moves to the dateline");
   assert.ok(!page.includes("<script"), "the Gallery is composed at build time and ships no engine bundle (ruling 2)");
@@ -36,13 +39,32 @@ test("GR2 the corner carries the name and its dateline, no control (ruling 2)", 
   const folio = between("<RoomFolio", "</RoomFolio>");
   assert.match(folio, /<p class="dateline">\{dateline\}<\/p>/, "the dateline is the corner's line");
   assert.ok(!folio.includes("folio-controls"), "the corner holds no control: the dozen is fixed at build time");
-  assert.match(page, /const dateline = `\$\{GALLERY_COUNT\} charts, from seed \$\{GALLERY_SEED\}`;/, "the dateline is derived from the composer's constants, never a literal count");
+  assert.match(
+    page,
+    /const dateline = `\$\{GALLERY_COUNT\} charts, from seed \$\{GALLERY_SEED\}`;/,
+    "the dateline is derived from the composer's constants, never a literal count",
+  );
 });
 
 test("GR3 the plates hang on the deep: the fog, the grid of figures, then the corner and the legend; no vignettes (a fixed darkening band over scrolling captions washed them to 2.86:1 at its edge, skeptic on PR #501), no stage, no Glass, no slip, no chart folio", () => {
-  const order = ["<Fog />", '<div class="grid" set:html={figures}></div>', "<RoomFolio", '<nav class="legend"'].map((m) => page.indexOf(m));
-  assert.ok(order.every((i, n) => i >= 0 && (n === 0 || i > order[n - 1]!)), `fog, grid, folio, legend: ${order.join(",")}`);
-  for (const gone of ["<Vignettes", 'class="vignette', 'class="stage"', "<ChartStage", 'id="map-viewport"', "<Glass", "<Slip", "<ChartFolio", "legend-dock"]) {
+  const order = ["<Fog />", '<div class="grid" set:html={figures}></div>', "<RoomFolio", '<nav class="legend"'].map(
+    (m) => page.indexOf(m),
+  );
+  assert.ok(
+    order.every((i, n) => i >= 0 && (n === 0 || i > order[n - 1]!)),
+    `fog, grid, folio, legend: ${order.join(",")}`,
+  );
+  for (const gone of [
+    "<Vignettes",
+    'class="vignette',
+    'class="stage"',
+    "<ChartStage",
+    'id="map-viewport"',
+    "<Glass",
+    "<Slip",
+    "<ChartFolio",
+    "legend-dock",
+  ]) {
     assert.ok(!page.includes(gone), `${gone} belongs to a stage room, not the Gallery`);
   }
 });
@@ -52,7 +74,11 @@ test("GR4 the legend row is one gold road back to the Explorer (ruling 2)", () =
   assert.match(legend, /<nav class="legend" slot="desk" aria-label="The road out">/);
   assert.match(legend, /<p class="legend-head">[^<]+<\/p>/, "the row keeps its flourish line");
   assert.equal([...legend.matchAll(/<LegendButton /g)].length, 1, "one road, no more");
-  assert.match(legend, /<LegendButton gold href="\/explorer\/" verb="Return to" room="The Explorer" \/>/, "the gold road home, as the other rooms carry it (the kit's, #487)");
+  assert.match(
+    legend,
+    /<LegendButton gold href="\/explorer\/" verb="Return to" room="The Explorer" \/>/,
+    "the gold road home, as the other rooms carry it (the kit's, #487)",
+  );
 });
 
 test("GR5 every plate is a road into its own world: the Explorer at the plate's seed, drawing the plate's own dress (antique, no legend), so the tip rides a real link (#289) and the plate opens the plate", () => {
@@ -60,44 +86,117 @@ test("GR5 every plate is a road into its own world: the Explorer at the plate's 
   assert.equal(cards.length, 2);
   for (const card of cards) {
     const html = cardFigureHtml(card);
-    assert.ok(html.includes(`<a href="/explorer/#seed=${card.seed}&amp;style=antique&amp;legend=0"><img src="${card.file}"`), `the plate links the Explorer at seed ${card.seed} in the plate's dress: ${html}`);
+    assert.ok(
+      html.includes(`<a href="/explorer/#seed=${card.seed}&amp;style=antique&amp;legend=0"><img src="${card.file}"`),
+      `the plate links the Explorer at seed ${card.seed} in the plate's dress: ${html}`,
+    );
     assert.ok(!html.includes(`href="${card.file}"`), "the raw svg is no longer the road (it had no road back)");
   }
   // The Explorer's default is the legend on, and the plate is drawn without one, so the road says so.
   const world = generateWorld(defaultRecipe(42));
   const plate = renderMap(world, { style: "antique", widthPx: 900 });
-  assert.equal(renderMap(world, { style: "antique", widthPx: 900, legend: false }), plate, "legend=0 is the plate's own dress");
-  assert.notEqual(renderMap(world, { style: "antique", widthPx: 900, legend: true }), plate, "the Explorer's default dress is a different drawing");
+  assert.equal(
+    renderMap(world, { style: "antique", widthPx: 900, legend: false }),
+    plate,
+    "legend=0 is the plate's own dress",
+  );
+  assert.notEqual(
+    renderMap(world, { style: "antique", widthPx: 900, legend: true }),
+    plate,
+    "the Explorer's default dress is a different drawing",
+  );
 });
 
 test("GR6 the css: twelve sheets at the house depth on the deep, captions lettered in parchment, the chart room's scroll lock lifted, the grid landing, the legend centred, print standing down", () => {
-  assert.match(css, /html:has\(body\.chart-room\), body\.chart-room\s*\{[^}]*height:\s*auto;[^}]*overflow:\s*visible/, "the kit locks a stage room's scroll; the plates scroll in flow");
+  assert.match(
+    css,
+    /html:has\(body\.chart-room\), body\.chart-room\s*\{[^}]*height:\s*auto;[^}]*overflow:\s*visible/,
+    "the kit locks a stage room's scroll; the plates scroll in flow",
+  );
   assert.match(css, /(^|\n)main\s*\{[^}]*padding:[^}]*var\(--band-h\)/, "the first row clears the cluster's band");
   assert.match(css, /(^|\n)\.grid\s*\{[^}]*animation:\s*sheet-land/, "the plates land as one sheet (#461 ruling 6)");
-  assert.match(css, /(^|\n)figure img\s*\{[^}]*border:\s*1px solid var\(--line-tan\);[^}]*box-shadow:\s*var\(--sheet-shadow\)/, "each plate rests at the house depth, via the token");
-  assert.match(css, /(^|\n)figure img:hover\s*\{[^}]*rotate\([^}]*box-shadow:\s*var\(--stage-shadow\)/, "the tip stays (the plate navigates), and a plate picked up rises to the chart-room depth, via the token");
-  assert.match(css, /(^|\n)figcaption\s*\{[^}]*color:\s*var\(--parchment\)/, "captions letter in parchment on the deep (line-tan measured 4.03:1, under the 4.5 floor)");
+  assert.match(
+    css,
+    /(^|\n)figure img\s*\{[^}]*border:\s*1px solid var\(--line-tan\);[^}]*box-shadow:\s*var\(--sheet-shadow\)/,
+    "each plate rests at the house depth, via the token",
+  );
+  assert.match(
+    css,
+    /(^|\n)figure img:hover\s*\{[^}]*rotate\([^}]*box-shadow:\s*var\(--stage-shadow\)/,
+    "the tip stays (the plate navigates), and a plate picked up rises to the chart-room depth, via the token",
+  );
+  assert.match(
+    css,
+    /(^|\n)figcaption\s*\{[^}]*color:\s*var\(--parchment\)/,
+    "captions letter in parchment on the deep (line-tan measured 4.03:1, under the 4.5 floor)",
+  );
   const screen = css.slice(0, css.indexOf("@media print"));
-  assert.doesNotMatch(screen, /figcaption[^{]*\{[^}]*var\(--ink-(dark|brown|faded)\)/, "no ink lettering on the deep outside print");
-  assert.match(css, /(^|\n)\.legend\s*\{\s*left:\s*50%;\s*\}/, "no slip to stand beside: the legend row is centred (placement is the page's, the dress the kit's)");
+  assert.doesNotMatch(
+    screen,
+    /figcaption[^{]*\{[^}]*var\(--ink-(dark|brown|faded)\)/,
+    "no ink lettering on the deep outside print",
+  );
+  assert.match(
+    css,
+    /(^|\n)\.legend\s*\{\s*left:\s*50%;\s*\}/,
+    "no slip to stand beside: the legend row is centred (placement is the page's, the dress the kit's)",
+  );
   // The pool is the kit's for the class, not the page's for the cluster alone: without it the corner and the legend row read 2.26:1 and 2.0:1 over the pale plates (plate read 2026-09-02).
   assert.doesNotMatch(css, /header\.chrome/, "the page does not pool its own cluster");
-  const pool = kit.match(/\n([^\n]*body\.chart-room:not\(:has\(\.stage\)\) :is\(header\.chrome, \.corner\.bl\)::before[^{]*)\{([^}]*)\}/);
+  const pool = kit.match(
+    /\n((?:[^\n{}]*,\n)*[^\n]*body\.chart-room:not\(:has\(\.stage\)\) :is\(header\.chrome, \.corner\.bl\)::before[^{]*)\{([^}]*)\}/,
+  );
   assert.ok(pool, "the kit pools the cluster and the chart folio of a stage-less chart room");
-  assert.match(pool[2]!, /background:\s*rgb\(from var\(--chart-ink\) r g b \/ 0\.92\);[^}]*filter:\s*blur\(16px\)/, "the #480 pool, the zoomed chart rooms' own");
-  assert.match(pool[1]!, /body:has\(#map-viewport\.zoomed\) :is\(header\.chrome, \.corner\.bl, \.strip\)::before/, "one rule with the zoomed rooms' pool, so the two cannot drift");
-  const panel = kit.match(/\n([^\n]*body\.chart-room:not\(:has\(\.stage\)\) \.corner\.tr::before[^{]*)\{([^}]*)\}/);
+  assert.match(
+    pool[2]!,
+    /background:\s*rgb\(from var\(--chart-ink\) r g b \/ 0\.92\);[^}]*filter:\s*blur\(16px\)/,
+    "the #480 pool, the zoomed chart rooms' own",
+  );
+  assert.match(
+    pool[1]!,
+    /body:has\(#map-viewport\.zoomed\) :is\(header\.chrome, \.corner\.bl, \.strip\)::before/,
+    "one rule with the zoomed rooms' pool, so the two cannot drift",
+  );
+  const panel = kit.match(
+    /\n((?:[^\n{}]*,\n)*[^\n]*body\.chart-room:not\(:has\(\.stage\)\) \.corner\.tr::before[^{]*)\{([^}]*)\}/,
+  );
   assert.ok(panel, "the kit gives a stage-less room's folio home's seed box");
-  assert.match(panel[1]!, /body:has\(#map-viewport\.zoomed\) \.corner\.tr::before/, "the same rule serves the zoomed rooms' folio");
-  assert.match(panel[2]!, /inset:\s*-0\.7rem -0\.9rem -0\.8rem;[^}]*linear-gradient\(to bottom, rgb\(from var\(--chart-ink\) r g b \/ 0\.85\), rgb\(from var\(--chart-ink\) r g b \/ 0\.72\)\)/, "home's own box: its padding as the insets, chart ink 0.85 to 0.72, no blur (public/index.css .lf-seed)");
+  assert.match(
+    panel[1]!,
+    /body:has\(#map-viewport\.zoomed\) \.corner\.tr::before/,
+    "the same rule serves the zoomed rooms' folio",
+  );
+  assert.match(
+    panel[2]!,
+    /inset:\s*-0\.7rem -0\.9rem -0\.8rem;[^}]*linear-gradient\(\s*to bottom,\s*rgb\(from var\(--chart-ink\) r g b \/ 0\.85\),\s*rgb\(from var\(--chart-ink\) r g b \/ 0\.72\)\s*\)/,
+    "home's own box: its padding as the insets, chart ink 0.85 to 0.72, no blur (public/index.css .lf-seed)",
+  );
   assert.doesNotMatch(panel[2]!, /filter/, "a crisp panel, not the pool");
-  const footing = kit.match(/\n([^\n]*body\.chart-room:not\(:has\(\.stage\)\) \.legend::before[^{]*)\{([^}]*)\}/);
+  const footing = kit.match(
+    /\n((?:[^\n{}]*,\n)*[^\n]*body\.chart-room:not\(:has\(\.stage\)\) \.legend::before[^{]*)\{([^}]*)\}/,
+  );
   assert.ok(footing, "the kit gives a stage-less room's legend row home's footing");
-  assert.match(footing[1]!, /body:has\(#map-viewport\.zoomed\) \.legend::before/, "the same rule serves the zoomed rooms' row");
-  assert.match(footing[2]!, /inset:\s*-0\.5rem -1\.1rem -0\.6rem;[^}]*linear-gradient\(to bottom, rgb\(from var\(--chart-ink\) r g b \/ 0\.85\), rgb\(from var\(--chart-ink\) r g b \/ 0\.72\)\)/, "home's own footing: its padding as the insets, the seed box's crisp panel (public/index.css .lf-legend; the fade left at the 2026-09-03 sitting, ruling 23)");
+  assert.match(
+    footing[1]!,
+    /body:has\(#map-viewport\.zoomed\) \.legend::before/,
+    "the same rule serves the zoomed rooms' row",
+  );
+  assert.match(
+    footing[2]!,
+    /inset:\s*-0\.5rem -1\.1rem -0\.6rem;[^}]*linear-gradient\(\s*to bottom,\s*rgb\(from var\(--chart-ink\) r g b \/ 0\.85\),\s*rgb\(from var\(--chart-ink\) r g b \/ 0\.72\)\s*\)/,
+    "home's own footing: its padding as the insets, the seed box's crisp panel (public/index.css .lf-legend; the fade left at the 2026-09-03 sitting, ruling 23)",
+  );
   assert.doesNotMatch(css, /\/\*/, "the shipped sheet carries no prose (public/gallery/index.css ships it verbatim)");
-  assert.doesNotMatch(css, /(^|\n)\s*(header|footer|p\.sub|main\.desk-panel)\s*[{,]/, "no rule targets furniture a chart room no longer has");
-  assert.doesNotMatch(css, /(^|\n)\s*\.(legend-btn|legend-row|legend-head|folio-room|room-name|dateline|fog|vignette|corner)\b[^{]*\{/, "the page css does not re-dress the kit (#302)");
+  assert.doesNotMatch(
+    css,
+    /(^|\n)\s*(header|footer|p\.sub|main\.desk-panel)\s*[{,]/,
+    "no rule targets furniture a chart room no longer has",
+  );
+  assert.doesNotMatch(
+    css,
+    /(^|\n)\s*\.(legend-btn|legend-row|legend-head|folio-room|room-name|dateline|fog|vignette|corner)\b[^{]*\{/,
+    "the page css does not re-dress the kit (#302)",
+  );
   const print = css.match(/@media print\s*\{([\s\S]*)\}\s*$/);
   assert.ok(print, "the page css ends with its print stand-down");
   assert.match(print[1]!, /figure img\s*\{[^}]*box-shadow:\s*none/, "print is paper: no depth");
@@ -106,8 +205,15 @@ test("GR6 the css: twelve sheets at the house depth on the deep, captions letter
 
 test("GR7 a plate prints inside its page: every full-width bordered box in the sheet counts its border inside its width, since at print main's padding goes and the page box is the container (#565, measured 392 on 390 at 390x844 and 818 on 816 at Letter)", () => {
   const swept = fullWidthWideningRules(css);
-  assert.ok(swept.some((rule) => rule.selector === "figure img"), `the plates are the rule this sweep is for; it selected ${JSON.stringify(swept.map((r) => r.selector))}`);
+  assert.ok(
+    swept.some((rule) => rule.selector === "figure img"),
+    `the plates are the rule this sweep is for; it selected ${JSON.stringify(swept.map((r) => r.selector))}`,
+  );
   for (const rule of swept) {
-    assert.equal(rule.declarations["box-sizing"], "border-box", `${rule.selector} takes a percentage width and a border or side padding, so on paper it runs past the page box unless its border counts inside its width`);
+    assert.equal(
+      rule.declarations["box-sizing"],
+      "border-box",
+      `${rule.selector} takes a percentage width and a border or side padding, so on paper it runs past the page box unless its border counts inside its width`,
+    );
   }
 });

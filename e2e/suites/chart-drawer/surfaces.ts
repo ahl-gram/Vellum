@@ -4,7 +4,8 @@ import { DRESS, SURFACES, both, drawerUp, slipTravelled } from "./reads.ts";
 import type { Edge } from "./reads.ts";
 
 // Its own one-shot payload rather than more fields on SURFACES: that one is polled by every settle in the CD9 step and read again by the CD13 and CD18 steps, and riding it measured 1.73s on this suite against a 0.7s run-to-run spread (2026-09-19, three runs each side).
-const PHONE_LEAF: Payload<string[]> = `[".slip-head .sheet-tabs", "#table-leaf", "#leaf-table", ".legend-dock", ".slip-handle"].filter((s) => document.querySelector(s))`;
+const PHONE_LEAF: Payload<string[]> =
+  `[".slip-head .sheet-tabs", "#table-leaf", "#leaf-table", ".legend-dock", ".slip-handle"].filter((s) => document.querySelector(s))`;
 
 export async function cd9NeverTogether({ evaluate, send, check, settle, go }: DrawerKit, SIX: string) {
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
@@ -43,7 +44,11 @@ export async function cd9NeverTogether({ evaluate, send, check, settle, go }: Dr
   return withOpen;
 }
 
-export async function cd12SeatsHold({ evaluate, check, settle, go }: DrawerKit, SIX: string, withOpen: Awaited<ReturnType<typeof cd9NeverTogether>>): Promise<void> {
+export async function cd12SeatsHold(
+  { evaluate, check, settle, go }: DrawerKit,
+  SIX: string,
+  withOpen: Awaited<ReturnType<typeof cd9NeverTogether>>,
+): Promise<void> {
   // Both readings are taken with the Broadside ALREADY folded, so the drawer's own fold is a no-op and only the drawer could move the furniture.
   await go(`${DRESS}&table=${SIX}`);
   const beforeSeats = await evaluate(SURFACES);
@@ -54,7 +59,9 @@ export async function cd12SeatsHold({ evaluate, check, settle, go }: DrawerKit, 
   const names = Object.keys(seatsShut);
   check(
     "CD12 opening the drawer does not move the chart's furniture: the caption and the roads out keep the seat they had and the drawer covers them, rather than being lifted onto the sheet where they cannot be read (#543 Fault 1, ruled 2026-09-08)",
-    names.length === 2 && names.every((k) => Math.abs(seatsOpen[k]! - seatsShut[k]!) < 1) && withOpen.lifted.length === 0,
+    names.length === 2 &&
+      names.every((k) => Math.abs(seatsOpen[k]! - seatsShut[k]!) < 1) &&
+      withOpen.lifted.length === 0,
     JSON.stringify({ shut: seatsShut, open: seatsOpen, lifted: withOpen.lifted }),
   );
 }
@@ -83,7 +90,11 @@ export async function cd13TabClear(bag: DrawerKit & { edge: Record<string, Edge>
       overlap: +overlap.toFixed(0),
       buttons: [...zoom.querySelectorAll(".zoom-btn")].map((b) => reach(b)) };
   })()`;
-  for (const [w, h] of [[1520, 872], [1280, 800], [1024, 800]]) {
+  for (const [w, h] of [
+    [1520, 872],
+    [1280, 800],
+    [1024, 800],
+  ]) {
     await send("Emulation.setDeviceMetricsOverride", { width: w, height: h, deviceScaleFactor: 1, mobile: false });
     await go(DRESS);
     const beforeFold = await evaluate(SURFACES);
@@ -94,7 +105,15 @@ export async function cd13TabClear(bag: DrawerKit & { edge: Record<string, Edge>
   const edges = Object.keys(edge);
   check(
     "CD13 with the Broadside folded the drawer's tab does not stand on the camera: the tab is z-19 over the corner's z-10, so an overlap is not untidiness, it is the + and the home press answering the tab instead (#543, Alex 2026-09-08)",
-    edges.length === 3 && edges.every((k) => edge[k]!.folded && edge[k]!.tabShown && edge[k]!.overlap === 0 && edge[k]!.buttons.length === 3 && edge[k]!.buttons.every((r) => r === 100)),
+    edges.length === 3 &&
+      edges.every(
+        (k) =>
+          edge[k]!.folded &&
+          edge[k]!.tabShown &&
+          edge[k]!.overlap === 0 &&
+          edge[k]!.buttons.length === 3 &&
+          edge[k]!.buttons.every((r) => r === 100),
+      ),
     JSON.stringify(edge),
   );
 }
@@ -103,7 +122,9 @@ export async function cd18RoadOn({ evaluate, check, settle }: DrawerKit): Promis
   const beforeRoad = await evaluate(SURFACES);
   await evaluate(`document.getElementById("chart-drawer-tab").click()`);
   await settle(SURFACES, both(drawerUp, slipTravelled(beforeRoad)), "chart-drawer-road-open");
-  const roadOn = await evaluate<{ disabled: boolean; stamp: string | null }>(`(() => { const b = document.getElementById("table-road"); return { disabled: b.disabled, stamp: (document.getElementById("table-road-stamp") || {}).textContent || null }; })()`);
+  const roadOn = await evaluate<{ disabled: boolean; stamp: string | null }>(
+    `(() => { const b = document.getElementById("table-road"); return { disabled: b.disabled, stamp: (document.getElementById("table-road-stamp") || {}).textContent || null }; })()`,
+  );
   check(
     "CD18 with sheets on the table the road to the Portfolio turns on: #520 shipped it disabled with the stamp saying the portfolio is not yet bound, and this sub is what binds it (#521)",
     roadOn.disabled === false,

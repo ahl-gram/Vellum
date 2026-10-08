@@ -64,11 +64,7 @@ function rotateToStart(cycle: TourPoint[], startIdx: number): TourPoint[] {
   return [...cycle.slice(at), ...cycle.slice(0, at)];
 }
 
-function orientCycle<T>(
-  cycle: ReadonlyArray<T>,
-  idxOf: (item: T) => number,
-  d: (a: T, b: T) => number,
-): T[] {
+function orientCycle<T>(cycle: ReadonlyArray<T>, idxOf: (item: T) => number, d: (a: T, b: T) => number): T[] {
   if (cycle.length < 3) return [...cycle]; // one way round only
   const forward = [...cycle];
   const reversed = [forward[0]!, ...forward.slice(1).reverse()];

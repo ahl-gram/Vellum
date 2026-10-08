@@ -9,9 +9,11 @@ export const STAND_IN_SILENT_VAR = "VELLUM_STAND_IN_SILENT";
 export const STAND_IN_COUNTER = "stand-in-launches";
 const LIFETIME_MS = 60_000;
 
-export const standInTarget = (port: number, launch: number): string => `ws://127.0.0.1:${port}/devtools/page/stand-in-${launch}`;
+export const standInTarget = (port: number, launch: number): string =>
+  `ws://127.0.0.1:${port}/devtools/page/stand-in-${launch}`;
 
-const flag = (name: string): string | undefined => process.argv.find((a) => a.startsWith(`--${name}=`))?.slice(name.length + 3);
+const flag = (name: string): string | undefined =>
+  process.argv.find((a) => a.startsWith(`--${name}=`))?.slice(name.length + 3);
 
 function main(): void {
   const port = Number(flag("remote-debugging-port"));
@@ -22,8 +24,12 @@ function main(): void {
   setTimeout(() => process.exit(0), LIFETIME_MS);
   if (launch <= Number(process.env[STAND_IN_SILENT_VAR] ?? "0")) return;
   createServer((req, res) => {
-    const worker = { type: "service_worker", webSocketDebuggerUrl: `ws://127.0.0.1:${port}/devtools/worker/stand-in-${launch}` };
-    const body = req.url === "/json" ? [worker, { type: "page", webSocketDebuggerUrl: standInTarget(port, launch) }] : {};
+    const worker = {
+      type: "service_worker",
+      webSocketDebuggerUrl: `ws://127.0.0.1:${port}/devtools/worker/stand-in-${launch}`,
+    };
+    const body =
+      req.url === "/json" ? [worker, { type: "page", webSocketDebuggerUrl: standInTarget(port, launch) }] : {};
     res.writeHead(200, { "content-type": "application/json" }).end(JSON.stringify(body));
   }).listen(port, "127.0.0.1");
 }

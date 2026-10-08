@@ -85,7 +85,8 @@ function deepInLake(w: World, gx: number, gy: number): boolean {
   const { w: W, h: H } = w.elev;
   for (let dy = -1; dy <= 1; dy++) {
     for (let dx = -1; dx <= 1; dx++) {
-      const nx = gx + dx, ny = gy + dy;
+      const nx = gx + dx,
+        ny = gy + dy;
       if (nx < 0 || ny < 0 || nx >= W || ny >= H) return false;
       const i = nx + ny * W;
       const water = (w.elev.data[i] as number) <= w.seaLevel;
@@ -102,8 +103,7 @@ function collectPoints(node: SvgNode | null): Array<{ px: number; py: number }> 
   const walk = (n: SvgNode): void => {
     const a = n.attrs;
     if (a.cx !== undefined && a.cy !== undefined) out.push({ px: Number(a.cx), py: Number(a.cy) });
-    if (a.x !== undefined && a.y !== undefined && n.tag === "text")
-      out.push({ px: Number(a.x), py: Number(a.y) });
+    if (a.x !== undefined && a.y !== undefined && n.tag === "text") out.push({ px: Number(a.x), py: Number(a.y) });
     if (typeof a.d === "string") {
       const m = /M(-?[\d.]+) (-?[\d.]+)/.exec(a.d);
       if (m) out.push({ px: Number(m[1]), py: Number(m[2]) });

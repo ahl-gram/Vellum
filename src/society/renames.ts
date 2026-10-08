@@ -25,7 +25,10 @@ export function assignFormerNames(
   taken: ReadonlySet<string>,
 ): ReadonlyMap<number, string> {
   const eligible = settlements.flatMap((s, i) => (s.ruined ? [] : [i]));
-  const chosen = rng.shuffled(eligible).slice(0, howMany(eligible.length)).sort((a, b) => a - b);
+  const chosen = rng
+    .shuffled(eligible)
+    .slice(0, howMany(eligible.length))
+    .sort((a, b) => a - b);
 
   const namer = createNamer(rng, culture);
   const avoid = new Set(taken);

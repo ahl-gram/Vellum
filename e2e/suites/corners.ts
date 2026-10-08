@@ -7,13 +7,43 @@ import { makeSettle } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
 import { onFixedDay } from "../support/fixed-day.ts";
 import type { Payload, SuiteContext } from "../types.ts";
-import { fillBetween, mediaEdges, meetings, nearest, pageFaults, routesUnder, strideWidths, squeezes } from "./corners/geometry.ts";
+import {
+  fillBetween,
+  mediaEdges,
+  meetings,
+  nearest,
+  pageFaults,
+  routesUnder,
+  strideWidths,
+  squeezes,
+} from "./corners/geometry.ts";
 import type { Control, CornerRead, Row } from "./corners/geometry.ts";
 import { co5Yields, co6Follows, co7Band } from "./corners/top-row.ts";
-import { fl1Floor, fl2Reach, fl3Relayout, fl4Read, fl5KeyboardDrawer, fl6Paper, fl7Degenerate } from "./corners/floor.ts";
+import {
+  fl1Floor,
+  fl2Reach,
+  fl3Relayout,
+  fl4Read,
+  fl5KeyboardDrawer,
+  fl6Paper,
+  fl7Degenerate,
+} from "./corners/floor.ts";
 
 const REPO = resolve(fileURLToPath(new URL(".", import.meta.url)), "..", "..");
-const PAGE_FLOOR = ["/", "/explorer/", "/explorer/portfolio/", "/faq/", "/gallery/", "/glossary/", "/print-room/", "/prospect/", "/reading-room/", "/ribbon/", "/seed-of-the-day/", "/specimen/"];
+const PAGE_FLOOR = [
+  "/",
+  "/explorer/",
+  "/explorer/portfolio/",
+  "/faq/",
+  "/gallery/",
+  "/glossary/",
+  "/print-room/",
+  "/prospect/",
+  "/reading-room/",
+  "/ribbon/",
+  "/seed-of-the-day/",
+  "/specimen/",
+];
 const YIELD_TOP = 1040;
 const YIELD_MID = 1032;
 // A page narrower than this lays out its 1024 layout (Alex, 2026-10-06, Issue #762), which FL1 holds piece for piece, so the sweeps read every page from here up.
@@ -23,9 +53,17 @@ const STRIDE = 32;
 const WIDE_H = 800;
 const MAX_FRAMES = 40;
 
-type PageResult = { readonly page: string; readonly stretches: readonly (readonly Row[])[]; readonly media: readonly string[]; readonly dateline: string | null; readonly links: readonly string[]; readonly error: string | null };
+type PageResult = {
+  readonly page: string;
+  readonly stretches: readonly (readonly Row[])[];
+  readonly media: readonly string[];
+  readonly dateline: string | null;
+  readonly links: readonly string[];
+  readonly error: string | null;
+};
 
-const LINKS: Payload<string[]> = `[...document.querySelectorAll("a[href]")].map((a) => a.href).filter((h) => h.startsWith(location.origin + "/")).map((h) => new URL(h).pathname)`;
+const LINKS: Payload<string[]> =
+  `[...document.querySelectorAll("a[href]")].map((a) => a.href).filter((h) => h.startsWith(location.origin + "/")).map((h) => new URL(h).pathname)`;
 
 const READ = `(() => {
   const r2 = (n) => Math.round(n * 100) / 100;
@@ -70,7 +108,8 @@ const restAt = (w: number): Payload<CornerRead> => `new Promise((resolve, reject
   requestAnimationFrame(tick);
 })`;
 
-const MEDIA: Payload<string[]> = `(() => { const out = []; const sheet = (s) => { if (s.media.mediaText) out.push(s.media.mediaText); try { walk(s.cssRules); } catch {} }; const walk = (rules) => { for (const r of rules) { if (r instanceof CSSMediaRule) out.push(r.media.mediaText); if (r instanceof CSSImportRule) { if (r.media.mediaText) out.push(r.media.mediaText); if (r.styleSheet) sheet(r.styleSheet); } if (r.cssRules) walk(r.cssRules); } }; for (const s of document.styleSheets) sheet(s); return out; })()`;
+const MEDIA: Payload<string[]> =
+  `(() => { const out = []; const sheet = (s) => { if (s.media.mediaText) out.push(s.media.mediaText); try { walk(s.cssRules); } catch {} }; const walk = (rules) => { for (const r of rules) { if (r instanceof CSSMediaRule) out.push(r.media.mediaText); if (r instanceof CSSImportRule) { if (r.media.mediaText) out.push(r.media.mediaText); if (r.styleSheet) sheet(r.styleSheet); } if (r.cssRules) walk(r.cssRules); } }; for (const s of document.styleSheets) sheet(s); return out; })()`;
 
 // The page's own dateline must be datelineFor's for today (or yesterday, across a UTC midnight) before the sweep swaps in the widest one.
 const WIDEST_DATELINE: Payload<string> = `(async () => {
@@ -96,16 +135,25 @@ async function load(ctx: SuiteContext, page: string, w: number): Promise<string 
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}${page}` });
   let up = false;
   for (let i = 0; i < 300 && !up; i++) {
-    up = await evaluate<boolean>(`document.readyState === "complete" && (!document.fonts || document.fonts.status === "loaded") && !!document.querySelector("header.chrome") && !!(document.querySelector(".corner.tr.folio-room") || document.querySelector(".lf-seed")) && (!document.getElementById("dateline") || document.getElementById("dateline").textContent !== "")`).catch(() => false);
+    up = await evaluate<boolean>(
+      `document.readyState === "complete" && (!document.fonts || document.fonts.status === "loaded") && !!document.querySelector("header.chrome") && !!(document.querySelector(".corner.tr.folio-room") || document.querySelector(".lf-seed")) && (!document.getElementById("dateline") || document.getElementById("dateline").textContent !== "")`,
+    ).catch(() => false);
     if (!up) await sleep(50);
   }
   if (!up) throw new Error(`${page} never came up at ${w}`);
-  await evaluate(`(() => { const s = document.createElement("div"); s.id = "co-vw"; s.style.cssText = "position:fixed;left:0;top:0;width:100vw;height:0;visibility:hidden;pointer-events:none"; document.body.appendChild(s); return true; })()`);
+  await evaluate(
+    `(() => { const s = document.createElement("div"); s.id = "co-vw"; s.style.cssText = "position:fixed;left:0;top:0;width:100vw;height:0;visibility:hidden;pointer-events:none"; document.body.appendChild(s); return true; })()`,
+  );
   return page === "/seed-of-the-day/" ? evaluate(WIDEST_DATELINE, true) : null;
 }
 
 async function readAt(ctx: SuiteContext, w: number): Promise<Row> {
-  await ctx.send("Emulation.setDeviceMetricsOverride", { width: w, height: WIDE_H, deviceScaleFactor: 1, mobile: false });
+  await ctx.send("Emulation.setDeviceMetricsOverride", {
+    width: w,
+    height: WIDE_H,
+    deviceScaleFactor: 1,
+    mobile: false,
+  });
   return { w, read: await ctx.evaluate(restAt(w), true) };
 }
 
@@ -128,13 +176,22 @@ async function sweepPage(ctx: SuiteContext, page: string): Promise<PageResult> {
   let dateline: string | null = null;
   try {
     dateline = await load(ctx, page, WIDE);
-    media.push(...await ctx.evaluate(MEDIA));
-    stretches.push(await readStretch(ctx, strideWidths(WIDE, ROOM_FLOOR, STRIDE, mediaEdges(media, ROOM_FLOOR - 1, WIDE))));
+    media.push(...(await ctx.evaluate(MEDIA)));
+    stretches.push(
+      await readStretch(ctx, strideWidths(WIDE, ROOM_FLOOR, STRIDE, mediaEdges(media, ROOM_FLOOR - 1, WIDE))),
+    );
     // Read at the END of the stretch, seconds after the load, so a link the page's script rewrites (the Print Room's road on to the Portfolio waits for the proof) is read as rewritten.
-    links.push(...await ctx.evaluate(LINKS));
+    links.push(...(await ctx.evaluate(LINKS)));
     return { page, stretches, media, dateline, links, error: null };
   } catch (err) {
-    return { page, stretches, media, dateline, links, error: err instanceof Error ? err.message.slice(0, 400) : String(err) };
+    return {
+      page,
+      stretches,
+      media,
+      dateline,
+      links,
+      error: err instanceof Error ? err.message.slice(0, 400) : String(err),
+    };
   }
 }
 
@@ -142,7 +199,9 @@ const PLANTED = "@media (max-width: 900px) { .co-witness { color: red; } }";
 async function floorControl(ctx: SuiteContext): Promise<{ clean: readonly string[]; planted: readonly string[] }> {
   await load(ctx, "/faq/", WIDE);
   const clean = pageFaults(await ctx.evaluate(MEDIA), [], ROOM_FLOOR);
-  await ctx.evaluate(`(() => { const s = document.createElement("style"); s.id = "co-floor-control"; s.textContent = ${JSON.stringify(PLANTED)}; document.head.appendChild(s); return true; })()`);
+  await ctx.evaluate(
+    `(() => { const s = document.createElement("style"); s.id = "co-floor-control"; s.textContent = ${JSON.stringify(PLANTED)}; document.head.appendChild(s); return true; })()`,
+  );
   const planted = pageFaults(await ctx.evaluate(MEDIA), [], ROOM_FLOOR);
   await ctx.evaluate(`(() => { document.getElementById("co-floor-control").remove(); return true; })()`);
   return { clean, planted };
@@ -156,24 +215,49 @@ async function co1Sweep(ctx: SuiteContext): Promise<readonly PageResult[]> {
   const lines = results.map((r) => {
     const rows = r.stretches.flat();
     const faults = pageFaults(r.media, rows, ROOM_FLOOR);
-    const close = rows.reduce<{ d: number; w: number }>((best, row) => { const d = nearest(row.read.left, row.read.right); return d < best.d ? { d, w: row.w } : best; }, { d: Infinity, w: 0 });
-    return { ok: r.error === null && faults.length === 0, text: `${r.page} ${rows.length} widths, nearest ${close.d.toFixed(1)} at ${close.w}${r.dateline ? ` (dateline "${r.dateline}")` : ""}${r.error ? `; ERROR ${r.error}` : ""}${faults.length ? `; ${faults.length} faults: ${faults.slice(0, 4).join("; ")}` : ""}` };
+    const close = rows.reduce<{ d: number; w: number }>(
+      (best, row) => {
+        const d = nearest(row.read.left, row.read.right);
+        return d < best.d ? { d, w: row.w } : best;
+      },
+      { d: Infinity, w: 0 },
+    );
+    return {
+      ok: r.error === null && faults.length === 0,
+      text: `${r.page} ${rows.length} widths, nearest ${close.d.toFixed(1)} at ${close.w}${r.dateline ? ` (dateline "${r.dateline}")` : ""}${r.error ? `; ERROR ${r.error}` : ""}${faults.length ? `; ${faults.length} faults: ${faults.slice(0, 4).join("; ")}` : ""}`,
+    };
   });
   const control = await floorControl(ctx);
   ctx.check(
     "CO1 on every page the tree builds, resized while loaded to 1280 at a 32px stride, every page from 1024, below which a page lays out its 1024 layout (FL1), and at both sides of every width media edge its CSS carries, every pixel between two reads that are not a plain shift, no ink of the head cluster overlaps the ink of the right-hand corner by any amount, both corners carry ink, every page keeps its motto, the band covers the cluster, nothing lays out wider than set or scrolls sideways, and the Seed of the Day writes its own dateline through datelineFor (Issue #638; Issue #762: re-floored at 1024, the motto kept everywhere); and no sheet any page loads, its own media list included, carries a width condition that switches at or below the 1024 floor, which a rule planted at 900 on the FAQ shows the same fault list naming (Issue #763 ruling 2A)",
-    missing.length === 0 && lines.every((l) => l.ok) && control.clean.length === 0 && control.planted.some((f) => f.includes("(max-width: 900px)")),
+    missing.length === 0 &&
+      lines.every((l) => l.ok) &&
+      control.clean.length === 0 &&
+      control.planted.some((f) => f.includes("(max-width: 900px)")),
     `${missing.length ? `pages missing from the tree: ${missing.join(", ")} | ` : ""}${lines.map((l) => l.text).join(" | ")} | control: clean ${JSON.stringify(control.clean)}, planted ${JSON.stringify(control.planted)}`,
   );
   return results;
 }
 
 /** A discovery route the sweep never opens (the atlas, written by the showcase generator rather than the tree): its links read once the document is complete and they stop changing. */
-async function linksAtRest(ctx: SuiteContext, page: string): Promise<{ links: readonly string[]; media: readonly string[] }> {
+async function linksAtRest(
+  ctx: SuiteContext,
+  page: string,
+): Promise<{ links: readonly string[]; media: readonly string[] }> {
   await ctx.send("Page.navigate", { url: "about:blank" });
   await ctx.send("Page.navigate", { url: `http://127.0.0.1:${ctx.PORT}${page}` });
-  const read: Payload<{ ready: string; links: string[]; media: string[] }> = `({ ready: document.readyState, links: ${LINKS}, media: ${MEDIA} })`;
-  const rest = await makeSettle(ctx)(read, (d, last) => d.ready === "complete" && !!last && last.ready === "complete" && JSON.stringify(last.links) === JSON.stringify(d.links), `corners-links-${page}`, 200);
+  const read: Payload<{ ready: string; links: string[]; media: string[] }> =
+    `({ ready: document.readyState, links: ${LINKS}, media: ${MEDIA} })`;
+  const rest = await makeSettle(ctx)(
+    read,
+    (d, last) =>
+      d.ready === "complete" &&
+      !!last &&
+      last.ready === "complete" &&
+      JSON.stringify(last.links) === JSON.stringify(d.links),
+    `corners-links-${page}`,
+    200,
+  );
   return { links: rest.links, media: rest.media };
 }
 
@@ -227,7 +311,9 @@ async function co3Wraps(ctx: SuiteContext): Promise<void> {
   let read = 0;
   for (const page of routesUnder(resolve(REPO, "src/pages"))) {
     await load(ctx, page, page === "/" ? ROOM_FLOOR : YIELD_TOP);
-    const yields = await ctx.evaluate<boolean>(`getComputedStyle(document.documentElement).getPropertyValue("--folio-cap").trim() !== ""`);
+    const yields = await ctx.evaluate<boolean>(
+      `getComputedStyle(document.documentElement).getPropertyValue("--folio-cap").trim() !== ""`,
+    );
     const widths = [...(yields ? [YIELD_TOP, YIELD_MID] : []), ...(page === "/" ? [ROOM_FLOOR] : [])];
     for (const w of widths) {
       await readAt(ctx, w);
@@ -251,14 +337,21 @@ async function co2Control(ctx: SuiteContext): Promise<void> {
   const at = ROOM_FLOOR;
   await load(ctx, "/ribbon/", at);
   const before = (await readAt(ctx, at)).read;
-  await evaluate(`(() => { const s = document.createElement("style"); s.id = "co-control"; s.textContent = ${JSON.stringify(PIN_CAP)}; document.head.appendChild(s); dispatchEvent(new Event("resize")); return true; })()`);
+  await evaluate(
+    `(() => { const s = document.createElement("style"); s.id = "co-control"; s.textContent = ${JSON.stringify(PIN_CAP)}; document.head.appendChild(s); dispatchEvent(new Event("resize")); return true; })()`,
+  );
   const pinned = await evaluate(restAt(at), true);
-  await evaluate(`(() => { document.getElementById("co-control").remove(); dispatchEvent(new Event("resize")); return true; })()`);
+  await evaluate(
+    `(() => { document.getElementById("co-control").remove(); dispatchEvent(new Event("resize")); return true; })()`,
+  );
   const after = await evaluate(restAt(at), true);
   const [hit] = meetings(pinned.left, pinned.right);
   check(
     "CO2 the same-run control: on the Ribbon at 1024 the instrument reads the corners clear, reports the nav running under the corner by 40px or more once a style pins the corner at its 30rem cap, moved 6rem in, and reads them clear again when the style goes and the top row lays the row out again (Issue #638; Issue #762, at the floor since pull request C)",
-    meetings(before.left, before.right).length === 0 && !!hit && hit.w >= 40 && meetings(after.left, after.right).length === 0,
+    meetings(before.left, before.right).length === 0 &&
+      !!hit &&
+      hit.w >= 40 &&
+      meetings(after.left, after.right).length === 0,
     `before ${meetings(before.left, before.right).length} meetings; pinned ${hit ? `"${hit.a}" over "${hit.b}" by ${hit.w.toFixed(1)} x ${hit.h.toFixed(1)}` : "none"}; after ${meetings(after.left, after.right).length} meetings`,
   );
 }
@@ -268,7 +361,9 @@ export async function run(ctx: SuiteContext): Promise<void> {
   try {
     await onFixedDay(ctx, async () => {
       let swept: readonly PageResult[] = [];
-      await step("CO1", async () => { swept = await co1Sweep(ctx); });
+      await step("CO1", async () => {
+        swept = await co1Sweep(ctx);
+      });
       await step("CO4", () => co4Roads(ctx, swept));
       await step("CO2", () => co2Control(ctx));
       await step("CO3", () => co3Wraps(ctx));
@@ -285,6 +380,8 @@ export async function run(ctx: SuiteContext): Promise<void> {
     });
   } finally {
     await ctx.clearMobile().catch(() => undefined);
-    await ctx.send("Emulation.setDeviceMetricsOverride", { width: WIDE, height: WIDE_H, deviceScaleFactor: 1, mobile: false }).catch(() => undefined);
+    await ctx
+      .send("Emulation.setDeviceMetricsOverride", { width: WIDE, height: WIDE_H, deviceScaleFactor: 1, mobile: false })
+      .catch(() => undefined);
   }
 }

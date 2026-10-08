@@ -45,7 +45,10 @@ test("ER2 the seed row is the folio's one control: seed, dice and Draw stand top
 test("ER3 the Broadside is the slip: The Land and The Hand ride it, the Press does not", () => {
   const slip = between("<Slip", "</Slip>");
   assert.match(slip, /<Slip id="broadside"/, "the slip is the Broadside");
-  assert.ok(slip.includes('aria-labelledby="grp-land"') && slip.includes('aria-labelledby="grp-hand"'), "the slip carries the Land and the Hand");
+  assert.ok(
+    slip.includes('aria-labelledby="grp-land"') && slip.includes('aria-labelledby="grp-hand"'),
+    "the slip carries the Land and the Hand",
+  );
   for (const id of ['id="verso-turn"', 'id="order-plates"', 'id="journal-link"']) {
     assert.ok(!slip.includes(id), `${id} is a road out, not a slip control`);
   }
@@ -54,8 +57,16 @@ test("ER3 the Broadside is the slip: The Land and The Hand ride it, the Press do
 test("ER4 the rest of the Press is the legend row: Turn the sheet, then the two gold roads (#462 ruling 4)", () => {
   const legend = between('<nav class="legend"', "</nav>");
   assert.match(legend, /<button id="verso-turn" class="legend-btn"/, "Turn the sheet is a legend button");
-  assert.match(legend, /<LegendButton id="order-plates" gold href="\.\.\/print-room\/" verb="Take to" room="The Print Room" \/>/, "the Print Room road is gold (the kit's, #487)");
-  assert.match(legend, /<LegendButton id="journal-link" gold href="\/reading-room\/" verb="Read the journal in" room="The Reading Room" \/>/, "the Reading Room road is gold");
+  assert.match(
+    legend,
+    /<LegendButton id="order-plates" gold href="\.\.\/print-room\/" verb="Take to" room="The Print Room" \/>/,
+    "the Print Room road is gold (the kit's, #487)",
+  );
+  assert.match(
+    legend,
+    /<LegendButton id="journal-link" gold href="\/reading-room\/" verb="Read the journal in" room="The Reading Room" \/>/,
+    "the Reading Room road is gold",
+  );
   assert.ok(legend.indexOf('id="verso-turn"') < legend.indexOf('id="order-plates"'), "Turn the sheet leads the row");
   assert.ok(!page.includes("action-link"), "the #270 action-link dress retires with the Press strip");
   assert.match(legend, /<p class="legend-head" id="grp-press">/, "the Press keeps its head, now the legend's");
@@ -69,20 +80,43 @@ test("ER5 the sheet stays the Glass's gesture box, so a bookmark's cx/cy stay sh
   );
   const viewport = between('<div id="map-viewport"', 'id="verso"');
   assert.ok(!viewport.includes("zoom-controls"), "the Glass no longer sits inside the viewport");
-  assert.ok(page.includes('<Glass id="zoom-controls" />'), "the Glass is the kit's corner cluster (#487), its id kept for glass.ts and the suites");
-  assert.match(page, /<p class="status" id="status" role="status" aria-live="polite"><\/p>/, "the status line keeps its id (the suites' settle probe)");
+  assert.ok(
+    page.includes('<Glass id="zoom-controls" />'),
+    "the Glass is the kit's corner cluster (#487), its id kept for glass.ts and the suites",
+  );
+  assert.match(
+    page,
+    /<p class="status" id="status" role="status" aria-live="polite"><\/p>/,
+    "the status line keeps its id (the suites' settle probe)",
+  );
   const lines = folioLines();
   assert.deepEqual(lines[0], ["folio-title", "folio-title"], "the chart's folio carries the world's name");
-  assert.deepEqual(lines[2], ["folio-coords", "caption"], "the caption is the folio's coords line (the suites read #caption)");
+  assert.deepEqual(
+    lines[2],
+    ["folio-coords", "caption"],
+    "the caption is the folio's coords line (the suites read #caption)",
+  );
 });
 
 test("ER6 the page css fits the sheet to what the chrome leaves and stands print down (#462 rulings 1 and 10)", () => {
-  assert.match(css, /\.stage\s*\{[^}]*padding:\s*var\(--reserve-top/, "the stage reserves the chrome's edges as padding, measured by room.ts");
+  assert.match(
+    css,
+    /\.stage\s*\{[^}]*padding:\s*var\(--reserve-top/,
+    "the stage reserves the chrome's edges as padding, measured by room.ts",
+  );
   assert.ok(!/max-width:\s*1100px/.test(css), "the 1100px column is gone: the chart is the room");
-  assert.match(css, /#map-viewport\.zoomable\s*\{[^}]*touch-action:\s*none/, "touch-action:none stays on the gesture box");
+  assert.match(
+    css,
+    /#map-viewport\.zoomable\s*\{[^}]*touch-action:\s*none/,
+    "touch-action:none stays on the gesture box",
+  );
   assert.match(css, /#map\s*\{[^}]*transform-origin:\s*0\s+0/, "#map keeps the top-left pivot");
   assert.match(css, /#map svg\[data-vellum-style\]\s*\{[^}]*height:\s*100%/, "the chart fills its fitted box");
-  assert.match(css, /#sheet\s*\{[^}]*box-shadow:\s*var\(--stage-shadow\)/, "the sheet rests at the chart-room depth, via the token");
+  assert.match(
+    css,
+    /#sheet\s*\{[^}]*box-shadow:\s*var\(--stage-shadow\)/,
+    "the sheet rests at the chart-room depth, via the token",
+  );
   const print = css.match(/@media print\s*\{([\s\S]*)\}\s*$/);
   assert.ok(print, "the page css ends with its print stand-down");
   assert.match(print[1]!, /\.stage\s*\{[^}]*position:\s*static/, "the chart prints in flow");
@@ -96,7 +130,10 @@ test("ER7 app.ts fits the room after the chart lands on BOTH draw paths and writ
   const settlePath = app.slice(app.indexOf("mapDiv.innerHTML = res.svg;"), app.indexOf("if (pendingCamera)"));
   assert.ok(turnPath.includes("room.layout()"), "the turn path refits once the leaf lands");
   assert.ok(settlePath.includes("room.layout()"), "the settle path refits once #map holds the chart");
-  assert.ok(settlePath.indexOf("room.layout()") > settlePath.indexOf("lc.buildPlaceOverlay(res.manifest)"), "the settle refits after the overlay is built, so the fit measures the chart as drawn");
+  assert.ok(
+    settlePath.indexOf("room.layout()") > settlePath.indexOf("lc.buildPlaceOverlay(res.manifest)"),
+    "the settle refits after the overlay is built, so the fit measures the chart as drawn",
+  );
   for (const id of ["folioTitle", "folioSub"]) {
     assert.ok(app.includes(id), `app.ts writes ${id}`);
   }

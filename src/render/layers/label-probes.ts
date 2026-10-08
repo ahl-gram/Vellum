@@ -3,12 +3,7 @@ import type { Projection } from "../transform.ts";
 
 const MAX_INTERIOR_PROBES = 240;
 
-export function interiorProbes(
-  blob: ReadonlyArray<number>,
-  gridW: number,
-  proj: Projection,
-  centroid: Pt,
-): Pt[] {
+export function interiorProbes(blob: ReadonlyArray<number>, gridW: number, proj: Projection, centroid: Pt): Pt[] {
   const scored = blob.map((i) => {
     const x = proj.px(i % gridW);
     const y = proj.py((i / gridW) | 0);

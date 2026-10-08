@@ -1,19 +1,15 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
-import {
-  findBrowser,
-  rasterizeSvg,
-  svgDimensions,
-} from "../../src/cli/raster.ts";
+import { findBrowser, rasterizeSvg, svgDimensions } from "../../src/cli/raster.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 
 test("svgDimensions reads the root width/height", () => {
-  assert.deepEqual(
-    svgDimensions(`<svg xmlns="x" width="800" height="600" viewBox="0 0 800 600">`),
-    { width: 800, height: 600 },
-  );
+  assert.deepEqual(svgDimensions(`<svg xmlns="x" width="800" height="600" viewBox="0 0 800 600">`), {
+    width: 800,
+    height: 600,
+  });
   const world = generateWorld(defaultRecipe(1, { gridW: 80, gridH: 60 }));
   const real = renderMap(world, { widthPx: 640 });
   assert.equal(svgDimensions(real).width, 640);
@@ -39,10 +35,6 @@ test("rasterizeSvg produces a real PNG (skipped without a browser)", async (t) =
   await rasterizeSvg(browser, svgPath, pngPath, 1);
   const png = await readFile(pngPath);
   assert.ok(png.length > 100, "png suspiciously small");
-  assert.deepEqual(
-    [...png.subarray(0, 4)],
-    [0x89, 0x50, 0x4e, 0x47],
-    "missing PNG magic bytes",
-  );
+  assert.deepEqual([...png.subarray(0, 4)], [0x89, 0x50, 0x4e, 0x47], "missing PNG magic bytes");
   await rm("out/test-tmp", { recursive: true, force: true });
 });

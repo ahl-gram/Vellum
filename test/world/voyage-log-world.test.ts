@@ -43,10 +43,7 @@ test("on a real routed world the mode-aware voice reaches the right ports (seed 
   assert.equal(closing.toIdx, plan.ports[0]!.idx, "the closing leg routes home to the capital");
   assert.equal(log.entries.length, plan.ports.length + 1, "one entry per port plus the homecoming");
   assert.ok(log.entries[0]!.text.includes("set out"), "the survey departs the capital");
-  assert.ok(
-    log.entries[log.entries.length - 1]!.text.includes("whence we set out"),
-    "and comes home to it",
-  );
+  assert.ok(log.entries[log.entries.length - 1]!.text.includes("whence we set out"), "and comes home to it");
 
   const firstSea = logPorts.findIndex((p) => p.arrivalMode === "sea");
   const firstRoad = logPorts.findIndex((p) => p.arrivalMode === "road");

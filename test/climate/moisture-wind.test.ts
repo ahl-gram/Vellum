@@ -20,13 +20,7 @@ function ridgeIsland() {
   });
 }
 
-function stripMean(
-  field: ArrayLike<number>,
-  w: number,
-  h: number,
-  x0: number,
-  x1: number,
-): number {
+function stripMean(field: ArrayLike<number>, w: number, h: number, x0: number, x1: number): number {
   let sum = 0;
   let n = 0;
   for (let y = 8; y < h - 8; y++) {

@@ -7,11 +7,7 @@ type Mat3 = readonly [Vec3, Vec3, Vec3];
 function hexToRgb(hex: string): Rgb {
   let h = hex.replace("#", "");
   if (h.length === 3) h = h[0]! + h[0]! + h[1]! + h[1]! + h[2]! + h[2]!;
-  return [
-    parseInt(h.slice(0, 2), 16),
-    parseInt(h.slice(2, 4), 16),
-    parseInt(h.slice(4, 6), 16),
-  ];
+  return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
 }
 
 const DEUTERANOPIA: Mat3 = [
@@ -31,9 +27,7 @@ const srgbToLinear = (c: number): number => {
 };
 
 function compositeLinear(fg: Rgb, bg: Rgb, alpha: number): Vec3 {
-  return [0, 1, 2].map((i) =>
-    srgbToLinear(alpha * fg[i]! + (1 - alpha) * bg[i]!),
-  ) as Vec3;
+  return [0, 1, 2].map((i) => srgbToLinear(alpha * fg[i]! + (1 - alpha) * bg[i]!)) as Vec3;
 }
 
 function applyMatrix(m: Mat3, [r, g, b]: Vec3): Vec3 {
@@ -48,24 +42,16 @@ function linearToLab([R, G, B]: Vec3): Vec3 {
   let x = (0.4124 * R + 0.3576 * G + 0.1805 * B) / 0.95047;
   let y = 0.2126 * R + 0.7152 * G + 0.0722 * B;
   let z = (0.0193 * R + 0.1192 * G + 0.9505 * B) / 1.08883;
-  const f = (t: number): number =>
-    t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116;
+  const f = (t: number): number => (t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116);
   x = f(x);
   y = f(y);
   z = f(z);
   return [116 * y - 16, 500 * (x - y), 200 * (y - z)];
 }
 
-const deltaE = (a: Vec3, b: Vec3): number =>
-  Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+const deltaE = (a: Vec3, b: Vec3): number => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
 
-export function washesConfusable(
-  a: string,
-  b: string,
-  paper: string,
-  opacity: number,
-  threshold = 2.5,
-): boolean {
+export function washesConfusable(a: string, b: string, paper: string, opacity: number, threshold = 2.5): boolean {
   const la = compositeLinear(hexToRgb(a), hexToRgb(paper), opacity);
   const lb = compositeLinear(hexToRgb(b), hexToRgb(paper), opacity);
   for (const m of [null, DEUTERANOPIA, PROTANOPIA] as const) {
@@ -83,9 +69,7 @@ export function washConflictMatrix(
   threshold = 2.5,
 ): boolean[][] {
   const n = palette.length;
-  const m: boolean[][] = Array.from({ length: n }, () =>
-    new Array<boolean>(n).fill(false),
-  );
+  const m: boolean[][] = Array.from({ length: n }, () => new Array<boolean>(n).fill(false));
   for (let i = 0; i < n; i++) {
     for (let j = i + 1; j < n; j++) {
       const c = washesConfusable(palette[i]!, palette[j]!, paper, opacity, threshold);

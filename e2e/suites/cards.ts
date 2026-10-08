@@ -4,10 +4,43 @@ import { makeSettle } from "../support/settle.ts";
 import type { SuiteContext } from "../types.ts";
 import { cardsKit } from "./cards/kit.ts";
 import { NARROW_SEED } from "./cards/reads.ts";
-import { pSetup, pManifest, p1Overlay, p2Idle, p2bPressLift, p4Capital, p6Ruin, p7Tooltip, p8TapPins, p10Focus, p11OutsideClick, p12PinSwitch, p13AxDescription, p14Unfurl, p15RealHover } from "./cards/overlay.ts";
+import {
+  pSetup,
+  pManifest,
+  p1Overlay,
+  p2Idle,
+  p2bPressLift,
+  p4Capital,
+  p6Ruin,
+  p7Tooltip,
+  p8TapPins,
+  p10Focus,
+  p11OutsideClick,
+  p12PinSwitch,
+  p13AxDescription,
+  p14Unfurl,
+  p15RealHover,
+} from "./cards/overlay.ts";
 import { p16Glass, p18Renamed, p18bNeverRenamed, p17RuinNote, pCardShot } from "./cards/glass.ts";
-import { p19CardsFit, p20PinnedTakesPointer, p26TailScrolls, p23CapHolds, p24NothingToScroll, pRestore } from "./cards/cap.ts";
-import { holdKit, p9Grace, p28Travel, p29NearestTown, p30Tablet, p31Keyboard, p31bFocusSurvivesRefill, p32Dismiss, p33DragKeepsPin } from "./cards/hold.ts";
+import {
+  p19CardsFit,
+  p20PinnedTakesPointer,
+  p26TailScrolls,
+  p23CapHolds,
+  p24NothingToScroll,
+  pRestore,
+} from "./cards/cap.ts";
+import {
+  holdKit,
+  p9Grace,
+  p28Travel,
+  p29NearestTown,
+  p30Tablet,
+  p31Keyboard,
+  p31bFocusSurvivesRefill,
+  p32Dismiss,
+  p33DragKeepsPin,
+} from "./cards/hold.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { evaluate } = ctx;
@@ -36,9 +69,15 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await p17RuinNote(ctx, pm);
   await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}))`);
   await pCardShot(ctx, pm);
-  const narrowCount = await evaluate<number>(`window.__vellumRunInline({kind:"draw",seed:${NARROW_SEED},overrides:{},render:{style:"antique",widthPx:1500,legend:true}}).manifest.places.length`);
+  const narrowCount = await evaluate<number>(
+    `window.__vellumRunInline({kind:"draw",seed:${NARROW_SEED},overrides:{},render:{style:"antique",widthPx:1500,legend:true}}).manifest.places.length`,
+  );
   await step("P19", () => p19CardsFit(k, narrowCount));
-  await step("P20 to P27", async () => { const open = await p20PinnedTakesPointer(k); await p26TailScrolls(ctx, open); await p23CapHolds(k, open); });
+  await step("P20 to P27", async () => {
+    const open = await p20PinnedTakesPointer(k);
+    await p26TailScrolls(ctx, open);
+    await p23CapHolds(k, open);
+  });
   await step("P24", () => p24NothingToScroll(k));
   const hk = holdKit({ ...ctx, settle });
   await step("P28 to P33", async () => {

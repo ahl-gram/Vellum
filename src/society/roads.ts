@@ -45,9 +45,7 @@ export function buildRoads(
 
   const slope = slopeField(elev);
   const terrainCost = (i: number): number =>
-    1 +
-    (slope.data[i] as number) * SLOPE_PENALTY +
-    (riverCells[i] === 1 ? RIVER_CROSSING : 0);
+    1 + (slope.data[i] as number) * SLOPE_PENALTY + (riverCells[i] === 1 ? RIVER_CROSSING : 0);
   const wiring: Wiring = { w, h, n: w * h, data, seaLevel, terrainCost, roads: [] };
 
   const budgets = realmBudgets(labels, seats.length, wiring.n);
@@ -127,7 +125,8 @@ function layRoyalTrunks(wiring: Wiring, webs: ReadonlyArray<RealmWeb>): void {
     if (seeded && principal !== undefined) {
       const ride = new Uint8Array(wiring.n);
       for (const c of cells) ride[c] = 1;
-      for (const p of connectToNetwork(wiring, web, principal.x, principal.y, "trunk", Infinity, ride)) web[p.x + p.y * wiring.w] = 1;
+      for (const p of connectToNetwork(wiring, web, principal.x, principal.y, "trunk", Infinity, ride))
+        web[p.x + p.y * wiring.w] = 1;
     }
     for (const c of cells) web[c] = 1;
     seeded = true;
@@ -145,15 +144,10 @@ function connectGroup(
   const lay = (s: Settlement, rank: Road["rank"], budget: number): void => {
     for (const p of connectToNetwork(wiring, network, s.x, s.y, rank, budget)) network[p.x + p.y * wiring.w] = 1;
   };
-  const anchorDist = (s: Settlement): number =>
-    Math.hypot(s.x - anchor.x, s.y - anchor.y);
-  const towns = members
-    .filter((s) => s.kind === "town")
-    .sort((a, b) => anchorDist(a) - anchorDist(b));
+  const anchorDist = (s: Settlement): number => Math.hypot(s.x - anchor.x, s.y - anchor.y);
+  const towns = members.filter((s) => s.kind === "town").sort((a, b) => anchorDist(a) - anchorDist(b));
   for (const t of towns) lay(t, "trunk", Infinity);
-  const villages = members
-    .filter((s) => s.kind === "village")
-    .sort((a, b) => anchorDist(a) - anchorDist(b));
+  const villages = members.filter((s) => s.kind === "village").sort((a, b) => anchorDist(a) - anchorDist(b));
   for (const v of villages) lay(v, "lane", villageBudget);
 }
 

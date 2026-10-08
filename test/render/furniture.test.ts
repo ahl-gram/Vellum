@@ -11,7 +11,6 @@ import { planScalebar } from "../../src/render/layers/scalebar.ts";
 import { planLegend } from "../../src/render/layers/legend.ts";
 import { boxesOverlap } from "../../src/render/geometry.ts";
 
-
 function ctxFor(seed: number): RenderCtx {
   const world = generateWorld(defaultRecipe(seed, { gridW: 160, gridH: 120 }));
   const widthPx = 1500;
@@ -38,14 +37,8 @@ test("the compass rose clears the scale bar and cartouche", () => {
     const compass = planCompass(ctx, cart, scale.box);
     if (!compass) continue; // no ocean room for a compass is acceptable
     drawn++;
-    assert.ok(
-      !boxesOverlap(compass.box, scale.box),
-      `compass overlaps the scale bar for seed ${seed}`,
-    );
-    assert.ok(
-      !boxesOverlap(compass.box, cart.rect),
-      `compass overlaps the cartouche for seed ${seed}`,
-    );
+    assert.ok(!boxesOverlap(compass.box, scale.box), `compass overlaps the scale bar for seed ${seed}`);
+    assert.ok(!boxesOverlap(compass.box, cart.rect), `compass overlaps the cartouche for seed ${seed}`);
   }
   assert.ok(drawn >= 30, `expected most seeds to draw a compass, got ${drawn}/40`);
 });
@@ -62,10 +55,7 @@ test("the compass rose clears the legend", () => {
     if (!compass) continue;
     drawn++;
     if (legend) {
-      assert.ok(
-        !boxesOverlap(compass.box, legend.box),
-        `compass overlaps the legend for seed ${seed}`,
-      );
+      assert.ok(!boxesOverlap(compass.box, legend.box), `compass overlaps the legend for seed ${seed}`);
     }
   }
   assert.ok(drawn >= 30, `expected most seeds to draw a compass, got ${drawn}/40`);

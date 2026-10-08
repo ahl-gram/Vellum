@@ -8,8 +8,17 @@ const PAGE = "/faq/";
 const ELSEWHERE = "/glossary/";
 
 type Notice = {
-  ready: string; width: number; scale: number; narrow: boolean; key: string | null;
-  shown: boolean; w: number; h: number; hitsButton: boolean; bodyPx: number; buttonPx: number;
+  ready: string;
+  width: number;
+  scale: number;
+  narrow: boolean;
+  key: string | null;
+  shown: boolean;
+  w: number;
+  h: number;
+  hitsButton: boolean;
+  bodyPx: number;
+  buttonPx: number;
   tap: { x: number; y: number };
 };
 
@@ -27,7 +36,11 @@ const READ: Payload<Notice> = `(() => {
     tap: { x: Math.round(cx - vv.offsetLeft), y: Math.round(cy - vv.offsetTop) } };
 })()`;
 
-export type DeskKit = SuiteContext & { settle: ReturnType<typeof makeSettle>; open: (path: string) => Promise<void>; forget: () => Promise<void> };
+export type DeskKit = SuiteContext & {
+  settle: ReturnType<typeof makeSettle>;
+  open: (path: string) => Promise<void>;
+  forget: () => Promise<void>;
+};
 
 export function deskKit(ctx: SuiteContext): DeskKit {
   const { send, evaluate, PORT } = ctx;
@@ -54,15 +67,40 @@ export async function dnPhone(k: DeskKit): Promise<void> {
   await k.forget();
   await k.open(PAGE);
   const phone = await readSettled(k, "the page on a phone");
-  check("DN1 a phone lays the page out at the fixed 1024 and shrinks it to fit: no narrow rule applies", phone.width === 1024 && phone.scale < 1 && !phone.narrow, JSON.stringify(phone));
-  check("DN2 the Notice to Travellers shows on a phone, its button reachable where it stands", phone.shown && phone.w > 0 && phone.hitsButton && phone.key === null, JSON.stringify(phone));
-  check("DN3 it reads at its own size on the phone's screen: body text 16 on-screen pixels, a button over the house's 24px thumb floor", phone.bodyPx >= 15.9 && phone.buttonPx >= 24, JSON.stringify({ bodyPx: phone.bodyPx, buttonPx: phone.buttonPx }));
+  check(
+    "DN1 a phone lays the page out at the fixed 1024 and shrinks it to fit: no narrow rule applies",
+    phone.width === 1024 && phone.scale < 1 && !phone.narrow,
+    JSON.stringify(phone),
+  );
+  check(
+    "DN2 the Notice to Travellers shows on a phone, its button reachable where it stands",
+    phone.shown && phone.w > 0 && phone.hitsButton && phone.key === null,
+    JSON.stringify(phone),
+  );
+  check(
+    "DN3 it reads at its own size on the phone's screen: body text 16 on-screen pixels, a button over the house's 24px thumb floor",
+    phone.bodyPx >= 15.9 && phone.buttonPx >= 24,
+    JSON.stringify({ bodyPx: phone.bodyPx, buttonPx: phone.buttonPx }),
+  );
   const paper = await printedWidth(k);
   const screen = await readSettled(k, "the page back on screen");
-  check("DN9 the notice prints as nothing (print is paper), and the same run's screen read shows it", paper === 0 && screen.w > 0, JSON.stringify({ paper, screen: screen.w }));
+  check(
+    "DN9 the notice prints as nothing (print is paper), and the same run's screen read shows it",
+    paper === 0 && screen.w > 0,
+    JSON.stringify({ paper, screen: screen.w }),
+  );
   await send("Emulation.setDeviceMetricsOverride", { width: 844, height: 390, deviceScaleFactor: 1, mobile: true });
-  const turned = await k.settle(READ, (d, last) => Math.abs(d.scale - phone.scale) > 0.1 && last !== null && last.scale === d.scale && last.bodyPx === d.bodyPx, "the phone turned");
-  check("DN3r turned sideways with no reload, the notice re-fits: its text still reads at 16 on-screen pixels", turned.bodyPx >= 15.9 && turned.bodyPx <= 16.1, JSON.stringify({ before: phone.scale, after: turned.scale, bodyPx: turned.bodyPx }));
+  const turned = await k.settle(
+    READ,
+    (d, last) =>
+      Math.abs(d.scale - phone.scale) > 0.1 && last !== null && last.scale === d.scale && last.bodyPx === d.bodyPx,
+    "the phone turned",
+  );
+  check(
+    "DN3r turned sideways with no reload, the notice re-fits: its text still reads at 16 on-screen pixels",
+    turned.bodyPx >= 15.9 && turned.bodyPx <= 16.1,
+    JSON.stringify({ before: phone.scale, after: turned.scale, bodyPx: turned.bodyPx }),
+  );
 }
 
 async function printedWidth({ send, evaluate }: DeskKit): Promise<number> {
@@ -79,11 +117,19 @@ export async function dnTablet(k: DeskKit): Promise<void> {
   await setMobileViewport(1024, 768);
   await k.open(PAGE);
   const tablet = await readSettled(k, "the page on a tablet");
-  check("DN5 a tablet at the 1024 floor lays the page out at scale 1 and never sees the notice", tablet.scale === 1 && !tablet.shown && tablet.w === 0 && tablet.key === null, JSON.stringify(tablet));
+  check(
+    "DN5 a tablet at the 1024 floor lays the page out at scale 1 and never sees the notice",
+    tablet.scale === 1 && !tablet.shown && tablet.w === 0 && tablet.key === null,
+    JSON.stringify(tablet),
+  );
   await setMobileViewport(820, 1180);
   await k.open(PAGE);
   const upright = await readSettled(k, "the page on a tablet held upright");
-  check("DN5b a tablet held upright (emulated, no browser toolbar) shrinks the page to fit but stands over 1024 tall, so it never sees the notice: the shell reads the screen's height, not its width", upright.width === 1024 && upright.scale < 1 && !upright.shown && upright.w === 0 && upright.key === null, JSON.stringify(upright));
+  check(
+    "DN5b a tablet held upright (emulated, no browser toolbar) shrinks the page to fit but stands over 1024 tall, so it never sees the notice: the shell reads the screen's height, not its width",
+    upright.width === 1024 && upright.scale < 1 && !upright.shown && upright.w === 0 && upright.key === null,
+    JSON.stringify(upright),
+  );
 }
 
 export async function dnNarrow(k: DeskKit): Promise<void> {
@@ -92,7 +138,16 @@ export async function dnNarrow(k: DeskKit): Promise<void> {
   await k.open(PAGE);
   const narrow = await readSettled(k, "the page in a narrow desktop window");
   const pageW = await k.evaluate<number>(`document.body.getBoundingClientRect().width`);
-  check("DN6 a desktop window narrowed to 390, a touchscreen's included, lays out the 1024 page at its own size, scrolling sideways over it rather than shrinking it, and never sees the notice (Issue #762: the 1024 floor)", narrow.width === 390 && pageW === 1024 && narrow.scale === 1 && !narrow.shown && narrow.w === 0 && narrow.key === null, JSON.stringify({ ...narrow, pageW }));
+  check(
+    "DN6 a desktop window narrowed to 390, a touchscreen's included, lays out the 1024 page at its own size, scrolling sideways over it rather than shrinking it, and never sees the notice (Issue #762: the 1024 floor)",
+    narrow.width === 390 &&
+      pageW === 1024 &&
+      narrow.scale === 1 &&
+      !narrow.shown &&
+      narrow.w === 0 &&
+      narrow.key === null,
+    JSON.stringify({ ...narrow, pageW }),
+  );
 }
 
 export type Refusal = { arm: () => Promise<void>; disarm: () => Promise<void> };
@@ -100,12 +155,16 @@ export type Refusal = { arm: () => Promise<void>; disarm: () => Promise<void> };
 export function storageRefusal({ send }: SuiteContext): Refusal {
   let id: string | null = null;
   const arm = async (): Promise<void> => {
-    const r = await send<{ identifier: string }>("Page.addScriptToEvaluateOnNewDocument", { source: `Storage.prototype.getItem = () => { throw new DOMException("refused", "SecurityError"); }; Storage.prototype.setItem = () => { throw new DOMException("refused", "QuotaExceededError"); };` });
+    const r = await send<{ identifier: string }>("Page.addScriptToEvaluateOnNewDocument", {
+      source: `Storage.prototype.getItem = () => { throw new DOMException("refused", "SecurityError"); }; Storage.prototype.setItem = () => { throw new DOMException("refused", "QuotaExceededError"); };`,
+    });
     id = r.identifier;
   };
   const disarm = async (): Promise<void> => {
     if (id === null) return;
-    try { await send("Page.removeScriptToEvaluateOnNewDocument", { identifier: id }); } catch {}
+    try {
+      await send("Page.removeScriptToEvaluateOnNewDocument", { identifier: id });
+    } catch {}
     id = null;
   };
   return { arm, disarm };
@@ -119,7 +178,11 @@ export async function dnRefused(k: DeskKit, refusal: Refusal): Promise<void> {
   await k.open(PAGE);
   const refused = await readSettled(k, "the page with storage refused");
   const logged = dropExpectedCancellations(consoleErrors.slice(errors));
-  check("DN7 with storage refused the page still boots and shows the notice, and nothing reaches the console", refused.shown && refused.key === "unreadable" && logged.length === 0, JSON.stringify({ refused, logged }));
+  check(
+    "DN7 with storage refused the page still boots and shows the notice, and nothing reaches the console",
+    refused.shown && refused.key === "unreadable" && logged.length === 0,
+    JSON.stringify({ refused, logged }),
+  );
 }
 
 export async function dnContinue(k: DeskKit): Promise<void> {
@@ -133,5 +196,13 @@ export async function dnContinue(k: DeskKit): Promise<void> {
   const after = await k.settle(READ, (d) => !d.shown || d.key !== null, "the tap handled");
   await k.open(ELSEWHERE);
   const next = await readSettled(k, "the next page after Continue anyway");
-  check("DN4 a real tap on Continue anyway hides the notice and remembers it: the next page does not show it", after.w === 0 && after.key === "1" && !next.shown && next.key === "1", JSON.stringify({ tap: before.tap, after: { w: after.w, key: after.key }, next: { shown: next.shown, key: next.key } }));
+  check(
+    "DN4 a real tap on Continue anyway hides the notice and remembers it: the next page does not show it",
+    after.w === 0 && after.key === "1" && !next.shown && next.key === "1",
+    JSON.stringify({
+      tap: before.tap,
+      after: { w: after.w, key: after.key },
+      next: { shown: next.shown, key: next.key },
+    }),
+  );
 }

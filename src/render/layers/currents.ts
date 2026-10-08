@@ -17,8 +17,7 @@ const START_OCEAN_DIST = 7; // seeds sit well offshore so lines have room
 
 function flowAt(x: number, y: number, seed: number): Vec | null {
   const eps = 0.6;
-  const p = (xx: number, yy: number): number =>
-    fbm2(xx * FREQ, yy * FREQ, seed, { octaves: 3, gain: 0.55 });
+  const p = (xx: number, yy: number): number => fbm2(xx * FREQ, yy * FREQ, seed, { octaves: 3, gain: 0.55 });
   const dpdx = (p(x + eps, y) - p(x - eps, y)) / (2 * eps);
   const dpdy = (p(x, y + eps) - p(x, y - eps)) / (2 * eps);
   const vx = dpdy;
@@ -28,12 +27,7 @@ function flowAt(x: number, y: number, seed: number): Vec | null {
   return [vx / m, vy / m];
 }
 
-export function traceStreamline(
-  world: World,
-  x0: number,
-  y0: number,
-  seed: number,
-): Array<[number, number]> {
+export function traceStreamline(world: World, x0: number, y0: number, seed: number): Array<[number, number]> {
   const { w, h } = world.elev;
   const od = world.oceanDist;
   const gate = world.region?.seaGate; // Issue #251: parent's genuine-sea partition, if a region
@@ -66,12 +60,7 @@ export function traceStreamline(
   return [...back, [x0, y0], ...fwd];
 }
 
-function chevron(
-  tip: readonly [number, number],
-  angle: number,
-  k: number,
-  style: RenderCtx["style"],
-): SvgNode {
+function chevron(tip: readonly [number, number], angle: number, k: number, style: RenderCtx["style"]): SvgNode {
   const hl = 4.5 * k;
   const a1 = angle + Math.PI * 0.78;
   const a2 = angle - Math.PI * 0.78;
@@ -95,9 +84,7 @@ function currentSpots(ctx: RenderCtx, avoid: ReadonlyArray<Box>): CurrentSpot[] 
   const k = proj.widthPx / 1500;
   const { w, h } = world.elev;
   const clear = (px: number, py: number): boolean =>
-    avoid.every(
-      (b) => !boxesOverlap(b, { x: px - 30, y: py - 30, w: 60, h: 60 }, 8),
-    );
+    avoid.every((b) => !boxesOverlap(b, { x: px - 30, y: py - 30, w: 60, h: 60 }, 8));
 
   const spots: CurrentSpot[] = [];
   for (let gy = 5; gy < h - 5; gy += 4) {
@@ -107,8 +94,10 @@ function currentSpots(ctx: RenderCtx, avoid: ReadonlyArray<Box>): CurrentSpot[] 
       const px = proj.px(gx);
       const py = proj.py(gy);
       const edge = Math.min(
-        px - proj.margin, py - proj.margin,
-        proj.widthPx - proj.margin - px, proj.heightPx - proj.margin - py,
+        px - proj.margin,
+        py - proj.margin,
+        proj.widthPx - proj.margin - px,
+        proj.heightPx - proj.margin - py,
       );
       if (edge < 60 * k || !clear(px, py)) continue;
       spots.push({ x: px, y: py, gx, gy });
@@ -122,10 +111,7 @@ function currentStrokes(ctx: RenderCtx, seed: number, s: CurrentSpot): SvgNode[]
   const k = proj.widthPx / 1500;
   const grid = traceStreamline(world, s.gx, s.gy, seed);
   if (grid.length < 9) return []; // drop stubs that hit land at once
-  const px: Array<[number, number]> = grid.map(([x, y]) => [
-    proj.px(x),
-    proj.py(y),
-  ]);
+  const px: Array<[number, number]> = grid.map(([x, y]) => [proj.px(x), proj.py(y)]);
   const line = chaikinSmooth(px, false, 2);
 
   let d = `M${line[0]![0].toFixed(1)} ${line[0]![1].toFixed(1)}`;
@@ -156,11 +142,7 @@ function currentStrokes(ctx: RenderCtx, seed: number, s: CurrentSpot): SvgNode[]
   return strokes;
 }
 
-export function currentsLayer(
-  ctx: RenderCtx,
-  cartouche: CartouchePlan,
-  compass: CompassPlan | null,
-): SvgNode | null {
+export function currentsLayer(ctx: RenderCtx, cartouche: CartouchePlan, compass: CompassPlan | null): SvgNode | null {
   const { style, world, proj, rng } = ctx;
   if (!style.currents) return null;
   const k = proj.widthPx / 1500;

@@ -1,5 +1,13 @@
 // The Chart Table's grammar (Sub 1 of Issue #401): one key, two hosts. It rides in the Explorer's hash while the table is being gathered and it IS the Portfolio page's address once the button is pressed, so the folio survives a reload and a round trip to the Prospect page. Pure and DOM-free like its siblings in src/site/{explorer,prospect,ribbon}/address.ts, because three bundles import it. The key is `table` (ruled at Issue #518's sitting, 2026-09-07; `plates` is taken by the Explorer's order button and the poster/atlas plates).
-import { LATTICE_DIVISIONS, LOD_BANDS, lodWindowFor, plotUvFromSheet, type LodBand, type SheetMargins, type UvCamera } from "../../world/lod.ts";
+import {
+  LATTICE_DIVISIONS,
+  LOD_BANDS,
+  lodWindowFor,
+  plotUvFromSheet,
+  type LodBand,
+  type SheetMargins,
+  type UvCamera,
+} from "../../world/lod.ts";
 import { plateDressFor } from "../../prospect/dress/context.ts";
 import { parseYear } from "./year.ts";
 import type { UvWindow, MapType } from "../../terrain/heightfield.ts";
@@ -263,7 +271,14 @@ export function prospectItemFrom(c: {
   if (!Number.isInteger(c.seed) || c.seed < 0) return null;
   if (c.index === null || !Number.isInteger(c.index) || c.index < 0) return null;
   if (c.year === null || !Number.isInteger(c.year) || c.year <= 0) return null;
-  return { kind: "prospect", seed: c.seed, overrides: c.overrides, style: plateDressFor(c.style), index: c.index, year: c.year };
+  return {
+    kind: "prospect",
+    seed: c.seed,
+    overrides: c.overrides,
+    style: plateDressFor(c.style),
+    index: c.index,
+    year: c.year,
+  };
 }
 
 /** Sub 3's drafting order: one run per world, first-seen. Keyed on the world the ADDRESS states, never a stringified overrides object, whose key order would split one world in two and regenerate the parent twice through the single-entry `worldFor` cache. */

@@ -26,7 +26,9 @@ const sections = (html: string): readonly Section[] => {
   // parts[0] is the preamble before the first heading; then (level, heading, body) triples.
   for (let i = 1; i + 2 < parts.length + 1; i += 3) {
     const level = Number(parts[i]);
-    const heading = parts[i + 1]!.replace(/<[^>]*>/g, "").replace(/&amp;/g, "&").trim();
+    const heading = parts[i + 1]!.replace(/<[^>]*>/g, "")
+      .replace(/&amp;/g, "&")
+      .trim();
     const body = parts[i + 2] ?? "";
     // Tolerate attributes on the term: an exact-tag match silently skips every entry carrying an id.
     const terms = [...body.matchAll(/<p class="term"[^>]*>([\s\S]*?)<\/p>/g)].map((m) =>
@@ -84,10 +86,34 @@ test("the chart section is split into the three #353 ratified (#353)", () => {
 test("every term the voyage and the gazetteer print is documented (#353)", () => {
   // Drawn from the terms that actually print in lore.ts, voyage-log.ts and the scale bar.
   const owed = [
-    "Quay", "Weir", "Breakwater", "Chandler", "Osier", "Drover", "Reeve", "Reach",
-    "Holding ground", "Warp", "Beck", "Fen", "Waterman", "Wharf", "Moorings",
-    "League", "Plate", "Colophon", "Docket", "Neat line", "Contour line",
-    "Attar", "Kvass", "Copal", "Copra", "Cochineal", "Iron bloom", "Kurgan",
+    "Quay",
+    "Weir",
+    "Breakwater",
+    "Chandler",
+    "Osier",
+    "Drover",
+    "Reeve",
+    "Reach",
+    "Holding ground",
+    "Warp",
+    "Beck",
+    "Fen",
+    "Waterman",
+    "Wharf",
+    "Moorings",
+    "League",
+    "Plate",
+    "Colophon",
+    "Docket",
+    "Neat line",
+    "Contour line",
+    "Attar",
+    "Kvass",
+    "Copal",
+    "Copra",
+    "Cochineal",
+    "Iron bloom",
+    "Kurgan",
   ];
   const terms = withTerms().flatMap((s) => s.terms);
   for (const term of owed) {
@@ -100,7 +126,11 @@ test("every term the voyage and the gazetteer print is documented (#353)", () =>
 
 test("no headword is defined twice: homographs run their senses together (#353)", () => {
   // Strip a parenthetical or comma qualifier first: "Bar (of a harbour)" vs "Bar, of a river" is the numbered-homograph form decision 7 rejects, and a whole-string compare would wave both through.
-  const bare = (t: string): string => t.toLowerCase().replace(/\s*[(,].*$/, "").trim();
+  const bare = (t: string): string =>
+    t
+      .toLowerCase()
+      .replace(/\s*[(,].*$/, "")
+      .trim();
   const seen = new Map<string, string>();
   for (const term of withTerms().flatMap((s) => s.terms)) {
     const key = bare(term);
@@ -116,9 +146,19 @@ test("no headword is defined twice: homographs run their senses together (#353)"
 
 test("the index slip replaced the hand-authored TOC: the sections are read from the page itself (#353, then #462 ruling 1)", () => {
   assert.ok(!source.includes('class="toc"'), "the dot-row TOC is gone");
-  assert.ok(source.includes('<IndexSlip slot="desk" sections={sections} kind="terms" />'), "the index slip stands in its place, fed from the page's own sections, in the desk layer that holds a scrolling room's chrome on the 1024 page (Issue #762)");
-  assert.ok(source.indexOf("<IndexSlip") < source.indexOf('<div class="sheet">'), "and precedes the prose it indexes, so the tab and a reader reach it first");
-  assert.match(source, /roomSections\(readFileSync\(fileURLToPath\(import\.meta\.url\), "utf8"\), "term"\)/, "the sections are parsed from THIS file at build");
+  assert.ok(
+    source.includes('<IndexSlip slot="desk" sections={sections} kind="terms" />'),
+    "the index slip stands in its place, fed from the page's own sections, in the desk layer that holds a scrolling room's chrome on the 1024 page (Issue #762)",
+  );
+  assert.ok(
+    source.indexOf("<IndexSlip") < source.indexOf('<div class="sheet">'),
+    "and precedes the prose it indexes, so the tab and a reader reach it first",
+  );
+  assert.match(
+    source,
+    /roomSections\(readFileSync\(fileURLToPath\(import\.meta\.url\), "utf8"\), "term"\)/,
+    "the sections are parsed from THIS file at build",
+  );
 });
 
 test("terms stay alphabetical inside their section (#353)", () => {
@@ -137,14 +177,21 @@ test("terms stay alphabetical inside their section (#353)", () => {
 test("the broadside stands beside the index at 22rem columns, and no TOC dress survives (#462 rulings 1 and 3, superseding #461 ruling 4's dot-row and ~26rem)", () => {
   for (const page of ["faq", "glossary"]) {
     const css = readFileSync(fileURLToPath(new URL(`../../public/${page}/index.css`, import.meta.url)), "utf8");
-    assert.match(css, /\.columns\s*\{[^}]*column-width:\s*22rem/, `${page}: 22rem columns beside the open index (26rem left one 800px line at 1280)`);
+    assert.match(
+      css,
+      /\.columns\s*\{[^}]*column-width:\s*22rem/,
+      `${page}: 22rem columns beside the open index (26rem left one 800px line at 1280)`,
+    );
     assert.ok(!/\.toc\b/.test(css), `${page}: the dot-row TOC's dress retired with it`);
     assert.ok(!/columns:\s*2/.test(css), `${page}: the #353 two-column TOC box stays retired`);
-    assert.match(css, /body\.room:has\(\.slip\.folded\) main\s*\{[^}]*margin-right:\s*0/, `${page}: folding the index hands the sheet the width (ruling 2)`);
+    assert.match(
+      css,
+      /body\.room:has\(\.slip\.folded\) main\s*\{[^}]*margin-right:\s*0/,
+      `${page}: folding the index hands the sheet the width (ruling 2)`,
+    );
     assert.match(css, /body\.room main\s*\{[^}]*transition:\s*margin-right/, `${page}: in one settle, not a jump`);
   }
 });
-
 
 test("every term carries a definition (#353)", () => {
   const bodies = source.split(/<h([23])[^>]*>([\s\S]*?)<\/h\1>/);

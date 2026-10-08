@@ -12,7 +12,10 @@ interface GlassDeps {
   mapViewport: HTMLElement;
   mapDiv: HTMLElement;
   runJob: Parameters<typeof createLodController>[0]["runJob"];
-  buildPlaceOverlay: (manifest: PlaceManifest, opts?: { preservePinByName?: boolean; box?: { x: number; y: number; w: number; h: number } }) => void;
+  buildPlaceOverlay: (
+    manifest: PlaceManifest,
+    opts?: { preservePinByName?: boolean; box?: { x: number; y: number; w: number; h: number } },
+  ) => void;
   reclampCard: () => void;
   setCaption: (text: string) => void;
   setError: (text: string) => void;
@@ -37,7 +40,7 @@ function glassCard(mapDiv: HTMLElement, deps: Readonly<GlassDeps>) {
   function setCardZoom(k: number): void {
     const card = document.getElementById("place-card");
     const overlay = mapDiv.querySelector<HTMLElement>(".place-overlay");
-        // ALL of them: an outgoing inset stays mounted until its fade ends, up to 700ms, so a singular query hands the counter-scale to the sheet leaving and not the one arriving.
+    // ALL of them: an outgoing inset stays mounted until its fade ends, up to 700ms, so a singular query hands the counter-scale to the sheet leaving and not the one arriving.
     const ears = [...mapDiv.querySelectorAll<HTMLElement>(".dog-ear")];
     for (const el of [card, overlay, ...ears]) {
       if (!el) continue;
@@ -50,7 +53,12 @@ function glassCard(mapDiv: HTMLElement, deps: Readonly<GlassDeps>) {
   return { setCardZoom };
 }
 
-function glassLod(mapDiv: HTMLElement, deps: Readonly<GlassDeps>, setCardZoom: (k: number) => void, zoomController: ZoomController): LodController {
+function glassLod(
+  mapDiv: HTMLElement,
+  deps: Readonly<GlassDeps>,
+  setCardZoom: (k: number) => void,
+  zoomController: ZoomController,
+): LodController {
   return createLodController({
     mapDiv,
     runJob: deps.runJob,
@@ -67,7 +75,13 @@ function glassLod(mapDiv: HTMLElement, deps: Readonly<GlassDeps>, setCardZoom: (
   });
 }
 
-function glassCamera(mapViewport: HTMLElement, deps: Readonly<GlassDeps>, zoomController: ZoomController, lodController: LodController, setCardZoom: (k: number) => void) {
+function glassCamera(
+  mapViewport: HTMLElement,
+  deps: Readonly<GlassDeps>,
+  zoomController: ZoomController,
+  lodController: LodController,
+  setCardZoom: (k: number) => void,
+) {
   // Issue #165/Issue #169: sheet fractions of the WORLD sheet at every band (the inset design never rebases), read from the STABLE viewport; guard a zero-size box (before first layout) so the division is finite.
   function cameraNow(): Camera {
     const W = mapViewport.clientWidth || 1;
@@ -108,15 +122,32 @@ function glassKeys(mapViewport: HTMLElement, zoomController: ZoomController, goH
     const W = mapViewport.clientWidth;
     const H = mapViewport.clientHeight;
     switch (e.key) {
-      case "+": case "=": zoomController.glideBy(ZOOM_STEP); break;
-      case "-": case "_": zoomController.glideBy(1 / ZOOM_STEP); break;
+      case "+":
+      case "=":
+        zoomController.glideBy(ZOOM_STEP);
+        break;
+      case "-":
+      case "_":
+        zoomController.glideBy(1 / ZOOM_STEP);
+        break;
       // ArrowRight reveals what lies to the right, so the content slides left and the screen translate decreases; the sign lives here and the controller stays direction-agnostic.
-      case "ArrowLeft": zoomController.panBy(W * PAN_FRACTION, 0); break;
-      case "ArrowRight": zoomController.panBy(-W * PAN_FRACTION, 0); break;
-      case "ArrowUp": zoomController.panBy(0, H * PAN_FRACTION); break;
-      case "ArrowDown": zoomController.panBy(0, -H * PAN_FRACTION); break;
-      case "0": goHomeVoiced(); break;
-      default: return;
+      case "ArrowLeft":
+        zoomController.panBy(W * PAN_FRACTION, 0);
+        break;
+      case "ArrowRight":
+        zoomController.panBy(-W * PAN_FRACTION, 0);
+        break;
+      case "ArrowUp":
+        zoomController.panBy(0, H * PAN_FRACTION);
+        break;
+      case "ArrowDown":
+        zoomController.panBy(0, -H * PAN_FRACTION);
+        break;
+      case "0":
+        goHomeVoiced();
+        break;
+      default:
+        return;
     }
     e.preventDefault();
   });
@@ -161,7 +192,13 @@ export function createGlass(deps: GlassDeps) {
   });
 
   const lodController = glassLod(mapDiv, deps, setCardZoom, zoomController);
-  const { cameraNow, onCameraSettle, syncZoom, applyCamera, refitCamera, goHomeVoiced } = glassCamera(mapViewport, deps, zoomController, lodController, setCardZoom);
+  const { cameraNow, onCameraSettle, syncZoom, applyCamera, refitCamera, goHomeVoiced } = glassCamera(
+    mapViewport,
+    deps,
+    zoomController,
+    lodController,
+    setCardZoom,
+  );
   glassKeys(mapViewport, zoomController, goHomeVoiced);
   glassPresses(buttons, zoomController, goHomeVoiced);
 

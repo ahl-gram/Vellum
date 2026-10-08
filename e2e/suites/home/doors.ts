@@ -11,7 +11,12 @@ export async function h13aPrePaint({ evaluate, send, check, sleep, PORT }: Suite
   let preModule = null;
   for (let i = 0; i < 100; i++) {
     try {
-      preModule = await evaluate<{ veil: boolean; adopted: boolean; seedForm: boolean; doorsYet: boolean } | null>(`(() => {
+      preModule = await evaluate<{
+        veil: boolean;
+        adopted: boolean;
+        seedForm: boolean;
+        doorsYet: boolean;
+      } | null>(`(() => {
         const v = document.getElementById("lf-veil");
         if (!v) return null;
         return { veil: true, adopted: v.dataset.adopted !== undefined, seedForm: !!document.getElementById("seed-form"),
@@ -31,7 +36,11 @@ export async function h13aPrePaint({ evaluate, send, check, sleep, PORT }: Suite
 export async function h13bRelease({ evaluate, check, sleep }: SuiteContext): Promise<void> {
   let released = null;
   for (let i = 0; i < 200; i++) {
-    try { released = await evaluate<{ veil: boolean; seedForm: boolean }>(`({ veil: !!document.getElementById("lf-veil"), seedForm: !!document.getElementById("seed-form") })`); } catch {}
+    try {
+      released = await evaluate<{ veil: boolean; seedForm: boolean }>(
+        `({ veil: !!document.getElementById("lf-veil"), seedForm: !!document.getElementById("seed-form") })`,
+      );
+    } catch {}
     if (released !== null && !released.veil) break;
     await sleep(100);
   }
@@ -46,7 +55,14 @@ export async function h13cDoorsRead({ evaluate, sleep }: SuiteContext) {
   let doors = null;
   for (let i = 0; i < 80; i++) {
     try {
-      doors = await evaluate<{ shown: boolean[]; hrefs: (string | null)[]; closesHidden: boolean; howHidden: boolean; scrollW: number; innerWidth: number } | null>(`(() => {
+      doors = await evaluate<{
+        shown: boolean[];
+        hrefs: (string | null)[];
+        closesHidden: boolean;
+        howHidden: boolean;
+        scrollW: number;
+        innerWidth: number;
+      } | null>(`(() => {
         const ids = ["explorer", "reading-room", "atlas", "gallery"];
         const cards = ids.map((id) => document.getElementById("lf-card-" + id));
         if (cards.some((c) => c === null)) return null;
@@ -72,9 +88,12 @@ export async function h13cDoorsRead({ evaluate, sleep }: SuiteContext) {
 export async function h13cStaticDoors({ check, shoot }: SuiteContext, doors: Doors): Promise<void> {
   check(
     "H13c a dead bundle reveals the four slips as plain static doors: each visible in flow with its room's own door, the dead close controls hidden, the how panel and the sideways scroll unmoved",
-    doors !== null && doors.shown.every(Boolean)
-      && JSON.stringify(doors.hrefs) === JSON.stringify(["explorer/", "reading-room/", "atlas/", "gallery/"])
-      && doors.closesHidden && doors.howHidden && doors.scrollW === doors.innerWidth,
+    doors !== null &&
+      doors.shown.every(Boolean) &&
+      JSON.stringify(doors.hrefs) === JSON.stringify(["explorer/", "reading-room/", "atlas/", "gallery/"]) &&
+      doors.closesHidden &&
+      doors.howHidden &&
+      doors.scrollW === doors.innerWidth,
     JSON.stringify(doors),
   );
   await shoot("home-failed-bundle-doors.png");
@@ -87,7 +106,9 @@ export async function h13dPrmDoors({ evaluate, send, check, sleep, PORT }: Suite
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
   let prmDoors = false;
   for (let i = 0; i < 90; i++) {
-    try { prmDoors = await evaluate(doorShown); } catch {}
+    try {
+      prmDoors = await evaluate(doorShown);
+    } catch {}
     if (prmDoors === true) break;
     await sleep(150);
   }
@@ -103,7 +124,12 @@ export async function h13ePrmNoFlash({ evaluate, send, check, sleep, PORT }: Sui
   // Mark the H13d page before leaving: without the marker the first samples race the navigation and read the OLD page's legitimately visible doors as a flash.
   await evaluate(`window.__h13d = 1`);
   // Throttle so the pre-.cam window is seconds wide: on an unthrottled localhost the module boots within a frame and a 75ms sampler proves nothing about a flash (skeptic round 3).
-  await send("Network.emulateNetworkConditions", { offline: false, latency: 200, downloadThroughput: 120000, uploadThroughput: 120000 });
+  await send("Network.emulateNetworkConditions", {
+    offline: false,
+    latency: 200,
+    downloadThroughput: 120000,
+    uploadThroughput: 120000,
+  });
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
   let prmFlash = false;
@@ -112,7 +138,9 @@ export async function h13ePrmNoFlash({ evaluate, send, check, sleep, PORT }: Sui
   let afterCam = 0;
   for (let i = 0; i < 120; i++) {
     try {
-      const s = await evaluate<{ old: boolean; ready: boolean; door: boolean; cam: boolean }>(`({ old: window.__h13d === 1, ready: !!document.getElementById("seed-form"), door: ${doorShown}, cam: !!document.querySelector("#lf-stage.cam") })`);
+      const s = await evaluate<{ old: boolean; ready: boolean; door: boolean; cam: boolean }>(
+        `({ old: window.__h13d === 1, ready: !!document.getElementById("seed-form"), door: ${doorShown}, cam: !!document.querySelector("#lf-stage.cam") })`,
+      );
       if (fresh) {
         if (s.door) prmFlash = true;
         if (s.cam) prmCam = true;
@@ -123,7 +151,12 @@ export async function h13ePrmNoFlash({ evaluate, send, check, sleep, PORT }: Sui
     if (prmCam && ++afterCam > 4) break;
     await sleep(75);
   }
-  await send("Network.emulateNetworkConditions", { offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1 });
+  await send("Network.emulateNetworkConditions", {
+    offline: false,
+    latency: 0,
+    downloadThroughput: -1,
+    uploadThroughput: -1,
+  });
   check(
     "H13e and never shows them on a healthy THROTTLED load: the pre-.cam window is seconds wide and no prm sample ever sees a door before the bundle provably boots",
     prmCam && !prmFlash,

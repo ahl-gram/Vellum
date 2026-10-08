@@ -74,7 +74,14 @@ export function readPaceSweep(samples: readonly PaceSample[], opts: PaceSweepOpt
     const rate = fitRate(leg);
     const expected = expectedRate(span, pace);
     const dev = rate / expected - 1;
-    return { pace, n: leg.length, rate, expected, dev, ok: leg.length >= PACE_LEG_MIN_SAMPLES && Math.abs(dev) <= PACE_RATE_TOLERANCE };
+    return {
+      pace,
+      n: leg.length,
+      rate,
+      expected,
+      dev,
+      ok: leg.length >= PACE_LEG_MIN_SAMPLES && Math.abs(dev) <= PACE_RATE_TOLERANCE,
+    };
   });
 
   let backward = 0;
@@ -103,7 +110,13 @@ export function readPaceSweep(samples: readonly PaceSample[], opts: PaceSweepOpt
   const ratio = first && lastLeg ? lastLeg.rate / first.rate : NaN;
   const ok = legs.every((l) => l.ok) && backward === 0 && jump <= jumpAllowed && !parked;
   const detail = JSON.stringify({
-    legs: legs.map((l) => ({ pace: l.pace, n: l.n, rate: Number(l.rate.toFixed(4)), expected: Number(l.expected.toFixed(4)), devPct: Number((l.dev * 100).toFixed(1)) })),
+    legs: legs.map((l) => ({
+      pace: l.pace,
+      n: l.n,
+      rate: Number(l.rate.toFixed(4)),
+      expected: Number(l.expected.toFixed(4)),
+      devPct: Number((l.dev * 100).toFixed(1)),
+    })),
     ratio: Number(ratio.toFixed(2)),
     backward,
     jump: Number(jump.toFixed(1)),
