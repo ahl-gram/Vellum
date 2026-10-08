@@ -115,10 +115,13 @@ home's line wins for the lane and this file's for the orchestrator.
   pull request or per named group of lanes, and a clearance covers what it names: a pull request or
   a lane outside it goes back to him.
 - **Before a merge, the pull request's one review round has run and its fixes are in** (workflow
-  step 15). Read every commit after that round yourself, since nothing reviewed it, and say so in the
-  report. Where main moved under the branch, the lane runs workflow step 10's combined-state check
-  first: `main`'s required checks do not require a branch to be current, so the merged state is not
-  the state CI ran.
+  step 15). What says so is the lane's final report, the one its definition's "When to stop" lists,
+  carrying the head sha and the skeptic's findings with what was done about each; that sha is the
+  one the merge's `--match-head-commit` takes. Never your own reading of the branch's commits, its
+  body or CI. Read every commit after that round yourself, since nothing reviewed it, and say so in
+  your report to Alex. Where main moved under the branch, the lane runs workflow step 10's
+  combined-state check first: `main`'s required checks do not require a branch to be current, so the
+  merged state is not the state CI ran.
 - **For a refactor, a moved proof or a new guard, run a check of your own before the merge.** Build a
   detached tree at the pull request's head (`git -C <main checkout> worktree add --detach <path>
   <sha>`, `node_modules` linked by path as `scripts/agent-sandbox.ts` does), run the lane's proof and
@@ -167,8 +170,8 @@ home's line wins for the lane and this file's for the orchestrator.
   scratch tools, and runs recon and the plan skeptic on its own pull request's row, as workflow
   step 8's plan per pull request implies.
 - **Retire a lane's tree once its last pull request has merged and it has reported.** Copy its `out/`
-  first: `git worktree remove` deletes the gitignored `out/`, and `git status --porcelain` reports
-  nothing there. The harness locks the tree to the session's own process, so unlock it once the lane
+  first, giving each delivery folder copied its page as workflow step 6 says: `git worktree remove`
+  deletes the gitignored `out/`, and `git status --porcelain` reports nothing there. The harness locks the tree to the session's own process, so unlock it once the lane
   has reported (`git -C <main checkout> worktree unlock <path>`), remove the `node_modules` link,
   then `git -C <main checkout> worktree remove --force <path>`.
 - **Stop the finished review agents a retired lane dispatched.** They stay in the session's agent

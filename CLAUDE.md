@@ -265,7 +265,9 @@ the sandbox for both review agents that build one, so the depth lives in one pla
 Any chart, diagnostic overlay, before/after image or other visual artifact you write to the filesystem
 goes in **`out/`** (the CLI's default output location; gitignored). That is where Alex looks, in the
 MAIN checkout: name the files in your reply so they are easy to open, and do not scatter samples in
-`/tmp`, the scratchpad or anywhere else he will not find. A dispatched lane's own `out/` is inside
+`/tmp`, the scratchpad or anywhere else he will not find. A delivery there is one folder with its own
+notes and its own page, made the way `handbook/specs/development-workflow.md` step 6 says, and the
+reply names that page too. A dispatched lane's own `out/` is inside
 its worktree and he never opens it, so a lane reports absolute paths and whoever dispatched it copies
 them across, per `handbook/specs/development-workflow.md` step 6, which also says why an agent whose
 only output is `out/` never runs in a harness-isolated tree: that tree is deleted when the run ends
