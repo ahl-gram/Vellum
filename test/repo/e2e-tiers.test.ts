@@ -1,13 +1,21 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { dirname, join, relative, resolve } from "node:path";
+import vm from "node:vm";
 import { E2E_SUITE_ORDER, SMOKE_SUITES, E2E_SUITES_VAR } from "../../e2e/support/suites.ts";
 import type { E2eSuiteName } from "../../e2e/support/suites.ts";
 import { E2E_LANES } from "../../e2e/support/lanes.ts";
 import { BUNDLE_ENTRIES } from "../../scripts/build-app-bundles.ts";
-import { e2eSuiteFamily, e2eSuitePath, readE2eSource } from "../../test-support/e2e-source.ts";
-import { containment, CTX_THROWING_WAITS } from "../../test-support/e2e-containment.ts";
+import { e2eSourcePaths, e2eSuiteFamily, readE2eSource } from "../../test-support/e2e-source.ts";
+import { CTX_THROWING_WAITS } from "../../scripts/lint/e2e-steps.ts";
+import type { SuiteContext } from "../../e2e/types.ts";
+import { r0ToR4Worker } from "../../e2e/suites/render.ts";
+import { rr0Boots } from "../../e2e/suites/reading-room/arrival.ts";
+import { readingRoomKit } from "../../e2e/suites/reading-room/kit.ts";
+import { run as fallback } from "../../e2e/suites/fallback.ts";
+import { rr14Fallback } from "../../e2e/suites/reading-room/fallback.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const src = (p: string) => readE2eSource(join(ROOT, p));
@@ -52,22 +60,80 @@ test("the smoke tier covers every page that ships its own bundle", () => {
   }
 });
 
-test("the two worker-bearing surfaces assert the worker is live AND that it degrades", () => {
-  // One worker/fallback check per surface; room-address cannot stand in here, it only checks the worker hook EXISTS.
+test("smoke keeps the three suites that cover the worker and its fallback", () => {
   for (const suite of ["render", "fallback", "reading-room"] as const) {
     assert.ok(SMOKE_SUITES.includes(suite), `smoke must keep ${suite} for worker/fallback coverage`);
   }
-  const family = (name: string) => e2eSuiteFamily(ROOT, name).map(src).join("\n");
-  const assertsWorkerLive = (name: string) => /__vellum\w*UsesWorker(\(\))?\s*===?\s*true/.test(family(name));
-  assert.ok(assertsWorkerLive("render"), "render no longer asserts the worker is live");
-  assert.ok(assertsWorkerLive("reading-room"), "reading-room no longer asserts the worker is live");
-  for (const name of ["fallback", "reading-room"]) {
-    assert.match(
-      family(name),
-      /serverState\.blockWorker = true/,
-      `suites/${name}.ts no longer exercises the 404 fallback`,
-    );
+});
+
+function standIn(hook: string, live: boolean) {
+  const seen = new Map<string, boolean>();
+  const log: Array<boolean | "navigate"> = [];
+  const window = { [hook]: () => live };
+  const ctx = {
+    evaluate: async (payload: string): Promise<unknown> => {
+      try {
+        return await (vm.runInNewContext(payload, { window }) as Promise<unknown>);
+      } catch {
+        return {};
+      }
+    },
+    check: (name: string, ok: boolean) => {
+      const id = name.split(" ")[0]!;
+      if (!seen.has(id)) seen.set(id, ok);
+    },
+    send: (method: string) => {
+      if (method === "Page.reload" || method === "Page.navigate") log.push("navigate");
+      return Promise.resolve({});
+    },
+    sleep: () => Promise.resolve(),
+    waitReady: () => Promise.resolve(true),
+    waitSettled: () => Promise.resolve(),
+    alive: () => Promise.resolve(true),
+    skippedGroups: [],
+    consoleErrors: [],
+    http4xx: [],
+    PORT: 0,
+    serverState: {
+      get blockWorker(): boolean {
+        return log.findLast((entry) => entry !== "navigate") ?? false;
+      },
+      set blockWorker(v: boolean) {
+        log.push(v);
+      },
+    },
+  };
+  return { ctx: ctx as unknown as SuiteContext, seen, log };
+}
+const ranOver = async (run: () => Promise<void>): Promise<void> => {
+  try {
+    await run();
+  } catch {}
+};
+
+test("R1 and RR1 pass a page whose worker is live and fail one whose worker is dead, read as the page reads them (census row 1, run over a stand-in page)", async () => {
+  for (const live of [true, false]) {
+    const explorer = standIn("__vellumUsesWorker", live);
+    await ranOver(() => r0ToR4Worker(explorer.ctx));
+    assert.equal(explorer.seen.get("R1"), live, `R1 with the worker ${live ? "live" : "dead"}`);
+    const room = standIn("__vellumReadingRoomUsesWorker", live);
+    await ranOver(() => rr0Boots(readingRoomKit(room.ctx)));
+    assert.equal(room.seen.get("RR1"), live, `RR1 with the worker ${live ? "live" : "dead"}`);
   }
+});
+
+test("both fallback checks tell the server to refuse the worker before they read the page (census row 1, run over a stand-in page)", async () => {
+  const refusedFirst = (log: ReadonlyArray<boolean | "navigate">): boolean =>
+    log.includes(true) && log.indexOf(true) < log.indexOf("navigate");
+  const explorer = standIn("__vellumUsesWorker", false);
+  await ranOver(() => fallback(explorer.ctx));
+  assert.ok(refusedFirst(explorer.log), "the Explorer's fallback does not refuse the worker before it loads the page");
+  const room = standIn("__vellumReadingRoomUsesWorker", false);
+  await ranOver(() => rr14Fallback(room.ctx));
+  assert.ok(
+    refusedFirst(room.log),
+    "the Reading Room's fallback does not refuse the worker before it loads the page, read as before its first navigation, so a refusal moved to between about:blank and the room reds too (a false red, the safe direction)",
+  );
 });
 
 test("the smoke tier stays materially cheaper than the full suite", () => {
@@ -231,170 +297,18 @@ test("every CI trigger gets the same full coverage, so nothing is conditional on
   assert.doesNotMatch(step, /full-e2e/, "the full-e2e label is wired back in, so PRs differ from main again");
 });
 
-// The helper is proved in isolation by test/repo/step-support.test.ts; what no test could see is a suite quietly going back to a bare await, which is the Issue #534 defect returning one suite at a time.
-// The GROUPS by name, never "at least one step": an import plus a single `await step(` left five of room-drawer's six groups unwrappable with this sweep still green (skeptic, 2026-09-10), which is a guard shaped like one instance of the class it claims to cover.
-const STEPPED_GROUPS: Readonly<Record<string, readonly string[]>> = {
-  render: ["R8", "R11a", "R11b", "R11c", "R12a", "R12b", "R15a", "R15b", "R13a", "R13b", "R13c", "R13e", "R restore"],
-  motion: ["D1, D2", "D3"],
-  turn: ["T1, T1b", "T2", "T3, T4", "T5", "T6", "T6b"],
-  verso: ["V setup", "V0", "V2", "V3", "V4b", "V5, V5b", "V restore"],
-  "zoom-gestures": ["ZG2, ZG3, ZG4", "ZG restore"],
-  "glass-ceremony": ["G setup", "G restore"],
-  cards: ["P setup", "P19", "P20 to P27", "P24", "P28 to P33", "P30", "P restore"],
-  fallback: ["B2b", "B3"],
-  "region-detail": ["RD setup", "RD3, RD4", "RD5", "RD restore"],
-  ribbon: ["RB1 to RB5e", "RB7", "RB8"],
-  prospect: ["PB2 to PB5", "PB6", "PB7 to PB7d", "PB7e", "PB8", "PB9"],
-  broadside: ["BR1 to BR1c", "BR2", "BR7"],
-  zoom: ["Z setup", "Z11", "Z12", "Z14a", "Z14b", "Z7", "Z13", "Z20d", "Z20g", "Z restore"],
-  survey: [
-    "SV1",
-    "SV2 to SV2c",
-    "SV2d",
-    "SV2e",
-    "SV2g",
-    "SV2h",
-    "SV2i",
-    "SV2j",
-    "SV2p",
-    "SV2m",
-    "SV2o",
-    "SV3",
-    "SV4",
-    "SV5c",
-    "SV5d",
-    "SV6",
-    "SV9",
-    "SV10",
-    "SV2n",
-  ],
-  cluster: ["DN1, DN2, DN3, DN9, DN3r", "DN5", "DN6", "DN7", "DN4", "DR11", "DR12", "DR13"],
-  "chart-drawer": [
-    "CD1",
-    "CD2, CD2b, CD2c",
-    "CD23",
-    "CD3",
-    "CD44",
-    "CD45",
-    "CD46",
-    "CD4",
-    "CD5",
-    "CD7, CD7b, CD7c",
-    "CD47",
-    "CD8",
-    "CD9, CD11, CD12, CD22, CD43",
-    "CD13",
-    "CD18",
-    "CD18b",
-    "CD48",
-    "NA2",
-    "CD25, CD26, CD30",
-    "CD27",
-    "CD28, CD29, CD34, CD35, CD31",
-    "CD32",
-    "CD49",
-    "CD50",
-    "CD36",
-    "CD37",
-    "CD38",
-    "CD39",
-    "CD40",
-    "CD41, CD42",
-  ],
-  "document-rooms": ["IX3", "NA3", "IX8"],
-  home: ["H19", "H19b", "H20"],
-  specimen: ["SB4"],
-  corners: ["CO1", "CO4", "CO2", "CO3", "CO5", "CO6", "CO7", "FL1", "FL2", "FL3", "FL4", "FL5", "FL6", "FL7"],
-  stage: ["NS1", "NA4", "EA1", "EA2, EA3, EL1, EL2", "EA4", "EA5"],
-};
-
-const SUITE_FILES = E2E_SUITE_ORDER.map((name) => [name, e2eSuitePath(name)] as const);
-const familyOf = (name: string) =>
-  e2eSuiteFamily(ROOT, name).map((path) => ({ path, text: readFileSync(join(ROOT, path), "utf8") }));
-
-test("the harness hands out exactly the two throwing waits the scan below seeds from, so a third one cannot arrive unread", () => {
+test("the harness hands out exactly the two throwing waits vellum/e2e-throw-inside-step seeds from, so a third one cannot arrive unread", () => {
   const harness = src("e2e/harness.ts").split("\n");
   const found = harness
     .map((line, i) => ({ line, i }))
-    .filter(({ line }) => /^async function wait\w+\(/.test(line))
+    .filter(({ line }) => /^(?:async function wait\w+\(|(?:export )?const wait\w+ = async)/.test(line))
     .filter(({ i }) => harness.slice(i, i + 12).some((l) => /throw new Error\("wait/.test(l)))
-    .map(({ line }) => line.replace(/^async function (wait\w+)\(.*$/, "$1"));
+    .map(({ line }) => line.replace(/^(?:async function |(?:export )?const )(wait\w+)\W.*$/, "$1"));
   assert.deepEqual(
     found,
     CTX_THROWING_WAITS.filter((w) => w !== "settle"),
-    "the harness's throwing waits are not the two CTX_THROWING_WAITS seeds this file's scan starts from",
+    "the harness's throwing waits are not the two CTX_THROWING_WAITS seeds vellum/e2e-throw-inside-step starts from",
   );
-});
-
-test("every suite with a wait that THROWS is named in the step roster, and every rostered suite has one (#560)", () => {
-  const unstepped: string[] = [];
-  const idle: string[] = [];
-  for (const name of E2E_SUITE_ORDER) {
-    const throwing = containment(familyOf(name)).throwingCalls > 0;
-    if (throwing && !(name in STEPPED_GROUPS)) unstepped.push(name);
-    if (!throwing && name in STEPPED_GROUPS) idle.push(name);
-  }
-  assert.deepEqual(
-    unstepped,
-    [],
-    "these suites call a wait that throws and step nothing, so a wait that gives up there records the SUITE as red, loses every check after it, and three such suites in a row trip the streak breaker into a HARNESS ERROR (#560)",
-  );
-  assert.deepEqual(
-    idle,
-    [],
-    "these suites are in the roster but the scan found no throwing call in their family at all, so it proves nothing there",
-  );
-});
-
-test("a suite that builds a step is named in the roster, so adopting one without joining cannot pass unread", () => {
-  const adopters = SUITE_FILES.filter(([, file]) => /from "\.\.\/support\/step\.ts"/.test(src(file))).map(
-    ([name]) => name,
-  );
-  assert.ok(
-    adopters.length > 0,
-    "no suite imports support/step.ts at all, so the assertion below would read an empty list",
-  );
-  assert.deepEqual(
-    adopters.filter((name) => !(name in STEPPED_GROUPS)),
-    [],
-    "a suite adopted step and never joined STEPPED_GROUPS, so its groups are unpinned and one can be unwrapped silently",
-  );
-});
-
-// The guard the roster cannot be: STEPPED_GROUPS pins the step NAMES, and a wait moved out of its step keeps every one of them.
-test("every call of a wait that throws is INSIDE a step, across each suite's file and folder (#560)", () => {
-  for (const name of E2E_SUITE_ORDER) {
-    const got = containment(familyOf(name));
-    const groups = STEPPED_GROUPS[name] ?? [];
-    assert.equal(
-      got.steps.length,
-      groups.length,
-      `suites/${name}.ts: the scan read ${got.steps.length} step calls against ${groups.length} in the roster, so it is reading the wrong files`,
-    );
-    assert.deepEqual(
-      got.breaches,
-      [],
-      `suites/${name}.ts calls a thrower or throws outside every step, so a timeout there fails the SUITE rather than the numbered check, and the checks after it never run (#560)`,
-    );
-  }
-});
-
-test("every check group that waits is still inside its own step, by name (#534)", () => {
-  for (const [suite, groups] of Object.entries(STEPPED_GROUPS)) {
-    const file = src(e2eSuitePath(suite));
-    assert.match(file, /from "\.\.\/support\/step\.ts"/, `suites/${suite}.ts no longer imports support/step.ts`);
-    assert.match(
-      file,
-      /const step = makeStep\(ctx\)/,
-      `suites/${suite}.ts no longer builds a step, so a wait that gives up there takes the suite with it again`,
-    );
-    const stepped = [...file.matchAll(/await step\("([^"]+)"/g)].map((m) => m[1]);
-    assert.deepEqual(
-      stepped,
-      groups.slice(),
-      `suites/${suite}.ts's stepped groups are not the ones this roster names: one was unwrapped, renamed, reordered or added without joining the roster`,
-    );
-  }
 });
 
 test("npm runs the e2e runner and the lane driver themselves, so neither script can drift off the file it names", () => {
@@ -405,4 +319,80 @@ test("npm runs the e2e runner and the lane driver themselves, so neither script 
     "node e2e/run.ts",
     "npm run test:e2e no longer runs the runner, and nothing else notices until someone runs it",
   );
+});
+
+test("the e2e source list reads every TypeScript file under e2e/ at any depth, and nothing else", () => {
+  const root = mkdtempSync(join(tmpdir(), "vellum-e2e-notes-"));
+  try {
+    const plant = (rel: string): void => {
+      mkdirSync(dirname(join(root, rel)), { recursive: true });
+      writeFileSync(join(root, rel), "");
+    };
+    [
+      "e2e/top.ts",
+      "e2e/suites/split/nested.ts",
+      "e2e/left.mjs",
+      "scripts/other.ts",
+      "scripts/e2e-beside.ts",
+      "test/e2e/x.test.ts",
+    ].forEach(plant);
+    assert.deepEqual(
+      e2eSourcePaths(root)
+        .map((f) => relative(root, f))
+        .sort(),
+      ["e2e/top.ts", "e2e/suites/split/nested.ts"].sort(),
+    );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("no e2e source is an .mts, .cts or .tsx: the lint reads only e2e/**/*.ts and the skip collector only .ts, so such a file escapes both and the step rule", () => {
+  const listing = readdirSync(join(ROOT, "e2e"), { recursive: true, encoding: "utf8" });
+  assert.ok(
+    listing.includes(join("suites", "specimen", "desktop.ts")),
+    "the listing missed a suite's part file, so it reads the wrong tree",
+  );
+  assert.deepEqual(
+    listing.filter((f) => /\.(?:mts|cts|tsx)$/.test(f)),
+    [],
+    "an e2e source the lint and the skip collector do not read; the checker follows an imported .mts, .cts or .tsx and honors its directives",
+  );
+});
+
+test("a suite's family is its suite file and every TypeScript file in its own folder at any depth, and never a sibling whose name it prefixes", () => {
+  const root = mkdtempSync(join(tmpdir(), "vellum-e2e-family-"));
+  try {
+    const plant = (rel: string): void => {
+      mkdirSync(dirname(join(root, rel)), { recursive: true });
+      writeFileSync(join(root, rel), "");
+    };
+    [
+      "e2e/suites/zoom.ts",
+      "e2e/suites/zoom/reads.ts",
+      "e2e/suites/zoom/deep/checks.ts",
+      "e2e/suites/zoom/notes.md",
+      "e2e/suites/zoom-gestures.ts",
+      "e2e/suites/zoom-gestures/checks.ts",
+      "e2e/support/zoom.ts",
+      "e2e/zoom.ts",
+      "e2e/suites/health.ts",
+    ].forEach(plant);
+    assert.deepEqual(e2eSuiteFamily(root, "zoom"), [
+      "e2e/suites/zoom.ts",
+      "e2e/suites/zoom/deep/checks.ts",
+      "e2e/suites/zoom/reads.ts",
+    ]);
+    assert.deepEqual(e2eSuiteFamily(root, "zoom-gestures"), [
+      "e2e/suites/zoom-gestures.ts",
+      "e2e/suites/zoom-gestures/checks.ts",
+    ]);
+    assert.deepEqual(
+      e2eSuiteFamily(root, "health"),
+      ["e2e/suites/health.ts"],
+      "a suite with no folder is its file alone",
+    );
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
 });

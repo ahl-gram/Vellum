@@ -14,7 +14,7 @@ type Trail = {
   hereColor: string | null;
   hereLine: string | null;
 };
-export type TrailKit = SuiteContext & { settle: ReturnType<typeof makeSettle>; goto: (path: string) => Promise<void> };
+export type TrailKit = ReturnType<typeof trailKit>;
 
 const NARROW = 640;
 const PARCHMENT = "rgb(239, 230, 207)";
@@ -65,7 +65,7 @@ const READ: Payload<Trail> = `(() => {
 
 const READY: Payload<boolean> = `document.readyState === "complete" && (!document.fonts || document.fonts.status === "loaded") && !!document.querySelector("header.chrome nav.rooms")`;
 
-export function trailKit(ctx: SuiteContext): TrailKit {
+export function trailKit(ctx: SuiteContext) {
   const settle = makeSettle(ctx);
   const goto = async (path: string): Promise<void> => {
     await ctx.send("Page.navigate", { url: "about:blank" });
