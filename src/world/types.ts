@@ -4,6 +4,7 @@ import type { FlowResult } from "../hydrology/flow.ts";
 import type { River } from "../hydrology/rivers.ts";
 import type { MapType, UvWindow } from "../terrain/heightfield.ts";
 import type { Culture, MapTitle } from "../society/names.ts";
+import type { CultureId } from "../society/culture-ids.ts";
 import type { Road } from "../society/roads.ts";
 import type { Settlement } from "../society/sites.ts";
 import type { RealmsResult } from "../society/realms.ts";
@@ -20,6 +21,7 @@ export type WorldRecipe = {
   readonly band: ClimateBand;
   /** Coastline irregularity in [0, 1]; omitted uses the map type's SHAPES value. */
   readonly coastWarp?: number;
+  readonly culture?: CultureId;
 };
 
 export type NamedSettlement = Settlement & {
