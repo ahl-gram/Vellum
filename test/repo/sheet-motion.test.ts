@@ -29,7 +29,9 @@ const lintWith = (rule?: string, options?: unknown): ESLint =>
     ...(rule ? { overrideConfig: { files: ["public/**/*.css"], rules: { [rule]: ["error", options] } } } : {}),
   });
 
-const reported = async (plant: Plant, path: string, rule: string, options?: unknown): Promise<number[]> => {
+type Found = { readonly lines: number[]; readonly stale: string[] };
+
+const found = async (plant: Plant, path: string, rule: string, options?: unknown): Promise<Found> => {
   const eslint = lintWith(options === undefined ? undefined : rule, options);
   const [result] = await eslint.lintText(plant.map(([line]) => line).join("\n"), { filePath: join(ROOT, path) });
   assert.deepEqual(
@@ -37,8 +39,15 @@ const reported = async (plant: Plant, path: string, rule: string, options?: unkn
     [],
     `the plant at ${path} does not parse, so no rule read it`,
   );
-  return [...new Set(result!.messages.filter((m) => m.ruleId === rule).map((m) => m.line))];
+  const mine = result!.messages.filter((m) => m.ruleId === rule);
+  return {
+    lines: [...new Set(mine.filter((m) => m.messageId !== "stale").map((m) => m.line))],
+    stale: mine.filter((m) => m.messageId === "stale").map((m) => m.message.slice(0, m.message.indexOf(" is "))),
+  };
 };
+
+const reported = async (plant: Plant, path: string, rule: string): Promise<number[]> =>
+  (await found(plant, path, rule)).lines;
 
 const refusedLines = (plant: Plant): number[] => plant.flatMap(([, r], i) => (r ? [i + 1] : []));
 
@@ -64,6 +73,7 @@ test("no hover or active rule lifts by a literal: the raise is a token, and a li
     ["@keyframes k { 70% { transform: translateY(-2px); } }", PASS],
     [".a:hover { translate: 0 -2px; }", PASS],
     [".a:hover { transform: translate(0, -2px) translate3d(0, -2px, 0); }", PASS],
+    [".a:hover { transform: translateY(calc(-2px)); }", REFUSE],
   ];
   await assertRefuses(
     plant,
@@ -77,14 +87,14 @@ test("no hover or active rule lifts by a literal: the raise is a token, and a li
     [".x:hover { transform: translateY(-6px); }", REFUSE],
   ];
   assert.deepEqual(
-    await reported(listed, "public/motion.css", LIFT, { sanctioned }),
-    [1, 2, 3],
-    "every arm is sanctioned at that value in this file, and an entry that matched nothing is reported stale on line 1",
+    await found(listed, "public/motion.css", LIFT, { sanctioned }),
+    { lines: [2, 3], stale: ["motion.css :: .gone:hover"] },
+    "every arm is sanctioned at that value in this file, and only the entry that matched nothing is stale",
   );
   assert.deepEqual(
-    await reported(listed, "public/house.css", LIFT, { sanctioned }),
-    [1, 2, 3],
-    "an entry for another file sanctions nothing here",
+    await found(listed, "public/house.css", LIFT, { sanctioned }),
+    { lines: [1, 2, 3], stale: [] },
+    "an entry for another file sanctions nothing here, and is not this file's to call stale",
   );
 });
 
@@ -114,9 +124,14 @@ test("every hover tip goes somewhere: a rotate() on hover stands only as a TIPPI
     [".z:hover { transform: rotate(1deg); }", REFUSE],
   ];
   assert.deepEqual(
-    await reported(listed, "public/motion.css", TIP, lists),
-    [1, 4],
-    "the stale entry on line 1, the unlisted tip on 4",
+    await found(listed, "public/motion.css", TIP, lists),
+    { lines: [4], stale: ["motion.css :: .gone:hover"] },
+    "a listed tip passes, the unlisted tip on 4 reds, and only the entry that matched nothing is stale",
+  );
+  assert.deepEqual(
+    (await found(listed, "public/house.css", TIP, lists)).stale,
+    [],
+    "another file's entries are not this file's to call stale",
   );
 });
 
@@ -134,6 +149,9 @@ test("an inline-block keeps its bullet on line one: a subject that settles displ
     [".g:hover .h { display: inline-block; }", REFUSE],
     ['a[href^="http:"] { display: inline-block; }', REFUSE],
     ["@media print { .k { display: inline-block; } }", REFUSE],
+    [".m { display: inline-block; } .m { color: red; }", REFUSE],
+    [".n { vertical-align: top; } .n { display: inline-block; }", PASS],
+    [".p .q:hover .r { display: inline-block; }", REFUSE],
   ];
   await assertRefuses(
     plant,
@@ -145,9 +163,9 @@ test("an inline-block keeps its bullet on line one: a subject that settles displ
     [".v { display: inline-block; }", REFUSE],
   ];
   assert.deepEqual(
-    await reported(listed, "public/motion.css", BULLET, { outside: ["motion.css :: .w a", "motion.css :: .gone"] }),
-    [1, 2],
-    "the stale entry on line 1, the unlisted inline-block on 2",
+    await found(listed, "public/motion.css", BULLET, { outside: ["motion.css :: .w a", "motion.css :: .gone"] }),
+    { lines: [2], stale: ["motion.css :: .gone"] },
+    "a listed inline-block passes, the unlisted one on 2 reds, and only the entry that matched nothing is stale",
   );
 });
 

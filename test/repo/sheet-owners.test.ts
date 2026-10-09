@@ -70,6 +70,7 @@ test("no sheet but public/house.css dresses the controls: a background on a list
     ["select { background: red; }", PASS],
     [".x select, .y { background: red; }", PASS],
     ["select .button { background: red; }", PASS],
+    [".x select button { background: red; }", PASS],
   ];
   await assertRule(plant, CONTROLS, "public/print-room/index.css", ["public/house.css"]);
 });
@@ -78,7 +79,28 @@ const KIT_PLANT: Plant = [
   [".legend .legend-head { display: block; color: red; }", REFUSE],
   [".slip-head h2 { color: var(--ink-brown); }", REFUSE],
   [".legend-btn .room { color: red; }", REFUSE],
-  ["#sheet .legend-head { color: red; }", REFUSE],
+  ...["sheet", "map-viewport", "map", "zoom-in", "zoom-out", "zoom-reset"].map(
+    (id) => [`#${id} .legend-head { color: red; }`, REFUSE] as const,
+  ),
+  ...[
+    "background-color",
+    "background-image",
+    "border-top",
+    "outline",
+    "outline-color",
+    "font-weight",
+    "letter-spacing",
+    "text-decoration",
+    "text-transform",
+  ].map((property) => [`.slip { ${property}: inherit; }`, REFUSE] as const),
+  [".cr-num { color: red; }", REFUSE],
+  ["label .legend-head { color: red; }", REFUSE],
+  [".legend select .legend-head { color: red; }", REFUSE],
+  [".slip { background-position: 0 0; }", PASS],
+  ...["select", "input", "option", "optgroup", "textarea", "label"].map(
+    (element) => [`.legend-head ${element} { color: red; }`, PASS] as const,
+  ),
+  [".slip:not(.page-own) { color: red; }", PASS],
   [".legend-head, .slip .cr-num { font-style: italic; }", REFUSE],
   [".zoom-btn { box-shadow: none; }", REFUSE],
   [".folded { opacity: 0.5; }", REFUSE],
@@ -98,6 +120,7 @@ test("no page sheet re-dresses the kit: a colour, border, shadow, face or tracki
     "public/motion.css",
     "public/shell.css",
     "public/fonts.css",
+    "public/atelier-split.css",
   ]);
   assert.deepEqual(
     await reported(KIT_PLANT, "public/home-noscript.css", KIT),
@@ -122,6 +145,8 @@ test("no sheet but public/atelier.css dresses the kit's contents row or the corn
     [".cr-num { color: var(--ink-dark); }", REFUSE],
     [".contents .cr-text { margin: 0; }", REFUSE],
     [".x, .cr-num { color: red; }", REFUSE],
+    [".cr-text { color: red; }", REFUSE],
+    [".contents .cr-num { color: red; }", REFUSE],
     [".contents li.on .cr-num { color: red; }", PASS],
     ['.itinerary .cr-num::after { content: " lg"; }', PASS],
     [".cr-numeral { color: red; }", PASS],
@@ -135,6 +160,7 @@ test("no sheet but public/atelier.css dresses the kit's contents row or the corn
     [".folio-controls select.control { background: none; }", REFUSE],
     [".folio-controls select.control { width: 7.4rem; }", PASS],
     [".folio-controls select.control option { appearance: none; }", PASS],
+    [".folio-controls select.control, .x { appearance: none; }", REFUSE],
   ];
   for (const sheet of ["public/print-room/index.css", "public/ribbon/index.css"])
     await assertRule(select, SELECT, sheet, ["public/atelier.css"]);
@@ -150,7 +176,7 @@ test("the engine's dressing has one home, public/living-chart.css, which names n
     [".voyage-wake { stroke: red; }", REFUSE],
     [".ages-range:focus-visible { outline: 0; }", REFUSE],
     ["button:not(.lf-station):not(.place-hit):hover { color: red; }", PASS],
-    [".pcx, .voyager { color: red; }", PASS],
+    [".pcx, .voyager, .my-pc-name, .place-hits { color: red; }", PASS],
     ["/* .pc-name and #map, named in a comment */", PASS],
   ];
   await assertRule(hooks, ENGINE, "public/explorer/index.css", ["public/living-chart.css"]);
