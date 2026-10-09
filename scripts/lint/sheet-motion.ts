@@ -29,15 +29,13 @@ export const TIPPING_LINKS: readonly string[] = [
   "motion.css :: body:has(.room-name) .wordmark a:hover, body:has(.room-name) .wordmark a:focus-visible",
   // Issue #270 ruling 7: the footnote marks follow through to /glossary/ anchors, so the ruling extended the tipping surface to them.
   "explorer/broadside.css :: a.fn:hover",
-  // `cardFigureHtml` in `src/cli/gallery.ts` wraps every contact-sheet plate in a link to the Explorer at the plate's seed (gallery-room.test.ts GR5 pins it).
   "src/cli/gallery.ts :: figure img:hover",
-  // The lift is scoped to figure a img, so where no link is made no lift applies (the Print Room's hidden copy carries no link).
   "src/atlas/document.ts :: .atlas-sheet figure a img:hover",
   "living-chart.css :: .pc-prospect:hover, .pc-prospect:focus-visible",
   "reading-room/index.css :: .rr-prospect a:hover img, .rr-prospect a:focus-visible img",
 ];
 
-/** Chart instruments (ratified 2026-08-24, PR #468 live review): a station pip's grow promises "this opens the station's slip in place" and the slip's Enter link is what leaves the page; kept apart from TIPPING_LINKS so that set stays true when it says a surface goes somewhere. */
+// Ratified 2026-08-24 (PR #468 live review): a station pip's grow opens its slip in place, and the slip's Enter link is what leaves the page.
 export const CHART_INSTRUMENTS: readonly string[] = [
   "index.css :: .lf-station:hover .lf-station-glyph, .lf-station:focus-visible .lf-station-glyph",
 ];
