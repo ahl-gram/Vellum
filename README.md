@@ -102,7 +102,8 @@ cultures renames every world. A naming change re-rolls existing seeds, owes a
 hero-chart regen (`npm run charts:regen` + `npm run og`), and must respect the
 **covenant seed**: seed 42's culture pick must keep landing on oromi across
 roster changes, so the golden world's every name stays bit-identical.
-`test/world/covenant-seed42.test.ts` fails loudly if it ever moves.
+`test/world/covenant-seed42.test.ts` fails loudly if it ever moves. A culture's `id` is world
+identity too: a world founded from a sentence names its culture by `id`, so an `id` is never renamed.
 
 ## Run it locally
 
