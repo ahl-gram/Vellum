@@ -13,7 +13,7 @@ import {
   type RuleNode,
 } from "./sheet-tokens.ts";
 
-// The grander plate, gallery and atlas scales are a question Issue #405 left standing, so each literal is sanctioned at its exact file, selector and value, and every comma arm of a literal-bearing rule must be individually sanctioned: a new surface cannot borrow an exception.
+// The grander plate, gallery and atlas scales are a question Issue #405 left standing, so each literal is sanctioned at its exact file, selector and value.
 export const SANCTIONED_LIFTS: Readonly<Record<string, string>> = {
   "motion.css :: .plate:hover": "-5px",
   "motion.css :: .plate:active": "-1px",
@@ -42,11 +42,10 @@ export const CHART_INSTRUMENTS: readonly string[] = [
   "index.css :: .lf-station:hover .lf-station-glyph, .lf-station:focus-visible .lf-station-glyph",
 ];
 
-/** A tip whose surface does not navigate, held on the record until Alex rules; park a line here only with the measurement written under it. */
+/** Park a line here only with the measurement written under it. */
 export const TIPS_AWAITING_A_RULING: readonly string[] = [];
 
-// Hand-measured (Issue #356): an inline-block takes its baseline from its LAST line box, so a wrapped tipping slip drops its bullet 26.00px to line two and vertical-align: top pins it back; a ::marker is not reachable from the DOM, so the rule is held by the lint.
-/** Each entry is a MEASUREMENT of the markup taken 2026-08-12, not a rule: it says these boxes are not list items on the pages that use them today, so re-take it when you touch one. */
+// Hand-measured (Issue #356): an inline-block takes its baseline from its LAST line box, so a wrapped slip drops its bullet 26.00px to line two; each entry is a measurement of the markup taken 2026-08-12 that the box is no list item, so re-take it when you touch one.
 export const INLINE_BLOCKS_OUTSIDE_MARKER_LISTS: readonly string[] = [
   // Inside <p class="wordmark"> or <h1 class="wordmark"> in BaseLayout's head cluster (Issue #461; the rooms nav pins vertical-align itself).
   "motion.css :: .wordmark a",
@@ -112,7 +111,7 @@ const liftByToken: CSSRuleDefinition = {
           for (const fn of functionsNamed(d.value, "translatey")) {
             if (atRest(fn) || fn.type !== "Function") continue;
             const lift = argumentOf(fn);
-            if (arms.every((arm) => Object.hasOwn(sanctioned, arm) && sanctioned[arm] === lift))
+            if (arms.length > 0 && arms.every((arm) => Object.hasOwn(sanctioned, arm) && sanctioned[arm] === lift))
               for (const arm of arms) used.add(arm);
             else context.report({ loc: locOf(d), messageId: "literal", data: { selector, lift } });
           }

@@ -1,10 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { ESLint } from "eslint";
-import { declaredIn, sheetsOnDisk, SRC_CSS_FILES } from "../../scripts/lint/sheet-tokens.ts";
+import { declaredIn, sheetsOnDisk, SRC_CSS_FILES, type ReadDir } from "../../scripts/lint/sheet-tokens.ts";
 import { lintTsRoots } from "../../test-support/lint-roots.ts";
 import { WITNESSES } from "../../test-support/lint-witnesses.ts";
 
@@ -145,14 +145,35 @@ test("the declared set reads a custom property wherever a sheet declares one, an
   );
 });
 
-test("the sheets the declared set reads are every .css file under public/ but a generated tree's (Issue #709, Issue #779 part 2d)", () => {
+const failing =
+  (code: string, at: string, readDir: ReadDir): ReadDir =>
+  (dir) => {
+    if (dir.endsWith(at)) throw Object.assign(new Error(`${code}: ${dir}`), { code });
+    return readDir(dir);
+  };
+
+test("the sheets the declared set reads are every .css file under public/ but a generated tree's, and a directory that vanishes mid-walk is skipped (Issue #709, Issue #779 part 2d)", () => {
   const root = mkdtempSync(join(tmpdir(), "vellum-sheets-"));
+  const onDisk: ReadDir = (dir) => readdirSync(dir, { withFileTypes: true });
   try {
-    for (const path of ["public/a.css", "public/room/index.css", "public/gallery/index.css", "public/b.txt"]) {
+    for (const path of [
+      "public/a.css",
+      "public/room/index.css",
+      "public/gallery/index.css",
+      "public/fonts/face.css",
+      "public/explorer/chunks/x.css",
+      "public/b.txt",
+    ]) {
       mkdirSync(dirname(join(root, path)), { recursive: true });
       writeFileSync(join(root, path), "");
     }
     assert.deepEqual(sheetsOnDisk(root), ["public/a.css", "public/room/index.css"]);
+    assert.deepEqual(
+      sheetsOnDisk(root, failing("ENOENT", "room", onDisk)),
+      ["public/a.css"],
+      "a directory the build cleans away during the walk is skipped, not thrown",
+    );
+    assert.throws(() => sheetsOnDisk(root, failing("EACCES", "room", onDisk)), /EACCES/, "any other failure is thrown");
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

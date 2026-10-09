@@ -5,6 +5,7 @@ import type { Rule } from "eslint";
 import { readdirSync, readFileSync } from "node:fs";
 import { join, relative, resolve, sep } from "node:path";
 import { SITE_PALETTE } from "../../src/atlas/palette.ts";
+import { GENERATED_SUBTREES } from "../clean-public-generated.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 
@@ -20,11 +21,31 @@ export const sheetKey = (filename: string): string => {
   return path.endsWith(".ts.css") ? path.slice(0, -".css".length) : path;
 };
 
-export const sheetsOnDisk = (root: string = ROOT): string[] =>
-  readdirSync(join(root, "public"), { recursive: true, encoding: "utf8" })
-    .map((entry) => `public/${entry.split(sep).join("/")}`)
-    .filter((path) => path.endsWith(".css") && !GENERATED_CSS.some(([tree]) => path.startsWith(tree)))
+type Entry = { readonly name: string; isDirectory(): boolean; isFile(): boolean };
+export type ReadDir = (dir: string) => readonly Entry[];
+const readDirOnDisk: ReadDir = (dir) => readdirSync(dir, { withFileTypes: true });
+const vanished = (error: unknown): boolean =>
+  typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT";
+
+export const sheetsOnDisk = (root: string = ROOT, readDir: ReadDir = readDirOnDisk): string[] => {
+  const walkDir = (rel: string): string[] => {
+    let entries: readonly Entry[];
+    try {
+      entries = readDir(join(root, "public", rel));
+    } catch (error) {
+      if (vanished(error)) return [];
+      throw error;
+    }
+    return entries.flatMap((entry) => {
+      const path = rel === "" ? entry.name : `${rel}/${entry.name}`;
+      if (entry.isDirectory()) return GENERATED_SUBTREES.includes(path) ? [] : walkDir(path);
+      return entry.isFile() && path.endsWith(".css") ? [`public/${path}`] : [];
+    });
+  };
+  return walkDir("")
+    .filter((path) => !GENERATED_CSS.some(([tree]) => path.startsWith(tree)))
     .sort();
+};
 
 export const readSheet = (path: string, root: string = ROOT): string | null => {
   try {

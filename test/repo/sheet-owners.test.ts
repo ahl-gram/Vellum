@@ -161,6 +161,9 @@ test("no sheet but public/atelier.css dresses the kit's contents row or the corn
     [".folio-controls select.control { width: 7.4rem; }", PASS],
     [".folio-controls select.control option { appearance: none; }", PASS],
     [".folio-controls select.control, .x { appearance: none; }", REFUSE],
+    [".folio .folio-controls select.control { appearance: none; }", REFUSE],
+    ["body .folio-controls select.control { background-image: none; }", REFUSE],
+    [".my-folio-controls select.control { appearance: none; }", PASS],
   ];
   for (const sheet of ["public/print-room/index.css", "public/ribbon/index.css"])
     await assertRule(select, SELECT, sheet, ["public/atelier.css"]);

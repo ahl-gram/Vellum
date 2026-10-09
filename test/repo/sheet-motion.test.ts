@@ -74,6 +74,7 @@ test("no hover or active rule lifts by a literal: the raise is a token, and a li
     [".a:hover { translate: 0 -2px; }", PASS],
     [".a:hover { transform: translate(0, -2px) translate3d(0, -2px, 0); }", PASS],
     [".a:hover { transform: translateY(calc(-2px)); }", REFUSE],
+    [".a:hover !! .b { transform: translateY(-2px); }", REFUSE],
   ];
   await assertRefuses(
     plant,
@@ -156,7 +157,7 @@ test("an inline-block keeps its bullet on line one: a subject that settles displ
   await assertRefuses(
     plant,
     BULLET,
-    "a subject with a pseudo-class or a pseudo-element is not a list item's box, as the old sweep read it; declarations merge over the whole file, at-rules included, a later one winning",
+    "a subject with a pseudo-class or a pseudo-element is not a list item's box, as the old sweep read it; declarations merge over the whole file, at-rules included, a later one winning. BLIND SPOT, declared, a miss: a selector css-tree cannot parse has no arm to read (a browser drops such a rule)",
   );
   const listed: Plant = [
     [".w a { display: inline-block; }", PASS],

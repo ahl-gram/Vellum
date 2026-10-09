@@ -149,7 +149,7 @@ const kitOwnsSelectDress = ruleOf(
       ? null
       : ({ arms, rule }) =>
           declarationsIf(
-            arms.some((a) => a.text === ".folio-controls select.control"),
+            arms.some((a) => /\.folio-controls select\.control$/.test(a.text)),
             rule,
             SELECT_DRESS,
           ),

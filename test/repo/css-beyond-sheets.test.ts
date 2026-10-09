@@ -10,15 +10,11 @@ import { SRC_CSS_FILES, type SrcCssFile } from "../../scripts/lint/sheet-tokens.
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const SHEETS_BLOCK = "the house's rules on every stylesheet";
-const COMMENT_RULES = [
-  "vellum/css-comment-issue-form",
-  "vellum/css-comment-no-em-dash",
-  "vellum/css-comment-one-line",
-  "vellum/css-comment-no-js-module",
-  "vellum/css-comment-citation-resolves",
-];
-const WHY_NO_COMMENTS =
-  "the comment rules stay off the built CSS: the atlas ships comments whose bytes DOWNLOAD_SHA256 pins, so a comment rule added to the stylesheet block is excluded here on purpose or it reds (handbook/errata/guards.md)";
+const EXCUSED: Readonly<Partial<Record<SrcCssFile, readonly string[]>>> = {
+  "src/atlas/document.ts": ["vellum/css-comment-issue-form", "vellum/css-comment-one-line"],
+};
+const WHY_EXCUSED =
+  "the atlas alone is excused the issue-form and one-line comment rules, for the comments it ships whose bytes DOWNLOAD_SHA256 in test/atlas/document.test.ts pins (handbook/errata/guards.md)";
 
 const styleBlocksIn = (html: string): string =>
   [...html.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join("\n");
@@ -59,9 +55,9 @@ const sheetsBlock = (): Linter.Config => {
   return block;
 };
 
-const builtCssLint = (): ESLint => {
+const builtCssLint = (excused: readonly string[]): ESLint => {
   const block = sheetsBlock();
-  const rules = Object.fromEntries(Object.entries(block.rules!).filter(([rule]) => !COMMENT_RULES.includes(rule)));
+  const rules = Object.fromEntries(Object.entries(block.rules!).filter(([rule]) => !excused.includes(rule)));
   return new ESLint({
     cwd: ROOT,
     overrideConfigFile: true,
@@ -78,12 +74,12 @@ const builtCssLint = (): ESLint => {
   });
 };
 
-const lintBuilt = async (source: string, css: string): Promise<string[]> => {
-  const [result] = await builtCssLint().lintText(css, { filePath: join(ROOT, `${source}.css`) });
+const lintBuilt = async (source: SrcCssFile, css: string, excused = EXCUSED[source] ?? []): Promise<string[]> => {
+  const [result] = await builtCssLint(excused).lintText(css, { filePath: join(ROOT, `${source}.css`) });
   return result!.messages.map((m) => `${source}:${m.line} ${m.ruleId ?? "fatal"} ${m.message}`);
 };
 
-test("every module that builds CSS is a TypeScript module with a builder here and CSS carrying its own anchor, and every comment rule kept off the built CSS is a rule of the stylesheet block (Issue #779 part 2d, D1 option C)", () => {
+test("every module that builds CSS is a TypeScript module with a builder here and CSS carrying its own anchor, and every rule a builder is excused is a rule of the stylesheet block that still reports there (Issue #779 part 2d, D1 option C)", async () => {
   for (const source of SRC_CSS_FILES) {
     assert.ok(
       source.endsWith(".ts"),
@@ -96,13 +92,25 @@ test("every module that builds CSS is a TypeScript module with a builder here an
     );
   }
   const ruled = Object.keys(sheetsBlock().rules!);
-  for (const rule of COMMENT_RULES)
-    assert.ok(ruled.includes(rule), `${rule} is excluded here but is no rule of the stylesheet block`);
+  for (const [source, rules] of Object.entries(EXCUSED) as Array<[SrcCssFile, readonly string[]]>) {
+    const reports = await lintBuilt(source, SRC_CSS[source].css(), []);
+    for (const rule of rules) {
+      assert.ok(ruled.includes(rule), `${source} is excused ${rule}, which is no rule of the stylesheet block`);
+      assert.ok(
+        reports.some((line) => line.includes(` ${rule} `)),
+        `${source} is excused ${rule}, which reports nothing there now: the excusal is stale, so delete it`,
+      );
+    }
+  }
 });
 
-test("the CSS the TypeScript builds passes every stylesheet rule but the comment rules, with no inline directive able to silence one (Issue #779 part 2d, D1 option C)", async () => {
+test("the CSS the TypeScript builds passes every stylesheet rule but the atlas's two excused comment rules, with no inline directive able to silence one (Issue #779 part 2d, D1 option C)", async () => {
   for (const source of SRC_CSS_FILES)
-    assert.deepEqual(await lintBuilt(source, SRC_CSS[source].css()), [], WHY_NO_COMMENTS);
+    assert.deepEqual(
+      await lintBuilt(source, SRC_CSS[source].css()),
+      [],
+      `${source}'s built CSS breaks a stylesheet rule; ${WHY_EXCUSED}`,
+    );
 });
 
 test("an eslint-disable comment in built CSS silences nothing, since the lint of the built CSS reads no inline directive (Issue #779 part 2d)", async () => {

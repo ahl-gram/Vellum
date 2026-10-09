@@ -126,7 +126,7 @@ test("the card's action row and its filing press are dressed by a rule of their 
     /pointer-events:\s*auto/,
     "and without this it is dead to a real pointer, since #place-card is pointer-events: none",
   );
-  // The press acts on the sheet and goes nowhere, so it must NOT wear the navigation tip; vellum/css-tip-goes-somewhere holds the class, this names the piece.
+  // vellum/css-tip-goes-somewhere holds every tip; this names the press.
   assert.doesNotMatch(
     css.slice(css.indexOf(".pc-lay")),
     /^\.pc-lay[^{]*:hover[^{]*\{[^}]*rotate\(/m,
