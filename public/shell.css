@@ -51,7 +51,6 @@ body {
   color: var(--ink-dark);
   font-family: var(--font-body, "Iowan Old Style", "Palatino", Georgia, serif);
 }
-/* A fixed full-viewport layer, not background-attachment: iOS treats fixed attachment as scroll. */
 body::before {
   content: "";
   position: fixed;
@@ -69,7 +68,6 @@ main {
 footer {
   font-family: var(--font-display, "Iowan Old Style", "Palatino", Georgia, serif);
 }
-/* The head cluster pins its own leading: page css sets body line-height for READING and the cluster must not inherit that inflation. */
 header.chrome {
   position: fixed;
   left: var(--chrome-x);

@@ -305,7 +305,11 @@ test("astro.config keeps the contractual shape (site, trailing slash, no fingerp
     false,
     "the migrated pages' markup must stay unminified (near-verbatim discipline)",
   );
-  assert.equal(config.build?.inlineStylesheets, "always", "the shell style must inline, never a fingerprinted file");
+  assert.equal(
+    config.build?.inlineStylesheets,
+    "always",
+    "a style Astro processes must inline, never a fingerprinted file",
+  );
   assert.ok(!("base" in config), "base must stay the default '/' (root-absolute assets break otherwise)");
   assert.ok(!("outDir" in config), "outDir must stay the default ./dist (deploy.yml uploads path: dist)");
 });
@@ -396,15 +400,11 @@ test("each rendered head carries the canonical meta with the ratified prop fan-o
   }
 });
 
-test("every built head links public/shell.css after its own sheet, the place the layout's inline style held, so a page rule still needs higher specificity to override the shell (handbook/specs/cascade-traps.md)", () => {
+test("every built head links public/shell.css last of its stylesheets, the place the layout's inline style held, so a page rule still needs higher specificity to override the shell (handbook/specs/cascade-traps.md)", () => {
   for (const p of PAGES) {
-    const head = headOf(page(p.route));
-    const pageCss = head.indexOf('<link rel="stylesheet" href="index.css">');
-    assert.ok(pageCss >= 0, `${p.route} links its own sheet`);
-    assert.ok(
-      head.indexOf('<link rel="stylesheet" href="/shell.css">') > pageCss,
-      `${p.route} links public/shell.css after index.css`,
-    );
+    const sheets = [...headOf(page(p.route)).matchAll(/<link rel="stylesheet" href="([^"]+)"/g)].map((m) => m[1]);
+    assert.ok(sheets.includes("index.css"), `${p.route} links its own sheet`);
+    assert.equal(sheets.at(-1), "/shell.css", `${p.route} links public/shell.css after every other stylesheet`);
   }
 });
 

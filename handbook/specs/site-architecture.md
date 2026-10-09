@@ -99,16 +99,15 @@ symbol and path so the reader goes and looks.
   page loads. A script inside an `.astro` page reaches none of them. A length that shrinks with the window, a height, the window's shape and a box's own size
   are outside the rule.
 - **The shell dresses once.** Every shared shell rule lives in `public/shell.css`, and a page's own
-  sheet carries page-specific rules only. A page carries no `<style>` of its own: its CSS lives in a
-  sheet under `public/`, where the stylesheet lint reads it (Alex, Issue #779 comment 6067462530);
-  home's scripts-off rules are `public/home-noscript.css`, linked from inside its `<noscript>`.
+  sheet carries page-specific rules only. Home's scripts-off rules are `public/home-noscript.css`,
+  linked from inside its `<noscript>`; both moved out of the pages so the stylesheet lint reads them
+  (Alex, Issue #779 comment 6067462530).
 - **Sheet order is a contract.** The layout links the root sheets, then the shared sheets a page
   opts into through its `extraCss` prop, then the page's own `public/**/index.css`, so a page keeps
   the last word on its own layout. An `extraCss` href is validated at render and THROWS unless it is
-  root-absolute. The layout links `public/shell.css` last, after the page sheet, which is why a
-  page override of a shell rule needs higher specificity; that trap belongs to
-  `handbook/specs/cascade-traps.md` and is not restated here, and `test/site/astro-scaffold.test.ts`
-  holds the order in every built head.
+  root-absolute. The layout links `public/shell.css` last of all, which is why a page override of a
+  shell rule needs higher specificity; that trap belongs to `handbook/specs/cascade-traps.md` and is
+  not restated here, and `test/site/astro-scaffold.test.ts` holds the order in every built head.
 - **Authored CSS hides in more places than `public/`.** A sweep written against `public/` alone
   misses every source in `src/` and passes. **The repo keeps its own roster of those**,
   `SRC_CSS_FILES` in `test-support/site-sheets.ts`, including a card whose faces are built rather
@@ -164,7 +163,7 @@ SVG remains the byte-faithful artifact.
   setting, because the migrated pages' markup has to stay near-verbatim. **Not minified is not the
   same as untouched**: the build still adds slot whitespace, entity-encodes expressions and expands
   self-closing SVG children, which is what the two bullets below are about. What it MINIFIES is the
-  Astro-processed script and the inlined shell CSS, which is what the quote-style bullet is about.
+  Astro-processed script, which is what the quote-style bullet is about.
 - **The minifier picks the quote style**, so a marker matching an inlined page script is written as
   a quote-agnostic pattern accepting backtick, double and single quotes, never as a quoted literal.
   The `pageScript` patterns in `test/site/astro-scaffold.test.ts` are the shape to copy.

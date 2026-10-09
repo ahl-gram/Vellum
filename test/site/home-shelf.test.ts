@@ -98,7 +98,7 @@ test("the scroll hint pulses only at full pull-back (#472, 2026-08-28 ruling): i
   );
 });
 
-test("nothing home loads locks the document's scroll (#472 retired the #461 body lock; the class, not the instance: every sheet home links, plus the inline style blocks)", () => {
+test("nothing home loads locks the document's scroll (#472 retired the #461 body lock; the class, not the instance: every sheet home links, the shell and the scripts-off sheet among them)", () => {
   // At-rule preludes are stripped first: split("}") alone hands an @media-first rule the prelude as its selector, and the sweep goes blind to it.
   const flatten = (cssText: string): string => cssText.replace(/@[^{}]*\{/g, "");
   const sources: ReadonlyArray<readonly [string, string]> = [

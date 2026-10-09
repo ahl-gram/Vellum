@@ -60,8 +60,8 @@ test("the room folio's panel is painted screen-only (#538): on paper the corner 
     .filter((p) => p !== "public/atelier.css")
     .sort();
   assert.ok(
-    sheets.includes("src/cli/gallery.ts") && sheets.includes("src/layouts/BaseLayout.astro"),
-    "the sweep reaches the generated Gallery sheet and the layout's style block",
+    sheets.includes("src/cli/gallery.ts") && sheets.includes("public/shell.css"),
+    "the sweep reaches the generated Gallery sheet and the shell sheet",
   );
   for (const p of sheets)
     assert.deepEqual(

@@ -13,7 +13,7 @@ test("the walnut deep: one declaration, the vignette over the lit walnut, consum
   // The deep (ruled 2026-08-25): the mockup's own body deep, token-derived, declared ONCE as --the-deep so the fixed ground layer and the running band can never drift apart.
   const css = layoutStyle();
   const deep = css.match(/--the-deep:\s*([\s\S]*?);/);
-  assert.ok(deep, "the layout style should declare --the-deep once");
+  assert.ok(deep, "public/shell.css should declare --the-deep once");
   const value = deep[1]!.replace(/\s+/g, " ").replace(/\( /g, "(").replace(/ \)/g, ")");
   const vignette = value.search(/radial-gradient\(120% 90% at 50% 30%,\s*rgb\(from var\(--ink-dark\) r g b \/ 0\)/);
   const walnut = value.search(
@@ -46,7 +46,7 @@ test("the interim desk panel: an unconverted room's main stands on parchment, no
   // Scaffolding with a stated retirement path: a page passes desk="open" once its own conversion sub (7-9) dresses it for the deep, and the class stops rendering.
   const css = layoutStyle();
   const panel = css.match(/main\.desk-panel\s*\{([\s\S]*?)\}/);
-  assert.ok(panel, "the layout style should carry main.desk-panel");
+  assert.ok(panel, "public/shell.css should carry main.desk-panel");
   assert.match(panel[1]!, /background:\s*var\(--parchment\)/, "the panel is the parchment the page css was tuned on");
   assert.match(panel[1]!, /box-shadow:\s*var\(--sheet-shadow\)/, "the panel rests at the house depth");
 });
@@ -61,7 +61,7 @@ test("the chrome passes the hand through: drags over the fixed cluster reach the
 
 test("print is paper all the way down: the dark ground resets with the chrome it carried (#454 open decision 4, skeptic finding 5)", () => {
   const print = layoutStyle().match(/@media print\s*\{([\s\S]*?)\n\}/);
-  assert.ok(print, "the layout style carries the print block");
+  assert.ok(print, "public/shell.css carries the print block");
   assert.match(
     print[1]!,
     /body\s*\{[^}]*background:\s*none/,
@@ -71,7 +71,7 @@ test("print is paper all the way down: the dark ground resets with the chrome it
 
 test("the deep's focus ring: the chrome on the walnut brightens the ring, paper keeps ink-dark (#324 decision 6, re-ratified at #461)", () => {
   const ring = layoutStyle().match(/header\.chrome a:focus-visible,\s*footer a:focus-visible\s*\{([\s\S]*?)\}/);
-  assert.ok(ring, "the layout style should carry the deep-chrome focus override");
+  assert.ok(ring, "public/shell.css should carry the deep-chrome focus override");
   assert.match(
     ring[1]!,
     /outline-color:\s*var\(--parchment-bright\)/,
@@ -83,7 +83,7 @@ test("BaseLayout declares --sheet-shadow, the one depth every sheet rests at (#3
   assert.match(
     layoutStyle(),
     /--sheet-shadow:\s*0 12px 34px rgb\(from var\(--chart-ink\) r g b \/ 0\.4\)/,
-    "the layout style should declare --sheet-shadow at the ratified 0.4",
+    "public/shell.css should declare --sheet-shadow at the ratified 0.4",
   );
 });
 
