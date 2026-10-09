@@ -59,6 +59,7 @@ const SHEET: ReadonlyArray<Row> = [
   ["desert shrines", 431890347, "shrines", { band: "tropical", culture: "veshari" }],
   ["dunes and pagodas", 786575556, "pagodas", { band: "tropical", culture: "veshari" }],
   ["dunes and atolls", 2166136261, "", { band: "tropical", mapType: "archipelago", culture: "oromi" }],
+  ["atolls and dunes", 2166136261, "", { band: "tropical", mapType: "archipelago", culture: "oromi" }],
 ];
 
 for (const [sentence, seed, residual, overrides] of SHEET) {

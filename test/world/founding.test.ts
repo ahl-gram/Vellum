@@ -217,6 +217,27 @@ test("only a word that sets the climate settles a clash over the names", () => {
   assert.deepEqual(steersOf(f, "fjords"), [{ subject: "coast", value: "ragged" }]);
 });
 
+test("a word that names a people but sets no climate is never credited beside a climate word that names one", () => {
+  const unclimatic = LEXICON.filter(
+    (e) => e.steers.length > 1 && bandOf(e.steers) === undefined && tongueOf(e.steers) !== undefined,
+  );
+  assert.ok(unclimatic.length > 0, "the list must hold a word naming a people beside another meaning but no climate");
+  for (const entry of NAMING_CLIMATE) {
+    const { own } = climateAndPeople(entry);
+    for (const other of unclimatic.filter((o) => tongueOf(o.steers) !== own)) {
+      for (const sentence of [`${entry.phrase} ${other.phrase}`, `${other.phrase} ${entry.phrase}`]) {
+        const f = founded(sentence);
+        assert.equal(f.overrides.culture, own, sentence);
+        assert.deepEqual(
+          steersOf(f, other.phrase),
+          other.steers.filter((s) => s.subject !== "culture"),
+          sentence,
+        );
+      }
+    }
+  }
+});
+
 test("with the climate itself contested, a clashed tradition falls to the chart number", () => {
   const f = founded("cold atolls and fjords");
   assert.deepEqual(f.overrides, { mapType: "archipelago", coastWarp: 0.95 });
@@ -232,7 +253,9 @@ test("a word keeps its tradition when only its climate clashed", () => {
 });
 
 test("a sentence naming no tradition takes the tradition of its climate word", () => {
-  assert.equal(founded("a cold land of quiet towns").overrides.culture, "norden");
+  const cold = founded("a cold land of quiet towns");
+  assert.equal(cold.overrides.culture, "norden");
+  assert.deepEqual(steersOf(cold, "cold"), [{ subject: "band", value: "polar" }], "the table names no word");
   assert.equal(founded("a warm land of quiet towns").overrides.culture, "oromi");
   assert.equal(founded("a mild land of quiet towns").overrides.culture, "sylvan");
   assert.equal(founded("a cold land of shrines").overrides.culture, "tsuren", "a named tradition outranks the climate");
