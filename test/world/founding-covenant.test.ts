@@ -9,7 +9,6 @@ const LOCK =
 
 type Row = readonly [sentence: string, seed: number, residual: string, overrides: FoundingOverrides];
 
-// Seeds are hashString of the residual, worked out by hand from the rules and computed apart from foundWorld.
 const SHEET: ReadonlyArray<Row> = [
   [
     "a cold archipelago of black pines, iron harbors, and a drowned kingdom",
@@ -60,6 +59,7 @@ for (const [sentence, seed, residual, overrides] of SHEET) {
     assert.ok(f.ok, sentence);
     assert.equal(f.version, FOUNDING_VERSION);
     assert.equal(f.residual, residual);
+    assert.equal(hashString(residual), seed, "the pinned seed is the hand-derived residual's own hash");
     assert.equal(f.seed, seed, LOCK);
     assert.deepEqual(f.overrides, overrides, LOCK);
   });
@@ -69,4 +69,78 @@ test("the covenant: every word on the list founds what version 1 founds", () => 
   const all = LEXICON.flatMap(({ phrase }) => [foundWorld(phrase), foundWorld(`${phrase} stone`)]);
   assert.equal(FOUNDING_VERSION, 1);
   assert.equal(hashString(JSON.stringify(all)), 3678728154, LOCK);
+});
+
+test("the covenant: a sentence of 120 characters founds, and one of 121 is refused", () => {
+  assert.equal(foundWorld("a".repeat(120)).ok, true, LOCK);
+  assert.deepEqual(foundWorld("a".repeat(121)), { ok: false, reason: "too-long" }, LOCK);
+});
+
+const NOT_SMALL = [
+  "or",
+  "but",
+  "nor",
+  "yet",
+  "so",
+  "for",
+  "in",
+  "on",
+  "at",
+  "by",
+  "to",
+  "from",
+  "into",
+  "onto",
+  "upon",
+  "over",
+  "under",
+  "beneath",
+  "beyond",
+  "across",
+  "through",
+  "its",
+  "his",
+  "her",
+  "their",
+  "our",
+  "my",
+  "your",
+  "this",
+  "that",
+  "these",
+  "those",
+  "there",
+  "here",
+  "is",
+  "are",
+  "was",
+  "were",
+  "be",
+  "as",
+  "if",
+  "than",
+  "then",
+  "when",
+  "while",
+  "who",
+  "which",
+  "what",
+  "all",
+  "some",
+  "no",
+  "not",
+  "one",
+  "every",
+  "each",
+  "o",
+];
+
+test("the covenant: the small words are the seven ruled and no others, among the words most likely to join them", () => {
+  const bare = foundWorld("stone stone");
+  assert.ok(bare.ok);
+  for (const word of NOT_SMALL) {
+    const f = foundWorld(`stone ${word} stone`);
+    assert.ok(f.ok, word);
+    assert.notEqual(f.seed, bare.seed, `"${word}" must count toward the chart number (${LOCK})`);
+  }
 });

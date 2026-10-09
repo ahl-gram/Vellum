@@ -6,12 +6,14 @@ export type Displayed = { readonly ok: true; readonly sentence: string };
 
 const CONTROL = /(?![\t\n\v\f\r])\p{Cc}/u;
 const UNKNOWN = /[\p{Cn}\p{Cs}]/u;
-const INVISIBLE = /[\u200E\u200F\u202A-\u202E\u2066-\u2069\uFEFF]/gu;
+const INVISIBLE = /[\p{Bidi_Control}\uFEFF]/gu;
 const ZERO_WIDTH_SPACE = /\u200B/gu;
+const KEYCAP = /[0-9#*]\uFE0F?\u20E3/gu;
 const FORMAT = /\p{Cf}/gu;
+const VARIATION = /\p{Variation_Selector}/gu;
 const POSSESSIVE = /['\u2018\u2019\u02BC][sS](?![\p{L}\p{M}\p{N}])/gu;
 const APOSTROPHE = /['\u2018\u2019\u02BC]/gu;
-const NOT_WORD = /[^\p{L}\p{M}\p{N}]+/gu;
+const WORD = /[\p{L}\p{N}][\p{L}\p{M}\p{N}]*/gu;
 
 const refuse = (reason: RefusalReason): Refusal => ({ ok: false, reason });
 
@@ -30,13 +32,12 @@ export function displayForm(input: string): Displayed | Refusal {
 }
 
 export function foundingWords(display: string): string[] {
-  return display
+  const cleaned = display
     .normalize("NFKC")
+    .replace(KEYCAP, " ")
     .replace(FORMAT, "")
+    .replace(VARIATION, "")
     .replace(POSSESSIVE, "")
-    .replace(APOSTROPHE, "")
-    .replace(NOT_WORD, " ")
-    .split(" ")
-    .filter((word) => word !== "")
-    .map((word) => word.toLowerCase());
+    .replace(APOSTROPHE, "");
+  return Array.from(cleaned.matchAll(WORD), ([word]) => word.toUpperCase().toLowerCase());
 }

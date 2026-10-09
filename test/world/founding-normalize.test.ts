@@ -108,3 +108,35 @@ test("emoji and symbols are ignored like punctuation", () => {
 test("digits are words", () => {
   assert.deepEqual(foundingWords("the 7 seas"), ["the", "7", "seas"]);
 });
+
+test("an emoji's presentation selector goes with the emoji, even against the next word", () => {
+  assert.deepEqual(foundingWords("\u{1F3DD}\uFE0F island"), ["island"]);
+  assert.deepEqual(foundingWords("\u2744\uFE0Fcold island"), ["cold", "island"]);
+  assert.deepEqual(foundingWords("\u2600\uFE0Ewarm isle"), ["warm", "isle"]);
+});
+
+test("a keycap emoji is ignored whole, digit and all", () => {
+  assert.deepEqual(foundingWords("#\uFE0F\u20E3 island"), ["island"]);
+  assert.deepEqual(foundingWords("1\uFE0F\u20E3 island"), ["island"]);
+  assert.deepEqual(foundingWords("7\u20E3 island"), ["island"]);
+});
+
+test("a variation selector after a letter, or a mark with no letter before it, is not part of a word", () => {
+  assert.deepEqual(foundingWords("cold\uFE0F isle"), ["cold", "isle"]);
+  assert.deepEqual(foundingWords("\u845B\u{E0100} isle"), ["\u845B", "isle"]);
+  assert.deepEqual(foundingWords("cold \u0301 isle"), ["cold", "isle"]);
+});
+
+test("case folds as well as lowers, so a sharp s and its capitals are one word", () => {
+  assert.deepEqual(foundingWords("STRASSE"), foundingWords("stra\u00DFe"));
+  assert.deepEqual(foundingWords("Stra\u00DFe"), ["strasse"]);
+});
+
+test("an apostrophe-s inside a word is not a possessive", () => {
+  assert.deepEqual(foundingWords("o'shea isle"), ["oshea", "isle"]);
+  assert.deepEqual(foundingWords("the isle's end"), ["the", "isle", "end"]);
+});
+
+test("the display form drops the Arabic letter mark with the other direction controls", () => {
+  assert.equal(shown("\u061Ccold \u061Cisle"), "cold isle");
+});

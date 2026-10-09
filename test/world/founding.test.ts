@@ -128,11 +128,21 @@ test("a sentence made only of table words and small words founds at the empty ch
   const f = founded("cold archipelago");
   assert.equal(f.seed, EMPTY_RESIDUAL_SEED);
   assert.deepEqual(f.overrides, { band: "polar", mapType: "archipelago", culture: "norden" });
-  for (const sentence of ["the a of", "!!!", "\u{1F409}"]) {
+  for (const sentence of ["the a of", "!!!", "\u{1F409}", "\u{1F5FA}\uFE0F", "#\uFE0F\u20E3"]) {
     const g = founded(sentence);
     assert.equal(g.seed, EMPTY_RESIDUAL_SEED, sentence);
     assert.deepEqual(g.overrides, {}, sentence);
   }
+});
+
+test("an emoji typed with a phone's presentation selector founds what the bare words found", () => {
+  const plain = founded("cold island");
+  for (const sentence of ["\u{1F3DD}\uFE0F cold island", "\u2744\uFE0Fcold island", "cold island \u{1F5FA}\uFE0F"]) {
+    const f = founded(sentence);
+    assert.equal(f.seed, plain.seed, sentence);
+    assert.deepEqual(f.overrides, plain.overrides, sentence);
+  }
+  assert.deepEqual(plain.overrides, { band: "polar", mapType: "island", culture: "norden" });
 });
 
 test("a sentence with no table word steers nothing and hashes its words", () => {
@@ -178,9 +188,17 @@ const POOL = [
   " black pines ",
   " drowned ",
   " the ",
+  "\uFE0F",
+  "\uFE0E",
+  "\u20E3",
+  "1\uFE0F\u20E3",
+  "\u061C",
+  "\u{1F3DD}\uFE0F",
+  "\u2744\uFE0Fcold",
+  " \u0301 ",
 ];
 const REASONS = new Set(["empty", "too-long", "control-character", "unknown-character"]);
-const UNCLEAN = /[\p{Cc}\p{Cn}\p{Cs}\u200B\u200E\u200F\u202A-\u202E\u2066-\u2069\uFEFF]|^\s|\s$|\s\s/u;
+const UNCLEAN = /[\p{Cc}\p{Cn}\p{Cs}\p{Bidi_Control}\u200B\uFEFF]|^\s|\s$|\s\s/u;
 
 test("any string founds a world or is refused by reason, never throws, and its display form founds itself", () => {
   const rng = createRng(391);
