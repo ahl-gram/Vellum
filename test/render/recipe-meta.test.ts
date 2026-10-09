@@ -203,3 +203,49 @@ test("a world chart carries NO region stamp, so recipeFromSvg has no region key 
   // deepEqual guards the conditional-spread: an undefined region key would break this
   assert.deepEqual(parsed.recipe, world.recipe, "the flat recipe still round-trips exactly");
 });
+
+test("a culture-pinned chart stamps its culture, and the stamp redraws it byte for byte (Issue #391)", () => {
+  const world = generateWorld(defaultRecipe(7, { culture: "norden" }));
+  const svg = renderMap(world, { style: "antique" });
+  assert.match(svg, /data-vellum-culture="norden"/, "the culture is stamped on the root");
+  assert.match(svg, /culture=norden/, "the metadata summary carries the culture");
+  const parsed = recipeFromSvg(svg);
+  assert.ok(parsed);
+  assert.deepEqual(parsed.recipe, world.recipe, "the recipe round-trips with its culture");
+  const redrawn = renderMap(generateWorld(parsed.recipe), { style: parsed.style });
+  assert.equal(redrawn, svg, "the recovered recipe redraws byte for byte, in the pinned tongue");
+});
+
+test("a region sheet of a culture-pinned world carries the culture its parent needs (Issue #391)", () => {
+  const world = generateWorld(defaultRecipe(7, { culture: "norden" }));
+  const capital = world.settlements.find((s) => s.kind === "capital");
+  assert.ok(capital);
+  const window = windowAround(world, capital, 0.25);
+  const region = generateRegionWorld(world, { window, gridW: 320, gridH: 240, title: "Detail" });
+  const svg = renderMap(region, {
+    style: "antique",
+    regionRecipe: { window, worldGridW: world.recipe.gridW, detail: 0 },
+  });
+  assert.match(svg, /data-vellum-culture="norden"/);
+  assert.equal(recipeFromSvg(svg)?.recipe.culture, "norden");
+});
+
+test("a chart with no culture carries no culture stamp, and its recipe no culture key (Issue #391)", () => {
+  const world = generateWorld(defaultRecipe(7));
+  const svg = renderMap(world, { style: "antique" });
+  assert.doesNotMatch(svg, /data-vellum-culture/);
+  assert.doesNotMatch(svg, /culture=/);
+  const parsed = recipeFromSvg(svg);
+  assert.ok(parsed);
+  assert.equal("culture" in parsed.recipe, false, "an absent culture must not come back as a key");
+  assert.deepEqual(parsed.recipe, world.recipe);
+});
+
+test("a chart stamped with a culture the engine does not know is unreadable, never read as unpinned (Issue #391)", () => {
+  const svg = renderMap(generateWorld(defaultRecipe(7, { culture: "norden" })), { style: "antique" });
+  for (const junk of ["klingon", "", "Norden", "6"]) {
+    const edited = svg.replace('data-vellum-culture="norden"', `data-vellum-culture="${junk}"`);
+    assert.notEqual(edited, svg, "the stamp must be there to edit");
+    assert.equal(recipeFromSvg(edited), null, `a culture of "${junk}" must not rebuild some other world`);
+  }
+});

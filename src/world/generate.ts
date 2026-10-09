@@ -248,6 +248,13 @@ function featureNames(
   };
 }
 
+function cultureFor(recipe: WorldRecipe, rng: Rng): Culture {
+  if (recipe.culture === undefined) return rng.fork("culture").pick(CULTURES);
+  const named = CULTURES.find((c) => c.id === recipe.culture);
+  if (named === undefined) throw new RangeError(`unknown culture "${recipe.culture}"`);
+  return named;
+}
+
 function worldTitle(rng: Rng, culture: Culture, mapType: MapType, named: ReadonlyArray<SettlementCore>): MapTitle {
   const capitalName = named.find((s) => s.kind === "capital")?.name;
   return makeMapTitle(rng.fork("title"), culture, mapType, mapType === "citystate" ? capitalName : undefined);
@@ -328,7 +335,7 @@ export function generateWorld(recipe: WorldRecipe): World {
   const settlements = siteStage(ground, rng, citystate);
   const { realms, roads } = realmStage(ground, settlements, recipe, citystate);
 
-  const culture = rng.fork("culture").pick(CULTURES);
+  const culture = cultureFor(recipe, rng);
   const arms = blazonRealms(culture, realms.seats.length, rng.fork("heraldry"));
   const namer = createNamer(rng.fork("names"), culture);
   const { named, riverNames } = namePlaces(namer, settlements, rivers);

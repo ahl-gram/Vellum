@@ -196,8 +196,10 @@ owes the script and moves the prospect plate pins.
   `test/render/recipe-meta.test.ts` guards the current fields with a `deepEqual` an `undefined` key
   breaks, and a new field owes its own case there.
 - **Seed 42's culture draw is a covenant.** A world's culture is picked with
-  `rng.fork("culture").pick(CULTURES)`, and `pick` indexes `floor(u * length)`, so both the ORDER and
-  the LENGTH of `CULTURES` in `src/society/names.ts` are load-bearing: seed 42's draw lands on
+  `rng.fork("culture").pick(CULTURES)` unless its recipe names one (`culture` in `src/world/types.ts`),
+  which skips the draw; a culture's ID is then world identity and is never renamed (the founding
+  section of `handbook/specs/engine-invariants.md`). `pick` indexes `floor(u * length)`, so both the
+  ORDER and the LENGTH of `CULTURES` in `src/society/names.ts` are load-bearing: seed 42's draw lands on
   `oromi` and must keep landing there. **What a moved draw breaks is names, not the checksum.**
   `partitionRealms` takes no rng and runs before the culture fork, so `w.realms.labels` and the
   checksum above are untouched by any culture change; what goes red is the title, the capital, the
