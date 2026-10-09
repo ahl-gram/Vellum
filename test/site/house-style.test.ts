@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { SITE_SHEETS, SRC_CSS_FILES, sheetsSweptBy } from "../../test-support/site-sheets.ts";
+import { sheetsSweptBy } from "../../test-support/site-sheets.ts";
 
 // The Specimen Book (Issue #324): the house style lives ONCE in /house.css, linked by BaseLayout on every page. The specs are the 2026-07-30 ledger ratifications (the comment on Issue #324); a change is a re-ratification, so these pins are deliberately literal.
 
@@ -177,24 +177,6 @@ test("the old page-local skins are gone: no sheet but the house sheet dresses th
       !/select,\s*button[^{]*\{[^}]*background/.test(read(sheet)),
       `${sheet} re-declares the control skin; the house sheet owns it`,
     );
-  }
-});
-
-test("no token value smuggled past the guards in rgb() form (#324)", async () => {
-  // rgb(74 56 38 / a) IS --ink-dark with alpha, invisible to the hex guard; alpha over a token is written rgb(from var(--token) r g b / a) so the quotation stays attached to its name.
-  const { SITE_PALETTE } = await import("../../src/atlas/palette.ts");
-  const sources = [...SITE_SHEETS, ...SRC_CSS_FILES];
-  for (const [name, hex] of Object.entries(SITE_PALETTE)) {
-    const h = String(hex);
-    if (!/^#[0-9a-f]{6}$/.test(h)) continue;
-    const [r, g, b] = [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
-    const smuggled = new RegExp(`rgb\\(\\s*${r}\\s+${g}\\s+${b}\\b`);
-    for (const source of sources) {
-      assert.ok(
-        !smuggled.test(read(source)),
-        `${source} carries ${name}'s value as raw rgb(${r} ${g} ${b}); use rgb(from var(${name}) r g b / a) where the css declares the token, or read SITE_PALETTE["${name}"] where it does not (render code)`,
-      );
-    }
   }
 });
 

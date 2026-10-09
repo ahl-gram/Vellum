@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import { generate, parse, walk } from "@eslint/css-tree";
 import { rulesIn } from "../../test-support/shell-css-rules.ts";
 import { SITE_SHEETS } from "../../test-support/site-sheets.ts";
 
@@ -41,25 +42,31 @@ const SHELL = "public/shell.css";
 const layoutStyle = () => read(SHELL);
 const PAGE_SHEETS = SITE_SHEETS.filter((sheet) => sheet !== SHELL);
 
-test("public/shell.css declares the palette tokens at their ratified values (#263)", () => {
-  const css = layoutStyle();
-  for (const [name, hex] of Object.entries(TOKENS)) {
-    assert.match(css, new RegExp(`${name}:\\s*${hex}`), `public/shell.css should declare ${name}: ${hex}`);
-  }
-});
+const shellDeclarations = (): Map<string, string[]> => {
+  const found = new Map<string, string[]>();
+  walk(parse(layoutStyle(), { parseCustomProperty: false }), (node) => {
+    if (node.type !== "Declaration" || !node.property.startsWith("--")) return;
+    const value = node.value.type === "Raw" ? node.value.value : generate(node.value);
+    found.set(node.property, [...(found.get(node.property) ?? []), value.replace(/\s+/g, " ").trim()]);
+  });
+  return found;
+};
 
-test("no tokenized hex survives raw: pages consume the vars, public/shell.css declares each once", () => {
-  for (const page of PAGE_SHEETS) {
-    const css = read(page).toLowerCase();
-    for (const [name, hex] of Object.entries(TOKENS)) {
-      assert.ok(!css.includes(hex), `${page} still carries raw ${hex}; it should consume var(${name})`);
-    }
-  }
-  const layout = layoutStyle().toLowerCase();
-  for (const [name, hex] of Object.entries(TOKENS)) {
-    const count = layout.split(hex).length - 1;
-    assert.equal(count, 1, `public/shell.css should carry ${hex} exactly once (the ${name} declaration)`);
-  }
+test("public/shell.css declares each palette token once at its ratified value, and each depth shadow once (Issue #263, Issue #367, Issue #463)", () => {
+  const declared = shellDeclarations();
+  for (const [name, hex] of Object.entries(TOKENS))
+    assert.deepEqual(declared.get(name), [hex], `public/shell.css should declare ${name}: ${hex}, once`);
+  // The sheet's lift is ONE token (Issue #367), ratified at 0.4 (2026-08-12): two coincident 0.2 shadows measured as a single 0.385.
+  assert.deepEqual(
+    declared.get("--sheet-shadow"),
+    ["0 12px 34px rgb(from var(--chart-ink) r g b / 0.4)"],
+    "the sheet shadow is declared once, at its ratified depth",
+  );
+  assert.deepEqual(
+    declared.get("--stage-shadow"),
+    ["0 18px 60px rgb(from var(--chart-ink) r g b / 0.55)"],
+    "the stage shadow is declared once, the mockup's own dress",
+  );
 });
 
 test("the retired near-miss inks never reappear (#269 review, item 4)", () => {
@@ -124,64 +131,6 @@ test("the composers dress from the same palette (#269 review follow-up)", async 
     }
     assert.ok(!html.includes("#5a4326"), `the ${label} atlas carries retired ink #5a4326; use var(--ink-dark)`);
   }
-});
-
-test("drift guard: every var() consumed without a fallback is declared (#263)", async () => {
-  // Consumptions WITH a fallback are excluded: they define their own undeclared behavior (the atlas-download font degradation relies on exactly that).
-  const { paletteRootCss } = await import("../../src/atlas/palette.ts");
-  const declared = new Set<string>();
-  const declarationSources = [...SITE_SHEETS.map(read), paletteRootCss()];
-  for (const text of declarationSources) {
-    for (const m of text.matchAll(/(--[a-zA-Z0-9-]+)\s*:/g)) declared.add(m[1]!);
-  }
-
-  const consumers: Array<[string, string]> = [
-    ...SITE_SHEETS.map((p): [string, string] => [p, read(p)]),
-    ["src/atlas/document.ts", read("src/atlas/document.ts")],
-    ["src/cli/gallery.ts", read("src/cli/gallery.ts")],
-  ];
-  for (const [name, text] of consumers) {
-    for (const m of text.matchAll(/var\(\s*(--[a-zA-Z0-9-]+)\s*\)/g)) {
-      assert.ok(declared.has(m[1]!), `${name} consumes ${m[1]} but nothing the page loads declares it`);
-    }
-  }
-});
-
-// The sheet's lift is ONE token (Issue #367), ratified at 0.4 (2026-08-12): two coincident 0.2 shadows measured as a single 0.385.
-const SHEET_SHADOW_GEOMETRY = "0 12px 34px";
-const STAGE_SHADOW_GEOMETRY = "0 18px 60px";
-
-test("the sheet shadow is declared once and consumed as a var: no raw geometry survives (#367)", () => {
-  for (const page of PAGE_SHEETS) {
-    assert.ok(
-      !read(page).includes(SHEET_SHADOW_GEOMETRY),
-      `${page} still writes the sheet shadow out longhand; it should consume var(--sheet-shadow)`,
-    );
-  }
-  assert.equal(
-    layoutStyle().split(SHEET_SHADOW_GEOMETRY).length - 1,
-    1,
-    "public/shell.css should carry the sheet-shadow geometry exactly once (the token declaration)",
-  );
-});
-
-test("the stage shadow is declared once and consumed as a var: the chart-room depth has one home too (#463)", () => {
-  for (const page of PAGE_SHEETS) {
-    assert.ok(
-      !read(page).includes(STAGE_SHADOW_GEOMETRY),
-      `${page} still writes the stage shadow out longhand; it should consume var(--stage-shadow)`,
-    );
-  }
-  assert.equal(
-    layoutStyle().split(STAGE_SHADOW_GEOMETRY).length - 1,
-    1,
-    "public/shell.css should carry the stage-shadow geometry exactly once (the token declaration)",
-  );
-  assert.match(
-    layoutStyle(),
-    /--stage-shadow:\s*0 18px 60px rgb\(from var\(--chart-ink\) r g b \/ 0\.55\);/,
-    "the token is the mockup's own dress",
-  );
 });
 
 // The hover raise and press are house values (Issue #405), named in motion.css's :root, the one sheet both the site pages and the standalone atlas page load.

@@ -230,6 +230,9 @@ const CSS_FORM_RULES = [
   "vellum/css-comment-no-js-module",
   "vellum/css-no-narrow-width",
   "vellum/css-comment-citation-resolves",
+  "vellum/css-token-by-name",
+  "vellum/css-shadow-by-token",
+  "vellum/css-var-declared",
 ];
 const TURNED_ON = [
   "@typescript-eslint/no-unnecessary-type-assertion",
