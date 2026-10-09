@@ -1,7 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import type { ClimateBand } from "../../src/climate/climate.ts";
 import { createRng, hashString } from "../../src/core/rng.ts";
+import { CULTURE_IDS, type CultureId } from "../../src/society/culture-ids.ts";
 import { foundWorld, type Founding } from "../../src/world/founding/found.ts";
+import { CLIMATE_TRADITION, LEXICON, type LexiconEntry, type Steer } from "../../src/world/founding/lexicon.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 import { recipeFromSvg } from "../../src/render/recipe-meta.ts";
@@ -15,6 +18,49 @@ const founded = (sentence: string): Founding => {
 };
 
 const phrases = (list: Founding["steered"]): string[] => list.map((r) => r.phrase);
+
+const steersOf = (f: Founding, phrase: string): ReadonlyArray<Steer> => {
+  const found = f.steered.find((r) => r.phrase === phrase);
+  assert.ok(found !== undefined, `"${phrase}" should steer`);
+  return found.steers;
+};
+
+const bandOf = (steers: ReadonlyArray<Steer>): ClimateBand | undefined => {
+  for (const steer of steers) if (steer.subject === "band") return steer.value;
+  return undefined;
+};
+
+const tongueOf = (steers: ReadonlyArray<Steer>): CultureId | undefined => {
+  for (const steer of steers) if (steer.subject === "culture") return steer.value;
+  return undefined;
+};
+
+const climateWords = (namesAPeople: boolean): LexiconEntry[] =>
+  LEXICON.filter((e) => bandOf(e.steers) !== undefined && (tongueOf(e.steers) !== undefined) === namesAPeople);
+const NAMING_CLIMATE = climateWords(true);
+const PLAIN_CLIMATE = climateWords(false);
+const BEATS_TABLE = NAMING_CLIMATE.filter((e) => {
+  const band = bandOf(e.steers);
+  return band !== undefined && tongueOf(e.steers) !== CLIMATE_TRADITION[band];
+});
+const TONGUE_WORDS = LEXICON.filter((e) => e.steers.length === 1 && tongueOf(e.steers) !== undefined);
+
+const oneWordPerOtherPeople = (own: CultureId): string[] => {
+  const words = CULTURE_IDS.filter((id) => id !== own).flatMap((id) =>
+    TONGUE_WORDS.filter((e) => tongueOf(e.steers) === id)
+      .slice(0, 1)
+      .map((e) => e.phrase),
+  );
+  assert.equal(words.length, CULTURE_IDS.length - 1, `every people but ${own} needs a word naming only it`);
+  return words;
+};
+
+const climateAndPeople = (entry: LexiconEntry): { band: ClimateBand; own: CultureId } => {
+  const band = bandOf(entry.steers);
+  const own = tongueOf(entry.steers);
+  assert.ok(band !== undefined && own !== undefined, entry.phrase);
+  return { band, own };
+};
 
 test("a sentence differing by one unrecognised word, by word order, or by a digit founds a different world", () => {
   assert.notEqual(founded("a cold island of iron towers").seed, founded("a cold island of iron towns").seed);
@@ -73,16 +119,102 @@ test("words that agree all steer", () => {
   assert.equal(f.residual, "");
 });
 
-test("a word with several meanings loses only the clashing one, and the clashed tradition falls to the climate word", () => {
+test("a clashed tradition falls to the climate word that names it, which is credited with it beside a plain climate word", () => {
   const f = founded("sun-drenched atolls ringed with shrines where the old kings drowned");
   assert.deepEqual(f.overrides, { mapType: "archipelago", band: "tropical", landFraction: 0.132, culture: "oromi" });
-  const atolls = f.steered.find((r) => r.phrase === "atolls");
-  assert.deepEqual(atolls?.steers, [
+  assert.deepEqual(steersOf(f, "atolls"), [
     { subject: "mapType", value: "archipelago" },
     { subject: "band", value: "tropical" },
+    { subject: "culture", value: "oromi" },
   ]);
+  assert.deepEqual(steersOf(f, "sun drenched"), [{ subject: "band", value: "tropical" }]);
   assert.deepEqual(phrases(f.contested), ["shrines"]);
   assert.equal(f.residual, "ringed shrines old kings");
+});
+
+test("a climate word that names a people settles a clash over the names with its own, and is credited with it", () => {
+  const f = founded("a desert of sultans and temples");
+  assert.deepEqual(f.overrides, { band: "tropical", culture: "veshari" });
+  assert.deepEqual(f.steered, [
+    {
+      phrase: "desert",
+      steers: [
+        { subject: "band", value: "tropical" },
+        { subject: "culture", value: "veshari" },
+      ],
+    },
+  ]);
+  assert.deepEqual(phrases(f.contested), ["sultans", "temples"]);
+  assert.equal(f.residual, "sultans temples");
+  assert.deepEqual(founded("taiga of jarls and boyars").overrides, { band: "polar", culture: "zoryan" });
+  assert.deepEqual(founded("desert shrines").overrides, { band: "tropical", culture: "veshari" });
+  assert.deepEqual(founded("dunes and pagodas").overrides, { band: "tropical", culture: "veshari" });
+});
+
+test("every climate word that names a people, against a word of every other people, settles the clash with its own", () => {
+  assert.ok(BEATS_TABLE.length > 0, "some swept word must name a people its climate's table would not give");
+  for (const entry of NAMING_CLIMATE) {
+    const { band, own } = climateAndPeople(entry);
+    for (const other of oneWordPerOtherPeople(own)) {
+      for (const sentence of [`${entry.phrase} ${other}`, `${other} ${entry.phrase}`]) {
+        const f = founded(sentence);
+        assert.equal(f.overrides.band, band, sentence);
+        assert.equal(f.overrides.culture, own, sentence);
+        assert.deepEqual(steersOf(f, entry.phrase), entry.steers, sentence);
+        assert.deepEqual(phrases(f.contested), [other], sentence);
+      }
+    }
+  }
+});
+
+test("a plain climate word steps aside, and is not credited with the people", () => {
+  const f = founded("a hot desert of sultans and temples");
+  assert.deepEqual(f.overrides, { band: "tropical", culture: "veshari" });
+  assert.deepEqual(steersOf(f, "hot"), [{ subject: "band", value: "tropical" }]);
+  assert.deepEqual(founded("frozen taiga of jarls and boyars").overrides, { band: "polar", culture: "zoryan" });
+  const both = founded("desert and dunes of sultans and temples");
+  assert.equal(both.overrides.culture, "veshari");
+  for (const word of ["desert", "dunes"]) assert.equal(tongueOf(steersOf(both, word)), "veshari", word);
+});
+
+test("every plain climate word, beside every climate word of its climate that names a people, steps aside", () => {
+  assert.ok(BEATS_TABLE.some((e) => PLAIN_CLIMATE.some((p) => bandOf(p.steers) === bandOf(e.steers))));
+  for (const entry of NAMING_CLIMATE) {
+    const { band, own } = climateAndPeople(entry);
+    for (const plain of PLAIN_CLIMATE.filter((p) => bandOf(p.steers) === band)) {
+      for (const other of oneWordPerOtherPeople(own)) {
+        const sentence = `${plain.phrase} ${entry.phrase} ${other}`;
+        const f = founded(sentence);
+        assert.equal(f.overrides.culture, own, sentence);
+        assert.deepEqual(steersOf(f, plain.phrase), plain.steers, sentence);
+        assert.deepEqual(steersOf(f, entry.phrase), entry.steers, sentence);
+      }
+    }
+  }
+});
+
+test("climate words of one climate that name different peoples leave the names to the table, crediting neither", () => {
+  const pairs = NAMING_CLIMATE.flatMap((a) =>
+    NAMING_CLIMATE.filter(
+      (b) => bandOf(b.steers) === bandOf(a.steers) && tongueOf(b.steers) !== tongueOf(a.steers),
+    ).map((b) => [a, b] as const),
+  );
+  assert.ok(pairs.length > 0, "the list must hold two climate words of one climate naming different peoples");
+  for (const [a, b] of pairs) {
+    const sentence = `${a.phrase} ${b.phrase}`;
+    const f = founded(sentence);
+    assert.equal(f.overrides.culture, CLIMATE_TRADITION[climateAndPeople(a).band], sentence);
+    for (const word of [a, b]) assert.equal(tongueOf(steersOf(f, word.phrase)), undefined, sentence);
+  }
+  for (const sentence of ["dunes and atolls", "atolls and dunes", "desert dunes and atolls"]) {
+    assert.equal(founded(sentence).overrides.culture, "oromi", sentence);
+  }
+});
+
+test("only a word that sets the climate settles a clash over the names", () => {
+  const f = founded("mild fjords and birches");
+  assert.deepEqual(f.overrides, { band: "temperate", coastWarp: 0.95, culture: "sylvan" });
+  assert.deepEqual(steersOf(f, "fjords"), [{ subject: "coast", value: "ragged" }]);
 });
 
 test("with the climate itself contested, a clashed tradition falls to the chart number", () => {

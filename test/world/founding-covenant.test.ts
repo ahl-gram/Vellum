@@ -51,6 +51,14 @@ const SHEET: ReadonlyArray<Row> = [
   ["Poopy pants", 3265339576, "poopy pants", {}],
   ["the island\u2019s last lighthouse", 2755850715, "last lighthouse", { mapType: "island" }],
   ["cold atolls and fjords", 3930381583, "cold", { mapType: "archipelago", coastWarp: 0.95 }],
+  ["a desert of sultans and temples", 2731924381, "sultans temples", { band: "tropical", culture: "veshari" }],
+  ["a hot desert of sultans and temples", 2731924381, "sultans temples", { band: "tropical", culture: "veshari" }],
+  ["desert and dunes of sultans and temples", 2731924381, "sultans temples", { band: "tropical", culture: "veshari" }],
+  ["taiga of jarls and boyars", 2804905647, "jarls boyars", { band: "polar", culture: "zoryan" }],
+  ["frozen taiga of jarls and boyars", 2804905647, "jarls boyars", { band: "polar", culture: "zoryan" }],
+  ["desert shrines", 431890347, "shrines", { band: "tropical", culture: "veshari" }],
+  ["dunes and pagodas", 786575556, "pagodas", { band: "tropical", culture: "veshari" }],
+  ["dunes and atolls", 2166136261, "", { band: "tropical", mapType: "archipelago", culture: "oromi" }],
 ];
 
 for (const [sentence, seed, residual, overrides] of SHEET) {
