@@ -72,7 +72,7 @@ download links no stylesheet of ours, so with the variables undefined it still l
 
 ## The palette, by role
 
-Every colour is a named token, declared once in the layout and mirrored for the generated documents.
+Every colour is a named token, declared once in `public/shell.css` and mirrored for the generated documents.
 The roles are what to design against:
 
 **Inks.** `--ink-dark` is the dark walnut of borders, buttons, prose and emphasis. `--ink-brown` is
@@ -92,7 +92,7 @@ ratified and it is the fastest way to tell whether a border is framing something
 **Quotations from the chart.** `--chart-paper` and `--chart-ink` are borrowed from the renderer's own
 constants and pinned equal to them by test. **Every depth shadow on the site is cast in chart ink**,
 and alpha over a token is written with the relative-colour form rather than a raw triplet, which a
-guard enforces. Four shadow tokens carry that ink: the sheet's and the stage's in the layout, the
+guard enforces. Four shadow tokens carry that ink: the sheet's and the stage's in `public/shell.css`, the
 raise and the press in the motion sheet. A `box-shadow` used as a ring rather than a depth (the
 slider thumbs) is not one of these and wears its own ink.
 

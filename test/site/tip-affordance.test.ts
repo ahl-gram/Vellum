@@ -43,8 +43,6 @@ const atlasCss = (): string => {
 };
 
 const SRC_CSS: Readonly<Record<(typeof SRC_CSS_FILES)[number], () => string>> = {
-  "src/layouts/BaseLayout.astro": () => styleBlocksIn(read("src/layouts/BaseLayout.astro")),
-  "src/pages/index.astro": () => styleBlocksIn(read("src/pages/index.astro")),
   "src/cli/gallery.ts": () => GALLERY_PAGE_CSS,
   "src/atlas/document.ts": atlasCss,
   "src/render/og-card.ts": () => OG_FONT_FACES.map((face) => fontFaceCss(face, "")).join("\n"),

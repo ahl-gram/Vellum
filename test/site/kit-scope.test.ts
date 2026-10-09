@@ -183,11 +183,9 @@ const classesNamed = (css: string): Set<string> =>
   );
 const kitClasses = (): Set<string> => {
   const others = new Set(
-    [
-      read("public/house.css"),
-      read("public/motion.css"),
-      read("src/layouts/BaseLayout.astro").match(/<style is:global>([\s\S]*?)<\/style>/)?.[1] ?? "",
-    ].flatMap((css) => [...classesNamed(css)]),
+    [read("public/house.css"), read("public/motion.css"), read("public/shell.css")].flatMap((css) => [
+      ...classesNamed(css),
+    ]),
   );
   return new Set(
     [...kitSheets().flatMap((s) => [...classesNamed(read(s))])].filter((c) => !others.has(c) && c !== "strip"),
@@ -221,7 +219,7 @@ const redressesIn = (css: string, kit: Set<string>): string[] =>
     }),
   );
 
-const KIT_SHEETS = /^public\/(atelier.*|house|motion|fonts)\.css$/;
+const KIT_SHEETS = /^public\/(atelier.*|house|motion|fonts|shell)\.css$/;
 const pageSheets = (): Array<readonly [string, string]> => [
   ...globSync("public/**/*.css", { cwd: REPO })
     .filter((p) => !KIT_SHEETS.test(p))

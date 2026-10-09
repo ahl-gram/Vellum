@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { rulesIn } from "../../test-support/shell-css-rules.ts";
 import { SITE_SHEETS } from "../../test-support/site-sheets.ts";
 
-// The shell dresses once (Issue #263): the palette is named ONCE in BaseLayout's global style and consumed as var() everywhere it matched exactly.
+// The shell dresses once (Issue #263): the palette is named ONCE in public/shell.css and consumed as var() everywhere it matched exactly.
 
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 const read = (p: string) => readFileSync(root(p), "utf8");
@@ -37,21 +37,19 @@ const TOKENS: Record<string, string> = {
 // Near-miss inks merged into --ink-dark: #3d2f1f has ONE sanctioned home, the --chart-ink declaration; #5a4326 is banned outright.
 const RETIRED_INKS = ["#3d2f1f", "#5a4326"] as const;
 
-const layoutStyle = () => {
-  const m = read("src/layouts/BaseLayout.astro").match(/<style is:global>([\s\S]*?)<\/style>/);
-  assert.ok(m, "BaseLayout.astro should carry the global shell <style>");
-  return m[1]!;
-};
+const SHELL = "public/shell.css";
+const layoutStyle = () => read(SHELL);
+const PAGE_SHEETS = SITE_SHEETS.filter((sheet) => sheet !== SHELL);
 
-test("BaseLayout declares the four palette tokens at their ratified values (#263)", () => {
+test("public/shell.css declares the palette tokens at their ratified values (#263)", () => {
   const css = layoutStyle();
   for (const [name, hex] of Object.entries(TOKENS)) {
-    assert.match(css, new RegExp(`${name}:\\s*${hex}`), `the layout style should declare ${name}: ${hex}`);
+    assert.match(css, new RegExp(`${name}:\\s*${hex}`), `public/shell.css should declare ${name}: ${hex}`);
   }
 });
 
-test("no tokenized hex survives raw: pages consume the vars, the layout declares each once", () => {
-  for (const page of SITE_SHEETS) {
+test("no tokenized hex survives raw: pages consume the vars, public/shell.css declares each once", () => {
+  for (const page of PAGE_SHEETS) {
     const css = read(page).toLowerCase();
     for (const [name, hex] of Object.entries(TOKENS)) {
       assert.ok(!css.includes(hex), `${page} still carries raw ${hex}; it should consume var(${name})`);
@@ -60,23 +58,23 @@ test("no tokenized hex survives raw: pages consume the vars, the layout declares
   const layout = layoutStyle().toLowerCase();
   for (const [name, hex] of Object.entries(TOKENS)) {
     const count = layout.split(hex).length - 1;
-    assert.equal(count, 1, `the layout should carry ${hex} exactly once (the ${name} declaration)`);
+    assert.equal(count, 1, `public/shell.css should carry ${hex} exactly once (the ${name} declaration)`);
   }
 });
 
 test("the retired near-miss inks never reappear (#269 review, item 4)", () => {
-  for (const source of SITE_SHEETS) {
+  for (const source of PAGE_SHEETS) {
     const text = read(source).toLowerCase();
     for (const hex of RETIRED_INKS) {
       assert.ok(!text.includes(hex), `${source} carries retired ink ${hex}; use var(--ink-dark)`);
     }
   }
-  const layout = read("src/layouts/BaseLayout.astro").toLowerCase();
-  assert.ok(!layout.includes("#5a4326"), "the layout carries retired ink #5a4326");
+  const layout = layoutStyle().toLowerCase();
+  assert.ok(!layout.includes("#5a4326"), "public/shell.css carries retired ink #5a4326");
   assert.equal(
     layout.split("#3d2f1f").length - 1,
     1,
-    "the layout should carry #3d2f1f exactly once, as the --chart-ink declaration",
+    "public/shell.css should carry #3d2f1f exactly once, as the --chart-ink declaration",
   );
   assert.match(layout, /--chart-ink:\s*#3d2f1f/, "#3d2f1f's one home is the --chart-ink token");
 });
@@ -132,14 +130,13 @@ test("drift guard: every var() consumed without a fallback is declared (#263)", 
   // Consumptions WITH a fallback are excluded: they define their own undeclared behavior (the atlas-download font degradation relies on exactly that).
   const { paletteRootCss } = await import("../../src/atlas/palette.ts");
   const declared = new Set<string>();
-  const declarationSources = [...SITE_SHEETS.map(read), layoutStyle(), paletteRootCss()];
+  const declarationSources = [...SITE_SHEETS.map(read), paletteRootCss()];
   for (const text of declarationSources) {
     for (const m of text.matchAll(/(--[a-zA-Z0-9-]+)\s*:/g)) declared.add(m[1]!);
   }
 
   const consumers: Array<[string, string]> = [
     ...SITE_SHEETS.map((p): [string, string] => [p, read(p)]),
-    ["BaseLayout <style is:global>", layoutStyle()],
     ["src/atlas/document.ts", read("src/atlas/document.ts")],
     ["src/cli/gallery.ts", read("src/cli/gallery.ts")],
   ];
@@ -155,7 +152,7 @@ const SHEET_SHADOW_GEOMETRY = "0 12px 34px";
 const STAGE_SHADOW_GEOMETRY = "0 18px 60px";
 
 test("the sheet shadow is declared once and consumed as a var: no raw geometry survives (#367)", () => {
-  for (const page of SITE_SHEETS) {
+  for (const page of PAGE_SHEETS) {
     assert.ok(
       !read(page).includes(SHEET_SHADOW_GEOMETRY),
       `${page} still writes the sheet shadow out longhand; it should consume var(--sheet-shadow)`,
@@ -164,12 +161,12 @@ test("the sheet shadow is declared once and consumed as a var: no raw geometry s
   assert.equal(
     layoutStyle().split(SHEET_SHADOW_GEOMETRY).length - 1,
     1,
-    "the layout should carry the sheet-shadow geometry exactly once (the token declaration)",
+    "public/shell.css should carry the sheet-shadow geometry exactly once (the token declaration)",
   );
 });
 
 test("the stage shadow is declared once and consumed as a var: the chart-room depth has one home too (#463)", () => {
-  for (const page of SITE_SHEETS) {
+  for (const page of PAGE_SHEETS) {
     assert.ok(
       !read(page).includes(STAGE_SHADOW_GEOMETRY),
       `${page} still writes the stage shadow out longhand; it should consume var(--stage-shadow)`,
@@ -178,7 +175,7 @@ test("the stage shadow is declared once and consumed as a var: the chart-room de
   assert.equal(
     layoutStyle().split(STAGE_SHADOW_GEOMETRY).length - 1,
     1,
-    "the layout should carry the stage-shadow geometry exactly once (the token declaration)",
+    "public/shell.css should carry the stage-shadow geometry exactly once (the token declaration)",
   );
   assert.match(
     layoutStyle(),
@@ -280,11 +277,6 @@ test("no hover or active rule states a lift as a px literal: the raise is a toke
   const { GALLERY_PAGE_CSS } = await import("../../src/cli/gallery.ts");
   const sheets: Array<[string, string]> = [
     ...SITE_SHEETS.map((p): [string, string] => [p, read(p)]),
-    ["BaseLayout <style is:global>", layoutStyle()],
-    [
-      "src/pages/index.astro <style>",
-      [...read("src/pages/index.astro").matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join("\n"),
-    ],
     ["src/cli/gallery.ts", GALLERY_PAGE_CSS],
     ["src/atlas/document.ts", await atlasStyleBlocks()],
   ];
@@ -375,7 +367,9 @@ function cssRules(css: string, media: readonly string[] = []): CssRule[] {
 const shellRules = cssRules(layoutStyle().replace(/\/\*[\s\S]*?\*\//g, ""));
 const trailRules = shellRules.filter((r) => /\.(trail|also|where)\b/.test(r.selector));
 const ruleAt = (selector: string, media: readonly string[]): string => {
-  const found = shellRules.filter((r) => r.selector === selector && JSON.stringify(r.media) === JSON.stringify(media));
+  const found = shellRules.filter(
+    (r) => r.selector.replace(/\s+/g, " ") === selector && JSON.stringify(r.media) === JSON.stringify(media),
+  );
   assert.equal(found.length, 1, `exactly one rule ${selector} under ${JSON.stringify(media)}`);
   return found[0]!.body;
 };

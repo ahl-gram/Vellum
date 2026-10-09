@@ -10,7 +10,7 @@ const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 const liveCss = (p: string): string => read(p).replace(/\/\*[\s\S]*?\*\//g, "");
 
 const css = liveCss("public/index.css");
-const layout = read("src/layouts/BaseLayout.astro");
+const layout = read("public/shell.css");
 
 const rule = (sheet: string, selector: string): string => {
   const m = sheet.match(

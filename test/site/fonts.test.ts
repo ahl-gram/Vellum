@@ -171,13 +171,17 @@ test("every page shell in the folio links /fonts.css (root-absolute, like /motio
   }
 });
 
-test("the shell binds all three roles once, in the layout's global style (#263)", async () => {
-  const layout = await readText("src/layouts/BaseLayout.astro");
-  const style = layout.match(/<style is:global>([\s\S]*?)<\/style>/);
-  assert.ok(style, "BaseLayout should carry the global shell <style>");
-  for (const v of ROLE_VARS) {
-    assert.match(style[1]!, new RegExp(`var\\(${v}[,)]`), `the shell style should bind ${v}`);
-  }
+test("the shell binds all three roles once, in public/shell.css (#263)", async () => {
+  const shell = await readText("public/shell.css");
+  const bindings = [
+    [/(^|\n)body\s*\{[^}]*font-family:\s*var\(--font-body,/, "--font-body on body"],
+    [
+      /(^|\n)\.wordmark,\s*\.room-name,\s*\.rooms,\s*footer\s*\{[^}]*font-family:\s*var\(--font-display,/,
+      "--font-display on the head cluster and footer",
+    ],
+    [/(^|\n)\.tagline\s*\{[^}]*font-family:\s*var\(--font-flourish,/, "--font-flourish on the tagline"],
+  ] as const;
+  for (const [rule, what] of bindings) assert.match(shell, rule, `the shell binds ${what}`);
 });
 
 test("index.css maps display + flourish roles onto headings and flourishes", async () => {

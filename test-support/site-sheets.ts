@@ -39,10 +39,4 @@ export function sheetsSweptBy(exclusions: Readonly<Record<string, string>>): Rea
   return SITE_SHEETS.filter((sheet) => !Object.hasOwn(exclusions, sheet));
 }
 
-export const SRC_CSS_FILES = [
-  "src/layouts/BaseLayout.astro",
-  "src/pages/index.astro",
-  "src/cli/gallery.ts",
-  "src/atlas/document.ts",
-  "src/render/og-card.ts",
-] as const;
+export const SRC_CSS_FILES = ["src/cli/gallery.ts", "src/atlas/document.ts", "src/render/og-card.ts"] as const;
