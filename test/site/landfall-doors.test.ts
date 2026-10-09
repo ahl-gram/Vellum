@@ -127,6 +127,11 @@ test("a no-JS visitor keeps the noscript doors alone: the reveal stands down ins
     noscript[0].includes('<link rel="stylesheet" href="home-noscript.css">'),
     "the noscript block links its sheet",
   );
+  assert.equal(
+    astro.split("home-noscript").length - 1,
+    noscript[0].split("home-noscript").length - 1,
+    "the scripts-off sheet is linked from inside <noscript> alone, so a reader with scripts on never loads it",
+  );
   assert.ok(
     read("public/home-noscript.css")
       .replace(/\s+/g, " ")

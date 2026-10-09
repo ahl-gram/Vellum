@@ -402,9 +402,22 @@ test("each rendered head carries the canonical meta with the ratified prop fan-o
 
 test("every built head links public/shell.css last of its stylesheets, the place the layout's inline style held, so a page rule still needs higher specificity to override the shell (handbook/specs/cascade-traps.md)", () => {
   for (const p of PAGES) {
-    const sheets = [...headOf(page(p.route)).matchAll(/<link rel="stylesheet" href="([^"]+)"/g)].map((m) => m[1]);
-    assert.ok(sheets.includes("index.css"), `${p.route} links its own sheet`);
-    assert.equal(sheets.at(-1), "/shell.css", `${p.route} links public/shell.css after every other stylesheet`);
+    const html = page(p.route);
+    const links = [...html.matchAll(/<link\b[^>]*\brel="stylesheet"[^>]*>/g)]
+      .map((m) => ({ at: m.index, href: /\bhref="([^"]+)"/.exec(m[0])?.[1] }))
+      .filter((l) => l.href !== "home-noscript.css");
+    assert.ok(
+      links.some((l) => l.href === "index.css"),
+      `${p.route} links its own sheet`,
+    );
+    const shell = links.at(-1);
+    assert.equal(
+      shell?.href,
+      "/shell.css",
+      `${p.route} links public/shell.css after every other stylesheet in the page`,
+    );
+    assert.ok(shell.at < html.indexOf("</head>"), `${p.route} links public/shell.css in its head`);
+    assert.equal(html.indexOf("<style", shell.at), -1, `${p.route} carries no <style> after public/shell.css`);
   }
 });
 
