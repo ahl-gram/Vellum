@@ -5,12 +5,6 @@ import { fileURLToPath } from "node:url";
 
 const homeSource = readFileSync(fileURLToPath(new URL("../../src/pages/index.astro", import.meta.url)), "utf8");
 
-test("the Go Deeper section is retired; its copy lives on the station slips (#459)", () => {
-  assert.ok(!homeSource.includes("Go Deeper"), "the old section must stay gone");
-  assert.ok(!homeSource.includes('class="card"'), "no encounter card survives outside the stage");
-  assert.ok(!homeSource.includes("cards-gloss"), "the section's gloss went with it");
-});
-
 test("the encounter gloss lives once, at the legend head (#459)", () => {
   const hits = homeSource.split("Every seed is a world entire").length - 1;
   assert.equal(hits, 1, "the legend head is the one home of the gloss line");

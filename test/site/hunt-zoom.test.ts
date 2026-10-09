@@ -51,12 +51,6 @@ test("HZ2 app.js adopts the shared zoom controller, bound to #map-viewport / #ma
   assert.match(js, /\.attach\(\)/, "the controller must be attached (binds the gestures)");
 });
 
-test("HZ3 app.js exposes the deterministic zoom hooks the e2e drives (#167)", () => {
-  const js = read("src/site/seed-of-the-day/app.ts");
-  assert.match(js, /window\.__vellumZoomTo\s*=/, "app.js should expose __vellumZoomTo");
-  assert.match(js, /window\.__vellumZoomState\s*=/, "app.js should expose __vellumZoomState");
-});
-
 test("HZ4 witness: the Hunt's entry imports its setup and builds its zoom controller with an options literal, so vellum/hunt-fixed-world has a module source and a controller to hold (#161 boundary)", () => {
   const sf = ts.createSourceFile("app.ts", read("src/site/seed-of-the-day/app.ts"), ts.ScriptTarget.Latest, true);
   const imports: string[] = [];

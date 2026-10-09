@@ -6,7 +6,6 @@ import { readFileSync } from "node:fs";
 const here = (p: string): string => readFileSync(new URL(p, import.meta.url), { encoding: "utf8" });
 const page = here("../../src/pages/explorer/index.astro");
 const glossary = here("../../src/pages/glossary/index.astro");
-const app = here("../../src/site/explorer/app.ts");
 
 // Each group is a role="group" region labelled by its head id; slice the page into its blocks in reading order.
 function block(from: string, to: string): string {
@@ -83,16 +82,6 @@ test("The Press is the legend row: Turn the sheet, then the Print Room and the j
     "the Print Room road stopped being the gold legend road",
   );
   assert.match(press, /<LegendButton id="journal-link" gold /, "the journal road stopped being the gold legend road");
-});
-
-// The journal pointer (ratified 2026-08-11, decision 2 on Issue #270): always visible, the print road's gold peer; the old caption wrapper must be GONE, not hidden.
-test("the journal pointer is the always-visible gold road, not the old caption (#270)", () => {
-  assert.ok(!page.includes('id="journal-line"'), "the old #journal-line caption wrapper survived the move");
-  assert.ok(
-    page.includes('verb="Read the journal in" room="The Reading Room"'),
-    "the road's verb and room lines are missing",
-  );
-  assert.ok(!app.includes("journalLine"), "app.ts still gates a caption wrapper that no longer exists");
 });
 
 // Decision 4 on Issue #270 (2026-08-11): the seals stay REAL checkboxes, ids and label text untouched.

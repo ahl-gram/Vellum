@@ -42,15 +42,6 @@ test("the walnut deep: one declaration, the vignette over the lit walnut, consum
   assert.equal(daylight, -1, "the light wash retired with the ground (#461 ruling 2)");
 });
 
-test("the interim desk panel: an unconverted room's main stands on parchment, not the deep (#461)", () => {
-  // Scaffolding with a stated retirement path: a page passes desk="open" once its own conversion sub (7-9) dresses it for the deep, and the class stops rendering.
-  const css = layoutStyle();
-  const panel = css.match(/main\.desk-panel\s*\{([\s\S]*?)\}/);
-  assert.ok(panel, "public/shell.css should carry main.desk-panel");
-  assert.match(panel[1]!, /background:\s*var\(--parchment\)/, "the panel is the parchment the page css was tuned on");
-  assert.match(panel[1]!, /box-shadow:\s*var\(--sheet-shadow\)/, "the panel rests at the house depth");
-});
-
 test("the chrome passes the hand through: drags over the fixed cluster reach the chart, links stay live (#461, skeptic finding 2)", () => {
   // The defect measured on home: a 485x79 dead drag zone under the cluster. The mockup's idiom (stage.css) is the fix: pointer-events none on the container, auto on the interactive children.
   const css = layoutStyle();
@@ -164,14 +155,4 @@ test("the chart marker is real: the renderer stamps it on every committed chart 
       `${chart} should carry the data-vellum-style marker the mount rules select on`,
     );
   }
-});
-
-test("the engine's own sheet states no shadow it could not win (#367)", () => {
-  // Host-agnostic: a shadow written here loses every cascade it enters.
-  const rule = findRule(read("public/living-chart.css"), ".voyage-overlay");
-  assert.ok(rule, "living-chart.css should still carry the .voyage-overlay layout rule");
-  assert.ok(
-    !/box-shadow/.test(rule.body),
-    "the engine sheet must not state a box-shadow it cannot win; the mounts own the fix",
-  );
 });

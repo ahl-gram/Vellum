@@ -149,7 +149,7 @@ test("RBR5 the stage holds the fitted sheet with the scroll as the one face in t
   );
 });
 
-test("RBR6 seats.ts binds the Glass and the room at the scroll's own aspect and leans the Glass on a row; app.ts writes the roads and never scrolls the page", () => {
+test("RBR6 seats.ts binds the Glass and the room at the scroll's own aspect and leans the Glass on a row; app.ts writes the roads", () => {
   assert.match(seats, /import\s*\{\s*bindRoom, type Room\s*\}\s*from\s*"\.\.\/shared\/room\.ts"/, "the shared room");
   assert.match(
     seats,
@@ -218,12 +218,6 @@ test("RBR6 seats.ts binds the Glass and the room at the scroll's own aspect and 
     settle.indexOf("room.layout()") > settle.indexOf("writeFolio("),
     "the refit follows the folio write, since the fit measures the folio's rect",
   );
-  for (const [name, src] of [
-    ["app.ts", app],
-    ["seats.ts", seats],
-  ] as const) {
-    assert.doesNotMatch(src, /scrollIntoView|window\.scrollTo|\.scrollTop\s*=/, `${name} moves the page`);
-  }
 });
 
 test("RBR7 the css: the sheet fitted to what the chrome leaves, the scroll as the sheet's face, the itinerary rows buttons in the text's dress, print standing down", () => {

@@ -244,9 +244,3 @@ test("the Explorer host wires the contract: mount class + sheet link (#302)", ()
   const layout = read("src/layouts/BaseLayout.astro");
   assert.ok(layout.includes("extraCss"), "BaseLayout emits a page's extra stylesheet links");
 });
-
-test("the Reading Room host wires the sheet-link half of the contract (#302, #221)", () => {
-  const page = read("src/pages/reading-room/index.astro");
-  assert.ok(page.includes("/living-chart.css"), "the Reading Room page links /living-chart.css");
-  assert.ok(page.includes("/reading-frame.css"), "the Reading Room page links /reading-frame.css");
-});

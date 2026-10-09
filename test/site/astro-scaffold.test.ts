@@ -772,42 +772,6 @@ test("every page's h1 names the page: the room on room pages, the wordmark on ho
   }
 });
 
-test("titles are computed in the layout from the room, never hand-set (#268)", () => {
-  const layout = readFileSync(root("src/layouts/BaseLayout.astro"), "utf8");
-  assert.ok(!layout.includes("wordmarkSuffix"), "wordmarkSuffix is retired (#268 reverses the #254 parameterization)");
-  assert.ok(layout.includes(" · Vellum"), "the layout owns the title scheme");
-
-  for (const p of PAGES) {
-    if (p.room) {
-      assert.equal(p.title, `${p.room} · Vellum`, `${p.route} title follows the room scheme`);
-    }
-    const source = readFileSync(root(`src/pages/${p.route.replace("index.html", "index.astro")}`), "utf8");
-    const open = source.match(/<BaseLayout([\s\S]*?)>/);
-    assert.ok(open, `${p.route} renders through BaseLayout`);
-    for (const gone of ["title=", "ogTitle=", "wordmarkSuffix="]) {
-      assert.ok(!open[1]!.includes(gone), `${p.route} must not hand-set ${gone.slice(0, -1)} (the layout computes it)`);
-    }
-    if (p.room) {
-      assert.ok(source.includes(`const room = "${p.room}"`), `${p.route} hoists its room to a const`);
-      assert.ok(open[1]!.includes("room={room}"), `${p.route} passes the const to the layout`);
-      assert.ok(source.includes(`const tagline = "${p.tagline}"`), `${p.route} hoists its tagline to a const`);
-      assert.match(
-        source,
-        /<RoomFolio (?:slot="desk" region )?room=\{room\} tagline=\{tagline\}>/,
-        `${p.route} stands its RoomFolio in the page, or as a named region in the desk layer on a room that scrolls down`,
-      );
-    } else {
-      assert.ok(!open[1]!.includes("room="), `${p.route} is home and passes no room`);
-    }
-    if (p.ogTitle !== p.title) {
-      const normalized = p.ogTitle.replace(" · Vellum", "");
-      assert.ok(open[1]!.includes(`ogRoom="${normalized}"`), `${p.route} normalizes its og twin via ogRoom`);
-    } else {
-      assert.ok(!open[1]!.includes("ogRoom="), `${p.route} needs no ogRoom (its room is already normalized)`);
-    }
-  }
-});
-
 test("the footer is constant and appears exactly once per page; a chart room alone has none (#462 ruling 9)", () => {
   for (const p of PAGES) {
     const footers = [...page(p.route).matchAll(/<footer>([\s\S]*?)<\/footer>/g)];

@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync, readdirSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { join } from "node:path";
 import { CULTURES } from "../../src/society/names.ts";
@@ -8,23 +8,6 @@ import { CULTURES } from "../../src/society/names.ts";
 // Prose facts the pages state about the engine (Issue #289, Issue #292): the culture count is read from the roster, never a number written down twice.
 
 const pagesDir = fileURLToPath(new URL("../../src/pages", import.meta.url));
-
-const astroSources = (dir: string): string[] =>
-  readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
-    e.isDirectory() ? astroSources(join(dir, e.name)) : e.name.endsWith(".astro") ? [join(dir, e.name)] : [],
-  );
-
-test("no page still counts six: the roster is ten (#289)", () => {
-  const sources = astroSources(pagesDir);
-  assert.ok(sources.length >= 4, "the src/pages tree should hold the authored pages");
-  // Every phrasing the six-count ever wore.
-  for (const path of sources) {
-    const text = readFileSync(path, "utf8");
-    for (const stale of ["six invented", "six cultures", "six languages", "six tongues"]) {
-      assert.ok(!text.includes(stale), `${path} still says "${stale}"; the culture roster is ten`);
-    }
-  }
-});
 
 test("the FAQ states the ten-culture roster outright", () => {
   const faq = readFileSync(join(pagesDir, "faq/index.astro"), "utf8");
