@@ -59,7 +59,8 @@ symbol and path so the reader goes and looks.
   a red.** The stylesheets under `public/` are no list anyone keeps: the stylesheet lint reaches
   every one by its glob, so a new sheet joins every rule by existing, and a rule that reads across
   sheets walks `public/` through `sheetsOnDisk` in `scripts/lint/sheet-tokens.ts`, which leaves out
-  the generated trees `GENERATED_CSS` names. `SITE_SHEETS` in `test-support/site-sheets.ts` reads the
+  the generated trees (`GENERATED_SUBTREES` in `scripts/clean-public-generated.ts`, and the CSS ones
+  `GENERATED_CSS` names) and skips a directory the build removes mid-walk. `SITE_SHEETS` in `test-support/site-sheets.ts` reads the
   same sheets from git for the tests, and `test/site/tip-affordance.test.ts` reds when git's list and
   the lint's walk disagree. A rule about how a sheet is written is a stylesheet lint rule, and a rule
   that holds for one sheet, or exempts one, names that sheet in the rule itself, by its file. A test
