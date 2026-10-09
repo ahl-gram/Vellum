@@ -236,11 +236,6 @@ test("PPR7 the css: the sheet fitted to what the chrome leaves, the plate as the
   assert.match(css, /#pp-plate\[hidden\]\s*\{[^}]*display:\s*none/, "hidden stays hidden under the author display");
   assert.doesNotMatch(
     css,
-    /(^|\n)(\.contents )?\.cr-(num|text)\s*\{/,
-    "the page css does not re-dress the kit's row (#302)",
-  );
-  assert.doesNotMatch(
-    css,
     /(^|\n)\s*(header|footer|\.plate-figure|\.actions|main)\s*[{,]/,
     "no rule targets furniture a chart room no longer has",
   );

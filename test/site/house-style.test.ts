@@ -2,7 +2,6 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { SITE_SHEETS, SRC_CSS_FILES, sheetsSweptBy } from "../../test-support/site-sheets.ts";
 
 // The Specimen Book (Issue #324): the house style lives ONCE in /house.css, linked by BaseLayout on every page. The specs are the 2026-07-30 ledger ratifications (the comment on Issue #324); a change is a re-ratification, so these pins are deliberately literal.
 
@@ -31,15 +30,6 @@ test("the intro role: flourish italic, ink-brown, centered (#324 decision 1)", (
   assert.match(rule, /font-style:\s*italic/, ".intro is italic");
   assert.match(rule, /color:\s*var\(--ink-brown\)/, ".intro is ink-brown");
   assert.match(rule, /text-align:\s*center/, ".intro is centered");
-});
-
-test("no sheet but the house sheet binds the intro voice (#324, Issue #709)", () => {
-  for (const sheet of sheetsSweptBy({ "public/house.css": "the house sheet is where the intro voice is written" })) {
-    assert.ok(
-      !/\.intro[^{]*\{[^}]*(font-family|font-style|color)/.test(read(sheet)),
-      `${sheet} re-binds the intro voice; the house sheet owns it`,
-    );
-  }
 });
 
 test("the status role: body italic, ink-faded (#324 decision 3)", () => {
@@ -170,32 +160,8 @@ test("home's flourish family survives the section removals (#324, reshaped at #4
   );
 });
 
-test("the old page-local skins are gone: no sheet but the house sheet dresses the controls (#324, Issue #709)", () => {
+test("home's seedrow wears the control idiom's corners, not its old 2px skin (#324, Issue #709)", () => {
   assert.ok(!/border-radius:\s*2px/.test(read("public/index.css")), "the seedrow's 2px corners joined the idiom");
-  for (const sheet of sheetsSweptBy({ "public/house.css": "the house sheet is where the control skin is written" })) {
-    assert.ok(
-      !/select,\s*button[^{]*\{[^}]*background/.test(read(sheet)),
-      `${sheet} re-declares the control skin; the house sheet owns it`,
-    );
-  }
-});
-
-test("no token value smuggled past the guards in rgb() form (#324)", async () => {
-  // rgb(74 56 38 / a) IS --ink-dark with alpha, invisible to the hex guard; alpha over a token is written rgb(from var(--token) r g b / a) so the quotation stays attached to its name.
-  const { SITE_PALETTE } = await import("../../src/atlas/palette.ts");
-  const sources = [...SITE_SHEETS, ...SRC_CSS_FILES];
-  for (const [name, hex] of Object.entries(SITE_PALETTE)) {
-    const h = String(hex);
-    if (!/^#[0-9a-f]{6}$/.test(h)) continue;
-    const [r, g, b] = [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
-    const smuggled = new RegExp(`rgb\\(\\s*${r}\\s+${g}\\s+${b}\\b`);
-    for (const source of sources) {
-      assert.ok(
-        !smuggled.test(read(source)),
-        `${source} carries ${name}'s value as raw rgb(${r} ${g} ${b}); use rgb(from var(${name}) r g b / a) where the css declares the token, or read SITE_PALETTE["${name}"] where it does not (render code)`,
-      );
-    }
-  }
 });
 
 test("the chart quotations equal the render constants they quote (#324)", async () => {

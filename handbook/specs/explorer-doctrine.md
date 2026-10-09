@@ -41,7 +41,8 @@ make an unqualified rule false. Read the surface, not just the rule.
   does not matter**: construction only stores references, so a host may build its DOM after wiring,
   and `test/site/living-chart-boundary.test.ts` pins that by constructing against bare objects.
 - **Engine dressing is edited in `public/living-chart.css`, never in a host's own sheet.** The
-  dressing keys on the mount class and never on a host's id.
+  dressing keys on the mount class and never on a host's id; `vellum/css-engine-dress-one-home` and
+  `vellum/css-engine-no-host-id` in `scripts/lint/sheet-owners.ts` refuse each.
 - **The host wires the document's click and keydown to the engine; the engine adds document
   listeners of its own only while a place card is shown** (Alex, Issue #750): a `mousemove` and a
   capture-phase `pointerdown` on the mount's own document (`mapEl.ownerDocument`), added when a card

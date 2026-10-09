@@ -126,7 +126,7 @@ test("the card's action row and its filing press are dressed by a rule of their 
     /pointer-events:\s*auto/,
     "and without this it is dead to a real pointer, since #place-card is pointer-events: none",
   );
-  // The press acts on the sheet and goes nowhere, so it must NOT wear the navigation tip; tip-affordance.test.ts sweeps the class, this names the piece.
+  // vellum/css-tip-goes-somewhere holds every tip; this names the press.
   assert.doesNotMatch(
     css.slice(css.indexOf(".pc-lay")),
     /^\.pc-lay[^{]*:hover[^{]*\{[^}]*rotate\(/m,
@@ -230,37 +230,6 @@ test("every card variant reads the clamp, and reads it INSIDE the counter-scale 
   const overlay = codeOf("src/site/living-chart/place-overlay.ts");
   for (const prop of ["--pc-dx", "--pc-dy"]) {
     assert.ok(overlay.includes(`setProperty("${prop}"`), `the engine no longer publishes ${prop}`);
-  }
-});
-
-test("the shared sheet is host-agnostic: no host element id, ever (#302)", () => {
-  const raw = read(SHEET);
-  assert.ok(raw.length > 0, `${SHEET} exists and is non-empty`);
-  // Comments may cite a host by name; SELECTORS must not. #place-card is ENGINE-created so it may appear; #map is the Explorer host's own mount.
-  const css = raw.replace(/\/\*[\s\S]*?\*\//g, "");
-  assert.ok(!css.includes("#map"), `${SHEET} must never key a rule on a host's #map`);
-});
-
-test("the dressing has one home: the Explorer sheet keeps no copy (#302)", () => {
-  // Strip comments first: prose may legitimately mention a class name, and the :not(.place-hit) exclusion in the Explorer's button rule stays by design.
-  const css = read("public/explorer/index.css").replace(/\/\*[\s\S]*?\*\//g, "");
-  const banned = [
-    ".place-overlay",
-    ".place-hit {",
-    ".place-hit::after",
-    ".place-hit:hover",
-    ".place-hit:focus",
-    "#place-card",
-    ".pc-",
-    "data-ink",
-    ".voyage-overlay",
-    ".voyage-track",
-    ".voyage-ship",
-    ".voyage-rider",
-    ".ages-range {",
-  ];
-  for (const s of banned) {
-    assert.ok(!css.includes(s), `public/explorer/index.css still carries ${s}; the rule lives in ${SHEET} now`);
   }
 });
 
