@@ -225,7 +225,7 @@ fail silently (an undeclared CSS variable, a suite the runner never calls, a bud
 
 1. `grep -rn` the nearest sibling's name across `src/`, `scripts/`, `e2e/`, `test/`, `.github/` and join
    every list it appears in: the runner's `SUITES` map, `MEASURED_SECONDS`, the tiers test, the
-   discovery files. A sheet under `public/` joins the sheet sweeps by existing (`SITE_SHEETS`).
+   discovery files. A sheet under `public/` joins the stylesheet lint by existing (its block reads `public/**/*.css`).
 2. Name in the PR body which rosters self-check and which were joined by hand;
    `handbook/specs/site-architecture.md` names the rosters a page or a sheet joins, and which close themselves.
 3. Re-measure any budget the roster carries; a number measured on an eleven-check suite is wrong on a
