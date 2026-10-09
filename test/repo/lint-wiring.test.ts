@@ -8,6 +8,13 @@ import ts from "typescript";
 import lintConfig from "../../eslint.config.ts";
 import { WITNESSES } from "../../test-support/lint-witnesses.ts";
 import { ciJob } from "../../test-support/ci-job.ts";
+import {
+  CHART_INSTRUMENTS,
+  INLINE_BLOCKS_OUTSIDE_MARKER_LISTS,
+  SANCTIONED_LIFTS,
+  TIPPING_LINKS,
+  TIPS_AWAITING_A_RULING,
+} from "../../scripts/lint/sheet-motion.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const src = (p: string) => readFileSync(join(ROOT, p), "utf8");
@@ -223,24 +230,30 @@ function pinCorrectness(file: string, typed: boolean, rules: Record<string, unkn
   }
 }
 
-const CSS_FORM_RULES = [
-  "vellum/css-comment-one-line",
-  "vellum/css-comment-no-em-dash",
-  "vellum/css-comment-issue-form",
-  "vellum/css-comment-no-js-module",
-  "vellum/css-no-narrow-width",
-  "vellum/css-comment-citation-resolves",
-  "vellum/css-token-by-name",
-  "vellum/css-shadow-by-token",
-  "vellum/css-var-declared",
-  "vellum/css-house-owns-intro",
-  "vellum/css-house-owns-controls",
-  "vellum/css-kit-not-redressed",
-  "vellum/css-kit-owns-contents-row",
-  "vellum/css-kit-owns-select-dress",
-  "vellum/css-engine-dress-one-home",
-  "vellum/css-engine-no-host-id",
-];
+const SHEET_RULES: Readonly<Record<string, unknown>> = {
+  "vellum/css-comment-one-line": [2],
+  "vellum/css-comment-no-em-dash": [2],
+  "vellum/css-comment-issue-form": [2],
+  "vellum/css-comment-no-js-module": [2],
+  "vellum/css-no-narrow-width": [2],
+  "vellum/css-comment-citation-resolves": [2],
+  "vellum/css-token-by-name": [2],
+  "vellum/css-shadow-by-token": [2],
+  "vellum/css-var-declared": [2],
+  "vellum/css-house-owns-intro": [2],
+  "vellum/css-house-owns-controls": [2],
+  "vellum/css-kit-not-redressed": [2],
+  "vellum/css-kit-owns-contents-row": [2],
+  "vellum/css-kit-owns-select-dress": [2],
+  "vellum/css-engine-dress-one-home": [2],
+  "vellum/css-engine-no-host-id": [2],
+  "vellum/css-lift-by-token": [2, { sanctioned: SANCTIONED_LIFTS }],
+  "vellum/css-tip-goes-somewhere": [
+    2,
+    { links: TIPPING_LINKS, instruments: CHART_INSTRUMENTS, awaiting: TIPS_AWAITING_A_RULING },
+  ],
+  "vellum/css-inline-block-bullet": [2, { outside: INLINE_BLOCKS_OUTSIDE_MARKER_LISTS }],
+};
 const TURNED_ON = [
   "@typescript-eslint/no-unnecessary-type-assertion",
   "@typescript-eslint/no-unsafe-argument",
@@ -330,7 +343,7 @@ function pinJavaScript(file: string, typed: boolean, config: Resolved, rules: Re
     `${file}: max-depth does not resolve at error with the ruled depth (Size, Issue #648)`,
   );
   pinCorrectness(file, typed, rules);
-  for (const rule of CSS_FORM_RULES) {
+  for (const rule of Object.keys(SHEET_RULES)) {
     assert.equal(
       rules[rule],
       undefined,
@@ -355,19 +368,18 @@ function pinCss(file: string, config: Resolved, rules: Record<string, unknown>):
     true,
     `${file}: the sheets parse strict, so a syntax css-tree does not know reds the lint; the family ruled tolerant (Alex's delegation, 2026-09-21, Issue #648)`,
   );
-  for (const rule of CSS_FORM_RULES) {
+  for (const [rule, entry] of Object.entries(SHEET_RULES))
     assert.deepEqual(
       rules[rule],
-      [2],
-      `${file}: ${rule} does not resolve at error with no options (CSS form, Issue #648)`,
+      entry,
+      `${file}: ${rule} does not resolve at error with its ruled options, or none (Issue #648, Issue #779 part 2d)`,
     );
-  }
   assert.deepEqual(
     Object.keys(rules)
       .filter((r) => severityOf(rules[r]) !== 0)
       .sort(),
-    [...CSS_FORM_RULES].sort(),
-    `${file}: a rule other than the comment-form rules, the narrow-width rule and the citation rule reaches the sheets (CSS form, Issue #648, Issue #675, Issue #763, Issue #779)`,
+    Object.keys(SHEET_RULES).sort(),
+    `${file}: a rule off the stylesheet block's ruled set reaches the sheets, or a ruled one does not (Issue #648, Issue #675, Issue #763, Issue #779)`,
   );
 }
 

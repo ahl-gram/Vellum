@@ -69,6 +69,19 @@ export const collapse = (text: string): string =>
     .replace(/\s+/g, " ")
     .trim();
 
+export type Arm = { readonly node: CssNode; readonly text: string };
+export const armsOf = (source: string, prelude: CssNode): Arm[] =>
+  prelude.type === "SelectorList"
+    ? childrenOf(prelude).map((node) => ({ node, text: collapse(sourceOf(source, node as never)) }))
+    : [];
+export const subjectOf = (arm: CssNode): CssNode[] => {
+  const kids = childrenOf(arm);
+  return kids.slice(kids.findLastIndex((kid) => kid.type === "Combinator") + 1);
+};
+export type RuleNode = { prelude: CssNode; block: { children: CssNode[] }; loc?: unknown };
+export const declarationsOf = (rule: RuleNode): Array<CssNode & { type: "Declaration" }> =>
+  rule.block.children.filter((d): d is CssNode & { type: "Declaration" } => d.type === "Declaration");
+
 const TOKEN_HOMES: ReadonlySet<string> = new Set(["shell.css", "src/atlas/document.ts"]);
 const TOKENS = Object.entries(SITE_PALETTE).map(([name, hex]) => ({
   name,

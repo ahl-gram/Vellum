@@ -1,20 +1,17 @@
 // A hand-authored file outside src/ (CLAUDE.md): the house's lint rules that keep each piece of dress in the sheet that owns it, the house's, the kit's and the engine's (Issue #779 part 2d), imported by eslint.config.ts and never run by Node directly.
 import type { CSSRuleDefinition } from "@eslint/css";
 import { parse, toPlainObject, walk, type CssNode } from "@eslint/css-tree";
-import { childrenOf, collapse, readSheet, sheetKey, sheetsOnDisk, sourceOf } from "./sheet-tokens.ts";
-
-type Arm = { readonly node: CssNode; readonly text: string };
-
-const armsOf = (source: string, prelude: CssNode): Arm[] =>
-  prelude.type === "SelectorList"
-    ? childrenOf(prelude).map((node) => ({ node, text: collapse(sourceOf(source, node as never)) }))
-    : [];
-
-const subjectOf = (arm: CssNode): CssNode[] => {
-  const kids = childrenOf(arm);
-  const last = kids.findLastIndex((kid) => kid.type === "Combinator");
-  return kids.slice(last + 1);
-};
+import {
+  armsOf,
+  childrenOf,
+  declarationsOf,
+  readSheet,
+  sheetKey,
+  sheetsOnDisk,
+  subjectOf,
+  type Arm,
+  type RuleNode,
+} from "./sheet-tokens.ts";
 
 const selectorNodes = (node: CssNode, outsideNot: boolean): CssNode[] => {
   if (outsideNot && node.type === "PseudoClassSelector" && node.name.toLowerCase() === "not") return [];
@@ -27,10 +24,6 @@ const idsIn = (arm: CssNode): string[] =>
   selectorNodes(arm, false).flatMap((n) => (n.type === "IdSelector" ? [n.name] : []));
 const subjectIs = (arm: CssNode, element: string): boolean =>
   subjectOf(arm).some((n) => n.type === "TypeSelector" && n.name.toLowerCase() === element);
-
-type RuleNode = { prelude: CssNode; block: { children: CssNode[] }; loc?: unknown };
-const declarationsOf = (rule: RuleNode): Array<CssNode & { type: "Declaration" }> =>
-  rule.block.children.filter((d): d is CssNode & { type: "Declaration" } => d.type === "Declaration");
 
 type Check = (args: {
   key: string;

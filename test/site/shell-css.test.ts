@@ -188,64 +188,6 @@ test("the wordmark tips under the hand on room pages, and stays still on home (#
   );
 });
 
-// The grander plate, gallery and atlas scales are a question Issue #405 left standing, so each literal is sanctioned at its exact selector and value, and every comma arm of a literal-bearing rule must be individually sanctioned: a new surface cannot borrow an exception.
-const SANCTIONED_LIFTS: Record<string, string> = {
-  ".plate:hover": "-5px",
-  ".plate:active": "-1px",
-  ".atlas-sheet figure a img:hover": "-5px",
-  ".atlas-sheet figure a img:active": "-1px",
-  "figure img:hover": "-4px",
-  "figure img:active": "-1px",
-};
-
-const atlasStyleBlocks = async (): Promise<string> => {
-  const { atlasDocument, atlasPlateFilename } = await import("../../src/atlas/document.ts");
-  const plate = { key: "antique", title: "hero", svg: "<svg></svg>" };
-  const html = atlasDocument(
-    {
-      title: "T",
-      subtitle: "s",
-      seed: 7,
-      hero: plate,
-      draughtings: [],
-      themes: [],
-      regions: [],
-      prospects: [],
-      bannersHtml: "",
-      chronicleHtml: "",
-      gazetteerHtml: "",
-    },
-    (p, s) => atlasPlateFilename(p, s),
-    { anchor: true, motion: true },
-  );
-  return [...html.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join("\n");
-};
-
-test("no hover or active rule states a lift as a px literal: the raise is a token (#405)", async () => {
-  // Scoped to :hover/:active selectors, so keyframe steps pass by construction (their selectors are waypoints like "70%": the paperSettle trap in motion.css); translateY(0) is a return to rest, not a lift.
-  const { GALLERY_PAGE_CSS } = await import("../../src/cli/gallery.ts");
-  const sheets: Array<[string, string]> = [
-    ...SITE_SHEETS.map((p): [string, string] => [p, read(p)]),
-    ["src/cli/gallery.ts", GALLERY_PAGE_CSS],
-    ["src/atlas/document.ts", await atlasStyleBlocks()],
-  ];
-  for (const [name, css] of sheets) {
-    for (const { selector, body } of rulesIn(css)) {
-      if (!/:hover|:active/.test(selector)) continue;
-      for (const m of body.matchAll(/translateY\(([^)]*)\)/g)) {
-        const arg = m[1]!.trim();
-        if (arg === "0" || arg.startsWith("var(")) continue;
-        const sanctioned = selector.split(",").every((arm) => SANCTIONED_LIFTS[arm.trim()] === arg);
-        assert.ok(
-          sanctioned,
-          `${name}: "${selector}" lifts by the literal ${arg}; ` +
-            `the house lift is translateY(var(--raise)) (or --press)`,
-        );
-      }
-    }
-  }
-});
-
 test("#402 the prospect reveal releases its transform: fill backwards, never both/forwards", () => {
   const css = read("public/reading-room/index.css");
   const rule = rulesIn(css).find((r) => /\.rr-prospect img\b/.test(r.selector) && /animation\s*:/.test(r.body));
