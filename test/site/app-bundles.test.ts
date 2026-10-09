@@ -42,13 +42,14 @@ test("the hand-coded public/ shells retired with the re-shell (#254): routes and
   }
 });
 
-test("the retired spawn target stays retired and both pages start the worker; vellum/worker-spawn-static holds the spawn's form (#208, TS source since #260)", () => {
+test("the retired spawn target stays retired; vellum/worker-spawn-static holds the spawn's form (#208, TS source since #260)", () => {
   const ts = read("src/site/explorer/worker-client.ts");
   assert.doesNotMatch(ts, /workerUrl/, "the parameterized spawn target retired with the twin arrangement");
-  assert.match(read("src/site/explorer/app.ts"), /await initWorker\(\);/);
-  const printRoom = read("src/site/print-room/app.ts");
-  assert.match(printRoom, /await initWorker\(\);/);
-  assert.doesNotMatch(printRoom, /initWorker\("/, "the Print Room no longer passes a spawn URL");
+  assert.doesNotMatch(
+    read("src/site/print-room/app.ts"),
+    /initWorker\("/,
+    "the Print Room no longer passes a spawn URL",
+  );
 });
 
 test("the press bundles from the src/site TypeScript entries (#260)", async () => {

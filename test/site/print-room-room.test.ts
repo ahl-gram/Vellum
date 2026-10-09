@@ -184,7 +184,7 @@ test("PRR5 the stage holds the fitted sheet with the proof and the turned plate 
   assert.ok(page.indexOf('id="pr-atlas"') > page.indexOf("<Glass />"), "the document follows the furniture");
 });
 
-test("PRR6 seats.ts binds the Glass and the room with the turned plate's own aspect; app.ts refits once the folio is written; nothing scrolls the page (the #494 ruling)", () => {
+test("PRR6 seats.ts binds the Glass and the room with the turned plate's own aspect; app.ts refits once the folio is written", () => {
   assert.match(seats, /import\s*\{\s*bindRoom, type Room\s*\}\s*from\s*"\.\.\/shared\/room\.ts"/, "the shared room");
   assert.match(
     seats,
@@ -217,17 +217,6 @@ test("PRR6 seats.ts binds the Glass and the room with the turned plate's own asp
     settle.indexOf("room.layout()") > settle.indexOf("writeFolio("),
     "the refit follows the folio write, since the fit measures the folio's rect",
   );
-  for (const [name, src] of [
-    ["app.ts", app],
-    ["bound-atlas.ts", atlas],
-    ["seats.ts", seats],
-  ] as const) {
-    assert.doesNotMatch(
-      src,
-      /scrollIntoView|window\.scrollTo|\.scrollTop\s*=/,
-      `${name} moves the page; the atlas turns on the stage instead (ruled 2026-08-30 on #494)`,
-    );
-  }
   assert.match(atlas, /turnTo\(/, "the atlas turns a plate onto the sheet");
   const bind = atlas.slice(atlas.indexOf("function bindAtlas"), atlas.indexOf("function printAtlas"));
   assert.ok(

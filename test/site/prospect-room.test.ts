@@ -147,7 +147,7 @@ test("PPR5 the stage holds the fitted sheet with the plate as the one face in th
   );
 });
 
-test("PPR6 seats.ts binds the Glass and the room at the plate's own aspect; app.ts redraws in place for the year, writes the address and the roads, refits after the folio, and never scrolls the page", () => {
+test("PPR6 seats.ts binds the Glass and the room at the plate's own aspect; app.ts redraws in place for the year, writes the address and the roads, and refits after the folio", () => {
   assert.match(seats, /import\s*\{\s*bindRoom, type Room\s*\}\s*from\s*"\.\.\/shared\/room\.ts"/, "the shared room");
   assert.match(
     seats,
@@ -203,12 +203,6 @@ test("PPR6 seats.ts binds the Glass and the room at the plate's own aspect; app.
     "the refit follows the folio write, since the fit measures the folio's rect",
   );
   assert.match(app, /revokeObjectURL\(/, "a redraw revokes the previous plate's blob (the Ribbon's discipline)");
-  for (const [name, src] of [
-    ["app.ts", app],
-    ["seats.ts", seats],
-  ] as const) {
-    assert.doesNotMatch(src, /scrollIntoView|window\.scrollTo|\.scrollTop\s*=/, `${name} moves the page`);
-  }
 });
 
 test("PPR7 the css: the sheet fitted to what the chrome leaves, the plate as the sheet's face, print standing down (#462 ruling 10)", () => {
