@@ -1,6 +1,7 @@
 import type { World, WorldRecipe } from "../world/types.ts";
 import { MAX_DETAIL, type MapType, type UvWindow } from "../terrain/heightfield.ts";
 import type { ClimateBand } from "../climate/climate.ts";
+import { isCultureId } from "../society/culture-ids.ts";
 import type { StyleName } from "./style.ts";
 import { el, type SvgNode } from "./svg.ts";
 
@@ -26,16 +27,18 @@ export function recipeAttrs(world: World, styleName: StyleName): Record<string, 
     "data-vellum-grid-h": r.gridH,
     "data-vellum-style": styleName,
     ...(r.coastWarp !== undefined ? { "data-vellum-coast-warp": r.coastWarp } : {}),
+    ...(r.culture !== undefined ? { "data-vellum-culture": r.culture } : {}),
   };
 }
 
 export function recipeMetadataNode(world: World, styleName: StyleName, regionRecipe?: RegionRecipe): SvgNode {
   const r = world.recipe;
   const coast = r.coastWarp !== undefined ? ` coast=${r.coastWarp}` : "";
+  const culture = r.culture !== undefined ? ` culture=${r.culture}` : "";
   const summary =
     `Vellum chart. Recipe: seed=${r.seed} type=${r.mapType} band=${r.band} ` +
     `land=${r.landFraction} grid=${r.gridW}x${r.gridH} style=${styleName} ` +
-    `engine=${ENGINE_VERSION}${coast}${regionMetadataSuffix(regionRecipe)}`;
+    `engine=${ENGINE_VERSION}${coast}${culture}${regionMetadataSuffix(regionRecipe)}`;
   return el("metadata", {}, [summary]);
 }
 
@@ -90,6 +93,8 @@ export function recipeFromSvg(svg: string): ParsedRecipe | null {
     return null;
   }
   const coastWarp = readAttr(svg, "data-vellum-coast-warp");
+  const culture = readAttr(svg, "data-vellum-culture");
+  if (culture !== null && !isCultureId(culture)) return null;
   return {
     recipe: {
       seed: Number(seed),
@@ -99,6 +104,7 @@ export function recipeFromSvg(svg: string): ParsedRecipe | null {
       landFraction: Number(landFraction),
       band: band as ClimateBand,
       ...(coastWarp !== null ? { coastWarp: Number(coastWarp) } : {}),
+      ...(culture !== null ? { culture } : {}),
     },
     style: style as StyleName,
     version,

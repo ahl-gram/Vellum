@@ -72,7 +72,8 @@ draw the same world for the same seed.
 `src/world/generate.ts`. `src/cli/main.ts`, `src/cli/atlas.ts` and `src/cli/gallery.ts` reach them
 directly; the Print Room reaches them through `runJob` in `src/site/explorer/worker-client.ts` and
 `worldFor` in `src/site/explorer/world-cache.ts`. A new surface joins that path rather than building
-a world its own way.
+a world its own way. A sentence founds through the same path: `foundWorld` in
+`src/world/founding/found.ts` produces only the seed and the overrides `defaultRecipe` takes.
 
 **Never re-derive the grid from a surface's own output size.** A wider poster is the same world
 drawn wider, never the same seed on a finer grid. A surface that sizes its grid from its canvas
@@ -82,6 +83,46 @@ The guards: `test/cli/poster-parity.test.ts` holds the covenant at recipe level 
 level, because a Print Room proof defaults its legend on and so is deliberately not byte-identical
 to a plain chart; and the `R4` check in `e2e/suites/render.ts` compares the browser worker's
 draw against the committed chart.
+
+## Founding a world from a sentence
+
+**A founded world is an ordinary recipe.** `foundWorld` in `src/world/founding/found.ts` turns a
+sentence into a seed and recipe overrides and nothing else, and the world is built by `defaultRecipe`
+then `generateWorld` like every other, the seed FIRST.
+
+**A published founding version never changes.** `FOUNDING_VERSION` in `src/world/founding/lexicon.ts`
+covers the whole procedure: the cleanup in `src/world/founding/normalize.ts`, the small words, the clash
+rule, the strengths, the climate traditions and the word list. Until the written-world link goes public
+(Issue #393), version 1 may still change, and the pins in `test/world/founding-covenant.test.ts` move
+with it. Once it is public, version 1 is locked: a change is a new version added beside it, and every
+old version stays foundable, so an old sentence keeps its world.
+
+**The constants and the rules in plain words live with the code, as data a page can render**: the
+exports of `src/world/founding/lexicon.ts`, `FOUNDING_RULES` among them. Do not copy a number or a word
+from them into a spec or into a page's prose.
+
+**A refusal is a value, never a throw.** `foundWorld` returns `{ ok: false, reason }` for an empty
+sentence, one over the cap, one holding a control character or a character the platform does not know,
+and a version this build does not have. A surface shows the reason; it does not catch.
+
+**Founding agrees across platforms or refuses.** The cleanup reads the platform's own Unicode knowledge,
+and a character the platform does not know is refused rather than read, so two platforms that disagree
+about a newly assigned character refuse it on one and found it on the other, and never found two worlds.
+Keep founding free of any locale-sensitive call, the clock and randomness. What no guard can hold is a
+character whose classification Unicode itself revises.
+
+**What a surface may read from a founding.** `sentence` is the display form: the text to letter and to
+carry in a link, which founds itself again unchanged. `steered` lists the words that steered, each with
+only the meanings it kept; `contested` lists the recognised words that lost every meaning to a clash and
+so count toward the chart number. A recognised word is in exactly one of the two, and an empty
+`steered` means nothing steered. The founded `culture` comes from a tradition word or, when none
+survives, from the climate word.
+
+**An absent `culture` is the seed's own draw.** `cultureFor` in `src/world/generate.ts` takes
+`rng.fork("culture")` only when the recipe names no culture, so a recipe without the field builds the
+world it always built, and a named culture renames a world without moving its land, settlements, roads
+or realms (`test/world/culture-pin.test.ts`). A culture ID is world identity: a founded chart stamps it
+and a written link names it, so an ID in `CULTURE_IDS` (`src/society/culture-ids.ts`) is never renamed.
 
 ## What a terrain change moves, and what it does not
 
