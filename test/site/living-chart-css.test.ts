@@ -233,37 +233,6 @@ test("every card variant reads the clamp, and reads it INSIDE the counter-scale 
   }
 });
 
-test("the shared sheet is host-agnostic: no host element id, ever (#302)", () => {
-  const raw = read(SHEET);
-  assert.ok(raw.length > 0, `${SHEET} exists and is non-empty`);
-  // Comments may cite a host by name; SELECTORS must not. #place-card is ENGINE-created so it may appear; #map is the Explorer host's own mount.
-  const css = raw.replace(/\/\*[\s\S]*?\*\//g, "");
-  assert.ok(!css.includes("#map"), `${SHEET} must never key a rule on a host's #map`);
-});
-
-test("the dressing has one home: the Explorer sheet keeps no copy (#302)", () => {
-  // Strip comments first: prose may legitimately mention a class name, and the :not(.place-hit) exclusion in the Explorer's button rule stays by design.
-  const css = read("public/explorer/index.css").replace(/\/\*[\s\S]*?\*\//g, "");
-  const banned = [
-    ".place-overlay",
-    ".place-hit {",
-    ".place-hit::after",
-    ".place-hit:hover",
-    ".place-hit:focus",
-    "#place-card",
-    ".pc-",
-    "data-ink",
-    ".voyage-overlay",
-    ".voyage-track",
-    ".voyage-ship",
-    ".voyage-rider",
-    ".ages-range {",
-  ];
-  for (const s of banned) {
-    assert.ok(!css.includes(s), `public/explorer/index.css still carries ${s}; the rule lives in ${SHEET} now`);
-  }
-});
-
 test("the Explorer host wires the contract: mount class + sheet link (#302)", () => {
   const page = read("src/pages/explorer/index.astro");
   assert.ok(

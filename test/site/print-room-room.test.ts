@@ -361,11 +361,6 @@ test("PRR8 the contents row is the kit's (#487, second use of the dated-row idio
   for (const sel of [".contents", ".cr-num", ".cr-text"]) {
     assert.ok(kit.includes(sel), `atelier.css dresses ${sel}`);
   }
-  assert.doesNotMatch(
-    css,
-    /(^|\n)(\.contents )?\.cr-(num|text)\s*\{/,
-    "the page css does not re-dress the kit's row (#302); only the inked row's colour is its own",
-  );
   assert.match(css, /\.contents li\.on/, "the page inks the row whose plate is on the sheet");
   assert.match(css, /\.plates/, "and seats the thumbnails");
 });

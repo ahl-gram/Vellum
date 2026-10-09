@@ -2,7 +2,6 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { sheetsSweptBy } from "../../test-support/site-sheets.ts";
 
 // The Specimen Book (Issue #324): the house style lives ONCE in /house.css, linked by BaseLayout on every page. The specs are the 2026-07-30 ledger ratifications (the comment on Issue #324); a change is a re-ratification, so these pins are deliberately literal.
 
@@ -31,15 +30,6 @@ test("the intro role: flourish italic, ink-brown, centered (#324 decision 1)", (
   assert.match(rule, /font-style:\s*italic/, ".intro is italic");
   assert.match(rule, /color:\s*var\(--ink-brown\)/, ".intro is ink-brown");
   assert.match(rule, /text-align:\s*center/, ".intro is centered");
-});
-
-test("no sheet but the house sheet binds the intro voice (#324, Issue #709)", () => {
-  for (const sheet of sheetsSweptBy({ "public/house.css": "the house sheet is where the intro voice is written" })) {
-    assert.ok(
-      !/\.intro[^{]*\{[^}]*(font-family|font-style|color)/.test(read(sheet)),
-      `${sheet} re-binds the intro voice; the house sheet owns it`,
-    );
-  }
 });
 
 test("the status role: body italic, ink-faded (#324 decision 3)", () => {
@@ -170,14 +160,8 @@ test("home's flourish family survives the section removals (#324, reshaped at #4
   );
 });
 
-test("the old page-local skins are gone: no sheet but the house sheet dresses the controls (#324, Issue #709)", () => {
+test("home's seedrow wears the control idiom's corners, not its old 2px skin (#324, Issue #709)", () => {
   assert.ok(!/border-radius:\s*2px/.test(read("public/index.css")), "the seedrow's 2px corners joined the idiom");
-  for (const sheet of sheetsSweptBy({ "public/house.css": "the house sheet is where the control skin is written" })) {
-    assert.ok(
-      !/select,\s*button[^{]*\{[^}]*background/.test(read(sheet)),
-      `${sheet} re-declares the control skin; the house sheet owns it`,
-    );
-  }
 });
 
 test("the chart quotations equal the render constants they quote (#324)", async () => {

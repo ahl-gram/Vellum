@@ -276,11 +276,6 @@ test("RBR7 the css: the sheet fitted to what the chrome leaves, the scroll as th
   );
   assert.doesNotMatch(
     css,
-    /(^|\n)(\.contents )?\.cr-(num|text)\s*\{/,
-    "the page css does not re-dress the kit's row (#302)",
-  );
-  assert.doesNotMatch(
-    css,
     /(^|\n)\s*(header|footer|\.plate-figure|\.actions|main)\s*[{,]/,
     "no rule targets furniture a chart room no longer has",
   );
@@ -291,18 +286,13 @@ test("RBR7 the css: the sheet fitted to what the chrome leaves, the scroll as th
   assert.match(print[1]!, /#rb-plate\s*\{[^}]*position:\s*static;[^}]*height:\s*auto/, "at its own proportion");
 });
 
-test("RBR8 the corner's select dress is the kit's at its second use (#487): atelier.css dresses .folio-controls select.control, the Print Room's sheet no longer does, the Ribbon's sets only the width", () => {
+test("RBR8 the corner's select dress is the kit's at its second use (#487): atelier.css dresses .folio-controls select.control, and the Print Room's and the Ribbon's sheets size it", () => {
   assert.match(
     kit,
     /\.folio-controls select\.control\s*\{[^}]*appearance:\s*none/,
     "the kit dresses the corner's select",
   );
   assert.match(kit, /\.folio-controls select\.control option\s*\{/, "and its options on the panel");
-  assert.doesNotMatch(
-    printCss,
-    /\.folio-controls select\.control\s*\{[^}]*appearance/,
-    "the Print Room's copy moved into the kit",
-  );
   assert.match(
     printCss,
     /\.folio-controls select\.control\s*\{\s*width:\s*7\.4rem;\s*\}/,
@@ -311,6 +301,4 @@ test("RBR8 the corner's select dress is the kit's at its second use (#487): atel
   const wide = css.slice(0, css.indexOf("@media print"));
   const selectRules = [...wide.matchAll(/\.folio-controls select\.control\s*\{([^}]*)\}/g)].map((m) => m[1]!);
   assert.ok(selectRules.length >= 1, "the Ribbon sizes its selects");
-  for (const body of selectRules)
-    assert.doesNotMatch(body, /appearance|background-image/, "and re-dresses nothing else");
 });

@@ -16,8 +16,9 @@ import paramExcuse from "./scripts/lint/param-excuse.ts";
 import commentCitation from "./scripts/lint/comment-citation.ts";
 import splitArguments, { OLDER_CALLS, SPLIT_FILES } from "./scripts/lint/split-arguments.ts";
 import sheetTokens, { SRC_CSS_FILES } from "./scripts/lint/sheet-tokens.ts";
+import sheetOwners from "./scripts/lint/sheet-owners.ts";
 
-const vellum = { meta: cssCommentForm.meta, rules: { ...cssCommentForm.rules, ...tsCommentForm.rules, ...sourceShape.rules, ...errorCast.rules, ...narrowWidth.rules, ...e2eScriptsOff.rules, ...importBounds.rules, ...siteShape.rules, ...paramExcuse.rules, ...commentCitation.rules, ...splitArguments.rules, ...e2eSteps.rules, ...sheetTokens.rules } };
+const vellum = { meta: cssCommentForm.meta, rules: { ...cssCommentForm.rules, ...tsCommentForm.rules, ...sourceShape.rules, ...errorCast.rules, ...narrowWidth.rules, ...e2eScriptsOff.rules, ...importBounds.rules, ...siteShape.rules, ...paramExcuse.rules, ...commentCitation.rules, ...splitArguments.rules, ...e2eSteps.rules, ...sheetTokens.rules, ...sheetOwners.rules } };
 const TS_ROOTS = ["e2e/**/*.ts", "scripts/**/*.ts", "src/**/*.ts", "test/**/*.ts", "test-support/**/*.ts"];
 const PAGE_ELEMENT_PARAMETERS = ["drawerEls", "ghostEl", "innerEl", "legendEl", "logEls", "mapEl", "noteEl", "pillEl", "roomEls", "sheetEl", "slipEl", "statusEl", "targetEl", "viewportEl"];
 const site = (...paths: string[]): string[][] => paths.map((path) => ["src/**/*.ts", path]);
@@ -102,6 +103,13 @@ export default defineConfig(
       "vellum/css-token-by-name": "error",
       "vellum/css-shadow-by-token": "error",
       "vellum/css-var-declared": "error",
+      "vellum/css-house-owns-intro": "error",
+      "vellum/css-house-owns-controls": "error",
+      "vellum/css-kit-not-redressed": "error",
+      "vellum/css-kit-owns-contents-row": "error",
+      "vellum/css-kit-owns-select-dress": "error",
+      "vellum/css-engine-dress-one-home": "error",
+      "vellum/css-engine-no-host-id": "error",
     },
   },
   {

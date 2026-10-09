@@ -28,15 +28,4 @@ function listSheets(): ReadonlyArray<string> {
 // A sweep that types out its own list of sheets instead of importing this reds nothing here (handbook/errata/guards.md), so Gate 1 item 16 is the only fence on that.
 export const SITE_SHEETS: ReadonlyArray<string> = listSheets();
 
-export function sheetsSweptBy(exclusions: Readonly<Record<string, string>>): ReadonlyArray<string> {
-  for (const [sheet, reason] of Object.entries(exclusions)) {
-    if (!SITE_SHEETS.includes(sheet))
-      throw new Error(
-        `${sheet} is excluded from a sweep but is not on SITE_SHEETS; delete the exclusion rather than leaving it to look like a decision`,
-      );
-    if (reason.trim() === "") throw new Error(`${sheet} is excluded with no reason; name why the sweep skips it`);
-  }
-  return SITE_SHEETS.filter((sheet) => !Object.hasOwn(exclusions, sheet));
-}
-
 export { SRC_CSS_FILES } from "../scripts/lint/sheet-tokens.ts";

@@ -233,6 +233,13 @@ const CSS_FORM_RULES = [
   "vellum/css-token-by-name",
   "vellum/css-shadow-by-token",
   "vellum/css-var-declared",
+  "vellum/css-house-owns-intro",
+  "vellum/css-house-owns-controls",
+  "vellum/css-kit-not-redressed",
+  "vellum/css-kit-owns-contents-row",
+  "vellum/css-kit-owns-select-dress",
+  "vellum/css-engine-dress-one-home",
+  "vellum/css-engine-no-host-id",
 ];
 const TURNED_ON = [
   "@typescript-eslint/no-unnecessary-type-assertion",
