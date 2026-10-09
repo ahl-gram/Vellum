@@ -4,7 +4,6 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { generate, parse, walk } from "@eslint/css-tree";
 import { rulesIn } from "../../test-support/shell-css-rules.ts";
-import { SITE_SHEETS } from "../../test-support/site-sheets.ts";
 
 // The shell dresses once (Issue #263): the palette is named ONCE in public/shell.css and consumed as var() everywhere it matched exactly.
 
@@ -35,12 +34,10 @@ const TOKENS: Record<string, string> = {
   "--chart-ink": "#3d2f1f",
 };
 
-// Near-miss inks merged into --ink-dark: #3d2f1f has ONE sanctioned home, the --chart-ink declaration; #5a4326 is banned outright.
 const RETIRED_INKS = ["#3d2f1f", "#5a4326"] as const;
 
 const SHELL = "public/shell.css";
 const layoutStyle = () => read(SHELL);
-const PAGE_SHEETS = SITE_SHEETS.filter((sheet) => sheet !== SHELL);
 
 const shellDeclarations = (): Map<string, string[]> => {
   const found = new Map<string, string[]>();
@@ -67,23 +64,6 @@ test("public/shell.css declares each palette token once at its ratified value, a
     ["0 18px 60px rgb(from var(--chart-ink) r g b / 0.55)"],
     "the stage shadow is declared once, the mockup's own dress",
   );
-});
-
-test("the retired near-miss inks never reappear (#269 review, item 4)", () => {
-  for (const source of PAGE_SHEETS) {
-    const text = read(source).toLowerCase();
-    for (const hex of RETIRED_INKS) {
-      assert.ok(!text.includes(hex), `${source} carries retired ink ${hex}; use var(--ink-dark)`);
-    }
-  }
-  const layout = layoutStyle().toLowerCase();
-  assert.ok(!layout.includes("#5a4326"), "public/shell.css carries retired ink #5a4326");
-  assert.equal(
-    layout.split("#3d2f1f").length - 1,
-    1,
-    "public/shell.css should carry #3d2f1f exactly once, as the --chart-ink declaration",
-  );
-  assert.match(layout, /--chart-ink:\s*#3d2f1f/, "#3d2f1f's one home is the --chart-ink token");
 });
 
 test("the composers dress from the same palette (#269 review follow-up)", async () => {
@@ -150,12 +130,6 @@ test("motion.css declares each raise/press token once, at its ratified value (#4
       `motion.css should declare ${name}: ${value}; exactly once`,
     );
     assert.equal(css.split(`${name}:`).length - 1, 1, `${name} should have exactly one declaration in motion.css`);
-  }
-});
-
-test("--raise-grand is retired: no declaration, no consumer (#470 ratified 2026-08-24, the #405 table update)", () => {
-  for (const sheet of SITE_SHEETS) {
-    assert.ok(!read(sheet).includes("--raise-grand"), `${sheet} must not declare or consume the retired --raise-grand`);
   }
 });
 

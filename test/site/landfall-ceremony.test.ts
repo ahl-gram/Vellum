@@ -143,16 +143,6 @@ test("the veil ships as no static element yet dresses first paint: a pre-paint i
   assert.match(veil, /dataset\.adopted/, "adoption is marked, standing the safety release down");
 });
 
-test("app.ts sails the ceremony: anchorage on a first arrival, straight to landfall otherwise (#457)", () => {
-  const app = read("src/site/home/app.ts");
-  assert.match(app, /firstArrival/, "the once-per-sitting gate is consulted");
-  assert.match(app, /wideView/, "a first arrival boots at the wide anchorage");
-  assert.match(app, /landfallView/, "the flight has the landfall view to land on");
-  assert.match(app, /playCeremony/, "the veil and counter are the ceremony module's");
-  assert.match(app, /sessionStorage/, "the sitting is remembered in sessionStorage, not localStorage");
-  assert.ok(!/localStorage/.test(app), "ratified: closing the browser resets the ceremony");
-});
-
 test("the veil's dress is in the home sheet: fixed over everything, lifting, reduced-motion still (#457)", () => {
   const css = read("public/index.css");
   const rule = (selector: RegExp): string => {

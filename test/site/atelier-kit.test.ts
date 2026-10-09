@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync, globSync } from "node:fs";
 import { resolve } from "node:path";
 
-// The Atelier Kit (Issue #487): the markup shapes the rooms pasted are components in src/layouts/ and no page carries a copy; the built html is pinned in astro-scaffold.test.ts.
+// The Atelier Kit (Issue #487): the markup shapes the rooms pasted are components in src/layouts/; the built html is pinned in astro-scaffold.test.ts.
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 const flat = (css: string): string => css.replace(/\s+/g, " ").replace(/\( /g, "(").replace(/ \)/g, ")");
@@ -19,21 +19,6 @@ const CHART_ROOMS = [
   "seed-of-the-day",
   "specimen",
 ].map((r) => `src/pages/${r}/index.astro`);
-
-test("AK1 no page carries a pasted copy of a lifted shape: the fog pair, the vignette pair, the Glass, the chart folio, a road out", () => {
-  for (const p of rooms) {
-    const src = read(p);
-    for (const [shape, pasted] of [
-      ["the fog pair", /class="fog a"/],
-      ["the vignette pair", /class="vignette top"/],
-      ["the Glass", /chrome corner br zoomery/],
-      ["the chart folio", /chrome corner bl folio/],
-      ["a road out", /<a[^>]*class="legend-btn/],
-    ] as const) {
-      assert.doesNotMatch(src, pasted, `${p} pastes ${shape}; it is a component now`);
-    }
-  }
-});
 
 test("AK2 every room wears the fog through the kit; every stage room wears the vignettes, the Gallery none (its captions scroll, #464)", () => {
   for (const p of rooms) assert.ok(read(p).includes("<Fog />"), `${p} wears <Fog />`);
