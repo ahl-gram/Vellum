@@ -48,7 +48,7 @@ test("the plates keep their streaming manners (#329, revived with the markup it 
       "the #329 lazy attribute rides the markup (Chrome's lazy threshold still fetches just-below-fold plates, so this pins the contract, not a deferral)",
     );
     assert.match(img, /fetchpriority="low"/, "a plate must not outrank a clicked room's HTML while it streams");
-    assert.match(img, /class="plate"/, "the plate wears motion.css's lift, the tip-affordance KNOWN entry");
+    assert.match(img, /class="plate"/, "the plate wears motion.css's lift, a TIPPING_LINKS entry");
     assert.match(
       img,
       /width="1500" height="1158"/,

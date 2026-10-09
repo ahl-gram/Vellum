@@ -56,11 +56,15 @@ symbol and path so the reader goes and looks.
   Gate 4 one: grep the nearest sibling's name across `src/`, `scripts/`, `e2e/`, `test/` and `.github/`, and
   join every list it appears in. A list written in prose is a starting point and goes stale; the
   grep does not. **Some rosters close themselves and some do not, so learn which before you rely on
-  a red.** The stylesheets under `public/` are no list anyone keeps: `SITE_SHEETS` in
-  `test-support/site-sheets.ts` reads them from git, so a new sheet joins every sweep that imports
-  it by existing, and `test/site/tip-affordance.test.ts` reds when git's list and a walk of `public/`
-  disagree. A new sweep over the sheets imports `SITE_SHEETS` rather than typing a list of its own,
-  and names any sheet it skips beside itself through `sheetsSweptBy`, with the reason. A sweep that
+  a red.** The stylesheets under `public/` are no list anyone keeps: the stylesheet lint reaches
+  every one by its glob, so a new sheet joins every rule by existing, and a rule that reads across
+  sheets walks `public/` through `sheetsOnDisk` in `scripts/lint/sheet-tokens.ts`, which leaves out
+  the generated trees (`GENERATED_SUBTREES` in `scripts/clean-public-generated.ts`, and the CSS ones
+  `GENERATED_CSS` names) and skips a directory the build removes mid-walk. `SITE_SHEETS` in `test-support/site-sheets.ts` reads the
+  same sheets from git for the tests, and `test/site/tip-affordance.test.ts` reds when git's list and
+  the lint's walk disagree. A rule about how a sheet is written is a stylesheet lint rule, and a rule
+  that holds for one sheet, or exempts one, names that sheet in the rule itself, by its file. A test
+  that still sweeps the sheets imports `SITE_SHEETS` rather than typing a list of its own; one that
   walks or globs `public/` for itself reads the disk instead, which on a built tree includes the
   generated gallery sheet `SITE_SHEETS` leaves out, so the two do not mean the same "every sheet".
   The authored CSS under `src/` closes by a `deepEqual` between `SRC_CSS_FILES` and a fingerprint
@@ -69,7 +73,8 @@ symbol and path so the reader goes and looks.
   hand-kept and silent when missed, which is why the grep comes first, and so are the lists that
   name a sheet for what it does rather than for being a sheet: `CHART_MOUNTS` in
   `test/site/shell-css-ground.test.ts`, the sheets home loads in `test/site/home-shelf.test.ts`,
-  and `KIT_SHEETS` in `test/site/kit-scope.test.ts`, the sheets linked on every page.
+  and `HOUSE_SHEETS` in `scripts/lint/sheet-owners.ts`, the sheets linked on every page, which
+  `vellum/css-kit-not-redressed` does not read as a page's own.
 - **The rosters a page or a sheet joins**, by symbol: `NAV_ITEMS`, `ROUTE_NAMES` and
   `ROUTE_CHILDREN` in `src/layouts/nav.ts`; `TOKENS` in `test/site/shell-css.test.ts`;
   `PAGES` in `test/site/astro-scaffold.test.ts`; `BUNDLE_ENTRIES` in `scripts/build-app-bundles.ts`;
@@ -108,15 +113,17 @@ symbol and path so the reader goes and looks.
   root-absolute. The layout links `public/shell.css` last of all, which is why a page override of a
   shell rule needs higher specificity; that trap belongs to `handbook/specs/cascade-traps.md` and is
   not restated here, and `test/site/astro-scaffold.test.ts` holds the order in every built head.
-- **Authored CSS hides in more places than `public/`.** A sweep written against `public/` alone
-  misses every source in `src/` and passes. **The repo keeps its own roster of those**,
-  `SRC_CSS_FILES` in `test-support/site-sheets.ts`, including a card whose faces are built rather
-  than authored, and `SRC_CSS` in
-  `test/site/tip-affordance.test.ts` pairs each with a way to get its CSS as a string, typed against
-  that list so neither can hold a source the other lacks. Read that roster rather than any list
-  written in prose, this one included: the sources are of several shapes (a constant written
-  verbatim to a generated sheet, constants that only exist once the document is composed) and each
-  needs its own way in.
+- **Authored CSS hides in more places than `public/`.** A rule written against `public/` alone
+  misses every module in `src/` that builds CSS, and passes. **The repo keeps its own roster of
+  those**, `SRC_CSS_FILES` in `scripts/lint/sheet-tokens.ts`, including a card whose faces are built
+  rather than authored, and `SRC_CSS` in `test/repo/css-beyond-sheets.test.ts` pairs each with a way
+  to get its CSS as a string, typed against that list so neither can hold a source the other lacks,
+  and lints that CSS through every stylesheet rule but the comment rules; `vellum/css-builder-token-by-name`
+  reads the same modules' strings for a token's colour written as `rgb()`. Read that roster rather
+  than any list written in prose, this one included: the sources are of several shapes (a constant
+  written verbatim to a generated sheet, constants that only exist once the document is composed)
+  and each needs its own way in. Every entry is a TypeScript module, since a page's CSS lives in a
+  sheet under `public/`.
 - **Link form is scoped, and the flat rule is false.** Root-absolute is the form for the links the
   SHELL owns: the `NAV_ITEMS` hrefs, which are root-absolute trailing-slash directory form by their
   own interface contract, the root and shared sheets, the icons and fonts, and the discovery routes.

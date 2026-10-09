@@ -15,8 +15,17 @@ import siteShape from "./scripts/lint/site-shape.ts";
 import paramExcuse from "./scripts/lint/param-excuse.ts";
 import commentCitation from "./scripts/lint/comment-citation.ts";
 import splitArguments, { OLDER_CALLS, SPLIT_FILES } from "./scripts/lint/split-arguments.ts";
+import sheetTokens, { SRC_CSS_FILES } from "./scripts/lint/sheet-tokens.ts";
+import sheetOwners from "./scripts/lint/sheet-owners.ts";
+import sheetMotion, {
+  CHART_INSTRUMENTS,
+  INLINE_BLOCKS_OUTSIDE_MARKER_LISTS,
+  SANCTIONED_LIFTS,
+  TIPPING_LINKS,
+  TIPS_AWAITING_A_RULING,
+} from "./scripts/lint/sheet-motion.ts";
 
-const vellum = { meta: cssCommentForm.meta, rules: { ...cssCommentForm.rules, ...tsCommentForm.rules, ...sourceShape.rules, ...errorCast.rules, ...narrowWidth.rules, ...e2eScriptsOff.rules, ...importBounds.rules, ...siteShape.rules, ...paramExcuse.rules, ...commentCitation.rules, ...splitArguments.rules, ...e2eSteps.rules } };
+const vellum = { meta: cssCommentForm.meta, rules: { ...cssCommentForm.rules, ...tsCommentForm.rules, ...sourceShape.rules, ...errorCast.rules, ...narrowWidth.rules, ...e2eScriptsOff.rules, ...importBounds.rules, ...siteShape.rules, ...paramExcuse.rules, ...commentCitation.rules, ...splitArguments.rules, ...e2eSteps.rules, ...sheetTokens.rules, ...sheetOwners.rules, ...sheetMotion.rules } };
 const TS_ROOTS = ["e2e/**/*.ts", "scripts/**/*.ts", "src/**/*.ts", "test/**/*.ts", "test-support/**/*.ts"];
 const PAGE_ELEMENT_PARAMETERS = ["drawerEls", "ghostEl", "innerEl", "legendEl", "logEls", "mapEl", "noteEl", "pillEl", "roomEls", "sheetEl", "slipEl", "statusEl", "targetEl", "viewportEl"];
 const site = (...paths: string[]): string[][] => paths.map((path) => ["src/**/*.ts", path]);
@@ -98,6 +107,22 @@ export default defineConfig(
       "vellum/css-comment-no-js-module": "error",
       "vellum/css-no-narrow-width": "error",
       "vellum/css-comment-citation-resolves": "error",
+      "vellum/css-token-by-name": "error",
+      "vellum/css-shadow-by-token": "error",
+      "vellum/css-var-declared": "error",
+      "vellum/css-house-owns-intro": "error",
+      "vellum/css-house-owns-controls": "error",
+      "vellum/css-kit-not-redressed": "error",
+      "vellum/css-kit-owns-contents-row": "error",
+      "vellum/css-kit-owns-select-dress": "error",
+      "vellum/css-engine-dress-one-home": "error",
+      "vellum/css-engine-no-host-id": "error",
+      "vellum/css-lift-by-token": ["error", { sanctioned: SANCTIONED_LIFTS }],
+      "vellum/css-tip-goes-somewhere": [
+        "error",
+        { links: TIPPING_LINKS, instruments: CHART_INSTRUMENTS, awaiting: TIPS_AWAITING_A_RULING },
+      ],
+      "vellum/css-inline-block-bullet": ["error", { outside: INLINE_BLOCKS_OUTSIDE_MARKER_LISTS }],
     },
   },
   {
@@ -179,6 +204,12 @@ export default defineConfig(
     files: site("src/site/reading-room/prospect-stage.ts"),
     plugins: { vellum },
     rules: { "vellum/stage-no-status": "error" },
+  },
+  {
+    name: "Issue #709: the modules that build CSS write no token's colour raw",
+    files: site(...SRC_CSS_FILES),
+    plugins: { vellum },
+    rules: { "vellum/css-builder-token-by-name": "error" },
   },
   {
     name: "Issue #654: the split builders",

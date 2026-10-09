@@ -20,10 +20,10 @@ const lintSheet = async (text: string, name = "lint-plant.css"): Promise<Array<[
 const PLANT = [
   "/* head block, line one of two, which may wrap between the word Issue",
   "   #13 and its number, as here */",
-  ".a { color: red; }",
+  ".x { color: red; }",
   "/* a mid-file two-liner",
   "   is not allowed */",
-  ".b { color: #1a2b3c; } /* the ink is #1a2b3c */",
+  ".y { color: #1a2b3c; } /* the ink is #1a2b3c */",
   "/* an em-dash \u2014 here */",
   "/* fixed in #12 */",
   "/* Issue #13 */",
@@ -58,8 +58,8 @@ test("the comment-form rules red on exactly the planted lines and nowhere else",
 });
 
 test("the file-head block is the comment nothing but whitespace precedes; a rule before it makes it mid-file", async () => {
-  assert.deepEqual(await lintSheet("\n\n/* two blank lines\n   then a block */\n.a { color: red; }\n"), []);
-  assert.deepEqual(await lintSheet(".a { color: red; }\n/* a block\n   after a rule */\n"), [[ONE_LINE, 2]]);
+  assert.deepEqual(await lintSheet("\n\n/* two blank lines\n   then a block */\n.x { color: red; }\n"), []);
+  assert.deepEqual(await lintSheet(".x { color: red; }\n/* a block\n   after a rule */\n"), [[ONE_LINE, 2]]);
 });
 
 test("the sheets parse tolerant: a syntax css-tree does not know is not a lint error, and the comments past it are still read", async () => {

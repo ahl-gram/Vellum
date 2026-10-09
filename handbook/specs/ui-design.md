@@ -72,7 +72,8 @@ download links no stylesheet of ours, so with the variables undefined it still l
 
 ## The palette, by role
 
-Every colour is a named token, declared once in `public/shell.css` and mirrored for the generated documents.
+Every colour is a named token, declared once in `public/shell.css` and mirrored for the generated documents;
+`vellum/css-token-by-name` refuses a token's colour written raw in a sheet or in the CSS the code builds.
 The roles are what to design against:
 
 **Inks.** `--ink-dark` is the dark walnut of borders, buttons, prose and emphasis. `--ink-brown` is
@@ -202,7 +203,7 @@ needed; when a second room needs it, it moves to the shared sheet and a componen
 and the first consumer is repointed. Anything still used once stays put. **A page seats a component;
 it does not re-dress it.** A page may give its own element inside a piece a face, and may ink a row
 under its own state, but an arm made only of kit classes may set no colour, border, shadow, font or
-tracking. A guard sweeps for exactly that.
+tracking. `vellum/css-kit-not-redressed` refuses exactly that.
 
 **When the reader is zoomed in, or the room has no stage, or the sheet is floored under the chrome,
 the furniture stands on a pool**: a blurred box that follows the cluster, running well past the
@@ -354,12 +355,12 @@ something that goes somewhere is the house's
 gesture; a tip on something that does not is a false affordance, and the glossary term tip was
 removed for exactly that reason. A non-navigating gesture is either a chart instrument, which is its
 own ratified class, or it goes on the list awaiting a ruling. A new tip joins one of those lists
-consciously, or the sweep refuses it.
+consciously, or `vellum/css-tip-goes-somewhere` refuses it.
 
 **A tip on an inline element needs `display: inline-block`** or the transform silently does nothing.
 And an inline-block takes its baseline from its last line box, so a wrapping list item drops its
-bullet beside line two: such a box pins `vertical-align: top`. Never "fix" that by going back to
-`display: inline`, which kills the tip.
+bullet beside line two: such a box pins `vertical-align: top`, which `vellum/css-inline-block-bullet`
+holds. Never "fix" that by going back to `display: inline`, which kills the tip.
 
 **How an affordance gate is written**, and why never on absent hover alone, is
 `handbook/specs/cascade-traps.md`'s.
