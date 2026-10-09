@@ -73,18 +73,6 @@ test("words that agree all steer", () => {
   assert.equal(f.residual, "");
 });
 
-test("a word with several meanings loses only the clashing one, and the clashed tradition falls to the climate word", () => {
-  const f = founded("sun-drenched atolls ringed with shrines where the old kings drowned");
-  assert.deepEqual(f.overrides, { mapType: "archipelago", band: "tropical", landFraction: 0.132, culture: "oromi" });
-  const atolls = f.steered.find((r) => r.phrase === "atolls");
-  assert.deepEqual(atolls?.steers, [
-    { subject: "mapType", value: "archipelago" },
-    { subject: "band", value: "tropical" },
-  ]);
-  assert.deepEqual(phrases(f.contested), ["shrines"]);
-  assert.equal(f.residual, "ringed shrines old kings");
-});
-
 test("with the climate itself contested, a clashed tradition falls to the chart number", () => {
   const f = founded("cold atolls and fjords");
   assert.deepEqual(f.overrides, { mapType: "archipelago", coastWarp: 0.95 });

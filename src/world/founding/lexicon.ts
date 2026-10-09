@@ -212,6 +212,6 @@ export const FOUNDING_RULES: ReadonlyArray<string> = [
   "Capitals, punctuation, extra spaces, symbols and emoji make no difference; a hyphen reads as a space, an apostrophe is dropped, and a possessive 's is ignored.",
   "Words on the list steer the world: its shape, its climate, how much land it has, how ragged its coast is, and the tongue its places are named in.",
   "Two words that disagree about the same thing both stop steering it; a word left steering nothing counts toward the chart number instead.",
-  "A world whose words name no tongue, or two that disagree, takes the tongue of its climate word; with no climate word either, the chart number chooses.",
+  "A world whose words name no tongue, or two that disagree, takes the tongue named by the words still setting its climate, when they name just one; when they name none, or two that differ, it takes the tongue its climate always gives; with no word left setting its climate, the chart number chooses.",
   `Every other word except ${smallWords} makes the chart number, in the order it was written.`,
 ];
