@@ -113,10 +113,13 @@ character whose classification Unicode itself revises.
 
 **What a surface may read from a founding.** `sentence` is the display form: the text to letter and to
 carry in a link, which founds itself again unchanged. `steered` lists the words that steered, each with
-only the meanings it kept; `contested` lists the recognised words that lost every meaning to a clash and
-so count toward the chart number. A recognised word is in exactly one of the two, and an empty
-`steered` means nothing steered. The founded `culture` comes from a tradition word or, when none
-survives, from the climate word.
+only the meanings it kept, except that a climate word whose own tradition names the world lists that
+tradition too; `contested` lists the recognised words that lost every meaning to a clash and so count
+toward the chart number, a tradition word among them even when its tradition is the world's by way of a
+climate word. A recognised word is in exactly one of the two, and an empty `steered` means nothing
+steered. The founded `culture` comes from a tradition word that survives the clash; else from the
+tradition the climate words name, when they name exactly one; else from `CLIMATE_TRADITION` for the
+climate.
 
 **An absent `culture` is the seed's own draw.** `cultureFor` in `src/world/generate.ts` takes
 `rng.fork("culture")` only when the recipe names no culture, so a recipe without the field builds the

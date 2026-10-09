@@ -1,4 +1,5 @@
 import { hashString } from "../../core/rng.ts";
+import type { CultureId } from "../../society/culture-ids.ts";
 import { defaultRecipe } from "../generate.ts";
 import type { WorldRecipe } from "../types.ts";
 import {
@@ -79,6 +80,27 @@ function settle(segments: ReadonlyArray<Segment>): Settled {
   return { steered, contested, loose };
 }
 
+const tongueOf = (steers: ReadonlyArray<Steer>): CultureId | undefined => {
+  for (const steer of steers) if (steer.subject === "culture") return steer.value;
+  return undefined;
+};
+
+const ownSteers = (recognised: Recognised): ReadonlyArray<Steer> => BY_PHRASE.get(recognised.phrase)?.steers ?? [];
+
+function creditClimateTongue(steered: ReadonlyArray<Recognised>): ReadonlyArray<Recognised> {
+  const climate = steered.filter((r) => r.steers.some((s) => s.subject === "band"));
+  const named = new Set(climate.map((r) => tongueOf(ownSteers(r))).filter((tongue) => tongue !== undefined));
+  if (named.size !== 1) return steered;
+  return steered.map((r) =>
+    climate.includes(r) && tongueOf(ownSteers(r)) !== undefined
+      ? {
+          phrase: r.phrase,
+          steers: ownSteers(r).filter((s) => s.subject === "culture" || r.steers.some((k) => k.subject === s.subject)),
+        }
+      : r,
+  );
+}
+
 type Choice = { -readonly [S in Steer as S["subject"]]?: S["value"] };
 
 function choose(steered: ReadonlyArray<Recognised>): Choice {
@@ -126,8 +148,9 @@ export function foundWorld(sentence: string, version: number = FOUNDING_VERSION)
   if (version !== FOUNDING_VERSION) return { ok: false, reason: "unknown-version" };
   const display = displayForm(sentence);
   if (!display.ok) return display;
-  const { steered, contested, loose } = settle(scan(foundingWords(display.sentence)));
-  const residual = loose.filter((word) => !SMALL_WORDS.has(word)).join(" ");
+  const settled = settle(scan(foundingWords(display.sentence)));
+  const steered = creditClimateTongue(settled.steered);
+  const residual = settled.loose.filter((word) => !SMALL_WORDS.has(word)).join(" ");
   const seed = hashString(residual);
   return {
     ok: true,
@@ -136,7 +159,7 @@ export function foundWorld(sentence: string, version: number = FOUNDING_VERSION)
     seed,
     overrides: overridesFor(seed, steered),
     steered,
-    contested,
+    contested: settled.contested,
     residual,
   };
 }
