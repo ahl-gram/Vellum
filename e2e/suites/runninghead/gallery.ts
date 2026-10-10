@@ -182,6 +182,7 @@ type Dress = {
   border: [string, string, number[]];
   plate: Shade;
   caption: number[];
+  title: number[];
   legendLeft: number;
   half: number;
   pool: [number[], string];
@@ -200,7 +201,7 @@ const DRESS_READ: Payload<Dress> = `(() => { ${PARTS}
   const img = getComputedStyle(q("figure img")), pool = getComputedStyle(q("header.chrome"), "::before");
   return { padTop: parseFloat(getComputedStyle(q("main")).paddingTop), bandH: parseFloat(root.getPropertyValue("--band-h")) * rem, rem,
     landing: getComputedStyle(q(".grid")).animationName, border: [img.borderTopWidth, img.borderTopStyle, rgba(img.borderTopColor)], plate: shade(img.boxShadow),
-    caption: rgba(getComputedStyle(q("figcaption")).color), legendLeft: parseFloat(getComputedStyle(q("nav.legend")).left), half: innerWidth / 2,
+    caption: rgba(getComputedStyle(q("figcaption")).color), title: rgba(getComputedStyle(q("figcaption strong")).color), legendLeft: parseFloat(getComputedStyle(q("nav.legend")).left), half: innerWidth / 2,
     pool: [rgba(pool.backgroundColor), pool.filter], panel: panel(".corner.tr"), footing: panel("nav.legend") };
 })()`;
 
@@ -222,6 +223,7 @@ const dressed = (d: Dress) =>
   nearRgba(d.border[2], tokenRgba("--line-tan")) &&
   shadowOf(d.plate, "0px 12px 34px 0px", 0.4) &&
   nearRgba(d.caption, tokenRgba("--parchment")) &&
+  nearRgba(d.title, tokenRgba("--parchment-bright")) &&
   Math.abs(d.legendLeft - d.half) < 0.5 &&
   nearRgba(d.pool[0], CHART_INK(0.92)) &&
   d.pool[1] === "blur(16px)" &&
@@ -262,8 +264,17 @@ async function printed(k: RunningHeadKit): Promise<Paper> {
   }
 }
 
+// RH10 scrolls by script, which an overflow:hidden root still allows; a reader scrolls by the wheel, which it does not.
+async function wheeled(k: RunningHeadKit): Promise<[number, number]> {
+  const before = await k.evaluate<number>(`scrollY`);
+  await k.wheel(640, 400, -300);
+  const after = await makeSettle(k)<number>(`scrollY`, (y, last) => y !== before && last === y, "gallery-wheeled", 40);
+  return [before, after];
+}
+
 export async function rh23Dress(k: RunningHeadKit): Promise<void> {
   const screen = await k.evaluate(DRESS_READ);
+  const scroll = await wheeled(k);
   const lift = await liftedPlate(k);
   const paper = await printed(k);
   const turned = /^matrix\(([^)]+)\)$/
@@ -271,14 +282,15 @@ export async function rh23Dress(k: RunningHeadKit): Promise<void> {
     ?.split(", ")
     .map(Number);
   k.check(
-    "RH23 the Gallery's dress as drawn: the first row clears the cluster's band, the plates land as one sheet, each plate a line-tan hairline at the house's sheet depth that a hand tips and raises to the stage depth, captions in parchment, the legend row centred, the cluster's pool and the corner's and legend's crisp panels the kit's, and on paper no depth and captions in ink, the screen read the control (Issue #464 ruling 2; Issue #367)",
-    dressed(screen) &&
+    "RH23 the Gallery's dress as drawn: the plates scroll under a real wheel, the chart room's lock lifted, the first row clears the cluster's band, the plates land as one sheet, each plate a line-tan hairline at the house's sheet depth that a hand tips and raises to the stage depth, captions in parchment and their titles parchment-bright, the legend row centred, the cluster's pool and the corner's and legend's crisp panels the kit's, and on paper no depth and captions in ink, the screen read the control (Issue #464 ruling 2; Issue #367)",
+    scroll[1] < scroll[0] &&
+      dressed(screen) &&
       !!turned &&
       Math.abs(turned[1]!) > 0.001 &&
       turned[5]! < 0 &&
       shadowOf(lift?.shadow ?? null, "0px 18px 60px 0px", 0.55) &&
       paper.plate === "none" &&
       nearRgba(paper.caption, tokenRgba("--ink-dark")),
-    JSON.stringify({ screen, lift, paper }),
+    JSON.stringify({ scroll, screen, lift, paper }),
   );
 }
