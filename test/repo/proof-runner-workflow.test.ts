@@ -13,7 +13,7 @@ const JOBS = ["plan", "prove", "ledger"] as const;
 // GitHub Free's concurrent-job limit for standard hosted runners (GitHub's Actions limits page, read 2026-10-09); which plan the account is on is unverified, and a larger plan only widens the room.
 const CONCURRENT_JOBS = 20;
 const DEPLOY_BUILD_JOBS = 1;
-// Setup before a job's first budget (two checkouts, the plan download, setup-node, a cold npm ci) took 15 to 25 s across run 38044238993's 16 prove jobs (2026-10-10), and each of the three budgeted commands may wait 5 s after its kill; two minutes holds both with room.
+// Setup before a job's first budget (two checkouts, the plan download, setup-node, a cold npm ci) took 15 to 25 s across run 38044238993's 16 prove jobs (2026-10-10), and each of a job's four budgeted commands (unit, lint, build, browser) may wait 5 s after its kill; two minutes holds both with room.
 const SETUP_MINUTES = 2;
 
 // A top-level block is a key at column 0, read to the next one. Blind spot, with its direction: a key written in flow style on one line (`on: [push]`) yields a block of one line, which the exact-lines assertions below read as a mismatch, so it errs toward a red.
