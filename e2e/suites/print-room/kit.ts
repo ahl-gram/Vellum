@@ -47,7 +47,6 @@ export function printRoomKit(ctx: SuiteContext) {
   return { ...ctx, orderPng, atlasFitAt };
 }
 
-// A real press and release where a hand would put it, shared by every room whose check drives the Glass or a press.
 export async function pressAt({ send }: Pick<SuiteContext, "send">, x: number, y: number): Promise<void> {
   await send("Input.dispatchMouseEvent", { type: "mousePressed", x, y, button: "left", buttons: 1, clickCount: 1 });
   await send("Input.dispatchMouseEvent", { type: "mouseReleased", x, y, button: "left", buttons: 0, clickCount: 1 });

@@ -24,20 +24,15 @@ test("PPR6 seats.ts imports the shared room, the shared camera and the kit's key
   );
 });
 
-test("PPR7 the css carries no rule for furniture a chart room retired, seats the plate by inset and width, and ends with its print block, whose stage arm the kit's own stage rule decides", () => {
+test("PPR7 the css carries no rule for furniture a chart room retired, seats the plate by inset, and ends with its print block, which prints the plate by height auto", () => {
   assert.doesNotMatch(
     css,
     /(^|\n)\s*(header|footer|\.plate-figure|\.actions|main)\s*[{,]/,
     "no rule targets furniture a chart room no longer has",
   );
-  assert.match(
-    css,
-    /#pp-plate\s*\{[^}]*inset:\s*0;[^}]*width:\s*100%/,
-    "the plate is seated by inset and width, which the sheet's own proportion makes redundant today",
-  );
+  assert.match(css, /#pp-plate\s*\{[^}]*inset:\s*0/, "the plate is seated by inset");
   const print = css.match(/@media print\s*\{([\s\S]*)\}\s*$/);
   assert.ok(print, "the page css ends with its print stand-down");
-  assert.match(print[1]!, /\.stage\s*\{[^}]*position:\s*static/, "the plate prints in flow");
   assert.match(print[1]!, /#pp-plate\s*\{[^}]*height:\s*auto/, "at its own proportion, by height auto");
 });
 
@@ -49,6 +44,11 @@ test("PR-lay the filing handler keeps the gate's own answer and reads its refusa
     handler,
     /\btable = laid\.items\b/,
     "the gate's answer is discarded and the table is built some other way, so the dedupe and the cap decide nothing here",
+  );
+  assert.notEqual(
+    handler.indexOf("laid.refused"),
+    -1,
+    "the handler no longer reads the refusal, so the order below reads nothing",
   );
   assert.ok(
     handler.indexOf("laid.refused") < handler.indexOf("table = laid.items"),

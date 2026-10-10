@@ -200,7 +200,6 @@ export async function pb16ScriptsOff(k: ProspectKit): Promise<void> {
   );
 }
 
-// Installed before the page: the roads' and the press's display at the first plate's blob, and every blob the page revokes.
 const WATCH = `(() => { const make = URL.createObjectURL.bind(URL), revoke = URL.revokeObjectURL.bind(URL); window.__pb17 = { first: null, revoked: [] };
   URL.createObjectURL = (b) => { if (!window.__pb17.first) { const r = document.getElementById("pp-ribbon-link"), l = document.getElementById("pp-lay"); window.__pb17.first = [r && r.style.display, l && l.style.display]; } return make(b); };
   URL.revokeObjectURL = (u) => { window.__pb17.revoked.push(u); return revoke(u); }; })();`;

@@ -82,7 +82,6 @@ export async function rb12Dress(k: RibbonKit): Promise<void> {
     "ribbon-dress-still",
   );
   const rem = await evaluate<number>(`parseFloat(getComputedStyle(document.documentElement).fontSize)`);
-  // A refit recomputes the seat from the folio as it stands, so a seat taken before the folio was written moves here.
   const seat = await evaluate<string[]>(
     `(() => { const l = document.querySelector(".legend"), before = l.style.left; window.dispatchEvent(new Event("resize")); return [before, l.style.left]; })()`,
   );

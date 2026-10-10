@@ -31,7 +31,6 @@ export async function hg5Bound(ctx: SuiteContext): Promise<void> {
       JSON.stringify({ b, lens, after }),
     );
   } finally {
-    // Wiring, not the claim: the camera is put home before the guesses.
     await evaluate(
       `(() => { if (window.__vellumZoomTo) window.__vellumZoomTo({ k: 1, x: 0, y: 0 }); document.activeElement && document.activeElement.blur(); return true; })()`,
     );

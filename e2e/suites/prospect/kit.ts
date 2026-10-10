@@ -83,7 +83,6 @@ export function prospectKit(ctx: SuiteContext) {
   return { ...ctx, page, goto, state, opened, svgOf, moveTo, pressAt, parkMouse, forget };
 }
 
-// The accessible name a control is announced by, read from the browser's own tree as `axDescription` in e2e/harness.ts reads a description.
 export async function axName({ send }: Pick<SuiteContext, "send">, selector: string): Promise<string | null> {
   const doc = await send<{ root: { nodeId: number } }>("DOM.getDocument", { depth: -1 });
   const { nodeId } = await send<{ nodeId: number }>("DOM.querySelector", { nodeId: doc.root.nodeId, selector });

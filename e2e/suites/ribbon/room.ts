@@ -132,7 +132,6 @@ export async function rb11Markup({ evaluate, check, opened }: RibbonKit): Promis
   );
 }
 
-// Installed before the page: the first status line the scroll's draw writes, and what the Prospect road and the plate were at that moment.
 const WATCH = `(() => { window.__rb16 = null; new MutationObserver(() => { const s = document.getElementById("rb-status"); if (window.__rb16 || !s || !s.textContent) return;
   const road = document.getElementById("rb-prospect-link"), plate = document.getElementById("rb-plate");
   window.__rb16 = { status: s.textContent, road: road && getComputedStyle(road).display, plateHidden: !!plate && plate.hidden }; }).observe(document, { childList: true, subtree: true, characterData: true }); })();`;

@@ -71,24 +71,25 @@ test("the room folio's panel is painted screen-only (#538): on paper the corner 
     );
 });
 
-test("the kit's print block scopes every message-box stand-down to the stage (#566, ruled 2026-09-11; kept for Issue #779 part 2i: every .status and .warning stands in a stage, so an unscoped arm would hide nothing a browser here can see)", () => {
+test("the kit's print blocks scope every message-box stand-down to the stage (#566, ruled 2026-09-11; kept for Issue #779 part 2i: every .status and .warning stands in a stage, so an unscoped arm would hide nothing a browser here can see)", () => {
   const css = readFileSync(resolve(import.meta.dirname, "..", "..", "public/atelier.css"), "utf8").replace(
     /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|\/\*[\s\S]*?\*\//g,
     (m) => (m.startsWith("/*") ? "" : m),
   );
-  const open = css.indexOf("@media print");
-  assert.notEqual(open, -1, "the kit carries a print block");
-  let depth = 0,
-    close = -1;
-  for (let i = css.indexOf("{", open); i < css.length && close < 0; i++) {
-    if (css[i] === "{") depth++;
-    else if (css[i] === "}" && --depth === 0) close = i;
+  const blocks: string[] = [];
+  for (let open = css.indexOf("@media print"); open !== -1; open = css.indexOf("@media print", open + 1)) {
+    let depth = 0,
+      close = -1;
+    for (let i = css.indexOf("{", open); i < css.length && close < 0; i++) {
+      if (css[i] === "{") depth++;
+      else if (css[i] === "}" && --depth === 0) close = i;
+    }
+    assert.ok(close > open, "a print block's own brace-matched close, so a block after it never widens the window");
+    blocks.push(css.slice(open, close));
   }
-  assert.ok(
-    close > open,
-    "the print block's own brace-matched close, so a block appended after it can never widen the window",
-  );
-  const stood = [...css.slice(open, close).matchAll(/([^{}]+)\{([^{}]*)\}/g)]
+  assert.ok(blocks.length > 0, "the kit carries a print block");
+  const stood = blocks
+    .flatMap((block) => [...block.matchAll(/([^{}]+)\{([^{}]*)\}/g)])
     .filter(([, , decls]) => /display\s*:\s*none/i.test(decls!))
     .flatMap(([, sel]) =>
       sel!

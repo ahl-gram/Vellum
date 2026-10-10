@@ -17,7 +17,6 @@ export async function pr37LegendClear({ evaluate, check, sleep }: SuiteContext):
     (d, last) => !d.moving && !!last && JSON.stringify(d.legend) === JSON.stringify(last.legend),
     "print-room-legend-still",
   );
-  // A refit recomputes the seat from the folio as it stands, so a seat taken before the folio was written moves here.
   const reseat = await evaluate<string>(
     `(() => { window.dispatchEvent(new Event("resize")); return document.querySelector(".legend").style.left; })()`,
   );

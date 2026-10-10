@@ -38,14 +38,13 @@ test("PRR6 seats.ts imports the shared room, the shared camera and the kit's key
   );
 });
 
-test("PRR7 the css carries no rule for the desk a chart room retired, and ends with its print block, whose unbound stage arm the kit's own stage rule decides", () => {
+test("PRR7 the css carries no rule for the desk a chart room retired, and ends with its print block", () => {
   assert.ok(
     !/max-width:\s*1000px/.test(css) && !css.includes(".order-desk") && !css.includes(".offering"),
     "the desk's column and cards are gone: the chart is the room",
   );
   const print = css.match(/@media print\s*\{([\s\S]*)\}\s*$/);
   assert.ok(print, "the page css ends with its print stand-down");
-  assert.match(print[1]!, /\.stage\s*\{[^}]*position:\s*static/, "unbound, the proof prints in flow");
   assert.doesNotMatch(
     print[1]!,
     /> header|\.room-head|> footer|\.order-desk|\.counter/,

@@ -47,7 +47,6 @@ export async function homeCamera(ctx: Pick<SuiteContext, "evaluate" | "sleep" | 
 
 export type GlideRead = { press: { x: number; y: number; hit: string | null } | null; mid: Lens | null; landed: Lens };
 
-/** The camera re-seats under a resize with no zoom event, and a glide in flight lands where it was going: a 3s glide caught mid-way, a resize, and the scale it comes to rest at (1.4 when the seat re-starts the glide, the mid-way scale when it stops it). */
 export async function midGlideRefit(ctx: SuiteContext): Promise<GlideRead> {
   const { evaluate, send, sleep } = ctx;
   // A reduced motion leaked by a suite that stopped mid-way makes every glide instant (Issue #637's class), so the read clears the features itself.

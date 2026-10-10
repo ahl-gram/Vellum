@@ -1,4 +1,4 @@
-// What a hover, a press and print do on the Ribbon (Issue #779 part 2g): a row's hover in the text's dress, the Glass and its silent refit, and paper standing a leaned camera down.
+// What a hover, a press and print do on the Ribbon (Issue #779 part 2g): a row's hover, keyboard focus and held press in the text's dress, the Glass and its silent refit, and paper standing a leaned camera down.
 import { nearRgba, PAGE_RGBA, tokenRgba } from "../../support/pixel.ts";
 import { makeMouse } from "../../support/home.ts";
 import { makeSettle } from "../../support/settle.ts";

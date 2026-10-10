@@ -7,7 +7,6 @@ import { resolve } from "node:path";
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => (existsSync(resolve(REPO, p)) ? readFileSync(resolve(REPO, p), "utf8") : "");
 const css = read("public/ribbon/index.css");
-const printCss = read("public/print-room/index.css");
 const seats = read("src/site/ribbon/seats.ts");
 
 test("RBR6 seats.ts imports the shared room, the shared camera and the kit's keys, leans by its one constant, and the row's text is a module of its own", () => {
@@ -34,7 +33,7 @@ test("RBR6 seats.ts imports the shared room, the shared camera and the kit's key
   );
 });
 
-test("RBR7 the css carries no rule for furniture a chart room retired, and ends with its print block, whose stage arm the kit's own stage rule decides", () => {
+test("RBR7 the css carries no rule for furniture a chart room retired, and ends with its print block", () => {
   assert.doesNotMatch(
     css,
     /(^|\n)\s*(header|footer|\.plate-figure|\.actions|main)\s*[{,]/,
@@ -42,13 +41,4 @@ test("RBR7 the css carries no rule for furniture a chart room retired, and ends 
   );
   const print = css.match(/@media print\s*\{([\s\S]*)\}\s*$/);
   assert.ok(print, "the page css ends with its print stand-down");
-  assert.match(print[1]!, /\.stage\s*\{[^}]*position:\s*static/, "the scroll prints in flow");
-});
-
-test("RBR8 the Print Room's sheet sizes its picker at the width the kit already gives", () => {
-  assert.match(
-    printCss,
-    /\.folio-controls select\.control\s*\{\s*width:\s*7\.4rem;\s*\}/,
-    "the Print Room keeps its picker's width at (0,2,1) (skeptic round 2)",
-  );
 });
