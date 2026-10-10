@@ -143,10 +143,7 @@ export const PEOPLE_WORDS: ReadonlyArray<LexiconEntry> = [
       "bactrian camel",
     ],
   ),
-  ...group(
-    [band("tropical"), tongue("veshari")],
-    ["dunes", "dune", "desert", "deserts", "burning sands", "sand sea", "sand seas"],
-  ),
+  ...group([band("tropical"), tongue("veshari")], ["dunes", "dune", "desert", "deserts", "burning sands"]),
   ...group(
     [tongue("veshari")],
     [
