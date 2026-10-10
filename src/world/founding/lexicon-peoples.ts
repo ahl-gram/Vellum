@@ -137,12 +137,11 @@ export const PEOPLE_WORDS: ReadonlyArray<LexiconEntry> = [
       "khaganates",
       "khanates",
       "felt tent",
+      "bactrian camels",
+      "bactrian camel",
     ],
   ),
-  ...group(
-    [band("tropical"), tongue("veshari")],
-    ["dunes", "dune", "desert", "deserts", "camels", "burning sands", "camel"],
-  ),
+  ...group([band("tropical"), tongue("veshari")], ["dunes", "dune", "desert", "deserts", "burning sands"]),
   ...group(
     [tongue("veshari")],
     [
@@ -178,6 +177,8 @@ export const PEOPLE_WORDS: ReadonlyArray<LexiconEntry> = [
       "bazaar",
       "caravanserais",
       "dhow",
+      "camels",
+      "camel",
     ],
   ),
   ...group([type("archipelago"), band("tropical"), tongue("oromi")], ["atolls"]),
@@ -284,6 +285,7 @@ export const PEOPLE_WORDS: ReadonlyArray<LexiconEntry> = [
       "toltec",
       "ball court",
       "eagle warrior",
+      "feathered serpents",
     ],
   ),
   ...group(
