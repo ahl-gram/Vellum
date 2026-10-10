@@ -144,8 +144,8 @@ const PANEL_DRESS: Payload<{ cap: string; width: [string, string]; scroll: [stri
 export async function l22PanelDress({ evaluate, check }: SuiteContext): Promise<void> {
   const p = await evaluate(PANEL_DRESS);
   check(
-    "L22 the how panel caps its height against the stage at the station slips' own width, and its prose scrolls inside it without chaining down to the page (#459, skeptic round 3; Issue #762)",
-    p.cap !== "none" && p.width[0] === p.width[1] && p.scroll[0] === "auto" && p.scroll[1] === "contain",
+    "L22 the how panel caps its own height 3rem short of the stage, at the station slips' own width, and its prose scrolls inside it without chaining down to the page (#459, skeptic round 3; Issue #762)",
+    p.cap === "calc(100% - 48px)" && p.width[0] === p.width[1] && p.scroll[0] === "auto" && p.scroll[1] === "contain",
     JSON.stringify(p),
   );
 }
@@ -335,14 +335,14 @@ export async function l29SlipBox(k: LandfallKit): Promise<void> {
   }
 }
 
-type Veil = { lift: string; ring: string; needle: string };
+type Veil = { lift: string[]; ring: string[]; needle: string[] };
 type Still = { ring: [string, string]; delay: string };
 
 const VEIL: Payload<Veil> = `(() => {
   const v = document.createElement("div"); v.className = "veil lifting";
   v.innerHTML = '<svg class="veil-rose"><circle class="rose-ring"></circle><path class="rose-needle"></path></svg>';
   document.body.appendChild(v);
-  try { const cs = (s) => getComputedStyle(v.querySelector(s)).animationName; return { lift: getComputedStyle(v).animationName, ring: cs(".rose-ring"), needle: cs(".rose-needle") }; }
+  try { const run = (e) => e.getAnimations().map((a) => a.animationName); return { lift: run(v), ring: run(v.querySelector(".rose-ring")), needle: run(v.querySelector(".rose-needle")) }; }
   finally { v.remove(); }
 })()`;
 
@@ -369,9 +369,9 @@ export async function l31Veil(k: SuiteContext): Promise<void> {
   const still = await stilled(k);
   k.check(
     "L31 the veil lifts, its rings draw and its needle settles by keyframes of home's own, and under reduced motion the rings stand drawn and still (#457)",
-    veil.lift === "veil-lift" &&
-      veil.ring === "rose-draw" &&
-      veil.needle === "needle-settle" &&
+    veil.lift.includes("veil-lift") &&
+      veil.ring.includes("rose-draw") &&
+      veil.needle.includes("needle-settle") &&
       still.ring[0] === "none" &&
       still.ring[1] === "0px",
     JSON.stringify({ veil, still }),

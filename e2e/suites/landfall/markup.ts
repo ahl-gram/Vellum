@@ -110,7 +110,7 @@ const SHELF: Payload<Promise<Shelf | null>> = `(async () => {
   const shelf = document.querySelector("section.lf-shelf");
   if (!shelf) return null;
   const imgs = [...shelf.querySelectorAll("img")];
-  for (const i of imgs) { i.scrollIntoView({ block: "center" }); await i.decode().catch(() => {}); }
+  for (const i of imgs) { i.scrollIntoView({ block: "center" }); await Promise.race([i.decode().catch(() => {}), new Promise((r) => setTimeout(r, 3000))]); }
   window.scrollTo(0, 0);
   const figures = await Promise.all([...shelf.querySelectorAll("figure")].map(async (f) => {
     const a = f.querySelector(":scope > a[href]"), i = f.querySelector("img"), href = a ? a.getAttribute("href") : null;
