@@ -176,6 +176,8 @@ go to Alex, `vellum-guard-prover` on every new or strengthened guard before the 
 `vellum-plate-reader` when the deliverable is an appearance, and `vellum-pr-skeptic` COLD on every
 pushed PR. A review agent never posts to GitHub: relay its report in your reply and **let Alex decide
 what lands on the PR**. `vellum-implementer` runs one issue through that sequence in its own tree.
+`vellum-designer` draws a design round's mockups for Alex's sitting and breaks an epic into its
+subs, handing its menu to whoever dispatched it.
 Every project agent under `.claude/agents/` sets `effort: xhigh` in its frontmatter (Alex,
 2026-09-13), because an agent without one inherits the session's level; the check is
 `echo $CLAUDE_EFFORT` inside a dispatched agent, run from a session at some OTHER level, since a
@@ -241,6 +243,10 @@ the sandbox for both review agents that build one, so the depth lives in one pla
   parse, while a plain single command passes (measured 2026-09-13). That is why the sandbox recipes
   take `create`'s printed path literally and read the sandbox's sha from its `.git` file. How a
   session runs several such lanes at once is `handbook/specs/orchestration.md`'s.
+- **`vellum-designer` gets its tree a fourth way, never through isolation**: what it delivers is
+  files under `out/`, which a harness tree does not keep, so a session standing in the main checkout builds a
+  detached tree for it and dispatches it without isolation, as
+  `handbook/specs/development-workflow.md` step 6 says.
 - **A dispatched review agent may not move or restore the tree it was dispatched from**, normally your
   live worktree. Commit before you dispatch one: `git restore` and `git checkout -- <path>` discard
   without leaving a reflog entry, so there is nothing to recover from afterwards.

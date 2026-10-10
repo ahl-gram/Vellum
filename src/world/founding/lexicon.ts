@@ -124,6 +124,7 @@ export const LEXICON: ReadonlyArray<LexiconEntry> = [
       "thule",
       "ultima thule",
       "icefield",
+      "snows",
     ],
   ),
   ...group(
@@ -211,6 +212,7 @@ export const LEXICON: ReadonlyArray<LexiconEntry> = [
       "seas receded",
       "receding seas",
       "waters abated",
+      "mostly land",
     ],
   ),
   ...group(
