@@ -123,7 +123,6 @@ async function rh8Clean(ctx: SuiteContext, errBase: number, httpBase: number): P
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/` });
   const restored = await waitReady();
 
-  // This suite is the sole visitor to /gallery/, /glossary/, /faq/ and /ribbon/, so a console error it drops is dropped nowhere else.
   const errDelta = dropExpectedCancellations(consoleErrors.slice(errBase));
   const httpDelta = http4xx.slice(httpBase).filter((u) => !/favicon/i.test(u));
   check(
