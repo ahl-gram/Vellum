@@ -271,10 +271,7 @@ export const LEXICON: ReadonlyArray<LexiconEntry> = [
     ],
   ),
   ...group([type("continent"), land("more")], ["supercontinent", "supercontinents"]),
-  ...group(
-    [type("archipelago"), band("tropical")],
-    ["cays", "coral isles", "coral islands", "spice islands", "coral isle"],
-  ),
+  ...group([type("archipelago"), band("tropical")], ["cays", "coral isles", "coral islands", "spice islands"]),
   ...PEOPLE_WORDS,
 ];
 

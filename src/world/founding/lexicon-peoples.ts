@@ -43,7 +43,6 @@ export const PEOPLE_WORDS: ReadonlyArray<LexiconEntry> = [
       "valkyrie",
       "runestone",
       "dragon ship",
-      "sea king",
       "stave church",
     ],
   ),
