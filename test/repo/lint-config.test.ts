@@ -51,7 +51,7 @@ const LIST_AT_REFORMAT: Readonly<Record<string, readonly [number, number]>> = {
   "e2e/suites/cards/cap.ts": [0, 3],
   "e2e/suites/cards/hold.ts": [1, 2],
   "e2e/suites/cards/overlay.ts": [0, 1],
-  "e2e/suites/chart-drawer/drag.ts": [0, 2],
+  "e2e/suites/chart-drawer/drag.ts": [0, 1],
   "e2e/suites/chart-drawer/floor.ts": [0, 1],
   "e2e/suites/chart-drawer/homes.ts": [0, 1],
   "e2e/suites/chart-drawer/prospect.ts": [0, 4],

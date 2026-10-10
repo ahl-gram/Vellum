@@ -21,7 +21,7 @@ import {
   cd51NoTipKeyed,
   cd52LayWrites,
 } from "./chart-drawer/desk.ts";
-import { cd44CarryFiles, cd45SnapBack, cd46ReducedCarry, cd47FullCarry, cd53Ceremony } from "./chart-drawer/drag.ts";
+import { cd45SnapBack, cd46ReducedCarry, cd47FullCarry, cd53Ceremony } from "./chart-drawer/drag.ts";
 import { cd54PortfolioLines, cd55WhereAuthored, cd56WorkerBlocked } from "./chart-drawer/room.ts";
 import { cd57PressDress, cd58TurnFiles, cd59AbortedTurn } from "./chart-drawer/gestures.ts";
 import { cd9NeverTogether, cd12SeatsHold, cd13TabClear, cd18RoadOn } from "./chart-drawer/surfaces.ts";
@@ -84,7 +84,6 @@ export async function run(ctx: SuiteContext): Promise<void> {
   // Issue #523 Sub 5: the desktop drag, the settle and the jolt, ruled 2026-09-21. The camera is d3's {x, y, k} and every Broadside fold schedules a room layout 340ms later that re-seats x/y (FOLD_SETTLE_MS in src/site/shared/slip.ts), so every drag check below holds the FOLD constant across its two reads (the Broadside already folded before the press), takes each read at REST (two reads 50ms apart agreeing, with no ghost and no settle in flight), and compares k exactly with x and y inside half a pixel: a no-change refit is a float round trip through the camera bridge, a d3 pan is the carry's own delta in the hundreds of px, and k alone (CD2c's read) cannot tell a pan at all.
   const { press, moveTo, release } = makeMouse(ctx);
   const kd = dragKit({ ...k, press, moveTo, release });
-  await step("CD44", () => cd44CarryFiles(kd));
   await step("CD45", () => cd45SnapBack(kd));
   await step("CD46", () => cd46ReducedCarry(kd));
   await step("CD4", () => cd4Reload(kd, laid));

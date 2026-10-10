@@ -29,7 +29,7 @@
   },
   "e2e/suites/chart-drawer/drag.ts": {
     "max-lines-per-function": {
-      "count": 2
+      "count": 1
     }
   },
   "e2e/suites/chart-drawer/floor.ts": {
