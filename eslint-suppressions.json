@@ -496,11 +496,6 @@
       "count": 1
     }
   },
-  "test/site/living-chart-css.test.ts": {
-    "max-lines-per-function": {
-      "count": 1
-    }
-  },
   "test/site/living-chart-no-bar-card.test.ts": {
     "max-lines": {
       "count": 1
