@@ -79,6 +79,60 @@ test("a red's id is its first token with trailing punctuation stripped", () => {
   assert.deepEqual(e2eOutcome(stdout, "", 1).reds, ["CD22", "SB"]);
 });
 
+const stoppedSteps = async (names: readonly string[]) => {
+  const out: string[] = [];
+  const err: string[] = [];
+  const check = (name: string, ok: unknown, detail = "") => out.push(harnessLine(name, !!ok, detail));
+  const saved = console.error;
+  console.error = (...parts: unknown[]) => err.push(format(...parts));
+  try {
+    for (const name of names)
+      await makeStep({ check })(name, () => Promise.reject(new Error(`settle timeout ${name}`)));
+  } finally {
+    console.error = saved;
+  }
+  return { stdout: out.join("\n"), stderr: err.join("\n") };
+};
+
+const wholeStops = async (names: readonly string[]) => {
+  const { stdout, stderr } = await stoppedSteps(names);
+  const got = e2eOutcome(stdout, stderr, 1);
+  assert.deepEqual(
+    got.reds,
+    [],
+    "a multi-word stop was read as a red on its first token, which an exact match can read as BITES",
+  );
+  assert.deepEqual(
+    got.stops.map((s) => [s.id, s.kind]),
+    names.map((n) => [n, "step"]),
+  );
+  names.forEach((name, i) => {
+    assert.ok(
+      got.stops[i]!.stanza.startsWith(`  ${name} never reached its assertion: Error: settle timeout ${name}\n    at `),
+      `the stop on ${name} lost its own stanza`,
+    );
+    for (const other of names.filter((n) => n !== name))
+      assert.ok(
+        !got.stops[i]!.stanza.includes(`${other} never reached`),
+        `the stanza of ${name} ran on into ${other}'s`,
+      );
+  });
+  const otherSeparator = stdout.replaceAll(`  ${String.fromCharCode(0x2014)} `, ": ");
+  assert.deepEqual(
+    e2eOutcome(otherSeparator, stderr, 1).stops.map((s) => s.id),
+    names,
+    "under another separator a multi-word stop stopped being a stop",
+  );
+};
+
+test("a step named for a range of checks stops whole: its whole name is the stop's id, its stanza is its own, and it adds no red", async () => {
+  await wholeStops(["P20 to P27", "BR1 to BR1c"]);
+});
+
+test("a step named for a comma list of checks stops whole: its whole name is the stop's id, its stanza is its own, and it adds no red", async () => {
+  await wholeStops(["CD2, CD2b, CD2c", "T1, T1b"]);
+});
+
 test("a stop is still a stop if the harness's detail separator ever changes, so it can never turn into a red", () => {
   const stdout = [
     "FAIL  SB13 never reached its assertion: settle timeout specimen-zoom-in",

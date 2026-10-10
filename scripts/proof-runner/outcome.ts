@@ -9,9 +9,9 @@ export type FileOutcome = { reds: Red[]; loadFailures: string[]; broken: string 
 const FAIL = "FAIL  ";
 const EM_DASH = String.fromCharCode(0x2014);
 const DETAIL = `  ${EM_DASH} `;
-const STEP_STOP = /^(\S+) never reached its assertion\b/;
-const SUITE_STOP = /^(\S+) stopped early, /;
-const STANZA_HEAD = /^ {2}\S+ (never reached its assertion|stopped early):/;
+const STEP_STOP = /^(\S.*?) never reached its assertion(?=$|[\s:])/;
+const SUITE_STOP = /^(\S.*?) stopped early, /;
+const STANZA_HEAD = /^ {2}\S.*? (never reached its assertion|stopped early):/;
 const STANZA_LINES = 60;
 
 const stanzaOf = (stderr: string, head: string): string => {
