@@ -69,7 +69,9 @@ export function prospectKit(ctx: SuiteContext) {
     throw new Error("prospect page never drew: " + label);
   };
   const svgOf = () => evaluate<string>(`fetch(document.getElementById("pp-plate").src).then(r=>r.text())`, true);
-  const moveTo = (x: number, y: number) => send("Input.dispatchMouseEvent", { type: "mouseMoved", x, y });
+  const moveTo = async (x: number, y: number): Promise<void> => {
+    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x, y });
+  };
   const pressAt = (x: number, y: number) => press(ctx, x, y);
   // Off the sheet, where `.plate:hover` cannot tip the full-sheet plate under a resting cursor (Issue #514).
   const parkMouse = () => moveTo(1, 1);

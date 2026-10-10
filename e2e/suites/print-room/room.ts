@@ -189,7 +189,10 @@ const NOTICE: Payload<{ ready: string; w: number }> =
   `(() => { const n = document.querySelector(".stage noscript .status"); return { ready: document.readyState, w: n ? n.getBoundingClientRect().width : 0 }; })()`;
 
 export async function pr36Authored({ evaluate, send, check, sleep, PORT }: SuiteContext): Promise<void> {
-  const settle = makeSettle({ evaluate: (e: string) => evaluate(e).catch(() => null), sleep });
+  const settle = makeSettle({
+    evaluate: (e: string) => evaluate<{ ready: string; w: number } | null>(e).catch(() => null),
+    sleep,
+  });
   const read = await withScriptsOff(send, async () => {
     await send("Page.navigate", { url: "about:blank" });
     await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/print-room/` });

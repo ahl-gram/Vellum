@@ -172,11 +172,12 @@ const OFF: Payload<Off> = `(() => { const text = ${TEXT}, id = (s) => document.g
 export async function pb16ScriptsOff(k: ProspectKit): Promise<void> {
   const { evaluate, send, check, sleep, page } = k;
   const control = await evaluate(OFF);
-  const settle = makeSettle({ evaluate: (e: string) => evaluate(e).catch(() => null), sleep });
+  type Loaded = { ready: string; lay: boolean };
+  const settle = makeSettle({ evaluate: (e: string) => evaluate<Loaded | null>(e).catch(() => null), sleep });
   const off = await withScriptsOff(send, async () => {
     await send("Page.navigate", { url: "about:blank" });
     await send("Page.navigate", { url: page("#seed=42&i=0") });
-    await settle<{ ready: string; lay: boolean }>(
+    await settle<Loaded>(
       `({ ready: document.readyState, lay: !!document.getElementById("pp-lay") })`,
       (d) => d.ready === "complete" && d.lay,
       "prospect-scripts-off",
@@ -269,14 +270,16 @@ async function backHome(k: ProspectKit, marker: string, unload: boolean): Promis
   await evaluate(
     `(() => { window.__pb18 = "${marker}"; ${unload ? `window.addEventListener("unload", () => {});` : ""} location.href = "/faq/"; return true; })()`,
   );
-  const settle = makeSettle({ evaluate: (e: string) => evaluate(e).catch(() => null), sleep });
-  await settle<{ path: string; ready: string }>(
+  type Away = { path: string; ready: string };
+  const away = makeSettle({ evaluate: (e: string) => evaluate<Away | null>(e).catch(() => null), sleep });
+  const home = makeSettle({ evaluate: (e: string) => evaluate<Home | null>(e).catch(() => null), sleep });
+  await away<Away>(
     `({ path: location.pathname, ready: document.readyState })`,
     (d) => d.path === "/faq/" && d.ready === "complete",
     "prospect-to-faq",
   );
   await evaluate(`(() => { history.back(); return true; })()`);
-  return settle(
+  return home(
     HOME,
     (d, last) => d.path === "/prospect/" && d.drawn && !!last && JSON.stringify(d) === JSON.stringify(last),
     "prospect-back",
