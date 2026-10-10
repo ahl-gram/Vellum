@@ -48,12 +48,19 @@ async function underHand(k: DrawerKit): Promise<{ rest: Press | null; hover: Pre
   const { evaluate, send, settle } = k;
   await park(send);
   const rest = await evaluate(PRESS);
-  if (rest) await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: rest.x, y: rest.y });
-  const hover = await settle(
-    PRESS,
-    (d, last) => d.hover && !!last && JSON.stringify(d) === JSON.stringify(last),
-    "chart-drawer-press-hovered",
-  );
+  // The room re-seats the card when a filing opens the drawer, so a hand that missed the moving press is put back on it.
+  let hover: Press | null = null;
+  for (let i = 0; i < 4 && hover === null; i++) {
+    const at = await evaluate(PRESS);
+    if (at) await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: at.x, y: at.y });
+    hover = await settle(
+      PRESS,
+      (d, last) => d.hover && !!last && JSON.stringify(d) === JSON.stringify(last),
+      "chart-drawer-press-hovered",
+      20,
+    ).catch(() => null);
+  }
+  if (hover === null) throw new Error("the hand never rested on the filing press");
   await park(send);
   const keyed = (await tabInto(k, "#place-card .pc-lay", "#place-card .pc-prospect")) ? await evaluate(PRESS) : null;
   await evaluate<boolean>(`(() => { if (document.activeElement) document.activeElement.blur(); return true; })()`);
