@@ -202,7 +202,7 @@ const CAMERA: Payload<Camera> = `(() => {
   const rgba = ${PAGE_RGBA}, c = document.getElementById("lf-controls"), on = getComputedStyle(c).display;
   c.classList.remove("on"); const off = getComputedStyle(c).display; c.classList.add("on");
   const f = document.activeElement?.id === "zoom-in" ? getComputedStyle(document.activeElement) : null;
-  return { off, on, ring: f && rgba(f.outlineColor), touch: [...c.querySelectorAll("button")].map((b) => getComputedStyle(b).touchAction) };
+  return { off, on, ring: f && rgba(f.outlineColor), touch: [...c.querySelectorAll("button"), document.querySelector(".lf-station"), document.querySelector(".lf-legend-btn")].map((b) => getComputedStyle(b).touchAction) };
 })()`;
 
 async function pressed(k: LandfallKit, id: string, settled: (c: Cam) => boolean): Promise<Cam | null> {
@@ -229,12 +229,12 @@ export async function l30Camera(k: LandfallKit): Promise<void> {
     `(() => { const s = document.getElementById("lf-stage").getBoundingClientRect(), r = document.getElementById("lf-sheet").getBoundingClientRect(); return Math.abs(r.x + r.width / 2 - s.x - s.width / 2) < 2 && Math.abs(r.y + r.height / 2 - s.y - s.height / 2) < 2; })()`,
   );
   k.check(
-    "L30 home's camera stays hidden until the bundle arms it, rings in the house's ink-dark under a keyboard's focus, hands a vertical touch to the page, and answers its presses: Stand off draws the camera back and the whole-sheet press lays the whole sheet in the stage's centre (#505, #475)",
+    "L30 home's camera stays hidden until the bundle arms it, rings in the house's ink-dark under a keyboard's focus, hands a vertical touch to the page as the stations and the legend's presses do, and answers its presses: Stand off draws the camera back and the whole-sheet press lays the whole sheet in the stage's centre (#505, #475)",
     read.off === "none" &&
       read.on === "flex" &&
       tabbed &&
       nearRgba(read.ring, tokenRgba("--ink-dark")) &&
-      read.touch.length === 3 &&
+      read.touch.length === 5 &&
       read.touch.every((t) => t === "pan-y") &&
       !!before &&
       !!out &&

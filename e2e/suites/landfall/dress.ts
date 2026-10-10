@@ -336,7 +336,7 @@ export async function l29SlipBox(k: LandfallKit): Promise<void> {
 }
 
 type Veil = { lift: string[]; ring: string[]; needle: string[] };
-type Still = { ring: [string, string]; delay: string };
+type Still = { rose: string[]; offsets: string[]; delay: string };
 
 const VEIL: Payload<Veil> = `(() => {
   const v = document.createElement("div"); v.className = "veil lifting";
@@ -348,10 +348,11 @@ const VEIL: Payload<Veil> = `(() => {
 
 // Scratch elements read and removed in one evaluate: the rose's ring as the veil carries it, and a bare block given a delayed animation of its own.
 const STILL: Payload<Still> = `(() => {
-  const r = document.createElement("div"); r.innerHTML = '<svg class="veil-rose"><circle class="rose-ring"></circle></svg>';
+  const r = document.createElement("div"); r.innerHTML = '<svg class="veil-rose"><circle class="rose-ring"></circle><circle class="rose-ring inner"></circle><g class="rose-rays"><path></path></g><path class="rose-needle"></path></svg>';
   const d = document.createElement("div"); d.style.animation = "lf-scratch 1s linear 2s";
   document.body.append(r, d);
-  try { const ring = getComputedStyle(r.querySelector(".rose-ring")); return { ring: [ring.animationName, ring.strokeDashoffset], delay: getComputedStyle(d).animationDelay }; }
+  try { const cs = (s) => getComputedStyle(r.querySelector(s)), rose = [".rose-ring:not(.inner)", ".rose-ring.inner", ".rose-rays path", ".rose-needle"];
+    return { rose: rose.map((s) => cs(s).animationName), offsets: rose.slice(0, 2).map((s) => cs(s).strokeDashoffset), delay: getComputedStyle(d).animationDelay }; }
   finally { r.remove(); d.remove(); }
 })()`;
 
@@ -368,12 +369,12 @@ export async function l31Veil(k: SuiteContext): Promise<void> {
   const veil = await k.evaluate(VEIL);
   const still = await stilled(k);
   k.check(
-    "L31 the veil lifts, its rings draw and its needle settles by keyframes of home's own, and under reduced motion the rings stand drawn and still (#457)",
+    "L31 the veil lifts, its rings draw and its needle settles by keyframes of home's own, and under reduced motion both rings stand drawn and the rays and the needle still (#457)",
     veil.lift.includes("veil-lift") &&
       veil.ring.includes("rose-draw") &&
       veil.needle.includes("needle-settle") &&
-      still.ring[0] === "none" &&
-      still.ring[1] === "0px",
+      still.rose.every((n) => n === "none") &&
+      still.offsets.every((o) => o === "0px"),
     JSON.stringify({ veil, still }),
   );
 }
