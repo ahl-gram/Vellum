@@ -282,8 +282,8 @@ Rules that catch drift:
   templates, or no world can print it.
 - **A glossed section runs to a small band of terms**, and a section that runs over is named as an
   exception rather than left to look like drift. A section under the floor is fine: the floor binds
-  only the sections that introduced it. `test/site/glossary-sections.test.ts` holds the cap and the
-  named exceptions.
+  only the sections that introduced it. IX12 in `e2e/suites/document-rooms/sheets.ts` holds the cap
+  and the named exceptions, read on the served page.
 - **A homograph takes the period form**: one headword whose senses run together, rather than a second
   entry under the same word.
 - **Culture sections are ordered alphabetically**, not in the order of the roster that generates
