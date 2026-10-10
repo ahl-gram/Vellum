@@ -428,19 +428,13 @@ test("CT8 the road to the Portfolio carries the Explorer's WHOLE address, not th
   // The ASSIGNMENT is anchored, not the tokens: the guard-prover's round 1 left the whole-address expression standing as a dead local and navigated with `deps.folioHref` alone, and a token-wise guard passed that with the road broken.
   assert.match(
     handler,
-    /window\.location\.href = `\$\{deps\.folioHref[^`]*\$\{tableHash\(window\.location\.hash, emitTable\(items\(\)\)\)\}`;/,
+    /window\.location\.href = `\.\/portfolio\/\$\{tableHash\(window\.location\.hash, emitTable\(items\(\)\)\)\}`;/,
     "the road no longer NAVIGATES to this page's own address plus the table: computing it and going somewhere else is the same defect as never computing it, and it is what #634 measured losing the world",
   );
   assert.doesNotMatch(
     handler,
     /#\$\{TABLE_KEY\}=/,
     "the key-only form is back; it is what #634 defect 1 measured losing the world",
-  );
-  // The fallback literal sits inside the wildcard above, so it needs its own pin (guard-prover round 2).
-  assert.match(
-    handler,
-    /deps\.folioHref \?\? "\.\/portfolio\/"/,
-    "the road's fallback destination changed: it is the Portfolio under the Explorer (Issue #669), trailing slash and all",
   );
 });
 

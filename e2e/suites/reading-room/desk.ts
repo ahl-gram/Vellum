@@ -1,4 +1,4 @@
-import type { SuiteContext } from "../../types.ts";
+import type { Payload, SuiteContext } from "../../types.ts";
 import { GOVERNING_BUDGET, stripRead, WIDE_WORST } from "./reads.ts";
 import type { Room, Strip } from "./reads.ts";
 
@@ -71,6 +71,21 @@ export async function rr37Envelope(
       byWidth[0]!.h! > deskSurvey!.h,
     JSON.stringify({ byWidth, envelope: WIDE_WORST, budget: GOVERNING_BUDGET }),
   );
+}
+
+const ROOM: Payload<Room> = `(() => { const box = (s) => { const e = document.querySelector(s); return e ? e.getBoundingClientRect() : { width: 0, height: 0, top: 0, bottom: 0 }; };
+  const r = box(".rf-chart svg[data-vellum-style]"), b = box("#sheet"), strip = box(".strip"), tr = box(".corner.tr");
+  return { page: document.documentElement.scrollHeight, vh: window.innerHeight, chartW: Math.round(r.width), chartH: Math.round(r.height), ratio: r.width ? r.height / r.width : 0,
+    fillsSheet: Math.abs(r.width - b.width) < 1 && Math.abs(r.height - b.height) < 1, topClear: Math.round(r.top - tr.bottom), bottomClear: Math.round(strip.top - r.bottom) }; })()`;
+
+// The governing 1440x900 viewport's reads, in one step: a part the room never seated fails these by name rather than stopping the suite.
+export async function rrDeskReads(ctx: SuiteContext): Promise<void> {
+  const deskRest = await ctx.evaluate(stripRead);
+  const room = await ctx.evaluate(ROOM);
+  await rr31StripStands(ctx, deskRest, room);
+  const deskSurvey = await rr35GoverningBudget(ctx, deskRest);
+  await rr37Envelope(ctx, deskSurvey);
+  rr36ChartFills(ctx, room);
 }
 
 export function rr36ChartFills({ check }: SuiteContext, room: Room): void {

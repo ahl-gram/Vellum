@@ -31,7 +31,6 @@ export interface ChartDrawerDeps {
   readonly drawThumb?: (item: TableItem) => Promise<{ url: string; title: string } | null>;
   /** The Broadside's fold. Read late: the room is bound after the table (Issue #543, ruled 2026-09-08). */
   readonly broadside?: () => SlipFold | null;
-  readonly folioHref?: string;
 }
 
 interface Row {
@@ -414,7 +413,7 @@ export function bindChartDrawer(drawerEls: ChartDrawerEls, deps: ChartDrawerDeps
   drawerEls.shut.addEventListener("click", () => setOpen(false, true));
   drawerEls.road.addEventListener("click", () => {
     if (items().length === 0) return;
-    window.location.href = `${deps.folioHref ?? "./portfolio/"}${tableHash(window.location.hash, emitTable(items()))}`;
+    window.location.href = `./portfolio/${tableHash(window.location.hash, emitTable(items()))}`;
   });
 
   return { lay, reveal, receiving, restore, state, isFull, holds };
