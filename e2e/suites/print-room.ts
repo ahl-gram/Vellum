@@ -1,17 +1,43 @@
 // Print Room e2e (PRL, PR0-PR29, PRC, PRB, PRW; Issue #133/Issue #134/Issue #135/Issue #136/Issue #137/Issue #212/Issue #217): the shell and inline fallback, the poster plates, the PNG rasterizer and the bound atlas; hand-authored like its sibling suites and self-contained (navigates itself, carries scoped no-4xx and console-error deltas).
+import { makeStep } from "../support/step.ts";
 import type { SuiteContext } from "../types.ts";
-import { printRoomKit } from "./print-room/kit.ts";
+import { printRoomKit, type PrintRoomKit } from "./print-room/kit.ts";
 import { prlLink, prwWarp } from "./print-room/link.ts";
-import { pr0Boots, pr3World, prcCarried, prbBare } from "./print-room/proof.ts";
+import { pr0Boots, pr37LegendClear, pr3World, prcCarried, prbBare } from "./print-room/proof.ts";
 import { pr10PlatesEnable, pr12GrandPoster, pr16Desk, pr28ChartPlate, pr17Png } from "./print-room/plates.ts";
-import { pr20Bind, pr31Turns, pr33BackMatter, pr34Leaned, pr23Download, pr25Hide } from "./print-room/atlas.ts";
-import { pr21BoundPrint, pr21bUnboundPrint } from "./print-room/print.ts";
-import { pr24Redraw, pr24bInFlight, pr24cRebind, pr26Redraw, pr27OrderDuring } from "./print-room/redraw.ts";
+import {
+  pr20Bind,
+  pr31Turns,
+  pr31dFocusKept,
+  pr33BackMatter,
+  pr34Leaned,
+  pr23Download,
+  pr25Hide,
+} from "./print-room/atlas.ts";
+import {
+  pr21BoundPrint,
+  pr21bUnboundPrint,
+  pr21eWarningSlip,
+  pr21fLeanedPrint,
+  pr39SilentRefit,
+} from "./print-room/print.ts";
+import {
+  pr24Redraw,
+  pr24bInFlight,
+  pr24cRebind,
+  pr24dLivePlate,
+  pr25bHideFace,
+  pr26Redraw,
+  pr27OrderDuring,
+} from "./print-room/redraw.ts";
 import { pr6Clean, pr8Fallback } from "./print-room/fallback.ts";
+import { pr38BoundDress } from "./print-room/dress.ts";
+import { pr36Authored } from "./print-room/room.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { send, shoot, consoleErrors, http4xx, PORT } = ctx;
   const k = printRoomKit(ctx);
+  const step = makeStep(ctx);
   const orderHref = await prlLink(ctx);
   const hashPart =
     orderHref && orderHref.includes("#") ? orderHref.slice(orderHref.indexOf("#")) : "#seed=42&style=antique&legend=1";
@@ -22,6 +48,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const prHttpBase = http4xx.length;
   // Every poll below swallows and retries: evaluate throws when it lands in a context an in-flight navigation has destroyed.
   await pr0Boots(ctx);
+  await step("PR37", () => pr37LegendClear(ctx));
   await pr3World(ctx);
   await prcCarried(ctx);
   // about:blank first, here and at every re-entry below: a navigate that differs only in the hash is same-document and never re-bootstraps the page.
@@ -39,24 +66,37 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await pr16Desk(ctx);
   await pr28ChartPlate(ctx);
   await pr17Png(k);
-  await pr20Bind(ctx);
-  await pr31Turns(ctx);
-  await pr33BackMatter(ctx);
-  await pr34Leaned(ctx);
-  await shoot("print-room-bound.png");
-  await pr21BoundPrint(k);
-  await pr23Download(ctx);
-  await pr24Redraw(ctx);
-  await pr24bInFlight(ctx);
-  await pr24cRebind(ctx);
-  await pr25Hide(ctx);
-  await pr21bUnboundPrint(ctx);
+  await boundAndPaper(ctx, k, step);
   await shoot("print-room.png");
   await pr26Redraw(ctx);
   await pr27OrderDuring(ctx);
   // PR6/PR7 must stay ahead of the inline-fallback block below, which 404s the worker on purpose.
   pr6Clean(ctx, prErrBase, prHttpBase);
   await pr8Fallback(ctx);
-  // PRW/PRW2 (Issue #137) run LAST: they navigate away from the page every check above shares.
+  // PRW/PRW2 (Issue #137) run after every check on the shared page: they navigate away from it.
   await prwWarp(ctx);
+  // PR36 runs last so prlLink's start, print-room's NEEDS_PREDECESSOR entry and the PR #701 row's reasoning stay true; it leaves a scripts-off page, which the next suite's own navigation replaces.
+  await step("PR36", () => pr36Authored(ctx));
+}
+
+async function boundAndPaper(ctx: SuiteContext, k: PrintRoomKit, step: ReturnType<typeof makeStep>): Promise<void> {
+  await pr20Bind(ctx);
+  await pr31Turns(ctx);
+  await step("PR38", () => pr38BoundDress(ctx));
+  await step("PR31d", () => pr31dFocusKept(k));
+  await pr33BackMatter(ctx);
+  await pr34Leaned(ctx);
+  await ctx.shoot("print-room-bound.png");
+  await pr21BoundPrint(k);
+  await pr23Download(ctx);
+  await pr24Redraw(ctx);
+  await pr24bInFlight(ctx);
+  await pr24cRebind(ctx);
+  await step("PR24d", () => pr24dLivePlate(ctx));
+  await pr25Hide(ctx);
+  await step("PR25b", () => pr25bHideFace(ctx));
+  await pr21bUnboundPrint(ctx);
+  await step("PR21e", () => pr21eWarningSlip(ctx));
+  await step("PR21f", () => pr21fLeanedPrint(ctx));
+  await step("PR39", () => pr39SilentRefit(ctx));
 }

@@ -23,6 +23,30 @@ const arrivalFrom = ({ evaluate, sleep }: Pick<TableKit, "evaluate" | "sleep">, 
     DRAWN,
   );
 
+type Roads = { drawn: boolean; hash: string; explorer: string | null; portfolio: string | null };
+const ROADS: Payload<Roads> = `(() => { const href = (id) => { const a = document.getElementById(id); return a ? a.getAttribute("href") : null; };
+  return { drawn: !!document.querySelector("#pr-preview svg") && document.getElementById("pr-status").textContent === "", hash: location.hash,
+    explorer: href("pr-explorer"), portfolio: href("pr-portfolio") }; })()`;
+
+export async function cd49bPrintRoomAddress({ evaluate, send, check, settle, PORT, forget }: TableKit): Promise<void> {
+  await forget();
+  await send("Page.navigate", { url: "about:blank" });
+  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/print-room/#${DRESS}&table=${ONE}` });
+  // Keyed on the draw and never on the roads, so a road the page fails to rewrite reads as a fault here.
+  await settle(ROADS, (d) => d.drawn, "chart-drawer-print-room-drawn", DRAWN);
+  const r = await evaluate(ROADS);
+  const h = r.hash.slice(1);
+  const p = new URLSearchParams(h);
+  check(
+    "CD49b the Print Room's two roads are its own address, table and all: once the proof is drawn, the road back to the Explorer and the road on to the Portfolio each carry the page's whole hash, the table it was handed and the world it shows (#634, Issue #669)",
+    r.explorer === `../explorer/#${h}` &&
+      r.portfolio === `../explorer/portfolio/#${h}` &&
+      p.get("table") === ONE &&
+      p.get("seed") === "42",
+    JSON.stringify(r),
+  );
+}
+
 export async function cd49PrintRoomRoad({
   evaluate,
   send,
