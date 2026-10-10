@@ -1,6 +1,5 @@
 // What a hover, a key, a press, a Read and print do in the Reading Room (Issue #779 part 2g): the revealed plate's unfurl and lift, the Glass, its silent refit and paper, and a counter Read refitting to the folio it writes.
 import { makeSettle } from "../../support/settle.ts";
-import { nearRgba, PAGE_RGBA, SHADE, tokenRgba } from "../../support/pixel.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import { clearMetrics, pressAt } from "../print-room/kit.ts";
 import { glideLanded, homeCamera, lensRest, midGlideRefit, ZOOM_IN } from "../print-room/print.ts";
@@ -31,25 +30,22 @@ type Plate = {
   hover: boolean;
   focus: boolean;
   t: string;
-  shadow: { colour: number[]; geometry: string } | null;
+  shadow: string;
+  raise: string;
 };
-const PLATE: Payload<Plate> = `(() => { const rgba = ${PAGE_RGBA}, shade = ${SHADE}, i = document.querySelector(".rr-prospect img"), a = i.closest("a"), r = i.getBoundingClientRect();
-  const x = r.left + r.width / 2, y = r.top + r.height / 2, cs = getComputedStyle(i);
-  return { x, y, hit: document.elementFromPoint(x, y) === i, hover: a.matches(":hover"), focus: a.matches(":focus-visible"), t: cs.transform, shadow: shade(cs.boxShadow) };
+const PLATE: Payload<Plate> = `(() => { const i = document.querySelector(".rr-prospect img"), a = i.closest("a"), r = i.getBoundingClientRect();
+  const x = r.left + r.width / 2, y = r.top + r.height / 2, cs = getComputedStyle(i), probe = document.createElement("div");
+  probe.style.boxShadow = "var(--raise-shadow)"; document.body.append(probe); const raise = getComputedStyle(probe).boxShadow; probe.remove();
+  return { x, y, hit: document.elementFromPoint(x, y) === i, hover: a.matches(":hover"), focus: a.matches(":focus-visible"), t: cs.transform, shadow: cs.boxShadow, raise };
 })()`;
 
 const lifted = (p: Plate): boolean => {
   const m = /^matrix\(([^)]*)\)$/.exec(p.t)?.[1]?.split(",").map(Number);
-  if (!m || !p.shadow) return false;
+  if (!m) return false;
   const turn = (Math.atan2(m[1]!, m[0]!) * 180) / Math.PI;
-  return (
-    Math.abs(turn + 0.5) < 0.05 &&
-    Math.abs(m[5]! + 2) < 0.05 &&
-    p.shadow.geometry === "0px 6px 16px 0px" &&
-    nearRgba(p.shadow.colour, tokenRgba("--chart-ink", 0.2))
-  );
+  return Math.abs(turn + 0.5) < 0.05 && Math.abs(m[5]! + 2) < 0.05 && p.raise !== "none" && p.shadow === p.raise;
 };
-const still = (d: Plate, last: Plate | null): boolean => !!last && d.t === last.t;
+const still = (d: Plate, last: Plate | null): boolean => !!last && d.t === last.t && d.shadow === last.shadow;
 
 async function plateLifts(ctx: SuiteContext): Promise<{ hovered: Plate; keyed: Plate; away: Plate }> {
   const { evaluate, send, sleep } = ctx;

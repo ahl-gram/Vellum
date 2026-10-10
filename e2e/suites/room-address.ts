@@ -1,7 +1,10 @@
 // Room address e2e (RA1-RA8, Issue #320 Sub 3): the Issue #192 A-suite's year-restore checks re-hosted; the Explorer-hosted A* originals stay green beside them.
 import { makeRoom } from "../support/room.ts";
 import { dropExpectedCancellations } from "../support/console.ts";
-import type { SuiteContext } from "../types.ts";
+import { makeSettle } from "../support/settle.ts";
+import { makeStep } from "../support/step.ts";
+import type { Payload, SuiteContext } from "../types.ts";
+import { ONE } from "./chart-drawer/reads.ts";
 
 type Room = ReturnType<typeof makeRoom>;
 type World = Awaited<ReturnType<typeof raWorld>>;
@@ -16,13 +19,16 @@ export async function run(ctx: SuiteContext): Promise<void> {
   // Issue #637 (Alex, 2026-09-20): RA5 reds under a leaked prefers-reduced-motion (a Play then parks at once and writes year=present into the hash), and any upstream suite that stops between setting and resetting it leaks it, since the runner's rescue resets the viewport and never emulated media (Issue #616's class); measured 2026-09-20 with a probe that ran this suite clean (8/8) and then under a leaked reduce (7/8, RA5), so the suite clears the features itself before its first boot rather than depending on its predecessor.
   await send("Emulation.setEmulatedMedia", { features: [] });
 
+  const step = makeStep(ctx);
   const { sm, midYear } = await raWorld(ctx, room);
   await ra1Restores(ctx, room, sm, midYear);
+  await step("RA9", () => ra9TableRides(ctx, room));
   await ra2Clamps(ctx, room, sm);
   await ra3Survey(ctx, room);
   await ra4Ignored(ctx, room, sm, midYear);
   await ra5AutoPark(ctx, sm, midYear);
   await ra6Reduced(ctx, room, midYear);
+  await step("RA10", () => ra10ReducedPace(ctx, room));
   await ra7Counter(ctx, room, midYear);
   ra8Clean(ctx, errBase, httpBase);
 }
@@ -252,6 +258,60 @@ async function ra7Counter({ evaluate, check, sleep }: SuiteContext, room: Room, 
       /(^|&)seed=100(&|$)/.test(ra7.hash),
     JSON.stringify({ ra7pre, ra7 }),
   );
+}
+
+type Carried = { hash: string | null; plate: string | null; shown: boolean };
+const CARRIED: Payload<Carried> = `(() => { const f = document.querySelector(".rr-prospect"), i = f && f.querySelector("img"), a = f && f.querySelector("a");
+  const table = (h) => (h === null ? null : new URLSearchParams(h.slice(h.indexOf("#") + 1)).get("table"));
+  return { hash: table(location.hash), plate: a && table(a.getAttribute("href") || ""), shown: !!f && !f.hidden && !!i && String(i.src).startsWith("blob:") }; })()`;
+
+async function ra9TableRides({ evaluate, check, sleep }: SuiteContext, room: Room): Promise<void> {
+  const settle = makeSettle({ evaluate, sleep });
+  const booted = await room.goto(`#seed=42&style=antique&year=650&table=${ONE}`);
+  const read = await settle(CARRIED, (d) => d.shown, "room-address-table-plate", 160);
+  check(
+    "RA9 a link's Chart Table rides the room's own rewrite of its address and the plate's road to the Prospect (#520 ruling B)",
+    booted && read.hash === ONE && read.plate === ONE,
+    JSON.stringify({ booted, read }),
+  );
+}
+
+type Reduced = {
+  pace: string;
+  pressed: (string | null)[];
+  engine: number;
+  hash: boolean;
+  rows: number;
+  durations: number[];
+};
+const REDUCED: Payload<Reduced> = `(() => { const g = document.querySelector(".rf-instrument .rf-pace"), rows = [...document.querySelectorAll(".rf-log-strip li")];
+  return { pace: getComputedStyle(g).display, pressed: [...g.querySelectorAll("button")].map((b) => b.getAttribute("aria-pressed")), engine: window.__vellumAgesState().pace,
+    hash: new URLSearchParams(location.hash.slice(1)).has("pace"), rows: rows.length,
+    durations: rows.flatMap((li) => getComputedStyle(li).transitionDuration.split(",").map((s) => parseFloat(s))) }; })()`;
+
+async function ra10ReducedPace({ evaluate, send, check }: SuiteContext, room: Room): Promise<void> {
+  await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
+  try {
+    const booted = await room.goto("#seed=42&style=antique&pace=4");
+    const reduced = await evaluate(REDUCED);
+    await send("Emulation.setEmulatedMedia", { features: [] });
+    const moving = await evaluate(REDUCED);
+    check(
+      "RA10 under reduced motion the pace stands down and the rows brighten at once, and a link's pace is no key: the room plays at the default, pressed and reported, and writes none back; with motion allowed again the pace stands and the rows fade (the control)",
+      booted &&
+        reduced.pace === "none" &&
+        reduced.rows > 0 &&
+        reduced.durations.every((s) => s < 0.001) &&
+        reduced.engine === 1 &&
+        JSON.stringify(reduced.pressed) === JSON.stringify(["true", "false", "false"]) &&
+        !reduced.hash &&
+        moving.pace === "flex" &&
+        moving.durations.every((s) => s >= 0.1),
+      JSON.stringify({ booted, reduced, moving }),
+    );
+  } finally {
+    await send("Emulation.setEmulatedMedia", { features: [] });
+  }
 }
 
 function ra8Clean(ctx: SuiteContext, errBase: number, httpBase: number): void {

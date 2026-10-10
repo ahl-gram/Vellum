@@ -14,13 +14,15 @@ import {
   rs17Story,
 } from "./room-instrument/sweep.ts";
 import { rs23OtherWorld, rs26Unfurl, rs27NoReplay, rs28Cancel } from "./room-instrument/arrival.ts";
-import { rs29Pace, rs30Rate } from "./room-instrument/pace.ts";
+import { rs29Pace, rs30Rate, rs31PaceDress } from "./room-instrument/pace.ts";
+import { makeStep } from "../support/step.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { evaluate } = ctx;
   const k = instrumentKit(ctx);
   const { setYear } = k;
   const gate = scopedHealth(ctx);
+  const step = makeStep(ctx);
 
   await rs0Boots(k);
   await rs1State(k);
@@ -47,5 +49,6 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const smNow = await scrubFacts(evaluate, await evaluate<number>(`window.__vellumReadingRoomState().seed`));
   await rs29Pace(k, smNow);
   await rs30Rate(k, smNow);
+  await step("RS31", () => rs31PaceDress(k));
   gate.check("RS24 the room instrument run is clean (no console errors, no new 4xx)");
 }
