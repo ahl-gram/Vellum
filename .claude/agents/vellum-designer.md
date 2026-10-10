@@ -1,7 +1,7 @@
 ---
 name: vellum-designer
 description: Runs a Vellum design round, steps 1 and 2 of handbook/specs/conventions.md's "How a design decision is made". It draws one mockup per honest direction from real engine output, beside today's look as the control, and delivers the stills to the main checkout's out/ for Alex's sitting. It also breaks an epic into its subs (ordered, scoped and risked, with a design round first wherever the deliverable is an appearance) once the epic's vellum-spec-recon has run. Either way it hands back the open decisions as a plain-words menu. It is not for the stills of a STOP sitting at workflow step 6, which stay the implementer's spike and the plate reader's. Dispatch it by name and WITHOUT worktree isolation, from a session standing in the main checkout, into a detached tree that session builds (handbook/specs/development-workflow.md step 6).
-tools: Bash, Read, Write, Edit, Glob, Grep, WebFetch, WebSearch
+tools: Bash, Read, Write, Edit, WebFetch, WebSearch
 model: fable[1m]
 effort: xhigh
 color: orange
