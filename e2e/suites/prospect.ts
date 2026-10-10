@@ -1,40 +1,11 @@
 // Prospect e2e (the PB checks, Issue #242; the chart room since Issue #463 part 4/4): the Explorer card's way in, the room's plate on the fitted sheet, the engraver's note on the slip, the year control engraving in place and writing the address, the roads out, the two-dress fallback, year-awareness, and same-address byte determinism; self-contained like its sibling suites (navigates itself, carries scoped no-4xx and console-error deltas).
 import { makeStep } from "../support/step.ts";
 import { dropExpectedCancellations } from "../support/console.ts";
-import type { Payload, SuiteContext } from "../types.ts";
-
-type Prospect = {
-  seed: number;
-  index: number;
-  year: number;
-  presentYear: number;
-  name: string;
-  dress: string;
-  era: string;
-  keyRows: number;
-  roads: boolean;
-  svgLength: number;
-  blob: boolean;
-  shown: boolean;
-  status: string | null;
-  title: string | null;
-  sub: string | null;
-  pressed: string | null;
-  chart: string | null;
-  ribbon: string | null;
-  ribbonVerb: string | null;
-  ribbonShown: boolean;
-  yearField: string;
-  eraLine: string | null;
-  noteTitle: string | null;
-  where: string | null;
-  note: string | null;
-  keyLis: number;
-  keyHeadHidden: boolean;
-  hash: string;
-};
-
-type ProspectKit = ReturnType<typeof prospectKit>;
+import type { SuiteContext } from "../types.ts";
+import { pb13Dress } from "./prospect/dress.ts";
+import { pb14Glass, pb15FilingPress } from "./prospect/gestures.ts";
+import { prospectKit, type Prospect, type ProspectKit } from "./prospect/kit.ts";
+import { pb12Markup, pb16ScriptsOff, pb17Boot, pb18TableHomes } from "./prospect/room.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { consoleErrors, http4xx } = ctx;
@@ -52,46 +23,19 @@ export async function run(ctx: SuiteContext): Promise<void> {
     await pb2CapitalPlate(k, href);
     first = await pb3eRoomAndPlate(k);
   });
+  await step("PB12", () => pb12Markup(k));
+  await step("PB13", () => pb13Dress(k));
+  await step("PB14", () => pb14Glass(k));
+  await step("PB15", () => pb15FilingPress(k));
   await step("PB6", () => pb6SameAddress(k, first));
   await step("PB7 to PB7d", () => pb7YearFilter(k));
   await step("PB7e", () => pb7eOrphan(k));
   await step("PB8", () => pb8TwoDress(k));
   await step("PB9", () => pb9BareVisit(k));
+  await step("PB16", () => pb16ScriptsOff(k));
+  await step("PB17", () => pb17Boot(k));
+  await step("PB18", () => pb18TableHomes(k));
   pb10NoErrors(ctx, errBase, httpBase);
-}
-
-function prospectKit(ctx: SuiteContext) {
-  const { evaluate, send, sleep, PORT } = ctx;
-  const page = (hash: string) => `http://127.0.0.1:${PORT}/prospect/${hash}`;
-  // The page reads its address ONCE at boot (the year control re-engraves the same place), and a hash-to-hash Page.navigate on one path is a SAME-DOCUMENT navigation that never re-boots it, so every fresh address must arrive through a real cross-path hop (the Print Room precedent).
-  const goto = async (hash: string) => {
-    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/faq/` });
-    // Poll for the hop COMMITTING, never a fixed sleep: until the prospect DOM is gone, a poll below could read the OLD document's settled state.
-    for (let i = 0; i < 100; i++) {
-      let away = null;
-      try {
-        away = await evaluate<boolean>(`!document.getElementById("pp-plate")`);
-      } catch {}
-      if (away) break;
-      await sleep(50);
-    }
-    await send("Page.navigate", { url: page(hash) });
-  };
-  const STATE: Payload<Prospect | null> = `(()=>{const st=window.__vellumProspectState&&window.__vellumProspectState();const img=document.getElementById("pp-plate");if(!st)return null;const q=(sel)=>{const el=document.querySelector(sel);return el?el.textContent:null;};const a=(id)=>document.getElementById(id).getAttribute("href");return{seed:st.seed,index:st.index,year:st.year,presentYear:st.presentYear,name:st.name,dress:st.dress,era:st.era,keyRows:st.keyRows,roads:st.roads,svgLength:st.svgLength,blob:!!(img&&img.src&&img.src.startsWith("blob:")),shown:!!img&&!img.hidden,status:q("#pp-status"),title:q("#folio-title"),sub:q("#folio-sub"),pressed:q("#pp-pressed"),chart:a("pp-chart-link"),ribbon:a("pp-ribbon-link"),ribbonVerb:q("#pp-ribbon-verb"),ribbonShown:getComputedStyle(document.getElementById("pp-ribbon-link")).display!=="none",yearField:document.getElementById("pp-year").value,eraLine:q("#pp-era"),noteTitle:q("#note-title"),where:q("#note .card-where"),note:q("#pp-note"),keyLis:document.querySelectorAll("#pp-key li").length,keyHeadHidden:getComputedStyle(document.getElementById("pp-key-head")).display==="none",hash:location.hash};})()`;
-  const state = () => evaluate(STATE);
-  const opened = async (label: string) => {
-    for (let i = 0; i < 200; i++) {
-      let s = null;
-      try {
-        s = await state();
-      } catch {}
-      if (s && s.blob && s.status === "") return s;
-      await sleep(75);
-    }
-    throw new Error("prospect page never drew: " + label);
-  };
-  const svgOf = () => evaluate<string>(`fetch(document.getElementById("pp-plate").src).then(r=>r.text())`, true);
-  return { ...ctx, page, goto, state, opened, svgOf };
 }
 
 async function pb1WayIn({ evaluate, send, check, sleep, PORT }: SuiteContext): Promise<string | null> {

@@ -73,7 +73,7 @@ const LIST_AT_REFORMAT: Readonly<Record<string, readonly [number, number]>> = {
   "e2e/suites/print-room/plates.ts": [0, 1],
   "e2e/suites/print-room/print.ts": [0, 2],
   "e2e/suites/print-room/redraw.ts": [0, 1],
-  "e2e/suites/prospect.ts": [1, 3],
+  "e2e/suites/prospect.ts": [0, 3],
   "e2e/suites/reading-room/arm.ts": [0, 1],
   "e2e/suites/reading-room/colophon.ts": [0, 1],
   "e2e/suites/reading-room/kit.ts": [0, 1],
@@ -143,8 +143,6 @@ const LIST_AT_REFORMAT: Readonly<Record<string, readonly [number, number]>> = {
   "test/site/living-chart-css.test.ts": [0, 1],
   "test/site/living-chart-no-bar-card.test.ts": [1, 1],
   "test/site/print-room-contents.test.ts": [0, 1],
-  "test/site/prospect-room.test.ts": [0, 2],
-  "test/site/ribbon-room.test.ts": [0, 2],
   "test/site/room.test.ts": [0, 1],
   "test/site/table-address.test.ts": [1, 0],
 };

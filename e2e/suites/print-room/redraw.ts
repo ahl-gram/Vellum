@@ -1,4 +1,5 @@
-import type { SuiteContext } from "../../types.ts";
+import { makeSettle } from "../../support/settle.ts";
+import type { Payload, SuiteContext } from "../../types.ts";
 
 export async function pr24Redraw({ evaluate, check, sleep }: SuiteContext): Promise<void> {
   const midDraw = await evaluate<{ bind: boolean; print: boolean; atlasEmpty: boolean; hasAtlas: boolean }>(
@@ -211,4 +212,64 @@ export async function pr27OrderDuring({ evaluate, check, sleep }: SuiteContext):
       !!pr27Settled,
     JSON.stringify({ pr27Ready, pr27Start, pr27OrderInDraw, pr27Violated, pr27Settled }),
   );
+}
+
+const BOUND: Payload<boolean> = `(() => { const imgs = [...document.querySelectorAll("#pr-contents .plates img")];
+  return !!window.__vellumBoundAtlas && document.body.classList.contains("has-atlas") && imgs.length > 0 && imgs.every((im) => im.complete && im.naturalWidth > 0) && !document.getElementById("pr-bind").disabled && !document.getElementById("pr-hide").disabled; })()`;
+const bound = ({ evaluate, sleep }: SuiteContext, label: string): Promise<boolean> =>
+  makeSettle({ evaluate, sleep })(BOUND, (d) => d, label, 400);
+
+type MidBind = { target: string | null; binding: boolean; src: string } | null;
+// Wiring, not the claim: Bind and the old thumbnail are pressed in one read so the turn lands while the re-bind is in flight; the claim is the blob drawing.
+const TURN_OLD: Payload<MidBind> = `(() => { const img = document.querySelector('#pr-contents .plates figure[data-plate="theme-moisture"] img'), thumb = img && img.closest(".thumb");
+  if (!thumb) return null; const target = img.src; document.getElementById("pr-bind").click(); thumb.click();
+  return { target, binding: document.getElementById("pr-bind").disabled, src: document.getElementById("pr-turned").src }; })()`;
+type Drawn = { src: string; complete: boolean; natural: number };
+const TURNED: Payload<Drawn> = `(() => { const t = document.getElementById("pr-turned"); return { src: t.src, complete: t.complete, natural: t.naturalWidth }; })()`;
+
+export async function pr24dLivePlate(ctx: SuiteContext): Promise<void> {
+  const { evaluate, check, sleep } = ctx;
+  const mid = await evaluate(TURN_OLD);
+  try {
+    const drawn = mid
+      ? await makeSettle({ evaluate, sleep })(TURNED, (d) => d.complete || d.src !== mid.target, "print-room-old-plate")
+      : null;
+    check(
+      "PR24d a plate turned while a re-bind is in flight is a live plate: the previous binding's thumbnail, pressed after Bind, turns its own blob onto the sheet and it draws, so no blob is revoked before the new binding lands",
+      !!mid &&
+        mid.binding &&
+        mid.src === mid.target &&
+        !!drawn &&
+        drawn.src === mid.target &&
+        drawn.complete &&
+        drawn.natural > 0,
+      JSON.stringify({ mid, drawn }),
+    );
+  } finally {
+    await bound(ctx, "print-room-rebound");
+  }
+}
+
+type Face = { up: boolean; label: string | null; away?: boolean; after?: string | null } | null;
+// Wiring, not the claim: the turn and Hide are pressed in one read, so a turn that fails reads as a fault and not a stop.
+const HIDE_FACE: Payload<Face> = `(() => { const t = document.querySelector('#pr-contents .turn[data-plate="gazetteer"]'), page = document.getElementById("pr-page"), vp = document.getElementById("map-viewport");
+  if (!t) return null; t.click(); const face = { up: !page.hidden, label: vp.getAttribute("aria-label") };
+  document.getElementById("pr-hide").click(); return { ...face, away: page.hidden, after: vp.getAttribute("aria-label") }; })()`;
+
+export async function pr25bHideFace(ctx: SuiteContext): Promise<void> {
+  const { evaluate, check } = ctx;
+  await evaluate(`document.getElementById("pr-bind").click()`);
+  try {
+    const ready = await bound(ctx, "print-room-bound-for-hide");
+    const f = ready ? await evaluate(HIDE_FACE) : null;
+    check(
+      "PR25b Hide puts the page face away and gives the gesture box back its own label: with the gazetteer turned up (its label the page's, the control), Hide leaves the page hidden and the label the proof's",
+      !!f && f.up && !/^The proof\./.test(f.label ?? "") && f.away === true && /^The proof\./.test(f.after ?? ""),
+      JSON.stringify(f),
+    );
+  } finally {
+    await evaluate(
+      `(() => { const h = document.getElementById("pr-hide"); if (!h.disabled) h.click(); return true; })()`,
+    );
+  }
 }

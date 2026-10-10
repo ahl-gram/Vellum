@@ -1,6 +1,7 @@
 // Daily Hunt e2e (H1-H12, HD, HG) on the seed-of-the-day page.
 import { dropExpectedCancellations } from "../support/console.ts";
 import type { SuiteContext } from "../types.ts";
+import { huntRoom } from "./hunt/room.ts";
 
 type Frac = { fx: number; fy: number };
 type Zoom = { k: number; x: number; y: number };
@@ -16,6 +17,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const HUNT_PAGE = `http://127.0.0.1:${PORT}/seed-of-the-day/`;
   const k = huntKit(ctx);
   await h1Opens(ctx, HUNT_PAGE);
+  await huntRoom(ctx);
   await h2Clues(ctx);
   const tgt = await huntQuarry(ctx);
   const miss = await h3Miss(k, tgt);

@@ -78,6 +78,9 @@ export const PAGE_RGBA = `((css) => { const c = document.createElement("canvas")
 // Spliced after PAGE_RGBA, bound as `rgba`: a plain linear gradient's colour stops in order, and none for any other background image.
 export const GRADIENT_STOPS = `((image) => /^linear-gradient\\((color|rgba?|oklab)\\(/.test(image) ? (image.match(/(color|rgba?|oklab)\\([^)]*\\)/g) ?? []).map(rgba) : [])`;
 
+// Spliced after PAGE_RGBA, bound as `rgba`: a one-layer box-shadow's colour and its four lengths, null for none; a second layer is no colour, so `rgba` throws on it.
+export const SHADE = `((s) => { const m = /^(.+\\)) (-?[\\d.]+px -?[\\d.]+px -?[\\d.]+px -?[\\d.]+px)$/.exec(s); return m ? { colour: rgba(m[1]), geometry: m[2] } : null; })`;
+
 export const tokenRgba = (token: keyof typeof SITE_PALETTE, alpha = 1): Rgba => {
   const hex = SITE_PALETTE[token];
   const channel = (at: number): number => parseInt(hex.slice(at, at + 2), 16);

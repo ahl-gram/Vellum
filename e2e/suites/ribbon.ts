@@ -1,34 +1,11 @@
 // Ribbon e2e (the RB checks; the chart room since Issue #463 part 4/4): the strip-chart page boots from the shared worker, defaults to the capital's farthest road, the itinerary fills the slip and a row leans the Glass, a picked journey redraws in place and writes the address and the roads out, and the same address presses byte-identical scrolls; self-contained like its sibling suites (navigates itself, carries scoped no-4xx and console-error deltas).
 import { makeStep } from "../support/step.ts";
 import { dropExpectedCancellations } from "../support/console.ts";
-import type { Payload, SuiteContext } from "../types.ts";
-
-type Ribbon = {
-  seed: number;
-  from: number;
-  to: number;
-  leagues: number;
-  dress: string;
-  stRows: number;
-  blob: boolean;
-  shown: boolean;
-  status: string | null;
-  title: string | null;
-  sub: string | null;
-  unrolled: string | null;
-  chart: string | null;
-  prospect: string | null;
-  prospectVerb: string | null;
-  slipTitle: string | null;
-  where: string | null;
-  rows: number;
-  toName: string | null;
-  fromOptions: number[];
-  prospectShown: boolean;
-  hash: string;
-};
-type Row = { cls: string; num: string | undefined; strong: string | null; em: string | null; button: boolean };
-type RibbonKit = ReturnType<typeof ribbonKit>;
+import type { SuiteContext } from "../types.ts";
+import { rb12Dress } from "./ribbon/dress.ts";
+import { rb13RowHover, rb14Glass, rb15Paper } from "./ribbon/gestures.ts";
+import { ribbonKit, type Ribbon, type RibbonKit, type Row } from "./ribbon/kit.ts";
+import { rb11Markup, rb16RoadStandsDown } from "./ribbon/room.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { consoleErrors, http4xx } = ctx;
@@ -46,41 +23,14 @@ export async function run(ctx: SuiteContext): Promise<void> {
   });
   await rb6PickedDestination(k);
   await step("RB7", () => rb7SameScroll(k, svg1));
+  await step("RB11", () => rb11Markup(k));
+  await step("RB12", () => rb12Dress(k));
+  await step("RB13", () => rb13RowHover(k));
+  await step("RB14", () => rb14Glass(k));
+  await step("RB15", () => rb15Paper(k));
+  await step("RB16", () => rb16RoadStandsDown(k));
   await step("RB8", () => rb8InkDress(k));
   rb9NoErrors(ctx, errBase, httpBase);
-}
-
-function ribbonKit(ctx: SuiteContext) {
-  const { evaluate, send, sleep, PORT } = ctx;
-  const page = (hash: string) => `http://127.0.0.1:${PORT}/ribbon/${hash}`;
-  // A hash-to-hash Page.navigate on one path is a SAME-DOCUMENT navigation that never re-boots the page, so every fresh address arrives through a real cross-path hop (the prospect suite's precedent).
-  const goto = async (hash: string) => {
-    await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/faq/` });
-    for (let i = 0; i < 100; i++) {
-      let away = null;
-      try {
-        away = await evaluate<boolean>(`!document.getElementById("rb-plate")`);
-      } catch {}
-      if (away) break;
-      await sleep(50);
-    }
-    await send("Page.navigate", { url: page(hash) });
-  };
-  const STATE: Payload<Ribbon | null> = `(()=>{const st=window.__vellumRibbonState&&window.__vellumRibbonState();const img=document.getElementById("rb-plate");if(!st)return null;const q=(sel)=>{const el=document.querySelector(sel);return el?el.textContent:null;};const a=(id)=>document.getElementById(id).getAttribute("href");const to=document.getElementById("rb-to");return{seed:st.seed,from:st.from,to:st.to,leagues:st.leagues,dress:st.dress,stRows:st.rows,blob:!!(img&&img.src&&img.src.startsWith("blob:")),shown:!!img&&!img.hidden,status:q("#rb-status"),title:q("#folio-title"),sub:q("#folio-sub"),unrolled:q("#rb-unrolled"),chart:a("rb-chart-link"),prospect:a("rb-prospect-link"),prospectVerb:q("#rb-prospect-verb"),slipTitle:q("#itinerary-title"),where:q("#itinerary .card-where"),rows:document.querySelectorAll("#rb-itinerary li").length,toName:to.selectedOptions[0]?to.selectedOptions[0].textContent:null,fromOptions:[...document.getElementById("rb-from").options].map((o)=>Number(o.value)),prospectShown:getComputedStyle(document.getElementById("rb-prospect-link")).display!=="none",hash:location.hash};})()`;
-  const state = () => evaluate(STATE);
-  const opened = async (label: string) => {
-    for (let i = 0; i < 200; i++) {
-      let s = null;
-      try {
-        s = await state();
-      } catch {}
-      if (s && s.blob && s.status === "") return s;
-      await sleep(75);
-    }
-    throw new Error("ribbon page never drew: " + label);
-  };
-  const svgOf = () => evaluate<string>(`fetch(document.getElementById("rb-plate").src).then(r=>r.text())`, true);
-  return { ...ctx, page, goto, state, opened, svgOf };
 }
 
 async function rb1SetsOut({ evaluate, send, check, page, opened }: RibbonKit): Promise<Ribbon> {

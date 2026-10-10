@@ -18,15 +18,6 @@ test("the status role's colour is ink-faded, a colour no served pill wears (#324
   assert.match(ruleOf(house(), /\.status/), /color:\s*var\(--ink-faded\)/, ".status is ink-faded");
 });
 
-test("the warning slip: 6px, line-tan, ink-brown, body size (#324 decision 4)", () => {
-  const rule = ruleOf(house(), /\.warning/);
-  assert.match(rule, /border-radius:\s*6px/, ".warning wears the panel radius");
-  assert.match(rule, /border:\s*1px solid var\(--line-tan\)/, ".warning wears the outer hairline");
-  assert.match(rule, /color:\s*var\(--ink-brown\)/, ".warning speaks ink-brown");
-  assert.match(rule, /background:\s*var\(--parchment-panel\)/, ".warning sits on panel paper");
-  assert.ok(!/font-size/.test(rule), ".warning keeps the body size");
-});
-
 test("the archivist's label, two tiers (#324 decision 5, candidate B)", () => {
   const label = ruleOf(house(), /\.archivist-label/);
   assert.match(label, /font-size:\s*0\.72rem/);

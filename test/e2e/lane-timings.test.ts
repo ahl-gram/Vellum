@@ -4,7 +4,7 @@ import { E2E_LANES } from "../../e2e/support/lanes.ts";
 import { E2E_SUITE_ORDER } from "../../e2e/support/suites.ts";
 import type { E2eSuiteName } from "../../e2e/support/suites.ts";
 
-// CI seconds per suite (Issue #763, 2026-10-06): the median of the runner's own per-suite wall clock over the slow runner tier, the lane jobs whose suite total is at least 0.95 of that lane's slowest, across every run whose head held Issue #762's pull request D (main 37526087943 to 37541080266 and nine pull request runs, 56 lane jobs, 7 to 9 a suite), since the runners come in three speeds and a plain median mixed them unevenly across lanes; read with `gh api --allow-escape-sequences repos/ahl-gram/Vellum/actions/jobs/<job>/logs` and the lines under `per-suite wall clock`; corners and stage, split from the corners suite those runs read (426.2) by Issue #763's ruling 1B, from that pull request's own slow-tier lane logs (runs 37573532752 and 37574662411: corners 211.8 and 215.3, stage 212.4; the first run's lane B drew the fast tier and is left out by the same rule); a new suite enters an estimate and is corrected from its pull request's own lane log; runninghead, cluster, document-rooms and specimen re-measured by Issue #779 part 2f (2026-10-09), each the committed value times its median over that pull request's slow-tier lane jobs (runs 38013530350 and 38013480434) over its median over main's (38006409805, and 37998664257 where its lane drew the slow tier), save specimen, whose lane drew the fast tier in both of that pull request's runs, scaled by its local ratio instead (6.5 s over 6.1 s, main 2cd57d74 against the branch, one at a time); home, landfall, cluster and specimen re-measured by Issue #779 part 2f's second pull request (2026-10-10) the same way, over its slow-tier lane jobs (runs 38045277166 and 38045247394) against main's slow-tier same-lane job (38020348372 for lanes B and D, 38018414672 for lane C).
+// CI seconds per suite (Issue #763, 2026-10-06): the median of the runner's own per-suite wall clock over the slow runner tier, the lane jobs whose suite total is at least 0.95 of that lane's slowest, across every run whose head held Issue #762's pull request D (main 37526087943 to 37541080266 and nine pull request runs, 56 lane jobs, 7 to 9 a suite), since the runners come in three speeds and a plain median mixed them unevenly across lanes; read with `gh api --allow-escape-sequences repos/ahl-gram/Vellum/actions/jobs/<job>/logs` and the lines under `per-suite wall clock`; corners and stage, split from the corners suite those runs read (426.2) by Issue #763's ruling 1B, from that pull request's own slow-tier lane logs (runs 37573532752 and 37574662411: corners 211.8 and 215.3, stage 212.4; the first run's lane B drew the fast tier and is left out by the same rule); a new suite enters an estimate and is corrected from its pull request's own lane log; runninghead, cluster, document-rooms and specimen re-measured by Issue #779 part 2f (2026-10-09), each the committed value times its median over that pull request's slow-tier lane jobs (runs 38013530350 and 38013480434) over its median over main's (38006409805, and 37998664257 where its lane drew the slow tier), save specimen, whose lane drew the fast tier in both of that pull request's runs, scaled by its local ratio instead (6.5 s over 6.1 s, main 2cd57d74 against the branch, one at a time); home, landfall, cluster and specimen re-measured by Issue #779 part 2f's second pull request (2026-10-10) the same way, over its slow-tier lane jobs (runs 38045277166 and 38045247394) against main's slow-tier same-lane job (38020348372 for lanes B and D, 38018414672 for lane C); hunt, print-room, prospect, ribbon and chart-drawer re-measured by Issue #779 part 2g's first pull request (2026-10-10) the same way, over its slow-tier lane jobs (lane A in runs 38071282977 and 38071499557, lane B in 38063204452, 38071282977 and 38071499557, lane D in 38068834224 and 38071499557) against main's (lane A in 38049702205, 38048211838, 38020348372 and 38018414672, lane B in 38059105744, 38049702205, 38020348372 and 38018414672, lane D in 38059105744, 38059071865, 38049702205, 38048211838 and 38020348372).
 const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   render: 44.8,
   motion: 3.6,
@@ -16,10 +16,10 @@ const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   cards: 74.0,
   health: 0.0,
   fallback: 7.7,
-  hunt: 11.4,
-  "print-room": 58.5,
-  prospect: 21.8,
-  ribbon: 6.5,
+  hunt: 12.8,
+  "print-room": 76.1,
+  prospect: 37.2,
+  ribbon: 15.9,
   home: 124.5,
   landfall: 69.4,
   survey: 111.8,
@@ -32,7 +32,7 @@ const MEASURED_SECONDS: Readonly<Record<E2eSuiteName, number>> = {
   "room-address": 43.6,
   runninghead: 19.5,
   cluster: 16.7,
-  "chart-drawer": 167.8,
+  "chart-drawer": 170.3,
   "document-rooms": 14.5,
   "region-detail": 44.1,
   specimen: 8.3,

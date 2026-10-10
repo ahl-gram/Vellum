@@ -27,6 +27,7 @@ import {
   cd24PortfolioSays,
   cd20BarePortfolio,
   cd21PortfolioGlass,
+  cd49bPrintRoomAddress,
   cd49PrintRoomRoad,
   cd50ScriptsOffHome,
 } from "./chart-drawer/portfolio.ts";
@@ -140,6 +141,7 @@ async function cd25CapturesAndHomes(kd: DragKit, step: Step, SIX: string): Promi
   // Issue #634: the table's second home, and the four roads the two homes exist for. ONE and TWO are addresses rather than gestures because every check below is about WHERE the table came from, not about the handle that filed it.
   const TWO = `${ONE}_k-p.seed-42.style-antique.i-0.year-1059`;
   const kt = tableKit(kd);
+  await step("CD49b", () => cd49bPrintRoomAddress(kt));
   await step("CD49", () => cd49PrintRoomRoad(kt));
   await step("CD50", () => cd50ScriptsOffHome(kt));
   await step("CD36", () => cd36GoldPress(kt));
