@@ -19,6 +19,8 @@ type Corner = {
   ids: number[];
   to: unknown[] | null;
 };
+// Tewetulua (24) is seed 42's one settlement no road leaves, PB7e's witness in e2e/suites/prospect.ts.
+const ORPHAN = 24;
 const CORNER: Payload<Corner> = `(() => { const text = ${TEXT}, kids = ${KIDS}, corner = document.querySelector(".corner.tr.folio-room"), group = corner && corner.querySelector(":scope > .folio-controls");
   const swap = document.getElementById("rb-swap"), to = document.getElementById("rb-to");
   return { h1s: [...document.querySelectorAll("h1")].map((h) => (corner && corner.contains(h) ? "corner " : "") + h.className + ": " + text(h)),
@@ -27,7 +29,7 @@ const CORNER: Payload<Corner> = `(() => { const text = ${TEXT}, kids = ${KIDS}, 
     labels: [...document.querySelectorAll("#rb-journey label")].map((l) => [l.htmlFor, text(l), document.getElementById(l.htmlFor) && document.getElementById(l.htmlFor).getAttribute("aria-label")]),
     swap: swap && [swap.getAttribute("type"), swap.className, text(swap), swap.previousElementSibling && swap.previousElementSibling.id, !!swap.closest("#rb-journey")],
     gloss: text(corner && corner.querySelector(":scope > .gloss")), ids: ["rb-from", "rb-to", "rb-swap"].map((id) => document.querySelectorAll("[id=" + id + "]").length),
-    to: to && [[...to.options].some((o) => o.value === "24"), [...to.options].some((o) => o.value === to.value)] };
+    to: to && [[...to.options].some((o) => o.value === "${ORPHAN}"), [...to.options].some((o) => o.value === to.value)] };
 })()`;
 
 const cornerFaults = (c: Corner): string[] =>

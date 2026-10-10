@@ -245,8 +245,9 @@ section points there rather than restating it.
   as the thing you meant. A card at `left: 0` is the clamp working (`axisNudge` in
   `src/render/place-card.ts` never pushes a card's near edge past its box), so a negative origin is
   the probe's own arithmetic on the rect and not the DOM's. Gate 2 item 13 points here.
-- **A device-metrics override is not undone when its clear returns.** The size the override set still
-  reads after `Emulation.clearDeviceMetricsOverride` resolves, until the next resize lands, so a check
+- **A device-metrics override may not be undone when its clear returns.** The size the override set can
+  still read after `Emulation.clearDeviceMetricsOverride` resolves (measured 2026-10-10 on the local
+  harness browser), until the next resize lands, so a check
   that clears one and then reads, presses or wheels at the window's own size waits for the window to
   leave the override's size first, as `clearMetrics` in `e2e/suites/print-room/kit.ts` does; a gesture
   aimed in between lands at the stale size's coordinates.
