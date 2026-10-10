@@ -1,3 +1,4 @@
+import type { Payload } from "../../types.ts";
 import { atFolded, CHART_ASPECT, CONTROL_GOLD, INK_BROWN, READ } from "./reads.ts";
 import type { Specimen } from "./reads.ts";
 import type { SpecimenKit } from "./kit.ts";
@@ -218,4 +219,115 @@ export async function sb6RestAgain({ evaluate, check, sleep, setState, read }: S
       refilled.disp !== "none",
     JSON.stringify({ back: { st: back.st, pool: back.pool }, emptied, refilled }),
   );
+}
+
+const ROUTE: Payload<{ robots: string | null; body: string[]; ogUrl: string | null; navLinks: number }> =
+  `(() => ({ robots: document.querySelector("meta[name='robots']")?.getAttribute("content") ?? null, body: [...document.body.classList],
+    ogUrl: document.querySelector("meta[property='og:url']")?.getAttribute("content") ?? null,
+    navLinks: document.querySelectorAll("nav.rooms a[href$='/specimen/']").length }))()`;
+
+export async function sb10Route({ evaluate, check }: SpecimenKit): Promise<void> {
+  const r = await evaluate(ROUTE);
+  check(
+    "SB10 the Book is a chart room off the nav and off the index: it asks not to be indexed, wears the chart room's classes, names /specimen/ as its own address, and no nav link leads to it (Issue #487 item 4)",
+    r.robots === "noindex" &&
+      r.body.includes("room") &&
+      r.body.includes("chart-room") &&
+      !!r.ogUrl &&
+      r.ogUrl.endsWith("/specimen/") &&
+      r.navLinks === 0,
+    JSON.stringify(r),
+  );
+}
+
+// Every piece and state the Book exists to show, counted on the page: a piece the page stopped standing reads 0.
+const PIECES = {
+  fog: ".fog.a, .fog.b",
+  vignettes: ".vignette.top, .vignette.bottom",
+  gestureBox: ".stage #map-viewport",
+  glassPresses: ".zoomery [data-zoom]",
+  chartFolio: ".corner.bl p",
+  goldRoad: "nav.legend a.legend-btn.gold",
+  plainRoad: "nav.legend a.legend-btn:not(.gold)[href]",
+  disabledPress: "nav.legend button.legend-btn:disabled",
+  slipFoot: ".slip .slip-foot",
+  contentsRows: ".slip ol.contents .cr-num",
+  inked: ".slip ol.index li.inked",
+  now: ".slip ol.index .now",
+  hit: ".slip ol.index .hit",
+  pillText: "#sb-status:not(:empty)",
+  control: ".folio-room .folio-controls .control",
+  dice: ".folio-room .folio-controls .dice",
+  primary: ".folio-room .folio-controls .primary",
+  stateSelect: "select#sb-state.control",
+};
+const WANT: Record<keyof typeof PIECES, number> = {
+  fog: 2,
+  vignettes: 2,
+  gestureBox: 1,
+  glassPresses: 3,
+  chartFolio: 4,
+  goldRoad: 1,
+  plainRoad: 1,
+  disabledPress: 1,
+  slipFoot: 1,
+  contentsRows: 3,
+  inked: 1,
+  now: 2,
+  hit: 1,
+  pillText: 1,
+  control: 2,
+  dice: 1,
+  primary: 1,
+  stateSelect: 1,
+};
+
+export async function sb11Pieces({ evaluate, check }: SpecimenKit): Promise<void> {
+  const counts = await evaluate<Record<string, number>>(
+    `(() => Object.fromEntries(Object.entries(${JSON.stringify(PIECES)}).map(([k, s]) => [k, document.querySelectorAll(s).length])))()`,
+  );
+  const short = Object.entries(WANT).filter(([k, n]) => counts[k] !== n);
+  check(
+    "SB11 the Book stands every kit piece in every state its dress can show: the fog and vignette pairs, the gesture box, the Glass's three presses, the chart folio's four lines, a gold road, a plain road and a disabled press, the slip's foot, the contents rows, the index's inked, reading and found marks, the pill with its words, and the corner's controls, dice, primary and state select (Issue #487 item 4)",
+    short.length === 0,
+    short.map(([k, n]) => `${k} ${counts[k]} of ${n}`).join(", ") || JSON.stringify(counts),
+  );
+}
+
+export async function sb12StatusVoice({ evaluate, check }: SpecimenKit): Promise<void> {
+  const v = await evaluate<{ style: string; family: string }>(
+    `(() => { const cs = getComputedStyle(document.getElementById("sb-status")); return { style: cs.fontStyle, family: cs.fontFamily }; })()`,
+  );
+  check(
+    "SB12 a room's status pill speaks in the house's status voice: italic, in the body face (Issue #324 decision 3)",
+    v.style === "italic" && /^"EB Garamond",/.test(v.family),
+    JSON.stringify(v),
+  );
+}
+
+const PRESS = (id: string): Payload<{ x: number; y: number } | null> =>
+  `(() => { const b = document.getElementById(${JSON.stringify(id)}); if (!b) return null; const r = b.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`;
+
+async function press(k: SpecimenKit, id: string): Promise<void> {
+  const at = await k.evaluate(PRESS(id));
+  if (!at) throw new Error(`no ${id} to press`);
+  await k.send("Input.dispatchMouseEvent", { type: "mousePressed", x: at.x, y: at.y, button: "left", clickCount: 1 });
+  await k.send("Input.dispatchMouseEvent", { type: "mouseReleased", x: at.x, y: at.y, button: "left", clickCount: 1 });
+}
+
+export async function sb13GlassPress(k: SpecimenKit): Promise<void> {
+  const before = await k.read();
+  try {
+    await press(k, "zoom-in");
+    const leaned = await k.settle(READ, (d) => !!d.st && d.st.zoomed, "specimen-zoom-in");
+    await press(k, "zoom-reset");
+    const home = await k.settle(READ, (d) => !!d.st && !d.st.zoomed, "specimen-zoom-home");
+    k.check(
+      "SB13 the Glass answers a real press: zoom-in leans the camera in and the home press brings it back, through the kit's own key binder (Issue #487)",
+      !!before.st && !before.st.zoomed && leaned.st!.zoomed && !home.st!.zoomed,
+      JSON.stringify({ before: before.st, leaned: leaned.st, home: home.st }),
+    );
+  } finally {
+    await k.setState("rest");
+  }
 }

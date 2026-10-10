@@ -1,7 +1,7 @@
 // The trail under the nav (Issue #668), read at 1280, 901 and 640, the last two laying out the 1024 page (Issue #762): its links answer a hit-test and one takes a real press, it clears a thumb's 24px round each of its links and the nav's, and the band and the Gallery give it ground. Every target is HIT-TESTED, never clicked through element.click().
 import type { Payload, SuiteContext } from "../../types.ts";
 import { makeSettle } from "../../support/settle.ts";
-import { sampleRow } from "../../support/pixel.ts";
+import { nearRgba, PAGE_RGBA, sampleRow, tokenRgba } from "../../support/pixel.ts";
 
 type Box = { x: number; y: number; w: number; h: number; right: number; bottom: number };
 type Target = Box & { t: string; hit: boolean };
@@ -193,4 +193,47 @@ export async function dr13Gallery(k: TrailKit): Promise<void> {
     rows.length === 2 && rows.every((r) => r.gap >= 4),
     JSON.stringify(rows),
   );
+}
+
+const GROUND: Payload<{ image: string; colour: number[] }> =
+  `(() => { const cs = getComputedStyle(document.body); return { image: cs.backgroundImage, colour: (${PAGE_RGBA})(cs.backgroundColor) }; })()`;
+
+async function printedGround(k: TrailKit): Promise<{ image: string; colour: number[] }> {
+  try {
+    await k.send("Emulation.setEmulatedMedia", { media: "print" });
+    return await k.evaluate(GROUND);
+  } finally {
+    await k.send("Emulation.setEmulatedMedia", { media: "" });
+  }
+}
+
+export async function dr14PrintIsPaper(k: TrailKit): Promise<void> {
+  await k.goto("/faq/");
+  const screen = await k.evaluate(GROUND);
+  const paper = await printedGround(k);
+  k.check(
+    "DR14 print is paper all the way down: printed, the Q & A's body drops the dark ground it carries on screen, the screen read in the same run the control (Issue #454 open decision 4)",
+    nearRgba(screen.colour, tokenRgba("--chart-ink")) && paper.image === "none" && paper.colour[3] === 0,
+    JSON.stringify({ screen, paper }),
+  );
+}
+
+const TRAIL_LINK: Payload<{ x: number; y: number; hovered: boolean; moving: number; colour: number[] } | null> =
+  `(() => { const a = document.querySelector("header.chrome .trail a"); if (!a) return null; const b = a.getBoundingClientRect(); return { x: b.x + b.width / 2, y: b.y + b.height / 2, hovered: a.matches(":hover"), moving: a.getAnimations().length, colour: (${PAGE_RGBA})(getComputedStyle(a).color) }; })()`;
+
+export async function dr15TrailHover(k: TrailKit): Promise<void> {
+  await k.goto("/prospect/");
+  const at = await k.evaluate(TRAIL_LINK);
+  if (!at) throw new Error("DR15: the Prospect carries no trail link");
+  await k.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: at.x, y: at.y, button: "none" });
+  try {
+    const lit = await k.settle(TRAIL_LINK, (d) => d.hovered && d.moving === 0, "trail-hover", 40);
+    k.check(
+      "DR15 a trail link under the hand brightens to parchment-bright, never a dimmer ink (Issue #668)",
+      nearRgba(at.colour, tokenRgba("--parchment")) && nearRgba(lit.colour, tokenRgba("--parchment-bright")),
+      JSON.stringify({ rest: at.colour, hover: lit.colour }),
+    );
+  } finally {
+    await k.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 700, button: "none" });
+  }
 }

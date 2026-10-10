@@ -20,7 +20,20 @@ import {
   rh9ContrastPins,
   rhSweep,
 } from "./runninghead/heads.ts";
-import { rh10cPrinted, rh10GalleryScrolled } from "./runninghead/gallery.ts";
+import { rh10cPrinted, rh10GalleryScrolled, rh21Room, rh22CornerAndRoad, rh23Dress } from "./runninghead/gallery.ts";
+import {
+  rh11Deep,
+  rh12FocusRing,
+  rh13WordmarkTip,
+  rh14Faces,
+  rh15BodyFace,
+  rh16Prefetch,
+  rh17ShellOnce,
+  rh18HouseSheet,
+  rh19MarksAndRobots,
+  rh20TextSize,
+  rh24TrailInks,
+} from "./runninghead/shell.ts";
 
 // Reading the producer's own template couples the injected twin to it: rename the class or demote the heading in renderBoundAtlas and RH7 reds instead of drifting.
 const REPO = resolve(fileURLToPath(new URL(".", import.meta.url)), "..", "..");
@@ -38,7 +51,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const k = runningHeadKit(ctx);
   const { visit } = k;
 
-  const { heads, unreachable } = await rhSweep(k);
+  const { heads, shells, unreachable } = await rhSweep(k);
   const bad = (pred: (h: Head, r: string) => boolean) => SHELLED.filter((r) => !heads[r] || !pred(heads[r], r));
   rh0OneH1(ctx, heads, unreachable, bad);
   rh1NamesPage(ctx, heads, bad);
@@ -49,7 +62,25 @@ export async function run(ctx: SuiteContext): Promise<void> {
   rh6Differ(ctx, heads, prose);
   await rh7AtlasTitle(k);
   rh9ContrastPins(ctx, heads, bad);
+  const now = (read: (c: typeof ctx.check) => void) => () => Promise.resolve(ctx.check).then(read);
+  for (const [name, read] of [
+    ["RH11", (c) => rh11Deep(c, shells)],
+    ["RH15", (c) => rh15BodyFace(c, shells)],
+    ["RH16", (c) => rh16Prefetch(c, shells)],
+    ["RH17", (c) => rh17ShellOnce(c, shells)],
+    ["RH18", (c) => rh18HouseSheet(c, shells)],
+    ["RH19", (c) => rh19MarksAndRobots(c, shells)],
+    ["RH20", (c) => rh20TextSize(c, shells)],
+    ["RH24", (c) => rh24TrailInks(c, shells)],
+  ] as const satisfies readonly (readonly [string, (c: typeof ctx.check) => void])[])
+    await step(name, now(read));
+  await step("RH12", () => rh12FocusRing(k));
+  await step("RH13", () => rh13WordmarkTip(k));
+  await step("RH14", () => rh14Faces(k, shells));
   await step("RH10", () => rh10GalleryScrolled(k));
+  await step("RH21", () => rh21Room(k));
+  await step("RH22", () => rh22CornerAndRoad(k));
+  await step("RH23", () => rh23Dress(k));
   // The stageless room on paper at a phone's width (RH10c, RH10d) and at Letter (RH10e); the screen's 1024 floor never reaches print.
   await send("Emulation.setDeviceMetricsOverride", { width: 390, height: 844, deviceScaleFactor: 1, mobile: false });
   // The Z13 bounce: /gallery/ is already loaded, and visit()'s probe (readyState complete plus a .wordmark) is satisfied by the STALE document, so a same-URL navigate can return before the new one commits.

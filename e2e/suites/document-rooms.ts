@@ -4,6 +4,16 @@ import { makeSettle } from "../support/settle.ts";
 import { withScriptsOff } from "../support/scripts-off.ts";
 import { makeStep } from "../support/step.ts";
 import type { Payload, SuiteContext } from "../types.ts";
+import {
+  ix9SurveySheet,
+  ix10ColumnsFold,
+  ix11Intro,
+  ix12GlossaryShape,
+  ix13Cultures,
+  ix14Anchors,
+  readSheets,
+} from "./document-rooms/sheets.ts";
+import type { Sheets } from "./document-rooms/sheets.ts";
 
 const FAQ = "/faq/";
 const GLOSSARY = "/glossary/";
@@ -99,6 +109,30 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("NA3", () => na3Floor(k));
   await ix6NoScript(k);
   await step("IX8", () => ix8Landmark(k));
+
+  let sheets: Sheets | undefined;
+  await step("IX9", async () => {
+    sheets = await readSheets(k);
+    ix9SurveySheet(k, sheets);
+  });
+  await step("IX10", () => ix10ColumnsFold(k, sheets!));
+  const read = (fn: (s: Sheets) => void) => () => Promise.resolve(sheets).then((s) => fn(s!));
+  await step(
+    "IX11",
+    read((s) => ix11Intro(k, s)),
+  );
+  await step(
+    "IX12",
+    read((s) => ix12GlossaryShape(k, s)),
+  );
+  await step(
+    "IX13",
+    read((s) => ix13Cultures(k, s)),
+  );
+  await step(
+    "IX14",
+    read((s) => ix14Anchors(k, s)),
+  );
 
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   gate.check("IX7 the document-room suite drove both rooms with no console error and no 4xx");

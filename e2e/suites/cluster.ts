@@ -3,7 +3,7 @@ import { makeStage, makeMouse, readCam, atLandfall } from "../support/home.ts";
 import { makeStep } from "../support/step.ts";
 import type { Payload, SuiteContext } from "../types.ts";
 import { deskKit, dnContinue, dnNarrow, dnPhone, dnRefused, dnTablet } from "./cluster/desk-notice.ts";
-import { dr11Wide, dr12Print, dr13Gallery, trailKit } from "./cluster/trail.ts";
+import { dr11Wide, dr12Print, dr13Gallery, dr14PrintIsPaper, dr15TrailHover, trailKit } from "./cluster/trail.ts";
 
 type Rect = { x: number; y: number; w: number; h: number; right: number; bottom: number };
 type Stage = ReturnType<typeof makeStage>;
@@ -34,6 +34,8 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("DR11", () => dr11Wide(trail));
   await step("DR12", () => dr12Print(trail));
   await step("DR13", () => dr13Gallery(trail));
+  await step("DR14", () => dr14PrintIsPaper(trail));
+  await step("DR15", () => dr15TrailHover(trail));
 
   await clearMobile();
   await send("Emulation.clearDeviceMetricsOverride");
