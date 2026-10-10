@@ -205,8 +205,10 @@ const WATCH = `(() => { const make = URL.createObjectURL.bind(URL), revoke = URL
   URL.revokeObjectURL = (u) => { window.__pb17.revoked.push(u); return revoke(u); }; })();`;
 type Seat = string[];
 const SEAT = `(() => { const s = document.getElementById("sheet").style; return [document.querySelector(".legend").style.left, document.querySelector(".stage").style.getPropertyValue("--reserve-bottom"), s.width, s.height]; })()`;
-const RESEAT: Payload<{ before: Seat; after: Seat }> =
-  `(() => { const before = ${SEAT}; window.dispatchEvent(new Event("resize")); return { before, after: ${SEAT} }; })()`;
+const RESEAT: Payload<{ before: Seat; planted: Seat; after: Seat }> =
+  `(() => { const before = ${SEAT}, l = document.querySelector(".legend").style, st = document.querySelector(".stage").style, sh = document.getElementById("sheet").style, px = (v) => parseFloat(v) + 1 + "px";
+  l.left = px(l.left); st.setProperty("--reserve-bottom", px(st.getPropertyValue("--reserve-bottom"))); sh.width = px(sh.width); sh.height = px(sh.height);
+  const planted = ${SEAT}; window.dispatchEvent(new Event("resize")); return { before, planted, after: ${SEAT} }; })()`;
 
 export async function pb17Boot(k: ProspectKit): Promise<void> {
   const { evaluate, send, check, sleep, goto, opened } = k;
@@ -233,9 +235,10 @@ export async function pb17Boot(k: ProspectKit): Promise<void> {
       200,
     );
     check(
-      "PB17 the boot: until the first plate the Ribbon road and the filing press stand down, the refit runs after the folio is written so a fresh refit leaves the legend, the reserve and the sheet where it put them, and engraving another year revokes the first plate's blob",
+      "PB17 the boot: until the first plate the Ribbon road and the filing press stand down, the refit runs after the folio is written so a fresh refit takes a planted legend, reserve and sheet away and leaves each where it put it, and engraving another year revokes the first plate's blob",
       same(first.first, ["none", "none"]) &&
         same(seat.before, seat.after) &&
+        seat.planted.every((v, i) => v !== seat.before[i]) &&
         after.src !== first.src &&
         after.revoked.includes(first.src),
       JSON.stringify({ first, seat, after }),
@@ -267,7 +270,7 @@ const HOME: Payload<Home> = `(() => { const p = document.getElementById("pp-lay"
 async function backHome(k: ProspectKit, marker: string, unload: boolean): Promise<Home> {
   const { evaluate, sleep } = k;
   await evaluate(
-    `(() => { window.__pb18 = "${marker}"; ${unload ? `window.addEventListener("unload", () => {});` : ""} location.href = "/faq/"; return true; })()`,
+    `(() => { window.__pb18 = "${marker}"; ${unload ? `window.addEventListener("unload", () => {});` : ""} setTimeout(() => { location.href = "/faq/"; }, 0); return true; })()`,
   );
   type Away = { path: string; ready: string };
   const away = makeSettle({ evaluate: (e: string) => evaluate<Away | null>(e).catch(() => null), sleep });
@@ -277,7 +280,7 @@ async function backHome(k: ProspectKit, marker: string, unload: boolean): Promis
     (d) => d.path === "/faq/" && d.ready === "complete",
     "prospect-to-faq",
   );
-  await evaluate(`(() => { history.back(); return true; })()`);
+  await evaluate(`(() => { setTimeout(() => history.back(), 0); return true; })()`);
   return home(
     HOME,
     (d, last) => d.path === "/prospect/" && d.drawn && !!last && JSON.stringify(d) === JSON.stringify(last),

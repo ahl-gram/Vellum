@@ -3,6 +3,7 @@ import { nearRgba, PAGE_RGBA, SHADE, tokenRgba } from "../../support/pixel.ts";
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload } from "../../types.ts";
 import type { RibbonKit } from "./kit.ts";
+import { LEGEND_RESEAT, reseatKept } from "../print-room/proof.ts";
 
 type Box = { l: number; t: number; r: number; b: number };
 type Dress = {
@@ -82,10 +83,11 @@ export async function rb12Dress(k: RibbonKit): Promise<void> {
     "ribbon-dress-still",
   );
   const rem = await evaluate<number>(`parseFloat(getComputedStyle(document.documentElement).fontSize)`);
-  const seat = await evaluate<string[]>(
-    `(() => { const l = document.querySelector(".legend"), before = l.style.left; window.dispatchEvent(new Event("resize")); return [before, l.style.left]; })()`,
-  );
-  const wrong = [...dressFaults(d, rem), ...(seat[0] === seat[1] ? [] : ["a fresh refit moves the legend"])];
+  const seat = await evaluate(LEGEND_RESEAT);
+  const wrong = [
+    ...dressFaults(d, rem),
+    ...(reseatKept(seat) ? [] : ["a fresh refit leaves a planted seat or moves the legend"]),
+  ];
   check(
     "RB12 the Ribbon at rest as dressed: the stage reserving the chrome, the sheet at the stage depth, the scroll filling it at its own proportion, the gesture box zoomable with touch-action none, the journey row wrapping with the journey its selects' own row, the rows' leans in the text's dress with their league marks and summit triangles, the selects in the kit's dress at 9.2rem with their options ink-dark on the panel, and the legend seated clear of the written folio",
     wrong.length === 0,

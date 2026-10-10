@@ -45,7 +45,17 @@ export async function homeCamera(ctx: Pick<SuiteContext, "evaluate" | "sleep" | 
   return at;
 }
 
-export type GlideRead = { press: { x: number; y: number; hit: string | null } | null; mid: Lens | null; landed: Lens };
+type Seated = { size: number[]; w: string; k: number };
+const SEATED: Payload<Seated> = `({ size: [innerWidth, innerHeight], w: document.getElementById("sheet").style.width, k: ${LENS}.k })`;
+export type GlideRead = {
+  press: { x: number; y: number; hit: string | null } | null;
+  mid: Lens | null;
+  from: string;
+  seated: Seated | null;
+  landed: Lens;
+};
+const REST_K = 1.4;
+const REST_TOLERANCE = 0.005;
 
 export async function midGlideRefit(ctx: SuiteContext): Promise<GlideRead> {
   const { evaluate, send, sleep } = ctx;
@@ -61,9 +71,16 @@ export async function midGlideRefit(ctx: SuiteContext): Promise<GlideRead> {
       if (d.k > 1.02 && d.k < 1.3) mid = d;
       else await sleep(20);
     }
+    const { w: from } = await evaluate(SEATED);
     await send("Emulation.setDeviceMetricsOverride", { width: 1200, height: 760, deviceScaleFactor: 1, mobile: false });
+    let seated: Seated | null = null;
+    for (let i = 0; i < 100 && seated === null; i++) {
+      const d = await evaluate(SEATED);
+      if (d.size[0] === 1200 && d.size[1] === 760 && d.w !== from) seated = d;
+      else await sleep(20);
+    }
     const landed = await lensRest({ evaluate, sleep }, "still", "glide-landed");
-    return { press, mid, landed };
+    return { press, mid, from, seated, landed };
   } finally {
     await evaluate(`document.documentElement.style.removeProperty("--glide")`);
     await clearMetrics({ evaluate, send, sleep }, 1200, 760);
@@ -72,7 +89,12 @@ export async function midGlideRefit(ctx: SuiteContext): Promise<GlideRead> {
 }
 
 export const glideLanded = (g: GlideRead): boolean =>
-  !!g.press && g.press.hit === "zoom-in" && !!g.mid && Math.abs(g.landed.k - 1.4) < 0.005;
+  !!g.press &&
+  g.press.hit === "zoom-in" &&
+  !!g.mid &&
+  !!g.seated &&
+  g.seated.k < REST_K - REST_TOLERANCE &&
+  Math.abs(g.landed.k - REST_K) < REST_TOLERANCE;
 
 export async function pr21BoundPrint({ evaluate, send, check, atlasFitAt }: PrintRoomKit): Promise<void> {
   await send("Emulation.setEmulatedMedia", { media: "print" });

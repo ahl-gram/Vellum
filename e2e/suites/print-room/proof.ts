@@ -2,13 +2,18 @@ import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 
 type Box = { l: number; t: number; r: number; b: number };
-type Clear = { title: string; lines: Box[]; legend: Box; left: string; moving: boolean; reseat?: string };
+type Clear = { title: string; lines: Box[]; legend: Box; left: string; moving: boolean };
 const CLEAR: Payload<Clear> = `(() => {
   const box = (r) => ({ l: r.left, t: r.top, r: r.right, b: r.bottom }), legend = document.querySelector(".legend"), range = document.createRange();
   const lines = [...document.querySelectorAll(".corner.bl.folio > p")].filter((p) => p.textContent.trim() !== "").map((p) => { range.selectNodeContents(p); return box(range.getBoundingClientRect()); });
   return { title: document.getElementById("folio-title").textContent, lines, legend: box(legend.getBoundingClientRect()), left: legend.style.left,
     moving: !legend.getAnimations().every((a) => a.playState === "finished") };
 })()`;
+export const PLANTED = "1px";
+export type Reseat = { before: string; left: string; bottom: string };
+export const LEGEND_RESEAT: Payload<Reseat> = `(() => { const l = document.querySelector(".legend"), before = l.style.left; l.style.bottom = "${PLANTED}";
+  window.dispatchEvent(new Event("resize")); return { before, left: l.style.left, bottom: l.style.bottom }; })()`;
+export const reseatKept = (r: Reseat): boolean => r.left === r.before && r.bottom !== PLANTED;
 const meets = (a: Box, b: Box): boolean => a.l < b.r && b.l < a.r && a.t < b.b && b.t < a.b;
 
 export async function pr37LegendClear({ evaluate, check, sleep }: SuiteContext): Promise<void> {
@@ -17,17 +22,16 @@ export async function pr37LegendClear({ evaluate, check, sleep }: SuiteContext):
     (d, last) => !d.moving && !!last && JSON.stringify(d.legend) === JSON.stringify(last.legend),
     "print-room-legend-still",
   );
-  const reseat = await evaluate<string>(
-    `(() => { window.dispatchEvent(new Event("resize")); return document.querySelector(".legend").style.left; })()`,
-  );
+  const reseat = await evaluate(LEGEND_RESEAT);
   const read = { ...still, reseat };
   check(
-    "PR37 the legend row stands clear of the chart folio's written lines: the refit that seats it beside the folio's text runs after the draw writes the folio, so the row is seated against the title it stands beside and a fresh refit leaves it where it is",
+    "PR37 the legend row stands clear of the chart folio's written lines: the refit that seats it beside the folio's text runs after the draw writes the folio, so the row is seated against the title it stands beside, and a fresh refit takes a planted seat away and leaves the row where it was",
     read.title === "The Isle of Rahai · Chart № 42" &&
       read.lines.length >= 2 &&
       read.legend.r > read.legend.l &&
       read.lines.every((l) => !meets(l, read.legend)) &&
-      read.reseat === read.left,
+      read.reseat.before === read.left &&
+      reseatKept(read.reseat),
     JSON.stringify(read),
   );
 }

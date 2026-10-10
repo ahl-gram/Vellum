@@ -5,15 +5,8 @@ import { printRoomKit, type PrintRoomKit } from "./print-room/kit.ts";
 import { prlLink, prwWarp } from "./print-room/link.ts";
 import { pr0Boots, pr37LegendClear, pr3World, prcCarried, prbBare } from "./print-room/proof.ts";
 import { pr10PlatesEnable, pr12GrandPoster, pr16Desk, pr28ChartPlate, pr17Png } from "./print-room/plates.ts";
-import {
-  pr20Bind,
-  pr31Turns,
-  pr31dFocusKept,
-  pr33BackMatter,
-  pr34Leaned,
-  pr23Download,
-  pr25Hide,
-} from "./print-room/atlas.ts";
+import { pr20Bind, pr31Turns, pr33BackMatter, pr34Leaned, pr23Download, pr25Hide } from "./print-room/atlas.ts";
+import { pr31dFocusKept } from "./print-room/gestures.ts";
 import {
   pr21BoundPrint,
   pr21bUnboundPrint,
