@@ -18,7 +18,6 @@ import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 // The Punchcutter's Case (Issue #228): three self-hosted OFL faces for the site chrome; the charts' own SVG lettering is out of scope, so no chart byte moves.
 
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
-const readText = (p: string) => readFile(root(p), "utf8").catch(() => "");
 
 const WOFF2 = [
   "im-fell-english-sc-latin-400-normal.woff2",
@@ -106,12 +105,6 @@ test("npm run astro:generate's fonts step copies the real kit into the public di
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
-});
-
-test("index.css maps display + flourish roles onto headings and flourishes", async () => {
-  const css = await readText("public/index.css");
-  assert.match(css, /var\(--font-display/, "titles/heads should use var(--font-display ...)");
-  assert.match(css, /var\(--font-flourish/, "taglines/captions should use var(--font-flourish ...)");
 });
 
 test("atlasDocument: the deployed page joins the Case; the offline download falls back", () => {

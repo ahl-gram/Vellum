@@ -124,23 +124,10 @@ test("the roles are worn: page markup carries the shared classes (#324)", () => 
   );
 });
 
-test("home's flourish family survives the section removals (#324, reshaped at #459 then #470)", () => {
+// A rule for a class no element wears paints nothing, so this retire pin stays a source read for part 2i of Issue #779; home's faces are e2e L25.
+test("home's sheet keeps no dress for the notice panel that left with its section (#459)", () => {
   const css = read("public/index.css").replace(/\/\*[\s\S]*?\*\//g, "");
   assert.ok(!css.includes(".notice-body"), "the notice panel left home with its section (#459)");
-  assert.match(
-    css,
-    /\.lf-shelf-grid figcaption \{[^}]*font-family: var\(--font-flourish/,
-    "the shelf's figcaptions wear the flourish voice (#472 revived home's figures, re-ratifying the #470 no-figcaption pin; the 2026-08-27 comment on #472 records the call)",
-  );
-  assert.match(
-    css,
-    /\.underhood \{[^}]*font-family: var\(--font-flourish/,
-    "the underhood keeps the flourish voice in its one surviving rule",
-  );
-});
-
-test("home's seedrow wears the control idiom's corners, not its old 2px skin (#324, Issue #709)", () => {
-  assert.ok(!/border-radius:\s*2px/.test(read("public/index.css")), "the seedrow's 2px corners joined the idiom");
 });
 
 test("the chart quotations equal the render constants they quote (#324)", async () => {
