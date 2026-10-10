@@ -196,3 +196,15 @@ test("each lifting surface consumes ITS token, not just a token (#405)", () => {
     }
   }
 });
+
+// The trail's inks at rest and under the hand are e2e RH24 and DR15; a `:visited` link's colour is one no browser hands a script, so the sweep over every trail rule stays (Issue #779 part 2f, for part 2i).
+test("no rule that dresses the trail reaches for an ink under the floor on the deep, in any state (Issue #668)", () => {
+  const trail = rulesIn(layoutStyle()).filter((r) => /\.(trail|also)\b/.test(r.selector));
+  assert.ok(trail.length >= 8, `the reader found the trail's rules (${trail.length}), so the sweep is not of nothing`);
+  for (const r of trail)
+    assert.doesNotMatch(
+      r.body,
+      /--ink-faded|--line-tan/,
+      `${r.selector} wears an ink that reads under 4.5:1 on the deep`,
+    );
+});

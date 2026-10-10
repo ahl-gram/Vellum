@@ -195,10 +195,10 @@ export async function dr13Gallery(k: TrailKit): Promise<void> {
   );
 }
 
-const GROUND: Payload<{ image: string; colour: number[] }> =
-  `(() => { const cs = getComputedStyle(document.body); return { image: cs.backgroundImage, colour: (${PAGE_RGBA})(cs.backgroundColor) }; })()`;
+type Ground = { image: string; colour: number[]; layer: string };
+const GROUND: Payload<Ground> = `(() => { const cs = getComputedStyle(document.body); return { image: cs.backgroundImage, colour: (${PAGE_RGBA})(cs.backgroundColor), layer: getComputedStyle(document.body, "::before").display }; })()`;
 
-async function printedGround(k: TrailKit): Promise<{ image: string; colour: number[] }> {
+async function printedGround(k: TrailKit): Promise<Ground> {
   try {
     await k.send("Emulation.setEmulatedMedia", { media: "print" });
     return await k.evaluate(GROUND);
@@ -212,28 +212,43 @@ export async function dr14PrintIsPaper(k: TrailKit): Promise<void> {
   const screen = await k.evaluate(GROUND);
   const paper = await printedGround(k);
   k.check(
-    "DR14 print is paper all the way down: printed, the Q & A's body drops the dark ground it carries on screen, the screen read in the same run the control (Issue #454 open decision 4)",
-    nearRgba(screen.colour, tokenRgba("--chart-ink")) && paper.image === "none" && paper.colour[3] === 0,
+    "DR14 print is paper all the way down: printed, the Q & A's body drops the dark ground it carries on screen and the fixed walnut layer over it stands down, the screen read in the same run the control (Issue #454 open decision 4)",
+    nearRgba(screen.colour, tokenRgba("--chart-ink")) &&
+      screen.layer !== "none" &&
+      paper.image === "none" &&
+      paper.colour[3] === 0 &&
+      paper.layer === "none",
     JSON.stringify({ screen, paper }),
   );
 }
 
-const TRAIL_LINK: Payload<{ x: number; y: number; hovered: boolean; moving: number; colour: number[] } | null> =
-  `(() => { const a = document.querySelector("header.chrome .trail a"); if (!a) return null; const b = a.getBoundingClientRect(); return { x: b.x + b.width / 2, y: b.y + b.height / 2, hovered: a.matches(":hover"), moving: a.getAnimations().length, colour: (${PAGE_RGBA})(getComputedStyle(a).color) }; })()`;
+type Link = { x: number; y: number; hovered: boolean; moving: number; colour: number[] } | null;
+const LINK = (selector: string): Payload<Link> =>
+  `(() => { const a = document.querySelector(${JSON.stringify(selector)}); if (!a) return null; const b = a.getBoundingClientRect(); return { x: b.x + b.width / 2, y: b.y + b.height / 2, hovered: a.matches(":hover"), moving: a.getAnimations().length, colour: (${PAGE_RGBA})(getComputedStyle(a).color) }; })()`;
 
-export async function dr15TrailHover(k: TrailKit): Promise<void> {
-  await k.goto("/prospect/");
-  const at = await k.evaluate(TRAIL_LINK);
-  if (!at) throw new Error("DR15: the Prospect carries no trail link");
+async function hovered(k: TrailKit, selector: string): Promise<[number[], number[]]> {
+  const at = await k.evaluate(LINK(selector));
+  if (!at) throw new Error(`DR15: the Prospect carries no ${selector}`);
   await k.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: at.x, y: at.y, button: "none" });
   try {
-    const lit = await k.settle(TRAIL_LINK, (d) => d.hovered && d.moving === 0, "trail-hover", 40);
-    k.check(
-      "DR15 a trail link under the hand brightens to parchment-bright, never a dimmer ink (Issue #668)",
-      nearRgba(at.colour, tokenRgba("--parchment")) && nearRgba(lit.colour, tokenRgba("--parchment-bright")),
-      JSON.stringify({ rest: at.colour, hover: lit.colour }),
-    );
+    const lit = await k.settle(LINK(selector), (d) => d.hovered && d.moving === 0, `hover ${selector}`, 40);
+    return [at.colour, lit.colour];
   } finally {
     await k.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 700, button: "none" });
   }
+}
+
+const QUIET = [tokenRgba("--parchment"), tokenRgba("--parchment-bright")];
+
+export async function dr15TrailHover(k: TrailKit): Promise<void> {
+  await k.goto("/prospect/");
+  const [rest, lit] = await hovered(k, "header.chrome .trail a");
+  const alias = await hovered(k, "header.chrome .also a");
+  k.check(
+    "DR15 a trail link under the hand brightens to parchment-bright, and the alias link under the hand keeps a parchment ink, never a dimmer one (Issue #668)",
+    nearRgba(rest, tokenRgba("--parchment")) &&
+      nearRgba(lit, tokenRgba("--parchment-bright")) &&
+      alias.every((c) => QUIET.some((q) => nearRgba(c, q))),
+    JSON.stringify({ rest, lit, alias }),
+  );
 }

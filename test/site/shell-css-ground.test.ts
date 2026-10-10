@@ -22,6 +22,15 @@ test("the walnut deep is mixed from the tokens and keeps no daylight wash (#461 
   assert.equal(css.search(/rgb\(255 250 235/), -1, "the light wash retired with the ground (#461 ruling 2)");
 });
 
+// The ring on the cluster's links is e2e RH12; the footer carries no link today, so its arm of the same rule is one no browser can show (Issue #779 part 2f, for part 2i).
+test("the deep's focus ring names the footer's links beside the cluster's (#324 decision 6, re-ratified at #461)", () => {
+  assert.match(
+    layoutStyle(),
+    /header\.chrome a:focus-visible,\s*footer a:focus-visible\s*\{[^}]*outline-color:\s*var\(--parchment-bright\)/,
+    "the footer's links ring like the cluster's, on the walnut",
+  );
+});
+
 test("the chrome passes the hand through: drags over the fixed cluster reach the chart, links stay live (#461, skeptic finding 2)", () => {
   // The defect measured on home: a 485x79 dead drag zone under the cluster. The mockup's idiom (stage.css) is the fix: pointer-events none on the container, auto on the interactive children.
   const css = layoutStyle();

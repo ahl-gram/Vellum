@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import { NAV_ITEMS } from "../../../src/layouts/nav.ts";
 import { REPO } from "../../support/runner.ts";
 import { nearRgba, PAGE_RGBA, tokenRgba } from "../../support/pixel.ts";
+import type { Rgba } from "../../support/pixel.ts";
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import { SHELLED } from "./reads.ts";
@@ -11,7 +12,14 @@ import type { RunningHeadKit } from "./kit.ts";
 
 export type Shell = {
   body: string;
-  deep: { body: string; position: string; band: string | null; clip: string | null; bandH: number };
+  deep: {
+    body: string;
+    position: string;
+    stops: [number[], string][];
+    band: string | null;
+    clip: string | null;
+    bandH: number;
+  };
   prefetch: string[];
   counts: { titles: number; headers: number; rooms: number; footers: number; metasOutsideHead: number };
   sheets: string[];
@@ -31,6 +39,7 @@ export const SHELL_READ: Payload<Promise<Shell>> = `document.fonts.ready.then(()
   return {
     body: getComputedStyle(document.body).fontFamily,
     deep: { body: getComputedStyle(document.body, "::before").backgroundImage, position: getComputedStyle(document.body, "::before").position,
+      stops: (getComputedStyle(document.body, "::before").backgroundImage.match(/(color|rgba?|oklab)\\([^)]*\\) [\\d.]+%/g) ?? []).map((s) => { const m = /^(.*\\)) ([\\d.]+%)$/.exec(s); return [rgba(m[1]), m[2]]; }),
       band: band && getComputedStyle(band, "::before").backgroundImage, clip: band && getComputedStyle(band, "::before").clipPath,
       bandH: parseFloat(root.getPropertyValue("--band-h")) * parseFloat(root.fontSize) },
     prefetch: [...document.querySelectorAll("link[rel='prefetch']")].map((l) => l.getAttribute("href")),
@@ -50,20 +59,36 @@ type Check = SuiteContext["check"];
 const offenders = (shells: Shells, ok: (s: Shell, route: string) => boolean): string[] =>
   SHELLED.filter((r) => !shells[r] || !ok(shells[r], r));
 
+const INK = tokenRgba("--ink-dark");
+const LIT = tokenRgba("--parchment");
+// The deep's five stops: the vignette, clear ink-dark at 40% to chart ink at 0.55, then the walnut, the ink-dark lit a tenth by parchment, ink-dark at 55%, chart ink.
+const DEEP_STOPS: readonly [Rgba, string][] = [
+  [tokenRgba("--ink-dark", 0), "40%"],
+  [tokenRgba("--chart-ink", 0.55), "100%"],
+  [[0, 1, 2].map((i) => Math.round(0.9 * INK[i]! + 0.1 * LIT[i]!)).concat(255) as unknown as Rgba, "0%"],
+  [INK, "55%"],
+  [tokenRgba("--chart-ink"), "100%"],
+];
+const stopOk = ([got, at]: [number[], string], [want, wantAt]: [Rgba, string]) =>
+  at === wantAt && (want[3] === 0 ? got[3] === 0 : nearRgba(got, want));
+const walnut = (d: Shell["deep"] | undefined) =>
+  !!d &&
+  d.band === d.body &&
+  (d.body.match(/radial-gradient\(/g) ?? []).length === 2 &&
+  d.body.startsWith("radial-gradient(120% 90% at 50% 30%") &&
+  d.body.includes("radial-gradient(80% 70% at 30% 20%") &&
+  d.stops.length === DEEP_STOPS.length &&
+  d.stops.every((s, i) => stopOk(s, DEEP_STOPS[i]!)) &&
+  d.position === "fixed" &&
+  !!d.clip &&
+  d.clip.includes(`calc(100% - ${d.bandH}px)`);
+
 export function rh11Deep(check: Check, shells: Shells): void {
-  const d = shells["/faq/"]?.deep;
-  const gradients = d ? (d.body.match(/radial-gradient\(/g) ?? []).length : 0;
+  const banded = ["/faq/", "/glossary/"].map((r) => shells[r]?.deep);
   check(
-    "RH11 the walnut deep is ONE ground: on a banded room the fixed ground layer and the band paint the same two radials, the darkening vignette over the lit walnut, and the band clips that deep to the band's height (Issue #461 ruling 2)",
-    !!d &&
-      d.band === d.body &&
-      gradients === 2 &&
-      d.body.startsWith("radial-gradient(120% 90% at 50% 30%") &&
-      d.body.includes("radial-gradient(80% 70% at 30% 20%") &&
-      d.position === "fixed" &&
-      !!d.clip &&
-      d.clip.includes(`calc(100% - ${d.bandH}px)`),
-    JSON.stringify(d),
+    "RH11 the walnut deep is ONE ground: on each banded room the fixed ground layer and the band paint the same two radials, the darkening vignette over the lit walnut, every stop at its token's colour and place, and the band clips that deep to the band's height (Issue #461 ruling 2)",
+    banded.every(walnut),
+    JSON.stringify(banded),
   );
 }
 
@@ -278,9 +303,10 @@ export async function rh13WordmarkTip(k: RunningHeadKit): Promise<void> {
   const keyed = await focusWordmark(k);
   if (!(await k.visit("/"))) throw new Error("RH13: home never loaded");
   const home = await hoverWordmark(k);
+  const homeKeyed = await focusWordmark(k);
   k.check(
-    "RH13 the wordmark tips on a room page, turned and lifted, under the hand and under keyboard focus alike, and stays still on home, where it names the page (Issue #289)",
-    tipped(room) && tipped(keyed) && home === "none",
-    JSON.stringify({ room, keyed, home }),
+    "RH13 the wordmark tips on a room page, turned and lifted, under the hand and under keyboard focus alike, and stays still on home under both, where it names the page (Issue #289)",
+    tipped(room) && tipped(keyed) && home === "none" && homeKeyed === "none",
+    JSON.stringify({ room, keyed, home, homeKeyed }),
   );
 }

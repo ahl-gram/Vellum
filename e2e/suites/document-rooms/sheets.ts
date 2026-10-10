@@ -1,7 +1,7 @@
 // The document rooms' sheets as the browser draws them (Issue #779 part 2f, the source-text tests moved here): the survey sheet's frame, the columns and the fold, the intro voice, the Glossary's Issue #353 shape, the culture facts the pages state, and the index anchors. One read per page, taken at 1280x800 on a page this suite already visits.
 import { CULTURES } from "../../../src/society/names.ts";
 import { makeSettle } from "../../support/settle.ts";
-import { nearRgba, PAGE_RGBA, tokenRgba } from "../../support/pixel.ts";
+import { luminance, nearRgba, PAGE_RGBA, sampleRow, tokenRgba } from "../../support/pixel.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 
 type Kit = SuiteContext & { settle: ReturnType<typeof makeSettle>; goto: (path: string) => Promise<void> };
@@ -14,12 +14,14 @@ type Sheet = {
   borderColour: number[];
   shadow: { colour: number[]; geometry: string } | null;
   ground: number[];
-  ticks: [string, string];
+  ticks: { content: string; display: string; width: string; edge: string }[];
   mainOutline: string;
   deskPanel: boolean;
-  transition: string;
+  transition: [string, string];
   columns: string;
-  intro: { family: string; style: string; colour: number[]; align: string } | null;
+  intros: { family: string; style: string; colour: number[]; align: string }[];
+  box: { x: number; y: number; w: number };
+  paper?: number;
   sections: Section[];
   entryIds: string[];
   saysTen: boolean;
@@ -30,7 +32,8 @@ export type Sheets = { faq: Sheet; glossary: Sheet };
 const SHEET_READ: Payload<Sheet> = `(() => {
   const rgba = ${PAGE_RGBA};
   const sheet = document.querySelector(".sheet"), cs = getComputedStyle(sheet), main = document.querySelector("body > main"), ms = getComputedStyle(main);
-  const intro = document.querySelector(".sheet p.intro"), is = intro && getComputedStyle(intro);
+  const tick = (pseudo, edge) => { const t = getComputedStyle(sheet, pseudo); return { content: t.content, display: t.display, width: t.width, edge: t.getPropertyValue(edge) }; };
+  const b = sheet.getBoundingClientRect();
   const sections = [];
   for (const el of sheet.querySelectorAll("h2, h3, p.term, p.def")) {
     if (/^H[23]$/.test(el.tagName)) sections.push({ heading: el.textContent.trim(), terms: [], defs: 0 });
@@ -39,13 +42,13 @@ const SHEET_READ: Payload<Sheet> = `(() => {
   }
   const names = document.getElementById("names");
   let missingCultures = null;
-  if (names) { const r = document.createRange(); r.setStartBefore(names); r.setEndAfter(document.body.lastChild); const text = r.toString().toLowerCase(); missingCultures = ${JSON.stringify(CULTURES.map((c) => c.id))}.filter((id) => !text.includes(id)); }
+  if (names) { const heads = [...sheet.querySelectorAll("h3")].filter((h) => names.compareDocumentPosition(h) & Node.DOCUMENT_POSITION_FOLLOWING).map((h) => h.textContent.toLowerCase()); missingCultures = ${JSON.stringify(CULTURES.map((c) => c.id))}.filter((id) => !heads.some((h) => h.includes(id))); }
   return { path: location.pathname, outline: [cs.outlineStyle, cs.outlineWidth], outlineColour: rgba(cs.outlineColor),
     border: [cs.borderTopWidth, cs.borderTopStyle], borderColour: rgba(cs.borderTopColor), shadow: (() => { const m = /^(.+\\)) (-?[\\d.]+px -?[\\d.]+px -?[\\d.]+px -?[\\d.]+px)$/.exec(cs.boxShadow); return m ? { colour: rgba(m[1]), geometry: m[2] } : null; })(), ground: rgba(cs.backgroundColor),
-    ticks: [getComputedStyle(sheet, "::before").content, getComputedStyle(sheet, "::after").content],
-    mainOutline: ms.outlineStyle, deskPanel: main.classList.contains("desk-panel"), transition: ms.transitionProperty,
+    ticks: [tick("::before", "border-top-width"), tick("::after", "border-bottom-width")], box: { x: b.x, y: b.y, w: b.width },
+    mainOutline: ms.outlineStyle, deskPanel: main.classList.contains("desk-panel"), transition: [ms.transitionProperty, ms.transitionDuration],
     columns: getComputedStyle(document.querySelector(".columns")).columnWidth,
-    intro: is && { family: is.fontFamily, style: is.fontStyle, colour: rgba(is.color), align: is.textAlign },
+    intros: [...sheet.querySelectorAll("p.intro")].map((i) => { const is = getComputedStyle(i); return { family: is.fontFamily, style: is.fontStyle, colour: rgba(is.color), align: is.textAlign }; }),
     sections, entryIds: [...sheet.querySelectorAll(":is(.q, .term)[id]")].map((e) => e.id),
     saysTen: document.body.textContent.replace(/\\s+/g, " ").includes("ten invented cultures"), missingCultures };
 })()`;
@@ -58,10 +61,15 @@ export async function readSheets(k: Kit): Promise<Sheets> {
 // The sheet lands with a settle that animates its own shadow (both-filled), so the read waits for every animation on it to have finished.
 const LANDED: Payload<boolean> = `(() => { const a = document.querySelector(".sheet")?.getAnimations() ?? []; return a.length > 0 && a.every((x) => x.playState === "finished"); })()`;
 
+// The paper read is a median of a strip in the sheet's left padding, where no lettering stands.
 async function landed(k: Kit, path: string): Promise<Sheet> {
   await k.goto(path);
   await k.settle(LANDED, (d) => d, `${path} sheet landed`);
-  return k.evaluate(SHEET_READ);
+  const sheet = await k.evaluate(SHEET_READ);
+  const strip = (await sampleRow(k.send, Math.round(sheet.box.x + 6), Math.round(sheet.box.y + 100), 16)).map(
+    luminance,
+  );
+  return { ...sheet, paper: [...strip].sort((a, b) => a - b)[Math.floor(strip.length / 2)] };
 }
 
 const LINE_TAN = tokenRgba("--line-tan");
@@ -76,7 +84,11 @@ const framed = (s: Sheet): boolean =>
   s.shadow.geometry === "0px 18px 60px 0px" &&
   nearRgba(s.shadow.colour, tokenRgba("--chart-ink", 0.55)) &&
   nearRgba(s.ground, tokenRgba("--parchment-panel")) &&
-  s.ticks.every((c) => c !== "none" && c !== "normal") &&
+  s.ticks.every(
+    (c) =>
+      c.content !== "none" && c.content !== "normal" && c.display !== "none" && c.width === "26px" && c.edge === "1px",
+  ) &&
+  (s.paper ?? 0) > 200 &&
   s.mainOutline === "none" &&
   !s.deskPanel;
 
@@ -85,12 +97,13 @@ export function ix9SurveySheet({ check }: Kit, { faq, glossary }: Sheets): void 
     "IX9 the Q & A's and the Glossary's content lies on a survey sheet, as drawn: a 1px line-tan frame inside a 3px double line-tan rule, raised at the stage depth once it has landed, panel paper and its corner ticks, while main carries no frame and no desk panel, so the running head and the footer stay on the desk (Issue #289)",
     framed(faq) && framed(glossary),
     JSON.stringify(
-      [faq, glossary].map(({ path, outline, border, shadow, ticks, mainOutline, deskPanel }) => ({
+      [faq, glossary].map(({ path, outline, border, shadow, ticks, paper, mainOutline, deskPanel }) => ({
         path,
         outline,
         border,
         shadow,
         ticks,
+        paper,
         mainOutline,
         deskPanel,
       })),
@@ -123,27 +136,35 @@ export async function ix10ColumnsFold(k: Kit, { faq, glossary }: Sheets): Promis
   ix10Report(k, faq, glossary, folded);
 }
 
+// The margin-right transition runs: named among the transitioned properties, with a duration above zero at its own place in the list.
+const slides = ([props, durations]: readonly [string, string]): boolean => {
+  const at = props.split(", ").indexOf("margin-right");
+  return at >= 0 && parseFloat(durations.split(", ")[at] ?? "0") > 0;
+};
+
 function ix10Report({ check }: Kit, faq: Sheet, glossary: Sheet, folded: readonly string[]): void {
   check(
-    "IX10 the Glossary stands its broadside in the Q & A's 22rem columns, and on both pages the sheet takes the width a folded index gives it in one settle: main's margin-right is the transitioned property, and folded it is 0 on each (Issue #462 rulings 1 to 3)",
+    "IX10 the Glossary stands its broadside in the Q & A's 22rem columns, and on both pages the sheet takes the width a folded index gives it in one settle: main's margin-right transitions over a real duration, and folded it is 0 on each (Issue #462 rulings 1 to 3)",
     glossary.columns === "352px" &&
-      faq.transition.split(", ").includes("margin-right") &&
-      glossary.transition.split(", ").includes("margin-right") &&
+      slides(faq.transition) &&
+      slides(glossary.transition) &&
       folded.every((m) => m === "0px"),
     JSON.stringify({ columns: glossary.columns, transitions: [faq.transition, glossary.transition], folded }),
   );
 }
 
 export function ix11Intro({ check }: Kit, { glossary }: Sheets): void {
-  const i = glossary.intro;
+  const off = glossary.intros.filter(
+    (i) =>
+      !/^"IM Fell English",/.test(i.family) ||
+      i.style !== "italic" ||
+      !nearRgba(i.colour, tokenRgba("--ink-brown")) ||
+      i.align !== "center",
+  );
   check(
-    "IX11 the Glossary's section intros speak in the house intro voice: the flourish face, italic, ink-brown, centred (Issue #324 decision 1)",
-    !!i &&
-      /^"IM Fell English",/.test(i.family) &&
-      i.style === "italic" &&
-      nearRgba(i.colour, tokenRgba("--ink-brown")) &&
-      i.align === "center",
-    JSON.stringify(i),
+    "IX11 every one of the Glossary's section intros speaks in the house intro voice: the flourish face, italic, ink-brown, centred (Issue #324 decision 1)",
+    glossary.intros.length > 1 && off.length === 0,
+    JSON.stringify({ intros: glossary.intros.length, off }),
   );
 }
 
@@ -210,7 +231,7 @@ export function ix12GlossaryShape({ check }: Kit, { glossary }: Sheets): void {
 
 export function ix13Cultures({ check }: Kit, { faq, glossary }: Sheets): void {
   check(
-    "IX13 the Q & A and the Glossary state the ten-culture roster outright, and the Glossary's Words on your own map document every culture in CULTURES (Issues #289, #292)",
+    "IX13 the Q & A and the Glossary state the ten-culture roster outright, and the Glossary's Words on your own map heads a section for every culture in CULTURES (Issues #289, #292)",
     faq.saysTen && glossary.saysTen && glossary.missingCultures !== null && glossary.missingCultures.length === 0,
     JSON.stringify({ faq: faq.saysTen, glossary: glossary.saysTen, missing: glossary.missingCultures }),
   );

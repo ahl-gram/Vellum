@@ -248,10 +248,11 @@ async function liftedPlate(k: RunningHeadKit): Promise<Lift> {
   }
 }
 
-type Paper = { moving: number; plate: string; caption: number[] };
+type Paper = { moving: number; plate: string; caption: number[]; title: number[]; line: number[] };
 const PRINT_READ: Payload<Paper> = `(() => { ${PARTS}
   const img = document.querySelector("figure img");
-  return { moving: img.getAnimations().length, plate: getComputedStyle(img).boxShadow, caption: rgba(getComputedStyle(document.querySelector("figcaption")).color) };
+  return { moving: img.getAnimations().length, plate: getComputedStyle(img).boxShadow, caption: rgba(getComputedStyle(document.querySelector("figcaption")).color),
+    title: rgba(getComputedStyle(document.querySelector("figcaption strong")).color), line: rgba(getComputedStyle(document.querySelector("figcaption span")).color) };
 })()`;
 
 async function printed(k: RunningHeadKit): Promise<Paper> {
@@ -282,7 +283,7 @@ export async function rh23Dress(k: RunningHeadKit): Promise<void> {
     ?.split(", ")
     .map(Number);
   k.check(
-    "RH23 the Gallery's dress as drawn: the plates scroll under a real wheel, the chart room's lock lifted, the first row clears the cluster's band, the plates land as one sheet, each plate a line-tan hairline at the house's sheet depth that a hand tips and raises to the stage depth, captions in parchment and their titles parchment-bright, the legend row centred, the cluster's pool and the corner's and legend's crisp panels the kit's, and on paper no depth and captions in ink, the screen read the control (Issue #464 ruling 2; Issue #367)",
+    "RH23 the Gallery's dress as drawn: the plates scroll under a real wheel, the chart room's lock lifted, the first row clears the cluster's band, the plates land as one sheet, each plate a line-tan hairline at the house's sheet depth that a hand tips and raises to the stage depth, captions in parchment and their titles parchment-bright, the legend row centred, the cluster's pool and the corner's and legend's crisp panels the kit's, and on paper no depth and captions, their titles and their lines in ink, the screen read the control (Issue #464 ruling 2; Issue #367)",
     scroll[1] < scroll[0] &&
       dressed(screen) &&
       !!turned &&
@@ -290,7 +291,9 @@ export async function rh23Dress(k: RunningHeadKit): Promise<void> {
       turned[5]! < 0 &&
       shadowOf(lift?.shadow ?? null, "0px 18px 60px 0px", 0.55) &&
       paper.plate === "none" &&
-      nearRgba(paper.caption, tokenRgba("--ink-dark")),
+      nearRgba(paper.caption, tokenRgba("--ink-dark")) &&
+      nearRgba(paper.title, tokenRgba("--ink-dark")) &&
+      nearRgba(paper.line, tokenRgba("--ink-brown")),
     JSON.stringify({ scroll, screen, lift, paper }),
   );
 }
