@@ -1,5 +1,6 @@
-import type { Point, SuiteContext } from "../../types.ts";
-import type { DrawerKit } from "./kit.ts";
+import type { Payload, Point, SuiteContext } from "../../types.ts";
+import { TABLE_STORE_KEY } from "../../../src/site/shared/table-store.ts";
+import { tabInto, type DrawerKit } from "./kit.ts";
 import { DEEP, DRAWN, DRESS, READ, atInset, drawerUp } from "./reads.ts";
 import type { Read } from "./reads.ts";
 
@@ -45,6 +46,53 @@ export async function cd1DogEar({ check, settle, go }: DrawerKit): Promise<void>
       cuttings: armed.cuttings,
       why,
     }),
+  );
+}
+
+// A transform's turn, read off its matrix: any rotate in a 2D matrix puts a nonzero b and c.
+export const TIPPED = `((t) => { const m = /^matrix\\(([^)]*)\\)$/.exec(t); if (!m) return t !== "none"; const v = m[1].split(",").map(Number); return Math.abs(v[1]) > 1e-6 || Math.abs(v[2]) > 1e-6; })`;
+const keyedTilt = (selector: string): Payload<{ focus: boolean; tipped: boolean; t: string } | null> =>
+  `(() => { const e = document.querySelector(${JSON.stringify(selector)}); if (!e) return null; const t = getComputedStyle(e).transform; return { focus: e.matches(":focus-visible"), tipped: ${TIPPED}(t), t }; })()`;
+
+export async function cd51NoTipKeyed(k: DrawerKit): Promise<void> {
+  const { evaluate, check } = k;
+  try {
+    const tab = (await tabInto(k, "#chart-drawer-tab")) ? await evaluate(keyedTilt("#chart-drawer-tab")) : null;
+    const ear = (await tabInto(k, "#map .region-inset .dog-ear"))
+      ? await evaluate(keyedTilt("#map .region-inset .dog-ear"))
+      : null;
+    check(
+      "CD51 the drawer's tab and the survey's dog-ear take no navigation tip under a keyboard's focus: neither goes anywhere, so neither promises it (the tip is the roads' alone)",
+      !!tab && tab.focus && !tab.tipped && !!ear && ear.focus && !ear.tipped,
+      JSON.stringify({ tab, ear }),
+    );
+  } finally {
+    await evaluate<boolean>(`(() => { if (document.activeElement) document.activeElement.blur(); return true; })()`);
+  }
+}
+
+type Roads = {
+  hash: string;
+  table: string | null;
+  stored: string | null;
+  order: string | null;
+  journal: string | null;
+};
+const ROADS: Payload<Roads> = `(() => ({ hash: location.hash, table: new URLSearchParams(location.hash.slice(1)).get("table"),
+  stored: (() => { try { return localStorage.getItem(${JSON.stringify(TABLE_STORE_KEY)}); } catch { return "THREW"; } })(),
+  order: (document.getElementById("order-plates") || { getAttribute: () => null }).getAttribute("href"),
+  journal: (document.getElementById("journal-link") || { getAttribute: () => null }).getAttribute("href") }))()`;
+
+export async function cd52LayWrites({ evaluate, check }: DrawerKit): Promise<void> {
+  const roads = await evaluate(ROADS);
+  check(
+    "CD52 a lay with no draw writes the table to the device and rebuilds every road that carries the page's address, the Print Room's and the Reading Room's, with the table it now holds (#634)",
+    !!roads.table &&
+      roads.table.startsWith("k-s.seed-42.") &&
+      roads.stored === roads.table &&
+      roads.order === `../print-room/${roads.hash}` &&
+      roads.journal === `/reading-room/${roads.hash}`,
+    JSON.stringify(roads),
   );
 }
 

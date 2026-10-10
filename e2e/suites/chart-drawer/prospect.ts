@@ -1,9 +1,10 @@
+import { roman } from "../../../src/site/portfolio/folio-lines.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import type { DrawerKit } from "./kit.ts";
 import { CARD, DRAWN, DRESS, PP, type Card } from "./reads.ts";
 
 // The card unfurls as it pins, so a press is clicked only once its box has held still across two reads and its centre hits it (run 37504526032 lost a press clicked at a box read once: the flake record's row).
-const pressAtRest = (d: Card, last: Card | null): boolean =>
+export const pressAtRest = (d: Card, last: Card | null): boolean =>
   !!d.press &&
   d.press.hit === "self" &&
   !!last?.press &&
@@ -338,5 +339,23 @@ export async function cd32MixedFolio({ evaluate, send, check, sleep, PORT }: Sui
       pfm.titles.filter((t) => /^The Prospect of \S/.test(t || "")).length === 2 &&
       /three sheets drafted/i.test(pfm.bound || ""),
     JSON.stringify(pfm),
+  );
+}
+
+type Row = { at: number; title: string; x: number; y: number; hit: boolean } | null;
+const PROSPECT_ROW: Payload<Row> = `(() => { const li = [...document.querySelectorAll("#pf-contents .row")].find((r) => /^a prospect/.test((r.querySelector(".row-band") || {}).textContent || "")); if (!li) return null;
+  const t = li.querySelector(".row-title"); t.scrollIntoView({ block: "center" }); const b = t.getBoundingClientRect(), x = b.x + b.width / 2, y = b.y + b.height / 2;
+  return { at: Number(li.dataset.at), title: t.textContent, x, y, hit: document.elementFromPoint(x, y) === t }; })()`;
+const ON_TOP: Payload<{ top: number; folio: string; svg: boolean }> =
+  `(() => ({ top: window.__vellumPortfolio().top, folio: document.getElementById("folio-title").textContent, svg: !!document.querySelector("#pf-sheet svg") }))()`;
+
+export async function cd60ProspectBroughtUp({ evaluate, check, settle, clickAt }: DrawerKit): Promise<void> {
+  const row = await evaluate(PROSPECT_ROW);
+  if (row?.hit) await clickAt(row.x, row.y);
+  const up = await settle(ON_TOP, (d) => !!row && d.top === row.at, "portfolio-prospect-up");
+  check(
+    "CD60 a prospect in a mixed folio comes to the top at a real press on its row like any sheet: nothing in the page holds a sheet back by its kind (#522)",
+    !!row && row.hit && up.folio === `${row.title} · Sheet ${roman(row.at + 1)} of ${roman(3)}` && up.svg,
+    JSON.stringify({ row, up }),
   );
 }

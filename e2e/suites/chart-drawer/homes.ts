@@ -1,4 +1,6 @@
 import { TABLE_STORE_KEY } from "../../../src/site/shared/table-store.ts";
+import { makeSettle } from "../../support/settle.ts";
+import type { Payload } from "../../types.ts";
 import type { TableKit } from "./kit.ts";
 import { DRAWN, DRESS, ONE, READ } from "./reads.ts";
 import type { Read, Stored } from "./reads.ts";
@@ -274,4 +276,62 @@ export async function cd41CachedReturn({
       stored: theirs.stored,
     }),
   );
+}
+
+type Folio = { items: number; road: string | null; marker: string | null; nav: string | null };
+const FOLIO: Payload<Folio | null> = `(() => { const p = window.__vellumPortfolio ? window.__vellumPortfolio() : null; if (!p) return null;
+  return { items: p.items, road: (document.getElementById("pf-explorer") || { getAttribute: () => null }).getAttribute("href"), marker: window.__cd61 || null,
+    nav: (performance.getEntriesByType("navigation")[0] || {}).type || null }; })()`;
+const PAIR_OF_SURVEYS = [
+  "k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-1.lx-4.ly-4",
+  "k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-1.lx-3.ly-3",
+].join("_");
+
+async function folioAt({ evaluate, send, sleep, PORT }: TableKit, hash: string): Promise<Folio> {
+  await send("Page.navigate", { url: "about:blank" });
+  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/portfolio/${hash}` });
+  return makeSettle({ evaluate: (e: string) => evaluate<Folio | null>(e).catch(() => null), sleep })(
+    FOLIO,
+    (d) => d.items > 0,
+    "portfolio-folio",
+  );
+}
+
+export async function cd61FolioHomes(kt: TableKit): Promise<void> {
+  const { evaluate, check, sleep, forget } = kt;
+  try {
+    await evaluate(`localStorage.setItem(${JSON.stringify(TABLE_STORE_KEY)}, ${JSON.stringify(ONE)})`);
+    const keyless = await folioAt(kt, "#seed=42&style=antique");
+    const linked = await folioAt(kt, `#table=${PAIR_OF_SURVEYS}`);
+    // The cache refused, CD38's instrument: a page carrying an unload listener is rebuilt on Back, so its own boot answers the traversal.
+    await evaluate(
+      `(() => { window.__cd61 = "warm"; window.addEventListener("unload", () => {}); location.href = "/faq/"; })()`,
+    );
+    for (let i = 0; i < 200; i++) {
+      await sleep(50);
+      if (
+        await evaluate<boolean>(`location.pathname === "/faq/" && document.readyState === "complete"`).catch(
+          () => false,
+        )
+      )
+        break;
+    }
+    await evaluate(`history.back()`);
+    const back = await makeSettle({ evaluate: (e: string) => evaluate<Folio | null>(e).catch(() => null), sleep })(
+      FOLIO,
+      (d) => d.nav === "back_forward",
+      "portfolio-back-rebuilt",
+    );
+    check(
+      "CD61 the Portfolio shows the folio its address names and else the device's, and a Back that rebuilds it shows the address's: a keyless arrival takes the one sheet the device holds and its road home carries it, a link's two beat the device, and a traversal takes no device term (#634 rulings 1 and 4)",
+      keyless.items === 1 &&
+        keyless.road === `../#seed=42&style=antique&table=${ONE}` &&
+        linked.items === 2 &&
+        back.marker === null &&
+        back.items === 2,
+      JSON.stringify({ keyless, linked, back }),
+    );
+  } finally {
+    await forget();
+  }
 }

@@ -159,3 +159,38 @@ export function tableKit(kd: DragKit) {
   };
   return { ...kd, STORE, reachedExplorer, atExplorer, openDrawer, restedAtExplorer, pressById };
 }
+
+type Keys = Pick<SuiteContext, "evaluate" | "send" | "sleep">;
+const key = async (send: SuiteContext["send"], modifiers = 0): Promise<void> => {
+  await send("Input.dispatchKeyEvent", {
+    type: "keyDown",
+    key: "Tab",
+    code: "Tab",
+    windowsVirtualKeyCode: 9,
+    modifiers,
+  });
+  await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9, modifiers });
+};
+
+// A keyboard's focus, so :focus-visible holds: a Tab from the element before it, or out and back with Shift; the answer is a premise the caller reads, never a throw.
+export async function tabInto({ evaluate, send, sleep }: Keys, selector: string, from?: string): Promise<boolean> {
+  const sel = JSON.stringify(selector);
+  await evaluate<boolean>(
+    `(() => { const e = document.querySelector(${JSON.stringify(from ?? selector)}); if (e) e.focus({ preventScroll: true }); return !!e; })()`,
+  );
+  await key(send);
+  if (from === undefined) await key(send, 8);
+  for (let i = 0; i < 20; i++) {
+    if (
+      await evaluate<boolean>(
+        `(() => { const e = document.querySelector(${sel}); return !!e && document.activeElement === e && e.matches(":focus-visible"); })()`,
+      )
+    )
+      return true;
+    await sleep(50);
+  }
+  return false;
+}
+
+export const park = (send: SuiteContext["send"]): Promise<unknown> =>
+  send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 700 });
