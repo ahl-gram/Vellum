@@ -359,66 +359,18 @@ test("CT7b a draw drops the pinned card before it rebases the camera (#631; kept
   );
 });
 
-test("CT9 the table is written to the device when the reader CHANGES it and re-seated on a cached return, which are the only two roads #634 leaves (ruled 2026-09-19)", () => {
+test("CT9 the Explorer takes the device the store module exports and seats the table in exactly two places, the boot and the cached return (#634, ruled 2026-09-19; kept for Issue #779 part 2i: an import's name and a census of call sites; CD37 to CD42 and CD52 read the device written on a change, the boot's precedence and the cached return)", () => {
   const app = readFileSync(resolve(REPO, "src/site/explorer/app.ts"), "utf8");
-  // `store` is the SHARED binding, not one this file rolled for itself: table-store.test.ts drives that binding against the real global, which is what makes every `readStoredTable(store)` below mean something a test has seen (guard-prover round 3).
   assert.match(
     app,
     /import \{\s*deviceStorage as store,[^}]*\} from "\.\.\/shared\/table-store\.ts";/,
-    "this page names its own device instead of taking the one the store module exports and tests, so it can be wired to nothing with every assertion here green",
+    "this page names its own device instead of taking the one the store module exports and tests, so it can be wired to nothing with every browser read here still green",
   );
-  const onChange = /onChange: \(laid\) => \{([\s\S]*?)\n {4}\},/.exec(app)?.[1] ?? "";
-  assert.match(
-    onChange,
-    /writeStoredTable\(store, laid\)/,
-    "a lay or a take no longer reaches the device, so the gathering exists only in the address again and the Back button loses it",
-  );
-  // Two restore sites by design, the boot and the cached return, so each is anchored on its own input rather than on whichever comes first in the file.
-  const sites = [...app.matchAll(/chartTable\.restore\(/g)].map((m) => m.index);
   assert.equal(
-    sites.length,
+    [...app.matchAll(/chartTable\.restore\(/g)].length,
     2,
-    "the Explorer seats the table in some number of places other than the two #634 leaves, and this guard is then reading one of them at random",
+    "the Explorer seats the table in some number of places other than the two #634 leaves",
   );
-  const bootAt = app.indexOf("chartTable.restore(tableOnArrival");
-  assert.notEqual(
-    bootAt,
-    -1,
-    "the boot no longer asks the ruled precedence, so either a link stops winning or a Back stops being told from an arrival",
-  );
-  const boot = app.slice(bootAt, app.indexOf("\n", bootAt));
-  assert.match(
-    boot,
-    /tableOnArrival\(hashed\.table, readStoredTable\(store\), navigationTypeNow\(\)\)/,
-    "the boot's precedence is asked with something other than this page's address, this device and this navigation's own type",
-  );
-  const show = app.slice(
-    app.indexOf('addEventListener("pageshow"'),
-    app.indexOf("\n});", app.indexOf('addEventListener("pageshow"')),
-  );
-  assert.ok(
-    show.length > 40,
-    "the pageshow listener is gone, and with it the ONLY road into a page the browser served from its cache: no boot code runs there at all",
-  );
-  assert.match(
-    show,
-    /if \(!e\.persisted\) return;/,
-    "the listener acts on a fresh load as well as a cached one, so it fights the boot's own precedence instead of being the restore's only reader",
-  );
-  // What `held` is BUILT FROM, not only what happens to it: the prover's round 1 set it to the drawer's own current state, which re-seats the drawer with what it already holds and reads as a restore while restoring nothing. The SHARED rule and not a hand-rolled one. The first version of this guard pinned `readStoredTable(store) ?? []`, which is the rule with its qualifier dropped: a device holding nothing then emptied the drawer on the very gesture meant to keep it, and this assertion cemented the defect (the cold review on PR #635).
-  assert.match(
-    show,
-    /const held = tableOnArrival\(parseTable\(location\.hash\), readStoredTable\(store\), TRAVERSAL\);/,
-    "the cached return re-seats the drawer from something other than the ruled precedence, and a hand-rolled one drops the qualifier that keeps a reader with nothing stored from losing their table",
-  );
-  // The skip is pinned BY ITS OPERATOR: inverting it reads as a harmless optimisation and skips precisely when a restore is owed, which is the feature inverted with nothing else in the file changed (guard-prover round 2).
-  assert.match(
-    show,
-    /if \(emitTable\(held\) === emitTable\(chartTable\.state\(\)\)\) return;/,
-    "the no-op skip on a cached return is gone or inverted, and inverted it does nothing exactly when the device and the drawer disagree",
-  );
-  assert.match(show, /chartTable\.restore\(held\)/, "and it never re-seats the drawer with what it read");
-  assert.match(show, /syncHash\(\)/, "and it leaves the address disagreeing with the drawer it just changed");
 });
 
 test("CT10 the sheets a re-seat drops are read against the table it brings, so every departed sheet's picture is named for revoking (#634; the drawer's own passes are chart-drawer-ceremony.test.ts's)", () => {

@@ -478,14 +478,6 @@
       "count": 1
     }
   },
-  "test/site/chart-drawer.test.ts": {
-    "max-lines": {
-      "count": 1
-    },
-    "max-lines-per-function": {
-      "count": 1
-    }
-  },
   "test/site/contents-row.test.ts": {
     "max-lines-per-function": {
       "count": 1
