@@ -1,0 +1,121 @@
+name: Proof runner
+run-name: proof ${{ github.ref_name }}
+
+# Dispatch-only mutation proofs (Issue #838), sent and read with `npm run proof`; how and when to use it is handbook/specs/development-workflow.md step 11.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: proof-runner
+  queue: max
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    name: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      sha: ${{ steps.plan.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+      - id: plan
+        run: node scripts/proof-runner/list.ts
+        env:
+          REF_NAME: ${{ github.ref_name }}
+          PLAN: ${{ runner.temp }}/plan.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: plan
+          path: ${{ runner.temp }}/plan.json
+          retention-days: 7
+
+  prove:
+    name: prove ${{ matrix.id }}
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      max-parallel: 12
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: runner
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.plan.outputs.sha }}
+          path: tree
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: plan
+          path: ${{ runner.temp }}/plan
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+      - run: npm ci
+        working-directory: tree
+      - run: node ../runner/scripts/proof-runner/job.ts
+        working-directory: tree
+        env:
+          PLAN: ${{ runner.temp }}/plan/plan.json
+          INDEX: ${{ matrix.index }}
+          OUT: ${{ runner.temp }}/result
+          VELLUM_BROWSER: /usr/bin/google-chrome
+          VELLUM_REQUIRE_BROWSER: '1'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: result-${{ matrix.index }}
+          path: ${{ runner.temp }}/result
+          retention-days: 7
+          if-no-files-found: ignore
+
+  ledger:
+    name: ledger
+    needs: [plan, prove]
+    if: always() && needs.plan.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: plan
+          path: ${{ runner.temp }}/plan
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: result-*
+          path: ${{ runner.temp }}/results
+          merge-multiple: true
+      - uses: actions/setup-node@v4
+        if: always()
+        with:
+          node-version: '26'
+      - if: always()
+        run: node scripts/proof-runner/ledger.ts
+        env:
+          PLAN: ${{ runner.temp }}/plan/plan.json
+          RESULTS: ${{ runner.temp }}/results
+          OUT: ${{ runner.temp }}/ledger
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ledger
+          path: ${{ runner.temp }}/ledger
+          retention-days: 30

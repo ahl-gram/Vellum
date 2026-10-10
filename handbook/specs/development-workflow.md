@@ -267,6 +267,30 @@ deliverable is an appearance, and again here when step 6's menu was ruled from s
 measured a spike and this run measures what was built. Zero red from the prover is a hole, not a
 pass, and a guard proved unable to bite is deleted rather than shipped.
 
+**A mutation proof may run on the CI proof runner instead of locally**
+(`.github/workflows/proof-runner.yml`); a local proof stays valid, and the runner only runs many at
+once on GitHub's runners. The orchestrator and a lane send a list with `npm run proof -- send
+<list>` from a tree whose commit is pushed, and read the ledger back with `npm run proof -- read
+<run>`, which deletes the throwaway `proof/` branch; a review agent hands its list to whoever
+dispatched it, since its definition does not let it create a branch. Each entry is one patch, or
+the find-and-replace or by-line edits `send` compiles into one against the commit, with the unit
+files, lint files and suite selection it must turn red, each named exactly: a red that was not named
+is IMPRECISE, and the row is sent again with it named. Each patch runs alone on a clean checkout
+beside an unmutated control per selection, and the ledger gives each row BITES, HOLE, IMPRECISE,
+NEEDS READ, INCONCLUSIVE, NOT APPLIED or UNPROVEN. **NEEDS READ is any stop**, a step that never
+reached its assertion or a suite that stopped early; it counts as the check failing only when the
+stderr stanza the ledger carries shows the claim's OWN read threw (Issue #779 comment 6090198881),
+and that is a person's read, never the runner's. INCONCLUSIVE is a control that was not clean or a
+run that could not be judged, and proves nothing either way. A ledger row with its run id is
+evidence the way a pasted red line is. Runs queue one at a time, and the workflow's `max-parallel`
+leaves one set of CI checks and the deploy build their room inside the account's job limit; a
+second set running at the same moment (two pull requests, or main's own just after a merge beside
+a pull request's) waits behind a running proof. A proof that cannot wait behind a long run is run
+locally.
+`send` refuses a selection that leaves out a `NEEDS_PREDECESSOR` suite or puts an `OPENS_ON_HOME`
+suite straight after `home` (`e2e/support/suites.ts`, read at the commit), and a list sent by hand
+with `send --raw` is not checked for either.
+
 **Arm a deadline when you dispatch an agent with a budget, and at the deadline nudge it with a
 message, never a stop.** Its only durable output is its final report, so a stopped agent hands back
 a fragment and the round's findings are lost; a message asking it to tear down and report what it
