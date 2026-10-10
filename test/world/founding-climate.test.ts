@@ -56,6 +56,11 @@ const climateAndPeople = (entry: LexiconEntry): { band: ClimateBand; own: Cultur
   return { band, own };
 };
 
+const keptBeside = (word: LexiconEntry, beside: LexiconEntry): ReadonlyArray<Steer> =>
+  word.steers.filter(
+    (s) => s.subject === "culture" || !beside.steers.some((t) => t.subject === s.subject && t.value !== s.value),
+  );
+
 const rivalsOf = (lost: Steer): LexiconEntry[] =>
   LEXICON.filter((rival) => {
     const [only] = rival.steers;
@@ -165,8 +170,8 @@ test("every plain climate word, before or after every climate word of its climat
         ]) {
           const f = founded(sentence);
           assert.equal(f.overrides.culture, own, sentence);
-          assert.deepEqual(steersOf(f, plain.phrase), plain.steers, sentence);
-          assert.deepEqual(steersOf(f, entry.phrase), entry.steers, sentence);
+          assert.deepEqual(steersOf(f, plain.phrase), keptBeside(plain, entry), sentence);
+          assert.deepEqual(steersOf(f, entry.phrase), keptBeside(entry, plain), sentence);
         }
       }
     }
@@ -214,11 +219,9 @@ test("a word that names a people but sets no climate is never credited beside a 
       for (const sentence of [`${entry.phrase} ${other.phrase}`, `${other.phrase} ${entry.phrase}`]) {
         const f = founded(sentence);
         assert.equal(f.overrides.culture, own, sentence);
-        assert.deepEqual(
-          steersOf(f, other.phrase),
-          other.steers.filter((s) => s.subject !== "culture"),
-          sentence,
-        );
+        const kept = keptBeside(other, entry).filter((s) => s.subject !== "culture");
+        if (kept.length === 0) assert.ok(phrases(f.contested).includes(other.phrase), sentence);
+        else assert.deepEqual(steersOf(f, other.phrase), kept, sentence);
       }
     }
   }
