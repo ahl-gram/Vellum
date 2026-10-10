@@ -52,10 +52,16 @@ const SHEET_READ: Payload<Sheet> = `(() => {
 
 export async function readSheets(k: Kit): Promise<Sheets> {
   await k.send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
-  await k.goto("/faq/");
-  const faq = await k.evaluate(SHEET_READ);
-  await k.goto("/glossary/");
-  return { faq, glossary: await k.evaluate(SHEET_READ) };
+  return { faq: await landed(k, "/faq/"), glossary: await landed(k, "/glossary/") };
+}
+
+// The sheet lands with a settle that animates its own shadow (both-filled), so the read waits for every animation on it to have finished.
+const LANDED: Payload<boolean> = `(() => { const a = document.querySelector(".sheet")?.getAnimations() ?? []; return a.length > 0 && a.every((x) => x.playState === "finished"); })()`;
+
+async function landed(k: Kit, path: string): Promise<Sheet> {
+  await k.goto(path);
+  await k.settle(LANDED, (d) => d, `${path} sheet landed`);
+  return k.evaluate(SHEET_READ);
 }
 
 const LINE_TAN = tokenRgba("--line-tan");
@@ -93,29 +99,35 @@ export function ix9SurveySheet({ check }: Kit, { faq, glossary }: Sheets): void 
 const FOLD: Payload<{ folded: boolean; margin: string; right: number } | null> =
   `(() => { const s = document.getElementById("index"), m = document.querySelector("body > main"); return s && m ? { folded: s.classList.contains("folded"), margin: getComputedStyle(m).marginRight, right: m.getBoundingClientRect().right } : null; })()`;
 
-export async function ix10ColumnsFold(k: Kit, { faq, glossary }: Sheets): Promise<void> {
-  // element.click() is wiring here: IX3 and NA3 drive the fold with a real press, and this read is about the Glossary sheet's own folded rule.
+// element.click() is wiring here: IX3 and NA3 drive the fold with a real press, and this read is about each page sheet's own folded rule.
+async function foldedMargin(k: Kit, path: string): Promise<string> {
+  await k.goto(path);
   try {
     const open = await k.evaluate(FOLD);
     await k.evaluate(`document.querySelector("#index .slip-fold").click()`);
     const folded = await k.settle(
       FOLD,
       (d, last) => d.folded && d.right !== open?.right && !!last && last.right === d.right,
-      "glossary-folded",
+      `${path} folded`,
     );
-    ix10Report(k, faq, glossary, folded);
+    return folded.margin;
   } finally {
     await k.evaluate(`document.querySelector("#index.folded") && document.querySelector(".slip-tab").click()`);
   }
 }
 
-function ix10Report({ check }: Kit, faq: Sheet, glossary: Sheet, folded: { folded: boolean; margin: string }): void {
+export async function ix10ColumnsFold(k: Kit, { faq, glossary }: Sheets): Promise<void> {
+  const folded = [await foldedMargin(k, "/faq/"), await foldedMargin(k, "/glossary/")];
+  ix10Report(k, faq, glossary, folded);
+}
+
+function ix10Report({ check }: Kit, faq: Sheet, glossary: Sheet, folded: readonly string[]): void {
   check(
-    "IX10 the Glossary stands its broadside in the Q & A's 22rem columns, and on both pages the sheet takes the width a folded index gives it in one settle: main's margin-right is the transitioned property, and the Glossary's folded margin is 0 (Issue #462 rulings 1 to 3)",
+    "IX10 the Glossary stands its broadside in the Q & A's 22rem columns, and on both pages the sheet takes the width a folded index gives it in one settle: main's margin-right is the transitioned property, and folded it is 0 on each (Issue #462 rulings 1 to 3)",
     glossary.columns === "352px" &&
       faq.transition.split(", ").includes("margin-right") &&
       glossary.transition.split(", ").includes("margin-right") &&
-      folded.margin === "0px",
+      folded.every((m) => m === "0px"),
     JSON.stringify({ columns: glossary.columns, transitions: [faq.transition, glossary.transition], folded }),
   );
 }
