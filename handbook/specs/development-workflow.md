@@ -40,6 +40,12 @@ an open pull request with CI green, and leaves merging and the hand-off to whoev
 orchestrating session (`handbook/specs/orchestration.md`) or Alex directly. It calls the review agents
 above at their steps.
 
+`vellum-designer` is not a reviewer either. It draws a design round's mockups from real engine output
+for Alex's sitting (`handbook/specs/conventions.md`, How a design decision is made), and breaks an
+epic into its subs from the epic and its `vellum-spec-recon` ledger, handing its menu to whoever
+dispatched it as an implementer lane does at step 6. Its only output is `out/`, so it is dispatched
+the way step 6 says such an agent is.
+
 ## The sequence
 
 **1. Read the issue: the body AND its comments**, through the two `gh api` calls `CLAUDE.md` gives
@@ -159,11 +165,12 @@ folder in the list Alex opens.
 in it.** The harness removes an `isolation: worktree` agent's tree at the end of its run when
 `git status --porcelain --untracked-files=normal` prints nothing and no commit is ahead of where the
 tree was made, and the gitignored `out/` never prints there. So an agent that would run in its own
-harness tree but whose only deliverable is files under `out/`, such as a design round or a
-measurement, is dispatched WITHOUT isolation, by a session standing in the main checkout:
+harness tree but whose only deliverable is files under `out/`, such as `vellum-designer` running a
+design round, or a measurement, is dispatched WITHOUT isolation, by a session standing in the main
+checkout:
 - The dispatcher builds its tree with `git -C <main checkout> worktree add --detach <main checkout>/.claude/worktrees/<name> origin/main` and links `node_modules` into it by path, with no `cd`, as `scripts/agent-sandbox.ts` does.
 - The agent writes straight to the main checkout's `out/<issue>/`, names the sha it ran at, and gives the folder its page by running `node scripts/delivery/main.ts` from its own tree with the folder's absolute path.
-- The dispatcher removes the tree once the stills have been ruled.
+- The dispatcher removes the tree once the stills have been ruled, or the report it was built for is in.
 
 A dispatcher fenced inside a worktree, an implementer lane or an EnterWorktree session, hands such an
 agent to the orchestrating session instead. This does not touch the agents that run in their
