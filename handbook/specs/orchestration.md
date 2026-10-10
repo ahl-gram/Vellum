@@ -126,7 +126,8 @@ home's line wins for the lane and this file's for the orchestrator.
   detached tree at the pull request's head (`git -C <main checkout> worktree add --detach <path>
   <sha>`, `node_modules` linked by path as `scripts/agent-sandbox.ts` does), run the lane's proof and
   guard tests there, plant one change in the moved code or against the new guard and confirm the
-  proof reports it, then remove the tree. Place the planted change where coverage shows the code
+  proof reports it, then remove the tree. The plant may instead go to the CI proof runner, on the
+  terms `handbook/specs/development-workflow.md` step 11 sets, when the queue ahead of it is short. Place the planted change where coverage shows the code
   runs: one on a path real worlds never reach moves nothing and proves nothing. A lint probe goes in
   an existing file, since a new file outside what the type checker includes fails the lint's project
   service as a parse error before any rule runs; run the lint as `npm run lint`; a probe of the

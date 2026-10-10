@@ -84,10 +84,13 @@ symbol and path so the reader goes and looks.
   check holds to `E2E_SUITE_ORDER`), `E2E_LANES` (`e2e/support/lanes.ts`), `MEASURED_SECONDS` (`test/e2e/lane-timings.test.ts`, CI seconds: an
   estimate first, corrected from its pull request's own lane log), and `NEEDS_PREDECESSOR` or `OPENS_ON_HOME`
   (`e2e/support/suites.ts`) if it reads the page the suite before it leaves or navigates first to
-  `/`. A new LANE joins two more: `ci.yml`'s job matrix, where
-  `test/repo/e2e-tiers.test.ts` reds if the matrix and `E2E_LANES` disagree, and `main`'s required
-  checks, which no test can see at all. A change to the number of unit shards joins the same
-  required checks, since each shard reports a check of its own.
+  `/`. A new LANE joins three more: `ci.yml`'s job matrix, where
+  `test/repo/e2e-tiers.test.ts` reds if the matrix and `E2E_LANES` disagree; `main`'s required
+  checks, which no test can see at all; and the proof runner's `max-parallel` in
+  `.github/workflows/proof-runner.yml`, which `test/repo/proof-runner-workflow.test.ts` reds when it
+  and CI's jobs no longer leave room inside the account's concurrent-job limit. A change to the
+  number of unit shards joins the same required checks, since each shard reports a check of its own,
+  and the same proof-runner cap.
 - **A phone lays every page out at a fixed 1024 CSS pixels and shrinks it to fit.** The layout's
   viewport tag is exactly `width=1024`: no `initial-scale`, which defeats the fit, and nothing that
   stops pinch-zoom. The one other document that writes its own head, the served atlas (the `motion`
