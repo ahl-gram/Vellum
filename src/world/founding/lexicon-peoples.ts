@@ -74,6 +74,8 @@ export const PEOPLE_WORDS: ReadonlyArray<LexiconEntry> = [
       "burgrave",
       "prince elector",
       "landsknecht",
+      "german",
+      "germans",
     ],
   ),
   ...group(
@@ -141,7 +143,10 @@ export const PEOPLE_WORDS: ReadonlyArray<LexiconEntry> = [
       "bactrian camel",
     ],
   ),
-  ...group([band("tropical"), tongue("veshari")], ["dunes", "dune", "desert", "deserts", "burning sands"]),
+  ...group(
+    [band("tropical"), tongue("veshari")],
+    ["dunes", "dune", "desert", "deserts", "burning sands", "sand sea", "sand seas"],
+  ),
   ...group(
     [tongue("veshari")],
     [
@@ -233,6 +238,7 @@ export const PEOPLE_WORDS: ReadonlyArray<LexiconEntry> = [
       "colonnade",
       "bireme",
       "hoplite",
+      "middle sea",
     ],
   ),
   ...group(
@@ -288,6 +294,7 @@ export const PEOPLE_WORDS: ReadonlyArray<LexiconEntry> = [
       "feathered serpents",
     ],
   ),
+  ...group([band("tropical"), tongue("tezcal")], ["jungle temples", "jungle temple"]),
   ...group(
     [tongue("sylvan")],
     [
@@ -322,6 +329,7 @@ export const PEOPLE_WORDS: ReadonlyArray<LexiconEntry> = [
       "cairn",
       "loch",
       "selkie",
+      "ireland",
     ],
   ),
   ...group([type("archipelago"), tongue("norden")], ["skerries"]),
