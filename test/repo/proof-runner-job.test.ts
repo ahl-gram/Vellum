@@ -135,6 +135,35 @@ test("a tree that is not clean when the job starts is reported before anything i
   );
 });
 
+test("a clean tree at some other commit than the list's is reported before anything is applied", async () => {
+  await withTempRepo(FILES, (dir) =>
+    withTmp(async (tmp) => {
+      const calls: string[] = [];
+      const got = await runJob(0, job(), "0".repeat(40), dir, { run: fakes(calls), reporter: REPORTER, tmp });
+      assert.match(got.error ?? "", /not clean at 0{40}: HEAD is [0-9a-f]{40}/);
+      assert.equal(got.applied, null);
+      assert.deepEqual(calls, []);
+    }),
+  );
+});
+
+test("a build that fails stops its browser check, which is marked as the build's failure rather than run", async () => {
+  await withTempRepo(FILES, (dir, sha) =>
+    withTmp(async (tmp) => {
+      const calls: string[] = [];
+      const run = fakes(calls, { "npm run build": { ...ok, status: 1, stderr: "vite: cannot resolve ./gone.ts" } });
+      const got = await runJob(0, job({ e2e: { suites: "specimen", expect: ["SB1"] } }), sha, dir, {
+        run,
+        reporter: REPORTER,
+        tmp,
+      });
+      assert.deepEqual(calls, ["unit", "npm run build"], "the browser suite ran on a site that never built");
+      assert.match(got.checks[1]?.broken ?? "", /the build failed \(exit 1\)/);
+      assert.equal(got.checks[1]?.budget, false);
+    }),
+  );
+});
+
 test("a build that runs past its budget still writes the result, the unit half kept and the browser check marked", async () => {
   await withTempRepo(FILES, (dir, sha) =>
     withTmp(async (tmp) => {

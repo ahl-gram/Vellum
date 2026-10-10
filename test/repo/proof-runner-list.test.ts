@@ -58,12 +58,17 @@ test("selections that differ only in order, case and spacing are one selection a
   const plan = planJobs(
     parseList(
       list([
-        entry("one", { e2e: { suites: "landfall,survey", expect: ["L1"] } }),
-        entry("two", { e2e: { suites: " Survey ,landfall", expect: ["L2"] } }),
+        entry("one", { e2e: { suites: " Survey ,landfall", expect: ["L1"] } }),
+        entry("two", { e2e: { suites: "landfall,survey", expect: ["L2"] } }),
+        entry("three", { e2e: { suites: "LANDFALL, survey", expect: ["L3"] } }),
       ]),
     ),
   );
-  assert.equal(plan.jobs.filter((j) => j.control === "e2e").length, 1);
+  assert.equal(
+    plan.jobs.filter((j) => j.control === "e2e").length,
+    1,
+    "the first selection is written out of canonical form, so a control keyed by the raw string would split here",
+  );
 });
 
 test("a duplicate id, an id outside the safe set and an id in the controls' namespace are each refused by name", () => {

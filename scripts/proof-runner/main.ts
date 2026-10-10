@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { BRANCH_PREFIX, parseList, planJobs, type List } from "./list.ts";
-import { branchBodies, buildList, readAt, type Mutation, type SuiteRules } from "./send.ts";
+import { buildList, readAt, sendList, type Gh, type Mutation, type SuiteRules } from "./send.ts";
 
 export const REPO = "ahl-gram/Vellum";
 export const WORKFLOW_FILE = "proof-runner.yml";
@@ -106,16 +106,15 @@ const findRun = (branch: string, printed: string): string => {
 const send = async (args: string[]): Promise<number> => {
   const list = await listFor(args);
   const plan = planJobs(list);
-  sh("gh", ["api", `repos/${REPO}/commits/${list.sha}`, "--jq", ".sha"]);
-  const runner = sh("gh", ["api", `repos/${REPO}/commits/${option(args, "--runner") ?? "main"}`, "--jq", ".sha"]);
+  const gh: Gh = {
+    commitSha: (ref) => sh("gh", ["api", `repos/${REPO}/commits/${ref}`, "--jq", ".sha"]),
+    treeOf: (sha) => sh("gh", ["api", `repos/${REPO}/git/commits/${sha}`, "--jq", ".tree.sha"]),
+    post: api,
+    dispatch: (branch) => sh("gh", ["workflow", "run", WORKFLOW_FILE, "-R", REPO, "--ref", branch]),
+  };
   const label = option(args, "--label") ?? `${list.sha.slice(0, 7)}-${Date.now()}`;
-  const runnerTree = sh("gh", ["api", `repos/${REPO}/git/commits/${runner}`, "--jq", ".tree.sha"]);
-  const blob = api("git/blobs", branchBodies.blob(`${JSON.stringify(list, null, 2)}\n`));
-  const tree = api("git/trees", branchBodies.tree(runnerTree, blob));
-  const commit = api("git/commits", branchBodies.commit(tree, runner, label));
-  api("git/refs", branchBodies.ref(label, commit));
-  const branch = `${BRANCH_PREFIX}${label}`;
-  const id = findRun(branch, sh("gh", ["workflow", "run", WORKFLOW_FILE, "-R", REPO, "--ref", branch]));
+  const { branch, runner, printed } = sendList(gh, list, option(args, "--runner") ?? "main", label);
+  const id = findRun(branch, printed);
   console.log(
     `sent ${list.entries.length} entries (${plan.jobs.length} jobs) at ${list.sha} on ${branch}, runner ${runner}\nrun ${id}: https://github.com/${REPO}/actions/runs/${id}\nread it with: npm run proof -- read ${id}`,
   );

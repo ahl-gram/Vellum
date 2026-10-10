@@ -152,6 +152,61 @@ test("an entry's verdict is its worst check's, so a unit bite does not hide a br
   );
 });
 
+test("a bite beside any other check verdict reads as that other verdict, so no row passes on half its proof", () => {
+  const entry: Entry = {
+    id: "both",
+    patch: PATCH,
+    unit: { files: ["test/a.test.ts"], expect: ["a"] },
+    e2e: { suites: "document-rooms", expect: ["IX9"] },
+  };
+  const plan = planJobs({ version: 1, sha: SHA, entries: [entry] });
+  const stop = { id: "IX9", kind: "step" as const, detail: "settle timeout", stanza: "" };
+  const others: [string, Partial<CheckResult>][] = [
+    ["HOLE", {}],
+    ["IMPRECISE", { reds: reds("IX10") }],
+    ["NEEDS READ", { stops: [stop] }],
+    ["INCONCLUSIVE", { broken: "the build failed (exit 1)" }],
+    ["UNPROVEN", { budget: true }],
+  ];
+  for (const [verdict, e2eMore] of others) {
+    const results = new Map<number, JobResult>([
+      [0, result(0, "both", [check("unit", { reds: reds("a") }), check("e2e", e2eMore)])],
+      [1, result(1, "control-e2e-1", [check("e2e")], { applied: null })],
+      [2, result(2, "control-unit", [check("unit")], { applied: null })],
+    ]);
+    assert.equal(
+      judge(plan, results)[0]!.verdict,
+      verdict,
+      `a unit bite beside a ${verdict} browser check read as the bite`,
+    );
+  }
+});
+
+test("a unit control's red voids only the entries that name its file", () => {
+  const unitEntry = (id: string, file: string, name: string): Entry => ({
+    id,
+    patch: PATCH,
+    unit: { files: [file], expect: [name] },
+  });
+  const plan = planJobs({
+    version: 1,
+    sha: SHA,
+    entries: [unitEntry("a", "test/a.test.ts", "a"), unitEntry("b", "test/b.test.ts", "b")],
+  });
+  const results = new Map<number, JobResult>([
+    [0, result(0, "a", [check("unit", { reds: [{ name: "a", file: "test/a.test.ts" }] })])],
+    [1, result(1, "b", [check("unit", { reds: [{ name: "b", file: "test/b.test.ts" }] })])],
+    [
+      2,
+      result(2, "control-unit", [check("unit", { reds: [{ name: "z", file: "test/b.test.ts" }] })], { applied: null }),
+    ],
+  ]);
+  const rows = judge(plan, results);
+  assert.equal(rows[0]!.verdict, "BITES", "a control red on another file voided this entry");
+  assert.equal(rows[1]!.verdict, "INCONCLUSIVE");
+  assert.match(rows[1]!.note, /control is red on z/);
+});
+
 test("an entry with no patch reads CLEAN or RED", () => {
   const plan = planJobs({ version: 1, sha: SHA, entries: [{ id: "s", e2e: { suites: "specimen", expect: [] } }] });
   const one = (checks: CheckResult[]) =>

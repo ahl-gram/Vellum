@@ -57,6 +57,12 @@ test("a browser run's reds, its stops and each stop's whole stderr stanza are re
   assert.match(got.stops[0]!.detail, /settle timeout l13-marks/);
   assert.match(got.stops[0]!.stanza, /^ {2}L13 never reached its assertion: Error: settle timeout/);
   assert.match(
+    stderr,
+    /L13 never reached[\s\S]*\n {2}landfall stopped early:/,
+    "the two stanzas are not adjacent in the fixture, so the bound below proves nothing",
+  );
+  assert.doesNotMatch(got.stops[0]!.stanza, /landfall stopped early/, "one stop's stanza ran on into the next stop's");
+  assert.match(
     got.stops[0]!.stanza,
     /\n {4}at /,
     "the stop's stack was dropped, so its reader cannot tell whose read threw",

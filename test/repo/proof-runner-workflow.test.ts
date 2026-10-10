@@ -37,6 +37,11 @@ test("the proof runner starts only by hand, never on a push or a pull request", 
 
 test("no job can push: the token reads contents only, and no checkout keeps its credentials", () => {
   assert.deepEqual(topBlock("permissions"), ["permissions:", "  contents: read"]);
+  assert.deepEqual(
+    TEXT.split("\n").filter((l) => /^\s*permissions\s*:/.test(l)),
+    ["permissions:"],
+    "a job grants itself permissions of its own, which override the read-only token",
+  );
   const checkouts = JOBS.flatMap((job) => steps(job)).filter((s) => s.includes("uses: actions/checkout@"));
   assert.ok(
     checkouts.length >= JOBS.length,

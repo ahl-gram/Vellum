@@ -127,18 +127,37 @@ export const orderProblems = (suites: string, rules: SuiteRules): string[] => {
   return problems;
 };
 
-export const branchBodies = {
-  blob: (content: string) => ({ content, encoding: "utf-8" }),
-  tree: (baseTree: string, blob: string) => ({
-    base_tree: baseTree,
+export type Post = (endpoint: string, body: object) => string;
+
+const pushBranch = (post: Post, runner: string, runnerTree: string, label: string, content: string): string => {
+  const blob = post("git/blobs", { content, encoding: "utf-8" });
+  const tree = post("git/trees", {
+    base_tree: runnerTree,
     tree: [{ path: LIST_FILE, mode: "100644", type: "blob", sha: blob }],
-  }),
-  commit: (tree: string, parent: string, label: string) => ({
-    message: `proof list ${label}`,
-    tree,
-    parents: [parent],
-  }),
-  ref: (label: string, commit: string) => ({ ref: `refs/heads/${BRANCH_PREFIX}${label}`, sha: commit }),
+  });
+  const commit = post("git/commits", { message: `proof list ${label}`, tree, parents: [runner] });
+  post("git/refs", { ref: `refs/heads/${BRANCH_PREFIX}${label}`, sha: commit });
+  return commit;
+};
+
+export type Gh = {
+  commitSha: (ref: string) => string;
+  treeOf: (sha: string) => string;
+  post: Post;
+  dispatch: (branch: string) => string;
+};
+
+export const sendList = (
+  gh: Gh,
+  list: List,
+  runnerRef: string,
+  label: string,
+): { branch: string; runner: string; printed: string } => {
+  gh.commitSha(list.sha);
+  const runner = gh.commitSha(runnerRef);
+  pushBranch(gh.post, runner, gh.treeOf(runner), label, `${JSON.stringify(list, null, 2)}\n`);
+  const branch = `${BRANCH_PREFIX}${label}`;
+  return { branch, runner, printed: gh.dispatch(branch) };
 };
 
 export type Built = { list: List | null; errors: string[]; warnings: string[] };

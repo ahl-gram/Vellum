@@ -3,14 +3,16 @@ import assert from "node:assert/strict";
 import { readFileSync, rmSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
 import { E2E_SUITE_ORDER, NEEDS_PREDECESSOR, OPENS_ON_HOME } from "../../e2e/support/suites.ts";
+import type { List } from "../../scripts/proof-runner/list.ts";
 import {
   appliesAt,
   applyEdits,
-  branchBodies,
   buildList,
   diffFor,
   orderProblems,
   readAt,
+  sendList,
+  type Gh,
   type Mutation,
 } from "../../scripts/proof-runner/send.ts";
 import { git } from "../../test-support/sandbox-repo.ts";
@@ -115,11 +117,47 @@ test("a selection without its predecessor, or with a suite that opens on home st
   assert.deepEqual(orderProblems("landfall", RULES), []);
 });
 
-test("the throwaway branch is the runner's tree plus the list alone, a commit whose one parent is the runner, under proof/", () => {
-  assert.deepEqual(branchBodies.tree("TREE", "BLOB"), {
-    base_tree: "TREE",
-    tree: [{ path: "proof.json", mode: "100644", type: "blob", sha: "BLOB" }],
+test("the throwaway branch is the runner's tree plus the list alone, a commit whose one parent is the runner, dispatched under proof/", () => {
+  const list: List = {
+    version: 1,
+    sha: "c".repeat(40),
+    entries: [{ id: "one", unit: { files: ["t.test.ts"], expect: [] } }],
+  };
+  const asked: string[] = [];
+  const posts: [string, Record<string, unknown>][] = [];
+  const dispatched: string[] = [];
+  const gh: Gh = {
+    commitSha: (ref) => (asked.push(ref), ref === "main" ? "RUNNER" : ref),
+    treeOf: (sha) => (sha === "RUNNER" ? "RUNNER-TREE" : "WRONG-TREE"),
+    post: (endpoint, body) => (posts.push([endpoint, body as Record<string, unknown>]), `${endpoint}-sha`),
+    dispatch: (branch) => (dispatched.push(branch), "https://github.com/x/y/actions/runs/7"),
+  };
+  const sent = sendList(gh, list, "main", "838-a");
+  assert.deepEqual(asked, [list.sha, "main"], "the commit under test was not looked up on the remote before sending");
+  assert.deepEqual(
+    posts.map(([e]) => e),
+    ["git/blobs", "git/trees", "git/commits", "git/refs"],
+  );
+  assert.deepEqual(JSON.parse(String(posts[0]![1]["content"])), list);
+  assert.deepEqual(posts[1]![1], {
+    base_tree: "RUNNER-TREE",
+    tree: [{ path: "proof.json", mode: "100644", type: "blob", sha: "git/blobs-sha" }],
   });
-  assert.deepEqual(branchBodies.commit("T2", "RUNNER", "838-a").parents, ["RUNNER"]);
-  assert.deepEqual(branchBodies.ref("838-a", "C"), { ref: "refs/heads/proof/838-a", sha: "C" });
+  assert.deepEqual(
+    posts[2]![1]["parents"],
+    ["RUNNER"],
+    "the list's commit sits on the code under test, so the run would take its workflow from there",
+  );
+  assert.deepEqual(posts[3]![1], { ref: "refs/heads/proof/838-a", sha: "git/commits-sha" });
+  assert.deepEqual(dispatched, ["proof/838-a"]);
+  assert.deepEqual(sent, { branch: "proof/838-a", runner: "RUNNER", printed: "https://github.com/x/y/actions/runs/7" });
+});
+
+test("an edit's replacement is taken literally, never as a replacement pattern", () => {
+  const read = reader({ "src/c.ts": "const a = 1;\nconst b = 2;\n" });
+  const after = applyEdits(read, [
+    { file: "src/c.ts", find: "a = 1", replace: "a = '$&$'" },
+    { file: "src/c.ts", line: 2, from: "b = 2", to: "b = '$`$&'" },
+  ]);
+  assert.equal(after.get("src/c.ts"), "const a = '$&$';\nconst b = '$`$&';\n");
 });
