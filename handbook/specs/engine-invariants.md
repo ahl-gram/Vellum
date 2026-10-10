@@ -94,8 +94,8 @@ then `generateWorld` like every other, the seed FIRST.
 covers the whole procedure: the cleanup in `src/world/founding/normalize.ts`, the small words, the clash
 rule, the strengths, the climate traditions and the word list. Until the written-world link goes public
 (Issue #393), version 1 may still change, and the pins in `test/world/founding-covenant.test.ts` and
-`test/world/founding-sample.test.ts` move with it. Once it is public, version 1 is locked: a change is a new version added beside it, and every
-old version stays foundable, so an old sentence keeps its world.
+`test/world/founding-sample.test.ts` move with it. Once it is public, version 1 is locked: a change is a
+new version added beside it, and every old version stays foundable, so an old sentence keeps its world.
 
 **The constants and the rules in plain words live with the code, as data a page can render**: the
 exports of `src/world/founding/lexicon.ts`, `FOUNDING_RULES` among them. Do not copy a number or a word
