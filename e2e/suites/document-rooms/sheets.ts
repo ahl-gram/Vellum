@@ -12,7 +12,7 @@ type Sheet = {
   outlineColour: number[];
   border: [string, string];
   borderColour: number[];
-  shadow: string;
+  shadow: { colour: number[]; geometry: string } | null;
   ground: number[];
   ticks: [string, string];
   mainOutline: string;
@@ -41,7 +41,7 @@ const SHEET_READ: Payload<Sheet> = `(() => {
   let missingCultures = null;
   if (names) { const r = document.createRange(); r.setStartBefore(names); r.setEndAfter(document.body.lastChild); const text = r.toString().toLowerCase(); missingCultures = ${JSON.stringify(CULTURES.map((c) => c.id))}.filter((id) => !text.includes(id)); }
   return { path: location.pathname, outline: [cs.outlineStyle, cs.outlineWidth], outlineColour: rgba(cs.outlineColor),
-    border: [cs.borderTopWidth, cs.borderTopStyle], borderColour: rgba(cs.borderTopColor), shadow: cs.boxShadow, ground: rgba(cs.backgroundColor),
+    border: [cs.borderTopWidth, cs.borderTopStyle], borderColour: rgba(cs.borderTopColor), shadow: (() => { const m = /^(.+\\)) (-?[\\d.]+px -?[\\d.]+px -?[\\d.]+px -?[\\d.]+px)$/.exec(cs.boxShadow); return m ? { colour: rgba(m[1]), geometry: m[2] } : null; })(), ground: rgba(cs.backgroundColor),
     ticks: [getComputedStyle(sheet, "::before").content, getComputedStyle(sheet, "::after").content],
     mainOutline: ms.outlineStyle, deskPanel: main.classList.contains("desk-panel"), transition: ms.transitionProperty,
     columns: getComputedStyle(document.querySelector(".columns")).columnWidth,
@@ -72,7 +72,9 @@ const framed = (s: Sheet): boolean =>
   s.border[0] === "1px" &&
   s.border[1] === "solid" &&
   nearRgba(s.borderColour, LINE_TAN) &&
-  s.shadow !== "none" &&
+  !!s.shadow &&
+  s.shadow.geometry === "0px 18px 60px 0px" &&
+  nearRgba(s.shadow.colour, tokenRgba("--chart-ink", 0.55)) &&
   nearRgba(s.ground, tokenRgba("--parchment-panel")) &&
   s.ticks.every((c) => c !== "none" && c !== "normal") &&
   s.mainOutline === "none" &&
@@ -80,7 +82,7 @@ const framed = (s: Sheet): boolean =>
 
 export function ix9SurveySheet({ check }: Kit, { faq, glossary }: Sheets): void {
   check(
-    "IX9 the Q & A's and the Glossary's content lies on a survey sheet, as drawn: a 1px line-tan frame inside a 3px double line-tan rule, a raised shadow, panel paper and its corner ticks, while main carries no frame and no desk panel, so the running head and the footer stay on the desk (Issue #289)",
+    "IX9 the Q & A's and the Glossary's content lies on a survey sheet, as drawn: a 1px line-tan frame inside a 3px double line-tan rule, raised at the stage depth once it has landed, panel paper and its corner ticks, while main carries no frame and no desk panel, so the running head and the footer stay on the desk (Issue #289)",
     framed(faq) && framed(glossary),
     JSON.stringify(
       [faq, glossary].map(({ path, outline, border, shadow, ticks, mainOutline, deskPanel }) => ({
