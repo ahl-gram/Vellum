@@ -348,7 +348,7 @@ test("CT7c the sheet assigned beside each overlay build reads no lastManifest, a
   );
 });
 
-test("CT7b a draw drops the pinned card before it rebases the camera (#631; kept for Issue #779 part 2i: two synchronous calls in one task, nothing between them to read; CD58 reads the card dropped and the real turn flag)", () => {
+test("CT7b a draw drops the pinned card before it rebases the camera (#631; kept for Issue #779 part 2i: two synchronous calls in one task, nothing between them to read, and no browser check here sees the drop, since CD58 shows no card when its turn begins; CD58 reads the real turn flag)", () => {
   const app = readFileSync(resolve(REPO, "src/site/explorer/app.ts"), "utf8");
   const at = app.indexOf("function draw(opts");
   assert.notEqual(at, -1, "draw() is gone, so the ordering assertion below reads an empty slice");

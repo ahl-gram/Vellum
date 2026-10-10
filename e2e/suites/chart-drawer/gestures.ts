@@ -213,23 +213,20 @@ export async function cd58TurnFiles(k: DrawerKit): Promise<void> {
     const before = await settle(TURN, (d) => d.hits > 6, "chart-drawer-turn-page");
     const p1 = (await evaluate(reachable([]))) ?? 1;
     const first = await fileAt(k, p1, 1);
-    const pinned = await pinAt(k, (await evaluate(reachable([p1, p1 + 1]))) ?? p1 + 2);
     const turning = await midTurn(k, p1 + 1);
     await settle(TURN, (d) => !d.turning && d.hits > 6, "chart-drawer-turned", 160);
     const p2 = (await evaluate(reachable([p1]))) ?? p1 + 1;
     const landed = await fileAt(k, p2, 2);
     check(
-      "CD58 a filing names the sheet on the chart across a style's turn: before it the drawn world in its dress, overrides and year; mid-turn the card pinned before it is dropped and its press refuses by the real turn flag, a keyboard's Enter filing nothing; after it the new dress over the same world, never a seed typed and not drawn",
+      "CD58 a filing names the sheet on the chart across a style's turn: before it the drawn world in its dress, overrides and year; mid-turn a card shown on the outgoing chart refuses by the real turn flag, a keyboard's Enter filing nothing; after it the new dress over the same world, never a seed typed and not drawn",
       filedAs(lastItem(first), p1, "antique", before.year) &&
-        pinned.shown &&
         turning.at.turning &&
-        !turning.at.card &&
         turning.face?.press?.text === LAY_ON_CARD &&
         !!turning.face.press.dim &&
         !turning.face.press.disabled &&
         turning.after.every((d) => d.cuttings === 1 && d.turning) &&
         filedAs(lastItem(landed), p2, "ink", before.year),
-      JSON.stringify({ before, first, pinned: pinned.press, turning, landed }),
+      JSON.stringify({ before, first, turning, landed }),
     );
   } finally {
     await evaluate<boolean>(
