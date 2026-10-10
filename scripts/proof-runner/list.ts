@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { appendFileSync, readFileSync, writeFileSync } from "node:fs";
-import { isAbsolute, join, normalize } from "node:path";
+import { isAbsolute, join, normalize, posix } from "node:path";
 
 export const LIST_FILE = "proof.json";
 export const BRANCH_PREFIX = "proof/";
@@ -38,6 +38,13 @@ const outside = (path: string): boolean => {
   return isAbsolute(path) || n === ".." || n.startsWith("../");
 };
 
+const fileProblems = (id: string, f: string): string[] => {
+  if (outside(f)) return [`"${id}": ${f} is outside the tree`];
+  if (f.startsWith("-")) return [`"${id}": ${f} starts with a dash, so the command would read it as an option`];
+  const plain = posix.normalize(f);
+  return plain === f ? [] : [`"${id}": ${f} is written ${plain} in its plain form, the form the readers report`];
+};
+
 const strings = (v: unknown): v is string[] => Array.isArray(v) && v.every((s) => typeof s === "string" && s !== "");
 
 const checkProblems = (id: string, kind: (typeof CHECK_KINDS)[number], raw: unknown, patched: boolean): string[] => {
@@ -65,7 +72,7 @@ const checkProblems = (id: string, kind: (typeof CHECK_KINDS)[number], raw: unkn
   } else {
     const files = check["files"];
     if (!strings(files) || files.length === 0) problems.push(`"${id}": its ${kind} check names no files`);
-    else for (const f of files.filter(outside)) problems.push(`"${id}": ${f} is outside the tree`);
+    else for (const f of files) problems.push(...fileProblems(id, f));
   }
   return problems;
 };

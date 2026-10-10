@@ -108,6 +108,26 @@ test("a patch path that is absolute or climbs out of the tree is refused", () =>
   refuses([entry("up", { patch: patchOf("../x.ts") })], /"up".*outside the tree/);
 });
 
+test("a check's file written in any but its plain form is refused naming the plain form, since the readers report plain paths and a control's red on a spelled-out path would go unseen", () => {
+  for (const [file, plain] of [
+    ["./test/a.test.ts", "test/a.test.ts"],
+    ["test//a.test.ts", "test/a.test.ts"],
+    ["test/x/../a.test.ts", "test/a.test.ts"],
+  ] as const) {
+    const says = (text: string) => (err: Error) => err.message.includes(text);
+    assert.throws(
+      () => parseList(list([entry("spelled", { unit: unit(file) })])),
+      says(`"spelled": ${file} is written ${plain}`),
+    );
+    assert.throws(
+      () => parseList(list([{ id: "linted", patch: PATCH, lint: { files: [file], expect: ["r"] } }])),
+      says(`"linted": ${file} is written ${plain}`),
+    );
+  }
+  refuses([entry("flag", { unit: unit("--fix") })], /"flag": --fix starts with a dash/);
+  assert.doesNotThrow(() => parseList(list([entry("plain", { unit: unit("test/a.test.ts") })])));
+});
+
 test("a budget may only lower its kind's default", () => {
   refuses([entry("slow", { unit: { ...unit(), budgetSeconds: BUDGET_SECONDS.unit + 1 } })], /"slow".*budget/);
   assert.doesNotThrow(() => parseList(list([entry("fast", { unit: { ...unit(), budgetSeconds: 20 } })])));

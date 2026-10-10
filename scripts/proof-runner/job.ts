@@ -42,7 +42,7 @@ export const runBudgeted: Runner = (cmd, args, options) =>
   new Promise((settle) => {
     const started = Date.now();
     const env: Record<string, string | undefined> = { ...process.env, ...options.env };
-    delete env["NODE_TEST_CONTEXT"]; // an outer node --test sets it, and a node --test run under it reports to that parent instead of to its own reporter
+    delete env["NODE_TEST_CONTEXT"];
     const child = spawn(cmd, args, { cwd: options.cwd, env, detached: true, stdio: ["ignore", "pipe", "pipe"] });
     let stdout = "";
     let stderr = "";

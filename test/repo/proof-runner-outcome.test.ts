@@ -79,6 +79,26 @@ test("a red's id is its first token with trailing punctuation stripped", () => {
   assert.deepEqual(e2eOutcome(stdout, "", 1).reds, ["CD22", "SB"]);
 });
 
+test("a stop is still a stop if the harness's detail separator ever changes, so it can never turn into a red", () => {
+  const stdout = [
+    "FAIL  SB13 never reached its assertion: settle timeout specimen-zoom-in",
+    "FAIL  landfall stopped early, so the checks after this one in that suite never ran (#534) - boom",
+  ].join("\n");
+  const got = e2eOutcome(stdout, "", 1);
+  assert.deepEqual(
+    got.reds,
+    [],
+    "a stop read as a red under another separator, so a row expecting it would read BITES",
+  );
+  assert.deepEqual(
+    got.stops.map((s) => [s.id, s.kind]),
+    [
+      ["SB13", "step"],
+      ["landfall", "suite"],
+    ],
+  );
+});
+
 test("a harness error, a run with no checks and a failing exit with no FAIL line are each a run that cannot be judged", () => {
   assert.match(e2eOutcome("", "HARNESS ERROR: Error: browser went away", 2).broken ?? "", /harness error/);
   assert.match(e2eOutcome("FAIL: no checks ran, so this run proves nothing.", "", 1).broken ?? "", /no checks ran/);
@@ -93,7 +113,7 @@ test("a harness error, a run with no checks and a failing exit with no FAIL line
 const spawnReporter = (dir: string, files: string[]) => {
   const dest = join(dir, "out.jsonl");
   const env = { ...process.env };
-  delete env["NODE_TEST_CONTEXT"]; // set by the outer node --test, it makes the inner run report to its parent and ignore its own reporter
+  delete env["NODE_TEST_CONTEXT"];
   const r = spawnSync(
     process.execPath,
     ["--test", `--test-reporter=${REPORTER}`, `--test-reporter-destination=${dest}`, ...files],

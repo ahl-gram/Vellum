@@ -195,7 +195,8 @@ export const buildList = (mutations: readonly Mutation[], sha: string, deps: Bui
     } catch (err) {
       errors.push(`"${m.id}": ${err instanceof Error ? err.message : String(err)}`);
     }
-    if (m.e2e) errors.push(...orderProblems(m.e2e.suites, deps.rules).map((p) => `"${m.id}": ${p}`));
+    if (typeof m.e2e?.suites === "string")
+      errors.push(...orderProblems(m.e2e.suites, deps.rules).map((p) => `"${m.id}": ${p}`));
   }
   if (errors.length > 0) return { list: null, errors, warnings };
   try {

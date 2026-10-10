@@ -44,7 +44,7 @@ jobs:
     name: prove ${{ matrix.id }}
     needs: plan
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       max-parallel: 12

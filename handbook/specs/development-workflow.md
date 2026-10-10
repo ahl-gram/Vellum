@@ -282,8 +282,11 @@ reached its assertion or a suite that stopped early; it counts as the check fail
 stderr stanza the ledger carries shows the claim's OWN read threw (Issue #779 comment 6090198881),
 and that is a person's read, never the runner's. INCONCLUSIVE is a control that was not clean or a
 run that could not be judged, and proves nothing either way. A ledger row with its run id is
-evidence the way a pasted red line is. Runs queue one at a time and take at most twelve jobs, so a
-pull request's checks keep their room; a proof that cannot wait behind a long run is run locally.
+evidence the way a pasted red line is. Runs queue one at a time, and the workflow's `max-parallel`
+leaves one set of CI checks and the deploy build their room inside the account's job limit; a
+second set running at the same moment (two pull requests, or main's own just after a merge beside
+a pull request's) waits behind a running proof. A proof that cannot wait behind a long run is run
+locally.
 `send` refuses a selection that leaves out a `NEEDS_PREDECESSOR` suite or puts an `OPENS_ON_HOME`
 suite straight after `home` (`e2e/support/suites.ts`, read at the commit), and a list sent by hand
 with `send --raw` is not checked for either.

@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { E2E_LANES } from "../../e2e/support/lanes.ts";
+import { BUDGET_SECONDS } from "../../scripts/proof-runner/list.ts";
 import { ciJob } from "../../test-support/ci-job.ts";
 
 const WORKFLOW = ".github/workflows/proof-runner.yml";
@@ -12,6 +13,8 @@ const JOBS = ["plan", "prove", "ledger"] as const;
 // GitHub Free's concurrent-job limit for standard hosted runners (GitHub's Actions limits page, read 2026-10-09); which plan the account is on is unverified, and a larger plan only widens the room.
 const CONCURRENT_JOBS = 20;
 const DEPLOY_BUILD_JOBS = 1;
+// Setup before a job's first budget (two checkouts, the plan download, setup-node, a cold npm ci) took 15 to 25 s across run 38044238993's 16 prove jobs (2026-10-10), and each of the three budgeted commands may wait 5 s after its kill; two minutes holds both with room.
+const SETUP_MINUTES = 2;
 
 // A top-level block is a key at column 0, read to the next one. Blind spot, with its direction: a key written in flow style on one line (`on: [push]`) yields a block of one line, which the exact-lines assertions below read as a mismatch, so it errs toward a red.
 const topBlock = (key: string): string[] => {
@@ -84,6 +87,16 @@ test("every job is bounded, and the sweep reads every job the workflow has", () 
   assert.deepEqual(ids, [...JOBS]);
   for (const job of JOBS)
     assert.match(ciJob(job, WORKFLOW), /^ {4}timeout-minutes: \d+$/m, `${job} has no timeout-minutes`);
+});
+
+test("a prove job's cap is above every budget its job can spend, with room for its setup, so a budget always fires before the cap", () => {
+  const cap = ciJob("prove", WORKFLOW).match(/^ {4}timeout-minutes: (\d+)$/m);
+  assert.ok(cap, "the prove job has no timeout-minutes");
+  const budgets = Object.values(BUDGET_SECONDS).reduce((sum, s) => sum + s, 0) / 60;
+  assert.ok(
+    Number(cap[1]) >= budgets + SETUP_MINUTES,
+    `the prove job's cap of ${cap[1]} minutes leaves less than ${SETUP_MINUTES} past its ${budgets} minutes of budgets, so the cap can cancel a job before it writes its result`,
+  );
 });
 
 test("every run line is one line, and none writes an expression into the shell; values reach scripts through env", () => {

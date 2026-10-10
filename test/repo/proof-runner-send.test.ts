@@ -95,6 +95,19 @@ test("every bad mutation in a list is named at once, and nothing is built from a
   });
 });
 
+test("a browser check missing its suites is named in the refusal like any other bad entry, not a crash", async () => {
+  await withTempRepo(FILES, (dir, sha) => {
+    const shapeless = {
+      id: "nosuites",
+      edits: [{ file: "src/b.ts", append: "// x\n" }],
+      e2e: { suite: "specimen", expect: ["SB1"] },
+    };
+    const built = buildList([shapeless as unknown as Mutation], sha, { repo: dir, read: reader(FILES), rules: RULES });
+    assert.equal(built.list, null);
+    assert.match(built.errors.join("\n"), /"nosuites" selects undefined; a proof must name the suites it runs/);
+  });
+});
+
 test("a file read at the commit keeps its last newline, so an appended edit compiles to a patch that applies there", async () => {
   await withTempRepo(FILES, (dir, sha) => {
     const read = readAt(dir, sha);

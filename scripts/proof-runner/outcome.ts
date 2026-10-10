@@ -9,7 +9,7 @@ export type FileOutcome = { reds: Red[]; loadFailures: string[]; broken: string 
 const FAIL = "FAIL  ";
 const EM_DASH = String.fromCharCode(0x2014);
 const DETAIL = `  ${EM_DASH} `;
-const STEP_STOP = " never reached its assertion";
+const STEP_STOP = /^(\S+) never reached its assertion\b/;
 const SUITE_STOP = /^(\S+) stopped early, /;
 const STANZA_HEAD = /^ {2}\S+ (never reached its assertion|stopped early):/;
 const STANZA_LINES = 60;
@@ -42,10 +42,15 @@ export const e2eOutcome = (stdout: string, stderr: string, exit: number | null):
     const cut = body.indexOf(DETAIL);
     const name = cut === -1 ? body : body.slice(0, cut);
     const detail = cut === -1 ? "" : body.slice(cut + DETAIL.length);
-    const suite = name.match(SUITE_STOP);
-    if (name.endsWith(STEP_STOP)) {
-      const id = name.slice(0, -STEP_STOP.length);
-      stops.push({ id, kind: "step", detail, stanza: stanzaOf(stderr, `  ${id}${STEP_STOP}:`) });
+    const step = body.match(STEP_STOP);
+    const suite = body.match(SUITE_STOP);
+    if (step) {
+      stops.push({
+        id: step[1]!,
+        kind: "step",
+        detail,
+        stanza: stanzaOf(stderr, `  ${step[1]!} never reached its assertion:`),
+      });
     } else if (suite) {
       stops.push({ id: suite[1]!, kind: "suite", detail, stanza: stanzaOf(stderr, `  ${suite[1]!} stopped early:`) });
     } else {
