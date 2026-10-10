@@ -24,6 +24,7 @@ import {
   h8bHoldSkip,
   h9CeremonyStandsDown,
   h12aVeilCovers,
+  h12cVeilAbove,
   h12bSkipOnFloor,
   h18CameraSeat,
   h11Clean,
@@ -92,6 +93,7 @@ async function h7Ceremony(ctx: SuiteContext, k: HomeKit): Promise<void> {
   await step("H10b", () => h10bInlinePredicate(ctx));
   await setNarrowViewport(390, 844);
   await h12aVeilCovers(ctx);
+  await step("H12c", () => h12cVeilAbove(ctx));
   await h12bSkipOnFloor(k);
   const seat390 = await camSeat();
   await clearMobile();

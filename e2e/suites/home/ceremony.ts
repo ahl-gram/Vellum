@@ -259,6 +259,22 @@ export async function h12aVeilCovers({ evaluate, send, check, shoot, sleep, PORT
   await shoot("home-veil-390.png");
 }
 
+const ABOVE: Payload<{ veil: boolean; hit: string | null } | null> = `(() => {
+  const v = document.getElementById("lf-veil"), a = document.querySelector("header.chrome .wordmark a");
+  if (!v || !a) return null;
+  const r = a.getBoundingClientRect(), h = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+  return { veil: !!h && v.contains(h), hit: h ? h.tagName + "." + h.className : null };
+})()`;
+
+export async function h12cVeilAbove({ evaluate, check }: SuiteContext): Promise<void> {
+  const above = await evaluate(ABOVE);
+  check(
+    "H12c the veil rides above the running head: the wordmark's own link, which takes the hand above the stage, lies under the veil while it stands (#457, ratified 3)",
+    !!above && above.veil,
+    JSON.stringify(above),
+  );
+}
+
 export async function h12bSkipOnFloor({ evaluate, check, sleep, pressKey }: HomeKit): Promise<void> {
   let armed12 = null;
   for (let i = 0; i < 150; i++) {
