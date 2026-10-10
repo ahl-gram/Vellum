@@ -68,7 +68,7 @@ const PRESS: Payload<Press> = `(() => { const rgba = ${PAGE_RGBA}, p = document.
   return { text: p.textContent, dim: p.classList.contains("dim"), disabled: p.disabled, ground: rgba(cs.backgroundColor), line: rgba(cs.borderTopColor), ink: rgba(cs.color), opacity: cs.opacity, face,
     file: getComputedStyle(p.parentElement).display, hover: p.matches(":hover"), focus: p.matches(":focus-visible"), active: document.activeElement === p, x, y, hit: document.elementFromPoint(x, y) === p,
     table: new URLSearchParams(location.hash.slice(1)).get("table"), device: localStorage.getItem(${STORE}), count: document.getElementById("pp-lay-count").textContent, roads: [href("pp-chart-link"), href("pp-ribbon-link")] }; })()`;
-// A refusal leaves nothing to poll to, so the second press is held past its answer: the click handler in src/site/prospect/app.ts files synchronously, so a wrong filing has written before the release returns, and CD35's 400ms is the headroom for one a frame or a task would defer.
+// A refusal leaves nothing to poll to, so the second press is held past its answer: the click handler in src/site/prospect/app.ts files synchronously, so a wrong filing has written before the release returns, and CD35's 400ms is the headroom for one a frame or a task would defer (derived 2026-10-10).
 const REFUSAL_DWELL_MS = 400;
 const held = (k: ProspectKit, label: string, ok: (p: Press) => boolean): Promise<Press> =>
   makeSettle(k)(PRESS, (d, last) => ok(d) && !!last && JSON.stringify(d) === JSON.stringify(last), label);
