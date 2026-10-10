@@ -152,14 +152,17 @@ export const passed = (rows: readonly Row[]): boolean =>
 export const codeSpan = (text: string): string =>
   text === "" ? "" : `\`${text.replace(/`/g, "'").replace(/\|/g, "\\|").replace(/\r?\n/g, " ")}\``;
 
+const NOTE_CHARS = 240;
+const cut = (note: string): string => (note.length > NOTE_CHARS ? `${note.slice(0, NOTE_CHARS)} ...` : note);
+
 const tableLines = (r: Row): string[] => {
   const head = `| ${r.index} | ${r.id} | ${r.verdict} |`;
   const blank = "| | | |";
-  if (r.checks.length === 0) return [`${head} | | | ${codeSpan(r.note)} | ${r.seconds ?? ""} |`];
+  if (r.checks.length === 0) return [`${head} | | | ${codeSpan(cut(r.note))} | ${r.seconds ?? ""} |`];
   return r.checks.map((c, i) =>
     [
       i === 0 ? head : blank,
-      ` ${c.kind} ${codeSpan(c.target)} | ${codeSpan(c.expect.join(", "))} | ${codeSpan(c.actual.join(", "))} | ${c.verdict}${c.note ? ` ${codeSpan(c.note)}` : ""} |`,
+      ` ${c.kind} ${codeSpan(c.target)} | ${codeSpan(c.expect.join(", "))} | ${codeSpan(c.actual.join(", "))} | ${c.verdict}${c.note ? ` ${codeSpan(cut(c.note))}` : ""} |`,
       ` ${i === 0 ? (r.seconds ?? "") : ""} |`,
     ].join(""),
   );

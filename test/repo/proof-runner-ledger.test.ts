@@ -5,6 +5,7 @@ import { codeSpan, judge, ledgerMarkdown, passed, type Row } from "../../scripts
 import { planJobs, type Entry } from "../../scripts/proof-runner/list.ts";
 
 const SHA = "b".repeat(40);
+const DASH = String.fromCharCode(0x2014);
 const PATCH = "diff --git a/src/x.ts b/src/x.ts\n--- a/src/x.ts\n+++ b/src/x.ts\n@@ -1 +1 @@\n-a\n+b\n";
 const e2e = (id: string, expect = ["IX9"]): Entry => ({ id, patch: PATCH, e2e: { suites: "document-rooms", expect } });
 
@@ -184,10 +185,25 @@ test("the run passes only when every mutation BITES and every control and sample
   assert.equal(passed([row("mutation", "BITES"), row("control", "RED")]), false);
 });
 
+test("a long note is cut short in the table, and a stop's whole stanza stays in the section for its reader", () => {
+  const long = `settle timeout specimen-zoom-in: ${"x".repeat(1000)}`;
+  const stop = {
+    id: "SB13",
+    kind: "step" as const,
+    detail: long,
+    stanza: `  SB13 never reached its assertion: Error: ${long}\n    at sb13GlassPress`,
+  };
+  const md = ledgerMarkdown([verdictOf([check("e2e", { stops: [stop] })])], { sha: SHA });
+  const row = md.split("\n").find((l) => l.startsWith("| 0 |"));
+  assert.ok(row !== undefined && row.length < 600, `the table row carries the whole stop: ${row?.length} characters`);
+  assert.match(row, / \.\.\.`/);
+  assert.ok(md.includes(stop.stanza), "the stop's stanza is not in the ledger for its reader");
+});
+
 test("a pasted detail lands in one code span, its backticks and pipes neutralised, so a body quoting it keeps its table and its em-dash in code", () => {
-  const detail = "border — 0px | `x`\nnext";
+  const detail = `border ${DASH} 0px | \`x\`\nnext`;
   const span = codeSpan(detail);
-  assert.equal(span, "`border — 0px \\| 'x' next`");
+  assert.equal(span, `\`border ${DASH} 0px \\| 'x' next\``);
   const rows = rowsFor(
     [e2e("m"), e2e("n")],
     [[check("e2e", { reds: reds("IX10") })], [check("e2e", { broken: `exited 1 with FAIL: x ${detail}` })]],
@@ -195,7 +211,7 @@ test("a pasted detail lands in one code span, its backticks and pipes neutralise
   const md = ledgerMarkdown(rows, { sha: SHA });
   const tableLines = md.split("\n").filter((l) => l.startsWith("|"));
   assert.ok(
-    tableLines.some((l) => l.includes("—")),
+    tableLines.some((l) => l.includes(DASH)),
     "the fixture's em-dash never reached the table, so the check below reads nothing",
   );
   for (const line of tableLines) {
@@ -203,7 +219,7 @@ test("a pasted detail lands in one code span, its backticks and pipes neutralise
       .split("`")
       .filter((_, k) => k % 2 === 0)
       .join("");
-    assert.doesNotMatch(outside, /—/, `an em-dash outside code in: ${line}`);
+    assert.ok(!outside.includes(DASH), `an em-dash outside code in: ${line}`);
   }
   assert.match(md, /\| m \| IMPRECISE \|/);
   assert.match(md, new RegExp(SHA));

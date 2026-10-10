@@ -7,7 +7,8 @@ export type E2eOutcome = { reds: string[]; stops: Stop[]; broken: string | null 
 export type FileOutcome = { reds: Red[]; loadFailures: string[]; broken: string | null };
 
 const FAIL = "FAIL  ";
-const DETAIL = "  — ";
+const EM_DASH = String.fromCharCode(0x2014);
+const DETAIL = `  ${EM_DASH} `;
 const STEP_STOP = " never reached its assertion";
 const SUITE_STOP = /^(\S+) stopped early, /;
 const STANZA_HEAD = /^ {2}\S+ (never reached its assertion|stopped early):/;
