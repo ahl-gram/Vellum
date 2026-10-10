@@ -128,13 +128,19 @@ async function cl2Selection(ctx: SuiteContext): Promise<void> {
   await shoot("cluster-wash-1280.png");
 }
 
+// The wash's drawn size against the size its insets give it around the cluster: a fixed width or height is the retired slab.
+const POOL: Payload<{ filter: string; size: number[]; insetSize: number[] }> = `(() => {
+  const c = document.querySelector("header.chrome"), r = c.getBoundingClientRect(), cs = getComputedStyle(c, "::before"), px = (v) => parseFloat(v);
+  return { filter: cs.filter, size: [px(cs.width), px(cs.height)], insetSize: [r.width - px(cs.left) - px(cs.right), r.height - px(cs.top) - px(cs.bottom)] };
+})()`;
+
 async function cl3Blur({ evaluate, check }: SuiteContext): Promise<void> {
-  const filter = await evaluate<string>(`getComputedStyle(document.querySelector("header.chrome"), "::before").filter`);
-  const px = Number(/^blur\(([\d.]+)px\)$/.exec(filter)?.[1] ?? NaN);
+  const pool = await evaluate(POOL);
+  const px = Number(/^blur\(([\d.]+)px\)$/.exec(pool.filter)?.[1] ?? NaN);
   check(
-    "CL3 the cluster's wash fades at a 16 to 28px blur, so its edge never shows (#480, screenshot 3)",
-    px >= 16 && px <= 28,
-    filter,
+    "CL3 the cluster's wash fades at a 16 to 28px blur and is sized by its insets around the cluster alone, no fixed box, so its edge never shows (#480, screenshot 3)",
+    px >= 16 && px <= 28 && pool.size.every((s, i) => Math.abs(s - pool.insetSize[i]!) < 0.5),
+    JSON.stringify(pool),
   );
 }
 
