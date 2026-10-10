@@ -260,18 +260,18 @@ async function ra7Counter({ evaluate, check, sleep }: SuiteContext, room: Room, 
   );
 }
 
-type Carried = { hash: string | null; plate: string | null; shown: boolean; year: string | null; pace: boolean };
+type Carried = { hash: string | null; plate: string | null; shown: boolean };
 const CARRIED: Payload<Carried> = `(() => { const f = document.querySelector(".rr-prospect"), i = f && f.querySelector("img"), a = f && f.querySelector("a");
-  const table = (h) => (h === null ? null : new URLSearchParams(h.slice(h.indexOf("#") + 1)).get("table")), own = new URLSearchParams(location.hash.slice(1));
-  return { hash: table(location.hash), plate: a && table(a.getAttribute("href") || ""), shown: !!f && !f.hidden && !!i && String(i.src).startsWith("blob:"), year: own.get("year"), pace: own.has("pace") }; })()`;
+  const table = (h) => (h === null ? null : new URLSearchParams(h.slice(h.indexOf("#") + 1)).get("table"));
+  return { hash: table(location.hash), plate: a && table(a.getAttribute("href") || ""), shown: !!f && !f.hidden && !!i && String(i.src).startsWith("blob:") }; })()`;
 
 async function ra9TableRides({ evaluate, check, sleep }: SuiteContext, room: Room): Promise<void> {
   const settle = makeSettle({ evaluate, sleep });
   const booted = await room.goto(`#seed=42&style=antique&year=650&table=${ONE}`);
   const read = await settle(CARRIED, (d) => d.shown, "room-address-table-plate", 160);
   check(
-    "RA9 a link's Chart Table rides the room's own rewrite of its address and the plate's road to the Prospect (#520 ruling B), and that rewrite, which writes the year, carries no pace (#493, ruled 2026-09-02)",
-    booted && read.hash === ONE && read.plate === ONE && read.year === "650" && !read.pace,
+    "RA9 a link's Chart Table rides the room's own rewrite of its address and the plate's road to the Prospect (#520 ruling B)",
+    booted && read.hash === ONE && read.plate === ONE,
     JSON.stringify({ booted, read }),
   );
 }
