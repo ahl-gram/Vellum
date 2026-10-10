@@ -9,11 +9,12 @@ import type { LandfallKit } from "./kit.ts";
 type Box = { x: number; y: number; w: number; h: number };
 const PANEL: readonly Rgba[] = [tokenRgba("--chart-ink", 0.85), tokenRgba("--chart-ink", 0.72)];
 const PARCHMENT = tokenRgba("--parchment");
-const paneled = (stops: number[][]) => stops.length === PANEL.length && stops.every((s, i) => nearRgba(s, PANEL[i]!));
+// Alpha within 1 (measured 2026-10-10: 0.85 reads 217 and 0.72 reads 184, the canvas round trip exact to the unit), so a stop moved by 0.01 reads as moved.
+const paneled = (stops: number[][]) =>
+  stops.length === PANEL.length && stops.every((s, i) => nearRgba(s, PANEL[i]!, 1));
 
 const BOX = `((e) => { const r = e.getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height }; })`;
 
-// The ground under a line of text: the median pixel of a one-row strip just clear of the line, inside its panel.
 async function groundOf({ send }: SuiteContext, b: Box, dy: number): Promise<[number, number, number]> {
   const row = await sampleRow(send, Math.round(b.x), Math.round(dy < 0 ? b.y + dy : b.y + b.h + dy), Math.round(b.w));
   return [...row].sort((p, q) => luminance(p) - luminance(q))[Math.floor(row.length / 2)]!;
@@ -290,7 +291,6 @@ export async function l20Stations(k: LandfallKit): Promise<void> {
 
 type SlipBox = { siblings: string[]; floats: string[]; open: boolean; capped: number; landfall: number; clips: string };
 
-// A scratch block far taller than the stage is put into the open slip for one read and taken out again: the cap is what the slip's box does with it.
 const SLIP_BOX: Payload<SlipBox> = `(() => {
   const stage = document.getElementById("lf-stage"), slip = document.getElementById("lf-card-gallery"), cs = getComputedStyle(slip);
   const siblings = []; for (let e = stage.nextElementSibling; e; e = e.nextElementSibling) siblings.push(e.tagName + (e.id ? "#" + e.id : ""));
@@ -336,7 +336,7 @@ export async function l29SlipBox(k: LandfallKit): Promise<void> {
 }
 
 type Veil = { lift: string[]; ring: string[]; needle: string[] };
-type Still = { rose: string[]; offsets: string[]; delay: string };
+type Still = { rose: string[]; offsets: string[]; shown: string[]; turn: number; delay: string };
 
 const VEIL: Payload<Veil> = `(() => {
   const v = document.createElement("div"); v.className = "veil lifting";
@@ -346,13 +346,12 @@ const VEIL: Payload<Veil> = `(() => {
   finally { v.remove(); }
 })()`;
 
-// Scratch elements read and removed in one evaluate: the rose's ring as the veil carries it, and a bare block given a delayed animation of its own.
 const STILL: Payload<Still> = `(() => {
   const r = document.createElement("div"); r.innerHTML = '<svg class="veil-rose"><circle class="rose-ring"></circle><circle class="rose-ring inner"></circle><g class="rose-rays"><path></path></g><path class="rose-needle"></path></svg>';
   const d = document.createElement("div"); d.style.animation = "lf-scratch 1s linear 2s";
   document.body.append(r, d);
-  try { const cs = (s) => getComputedStyle(r.querySelector(s)), rose = [".rose-ring:not(.inner)", ".rose-ring.inner", ".rose-rays path", ".rose-needle"];
-    return { rose: rose.map((s) => cs(s).animationName), offsets: rose.slice(0, 2).map((s) => cs(s).strokeDashoffset), delay: getComputedStyle(d).animationDelay }; }
+  try { const cs = (s) => getComputedStyle(r.querySelector(s)), rose = [".rose-ring:not(.inner)", ".rose-ring.inner", ".rose-rays path", ".rose-needle"], needle = new DOMMatrixReadOnly(cs(".rose-needle").transform);
+    return { rose: rose.map((s) => cs(s).animationName), offsets: rose.slice(0, 2).map((s) => cs(s).strokeDashoffset), shown: [cs(".rose-rays path").opacity, cs(".rose-needle").opacity], turn: Math.round(Math.atan2(needle.b, needle.a) * 180 / Math.PI), delay: getComputedStyle(d).animationDelay }; }
   finally { r.remove(); d.remove(); }
 })()`;
 
@@ -369,12 +368,14 @@ export async function l31Veil(k: SuiteContext): Promise<void> {
   const veil = await k.evaluate(VEIL);
   const still = await stilled(k);
   k.check(
-    "L31 the veil lifts, its rings draw and its needle settles by keyframes of home's own, and under reduced motion both rings stand drawn and the rays and the needle still (#457)",
+    "L31 the veil lifts, its rings draw and its needle settles by keyframes of home's own, and under reduced motion the rose stands finished and still: both rings drawn, the rays shown at 0.75, the needle shown and settled at 16 degrees (#457)",
     veil.lift.includes("veil-lift") &&
       veil.ring.includes("rose-draw") &&
       veil.needle.includes("needle-settle") &&
       still.rose.every((n) => n === "none") &&
-      still.offsets.every((o) => o === "0px"),
+      still.offsets.every((o) => o === "0px") &&
+      JSON.stringify(still.shown) === JSON.stringify(["0.75", "1"]) &&
+      still.turn === 16,
     JSON.stringify({ veil, still }),
   );
 }

@@ -39,7 +39,6 @@ export async function l13Stations({ evaluate, check }: SuiteContext): Promise<vo
   );
 }
 
-// The page's own words: every text node but a script's or a style's.
 const PAGE_TEXT = `(() => { const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT); let s = ""; while (w.nextNode()) if (!w.currentNode.parentElement.closest("script, style")) s += w.currentNode.textContent; return s; })()`;
 
 type Slip = { id: string; kids: string[]; enter: string | null; arms: string[] };

@@ -60,7 +60,7 @@ test("sampleRow never falls back to the viewport clip: a scroll read that throws
   }
 });
 
-test("tokenRgba reads a palette token's channels and an alpha in 0 to 255, and nearRgba allows 2 a channel and 3 on alpha, no more", () => {
+test("tokenRgba reads a palette token's channels and an alpha in 0 to 255, and nearRgba allows 2 a channel and 3 on alpha, or the alpha it is handed, no more", () => {
   assert.deepEqual(tokenRgba("--parchment"), [239, 230, 207, 255]);
   assert.deepEqual(tokenRgba("--chart-ink", 0.55), [61, 47, 31, 140]);
   const want = tokenRgba("--parchment");
@@ -69,4 +69,7 @@ test("tokenRgba reads a palette token's channels and an alpha in 0 to 255, and n
   assert.ok(!nearRgba([239, 230, 207, 251], want), "4 off the alpha");
   assert.ok(!nearRgba([239, 230, 207], want), "a read missing its alpha");
   assert.ok(!nearRgba(null, want) && !nearRgba(undefined, want), "no read at all");
+  const stop = tokenRgba("--chart-ink", 0.85);
+  assert.ok(nearRgba([61, 47, 31, 216], stop, 1), "a panel stop's own rounding passes the tighter alpha");
+  assert.ok(!nearRgba([61, 47, 31, 214], stop, 1), "a stop moved by 0.01 does not");
 });

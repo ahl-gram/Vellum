@@ -97,34 +97,41 @@ export async function l9hControlTap({ evaluate, check, sleep, touch, camNow, rec
   );
 }
 
-// The kit sheet is linked on every page, so a kit rule on a class home also wears leaks onto home unless a chart room or a room scopes it; an arm's state and pseudo-element are set aside so it is read whatever state it names, and the Glass, which home wears through the kit on purpose, is L24's.
+const ARMS = `((list) => { const out = []; let depth = 0, start = 0; for (let i = 0; i < list.length; i++) { const c = list[i]; if (c === "(") depth++; else if (c === ")") depth--; else if (c === "," && depth === 0) { out.push(list.slice(start, i).trim()); start = i + 1; } } return [...out, list.slice(start).trim()]; })`;
+
 const KIT_WALK = (
   plants: readonly string[],
-): Payload<{ sheets: number; arms: number; offenders: string[] }> => `(() => {
+): Payload<{ sheets: number; arms: number; offenders: string[]; unparsed: string[] }> => `(() => {
   const SCOPED = /(^|\\s)body\\.(?:chart-room|room)\\b/;
   const kit = [...document.styleSheets].filter((s) => /\\/atelier[^/]*\\.css$/.test(s.href || ""));
   const glass = document.getElementById("lf-controls");
   const at = ${JSON.stringify(plants)}.map((p) => kit[0].insertRule(p, kit[0].cssRules.length));
   try {
-    const arms = [];
-    const walk = (rules) => { for (const r of rules) { if (r instanceof CSSStyleRule) arms.push(...r.selectorText.split(",").map((a) => a.trim())); else if (r.cssRules) walk(r.cssRules); } };
+    const arms = [], unparsed = [], split = ${ARMS};
+    const walk = (rules) => { for (const r of rules) { if (r instanceof CSSStyleRule) arms.push(...split(r.selectorText)); else if (r.cssRules) walk(r.cssRules); } };
     kit.forEach((s) => walk(s.cssRules));
     const bare = (a) => a.replace(/::?(before|after|placeholder|marker|selection|-webkit-[a-z-]+)\\b.*$/, "").replace(/:(hover|focus-visible|focus-within|focus|active)\\b/g, "");
-    const reaches = (a) => { try { return [...document.querySelectorAll(bare(a) || "*")].some((e) => !glass.contains(e)); } catch { return false; } };
-    return { sheets: kit.length, arms: arms.length, offenders: arms.filter((a) => /\\./.test(a) && !SCOPED.test(a) && reaches(a)) };
+    const reaches = (a) => { try { return [...document.querySelectorAll(bare(a) || "*")].some((e) => !glass.contains(e)); } catch { unparsed.push(a); return false; } };
+    return { sheets: kit.length, arms: arms.length, offenders: arms.filter((a) => /\\./.test(a) && !SCOPED.test(a) && reaches(a)), unparsed };
   } finally { at.reverse().forEach((i) => kit[0].deleteRule(i)); }
 })()`;
-const PLANTS = [".stage:hover { position: fixed; }", ".stage .sheet { color: red; }"];
+const PLANTS = [
+  ".stage:hover { position: fixed; }",
+  ".stage .sheet { color: red; }",
+  ".stage :is(.sheet, .lf-chart) { color: red; }",
+];
 
 export async function l23KitReach({ evaluate, check }: SuiteContext): Promise<void> {
   const walk = await evaluate(KIT_WALK([]));
   const planted = await evaluate(KIT_WALK(PLANTS));
   check(
-    "L23 no kit rule reaches home: every arm of the kit's sheet that names a class and is not scoped to a chart room or a room matches nothing home wears outside the Glass, in any state, and a bare rule and a compound of home's classes planted into the sheet are both read as reaching it (#487, the #302 inverse)",
+    "L23 no kit rule reaches home: every arm of the kit's sheet that names a class and is not scoped to a chart room or a room matches nothing home wears outside the Glass, in any state, every arm parses, and a bare rule, a compound of home's classes and an arm whose brackets hold a comma, planted into the sheet, are each read as reaching it (#487, the #302 inverse)",
     walk.sheets > 0 &&
       walk.arms > 0 &&
       walk.offenders.length === 0 &&
-      JSON.stringify(planted.offenders) === JSON.stringify([".stage:hover", ".stage .sheet"]),
+      walk.unparsed.length === 0 &&
+      JSON.stringify(planted.offenders) ===
+        JSON.stringify([".stage:hover", ".stage .sheet", ".stage :is(.sheet, .lf-chart)"]),
     JSON.stringify({ walk, planted }),
   );
 }
@@ -139,7 +146,6 @@ async function tabToZoomIn({ evaluate, send }: LandfallKit): Promise<boolean> {
   );
 }
 
-// Each kit declaration on an element of the Glass that is not dress is taken off its live rule for one read and put back: a computed value that moves means the kit's declaration wins on home's camera.
 const LEAKS = (plant: string | null): Payload<{ rules: number; wins: string[][] }> => `(() => {
   const SCOPED = /(^|\\s)body\\.(?:chart-room|room)\\b/;
   const DRESS = /^(display|flex-direction|gap|row-gap|column-gap|align-items|transition|line-height|width|height|font|color|background|border|cursor|text-align)/;
@@ -147,11 +153,11 @@ const LEAKS = (plant: string | null): Payload<{ rules: number; wins: string[][] 
   const glass = [document.getElementById("lf-controls"), ...document.querySelectorAll("#lf-controls *")];
   const at = ${JSON.stringify(plant)} === null ? -1 : kit[0].insertRule(${JSON.stringify(plant)}, kit[0].cssRules.length);
   try {
-    const rules = [], wins = [];
+    const rules = [], wins = [], split = ${ARMS};
     const walk = (list) => { for (const r of list) { if (r instanceof CSSStyleRule) rules.push(r); else if (r.cssRules && !(r instanceof CSSMediaRule && !matchMedia(r.conditionText).matches)) walk(r.cssRules); } };
     kit.forEach((s) => walk(s.cssRules));
     for (const r of rules) {
-      const arms = r.selectorText.split(",").map((a) => a.trim()).filter((a) => !SCOPED.test(a) && !a.includes("body:has") && /\\./.test(a));
+      const arms = split(r.selectorText).filter((a) => !SCOPED.test(a) && !a.includes("body:has") && /\\./.test(a));
       const hit = glass.filter((e) => arms.some((a) => { try { return e.matches(a); } catch { return false; } }));
       if (!hit.length) continue;
       for (const p of [...r.style]) {
@@ -173,7 +179,9 @@ export async function l24CameraLeaks(k: LandfallKit): Promise<void> {
   const { evaluate, send, check } = k;
   const rest = await evaluate(LEAKS(null));
   const planted = await evaluate(LEAKS(".corner { top: 3px; }"));
-  const focused = (await tabToZoomIn(k)) ? await evaluate(LEAKS(null)) : null;
+  const tabbed = await tabToZoomIn(k);
+  const focused = tabbed ? await evaluate(LEAKS(null)) : null;
+  const bracketed = tabbed ? await evaluate(LEAKS(".corner :is(a, button):focus-visible { margin-top: 3px; }")) : null;
   await evaluate(`document.activeElement instanceof HTMLElement && document.activeElement.blur()`);
   const at = await evaluate(ZOOM_IN_AT);
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: at.x, y: at.y, button: "none" });
@@ -184,15 +192,18 @@ export async function l24CameraLeaks(k: LandfallKit): Promise<void> {
     await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 20, y: 20, button: "none" });
   }
   check(
-    "L24 home wears the kit's camera through the component alone: no kit declaration that is not dress wins on the Glass at rest, under a keyboard's focus or under the hand, and a seat planted on the corner and a lift planted on a hovered press are each read as winning (#505)",
+    "L24 home wears the kit's camera through the component alone: no kit declaration that is not dress wins on the Glass at rest, under a keyboard's focus or under the hand, and a seat planted on the corner, a lift planted on a hovered press and one planted on a focused press through an arm whose brackets hold a comma are each read as winning (#505)",
     rest.rules > 0 &&
       rest.wins.length === 0 &&
       !!focused &&
       focused.wins.length === 0 &&
+      !!bracketed &&
+      bracketed.wins.length === 1 &&
+      bracketed.wins[0]![1] === "margin-top" &&
       planted.wins.some((w) => w[1] === "top") &&
       hovered.wins.length === 1 &&
       hovered.wins[0]![1] === "margin-top",
-    JSON.stringify({ rest, focused, planted, hovered }),
+    JSON.stringify({ rest, focused, bracketed, planted, hovered }),
   );
 }
 

@@ -192,7 +192,6 @@ async function openSlip(
   return s;
 }
 
-// A point on bare chart: inside the stage, clear of every slip, station, mark of the Glass and the corner chrome.
 const BARE: Payload<Point | null> = `(() => {
   const s = document.getElementById("lf-stage").getBoundingClientRect();
   for (const fx of [0.15, 0.25, 0.35, 0.5]) for (const fy of [0.3, 0.5, 0.7]) {
@@ -206,7 +205,8 @@ async function tapKeeps(k: LandfallKit): Promise<{ kept: boolean; closed: boolea
   const { evaluate, clickAt, sleep } = k;
   await openSlip(k, "gallery");
   const zoom = await evaluate(buttonPoint("#zoom-in"));
-  if (zoom) await clickAt(Math.round(zoom.x), Math.round(zoom.y));
+  if (!zoom) throw new Error("L28: no #zoom-in to press inside the stage");
+  await clickAt(Math.round(zoom.x), Math.round(zoom.y));
   await sleep(600);
   const kept = (await evaluate(OPEN("gallery"))).open;
   const bare = await evaluate(BARE);

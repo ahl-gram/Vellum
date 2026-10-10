@@ -124,7 +124,7 @@ test("the roles are worn: page markup carries the shared classes (#324)", () => 
   );
 });
 
-// A rule for a class no element wears paints nothing, so this retire pin stays a source read for part 2i of Issue #779; home's faces are e2e L25.
+// A rule for a class no element wears paints nothing, so this retire pin stays a source read for part 2i of Issue #779.
 test("home's sheet keeps no dress for the notice panel that left with its section (#459)", () => {
   const css = read("public/index.css").replace(/\/\*[\s\S]*?\*\//g, "");
   assert.ok(!css.includes(".notice-body"), "the notice panel left home with its section (#459)");

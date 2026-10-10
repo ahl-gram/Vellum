@@ -82,7 +82,6 @@ async function l1Desktop(k: LandfallKit): Promise<void> {
   await l4l8Enters(k);
 }
 
-// Home read at rest on a fresh landfall (Issue #779 part 2f): its markup, its dress and the kit's reach, then the reads that take a gesture, each undoing it, then the two under emulated reduced motion.
 async function l13Home(k: LandfallKit, step: ReturnType<typeof makeStep>): Promise<void> {
   await k.settleHome();
   await step("L13", () => l13Stations(k));

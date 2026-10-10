@@ -84,5 +84,5 @@ export const tokenRgba = (token: keyof typeof SITE_PALETTE, alpha = 1): Rgba => 
   return [channel(1), channel(3), channel(5), Math.round(alpha * 255)];
 };
 
-export const nearRgba = (got: readonly number[] | null | undefined, want: Rgba): boolean =>
-  !!got && got.length === 4 && got.every((v, i) => Math.abs(v - want[i]!) <= (i === 3 ? 3 : 2));
+export const nearRgba = (got: readonly number[] | null | undefined, want: Rgba, alpha = 3): boolean =>
+  !!got && got.length === 4 && got.every((v, i) => Math.abs(v - want[i]!) <= (i === 3 ? alpha : 2));

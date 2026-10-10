@@ -210,8 +210,8 @@ const shadowOf = (s: Shade, geometry: string, alpha: number) =>
   !!s && s.geometry === geometry && nearRgba(s.colour, CHART_INK(alpha));
 const panelOf = (p: Panel, rem: number, insets: readonly number[]) =>
   p.stops.length === 2 &&
-  nearRgba(p.stops[0], CHART_INK(0.85)) &&
-  nearRgba(p.stops[1], CHART_INK(0.72)) &&
+  nearRgba(p.stops[0], CHART_INK(0.85), 1) &&
+  nearRgba(p.stops[1], CHART_INK(0.72), 1) &&
   p.insets.every((v, i) => Math.abs(v - insets[i]! * rem) < 0.05);
 
 const dressed = (d: Dress) =>

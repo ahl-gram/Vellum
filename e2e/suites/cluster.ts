@@ -128,7 +128,6 @@ async function cl2Selection(ctx: SuiteContext): Promise<void> {
   await shoot("cluster-wash-1280.png");
 }
 
-// The wash's drawn size against the size its insets give it around the cluster: a fixed width or height is the retired slab.
 const POOL: Payload<{ filter: string; size: number[]; insetSize: number[] }> = `(() => {
   const c = document.querySelector("header.chrome"), r = c.getBoundingClientRect(), cs = getComputedStyle(c, "::before"), px = (v) => parseFloat(v);
   return { filter: cs.filter, size: [px(cs.width), px(cs.height)], insetSize: [r.width - px(cs.left) - px(cs.right), r.height - px(cs.top) - px(cs.bottom)] };
@@ -167,7 +166,6 @@ async function cl4Offsets(k: TrailKit): Promise<void> {
   );
 }
 
-// Off its links, the first point inside the cluster's own box that no link covers.
 const HAND: Payload<{ through: boolean; point: number[] | null; link: boolean }> = `(() => {
   scrollTo({ top: 0, left: 0, behavior: "instant" });
   const c = document.querySelector("header.chrome"), b = c.getBoundingClientRect(), a = c.querySelector("nav.rooms a"), ar = a.getBoundingClientRect();

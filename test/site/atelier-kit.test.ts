@@ -168,7 +168,7 @@ test("AK7 the camera's press is home's face everywhere (#505, ruled 2026-09-02):
   );
 });
 
-// A second seat rule that repeats the first changes nothing a page shows, so the count stays a source read for part 2i of Issue #779; the seat, its reveal, ring, touch and bindings are e2e H18 and L30.
+// A second seat rule that repeats the first changes nothing a page shows, so the count stays a source read for part 2i of Issue #779.
 test("AK8 home's camera has one seat rule, at every width (#505, ruled 2026-09-02: home keeps its own seat)", () => {
   const seats = [...read("public/index.css").matchAll(/#lf-controls\s*\{([^}]*)\}/g)];
   assert.equal(
