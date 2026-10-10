@@ -1,5 +1,6 @@
 // What a hover, a press and print do on the Ribbon (Issue #779 part 2g): a row's hover in the text's dress, the Glass and its silent refit, and paper standing a leaned camera down.
 import { nearRgba, PAGE_RGBA, tokenRgba } from "../../support/pixel.ts";
+import { makeMouse } from "../../support/home.ts";
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload } from "../../types.ts";
 import { glideLanded, homeCamera, LENS, midGlideRefit, lensRest, ZOOM_IN } from "../print-room/print.ts";
@@ -10,6 +11,9 @@ type Lean = {
   x: number;
   y: number;
   hover: boolean;
+  focus: boolean;
+  active: boolean;
+  on: boolean;
   moving: boolean;
   stops: number[][];
   image: string;
@@ -17,32 +21,45 @@ type Lean = {
   shadow: string;
 };
 const LEAN: Payload<Lean> = `(() => { const rgba = ${PAGE_RGBA}, b = document.querySelector("#rb-itinerary .lean"), r = b.getBoundingClientRect(), cs = getComputedStyle(b);
-  return { x: r.left + Math.min(40, r.width / 2), y: r.top + r.height / 2, hover: b.matches(":hover"), moving: b.getAnimations().length > 0, image: cs.backgroundImage,
+  return { x: r.left + Math.min(40, r.width / 2), y: r.top + r.height / 2, hover: b.matches(":hover"), focus: b.matches(":focus-visible"), active: b.matches(":active"), on: b.parentElement.classList.contains("on"), moving: b.getAnimations().length > 0, image: cs.backgroundImage,
     stops: /^linear-gradient\\(to right, /.test(cs.backgroundImage) ? (cs.backgroundImage.match(/(color|rgba?|oklab)\\([^)]*\\)/g) || []).map(rgba) : [], transform: cs.transform, shadow: cs.boxShadow }; })()`;
+
+const washed = (d: Lean): boolean =>
+  d.stops.length === 2 &&
+  nearRgba(d.stops[0], tokenRgba("--control-gold")) &&
+  d.stops[1]![3] === 0 &&
+  d.transform === "none" &&
+  d.shadow === "none";
+const still = (d: Lean, last: Lean | null): boolean =>
+  !d.moving && !!last && JSON.stringify(d) === JSON.stringify(last);
 
 export async function rb13RowHover(k: RibbonKit): Promise<void> {
   const { evaluate, send, check, sleep, opened } = k;
+  const settle = makeSettle({ evaluate, sleep });
+  const mouse = makeMouse({ send, sleep });
   await opened("seed 42, for a row's hover");
   try {
     const atRest = await evaluate(LEAN);
     await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: atRest.x, y: atRest.y });
-    const hovered = await makeSettle({ evaluate, sleep })(
-      LEAN,
-      (d, last) => d.hover && !d.moving && !!last && JSON.stringify(d) === JSON.stringify(last),
-      "ribbon-row-hovered",
-    );
+    const hovered = await settle(LEAN, (d, last) => d.hover && still(d, last), "ribbon-row-hovered");
+    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 700 });
+    await evaluate(`(() => { document.querySelector("#itinerary .slip-fold").focus(); return true; })()`);
+    await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9 });
+    await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9 });
+    const keyed = await settle(LEAN, (d, last) => d.focus && !d.hover && still(d, last), "ribbon-row-keyed");
+    await evaluate(`(() => { document.activeElement.blur(); return true; })()`);
+    await mouse.press(atRest.x, atRest.y);
+    await mouse.moveTo({ x: atRest.x, y: atRest.y }, { x: 1, y: 700 });
+    const held = await settle(LEAN, (d, last) => d.active && !d.hover && !d.focus && still(d, last), "ribbon-row-held");
     check(
-      "RB13 a row's hover keeps the text's dress against the house button skin: at rest no wash (the control), under a real hand the gold wash fading to nothing, no lift and no shadow",
-      atRest.image === "none" &&
-        hovered.stops.length === 2 &&
-        nearRgba(hovered.stops[0], tokenRgba("--control-gold")) &&
-        hovered.stops[1]![3] === 0 &&
-        hovered.transform === "none" &&
-        hovered.shadow === "none",
-      JSON.stringify({ atRest, hovered }),
+      "RB13 a row's hover, keyboard focus and held press keep the text's dress against the house button skin: at rest no wash (the control), and under a real hand, a real Tab and a press held off the row the gold wash fading to nothing, no lift and no shadow",
+      atRest.image === "none" && washed(hovered) && washed(keyed) && !keyed.on && washed(held) && !held.on,
+      JSON.stringify({ atRest, hovered, keyed, held }),
     );
   } finally {
+    await mouse.release(1, 700);
     await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 700 });
+    await evaluate(`(() => { if (document.activeElement) document.activeElement.blur(); return true; })()`);
   }
 }
 
