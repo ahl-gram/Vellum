@@ -139,7 +139,6 @@ const LIST_AT_REFORMAT: Readonly<Record<string, readonly [number, number]>> = {
   "test/site/atelier-kit.test.ts": [0, 1],
   "test/site/chart-drawer.test.ts": [1, 1],
   "test/site/contents-row.test.ts": [0, 1],
-  "test/site/gallery-room.test.ts": [0, 1],
   "test/site/house-style.test.ts": [0, 1],
   "test/site/living-chart-css.test.ts": [0, 1],
   "test/site/living-chart-no-bar-card.test.ts": [1, 1],

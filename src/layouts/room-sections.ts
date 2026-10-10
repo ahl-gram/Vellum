@@ -1,4 +1,4 @@
-// The index slip's sections, read at BUILD time from the page's own source so the index cannot drift from the prose it points at; the h2 sections and their entries are the same shapes test/site/glossary-sections.test.ts parses.
+// The index slip's sections, read at BUILD time from the page's own source so the index cannot drift from the prose it points at.
 
 export interface IndexEntry {
   readonly id: string;

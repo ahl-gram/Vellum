@@ -494,11 +494,6 @@
       "count": 1
     }
   },
-  "test/site/gallery-room.test.ts": {
-    "max-lines-per-function": {
-      "count": 1
-    }
-  },
   "test/site/house-style.test.ts": {
     "max-lines-per-function": {
       "count": 1

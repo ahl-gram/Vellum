@@ -49,7 +49,7 @@ const shellDeclarations = (): Map<string, string[]> => {
   return found;
 };
 
-test("public/shell.css declares each palette token once at its ratified value, and each depth shadow once (Issue #263, Issue #367, Issue #463)", () => {
+test("public/shell.css declares each palette token once at its ratified value, each depth shadow once, and the walnut deep once (Issue #263, Issue #367, Issue #463, Issue #461)", () => {
   const declared = shellDeclarations();
   for (const [name, hex] of Object.entries(TOKENS))
     assert.deepEqual(declared.get(name), [hex], `public/shell.css should declare ${name}: ${hex}, once`);
@@ -64,6 +64,7 @@ test("public/shell.css declares each palette token once at its ratified value, a
     ["0 18px 60px rgb(from var(--chart-ink) r g b / 0.55)"],
     "the stage shadow is declared once, the mockup's own dress",
   );
+  assert.equal(declared.get("--the-deep")?.length, 1, "the walnut deep is declared once, so ground and band share it");
 });
 
 test("the composers dress from the same palette (#269 review follow-up)", async () => {
@@ -145,23 +146,6 @@ test("the plate dress rests flat and tips on hover (#130, the consumer is now pr
   );
 });
 
-test("the wordmark tips under the hand on room pages, and stays still on home (#289)", () => {
-  const css = read("public/motion.css");
-  // Keyed on .wordmark, not h1 (Issue #288): on a room page the h1 is the room name with no link to tip, so keying on h1 would silently select nothing.
-  const hover = css.match(
-    /body:has\(\.room-name\) \.wordmark a:hover,\s*body:has\(\.room-name\) \.wordmark a:focus-visible\s*\{([^}]*)\}/,
-  );
-  assert.ok(hover, "the room-scoped wordmark hover rule should exist in motion.css");
-  assert.ok(
-    /rotate\(/.test(hover[1]!) && /translateY\(/.test(hover[1]!),
-    "the wordmark should tip (rotate) and lift (translateY) under the hand",
-  );
-  assert.ok(
-    !/(?<!\(\.room-name\) )\.wordmark a:hover/.test(css.replace(/body:has\(\.room-name\) \.wordmark a:hover/g, "")),
-    "no unscoped .wordmark a:hover may leak the tip onto home",
-  );
-});
-
 test("#402 the prospect reveal releases its transform: fill backwards, never both/forwards", () => {
   const css = read("public/reading-room/index.css");
   const rule = rulesIn(css).find((r) => /\.rr-prospect img\b/.test(r.selector) && /animation\s*:/.test(r.body));
@@ -213,44 +197,14 @@ test("each lifting surface consumes ITS token, not just a token (#405)", () => {
   }
 });
 
-type CssRule = { readonly media: readonly string[]; readonly selector: string; readonly body: string };
-function cssRules(css: string, media: readonly string[] = []): CssRule[] {
-  const out: CssRule[] = [];
-  for (let i = 0, open = css.indexOf("{"); open >= 0; open = css.indexOf("{", i)) {
-    let close = open + 1;
-    for (let depth = 1; depth > 0 && close < css.length; close++)
-      depth += css[close] === "{" ? 1 : css[close] === "}" ? -1 : 0;
-    const prelude = css.slice(i, open).trim();
-    const body = css.slice(open + 1, close - 1);
-    if (prelude.startsWith("@media")) out.push(...cssRules(body, [...media, prelude]));
-    else if (!prelude.startsWith("@")) out.push({ media, selector: prelude, body });
-    i = close;
-  }
-  return out;
-}
-
-const shellRules = cssRules(layoutStyle().replace(/\/\*[\s\S]*?\*\//g, ""));
-const trailRules = shellRules.filter((r) => /\.(trail|also|where)\b/.test(r.selector));
-const ruleAt = (selector: string, media: readonly string[]): string => {
-  const found = shellRules.filter(
-    (r) => r.selector.replace(/\s+/g, " ") === selector && JSON.stringify(r.media) === JSON.stringify(media),
-  );
-  assert.equal(found.length, 1, `exactly one rule ${selector} under ${JSON.stringify(media)}`);
-  return found[0]!.body;
-};
-
-test("the trail is quiet by size and never by a dimmer ink: no rule that dresses it reaches for an ink under the floor on the deep (Issue #668)", () => {
-  assert.ok(
-    trailRules.length >= 10,
-    `the reader found the trail's rules (${trailRules.length}), so the sweep below is not of nothing`,
-  );
-  for (const r of trailRules)
+// A `:visited` link's colour is one no browser hands a script (Issue #779 part 2f).
+test("no rule that dresses the trail reaches for an ink under the floor on the deep, in any state (Issue #668)", () => {
+  const trail = rulesIn(layoutStyle()).filter((r) => /\.(trail|also|where)\b/.test(r.selector));
+  assert.ok(trail.length >= 10, `the reader found the trail's rules (${trail.length}), so the sweep is not of nothing`);
+  for (const r of trail)
     assert.doesNotMatch(
       r.body,
       /--ink-faded|--line-tan/,
       `${r.selector} wears an ink that reads under 4.5:1 on the deep`,
     );
-  const here = ruleAt('.trail [aria-current="page"], .trail .here', []);
-  assert.match(here, /color:\s*var\(--parchment-bright\)/, "the page's own segment brightens");
-  assert.match(here, /text-decoration:\s*underline/, "and is underlined, never colour alone");
 });

@@ -1,5 +1,6 @@
 // A rendered-pixel strip for suites whose claim is about PAINT (opacity, a glyph showing through), which no hit-test or computed style can see; one row of a Page.captureScreenshot clip, decoded here with node:zlib so the harness takes no image dependency.
 import { inflateSync } from "node:zlib";
+import { SITE_PALETTE } from "../../src/atlas/palette.ts";
 
 const paeth = (a: number, b: number, c: number): number => {
   const p = a + b - c;
@@ -68,3 +69,17 @@ export async function sampleRow(
 }
 
 export const luminance = ([r, g, b]: readonly [number, number, number]): number => 0.2126 * r + 0.7152 * g + 0.0722 * b;
+
+export type Rgba = readonly [number, number, number, number];
+
+// Spliced into a payload: Chromium serialises one token colour as rgb(), color(srgb ...) or oklab(...) by property, so a check compares the channels one canvas pixel reads back; a canvas keeps its last fillStyle for a string it cannot parse, hence the sentinel.
+export const PAGE_RGBA = `((css) => { const c = document.createElement("canvas"); c.width = c.height = 1; const x = c.getContext("2d"); x.fillStyle = "#fe01fd"; x.fillStyle = css; if (x.fillStyle === "#fe01fd") throw new Error("not a colour: " + css); x.fillRect(0, 0, 1, 1); return [...x.getImageData(0, 0, 1, 1).data]; })`;
+
+export const tokenRgba = (token: keyof typeof SITE_PALETTE, alpha = 1): Rgba => {
+  const hex = SITE_PALETTE[token];
+  const channel = (at: number): number => parseInt(hex.slice(at, at + 2), 16);
+  return [channel(1), channel(3), channel(5), Math.round(alpha * 255)];
+};
+
+export const nearRgba = (got: readonly number[] | null | undefined, want: Rgba): boolean =>
+  !!got && got.length === 4 && got.every((v, i) => Math.abs(v - want[i]!) <= (i === 3 ? 3 : 2));

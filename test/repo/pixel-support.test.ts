@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { sampleRow } from "../../e2e/support/pixel.ts";
+import { nearRgba, sampleRow, tokenRgba } from "../../e2e/support/pixel.ts";
 
 // A 1x1 8-bit RGBA PNG, enough for the decoder.
 const PNG_1x1 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==";
@@ -58,4 +58,15 @@ test("sampleRow never falls back to the viewport clip: a scroll read that throws
     );
     assert.equal(shot, false, "no screenshot is taken on a failed scroll read");
   }
+});
+
+test("tokenRgba reads a palette token's channels and an alpha in 0 to 255, and nearRgba allows 2 a channel and 3 on alpha, no more", () => {
+  assert.deepEqual(tokenRgba("--parchment"), [239, 230, 207, 255]);
+  assert.deepEqual(tokenRgba("--chart-ink", 0.55), [61, 47, 31, 140]);
+  const want = tokenRgba("--parchment");
+  assert.ok(nearRgba([241, 228, 207, 252], want), "within 2 a channel and 3 on alpha");
+  assert.ok(!nearRgba([242, 230, 207, 255], want), "3 off a channel");
+  assert.ok(!nearRgba([239, 230, 207, 251], want), "4 off the alpha");
+  assert.ok(!nearRgba([239, 230, 207], want), "a read missing its alpha");
+  assert.ok(!nearRgba(null, want) && !nearRgba(undefined, want), "no read at all");
 });

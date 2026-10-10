@@ -172,7 +172,8 @@ const withoutMedia = (css: string): string => {
   return out + css.slice(at);
 };
 
-test("the layout stops a phone browser enlarging text inside the 1024 page (its effect on a real phone is UNVERIFIABLE under emulation, so the declaration is the pin)", () => {
+// Chromium reads the two spellings as one property, so no browser here sees each declared; iOS Safari reads the prefixed one (measured, Issue #779 part 2f).
+test("the layout declares both spellings of the text-size hold, outside every media block (Issue #761)", () => {
   const shell = readFileSync(resolve(import.meta.dirname, "..", "..", "public/shell.css"), "utf8");
   const screenRules = withoutMedia(shell.replace(/\/\*[\s\S]*?\*\//g, ""));
   assert.match(

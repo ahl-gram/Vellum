@@ -1,7 +1,7 @@
 // The trail under the nav (Issue #668), read at 1280, 901 and 640, the last two laying out the 1024 page (Issue #762): its links answer a hit-test and one takes a real press, it clears a thumb's 24px round each of its links and the nav's, and the band and the Gallery give it ground. Every target is HIT-TESTED, never clicked through element.click().
 import type { Payload, SuiteContext } from "../../types.ts";
 import { makeSettle } from "../../support/settle.ts";
-import { sampleRow } from "../../support/pixel.ts";
+import { nearRgba, PAGE_RGBA, sampleRow, tokenRgba } from "../../support/pixel.ts";
 
 type Box = { x: number; y: number; w: number; h: number; right: number; bottom: number };
 type Target = Box & { t: string; hit: boolean };
@@ -192,5 +192,63 @@ export async function dr13Gallery(k: TrailKit): Promise<void> {
     "DR13 the Gallery's first row stands clear of the head cluster with the trail in it, at 1280 and at 640, which lays out the 1024 page (Issue #762; Issue #668; the size of the gap is ruling 3's, provisional until Issue #736)",
     rows.length === 2 && rows.every((r) => r.gap >= 4),
     JSON.stringify(rows),
+  );
+}
+
+type Ground = { image: string; colour: number[]; layer: string };
+const GROUND: Payload<Ground> = `(() => { const cs = getComputedStyle(document.body); return { image: cs.backgroundImage, colour: (${PAGE_RGBA})(cs.backgroundColor), layer: getComputedStyle(document.body, "::before").display }; })()`;
+
+async function printedGround(k: TrailKit): Promise<Ground> {
+  try {
+    await k.send("Emulation.setEmulatedMedia", { media: "print" });
+    return await k.evaluate(GROUND);
+  } finally {
+    await k.send("Emulation.setEmulatedMedia", { media: "" });
+  }
+}
+
+export async function dr14PrintIsPaper(k: TrailKit): Promise<void> {
+  await k.goto("/faq/");
+  const screen = await k.evaluate(GROUND);
+  const paper = await printedGround(k);
+  k.check(
+    "DR14 print is paper all the way down: printed, the Q & A's body drops the dark ground it carries on screen and the fixed walnut layer over it stands down, the screen read in the same run the control (Issue #454 open decision 4)",
+    nearRgba(screen.colour, tokenRgba("--chart-ink")) &&
+      screen.layer !== "none" &&
+      paper.image === "none" &&
+      paper.colour[3] === 0 &&
+      paper.layer === "none",
+    JSON.stringify({ screen, paper }),
+  );
+}
+
+type Link = { x: number; y: number; hovered: boolean; moving: number; colour: number[] } | null;
+const LINK = (selector: string): Payload<Link> =>
+  `(() => { const a = document.querySelector(${JSON.stringify(selector)}); if (!a) return null; const b = a.getBoundingClientRect(); return { x: b.x + b.width / 2, y: b.y + b.height / 2, hovered: a.matches(":hover"), moving: a.getAnimations().length, colour: (${PAGE_RGBA})(getComputedStyle(a).color) }; })()`;
+
+async function hovered(k: TrailKit, selector: string): Promise<[number[], number[]]> {
+  const at = await k.evaluate(LINK(selector));
+  if (!at) throw new Error(`DR15: the Prospect carries no ${selector}`);
+  await k.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: at.x, y: at.y, button: "none" });
+  try {
+    const lit = await k.settle(LINK(selector), (d) => d.hovered && d.moving === 0, `hover ${selector}`, 40);
+    return [at.colour, lit.colour];
+  } finally {
+    await k.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 700, button: "none" });
+  }
+}
+
+const QUIET = [tokenRgba("--parchment"), tokenRgba("--parchment-bright")];
+
+export async function dr15TrailHover(k: TrailKit): Promise<void> {
+  await k.goto("/prospect/");
+  const [rest, lit] = await hovered(k, "header.chrome .trail a");
+  const alias = await hovered(k, "header.chrome .also a");
+  k.check(
+    "DR15 a trail link under the hand brightens to parchment-bright, and the alias link under the hand keeps a parchment ink, never a dimmer one (Issue #668)",
+    nearRgba(rest, tokenRgba("--parchment")) &&
+      nearRgba(lit, tokenRgba("--parchment-bright")) &&
+      alias.every((c) => QUIET.some((q) => nearRgba(c, q))),
+    JSON.stringify({ rest, lit, alias }),
   );
 }

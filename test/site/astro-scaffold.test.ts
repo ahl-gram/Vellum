@@ -314,38 +314,12 @@ test("astro.config keeps the contractual shape (site, trailing slash, no fingerp
   assert.ok(!("outDir" in config), "outDir must stay the default ./dist (deploy.yml uploads path: dist)");
 });
 
-test("BaseLayout prefetches the room shells so a first click commits instantly (#329)", () => {
-  const layout = readFileSync(root("src/layouts/BaseLayout.astro"), "utf8");
-  assert.ok(layout.includes('rel="prefetch"'), "the shell prefetches sibling rooms");
-  assert.match(
-    layout,
-    /NAV_ITEMS[\s\S]{0,200}rel="prefetch"|rel="prefetch"[\s\S]{0,200}NAV_ITEMS/,
-    "the prefetch list derives from NAV_ITEMS, never a hand-copied route list",
-  );
-});
-
-test("the shell is authored exactly once: pages carry no header/nav/footer/meta boilerplate", () => {
-  const layout = readFileSync(root("src/layouts/BaseLayout.astro"), "utf8");
-  for (const marker of ["<footer>", 'class="rooms"', 'property="og:title"', 'name="twitter:card"', "<title>"]) {
-    assert.ok(layout.includes(marker), `BaseLayout.astro should own the shell marker ${marker}`);
-  }
-  assert.ok(layout.includes("NAV_ITEMS"), "the layout should render the typed nav data, not hand-authored items");
-
+// A page's own html or head tag reaches no browser: the parser drops both inside body (measured on the Q & A, Issue #779 part 2f).
+test("no page's source opens its own html or head", () => {
   for (const p of PAGES) {
     const source = readFileSync(root(`src/pages/${p.route.replace("index.html", "index.astro")}`), "utf8");
-    // Meta-attribute forms: a bare "og:" false-positives on prose ("log:").
-    for (const marker of [
-      "<footer",
-      'class="rooms"',
-      'property="og:',
-      'name="twitter:',
-      "<title",
-      "<header",
-      "<html",
-      "<head",
-    ]) {
-      assert.ok(!source.includes(marker), `${p.route} source should not duplicate the shell (found ${marker})`);
-    }
+    for (const marker of [/<html[\s>]/, /<head[\s>]/])
+      assert.doesNotMatch(source, marker, `${p.route} source should not duplicate the shell`);
   }
 });
 
@@ -583,58 +557,19 @@ test("one page mark per page across nav and trail: one on every page in the tree
   }
 });
 
-test("the layout ships the cluster's ratified pins: leading, weight, the aria-current span (#461)", () => {
+test("the shell carries no retired cluster dress (#461 ruling 1)", () => {
   const css = readFileSync(join(outDir, "shell.css"), "utf8");
-  assert.match(
-    css,
-    /\.rooms\s*\{[^}]*font-size:\s*0?\.72rem/,
-    "one nav font size everywhere (the mockup's 0.72rem cluster nav)",
-  );
-  assert.match(
-    css,
-    /\.rooms\s+\[aria-current=(?:"page"|page)\]\s*\{[^}]*display:\s*inline-block/,
-    "the current label joins motion.css's inline-block rule so a multi-word label cannot wrap mid-label",
-  );
-  // The you-are-here marker never relies on color alone (Issue #268, re-ratified at Issue #461): brightened AND underlined.
-  assert.match(
-    css,
-    /\.rooms\s+\[aria-current=(?:"page"|page)\]\s*\{[^}]*color:\s*var\(--parchment-bright\)/,
-    "the current label brightens against the deep",
-  );
-  assert.match(
-    css,
-    /\.rooms\s+\[aria-current=(?:"page"|page)\]\s*\{[^}]*text-decoration(?:-line)?:\s*underline/,
-    "the current label is underlined",
-  );
-  // Issue #461's second addendum: the cluster pins its own line-height rather than inheriting the page's reading leading.
-  assert.match(
-    css,
-    /(?:header\.chrome|\.chrome)\s*\{[^}]*line-height:\s*normal/,
-    "the cluster pins line-height normal so the page's 1.6 cannot inflate its gaps",
-  );
-  assert.match(css, /\.wordmark\s*\{[^}]*line-height:\s*1\.15/, "the wordmark pins the mockup's 1.15");
-  assert.match(css, /\.wordmark\s*\{[^}]*letter-spacing:\s*0?\.12em/, "the wordmark wears the mockup's tracking");
-  assert.match(
-    css,
-    /\.wordmark\s*\{[^}]*font-weight:\s*400/,
-    "the wordmark pins the cluster's 400 against the h1 UA bold",
-  );
-  assert.match(css, /\.room-name\s*\{[^}]*font-weight:\s*400/, "the room name pins 400 against its h1's UA bold");
   assert.ok(!css.includes(".head-rule"), "the folio's double rule retired with the band (#461 ruling 1)");
   assert.ok(!css.includes(".manicule"), "the manicule retired with the folio nav (#461 ruling 1)");
   assert.ok(!css.includes(".topnav"), "the folio topnav retired; the cluster's .rooms nav replaced it");
 });
 
-test("a page whose markup carries the survey sheet passes desk open (#461, the interim rule's converse)", () => {
-  // The survey sheet is the BARE <div class="sheet">; the Explorer's chart mount is class="sheet" id="sheet", a different animal (sheet-frame.test.ts keys the same way).
+test("a page with no survey sheet keeps the interim desk (#461)", () => {
   for (const p of PAGES) {
     if (p.route === "index.html") continue;
     const source = readFileSync(root(`src/pages/${p.route.replace("index.html", "index.astro")}`), "utf8");
-    if (source.includes('<div class="sheet">')) {
-      assert.match(source, /desk="open"/, `${p.route} carries the survey sheet, so its layout call must open the desk`);
-    } else {
+    if (!source.includes('<div class="sheet">'))
       assert.ok(!source.includes('desk="open"'), `${p.route} has no survey sheet, so it keeps the interim desk panel`);
-    }
   }
 });
 

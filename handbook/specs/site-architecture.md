@@ -214,8 +214,8 @@ other way, which is what earns them a section of their own.
 - **`is:inline` on a working page's bundle-twin script tag is contractual.** Without it the build
   routes that script through its own pass, which the ratified #204 analysis rejects for these
   surfaces. **The guards name their pages by literal path, so the class is covered only indirectly**:
-  the source-level pins list their pages, while the built-output assertion that each app page keeps
-  its bundle-twin script tag rendered verbatim runs over `PAGES` in
+  the source-level pin in `test/site/app-bundles.test.ts` lists its pages, while the built-output
+  assertion that each app page keeps its bundle-twin script tag rendered verbatim runs over `PAGES` in
   `test/site/astro-scaffold.test.ts`, which a new working page joins. A page that omits `is:inline`
   AND skips that roster reds nothing. Copy a sibling page's script tag whole, and join the roster.
 

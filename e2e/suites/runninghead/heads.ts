@@ -15,12 +15,15 @@ import {
   SHELLED,
 } from "./reads.ts";
 import type { Bad, Head, Heads } from "./reads.ts";
+import { SHELL_READ } from "./shell.ts";
+import type { Shells } from "./shell.ts";
 
 const poolAlpha = (color: string) =>
   Number((String(color).match(/\/\s*([\d.]+)\)/) || String(color).match(/rgba\([^)]*,\s*([\d.]+)\)/) || [])[1] ?? "0");
 
 export async function rhSweep({ evaluate, shoot, visit }: RunningHeadKit) {
   const heads: Record<string, Head | undefined> = {};
+  const shells: Shells = {};
   const unreachable: string[] = [];
   for (const route of SHELLED) {
     if (!(await visit(route))) {
@@ -28,10 +31,11 @@ export async function rhSweep({ evaluate, shoot, visit }: RunningHeadKit) {
       continue;
     }
     heads[route] = JSON.parse(await evaluate(HEAD_READ)) as Head;
+    shells[route] = await evaluate(SHELL_READ, true);
     if (route === "/") await shoot("running-head-home.png");
     if (route === PROSE) await shoot("running-head-room.png");
   }
-  return { heads, unreachable };
+  return { heads, shells, unreachable };
 }
 
 export function rh0OneH1({ check }: SuiteContext, heads: Heads, unreachable: string[], bad: Bad): void {
