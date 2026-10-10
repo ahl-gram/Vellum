@@ -6,6 +6,7 @@ import { join, resolve } from "node:path";
 import { runBudgeted, runJob, type Runner } from "../../scripts/proof-runner/job.ts";
 import type { Job } from "../../scripts/proof-runner/list.ts";
 import { withTempRepo } from "../../test-support/proof-runner-repo.ts";
+import { git } from "../../test-support/sandbox-repo.ts";
 
 const REPORTER = resolve(import.meta.dirname, "..", "..", "scripts", "proof-runner", "reporter.ts");
 const patchOf = (from: string, to: string) =>
@@ -13,7 +14,8 @@ const patchOf = (from: string, to: string) =>
 const FILES = {
   "package.json": '{ "type": "module" }\n',
   "src/x.ts": "export const x = 1;\n",
-  "test/x.test.ts": 'import { test } from "node:test";\nimport assert from "node:assert/strict";\nimport { x } from "../src/x.ts";\ntest("x is one", () => assert.equal(x, 1));\n',
+  "test/x.test.ts":
+    'import { test } from "node:test";\nimport assert from "node:assert/strict";\nimport { x } from "../src/x.ts";\ntest("x is one", () => assert.equal(x, 1));\n',
 };
 const ok = { status: 0, stdout: "", stderr: "", budget: false, seconds: 0 };
 
@@ -26,22 +28,29 @@ const withTmp = async <T>(body: (tmp: string) => Promise<T>): Promise<T> => {
   }
 };
 
-const fakes = (calls: string[], overrides: Record<string, Awaited<ReturnType<Runner>>> = {}): Runner => async (cmd, args, options) => {
-  const line = [cmd, ...args].join(" ");
-  const key = Object.keys(overrides).find((k) => line.includes(k));
-  if (key !== undefined) {
-    calls.push(key);
-    return overrides[key]!;
-  }
-  if (line.includes("npm run build") || line.includes("e2e/run.ts") || line.includes("eslint")) {
-    calls.push(line.includes("build") ? "build" : line.includes("eslint") ? "lint" : "e2e");
-    return line.includes("eslint") ? { ...ok, stdout: "[]" } : ok;
-  }
-  if (line.includes("--test")) calls.push("unit");
-  return runBudgeted(cmd, args, options);
-};
+const fakes =
+  (calls: string[], overrides: Record<string, Awaited<ReturnType<Runner>>> = {}): Runner =>
+  async (cmd, args, options) => {
+    const line = [cmd, ...args].join(" ");
+    const key = Object.keys(overrides).find((k) => line.includes(k));
+    if (key !== undefined) {
+      calls.push(key);
+      return overrides[key]!;
+    }
+    if (line.includes("npm run build") || line.includes("e2e/run.ts") || line.includes("eslint")) {
+      calls.push(line.includes("build") ? "build" : line.includes("eslint") ? "lint" : "e2e");
+      return line.includes("eslint") ? { ...ok, stdout: "[]" } : ok;
+    }
+    if (line.includes("--test")) calls.push("unit");
+    return runBudgeted(cmd, args, options);
+  };
 
-const job = (more: Partial<Job> = {}): Job => ({ id: "j", patch: patchOf("export const x = 1;", "export const x = 2;"), unit: { files: ["test/x.test.ts"], expect: ["x is one"] }, ...more });
+const job = (more: Partial<Job> = {}): Job => ({
+  id: "j",
+  patch: patchOf("export const x = 1;", "export const x = 2;"),
+  unit: { files: ["test/x.test.ts"], expect: ["x is one"] },
+  ...more,
+});
 
 test("a patch that applies leaves the file with the patch's text, and the unit run then reads its red", async () => {
   await withTempRepo(FILES, (dir, sha) =>
@@ -58,7 +67,11 @@ test("a patch that no longer applies is reported with git's own message, and the
   await withTempRepo(FILES, (dir, sha) =>
     withTmp(async (tmp) => {
       const calls: string[] = [];
-      const got = await runJob(0, job({ patch: patchOf("export const x = 9;", "export const x = 2;") }), sha, dir, { run: fakes(calls), reporter: REPORTER, tmp });
+      const got = await runJob(0, job({ patch: patchOf("export const x = 9;", "export const x = 2;") }), sha, dir, {
+        run: fakes(calls),
+        reporter: REPORTER,
+        tmp,
+      });
       assert.equal(got.applied, false);
       assert.match(got.applyError, /patch does not apply/);
       assert.deepEqual(calls, [], "a check ran on a tree its patch never reached");
@@ -75,7 +88,12 @@ test("unit runs first, then lint, and the build only when there is a browser che
       await runJob(0, both, sha, dir, { run: fakes(calls), reporter: REPORTER, tmp });
       assert.deepEqual(calls, ["unit", "lint", "build", "e2e"]);
       calls.length = 0;
-      await runJob(1, job({ patch: undefined, unit: { files: ["test/x.test.ts"], expect: [] } }), sha, dir, { run: fakes(calls), reporter: REPORTER, tmp });
+      git(["checkout", "--", "."], dir);
+      await runJob(1, job({ patch: undefined, unit: { files: ["test/x.test.ts"], expect: [] } }), sha, dir, {
+        run: fakes(calls),
+        reporter: REPORTER,
+        tmp,
+      });
       assert.deepEqual(calls, ["unit"], "a job with no browser check built the site anyway");
     }),
   );
@@ -91,7 +109,10 @@ test("a budget kills the command's whole process group, so a chain's grandchild 
     const pid = Number(readFileSync(pidFile, "utf8"));
     try {
       await new Promise((settle) => setTimeout(settle, 200));
-      assert.throws(() => process.kill(pid, 0), "the chain's grandchild outlived the budget, which is what a spawnSync timeout leaves behind");
+      assert.throws(
+        () => process.kill(pid, 0),
+        "the chain's grandchild outlived the budget, which is what a spawnSync timeout leaves behind",
+      );
     } finally {
       try {
         process.kill(pid, "SIGKILL");
@@ -118,9 +139,19 @@ test("a build that runs past its budget still writes the result, the unit half k
   await withTempRepo(FILES, (dir, sha) =>
     withTmp(async (tmp) => {
       const run = fakes([], { "npm run build": { ...ok, status: null, budget: true } });
-      const got = await runJob(0, job({ e2e: { suites: "specimen", expect: ["SB1"] } }), sha, dir, { run, reporter: REPORTER, tmp });
-      assert.deepEqual(got.checks.map((c) => c.kind), ["unit", "e2e"]);
-      assert.deepEqual(got.checks[0]?.reds.map((r) => r.name), ["x is one"]);
+      const got = await runJob(0, job({ e2e: { suites: "specimen", expect: ["SB1"] } }), sha, dir, {
+        run,
+        reporter: REPORTER,
+        tmp,
+      });
+      assert.deepEqual(
+        got.checks.map((c) => c.kind),
+        ["unit", "e2e"],
+      );
+      assert.deepEqual(
+        got.checks[0]?.reds.map((r) => r.name),
+        ["x is one"],
+      );
       assert.equal(got.checks[1]?.budget, true);
       assert.equal(existsSync(join(dir, "dist")), false);
     }),

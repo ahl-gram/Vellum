@@ -23,6 +23,9 @@ test("a run of another workflow, or on a branch outside proof/, is refused and n
 });
 
 test("a run still going is waited on, not fetched", () => {
-  assert.deepEqual(readPlan(run({ status: "in_progress", conclusion: "" }), false), { action: "wait", status: "in_progress" });
+  assert.deepEqual(readPlan(run({ status: "in_progress", conclusion: "" }), false), {
+    action: "wait",
+    status: "in_progress",
+  });
   assert.deepEqual(readPlan(run({ status: "queued", conclusion: "" }), false), { action: "wait", status: "queued" });
 });

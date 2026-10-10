@@ -2,7 +2,15 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { BUDGET_SECONDS, LIST_FILE, MAX_JOBS, parseList, planFromCheckout, planJobs, selectionKey } from "../../scripts/proof-runner/list.ts";
+import {
+  BUDGET_SECONDS,
+  LIST_FILE,
+  MAX_JOBS,
+  parseList,
+  planFromCheckout,
+  planJobs,
+  selectionKey,
+} from "../../scripts/proof-runner/list.ts";
 import { commitAll, withTempRepo } from "../../test-support/proof-runner-repo.ts";
 
 const SHA = "a".repeat(40);
@@ -30,7 +38,11 @@ test("a list plans one job per entry, then a control per distinct suite selectio
     ["one", "two", "three", "control-e2e-1", "control-e2e-2", "control-lint", "control-unit"],
   );
   const byId = new Map(plan.jobs.map((j) => [j.id, j]));
-  assert.deepEqual(byId.get("control-e2e-1"), { id: "control-e2e-1", control: "e2e", e2e: { suites: "document-rooms", expect: [] } });
+  assert.deepEqual(byId.get("control-e2e-1"), {
+    id: "control-e2e-1",
+    control: "e2e",
+    e2e: { suites: "document-rooms", expect: [] },
+  });
   assert.deepEqual(byId.get("control-unit"), {
     id: "control-unit",
     control: "unit",
@@ -69,7 +81,10 @@ test("a check on a patched entry that expects no red is refused, since a mutatio
 });
 
 test("an entry with no patch that expects a red is refused, since nothing was broken", () => {
-  refuses([{ id: "sample", e2e: { suites: "specimen", expect: ["SB1"] } }], /"sample" has no patch, so its e2e check must expect no red/);
+  refuses(
+    [{ id: "sample", e2e: { suites: "specimen", expect: ["SB1"] } }],
+    /"sample" has no patch, so its e2e check must expect no red/,
+  );
 });
 
 test("a selection of every suite, the smoke tier or nothing at all is refused, since a proof names its suites", () => {
@@ -94,7 +109,8 @@ test("a budget may only lower its kind's default", () => {
 });
 
 test("a lint plant in a new file is refused, since a file the type checker does not include fails before any rule runs", () => {
-  const added = "diff --git a/src/new.ts b/src/new.ts\nnew file mode 100644\n--- /dev/null\n+++ b/src/new.ts\n@@ -0,0 +1 @@\n+x\n";
+  const added =
+    "diff --git a/src/new.ts b/src/new.ts\nnew file mode 100644\n--- /dev/null\n+++ b/src/new.ts\n@@ -0,0 +1 @@\n+x\n";
   refuses([{ id: "fresh", patch: added, lint: { files: ["src/new.ts"], expect: ["r"] } }], /"fresh".*new file/);
 });
 
@@ -106,7 +122,10 @@ test("every problem in a list is named in one refusal, not the first alone", () 
 });
 
 test("a list of 256 jobs counting its controls is planned, and one of 257 is refused naming the count", () => {
-  const many = (n: number) => Array.from({ length: n }, (_, i) => entry(`m${i}`, { unit: undefined, e2e: { suites: "specimen", expect: ["S"] } }));
+  const many = (n: number) =>
+    Array.from({ length: n }, (_, i) =>
+      entry(`m${i}`, { unit: undefined, e2e: { suites: "specimen", expect: ["S"] } }),
+    );
   assert.equal(planJobs(parseList(list(many(MAX_JOBS - 1)))).jobs.length, MAX_JOBS);
   assert.throws(() => planJobs(parseList(list(many(MAX_JOBS)))), /257 jobs/);
 });

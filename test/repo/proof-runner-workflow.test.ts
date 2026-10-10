@@ -21,7 +21,10 @@ const topBlock = (key: string): string[] => {
   const end = lines.findIndex((l, i) => i > at && /^\S/.test(l));
   return lines.slice(at, end === -1 ? lines.length : end).filter((l) => l.trim() !== "");
 };
-const steps = (job: string): string[] => ciJob(job, WORKFLOW).split(/\n(?= {6}- )/).slice(1);
+const steps = (job: string): string[] =>
+  ciJob(job, WORKFLOW)
+    .split(/\n(?= {6}- )/)
+    .slice(1);
 const matrixSize = (job: string, key: string): number => {
   const found = ciJob(job).match(new RegExp(`^ {8}${key}: \\[([^\\]]*)\\]$`, "m"));
   assert.ok(found, `ci.yml's ${job} matrix has no ${key} list, so the job count below would read nothing`);
@@ -35,12 +38,21 @@ test("the proof runner starts only by hand, never on a push or a pull request", 
 test("no job can push: the token reads contents only, and no checkout keeps its credentials", () => {
   assert.deepEqual(topBlock("permissions"), ["permissions:", "  contents: read"]);
   const checkouts = JOBS.flatMap((job) => steps(job)).filter((s) => s.includes("uses: actions/checkout@"));
-  assert.ok(checkouts.length >= JOBS.length, "fewer checkouts than jobs were read, so the sweep below covers too little");
-  for (const step of checkouts) assert.match(step, /^ {10}persist-credentials: false$/m, `a checkout keeps its credentials:\n${step}`);
+  assert.ok(
+    checkouts.length >= JOBS.length,
+    "fewer checkouts than jobs were read, so the sweep below covers too little",
+  );
+  for (const step of checkouts)
+    assert.match(step, /^ {10}persist-credentials: false$/m, `a checkout keeps its credentials:\n${step}`);
 });
 
 test("proof runs queue one at a time, every waiting run kept rather than the default queue's cancelling", () => {
-  assert.deepEqual(topBlock("concurrency"), ["concurrency:", "  group: proof-runner", "  queue: max", "  cancel-in-progress: false"]);
+  assert.deepEqual(topBlock("concurrency"), [
+    "concurrency:",
+    "  group: proof-runner",
+    "  queue: max",
+    "  cancel-in-progress: false",
+  ]);
 });
 
 test("the prove matrix leaves room for a pull request's CI jobs and the deploy build inside the concurrent-job limit", () => {
@@ -53,13 +65,20 @@ test("the prove matrix leaves room for a pull request's CI jobs and the deploy b
     Number(cap[1]) + ciJobs + DEPLOY_BUILD_JOBS <= CONCURRENT_JOBS,
     `max-parallel ${cap[1]} plus CI's ${ciJobs} jobs and the deploy build passes ${CONCURRENT_JOBS}, so a pull request's checks wait behind a proof run`,
   );
-  assert.match(prove, /^ {6}fail-fast: false$/m, "fail-fast would cancel every other mutation when one goes red, which is the expected outcome");
+  assert.match(
+    prove,
+    /^ {6}fail-fast: false$/m,
+    "fail-fast would cancel every other mutation when one goes red, which is the expected outcome",
+  );
 });
 
 test("every job is bounded, and the sweep reads every job the workflow has", () => {
-  const ids = [...TEXT.matchAll(/^ {2}([A-Za-z0-9_-]+):\s*$/gm)].map((m) => m[1]).filter((id) => id !== "workflow_dispatch");
+  const ids = [...TEXT.matchAll(/^ {2}([A-Za-z0-9_-]+):\s*$/gm)]
+    .map((m) => m[1])
+    .filter((id) => id !== "workflow_dispatch");
   assert.deepEqual(ids, [...JOBS]);
-  for (const job of JOBS) assert.match(ciJob(job, WORKFLOW), /^ {4}timeout-minutes: \d+$/m, `${job} has no timeout-minutes`);
+  for (const job of JOBS)
+    assert.match(ciJob(job, WORKFLOW), /^ {4}timeout-minutes: \d+$/m, `${job} has no timeout-minutes`);
 });
 
 test("every run line is one line, and none writes an expression into the shell; values reach scripts through env", () => {
