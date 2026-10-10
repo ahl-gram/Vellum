@@ -4,6 +4,7 @@ import { makeStep } from "../support/step.ts";
 import type { Payload, SuiteContext } from "../types.ts";
 import { deskKit, dnContinue, dnNarrow, dnPhone, dnRefused, dnTablet } from "./cluster/desk-notice.ts";
 import { dr11Wide, dr12Print, dr13Gallery, dr14PrintIsPaper, dr15TrailHover, trailKit } from "./cluster/trail.ts";
+import type { TrailKit } from "./cluster/trail.ts";
 
 type Rect = { x: number; y: number; w: number; h: number; right: number; bottom: number };
 type Stage = ReturnType<typeof makeStage>;
@@ -21,6 +22,10 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   await cl1Wash(ctx, settleHome);
   await cl2Selection(ctx);
+  const trail = trailKit(ctx);
+  await step("CL3", () => cl3Blur(ctx));
+  await step("CL5", () => cl5Hand(ctx));
+  await step("CL4", () => cl4Offsets(trail));
 
   const desk = deskKit(ctx);
   await step("DN1, DN2, DN3, DN9, DN3r", () => dnPhone(desk));
@@ -30,7 +35,6 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("DN4", () => dnContinue(desk));
 
   await clearMobile();
-  const trail = trailKit(ctx);
   await step("DR11", () => dr11Wide(trail));
   await step("DR12", () => dr12Print(trail));
   await step("DR13", () => dr13Gallery(trail));
@@ -122,4 +126,63 @@ async function cl2Selection(ctx: SuiteContext): Promise<void> {
     }),
   );
   await shoot("cluster-wash-1280.png");
+}
+
+const POOL: Payload<{ filter: string; size: number[]; insetSize: number[] }> = `(() => {
+  const c = document.querySelector("header.chrome"), r = c.getBoundingClientRect(), cs = getComputedStyle(c, "::before"), px = (v) => parseFloat(v);
+  return { filter: cs.filter, size: [px(cs.width), px(cs.height)], insetSize: [r.width - px(cs.left) - px(cs.right), r.height - px(cs.top) - px(cs.bottom)] };
+})()`;
+
+async function cl3Blur({ evaluate, check }: SuiteContext): Promise<void> {
+  const pool = await evaluate(POOL);
+  const px = Number(/^blur\(([\d.]+)px\)$/.exec(pool.filter)?.[1] ?? NaN);
+  check(
+    "CL3 the cluster's wash fades at a 16 to 28px blur and is sized by its insets around the cluster alone, no fixed box, so its edge never shows (#480, screenshot 3)",
+    px >= 16 && px <= 28 && pool.size.every((s, i) => Math.abs(s - pool.insetSize[i]!) < 0.5),
+    JSON.stringify(pool),
+  );
+}
+
+// The cluster rides home's page and stands fixed on a room's, so its corner is read in the document's coordinates.
+const CHROME: Payload<{ x: number; y: number; tokens: [number, number] }> = `(() => {
+  const root = getComputedStyle(document.documentElement), rem = parseFloat(root.fontSize), r = document.querySelector("header.chrome").getBoundingClientRect();
+  return { x: r.left + scrollX, y: r.top + scrollY, tokens: [parseFloat(root.getPropertyValue("--chrome-x")) * rem, parseFloat(root.getPropertyValue("--chrome-y")) * rem] };
+})()`;
+
+const atTokens = (c: { x: number; y: number; tokens: [number, number] }) =>
+  Math.abs(c.tokens[0] - 1.6 * REM) < 0.01 &&
+  Math.abs(c.tokens[1] - 1.4 * REM) < 0.01 &&
+  Math.abs(c.x - c.tokens[0]) < 0.5 &&
+  Math.abs(c.y - c.tokens[1]) < 0.5;
+
+async function cl4Offsets(k: TrailKit): Promise<void> {
+  const home = await k.evaluate(CHROME);
+  await k.goto("/gallery/");
+  const room = await k.evaluate(CHROME);
+  k.check(
+    "CL4 the cluster stands at the chrome's corner tokens, 1.6rem in and 1.4rem down, on home and on a chart room alike, so the wash and the atelier's corners follow one pair (#480)",
+    atTokens(home) && atTokens(room),
+    JSON.stringify({ home, room }),
+  );
+}
+
+const HAND: Payload<{ through: boolean; point: number[] | null; link: boolean }> = `(() => {
+  scrollTo({ top: 0, left: 0, behavior: "instant" });
+  const c = document.querySelector("header.chrome"), b = c.getBoundingClientRect(), a = c.querySelector("nav.rooms a"), ar = a.getBoundingClientRect();
+  let point = null, through = false;
+  for (let y = b.top + 4; y < b.bottom - 2 && !point; y += 6) for (let x = b.left + 4; x < b.right - 4 && !point; x += 12) {
+    const e = document.elementFromPoint(x, y);
+    if (e && !e.closest("header.chrome a")) { point = [x, y]; through = !!e.closest("#lf-stage"); }
+  }
+  const at = document.elementFromPoint(ar.left + ar.width / 2, ar.top + ar.height / 2);
+  return { through, point, link: !!at && (at === a || a.contains(at)) };
+})()`;
+
+async function cl5Hand({ evaluate, check }: SuiteContext): Promise<void> {
+  const h = await evaluate(HAND);
+  check(
+    "CL5 the cluster passes the hand through: off its links a point inside its box reaches the chart beneath, while its links take the hand back (#461, skeptic finding 2)",
+    !!h.point && h.through && h.link,
+    JSON.stringify(h),
+  );
 }

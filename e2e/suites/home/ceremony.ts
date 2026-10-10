@@ -1,7 +1,8 @@
+import { veilMarkup } from "../../../src/site/home/veil.ts";
 import { dropExpectedCancellations } from "../../support/console.ts";
 import { readCam, atLandfall } from "../../support/home.ts";
 import type { Cam } from "../../support/home.ts";
-import type { SuiteContext } from "../../types.ts";
+import type { Payload, SuiteContext } from "../../types.ts";
 import type { HomeKit } from "./kit.ts";
 import { anchored, seatOk } from "./reads.ts";
 import type { Seat } from "./reads.ts";
@@ -34,6 +35,29 @@ export async function h7aVeil({ evaluate, send, check, shoot, sleep, PORT }: Sui
     JSON.stringify(veiled),
   );
   await shoot("home-veil.png");
+}
+
+type Adopted = { veils: number; id: string | null; adopted: boolean; shape: boolean };
+
+// The status line ticks while it is read, so the veil's shape and words are compared with that one line set aside.
+const ADOPTED: Payload<Adopted> = `(() => {
+  const veils = [...document.querySelectorAll(".veil")], v = veils[0];
+  const want = new DOMParser().parseFromString(${JSON.stringify(veilMarkup())}, "text/html").body;
+  const shape = (root) => [...root.querySelectorAll("*")].filter((e) => !e.classList.contains("veil-status")).map((e) => e.tagName + "." + (e.getAttribute("class") ?? "") + ":" + (e.children.length ? "" : e.textContent.trim()));
+  return { veils: veils.length, id: v ? v.id : null, adopted: !!v && v.dataset.adopted !== undefined, shape: !!v && JSON.stringify(shape(v)) === JSON.stringify(shape(want)) };
+})()`;
+
+export async function h7cAdopted({ evaluate, check, sleep }: SuiteContext): Promise<void> {
+  let a = await evaluate(ADOPTED);
+  for (let i = 0; i < 40 && !a.adopted; i++) {
+    await sleep(60);
+    a = await evaluate(ADOPTED);
+  }
+  check(
+    "H7c the module adopts the pre-paint veil rather than raising a twin, and marks it adopted so the inline safety release stands down: one veil stands, the pre-paint one, its markup the one veilMarkup() writes (#457)",
+    a.veils === 1 && a.id === "lf-veil" && a.adopted && a.shape,
+    JSON.stringify(a),
+  );
 }
 
 export async function h7bLandfall({ evaluate, check, shoot, sleep }: SuiteContext): Promise<void> {
@@ -155,6 +179,44 @@ export async function h9CeremonyStandsDown({ evaluate, send, check, sleep, PORT 
   );
 }
 
+// Installed before the page, so a veil the inline script raises is counted however soon the module's boot takes it down, which a polled sample can miss.
+const VEIL_WATCH = `window.__lfVeils = 0; new MutationObserver((ms) => { for (const m of ms) for (const n of m.addedNodes) if (n.id === "lf-veil") window.__lfVeils++; }).observe(document, { childList: true, subtree: true });`;
+
+async function veilsRaised({ evaluate, send, sleep, PORT }: SuiteContext): Promise<number> {
+  await send("Page.navigate", { url: "about:blank" });
+  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
+  for (let i = 0; i < 200; i++) {
+    const n = await evaluate<number | null>(
+      `location.pathname === "/" && document.querySelector("#lf-stage.cam") ? window.__lfVeils : null`,
+    ).catch(() => null);
+    if (n !== null) return n;
+    await sleep(50);
+  }
+  throw new Error("H10b: home never booted");
+}
+
+export async function h10bInlinePredicate(ctx: SuiteContext): Promise<void> {
+  const { evaluate, send, check } = ctx;
+  const watch = await send<{ identifier: string }>("Page.addScriptToEvaluateOnNewDocument", { source: VEIL_WATCH });
+  let counts: number[];
+  try {
+    await evaluate(`sessionStorage.clear()`);
+    const first = await veilsRaised(ctx);
+    const returning = await veilsRaised(ctx);
+    await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
+    await evaluate(`sessionStorage.clear()`);
+    counts = [first, returning, await veilsRaised(ctx)];
+  } finally {
+    await send("Emulation.setEmulatedMedia", { features: [] });
+    await send("Page.removeScriptToEvaluateOnNewDocument", { identifier: watch.identifier });
+  }
+  check(
+    "H10b the pre-paint script raises its veil on a first arrival alone: a return within the sitting and a reduced-motion first arrival each raise none, counted by an observer installed before the page, the plain first arrival raising one, the same run's control (#457)",
+    JSON.stringify(counts) === JSON.stringify([1, 0, 0]),
+    JSON.stringify({ first: counts[0], returning: counts[1], reduced: counts[2] }),
+  );
+}
+
 export async function h12aVeilCovers({ evaluate, send, check, shoot, sleep, PORT }: SuiteContext): Promise<void> {
   await evaluate(`sessionStorage.clear()`);
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/` });
@@ -195,6 +257,22 @@ export async function h12aVeilCovers({ evaluate, send, check, shoot, sleep, PORT
     JSON.stringify(narrow12),
   );
   await shoot("home-veil-390.png");
+}
+
+const ABOVE: Payload<{ veil: boolean; hit: string | null } | null> = `(() => {
+  const v = document.getElementById("lf-veil"), a = document.querySelector("header.chrome .wordmark a");
+  if (!v || !a) return null;
+  const r = a.getBoundingClientRect(), h = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+  return { veil: !!h && v.contains(h), hit: h ? h.tagName + "." + h.className : null };
+})()`;
+
+export async function h12cVeilAbove({ evaluate, check }: SuiteContext): Promise<void> {
+  const above = await evaluate(ABOVE);
+  check(
+    "H12c the veil rides above the running head: the wordmark's own link, which takes the hand above the stage, lies under the veil while it stands (#457, ratified 3)",
+    !!above && above.veil,
+    JSON.stringify(above),
+  );
 }
 
 export async function h12bSkipOnFloor({ evaluate, check, sleep, pressKey }: HomeKit): Promise<void> {

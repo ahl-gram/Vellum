@@ -1,7 +1,5 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { SHEET, fitScale, centerFraction } from "../../src/site/home/camera.ts";
 import { homeStage } from "../../src/site/home/stage-data.ts";
 import { homeStations, stationSpots, unclaimedDots } from "../../src/site/home/stations.ts";
@@ -22,11 +20,7 @@ import {
 
 // Landfall Sub 3 (Issue #458): the stations, the cards, the legend, and the idle drift; the spec is the archived mockup (design/atelier-map, PR #466) and the ratified comments on Issue #458.
 
-const REPO = resolve(import.meta.dirname, "..", "..");
-const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 const normalize = (s: string) => s.replace(/\s+/g, " ").trim();
-// A commented-out rule still matches a raw-text regex, so the css sweeps read the sheet stripped.
-const liveCss = (p: string): string => read(p).replace(/\/\*[\s\S]*?\*\//g, "");
 
 const stage = homeStage();
 const stations = homeStations();
@@ -218,77 +212,4 @@ test("the drift never breathes the marks layer open: a camera parked under the c
     Math.abs(driftTarget(above, fit).s - above.s * 1.015) < 1e-12,
     "a camera already close-in swells too: 1.015 up cannot cross back down",
   );
-});
-
-test("home mounts the stations outside the dot layer's aria shroud, with the legend and four slips (#458)", () => {
-  const astro = read("src/pages/index.astro");
-  assert.match(astro, /homeStations/, "the frontmatter reads the station roster at build");
-  assert.match(astro, /unclaimedDots/, "the dot layer yields the spots the stations claim");
-  const marks = astro.match(/<div class="lf-marks"[^>]*>/);
-  assert.ok(marks && marks[0].includes('aria-hidden="true"'), "the decorative dots stay shrouded");
-  const stationsAt = astro.indexOf('class="lf-stations"');
-  assert.ok(stationsAt > -1, "the station layer mounts");
-  const stationsTag = astro.slice(astro.lastIndexOf("<", stationsAt), astro.indexOf(">", stationsAt));
-  assert.ok(!stationsTag.includes("aria-hidden"), "the stations are real controls, never shrouded");
-  const stationsBlock = astro.slice(stationsAt, astro.indexOf("</div>", stationsAt));
-  assert.match(stationsBlock, /<button[\s\S]{0,200}?class=\{`lf-station/, "each station is a button");
-  assert.match(astro, /data-station=\{s\.id\}/, "the client finds a station's anchor on the button itself");
-  assert.match(astro, /data-nx=\{String\(s\.nx\)\}/, "the anchor rides at full precision, never the styled percent");
-  assert.match(astro, /class="lf-legend"/, "the legend strip stands at the stage foot");
-  assert.match(astro, /class="lf-legend-btn"/, "the legend duplicates every station as a button");
-  assert.match(astro, /class="lf-card"/, "the card slips mount");
-  assert.match(astro, /class="lf-card-close"/, "each slip carries its close");
-  assert.match(astro, /class="lf-card-arms"/, "the arms row mounts for the atlas slip");
-  assert.match(astro, /arms-42-0\.svg[\s\S]*arms-42-1\.svg[\s\S]*arms-42-2\.svg/, "the three arms ride the atlas slip");
-});
-
-test("the hidden attribute is re-asserted where the slips could lose it (#458, the Sub 1 inert-hidden lesson)", () => {
-  const css = liveCss("public/index.css");
-  assert.match(
-    css,
-    /\.lf-card\[hidden\]\s*\{\s*display:\s*none/,
-    "a hidden slip stays hidden whatever .lf-card declares",
-  );
-});
-
-test("the station dress is the mockup's: pulse, diamond glyph, at-sea round, reduced-motion still (#458)", () => {
-  const css = liveCss("public/index.css");
-  assert.match(css, /\.lf-station\b/, "the station wears its own dress");
-  assert.match(css, /@keyframes lf-station-pulse/, "the pulse ring breathes");
-  assert.match(css, /\.lf-station\.at-sea/, "the at-sea station drops the diamond");
-  const legend = css.match(/\.lf-legend \{([^}]*)\}/);
-  assert.ok(
-    legend && /pointer-events:\s*none/.test(legend[1]!),
-    "the legend chrome passes clicks through to the station beneath (plate-reader: the head swallowed the Reading Room icon's click)",
-  );
-  const legendBtn = css.match(/\.lf-legend-btn \{([^}]*)\}/);
-  assert.ok(legendBtn && /pointer-events:\s*auto/.test(legendBtn[1]!), "the legend's buttons take their clicks back");
-  const reduced = css.match(/@media \(prefers-reduced-motion: reduce\) \{([\s\S]*?)\n\}/g)?.join("\n") ?? "";
-  assert.match(reduced, /\.lf-pulse[^{]*\{[^}]*animation:\s*none/, "reduced motion stills the pulse");
-  const motion = read("public/motion.css").replace(/\/\*[\s\S]*?\*\//g, "");
-  for (const state of ["", ":hover", ":active"]) {
-    assert.match(
-      motion,
-      new RegExp(`button:not\\(\\.lf-station\\):not\\(\\.place-hit\\)${state.replace(":", "\\:")}`),
-      `motion.css's button${state} dress must exclude .lf-station like .place-hit: the house lift replaces the anchor transform (17px drift, counter-scale lost), and the house transition lags the counter-scale a beat behind every zoom`,
-    );
-  }
-  const house = read("public/house.css").replace(/\/\*[\s\S]*?\*\//g, "");
-  assert.match(
-    house,
-    /button:not\(\.lf-station\):not\(\.place-hit\):hover/,
-    "house.css's button hover wash must exclude .lf-station too: it painted the 34px button square bright around the diamond (Alex, PR #468 live review)",
-  );
-  assert.ok(
-    !/\.lf-station-slip[^{]*\{[^}]*display:\s*none/.test(css.replace(/\/\*[\s\S]*?\*\//g, "")),
-    "the station name slips stay at every width: the boxed-era narrow stand-down retired when Sub 6's full bleed restored the mockup's spacing (#461 ruling 1; the 2026-08-24 stand-down was scoped to the compressed stage)",
-  );
-});
-
-test("app.ts flies the stations and breathes the drift (#458)", () => {
-  const app = read("src/site/home/app.ts");
-  assert.match(app, /stationFlightView/, "station flights use the pure framing");
-  assert.match(app, /driftTarget/, "the drift tween aims at the pure target");
-  assert.match(app, /IDLE_DELAY_MS/, "the idle timer keeps the ratified delay");
-  assert.match(app, /bindStations/, "the cards module owns the card DOM");
 });

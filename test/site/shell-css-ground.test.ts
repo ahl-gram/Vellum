@@ -30,14 +30,6 @@ test("the deep's focus ring names the footer's links beside the cluster's (#324 
   );
 });
 
-test("the chrome passes the hand through: drags over the fixed cluster reach the chart, links stay live (#461, skeptic finding 2)", () => {
-  // The defect measured on home: a 485x79 dead drag zone under the cluster. The mockup's idiom (stage.css) is the fix: pointer-events none on the container, auto on the interactive children.
-  const css = layoutStyle();
-  const chrome = css.match(/header\.chrome\s*\{([\s\S]*?)\}/);
-  assert.ok(chrome && /pointer-events:\s*none/.test(chrome[1]!), "the chrome container passes pointer events through");
-  assert.match(css, /header\.chrome a\s*\{[^}]*pointer-events:\s*auto/, "the links take the hand back");
-});
-
 const findRule = (css: string, selector: string) => rulesIn(css).find((r) => r.selector === selector);
 
 /** The attribute the renderer stamps on a chart and nothing else carries: it tells a mount's chart apart from the engine's overlays. */

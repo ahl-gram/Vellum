@@ -139,22 +139,6 @@ test("zoomTarget clamps the scale BEFORE anchoring, so the cursor point never dr
   assert.ok(Math.abs(pastFloor.y - floor.y) < 1e-9, "y holds at the floor");
 });
 
-test("home mounts the stage, maps the manifest marks, and loads its bundle twin (#455)", () => {
-  const astro = read("src/pages/index.astro");
-  assert.match(astro, /homeStage/, "the frontmatter computes the stage at build");
-  assert.match(astro, /class="landfall"/, "the stage section mounts");
-  assert.match(
-    astro,
-    /unclaimedDots\(stage\.dots, stations\)/,
-    "marks render server-side from the manifest, less the spots the stations claim (#458)",
-  );
-  assert.match(
-    astro,
-    /<script type="module" src="app\.bundle\.js" is:inline><\/script>/,
-    "home loads its Vite twin, opted out of Astro's script pass",
-  );
-});
-
 test("the press, the cleaner, and .gitignore all carry the home twin (#455)", async () => {
   const [{ BUNDLE_ENTRIES }, { GENERATED_SUBTREES }] = await Promise.all([
     import("../../scripts/build-app-bundles.ts"),

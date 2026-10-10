@@ -6,7 +6,6 @@ import { resolve } from "node:path";
 // The Atelier Kit (Issue #487): the markup shapes the rooms pasted are components in src/layouts/; the built html is pinned in astro-scaffold.test.ts.
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
-const flat = (css: string): string => css.replace(/\s+/g, " ").replace(/\( /g, "(").replace(/ \)/g, ")");
 const pages = globSync("src/pages/**/index.astro", { cwd: REPO }).sort();
 const rooms = pages.filter((p) => p !== "src/pages/index.astro");
 const CHART_ROOMS = [
@@ -169,71 +168,12 @@ test("AK7 the camera's press is home's face everywhere (#505, ruled 2026-09-02):
   );
 });
 
-test("AK8 home seats the kit's camera itself (#505, ruled 2026-09-02: home keeps its own seat) and binds it by id, never through glass-keys", () => {
-  const css = read("public/index.css");
-  const seats = [...css.matchAll(/#lf-controls\s*\{([^}]*)\}/g)];
+// A second seat rule that repeats the first changes nothing a page shows, so the count stays a source read for part 2i of Issue #779.
+test("AK8 home's camera has one seat rule, at every width (#505, ruled 2026-09-02: home keeps its own seat)", () => {
+  const seats = [...read("public/index.css").matchAll(/#lf-controls\s*\{([^}]*)\}/g)];
   assert.equal(
     seats.length,
     1,
     "one seat rule, at every width (the phone twin was dead: the id already outranks the kit's 900px seat)",
-  );
-  const declared = new Set(
-    seats[0]![1]!
-      .split(";")
-      .map((d) => d.trim())
-      .filter(Boolean),
-  );
-  for (const d of [
-    "display: none",
-    "position: absolute",
-    "right: 1.6rem",
-    "bottom: 1.4rem",
-    "z-index: auto",
-    "animation: none",
-    "pointer-events: auto",
-  ]) {
-    assert.ok(
-      declared.has(d),
-      `the seat declares ${d} (inside the stage as before, scrolling away with it; the kit's fixed corner, depth, ink-in and pointer policy stood down)`,
-    );
-  }
-  assert.match(css, /#lf-controls\.on\s*\{\s*display:\s*flex;/, "shown once the camera arms");
-  assert.match(
-    css,
-    /#lf-controls button:focus-visible\s*\{\s*outline-color:\s*var\(--ink-dark\);/,
-    "the house's ring on home's presses, not the kit's corner ring (the camera stands on chart paper once zoomed; skeptic on PR #508)",
-  );
-  assert.match(
-    css,
-    /#lf-controls button \{\s*touch-action: pan-y;\s*\}/,
-    "the touch-action line the presses carried (#475) stays",
-  );
-  const app = read("src/site/home/app.ts");
-  for (const id of ["zoom-in", "zoom-out", "zoom-reset"])
-    assert.ok(app.includes(`getElementById("${id}")`), `app.ts binds ${id}`);
-  assert.ok(app.includes('getElementById("lf-controls")'), "and reveals the cluster by the id it passes the component");
-});
-
-test("AK7 the legend row is ONE face on home and in the kit: the seed box's crisp panel under both rows, parchment on both verb lines (the 2026-09-03 sitting, rulings 23 and 24 on #454; the fade's clear top measured 1.0:1 and 1.76:1 under the head, line-tan 4.09:1 under the verb)", () => {
-  const home = read("public/index.css").replace(/\/\*[\s\S]*?\*\//g, "");
-  const kit = read("public/atelier.css").replace(/\/\*[\s\S]*?\*\//g, "");
-  const panel =
-    "linear-gradient(to bottom, rgb(from var(--chart-ink) r g b / 0.85), rgb(from var(--chart-ink) r g b / 0.72))";
-  const wearers: Array<[string, RegExpMatchArray | null]> = [
-    ["home's seed box .lf-seed", home.match(/\.lf-seed \{([^}]*)\}/)],
-    ["home's legend row .lf-legend", home.match(/\.lf-legend \{([^}]*)\}/)],
-    ["the kit's room folio .corner.tr::before", kit.match(/\.corner\.tr::before[^{]*\{([^}]*)\}/)],
-    ["the kit's legend row .legend::before", kit.match(/\.legend::before[^{]*\{([^}]*)\}/)],
-  ];
-  for (const [name, m] of wearers)
-    assert.ok(m && flat(m[1]!).includes(`background: ${panel};`), `${name} stands on the one panel`);
-  const homeVerb = home.match(/\.lf-legend-verb \{([^}]*)\}/);
-  const kitVerb = kit.match(/\.legend-btn \.verb \{([^}]*)\}/);
-  assert.ok(homeVerb && /color:\s*var\(--parchment\)/.test(homeVerb[1]!), "home's verb wears parchment");
-  assert.ok(kitVerb && /color:\s*var\(--parchment\)/.test(kitVerb[1]!), "the kit's verb wears parchment");
-  assert.match(
-    kit,
-    /\.legend-btn\.gold \.verb \{[^}]*color:\s*var\(--ink-brown\)/,
-    "the gold road's verb keeps ink-brown on its gold ground",
   );
 });

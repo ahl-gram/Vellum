@@ -72,9 +72,8 @@ symbol and path so the reader goes and looks.
   build time, by throwing when it has no blurb. The page, bundle, cleaning and lane rosters are
   hand-kept and silent when missed, which is why the grep comes first, and so are the lists that
   name a sheet for what it does rather than for being a sheet: `CHART_MOUNTS` in
-  `test/site/shell-css-ground.test.ts`, the sheets home loads in `test/site/home-shelf.test.ts`,
-  and `HOUSE_SHEETS` in `scripts/lint/sheet-owners.ts`, the sheets linked on every page, which
-  `vellum/css-kit-not-redressed` does not read as a page's own.
+  `test/site/shell-css-ground.test.ts` and `HOUSE_SHEETS` in `scripts/lint/sheet-owners.ts`, the
+  sheets linked on every page, which `vellum/css-kit-not-redressed` does not read as a page's own.
 - **The rosters a page or a sheet joins**, by symbol: `NAV_ITEMS`, `ROUTE_NAMES` and
   `ROUTE_CHILDREN` in `src/layouts/nav.ts`; `TOKENS` in `test/site/shell-css.test.ts`;
   `PAGES` in `test/site/astro-scaffold.test.ts`; `BUNDLE_ENTRIES` in `scripts/build-app-bundles.ts`;

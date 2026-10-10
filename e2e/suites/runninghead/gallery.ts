@@ -1,5 +1,5 @@
 import { GALLERY_COUNT, GALLERY_SEED } from "../../../src/cli/gallery.ts";
-import { luminance, nearRgba, PAGE_RGBA, sampleRow, tokenRgba } from "../../support/pixel.ts";
+import { GRADIENT_STOPS, luminance, nearRgba, PAGE_RGBA, sampleRow, tokenRgba } from "../../support/pixel.ts";
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, Point } from "../../types.ts";
 import type { RunningHeadKit } from "./kit.ts";
@@ -193,8 +193,8 @@ type Dress = {
 
 const PARTS = `const rgba = ${PAGE_RGBA};
   const shade = (s) => { const m = /^(.+\\)) (-?[\\d.]+px -?[\\d.]+px -?[\\d.]+px -?[\\d.]+px)$/.exec(s); return m ? { colour: rgba(m[1]), geometry: m[2] } : null; };
-  const panel = (sel) => { const cs = getComputedStyle(document.querySelector(sel), "::before"); const plain = /^linear-gradient\\((color|rgba?|oklab)\\(/.test(cs.backgroundImage);
-    return { stops: plain ? (cs.backgroundImage.match(/(color|rgba?|oklab)\\([^)]*\\)/g) ?? []).map(rgba) : [], insets: [cs.top, cs.right, cs.bottom, cs.left].map(parseFloat) }; };`;
+  const stops = ${GRADIENT_STOPS};
+  const panel = (sel) => { const cs = getComputedStyle(document.querySelector(sel), "::before"); return { stops: stops(cs.backgroundImage), insets: [cs.top, cs.right, cs.bottom, cs.left].map(parseFloat) }; };`;
 
 const DRESS_READ: Payload<Dress> = `(() => { ${PARTS}
   const q = (s) => document.querySelector(s), root = getComputedStyle(document.documentElement), rem = parseFloat(root.fontSize);
@@ -210,8 +210,8 @@ const shadowOf = (s: Shade, geometry: string, alpha: number) =>
   !!s && s.geometry === geometry && nearRgba(s.colour, CHART_INK(alpha));
 const panelOf = (p: Panel, rem: number, insets: readonly number[]) =>
   p.stops.length === 2 &&
-  nearRgba(p.stops[0], CHART_INK(0.85)) &&
-  nearRgba(p.stops[1], CHART_INK(0.72)) &&
+  nearRgba(p.stops[0], CHART_INK(0.85), 1) &&
+  nearRgba(p.stops[1], CHART_INK(0.72), 1) &&
   p.insets.every((v, i) => Math.abs(v - insets[i]! * rem) < 0.05);
 
 const dressed = (d: Dress) =>

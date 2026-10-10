@@ -1,11 +1,25 @@
-// Landfall hardening e2e (Issue #460, second suite by ratification 2026-08-25): the wheel consumed-vs-released contract at both zoom clamps (L1), the six panel arms from the superseding 2026-08-24T18:53 spec plus the sixth-arm clearance (L2-L7), the Enter links as 44px touch targets (L8), touch two-finger-drives vs one-finger-page-scroll under one emulation set (L9), and the seed form's no-JS GET fallback with its bare-visit control (L10-L11). Every gesture is REAL dispatched input; suite-home's plumbing arrives via support/home.ts.
+// Landfall hardening e2e (Issue #460, second suite by ratification 2026-08-25): the wheel consumed-vs-released contract at both zoom clamps (L1), the six panel arms from the superseding 2026-08-24T18:53 spec plus the sixth-arm clearance (L2-L7), the Enter links as 44px touch targets (L8), touch two-finger-drives vs one-finger-page-scroll under one emulation set (L9), and the seed form's no-JS GET fallback with its bare-visit control (L10-L11), and home's markup and dress at rest (L13-L32, Issue #779 part 2f). Every gesture is REAL dispatched input; suite-home's plumbing arrives via support/home.ts.
 import { scopedHealth } from "../support/room.ts";
+import { makeStep } from "../support/step.ts";
 import type { SuiteContext } from "../types.ts";
+import { l13Stations, l14Legend, l15Shelf, l16NoticeAndPanel, l17Hook } from "./landfall/markup.ts";
+import {
+  l18Corner,
+  l19Legend,
+  l20Stations,
+  l21Stamp,
+  l22PanelDress,
+  l25Faces,
+  l26Corners,
+  l29SlipBox,
+  l31Veil,
+  l32Blanket,
+} from "./landfall/dress.ts";
 import { stageKit, gestureKit, entersKit } from "./landfall/kit.ts";
 import type { LandfallKit } from "./landfall/kit.ts";
 import { stagePoint } from "./landfall/reads.ts";
 import { l1aConsumed, l1bCloseClamp, l1cNotDeadZone, l1dStandOff, l1dReleased, l1eAbsorbed } from "./landfall/wheel.ts";
-import { l1jHint, l1kSurfaces, l1fScrolledPage, l1gKeys, l1hDrift, l1iCluster } from "./landfall/page.ts";
+import { l1jHint, l1kSurfaces, l1fScrolledPage, l1gKeys, l1hDrift, l1iCluster, l27HintPlace } from "./landfall/page.ts";
 import {
   l5HowOpens,
   l5bArrowScrolls,
@@ -14,10 +28,11 @@ import {
   l3HeadSwallows,
   l7WideClear,
   l4l8Enters,
+  l28SlipGestures,
 } from "./landfall/panel.ts";
 import { l9aOneFinger, l9bPinch, l9cTwoFingerPan } from "./landfall/touch.ts";
 import { l9dCeiling, l9d2Debt, l9eFloor } from "./landfall/clamps.ts";
-import { l9fPipGestures, l9hControlTap } from "./landfall/controls.ts";
+import { l9fPipGestures, l9hControlTap, l23KitReach, l24CameraLeaks, l30Camera } from "./landfall/controls.ts";
 import { l10NoScriptGet, l11IgnoresQuery } from "./landfall/seed.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
@@ -28,6 +43,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const k = entersKit(k1);
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   await l1Desktop(k);
+  await l13Home(k, makeStep(ctx));
   await l9Touch(k);
   await l10NoScriptGet(k);
   await l11IgnoresQuery(k);
@@ -64,6 +80,30 @@ async function l1Desktop(k: LandfallKit): Promise<void> {
   await pressKey("Escape", "Escape", 27);
   await sleep(500);
   await l4l8Enters(k);
+}
+
+async function l13Home(k: LandfallKit, step: ReturnType<typeof makeStep>): Promise<void> {
+  await k.settleHome();
+  await step("L13", () => l13Stations(k));
+  await step("L14", () => l14Legend(k));
+  await step("L15", () => l15Shelf(k));
+  await step("L16", () => l16NoticeAndPanel(k));
+  await step("L17", () => l17Hook(k));
+  await step("L18", () => l18Corner(k));
+  await step("L19", () => l19Legend(k));
+  await step("L21", () => l21Stamp(k));
+  await step("L22", () => l22PanelDress(k));
+  await step("L25", () => l25Faces(k));
+  await step("L26", () => l26Corners(k));
+  await step("L23", () => l23KitReach(k));
+  await step("L24", () => l24CameraLeaks(k));
+  await step("L27", () => l27HintPlace(k));
+  await step("L29", () => l29SlipBox(k));
+  await step("L30", () => l30Camera(k));
+  await step("L20", () => l20Stations(k));
+  await step("L28", () => l28SlipGestures(k));
+  await step("L31", () => l31Veil(k));
+  await step("L32", () => l32Blanket(k));
 }
 
 async function l9Touch(k: LandfallKit): Promise<void> {

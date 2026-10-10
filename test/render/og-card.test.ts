@@ -203,12 +203,8 @@ test("the seed-42 chart is ghosted full-bleed behind the lettering, once", () =>
   assert.ok(card.indexOf(ghost) > card.indexOf("url(#veil-deep)"), "the chart is painted over the deep");
 });
 
-test("the foot line is the homepage hook, as written, in spaced small caps, broken where the page breaks it", () => {
+test("the foot line is the homepage hook, as written, in spaced small caps, in two lines", () => {
   assert.deepEqual(OG_HOOK_LINES, ["Give Vellum a number.", "It gives you back a world."]);
-  assert.ok(
-    read("src/pages/index.astro").includes(OG_HOOK_LINES.join("<br>")),
-    "the card breaks the hook where the homepage does, and its words are the page's",
-  );
   assert.ok(!card.includes("GIVE VELLUM"), "the hook is not uppercased: the SC face sets the small caps");
   const lines = OG_HOOK_LINES.map((l) => textTag(card, l));
   for (const tag of lines) {
