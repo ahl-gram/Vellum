@@ -169,7 +169,7 @@ async function midTurn(k: DrawerKit, idx: number): Promise<{ at: Turn; face: Car
   await evaluate<boolean>(
     `(() => { const p = document.querySelector("#place-card .pc-lay"); if (p) p.focus({ preventScroll: true }); return document.activeElement === p; })()`,
   );
-  // The character is what makes Enter press a button; without it the key files nothing at any time (send T, run 38087000715: row CT7b.a).
+  // Enter presses the button only with its character: without it row CT7b.a, a lay that ignores the turn, stayed green on the runner (send T, run 38087000715), and with it CD58 stops on its next filing, measured locally.
   await send("Input.dispatchKeyEvent", {
     type: "keyDown",
     key: "Enter",
