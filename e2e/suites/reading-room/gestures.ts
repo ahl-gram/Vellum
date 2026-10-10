@@ -32,11 +32,12 @@ type Plate = {
   t: string;
   shadow: string;
   raise: string;
+  anims: number;
 };
 const PLATE: Payload<Plate> = `(() => { const i = document.querySelector(".rr-prospect img"), a = i.closest("a"), r = i.getBoundingClientRect();
   const x = r.left + r.width / 2, y = r.top + r.height / 2, cs = getComputedStyle(i), probe = document.createElement("div");
   probe.style.boxShadow = "var(--raise-shadow)"; document.body.append(probe); const raise = getComputedStyle(probe).boxShadow; probe.remove();
-  return { x, y, hit: document.elementFromPoint(x, y) === i, hover: a.matches(":hover"), focus: a.matches(":focus-visible"), t: cs.transform, shadow: cs.boxShadow, raise };
+  return { x, y, hit: document.elementFromPoint(x, y) === i, hover: a.matches(":hover"), focus: a.matches(":focus-visible"), t: cs.transform, shadow: cs.boxShadow, raise, anims: i.getAnimations().length };
 })()`;
 
 const lifted = (p: Plate): boolean => {
@@ -46,13 +47,26 @@ const lifted = (p: Plate): boolean => {
   return Math.abs(turn + 0.5) < 0.05 && Math.abs(m[5]! + 2) < 0.05 && p.raise !== "none" && p.shadow === p.raise;
 };
 const still = (d: Plate, last: Plate | null): boolean => !!last && d.t === last.t && d.shadow === last.shadow;
+// Stillness alone took RR42 red in 9 of the proof runner's 93 `reading-room` jobs, all on its slowest tier (run 38086989550, Issue #779 part 2g), which a stall before the transition starts satisfies (Issue #529), so a lift is read only once its transition was seen running and has ended.
+const liftLanded = (): ((d: Plate, last: Plate | null) => boolean) => {
+  let seen = false;
+  return (d, last) => {
+    seen ||= d.anims > 0;
+    return seen && d.anims === 0 && still(d, last);
+  };
+};
 
 async function plateLifts(ctx: SuiteContext): Promise<{ hovered: Plate; keyed: Plate; away: Plate }> {
   const { evaluate, send, sleep } = ctx;
   const settle = makeSettle({ evaluate, sleep });
   const at = await evaluate(PLATE);
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: at.x, y: at.y });
-  const hovered = await settle(PLATE, (d, last) => d.hit && d.hover && still(d, last), "reading-room-plate-hovered");
+  const hoverLanded = liftLanded();
+  const hovered = await settle(
+    PLATE,
+    (d, last) => d.hit && d.hover && hoverLanded(d, last),
+    "reading-room-plate-hovered",
+  );
   await park(send);
   const away = await settle(
     PLATE,
@@ -61,7 +75,8 @@ async function plateLifts(ctx: SuiteContext): Promise<{ hovered: Plate; keyed: P
   );
   await evaluate<boolean>(`(() => { document.querySelector("#journal .slip-fold").focus(); return true; })()`);
   await tab(send);
-  const keyed = await settle(PLATE, (d, last) => d.focus && !d.hover && still(d, last), "reading-room-plate-keyed");
+  const keyLanded = liftLanded();
+  const keyed = await settle(PLATE, (d, last) => d.focus && !d.hover && keyLanded(d, last), "reading-room-plate-keyed");
   return { hovered, keyed, away };
 }
 
