@@ -138,9 +138,6 @@
     }
   },
   "e2e/suites/prospect.ts": {
-    "max-lines": {
-      "count": 1
-    },
     "max-lines-per-function": {
       "count": 3
     }

@@ -73,7 +73,7 @@ const LIST_AT_REFORMAT: Readonly<Record<string, readonly [number, number]>> = {
   "e2e/suites/print-room/plates.ts": [0, 1],
   "e2e/suites/print-room/print.ts": [0, 2],
   "e2e/suites/print-room/redraw.ts": [0, 1],
-  "e2e/suites/prospect.ts": [1, 3],
+  "e2e/suites/prospect.ts": [0, 3],
   "e2e/suites/reading-room/arm.ts": [0, 1],
   "e2e/suites/reading-room/colophon.ts": [0, 1],
   "e2e/suites/reading-room/kit.ts": [0, 1],

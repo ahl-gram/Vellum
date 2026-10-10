@@ -245,6 +245,11 @@ section points there rather than restating it.
   as the thing you meant. A card at `left: 0` is the clamp working (`axisNudge` in
   `src/render/place-card.ts` never pushes a card's near edge past its box), so a negative origin is
   the probe's own arithmetic on the rect and not the DOM's. Gate 2 item 13 points here.
+- **A device-metrics override is not undone when its clear returns.** The size the override set still
+  reads after `Emulation.clearDeviceMetricsOverride` resolves, until the next resize lands, so a check
+  that clears one and then reads, presses or wheels at the window's own size waits for the window to
+  leave the override's size first, as `clearMetrics` in `e2e/suites/print-room/kit.ts` does; a gesture
+  aimed in between lands at the stale size's coordinates.
 - **The headless window has a minimum width clamp.** A window asked for narrower than the clamp lays
   out at the clamp and the capture is cropped, which reads as an overflow bug that is not there. The
   route to a true narrow viewport is device-metric emulation, and the harness wraps it two ways in
