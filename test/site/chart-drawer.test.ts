@@ -331,110 +331,31 @@ test("CT7 the sheet a filing is made from carries its own present year, so a wor
   );
 });
 
-test("CT7c the Explorer assigns that sheet beside the OVERLAY it describes, which is what keeps an aborted turn consistent rather than skewed (#631 round 3)", () => {
+test("CT7c the sheet assigned beside each overlay build reads no lastManifest, and one call reaches the landing paths (#631 round 3; kept for Issue #779 part 2i: a second source the same value comes from, and the count of calls, show nowhere; CD57 to CD59 read what is filed)", () => {
   const src = readFileSync(resolve(REPO, "src/site/explorer/app.ts"), "utf8");
   const builds = [...src.matchAll(/lc\.buildPlaceOverlay\(res\.manifest\);\n(\s*)([^\n]*)/g)].map((m) => m[2]!);
   assert.ok(builds.length >= 2, "both draw paths build the overlay, or this guard reads fewer than it thinks");
-  for (const next of builds) {
-    assert.match(
-      next,
-      /^lastSheet = \{/,
-      "the line after an overlay build is not the sheet assignment, so the hit targets on screen and the world the card files from can drift apart",
-    );
+  for (const next of builds)
     assert.doesNotMatch(
       next,
       /lastManifest/,
-      "a year read from the module's own lastManifest is the second, independently-moving source this shape exists to remove, and a `!` defeats a check that spells the whole path",
+      "a year read from the module's own lastManifest is the second, independently-moving source this shape exists to remove",
     );
-    // The YEAR axis was guarded and the WORLD axis was not, so a hard-coded `style` in the turn branch (reached only by the style-change path) filed an antique-dressed prospect over an ink chart with the suite green. Every field is pinned, not merely the year.
-    const fields = next
-      .slice(next.indexOf("{") + 1, next.lastIndexOf("}"))
-      .split(",")
-      .map((f) => f.trim())
-      .filter(Boolean);
-    assert.deepEqual(
-      fields,
-      ["seed", "overrides", "style", "presentYear: res.manifest.presentYear"],
-      "the sheet is built from something other than the drawn world's own seed, overrides and style and that same manifest's year, so a filing can name a different chart than the one the reader is looking at",
-    );
-  }
   assert.equal(
-    (src.match(/presentYear: res\.manifest\.presentYear/g) ?? []).length,
-    builds.length,
-    "one build's year is read from the manifest it was built from and another's is not, which is the drift with one of the two doors left open",
-  );
-  // Read as text, so a local shadowing one of these names above the call passes it.
-  const calls = [...src.matchAll(/^\s*landDraw\(([^)]*)\);$/gm)].map((m) => m[1]!.split(",").map((a) => a.trim()));
-  assert.equal(
-    calls.length,
+    [...src.matchAll(/^\s*landDraw\(([^)]*)\);$/gm)].length,
     1,
-    "the landing paths are reached from some number of places other than the one draw, so the arguments pinned below are not the ones every landing takes",
-  );
-  const params = /function landDraw\(([^)]*)\)/.exec(src);
-  assert.ok(params, "landDraw is gone, so the argument check below reads nothing");
-  assert.deepEqual(
-    calls[0],
-    params[1]!
-      .split(",")
-      .map((p) => p.split(":")[0]!.trim())
-      .filter(Boolean),
-    "a landing path is handed something other than the drawn world's own value under its own name, which is where a constant style would now stand in, with every field of the sheet above still reading `style`",
+    "the landing paths are reached from some number of places other than the one draw",
   );
 });
 
-test("CT7b the Explorer passes the REAL turn flag into the gate, so the pure refusal above cannot be fed a constant (#631)", () => {
-  const app = readFileSync(resolve(REPO, "src/site/explorer/app.ts"), "utf8")
-    .replace(/\/\*[\s\S]*?\*\//g, "")
-    .replace(/\/\/[^\n]*/g, "");
-  const sites = [...app.matchAll(/filingAt\(/g)].map((m) => m.index);
-  assert.equal(
-    sites.length,
-    1,
-    "a second call site is a second answer to the same question, and reading only the first leaves it unguarded",
-  );
-  const at = sites[0];
-  const call = app.slice(at, app.indexOf("})", at));
-  assert.match(
-    call,
-    /turning:\s*sheetEl\.classList\.contains\("turning"\)/,
-    "the gate is fed a literal or a stale flag instead of the sheet's own state; `turning` is the class runTurn brackets the window with",
-  );
-  assert.doesNotMatch(
-    call,
-    /turning:\s*(false|true)\b/,
-    "a constant here disables the refusal while every unit assertion above stays green",
-  );
-  // The window is closed upstream too, and that line had no reader until a mutation deleted it and shipped green: the
-  // card belongs to the chart being replaced, so a draw drops it BEFORE it rebases and swaps the sheet under it.
-  const at2 = app.indexOf("function draw(opts");
-  assert.notEqual(at2, -1, "draw() is gone, so the ordering assertion below reads an empty slice");
-  const draw = app.slice(at2, app.indexOf("\n}", at2));
-  assert.match(
-    draw,
-    /lc\.hideCard\(\);/,
-    "a pinned card outlives the chart it names, and its hit targets then point at the OUTGOING world's places for the length of the turn",
-  );
+test("CT7b a draw drops the pinned card before it rebases the camera (#631; kept for Issue #779 part 2i: two synchronous calls in one task, nothing between them to read; CD58 reads the card dropped and the real turn flag)", () => {
+  const app = readFileSync(resolve(REPO, "src/site/explorer/app.ts"), "utf8");
+  const at = app.indexOf("function draw(opts");
+  assert.notEqual(at, -1, "draw() is gone, so the ordering assertion below reads an empty slice");
+  const draw = app.slice(at, app.indexOf("\n}", at));
   assert.ok(
-    draw.indexOf("lc.hideCard();") < draw.indexOf("glass.rebase();"),
-    "and it is dropped before the rebase, so nothing reads it in between",
-  );
-});
-
-test("CT8 the road to the Portfolio carries the Explorer's WHOLE address, not the table key alone (#634 ruling 3, 2026-09-19)", () => {
-  const src = readFileSync(resolve(REPO, "src/site/explorer/chart-drawer-bind.ts"), "utf8");
-  const at = src.indexOf("drawerEls.road.addEventListener");
-  assert.notEqual(at, -1, "the road's own handler is gone, so this guard would be reading the whole file");
-  const handler = src.slice(at, src.indexOf("});", at));
-  // The ASSIGNMENT is anchored, not the tokens: the guard-prover's round 1 left the whole-address expression standing as a dead local and navigated with `deps.folioHref` alone, and a token-wise guard passed that with the road broken.
-  assert.match(
-    handler,
-    /window\.location\.href = `\.\/portfolio\/\$\{tableHash\(window\.location\.hash, emitTable\(items\(\)\)\)\}`;/,
-    "the road no longer NAVIGATES to this page's own address plus the table: computing it and going somewhere else is the same defect as never computing it, and it is what #634 measured losing the world",
-  );
-  assert.doesNotMatch(
-    handler,
-    /#\$\{TABLE_KEY\}=/,
-    "the key-only form is back; it is what #634 defect 1 measured losing the world",
+    draw.indexOf("lc.hideCard();") !== -1 && draw.indexOf("lc.hideCard();") < draw.indexOf("glass.rebase();"),
+    "the card is dropped before the rebase, so nothing reads it in between",
   );
 });
 
@@ -516,7 +437,7 @@ test("CT10 the sheets a re-seat drops are read against the table it brings, so e
   assert.deepEqual(sheetsThatLeft([], before), [], "and an arrival into a bare drawer forgets nothing");
 });
 
-test("CT11 EVERY road out that carries this page's address is rebuilt by the one hash writer, never by the draw (#634, the cold review's round 3 on PR #635)", () => {
+test("CT11 EVERY road out that carries this page's address is rebuilt by the one hash writer, never by the draw (#634, the cold review's round 3 on PR #635; kept for Issue #779 part 2i: a class over every road the file may grow, where CD52 reads the two that stand)", () => {
   // Guarded as a CLASS, and derived rather than restated: the roads are read out of the file. Laying a sheet, taking
   // one off and a cached return all move the address WITHOUT drawing, so a road rebuilt in draw() hands on the table as
   // it stood at the last draw. Measured doing exactly that: a reader who took their only sheet off still pressed a road

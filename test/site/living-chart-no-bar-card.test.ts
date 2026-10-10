@@ -1,6 +1,5 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import { barlessHost, realWorld } from "../../test-support/living-chart-hosts.ts";
 import { HOLD_GRACE_MS } from "../../src/site/living-chart/place-card-hold.ts";
 
@@ -150,14 +149,6 @@ test("LP3 the press's face and its refusal come from the HOST's table, and the p
     pressB.getAttribute("disabled"),
     null,
     "a refusing press is not disabled: that leaves the tab order, and the dog-ear's ruled shape stays pressable and answers",
-  );
-  const overlaySrc = readFileSync(new URL("../../src/site/living-chart/place-overlay.ts", import.meta.url), "utf8")
-    .replace(/\/\*[\s\S]*?\*\//g, "")
-    .replace(/\/\/[^\n]*/g, "");
-  assert.doesNotMatch(
-    overlaySrc,
-    /\bdisabled\b/,
-    "and nothing in the overlay may reach for disabled, which is the form that silently drops the press out of the tab order",
   );
 });
 

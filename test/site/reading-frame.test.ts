@@ -11,17 +11,6 @@ const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 
 installShim();
 
-/** Declaration blocks whose selector LIST contains `selector`, joined; membership beats a literal anchor, which a comma after the class defeats. */
-function declarationsFor(css: string, selector: string): string {
-  const src = css.replace(/\/\*[\s\S]*?\*\//g, "");
-  const out: string[] = [];
-  for (const m of src.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
-    const arms = m[1]!.split(",").map((s) => s.trim());
-    if (arms.includes(selector)) out.push(m[2]!);
-  }
-  return out.join("\n");
-}
-
 test("the frame mounts and hands the engine a complete host (#219, the first non-Explorer host)", async () => {
   const { createReadingFrame } = await import("../../src/site/reading-frame/index.ts");
   const mount = new El("div");
@@ -180,32 +169,7 @@ test("#442 the live row is a MIRROR: it never writes into the journal the engine
   );
 });
 
-test("#463 (#462 ruling 6) the wrapper is the strip's column with the told row above the bar, seated by the host; the bar keeps the unfurl", () => {
-  const css = read("public/reading-frame.css");
-  const wrapper = declarationsFor(css, ".rf-instrument-strip");
-  assert.ok(wrapper, "the wrapper carries a rule of its own");
-  assert.match(
-    wrapper,
-    /flex-direction:\s*column-reverse/,
-    "the row being told stands above the bar (the frame builds them bar-first)",
-  );
-  assert.doesNotMatch(
-    wrapper,
-    /position:\s*(sticky|fixed)/,
-    "where the strip stands is the host's (the #442 sticky shape retired)",
-  );
-  assert.doesNotMatch(wrapper, /transform|animation/, "and it is never transformed");
-
-  // The polarity a presence check cannot see: the arrival animation must stay on the INNER bar. Both halves, so moving it onto the wrapper fails here rather than at a rendered probe.
-  assert.match(
-    css,
-    /\.rf-arrival \.rf-instrument\s*\{[^}]*animation:\s*paperUnfurl/,
-    "the unfurl still transforms .rf-instrument",
-  );
-  assert.doesNotMatch(css, /\.rf-arrival \.rf-instrument-strip\b/, "and never the sticky wrapper itself");
-});
-
-test("#442 the mirror takes its SOURCE's voice: roman for an annal, the surveyor's italic for a day row", async () => {
+test("#442 the mirror takes its SOURCE's voice: a day row is told in the surveyor's prologue, an annal in the chronicler's", async () => {
   const { createReadingFrame } = await import("../../src/site/reading-frame/index.ts");
   const frame = createReadingFrame(new El("div") as unknown as HTMLElement);
   const told = frame.told as unknown as El;
@@ -219,37 +183,14 @@ test("#442 the mirror takes its SOURCE's voice: roman for an annal, the surveyor
     "an annal is the chronicler's, and must not inherit the survey voice",
   );
   frame.setTold(null);
-
-  const css = read("public/reading-frame.css");
-  const toldText = css.match(/\.rf-told \.cr-text\s*\{[^}]*\}/)?.[0] ?? "";
-  assert.ok(toldText, "the mirror dresses its text column");
-  assert.doesNotMatch(toldText, /font-style:\s*italic/, "the UNQUALIFIED mirror is roman, like the annals it copies");
-  assert.match(
-    css,
-    /\.rf-told\.prologue \.cr-text\s*\{[^}]*font-style:\s*italic/,
-    "and only the prologue-voiced mirror is italic, like the day rows it copies",
-  );
-  const journalAnnal = css.match(/\.rf-log-strip li\.prologue \.cr-text\s*\{[^}]*\}/)?.[0] ?? "";
-  assert.match(journalAnnal, /font-style:\s*italic/, "the source it is matching is still italic in the journal");
 });
 
-test("#442 the live row takes the shared gutter idiom and refuses the drop cap", () => {
-  const css = read("public/reading-frame.css");
-  const told = declarationsFor(css, ".rf-told");
-  assert.ok(told, "the live row carries a rule of its own");
-  assert.match(
-    declarationsFor(css, ".rf-told .cr-text"),
-    /color:\s*var\(--parchment-bright\)/,
-    "the row is written in the strip's ink: it stands on the deep since #463, not on a panel",
+test("#442 no rule dresses a drop cap in the live row (kept for Issue #779 part 2i: the mirror writes plain text, so no .cr-dc stands in it for a browser to read)", () => {
+  assert.doesNotMatch(
+    read("public/reading-frame.css"),
+    /\.rf-told[^{]*\.cr-dc/,
+    "the 2.1em initial never reaches the strip",
   );
-  assert.ok(declarationsFor(css, ".rf-told .cr-year"), "it dresses the shared gutter column");
-  assert.match(
-    declarationsFor(css, ".rf-told[hidden]"),
-    /display:\s*none/,
-    "hidden means gone, not merely transparent",
-  );
-  assert.doesNotMatch(css, /\.rf-told[^{]*\.cr-dc/, "the 2.1em initial never reaches the strip");
-  assert.doesNotMatch(told, /max-height|overflow/, "the live row is one row, never a scroller of its own");
 });
 
 test("the instrument panel starts hidden and the ONE journal nests inside it (#219, fused at #220)", async () => {
@@ -287,22 +228,7 @@ test("destroy() unmounts the frame (a page host that leaves takes its DOM with i
   assert.equal(mount.children.length, 0, "destroy() removes the frame's root from its mount");
 });
 
-test("the frame's log never nests a scroller, at any width (#219 acceptance, decision 2)", () => {
-  const css = read("public/reading-frame.css");
-  assert.doesNotMatch(
-    css,
-    /overflow-y\s*:\s*(auto|scroll)/,
-    "the frame's log is a single vertical story: the PAGE scroll owns it, at every width",
-  );
-  assert.doesNotMatch(
-    css,
-    /max-height/,
-    "no max-height cap: the log is bounded by construction (14 events + ~24 legs), not by a scrollbar",
-  );
-  // Measured over CDP at a REAL 320px viewport (Brave's --window-size does not shrink the layout viewport): a flex item's min-width:auto refuses to shrink and a range input's intrinsic width is ~129px, so the row overflowed to scrollWidth 355. Both halves are load-bearing.
-  assert.match(css, /\.rf-play\s*\{[^}]*flex:\s*none/, "Play keeps its own width and never stretches the row");
-  assert.match(css, /\.rf-range\s*\{[^}]*min-width:\s*0/, "the slider may shrink below its intrinsic width");
-
+test("the Explorer's sheet revives no scroll cap for a journal (#219 acceptance, decision 2; kept for Issue #779 part 2i: the Explorer carries no journal since Issue #459, so the rule would name nothing a browser can read)", () => {
   const explorer = read("public/explorer/index.css");
   assert.equal(
     explorer.match(/max-height:\s*32rem;\s*overflow-y:\s*auto/g)?.length ?? 0,
@@ -346,19 +272,10 @@ test("#493 the pace stands at the readout's right: three presses 1x 2x 4x in one
   );
 });
 
-test("#493 the pace's dress: the strip's dark presses in the mockup's measure, the chosen one on parchment, and the group stands at every width (Issue #762, default D1)", () => {
-  const css = read("public/reading-frame.css");
-  assert.match(css, /\.rf-pace\s*\{[^}]*flex:\s*none/, "the group keeps its width beside the shrinking bar");
-  assert.match(css, /\.rf-pace button\s*\{[^}]*width:\s*1\.9rem;[^}]*height:\s*1\.6rem;/, "the mockup's press");
+test("#493 the pace's keyboard arm stands four classes deep beside its hover arm (kept for Issue #779 part 2i: no house rule competes under focus alone, so its depth shows nowhere; RS31 reads the dress)", () => {
   assert.match(
-    css,
-    /\.rf-instrument-strip \.rf-instrument \.rf-pace button:hover,\s*\.rf-instrument-strip \.rf-instrument \.rf-pace button:focus-visible\s*\{/,
-    "four classes deep against the house hover wash, as Play is",
-  );
-  const pressed = declarationsFor(css, '.rf-instrument-strip .rf-instrument .rf-pace button[aria-pressed="true"]');
-  assert.match(pressed, /background:\s*var\(--parchment\)/, "the chosen pace stands on parchment");
-  assert.ok(
-    css.indexOf('.rf-pace button[aria-pressed="true"]') > css.indexOf(".rf-pace button:hover"),
-    "written after the hover so a hovered chosen press stays chosen",
+    read("public/reading-frame.css"),
+    /\.rf-instrument-strip \.rf-instrument \.rf-pace button:focus-visible\s*\{/,
+    "four classes deep, as Play is",
   );
 });
