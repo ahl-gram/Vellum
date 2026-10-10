@@ -19,11 +19,12 @@ type Press = {
   tipped: boolean;
   x: number;
   y: number;
+  running: number;
 };
 const PRESS: Payload<Press | null> = `(() => { const rgba = ${PAGE_RGBA}, p = document.querySelector("#place-card .pc-lay"), a = document.querySelector("#place-card .pc-acts"); if (!p || !a) return null;
   const pc = getComputedStyle(p), ac = getComputedStyle(a), r = p.getBoundingClientRect();
   return { text: p.textContent, dim: p.classList.contains("dim"), hover: p.matches(":hover"), focus: p.matches(":focus-visible"), acts: [ac.display, ac.rowGap],
-    ground: rgba(pc.backgroundColor), border: rgba(pc.borderTopColor), opacity: pc.opacity, tipped: ${TIPPED}(pc.transform), x: r.left + r.width / 2, y: r.top + r.height / 2 }; })()`;
+    ground: rgba(pc.backgroundColor), border: rgba(pc.borderTopColor), opacity: pc.opacity, tipped: ${TIPPED}(pc.transform), x: r.left + r.width / 2, y: r.top + r.height / 2, running: p.getAnimations().filter((x) => x.playState === "running").length }; })()`;
 const HIT = (idx: number): Payload<{ x: number; y: number; hit: boolean } | null> =>
   `(() => { const h = document.querySelector('.place-overlay .place-hit[data-idx="${idx}"]'); if (!h) return null; const b = h.getBoundingClientRect(); const x = b.x + b.width / 2, y = b.y + b.height / 2; return { x, y, hit: document.elementFromPoint(x, y) === h }; })()`;
 
@@ -32,15 +33,20 @@ const reachable = (skip: number[]): Payload<number | null> =>
   `(() => { for (const h of document.querySelectorAll(".place-overlay .place-hit")) { const i = Number(h.dataset.idx); if (i < 1 || ${JSON.stringify(skip)}.includes(i)) continue;
   const b = h.getBoundingClientRect(); if (document.elementFromPoint(b.x + b.width / 2, b.y + b.height / 2) === h) return i; } return null; })()`;
 
-// A card is pinned by a real press on its town's own hit, and read once its filing press has held still across two reads.
+const UNFURL: Payload<string[] | null> =
+  `(() => { const i = document.querySelector("#place-card .pc-inner"); return i ? i.getAnimations().map((a) => a.playState) : null; })()`;
+
+// A card is pinned by a real press on its town's own hit, and read once its unfurl has finished and its filing press has held still across two reads.
 export async function pinAt(k: DrawerKit, idx: number): Promise<Card> {
   const { evaluate, clickAt, settle } = k;
   const at = await evaluate(HIT(idx));
   if (at?.hit) await clickAt(at.x, at.y);
+  await settle(CARD, (d) => d.shown && d.press?.idx === String(idx), `chart-drawer-pin-${idx}`);
+  await settle(UNFURL, (d) => d.length > 0 && d.every((s) => s === "finished"), `chart-drawer-pin-${idx}-unfurled`);
   return settle(
     CARD,
-    (d, last) => d.shown && d.press?.idx === String(idx) && pressAtRest(d, last),
-    `chart-drawer-pin-${idx}`,
+    (d, last) => d.press?.idx === String(idx) && pressAtRest(d, last),
+    `chart-drawer-pin-${idx}-rest`,
   );
 }
 
@@ -55,14 +61,20 @@ async function underHand(k: DrawerKit): Promise<{ rest: Press | null; hover: Pre
     if (at) await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: at.x, y: at.y });
     hover = await settle(
       PRESS,
-      (d, last) => d.hover && !!last && JSON.stringify(d) === JSON.stringify(last),
+      (d, last) => d.hover && d.running === 0 && !!last && JSON.stringify(d) === JSON.stringify(last),
       "chart-drawer-press-hovered",
       20,
     ).catch(() => null);
   }
   if (hover === null) throw new Error("the hand never rested on the filing press");
   await park(send);
-  const keyed = (await tabInto(k, "#place-card .pc-lay", "#place-card .pc-prospect")) ? await evaluate(PRESS) : null;
+  const keyed = (await tabInto(k, "#place-card .pc-lay", "#place-card .pc-prospect"))
+    ? await settle(
+        PRESS,
+        (d, last) => d.focus && d.running === 0 && !!last && JSON.stringify(d) === JSON.stringify(last),
+        "chart-drawer-press-keyed",
+      )
+    : null;
   await evaluate<boolean>(`(() => { if (document.activeElement) document.activeElement.blur(); return true; })()`);
   return { rest, hover, keyed };
 }
@@ -82,13 +94,14 @@ export async function cd57PressDress(k: DrawerKit): Promise<void> {
   try {
     await go(DRESS);
     await settle(CARD, (d) => d.hits > 1, "chart-drawer-press-card");
-    const card = await pinAt(k, (await k.evaluate(reachable([]))) ?? 1);
+    await pinAt(k, (await k.evaluate(reachable([]))) ?? 1);
     const open = await underHand(k);
-    if (card.press) await k.clickAt(card.press.box.x, card.press.box.y);
+    const now = await k.evaluate(PRESS);
+    if (now) await k.clickAt(now.x, now.y);
     await settle(
       CARD,
       (d, last) => d.press?.text === "Already on the table" && pressAtRest(d, last),
-      "chart-drawer-press-filed",
+      `chart-drawer-press-filed-at-${now?.x},${now?.y}`,
     );
     const held = await underHand(k);
     check(
@@ -156,8 +169,23 @@ async function midTurn(k: DrawerKit, idx: number): Promise<{ at: Turn; face: Car
   await evaluate<boolean>(
     `(() => { const p = document.querySelector("#place-card .pc-lay"); if (p) p.focus({ preventScroll: true }); return document.activeElement === p; })()`,
   );
-  await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Enter", code: "Enter", windowsVirtualKeyCode: 13 });
-  await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Enter", code: "Enter", windowsVirtualKeyCode: 13 });
+  // The character is what makes Enter press a button; without it the key files nothing at any time (send T, run 38087000715: row CT7b.a).
+  await send("Input.dispatchKeyEvent", {
+    type: "keyDown",
+    key: "Enter",
+    code: "Enter",
+    text: "\r",
+    unmodifiedText: "\r",
+    windowsVirtualKeyCode: 13,
+    nativeVirtualKeyCode: 13,
+  });
+  await send("Input.dispatchKeyEvent", {
+    type: "keyUp",
+    key: "Enter",
+    code: "Enter",
+    windowsVirtualKeyCode: 13,
+    nativeVirtualKeyCode: 13,
+  });
   const after: Turn[] = [];
   for (let i = 0; i < 6; i++) {
     after.push(await evaluate(TURN));

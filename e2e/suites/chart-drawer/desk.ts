@@ -51,16 +51,19 @@ export async function cd1DogEar({ check, settle, go }: DrawerKit): Promise<void>
 
 // A transform's turn, read off its matrix: any rotate in a 2D matrix puts a nonzero b and c.
 export const TIPPED = `((t) => { const m = /^matrix\\(([^)]*)\\)$/.exec(t); if (!m) return t !== "none"; const v = m[1].split(",").map(Number); return Math.abs(v[1]) > 1e-6 || Math.abs(v[2]) > 1e-6; })`;
-const keyedTilt = (selector: string): Payload<{ focus: boolean; tipped: boolean; t: string } | null> =>
-  `(() => { const e = document.querySelector(${JSON.stringify(selector)}); if (!e) return null; const t = getComputedStyle(e).transform; return { focus: e.matches(":focus-visible"), tipped: ${TIPPED}(t), t }; })()`;
+const keyedTilt = (selector: string): Payload<{ focus: boolean; tipped: boolean; t: string; running: number } | null> =>
+  `(() => { const e = document.querySelector(${JSON.stringify(selector)}); if (!e) return null; const t = getComputedStyle(e).transform; return { focus: e.matches(":focus-visible"), tipped: ${TIPPED}(t), t, running: e.getAnimations().filter((a) => a.playState === "running").length }; })()`;
+// Read once the focus's own transition has ended: a read at its first frame finds the rest it is leaving (send T, run 38087000715: rows CC3.f3 and CC3.f4).
+const keyedAtRest = async (k: DrawerKit, selector: string) =>
+  (await tabInto(k, selector))
+    ? k.settle(keyedTilt(selector), (d, last) => d.running === 0 && d.t === last?.t, `chart-drawer-keyed-${selector}`)
+    : null;
 
 export async function cd51NoTipKeyed(k: DrawerKit): Promise<void> {
   const { evaluate, check } = k;
   try {
-    const tab = (await tabInto(k, "#chart-drawer-tab")) ? await evaluate(keyedTilt("#chart-drawer-tab")) : null;
-    const ear = (await tabInto(k, "#map .region-inset .dog-ear"))
-      ? await evaluate(keyedTilt("#map .region-inset .dog-ear"))
-      : null;
+    const tab = await keyedAtRest(k, "#chart-drawer-tab");
+    const ear = await keyedAtRest(k, "#map .region-inset .dog-ear");
     check(
       "CD51 the drawer's tab and the survey's dog-ear take no navigation tip under a keyboard's focus: neither goes anywhere, so neither promises it (the tip is the roads' alone)",
       !!tab && tab.focus && !tab.tipped && !!ear && ear.focus && !ear.tipped,

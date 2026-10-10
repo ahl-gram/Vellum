@@ -203,10 +203,11 @@ const TILTS: Payload<{
   li: string;
   off: { focus: boolean; t: string } | null;
   within: string;
+  running: number;
 }> =
   `(() => { const li = document.querySelector("#cuttings li"), img = li.querySelector("img, .awaited"), off = li.querySelector(".off"), r = img.getBoundingClientRect();
   return { x: r.left + r.width / 2, y: r.top + r.height / 2, hover: li.matches(":hover"), li: getComputedStyle(li).transform,
-    off: off && { focus: off.matches(":focus-visible"), t: getComputedStyle(off).transform }, within: li.matches(":focus-within") ? getComputedStyle(li).transform : "unfocused" }; })()`;
+    off: off && { focus: off.matches(":focus-visible"), t: getComputedStyle(off).transform }, within: li.matches(":focus-within") ? getComputedStyle(li).transform : "unfocused", running: li.getAnimations({ subtree: true }).filter((a) => a.playState === "running").length }; })()`;
 
 export async function cd53Ceremony(k: DrawerKit): Promise<void> {
   const { evaluate, send, check, sleep } = k;
@@ -223,11 +224,18 @@ export async function cd53Ceremony(k: DrawerKit): Promise<void> {
     await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: at.x, y: at.y });
     const hovered = await settle(
       TILTS,
-      (d, last) => d.hover && !!last && d.li === last.li,
+      (d, last) => d.hover && d.running === 0 && !!last && d.li === last.li,
       "chart-drawer-cutting-hovered",
     );
     await park(send);
-    const keyed = (await tabInto(k, "#cuttings li .off")) ? await evaluate(TILTS) : null;
+    // Read once the hand's and the focus's own transitions have ended: a read at the first frame finds the rest being left (send T, run 38087000715: row CC3.f2).
+    const keyed = (await tabInto(k, "#cuttings li .off"))
+      ? await settle(
+          TILTS,
+          (d, last) => !!d.off?.focus && d.running === 0 && d.off.t === last?.off?.t,
+          "chart-drawer-off-keyed",
+        )
+      : null;
     const wrong = c ? ceremonyFaults(c) : ["no cutting to read"];
     check(
       "CD53 the cutting's settle and the table's jolt are animations on their own classes: the settle a keyframe on transform alone ending at none, timed by the motion tokens and filled both, its shadow flattening on the image to the token the static rest also reads, the drawer's slide its only animation whatever the jolt or a receiving edge do, and no cutting or its remove press takes a tip under a real hover or a keyboard's focus",
