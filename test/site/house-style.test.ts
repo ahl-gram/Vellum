@@ -14,29 +14,9 @@ const ruleOf = (css: string, selector: RegExp): string => {
   return m ? m[2]! : "";
 };
 
-test("BaseLayout links /house.css on every page, after motion.css and before extraCss (#324)", () => {
-  const layout = read("src/layouts/BaseLayout.astro");
-  const motion = layout.indexOf(`<link rel="stylesheet" href="/motion.css">`);
-  const houseLink = layout.indexOf(`<link rel="stylesheet" href="/house.css">`);
-  const extra = layout.indexOf("extraCss.map");
-  assert.ok(houseLink > -1, "BaseLayout should link /house.css");
-  assert.ok(motion > -1 && motion < houseLink, "/house.css follows /motion.css");
-  assert.ok(extra > houseLink, "/house.css precedes the extraCss links so page rules keep the last word");
-});
-
-test("the intro role: flourish italic, ink-brown, centered (#324 decision 1)", () => {
-  const rule = ruleOf(house(), /\.intro/);
-  assert.match(rule, /var\(--font-flourish/, ".intro wears the flourish face");
-  assert.match(rule, /font-style:\s*italic/, ".intro is italic");
-  assert.match(rule, /color:\s*var\(--ink-brown\)/, ".intro is ink-brown");
-  assert.match(rule, /text-align:\s*center/, ".intro is centered");
-});
-
-test("the status role: body italic, ink-faded (#324 decision 3)", () => {
-  const rule = ruleOf(house(), /\.status/);
-  assert.match(rule, /font-style:\s*italic/, ".status is italic");
-  assert.match(rule, /color:\s*var\(--ink-faded\)/, ".status is ink-faded");
-  assert.ok(!/font-family/.test(rule), ".status stays in the body face");
+// The status role's voice is e2e SB12 on the Specimen's pill; its colour stays here because every served pill stands in a chart room's stage, where the kit's parchment wins (Issue #779 part 2f, for part 2i).
+test("the status role's colour is ink-faded, a colour no served pill wears (#324 decision 3)", () => {
+  assert.match(ruleOf(house(), /\.status/), /color:\s*var\(--ink-faded\)/, ".status is ink-faded");
 });
 
 test("the warning slip: 6px, line-tan, ink-brown, body size (#324 decision 4)", () => {

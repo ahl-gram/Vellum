@@ -235,8 +235,25 @@ export async function rh12FocusRing({ evaluate, send, check, visit }: RunningHea
   );
 }
 
-const WORDMARK: Payload<{ x: number; y: number; hovered: boolean; moving: number; transform: string } | null> =
-  `(() => { const a = document.querySelector("header.chrome .wordmark a"); if (!a) return null; const b = a.getBoundingClientRect(); return { x: b.x + b.width / 2, y: b.y + b.height / 2, hovered: a.matches(":hover"), moving: a.getAnimations().length, transform: getComputedStyle(a).transform }; })()`;
+type Wordmark = { x: number; y: number; hovered: boolean; focused: boolean; moving: number; transform: string } | null;
+const WORDMARK: Payload<Wordmark> = `(() => { const a = document.querySelector("header.chrome .wordmark a"); if (!a) return null; const b = a.getBoundingClientRect(); return { x: b.x + b.width / 2, y: b.y + b.height / 2, hovered: a.matches(":hover"), focused: a.matches(":focus-visible"), moving: a.getAnimations().length, transform: getComputedStyle(a).transform }; })()`;
+
+async function focusWordmark(k: RunningHeadKit): Promise<string> {
+  await k.send("Input.dispatchKeyEvent", {
+    type: "keyDown",
+    key: "Shift",
+    code: "ShiftLeft",
+    windowsVirtualKeyCode: 16,
+  });
+  await k.send("Input.dispatchKeyEvent", { type: "keyUp", key: "Shift", code: "ShiftLeft", windowsVirtualKeyCode: 16 });
+  await k.evaluate(`document.querySelector("header.chrome .wordmark a").focus()`);
+  try {
+    const rest = await makeSettle(k)(WORDMARK, (d) => d.focused && d.moving === 0, "wordmark-focus", 40);
+    return rest.transform;
+  } finally {
+    await k.evaluate(`document.activeElement instanceof HTMLElement && document.activeElement.blur()`);
+  }
+}
 
 async function hoverWordmark(k: RunningHeadKit): Promise<string> {
   const at = await k.evaluate(WORDMARK);
@@ -258,11 +275,12 @@ const tipped = (m: string): boolean => {
 export async function rh13WordmarkTip(k: RunningHeadKit): Promise<void> {
   if (!(await k.visit("/faq/"))) throw new Error("RH13: the Q & A never loaded");
   const room = await hoverWordmark(k);
+  const keyed = await focusWordmark(k);
   if (!(await k.visit("/"))) throw new Error("RH13: home never loaded");
   const home = await hoverWordmark(k);
   k.check(
-    "RH13 the wordmark tips under the hand on a room page, turned and lifted, and stays still on home, where it names the page (Issue #289)",
-    tipped(room) && home === "none",
-    JSON.stringify({ room, home }),
+    "RH13 the wordmark tips on a room page, turned and lifted, under the hand and under keyboard focus alike, and stays still on home, where it names the page (Issue #289)",
+    tipped(room) && tipped(keyed) && home === "none",
+    JSON.stringify({ room, keyed, home }),
   );
 }

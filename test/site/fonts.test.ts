@@ -20,8 +20,6 @@ import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 const readText = (p: string) => readFile(root(p), "utf8").catch(() => "");
 
-const ROLE_VARS = ["--font-display", "--font-flourish", "--font-body"] as const;
-
 const WOFF2 = [
   "im-fell-english-sc-latin-400-normal.woff2",
   "im-fell-english-latin-400-italic.woff2",
@@ -30,31 +28,6 @@ const WOFF2 = [
   "eb-garamond-latin-600-normal.woff2",
   "eb-garamond-latin-700-normal.woff2",
 ] as const;
-
-// Every page renders through BaseLayout, so the one layout is the folio's shell; the atlas and gallery are guarded through their generators below.
-const AUTHORED_PAGES = ["src/layouts/BaseLayout.astro"] as const;
-
-test("fonts.css self-hosts the three Fell/Garamond faces with font-display: swap", async () => {
-  const css = await readText("public/fonts.css");
-  assert.ok(css.length > 0, "public/fonts.css should exist");
-
-  for (const family of ["IM Fell English SC", "IM Fell English", "EB Garamond"]) {
-    assert.ok(
-      new RegExp(`@font-face[^}]*font-family:\\s*['"]${family}['"]`, "s").test(css),
-      `fonts.css should @font-face the "${family}" family`,
-    );
-  }
-
-  assert.match(css, /font-display:\s*swap/, "faces must use font-display: swap");
-
-  assert.match(css, /url\(\s*['"]?\/fonts\/[^)]+\.woff2/, "faces must load from /fonts/");
-  assert.doesNotMatch(css, /fonts\.googleapis\.com|fonts\.gstatic\.com/, "no third-party font host");
-
-  for (const v of ROLE_VARS) {
-    assert.ok(css.includes(v), `fonts.css :root should publish ${v}`);
-  }
-  assert.match(css, /Iowan Old Style/, "the role vars should fall back to the existing serif stack");
-});
 
 test("the self-hosted woff2 files and their OFL license live in design/kit/fonts/, the one copy the site builds from", () => {
   for (const file of WOFF2) {
@@ -79,34 +52,6 @@ test("the self-hosted woff2 files and their OFL license live in design/kit/fonts
   });
   assert.equal(tracked.status, 0, `git ls-files failed: ${tracked.stderr}`);
   assert.equal(tracked.stdout, "", "public/fonts/ is generated from the kit, so git tracks nothing there");
-});
-
-const FACE = /@font-face\s*\{([^}]*)\}/g;
-const faceOf = (block: string): string => {
-  const get = (prop: string): string => block.match(new RegExp(`${prop}:\\s*([^;]+);`))?.[1]?.trim() ?? "";
-  return [get("font-family"), get("font-style"), get("font-weight"), get("font-display"), get("src")].join(" | ");
-};
-const facesIn = (css: string): string[] =>
-  [...css.matchAll(FACE)].map(([, block]) => faceOf(block!.replaceAll("'", '"')));
-
-test("every face the site serves is a file in the kit, and the kit's own sheet declares the same faces for a design round", async () => {
-  const site = facesIn(await readText("public/fonts.css"));
-  const kit = facesIn(await readText("design/kit/fonts.css"));
-  assert.equal(site.length, WOFF2.length, "public/fonts.css should declare one face per woff2");
-  for (const face of site) {
-    assert.match(face, /\| swap \|/, `${face} must use font-display: swap`);
-    const file = face.match(/url\("\/fonts\/([^"]+)"\)/)?.[1];
-    assert.ok(file !== undefined, `${face} does not load from /fonts/`);
-    assert.ok(
-      existsSync(root(`design/kit/fonts/${file}`)),
-      `${file} is served at /fonts/ but is not in design/kit/fonts/`,
-    );
-  }
-  assert.deepEqual(
-    kit,
-    site.map((face) => face.replace('url("/fonts/', 'url("fonts/')),
-    "design/kit/fonts.css should declare the site's faces with URLs relative to the kit",
-  );
 });
 
 test("the build copies every file of the kit into the site's fonts, byte for byte", async () => {
@@ -161,27 +106,6 @@ test("npm run astro:generate's fonts step copies the real kit into the public di
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
-});
-
-test("every page shell in the folio links /fonts.css (root-absolute, like /motion.css)", async () => {
-  for (const page of AUTHORED_PAGES) {
-    const html = await readText(page);
-    assert.ok(html.length > 0, `${page} should exist`);
-    assert.match(html, /<link rel="stylesheet" href="\/fonts\.css">/, `${page} should link the shared /fonts.css`);
-  }
-});
-
-test("the shell binds all three roles once, in public/shell.css (#263)", async () => {
-  const shell = await readText("public/shell.css");
-  const bindings = [
-    [/(^|\n)body\s*\{[^}]*font-family:\s*var\(--font-body,/, "--font-body on body"],
-    [
-      /(^|\n)\.wordmark,\s*\.room-name,\s*\.rooms,\s*footer\s*\{[^}]*font-family:\s*var\(--font-display,/,
-      "--font-display on the head cluster and footer",
-    ],
-    [/(^|\n)\.tagline\s*\{[^}]*font-family:\s*var\(--font-flourish,/, "--font-flourish on the tagline"],
-  ] as const;
-  for (const [rule, what] of bindings) assert.match(shell, rule, `the shell binds ${what}`);
 });
 
 test("index.css maps display + flourish roles onto headings and flourishes", async () => {

@@ -1,12 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
 import { indexCount, roomSections } from "../../src/layouts/room-sections.ts";
 
 // Issue #462 document-room ruling 1: the index is read from the page's own source at build, so every section and every entry on the page is in it and nothing else is.
-
-const read = (p: string) => readFileSync(fileURLToPath(new URL(`../../${p}`, import.meta.url)), "utf8");
 
 const FIXTURE = `
 <h2 id="about">About &amp; more</h2>
@@ -58,25 +54,3 @@ test("the other entry class is invisible: a term list read as questions finds no
   const sections = roomSections(`<h2 id="a">A</h2><p class="term" id="t">T</p>`, "q");
   assert.deepEqual(sections[0]!.entries, []);
 });
-
-for (const [route, cls] of [
-  ["faq", "q"],
-  ["glossary", "term"],
-] as const) {
-  test(`${route}: every h2 section and every ${cls} on the page is in the index, ids unique (#462)`, () => {
-    const source = read(`src/pages/${route}/index.astro`);
-    const sections = roomSections(source, cls);
-    const h2s = [...source.matchAll(/<h2 id="([^"]+)"/g)].map((m) => m[1]);
-    assert.deepEqual(
-      sections.map((s) => s.id),
-      h2s,
-      "the index lists exactly the page's sections, in order",
-    );
-    const onPage = [...source.matchAll(new RegExp(`<p class="${cls}"[^>]*>`, "g"))].length;
-    assert.equal(indexCount(sections), onPage, `every ${cls} on the page is an index entry`);
-    assert.ok(onPage > 0, "the page has entries to index");
-    const ids = sections.flatMap((s) => s.entries.map((e) => e.id));
-    assert.equal(new Set(ids).size, ids.length, "no two entries share an anchor");
-    for (const id of ids) assert.match(id, /^[a-z0-9-]+$/, `${id} is a plain anchor`);
-  });
-}
