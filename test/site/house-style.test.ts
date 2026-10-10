@@ -14,7 +14,6 @@ const ruleOf = (css: string, selector: RegExp): string => {
   return m ? m[2]! : "";
 };
 
-// The status role's voice is e2e SB12 on the Specimen's pill; its colour stays here because every served pill stands in a chart room's stage, where the kit's parchment wins (Issue #779 part 2f, for part 2i).
 test("the status role's colour is ink-faded, a colour no served pill wears (#324 decision 3)", () => {
   assert.match(ruleOf(house(), /\.status/), /color:\s*var\(--ink-faded\)/, ".status is ink-faded");
 });

@@ -67,7 +67,6 @@ export async function run(ctx: SuiteContext): Promise<void> {
     ["RH11", (c) => rh11Deep(c, shells)],
     ["RH15", (c) => rh15BodyFace(c, shells)],
     ["RH16", (c) => rh16Prefetch(c, shells)],
-    ["RH17", (c) => rh17ShellOnce(c, shells)],
     ["RH18", (c) => rh18HouseSheet(c, shells)],
     ["RH19", (c) => rh19MarksAndRobots(c, shells)],
     ["RH20", (c) => rh20TextSize(c, shells)],
@@ -77,6 +76,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("RH12", () => rh12FocusRing(k));
   await step("RH13", () => rh13WordmarkTip(k));
   await step("RH14", () => rh14Faces(k, shells));
+  await step("RH17", () => rh17ShellOnce(k, shells));
   await step("RH10", () => rh10GalleryScrolled(k));
   await step("RH21", () => rh21Room(k));
   await step("RH22", () => rh22CornerAndRoad(k));

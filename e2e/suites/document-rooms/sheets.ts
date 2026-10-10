@@ -61,7 +61,6 @@ export async function readSheets(k: Kit): Promise<Sheets> {
 // The sheet lands with a settle that animates its own shadow (both-filled), so the read waits for every animation on it to have finished.
 const LANDED: Payload<boolean> = `(() => { const a = document.querySelector(".sheet")?.getAnimations() ?? []; return a.length > 0 && a.every((x) => x.playState === "finished"); })()`;
 
-// The paper read is a median of a strip in the sheet's left padding, where no lettering stands.
 async function landed(k: Kit, path: string): Promise<Sheet> {
   await k.goto(path);
   await k.settle(LANDED, (d) => d, `${path} sheet landed`);
@@ -136,7 +135,6 @@ export async function ix10ColumnsFold(k: Kit, { faq, glossary }: Sheets): Promis
   ix10Report(k, faq, glossary, folded);
 }
 
-// The margin-right transition runs: named among the transitioned properties, with a duration above zero at its own place in the list.
 const slides = ([props, durations]: readonly [string, string]): boolean => {
   const at = props.split(", ").indexOf("margin-right");
   return at >= 0 && parseFloat(durations.split(", ")[at] ?? "0") > 0;
@@ -182,7 +180,6 @@ const ADDED = [
   "What a place ships",
 ];
 const CHART_SPLIT = ["The sheet and its frame", "On the chart itself", "Soundings & sea marks"];
-// The terms Vellum's own output prints: the gazetteer, the voyage journal and the scale bar.
 const OWED =
   "Quay Weir Breakwater Chandler Osier Drover Reeve Reach Holding_ground Warp Beck Fen Waterman Wharf Moorings League Plate Colophon Docket Neat_line Contour_line Attar Kvass Copal Copra Cochineal Iron_bloom Kurgan"
     .split(" ")

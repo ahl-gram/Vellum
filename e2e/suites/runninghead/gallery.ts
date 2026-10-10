@@ -155,7 +155,7 @@ export async function rh22CornerAndRoad({ evaluate, check }: RunningHeadKit): Pr
   const g = await evaluate(ROOM_READ);
   const l = g.legend;
   check(
-    "RH22 the Gallery's corner carries its name and a dateline counted from the composer's own constants, and no control; the fog hangs before the grid and the corner before the legend, with none of a stage room's furniture; and the legend row is one gold road back to the Explorer (Issue #464 ruling 2)",
+    "RH22 the Gallery's corner carries its name and a dateline counted from the composer's own constants, and no control; the fog hangs before the grid and the corner before the legend, with none of a stage room's furniture (a fixed vignette band over the scrolling captions washed them to 2.86:1, PR #501); and the legend row is one gold road back to the Explorer (Issue #464 ruling 2)",
     g.dateline === `${GALLERY_COUNT} charts, from seed ${GALLERY_SEED}` &&
       !g.controls &&
       g.inOrder &&
@@ -183,6 +183,7 @@ type Dress = {
   plate: Shade;
   caption: number[];
   title: number[];
+  line: number[];
   legendLeft: number;
   half: number;
   pool: [number[], string];
@@ -190,7 +191,6 @@ type Dress = {
   footing: Panel;
 };
 
-// Shared by the screen, hover and print reads: a box-shadow split into its colour and its geometry, and a gradient into its stops, each through the canvas normaliser.
 const PARTS = `const rgba = ${PAGE_RGBA};
   const shade = (s) => { const m = /^(.+\\)) (-?[\\d.]+px -?[\\d.]+px -?[\\d.]+px -?[\\d.]+px)$/.exec(s); return m ? { colour: rgba(m[1]), geometry: m[2] } : null; };
   const panel = (sel) => { const cs = getComputedStyle(document.querySelector(sel), "::before"); const plain = /^linear-gradient\\((color|rgba?|oklab)\\(/.test(cs.backgroundImage);
@@ -201,7 +201,7 @@ const DRESS_READ: Payload<Dress> = `(() => { ${PARTS}
   const img = getComputedStyle(q("figure img")), pool = getComputedStyle(q("header.chrome"), "::before");
   return { padTop: parseFloat(getComputedStyle(q("main")).paddingTop), bandH: parseFloat(root.getPropertyValue("--band-h")) * rem, rem,
     landing: getComputedStyle(q(".grid")).animationName, border: [img.borderTopWidth, img.borderTopStyle, rgba(img.borderTopColor)], plate: shade(img.boxShadow),
-    caption: rgba(getComputedStyle(q("figcaption")).color), title: rgba(getComputedStyle(q("figcaption strong")).color), legendLeft: parseFloat(getComputedStyle(q("nav.legend")).left), half: innerWidth / 2,
+    caption: rgba(getComputedStyle(q("figcaption")).color), title: rgba(getComputedStyle(q("figcaption strong")).color), line: rgba(getComputedStyle(q("figcaption span")).color), legendLeft: parseFloat(getComputedStyle(q("nav.legend")).left), half: innerWidth / 2,
     pool: [rgba(pool.backgroundColor), pool.filter], panel: panel(".corner.tr"), footing: panel("nav.legend") };
 })()`;
 
@@ -224,6 +224,7 @@ const dressed = (d: Dress) =>
   shadowOf(d.plate, "0px 12px 34px 0px", 0.4) &&
   nearRgba(d.caption, tokenRgba("--parchment")) &&
   nearRgba(d.title, tokenRgba("--parchment-bright")) &&
+  nearRgba(d.line, tokenRgba("--parchment")) &&
   Math.abs(d.legendLeft - d.half) < 0.5 &&
   nearRgba(d.pool[0], CHART_INK(0.92)) &&
   d.pool[1] === "blur(16px)" &&
@@ -283,7 +284,7 @@ export async function rh23Dress(k: RunningHeadKit): Promise<void> {
     ?.split(", ")
     .map(Number);
   k.check(
-    "RH23 the Gallery's dress as drawn: the plates scroll under a real wheel, the chart room's lock lifted, the first row clears the cluster's band, the plates land as one sheet, each plate a line-tan hairline at the house's sheet depth that a hand tips and raises to the stage depth, captions in parchment and their titles parchment-bright, the legend row centred, the cluster's pool and the corner's and legend's crisp panels the kit's, and on paper no depth and captions, their titles and their lines in ink, the screen read the control (Issue #464 ruling 2; Issue #367)",
+    "RH23 the Gallery's dress as drawn: the plates scroll under a real wheel, the chart room's lock lifted, the first row clears the cluster's band, the plates land as one sheet, each plate a line-tan hairline at the house's sheet depth that a hand tips and raises to the stage depth, captions and their lines in parchment and their titles parchment-bright, no ink on the deep, the legend row centred, the cluster's pool and the corner's and legend's crisp panels the kit's, and on paper no depth and captions, their titles and their lines in ink, the screen read the control (Issue #464 ruling 2; Issue #367)",
     scroll[1] < scroll[0] &&
       dressed(screen) &&
       !!turned &&

@@ -314,7 +314,7 @@ test("astro.config keeps the contractual shape (site, trailing slash, no fingerp
   assert.ok(!("outDir" in config), "outDir must stay the default ./dist (deploy.yml uploads path: dist)");
 });
 
-// The shell authored once is e2e RH17 (one title, one header, one rooms nav, at most one footer, the share meta in the head) and the prefetch list RH16; a page's own html or head tag reaches no browser (the parser drops both inside body, measured on the FAQ), so that ban stays here for part 2i (Issue #779 part 2f).
+// A page's own html or head tag reaches no browser: the parser drops both inside body (measured on the Q & A, Issue #779 part 2f).
 test("no page's source opens its own html or head", () => {
   for (const p of PAGES) {
     const source = readFileSync(root(`src/pages/${p.route.replace("index.html", "index.astro")}`), "utf8");
@@ -557,7 +557,6 @@ test("one page mark per page across nav and trail: one on every page in the tree
   }
 });
 
-// The cluster's pins as drawn are e2e RH2, RH5 and RH19; what stays here are rules for retired classes no page wears (Issue #779 part 2f, for part 2i).
 test("the shell carries no retired cluster dress (#461 ruling 1)", () => {
   const css = readFileSync(join(outDir, "shell.css"), "utf8");
   assert.ok(!css.includes(".head-rule"), "the folio's double rule retired with the band (#461 ruling 1)");
@@ -565,7 +564,6 @@ test("the shell carries no retired cluster dress (#461 ruling 1)", () => {
   assert.ok(!css.includes(".topnav"), "the folio topnav retired; the cluster's .rooms nav replaced it");
 });
 
-// A page with the survey sheet opening the desk is e2e IX9; the converse has no served page to show it while every room is converted, and goes with the desk panel's CSS (the PR #833 row in handbook/errata/site.md).
 test("a page with no survey sheet keeps the interim desk (#461)", () => {
   for (const p of PAGES) {
     if (p.route === "index.html") continue;

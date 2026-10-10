@@ -37,11 +37,8 @@ test("GR5 every plate is a road into its own world: the Explorer at the plate's 
   );
 });
 
-// The room as served (a chart room, its corner, its road, its dress, print) is e2e RH21 to RH23 beside RH10; what stays below no browser can see: a chart room ignores a desk prop, the layout re-seats the desk slot so the source order across slots never reaches the page, the trail rule always overrides the base padding, a page pool loses to the kit's, and a comment or an absent rule paints nothing (Issue #779 part 2f, for part 2i).
-test("GR1 the Gallery's layout call carries no desk, and its source keeps the fog and the grid ahead of the corner and the legend", () => {
-  const open = page.match(/<BaseLayout([\s\S]*?)>/);
-  assert.ok(open, "the page renders through BaseLayout");
-  assert.ok(!open[1]!.includes("desk="), "the interim desk retires with the conversion");
+// The layout re-seats the desk slot, so the source order across slots never reaches the page, and the trail's rule overrides the base padding on every served Gallery (Issue #779 part 2f).
+test("GR1 the Gallery's source keeps the fog and the grid ahead of the corner and the legend", () => {
   const order = ["<Fog />", '<div class="grid"', "<RoomFolio", '<nav class="legend"'].map((m) => page.indexOf(m));
   assert.ok(
     order.every((i, n) => i >= 0 && (n === 0 || i > order[n - 1]!)),

@@ -172,7 +172,7 @@ const withoutMedia = (css: string): string => {
   return out + css.slice(at);
 };
 
-// e2e RH20 holds the html at 100% on every page; Chromium reads the two spellings as one, so that each is declared (iOS Safari reads the prefixed one) is a claim no browser here can see (Issue #779 part 2f, for part 2i).
+// Chromium reads the two spellings as one property, so no browser here sees each declared; iOS Safari reads the prefixed one (measured, Issue #779 part 2f).
 test("the layout declares both spellings of the text-size hold, outside every media block (Issue #761)", () => {
   const shell = readFileSync(resolve(import.meta.dirname, "..", "..", "public/shell.css"), "utf8");
   const screenRules = withoutMedia(shell.replace(/\/\*[\s\S]*?\*\//g, ""));

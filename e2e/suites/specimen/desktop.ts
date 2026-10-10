@@ -240,7 +240,6 @@ export async function sb10Route({ evaluate, check }: SpecimenKit): Promise<void>
   );
 }
 
-// Every piece and state the Book exists to show, counted on the page: a piece the page stopped standing reads 0.
 const PIECES = {
   fog: ".fog.a, .fog.b",
   vignettes: ".vignette.top, .vignette.bottom",

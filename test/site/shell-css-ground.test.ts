@@ -9,7 +9,7 @@ const read = (p: string) => readFileSync(root(p), "utf8");
 
 const layoutStyle = () => read("public/shell.css");
 
-// The walnut deep as drawn (one ground for the fixed layer and the band, the vignette over the walnut, the clip) is e2e RH11, and its one declaration the declaration test in test/site/shell-css.test.ts; what stays here no browser can see: a raw hex renders the token mix's colour exactly, and a retired wash in a rule no element wears paints nothing (Issue #779 part 2f, for part 2i).
+// A raw hex renders the token mix's colour exactly, so no browser tells the two apart (Issue #779 part 2f).
 test("the walnut deep is mixed from the tokens and keeps no daylight wash (#461 ruling 2)", () => {
   const css = layoutStyle();
   const deep = css.match(/--the-deep:\s*([\s\S]*?);/);
@@ -22,7 +22,6 @@ test("the walnut deep is mixed from the tokens and keeps no daylight wash (#461 
   assert.equal(css.search(/rgb\(255 250 235/), -1, "the light wash retired with the ground (#461 ruling 2)");
 });
 
-// The ring on the cluster's links is e2e RH12; the footer carries no link today, so its arm of the same rule is one no browser can show (Issue #779 part 2f, for part 2i).
 test("the deep's focus ring names the footer's links beside the cluster's (#324 decision 6, re-ratified at #461)", () => {
   assert.match(
     layoutStyle(),

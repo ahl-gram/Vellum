@@ -7,7 +7,7 @@ import { nearRgba, PAGE_RGBA, tokenRgba } from "../../support/pixel.ts";
 import type { Rgba } from "../../support/pixel.ts";
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
-import { SHELLED } from "./reads.ts";
+import { CHART, SHELLED } from "./reads.ts";
 import type { RunningHeadKit } from "./kit.ts";
 
 export type Shell = {
@@ -44,7 +44,7 @@ export const SHELL_READ: Payload<Promise<Shell>> = `document.fonts.ready.then(()
       bandH: parseFloat(root.getPropertyValue("--band-h")) * parseFloat(root.fontSize) },
     prefetch: [...document.querySelectorAll("link[rel='prefetch']")].map((l) => l.getAttribute("href")),
     counts: { titles: [...document.querySelectorAll("title")].filter((t) => !t.closest("svg")).length, headers: document.querySelectorAll("header").length,
-      rooms: document.querySelectorAll("nav.rooms").length, footers: document.querySelectorAll("footer").length,
+      rooms: document.querySelectorAll(".rooms").length, footers: document.querySelectorAll("footer").length,
       metasOutsideHead: shellMeta.filter((m) => !document.head.contains(m)).length },
     sheets: [...document.styleSheets].filter((s) => s.href).map((s) => new URL(s.href).pathname),
     current: cs && { display: cs.display, colour: rgba(cs.color), line: cs.textDecorationLine },
@@ -61,7 +61,6 @@ const offenders = (shells: Shells, ok: (s: Shell, route: string) => boolean): st
 
 const INK = tokenRgba("--ink-dark");
 const LIT = tokenRgba("--parchment");
-// The deep's five stops: the vignette, clear ink-dark at 40% to chart ink at 0.55, then the walnut, the ink-dark lit a tenth by parchment, ink-dark at 55%, chart ink.
 const DEEP_STOPS: readonly [Rgba, string][] = [
   [tokenRgba("--ink-dark", 0), "40%"],
   [tokenRgba("--chart-ink", 0.55), "100%"],
@@ -111,15 +110,23 @@ export function rh16Prefetch(check: Check, shells: Shells): void {
   );
 }
 
-export function rh17ShellOnce(check: Check, shells: Shells): void {
-  const off = offenders(
-    shells,
-    ({ counts: c }) => c.titles === 1 && c.headers === 1 && c.rooms === 1 && c.footers <= 1 && c.metasOutsideHead === 0,
-  );
-  check(
-    "RH17 the shell is authored once: every shelled page carries one title, one header, one rooms nav, at most one footer, and its share meta in the head alone",
+const PORTFOLIO = "/explorer/portfolio/";
+// A chart room renders no layout footer, so on one any footer is a page's own.
+const once = (c: Shell["counts"], route: string) =>
+  c.titles === 1 &&
+  c.headers === 1 &&
+  c.rooms === 1 &&
+  c.footers === (CHART.includes(route) || route === PORTFOLIO ? 0 : 1) &&
+  c.metasOutsideHead === 0;
+
+export async function rh17ShellOnce(k: RunningHeadKit, shells: Shells): Promise<void> {
+  if (!(await k.visit(PORTFOLIO))) throw new Error("RH17: the Portfolio never loaded");
+  const all: Shells = { ...shells, [PORTFOLIO]: await k.evaluate(SHELL_READ, true) };
+  const off = [...SHELLED, PORTFOLIO].filter((r) => !all[r] || !once(all[r].counts, r));
+  k.check(
+    "RH17 the shell is authored once: every shelled page and the Portfolio carry one title, one header, one rooms nav, the layout's footer and no other (none on a chart room), and their share meta in the head alone",
     off.length === 0,
-    off.map((r) => `${r}: ${JSON.stringify(shells[r]?.counts)}`).join(" | ") || `${SHELLED.length} pages`,
+    off.map((r) => `${r}: ${JSON.stringify(all[r]?.counts)}`).join(" | ") || `${SHELLED.length + 1} pages`,
   );
 }
 
