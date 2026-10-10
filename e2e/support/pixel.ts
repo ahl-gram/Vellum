@@ -75,6 +75,9 @@ export type Rgba = readonly [number, number, number, number];
 // Spliced into a payload: Chromium serialises one token colour as rgb(), color(srgb ...) or oklab(...) by property, so a check compares the channels one canvas pixel reads back; a canvas keeps its last fillStyle for a string it cannot parse, hence the sentinel.
 export const PAGE_RGBA = `((css) => { const c = document.createElement("canvas"); c.width = c.height = 1; const x = c.getContext("2d"); x.fillStyle = "#fe01fd"; x.fillStyle = css; if (x.fillStyle === "#fe01fd") throw new Error("not a colour: " + css); x.fillRect(0, 0, 1, 1); return [...x.getImageData(0, 0, 1, 1).data]; })`;
 
+// Spliced after PAGE_RGBA, bound as `rgba`: a plain linear gradient's colour stops in order, and none for any other background image.
+export const GRADIENT_STOPS = `((image) => /^linear-gradient\\((color|rgba?|oklab)\\(/.test(image) ? (image.match(/(color|rgba?|oklab)\\([^)]*\\)/g) ?? []).map(rgba) : [])`;
+
 export const tokenRgba = (token: keyof typeof SITE_PALETTE, alpha = 1): Rgba => {
   const hex = SITE_PALETTE[token];
   const channel = (at: number): number => parseInt(hex.slice(at, at + 2), 16);

@@ -1,6 +1,19 @@
-import type { Point } from "../../types.ts";
+import { nearRgba, PAGE_RGBA, tokenRgba } from "../../support/pixel.ts";
+import type { Payload, Point, SuiteContext } from "../../types.ts";
 import type { LandfallKit } from "./kit.ts";
 import { down, stagePoint } from "./reads.ts";
+
+const HINT: Payload<{ inStage: boolean; hidden: string | null; ink: number[] } | null> =
+  `(() => { const rgba = ${PAGE_RGBA}, m = document.querySelector(".lf-more"); return m && { inStage: !!m.closest("#lf-stage"), hidden: m.getAttribute("aria-hidden"), ink: rgba(getComputedStyle(m).color) }; })()`;
+
+export async function l27HintPlace({ evaluate, check }: SuiteContext): Promise<void> {
+  const h = await evaluate(HINT);
+  check(
+    "L27 the scroll hint rides inside the stage, decorative to a screen reader, in parchment (line-tan measured 4.03:1 on the deep, RH9a) (#472, the 2026-08-28 ruling)",
+    !!h && h.inStage && h.hidden === "true" && nearRgba(h.ink, tokenRgba("--parchment")),
+    JSON.stringify(h),
+  );
+}
 
 export async function l1jHint({ evaluate, check, sleep, wheelAt, freshGesture, readHint }: LandfallKit): Promise<void> {
   let hintOn = null;

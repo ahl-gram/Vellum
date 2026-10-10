@@ -1,6 +1,6 @@
 import { buttonPoint, readXform } from "../../support/home.ts";
 import type { Cam } from "../../support/home.ts";
-import type { SuiteContext } from "../../types.ts";
+import type { Payload, Point, SuiteContext } from "../../types.ts";
 import type { LandfallKit } from "./kit.ts";
 
 type How = Awaited<ReturnType<typeof l5HowOpens>>;
@@ -162,5 +162,92 @@ export async function l4l8Enters({ check, measureEnters }: LandfallKit): Promise
     "L8 every slip's Enter link is a 44px touch target, measured open (#460 ratification 2)",
     enters.length === 4 && enters.every((b) => b !== null && b.open && b.h >= 44 && b.w >= 44),
     JSON.stringify({ enters }),
+  );
+}
+
+const SLIPS = ["explorer", "reading-room", "atlas", "gallery"] as const;
+
+const OPEN = (id: string): Payload<{ open: boolean; focus: string | null; hasScroller: boolean }> =>
+  `(() => { const c = document.getElementById("lf-card-${id}"); if (!c) return { open: false, focus: null, hasScroller: false }; const cs = getComputedStyle(c);
+    return { open: !c.hidden && cs.visibility !== "hidden" && Number(cs.opacity) > 0.95, focus: document.activeElement === c ? "card" : document.activeElement?.className ?? null, hasScroller: !!c.querySelector(".lf-card-scroll") }; })()`;
+
+async function openSlip(
+  k: LandfallKit,
+  id: string,
+): Promise<{ open: boolean; focus: string | null; hasScroller: boolean }> {
+  const { evaluate, clickAt, sleep } = k;
+  const at = await evaluate(buttonPoint(`.lf-legend-btn[data-station="${id}"]`));
+  if (!at) throw new Error(`L28: no legend press for ${id}`);
+  await clickAt(Math.round(at.x), Math.round(at.y));
+  let s = await evaluate(OPEN(id));
+  for (let i = 0; i < 80 && !s.open; i++) {
+    await sleep(75);
+    s = await evaluate(OPEN(id));
+  }
+  for (let i = 0; i < 40; i++) {
+    const a = await evaluate(readXform);
+    await sleep(250);
+    if (a !== null && a === (await evaluate(readXform))) break;
+  }
+  return s;
+}
+
+// A point on bare chart: inside the stage, clear of every slip, station, mark of the Glass and the corner chrome.
+const BARE: Payload<Point | null> = `(() => {
+  const s = document.getElementById("lf-stage").getBoundingClientRect();
+  for (const fx of [0.15, 0.25, 0.35, 0.5]) for (const fy of [0.3, 0.5, 0.7]) {
+    const x = s.x + s.width * fx, y = s.y + s.height * fy, e = document.elementFromPoint(x, y);
+    if (e && e.closest("#lf-stage") && !e.closest("button, a, .lf-card, form, nav")) return { x: Math.round(x), y: Math.round(y) };
+  }
+  return null;
+})()`;
+
+async function tapKeeps(k: LandfallKit): Promise<{ kept: boolean; closed: boolean }> {
+  const { evaluate, clickAt, sleep } = k;
+  await openSlip(k, "gallery");
+  const zoom = await evaluate(buttonPoint("#zoom-in"));
+  if (zoom) await clickAt(Math.round(zoom.x), Math.round(zoom.y));
+  await sleep(600);
+  const kept = (await evaluate(OPEN("gallery"))).open;
+  const bare = await evaluate(BARE);
+  if (bare) await clickAt(bare.x, bare.y);
+  let closed = false;
+  for (let i = 0; i < 20 && !closed; i++) {
+    await sleep(75);
+    closed = await evaluate<boolean>(`document.getElementById("lf-card-gallery").hidden`);
+  }
+  return { kept, closed };
+}
+
+export async function l28SlipGestures(k: LandfallKit): Promise<void> {
+  const { check, sleep, pressKey, scrollY, centerOf, camScale, wheelAt } = k;
+  const rows: string[] = [];
+  let ok = true;
+  try {
+    for (const id of SLIPS) {
+      const s = await openSlip(k, id);
+      const head = await centerOf(`#lf-card-${id} .lf-card-title`);
+      const [y0, s0] = [await scrollY(), await camScale()];
+      await wheelAt(head, 120);
+      await sleep(250);
+      const [y1, s1] = [await scrollY(), await camScale()];
+      const swallowed = !!head && y1 === y0 && s0 !== null && s1 !== null && Math.abs(s1 / s0 - 1) < 0.005;
+      const focused = !s.hasScroller && s.focus === "card";
+      ok &&= s.open && swallowed && focused;
+      rows.push(`${id}: open ${s.open}, focus ${s.focus}, page ${y0} to ${y1}, scale ${s0} to ${s1}`);
+      await pressKey("Escape", "Escape", 27);
+      await sleep(500);
+    }
+    const tap = await tapKeeps(k);
+    ok &&= tap.kept && tap.closed;
+    rows.push(`a press inside the stage kept the slip ${tap.kept}, a tap on bare chart closed it ${tap.closed}`);
+  } finally {
+    await pressKey("Escape", "Escape", 27);
+    await sleep(400);
+  }
+  check(
+    "L28 every station slip swallows a wheel over its head, the page and the chart both unmoved, and takes focus on itself, having no scroller; a press on a control inside the stage leaves an open slip open, while a tap on bare chart sets it aside, the same run's control (#459)",
+    ok,
+    rows.join(" | "),
   );
 }
