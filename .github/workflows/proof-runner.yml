@@ -1,0 +1,33 @@
+name: Proof runner
+
+on: workflow_dispatch
+
+permissions:
+  contents: write
+
+concurrency:
+  group: proof-runner
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo ${{ github.ref_name }}
+
+  prove:
+    needs: plan
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        index: [0]
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo prove
+
+  ledger:
+    needs: [plan, prove]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo ledger
