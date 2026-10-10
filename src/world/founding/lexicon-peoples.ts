@@ -42,7 +42,8 @@ export const PEOPLE_WORDS: ReadonlyArray<LexiconEntry> = [
   ),
   ...group([band("tropical"), tongue("veshari")], ["dunes", "dune", "desert", "deserts"]),
   ...group([tongue("veshari")], ["oasis", "oases", "sultan", "sultans", "caravan", "caravans", "minaret", "minarets"]),
-  ...group([type("archipelago"), band("tropical"), tongue("oromi")], ["atolls", "atoll"]),
+  ...group([type("archipelago"), band("tropical"), tongue("oromi")], ["atolls"]),
+  ...group([type("island"), band("tropical"), tongue("oromi")], ["atoll"]),
   ...group(
     [tongue("oromi")],
     ["lagoon", "lagoons", "outrigger", "outriggers", "canoe", "canoes", "chiefdom", "chiefdoms", "fire peaks"],
