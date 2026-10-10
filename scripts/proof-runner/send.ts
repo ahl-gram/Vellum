@@ -25,6 +25,14 @@ export type SuiteRules = {
 const GIT_MS = 30_000;
 const count = (text: string, part: string): number => text.split(part).length - 1;
 
+export const readAt =
+  (repo: string, sha: string) =>
+  (file: string): string => {
+    const r = spawnSync("git", ["show", `${sha}:${file}`], { cwd: repo, encoding: "utf8", timeout: GIT_MS });
+    if (r.status !== 0) throw new Error(`${file} is not a file at ${sha}: ${r.stderr.trim()}`);
+    return r.stdout;
+  };
+
 const applyOne = (text: string, edit: Edit): string => {
   if ("append" in edit) return text + edit.append;
   if ("find" in edit) {

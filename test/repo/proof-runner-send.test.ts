@@ -10,6 +10,7 @@ import {
   buildList,
   diffFor,
   orderProblems,
+  readAt,
   type Mutation,
 } from "../../scripts/proof-runner/send.ts";
 import { git } from "../../test-support/sandbox-repo.ts";
@@ -89,6 +90,20 @@ test("every bad mutation in a list is named at once, and nothing is built from a
     assert.equal(built.list, null);
     assert.equal(built.errors.length, 2);
     assert.match(built.errors.join("\n"), /zero[\s\S]*twice/);
+  });
+});
+
+test("a file read at the commit keeps its last newline, so an appended edit compiles to a patch that applies there", async () => {
+  await withTempRepo(FILES, (dir, sha) => {
+    const read = readAt(dir, sha);
+    assert.equal(read("src/b.ts"), FILES["src/b.ts"]);
+    assert.throws(() => read("src/missing.ts"), /src\/missing\.ts/);
+    const appended: Mutation = {
+      id: "tail",
+      edits: [{ file: "src/b.ts", append: "// x\n" }],
+      lint: { files: ["src/b.ts"], expect: ["r"] },
+    };
+    assert.deepEqual(buildList([appended], sha, { repo: dir, read, rules: RULES }).errors, []);
   });
 });
 

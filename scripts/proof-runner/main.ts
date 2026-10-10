@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { BRANCH_PREFIX, parseList, planJobs, type List } from "./list.ts";
-import { branchBodies, buildList, type Mutation, type SuiteRules } from "./send.ts";
+import { branchBodies, buildList, readAt, type Mutation, type SuiteRules } from "./send.ts";
 
 export const REPO = "ahl-gram/Vellum";
 export const WORKFLOW_FILE = "proof-runner.yml";
@@ -43,7 +43,7 @@ const rulesAt = async (sha: string): Promise<SuiteRules> => {
   const dir = mkdtempSync(join(tmpdir(), "proof-runner-rules-"));
   try {
     const file = join(dir, "suites.mts");
-    writeFileSync(file, sh("git", ["show", `${sha}:e2e/support/suites.ts`]));
+    writeFileSync(file, readAt(process.cwd(), sha)("e2e/support/suites.ts"));
     const m = (await import(pathToFileURL(file).href)) as {
       E2E_SUITE_ORDER: string[];
       NEEDS_PREDECESSOR: Record<string, string>;
@@ -71,7 +71,7 @@ const listFor = async (args: string[]): Promise<List> => {
   const sha = sh("git", ["rev-parse", option(args, "--sha") ?? "HEAD"]);
   const built = buildList(await loadMutations(args[0] ?? ""), sha, {
     repo: process.cwd(),
-    read: (f) => sh("git", ["show", `${sha}:${f}`]),
+    read: readAt(process.cwd(), sha),
     rules: await rulesAt(sha),
   });
   for (const w of built.warnings) console.warn(`warning: ${w}`);
