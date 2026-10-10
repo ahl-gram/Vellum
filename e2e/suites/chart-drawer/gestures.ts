@@ -213,7 +213,7 @@ export async function cd58TurnFiles(k: DrawerKit): Promise<void> {
     const before = await settle(TURN, (d) => d.hits > 6, "chart-drawer-turn-page");
     const p1 = (await evaluate(reachable([]))) ?? 1;
     const first = await fileAt(k, p1, 1);
-    const pinned = await pinAt(k, (await evaluate(reachable([p1]))) ?? p1 + 1);
+    const pinned = await pinAt(k, (await evaluate(reachable([p1, p1 + 1]))) ?? p1 + 2);
     const turning = await midTurn(k, p1 + 1);
     await settle(TURN, (d) => !d.turning && d.hits > 6, "chart-drawer-turned", 160);
     const p2 = (await evaluate(reachable([p1]))) ?? p1 + 1;
