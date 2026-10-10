@@ -514,16 +514,6 @@
       "count": 1
     }
   },
-  "test/site/prospect-room.test.ts": {
-    "max-lines-per-function": {
-      "count": 2
-    }
-  },
-  "test/site/ribbon-room.test.ts": {
-    "max-lines-per-function": {
-      "count": 2
-    }
-  },
   "test/site/room.test.ts": {
     "max-lines-per-function": {
       "count": 1
