@@ -43,8 +43,8 @@ above at their steps.
 `vellum-designer` is not a reviewer either. It draws a design round's mockups from real engine output
 for Alex's sitting (`handbook/specs/conventions.md`, How a design decision is made), and breaks an
 epic into its subs from the epic and its `vellum-spec-recon` ledger, handing its menu to whoever
-dispatched it as an implementer lane does at step 6. Its only output is `out/`, so it is dispatched
-the way step 6 says such an agent is.
+dispatched it as an implementer lane does at step 6. What it delivers is files under `out/`, so it is
+dispatched the way step 6 says such an agent is.
 
 ## The sequence
 

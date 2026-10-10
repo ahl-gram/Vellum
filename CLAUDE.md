@@ -243,8 +243,8 @@ the sandbox for both review agents that build one, so the depth lives in one pla
   parse, while a plain single command passes (measured 2026-09-13). That is why the sandbox recipes
   take `create`'s printed path literally and read the sandbox's sha from its `.git` file. How a
   session runs several such lanes at once is `handbook/specs/orchestration.md`'s.
-- **`vellum-designer` gets its tree a fourth way, never through isolation**: its only output is
-  `out/`, which a harness tree does not keep, so a session standing in the main checkout builds a
+- **`vellum-designer` gets its tree a fourth way, never through isolation**: what it delivers is
+  files under `out/`, which a harness tree does not keep, so a session standing in the main checkout builds a
   detached tree for it and dispatches it without isolation, as
   `handbook/specs/development-workflow.md` step 6 says.
 - **A dispatched review agent may not move or restore the tree it was dispatched from**, normally your
