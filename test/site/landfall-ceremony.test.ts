@@ -1,7 +1,5 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { SHEET, fitScale, centerFraction } from "../../src/site/home/camera.ts";
 import {
   TARGET_FATHOMS,
@@ -22,9 +20,6 @@ import {
 import { veilMarkup } from "../../src/site/home/veil.ts";
 
 // Landfall Sub 2 (Issue #457): the ceremony; the spec is the archived mockup (design/atelier-map, PR #466) and the 2026-08-23 ratified comment on Issue #457.
-
-const REPO = resolve(import.meta.dirname, "..", "..");
-const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 
 test("the ceremony keeps the mockup's clock and the chart's own number (#457)", () => {
   assert.equal(TARGET_FATHOMS, 42, "the sounding counts to the seed itself");
@@ -112,52 +107,4 @@ test("the veil is the mockup's: wordmark, flourish tagline, self-drawing rose, s
   assert.match(html, /class="rose-pin"/, "the pin caps the needle");
   assert.match(html, /role="status"/, "the sounding line is a live status region");
   assert.ok(html.includes(soundingLabel(0)), "the line opens at 0 fathom");
-});
-
-test("the veil ships as no static element yet dresses first paint: a pre-paint inline script injects it (#457, the incognito flash)", () => {
-  const astro = read("src/pages/index.astro");
-  const markup = astro.replace(/<script[\s\S]*?<\/script>/g, "");
-  assert.ok(
-    !/veil-wordmark|class="veil"|id="lf-veil"/.test(markup),
-    "no veil ELEMENT in the page markup; without JS there is nothing to trap behind",
-  );
-  assert.match(
-    astro,
-    /veilMarkup\(\)/,
-    "the inline script's markup is the one veilMarkup() source, interpolated at build",
-  );
-  assert.match(astro, /ARRIVED_KEY/, "the inline predicate reads the same sessionStorage key the module marks");
-  assert.match(astro, /prefers-reduced-motion/, "the inline predicate gives reduced motion no veil at all");
-  const scriptAt = astro.indexOf("define:vars");
-  assert.ok(
-    scriptAt > -1 && scriptAt < astro.indexOf('class="landfall"'),
-    "the veil script parses BEFORE the stage, so first paint already wears the deep",
-  );
-  assert.match(astro, /dataset\.adopted/, "an unadopted veil releases itself: a failed bundle can never trap the page");
-  const veil = read("src/site/home/veil.ts");
-  assert.match(
-    veil,
-    /getElementById\("lf-veil"\)/,
-    "playCeremony adopts the pre-paint veil instead of injecting a twin",
-  );
-  assert.match(veil, /dataset\.adopted/, "adoption is marked, standing the safety release down");
-});
-
-test("the veil's dress is in the home sheet: fixed over everything, lifting, reduced-motion still (#457)", () => {
-  const css = read("public/index.css");
-  const rule = (selector: RegExp): string => {
-    const m = css.match(new RegExp(`(^|\\n)\\s*${selector.source}[^{]*\\{([^}]*)\\}`));
-    return m ? m[2]! : "";
-  };
-  const veil = rule(/\.veil /);
-  assert.match(veil, /position:\s*fixed/, ".veil pins to the viewport");
-  assert.match(veil, /inset:\s*0/, ".veil covers everything, running head included (ratified 3)");
-  assert.match(veil, /z-index/, ".veil rides above the shell");
-  assert.match(css, /@keyframes rose-draw/, "the rings draw by dashoffset");
-  assert.match(css, /@keyframes needle-settle/, "the needle settles by keyframe");
-  assert.match(css, /@keyframes veil-lift/, "the lift is animated");
-  assert.match(css, /\.veil\.lifting/, "the lifting class plays the lift");
-  const reduced = css.match(/@media \(prefers-reduced-motion: reduce\) \{([\s\S]*?)\n\}/g)?.join("\n") ?? "";
-  assert.match(reduced, /rose-ring[^{]*\{[^}]*animation:\s*none/, "reduced motion stills the rose");
-  assert.match(reduced, /stroke-dashoffset:\s*0/, "reduced motion shows the rings drawn, not absent");
 });

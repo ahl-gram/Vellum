@@ -1,3 +1,4 @@
+import { nearRgba, PAGE_RGBA, tokenRgba } from "../../support/pixel.ts";
 import type { Payload } from "../../types.ts";
 import { atFolded, CHART_ASPECT, CONTROL_GOLD, INK_BROWN, READ } from "./reads.ts";
 import type { Specimen } from "./reads.ts";
@@ -329,4 +330,16 @@ export async function sb13GlassPress(k: SpecimenKit): Promise<void> {
   } finally {
     await k.setState("rest");
   }
+}
+
+const VERBS: Payload<number[][]> =
+  `(() => { const rgba = ${PAGE_RGBA}; return ["a.legend-btn:not(.gold) .verb", "a.legend-btn.gold .verb"].map((s) => rgba(getComputedStyle(document.querySelector(s)).color)); })()`;
+
+export async function sb14Verbs({ evaluate, check }: SpecimenKit): Promise<void> {
+  const [plain, gold] = await evaluate(VERBS);
+  check(
+    "SB14 the kit's road speaks its verb in parchment, as home's legend row does, and the gold road's in ink-brown on its gold ground (the 2026-09-03 sitting, ruling 24 on #454)",
+    nearRgba(plain, tokenRgba("--parchment")) && nearRgba(gold, tokenRgba("--ink-brown")),
+    JSON.stringify({ plain, gold }),
+  );
 }
