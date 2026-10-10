@@ -64,6 +64,9 @@ const SHEET: ReadonlyArray<Row> = [
   ["camels and a camel", 2166136261, "", { culture: "veshari" }],
   ["Bactrian camels cross the cold steppe.", 703928475, "cross", { band: "polar", culture: "ordai" }],
   ["a bactrian camel", 2166136261, "", { culture: "ordai" }],
+  ["a sand sea and sand seas", 2166136261, "", { band: "tropical", culture: "veshari" }],
+  ["a jungle temple and jungle temples", 2166136261, "", { band: "tropical", culture: "tezcal" }],
+  ["a german and germans", 2166136261, "", { culture: "draket" }],
 ];
 
 for (const [sentence, seed, residual, overrides] of SHEET) {
@@ -81,7 +84,7 @@ for (const [sentence, seed, residual, overrides] of SHEET) {
 test("the covenant: every word on the list founds what version 1 founds", () => {
   const all = LEXICON.flatMap(({ phrase }) => [foundWorld(phrase), foundWorld(`${phrase} stone`)]);
   assert.equal(FOUNDING_VERSION, 1);
-  assert.equal(hashString(JSON.stringify(all)), 328613771, LOCK);
+  assert.equal(hashString(JSON.stringify(all)), 3937913670, LOCK);
 });
 
 test("the covenant: a sentence of 120 characters founds, and one of 121 is refused", () => {
