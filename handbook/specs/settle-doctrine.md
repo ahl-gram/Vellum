@@ -251,6 +251,13 @@ section points there rather than restating it.
   that clears one and then reads, presses or wheels at the window's own size waits for the window to
   leave the override's size first, as `clearMetrics` in `e2e/suites/print-room/kit.ts` does; a gesture
   aimed in between lands at the stale size's coordinates.
+- **Enter presses a focused button only when the key event carries its character.** An
+  `Input.dispatchKeyEvent` `keyDown` for Enter with no `text` fires no activation (measured
+  2026-10-10: without it the press filed nothing on the CI proof runner, and with it the same press
+  filed there and on the local harness browser), so a check that a key press
+  files nothing passes whatever the page would have done. Send Enter with `text: "\r"`, as
+  `p31Keyboard` in `e2e/suites/cards/hold.ts` and `midTurn` in `e2e/suites/chart-drawer/gestures.ts`
+  do, and read that the press holds the focus before trusting the key's lack of effect.
 - **The headless window has a minimum width clamp.** A window asked for narrower than the clamp lays
   out at the clamp and the capture is cropped, which reads as an overflow bug that is not there. The
   route to a true narrow viewport is device-metric emulation, and the harness wraps it two ways in
