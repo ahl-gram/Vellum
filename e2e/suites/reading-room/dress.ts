@@ -2,6 +2,7 @@
 import { makeSettle } from "../../support/settle.ts";
 import { nearRgba, PAGE_RGBA, SHADE, tokenRgba } from "../../support/pixel.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
+import { BAR, scrubTo } from "./kit.ts";
 
 const same = (a: unknown, b: unknown): boolean => JSON.stringify(a) === JSON.stringify(b);
 const faults = (parts: (true | string)[]): string[] => parts.filter((f): f is string => f !== true);
@@ -129,10 +130,6 @@ const TOLD: Payload<Told | null> = `(() => { const rgba = ${PAGE_RGBA}, t = docu
   return { ...read, gone };
 })()`;
 
-// Wiring, not the claim: the bar is driven by its input event to reach each half's told row.
-const scrubTo = (edge: "min" | "max"): string =>
-  `(() => { const r = document.querySelector(".rf-range"); r.value = r.${edge}; r.dispatchEvent(new Event("input", { bubbles: true })); return true; })()`;
-
 async function toldAt({ evaluate, sleep }: SuiteContext, edge: "min" | "max"): Promise<Told> {
   const settle = makeSettle({ evaluate, sleep });
   await evaluate<boolean>(scrubTo(edge));
@@ -154,6 +151,7 @@ const toldFaults = (day: Told, annal: Told): string[] =>
 
 export async function rr39AtRest(ctx: SuiteContext): Promise<void> {
   const { evaluate, check } = ctx;
+  const bar = await evaluate(BAR);
   try {
     const seats = await evaluate(SEATS);
     const stage = await evaluate(STAGE);
@@ -167,6 +165,6 @@ export async function rr39AtRest(ctx: SuiteContext): Promise<void> {
       JSON.stringify({ wrong, seats, stage, frame, day, annal }),
     );
   } finally {
-    await evaluate<boolean>(scrubTo("min"));
+    await evaluate<boolean>(scrubTo(bar));
   }
 }

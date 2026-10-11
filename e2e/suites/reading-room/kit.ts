@@ -7,6 +7,11 @@ export const RR_LENS: Payload<Lens> = `(() => { const e = document.querySelector
   const t = getComputedStyle(e).transform, m = /^matrix\\(([^,]+),/.exec(t);
   return { k: m ? Number(m[1]) : 1, t, zoomed: document.getElementById("map-viewport").classList.contains("zoomed") }; })()`;
 
+// Wiring, not a claim: the bar is driven by its input event, to an edge or back to a value read off it.
+export const BAR: Payload<string> = `document.querySelector(".rf-range").value`;
+export const scrubTo = (to: string): string =>
+  `(() => { const r = document.querySelector(".rf-range"); r.value = ${to === "min" || to === "max" ? `r.${to}` : JSON.stringify(to)}; r.dispatchEvent(new Event("input", { bubbles: true })); return true; })()`;
+
 export type ReadingRoomKit = ReturnType<typeof readingRoomKit>;
 
 export function readingRoomKit(ctx: SuiteContext) {

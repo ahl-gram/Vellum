@@ -154,7 +154,6 @@ type Ceremony = {
   root: { names: string[]; same: boolean; finished: boolean };
   jolt: string[];
 };
-// The settle and the jolt read off their animations with the classes put on scratch: the landing on the first cutting, finished at once; the jolt and the receiving edge on the list and the drawer.
 const CEREMONY: Payload<Ceremony | null> = `(() => { const rgba = ${PAGE_RGBA}, shadeOf = ${SHADE}, li = document.querySelector("#cuttings li"), img = li && li.querySelector("img"), drawer = document.getElementById("chart-drawer"), list = document.getElementById("cuttings");
   if (!img) return null;
   const probe = document.createElement("div"); probe.style.cssText = "animation-duration: var(--paper-settle); animation-timing-function: var(--ease-paper); box-shadow: var(--cutting-shadow)"; document.body.append(probe);

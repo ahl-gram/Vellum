@@ -1,18 +1,14 @@
 // What a hover, a key, a press, a Read and print do in the Reading Room (Issue #779 part 2g): the revealed plate's unfurl and lift, the Glass, its silent refit and paper, and a counter Read refitting to the folio it writes.
+import { sendKey } from "../../support/home.ts";
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import { clearMetrics, pressAt } from "../print-room/kit.ts";
 import { glideLanded, homeCamera, lensRest, midGlideRefit, ZOOM_IN } from "../print-room/print.ts";
-import { RR_LENS } from "./kit.ts";
+import { BAR, RR_LENS, scrubTo } from "./kit.ts";
 
 const park = (send: SuiteContext["send"]) => send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 1 });
-const tab = async (send: SuiteContext["send"]): Promise<void> => {
-  await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9 });
-  await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9 });
-};
 
 type Unfurl = { name: string; fill: string; origin: string; half: number; open: number[] | null; end: number | null };
-// The reveal re-run by hiding and showing the stage, paused at its first frame and one millisecond before its last; the angle is the matrix3d's tilt about x.
 const UNFURL: Payload<Unfurl | null> = `(() => { const f = document.querySelector(".rr-prospect"), i = f && f.querySelector("img"); if (!i) return null;
   const cs = getComputedStyle(i), base = { name: cs.animationName, fill: cs.animationFillMode, origin: cs.transformOrigin, half: i.getBoundingClientRect().width / 2 };
   const tilt = () => { const m = /^matrix3d\\(([^)]*)\\)$/.exec(getComputedStyle(i).transform); if (!m) return 0; const v = m[1].split(",").map(Number); return Math.atan2(v[6], v[5]) * 180 / Math.PI; };
@@ -74,7 +70,7 @@ async function plateLifts(ctx: SuiteContext): Promise<{ hovered: Plate; keyed: P
     "reading-room-plate-rested",
   );
   await evaluate<boolean>(`(() => { document.querySelector("#journal .slip-fold").focus(); return true; })()`);
-  await tab(send);
+  await sendKey(send, "Tab", "Tab", 9);
   const keyLanded = liftLanded();
   const keyed = await settle(PLATE, (d, last) => d.focus && !d.hover && keyLanded(d, last), "reading-room-plate-keyed");
   return { hovered, keyed, away };
@@ -82,6 +78,7 @@ async function plateLifts(ctx: SuiteContext): Promise<{ hovered: Plate; keyed: P
 
 export async function rr42PlateReveal(ctx: SuiteContext): Promise<void> {
   const { evaluate, send, check, sleep } = ctx;
+  await send("Emulation.setEmulatedMedia", { media: "", features: [] });
   await clearMetrics({ evaluate, send, sleep }, 1440, 900);
   await park(send);
   try {
@@ -153,16 +150,13 @@ const FIT: Payload<Fit> = `(() => { const s = window.__vellumReadingRoomState ? 
 const READ_AT: Payload<{ x: number; y: number; hit: boolean }> =
   `(() => { const b = document.querySelector(".rr-read"), r = b.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2;
   return { x, y, hit: document.elementFromPoint(x, y) === b }; })()`;
-const scrub = (edge: "min" | "max"): string =>
-  `(() => { const r = document.querySelector(".rf-range"); r.value = r.${edge}; r.dispatchEvent(new Event("input", { bubbles: true })); return true; })()`;
 
-// A blanked survey line shortens the folio, so the fit grows into the room it leaves until a draw writes the line and refits.
 async function refitAfterRead(
   ctx: SuiteContext,
 ): Promise<{ before: Fit; blanked: Fit; read: { hit: boolean }; drawn: Fit }> {
   const { evaluate, send, sleep } = ctx;
   const settle = makeSettle({ evaluate, sleep });
-  await evaluate<boolean>(scrub("max"));
+  await evaluate<boolean>(scrubTo("max"));
   const before = await settle(
     FIT,
     (d, last) => d.size[0] === 1440 && !!last && d.h === last.h && d.sub !== "",
@@ -189,6 +183,7 @@ async function refitAfterRead(
 
 export async function rr41ReadRefits(ctx: SuiteContext): Promise<void> {
   const { evaluate, check } = ctx;
+  const bar = await evaluate(BAR);
   try {
     const { before, blanked, read, drawn } = await refitAfterRead(ctx);
     check(
@@ -205,7 +200,7 @@ export async function rr41ReadRefits(ctx: SuiteContext): Promise<void> {
     await evaluate<boolean>(
       `(() => { const s = document.getElementById("folio-sub"); if (s.textContent === "" && window.__rr41Sub) { s.textContent = window.__rr41Sub; window.dispatchEvent(new Event("resize")); } delete window.__rr41Sub; return true; })()`,
     );
-    await evaluate<boolean>(scrub("min"));
+    await evaluate<boolean>(scrubTo(bar));
     await park(ctx.send);
   }
 }

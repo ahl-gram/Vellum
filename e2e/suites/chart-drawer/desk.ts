@@ -49,7 +49,6 @@ export async function cd1DogEar({ check, settle, go }: DrawerKit): Promise<void>
   );
 }
 
-// A transform's turn, read off its matrix: any rotate in a 2D matrix puts a nonzero b and c.
 export const TIPPED = `((t) => { const m = /^matrix\\(([^)]*)\\)$/.exec(t); if (!m) return t !== "none"; const v = m[1].split(",").map(Number); return Math.abs(v[1]) > 1e-6 || Math.abs(v[2]) > 1e-6; })`;
 const keyedTilt = (selector: string): Payload<{ focus: boolean; tipped: boolean; t: string; running: number } | null> =>
   `(() => { const e = document.querySelector(${JSON.stringify(selector)}); if (!e) return null; const t = getComputedStyle(e).transform; return { focus: e.matches(":focus-visible"), tipped: ${TIPPED}(t), t, running: e.getAnimations().filter((a) => a.playState === "running").length }; })()`;

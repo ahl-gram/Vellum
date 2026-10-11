@@ -23,7 +23,6 @@ const NEXT: Payload<{ x: number; y: number; hit: boolean } | null> =
   const x = r.left + r.width / 2, y = r.top + r.height / 2, e = document.elementFromPoint(x, y); return { x, y, hit: !!e && b.contains(e) }; })()`;
 const WINDOW = SAY_HOLD_MS + SAY_FADE_MS + 500;
 
-// A window at least `ms` long: every read sleeps its 250ms, so the reads span the window whatever the runner adds.
 async function dwell({ evaluate, sleep }: SuiteContext, ms: number, until?: (d: Pill) => boolean): Promise<Pill[]> {
   const reads: Pill[] = [];
   for (let i = 0; i < Math.ceil(ms / 250); i++) {

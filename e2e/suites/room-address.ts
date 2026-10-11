@@ -260,10 +260,10 @@ async function ra7Counter({ evaluate, check, sleep }: SuiteContext, room: Room, 
   );
 }
 
-type Carried = { hash: string | null; plate: string | null; shown: boolean };
+type Carried = { hash: string | null; plate: string | null; shown: boolean; rewritten: boolean };
 const CARRIED: Payload<Carried> = `(() => { const f = document.querySelector(".rr-prospect"), i = f && f.querySelector("img"), a = f && f.querySelector("a");
   const table = (h) => (h === null ? null : new URLSearchParams(h.slice(h.indexOf("#") + 1)).get("table"));
-  return { hash: table(location.hash), plate: a && table(a.getAttribute("href") || ""), shown: !!f && !f.hidden && !!i && String(i.src).startsWith("blob:") }; })()`;
+  return { hash: table(location.hash), plate: a && table(a.getAttribute("href") || ""), shown: !!f && !f.hidden && !!i && String(i.src).startsWith("blob:"), rewritten: new URLSearchParams(location.hash.slice(1)).has("legend") }; })()`;
 
 async function ra9TableRides({ evaluate, check, sleep }: SuiteContext, room: Room): Promise<void> {
   const settle = makeSettle({ evaluate, sleep });
@@ -271,7 +271,7 @@ async function ra9TableRides({ evaluate, check, sleep }: SuiteContext, room: Roo
   const read = await settle(CARRIED, (d) => d.shown, "room-address-table-plate", 160);
   check(
     "RA9 a link's Chart Table rides the room's own rewrite of its address and the plate's road to the Prospect (#520 ruling B)",
-    booted && read.hash === ONE && read.plate === ONE,
+    booted && read.rewritten && read.hash === ONE && read.plate === ONE,
     JSON.stringify({ booted, read }),
   );
 }

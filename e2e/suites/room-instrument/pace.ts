@@ -1,3 +1,4 @@
+import { sendKey } from "../../support/home.ts";
 import { readPaceSweep, PACE_LEG_MS } from "../../support/pace.ts";
 import { nearRgba, PAGE_RGBA, tokenRgba } from "../../support/pixel.ts";
 import { makeSettle } from "../../support/settle.ts";
@@ -96,10 +97,7 @@ const stillAt = (i: number, cond: (p: Press) => boolean) => (d: Pace, last: Pace
 
 async function paceUnderHand({ evaluate, send, sleep }: InstrumentKit): Promise<Record<string, Pace>> {
   const settle = makeSettle({ evaluate, sleep });
-  const tab = async () => {
-    await send("Input.dispatchKeyEvent", { type: "keyDown", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9 });
-    await send("Input.dispatchKeyEvent", { type: "keyUp", key: "Tab", code: "Tab", windowsVirtualKeyCode: 9 });
-  };
+  const tab = () => sendKey(send, "Tab", "Tab", 9);
   const rest = await evaluate(PACE);
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: rest.presses[1]!.x, y: rest.presses[1]!.y });
   const hovered = await settle(

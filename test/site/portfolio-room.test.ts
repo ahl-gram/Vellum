@@ -3,7 +3,6 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-// Issue #521 Sub 3's guards on the Portfolio, kept for Issue #779 part 2i: what the page does with them is read in chart-drawer (CD19, CD20, CD32, CD36, CD55, CD56, CD60, CD61); what stays here is an import's name or a retired name, which no browser can see.
 const REPO = resolve(import.meta.dirname, "..", "..");
 const app = readFileSync(resolve(REPO, "src/site/portfolio/app.ts"), "utf8");
 

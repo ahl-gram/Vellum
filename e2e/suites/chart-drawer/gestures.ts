@@ -28,7 +28,6 @@ const PRESS: Payload<Press | null> = `(() => { const rgba = ${PAGE_RGBA}, p = do
 const HIT = (idx: number): Payload<{ x: number; y: number; hit: boolean } | null> =>
   `(() => { const h = document.querySelector('.place-overlay .place-hit[data-idx="${idx}"]'); if (!h) return null; const b = h.getBoundingClientRect(); const x = b.x + b.width / 2, y = b.y + b.height / 2; return { x, y, hit: document.elementFromPoint(x, y) === h }; })()`;
 
-// The first town at or past index 1 whose hit answers at its own centre, so a pin lands where the reader's would.
 const reachable = (skip: number[]): Payload<number | null> =>
   `(() => { for (const h of document.querySelectorAll(".place-overlay .place-hit")) { const i = Number(h.dataset.idx); if (i < 1 || ${JSON.stringify(skip)}.includes(i)) continue;
   const b = h.getBoundingClientRect(); if (document.elementFromPoint(b.x + b.width / 2, b.y + b.height / 2) === h) return i; } return null; })()`;
@@ -36,7 +35,6 @@ const reachable = (skip: number[]): Payload<number | null> =>
 const UNFURL: Payload<string[] | null> =
   `(() => { const i = document.querySelector("#place-card .pc-inner"); return i ? i.getAnimations().map((a) => a.playState) : null; })()`;
 
-// A card is pinned by a real press on its town's own hit, and read once its unfurl has finished and its filing press has held still across two reads.
 export async function pinAt(k: DrawerKit, idx: number): Promise<Card> {
   const { evaluate, clickAt, settle } = k;
   const at = await evaluate(HIT(idx));
@@ -53,7 +51,11 @@ export async function pinAt(k: DrawerKit, idx: number): Promise<Card> {
 async function underHand(k: DrawerKit): Promise<{ rest: Press | null; hover: Press; keyed: Press | null }> {
   const { evaluate, send, settle } = k;
   await park(send);
-  const rest = await evaluate(PRESS);
+  const rest = await settle(
+    PRESS,
+    (d, last) => !d.hover && d.running === 0 && !!last && JSON.stringify(d) === JSON.stringify(last),
+    "chart-drawer-press-rest",
+  );
   // The room re-seats the card when a filing opens the drawer, so a hand that missed the moving press is put back on it.
   let hover: Press | null = null;
   for (let i = 0; i < 4 && hover === null; i++) {
@@ -156,7 +158,10 @@ async function fileAt(k: DrawerKit, idx: number, count: number): Promise<Turn> {
   return filed;
 }
 
-async function midTurn(k: DrawerKit, idx: number): Promise<{ at: Turn; face: Card | null; after: Turn[] }> {
+async function midTurn(
+  k: DrawerKit,
+  idx: number,
+): Promise<{ at: Turn; face: Card | null; focused: boolean; after: Turn[] }> {
   const { evaluate, send, settle, sleep } = k;
   await evaluate<boolean>(restyle("ink"));
   const at = await settle(TURN, (d) => d.turning, "chart-drawer-turning");
@@ -166,8 +171,8 @@ async function midTurn(k: DrawerKit, idx: number): Promise<{ at: Turn; face: Car
   const face = await settle(CARD, (d) => d.shown && d.press?.idx === String(idx), "chart-drawer-turning-face").catch(
     () => null,
   );
-  await evaluate<boolean>(
-    `(() => { const p = document.querySelector("#place-card .pc-lay"); if (p) p.focus({ preventScroll: true }); return document.activeElement === p; })()`,
+  const focused = await evaluate<boolean>(
+    `(() => { const p = document.querySelector("#place-card .pc-lay"); if (p) p.focus({ preventScroll: true }); return !!p && document.activeElement === p; })()`,
   );
   // Enter presses the button only with its character: without it row CT7b.a, a lay that ignores the turn, stayed green on the runner (send T, run 38087000715), and with it CD58 stops on its next filing, measured locally.
   await send("Input.dispatchKeyEvent", {
@@ -191,7 +196,7 @@ async function midTurn(k: DrawerKit, idx: number): Promise<{ at: Turn; face: Car
     after.push(await evaluate(TURN));
     await sleep(50);
   }
-  return { at, face, after };
+  return { at, face, focused, after };
 }
 
 const holdDraw = (on: boolean): string => `(() => { window.__cdTurn.holdDraw = ${on}; return true; })()`;
@@ -224,6 +229,7 @@ export async function cd58TurnFiles(k: DrawerKit): Promise<void> {
         turning.face?.press?.text === LAY_ON_CARD &&
         !!turning.face.press.dim &&
         !turning.face.press.disabled &&
+        turning.focused &&
         turning.after.every((d) => d.cuttings === 1 && d.turning) &&
         filedAs(lastItem(landed), p2, "ink", before.year),
       JSON.stringify({ before, first, turning, landed }),
@@ -238,8 +244,9 @@ export async function cd58TurnFiles(k: DrawerKit): Promise<void> {
 }
 
 export async function cd59AbortedTurn(k: DrawerKit): Promise<void> {
-  const { evaluate, check, settle } = k;
+  const { evaluate, send, check, settle } = k;
   try {
+    await send("Emulation.setEmulatedMedia", { features: [] });
     await evaluate<boolean>(
       `(() => { document.documentElement.style.setProperty("--turn", "2000ms"); return true; })()`,
     );
