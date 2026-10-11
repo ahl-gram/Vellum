@@ -146,57 +146,12 @@ test("an empty line written mid-fade takes the fade off with it (#547 ruling 4)"
   assert.equal(f.timers.waiting(), 0);
 });
 
-// Both pages, because one page wired and the other not is exactly the shape Issue #547 was filed about (the Chart Table's guards all ran at 390 and nowhere else). Read against the source with whitespace COLLAPSED: the prover reverted the Explorer to a multi-line bare write and a line-bounded pattern could not see across the break (2026-09-13). Blind spot, named with its direction: this reads the source and not the running page, so it errs toward a miss, and e2e CD23 is the Explorer's resolved read; the Portfolio has no behavioural read inside this suite's measured time budget, which the PR body carries as residue.
-test("every room that announces on a status pill announces through the one announcer, uses what it built, and keeps no bare write of its own (#547 ruling 4)", () => {
+test("both rooms that announce on a status pill import the one announcer (#547 ruling 4; kept for Issue #779 part 2i: an import's name shows nowhere, and CD23 and CD54 read what each announces)", () => {
   const REPO = resolve(import.meta.dirname, "..", "..");
-  const pages = [
-    ["src/site/explorer/app.ts", "status"],
-    ["src/site/portfolio/app.ts", "status"],
-  ] as const;
-  for (const [path, pill] of pages) {
-    const flat = readFileSync(resolve(REPO, path), "utf8").replace(/\s+/g, " ");
-    assert.match(flat, /from "\.\.\/shared\/announce\.ts"/, `${path} does not reach the shared announcer at all`);
-    const built = flat.match(new RegExp(`const (\\w+) = makeAnnouncer\\(${pill}, \\{`));
-    assert.ok(
-      built,
-      `${path} imports the announcer and builds nothing over its pill, so its announcements never leave the chart`,
+  for (const path of ["src/site/explorer/app.ts", "src/site/portfolio/app.ts"])
+    assert.match(
+      readFileSync(resolve(REPO, path), "utf8"),
+      /from "\.\.\/shared\/announce\.ts"/,
+      `${path} does not reach the shared announcer at all`,
     );
-    assert.ok(
-      built[1] === "say" || new RegExp(`say: ${built[1]}\\b`).test(flat),
-      `${path} builds an announcer called ${built[1]} and never hands it over as the say, which passes every other assertion here and leaves the line standing`,
-    );
-    assert.doesNotMatch(
-      flat,
-      new RegExp(`say(: |\\s*= )[^;]*${pill}\\.textContent`),
-      `${path} still writes its announcement straight onto the pill, which is the defect #547 named`,
-    );
-  }
-});
-
-// Nothing in the browser can tell the two writers apart: CD24 reads the line and the pill's fade, and both look identical whichever one put the line there.
-test("the Portfolio's ruled announcement goes through the announcer and its progress line does not (#547 ruling 4)", () => {
-  const flat = readFileSync(resolve(import.meta.dirname, "..", "..", "src/site/portfolio/app.ts"), "utf8").replace(
-    /\s+/g,
-    " ",
-  );
-  assert.match(
-    flat,
-    /say\([^;]*is on top/,
-    "the sheet brought up is ANNOUNCED, so it leaves the chart the way the Chart Table's line does",
-  );
-  assert.doesNotMatch(
-    flat,
-    /tell\([^;]*is on top/,
-    "and never written bare, which would leave it standing over the chart forever",
-  );
-  assert.match(
-    flat,
-    /tell\([^;]*draftedLine/,
-    "while the drafting count is written bare, or a sheet slower than the hold blanks the stage mid-draft",
-  );
-  assert.doesNotMatch(
-    flat,
-    /say\([^;]*draftedLine/,
-    "and never announced, or it goes while the drafting is still running",
-  );
 });

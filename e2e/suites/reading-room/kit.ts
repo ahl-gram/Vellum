@@ -1,5 +1,16 @@
-import type { SuiteContext } from "../../types.ts";
+import type { Payload, SuiteContext } from "../../types.ts";
+import type { Lens } from "../print-room/print.ts";
 import { stageRead } from "./reads.ts";
+
+// The frame's chart is this room's transform target; an empty gesture box reads as a camera at rest, so a row that empties it fails the camera's reads rather than stopping them.
+export const RR_LENS: Payload<Lens> = `(() => { const e = document.querySelector("#map-viewport > .rf-chart"); if (!e) return { k: 1, t: "absent", zoomed: false };
+  const t = getComputedStyle(e).transform, m = /^matrix\\(([^,]+),/.exec(t);
+  return { k: m ? Number(m[1]) : 1, t, zoomed: document.getElementById("map-viewport").classList.contains("zoomed") }; })()`;
+
+// Wiring, not a claim: the bar is driven by its input event, to an edge or back to a value read off it.
+export const BAR: Payload<string> = `document.querySelector(".rf-range").value`;
+export const scrubTo = (to: string): string =>
+  `(() => { const r = document.querySelector(".rf-range"); r.value = ${to === "min" || to === "max" ? `r.${to}` : JSON.stringify(to)}; r.dispatchEvent(new Event("input", { bubbles: true })); return true; })()`;
 
 export type ReadingRoomKit = ReturnType<typeof readingRoomKit>;
 

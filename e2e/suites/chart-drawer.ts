@@ -18,8 +18,12 @@ import {
   cd5CuttingOff,
   cd7Cap,
   cd8Home,
+  cd51NoTipKeyed,
+  cd52LayWrites,
 } from "./chart-drawer/desk.ts";
-import { cd44CarryFiles, cd45SnapBack, cd46ReducedCarry, cd47FullCarry } from "./chart-drawer/drag.ts";
+import { cd45SnapBack, cd46ReducedCarry, cd47FullCarry, cd53Ceremony } from "./chart-drawer/drag.ts";
+import { cd54PortfolioLines, cd55WhereAuthored, cd56WorkerBlocked } from "./chart-drawer/room.ts";
+import { cd57PressDress, cd58TurnFiles, cd59AbortedTurn } from "./chart-drawer/gestures.ts";
 import { cd9NeverTogether, cd12SeatsHold, cd13TabClear, cd18RoadOn } from "./chart-drawer/surfaces.ts";
 import {
   cd18bRoadCarries,
@@ -39,6 +43,7 @@ import {
   cd34PageRefusals,
   cd31RoundTrip,
   cd32MixedFolio,
+  cd60ProspectBroughtUp,
 } from "./chart-drawer/prospect.ts";
 import {
   cd36GoldPress,
@@ -47,6 +52,7 @@ import {
   cd39LinkBeatsDevice,
   cd40EmptySticks,
   cd41CachedReturn,
+  cd61FolioHomes,
 } from "./chart-drawer/homes.ts";
 
 type Step = ReturnType<typeof makeStep>;
@@ -61,13 +67,16 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const { clickEar, forget } = k;
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   await step("CD1", () => cd1DogEar(k));
-  // The one read that crosses a step: CD4 reloads the address CD2 wrote, so if CD2 never laid a sheet, CD4 fails as CD4 rather than passing against a table nobody filled.
+  await step("CD51", () => cd51NoTipKeyed(k));
+  // The one value a step hands another: CD4 reloads the address CD2 wrote, so if CD2 never laid a sheet, CD4 fails as CD4 rather than passing against a table nobody filled. Several later checks read the page an earlier step left (CD52, CD53 and CD60 the sheets CD2 and CD32 laid, CD55 the bare Portfolio CD20 and CD21 left, CD59 the page CD58 loaded).
   let laid: Read | null = null;
   await step("CD2, CD2b, CD2c", async () => {
     const earAt = await clickEar();
     laid = await cd2Lays(k);
     await cd2bRealPointer(k, earAt);
   });
+  await step("CD52", () => cd52LayWrites(k));
+  await step("CD53", () => cd53Ceremony(k));
   // A FLOOR, never a ceiling: a slow runner delays the clear and can only push this up, where a wall-clock ceiling on a runner-dependent measurement is RS30's own scar. 1s under the ruled hold covers the press, the read and the probe that stand between the announcement and the clock starting; the number moves with the constant, and the literal 8000 is pinned in test/site/announce.test.ts.
   const HOLD_FLOOR = SAY_HOLD_MS - 1000;
   await step("CD23", () => cd23LineLeaves(k, HOLD_FLOOR));
@@ -75,7 +84,6 @@ export async function run(ctx: SuiteContext): Promise<void> {
   // Issue #523 Sub 5: the desktop drag, the settle and the jolt, ruled 2026-09-21. The camera is d3's {x, y, k} and every Broadside fold schedules a room layout 340ms later that re-seats x/y (FOLD_SETTLE_MS in src/site/shared/slip.ts), so every drag check below holds the FOLD constant across its two reads (the Broadside already folded before the press), takes each read at REST (two reads 50ms apart agreeing, with no ghost and no settle in flight), and compares k exactly with x and y inside half a pixel: a no-change refit is a float round trip through the camera bridge, a d3 pan is the carry's own delta in the hundreds of px, and k alone (CD2c's read) cannot tell a pan at all.
   const { press, moveTo, release } = makeMouse(ctx);
   const kd = dragKit({ ...k, press, moveTo, release });
-  await step("CD44", () => cd44CarryFiles(kd));
   await step("CD45", () => cd45SnapBack(kd));
   await step("CD46", () => cd46ReducedCarry(kd));
   await step("CD4", () => cd4Reload(kd, laid));
@@ -120,9 +128,12 @@ async function cd9Surfaces(kd: DragKit, step: Step, SIX: string): Promise<void> 
   await step("CD18b", () => cd18bRoadCarries(kd, SIX));
   await cd19PortfolioDrafts(kd);
   await cd24PortfolioSays(kd);
+  await step("CD54", () => cd54PortfolioLines(kd));
   // BARE means bare on both homes since Issue #634: a Portfolio the address names no folio for now shows what the device holds (ruling 4), so the six this group just laid would arrive here as a full pile.
   await cd20BarePortfolio(kd);
   await cd21PortfolioGlass(kd);
+  await step("CD55", () => cd55WhereAuthored(kd));
+  await step("CD56", () => cd56WorkerBlocked(kd));
   await step("CD48", () => cd48TouchHandle(kd));
   await step("NA2", () => na2DrawerBelowFloor(kd));
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
@@ -131,13 +142,18 @@ async function cd9Surfaces(kd: DragKit, step: Step, SIX: string): Promise<void> 
 async function cd25CapturesAndHomes(kd: DragKit, step: Step, SIX: string): Promise<void> {
   // Issue #522 Sub 4: the two capture points for a prospect, and the mixed folio they make.
   await step("CD25, CD26, CD30", () => cd25CardPress(kd));
+  await step("CD57", () => cd57PressDress(kd));
   await step("CD27", () => cd27CardAtCap(kd, SIX));
+  await step("CD58", () => cd58TurnFiles(kd));
+  // CD58 installs the worker hold CD59 uses and files the two sheets it counts, so a CD58 stop takes CD59 with it.
+  await step("CD59", () => cd59AbortedTurn(kd));
   await step("CD28, CD29, CD34, CD35, CD31", async () => {
     const two = await cd28PagePress(kd);
     await cd34PageRefusals(kd, SIX);
     await cd31RoundTrip(kd, two);
   });
   await step("CD32", () => cd32MixedFolio(kd));
+  await step("CD60", () => cd60ProspectBroughtUp(kd));
   // Issue #634: the table's second home, and the four roads the two homes exist for. ONE and TWO are addresses rather than gestures because every check below is about WHERE the table came from, not about the handle that filed it.
   const TWO = `${ONE}_k-p.seed-42.style-antique.i-0.year-1059`;
   const kt = tableKit(kd);
@@ -150,4 +166,5 @@ async function cd25CapturesAndHomes(kd: DragKit, step: Step, SIX: string): Promi
   await step("CD39", () => cd39LinkBeatsDevice(kt, TWO));
   await step("CD40", () => cd40EmptySticks(kt));
   await step("CD41, CD42", () => cd41CachedReturn(kt));
+  await step("CD61", () => cd61FolioHomes(kt));
 }

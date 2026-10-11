@@ -1,9 +1,9 @@
-// Reading Room e2e (RR0-RR34; Issue #221 plus Issue #318 colophon dice, Issue #418 pre-arm window, Issue #402 prospect stage and Issue #442 the sticky strip): self-contained (navigates itself, scoped no-4xx and console-error delta); there is deliberately NO Explorer entry point (decision 3 on Issue #221), so checks navigate with constructed hashes, and arrival is AT REST on every path.
+// Reading Room e2e (RR0-RR42; Issue #221 plus Issue #318 colophon dice, Issue #418 pre-arm window, Issue #402 prospect stage and Issue #442 the sticky strip): self-contained (navigates itself, scoped no-4xx and console-error delta); there is deliberately NO Explorer entry point (decision 3 on Issue #221), so checks navigate with constructed hashes, and arrival is AT REST on every path.
+import { makeStep } from "../support/step.ts";
 import type { SuiteContext } from "../types.ts";
 import { readingRoomKit } from "./reading-room/kit.ts";
-import { stripRead } from "./reading-room/reads.ts";
 import { rr0Boots, rr4AtRest, rr26BareVisit, rr29Play } from "./reading-room/arrival.ts";
-import { rr31StripStands, rr35GoverningBudget, rr37Envelope, rr36ChartFills } from "./reading-room/desk.ts";
+import { rrDeskReads } from "./reading-room/desk.ts";
 import { rr6Survey, rr7Year, rr9Today, rr10CrossLinks } from "./reading-room/addresses.ts";
 import {
   rr16Colophon,
@@ -16,10 +16,17 @@ import {
 import { rr23Usurped, rr24BeforeArm, rr25TearDown } from "./reading-room/arm.ts";
 import { rr11bScrubHandles } from "./reading-room/scrub.ts";
 import { rr12Clean, rr14Fallback } from "./reading-room/fallback.ts";
+import { rr38Authored } from "./reading-room/room.ts";
+import { rr39AtRest } from "./reading-room/dress.ts";
+import { rr40Glass, rr41ReadRefits, rr42PlateReveal } from "./reading-room/gestures.ts";
+
+type Step = ReturnType<typeof makeStep>;
 
 export async function run(ctx: SuiteContext): Promise<void> {
-  const { evaluate, send, shoot, sleep, consoleErrors, http4xx, PORT } = ctx;
+  const { send, shoot, consoleErrors, http4xx, PORT } = ctx;
   const k = readingRoomKit(ctx);
+  const step = makeStep(ctx);
+  await step("RR38", () => rr38Authored(ctx));
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/reading-room/#seed=42&style=antique&legend=1` });
   const rrErrBase = consoleErrors.length;
   const rrHttpBase = http4xx.length;
@@ -27,30 +34,10 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await rr4AtRest(ctx);
   // Seed 42's beats, measured 2026-08-22: foundings 451/552/597 (i=0/4/6), twin ruins 1039 (i=19/22; the LAST told holds the stage), present 1059. This hash carries no live key, so it is a PLAIN visit and opens with no plate (Issue #442 reversing Issue #402); RR29 shows Play bringing one.
   await rr26BareVisit(k);
-  // The harness window is 1280x2400, where this page has only a few hundred px of scroll and the strip could never reach the top, so this reading pins Issue #442's governing 1440x900 viewport; mobile:false because mobile:true changes layout semantics as well as size.
-  await send("Emulation.setDeviceMetricsOverride", { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
-  await sleep(200);
-  const deskRest = await evaluate(stripRead);
-  const room = await evaluate<{
-    page: number;
-    vh: number;
-    chartW: number;
-    chartH: number;
-    ratio: number;
-    fillsSheet: boolean;
-    topClear: number;
-    bottomClear: number;
-  }>(
-    `(()=>{const s=document.querySelector(".rf-chart svg[data-vellum-style]");const r=s?s.getBoundingClientRect():{width:0,height:0,top:0,bottom:0};const b=document.getElementById("sheet").getBoundingClientRect();const strip=document.querySelector(".strip").getBoundingClientRect();const tr=document.querySelector(".corner.tr").getBoundingClientRect();return{page:document.documentElement.scrollHeight,vh:window.innerHeight,chartW:Math.round(r.width),chartH:Math.round(r.height),ratio:r.width?r.height/r.width:0,fillsSheet:Math.abs(r.width-b.width)<1&&Math.abs(r.height-b.height)<1,topClear:Math.round(r.top-tr.bottom),bottomClear:Math.round(strip.top-r.bottom)};})()`,
-  );
-  await rr31StripStands(ctx, deskRest, room);
-  const deskSurvey = await rr35GoverningBudget(ctx, deskRest);
-  await rr37Envelope(ctx, deskSurvey);
-  rr36ChartFills(ctx, room);
-  await evaluate(`(()=>{window.scrollTo(0,0);return null;})()`);
-  await send("Emulation.clearDeviceMetricsOverride");
-  await sleep(200);
+  await atTheDesk(ctx, step);
   await rr29Play(k);
+  await step("RR42", () => rr42PlateReveal(ctx));
+  await step("RR40", () => rr40Glass(ctx));
   await rr6Survey(k);
   await rr7Year(k);
   await shoot("reading-room.png");
@@ -68,4 +55,17 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await rr11bScrubHandles(k, ctx);
   rr12Clean(ctx, rrErrBase, rrHttpBase);
   await rr14Fallback(ctx);
+}
+
+async function atTheDesk(ctx: SuiteContext, step: Step): Promise<void> {
+  const { evaluate, send, sleep } = ctx;
+  // The harness window is 1280x2400, where this page has only a few hundred px of scroll and the strip could never reach the top, so this reading pins Issue #442's governing 1440x900 viewport; mobile:false because mobile:true changes layout semantics as well as size.
+  await send("Emulation.setDeviceMetricsOverride", { width: 1440, height: 900, deviceScaleFactor: 1, mobile: false });
+  await sleep(200);
+  await step("RR31, RR35, RR37, RR36", () => rrDeskReads(ctx));
+  await step("RR39", () => rr39AtRest(ctx));
+  await step("RR41", () => rr41ReadRefits(ctx));
+  await evaluate(`(()=>{window.scrollTo(0,0);return null;})()`);
+  await send("Emulation.clearDeviceMetricsOverride");
+  await sleep(200);
 }

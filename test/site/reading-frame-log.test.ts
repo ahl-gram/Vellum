@@ -122,10 +122,8 @@ test("the log is a labeled region and its rows are plain text (accessibility car
   assert.equal(panel.getAttribute("aria-label"), "The surveyor's log", "and it is named");
 });
 
-test("one canonical row rule covers the one arrived-state (#219; collapsed at #220)", () => {
+test("the frame's sheet keeps no retired row state (#219; collapsed at #220; kept for Issue #779 part 2i: retired names no element wears)", () => {
   const css = read("public/reading-frame.css");
-  const brighten = css.match(/^[^{]*\.inked[^{]*\{[^}]*\}/m);
-  assert.ok(brighten, "the frame css carries the rule keyed on the one .inked state");
   for (const stale of ["past", "logged"]) {
     assert.doesNotMatch(
       css,
@@ -133,26 +131,12 @@ test("one canonical row rule covers the one arrived-state (#219; collapsed at #2
       `the retired .${stale} selector must not linger after the #220 collapse`,
     );
   }
-  assert.match(css, /\.prologue\b/, "the surveyor's prologue voice (#220's Overture) is dressed in the frame css");
-  assert.match(css, /\.cr-year/, "the frame dresses the shared .cr-year column the engine's builders already emit");
-  assert.match(css, /\.cr-text/, "and the shared .cr-text column");
 });
 
-test("the brighten is a transition, so motion.css's universal collapse reaches it (#128)", () => {
-  const css = read("public/reading-frame.css");
-  assert.match(
-    css,
-    /transition:\s*opacity/,
-    "rows brighten via a transition, the form the reduced-motion block collapses",
-  );
+test("the frame's sheet carries no reduced-motion block of its own (#128; kept for Issue #779 part 2i: a block agreeing with motion.css's collapse computes the same; RA10 reads the collapse)", () => {
   assert.doesNotMatch(
-    css,
+    read("public/reading-frame.css"),
     /prefers-reduced-motion/,
     "the frame needs no reduced-motion block of its own: motion.css's universal `*` collapse already reaches it, and a local block would be a second source of truth",
-  );
-  assert.match(
-    read("public/motion.css"),
-    /@media \(prefers-reduced-motion: reduce\)[\s\S]*transition-duration: 0\.01ms !important/,
-    "the universal collapse this frame relies on is still there",
   );
 });

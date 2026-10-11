@@ -1,4 +1,8 @@
+import { sendKey } from "../../support/home.ts";
 import { readPaceSweep, PACE_LEG_MS } from "../../support/pace.ts";
+import { nearRgba, PAGE_RGBA, tokenRgba } from "../../support/pixel.ts";
+import { makeSettle } from "../../support/settle.ts";
+import type { Payload } from "../../types.ts";
 import type { Facts, InstrumentKit } from "./kit.ts";
 
 export async function rs29Pace(
@@ -63,4 +67,88 @@ export async function rs30Rate(
     rs30.ok && rs30lbl === "Pause",
     `${rs30.detail} label=${rs30lbl}`,
   );
+}
+
+type Press = {
+  x: number;
+  y: number;
+  hover: boolean;
+  focus: boolean;
+  pressed: boolean;
+  t: string;
+  size: string[];
+  ground: number[];
+  ink: number[];
+};
+type Pace = { group: string[]; presses: Press[] };
+const PACE: Payload<Pace> = `(() => { const rgba = ${PAGE_RGBA}, g = document.querySelector(".rf-instrument .rf-pace"), gs = getComputedStyle(g);
+  return { group: [gs.flexGrow, gs.flexShrink], presses: [...g.querySelectorAll("button")].map((b) => { const r = b.getBoundingClientRect(), cs = getComputedStyle(b);
+    return { x: r.left + r.width / 2, y: r.top + r.height / 2, hover: b.matches(":hover"), focus: b.matches(":focus-visible"), pressed: b.getAttribute("aria-pressed") === "true",
+      t: cs.transform, size: [cs.width, cs.height], ground: rgba(cs.backgroundColor), ink: rgba(cs.color) }; }) }; })()`;
+
+const chosen = (p: Press): boolean =>
+  p.pressed && nearRgba(p.ground, tokenRgba("--parchment")) && nearRgba(p.ink, tokenRgba("--ink-dark"));
+const washed = (p: Press): boolean =>
+  !p.pressed && nearRgba(p.ground, tokenRgba("--ink-dark")) && nearRgba(p.ink, tokenRgba("--parchment-bright"));
+const resting = (p: Press): boolean =>
+  !p.pressed && nearRgba(p.ground, tokenRgba("--chart-ink", 0.5)) && nearRgba(p.ink, tokenRgba("--line-tan"));
+const stillAt = (i: number, cond: (p: Press) => boolean) => (d: Pace, last: Pace | null) =>
+  cond(d.presses[i]!) && !!last && d.presses[i]!.t === last.presses[i]!.t;
+
+async function paceUnderHand({ evaluate, send, sleep }: InstrumentKit): Promise<Record<string, Pace>> {
+  const settle = makeSettle({ evaluate, sleep });
+  const tab = () => sendKey(send, "Tab", "Tab", 9);
+  const rest = await evaluate(PACE);
+  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: rest.presses[1]!.x, y: rest.presses[1]!.y });
+  const hovered = await settle(
+    PACE,
+    stillAt(1, (p) => p.hover),
+    "pace-hovered",
+  );
+  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: rest.presses[0]!.x, y: rest.presses[0]!.y });
+  const chosenHovered = await settle(
+    PACE,
+    stillAt(0, (p) => p.hover),
+    "pace-chosen-hovered",
+  );
+  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 1 });
+  await evaluate<boolean>(`(() => { document.querySelector(".rf-range").focus(); return true; })()`);
+  await tab();
+  const chosenKeyed = await settle(
+    PACE,
+    stillAt(0, (p) => p.focus && !p.hover),
+    "pace-chosen-keyed",
+  );
+  await tab();
+  const keyed = await settle(
+    PACE,
+    stillAt(1, (p) => p.focus && !p.hover),
+    "pace-keyed",
+  );
+  return { rest, hovered, chosenHovered, chosenKeyed, keyed };
+}
+
+export async function rs31PaceDress(k: InstrumentKit): Promise<void> {
+  const { evaluate, send, check } = k;
+  try {
+    const r = await paceUnderHand(k);
+    check(
+      "RS31 the pace keeps the strip's dress against the house button skin: the group never flexes, each press the mockup's 1.9 by 1.6rem, the chosen one on parchment at rest, under the hand and under a keyboard's focus, the others ink on line-tan at rest (the control) and washed dark under a real hover and a real Tab",
+      JSON.stringify(r.rest!.group) === JSON.stringify(["0", "0"]) &&
+        r.rest!.presses.length === 3 &&
+        r.rest!.presses.every(
+          (p) => Math.abs(parseFloat(p.size[0]!) - 30.4) < 0.05 && Math.abs(parseFloat(p.size[1]!) - 25.6) < 0.05,
+        ) &&
+        chosen(r.rest!.presses[0]!) &&
+        resting(r.rest!.presses[1]!) &&
+        washed(r.hovered!.presses[1]!) &&
+        chosen(r.chosenHovered!.presses[0]!) &&
+        chosen(r.chosenKeyed!.presses[0]!) &&
+        washed(r.keyed!.presses[1]!),
+      JSON.stringify(r),
+    );
+  } finally {
+    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 1 });
+    await evaluate<boolean>(`(() => { if (document.activeElement) document.activeElement.blur(); return true; })()`);
+  }
 }

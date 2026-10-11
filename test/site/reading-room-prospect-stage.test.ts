@@ -1,7 +1,5 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { installShim } from "../../test-support/element-shim.ts";
 import type { PlateSpec } from "../../src/site/reading-room/told-plate.ts";
 
@@ -9,30 +7,12 @@ import type { PlateSpec } from "../../src/site/reading-room/told-plate.ts";
 installShim();
 const { createProspectStage } = await import("../../src/site/reading-room/prospect-stage.ts");
 
-const REPO = resolve(import.meta.dirname, "..", "..");
-
 const BEAT: PlateSpec = { index: 0, year: 451 };
 const LATER: PlateSpec = { index: 5, year: 620 };
 // The same town, at the present rather than at its founding: a DIFFERENT plate, since prospectPlate reads the year as an era filter.
 const SAME_TOWN_TODAY: PlateSpec = { index: 0, year: 1218 };
 
 const tick = () => new Promise((r) => setTimeout(r, 0));
-
-/** Declaration blocks whose selector LIST contains `selector`, joined; see the twin in reading-frame.test.ts for why membership beats a literal anchor. */
-function declarationsFor(css: string, selector: string): string {
-  const src = css.replace(/\/\*[\s\S]*?\*\//g, "");
-  const out: string[] = [];
-  for (const m of src.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
-    if (
-      m[1]!
-        .split(",")
-        .map((s) => s.trim())
-        .includes(selector)
-    )
-      out.push(m[2]!);
-  }
-  return out.join("\n");
-}
 
 function harness() {
   const fetched: PlateSpec[] = [];
@@ -162,38 +142,4 @@ test("#402 a late fetch from a superseded world is dropped, not painted", async 
 
   assert.equal(stage.root.hidden, true, "the superseded world's plate never reaches the screen");
   assert.deepEqual(revoked, ["url:svg-old"], "its blob is revoked instead of leaking");
-});
-
-test("#442 the unfurl uses a BACKWARDS fill, so the plate's hover lift survives the reveal", () => {
-  const css = readFileSync(resolve(REPO, "public/reading-room/index.css"), "utf8");
-  const rule = declarationsFor(css, ".rr-prospect img");
-  assert.ok(rule, "the plate carries an image rule");
-  const anim = rule.match(/animation:[^;]*;/)?.[0];
-  assert.ok(anim, "and an entrance animation");
-  assert.match(anim, /\bbackwards\b/, "the reveal fills BACKWARDS");
-  assert.doesNotMatch(
-    anim,
-    /\b(both|forwards)\b/,
-    "never both/forwards: that pins the final keyframe's transform at animation priority and silently kills the hover lift",
-  );
-  // The polarity: a keyframe whose `to` sets a transform would re-pin it even under backwards, so the resting frame must be transform: none.
-  const name = /animation:\s*(\S+)/.exec(anim)?.[1] ?? "";
-  const keyframes = css.match(new RegExp(`@keyframes ${name}\\s*\\{(?:[^{}]|\\{[^{}]*\\})*\\}`))?.[0];
-  assert.ok(keyframes, `the reveal's keyframes (${name}) are here`);
-  assert.match(keyframes, /to\s*\{[^}]*transform:\s*none/, "the resting keyframe releases the transform");
-  // rotateX(0deg) in the opening frame satisfies a presence check while producing a plain fade, so the OPENING angle has to be non-zero.
-  const from = keyframes.match(/from\s*\{[^}]*\}/)?.[0] ?? "";
-  const openingAngle = Number(/rotateX\((-?[\d.]+)deg\)/.exec(from)?.[1] ?? "0");
-  assert.notEqual(
-    openingAngle,
-    0,
-    `the unfurl opens at a real angle, not a fade dressed as one (got ${openingAngle}deg)`,
-  );
-  assert.ok(Math.abs(openingAngle) > 20, `and an angle you can see, not a token one (got ${openingAngle}deg)`);
-  assert.match(rule, /transform-origin:\s*top center/, "anchored at the top edge, the way paperUnfurl's consumers are");
-  assert.match(
-    css,
-    /\.rr-prospect a:hover img[^{]*\{[^}]*transform:/,
-    "and the hover lift is a transform that must win",
-  );
 });

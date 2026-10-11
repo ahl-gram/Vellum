@@ -146,18 +146,6 @@ test("the plate dress rests flat and tips on hover (#130, the consumer is now pr
   );
 });
 
-test("#402 the prospect reveal releases its transform: fill backwards, never both/forwards", () => {
-  const css = read("public/reading-room/index.css");
-  const rule = rulesIn(css).find((r) => /\.rr-prospect img\b/.test(r.selector) && /animation\s*:/.test(r.body));
-  assert.ok(rule, ".rr-prospect img carries the plate's entrance animation");
-  const anim = /animation\s*:\s*([^;]+)/.exec(rule.body)?.[1] ?? "";
-  assert.ok(
-    /\bbackwards\b/.test(anim) && !/\b(both|forwards)\b/.test(anim),
-    `a both/forwards fill pins the final keyframe's transform at animation priority forever, ` +
-      `which outranks the hover lift (measured 2026-08-22, the #402 plate-reader control probe); got "${anim}"`,
-  );
-});
-
 // Identity, not presence: the sweep proves a lift is SOME token; this pins WHICH one each consumer uses.
 const TOKEN_CONSUMERS: ReadonlyArray<{ file: string; arm: string; lift: string; shadow?: string }> = [
   {

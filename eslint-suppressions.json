@@ -29,7 +29,7 @@
   },
   "e2e/suites/chart-drawer/drag.ts": {
     "max-lines-per-function": {
-      "count": 2
+      "count": 1
     }
   },
   "e2e/suites/chart-drawer/floor.ts": {
@@ -478,25 +478,12 @@
       "count": 1
     }
   },
-  "test/site/chart-drawer.test.ts": {
-    "max-lines": {
-      "count": 1
-    },
-    "max-lines-per-function": {
-      "count": 1
-    }
-  },
   "test/site/contents-row.test.ts": {
     "max-lines-per-function": {
       "count": 1
     }
   },
   "test/site/house-style.test.ts": {
-    "max-lines-per-function": {
-      "count": 1
-    }
-  },
-  "test/site/living-chart-css.test.ts": {
     "max-lines-per-function": {
       "count": 1
     }

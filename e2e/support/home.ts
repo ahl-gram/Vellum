@@ -39,13 +39,15 @@ export const buttonPoint = (selector: string): Payload<Point | null> => `(() => 
   return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
 })()`;
 
+export const sendKey = async (send: SuiteContext["send"], key: string, code: string, vk: number): Promise<void> => {
+  await send("Input.dispatchKeyEvent", { type: "keyDown", key, code, windowsVirtualKeyCode: vk });
+  await send("Input.dispatchKeyEvent", { type: "keyUp", key, code, windowsVirtualKeyCode: vk });
+};
+
 export const makeStage = (ctx: Pick<SuiteContext, "evaluate" | "send" | "sleep" | "PORT">) => {
   const { evaluate, send, sleep, PORT } = ctx;
 
-  const pressKey = async (key: string, code: string, vk: number): Promise<void> => {
-    await send("Input.dispatchKeyEvent", { type: "keyDown", key, code, windowsVirtualKeyCode: vk });
-    await send("Input.dispatchKeyEvent", { type: "keyUp", key, code, windowsVirtualKeyCode: vk });
-  };
+  const pressKey = (key: string, code: string, vk: number): Promise<void> => sendKey(send, key, code, vk);
 
   const clickAt = async (x: number, y: number): Promise<void> => {
     await send("Input.dispatchMouseEvent", { type: "mousePressed", x, y, button: "left", clickCount: 1 });

@@ -13,12 +13,13 @@ export const lensRest = async (
   { evaluate, sleep }: Pick<SuiteContext, "evaluate" | "sleep">,
   want: Rest,
   label: string,
+  lens: Payload<Lens> = LENS,
 ): Promise<Lens> => {
-  let last = await evaluate(LENS);
+  let last = await evaluate(lens);
   let left = last.zoomed;
   for (let i = 0; i < 60; i++) {
     await sleep(150);
-    const d = await evaluate(LENS);
+    const d = await evaluate(lens);
     left ||= d.zoomed;
     if (d.t === last.t && (want === "still" || left || i >= 6)) return d;
     last = d;
@@ -32,21 +33,25 @@ const VIEWPORT: Payload<{ x: number; y: number; hit: string | null; size: number
   `(() => { const r = document.getElementById("map-viewport").getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2, e = document.elementFromPoint(x, y); return { x, y, hit: e && (e.id || e.tagName), size: [innerWidth, innerHeight] }; })()`;
 
 // Wiring, not the claim: home by the Glass's own press, else by a wheel out where a row silenced the Glass, and no throw on a camera left leaned, since a cleanup's stop is no claim's read.
-export async function homeCamera(ctx: Pick<SuiteContext, "evaluate" | "sleep" | "wheel" | "send">): Promise<Lens> {
+export async function homeCamera(
+  ctx: Pick<SuiteContext, "evaluate" | "sleep" | "wheel" | "send">,
+  lens: Payload<Lens> = LENS,
+): Promise<Lens> {
   const { evaluate, send, wheel } = ctx;
   await evaluate(`(() => { const b = document.getElementById("zoom-reset"); if (b) b.click(); return true; })()`);
-  let at = await lensRest(ctx, "still", "camera-home");
+  let at = await lensRest(ctx, "still", "camera-home", lens);
   if (at.k > 1.001) {
     const c = await evaluate(VIEWPORT);
     await wheel(c.x, c.y, 4000);
-    at = await lensRest(ctx, "still", "camera-wheeled-home");
+    at = await lensRest(ctx, "still", "camera-wheeled-home", lens);
   }
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 1 });
   return at;
 }
 
 type Seated = { size: number[]; w: string; k: number };
-const SEATED: Payload<Seated> = `({ size: [innerWidth, innerHeight], w: document.getElementById("sheet").style.width, k: ${LENS}.k })`;
+const seatedOf = (lens: Payload<Lens>): Payload<Seated> =>
+  `({ size: [innerWidth, innerHeight], w: document.getElementById("sheet").style.width, k: ${lens}.k })`;
 export type GlideRead = {
   press: { x: number; y: number; hit: string | null } | null;
   mid: Lens | null;
@@ -57,7 +62,7 @@ export type GlideRead = {
 const REST_K = 1.4;
 const REST_TOLERANCE = 0.005;
 
-export async function midGlideRefit(ctx: SuiteContext): Promise<GlideRead> {
+export async function midGlideRefit(ctx: SuiteContext, lens: Payload<Lens> = LENS): Promise<GlideRead> {
   const { evaluate, send, sleep } = ctx;
   // A reduced motion leaked by a suite that stopped mid-way makes every glide instant (Issue #637's class), so the read clears the features itself.
   await send("Emulation.setEmulatedMedia", { features: [] });
@@ -67,24 +72,25 @@ export async function midGlideRefit(ctx: SuiteContext): Promise<GlideRead> {
     if (press) await pressAt({ send }, press.x, press.y);
     let mid: Lens | null = null;
     for (let i = 0; i < 150 && mid === null; i++) {
-      const d = await evaluate(LENS);
+      const d = await evaluate(lens);
       if (d.k > 1.02 && d.k < 1.3) mid = d;
       else await sleep(20);
     }
-    const { w: from } = await evaluate(SEATED);
+    const seatRead = seatedOf(lens);
+    const { w: from } = await evaluate(seatRead);
     await send("Emulation.setDeviceMetricsOverride", { width: 1200, height: 760, deviceScaleFactor: 1, mobile: false });
     let seated: Seated | null = null;
     for (let i = 0; i < 100 && seated === null; i++) {
-      const d = await evaluate(SEATED);
+      const d = await evaluate(seatRead);
       if (d.size[0] === 1200 && d.size[1] === 760 && d.w !== from) seated = d;
       else await sleep(20);
     }
-    const landed = await lensRest({ evaluate, sleep }, "still", "glide-landed");
+    const landed = await lensRest({ evaluate, sleep }, "still", "glide-landed", lens);
     return { press, mid, from, seated, landed };
   } finally {
     await evaluate(`document.documentElement.style.removeProperty("--glide")`);
     await clearMetrics({ evaluate, send, sleep }, 1200, 760);
-    await homeCamera(ctx);
+    await homeCamera(ctx, lens);
   }
 }
 
