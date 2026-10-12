@@ -31,7 +31,7 @@ Everything you put in front of Alex is drawn from the real thing or measured fro
 
 ## Where you stand
 
-Before anything else, before any reading, run `echo "effort=$CLAUDE_EFFORT"` and `pwd`, and put both lines at the head of your report.
+Before anything else, before any reading, run `pwd`, and put it at the head of your report.
 
 What a round or a breakdown delivers is files under `out/`, so you never run in a harness-isolated tree: the harness deletes one when its agent's run ends unless git sees a change in it, and `out/` is not one (`handbook/specs/development-workflow.md` step 6). You are dispatched without isolation by a session standing in the main checkout, and that session builds your tree first: `git -C <main checkout> worktree add --detach <main checkout>/.claude/worktrees/design-<issue> origin/main`, with `node_modules` linked into it by path as `scripts/agent-sandbox.ts` does. Your dispatch prompt names the tree's absolute path and the issue or epic number. The session removes the tree once your stills are ruled, or once your breakdown is in.
 
@@ -71,7 +71,7 @@ A round is steps 1 and 2 of `handbook/specs/conventions.md`, "How a design decis
 **References.** What the archive keeps of them is `handbook/specs/conventions.md`'s, under "Things a design round owes": links, never the scans. Download them into the main checkout's `out/<issue>/refs/`. Keep a data file there beside your notes giving, for each one, its source page, original URL, pixel size and licence field. Count licences from that file, never from memory: the Issue #747 notes said "public-domain or CC0" of a set that held a CC BY-SA scan.
 
 **Libraries.**
-- A library is allowed where it earns its place (`CLAUDE.md`, "Dependencies are a normal choice"). Spike it in its own folder in your tree's `out/<issue>/`, since a spike is code, with its own `package.json` and `node_modules`, and copy it to the delivery with the rest of your code. Never `npm install` or `npm ci` through your tree's `node_modules`, which is a link to the main checkout's install: `.claude/agents/vellum-implementer.md` says why, at its link step.
+- A library is allowed where it earns its place (`CLAUDE.md`, "Dependencies are a normal choice"). Spike it in its own folder in your tree's `out/<issue>/`, since a spike is code, with its own `package.json` and `node_modules`, and copy it to the delivery with the rest of your code. Never `npm install` or `npm ci` through your tree's `node_modules`, which is a link to the main checkout's install: `.opencode/agents/vellum-implementer.md` says why, at its link step.
 - Report what it costs as a table: bundle size minified and gzipped, the size it adds to the artifact, the render time it adds, and whether its code passes the byte-identity check below.
 - When you propose none and the sitting asks for one anyway, spike one (Issue #747's sitting did).
 
