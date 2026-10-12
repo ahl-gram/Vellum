@@ -4,7 +4,8 @@ A PreToolUse hook that puts the skill's gates in front of the model at the momen
 or a shared test helper, a browser-driving script, a stylesheet, or anything that can move a chart or the golden, creates a
 file that joins a roster, or pushes; and refuses the mechanical never-list outright. It is wired in the repo's `.claude/settings.json`, so it runs in
 every session launched from the Vellum root or a worktree. The skill works without it if that block
-is ever removed.
+is ever removed. OpenCode reaches the same refusals, never the gates, through `.opencode/plugins/footguns/`, which hands
+`decide` its shell, write and edit calls with `cwd_persists: false`, since an OpenCode shell call never moves its session.
 
 ## What it does
 
