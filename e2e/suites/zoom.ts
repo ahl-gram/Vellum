@@ -1,7 +1,7 @@
 // Surveyor's Glass e2e (Z): pan/zoom on the Explorer chart via the shared d3-zoom controller, plus the settle-to-region redraft (Z17+). Resolved matrices are asserted on purpose: getComputedStyle returns "none" for a rejected value, so the assertion doubles as proof the px-suffixed transform is valid CSS (d3's own toString() is not).
 import { makeStep } from "../support/step.ts";
 import type { SuiteContext } from "../types.ts";
-import { zoomKit } from "./zoom/kit.ts";
+import { zoomKit, type ZoomKit } from "./zoom/kit.ts";
 import {
   zSetup,
   z1ZoomTo,
@@ -54,17 +54,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const k = zoomKit(ctx);
   // Issue #169: the semantic redraft is OFF for the geometric block (Z1-Z16) and back ON for Z17+; a fresh page defaults it ON, so re-set it after every reload.
   await step("Z setup", () => zSetup(ctx));
-  await z1ZoomTo(ctx);
-  await z2MaxClamp(ctx);
-  await zK4Shot(ctx);
-  await z3MinClamp(ctx);
-  await z4RoundTrip(ctx);
-  await z6PinnedCard(ctx);
-  await z8CardConstant(ctx);
-  await z8bHoverRing(k);
-  await z9Keyboard(ctx);
-  await z10Buttons(ctx);
-  await z10bNoDblclickLeak(ctx);
+  await zGeometric(ctx, k);
   await step("Z11", () => z11Styles(ctx));
   await step("Z12", () => z12HashWrite(ctx));
   await z5VersoHomes(ctx);
@@ -94,4 +84,18 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const deep21 = await z21Hamlets(k, target21);
   await z21bOneBandUp(k, target21, deep21);
   await step("Z restore", () => zRestore(k));
+}
+
+async function zGeometric(ctx: SuiteContext, k: ZoomKit): Promise<void> {
+  await z1ZoomTo(ctx);
+  await z2MaxClamp(ctx);
+  await zK4Shot(ctx);
+  await z3MinClamp(ctx);
+  await z4RoundTrip(ctx);
+  await z6PinnedCard(ctx);
+  await z8CardConstant(ctx);
+  await z8bHoverRing(k);
+  await z9Keyboard(ctx);
+  await z10Buttons(ctx);
+  await z10bNoDblclickLeak(ctx);
 }
