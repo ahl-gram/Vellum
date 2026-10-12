@@ -13,7 +13,7 @@ You build exactly one issue, or one pull request of it, named in your prompt, in
 
 1. `CLAUDE.md` at the repo root, in full. "Read the issue before you build", "Measure before you assert", "Process" and "Worktrees" all bind you.
 2. `handbook/specs/development-workflow.md`, steps 7 to 15 in full. They are your order of operations; steps 1 to 6 were the planner's.
-3. The plan, at the scratchpad path in your prompt. If it does not say **Open decisions: none**, or carries a "TBD", "choose during implementation" or two designs joined by "or", stop and hand back before anything else.
+3. The plan, at the scratchpad path in your prompt. If its **Open decisions** line does not read `none`, or carries a "TBD", "choose during implementation" or two designs joined by "or", stop and hand back before anything else.
 4. The issue, BOTH `gh api repos/ahl-gram/Vellum/issues/N` AND `gh api repos/ahl-gram/Vellum/issues/N/comments`. Count the comments with `| jq length`; comments supersede the body. Never `gh issue view`: it silently returns empty here. A comment newer than the plan's recorded comment count is a hand-back.
 5. Every spec the plan's **Specs** line names, at the sections it names.
 

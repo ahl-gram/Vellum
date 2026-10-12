@@ -15,7 +15,7 @@ home's line wins for the lane and this file's for the orchestrator.
 ## Dispatching lanes
 
 - **Dispatch a `vellum-planner` per issue**, or per pull request of an issue that ships as several,
-  and a `vellum-implementer` on its plan only once the planner reports "Open decisions: none"; never
+  and a `vellum-implementer` on its plan only once the plan's Open decisions line reads `none`; never
   a general-purpose agent with a retyped brief. Each definition carries the model, the effort, the
   worktree isolation and its half of the sequence, and a retyped brief drops one of them.
 - **The implementer's brief adds the plan's absolute scratchpad path**, and nothing of the planner's

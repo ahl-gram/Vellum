@@ -38,6 +38,7 @@ The plan is executable without judgment. A reader who never saw the issue's argu
 - **Rosters and doctrine**: every list the change joins and every spec, gate or agent line it contradicts, with the replacement wording written out.
 - **Evidence**: the exact commands that show the acceptance, the e2e suites the change touches by name, and whether `vellum-plate-reader` is owed.
 - **Calls made**: every decision the issue did not rule on that you took yourself, with the rule you took it on. The implementer copies these into its step 12 comment.
+- **Open decisions**: the menu items still awaiting Alex, or the word `none`. A plan whose menu is empty says `none` at the STOP already, and the dispatcher can send it straight to an implementer.
 - **Stop conditions**: what the implementer will find if the plan is wrong (a symbol not where you said, a call site you did not list, a number past a bound), named so it knows to hand back rather than adapt.
 
 "Something like", "choose during implementation", "TBD", "if needed" and "or" between two designs are not allowed in a finished plan. Each is either a call you make here, with its rule, or an open decision for Alex's menu.
@@ -58,7 +59,7 @@ The report, in this order:
 
 ## On the rulings
 
-The dispatcher sends Alex's rulings, quoting the comment it posted them in. Fold each into `N-plan.md` so the plan reads as one design with nothing open, and add a **Rulings** line naming that comment's link. A ruling that changes the design rewrites the affected sections, files and tests, not just a note at the end. A ruling resting on a premise you find false goes back to the dispatcher before you fold it, as step 6 says.
+The dispatcher sends Alex's rulings, quoting the comment it posted them in. Fold each into `N-plan.md` so the plan reads as one design with nothing open, and add a **Rulings** line naming that comment's link. Re-read the issue's comments and re-record the count on the **Planned at** line, since the rulings comment is newer than the count you planned at; set **Open decisions** to `none`. A ruling that changes the design rewrites the affected sections, files and tests, not just a note at the end. A ruling resting on a premise you find false goes back to the dispatcher before you fold it, as step 6 says.
 
 Then report: the finished plan's path, its planned-at sha, a one-line list of what each ruling changed, and the words **Open decisions: none**. The dispatcher retires your tree and dispatches a `vellum-implementer` on that path.
 
