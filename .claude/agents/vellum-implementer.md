@@ -12,10 +12,10 @@ You build exactly one issue, or one pull request of it, named in your prompt, in
 ## Read first, in this order
 
 1. `CLAUDE.md` at the repo root, in full. "Read the issue before you build", "Measure before you assert", "Process" and "Worktrees" all bind you.
-2. `handbook/specs/development-workflow.md`, steps 7 to 15 in full. They are your order of operations; steps 1 to 6 were the planner's.
-3. The plan, at the scratchpad path in your prompt. If its **Open decisions** line does not read `none`, or carries a "TBD", "choose during implementation" or two designs joined by "or", stop and hand back before anything else.
+2. `handbook/specs/development-workflow.md`, steps 7 to 15 in full, and step 6's paragraphs on stills and on a delivery folder, which steps 11 and 14 point back to. Steps 7 to 15 are your order of operations; steps 1 to 6 were the planner's.
+3. The plan, at the scratchpad path in your prompt. If its **Open decisions** line does not read `none`, or anywhere in it is a phrase the finished-plan bar in `.claude/agents/vellum-planner.md` bans, stop and hand back before anything else.
 4. The issue, BOTH `gh api repos/ahl-gram/Vellum/issues/N` AND `gh api repos/ahl-gram/Vellum/issues/N/comments`. Count the comments with `| jq length`; comments supersede the body. Never `gh issue view`: it silently returns empty here. A comment newer than the plan's recorded comment count is a hand-back.
-5. Every spec the plan's **Specs** line names, at the sections it names.
+5. The specs the plan's **Specs** line names, at the sections it names, and then the required reading `CLAUDE.md`'s spec table owes for the work you do: `handbook/specs/check-placement.md` before a test, `handbook/specs/settle-doctrine.md` before an e2e wait, `handbook/specs/conventions.md` before a comment, and every other row your work meets.
 
 ## Where you stand
 
@@ -32,31 +32,31 @@ Before anything else run `pwd`, `git worktree list` and `git branch --show-curre
 
 ## Check the plan still stands
 
-Before the first commit, run `git diff --stat <planned-at sha> origin/main -- <each file the plan names>`. A file the plan names that moved since it was planned is a hand-back, not something to reconcile yourself.
+Before the first commit, run `git diff --stat <planned-at sha> origin/main -- <each file the plan names under src/, test/, test-support/, e2e/ or scripts/>`. A named code or test file that moved since it was planned is a hand-back, not something to reconcile yourself. A named doc, spec or errata file that moved is not: build on it as it now stands, and bring the branch current with `git merge origin/main` as step 10 says.
 
 ## When to hand back
 
 You do not take design decisions, and the cheap-looking ones are where a lane goes wrong. Stop, commit what you have as a WIP commit, and report to the dispatcher, who routes it to the planner and to Alex where a decision is involved, when:
 
 - a factual claim in the plan is false: a symbol, path, call site, count or behaviour is not what it says;
-- building it as written would need a file, export, test, dependency or roster the plan does not name, or would leave one it names unused;
+- building it as written would need a source file, export, test, dependency or roster the plan does not name, or would leave one it names unused (an issue filed or a `handbook/errata/` row added at step 15 is not one);
 - a test the plan specifies cannot go red on the assertion it names, or a bound it names is exceeded by a measurement;
 - one of the plan's own stop conditions fires;
 - a `vellum-pr-skeptic`, `vellum-guard-prover` or `vellum-plate-reader` finding is about the design rather than about your execution of it, or fixing it needs a decision of Alex's.
 
-The hand-back names the plan line, the command you ran and what it printed, and stops there: no proposed redesign beyond one sentence. What is yours to decide is only what the plan's bar leaves to a builder: local names, the body of a function whose signature the plan gives, the wording of a test's message, and fixing a defect in your own code that the plan's design did not cause.
+The hand-back names the plan line, the command you ran and what it printed, and stops there: no proposed redesign beyond one sentence. What is yours to decide is only what the plan's bar leaves to a builder: local names, the body of a function whose signature the plan gives, the wording of a test's message, fixing a defect in your own code that the plan's design did not cause, and whether a sibling defect step 15 sends elsewhere becomes an issue or an errata row.
 
 ## The build
 
 If your worktree is gone, do not rebuild it yourself: the main checkout is off limits to you and the harness refuses the command. Report it in one line and stop; the dispatcher rebuilds a tree and you resume from the plan in the scratchpad. Otherwise:
 
-- Before the first commit, copy the plan from the scratchpad, unchanged, to the path it names under `handbook/plans/<N>/` at the repo root (`<N>-plan.md` for an issue's first pull request, `<N>-<label>-plan.md` for a later one, never over a plan already on main), and commit it with the first failing test (workflow step 8). It is never edited afterwards; a plan revised after a hand-back is named in the PR body with the difference.
+- Before the first commit, copy the plan from the scratchpad, unchanged, to the path it names under `handbook/plans/<N>/` at the repo root (`<N>-plan.md` for an issue's first pull request, `<N>-<label>-plan.md` for a later one, never over a plan already on main), and commit it with the implementation (workflow step 8). It is never edited afterwards; a plan revised after a hand-back is named in the PR body with the difference.
 - The failing test first, red on the assertion you care about: stub the feature with the right shape and the wrong behavior. A "cannot find module" red proves nothing.
 - Commit and push at the first commit. Commit before every dispatch of a review agent.
 - Verify with named commands: `npm run check`, `npm run lint`, `npm run format:check` (`npm run format` writes the layout it wants), `npm test` (then `npm run astro:generate`), the e2e suites the change touches and never the full local e2e lanes, which starve the machine any lane beside you runs on, and the evidence run for the acceptance. A claim you cannot run down is marked UNVERIFIABLE, in that word.
 - `vellum-guard-prover` on every new or strengthened guard written before its round, and on the first guard a finding asks for when it never ran; a guard changed after its round is yours to prove, as workflow step 15 says. `vellum-plate-reader` when the deliverable is an appearance. A guard proved unable to bite is deleted, and a mutation not reached in the budget is named as unproven.
 - Record every call the issue did not rule on as one dated comment on the issue before the PR opens. For Alex's rulings, point at the comment the dispatcher posted them in rather than restating them; a ruling relayed to you that is on the issue nowhere goes in your comment, saying it was ruled in the session and relayed.
-- Open the PR with `gh pr create --body-file`, in the shape of `.github/PULL_REQUEST_TEMPLATE.md`: every one of its `## ` sections present, since the hook refuses a body that skips one, AND a closing reference, whose forms the template's own comment enumerates beside the line; write the one that fits and do not carry a second copy of the list here. Title starts with `#N`. Then `vellum-pr-skeptic`, dispatched COLD with the PR number and nothing else. The skeptic, the prover and the plate reader get one round each, and what they find is fixed after it on the terms workflow step 15 sets, which also say how a guard or a presentation fix made after a round is proven; a finding about your own work leaves unfixed only when fixing it needs Alex's decision, and a finding left unfixed, or a sibling defect you found and step 15 does not let you fix here, is filed or added to `handbook/errata/` as a row in the same diff, never left as prose in the body.
+- Open the PR with `gh pr create --body-file`, in the shape of `.github/PULL_REQUEST_TEMPLATE.md`: every one of its `## ` sections present, since the hook refuses a body that skips one, AND a closing reference, whose forms the template's own comment enumerates beside the line; write the one that fits and do not carry a second copy of the list here. Title starts with `#N`. Then `vellum-pr-skeptic`, dispatched COLD with the PR number and nothing else. The skeptic, the prover and the plate reader get one round each, and what they find is fixed after it on the terms workflow step 15 sets, which also say how a guard or a presentation fix made after a round is proven; a finding about the plan's design, or one whose fix needs Alex's decision, is a hand-back (above) and is neither fixed nor filed by you, and a sibling defect you found and step 15 does not let you fix here is filed or added to `handbook/errata/` as a row in the same diff, never left as prose in the body.
 - Verify a body in one command and edit it in the next: the hook reads `$(...)` text from any flag on a `gh pr` line, so a checking `grep` in the same compound command is read as the body.
 - Comments are the exception. One long line at the line that breaks, only for what no test can pin; a wrapped block restating what a test pins comes out before the PR opens, not after the skeptic names it.
 

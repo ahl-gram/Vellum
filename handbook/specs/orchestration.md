@@ -5,8 +5,8 @@ one issue's `vellum-planner` and then its `vellum-implementer`: how it briefs th
 stalls or loses its tree, merges what it is cleared to merge, and retires them. Read it before
 dispatching a second lane, and before handing an issue from one lane to another.
 
-Each lane runs `handbook/specs/development-workflow.md` from start to finish, the planner through
-step 6 and the implementer from step 7, and the lane's own half is its two definitions':
+Each lane runs `handbook/specs/development-workflow.md` up to an open pull request with CI green,
+the planner through step 6 and the implementer from step 7 to that point, and the lane's own half is its two definitions':
 `.claude/agents/vellum-planner.md` holds the plan, the STOP and the folded rulings, and
 `.claude/agents/vellum-implementer.md` the branch, the build, the hand-back and never merging. `CLAUDE.md`'s Worktrees section holds the worktree conduct every session keeps. This
 file points at those homes rather than restating them, and where a step here meets one of them, that
@@ -15,7 +15,8 @@ home's line wins for the lane and this file's for the orchestrator.
 ## Dispatching lanes
 
 - **Dispatch a `vellum-planner` per issue**, or per pull request of an issue that ships as several,
-  and a `vellum-implementer` on its plan only once the plan's Open decisions line reads `none`; never
+  and a `vellum-implementer` on its plan only once Alex has seen it at the STOP, empty menu or not,
+  and its Open decisions line reads `none`; never
   a general-purpose agent with a retyped brief. Each definition carries the model, the effort, the
   worktree isolation and its half of the sequence, and a retyped brief drops one of them.
 - **The implementer's brief adds the plan's absolute scratchpad path**, and nothing of the planner's
@@ -46,8 +47,9 @@ home's line wins for the lane and this file's for the orchestrator.
   implementer's record points at the post rather than restating it (workflow step 12).
 - **Once the planner reports the plan finished, retire its tree** after copying its `out/` across
   (Retiring, below), and dispatch the implementer on the plan's path.
-- **An implementer's hand-back goes to the planner**, resumed by a message or dispatched fresh with
-  the issue, the plan's path and the hand-back, and from the planner to Alex when it opens a
+- **An implementer's hand-back goes to a fresh `vellum-planner`**, which gets a fresh tree, dispatched
+  with the issue, the plan's path and the hand-back, never a message to the retired one, which has no
+  tree to stand in, and from the planner to Alex when it opens a
   decision. Never answer a hand-back yourself with a design call: that puts the decision back in the
   cheaper lane by another route. The implementer resumes on the revised plan's path.
 - **A ruling a lane will need before its own record is on the issue before the lane is briefed.** A
@@ -118,8 +120,8 @@ home's line wins for the lane and this file's for the orchestrator.
   file blocks both commands: move it to the Trash first. Then link `node_modules` by path as
   `scripts/agent-sandbox.ts` does, bring a lane that had no commits current with
   `git -C <path> merge --ff-only origin/main`, and message the lane to resume from its scratchpad
-  plan. A planner's lost tree is rebuilt only when it held a spike whose stills were not yet copied;
-  otherwise its plan in the scratchpad is all it needs, and it resumes without one.
+  plan. A planner whose tree is lost is never resumed without one: dispatch a fresh planner on the
+  scratchpad plan, after copying any stills its tree still held.
 
 ## Merging
 
@@ -195,7 +197,8 @@ home's line wins for the lane and this file's for the orchestrator.
 
 ## Before the session ends
 
-- **The scratchpad does not outlive the session.** Copy each lane's tools to `out/scratch-<date>/`
+- **The scratchpad does not outlive the session.** Copy each lane's tools, and every finished plan
+  no branch has committed yet, to `out/scratch-<date>/`
   with a handover note of each lane's open items, under no name `node --test` collects: Gate 1
   item 8 names the patterns, and they are collected inside the gitignored `out/` too.
 - **Every issue filed in the session is on the board and phased** (`CLAUDE.md`, Session handoff).

@@ -20,7 +20,7 @@ What a round or a breakdown delivers is files under `out/`, so you never run in 
 - If the prompt names no tree, or names the main checkout itself, or the path holds no `.git` FILE, STOP here and report exactly that. Do not build a tree yourself, and do not work in the main checkout instead.
 - Read your tree's sha from its `.git` file (`cat "$(sed 's/^gitdir: //' <tree>/.git)/HEAD"`) and name it in your report: every figure you give comes from that sha. The same `gitdir:` line names the main checkout, the part before `/.git/worktrees/`.
 - Run everything in your tree, one `cd <the literal path> && <command>` per call, since your shell does not keep its directory between calls.
-- A session fenced inside a worktree (an implementer lane, an EnterWorktree session) cannot dispatch you this way, and hands you to the orchestrating session, as step 6 says. If your prompt shows that was skipped, say so.
+- A session fenced inside a worktree (a planner or an implementer, an EnterWorktree session) cannot dispatch you this way, and hands you to the orchestrating session, as step 6 says. If your prompt shows that was skipped, say so.
 
 ## Read first
 

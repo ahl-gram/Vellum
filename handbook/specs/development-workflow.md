@@ -122,9 +122,8 @@ Alex. The dispatcher posts his answer on the issue as he gives it, and the imple
 record points at that post; how the dispatcher relays a menu and its rulings is
 `handbook/specs/orchestration.md`'s.
 
-**The plan that leaves step 6 is finished.** It names every file and what changes in it, each test
-with its red assertion and its mutation, the order of commits, the rosters and doctrine lines it
-drags with their new wording, and the evidence commands, and it says "Open decisions: none". The
+**The plan that leaves step 6 is finished**, to the bar `.claude/agents/vellum-planner.md` sets, and
+it STOPs here even when its menu is empty, so Alex sees the planner's own calls before the build. The
 implementer builds it as written. A plan proved wrong after step 6, by a builder's measurement or by
 a step 14 finding about the design, goes back to the planner and, where it opens a decision, back to
 Alex here; the builder does not adapt it.
@@ -184,7 +183,7 @@ checkout:
 - The agent writes straight to the main checkout's `out/<issue>/`, names the sha it ran at, and gives the folder its page by running `node scripts/delivery/main.ts` from its own tree with the folder's absolute path.
 - The dispatcher removes the tree once the stills have been ruled, or the report it was built for is in.
 
-A dispatcher fenced inside a worktree, an implementer lane or an EnterWorktree session, hands such an
+A dispatcher fenced inside a worktree, a planner, an implementer or an EnterWorktree session, hands such an
 agent to the orchestrating session instead. This does not touch the agents that run in their
 dispatcher's own tree: `vellum-plate-reader` still reads an uncommitted spike there and writes that
 tree's `out/`. A `vellum-planner` keeps its harness tree through the STOP by the untracked plan copy
@@ -386,8 +385,9 @@ round proves it. Any other guard the fix changes or adds is one the prover has n
 it bites yourself, by breaking the behavior it guards and watching it go red, committed first as
 "Commit before you mutate" says, and the PR body names it as proven by the implementing session
 only. A presentation fix made after the plate reader's round is measured by you the same way and
-named the same way. **A finding about this pull request's own work leaves unfixed only when fixing it
-needs a decision of Alex's**: it is then an issue or a `handbook/errata/` row, and the PR body names
+named the same way. **In a lane, a finding about the plan's design rather than its build goes back to
+the planner**, and through it to Alex, as step 6 says, before anything is fixed or filed. **A finding
+about this pull request's own work leaves unfixed only when fixing it needs a decision of Alex's**: it is then an issue or a `handbook/errata/` row, and the PR body names
 which and why. **A finding it found but did not cause**, a sibling defect in code or text it did not
 write, goes to an issue or a row, as `vellum-footguns` Gate 5 item 7 says. **An issue is searched for
 before it is filed**, the open issues and `handbook/errata/` both, and a near duplicate is folded into
