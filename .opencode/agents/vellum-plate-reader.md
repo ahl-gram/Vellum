@@ -1,7 +1,7 @@
 ---
 description: Renders the actual artifact (a chart, a page, an Explorer state, a motion sequence) at real viewports through CDP and MEASURES it, for work whose acceptance is about appearance, layout, motion, or legibility. Use before opening a PR on any presentation sub, over a throwaway spike at workflow step 6 when Alex is to rule an appearance from stills, and whenever a claim is about how something looks or reads rather than what the DOM contains.
 mode: subagent
-model: anthropic/claude-sonnet-5-5#xhigh
+model: opencode/qwen3.8-flash#xhigh
 color: "#00ffff"
 permissions:
   - action: "*"
@@ -38,7 +38,7 @@ You look at the thing, and then you measure it. Structural tests cannot see layo
 Falsifiable checks this project's history hands you:
 
 - **Overflow**: at 1024 and wider, `document.documentElement.scrollWidth > clientWidth`, and the same on any container that is supposed to scroll internally. This is the Issue #219 defect. A staged chart room's body clips, so a piece overrunning it reads clean there: read the piece's own rect against the body's edge. Below 1024 the page scrolls sideways by design, and the check is `FL1`'s in `e2e/suites/corners/floor.ts`: the document overhangs the window by exactly 1024 less its width, and every piece stands where it stands at 1024.
-- **Widths**: unless the dispatch names others, read at 1024 and 1280, and at 640 for every piece keeping its place on the 1024 page while the window scrolls sideways. Gate 3 item 3 of `.claude/skills/vellum-footguns/SKILL.md` is the rule and this is its copy, kept here because the hook never shows that gate to an agent that writes only into `out/`.
+- **Widths**: unless the dispatch names others, read at 1024 and 1280, and at 640 for every piece keeping its place on the 1024 page while the window scrolls sideways. Gate 3 item 3 of `.opencode/skills/vellum-footguns/SKILL.md` is the rule and this is its copy, kept here because the hook never shows that gate to an agent that writes only into `out/`.
 - **Resolved computed styles**, not stylesheet text. From #295: a `header h1` to `header .wordmark` specificity flip passed every test in the repo. Read `getComputedStyle(el)` on the live element and pin against a measured constant, not against a sibling page (a sibling comparison cannot see a regression that lands on both).
 - **Bounding boxes**: `getBoundingClientRect()` for overlap, clipping, off-frame content, and element size (the gigantic place cards were a `--zoom-k` publication failure, visible as a number).
 - **Both zooms**: render the full plate or full page AND a 1:1 crop. Glance properties like visual hierarchy and clutter only exist at full scale; fine properties like label legibility only exist in the crop. Reporting one and calling the criterion met is the #75 mistake.
