@@ -2,10 +2,10 @@
 import { dropExpectedCancellations } from "../support/console.ts";
 import type { Payload, Point, SuiteContext } from "../types.ts";
 import { makeStep } from "../support/step.ts";
+import { broadsideKit, type BroadsideKit } from "./broadside/kit.ts";
 
 type Box = { l: number; r: number; t: number; b: number; w: number } | null;
 type Room = { lg: Box; bl: Box; sl: Box; gl: Box; sh: Box; folioText: number; w: number; h: number };
-type BroadsideKit = ReturnType<typeof broadsideKit>;
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { consoleErrors, http4xx } = ctx;
@@ -26,34 +26,6 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await br6Tap(k);
   await step("BR7", () => br7Glossary(k));
   br8Clean(ctx, errBase, httpBase);
-}
-
-function broadsideKit(ctx: SuiteContext) {
-  const { evaluate, send, sleep, waitReady, waitSettled, PORT } = ctx;
-  const EXP = `http://127.0.0.1:${PORT}/explorer/`;
-  const goto = async (url: string, label: string): Promise<void> => {
-    await send("Page.navigate", { url: "about:blank" });
-    await send("Page.navigate", { url });
-    await waitReady();
-    await waitSettled(label);
-  };
-  const waitInked = async (label: string): Promise<void> => {
-    for (let i = 0; i < 120; i++) {
-      if (await evaluate<boolean>(`!!document.querySelector("#map .voyage-overlay .voyage-track")`)) return;
-      await sleep(50);
-    }
-    throw new Error("waitInked timeout " + label);
-  };
-  const gotoPlain = async (url: string, label: string): Promise<void> => {
-    await send("Page.navigate", { url: "about:blank" });
-    await send("Page.navigate", { url });
-    for (let i = 0; i < 100; i++) {
-      if (await evaluate<boolean>(`document.readyState === "complete"`)) return;
-      await sleep(50);
-    }
-    throw new Error("gotoPlain timeout " + label);
-  };
-  return { ...ctx, EXP, goto, waitInked, gotoPlain };
 }
 
 async function br1Groups({ evaluate, check, goto, EXP }: BroadsideKit): Promise<void> {
