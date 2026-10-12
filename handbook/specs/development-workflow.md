@@ -35,15 +35,19 @@ its definition under `.claude/agents/`.
 | `vellum-guard-prover` | 11, 15 | the behaviour each new or strengthened guard claims to hold, deleted or inverted one at a time in its own tree | a test that stays green when the thing it guards is broken |
 | `vellum-pr-skeptic` | 14 | the pull request, attacked cold in its own sandbox with commands of its own | what the implementing session believed and never checked, against the issue and the house contracts |
 
-`vellum-implementer` is not a reviewer: it takes one issue through this sequence in its own tree, up to
-an open pull request with CI green, and leaves merging and the hand-off to whoever dispatched it, an
-orchestrating session (`handbook/specs/orchestration.md`) or Alex directly. It calls the review agents
-above at their steps.
+`vellum-planner` and `vellum-implementer` are not reviewers: between them they take one issue through
+this sequence, and together they are a lane. The planner runs steps 1 to 6 on the most capable model,
+takes every design decision or puts it to Alex, and folds his rulings into a plan with no decision
+left open. The implementer runs a less capable model, builds that plan from step 7 in its own tree up
+to an open pull request with CI green, and hands back rather than decides wherever the plan is wrong
+or silent. Both leave merging and the hand-off to whoever dispatched them, an orchestrating session
+(`handbook/specs/orchestration.md`) or Alex directly, and each calls the review agents above at its
+steps.
 
 `vellum-designer` is not a reviewer either. It draws a design round's mockups from real engine output
 for Alex's sitting (`handbook/specs/conventions.md`, How a design decision is made), and breaks an
 epic into its subs from the epic and its `vellum-spec-recon` ledger, handing its menu to whoever
-dispatched it as an implementer lane does at step 6. What it delivers is files under `out/`, so it is
+dispatched it as a planner does at step 6. What it delivers is files under `out/`, so it is
 dispatched the way step 6 says such an agent is.
 
 ## The sequence
@@ -110,12 +114,19 @@ checked by running it; a ruling taken on an unmeasured consequence is re-taken w
 option about code he cannot picture carries a real before and after from the repo, the file and the
 edit, rather than a description of them.
 
-**When the session running this sequence is a dispatched `vellum-implementer` lane, the menu goes to
-the dispatching session instead**, as the last part of its step 6 report, and the dispatcher puts it
-to Alex in `AskUserQuestion` and relays his rulings back. The STOP is the same; only who holds the
-menu changes, because a subagent's question does not reach Alex. The dispatcher posts his answer on
-the issue as he gives it, and the implementer's step 12 record points at that post; how the
-dispatcher relays a menu and its rulings is `handbook/specs/orchestration.md`'s.
+**When the session running this sequence is a dispatched `vellum-planner`, the menu goes to the
+dispatching session instead**, as the last part of its step 6 report, and the dispatcher puts it to
+Alex in `AskUserQuestion` and relays his rulings back to the planner, which folds them into the plan.
+The STOP is the same; only who holds the menu changes, because a subagent's question does not reach
+Alex. The dispatcher posts his answer on the issue as he gives it, and the implementer's step 12
+record points at that post; how the dispatcher relays a menu and its rulings is
+`handbook/specs/orchestration.md`'s.
+
+**The plan that leaves step 6 is finished**, to the bar `.claude/agents/vellum-planner.md` sets, and
+it STOPs here even when its menu is empty, so Alex sees the planner's own calls before the build. The
+implementer builds it as written. A plan proved wrong after step 6, by a builder's measurement or by
+a step 14 finding about the design, goes back to the planner and, where it opens a decision, back to
+Alex here; the builder does not adapt it.
 
 **When the ruling is an appearance, the menu carries stills.** A direction described in prose asks
 Alex to picture it and then holds him to what he pictured, which is how a ruling gets made on
@@ -172,11 +183,12 @@ checkout:
 - The agent writes straight to the main checkout's `out/<issue>/`, names the sha it ran at, and gives the folder its page by running `node scripts/delivery/main.ts` from its own tree with the folder's absolute path.
 - The dispatcher removes the tree once the stills have been ruled, or the report it was built for is in.
 
-A dispatcher fenced inside a worktree, an implementer lane or an EnterWorktree session, hands such an
+A dispatcher fenced inside a worktree, a planner, an implementer or an EnterWorktree session, hands such an
 agent to the orchestrating session instead. This does not touch the agents that run in their
 dispatcher's own tree: `vellum-plate-reader` still reads an uncommitted spike there and writes that
-tree's `out/`. A `vellum-implementer` lane keeps its harness tree through the STOP by the untracked
-plan copy its definition makes, and by its commits after that.
+tree's `out/`. A `vellum-planner` keeps its harness tree through the STOP by the untracked plan copy
+its definition makes; a `vellum-implementer` gets a fresh tree of its own and keeps it by its
+commits.
 
 **7. Worktree, then rename the branch**, before the first commit, or the PR carries the harness's
 name instead of yours. The rest of the worktree rules, including why the branch needs renaming at
@@ -373,8 +385,9 @@ round proves it. Any other guard the fix changes or adds is one the prover has n
 it bites yourself, by breaking the behavior it guards and watching it go red, committed first as
 "Commit before you mutate" says, and the PR body names it as proven by the implementing session
 only. A presentation fix made after the plate reader's round is measured by you the same way and
-named the same way. **A finding about this pull request's own work leaves unfixed only when fixing it
-needs a decision of Alex's**: it is then an issue or a `handbook/errata/` row, and the PR body names
+named the same way. **In a lane, a finding about the plan's design rather than its build goes back to
+the planner**, and through it to Alex, as step 6 says, before anything is fixed or filed. **A finding
+about this pull request's own work leaves unfixed only when fixing it needs a decision of Alex's**: it is then an issue or a `handbook/errata/` row, and the PR body names
 which and why. **A finding it found but did not cause**, a sibling defect in code or text it did not
 write, goes to an issue or a row, as `vellum-footguns` Gate 5 item 7 says. **An issue is searched for
 before it is filed**, the open issues and `handbook/errata/` both, and a near duplicate is folded into

@@ -25,7 +25,7 @@ READING before the work its row names.
 | `handbook/specs/region-and-voyage.md` | its other half: what a region sheet may do that a world sheet may not, how a finer view is built and what it guarantees, how the voyage splits worker from client | any work on a region sheet, a level of detail, or the voyage |
 | `handbook/specs/site-architecture.md` | how the site is authored, bundled, discovered and shipped: the page model, the rosters a page joins, what the build does to authored markup, the two forms that fail silently | adding or restructuring a page, a stylesheet, a bundle or an inlined script |
 | `handbook/specs/development-workflow.md` | the order of operations from a filed issue to a pull request, which subagent runs at which step, and the one place the work stops for Alex's ruling | starting a sub or an epic, since its early steps are the ones a session cannot go back and take later |
-| `handbook/specs/orchestration.md` | how a session runs several implementer lanes at once: briefing them, relaying their menus and Alex's rulings, watching them and CI, a stalled lane or a lost tree, merging what it is cleared to merge, and retiring a lane | dispatching a second lane, and handing an issue from one lane to another |
+| `handbook/specs/orchestration.md` | how a session runs several lanes at once: briefing them, relaying their menus and Alex's rulings, watching them and CI, a stalled lane or a lost tree, merging what it is cleared to merge, and retiring a lane | dispatching a second lane, and handing an issue from one lane to another |
 | `handbook/specs/conventions.md` | how the house decides, and how it writes a rule down: how a design decision is made and built to, where a rule lives and what a new spec joins, how a spec and the rest of the house's prose are written, how code is cited, and how a comment sweep is run and proven | starting a design round or building to ruled stills; adding or moving a rule, adding a spec, editing a spec, or writing, citing or sweeping a comment |
 | `handbook/specs/settle-doctrine.md` | how an e2e wait is written, and what the harness environment it runs in actually does | any e2e wait, settle or CDP probe, and any screenshot, focus state or narrow viewport read in the harness |
 | `handbook/specs/check-placement.md` | which check holds which kind of rule: the type checker, the lint, the unit suite or the browser, and what a unit test may read | writing a test, a lint rule or a browser check, and moving a rule from one to another |
@@ -175,7 +175,9 @@ which step: `vellum-spec-recon` at the start, `vellum-plan-skeptic` on the plan 
 go to Alex, `vellum-guard-prover` on every new or strengthened guard before the PR,
 `vellum-plate-reader` when the deliverable is an appearance, and `vellum-pr-skeptic` COLD on every
 pushed PR. A review agent never posts to GitHub: relay its report in your reply and **let Alex decide
-what lands on the PR**. `vellum-implementer` runs one issue through that sequence in its own tree.
+what lands on the PR**. `vellum-planner` runs one issue through step 6 on the most capable model and
+hands back a plan with no decision left open; `vellum-implementer` builds that plan in its own tree
+on a cheaper model, and hands back rather than decides wherever the plan is wrong.
 `vellum-designer` draws a design round's mockups for Alex's sitting and breaks an epic into its
 subs, handing its menu to whoever dispatched it.
 Every project agent under `.claude/agents/` sets `effort: xhigh` in its frontmatter (Alex,
@@ -203,8 +205,8 @@ session already at xhigh cannot tell the frontmatter from inheritance.
   comment rule's "no test can practically pin it" carve-out rather than an exemption from it.
 - **When asking Alex to make an open decision**, explain it in plain words, no jargon and no acronyms,
   in an `AskUserQuestion` menu rather than in prose, and STOP there. A decision that is his is not one
-  to default your way and mention afterwards. A dispatched `vellum-implementer` lane cannot reach him,
-  so it hands the menu to its dispatcher at the same STOP.
+  to default your way and mention afterwards. A dispatched `vellum-planner` cannot reach him, so
+  it hands the menu to its dispatcher at the same STOP.
 - **No em-dashes** in issue bodies, PR bodies, issue and PR comments, commit messages, published copy
   or new code comments. In an issue or PR body or comment, a commit message or the repo's markdown,
   one inside inline backticks or a fenced code block is code, not prose, and stands: that is how a
@@ -236,8 +238,8 @@ the sandbox for both review agents that build one, so the depth lives in one pla
   assets under `public/` and neither `git status` nor `git status --ignored` reports it, so no
   reviewer runs a suite in a tree it does not own. It passes the sha explicitly, which that script
   requires of a `skeptic-*` sandbox.
-- **`vellum-implementer` gets its worktree a third way**: `isolation: worktree` in its frontmatter, so
-  the harness builds and locks one at dispatch. Inside such a tree, and inside any EnterWorktree tree,
+- **`vellum-planner` and `vellum-implementer` get their worktrees a third way**: `isolation: worktree`
+  in their frontmatter, so the harness builds and locks one at dispatch, a separate one for each. Inside such a tree, and inside any EnterWorktree tree,
   the harness is a fence: it refuses a compound command whose `cd` goes to a shell variable, any `git`
   run in a directory other than that worktree, and some quoted `jq` or `sed` constructs it cannot
   parse, while a plain single command passes (measured 2026-09-13). That is why the sandbox recipes
