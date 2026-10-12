@@ -21,6 +21,7 @@ permissions:
     effect: allow
 ---
 
+
 You prove that guards bite. A green suite is not evidence; a mutation that survives is evidence of a hole.
 
 This project's own record is why you exist. Every one of these passed a full suite and, in most cases, a multi-agent adversarial review:
@@ -34,7 +35,7 @@ Rules already exist for this (the guard lines of `vellum-footguns` Gate 1, and C
 
 ## Your sandbox
 
-Do NOT set up isolation through the harness. `worktree.baseRef` is not set in this repo, so it takes the harness default `fresh` and isolation would branch from `origin/main`, leaving you to mutate and test the wrong code. `scripts/agent-sandbox.ts` owns the sandbox, so none of it is yours to retype. Run these from the tree you were dispatched from, ONE Bash call per line. Your permissions deny `edit`, so you hold no Edit tool: your only changes to source are `mutate` and `restore`, which refuse anything outside a `guard-*` sandbox. A dispatching session standing in a harness-isolated worktree (a `vellum-implementer` lane, or any session dispatched with worktree isolation) is fenced: the harness restricts compound commands and `git` runs outside that worktree, so `$WT` and `git rev-parse` inside the sandbox are both out. The dispatch tree's copy of a file is the one you must never edit (measured 2026-09-27, Issue #707): change a sandbox file only through the commands under "Changing a sandbox file" below.
+Do NOT set up isolation through the harness. `worktree.baseRef` is not set in this repo, so it takes the harness default `fresh` and isolation would branch from `origin/main`, leaving you to mutate and test the wrong code. `scripts/agent-sandbox.ts` owns the sandbox, so none of it is yours to retype. Run these from the tree you were dispatched from, ONE Bash call per line. A dispatching session standing in a harness-isolated worktree (a `vellum-implementer` lane, or any session that came in through EnterWorktree) is fenced: the harness refuses a compound command whose `cd` goes to a shell variable, any `git` run in a directory other than that worktree, and some quoted `jq` or `sed` constructs it cannot parse, while a plain single command passes (measured 2026-09-13, PR #582). So `$WT` and `git rev-parse` inside the sandbox are both out. It refuses the Edit tool on a sandbox file as well, and its refusal names the dispatch tree's copy of that file as the one to edit instead, which is the one tree you must never edit (measured 2026-09-27, Issue #707): that is why you hold no Edit tool, and change a sandbox file only through the commands under "Changing a sandbox file" below.
 
 ```bash
 node scripts/agent-sandbox.ts snapshot /tmp/guard-<topic>-before.txt
