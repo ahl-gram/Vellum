@@ -49,24 +49,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const k = cardsKit({ ...ctx, settle });
   await step("P setup", () => pSetup(ctx));
   const pm = await pManifest(ctx);
-  await p1Overlay(ctx, pm);
-  await p2Idle(ctx);
-  await p2bPressLift(ctx);
-  await p4Capital(ctx, pm);
-  await p6Ruin(ctx, pm);
-  await p7Tooltip(ctx, pm);
-  await p8TapPins(ctx, pm);
-  await p9Grace(ctx, pm.cap);
-  await p10Focus(ctx, pm);
-  await p11OutsideClick(ctx, pm);
-  await p12PinSwitch(ctx, pm);
-  await p13AxDescription(ctx, pm);
-  await p14Unfurl(ctx, pm);
-  await p15RealHover(ctx, pm);
-  await p16Glass(ctx, pm);
-  await p18Renamed(ctx, pm);
-  await p18bNeverRenamed(ctx, pm);
-  await p17RuinNote(ctx, pm);
+  await pOverlayReads(ctx, pm);
   await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}))`);
   await pCardShot(ctx, pm);
   const narrowCount = await evaluate<number>(
@@ -91,4 +74,25 @@ export async function run(ctx: SuiteContext): Promise<void> {
   });
   await step("P30", () => p30Tablet(hk));
   await step("P restore", () => pRestore(ctx));
+}
+
+async function pOverlayReads(ctx: SuiteContext, pm: Awaited<ReturnType<typeof pManifest>>): Promise<void> {
+  await p1Overlay(ctx, pm);
+  await p2Idle(ctx);
+  await p2bPressLift(ctx);
+  await p4Capital(ctx, pm);
+  await p6Ruin(ctx, pm);
+  await p7Tooltip(ctx, pm);
+  await p8TapPins(ctx, pm);
+  await p9Grace(ctx, pm.cap);
+  await p10Focus(ctx, pm);
+  await p11OutsideClick(ctx, pm);
+  await p12PinSwitch(ctx, pm);
+  await p13AxDescription(ctx, pm);
+  await p14Unfurl(ctx, pm);
+  await p15RealHover(ctx, pm);
+  await p16Glass(ctx, pm);
+  await p18Renamed(ctx, pm);
+  await p18bNeverRenamed(ctx, pm);
+  await p17RuinNote(ctx, pm);
 }
