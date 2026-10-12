@@ -1,0 +1,18 @@
+const root = "<repo>/";
+const { defaultRecipe, generateWorld } = await import(root + "src/world/generate.ts");
+const { buildPlaceManifest } = await import(root + "src/render/place-manifest.ts");
+for (const seed of [42, 4294967295]) {
+  const world = generateWorld(defaultRecipe(seed));
+  const m = buildPlaceManifest(world, 1500);
+  console.log("seed", seed, "places", m.places.length, "heightPx", m.heightPx);
+  for (const p of m.places)
+    console.log(
+      p.idx,
+      JSON.stringify(p.name),
+      p.kind,
+      p.ruined ? "ruin" : "",
+      p.formerName ?? "",
+      p.nx.toFixed(3),
+      p.ny.toFixed(3),
+    );
+}

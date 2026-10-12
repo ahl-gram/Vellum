@@ -1,0 +1,14 @@
+import { transform } from "<repo>/node_modules/@astrojs/compiler-rs/dist/index.mjs";
+const cases = {
+  inline: `<main><script type="module" src="./app.bundle.js" is:inline></script></main>`,
+  bare: `<main><script type="module" src="./app.bundle.js"></script></main>`,
+  noType: `<main><script src="./app.bundle.js" is:inline></script></main>`,
+  srcOnly: `<main><script src="./app.bundle.js"></script></main>`,
+  today: `<main><script type="module" src="app.bundle.js"></script></main>`,
+  raw: `<main><script type="module" src="./app.js"></script></main>`,
+};
+for (const [k, src] of Object.entries(cases)) {
+  const r = transform(src, { filename: "/x/src/pages/explorer/index.astro" });
+  const m = r.code.match(/\$\$render`[\s\S]*?`/);
+  console.log("==", k, JSON.stringify(r.scripts), m ? m[0] : r.code.slice(-300));
+}

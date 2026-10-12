@@ -1,0 +1,139 @@
+// 779-2h-E: render section C (the rows) from the counted edits plus each row's predictions.
+import { readFileSync, writeFileSync } from "node:fs";
+import { ROWS } from "./779-2h-E-rows.mjs";
+
+const BS = "test/site/broadside.test.ts";
+const ER = "test/site/explorer-room.test.ts";
+const EP = "test/site/explorer-page.test.ts";
+const TA = "test/site/table-address.test.ts";
+const TF = "test/site/tip-affordance.test.ts";
+const RD = "test/site/region-detail-wiring.test.ts";
+const AB = "test/site/app-bundles.test.ts";
+const AS = "test/site/astro-scaffold.test.ts";
+const AK = "test/site/atelier-kit.test.ts";
+const LC = "test/site/living-chart-css.test.ts";
+const U = (file, ...tests) => ({ file, tests });
+
+const E1 = "E:broadside:1", E2 = "E:broadside:2", E3 = "E:broadside:3", E4 = "E:broadside:4", E5 = "E:broadside:5", E6 = "E:broadside:6";
+const B = "broadside";
+
+// [claims, unit [{file, tests}], selection, expect reds, stops, kind, note]
+export const META = {
+  "BS1.a": ["BS1.a (and BS2's block start)", [U(BS, "BS1", "BS2")], B, ["BR1", E1], [], "BITES", "BR1's want map reads the label for seed, random and draw"],
+  "BS1.b": ["BS1.b", [U(BS, "BS1")], B, [E1], [], "BITES", "RoomFolio moved whole after the Slip; BR1 green (groups intact)"],
+  "BS1.c": ["BS1.c", [U(BS, "BS1", "BS3", "BS4")], B, [E1], [], "BITES", "Land panel moved after the Hand panel; BR1, BR1b green (both tracks still share the Land ledger)"],
+  "BS1.d": ["BS1.d", [U(BS, "BS1")], B, [E1], [], "BITES", "nav.legend moved above the Slip; it is fixed, so no read moves"],
+  M1: ["BS2.a #random; BS5.b (a seed-row id in the Press); ER2.a #random", [U(BS, "BS2", "BS5"), U(ER, "ER2")], B, ["BR1", E1], [], "BITES", "lands in the legend row inside a display:none span so the row's layout is untouched (BR2, BR1c stay green)"],
+  M2: ["BS2.a #seed; BS3.b (a seed-row id in The Land); ER2.a #seed; ER2.c #seed", [U(BS, "BS2", "BS3"), U(ER, "ER2")], B, ["BR1", E1], [], "BITES", "appended as the Land panel's last child, outside .ledger (no grid shift)"],
+  M3: ["BS2.a #draw; BS4.b (a seed-row id in The Hand); ER2.a #draw; ER2.c #draw", [U(BS, "BS2", "BS4"), U(ER, "ER2")], B, ["BR1", E1], [], "BITES", "appended as the Hand panel's last child, outside .ledger"],
+  M4: ["BS3.a #type; BS2.b (a Land id in the seed row)", [U(BS, "BS2", "BS3")], B, ["BR1", E1], [], "BITES", "the ledger's columns are pinned, so the tracks keep col 3 (BR1b green); E:broadside:3 still finds #type's options"],
+  M5: ["BS3.a #band; BS5.b (a Land id in the Press)", [U(BS, "BS3", "BS5")], B, ["BR1", E1], [], "BITES", "hidden span in the legend row, as M1"],
+  M6: ["BS3.a #land", [U(BS, "BS3")], B, ["BR1", "BR1b", E1], [], "BITES", "moved out of every group to just after </RoomFolio>; BR1b reads #land's edges against #coast's"],
+  M7: ["BS3.a #coast; BS4.b (a Land id in The Hand)", [U(BS, "BS3", "BS4")], B, ["BR1", "BR1b", E1], [], "BITES", "BR1b reads #coast's edges; the coast-warp mark BR5 and E:broadside:5 hover stays in the Land ledger"],
+  M8: ["BS4.a #style; BS3.b (a Hand id in The Land)", [U(BS, "BS3", "BS4")], B, ["BR1", E1], [], "BITES", "the census's BS3 mutation, as a move to the Land panel's end"],
+  M9: ["BS4.a #theme", [U(BS, "BS4")], B, ["BR1", E1], [], "BITES", "to just after </RoomFolio>"],
+  M10: ["BS4.a #legend; BS2.b (a Hand id in the seed row)", [U(BS, "BS2", "BS4")], B, ["BR1", E1], [], "BITES", "BS6 stays green (its regex reads the label wherever it stands)"],
+  M11: ["BS4.a #arms", [U(BS, "BS4")], B, ["BR1", E1], [], "BITES", "to just after </RoomFolio>"],
+  M12: ["BS4.a #beasts (BR1's want map has no beasts); BS5.b (a Hand id in the Press)", [U(BS, "BS4", "BS5")], B, [E1], [], "BITES", "the one Hand control BR1 cannot see; hidden span in the legend row, the label unchanged so BS6 stays green"],
+  M13: ["BS4.a #ages", [U(BS, "BS4")], B, ["BR1", "BR3", E1], [], "BITES", "the seal's dress is scoped to .broadside (public/explorer/broadside.css), so the label outside it shows no countersign and BR3 FAILs; EP1, BS6 green"],
+  M14: ["BS5.a #verso-turn; BS4.b (a Press id in The Hand); ER3.c; ER4.a (membership)", [U(BS, "BS4", "BS5"), U(ER, "ER3", "ER4")], B, ["BR1", E1], [], "BITES", "the § mark stays in the row; waitSettled still finds #verso-turn"],
+  M15: ["BS5.a #order-plates; BS2.b (a Press id in the seed row); ER4.b (place)", [U(BS, "BS2", "BS5"), U(ER, "ER4")], B, ["BR1", "BR2", E1], [], "BITES", "BR2's sameRow (journal-link's top against order-plates') FAILs with the road in the corner"],
+  M16: ["BS5.a #journal-link; BS3.b (a Press id in The Land); ER3.c; ER4.c (place)", [U(BS, "BS3", "BS5"), U(ER, "ER3", "ER4")], B, ["BR1", "BR2", E1], [], "BITES", "BR2's sameRow FAILs with the road on the slip"],
+  "BS2.c": ["BS2.c; ER2.b", [U(BS, "BS2"), U(ER, "ER2")], B, [E1], [], "BITES", "Draw loses class primary; no other check reads it"],
+  "ER2.a": ["ER2.a (the seed row's group out of the folio corner, whole)", [U(BS, "BS2"), U(ER, "ER2")], B, [E1], [], "BITES", "the census's ER2 mutation; BR1 green (the group keeps its label)"],
+  "BS6.a": ["BS6.a (legend's seal class)", [U(BS, "BS6")], B, [E1], [], "BITES", "the census's BS6 mutation"],
+  "BS6.b": ["BS6.b (arms' label text)", [U(BS, "BS6")], B, [E1], [], "BITES", ""],
+  "BS6.c": ["BS6.c (beasts' type)", [U(BS, "BS6")], B, [E1], [], "BITES", "beasts, since BR1 and BR3 never read it"],
+  "BS6.d": ["BS6.d (an id untouched; renamed on both sides so the page lives)", [U(BS, "BS4", "BS6")], B, ["BR1", E1], [], "BITES", "page and src/site/explorer/elements.ts renamed together"],
+  "BS6.e": ["BS6.e (the label wraps its real checkbox)", [U(BS, "BS6")], B, [E1], [], "BITES", ""],
+  "EP1.a": ["EP1.a; BS6.b (survey)", [U(BS, "BS6"), U(EP, "EP1")], B, [E1], [], "BITES", "the census's EP1 mutation; BR3 green (it reads the box, not the word)"],
+  "BS7.a": ["BS7.a (the verso anchor: mark and note both re-pointed)", [U(BS, "BS7")], B, [E1], [], "BITES", "both edits are owed: the note's own link also carries href=\"/glossary/#verso\", so the mark alone leaves BS7 green; #survey exists, so BS8 stays green"],
+  "BS7.b": ["BS7.b (a note's head)", [U(BS, "BS7")], B, [E1], [], "BITES", ""],
+  "BS7.c": ["BS7.c (no title on a mark)", [U(BS, "BS7")], B, [E1], [], "BITES", "the census's BS7 mutation"],
+  "BS8.a": ["BS8.a (the floor of four)", [U(BS, "BS7", "BS8")], B, [E1, "BR6"], [], "BITES", "five links go so three remain; BR6's hasLink reads #note-survey's own link"],
+  "BS8.b1": ["BS8.b (an anchor the marks name missing on the glossary)", [U(BS, "BS8")], B, ["BR7"], [], "BITES", "the census's BS8 mutation"],
+  "BS8.b2": ["BS8.b (the derived set: a fifth mark to an anchor nowhere)", [U(BS, "BS8")], B, [E1], [], "BITES", "BR7 reads four fixed ids, so it stays green; E:broadside:1 reads the marks exactly"],
+  "BS9.a": ["BS9.a", [U(BS, "BS9")], B, ["BR7"], [], "BITES", "the census's BS9 mutation; E:broadside:2 finds the section by id"],
+  "BS9.b1": ["BS9.b Survey", [U(BS, "BS9")], B, [E2], [], "BITES", "no other glossary term reads >Survey</p> (counted)"],
+  "BS9.b2": ["BS9.b Coast warp", [U(BS, "BS9")], B, [E2], [], "BITES", ""],
+  "BS9.b3": ["BS9.b Seed's choice", [U(BS, "BS9")], B, [E2], [], "BITES", ""],
+  "ER1.a": ["ER1.a chartRoom", [U(ER, "ER1")], "runninghead", ["RH2", "RH3", "RH17"], [], "BITES", "PRR1.a's measured set on the Print Room; ? until measured (another runninghead read of a chart room may join)"],
+  "ER1.b": ["ER1.b the name in the folio corner", [U(ER, "ER1")], B, [E1], [], "BITES", ""],
+  "ER1.c": ["ER1.c the tagline", [U(ER, "ER1")], B, [E1], [], "BITES", "2e measured runninghead ALL PASS on this edit"],
+  "ER1.d": ["ER1.d no RoomHead (a planted second h1)", [], B, [E1], [], "BITES", "e2e only: ER1's source pin stays green (no RoomHead component exists), the 2g precedent (PPR1.c, RBR1.4)"],
+  "ER3.a": ["ER3.a the slip is #broadside", [U(ER, "ER3")], B, [E1], ["BR1 to BR1c"], "NEEDS READ at BR1c's own read", "BR1c reads r(\"#broadside\") and its legendClear throws on the null slip (TypeError: Cannot read properties of null (reading 'l')); E:broadside:1 FAILs by name"],
+  "ER3.b": ["ER3.b The Hand rides the slip", [U(BS, "BS4"), U(ER, "ER3")], B, [E1, "BR3", "BR6?"], [], "BITES", "the census's ER3 mutation; the panel leaves .broadside, so BR3's seal shows no countersign, and the survey mark lands behind the fixed stage, so BR6's real tap misses it (? until measured)"],
+  "ER4.a": ["ER4.a; BS5.c", [U(BS, "BS5"), U(ER, "ER4")], B, [E1], [], "BITES", ""],
+  "ER4.b-gold": ["ER4.b gold; BS5.d", [U(BS, "BS5"), U(ER, "ER4")], B, ["BR2", E1], [], "BITES", "BR2 compares the two roads' className"],
+  "ER4.b-href": ["ER4.b href as authored", [U(ER, "ER4")], B, [E1], [], "BITES", "the script rewrites the href at every hash write, so only the scripts-off read sees it"],
+  "ER4.b-verb": ["ER4.b verb", [U(ER, "ER4")], B, [E1], [], "BITES", ""],
+  "ER4.b-room": ["ER4.b room", [U(ER, "ER4")], B, [E1], [], "BITES", "astro-scaffold's road-name test reds too (unlisted)"],
+  "ER4.c-gold": ["ER4.c gold; BS5.e", [U(BS, "BS5"), U(ER, "ER4")], B, ["BR2", E1], [], "BITES", ""],
+  "ER4.c-href": ["ER4.c href as authored", [U(ER, "ER4")], B, [E1], [], "BITES", ""],
+  "ER4.c-verb": ["ER4.c verb", [U(ER, "ER4")], B, [E1], [], "BITES", ""],
+  "ER4.c-room": ["ER4.c room", [U(ER, "ER4")], B, [E1], [], "BITES", ""],
+  "ER4.d": ["ER4.d Turn the sheet leads the row", [U(ER, "ER4")], B, [E1], [], "BITES", "the whole line (button and § mark) moved after the journal road"],
+  "ER4.e": ["ER4.e no action-link (planted, hidden)", [U(ER, "ER4")], B, [E1], [], "BITES", ""],
+  "ER4.f": ["ER4.f the head's class", [U(ER, "ER4")], B, [E1], [], "BITES", "BR1 reads the head's text only"],
+  "ER5.a1": ["ER5.a #sheet.sheet", [U(ER, "ER5")], B, [E1], [], "BITES", ""],
+  "ER5.a2": ["ER5.a #sheet-inner.sheet-inner", [U(ER, "ER5"), U(AK, "AK5")], B, [E1], [], "BITES", "AK5 is the kit agent's"],
+  "ER5.a3": ["ER5.a #map.living-chart", [U(ER, "ER5"), U(LC, "LC")], B, [E1], [], "BITES", "living-chart-css's host-contract test is the engine-hooks agent's; E:broadside:1 also holds its mount-class claim"],
+  "ER5.a4": ["ER5.a #verso beside the gesture box in the leaf", [U(ER, "ER5")], B, [E1], [], "BITES", "#verso is visibility:hidden at rest, so no hit-test moves"],
+  "ER5.a5": ["ER5.a #verso aria-hidden", [U(ER, "ER5")], B, [E1], [], "BITES", ""],
+  "ER5.a6": ["ER5.a #map empty as authored", [U(ER, "ER5")], B, [E1], [], "BITES", "draw() wipes #map, so only the scripts-off read sees it"],
+  "ER5.a7": ["ER5.a #verso empty as authored", [U(ER, "ER5")], B, [E1], [], "BITES", "rebuildVerso replaces #verso's children"],
+  "ER5.b": ["ER5.b the Glass outside the gesture box", [U(ER, "ER5")], B, [E1], [], "BITES", "AK3 and astro-scaffold's KIT_GLASS stay green (the markup is unchanged, only its place)"],
+  "ER5.c": ["ER5.c the Glass's id (renamed on both sides)", [U(ER, "ER5"), U(AK, "AK3")], B, [E1], [], "BITES", "glass.ts binds stopPropagation on the cluster, so a one-sided rename kills the page; app.ts renamed with it"],
+  "ER5.d1": ["ER5.d the status line's id (renamed on both sides)", [U(ER, "ER5")], B, [E1], ["BR1 to BR1c", E4], "NEEDS READ at the settle probe's own read", "waitReady in e2e/harness.ts reads document.getElementById(\"status\").textContent and throws (eval exception: TypeError) inside BR1's goto and E:broadside:4's goto: the claim names that probe as its reader"],
+  "ER5.d2": ["ER5.d aria-live", [U(ER, "ER5")], B, [E1], [], "BITES", "the census's ER5 mutation"],
+  "ER5.d3": ["ER5.d role", [U(ER, "ER5")], B, [E1], [], "BITES", ""],
+  "ER5.d4": ["ER5.d class status", [U(ER, "ER5")], B, [E1], [], "BITES", "an empty unstyled p in the flex stage has no width, so the sheet does not move"],
+  "ER5.d5": ["ER5.d empty as authored", [U(ER, "ER5")], B, [E1], [], "BITES", "the script overwrites it at the first draw"],
+  "ER5.e": ["ER5.e folio line one", [U(ER, "ER5")], B, [E1], [], "BITES", "astro-scaffold's folio-lead assertion reds too (unlisted); E:broadside:4 reads #folio-title by id and stays green"],
+  "ER5.f": ["ER5.f folio line three is #caption, folio-coords", [U(ER, "ER5")], B, [E1], [], "BITES", ""],
+  "ER6.a": ["ER6.a the stage's reserve", [U(ER, "ER6")], B, [E4, "BR1c?"], [], "BITES", "the sheet centres in the whole stage, about half the right reserve over toward the slip and the Glass, so BR1c's sh.r <= gl.l - 8 likely FAILs (? until measured)"],
+  "ER6.c": ["ER6.c touch-action none", [U(ER, "ER6")], B, [E4], [], "BITES", "Z7 and Z11 (zoom) red too, not sent"],
+  "ER6.d": ["ER6.d the top-left pivot", [U(ER, "ER6")], B, [E4], [], "BITES", "Z1 (zoom) reds too, not sent (its zoom set is unmeasured)"],
+  "ER6.e": ["ER6.e the chart fills its fitted box", [U(ER, "ER6")], B, [E4], [], "BITES", "the svg's own height=\"1158\" attribute takes over, past the sheet's fitted height"],
+  "ER6.f": ["ER6.f the sheet at the stage depth, via the token", [U(ER, "ER6")], B, [E4], [], "BITES", "FL6 (corners) stays green: it reads this shadow and asserts it only for the Portfolio"],
+  "ER6.i": ["ER6.i the chart prints unzoomed (!important against the camera's inline transform)", [U(ER, "ER6")], B, [E6], [], "BITES", ""],
+  "ER7.a-bind": ["ER7.a, what the import binds (bindRoom stubbed)", [], B, [E4, E6, "BR1c?"], [], "BITES (CONDITIONAL)", "e2e only: ER7 stays green (the import and both slices stand); the 0x0 sheet leaves no gesture box under E:broadside:6's wheel, no reserve under E:broadside:4, and the legend at the kit's default seat (BR1c ?); CONDITIONAL as a whole: the stub also skips bindSlip and placeSlip, so the slip is never seated or bound and the marks BR4, BR5, BR6 and E:broadside:5 aim at may move; measure the row locally on broadside and send the measured set (F5)"],
+  "ER7.b-local": ["ER7.b the turn path's refit (equivalence)", [U(ER, "ER7")], "broadside, then turn", [], [], "LOCAL", "expected ALL PASS on both: a style turn re-dresses the same world (every world is 320x240, so the same aspect) under the same folio; green confirms the errata row, any red becomes that row's holder and goes to the runner"],
+  "ER7.c": ["ER7.c the settle path's refit", [U(ER, "ER7")], B, [E4, "BR1c?"], [], "BITES (CONDITIONAL)", "the boot seat was taken before the folio write, so the reseat moves it; CONDITIONAL on no later layout healing it (F2)"],
+  "ER7.e1": ["ER7.e folioTitle written", [U(ER, "ER7")], B, [E4], [], "BITES", "the import name goes too, since ER7 only asks that app.ts mention folioTitle"],
+  "ER7.e2": ["ER7.e folioSub written", [U(ER, "ER7")], B, [E4], [], "BITES", "as ER7.e1"],
+  "TF1.a": ["TF1.a the tip's angle", [U(TF, "TF1")], B, [E5], [], "BITES", "unit predicted (the file's roster needs git, so the scratch copy could not load it)"],
+  "TF1.b": ["TF1.b the tip's raise via --raise", [U(TF, "TF1")], B, [E5], [], "BITES", "as TF1.a"],
+  "TA1.a": ["TA1.a #style", [U(TA, "TA1")], B, [E3], [], "BITES", "the census's TA1 mutation"],
+  "TA1.b": ["TA1.a #type", [U(TA, "TA1")], B, [E3], [], "BITES", ""],
+  "TA1.c": ["TA1.a #band", [U(TA, "TA1")], B, [E3], [], "BITES", ""],
+  "TA1.d": ["TA1.a #theme", [U(TA, "TA1")], B, [E3], [], "BITES", ""],
+  "RDW1.a": ["RDW1.a worker.ts detail", [U(RD, "RDW1")], "render", ["R14"], [], "BITES", "R14 compares the worker's region job with runInline in one page; RD1/RD2 (region-detail) would red too, not selected"],
+  "RDW1.b": ["RDW1.b worker.ts level", [U(RD, "RDW1")], "render", ["R14"], [], "BITES", "the stamp differs, so the bytes do"],
+  "RDW1.d": ["RDW1.d worker-client.ts detail", [U(RD, "RDW1", "BAND1", "BAND2", "BAND3", "HELD", "STAMP")], "-", [], [], "HELD-RUN", "unit only; measured on a scratch copy; R14 would red too"],
+  "RDW1.e": ["RDW1.e worker-client.ts level", [U(RD, "RDW1", "BAND1", "BAND2", "BAND3", "STAMP")], "-", [], [], "HELD-RUN", "unit only; measured"],
+  "RDW1.f": ["RDW1.f worker-client.ts chainCache", [U(RD, "RDW1", "HELD")], "-", [], [], "HELD-RUN", "unit only; measured"],
+  "AB1.a1": ["AB1.a the Explorer loads its twin as a module script", [U(AB, "AB1"), U(AS, "TWIN")], "-", [], [], "HELD-DATA", "is:inline kept, so the compiler still emits the tag verbatim, now without type=\"module\""],
+  "AB1.a2": ["AB1.a the Print Room", [U(AB, "AB1"), U(AS, "TWIN")], "-", [], [], "HELD-DATA", ""],
+  "AB1.a3": ["AB1.a the Seed of the Day", [U(AB, "AB1"), U(AS, "TWIN")], "-", [], [], "HELD-DATA", ""],
+  "AB1.a4": ["AB1.a the Reading Room", [U(AB, "AB1"), U(AS, "TWIN")], "-", [], [], "HELD-DATA", ""],
+  "AB1.b1": ["AB1.b the Explorer loads no raw source", [U(AB, "AB1"), U(AS, "TWIN", "LINKS")], "-", [], [], "HELD-DATA", "astro-scaffold's two reds predicted (? on LINKS): its doesNotMatch, and the link resolver finding no /explorer/app.js"],
+  "AB1.b2": ["AB1.b the Print Room", [U(AB, "AB1"), U(AS, "TWIN", "LINKS")], "-", [], [], "HELD-DATA", "as AB1.b1"],
+  "AB1.b3": ["AB1.b the Seed of the Day", [U(AB, "AB1"), U(AS, "TWIN", "LINKS")], "-", [], [], "HELD-DATA", "as AB1.b1"],
+  "AB1.b4": ["AB1.b the Reading Room", [U(AB, "AB1"), U(AS, "TWIN", "LINKS")], "-", [], [], "HELD-DATA", "as AB1.b1"],
+  "AB1.c-local": ["AB1.c is:inline (the word), on 6091335054 item 1's terms", [U(AB, "AB1")], "-", [], [], "LOCAL", "evidence for the deletion: build with is:inline dropped from the four pages; astro-scaffold's TWIN stays GREEN and the four built pages are byte-identical to an unmutated build (F1)"],
+};
+
+let out = "";
+let n = 0;
+for (const [id, edits] of Object.entries(ROWS)) {
+  const m = META[id];
+  if (!m) throw new Error("no meta for " + id);
+  n++;
+  const [claims, unit, sel, reds, stops, kind, note] = m;
+  const unitText = unit.length ? unit.map((u) => `${u.file}: {${u.tests.join(", ")}}`).join("; ") : "none (unit stays green; no unit block)";
+  const e2eText = sel === "-" ? "none" : `selection \`${sel}\`; expect {${reds.join(", ")}}${stops.length ? `; stops {${stops.map((s) => `"${s}"`).join(", ")}}` : ""}`;
+  out += `#### ${id}\n- claims: ${claims}\n- edits (count 1 each, at 2b148100 and where applied):\n\n\`\`\`json\n${JSON.stringify(edits)}\n\`\`\`\n\n- unit: ${unitText}\n- e2e: ${e2eText}\n- kind: ${kind}\n- note: ${note || "-"}\n\n`;
+}
+writeFileSync(new URL("./779-2h-E-sectionC.md", import.meta.url), out);
+console.log("rows", n);

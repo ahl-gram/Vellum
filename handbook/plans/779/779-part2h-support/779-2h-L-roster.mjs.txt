@@ -1,0 +1,9 @@
+import { readFileSync } from "node:fs";
+const css = readFileSync(process.argv[2], "utf8");
+const R = [".place-overlay {",".place-hit {",".place-hit::after","#place-card {","#place-card[hidden]","#place-card.pinned.pc-scrolls .pc-inner","#place-card.flip-h","#place-card.flip-v",".pc-inner",".pc-name",".pc-rank",".pc-founded",".pc-former",".pc-tongue",".pc-roots",".pc-tale",".pc-acts",".pc-prospect",".pc-lay",".place-overlay.scrub .place-hit",".place-hit.pc-near",".place-overlay.pc-over .place-hit:not(.pc-own)",".place-hit.pc-near::after",'.living-chart g.settlement[data-ink="founding"]','.living-chart g.settlement[data-ink="ruin"]',".living-chart g.settlement[data-ink] > text",".voyage-overlay",".voyage-track",".voyage-ship",".voyage-rider",".ages-range"];
+const lines = css.split("\n");
+for (const r of R) {
+  const at = [];
+  lines.forEach((l, i) => { let p = 0; while ((p = l.indexOf(r, p)) >= 0) { at.push(i + 1); p += r.length; } });
+  console.log(String(css.split(r).length - 1).padStart(2), JSON.stringify(r), at.join(","));
+}

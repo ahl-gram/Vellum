@@ -1,0 +1,105 @@
+// 779-2h-E: write 779-2h-rows-explorer.json from the counted edits and the row metadata, then verify it against the disk and against the appendix table.
+import { readFileSync, writeFileSync } from "node:fs";
+import { ROWS } from "./779-2h-E-rows.mjs";
+import { META } from "./779-2h-E-gen.mjs";
+
+const ROOT = "<repo>/";
+const HERE = "<scratchpad>/";
+const FINAL = { "E:broadside:1": "BR9", "E:broadside:2": "BR10", "E:broadside:3": "BR11", "E:broadside:4": "BR12", "E:broadside:5": "BR13", "E:broadside:6": "BR14" };
+const NAMES = {
+  BS1: "the Broadside groups exist in reading order: the seed row in the folio, then Land and Hand on the slip, then the Press as the legend row (#270, #463)",
+  BS2: "the seed row holds the seed, the dice and Draw, and nothing else (#462 ruling 8)",
+  BS3: "The Land holds every generation control and no dressing control (#270)",
+  BS4: "The Hand holds every dressing control and no generation control (#270)",
+  BS5: "The Press is the legend row: Turn the sheet, then the Print Room and the journal as gold roads (#462 ruling 4)",
+  BS6: "the overlay checkboxes wear the seal dressing with ids untouched (#270)",
+  BS7: "every footnote mark links a glossary anchor and carries a real note (#270)",
+  BS8: "every glossary anchor the marks point at exists on the glossary page (#270)",
+  BS9: "the glossary gained the drafting-table section for the control terms (#270)",
+  EP1: "the one checkbox wears the ratified survey label (#317 decision 1)",
+  ER1: "ER1 the Explorer is a chart room: chartRoom on the layout, the RoomFolio in place of the RoomHead",
+  ER2: "ER2 the seed row is the folio's one control: seed, dice and Draw stand top right (#462 ruling 8)",
+  ER3: "ER3 the Broadside is the slip: The Land and The Hand ride it, the Press does not",
+  ER4: "ER4 the rest of the Press is the legend row: Turn the sheet, then the two gold roads (#462 ruling 4)",
+  ER5: "ER5 the sheet stays the Glass's gesture box, so a bookmark's cx/cy stay sheet fractions; the Glass stands at the chart's corner outside it",
+  ER6: "ER6 the page css fits the sheet to what the chrome leaves and stands print down (#462 rulings 1 and 10)",
+  ER7: "ER7 app.ts fits the room after the chart lands on BOTH draw paths and writes the folio's lines",
+  TA1: "the allowlists mirror the Explorer's own selects, or a link the Explorer can write cannot be filed",
+  TF1: "the footnote marks go to the glossary, so they tip, at the wordmark's numbers (#270 ruling 7)",
+  RDW1: "the worker and its inline twin build the same region spec, so the two cannot drift apart",
+  BAND1: "band 1: the Explorer's region job draws the chained field and stamps detail 1",
+  BAND2: "band 2: the Explorer's region job draws the chained field and stamps detail 2",
+  BAND3: "band 3: the Explorer's region job draws the chained field and stamps detail 3",
+  HELD: "the region job actually builds in the HELD cache, which no byte comparison can see",
+  STAMP: "the stamp follows the WINDOW, not the band index the job happened to carry",
+  AB1: "all four app pages load their bundled app twin via is:inline, none load raw source (#208, #254)",
+  TWIN: "each app page keeps its bundle-twin module script, rendered verbatim inside <main>",
+  LINKS: "every internal link and embed on the rendered pages resolves",
+  AK3: "AK3 every chart room stands the Glass and the chart folio from the kit; the Explorer alone names its cluster for glass.ts",
+  AK5: "AK5 the stage is lifted where the skeleton is one shape (the Print Room, the Prospect, the Ribbon); the three unique skeletons stay in their pages",
+  LC: "the Explorer host wires the contract: mount class + sheet link (#302)",
+};
+const MEASURE_FIRST_BY_NOTE = new Set(["ER1.a", "AB1.b1", "AB1.b2", "AB1.b3", "AB1.b4"]);
+
+const kindOf = (k) =>
+  k.startsWith("BITES") ? "BITES" : k.startsWith("NEEDS READ") ? "NEEDS READ" : k === "HELD-DATA" || k === "HELD-RUN" || k === "LOCAL" ? k : (() => { throw new Error("kind " + k); })();
+const finalId = (n) => FINAL[n] ?? n;
+
+const rows = Object.entries(ROWS).map(([id, edits]) => {
+  const [, unit, sel, reds, , kind] = META[id];
+  const row = { id, kind: kindOf(kind), edits };
+  if (unit.length) row.unit = { files: unit.map((u) => u.file), expect: unit.flatMap((u) => u.tests.map((t) => NAMES[t] ?? (() => { throw new Error("name " + t); })())) };
+  if (row.kind !== "LOCAL" && sel !== "-") row.e2e = { suites: sel, expect: reds.map((r) => finalId(r.replace(/\?$/, ""))) };
+  if (reds.some((r) => r.endsWith("?")) || kind.includes("CONDITIONAL") || MEASURE_FIRST_BY_NOTE.has(id)) row.measureFirst = true;
+  if (id === "ER7.b-local") row.localSuites = "broadside,turn";
+  return row;
+});
+writeFileSync(HERE + "779-2h-rows-explorer.json", JSON.stringify(rows, null, 2) + "\n");
+
+// Verify 1: every find occurs exactly once in its file on disk, and once again where applied after the row's earlier edits.
+const count = (t, f) => t.split(f).length - 1;
+const problems = [];
+for (const r of rows) {
+  const work = {};
+  for (const e of r.edits) {
+    const disk = readFileSync(ROOT + e.file, "utf8");
+    work[e.file] ??= disk;
+    if (count(disk, e.find) !== 1) problems.push(`${r.id}: find occurs ${count(disk, e.find)} times on disk in ${e.file}`);
+    if (count(work[e.file], e.find) !== 1) problems.push(`${r.id}: find occurs ${count(work[e.file], e.find)} times where applied in ${e.file}`);
+    work[e.file] = work[e.file].replace(e.find, () => e.replace);
+  }
+}
+
+// Verify 2: the JSON against the appendix table, row for row.
+const table = readFileSync(HERE + "779-2h-appendix-explorer.md", "utf8");
+const sections = table.split(/\n#### /).slice(1).map((s) => s.split(/\n## /)[0]);
+const parsed = sections.map((s) => {
+  const id = s.split("\n")[0].trim();
+  const edits = JSON.parse(/```json\n([\s\S]*?)\n```/.exec(s)[1]);
+  const unitLine = /\n- unit: (.*)/.exec(s)[1];
+  const e2eLine = /\n- e2e: (.*)/.exec(s)[1];
+  const kindLine = /\n- kind: (.*)/.exec(s)[1];
+  const unit = unitLine.startsWith("none")
+    ? null
+    : unitLine.split("; ").map((part) => {
+        const m = /^(\S+): \{(.*)\}$/.exec(part);
+        return { file: m[1], tests: m[2].split(", ") };
+      });
+  const e2e = e2eLine === "none" ? null : /^selection `([^`]+)`; expect \{([^}]*)\}/.exec(e2eLine);
+  return { id, edits, unit, e2e: e2e && { suites: e2e[1], expect: e2e[2] ? e2e[2].split(", ").map((x) => x.replace(/\?$/, "")) : [] }, kind: kindLine };
+});
+const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+const setEq = (a, b) => same([...a].sort(), [...b].sort());
+const disagree = [];
+if (parsed.length !== rows.length) disagree.push(`row count: table ${parsed.length}, json ${rows.length}`);
+rows.forEach((r, i) => {
+  const t = parsed[i];
+  if (!t || t.id !== r.id) return disagree.push(`row ${i}: table ${t && t.id}, json ${r.id}`);
+  if (!same(t.edits, r.edits)) disagree.push(`${r.id}: edits`);
+  const tUnit = t.unit ? { files: t.unit.map((u) => u.file), expect: t.unit.flatMap((u) => u.tests.map((x) => NAMES[x])) } : null;
+  if (!same(tUnit && tUnit.files, r.unit ? r.unit.files : null) || !setEq(tUnit ? tUnit.expect : [], r.unit ? r.unit.expect : [])) disagree.push(`${r.id}: unit`);
+  const tE2e = r.kind === "LOCAL" ? null : t.e2e;
+  if (!same(tE2e && tE2e.suites, r.e2e ? r.e2e.suites : null) || !setEq(tE2e ? tE2e.expect : [], r.e2e ? r.e2e.expect : [])) disagree.push(`${r.id}: e2e`);
+  if (kindOf(t.kind.replace(/^NEEDS READ.*/, "NEEDS READ")) !== r.kind) disagree.push(`${r.id}: kind (${t.kind})`);
+});
+console.log(JSON.stringify({ rows: rows.length, findProblems: problems, disagree, measureFirst: rows.filter((r) => r.measureFirst).map((r) => r.id) }, null, 1));

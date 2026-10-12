@@ -1,0 +1,69 @@
+// Builds 779-2h-rows-engine.json from the design spec (779-2h-L-gen.mjs), then checks it against the appendix row for row and every find on disk.
+import { readFileSync, writeFileSync } from "node:fs";
+import assert from "node:assert/strict";
+const DIR = "<scratchpad>/";
+const ROOT = "<repo>/";
+const gen = readFileSync(DIR + "779-2h-L-gen.mjs", "utf8");
+const grab = (from, to) => gen.slice(gen.indexOf(from), gen.indexOf(to, gen.indexOf(from)));
+const N = new Function(`return ${grab("{\n  LC1:", "\n};") + "\n}"}`)();
+const PC6 = new Function(`return ${grab("[\n  \"#387 a card", "\n];") + "\n]"}`)();
+const R = new Function(`return ${grab("[\n  [\"LC1.a\"", "\n];\nconst unitOf") + "\n]"}`)();
+const { EDITS } = await import(DIR + "779-2h-L-finds.mjs");
+const EXTRA = { "LC3.d1": ["public/living-chart.css", "z-index: 1;", "z-index: 0;"], "LC3.d2": ["public/living-chart.css", "z-index: 1;", "z-index: 9;"] };
+const FINAL = { "L:render:1": "R16", "L:render:2": "R17", "L:zoom:1": "Z22", "L:zoom:2": "Z23", "L:zoom:3": "Z24", "L:zoom:4": "Z25", "L:zoom:5": "Z26", "L:zoom:6": "Z27", "L:cards:1": "P36", "L:reading-room:1": "RR43", "L:room-instrument:1": "RS32" };
+const FILE = { LC: "test/site/living-chart-css.test.ts", SG: "test/site/shell-css-ground.test.ts", ER: "test/site/explorer-room.test.ts", SH: "test/site/shell-css.test.ts", PC: "test/site/place-card-clamp.test.ts" };
+const fileOf = (k) => FILE[k === "SH" ? "SH" : k === "PC" ? "PC" : k.slice(0, 2)];
+const MEASURE = new Set(["LC1.c", "LC1.d", "LC1.i", "LC7.B1", "LC7.w", "LC7.x", "SG4.b1", "SG5.a2", "SG5.d"]);
+const edit = (id) => {
+  const [file, find, replace] = EXTRA[id] ?? EDITS.find((e) => e[0] === id).slice(1);
+  return { file, find, replace };
+};
+const rows = R.map(([id, , ids, unit, sel, exp, kind]) => {
+  const row = { id, kind, edits: ids.map(edit) };
+  if (unit.length) {
+    const files = [...new Set(unit.map(fileOf))];
+    const expect = unit.flatMap((k) => (k === "PC" ? PC6 : [N[k]]));
+    row.unit = { files, expect };
+  }
+  if (kind !== "LOCAL") row.e2e = { suites: sel, expect: exp.map((c) => FINAL[c] ?? c) };
+  if (MEASURE.has(id)) row.measureFirst = true;
+  return row;
+});
+writeFileSync(DIR + "779-2h-rows-engine.json", JSON.stringify(rows, null, 2) + "\n");
+
+// 1. every find occurs exactly once on disk
+for (const r of rows)
+  for (const e of r.edits) {
+    const n = readFileSync(ROOT + e.file, "utf8").split(e.find).length - 1;
+    assert.equal(n, 1, `${r.id}: ${e.file} holds its find ${n} times`);
+  }
+// 2. the JSON equals the appendix's section C, row for row
+const md = readFileSync(DIR + "779-2h-appendix-engine.md", "utf8");
+const lines = md.split("\n").filter((l) => /^- \*\*(LC|SG)\S+\*\* \(claim /.test(l));
+assert.equal(lines.length, rows.length, "row counts differ");
+const parsed = lines.map((l) => {
+  const id = /^- \*\*(\S+)\*\*/.exec(l)[1];
+  const edits = JSON.parse(/Edits: `` (\[.*?\]) ``\./.exec(l)[1]);
+  const unitText = /Unit: (.*?)\. E2e: /.exec(l)[1];
+  let unit;
+  if (!unitText.startsWith("none")) {
+    const segs = unitText.split(" | ");
+    unit = {
+      files: segs.map((s) => /^`([^`]+)`/.exec(s)[1]),
+      expect: segs.flatMap((s) => [...s.matchAll(/"(?:[^"\\]|\\.)*"/g)].map((m) => JSON.parse(m[0]))),
+    };
+  }
+  const e2eM = /E2e: `([^`]+)`, expect exactly `(\[.*?\])`\. (BITES|NEEDS READ|LOCAL)\./.exec(l);
+  const kind = e2eM[3];
+  const row = { id, kind, edits };
+  if (unit) row.unit = unit;
+  if (kind !== "LOCAL") row.e2e = { suites: e2eM[1], expect: JSON.parse(e2eM[2]) };
+  else assert.deepEqual(JSON.parse(e2eM[2]), [], `${id}: a LOCAL arm expects no red`);
+  return row;
+});
+const strip = (r) => Object.fromEntries(Object.entries(r).filter(([k]) => k !== "measureFirst"));
+rows.forEach((r, i) => assert.deepEqual(strip(r), parsed[i], `row ${i} (${r.id}) differs from the table`));
+const ids = new Set(rows.map((r) => r.id));
+assert.equal(ids.size, rows.length, "duplicate row ids");
+for (const id of MEASURE) assert.ok(ids.has(id), `measureFirst names a missing row ${id}`);
+console.log(`${rows.length} rows; every find once on disk; JSON equals the table row for row; measureFirst on ${[...MEASURE].join(", ")}`);

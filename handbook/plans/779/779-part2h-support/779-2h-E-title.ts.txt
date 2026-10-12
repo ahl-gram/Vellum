@@ -1,0 +1,3 @@
+import { defaultRecipe, generateWorld } from "<repo>/src/world/generate.ts";
+const w = generateWorld(defaultRecipe(42));
+console.log(JSON.stringify(w.title));

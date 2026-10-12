@@ -1,0 +1,151 @@
+import { readFileSync, writeFileSync } from "node:fs";
+import { EDITS } from "./779-2h-L-finds.mjs";
+const ROOT = "<repo>/";
+const LCF = "test/site/living-chart-css.test.ts";
+const SGF = "test/site/shell-css-ground.test.ts";
+const ERF = "test/site/explorer-room.test.ts";
+const PCF = "test/site/place-card-clamp.test.ts";
+const N = {
+  LC1: "the shared sheet dresses every engine-emitted hook (#302)",
+  LC2: "the hit divides by --zoom-k once, on the element; the ring pseudos stay plain (#331)",
+  LC3: "the town raised over an overlapping neighbour stays below the card it opens (#632)",
+  LC4: "the card's action row, its filing press and its refusing face are each declared once (#522; kept for Issue #779 part 2i: a second block repeating the first shows nowhere, and CD57 reads the dress)",
+  LC5: "the philologist's note is dressed, visible, and named the same on both sides (#124)",
+  LC6: "a flipped card is anchored on the side it flips toward, and reads its anchor from the engine (#124)",
+  LC7: "every card variant reads the clamp, and reads it INSIDE the counter-scale (#387/#388)",
+  LC8: "the Explorer host wires the contract: mount class + sheet link (#302)",
+  SG3: "each chart mount keeps its qualified chart rule (#367, #463)",
+  SG4: "each mount dresses its sheet at the house depth, via the token (#367)",
+  SG5: "no mount dresses a BARE svg: the engine's overlays are not sheets (#367)",
+  ER5: "ER5 the sheet stays the Glass's gesture box, so a bookmark's cx/cy stay sheet fractions; the Glass stands at the chart's corner outside it",
+  SH: "public/shell.css declares each palette token once at its ratified value, each depth shadow once, and the walnut deep once (Issue #263, Issue #367, Issue #463, Issue #461)",
+  ER6: "ER6 the page css fits the sheet to what the chrome leaves and stands print down (#462 rulings 1 and 10)",
+};
+const PC6 = [
+  "#387 a card measured off the bottom of the chart publishes the nudge that brings it back",
+  "#388 a card measured off the side of the viewport publishes the nudge on the other axis",
+  "#387/#388 the nudge is recomputed per show, never inherited from the card before it",
+  "#387/#388 a box the host cannot supply yet is not treated as an empty box at the origin",
+  "#387/#388 an open card is re-measured on demand, so a stale nudge cannot outlive its geometry",
+  "#387/#388 the host's box reaches the card through createLivingChart, not only the overlay",
+];
+const fileOf = (k) => (k.startsWith("LC") ? LCF : k.startsWith("SG") ? SGF : k === "SH" ? "test/site/shell-css.test.ts" : ERF);
+const extraEdits = { "LC3.d1": ["public/living-chart.css", "z-index: 1;", "z-index: 0;"], "LC3.d2": ["public/living-chart.css", "z-index: 1;", "z-index: 9;"] };
+const edit = (id) => {
+  const e = extraEdits[id] ?? EDITS.find((x) => x[0] === id)?.slice(1);
+  if (!e) throw new Error("no edit " + id);
+  const [file, find, replace] = e;
+  const n = readFileSync(ROOT + file, "utf8").split(find).length - 1;
+  if (n !== 1) throw new Error(`${id} occurs ${n}`);
+  return { file, find, replace };
+};
+// [row, claims, editIds, unitKeys, selection, expect, kind, note]
+const R = [
+  ["LC1.a", "LC1.a", ["LC1.a"], ["LC1"], "cards", ["P3"], "BITES", "the overlay box loses position, inset and pointer-events none; its hits and card stay positioned against #map, so only P3's computed read of the overlay sees it"],
+  ["LC1.b", "LC1.b (and the hit's cursor)", ["LC1.b"], ["LC2"], "zoom", ["Z8b", "L:zoom:1", "L:zoom:6"], "BITES", "LC1 stays green: `.place-hit {` still stands inside the scrub rule; the hits fall into the overlay's flow as house buttons and inherit pointer-events none, so Z8b's real hover finds no :hover, L:zoom:1 reads no 26px box on the mark, L:zoom:6's real press pins nothing"],
+  ["LC1.c", "LC1.c, LC2.d1", ["LC1.c"], ["LC1", "LC2"], "zoom", ["L:zoom:1"], "BITES", "the ring loses its content, so it never paints; Z8b predicted green, since getComputedStyle still resolves the shown rule's opacity 1 and scale(1) on a pseudo with no content (F5); `[data-x]` keeps LC2's pseudo regex from matching the renamed rule"],
+  ["LC1.d", "LC1.d", ["LC1.d"], ["LC1", "LC3", "LC6", "LC7"], "zoom", ["L:zoom:3", "L:zoom:4", "L:zoom:5", "L:zoom:6"], "BITES", "`[data-x]` keeps the id, so `vellum/css-engine-no-host-id` has nothing new to read; the card goes static, full-width and z-auto; Z8 predicted green (seed 42's town nearest the centre is flipped, F14); LOCAL FIRST"],
+  ["LC1.f", "LC1.f", ["LC1.f"], ["LC1"], "cards", ["P20", "P26"], "BITES", "a pinned scrolling card keeps pointer-events none: P20 reads it, P26's elementFromPoint misses the card and its wheel reaches the camera; P27 (keyboard) stays green"],
+  ["LC1.g", "LC1.g", ["LC1.g"], ["LC6", "LC7"], "zoom", ["L:zoom:3"], "BITES", "LC1 stays green (`#place-card.flip-h` stands in the flip-h.flip-v rule); flip-h cards fall back to the base anchor; the clamp still lands them flush, so L:zoom:4 stays green"],
+  ["LC1.h", "LC1.h", ["LC1.h"], ["LC7"], "zoom", ["L:zoom:3"], "BITES", "LC1 stays green (`#place-card.flip-v .pc-inner` keeps the substring); flip-v cards take the base translate and stand below their mark"],
+  ["LC1.i", "LC1.i", ["LC1.i"], [], "zoom", ["L:zoom:3", "L:zoom:4", "L:zoom:5", "L:zoom:6"], "BITES", "unit green: `.pc-inner` stands in four other rules (no unit block, 2g-plates call 13); no unfurl, no cap, no paper: every card read's rest witness fails; LOCAL FIRST"],
+  ["LC1.j", "LC1.j", ["LC1.j"], ["LC1"], "zoom", ["L:zoom:5"], "BITES", ".pc-name falls to an inline strong at the inner's 14.4px"],
+  ["LC1.k", "LC1.k", ["LC1.k"], ["LC1"], "zoom", ["L:zoom:5"], "BITES", ".pc-rank loses italic, uppercase, ink-brown, 0.82rem"],
+  ["LC1.l", "LC1.l", ["LC1.l"], ["LC1"], "zoom", ["L:zoom:5"], "BITES", ".pc-founded loses block, 0.35rem and tabular-nums"],
+  ["LC1.m", "LC1.m", ["LC1.m"], ["LC1"], "zoom", ["L:zoom:5"], "BITES", "the capital (Laukuwelua, once Haitani) carries .pc-former"],
+  ["LC1.n", "LC1.n", ["LC1.n"], ["LC1", "LC5"], "zoom", ["L:zoom:5"], "BITES", "the note loses its hairline and size"],
+  ["LC1.o", "LC1.o", ["LC1.o"], ["LC1", "LC5"], "zoom", ["L:zoom:5"], "BITES", "the roots lose italic, 0.78rem, ink-tale"],
+  ["LC1.p", "LC1.p", ["LC1.p"], ["LC1"], "zoom", ["L:zoom:5"], "BITES", "the ruin's tale takes the p defaults (1em margins, roman)"],
+  ["LC1.q", "LC1.q", ["LC1.q"], ["LC1", "LC4"], "zoom", ["L:zoom:5"], "BITES", "the row goes block, its actions inline side by side; LC4 (2i's) reds on its soleRule"],
+  ["LC1.r", "LC1.r", ["LC1.r"], [], "zoom", ["L:zoom:5"], "BITES", "unit green: `.pc-prospect` stands in the hover rule; the link loses gold, inline-block and pointer-events auto; on `cards` P28 and P31b would red too (they press the link), so the row runs on `zoom`, where nothing presses it"],
+  ["LC1.s", "LC1.s", ["LC1.s"], ["LC4"], "zoom", ["L:zoom:5"], "BITES", "LC1 green (`.pc-lay` stands in five more rules); the press takes the house button's cream and 1.5px ink border and loses pointer-events; CD57 (chart-drawer) reads the same, not sent"],
+  ["LC1.t", "LC1.t", ["LC1.t"], ["LC1"], "reading-room", ["RR11b"], "BITES", "the Reading Room's hits take pointer-events auto"],
+  ["LC1.u", "LC1.u", ["LC1.u"], ["LC3"], "cards", ["L:cards:1"], "BITES", "LC1 green (`.place-hit.pc-near` stands in the ring rule); LC3's soleRule finds no block; the raised town no longer rises over the later box covering it"],
+  ["LC1.v", "LC1.v", ["LC1.v"], ["LC1"], "zoom", ["L:zoom:6"], "BITES", "with the hand over a pinned card, the other towns keep cursor pointer"],
+  ["LC1.w", "LC1.w", ["LC1.w"], ["LC1"], "zoom", ["Z8b", "L:zoom:6"], "BITES", "the ring never grows on the town the pointer raises; L:zoom:1's keyboard ring (the focus arm) stays green"],
+  ["LC1.x", "LC1.x", ["LC1.x"], ["LC1"], "room-ink", ["RS19", "RS22"], "BITES", "no inkStamp on a founding: RS19 reads the name, RS22 finds no animated mark (castles 0)"],
+  ["LC1.y", "LC1.y", ["LC1.y"], ["LC1"], "room-ink", ["RS21"], "BITES", "a ruin's mark loses dryingInk"],
+  ["LC1.z", "LC1.z", ["LC1.z"], ["LC1"], "room-ink", ["RS20"], "BITES", "a revealed name loses its quick dryingInk"],
+  ["LC1.aa", "LC1.aa", ["LC1.aa"], [], "zoom", ["L:zoom:2"], "BITES", "unit green: `.voyage-overlay` also stands in the comment above the rule; the overlay svg goes static, 300x150, pointer-events auto, overflow hidden"],
+  ["LC1.ab", "LC1.ab", ["LC1.ab"], ["LC1"], "zoom", ["L:zoom:2"], "BITES", "the polyline fills black and strokes nothing"],
+  ["LC1.ac", "LC1.ac", ["LC1.ac"], [], "zoom", ["L:zoom:2"], "BITES", "unit green: `.voyage-ship` stands in four more rules; the hook's first rule is the hull arm, so the ship's hull fills black, unstroked"],
+  ["LC1.ad", "LC1.ad", ["LC1.ad"], [], "zoom", ["L:zoom:2"], "BITES", "unit green: `.voyage-rider` stands in six more rules; the rider's body fills black, unstroked"],
+  ["LC1.ae", "LC1.ae", ["LC1.ae"], [], "room-instrument", ["L:room-instrument:1"], "BITES", "unit green: `.ages-range` stands in the focus and thumb rules; the bar takes the native slider, its margin and no painted layers"],
+  ["LC2.a", "LC2.a", ["LC2.a"], ["LC2"], "zoom", ["Z8b", "L:zoom:1"], "BITES", "the hit's transform line deleted: anchored by its corner and 104px at k=4"],
+  ["LC2.b", "LC2.b", ["LC2.b"], ["LC2"], "zoom", ["L:zoom:1"], "BITES", "the translate dropped: the box keeps 26px, its centre 13px off the mark at k=1 and 52px at k=4; Z8b hovers the box's own centre and stays green"],
+  ["LC2.c", "LC2.c", ["LC2.c"], ["LC2"], "zoom", ["Z8b", "L:zoom:1"], "BITES", "the division dropped (the census's mutation): 104px at k=4, still on the mark"],
+  ["LC2.d2", "LC2.d2", ["LC2.d2"], ["LC2"], "zoom", ["L:zoom:1"], "BITES", "the shown rule's keyboard arm renamed: a Tabbed town's ring stays at rest; the pointer arm (Z8b) stays green"],
+  ["LC2.e1", "LC2.e1", ["LC2.e1"], ["LC2"], "zoom", ["L:zoom:1"], "BITES", "2e's measured mutation (zoom ALL PASS 39/39): the resting ring reads scale 0.2125 at k=4"],
+  ["LC2.e2", "LC2.e2", ["LC2.e2"], ["LC2"], "zoom", ["Z8b", "L:zoom:1"], "BITES", "the shown ring reads 0.25 at k=4 under the hover (Z8b) and the keyboard (L:zoom:1)"],
+  ["LC3.c1", "LC3.c1", ["LC3.c1"], ["LC3"], "cards", ["L:cards:1"], "BITES", "the raised town's z-index deleted"],
+  ["LC3.c2", "LC3.c2", ["LC3.c2"], ["LC3"], "zoom", ["L:zoom:6"], "BITES", "the card's z-index deleted: the raised town (z 1) paints its ring over the card"],
+  ["LC3.d1", "LC3.d (raised > 0)", ["LC3.d1"], ["LC3"], "cards", ["L:cards:1"], "BITES", "z-index 0: the raised box no longer rises over the later box covering it"],
+  ["LC3.d2", "LC3.d (raised < card)", ["LC3.d2"], ["LC3"], "zoom", ["L:zoom:6"], "BITES", "the census's mutation, z-index 9: the raised town paints over the card it does not own"],
+  ["LC5.b", "LC5.b", ["LC5.b"], ["LC5"], "zoom", ["L:zoom:5"], "BITES", "the note's hairline deleted"],
+  ["LC5.c", "LC5.c", ["LC5.c"], ["LC5"], "zoom", ["L:zoom:5"], "BITES", "the note gutted to display none: L:zoom:5 reads its box; on `cards` P17b would likely red too (the AX description skips a display:none descendant) and P16 would not (it reads textContent), which is why the row runs on `zoom`"],
+  ["LC5.e", "LC5.e", ["LC5.e"], ["LC5"], "zoom", ["L:zoom:5"], "BITES", "the roots gutted to display none"],
+  ["LC5.f", "LC5.f", ["LC5.f"], ["LC5"], "cards", ["P16", "P17", "P18", "P18b"], "BITES", "the engine writes .pc-tonguex: P16's tongue read is undefined, the three order strings break; P17b (the AX text) stays green"],
+  ["LC5.g", "LC5.g", ["LC5.g"], ["LC5"], "cards", ["P16", "P17", "P18", "P18b"], "BITES", "the engine writes .pc-rootsx"],
+  ["LC6.b", "LC6.b", ["LC6.b"], ["LC6"], "zoom", ["L:zoom:3"], "BITES", "flip-h keeps the base left, so the right is ignored and the card hangs right of its mark"],
+  ["LC6.c", "LC6.c", ["LC6.c"], ["LC6"], "zoom", ["L:zoom:3"], "BITES", "flip-h with left and right auto stands at the overlay's left edge"],
+  ["LC6.d", "LC6.d", ["LC6.d"], ["LC6"], "zoom", ["L:zoom:3"], "BITES", "visible only at depth: with origin 0 0 a flip-h card's right edge stands 3 card-widths left of its seat at k=4; exact at k=1"],
+  ["LC6.e", "LC6.e", ["LC6.e"], ["LC6"], "zoom", ["L:zoom:3"], "BITES", "unflipped and flip-v cards stand at the overlay's left edge"],
+  ["LC6.f", "LC6.f", ["LC6.f"], ["LC6"], "zoom", ["L:zoom:3"], "BITES", "every card stands at its static top"],
+  ["LC6.g", "LC6.g", ["LC6.g"], ["LC6"], "zoom", ["L:zoom:3"], "BITES", "the engine publishes no anchor x: every card falls back to nx 0"],
+  ["LC6.h", "LC6.h", ["LC6.h"], ["LC6"], "zoom", ["L:zoom:3"], "BITES", "no anchor y: ny 0"],
+  ["LC6.j", "LC6.j", ["LC6.j"], ["LC6"], "zoom", ["L:zoom:3"], "BITES", "an inline left beats flip-h's left auto: the flipped cards hang right of their marks"],
+  ["LC7.B1", "LC7.B1", ["LC7.B1"], ["LC7"], "zoom", ["L:zoom:3", "L:zoom:4"], "BITES", "the base card's transform deleted: no gap, no counter-scale, no nudge; Z8 green (its town is flipped); L:zoom:6 green unless its A is an unflipped town (F3)"],
+  ["LC7.H1", "LC7.H1", ["LC7.H1"], ["LC7"], "zoom", ["L:zoom:3"], "BITES", "flip-h takes the base translate (+10px) about its right edge"],
+  ["LC7.V1", "LC7.V1", ["LC7.V1"], ["LC7"], "zoom", ["L:zoom:3"], "BITES", "flip-v takes the base translate and stands below its mark"],
+  ["LC7.HV1", "LC7.HV1", ["LC7.HV1"], ["LC7"], "zoom", ["L:zoom:3"], "BITES", "flip-h.flip-v takes flip-v's translate about its right edge"],
+  ["LC7.B2", "LC7.B2", ["LC7.B2"], ["LC7"], "zoom", ["L:zoom:4"], "BITES", "the base card never clamps across"],
+  ["LC7.H2", "LC7.H2", ["LC7.H2"], ["LC7"], "zoom", ["L:zoom:4"], "BITES", "flip-h never clamps across"],
+  ["LC7.V2", "LC7.V2", ["LC7.V2"], ["LC7"], "zoom", ["L:zoom:4"], "BITES", "flip-v never clamps across"],
+  ["LC7.HV2", "LC7.HV2", ["LC7.HV2"], ["LC7"], "zoom", ["L:zoom:4"], "BITES", "flip-h.flip-v never clamps across"],
+  ["LC7.B3", "LC7.B3", ["LC7.B3"], ["LC7"], "zoom", ["L:zoom:4"], "BITES", "the base card never clamps down"],
+  ["LC7.H3", "LC7.H3", ["LC7.H3"], ["LC7"], "zoom", ["L:zoom:4"], "BITES", "flip-h never clamps down"],
+  ["LC7.V3", "LC7.V3", ["LC7.V3"], ["LC7"], "zoom", ["L:zoom:4"], "BITES", "flip-v never clamps up"],
+  ["LC7.HV3", "LC7.HV3", ["LC7.HV3"], ["LC7"], "zoom", ["L:zoom:4"], "BITES", "flip-h.flip-v never clamps up"],
+  ["LC7.B4", "LC7.B4", ["LC7.B4"], ["LC7"], "zoom", ["L:zoom:3", "L:zoom:4"], "BITES", "the translate outside the counter-scale: exact at k=1, the gap 40px and the nudge four times itself at k=4"],
+  ["LC7.H4", "LC7.H4", ["LC7.H4"], ["LC7"], "zoom", ["L:zoom:3", "L:zoom:4"], "BITES", "as B4 for flip-h"],
+  ["LC7.V4", "LC7.V4", ["LC7.V4"], ["LC7"], "zoom", ["L:zoom:3", "L:zoom:4"], "BITES", "as B4 for flip-v (the -100% lift scaled four times too)"],
+  ["LC7.HV4", "LC7.HV4", ["LC7.HV4"], ["LC7"], "zoom", ["L:zoom:3", "L:zoom:4"], "BITES", "as B4 for flip-h.flip-v"],
+  ["LC7.w", "LC7.w", ["LC7.w1", "LC7.w2"], ["LC7", "PC"], "zoom", ["L:zoom:4"], "BITES", "both --pc-dx writes renamed (the reset and the nudge; the PR #719 row: renaming one leaves LC7 green); no card clamps across"],
+  ["LC7.x", "LC7.x", ["LC7.x1", "LC7.x2"], ["LC7", "PC"], "zoom", ["L:zoom:4"], "BITES", "both --pc-dy writes renamed; no card clamps vertically"],
+  ["LC8.a", "LC8.a", ["LC8.a"], ["LC8", "ER5"], "render", ["L:render:1"], "BITES", "ER5 (explorer-room.test.ts, another area's) reds on its own markup regex; the class keys nothing the Explorer paints today (F7)"],
+  ["LC8.b", "LC8.b", ["LC8.b"], ["LC8"], "render", ["L:render:1"], "BITES", "the Explorer loses the engine's sheet; render reads no overlay dress, so only L:render:1 sees it there (on `cards` P2, P3, P15 and more would red)"],
+  ["LC8.c", "LC8.c", ["LC8.c"], [], "render", ["L:render:1"], "BITES", "unit green: `extraCss` still names BaseLayout's prop; every page loses its extra sheets, and render visits only the Explorer"],
+  ["SG3.a1", "SG3.a1", ["SG3.a1"], ["SG3", "ER6"], "render", ["L:render:2"], "BITES", "SG3 still finds the print block's `#map svg[data-vellum-style]` and reds on its width; the chart lays out at its 1500x1158 attributes"],
+  ["SG3.a2", "SG3.a2", ["SG3.a2"], ["SG3"], "render", ["L:render:2"], "BITES", "the census's mutation: the chart takes its 1500px width attribute; ER6 (height 100%) stays green"],
+  ["SG3.b1", "SG3.b1", ["SG3.b1"], ["SG3"], "reading-room", ["RR36"], "BITES", "the Reading Room's chart lays out at its attributes; RR39 reads the same svg's shadow, still none"],
+  ["SG3.b2", "SG3.b2", ["SG3.b2"], ["SG3"], "reading-room", ["RR36"], "BITES", "the frame's chart takes its 1500px width attribute"],
+  ["SG4.a1", "SG4.a1", ["SG4.a1"], ["SG4", "ER6"], "render", ["L:render:2"], "BITES", "SG4 finds the print `#sheet` and reds on its shadow; the Explorer's sheet loses position, shadow and its 0 base size; render reads no layout but L:render:2"],
+  ["SG4.a2", "SG4.a2", ["SG4.a2"], ["SG4", "ER6"], "render", ["L:render:2"], "BITES", "the census's mutation: the sheet rests at the plate depth"],
+  ["SG4.b1", "SG4.b1", ["SG4.b1"], ["SG4"], "reading-room", ["RR36", "RR39"], "BITES", "the Reading Room's `#sheet` rule renamed: static, unshadowed, its gesture box re-anchored on the fixed stage; RR40 and RR41 marked ?; LOCAL FIRST"],
+  ["SG4.b2", "SG4.b2", ["SG4.b2"], ["SG4"], "reading-room", ["RR39"], "BITES", "the Reading Room's sheet at the plate depth: RR39's own-against-probe read"],
+  ["SG4.a3", "SG4.a2 (derivation, green arm)", ["SG4.a3"], ["SG4", "ER6"], "render", [], "LOCAL", "the hand copy of the token's value alone: L:render:2 stays green (own equals the probe), as it must; the runner refuses an entry that expects no red, so this arm runs locally and is named so in the ledger"],
+  ["SG4.a4", "SG4.a2 (derivation, control)", ["SG4.a3", "TOKEN"], ["SG4", "ER6", "SH"], "render", ["L:render:2"], "BITES", "the hand copy with the token's value changed on top: the sheet keeps 0.55 while the token reads 0.5, so L:render:2's own-against-probe read reds"],
+  ["SG4.b3", "SG4.b2 (derivation, green arm)", ["SG4.b3"], ["SG4"], "reading-room", [], "LOCAL", "as SG4.a3 for the Reading Room: RR39 stays green; 2g-reading proved the same derivation on this file in two parts for RR-room 6's own test (its plan, 'RR-room 6': the hand copy alone local and green, the token changed on top red), so the browser half is on record; this pair is run again because it names SG4 in its unit half"],
+  ["SG4.b4", "SG4.b2 (derivation, control)", ["SG4.b3", "TOKEN"], ["SG4", "SH"], "reading-room", ["RR39"], "BITES", "the hand copy with the token changed on top: RR39's own-against-probe read reds"],
+  ["SG5.a1", "SG5.a1", ["SG5.a"], ["SG5"], "render", ["L:render:2"], "BITES", "the census's plant: the chart svg casts the stage shadow under the sheet's (L:zoom:2 would red too, on `zoom`, since the overlay is a bare svg as well)"],
+  ["SG5.a2", "SG5.a2", ["SG5.a2"], ["SG5"], "zoom", ["L:zoom:2"], "BITES", "the overlay-only plant, aimed by sibling order and naming no engine class (a `.voyage-overlay` arm in a host sheet is refused by `vellum/css-engine-dress-one-home` already): the voyage svg follows the chart in `#map` (`mapEl.appendChild` in `src/site/living-chart/voyage-session.ts`), so it casts the stage shadow and the chart stays clean (F18)"],
+  ["SG5.b", "SG5.b", ["SG5.b"], ["SG5"], "reading-room", ["RR39", "L:reading-room:1"], "BITES", "the bare plant in the room's sheet: RR39's chart-svg read and the overlay read"],
+  ["SG5.c", "SG5.c", ["SG5.c"], ["SG5"], "reading-room", ["RR39", "L:reading-room:1"], "BITES", "the same plant in the swept frame sheet"],
+  ["SG5.d", "SG5.d", ["SG5.d"], ["SG5"], "reading-room", ["L:reading-room:1"], "BITES", "the overlay-only plant in the room's sheet, by sibling order as SG5.a2 (F18); RR39's chart read stays green"],
+];
+const unitOf = (keys) => {
+  const by = {};
+  for (const k of keys) {
+    if (k === "PC") { by[PCF] = PC6.map((n) => ({ q: n })); continue; }
+    const f = fileOf(k);
+    (by[f] ??= []).push(N[k]);
+  }
+  return Object.entries(by).map(([f, ts]) => `\`${f}\`: ${ts.map((t) => (typeof t === "string" ? JSON.stringify(t) : `${JSON.stringify(t.q)} (?)`)).join("; ")}`).join(" | ") || "none (the edit leaves every unit test green; no unit block)";
+};
+const out = [];
+for (const [row, claims, ids, unit, sel, exp, kind, note] of R) {
+  const edits = ids.map(edit);
+  out.push(`- **${row}** (claim ${claims}). Edits: \`\` ${JSON.stringify(edits)} \`\`. Find occurrences: ${ids.map(() => "1").join(", ")}. Unit: ${unitOf(unit)}. E2e: \`${sel}\`, expect exactly \`${JSON.stringify(exp)}\`. ${kind}. ${note}.`);
+}
+writeFileSync(new URL("./779-2h-L-rows.md", import.meta.url), out.join("\n") + "\n");
+console.log(out.length, "rows");

@@ -1,0 +1,130 @@
+import { readFileSync } from "node:fs";
+import assert from "node:assert/strict";
+import { EDITS } from "./779-2h-L-finds.mjs";
+const ROOT = "<repo>/";
+const base = (p) => { try { return readFileSync(ROOT + p, "utf8"); } catch { return ""; } };
+const extra = [];
+const MULTI = { "LC7.w": ["LC7.w1", "LC7.w2"], "LC7.x": ["LC7.x1", "LC7.x2"], "SG4.a4": ["SG4.a3", "TOKEN"], "SG4.b4": ["SG4.b3", "TOKEN"] };
+let files = {};
+const read = (p) => (p in files ? files[p] : base(p));
+const SHEET = "public/living-chart.css";
+const soleRule = (css, selector) => {
+  const blocks = [...css.matchAll(new RegExp(`${selector.replace(/\./g, "\\.")}\\s*\\{[^}]*\\}`, "g"))];
+  assert.equal(blocks.length, 1);
+  return blocks[0][0];
+};
+const codeOf = (p) => read(p).replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+const ENGINE_RULES = [".place-overlay {", ".place-hit {", ".place-hit::after", "#place-card {", "#place-card[hidden]", "#place-card.pinned.pc-scrolls .pc-inner", "#place-card.flip-h", "#place-card.flip-v", ".pc-inner", ".pc-name", ".pc-rank", ".pc-founded", ".pc-former", ".pc-tongue", ".pc-roots", ".pc-tale", ".pc-acts", ".pc-prospect", ".pc-lay", ".place-overlay.scrub .place-hit", ".place-hit.pc-near", ".place-overlay.pc-over .place-hit:not(.pc-own)", ".place-hit.pc-near::after", '.living-chart g.settlement[data-ink="founding"]', '.living-chart g.settlement[data-ink="ruin"]', ".living-chart g.settlement[data-ink] > text", ".voyage-overlay", ".voyage-track", ".voyage-ship", ".voyage-rider", ".ages-range"];
+const T = {
+  LC1: () => { const css = read(SHEET); assert.ok(css.length > 0); for (const r of ENGINE_RULES) assert.ok(css.includes(r), r); },
+  LC2: () => {
+    const css = read(SHEET);
+    const hit = css.match(/\.place-hit\s*\{[^}]*transform:\s*([^;}]+)/);
+    assert.ok(hit);
+    assert.match(hit[1], /translate\(-50%,\s*-50%\)\s*scale\(calc\(1\s*\/\s*var\(--zoom-k,\s*1\)\)\)/);
+    const pseudos = css.match(/\.place-hit[:a-z-]*:after[^{]*\{[^}]*\}|\.place-hit[:a-z-]*::after[^{]*\{[^}]*\}/g) ?? [];
+    assert.ok(pseudos.length >= 2);
+    for (const rule of pseudos) assert.doesNotMatch(rule, /--zoom-k/);
+  },
+  LC3: () => {
+    const css = read(SHEET);
+    const z = (s) => Number((soleRule(css, s).match(/z-index:\s*(-?\d+)/) ?? [])[1]);
+    const raised = z(".place-hit.pc-near"), card = z("#place-card");
+    assert.ok(Number.isFinite(raised) && Number.isFinite(card));
+    assert.ok(raised > 0 && raised < card);
+  },
+  LC4: () => { const css = read(SHEET); for (const s of [".pc-acts", ".pc-lay", ".pc-lay.dim"]) soleRule(css, s); },
+  LC5: () => {
+    const css = read(SHEET);
+    const tongue = soleRule(css, ".pc-tongue");
+    assert.match(tongue, /border-top:/);
+    for (const [, rule] of [[".pc-tongue", tongue], [".pc-roots", soleRule(css, ".pc-roots")]]) assert.doesNotMatch(rule, /display:\s*none/);
+    const overlay = codeOf("src/site/living-chart/place-overlay.ts");
+    for (const cls of ["pc-tongue", "pc-roots"]) assert.ok(overlay.includes(`className = "${cls}"`));
+  },
+  LC6: () => {
+    const css = read(SHEET);
+    const flip = soleRule(css, "#place-card.flip-h");
+    assert.match(flip, /left:\s*auto/);
+    assert.match(flip, /right:\s*calc\(100% - var\(--pc-nx/);
+    assert.match(flip, /transform-origin:\s*100% 0/);
+    const b = soleRule(css, "#place-card");
+    assert.match(b, /left:\s*calc\(var\(--pc-nx/);
+    assert.match(b, /top:\s*calc\(var\(--pc-ny/);
+    const overlay = codeOf("src/site/living-chart/place-overlay.ts");
+    for (const prop of ["--pc-nx", "--pc-ny"]) assert.ok(overlay.includes(`setProperty("${prop}"`));
+    const at = overlay.indexOf("function showPlaceCard");
+    assert.notEqual(at, -1);
+    const body = overlay.slice(at, overlay.indexOf("\n  function ", at + 1));
+    assert.doesNotMatch(body, /\.style\.left\s*=/);
+  },
+  LC7: () => {
+    const css = read(SHEET);
+    for (const sel of ["#place-card", "#place-card.flip-h", "#place-card.flip-v", "#place-card.flip-h.flip-v"]) {
+      const tr = soleRule(css, sel).match(/transform:\s*([^;}]+)/);
+      assert.ok(tr);
+      const t = tr[1].replace(/\s+/g, " ");
+      for (const p of ["--pc-dx", "--pc-dy"]) assert.ok(t.includes(p));
+      assert.ok(t.startsWith("scale(calc(1 / var(--zoom-k, 1))) translate("));
+      assert.equal(t.split("translate(").length - 1, 1);
+      assert.equal(t.split("scale(").length - 1, 1);
+    }
+    const overlay = codeOf("src/site/living-chart/place-overlay.ts");
+    for (const p of ["--pc-dx", "--pc-dy"]) assert.ok(overlay.includes(`setProperty("${p}"`));
+  },
+  LC8: () => {
+    const page = read("src/pages/explorer/index.astro");
+    assert.ok(/id="map"[^>]*class="[^"]*\bliving-chart\b/.test(page) || /class="[^"]*\bliving-chart\b[^"]*"[^>]*id="map"/.test(page));
+    assert.ok(page.includes("/living-chart.css"));
+    assert.ok(read("src/layouts/BaseLayout.astro").includes("extraCss"));
+  },
+};
+const rulesIn = (css) => [...css.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((m) => ({ selector: m[1].trim(), body: m[2] }));
+const findRule = (css, s) => rulesIn(css).find((r) => r.selector === s);
+const CHART_MARKER = "[data-vellum-style]";
+const CHART_MOUNTS = [
+  { host: "Explorer", file: "public/explorer/index.css", mount: "#map", rule: "#sheet", token: "--stage-shadow" },
+  { host: "Reading Room", file: "public/reading-room/index.css", mount: ".rf-chart", rule: "#sheet", token: "--stage-shadow", sweep: ["public/reading-frame.css"] },
+];
+const DEPTH = /box-shadow:\s*var\(--(?:sheet|stage)-shadow\)/;
+Object.assign(T, {
+  SG3: () => { for (const [f, s] of [["public/explorer/index.css", `#map svg${CHART_MARKER}`], ["public/reading-frame.css", `.rf-chart svg${CHART_MARKER}`]]) { const fd = findRule(read(f), s); assert.ok(fd); assert.match(fd.body, /width:\s*100%/); } },
+  SG4: () => { for (const { file, rule, token } of CHART_MOUNTS) { const fd = findRule(read(file), rule); assert.ok(fd); assert.match(fd.body, new RegExp(`box-shadow:\\s*var\\(${token}\\)`)); } },
+  SG5: () => { for (const { file, mount, ...rest } of CHART_MOUNTS) { const sweep = rest.sweep ?? []; for (const { selector, body } of [file, ...sweep].flatMap((f) => rulesIn(read(f)))) { if (!DEPTH.test(body)) continue; for (const arm of selector.split(",").map((s) => s.trim())) { if (!arm.startsWith(mount) || !/\bsvg\b/.test(arm)) continue; assert.ok(arm.includes(CHART_MARKER)); } } } },
+  ER5: () => { assert.match(read("src/pages/explorer/index.astro"), /<div class="stage">[\s\S]*<div class="sheet" id="sheet">\s*<div class="sheet-inner" id="sheet-inner">\s*<div id="map-viewport"[^>]*>\s*<div id="map" class="living-chart"><\/div>\s*<\/div>\s*<div id="verso" aria-hidden="true"><\/div>/); },
+  ER6: () => {
+    const css = read("public/explorer/index.css");
+    assert.match(css, /\.stage\s*\{[^}]*padding:\s*var\(--reserve-top/);
+    assert.ok(!/max-width:\s*1100px/.test(css));
+    assert.match(css, /#map-viewport\.zoomable\s*\{[^}]*touch-action:\s*none/);
+    assert.match(css, /#map\s*\{[^}]*transform-origin:\s*0\s+0/);
+    assert.match(css, /#map svg\[data-vellum-style\]\s*\{[^}]*height:\s*100%/);
+    assert.match(css, /#sheet\s*\{[^}]*box-shadow:\s*var\(--stage-shadow\)/);
+    const print = css.match(/@media print\s*\{([\s\S]*)\}\s*$/);
+    assert.ok(print);
+    assert.match(print[1], /\.stage\s*\{[^}]*position:\s*static/);
+    assert.match(print[1], /#map\s*\{[^}]*transform:\s*none\s*!important/);
+  },
+  HS: () => {
+    const ruleOf = (css, re) => { const m = rulesIn(css).find((r) => re.test(r.selector)); return m ? m.body : ""; };
+    assert.ok(!/var\(--ink-brown\)/.test(ruleOf(read(SHEET), /\.ages-range:focus-visible/)));
+  },
+  SHELL: () => { const m = read("public/shell.css").match(/--stage-shadow:\s*([^;]+);/g) ?? []; assert.deepEqual(m.map((x) => x.replace(/--stage-shadow:\s*/, "").replace(/;$/, "").replace(/\s+/g, " ").trim()), ["0 18px 60px rgb(from var(--chart-ink) r g b / 0.55)"]); },
+  SC: () => {
+    const rule = rulesIn(read(SHEET)).find((r) => r.selector.split(",").map((s) => s.trim().replace(/\s+/g, " ")).includes(".pc-prospect:hover"));
+    assert.ok(rule); assert.match(rule.body, /transform:\s*translateY\(var\(--raise\)\)/);
+  },
+});
+const run = () => Object.entries(T).filter(([, f]) => { try { f(); return false; } catch { return true; } }).map(([k]) => k);
+files = {};
+console.log("control:", run().join(",") || "all green");
+for (const [mid, ids] of Object.entries(MULTI)) {
+  files = {};
+  for (const id of ids) { const [, file, find, replace] = EDITS.find((e) => e[0] === id); files[file] = read(file).split(find).join(replace); }
+  console.log(mid.padEnd(8), run().join(",") || "(green)");
+}
+for (const [id, file, find, replace] of [...EDITS, ...extra]) {
+  files = { [file]: base(file).split(find).join(replace) };
+  if (base(file).split(find).length - 1 !== 1) { console.log(id, "NOT UNIQUE"); continue; }
+  console.log(id.padEnd(8), run().join(",") || "(green)");
+}

@@ -1,0 +1,9 @@
+import { readFileSync, writeFileSync } from "node:fs";
+const [file, sectionFile] = process.argv.slice(2);
+const doc = readFileSync(file, "utf8");
+const body = readFileSync(sectionFile, "utf8");
+const start = doc.indexOf("### AK2\n\n| row |");
+const end = doc.indexOf("Row count: ");
+if (start < 0 || end < start) throw new Error("anchors not found");
+writeFileSync(file, doc.slice(0, start) + body + doc.slice(end));
+console.log("spliced", start, end);

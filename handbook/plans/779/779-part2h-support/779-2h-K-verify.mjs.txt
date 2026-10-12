@@ -1,0 +1,56 @@
+// Reads the appendix's section C tables back, checks them against 779-2h-rows-kit.json row for row, and recounts every find on the tree.
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { deepStrictEqual } from "node:assert/strict";
+
+const [doc, jsonFile, tree] = process.argv.slice(2);
+const md = readFileSync(doc, "utf8");
+const rows = JSON.parse(readFileSync(jsonFile, "utf8"));
+const c = md.slice(md.indexOf("## C. The rows"), md.indexOf("## D. The 2i table"));
+const NAMES = {
+  "test/site/atelier-kit.test.ts": "AK",
+  "test/site/astro-scaffold.test.ts": "AST",
+};
+const parsed = [];
+for (const line of c.split("\n")) {
+  if (!/^\| [A-Z]{2}\d\.[a-z]\d?(-\d)? \| `/.test(line)) continue;
+  const cells = line.slice(2, -2).split(/(?<!\\) \| /).map((s) => s.replace(/\\\|/g, "|"));
+  const [id, edits, unit, suites, expect, kind] = cells;
+  parsed.push({
+    id,
+    edits: JSON.parse(edits.slice(1, -1)),
+    unitCodes: unit.split("; "),
+    suites: suites.slice(1, -1),
+    expect: expect.split(", "),
+    kind: kind.replace(", measure first", ""),
+    measureFirst: kind.includes("measure first"),
+  });
+}
+let problems = 0;
+const fail = (m) => {
+  problems++;
+  console.log("MISMATCH", m);
+};
+if (parsed.length !== rows.length) fail(`table ${parsed.length} rows, JSON ${rows.length}`);
+for (let i = 0; i < Math.max(parsed.length, rows.length); i++) {
+  const t = parsed[i], j = rows[i];
+  if (!t || !j) continue;
+  try {
+    deepStrictEqual(
+      { id: t.id, edits: t.edits, suites: t.suites, expect: t.expect, kind: t.kind, mf: t.measureFirst, units: t.unitCodes.length },
+      { id: j.id, edits: j.edits, suites: j.e2e.suites, expect: j.e2e.expect, kind: j.kind, mf: !!j.measureFirst, units: j.unit.expect.length },
+    );
+  } catch (err) {
+    fail(`${t.id}: ${err.message.split("\n").slice(0, 6).join(" ")}`);
+  }
+  for (const ed of j.edits) {
+    const n = readFileSync(join(tree, ed.file), "utf8").split(ed.find).length - 1;
+    if (n !== 1) fail(`${j.id} ${ed.file} find occurs ${n}`);
+  }
+  for (const f of j.unit.files) if (!NAMES[f] && !/^test\/site\//.test(f)) fail(`${j.id} unit file ${f}`);
+  for (const name of j.unit.expect) {
+    const ok = j.unit.files.some((f) => readFileSync(join(tree, f), "utf8").includes(`test(${JSON.stringify(name)}`));
+    if (!ok) fail(`${j.id} unit test not found by exact name: ${name.slice(0, 60)}`);
+  }
+}
+console.log(`table rows ${parsed.length}, JSON rows ${rows.length}, problems ${problems}`);
