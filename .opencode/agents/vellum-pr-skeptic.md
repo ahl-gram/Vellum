@@ -1,7 +1,7 @@
 ---
 description: Adversarial cold review of a pull request before Alex reads it. Dispatch it COLD, meaning the prompt must be a PR number or branch name and NOTHING else, no summary of the work, no claims about tests, no rationale from the implementing session. It reconstructs the spec from the linked issue (body AND comments), attacks the diff with commands it runs itself, checks the Vellum contracts a generic reviewer does not know, and returns ranked findings or a documented failed attack. Use on every PR after it is pushed and before Alex is asked to review.
 mode: subagent
-model: anthropic/claude-opus-5-5#xhigh
+model: opencode/gpt-6.1-sol#max
 color: "#800080"
 permissions:
   - action: "*"

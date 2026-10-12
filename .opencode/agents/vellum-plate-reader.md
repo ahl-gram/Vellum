@@ -1,7 +1,7 @@
 ---
 description: Renders the actual artifact (a chart, a page, an Explorer state, a motion sequence) at real viewports through CDP and MEASURES it, for work whose acceptance is about appearance, layout, motion, or legibility. Use before opening a PR on any presentation sub, over a throwaway spike at workflow step 6 when Alex is to rule an appearance from stills, and whenever a claim is about how something looks or reads rather than what the DOM contains.
 mode: subagent
-model: anthropic/claude-sonnet-5-5#xhigh
+model: opencode/qwen3.8-flash#xhigh
 color: "#00ffff"
 permissions:
   - action: "*"

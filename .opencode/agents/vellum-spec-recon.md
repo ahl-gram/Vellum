@@ -1,7 +1,7 @@
 ---
 description: Checks that an issue or epic is still true before code is written against it. Fetches the issue body AND its comments, verifies every cited path, symbol, test name, count, and claim against the repo as it stands, and returns a CURRENT / STALE / UNVERIFIABLE ledger plus the open decisions Alex has not ruled on. Use at the start of any sub or epic, and before building on any plan written more than a few sessions ago.
 mode: subagent
-model: anthropic/claude-opus-5-5#xhigh
+model: opencode/glm-5.3#max
 color: "#0000ff"
 permissions:
   - action: "*"
