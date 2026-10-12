@@ -17,12 +17,11 @@ export const shellRefusal = async (event: ShellEvent): Promise<string | null> =>
 
 export const toolRefusal = async (event: ToolEvent): Promise<string | null> => {
   const input = event.input ?? {};
-  const shared = { session_id: event.sessionID, cwd_persists: false };
   if (event.tool === "write") {
-    return refusalOf({ ...shared, tool_name: "Write", tool_input: { file_path: text(input.path), content: text(input.content) } });
+    return refusalOf({ tool_name: "Write", tool_input: { file_path: text(input.path), content: text(input.content) } });
   }
   if (event.tool === "edit") {
-    return refusalOf({ ...shared, tool_name: "Edit", tool_input: { file_path: text(input.path), new_string: text(input.newString) } });
+    return refusalOf({ tool_name: "Edit", tool_input: { file_path: text(input.path), new_string: text(input.newString) } });
   }
   return null;
 };

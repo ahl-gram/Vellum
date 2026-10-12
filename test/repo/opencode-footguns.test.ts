@@ -37,9 +37,32 @@ test("the OpenCode write and edit tools map onto the Claude hook's fields, so a 
   assert.equal(await toolRefusal({ ...edit, input: { ...edit.input, path: "src/probe.ts" } }), null);
 });
 
-test("an OpenCode tool the plugin does not map is never refused", async () => {
-  assert.equal(
-    await toolRefusal({ tool: "read", input: { path: "scripts/probe.ts", content: SILENT_ESCAPE_SOURCE } }),
-    null,
+test("an OpenCode tool the plugin does not map is never refused, whatever fields it carries", async () => {
+  for (const tool of ["read", "multiedit", "patch", "apply_patch", "bash", "shell", "glob"]) {
+    const input = { path: "scripts/probe.ts", content: SILENT_ESCAPE_SOURCE, newString: SILENT_ESCAPE_SOURCE };
+    assert.equal(await toolRefusal({ tool, input }), null, tool);
+  }
+});
+
+test("a gate note or warning from the Claude hook is never turned into a refusal", async () => {
+  assert.equal(await shellRefusal({ command: "pkill brave", cwd: ROOT }), null);
+  const noisy = "const re = `a\\(b`;\n";
+  assert.equal(await toolRefusal({ tool: "write", input: { path: "scripts/probe.ts", content: noisy } }), null);
+  assert.equal(await toolRefusal({ tool: "edit", input: { path: "scripts/probe.ts", newString: noisy } }), null);
+});
+
+test("a call the rules cannot read fails open rather than refusing every command", async () => {
+  assert.equal(await shellRefusal({ command: 5 as unknown as string, cwd: ROOT }), null);
+  assert.equal(await toolRefusal({ tool: "write" }), null);
+  assert.equal(await toolRefusal({ tool: "edit" }), null);
+});
+
+test("switching off the bare-cd refusal leaves every other shell refusal standing", async () => {
+  const scriptWrite = `cat > scripts/probe.ts <<'EOF'\n${SILENT_ESCAPE_SOURCE}EOF`;
+  assert.match((await shellRefusal({ command: scriptWrite, cwd: ROOT })) ?? "", /inside a backtick string/);
+  assert.match((await shellRefusal({ command: "perl -pi -e 's/a/é/' file.txt", cwd: ROOT })) ?? "", /non-ASCII/);
+  assert.match(
+    (await shellRefusal({ command: "gh api repos/o/r/issues/1 -f body=x", cwd: ROOT })) ?? "",
+    /switches `gh api` to POST/,
   );
 });
