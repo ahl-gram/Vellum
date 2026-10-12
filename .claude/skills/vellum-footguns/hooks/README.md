@@ -4,11 +4,12 @@ A PreToolUse hook that puts the skill's gates in front of the model at the momen
 or a shared test helper, a browser-driving script, a stylesheet, or anything that can move a chart or the golden, creates a
 file that joins a roster, or pushes; and refuses the mechanical never-list outright. It is wired in the repo's `.claude/settings.json`, so it runs in
 every session launched from the Vellum root or a worktree. The skill works without it if that block
-is ever removed.
+is ever removed. OpenCode reaches the same refusals, never the gates, through `.opencode/plugins/footguns/`, which hands
+`decide` its shell, write and edit calls with `cwd_persists: false`, since an OpenCode shell call never moves its session.
 
 ## What it does
 
-- **Injects a gate once per session**, reading the text from `SKILL.md` so the skill stays the single
+- **Injects a gate once per session**, reading the text from `.claude/skills/vellum-footguns/SKILL.md` so the skill stays the single
   source: Gate 1 on `test/**/*.test.ts`; Gate 2 on `.mjs` under `scripts/`, `out/` and `e2e/`, and on `.ts` under `e2e/` and `out/` (the whole e2e tree: the harness, the runners, the suites, their helpers and the two proof tools; never all of `scripts/**/*.ts`, since the first matching route wins and Gate 6 owns the render scripts); Gate 3 on
   `*.css` and `*.astro`; Gate 4 on a Write that creates a new file under `src/pages/`, `src/site/`,
   `e2e/suites/*.ts` (a suite, never a file in a suite's folder) or `public/*.css`, never a `*.test.ts` or a file in a `test-support/` folder, since a test or its helper joins no roster and its path can echo one (`test/e2e/suites/`); Gate 5 on `git push` and `gh pr create` / `gh pr edit`;
@@ -278,7 +279,7 @@ node .claude/skills/vellum-footguns/hooks/footgun-gate.selftest.ts
 
 One line per fixture, `ok` or `FAIL` with the decision and the text it expected; the exit code is
 the number of misses. Every gate's text is asserted non-empty first, so a renamed heading in
-`SKILL.md` fails here rather than shipping an empty injection, and the PR template is asserted to
+`.claude/skills/vellum-footguns/SKILL.md` fails here rather than shipping an empty injection, and the PR template is asserted to
 carry sections and no em-dash, so a template that would prefill an unusable body fails here too.
 The five section names are written out in the fixture table and derived in the hook; that asymmetry
 is deliberate, since fixtures built by reading the template would follow a rename and red nothing.

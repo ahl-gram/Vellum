@@ -20,7 +20,7 @@ export type ToolInput = {
   command?: string;
   edits?: { new_string?: string }[];
 };
-export type Payload = { tool_name?: string; session_id?: string; cwd?: string; agent_id?: string; tool_input?: ToolInput };
+export type Payload = { tool_name?: string; session_id?: string; cwd?: string; agent_id?: string; cwd_persists?: boolean; tool_input?: ToolInput };
 type Output = { hookEventName: "PreToolUse"; permissionDecision?: "deny"; permissionDecisionReason?: string; additionalContext?: string };
 export type Decision = { hookSpecificOutput: Output } | null;
 
@@ -354,7 +354,7 @@ const checkBash = async (payload: Payload, sessionId: string): Promise<Decision>
     if (refusal) return refusal;
     notes.push(note);
   }
-  const moved = payload.agent_id === undefined ? bareCdReason(command, cwd, process.env.CLAUDE_PROJECT_DIR) : null;
+  const moved = payload.agent_id === undefined && payload.cwd_persists !== false ? bareCdReason(command, cwd, process.env.CLAUDE_PROJECT_DIR) : null;
   if (moved) return deny(moved);
   if (parts.some((s) => GH_PR_WRITE.test(s) || gitCall(s)?.sub === "push")) {
     notes.push(gateNote(sessionId, "push", "Gate 5", "You are about to push or write a PR body."));
