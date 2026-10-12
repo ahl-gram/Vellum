@@ -1,21 +1,26 @@
 # Running several lanes at once
 
-**This file is the orchestrating session's half of running several `vellum-implementer` lanes at
-once**: how it briefs them, relays their menus and Alex's rulings, watches them, recovers one that
+**This file is the orchestrating session's half of running several lanes at once**, a lane being
+one issue's `vellum-planner` and then its `vellum-implementer`: how it briefs them, relays their menus and Alex's rulings, watches them, recovers one that
 stalls or loses its tree, merges what it is cleared to merge, and retires them. Read it before
 dispatching a second lane, and before handing an issue from one lane to another.
 
-Each lane runs `handbook/specs/development-workflow.md` from start to finish, and the lane's own half
-is `.claude/agents/vellum-implementer.md`'s: its branch, its tree, its scratch files, its STOP, and
-never merging. `CLAUDE.md`'s Worktrees section holds the worktree conduct every session keeps. This
+Each lane runs `handbook/specs/development-workflow.md` from start to finish, the planner through
+step 6 and the implementer from step 7, and the lane's own half is its two definitions':
+`.claude/agents/vellum-planner.md` holds the plan, the STOP and the folded rulings, and
+`.claude/agents/vellum-implementer.md` the branch, the build, the hand-back and never merging. `CLAUDE.md`'s Worktrees section holds the worktree conduct every session keeps. This
 file points at those homes rather than restating them, and where a step here meets one of them, that
 home's line wins for the lane and this file's for the orchestrator.
 
 ## Dispatching lanes
 
-- **Dispatch a `vellum-implementer` per issue**, or per issue that ships as several pull requests;
-  never a general-purpose agent with a retyped brief. The definition carries the model, the effort,
-  the worktree isolation and the sequence, and a retyped brief drops one of them.
+- **Dispatch a `vellum-planner` per issue**, or per pull request of an issue that ships as several,
+  and a `vellum-implementer` on its plan only once the planner reports "Open decisions: none"; never
+  a general-purpose agent with a retyped brief. Each definition carries the model, the effort, the
+  worktree isolation and its half of the sequence, and a retyped brief drops one of them.
+- **The implementer's brief adds the plan's absolute scratchpad path**, and nothing of the planner's
+  reasoning beyond what the plan itself says: the plan is the contract, and a builder told why a
+  design was chosen is a builder invited to re-choose it.
 - **The brief carries what the lane cannot read for itself**: the issue number; the lanes running
   beside it and the files each owns; where two lanes must edit the same lines, the order they merge
   in (`vellum-footguns` Gate 5 item 9) and the instruction to keep both edits in that order; the
@@ -23,7 +28,7 @@ home's line wins for the lane and this file's for the orchestrator.
   quoted from its posted comment; and, where it asks for a read of the roadmap board, a read that
   counts its rows against the board's total, since a listing cut short is not an absence (the Never
   list).
-- **Several lanes may sit in phase one at once.** Recon, the plan and the plan skeptic write no code,
+- **Several planners may run at once.** Recon, the plan and the plan skeptic write no code,
   so running them together is cheap and batches Alex's menus into one sitting; the builds are the
   expensive part.
 - **No agent in a parallel run runs the full local e2e lanes.** A starved machine stalls the lanes
@@ -35,10 +40,16 @@ home's line wins for the lane and this file's for the orchestrator.
 
 ## The STOP and the relay
 
-- **A lane's menu is its hand-back** (workflow step 6). Put it to Alex; post his answer on the issue
-  as a dated comment the moment he gives it, in his own words; then message the same lane with the
-  rulings, quoting that comment, never a paraphrase. The lane's own record points at the post rather
-  than restating it (workflow step 12).
+- **A planner's menu is its hand-back** (workflow step 6). Put it to Alex; post his answer on the
+  issue as a dated comment the moment he gives it, in his own words; then message the same planner
+  with the rulings, quoting that comment, never a paraphrase, so it folds them into the plan. The
+  implementer's record points at the post rather than restating it (workflow step 12).
+- **Once the planner reports the plan finished, retire its tree** after copying its `out/` across
+  (Retiring, below), and dispatch the implementer on the plan's path.
+- **An implementer's hand-back goes to the planner**, resumed by a message or dispatched fresh with
+  the issue, the plan's path and the hand-back, and from the planner to Alex when it opens a
+  decision. Never answer a hand-back yourself with a design call: that puts the decision back in the
+  cheaper lane by another route. The implementer resumes on the revised plan's path.
 - **A ruling a lane will need before its own record is on the issue before the lane is briefed.** A
   standing ruling above all: a cold plan skeptic reads only the issue, and raises a rule it finds
   nowhere there as a defect.
@@ -107,7 +118,8 @@ home's line wins for the lane and this file's for the orchestrator.
   file blocks both commands: move it to the Trash first. Then link `node_modules` by path as
   `scripts/agent-sandbox.ts` does, bring a lane that had no commits current with
   `git -C <path> merge --ff-only origin/main`, and message the lane to resume from its scratchpad
-  plan.
+  plan. A planner's lost tree is rebuilt only when it held a spike whose stills were not yet copied;
+  otherwise its plan in the scratchpad is all it needs, and it resumes without one.
 
 ## Merging
 
@@ -166,10 +178,10 @@ home's line wins for the lane and this file's for the orchestrator.
 ## Handing over and retiring a lane
 
 - **Plan a handover at each pull request boundary of an issue that ships as several**, and take a
-  lane's own estimate of its remaining context as a guess. A fresh lane takes over from the committed
-  plan, the issue's comments (the rulings and the numbered calls) and the earlier lane's prefixed
-  scratch tools, and runs recon and the plan skeptic on its own pull request's row, as workflow
-  step 8's plan per pull request implies.
+  lane's own estimate of its remaining context as a guess. A fresh `vellum-planner` takes over from
+  the committed plan, the issue's comments (the rulings and the numbered calls) and the earlier
+  lane's prefixed scratch tools, and runs recon and the plan skeptic on its own pull request's row,
+  as workflow step 8's plan per pull request implies; a fresh implementer builds that plan.
 - **Retire a lane's tree once its last pull request has merged and it has reported.** Copy its `out/`
   first, giving each delivery folder copied its page as workflow step 6 says: `git worktree remove`
   deletes the gitignored `out/`, and `git status --porcelain` reports nothing there. The harness locks the tree to the session's own process, so unlock it once the lane
@@ -191,6 +203,6 @@ home's line wins for the lane and this file's for the orchestrator.
 ---
 
 *Companion to `handbook/specs/development-workflow.md` (the sequence each lane runs),
-`.claude/agents/vellum-implementer.md` (the lane's own half), `CLAUDE.md` (the worktree conduct and
+`.claude/agents/vellum-planner.md` and `.claude/agents/vellum-implementer.md` (the lane's own half), `CLAUDE.md` (the worktree conduct and
 the board), and `.claude/skills/vellum-footguns/SKILL.md` (the gates, the Never list and the
 defaults this file points at).*

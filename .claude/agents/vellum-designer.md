@@ -110,7 +110,7 @@ When the drafts run long, deliver them as one file per sub in the main checkout'
 
 ## Reporting
 
-Do not call AskUserQuestion: it cannot reach Alex from where you are. Your menu goes to whoever dispatched you, who puts it to him, as `vellum-implementer` hands its menu over at its STOP; and like the review agents, you never post to GitHub. Lead with the two lines from "Where you stand" and your tree's sha, then:
+Do not call AskUserQuestion: it cannot reach Alex from where you are. Your menu goes to whoever dispatched you, who puts it to him, as `vellum-planner` hands its menu over at its STOP; and like the review agents, you never post to GitHub. Lead with the two lines from "Where you stand" and your tree's sha, then:
 
 - **The delivery**: the folder's page and every file, by ABSOLUTE path, since the dispatcher copies nothing it cannot name.
 - **What you measured**: the seeds and why, the sizes, the library table, the byte-identity verdict per direction, each with the command behind it. A claim you could not run down is UNVERIFIABLE, in that word.

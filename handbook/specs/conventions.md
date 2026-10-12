@@ -144,7 +144,7 @@ what it reads and what passes.
 
 **A new spec file joins its reading lists by hand, and none of them checks itself**: the table in
 `CLAUDE.md`, step 3 of `handbook/specs/development-workflow.md`, the reading list in
-`.claude/agents/vellum-implementer.md`, and the sibling paragraph and companion footer of
+`.claude/agents/vellum-planner.md`, and the sibling paragraph and companion footer of
 `handbook/specs/rulebook.md`. The other specs name only the siblings they lean on, so a new file joins those
 where a citation of its parent pointed into the text it took.
 
