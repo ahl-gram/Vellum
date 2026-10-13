@@ -1,12 +1,15 @@
 // Explorer render core e2e (R): worker active, worker/inline byte-parity, the committed-chart ULP check, the thematic layer, coast warp, Tide Wheel and arms toggle.
 import { makeStep } from "../support/step.ts";
 import type { SuiteContext } from "../types.ts";
+import { r16HostContract } from "./render/room.ts";
+import { r17SheetDepth } from "./render/dress.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { evaluate, check } = ctx;
   // R0 through R4, R13d and R14 are deliberately not stepped: they drive the engine directly, with no wait to give up.
   const step = makeStep(ctx);
   await r0ToR4Worker(ctx);
+  await step("R16", () => r16HostContract(ctx));
   await step("R8", () => r8Theme(ctx));
 
   const landPresent = await evaluate<boolean>(`!!document.getElementById("land")`);
@@ -47,6 +50,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   }
 
   await r14Region(ctx);
+  await step("R17", () => r17SheetDepth(ctx));
 }
 
 export async function r0ToR4Worker({ evaluate, check, waitReady }: SuiteContext): Promise<void> {
