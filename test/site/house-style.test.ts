@@ -18,101 +18,15 @@ test("the status role's colour is ink-faded, a colour no served pill wears (#324
   assert.match(ruleOf(house(), /\.status/), /color:\s*var\(--ink-faded\)/, ".status is ink-faded");
 });
 
-test("the archivist's label, two tiers (#324 decision 5, candidate B)", () => {
-  const label = ruleOf(house(), /\.archivist-label/);
-  assert.match(label, /font-size:\s*0\.72rem/);
-  assert.match(label, /letter-spacing:\s*0\.1em/);
-  assert.match(label, /font-weight:\s*400/);
-  assert.match(label, /text-transform:\s*uppercase/);
-  assert.match(label, /color:\s*var\(--ink-faded\)/);
+test("the archivist's head tier holds its size and spacing (#324 decision 5, candidate B; kept for Issue #779 part 2i: HOLE on the runner, run 38340335013, since RH27 reads the Explorer's group head within 0.05 rem, so a step of 0.02 rem in the size or 0.02 em in the spacing passes it)", () => {
   const head = ruleOf(house(), /\.archivist-head/);
   assert.match(head, /font-size:\s*0\.82rem/);
   assert.match(head, /letter-spacing:\s*0\.18em/);
-  assert.match(head, /font-weight:\s*600/);
-  assert.match(head, /text-transform:\s*uppercase/);
-  assert.match(head, /color:\s*var\(--ink-faded\)/);
 });
 
-test("the control idiom: cream, 1.5px ink-dark, 4px, one primary (#324)", () => {
-  const css = house();
-  const base = ruleOf(css, /input\[type="number"\],\s*select,\s*button/);
-  assert.match(base, /background:\s*var\(--control-cream\)/);
-  assert.match(base, /border:\s*1\.5px solid var\(--ink-dark\)/);
-  assert.match(base, /border-radius:\s*4px/);
-  assert.match(base, /font-size:\s*0\.95rem/);
-  const primary = ruleOf(css, /button\.primary/);
-  assert.match(primary, /background:\s*var\(--ink-dark\)/);
-  assert.match(primary, /color:\s*var\(--chart-paper\)/, "the primary's lettering is the chart paper");
-  const primaryHover = ruleOf(css, /button\.primary:hover/);
-  assert.match(primaryHover, /background:\s*var\(--ink-press\)/);
-  const link = ruleOf(css, /a\.control/);
-  assert.match(link, /text-decoration:\s*none/, "a.control dresses a link as the idiom");
-  assert.match(css, /:not\(\.place-hit\):hover/, "the hover excludes the engine's invisible hit targets");
-});
-
-test("the focus ring: 2px ink-dark, everywhere (#324 decision 6)", () => {
-  assert.match(
-    house(),
-    /:focus-visible[^{]*\{[^}]*outline:\s*2px solid var\(--ink-dark\)/,
-    "the house sheet binds the ratified focus ring",
-  );
-  assert.ok(
-    !/var\(--ink-brown\)/.test(ruleOf(read("public/living-chart.css"), /\.ages-range:focus-visible/)),
-    "the ages-range ring conforms to ink-dark",
-  );
-});
-
-test("the roles are worn: page markup carries the shared classes (#324)", () => {
-  const wears = (file: string, pattern: RegExp, what: string) => {
-    assert.match(read(file), pattern, `${file}: ${what}`);
-  };
-  wears("src/pages/index.astro", /<button[^>]*class="[^"]*primary/, "Draw it joins the primary idiom");
-  wears(
-    "src/pages/index.astro",
-    /<input id="seed-input" class="control"/,
-    "the seed input opts into the idiom (type=text for the iOS numeric keypad, so the attribute selector cannot see it)",
-  );
-  wears(
-    "src/pages/gallery/index.astro",
-    /<p class="dateline">\{dateline\}<\/p>/,
-    "the gallery's count is the folio corner's line",
-  );
-  wears("src/pages/seed-of-the-day/index.astro", /class="[^"]*hunt-intro intro/, "the hunt intro is an intro");
-  wears(
-    "src/pages/seed-of-the-day/index.astro",
-    /<p class="dateline" id="dateline">/,
-    "the dateline is the folio corner's line",
-  );
-  wears(
-    "src/pages/seed-of-the-day/index.astro",
-    /<LegendButton road=\{r\.road\}/,
-    "the roads out are legend buttons (the kit's, #487)",
-  );
-  wears(
-    "src/pages/print-room/index.astro",
-    /<button class="legend-btn" type="button" data-poster=/,
-    "the poster plates are legend buttons",
-  );
-  wears(
-    "src/pages/print-room/index.astro",
-    /<button id="pr-draw" class="primary"/,
-    "Pull a proof is the room's primary",
-  );
-  wears(
-    "src/pages/explorer/index.astro",
-    /class="panel-head archivist-head"/,
-    "the Broadside group heads are standing heads",
-  );
-  wears(
-    "src/pages/faq/index.astro",
-    /<p class="dateline">\{count\}<\/p>/,
-    "the question count is the folio corner's line",
-  );
-  wears(
-    "src/pages/glossary/index.astro",
-    /<input class="control" type="search"/,
-    "the find box opts into the control idiom",
-  );
+test("the control idiom's border is 1.5px (#324; kept for Issue #779 part 2i: Chromium reads a 1.5px border as 1px at a device pixel ratio of 1 and of 2, measured 2026-10-13, so no browser read here tells it from 1px)", () => {
+  const base = ruleOf(house(), /input\[type="number"\],\s*select,\s*button/);
+  assert.match(base, /border:\s*1\.5px /);
 });
 
 // A rule for a class no element wears paints nothing, so this retire pin stays a source read for part 2i of Issue #779.

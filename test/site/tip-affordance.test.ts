@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import { GENERATED_CSS, sheetsOnDisk } from "../../scripts/lint/sheet-tokens.ts";
 import { SITE_SHEETS, SRC_CSS_FILES } from "../../test-support/site-sheets.ts";
 
-// What tips and what pins its bullet is the stylesheet lint's (vellum/css-tip-goes-somewhere and vellum/css-inline-block-bullet, Issue #779 part 2d); this file holds the footnote marks' tip, the roster of CSS-bearing sources under src/ that the lint reaches by running them (test/repo/css-beyond-sheets.test.ts), and the sheets the lint's walk of public/ reads.
+// What tips and what pins its bullet is the stylesheet lint's (vellum/css-tip-goes-somewhere and vellum/css-inline-block-bullet, Issue #779 part 2d); this file holds the roster of CSS-bearing sources under src/ that the lint reaches by running them (test/repo/css-beyond-sheets.test.ts), and the sheets the lint's walk of public/ reads. The footnote marks' tip is `broadside` BR13's (Issue #779 part 2h).
 
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 const read = (p: string) => readFileSync(root(p), "utf8");
@@ -34,14 +34,6 @@ const cssBearingSources = (): string[] =>
       const source = withoutComments(read(p));
       return CSS_FINGERPRINTS.some(([, matches]) => matches(source));
     });
-
-test("the footnote marks go to the glossary, so they tip, at the wordmark's numbers (#270 ruling 7)", () => {
-  assert.match(
-    read("public/explorer/broadside.css"),
-    /a\.fn:hover\s*\{\s*transform:\s*translateY\(var\(--raise\)\)\s+rotate\(-0\.6deg\)/,
-    "the marks navigate but carry no tip; ruling 7 extends the tipping surface to them",
-  );
-});
 
 test("the authored roster is exactly the css-bearing sources under src/ (#360)", () => {
   assert.deepEqual(

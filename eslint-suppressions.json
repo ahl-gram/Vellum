@@ -473,17 +473,7 @@
       "count": 2
     }
   },
-  "test/site/atelier-kit.test.ts": {
-    "max-lines-per-function": {
-      "count": 1
-    }
-  },
   "test/site/contents-row.test.ts": {
-    "max-lines-per-function": {
-      "count": 1
-    }
-  },
-  "test/site/house-style.test.ts": {
     "max-lines-per-function": {
       "count": 1
     }
@@ -498,16 +488,6 @@
   },
   "test/site/print-room-contents.test.ts": {
     "max-lines-per-function": {
-      "count": 1
-    }
-  },
-  "test/site/room.test.ts": {
-    "max-lines-per-function": {
-      "count": 1
-    }
-  },
-  "test/site/table-address.test.ts": {
-    "max-lines": {
       "count": 1
     }
   }

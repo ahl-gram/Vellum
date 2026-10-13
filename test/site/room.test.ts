@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { globSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { GLASS_GAP_REM, pressRowStacks, rowSheds } from "../../src/site/shared/room-seats.ts";
 import { bindRoom } from "../../src/site/shared/room.ts";
@@ -14,61 +14,6 @@ test("the Glass's computed seat beside an open slip is the sheet's own arithmeti
   );
   assert.ok(m, "atelier.css seats the Glass at --slip-w plus two rem terms");
   assert.equal(Number(m[1]) + Number(m[2]), GLASS_GAP_REM, "room-seats.ts's GLASS_GAP_REM drifted from the sheet");
-});
-
-test("the room folio's panel is painted screen-only (#538): on paper the corner goes static and in flow, and an absolute panel on a static corner resolved against the whole page (e2e RH10c and SB9b pin the resolved value)", () => {
-  const REPO = resolve(import.meta.dirname, "..", "..");
-  const strip = (p: string) =>
-    readFileSync(resolve(REPO, p), "utf8").replace(/"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|\/\*[\s\S]*?\*\//g, (m) =>
-      m.startsWith("/*") ? "" : m,
-    );
-  // The sweep errs toward flagging: any tr or folio-room word in a content-giving before or after selector, any case, any spelling; the wrap's window is its own brace-matched close, and a brace inside a string can only close it early or never, so the window is never too wide; a quoted string passes the comment stripper whole, so a "/*" in a content value hides nothing. What it cannot see, named: native nesting (no sheet uses it) and a selector reaching the folio by a shared class or by structure; RH10c and SB9b read the resolved content.
-  const paints = (css: string) =>
-    [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].filter(
-      ([, sel, decls]) =>
-        /:{1,2}(before|after)/i.test(sel!) && /\b(tr|folio-room)\b/i.test(sel!) && /content\s*:/i.test(decls!),
-    );
-  const css = strip("public/atelier.css");
-  const screen = css.indexOf("@media screen {");
-  const closeOf = (open: number) => {
-    let depth = 0;
-    for (let i = open; i < css.length; i++) {
-      if (css[i] === "{") depth++;
-      else if (css[i] === "}" && --depth === 0) return i;
-    }
-    return -1;
-  };
-  const close = screen >= 0 ? closeOf(screen) : -1;
-  assert.ok(screen >= 0 && close > screen, "the kit carries a screen-only block");
-  assert.match(
-    css.slice(screen, close),
-    /\.corner\.tr::before[^{]*\{[^}]*content\s*:\s*""/i,
-    "the painting rule that gives the folio panel its content sits inside it",
-  );
-  const kit = paints(css);
-  assert.ok(kit.length >= 1, "at least one rule gives the folio's pseudo content");
-  for (const m of kit)
-    assert.ok(
-      m.index > screen && m.index < close,
-      `a rule giving the folio's pseudo content sits outside the screen-only wrap: ${m[1]!.trim().slice(0, 80)}`,
-    );
-  const sheets = [
-    ...globSync("public/**/*.css", { cwd: REPO }),
-    ...globSync("src/**/*.astro", { cwd: REPO }),
-    ...globSync("src/cli/*.ts", { cwd: REPO }),
-  ]
-    .filter((p) => p !== "public/atelier.css")
-    .sort();
-  assert.ok(
-    sheets.includes("src/cli/gallery.ts") && sheets.includes("public/shell.css"),
-    "the sweep reaches the generated Gallery sheet and the shell sheet",
-  );
-  for (const p of sheets)
-    assert.deepEqual(
-      paints(strip(p)).map((m) => m[1]!.trim().slice(0, 80)),
-      [],
-      `${p} paints the folio's pseudo itself; the panel belongs to the kit`,
-    );
 });
 
 test("the kit's print blocks scope every message-box stand-down to the stage (#566, ruled 2026-09-11; kept for Issue #779 part 2i: every .status and .warning stands in a stage, so an unscoped arm would hide nothing a browser here can see)", () => {
@@ -106,24 +51,14 @@ test("the kit's print blocks scope every message-box stand-down to the stage (#5
     );
 });
 
-// This reads public/atelier.css alone, so a page sheet re-raising the opacity would pass it: extraCss links after the kit and wins on equal specificity. CD23 and CD24 read the resolved value and are the guard for that (Issue #547).
-test("the kit gives the stage's status pill its fade, keyed to the class so every chart room's pill wears it (#547)", () => {
+test("the kit's fade arms stand on a chart room's stage and name no page's id (#547; kept for Issue #779 part 2i: every .status stands in a chart room's stage, so a broadened arm, or an id arm beside the class arm, changes nothing served; RH26 reads every room's fade)", () => {
   const css = readFileSync(resolve(import.meta.dirname, "..", "..", "public/atelier.css"), "utf8").replace(
     /\/\*[\s\S]*?\*\//g,
     "",
   );
-  const base = css.match(/body\.chart-room \.stage \.status\s*\{([^}]*)\}/);
-  assert.ok(base, "the kit dresses the stage's pill");
-  assert.match(
-    base[1]!,
-    /transition:\s*opacity\s+0\.45s/,
-    "the pill carries the fade's own duration, the one src/site/shared/announce.ts waits out before it clears the text",
-  );
-  // Every arm, keyed on the bare class: `.status.fading` as the anchor misses `#pf-status.fading`, the one spelling that leaves a page's announcement standing (skeptic round 2 on PR #584).
   const fades = [...css.matchAll(/([^{}]*\.fading[^{}]*)\{([^}]*)\}/g)];
-  assert.ok(fades.length > 0, "and the kit carries the arm the announcer turns on");
+  assert.ok(fades.length > 0, "the kit carries the arm the announcer turns on");
   for (const fade of fades) {
-    assert.match(fade[2]!, /opacity:\s*0/, `which is what fading means: ${fade[1]!.trim()}`);
     assert.match(
       fade[1]!,
       /body\.chart-room \.stage\b/,

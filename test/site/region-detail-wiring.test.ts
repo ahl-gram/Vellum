@@ -11,7 +11,7 @@ import { renderMap, type RenderOptions } from "../../src/render/map-renderer.ts"
 import { recipeFromSvg } from "../../src/render/recipe-meta.ts";
 import { LOD_BANDS, lodWindowFor, type LodBand } from "../../src/world/lod.ts";
 
-// What the Glass dispatches (Issue #400): the bands are the Explorer's own (lod.ts), so these run the real runInline; the worker's own region branch is held to runInline by its source at the foot of this file and proved live by e2e R14.
+// What the Glass dispatches (Issue #400): the bands are the Explorer's own (lod.ts), so these run the real runInline; the worker's own region spec is proved live by e2e R14, and only its held cache is read from source at the foot of this file.
 
 const SEED = 2;
 const CX = 0.5625;
@@ -114,14 +114,7 @@ test("a chain cache held across jobs cannot move a byte: the same window redraws
   );
 });
 
-test("the worker and its inline twin build the same region spec, so the two cannot drift apart", () => {
-  const ROOT = resolve(import.meta.dirname, "..", "..");
-  const read = (p: string): string => readFileSync(resolve(ROOT, p), "utf8");
-  for (const file of ["src/site/explorer/worker.ts", "src/site/explorer/worker-client.ts"]) {
-    const source = read(file);
-    const has = (re: RegExp): boolean => re.test(source);
-    assert.ok(has(/detail: true/), `${file} no longer draws the region job's detailed field`);
-    assert.ok(has(/regionDetailLevel\(/), `${file} stamps a detail level it did not derive from the spec`);
-    assert.ok(has(/chainCache: regionChainCache/), `${file} no longer builds in the held chain cache`);
-  }
+test("the worker's region job builds in the held chain cache (kept for Issue #779 part 2i: the cache is transparent to every byte, so only time could see it)", () => {
+  const worker = readFileSync(resolve(import.meta.dirname, "..", "..", "src/site/explorer/worker.ts"), "utf8");
+  assert.ok(/chainCache: regionChainCache/.test(worker), "the worker no longer builds in the held chain cache");
 });
