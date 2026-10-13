@@ -156,3 +156,4 @@ Neither of the readings the record carried before that was right. #546's comment
 "the Broadside not yet settled above the drawer band" and asked that the next occurrence capture the
 Broadside's rect; nothing was painted over the buttons, they were off screen. #578's body offered
 "or with something painted over all of them" as an alternative to the timing; it was the timing.
+| 2026-10-13 | RR42 | 38393177956 (CI, lane B job 115281737720) | `299a80ad`, `chore/876-flake-sequence` (Issue #876, PR #877; a prose-only diff) | `{"unfurl":{"name":"prospectUnfurl","fill":"backwards","origin":"150.406px 0px","half":151.20504760742188,"open":[0,-58.00000991946718],"end":-0.0011401688234259828}` and hovered, keyed and away reads that decode to pass; the one false conjunct is `Math.abs(parseFloat(unfurl.origin) - unfurl.half) < 0.01` | open, Issue #869: the check's base read lands inside the plate's own arrival unfurl; re-run once, by the push that adds this row |
