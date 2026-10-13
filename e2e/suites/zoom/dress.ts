@@ -81,6 +81,7 @@ export async function z23SurveyOverlay({ evaluate, check, sleep }: ZoomKit): Pro
   }
 }
 
+// The 0.5px of 2026-10-13 (Issue #779 part 2h): layout resolves to 1/64px, so a seat sits within about 0.05px of its nominal 10px and a card within as much of 16rem, and the guard prover's steps (a gap of 10.9px, a width of 16.05rem) are 0.9px and 0.8px; the runs' payloads print the rects rounded, so the headroom is the principle's and three unmutated Linux executions green (two CI lane A jobs and one runner control).
 const seatFaults = (label: string, variant: string, p: Seat, rem: number): string[] => {
   if (!p) return [`${label}: no card`];
   const markX = p.map[0]! + p.nx * p.map[2]!,

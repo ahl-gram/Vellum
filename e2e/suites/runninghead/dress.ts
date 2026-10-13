@@ -41,6 +41,7 @@ function roleWear(kits: Record<string, KitSample | undefined>): string[] {
   const wrong: string[] = [];
   const at = (route: string, sel: string): Role | undefined => kits[route]?.roles[sel];
   const rem = (route: string): number => kits[route]?.rem ?? 16;
+  // 0.01 rem, derived at roleHeads below.
   const near = (route: string, got: number, want: number): boolean => Math.abs(got - want) <= 0.01 * rem(route);
   const want = (route: string, sel: string, ok: boolean): void => {
     if (!ok) wrong.push(`${route} ${sel}: ${JSON.stringify(at(route, sel))}`);
@@ -73,6 +74,7 @@ function roleHeads(kits: Record<string, KitSample | undefined>): string[] {
   const wrong: string[] = [];
   const at = (route: string, sel: string): Role | undefined => kits[route]?.roles[sel];
   const rem = (route: string): number => kits[route]?.rem ?? 16;
+  // The 0.01 rem of 2026-10-13 (Issue #779 part 2h): these are computed lengths, exact products of the root size, and a used width snaps to 1/64px (0.016px against 0.16px), so the headroom is tenfold; the guard prover's steps were 0.02 rem (the head's size), 0.041 rem (its spacing), 0.04 rem (a dateline's size, the seed input's width). The sweep's payload prints no lengths, so there is no measured worst case.
   const near = (route: string, got: number, want: number): boolean => Math.abs(got - want) <= 0.01 * rem(route);
   const want = (route: string, sel: string, ok: boolean): void => {
     if (!ok) wrong.push(`${route} ${sel}: ${JSON.stringify(at(route, sel))}`);

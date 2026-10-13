@@ -244,6 +244,7 @@ const ringFaults = (label: string, r: RingRead, opacity: string, scale: number, 
       `${label}: ring scale ${scaleOf(r.transform)}, want ${scale}`,
   ]);
 
+// Bounds of 2026-10-13 (Issue #779 part 2h): every CI payload (lane A, runs 38356612460 and 38358920653) and every local run reads the box 26 by 26 and the keyboard ring's matrix exactly 1, so 0.5px and 0.005 sit far above the worst case seen, 0, and below the guard prover's steps (a 27px box, a ring of 1.015).
 const hitFaults = (label: string, h: Hit | null): string[] => {
   if (!h) return [`${label}: no hit`];
   const markX = h.map[0] + h.nx * h.map[2],

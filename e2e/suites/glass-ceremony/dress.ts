@@ -37,6 +37,7 @@ const FACE = (
 
 const faultsOf = (id: string, d: Press): string[] => {
   if (!d) return [`${id}: no press`];
+  // The 0.01 rem of 2026-10-13 (Issue #779 part 2h): CI prints the size 17.6 and the leading 17.6px on all three presses (1.1rem exactly, a worst case of 0) and the height 35.1875 against 35.2 (0.0125 of its 0.5), and the guard prover's step was 1.14rem, 0.04 rem off.
   const near = (a: number, b: number): boolean => Math.abs(a - b) <= 0.01 * d.rem;
   return [
     Math.abs(d.h - 2.2 * d.rem) <= 0.5 ? true : `height ${d.h}, want 2.2rem`,
