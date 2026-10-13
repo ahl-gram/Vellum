@@ -13,6 +13,7 @@ import {
   runnerHooks,
 } from "../../e2e/support/runner.ts";
 import type { Accumulators, EnvLike, RunnerIo } from "../../e2e/support/runner.ts";
+import { E2E_SKIPS } from "../../e2e/support/skips.ts";
 import { E2E_SUITE_ORDER, resolveSuiteSelection } from "../../e2e/support/suites.ts";
 import type { E2eSuiteName } from "../../e2e/support/suites.ts";
 import { laneLineIsSkip } from "../../e2e/support/lanes.ts";
@@ -276,6 +277,23 @@ test("runE2e reds a listed step no suite met, and reports a met one in its outco
     out.at(-1) ?? "",
     /^\nSOME FAILED, and 1 check skipped on purpose \(R9, Issue #11\) {2}\(1\/2\)$/,
     "the met skip is not in the outcome line, or the unmet one is",
+  );
+});
+
+test("a run given no list reads the real one: a listed step its suite never met reds the run", async (t) => {
+  noExit(t);
+  const first = E2E_SKIPS[0];
+  if (!first) return;
+  const { io, accumulators } = rig({ VELLUM_E2E_SUITES: first.suite });
+  assert.equal(await runE2e(io), 1, "production passes no list, and the real one was not the default");
+  assert.ok(
+    accumulators.results.some(
+      (r) =>
+        !r.ok &&
+        r.name ===
+          `${first.step} is listed as skipped for Issue #${first.issue}, but ${first.suite} ran to its end with no step by that name`,
+    ),
+    JSON.stringify(accumulators.results),
   );
 });
 

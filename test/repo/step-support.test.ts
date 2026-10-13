@@ -1,5 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { E2E_SKIPS } from "../../e2e/support/skips.ts";
 import { makeStep } from "../../e2e/support/step.ts";
 
 type Recorded = readonly [string, boolean, string];
@@ -134,4 +135,43 @@ test("a step not on the list still runs", async () => {
   assert.equal(ran, true, "a step the list does not name was skipped with its neighbour");
   assert.deepEqual(skippedChecks, [], "a step that ran was named as skipped");
   assert.deepEqual(results, [["RR40 a claim the next check holds", true, ""]]);
+});
+
+test("a step whose name is only part of a listed step's name, or holds one, still runs", async () => {
+  const { check } = recorder();
+  const skippedChecks: string[] = [];
+  const list = [
+    { suite: "reading-room", step: "RR42", issue: 869 },
+    { suite: "chart-drawer", step: "CD25, CD26, CD30", issue: 716 },
+  ] as const;
+  const step = makeStep({ check, alive: () => true, skips: list, skippedChecks });
+  const ran: string[] = [];
+  for (const name of ["RR4", "RR421", "CD26", "CD25, CD26, CD30, CD31"])
+    await step(name, () => {
+      ran.push(name);
+      return Promise.resolve();
+    });
+  assert.deepEqual(
+    ran,
+    ["RR4", "RR421", "CD26", "CD25, CD26, CD30, CD31"],
+    "a step was skipped on a partial name match",
+  );
+  assert.deepEqual(skippedChecks, []);
+});
+
+test("a step built with no list skips the first entry of the real list", async () => {
+  const first = E2E_SKIPS[0];
+  // With an empty list the default and `[]` behave the same, so there is nothing for this to bite until an entry returns.
+  if (!first) return;
+  const { results, check } = recorder();
+  const skippedChecks: string[] = [];
+  const step = makeStep({ check, alive: () => true, skippedChecks });
+  let ran = false;
+  await step(first.step, () => {
+    ran = true;
+    return Promise.resolve();
+  });
+  assert.equal(ran, false, "production builds a step with no list, and the real list was not the default");
+  assert.deepEqual(skippedChecks, [first.step]);
+  assert.deepEqual(results, []);
 });
