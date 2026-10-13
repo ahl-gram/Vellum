@@ -212,12 +212,18 @@ export function formatSuiteTimings(timings: readonly E2eSuiteTiming[]): readonly
   ];
 }
 
-export function runOutcome(results: readonly E2eCheckResult[]): E2eOutcome {
+export function runOutcome(results: readonly E2eCheckResult[], skipped: readonly string[] = []): E2eOutcome {
   if (results.length === 0) return { ok: false, line: "FAIL: no checks ran, so this run proves nothing." };
   const passed = results.filter((r) => r.ok).length;
+  const ok = passed === results.length;
+  const tally = `(${passed}/${results.length})`;
+  if (skipped.length === 0) return { ok, line: `${ok ? "ALL PASS" : "SOME FAILED"}  ${tally}` };
+  const named = `${skipped.length} check${skipped.length > 1 ? "s" : ""} skipped on purpose (${skipped.join("; ")})`;
   return {
-    ok: passed === results.length,
-    line: `${passed === results.length ? "ALL PASS" : "SOME FAILED"}  (${passed}/${results.length})`,
+    ok,
+    line: ok
+      ? `ALL PASS, but ${named}, so this run proves less than a pass  ${tally}`
+      : `SOME FAILED, and ${named}  ${tally}`,
   };
 }
 

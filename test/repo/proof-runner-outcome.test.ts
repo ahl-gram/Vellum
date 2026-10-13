@@ -153,6 +153,14 @@ test("a stop is still a stop if the harness's detail separator ever changes, so 
   );
 });
 
+test("a skipped check's line is no red to the proof runner, so a row naming it reads as a hole", () => {
+  const stdout =
+    "  RR42, Issue #869: skipped on purpose, not run\nALL PASS, but 1 check skipped on purpose (RR42, Issue #869), so this run proves less than a pass  (2/2)\n";
+  const got = e2eOutcome(stdout, "", 0);
+  assert.deepEqual(got.reds, [], "a skipped check was read as a red, so a row naming it would read as BITES");
+  assert.deepEqual(got.stops, [], "a skipped check was read as a stop");
+});
+
 test("a harness error, a run with no checks and a failing exit with no FAIL line are each a run that cannot be judged", () => {
   assert.match(e2eOutcome("", "HARNESS ERROR: Error: browser went away", 2).broken ?? "", /harness error/);
   assert.match(e2eOutcome("FAIL: no checks ran, so this run proves nothing.", "", 1).broken ?? "", /no checks ran/);

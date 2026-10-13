@@ -254,6 +254,29 @@ test("a group a suite skipped reaches the report, and the health checkpoint does
   );
 });
 
+test("runE2e reds a listed step no suite met, and reports a met one in its outcome line", async (t) => {
+  noExit(t);
+  const { io, out, accumulators } = rig({ VELLUM_E2E_SUITES: "render" }, (name, acc) => {
+    if (name === "render") acc.skippedChecks.push("R9");
+  });
+  const skips = [
+    { suite: "render", step: "R9", issue: 11 },
+    { suite: "render", step: "R10", issue: 12 },
+  ] as const;
+  assert.equal(await runE2e({ ...io, skips }), 1, "a listed step no suite met left the run green");
+  const unmet = accumulators.results.filter((r) => !r.ok);
+  assert.equal(unmet.length, 1, JSON.stringify(accumulators.results));
+  assert.match(
+    unmet[0]!.name,
+    /^R10 is listed as skipped for Issue #12, but render ran to its end with no step by that name$/,
+  );
+  assert.match(
+    out.at(-1) ?? "",
+    /^\nSOME FAILED, and 1 check skipped on purpose \(R9, Issue #11\) {2}\(1\/2\)$/,
+    "the met skip is not in the outcome line, or the unmet one is",
+  );
+});
+
 test("the report names the timings, a suite that stopped early and the tier, and certifies what ran whole before health", () => {
   const lines = reportLines(
     [

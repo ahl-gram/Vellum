@@ -17,11 +17,11 @@ export function skipLabel(skip: E2eSkip): string {
 }
 
 export function unmetSkips(
-  _skips: readonly E2eSkip[],
-  _timings: readonly E2eSuiteTiming[],
-  _met: readonly string[],
+  skips: readonly E2eSkip[],
+  timings: readonly E2eSuiteTiming[],
+  met: readonly string[],
 ): readonly E2eSkip[] {
-  return [];
+  return skips.filter((s) => timings.some((t) => t.name === s.suite && !t.aborted) && !met.includes(s.step));
 }
 
 export function closedSkips(

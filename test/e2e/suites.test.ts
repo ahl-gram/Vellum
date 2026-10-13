@@ -12,6 +12,7 @@ import {
   suitesNotWhole,
 } from "../../e2e/support/suites.ts";
 import type { E2eRunHooks } from "../../e2e/support/suites.ts";
+import { laneCheckTally, laneLineIsSkip } from "../../e2e/support/lanes.ts";
 
 // Selection throws rather than narrowing: `every()` is true for [], so a typo'd name that matched nothing would report ALL PASS (0/0) and exit 0.
 
@@ -146,6 +147,19 @@ test("a run that executed no checks fails instead of reporting ALL PASS (0/0)", 
   assert.match(runOutcome([{ ok: true }, { ok: true }]).line, /ALL PASS {2}\(2\/2\)/);
   assert.equal(runOutcome([{ ok: true }, { ok: false }]).ok, false);
   assert.match(runOutcome([{ ok: true }, { ok: false }]).line, /SOME FAILED {2}\(1\/2\)/);
+});
+
+test("runOutcome names a skipped check, counts it as neither a pass nor a fail, and keeps the lane tally readable", () => {
+  const passing = runOutcome([{ ok: true }, { ok: true }], ["RR42, Issue #869"]);
+  assert.equal(passing.ok, true, "a skipped check changed the verdict of the checks that ran");
+  assert.match(passing.line, /skipped on purpose \(RR42, Issue #869\)/, "the outcome line does not name the skip");
+  assert.match(passing.line, /proves less than a pass/, "a green run with a skip does not say it proved less");
+  assert.deepEqual(laneCheckTally(passing.line), { passed: 2, total: 2 }, "the skip moved the lane driver's tally");
+  assert.equal(laneLineIsSkip(passing.line), false, "the lane driver reads a skipped check as a skipped lane");
+  const failing = runOutcome([{ ok: true }, { ok: false }], ["RR42, Issue #869", "RS30, Issue #622"]);
+  assert.equal(failing.ok, false);
+  assert.match(failing.line, /^SOME FAILED, and 2 checks skipped on purpose \(RR42, Issue #869; RS30, Issue #622\)/);
+  assert.deepEqual(laneCheckTally(failing.line), { passed: 1, total: 2 });
 });
 
 test("runSelected times each suite it ran, in the order it ran them", () => {
