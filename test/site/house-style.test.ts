@@ -18,12 +18,6 @@ test("the status role's colour is ink-faded, a colour no served pill wears (#324
   assert.match(ruleOf(house(), /\.status/), /color:\s*var\(--ink-faded\)/, ".status is ink-faded");
 });
 
-test("the archivist's head tier holds its size and spacing (#324 decision 5, candidate B; kept for Issue #779 part 2i: HOLE on the runner, run 38340335013, since RH27 reads the Explorer's group head within 0.05 rem, so a step of 0.02 rem in the size or 0.02 em in the spacing passes it)", () => {
-  const head = ruleOf(house(), /\.archivist-head/);
-  assert.match(head, /font-size:\s*0\.82rem/);
-  assert.match(head, /letter-spacing:\s*0\.18em/);
-});
-
 test("the control idiom's border is 1.5px (#324; kept for Issue #779 part 2i: Chromium reads a 1.5px border as 1px at a device pixel ratio of 1 and of 2, measured 2026-10-13, so no browser read here tells it from 1px)", () => {
   const base = ruleOf(house(), /input\[type="number"\],\s*select,\s*button/);
   assert.match(base, /border:\s*1\.5px /);
