@@ -6,6 +6,7 @@ import {
   AT_HOME,
   CENTRE,
   FOCUS,
+  HIDE,
   INKED,
   OVERLAY,
   PART,
@@ -114,7 +115,8 @@ async function seatAt(
     if (!at) return { row: "", wrong: [`${variant} at k=${k}: no target to centre`] };
     await evaluate(CENTRE(idx, at.px, at.py));
   }
-  await evaluate(ZERO_NUDGE, true);
+  const hidden = await evaluate(HIDE, true);
+  const still = await evaluate(ZERO_NUDGE, true);
   if (!(await evaluate(FOCUS(idx)))) return { row: "", wrong: [`${variant} at k=${k}: no hit to focus`] };
   let p = await evaluate(PICK(idx));
   for (let t = 0; t < 20 && p && !p.rested; t++) {
@@ -122,7 +124,11 @@ async function seatAt(
     p = await evaluate(PICK(idx));
   }
   const row = `${variant}@${k}: ${p ? `${p.name} ${p.dx},${p.dy} ${p.card.map(Math.round).join(",")}` : "none"}`;
-  return { row, wrong: seatFaults(`${variant} at k=${k}`, variant, p, rem) };
+  const premise =
+    hidden && still
+      ? []
+      : [`${variant} at k=${k}: the card of the town before would not hide or the map would not rest`];
+  return { row, wrong: [...premise, ...seatFaults(`${variant} at k=${k}`, variant, p, rem)] };
 }
 
 async function zoomHome(evaluate: SuiteContext["evaluate"], sleep: SuiteContext["sleep"]): Promise<void> {

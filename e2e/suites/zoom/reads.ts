@@ -178,7 +178,13 @@ export const taleWants = (rem: number): readonly Want[] => [
   ["color", tokenRgba("--ink-tale")],
 ];
 
-// Under reduced motion the card's own 0.01ms transition makes the engine's reset-then-measure see the previous town's nudge (Issue #868), so the nudge is zeroed and left a frame to land before each town is focused; a card rests once the inner's roll and the card's own transition have both finished.
-export const ZERO_NUDGE: Payload<boolean> = `(async () => { const c = document.getElementById("place-card");
-  c.style.setProperty("--pc-dx", "0px"); c.style.setProperty("--pc-dy", "0px");
-  await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))); return true; })()`;
+// Under reduced motion the blanket's 0.01ms makes the map's camera a transition that runs for several frames and the card's own anchor another, so the engine's clamp measures the camera before this one, or the previous town's nudge (Issue #868); before each town is focused the map is waited to rest and the nudge zeroed and left two frames to land.
+export const ZERO_NUDGE: Payload<boolean> = `(async () => { const c = document.getElementById("place-card"), m = document.getElementById("map"), frame = () => new Promise((r) => requestAnimationFrame(r));
+  for (let i = 0; i < 90 && m.getAnimations().length > 0; i++) await frame();
+  c.style.setProperty("--pc-dx", "0px"); c.style.setProperty("--pc-dy", "0px"); await frame(); await frame(); return m.getAnimations().length === 0; })()`;
+
+export const HIDE: Payload<boolean> = `(async () => { const c = document.getElementById("place-card"), frame = () => new Promise((r) => requestAnimationFrame(r));
+  if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+  document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+  for (let i = 0; i < 30 && !c.hidden; i++) await frame();
+  void getComputedStyle(c).display; await frame(); return c.hidden; })()`;

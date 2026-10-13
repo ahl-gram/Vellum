@@ -309,6 +309,7 @@ export async function z22HitAndRing({ evaluate, send, check, sleep }: SuiteConte
 
 type Row = {
   idx: number;
+  fresh: boolean;
   rested: boolean;
   flipH: boolean;
   flipV: boolean;
@@ -317,14 +318,28 @@ type Row = {
   card: number[];
   box: number[];
 };
+// The town is focused from a hidden card (a card shown from another town carries a transition of its anchor, and the engine's clamp would measure that seat), read once it rests, and put away with a style flush before the next.
 const SEAT = (idx: number): Payload<Row | null> =>
   `(async () => { const card = document.getElementById("place-card"), h = document.querySelector('.place-overlay .place-hit[data-idx="${idx}"]'), frame = () => new Promise((r) => requestAnimationFrame(r));
-  if (!h) return null; const name = (h.getAttribute("aria-label") || "").split(", ")[0]; h.focus({ preventScroll: true }); let rested = false;
+  if (!h) return null; const name = (h.getAttribute("aria-label") || "").split(", ")[0], fresh = card.hidden; h.focus({ preventScroll: true }); let rested = false;
   for (let i = 0; i < 90 && !rested; i++) { const a = card.querySelector(".pc-inner")?.getAnimations() ?? [];
     rested = !card.hidden && (card.querySelector(".pc-name") || {}).textContent === name && a.length > 0 && a.every((v) => v.playState === "finished") && card.getAnimations().length === 0; if (!rested) await frame(); }
-  const r = card.getBoundingClientRect(), b = document.getElementById("map-viewport").getBoundingClientRect();
-  return { idx: ${idx}, rested, flipH: card.classList.contains("flip-h"), flipV: card.classList.contains("flip-v"), dx: parseFloat(card.style.getPropertyValue("--pc-dx") || "0"),
-    dy: parseFloat(card.style.getPropertyValue("--pc-dy") || "0"), card: [r.left, r.top, r.right, r.bottom], box: [b.left, b.top, b.right, b.bottom] }; })()`;
+  const r = card.getBoundingClientRect(), b = document.getElementById("map-viewport").getBoundingClientRect(), num = (n) => parseFloat(card.style.getPropertyValue(n) || "0");
+  const row = { idx: ${idx}, fresh, rested, flipH: card.classList.contains("flip-h"), flipV: card.classList.contains("flip-v"), dx: num("--pc-dx"), dy: num("--pc-dy"), card: [r.left, r.top, r.right, r.bottom], box: [b.left, b.top, b.right, b.bottom] };
+  h.blur(); document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+  for (let i = 0; i < 30 && !card.hidden; i++) await frame();
+  void getComputedStyle(card).display; await frame(); return row; })()`;
+const HIDDEN: Payload<boolean> = `(async () => { const c = document.getElementById("place-card");
+  for (let i = 0; i < 30 && !c.hidden; i++) await new Promise((r) => requestAnimationFrame(r));
+  void getComputedStyle(c).display; return c.hidden; })()`;
+const AT_SEAT = (u: number, v: number): Payload<boolean> =>
+  `(() => { const vp = document.getElementById("map-viewport"); window.__vellumZoomTo({ k: 4, x: vp.clientWidth / 2 - 4 * ${u} * vp.clientWidth, y: vp.clientHeight / 2 - 4 * ${v} * vp.clientHeight }); return true; })()`;
+// Seed 42's cards need a nudge on every variant and axis at the first seat only on some worlds (lane order draws it with the land and coast sliders the earlier suites moved), so a second and a third seat on the sheet's diagonal give each variant an edge to be nudged from.
+const SEATS: readonly (readonly [number, number])[] = [
+  [0.5, 0.5],
+  [0.25, 0.25],
+  [0.75, 0.75],
+];
 const HITS: Payload<number[]> =
   `[...document.querySelectorAll(".place-overlay .place-hit")].map((h) => Number(h.dataset.idx))`;
 
@@ -334,6 +349,7 @@ const flushFaults = (r: Row): string[] => {
   const [cl, ct, cr, cb] = r.card as [number, number, number, number],
     [bl, bt, br, bb] = r.box as [number, number, number, number];
   return faults([
+    r.fresh || `hit ${r.idx}: the card was still shown from the town before, or the map had not come to rest`,
     r.rested || `hit ${r.idx}: the card never rested`,
     (cl >= bl - 0.5 && cr <= br + 0.5 && ct >= bt - 0.5 && cb <= bb + 0.5) ||
       `hit ${r.idx}: card ${cl},${ct},${cr},${cb} outside ${bl},${bt},${br},${bb}`,
@@ -347,13 +363,14 @@ export async function z25ClampFlush({ evaluate, send, check }: SuiteContext): Pr
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
   const rows: Row[] = [];
   try {
-    await evaluate(
-      `(() => { const vp = document.getElementById("map-viewport"); window.__vellumZoomTo({ k: 4, x: -(3 * vp.clientWidth) / 2, y: -(3 * vp.clientHeight) / 2 }); })()`,
-    );
-    for (const idx of await evaluate(HITS)) {
-      await evaluate(ZERO_NUDGE, true);
-      const row = await evaluate(SEAT(idx), true);
-      if (row) rows.push(row);
+    for (const [u, v] of SEATS) {
+      await evaluate(AT_SEAT(u, v));
+      await evaluate(HIDDEN, true);
+      for (const idx of await evaluate(HITS)) {
+        const still = await evaluate(ZERO_NUDGE, true);
+        const row = await evaluate(SEAT(idx), true);
+        if (row) rows.push({ ...row, fresh: row.fresh && still });
+      }
     }
   } finally {
     await park({ evaluate, send });
