@@ -7,10 +7,10 @@ import { resolve } from "node:path";
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 
-test("AK6 the kit's glass-keys.ts reads every [data-zoom] press on the page, the premise vellum/explorer-no-glass-keys rests on (kept for Issue #779 part 2i as that rule's witness; SB13 and SB15 press what it binds)", () => {
+test("AK6 the kit's glass-keys.ts binds every [data-zoom] press on the page, document-wide, the premise vellum/explorer-no-glass-keys rests on (kept at the close of Issue #779 as that rule's witness, and the only check that the binding reaches the fit press: SB15 holds the out press, SB13 presses the fit press without holding it, and nothing reads what the fit press does)", () => {
   assert.match(
     read("src/site/shared/glass-keys.ts"),
-    /querySelectorAll<HTMLElement>\("\[data-zoom\]"\)/,
+    /\bdocument\.querySelectorAll<HTMLElement>\("\[data-zoom\]"\)/,
     "the kit's binding reads every data-zoom press on the page",
   );
 });
