@@ -65,11 +65,17 @@ test("closedSkips refuses a closed or missing issue and passes an open one", asy
   assert.deepEqual(await closedSkips([], () => Promise.reject(new Error("an empty list asked GitHub"))), []);
 });
 
-test("ci.yml's check-and-test job runs the open-issue script as a real step with the job's token, and the script exists", () => {
+test("ci.yml's check-and-test job runs the open-issue script last, as a real step with the job's token, and the script exists", () => {
+  const job = ciJob("check-and-test");
   assert.match(
-    ciJob("check-and-test"),
+    job,
     /^ {6}- name: Each e2e skip names an open issue\n {8}run: node scripts\/e2e-skips-open\.ts\n {8}env:\n {10}GITHUB_TOKEN: \$\{\{ github\.token \}\}\n(?= {6}- |\n|$)/m,
     "the check-and-test job has no step of the shape `- name: Each e2e skip names an open issue` / `run: node scripts/e2e-skips-open.ts` with the job's token, so a skip whose issue has closed goes unnoticed",
+  );
+  const at = job.indexOf("- name: Each e2e skip names an open issue");
+  assert.ok(
+    at > job.indexOf("- name: Format\n") && at > job.indexOf("- name: Test\n") && job.indexOf("- name: Test\n") !== -1,
+    "the open-issue step does not run after Format and Test, so while it is red neither of them runs",
   );
   assert.ok(existsSync(join(ROOT, "scripts", "e2e-skips-open.ts")), "the step runs a script that is not there");
 });
