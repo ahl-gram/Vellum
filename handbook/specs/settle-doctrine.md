@@ -118,6 +118,22 @@ headless browser actually do, so a green run can be believed.
     any selection into the canonical order and auto-adds the suite that consumes the boot draw, so
     an arbitrary order cannot be reproduced by asking for it.
 
+## A flake, from red to restore
+
+The order a flaky check goes through. Each step is stated once, in the home it names; this section
+holds only the order.
+
+1. **A red is yours until proven a flake.** It gets its row in
+   `.claude/skills/vellum-footguns/references/flake-record.md` before the one re-run, which is alone;
+   a second red is a defect (`vellum-footguns` Gate 2 item 10).
+2. **It leaves a trail.** A PR comment with the payload; it is never silently re-run away (item 12).
+3. **Recurrence becomes an issue.** At three rows with no issue open, raise it and offer to file one
+   (item 12).
+4. **A filed issue pulls the check out of the run**, by whoever files it, with no ruling asked (item 11).
+5. **The issue names the gap**: each claim the check held and each proof row that named it, unprotected
+   until the check returns (item 11).
+6. **Fixing the flake puts the check back** (item 11).
+
 ## The environment
 
 The clauses above say how a wait is written. This section says what the harness and the headless
