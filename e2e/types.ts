@@ -24,6 +24,7 @@ export type StartOptions = {
   consoleErrors: string[];
   http4xx: string[];
   skippedGroups: string[];
+  skippedChecks: string[];
 };
 
 export type SuiteContext = {
@@ -51,6 +52,7 @@ export type SuiteContext = {
   consoleErrors: string[];
   http4xx: string[];
   skippedGroups: string[];
+  skippedChecks: string[];
   PORT: number;
 };
 

@@ -8,8 +8,8 @@ export interface E2eSkip {
 
 export const E2E_SKIPS: readonly E2eSkip[] = [];
 
-export function skipFor(_skips: readonly E2eSkip[], _step: string): E2eSkip | undefined {
-  return undefined;
+export function skipFor(skips: readonly E2eSkip[], step: string): E2eSkip | undefined {
+  return skips.find((s) => s.step === step);
 }
 
 export function skipLabel(skip: E2eSkip): string {

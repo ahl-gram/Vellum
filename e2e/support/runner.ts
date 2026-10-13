@@ -15,7 +15,10 @@ import {
 } from "./suites.ts";
 import type { E2eCheckResult, E2eRunHooks, E2eSuiteName, E2eSuiteRunners, E2eSuiteTiming } from "./suites.ts";
 
-export type Accumulators = Pick<StartOptions, "results" | "consoleErrors" | "http4xx" | "skippedGroups">;
+export type Accumulators = Pick<
+  StartOptions,
+  "results" | "consoleErrors" | "http4xx" | "skippedGroups" | "skippedChecks"
+>;
 export type RunnerContext = Pick<SuiteContext, "check" | "alive" | "clearMobile">;
 export type EnvLike = Readonly<Record<string, string | undefined>>;
 

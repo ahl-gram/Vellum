@@ -91,6 +91,7 @@ function standIn(hook: string, live: boolean) {
     waitSettled: () => Promise.resolve(),
     alive: () => Promise.resolve(true),
     skippedGroups: [],
+    skippedChecks: [],
     consoleErrors: [],
     http4xx: [],
     PORT: 0,

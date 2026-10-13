@@ -320,6 +320,7 @@ export async function start({
   consoleErrors,
   http4xx,
   skippedGroups,
+  skippedChecks,
 }: StartOptions): Promise<SuiteContext> {
   OUT_DIR = OUT;
   await mkdir(OUT, { recursive: true });
@@ -372,6 +373,7 @@ export async function start({
     consoleErrors,
     http4xx,
     skippedGroups,
+    skippedChecks,
     PORT,
   };
 }

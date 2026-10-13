@@ -25,7 +25,7 @@ const realRun = async () => {
     check("IX9 the survey sheet frames the page", false, "border 0px");
     check("IX10 the index stands beside the broadside", true);
     await makeStep({ check })("L13", () => Promise.reject(new Error('settle timeout l13-marks: {"n":0}')));
-    const accumulators = { results: [], consoleErrors: [], http4xx: [], skippedGroups: [] };
+    const accumulators = { results: [], consoleErrors: [], http4xx: [], skippedGroups: [], skippedChecks: [] };
     const ctx = { check, alive: () => Promise.resolve(true), clearMobile: () => Promise.resolve() };
     const hooks = runnerHooks(ctx, accumulators, (...parts) => err.push(format(...parts)), 50);
     assert.ok(

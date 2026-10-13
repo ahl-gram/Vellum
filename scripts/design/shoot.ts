@@ -231,6 +231,7 @@ export async function shootAll(shots: readonly Shot[], options: ShootOptions = {
       consoleErrors: [],
       http4xx: [],
       skippedGroups: [],
+      skippedChecks: [],
     });
     if (options.reducedMotion === true) {
       await ctx.send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
