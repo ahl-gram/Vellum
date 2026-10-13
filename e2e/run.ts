@@ -9,10 +9,11 @@ const results: StartOptions["results"] = [];
 const consoleErrors: string[] = [];
 const http4xx: string[] = [];
 const skippedGroups: string[] = [];
+const skippedChecks: string[] = [];
 
 process.exit(
   await runE2eFromProcess(
-    { results, consoleErrors, http4xx, skippedGroups },
+    { results, consoleErrors, http4xx, skippedGroups, skippedChecks },
     { findBrowser, start, cleanup, suites: SUITES },
   ),
 );

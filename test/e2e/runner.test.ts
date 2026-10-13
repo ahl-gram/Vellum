@@ -13,6 +13,7 @@ import {
   runnerHooks,
 } from "../../e2e/support/runner.ts";
 import type { Accumulators, EnvLike, RunnerIo } from "../../e2e/support/runner.ts";
+import { E2E_SKIPS } from "../../e2e/support/skips.ts";
 import { E2E_SUITE_ORDER, resolveSuiteSelection } from "../../e2e/support/suites.ts";
 import type { E2eSuiteName } from "../../e2e/support/suites.ts";
 import { laneLineIsSkip } from "../../e2e/support/lanes.ts";
@@ -59,8 +60,16 @@ const fakeSuites = (ctx: Ctx, acc: Accumulators, ran: E2eSuiteName[], run: Suite
     ]),
   );
 
+const freshAccumulators = (): Accumulators => ({
+  results: [],
+  consoleErrors: [],
+  http4xx: [],
+  skippedGroups: [],
+  skippedChecks: [],
+});
+
 function rig(env: EnvLike, run: SuiteBody = () => {}) {
-  const accumulators: Accumulators = { results: [], consoleErrors: [], http4xx: [], skippedGroups: [] };
+  const accumulators = freshAccumulators();
   const out: string[] = [];
   const errParts: unknown[][] = [];
   const err: string[] = [];
@@ -171,7 +180,7 @@ test("a suite that throws reds its own check, has its viewport reset, and the la
 
 test("the viewport reset after a suite stops is bounded, so a reset that never settles cannot stall the lane", async () => {
   const ctx: Ctx = { check: () => {}, alive: () => Promise.resolve(true), clearMobile: () => new Promise(() => {}) };
-  const acc: Accumulators = { results: [], consoleErrors: [], http4xx: [], skippedGroups: [] };
+  const acc = freshAccumulators();
   const handler = runnerHooks(ctx, acc, () => {}, 20).onSuiteError;
   assert.ok(handler, "the runner hands runSelected no per-suite handler");
   let guard: NodeJS.Timeout | undefined;
@@ -245,6 +254,49 @@ test("a group a suite skipped reaches the report, and the health checkpoint does
   assert.ok(
     out.includes("  N1/N2 ran, but no suite before them ran to its end, so they certify no suite."),
     JSON.stringify(out),
+  );
+});
+
+test("runE2e reds a listed step no suite met, and reports a met one in its outcome line", async (t) => {
+  noExit(t);
+  const { io, out, accumulators } = rig({ VELLUM_E2E_SUITES: "render" }, (name, acc) => {
+    if (name === "render") acc.skippedChecks.push("R9");
+  });
+  const skips = [
+    { suite: "render", step: "R9", issue: 11 },
+    { suite: "render", step: "R10", issue: 12 },
+  ] as const;
+  assert.equal(await runE2e({ ...io, skips }), 1, "a listed step no suite met left the run green");
+  const unmet = accumulators.results.filter((r) => !r.ok);
+  assert.equal(unmet.length, 1, JSON.stringify(accumulators.results));
+  assert.match(
+    unmet[0]!.name,
+    /^R10 is listed as skipped for Issue #12, but render ran to its end with no step by that name$/,
+  );
+  assert.match(
+    out.at(-1) ?? "",
+    /^\nSOME FAILED, and 1 check skipped on purpose \(R9, Issue #11\) {2}\(1\/2\)$/,
+    "the met skip is not in the outcome line, or the unmet one is",
+  );
+});
+
+test("a run given no list reads the real one: a listed step its suite never met reds the run", async (t) => {
+  noExit(t);
+  const first = E2E_SKIPS[0];
+  if (!first) {
+    t.skip("the list is empty, so the default and [] behave the same and nothing here can bite");
+    return;
+  }
+  const { io, accumulators } = rig({ VELLUM_E2E_SUITES: first.suite });
+  assert.equal(await runE2e(io), 1, "production passes no list, and the real one was not the default");
+  assert.ok(
+    accumulators.results.some(
+      (r) =>
+        !r.ok &&
+        r.name ===
+          `${first.step} is listed as skipped for Issue #${first.issue}, but ${first.suite} ran to its end with no step by that name`,
+    ),
+    JSON.stringify(accumulators.results),
   );
 });
 
@@ -345,7 +397,7 @@ test("the process binding reads the real environment and the real terminal", asy
     errors.push(parts.map(String).join(" "));
   });
   t.mock.method(console, "log", () => {});
-  const acc: Accumulators = { results: [], consoleErrors: [], http4xx: [], skippedGroups: [] };
+  const acc = freshAccumulators();
   const { io } = rig({});
   const deps = { ...io, findBrowser: () => null };
   try {

@@ -109,8 +109,9 @@ type Paper = { strip: string; t: string };
 const PAPER: Payload<Paper> = `(() => ({ strip: getComputedStyle(document.querySelector(".strip")).display, t: ${RR_LENS}.t }))()`;
 
 export async function rr40Glass(ctx: SuiteContext): Promise<void> {
-  const { evaluate, send, check } = ctx;
+  const { evaluate, send, check, sleep } = ctx;
   await send("Emulation.setEmulatedMedia", { media: "", features: [] });
+  await clearMetrics({ evaluate, send, sleep }, 1440, 900);
   await park(send);
   try {
     const rest = await evaluate(RR_LENS);

@@ -32,6 +32,10 @@ jobs:
         run: npm run format:check
       - name: Test
         run: npm test -- --test-shard=${{ matrix.shard }}/${{ strategy.job-total }}
+      - name: Each e2e skip names an open issue
+        run: node scripts/e2e-skips-open.ts
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
   build-and-e2e:
     name: build & e2e lane ${{ matrix.lane }}

@@ -82,13 +82,20 @@ headless browser actually do, so a green run can be believed.
     factor from a measured worst case and date it at the constant.
 11. **A filed flake issue pulls the flaky check out of the run (Alex, 2026-10-13, Issue #872).** It covers
     every open flake issue, those filed before this rule included. Whoever files the issue pulls the check
-    out in the change they are making, with no ruling asked; a lane whose plan does not name the check's
-    file never edits it and hands the pull-out to the session that dispatched it. Until the harness can
-    skip one check (Issue #873), pulling it out means removing its step call and that call's import and
-    leaving its function in place, with a one-line comment at the function naming the issue; the issue
-    stays open as the restore, and fixing the flake puts the call back. The issue names each claim the
-    check held and each proof row that named it, and those claims count as unprotected until the check
-    returns; no earlier deletion is undone. Once Issue #873 lands it is a skip instead.
+    out in the change they are making, with no ruling asked; a lane whose plan does not name
+    `e2e/support/skips.ts` never edits it and hands the skip to the session that dispatched it. Pulling it
+    out is one entry in `E2E_SKIPS` (`e2e/support/skips.ts`) naming the suite, the step and the issue, and a
+    check that runs outside every step is first wrapped in one: the step stays in its suite and does not
+    run, the run's outcome line names it and counts each check its step names as skipped on purpose,
+    neither a pass nor a fail, a mutation row whose only expected red is that check reads HOLE until it
+    returns (a row that expects it beside another reads IMPRECISE), and CI fails while any entry names an
+    issue that is not open. A skipped body leaves nothing behind, so before the entry lands,
+    every state the body sets or waits for that a later check in the suite reads is set or awaited by that
+    later check itself (Issue #873: RS31 read the pace RS30's last press restored, and RR40 the window RR42
+    waited back). The issue stays open as the restore, and fixing the flake deletes the entry. The issue
+    names each claim the check held and each proof row that named it, and those claims count as
+    unprotected until the check returns; no earlier deletion is undone. The list is the one roster of
+    skipped checks.
 12. **A CI flake leaves a trail.** A PR comment with the payload and what to capture next; it is
     never silently re-run away (#546's CD7b). When a check's rows in
     `.claude/skills/vellum-footguns/references/flake-record.md` reach three with no issue open for

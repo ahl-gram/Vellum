@@ -308,7 +308,7 @@ function onCdpMessage(ev: MessageEvent, consoleErrors: string[], http4xx: string
   }
 }
 
-// results/consoleErrors/http4xx/skippedGroups are pushed to BY REFERENCE (the ws handler, check and makeStep hold them) so the runner's trailing tally sees them.
+// results/consoleErrors/http4xx/skippedGroups/skippedChecks are pushed to BY REFERENCE (the ws handler, check and makeStep hold them) so the runner's trailing tally sees them.
 export async function start({
   browser,
   SITE,
@@ -320,6 +320,7 @@ export async function start({
   consoleErrors,
   http4xx,
   skippedGroups,
+  skippedChecks,
 }: StartOptions): Promise<SuiteContext> {
   OUT_DIR = OUT;
   await mkdir(OUT, { recursive: true });
@@ -372,6 +373,7 @@ export async function start({
     consoleErrors,
     http4xx,
     skippedGroups,
+    skippedChecks,
     PORT,
   };
 }

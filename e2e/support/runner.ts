@@ -3,6 +3,8 @@ import { fileURLToPath } from "node:url";
 import type { StartOptions, SuiteContext } from "../types.ts";
 import { browserlessAction } from "./browser-policy.ts";
 import { e2eOutSubdir, resolveE2ePorts } from "./ports.ts";
+import { E2E_SKIPS, unmetSkips } from "./skips.ts";
+import type { E2eSkip } from "./skips.ts";
 import {
   E2E_SUITE_ORDER,
   errorText,
@@ -15,7 +17,10 @@ import {
 } from "./suites.ts";
 import type { E2eCheckResult, E2eRunHooks, E2eSuiteName, E2eSuiteRunners, E2eSuiteTiming } from "./suites.ts";
 
-export type Accumulators = Pick<StartOptions, "results" | "consoleErrors" | "http4xx" | "skippedGroups">;
+export type Accumulators = Pick<
+  StartOptions,
+  "results" | "consoleErrors" | "http4xx" | "skippedGroups" | "skippedChecks"
+>;
 export type RunnerContext = Pick<SuiteContext, "check" | "alive" | "clearMobile">;
 export type EnvLike = Readonly<Record<string, string | undefined>>;
 
@@ -24,6 +29,7 @@ export interface RunnerDeps<C extends RunnerContext> {
   readonly start: (options: StartOptions) => Promise<C>;
   readonly cleanup: () => void;
   readonly suites: E2eSuiteRunners<C>;
+  readonly skips?: readonly E2eSkip[];
 }
 
 export interface RunnerIo<C extends RunnerContext> extends RunnerDeps<C> {
@@ -155,8 +161,19 @@ export async function runE2e<C extends RunnerContext>(io: RunnerIo<C>): Promise<
   try {
     const ctx = await io.start({ browser, ...where, ...io.accumulators });
     const timings = await runSelected(selected, io.suites, ctx, runnerHooks(ctx, io.accumulators, io.err));
+    const { skippedChecks } = io.accumulators;
+    const skips = io.skips ?? E2E_SKIPS;
+    for (const s of unmetSkips(skips, timings, skippedChecks)) {
+      ctx.check(
+        `${s.step} is listed as skipped for Issue #${s.issue}, but ${s.suite} ran to its end with no step by that name`,
+        false,
+      );
+    }
     for (const line of reportLines(timings, selected, tier)) io.out(line);
-    const outcome = runOutcome(io.accumulators.results);
+    const outcome = runOutcome(
+      io.accumulators.results,
+      skips.filter((s) => skippedChecks.includes(s.step)),
+    );
     io.out(`\n${outcome.line}`);
     io.cleanup();
     return outcome.ok ? 0 : 1;

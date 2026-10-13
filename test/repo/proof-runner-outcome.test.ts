@@ -25,7 +25,7 @@ const realRun = async () => {
     check("IX9 the survey sheet frames the page", false, "border 0px");
     check("IX10 the index stands beside the broadside", true);
     await makeStep({ check })("L13", () => Promise.reject(new Error('settle timeout l13-marks: {"n":0}')));
-    const accumulators = { results: [], consoleErrors: [], http4xx: [], skippedGroups: [] };
+    const accumulators = { results: [], consoleErrors: [], http4xx: [], skippedGroups: [], skippedChecks: [] };
     const ctx = { check, alive: () => Promise.resolve(true), clearMobile: () => Promise.resolve() };
     const hooks = runnerHooks(ctx, accumulators, (...parts) => err.push(format(...parts)), 50);
     assert.ok(
@@ -151,6 +151,14 @@ test("a stop is still a stop if the harness's detail separator ever changes, so 
       ["landfall", "suite"],
     ],
   );
+});
+
+test("a skipped check's line is no red to the proof runner, so a row naming it reads as a hole", () => {
+  const stdout =
+    "  RR42, Issue #869: skipped on purpose, not run\nALL PASS, but 1 check skipped on purpose (RR42, Issue #869), so this run proves less than a pass  (2/2)\n";
+  const got = e2eOutcome(stdout, "", 0);
+  assert.deepEqual(got.reds, [], "a skipped check was read as a red, so a row naming it would read as BITES");
+  assert.deepEqual(got.stops, [], "a skipped check was read as a stop");
 });
 
 test("a harness error, a run with no checks and a failing exit with no FAIL line are each a run that cannot be judged", () => {
