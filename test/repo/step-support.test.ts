@@ -159,10 +159,12 @@ test("a step whose name is only part of a listed step's name, or holds one, stil
   assert.deepEqual(skippedChecks, []);
 });
 
-test("a step built with no list skips the first entry of the real list", async () => {
+test("a step built with no list skips the first entry of the real list", async (t) => {
   const first = E2E_SKIPS[0];
-  // With an empty list the default and `[]` behave the same, so there is nothing for this to bite until an entry returns.
-  if (!first) return;
+  if (!first) {
+    t.skip("the list is empty, so the default and [] behave the same and nothing here can bite");
+    return;
+  }
   const { results, check } = recorder();
   const skippedChecks: string[] = [];
   const step = makeStep({ check, alive: () => true, skippedChecks });

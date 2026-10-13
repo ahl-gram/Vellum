@@ -1,9 +1,14 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { existsSync } from "node:fs";
+import { join, resolve } from "node:path";
+import { ciJob } from "../../test-support/ci-job.ts";
 import { laneCheckTally, laneLineIsSkip } from "../../e2e/support/lanes.ts";
 import { closedSkips, unmetSkips } from "../../e2e/support/skips.ts";
 import type { E2eSkip } from "../../e2e/support/skips.ts";
 import { runOutcome } from "../../e2e/support/suites.ts";
+
+const ROOT = resolve(import.meta.dirname, "..", "..");
 
 test("runOutcome names a skipped check, counts it as neither a pass nor a fail, and keeps the lane tally readable", () => {
   const passing = runOutcome([{ ok: true }, { ok: true }], [{ suite: "reading-room", step: "RR42", issue: 869 }]);
@@ -58,4 +63,13 @@ test("closedSkips refuses a closed or missing issue and passes an open one", asy
   assert.deepEqual(got, [closed, missing], "an entry whose issue is not open was let through");
   assert.deepEqual(asked, [1, 2, 3], "an entry's issue was never asked about");
   assert.deepEqual(await closedSkips([], () => Promise.reject(new Error("an empty list asked GitHub"))), []);
+});
+
+test("ci.yml's check-and-test job runs the open-issue script as a real step with the job's token, and the script exists", () => {
+  assert.match(
+    ciJob("check-and-test"),
+    /^ {6}- name: Each e2e skip names an open issue\n {8}run: node scripts\/e2e-skips-open\.ts\n {8}env:\n {10}GITHUB_TOKEN: \$\{\{ github\.token \}\}\n(?= {6}- |\n|$)/m,
+    "the check-and-test job has no step of the shape `- name: Each e2e skip names an open issue` / `run: node scripts/e2e-skips-open.ts` with the job's token, so a skip whose issue has closed goes unnoticed",
+  );
+  assert.ok(existsSync(join(ROOT, "scripts", "e2e-skips-open.ts")), "the step runs a script that is not there");
 });

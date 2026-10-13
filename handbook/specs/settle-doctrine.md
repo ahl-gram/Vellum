@@ -87,15 +87,15 @@ headless browser actually do, so a green run can be believed.
     out is one entry in `E2E_SKIPS` (`e2e/support/skips.ts`) naming the suite, the step and the issue, and a
     check that runs outside every step is first wrapped in one: the step stays in its suite and does not
     run, the run's outcome line names it and counts each check its step names as skipped on purpose,
-    neither a pass nor a fail, a mutation row naming it reads HOLE until it returns, and CI fails while any
-    entry names an issue that is not open. A skipped body leaves nothing behind, so before the entry lands,
+    neither a pass nor a fail, a mutation row whose only expected red is that check reads HOLE until it
+    returns (a row that expects it beside another reads IMPRECISE), and CI fails while any entry names an
+    issue that is not open. A skipped body leaves nothing behind, so before the entry lands,
     every state the body sets or waits for that a later check in the suite reads is set or awaited by that
     later check itself (Issue #873: RS31 read the pace RS30's last press restored, and RR40 the window RR42
     waited back). The issue stays open as the restore, and fixing the flake deletes the entry. The issue
     names each claim the check held and each proof row that named it, and those claims count as
     unprotected until the check returns; no earlier deletion is undone. The list is the one roster of
-    skipped checks; when Issue #873 landed it held RR42 (Issue #869), RS30 (Issue #622) and CD25, CD26 and
-    CD30 (Issue #716).
+    skipped checks.
 12. **A CI flake leaves a trail.** A PR comment with the payload and what to capture next; it is
     never silently re-run away (#546's CD7b). When a check's rows in
     `.claude/skills/vellum-footguns/references/flake-record.md` reach three with no issue open for

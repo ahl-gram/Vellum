@@ -283,7 +283,10 @@ test("runE2e reds a listed step no suite met, and reports a met one in its outco
 test("a run given no list reads the real one: a listed step its suite never met reds the run", async (t) => {
   noExit(t);
   const first = E2E_SKIPS[0];
-  if (!first) return;
+  if (!first) {
+    t.skip("the list is empty, so the default and [] behave the same and nothing here can bite");
+    return;
+  }
   const { io, accumulators } = rig({ VELLUM_E2E_SUITES: first.suite });
   assert.equal(await runE2e(io), 1, "production passes no list, and the real one was not the default");
   assert.ok(
