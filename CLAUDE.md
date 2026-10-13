@@ -41,7 +41,7 @@ The rules below refine the workspace rules in `~/CodeProjects/CLAUDE.md` for thi
 
 **This file is TRACKED in the repo.** `RESUME-HERE.md`, `session-notes/` and
 `.claude/settings.local.json` stay gitignored: per-session state and personal settings, not
-instructions. `.claude/agents/`, `.claude/skills/` and `.claude/settings.json` (the footgun hook) are
+instructions. `.claude/agents/`, `.claude/skills/` and `.claude/settings.json` (the footgun hook and the subagent cache lifetime) are
 tracked. Because it is tracked, **editing it costs a branch and a PR** (main requires its CI checks
 and enforces them for admins); budget for that before adding a rule mid-session.
 
