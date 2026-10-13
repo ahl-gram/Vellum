@@ -59,14 +59,16 @@ const fakeSuites = (ctx: Ctx, acc: Accumulators, ran: E2eSuiteName[], run: Suite
     ]),
   );
 
+const freshAccumulators = (): Accumulators => ({
+  results: [],
+  consoleErrors: [],
+  http4xx: [],
+  skippedGroups: [],
+  skippedChecks: [],
+});
+
 function rig(env: EnvLike, run: SuiteBody = () => {}) {
-  const accumulators: Accumulators = {
-    results: [],
-    consoleErrors: [],
-    http4xx: [],
-    skippedGroups: [],
-    skippedChecks: [],
-  };
+  const accumulators = freshAccumulators();
   const out: string[] = [];
   const errParts: unknown[][] = [];
   const err: string[] = [];
@@ -177,7 +179,7 @@ test("a suite that throws reds its own check, has its viewport reset, and the la
 
 test("the viewport reset after a suite stops is bounded, so a reset that never settles cannot stall the lane", async () => {
   const ctx: Ctx = { check: () => {}, alive: () => Promise.resolve(true), clearMobile: () => new Promise(() => {}) };
-  const acc: Accumulators = { results: [], consoleErrors: [], http4xx: [], skippedGroups: [], skippedChecks: [] };
+  const acc = freshAccumulators();
   const handler = runnerHooks(ctx, acc, () => {}, 20).onSuiteError;
   assert.ok(handler, "the runner hands runSelected no per-suite handler");
   let guard: NodeJS.Timeout | undefined;
@@ -374,7 +376,7 @@ test("the process binding reads the real environment and the real terminal", asy
     errors.push(parts.map(String).join(" "));
   });
   t.mock.method(console, "log", () => {});
-  const acc: Accumulators = { results: [], consoleErrors: [], http4xx: [], skippedGroups: [], skippedChecks: [] };
+  const acc = freshAccumulators();
   const { io } = rig({});
   const deps = { ...io, findBrowser: () => null };
   try {

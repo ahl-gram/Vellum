@@ -49,7 +49,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   // Issue #493. The facts of the world ON SCREEN: RS23 and the counter reads above drew seed 9, and seed 42's years would clamp the bar to the present (a Play from the present reopens the whole story in the survey chamber, where the year is null by contract).
   const smNow = await scrubFacts(evaluate, await evaluate<number>(`window.__vellumReadingRoomState().seed`));
   await rs29Pace(k, smNow);
-  await rs30Rate(k, smNow);
+  await step("RS30", () => rs30Rate(k, smNow));
   await step("RS31", () => rs31PaceDress(k));
   await step("RS32", () => rs32BarDress(k));
   gate.check("RS24 the room instrument run is clean (no console errors, no new 4xx)");
