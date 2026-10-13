@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-// Issue #463: the Explorer as a chart room on the Issue #462 pattern (rulings 1 to 10). Issue #779 part 2h moved every claim a browser can read to `broadside`, `render` and `runninghead`; what stays here is a retired rule's absence, the print block's place, an import and two synchronous calls in one task.
+// Issue #463: the Explorer as a chart room on the Issue #462 pattern (rulings 1 to 10).
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 const css = read("public/explorer/index.css");

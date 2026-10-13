@@ -41,7 +41,6 @@ function roleWear(kits: Record<string, KitSample | undefined>): string[] {
   const wrong: string[] = [];
   const at = (route: string, sel: string): Role | undefined => kits[route]?.roles[sel];
   const rem = (route: string): number => kits[route]?.rem ?? 16;
-  // 0.01 rem, derived at roleHeads below.
   const near = (route: string, got: number, want: number): boolean => Math.abs(got - want) <= 0.01 * rem(route);
   const want = (route: string, sel: string, ok: boolean): void => {
     if (!ok) wrong.push(`${route} ${sel}: ${JSON.stringify(at(route, sel))}`);

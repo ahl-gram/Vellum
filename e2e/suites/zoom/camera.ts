@@ -399,7 +399,7 @@ export async function z25ClampFlush({ evaluate, send, check }: SuiteContext): Pr
   );
   if (lacking.length) wrong.push(`no nudge witness on ${lacking.join(", ")}`);
   check(
-    "Z25 every card shown at depth is nudged flush into its box, in all four variants on both axes",
+    "Z25 every card shown at depth, after the harness has zeroed the previous town's nudge, is nudged flush into its box, in all four variants on both axes",
     wrong.length === 0,
     JSON.stringify({ wrong, hits: rows.length, variants: rows.map((r) => `${r.idx}:${variantOf(r)}:${r.dx},${r.dy}`) }),
   );

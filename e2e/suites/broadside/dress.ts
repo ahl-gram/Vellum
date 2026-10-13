@@ -81,7 +81,7 @@ export async function br12Dress(k: BroadsideKit): Promise<void> {
     ...(reseatKept(seat) ? [] : ["a fresh refit leaves a planted seat or moves the legend"]),
   ];
   check(
-    "BR12 the Explorer at rest as dressed: the stage reserving the chrome as its padding, the sheet at the stage depth (the token's), the gesture box zoomable with touch-action none, the transform target pivoting top left, the chart filling its fitted box, the folio's title and survey lines written from the drawn world, and the legend seated clear of the written folio where a fresh refit leaves it",
+    "BR12 the Explorer at rest as dressed: the stage's padding equal to the reserves the fit wrote, the sheet at the stage depth (the token's), the gesture box zoomable with touch-action none, the transform target pivoting top left, the chart filling its fitted box, the folio's title and survey lines written from the drawn world, and the legend seated clear of the written folio where a fresh refit leaves it",
     wrong.length === 0,
     JSON.stringify({ wrong, d, seat }),
   );

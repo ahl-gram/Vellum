@@ -146,7 +146,6 @@ export async function z24CardSeats({ evaluate, send, check, sleep }: SuiteContex
   const rem = await evaluate<number>(`parseFloat(getComputedStyle(document.documentElement).fontSize)`);
   const wrong: string[] = [];
   const rows: string[] = [];
-  // one seat read per variant at rest and at depth
   try {
     await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))`);
     await evaluate(`document.activeElement instanceof HTMLElement && document.activeElement.blur()`);
@@ -358,7 +357,7 @@ export async function z26CardDress({ evaluate, send, check, sleep }: SuiteContex
     await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))`);
   }
   check(
-    "Z26 the place card wears the engine's dress: its box, its paper, its head, its action row and its philologist's note, each part as its own rule sets it",
+    "Z26 the place card wears the engine's dress: its box, its paper, its head, its action row and its philologist's note, each part in the declarations this check reads of its rule",
     wrong.length === 0,
     JSON.stringify({ wrong }),
   );
