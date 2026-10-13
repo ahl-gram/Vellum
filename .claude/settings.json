@@ -12,5 +12,6 @@
         ]
       }
     ]
-  }
+  },
+  "subagentPromptCacheTtl": "1h"
 }
