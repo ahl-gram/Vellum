@@ -168,3 +168,15 @@ export async function rr39AtRest(ctx: SuiteContext): Promise<void> {
     await evaluate<boolean>(scrubTo(bar));
   }
 }
+
+const OVERLAY_SHADOW: Payload<string | null> =
+  `(() => { const o = document.querySelector(".rf-chart .voyage-overlay"); return o ? getComputedStyle(o).boxShadow : null; })()`;
+
+export async function rr43OverlayUnshadowed({ evaluate, check }: SuiteContext): Promise<void> {
+  const shadow = await evaluate(OVERLAY_SHADOW);
+  check(
+    "RR43 the survey track is no sheet: the room's overlay stands in the mount and casts no shadow",
+    shadow === "none",
+    JSON.stringify({ shadow }),
+  );
+}
