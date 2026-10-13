@@ -54,7 +54,7 @@ export interface ZoomController {
   reset(): void;
   rebase(): void;
   zoomTo(next: ZoomState): void;
-  /** Re-seat the camera against a refitted viewport with no zoom event: no settle, no hash write, no redraft, and a glide in flight is left to land (a refit before the boot wrote an empty seed into the hash, CI R0b). */
+  /** Re-seat the camera against a refitted viewport with no zoom event: no settle, no hash write, no redraft (a refit before the boot wrote an empty seed into the hash, CI R0b). */
   refit(next: ZoomState): void;
   glideBy(factor: number): void;
   glideHome(onDone?: () => void): void;
