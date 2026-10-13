@@ -6,15 +6,26 @@ import type { E2eSkip } from "../../e2e/support/skips.ts";
 import { runOutcome } from "../../e2e/support/suites.ts";
 
 test("runOutcome names a skipped check, counts it as neither a pass nor a fail, and keeps the lane tally readable", () => {
-  const passing = runOutcome([{ ok: true }, { ok: true }], ["RR42, Issue #869"]);
+  const passing = runOutcome([{ ok: true }, { ok: true }], [{ suite: "reading-room", step: "RR42", issue: 869 }]);
   assert.equal(passing.ok, true, "a skipped check changed the verdict of the checks that ran");
   assert.match(passing.line, /skipped on purpose \(RR42, Issue #869\)/, "the outcome line does not name the skip");
+  assert.match(passing.line, /1 check skipped on purpose/, "one skipped check was counted as more or fewer");
   assert.match(passing.line, /proves less than a pass/, "a green run with a skip does not say it proved less");
   assert.deepEqual(laneCheckTally(passing.line), { passed: 2, total: 2 }, "the skip moved the lane driver's tally");
   assert.equal(laneLineIsSkip(passing.line), false, "the lane driver reads a skipped check as a skipped lane");
-  const failing = runOutcome([{ ok: true }, { ok: false }], ["RR42, Issue #869", "RS30, Issue #622"]);
+  const failing = runOutcome(
+    [{ ok: true }, { ok: false }],
+    [
+      { suite: "reading-room", step: "RR42", issue: 869 },
+      { suite: "chart-drawer", step: "CD25, CD26, CD30", issue: 716 },
+    ],
+  );
   assert.equal(failing.ok, false);
-  assert.match(failing.line, /^SOME FAILED, and 2 checks skipped on purpose \(RR42, Issue #869; RS30, Issue #622\)/);
+  assert.match(
+    failing.line,
+    /^SOME FAILED, and 4 checks skipped on purpose \(RR42, Issue #869; CD25, CD26, CD30, Issue #716\)/,
+    "the count is of the checks a step names, not of the entries",
+  );
   assert.deepEqual(laneCheckTally(failing.line), { passed: 1, total: 2 });
 });
 

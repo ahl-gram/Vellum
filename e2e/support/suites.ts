@@ -1,3 +1,6 @@
+import { skipLabel } from "./skips.ts";
+import type { E2eSkip } from "./skips.ts";
+
 export const E2E_SUITES_VAR = "VELLUM_E2E_SUITES";
 
 export const E2E_SUITE_ORDER = [
@@ -212,13 +215,14 @@ export function formatSuiteTimings(timings: readonly E2eSuiteTiming[]): readonly
   ];
 }
 
-export function runOutcome(results: readonly E2eCheckResult[], skipped: readonly string[] = []): E2eOutcome {
+export function runOutcome(results: readonly E2eCheckResult[], skipped: readonly E2eSkip[] = []): E2eOutcome {
   if (results.length === 0) return { ok: false, line: "FAIL: no checks ran, so this run proves nothing." };
   const passed = results.filter((r) => r.ok).length;
   const ok = passed === results.length;
   const tally = `(${passed}/${results.length})`;
   if (skipped.length === 0) return { ok, line: `${ok ? "ALL PASS" : "SOME FAILED"}  ${tally}` };
-  const named = `${skipped.length} check${skipped.length > 1 ? "s" : ""} skipped on purpose (${skipped.join("; ")})`;
+  const checks = skipped.reduce((n, s) => n + s.step.split(", ").length, 0);
+  const named = `${checks} check${checks > 1 ? "s" : ""} skipped on purpose (${skipped.map(skipLabel).join("; ")})`;
   return {
     ok,
     line: ok

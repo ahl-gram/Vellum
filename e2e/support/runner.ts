@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 import type { StartOptions, SuiteContext } from "../types.ts";
 import { browserlessAction } from "./browser-policy.ts";
 import { e2eOutSubdir, resolveE2ePorts } from "./ports.ts";
-import { E2E_SKIPS, skipLabel, unmetSkips } from "./skips.ts";
+import { E2E_SKIPS, unmetSkips } from "./skips.ts";
 import type { E2eSkip } from "./skips.ts";
 import {
   E2E_SUITE_ORDER,
@@ -172,7 +172,7 @@ export async function runE2e<C extends RunnerContext>(io: RunnerIo<C>): Promise<
     for (const line of reportLines(timings, selected, tier)) io.out(line);
     const outcome = runOutcome(
       io.accumulators.results,
-      skips.filter((s) => skippedChecks.includes(s.step)).map(skipLabel),
+      skips.filter((s) => skippedChecks.includes(s.step)),
     );
     io.out(`\n${outcome.line}`);
     io.cleanup();
