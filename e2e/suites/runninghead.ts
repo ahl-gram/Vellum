@@ -21,6 +21,7 @@ import {
   rhSweep,
 } from "./runninghead/heads.ts";
 import { rh10cPrinted, rh10GalleryScrolled, rh21Room, rh22CornerAndRoad, rh23Dress } from "./runninghead/gallery.ts";
+import { kitChecks } from "./runninghead/room.ts";
 import {
   rh11Deep,
   rh12FocusRing,
@@ -51,7 +52,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const k = runningHeadKit(ctx);
   const { visit } = k;
 
-  const { heads, shells, unreachable } = await rhSweep(k);
+  const { heads, shells, unreachable, kits } = await rhSweep(k);
   const bad = (pred: (h: Head, r: string) => boolean) => SHELLED.filter((r) => !heads[r] || !pred(heads[r], r));
   rh0OneH1(ctx, heads, unreachable, bad);
   rh1NamesPage(ctx, heads, bad);
@@ -73,6 +74,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
     ["RH24", (c) => rh24TrailInks(c, shells)],
   ] as const satisfies readonly (readonly [string, (c: typeof ctx.check) => void])[])
     await step(name, now(read));
+  await kitChecks(ctx, step, k, kits);
   await step("RH12", () => rh12FocusRing(k));
   await step("RH13", () => rh13WordmarkTip(k));
   await step("RH14", () => rh14Faces(k, shells));

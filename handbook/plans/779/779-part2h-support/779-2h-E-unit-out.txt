@@ -1,0 +1,244 @@
+BS1.a	src/pages/explorer/index.astro	orig=1	applied=1
+BS1.b	src/pages/explorer/index.astro	orig=1	applied=1
+BS1.b	src/pages/explorer/index.astro	orig=1	applied=1
+BS1.c	src/pages/explorer/index.astro	orig=1	applied=1
+BS1.c	src/pages/explorer/index.astro	orig=1	applied=1
+BS1.d	src/pages/explorer/index.astro	orig=1	applied=1
+BS1.d	src/pages/explorer/index.astro	orig=1	applied=1
+M1	src/pages/explorer/index.astro	orig=1	applied=1
+M1	src/pages/explorer/index.astro	orig=1	applied=1
+M2	src/pages/explorer/index.astro	orig=1	applied=1
+M2	src/pages/explorer/index.astro	orig=1	applied=1
+M3	src/pages/explorer/index.astro	orig=1	applied=1
+M3	src/pages/explorer/index.astro	orig=1	applied=1
+M4	src/pages/explorer/index.astro	orig=1	applied=1
+M4	src/pages/explorer/index.astro	orig=1	applied=1
+M5	src/pages/explorer/index.astro	orig=1	applied=1
+M5	src/pages/explorer/index.astro	orig=1	applied=1
+M6	src/pages/explorer/index.astro	orig=1	applied=1
+M6	src/pages/explorer/index.astro	orig=1	applied=1
+M7	src/pages/explorer/index.astro	orig=1	applied=1
+M7	src/pages/explorer/index.astro	orig=1	applied=1
+M8	src/pages/explorer/index.astro	orig=1	applied=1
+M8	src/pages/explorer/index.astro	orig=1	applied=1
+M9	src/pages/explorer/index.astro	orig=1	applied=1
+M9	src/pages/explorer/index.astro	orig=1	applied=1
+M10	src/pages/explorer/index.astro	orig=1	applied=1
+M10	src/pages/explorer/index.astro	orig=1	applied=1
+M11	src/pages/explorer/index.astro	orig=1	applied=1
+M11	src/pages/explorer/index.astro	orig=1	applied=1
+M12	src/pages/explorer/index.astro	orig=1	applied=1
+M12	src/pages/explorer/index.astro	orig=1	applied=1
+M13	src/pages/explorer/index.astro	orig=1	applied=1
+M13	src/pages/explorer/index.astro	orig=1	applied=1
+M14	src/pages/explorer/index.astro	orig=1	applied=1
+M14	src/pages/explorer/index.astro	orig=1	applied=1
+M15	src/pages/explorer/index.astro	orig=1	applied=1
+M15	src/pages/explorer/index.astro	orig=1	applied=1
+M16	src/pages/explorer/index.astro	orig=1	applied=1
+M16	src/pages/explorer/index.astro	orig=1	applied=1
+BS2.c	src/pages/explorer/index.astro	orig=1	applied=1
+ER2.a	src/pages/explorer/index.astro	orig=1	applied=1
+ER2.a	src/pages/explorer/index.astro	orig=1	applied=1
+BS6.a	src/pages/explorer/index.astro	orig=1	applied=1
+BS6.b	src/pages/explorer/index.astro	orig=1	applied=1
+BS6.c	src/pages/explorer/index.astro	orig=1	applied=1
+BS6.d	src/pages/explorer/index.astro	orig=1	applied=1
+BS6.d	src/site/explorer/elements.ts	orig=1	applied=1
+BS6.e	src/pages/explorer/index.astro	orig=1	applied=1
+EP1.a	src/pages/explorer/index.astro	orig=1	applied=1
+BS7.a	src/pages/explorer/index.astro	orig=1	applied=1
+BS7.a	src/pages/explorer/index.astro	orig=1	applied=1
+BS7.b	src/pages/explorer/index.astro	orig=1	applied=1
+BS7.c	src/pages/explorer/index.astro	orig=1	applied=1
+BS8.a	src/pages/explorer/index.astro	orig=1	applied=1
+BS8.a	src/pages/explorer/index.astro	orig=1	applied=1
+BS8.a	src/pages/explorer/index.astro	orig=1	applied=1
+BS8.a	src/pages/explorer/index.astro	orig=1	applied=1
+BS8.a	src/pages/explorer/index.astro	orig=1	applied=1
+BS8.b1	src/pages/glossary/index.astro	orig=1	applied=1
+BS8.b2	src/pages/explorer/index.astro	orig=1	applied=1
+BS9.a	src/pages/glossary/index.astro	orig=1	applied=1
+BS9.b1	src/pages/glossary/index.astro	orig=1	applied=1
+BS9.b2	src/pages/glossary/index.astro	orig=1	applied=1
+BS9.b3	src/pages/glossary/index.astro	orig=1	applied=1
+ER1.a	src/pages/explorer/index.astro	orig=1	applied=1
+ER1.b	src/pages/explorer/index.astro	orig=1	applied=1
+ER1.c	src/pages/explorer/index.astro	orig=1	applied=1
+ER1.d	src/pages/explorer/index.astro	orig=1	applied=1
+ER3.a	src/pages/explorer/index.astro	orig=1	applied=1
+ER3.b	src/pages/explorer/index.astro	orig=1	applied=1
+ER3.b	src/pages/explorer/index.astro	orig=1	applied=1
+ER4.a	src/pages/explorer/index.astro	orig=1	applied=1
+ER4.b-gold	src/pages/explorer/index.astro	orig=1	applied=1
+ER4.b-href	src/pages/explorer/index.astro	orig=1	applied=1
+ER4.b-verb	src/pages/explorer/index.astro	orig=1	applied=1
+ER4.b-room	src/pages/explorer/index.astro	orig=1	applied=1
+ER4.c-gold	src/pages/explorer/index.astro	orig=1	applied=1
+ER4.c-href	src/pages/explorer/index.astro	orig=1	applied=1
+ER4.c-verb	src/pages/explorer/index.astro	orig=1	applied=1
+ER4.c-room	src/pages/explorer/index.astro	orig=1	applied=1
+ER4.d	src/pages/explorer/index.astro	orig=1	applied=1
+ER4.d	src/pages/explorer/index.astro	orig=1	applied=1
+ER4.e	src/pages/explorer/index.astro	orig=1	applied=1
+ER4.f	src/pages/explorer/index.astro	orig=1	applied=1
+ER5.a1	src/pages/explorer/index.astro	orig=1	applied=1
+ER5.a2	src/pages/explorer/index.astro	orig=1	applied=1
+ER5.a3	src/pages/explorer/index.astro	orig=1	applied=1
+ER5.a4	src/pages/explorer/index.astro	orig=1	applied=1
+ER5.a5	src/pages/explorer/index.astro	orig=1	applied=1
+ER5.a6	src/pages/explorer/index.astro	orig=1	applied=1
+ER5.a7	src/pages/explorer/index.astro	orig=1	applied=1
+ER5.b	src/pages/explorer/index.astro	orig=1	applied=1
+ER5.b	src/pages/explorer/index.astro	orig=1	applied=1
+ER5.c	src/pages/explorer/index.astro	orig=1	applied=1
+ER5.c	src/site/explorer/app.ts	orig=1	applied=1
+ER5.d1	src/pages/explorer/index.astro	orig=1	applied=1
+ER5.d1	src/site/explorer/elements.ts	orig=1	applied=1
+ER5.d2	src/pages/explorer/index.astro	orig=1	applied=1
+ER5.d3	src/pages/explorer/index.astro	orig=1	applied=1
+ER5.d4	src/pages/explorer/index.astro	orig=1	applied=1
+ER5.d5	src/pages/explorer/index.astro	orig=1	applied=1
+ER5.e	src/pages/explorer/index.astro	orig=1	applied=1
+ER5.f	src/pages/explorer/index.astro	orig=1	applied=1
+ER6.a	public/explorer/index.css	orig=1	applied=1
+ER6.c	public/explorer/index.css	orig=1	applied=1
+ER6.d	public/explorer/index.css	orig=1	applied=1
+ER6.e	public/explorer/index.css	orig=1	applied=1
+ER6.f	public/explorer/index.css	orig=1	applied=1
+ER6.i	public/explorer/index.css	orig=1	applied=1
+ER7.a-bind	src/site/explorer/app.ts	orig=1	applied=1
+ER7.b-local	src/site/explorer/app.ts	orig=1	applied=1
+ER7.c	src/site/explorer/app.ts	orig=1	applied=1
+ER7.e1	src/site/explorer/app.ts	orig=1	applied=1
+ER7.e1	src/site/explorer/app.ts	orig=1	applied=1
+ER7.e2	src/site/explorer/app.ts	orig=1	applied=1
+ER7.e2	src/site/explorer/app.ts	orig=1	applied=1
+TF1.a	public/explorer/broadside.css	orig=1	applied=1
+TF1.b	public/explorer/broadside.css	orig=1	applied=1
+TA1.a	src/pages/explorer/index.astro	orig=1	applied=1
+TA1.b	src/pages/explorer/index.astro	orig=1	applied=1
+TA1.c	src/pages/explorer/index.astro	orig=1	applied=1
+TA1.d	src/pages/explorer/index.astro	orig=1	applied=1
+RDW1.a	src/site/explorer/worker.ts	orig=1	applied=1
+RDW1.b	src/site/explorer/worker.ts	orig=1	applied=1
+RDW1.d	src/site/explorer/worker-client.ts	orig=1	applied=1
+RDW1.e	src/site/explorer/worker-client.ts	orig=1	applied=1
+RDW1.f	src/site/explorer/worker-client.ts	orig=1	applied=1
+AB1.a1	src/pages/explorer/index.astro	orig=1	applied=1
+AB1.a2	src/pages/print-room/index.astro	orig=1	applied=1
+AB1.a3	src/pages/seed-of-the-day/index.astro	orig=1	applied=1
+AB1.a4	src/pages/reading-room/index.astro	orig=1	applied=1
+AB1.b1	src/pages/explorer/index.astro	orig=1	applied=1
+AB1.b2	src/pages/print-room/index.astro	orig=1	applied=1
+AB1.b3	src/pages/seed-of-the-day/index.astro	orig=1	applied=1
+AB1.b4	src/pages/reading-room/index.astro	orig=1	applied=1
+AB1.c-local	src/pages/explorer/index.astro	orig=1	applied=1
+AB1.c-local	src/pages/print-room/index.astro	orig=1	applied=1
+AB1.c-local	src/pages/seed-of-the-day/index.astro	orig=1	applied=1
+AB1.c-local	src/pages/reading-room/index.astro	orig=1	applied=1
+rows 103 bad 0
+BASELINE reds: ["public/ holds no committed source: the raw app JS and the .d.ts twins retired (\\#260)","the cleaned set and gitignore cover the Print Room and Reading Room twins and the chunk dir (\\#208, \\#221)","the Portfolio's twin is cleaned and ignored at its address under the Explorer, and its old address stays in the cleaned set as a tombstone (Issue \\#669)","every app page's twin is cleaned and ignored at its own address, so none can be committed or left stale (\\#208)","the clean never reaches a tracked file: no GENERATED_SUBTREES entry is, or holds, a path git tracks under public/ (Issue \\#669)","the press lands only what it built: no tracked file of public/ is copied into the root it builds into (\\#208)"]
+BS1.a	["the Broadside groups exist in reading order: the seed row in the folio, then Land and Hand on the slip, then the Press as the legend row (\\#270, \\#463)","the seed row holds the seed, the dice and Draw, and nothing else (\\#462 ruling 8)"]
+BS1.b	["the Broadside groups exist in reading order: the seed row in the folio, then Land and Hand on the slip, then the Press as the legend row (\\#270, \\#463)"]
+BS1.c	["the Broadside groups exist in reading order: the seed row in the folio, then Land and Hand on the slip, then the Press as the legend row (\\#270, \\#463)","The Land holds every generation control and no dressing control (\\#270)","The Hand holds every dressing control and no generation control (\\#270)"]
+BS1.d	["the Broadside groups exist in reading order: the seed row in the folio, then Land and Hand on the slip, then the Press as the legend row (\\#270, \\#463)"]
+M1	["the seed row holds the seed, the dice and Draw, and nothing else (\\#462 ruling 8)","The Press is the legend row: Turn the sheet, then the Print Room and the journal as gold roads (\\#462 ruling 4)","ER2 the seed row is the folio's one control: seed, dice and Draw stand top right (\\#462 ruling 8)"]
+M2	["the seed row holds the seed, the dice and Draw, and nothing else (\\#462 ruling 8)","The Land holds every generation control and no dressing control (\\#270)","ER2 the seed row is the folio's one control: seed, dice and Draw stand top right (\\#462 ruling 8)"]
+M3	["the seed row holds the seed, the dice and Draw, and nothing else (\\#462 ruling 8)","The Hand holds every dressing control and no generation control (\\#270)","ER2 the seed row is the folio's one control: seed, dice and Draw stand top right (\\#462 ruling 8)"]
+M4	["the seed row holds the seed, the dice and Draw, and nothing else (\\#462 ruling 8)","The Land holds every generation control and no dressing control (\\#270)"]
+M5	["The Land holds every generation control and no dressing control (\\#270)","The Press is the legend row: Turn the sheet, then the Print Room and the journal as gold roads (\\#462 ruling 4)"]
+M6	["The Land holds every generation control and no dressing control (\\#270)"]
+M7	["The Land holds every generation control and no dressing control (\\#270)","The Hand holds every dressing control and no generation control (\\#270)"]
+M8	["The Land holds every generation control and no dressing control (\\#270)","The Hand holds every dressing control and no generation control (\\#270)"]
+M9	["The Hand holds every dressing control and no generation control (\\#270)"]
+M10	["the seed row holds the seed, the dice and Draw, and nothing else (\\#462 ruling 8)","The Hand holds every dressing control and no generation control (\\#270)"]
+M11	["The Hand holds every dressing control and no generation control (\\#270)"]
+M12	["The Hand holds every dressing control and no generation control (\\#270)","The Press is the legend row: Turn the sheet, then the Print Room and the journal as gold roads (\\#462 ruling 4)"]
+M13	["The Hand holds every dressing control and no generation control (\\#270)"]
+M14	["The Hand holds every dressing control and no generation control (\\#270)","The Press is the legend row: Turn the sheet, then the Print Room and the journal as gold roads (\\#462 ruling 4)","ER3 the Broadside is the slip: The Land and The Hand ride it, the Press does not","ER4 the rest of the Press is the legend row: Turn the sheet, then the two gold roads (\\#462 ruling 4)"]
+M15	["the seed row holds the seed, the dice and Draw, and nothing else (\\#462 ruling 8)","The Press is the legend row: Turn the sheet, then the Print Room and the journal as gold roads (\\#462 ruling 4)","ER4 the rest of the Press is the legend row: Turn the sheet, then the two gold roads (\\#462 ruling 4)"]
+M16	["The Land holds every generation control and no dressing control (\\#270)","The Press is the legend row: Turn the sheet, then the Print Room and the journal as gold roads (\\#462 ruling 4)","ER3 the Broadside is the slip: The Land and The Hand ride it, the Press does not","ER4 the rest of the Press is the legend row: Turn the sheet, then the two gold roads (\\#462 ruling 4)"]
+BS2.c	["the seed row holds the seed, the dice and Draw, and nothing else (\\#462 ruling 8)","ER2 the seed row is the folio's one control: seed, dice and Draw stand top right (\\#462 ruling 8)"]
+ER2.a	["the seed row holds the seed, the dice and Draw, and nothing else (\\#462 ruling 8)","ER2 the seed row is the folio's one control: seed, dice and Draw stand top right (\\#462 ruling 8)"]
+BS6.a	["the overlay checkboxes wear the seal dressing with ids untouched (\\#270)"]
+BS6.b	["the overlay checkboxes wear the seal dressing with ids untouched (\\#270)"]
+BS6.c	["the overlay checkboxes wear the seal dressing with ids untouched (\\#270)"]
+BS6.d	["The Hand holds every dressing control and no generation control (\\#270)","the overlay checkboxes wear the seal dressing with ids untouched (\\#270)"]
+BS6.e	["the overlay checkboxes wear the seal dressing with ids untouched (\\#270)"]
+EP1.a	["the overlay checkboxes wear the seal dressing with ids untouched (\\#270)","the one checkbox wears the ratified survey label (\\#317 decision 1)"]
+BS7.a	["every footnote mark links a glossary anchor and carries a real note (\\#270)"]
+BS7.b	["every footnote mark links a glossary anchor and carries a real note (\\#270)"]
+BS7.c	["every footnote mark links a glossary anchor and carries a real note (\\#270)"]
+BS8.a	["every footnote mark links a glossary anchor and carries a real note (\\#270)","every glossary anchor the marks point at exists on the glossary page (\\#270)"]
+BS8.b1	["every glossary anchor the marks point at exists on the glossary page (\\#270)"]
+BS8.b2	["every glossary anchor the marks point at exists on the glossary page (\\#270)"]
+BS9.a	["the glossary gained the drafting-table section for the control terms (\\#270)"]
+BS9.b1	["the glossary gained the drafting-table section for the control terms (\\#270)"]
+BS9.b2	["the glossary gained the drafting-table section for the control terms (\\#270)"]
+BS9.b3	["the glossary gained the drafting-table section for the control terms (\\#270)"]
+ER1.a	["ER1 the Explorer is a chart room: chartRoom on the layout, the RoomFolio in place of the RoomHead"]
+ER1.b	["ER1 the Explorer is a chart room: chartRoom on the layout, the RoomFolio in place of the RoomHead"]
+ER1.c	["ER1 the Explorer is a chart room: chartRoom on the layout, the RoomFolio in place of the RoomHead"]
+ER1.d	[]
+ER3.a	["ER3 the Broadside is the slip: The Land and The Hand ride it, the Press does not"]
+ER3.b	["The Hand holds every dressing control and no generation control (\\#270)","ER3 the Broadside is the slip: The Land and The Hand ride it, the Press does not"]
+ER4.a	["The Press is the legend row: Turn the sheet, then the Print Room and the journal as gold roads (\\#462 ruling 4)","ER4 the rest of the Press is the legend row: Turn the sheet, then the two gold roads (\\#462 ruling 4)"]
+ER4.b-gold	["The Press is the legend row: Turn the sheet, then the Print Room and the journal as gold roads (\\#462 ruling 4)","ER4 the rest of the Press is the legend row: Turn the sheet, then the two gold roads (\\#462 ruling 4)"]
+ER4.b-href	["ER4 the rest of the Press is the legend row: Turn the sheet, then the two gold roads (\\#462 ruling 4)"]
+ER4.b-verb	["ER4 the rest of the Press is the legend row: Turn the sheet, then the two gold roads (\\#462 ruling 4)"]
+ER4.b-room	["ER4 the rest of the Press is the legend row: Turn the sheet, then the two gold roads (\\#462 ruling 4)"]
+ER4.c-gold	["The Press is the legend row: Turn the sheet, then the Print Room and the journal as gold roads (\\#462 ruling 4)","ER4 the rest of the Press is the legend row: Turn the sheet, then the two gold roads (\\#462 ruling 4)"]
+ER4.c-href	["ER4 the rest of the Press is the legend row: Turn the sheet, then the two gold roads (\\#462 ruling 4)"]
+ER4.c-verb	["ER4 the rest of the Press is the legend row: Turn the sheet, then the two gold roads (\\#462 ruling 4)"]
+ER4.c-room	["ER4 the rest of the Press is the legend row: Turn the sheet, then the two gold roads (\\#462 ruling 4)"]
+ER4.d	["ER4 the rest of the Press is the legend row: Turn the sheet, then the two gold roads (\\#462 ruling 4)"]
+ER4.e	["ER4 the rest of the Press is the legend row: Turn the sheet, then the two gold roads (\\#462 ruling 4)"]
+ER4.f	["ER4 the rest of the Press is the legend row: Turn the sheet, then the two gold roads (\\#462 ruling 4)"]
+ER5.a1	["ER5 the sheet stays the Glass's gesture box, so a bookmark's cx/cy stay sheet fractions; the Glass stands at the chart's corner outside it"]
+ER5.a2	["AK5 the stage is lifted where the skeleton is one shape (the Print Room, the Prospect, the Ribbon); the three unique skeletons stay in their pages","ER5 the sheet stays the Glass's gesture box, so a bookmark's cx/cy stay sheet fractions; the Glass stands at the chart's corner outside it"]
+ER5.a3	["ER5 the sheet stays the Glass's gesture box, so a bookmark's cx/cy stay sheet fractions; the Glass stands at the chart's corner outside it","the Explorer host wires the contract: mount class + sheet link (\\#302)"]
+ER5.a4	["ER5 the sheet stays the Glass's gesture box, so a bookmark's cx/cy stay sheet fractions; the Glass stands at the chart's corner outside it"]
+ER5.a5	["ER5 the sheet stays the Glass's gesture box, so a bookmark's cx/cy stay sheet fractions; the Glass stands at the chart's corner outside it"]
+ER5.a6	["ER5 the sheet stays the Glass's gesture box, so a bookmark's cx/cy stay sheet fractions; the Glass stands at the chart's corner outside it"]
+ER5.a7	["ER5 the sheet stays the Glass's gesture box, so a bookmark's cx/cy stay sheet fractions; the Glass stands at the chart's corner outside it"]
+ER5.b	["ER5 the sheet stays the Glass's gesture box, so a bookmark's cx/cy stay sheet fractions; the Glass stands at the chart's corner outside it"]
+ER5.c	["AK3 every chart room stands the Glass and the chart folio from the kit; the Explorer alone names its cluster for glass.ts","ER5 the sheet stays the Glass's gesture box, so a bookmark's cx/cy stay sheet fractions; the Glass stands at the chart's corner outside it"]
+ER5.d1	["ER5 the sheet stays the Glass's gesture box, so a bookmark's cx/cy stay sheet fractions; the Glass stands at the chart's corner outside it"]
+ER5.d2	["ER5 the sheet stays the Glass's gesture box, so a bookmark's cx/cy stay sheet fractions; the Glass stands at the chart's corner outside it"]
+ER5.d3	["ER5 the sheet stays the Glass's gesture box, so a bookmark's cx/cy stay sheet fractions; the Glass stands at the chart's corner outside it"]
+ER5.d4	["ER5 the sheet stays the Glass's gesture box, so a bookmark's cx/cy stay sheet fractions; the Glass stands at the chart's corner outside it"]
+ER5.d5	["ER5 the sheet stays the Glass's gesture box, so a bookmark's cx/cy stay sheet fractions; the Glass stands at the chart's corner outside it"]
+ER5.e	["ER5 the sheet stays the Glass's gesture box, so a bookmark's cx/cy stay sheet fractions; the Glass stands at the chart's corner outside it"]
+ER5.f	["ER5 the sheet stays the Glass's gesture box, so a bookmark's cx/cy stay sheet fractions; the Glass stands at the chart's corner outside it"]
+ER6.a	["ER6 the page css fits the sheet to what the chrome leaves and stands print down (\\#462 rulings 1 and 10)"]
+ER6.c	["ER6 the page css fits the sheet to what the chrome leaves and stands print down (\\#462 rulings 1 and 10)"]
+ER6.d	["ER6 the page css fits the sheet to what the chrome leaves and stands print down (\\#462 rulings 1 and 10)"]
+ER6.e	["ER6 the page css fits the sheet to what the chrome leaves and stands print down (\\#462 rulings 1 and 10)"]
+ER6.f	["ER6 the page css fits the sheet to what the chrome leaves and stands print down (\\#462 rulings 1 and 10)"]
+ER6.i	["ER6 the page css fits the sheet to what the chrome leaves and stands print down (\\#462 rulings 1 and 10)"]
+ER7.a-bind	[]
+ER7.b-local	["ER7 app.ts fits the room after the chart lands on BOTH draw paths and writes the folio's lines"]
+ER7.c	["ER7 app.ts fits the room after the chart lands on BOTH draw paths and writes the folio's lines"]
+ER7.e1	["ER7 app.ts fits the room after the chart lands on BOTH draw paths and writes the folio's lines"]
+ER7.e2	["ER7 app.ts fits the room after the chart lands on BOTH draw paths and writes the folio's lines"]
+TF1.a	[]
+TF1.b	[]
+TA1.a	["the allowlists mirror the Explorer's own selects, or a link the Explorer can write cannot be filed"]
+TA1.b	["the allowlists mirror the Explorer's own selects, or a link the Explorer can write cannot be filed"]
+TA1.c	["the allowlists mirror the Explorer's own selects, or a link the Explorer can write cannot be filed"]
+TA1.d	["the allowlists mirror the Explorer's own selects, or a link the Explorer can write cannot be filed"]
+RDW1.a	[]
+RDW1.b	[]
+RDW1.d	[]
+RDW1.e	[]
+RDW1.f	[]
+AB1.a1	["all four app pages load their bundled app twin via is:inline, none load raw source (\\#208, \\#254)"]
+AB1.a2	["all four app pages load their bundled app twin via is:inline, none load raw source (\\#208, \\#254)"]
+AB1.a3	["all four app pages load their bundled app twin via is:inline, none load raw source (\\#208, \\#254)"]
+AB1.a4	["all four app pages load their bundled app twin via is:inline, none load raw source (\\#208, \\#254)"]
+AB1.b1	["all four app pages load their bundled app twin via is:inline, none load raw source (\\#208, \\#254)"]
+AB1.b2	["all four app pages load their bundled app twin via is:inline, none load raw source (\\#208, \\#254)"]
+AB1.b3	["all four app pages load their bundled app twin via is:inline, none load raw source (\\#208, \\#254)"]
+AB1.b4	["all four app pages load their bundled app twin via is:inline, none load raw source (\\#208, \\#254)"]
+AB1.c-local	["all four app pages load their bundled app twin via is:inline, none load raw source (\\#208, \\#254)"]

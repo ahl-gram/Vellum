@@ -41,6 +41,7 @@ import {
   p32Dismiss,
   p33DragKeepsPin,
 } from "./cards/hold.ts";
+import { p34ButtonLift, p35ProspectLift, p36RaisedTakesHand } from "./cards/gestures.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { evaluate } = ctx;
@@ -49,26 +50,11 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const k = cardsKit({ ...ctx, settle });
   await step("P setup", () => pSetup(ctx));
   const pm = await pManifest(ctx);
-  await p1Overlay(ctx, pm);
-  await p2Idle(ctx);
-  await p2bPressLift(ctx);
-  await p4Capital(ctx, pm);
-  await p6Ruin(ctx, pm);
-  await p7Tooltip(ctx, pm);
-  await p8TapPins(ctx, pm);
-  await p9Grace(ctx, pm.cap);
-  await p10Focus(ctx, pm);
-  await p11OutsideClick(ctx, pm);
-  await p12PinSwitch(ctx, pm);
-  await p13AxDescription(ctx, pm);
-  await p14Unfurl(ctx, pm);
-  await p15RealHover(ctx, pm);
-  await p16Glass(ctx, pm);
-  await p18Renamed(ctx, pm);
-  await p18bNeverRenamed(ctx, pm);
-  await p17RuinNote(ctx, pm);
+  await pOverlayReads(ctx, pm);
   await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}))`);
   await pCardShot(ctx, pm);
+  await step("P34", () => p34ButtonLift(ctx));
+  await step("P35", () => p35ProspectLift(ctx));
   const narrowCount = await evaluate<number>(
     `window.__vellumRunInline({kind:"draw",seed:${NARROW_SEED},overrides:{},render:{style:"antique",widthPx:1500,legend:true}}).manifest.places.length`,
   );
@@ -89,6 +75,28 @@ export async function run(ctx: SuiteContext): Promise<void> {
     await p32Dismiss(hk, marks);
     await p33DragKeepsPin(hk, marks);
   });
+  await step("P36", () => p36RaisedTakesHand(hk));
   await step("P30", () => p30Tablet(hk));
   await step("P restore", () => pRestore(ctx));
+}
+
+async function pOverlayReads(ctx: SuiteContext, pm: Awaited<ReturnType<typeof pManifest>>): Promise<void> {
+  await p1Overlay(ctx, pm);
+  await p2Idle(ctx);
+  await p2bPressLift(ctx);
+  await p4Capital(ctx, pm);
+  await p6Ruin(ctx, pm);
+  await p7Tooltip(ctx, pm);
+  await p8TapPins(ctx, pm);
+  await p9Grace(ctx, pm.cap);
+  await p10Focus(ctx, pm);
+  await p11OutsideClick(ctx, pm);
+  await p12PinSwitch(ctx, pm);
+  await p13AxDescription(ctx, pm);
+  await p14Unfurl(ctx, pm);
+  await p15RealHover(ctx, pm);
+  await p16Glass(ctx, pm);
+  await p18Renamed(ctx, pm);
+  await p18bNeverRenamed(ctx, pm);
+  await p17RuinNote(ctx, pm);
 }

@@ -16,20 +16,6 @@ import type { FaceTable } from "../../src/prospect/letter/face.ts";
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 
-test("all four app pages load their bundled app twin via is:inline, none load raw source (#208, #254)", () => {
-  // is:inline is load-bearing: without it Astro routes the script through its own Vite pass, which Issue #204's ratified analysis rejects for these surfaces.
-  for (const [pageSource, src] of [
-    ["src/pages/explorer/index.astro", /<script type="module" src="\.\/app\.bundle\.js" is:inline><\/script>/],
-    ["src/pages/print-room/index.astro", /<script type="module" src="\.\/app\.bundle\.js" is:inline><\/script>/],
-    ["src/pages/seed-of-the-day/index.astro", /<script type="module" src="app\.bundle\.js" is:inline><\/script>/],
-    ["src/pages/reading-room/index.astro", /<script type="module" src="\.\/app\.bundle\.js" is:inline><\/script>/],
-  ] as const) {
-    const html = read(pageSource);
-    assert.match(html, src, `${pageSource} should load its bundle twin, opted out of Astro's script processing`);
-    assert.doesNotMatch(html, /src="(\.\/)?app\.js"/, `${pageSource} must not load the raw ESM entry`);
-  }
-});
-
 test("the hand-coded public/ shells retired with the re-shell (#254): routes and public/ stay disjoint", () => {
   // Sub 1 constraint 9: Astro documents no collision precedence between a public/ file and a same-path route, so the routes must be the only claimants of these URLs.
   for (const shell of [

@@ -1,0 +1,2600 @@
+[
+  {
+    "id": "AK2.a",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/pages/faq/index.astro",
+        "find": "<Fog />",
+        "replace": ""
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts",
+        "test/site/astro-scaffold.test.ts"
+      ],
+      "expect": [
+        "AK2 every room wears the fog through the kit; every stage room wears the vignettes, the Gallery none (its captions scroll, #464)",
+        "the kit's lifted shapes render one shape on every page that wears them: the fog, the vignettes, the Glass, the chart folio's lines, the stage, every road out (#487)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH32"
+      ]
+    }
+  },
+  {
+    "id": "AK2.b",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/pages/prospect/index.astro",
+        "find": "<Vignettes />",
+        "replace": ""
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts",
+        "test/site/astro-scaffold.test.ts"
+      ],
+      "expect": [
+        "AK2 every room wears the fog through the kit; every stage room wears the vignettes, the Gallery none (its captions scroll, #464)",
+        "the kit's lifted shapes render one shape on every page that wears them: the fog, the vignettes, the Glass, the chart folio's lines, the stage, every road out (#487)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH32"
+      ]
+    }
+  },
+  {
+    "id": "AK2.c",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/pages/gallery/index.astro",
+        "find": "import Fog from \"../../layouts/Fog.astro\";",
+        "replace": "import Fog from \"../../layouts/Fog.astro\";\nimport Vignettes from \"../../layouts/Vignettes.astro\";"
+      },
+      {
+        "file": "src/pages/gallery/index.astro",
+        "find": "<Fog />",
+        "replace": "<Fog />\n<Vignettes />"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts",
+        "test/site/astro-scaffold.test.ts"
+      ],
+      "expect": [
+        "AK2 every room wears the fog through the kit; every stage room wears the vignettes, the Gallery none (its captions scroll, #464)",
+        "the kit's lifted shapes render one shape on every page that wears them: the fog, the vignettes, the Glass, the chart folio's lines, the stage, every road out (#487)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH22",
+        "RH32"
+      ]
+    }
+  },
+  {
+    "id": "AK2.d",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/pages/index.astro",
+        "find": "import Glass from \"../layouts/Glass.astro\";",
+        "replace": "import Glass from \"../layouts/Glass.astro\";\nimport Fog from \"../layouts/Fog.astro\";"
+      },
+      {
+        "file": "src/pages/index.astro",
+        "find": "    <Glass id=\"lf-controls\" />",
+        "replace": "    <Glass id=\"lf-controls\" />\n    <Fog />"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts",
+        "test/site/astro-scaffold.test.ts"
+      ],
+      "expect": [
+        "AK2 every room wears the fog through the kit; every stage room wears the vignettes, the Gallery none (its captions scroll, #464)",
+        "the kit's lifted shapes render one shape on every page that wears them: the fog, the vignettes, the Glass, the chart folio's lines, the stage, every road out (#487)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH32"
+      ]
+    },
+    "measureFirst": true
+  },
+  {
+    "id": "AK3.a",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/pages/prospect/index.astro",
+        "find": "<Glass />",
+        "replace": ""
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts",
+        "test/site/astro-scaffold.test.ts"
+      ],
+      "expect": [
+        "AK3 every chart room stands the Glass and the chart folio from the kit; the Explorer alone names its cluster for glass.ts",
+        "the kit's lifted shapes render one shape on every page that wears them: the fog, the vignettes, the Glass, the chart folio's lines, the stage, every road out (#487)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH32"
+      ]
+    }
+  },
+  {
+    "id": "AK3.b",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/pages/prospect/index.astro",
+        "find": "<ChartFolio lines={[[\"folio-title\", \"folio-title\"], [\"folio-sub\", \"folio-sub\"], [\"folio-coords\", \"pp-pressed\"]]} />",
+        "replace": "<div class=\"chrome corner bl\"><p class=\"folio-title\" id=\"folio-title\"></p><p class=\"folio-sub\" id=\"folio-sub\"></p><p class=\"folio-coords\" id=\"pp-pressed\"></p></div>"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts",
+        "test/site/astro-scaffold.test.ts"
+      ],
+      "expect": [
+        "AK3 every chart room stands the Glass and the chart folio from the kit; the Explorer alone names its cluster for glass.ts",
+        "the kit's lifted shapes render one shape on every page that wears them: the fog, the vignettes, the Glass, the chart folio's lines, the stage, every road out (#487)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH32"
+      ]
+    }
+  },
+  {
+    "id": "AK3.c",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/pages/explorer/index.astro",
+        "find": "<Glass id=\"zoom-controls\" />",
+        "replace": "<Glass id=\"zoom-cluster\" />"
+      },
+      {
+        "file": "src/site/explorer/app.ts",
+        "find": "cluster: $(\"zoom-controls\")",
+        "replace": "cluster: $(\"zoom-cluster\")"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts",
+        "test/site/explorer-room.test.ts",
+        "test/site/astro-scaffold.test.ts"
+      ],
+      "expect": [
+        "AK3 every chart room stands the Glass and the chart folio from the kit; the Explorer alone names its cluster for glass.ts",
+        "ER5 the sheet stays the Glass's gesture box, so a bookmark's cx/cy stay sheet fractions; the Glass stands at the chart's corner outside it",
+        "the kit's lifted shapes render one shape on every page that wears them: the fog, the vignettes, the Glass, the chart folio's lines, the stage, every road out (#487)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH32"
+      ]
+    }
+  },
+  {
+    "id": "AK3.d",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/pages/index.astro",
+        "find": "<Glass id=\"lf-controls\" />",
+        "replace": "<Glass />"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts",
+        "test/site/astro-scaffold.test.ts"
+      ],
+      "expect": [
+        "AK3 every chart room stands the Glass and the chart folio from the kit; the Explorer alone names its cluster for glass.ts",
+        "the kit's lifted shapes render one shape on every page that wears them: the fog, the vignettes, the Glass, the chart folio's lines, the stage, every road out (#487)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH32"
+      ]
+    }
+  },
+  {
+    "id": "AK3.e",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/pages/gallery/index.astro",
+        "find": "import LegendButton from \"../../layouts/LegendButton.astro\";",
+        "replace": "import LegendButton from \"../../layouts/LegendButton.astro\";\nimport Glass from \"../../layouts/Glass.astro\";"
+      },
+      {
+        "file": "src/pages/gallery/index.astro",
+        "find": "</BaseLayout>",
+        "replace": "<Glass />\n</BaseLayout>"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts"
+      ],
+      "expect": [
+        "AK3 every chart room stands the Glass and the chart folio from the kit; the Explorer alone names its cluster for glass.ts"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH22",
+        "RH32"
+      ]
+    }
+  },
+  {
+    "id": "AK4.a",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/layouts/Fog.astro",
+        "find": "<div class=\"fog b\" aria-hidden=\"true\"></div>",
+        "replace": "<div class=\"fog b\"></div>"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts",
+        "test/site/astro-scaffold.test.ts"
+      ],
+      "expect": [
+        "AK4 the kit's shapes: the fog and vignette pairs, the Glass with data-zoom on every press, the chart folio's [class, id] lines, the stage's gesture box and after-slot, the road out",
+        "the kit's lifted shapes render one shape on every page that wears them: the fog, the vignettes, the Glass, the chart folio's lines, the stage, every road out (#487)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH32"
+      ]
+    }
+  },
+  {
+    "id": "AK4.b",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/layouts/Vignettes.astro",
+        "find": "<div class=\"vignette bottom\" aria-hidden=\"true\"></div>",
+        "replace": "<div class=\"vignette bottom\"></div>"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts",
+        "test/site/astro-scaffold.test.ts"
+      ],
+      "expect": [
+        "AK4 the kit's shapes: the fog and vignette pairs, the Glass with data-zoom on every press, the chart folio's [class, id] lines, the stage's gesture box and after-slot, the road out",
+        "the kit's lifted shapes render one shape on every page that wears them: the fog, the vignettes, the Glass, the chart folio's lines, the stage, every road out (#487)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH32"
+      ]
+    }
+  },
+  {
+    "id": "AK4.c",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/layouts/Glass.astro",
+        "find": "id={id} role=\"group\" aria-label=\"Camera\">",
+        "replace": "id={id} aria-label=\"Camera\">"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts",
+        "test/site/astro-scaffold.test.ts"
+      ],
+      "expect": [
+        "AK4 the kit's shapes: the fog and vignette pairs, the Glass with data-zoom on every press, the chart folio's [class, id] lines, the stage's gesture box and after-slot, the road out",
+        "the kit's lifted shapes render one shape on every page that wears them: the fog, the vignettes, the Glass, the chart folio's lines, the stage, every road out (#487)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH32"
+      ]
+    }
+  },
+  {
+    "id": "AK4.d1",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/layouts/Glass.astro",
+        "find": "data-zoom=\"in\" aria-label=\"Draw nearer\">+</button>",
+        "replace": "aria-label=\"Draw nearer\">+</button>"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts",
+        "test/site/astro-scaffold.test.ts"
+      ],
+      "expect": [
+        "AK4 the kit's shapes: the fog and vignette pairs, the Glass with data-zoom on every press, the chart folio's [class, id] lines, the stage's gesture box and after-slot, the road out",
+        "the kit's lifted shapes render one shape on every page that wears them: the fog, the vignettes, the Glass, the chart folio's lines, the stage, every road out (#487)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH32"
+      ]
+    }
+  },
+  {
+    "id": "AK4.d2",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/layouts/Glass.astro",
+        "find": "aria-label=\"Stand off\">&minus;",
+        "replace": "aria-label=\"Step back\">&minus;"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts",
+        "test/site/astro-scaffold.test.ts"
+      ],
+      "expect": [
+        "AK4 the kit's shapes: the fog and vignette pairs, the Glass with data-zoom on every press, the chart folio's [class, id] lines, the stage's gesture box and after-slot, the road out",
+        "the kit's lifted shapes render one shape on every page that wears them: the fog, the vignettes, the Glass, the chart folio's lines, the stage, every road out (#487)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH32"
+      ]
+    }
+  },
+  {
+    "id": "AK4.d3",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/layouts/Glass.astro",
+        "find": "aria-label=\"The whole sheet\">&#8962;</button>",
+        "replace": "aria-label=\"The whole sheet\">&#8592;</button>"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts",
+        "test/site/astro-scaffold.test.ts"
+      ],
+      "expect": [
+        "AK4 the kit's shapes: the fog and vignette pairs, the Glass with data-zoom on every press, the chart folio's [class, id] lines, the stage's gesture box and after-slot, the road out",
+        "the kit's lifted shapes render one shape on every page that wears them: the fog, the vignettes, the Glass, the chart folio's lines, the stage, every road out (#487)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH32"
+      ]
+    }
+  },
+  {
+    "id": "AK4.e",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/layouts/Glass.astro",
+        "find": "  <button id=\"zoom-in\" class=\"zoom-btn\" type=\"button\" data-zoom=\"in\" aria-label=\"Draw nearer\">+</button>\n  <button id=\"zoom-out\" class=\"zoom-btn\" type=\"button\" data-zoom=\"out\" aria-label=\"Stand off\">&minus;</button>",
+        "replace": "  <button id=\"zoom-out\" class=\"zoom-btn\" type=\"button\" data-zoom=\"out\" aria-label=\"Stand off\">&minus;</button>\n  <button id=\"zoom-in\" class=\"zoom-btn\" type=\"button\" data-zoom=\"in\" aria-label=\"Draw nearer\">+</button>"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts",
+        "test/site/astro-scaffold.test.ts"
+      ],
+      "expect": [
+        "AK4 the kit's shapes: the fog and vignette pairs, the Glass with data-zoom on every press, the chart folio's [class, id] lines, the stage's gesture box and after-slot, the road out",
+        "the kit's lifted shapes render one shape on every page that wears them: the fog, the vignettes, the Glass, the chart folio's lines, the stage, every road out (#487)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH32"
+      ]
+    }
+  },
+  {
+    "id": "AK4.f1",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/layouts/Glass.astro",
+        "find": "aria-label=\"Draw nearer\">+</button>",
+        "replace": "aria-label=\"Draw nearer\" title=\"Draw nearer\">+</button>"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts",
+        "test/site/astro-scaffold.test.ts"
+      ],
+      "expect": [
+        "AK4 the kit's shapes: the fog and vignette pairs, the Glass with data-zoom on every press, the chart folio's [class, id] lines, the stage's gesture box and after-slot, the road out",
+        "the kit's lifted shapes render one shape on every page that wears them: the fog, the vignettes, the Glass, the chart folio's lines, the stage, every road out (#487)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH32"
+      ]
+    }
+  },
+  {
+    "id": "AK4.f2",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/layouts/Glass.astro",
+        "find": "aria-label=\"Draw nearer\">+</button>",
+        "replace": "aria-label=\"Draw nearer\"><svg width=\"10\" height=\"10\"></svg></button>"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts",
+        "test/site/astro-scaffold.test.ts"
+      ],
+      "expect": [
+        "AK4 the kit's shapes: the fog and vignette pairs, the Glass with data-zoom on every press, the chart folio's [class, id] lines, the stage's gesture box and after-slot, the road out",
+        "the kit's lifted shapes render one shape on every page that wears them: the fog, the vignettes, the Glass, the chart folio's lines, the stage, every road out (#487)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH32"
+      ]
+    }
+  },
+  {
+    "id": "AK4.f3",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/layouts/Glass.astro",
+        "find": "  <button id=\"zoom-reset\"",
+        "replace": "  <p class=\"zoom-keys\">+ &minus; 0</p>\n  <button id=\"zoom-reset\""
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts",
+        "test/site/astro-scaffold.test.ts"
+      ],
+      "expect": [
+        "AK4 the kit's shapes: the fog and vignette pairs, the Glass with data-zoom on every press, the chart folio's [class, id] lines, the stage's gesture box and after-slot, the road out",
+        "AK7 the camera's press is home's face everywhere (#505, ruled 2026-09-02): 2.2rem square in the body face at 1.1rem, the house's rounding kept, the mockup's ease; the keys slip is gone from the kit",
+        "the kit's lifted shapes render one shape on every page that wears them: the fog, the vignettes, the Glass, the chart folio's lines, the stage, every road out (#487)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH32"
+      ]
+    }
+  },
+  {
+    "id": "AK4.g",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/layouts/ChartFolio.astro",
+        "find": "<div class=\"chrome corner bl folio\">",
+        "replace": "<div class=\"chrome corner bl\">"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts",
+        "test/site/astro-scaffold.test.ts"
+      ],
+      "expect": [
+        "AK4 the kit's shapes: the fog and vignette pairs, the Glass with data-zoom on every press, the chart folio's [class, id] lines, the stage's gesture box and after-slot, the road out",
+        "the kit's lifted shapes render one shape on every page that wears them: the fog, the vignettes, the Glass, the chart folio's lines, the stage, every road out (#487)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH32"
+      ]
+    }
+  },
+  {
+    "id": "AK4.h",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/layouts/ChartFolio.astro",
+        "find": "<p class={cls} id={id}></p>",
+        "replace": "<p class={cls} id={id} aria-live=\"polite\"></p>"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts",
+        "test/site/astro-scaffold.test.ts"
+      ],
+      "expect": [
+        "AK4 the kit's shapes: the fog and vignette pairs, the Glass with data-zoom on every press, the chart folio's [class, id] lines, the stage's gesture box and after-slot, the road out",
+        "the kit's lifted shapes render one shape on every page that wears them: the fog, the vignettes, the Glass, the chart folio's lines, the stage, every road out (#487)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH32"
+      ]
+    }
+  },
+  {
+    "id": "AK4.i1",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/layouts/ChartStage.astro",
+        "find": "tabindex=\"0\" role=\"application\" aria-label={label}>",
+        "replace": "tabindex=\"0\" aria-label={label}>"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts",
+        "test/site/astro-scaffold.test.ts"
+      ],
+      "expect": [
+        "AK4 the kit's shapes: the fog and vignette pairs, the Glass with data-zoom on every press, the chart folio's [class, id] lines, the stage's gesture box and after-slot, the road out",
+        "the kit's lifted shapes render one shape on every page that wears them: the fog, the vignettes, the Glass, the chart folio's lines, the stage, every road out (#487)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH32"
+      ]
+    }
+  },
+  {
+    "id": "AK4.i2",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/layouts/ChartStage.astro",
+        "find": "<div id=\"map\">\n    <slot />\n  </div></div></div>",
+        "replace": "<div id=\"map\"></div></div></div>\n    <slot />"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts"
+      ],
+      "expect": [
+        "AK4 the kit's shapes: the fog and vignette pairs, the Glass with data-zoom on every press, the chart folio's [class, id] lines, the stage's gesture box and after-slot, the road out"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH25"
+      ]
+    },
+    "measureFirst": true
+  },
+  {
+    "id": "AK4.i3",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/layouts/ChartStage.astro",
+        "find": "  <slot name=\"after\" />\n</div>",
+        "replace": "</div>\n<slot name=\"after\" />"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts"
+      ],
+      "expect": [
+        "AK4 the kit's shapes: the fog and vignette pairs, the Glass with data-zoom on every press, the chart folio's [class, id] lines, the stage's gesture box and after-slot, the road out"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH25",
+        "RH26",
+        "RH32"
+      ]
+    }
+  },
+  {
+    "id": "AK4.j1",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/layouts/LegendButton.astro",
+        "find": "<span class=\"room\">{room}</span></a>",
+        "replace": "<span class=\"place\">{room}</span></a>"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts",
+        "test/site/astro-scaffold.test.ts"
+      ],
+      "expect": [
+        "AK4 the kit's shapes: the fog and vignette pairs, the Glass with data-zoom on every press, the chart folio's [class, id] lines, the stage's gesture box and after-slot, the road out",
+        "every road out names its destination by that route's name in the tree (Issue #668)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH22",
+        "RH32"
+      ]
+    }
+  },
+  {
+    "id": "AK4.j2",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/layouts/LegendButton.astro",
+        "find": "data-road={road} href={href}>",
+        "replace": "href={href}>"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts",
+        "test/site/astro-scaffold.test.ts"
+      ],
+      "expect": [
+        "AK4 the kit's shapes: the fog and vignette pairs, the Glass with data-zoom on every press, the chart folio's [class, id] lines, the stage's gesture box and after-slot, the road out",
+        "the kit's lifted shapes render one shape on every page that wears them: the fog, the vignettes, the Glass, the chart folio's lines, the stage, every road out (#487)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH32"
+      ]
+    }
+  },
+  {
+    "id": "AK4.j3",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/layouts/LegendButton.astro",
+        "find": "class={gold ? \"legend-btn gold\" : \"legend-btn\"}",
+        "replace": "class={gold ? \"legend-btn\" : \"legend-btn\"}"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts",
+        "test/site/astro-scaffold.test.ts"
+      ],
+      "expect": [
+        "AK4 the kit's shapes: the fog and vignette pairs, the Glass with data-zoom on every press, the chart folio's [class, id] lines, the stage's gesture box and after-slot, the road out",
+        "the kit's lifted shapes render one shape on every page that wears them: the fog, the vignettes, the Glass, the chart folio's lines, the stage, every road out (#487)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH22",
+        "RH32"
+      ]
+    }
+  },
+  {
+    "id": "AK5.a",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/pages/ribbon/index.astro",
+        "find": "<ChartStage label=\"The scroll. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet.\">",
+        "replace": "<div class=\"stage\">\n  <div class=\"sheet\" id=\"sheet\"><div id=\"map-viewport\" tabindex=\"0\" aria-label=\"The scroll. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet.\"><div id=\"map\">"
+      },
+      {
+        "file": "src/pages/ribbon/index.astro",
+        "find": "  <Fragment slot=\"after\">",
+        "replace": "  </div></div></div>\n  <Fragment>"
+      },
+      {
+        "file": "src/pages/ribbon/index.astro",
+        "find": "</ChartStage>",
+        "replace": "</div>"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts",
+        "test/site/astro-scaffold.test.ts"
+      ],
+      "expect": [
+        "AK5 the stage is lifted where the skeleton is one shape (the Print Room, the Prospect, the Ribbon); the three unique skeletons stay in their pages",
+        "the kit's lifted shapes render one shape on every page that wears them: the fog, the vignettes, the Glass, the chart folio's lines, the stage, every road out (#487)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH32"
+      ]
+    }
+  },
+  {
+    "id": "AK5.b",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/pages/explorer/index.astro",
+        "find": "<div class=\"sheet-inner\" id=\"sheet-inner\">",
+        "replace": "<div class=\"sheet-leaf\" id=\"sheet-inner\">"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts",
+        "test/site/explorer-room.test.ts"
+      ],
+      "expect": [
+        "AK5 the stage is lifted where the skeleton is one shape (the Print Room, the Prospect, the Ribbon); the three unique skeletons stay in their pages",
+        "ER5 the sheet stays the Glass's gesture box, so a bookmark's cx/cy stay sheet fractions; the Glass stands at the chart's corner outside it"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH25"
+      ]
+    }
+  },
+  {
+    "id": "AK5.c",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/pages/reading-room/index.astro",
+        "find": "0 shows the full sheet.\"></div></div>",
+        "replace": "0 shows the full sheet.\"><div class=\"rf-ghost\"></div></div></div>"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts"
+      ],
+      "expect": [
+        "AK5 the stage is lifted where the skeleton is one shape (the Print Room, the Prospect, the Ribbon); the three unique skeletons stay in their pages"
+      ]
+    },
+    "e2e": {
+      "suites": "reading-room",
+      "expect": [
+        "RR38"
+      ]
+    },
+    "measureFirst": true
+  },
+  {
+    "id": "AK5.d",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/pages/seed-of-the-day/index.astro",
+        "find": "<div id=\"map\"><div id=\"sheet\" class=\"sheet\"></div></div>",
+        "replace": "<div id=\"map\"><div class=\"sheet-wrap\"><div id=\"sheet\" class=\"sheet\"></div></div></div>"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts"
+      ],
+      "expect": [
+        "AK5 the stage is lifted where the skeleton is one shape (the Print Room, the Prospect, the Ribbon); the three unique skeletons stay in their pages"
+      ]
+    },
+    "e2e": {
+      "suites": "hunt",
+      "expect": [
+        "HG6"
+      ]
+    },
+    "measureFirst": true
+  },
+  {
+    "id": "AK6.a1",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/site/shared/glass-keys.ts",
+        "find": "querySelectorAll<HTMLElement>(\"[data-zoom]\")",
+        "replace": "querySelectorAll<HTMLElement>(\"[data-zoom=in]\")"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts"
+      ],
+      "expect": [
+        "AK6 the kit's glass-keys.ts binds every [data-zoom] press on the page, document-wide, which is why vellum/explorer-no-glass-keys keeps the Explorer and home, each binding its own presses by id, off it"
+      ]
+    },
+    "e2e": {
+      "suites": "specimen",
+      "expect": [
+        "SB13",
+        "SB15"
+      ]
+    }
+  },
+  {
+    "id": "AK6.a2",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/site/shared/glass-keys.ts",
+        "find": "querySelectorAll<HTMLElement>(\"[data-zoom]\")",
+        "replace": "querySelectorAll<HTMLElement>(\"[data-zoom=in], [data-zoom=fit]\")"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts"
+      ],
+      "expect": [
+        "AK6 the kit's glass-keys.ts binds every [data-zoom] press on the page, document-wide, which is why vellum/explorer-no-glass-keys keeps the Explorer and home, each binding its own presses by id, off it"
+      ]
+    },
+    "e2e": {
+      "suites": "specimen",
+      "expect": [
+        "SB15"
+      ]
+    }
+  },
+  {
+    "id": "AK6.a3",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/site/shared/glass-keys.ts",
+        "find": "querySelectorAll<HTMLElement>(\"[data-zoom]\")",
+        "replace": "querySelectorAll<HTMLElement>(\"[data-zoom=in], [data-zoom=out]\")"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts"
+      ],
+      "expect": [
+        "AK6 the kit's glass-keys.ts binds every [data-zoom] press on the page, document-wide, which is why vellum/explorer-no-glass-keys keeps the Explorer and home, each binding its own presses by id, off it"
+      ]
+    },
+    "e2e": {
+      "suites": "specimen",
+      "expect": [
+        "SB13"
+      ]
+    }
+  },
+  {
+    "id": "AK7.a1",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/atelier.css",
+        "find": "  width: 2.2rem;\n  height: 2.2rem;",
+        "replace": "  width: 2.4rem;\n  height: 2.2rem;"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts"
+      ],
+      "expect": [
+        "AK7 the camera's press is home's face everywhere (#505, ruled 2026-09-02): 2.2rem square in the body face at 1.1rem, the house's rounding kept, the mockup's ease; the keys slip is gone from the kit"
+      ]
+    },
+    "e2e": {
+      "suites": "glass-ceremony",
+      "expect": [
+        "G1"
+      ]
+    }
+  },
+  {
+    "id": "AK7.a2",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/atelier.css",
+        "find": "  width: 2.2rem;\n  height: 2.2rem;",
+        "replace": "  width: 2.2rem;\n  height: 2.4rem;"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts"
+      ],
+      "expect": [
+        "AK7 the camera's press is home's face everywhere (#505, ruled 2026-09-02): 2.2rem square in the body face at 1.1rem, the house's rounding kept, the mockup's ease; the keys slip is gone from the kit"
+      ]
+    },
+    "e2e": {
+      "suites": "glass-ceremony",
+      "expect": [
+        "G9"
+      ]
+    }
+  },
+  {
+    "id": "AK7.b1",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/atelier.css",
+        "find": "  height: 2.2rem;\n  font-family: var(--font-body,",
+        "replace": "  height: 2.2rem;\n  font-family: var(--font-display,"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts"
+      ],
+      "expect": [
+        "AK7 the camera's press is home's face everywhere (#505, ruled 2026-09-02): 2.2rem square in the body face at 1.1rem, the house's rounding kept, the mockup's ease; the keys slip is gone from the kit"
+      ]
+    },
+    "e2e": {
+      "suites": "glass-ceremony",
+      "expect": [
+        "G9"
+      ]
+    }
+  },
+  {
+    "id": "AK7.b2",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/atelier.css",
+        "find": "  font-size: 1.1rem;\n  line-height: 1;",
+        "replace": "  font-size: 1.2rem;\n  line-height: 1;"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts"
+      ],
+      "expect": [
+        "AK7 the camera's press is home's face everywhere (#505, ruled 2026-09-02): 2.2rem square in the body face at 1.1rem, the house's rounding kept, the mockup's ease; the keys slip is gone from the kit"
+      ]
+    },
+    "e2e": {
+      "suites": "glass-ceremony",
+      "expect": [
+        "G9"
+      ]
+    }
+  },
+  {
+    "id": "AK7.b3",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/atelier.css",
+        "find": "  font-size: 1.1rem;\n  line-height: 1;",
+        "replace": "  font-size: 1.1rem;\n  line-height: 1.2;"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts"
+      ],
+      "expect": [
+        "AK7 the camera's press is home's face everywhere (#505, ruled 2026-09-02): 2.2rem square in the body face at 1.1rem, the house's rounding kept, the mockup's ease; the keys slip is gone from the kit"
+      ]
+    },
+    "e2e": {
+      "suites": "glass-ceremony",
+      "expect": [
+        "G9"
+      ]
+    }
+  },
+  {
+    "id": "AK7.c1",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/atelier.css",
+        "find": "  font-size: 1.1rem;\n  line-height: 1;\n  color: var(--parchment);",
+        "replace": "  font-size: 1.1rem;\n  line-height: 1;\n  color: var(--parchment-bright);"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts"
+      ],
+      "expect": [
+        "AK7 the camera's press is home's face everywhere (#505, ruled 2026-09-02): 2.2rem square in the body face at 1.1rem, the house's rounding kept, the mockup's ease; the keys slip is gone from the kit"
+      ]
+    },
+    "e2e": {
+      "suites": "glass-ceremony",
+      "expect": [
+        "G9"
+      ]
+    }
+  },
+  {
+    "id": "AK7.c2",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/atelier.css",
+        "find": "  line-height: 1;\n  color: var(--parchment);\n  background: rgb(from var(--chart-ink) r g b / 0.5);",
+        "replace": "  line-height: 1;\n  color: var(--parchment);\n  background: rgb(from var(--chart-ink) r g b / 0.6);"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts"
+      ],
+      "expect": [
+        "AK7 the camera's press is home's face everywhere (#505, ruled 2026-09-02): 2.2rem square in the body face at 1.1rem, the house's rounding kept, the mockup's ease; the keys slip is gone from the kit"
+      ]
+    },
+    "e2e": {
+      "suites": "glass-ceremony",
+      "expect": [
+        "G9"
+      ]
+    }
+  },
+  {
+    "id": "AK7.c3",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/atelier.css",
+        "find": "  border: 1px solid var(--line-tan);\n  cursor: pointer;",
+        "replace": "  border: 1px solid var(--line-faint);\n  cursor: pointer;"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts"
+      ],
+      "expect": [
+        "AK7 the camera's press is home's face everywhere (#505, ruled 2026-09-02): 2.2rem square in the body face at 1.1rem, the house's rounding kept, the mockup's ease; the keys slip is gone from the kit"
+      ]
+    },
+    "e2e": {
+      "suites": "glass-ceremony",
+      "expect": [
+        "G9"
+      ]
+    }
+  },
+  {
+    "id": "AK7.d1",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/atelier.css",
+        "find": "  width: 2.2rem;\n  height: 2.2rem;",
+        "replace": "  width: 2.2rem;\n  height: 2.2rem;\n  border-radius: 6px;"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts"
+      ],
+      "expect": [
+        "AK7 the camera's press is home's face everywhere (#505, ruled 2026-09-02): 2.2rem square in the body face at 1.1rem, the house's rounding kept, the mockup's ease; the keys slip is gone from the kit"
+      ]
+    },
+    "e2e": {
+      "suites": "glass-ceremony",
+      "expect": [
+        "G1"
+      ]
+    }
+  },
+  {
+    "id": "AK7.d2",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/atelier.css",
+        "find": "  width: 2.2rem;\n  height: 2.2rem;",
+        "replace": "  width: 2.2rem;\n  height: 2.2rem;\n  padding: 0;"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts"
+      ],
+      "expect": [
+        "AK7 the camera's press is home's face everywhere (#505, ruled 2026-09-02): 2.2rem square in the body face at 1.1rem, the house's rounding kept, the mockup's ease; the keys slip is gone from the kit"
+      ]
+    },
+    "e2e": {
+      "suites": "glass-ceremony",
+      "expect": [
+        "G9"
+      ]
+    }
+  },
+  {
+    "id": "AK7.d3",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/atelier.css",
+        "find": "  width: 2.2rem;\n  height: 2.2rem;",
+        "replace": "  width: 2.2rem;\n  height: 2.2rem;\n  display: flex;"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts"
+      ],
+      "expect": [
+        "AK7 the camera's press is home's face everywhere (#505, ruled 2026-09-02): 2.2rem square in the body face at 1.1rem, the house's rounding kept, the mockup's ease; the keys slip is gone from the kit"
+      ]
+    },
+    "e2e": {
+      "suites": "glass-ceremony",
+      "expect": [
+        "G9"
+      ]
+    }
+  },
+  {
+    "id": "AK7.f1",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/atelier.css",
+        "find": ".zoomery.corner .zoom-btn:focus-visible {\n  background: var(--ink-dark);",
+        "replace": ".zoomery.corner .zoom-btn:focus-visible {\n  background: var(--ink-brown);"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts"
+      ],
+      "expect": [
+        "AK7 the camera's press is home's face everywhere (#505, ruled 2026-09-02): 2.2rem square in the body face at 1.1rem, the house's rounding kept, the mockup's ease; the keys slip is gone from the kit"
+      ]
+    },
+    "e2e": {
+      "suites": "glass-ceremony",
+      "expect": [
+        "G10"
+      ]
+    }
+  },
+  {
+    "id": "AK7.f2",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/atelier.css",
+        "find": ".zoomery.corner .zoom-btn:focus-visible {\n  background: var(--ink-dark);\n  color: var(--parchment-bright);",
+        "replace": ".zoomery.corner .zoom-btn:focus-visible {\n  background: var(--ink-dark);\n  color: var(--parchment);"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts"
+      ],
+      "expect": [
+        "AK7 the camera's press is home's face everywhere (#505, ruled 2026-09-02): 2.2rem square in the body face at 1.1rem, the house's rounding kept, the mockup's ease; the keys slip is gone from the kit"
+      ]
+    },
+    "e2e": {
+      "suites": "glass-ceremony",
+      "expect": [
+        "G10"
+      ]
+    }
+  },
+  {
+    "id": "AK7.f3",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/atelier.css",
+        "find": ".zoomery.corner .zoom-btn:hover,",
+        "replace": ""
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts"
+      ],
+      "expect": [
+        "AK7 the camera's press is home's face everywhere (#505, ruled 2026-09-02): 2.2rem square in the body face at 1.1rem, the house's rounding kept, the mockup's ease; the keys slip is gone from the kit"
+      ]
+    },
+    "e2e": {
+      "suites": "glass-ceremony",
+      "expect": [
+        "G10"
+      ]
+    }
+  },
+  {
+    "id": "AK7.f4",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/atelier.css",
+        "find": ".zoomery.corner .zoom-btn:hover,\n.zoomery.corner .zoom-btn:focus-visible {",
+        "replace": ".zoomery.corner .zoom-btn:hover {"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts"
+      ],
+      "expect": [
+        "AK7 the camera's press is home's face everywhere (#505, ruled 2026-09-02): 2.2rem square in the body face at 1.1rem, the house's rounding kept, the mockup's ease; the keys slip is gone from the kit"
+      ]
+    },
+    "e2e": {
+      "suites": "glass-ceremony",
+      "expect": [
+        "G10"
+      ]
+    }
+  },
+  {
+    "id": "AK7.f5",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/atelier.css",
+        "find": ".zoomery.corner .zoom-btn:hover,",
+        "replace": ".zoom-btn:hover,"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/atelier-kit.test.ts"
+      ],
+      "expect": [
+        "AK7 the camera's press is home's face everywhere (#505, ruled 2026-09-02): 2.2rem square in the body face at 1.1rem, the house's rounding kept, the mockup's ease; the keys slip is gone from the kit"
+      ]
+    },
+    "e2e": {
+      "suites": "glass-ceremony",
+      "expect": [
+        "G10"
+      ]
+    }
+  },
+  {
+    "id": "RT2.a",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/atelier.css",
+        "find": "  body:has(#map-viewport.zoomed) .corner.tr::before,",
+        "replace": "}\n@media all {\n  body:has(#map-viewport.zoomed) .corner.tr::before,"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/room.test.ts"
+      ],
+      "expect": [
+        "the room folio's panel is painted screen-only (#538): on paper the corner goes static and in flow, and an absolute panel on a static corner resolved against the whole page (e2e RH10c and SB9b pin the resolved value)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH10c",
+        "RH29",
+        "RH10d",
+        "RH10e"
+      ]
+    },
+    "measureFirst": true
+  },
+  {
+    "id": "RT2.b",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/print-room/index.css",
+        "find": ".bind-row {",
+        "replace": ".corner.tr::before {\n  content: \"\";\n}\n.bind-row {"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/room.test.ts"
+      ],
+      "expect": [
+        "the room folio's panel is painted screen-only (#538): on paper the corner goes static and in flow, and an absolute panel on a static corner resolved against the whole page (e2e RH10c and SB9b pin the resolved value)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH29"
+      ]
+    }
+  },
+  {
+    "id": "RT2.c",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/atelier.css",
+        "find": "  --folio-w: 19rem;",
+        "replace": "  --folio-w: 19rem;\n}\n.folio-room::after {\n  content: \"\";"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/room.test.ts"
+      ],
+      "expect": [
+        "the room folio's panel is painted screen-only (#538): on paper the corner goes static and in flow, and an absolute panel on a static corner resolved against the whole page (e2e RH10c and SB9b pin the resolved value)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH29"
+      ]
+    }
+  },
+  {
+    "id": "RT2.d",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/ribbon/index.css",
+        "find": ".journey {",
+        "replace": "body.stage-under .corner.tr::before {\n  content: \"\";\n}\n.journey {"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/room.test.ts"
+      ],
+      "expect": [
+        "the room folio's panel is painted screen-only (#538): on paper the corner goes static and in flow, and an absolute panel on a static corner resolved against the whole page (e2e RH10c and SB9b pin the resolved value)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH29"
+      ]
+    }
+  },
+  {
+    "id": "RT4.a",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/atelier.css",
+        "find": "  transition: opacity 0.45s var(--ease-paper);",
+        "replace": "  transition: opacity 0.3s var(--ease-paper);"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/room.test.ts"
+      ],
+      "expect": [
+        "the kit gives the stage's status pill its fade, keyed to the class so every chart room's pill wears it (#547)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH26"
+      ]
+    }
+  },
+  {
+    "id": "RT4.b",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/atelier.css",
+        "find": ".status.fading {\n  opacity: 0;",
+        "replace": ".status.fading {\n  opacity: 1;"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/room.test.ts"
+      ],
+      "expect": [
+        "the kit gives the stage's status pill its fade, keyed to the class so every chart room's pill wears it (#547)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH26"
+      ]
+    }
+  },
+  {
+    "id": "RT4.c",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/atelier.css",
+        "find": "body.chart-room .stage .status.fading {",
+        "replace": "body.chart-room .stage #status.fading {"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/room.test.ts"
+      ],
+      "expect": [
+        "the kit gives the stage's status pill its fade, keyed to the class so every chart room's pill wears it (#547)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH26"
+      ]
+    }
+  },
+  {
+    "id": "RT4.d",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/atelier.css",
+        "find": "body.chart-room .stage .status {",
+        "replace": "body.chart-room .stage #status {"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/room.test.ts"
+      ],
+      "expect": [
+        "the kit gives the stage's status pill its fade, keyed to the class so every chart room's pill wears it (#547)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH26"
+      ]
+    }
+  },
+  {
+    "id": "HS2.b1",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/house.css",
+        "find": "  font-size: 0.82rem;",
+        "replace": "  font-size: 0.8rem;"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/house-style.test.ts"
+      ],
+      "expect": [
+        "the archivist's label, two tiers (#324 decision 5, candidate B)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH27"
+      ]
+    }
+  },
+  {
+    "id": "HS2.b2",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/house.css",
+        "find": "  letter-spacing: 0.18em;",
+        "replace": "  letter-spacing: 0.16em;"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/house-style.test.ts"
+      ],
+      "expect": [
+        "the archivist's label, two tiers (#324 decision 5, candidate B)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH27"
+      ]
+    }
+  },
+  {
+    "id": "HS2.b3",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/house.css",
+        "find": "  font-weight: 600;",
+        "replace": "  font-weight: 500;"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/house-style.test.ts"
+      ],
+      "expect": [
+        "the archivist's label, two tiers (#324 decision 5, candidate B)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH27"
+      ]
+    }
+  },
+  {
+    "id": "HS2.b4",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/house.css",
+        "find": "  font-weight: 600;\n  text-transform: uppercase;",
+        "replace": "  font-weight: 600;\n  text-transform: none;"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/house-style.test.ts"
+      ],
+      "expect": [
+        "the archivist's label, two tiers (#324 decision 5, candidate B)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH27"
+      ]
+    }
+  },
+  {
+    "id": "HS2.b5",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/house.css",
+        "find": "  font-weight: 600;\n  text-transform: uppercase;\n  color: var(--ink-faded);",
+        "replace": "  font-weight: 600;\n  text-transform: uppercase;\n  color: var(--ink-brown);"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/house-style.test.ts"
+      ],
+      "expect": [
+        "the archivist's label, two tiers (#324 decision 5, candidate B)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH27"
+      ]
+    }
+  },
+  {
+    "id": "HS3.a",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/house.css",
+        "find": "  font-family: inherit;\n  font-size: 0.95rem;\n  color: var(--ink-dark);\n  background: var(--control-cream);",
+        "replace": "  font-family: inherit;\n  font-size: 0.95rem;\n  color: var(--ink-dark);\n  background: var(--parchment);"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/house-style.test.ts"
+      ],
+      "expect": [
+        "the control idiom: cream, 1.5px ink-dark, 4px, one primary (#324)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH28"
+      ]
+    }
+  },
+  {
+    "id": "HS3.b1",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/house.css",
+        "find": "  border: 1.5px solid var(--ink-dark);\n  border-radius: 4px;\n  padding: 0.4rem 0.6rem;\n}\nbutton {",
+        "replace": "  border: 2.5px solid var(--ink-dark);\n  border-radius: 4px;\n  padding: 0.4rem 0.6rem;\n}\nbutton {"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/house-style.test.ts"
+      ],
+      "expect": [
+        "the control idiom: cream, 1.5px ink-dark, 4px, one primary (#324)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH28"
+      ]
+    },
+    "measureFirst": true
+  },
+  {
+    "id": "HS3.b2",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/house.css",
+        "find": "  border: 1.5px solid var(--ink-dark);\n  border-radius: 4px;\n  padding: 0.4rem 0.6rem;\n}\nbutton {",
+        "replace": "  border: 1.5px solid var(--ink-brown);\n  border-radius: 4px;\n  padding: 0.4rem 0.6rem;\n}\nbutton {"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/house-style.test.ts"
+      ],
+      "expect": [
+        "the control idiom: cream, 1.5px ink-dark, 4px, one primary (#324)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH28"
+      ]
+    }
+  },
+  {
+    "id": "HS3.c",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/house.css",
+        "find": "  border-radius: 4px;\n  padding: 0.4rem 0.6rem;\n}\nbutton {",
+        "replace": "  border-radius: 6px;\n  padding: 0.4rem 0.6rem;\n}\nbutton {"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/house-style.test.ts"
+      ],
+      "expect": [
+        "the control idiom: cream, 1.5px ink-dark, 4px, one primary (#324)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH28"
+      ]
+    }
+  },
+  {
+    "id": "HS3.d",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/house.css",
+        "find": "  font-family: inherit;\n  font-size: 0.95rem;",
+        "replace": "  font-family: inherit;\n  font-size: 1rem;"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/house-style.test.ts"
+      ],
+      "expect": [
+        "the control idiom: cream, 1.5px ink-dark, 4px, one primary (#324)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH28"
+      ]
+    }
+  },
+  {
+    "id": "HS3.e",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/house.css",
+        "find": "button.primary {\n  background: var(--ink-dark);",
+        "replace": "button.primary {\n  background: var(--ink-press);"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/house-style.test.ts"
+      ],
+      "expect": [
+        "the control idiom: cream, 1.5px ink-dark, 4px, one primary (#324)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH28"
+      ]
+    }
+  },
+  {
+    "id": "HS3.f",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/house.css",
+        "find": "  color: var(--chart-paper);",
+        "replace": "  color: var(--parchment);"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/house-style.test.ts"
+      ],
+      "expect": [
+        "the control idiom: cream, 1.5px ink-dark, 4px, one primary (#324)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH28"
+      ]
+    }
+  },
+  {
+    "id": "HS3.i",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/house.css",
+        "find": "button:not(.lf-station):not(.place-hit):hover {",
+        "replace": "button:not(.lf-station):hover {"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/house-style.test.ts"
+      ],
+      "expect": [
+        "the control idiom: cream, 1.5px ink-dark, 4px, one primary (#324)"
+      ]
+    },
+    "e2e": {
+      "suites": "cards",
+      "expect": [
+        "P15"
+      ]
+    }
+  },
+  {
+    "id": "HS4.a1",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/house.css",
+        "find": "  outline: 2px solid var(--ink-dark);",
+        "replace": "  outline: 3px solid var(--ink-dark);"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/house-style.test.ts"
+      ],
+      "expect": [
+        "the focus ring: 2px ink-dark, everywhere (#324 decision 6)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH30"
+      ]
+    }
+  },
+  {
+    "id": "HS4.a2",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/house.css",
+        "find": "  outline: 2px solid var(--ink-dark);",
+        "replace": "  outline: 2px dashed var(--ink-dark);"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/house-style.test.ts"
+      ],
+      "expect": [
+        "the focus ring: 2px ink-dark, everywhere (#324 decision 6)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH30"
+      ]
+    }
+  },
+  {
+    "id": "HS4.a3",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/house.css",
+        "find": "  outline: 2px solid var(--ink-dark);",
+        "replace": "  outline: 2px solid var(--ink-brown);"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/house-style.test.ts"
+      ],
+      "expect": [
+        "the focus ring: 2px ink-dark, everywhere (#324 decision 6)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH12"
+      ]
+    }
+  },
+  {
+    "id": "HS5.a",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/pages/index.astro",
+        "find": "<button type=\"submit\" class=\"primary\">Draw it</button>",
+        "replace": "<button type=\"submit\">Draw it</button>"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/house-style.test.ts"
+      ],
+      "expect": [
+        "the roles are worn: page markup carries the shared classes (#324)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH27"
+      ]
+    }
+  },
+  {
+    "id": "HS5.b",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/pages/index.astro",
+        "find": "<input id=\"seed-input\" class=\"control\" name=\"seed\"",
+        "replace": "<input id=\"seed-input\" name=\"seed\""
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/house-style.test.ts"
+      ],
+      "expect": [
+        "the roles are worn: page markup carries the shared classes (#324)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH27"
+      ]
+    }
+  },
+  {
+    "id": "HS5.c",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/pages/gallery/index.astro",
+        "find": "<p class=\"dateline\">{dateline}</p>",
+        "replace": "<p>{dateline}</p>"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/house-style.test.ts"
+      ],
+      "expect": [
+        "the roles are worn: page markup carries the shared classes (#324)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH22"
+      ]
+    }
+  },
+  {
+    "id": "HS5.d",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/pages/seed-of-the-day/index.astro",
+        "find": "<p class=\"hunt-intro intro\">",
+        "replace": "<p class=\"hunt-intro\">"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/house-style.test.ts"
+      ],
+      "expect": [
+        "the roles are worn: page markup carries the shared classes (#324)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH27"
+      ]
+    }
+  },
+  {
+    "id": "HS5.e",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/pages/seed-of-the-day/index.astro",
+        "find": "<p class=\"dateline\" id=\"dateline\"></p>",
+        "replace": "<p id=\"dateline\"></p>"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/house-style.test.ts"
+      ],
+      "expect": [
+        "the roles are worn: page markup carries the shared classes (#324)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH27"
+      ]
+    }
+  },
+  {
+    "id": "HS5.f",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/pages/seed-of-the-day/index.astro",
+        "find": "<LegendButton road={r.road} href={r.href}",
+        "replace": "<LegendButton href={r.href}"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/house-style.test.ts",
+        "test/site/astro-scaffold.test.ts"
+      ],
+      "expect": [
+        "the roles are worn: page markup carries the shared classes (#324)",
+        "the kit's lifted shapes render one shape on every page that wears them: the fog, the vignettes, the Glass, the chart folio's lines, the stage, every road out (#487)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH32"
+      ]
+    }
+  },
+  {
+    "id": "HS5.g",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/pages/print-room/index.astro",
+        "find": "<button class=\"legend-btn\" type=\"button\" data-poster=\"chart\"",
+        "replace": "<button class=\"poster-btn\" type=\"button\" data-poster=\"chart\""
+      },
+      {
+        "file": "src/pages/print-room/index.astro",
+        "find": "<button class=\"legend-btn\" type=\"button\" data-poster=\"desk\"",
+        "replace": "<button class=\"poster-btn\" type=\"button\" data-poster=\"desk\""
+      },
+      {
+        "file": "src/pages/print-room/index.astro",
+        "find": "<button class=\"legend-btn\" type=\"button\" data-poster=\"wall\"",
+        "replace": "<button class=\"poster-btn\" type=\"button\" data-poster=\"wall\""
+      },
+      {
+        "file": "src/pages/print-room/index.astro",
+        "find": "<button class=\"legend-btn\" type=\"button\" data-poster=\"grand\"",
+        "replace": "<button class=\"poster-btn\" type=\"button\" data-poster=\"grand\""
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/house-style.test.ts"
+      ],
+      "expect": [
+        "the roles are worn: page markup carries the shared classes (#324)"
+      ]
+    },
+    "e2e": {
+      "suites": "hunt,print-room",
+      "expect": [
+        "PR36"
+      ]
+    }
+  },
+  {
+    "id": "HS5.h",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/pages/print-room/index.astro",
+        "find": "<button id=\"pr-draw\" class=\"primary\" type=\"button\">",
+        "replace": "<button id=\"pr-draw\" type=\"button\">"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/house-style.test.ts"
+      ],
+      "expect": [
+        "the roles are worn: page markup carries the shared classes (#324)"
+      ]
+    },
+    "e2e": {
+      "suites": "hunt,print-room",
+      "expect": [
+        "PR36"
+      ]
+    }
+  },
+  {
+    "id": "HS5.i",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/pages/explorer/index.astro",
+        "find": "<p class=\"panel-head archivist-head\" id=\"grp-land\">",
+        "replace": "<p class=\"panel-head\" id=\"grp-land\">"
+      },
+      {
+        "file": "src/pages/explorer/index.astro",
+        "find": "<p class=\"panel-head archivist-head\" id=\"grp-hand\">",
+        "replace": "<p class=\"panel-head\" id=\"grp-hand\">"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/house-style.test.ts"
+      ],
+      "expect": [
+        "the roles are worn: page markup carries the shared classes (#324)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH27"
+      ]
+    }
+  },
+  {
+    "id": "HS5.j",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/pages/faq/index.astro",
+        "find": "<p class=\"dateline\">{count}</p>",
+        "replace": "<p>{count}</p>"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/house-style.test.ts"
+      ],
+      "expect": [
+        "the roles are worn: page markup carries the shared classes (#324)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH27"
+      ]
+    }
+  },
+  {
+    "id": "HS5.k",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/pages/glossary/index.astro",
+        "find": "<input class=\"control\" type=\"search\"",
+        "replace": "<input type=\"search\""
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/house-style.test.ts"
+      ],
+      "expect": [
+        "the roles are worn: page markup carries the shared classes (#324)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH27"
+      ]
+    }
+  },
+  {
+    "id": "SC3.a1",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/motion.css",
+        "find": "  --raise: -2px;",
+        "replace": "  --raise: -3px;"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/shell-css.test.ts"
+      ],
+      "expect": [
+        "motion.css declares each raise/press token once, at its ratified value (#405)"
+      ]
+    },
+    "e2e": {
+      "suites": "cards",
+      "expect": [
+        "P34"
+      ]
+    }
+  },
+  {
+    "id": "SC3.a2",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/motion.css",
+        "find": "  --press: 1px;",
+        "replace": "  --press: 2px;"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/shell-css.test.ts"
+      ],
+      "expect": [
+        "motion.css declares each raise/press token once, at its ratified value (#405)"
+      ]
+    },
+    "e2e": {
+      "suites": "cards",
+      "expect": [
+        "P34"
+      ]
+    }
+  },
+  {
+    "id": "SC3.a3",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/motion.css",
+        "find": "  --raise-shadow: 0 6px 16px rgb(from var(--chart-ink) r g b / 0.2);",
+        "replace": "  --raise-shadow: 0 6px 16px rgb(from var(--chart-ink) r g b / 0.3);"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/shell-css.test.ts"
+      ],
+      "expect": [
+        "motion.css declares each raise/press token once, at its ratified value (#405)"
+      ]
+    },
+    "e2e": {
+      "suites": "cards",
+      "expect": [
+        "P34"
+      ]
+    }
+  },
+  {
+    "id": "SC3.a4",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/motion.css",
+        "find": "  --press-shadow: 0 1px 3px rgb(from var(--chart-ink) r g b / 0.14);",
+        "replace": "  --press-shadow: 0 1px 3px rgb(from var(--chart-ink) r g b / 0.24);"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/shell-css.test.ts"
+      ],
+      "expect": [
+        "motion.css declares each raise/press token once, at its ratified value (#405)"
+      ]
+    },
+    "e2e": {
+      "suites": "cards",
+      "expect": [
+        "P34"
+      ]
+    }
+  },
+  {
+    "id": "SC4.a",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/motion.css",
+        "find": ".plate {",
+        "replace": ".plate {\n  transform: rotate(-0.6deg);"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/shell-css.test.ts"
+      ],
+      "expect": [
+        "the plate dress rests flat and tips on hover (#130, the consumer is now print-room)"
+      ]
+    },
+    "e2e": {
+      "suites": "home",
+      "expect": [
+        "H21"
+      ]
+    }
+  },
+  {
+    "id": "SC4.b1",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/motion.css",
+        "find": "  transform: translateY(-5px) rotate(-0.6deg);",
+        "replace": "  transform: translateY(-5px);"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/shell-css.test.ts"
+      ],
+      "expect": [
+        "the plate dress rests flat and tips on hover (#130, the consumer is now print-room)"
+      ]
+    },
+    "e2e": {
+      "suites": "home",
+      "expect": [
+        "H21"
+      ]
+    }
+  },
+  {
+    "id": "SC4.b2",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/motion.css",
+        "find": "  transform: translateY(-5px) rotate(-0.6deg);",
+        "replace": "  transform: rotate(-0.6deg);"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/shell-css.test.ts"
+      ],
+      "expect": [
+        "the plate dress rests flat and tips on hover (#130, the consumer is now print-room)"
+      ]
+    },
+    "e2e": {
+      "suites": "home",
+      "expect": [
+        "H21"
+      ]
+    }
+  },
+  {
+    "id": "SC5.a",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/motion.css",
+        "find": ".action-link:hover {\n  transform: translateY(var(--raise));",
+        "replace": ".action-link:hover {\n  transform: translateY(var(--press));"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/shell-css.test.ts"
+      ],
+      "expect": [
+        "each lifting surface consumes ITS token, not just a token (#405)"
+      ]
+    },
+    "e2e": {
+      "suites": "cards",
+      "expect": [
+        "P34"
+      ]
+    }
+  },
+  {
+    "id": "SC5.b",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/motion.css",
+        "find": "  box-shadow: var(--raise-shadow);",
+        "replace": "  box-shadow: var(--press-shadow);"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/shell-css.test.ts"
+      ],
+      "expect": [
+        "each lifting surface consumes ITS token, not just a token (#405)"
+      ]
+    },
+    "e2e": {
+      "suites": "cards",
+      "expect": [
+        "P34"
+      ]
+    }
+  },
+  {
+    "id": "SC5.c",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/motion.css",
+        "find": "  transform: translateY(var(--press));",
+        "replace": "  transform: translateY(var(--raise));"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/shell-css.test.ts"
+      ],
+      "expect": [
+        "each lifting surface consumes ITS token, not just a token (#405)"
+      ]
+    },
+    "e2e": {
+      "suites": "cards",
+      "expect": [
+        "P34"
+      ]
+    }
+  },
+  {
+    "id": "SC5.d",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/motion.css",
+        "find": "  box-shadow: var(--press-shadow);",
+        "replace": "  box-shadow: var(--raise-shadow);"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/shell-css.test.ts"
+      ],
+      "expect": [
+        "each lifting surface consumes ITS token, not just a token (#405)"
+      ]
+    },
+    "e2e": {
+      "suites": "cards",
+      "expect": [
+        "P34"
+      ]
+    }
+  },
+  {
+    "id": "SC5.e",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/motion.css",
+        "find": ".rooms a:focus-visible {\n  transform: translateY(var(--raise));",
+        "replace": ".rooms a:focus-visible {\n  transform: translateY(var(--press));"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/shell-css.test.ts"
+      ],
+      "expect": [
+        "each lifting surface consumes ITS token, not just a token (#405)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH31"
+      ]
+    }
+  },
+  {
+    "id": "SC5.f",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/motion.css",
+        "find": "  transform: translateY(var(--raise)) rotate(-0.6deg);",
+        "replace": "  transform: translateY(var(--press)) rotate(-0.6deg);"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/shell-css.test.ts"
+      ],
+      "expect": [
+        "each lifting surface consumes ITS token, not just a token (#405)"
+      ]
+    },
+    "e2e": {
+      "suites": "runninghead",
+      "expect": [
+        "RH13"
+      ]
+    }
+  },
+  {
+    "id": "SC5.g",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "  transform: translateY(var(--raise)) rotate(-0.6deg);",
+        "replace": "  transform: translateY(var(--press)) rotate(-0.6deg);"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/shell-css.test.ts"
+      ],
+      "expect": [
+        "each lifting surface consumes ITS token, not just a token (#405)"
+      ]
+    },
+    "e2e": {
+      "suites": "cards",
+      "expect": [
+        "P35"
+      ]
+    }
+  }
+]

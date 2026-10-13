@@ -21,7 +21,7 @@ export const APP = "/explorer/";
 
 // Anchored and disjoint on purpose: the flourish face's name is a prefix of the display face's, so an unanchored test for one would match the other.
 export const DISPLAY_FACE = /^"IM Fell English SC",/;
-const FLOURISH_FACE = /^"IM Fell English",/;
+export const FLOURISH_FACE = /^"IM Fell English",/;
 
 // Every constant MEASURED against the built dist/ (out/probe-cluster.mjs, 2026-08-26), never derived; tracking null means the browser reported "normal" and is asserted as such. The cluster is ONE dress on every page (Issue #461 ruling 1): home differs only in the wordmark's tag (h1, Issue #288) and in having no room head to measure.
 const ROOM_HEAD = {

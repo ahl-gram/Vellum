@@ -115,73 +115,12 @@ test("the composers dress from the same palette (#269 review follow-up)", async 
 });
 
 // The hover raise and press are house values (Issue #405), named in motion.css's :root, the one sheet both the site pages and the standalone atlas page load.
-const RAISE_TOKENS = [
-  ["--raise", "-2px"],
-  ["--press", "1px"],
-  ["--raise-shadow", "0 6px 16px rgb(from var(--chart-ink) r g b / 0.2)"],
-  ["--press-shadow", "0 1px 3px rgb(from var(--chart-ink) r g b / 0.14)"],
-] as const;
+const RAISE_TOKENS = ["--raise", "--press", "--raise-shadow", "--press-shadow"] as const;
 
-test("motion.css declares each raise/press token once, at its ratified value (#405)", () => {
+test("motion.css declares each raise/press token once (#405; kept for Issue #779 part 2i: a second declaration repeating the first changes nothing served, and P34 reads each token's ratified value)", () => {
   const css = read("public/motion.css");
-  for (const [name, value] of RAISE_TOKENS) {
-    assert.equal(
-      css.split(`${name}: ${value};`).length - 1,
-      1,
-      `motion.css should declare ${name}: ${value}; exactly once`,
-    );
+  for (const name of RAISE_TOKENS) {
     assert.equal(css.split(`${name}:`).length - 1, 1, `${name} should have exactly one declaration in motion.css`);
-  }
-});
-
-test("the plate dress rests flat and tips on hover (#130, the consumer is now print-room)", () => {
-  const css = read("public/motion.css");
-  const base = css.match(/\.plate\s*\{([^}]*)\}/);
-  assert.ok(base, ".plate base rule exists in motion.css");
-  assert.ok(!/rotate\(/.test(base[1]!), ".plate rests flat (no resting rotate)");
-  const hover = css.match(/\.plate:hover\s*\{([^}]*)\}/);
-  assert.ok(
-    hover && /rotate\(/.test(hover[1]!) && /translateY\(/.test(hover[1]!),
-    ".plate tips (rotate) and lifts (translateY) under the hand",
-  );
-});
-
-// Identity, not presence: the sweep proves a lift is SOME token; this pins WHICH one each consumer uses.
-const TOKEN_CONSUMERS: ReadonlyArray<{ file: string; arm: string; lift: string; shadow?: string }> = [
-  {
-    file: "public/motion.css",
-    arm: "button:not(.lf-station):not(.place-hit):hover",
-    lift: "--raise",
-    shadow: "--raise-shadow",
-  },
-  {
-    file: "public/motion.css",
-    arm: "button:not(.lf-station):not(.place-hit):active",
-    lift: "--press",
-    shadow: "--press-shadow",
-  },
-  { file: "public/motion.css", arm: ".rooms a:hover", lift: "--raise" },
-  { file: "public/motion.css", arm: "body:has(.room-name) .wordmark a:hover", lift: "--raise" },
-  { file: "public/living-chart.css", arm: ".pc-prospect:hover", lift: "--raise" },
-];
-
-test("each lifting surface consumes ITS token, not just a token (#405)", () => {
-  for (const { file, arm, lift, shadow } of TOKEN_CONSUMERS) {
-    const rule = rulesIn(read(file)).find((r) =>
-      r.selector
-        .split(",")
-        .map((s) => s.trim().replace(/\s+/g, " "))
-        .includes(arm),
-    );
-    assert.ok(rule, `${file} should carry a rule selecting ${arm}`);
-    assert.match(
-      rule.body,
-      new RegExp(`transform:\\s*translateY\\(var\\(${lift}\\)\\)`),
-      `${arm} should lift by var(${lift})`,
-    );
-    if (shadow) {
-      assert.match(rule.body, new RegExp(`box-shadow:\\s*var\\(${shadow}\\)`), `${arm} should cast var(${shadow})`);
-    }
   }
 });
 

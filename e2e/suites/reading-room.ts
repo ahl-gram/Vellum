@@ -1,4 +1,4 @@
-// Reading Room e2e (RR0-RR42; Issue #221 plus Issue #318 colophon dice, Issue #418 pre-arm window, Issue #402 prospect stage and Issue #442 the sticky strip): self-contained (navigates itself, scoped no-4xx and console-error delta); there is deliberately NO Explorer entry point (decision 3 on Issue #221), so checks navigate with constructed hashes, and arrival is AT REST on every path.
+// Reading Room e2e (RR0-RR43; Issue #221 plus Issue #318 colophon dice, Issue #418 pre-arm window, Issue #402 prospect stage and Issue #442 the sticky strip): self-contained (navigates itself, scoped no-4xx and console-error delta); there is deliberately NO Explorer entry point (decision 3 on Issue #221), so checks navigate with constructed hashes, and arrival is AT REST on every path.
 import { makeStep } from "../support/step.ts";
 import type { SuiteContext } from "../types.ts";
 import { readingRoomKit } from "./reading-room/kit.ts";
@@ -17,7 +17,7 @@ import { rr23Usurped, rr24BeforeArm, rr25TearDown } from "./reading-room/arm.ts"
 import { rr11bScrubHandles } from "./reading-room/scrub.ts";
 import { rr12Clean, rr14Fallback } from "./reading-room/fallback.ts";
 import { rr38Authored } from "./reading-room/room.ts";
-import { rr39AtRest } from "./reading-room/dress.ts";
+import { rr39AtRest, rr43OverlayUnshadowed } from "./reading-room/dress.ts";
 import { rr40Glass, rr41ReadRefits, rr42PlateReveal } from "./reading-room/gestures.ts";
 
 type Step = ReturnType<typeof makeStep>;
@@ -64,6 +64,7 @@ async function atTheDesk(ctx: SuiteContext, step: Step): Promise<void> {
   await sleep(200);
   await step("RR31, RR35, RR37, RR36", () => rrDeskReads(ctx));
   await step("RR39", () => rr39AtRest(ctx));
+  await step("RR43", () => rr43OverlayUnshadowed(ctx));
   await step("RR41", () => rr41ReadRefits(ctx));
   await evaluate(`(()=>{window.scrollTo(0,0);return null;})()`);
   await send("Emulation.clearDeviceMetricsOverride");

@@ -37,7 +37,7 @@ make an unqualified rule false. Read the surface, not just the rule.
     not catch a document-scoped `querySelector`, or the name assembled from pieces.
 - **A page that mounts the engine owes the sheet and the class**: link `/living-chart.css` through
   `BaseLayout`'s `extraCss` prop (`src/layouts/BaseLayout.astro`), and put `class="living-chart"` on
-  the chart mount it hands in. A page that skips either renders its overlays undressed. **The order
+  the chart mount it hands in. A page that skips the sheet renders its overlays undressed, and one that skips the class loses the ink-in dress of the chronicle's marks, the `.living-chart g.settlement[data-ink]` rules, the only rules in the sheet that key on it. **The order
   does not matter**: construction only stores references, so a host may build its DOM after wiring,
   and `test/site/living-chart-boundary.test.ts` pins that by constructing against bare objects.
 - **Engine dressing is edited in `public/living-chart.css`, never in a host's own sheet.** The

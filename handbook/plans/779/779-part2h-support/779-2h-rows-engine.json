@@ -1,0 +1,2304 @@
+[
+  {
+    "id": "LC1.a",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": ".place-overlay {",
+        "replace": ".place-overlayx {"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "the shared sheet dresses every engine-emitted hook (#302)"
+      ]
+    },
+    "e2e": {
+      "suites": "cards",
+      "expect": [
+        "P3"
+      ]
+    }
+  },
+  {
+    "id": "LC1.b",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "}\n.place-hit {",
+        "replace": "}\n.place-hitx {"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "the hit divides by --zoom-k once, on the element; the ring pseudos stay plain (#331)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z8b",
+        "Z22",
+        "Z27"
+      ]
+    }
+  },
+  {
+    "id": "LC1.c",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": ".place-hit::after {",
+        "replace": ".place-hit[data-x]::after {"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "the shared sheet dresses every engine-emitted hook (#302)",
+        "the hit divides by --zoom-k once, on the element; the ring pseudos stay plain (#331)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z22"
+      ]
+    },
+    "measureFirst": true
+  },
+  {
+    "id": "LC1.d",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "#place-card {",
+        "replace": "#place-card[data-x] {"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "the shared sheet dresses every engine-emitted hook (#302)",
+        "the town raised over an overlapping neighbour stays below the card it opens (#632)",
+        "a flipped card is anchored on the side it flips toward, and reads its anchor from the engine (#124)",
+        "every card variant reads the clamp, and reads it INSIDE the counter-scale (#387/#388)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z24",
+        "Z25",
+        "Z26",
+        "Z27"
+      ]
+    },
+    "measureFirst": true
+  },
+  {
+    "id": "LC1.f",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "#place-card.pinned.pc-scrolls .pc-inner {",
+        "replace": "#place-card.pinned.pc-scrollsx .pc-inner {"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "the shared sheet dresses every engine-emitted hook (#302)"
+      ]
+    },
+    "e2e": {
+      "suites": "cards",
+      "expect": [
+        "P20",
+        "P26"
+      ]
+    }
+  },
+  {
+    "id": "LC1.g",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "#place-card.flip-h {",
+        "replace": "#place-card.flip-hx {"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "a flipped card is anchored on the side it flips toward, and reads its anchor from the engine (#124)",
+        "every card variant reads the clamp, and reads it INSIDE the counter-scale (#387/#388)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z24"
+      ]
+    }
+  },
+  {
+    "id": "LC1.h",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "#place-card.flip-v {",
+        "replace": "#place-card.flip-vx {"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "every card variant reads the clamp, and reads it INSIDE the counter-scale (#387/#388)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z24"
+      ]
+    }
+  },
+  {
+    "id": "LC1.i",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "}\n.pc-inner {",
+        "replace": "}\n.x-pc-inner {"
+      }
+    ],
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z24",
+        "Z25",
+        "Z26",
+        "Z27"
+      ]
+    },
+    "measureFirst": true
+  },
+  {
+    "id": "LC1.j",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": ".pc-name {",
+        "replace": ".x-pc-name {"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "the shared sheet dresses every engine-emitted hook (#302)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z26"
+      ]
+    }
+  },
+  {
+    "id": "LC1.k",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": ".pc-rank {",
+        "replace": ".x-pc-rank {"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "the shared sheet dresses every engine-emitted hook (#302)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z26"
+      ]
+    }
+  },
+  {
+    "id": "LC1.l",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": ".pc-founded {",
+        "replace": ".x-pc-founded {"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "the shared sheet dresses every engine-emitted hook (#302)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z26"
+      ]
+    }
+  },
+  {
+    "id": "LC1.m",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": ".pc-former {",
+        "replace": ".x-pc-former {"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "the shared sheet dresses every engine-emitted hook (#302)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z26"
+      ]
+    }
+  },
+  {
+    "id": "LC1.n",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": ".pc-tongue {",
+        "replace": ".x-pc-tongue {"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "the shared sheet dresses every engine-emitted hook (#302)",
+        "the philologist's note is dressed, visible, and named the same on both sides (#124)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z26"
+      ]
+    }
+  },
+  {
+    "id": "LC1.o",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": ".pc-roots {",
+        "replace": ".x-pc-roots {"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "the shared sheet dresses every engine-emitted hook (#302)",
+        "the philologist's note is dressed, visible, and named the same on both sides (#124)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z26"
+      ]
+    }
+  },
+  {
+    "id": "LC1.p",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": ".pc-tale {",
+        "replace": ".x-pc-tale {"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "the shared sheet dresses every engine-emitted hook (#302)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z26"
+      ]
+    }
+  },
+  {
+    "id": "LC1.q",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": ".pc-acts {",
+        "replace": ".x-pc-acts {"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "the shared sheet dresses every engine-emitted hook (#302)",
+        "the card's action row, its filing press and its refusing face are each declared once (#522; kept for Issue #779 part 2i: a second block repeating the first shows nowhere, and CD57 reads the dress)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z26"
+      ]
+    }
+  },
+  {
+    "id": "LC1.r",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": ".pc-prospect {",
+        "replace": ".x-pc-prospect {"
+      }
+    ],
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z26"
+      ]
+    }
+  },
+  {
+    "id": "LC1.s",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": ".pc-lay {",
+        "replace": ".x-pc-lay {"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "the card's action row, its filing press and its refusing face are each declared once (#522; kept for Issue #779 part 2i: a second block repeating the first shows nowhere, and CD57 reads the dress)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z26"
+      ]
+    }
+  },
+  {
+    "id": "LC1.t",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": ".place-overlay.scrub .place-hit {",
+        "replace": ".place-overlay.scrubx .place-hit {"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "the shared sheet dresses every engine-emitted hook (#302)"
+      ]
+    },
+    "e2e": {
+      "suites": "reading-room",
+      "expect": [
+        "RR11b"
+      ]
+    }
+  },
+  {
+    "id": "LC1.u",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": ".place-hit.pc-near {",
+        "replace": ".place-hit.pc-nearx {"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "the town raised over an overlapping neighbour stays below the card it opens (#632)"
+      ]
+    },
+    "e2e": {
+      "suites": "cards",
+      "expect": [
+        "P36"
+      ]
+    }
+  },
+  {
+    "id": "LC1.v",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": ".place-overlay.pc-over .place-hit:not(.pc-own) {",
+        "replace": ".place-overlay.pc-overx .place-hit:not(.pc-own) {"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "the shared sheet dresses every engine-emitted hook (#302)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z27"
+      ]
+    }
+  },
+  {
+    "id": "LC1.w",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": ".place-hit.pc-near::after,",
+        "replace": ".place-hit.pc-nearx::after,"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "the shared sheet dresses every engine-emitted hook (#302)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z8b",
+        "Z27"
+      ]
+    }
+  },
+  {
+    "id": "LC1.x",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": ".living-chart g.settlement[data-ink=\"founding\"]",
+        "replace": ".living-chart g.settlement[data-ink=\"foundingx\"]"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "the shared sheet dresses every engine-emitted hook (#302)"
+      ]
+    },
+    "e2e": {
+      "suites": "room-ink",
+      "expect": [
+        "RS19",
+        "RS22"
+      ]
+    }
+  },
+  {
+    "id": "LC1.y",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": ".living-chart g.settlement[data-ink=\"ruin\"]",
+        "replace": ".living-chart g.settlement[data-ink=\"ruinx\"]"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "the shared sheet dresses every engine-emitted hook (#302)"
+      ]
+    },
+    "e2e": {
+      "suites": "room-ink",
+      "expect": [
+        "RS21"
+      ]
+    }
+  },
+  {
+    "id": "LC1.z",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": ".living-chart g.settlement[data-ink] > text",
+        "replace": ".living-chart g.settlement[data-inkx] > text"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "the shared sheet dresses every engine-emitted hook (#302)"
+      ]
+    },
+    "e2e": {
+      "suites": "room-ink",
+      "expect": [
+        "RS20"
+      ]
+    }
+  },
+  {
+    "id": "LC1.aa",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": ".voyage-overlay {",
+        "replace": ".x-voyage-overlay {"
+      }
+    ],
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z23"
+      ]
+    }
+  },
+  {
+    "id": "LC1.ab",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": ".voyage-track {",
+        "replace": ".x-voyage-track {"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "the shared sheet dresses every engine-emitted hook (#302)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z23"
+      ]
+    }
+  },
+  {
+    "id": "LC1.ac",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": ".voyage-ship path,",
+        "replace": ".x-voyage-ship path,"
+      }
+    ],
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z23"
+      ]
+    }
+  },
+  {
+    "id": "LC1.ad",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": ".voyage-rider path {",
+        "replace": ".x-voyage-rider path {"
+      }
+    ],
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z23"
+      ]
+    }
+  },
+  {
+    "id": "LC1.ae",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": ".ages-range {",
+        "replace": ".x-ages-range {"
+      }
+    ],
+    "e2e": {
+      "suites": "room-instrument",
+      "expect": [
+        "RS32"
+      ]
+    }
+  },
+  {
+    "id": "LC2.a",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "  transform: translate(-50%, -50%) scale(calc(1 / var(--zoom-k, 1)));\n",
+        "replace": ""
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "the hit divides by --zoom-k once, on the element; the ring pseudos stay plain (#331)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z8b",
+        "Z22"
+      ]
+    }
+  },
+  {
+    "id": "LC2.b",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "transform: translate(-50%, -50%) scale(calc(1 / var(--zoom-k, 1)));",
+        "replace": "transform: scale(calc(1 / var(--zoom-k, 1)));"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "the hit divides by --zoom-k once, on the element; the ring pseudos stay plain (#331)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z22"
+      ]
+    }
+  },
+  {
+    "id": "LC2.c",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "transform: translate(-50%, -50%) scale(calc(1 / var(--zoom-k, 1)));",
+        "replace": "transform: translate(-50%, -50%);"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "the hit divides by --zoom-k once, on the element; the ring pseudos stay plain (#331)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z8b",
+        "Z22"
+      ]
+    }
+  },
+  {
+    "id": "LC2.d2",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": ".place-hit:focus-visible::after {",
+        "replace": ".place-hit[data-x]:focus-visible::after {"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "the hit divides by --zoom-k once, on the element; the ring pseudos stay plain (#331)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z22"
+      ]
+    }
+  },
+  {
+    "id": "LC2.e1",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "transform: scale(0.85);",
+        "replace": "transform: scale(calc(0.85 / var(--zoom-k, 1)));"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "the hit divides by --zoom-k once, on the element; the ring pseudos stay plain (#331)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z22"
+      ]
+    }
+  },
+  {
+    "id": "LC2.e2",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "transform: scale(1);",
+        "replace": "transform: scale(calc(1 / var(--zoom-k, 1)));"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "the hit divides by --zoom-k once, on the element; the ring pseudos stay plain (#331)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z8b",
+        "Z22"
+      ]
+    }
+  },
+  {
+    "id": "LC3.c1",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "  z-index: 1;\n",
+        "replace": ""
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "the town raised over an overlapping neighbour stays below the card it opens (#632)"
+      ]
+    },
+    "e2e": {
+      "suites": "cards",
+      "expect": [
+        "P36"
+      ]
+    }
+  },
+  {
+    "id": "LC3.c2",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "  z-index: 5;\n",
+        "replace": ""
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "the town raised over an overlapping neighbour stays below the card it opens (#632)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z27"
+      ]
+    }
+  },
+  {
+    "id": "LC3.d1",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "z-index: 1;",
+        "replace": "z-index: 0;"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "the town raised over an overlapping neighbour stays below the card it opens (#632)"
+      ]
+    },
+    "e2e": {
+      "suites": "cards",
+      "expect": [
+        "P36"
+      ]
+    }
+  },
+  {
+    "id": "LC3.d2",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "z-index: 1;",
+        "replace": "z-index: 9;"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "the town raised over an overlapping neighbour stays below the card it opens (#632)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z27"
+      ]
+    }
+  },
+  {
+    "id": "LC5.b",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "  border-top: 1px solid rgb(from var(--ink-dark) r g b / 0.22);\n",
+        "replace": ""
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "the philologist's note is dressed, visible, and named the same on both sides (#124)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z26"
+      ]
+    }
+  },
+  {
+    "id": "LC5.c",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "  margin: 0.45rem 0 0;",
+        "replace": "  margin: 0.45rem 0 0;\n  display: none;"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "the philologist's note is dressed, visible, and named the same on both sides (#124)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z26"
+      ]
+    }
+  },
+  {
+    "id": "LC5.e",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "  line-height: 1.3;",
+        "replace": "  line-height: 1.3;\n  display: none;"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "the philologist's note is dressed, visible, and named the same on both sides (#124)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z26"
+      ]
+    }
+  },
+  {
+    "id": "LC5.f",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/site/living-chart/place-overlay.ts",
+        "find": "tongue.className = \"pc-tongue\";",
+        "replace": "tongue.className = \"pc-tonguex\";"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "the philologist's note is dressed, visible, and named the same on both sides (#124)"
+      ]
+    },
+    "e2e": {
+      "suites": "cards",
+      "expect": [
+        "P16",
+        "P17",
+        "P18",
+        "P18b"
+      ]
+    }
+  },
+  {
+    "id": "LC5.g",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/site/living-chart/place-overlay.ts",
+        "find": "derivation.className = \"pc-roots\";",
+        "replace": "derivation.className = \"pc-rootsx\";"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "the philologist's note is dressed, visible, and named the same on both sides (#124)"
+      ]
+    },
+    "e2e": {
+      "suites": "cards",
+      "expect": [
+        "P16",
+        "P17",
+        "P18",
+        "P18b"
+      ]
+    }
+  },
+  {
+    "id": "LC6.b",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "  left: auto;\n",
+        "replace": ""
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "a flipped card is anchored on the side it flips toward, and reads its anchor from the engine (#124)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z24"
+      ]
+    }
+  },
+  {
+    "id": "LC6.c",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "  right: calc(100% - var(--pc-nx, 0) * 100%);\n",
+        "replace": ""
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "a flipped card is anchored on the side it flips toward, and reads its anchor from the engine (#124)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z24"
+      ]
+    }
+  },
+  {
+    "id": "LC6.d",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "  right: calc(100% - var(--pc-nx, 0) * 100%);\n  transform-origin: 100% 0;",
+        "replace": "  right: calc(100% - var(--pc-nx, 0) * 100%);"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "a flipped card is anchored on the side it flips toward, and reads its anchor from the engine (#124)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z24"
+      ]
+    }
+  },
+  {
+    "id": "LC6.e",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "  left: calc(var(--pc-nx, 0) * 100%);\n",
+        "replace": ""
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "a flipped card is anchored on the side it flips toward, and reads its anchor from the engine (#124)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z24"
+      ]
+    }
+  },
+  {
+    "id": "LC6.f",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "  top: calc(var(--pc-ny, 0) * 100%);\n",
+        "replace": ""
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "a flipped card is anchored on the side it flips toward, and reads its anchor from the engine (#124)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z24"
+      ]
+    }
+  },
+  {
+    "id": "LC6.g",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/site/living-chart/place-overlay.ts",
+        "find": "el.style.setProperty(\"--pc-nx\", String(place.nx));",
+        "replace": "el.style.setProperty(\"--pc-nxx\", String(place.nx));"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "a flipped card is anchored on the side it flips toward, and reads its anchor from the engine (#124)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z24"
+      ]
+    }
+  },
+  {
+    "id": "LC6.h",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/site/living-chart/place-overlay.ts",
+        "find": "el.style.setProperty(\"--pc-ny\", String(place.ny));",
+        "replace": "el.style.setProperty(\"--pc-nyx\", String(place.ny));"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "a flipped card is anchored on the side it flips toward, and reads its anchor from the engine (#124)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z24"
+      ]
+    }
+  },
+  {
+    "id": "LC6.j",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/site/living-chart/place-overlay.ts",
+        "find": "el.style.setProperty(\"--pc-ny\", String(place.ny));",
+        "replace": "el.style.setProperty(\"--pc-ny\", String(place.ny));\n    el.style.left = `${place.nx * 100}%`;"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "a flipped card is anchored on the side it flips toward, and reads its anchor from the engine (#124)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z24"
+      ]
+    }
+  },
+  {
+    "id": "LC7.B1",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "  transform: scale(calc(1 / var(--zoom-k, 1))) translate(calc(10px + var(--pc-dx, 0px)), calc(10px + var(--pc-dy, 0px)));\n",
+        "replace": ""
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "every card variant reads the clamp, and reads it INSIDE the counter-scale (#387/#388)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z24",
+        "Z25"
+      ]
+    },
+    "measureFirst": true
+  },
+  {
+    "id": "LC7.H1",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "  transform: scale(calc(1 / var(--zoom-k, 1)))\n    translate(calc(-10px + var(--pc-dx, 0px)), calc(10px + var(--pc-dy, 0px)));\n",
+        "replace": ""
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "every card variant reads the clamp, and reads it INSIDE the counter-scale (#387/#388)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z24"
+      ]
+    }
+  },
+  {
+    "id": "LC7.V1",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "  transform: scale(calc(1 / var(--zoom-k, 1)))\n    translate(calc(10px + var(--pc-dx, 0px)), calc(-100% - 10px + var(--pc-dy, 0px)));\n",
+        "replace": ""
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "every card variant reads the clamp, and reads it INSIDE the counter-scale (#387/#388)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z24"
+      ]
+    }
+  },
+  {
+    "id": "LC7.HV1",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "  transform: scale(calc(1 / var(--zoom-k, 1)))\n    translate(calc(-10px + var(--pc-dx, 0px)), calc(-100% - 10px + var(--pc-dy, 0px)));\n",
+        "replace": ""
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "every card variant reads the clamp, and reads it INSIDE the counter-scale (#387/#388)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z24"
+      ]
+    }
+  },
+  {
+    "id": "LC7.B2",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "translate(calc(10px + var(--pc-dx, 0px)), calc(10px + var(--pc-dy, 0px)))",
+        "replace": "translate(calc(10px), calc(10px + var(--pc-dy, 0px)))"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "every card variant reads the clamp, and reads it INSIDE the counter-scale (#387/#388)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z25"
+      ]
+    }
+  },
+  {
+    "id": "LC7.H2",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "translate(calc(-10px + var(--pc-dx, 0px)), calc(10px + var(--pc-dy, 0px)))",
+        "replace": "translate(calc(-10px), calc(10px + var(--pc-dy, 0px)))"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "every card variant reads the clamp, and reads it INSIDE the counter-scale (#387/#388)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z25"
+      ]
+    }
+  },
+  {
+    "id": "LC7.V2",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "translate(calc(10px + var(--pc-dx, 0px)), calc(-100% - 10px + var(--pc-dy, 0px)))",
+        "replace": "translate(calc(10px), calc(-100% - 10px + var(--pc-dy, 0px)))"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "every card variant reads the clamp, and reads it INSIDE the counter-scale (#387/#388)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z25"
+      ]
+    }
+  },
+  {
+    "id": "LC7.HV2",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "translate(calc(-10px + var(--pc-dx, 0px)), calc(-100% - 10px + var(--pc-dy, 0px)))",
+        "replace": "translate(calc(-10px), calc(-100% - 10px + var(--pc-dy, 0px)))"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "every card variant reads the clamp, and reads it INSIDE the counter-scale (#387/#388)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z25"
+      ]
+    }
+  },
+  {
+    "id": "LC7.B3",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "translate(calc(10px + var(--pc-dx, 0px)), calc(10px + var(--pc-dy, 0px)))",
+        "replace": "translate(calc(10px + var(--pc-dx, 0px)), calc(10px))"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "every card variant reads the clamp, and reads it INSIDE the counter-scale (#387/#388)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z25"
+      ]
+    }
+  },
+  {
+    "id": "LC7.H3",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "translate(calc(-10px + var(--pc-dx, 0px)), calc(10px + var(--pc-dy, 0px)))",
+        "replace": "translate(calc(-10px + var(--pc-dx, 0px)), calc(10px))"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "every card variant reads the clamp, and reads it INSIDE the counter-scale (#387/#388)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z25"
+      ]
+    }
+  },
+  {
+    "id": "LC7.V3",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "translate(calc(10px + var(--pc-dx, 0px)), calc(-100% - 10px + var(--pc-dy, 0px)))",
+        "replace": "translate(calc(10px + var(--pc-dx, 0px)), calc(-100% - 10px))"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "every card variant reads the clamp, and reads it INSIDE the counter-scale (#387/#388)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z25"
+      ]
+    }
+  },
+  {
+    "id": "LC7.HV3",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "translate(calc(-10px + var(--pc-dx, 0px)), calc(-100% - 10px + var(--pc-dy, 0px)))",
+        "replace": "translate(calc(-10px + var(--pc-dx, 0px)), calc(-100% - 10px))"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "every card variant reads the clamp, and reads it INSIDE the counter-scale (#387/#388)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z25"
+      ]
+    }
+  },
+  {
+    "id": "LC7.B4",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "  transform: scale(calc(1 / var(--zoom-k, 1))) translate(calc(10px + var(--pc-dx, 0px)), calc(10px + var(--pc-dy, 0px)));",
+        "replace": "  transform: translate(calc(10px + var(--pc-dx, 0px)), calc(10px + var(--pc-dy, 0px))) scale(calc(1 / var(--zoom-k, 1)));"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "every card variant reads the clamp, and reads it INSIDE the counter-scale (#387/#388)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z24",
+        "Z25"
+      ]
+    }
+  },
+  {
+    "id": "LC7.H4",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "  transform: scale(calc(1 / var(--zoom-k, 1)))\n    translate(calc(-10px + var(--pc-dx, 0px)), calc(10px + var(--pc-dy, 0px)));",
+        "replace": "  transform: translate(calc(-10px + var(--pc-dx, 0px)), calc(10px + var(--pc-dy, 0px)))\n    scale(calc(1 / var(--zoom-k, 1)));"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "every card variant reads the clamp, and reads it INSIDE the counter-scale (#387/#388)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z24",
+        "Z25"
+      ]
+    }
+  },
+  {
+    "id": "LC7.V4",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "  transform: scale(calc(1 / var(--zoom-k, 1)))\n    translate(calc(10px + var(--pc-dx, 0px)), calc(-100% - 10px + var(--pc-dy, 0px)));",
+        "replace": "  transform: translate(calc(10px + var(--pc-dx, 0px)), calc(-100% - 10px + var(--pc-dy, 0px)))\n    scale(calc(1 / var(--zoom-k, 1)));"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "every card variant reads the clamp, and reads it INSIDE the counter-scale (#387/#388)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z24",
+        "Z25"
+      ]
+    }
+  },
+  {
+    "id": "LC7.HV4",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/living-chart.css",
+        "find": "  transform: scale(calc(1 / var(--zoom-k, 1)))\n    translate(calc(-10px + var(--pc-dx, 0px)), calc(-100% - 10px + var(--pc-dy, 0px)));",
+        "replace": "  transform: translate(calc(-10px + var(--pc-dx, 0px)), calc(-100% - 10px + var(--pc-dy, 0px)))\n    scale(calc(1 / var(--zoom-k, 1)));"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "every card variant reads the clamp, and reads it INSIDE the counter-scale (#387/#388)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z24",
+        "Z25"
+      ]
+    }
+  },
+  {
+    "id": "LC7.w",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/site/living-chart/place-overlay.ts",
+        "find": "el.style.setProperty(\"--pc-dx\", \"0px\");",
+        "replace": "el.style.setProperty(\"--pc-dxx\", \"0px\");"
+      },
+      {
+        "file": "src/site/living-chart/place-overlay.ts",
+        "find": "el.style.setProperty(\"--pc-dx\", `${dx}px`);",
+        "replace": "el.style.setProperty(\"--pc-dxx\", `${dx}px`);"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts",
+        "test/site/place-card-clamp.test.ts"
+      ],
+      "expect": [
+        "every card variant reads the clamp, and reads it INSIDE the counter-scale (#387/#388)",
+        "#387 a card measured off the bottom of the chart publishes the nudge that brings it back",
+        "#388 a card measured off the side of the viewport publishes the nudge on the other axis",
+        "#387/#388 the nudge is recomputed per show, never inherited from the card before it",
+        "#387/#388 a box the host cannot supply yet is not treated as an empty box at the origin",
+        "#387/#388 an open card is re-measured on demand, so a stale nudge cannot outlive its geometry",
+        "#387/#388 the host's box reaches the card through createLivingChart, not only the overlay"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z25"
+      ]
+    },
+    "measureFirst": true
+  },
+  {
+    "id": "LC7.x",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/site/living-chart/place-overlay.ts",
+        "find": "el.style.setProperty(\"--pc-dy\", \"0px\");",
+        "replace": "el.style.setProperty(\"--pc-dyx\", \"0px\");"
+      },
+      {
+        "file": "src/site/living-chart/place-overlay.ts",
+        "find": "el.style.setProperty(\"--pc-dy\", `${dy}px`);",
+        "replace": "el.style.setProperty(\"--pc-dyx\", `${dy}px`);"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts",
+        "test/site/place-card-clamp.test.ts"
+      ],
+      "expect": [
+        "every card variant reads the clamp, and reads it INSIDE the counter-scale (#387/#388)",
+        "#387 a card measured off the bottom of the chart publishes the nudge that brings it back",
+        "#388 a card measured off the side of the viewport publishes the nudge on the other axis",
+        "#387/#388 the nudge is recomputed per show, never inherited from the card before it",
+        "#387/#388 a box the host cannot supply yet is not treated as an empty box at the origin",
+        "#387/#388 an open card is re-measured on demand, so a stale nudge cannot outlive its geometry",
+        "#387/#388 the host's box reaches the card through createLivingChart, not only the overlay"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z25"
+      ]
+    },
+    "measureFirst": true
+  },
+  {
+    "id": "LC8.a",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/pages/explorer/index.astro",
+        "find": "<div id=\"map\" class=\"living-chart\"></div>",
+        "replace": "<div id=\"map\"></div>"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts",
+        "test/site/explorer-room.test.ts"
+      ],
+      "expect": [
+        "the Explorer host wires the contract: mount class + sheet link (#302)",
+        "ER5 the sheet stays the Glass's gesture box, so a bookmark's cx/cy stay sheet fractions; the Glass stands at the chart's corner outside it"
+      ]
+    },
+    "e2e": {
+      "suites": "render",
+      "expect": [
+        "R16"
+      ]
+    }
+  },
+  {
+    "id": "LC8.b",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/pages/explorer/index.astro",
+        "find": "extraCss={[\"/living-chart.css\", \"/explorer/broadside.css\", \"/explorer/chart-drawer.css\"]}",
+        "replace": "extraCss={[\"/explorer/broadside.css\", \"/explorer/chart-drawer.css\"]}"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/living-chart-css.test.ts"
+      ],
+      "expect": [
+        "the Explorer host wires the contract: mount class + sheet link (#302)"
+      ]
+    },
+    "e2e": {
+      "suites": "render",
+      "expect": [
+        "R16"
+      ]
+    }
+  },
+  {
+    "id": "LC8.c",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "src/layouts/BaseLayout.astro",
+        "find": "{extraCss.map((href) => <link rel=\"stylesheet\" href={href} />)}\n",
+        "replace": ""
+      }
+    ],
+    "e2e": {
+      "suites": "render",
+      "expect": [
+        "R16"
+      ]
+    }
+  },
+  {
+    "id": "SG3.a1",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/explorer/index.css",
+        "find": "\n#map svg[data-vellum-style] {",
+        "replace": "\n#map svg[data-x] {"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/shell-css-ground.test.ts",
+        "test/site/explorer-room.test.ts"
+      ],
+      "expect": [
+        "each chart mount keeps its qualified chart rule (#367, #463)",
+        "ER6 the page css fits the sheet to what the chrome leaves and stands print down (#462 rulings 1 and 10)"
+      ]
+    },
+    "e2e": {
+      "suites": "render",
+      "expect": [
+        "R17"
+      ]
+    }
+  },
+  {
+    "id": "SG3.a2",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/explorer/index.css",
+        "find": "#map svg[data-vellum-style] {\n  width: 100%;\n",
+        "replace": "#map svg[data-vellum-style] {\n"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/shell-css-ground.test.ts"
+      ],
+      "expect": [
+        "each chart mount keeps its qualified chart rule (#367, #463)"
+      ]
+    },
+    "e2e": {
+      "suites": "render",
+      "expect": [
+        "R17"
+      ]
+    }
+  },
+  {
+    "id": "SG3.b1",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/reading-frame.css",
+        "find": ".rf-chart svg[data-vellum-style] {",
+        "replace": ".rf-chart svg[data-x] {"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/shell-css-ground.test.ts"
+      ],
+      "expect": [
+        "each chart mount keeps its qualified chart rule (#367, #463)"
+      ]
+    },
+    "e2e": {
+      "suites": "reading-room",
+      "expect": [
+        "RR36"
+      ]
+    }
+  },
+  {
+    "id": "SG3.b2",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/reading-frame.css",
+        "find": "  display: block;\n  width: 100%;\n  height: 100%;\n}",
+        "replace": "  display: block;\n  height: 100%;\n}"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/shell-css-ground.test.ts"
+      ],
+      "expect": [
+        "each chart mount keeps its qualified chart rule (#367, #463)"
+      ]
+    },
+    "e2e": {
+      "suites": "reading-room",
+      "expect": [
+        "RR36"
+      ]
+    }
+  },
+  {
+    "id": "SG4.a1",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/explorer/index.css",
+        "find": "\n#sheet {",
+        "replace": "\n#sheetx {"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/shell-css-ground.test.ts",
+        "test/site/explorer-room.test.ts"
+      ],
+      "expect": [
+        "each mount dresses its sheet at the house depth, via the token (#367)",
+        "ER6 the page css fits the sheet to what the chrome leaves and stands print down (#462 rulings 1 and 10)"
+      ]
+    },
+    "e2e": {
+      "suites": "render",
+      "expect": [
+        "R17"
+      ]
+    }
+  },
+  {
+    "id": "SG4.a2",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/explorer/index.css",
+        "find": "  box-shadow: var(--stage-shadow);",
+        "replace": "  box-shadow: var(--sheet-shadow);"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/shell-css-ground.test.ts",
+        "test/site/explorer-room.test.ts"
+      ],
+      "expect": [
+        "each mount dresses its sheet at the house depth, via the token (#367)",
+        "ER6 the page css fits the sheet to what the chrome leaves and stands print down (#462 rulings 1 and 10)"
+      ]
+    },
+    "e2e": {
+      "suites": "render",
+      "expect": [
+        "R17"
+      ]
+    }
+  },
+  {
+    "id": "SG4.b1",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/reading-room/index.css",
+        "find": "\n#sheet {",
+        "replace": "\n#sheetx {"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/shell-css-ground.test.ts"
+      ],
+      "expect": [
+        "each mount dresses its sheet at the house depth, via the token (#367)"
+      ]
+    },
+    "e2e": {
+      "suites": "reading-room",
+      "expect": [
+        "RR36",
+        "RR39"
+      ]
+    },
+    "measureFirst": true
+  },
+  {
+    "id": "SG4.b2",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/reading-room/index.css",
+        "find": "  box-shadow: var(--stage-shadow);",
+        "replace": "  box-shadow: var(--sheet-shadow);"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/shell-css-ground.test.ts"
+      ],
+      "expect": [
+        "each mount dresses its sheet at the house depth, via the token (#367)"
+      ]
+    },
+    "e2e": {
+      "suites": "reading-room",
+      "expect": [
+        "RR39"
+      ]
+    }
+  },
+  {
+    "id": "SG4.a3",
+    "kind": "LOCAL",
+    "edits": [
+      {
+        "file": "public/explorer/index.css",
+        "find": "  box-shadow: var(--stage-shadow);",
+        "replace": "  box-shadow: 0 18px 60px rgb(from var(--chart-ink) r g b / 0.55);"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/shell-css-ground.test.ts",
+        "test/site/explorer-room.test.ts"
+      ],
+      "expect": [
+        "each mount dresses its sheet at the house depth, via the token (#367)",
+        "ER6 the page css fits the sheet to what the chrome leaves and stands print down (#462 rulings 1 and 10)"
+      ]
+    }
+  },
+  {
+    "id": "SG4.a4",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/explorer/index.css",
+        "find": "  box-shadow: var(--stage-shadow);",
+        "replace": "  box-shadow: 0 18px 60px rgb(from var(--chart-ink) r g b / 0.55);"
+      },
+      {
+        "file": "public/shell.css",
+        "find": "  --stage-shadow: 0 18px 60px rgb(from var(--chart-ink) r g b / 0.55);",
+        "replace": "  --stage-shadow: 0 18px 60px rgb(from var(--chart-ink) r g b / 0.5);"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/shell-css-ground.test.ts",
+        "test/site/explorer-room.test.ts",
+        "test/site/shell-css.test.ts"
+      ],
+      "expect": [
+        "each mount dresses its sheet at the house depth, via the token (#367)",
+        "ER6 the page css fits the sheet to what the chrome leaves and stands print down (#462 rulings 1 and 10)",
+        "public/shell.css declares each palette token once at its ratified value, each depth shadow once, and the walnut deep once (Issue #263, Issue #367, Issue #463, Issue #461)"
+      ]
+    },
+    "e2e": {
+      "suites": "render",
+      "expect": [
+        "R17"
+      ]
+    }
+  },
+  {
+    "id": "SG4.b3",
+    "kind": "LOCAL",
+    "edits": [
+      {
+        "file": "public/reading-room/index.css",
+        "find": "  box-shadow: var(--stage-shadow);",
+        "replace": "  box-shadow: 0 18px 60px rgb(from var(--chart-ink) r g b / 0.55);"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/shell-css-ground.test.ts"
+      ],
+      "expect": [
+        "each mount dresses its sheet at the house depth, via the token (#367)"
+      ]
+    }
+  },
+  {
+    "id": "SG4.b4",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/reading-room/index.css",
+        "find": "  box-shadow: var(--stage-shadow);",
+        "replace": "  box-shadow: 0 18px 60px rgb(from var(--chart-ink) r g b / 0.55);"
+      },
+      {
+        "file": "public/shell.css",
+        "find": "  --stage-shadow: 0 18px 60px rgb(from var(--chart-ink) r g b / 0.55);",
+        "replace": "  --stage-shadow: 0 18px 60px rgb(from var(--chart-ink) r g b / 0.5);"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/shell-css-ground.test.ts",
+        "test/site/shell-css.test.ts"
+      ],
+      "expect": [
+        "each mount dresses its sheet at the house depth, via the token (#367)",
+        "public/shell.css declares each palette token once at its ratified value, each depth shadow once, and the walnut deep once (Issue #263, Issue #367, Issue #463, Issue #461)"
+      ]
+    },
+    "e2e": {
+      "suites": "reading-room",
+      "expect": [
+        "RR39"
+      ]
+    }
+  },
+  {
+    "id": "SG5.a1",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/explorer/index.css",
+        "find": "/* [data-vellum-style] scopes this to renderer-stamped charts; unqualified it also sized the survey-track svg. */",
+        "replace": "#map svg {\n  box-shadow: var(--stage-shadow);\n}\n/* [data-vellum-style] scopes this to renderer-stamped charts; unqualified it also sized the survey-track svg. */"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/shell-css-ground.test.ts"
+      ],
+      "expect": [
+        "no mount dresses a BARE svg: the engine's overlays are not sheets (#367)"
+      ]
+    },
+    "e2e": {
+      "suites": "render",
+      "expect": [
+        "R17"
+      ]
+    }
+  },
+  {
+    "id": "SG5.a2",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/explorer/index.css",
+        "find": "/* [data-vellum-style] scopes this to renderer-stamped charts; unqualified it also sized the survey-track svg. */",
+        "replace": "#map > svg ~ svg {\n  box-shadow: var(--stage-shadow);\n}\n/* [data-vellum-style] scopes this to renderer-stamped charts; unqualified it also sized the survey-track svg. */"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/shell-css-ground.test.ts"
+      ],
+      "expect": [
+        "no mount dresses a BARE svg: the engine's overlays are not sheets (#367)"
+      ]
+    },
+    "e2e": {
+      "suites": "zoom",
+      "expect": [
+        "Z23"
+      ]
+    },
+    "measureFirst": true
+  },
+  {
+    "id": "SG5.b",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/reading-room/index.css",
+        "find": "#map-viewport .rf-chart {\n  position: absolute;",
+        "replace": ".rf-chart svg {\n  box-shadow: var(--stage-shadow);\n}\n#map-viewport .rf-chart {\n  position: absolute;"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/shell-css-ground.test.ts"
+      ],
+      "expect": [
+        "no mount dresses a BARE svg: the engine's overlays are not sheets (#367)"
+      ]
+    },
+    "e2e": {
+      "suites": "reading-room",
+      "expect": [
+        "RR39",
+        "RR43"
+      ]
+    }
+  },
+  {
+    "id": "SG5.c",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/reading-frame.css",
+        "find": ".rf-chart {\n  position: relative;\n}",
+        "replace": ".rf-chart {\n  position: relative;\n}\n.rf-chart svg {\n  box-shadow: var(--stage-shadow);\n}"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/shell-css-ground.test.ts"
+      ],
+      "expect": [
+        "no mount dresses a BARE svg: the engine's overlays are not sheets (#367)"
+      ]
+    },
+    "e2e": {
+      "suites": "reading-room",
+      "expect": [
+        "RR39",
+        "RR43"
+      ]
+    }
+  },
+  {
+    "id": "SG5.d",
+    "kind": "BITES",
+    "edits": [
+      {
+        "file": "public/reading-room/index.css",
+        "find": "#map-viewport .rf-chart {\n  position: absolute;",
+        "replace": ".rf-chart > svg ~ svg {\n  box-shadow: var(--stage-shadow);\n}\n#map-viewport .rf-chart {\n  position: absolute;"
+      }
+    ],
+    "unit": {
+      "files": [
+        "test/site/shell-css-ground.test.ts"
+      ],
+      "expect": [
+        "no mount dresses a BARE svg: the engine's overlays are not sheets (#367)"
+      ]
+    },
+    "e2e": {
+      "suites": "reading-room",
+      "expect": [
+        "RR43"
+      ]
+    },
+    "measureFirst": true
+  }
+]

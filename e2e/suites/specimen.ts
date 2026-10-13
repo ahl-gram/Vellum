@@ -21,6 +21,7 @@ import {
   sb14Verbs,
 } from "./specimen/desktop.ts";
 import { sb9bPrinted, sb9PrintIsPaper, sb9dNoScript } from "./specimen/print.ts";
+import { sb15OutPress } from "./specimen/gestures.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { send, sleep } = ctx;
@@ -51,6 +52,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("SB11", () => sb11Pieces(k));
   await step("SB12", () => sb12StatusVoice(k));
   await step("SB13", () => sb13GlassPress(k));
+  await step("SB15", () => sb15OutPress(k));
   await step("SB14", () => sb14Verbs(k));
   // SB9b prints a leaned Book; the phone block that used to lean it before here went with the narrow layout (Issue #762).
   await setState("leaned");

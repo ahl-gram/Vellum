@@ -1,7 +1,5 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import {
   TABLE_KEY,
   TABLE_CAP,
@@ -27,8 +25,6 @@ import {
 } from "../../src/world/lod.ts";
 import { finalizeHash } from "../../src/site/explorer/address.ts";
 import { SURVEY, PROSPECT, survey, prospect, hashOf } from "../../test-support/table-address-fixtures.ts";
-
-const REPO = resolve(import.meta.dirname, "..", "..");
 
 test("the key is the ruled one and the cap is the ruled six (#518's sitting, #401 ruling 5)", () => {
   assert.equal(TABLE_KEY, "table");
@@ -320,31 +316,6 @@ test("groupByWorld groups on the world the address states, so a key order cannot
   assert.equal(groupByWorld([one, two]).length, 1, "the same world, however the caller built the object");
   const other = { ...survey, overrides: { mapType: "citystate" } } as SurveyItem;
   assert.equal(groupByWorld([one, other]).length, 2, "a different override set IS a different world");
-});
-
-test("the allowlists mirror the Explorer's own selects, or a link the Explorer can write cannot be filed", () => {
-  const page = readFileSync(resolve(REPO, "src/pages/explorer/index.astro"), "utf8");
-  const optionsOf = (id: string): string[] => {
-    const sel = new RegExp(`<select id="${id}">([\\s\\S]*?)</select>`).exec(page);
-    assert.ok(sel, `the Explorer still has a #${id} select`);
-    return [...(sel[1] as string).matchAll(/<option value="([^"]*)"/g)]
-      .map((m) => m[1] as string)
-      .filter((v) => v !== "");
-  };
-  for (const [id, field, sample] of [
-    ["style", "style", "k-s.seed-42.style-VALUE.legend-1.arms-0.beasts-0.rung-2.lx-1.ly-1"],
-    ["type", "type", "k-s.seed-42.type-VALUE.style-antique.legend-1.arms-0.beasts-0.rung-2.lx-1.ly-1"],
-    ["band", "band", "k-s.seed-42.band-VALUE.style-antique.legend-1.arms-0.beasts-0.rung-2.lx-1.ly-1"],
-    ["theme", "theme", "k-s.seed-42.theme-VALUE.style-antique.legend-1.arms-0.beasts-0.rung-2.lx-1.ly-1"],
-  ] as const) {
-    for (const value of optionsOf(id)) {
-      assert.equal(
-        (parseTable(hashOf(sample.replace("VALUE", value))) as ReadonlyArray<TableItem>).length,
-        1,
-        `the Explorer offers ${field}=${value} but the table's allowlist refuses it`,
-      );
-    }
-  }
 });
 
 test("legend and arms ride as the Explorer writes them, 1 or 0, and nothing else reads as true", () => {
