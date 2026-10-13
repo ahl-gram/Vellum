@@ -1,6 +1,7 @@
 // Under a pinned card, the raised town and the hand (Issue #779 part 2h): Z27.
 import { sampleRow } from "../../support/pixel.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
+import { pressAt } from "../print-room/kit.ts";
 
 type Mark = { idx: number; name: string; x: number; y: number };
 const MARKS: Payload<Mark[]> =
@@ -10,10 +11,18 @@ const MARKS: Payload<Mark[]> =
 const HIT_AT = (m: Mark): Payload<boolean> => `(() => { const e = document.elementFromPoint(${m.x}, ${m.y});
   const h = e && e.closest ? e.closest(".place-hit") : null; return !!h && Number(h.dataset.idx) === ${m.idx}; })()`;
 
-type Card = { pinned: boolean; name: string | null; scrolled: boolean; rect: number[]; acts: number[] } | null;
+type Card = {
+  pinned: boolean;
+  name: string | null;
+  scrolled: boolean;
+  rested: boolean;
+  rect: number[];
+  acts: number[];
+} | null;
 const CARD: Payload<Card> = `(() => { const c = document.getElementById("place-card"); if (!c || c.hidden) return null;
   const r = c.getBoundingClientRect(), a = c.querySelector(".pc-acts"), ar = a ? a.getBoundingClientRect() : null;
-  return { pinned: c.classList.contains("pinned"), name: (c.querySelector(".pc-name") || {}).textContent, scrolled: c.classList.contains("pc-scrolls"),
+  const a2 = c.querySelector(".pc-inner") ? c.querySelector(".pc-inner").getAnimations() : [];
+  return { pinned: c.classList.contains("pinned"), name: (c.querySelector(".pc-name") || {}).textContent, scrolled: c.classList.contains("pc-scrolls"), rested: a2.length > 0 && a2.every((v) => v.playState === "finished") && c.getAnimations().length === 0,
     rect: [r.left, r.top, r.right, r.bottom], acts: ar ? [ar.left, ar.top, ar.right, ar.bottom] : [0, 0, 0, 0] }; })()`;
 
 const NEAR = (idx: number): Payload<{ near: boolean; opacity: string; pinned: string | null }> =>
@@ -36,46 +45,39 @@ const same = (a: unknown, b: unknown): boolean => JSON.stringify(a) === JSON.str
 
 type Found = { a: Mark; b: Mark; controlRow: readonly (readonly number[])[]; controlCursor: string };
 
-async function pinAndFind(
+async function pinCard(
   { evaluate, send, sleep }: Pick<SuiteContext, "evaluate" | "send" | "sleep">,
+  a: Mark,
+): Promise<Card> {
+  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: a.x, y: a.y });
+  await pressAt({ send }, a.x, a.y);
+  let card: Card = null;
+  let before: Card | undefined;
+  for (let i = 0; i < 40; i++) {
+    before = card;
+    card = await evaluate(CARD);
+    if (card?.pinned && card.name === a.name && !card.scrolled && card.rested && same(card.rect, before?.rect)) break;
+    await sleep(50);
+  }
+  return card?.pinned && card.name === a.name && !card.scrolled ? card : null;
+}
+
+async function pinAndFind(
+  ctx: Pick<SuiteContext, "evaluate" | "send" | "sleep">,
   marks: Mark[],
 ): Promise<Found | null> {
   for (const a of marks) {
-    if (!(await evaluate(HIT_AT(a)))) continue;
-    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: a.x, y: a.y });
-    await send("Input.dispatchMouseEvent", {
-      type: "mousePressed",
-      x: a.x,
-      y: a.y,
-      button: "left",
-      buttons: 1,
-      clickCount: 1,
-    });
-    await send("Input.dispatchMouseEvent", {
-      type: "mouseReleased",
-      x: a.x,
-      y: a.y,
-      button: "left",
-      buttons: 0,
-      clickCount: 1,
-    });
-    let card: Card = null;
-    const seen: { last: Card } = { last: null };
-    for (let i = 0; i < 40; i++) {
-      seen.last = card;
-      card = await evaluate(CARD);
-      if (card && card.pinned && card.name === a.name && !card.scrolled && same(card.rect, seen.last && seen.last.rect))
-        break;
-      await sleep(50);
-    }
-    if (!card || !card.pinned || card.name !== a.name || card.scrolled) continue;
-    const b = marks.find((m) => m.idx !== a.idx && inside(m, card.rect, 14) && !inside(m, card.acts, 14));
+    await ctx.evaluate(RESET);
+    await ctx.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 5, y: 5 });
+    if (!(await ctx.evaluate(HIT_AT(a)))) continue;
+    const card = await pinCard(ctx, a);
+    const b = card && marks.find((m) => m.idx !== a.idx && inside(m, card.rect, 14) && !inside(m, card.acts, 14));
     if (!b) continue;
     return {
       a,
       b,
-      controlRow: await sampleRow(send, Math.round(b.x) - 14, Math.round(b.y), 28),
-      controlCursor: await evaluate(CURSOR(b.idx)),
+      controlRow: await sampleRow(ctx.send, Math.round(b.x) - 14, Math.round(b.y), 28),
+      controlCursor: await ctx.evaluate(CURSOR(b.idx)),
     };
   }
   return null;

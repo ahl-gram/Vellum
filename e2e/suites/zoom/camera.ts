@@ -2,13 +2,21 @@ import { PAGE_RGBA, nearRgba, tokenRgba } from "../../support/pixel.ts";
 import { sendKey } from "../../support/home.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import type { ZoomKit } from "./kit.ts";
-import { ringAtRest, ringScale } from "./reads.ts";
+import { ZERO_NUDGE, ringAtRest, ringScale } from "./reads.ts";
 import type { Cam } from "./reads.ts";
 
-export async function zSetup({ evaluate, shoot, waitSettled }: SuiteContext): Promise<void> {
+export async function zSetup({ evaluate, shoot, waitSettled, sleep }: SuiteContext): Promise<void> {
+  // Alone, this suite starts before the page's own boot draw (the Seed of the Day) has landed, and that draw lands after the click below and overwrites it, so the boot settles first and the draw below is waited for by its address.
+  await waitSettled("zoom-boot");
   await evaluate(
     `(()=>{for(const id of ["ages"]){const c=document.getElementById(id);if(c.checked){c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));}}document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`,
   );
+  let drawn = false;
+  for (let i = 0; i < 200 && !drawn; i++) {
+    drawn = await evaluate<boolean>(`location.hash.includes("seed=42")`);
+    if (!drawn) await sleep(50);
+  }
+  if (!drawn) throw new Error("zoom-base: the seed 42 draw never landed");
   await waitSettled("zoom-base");
   await evaluate(`window.__vellumSetRedraftEnabled(false)`);
   await shoot("explorer-zoom-k1.png");
@@ -306,117 +314,61 @@ type Row = {
   flipV: boolean;
   dx: number;
   dy: number;
-  card: [number, number, number, number];
-  box: [number, number, number, number];
+  card: number[];
+  box: number[];
 };
-const REST_ONE: (idx: number) => Payload<{ rested: boolean; flipH: boolean; flipV: boolean } | null> = (idx) =>
-  `(async () => { const card = document.getElementById("place-card"), h = document.querySelector('.place-overlay .place-hit[data-idx="${idx}"]');
-  if (!h) return null; h.focus({ preventScroll: true });
-  const name = (h.getAttribute("aria-label") || "").split(", ")[0], frame = () => new Promise((r) => requestAnimationFrame(r));
-  let rested = false;
-  for (let i = 0; i < 12; i++) {
-    const inner = card.querySelector(".pc-inner"), a = inner ? inner.getAnimations() : [];
-    if (!card.hidden && (card.querySelector(".pc-name") || {}).textContent === name && a.length > 0 && a.every((v) => v.playState === "finished")) { rested = true; break; }
-    await frame();
-  }
-  return { rested, flipH: card.classList.contains("flip-h"), flipV: card.classList.contains("flip-v") }; })()`;
-
-const REAPPLY: Payload<boolean> = `(() => { window.__vellumZoomTo(window.__vellumZoomState()); return true; })()`;
-
-const RECT: Payload<{
-  card: [number, number, number, number];
-  box: [number, number, number, number];
-  dx: number;
-  dy: number;
-} | null> = `(() => { const card = document.getElementById("place-card"), vp = document.getElementById("map-viewport");
-  if (!card) return null; const r = card.getBoundingClientRect(), b = vp.getBoundingClientRect();
-  return { card: [r.left, r.top, r.right, r.bottom], box: [b.left, b.top, b.right, b.bottom],
-    dx: parseFloat(card.style.getPropertyValue("--pc-dx") || "0"), dy: parseFloat(card.style.getPropertyValue("--pc-dy") || "0") }; })()`;
-
+const SEAT = (idx: number): Payload<Row | null> =>
+  `(async () => { const card = document.getElementById("place-card"), h = document.querySelector('.place-overlay .place-hit[data-idx="${idx}"]'), frame = () => new Promise((r) => requestAnimationFrame(r));
+  if (!h) return null; const name = (h.getAttribute("aria-label") || "").split(", ")[0]; h.focus({ preventScroll: true }); let rested = false;
+  for (let i = 0; i < 90 && !rested; i++) { const a = card.querySelector(".pc-inner")?.getAnimations() ?? [];
+    rested = !card.hidden && (card.querySelector(".pc-name") || {}).textContent === name && a.length > 0 && a.every((v) => v.playState === "finished") && card.getAnimations().length === 0; if (!rested) await frame(); }
+  const r = card.getBoundingClientRect(), b = document.getElementById("map-viewport").getBoundingClientRect();
+  return { idx: ${idx}, rested, flipH: card.classList.contains("flip-h"), flipV: card.classList.contains("flip-v"), dx: parseFloat(card.style.getPropertyValue("--pc-dx") || "0"),
+    dy: parseFloat(card.style.getPropertyValue("--pc-dy") || "0"), card: [r.left, r.top, r.right, r.bottom], box: [b.left, b.top, b.right, b.bottom] }; })()`;
 const HITS: Payload<number[]> =
   `[...document.querySelectorAll(".place-overlay .place-hit")].map((h) => Number(h.dataset.idx))`;
 
+const variantOf = (r: Row): string => (r.flipH ? "h" : "") + (r.flipV ? "v" : "") || "plain";
+
+const flushFaults = (r: Row): string[] => {
+  const [cl, ct, cr, cb] = r.card as [number, number, number, number],
+    [bl, bt, br, bb] = r.box as [number, number, number, number];
+  return faults([
+    r.rested || `hit ${r.idx}: the card never rested`,
+    (cl >= bl - 0.5 && cr <= br + 0.5 && ct >= bt - 0.5 && cb <= bb + 0.5) ||
+      `hit ${r.idx}: card ${cl},${ct},${cr},${cb} outside ${bl},${bt},${br},${bb}`,
+    r.dx === 0 || Math.abs(cr - br) <= 0.5 || Math.abs(cl - bl) <= 0.5 || `hit ${r.idx}: dx ${r.dx} off neither edge`,
+    r.dy === 0 || Math.abs(cb - bb) <= 0.5 || Math.abs(ct - bt) <= 0.5 || `hit ${r.idx}: dy ${r.dy} off neither edge`,
+  ]);
+};
+
 export async function z25ClampFlush({ evaluate, send, check }: SuiteContext): Promise<void> {
-  await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))`);
-  await evaluate(`document.activeElement instanceof HTMLElement && document.activeElement.blur()`);
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 5, y: 5 });
+  await park({ evaluate, send });
   await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
   const rows: Row[] = [];
   try {
     await evaluate(
       `(() => { const vp = document.getElementById("map-viewport"); window.__vellumZoomTo({ k: 4, x: -(3 * vp.clientWidth) / 2, y: -(3 * vp.clientHeight) / 2 }); })()`,
     );
-    const hits = await evaluate(HITS);
-    for (const idx of hits) {
-      const rest = await evaluate(REST_ONE(idx));
-      if (!rest) continue;
-      // The clamp measured the card in the same task that wrote its anchor, where this page's style has not landed yet, so a camera re-apply re-clamps against the settled box (the path every redraft's fresh card takes); the rect is then read from node, which is where the settled style lands.
-      await evaluate(REAPPLY);
-      const r = await evaluate(RECT);
-      if (!r) continue;
-      rows.push({
-        idx,
-        rested: rest.rested,
-        flipH: rest.flipH,
-        flipV: rest.flipV,
-        dx: r.dx,
-        dy: r.dy,
-        card: r.card,
-        box: r.box,
-      });
+    for (const idx of await evaluate(HITS)) {
+      await evaluate(ZERO_NUDGE, true);
+      const row = await evaluate(SEAT(idx), true);
+      if (row) rows.push(row);
     }
   } finally {
-    await evaluate(`document.activeElement instanceof HTMLElement && document.activeElement.blur()`);
-    await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))`);
-    await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
+    await park({ evaluate, send });
     await send("Emulation.setEmulatedMedia", { features: [] });
   }
-  const wrong: string[] = [];
-  if (rows.length === 0) wrong.push("no cards read");
-  const flush = (r: Row): string[] => {
-    const [cl, ct, cr, cb] = r.card,
-      [bl, bt, br, bb] = r.box;
-    return faults([
-      r.rested || `hit ${r.idx}: the card never rested`,
-      (cl >= bl - 0.5 && cr <= br + 0.5 && ct >= bt - 0.5 && cb <= bb + 0.5) ||
-        `hit ${r.idx}: card ${cl},${ct},${cr},${cb} outside ${bl},${bt},${br},${bb}`,
-      r.dx === 0 || Math.abs(cr - br) <= 0.5 || Math.abs(cl - bl) <= 0.5 || `hit ${r.idx}: dx ${r.dx} off neither edge`,
-      r.dy === 0 || Math.abs(cb - bb) <= 0.5 || Math.abs(ct - bt) <= 0.5 || `hit ${r.idx}: dy ${r.dy} off neither edge`,
-    ]);
-  };
-  for (const r of rows) wrong.push(...flush(r));
-  const witness = ["plain", "h", "v", "hv"].filter(
-    (v) => !rows.some((r) => variantOf(r) === v && r.dx !== 0) || !rows.some((r) => variantOf(r) === v && r.dy !== 0),
+  const wrong = faults([rows.length > 0 || "no cards read", ...rows.flatMap(flushFaults)]);
+  const lacking = ["plain", "h", "v", "hv"].flatMap((v) =>
+    (["dx", "dy"] as const)
+      .filter((axis) => !rows.some((r) => variantOf(r) === v && r[axis] !== 0))
+      .map((a) => `${v}.${a}`),
   );
-  if (witness.length) wrong.push(`no nudge witness on ${witness.join(", ")}`);
+  if (lacking.length) wrong.push(`no nudge witness on ${lacking.join(", ")}`);
   check(
     "Z25 every card shown at depth is nudged flush into its box, in all four variants on both axes",
     wrong.length === 0,
     JSON.stringify({ wrong, hits: rows.length, variants: rows.map((r) => `${r.idx}:${variantOf(r)}:${r.dx},${r.dy}`) }),
   );
 }
-
-async function sweepSeats(evaluate: SuiteContext["evaluate"]): Promise<Row[]> {
-  const rows: Row[] = [];
-  for (const idx of await evaluate(HITS)) {
-    const rest = await evaluate(REST_ONE(idx));
-    if (!rest) continue;
-    // The clamp measured the card in the same task that wrote its anchor, where this page's style has not landed yet, so a camera re-apply re-clamps against the settled box (the path every redraft's fresh card takes); the rect is then read from node, which is where the settled style lands.
-    await evaluate(REAPPLY);
-    const r = await evaluate(RECT);
-    if (!r) continue;
-    rows.push({
-      idx,
-      rested: rest.rested,
-      flipH: rest.flipH,
-      flipV: rest.flipV,
-      dx: r.dx,
-      dy: r.dy,
-      card: r.card,
-      box: r.box,
-    });
-  }
-  return rows;
-}
-
-const variantOf = (r: Row): string => (r.flipH ? "h" : "") + (r.flipV ? "v" : "") || "plain";

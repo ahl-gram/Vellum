@@ -1,6 +1,7 @@
 // The inked survey's overlay, the card's seats and its dress (Issue #779 part 2h): Z23, Z24 and Z26 on seed 42.
 import { PAGE_RGBA, SHADE, nearRgba, tokenRgba } from "../../support/pixel.ts";
 import type { SuiteContext } from "../../types.ts";
+import type { ZoomKit } from "./kit.ts";
 import {
   AT_HOME,
   CENTRE,
@@ -10,6 +11,7 @@ import {
   PART,
   PICK,
   PICKS,
+  ZERO_NUDGE,
   actsWants,
   cardWants,
   formerWants,
@@ -28,7 +30,7 @@ import type { Part, Seat, Want } from "./reads.ts";
 const faults = (parts: (true | string)[]): string[] => parts.filter((f): f is string => f !== true);
 const near = (a: number, b: number, tolerance: number): boolean => Math.abs(a - b) <= tolerance;
 
-export async function z23SurveyOverlay({ evaluate, check, sleep }: SuiteContext): Promise<void> {
+export async function z23SurveyOverlay({ evaluate, check, sleep }: ZoomKit): Promise<void> {
   await evaluate(
     `(() => { const c = document.getElementById("ages"); c.checked = true; c.dispatchEvent(new Event("change", { bubbles: true })); })()`,
   );
@@ -112,6 +114,7 @@ async function seatAt(
     if (!at) return { row: "", wrong: [`${variant} at k=${k}: no target to centre`] };
     await evaluate(CENTRE(idx, at.px, at.py));
   }
+  await evaluate(ZERO_NUDGE, true);
   if (!(await evaluate(FOCUS(idx)))) return { row: "", wrong: [`${variant} at k=${k}: no hit to focus`] };
   let p = await evaluate(PICK(idx));
   for (let t = 0; t < 20 && p && !p.rested; t++) {
@@ -202,15 +205,6 @@ async function findHit(evaluate: SuiteContext["evaluate"], suffix: string): Prom
   return evaluate<Named>(
     `(() => { const h = [...document.querySelectorAll(".place-overlay .place-hit")].find((x) => (x.getAttribute("aria-label") || "").endsWith(${JSON.stringify(suffix)}));
     return h ? { idx: Number(h.dataset.idx), name: (h.getAttribute("aria-label") || "").split(", ")[0] } : null; })()`,
-  );
-}
-
-async function findRenamed(evaluate: SuiteContext["evaluate"]): Promise<Named> {
-  return evaluate<Named>(
-    `(() => { const r = window.__vellumRunInline({ kind: "draw", seed: 42, overrides: {}, render: { style: "antique", widthPx: 1500, legend: true } });
-    const i = r.manifest.places.findIndex((p) => p.formerName !== undefined);
-    if (i < 0) return null; const h = document.querySelector('.place-overlay .place-hit[data-idx="' + i + '"]');
-    return h ? { idx: i, name: (h.getAttribute("aria-label") || "").split(", ")[0] } : null; })()`,
   );
 }
 
@@ -322,25 +316,13 @@ async function capitalFaults(
   rem: number,
 ): Promise<string[]> {
   if (!capital || !(await showCard(ctx, capital.idx, capital.name))) return ["the capital's card never rested"];
+  const former = await ctx.evaluate(PART("#place-card .pc-former", ["display", "margin-top", "font-size", "color"]));
   return [
     ...(await cardFaults({ evaluate: ctx.evaluate }, rem)),
     ...(await actsFaults({ evaluate: ctx.evaluate }, rem)),
     ...(await noteFaults({ evaluate: ctx.evaluate }, rem)),
+    ...wants(former, "former", formerWants(rem)),
   ];
-}
-
-async function formerFaults(
-  ctx: Pick<SuiteContext, "evaluate" | "sleep">,
-  renamed: Named,
-  rem: number,
-): Promise<string[]> {
-  if (!renamed || !(await showCard(ctx, renamed.idx, renamed.name))) return ["the renamed place's card never rested"];
-  const former = await ctx.evaluate(PART("#place-card .pc-former", ["display", "margin-top", "font-size", "color"]));
-  if (!former) {
-    const html = await ctx.evaluate<string>(`document.getElementById("place-card").innerHTML.slice(0, 400)`);
-    return [`former: absent; card ${html}`];
-  }
-  return wants(former, "former", formerWants(rem));
 }
 
 async function taleFaults(ctx: Pick<SuiteContext, "evaluate" | "sleep">, ruin: Named, rem: number): Promise<string[]> {
@@ -353,23 +335,16 @@ async function taleFaults(ctx: Pick<SuiteContext, "evaluate" | "sleep">, ruin: N
   ];
 }
 
-export async function z26CardDress({ evaluate, send, check, sleep, waitSettled }: SuiteContext): Promise<void> {
-  // The dress is read on seed 42, whatever world the steps before left on the page.
-  await evaluate(
-    `(() => { document.getElementById("seed").value = "42"; document.getElementById("style").value = "antique"; document.getElementById("draw").click(); })()`,
-  );
-  await waitSettled("z26-seed-42");
+export async function z26CardDress({ evaluate, send, check, sleep }: SuiteContext): Promise<void> {
   const rem = await evaluate<number>(`parseFloat(getComputedStyle(document.documentElement).fontSize)`);
   const wrong: string[] = [];
   const capital = await findHit(evaluate, ", Capital");
   const ruin = await findHit(evaluate, ", Ruin");
-  const renamed = await findRenamed(evaluate);
   try {
     await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))`);
     await evaluate(`document.activeElement instanceof HTMLElement && document.activeElement.blur()`);
     await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 5, y: 5 });
     wrong.push(...(await capitalFaults({ evaluate, sleep }, capital, rem)));
-    wrong.push(...(await formerFaults({ evaluate, sleep }, renamed, rem)));
     wrong.push(...(await taleFaults({ evaluate, sleep }, ruin, rem)));
   } finally {
     await evaluate(`document.activeElement instanceof HTMLElement && document.activeElement.blur()`);

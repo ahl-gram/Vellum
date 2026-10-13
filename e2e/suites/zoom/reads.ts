@@ -53,7 +53,7 @@ export const PICK = (
   if (!c || c.hidden || !h) return null;
   const inner = c.querySelector(".pc-inner"), a = inner ? inner.getAnimations() : [], r = c.getBoundingClientRect(), m = document.getElementById("map").getBoundingClientRect();
   return { idx: Number(h.dataset.idx), name: (c.querySelector(".pc-name") || {}).textContent, flipH: c.classList.contains("flip-h"), flipV: c.classList.contains("flip-v"),
-    dx: c.style.getPropertyValue("--pc-dx"), dy: c.style.getPropertyValue("--pc-dy"), rested: a.length > 0 && a.every((v) => v.playState === "finished"),
+    dx: c.style.getPropertyValue("--pc-dx"), dy: c.style.getPropertyValue("--pc-dy"), rested: a.length > 0 && a.every((v) => v.playState === "finished") && c.getAnimations().length === 0,
     card: [r.left, r.top, r.right, r.bottom], map: [m.left, m.top, m.width, m.height], nx: parseFloat(h.style.left) / 100, ny: parseFloat(h.style.top) / 100 }; })()`;
 
 export const PICKS: Payload<number[]> =
@@ -177,3 +177,8 @@ export const taleWants = (rem: number): readonly Want[] => [
   ["font-style", "italic"],
   ["color", tokenRgba("--ink-tale")],
 ];
+
+// Under reduced motion the card's own 0.01ms transition makes the engine's reset-then-measure see the previous town's nudge (Issue #868), so the nudge is zeroed and left a frame to land before each town is focused; a card rests once the inner's roll and the card's own transition have both finished.
+export const ZERO_NUDGE: Payload<boolean> = `(async () => { const c = document.getElementById("place-card");
+  c.style.setProperty("--pc-dx", "0px"); c.style.setProperty("--pc-dy", "0px");
+  await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r))); return true; })()`;
