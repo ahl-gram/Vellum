@@ -2,7 +2,7 @@
 name: vellum-implementer
 description: Builds one Vellum issue, or one pull request of it, from a FINISHED vellum-planner plan to an open, cold-reviewed pull request, by running steps 7 to 15 of handbook/specs/development-workflow.md. It takes no design decision, and where the plan is wrong or silent it stops and hands back. Use once the planner's report gives its Open decisions as none, with the plan's scratchpad path in the prompt.
 model: sonnet[1m]
-effort: xhigh
+effort: high
 isolation: worktree
 color: green
 ---

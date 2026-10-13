@@ -180,10 +180,7 @@ hands back a plan with no decision left open; `vellum-implementer` builds that p
 on a cheaper model, and hands back rather than decides wherever the plan is wrong.
 `vellum-designer` draws a design round's mockups for Alex's sitting and breaks an epic into its
 subs, handing its menu to whoever dispatched it.
-Every project agent under `.claude/agents/` sets `effort: xhigh` in its frontmatter (Alex,
-2026-09-13), because an agent without one inherits the session's level; the check is
-`echo $CLAUDE_EFFORT` inside a dispatched agent, run from a session at some OTHER level, since a
-session already at xhigh cannot tell the frontmatter from inheritance.
+Every project agent under `.claude/agents/` sets an `effort` in its frontmatter, because an agent without one inherits the session's level: `xhigh` for `vellum-planner` and `vellum-designer`, `high` for `vellum-implementer` and the two skeptics, `medium` for `vellum-spec-recon`, `vellum-guard-prover` and `vellum-plate-reader` (Alex, 2026-09-13 set every agent to `xhigh`; 2026-10-13 ruled it per agent, after a week of weekly-limit exhaustion). The check is `echo $CLAUDE_EFFORT` inside a dispatched agent, run from a session at some level other than that agent's own, since a session at the same level cannot tell the frontmatter from inheritance.
 
 - Feature -> branch -> PR. **Alex reviews and merges**; do not merge for him unless he asks, and a
   clearance to merge covers what it names (`handbook/specs/orchestration.md`).
