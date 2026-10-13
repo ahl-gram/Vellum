@@ -160,7 +160,8 @@ Scars: #366, #368, #454, #474, #501, #520, #526, #529, #533, #535, #536, #537, #
 10. **A red is yours until proven a flake.** Re-run ONCE, alone, never two PRs concurrently; a
     second red is a defect. Put the payload and what to capture next in a PR comment; never re-run it
     away. **Give it a row in `references/flake-record.md` BEFORE you re-run**, one row per failure
-    with the run id, the payload and the disposition: #578 found CD7b had failed this way three times and that
+    (a launch hiccup, a lane whose browser never starts so no check runs, included) with the run id,
+    the payload and the disposition: #578 found CD7b had failed this way three times and that
     reconstructing even that cost a forty-run dig. Once a flake issue is filed, the check is pulled
     out of the run: `handbook/specs/settle-doctrine.md` item 11.
 11. **A run whose log has not moved in ten minutes is hung, not slow.** Before reporting "still
