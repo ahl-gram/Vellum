@@ -41,6 +41,7 @@ import {
   p32Dismiss,
   p33DragKeepsPin,
 } from "./cards/hold.ts";
+import { p34ButtonLift, p35ProspectLift, p36RaisedTakesHand } from "./cards/gestures.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { evaluate } = ctx;
@@ -52,6 +53,8 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await pOverlayReads(ctx, pm);
   await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}))`);
   await pCardShot(ctx, pm);
+  await step("P34", () => p34ButtonLift(ctx));
+  await step("P35", () => p35ProspectLift(ctx));
   const narrowCount = await evaluate<number>(
     `window.__vellumRunInline({kind:"draw",seed:${NARROW_SEED},overrides:{},render:{style:"antique",widthPx:1500,legend:true}}).manifest.places.length`,
   );
@@ -72,6 +75,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
     await p32Dismiss(hk, marks);
     await p33DragKeepsPin(hk, marks);
   });
+  await step("P36", () => p36RaisedTakesHand(hk));
   await step("P30", () => p30Tablet(hk));
   await step("P restore", () => pRestore(ctx));
 }
