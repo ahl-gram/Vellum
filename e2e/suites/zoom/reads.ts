@@ -19,11 +19,19 @@ export type Overlay = {
   h: number;
   mapW: number;
   mapH: number;
-  track: { fill: string; stroke: number[]; sw: string; dash: string; cap: string; vector: string; opacity: string };
-  hull: { fill: number[]; stroke: number[]; sw: string } | null;
-  body: { fill: number[]; stroke: number[]; sw: string } | null;
+  track: {
+    fill: string;
+    stroke: number[] | null;
+    sw: string;
+    dash: string;
+    cap: string;
+    vector: string;
+    opacity: string;
+  };
+  hull: { fill: number[] | null; stroke: number[] | null; sw: string } | null;
+  body: { fill: number[] | null; stroke: number[] | null; sw: string } | null;
 } | null;
-export const OVERLAY: Payload<Overlay> = `(() => { const rgba = ${PAGE_RGBA}, cs = (e) => getComputedStyle(e);
+export const OVERLAY: Payload<Overlay> = `(() => { const colour = ${PAGE_RGBA}, rgba = (css) => { try { return colour(css); } catch { return null; } }, cs = (e) => getComputedStyle(e);
   const svg = document.querySelector("#map .voyage-overlay"); if (!svg) return null;
   const s = cs(svg), m = document.getElementById("map");
   const track = document.querySelector("#map .voyage-overlay .voyage-track");

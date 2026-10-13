@@ -191,13 +191,14 @@ type Hit = {
   near: boolean;
   focused: boolean;
   hovered: boolean;
+  moving: boolean;
   ring: RingRead;
 };
 const HIT = (idx: number): Payload<Hit | null> => `(() => { const rgba = ${PAGE_RGBA};
   const t = document.querySelector('#map .place-hit[data-idx="${idx}"]'); if (!t) return null;
   const m = document.getElementById("map"), b = t.getBoundingClientRect(), mb = m.getBoundingClientRect(), s = getComputedStyle(t, "::after");
   return { rect: [b.left, b.top, b.width, b.height], nx: parseFloat(t.style.left) / 100, ny: parseFloat(t.style.top) / 100,
-    map: [mb.left, mb.top, mb.width, mb.height], near: t.classList.contains("pc-near"), focused: document.activeElement === t, hovered: t.matches(":hover"),
+    map: [mb.left, mb.top, mb.width, mb.height], near: t.classList.contains("pc-near"), focused: document.activeElement === t, hovered: t.matches(":hover"), moving: document.getAnimations().some((a) => a.effect && a.effect.target === t && a.playState !== "finished"),
     ring: { content: s.content, width: s.width, height: s.height, bw: s.borderTopWidth, bs: s.borderTopStyle, bc: rgba(s.borderTopColor), radius: s.borderTopLeftRadius, opacity: s.opacity, transform: s.transform } }; })()`;
 
 const TARGET: Payload<{ t: number; p: number } | null> =
@@ -258,6 +259,18 @@ const hitFaults = (label: string, h: Hit | null): string[] => {
   ]);
 };
 
+async function restedHit(
+  { evaluate, sleep }: Pick<SuiteContext, "evaluate" | "sleep">,
+  idx: number,
+): Promise<Hit | null> {
+  let h = await evaluate(HIT(idx));
+  for (let i = 0; i < 40 && h && h.moving; i++) {
+    await sleep(50);
+    h = await evaluate(HIT(idx));
+  }
+  return h;
+}
+
 export async function z22HitAndRing({ evaluate, send, check, sleep }: SuiteContext): Promise<void> {
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 5, y: 5 });
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
@@ -277,7 +290,7 @@ export async function z22HitAndRing({ evaluate, send, check, sleep }: SuiteConte
     if (target && target.t >= 0) {
       read.at1 = await evaluate(HIT(target.t));
       await evaluate(CENTRE(target.t));
-      read.at4 = await evaluate(HIT(target.t));
+      read.at4 = await restedHit({ evaluate, sleep }, target.t);
       if (target.p >= 0) {
         await evaluate(
           `document.querySelector('#map .place-hit[data-idx="${target.p}"]').focus({ preventScroll: true })`,
