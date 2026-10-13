@@ -1,4 +1,4 @@
-/* Living-chart engine overlay dressing, host-agnostic. Host contract, both halves or the overlays render undressed: link /living-chart.css and put class="living-chart" on the chart mount handed to the engine. */
+/* Living-chart engine overlay dressing, host-agnostic. Host contract: link /living-chart.css, or the overlays render undressed, and put class="living-chart" on the chart mount handed to the engine, which the ink-in rules below key on. */
 
 /* The .place-hit reset is load-bearing: a host's own button styling would otherwise paint opaque boxes over each map glyph and break idle parity. */
 .place-overlay {

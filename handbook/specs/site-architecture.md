@@ -71,12 +71,12 @@ symbol and path so the reader goes and looks.
   walk of `src/`, which reds by name and tells you what to add. A discovery route closes too, at
   build time, by throwing when it has no blurb. The page, bundle, cleaning and lane rosters are
   hand-kept and silent when missed, which is why the grep comes first, and so are the lists that
-  name a sheet for what it does rather than for being a sheet: `CHART_MOUNTS` in
-  `test/site/shell-css-ground.test.ts` and `HOUSE_SHEETS` in `scripts/lint/sheet-owners.ts`, the
-  sheets linked on every page, which `vellum/css-kit-not-redressed` does not read as a page's own.
+  name a sheet for what it does rather than for being a sheet: `HOUSE_SHEETS` in
+  `scripts/lint/sheet-owners.ts`, the sheets linked on every page, which `vellum/css-kit-not-redressed`
+  does not read as a page's own.
 - **The rosters a page or a sheet joins**, by symbol: `NAV_ITEMS`, `ROUTE_NAMES` and
   `ROUTE_CHILDREN` in `src/layouts/nav.ts`; `TOKENS` in `test/site/shell-css.test.ts`;
-  `PAGES` in `test/site/astro-scaffold.test.ts`; `BUNDLE_ENTRIES` in `scripts/build-app-bundles.ts`;
+  `PAGES` in `test/site/astro-scaffold.test.ts`, with `ROADS` and `STAGES` beside it for a page carrying a road out or the kit's stage, and RH32's browser copies of them in `e2e/suites/runninghead/room.ts` (`KIT_ROADS`, `CHART_ROOMS`, `FOG_ROOMS`, `STAGED`); `BUNDLE_ENTRIES` in `scripts/build-app-bundles.ts`;
   `GENERATED_SUBTREES` in `scripts/clean-public-generated.ts`; `ROUTE_ENTRIES` and
   `DISCOVERY_ROUTES` in `scripts/generate-discovery.ts`. A new suite additionally joins `E2E_SUITE_ORDER`
   (`e2e/support/suites.ts`), the runner's `SUITES` map (`e2e/support/suite-map.ts`, which the type
@@ -215,11 +215,10 @@ other way, which is what earns them a section of their own.
   page rather than a broken one. That is the failure the literal form above exists to prevent.
 - **`is:inline` on a working page's bundle-twin script tag is contractual.** Without it the build
   routes that script through its own pass, which the ratified #204 analysis rejects for these
-  surfaces. **The guards name their pages by literal path, so the class is covered only indirectly**:
-  the source-level pin in `test/site/app-bundles.test.ts` lists its pages, while the built-output
-  assertion that each app page keeps its bundle-twin script tag rendered verbatim runs over `PAGES` in
-  `test/site/astro-scaffold.test.ts`, which a new working page joins. A page that omits `is:inline`
-  AND skips that roster reds nothing. Copy a sibling page's script tag whole, and join the roster.
+  surfaces. **No guard reads the word itself**: the built-output assertion that each app page keeps
+  its bundle-twin script tag rendered verbatim runs over `PAGES` in `test/site/astro-scaffold.test.ts`,
+  which a new working page joins, and the word's own guard is Issue #600's. Copy a sibling page's
+  script tag whole, and join the roster.
 
 ## Discovery and indexes
 
