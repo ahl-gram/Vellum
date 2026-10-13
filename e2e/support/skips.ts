@@ -24,9 +24,10 @@ export function unmetSkips(
   return skips.filter((s) => timings.some((t) => t.name === s.suite && !t.aborted) && !met.includes(s.step));
 }
 
-export function closedSkips(
-  _skips: readonly E2eSkip[],
-  _stateOf: (issue: number) => Promise<string>,
+export async function closedSkips(
+  skips: readonly E2eSkip[],
+  stateOf: (issue: number) => Promise<string>,
 ): Promise<readonly E2eSkip[]> {
-  return Promise.resolve([]);
+  const states = await Promise.all(skips.map((s) => stateOf(s.issue)));
+  return skips.filter((_, i) => states[i] !== "open");
 }

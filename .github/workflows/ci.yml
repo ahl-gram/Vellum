@@ -28,6 +28,10 @@ jobs:
         run: npm run check
       - name: Lint
         run: npm run lint
+      - name: Each e2e skip names an open issue
+        run: node scripts/e2e-skips-open.ts
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
       - name: Format
         run: npm run format:check
       - name: Test
