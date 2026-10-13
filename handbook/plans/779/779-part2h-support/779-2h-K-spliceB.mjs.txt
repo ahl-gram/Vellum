@@ -1,9 +1,0 @@
-import { readFileSync, writeFileSync } from "node:fs";
-const [file, sectionFile, from, to] = process.argv.slice(2);
-const doc = readFileSync(file, "utf8");
-const body = readFileSync(sectionFile, "utf8");
-const a = doc.indexOf(from);
-const b = doc.indexOf(to);
-if (a < 0 || b < a) throw new Error(`anchors ${a} ${b}`);
-writeFileSync(file, doc.slice(0, a) + body + "\n" + doc.slice(b));
-console.log("spliced", a, b);
