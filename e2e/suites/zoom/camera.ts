@@ -1,4 +1,6 @@
-import type { SuiteContext } from "../../types.ts";
+import { PAGE_RGBA, nearRgba, tokenRgba } from "../../support/pixel.ts";
+import { sendKey } from "../../support/home.ts";
+import type { Payload, SuiteContext } from "../../types.ts";
 import type { ZoomKit } from "./kit.ts";
 import { ringAtRest, ringScale } from "./reads.ts";
 import type { Cam } from "./reads.ts";
@@ -160,3 +162,261 @@ export async function z8bHoverRing({ evaluate, send, check, sleep, readRing }: Z
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 5, y: 5 });
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
 }
+
+type RingRead = {
+  content: string;
+  width: string;
+  height: string;
+  bw: string;
+  bs: string;
+  bc: number[];
+  radius: string;
+  opacity: string;
+  transform: string;
+};
+type Hit = {
+  rect: [number, number, number, number];
+  nx: number;
+  ny: number;
+  map: [number, number, number, number];
+  near: boolean;
+  focused: boolean;
+  hovered: boolean;
+  ring: RingRead;
+};
+const HIT = (idx: number): Payload<Hit | null> => `(() => { const rgba = ${PAGE_RGBA};
+  const t = document.querySelector('#map .place-hit[data-idx="${idx}"]'); if (!t) return null;
+  const m = document.getElementById("map"), b = t.getBoundingClientRect(), mb = m.getBoundingClientRect(), s = getComputedStyle(t, "::after");
+  return { rect: [b.left, b.top, b.width, b.height], nx: parseFloat(t.style.left) / 100, ny: parseFloat(t.style.top) / 100,
+    map: [mb.left, mb.top, mb.width, mb.height], near: t.classList.contains("pc-near"), focused: document.activeElement === t, hovered: t.matches(":hover"),
+    ring: { content: s.content, width: s.width, height: s.height, bw: s.borderTopWidth, bs: s.borderTopStyle, bc: rgba(s.borderTopColor), radius: s.borderTopLeftRadius, opacity: s.opacity, transform: s.transform } }; })()`;
+
+const TARGET: Payload<{ t: number; p: number } | null> =
+  `(() => { const vp = document.getElementById("map-viewport"), vr = vp.getBoundingClientRect();
+  const cx = vr.left + vr.width / 2, cy = vr.top + vr.height / 2;
+  const hits = [...document.querySelectorAll("#map .place-hit")].map((h) => { const r = h.getBoundingClientRect(); return { idx: Number(h.dataset.idx), x: r.left + r.width / 2, y: r.top + r.height / 2 }; }).filter((h) => h.idx >= 1);
+  let best = null, bd = Infinity; for (const h of hits) { const d = Math.hypot(h.x - cx, h.y - cy); if (d < bd) { bd = d; best = h; } }
+  if (!best) return null;
+  return { t: best.idx, p: hits.some((h) => h.idx === best.idx - 1) ? best.idx - 1 : -1 }; })()`;
+
+const CENTRE = (
+  idx: number,
+): Payload<boolean> => `(() => { const vp = document.getElementById("map-viewport"), t = document.querySelector('#map .place-hit[data-idx="${idx}"]');
+  if (!t) return false; const vr = vp.getBoundingClientRect(), r = t.getBoundingClientRect();
+  const px = r.left + r.width / 2 - vr.left, py = r.top + r.height / 2 - vr.top;
+  window.__vellumZoomTo({ k: 4, x: vp.clientWidth / 2 - 4 * px, y: vp.clientHeight / 2 - 4 * py }); return true; })()`;
+
+const SHOWN = (
+  idx: number,
+): Payload<{ focused: boolean; visible: boolean; opacity: string; transform: string } | null> =>
+  `(() => { const t = document.querySelector('#map .place-hit[data-idx="${idx}"]'); if (!t) return null;
+  const s = getComputedStyle(t, "::after");
+  return { focused: document.activeElement === t, visible: t.matches(":focus-visible"), opacity: s.opacity, transform: s.transform }; })()`;
+
+const park = async ({ evaluate, send }: Pick<SuiteContext, "evaluate" | "send">): Promise<void> => {
+  await evaluate(`document.activeElement instanceof HTMLElement && document.activeElement.blur()`);
+  await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))`);
+  await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
+  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 5, y: 5 });
+};
+const scaleOf = (m: string): number => Number((/^matrix\(([-\d.]+)/.exec(m) || [])[1] ?? "NaN");
+const faults = (parts: (true | string)[]): string[] => parts.filter((f): f is string => f !== true);
+
+const ringFaults = (label: string, r: RingRead, opacity: string, scale: number, tolerance: number): string[] =>
+  faults([
+    r.content === '""' || `${label}: ring content ${r.content}`,
+    (r.width === "20px" && r.height === "20px") || `${label}: ring ${r.width}x${r.height}`,
+    (r.bw === "2px" && r.bs === "solid") || `${label}: ring border ${r.bw} ${r.bs}`,
+    nearRgba(r.bc, tokenRgba("--ink-dark")) || `${label}: ring colour ${JSON.stringify(r.bc)}`,
+    r.radius === "50%" || `${label}: ring radius ${r.radius}`,
+    r.opacity === opacity || `${label}: ring opacity ${r.opacity}, want ${opacity}`,
+    Math.abs(scaleOf(r.transform) - scale) <= tolerance ||
+      `${label}: ring scale ${scaleOf(r.transform)}, want ${scale}`,
+  ]);
+
+const hitFaults = (label: string, h: Hit | null): string[] => {
+  if (!h) return [`${label}: no hit`];
+  const markX = h.map[0] + h.nx * h.map[2],
+    markY = h.map[1] + h.ny * h.map[3],
+    cx = h.rect[0] + h.rect[2] / 2,
+    cy = h.rect[1] + h.rect[3] / 2;
+  return faults([
+    (Math.abs(cx - markX) <= 0.5 && Math.abs(cy - markY) <= 0.5) ||
+      `${label}: box centre ${cx},${cy} against the mark ${markX},${markY}`,
+    (Math.abs(h.rect[2] - 26) <= 1 && Math.abs(h.rect[3] - 26) <= 1) || `${label}: box ${h.rect[2]}x${h.rect[3]}`,
+    (!h.near && !h.focused && !h.hovered) || `${label}: the hit is raised, focused or hovered`,
+    ...ringFaults(label, h.ring, "0", 0.85, 0.005),
+  ]);
+};
+
+export async function z22HitAndRing({ evaluate, send, check, sleep }: SuiteContext): Promise<void> {
+  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 5, y: 5 });
+  await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
+  const target = await evaluate(TARGET);
+  type Shown = { focused: boolean; visible: boolean; opacity: string; transform: string } | null;
+  const shownOf = async (idx: number): Promise<Shown> => {
+    let last = await evaluate(SHOWN(idx));
+    for (let i = 0; i < 30 && last; i++) {
+      if (last.focused && last.opacity === "1") break;
+      await sleep(50);
+      last = await evaluate(SHOWN(idx));
+    }
+    return last;
+  };
+  const read: { at1: Hit | null; at4: Hit | null; shown: Shown } = { at1: null, at4: null, shown: null };
+  try {
+    if (target && target.t >= 0) {
+      read.at1 = await evaluate(HIT(target.t));
+      await evaluate(CENTRE(target.t));
+      read.at4 = await evaluate(HIT(target.t));
+      if (target.p >= 0) {
+        await evaluate(
+          `document.querySelector('#map .place-hit[data-idx="${target.p}"]').focus({ preventScroll: true })`,
+        );
+        await sendKey(send, "Tab", "Tab", 9);
+        read.shown = await shownOf(target.t);
+      }
+    }
+  } finally {
+    await park({ evaluate, send });
+  }
+  const { at1, at4, shown } = read;
+  const wrong = faults([
+    (!!target && target.t >= 0 && target.p >= 0) || "no target or no town one index below it",
+    ...hitFaults("k=1", at1),
+    ...hitFaults("k=4", at4),
+    (!!shown &&
+      shown.focused &&
+      shown.visible &&
+      shown.opacity === "1" &&
+      Math.abs(scaleOf(shown.transform) - 1) <= 0.02) ||
+      `the keyboard ring: ${JSON.stringify(shown)}`,
+  ]);
+  check(
+    "Z22 a hit holds its 26px box on its mark at rest and at depth, its resting ring 20px at 0.85 with no division of its own, and a keyboard's focus grows the ring to 1 at depth",
+    wrong.length === 0,
+    JSON.stringify({ wrong, target, at1, at4, shown }),
+  );
+}
+
+type Row = {
+  idx: number;
+  rested: boolean;
+  flipH: boolean;
+  flipV: boolean;
+  dx: number;
+  dy: number;
+  card: [number, number, number, number];
+  box: [number, number, number, number];
+};
+const REST_ONE: (idx: number) => Payload<{ rested: boolean; flipH: boolean; flipV: boolean } | null> = (idx) =>
+  `(async () => { const card = document.getElementById("place-card"), h = document.querySelector('.place-overlay .place-hit[data-idx="${idx}"]');
+  if (!h) return null; h.focus({ preventScroll: true });
+  const name = (h.getAttribute("aria-label") || "").split(", ")[0], frame = () => new Promise((r) => requestAnimationFrame(r));
+  let rested = false;
+  for (let i = 0; i < 12; i++) {
+    const inner = card.querySelector(".pc-inner"), a = inner ? inner.getAnimations() : [];
+    if (!card.hidden && (card.querySelector(".pc-name") || {}).textContent === name && a.length > 0 && a.every((v) => v.playState === "finished")) { rested = true; break; }
+    await frame();
+  }
+  return { rested, flipH: card.classList.contains("flip-h"), flipV: card.classList.contains("flip-v") }; })()`;
+
+const REAPPLY: Payload<boolean> = `(() => { window.__vellumZoomTo(window.__vellumZoomState()); return true; })()`;
+
+const RECT: Payload<{
+  card: [number, number, number, number];
+  box: [number, number, number, number];
+  dx: number;
+  dy: number;
+} | null> = `(() => { const card = document.getElementById("place-card"), vp = document.getElementById("map-viewport");
+  if (!card) return null; const r = card.getBoundingClientRect(), b = vp.getBoundingClientRect();
+  return { card: [r.left, r.top, r.right, r.bottom], box: [b.left, b.top, b.right, b.bottom],
+    dx: parseFloat(card.style.getPropertyValue("--pc-dx") || "0"), dy: parseFloat(card.style.getPropertyValue("--pc-dy") || "0") }; })()`;
+
+const HITS: Payload<number[]> =
+  `[...document.querySelectorAll(".place-overlay .place-hit")].map((h) => Number(h.dataset.idx))`;
+
+export async function z25ClampFlush({ evaluate, send, check }: SuiteContext): Promise<void> {
+  await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))`);
+  await evaluate(`document.activeElement instanceof HTMLElement && document.activeElement.blur()`);
+  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 5, y: 5 });
+  await send("Emulation.setEmulatedMedia", { features: [{ name: "prefers-reduced-motion", value: "reduce" }] });
+  const rows: Row[] = [];
+  try {
+    await evaluate(
+      `(() => { const vp = document.getElementById("map-viewport"); window.__vellumZoomTo({ k: 4, x: -(3 * vp.clientWidth) / 2, y: -(3 * vp.clientHeight) / 2 }); })()`,
+    );
+    const hits = await evaluate(HITS);
+    for (const idx of hits) {
+      const rest = await evaluate(REST_ONE(idx));
+      if (!rest) continue;
+      // The clamp measured the card in the same task that wrote its anchor, where this page's style has not landed yet, so a camera re-apply re-clamps against the settled box (the path every redraft's fresh card takes); the rect is then read from node, which is where the settled style lands.
+      await evaluate(REAPPLY);
+      const r = await evaluate(RECT);
+      if (!r) continue;
+      rows.push({
+        idx,
+        rested: rest.rested,
+        flipH: rest.flipH,
+        flipV: rest.flipV,
+        dx: r.dx,
+        dy: r.dy,
+        card: r.card,
+        box: r.box,
+      });
+    }
+  } finally {
+    await evaluate(`document.activeElement instanceof HTMLElement && document.activeElement.blur()`);
+    await evaluate(`document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))`);
+    await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
+    await send("Emulation.setEmulatedMedia", { features: [] });
+  }
+  const wrong: string[] = [];
+  if (rows.length === 0) wrong.push("no cards read");
+  const flush = (r: Row): string[] => {
+    const [cl, ct, cr, cb] = r.card,
+      [bl, bt, br, bb] = r.box;
+    return faults([
+      r.rested || `hit ${r.idx}: the card never rested`,
+      (cl >= bl - 0.5 && cr <= br + 0.5 && ct >= bt - 0.5 && cb <= bb + 0.5) ||
+        `hit ${r.idx}: card ${cl},${ct},${cr},${cb} outside ${bl},${bt},${br},${bb}`,
+      r.dx === 0 || Math.abs(cr - br) <= 0.5 || Math.abs(cl - bl) <= 0.5 || `hit ${r.idx}: dx ${r.dx} off neither edge`,
+      r.dy === 0 || Math.abs(cb - bb) <= 0.5 || Math.abs(ct - bt) <= 0.5 || `hit ${r.idx}: dy ${r.dy} off neither edge`,
+    ]);
+  };
+  for (const r of rows) wrong.push(...flush(r));
+  const witness = ["plain", "h", "v", "hv"].filter(
+    (v) => !rows.some((r) => variantOf(r) === v && r.dx !== 0) || !rows.some((r) => variantOf(r) === v && r.dy !== 0),
+  );
+  if (witness.length) wrong.push(`no nudge witness on ${witness.join(", ")}`);
+  check(
+    "Z25 every card shown at depth is nudged flush into its box, in all four variants on both axes",
+    wrong.length === 0,
+    JSON.stringify({ wrong, hits: rows.length, variants: rows.map((r) => `${r.idx}:${variantOf(r)}:${r.dx},${r.dy}`) }),
+  );
+}
+
+async function sweepSeats(evaluate: SuiteContext["evaluate"]): Promise<Row[]> {
+  const rows: Row[] = [];
+  for (const idx of await evaluate(HITS)) {
+    const rest = await evaluate(REST_ONE(idx));
+    if (!rest) continue;
+    // The clamp measured the card in the same task that wrote its anchor, where this page's style has not landed yet, so a camera re-apply re-clamps against the settled box (the path every redraft's fresh card takes); the rect is then read from node, which is where the settled style lands.
+    await evaluate(REAPPLY);
+    const r = await evaluate(RECT);
+    if (!r) continue;
+    rows.push({
+      idx,
+      rested: rest.rested,
+      flipH: rest.flipH,
+      flipV: rest.flipV,
+      dx: r.dx,
+      dy: r.dy,
+      card: r.card,
+      box: r.box,
+    });
+  }
+  return rows;
+}
+
+const variantOf = (r: Row): string => (r.flipH ? "h" : "") + (r.flipV ? "v" : "") || "plain";

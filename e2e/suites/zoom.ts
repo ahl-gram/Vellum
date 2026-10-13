@@ -46,6 +46,9 @@ import {
   z21bOneBandUp,
   zRestore,
 } from "./zoom/bands.ts";
+import { z23SurveyOverlay, z24CardSeats, z26CardDress } from "./zoom/dress.ts";
+import { z27UnderPinned } from "./zoom/gestures.ts";
+import { z22HitAndRing, z25ClampFlush } from "./zoom/camera.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { evaluate } = ctx;
@@ -55,6 +58,11 @@ export async function run(ctx: SuiteContext): Promise<void> {
   // Issue #169: the semantic redraft is OFF for the geometric block (Z1-Z16) and back ON for Z17+; a fresh page defaults it ON, so re-set it after every reload.
   await step("Z setup", () => zSetup(ctx));
   await zGeometric(ctx, k);
+  await step("Z22", () => z22HitAndRing(ctx));
+  await step("Z24", () => z24CardSeats(ctx));
+  await step("Z25", () => z25ClampFlush(ctx));
+  await step("Z26", () => z26CardDress(ctx));
+  await step("Z27", () => z27UnderPinned(ctx));
   await step("Z11", () => z11Styles(ctx));
   await step("Z12", () => z12HashWrite(ctx));
   await z5VersoHomes(ctx);
@@ -77,6 +85,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await z20bReducedMotion(k);
   await z20cThrottle(k);
   await step("Z20d", () => z20dInkDrops(k));
+  await step("Z23", () => z23SurveyOverlay(ctx));
   await z20eCardSurvives(k);
   await z20fStepsDown(k);
   await step("Z20g", () => z20gInkBlocks(k));
