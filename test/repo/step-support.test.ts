@@ -103,3 +103,35 @@ test("a step built WITHOUT a sink still contains its group, so a caller that pre
     "a sink-less caller threw out of the containment path instead of recording its red",
   );
 });
+
+const RR42_SKIP = [{ suite: "reading-room", step: "RR42", issue: 869 }] as const;
+
+test("a listed step does not run its body, checks nothing, and records its name", async () => {
+  const { results, check } = recorder();
+  const skippedChecks: string[] = [];
+  const step = makeStep({ check, alive: () => true, skips: RR42_SKIP, skippedChecks });
+  let ran = false;
+  await step("RR42", () => {
+    ran = true;
+    check("RR42 a claim the skipped check held", true);
+    return Promise.resolve();
+  });
+  assert.equal(ran, false, "a step on the skip list ran its body, so the flaky check is still in the run");
+  assert.deepEqual(results, [], "a skipped step recorded a check, so it counts as a pass or a fail");
+  assert.deepEqual(skippedChecks, ["RR42"], "the skipped step is not named where the runner can report it");
+});
+
+test("a step not on the list still runs", async () => {
+  const { results, check } = recorder();
+  const skippedChecks: string[] = [];
+  const step = makeStep({ check, alive: () => true, skips: RR42_SKIP, skippedChecks });
+  let ran = false;
+  await step("RR40", () => {
+    ran = true;
+    check("RR40 a claim the next check holds", true);
+    return Promise.resolve();
+  });
+  assert.equal(ran, true, "a step the list does not name was skipped with its neighbour");
+  assert.deepEqual(skippedChecks, [], "a step that ran was named as skipped");
+  assert.deepEqual(results, [["RR40 a claim the next check holds", true, ""]]);
+});

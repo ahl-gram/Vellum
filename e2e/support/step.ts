@@ -1,13 +1,22 @@
+import { E2E_SKIPS } from "./skips.ts";
+import type { E2eSkip } from "./skips.ts";
+
 // Containment at CHECK granularity, the twin of runSelected's at suite granularity (Issue #534): a settle THROWS on timeout (support/settle.ts, and that is deliberate: handing the last read back lets the check pass on a stale snapshot), so without this the gestures, waits and checks that make up ONE numbered check take the whole suite down and the reader gets `settle timeout open` where a named red belongs.
 export function makeStep({
   check,
   alive,
   skippedGroups = [],
+  skips = E2E_SKIPS,
+  skippedChecks = [],
 }: {
   check: (name: string, ok: boolean, detail?: string) => void;
   alive?: () => boolean | Promise<boolean>;
   skippedGroups?: string[];
+  skips?: readonly E2eSkip[];
+  skippedChecks?: string[];
 }) {
+  void skips;
+  void skippedChecks;
   return async (name: string, body: () => Promise<void>): Promise<void> => {
     try {
       await body();
