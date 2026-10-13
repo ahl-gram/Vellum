@@ -20,7 +20,7 @@
     "astro:dev": "npm run astro:generate && astro dev",
     "astro:preview": "astro preview",
     "build": "npm run astro:generate && astro build",
-    "test": "node --test",
+    "test": "node --import ./test-support/source-read-guard.ts --test",
     "test:e2e": "node e2e/run.ts",
     "test:e2e:lanes": "node e2e/lanes.ts",
     "check": "tsc --noEmit && tsc --noEmit -p tsconfig.engine.json && tsc --noEmit -p tsconfig.worker.json",
