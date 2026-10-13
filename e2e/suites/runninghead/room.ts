@@ -61,6 +61,7 @@ const ROLE_SELECTORS = [
   "#dateline",
   ".folio-room .dateline",
   "#grp-land",
+  "#grp-hand",
   ".find input[type=search]",
   "#type",
   "#sb-report",
@@ -159,6 +160,7 @@ const PILLS: Record<string, string> = {
   "/prospect/": "P#pp-status",
   "/ribbon/": "P#rb-status",
   "/specimen/": "P#sb-status",
+  [PORTFOLIO]: "P#pf-status",
 };
 
 export function rh25Skeleton(check: SuiteContext["check"], kits: Record<string, KitSample | undefined>): void {

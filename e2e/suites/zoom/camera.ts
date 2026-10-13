@@ -253,7 +253,7 @@ const hitFaults = (label: string, h: Hit | null): string[] => {
   return faults([
     (Math.abs(cx - markX) <= 0.5 && Math.abs(cy - markY) <= 0.5) ||
       `${label}: box centre ${cx},${cy} against the mark ${markX},${markY}`,
-    (Math.abs(h.rect[2] - 26) <= 1 && Math.abs(h.rect[3] - 26) <= 1) || `${label}: box ${h.rect[2]}x${h.rect[3]}`,
+    (Math.abs(h.rect[2] - 26) <= 0.5 && Math.abs(h.rect[3] - 26) <= 0.5) || `${label}: box ${h.rect[2]}x${h.rect[3]}`,
     (!h.near && !h.focused && !h.hovered) || `${label}: the hit is raised, focused or hovered`,
     ...ringFaults(label, h.ring, "0", 0.85, 0.005),
   ]);
@@ -311,7 +311,7 @@ export async function z22HitAndRing({ evaluate, send, check, sleep }: SuiteConte
       shown.focused &&
       shown.visible &&
       shown.opacity === "1" &&
-      Math.abs(scaleOf(shown.transform) - 1) <= 0.02) ||
+      Math.abs(scaleOf(shown.transform) - 1) <= 0.005) ||
       `the keyboard ring: ${JSON.stringify(shown)}`,
   ]);
   check(

@@ -49,7 +49,7 @@ export function rh29Printed(check: SuiteContext["check"], kits: Record<string, K
   }
   const control = kits["/gallery/"]?.before;
   check(
-    "RH29 on paper no room paints its folio's panel, in the state it stands in or in any other, and the screen still does where the kit says so (blind spot: a sheet no served page links, a rule a script inserts after the read, and a nested rule that reaches the corner through & rather than naming it; each errs toward a miss)",
+    "RH29 on paper no room paints its folio's panel, in the state it stands in or in any other, and the screen still does where the kit says so (blind spot: a sheet no served page links, a rule a script inserts after the read, a nested rule that reaches the corner through & rather than naming it, and a rule that names the corner by an attribute selector rather than a dotted .tr or .folio-room; each errs toward a miss)",
     wrong.length === 0 && control === '""',
     JSON.stringify({ wrong, control }),
   );
@@ -76,7 +76,9 @@ export async function rh30Ring({ evaluate, send, check, visit }: RunningHeadKit)
 }
 
 type Link = { x: number; y: number; reach: boolean; hover: boolean; moving: number; t: string; probe: string } | null;
-const LINK: Payload<Link> = `(() => { const a = document.querySelector("header.chrome nav.rooms a:not([aria-current])"); if (!a) return null;
+const LINK = (
+  at: 0 | -1,
+): Payload<Link> => `(() => { const a = [...document.querySelectorAll("header.chrome nav.rooms a:not([aria-current])")].at(${at}); if (!a) return null;
   const r = a.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2, e = document.elementFromPoint(x, y);
   const probe = document.createElement("div"); probe.style.transform = "translateY(var(--raise))"; document.body.appendChild(probe);
   const p = getComputedStyle(probe).transform; probe.remove();
@@ -88,28 +90,31 @@ const fOf = (m: string): number | null => {
   return v && v.length === 6 ? v[5]! : null;
 };
 
-export async function rh31Raise({ evaluate, send, check, visit, sleep }: RunningHeadKit): Promise<void> {
-  if (!(await visit("/faq/"))) throw new Error("RH31: the Q & A never loaded");
-  let last = await evaluate(LINK);
+async function raised({ evaluate, send, sleep }: RunningHeadKit, at: 0 | -1): Promise<Link> {
+  let last = await evaluate(LINK(at));
+  if (last) await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: last.x, y: last.y });
+  for (let i = 0; i < 20 && last; i++) {
+    last = await evaluate(LINK(at));
+    if (last && last.hover && last.moving === 0) break;
+    await sleep(50);
+  }
+  return last;
+}
+
+export async function rh31Raise(k: RunningHeadKit): Promise<void> {
+  if (!(await k.visit("/faq/"))) throw new Error("RH31: the Q & A never loaded");
   try {
-    if (last) await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: last.x, y: last.y });
-    for (let i = 0; i < 20 && last; i++) {
-      const d = await evaluate(LINK);
-      if (d && d.hover && d.moving === 0) {
-        last = d;
-        break;
-      }
-      last = d;
-      await sleep(50);
-    }
-    const f = last ? fOf(last.t) : null;
-    const probe = last ? fOf(last.probe) : null;
-    check(
-      "RH31 a nav link rises by the house raise under the hand",
-      !!last && last.reach && last.hover && f !== null && probe !== null && f === probe && f !== 0,
-      JSON.stringify(last),
+    const reads = [await raised(k, 0), await raised(k, -1)];
+    const rises = reads.every((r) => {
+      const f = r ? fOf(r.t) : null;
+      return !!r && r.reach && r.hover && f !== null && f === fOf(r.probe) && f !== 0;
+    });
+    k.check(
+      "RH31 the first and the last nav link each rise by the house raise under the hand",
+      rises,
+      JSON.stringify(reads),
     );
   } finally {
-    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 700 });
+    await k.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 700 });
   }
 }

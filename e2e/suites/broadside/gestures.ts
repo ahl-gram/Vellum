@@ -15,45 +15,58 @@ const nums = (t: string): number[] | null => {
   return m ? m[1]!.split(",").map(Number) : null;
 };
 
-export async function br13Tip({ evaluate, send, check, sleep }: BroadsideKit): Promise<void> {
-  const mark = 'a.fn[data-note="note-coast-warp"]';
-  const word = "header.chrome .wordmark a";
-  const poll = async (sel: string, tries: number): Promise<Tip> => {
-    let last = await evaluate(TIP(sel));
-    for (let i = 0; i < tries; i++) {
-      const d = await evaluate(TIP(sel));
-      if (d && last && d.t === last.t && d.hover && !d.moving) return d;
-      last = d;
-      await sleep(50);
-    }
-    return last;
-  };
+const MARKS = ["seeds-choice", "coast-warp", "survey", "verso"].map((n) => `a.fn[data-note="note-${n}"]`);
+
+async function tipOf(
+  { evaluate, sleep }: Pick<BroadsideKit, "evaluate" | "sleep">,
+  sel: string,
+  tries: number,
+): Promise<Tip> {
+  let last = await evaluate(TIP(sel));
+  for (let i = 0; i < tries; i++) {
+    const d = await evaluate(TIP(sel));
+    if (d && last && d.t === last.t && d.hover && !d.moving) return d;
+    last = d;
+    await sleep(50);
+  }
+  return last;
+}
+
+// A hovered mark opens its note, which can stand over the next mark; wiring, not the claim, so the notes are put away before each hover.
+async function hovered(k: BroadsideKit, sel: string, tries: number): Promise<{ at: At; tip: Tip }> {
+  await k.evaluate(
+    `document.querySelectorAll(".fn-note").forEach((n) => { if (n.matches(":popover-open")) n.hidePopover(); })`,
+  );
+  const at = await k.evaluate(AT(sel));
+  if (at) await k.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: at.x, y: at.y });
+  return { at, tip: at ? await tipOf(k, sel, tries) : null };
+}
+
+export async function br13Tip(k: BroadsideKit): Promise<void> {
   try {
-    const atMark = await evaluate(AT(mark));
-    if (atMark) await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: atMark.x, y: atMark.y });
-    const markTip = atMark ? await poll(mark, 20) : null;
-    const atWord = await evaluate(AT(word));
-    if (atWord) await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: atWord.x, y: atWord.y });
-    const wordTip = atWord ? await poll(word, 30) : null;
-    const a = markTip ? nums(markTip.t) : null;
-    const b = wordTip ? nums(wordTip.t) : null;
-    const same = !!a && !!b && a.length === 6 && b.length === 6 && a.every((v, i) => Math.abs(v - b[i]!) <= 1e-3);
-    check(
-      "BR13 a footnote mark goes to the glossary, so under a real hover it tips at the wordmark's own numbers (#270 ruling 7)",
-      !!atMark &&
-        atMark.reach &&
-        !!atWord &&
-        atWord.reach &&
-        !!markTip &&
-        markTip.hover &&
-        markTip.t !== "none" &&
-        !!wordTip &&
-        wordTip.hover &&
-        same,
-      JSON.stringify({ atMark, markTip, atWord, wordTip }),
+    const word = await hovered(k, "header.chrome .wordmark a", 30);
+    const want = word.tip ? nums(word.tip.t) : null;
+    const marks = [];
+    for (const sel of MARKS) marks.push({ sel, ...(await hovered(k, sel, 20)) });
+    const wrong = marks
+      .filter((m) => {
+        const got = m.tip ? nums(m.tip.t) : null;
+        const same =
+          !!got &&
+          !!want &&
+          got.length === 6 &&
+          want.length === 6 &&
+          got.every((v, i) => Math.abs(v - want[i]!) <= 1e-3);
+        return !(!!m.at && m.at.reach && !!m.tip && m.tip.hover && m.tip.t !== "none" && same);
+      })
+      .map((m) => m.sel);
+    k.check(
+      "BR13 every footnote mark goes to the glossary, so under a real hover each tips at the wordmark's own numbers (#270 ruling 7)",
+      !!word.at && word.at.reach && !!word.tip && word.tip.hover && !!want && wrong.length === 0,
+      JSON.stringify({ word, wrong, marks }),
     );
   } finally {
-    await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 1 });
+    await k.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 1 });
   }
 }
 

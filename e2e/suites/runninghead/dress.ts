@@ -2,6 +2,7 @@
 import { SAY_FADE_MS } from "../../../src/site/shared/announce.ts";
 import { nearRgba, tokenRgba } from "../../support/pixel.ts";
 import type { SuiteContext } from "../../types.ts";
+import { PORTFOLIO } from "./gestures.ts";
 import { DISPLAY_FACE, FLOURISH_FACE } from "./reads.ts";
 import type { KitSample, Role } from "./room.ts";
 
@@ -13,6 +14,7 @@ const PILL_ROOMS = [
   "/reading-room/",
   "/seed-of-the-day/",
   "/specimen/",
+  PORTFOLIO,
 ];
 
 export function rh26Pill(check: SuiteContext["check"], kits: Record<string, KitSample | undefined>): void {
@@ -39,7 +41,7 @@ function roleWear(kits: Record<string, KitSample | undefined>): string[] {
   const wrong: string[] = [];
   const at = (route: string, sel: string): Role | undefined => kits[route]?.roles[sel];
   const rem = (route: string): number => kits[route]?.rem ?? 16;
-  const near = (route: string, got: number, want: number): boolean => Math.abs(got - want) <= 0.05 * rem(route);
+  const near = (route: string, got: number, want: number): boolean => Math.abs(got - want) <= 0.01 * rem(route);
   const want = (route: string, sel: string, ok: boolean): void => {
     if (!ok) wrong.push(`${route} ${sel}: ${JSON.stringify(at(route, sel))}`);
   };
@@ -71,7 +73,7 @@ function roleHeads(kits: Record<string, KitSample | undefined>): string[] {
   const wrong: string[] = [];
   const at = (route: string, sel: string): Role | undefined => kits[route]?.roles[sel];
   const rem = (route: string): number => kits[route]?.rem ?? 16;
-  const near = (route: string, got: number, want: number): boolean => Math.abs(got - want) <= 0.05 * rem(route);
+  const near = (route: string, got: number, want: number): boolean => Math.abs(got - want) <= 0.01 * rem(route);
   const want = (route: string, sel: string, ok: boolean): void => {
     if (!ok) wrong.push(`${route} ${sel}: ${JSON.stringify(at(route, sel))}`);
   };
@@ -90,18 +92,20 @@ function roleHeads(kits: Record<string, KitSample | undefined>): string[] {
         nearRgba(d.color, tokenRgba("--parchment")),
     );
   }
-  const head = at("/explorer/", "#grp-land");
-  want(
-    "/explorer/",
-    "#grp-land",
-    !!head &&
-      near("/explorer/", head.size, 0.82 * rem("/explorer/")) &&
-      head.spacing !== null &&
-      near("/explorer/", head.spacing, 0.18 * 0.82 * rem("/explorer/")) &&
-      head.weight === "600" &&
-      head.transform === "uppercase" &&
-      nearRgba(head.color, tokenRgba("--ink-faded")),
-  );
+  for (const sel of ["#grp-land", "#grp-hand"]) {
+    const head = at("/explorer/", sel);
+    want(
+      "/explorer/",
+      sel,
+      !!head &&
+        near("/explorer/", head.size, 0.82 * rem("/explorer/")) &&
+        head.spacing !== null &&
+        near("/explorer/", head.spacing, 0.18 * 0.82 * rem("/explorer/")) &&
+        head.weight === "600" &&
+        head.transform === "uppercase" &&
+        nearRgba(head.color, tokenRgba("--ink-faded")),
+    );
+  }
   const find = at("/glossary/", ".find input[type=search]");
   want(
     "/glossary/",

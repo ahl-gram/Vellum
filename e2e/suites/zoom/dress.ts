@@ -94,11 +94,11 @@ const seatFaults = (label: string, variant: string, p: Seat, rem: number): strin
     (p.flipH === variant.includes("h") && p.flipV === variant.includes("v")) ||
       `${label}: classes ${p.flipH},${p.flipV}`,
     (p.dx === "0px" && p.dy === "0px") || `${label}: nudged ${p.dx},${p.dy}`,
-    (variant.includes("h") ? near(cr, markX - 10, 1) : near(cl, markX + 10, 1)) ||
+    (variant.includes("h") ? near(cr, markX - 10, 0.5) : near(cl, markX + 10, 0.5)) ||
       `${label}: the anchored ${variant.includes("h") ? "right" : "left"} ${variant.includes("h") ? cr : cl} against the mark ${markX}`,
-    (variant.includes("v") ? near(cb, markY - 10, 1) : near(ct, markY + 10, 1)) ||
+    (variant.includes("v") ? near(cb, markY - 10, 0.5) : near(ct, markY + 10, 0.5)) ||
       `${label}: the anchored ${variant.includes("v") ? "bottom" : "top"} ${variant.includes("v") ? cb : ct} against the mark ${markY}`,
-    near(cr - cl, 16 * rem, 1) || `${label}: ${cr - cl} wide, want ${16 * rem}`,
+    near(cr - cl, 16 * rem, 0.5) || `${label}: ${cr - cl} wide, want ${16 * rem}`,
   ]);
 };
 
