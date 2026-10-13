@@ -161,8 +161,8 @@ Scars: #366, #368, #454, #474, #501, #520, #526, #529, #533, #535, #536, #537, #
     second red is a defect. Put the payload and what to capture next in a PR comment; never re-run it
     away. **Give it a row in `references/flake-record.md` BEFORE you re-run**, one row per failure
     with the run id, the payload and the disposition: #578 found CD7b had failed this way three times and that
-    reconstructing even that cost a forty-run dig. A flaky check biting a content-only PR keeps
-    measuring and logging but stops asserting, with the issue number at the line.
+    reconstructing even that cost a forty-run dig. Once a flake issue is filed, the check is pulled
+    out of the run: `handbook/specs/settle-doctrine.md` item 11.
 11. **A run whose log has not moved in ten minutes is hung, not slow.** Before reporting "still
     running", check `ls -d /var/folders/*/*/T/vellum-e2e-* | wc -l` and
     `ps aux | grep '[r]emote-debugging-port'`; a starved machine stalls a lane you did not touch.

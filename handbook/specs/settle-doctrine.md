@@ -80,14 +80,19 @@ headless browser actually do, so a green run can be believed.
    flake.
 10. **Region-job settles scale with the runner.** 20s on CI where 6s passes locally; derive the
     factor from a measured worst case and date it at the constant.
-11. **Stop-gap for a flake biting a content-only PR (#526, 2026-09-07).** The check keeps taking
-    and logging its measurement but stops asserting, with the issue number at the line, until the
-    fix lands alone.
+11. **A filed flake issue pulls the flaky check out of the run (Alex, 2026-10-13, Issue #872).** Whoever
+    files the issue pulls the check out in the change they are making, with no ruling asked, the issue
+    number at the line and the issue left open as the restore: fixing the flake puts the check back. The
+    issue names each claim the check held and each proof row that named it, and those claims count as
+    unprotected until the check returns; no earlier deletion is undone. Until the harness can skip one
+    check (Issue #873), pulling it out means removing its step and function the way CD44 was (Issue #843),
+    the code kept in git history; once Issue #873 lands it is a skip instead. This replaces the
+    content-only stop-gap of #526, under which a flaky check kept measuring but stopped asserting.
 12. **A CI flake leaves a trail.** A PR comment with the payload and what to capture next; it is
     never silently re-run away (#546's CD7b). When a check's rows in
     `.claude/skills/vellum-footguns/references/flake-record.md` reach three with no issue open for
     it, raise it in the same reply and offer to file one, so recurring flakes become issues rather
-    than piling up as rows.
+    than piling up as rows; a filed issue takes item 11.
 13. **A stillness assertion in a fixture that crosses the ambient idle delay needs a tolerance sized
     to the drift, not an epsilon.** The home stage starts drifting on its own once it has been idle
     (`IDLE_DELAY_MS` and the drift constants in `src/site/home/drift.ts`), so a long fixture reads
