@@ -99,7 +99,7 @@ Scars: #49, #124, #270, #275, #295, #320, #353, #358, #360, #363, #380, #383, #3
 Scars: Issue #270, Issue #353, Issue #358, Issue #360, PR #380, PR #554, PR #631.
 
 Gate 1 binds here too. Whether the check belongs in a unit test at all is
-`handbook/specs/check-placement.md`'s.
+`handbook/specs/check-placement.md`'s. `npm test` fails a source read `SOURCE_READS` in `test-support/source-read-list.ts` does not name (Issue #779).
 
 1. **A hand-rolled reader is a guard's blind spot.** A CSS selector reader splits on TOP-LEVEL
     commas and tests the SUBJECT, the last compound; otherwise an `:is()` arm, an ancestor's

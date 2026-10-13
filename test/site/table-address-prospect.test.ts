@@ -1,13 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { TABLE_KEY, parseTable, emitTable, prospectItemFrom } from "../../src/site/shared/table-address.ts";
 import { layOnTable } from "../../src/site/explorer/chart-drawer.ts";
 import { chartTarget, ribbonTarget, yearHash } from "../../src/site/prospect/address.ts";
 import { SURVEY, PROSPECT, survey, prospect, hashOf } from "../../test-support/table-address-fixtures.ts";
-
-const REPO = resolve(import.meta.dirname, "..", "..");
 
 test("chartTarget carries the table home from the Prospect page (#401 ruling 7 depends on it; the Explorer's writer is Sub 2's half)", () => {
   const hash = `#seed=42&style=antique&${TABLE_KEY}=${SURVEY}&i=4&year=300`;
@@ -25,30 +21,6 @@ test("TP1 prospectItemFrom normalises the dress through plateDressFor, so the pl
   // The two styles that have no plate of their own: plateDressFor sends both to the antique plate, so the address says antique too.
   assert.equal(prospectItemFrom({ ...at, style: "topographic" })?.style, "antique");
   assert.equal(prospectItemFrom({ ...at, style: "nautical" })?.style, "antique");
-});
-
-test("TP2 both capture points reach prospectItemFrom; vellum/prospect-item-through-builder refuses a literal of their own (#522)", () => {
-  const strip = (p: string): string =>
-    readFileSync(resolve(REPO, p), "utf8")
-      .replace(/\/\*[\s\S]*?\*\//g, "")
-      .replace(/\/\/[^\n]*/g, "");
-  // The Explorer reaches the builder THROUGH `filingAt`, which also holds the mid-turn refusal (CT7); the page reaches it
-  // directly. Either route is fine, a third spelling is not.
-  assert.match(
-    strip("src/site/explorer/chart-drawer.ts").slice(
-      strip("src/site/explorer/chart-drawer.ts").indexOf("export function filingAt"),
-    ),
-    /\bprospectItemFrom\b/,
-    "filingAt no longer ends at the one builder, so the Explorer's door has a spelling of its own again",
-  );
-  for (const door of ["src/site/explorer/app.ts", "src/site/prospect/app.ts"]) {
-    const src = strip(door);
-    assert.match(
-      src,
-      /\b(prospectItemFrom|filingAt)\b/,
-      `${door} does not reach the one builder, so its spelling of a prospect can drift from the other door's`,
-    );
-  }
 });
 
 test("TP2b one plate filed twice is refused rather than seated twice, which is what the shared spelling buys (#522)", () => {

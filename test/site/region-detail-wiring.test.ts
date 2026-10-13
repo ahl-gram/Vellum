@@ -114,7 +114,7 @@ test("a chain cache held across jobs cannot move a byte: the same window redraws
   );
 });
 
-test("the worker's region job builds in the held chain cache (kept for Issue #779 part 2i: the cache is transparent to every byte, so only time could see it)", () => {
+test("the worker's region job builds in the held chain cache (kept at the close of Issue #779: the cache is transparent to every byte, so only time could see it)", () => {
   const worker = readFileSync(resolve(import.meta.dirname, "..", "..", "src/site/explorer/worker.ts"), "utf8");
   assert.ok(/chainCache: regionChainCache/.test(worker), "the worker no longer builds in the held chain cache");
 });

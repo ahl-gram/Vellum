@@ -1,6 +1,7 @@
 // The Print Room's bound atlas: composes the full atlas of the proof on the desk off-thread, lays it out as the hidden document Print and Download deliver, turns its plates onto the sheet and lists them on the slip (the Issue #494 ruling).
 import { runJob } from "../explorer/worker-client.ts";
 import { errorText } from "../shared/error-text.ts";
+import { atlasHeadMarkup } from "./atlas-head-markup.ts";
 import { plateFigure } from "./plate-markup.ts";
 import { contentsRows, plateCounts, plateLine, type PlateRef } from "./contents-markup.ts";
 import { plateAspect } from "./plate-aspect.ts";
@@ -157,11 +158,7 @@ function renderBoundAtlas(atlas: AtlasDocumentData): void {
   plates = new Map([hero, ...draughtings, ...themes, ...regions, ...prospects].map((b) => [b.plate.key, b]));
   const fig = (b: Bound, cls = ""): string => plateFigure(b.plate.href, b.plate.title, cls);
   const figs = (bs: Bound[]): string => bs.map((b) => fig(b)).join("\n");
-  atlasDiv.innerHTML = `<header class="atlas-head print-only">
-  <h1>${escapeXml(atlas.title)}</h1>
-  <p class="subtitle">${escapeXml(atlas.subtitle)}</p>
-  <p class="chartno">VELLUM · CHART № ${atlas.seed}</p>
-</header>
+  atlasDiv.innerHTML = `${atlasHeadMarkup(atlas)}
 ${fig(hero, "hero-plate print-only")}
 <section><h2>Other Draughtings</h2><div class="styles">${figs(draughtings)}</div></section>
 <section><h2>Thematic Surveys</h2><div class="themes">${figs(themes)}</div></section>

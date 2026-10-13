@@ -1,7 +1,5 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { FADING, SAY_FADE_MS, SAY_HOLD_MS, makeAnnouncer } from "../../src/site/shared/announce.ts";
 
 const fakePill = () => {
@@ -144,14 +142,4 @@ test("an empty line written mid-fade takes the fade off with it (#547 ruling 4)"
   f.say("");
   assert.equal(f.pill.has(FADING), false, "or the pill stays transparent for the next line");
   assert.equal(f.timers.waiting(), 0);
-});
-
-test("both rooms that announce on a status pill import the one announcer (#547 ruling 4; kept for Issue #779 part 2i: an import's name shows nowhere, and CD23 and CD54 read what each announces)", () => {
-  const REPO = resolve(import.meta.dirname, "..", "..");
-  for (const path of ["src/site/explorer/app.ts", "src/site/portfolio/app.ts"])
-    assert.match(
-      readFileSync(resolve(REPO, path), "utf8"),
-      /from "\.\.\/shared\/announce\.ts"/,
-      `${path} does not reach the shared announcer at all`,
-    );
 });

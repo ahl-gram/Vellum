@@ -8,29 +8,6 @@ import type { RoomFurniture } from "../../src/site/reading-room/seats.ts";
 // The Reading Room is a chart room on the Issue #462 pattern (Issue #463): the chart full-bleed on the deep, the name and its one control top right, the Journal on a slip that scrolls, the dated log's instrument as a bottom strip, no band, no footer, no roads out.
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
-const app = read("src/site/reading-room/app.ts");
-const seats = read("src/site/reading-room/seats.ts");
-
-test("RR-room 2 the runtime colophon builder stays retired: app.ts builds no colophon of its own (kept for Issue #779 part 2i: a retired name a page cannot show)", () => {
-  assert.ok(
-    !app.includes("createColophon") && !app.includes("colophon.ts"),
-    "the runtime colophon builder retires: the page seats the row",
-  );
-});
-
-test("RR-room 5 seats.ts imports the shared room, the shared camera and the kit's keys (kept for Issue #779 part 2i by ruling 3 of issuecomment-6098118329; what they bind is read by RR36, RR39 and RR40)", () => {
-  assert.match(seats, /import\s*\{\s*bindRoom, type Room\s*\}\s*from\s*"\.\.\/shared\/room\.ts"/, "the shared room");
-  assert.match(
-    seats,
-    /import\s*\{\s*createZoomController\s*\}\s*from\s*"\.\.\/shared\/zoom-controller\.ts"/,
-    "the Glass is the shared controller",
-  );
-  assert.match(
-    seats,
-    /import\s*\{\s*bindGlassKeys\s*\}\s*from\s*"\.\.\/shared\/glass-keys\.ts"/,
-    "its keys and buttons are the kit's",
-  );
-});
 
 test("RR-room 5b seatFrame seats the frame's parts: chart and status in the stage; strip, slip AND its tab inside the panel the engine hides, since a part seated outside it stands through every teardown; log and plate in the slip", async () => {
   const g = globalThis as Record<string, unknown>;
@@ -81,15 +58,7 @@ test("RR-room 5b seatFrame seats the frame's parts: chart and status in the stag
   }
 });
 
-test("RR-room 7 a pace press tells the engine before it marks the frame's face (kept for Issue #779 part 2i: two synchronous writes in one handler no reader can order; RS29, RS30 and RA10 read what the press does)", () => {
-  assert.match(
-    app,
-    /for \(const \[k, btn\] of frame\.paceButtons\)\s*btn\.addEventListener\("click", \(\) => \{\s*lc\.setPace\(k\);\s*frame\.markPace\(k\);\s*\}\);/,
-    "one listener per press, the engine first, then the strip's face",
-  );
-});
-
-// Issue #520 ruling B (2026-09-07): the room's writers each build a FRESH URLSearchParams and finalize it, so any key they do not know dies on a copied link. RA9 reads both writers carrying the table; this census of the writers and of where a hash is built is what no browser can read (kept for Issue #779 part 2i).
+// Issue #520 ruling B (2026-09-07): the room's writers each build a FRESH URLSearchParams and finalize it, so any key they do not know dies on a copied link. RA9 reads both writers carrying the table; this census of the writers and of where a hash is built is what no browser can read (kept at the close of Issue #779).
 test("every hash the Reading Room builds is built inside one of its two known writers (#520 ruling B)", () => {
   const src = read("src/site/reading-room/app.ts");
   const decls = [

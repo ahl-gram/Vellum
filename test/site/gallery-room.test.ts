@@ -1,14 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { GALLERY_PAGE_CSS, cardFigureHtml, galleryCards } from "../../src/cli/gallery.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 
 // The Gallery (Issue #464, ruled 2026-09-02 on the issue): twelve plates on the deep as twelve sheets, a chart room without a stage; the plates are the roads into their own worlds, the legend row the one gold road back to the Explorer.
-const REPO = resolve(import.meta.dirname, "..", "..");
-const page = readFileSync(resolve(REPO, "src/pages/gallery/index.astro"), "utf8");
 const css = GALLERY_PAGE_CSS;
 
 test("GR5 every plate is a road into its own world: the Explorer at the plate's seed, drawing the plate's own dress (antique, no legend), so the tip rides a real link (#289) and the plate opens the plate", () => {
@@ -34,15 +30,6 @@ test("GR5 every plate is a road into its own world: the Explorer at the plate's 
     renderMap(world, { style: "antique", widthPx: 900, legend: true }),
     plate,
     "the Explorer's default dress is a different drawing",
-  );
-});
-
-// The layout re-seats the desk slot, so the source order across slots never reaches the page, and the trail's rule overrides the base padding on every served Gallery (Issue #779 part 2f).
-test("GR1 the Gallery's source keeps the fog and the grid ahead of the corner and the legend", () => {
-  const order = ["<Fog />", '<div class="grid"', "<RoomFolio", '<nav class="legend"'].map((m) => page.indexOf(m));
-  assert.ok(
-    order.every((i, n) => i >= 0 && (n === 0 || i > order[n - 1]!)),
-    `fog, grid, folio, legend: ${order.join(",")}`,
   );
 });
 

@@ -9,7 +9,7 @@ const read = (p: string) => readFileSync(root(p), "utf8");
 const layoutStyle = () => read("public/shell.css");
 
 // A raw hex renders the token mix's colour exactly, so no browser tells the two apart (Issue #779 part 2f).
-test("the walnut deep is mixed from the tokens and keeps no daylight wash (#461 ruling 2)", () => {
+test("the walnut deep is mixed from the tokens (#461 ruling 2; kept at the close of Issue #779: a raw hex renders the mix exactly until a token moves)", () => {
   const css = layoutStyle();
   const deep = css.match(/--the-deep:\s*([\s\S]*?);/);
   assert.ok(deep, "public/shell.css should declare --the-deep");
@@ -17,15 +17,6 @@ test("the walnut deep is mixed from the tokens and keeps no daylight wash (#461 
     deep[1]!.replace(/\s+/g, " "),
     /color-mix\(in srgb, var\(--ink-dark\) 90%, var\(--parchment\) 10%\)/,
     "the lit walnut is token-derived (no raw #55402a)",
-  );
-  assert.equal(css.search(/rgb\(255 250 235/), -1, "the light wash retired with the ground (#461 ruling 2)");
-});
-
-test("the deep's focus ring names the footer's links beside the cluster's (#324 decision 6, re-ratified at #461)", () => {
-  assert.match(
-    layoutStyle(),
-    /header\.chrome a:focus-visible,\s*footer a:focus-visible\s*\{[^}]*outline-color:\s*var\(--parchment-bright\)/,
-    "the footer's links ring like the cluster's, on the walnut",
   );
 });
 

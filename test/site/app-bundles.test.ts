@@ -28,16 +28,6 @@ test("the hand-coded public/ shells retired with the re-shell (#254): routes and
   }
 });
 
-test("the retired spawn target stays retired; vellum/worker-spawn-static holds the spawn's form (#208, TS source since #260)", () => {
-  const ts = read("src/site/explorer/worker-client.ts");
-  assert.doesNotMatch(ts, /workerUrl/, "the parameterized spawn target retired with the twin arrangement");
-  assert.doesNotMatch(
-    read("src/site/print-room/app.ts"),
-    /initWorker\("/,
-    "the Print Room no longer passes a spawn URL",
-  );
-});
-
 test("the press bundles from the src/site TypeScript entries (#260)", async () => {
   const { BUNDLE_ENTRIES } = await import("../../scripts/build-app-bundles.ts");
   assert.deepEqual(

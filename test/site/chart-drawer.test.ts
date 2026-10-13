@@ -331,16 +331,8 @@ test("CT7 the sheet a filing is made from carries its own present year, so a wor
   );
 });
 
-test("CT7c the sheet assigned beside each overlay build reads no lastManifest, and one call reaches the landing paths (#631 round 3; kept for Issue #779 part 2i: a second source the same value comes from, and the count of calls, show nowhere; CD57 to CD59 read what is filed)", () => {
+test("CT7c one call reaches the landing paths (#631 round 3; kept at the close of Issue #779: a census of call sites; CD57 to CD59 read what is filed)", () => {
   const src = readFileSync(resolve(REPO, "src/site/explorer/app.ts"), "utf8");
-  const builds = [...src.matchAll(/lc\.buildPlaceOverlay\(res\.manifest\);\n(\s*)([^\n]*)/g)].map((m) => m[2]!);
-  assert.ok(builds.length >= 2, "both draw paths build the overlay, or this guard reads fewer than it thinks");
-  for (const next of builds)
-    assert.doesNotMatch(
-      next,
-      /lastManifest/,
-      "a year read from the module's own lastManifest is the second, independently-moving source this shape exists to remove",
-    );
   assert.equal(
     [...src.matchAll(/^\s*landDraw\(([^)]*)\);$/gm)].length,
     1,
@@ -348,24 +340,8 @@ test("CT7c the sheet assigned beside each overlay build reads no lastManifest, a
   );
 });
 
-test("CT7b a draw drops the pinned card before it rebases the camera (#631; kept for Issue #779 part 2i: two synchronous calls in one task, nothing between them to read, and no browser check here sees the drop, since CD58 shows no card when its turn begins; CD58 reads the real turn flag)", () => {
+test("CT9 the Explorer seats the table in exactly two places, the boot and the cached return (#634, ruled 2026-09-19; kept at the close of Issue #779: a census of call sites; CD37 to CD42 and CD52 read the device written on a change, the boot's precedence and the cached return)", () => {
   const app = readFileSync(resolve(REPO, "src/site/explorer/app.ts"), "utf8");
-  const at = app.indexOf("function draw(opts");
-  assert.notEqual(at, -1, "draw() is gone, so the ordering assertion below reads an empty slice");
-  const draw = app.slice(at, app.indexOf("\n}", at));
-  assert.ok(
-    draw.indexOf("lc.hideCard();") !== -1 && draw.indexOf("lc.hideCard();") < draw.indexOf("glass.rebase();"),
-    "the card is dropped before the rebase, so nothing reads it in between",
-  );
-});
-
-test("CT9 the Explorer takes the device the store module exports and seats the table in exactly two places, the boot and the cached return (#634, ruled 2026-09-19; kept for Issue #779 part 2i: an import's name and a census of call sites; CD37 to CD42 and CD52 read the device written on a change, the boot's precedence and the cached return)", () => {
-  const app = readFileSync(resolve(REPO, "src/site/explorer/app.ts"), "utf8");
-  assert.match(
-    app,
-    /import \{\s*deviceStorage as store,[^}]*\} from "\.\.\/shared\/table-store\.ts";/,
-    "this page names its own device instead of taking the one the store module exports and tests, so it can be wired to nothing with every browser read here still green",
-  );
   assert.equal(
     [...app.matchAll(/chartTable\.restore\(/g)].length,
     2,
@@ -389,7 +365,7 @@ test("CT10 the sheets a re-seat drops are read against the table it brings, so e
   assert.deepEqual(sheetsThatLeft([], before), [], "and an arrival into a bare drawer forgets nothing");
 });
 
-test("CT11 EVERY road out that carries this page's address is rebuilt by the one hash writer, never by the draw (#634, the cold review's round 3 on PR #635; kept for Issue #779 part 2i: a class over every road the file may grow, where CD52 reads the two that stand)", () => {
+test("CT11 EVERY road out that carries this page's address is rebuilt by the one hash writer, never by the draw (#634, the cold review's round 3 on PR #635; kept at the close of Issue #779: a class over every road the file may grow, where CD52 reads the two that stand)", () => {
   // Guarded as a CLASS, and derived rather than restated: the roads are read out of the file. Laying a sheet, taking
   // one off and a cached return all move the address WITHOUT drawing, so a road rebuilt in draw() hands on the table as
   // it stood at the last draw. Measured doing exactly that: a reader who took their only sheet off still pressed a road

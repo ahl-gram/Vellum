@@ -23,6 +23,6 @@ const topLevel = css.replace(/@media[^{]*\{[\s\S]*?\n\}/g, "");
 
 test("the stage never yields its lettering to a drag: user-select none on the whole stage, so a pip drag selects nothing (#480, screenshot 4)", () => {
   const stage = rule(topLevel, ".landfall .stage");
-  assert.match(stage, /user-select:\s*none/, "the stage opts its lettering out of selection");
+  assert.match(stage, /(?<![-\w])user-select:\s*none/, "the stage opts its lettering out of selection");
   assert.match(stage, /-webkit-user-select:\s*none/, "iOS Safari reads the prefixed form");
 });

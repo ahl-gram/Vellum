@@ -72,12 +72,22 @@ belongs in.
   harmless rewrite moves it, and over CSS passes on a declaration that is present and loses
   (`handbook/specs/cascade-traps.md`).
 - **A test may read a file as DATA where the file is the thing under test**: a built page, a generated
-  chart, a config the house reads (`eslint.config.ts`, a workflow), or a stylesheet value the
-  code's own arithmetic must match (the Glass's seat beside the slip in `test/site/room.test.ts`).
-  The test checks what the file holds: a value against the code that must agree with it, or a config's
-  shape. Finding the anchor first (`vellum-footguns` Gate 1) is part of reading the file, not the check,
-  and how such a reader goes blind is `vellum-footguns` Gate 7's.
-- Existing tests that search source text move under this rule as each one is touched.
+  file (a chart, a face table), a config the house reads (`eslint.config.ts`, a workflow), or a
+  stylesheet value the code's own arithmetic must match (the Glass's seat beside the slip in
+  `test/site/room.test.ts`). The test checks what the file holds: a value against the code that must
+  agree with it, or a config's shape. Finding the anchor first (`vellum-footguns` Gate 1) is part of
+  reading the file, not the check, and how such a reader goes blind is `vellum-footguns` Gate 7's.
+- **A lint rule's witness may read the source the rule keys on**, to show the rule still has
+  something to hold where the rule cannot say so itself.
+- **`npm test` checks both rules file by file.** `test-support/source-read-guard.ts` fails a test
+  file that reads a source file (TypeScript under `src/`, `e2e/` or `scripts/`, a page, a stylesheet
+  under `public/`) unless `SOURCE_READS` in `test-support/source-read-list.ts` names the read, or a
+  folder holding it, for that file, and fails an entry the file no longer reads. A data read or a
+  witness joins the list with its kind. The tests kept when Issue #779 closed, each guarding what no
+  instrument here reaches, carry the kind `kept`: one leaves the list when it moves to a lint rule or
+  a browser check, and none joins it. The guard cannot tell a new read in a listed file from the
+  listed one, nor see a read that code under `src/`, `scripts/` or `e2e/` makes for the test; review
+  holds those.
 
 ## The browser lanes and a plate read
 

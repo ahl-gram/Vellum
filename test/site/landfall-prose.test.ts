@@ -52,28 +52,3 @@ test("every pip's at-sea dress is earned from the terrain, not asserted by hand 
     );
   }
 });
-
-// No reader of the page sees code shape, and no link stands inside the stage for the tap guard's `a` arm to answer (Issue #779 part 2f).
-test("input.ts carries no card guard, the slip's wheel handler opens on its scroller lookup, and the stage's tap guard spares links beside buttons (#459 skeptic rounds 1 and 2, reshaped at #470)", () => {
-  const input = read("src/site/home/input.ts");
-  const cards = read("src/site/home/cards.ts");
-  assert.ok(
-    !input.includes("lf-card"),
-    "input.ts carries no card guard: the slips left the stage, and dead code that LOOKS like a guard is worse than none",
-  );
-  const at = cards.indexOf('"wheel"');
-  assert.ok(at >= 0, "the wheel binding exists");
-  const next = cards.indexOf("addEventListener", at);
-  const wheel = next === -1 ? cards.slice(at) : cards.slice(at, next);
-  const wheelBody = wheel.slice(wheel.indexOf("{", wheel.indexOf("=>")) + 1);
-  assert.match(
-    wheelBody.trimStart(),
-    /^const scroller =/,
-    "the handler's FIRST statement is the scroller lookup: an unconditional bail above it would leave every check below as dead text these pins still match (guard-prover round 4 hole)",
-  );
-  assert.match(
-    cards,
-    /if \(e\.target instanceof Element && e\.target\.closest\("button, a"\) !== null\) return;/,
-    "the stage's tap-to-close guard spares links as well as buttons inside the stage",
-  );
-});

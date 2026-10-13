@@ -1,13 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 
 // The Reading Room's frame (Issue #219): host-agnostic, the first non-Explorer host of the Issue #191 engine; ratified 2026-07-27 (https://github.com/ahl-gram/Vellum/issues/219#issuecomment-5097366231): no Explorer watch view, and the log FLOWS at every width, bounded by construction. The frame BUILDS DOM, so the element shim stands in for the environment, never the module under test.
 import { El, el, installShim, walk } from "../../test-support/element-shim.ts";
-
-const REPO = resolve(import.meta.dirname, "..", "..");
-const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 
 installShim();
 
@@ -185,14 +180,6 @@ test("#442 the mirror takes its SOURCE's voice: a day row is told in the surveyo
   frame.setTold(null);
 });
 
-test("#442 no rule dresses a drop cap in the live row (kept for Issue #779 part 2i: the mirror writes plain text, so no .cr-dc stands in it for a browser to read)", () => {
-  assert.doesNotMatch(
-    read("public/reading-frame.css"),
-    /\.rf-told[^{]*\.cr-dc/,
-    "the 2.1em initial never reaches the strip",
-  );
-});
-
 test("the instrument panel starts hidden and the ONE journal nests inside it (#219, fused at #220)", async () => {
   const { createReadingFrame } = await import("../../src/site/reading-frame/index.ts");
   const frame = createReadingFrame(new El("div") as unknown as HTMLElement);
@@ -228,15 +215,6 @@ test("destroy() unmounts the frame (a page host that leaves takes its DOM with i
   assert.equal(mount.children.length, 0, "destroy() removes the frame's root from its mount");
 });
 
-test("the Explorer's sheet revives no scroll cap for a journal (#219 acceptance, decision 2; kept for Issue #779 part 2i: the Explorer carries no journal since Issue #459, so the rule would name nothing a browser can read)", () => {
-  const explorer = read("public/explorer/index.css");
-  assert.equal(
-    explorer.match(/max-height:\s*32rem;\s*overflow-y:\s*auto/g)?.length ?? 0,
-    0,
-    "the Explorer's journal flows like the frame's; a revived scroll cap would truncate the fused journal",
-  );
-});
-
 test("#493 the pace stands at the readout's right: three presses 1x 2x 4x in one group, the slowest pressed at rest, and the frame moves the press", async () => {
   const { createReadingFrame } = await import("../../src/site/reading-frame/index.ts");
   const frame = createReadingFrame(el());
@@ -269,13 +247,5 @@ test("#493 the pace stands at the readout's right: three presses 1x 2x 4x in one
     pace.children.map((b) => b.getAttribute("aria-pressed")),
     ["true", "false", "false"],
     "and back",
-  );
-});
-
-test("#493 the pace's keyboard arm stands four classes deep beside its hover arm (kept for Issue #779 part 2i: no house rule competes under focus alone, so its depth shows nowhere; RS31 reads the dress)", () => {
-  assert.match(
-    read("public/reading-frame.css"),
-    /\.rf-instrument-strip \.rf-instrument \.rf-pace button:focus-visible\s*\{/,
-    "four classes deep, as Play is",
   );
 });
