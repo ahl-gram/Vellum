@@ -20,11 +20,14 @@
   height: 100dvh;
   overflow: hidden;
   cursor: grab;
-  touch-action: pan-y;
+  touch-action: manipulation;
   display: grid;
   place-items: center;
   user-select: none;
   -webkit-user-select: none;
+}
+.landfall .stage.zoomable {
+  touch-action: pan-y;
 }
 .landfall .stage.dragging {
   cursor: grabbing;
@@ -291,9 +294,7 @@ header.chrome::before {
   cursor: pointer;
 }
 /* Real hardware reads the touched element's touch-action, so a control defaulting to auto lets the browser claim a gesture starting there; CDP emulation cannot see this line, only a phone pass can. */
-.lf-station,
-.lf-legend-btn,
-#lf-controls button {
+.landfall .stage.zoomable :is(.lf-station, .lf-legend-btn, #lf-controls button) {
   touch-action: pan-y;
 }
 .lf-station-glyph {

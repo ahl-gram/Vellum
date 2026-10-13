@@ -8,6 +8,7 @@ export type StageInputHandlers = {
   readonly pinch: (px: number, py: number, ratio: number) => void;
   readonly dive: (px: number, py: number) => void;
   readonly key: (key: string) => boolean;
+  readonly takesTouch: () => boolean;
 };
 
 type Point = { x: number; y: number };
@@ -59,7 +60,13 @@ function stagePinch(pointers: ReadonlyMap<number, Point>, on: StageInputHandlers
   return { anchor, step, frame: (): number => frame, setFrame, setPinchStart, setMid };
 }
 
-function listenStage(stage: HTMLElement, on: StageInputHandlers, local: Local, onControl: (e: Event) => boolean): void {
+function listenStage(
+  stage: HTMLElement,
+  on: StageInputHandlers,
+  local: Local,
+  onControl: (e: Event) => boolean,
+  refuses: () => boolean,
+): void {
   stage.addEventListener(
     "wheel",
     (e) => {
@@ -70,7 +77,7 @@ function listenStage(stage: HTMLElement, on: StageInputHandlers, local: Local, o
   );
 
   stage.addEventListener("dblclick", (e) => {
-    if (onControl(e)) return;
+    if (onControl(e) || refuses()) return;
     const p = local(e);
     on.dive(p.x, p.y);
   });
@@ -80,14 +87,18 @@ function listenStage(stage: HTMLElement, on: StageInputHandlers, local: Local, o
   });
 }
 
-// Touch policy (Issue #455): one finger scrolls the page (touch-action: pan-y), two fingers drive the map, any mouse button pans.
+// Touch policy (Issue #455, Issue #778): while the stage takes touch one finger scrolls the page (touch-action: pan-y) and two fingers drive the map; otherwise every finger is the page's; any mouse button pans.
 export function bindStageInput(stage: HTMLElement, on: StageInputHandlers): void {
   const pointers = new Map<number, Point>();
   let last: Point | null = null;
+  let lastType = "";
+  const refuses = (): boolean => lastType === "touch" && !on.takesTouch();
   const { local } = stageLocal(stage);
   const { anchor, step, frame, setFrame, setPinchStart, setMid } = stagePinch(pointers, on, local);
 
   stage.addEventListener("pointerdown", (e) => {
+    lastType = e.pointerType;
+    if (e.pointerType === "touch" && !on.takesTouch()) return;
     if (e.pointerType === "mouse" && onControl(e)) return;
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (e.pointerType === "mouse") {
@@ -128,5 +139,5 @@ export function bindStageInput(stage: HTMLElement, on: StageInputHandlers): void
   stage.addEventListener("pointerup", end);
   stage.addEventListener("pointercancel", end);
 
-  listenStage(stage, on, local, onControl);
+  listenStage(stage, on, local, onControl, refuses);
 }
