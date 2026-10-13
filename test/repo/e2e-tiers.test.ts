@@ -289,7 +289,7 @@ test("ci.yml shards the unit suite across a matrix of 1 to N, and every leg runs
   );
 });
 
-test("every CI trigger gets the same full coverage, so nothing is conditional on the event", () => {
+test("every CI trigger gets the same full coverage, so no e2e step is conditional on the event", () => {
   const at = CI.indexOf("test:e2e:lanes");
   // slice(-1) is the file's LAST CHARACTER, not the whole file, so a missing anchor would leave both assertions below passing against nothing.
   assert.notEqual(at, -1, "the e2e step is gone, so this guard would be reading an empty slice");
