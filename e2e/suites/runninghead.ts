@@ -1,9 +1,7 @@
 // Running Head e2e (RH0-RH8, Issue #295; reshaped for the Issue #461 head cluster): the shell's masthead asserted by RESOLVED computed styles, because a rule that is present but LOSES the cascade passes every source-text test (Issue #288); self-contained, restores the Explorer base.
-import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
-import { resolve } from "node:path";
 import { dropExpectedCancellations } from "../support/console.ts";
 import { makeStep } from "../support/step.ts";
+import { atlasHeadMarkup } from "../../src/site/print-room/atlas-head-markup.ts";
 import type { SuiteContext } from "../types.ts";
 import { runningHeadKit } from "./runninghead/kit.ts";
 import type { RunningHeadKit } from "./runninghead/kit.ts";
@@ -35,14 +33,6 @@ import {
   rh20TextSize,
   rh24TrailInks,
 } from "./runninghead/shell.ts";
-
-// Reading the producer's own template couples the injected twin to it: rename the class or demote the heading in renderBoundAtlas and RH7 reds instead of drifting.
-const REPO = resolve(fileURLToPath(new URL(".", import.meta.url)), "..", "..");
-const boundAtlasEmitsAtlasHead = () => {
-  const src = readFileSync(resolve(REPO, "src/site/print-room/bound-atlas.ts"), "utf8");
-  const header = src.match(/<header class="atlas-head[^]*?<\/header>/);
-  return !!header && /<h1>/.test(header[0]);
-};
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { send, consoleErrors, http4xx } = ctx;
@@ -96,7 +86,6 @@ export async function run(ctx: SuiteContext): Promise<void> {
 
 async function rh7AtlasTitle({ evaluate, check, visit }: RunningHeadKit): Promise<void> {
   // .print-only is display:none on screen so no screenshot can reach this, but computed style resolves through display:none; a probe showed a bare h1 in the same container resolves to the BODY face, so the assertion discriminates.
-  const producerShape = boundAtlasEmitsAtlasHead();
   type AtlasRead = { family: string; size: number; hidden: boolean } | null;
   let atlas: AtlasRead = null;
   if (await visit("/print-room/")) {
@@ -104,9 +93,9 @@ async function rh7AtlasTitle({ evaluate, check, visit }: RunningHeadKit): Promis
       await evaluate<string>(`(() => {
       const d = document.getElementById("pr-atlas");
       if (!d) return JSON.stringify(null);
-      d.innerHTML = '<header class="atlas-head print-only">' +
-        '<h1>The Isle of Rahai</h1><p class="subtitle">An atlas</p><p class="chartno">VELLUM \\u00b7 CHART \\u2116 42</p></header>';
+      d.innerHTML = ${JSON.stringify(atlasHeadMarkup({ title: "The Isle of Rahai", subtitle: "An atlas", seed: 42 }))};
       const h1 = d.querySelector(".atlas-head h1");
+      if (!h1) return JSON.stringify(null);
       const cs = getComputedStyle(h1);
       return JSON.stringify({ family: cs.fontFamily, size: parseFloat(cs.fontSize),
         hidden: getComputedStyle(h1.parentElement).display === "none" });
@@ -114,9 +103,9 @@ async function rh7AtlasTitle({ evaluate, check, visit }: RunningHeadKit): Promis
     ) as AtlasRead;
   }
   check(
-    "RH7 the Print Room's bound-atlas title resolves to the display face (unreachable by any screenshot), and the producer still emits that markup",
-    producerShape && !!atlas && DISPLAY_FACE.test(atlas.family) && near(atlas.size, 35.2) && atlas.hidden,
-    `producer emits header.atlas-head > h1: ${producerShape}; injected twin: ${JSON.stringify(atlas)}`,
+    "RH7 the Print Room's bound-atlas title, written by the producer's own markup, resolves to the display face (unreachable by any screenshot)",
+    !!atlas && DISPLAY_FACE.test(atlas.family) && near(atlas.size, 35.2) && atlas.hidden,
+    `injected twin: ${JSON.stringify(atlas)}`,
   );
 }
 
