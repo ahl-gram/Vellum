@@ -5,8 +5,9 @@ import type { ZoomKit } from "./kit.ts";
 import { ZERO_NUDGE, ringAtRest, ringScale } from "./reads.ts";
 import type { Cam } from "./reads.ts";
 
-export async function zSetup({ evaluate, shoot, waitSettled, sleep }: SuiteContext): Promise<void> {
-  // Alone, this suite starts before the page's own boot draw (the Seed of the Day) has landed, and that draw lands after the click below and overwrites it, so the boot settles first and the draw below is waited for by its address.
+export async function zSetup({ evaluate, shoot, waitReady, waitSettled, sleep }: SuiteContext): Promise<void> {
+  // Alone, this suite starts before the page has committed (a CI runner's first evaluate reads an empty document) and before its own boot draw (the Seed of the Day) has landed, and that draw lands after the click below and overwrites it, so the boot is waited for first and the draw below by its address.
+  if (!(await waitReady())) throw new Error("zoom-boot: the Explorer never drew its boot chart");
   await waitSettled("zoom-boot");
   await evaluate(
     `(()=>{for(const id of ["ages"]){const c=document.getElementById(id);if(c.checked){c.checked=false;c.dispatchEvent(new Event("change",{bubbles:true}));}}document.getElementById("seed").value="42";document.getElementById("style").value="antique";document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("draw").click();})()`,
