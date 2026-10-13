@@ -7,6 +7,7 @@ import { BUDGET_SECONDS } from "../../scripts/proof-runner/list.ts";
 import { ciJob } from "../../test-support/ci-job.ts";
 
 const WORKFLOW = ".github/workflows/proof-runner.yml";
+const CI_WORKFLOW = ".github/workflows/ci.yml";
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const TEXT = readFileSync(join(ROOT, WORKFLOW), "utf8");
 const JOBS = ["plan", "prove", "ledger"] as const;
@@ -16,11 +17,16 @@ const DEPLOY_BUILD_JOBS = 1;
 // Setup before a job's first budget (two checkouts, the plan download, setup-node, a cold npm ci) took 15 to 25 s across run 38044238993's 16 prove jobs (2026-10-10), and each of a job's four budgeted commands (unit, lint, build, browser) may wait 5 s after its kill; two minutes holds both with room.
 const SETUP_MINUTES = 2;
 
+const uncommented = (workflow: string): string[] =>
+  readFileSync(join(ROOT, workflow), "utf8")
+    .split("\n")
+    .filter((l) => !l.trim().startsWith("#"));
+
 // A top-level block is a key at column 0, read to the next one. Blind spot, with its direction: a key written in flow style on one line (`on: [push]`) yields a block of one line, which the exact-lines assertions below read as a mismatch, so it errs toward a red.
-const topBlock = (key: string): string[] => {
-  const lines = TEXT.split("\n").filter((l) => !l.trim().startsWith("#"));
+const topBlock = (key: string, workflow = WORKFLOW): string[] => {
+  const lines = uncommented(workflow);
   const at = lines.findIndex((l) => l.startsWith(`${key}:`));
-  assert.notEqual(at, -1, `${WORKFLOW} has no top-level ${key}, so this reader is looking at the wrong shape`);
+  assert.notEqual(at, -1, `${workflow} has no top-level ${key}, so this reader is looking at the wrong shape`);
   const end = lines.findIndex((l, i) => i > at && /^\S/.test(l));
   return lines.slice(at, end === -1 ? lines.length : end).filter((l) => l.trim() !== "");
 };
@@ -61,6 +67,23 @@ test("proof runs queue one at a time, every waiting run kept rather than the def
     "  queue: max",
     "  cancel-in-progress: false",
   ]);
+});
+
+test("a newer push to a pull request cancels the CI run still going on its older head, while a push to main or a run started by hand takes a group of its own and is never cancelled or held (Issue #860)", () => {
+  assert.deepEqual(topBlock("concurrency", CI_WORKFLOW), [
+    "concurrency:",
+    "  group: ci-${{ github.event_name }}-${{ github.event.pull_request.number || github.run_id }}",
+    "  cancel-in-progress: ${{ github.event_name == 'pull_request' }}",
+  ]);
+});
+
+// Blind spot, with its direction: a quoted key (`"concurrency":`) or one inside a flow mapping slips past this sweep, a miss that lets a job-level block through; and an indented line of that key name that is no block (an env entry, a line in a run script) reads as a second one, a false red that errs toward the safe side.
+test("ci.yml sets concurrency once, for the whole workflow, so no job's own group can cancel or hold a run on main", () => {
+  assert.deepEqual(
+    uncommented(CI_WORKFLOW).filter((l) => /^\s*concurrency\s*:/.test(l)),
+    ["concurrency:"],
+    "ci.yml sets concurrency somewhere other than once at the top, so a job's own group can cancel or hold a run on main",
+  );
 });
 
 test("the prove matrix leaves room for a pull request's CI jobs and the deploy build inside the concurrent-job limit", () => {

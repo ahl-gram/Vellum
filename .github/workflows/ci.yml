@@ -6,6 +6,10 @@ on:
   pull_request:
   workflow_dispatch:
 
+concurrency:
+  group: ci-${{ github.event_name }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 # Independent jobs run in parallel: each check-and-test shard typechecks, lints, checks the format and runs its slice of the unit files without building, and each build-and-e2e job builds dist/ and runs one lane of E2E_LANES, all on runners of their own; a pull request waits for the longest job, not the sum, and every job runs on every trigger.
 jobs:
   check-and-test:
