@@ -38,6 +38,8 @@ test("isSource names code under src, e2e and scripts, the pages and the authored
     "test-support/element-shim.ts",
     "design/kit/fonts.css",
     "dist/index.html",
+    "public/page.astro",
+    "dist/index.astro",
   ];
   for (const rel of source) assert.equal(isSource(rel), true, `${rel} is source`);
   for (const rel of other) assert.equal(isSource(rel), false, `${rel} is not source`);
@@ -110,8 +112,8 @@ test("the verdict names every unlisted read, and in a whole run every entry no r
   assert.deepEqual(verdict(reads, ENTRIES, true).unused, [], "a filtered run cannot call an entry stale");
 });
 
-const CHILD_TIMEOUT_MS = 60_000;
 // A cap on a hang, never a budget (2026-10-13: a planted run took about 0.1 s on a Mac).
+const CHILD_TIMEOUT_MS = 60_000;
 
 interface Plant {
   readonly body: string;
@@ -168,7 +170,7 @@ const plantRun = (plant: Plant): Ran => {
 };
 
 const BLIND_SPOTS =
-  "BLIND SPOTS, declared, each erring toward a pass: a new source-text test in a listed file that reads a path its entries already cover (per file, not per test); a read a library or a repo module under src, scripts or e2e makes for the test, and a read by a child process; fs.openSync, fs.createReadStream and a descriptor; a run outside npm test or under --test-isolation=none; and two entries on one path, which cannot be told apart";
+  "BLIND SPOTS, declared, each erring toward a pass: a new source-text test in a listed file that reads a path its entries already cover (per file, not per test); a read a library or a repo module under src, scripts or e2e makes for the test, and a read by a child process; fs.openSync, fs.createReadStream and a descriptor, and a read reached through a Node built-in (promisify(fs.readFile), a timer handed readFileSync, a FileHandle, a copy of the file); a run outside npm test or under --test-isolation=none; and two entries on one path, which cannot be told apart";
 
 const verdictOf = (ran: Ran, status: 0 | 1, message: string): void => {
   assert.equal(ran.status, status, `${message}\n${ran.out}`);

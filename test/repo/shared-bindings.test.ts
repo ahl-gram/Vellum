@@ -33,7 +33,7 @@ const reported = async (lines: readonly string[], path: string): Promise<Array<[
 };
 
 const BLIND_SPOT =
-  "BLIND SPOTS, declared: a namespace import (import * as glass) and a re-export do not count as taking the binding, which errs toward a red; the use may stand anywhere in the file, which errs toward a pass";
+  "BLIND SPOTS, declared: a namespace import (import * as glass) and a re-export do not count as taking the binding, which errs toward a red; the use may stand anywhere in the file, and a use only in a type position (typeof), under void or in a local re-export still counts, which errs toward a pass";
 
 const PLANTS: ReadonlyArray<readonly [string, readonly string[], Array<[string, string]>]> = [
   [
