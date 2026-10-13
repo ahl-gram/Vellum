@@ -86,6 +86,9 @@ const PACE: Payload<Pace> = `(() => { const rgba = ${PAGE_RGBA}, g = document.qu
     return { x: r.left + r.width / 2, y: r.top + r.height / 2, hover: b.matches(":hover"), focus: b.matches(":focus-visible"), pressed: b.getAttribute("aria-pressed") === "true",
       t: cs.transform, size: [cs.width, cs.height], ground: rgba(cs.backgroundColor), ink: rgba(cs.color) }; }) }; })()`;
 
+const PACE_STILL: Payload<{ pressed: boolean[]; moving: number }> =
+  `(() => { const b = [...document.querySelectorAll(".rf-instrument .rf-pace button")]; return { pressed: b.map((x) => x.getAttribute("aria-pressed") === "true"), moving: b.reduce((n, x) => n + x.getAnimations().length, 0) }; })()`;
+
 const chosen = (p: Press): boolean =>
   p.pressed && nearRgba(p.ground, tokenRgba("--parchment")) && nearRgba(p.ink, tokenRgba("--ink-dark"));
 const washed = (p: Press): boolean =>
@@ -129,8 +132,10 @@ async function paceUnderHand({ evaluate, send, sleep }: InstrumentKit): Promise<
 }
 
 export async function rs31PaceDress(k: InstrumentKit): Promise<void> {
-  const { evaluate, send, check } = k;
+  const { evaluate, send, check, sleep } = k;
   try {
+    await evaluate(`document.querySelector('.rf-pace button[data-pace="1"]').click()`);
+    await makeSettle({ evaluate, sleep })(PACE_STILL, (d) => d.pressed[0] === true && d.moving === 0, "pace-at-1x");
     const r = await paceUnderHand(k);
     check(
       "RS31 the pace keeps the strip's dress against the house button skin: the group never flexes, each press the mockup's 1.9 by 1.6rem, the chosen one on parchment at rest, under the hand and under a keyboard's focus, the others ink on line-tan at rest (the control) and washed dark under a real hover and a real Tab",
