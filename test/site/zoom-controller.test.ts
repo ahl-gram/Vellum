@@ -1,6 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { zoomTransformToCss, constrainZoom, nextGlideTarget } from "../../src/site/shared/zoom-controller.ts";
+import {
+  zoomTransformToCss,
+  constrainZoom,
+  nextGlideTarget,
+  gestureAllowed,
+} from "../../src/site/shared/zoom-controller.ts";
 
 // The Glass (Issue #164): d3-zoom handles the gestures; the translate clamp mirrors d3-zoom's defaultConstrain (the sheet is the viewport, so the world extent IS the viewport extent), recomputed against a scale itself clamped to the extent. Live gestures are proven by e2e suite-zoom Z1-Z4.
 
@@ -50,4 +55,19 @@ test("nextGlideTarget clamps at both ends of the scaleExtent (#170)", () => {
   assert.equal(nextGlideTarget(8, 1.4, SCALE), 8);
   assert.equal(nextGlideTarget(1.2, 1 / 1.4, SCALE), 1);
   assert.equal(nextGlideTarget(1, 1 / 1.4, SCALE), 1);
+});
+
+test("with the chart not taking touch, a finger never starts a camera gesture, and neither does the mouse event a tap fires (Issue #778)", () => {
+  for (const type of ["touchstart", "touchmove", "touchend", "touchcancel", "mousedown", "dblclick"]) {
+    assert.equal(gestureAllowed({ type }, "touch", false), false, `${type} after a touch, press off`);
+    assert.equal(gestureAllowed({ type }, "touch", true), true, `${type} after a touch, press on`);
+  }
+  assert.equal(gestureAllowed({ type: "mousedown", button: 0 }, "mouse", false), true);
+  assert.equal(gestureAllowed({ type: "dblclick" }, "mouse", false), true);
+});
+
+test("otherwise the camera keeps d3-zoom's own filter: a ctrl-held wheel is a trackpad pinch and passes, a ctrl-held press and a second button are refused (Issue #778)", () => {
+  assert.equal(gestureAllowed({ type: "wheel", ctrlKey: true }, "touch", false), true);
+  assert.equal(gestureAllowed({ type: "mousedown", ctrlKey: true }, "mouse", true), false);
+  assert.equal(gestureAllowed({ type: "mousedown", button: 2 }, "mouse", true), false);
 });

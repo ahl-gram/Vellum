@@ -32,6 +32,18 @@ export function constrainZoom(
   return { x: t.x + k * dx, y: t.y + k * dy, k };
 }
 
+export interface GestureEventLike {
+  readonly type: string;
+  readonly ctrlKey?: boolean;
+  readonly button?: number;
+}
+
+export function gestureAllowed(e: GestureEventLike, lastPointer: string | null, touch: boolean): boolean {
+  void lastPointer;
+  void touch;
+  return (!e.ctrlKey || e.type === "wheel") && !e.button;
+}
+
 /** The absolute k a glide flies to; compounds against the PENDING target so hammering "+" lands factor^presses, clamped to scaleExtent. */
 export function nextGlideTarget(baseK: number, factor: number, scaleExtent: readonly [number, number]): number {
   return Math.max(scaleExtent[0], Math.min(scaleExtent[1], baseK * factor));
