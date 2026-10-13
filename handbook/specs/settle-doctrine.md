@@ -80,14 +80,20 @@ headless browser actually do, so a green run can be believed.
    flake.
 10. **Region-job settles scale with the runner.** 20s on CI where 6s passes locally; derive the
     factor from a measured worst case and date it at the constant.
-11. **Stop-gap for a flake biting a content-only PR (#526, 2026-09-07).** The check keeps taking
-    and logging its measurement but stops asserting, with the issue number at the line, until the
-    fix lands alone.
+11. **A filed flake issue pulls the flaky check out of the run (Alex, 2026-10-13, Issue #872).** It covers
+    every open flake issue, those filed before this rule included. Whoever files the issue pulls the check
+    out in the change they are making, with no ruling asked; a lane whose plan does not name the check's
+    file never edits it and hands the pull-out to the session that dispatched it. Until the harness can
+    skip one check (Issue #873), pulling it out means removing its step call and that call's import and
+    leaving its function in place, with a one-line comment at the function naming the issue; the issue
+    stays open as the restore, and fixing the flake puts the call back. The issue names each claim the
+    check held and each proof row that named it, and those claims count as unprotected until the check
+    returns; no earlier deletion is undone. Once Issue #873 lands it is a skip instead.
 12. **A CI flake leaves a trail.** A PR comment with the payload and what to capture next; it is
     never silently re-run away (#546's CD7b). When a check's rows in
     `.claude/skills/vellum-footguns/references/flake-record.md` reach three with no issue open for
     it, raise it in the same reply and offer to file one, so recurring flakes become issues rather
-    than piling up as rows.
+    than piling up as rows; a filed issue takes item 11.
 13. **A stillness assertion in a fixture that crosses the ambient idle delay needs a tolerance sized
     to the drift, not an epsilon.** The home stage starts drifting on its own once it has been idle
     (`IDLE_DELAY_MS` and the drift constants in `src/site/home/drift.ts`), so a long fixture reads

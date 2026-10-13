@@ -93,7 +93,7 @@ Noted 2026-09-16, overtaken before the move: shipped in PR #620 (merged 2026-09-
 
 ## Held, not declined
 
-The date-flake clause, that a hunt-suite red not reproducing locally is a date flake first since that suite runs the world today's UTC date seeds, is HELD: Alex's flake-record ruling freezes Gate 2 item 10 until he lifts it.
+The date-flake clause, that a hunt-suite red not reproducing locally is a date flake first since that suite runs the world today's UTC date seeds, is HELD: Alex's flake-record ruling freezes this clause of Gate 2 item 10 until he lifts it; the pointer to the pull-out rule in that item is Issue #872's, ruled by Alex.
 
 ## Closed out here, no promotion owed
 
