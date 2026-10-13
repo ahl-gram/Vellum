@@ -339,9 +339,8 @@ precisely, because a token that falls outside it looks identical at the point of
   cancelled that way.** A push to `main` and a run started by hand each take a concurrency group of
   their own, so every merge's own run finishes and none waits behind another; the `concurrency`
   block in `.github/workflows/ci.yml` holds this and `test/repo/proof-runner-workflow.test.ts` pins
-  it. Merging reads only the newest run on the final head. A lane that needs a second complete run
-  of one head, to re-measure `MEASURED_SECONDS`, starts one with
-  `gh workflow run ci.yml --ref <branch>`, which no newer push cancels.
+  it. A run started by hand is a second full run of one commit, useful for re-timing, and it does
+  not replace the pull request's own run in the commit's check list, which is what merging reads.
 - **Required checks are matched by JOB NAME, and that roster lives outside the tree.** Renaming a job
   in the workflow looks cosmetic and blocks EVERY merge, because the required context never reports
   again until branch protection is updated to match; ADDING a job that ought to be required is the
