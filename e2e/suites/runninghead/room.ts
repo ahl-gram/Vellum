@@ -324,7 +324,7 @@ function roadFaults(route: string, s: KitSample | undefined): string[] {
 
 export function rh32Kit(check: SuiteContext["check"], kits: Record<string, KitSample | undefined>): void {
   const wrong: string[] = [];
-  for (const route of FOG_ROOMS) wrong.push(...fogFaults(route, kits[route]));
+  for (const route of ["/", ...FOG_ROOMS]) wrong.push(...fogFaults(route, kits[route]));
   for (const route of CHART_ROOMS)
     wrong.push(...vignetteFaults(route, kits[route]), ...folioFaults(route, kits[route]));
   for (const route of [...CHART_ROOMS, "/"]) wrong.push(...glassFaults(route, kits[route]));
