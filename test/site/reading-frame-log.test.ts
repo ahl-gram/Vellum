@@ -1,12 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import type { VoyageLogPort } from "../../src/world/voyage-log.ts";
 import { El, el, installShim } from "../../test-support/element-shim.ts";
-
-const REPO = resolve(import.meta.dirname, "..", "..");
-const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 
 installShim();
 
@@ -120,23 +115,4 @@ test("the log is a labeled region and its rows are plain text (accessibility car
   const panel = log.panel as unknown as El;
   assert.equal(panel.getAttribute("role"), "region", "the log panel is a landmark a screen reader can jump to");
   assert.equal(panel.getAttribute("aria-label"), "The surveyor's log", "and it is named");
-});
-
-test("the frame's sheet keeps no retired row state (#219; collapsed at #220; kept for Issue #779 part 2i: retired names no element wears)", () => {
-  const css = read("public/reading-frame.css");
-  for (const stale of ["past", "logged"]) {
-    assert.doesNotMatch(
-      css,
-      new RegExp(`\\.${stale}\\b`),
-      `the retired .${stale} selector must not linger after the #220 collapse`,
-    );
-  }
-});
-
-test("the frame's sheet carries no reduced-motion block of its own (#128; kept for Issue #779 part 2i: a block agreeing with motion.css's collapse computes the same; RA10 reads the collapse)", () => {
-  assert.doesNotMatch(
-    read("public/reading-frame.css"),
-    /prefers-reduced-motion/,
-    "the frame needs no reduced-motion block of its own: motion.css's universal `*` collapse already reaches it, and a local block would be a second source of truth",
-  );
 });

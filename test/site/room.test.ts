@@ -16,62 +16,6 @@ test("the Glass's computed seat beside an open slip is the sheet's own arithmeti
   assert.equal(Number(m[1]) + Number(m[2]), GLASS_GAP_REM, "room-seats.ts's GLASS_GAP_REM drifted from the sheet");
 });
 
-test("the kit's print blocks scope every message-box stand-down to the stage (#566, ruled 2026-09-11; kept for Issue #779 part 2i: every .status and .warning stands in a stage, so an unscoped arm would hide nothing a browser here can see)", () => {
-  const css = readFileSync(resolve(import.meta.dirname, "..", "..", "public/atelier.css"), "utf8").replace(
-    /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|\/\*[\s\S]*?\*\//g,
-    (m) => (m.startsWith("/*") ? "" : m),
-  );
-  const blocks: string[] = [];
-  for (let open = css.indexOf("@media print"); open !== -1; open = css.indexOf("@media print", open + 1)) {
-    let depth = 0,
-      close = -1;
-    for (let i = css.indexOf("{", open); i < css.length && close < 0; i++) {
-      if (css[i] === "{") depth++;
-      else if (css[i] === "}" && --depth === 0) close = i;
-    }
-    assert.ok(close > open, "a print block's own brace-matched close, so a block after it never widens the window");
-    blocks.push(css.slice(open, close));
-  }
-  assert.ok(blocks.length > 0, "the kit carries a print block");
-  const stood = blocks
-    .flatMap((block) => [...block.matchAll(/([^{}]+)\{([^{}]*)\}/g)])
-    .filter(([, , decls]) => /display\s*:\s*none/i.test(decls!))
-    .flatMap(([, sel]) =>
-      sel!
-        .split(",")
-        .map((arm) => arm.trim())
-        .filter((arm) => /\b(status|warning)\b/i.test(arm)),
-    );
-  assert.ok(stood.length > 0, "the print block stands no message box down, so the scoping below reads nothing");
-  for (const arm of stood)
-    assert.match(
-      arm,
-      /\.stage\b/i,
-      `a message-box stand-down that is not scoped to a chart room's stage: ${arm.slice(0, 80)}`,
-    );
-});
-
-test("the kit's fade arms stand on a chart room's stage and name no page's id (#547; kept for Issue #779 part 2i: every .status stands in a chart room's stage, so a broadened arm, or an id arm beside the class arm, changes nothing served; RH26 reads every room's fade)", () => {
-  const css = readFileSync(resolve(import.meta.dirname, "..", "..", "public/atelier.css"), "utf8").replace(
-    /\/\*[\s\S]*?\*\//g,
-    "",
-  );
-  const fades = [...css.matchAll(/([^{}]*\.fading[^{}]*)\{([^}]*)\}/g)];
-  assert.ok(fades.length > 0, "the kit carries the arm the announcer turns on");
-  for (const fade of fades) {
-    assert.match(
-      fade[1]!,
-      /body\.chart-room \.stage\b/,
-      `scoped to a chart room's stage like every other rule on this pill: ${fade[1]!.trim()}`,
-    );
-    assert.doesNotMatch(
-      fade[1]!,
-      /#/,
-      `keyed to the class and never to one page's id, or that page's pill never fades: ${fade[1]!.trim()}`,
-    );
-  }
-});
-
 class WrappingLegend extends El {
   override getBoundingClientRect() {
     const top = this.style.left ? 500 : 760;

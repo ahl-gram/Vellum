@@ -96,7 +96,7 @@ test("TS4 a BACK or FORWARD arrival takes the device's table over the stale addr
 test("TS5 a back arrival with NOTHING on the device still takes the address it landed on (#634)", () => {
   const carried = fill(1);
   assert.equal(emitTable(tableOnArrival(carried, null, "back_forward")), emitTable(carried));
-  // The case the cold review on PR #635 found shipped as a total loss: the two restore paths hand-rolled this rule without its qualifier, so a reader whose device holds nothing had the drawer EMPTIED by the gesture meant to keep it. Driven here at the rule, whose hosts are pinned to it by name in chart-drawer.test.ts and prospect-room.test.ts.
+  // The case the cold review on PR #635 found shipped as a total loss: the two restore paths hand-rolled this rule without its qualifier, so a reader whose device holds nothing had the drawer EMPTIED by the gesture meant to keep it. Driven here at the rule.
   assert.equal(
     tableOnArrival(carried, null, TRAVERSAL).length,
     1,

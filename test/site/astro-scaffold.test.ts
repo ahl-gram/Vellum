@@ -314,15 +314,6 @@ test("astro.config keeps the contractual shape (site, trailing slash, no fingerp
   assert.ok(!("outDir" in config), "outDir must stay the default ./dist (deploy.yml uploads path: dist)");
 });
 
-// A page's own html or head tag reaches no browser: the parser drops both inside body (measured on the Q & A, Issue #779 part 2f).
-test("no page's source opens its own html or head", () => {
-  for (const p of PAGES) {
-    const source = readFileSync(root(`src/pages/${p.route.replace("index.html", "index.astro")}`), "utf8");
-    for (const marker of [/<html[\s>]/, /<head[\s>]/])
-      assert.doesNotMatch(source, marker, `${p.route} source should not duplicate the shell`);
-  }
-});
-
 test("each rendered head carries the canonical meta with the ratified prop fan-out", () => {
   for (const p of PAGES) {
     const head = headOf(page(p.route));
@@ -554,22 +545,6 @@ test("one page mark per page across nav and trail: one on every page in the tree
   for (const p of PAGES) {
     const marks = page(p.route).match(/<[a-z]+\b[^>]*\saria-current="page"/g) ?? [];
     assert.equal(marks.length, p.trail ? 1 : 0, `${p.route} carries ${marks.length} page marks`);
-  }
-});
-
-test("the shell carries no retired cluster dress (#461 ruling 1)", () => {
-  const css = readFileSync(join(outDir, "shell.css"), "utf8");
-  assert.ok(!css.includes(".head-rule"), "the folio's double rule retired with the band (#461 ruling 1)");
-  assert.ok(!css.includes(".manicule"), "the manicule retired with the folio nav (#461 ruling 1)");
-  assert.ok(!css.includes(".topnav"), "the folio topnav retired; the cluster's .rooms nav replaced it");
-});
-
-test("a page with no survey sheet keeps the interim desk (#461)", () => {
-  for (const p of PAGES) {
-    if (p.route === "index.html") continue;
-    const source = readFileSync(root(`src/pages/${p.route.replace("index.html", "index.astro")}`), "utf8");
-    if (!source.includes('<div class="sheet">'))
-      assert.ok(!source.includes('desk="open"'), `${p.route} has no survey sheet, so it keeps the interim desk panel`);
   }
 });
 

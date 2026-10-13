@@ -74,7 +74,7 @@ const addr = parseProspectAddress(location.hash);
 // A bare visit lands on today's seed-of-the-day (UTC) and its capital, the same default world as every other surface.
 const seed = (addr.seed ?? seedForDate(new Date())) >>> 0;
 const dress = plateDressFor(addr.style ?? "antique");
-// ONE object for the job and for the filed item: two copies of this literal is how the page and the card come to spell one plate two ways, which is what TP2's single builder exists to prevent and what a divergent INPUT to it would defeat.
+// ONE object for the job and for the filed item: two copies of this literal is how the page and the card come to spell one plate two ways, which is what the one builder, `prospectItemFrom` in `src/site/shared/table-address.ts`, exists to prevent and what a divergent INPUT to it would defeat.
 const overrides: TableOverrides = {
   ...(addr.type ? { mapType: addr.type } : {}),
   ...(addr.band ? { band: addr.band } : {}),

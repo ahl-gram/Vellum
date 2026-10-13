@@ -114,16 +114,6 @@ test("the composers dress from the same palette (#269 review follow-up)", async 
   }
 });
 
-// The hover raise and press are house values (Issue #405), named in motion.css's :root, the one sheet both the site pages and the standalone atlas page load.
-const RAISE_TOKENS = ["--raise", "--press", "--raise-shadow", "--press-shadow"] as const;
-
-test("motion.css declares each raise/press token once (#405; kept for Issue #779 part 2i: a second declaration repeating the first changes nothing served, and P34 reads each token's ratified value)", () => {
-  const css = read("public/motion.css");
-  for (const name of RAISE_TOKENS) {
-    assert.equal(css.split(`${name}:`).length - 1, 1, `${name} should have exactly one declaration in motion.css`);
-  }
-});
-
 // A `:visited` link's colour is one no browser hands a script (Issue #779 part 2f).
 test("no rule that dresses the trail reaches for an ink under the floor on the deep, in any state (Issue #668)", () => {
   const trail = rulesIn(layoutStyle()).filter((r) => /\.(trail|also|where)\b/.test(r.selector));

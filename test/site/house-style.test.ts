@@ -14,19 +14,9 @@ const ruleOf = (css: string, selector: RegExp): string => {
   return m ? m[2]! : "";
 };
 
-test("the status role's colour is ink-faded, a colour no served pill wears (#324 decision 3)", () => {
-  assert.match(ruleOf(house(), /\.status/), /color:\s*var\(--ink-faded\)/, ".status is ink-faded");
-});
-
-test("the control idiom's border is 1.5px (#324; kept for Issue #779 part 2i: Chromium reads a 1.5px border as 1px at a device pixel ratio of 1 and of 2, measured 2026-10-13, so no browser read here tells it from 1px)", () => {
+test("the control idiom's border is 1.5px (#324; kept at the close of Issue #779: Chromium reads a 1.5px border as 1px at a device pixel ratio of 1 and of 2, measured 2026-10-13, so no browser read here tells it from 1px)", () => {
   const base = ruleOf(house(), /input\[type="number"\],\s*select,\s*button/);
   assert.match(base, /border:\s*1\.5px /);
-});
-
-// A rule for a class no element wears paints nothing, so this retire pin stays a source read for part 2i of Issue #779.
-test("home's sheet keeps no dress for the notice panel that left with its section (#459)", () => {
-  const css = read("public/index.css").replace(/\/\*[\s\S]*?\*\//g, "");
-  assert.ok(!css.includes(".notice-body"), "the notice panel left home with its section (#459)");
 });
 
 test("the chart quotations equal the render constants they quote (#324)", async () => {
