@@ -77,7 +77,7 @@ test("a newer push to a pull request cancels the CI run still going on its older
   ]);
 });
 
-// Blind spot, with its direction: a quoted key (`"concurrency":`) or one inside a flow mapping slips past this sweep, a miss and never a false red.
+// Blind spot, with its direction: a quoted key (`"concurrency":`) or one inside a flow mapping slips past this sweep, a miss that lets a job-level block through; and an indented line of that key name that is no block (an env entry, a line in a run script) reads as a second one, a false red that errs toward the safe side.
 test("ci.yml sets concurrency once, for the whole workflow, so no job's own group can cancel or hold a run on main", () => {
   assert.deepEqual(
     uncommented(CI_WORKFLOW).filter((l) => /^\s*concurrency\s*:/.test(l)),
