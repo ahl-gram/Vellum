@@ -1,4 +1,6 @@
 // Issue #270 the Broadside's footnote apparatus: a period mark (<a class="fn">) opens a marginalia note through the native popover API and follows through to the term's /glossary/ anchor; fine pointers get hover/focus + click-through, touch gets the ratified tap-toggle instead of navigation.
+import { TOUCH_PRIMARY } from "../shared/chart-touch.ts";
+
 interface NotePair {
   mark: HTMLAnchorElement;
   note: HTMLElement;
@@ -34,7 +36,7 @@ function place(mark: HTMLElement, noteEl: HTMLElement): void {
 export function wireFootnotes(): void {
   if (!("showPopover" in HTMLElement.prototype)) return;
   // Touch-primary means hover:none AND pointer:coarse: a bare (hover: none) over-matches environments with NO pointer at all (linux headless CI reports hover:none with pointer:none), muting the focus path where a keyboard user needs it (e2e BR4/BR5); queried at event time so a device-mode flip (or the e2e's emulation) is honored without a reload.
-  const touchPrimary = (): boolean => window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+  const touchPrimary = (): boolean => window.matchMedia(TOUCH_PRIMARY).matches;
   for (const { mark, note } of pairs()) {
     const show = (): void => {
       if (note.matches(":popover-open")) return;
