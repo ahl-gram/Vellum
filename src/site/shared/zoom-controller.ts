@@ -39,8 +39,9 @@ export interface GestureEventLike {
 }
 
 export function gestureAllowed(e: GestureEventLike, lastPointer: string | null, touch: boolean): boolean {
-  void lastPointer;
-  void touch;
+  const fromTouch =
+    e.type.startsWith("touch") || ((e.type === "mousedown" || e.type === "dblclick") && lastPointer === "touch");
+  if (fromTouch && !touch) return false;
   return (!e.ctrlKey || e.type === "wheel") && !e.button;
 }
 
@@ -72,6 +73,7 @@ export interface ZoomController {
   glideHome(onDone?: () => void): void;
   panBy(dxScreen: number, dyScreen: number): void;
   getState(): ZoomState;
+  takeTouch(on: boolean): void;
 }
 
 // d3-zoom stashes the live transform on the element itself as `__zoom`; typed so getState/rebase read and write it through one cast.
@@ -229,6 +231,39 @@ function zoomGlide(
   return { glideTo, glideBy, glideTargetK: () => glideTargetK, setGlideTargetK };
 }
 
+const TOUCH_EVENTS = "touchstart.zoom touchmove.zoom touchend.zoom touchcancel.zoom";
+
+function zoomTouch(viewportEl: HTMLElement, sel: Sel, behavior: Behavior) {
+  let touch = true;
+  let attached = false;
+  let lastPointer: string | null = null;
+  const note = (e: PointerEvent): void => {
+    lastPointer = e.pointerType;
+  };
+  behavior.touchable(function (this: HTMLElement) {
+    return touch && (navigator.maxTouchPoints > 0 || "ontouchstart" in this);
+  });
+  behavior.filter((e: GestureEventLike) => gestureAllowed(e, lastPointer, touch));
+  return {
+    watch(): void {
+      attached = true;
+      viewportEl.addEventListener("pointerdown", note, { capture: true, passive: true });
+      viewportEl.classList.toggle("zoomable", touch);
+    },
+    unwatch(): void {
+      attached = false;
+      viewportEl.removeEventListener("pointerdown", note, { capture: true });
+    },
+    take: (next: boolean): void => {
+      touch = next;
+      if (!attached) return;
+      viewportEl.classList.toggle("zoomable", next);
+      if (next) sel().call(behavior);
+      else sel().on(TOUCH_EVENTS, null);
+    },
+  };
+}
+
 function zoomSeat(
   viewportEl: HTMLElement,
   syncDblDuration: () => void,
@@ -236,6 +271,7 @@ function zoomSeat(
   behavior: Behavior,
   clearSettle: () => void,
   apply: (transform: ZoomTransform) => void,
+  touch: { watch(): void; unwatch(): void },
 ): Pick<ZoomController, "attach" | "detach" | "reset" | "rebase"> {
   return {
     /** Bind the gesture listeners to viewportEl. Idempotent (re-binds in place). */
@@ -243,12 +279,13 @@ function zoomSeat(
       // Registered BEFORE d3 binds its own dblclick so ours always runs first: capture beats bubble, and AT_TARGET fires in registration order.
       viewportEl.addEventListener("dblclick", syncDblDuration, true);
       sel().call(behavior);
-      viewportEl.classList.add("zoomable");
+      touch.watch();
     },
     /** Remove the gesture listeners. Leaves the current transform in place. */
     detach() {
       sel().on(".zoom", null);
       viewportEl.removeEventListener("dblclick", syncDblDuration, true);
+      touch.unwatch();
       viewportEl.classList.remove("zoomable");
       clearSettle();
     },
@@ -353,6 +390,7 @@ export function createZoomController({
   const DBLCLICK_MS = 250;
 
   const behavior = zoomBehavior(scaleExtent, viewportExtent, prefersReduced, DBLCLICK_MS);
+  const touch = zoomTouch(viewportEl, sel, behavior);
   const { syncDblDuration, clearSettle, apply, setSettleTimer } = zoomPaint(
     behavior,
     prefersReduced,
@@ -372,7 +410,8 @@ export function createZoomController({
   );
 
   return {
-    ...zoomSeat(viewportEl, syncDblDuration, sel, behavior, clearSettle, apply),
+    ...zoomSeat(viewportEl, syncDblDuration, sel, behavior, clearSettle, apply, touch),
+    takeTouch: touch.take,
     ...zoomFit(viewportExtent, scaleExtent, sel, behavior, glideTargetK, viewportEl, apply, glideTo),
     glideBy,
     ...zoomHome(clearSettle, setGlideTargetK, prefersReduced, sel, behavior, apply, glideMsNow, getState),
