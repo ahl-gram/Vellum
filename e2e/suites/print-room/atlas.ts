@@ -1,4 +1,5 @@
 import type { Payload, SuiteContext } from "../../types.ts";
+import { atlasHeadMarkup } from "../../../src/site/print-room/atlas-head-markup.ts";
 import type { Matter } from "./reads.ts";
 
 export async function pr20Bind({ evaluate, check, sleep }: SuiteContext): Promise<void> {
@@ -47,8 +48,10 @@ export async function pr20Bind({ evaluate, check, sleep }: SuiteContext): Promis
         inked: string | null;
         plateLine: string;
         stamp: string;
+        head: string | null;
+        chartno: string | null;
       } | null>(
-        `(()=>{const b=window.__vellumBoundAtlas;if(!b)return null;const imgs=[...document.querySelectorAll("#pr-atlas img")];const hero=document.querySelector("#pr-atlas .hero-plate");return{seed:b.seed,title:b.title,figs:b.figures,plates:document.querySelectorAll("#pr-atlas figure:not(.banner)").length,print:!document.getElementById("pr-print").disabled,dl:!document.getElementById("pr-download").disabled,hide:!document.getElementById("pr-hide").disabled,hasAtlas:document.body.classList.contains("has-atlas"),imgs:imgs.length,loaded:imgs.length>0&&imgs.every(im=>im.complete&&im.naturalWidth>0),heroHiddenOnScreen:hero?getComputedStyle(hero).display==="none":false,heads:[...document.querySelectorAll("#pr-atlas h2")].map(h=>h.textContent),prospectPlate:[...document.querySelectorAll("#pr-atlas figcaption")].some(f=>f.textContent.startsWith("The Prospect of ")),atlasHidden:getComputedStyle(document.getElementById("pr-atlas")).display==="none",turned:(()=>{const t=document.getElementById("pr-turned");return !t.hidden&&/^blob:/.test(t.src);})(),proofHidden:document.getElementById("pr-preview").hidden,thumbs:document.querySelectorAll("#pr-contents .plates figure").length,inked:(document.querySelector("#pr-contents li.on .turn.here")||{dataset:{}}).dataset.plate||null,plateLine:document.getElementById("pr-plate-line").textContent,stamp:document.getElementById("pr-stamp").textContent};})()`,
+        `(()=>{const b=window.__vellumBoundAtlas;if(!b)return null;const imgs=[...document.querySelectorAll("#pr-atlas img")];const hero=document.querySelector("#pr-atlas .hero-plate");return{seed:b.seed,title:b.title,figs:b.figures,plates:document.querySelectorAll("#pr-atlas figure:not(.banner)").length,print:!document.getElementById("pr-print").disabled,dl:!document.getElementById("pr-download").disabled,hide:!document.getElementById("pr-hide").disabled,hasAtlas:document.body.classList.contains("has-atlas"),imgs:imgs.length,loaded:imgs.length>0&&imgs.every(im=>im.complete&&im.naturalWidth>0),heroHiddenOnScreen:hero?getComputedStyle(hero).display==="none":false,heads:[...document.querySelectorAll("#pr-atlas h2")].map(h=>h.textContent),prospectPlate:[...document.querySelectorAll("#pr-atlas figcaption")].some(f=>f.textContent.startsWith("The Prospect of ")),atlasHidden:getComputedStyle(document.getElementById("pr-atlas")).display==="none",turned:(()=>{const t=document.getElementById("pr-turned");return !t.hidden&&/^blob:/.test(t.src);})(),proofHidden:document.getElementById("pr-preview").hidden,thumbs:document.querySelectorAll("#pr-contents .plates figure").length,inked:(document.querySelector("#pr-contents li.on .turn.here")||{dataset:{}}).dataset.plate||null,plateLine:document.getElementById("pr-plate-line").textContent,stamp:document.getElementById("pr-stamp").textContent,head:(document.querySelector("#pr-atlas .atlas-head h1")||{}).textContent??null,chartno:(document.querySelector("#pr-atlas .atlas-head .chartno")||{}).textContent??null};})()`,
       );
     } catch {}
     if (s && s.loaded) {
@@ -77,6 +80,14 @@ export async function pr20Bind({ evaluate, check, sleep }: SuiteContext): Promis
       /^plate i of the bound atlas/.test(bound.plateLine) &&
       /^bound in \d+s$/.test(bound.stamp),
     JSON.stringify(bound),
+  );
+
+  // The running head is read off the page after a real bind, against the text the shared atlasHeadMarkup gives for this world, so a renderBoundAtlas that stops calling it reds here (RH7 runs the markup module itself and cannot see that).
+  const expected = atlasHeadMarkup({ title: "T", subtitle: "S", seed: 42 }).match(/class="chartno">([^<]*)</)?.[1];
+  check(
+    "PR20d the bound atlas's running head, written by renderBoundAtlas, is the shared markup's: the heading is the world's title and the chart number line is the one atlasHeadMarkup writes",
+    !!bound && bound.head === "The Isle of Rahai" && expected !== undefined && bound.chartno === expected,
+    JSON.stringify(bound && { head: bound.head, chartno: bound.chartno, expected }),
   );
 
   const prospectAt = bound ? bound.heads.indexOf("The Prospect of the Capital") : -1;
