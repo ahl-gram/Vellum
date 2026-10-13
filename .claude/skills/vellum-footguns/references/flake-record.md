@@ -16,9 +16,8 @@ where the proof goes.
 - **A red you believe is a flake gets a row before you re-run anything.** The payload verbatim, inside
   backticks, where an em-dash it carries stands; the run id, the sha and branch. A row costs a minute; the dig costs a session.
 - **A row's disposition is one of three**: *settled* (the wait or the bound was fixed, and the check
-  asserts again, with the PR that did it), *measuring-only* (the check still takes and logs its
-  measurement but has stopped asserting, under an issue number, per Gate 2 item 10), or *open* (seen,
-  recorded, nobody has acted).
+  asserts again, with the PR that did it), *pulled out* (the check no longer runs, under an issue number,
+  per `handbook/specs/settle-doctrine.md` item 11), or *open* (seen, recorded, nobody has acted).
 - **A cell that cannot be read back is written "not retained"**, never inferred. GitHub ages out run
   logs, and a guess here is worse than a gap.
 - **This is a record, not a rule.** It is not required reading before a kind of work; it is what you
