@@ -25,10 +25,10 @@ home's line wins for the lane and this file's for the orchestrator.
 - **The brief carries what the lane cannot read for itself**: the issue number; the lanes running
   beside it and the files each owns; where two lanes must edit the same lines, the order they merge
   in (`vellum-footguns` Gate 5 item 9) and the instruction to keep both edits in that order; the
-  attribution lines; push at the first commit and commit small and often; any ruling of Alex's,
-  quoted from its posted comment; and, where it asks for a read of the roadmap board, a read that
-  counts its rows against the board's total, since a listing cut short is not an absence (the Never
-  list).
+  session link for the attribution trailer (`CLAUDE.md`, Process); push at the first commit and
+  commit small and often; any ruling of Alex's, quoted from its posted comment; and, where it asks
+  for a read of the roadmap board, a read that counts its rows against the board's total, since a
+  listing cut short is not an absence (the Never list).
 - **Several planners may run at once.** Recon, the plan and the plan skeptic write no code,
   so running them together is cheap and batches Alex's menus into one sitting; the builds are the
   expensive part.
@@ -164,9 +164,11 @@ home's line wins for the lane and this file's for the orchestrator.
 - **Squash with `gh pr merge <PR> --squash --match-head-commit <sha> --subject "<#N title> (#<PR>)"
   --body-file <file>`.** Build the body from `git log --no-merges origin/main..origin/<branch>
   --reverse --format='* %s%n%n%b'` with each commit's trailer lines taken out, since the pull
-  request's own commit listing cuts headlines short; close it with the session's attribution lines,
-  since a lane's trailer can drift; and grep it for an em-dash before merging, since the hook reads
-  no merge body. Write the file in one call and merge in the next (the Never list's last line).
+  request's own commit listing cuts headlines short; close it with one trailer block, each distinct
+  `Drafted-By:` line those commits carried beside the session's own lines (`CLAUDE.md`, Process),
+  since a lane's `Co-Authored-By` or session link can drift; and grep it for an em-dash before
+  merging, since the hook reads no merge body. Write the file in one call and merge in the next (the
+  Never list's last line).
 - **Merge in the stated order** where two lanes edit the same lines (Gate 5 item 9). Two pull
   requests that both append rows to one `handbook/errata/` file conflict on the second merge, every
   time: brief the second lane up front to `git merge origin/main` once the first lands, keep both

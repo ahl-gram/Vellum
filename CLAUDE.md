@@ -212,6 +212,24 @@ session already at xhigh cannot tell the frontmatter from inheritance.
   one inside inline backticks or a fenced code block is code, not prose, and stands: that is how a
   pasted red line keeps its own (Issue #644). The footgun hook refuses one in a body's prose and reads what code
   is the way `.claude/skills/vellum-footguns/hooks/README.md` says.
+- **Attribution is the house's own and replaces the default one the harness supplies.** A commit
+  message ends with one trailer block of three lines: `Drafted-By: <agent> (<model id>)`,
+  `Co-Authored-By: Claude <noreply@anthropic.com>` and `Claude-Session: <session link>`. `<agent>` is
+  the name of the agent definition you run as (`vellum-planner`, `vellum-implementer`) or
+  `main session`, and `<model id>` is the model you are, never one copied from a brief. A pull
+  request body ends with three stacked lines, written as a slip is (`handbook/specs/ui-design.md`,
+  The voice):
+
+  ```
+  *Drafted by*
+  **Claude Code**
+  *the pages above, and the session that set them down: <session link>*
+  ```
+
+  The session link is the dispatching session's, the one part a lane cannot read for itself, so the
+  brief carries it and a lane without it stops and asks before its first commit. A squash merge's
+  closing block carries each distinct `Drafted-By:` line of its commits beside the merging session's
+  own (`handbook/specs/orchestration.md`).
 - **Comments are the exception, not the rule.** A behavior a test pins needs no comment: the test is
   the record, delete the prose. A local invariant earns a test first; only where no test can
   practically pin it (cross-platform float drift, hand-measured browser quirks) does it keep a single
