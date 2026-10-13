@@ -310,6 +310,18 @@ body:has(.slip.folded) .corner.br.zoomery {
   background: var(--ink-dark);
   color: var(--parchment-bright);
 }
+.zoomery .zoom-btn.touch-btn {
+  font-family: var(--font-serif-fallback, "Iowan Old Style", "Palatino", Georgia, serif);
+  font-size: 1.35rem;
+}
+.zoomery.corner .zoom-btn.touch-btn[aria-pressed="true"] {
+  background: var(--parchment-bright);
+  color: var(--ink-dark);
+  border-color: var(--parchment);
+}
+#map-viewport:not(.zoomable) {
+  touch-action: manipulation;
+}
 
 .legend {
   position: fixed;

@@ -814,6 +814,7 @@ const KIT_FOG = '<div class="fog a" aria-hidden="true"></div><div class="fog b" 
 const KIT_VIGNETTES =
   '<div class="vignette top" aria-hidden="true"></div><div class="vignette bottom" aria-hidden="true"></div>';
 const KIT_GLASS = (id: string) => `<div class="chrome corner br zoomery"${id} role="group" aria-label="Camera">
+  <button id="zoom-touch" class="zoom-btn touch-btn" type="button" aria-pressed="false" aria-label="The chart in hand" hidden>&#9758;</button>
   <button id="zoom-in" class="zoom-btn" type="button" data-zoom="in" aria-label="Draw nearer">+</button>
   <button id="zoom-out" class="zoom-btn" type="button" data-zoom="out" aria-label="Stand off">&minus;</button>
   <button id="zoom-reset" class="zoom-btn" type="button" data-zoom="fit" aria-label="The whole sheet">&#8962;</button>
