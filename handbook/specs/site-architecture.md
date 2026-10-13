@@ -335,6 +335,13 @@ precisely, because a token that falls outside it looks identical at the point of
   not the sum, and the repeated install and build are the price of that. Every lane rebuilds rather
   than downloading a shared artifact, and prints a hash of its own `dist/` so a disagreement between
   two lanes is visible instead of silent.
+- **A pull request's newest run cancels any of its own runs still going, and no other run is ever
+  cancelled that way.** A push to `main` and a run started by hand each take a concurrency group of
+  their own, so every merge's own run finishes and none waits behind another; the `concurrency`
+  block in `.github/workflows/ci.yml` holds this and `test/repo/proof-runner-workflow.test.ts` pins
+  it. Merging reads only the newest run on the final head. A lane that needs a second complete run
+  of one head, to re-measure `MEASURED_SECONDS`, starts one with
+  `gh workflow run ci.yml --ref <branch>`, which no newer push cancels.
 - **Required checks are matched by JOB NAME, and that roster lives outside the tree.** Renaming a job
   in the workflow looks cosmetic and blocks EVERY merge, because the required context never reports
   again until branch protection is updated to match; ADDING a job that ought to be required is the
