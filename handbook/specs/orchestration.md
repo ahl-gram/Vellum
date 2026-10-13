@@ -45,8 +45,22 @@ home's line wins for the lane and this file's for the orchestrator.
   issue as a dated comment the moment he gives it, in his own words; then message the same planner
   with the rulings, quoting that comment, never a paraphrase, so it folds them into the plan. The
   implementer's record points at the post rather than restating it (workflow step 12).
-- **Once the planner reports the plan finished, retire its tree** after copying its `out/` across
-  (Retiring, below), and dispatch the implementer on the plan's path.
+- **Archive a finished plan in two places before anything else happens to it.** Until the
+  implementer's first commit is pushed, the scratchpad holds the only copy and it ends with the
+  session. When the planner reports `Open decisions: none`, copy the plan to `out/plans/` in the
+  main checkout under its file name with a UTC timestamp before `.md`, so a revision never
+  overwrites an earlier copy, and `cmp` the copy against the scratchpad file. Then post it on the
+  issue, which survives the machine. Each archive comment opens with the fixed line
+  `Plan archive, not a ruling: <plan file name>, part <i> of <k>, sha256 <hex>`, `<hex>` being
+  `shasum -a 256` of the whole plan file on every part, then a blank line and the plan text. A plan
+  too long for one comment is cut at line boundaries into parts of at most 60,000 bytes, posted in
+  order, one `gh issue comment --body-file` per call. Read the comments back with `gh api` and
+  confirm the parts, joined, equal the file apart from a final newline. A lost plan is restored
+  from `out/plans/`, or from the comments by joining the parts, dropping each opening line and
+  checking the sha256. `.claude/agents/vellum-implementer.md` quotes the opening line's fixed text
+  so that it does not count these comments as new ones: edit the two together.
+- **Once the plan is archived, retire the planner's tree** after copying its `out/` across
+  (Retiring, below), and dispatch the implementer on the plan's scratchpad path.
 - **An implementer's hand-back goes to a fresh `vellum-planner`**, which gets a fresh tree, dispatched
   with the issue, the plan's path and the hand-back, never a message to the retired one, which has no
   tree to stand in, and from the planner to Alex when it opens a
@@ -197,8 +211,8 @@ home's line wins for the lane and this file's for the orchestrator.
 
 ## Before the session ends
 
-- **The scratchpad does not outlive the session.** Copy each lane's tools, and every finished plan
-  no branch has committed yet, to `out/scratch-<date>/`
+- **The scratchpad does not outlive the session.** Copy each lane's tools, and every plan not yet
+  finished, to `out/scratch-<date>/`; a finished plan is already in `out/plans/`
   with a handover note of each lane's open items, under no name `node --test` collects: Gate 1
   item 8 names the patterns, and they are collected inside the gitignored `out/` too.
 - **Every issue filed in the session is on the board and phased** (`CLAUDE.md`, Session handoff).
