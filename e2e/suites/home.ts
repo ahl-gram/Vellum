@@ -44,6 +44,7 @@ import {
 } from "./home/doors.ts";
 import { h14aFlight, h14aCardFits, h14bEscape, h14dPipHover, h14cLegend, h17Clean } from "./home/stations.ts";
 import { h15aDrift, h15bWheelStops, h15cRearmed, h15dFlightStops, h16NoDrift } from "./home/drift.ts";
+import { homeGestures } from "./home/gestures.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { send, consoleErrors, http4xx, PORT } = ctx;
@@ -63,6 +64,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await h7Ceremony(ctx, k);
   await h14Stations(ctx, k);
   await h19Floor(ctx, k);
+  await homeGestures(ctx, k);
 }
 
 async function h19Floor(ctx: SuiteContext, k: HomeKit): Promise<void> {
