@@ -155,8 +155,13 @@ scrolling page it washes out whatever passes through it. Four corners, each a na
   narrows it toward the kit's width wherever the cap would run under the nav.
 - **The chart folio**, bottom left: the lines the room's script fills at the draw, the chart's title,
   survey line and coordinates.
-- **The Surveyor's Glass**, bottom right of the chart: the camera's presses. Where it is seated and
-  why is `handbook/specs/explorer-doctrine.md`'s, under the camera, the gesture and the fit.
+- **The Surveyor's Glass**, bottom right of the chart: the camera's presses, and where touch is the
+  main pointer one more above them, a manicule that gives the reader's fingers to the chart, lit while it does
+  (Alex, 2026-10-13, Issue #778). Where it is seated and why, and what the manicule does, are
+  `handbook/specs/explorer-doctrine.md`'s, under the camera, the gesture and the fit. **A toggle
+  press is lit when on, never in the dress of its own hover**, since a touch browser leaves a
+  tapped press hovered and focused. **Provisional until the post-use review:** the manicule's
+  glyph, its seat, its lit dress and its name.
 
 Between them: **the slip**, the working panel on the right, which is the mockup's station card grown
 into a desk. It folds away to a bookmark tab on the right edge. **The legend row** runs along the bottom and carries the roads out, seated in the gap beside
@@ -356,6 +361,10 @@ gesture; a tip on something that does not is a false affordance, and the glossar
 removed for exactly that reason. A non-navigating gesture is either a chart instrument, which is its
 own ratified class, or it goes on the list awaiting a ruling. A new tip joins one of those lists
 consciously, or `vellum/css-tip-goes-somewhere` refuses it.
+
+**Where touch is the main pointer a finger belongs to the page until the reader gives it to the
+chart**, with the Glass's manicule (Issue #778): a pinch zooms the page and a swipe scrolls it, on the chart and
+off it. How the camera stands down is `handbook/specs/explorer-doctrine.md`'s.
 
 **A tip on an inline element needs `display: inline-block`** or the transform silently does nothing.
 And an inline-block takes its baseline from its last line box, so a wrapping list item drops its

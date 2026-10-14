@@ -73,7 +73,9 @@ declaration you write to get there. The checklist form of the same lines is `vel
   1024 seat. Home's riding head cluster is one; its body is made its containing block
   (`position: relative`), and `FL1` in `e2e/suites/corners/floor.ts` reads it at a 400 window.
 - **An affordance gate is `(hover: none) and (pointer: coarse)`, never `(hover: none)` on its own**,
-  wherever it is asked, which today is a `matchMedia` call rather than a sheet. A machine with no pointing device at all reports `hover: none`
+  wherever it is asked, which today is a `matchMedia` call rather than a sheet, written once
+  (`TOUCH_PRIMARY` in `src/site/shared/chart-touch.ts`, read by the footnotes and by the Glass's
+  touch press). A machine with no pointing device at all reports `hover: none`
   together with `pointer: none`, so the bare query matches it too and stands the affordance down
   exactly where a keyboard user needs it. Linux headless CI is such a machine (e2e BR4 and BR5 hold the line). The bare query is still the
   right tool for **asking what the environment reports**, which is why an e2e probe uses it to detect
