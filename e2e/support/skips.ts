@@ -10,6 +10,7 @@ export const E2E_SKIPS: readonly E2eSkip[] = [
   { suite: "reading-room", step: "RR42", issue: 869 },
   { suite: "room-instrument", step: "RS30", issue: 622 },
   { suite: "chart-drawer", step: "CD25, CD26, CD30", issue: 716 },
+  { suite: "corners", step: "FL1", issue: 894 },
 ];
 
 export function skipFor(skips: readonly E2eSkip[], step: string): E2eSkip | undefined {
