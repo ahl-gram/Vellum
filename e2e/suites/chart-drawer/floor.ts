@@ -1,4 +1,5 @@
 // The Chart Table under the 1024 floor (Issue #762 pull request C; Alex, 2026-10-06, issuecomment-6010814718): below 1024 the Explorer lays out the 1024 page and the window scrolls sideways over it, so the drawer, its tab and the dog-ear's mouse carry work there as at 1024, and touch is a tablet's at 1024.
+import { takeChartTouch } from "../../support/chart-touch.ts";
 import type { Payload, Point } from "../../types.ts";
 import type { DragKit } from "./kit.ts";
 import { CARRY, DEEP, DRAWN, DRESS, ONE, READ, atInset, atRest, drawerUp } from "./reads.ts";
@@ -98,21 +99,12 @@ export async function na2DrawerBelowFloor(kd: DragKit): Promise<void> {
 }
 
 // CD48 (Issue #523 build item 4), moved to a 1024 tablet when the narrow layout went (Issue #762 pull request C): the handle's touch drag first, the pan control LAST, since a pan at DEEP can recommit the inset and rebuild the ear. No tap files a sheet first, as it did at 640, since at 1024 the filing opens the drawer and folds the Broadside, whose refit moves the camera under the read.
-export async function cd48TouchHandle({
-  evaluate,
-  check,
-  sleep,
-  touch,
-  touchPan,
-  settle,
-  go,
-  setNarrowViewport,
-  clearMobile,
-  send,
-}: DragKit): Promise<void> {
+export async function cd48TouchHandle(kd: DragKit): Promise<void> {
+  const { evaluate, sleep, touch, settle, go, setNarrowViewport } = kd;
   await setNarrowViewport(1024, 844);
   await go(`${DRESS}&${DEEP}`);
   await settle(READ, atInset, "chart-drawer-tablet-inset", DRAWN);
+  await takeChartTouch(kd, true);
   const ear = `(() => { const e = document.querySelector("#map .region-inset .dog-ear"); if (!e) return null; const b = e.getBoundingClientRect(); return { x: Math.round(b.x + b.width * 0.72), y: Math.round(b.y + b.height * 0.28) }; })()`;
   const camBefore = await settle<Cam>(
     `window.__vellumZoomState()`,
@@ -133,6 +125,19 @@ export async function cd48TouchHandle({
   const afterHandle = await evaluate<{ cam: Cam; ghost: boolean; drag: boolean; cuttings: number }>(
     `({ cam: window.__vellumZoomState(), ghost: !!document.querySelector(".sheet-ghost"), drag: document.body.classList.contains("sheet-drag"), cuttings: document.querySelectorAll("#cuttings li").length })`,
   );
+  await cd48Control(kd, { earNow, camBefore, afterHandle, ghostSeen });
+}
+
+type Seen = {
+  earNow: Point | null;
+  camBefore: Cam;
+  afterHandle: { cam: Cam; ghost: boolean; drag: boolean; cuttings: number };
+  ghostSeen: boolean;
+};
+
+async function cd48Control(kd: DragKit, seen: Seen): Promise<void> {
+  const { evaluate, check, sleep, touchPan, clearMobile, send } = kd;
+  const { earNow, camBefore, afterHandle, ghostSeen } = seen;
   const panFrom = await evaluate<{
     x: number;
     y: number;
@@ -143,10 +148,11 @@ export async function cd48TouchHandle({
   if (panFrom) await touchPan(panFrom.x, panFrom.y, panFrom.x + 80, panFrom.y + 60);
   await sleep(500);
   const afterPan = await evaluate<Cam>(`window.__vellumZoomState()`);
+  await takeChartTouch(kd, false);
   await clearMobile();
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   check(
-    "CD48 on a 1024 tablet a touch that begins on the dog-ear and drags neither pans nor zooms the map, never raises a ghost and files nothing (touch never drags, Issue #401 ruling 6), while a touch that begins beside it on the chart still pans, the control that proves the camera was listening: the first is the ear's stopped touchstart, the second is d3 bound under touch emulation that was active BEFORE the navigate (Issue #523 build item 4; at 1024 since Issue #762)",
+    "CD48 on a 1024 tablet a touch that begins on the dog-ear and drags neither pans nor zooms the map, never raises a ghost and files nothing (touch never drags, Issue #401 ruling 6), while a touch that begins beside it on the chart still pans, the control that proves the camera was listening: the first is the ear's stopped touchstart, the second is d3 bound under touch emulation that was active BEFORE the navigate (Issue #523 build item 4; at 1024 since Issue #762; the chart's touch press is given first and taken back after (Issue #778))",
     !!earNow &&
       camBefore.k === afterHandle.cam.k &&
       camBefore.x === afterHandle.cam.x &&

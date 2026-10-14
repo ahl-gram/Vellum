@@ -1,6 +1,9 @@
+import { touchRead } from "../../support/chart-touch.ts";
+import { readCam } from "../../support/home.ts";
+import { makeSettle } from "../../support/settle.ts";
 import type { Point } from "../../types.ts";
 import type { LandfallKit } from "./kit.ts";
-import { roomy, stillCam } from "./reads.ts";
+import { roomy, stagePoint, stillCam } from "./reads.ts";
 
 export async function l9aOneFinger(
   { evaluate, send, check, sleep, touch, camNow }: LandfallKit,
@@ -104,5 +107,70 @@ export async function l9cTwoFingerPan(
       panDelta.dy < 42 &&
       Math.abs(panDelta.sRatio - 1) < 1e-6,
     JSON.stringify({ room9c, startClear9c, panBefore, panAfter, panDelta }),
+  );
+}
+
+async function tapTwice({ touch, sleep }: LandfallKit, p: Point): Promise<void> {
+  for (const gap of [60, 0]) {
+    await touch("touchStart", [{ x: p.x, y: p.y, id: 0 }]);
+    await touch("touchEnd", []);
+    await sleep(gap);
+  }
+}
+
+export async function l9iTouchOff(k: LandfallKit): Promise<void> {
+  const { evaluate, check, pinch, camNow, sleep } = k;
+  const pt = await evaluate(stagePoint);
+  if (pt === null) throw new Error("home has no stage to read");
+  const read = await evaluate(touchRead("#lf-stage"));
+  const onControl = await evaluate<boolean>(
+    `document.elementFromPoint(${pt.x}, ${pt.y})?.closest("button, a, input, select") != null`,
+  );
+  const before = await camNow();
+  await evaluate(
+    `(window.__l9i = 0, window.addEventListener("touchstart", () => { window.__l9i++; }, { capture: true, passive: true }), true)`,
+  );
+  await pinch(pt.x, pt.y, 60, 180);
+  await makeSettle(k)<number>(`window.__l9i`, (d) => d >= 1, "L9i the dispatched fingers reach the page");
+  await evaluate(
+    `(window.__l9iDbl = 0, document.getElementById("lf-stage").addEventListener("dblclick", () => { window.__l9iDbl++; }, true), true)`,
+  );
+  await tapTwice(k, pt);
+  await makeSettle(k)<number>(
+    `window.__l9iDbl`,
+    (d) => d >= 1,
+    "L9i the double tap reaches the stage as a double click",
+  );
+  // Home's dive flies 0.6s: past it, the camera must be where it was, within the drift's stillness.
+  await sleep(800);
+  const after = await makeSettle(k)(readCam, (d, last) => stillCam(d, last), "L9i the camera rests");
+  check(
+    "L9i where touch is the main pointer home's stage takes no finger until the touch press is pressed: touch-action manipulation and no class, and a two-finger pinch and a double tap leave the camera where it was (Issue #778)",
+    read.shown &&
+      read.pressed === "false" &&
+      read.zoomable === false &&
+      read.touchAction === "manipulation" &&
+      !onControl &&
+      stillCam(before, after),
+    JSON.stringify({ read, onControl, before, after }),
+  );
+}
+
+export async function l9jBrowserPinch(k: LandfallKit): Promise<void> {
+  const { evaluate, check, send, camNow } = k;
+  const pt = await evaluate(stagePoint);
+  if (pt === null) throw new Error("home has no stage to read");
+  const before = await camNow();
+  await send("Input.synthesizePinchGesture", { x: pt.x, y: pt.y, scaleFactor: 2, gestureSourceType: "touch" });
+  const scale = await makeSettle(k)<number>(
+    `visualViewport.scale`,
+    (d, last) => d !== 1 && last === d,
+    "L9j the page's scale leaves 1",
+  );
+  const after = await camNow();
+  check(
+    "L9j with the touch press off a browser pinch on home's stage zooms the page and not the map (Issue #778)",
+    scale >= 1.8 && stillCam(before, after),
+    JSON.stringify({ scale, before, after }),
   );
 }

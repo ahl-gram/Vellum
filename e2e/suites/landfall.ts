@@ -1,5 +1,7 @@
 // Landfall hardening e2e (Issue #460, second suite by ratification 2026-08-25): the wheel consumed-vs-released contract at both zoom clamps (L1), the six panel arms from the superseding 2026-08-24T18:53 spec plus the sixth-arm clearance (L2-L7), the Enter links as 44px touch targets (L8), touch two-finger-drives vs one-finger-page-scroll under one emulation set (L9), and the seed form's no-JS GET fallback with its bare-visit control (L10-L11), and home's markup and dress at rest (L13-L32, Issue #779 part 2f). Every gesture is REAL dispatched input; suite-home's plumbing arrives via support/home.ts.
+import { forgetChartTouch, takeChartTouch } from "../support/chart-touch.ts";
 import { scopedHealth } from "../support/room.ts";
+import { makeSettle } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
 import type { SuiteContext } from "../types.ts";
 import { l13Stations, l14Legend, l15Shelf, l16NoticeAndPanel, l17Hook } from "./landfall/markup.ts";
@@ -30,7 +32,7 @@ import {
   l4l8Enters,
   l28SlipGestures,
 } from "./landfall/panel.ts";
-import { l9aOneFinger, l9bPinch, l9cTwoFingerPan } from "./landfall/touch.ts";
+import { l9aOneFinger, l9bPinch, l9cTwoFingerPan, l9iTouchOff, l9jBrowserPinch } from "./landfall/touch.ts";
 import { l9dCeiling, l9d2Debt, l9eFloor } from "./landfall/clamps.ts";
 import { l9fPipGestures, l9hControlTap, l23KitReach, l24CameraLeaks, l30Camera } from "./landfall/controls.ts";
 import { l10NoScriptGet, l11IgnoresQuery } from "./landfall/seed.ts";
@@ -44,7 +46,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   await l1Desktop(k);
   await l13Home(k, makeStep(ctx));
-  await l9Touch(k);
+  await l9Touch(k, makeStep(ctx));
   await l10NoScriptGet(k);
   await l11IgnoresQuery(k);
   gate.check("L12 the landfall hardening flow is clean (no console errors, no new 4xx)");
@@ -106,12 +108,24 @@ async function l13Home(k: LandfallKit, step: ReturnType<typeof makeStep>): Promi
   await step("L32", () => l32Blanket(k));
 }
 
-async function l9Touch(k: LandfallKit): Promise<void> {
+async function l9Touch(k: LandfallKit, step: ReturnType<typeof makeStep>): Promise<void> {
   const { evaluate, setMobileViewport, clearMobile, settleHome } = k;
-  // L9 is the touch contract on a tablet at the 1024 floor (Issue #761), its emulation set once before the boot that binds touch and never changed after the first real touch (the suite-zoom-gestures trap).
+  // L9 is the touch contract on a tablet at the 1024 floor (Issue #761), its emulation set once before the boot that binds touch and never changed after the first real touch (the suite-zoom-gestures trap); the chart takes a finger only once its touch press is pressed (Issue #778), so L9i and L9j read it off and the rest read it given.
   await setMobileViewport(1024, 768);
   await k.send("Page.navigate", { url: "about:blank" });
   await settleHome();
+  await step("L9i", () => l9iTouchOff(k));
+  await step("L9j", () => l9jBrowserPinch(k));
+  await k.send("Page.navigate", { url: "about:blank" });
+  await settleHome();
+  await step("L9 touch given", async () => {
+    await makeSettle(k)(
+      `visualViewport.scale`,
+      (s) => s === 1,
+      "the page kept the browser pinch's scale across a reload",
+    );
+    await takeChartTouch(k, true);
+  });
   const stagePt9 = await evaluate(stagePoint);
   // Drift-sized stillness: on slow CI the fixture has crossed IDLE_DELAY_MS by here and the ambient ±1.5% drift moved the camera 3e-6 between reads (PR #482 CI); a one-finger pan that drove the map would move it 60px.
   await l9aOneFinger(k, stagePt9);
@@ -123,5 +137,7 @@ async function l9Touch(k: LandfallKit): Promise<void> {
   await l9eFloor(k, stagePt9);
   await l9fPipGestures(k);
   await l9hControlTap(k);
+  await step("L9 touch taken back", () => takeChartTouch(k, false));
+  await evaluate(forgetChartTouch);
   await clearMobile();
 }

@@ -1,4 +1,5 @@
 // The Chart Table's drawer (Issue #520 Sub 2 of Issue #401, direction D ruled at the Issue #518 sitting): the dog-ear on the committed survey, the drawer it fills, the cap, and since Issue #634 the table's two homes, the address deciding an arrival and the device a return. `chart-drawer` and never `drawer` (Issue #520 ruling 2).
+import { forgetChartTouch } from "../support/chart-touch.ts";
 import { makeSettle } from "../support/settle.ts";
 import { makeStep } from "../support/step.ts";
 import { makeMouse } from "../support/home.ts";
@@ -135,6 +136,7 @@ async function cd9Surfaces(kd: DragKit, step: Step, SIX: string): Promise<void> 
   await step("CD55", () => cd55WhereAuthored(kd));
   await step("CD56", () => cd56WorkerBlocked(kd));
   await step("CD48", () => cd48TouchHandle(kd));
+  await kd.evaluate(forgetChartTouch);
   await step("NA2", () => na2DrawerBelowFloor(kd));
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
 }
