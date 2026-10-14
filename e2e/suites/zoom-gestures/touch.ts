@@ -113,13 +113,13 @@ async function zg7DoubleTapOff(k: GesturesKit): Promise<void> {
   );
 }
 
-async function zg6Pinches(k: GesturesKit): Promise<void> {
+export async function zg6Pinches(k: GesturesKit): Promise<void> {
   const p = await centre(k);
   await k.evaluate(
-    `(window.__zg6 = 0, window.addEventListener("touchstart", () => { window.__zg6++; }, { capture: true, passive: true }), true)`,
+    `(window.__zg6 = 0, window.addEventListener("touchstart", (e) => { window.__zg6 = Math.max(window.__zg6, e.touches.length); }, { capture: true, passive: true }), true)`,
   );
   await k.send("Input.synthesizePinchGesture", { x: p.x, y: p.y, scaleFactor: 2, gestureSourceType: "touch" });
-  await makeSettle(k)<number>(`window.__zg6`, (d) => d >= 1, "ZG6 the browser's fingers reach the page");
+  await makeSettle(k)<number>(`window.__zg6`, (d) => d >= 2, "ZG6 the browser's two fingers reach the page");
   const scale = await makeSettle(k)(SCALE, (d, last) => d !== 1 && last === d, "ZG6 the page's scale leaves 1");
   const synthesized = await kStill(k, "ZG6 the camera rests after the browser pinch");
   k.check(
@@ -133,7 +133,6 @@ export async function zgTouchOff(k: GesturesKit): Promise<void> {
   await zg5AtRest(k);
   await zg5bGlassPress(k);
   await zg7DoubleTapOff(k);
-  await zg6Pinches(k);
 }
 
 export async function zg8TouchTaken(k: GesturesKit): Promise<void> {
@@ -176,7 +175,7 @@ export async function zg4BrowserPinch(k: GesturesKit): Promise<void> {
     `({ scale: visualViewport.scale, touchAction: getComputedStyle(document.querySelector("${BOX}")).touchAction })`,
   );
   k.check(
-    "ZG4 with the chart taking touch a browser pinch over the sheet zooms the map and not the page (AC2's touch-action wiring; the dispatched pinch this check used never zoomed the page in any state, measured 2026-10-13) (Issue #778)",
+    "ZG4 with the chart taking touch a browser pinch over the sheet zooms the map and not the page (AC2's touch-action wiring, read from the computed style: while the camera listens no pinch the harness sends zooms the page, the box at none or at auto, measured 2026-10-13) (Issue #778)",
     page.touchAction === "none" && zoomed > 1.3 && Math.abs(page.scale - 1) < 0.01,
     JSON.stringify({ k: zoomed, ...page }),
   );
@@ -220,6 +219,7 @@ export async function zg9Rooms(k: GesturesKit): Promise<void> {
 }
 
 export async function zg10Carried(k: GesturesKit): Promise<void> {
+  await makeSettle(k)(SCALE, (d) => d === 1, "ZG10 the page is back at scale 1 before the tap");
   await takeChartTouch(k, true);
   await k.reloadHome("touch-carried");
   const carried = await k.evaluate(touchRead(BOX));

@@ -157,10 +157,10 @@ export async function l9jBrowserPinch(k: LandfallKit): Promise<void> {
   if (pt === null) throw new Error("home has no stage to read");
   const before = await camNow();
   await evaluate(
-    `(window.__l9j = 0, window.addEventListener("touchstart", () => { window.__l9j++; }, { capture: true, passive: true }), true)`,
+    `(window.__l9j = 0, window.addEventListener("touchstart", (e) => { window.__l9j = Math.max(window.__l9j, e.touches.length); }, { capture: true, passive: true }), true)`,
   );
   await send("Input.synthesizePinchGesture", { x: pt.x, y: pt.y, scaleFactor: 2, gestureSourceType: "touch" });
-  await makeSettle(k)<number>(`window.__l9j`, (d) => d >= 1, "L9j the browser's fingers reach the page");
+  await makeSettle(k)<number>(`window.__l9j`, (d) => d >= 2, "L9j the browser's two fingers reach the page");
   const scale = await makeSettle(k)<number>(
     `visualViewport.scale`,
     (d, last) => d !== 1 && last === d,
