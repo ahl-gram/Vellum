@@ -1,4 +1,4 @@
-import { touchRead } from "../../support/chart-touch.ts";
+import { browserPinch, touchRead } from "../../support/chart-touch.ts";
 import { readCam } from "../../support/home.ts";
 import { makeSettle } from "../../support/settle.ts";
 import type { Point } from "../../types.ts";
@@ -152,24 +152,16 @@ export async function l9iTouchOff(k: LandfallKit): Promise<void> {
 }
 
 export async function l9jBrowserPinch(k: LandfallKit): Promise<void> {
-  const { evaluate, check, send, camNow } = k;
+  const { evaluate, check, camNow } = k;
   const pt = await evaluate(stagePoint);
   if (pt === null) throw new Error("home has no stage to read");
   const before = await camNow();
-  await evaluate(
-    `(window.__l9j = 0, window.addEventListener("touchstart", (e) => { window.__l9j = Math.max(window.__l9j, e.touches.length); }, { capture: true, passive: true }), true)`,
-  );
-  await send("Input.synthesizePinchGesture", { x: pt.x, y: pt.y, scaleFactor: 2, gestureSourceType: "touch" });
-  await makeSettle(k)<number>(`window.__l9j`, (d) => d >= 2, "L9j the browser's two fingers reach the page");
-  const scale = await makeSettle(k)<number>(
-    `visualViewport.scale`,
-    (d, last) => d !== 1 && last === d,
-    "L9j the page's scale leaves 1",
-  );
-  const after = await camNow();
+  await browserPinch(k, pt, "L9j");
+  const after = await makeSettle(k)(readCam, (d, last) => stillCam(d, last), "L9j the camera rests");
+  const scale = await evaluate<number>(`visualViewport.scale`);
   check(
-    "L9j with the touch press off a browser pinch on home's stage zooms the page and not the map (Issue #778)",
-    scale >= 1.8 && stillCam(before, after),
+    "L9j with the touch press off a browser pinch's two fingers on home's stage reach the page and never move the map (the page's own zoom is a phone pass item) (Issue #778)",
+    stillCam(before, after),
     JSON.stringify({ scale, before, after }),
   );
 }

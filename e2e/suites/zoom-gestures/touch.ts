@@ -1,7 +1,13 @@
 // The chart's touch press as the gesture suite drives it (Issue #778): off at every arrival, a browser pinch and a double tap belong to the page, and given, the chart takes the finger as it always did.
 import { nearRgba, tokenRgba } from "../../support/pixel.ts";
 import { makeSettle } from "../../support/settle.ts";
-import { takeChartTouch, touchListeners, touchRead } from "../../support/chart-touch.ts";
+import {
+  browserPinch,
+  releaseChartTouch,
+  takeChartTouch,
+  touchListeners,
+  touchRead,
+} from "../../support/chart-touch.ts";
 import type { TouchRead } from "../../support/chart-touch.ts";
 import type { Payload, Point } from "../../types.ts";
 import { CHART_ROOM_FLOOR } from "../stage/stage.ts";
@@ -114,17 +120,14 @@ async function zg7DoubleTapOff(k: GesturesKit): Promise<void> {
 }
 
 export async function zg6Pinches(k: GesturesKit): Promise<void> {
+  await k.evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
   const p = await centre(k);
-  await k.evaluate(
-    `(window.__zg6 = 0, window.addEventListener("touchstart", (e) => { window.__zg6 = Math.max(window.__zg6, e.touches.length); }, { capture: true, passive: true }), true)`,
-  );
-  await k.send("Input.synthesizePinchGesture", { x: p.x, y: p.y, scaleFactor: 2, gestureSourceType: "touch" });
-  await makeSettle(k)<number>(`window.__zg6`, (d) => d >= 2, "ZG6 the browser's two fingers reach the page");
-  const scale = await makeSettle(k)(SCALE, (d, last) => d !== 1 && last === d, "ZG6 the page's scale leaves 1");
+  await browserPinch(k, p, "ZG6");
   const synthesized = await kStill(k, "ZG6 the camera rests after the browser pinch");
+  const scale = await k.evaluate(SCALE);
   k.check(
-    "ZG6 with the touch press off two fingers on the sheet never reach the camera, and a browser pinch there zooms the page instead (k stays 1, the page's scale near 2; ZG4 is the same instrument's other arm) (Issue #778)",
-    synthesized === 1 && scale >= 1.8,
+    "ZG6 with the touch press off a browser pinch's two fingers on the sheet reach the page and never the camera, k staying 1 (the page's own zoom is a phone pass item; ZG4 is the same pinch with the press on) (Issue #778)",
+    synthesized === 1,
     JSON.stringify({ synthesized, scale }),
   );
 }
@@ -223,7 +226,7 @@ export async function zg10Carried(k: GesturesKit): Promise<void> {
   await takeChartTouch(k, true);
   await k.reloadHome("touch-carried");
   const carried = await k.evaluate(touchRead(BOX));
-  await takeChartTouch(k, false);
+  await releaseChartTouch(k);
   const back = await k.evaluate(touchRead(BOX));
   k.check(
     "ZG10 given in one room, the press boots given in the next, and the suite takes it back for the lane (Issue #778)",

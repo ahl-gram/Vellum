@@ -1,6 +1,6 @@
 // The chart's touch press as a browser check reads and drives it (Issue #778); every suite that gives the chart a finger takes it back and forgets it after its steps.
 import { CHART_TOUCH_KEY } from "../../src/site/shared/chart-touch.ts";
-import type { Payload, SuiteContext } from "../types.ts";
+import type { Payload, Point, SuiteContext } from "../types.ts";
 import { PAGE_RGBA } from "./pixel.ts";
 import { makeSettle } from "./settle.ts";
 
@@ -46,6 +46,30 @@ export async function takeChartTouch(
   await ctx.touch("touchStart", [{ x: at.x, y: at.y, id: 0 }]);
   await ctx.touch("touchEnd", []);
   await makeSettle(ctx)(PRESSED, (d) => d === String(on), `the chart's touch press reads ${on ? "pressed" : "off"}`);
+}
+
+export async function releaseChartTouch(ctx: Pick<SuiteContext, "evaluate" | "touch" | "sleep">): Promise<void> {
+  if ((await ctx.evaluate(PRESSED)) === "true") await takeChartTouch(ctx, false);
+}
+
+const FINGERS: Payload<true> = `(() => {
+  const w = (window.__fingers = { most: 0, lifted: false });
+  const o = { capture: true, passive: true };
+  window.addEventListener("touchstart", (e) => { w.most = Math.max(w.most, e.touches.length); }, o);
+  for (const t of ["touchend", "touchcancel"]) window.addEventListener(t, (e) => { if (e.touches.length === 0) w.lifted = true; }, o);
+  return true;
+})()`;
+
+export async function browserPinch(
+  ctx: Pick<SuiteContext, "evaluate" | "send" | "sleep">,
+  at: Point,
+  label: string,
+): Promise<void> {
+  await ctx.evaluate(FINGERS);
+  await ctx.send("Input.synthesizePinchGesture", { x: at.x, y: at.y, scaleFactor: 2, gestureSourceType: "touch" });
+  const settle = makeSettle(ctx);
+  await settle<number>(`window.__fingers.most`, (d) => d >= 2, `${label} the browser's two fingers reach the page`);
+  await settle<boolean>(`window.__fingers.lifted`, (d) => d, `${label} the browser's fingers lift`);
 }
 
 export async function touchListeners(ctx: Pick<SuiteContext, "send">, selector: string): Promise<string[]> {

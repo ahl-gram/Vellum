@@ -1,5 +1,5 @@
 // The Chart Table under the 1024 floor (Issue #762 pull request C; Alex, 2026-10-06, issuecomment-6010814718): below 1024 the Explorer lays out the 1024 page and the window scrolls sideways over it, so the drawer, its tab and the dog-ear's mouse carry work there as at 1024, and touch is a tablet's at 1024.
-import { takeChartTouch } from "../../support/chart-touch.ts";
+import { releaseChartTouch, takeChartTouch } from "../../support/chart-touch.ts";
 import type { Payload, Point } from "../../types.ts";
 import type { DragKit } from "./kit.ts";
 import { CARRY, DEEP, DRAWN, DRESS, ONE, READ, atInset, atRest, drawerUp } from "./reads.ts";
@@ -148,7 +148,7 @@ async function cd48Control(kd: DragKit, seen: Seen): Promise<void> {
   if (panFrom) await touchPan(panFrom.x, panFrom.y, panFrom.x + 80, panFrom.y + 60);
   await sleep(500);
   const afterPan = await evaluate<Cam>(`window.__vellumZoomState()`);
-  await takeChartTouch(kd, false);
+  await releaseChartTouch(kd);
   await clearMobile();
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   check(
