@@ -110,7 +110,7 @@ async function l13Home(k: LandfallKit, step: ReturnType<typeof makeStep>): Promi
 
 async function l9Touch(k: LandfallKit, step: ReturnType<typeof makeStep>): Promise<void> {
   const { evaluate, setMobileViewport, clearMobile, settleHome } = k;
-  // L9 is the touch contract on a tablet at the 1024 floor (Issue #761), its emulation set once before the boot that binds touch and never changed after the first real touch (the suite-zoom-gestures trap); the chart takes a finger only once its touch press is pressed (Issue #778), so L9i and L9j read it off and the rest read it given.
+  // L9 is the touch contract on a tablet at the 1024 floor (Issue #761), its emulation set once before the boot that binds touch and never changed after the first real touch (the suite-zoom-gestures trap).
   await setMobileViewport(1024, 768);
   await k.send("Page.navigate", { url: "about:blank" });
   await settleHome();
@@ -126,18 +126,21 @@ async function l9Touch(k: LandfallKit, step: ReturnType<typeof makeStep>): Promi
     );
     await takeChartTouch(k, true);
   });
-  const stagePt9 = await evaluate(stagePoint);
-  // Drift-sized stillness: on slow CI the fixture has crossed IDLE_DELAY_MS by here and the ambient ±1.5% drift moved the camera 3e-6 between reads (PR #482 CI); a one-finger pan that drove the map would move it 60px.
-  await l9aOneFinger(k, stagePt9);
-  await l9bPinch(k, stagePt9);
-  // L9c-L9g: the real two-finger contract (Issue #475). Every pan read pins its fixture's clamp headroom first: the old L9c went green off a clamp-parked fixture (PR #474 skeptic finding 3), so an unproven fixture is the bug these arms exist to never repeat.
-  await l9cTwoFingerPan(k, stagePt9);
-  await l9dCeiling(k, stagePt9);
-  await l9d2Debt(k, stagePt9);
-  await l9eFloor(k, stagePt9);
-  await l9fPipGestures(k);
-  await l9hControlTap(k);
-  await step("L9 touch taken back", () => takeChartTouch(k, false));
-  await evaluate(forgetChartTouch);
+  try {
+    const stagePt9 = await evaluate(stagePoint);
+    // Drift-sized stillness: on slow CI the fixture has crossed IDLE_DELAY_MS by here and the ambient ±1.5% drift moved the camera 3e-6 between reads (PR #482 CI); a one-finger pan that drove the map would move it 60px.
+    await l9aOneFinger(k, stagePt9);
+    await l9bPinch(k, stagePt9);
+    // L9c-L9g: the real two-finger contract (Issue #475). Every pan read pins its fixture's clamp headroom first: the old L9c went green off a clamp-parked fixture (PR #474 skeptic finding 3), so an unproven fixture is the bug these arms exist to never repeat.
+    await l9cTwoFingerPan(k, stagePt9);
+    await l9dCeiling(k, stagePt9);
+    await l9d2Debt(k, stagePt9);
+    await l9eFloor(k, stagePt9);
+    await l9fPipGestures(k);
+    await l9hControlTap(k);
+    await step("L9 touch taken back", () => takeChartTouch(k, false));
+  } finally {
+    await evaluate(forgetChartTouch);
+  }
   await clearMobile();
 }

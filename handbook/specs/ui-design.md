@@ -364,7 +364,8 @@ consciously, or `vellum/css-tip-goes-somewhere` refuses it.
 
 **Where touch is the main pointer a finger belongs to the page until the reader gives it to the
 chart**, with the Glass's manicule (Issue #778): a pinch zooms the page and a swipe scrolls it, on the chart and
-off it. How the camera stands down is `handbook/specs/explorer-doctrine.md`'s.
+off it, except over an open place card, whose own vertical pan keeps a pinch that starts on it from the page
+(`handbook/errata/site.md` holds it). How the camera stands down is `handbook/specs/explorer-doctrine.md`'s.
 
 **A tip on an inline element needs `display: inline-block`** or the transform silently does nothing.
 And an inline-block takes its baseline from its last line box, so a wrapping list item drops its

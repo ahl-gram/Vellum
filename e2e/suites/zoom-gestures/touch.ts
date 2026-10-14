@@ -36,12 +36,12 @@ async function doubleTap(k: GesturesKit, p: Point): Promise<void> {
   await tapAt(k, p);
 }
 
-// Readiness: the camera has left k = 1 and two reads agree.
 async function kLeft(k: GesturesKit, label: string): Promise<number> {
   return makeSettle(k)(ZOOM_K, (d, last) => d !== 1 && last === d, label);
 }
 
-// Measurement: six consecutive reads agree, past the camera's 250 ms double-click glide, and the last of them is the answer.
+// Six consecutive reads agree (five repeats at 50 ms: 250 ms, past the camera's 250 ms double-click glide).
+const STILL_REPEATS = 5;
 async function kStill(k: GesturesKit, label: string): Promise<number> {
   let same = 0;
   let prev: number | null = null;
@@ -49,13 +49,12 @@ async function kStill(k: GesturesKit, label: string): Promise<number> {
     const now = await k.evaluate(ZOOM_K);
     same = now === prev ? same + 1 : 0;
     prev = now;
-    if (same >= 5) return now;
+    if (same >= STILL_REPEATS) return now;
     await k.sleep(50);
   }
   throw new Error(`settle timeout ${label}: ${prev}`);
 }
 
-// The press transitions its ground over 0.2s, so a read of the dress waits for two reads of it to agree.
 async function dressRead(k: GesturesKit, box: string, label: string): Promise<TouchRead> {
   return makeSettle(k)(
     touchRead(box),

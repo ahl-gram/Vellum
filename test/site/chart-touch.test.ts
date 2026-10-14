@@ -3,8 +3,6 @@ import assert from "node:assert/strict";
 import { El } from "../../test-support/element-shim.ts";
 import { bindChartTouch, holdTouch, touchHeld, type TouchPress } from "../../src/site/shared/chart-touch.ts";
 
-// The chart's touch press (Issue #778): the visit's choice lives in session storage; the press is shown only where the page says touch is the main pointer.
-
 const store = (initial: Record<string, string> = {}) => {
   const items = new Map(Object.entries(initial));
   const storage = {

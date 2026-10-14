@@ -118,6 +118,7 @@ async function tapTwice({ touch, sleep }: LandfallKit, p: Point): Promise<void> 
   }
 }
 
+const PAST_DIVE_MS = 800; // home's dive flies 0.6s
 export async function l9iTouchOff(k: LandfallKit): Promise<void> {
   const { evaluate, check, camNow, sleep } = k;
   const pt = await evaluate(stagePoint);
@@ -136,8 +137,7 @@ export async function l9iTouchOff(k: LandfallKit): Promise<void> {
     (d) => d >= 1,
     "L9i the double tap reaches the stage as a double click",
   );
-  // Home's dive flies 0.6s: past it, the camera must be where it was, within the drift's stillness.
-  await sleep(800);
+  await sleep(PAST_DIVE_MS);
   const after = await makeSettle(k)(readCam, (d, last) => stillCam(d, last), "L9i the camera rests");
   check(
     "L9i where touch is the main pointer home's stage takes no finger until the touch press is pressed: touch-action manipulation and no class, and a double tap leaves the camera where it was (Issue #778)",

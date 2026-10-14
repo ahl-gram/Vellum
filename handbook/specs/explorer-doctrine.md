@@ -168,7 +168,7 @@ make an unqualified rule false. Read the surface, not just the rule.
   `src/site/shared/chart-touch.ts`) shows only where the house's touch gate matches as the page
   boots (`TOUCH_PRIMARY` there), starts off on every visit and holds the reader's choice for the
   visit. A device with touch but another main pointer, a touchscreen laptop, shows no press and
-  its chart takes a finger as it always has. Off, nothing on a chart listens to touch: `takeTouch` in
+  its chart takes a finger as it always has. Off, the camera listens to no touch: `takeTouch` in
   `src/site/shared/zoom-controller.ts` unbinds the camera's touch listeners and drops the class,
   the box takes `touch-action: manipulation` so a tap on the chart never waits for a second one,
   and the camera's filter refuses the mouse events a tap fires (`gestureAllowed` there), since a
