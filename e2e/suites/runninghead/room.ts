@@ -233,6 +233,7 @@ export const KIT_ROADS: Record<string, ReadonlyArray<RoadWant>> = {
 const same = (a: unknown, b: unknown): boolean => JSON.stringify(a) === JSON.stringify(b);
 const faults = (parts: (true | string)[]): string[] => parts.filter((f): f is string => f !== true);
 const GLASS_PRESSES = [
+  ["BUTTON", "zoom-touch", "zoom-btn touch-btn", "button", null, "The chart in hand", "☞", null, 0],
   ["BUTTON", "zoom-in", "zoom-btn", "button", "in", "Draw nearer", "+", null, 0],
   ["BUTTON", "zoom-out", "zoom-btn", "button", "out", "Stand off", "−", null, 0],
   ["BUTTON", "zoom-reset", "zoom-btn", "button", "fit", "The whole sheet", "⌂", null, 0],

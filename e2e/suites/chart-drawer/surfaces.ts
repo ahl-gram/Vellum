@@ -88,7 +88,7 @@ export async function cd13TabClear(bag: DrawerKit & { edge: Record<string, Edge>
     return { folded: document.querySelector(".slip").classList.contains("folded"),
       tabShown: getComputedStyle(tab).display !== "none",
       overlap: +overlap.toFixed(0),
-      buttons: [...zoom.querySelectorAll(".zoom-btn")].map((b) => reach(b)) };
+      buttons: [...zoom.querySelectorAll(".zoom-btn:not([hidden])")].map((b) => reach(b)) };
   })()`;
   for (const [w, h] of [
     [1520, 872],

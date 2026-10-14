@@ -151,6 +151,7 @@ const stageFaults = (s: Stage): string[] =>
       "group",
       false,
       [
+        ["zoom-touch", null],
         ["zoom-in", "in"],
         ["zoom-out", "out"],
         ["zoom-reset", "fit"],

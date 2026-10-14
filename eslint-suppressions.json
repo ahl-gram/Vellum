@@ -32,11 +32,6 @@
       "count": 1
     }
   },
-  "e2e/suites/chart-drawer/floor.ts": {
-    "max-lines-per-function": {
-      "count": 1
-    }
-  },
   "e2e/suites/chart-drawer/homes.ts": {
     "max-lines-per-function": {
       "count": 1
@@ -213,11 +208,6 @@
     }
   },
   "e2e/suites/turn.ts": {
-    "max-lines-per-function": {
-      "count": 1
-    }
-  },
-  "e2e/suites/zoom-gestures.ts": {
     "max-lines-per-function": {
       "count": 1
     }

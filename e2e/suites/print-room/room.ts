@@ -172,6 +172,7 @@ const stageFaults = (s: Stage): string[] =>
       "the pill, the warning and the notice in the stage",
     same(s.pill, ["status", "polite", "", true]) || "the pill a live status, the warning hidden",
     same(s.glass, [
+      ["zoom-touch", null],
       ["zoom-in", "in"],
       ["zoom-out", "out"],
       ["zoom-reset", "fit"],

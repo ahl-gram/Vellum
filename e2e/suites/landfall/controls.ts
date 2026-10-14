@@ -245,7 +245,7 @@ export async function l30Camera(k: LandfallKit): Promise<void> {
       read.on === "flex" &&
       tabbed &&
       nearRgba(read.ring, tokenRgba("--ink-dark")) &&
-      read.touch.length === 5 &&
+      read.touch.length === 6 &&
       read.touch.every((t) => t === "pan-y") &&
       !!before &&
       !!out &&
