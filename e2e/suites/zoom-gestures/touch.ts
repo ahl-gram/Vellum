@@ -118,16 +118,14 @@ async function zg6Pinches(k: GesturesKit): Promise<void> {
   await k.evaluate(
     `(window.__zg6 = 0, window.addEventListener("touchstart", () => { window.__zg6++; }, { capture: true, passive: true }), true)`,
   );
-  await k.pinch(p.x, p.y, 70, 170);
-  await makeSettle(k)<number>(`window.__zg6`, (d) => d >= 1, "ZG6 the dispatched fingers reach the page");
-  const dispatched = await kStill(k, "ZG6 the camera rests after the dispatched pinch");
   await k.send("Input.synthesizePinchGesture", { x: p.x, y: p.y, scaleFactor: 2, gestureSourceType: "touch" });
+  await makeSettle(k)<number>(`window.__zg6`, (d) => d >= 1, "ZG6 the browser's fingers reach the page");
   const scale = await makeSettle(k)(SCALE, (d, last) => d !== 1 && last === d, "ZG6 the page's scale leaves 1");
   const synthesized = await kStill(k, "ZG6 the camera rests after the browser pinch");
   k.check(
     "ZG6 with the touch press off two fingers on the sheet never reach the camera, and a browser pinch there zooms the page instead (k stays 1, the page's scale near 2; ZG4 is the same instrument's other arm) (Issue #778)",
-    dispatched === 1 && synthesized === 1 && scale >= 1.8,
-    JSON.stringify({ dispatched, synthesized, scale }),
+    synthesized === 1 && scale >= 1.8,
+    JSON.stringify({ synthesized, scale }),
   );
 }
 

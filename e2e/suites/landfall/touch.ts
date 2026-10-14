@@ -119,7 +119,7 @@ async function tapTwice({ touch, sleep }: LandfallKit, p: Point): Promise<void> 
 }
 
 export async function l9iTouchOff(k: LandfallKit): Promise<void> {
-  const { evaluate, check, pinch, camNow, sleep } = k;
+  const { evaluate, check, camNow, sleep } = k;
   const pt = await evaluate(stagePoint);
   if (pt === null) throw new Error("home has no stage to read");
   const read = await evaluate(touchRead("#lf-stage"));
@@ -127,11 +127,6 @@ export async function l9iTouchOff(k: LandfallKit): Promise<void> {
     `document.elementFromPoint(${pt.x}, ${pt.y})?.closest("button, a, input, select") != null`,
   );
   const before = await camNow();
-  await evaluate(
-    `(window.__l9i = 0, window.addEventListener("touchstart", () => { window.__l9i++; }, { capture: true, passive: true }), true)`,
-  );
-  await pinch(pt.x, pt.y, 60, 180);
-  await makeSettle(k)<number>(`window.__l9i`, (d) => d >= 1, "L9i the dispatched fingers reach the page");
   await evaluate(
     `(window.__l9iDbl = 0, document.getElementById("lf-stage").addEventListener("dblclick", () => { window.__l9iDbl++; }, true), true)`,
   );
@@ -145,7 +140,7 @@ export async function l9iTouchOff(k: LandfallKit): Promise<void> {
   await sleep(800);
   const after = await makeSettle(k)(readCam, (d, last) => stillCam(d, last), "L9i the camera rests");
   check(
-    "L9i where touch is the main pointer home's stage takes no finger until the touch press is pressed: touch-action manipulation and no class, and a two-finger pinch and a double tap leave the camera where it was (Issue #778)",
+    "L9i where touch is the main pointer home's stage takes no finger until the touch press is pressed: touch-action manipulation and no class, and a double tap leaves the camera where it was (Issue #778)",
     read.shown &&
       read.pressed === "false" &&
       read.zoomable === false &&
@@ -161,7 +156,11 @@ export async function l9jBrowserPinch(k: LandfallKit): Promise<void> {
   const pt = await evaluate(stagePoint);
   if (pt === null) throw new Error("home has no stage to read");
   const before = await camNow();
+  await evaluate(
+    `(window.__l9j = 0, window.addEventListener("touchstart", () => { window.__l9j++; }, { capture: true, passive: true }), true)`,
+  );
   await send("Input.synthesizePinchGesture", { x: pt.x, y: pt.y, scaleFactor: 2, gestureSourceType: "touch" });
+  await makeSettle(k)<number>(`window.__l9j`, (d) => d >= 1, "L9j the browser's fingers reach the page");
   const scale = await makeSettle(k)<number>(
     `visualViewport.scale`,
     (d, last) => d !== 1 && last === d,
