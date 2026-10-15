@@ -2,6 +2,7 @@
 
 :root {
   --slip-w: 22rem;
+  --desk-frame-h: 768px;
 }
 
 .fog {
@@ -47,6 +48,17 @@ html:has(body.chart-room) {
 body.chart-room {
   height: 100%;
   overflow: clip;
+}
+@media screen {
+  html.desk-frame:has(body.chart-room) {
+    --desk-lift: max(0px, var(--desk-frame-h) - 100svh);
+    height: auto;
+    overflow-y: auto;
+    background: var(--chart-ink);
+  }
+  html.desk-frame body.chart-room {
+    height: var(--desk-frame-h);
+  }
 }
 .desk-layer.on > :is(.slip, .legend) {
   pointer-events: auto;

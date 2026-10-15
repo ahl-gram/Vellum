@@ -1,7 +1,7 @@
-// The chart room (Issue #462, lifted into the Atelier Kit at its second use, Issue #463/Issue #487): the sheet fitted to what the chrome leaves on the room's page (at least 1024 wide, page-box.ts), the slip's fold, the legend row's seat. The Glass's keys and buttons are the page's own (glass-keys.ts for a plain controller, the Explorer's glass.ts for the LOD camera).
+// The chart room (Issue #462, lifted into the Atelier Kit at its second use, Issue #463/Issue #487): the sheet fitted to what the chrome leaves on the room's page (at least 1024 wide, and 768 tall in the desk frame, page-box.ts), the slip's fold, the legend row's seat. The Glass's keys and buttons are the page's own (glass-keys.ts for a plain controller, the Explorer's glass.ts for the LOD camera).
 import { CHROME_GAP, fitStage, holdsSheet } from "./stage-fit.ts";
 import { bindSlip, type SlipFold } from "./slip.ts";
-import { pageBox } from "./page-box.ts";
+import { DESK_FRAME, deskFrameDue, pageBottom, pageBox, pageTop } from "./page-box.ts";
 import { glassLeft, placeLegendRow, placeSlip, rectOf, slipWidth } from "./room-seats.ts";
 
 const FALLBACK_ASPECT = 1500 / 1157.931;
@@ -63,10 +63,11 @@ function refitOnChrome(layout: () => void): void {
   for (const el of [q("header.chrome"), q(".corner.tr")]) if (el !== null) observer.observe(el);
 }
 
-const tops = (els: Array<Element | null>) => els.map(rectOf).flatMap((r) => (r === null ? [] : [r.top]));
-const bottoms = (els: Array<Element | null>) => els.map(rectOf).flatMap((r) => (r === null ? [] : [r.bottom]));
+const tops = (els: Array<Element | null>) => els.map(rectOf).flatMap((r) => (r === null ? [] : [pageTop(r)]));
+const bottoms = (els: Array<Element | null>) => els.map(rectOf).flatMap((r) => (r === null ? [] : [pageBottom(r)]));
 
 export function bindRoom<Held>(parts: RoomParts<Held>): Room {
+  document.documentElement.classList.toggle(DESK_FRAME, deskFrameDue(window.visualViewport?.scale ?? 1));
   const { frame, sheet, camera } = parts;
   const slip = q(".slip");
   const legend = q(".legend");

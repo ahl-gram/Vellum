@@ -1,5 +1,5 @@
-// The chart room's seats (Issue #462), the measured placements bindRoom runs on every layout: the slip below the folio and above a strip, the legend row centred in the room the chart folio, the Glass and an open slip leave it. Every horizontal read is in page coordinates (page-box.ts), so a layout fired while the 1024 page is scrolled sideways places each piece where it stands unscrolled.
-import { pageBox, pageLeft, pageRight } from "./page-box.ts";
+// The chart room's seats (Issue #462), the measured placements bindRoom runs on every layout: the slip below the folio and above a strip, the legend row centred in the room the chart folio, the Glass and an open slip leave it. Every read is in page coordinates (page-box.ts), so a layout fired while the page is scrolled, sideways under the 1024 floor or down a desk frame, places each piece where it stands unscrolled.
+import { pageBottom, pageBox, pageLeft, pageRight, pageTop } from "./page-box.ts";
 
 const SLIP_TOP_GAP = 16;
 const SLIP_FLOOR = 22;
@@ -31,9 +31,10 @@ export function textRight(el: Element | null): number | null {
 
 /** The slip hangs below the room's folio; a room with a bottom strip (the Reading Room's instrument) floors it at the strip, not the page's foot. */
 export function placeSlip(slipEl: HTMLElement, folio: Element | null, strip: Element | null): void {
-  const top = (rectOf(folio)?.bottom ?? 0) + SLIP_TOP_GAP;
+  const folioRect = rectOf(folio);
+  const top = (folioRect !== null ? pageBottom(folioRect) : 0) + SLIP_TOP_GAP;
   const stripRect = rectOf(strip);
-  const floor = stripRect !== null ? stripRect.top - STRIP_GAP : pageBox().h - SLIP_FLOOR;
+  const floor = stripRect !== null ? pageTop(stripRect) - STRIP_GAP : pageBox().h - SLIP_FLOOR;
   slipEl.style.top = `${top}px`;
   slipEl.style.maxHeight = `${floor - top}px`;
 }
@@ -99,7 +100,7 @@ export function placeLegendRow(legendEl: HTMLElement, room: LegendRoom): void {
       transform: "none",
       left: `${chromeX}px`,
       maxWidth: `${Math.max(0, bound - chromeX)}px`,
-      bottom: `${pageBox().h - folio.top + LEGEND_RISE}px`,
+      bottom: `${pageBox().h - pageTop(folio) + LEGEND_RISE}px`,
     });
     if (chrome !== null)
       legendEl.classList.toggle(

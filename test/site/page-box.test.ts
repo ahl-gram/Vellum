@@ -16,7 +16,11 @@ test("UF2 a viewport x read while the page is scrolled sideways is the page x le
 });
 
 test("UF3 a viewport y read while the page is scrolled down a desk frame is the page y less the scroll (Issue #778)", () => {
-  assert.equal(pageY(-180, 294), 114, "the slip's top read at -180 with the frame scrolled 294 stands at 114 on the page");
+  assert.equal(
+    pageY(-180, 294),
+    114,
+    "the slip's top read at -180 with the frame scrolled 294 stands at 114 on the page",
+  );
   assert.equal(pageY(114, 0), 114, "unscrolled, the two agree");
 });
 
