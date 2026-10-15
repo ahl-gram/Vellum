@@ -6,6 +6,7 @@ import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import { CHART_ROOM_FLOOR, DESK_FRAME_H, PHONE, open, rest, stageFaults } from "./stage.ts";
 import type { Read } from "./stage.ts";
+import { switchFaults, withStyledBoot } from "./styled-boot.ts";
 
 const UPRIGHT = { w: 390, h: 844, laidOut: { w: 1024, h: 2217 } };
 // On the desk: four pixels under the frame's foot at 768, where the deep's gradient would step, and far below it, above the upright window's foot at 2217.
@@ -37,7 +38,7 @@ const SEATS: Payload<Seats> = `(() => {
   return {
     sy,
     framed: document.documentElement.classList.contains(${JSON.stringify(DESK_FRAME)}),
-    strip: !!document.querySelector(".strip"),
+    strip: ((e) => e !== null && e.getBoundingClientRect().height > 0)(document.querySelector(".strip")),
     sheet: s.height > 0 ? [r1(s.left), r1(s.top + sy), r1(s.width), r1(s.height)] : null,
     slipTop: slip ? slip.style.top : null,
     slipMax: slip ? slip.style.maxHeight : null,
@@ -74,6 +75,9 @@ type Relaid = { page: string; before: Seats; after: Seats };
 
 async function relaid(ctx: SuiteContext, page: string): Promise<Relaid> {
   await open(ctx, page, PHONE.w, PHONE.h, PHONE.laidOut, "EA7");
+  // Laid out again unscrolled and again at the foot, never against the first layout, which under reduced motion the Reading Room takes with its chart folio's seat mid-transition (Issue #868); the resize is dispatched rather than made, since a metrics change under phone emulation changes the window the read compares against.
+  await ctx.evaluate('(window.dispatchEvent(new Event("resize")), true)');
+  await rest(ctx, PHONE.laidOut.w, PHONE.laidOut.h, `EA7 ${page} laid out again unscrolled`);
   const before = await ctx.evaluate(SEATS);
   await ctx.send("Input.synthesizeScrollGesture", {
     x: SWIPE_AT.x,
@@ -87,7 +91,6 @@ async function relaid(ctx: SuiteContext, page: string): Promise<Relaid> {
     (y, last) => y === DESK_FRAME_H - PHONE.laidOut.h && last === y,
     `EA7 ${page} a swipe reaches the frame's foot`,
   );
-  // The room lays out on a resize; the event is dispatched rather than made, since a metrics change under phone emulation changes the window the read compares against.
   await ctx.evaluate('(window.dispatchEvent(new Event("resize")), true)');
   await rest(ctx, PHONE.laidOut.w, PHONE.laidOut.h, `EA7 ${page} relaid`);
   const after = await ctx.evaluate(SEATS);
@@ -107,9 +110,9 @@ export async function ea7Scrolled(ctx: SuiteContext): Promise<void> {
   const strips = rooms.filter((r) => r.before.strip).length;
   const presses = rooms.filter((r) => r.before.pressFoot !== null && r.before.pressFoot !== "").length;
   ctx.check(
-    "EA7 on a phone held sideways, a reader's swipe scrolls every chart room to the foot of its desk frame, and the room laid out again there seats its sheet, its slip and its Press exactly where it seats them unscrolled: every vertical read is in page coordinates (Issue #778)",
+    "EA7 on a phone held sideways, a reader's swipe scrolls every chart room to the foot of its desk frame, and the room laid out again there seats its sheet, its slip and its Press exactly where the same room laid out again unscrolled seats them: every vertical read is in page coordinates (Issue #778)",
     faults.length === 0 && slips > 0 && strips > 0 && presses > 0,
-    `${rooms.length} rooms; ${slips} with a slip, ${strips} with a strip, ${presses} with a risen Press; ${faults.length ? `${faults.length} faults: ${faults.slice(0, 6).join("; ")}` : "no faults"}`,
+    `${rooms.length} rooms; ${slips} with a slip, ${strips} with a shown strip, ${presses} with a risen Press; ${faults.length ? `${faults.length} faults: ${faults.slice(0, 6).join("; ")}` : "no faults"}`,
   );
 }
 
@@ -124,7 +127,8 @@ async function uprightReads(ctx: SuiteContext): Promise<Read[]> {
 
 export async function ea6Upright(ctx: SuiteContext): Promise<void> {
   await ctx.setMobileViewport(UPRIGHT.w, UPRIGHT.h);
-  const reads = await uprightReads(ctx);
+  const reads = await withStyledBoot(ctx, () => uprightReads(ctx));
+  const switched = switchFaults(reads, DESK_FRAME_H);
   const missing = CHART_ROOM_FLOOR.filter((p) => !reads.some((r) => r.page === p));
   const faults = [
     ...reads.flatMap(stageFaults),
@@ -141,9 +145,14 @@ export async function ea6Upright(ctx: SuiteContext): Promise<void> {
     : null;
   const onInk = desk.every((p) => nearRgba([...p, 255], ink));
   ctx.check(
-    "EA6 on a phone held upright (390x844, laid out 1024x2217) every chart room keeps the desk frame: it lays out 1024 by 768 at the top of a page no taller than the window, no sheet floors, the Press never stacks, no chrome ink meets other chrome ink, and the desk below the frame reads chart ink where a row through a sheet does not (Issue #778 ruling 9)",
-    missing.length === 0 && faults.length === 0 && onInk && control !== null && !nearRgba([...control, 255], ink),
-    `${reads.length} chart rooms${missing.length ? `, missing ${missing.join(", ")}` : ""}; desk rows ${DESK_ROWS.map((y, i) => `${y}: ${desk[i]?.join(",")}`).join("; ")}, a row through the sheet ${control?.join(",")}; ${faults.length ? `${faults.length} faults: ${faults.slice(0, 6).join("; ")}` : "no faults"}`,
+    "EA6 on a phone held upright (390x844, laid out 1024x2217) every chart room keeps the desk frame: it lays out 1024 by 768 at the top of a page no taller than the window, its body at 768 the moment the frame switches on, under reduced motion and with the page's style resolved before the room binds, no sheet floors, the Press never stacks, no chrome ink meets other chrome ink, and the desk below the frame reads chart ink where a row through a sheet does not (Issue #778 ruling 9)",
+    missing.length === 0 &&
+      switched.length === 0 &&
+      faults.length === 0 &&
+      onInk &&
+      control !== null &&
+      !nearRgba([...control, 255], ink),
+    `${reads.length} chart rooms${missing.length ? `, missing ${missing.join(", ")}` : ""}; desk rows ${DESK_ROWS.map((y, i) => `${y}: ${desk[i]?.join(",")}`).join("; ")}, a row through the sheet ${control?.join(",")}; the switch ${switched.join("; ") || "768 at once in every room"}; ${faults.length ? `${faults.length} faults: ${faults.slice(0, 6).join("; ")}` : "no faults"}`,
   );
 }
 

@@ -9,6 +9,8 @@ import type { Payload, SuiteContext } from "../../types.ts";
 import { GLYPHS_OVER_SHEET } from "./glyphs.ts";
 import type { Glyph } from "./glyphs.ts";
 import { routesUnder } from "../corners/geometry.ts";
+import { switchFaults, withStyledBoot } from "./styled-boot.ts";
+import type { DeskSwitch } from "./styled-boot.ts";
 
 const REPO = resolve(fileURLToPath(new URL(".", import.meta.url)), "..", "..", "..");
 export const CHART_ROOM_FLOOR = [
@@ -61,6 +63,8 @@ type Stage = {
   framed: boolean;
   pageH: number;
   docH: number;
+  reduce: boolean;
+  deskSwitch: DeskSwitch | null;
   sheet: Box;
   under: boolean;
   reserveRight: number;
@@ -122,7 +126,7 @@ const STAGE: Payload<Stage | { chartRoom: false; ready: boolean }> = `(() => {
   const order = pieceEls.map((e, i) => i).sort((i, j) => (pieceEls[i].compareDocumentPosition(pieceEls[j]) & Node.DOCUMENT_POSITION_FOLLOWING) ? -1 : 1);
   const ranks = pieceEls.map((e, i) => (parseInt(getComputedStyle(e).zIndex, 10) || 0) * 1000 + order.indexOf(i));
   const status = document.querySelector(".stage .status");
-  return { chartRoom: true, ready, drawn: !status || !status.textContent.trim().endsWith("\\u2026"), innerW: innerWidth, innerH: innerHeight, pageW, framed, pageH, docH: document.documentElement.scrollHeight,
+  return { chartRoom: true, ready, drawn: !status || !status.textContent.trim().endsWith("\\u2026"), innerW: innerWidth, innerH: innerHeight, pageW, framed, pageH, docH: document.documentElement.scrollHeight, reduce: matchMedia("(prefers-reduced-motion: reduce)").matches, deskSwitch: window.__deskSwitch ?? null,
     sheet: box(sheet.getBoundingClientRect()), under: document.body.classList.contains("stage-under"),
     reserveRight: frame ? parseFloat(frame.style.getPropertyValue("--reserve-right")) : NaN,
     presses: legend ? [...legend.querySelectorAll(".legend-row .legend-btn")].map((b) => b.getBoundingClientRect()).filter((b) => b.width > 0).map(box) : [],
@@ -224,22 +228,30 @@ export type StageRun = { rooms: string[]; reads: Read[] };
 
 export async function ea1Phone(ctx: SuiteContext): Promise<StageRun> {
   await ctx.setMobileViewport(PHONE.w, PHONE.h);
-  const reads: Read[] = [];
-  for (const page of routesUnder(resolve(REPO, "src/pages"))) {
-    const s = await open(ctx, page, PHONE.w, PHONE.h, PHONE.laidOut, "EA1");
-    if (s) reads.push({ page, size: `${PHONE.w}x${PHONE.h} phone`, s });
-  }
+  const reads = await withStyledBoot(ctx, async () => {
+    const got: Read[] = [];
+    for (const page of routesUnder(resolve(REPO, "src/pages"))) {
+      const s = await open(ctx, page, PHONE.w, PHONE.h, PHONE.laidOut, "EA1");
+      if (s) got.push({ page, size: `${PHONE.w}x${PHONE.h} phone`, s });
+    }
+    return got;
+  });
   const rooms = reads.map((r) => r.page);
   const missing = CHART_ROOM_FLOOR.filter((p) => !rooms.includes(p));
   const floored = reads.filter((r) => r.s.under).map((r) => r.page);
   const unframed = reads
     .filter((r) => !r.s.framed || r.s.pageH !== DESK_FRAME_H || r.s.docH !== DESK_FRAME_H)
     .map((r) => `${r.page} (framed ${r.s.framed}, ${r.s.pageH} tall, document ${r.s.docH})`);
+  const switched = switchFaults(reads, DESK_FRAME_H);
   const faults = known(reads.flatMap(stageFaults));
   ctx.check(
-    "EA1 on a phone held sideways (844x390, laid out 1024x474 by the fixed viewport) every chart room keeps the desk frame: it lays out 1024 by 768, the page scrolling the 294 the window lacks, no sheet floors, the Press never stacks, and no chrome ink meets other chrome ink or lies under another piece's backing (Issue #778 ruling 10, which retired the floor the Explorer and the Print Room took here under Issue #762)",
-    missing.length === 0 && unframed.length === 0 && floored.length === 0 && faults.length === 0,
-    `${rooms.length} chart rooms${missing.length ? `, missing ${missing.join(", ")}` : ""}; unframed ${unframed.join(", ") || "none"}; floored ${floored.join(", ") || "none"}; ${faults.length ? `${faults.length} faults: ${faults.slice(0, 6).join("; ")}` : "no faults"}`,
+    "EA1 on a phone held sideways (844x390, laid out 1024x474 by the fixed viewport) every chart room keeps the desk frame: it lays out 1024 by 768, the page scrolling the 294 the window lacks, its body at 768 the moment the frame switches on, under reduced motion and with the page's style resolved before the room binds, no sheet floors, the Press never stacks, and no chrome ink meets other chrome ink or lies under another piece's backing (Issue #778 ruling 10, which retired the floor the Explorer and the Print Room took here under Issue #762)",
+    missing.length === 0 &&
+      unframed.length === 0 &&
+      switched.length === 0 &&
+      floored.length === 0 &&
+      faults.length === 0,
+    `${rooms.length} chart rooms${missing.length ? `, missing ${missing.join(", ")}` : ""}; unframed ${unframed.join(", ") || "none"}; the switch ${switched.join("; ") || "768 at once in every room"}; floored ${floored.join(", ") || "none"}; ${faults.length ? `${faults.length} faults: ${faults.slice(0, 6).join("; ")}` : "no faults"}`,
   );
   return { rooms, reads };
 }

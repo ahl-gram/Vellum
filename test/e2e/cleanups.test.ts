@@ -5,6 +5,7 @@ import { cd50ScriptsOffHome } from "../../e2e/suites/chart-drawer/portfolio.ts";
 import type { TableKit } from "../../e2e/suites/chart-drawer/kit.ts";
 import { deskKit, dnContinue, dnRefused } from "../../e2e/suites/cluster/desk-notice.ts";
 import type { DeskKit } from "../../e2e/suites/cluster/desk-notice.ts";
+import { withStyledBoot } from "../../e2e/suites/stage/styled-boot.ts";
 import type { SuiteContext } from "../../e2e/types.ts";
 
 const SCRIPTS = "Emulation.setScriptExecutionDisabled";
@@ -140,4 +141,23 @@ test("the desk kit's forget removes the notice's own key from the page's storage
   } as unknown as SuiteContext;
   await deskKit(ctx).forget();
   assert.ok(evaluated.includes(`localStorage.removeItem("vellum.desk-notice.v1")`), JSON.stringify(evaluated));
+});
+
+test("withStyledBoot takes its forced style read back off by its own identifier, after its body and when its body throws (Issue #778)", async () => {
+  const quiet = recorder();
+  assert.equal(await withStyledBoot({ send: quiet.send }, () => Promise.resolve("read")), "read");
+  const failing = recorder();
+  await assert.rejects(
+    withStyledBoot({ send: failing.send }, () => Promise.reject(new Error("the body's own error"))),
+    /the body's own error/,
+  );
+  for (const { sent } of [quiet, failing]) {
+    const added = sent.findIndex((s) => s.method === "Page.addScriptToEvaluateOnNewDocument");
+    assert.notEqual(added, -1, "the boot was never forced");
+    assert.deepEqual(
+      sent.filter((s) => s.method === "Page.removeScriptToEvaluateOnNewDocument").map((s) => s.params?.["identifier"]),
+      [`script-${added + 1}`],
+      "a forced style read outlives its step",
+    );
+  }
 });
