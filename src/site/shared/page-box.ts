@@ -24,7 +24,7 @@ export interface PageBox {
   readonly h: number;
 }
 
-/** The page a room lays out on: the floor's width at a narrower window, and the desk frame's height on a page that boots set small, else the root's client height, which a sideways scrollbar shortens where `innerHeight` does not. */
+/** The page a room lays out on: the floor's width at a narrower window, and the root's client height, which a sideways scrollbar shortens where `innerHeight` does not. */
 export function pageBox(): PageBox {
   const root = document.documentElement;
   const frame = root.classList.contains(DESK_FRAME)

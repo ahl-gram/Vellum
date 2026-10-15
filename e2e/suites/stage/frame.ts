@@ -9,7 +9,6 @@ import type { Read } from "./stage.ts";
 import { switchFaults, withStyledBoot } from "./styled-boot.ts";
 
 const UPRIGHT = { w: 390, h: 844, laidOut: { w: 1024, h: 2217 } };
-// On the desk: four pixels under the frame's foot at 768, where the deep's gradient would step, and far below it, above the upright window's foot at 2217.
 const DESK_ROWS = [772, 1500];
 // Points of the 844x390 screen on every room's sheet and off its slip and Press, read as screen or as layout pixels (measured 2026-10-14, Issue #778's planner probes).
 const SWIPE_AT = { x: 422, y: 300 };
