@@ -3,7 +3,7 @@
 **This file is the orchestrating session's half of running several lanes at once**, a lane being
 one issue's `vellum-planner` and then its `vellum-implementer`: how it briefs them, relays their menus and Alex's rulings, watches them, recovers one that
 stalls or loses its tree, merges what it is cleared to merge, and retires them. Read it before
-dispatching a second lane, and before handing an issue from one lane to another.
+dispatching a lane, and before handing an issue from one lane to another.
 
 Each lane runs `handbook/specs/development-workflow.md` up to an open pull request with CI green,
 the planner through step 6 and the implementer from step 7 to that point, and the lane's own half is its two definitions':

@@ -84,7 +84,7 @@ comment,
 `handbook/specs/settle-doctrine.md` before any work that writes an e2e wait, settle, or CDP probe, or that
 reads a screenshot, a focus state or a narrow viewport in the harness,
 `handbook/specs/check-placement.md` before writing a test, a lint rule or a browser check, or moving a rule
-from one to another, and `handbook/specs/orchestration.md` before dispatching a second lane, or handing
+from one to another, and `handbook/specs/orchestration.md` before dispatching a lane, or handing
 an issue from one lane to another.
 
 **4. Get a cold read on the plan: `vellum-plan-skeptic`.** Not `vellum-pr-skeptic`, which reviews a
@@ -198,14 +198,14 @@ worktree when it starts, and its definition carries the rename.
 **8. Implement.** Five things the word hides, the first a record and the rest each with its own
 scar:
 
-- **Archive the finalized plan before the first commit.** Copy the plan exactly as step 6 left it
-  to `handbook/plans/<N>/<N>-plan.md` at the repo root, `N` the issue's number, and commit it with the
+- **Archive the finalized plan before the first commit.** Copy the plan exactly as step 6 left it,
+  Alex's folded rulings included, to `handbook/plans/<N>/<N>-plan.md` at the repo root, `N` the issue's number, and commit it with the
   implementation. Every plan for an issue lives in that issue's own directory. An issue that ships
   as several pull requests archives one plan per pull request: the first is
   `handbook/plans/<N>/<N>-plan.md` and stays frozen as that pull request left it, and each later pull
   request archives its own reviewed design beside it as `handbook/plans/<N>/<N>-<label>-plan.md`, `<label>`
   naming the row or pull request (`row8a`, `pr2`), copied as it stood after the plan skeptic's
-  findings were folded in and committed with that pull request's first commit. Each is a record
+  findings and Alex's rulings were folded in and committed with that pull request's first commit. Each is a record
   of what was planned and is never edited afterwards: a plan that
   changes at review is named in the PR body with the difference, not a rewritten file.
   `handbook/plans/` is an archive on `design/`'s pattern, content only, and sits outside the roots
