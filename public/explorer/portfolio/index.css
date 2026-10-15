@@ -20,7 +20,7 @@
   inset: 0;
   cursor: grab;
 }
-/* d3-zoom does not set touch-action; without none the browser's native pan and pinch preempt the gesture. `attach` in `src/site/shared/zoom-controller.ts` adds .zoomable, and every chart room carries this rule in its own sheet. */
+/* d3-zoom does not set touch-action; without none the browser's native pan and pinch preempt the gesture. `attach` in `src/site/shared/zoom-controller.ts` adds .zoomable while the chart takes touch (Issue #778), and every chart room carries this rule in its own sheet. */
 #map-viewport.zoomable {
   touch-action: none;
 }

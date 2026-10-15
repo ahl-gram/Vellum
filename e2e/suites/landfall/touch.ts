@@ -1,6 +1,9 @@
+import { browserPinch, touchRead } from "../../support/chart-touch.ts";
+import { readCam } from "../../support/home.ts";
+import { makeSettle } from "../../support/settle.ts";
 import type { Point } from "../../types.ts";
 import type { LandfallKit } from "./kit.ts";
-import { roomy, stillCam } from "./reads.ts";
+import { roomy, stagePoint, stillCam } from "./reads.ts";
 
 export async function l9aOneFinger(
   { evaluate, send, check, sleep, touch, camNow }: LandfallKit,
@@ -104,5 +107,61 @@ export async function l9cTwoFingerPan(
       panDelta.dy < 42 &&
       Math.abs(panDelta.sRatio - 1) < 1e-6,
     JSON.stringify({ room9c, startClear9c, panBefore, panAfter, panDelta }),
+  );
+}
+
+async function tapTwice({ touch, sleep }: LandfallKit, p: Point): Promise<void> {
+  for (const gap of [60, 0]) {
+    await touch("touchStart", [{ x: p.x, y: p.y, id: 0 }]);
+    await touch("touchEnd", []);
+    await sleep(gap);
+  }
+}
+
+const PAST_DIVE_MS = 800; // home's dive flies 0.6s
+export async function l9iTouchOff(k: LandfallKit): Promise<void> {
+  const { evaluate, check, camNow, sleep } = k;
+  const pt = await evaluate(stagePoint);
+  if (pt === null) throw new Error("home has no stage to read");
+  const read = await evaluate(touchRead("#lf-stage"));
+  const onControl = await evaluate<boolean>(
+    `document.elementFromPoint(${pt.x}, ${pt.y})?.closest("button, a, input, select") != null`,
+  );
+  const before = await camNow();
+  await evaluate(
+    `(window.__l9iDbl = 0, document.getElementById("lf-stage").addEventListener("dblclick", () => { window.__l9iDbl++; }, true), true)`,
+  );
+  await tapTwice(k, pt);
+  await makeSettle(k)<number>(
+    `window.__l9iDbl`,
+    (d) => d >= 1,
+    "L9i the double tap reaches the stage as a double click",
+  );
+  await sleep(PAST_DIVE_MS);
+  const after = await makeSettle(k)(readCam, (d, last) => stillCam(d, last), "L9i the camera rests");
+  check(
+    "L9i where touch is the main pointer home's stage takes no finger until the touch press is pressed: touch-action manipulation and no class, and a double tap leaves the camera where it was (Issue #778)",
+    read.shown &&
+      read.pressed === "false" &&
+      read.zoomable === false &&
+      read.touchAction === "manipulation" &&
+      !onControl &&
+      stillCam(before, after),
+    JSON.stringify({ read, onControl, before, after }),
+  );
+}
+
+export async function l9jBrowserPinch(k: LandfallKit): Promise<void> {
+  const { evaluate, check, camNow } = k;
+  const pt = await evaluate(stagePoint);
+  if (pt === null) throw new Error("home has no stage to read");
+  const before = await camNow();
+  await browserPinch(k, pt, "L9j");
+  const after = await makeSettle(k)(readCam, (d, last) => stillCam(d, last), "L9j the camera rests");
+  const scale = await evaluate<number>(`visualViewport.scale`);
+  check(
+    "L9j with the touch press off a browser pinch's two fingers on home's stage reach the page and never move the map (the page's own zoom is a phone pass item) (Issue #778)",
+    stillCam(before, after),
+    JSON.stringify({ scale, before, after }),
   );
 }

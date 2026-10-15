@@ -105,7 +105,15 @@ const kitClasses = (): Set<string> => {
 };
 
 const HOUSE_SHEETS = /^(atelier[^/]*|house|motion|fonts|shell)\.css$/;
-const KIT_IDS: ReadonlySet<string> = new Set(["sheet", "map-viewport", "map", "zoom-in", "zoom-out", "zoom-reset"]);
+const KIT_IDS: ReadonlySet<string> = new Set([
+  "sheet",
+  "map-viewport",
+  "map",
+  "zoom-in",
+  "zoom-out",
+  "zoom-reset",
+  "zoom-touch",
+]);
 const OWN_ELEMENT: ReadonlySet<string> = new Set(["select", "input", "option", "optgroup", "textarea", "label"]);
 const REDRESS =
   /^(color|background(-color|-image)?|border(-[a-z]+)?|outline(-color)?|box-shadow|font(-[a-z]+)?|letter-spacing|text-decoration|text-transform|opacity)$/;

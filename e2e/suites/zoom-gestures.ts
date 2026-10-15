@@ -1,8 +1,19 @@
-// Glass gestures e2e (Issue #166): suite-zoom's behaviour re-proven through REAL CDP input (mouse wheel, touch, device metrics); runs right after suite-zoom and restores its clean desktop home before suite-cards. d3-zoom binds its touch listeners ONLY when the page BOOTS as a touch device (defaultTouchable reads navigator.maxTouchPoints at attach time), so the touch block enables emulation and then RELOADS. NEVER dispatch a real touch while touch emulation is off (it wedges Chrome's touch input pipeline for the WHOLE session; a real mouse wheel is safe, only touch poisons), and NEVER change the emulation config after a real touch (later touches route to native page pinch-zoom and a clear+reload does NOT recover it), so ALL touch checks run under ONE tablet-metric emulation set (1024x768, Issue #761) enabled once and left alone.
+// Glass gestures e2e (Issue #166): suite-zoom's behaviour re-proven through REAL CDP input (mouse wheel, touch, device metrics); runs right after suite-zoom and restores its clean desktop home before suite-cards; the chart takes a finger only once its touch press is pressed (Issue #778), so ZG5 to ZG7 read it off, ZG9 reads every other room off, ZG10 carries it from room to room and takes it back, ZG8 presses it for ZG2 to ZG4, ZG8c takes it back, and the suite forgets it before the next. d3-zoom binds its touch listeners ONLY when the page BOOTS as a touch device (defaultTouchable reads navigator.maxTouchPoints at attach time), so the touch block enables emulation and then RELOADS. NEVER dispatch a real touch while touch emulation is off (it wedges Chrome's touch input pipeline for the WHOLE session; a real mouse wheel is safe, only touch poisons), and NEVER change the emulation config after a real touch (later touches route to native page pinch-zoom and a clear+reload does NOT recover it), and NEVER load a page in the touch block after a dispatched two-finger touch (later touches then reach no listener, a tap landing only as its click, and a pinch zooms the page whatever touch-action says; measured 2026-10-13 on main's build too, Issue #778), so every page load comes before ZG2's pinch, the touch-off pinch is the browser's own (Input.synthesizePinchGesture) and is read for its two fingers and the camera, never for the page's own zoom (linux Chrome on CI never moves visualViewport.scale under it, where Brave on macOS zooms the page to 2; measured 2026-10-13, Issue #778), and ALL touch checks run under ONE tablet-metric emulation set (1024x768, Issue #761) enabled once and left alone.
+import { forgetChartTouch } from "../support/chart-touch.ts";
 import { makeStep } from "../support/step.ts";
 import type { SuiteContext } from "../types.ts";
+import {
+  zg10Carried,
+  zg1cDeskHidesTouch,
+  zg4BrowserPinch,
+  zg8TouchTaken,
+  zg6Pinches,
+  zg8cTakenBack,
+  zg9Rooms,
+  zgTouchOff,
+} from "./zoom-gestures/touch.ts";
 
-type GesturesKit = ReturnType<typeof gesturesKit>;
+export type GesturesKit = ReturnType<typeof gesturesKit>;
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const { setMobileViewport, clearMobile } = ctx;
@@ -11,8 +22,19 @@ export async function run(ctx: SuiteContext): Promise<void> {
   const k = gesturesKit(ctx);
 
   await zg1WheelZooms(k);
+  await step("ZG1c", () => zg1cDeskHidesTouch(k));
   await setMobileViewport(1024, 768);
-  await step("ZG2, ZG3, ZG4", () => zg2TouchGestures(k));
+  await step("ZG5, ZG5b, ZG7", () => zgTouchOff(k));
+  await step("ZG6", () => zg6Pinches(k));
+  await step("ZG9", () => zg9Rooms(k));
+  await step("ZG10", () => zg10Carried(k));
+  await step("ZG8, ZG8b, ZG2, ZG3, ZG4, ZG8c", async () => {
+    await zg8TouchTaken(k);
+    await zg2TouchGestures(k);
+    await zg4BrowserPinch(k);
+    await zg8cTakenBack(k);
+  });
+  await k.evaluate(forgetChartTouch);
 
   // clearMobile stays OUTSIDE every step: the runner compensates for a suite left at phone metrics in onSuiteError, which a contained step no longer reaches.
   await clearMobile();
@@ -69,21 +91,17 @@ async function zg2TouchGestures({
   sleep,
   pinch,
   touchPan,
-  reloadHome,
   vpRect,
   state,
 }: GesturesKit): Promise<void> {
-  await reloadHome("gesture-mobile-boot");
   await zg2aTablet(evaluate, check);
-  const touchAction = await evaluate<string>(`getComputedStyle(document.getElementById("map-viewport")).touchAction`);
-  const scaleAtBoot = await evaluate<number>(`visualViewport.scale`);
   const scrollToMap = () =>
     evaluate<undefined>(`document.getElementById("map-viewport").scrollIntoView({block:"center"})`);
   await scrollToMap();
   await sleep(60);
 
-  let r = await vpRect();
-  let cx = Math.round(r.L + r.W * 0.5),
+  const r = await vpRect();
+  const cx = Math.round(r.L + r.W * 0.5),
     cy = Math.round(r.T + r.H * 0.5);
   await pinch(cx, cy, 70, 170);
   await sleep(100);
@@ -104,26 +122,6 @@ async function zg2TouchGestures({
     Math.abs(after.x - before.x - -80) < 2 && Math.abs(after.y - before.y - -60) < 2 && after.k === before.k,
     JSON.stringify({ before, after }),
   );
-
-  await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
-  await scrollToMap();
-  await sleep(60);
-  r = await vpRect();
-  cx = Math.round(r.L + r.W * 0.5);
-  cy = Math.round(r.T + r.H * 0.5);
-  const scrollBefore = await evaluate<number>(`window.scrollY`);
-  await pinch(cx, cy, 70, 180);
-  await sleep(100);
-  const zg4 = await state();
-  const page = await evaluate<{ scrolled: number; vs: number }>(
-    `({scrolled:(window.scrollY - ${scrollBefore}), vs:visualViewport.scale})`,
-  );
-  check(
-    "ZG4 a pinch under mobile viewport zooms the map without page pinch-zoom (AC2 touch-action wiring)",
-    touchAction === "none" && Math.abs(scaleAtBoot - 1) < 0.01 && zg4.k > 1.3 && Math.abs(page.vs - 1) < 0.01,
-    JSON.stringify({ touchAction, scaleAtBoot, k: zg4.k, page }),
-  );
-  await shoot("explorer-gesture-mobile-pinch.png");
 }
 
 async function zg2aTablet(evaluate: GesturesKit["evaluate"], check: GesturesKit["check"]): Promise<void> {

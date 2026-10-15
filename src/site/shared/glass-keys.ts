@@ -1,4 +1,5 @@
 // The Surveyor's Glass on a plain controller, the Hunt's and every room whose camera is purely geometric: keys and buttons enter d3-zoom's own pipeline through the controller, the Explorer's wiring. The Explorer keeps its own in glass.ts, where the home glide also eases the LOD camera.
+import { bindChartTouch, pageTouchEnv } from "./chart-touch.ts";
 import type { ZoomController } from "./zoom-controller.ts";
 
 // The Explorer's own steps (src/site/explorer/glass.ts), not imported: that module carries the LOD schedule the Hunt must never bundle.
@@ -47,4 +48,5 @@ export function bindGlassKeys(viewport: HTMLElement, zoom: ZoomController): void
       else zoom.glideHome();
     });
   }
+  bindChartTouch(document.getElementById("zoom-touch"), (on) => zoom.takeTouch(on), pageTouchEnv());
 }

@@ -267,7 +267,13 @@ const glass = createGlass({
       settleEase: () => token("--ease-paper") || "ease-out",
     });
   },
-  buttons: { zoomIn: $("zoom-in"), zoomOut: $("zoom-out"), reset: $("zoom-reset"), cluster: $("zoom-controls") },
+  buttons: {
+    touch: $("zoom-touch"),
+    zoomIn: $("zoom-in"),
+    zoomOut: $("zoom-out"),
+    reset: $("zoom-reset"),
+    cluster: $("zoom-controls"),
+  },
 });
 
 const room = bindRoom({

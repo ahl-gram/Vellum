@@ -162,7 +162,21 @@ make an unqualified rule false. Read the surface, not just the rule.
   refuses a `glass-keys` import and any `[data-zoom]` string under `src/site/explorer/` and
   `src/site/home/`; a selector assembled from pieces passes it.
 - **`touch-action: none` is required for touch drag and pinch**, because the zoom behaviour does not
-  set it, and it is gated to the class the controller adds only while attached.
+  set it, and it is gated to the class the controller adds only while attached and taking touch.
+- **Where touch is the main pointer a finger moves the page until the reader gives it to the
+  chart** (Alex, 2026-10-13, Issue #778). The press at the top of the Glass (`bindChartTouch` in
+  `src/site/shared/chart-touch.ts`) shows only where the house's touch gate matches as the page
+  boots (`TOUCH_PRIMARY` there), starts off on every visit and holds the reader's choice for the
+  visit. A device with touch but another main pointer, a touchscreen laptop, shows no press and
+  its chart takes a finger as it always has. Off, the camera listens to no touch: `takeTouch` in
+  `src/site/shared/zoom-controller.ts` unbinds the camera's touch listeners and drops the class,
+  the box takes `touch-action: manipulation` so a tap on the chart never waits for a second one,
+  and the camera's filter refuses the mouse events a tap fires (`gestureAllowed` there), since a
+  double tap otherwise reaches the double-click zoom. Home's stage takes the same press through
+  `bindStageInput` in `src/site/home/input.ts`. The wheel, the keys and the Glass's presses drive
+  the camera whatever the press says. **A new surface that takes a finger joins this press**
+  rather than taking touch on its own. Whether a real phone gives the pinch to the page every
+  time is a phone pass, never a harness read.
 - **Any interactive control placed inside the zoom-bound gesture box stops propagation of the gesture
   events on its container**, or a rapid double-click on the control bubbles into the built-in
   double-click-to-zoom and the map lurches on its own. The live instance is `makeDogEar` in

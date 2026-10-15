@@ -75,6 +75,7 @@ const deskFaults = (d: Desk): string[] =>
     same(d.viewport, ["0", "application", 0]) || "the gesture box focusable, an application, empty as authored",
     d.mount === 0 || "the frame's empty mount",
     same(d.glass, [
+      ["zoom-touch", null],
       ["zoom-in", "in"],
       ["zoom-out", "out"],
       ["zoom-reset", "fit"],

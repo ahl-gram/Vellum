@@ -1,11 +1,12 @@
 ---
-// The camera at the chart's corner (#462 chart-room ruling 2; the Atelier Kit, #487; the atelier-map mockup's own shape): three presses, a SIBLING of the stage so it never rides #map's live zoom. The presses carry data-zoom for the kit's glass-keys.ts; the Explorer and home bind them by id from their own scripts.
+// The camera at the chart's corner (Issue #462 chart-room ruling 2; the Atelier Kit, Issue #487; the atelier-map mockup's own shape): three presses, a SIBLING of the stage so it never rides #map's live zoom, and above them the chart's touch press, hidden until the script shows it where touch is the main pointer (Issue #778). The zoom presses carry data-zoom for the kit's glass-keys.ts and the touch press none; the Explorer and home bind them by id from their own scripts.
 interface Props {
   id?: string;
 }
 const { id } = Astro.props;
 ---
 <div class="chrome corner br zoomery" id={id} role="group" aria-label="Camera">
+  <button id="zoom-touch" class="zoom-btn touch-btn" type="button" aria-pressed="false" aria-label="The chart in hand" hidden>&#9758;</button>
   <button id="zoom-in" class="zoom-btn" type="button" data-zoom="in" aria-label="Draw nearer">+</button>
   <button id="zoom-out" class="zoom-btn" type="button" data-zoom="out" aria-label="Stand off">&minus;</button>
   <button id="zoom-reset" class="zoom-btn" type="button" data-zoom="fit" aria-label="The whole sheet">&#8962;</button>

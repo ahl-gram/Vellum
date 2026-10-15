@@ -1,4 +1,5 @@
 // The Surveyor's Glass wiring: one factory owns the geometric camera, the semantic redraft, the card counter-scale and the keyboard + on-screen driving; app.ts keeps only the POLICY calls (when to rebase, reset, or home).
+import { bindChartTouch, pageTouchEnv } from "../shared/chart-touch.ts";
 import { createZoomController, type ZoomController, type ZoomState } from "../shared/zoom-controller.ts";
 import { createLodController } from "./lod-controller.ts";
 import { cameraFromTransform, transformFromCamera, type Camera } from "./camera.ts";
@@ -24,7 +25,7 @@ interface GlassDeps {
   syncHash: () => void;
   /** Issue #520: the dog-ear rides the committed inset, so the conductor hangs it here rather than on a sibling that would outlive the sheet. */
   decorateInset?: (el: HTMLElement) => void;
-  buttons: { zoomIn: HTMLElement; zoomOut: HTMLElement; reset: HTMLElement; cluster: HTMLElement };
+  buttons: { touch: HTMLElement; zoomIn: HTMLElement; zoomOut: HTMLElement; reset: HTMLElement; cluster: HTMLElement };
 }
 
 type LodController = ReturnType<typeof createLodController>;
@@ -161,6 +162,7 @@ function glassPresses(buttons: GlassDeps["buttons"], zoomController: ZoomControl
   for (const type of ["mousedown", "dblclick", "wheel", "touchstart"]) {
     buttons.cluster.addEventListener(type, (e) => e.stopPropagation());
   }
+  bindChartTouch(buttons.touch, (on) => zoomController.takeTouch(on), pageTouchEnv());
 }
 
 function glassApi(zoomController: ZoomController, lodController: LodController) {

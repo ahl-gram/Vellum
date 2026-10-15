@@ -15,6 +15,7 @@ import { firstArrival, landfallView, markArrival, wideView } from "./ceremony.ts
 import { bearingLine, type Capital } from "./coords.ts";
 import { bindStations } from "./cards.ts";
 import { DRIFT_SECONDS, IDLE_DELAY_MS, driftTarget } from "./drift.ts";
+import { bindChartTouch, pageTouchEnv } from "../shared/chart-touch.ts";
 import { bindStageInput } from "./input.ts";
 import { STATION_FLIGHT_SECONDS, stationFlightView } from "./station-flight.ts";
 import { createValve, overhangOf, sidewaysToPage } from "./valve.ts";
@@ -125,7 +126,18 @@ if (stage instanceof HTMLElement && sheetEl instanceof HTMLElement) {
 
   let gestureScale = 1;
   const valve = createValve();
+  let takesTouch = true;
+  stage.classList.add("zoomable");
+  bindChartTouch(
+    document.getElementById("zoom-touch"),
+    (on) => {
+      takesTouch = on;
+      stage.classList.toggle("zoomable", on);
+    },
+    pageTouchEnv(),
+  );
   bindStageInput(stage, {
+    takesTouch: () => takesTouch,
     press: () => {
       gestureScale = cam.s;
       stopDrift();

@@ -80,7 +80,9 @@ deliberately moved posters, atlas and PDF off the CLI onto dedicated pages, shri
 
 **Desktop only** (Alex, 2026-10-04 and 2026-10-06, Issue #760; worded 2026-10-07, Issue #764). Vellum is made for a desktop, a
 laptop or a large tablet: no layout is built for a window narrower than the one
-`handbook/specs/ui-design.md` lays every page out for, and touch input stays, for the tablets. Two
+`handbook/specs/ui-design.md` lays every page out for. Touch input stays, for the tablets, but a
+chart takes a finger only once the reader asks it to (Alex, 2026-10-13, Issue #778); until then a
+pinch and a swipe move the page. Two
 costs are accepted with it: a desktop zoomed far enough to go below that width scrolls sideways
 rather than reflowing, and a search engine ranks a page that is not mobile-friendly lower. The way
 back, if Vellum ever courts search traffic, is the home page alone with a device-width viewport and

@@ -79,7 +79,7 @@ const KIT_PLANT: Plant = [
   [".legend .legend-head { display: block; color: red; }", REFUSE],
   [".slip-head h2 { color: var(--ink-brown); }", REFUSE],
   [".legend-btn .room { color: red; }", REFUSE],
-  ...["sheet", "map-viewport", "map", "zoom-in", "zoom-out", "zoom-reset"].map(
+  ...["sheet", "map-viewport", "map", "zoom-in", "zoom-out", "zoom-reset", "zoom-touch"].map(
     (id) => [`#${id} .legend-head { color: red; }`, REFUSE] as const,
   ),
   ...[
