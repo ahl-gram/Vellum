@@ -22,12 +22,14 @@ test("UF3 a viewport y read while the page is scrolled down a desk frame is the 
     "the slip's top read at -180 with the frame scrolled 294 stands at 114 on the page",
   );
   assert.equal(pageY(114, 0), 114, "unscrolled, the two agree");
+  assert.equal(pageY(100, -20), 80, "a rubber-banded page scrolled above its top reads less, never more");
 });
 
 test("UF4 a page that boots set small to fit the screen takes the desk frame, either way up, and a page at full size or larger never does (Issue #778 rulings 9 and 10)", () => {
   assert.equal(deskFrameDue(0.380859375), true, "390x844 phone upright: 390 / 1024");
   assert.equal(deskFrameDue(0.82421875), true, "844x390 phone sideways");
   assert.equal(deskFrameDue(0.80078125), true, "820x1180 tablet upright");
+  assert.equal(deskFrameDue(0.9990234375), true, "a 1023 screen's page, shrunk by a single pixel, is still set small");
   assert.equal(deskFrameDue(1), false, "a 1024x768 tablet, and every desktop, lays the page out at full size");
   assert.equal(deskFrameDue(1.15234375), false, "an 1180x820 tablet held sideways enlarges the page");
 });

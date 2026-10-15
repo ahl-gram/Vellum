@@ -145,13 +145,26 @@ test("the desk kit's forget removes the notice's own key from the page's storage
 
 test("withStyledBoot takes its forced style read back off by its own identifier, after its body and when its body throws (Issue #778)", async () => {
   const quiet = recorder();
-  assert.equal(await withStyledBoot({ send: quiet.send }, () => Promise.resolve("read")), "read");
+  const body = () => {
+    assert.equal(
+      quiet.sent.some((s) => s.method === "Page.removeScriptToEvaluateOnNewDocument"),
+      false,
+      "the forced style read was taken off before its body ran",
+    );
+    return Promise.resolve("read");
+  };
+  assert.equal(await withStyledBoot({ send: quiet.send }, body), "read");
   const failing = recorder();
   await assert.rejects(
     withStyledBoot({ send: failing.send }, () => Promise.reject(new Error("the body's own error"))),
     /the body's own error/,
   );
-  for (const { sent } of [quiet, failing]) {
+  const refusing = recorder((s) => s.method === "Page.removeScriptToEvaluateOnNewDocument");
+  await assert.rejects(
+    withStyledBoot({ send: refusing.send }, () => Promise.reject(new Error("the body's own error"))),
+    /the body's own error/,
+  );
+  for (const { sent } of [quiet, failing, refusing]) {
     const added = sent.findIndex((s) => s.method === "Page.addScriptToEvaluateOnNewDocument");
     assert.notEqual(added, -1, "the boot was never forced");
     assert.deepEqual(
