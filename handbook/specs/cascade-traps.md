@@ -67,6 +67,20 @@ declaration you write to get there. The checklist form of the same lines is `vel
   Their overflow also counts in the element's own `scrollWidth` and `scrollHeight`, so a script that
   sizes a capture or a scroll by that body reads past anything a reader can reach; read the
   document's instead.
+- **Under reduced motion a change of style is a transition, even where no rule wrote one.** The
+  blanket in `public/motion.css` sets `transition-duration: 0.01ms !important` on every element,
+  and `transition-property` is `all` wherever no rule sets it, so a height, an inset or a
+  transform that a class or a script changes reaches its new value a frame or two later rather
+  than at once. A rect read in the same task, or in a `ResizeObserver` callback of the next
+  frame, reads the old geometry, and a layout taken from it stays wrong until something lays the
+  page out again. With motion on only a property a rule names transitions; the lag the blanket
+  adds shows only under reduced motion, and only where the page had resolved its style before
+  the change. What stops it on one element is `transition-property: none`, since the blanket's
+  `!important` forces only the duration and the delay, so a `transition-duration: 0s` there
+  loses. The desk frame's body rule in `public/atelier.css` carries `transition: none` for this
+  (Issue #778), as `placeLegendRow` in `src/site/shared/room-seats.ts` and `layRow` in
+  `src/site/shell/top-row.ts` hold the transition off while they write and read; the cases still
+  open are Issue #868's.
 - **An absolutely positioned box with no positioned ancestor lays out against the window, not the
   floored page.** Its containing block is the initial one, the window's size, so under the 1024
   floor a shrink-to-fit box there wraps at a narrow window while every piece around it keeps its

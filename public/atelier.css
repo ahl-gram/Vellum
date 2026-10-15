@@ -58,6 +58,7 @@ body.chart-room {
   }
   html.desk-frame body.chart-room {
     height: var(--desk-frame-h);
+    transition: none;
   }
 }
 .desk-layer.on > :is(.slip, .legend) {

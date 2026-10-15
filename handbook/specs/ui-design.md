@@ -395,7 +395,9 @@ which of the two it is.
 subtler in a room than on the homepage.
 
 **Reduced motion is the control, not just a courtesy.** The shared motion sheet zeroes every animation
-delay and duration under `prefers-reduced-motion` with `!important`, and three things follow:
+and transition delay and cuts every duration to 0.01ms under `prefers-reduced-motion` with
+`!important` (near zero, not zero, and a transition on every property wherever no rule names
+which ones transition: `handbook/specs/cascade-traps.md`), and three things follow:
 
 - **A functional animation is not a ceremony.** A timer or a progress indicator that must keep running
   needs its own same-origin `!important` exemption at higher specificity, or the blanket stops it.
