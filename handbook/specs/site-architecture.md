@@ -97,7 +97,10 @@ symbol and path so the reader goes and looks.
   own, since its bytes are pinned. A desktop browser ignores the tag, so a narrowed or zoomed desktop
   window lays out at its own width: every page below 1024 keeps its 1024 layout at full size and the
   window scrolls sideways over it (the `min-width` on `body` in `public/shell.css`, Issue #762, and on
-  the served atlas's `html` in `src/atlas/document.ts`, Issue #763).
+  the served atlas's `html` in `src/atlas/document.ts`, Issue #763). A staged chart room on a page set
+  small that way also keeps a height, the desk frame's 768 (`handbook/specs/ui-design.md`, the room
+  and its furniture). It is keyed on the page's own shrink, which the desk notice already reads,
+  never on the window's width, and the layout stays 1024 wide, so the rule below does not reach it.
   `test/site/astro-scaffold.test.ts` and `test/atlas/document.test.ts` hold the tag, and `FL1` in
   `e2e/suites/corners/floor.ts` holds every served page to the floor. **No rule switches the layout at
   a fixed window width at or below the floor**, in a sheet or a script: `vellum/css-no-narrow-width`

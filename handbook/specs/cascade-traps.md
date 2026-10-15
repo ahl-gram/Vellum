@@ -66,7 +66,12 @@ declaration you write to get there. The checklist form of the same lines is `vel
   focus moving onto a piece can scroll out from under the reader (`FL5` in `e2e/suites/corners/floor.ts`).
   Their overflow also counts in the element's own `scrollWidth` and `scrollHeight`, so a script that
   sizes a capture or a scroll by that body reads past anything a reader can reach; read the
-  document's instead.
+  document's instead. **A desk frame makes that body shorter than the window**
+  (`handbook/specs/ui-design.md`): the containment keeps the body's own ground off the canvas, so the
+  desk below is painted on the root (`html.desk-frame` in `public/atelier.css`), and where the frame
+  is taller than the window the fixed furniture scrolls down with the page, so a script that seats a
+  piece reads its rects in page coordinates on both axes (`pageTop` and `pageBottom` beside
+  `pageLeft` in `src/site/shared/page-box.ts`).
 - **Under reduced motion a change of style is a transition, even where no rule wrote one.** The
   blanket in `public/motion.css` sets `transition-duration: 0.01ms !important` on every element,
   and `transition-property` is `all` wherever no rule sets it, so a height, an inset or a
