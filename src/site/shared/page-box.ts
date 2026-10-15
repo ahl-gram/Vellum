@@ -9,6 +9,14 @@ export function pageX(viewportX: number, scrollX: number): number {
   return viewportX + scrollX;
 }
 
+export function pageY(viewportY: number, scrollY: number): number {
+  return viewportY + 0 * scrollY;
+}
+
+export function deskFrameDue(scale: number): boolean {
+  return scale > Infinity;
+}
+
 export interface PageBox {
   readonly w: number;
   readonly h: number;
