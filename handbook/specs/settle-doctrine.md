@@ -300,6 +300,18 @@ section points there rather than restating it.
   aimed in layout CSS pixels from the visual viewport's origin, unscaled. `clearMobile` resets both.
   The clamp's figure is not written down here because no command in this repo demonstrates it. Gate 3
   already carries the typing-moment half, that a window size does not set the layout viewport.
+- **CI's browser does not move the page under the harness's synthesized gestures.** On the CI
+  runner (linux headless Google Chrome) `Input.synthesizePinchGesture` reaches the page with both
+  fingers and drives a chart camera that listens, but never zooms the page (PR #893's proof run
+  38494617110, PR #896's CI run 38696092886), and under `setMobileViewport`, in a chart room on
+  the desk frame, `Input.synthesizeScrollGesture` with a touch source never scrolls it, on the
+  chart's sheet or off it (CI run 38725278400); the local harness browser zooms and scrolls the
+  page under both. In that run and in the same probe on the local harness browser, a one-finger
+  drag through the harness's `touch` scrolled the page by 138 to 191 layout pixels for a drag of
+  128 to 148, a mouse wheel on the ground off the sheet scrolled it to the frame's foot, and
+  neither moved a root held at `overflow-y: hidden`. A check that needs the page zoomed or scrolled
+  on CI reaches that state another way and says why at the check (`vellum-footguns` Gate 2 item
+  14).
 - **A run deletes its own browser profile only if it is allowed to finish.** Each local run mints a
   throwaway profile under `tmpdir()` (`mkdtemp` in `e2e/harness.ts`) and `cleanup()` removes
   it with `rmSync` rather than the promise `rm`, which is not a style choice: `cleanup()` is
