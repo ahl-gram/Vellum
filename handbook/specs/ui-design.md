@@ -123,20 +123,33 @@ what the chrome leaves and **measured off the chrome's own rects, never guessed*
 the chrome has its text, or the fit reads an empty box, and again once the fonts are ready, on
 every resize, and whenever the head cluster or the room folio changes size, which `bindRoom` in
 `src/site/shared/room.ts` wires). **The stage is the fixed
-full-viewport box the chart is mounted in**, declared as `body.chart-room .stage` in
+box the chart is mounted in, the whole window or the desk frame below**, declared as `body.chart-room .stage` in
 `public/atelier.css`; a room that hangs its plates on the deep rather than mounting one chart has
 none, and the Gallery is that room today. No band, no footer: a chart room with a
-stage does not scroll. **The chart keeps a minimum size**: where the chrome would leave the sheet
-under half the width it could have (the window less an open slip, at the window's full height), the
+stage does not scroll, save down a desk frame taller than the window. **The chart keeps a minimum size**: where the chrome would leave the sheet
+under half the width it could have (the window less an open slip, at the window's full height, or the desk frame's), the
 sheet takes all of that room instead, centred and wholly inside the window, and runs under the
 chrome; it does not pan at rest, and the reader zooms to see beneath the chrome (`fitStage` in
 `src/site/shared/stage-fit.ts`, which marks the page `stage-under` while it does). **Provisional
 until the post-use review:** the floor's trigger and its size. **A room narrower than 1024 keeps its
 1024 layout at full size and the window scrolls sideways over it** (Alex, 2026-10-06, Issue #762):
 there is one layout, every piece of the chrome stands on the 1024 page where it stands at 1024, and
-the fit reads that page at the window's height. Home takes the same floor: its stage, its camera and
+the fit reads that page at the window's height, or at the desk frame's. Home takes the same floor: its stage, its camera and
 its corners stand on the 1024 page, and its riding cluster is laid out against that page, never the
-window. **A chart room without a stage is the exception and it does scroll**, its
+window.
+
+**Where the page boots set small to fit the screen, a chart room keeps the desk frame** (Alex,
+2026-10-13 and 2026-10-14, Issue #778 rulings 9 and 10 and their re-takes in issuecomment-6182363777):
+it lays out 1024 by 768, the window it is designed at, at the top of its page, whichever way the
+screen is held, and never fits the screen's own shape. Below a frame that stops short of the screen's
+foot lies the desk, flat chart ink; a screen shorter than the frame scrolls down it, the Glass and
+the chart folio starting below the screen. Whether the page is set small is read once, as the room
+binds (`deskFrameDue` in `src/site/shared/page-box.ts`, called by `bindRoom`), so a pinch that zooms
+the page never moves the frame. Home, the Gallery, the document rooms and every desktop or laptop
+window, whatever its shape, take none. **Provisional until the post-use review:** the frame's size
+and which screens take it.
+
+**A chart room without a stage is the exception and it does scroll**, its
 content passing under the fixed chrome, which is why it pools every piece of that chrome rather than
 the cluster alone, and why **it wears no vignettes**: a vignette is a fixed darkening band, and on a
 scrolling page it washes out whatever passes through it. Four corners, each a named piece of the kit:
@@ -228,7 +241,7 @@ looks like padding is the row's own pseudo-element drawn at those insets, so the
 seat and the fit both read, never changes. A real padding on it wraps the roads.
 
 **The desk notice is a note, never a wall.** A phone that had to shrink the page to fit sees the
-Notice to Travellers: a tilted parchment stamp above the foot of the screen, edged in a dark double
+Notice to Travellers: a tilted parchment stamp above the foot of the screen, or of the desk frame where the frame stops short of it, edged in a dark double
 rule with a close walnut halo so it stands clear of the page beneath it, and sized in units of the
 shrink so its text reads at 16 pixels on the phone's own screen, re-fitted when the phone turns. It
 shows on every page the layout renders until "Continue anyway" is pressed once, then never again in
@@ -395,7 +408,9 @@ which of the two it is.
 subtler in a room than on the homepage.
 
 **Reduced motion is the control, not just a courtesy.** The shared motion sheet zeroes every animation
-delay and duration under `prefers-reduced-motion` with `!important`, and three things follow:
+and transition delay and cuts every duration to 0.01ms under `prefers-reduced-motion` with
+`!important` (near zero, not zero, and a transition on every property wherever no rule names
+which ones transition: `handbook/specs/cascade-traps.md`), and three things follow:
 
 - **A functional animation is not a ceremony.** A timer or a progress indicator that must keep running
   needs its own same-origin `!important` exemption at higher specificity, or the blanket stops it.

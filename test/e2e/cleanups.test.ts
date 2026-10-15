@@ -5,6 +5,7 @@ import { cd50ScriptsOffHome } from "../../e2e/suites/chart-drawer/portfolio.ts";
 import type { TableKit } from "../../e2e/suites/chart-drawer/kit.ts";
 import { deskKit, dnContinue, dnRefused } from "../../e2e/suites/cluster/desk-notice.ts";
 import type { DeskKit } from "../../e2e/suites/cluster/desk-notice.ts";
+import { withStyledBoot } from "../../e2e/suites/stage/styled-boot.ts";
 import type { SuiteContext } from "../../e2e/types.ts";
 
 const SCRIPTS = "Emulation.setScriptExecutionDisabled";
@@ -140,4 +141,36 @@ test("the desk kit's forget removes the notice's own key from the page's storage
   } as unknown as SuiteContext;
   await deskKit(ctx).forget();
   assert.ok(evaluated.includes(`localStorage.removeItem("vellum.desk-notice.v1")`), JSON.stringify(evaluated));
+});
+
+test("withStyledBoot takes its forced style read back off by its own identifier, after its body and when its body throws (Issue #778)", async () => {
+  const quiet = recorder();
+  const body = () => {
+    assert.equal(
+      quiet.sent.some((s) => s.method === "Page.removeScriptToEvaluateOnNewDocument"),
+      false,
+      "the forced style read was taken off before its body ran",
+    );
+    return Promise.resolve("read");
+  };
+  assert.equal(await withStyledBoot({ send: quiet.send }, body), "read");
+  const failing = recorder();
+  await assert.rejects(
+    withStyledBoot({ send: failing.send }, () => Promise.reject(new Error("the body's own error"))),
+    /the body's own error/,
+  );
+  const refusing = recorder((s) => s.method === "Page.removeScriptToEvaluateOnNewDocument");
+  await assert.rejects(
+    withStyledBoot({ send: refusing.send }, () => Promise.reject(new Error("the body's own error"))),
+    /the body's own error/,
+  );
+  for (const { sent } of [quiet, failing, refusing]) {
+    const added = sent.findIndex((s) => s.method === "Page.addScriptToEvaluateOnNewDocument");
+    assert.notEqual(added, -1, "the boot was never forced");
+    assert.deepEqual(
+      sent.filter((s) => s.method === "Page.removeScriptToEvaluateOnNewDocument").map((s) => s.params?.["identifier"]),
+      [`script-${added + 1}`],
+      "a forced style read outlives its step",
+    );
+  }
 });

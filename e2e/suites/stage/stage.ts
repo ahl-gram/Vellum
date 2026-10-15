@@ -1,6 +1,7 @@
-// The chart's minimum size in every chart room (Issue #762, pull request A): on a phone held sideways and on a short or narrow window the sheet keeps at least half the room it could show it in, and takes all of it when the fit would leave less; the Press never stacks down the page; no chrome ink lands on other chrome; and the chrome over a floored chart reads.
+// The chart's minimum size in every chart room (Issue #762, pull request A): on a short or narrow window the sheet keeps at least half the room it could show it in, and takes all of it when the fit would leave less, and a phone lays a chart room out in the desk frame (Issue #778); the Press never stacks down the page; no chrome ink lands on other chrome; and the chrome over a floored chart reads.
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { DESK_FRAME } from "../../../src/site/shared/page-box.ts";
 import { CHROME_GAP } from "../../../src/site/shared/stage-fit.ts";
 import { sampleRow } from "../../support/pixel.ts";
 import { makeSettle } from "../../support/settle.ts";
@@ -8,6 +9,8 @@ import type { Payload, SuiteContext } from "../../types.ts";
 import { GLYPHS_OVER_SHEET } from "./glyphs.ts";
 import type { Glyph } from "./glyphs.ts";
 import { routesUnder } from "../corners/geometry.ts";
+import { switchFaults, withStyledBoot } from "./styled-boot.ts";
+import type { DeskSwitch } from "./styled-boot.ts";
 
 const REPO = resolve(fileURLToPath(new URL(".", import.meta.url)), "..", "..", "..");
 export const CHART_ROOM_FLOOR = [
@@ -20,8 +23,9 @@ export const CHART_ROOM_FLOOR = [
   "/seed-of-the-day/",
   "/specimen/",
 ];
-const PHONE = { w: 844, h: 390, laidOut: { w: 1024, h: 474 } };
+export const PHONE = { w: 844, h: 390, laidOut: { w: 1024, h: 474 } };
 export const DESK = { w: 1280, h: 800 };
+export const DESK_FRAME_H = 768;
 const WINDOWS: readonly (readonly [number, number])[] = [
   [1280, 720],
   [1024, 768],
@@ -56,6 +60,11 @@ type Stage = {
   innerW: number;
   innerH: number;
   pageW: number;
+  framed: boolean;
+  pageH: number;
+  docH: number;
+  reduce: boolean;
+  deskSwitch: DeskSwitch | null;
   sheet: Box;
   under: boolean;
   reserveRight: number;
@@ -67,7 +76,7 @@ type Stage = {
   contains: [number, number][];
   backings: Backing[];
 };
-type Read = { page: string; size: string; s: Stage };
+export type Read = { page: string; size: string; s: Stage };
 
 // A room's landing holds its from keyframe until the next rendered frame, reduced motion or not, so a starved runner can hand back two identical reads of a sheet still at 1.004 and 10px low (lane C on PR #795, FL1 on the Glossary); `both` keeps the finished landing listed, so a read after a resize passes at once, and home has none to wait for.
 export const LANDED = `(() => { const a = document.getAnimations().filter((x) => x.animationName === "sheet-land"); return a.every((x) => x.playState === "finished") && (a.length > 0 || !document.body.classList.contains("room")); })()`;
@@ -88,8 +97,10 @@ const STAGE: Payload<Stage | { chartRoom: false; ready: boolean }> = `(() => {
   const clipOf = (el, b) => { let c = { x: b.left, y: b.top, r: b.right, b: b.bottom }; for (let e = el.parentElement; e && e !== document.body; e = e.parentElement) { const cs = getComputedStyle(e); if (cs.overflowX !== "visible" || cs.overflowY !== "visible") { const q = e.getBoundingClientRect(); c = { x: Math.max(c.x, q.left), y: Math.max(c.y, q.top), r: Math.min(c.r, q.right), b: Math.min(c.b, q.bottom) }; } } return c.r - c.x > 0.5 && c.b - c.y > 0.5 ? c : null; };
   const skip = "svg, noscript, script, style, .desk-notice, #map, .living-chart, .place-hit, #sheet";
   const pageW = Math.max(innerWidth, document.body.getBoundingClientRect().width);
+  const framed = document.documentElement.classList.contains(${JSON.stringify(DESK_FRAME)});
+  const pageH = framed ? document.body.getBoundingClientRect().height : innerHeight;
   const ink = [];
-  const add = (el, b, t) => { const c = clipOf(el, b); const piece = pieceOf(el); if (c && piece >= 0 && c.r > 0 && c.x < pageW && c.b > 0 && c.y < innerHeight) ink.push({ ...box({ left: c.x, top: c.y, right: c.r, bottom: c.b }), piece, t }); };
+  const add = (el, b, t) => { const c = clipOf(el, b); const piece = pieceOf(el); if (c && piece >= 0 && c.r > 0 && c.x < pageW && c.b > 0 && c.y < pageH) ink.push({ ...box({ left: c.x, top: c.y, right: c.r, bottom: c.b }), piece, t }); };
   const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
   for (let n = walk.nextNode(); n; n = walk.nextNode()) {
     const el = n.parentElement;
@@ -115,7 +126,7 @@ const STAGE: Payload<Stage | { chartRoom: false; ready: boolean }> = `(() => {
   const order = pieceEls.map((e, i) => i).sort((i, j) => (pieceEls[i].compareDocumentPosition(pieceEls[j]) & Node.DOCUMENT_POSITION_FOLLOWING) ? -1 : 1);
   const ranks = pieceEls.map((e, i) => (parseInt(getComputedStyle(e).zIndex, 10) || 0) * 1000 + order.indexOf(i));
   const status = document.querySelector(".stage .status");
-  return { chartRoom: true, ready, drawn: !status || !status.textContent.trim().endsWith("\\u2026"), innerW: innerWidth, innerH: innerHeight, pageW,
+  return { chartRoom: true, ready, drawn: !status || !status.textContent.trim().endsWith("\\u2026"), innerW: innerWidth, innerH: innerHeight, pageW, framed, pageH, docH: document.documentElement.scrollHeight, reduce: matchMedia("(prefers-reduced-motion: reduce)").matches, deskSwitch: window.__deskSwitch ?? null,
     sheet: box(sheet.getBoundingClientRect()), under: document.body.classList.contains("stage-under"),
     reserveRight: frame ? parseFloat(frame.style.getPropertyValue("--reserve-right")) : NaN,
     presses: legend ? [...legend.querySelectorAll(".legend-row .legend-btn")].map((b) => b.getBoundingClientRect()).filter((b) => b.width > 0).map(box) : [],
@@ -144,13 +155,13 @@ export function stageFaults({ page, size, s }: Read): string[] {
     h = s.sheet.b - s.sheet.y;
   if (!(w > 0 && h > 0)) return [`${at}: no sheet (${w} x ${h})`];
   // The page, not the window: below 1024 a room lays out its 1024 page (Issue #762), read unscrolled so the two share an origin.
-  const room = Math.min(s.pageW - s.reserveRight - 2 * CHROME_GAP, (s.innerH - 2 * CHROME_GAP) * (w / h));
+  const room = Math.min(s.pageW - s.reserveRight - 2 * CHROME_GAP, (s.pageH - 2 * CHROME_GAP) * (w / h));
   if (!Number.isFinite(room)) faults.push(`${at}: no reserve read`);
   if (s.under && Math.abs(w - room) > 1)
     faults.push(`${at}: floored at ${w.toFixed(1)}, not the whole room ${room.toFixed(1)}`);
   if (!s.under && w < room / 2 - 0.5)
     faults.push(`${at}: the sheet is ${w.toFixed(1)}, under half its room ${room.toFixed(1)}, and not floored`);
-  if (s.under && (s.sheet.x < -0.5 || s.sheet.y < -0.5 || s.sheet.r > s.pageW + 0.5 || s.sheet.b > s.innerH + 0.5))
+  if (s.under && (s.sheet.x < -0.5 || s.sheet.y < -0.5 || s.sheet.r > s.pageW + 0.5 || s.sheet.b > s.pageH + 0.5))
     faults.push(`${at}: the floored sheet leaves the page (${JSON.stringify(s.sheet)})`);
   const lines = lineCount(s.presses);
   if (s.presses.length >= 2 && (lines > 2 || lines === s.presses.length))
@@ -197,7 +208,7 @@ export async function rest(ctx: SuiteContext, w: number, h: number, label: strin
   return got.chartRoom ? got : null;
 }
 
-async function open(
+export async function open(
   ctx: SuiteContext,
   page: string,
   w: number,
@@ -217,19 +228,30 @@ export type StageRun = { rooms: string[]; reads: Read[] };
 
 export async function ea1Phone(ctx: SuiteContext): Promise<StageRun> {
   await ctx.setMobileViewport(PHONE.w, PHONE.h);
-  const reads: Read[] = [];
-  for (const page of routesUnder(resolve(REPO, "src/pages"))) {
-    const s = await open(ctx, page, PHONE.w, PHONE.h, PHONE.laidOut, "EA1");
-    if (s) reads.push({ page, size: `${PHONE.w}x${PHONE.h} phone`, s });
-  }
+  const reads = await withStyledBoot(ctx, async () => {
+    const got: Read[] = [];
+    for (const page of routesUnder(resolve(REPO, "src/pages"))) {
+      const s = await open(ctx, page, PHONE.w, PHONE.h, PHONE.laidOut, "EA1");
+      if (s) got.push({ page, size: `${PHONE.w}x${PHONE.h} phone`, s });
+    }
+    return got;
+  });
   const rooms = reads.map((r) => r.page);
   const missing = CHART_ROOM_FLOOR.filter((p) => !rooms.includes(p));
   const floored = reads.filter((r) => r.s.under).map((r) => r.page);
+  const unframed = reads
+    .filter((r) => !r.s.framed || r.s.pageH !== DESK_FRAME_H || r.s.docH !== DESK_FRAME_H)
+    .map((r) => `${r.page} (framed ${r.s.framed}, ${r.s.pageH} tall, document ${r.s.docH})`);
+  const switched = switchFaults(reads, DESK_FRAME_H);
   const faults = known(reads.flatMap(stageFaults));
   ctx.check(
-    "EA1 on a phone held sideways (844x390, laid out 1024x474 by the fixed viewport) every chart room keeps at least half the room it could show its sheet in, a floored sheet takes all of it inside the window, the Press never stacks, and no chrome ink meets other chrome ink or lies under another piece's backing; the Explorer and the Print Room floor (39x30 and 0x0 on screen on main)(Issue #762, rulings 4a and 4c)",
-    missing.length === 0 && floored.includes("/explorer/") && floored.includes("/print-room/") && faults.length === 0,
-    `${rooms.length} chart rooms${missing.length ? `, missing ${missing.join(", ")}` : ""}; floored ${floored.join(", ") || "none"}; ${faults.length ? `${faults.length} faults: ${faults.slice(0, 6).join("; ")}` : "no faults"}`,
+    "EA1 on a phone held sideways (844x390, laid out 1024x474 by the fixed viewport) every chart room keeps the desk frame: it lays out 1024 by 768, the page scrolling the 294 the window lacks, its body at 768 the moment the frame switches on, under reduced motion and with the page's style resolved before the room binds, no sheet floors, the Press never stacks, and no chrome ink meets other chrome ink or lies under another piece's backing (Issue #778 ruling 10, which retired the floor the Explorer and the Print Room took here under Issue #762)",
+    missing.length === 0 &&
+      unframed.length === 0 &&
+      switched.length === 0 &&
+      floored.length === 0 &&
+      faults.length === 0,
+    `${rooms.length} chart rooms${missing.length ? `, missing ${missing.join(", ")}` : ""}; unframed ${unframed.join(", ") || "none"}; the switch ${switched.join("; ") || "768 at once in every room"}; floored ${floored.join(", ") || "none"}; ${faults.length ? `${faults.length} faults: ${faults.slice(0, 6).join("; ")}` : "no faults"}`,
   );
   return { rooms, reads };
 }

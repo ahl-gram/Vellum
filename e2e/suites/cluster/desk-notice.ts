@@ -1,3 +1,4 @@
+import { DESK_FRAME } from "../../../src/site/shared/page-box.ts";
 import { dropExpectedCancellations } from "../../support/console.ts";
 import { makeSettle } from "../../support/settle.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
@@ -193,6 +194,52 @@ export async function dnContinue(k: DeskKit): Promise<void> {
         after: { w: after.w, key: after.key },
         next: { shown: next.shown, key: next.key },
       }),
+    );
+  } finally {
+    await k.forget();
+  }
+}
+
+type FramedNotice = {
+  ready: string;
+  framed: boolean;
+  shown: boolean;
+  top: number;
+  bottom: number;
+  inner: number;
+  hits: boolean;
+};
+
+const FRAMED_NOTICE: Payload<FramedNotice> = `(() => {
+  const n = document.querySelector(".desk-notice");
+  const r = n.getBoundingClientRect();
+  const b = n.querySelector("button").getBoundingClientRect();
+  return { ready: document.readyState, framed: document.documentElement.classList.contains(${JSON.stringify(DESK_FRAME)}), shown: n.classList.contains("on"),
+    top: r.top, bottom: r.bottom, inner: innerHeight, hits: document.elementFromPoint(b.left + b.width / 2, b.top + b.height / 2) === n.querySelector("button") };
+})()`;
+
+const inWindow = (d: FramedNotice): boolean => d.framed && d.shown && d.top >= 0 && d.bottom <= d.inner && d.hits;
+
+export async function dnFramed(k: DeskKit): Promise<void> {
+  const { check, setMobileViewport } = k;
+  const read = (label: string) =>
+    k.settle(
+      FRAMED_NOTICE,
+      (d, last) => d.ready === "complete" && last !== null && JSON.stringify(d) === JSON.stringify(last),
+      label,
+    );
+  try {
+    await setMobileViewport(844, 390);
+    await k.forget();
+    await k.open("/explorer/");
+    const side = await read("DN10 the framed room sideways");
+    await setMobileViewport(390, 844);
+    await k.open("/explorer/");
+    const up = await read("DN10 the framed room upright");
+    check(
+      "DN10 on a chart room's desk frame the Notice to Travellers stands wholly inside the window at first sight, held sideways and upright, and its button is reachable where it stands (Issue #778)",
+      inWindow(side) && inWindow(up),
+      JSON.stringify({ side, up }),
     );
   } finally {
     await k.forget();

@@ -2,7 +2,7 @@
 import { makeStage, makeMouse, readCam, atLandfall } from "../support/home.ts";
 import { makeStep } from "../support/step.ts";
 import type { Payload, SuiteContext } from "../types.ts";
-import { deskKit, dnContinue, dnNarrow, dnPhone, dnRefused, dnTablet } from "./cluster/desk-notice.ts";
+import { deskKit, dnContinue, dnFramed, dnNarrow, dnPhone, dnRefused, dnTablet } from "./cluster/desk-notice.ts";
 import { dr11Wide, dr12Print, dr13Gallery, dr14PrintIsPaper, dr15TrailHover, trailKit } from "./cluster/trail.ts";
 import type { TrailKit } from "./cluster/trail.ts";
 
@@ -33,6 +33,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("DN6", () => dnNarrow(desk));
   await step("DN7", () => dnRefused(desk));
   await step("DN4", () => dnContinue(desk));
+  await step("DN10", () => dnFramed(desk));
 
   await clearMobile();
   await step("DR11", () => dr11Wide(trail));

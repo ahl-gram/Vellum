@@ -118,6 +118,9 @@ Three candidates from building the corners sweep (`e2e/suites/corners.ts`), the 
 Two candidates from the `vellum-plate-reader` sitting on Issue #762's pull request B, both for Gate 2, measured but with no incident of their own yet:
 
 - Under emulated reduced motion every property of every element transitions for 0.01ms, because the motion sheet's blanket sets the duration and the default `transition-property` is `all`; so a script that writes an inline length and reads the box in the same task reads the transition's start value. The top row's step 6 spike engaged on 0 of 10 loads at 1024 that way; `placeLegendRow` in `src/site/shared/room-seats.ts` and `layRow` in `src/site/shell/top-row.ts` hold the transition off while they write and read. Earns its line when a check or a measured placement is shown to have read a start value under reduced motion.
+
+Noted 2026-10-15, promoted: Gate 3 item 7 now carries it with its incident (Issue #778, where the desk frame's body read 0px as the Specimen Book first laid out under reduced motion and the room floored its sheet), and `handbook/specs/cascade-traps.md` its reason; it went to Gate 3, the checklist form that spec names, and not to Gate 2, whose note for a new e2e suite had no room for it under the 8,000-character bound of Issue #708's ruling D.
+
 - A `Page.captureScreenshot` with a `clip.scale` of 3 or 4 leaves the page laid out about 1px differently afterwards (a controls row 71.44 to 70.44, the sheet's top by 0.5), where a scale of 1 leaves it untouched; take every measurement before a scaled capture. Earns its line when a check is shown to have measured a layout a scaled capture moved.
 
 Three more from the same pull request's step 11 plate read, measured but with no incident of their own yet, the first two for Gate 2 and the third for the tooling:

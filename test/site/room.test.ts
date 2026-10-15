@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { DESK_FRAME } from "../../src/site/shared/page-box.ts";
 import { GLASS_GAP_REM, pressRowStacks, rowSheds } from "../../src/site/shared/room-seats.ts";
 import { bindRoom } from "../../src/site/shared/room.ts";
 import { CHROME_GAP } from "../../src/site/shared/stage-fit.ts";
@@ -31,10 +32,10 @@ test("bindRoom seats the legend row before it fits the sheet", () => {
   const legend = new WrappingLegend("nav");
   g.document = {
     querySelector: (sel: string) => (sel === ".legend" ? legend : null),
-    documentElement: { clientWidth: 1280, clientHeight: 800 },
+    documentElement: { clientWidth: 1280, clientHeight: 800, classList: new El("html").classList },
     body: new El("body"),
   };
-  g.window = { addEventListener: () => {}, scrollX: 0 };
+  g.window = { addEventListener: () => {}, scrollX: 0, scrollY: 0 };
   g.ResizeObserver = class {
     observe() {}
   };
@@ -104,4 +105,164 @@ test("UL1 a risen row sheds its note only where its top would come within the ga
     false,
     "a backing that reaches less than the gap leaves the gap the rule",
   );
+});
+
+const FRAME_H = 768;
+const SIDEWAYS = { clientWidth: 1024, clientHeight: 474, scale: 0.82421875 };
+const FOOT = FRAME_H - SIDEWAYS.clientHeight;
+
+type Box = { readonly left: number; readonly top: number; readonly right: number; readonly bottom: number };
+
+const liveScrollY = (): number => (globalThis as unknown as { window: { scrollY: number } }).window.scrollY;
+
+class PageEl extends El {
+  readonly page: Box;
+  constructor(tag: string, page: Box) {
+    super(tag);
+    this.page = page;
+  }
+  override getBoundingClientRect() {
+    const { left, top, right, bottom } = this.page;
+    const y = liveScrollY();
+    return { left, right, top: top - y, bottom: bottom - y, width: right - left, height: bottom - top };
+  }
+}
+
+const press = (offsetTop: number): El =>
+  Object.assign(new El("button"), { offsetTop, rect: { left: 0, top: 0, right: 80, bottom: 32 } });
+
+class StackedLegend extends PageEl {
+  override querySelectorAll(): El[] {
+    return [press(0), press(44)];
+  }
+}
+
+const deskEls = (): Map<string, El> =>
+  new Map<string, El>([
+    ["header.chrome", new PageEl("header", { left: 32, top: 16, right: 600, bottom: 128 })],
+    [".corner.tr", new PageEl("div", { left: 800, top: 16, right: 1000, bottom: 96 })],
+    [".slip", new PageEl("aside", { left: 700, top: 112, right: 1000, bottom: 600 })],
+    [".corner.bl", new PageEl("div", { left: 32, top: 680, right: 300, bottom: 752 })],
+    [".legend", new StackedLegend("nav", { left: 340, top: 560, right: 640, bottom: 668 })],
+    [".strip", new PageEl("div", { left: 0, top: 700, right: 1024, bottom: 760 })],
+  ]);
+
+const ROOM_GLOBALS = ["document", "window", "ResizeObserver", "getComputedStyle"] as const;
+
+function withRoomGlobals(body: () => void): void {
+  const g = globalThis as Record<string, unknown>;
+  const saved = ROOM_GLOBALS.map((n) => [n, n in g, g[n]] as const);
+  try {
+    body();
+  } finally {
+    for (const [n, had, v] of saved) {
+      if (had) g[n] = v;
+      else delete g[n];
+    }
+  }
+}
+
+type DeskWindow = { scrollY: number; readonly visualViewport: { scale: number } };
+
+function installDesk(els: Map<string, El>): { root: { classList: El["classList"] }; body: El; win: DeskWindow } {
+  const root = {
+    clientWidth: SIDEWAYS.clientWidth,
+    clientHeight: SIDEWAYS.clientHeight,
+    classList: new El("html").classList,
+  };
+  const body = new El("body");
+  const win = { addEventListener: () => {}, scrollX: 0, scrollY: 0, visualViewport: { scale: SIDEWAYS.scale } };
+  const g = globalThis as Record<string, unknown>;
+  g.document = {
+    querySelector: (sel: string) => els.get(sel) ?? null,
+    documentElement: root,
+    body,
+    createRange: () => ({}),
+  };
+  g.window = win;
+  g.ResizeObserver = class {
+    observe() {}
+  };
+  g.getComputedStyle = () => ({
+    getPropertyValue: (p: string) => (p === "--desk-frame-h" ? `${FRAME_H}px` : ""),
+    fontSize: "16px",
+    top: "",
+  });
+  return { root, body, win };
+}
+
+type DeskRoom = {
+  readonly layout: () => void;
+  readonly seats: () => Record<string, unknown>;
+  readonly framed: () => boolean;
+  readonly win: DeskWindow;
+};
+
+function bindDeskRoom(): DeskRoom {
+  const els = deskEls();
+  const { root, body, win } = installDesk(els);
+  const frame = new El("div");
+  const { layout } = bindRoom({
+    frame: frame as unknown as HTMLElement,
+    sheet: new El("div") as unknown as HTMLElement,
+    camera: { hold: () => null, restore: () => {} },
+    aspect: () => 1.5,
+  });
+  const style = (sel: string) => els.get(sel)?.style;
+  return {
+    layout,
+    win,
+    framed: () => root.classList.contains(DESK_FRAME),
+    seats: () => ({
+      under: body.classList.contains("stage-under"),
+      reserveTop: frame.style.getPropertyValue("--reserve-top"),
+      reserveBottom: frame.style.getPropertyValue("--reserve-bottom"),
+      slipTop: style(".slip")?.top,
+      slipMax: style(".slip")?.maxHeight,
+      pressFoot: style(".legend")?.bottom,
+    }),
+  };
+}
+
+const DESK_SEATS = {
+  under: false,
+  reserveTop: "142px",
+  reserveBottom: "222px",
+  slipTop: "112px",
+  slipMax: "576px",
+  pressFoot: "100px",
+};
+
+test("UD1 a room in the desk frame laid out again at the frame's foot seats its reserves, its slip and its risen Press where it seats them unscrolled: every vertical read is in page coordinates (Issue #778)", () => {
+  withRoomGlobals(() => {
+    const room = bindDeskRoom();
+    room.layout();
+    assert.deepEqual(
+      room.seats(),
+      DESK_SEATS,
+      "unscrolled: the reserves clear the head's foot (128 + 14) and the risen Press's top (768 - 560 + 14), the slip hangs below its folio (96 + 16) and stops above the strip (700 - 12 - 112), and the risen Press stands above the chart folio (768 - 680 + 12)",
+    );
+    room.win.scrollY = FOOT;
+    room.layout();
+    assert.deepEqual(
+      room.seats(),
+      DESK_SEATS,
+      `laid out again at the frame's foot, scrolled ${FOOT}, every seat stands where it stood unscrolled`,
+    );
+  });
+});
+
+test("UD2 a pinch past full size after the room binds leaves the desk frame standing and its seats unmoved: whether the page was set small is read once, as the room binds (Issue #778)", () => {
+  withRoomGlobals(() => {
+    const room = bindDeskRoom();
+    room.layout();
+    room.win.visualViewport.scale = 2;
+    room.layout();
+    assert.equal(room.framed(), true, "the frame the room bound with stands after the pinch");
+    assert.deepEqual(
+      room.seats(),
+      DESK_SEATS,
+      `laid out again after the pinch, the room still lays out on the frame's ${FRAME_H}, not the window's ${SIDEWAYS.clientHeight}`,
+    );
+  });
 });

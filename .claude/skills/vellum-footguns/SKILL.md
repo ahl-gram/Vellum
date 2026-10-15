@@ -216,6 +216,11 @@ This is the checklist; the reasons are not copied here.
    `handbook/specs/development-workflow.md` step 6: the candidates, the control arm, and where the stills go.
    The ruling stays provisional until Alex has used the branch live. Pin correctness now, let
    dressing-level pins lag one live cycle.
+7. **A box a script measures after a class or an inline style changes its size or seat owes a
+   render under reduced motion with the page's style resolved before the change**, the case in
+   which that change can run as a 0.01ms transition and a rect read in the same task finds the box
+   where it started (`handbook/specs/cascade-traps.md`; `e2e/suites/stage/styled-boot.ts` forces
+   the resolve; Issue #778).
 
 ## Gate 4: before adding anything that joins a roster
 
