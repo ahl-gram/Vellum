@@ -198,8 +198,8 @@ worktree when it starts, and its definition carries the rename.
 **8. Implement.** Five things the word hides, the first a record and the rest each with its own
 scar:
 
-- **Archive the finalized plan before the first commit.** Copy the plan exactly as step 6 left it
-  to `handbook/plans/<N>/<N>-plan.md` at the repo root, `N` the issue's number, and commit it with the
+- **Archive the finalized plan before the first commit.** Copy the plan exactly as step 6 left it,
+  Alex's folded rulings included, to `handbook/plans/<N>/<N>-plan.md` at the repo root, `N` the issue's number, and commit it with the
   implementation. Every plan for an issue lives in that issue's own directory. An issue that ships
   as several pull requests archives one plan per pull request: the first is
   `handbook/plans/<N>/<N>-plan.md` and stays frozen as that pull request left it, and each later pull
