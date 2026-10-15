@@ -31,10 +31,10 @@ test("bindRoom seats the legend row before it fits the sheet", () => {
   const legend = new WrappingLegend("nav");
   g.document = {
     querySelector: (sel: string) => (sel === ".legend" ? legend : null),
-    documentElement: { clientWidth: 1280, clientHeight: 800 },
+    documentElement: { clientWidth: 1280, clientHeight: 800, classList: new El("html").classList },
     body: new El("body"),
   };
-  g.window = { addEventListener: () => {}, scrollX: 0 };
+  g.window = { addEventListener: () => {}, scrollX: 0, scrollY: 0 };
   g.ResizeObserver = class {
     observe() {}
   };
