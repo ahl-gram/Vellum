@@ -181,7 +181,9 @@ export async function at2Places(k: TrailKit): Promise<void> {
       const mine = PLACES[row.page];
       const bad = [
         JSON.stringify(d.hrefs.map((h) => h.href).sort()) === JSON.stringify(want) ? "" : "hrefs",
-        d.hrefs.every((h) => h.text && h.pip) ? "" : "hits",
+        d.hrefs.every((h) => h.text && h.pip)
+          ? ""
+          : `hits missed at ${d.hrefs.filter((h) => !h.text || !h.pip).map((h) => `${h.href} text ${h.text} pip ${h.pip}`)}`,
         mine ? (d.here?.cx === String(mine.x) && d.here.cy === String(mine.y) ? "" : "pin") : d.here ? "stray pin" : "",
         d.you === !!mine ? "" : "you",
         d.marks === 0 ? "" : "page mark",

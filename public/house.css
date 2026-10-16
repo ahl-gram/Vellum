@@ -85,7 +85,7 @@ a.control:hover {
   background: var(--parchment-bright);
 }
 
-:is(a, input, select, [tabindex], button:not(.place-hit)):focus-visible {
+:is(a, input, select, summary, [tabindex], button:not(.place-hit)):focus-visible {
   outline: 2px solid var(--ink-dark);
   outline-offset: 2px;
 }
