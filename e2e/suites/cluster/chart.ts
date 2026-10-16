@@ -64,12 +64,9 @@ const NAMES = {
 type Rest1 = { open: boolean; press: Rect; cluster: Rect; sheet: Rect | null; dead: string[] };
 const AT1_REST: Payload<Rest1> = `(() => ({ open: ${FOLD}.open, press: ${RECT}(${PRESS}), cluster: ${RECT}(document.querySelector("header.chrome")), sheet: ${RECT}(document.getElementById("sheet")),
   dead: [...document.querySelectorAll("header.chrome :is(a, button, summary, input, select, [tabindex])")].filter((e) => getComputedStyle(e).pointerEvents === "none").map((e) => e.tagName + " " + (e.textContent || "").trim().slice(0, 24)) }))()`;
-type Open1 = {
-  open: boolean;
+type Open1 = Pick<Rest1, "open" | "cluster" | "sheet"> & {
   shown: boolean;
   panel: Rect;
-  cluster: Rect;
-  sheet: Rect | null;
   innerWidth: number;
   innerHeight: number;
 };
@@ -183,7 +180,10 @@ export async function at2Places(k: TrailKit): Promise<void> {
         JSON.stringify(d.hrefs.map((h) => h.href).sort()) === JSON.stringify(want) ? "" : "hrefs",
         d.hrefs.every((h) => h.text && h.pip)
           ? ""
-          : `hits missed at ${d.hrefs.filter((h) => !h.text || !h.pip).map((h) => `${h.href} text ${h.text} pip ${h.pip}`)}`,
+          : `missed ${d.hrefs
+              .filter((h) => !h.text || !h.pip)
+              .map((h) => h.href)
+              .join(" ")}`,
         mine ? (d.here?.cx === String(mine.x) && d.here.cy === String(mine.y) ? "" : "pin") : d.here ? "stray pin" : "",
         d.you === !!mine ? "" : "you",
         d.marks === 0 ? "" : "page mark",
@@ -324,11 +324,7 @@ async function underHand(k: TrailKit, b: Rect): Promise<Dress> {
 const PARCHMENT = tokenRgba("--parchment");
 const BRIGHT = tokenRgba("--parchment-bright");
 const ringOk = (d: Dress): boolean =>
-  d.focusVisible &&
-  d.outline[0] === "solid" &&
-  d.outline[1] === "2px" &&
-  d.outline[2] === "2px" &&
-  nearRgba(d.outline[3], BRIGHT);
+  d.focusVisible && d.outline.slice(0, 3).join(" ") === "solid 2px 2px" && nearRgba(d.outline[3], BRIGHT);
 const litOk = (d: Dress): boolean =>
   nearRgba(d.colour, tokenRgba("--ink-dark")) && nearRgba(d.bg, BRIGHT) && d.shadow.startsWith("rgb(255, 247, 228)");
 
