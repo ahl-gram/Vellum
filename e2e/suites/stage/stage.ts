@@ -186,7 +186,7 @@ export function stageFaults({ page, size, s }: Read): string[] {
 const known = (all: readonly string[]): string[] =>
   all.filter((f) => !(f.includes(SLIP_TAB_SIBLING.at) && SLIP_TAB_SIBLING.pieces.some((p) => f.includes(p))));
 
-// At rest: the document and its fonts are in, the stage no longer reports a draw in progress (a line ending in an ellipsis), and the fit, the floor and the Press's seat read the same on STILL_READS polls running, since a plate with no draw to wait on (an empty Portfolio) gives no other signal.
+// At rest: the document and its fonts are in, the stage no longer reports a draw in progress (a line ending in an ellipsis), and the fit, the floor and the Press's seat read the same on STILL_READS polls running, since a plate with no draw to wait on (a Portfolio with nothing gathered, which shows its plate) gives no other signal.
 const STILL_READS = 6;
 
 export async function rest(ctx: SuiteContext, w: number, h: number, label: string): Promise<Stage | null> {

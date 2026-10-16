@@ -6,6 +6,8 @@ import {
   boundLine,
   draftedLine,
   gatheredLine,
+  PLATE_SOURCE,
+  PLATE_TITLE,
   roman,
   sheetLine,
 } from "../../src/site/portfolio/folio-lines.ts";
@@ -66,4 +68,9 @@ test("PF8 the slip's where-line carries the tally the mockup gives it, and follo
   assert.equal(gatheredLine(6), "six sheets gathered at the Explorer");
   assert.equal(gatheredLine(1), "one sheet gathered at the Explorer");
   assert.equal(gatheredLine(0), "no sheets gathered at the Explorer");
+});
+
+test("PF9 the chart folio names the plate a Portfolio with nothing gathered shows, and the world its pictures are drawn from (Issue #670)", () => {
+  assert.equal(PLATE_TITLE, "How a Portfolio is Gathered");
+  assert.equal(PLATE_SOURCE, "a plate of the house, drawn from The Isle of Rahai, chart № 42");
 });

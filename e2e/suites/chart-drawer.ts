@@ -30,8 +30,10 @@ import {
   cd18bRoadCarries,
   cd19PortfolioDrafts,
   cd24PortfolioSays,
-  cd20BarePortfolio,
+  bareArrived,
+  cd20PlatePortfolio,
   cd21PortfolioGlass,
+  cd62PlateReads,
   cd49bPrintRoomAddress,
   cd49PrintRoomRoad,
   cd50ScriptsOffHome,
@@ -69,7 +71,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   await step("CD1", () => cd1DogEar(k));
   await step("CD51", () => cd51NoTipKeyed(k));
-  // The one value a step hands another: CD4 reloads the address CD2 wrote, so if CD2 never laid a sheet, CD4 fails as CD4 rather than passing against a table nobody filled. Several later checks read the page an earlier step left (CD52, CD53 and CD60 the sheets CD2 and CD32 laid, CD55 the bare Portfolio CD20 and CD21 left, CD59 the page CD58 loaded).
+  // The one value a step hands another: CD4 reloads the address CD2 wrote, so if CD2 never laid a sheet, CD4 fails as CD4 rather than passing against a table nobody filled. Several later checks read the page an earlier step left (CD52, CD53 and CD60 the sheets CD2 and CD32 laid, CD55 the bare Portfolio the CD62, CD21 step left, CD59 the page CD58 loaded).
   let laid: Read | null = null;
   await step("CD2, CD2b, CD2c", async () => {
     const earAt = await clickEar();
@@ -131,8 +133,13 @@ async function cd9Surfaces(kd: DragKit, step: Step, SIX: string): Promise<void> 
   await cd24PortfolioSays(kd);
   await step("CD54", () => cd54PortfolioLines(kd));
   // BARE means bare on both homes since Issue #634: a Portfolio the address names no folio for now shows what the device holds (ruling 4), so the six this group just laid would arrive here as a full pile.
-  await cd20BarePortfolio(kd);
-  await cd21PortfolioGlass(kd);
+  await step("CD20", () => cd20PlatePortfolio(tableKit(kd)));
+  await step("CD62, CD21", async () => {
+    await bareArrived(kd);
+    await cd62PlateReads(kd);
+    await cd21PortfolioGlass(kd);
+  });
+  await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   await step("CD55", () => cd55WhereAuthored(kd));
   await step("CD56", () => cd56WorkerBlocked(kd));
   await step("CD48", () => cd48TouchHandle(kd));

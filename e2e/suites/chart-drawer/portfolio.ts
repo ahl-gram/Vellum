@@ -3,6 +3,8 @@ import { makeSettle } from "../../support/settle.ts";
 import { withScriptsOff } from "../../support/scripts-off.ts";
 import type { DrawerKit, TableKit } from "./kit.ts";
 import { DRAWN, DRESS, ONE } from "./reads.ts";
+import { BARE_LINE, PLATE_SOURCE, PLATE_TITLE, gatheredLine } from "../../../src/site/portfolio/folio-lines.ts";
+import { PLATE_ROOM, PLATE_VERB } from "../../../src/site/portfolio/how-plate.ts";
 
 type Arrival = {
   path: string;
@@ -202,38 +204,145 @@ export async function cd24PortfolioSays({ evaluate, check, sleep, clickAt }: Dra
   );
 }
 
-export async function cd20BarePortfolio({ evaluate, send, check, sleep, PORT, forget }: DrawerKit): Promise<void> {
+type BareVisit = { ready: string; fonts: string; app: boolean };
+const BARE_READY: Payload<BareVisit> = `({ ready: document.readyState, fonts: document.fonts.status, app: !!window.__vellumPortfolio })`;
+
+export async function bareArrived({ evaluate, send, sleep, PORT, forget }: DrawerKit): Promise<void> {
   await forget();
   await send("Page.navigate", { url: "about:blank" });
   await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/portfolio/` });
-  for (let i = 0; i < 200; i++) {
-    await sleep(100);
-    if (await evaluate<boolean>(`!!window.__vellumPortfolio`)) break;
-  }
-  await sleep(400);
-  const empty = await evaluate<{
-    bound: string | null;
-    where: string | null;
-    explorer: boolean;
-    next: boolean;
-    download: boolean;
-  }>(`(() => ({ bound: (document.getElementById("pf-bound") || {}).textContent || null,
-    where: (document.querySelector("#portfolio .card-where") || {}).textContent || null,
-    // The RECT of all three, never .hidden: atelier.css sets an author display on .legend-btn, which beats the UA [hidden] rule, so el.hidden = true silently no-ops and a check on that property is a check on its own input (#270's guard-prover find).
-    // The road takes the same measure as the two presses because it is the same script decision: its mere presence is an Astro literal the page script never touches, and could not go red however the stand-down was written.
-    explorer: (() => { const a = document.getElementById("pf-explorer"); return !!a && a.getBoundingClientRect().width > 0.5; })(),
-    next: (() => { const b = document.getElementById("pf-next"); return !!b && b.getBoundingClientRect().width > 0.5; })(),
-    download: (() => { const b = document.getElementById("pf-download"); return !!b && b.getBoundingClientRect().width > 0.5; })() }))()`);
-  check(
-    "CD20 a Portfolio reached with nothing gathered says so in the room's own voice, in the slip's where-line as well as the bound line, and keeps only the road that has somewhere to go (ruled 2026-09-08): the two sheet presses have nothing to act on and stand down, and the road is measured by its rect the way they are",
-    !!empty.bound &&
-      /table is laid at the Explorer/.test(empty.bound) &&
-      /no sheets gathered at the Explorer/.test(empty.where || "") &&
-      empty.explorer &&
-      !empty.next &&
-      !empty.download,
-    JSON.stringify(empty),
+  await makeSettle({ evaluate: (e: string) => evaluate<BareVisit>(e).catch(() => null), sleep })(
+    BARE_READY,
+    (d) => d.ready === "complete" && d.fonts === "loaded" && d.app,
+    "chart-drawer-bare-portfolio-arrived",
   );
+}
+
+type PlateVisit = {
+  plate: boolean;
+  title: string | null;
+  folioTitle: string | null;
+  folioSub: string | null;
+  bound: string | null;
+  where: string | null;
+  next: number;
+  download: number;
+  explorer: number;
+  items: number | null;
+  hash: string;
+  href: string | null;
+  workers: number | null;
+};
+const PLATE_VISIT: Payload<PlateVisit> = `(() => {
+  // The RECT of all three, never .hidden: atelier.css sets an author display on .legend-btn, which beats the UA [hidden] rule, so el.hidden = true silently no-ops and a check on that property is a check on its own input (#270's guard-prover find).
+  // The road takes the same measure as the two presses because it is the same script decision: its mere presence is an Astro literal the page script never touches, and could not go red however the stand-down was written.
+  const width = (id) => { const e = document.getElementById(id); return e ? e.getBoundingClientRect().width : 0; };
+  const text = (sel) => (document.querySelector(sel) || {}).textContent || null;
+  const a = document.getElementById("pf-explorer");
+  return { plate: !!document.querySelector("#pf-sheet svg.how-plate"), title: text("#pf-sheet svg.how-plate .p-title"),
+    folioTitle: text("#folio-title"), folioSub: text("#folio-sub"), bound: text("#pf-bound"), where: text("#portfolio .card-where"),
+    next: width("pf-next"), download: width("pf-download"), explorer: width("pf-explorer"),
+    items: window.__vellumPortfolio ? window.__vellumPortfolio().items : null, hash: location.hash,
+    href: a ? a.getAttribute("href") : null, workers: typeof window.__cd20Workers === "number" ? window.__cd20Workers : null };
+})()`;
+const PLATE_IMAGE: Payload<number | null> =
+  `(async () => { const img = document.querySelector("#pf-sheet svg.how-plate image"); if (!img) return null;
+  return (await fetch(new URL(img.getAttribute("href"), document.baseURI).href)).status; })()`;
+const WORKER_COUNT = `(() => { window.__cd20Workers = 0; const W = window.Worker; window.Worker = class extends W { constructor(...a) { super(...a); window.__cd20Workers++; } }; })();`;
+const EXPLORER_ROAD: Payload<{ workers: number | null; verb: string | null; room: string | null }> =
+  `(() => ({ workers: typeof window.__cd20Workers === "number" ? window.__cd20Workers : null, verb: (document.querySelector("#table-road .verb") || {}).textContent || null, room: (document.querySelector("#table-road .room") || {}).textContent || null }))()`;
+
+async function plateVisit(kt: TableKit): Promise<{ visit: PlateVisit; image: number | null; store: string | null }> {
+  await bareArrived(kt);
+  const visit = await kt.evaluate(PLATE_VISIT);
+  const image = await kt.evaluate(PLATE_IMAGE, true);
+  return { visit, image, store: await kt.evaluate(kt.STORE) };
+}
+
+export async function cd20PlatePortfolio(kt: TableKit): Promise<void> {
+  const { evaluate, send, check, sleep } = kt;
+  const { identifier } = await send<{ identifier: string }>("Page.addScriptToEvaluateOnNewDocument", {
+    source: WORKER_COUNT,
+  });
+  try {
+    const { visit, image, store } = await plateVisit(kt);
+    const press = await kt.pressById("pf-explorer");
+    const arrived = await arrivalFrom({ evaluate, sleep }, "/explorer/portfolio/");
+    // The Explorer starts its worker at boot, so this count is the instrument's own control: a counter that never counts reds here and not as a pass on the Portfolio.
+    const road = await makeSettle({
+      evaluate: (e: string) => evaluate<typeof EXPLORER_ROAD>(e).catch(() => null),
+      sleep,
+    })(EXPLORER_ROAD, (d) => (d.workers ?? 0) >= 1, "cd20-explorer-worker-control", DRAWN);
+    check(
+      "CD20 a Portfolio reached with nothing gathered on either home lays the drawn plate of the three steps on its stage, its picture the committed chart, with no worker started, while the slip and the road say what they said (the 2026-09-08 bare voice); the device's table stays empty, the address names none, a REAL press on the road lands on the Explorer carrying no table, and the plate's gold press reads as the Explorer's own does (Issue #670)",
+      visit.plate &&
+        visit.title === PLATE_TITLE &&
+        image === 200 &&
+        visit.folioTitle === PLATE_TITLE &&
+        visit.folioSub === PLATE_SOURCE &&
+        visit.bound === BARE_LINE &&
+        visit.where === gatheredLine(0) &&
+        visit.next <= 0.5 &&
+        visit.download <= 0.5 &&
+        visit.explorer > 0.5 &&
+        visit.items === 0 &&
+        visit.hash === "" &&
+        visit.href === "../" &&
+        visit.workers === 0 &&
+        store === null &&
+        press.hit &&
+        arrived.path === "/explorer/" &&
+        arrived.table === null &&
+        road.verb === PLATE_VERB &&
+        road.room === PLATE_ROOM,
+      JSON.stringify({ visit, image, store, press, arrived, road }),
+    );
+  } finally {
+    await send("Page.removeScriptToEvaluateOnNewDocument", { identifier });
+  }
+}
+
+type PlateWords = { count: number; smallest: number | null; width: number; floor: number };
+const PLATE_WORDS: Payload<PlateWords> = `(() => {
+  const note = document.querySelector("#portfolio .slip-foot .note");
+  const floor = note ? parseFloat(getComputedStyle(note).fontSize) : 0;
+  const svg = document.querySelector("#pf-sheet svg.how-plate");
+  if (!svg) return { count: 0, smallest: null, width: 0, floor };
+  const width = svg.getBoundingClientRect().width;
+  const scale = width / svg.viewBox.baseVal.width;
+  const sizes = [...svg.querySelectorAll("text")].map((t) => parseFloat(getComputedStyle(t).fontSize) * scale);
+  return { count: sizes.length, smallest: sizes.length ? Math.min(...sizes) : null, width, floor };
+})()`;
+
+export async function cd62PlateReads(k: DrawerKit): Promise<void> {
+  const { evaluate, send, check, sleep } = k;
+  const settle = makeSettle({ evaluate: (e: string) => evaluate<PlateWords>(e).catch(() => null), sleep });
+  // The first read after arrival is still fitting (657.5 against the rest of 655.2 at 1280, measured 2026-10-16), so the width read is taken at rest like the others.
+  const wide = await settle(PLATE_WORDS, (d, last) => !!last && d.width === last.width, "cd62-plate-at-1280", DRAWN);
+  try {
+    await send("Emulation.setDeviceMetricsOverride", { width: 1024, height: 768, deviceScaleFactor: 1, mobile: false });
+    const narrow = await settle(
+      PLATE_WORDS,
+      (d, last) => (wide.width === 0 || Math.abs(d.width - wide.width) > 0.5) && !!last && d.width === last.width,
+      "cd62-plate-at-1024",
+      DRAWN,
+    );
+    const reads = (d: PlateWords): boolean =>
+      d.count === 16 && d.floor > 0 && d.smallest !== null && d.smallest >= d.floor;
+    check(
+      "CD62 every word of the plate reads at no less than the page's own smallest body text, the slip foot's note, at 1280x800 and at 1024x768, the windows the plate was ruled at, so there the plate a stranger is shown is never set smaller than the page around it; a window under 692 px tall is a ruled cost in handbook/errata/site.md (Issue #670, ruled from the redrawn stills and on the short window)",
+      reads(wide) && reads(narrow),
+      JSON.stringify({ wide, narrow }),
+    );
+  } finally {
+    await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
+    await settle(
+      PLATE_WORDS,
+      (d, last) => Math.abs(d.width - wide.width) < 0.5 && !!last && d.width === last.width,
+      "cd62-plate-back-at-1280",
+      DRAWN,
+    );
+  }
 }
 
 export async function cd21PortfolioGlass({ evaluate, check, sleep }: SuiteContext): Promise<void> {

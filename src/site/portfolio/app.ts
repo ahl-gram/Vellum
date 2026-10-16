@@ -8,7 +8,18 @@ import { chartFilename } from "../print-room/poster-presets.ts";
 import { thumbJobFor, thumbNames, subOf } from "../explorer/chart-drawer.ts";
 import { parseTable, groupByWorld, emitTable, tableHash, TABLE_KEY, type TableItem } from "../shared/table-address.ts";
 import { deviceStorage as store, folioOnArrival, readStoredTable } from "../shared/table-store.ts";
-import { BARE_LINE, beneathLine, boundLine, draftedLine, gatheredLine, roman, sheetLine } from "./folio-lines.ts";
+import {
+  BARE_LINE,
+  PLATE_SOURCE,
+  PLATE_TITLE,
+  beneathLine,
+  boundLine,
+  draftedLine,
+  gatheredLine,
+  roman,
+  sheetLine,
+} from "./folio-lines.ts";
+import { PLATE_CHART, howPlate } from "./how-plate.ts";
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string): T => document.getElementById(id) as T;
 const status = $("pf-status");
@@ -253,6 +264,10 @@ const start = async (): Promise<void> => {
   retitle();
   showTop();
   if (sheets.length === 0) {
+    sheetBox.innerHTML = howPlate(PLATE_CHART);
+    folioTitle.textContent = PLATE_TITLE;
+    folioSub.textContent = PLATE_SOURCE;
+    room.layout();
     // hidden is inert on these: atelier.css sets an author display on .legend-btn, which beats the UA [hidden] rule, so
     // el.hidden = true silently no-ops (the Issue #270 guard-prover's find). The Prospect and the Ribbon hide the same way.
     next.style.display = "none";
