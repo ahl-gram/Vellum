@@ -113,8 +113,8 @@ header.chrome:has(.atelier-fold[open]) {
 }
 .atelier .capital .pip,
 .atelier .here .pip,
-.atelier a.place:hover .pip,
-.atelier a.place:focus-visible .pip {
+.atelier a.place:not(.landing):hover .pip,
+.atelier a.place:not(.landing):focus-visible .pip {
   fill: var(--parchment-bright);
 }
 .atelier .here text,
@@ -132,6 +132,10 @@ header.chrome:has(.atelier-fold[open]) {
   fill: none;
   stroke: var(--parchment);
   stroke-width: 1.4;
+}
+.atelier a.place.landing:hover .pip,
+.atelier a.place.landing:focus-visible .pip {
+  stroke: var(--parchment-bright);
 }
 .atelier .landing text {
   font-style: italic;
