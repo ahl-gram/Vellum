@@ -5,6 +5,16 @@ import type { Payload, SuiteContext } from "../types.ts";
 import { deskKit, dnContinue, dnFramed, dnNarrow, dnPhone, dnRefused, dnTablet } from "./cluster/desk-notice.ts";
 import { dr11Wide, dr12Print, dr13Gallery, dr14PrintIsPaper, dr15TrailHover, trailKit } from "./cluster/trail.ts";
 import type { TrailKit } from "./cluster/trail.ts";
+import {
+  at1Press,
+  at2Places,
+  at3Keys,
+  at4ScriptsOff,
+  at5Spacing,
+  at6Dress,
+  at7Rides,
+  at8Back,
+} from "./cluster/chart.ts";
 
 type Rect = { x: number; y: number; w: number; h: number; right: number; bottom: number };
 type Stage = ReturnType<typeof makeStage>;
@@ -41,6 +51,14 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("DR13", () => dr13Gallery(trail));
   await step("DR14", () => dr14PrintIsPaper(trail));
   await step("DR15", () => dr15TrailHover(trail));
+  await step("AT1", () => at1Press(trail));
+  await step("AT2", () => at2Places(trail));
+  await step("AT3", () => at3Keys(trail));
+  await step("AT4", () => at4ScriptsOff(trail));
+  await step("AT5", () => at5Spacing(trail));
+  await step("AT6", () => at6Dress(trail));
+  await step("AT7", () => at7Rides(trail));
+  await step("AT8", () => at8Back(trail));
 
   await clearMobile();
   await send("Emulation.clearDeviceMetricsOverride");
@@ -58,30 +76,32 @@ async function cl1Wash({ evaluate, check }: SuiteContext, settleHome: Stage["set
     image: string;
     box: { left: number; top: number; right: number; bottom: number };
     nav: { right: number; bottom: number };
+    foot: { bottom: number };
     cluster: { right: number; bottom: number; left: number; top: number };
   }>(`(() => {
     const chrome = document.querySelector("header.chrome");
     const cs = getComputedStyle(chrome, "::before");
     const c = chrome.getBoundingClientRect();
     const nav = document.querySelector("header.chrome nav.rooms").getBoundingClientRect();
+    const foot = document.querySelector("header.chrome .atelier-press").getBoundingClientRect();
     const px = (v) => parseFloat(v);
     return { filter: cs.filter, bg: cs.backgroundColor, image: cs.backgroundImage,
       box: { left: c.left + px(cs.left), top: c.top + px(cs.top), right: c.right - px(cs.right), bottom: c.bottom - px(cs.bottom) },
-      nav: { right: nav.right, bottom: nav.bottom }, cluster: { right: c.right, bottom: c.bottom, left: c.left, top: c.top } };
+      nav: { right: nav.right, bottom: nav.bottom }, foot: { bottom: foot.bottom }, cluster: { right: c.right, bottom: c.bottom, left: c.left, top: c.top } };
   })()`);
   const alpha = parseFloat(
     (wash.bg.match(/\/\s*([\d.]+)\)/) || wash.bg.match(/rgba\([^)]*,\s*([\d.]+)\)/) || [])[1] ?? "1",
   );
   check(
-    "CL1 the cluster's wash is a soft pool sized by the cluster: it ends 1.5 to 3rem past the nav's right and bottom, blurred, at 0.8 ink or deeper, no gradient box (#480 screenshot 3; the slab measured 736x272 against a nav ending at 510x102)",
+    "CL1 the cluster's wash is a soft pool sized by the cluster: it ends 1.5 to 3rem past the nav's right and past the foot of the cluster's last line, the chart's press (Issue #671), blurred, at 0.8 ink or deeper, no gradient box (#480 screenshot 3; the slab measured 736x272 against a nav ending at 510x102)",
     !!cam &&
       wash.image === "none" &&
       /blur\(/.test(wash.filter) &&
       alpha >= 0.8 &&
       wash.box.right - wash.nav.right >= 1.5 * REM &&
       wash.box.right - wash.nav.right <= 3 * REM &&
-      wash.box.bottom - wash.nav.bottom >= 1.5 * REM &&
-      wash.box.bottom - wash.nav.bottom <= 3 * REM &&
+      wash.box.bottom - wash.foot.bottom >= 1.5 * REM &&
+      wash.box.bottom - wash.foot.bottom <= 3 * REM &&
       wash.box.left <= -2 * REM &&
       wash.box.top <= -2 * REM,
     JSON.stringify({ cam: !!cam, wash, alpha }),
