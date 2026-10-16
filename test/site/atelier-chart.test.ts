@@ -5,10 +5,15 @@ import { NAV_ITEMS, ROUTE_CHILDREN, ROUTE_NAMES, aliasesOf } from "../../src/lay
 import { ATLAS_ROUTE } from "../../scripts/generate-discovery.ts";
 
 test("AC1 every route in the tree, and home, is a place on the chart of the atelier, and the one place off the tree is the atlas, drawn as an isle off home (Issue #671; Alex, 2026-10-16, D3)", () => {
-  const want = [...new Set(["/", ...NAV_ITEMS.map((i) => i.href), ...Object.values(ROUTE_CHILDREN).flat(), ATLAS_ROUTE])];
+  const want = [
+    ...new Set(["/", ...NAV_ITEMS.map((i) => i.href), ...Object.values(ROUTE_CHILDREN).flat(), ATLAS_ROUTE]),
+  ];
   assert.deepEqual(Object.keys(PLACES).sort(), want.sort());
   assert.equal(PLACES[ATLAS_ROUTE]?.rank, "isle");
-  assert.ok(ROADS.some(([a, b]) => a === "/" && b === ATLAS_ROUTE), "the atlas isle has its road from home");
+  assert.ok(
+    ROADS.some(([a, b]) => a === "/" && b === ATLAS_ROUTE),
+    "the atlas isle has its road from home",
+  );
 });
 
 test("AC2 every road and the alias track joins two places on the chart, and the tracks are exactly the tree's aliases (Issue #671)", () => {
