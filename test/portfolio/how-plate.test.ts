@@ -74,9 +74,17 @@ test("PL2 the plate writes no colour and no face of its own, so the page's token
 });
 
 test("PL3 the plate's one picture is the committed antique chart, reached from the Portfolio's own address (Issue #670)", () => {
-  const hrefs = [...howPlate(PLATE_CHART).matchAll(/href="([^"]*)"/g)].map((m) => m[1]);
-  assert.ok(hrefs.length > 0, "the plate draws its chart");
+  const svg = howPlate(PLATE_CHART);
+  const hrefs = [...svg.matchAll(/href="([^"]*)"/g)].map((m) => m[1]);
+  const images = [...svg.matchAll(/<image\b[^>]*>/g)].map((m) => m[0]);
+  assert.equal(images.length, 5, "the plate draws five crops of the chart, one per picture");
+  assert.equal(hrefs.length, images.length, "every href is an image's");
   for (const href of hrefs) assert.equal(href, PLATE_CHART);
+  assert.equal(svg.match(/<svg\b/g)?.length, 1, "a nested svg would take the page's .pf-sheet svg size");
+  const ids = [...svg.matchAll(/<clipPath id="([^"]+)"/g)].map((m) => m[1]);
+  assert.equal(new Set(ids).size, ids.length, "each crop owns its clip path");
+  const used = [...svg.matchAll(/clip-path="url\(#([^)]+)\)"/g)].map((m) => m[1]);
+  assert.deepEqual(used, ids, "each crop is clipped by its own clip path, in document order");
   assert.equal(
     new URL(PLATE_CHART, "https://vellum.example/explorer/portfolio/").pathname,
     "/charts/chart-42-antique.svg",
