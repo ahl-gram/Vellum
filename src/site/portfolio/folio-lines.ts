@@ -31,6 +31,9 @@ export function draftedLine(drawn: number, total: number): string {
 
 export const BARE_LINE = "No sheets were gathered for this portfolio. The table is laid at the Explorer.";
 
+export const PLATE_TITLE = "";
+export const PLATE_SOURCE = "";
+
 export function sheetLine(title: string, at: number, of: number): string {
   return `${title} · Sheet ${roman(at)} of ${roman(of)}`;
 }
