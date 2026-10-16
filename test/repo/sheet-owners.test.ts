@@ -120,6 +120,7 @@ test("no page sheet re-dresses the kit: a colour, border, shadow, face or tracki
     "public/motion.css",
     "public/shell.css",
     "public/fonts.css",
+    "public/chart-of-the-atelier.css",
     "public/atelier-split.css",
   ]);
   assert.deepEqual(

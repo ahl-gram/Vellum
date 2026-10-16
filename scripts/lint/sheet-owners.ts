@@ -104,7 +104,7 @@ const kitClasses = (): Set<string> => {
   );
 };
 
-const HOUSE_SHEETS = /^(atelier[^/]*|house|motion|fonts|shell)\.css$/;
+const HOUSE_SHEETS = /^(atelier[^/]*|house|motion|fonts|shell|chart-of-the-atelier)\.css$/;
 const KIT_IDS: ReadonlySet<string> = new Set([
   "sheet",
   "map-viewport",

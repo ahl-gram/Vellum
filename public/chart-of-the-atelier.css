@@ -1,0 +1,4 @@
+/* The chart of the atelier (Issue #671): its press rides the trail's line, or its own under the nav where no trail is, and its panel stands inside the head cluster so it rides with it on the 1024 page. */
+:root {
+  --press-gap: 0.7rem;
+}
