@@ -206,7 +206,7 @@ const KEYS: Payload<Keys> = `(() => { const f = ${FOLD}, a = document.activeElem
 
 export async function at3Keys(k: TrailKit): Promise<void> {
   const read = (label: string) => polled(k, KEYS, `AT3 ${label}`);
-  const focusPress = () => k.evaluate(`${PRESS}.focus()`);
+  const focusPress = () => k.evaluate<undefined>(`${PRESS}.focus()`);
   try {
     await arrive(k, "/faq/", BIG);
     await focusPress();
@@ -421,7 +421,7 @@ export async function at8Back(k: TrailKit): Promise<void> {
     const glossary = await k.evaluate<Rect>(`${RECT}(${PANEL}.querySelector('a[href="/glossary/"] text'))`);
     await pressAt(k, centre(glossary).x, centre(glossary).y);
     await k.settle(state, (d) => d.path === "/glossary/" && d.ready === "complete", "AT8 at the Glossary");
-    await k.evaluate(`history.back()`).catch(() => undefined);
+    await k.evaluate<undefined>(`history.back()`).catch(() => undefined);
     const back = await k.settle(state, (d) => d.path === "/faq/" && d.ready === "complete", "AT8 back at the Q & A");
     k.check(NAMES.at8, back.warm === "warm" && back.open === false, JSON.stringify(back));
   } finally {

@@ -130,7 +130,14 @@ export async function rh17ShellOnce(k: RunningHeadKit, shells: Shells): Promise<
   );
 }
 
-const SHELL_SHEETS = new Set(["/fonts.css", "/motion.css", "/house.css", "/atelier.css", "/chart-of-the-atelier.css", "/shell.css"]);
+const SHELL_SHEETS = new Set([
+  "/fonts.css",
+  "/motion.css",
+  "/house.css",
+  "/atelier.css",
+  "/chart-of-the-atelier.css",
+  "/shell.css",
+]);
 
 export function rh18HouseSheet(check: Check, shells: Shells): void {
   const off = offenders(shells, ({ sheets }) => {
