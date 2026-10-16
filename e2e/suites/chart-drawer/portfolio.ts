@@ -330,7 +330,7 @@ export async function cd62PlateReads(k: DrawerKit): Promise<void> {
     const reads = (d: PlateWords): boolean =>
       d.count === 16 && d.floor > 0 && d.smallest !== null && d.smallest >= d.floor;
     check(
-      "CD62 every word of the plate reads at no less than the page's own smallest body text, the slip foot's note, at 1280 and at 1024, so the plate a stranger is shown is never set smaller than the page around it (Issue #670, ruled from the redrawn stills)",
+      "CD62 every word of the plate reads at no less than the page's own smallest body text, the slip foot's note, at 1280x800 and at 1024x768, the windows the plate was ruled at, so there the plate a stranger is shown is never set smaller than the page around it; a window under 692 px tall is a ruled cost in handbook/errata/site.md (Issue #670, ruled from the redrawn stills and on the short window)",
       reads(wide) && reads(narrow),
       JSON.stringify({ wide, narrow }),
     );
