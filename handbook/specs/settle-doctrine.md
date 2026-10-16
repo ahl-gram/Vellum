@@ -227,11 +227,14 @@ section points there rather than restating it.
   photographed. Two shots of different sizes, or whose probes recorded different layouts, are a
   difference whatever AE says, since ImageMagick scores the extra rows against the smaller image's
   edge. A full-page capture (`captureBeyondViewport`)
-  is for a scrolling page alone, for three reasons: it drops a chart room's bottom-left fixed
+  is for a scrolling page alone, for these reasons: it drops a chart room's bottom-left fixed
   furniture; it lays the page out at its document height, not at the viewport a visitor sees; and
   it CHANGES the page it photographs, so it is taken once per page and a page is never polled that
   way; and on home and the atlas at 1280 it varies between runs where a viewport capture of the
-  same page does not, so their rows are often untrusted (measured 2026-10-02, cause unverified).
+  same page does not, so their rows are often untrusted (measured 2026-10-02, cause unverified);
+  and on a freshly loaded page whose items use `content-visibility: auto` it paints the first few
+  items and then empty ground (measured 2026-10-08: a 1280 by 6691 image of a page 5935 px tall,
+  three of eight figures drawn), so such a page is stitched from viewport shots instead.
 - **A sleep past an animation's nominal duration still lands mid-animation.** The place card's
   unfurl is `paperUnfurl` in `public/motion.css`, a `rotateX` roll that the `.pc-inner` rules in
   `public/living-chart.css` grade `--unfurl-quick` (400ms) on a shown card and `--unfurl` (650ms)
@@ -312,6 +315,20 @@ section points there rather than restating it.
   neither moved a root held at `overflow-y: hidden`. A check that needs the page zoomed or scrolled
   on CI reaches that state another way and says why at the check (`vellum-footguns` Gate 2 item
   14).
+- **Fail a frame's document through `Fetch.failRequest`; a blocked-URL list does not stop it.** With
+  `Network.setBlockedURLs` set, a page's frames still requested their documents (measured
+  2026-10-08: ten Documents requested), while failing the request through `Fetch.failRequest` on a
+  second CDP socket did stop them (three requested, one blocked). A probe that needs a frame's load
+  to fail does it there and counts the Documents requested, never trusting the list.
+- **Read a page's failed loads from a second CDP socket; the harness cannot.** The `consoleErrors`
+  collector in `e2e/harness.ts` drops every "Failed to load resource" entry and the harness never
+  reads `Network.loadingFailed`, so a `file://` page's failed loads reach it as nothing. A second
+  websocket on the same page target is a passive tap that receives what the first one drops, and
+  changes nothing on the page.
+- **Do not count on `loading="lazy"` deferring a frame loaded from disk.** In headless Brave all
+  seven frames of a generated page were in the frame tree five seconds after load, the deepest about
+  592000 px down the page (measured 2026-10-08, cause unverified, and another browser may differ),
+  so a probe that assumes the frames below the fold have not loaded is measuring a different page.
 - **A run deletes its own browser profile only if it is allowed to finish.** Each local run mints a
   throwaway profile under `tmpdir()` (`mkdtemp` in `e2e/harness.ts`) and `cleanup()` removes
   it with `rmSync` rather than the promise `rm`, which is not a style choice: `cleanup()` is
