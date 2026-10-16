@@ -207,7 +207,6 @@ export async function cd24PortfolioSays({ evaluate, check, sleep, clickAt }: Dra
 type BareVisit = { ready: string; fonts: string; app: boolean };
 const BARE_READY: Payload<BareVisit> = `({ ready: document.readyState, fonts: document.fonts.status, app: !!window.__vellumPortfolio })`;
 
-/** The arrival of a Portfolio with nothing gathered: the device cleared, no hash, and the page at rest. It does NOT wait for the plate, so a missing plate reds the checks that assert it, by name, and the check after it still runs. */
 export async function bareArrived({ evaluate, send, sleep, PORT, forget }: DrawerKit): Promise<void> {
   await forget();
   await send("Page.navigate", { url: "about:blank" });
@@ -246,7 +245,6 @@ const PLATE_VISIT: Payload<PlateVisit> = `(() => {
     items: window.__vellumPortfolio ? window.__vellumPortfolio().items : null, hash: location.hash,
     href: a ? a.getAttribute("href") : null, workers: typeof window.__cd20Workers === "number" ? window.__cd20Workers : null };
 })()`;
-// Fetched as the browser would resolve the image, from the page's own base, so a reference that resolves under the wrong directory reads its 404 here.
 const PLATE_IMAGE: Payload<number | null> =
   `(async () => { const img = document.querySelector("#pf-sheet svg.how-plate image"); if (!img) return null;
   return (await fetch(new URL(img.getAttribute("href"), document.baseURI).href)).status; })()`;

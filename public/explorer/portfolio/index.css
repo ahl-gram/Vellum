@@ -72,7 +72,7 @@
   display: block;
 }
 
-/* The plate a Portfolio with nothing gathered shows (Issue #670); its font sizes are viewBox units, and CD62 holds every word to the page's own smallest body text. */
+/* The plate a Portfolio with nothing gathered shows (Issue #670); its font sizes are viewBox units. */
 .how-plate .p-ground,
 .how-plate .p-paper,
 .how-plate .p-leaf,

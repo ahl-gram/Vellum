@@ -68,9 +68,32 @@ test("PL2 the plate writes no colour and no face of its own, so the page's token
   assert.doesNotMatch(svg, /\b(fill|stroke|style|font-family|font-size)=/);
   assert.doesNotMatch(svg, /<style/);
   assert.doesNotMatch(svg, /rgb\(/);
-  const marks = [...svg.matchAll(/<(rect|path|line|text)\b[^>]*>/g)].map((m) => m[0]);
+  const tags = [...svg.matchAll(/<([a-zA-Z]+)\b([^>]*)>/g)].map((m) => ({ name: m[1]!, attrs: m[2]!, tag: m[0] }));
+  const marks = tags.filter((t) => !["svg", "clipPath", "g", "image"].includes(t.name));
   assert.ok(marks.length > 0, "the plate has marks to dress");
-  for (const mark of marks) assert.match(mark, /\bclass="/, `${mark} carries no class`);
+  for (const mark of marks) assert.match(mark.tag, /\bclass="/, `${mark.tag} carries no class`);
+  const geometry = new Set([
+    "xmlns",
+    "viewBox",
+    "class",
+    "id",
+    "width",
+    "height",
+    "x",
+    "y",
+    "x1",
+    "y1",
+    "x2",
+    "y2",
+    "rx",
+    "d",
+  ]);
+  for (const name of ["text-anchor", "transform", "clip-path", "href"]) geometry.add(name);
+  for (const t of tags)
+    for (const [, attr] of t.attrs.matchAll(/([\w:-]+)=/g))
+      assert.ok(geometry.has(attr!), `${t.tag} carries ${attr}, a mark the page's sheet has to dress`);
+  for (const t of tags.filter((t) => t.name === "text"))
+    assert.doesNotMatch(t.attrs, /\btransform=/, `${t.tag} is scaled by a transform CD62 does not read`);
 });
 
 test("PL3 the plate's one picture is the committed antique chart, reached from the Portfolio's own address (Issue #670)", () => {
