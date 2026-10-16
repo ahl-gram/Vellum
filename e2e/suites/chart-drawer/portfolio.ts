@@ -319,7 +319,8 @@ const PLATE_WORDS: Payload<PlateWords> = `(() => {
 export async function cd62PlateReads(k: DrawerKit): Promise<void> {
   const { evaluate, send, check, sleep } = k;
   const settle = makeSettle({ evaluate: (e: string) => evaluate<PlateWords>(e).catch(() => null), sleep });
-  const wide = await evaluate(PLATE_WORDS);
+  // The first read after arrival is still fitting (657.5 against the rest of 655.2 at 1280, measured 2026-10-16), so the width read is taken at rest like the others.
+  const wide = await settle(PLATE_WORDS, (d, last) => !!last && d.width === last.width, "cd62-plate-at-1280", DRAWN);
   try {
     await send("Emulation.setDeviceMetricsOverride", { width: 1024, height: 768, deviceScaleFactor: 1, mobile: false });
     const narrow = await settle(

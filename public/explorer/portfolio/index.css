@@ -72,6 +72,91 @@
   display: block;
 }
 
+/* The plate a Portfolio with nothing gathered shows (Issue #670); its font sizes are viewBox units, and CD62 holds every word to the page's own smallest body text. */
+.how-plate .p-ground,
+.how-plate .p-paper,
+.how-plate .p-leaf,
+.how-plate .p-tabpaper {
+  fill: var(--chart-paper);
+}
+.how-plate .p-leaf {
+  stroke: var(--line-tan);
+  stroke-width: 1.5;
+}
+.how-plate .p-tabpaper,
+.how-plate .p-paper {
+  stroke: var(--ink-dark);
+  stroke-width: 1.5;
+}
+.how-plate .p-rule {
+  fill: none;
+  stroke: var(--ink-dark);
+}
+.how-plate .p-rule.outer {
+  stroke-width: 3;
+}
+.how-plate .p-rule.inner {
+  stroke-width: 1;
+}
+.how-plate .p-hair {
+  stroke: var(--line-tan);
+  stroke-width: 2;
+}
+.how-plate .p-frame {
+  fill: none;
+  stroke: var(--ink-dark);
+  stroke-width: 2;
+}
+.how-plate .p-window {
+  fill: none;
+  stroke: var(--iron-red);
+  stroke-width: 4;
+  stroke-dasharray: 12 8;
+}
+.how-plate .p-gold {
+  fill: var(--control-gold);
+  stroke: var(--ink-dark);
+  stroke-width: 1.5;
+}
+.how-plate .p-walnut {
+  fill: var(--chart-ink);
+}
+.how-plate .p-title {
+  font-family: var(--font-display);
+  font-size: 58px;
+  fill: var(--ink-dark);
+  letter-spacing: 3px;
+}
+.how-plate .p-head {
+  font-family: var(--font-display);
+  font-size: 38px;
+  fill: var(--ink-dark);
+  letter-spacing: 1.5px;
+}
+.how-plate .p-cap {
+  font-family: var(--font-body);
+  font-size: 31px;
+  fill: var(--ink-dark);
+}
+.how-plate .p-tab {
+  font-family: var(--font-display);
+  font-size: 30px;
+  fill: var(--ink-dark);
+  letter-spacing: 1px;
+}
+.how-plate .p-verb {
+  font-family: var(--font-flourish);
+  font-style: italic;
+  font-size: 30px;
+  fill: var(--ink-brown);
+}
+.how-plate .p-room {
+  font-family: var(--font-display);
+  font-size: 30px;
+  fill: var(--ink-dark);
+  letter-spacing: 2px;
+}
+
 .bound-line {
   font-size: 0.95rem;
   line-height: 1.5;

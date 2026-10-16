@@ -171,7 +171,7 @@ owes the script and moves the prospect plate pins.
   surfaces for each. Known homes today, and this list is deliberately NOT closed, because nothing
   sweeps prose and the next page to quote the world will not appear in it: `src/pages/index.astro`
   (the atlas road, and the arms images' `alt` text, which names realms), `src/pages/faq/index.astro`,
-  `src/site/home/stations.ts` (mooring names and the station title) and `README.md`.
+  `src/site/home/stations.ts` (mooring names and the station title), `src/site/portfolio/folio-lines.ts` (the Portfolio plate's source line, which names the world) and `README.md`; the plate's crops in `src/site/portfolio/how-plate.ts` are coordinates on the committed antique chart, so a re-roll, or a regen that moves its labels, changes what they frame.
 - **Some levers are golden-safe by construction, and a change behind one of them owes no regen and
   no golden re-pin.** The named ones are worth knowing before paying for a regen.
   - **A render gate that only region sheets pass.** `world.region !== undefined` selects
