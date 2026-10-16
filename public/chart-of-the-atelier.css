@@ -108,6 +108,9 @@ header.chrome:has(.atelier-fold[open]) {
 .atelier .pip {
   fill: var(--parchment);
 }
+.atelier a.place .pip {
+  pointer-events: visible;
+}
 .atelier .capital .pip,
 .atelier .here .pip,
 .atelier a.place:hover .pip,
