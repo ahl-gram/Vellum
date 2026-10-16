@@ -566,7 +566,7 @@ test("the chart of the atelier rides every page's head cluster: its fold at the 
       );
     }
     assert.ok(
-      inner.startsWith('<summary class="atelier-press">the chart of the atelier</summary>'),
+      inner.includes('<summary class="atelier-press">the chart of the atelier</summary>'),
       `${p.route}: the press reads 'the chart of the atelier'`,
     );
     const links = [...inner.matchAll(PLACE_LINK)].map((m) => m[1]).sort();

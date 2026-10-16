@@ -1,7 +1,29 @@
 ---
+import { COAST, PIP_R, PLACES, ROADS, TRACKS, roadPath } from "./atelier-chart.ts";
 interface Props {
   path: string;
 }
+const { path } = Astro.props;
+const here = PLACES[path];
 ---
 
-<details class="atelier-fold"><summary class="atelier-press">the chart of the atelier</summary></details>
+<details class="atelier-fold">
+  <summary class="atelier-press">the chart of the atelier</summary>
+  <nav class="atelier" aria-label="The chart of the atelier">
+    <svg viewBox="0 0 600 420">
+      <path class="sea-ring" d={COAST} aria-hidden="true" />
+      <path class="land" d={COAST} aria-hidden="true" />
+      {ROADS.map((r) => <path class="road" d={roadPath(r)} aria-hidden="true" />)}
+      {TRACKS.map((r) => <path class="road track" d={roadPath(r)} aria-hidden="true" />)}
+      {Object.entries(PLACES).map(([href, p]) => href === path ? (
+        <g class={`place ${p.rank} here`}><circle class="halo" cx={p.x} cy={p.y} r="16" /><circle class="pip" cx={p.x} cy={p.y} r={PIP_R[p.rank]} /><text x={p.x} y={p.y - 11}>{p.name}</text></g>
+      ) : (
+        <a href={href} class={`place ${p.rank}`}><circle class="pip" cx={p.x} cy={p.y} r={PIP_R[p.rank]} /><text x={p.x} y={p.y - 11}>{p.name}</text></a>
+      ))}
+      {here && <g class="you"><path d={`M${here.x} ${here.y + 19} L${here.x} ${here.y + 29}`} /><text x={here.x} y={here.y + 42}>you are here</text></g>}
+      <g class="rose" transform="translate(538 380)" aria-hidden="true"><circle r="15" /><path d="M0 -15 L3.4 -3.4 L15 0 L3.4 3.4 L0 15 L-3.4 3.4 L-15 0 L-3.4 -3.4 Z" /><text y="-19">N</text></g>
+      <text class="atelier-cartouche" x="86" y="408" aria-hidden="true">A Chart of the Atelier</text>
+    </svg>
+    <p class="atelier-key">the dashed track is a second way in, not a second home</p>
+  </nav>
+</details>
