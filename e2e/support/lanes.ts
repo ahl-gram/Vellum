@@ -41,7 +41,6 @@ export const E2E_LANES: readonly E2eLane[] = [
       "room-voyage",
       "room-voyage-route",
       "runninghead",
-      "cluster",
       "stage",
     ],
     port: DEFAULT_E2E_PORT + 1,
@@ -49,7 +48,7 @@ export const E2E_LANES: readonly E2eLane[] = [
   },
   {
     name: "C",
-    suites: ["home", "room-instrument", "specimen", "corners"],
+    suites: ["home", "room-instrument", "cluster", "specimen", "corners"],
     port: DEFAULT_E2E_PORT + 2,
     dport: DEFAULT_E2E_DPORT + 2,
   },
