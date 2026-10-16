@@ -404,7 +404,7 @@ checks against.
   reading-page kind only; a working page that mounts a bundle owes a good deal more, and
   `handbook/specs/site-architecture.md` writes both kinds out. **The nav is a flat top line over a
   tree**, both modeled once as typed data: `NAV_ITEMS` stays flat and is all the nav renders, and a
-  room's children are seated under it in `ROUTE_CHILDREN`, which the trail reads. Revisit the top
+  room's children are seated under it in `ROUTE_CHILDREN`, which the trail and the chart of the atelier read. Revisit the top
   line only on a named trigger: an eighth surface scheduled for it, or the nav no longer fitting
   beside the room's corner on its one line at 1024, at the browser's default text size (Alex,
   2026-10-07, Issue #764).
