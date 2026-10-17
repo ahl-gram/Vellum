@@ -16,8 +16,7 @@ const DECLARED: ReadonlySet<string> = new Set([
 const packageName = (specifier: string): string | null => {
   if (/^[./#]/.test(specifier) || /^[a-z][a-z0-9+.-]*:/i.test(specifier) || isBuiltin(specifier)) return null;
   const parts = specifier.split("/");
-  const name = specifier.startsWith("@") ? parts.slice(0, 2).join("/") : parts[0]!;
-  return name === "" ? null : name;
+  return specifier.startsWith("@") ? parts.slice(0, 2).join("/") : parts[0]!;
 };
 const declared = (name: string, typeOnly: boolean): boolean =>
   DECLARED.has(name) || (typeOnly && DECLARED.has(`@types/${name}`));

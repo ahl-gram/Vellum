@@ -41,6 +41,8 @@ const PLANT: ReadonlyArray<readonly [string, string | null]> = [
   ['export const loadPad = () => import("left-pad");', "left-pad"],
   ["export const loadPadTemplate = () => import(`left-pad`);", "left-pad"],
   ['export type Pad = typeof import("left-pad");', "left-pad"],
+  ['export type { Node as EsNode } from "estree";', PASS],
+  ['export type * from "estree";', PASS],
 ];
 const REPORTED = PLANT.flatMap(([, name], i) => (name === null ? [] : [`${i + 1} ${name}`]));
 const BLIND_SPOTS =
