@@ -40,6 +40,7 @@
   --chrome-x: 1.6rem;
   --chrome-y: 1.4rem;
   --trail-gap: 0.6rem;
+  --trail-line: 1rem;
 }
 /* A palette inversion, not a dark mode: form controls stay light. */
 :root {
@@ -154,6 +155,7 @@ footer a:focus-visible {
   color: var(--parchment);
   font-size: 0.78rem;
   vertical-align: -0.04em;
+  line-height: var(--trail-line);
 }
 .trail > :not(.way) {
   white-space: nowrap;
