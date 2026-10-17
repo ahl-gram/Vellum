@@ -206,8 +206,8 @@ the nav and the trail are whole. It opens and shuts as a fold the browser keeps,
 scripts off, and the shell's script adds Escape, a click elsewhere, focus leaving it and leaving the
 page. Its press is lit while it is open, dark ink on a cream ground, which its hover never wears.
 Its panel stands inside the head cluster, so it rides with the cluster on every page and keeps its
-place on the 1024 page; the cluster rises above the room's furniture while it is open, so no piece
-of the room paints over it; a closed fold's content stands down by display, since a script reading
+place on the 1024 page; the cluster rises above the room's furniture while it is open, so none of
+the room's furniture paints over it, the carried sheet, the desk notice and the veil alone standing above; a closed fold's content stands down by display, since a script reading
 it otherwise finds its boxes. On a window too short for it the panel is cut at the window's foot, a
 cost recorded in `handbook/errata/site.md`. Every word on it wears a wide outline in the panel's own
 ink, so the roads and the coast stop short of the names. **Provisional until the post-use review:**
