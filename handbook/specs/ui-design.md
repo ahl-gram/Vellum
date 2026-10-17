@@ -192,10 +192,7 @@ AND underlined, never colour alone; on a top-level room the trail's last segment
 dress without the mark, which the nav carries. Home carries none, its wordmark being its mark, and
 so does a page deliberately outside the tree. The trail's links are parchment like the nav's, never
 a dimmer ink, and at every width each clears a thumb's 24px from the cluster's other links and
-controls. **Provisional until the post-use review:** the trail's size step under the nav, its separator glyph, the alias line's wording and
-whether it earns its place, the trail and the nav sharing one ink, the margins that clear
-the targets' spacing, the Gallery's first row given back its gap, and the alias link's
-strengthened underline.
+controls. **Ratified at the post-use review (Issue #736):** the trail's size step under the nav, its separator glyph, the margins that clear the targets' spacing, the Gallery's first row given back its gap, and the alias link's strengthened underline. The cluster suite's DR16 holds the size step, the margins, the trail's line and the underline's strength, and DR13 holds the Gallery's clearance against a change to the trail's line; no check reads the separator glyph, and the Gallery's other spacing is not pinned (`handbook/errata/site.md`). **Still provisional:** the alias line's wording and whether it earns its place. The trail and the nav sharing one ink stays as `handbook/errata/site.md` records it.
 
 **The chart of the atelier is the listing, laid over the trail as a layer.** Its press opens a small
 chart of the site's own shape: every route in the tree is a place and the atlas an isle off home

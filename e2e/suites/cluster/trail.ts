@@ -19,6 +19,8 @@ export type TrailKit = ReturnType<typeof trailKit>;
 const NARROW = 640;
 const PARCHMENT = "rgb(239, 230, 207)";
 const PARCHMENT_BRIGHT = "rgb(255, 247, 228)";
+// Blink lays a box out in 1/64px units, so a gap read between two edges errs by at most two of them.
+const LAYOUT_SLACK = 1 / 32;
 
 type Rgb = readonly [number, number, number];
 const channel = (c: number) => {
@@ -172,7 +174,8 @@ export async function dr12Print(k: TrailKit): Promise<void> {
 
 export async function dr13Gallery(k: TrailKit): Promise<void> {
   const { evaluate, check, setNarrowViewport, clearMobile, send } = k;
-  const rows: { width: number; gap: number }[] = [];
+  const rows: { width: number; gap: number; grown: number }[] = [];
+  const GROWN: Payload<number> = `(() => { const s = document.createElement("style"); s.textContent = ":root { --trail-line: 2rem; } .trail .way { font-size: 1rem; }"; document.head.append(s); const g = document.querySelector(".grid figure").getBoundingClientRect().top - document.querySelector("header.chrome").getBoundingClientRect().bottom; s.remove(); return g; })()`;
   for (const width of [1280, NARROW] as const) {
     if (width === NARROW) await setNarrowViewport(NARROW, 844);
     await k.goto("/gallery/");
@@ -184,13 +187,13 @@ export async function dr13Gallery(k: TrailKit): Promise<void> {
     const gap = await evaluate<number>(
       `document.querySelector(".grid figure").getBoundingClientRect().top - document.querySelector("header.chrome").getBoundingClientRect().bottom`,
     );
-    rows.push({ width, gap });
+    rows.push({ width, gap, grown: await evaluate(GROWN) });
   }
   await clearMobile();
   await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
   check(
-    "DR13 the Gallery's first row stands clear of the head cluster with the trail in it, at 1280 and at 640, which lays out the 1024 page (Issue #762; Issue #668; the size of the gap is ruling 3's, provisional until Issue #736)",
-    rows.length === 2 && rows.every((r) => r.gap >= 4),
+    "DR13 the Gallery's first row stands clear of the head cluster with the trail in it, at 1280 and at 640, which lays out the 1024 page, and keeps that clearance when the trail's line and its arrow grow, since the Gallery reserves the trail's own line rather than a copy of it (Issue #762; Issue #668; the gap ratified on Issue #736; Issue #906)",
+    rows.length === 2 && rows.every((r) => r.gap >= 4 && Math.abs(r.grown - r.gap) <= LAYOUT_SLACK),
     JSON.stringify(rows),
   );
 }
@@ -250,5 +253,33 @@ export async function dr15TrailHover(k: TrailKit): Promise<void> {
       nearRgba(lit, tokenRgba("--parchment-bright")) &&
       alias.every((c) => QUIET.some((q) => nearRgba(c, q))),
     JSON.stringify({ rest, lit, alias }),
+  );
+}
+
+type TrailDress = {
+  navBottom: number;
+  trailTop: number;
+  trailBottom: number;
+  trailHeight: number;
+  alsoTop: number;
+  trailFont: string;
+  underline: string;
+} | null;
+const DRESS: Payload<TrailDress> = `(() => { const q = (s) => document.querySelector(s); const nav = q("header.chrome nav.rooms"), trail = q("header.chrome .trail"), also = q("header.chrome .also"), alias = q("header.chrome .also a"); if (!nav || !trail || !also || !alias) return null; const n = nav.getBoundingClientRect(), t = trail.getBoundingClientRect(), a = also.getBoundingClientRect(); return { navBottom: n.bottom, trailTop: t.top, trailBottom: t.bottom, trailHeight: t.height, alsoTop: a.top, trailFont: getComputedStyle(trail).fontSize, underline: getComputedStyle(alias).textDecorationColor }; })()`;
+
+export async function dr16Dress(k: TrailKit): Promise<void> {
+  await k.send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
+  await k.goto("/prospect/");
+  const d = await k.evaluate(DRESS);
+  const alpha = d ? parseColour(d.underline).alpha : NaN;
+  k.check(
+    "DR16 the trail's dressing stands as Issue #736 ratified it, on the Prospect at 1280: 0.6rem from the nav to the trail, 0.55rem from the trail to the alias line, the trail's type at 0.62rem on a 1rem line, and the alias underline drawn at 55% of its ink, which reads about 3.7:1 over the band (DR11 holds its 3:1 floor) (Issue #906)",
+    !!d &&
+      Math.abs(d.trailTop - d.navBottom - 9.6) <= LAYOUT_SLACK &&
+      Math.abs(d.alsoTop - d.trailBottom - 8.8) <= LAYOUT_SLACK &&
+      Math.abs(d.trailHeight - 16) <= LAYOUT_SLACK &&
+      d.trailFont === "9.92px" &&
+      alpha === 0.55,
+    JSON.stringify(d),
   );
 }
