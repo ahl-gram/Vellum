@@ -41,13 +41,15 @@ async function key(k: TrailKit, name: "Enter" | "Tab" | "Escape"): Promise<void>
 const polled = <T>(k: TrailKit, read: Payload<T>, label: string) =>
   k.settle(read, (d, last) => last !== null && JSON.stringify(d) === JSON.stringify(last), label);
 
+// The Reading Room armed 1.8 s after load here (2026-10-16, Issue #671); its own armed-and-at-rest wait allows 15 s, since a worker that stops answering costs 6 s before the inline fallback arms (`settled` in `e2e/support/room.ts`, Issue #418), so every rest here waits as long before it throws, at 50 ms a poll.
+const ARMED = 300;
 type Rest = { still: boolean; sheet: Rect | null };
-const RESTING: Payload<Rest> = `(() => ({ still: document.querySelector("header.chrome").getAnimations().every((a) => a.playState === "finished") && !(document.getElementById("status")?.textContent ?? "").trim(), sheet: ${RECT}(document.getElementById("sheet")) }))()`;
+const RESTING: Payload<Rest> = `(() => ({ still: document.querySelector("header.chrome").getAnimations().every((a) => a.playState === "finished") && ![...document.querySelectorAll("#status, .rf-status")].some((s) => s.textContent.trim()) && (!document.querySelector(".rf-status") || !!document.querySelector(".rf-chart svg")), sheet: ${RECT}(document.getElementById("sheet")) }))()`;
 
 async function arrive(k: TrailKit, page: string, size: Size): Promise<void> {
   await sized(k, size);
   await k.goto(page);
-  await k.settle(RESTING, (d, last) => d.still && last !== null && near(d.sheet, last.sheet), `AT rest ${page}`);
+  await k.settle(RESTING, (d, last) => d.still && last !== null && near(d.sheet, last.sheet), `AT rest ${page}`, ARMED);
 }
 
 const NAMES = {
