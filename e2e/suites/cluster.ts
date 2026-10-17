@@ -5,16 +5,8 @@ import type { Payload, SuiteContext } from "../types.ts";
 import { deskKit, dnContinue, dnFramed, dnNarrow, dnPhone, dnRefused, dnTablet } from "./cluster/desk-notice.ts";
 import { dr11Wide, dr12Print, dr13Gallery, dr14PrintIsPaper, dr15TrailHover, trailKit } from "./cluster/trail.ts";
 import type { TrailKit } from "./cluster/trail.ts";
-import {
-  at1Press,
-  at2Places,
-  at3Keys,
-  at4ScriptsOff,
-  at5Spacing,
-  at6Dress,
-  at7Rides,
-  at8Back,
-} from "./cluster/chart.ts";
+import { at1Press, at2Places, at3Keys, at4ScriptsOff, at5Spacing, at6Dress } from "./cluster/chart.ts";
+import { at7Rides, at8Back } from "./cluster/chart-back.ts";
 
 type Rect = { x: number; y: number; w: number; h: number; right: number; bottom: number };
 type Stage = ReturnType<typeof makeStage>;

@@ -7,25 +7,25 @@ import { withScriptsOff } from "../../support/scripts-off.ts";
 import { spacing } from "./trail.ts";
 import type { TrailKit } from "./trail.ts";
 
-type Rect = { x: number; y: number; w: number; h: number; right: number; bottom: number };
+export type Rect = { x: number; y: number; w: number; h: number; right: number; bottom: number };
 type Size = readonly [number, number];
 
-const RECT = `((e) => { if (!e) return null; const b = e.getBoundingClientRect(); return { x: b.x, y: b.y, w: b.width, h: b.height, right: b.right, bottom: b.bottom }; })`;
-const FOLD = `document.querySelector("header.chrome details.atelier-fold")`;
-const PRESS = `${FOLD}.querySelector("summary")`;
-const PANEL = `${FOLD}.querySelector("nav.atelier")`;
-const BIG: Size = [1280, 800];
+export const RECT = `((e) => { if (!e) return null; const b = e.getBoundingClientRect(); return { x: b.x, y: b.y, w: b.width, h: b.height, right: b.right, bottom: b.bottom }; })`;
+export const FOLD = `document.querySelector("header.chrome details.atelier-fold")`;
+export const PRESS = `${FOLD}.querySelector("summary")`;
+export const PANEL = `${FOLD}.querySelector("nav.atelier")`;
+export const BIG: Size = [1280, 800];
 
-const centre = (b: Rect) => ({ x: b.x + b.w / 2, y: b.y + b.h / 2 });
+export const centre = (b: Rect) => ({ x: b.x + b.w / 2, y: b.y + b.h / 2 });
 const near = (a: Rect | null, b: Rect | null): boolean =>
   a === null || b === null
     ? a === b
     : (["x", "y", "w", "h", "right", "bottom"] as const).every((f) => Math.abs(a[f] - b[f]) <= 0.5);
 
-const sized = (k: TrailKit, [width, height]: Size) =>
+export const sized = (k: TrailKit, [width, height]: Size) =>
   k.send("Emulation.setDeviceMetricsOverride", { width, height, deviceScaleFactor: 1, mobile: false });
 
-async function pressAt(k: TrailKit, x: number, y: number): Promise<void> {
+export async function pressAt(k: TrailKit, x: number, y: number): Promise<void> {
   await k.send("Input.dispatchMouseEvent", { type: "mousePressed", x, y, button: "left", clickCount: 1 });
   await k.send("Input.dispatchMouseEvent", { type: "mouseReleased", x, y, button: "left", clickCount: 1 });
 }
@@ -38,7 +38,7 @@ async function key(k: TrailKit, name: "Enter" | "Tab" | "Escape"): Promise<void>
   await k.send("Input.dispatchKeyEvent", { type: "keyUp", key: name, code: name, windowsVirtualKeyCode: vk });
 }
 
-const polled = <T>(k: TrailKit, read: Payload<T>, label: string) =>
+export const polled = <T>(k: TrailKit, read: Payload<T>, label: string) =>
   k.settle(read, (d, last) => last !== null && JSON.stringify(d) === JSON.stringify(last), label);
 
 // The Reading Room armed 1.8 s after load here (2026-10-16, Issue #671); its own armed-and-at-rest wait allows 15 s, since a worker that stops answering costs 6 s before the inline fallback arms (`settled` in `e2e/support/room.ts`, Issue #418), so every rest here waits as long before it throws, at 50 ms a poll.
@@ -46,13 +46,13 @@ const ARMED = 300;
 type Rest = { still: boolean; sheet: Rect | null };
 const RESTING: Payload<Rest> = `(() => ({ still: document.querySelector("header.chrome").getAnimations().every((a) => a.playState === "finished") && ![...document.querySelectorAll("#status, .rf-status")].some((s) => s.textContent.trim()) && (!document.querySelector(".rf-status") || !!document.querySelector(".rf-chart svg")), sheet: ${RECT}(document.getElementById("sheet")) }))()`;
 
-async function arrive(k: TrailKit, page: string, size: Size): Promise<void> {
+export async function arrive(k: TrailKit, page: string, size: Size): Promise<void> {
   await sized(k, size);
   await k.goto(page);
   await k.settle(RESTING, (d, last) => d.still && last !== null && near(d.sheet, last.sheet), `AT rest ${page}`, ARMED);
 }
 
-const NAMES = {
+export const NAMES = {
   at1: "AT1 a real press on the chart of the atelier's press opens it and a second shuts it, at 1280 and at 1024 on the Q & A, the Explorer, the Prospect and home, and nothing in the head cluster that takes a press is dead to the hand: open, the panel stands below the cluster and inside the window, and neither the cluster nor the fitted sheet moves (Issue #671; the Issue #520 class)",
   at2: "AT2 on every page in the tree and on the Specimen, the open chart of the atelier offers every place but the page's own, the Atlas isle among them, as a link that takes the hand at its name and at its pip, counted against the drawing, pins the page's own place and no other, carries no page mark, lets no two of its words overlap, and nothing in the room paints over it (Issue #671; the round's label overlaps, design/nav-wayfinding/README.md)",
   at3: "AT3 the chart of the atelier answers the keyboard and the hand: Enter opens it, Tab walks into its places, Escape shuts it and hands the focus back to its press, Tab past its last place shuts it, a click on the panel itself leaves it open, and a click anywhere else on the page shuts it (Issue #671; Alex, 2026-10-16, D1)",
@@ -358,74 +358,6 @@ export async function at6Dress(k: TrailKit): Promise<void> {
         ringOk(open),
       JSON.stringify({ rest, restRow, hot, shutRing, open, openRow, openHot }),
     );
-  } finally {
-    await sized(k, BIG);
-  }
-}
-
-type Ride = { open: boolean; press: Rect; panel: Rect; scrollX: number; scrollY: number };
-const RIDE: Payload<Ride> = `({ open: ${FOLD}.open, press: ${RECT}(${PRESS}), panel: ${RECT}(${PANEL}), scrollX, scrollY })`;
-
-async function rides(k: TrailKit, page: string, sideways: boolean): Promise<string | null> {
-  const before = await polled(k, RIDE, `AT7 rest ${page}`);
-  await pressAt(k, centre(before.press).x, centre(before.press).y);
-  const opened = await polled(k, RIDE, `AT7 open ${page}`);
-  const to = sideways ? `left: document.documentElement.scrollWidth, top: 0` : `left: 0, top: 400`;
-  await k.evaluate(`scrollTo({ ${to}, behavior: "instant" })`);
-  const axis = sideways ? "scrollX" : "scrollY";
-  const after = await k.settle(
-    RIDE,
-    (d, last) => d[axis] > 0 && last !== null && d[axis] === last[axis],
-    `AT7 scrolled ${page}`,
-  );
-  const moved = (a: Rect, b: Rect, f: "x" | "y") => b[f] - a[f];
-  const f = sideways ? "x" : "y";
-  const by = -(after[axis] - opened[axis]);
-  const good =
-    opened.open &&
-    after[axis] > 0 &&
-    [moved(opened.press, after.press, f), moved(opened.panel, after.panel, f)].every((m) => Math.abs(m - by) <= 0.5) &&
-    Math.abs(moved(opened.press, after.press, sideways ? "y" : "x")) <= 0.5 &&
-    Math.abs(moved(opened.panel, after.panel, sideways ? "y" : "x")) <= 0.5;
-  return good ? null : JSON.stringify({ opened, after });
-}
-
-export async function at7Rides(k: TrailKit): Promise<void> {
-  const rows: string[] = [];
-  try {
-    await arrive(k, "/", BIG);
-    rows.push(`1280 /: ${(await rides(k, "/", false)) ?? "ok"}`);
-    await k.setNarrowViewport(640, 800);
-    for (const page of ["/", "/explorer/", "/faq/"]) {
-      await k.goto(page);
-      rows.push(`640 ${page}: ${(await rides(k, page, true)) ?? "ok"}`);
-    }
-  } finally {
-    await k.clearMobile();
-    await sized(k, BIG);
-  }
-  k.check(
-    NAMES.at7,
-    rows.every((r) => r.endsWith(": ok")),
-    rows.join(" | "),
-  );
-}
-
-export async function at8Back(k: TrailKit): Promise<void> {
-  const state: Payload<{ path: string; ready: string; warm: unknown; open: boolean | null }> =
-    `({ path: location.pathname, ready: document.readyState, warm: window.__at8 ?? null, open: ${FOLD}?.open ?? null })`;
-  try {
-    await arrive(k, "/faq/", BIG);
-    await k.evaluate(`window.__at8 = "warm"`);
-    const press = await k.evaluate<Rect>(`${RECT}(${PRESS})`);
-    await pressAt(k, centre(press).x, centre(press).y);
-    await polled(k, state, "AT8 open");
-    const glossary = await k.evaluate<Rect>(`${RECT}(${PANEL}.querySelector('a[href="/glossary/"] text'))`);
-    await pressAt(k, centre(glossary).x, centre(glossary).y);
-    await k.settle(state, (d) => d.path === "/glossary/" && d.ready === "complete", "AT8 at the Glossary");
-    await k.evaluate<undefined>(`history.back()`).catch(() => undefined);
-    const back = await k.settle(state, (d) => d.path === "/faq/" && d.ready === "complete", "AT8 back at the Q & A");
-    k.check(NAMES.at8, back.warm === "warm" && back.open === false, JSON.stringify(back));
   } finally {
     await sized(k, BIG);
   }
