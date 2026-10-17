@@ -3,7 +3,15 @@ import { makeStage, makeMouse, readCam, atLandfall } from "../support/home.ts";
 import { makeStep } from "../support/step.ts";
 import type { Payload, SuiteContext } from "../types.ts";
 import { deskKit, dnContinue, dnFramed, dnNarrow, dnPhone, dnRefused, dnTablet } from "./cluster/desk-notice.ts";
-import { dr11Wide, dr12Print, dr13Gallery, dr14PrintIsPaper, dr15TrailHover, trailKit } from "./cluster/trail.ts";
+import {
+  dr11Wide,
+  dr12Print,
+  dr13Gallery,
+  dr14PrintIsPaper,
+  dr15TrailHover,
+  dr16Dress,
+  trailKit,
+} from "./cluster/trail.ts";
 import type { TrailKit } from "./cluster/trail.ts";
 import { at1Press, at2Places, at3Keys, at4ScriptsOff, at5Spacing, at6Dress } from "./cluster/chart.ts";
 import { at7Rides, at8Back } from "./cluster/chart-back.ts";
@@ -43,6 +51,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("DR13", () => dr13Gallery(trail));
   await step("DR14", () => dr14PrintIsPaper(trail));
   await step("DR15", () => dr15TrailHover(trail));
+  await step("DR16", () => dr16Dress(trail));
   await step("AT1", () => at1Press(trail));
   await step("AT2", () => at2Places(trail));
   await step("AT3", () => at3Keys(trail));

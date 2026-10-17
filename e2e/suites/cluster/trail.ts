@@ -255,3 +255,31 @@ export async function dr15TrailHover(k: TrailKit): Promise<void> {
     JSON.stringify({ rest, lit, alias }),
   );
 }
+
+type TrailDress = {
+  navBottom: number;
+  trailTop: number;
+  trailBottom: number;
+  trailHeight: number;
+  alsoTop: number;
+  trailFont: string;
+  underline: string;
+} | null;
+const DRESS: Payload<TrailDress> = `(() => { const q = (s) => document.querySelector(s); const nav = q("header.chrome nav.rooms"), trail = q("header.chrome .trail"), also = q("header.chrome .also"), alias = q("header.chrome .also a"); if (!nav || !trail || !also || !alias) return null; const n = nav.getBoundingClientRect(), t = trail.getBoundingClientRect(), a = also.getBoundingClientRect(); return { navBottom: n.bottom, trailTop: t.top, trailBottom: t.bottom, trailHeight: t.height, alsoTop: a.top, trailFont: getComputedStyle(trail).fontSize, underline: getComputedStyle(alias).textDecorationColor }; })()`;
+
+export async function dr16Dress(k: TrailKit): Promise<void> {
+  await k.send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 800, deviceScaleFactor: 1, mobile: false });
+  await k.goto("/prospect/");
+  const d = await k.evaluate(DRESS);
+  const alpha = d ? parseColour(d.underline).alpha : NaN;
+  k.check(
+    "DR16 the trail's dressing stands as Issue #736 ratified it, on the Prospect at 1280: 0.6rem from the nav to the trail, 0.55rem from the trail to the alias line, the trail's type at 0.62rem on a 1rem line, and the alias underline drawn at 55% of its ink, which reads about 3.7:1 over the band (DR11 holds its 3:1 floor) (Issue #906)",
+    !!d &&
+      Math.abs(d.trailTop - d.navBottom - 9.6) <= LAYOUT_SLACK &&
+      Math.abs(d.alsoTop - d.trailBottom - 8.8) <= LAYOUT_SLACK &&
+      Math.abs(d.trailHeight - 16) <= LAYOUT_SLACK &&
+      d.trailFont === "9.92px" &&
+      alpha === 0.55,
+    JSON.stringify(d),
+  );
+}
