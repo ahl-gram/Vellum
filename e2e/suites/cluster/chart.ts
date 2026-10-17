@@ -1,4 +1,4 @@
-// The chart of the atelier (Issue #671): the press in the head cluster opens a small chart of the site's own shape, every place a link but the page's own. Every gesture is a REAL press at a rect read from the page; element.click() appears only where a check says it is wiring.
+// The chart of the atelier (Issue #671): the press in the head cluster opens a small chart of the site's own shape, every place a link but the page's own. Every gesture is a REAL press at a rect read from the page; a property set or a focus taken through evaluate is wiring, and says so at its check.
 import type { Payload } from "../../types.ts";
 import { nearRgba, PAGE_RGBA, sampleRow, tokenRgba } from "../../support/pixel.ts";
 import { PLACES } from "../../../src/layouts/atelier-chart.ts";
@@ -55,7 +55,7 @@ export async function arrive(k: TrailKit, page: string, size: Size): Promise<voi
 export const NAMES = {
   at1: "AT1 a real press on the chart of the atelier's press opens it and a second shuts it, at 1280 and at 1024 on the Q & A, the Explorer, the Prospect and home, and nothing in the head cluster that takes a press is dead to the hand: open, the panel stands below the cluster and inside the window, and neither the cluster nor the fitted sheet moves (Issue #671; the Issue #520 class)",
   at2: "AT2 on every page in the tree and on the Specimen, the open chart of the atelier offers every place but the page's own, the Atlas isle among them, as a link that takes the hand at its name and at its pip, counted against the drawing, pins the page's own place and no other, carries no page mark, lets no two of its words overlap, and nothing in the room paints over it (Issue #671; the round's label overlaps, design/nav-wayfinding/README.md)",
-  at3: "AT3 the chart of the atelier answers the keyboard and the hand: Enter opens it, Tab walks into its places, Escape shuts it and hands the focus back to its press, Tab past its last place shuts it, a click on the panel itself leaves it open, and a click anywhere else on the page shuts it (Issue #671; Alex, 2026-10-16, D1)",
+  at3: "AT3 the chart of the atelier answers the keyboard and the hand: Enter opens it, Tab walks into its places, Escape shuts it and hands the focus back to its press when the focus was inside it and leaves it where it was when it was not, Tab past its last place shuts it, a click on the panel itself leaves it open, and a click anywhere else on the page shuts it (Issue #671; Alex, 2026-10-16, D1)",
   at4: "AT4 with scripts off the chart of the atelier still opens and shuts by a real press on the Q & A, the scripted run of AT1 its same-run control (Issue #671; Alex, 2026-10-16, D1)",
   at5: "AT5 the chart of the atelier's press clears a thumb's 24px round every link in the head cluster, on its own line under the nav (home, the Specimen) and at the trail's end (the Q & A, the Seed of the Day, the Ribbon, the Prospect), and its box ends with its words (Issue #671; Alex, 2026-10-03, on Issue #668)",
   at6: "AT6 the chart of the atelier's press is parchment on the deep at rest and parchment-bright under the hand; while the chart is open it is lit, dark ink on a painted cream ground, and stays lit under the hand, never in its hover's dress; and under keyboard focus, shut or open, it wears the chrome's ring, 2px solid parchment-bright at a 2px offset (Issue #671; Alex, 2026-10-16, D10; a toggle press is lit when on, never in the dress of its own hover; the focus ring is one face, Issue #324)",
@@ -227,6 +227,10 @@ export async function at3Keys(k: TrailKit): Promise<void> {
     const panel = await k.evaluate<Rect>(`${RECT}(${PANEL})`);
     await pressAt(k, panel.x + 6, panel.y + 5);
     const onPanel = await read("a press on the panel");
+    await key(k, "Escape");
+    const outsideEsc = await read("Escape with the focus outside the chart");
+    await focusPress();
+    await key(k, "Enter");
     const bare = await k.evaluate<boolean>(`!document.elementFromPoint(700, 60)?.closest("a, button")`);
     await pressAt(k, 700, 60);
     const elsewhere = await read("a press elsewhere");
@@ -240,10 +244,12 @@ export async function at3Keys(k: TrailKit): Promise<void> {
         past.outside &&
         reopened.open &&
         onPanel.open &&
+        !outsideEsc.open &&
+        !outsideEsc.press &&
         bare &&
         !elsewhere.open &&
         elsewhere.path === "/faq/",
-      JSON.stringify({ entered, walked, escaped, past, reopened, onPanel, bare, elsewhere }),
+      JSON.stringify({ entered, walked, escaped, past, reopened, onPanel, outsideEsc, bare, elsewhere }),
     );
   } finally {
     await sized(k, BIG);
@@ -328,7 +334,9 @@ const BRIGHT = tokenRgba("--parchment-bright");
 const ringOk = (d: Dress): boolean =>
   d.focusVisible && d.outline.slice(0, 3).join(" ") === "solid 2px 2px" && nearRgba(d.outline[3], BRIGHT);
 const litOk = (d: Dress): boolean =>
-  nearRgba(d.colour, tokenRgba("--ink-dark")) && nearRgba(d.bg, BRIGHT) && d.shadow.startsWith("rgb(255, 247, 228)");
+  nearRgba(d.colour, tokenRgba("--ink-dark")) &&
+  nearRgba(d.bg, BRIGHT) &&
+  d.shadow.startsWith(`rgb(${BRIGHT.slice(0, 3).join(", ")})`);
 
 export async function at6Dress(k: TrailKit): Promise<void> {
   try {
