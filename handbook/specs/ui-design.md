@@ -155,7 +155,7 @@ the cluster alone, and why **it wears no vignettes**: a vignette is a fixed dark
 scrolling page it washes out whatever passes through it. Four corners, each a named piece of the kit:
 
 - **The head cluster**, top left: wordmark, flourish tagline, dot-separated rooms nav and, on every
-  page with a seat in the route tree, the trail under it, directly on the deep. Fixed in a room,
+  page with a seat in the route tree, the trail under it, the press that opens the chart of the atelier riding the trail's line, or taking its own under the nav where the page has no trail, directly on the deep. Fixed in a room,
   riding the page on home. The motto keeps its line and the wordmark its size at every width. **The
   cluster and the right-hand corner share one top row** on every page, laid out from their own boxes
   by `src/site/shell/top-row.ts`: a corner wider than the kit's gives way toward the kit's width,
@@ -196,6 +196,24 @@ controls. **Provisional until the post-use review:** the trail's size step under
 whether it earns its place, the trail and the nav sharing one ink, the margins that clear
 the targets' spacing, the Gallery's first row given back its gap, and the alias link's
 strengthened underline.
+
+**The chart of the atelier is the listing, laid over the trail as a layer.** Its press opens a small
+chart of the site's own shape: every route in the tree is a place and the atlas an isle off home
+(`PLACES` in `src/layouts/atelier-chart.ts`, held to the tree by `test/site/atelier-chart.test.ts`),
+the roads are drawn, an alias is a dashed track, home sits at sea as a ring, and a pin stands on the
+page's own place, which is the one place that is not a link and carries no page mark. Pull it and
+the nav and the trail are whole. It opens and shuts as a fold the browser keeps, so it works with
+scripts off, and the shell's script adds Escape, a click elsewhere, focus leaving it and leaving the
+page. Its press is lit while it is open, dark ink on a cream ground, which its hover never wears.
+Its panel stands inside the head cluster, so it rides with the cluster on every page and keeps its
+place on the 1024 page; the cluster rises above the room's furniture while it is open, so none of
+the room's furniture paints over it, the carried sheet, the desk notice and the veil alone standing above; a closed fold's content stands down by display, since a script reading
+it otherwise finds its boxes. On a window too short for it the panel is cut at the window's foot, a
+cost recorded in `handbook/errata/site.md`. Every word on it wears a wide outline in the panel's own
+ink, so the roads and the coast stop short of the names. **Provisional until the post-use review:**
+the drawing (the coast, the places, their ranks and labels, the roads, the atlas isle), the press's
+words, its seat at the trail's end and its lit ground, the panel's size, opacity and seat, the key
+line, the outline, the cut on a short window, and the press's gap under the nav.
 
 **A document room** is the sheet instead. It keeps the band and the footer because it scrolls, and it
 replaces a table of contents with an **index slip** that inks the section being read and keeps it in
@@ -349,8 +367,8 @@ Warnings are panels, not slips. Beside them: one standard control in the cream f
 whose text is chart paper, one featured gold action, and the translucent overlay presses of the
 Glass, whose translucency is load-bearing over a chart.
 
-**A control's font size does not go below 16px in the corner chrome**, because a smaller input font
-makes iOS Safari zoom the page on focus.
+**A control a reader types into, a field or a select, does not go below a 16px font in the corner chrome**, because a smaller input font
+makes iOS Safari zoom the page on focus. A press takes no typing and keeps the size of the line it rides, as the chart of the atelier's does.
 
 **On screen every page is laid out for 1024 wide and up, and nothing is designed for a narrower
 window**, a desktop window zoomed until it is narrower than 1024 included: what a narrower window

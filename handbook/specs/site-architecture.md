@@ -34,20 +34,20 @@ symbol and path so the reader goes and looks.
   below. A page can be any combination of the two.
 - **How a page is reached comes in four kinds.** A nav-listed room has its entry in `NAV_ITEMS` in
   `src/layouts/nav.ts`. A child is seated under its room in `ROUTE_CHILDREN` beside it: off the
-  nav's top line, inside the discovery routes, and named by the trail, which is how `/prospect/`,
+  nav's top line, inside the discovery routes, named by the trail and listed by the chart of the atelier, which is how `/prospect/`,
   `/ribbon/` and the Portfolio are reached. A destination is off the tree but inside the discovery
-  routes, which is how `/atlas/` is reached, and a new discovery route is either seated or named
+  routes, which is how `/atlas/` is reached (the chart of the atelier draws it as an isle off home), and a new discovery route is either seated or named
   beside the atlas, which `test/site/route-tree.test.ts` holds. A page may also be deliberately off
   all of them, carrying the layout's `noindex` prop, which is what `/specimen/` is. A page that is
   off a list is a decision with a mechanism behind it, so do not "fix" one by adding it.
 - **The nav's top line lists ROOMS, world-agnostic and shell-wearing, and a room may carry children
   seated under it that are not strictly rooms.** A route's seat is its first appearance in the tree
   and any later appearance is an alias. The atlas stays out of both, because it is one world's
-  generated output rather than a room, with the home card as its way in. **The home cards are modes
+  generated output rather than a room, with the home card and the chart of the atelier's isle as its ways in. **The home cards are modes
   of encounter**, one to a mode, and a page deliberately without a card is not an oversight.
 - **A reading page is cheap and a working page is not.** A reading page is the `.astro` file plus,
   if it is a room, its `NAV_ITEMS` entry or its seat in `ROUTE_CHILDREN`, its name in
-  `ROUTE_NAMES`, and its own sheet. A working page that mounts a bundle owes
+  `ROUTE_NAMES`, its place on the chart of the atelier (`PLACES` in `src/layouts/atelier-chart.ts`, which `test/site/atelier-chart.test.ts` reds without), and its own sheet. A working page that mounts a bundle owes
   all of that plus its entry in `BUNDLE_ENTRIES` (`scripts/build-app-bundles.ts`), its generated
   twin in `GENERATED_SUBTREES` (`scripts/clean-public-generated.ts`) and in `.gitignore`, and its own
   e2e suite, which then joins the suite order, the runner's map, a lane and that lane's measured
@@ -75,7 +75,7 @@ symbol and path so the reader goes and looks.
   `scripts/lint/sheet-owners.ts`, the sheets linked on every page, which `vellum/css-kit-not-redressed`
   does not read as a page's own.
 - **The rosters a page or a sheet joins**, by symbol: `NAV_ITEMS`, `ROUTE_NAMES` and
-  `ROUTE_CHILDREN` in `src/layouts/nav.ts`; `TOKENS` in `test/site/shell-css.test.ts`;
+  `ROUTE_CHILDREN` in `src/layouts/nav.ts`; `PLACES` in `src/layouts/atelier-chart.ts`; `TOKENS` in `test/site/shell-css.test.ts`;
   `PAGES` in `test/site/astro-scaffold.test.ts`, with `ROADS` and `STAGES` beside it for a page carrying a road out or the kit's stage, and RH32's browser copies of them in `e2e/suites/runninghead/room.ts` (`KIT_ROADS`, `CHART_ROOMS`, `FOG_ROOMS`, `STAGED`); `BUNDLE_ENTRIES` in `scripts/build-app-bundles.ts`;
   `GENERATED_SUBTREES` in `scripts/clean-public-generated.ts`; `ROUTE_ENTRIES` and
   `DISCOVERY_ROUTES` in `scripts/generate-discovery.ts`. A new suite additionally joins `E2E_SUITE_ORDER`
@@ -108,7 +108,7 @@ symbol and path so the reader goes and looks.
   (both in `scripts/lint/narrow-width.ts`), and `CO1` in `e2e/suites/corners.ts` in any sheet a built
   page loads. A script inside an `.astro` page reaches none of them. A length that shrinks with the window, a height, the window's shape and a box's own size
   are outside the rule.
-- **The shell dresses once.** Every shared shell rule lives in `public/shell.css`, and a page's own
+- **The shell dresses once.** Every shared shell rule lives in `public/shell.css`, save the dress of a component the shell seats on every page, which is its own sheet, linked on every page and named in `HOUSE_SHEETS` (the chart of the atelier's, `public/chart-of-the-atelier.css`); a page's own
   sheet carries page-specific rules only. Home's scripts-off rules are `public/home-noscript.css`,
   linked from inside its `<noscript>`; both moved out of the pages so the stylesheet lint reads them
   (Alex, Issue #779 comment 6067462530).

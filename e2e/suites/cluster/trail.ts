@@ -59,7 +59,7 @@ const READ: Payload<Trail> = `(() => {
   const where = document.querySelector("header.chrome .where");
   const here = document.querySelector("header.chrome .trail [aria-current], header.chrome .trail .here"), link = document.querySelector("header.chrome .trail a");
   return { path: location.pathname, whereVisibility: where ? getComputedStyle(where).visibility : null,
-    links: [...document.querySelectorAll("header.chrome .where a")].map(target), navLinks: [...document.querySelectorAll("header.chrome nav.rooms a")].map(target),
+    links: [...document.querySelectorAll("header.chrome :is(.trail, .also) a")].map(target), navLinks: [...document.querySelectorAll("header.chrome nav.rooms a")].map(target),
     linkColor: link ? getComputedStyle(link).color : null, hereColor: here ? getComputedStyle(here).color : null, hereLine: here ? getComputedStyle(here).textDecorationLine : null };
 })()`;
 
@@ -79,7 +79,7 @@ export function trailKit(ctx: SuiteContext) {
 const centre = (b: Box) => ({ x: b.x + b.w / 2, y: b.y + b.h / 2 });
 const toBox = (p: { x: number; y: number }, b: Box) =>
   Math.hypot(Math.max(b.x - p.x, 0, p.x - b.right), Math.max(b.y - p.y, 0, p.y - b.bottom));
-const spacing = (ts: readonly Box[]): number[] =>
+export const spacing = (ts: readonly Box[]): number[] =>
   ts.map((a, i) =>
     Math.min(
       ...ts

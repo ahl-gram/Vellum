@@ -63,7 +63,7 @@ type PageResult = {
 };
 
 const LINKS: Payload<string[]> =
-  `[...document.querySelectorAll("a[href]")].map((a) => a.href).filter((h) => h.startsWith(location.origin + "/")).map((h) => new URL(h).pathname)`;
+  `[...document.querySelectorAll("a[href]")].map((a) => new URL(a.getAttribute("href"), document.baseURI).href).filter((h) => h.startsWith(location.origin + "/")).map((h) => new URL(h).pathname)`;
 
 const READ = `(() => {
   const r2 = (n) => Math.round(n * 100) / 100;

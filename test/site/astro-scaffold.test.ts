@@ -6,6 +6,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { join, relative } from "node:path";
 import { NAV_ITEMS, ROUTE_NAMES } from "../../src/layouts/nav.ts";
+import { PLACES } from "../../src/layouts/atelier-chart.ts";
 import { cleanPublicGenerated } from "../../scripts/clean-public-generated.ts";
 import { PORTFOLIO_ROUTE } from "../../scripts/generate-discovery.ts";
 
@@ -529,7 +530,10 @@ test("the trail names the path from Vellum to the page on every page in the tree
 
 test("the alias line: the Prospect alone says where else it is reached from, as one link under its trail (Issue #668)", () => {
   for (const p of PAGES.filter((q) => q.trail)) {
-    const tail = [...page(p.route).matchAll(TRAIL)][0]?.[2];
+    const tail = [...page(p.route).matchAll(TRAIL)][0]?.[2]?.replace(
+      /^<details class="atelier-fold">[\s\S]*?<\/details>/,
+      "",
+    );
     assert.notEqual(tail, undefined, `${p.route} draws its trail`);
     if (!p.also) {
       assert.equal(tail, "", `${p.route} is reached from nowhere else`);
@@ -538,6 +542,57 @@ test("the alias line: the Prospect alone says where else it is reached from, as 
     const m = tail!.match(/^<p class="also">[^<]*<a href="([^"]+)">([^<]+)<\/a><\/p>$/);
     assert.ok(m, `${p.route} carries one alias line holding one link: ${tail}`);
     assert.deepEqual([decode(m[2]!), m[1]], p.also, `${p.route}'s alias line names the room it is also reached from`);
+  }
+});
+
+const FOLD = /<details class="atelier-fold">([\s\S]*?)<\/details>/g;
+const PLACE_LINK = /<a href="([^"]+)" class="place [a-z]+">/g;
+
+test("the chart of the atelier rides every page's head cluster: its fold at the trail's end where the page has a trail and under the nav where it has none, its press reading 'the chart of the atelier', every place a link to its route but the page's own, which carries the pin, the Specimen with every place a link and no pin, and no page mark inside it (Issue #671)", () => {
+  for (const p of PAGES) {
+    const html = page(p.route);
+    const folds = [...html.matchAll(FOLD)];
+    assert.equal(folds.length, 1, `${p.route} carries exactly one chart of the atelier`);
+    const [whole, inner = ""] = folds[0]!;
+    const at = html.indexOf(whole);
+    if (p.trail) {
+      const trailEnd = html.indexOf("</nav>", html.indexOf('<nav class="trail"')) + "</nav>".length;
+      assert.equal(at, trailEnd, `${p.route} seats the fold right after the trail, at the end of its line`);
+    } else {
+      const navEnd = html.indexOf("</nav>", html.indexOf('<nav class="rooms"'));
+      assert.ok(
+        at > navEnd && at < html.indexOf("</header>"),
+        `${p.route} has no trail, so the fold takes its own line under the nav, inside the cluster`,
+      );
+    }
+    assert.ok(
+      inner.includes('<summary class="atelier-press">the chart of the atelier</summary>'),
+      `${p.route}: the press reads 'the chart of the atelier'`,
+    );
+    const links = [...inner.matchAll(PLACE_LINK)].map((m) => m[1]).sort();
+    assert.deepEqual(
+      links,
+      Object.keys(PLACES)
+        .filter((r) => r !== p.dir)
+        .sort(),
+      `${p.route}: every place but the page's own is a link to its route`,
+    );
+    const here = [...inner.matchAll(/<g class="place [a-z]+ here">/g)];
+    assert.equal(
+      here.length,
+      p.dir in PLACES ? 1 : 0,
+      `${p.route}: the pin stands on the page's own place, if it has one`,
+    );
+    if (here.length > 0) {
+      const cx = inner.slice(inner.indexOf(here[0]![0])).match(/cx="([^"]*)"/);
+      assert.equal(cx?.[1], String(PLACES[p.dir]!.x), `${p.route}: the pin is drawn on its own place`);
+    }
+    assert.equal(
+      inner.split('<g class="you">').length - 1,
+      here.length,
+      `${p.route}: 'you are here' accompanies the pin`,
+    );
+    assert.ok(!inner.includes("aria-current"), `${p.route}: the chart carries no page mark`);
   }
 });
 
