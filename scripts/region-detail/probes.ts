@@ -1,13 +1,13 @@
-import { defaultRecipe, generateWorld } from "../src/world/generate.ts";
-import { buildHeightfield, type UvWindow } from "../src/terrain/heightfield.ts";
-import { buildChainedField, detailForWindow } from "../src/world/detail-chain.ts";
-import { parentSurfaceOnWindow } from "../src/terrain/detail-guarantees.ts";
-import { landSnapRadius, snapToLand } from "../src/world/snap-to-land.ts";
-import { hamletCandidates } from "../src/society/hamlets.ts";
-import { windowAround } from "../src/world/region.ts";
-import { FULL_WINDOW, LOD_BANDS, lodWindowFor, type LodBand } from "../src/world/lod.ts";
-import type { World } from "../src/world/types.ts";
-import { bandWindows } from "./region-detail-sweep-windows.ts";
+import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
+import { buildHeightfield, type UvWindow } from "../../src/terrain/heightfield.ts";
+import { buildChainedField, detailForWindow } from "../../src/world/detail-chain.ts";
+import { parentSurfaceOnWindow } from "../../src/terrain/detail-guarantees.ts";
+import { landSnapRadius, snapToLand } from "../../src/world/snap-to-land.ts";
+import { hamletCandidates } from "../../src/society/hamlets.ts";
+import { windowAround } from "../../src/world/region.ts";
+import { FULL_WINDOW, LOD_BANDS, lodWindowFor, type LodBand } from "../../src/world/lod.ts";
+import type { World } from "../../src/world/types.ts";
+import { bandWindows } from "./sweep-windows.ts";
 
 /** The two follow-up isolations behind Issue #399's PR and its comment on Issue #443. Committed rather than left in a worktree's out/, because Issue #376's prototype numbers and Issue #443's probes both died with their scratchpads and had to be re-earned. */
 
@@ -137,6 +137,6 @@ const mode = process.argv[2];
 if (mode === "counterfactual") counterfactual();
 else if (mode === "mouths") mouthMechanism();
 else {
-  console.error("usage: node scripts/region-detail-probes.ts <counterfactual|mouths>");
+  console.error("usage: node scripts/region-detail/probes.ts <counterfactual|mouths>");
   process.exitCode = 1;
 }

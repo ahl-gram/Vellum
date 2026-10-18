@@ -1,9 +1,9 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { defaultRecipe, generateWorld } from "../src/world/generate.ts";
-import { LOD_BANDS, type LodBand } from "../src/world/lod.ts";
-import { measure, type RiverFailure, type WindowResult } from "./region-detail-sweep-measure.ts";
-import { bandWindows } from "./region-detail-sweep-windows.ts";
+import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
+import { LOD_BANDS, type LodBand } from "../../src/world/lod.ts";
+import { measure, type RiverFailure, type WindowResult } from "./sweep-measure.ts";
+import { bandWindows } from "./sweep-windows.ts";
 
 /** The measurement half of Issue #399. Every claim in that sub's acceptance is a number this script prints, for both arms (bare heightfield and chained detail) so a difference can be attributed. Not in `npm test`: a chained band-3 region costs ~1.1s and the whole sweep runs minutes. */
 

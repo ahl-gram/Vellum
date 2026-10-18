@@ -1,9 +1,9 @@
-import { defaultRecipe, generateWorld } from "../src/world/generate.ts";
-import { generateRegionWorld, regionTitle } from "../src/world/region.ts";
-import { buildChainedField, canonicalParent, createChainCache } from "../src/world/detail-chain.ts";
-import { LOD_BANDS, lodWindowFor, type LodBand } from "../src/world/lod.ts";
-import type { UvWindow } from "../src/terrain/heightfield.ts";
-import type { World } from "../src/world/types.ts";
+import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
+import { generateRegionWorld, regionTitle } from "../../src/world/region.ts";
+import { buildChainedField, canonicalParent, createChainCache } from "../../src/world/detail-chain.ts";
+import { LOD_BANDS, lodWindowFor, type LodBand } from "../../src/world/lod.ts";
+import type { UvWindow } from "../../src/terrain/heightfield.ts";
+import type { World } from "../../src/world/types.ts";
 
 /** The cost half of Issue #400's acceptance: what a Glass descent costs on each arm, and what a chain cache shared ACROSS region jobs would buy. The browser number is the one that counts (the caption's "drawn in Nms"); this is the engine-side control that says where the time goes. Not in `npm test`: a chained band-3 region costs about a second and the whole run takes minutes. */
 
