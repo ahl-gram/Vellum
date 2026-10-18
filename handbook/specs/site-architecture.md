@@ -28,6 +28,7 @@ symbol and path so the reader goes and looks.
   `src/pages/<route>/index.astro`, home being `src/pages/index.astro`, and the layout is
   `src/layouts/BaseLayout.astro`, which owns the nav, the head cluster, the footer and the page
   meta. The tree is the roster of pages; no list of them is kept anywhere, including here.
+- **A component under `src/layouts/` keeps a piece of the room's furniture one shape, and the page keeps where the piece stands.** The order of a room's furniture inside the shell (the stage, the folios, the slip, the legend row, the Glass) is written in its page, and that order carries the room's stacking and its tab order.
 - **A page's files share its route path in every tree that holds one.** Its markup is
   `src/pages/<route>/index.astro`, its own code, where it has any, sits under `src/site/<route>/`, and the sheet it
   authors is `src/styles/<route>/index.css`, served at `<route>/index.css`, which the layout links relatively; home, whose route is the
@@ -83,7 +84,7 @@ symbol and path so the reader goes and looks.
   does not read as a page's own.
 - **The rosters a page or a sheet joins**, by symbol: `NAV_ITEMS`, `ROUTE_NAMES` and
   `ROUTE_CHILDREN` in `src/layouts/nav.ts`; `PLACES` in `src/layouts/atelier-chart.ts`; `TOKENS` in `test/site/shell-css.test.ts`;
-  `PAGES` in `test/site/astro-scaffold.test.ts`, with `ROADS` and `STAGES` beside it for a page carrying a road out or the kit's stage, and RH32's browser copies of them in `e2e/suites/runninghead/room.ts` (`KIT_ROADS`, `CHART_ROOMS`, `FOG_ROOMS`, `STAGED`); `BUNDLE_ENTRIES` in `scripts/build-app-bundles.ts`;
+  `PAGES` in `test/site/astro-scaffold.test.ts`, with `ROADS`, `STAGES`, `LEGENDS` and `NOTICES` beside it for a page carrying a road out, the kit's stage, a legend row or a stage's notices, and RH32's browser copies of `ROADS` and `STAGES` in `e2e/suites/runninghead/room.ts` (`KIT_ROADS`, `CHART_ROOMS`, `FOG_ROOMS`, `STAGED`); `BUNDLE_ENTRIES` in `scripts/build-app-bundles.ts`;
   `ROUTE_ENTRIES` and
   `DISCOVERY_ROUTES` in `scripts/generate-discovery.ts`. A new suite additionally joins `E2E_SUITE_ORDER`
   (`e2e/support/suites.ts`), the runner's `SUITES` map (`e2e/support/suite-map.ts`, which the type
