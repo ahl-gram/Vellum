@@ -123,7 +123,7 @@ test("the accumulator is still the consoleErrors field vellum/e2e-console-read-t
   assert.match(
     readFileSync(join(E2E, "types.ts"), "utf8"),
     /^\s+consoleErrors: string\[\];$/m,
-    "e2e/types.ts no longer declares the consoleErrors field, so the lint rule keyed on that name reads nothing; rename the rule's ACCUMULATOR in scripts/lint/source-shape.ts with it",
+    "e2e/types.ts no longer declares the consoleErrors field, so the lint rule keyed on that name reads nothing; rename the rule's ACCUMULATOR in scripts/lint/source-shape-console.ts with it",
   );
   const handed = e2eFiles().filter((f) =>
     /dropExpectedCancellations\([^)]*\bconsoleErrors\b/.test(readE2eSource(join(E2E, f))),
