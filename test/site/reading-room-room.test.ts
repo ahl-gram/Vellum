@@ -15,7 +15,7 @@ test("RR-room 5b seatFrame seats the frame's parts: chart and status in the stag
   installShim();
   try {
     const [{ createReadingFrame }, { createProspectStage }, { seatFrame }] = await Promise.all([
-      import("../../src/site/reading-frame/index.ts"),
+      import("../../src/site/shared/reading-frame/index.ts"),
       import("../../src/site/reading-room/prospect-stage.ts"),
       import("../../src/site/reading-room/seats.ts"),
     ]);

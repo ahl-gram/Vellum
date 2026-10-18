@@ -55,7 +55,7 @@ test("no chart room moves the reading position: no scroll call and no scroll wri
   const rule = "vellum/room-no-scroll";
   for (const room of [
     "src/site/reading-room/prospect-stage.ts",
-    "src/site/reading-frame/index.ts",
+    "src/site/shared/reading-frame/index.ts",
     "src/site/print-room/app.ts",
     "src/site/prospect/app.ts",
     "src/site/ribbon/app.ts",

@@ -1,6 +1,6 @@
 // Shared hosts and recorders for the living-chart boundary suites; outside test/ so node --test does not collect it. The engine is imported DYNAMICALLY inside the functions that need it, so importing this helper cannot smuggle the engine past the no-DOM import guard.
-import type { LivingChart } from "../src/site/living-chart/index.ts";
-import type { VoyageLogPanel } from "../src/site/living-chart/voyage-log-panel.ts";
+import type { LivingChart } from "../src/site/shared/living-chart/index.ts";
+import type { VoyageLogPanel } from "../src/site/shared/living-chart/voyage-log-panel.ts";
 import type { PlaceManifest } from "../src/render/place-manifest.ts";
 import type { Survey } from "../src/render/survey.ts";
 import type { World } from "../src/world/types.ts";
@@ -108,7 +108,7 @@ export function stackedMount(): { el: HTMLElement; ledger: string[] } {
 
 /** The margin log is a SIBLING of the mount, so no mount ledger can see it, and barlessLogPanel's own hideLog records nothing: this call ledger is the only way to prove a bail hid the journal it left behind. */
 export async function recordingLogPanel(): Promise<{ panel: VoyageLogPanel; calls: string[] }> {
-  const { barlessLogPanel } = await import("../src/site/living-chart/no-bar.ts");
+  const { barlessLogPanel } = await import("../src/site/shared/living-chart/no-bar.ts");
   const base = barlessLogPanel();
   const calls: string[] = [];
   const panel: VoyageLogPanel = {
@@ -202,7 +202,7 @@ export async function barlessHost(opts?: {
 }): Promise<{ lc: LivingChart; mount: El; calls: string[] }> {
   const [{ El }, { createLivingChart }] = await Promise.all([
     import("./element-shim.ts"),
-    import("../src/site/living-chart/index.ts"),
+    import("../src/site/shared/living-chart/index.ts"),
   ]);
   await realWorld(); // installs the shim before any element is built
   const mount = new El("div");

@@ -225,7 +225,7 @@
   pointer-events: none;
   cursor: default;
 }
-/* Animations ride the children, never the group, whose box spans halo, glyph and label; the origin is per-element data written inline by `applyScrub` in `src/site/living-chart/chronicle.ts` because a profile glyph stands on its point while a plan glyph centres on it (`RS22` in `e2e/suites/room-ink.ts` reads the town point staying fixed). */
+/* Animations ride the children, never the group, whose box spans halo, glyph and label; the origin is per-element data written inline by `applyScrub` in `src/site/shared/living-chart/chronicle.ts` because a profile glyph stands on its point while a plan glyph centres on it (`RS22` in `e2e/suites/room-ink.ts` reads the town point staying fixed). */
 .living-chart g.settlement[data-ink="founding"] > :not(text) {
   animation: inkStamp var(--paper) var(--ease-paper) both;
 }
@@ -236,7 +236,7 @@
   animation: dryingInk var(--paper-quick) var(--ease-paper) var(--paper-quick) both;
 }
 
-/* A sibling svg, never inside the chart, so Download stays byte-identical; its reduced-motion twin is `prefersReduce` in `src/site/living-chart/voyage.ts`; no shadow rule here on purpose, the hosts' qualified mount rules carry it and a bare .voyage-overlay opt-out (0,1,0) would lose to them (1,0,1). */
+/* A sibling svg, never inside the chart, so Download stays byte-identical; its reduced-motion twin is `prefersReduce` in `src/site/shared/living-chart/voyage.ts`; no shadow rule here on purpose, the hosts' qualified mount rules carry it and a bare .voyage-overlay opt-out (0,1,0) would lose to them (1,0,1). */
 .voyage-overlay {
   position: absolute;
   inset: 0;

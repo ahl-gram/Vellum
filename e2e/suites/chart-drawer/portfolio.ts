@@ -3,8 +3,13 @@ import { makeSettle } from "../../support/settle.ts";
 import { withScriptsOff } from "../../support/scripts-off.ts";
 import type { DrawerKit, TableKit } from "./kit.ts";
 import { DRAWN, DRESS, ONE } from "./reads.ts";
-import { BARE_LINE, PLATE_SOURCE, PLATE_TITLE, gatheredLine } from "../../../src/site/portfolio/folio-lines.ts";
-import { PLATE_ROOM, PLATE_VERB } from "../../../src/site/portfolio/how-plate.ts";
+import {
+  BARE_LINE,
+  PLATE_SOURCE,
+  PLATE_TITLE,
+  gatheredLine,
+} from "../../../src/site/explorer/portfolio/folio-lines.ts";
+import { PLATE_ROOM, PLATE_VERB } from "../../../src/site/explorer/portfolio/how-plate.ts";
 
 type Arrival = {
   path: string;

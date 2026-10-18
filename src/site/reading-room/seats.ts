@@ -1,7 +1,7 @@
 // The Reading Room's chart-room seats: where the reading frame's parts go, the Glass, the fit, the folio and the scale. app.ts stays the conductor.
 import type { DrawResult } from "../explorer/worker-client.ts";
-import type { ReadingFrame } from "../reading-frame/index.ts";
-import type { LivingChart } from "../living-chart/index.ts";
+import type { ReadingFrame } from "../shared/reading-frame/index.ts";
+import type { LivingChart } from "../shared/living-chart/index.ts";
 import type { ProspectStage } from "./prospect-stage.ts";
 import { createZoomController } from "../shared/zoom-controller.ts";
 import { bindGlassKeys } from "../shared/glass-keys.ts";

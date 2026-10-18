@@ -14,8 +14,8 @@ const SUBTITLE = "as surveyed by Taiki the Wayfarer";
 
 async function builderOverStack() {
   const [{ createSessionBuilder }, { barlessLogPanel }] = await Promise.all([
-    import("../../src/site/living-chart/voyage-session.ts"),
-    import("../../src/site/living-chart/no-bar.ts"),
+    import("../../src/site/shared/living-chart/voyage-session.ts"),
+    import("../../src/site/shared/living-chart/no-bar.ts"),
   ]);
   // realWorld installs the element shim the overlay svg's construction needs.
   const { manifest, survey } = await realWorld();
@@ -61,7 +61,7 @@ test("#364 a build that bails leaves the mount exactly as it found it", async ()
 });
 
 async function engineOverStack() {
-  const { createVoyage } = await import("../../src/site/living-chart/voyage.ts");
+  const { createVoyage } = await import("../../src/site/shared/living-chart/voyage.ts");
   const { manifest, survey } = await realWorld();
   const mount = stackedMount();
   const { sink, calls } = recordingSink();

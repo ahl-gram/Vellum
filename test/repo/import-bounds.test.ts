@@ -1,7 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { ESLint } from "eslint";
+import { ESLint, Linter } from "eslint";
+import tseslint from "typescript-eslint";
+import importBounds, { ROOMS_UNDER_THE_EXPLORER } from "../../scripts/lint/import-bounds.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const eslint = new ESLint({ cwd: ROOT, flags: ["unstable_native_nodejs_ts_config"] });
@@ -173,4 +176,42 @@ test("the Hunt stays a fixed world: no module source naming a finer survey, a re
     [],
     "the rule reaches the Hunt's modules alone",
   );
+});
+
+const GLASS_KEYS_PLANT = [
+  'import { bindGlassKeys } from "../../shared/glass-keys.ts";',
+  'export const z = (root: ParentNode) => root.querySelectorAll("[data-zoom]");',
+  "export const y = bindGlassKeys;",
+];
+
+test("the glass-keys ban spares the Portfolio's own folder under the Explorer and no other, so the Explorer's own modules at any depth stay inside it (Issue #767)", () => {
+  const rulesAt = (path: string): number[] =>
+    new Linter({ cwd: ROOT })
+      .verify(
+        GLASS_KEYS_PLANT.join("\n"),
+        [
+          {
+            files: ["**/*.ts"],
+            plugins: { vellum: importBounds },
+            languageOptions: { parser: tseslint.parser },
+            rules: { "vellum/explorer-no-glass-keys": "error" },
+          },
+        ],
+        { filename: join(ROOT, path) },
+      )
+      .map((m) => m.line);
+  assert.deepEqual(rulesAt("src/site/explorer/portfolio/app.ts"), [], "the Portfolio binds the kit's keys on purpose");
+  for (const path of [
+    "src/site/explorer/app.ts",
+    "src/site/explorer/nested/deeper/part.ts",
+    "src/site/explorer/portfolio-zz/app.ts",
+    "src/site/explorer/nested/src/site/explorer/portfolio/app.ts",
+  ])
+    assert.deepEqual(rulesAt(path), [1, 2], `${path} stays under the ban`);
+  assert.deepEqual(
+    ROOMS_UNDER_THE_EXPLORER,
+    ["src/site/explorer/portfolio/"],
+    "the exemption names the Portfolio's folder and no other",
+  );
+  for (const room of ROOMS_UNDER_THE_EXPLORER) assert.ok(existsSync(join(ROOT, room)), `${room} exists on disk`);
 });

@@ -1,5 +1,5 @@
-import { lodWindowFor, type LodBand } from "../src/world/lod.ts";
-import type { UvWindow } from "../src/terrain/heightfield.ts";
+import { lodWindowFor, type LodBand } from "../../src/world/lod.ts";
+import type { UvWindow } from "../../src/terrain/heightfield.ts";
 
 export function bandWindows(band: LodBand): UvWindow[] {
   const n = Math.round(1 / band.sizeUV);

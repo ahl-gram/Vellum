@@ -144,7 +144,7 @@ export default defineConfig(
   },
   {
     name: "Issue #675: the living-chart engine takes its elements from the host",
-    files: [["src/**/*.ts", "src/site/living-chart/**"]],
+    files: [["src/**/*.ts", "src/site/shared/living-chart/**"]],
     plugins: { vellum },
     rules: { "vellum/engine-no-id-lookup": "error" },
   },
@@ -199,7 +199,7 @@ export default defineConfig(
   },
   {
     name: "the house's rules on the chart rooms' modules",
-    files: site("src/site/reading-room/**", "src/site/reading-frame/**", "src/site/print-room/**", "src/site/prospect/**", "src/site/ribbon/**"),
+    files: site("src/site/reading-room/**", "src/site/shared/reading-frame/**", "src/site/print-room/**", "src/site/prospect/**", "src/site/ribbon/**"),
     plugins: { vellum },
     rules: { "vellum/room-no-scroll": "error" },
   },
@@ -223,7 +223,7 @@ export default defineConfig(
   },
   {
     name: "Issue #728: the reading frame looks nothing up by id and imports nothing from the Explorer",
-    files: [["src/**/*.ts", "src/site/reading-frame/**"]],
+    files: [["src/**/*.ts", "src/site/shared/reading-frame/**"]],
     plugins: { vellum },
     rules: { "vellum/frame-no-id-lookup": "error", "vellum/frame-no-explorer-import": "error" },
   },

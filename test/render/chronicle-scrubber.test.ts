@@ -17,7 +17,7 @@ import {
   sweepElapsedAt,
 } from "../../src/render/chronicle-scrubber.ts";
 
-// The pure core only; the DOM wiring lives in src/site/living-chart/chronicle.ts, covered by the Explorer e2e.
+// The pure core only; the DOM wiring lives in src/site/shared/living-chart/chronicle.ts, covered by the Explorer e2e.
 
 const mark = (over: Partial<PlaceMark> = {}): PlaceMark => ({
   idx: 0,

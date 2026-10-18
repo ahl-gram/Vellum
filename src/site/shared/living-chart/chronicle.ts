@@ -7,7 +7,7 @@ import {
   inkGradeFor,
   type ScrubMark,
   type YearRange,
-} from "../../render/chronicle-scrubber.ts";
+} from "../../../render/chronicle-scrubber.ts";
 import type { OverlayData } from "./place-overlay.ts";
 
 interface ScrubState {

@@ -28,12 +28,12 @@ const assertFullApi = (lc: unknown, shape: string): void => {
 
 test("the engine imports without a DOM: no module-scope document access (#191)", async () => {
   assert.equal(typeof (globalThis as { document?: unknown }).document, "undefined", "no DOM is installed here");
-  const mod = await import("../../src/site/living-chart/index.ts");
+  const mod = await import("../../src/site/shared/living-chart/index.ts");
   assert.equal(typeof mod.createLivingChart, "function", "the boundary exports createLivingChart");
 });
 
 test("createLivingChart constructs against a plain-object host and exposes the full API (#191)", async () => {
-  const { createLivingChart } = await import("../../src/site/living-chart/index.ts");
+  const { createLivingChart } = await import("../../src/site/shared/living-chart/index.ts");
   // Plain empty objects, not DOM stubs: every element access must happen inside a method call, or a host that builds its DOM after wiring null-binds exactly like Issue #191's bug.
   const lc = createLivingChart({
     mapEl: bareEl(),
@@ -51,7 +51,7 @@ test("createLivingChart constructs against a plain-object host and exposes the f
 });
 
 test("createLivingChart constructs against a host with NO scrubber: the bar is optional (#319)", async () => {
-  const { createLivingChart } = await import("../../src/site/living-chart/index.ts");
+  const { createLivingChart } = await import("../../src/site/shared/living-chart/index.ts");
   const lc = createLivingChart({ mapEl: bareEl(), statusEl: bareEl() });
   assertFullApi(lc, "a host with no scrubber");
 });
@@ -62,6 +62,9 @@ test("the Explorer no longer carries a welded copy of the machinery (#191)", () 
     "src/site/explorer/voyage.ts",
     "src/site/explorer/voyage-log-panel.ts",
   ]) {
-    assert.ok(!existsSync(resolve(REPO, old)), `${old} must not exist: the engine lives in src/site/living-chart/`);
+    assert.ok(
+      !existsSync(resolve(REPO, old)),
+      `${old} must not exist: the engine lives in src/site/shared/living-chart/`,
+    );
   }
 });

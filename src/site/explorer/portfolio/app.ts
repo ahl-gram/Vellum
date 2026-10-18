@@ -1,13 +1,20 @@
 // The Portfolio (Issue #521 Sub 3 of Issue #401). The table rides in this page's address, and since Issue #634 falls back to the device when the address names no folio; either way the page reads it ONCE at load and never rewrites it. One job per gathered sheet, a region for a survey and a plate for a prospect since Issue #522, dispatched grouped by world because worldFor is a single-entry cache, and the sheets arrive progressively into a pile whose top sheet stands on the stage.
-import { initWorker, runJob, usesWorker } from "../explorer/worker-client.ts";
-import { bindRoom } from "../shared/room.ts";
-import { bindGlassKeys } from "../shared/glass-keys.ts";
-import { makeAnnouncer } from "../shared/announce.ts";
-import { createZoomController } from "../shared/zoom-controller.ts";
-import { chartFilename } from "../print-room/poster-presets.ts";
-import { thumbJobFor, thumbNames, subOf } from "../explorer/chart-drawer.ts";
-import { parseTable, groupByWorld, emitTable, tableHash, TABLE_KEY, type TableItem } from "../shared/table-address.ts";
-import { deviceStorage as store, folioOnArrival, readStoredTable } from "../shared/table-store.ts";
+import { initWorker, runJob, usesWorker } from "../worker-client.ts";
+import { bindRoom } from "../../shared/room.ts";
+import { bindGlassKeys } from "../../shared/glass-keys.ts";
+import { makeAnnouncer } from "../../shared/announce.ts";
+import { createZoomController } from "../../shared/zoom-controller.ts";
+import { chartFilename } from "../../print-room/poster-presets.ts";
+import { thumbJobFor, thumbNames, subOf } from "../chart-drawer.ts";
+import {
+  parseTable,
+  groupByWorld,
+  emitTable,
+  tableHash,
+  TABLE_KEY,
+  type TableItem,
+} from "../../shared/table-address.ts";
+import { deviceStorage as store, folioOnArrival, readStoredTable } from "../../shared/table-store.ts";
 import {
   BARE_LINE,
   PLATE_SOURCE,

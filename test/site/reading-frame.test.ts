@@ -7,7 +7,7 @@ import { El, el, installShim, walk } from "../../test-support/element-shim.ts";
 installShim();
 
 test("the frame mounts and hands the engine a complete host (#219, the first non-Explorer host)", async () => {
-  const { createReadingFrame } = await import("../../src/site/reading-frame/index.ts");
+  const { createReadingFrame } = await import("../../src/site/shared/reading-frame/index.ts");
   const mount = new El("div");
   const frame = createReadingFrame(mount as unknown as HTMLElement);
 
@@ -32,7 +32,7 @@ test("the frame mounts and hands the engine a complete host (#219, the first non
     );
   }
 
-  const { createLivingChart } = await import("../../src/site/living-chart/index.ts");
+  const { createLivingChart } = await import("../../src/site/shared/living-chart/index.ts");
   const lc = createLivingChart(host);
   for (const method of [
     "applyAges",
@@ -53,7 +53,7 @@ test("the frame mounts and hands the engine a complete host (#219, the first non
 });
 
 test("the reading frame's chart mount carries the engine's class beside its own, for any host that mounts it (#302)", async () => {
-  const { createReadingFrame } = await import("../../src/site/reading-frame/index.ts");
+  const { createReadingFrame } = await import("../../src/site/shared/reading-frame/index.ts");
   const frame = createReadingFrame(new El("div") as unknown as HTMLElement);
   const mapEl = frame.host.mapEl as unknown as El;
   assert.ok(mapEl.classes.has("rf-chart"), "the mount keeps the frame's own class");
@@ -61,7 +61,7 @@ test("the reading frame's chart mount carries the engine's class beside its own,
 });
 
 test("#402/#442 the frame forwards onAgesTold to the scrubber host beside onPark", async () => {
-  const { createReadingFrame } = await import("../../src/site/reading-frame/index.ts");
+  const { createReadingFrame } = await import("../../src/site/shared/reading-frame/index.ts");
   const onAgesTold = (): void => {};
   const onPark = (): void => {};
   const frame = createReadingFrame(new El("div") as unknown as HTMLElement, { onPark, onAgesTold });
@@ -70,7 +70,7 @@ test("#402/#442 the frame forwards onAgesTold to the scrubber host beside onPark
 });
 
 test("#442 the bar and the live row share ONE wrapper, inside the panel, above the journal", async () => {
-  const { createReadingFrame } = await import("../../src/site/reading-frame/index.ts");
+  const { createReadingFrame } = await import("../../src/site/shared/reading-frame/index.ts");
   const frame = createReadingFrame(new El("div") as unknown as HTMLElement);
   const panel = frame.host.scrubber.panel as unknown as El;
   const strip = frame.strip as unknown as El;
@@ -103,7 +103,7 @@ test("#442 the bar and the live row share ONE wrapper, inside the panel, above t
 });
 
 test("#442 setTold mirrors either half's row, and clears rather than lingering", async () => {
-  const { createReadingFrame } = await import("../../src/site/reading-frame/index.ts");
+  const { createReadingFrame } = await import("../../src/site/shared/reading-frame/index.ts");
   const frame = createReadingFrame(new El("div") as unknown as HTMLElement);
   const told = frame.told as unknown as El;
   const parts = () => told.children.map((s) => ({ cls: s.className, text: s.textContent }));
@@ -142,7 +142,7 @@ test("#442 setTold mirrors either half's row, and clears rather than lingering",
 });
 
 test("#442 the live row is a MIRROR: it never writes into the journal the engine owns", async () => {
-  const { createReadingFrame } = await import("../../src/site/reading-frame/index.ts");
+  const { createReadingFrame } = await import("../../src/site/shared/reading-frame/index.ts");
   const frame = createReadingFrame(new El("div") as unknown as HTMLElement);
   const strip = frame.host.scrubber.strip as unknown as El;
   frame.log.render([{ year: 214, text: "Aldmarch is founded." }]);
@@ -165,7 +165,7 @@ test("#442 the live row is a MIRROR: it never writes into the journal the engine
 });
 
 test("#442 the mirror takes its SOURCE's voice: a day row is told in the surveyor's prologue, an annal in the chronicler's", async () => {
-  const { createReadingFrame } = await import("../../src/site/reading-frame/index.ts");
+  const { createReadingFrame } = await import("../../src/site/shared/reading-frame/index.ts");
   const frame = createReadingFrame(new El("div") as unknown as HTMLElement);
   const told = frame.told as unknown as El;
 
@@ -181,7 +181,7 @@ test("#442 the mirror takes its SOURCE's voice: a day row is told in the surveyo
 });
 
 test("the instrument panel starts hidden and the ONE journal nests inside it (#219, fused at #220)", async () => {
-  const { createReadingFrame } = await import("../../src/site/reading-frame/index.ts");
+  const { createReadingFrame } = await import("../../src/site/shared/reading-frame/index.ts");
   const frame = createReadingFrame(new El("div") as unknown as HTMLElement);
   assert.equal((frame.host.scrubber.panel as unknown as El).hidden, true, "the instrument starts hidden");
   // The journal must ride INSIDE the panel the engine hides, or turning the instrument off would leave a stale strip on screen.
@@ -197,7 +197,7 @@ test("the instrument panel starts hidden and the ONE journal nests inside it (#2
 });
 
 test("the frame sets no element id on anything it builds: identity stays the host's namespace, and vellum/frame-no-id-lookup keeps its source from looking one up (#191, #219)", async () => {
-  const { createReadingFrame } = await import("../../src/site/reading-frame/index.ts");
+  const { createReadingFrame } = await import("../../src/site/shared/reading-frame/index.ts");
   const frame = createReadingFrame(new El("div") as unknown as HTMLElement);
   for (const node of walk(frame.root as unknown as El)) {
     assert.ok(
@@ -208,7 +208,7 @@ test("the frame sets no element id on anything it builds: identity stays the hos
 });
 
 test("destroy() unmounts the frame (a page host that leaves takes its DOM with it)", async () => {
-  const { createReadingFrame } = await import("../../src/site/reading-frame/index.ts");
+  const { createReadingFrame } = await import("../../src/site/shared/reading-frame/index.ts");
   const mount = new El("div");
   const frame = createReadingFrame(mount as unknown as HTMLElement);
   frame.destroy();
@@ -216,7 +216,7 @@ test("destroy() unmounts the frame (a page host that leaves takes its DOM with i
 });
 
 test("#493 the pace stands at the readout's right: three presses 1x 2x 4x in one group, the slowest pressed at rest, and the frame moves the press", async () => {
-  const { createReadingFrame } = await import("../../src/site/reading-frame/index.ts");
+  const { createReadingFrame } = await import("../../src/site/shared/reading-frame/index.ts");
   const frame = createReadingFrame(el());
   const instrument = (frame.strip as unknown as El).children[0]!;
   assert.deepEqual(

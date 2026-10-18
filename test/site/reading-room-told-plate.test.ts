@@ -8,7 +8,7 @@ import {
   plateKeyOf,
 } from "../../src/site/reading-room/told-plate.ts";
 import type { StoryBeat } from "../../src/site/reading-room/beats.ts";
-import type { ToldEntry } from "../../src/site/living-chart/told.ts";
+import type { ToldEntry } from "../../src/site/shared/living-chart/told.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { buildPlaceManifest } from "../../src/render/place-manifest.ts";
 import { buildVoyagePlan } from "../../src/render/voyage.ts";
