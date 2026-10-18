@@ -272,7 +272,6 @@ const glass = createGlass({
     zoomIn: $("zoom-in"),
     zoomOut: $("zoom-out"),
     reset: $("zoom-reset"),
-    cluster: $("zoom-controls"),
   },
 });
 
