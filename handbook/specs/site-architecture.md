@@ -33,7 +33,10 @@ symbol and path so the reader goes and looks.
   authors is `src/styles/<route>/index.css`, served at `<route>/index.css`, which the layout links relatively; home, whose route is the
   root, is `src/pages/index.astro`, `src/site/home/` and `src/styles/index.css` with
   `src/styles/home-noscript.css`. A folder directly under `src/site/` is one page's own, named by its
-  route, or `src/site/shared/`. `test/site/folder-layout.test.ts` holds the code's half and the
+  route, or `src/site/shared/`, and so is a folder directly under `src/styles/`: a sheet that is no one
+  page's own, linked by the layout on every page or opted into through `extraCss` as a shared
+  component's dress, is kept in `src/styles/shared/` and served under `/shared/`, and home's sheets
+  are the only sheets at the top. `test/site/folder-layout.test.ts` holds the code's half and both trees'
   folders, and the head tests in `test/site/astro-scaffold.test.ts` hold the relative link to the sheet.
 - **Two INDEPENDENT questions decide what a page joins, and mixing them up is how a page gets
   mis-budgeted.** The first is how the page is reached, which decides its place in the nav and the
@@ -131,7 +134,7 @@ symbol and path so the reader goes and looks.
   `scripts/served-sources.ts`, whose `SERVED_SOURCES` names the folders and their kinds. Everything
   else the site serves is written by `npm run astro:generate` into `generated/`, Astro's public
   folder, which nothing tracks.
-- **Sheet order is a contract.** The layout links the root sheets, then the shared sheets a page
+- **Sheet order is a contract.** The layout links the sheets every page wears, save the shell's, then the sheets a page
   opts into through its `extraCss` prop, then the page's own sheet, `<route>/index.css`, so a page keeps
   the last word on its own layout. An `extraCss` href is validated at render and THROWS unless it is
   root-absolute. The layout links `/shared/shell.css` last of all, which is why a page override of a
@@ -150,7 +153,7 @@ symbol and path so the reader goes and looks.
   sheet under `src/styles/`.
 - **Link form is scoped, and the flat rule is false.** Root-absolute is the form for the links the
   SHELL owns: the `NAV_ITEMS` hrefs, which are root-absolute trailing-slash directory form by their
-  own interface contract, the root and shared sheets, the icons and fonts, and the discovery routes.
+  own interface contract, the shared sheets, the icons and fonts, and the discovery routes.
   A page's OWN in-body links are RELATIVE and pinned that way: home's chart embeds, its seed form's
   action, its room doors, and every working page's bundle twin. Write a new link in the form its
   neighbours use, and expect a test to hold you to it.
