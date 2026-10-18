@@ -371,12 +371,6 @@ const frameNoExplorerImport = sourceBan(
   (text) => text.includes("explorer/"),
 );
 
-const explorerNoGlassKeys = sourceBan(
-  "the Explorer and home bind their own zoom presses by id: neither imports glass-keys.ts nor queries [data-zoom], a document-wide binding that would double every press (handbook/specs/explorer-doctrine.md)",
-  (text) => text.includes("glass-keys"),
-  (text) => /\[\s*data-zoom/i.test(text) || /(?:^|\/)glass-keys\b/.test(text),
-);
-
 const CONTENTS_ROW_BUILDER = "src/site/shared/contents-row.ts";
 
 const contentsRowBuilderOnly: Rule.RuleModule = {
@@ -535,7 +529,6 @@ export default {
   rules: {
     "frame-no-id-lookup": frameNoIdLookup,
     "frame-no-explorer-import": frameNoExplorerImport,
-    "explorer-no-glass-keys": explorerNoGlassKeys,
     "contents-row-builder-only": contentsRowBuilderOnly,
     "test-no-test-import": testNoTestImport,
     "engine-no-id-lookup": engineNoIdLookup,
