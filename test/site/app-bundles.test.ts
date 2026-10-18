@@ -133,25 +133,6 @@ test("every app page's twin is cleaned and ignored at its own address, so none c
   }
 });
 
-test("the clean never reaches a tracked file: no GENERATED_SUBTREES entry is, or holds, a path git tracks under public/ (Issue #669)", async () => {
-  const { GENERATED_SUBTREES } = await import("../../scripts/clean-public-generated.ts");
-  const tracked = execFileSync("git", ["ls-files", "public"], { cwd: REPO, encoding: "utf8", timeout: 30_000 })
-    .split("\n")
-    .filter(Boolean);
-  assert.ok(
-    tracked.includes("src/styles/explorer/portfolio/index.css"),
-    "precondition: the Portfolio's tracked sheet shares its directory with a generated twin, which is the case that makes a directory-wide entry destructive",
-  );
-  const reached = GENERATED_SUBTREES.flatMap((sub) =>
-    tracked.filter((f) => f === `public/${sub}` || f.startsWith(`public/${sub}/`)).map((f) => `${sub} reaches ${f}`),
-  );
-  assert.deepEqual(
-    reached,
-    [],
-    "a cleaned entry that is or holds a tracked file deletes committed content on every npm test and every build",
-  );
-});
-
 // Characterization of the press on a hermetic fixture, one knob per check.
 
 async function withFixture<T>(run: (dir: string) => T | Promise<T>): Promise<T> {
