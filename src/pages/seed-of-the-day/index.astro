@@ -6,6 +6,7 @@ import Vignettes from "../../layouts/Vignettes.astro";
 import Glass from "../../layouts/Glass.astro";
 import ChartFolio from "../../layouts/ChartFolio.astro";
 import LegendButton from "../../layouts/LegendButton.astro";
+import LegendRow from "../../layouts/LegendRow.astro";
 import Slip from "../../layouts/Slip.astro";
 
 const room = "The Seed of the Day";
@@ -61,12 +62,10 @@ const roads = [
 
 <ChartFolio lines={[["folio-title", "folio-title"], ["folio-sub", "folio-sub"], ["folio-coords", "folio-coords"], ["folio-note", "folio-note"]]} />
 
-<nav class="legend" aria-label="Today's roads out">
-  <p class="legend-head">Same day, same world, everywhere &middot; come back tomorrow for a new one</p>
-  <div class="legend-row">
-    {roads.map((r) => <LegendButton road={r.road} href={r.href} verb={r.verb} room={r.room} />)}
-  </div>
-</nav>
+<LegendRow label="Today's roads out">
+  <Fragment slot="head">Same day, same world, everywhere &middot; come back tomorrow for a new one</Fragment>
+  {roads.map((r) => <LegendButton road={r.road} href={r.href} verb={r.verb} room={r.room} />)}
+</LegendRow>
 
 <Glass />
 

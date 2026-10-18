@@ -7,6 +7,7 @@ import ChartStage from "../../layouts/ChartStage.astro";
 import Glass from "../../layouts/Glass.astro";
 import ChartFolio from "../../layouts/ChartFolio.astro";
 import LegendButton from "../../layouts/LegendButton.astro";
+import LegendRow from "../../layouts/LegendRow.astro";
 import Slip from "../../layouts/Slip.astro";
 
 const room = "The Prospect";
@@ -57,13 +58,11 @@ const tagline = "the second camera";
 
 <ChartFolio lines={[["folio-title", "folio-title"], ["folio-sub", "folio-sub"], ["folio-coords", "pp-pressed"]]} />
 
-<nav class="legend" aria-label="The roads out">
-  <p class="legend-head">The roads out</p>
-  <div class="legend-row">
-    <LegendButton id="pp-chart-link" gold href="/explorer/" verb="Return to" room="The Explorer" />
-    <LegendButton id="pp-ribbon-link" href="/ribbon/" verbId="pp-ribbon-verb" verb="Take the road from here in" room="The Wayfarer's Ribbon" />
-  </div>
-</nav>
+<LegendRow label="The roads out">
+  <Fragment slot="head">The roads out</Fragment>
+  <LegendButton id="pp-chart-link" gold href="/explorer/" verb="Return to" room="The Explorer" />
+  <LegendButton id="pp-ribbon-link" href="/ribbon/" verbId="pp-ribbon-verb" verb="Take the road from here in" room="The Wayfarer's Ribbon" />
+</LegendRow>
 
 <Glass />
 

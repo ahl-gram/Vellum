@@ -6,6 +6,7 @@ import Vignettes from "../../layouts/Vignettes.astro";
 import Glass from "../../layouts/Glass.astro";
 import ChartFolio from "../../layouts/ChartFolio.astro";
 import LegendButton from "../../layouts/LegendButton.astro";
+import LegendRow from "../../layouts/LegendRow.astro";
 import Slip from "../../layouts/Slip.astro";
 
 const room = "The Explorer";
@@ -132,14 +133,12 @@ const tagline = "every seed is a world, draw one";
 <ChartFolio lines={[["folio-title", "folio-title"], ["folio-sub", "folio-sub"], ["folio-coords", "caption"]]} />
 
 <!-- Both roads' hrefs are kept current beside every hash write (app.ts). -->
-<nav class="legend" aria-label="The Press">
-  <p class="legend-head" id="grp-press">The Press &middot; what the sheet can do next</p>
-  <div class="legend-row" role="group" aria-labelledby="grp-press">
-    <button id="verso-turn" class="legend-btn" type="button"><span class="verb">Turn</span><span class="room">The Sheet</span></button><a class="fn" href="/glossary/#verso" data-note="note-verso" aria-describedby="note-verso" aria-label="note on the verso">&sect;</a>
-    <LegendButton id="order-plates" gold href="../print-room/" verb="Take to" room="The Print Room" />
-    <LegendButton id="journal-link" gold href="/reading-room/" verb="Read the journal in" room="The Reading Room" />
-  </div>
-</nav>
+<LegendRow label="The Press" headId="grp-press">
+  <Fragment slot="head">The Press &middot; what the sheet can do next</Fragment>
+  <button id="verso-turn" class="legend-btn" type="button"><span class="verb">Turn</span><span class="room">The Sheet</span></button><a class="fn" href="/glossary/#verso" data-note="note-verso" aria-describedby="note-verso" aria-label="note on the verso">&sect;</a>
+  <LegendButton id="order-plates" gold href="../print-room/" verb="Take to" room="The Print Room" />
+  <LegendButton id="journal-link" gold href="/reading-room/" verb="Read the journal in" room="The Reading Room" />
+</LegendRow>
 
 <!-- The Chart Table drawer (direction D at the Issue #518 sitting): authored here, bound by src/site/explorer/chart-drawer-bind.ts; the cuttings are rendered from the table's two homes, the address deciding an arrival and the device deciding a return (Issue #634, superseding Issue #401 ruling 3). -->
 <button id="chart-drawer-tab" class="chart-drawer-tab" type="button" aria-expanded="false" aria-controls="chart-drawer">The Drawer &middot; the table is bare</button>

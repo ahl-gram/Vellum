@@ -7,6 +7,7 @@ import ChartStage from "../../layouts/ChartStage.astro";
 import Glass from "../../layouts/Glass.astro";
 import ChartFolio from "../../layouts/ChartFolio.astro";
 import LegendButton from "../../layouts/LegendButton.astro";
+import LegendRow from "../../layouts/LegendRow.astro";
 import Slip from "../../layouts/Slip.astro";
 
 const room = "The Wayfarer's Ribbon";
@@ -56,13 +57,11 @@ const tagline = "the road, unrolled";
 
 <ChartFolio lines={[["folio-title", "folio-title"], ["folio-sub", "folio-sub"], ["folio-coords", "rb-unrolled"]]} />
 
-<nav class="legend" aria-label="The roads out">
-  <p class="legend-head">The roads out</p>
-  <div class="legend-row">
-    <LegendButton id="rb-chart-link" gold href="/explorer/" verb="Return to" room="The Explorer" />
-    <LegendButton id="rb-prospect-link" href="/prospect/" verbId="rb-prospect-verb" verb="See the road's end in" room="The Prospect" />
-  </div>
-</nav>
+<LegendRow label="The roads out">
+  <Fragment slot="head">The roads out</Fragment>
+  <LegendButton id="rb-chart-link" gold href="/explorer/" verb="Return to" room="The Explorer" />
+  <LegendButton id="rb-prospect-link" href="/prospect/" verbId="rb-prospect-verb" verb="See the road's end in" room="The Prospect" />
+</LegendRow>
 
 <Glass />
 

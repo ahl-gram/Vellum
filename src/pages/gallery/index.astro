@@ -3,6 +3,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import RoomFolio from "../../layouts/RoomFolio.astro";
 import Fog from "../../layouts/Fog.astro";
 import LegendButton from "../../layouts/LegendButton.astro";
+import LegendRow from "../../layouts/LegendRow.astro";
 import { GALLERY_COUNT, GALLERY_SEED, cardFigureHtml, galleryCards } from "../../cli/gallery.ts";
 
 // Composed at build time from the same composer generate-showcases renders the SVGs with, so the two runs agree on worlds and filenames.
@@ -26,10 +27,8 @@ const dateline = `${GALLERY_COUNT} charts, from seed ${GALLERY_SEED}`;
   <p class="dateline">{dateline}</p>
 </RoomFolio>
 
-<nav class="legend" slot="desk" aria-label="The road out">
-  <p class="legend-head">every plate is a road into its own world</p>
-  <div class="legend-row">
-    <LegendButton gold href="/explorer/" verb="Return to" room="The Explorer" />
-  </div>
-</nav>
+<LegendRow slot="desk" label="The road out">
+  <Fragment slot="head">every plate is a road into its own world</Fragment>
+  <LegendButton gold href="/explorer/" verb="Return to" room="The Explorer" />
+</LegendRow>
 </BaseLayout>

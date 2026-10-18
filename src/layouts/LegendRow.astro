@@ -1,0 +1,16 @@
+---
+// The legend row at the chart's foot (Issue #462 chart-room ruling 4; the Atelier Kit, Issue #487; Issue #827): the nav the page names, its head, and the row its roads out and presses stand in, a group named by rowLabel or else by the head when the head has an id; the page writes the words and the order, the component keeps the shape.
+interface Props {
+  label: string;
+  headId?: string;
+  rowLabel?: string;
+}
+const { label, headId, rowLabel } = Astro.props;
+const group = headId !== undefined || rowLabel !== undefined;
+---
+<nav class="legend" aria-label={label}>
+  <p class="legend-head" id={headId}><slot name="head" /></p>
+  <slot name="note" />
+  <div class="legend-row" role={group ? "group" : undefined} aria-label={rowLabel} aria-labelledby={rowLabel === undefined ? headId : undefined}><slot /></div>
+  <slot name="status" />
+</nav>
