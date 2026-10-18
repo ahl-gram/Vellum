@@ -41,12 +41,11 @@ function sweepWindows(count: CountWindow): void {
   }
 }
 
-/** Does the band-scaled snap radius rescue anything the old radius-1 scan dropped? Bare field only: that is what ships today, so a nonzero answer is a change to sheets Alex can already see. */
-function counterfactual(): void {
-  type Row = { onWater: number; rescued: number; lostAnyway: number; radius: number };
-  const tally = new Map<string, Row>();
-  const rescued: string[] = [];
+type CounterfactualRow = { onWater: number; rescued: number; lostAnyway: number; radius: number };
 
+function counterfactualCount(): { count: CountWindow; tally: Map<string, CounterfactualRow>; rescued: string[] } {
+  const tally = new Map<string, CounterfactualRow>();
+  const rescued: string[] = [];
   const count: CountWindow = (world, label, window, gridW, gridH) => {
     const worldAspect = (world.recipe.gridW - 1) / (world.recipe.gridH - 1);
     const elev = buildHeightfield({
@@ -89,6 +88,12 @@ function counterfactual(): void {
     }
     tally.set(label, row);
   };
+  return { count, tally, rescued };
+}
+
+/** Does the band-scaled snap radius rescue anything the old radius-1 scan dropped? Bare field only: that is what ships today, so a nonzero answer is a change to sheets Alex can already see. */
+function counterfactual(): void {
+  const { count, tally, rescued } = counterfactualCount();
 
   sweepWindows(count);
 

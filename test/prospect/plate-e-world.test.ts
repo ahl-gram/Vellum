@@ -90,27 +90,63 @@ test("every piece of furniture, every lettered run and every bird stays inside t
   assert.ok(plates > 300, `premise: the sweep engraves the ruled places and whole worlds (${plates})`);
 });
 
+function assertTownsWhereHillsPut(label: string, plate: ReturnType<typeof engrave>, surroundings: Surroundings): void {
+  const unflown = horizonTowns(
+    engraver(STYLES.antique),
+    createLettering("t"),
+    plate.era === "before-founding" ? [] : surroundings.roadTowns,
+    plate.key,
+    {
+      ...skylineOf(plate.g),
+      birds: [],
+      avoid: [plate.furniture.cartouche, plate.furniture.medals, plate.furniture.key, plate.furniture.margin].flat(),
+    },
+  );
+  assert.deepEqual(
+    plate.furniture.towns,
+    unflown.boxes,
+    `${label}: a horizon name stands where the hills and the masts put it; the birds give way to it, never it to them`,
+  );
+}
+
+function assertHorizonNamesClear(
+  label: string,
+  furniture: readonly Box[],
+  named: ReturnType<typeof engrave>["furniture"]["towns"],
+  v: ReturnType<typeof engrave>["picture"]["vignette"],
+): void {
+  named.forEach((b, i) => {
+    for (const f of furniture)
+      assert.ok(
+        !overlaps(b, f),
+        `${label}: a horizon name ${JSON.stringify(b)} crosses the furniture at ${JSON.stringify(f)}`,
+      );
+    named.forEach((o, j) =>
+      assert.ok(
+        j <= i || Math.floor(i / 3) === Math.floor(j / 3) || !overlaps(b, o),
+        `${label}: two horizon names cross, ${JSON.stringify(b)} and ${JSON.stringify(o)}`,
+      ),
+    );
+    if (i % 3 === 2) return;
+    const glyph = named[i - (i % 3) + 2]!;
+    assert.ok(
+      !overlaps(b, glyph),
+      `${label}: a horizon name ${JSON.stringify(b)} crosses its own far-town glyph ${JSON.stringify(glyph)}`,
+    );
+    for (let x = b.x0; x <= b.x1; x += 1)
+      assert.ok(
+        !(b.y0 < v.chordAt(x) && b.y1 > v.chordAt(x)),
+        `${label}: the hill's straight edge runs through a horizon name at x ${x.toFixed(1)}`,
+      );
+  });
+}
+
 test('a horizon town\'s name and number clear every mast, the ridge line under them, the hill\'s straight edge, their own far-town glyph, the furniture and every other horizon name (the round\'s "3 Poalo" and "6 Haireno", and the class)', () => {
   let labels = 0;
   let paired = 0;
   everyPlate((label, plate, surroundings) => {
     const v = plate.picture.vignette;
-    const unflown = horizonTowns(
-      engraver(STYLES.antique),
-      createLettering("t"),
-      plate.era === "before-founding" ? [] : surroundings.roadTowns,
-      plate.key,
-      {
-        ...skylineOf(plate.g),
-        birds: [],
-        avoid: [plate.furniture.cartouche, plate.furniture.medals, plate.furniture.key, plate.furniture.margin].flat(),
-      },
-    );
-    assert.deepEqual(
-      plate.furniture.towns,
-      unflown.boxes,
-      `${label}: a horizon name stands where the hills and the masts put it; the birds give way to it, never it to them`,
-    );
+    assertTownsWhereHillsPut(label, plate, surroundings);
     const furniture = [
       plate.furniture.cartouche,
       plate.furniture.medals,
@@ -119,30 +155,7 @@ test('a horizon town\'s name and number clear every mast, the ridge line under t
     ].flat();
     const named = plate.furniture.towns;
     if (named.length >= 6) paired++;
-    named.forEach((b, i) => {
-      for (const f of furniture)
-        assert.ok(
-          !overlaps(b, f),
-          `${label}: a horizon name ${JSON.stringify(b)} crosses the furniture at ${JSON.stringify(f)}`,
-        );
-      named.forEach((o, j) =>
-        assert.ok(
-          j <= i || Math.floor(i / 3) === Math.floor(j / 3) || !overlaps(b, o),
-          `${label}: two horizon names cross, ${JSON.stringify(b)} and ${JSON.stringify(o)}`,
-        ),
-      );
-      if (i % 3 === 2) return;
-      const glyph = named[i - (i % 3) + 2]!;
-      assert.ok(
-        !overlaps(b, glyph),
-        `${label}: a horizon name ${JSON.stringify(b)} crosses its own far-town glyph ${JSON.stringify(glyph)}`,
-      );
-      for (let x = b.x0; x <= b.x1; x += 1)
-        assert.ok(
-          !(b.y0 < v.chordAt(x) && b.y1 > v.chordAt(x)),
-          `${label}: the hill's straight edge runs through a horizon name at x ${x.toFixed(1)}`,
-        );
-    });
+    assertHorizonNamesClear(label, furniture, named, v);
     for (const b of named.filter((_, i) => i % 3 !== 2)) {
       labels++;
       for (const m of v.masts)

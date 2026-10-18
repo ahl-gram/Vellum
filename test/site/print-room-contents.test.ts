@@ -49,10 +49,7 @@ test("unbound, the eleven rows stand in the mockup's words with no plates and no
   assert.doesNotMatch(html, /class="plates"|class="turn"|data-plate=/, "nothing to turn to yet");
 });
 
-test("bound, every plate is a turn and a thumbnail, the regions and the prospect are named, the counts ride the last three rows", () => {
-  const html = contentsRows(DATA);
-  const li = rows(html);
-  assert.equal(li.length, 11);
+function checkBoundPlateRows(li: readonly string[]): void {
   assert.match(
     li[0]!,
     /<button class="turn" type="button" data-plate="antique">The chart, drawn in the <em>antique<\/em> manner<\/button>/,
@@ -78,6 +75,9 @@ test("bound, every plate is a turn and a thumbnail, the regions and the prospect
     li[5]!,
     /<span class="cr-num">vi<\/span>.*data-plate="theme-population">A thematic survey of <em>population<\/em>/,
   );
+}
+
+function checkBoundBackRows(li: readonly string[]): void {
   assert.match(
     li[6]!,
     /Regional surveys: <button class="turn" type="button" data-plate="region-1"><em>The Environs of Laukuwelua<\/em><\/button>, <button[^>]*data-plate="region-2"><em>The Environs of Toatauhe<\/em><\/button>/,
@@ -98,6 +98,14 @@ test("bound, every plate is a turn and a thumbnail, the regions and the prospect
     li[10]!,
     /<button class="turn" type="button" data-plate="gazetteer">The gazetteer<\/button> <span class="n">&middot; 30 places<\/span>/,
   );
+}
+
+test("bound, every plate is a turn and a thumbnail, the regions and the prospect are named, the counts ride the last three rows", () => {
+  const html = contentsRows(DATA);
+  const li = rows(html);
+  assert.equal(li.length, 11);
+  checkBoundPlateRows(li);
+  checkBoundBackRows(li);
   const figures = [...html.matchAll(/<figure[^>]*data-plate="([^"]+)"/g)].map((m) => m[1]);
   assert.deepEqual(
     figures,

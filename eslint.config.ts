@@ -6,6 +6,7 @@ import css from "@eslint/css";
 import cssCommentForm from "./scripts/lint/css-comment-form.ts";
 import tsCommentForm from "./scripts/lint/ts-comment-form.ts";
 import sourceShape from "./scripts/lint/source-shape.ts";
+import sourceShapeConsole from "./scripts/lint/source-shape-console.ts";
 import errorCast from "./scripts/lint/error-cast.ts";
 import narrowWidth from "./scripts/lint/narrow-width.ts";
 import e2eScriptsOff from "./scripts/lint/e2e-scripts-off.ts";
@@ -27,7 +28,7 @@ import sheetMotion, {
   TIPS_AWAITING_A_RULING,
 } from "./scripts/lint/sheet-motion.ts";
 
-const vellum = { meta: cssCommentForm.meta, rules: { ...cssCommentForm.rules, ...tsCommentForm.rules, ...sourceShape.rules, ...errorCast.rules, ...narrowWidth.rules, ...e2eScriptsOff.rules, ...importBounds.rules, ...siteShape.rules, ...paramExcuse.rules, ...commentCitation.rules, ...splitArguments.rules, ...e2eSteps.rules, ...sheetTokens.rules, ...sheetOwners.rules, ...sheetMotion.rules, ...sharedBindings.rules, ...packageImports.rules } };
+const vellum = { meta: cssCommentForm.meta, rules: { ...cssCommentForm.rules, ...tsCommentForm.rules, ...sourceShape.rules, ...sourceShapeConsole.rules, ...errorCast.rules, ...narrowWidth.rules, ...e2eScriptsOff.rules, ...importBounds.rules, ...siteShape.rules, ...paramExcuse.rules, ...commentCitation.rules, ...splitArguments.rules, ...e2eSteps.rules, ...sheetTokens.rules, ...sheetOwners.rules, ...sheetMotion.rules, ...sharedBindings.rules, ...packageImports.rules } };
 const TS_ROOTS = ["e2e/**/*.ts", "scripts/**/*.ts", "src/**/*.ts", "test/**/*.ts", "test-support/**/*.ts"];
 const PAGE_ELEMENT_PARAMETERS = ["drawerEls", "ghostEl", "innerEl", "legendEl", "logEls", "mapEl", "noteEl", "pillEl", "roomEls", "sheetEl", "slipEl", "statusEl", "targetEl", "viewportEl"];
 const site = (...paths: string[]): string[][] => paths.map((path) => ["src/**/*.ts", path]);

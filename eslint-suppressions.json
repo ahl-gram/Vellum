@@ -232,26 +232,6 @@
       "count": 1
     }
   },
-  "scripts/lint/source-shape.ts": {
-    "max-lines": {
-      "count": 1
-    }
-  },
-  "scripts/region-detail/probes.ts": {
-    "max-lines-per-function": {
-      "count": 1
-    }
-  },
-  "scripts/region-detail/sweep-measure.ts": {
-    "max-lines-per-function": {
-      "count": 2
-    }
-  },
-  "scripts/region-detail/sweep.ts": {
-    "max-lines-per-function": {
-      "count": 1
-    }
-  },
   "src/itinerary/dress/plate.ts": {
     "max-lines-per-function": {
       "count": 1
@@ -351,14 +331,6 @@
       "count": 1
     }
   },
-  "src/site/shared/living-chart/place-overlay.ts": {
-    "max-lines": {
-      "count": 1
-    },
-    "max-lines-per-function": {
-      "count": 1
-    }
-  },
   "src/site/print-room/app.ts": {
     "max-lines-per-function": {
       "count": 1
@@ -370,6 +342,14 @@
     }
   },
   "src/site/reading-room/prospect-stage.ts": {
+    "max-lines-per-function": {
+      "count": 1
+    }
+  },
+  "src/site/shared/living-chart/place-overlay.ts": {
+    "max-lines": {
+      "count": 1
+    },
     "max-lines-per-function": {
       "count": 1
     }
@@ -389,21 +369,6 @@
       "count": 1
     }
   },
-  "test/e2e/suites.test.ts": {
-    "max-lines-per-function": {
-      "count": 1
-    }
-  },
-  "test/prospect/plate-e-world.test.ts": {
-    "max-lines-per-function": {
-      "count": 2
-    }
-  },
-  "test/repo/agent-sandbox-mutate.test.ts": {
-    "max-lines-per-function": {
-      "count": 2
-    }
-  },
   "test/repo/agent-sandbox.test.ts": {
     "max-lines": {
       "count": 1
@@ -418,11 +383,6 @@
     "max-lines": {
       "count": 1
     },
-    "max-lines-per-function": {
-      "count": 1
-    }
-  },
-  "test/repo/e2e-tiers.test.ts": {
     "max-lines-per-function": {
       "count": 1
     }
@@ -448,30 +408,15 @@
       "count": 1
     }
   },
-  "test/site/app-bundles.test.ts": {
-    "max-lines-per-function": {
-      "count": 1
-    }
-  },
   "test/site/astro-scaffold.test.ts": {
     "max-lines-per-function": {
       "count": 2
-    }
-  },
-  "test/site/contents-row.test.ts": {
-    "max-lines-per-function": {
-      "count": 1
     }
   },
   "test/site/living-chart-no-bar-card.test.ts": {
     "max-lines": {
       "count": 1
     },
-    "max-lines-per-function": {
-      "count": 1
-    }
-  },
-  "test/site/print-room-contents.test.ts": {
     "max-lines-per-function": {
       "count": 1
     }

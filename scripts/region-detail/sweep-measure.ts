@@ -222,16 +222,36 @@ type LandTally = {
   readonly landOverParentSea: number;
 };
 
-function landTally(world: World, region: World, window: UvWindow, gridW: number, gridH: number): LandTally {
+type ParentLand = Pick<LandTally, "parentLand" | "parentSnowAlpine" | "parentLandDrowned">;
+type RegionLand = Omit<LandTally, keyof ParentLand>;
+
+function parentLandTally(world: World, region: World, window: UvWindow, gridW: number, gridH: number): ParentLand {
+  const { data } = region.elev;
+  const sea = region.seaLevel;
+  let parentLand = 0;
+  let parentSnowAlpine = 0;
+  let parentLandDrowned = 0;
+  for (let gy = 0; gy < gridH; gy++) {
+    for (let gx = 0; gx < gridW; gx++) {
+      const i = gx + gy * gridW;
+      const wi = worldCellUnder(world, window, gridW, gridH, gx, gy);
+      if ((world.elev.data[wi] as number) <= world.seaLevel) continue;
+      parentLand++;
+      const pb = world.biomes[wi] as number;
+      if (pb === BIOMES.snow || pb === BIOMES.alpine) parentSnowAlpine++;
+      if ((data[i] as number) <= sea) parentLandDrowned++;
+    }
+  }
+  return { parentLand, parentSnowAlpine, parentLandDrowned };
+}
+
+function regionLandTally(world: World, region: World, window: UvWindow, gridW: number, gridH: number): RegionLand {
   const { data } = region.elev;
   const sea = region.seaLevel;
   let landCells = 0;
   let sharedLandCells = 0;
   let biomeMismatch = 0;
   let snowAlpine = 0;
-  let parentLand = 0;
-  let parentSnowAlpine = 0;
-  let parentLandDrowned = 0;
   let realmlessOverParentLand = 0;
   let realmlessOverParentSea = 0;
   let landOverParentSea = 0;
@@ -240,15 +260,7 @@ function landTally(world: World, region: World, window: UvWindow, gridW: number,
       const i = gx + gy * gridW;
       const wi = worldCellUnder(world, window, gridW, gridH, gx, gy);
       const parentIsLand = (world.elev.data[wi] as number) > world.seaLevel;
-      if (parentIsLand) {
-        parentLand++;
-        const pb = world.biomes[wi] as number;
-        if (pb === BIOMES.snow || pb === BIOMES.alpine) parentSnowAlpine++;
-      }
-      if ((data[i] as number) <= sea) {
-        if (parentIsLand) parentLandDrowned++;
-        continue;
-      }
+      if ((data[i] as number) <= sea) continue;
       landCells++;
       const b = region.biomes[i] as number;
       if (b === BIOMES.snow || b === BIOMES.alpine) snowAlpine++;
@@ -268,12 +280,16 @@ function landTally(world: World, region: World, window: UvWindow, gridW: number,
     sharedLandCells,
     biomeMismatch,
     snowAlpine,
-    parentLand,
-    parentSnowAlpine,
-    parentLandDrowned,
     realmlessOverParentLand,
     realmlessOverParentSea,
     landOverParentSea,
+  };
+}
+
+function landTally(world: World, region: World, window: UvWindow, gridW: number, gridH: number): LandTally {
+  return {
+    ...regionLandTally(world, region, window, gridW, gridH),
+    ...parentLandTally(world, region, window, gridW, gridH),
   };
 }
 
@@ -318,6 +334,19 @@ function regionFor(world: World, band: LodBand, window: UvWindow, detail: boolea
   });
 }
 
+const landColumns = (land: LandTally) => ({
+  landCells: land.landCells,
+  biomeMismatchOnSharedLand: land.biomeMismatch,
+  sharedLandCells: land.sharedLandCells,
+  snowAlpineFraction: land.landCells === 0 ? 0 : land.snowAlpine / land.landCells,
+  parentSnowAlpineFraction: land.parentLand === 0 ? 0 : land.parentSnowAlpine / land.parentLand,
+  realmlessOverParentLand: land.realmlessOverParentLand,
+  realmlessOverParentSea: land.realmlessOverParentSea,
+  landOverParentSea: land.landOverParentSea,
+  parentLandDrownedInRegion: land.parentLandDrowned,
+  parentLandCells: land.parentLand,
+});
+
 export function measure(
   world: World,
   band: LodBand,
@@ -354,16 +383,7 @@ export function measure(
     roads: region.roads.length,
     roadCellsOnWater: net.roadCellsOnWater,
     settlementsOffRoadNetwork: net.settlementsOffRoadNetwork,
-    landCells: land.landCells,
-    biomeMismatchOnSharedLand: land.biomeMismatch,
-    sharedLandCells: land.sharedLandCells,
-    snowAlpineFraction: land.landCells === 0 ? 0 : land.snowAlpine / land.landCells,
-    parentSnowAlpineFraction: land.parentLand === 0 ? 0 : land.parentSnowAlpine / land.parentLand,
-    realmlessOverParentLand: land.realmlessOverParentLand,
-    realmlessOverParentSea: land.realmlessOverParentSea,
-    landOverParentSea: land.landOverParentSea,
-    parentLandDrownedInRegion: land.parentLandDrowned,
-    parentLandCells: land.parentLand,
+    ...landColumns(land),
     worldFusedPairs: masses.fusedPairs,
     worldMassesLost: masses.lost,
     worldMassesInWindow: masses.inWindow,
