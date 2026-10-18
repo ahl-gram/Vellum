@@ -47,12 +47,27 @@ test("the press bundles from the src/site TypeScript entries (#260)", async () =
   );
 });
 
-test("public/ holds no committed source: the raw app JS and the .d.ts twins retired (#260)", () => {
-  // git ls-files is the oracle: the generated twins/chunks are .js too but gitignored; the acceptance is about COMMITTED content.
-  const tracked = execFileSync("git", ["ls-files", "public"], { cwd: REPO, encoding: "utf8" })
+test("nothing in the build-output folder or the retired public/ is tracked, and the ignore file names the folder whole and nothing beneath it (#260, Issue #768)", () => {
+  // 2026-10-18: this git ls-files answers in under 10 ms on a Mac; thirty seconds is a cap on a hang, not a budget.
+  const tracked = execFileSync("git", ["ls-files", "--", "generated", "public"], {
+    cwd: REPO,
+    encoding: "utf8",
+    timeout: 30_000,
+  })
     .split("\n")
-    .filter((f) => f.endsWith(".js") || f.endsWith(".d.ts"));
-  assert.deepEqual(tracked, [], "no committed .js or .d.ts may remain under public/");
+    .filter(Boolean);
+  assert.deepEqual(
+    tracked,
+    [],
+    "a tracked file under generated/ is deleted by every build, and one under public/ is served by nothing",
+  );
+  const lines = read(".gitignore").split("\n");
+  assert.ok(lines.includes("/generated/"), ".gitignore should carry the exact line /generated/");
+  assert.deepEqual(
+    lines.filter((line) => /^\/?(public|generated)\/./.test(line)),
+    [],
+    "a line naming a path beneath the build-output folder, or under the retired public/, is a one-by-one entry the whole-folder line replaced",
+  );
 });
 
 test("the tsc engine emit retired: no browser tsconfig, astro:generate is clean-bundle-showcases (#260)", () => {

@@ -105,8 +105,20 @@ test("astro dev serves the app surfaces at their canonical directory URLs (dev p
     }
     const route = await fetch(at("/faq/"));
     assert.equal(route.status, 200, "Astro routes keep winning their own URLs");
+    assert.ok(existsSync(root("src/styles/explorer/index.css")), "the sheet is written under src/styles/");
+    assert.equal(
+      existsSync(root("generated/explorer/index.css")),
+      false,
+      "no copy of a sheet sits in the build-output folder, so the dev server's answer is the source's",
+    );
     const sub = await fetch(at("/explorer/index.css"));
-    assert.equal(sub.status, 200, "exact-path subresources stay served from public/");
+    assert.equal(sub.status, 200, "a sheet is served in dev from src/styles/");
+    assert.ok(sub.headers.get("content-type")?.startsWith("text/css"), "the sheet is answered as text/css");
+    assert.equal(
+      await sub.text(),
+      readFileSync(root("src/styles/explorer/index.css"), "utf8"),
+      "the dev server answers with the source's current bytes",
+    );
     const missing = await fetch(at("/no-such-surface/"));
     assert.equal(missing.status, 404, "directories with no public/ shell still 404");
   } finally {
