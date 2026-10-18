@@ -36,7 +36,7 @@ picks a map tint, not a colour scheme.)
 ## The case
 
 Three faces, three roles, self-hosted, ratified as the Punchcutter's Case (#228). The face files and
-the role variables are declared in `public/fonts.css`:
+the role variables are declared in `src/styles/fonts.css`:
 
 - **Display: IM Fell English SC.** The wordmark, room names, section heads, the nav, the footer.
 - **Flourish: IM Fell English italic.** Taglines, intros, captions, asides. The voice that speaks
@@ -51,7 +51,7 @@ Fell or Garamond leaking into rendered SVG. Keep the boundary.
 capitals, drawn as outlines from the committed tables under `src/prospect/letter/` (Issue #754), so a
 plate names no font and draws the same on every device. The face has no "№", so the plate's is
 drawn by hand in the face's ink (`src/prospect/letter/numero.ts`). That face is the plate's alone: it is not
-self-hosted, never joins `public/fonts.css`, and its tables are written only by `npm run plate-face`.
+self-hosted, never joins `src/styles/fonts.css`, and its tables are written only by `npm run plate-face`.
 
 Things the Fell faces do that have each cost something:
 
@@ -72,7 +72,7 @@ download links no stylesheet of ours, so with the variables undefined it still l
 
 ## The palette, by role
 
-Every colour is a named token, declared once in `public/shell.css` and mirrored for the generated documents;
+Every colour is a named token, declared once in `src/styles/shell.css` and mirrored for the generated documents;
 `vellum/css-token-by-name` refuses a token's colour written raw in a sheet or in the CSS the code builds.
 The roles are what to design against:
 
@@ -93,7 +93,7 @@ ratified and it is the fastest way to tell whether a border is framing something
 **Quotations from the chart.** `--chart-paper` and `--chart-ink` are borrowed from the renderer's own
 constants and pinned equal to them by test. **Every depth shadow on the site is cast in chart ink**,
 and alpha over a token is written with the relative-colour form rather than a raw triplet, which a
-guard enforces. Four shadow tokens carry that ink: the sheet's and the stage's in `public/shell.css`, the
+guard enforces. Four shadow tokens carry that ink: the sheet's and the stage's in `src/styles/shell.css`, the
 raise and the press in the motion sheet. A `box-shadow` used as a ring rather than a depth (the
 slider thumbs) is not one of these and wears its own ink.
 
@@ -124,7 +124,7 @@ the chrome has its text, or the fit reads an empty box, and again once the fonts
 every resize, and whenever the head cluster or the room folio changes size, which `bindRoom` in
 `src/site/shared/room.ts` wires). **The stage is the fixed
 box the chart is mounted in, the whole window or the desk frame below**, declared as `body.chart-room .stage` in
-`public/atelier.css`; a room that hangs its plates on the deep rather than mounting one chart has
+`src/styles/atelier.css`; a room that hangs its plates on the deep rather than mounting one chart has
 none, and the Gallery is that room today. No band, no footer: a chart room with a
 stage does not scroll, save down a desk frame taller than the window. **The chart keeps a minimum size**: where the chrome would leave the sheet
 under half the width it could have (the window less an open slip, at the window's full height, or the desk frame's), the
@@ -356,7 +356,7 @@ that footing.
 
 **A refusing press dims by swapping its ground, never by opacity.** Opacity takes the face under the
 floor, where a cream ground under full-strength ink keeps it far above it (`.pc-lay.dim` in
-`public/living-chart.css` carries the measurement). The press stays pressable rather than
+`src/styles/living-chart.css` carries the measurement). The press stays pressable rather than
 `disabled`, so a keyboard reader still reaches it and hears why it refuses.
 
 **Controls sit in three radius families, descending**: panels, then slips and controls, then chips.
@@ -452,7 +452,7 @@ ran by listening for its own end. The recipe is a pair of rules:
 
 - **The trigger is a class the host applies, never the hidden attribute.** Restoring display starts
   an animation afresh, so a rule gated on hidden replays the ceremony every time the element is shown
-  again. `.rf-arrival` in `public/reading-frame.css` is the shape to copy.
+  again. `.rf-arrival` in `src/styles/reading-frame.css` is the shape to copy.
 - **The class retires when nothing is animating**, on the animation end plus a check that no
   animation is still running, AND deterministically at the top of the host's own draw. The second
   half is not belt and braces: it is the only path that runs when the first event never fires.

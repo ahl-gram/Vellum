@@ -4,41 +4,19 @@ import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { join } from "node:path";
-import { cleanPublicGenerated, GENERATED_SUBTREES } from "../../scripts/clean-public-generated.ts";
+import { cleanGenerated, GENERATED } from "../../scripts/clean-generated.ts";
 
 process.env.ASTRO_TELEMETRY_DISABLED = "1";
 
-// Scriptorium Sub 3 (Issue #204): the app surfaces' source served verbatim from public/. SPEC: the ratified 2026-07-21 comment on Issue #202 (sections 1 and 3, constraints 2, 3, 4, 10), with decision D's clean-before-regen so a renamed engine module cannot leave an importable orphan that masks a 404 locally.
+// Scriptorium Sub 3 (Issue #204): the app surfaces' bundles served verbatim from the build-output folder (generated/ since Issue #768). SPEC: the ratified 2026-07-21 comment on Issue #202 (sections 1 and 3, constraints 2, 3, 4, 10), with decision D's clean-before-regen so a renamed engine module cannot leave an importable orphan that masks a 404 locally.
 
 const root = (p = "") => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 
-// The literal Sub 3 floor, deliberately NOT derived from GENERATED_SUBTREES: a constant serving as both subject and oracle lets a botched list edit pass every guard. Sub 4 may only GROW the cleaned set.
-const SUB3_GENERATED = [
-  "explorer/engine",
-  "explorer/app.bundle.js",
-  "explorer/worker.bundle.js",
-  "seed-of-the-day/app.bundle.js",
-] as const;
-
-test("the cleaned set keeps its Sub 3 floor (later subs may only grow it)", () => {
-  for (const sub of SUB3_GENERATED) {
-    assert.ok(GENERATED_SUBTREES.includes(sub), `GENERATED_SUBTREES must keep ${sub}`);
-  }
-});
-
-test("the generated runtime trees are gitignored in public/", () => {
-  const lines = readFileSync(root(".gitignore"), "utf8").split("\n");
-  for (const sub of SUB3_GENERATED) {
-    const line = sub.endsWith(".bundle.js") ? `public/${sub}` : `public/${sub}/`;
-    assert.ok(lines.includes(line), `.gitignore should carry the exact line ${line}`);
-  }
-});
-
-test("astro:generate regenerates the runtime trees into public/, and dev/build run it first", () => {
+test("astro:generate regenerates the runtime trees into generated/, and dev/build run it first", () => {
   const pkg = JSON.parse(readFileSync(root("package.json"), "utf8")) as { scripts: Record<string, string> };
   assert.equal(
     pkg.scripts["astro:generate"],
-    "node scripts/clean-public-generated.ts && node scripts/kit-fonts.ts && node scripts/build-app-bundles.ts && node scripts/generate-showcases.ts && node scripts/generate-discovery.ts",
+    "node scripts/clean-generated.ts && node scripts/kit-fonts.ts && node scripts/build-app-bundles.ts && node scripts/generate-showcases.ts && node scripts/generate-discovery.ts",
     "astro:generate must clean, copy the kit fonts (Issue #706), bundle (Vite compiles the TS graph since Sub 9, #260), then generate the showcases and the discovery files",
   );
   assert.equal(pkg.scripts["astro:dev"], "npm run astro:generate && astro dev", "dev parity needs the runtime trees");
@@ -46,42 +24,38 @@ test("astro:generate regenerates the runtime trees into public/, and dev/build r
   assert.equal(pkg.scripts["astro:preview"], "astro preview", "preview reuses the last build untouched");
 });
 
-test("clean-before-regen removes exactly its own generated subtrees, tolerating absence", async () => {
-  const tmp = root("out/test-clean-public");
-  rmSync(tmp, { recursive: true, force: true });
+test("clean-before-regen deletes the build-output folder whole, tolerates its absence, and refuses a folder of any other name (Issue #204 decision D, Issue #768)", async () => {
+  const base = root("out/test-clean");
+  const tmp = join(base, GENERATED);
+  rmSync(base, { recursive: true, force: true });
   mkdirSync(join(tmp, "explorer", "engine", "world"), { recursive: true });
   writeFileSync(join(tmp, "explorer", "engine", "world", "orphan.js"), "// renamed-away module");
   writeFileSync(join(tmp, "explorer", "app.bundle.js"), "// stale twin");
-  writeFileSync(join(tmp, "explorer", "worker.bundle.js"), "// stale twin");
-  mkdirSync(join(tmp, "seed-of-the-day"), { recursive: true });
-  writeFileSync(join(tmp, "seed-of-the-day", "app.bundle.js"), "// stale twin");
-  writeFileSync(join(tmp, "explorer", "app.js"), "// committed source, must survive");
+  writeFileSync(join(base, "beside.txt"), "beside the folder, must survive");
 
-  await cleanPublicGenerated(tmp);
-  // Assert the LITERAL paths: an assertion derived from GENERATED_SUBTREES would be circular.
-  assert.ok(!existsSync(join(tmp, "explorer", "engine")), "the engine subtree should be cleaned before regen");
-  for (const twin of SUB3_GENERATED.filter((s) => s.endsWith(".bundle.js"))) {
-    assert.ok(!existsSync(join(tmp, twin)), `${twin} should be cleaned before regen`);
-  }
-  assert.ok(existsSync(join(tmp, "explorer", "app.js")), "committed source must survive the clean");
+  await cleanGenerated(tmp);
+  assert.ok(!existsSync(tmp), "the build-output folder should be deleted whole before regen");
+  assert.ok(existsSync(join(base, "beside.txt")), "a file beside the folder must survive the clean");
 
-  await cleanPublicGenerated(tmp); // second run on an already-clean tree must not throw
-  rmSync(tmp, { recursive: true, force: true });
+  await cleanGenerated(tmp); // second run on an already-clean tree must not throw
+
+  await assert.rejects(cleanGenerated(base), /refusing/, "a folder not named generated is refused");
+  assert.ok(existsSync(join(base, "beside.txt")), "the refused folder is left alone");
+  rmSync(base, { recursive: true, force: true });
 });
 
-test("the no-arg CLI cleans ./public relative to CWD (the exact astro:generate invocation)", () => {
+test("the no-arg CLI deletes ./generated relative to CWD (the exact astro:generate invocation)", () => {
   const scratch = root("out/test-clean-cli");
   rmSync(scratch, { recursive: true, force: true });
-  mkdirSync(join(scratch, "public", "explorer", "engine", "world"), { recursive: true });
-  writeFileSync(join(scratch, "public", "explorer", "engine", "world", "orphan.js"), "// stale");
-  writeFileSync(join(scratch, "public", "explorer", "app.bundle.js"), "// stale twin");
-  writeFileSync(join(scratch, "public", "explorer", "app.js"), "// committed source, must survive");
+  mkdirSync(join(scratch, GENERATED, "explorer", "engine", "world"), { recursive: true });
+  writeFileSync(join(scratch, GENERATED, "explorer", "engine", "world", "orphan.js"), "// stale");
+  mkdirSync(join(scratch, "src"), { recursive: true });
+  writeFileSync(join(scratch, "src", "app.ts"), "// committed source, must survive");
 
-  execFileSync(process.execPath, [root("scripts/clean-public-generated.ts")], { cwd: scratch });
+  execFileSync(process.execPath, [root("scripts/clean-generated.ts")], { cwd: scratch });
 
-  assert.ok(!existsSync(join(scratch, "public", "explorer", "engine")), "the CLI should clean <cwd>/public");
-  assert.ok(!existsSync(join(scratch, "public", "explorer", "app.bundle.js")), "twins go too");
-  assert.ok(existsSync(join(scratch, "public", "explorer", "app.js")), "committed files survive");
+  assert.ok(!existsSync(join(scratch, GENERATED)), "the CLI should delete <cwd>/generated");
+  assert.ok(existsSync(join(scratch, "src", "app.ts")), "committed files survive");
   rmSync(scratch, { recursive: true, force: true });
 });
 
@@ -105,10 +79,30 @@ test("astro dev serves the app surfaces at their canonical directory URLs (dev p
     }
     const route = await fetch(at("/faq/"));
     assert.equal(route.status, 200, "Astro routes keep winning their own URLs");
+    assert.ok(existsSync(root("src/styles/explorer/index.css")), "the sheet is written under src/styles/");
+    assert.equal(
+      existsSync(root("generated/explorer/index.css")),
+      false,
+      "no copy of a sheet sits in the build-output folder, so the dev server's answer is the source's",
+    );
     const sub = await fetch(at("/explorer/index.css"));
-    assert.equal(sub.status, 200, "exact-path subresources stay served from public/");
+    assert.equal(sub.status, 200, "a sheet is served in dev from src/styles/");
+    assert.ok(sub.headers.get("content-type")?.startsWith("text/css"), "the sheet is answered as text/css");
+    assert.equal(
+      await sub.text(),
+      readFileSync(root("src/styles/explorer/index.css"), "utf8"),
+      "the dev server answers with the source's current bytes",
+    );
+    assert.ok(existsSync(root("src/static/og.png")), "the card is written under src/static/");
+    const card = await fetch(at("/og.png"));
+    assert.equal(card.status, 200, "a committed file is served in dev from src/static/");
+    assert.equal(card.headers.get("content-type"), "image/png", "the card is answered as image/png");
+    assert.ok(
+      Buffer.from(await card.arrayBuffer()).equals(readFileSync(root("src/static/og.png"))),
+      "the dev server answers with the card's bytes",
+    );
     const missing = await fetch(at("/no-such-surface/"));
-    assert.equal(missing.status, 404, "directories with no public/ shell still 404");
+    assert.equal(missing.status, 404, "directories with no generated/ shell still 404");
   } finally {
     await server.stop();
   }

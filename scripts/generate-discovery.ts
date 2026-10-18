@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { GENERATED } from "./clean-generated.ts";
 import { NAV_ITEMS } from "../src/layouts/nav.ts";
 
 /** Issue #286: the three discovery files (sitemap.xml, robots.txt, llms.txt), GENERATED from NAV_ITEMS in the astro:generate step so they cannot drift from the nav; robots.txt is generated rather than committed because its Sitemap: line carries the origin, which the 2026-07-24 domain move would have stranded. */
@@ -177,7 +178,7 @@ export async function configuredSite(): Promise<string> {
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const root = resolve(process.argv[2] ?? "public");
+  const root = resolve(process.argv[2] ?? GENERATED);
   configuredSite()
     .then((site) => generateDiscovery(root, site))
     .catch((err: unknown) => {

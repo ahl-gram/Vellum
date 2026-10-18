@@ -3,8 +3,9 @@ import { cp, mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { GENERATED } from "./clean-generated.ts";
 
-/** Issue #208 Sub 7: one multi-entry Vite press bundles the app surfaces into their gitignored .bundle.js twins under public/; the worker is emitted ONCE at explorer/worker.bundle.js, its own chunks apart under explorer/chunks/worker/, and every surface that runs a job through `initWorker` in `src/site/explorer/worker-client.ts` shares it, shared chunks land in explorer/chunks/ with fixed names, and every knob keeps the emitted code behaviorally identical to the source (no minify, no downlevel, no preload polyfill), save that a page's import() goes through the bundler's preload helper, which fires vite:preloadError on window when a load fails. */
+/** Issue #208 Sub 7: one multi-entry Vite press bundles the app surfaces into their gitignored .bundle.js twins under generated/; the worker is emitted ONCE at explorer/worker.bundle.js, its own chunks apart under explorer/chunks/worker/, and every surface that runs a job through `initWorker` in `src/site/explorer/worker-client.ts` shares it, shared chunks land in explorer/chunks/ with fixed names, and every knob keeps the emitted code behaviorally identical to the source (no minify, no downlevel, no preload polyfill), save that a page's import() goes through the bundler's preload helper, which fires vite:preloadError on window when a load fails. */
 
 const REPO = fileURLToPath(new URL("..", import.meta.url));
 
@@ -98,7 +99,7 @@ export async function bundleToString(absEntry: string): Promise<string> {
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const root = resolve(process.argv[2] ?? "public");
+  const root = resolve(process.argv[2] ?? GENERATED);
   bundleAppSurfaces(root)
     .then(() => {
       for (const { entry, twin } of BUNDLE_ENTRIES) console.log(`bundled ${entry} -> ${twin}`);

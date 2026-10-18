@@ -25,9 +25,9 @@ const LINT_SCOPE = [
   "**/*.jsx",
   "**/*.mjs",
   "e2e/**/*.ts",
-  "public/**/*.css",
   "scripts/**/*.ts",
   "src/**/*.ts",
+  "src/styles/**/*.css",
   "test-support/**/*.ts",
   "test/**/*.ts",
 ];
@@ -571,8 +571,8 @@ const JS_UNREAD = [
   "out/x.mjs",
   "out/probe/x.js",
   "dist/x.js",
-  "public/explorer/app.bundle.js",
-  "public/atlas/x.js",
+  "generated/explorer/app.bundle.js",
+  "generated/atlas/x.js",
   ".claude/worktrees/w/scripts/x.mjs",
   "node_modules/x/index.js",
 ];

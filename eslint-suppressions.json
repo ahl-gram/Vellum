@@ -440,11 +440,6 @@
       "count": 2
     }
   },
-  "test/repo/prose-paths.test.ts": {
-    "max-lines-per-function": {
-      "count": 1
-    }
-  },
   "test/repo/source-shape.test.ts": {
     "max-lines": {
       "count": 1

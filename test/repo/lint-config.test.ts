@@ -19,7 +19,7 @@ test("every block lets ESLint parse the program it lints: no block carries a pro
   );
   assert.deepEqual(
     blocks.filter((b) => "language" in b).map((b) => b.files),
-    [["public/**/*.css"]],
+    [["src/styles/**/*.css"]],
     "a block other than the stylesheet block names a language, so the files it matches are parsed as something the TypeScript rules never read",
   );
   assert.deepEqual(
@@ -132,7 +132,6 @@ const LIST_AT_REFORMAT: Readonly<Record<string, readonly [number, number]>> = {
   "test/repo/e2e-tiers.test.ts": [0, 1],
   "test/repo/footgun-gate.test.ts": [1, 0],
   "test/repo/lint-wiring.test.ts": [1, 2],
-  "test/repo/prose-paths.test.ts": [0, 1],
   "test/repo/source-shape.test.ts": [1, 1],
   "test/site/app-bundles.test.ts": [0, 1],
   "test/site/astro-scaffold.test.ts": [0, 2],

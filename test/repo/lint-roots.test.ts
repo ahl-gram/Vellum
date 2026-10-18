@@ -8,7 +8,7 @@ test("the lint's TypeScript roots are read from globs of one shape, and a TypeSc
       "src/**/*.ts",
       "e2e/**/*.ts",
       "**/*.js",
-      "public/**/*.css",
+      "src/styles/**/*.css",
       "src/**/*.ts",
       ["test/**/*.ts", "**/*.mts"],
       ["**/*.mts", "scripts/**/*.ts"],

@@ -24,13 +24,13 @@ test("isSource names code under src, e2e and scripts, the pages and the authored
     "src/pages/index.astro",
     "e2e/harness.ts",
     "scripts/lint/source-shape.ts",
-    "public/house.css",
-    "public/explorer/broadside.css",
+    "src/styles/house.css",
+    "src/styles/explorer/broadside.css",
   ];
   const other = [
-    "public/gallery/index.css",
-    "public/charts/chart-42-antique.svg",
-    "public/og.png",
+    "generated/gallery/index.css",
+    "src/static/charts/chart-42-antique.svg",
+    "src/static/og.png",
     "package.json",
     ".github/workflows/ci.yml",
     "eslint.config.ts",
@@ -50,8 +50,8 @@ test("a folder entry covers every file at any depth under it and nothing beside 
   assert.equal(covers("e2e/**", "e2e/suites/b/c.ts"), true);
   assert.equal(covers("e2e/**", "e2ex/a.ts"), false);
   assert.equal(covers("src/site/**", "src/sitex/a.ts"), false);
-  assert.equal(covers("public/house.css", "public/house.css"), true);
-  assert.equal(covers("public/house.css", "public/house.css.map"), false);
+  assert.equal(covers("src/styles/house.css", "src/styles/house.css"), true);
+  assert.equal(covers("src/styles/house.css", "src/styles/house.css.map"), false);
 });
 
 const SELF = "/r/test-support/source-read-guard.ts";
@@ -101,7 +101,7 @@ test("a run filtered by name, by a skip pattern or to only-tests reads no entry 
 const ENTRIES: readonly SourceRead[] = [
   { reads: "src/a.ts", kind: "data" },
   { reads: "e2e/**", kind: "witness" },
-  { reads: "public/x.css", kind: "kept" },
+  { reads: "src/styles/x.css", kind: "kept" },
 ];
 
 test("the verdict names every unlisted read, and in a whole run every entry no read used", () => {
@@ -131,7 +131,7 @@ const FILES: Readonly<Record<string, string>> = {
   "src/a.ts": "export const a = 1;\n",
   "src/reader.ts":
     'import { readFileSync } from "node:fs";\nexport const text = (): string => readFileSync(new URL("./a.ts", import.meta.url), "utf8");\n',
-  "public/house.css": "a {}\n",
+  "src/styles/house.css": "a {}\n",
   "test-support/reader.ts":
     'import { readFileSync } from "node:fs";\nexport const readVia = (p: string): string => readFileSync(p, "utf8");\n',
 };
@@ -200,10 +200,10 @@ test("(c) a read the test swallows in an empty catch still fails its file", () =
 
 test("(d) an entry the file no longer reads fails a whole run and not a filtered one", () => {
   const body = 'test("plant", () => {});\n';
-  const list: readonly SourceRead[] = [{ reads: "public/house.css", kind: "data" }];
+  const list: readonly SourceRead[] = [{ reads: "src/styles/house.css", kind: "data" }];
   const whole = plantRun({ body, list });
   verdictOf(whole, 1, "a stale entry passed a whole run");
-  assert.match(whole.out, /no longer reads public\/house\.css \(data\)/, "the verdict names the entry");
+  assert.match(whole.out, /no longer reads src\/styles\/house\.css \(data\)/, "the verdict names the entry");
   verdictOf(
     plantRun({ body, list, testFlags: ["--test-name-pattern=plant"] }),
     0,
@@ -228,7 +228,7 @@ test("(g) a read of a file that is not source is not counted", () => {
 
 test("(h) a promises read counts as a read", () => {
   const body =
-    'import { readFile } from "node:fs/promises";\ntest("plant", async () => { await readFile("public/house.css", "utf8"); });\n';
+    'import { readFile } from "node:fs/promises";\ntest("plant", async () => { await readFile("src/styles/house.css", "utf8"); });\n';
   verdictOf(plantRun({ body }), 1, "an unlisted promises read passed");
 });
 
@@ -260,18 +260,18 @@ test("the list names only test files that exist, source it can read, and kinds t
 
 const KEPT_AT_CLOSE: ReadonlyArray<readonly [string, string]> = [
   ["test/site/chart-drawer.test.ts", "src/site/explorer/app.ts"],
-  ["test/site/desk-notice.test.ts", "public/shell.css"],
-  ["test/site/home-cluster.test.ts", "public/index.css"],
-  ["test/site/house-style.test.ts", "public/house.css"],
-  ["test/site/landfall-doors.test.ts", "public/index.css"],
+  ["test/site/desk-notice.test.ts", "src/styles/shell.css"],
+  ["test/site/home-cluster.test.ts", "src/styles/index.css"],
+  ["test/site/house-style.test.ts", "src/styles/house.css"],
   ["test/site/landfall-doors.test.ts", "src/pages/index.astro"],
+  ["test/site/landfall-doors.test.ts", "src/styles/index.css"],
   ["test/site/print-room-room.test.ts", "src/site/print-room/bound-atlas.ts"],
   ["test/site/reading-room-room.test.ts", "src/site/reading-room/app.ts"],
   ["test/site/region-detail-wiring.test.ts", "src/site/explorer/worker.ts"],
   ["test/site/sheet-height.test.ts", "e2e/**"],
   ["test/site/sheet-height.test.ts", "src/site/home/camera.ts"],
-  ["test/site/shell-css-ground.test.ts", "public/shell.css"],
-  ["test/site/shell-css.test.ts", "public/shell.css"],
+  ["test/site/shell-css-ground.test.ts", "src/styles/shell.css"],
+  ["test/site/shell-css.test.ts", "src/styles/shell.css"],
 ];
 
 test("the kept reads only shrink: the change that moves one to a lint rule or a browser check removes it here and from the list", () => {

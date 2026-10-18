@@ -3,10 +3,11 @@ import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import { sep } from "node:path";
 import { fileURLToPath } from "node:url";
-import { GENERATED_CSS, sheetsOnDisk } from "../../scripts/lint/sheet-tokens.ts";
+import { sheetsOnDisk } from "../../scripts/lint/sheet-tokens.ts";
+import { STYLES } from "../../scripts/served-sources.ts";
 import { SITE_SHEETS, SRC_CSS_FILES } from "../../test-support/site-sheets.ts";
 
-// What tips and what pins its bullet is the stylesheet lint's (vellum/css-tip-goes-somewhere and vellum/css-inline-block-bullet, Issue #779 part 2d); this file holds the roster of CSS-bearing sources under src/ that the lint reaches by running them (test/repo/css-beyond-sheets.test.ts), and the sheets the lint's walk of public/ reads.
+// What tips and what pins its bullet is the stylesheet lint's (vellum/css-tip-goes-somewhere and vellum/css-inline-block-bullet, Issue #779 part 2d); this file holds the roster of CSS-bearing sources under src/ that the lint reaches by running them (test/repo/css-beyond-sheets.test.ts), and the sheets the lint's walk of src/styles/ reads.
 
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 const read = (p: string) => readFileSync(root(p), "utf8");
@@ -24,11 +25,11 @@ const CSS_FINGERPRINTS: ReadonlyArray<readonly [string, (source: string) => bool
   ["a rotate-on-hover tip", (s) => /:hover/.test(s) && /rotate\(/.test(s)],
 ];
 
-/** public/ and src/ are the whole authored-css surface: CLAUDE.md forbids .js outside src/, and public/ is otherwise static assets, so nothing else can hold a stylesheet. */
+/** src/ is the whole authored-css surface: CLAUDE.md forbids .js outside src/, and nothing is tracked under public/ or generated/ (test/site/app-bundles.test.ts), so nothing else can hold a stylesheet. */
 const cssBearingSources = (): string[] =>
   readdirSync(root("src"), { recursive: true, encoding: "utf8" })
     .map((entry) => `src/${entry.split(sep).join("/")}`)
-    // .css is scanned though there are zero stylesheets under src/ today, so the one obvious way to add authored css is not the way the scan misses.
+    .filter((p) => !(p.startsWith(`${STYLES}/`) && p.endsWith(".css")))
     .filter((p) => p.endsWith(".ts") || p.endsWith(".astro") || p.endsWith(".css"))
     .filter((p) => {
       const source = withoutComments(read(p));
@@ -118,23 +119,11 @@ test("the css-source scan sees css, and sees the defects it polices (#360)", () 
   assertScanIgnoresNonCss();
 });
 
-test("every generated tree names a source the lint actually reads (#360)", () => {
-  const swept = new Set<string>(SRC_CSS_FILES);
-  for (const [tree, source] of GENERATED_CSS) {
-    assert.ok(
-      swept.has(source),
-      `${tree} is skipped by the public/ walk because ${source} is supposed to be ` +
-        `linted in its place, and ${source} is not on SRC_CSS_FILES. Either add it there or ` +
-        `stop exempting the tree; as it stands that css is in no lint at all`,
-    );
-  }
-});
-
-test("the sheet roster git lists is every stylesheet on disk under public/ that no generator writes (#358, Issue #709)", () => {
+test("the sheet roster git lists is every stylesheet on disk under src/styles/ (#358, Issue #709)", () => {
   assert.deepEqual(
     sheetsOnDisk(),
     SITE_SHEETS,
-    "a sheet on disk and off SITE_SHEETS is gitignored, so the stylesheet lint never lints it while its rules read it as a sheet: add its tree to GENERATED_CSS " +
-      "if a generator writes it, or stop ignoring it; a sheet on SITE_SHEETS and off the disk was deleted without git rm",
+    "a sheet on disk and off SITE_SHEETS is gitignored, so the stylesheet lint never lints it while its rules read it as a sheet: stop ignoring it; " +
+      "a sheet on SITE_SHEETS and off the disk was deleted without git rm",
   );
 });

@@ -116,5 +116,5 @@ test("the rule resolves at error on every TypeScript root the lint reads, at any
     [2],
     `${RULE} does not reach a room written tomorrow`,
   );
-  assert.equal(await resolvedRule(WITNESSES["public/**/*.css"]!), undefined, `${RULE} reaches a sheet`);
+  assert.equal(await resolvedRule(WITNESSES["src/styles/**/*.css"]!), undefined, `${RULE} reaches a sheet`);
 });

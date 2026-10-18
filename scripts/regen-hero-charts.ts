@@ -3,9 +3,9 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { heroChartSvgs } from "./hero-charts.ts";
 
-/** npm run charts:regen (Issue #205): the ONLY writer of the committed public/charts goldens. Run on a ratified re-roll or hero refresh, then npm run og, and land the regen ALONE, verified by diffing the committed charts old-vs-new (the Issue #40 drift guard is circular right after a regen). */
+/** npm run charts:regen (Issue #205): the ONLY writer of the committed src/static/charts goldens. Run on a ratified re-roll or hero refresh, then npm run og, and land the regen ALONE, verified by diffing the committed charts old-vs-new (the Issue #40 drift guard is circular right after a regen). */
 
-export const HERO_CHART_DIRS: ReadonlyArray<string> = ["public/charts"];
+export const HERO_CHART_DIRS: ReadonlyArray<string> = ["src/static/charts"];
 
 export async function regenHeroCharts(dirs: ReadonlyArray<string>): Promise<void> {
   const svgs = heroChartSvgs();

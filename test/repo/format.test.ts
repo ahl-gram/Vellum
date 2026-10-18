@@ -21,7 +21,6 @@ const RULED_IGNORE = [
   "!*.ts",
   "/*",
   "!/e2e/",
-  "!/public/",
   "!/scripts/",
   "!/src/",
   "!/test/",
@@ -71,7 +70,7 @@ test(".prettierignore is exactly the ruled list (Alex, 2026-10-07, Issue #779)",
   );
 });
 
-test("through Prettier itself, a tracked file is formatted exactly when it is TypeScript under a lint root or a sheet under public/, the plate face tables aside (Alex, 2026-10-07, Issue #779)", async () => {
+test("through Prettier itself, a tracked file is formatted exactly when it is TypeScript under a lint root or a sheet under src/styles/, the plate face tables aside (Alex, 2026-10-07, Issue #779)", async () => {
   const files = tracked();
   const roots = lintTsRoots();
   const faces = (Object.keys(PLATE_FACES) as FaceName[]).map((name) => relative(ROOT, faceModulePath(name)));

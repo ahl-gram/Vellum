@@ -3,7 +3,7 @@ import { renderMap } from "../src/render/map-renderer.ts";
 import { armsSvgDocument, paletteForStyle } from "../src/render/layers/heraldry.ts";
 import { STYLES } from "../src/render/style.ts";
 
-/** Single source of truth for the committed public/charts showcase: both regen-hero-charts.ts (the writer) and the drift guard test/site/hero-charts.test.ts call this one function, so the two can never disagree on how a hero chart is drawn. */
+/** Single source of truth for the committed src/static/charts showcase: both regen-hero-charts.ts (the writer) and the drift guard test/site/hero-charts.test.ts call this one function, so the two can never disagree on how a hero chart is drawn. */
 
 export const HERO_SEED = 42;
 const HERO_STYLES = ["antique", "topographic", "ink", "nautical"] as const;

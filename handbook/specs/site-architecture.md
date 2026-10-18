@@ -30,9 +30,9 @@ symbol and path so the reader goes and looks.
   meta. The tree is the roster of pages; no list of them is kept anywhere, including here.
 - **A page's files share its route path in every tree that holds one.** Its markup is
   `src/pages/<route>/index.astro`, its own code, where it has any, sits under `src/site/<route>/`, and the sheet it
-  authors is `public/<route>/index.css`, which the layout links relatively; home, whose route is the
-  root, is `src/pages/index.astro`, `src/site/home/` and `public/index.css` with
-  `public/home-noscript.css`. A folder directly under `src/site/` is one page's own, named by its
+  authors is `src/styles/<route>/index.css`, served at `<route>/index.css`, which the layout links relatively; home, whose route is the
+  root, is `src/pages/index.astro`, `src/site/home/` and `src/styles/index.css` with
+  `src/styles/home-noscript.css`. A folder directly under `src/site/` is one page's own, named by its
   route, or `src/site/shared/`. `test/site/folder-layout.test.ts` holds the code's half and the
   folders, and the head tests in `test/site/astro-scaffold.test.ts` hold the relative link to the sheet.
 - **Two INDEPENDENT questions decide what a page joins, and mixing them up is how a page gets
@@ -55,25 +55,22 @@ symbol and path so the reader goes and looks.
 - **A reading page is cheap and a working page is not.** A reading page is the `.astro` file plus,
   if it is a room, its `NAV_ITEMS` entry or its seat in `ROUTE_CHILDREN`, its name in
   `ROUTE_NAMES`, its place on the chart of the atelier (`PLACES` in `src/layouts/atelier-chart.ts`, which `test/site/atelier-chart.test.ts` reds without), and its own sheet. A working page that mounts a bundle owes
-  all of that plus its entry in `BUNDLE_ENTRIES` (`scripts/build-app-bundles.ts`), its generated
-  twin in `GENERATED_SUBTREES` (`scripts/clean-public-generated.ts`) and in `.gitignore`, and its own
+  all of that plus its entry in `BUNDLE_ENTRIES` (`scripts/build-app-bundles.ts`), whose
+  twin the press writes into the build-output folder, and its own
   e2e suite, which then joins the suite order, the runner's map, a lane and that lane's measured
   budget. **Budgeting a working page as a two-file change is the mistake this rule exists to stop.**
 - **The rosters are found by grepping, never by reading a list.** The mechanism is the footguns
   Gate 4 one: grep the nearest sibling's name across `src/`, `scripts/`, `e2e/`, `test/` and `.github/`, and
   join every list it appears in. A list written in prose is a starting point and goes stale; the
   grep does not. **Some rosters close themselves and some do not, so learn which before you rely on
-  a red.** The stylesheets under `public/` are no list anyone keeps: the stylesheet lint reaches
+  a red.** The stylesheets under `src/styles/` are no list anyone keeps: the stylesheet lint reaches
   every one by its glob, so a new sheet joins every rule by existing, and a rule that reads across
-  sheets walks `public/` through `sheetsOnDisk` in `scripts/lint/sheet-tokens.ts`, which leaves out
-  the generated trees (`GENERATED_SUBTREES` in `scripts/clean-public-generated.ts`, and the CSS ones
-  `GENERATED_CSS` names) and skips a directory the build removes mid-walk. `SITE_SHEETS` in `test-support/site-sheets.ts` reads the
+  sheets walks `src/styles/` through `sheetsOnDisk` in `scripts/lint/sheet-tokens.ts`. `SITE_SHEETS` in `test-support/site-sheets.ts` reads the
   same sheets from git for the tests, and `test/site/tip-affordance.test.ts` reds when git's list and
   the lint's walk disagree. A rule about how a sheet is written is a stylesheet lint rule, and a rule
   that holds for one sheet, or exempts one, names that sheet in the rule itself, by its file. A test
-  that still sweeps the sheets imports `SITE_SHEETS` rather than typing a list of its own; one that
-  walks or globs `public/` for itself reads the disk instead, which on a built tree includes the
-  generated gallery sheet `SITE_SHEETS` leaves out, so the two do not mean the same "every sheet".
+  that still sweeps the sheets imports `SITE_SHEETS` rather than typing a list of its own; the
+  gallery's sheet is generated into `generated/gallery/` and is on neither, its CSS linted through `src/cli/gallery.ts`.
   The authored CSS under `src/` closes by a `deepEqual` between `SRC_CSS_FILES` and a fingerprint
   walk of `src/`, which reds by name and tells you what to add. A discovery route closes too, at
   build time, by throwing when it has no blurb. The page, bundle, cleaning and lane rosters are
@@ -84,7 +81,7 @@ symbol and path so the reader goes and looks.
 - **The rosters a page or a sheet joins**, by symbol: `NAV_ITEMS`, `ROUTE_NAMES` and
   `ROUTE_CHILDREN` in `src/layouts/nav.ts`; `PLACES` in `src/layouts/atelier-chart.ts`; `TOKENS` in `test/site/shell-css.test.ts`;
   `PAGES` in `test/site/astro-scaffold.test.ts`, with `ROADS` and `STAGES` beside it for a page carrying a road out or the kit's stage, and RH32's browser copies of them in `e2e/suites/runninghead/room.ts` (`KIT_ROADS`, `CHART_ROOMS`, `FOG_ROOMS`, `STAGED`); `BUNDLE_ENTRIES` in `scripts/build-app-bundles.ts`;
-  `GENERATED_SUBTREES` in `scripts/clean-public-generated.ts`; `ROUTE_ENTRIES` and
+  `ROUTE_ENTRIES` and
   `DISCOVERY_ROUTES` in `scripts/generate-discovery.ts`. A new suite additionally joins `E2E_SUITE_ORDER`
   (`e2e/support/suites.ts`), the runner's `SUITES` map (`e2e/support/suite-map.ts`, which the type
   check holds to `E2E_SUITE_ORDER`), `E2E_LANES` (`e2e/support/lanes.ts`), `MEASURED_SECONDS` (`test/e2e/lane-timings.test.ts`, CI seconds: an
@@ -111,7 +108,7 @@ symbol and path so the reader goes and looks.
   arm of `atlasHead` in `src/atlas/document.ts`), carries the same tag; the offline download keeps its
   own, since its bytes are pinned. A desktop browser ignores the tag, so a narrowed or zoomed desktop
   window lays out at its own width: every page below 1024 keeps its 1024 layout at full size and the
-  window scrolls sideways over it (the `min-width` on `body` in `public/shell.css`, Issue #762, and on
+  window scrolls sideways over it (the `min-width` on `body` in `src/styles/shell.css`, Issue #762, and on
   the served atlas's `html` in `src/atlas/document.ts`, Issue #763). A staged chart room on a page set
   small that way also keeps a height, the desk frame's 768 (`handbook/specs/ui-design.md`, the room
   and its furniture). It is keyed on the page's own shrink, which the desk notice already reads,
@@ -119,22 +116,29 @@ symbol and path so the reader goes and looks.
   `test/site/astro-scaffold.test.ts` and `test/atlas/document.test.ts` hold the tag, and `FL1` in
   `e2e/suites/corners/floor.ts` holds every served page to the floor. **No rule switches the layout at
   a fixed window width at or below the floor**, in a sheet or a script: `vellum/css-no-narrow-width`
-  refuses one in a sheet under `public/`, `vellum/no-narrow-width` in a TypeScript file under `src/`
+  refuses one in a sheet under `src/styles/`, `vellum/no-narrow-width` in a TypeScript file under `src/`
   (both in `scripts/lint/narrow-width.ts`), and `CO1` in `e2e/suites/corners.ts` in any sheet a built
   page loads. A script inside an `.astro` page reaches none of them. A length that shrinks with the window, a height, the window's shape and a box's own size
   are outside the rule.
-- **The shell dresses once.** Every shared shell rule lives in `public/shell.css`, save the dress of a component the shell seats on every page, which is its own sheet, linked on every page and named in `HOUSE_SHEETS` (the chart of the atelier's, `public/chart-of-the-atelier.css`); a page's own
-  sheet carries page-specific rules only. Home's scripts-off rules are `public/home-noscript.css`,
+- **The shell dresses once.** Every shared shell rule lives in `src/styles/shell.css`, save the dress of a component the shell seats on every page, which is its own sheet, linked on every page and named in `HOUSE_SHEETS` (the chart of the atelier's, `src/styles/chart-of-the-atelier.css`); a page's own
+  sheet carries page-specific rules only. Home's scripts-off rules are `src/styles/home-noscript.css`,
   linked from inside its `<noscript>`; both moved out of the pages so the stylesheet lint reads them
   (Alex, Issue #779 comment 6067462530).
+- **A file the site serves as written is kept under `src/styles/` (the sheets) or `src/static/` (the
+  committed charts, icons and card), at the path it is served from.** The build copies the kinds each
+  folder keeps into the built site at the same paths, and nothing else in either, and the dev server
+  serves them from there, so an edit shows on the next reload; both are `servedSources` in
+  `scripts/served-sources.ts`, whose `SERVED_SOURCES` names the folders and their kinds. Everything
+  else the site serves is written by `npm run astro:generate` into `generated/`, Astro's public
+  folder, which nothing tracks.
 - **Sheet order is a contract.** The layout links the root sheets, then the shared sheets a page
-  opts into through its `extraCss` prop, then the page's own `public/**/index.css`, so a page keeps
+  opts into through its `extraCss` prop, then the page's own sheet, `<route>/index.css`, so a page keeps
   the last word on its own layout. An `extraCss` href is validated at render and THROWS unless it is
-  root-absolute. The layout links `public/shell.css` last of all, which is why a page override of a
+  root-absolute. The layout links `/shell.css` last of all, which is why a page override of a
   shell rule needs higher specificity; that trap belongs to `handbook/specs/cascade-traps.md` and is
   not restated here, and `test/site/astro-scaffold.test.ts` holds the order in every built head.
-- **Authored CSS hides in more places than `public/`.** A rule written against `public/` alone
-  misses every module in `src/` that builds CSS, and passes. **The repo keeps its own roster of
+- **Authored CSS hides in more places than `src/styles/`.** A rule written against `src/styles/` alone
+  misses every module elsewhere in `src/` that builds CSS, and passes. **The repo keeps its own roster of
   those**, `SRC_CSS_FILES` in `scripts/lint/sheet-tokens.ts`, including a card whose faces are built
   rather than authored, and `SRC_CSS` in `test/repo/css-beyond-sheets.test.ts` pairs each with a way
   to get its CSS as a string, typed against that list so neither can hold a source the other lacks,
@@ -143,7 +147,7 @@ symbol and path so the reader goes and looks.
   than any list written in prose, this one included: the sources are of several shapes (a constant
   written verbatim to a generated sheet, constants that only exist once the document is composed)
   and each needs its own way in. Every entry is a TypeScript module, since a page's CSS lives in a
-  sheet under `public/`.
+  sheet under `src/styles/`.
 - **Link form is scoped, and the flat rule is false.** Root-absolute is the form for the links the
   SHELL owns: the `NAV_ITEMS` hrefs, which are root-absolute trailing-slash directory form by their
   own interface contract, the root and shared sheets, the icons and fonts, and the discovery routes.
@@ -206,7 +210,7 @@ SVG remains the byte-faithful artifact.
   one built page. Where byte identity matters, hand the text through as literal markup rather than
   through an expression.
 - **CSS that travels as a STRING keeps its comments, and they ship as public page bytes.** The
-  distinction is whether the build's CSS pipeline ever sees it. A sheet under `public/` is copied as
+  distinction is whether the build's CSS pipeline ever sees it. A sheet under `src/styles/` is copied as
   written, comments included, so the same holds for it. `ATLAS_SHEET_CSS` in `src/atlas/document.ts`
   is a string: interpolated into the generated atlas document, and assigned to a style element's
   text content at runtime by the Print Room's bundled code. Neither path is minified, so prose
@@ -244,7 +248,7 @@ other way, which is what earns them a section of their own.
   `scripts/generate-discovery.ts` writes them from `DISCOVERY_ROUTES`, which is the nav plus the
   routes that are not nav items, and every origin resolves against the `site` value in
   `astro.config.ts`. A domain move therefore updates all of them at once, which is exactly why
-  `public/robots.txt` is generated rather than hand-written: a hand-written sitemap line survives such a
+  `generated/robots.txt` is generated rather than hand-written: a hand-written sitemap line survives such a
   move still pointing at the retired domain, which is what a domain move here would have stranded.
 - **A route with no blurb is a build error.** Adding a route without its `ROUTE_ENTRIES` line throws
   by name, and the generator also throws if `site` is unset.
@@ -269,15 +273,15 @@ other way, which is what earns them a section of their own.
 precisely, because a token that falls outside it looks identical at the point of use.
 
 - **A colour goes in BOTH places, which is `ui-design.md`'s own wording**: declared once in
-  `public/shell.css` and mirrored in `SITE_PALETTE` in `src/atlas/palette.ts`. The
+  `src/styles/shell.css` and mirrored in `SITE_PALETTE` in `src/atlas/palette.ts`. The
   guard is a `deepEqual` against `TOKENS` in `test/site/shell-css.test.ts`, so the ratified roster is
   a third place the pair is measured against. The phrase "the three-place join" belongs to
   `test/atlas/document.test.ts`, which uses it in its own title for the arrangement below, and is not
   `ui-design.md`'s wording for the colour rule.
 - **The rule for what is outside is a DERIVATION, not a list.** `SITE_PALETTE` carries flat
   name-to-hex colours only, so a token whose value is not a flat hex is not in the join. Where it
-  lives is then wherever declares it: `public/shell.css` holds the deep, the depth shadows
-  and the room-furniture lengths; `public/fonts.css` and `public/motion.css` declare their
+  lives is then wherever declares it: `src/styles/shell.css` holds the deep, the depth shadows
+  and the room-furniture lengths; `src/styles/fonts.css` and `src/styles/motion.css` declare their
   own; and a page sheet may declare one in its own `:root`, where the SAME token name legitimately
   holds a different value on different pages. Check the declaration, not a remembered home.
 - **A self-contained generated document declares its own copy, in one of two shapes.** The atlas
@@ -296,9 +300,9 @@ precisely, because a token that falls outside it looks identical at the point of
 - **One press, one pass.** `scripts/build-app-bundles.ts` is a single multi-entry Vite build over
   `BUNDLE_ENTRIES`, compiling the TypeScript entries and the engine graph they import together, so
   there is no separate emit step and nothing orders against one. Twins are staged in a temporary
-  directory and copied into `public/`; shared chunks take fixed names with no hashes; one worker
+  directory and copied into the build-output folder, `generated/`; shared chunks take fixed names with no hashes; one worker
   chunk serves the surfaces that spawn it. `publicDir` is false in each press config, guarded, since
-  a truthy value copies `public/` into itself.
+  a truthy value copies a public folder into the press's own output.
 - **A job that draws a plate loads the plate's code on demand.** Today those are
   `prospectResultFor` in `src/site/explorer/prospect-job.ts` and `composeAtlas` in
   `src/atlas/compose.ts`: a page and the worker reach them only through `import()`, so a page that
@@ -330,17 +334,18 @@ precisely, because a token that falls outside it looks identical at the point of
   its exact command string. A reordered or added step reds all of them at once: that is the pin
   working, not a break, but budget the edits.
 - **The site's fonts are generated, from the design kit.** `scripts/kit-fonts.ts` copies
-  `design/kit/fonts/`, the one copy the site reads, into the gitignored `public/fonts/`, so a face is
-  added or changed in the kit and never under `public/`. Nothing under test reads `public/fonts/`:
-  `test/site/astro-scaffold.test.ts` cleans the generated trees while other files run, so a reader
+  `design/kit/fonts/`, the one copy the site reads, into `generated/fonts/`, so a face is
+  added or changed in the kit and never in the build-output folder. Nothing under test reads `generated/fonts/`:
+  `test/site/astro-scaffold.test.ts` deletes the build-output folder while other files run, so a reader
   there races it; read `KIT_FONTS` from `scripts/kit-fonts.ts` instead.
 - **Clean before regenerate.** The generators overwrite and never delete, so without the clean a
   renamed module leaves an importable orphan that masks a missing file locally while CI, always a
-  fresh checkout, stays fine. `GENERATED_SUBTREES` is that list; it may grow and may not shrink, it
-  carries a deliberate tombstone for a tree nothing generates any more, and a test assertion of its
-  floor stays LITERAL rather than derived from the constant the code iterates.
+  fresh checkout, stays fine. The clean deletes the build-output folder, `generated/`, whole
+  (`cleanGenerated` in `scripts/clean-generated.ts`, which refuses a folder of any other name), so no
+  list of generated trees is kept; nothing in the folder is tracked, and `.gitignore` names it in one
+  line, which `test/site/app-bundles.test.ts` holds.
 - **The dev server needs its dev-only middleware.** `astro.config.ts` registers a middleware that
-  serves the surfaces' canonical trailing-slash URLs in dev, because the dev public middleware serves
+  serves the surfaces' canonical trailing-slash URLs from `generated/` in dev, because the dev public middleware serves
   exact file paths only. Removing it looks harmless and 404s every working page in dev, while build
   and preview are untouched.
 - **The e2e harness serves the engine by type-stripping the real source.** `serveEngineModule` in

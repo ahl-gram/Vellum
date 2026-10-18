@@ -10,7 +10,7 @@ const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 const liveCss = (p: string): string => read(p).replace(/\/\*[\s\S]*?\*\//g, "");
 
 const astro = read("src/pages/index.astro");
-const css = liveCss("public/index.css");
+const css = liveCss("src/styles/index.css");
 
 // Both numbers are source, the reveal's delay in a sheet and the veil's release in an inline script, so this read is kept at the close of Issue #779.
 test("the 10s window is the veil's own, derived not duplicated by hand (#470)", () => {

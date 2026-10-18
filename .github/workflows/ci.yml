@@ -59,7 +59,7 @@ jobs:
       - run: npm ci
       # Build the deploy artifact and run the e2e against it, so CI validates the
       # exact dist/ that gets published. Since Sub 5 (#206) `npm run build` IS the
-      # Astro build: astro:generate refreshes the public/ runtime trees (engine,
+      # Astro build: astro:generate refreshes the generated/ runtime trees (engine,
       # bundles, showcases), then `astro build` assembles dist/.
       - name: Build site into dist/
         run: npm run build

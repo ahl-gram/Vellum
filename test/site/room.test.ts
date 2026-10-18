@@ -9,7 +9,7 @@ import { CHROME_GAP } from "../../src/site/shared/stage-fit.ts";
 import { El } from "../../test-support/element-shim.ts";
 
 test("the Glass's computed seat beside an open slip is the sheet's own arithmetic (atelier.css: --slip-w + 2rem + 1.4rem)", () => {
-  const css = readFileSync(resolve(import.meta.dirname, "..", "..", "public/atelier.css"), "utf8");
+  const css = readFileSync(resolve(import.meta.dirname, "..", "..", "src/styles/atelier.css"), "utf8");
   const m = css.match(
     /\.corner\.br\.zoomery\s*\{[^}]*right:\s*calc\(var\(--slip-w\)\s*\+\s*([\d.]+)rem\s*\+\s*([\d.]+)rem\)/,
   );

@@ -40,7 +40,7 @@ make an unqualified rule false. Read the surface, not just the rule.
   the chart mount it hands in. A page that skips the sheet renders its overlays undressed, and one that skips the class loses the ink-in dress of the chronicle's marks, the `.living-chart g.settlement[data-ink]` rules, the only rules in the sheet that key on it. **The order
   does not matter**: construction only stores references, so a host may build its DOM after wiring,
   and `test/site/living-chart-boundary.test.ts` pins that by constructing against bare objects.
-- **Engine dressing is edited in `public/living-chart.css`, never in a host's own sheet.** The
+- **Engine dressing is edited in `src/styles/living-chart.css`, never in a host's own sheet.** The
   dressing keys on the mount class and never on a host's id; `vellum/css-engine-dress-one-home` and
   `vellum/css-engine-no-host-id` in `scripts/lint/sheet-owners.ts` refuse each.
 - **The host wires the document's click and keydown to the engine; the engine adds document
@@ -89,9 +89,9 @@ make an unqualified rule false. Read the surface, not just the rule.
     anything mounted there with an inline svg inside BECOMES that element and takes the suite's reads
     with it. This is decided by the markup choice and cannot be caught afterwards. Elsewhere in the
     mount a sibling `<svg>` is fine, and the voyage track is one.
-  - **`.region-inset` is `pointer-events: none`** (`public/explorer/index.css`), so anything mounted
+  - **`.region-inset` is `pointer-events: none`** (`src/styles/explorer/index.css`), so anything mounted
     in it restores its own or it is reachable by keyboard alone and a real click lands on the chart
-    underneath. The precedent is `.dog-ear` in `public/explorer/chart-drawer.css`.
+    underneath. The precedent is `.dog-ear` in `src/styles/explorer/chart-drawer.css`.
   - **A hook that asks the controller what is committed runs AFTER the inset assignment**, or it
     describes the outgoing sheet. The type check is clean either way and no unit test sees it.
   - **The voyage track is a SIBLING `<svg>` inside the mount, never inside the chart's own svg**,

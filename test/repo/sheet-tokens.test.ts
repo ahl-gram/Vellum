@@ -69,9 +69,9 @@ const COLOUR_PLANT = (home: boolean): Plant => [
 const COLOUR_BLIND =
   "BLIND SPOTS, declared, each a miss: a token written as hsl(), a percentage rgb(), a named colour or color-mix() of literals; a token's hex or rgb inside a string or a url(), which the old text sweeps read; a value css-tree cannot re-parse (the family parses tolerant, Issue #648), skipped rather than reported";
 
-test("no sheet writes a token's colour raw, as a hash of any case or length or an rgb() in either form, in a value, a fallback or a custom property, and only public/shell.css writes a token's own declaration (Issue #263, Issue #324, Issue #779 part 2d)", async () => {
-  await assertRefuses(COLOUR_PLANT(false), "public/house.css", TOKEN, COLOUR_BLIND);
-  await assertRefuses(COLOUR_PLANT(true), "public/shell.css", TOKEN, COLOUR_BLIND);
+test("no sheet writes a token's colour raw, as a hash of any case or length or an rgb() in either form, in a value, a fallback or a custom property, and only src/styles/shell.css writes a token's own declaration (Issue #263, Issue #324, Issue #779 part 2d)", async () => {
+  await assertRefuses(COLOUR_PLANT(false), "src/styles/house.css", TOKEN, COLOUR_BLIND);
+  await assertRefuses(COLOUR_PLANT(true), "src/styles/shell.css", TOKEN, COLOUR_BLIND);
 });
 
 const SHADOW_PLANT = (home: boolean): Plant => [
@@ -93,11 +93,11 @@ const SHADOW_PLANT = (home: boolean): Plant => [
   ["/* 0 12px 34px, named in a comment */", PASS],
 ];
 
-test("no sheet writes a depth shadow's geometry longhand, in any property, at a zero of any unit, and only public/shell.css declares the token itself (Issue #367, Issue #463, Issue #779 part 2d)", async () => {
+test("no sheet writes a depth shadow's geometry longhand, in any property, at a zero of any unit, and only src/styles/shell.css declares the token itself (Issue #367, Issue #463, Issue #779 part 2d)", async () => {
   const blind =
     "BLIND SPOTS, declared, each a miss: the geometry inside a string or a url(); the geometry as calc() terms or in a unit other than px";
-  await assertRefuses(SHADOW_PLANT(false), "public/house.css", SHADOW, blind);
-  await assertRefuses(SHADOW_PLANT(true), "public/shell.css", SHADOW, blind);
+  await assertRefuses(SHADOW_PLANT(false), "src/styles/house.css", SHADOW, blind);
+  await assertRefuses(SHADOW_PLANT(true), "src/styles/shell.css", SHADOW, blind);
 });
 
 const VAR_PLANT: Plant = [
@@ -111,10 +111,10 @@ const VAR_PLANT: Plant = [
   [".a { color: var(--ink-dark); }", PASS],
 ];
 
-test("every var() with no fallback names a property some sheet under public/ or the file itself declares, read through fallbacks and custom properties (Issue #263, Issue #779 part 2d)", async () => {
+test("every var() with no fallback names a property some sheet under src/styles/ or the file itself declares, read through fallbacks and custom properties (Issue #263, Issue #779 part 2d)", async () => {
   const blind =
     "BLIND SPOTS, declared: the declared set does not know which page loads which sheet (a pass); the builders' markup outside their CSS is not read, where the old drift guard read their whole source (a miss, handbook/errata/guards.md)";
-  await assertRefuses(VAR_PLANT, "public/house.css", VAR, blind);
+  await assertRefuses(VAR_PLANT, "src/styles/house.css", VAR, blind);
   const spread: Plant = [
     [".a { height: var(--band-h); }", PASS],
     [".a { transform: translateY(var(--raise)); }", PASS],
@@ -122,19 +122,19 @@ test("every var() with no fallback names a property some sheet under public/ or 
   ];
   await assertRefuses(
     spread,
-    "public/house.css",
+    "src/styles/house.css",
     VAR,
-    "a var only public/shell.css or only public/motion.css declares is read off the disk",
+    "a var only src/styles/shell.css or only src/styles/motion.css declares is read off the disk",
   );
   assert.deepEqual(
-    await reported(spread, "public/shell.css", VAR),
+    await reported(spread, "src/styles/shell.css", VAR),
     [1, 3],
-    "linting public/shell.css, its own disk copy is not read: only the text being linted declares for it",
+    "linting src/styles/shell.css, its own disk copy is not read: only the text being linted declares for it",
   );
   assert.deepEqual(
-    await reported(spread, "public/motion.css", VAR),
+    await reported(spread, "src/styles/motion.css", VAR),
     [2, 3],
-    "and linting public/motion.css, its own disk copy is not read either",
+    "and linting src/styles/motion.css, its own disk copy is not read either",
   );
 });
 
@@ -152,32 +152,31 @@ const failing =
     return readDir(dir);
   };
 
-test("the sheets the declared set reads are every .css file under public/ but a generated tree's, and a directory that vanishes mid-walk is skipped (Issue #709, Issue #779 part 2d)", () => {
+test("the sheets the declared set reads are every .css file under src/styles/, at any depth, and a directory that vanishes mid-walk is skipped (Issue #709, Issue #779 part 2d, Issue #768)", () => {
   const root = mkdtempSync(join(tmpdir(), "vellum-sheets-"));
   const onDisk: ReadDir = (dir) => readdirSync(dir, { withFileTypes: true });
+  const sheets = [
+    "src/styles/a.css",
+    "src/styles/explorer/chunks/x.css",
+    "src/styles/fonts/face.css",
+    "src/styles/room/index.css",
+  ];
   try {
-    for (const path of [
-      "public/a.css",
-      "public/room/index.css",
-      "public/gallery/index.css",
-      "public/fonts/face.css",
-      "public/explorer/chunks/x.css",
-      "public/b.txt",
-    ]) {
+    for (const path of [...sheets, "src/styles/b.txt"]) {
       mkdirSync(dirname(join(root, path)), { recursive: true });
       writeFileSync(join(root, path), "");
     }
-    assert.deepEqual(sheetsOnDisk(root), ["public/a.css", "public/room/index.css"]);
+    assert.deepEqual(sheetsOnDisk(root), sheets, "a sheet is read at any depth, in a folder named like a build's");
     assert.deepEqual(
       sheetsOnDisk(root, failing("ENOENT", "room", onDisk)),
-      ["public/a.css"],
-      "a directory the build cleans away during the walk is skipped, not thrown",
+      sheets.filter((path) => path !== "src/styles/room/index.css"),
+      "a directory that vanishes during the walk is skipped, not thrown",
     );
     assert.throws(() => sheetsOnDisk(root, failing("EACCES", "room", onDisk)), /EACCES/, "any other failure is thrown");
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
-  assert.ok(sheetsOnDisk().includes("public/shell.css"), "the walk of the real tree reads public/shell.css");
+  assert.ok(sheetsOnDisk().includes("src/styles/shell.css"), "the walk of the real tree reads src/styles/shell.css");
 });
 
 const BUILDER_PLANT: Plant = [
@@ -203,7 +202,7 @@ const resolvedRule = async (file: string, rule: string): Promise<unknown> =>
 
 test("the three sheet rules resolve at error on every sheet and on no script; the builder rule on exactly the modules that build CSS (Issue #779 part 2d)", async () => {
   for (const rule of [TOKEN, SHADOW, VAR]) {
-    for (const file of [WITNESSES["public/**/*.css"]!, "public/zz-new-room/index.css"])
+    for (const file of [WITNESSES["src/styles/**/*.css"]!, "src/styles/zz-new-room/index.css"])
       assert.deepEqual(await resolvedRule(file, rule), [2], `${rule} does not resolve at error on ${file}`);
     for (const root of lintTsRoots())
       assert.equal(
@@ -214,6 +213,6 @@ test("the three sheet rules resolve at error on every sheet and on no script; th
   }
   for (const file of SRC_CSS_FILES)
     assert.deepEqual(await resolvedRule(file, BUILDER), [2], `${BUILDER} does not resolve at error on ${file}`);
-  for (const file of [WITNESSES["src/**/*.ts"]!, "src/cli/zz-new.ts", WITNESSES["public/**/*.css"]!])
+  for (const file of [WITNESSES["src/**/*.ts"]!, "src/cli/zz-new.ts", WITNESSES["src/styles/**/*.css"]!])
     assert.equal(await resolvedRule(file, BUILDER), undefined, `${BUILDER} reaches ${file}, which builds no CSS`);
 });

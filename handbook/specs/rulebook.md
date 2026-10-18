@@ -115,21 +115,21 @@ items that unlock the most downstream value, then the re-roll tail.
 
 ## Golden and committed-chart discipline
 
-**Committed content, because a hand-authored page embeds it:** `public/charts/chart-42-*.svg`,
-`public/charts/arms-42-*.svg`, `public/og.png`, and `public/favicon.svg` plus
-`public/apple-touch-icon.png` (#489; `npm run icons` is their single writer, and a test pins the SVG
-to the Fell SC woff2). Everything else generated is gitignored and rebuilt per deploy:
-`public/atlas/`, `public/gallery/`, the bundle twins and their chunks, and `public/fonts/`, copied
+**Committed content, because a hand-authored page embeds it:** `src/static/charts/chart-42-*.svg`,
+`src/static/charts/arms-42-*.svg`, `src/static/og.png`, and `src/static/favicon.svg` plus
+`src/static/apple-touch-icon.png` (#489; `npm run icons` is their single writer, and a test pins the SVG
+to the Fell SC woff2). Everything else the site serves is generated into `generated/`, which nothing tracks, and rebuilt per deploy:
+the atlas, the gallery, the bundle twins and their chunks, and the fonts copied
 from `design/kit/fonts/`.
 
 **The committed list above is the rule; there is no shorter procedure that derives it.** "Referenced
 by a hand-authored page" is the family resemblance, not a test: `src/pages/specimen/index.astro`
-embeds `/gallery/chart-<seed>.svg` and `public/gallery/` is gitignored with nothing tracked in it.
-What separates the two halves is that the committed four are stable across deploys and the generated
+embeds `/gallery/chart-<seed>.svg` and `generated/gallery/` is generated with nothing tracked in it.
+What separates the two halves is that the committed files are stable across deploys and the generated
 trees are re-derived per deploy from a seed that moves. **Adding to the committed list is a
 deliberate decision, not the output of applying a line**, so make it deliberately and add the file
 here. Two tombstones so nobody goes looking: `docs/` retired at #206, and the tsc engine emit retired
-at #260 with its clean-list entry kept deliberately.
+at #260 (the clean, which deletes the build-output folder whole, removes any local leftover of it).
 
 **Committed generated source:** `src/prospect/letter/face-roman.ts`, `face-caps.ts` and
 `face-italic.ts`, the plate face's outline tables (Issue #754). `npm run plate-face` is their single
@@ -141,8 +141,8 @@ owes the script and moves the prospect plate pins.
 `test/world/golden-seed42.test.ts`. A seed re-roll re-pins it.
 
 - **A render change that moves any label or path owes a regen**: `npm run charts:regen` and
-  `npm run og` (since #205). `charts:regen` single-writes `public/charts`; `og` writes
-  `public/og.png`. A font-subset change additionally owes `npm run icons`, and a change to the plate
+  `npm run og` (since #205). `charts:regen` single-writes `src/static/charts`; `og` writes
+  `src/static/og.png`. A font-subset change additionally owes `npm run icons`, and a change to the plate
   face owes `npm run plate-face`. **There is no `site` script**; it went at #206.
 - **Verify a regen by diffing the committed charts old against new**, snapshotting them first. The
   **#40 hero drift guard** compares a fresh render against the committed one, so after a regen it is

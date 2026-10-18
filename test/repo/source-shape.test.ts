@@ -509,11 +509,11 @@ const REACH: ReadonlyArray<readonly [string, string, string]> = [
   [GLASS, "src/site/explorer/app.ts", "src/site/prospect/seats.ts"],
   [GLASS, "src/site/home/app.ts", "src/site/prospect/seats.ts"],
   [CONTENTS, "src/site/prospect/seats.ts", "src/cli/main.ts"],
-  [TEST_IMPORTS, "e2e/harness.ts", "public/house.css"],
-  [TEST_IMPORTS, "scripts/build-app-bundles.ts", "public/house.css"],
-  [TEST_IMPORTS, "src/cli/main.ts", "public/house.css"],
-  [TEST_IMPORTS, "test/repo/lint-config.test.ts", "public/house.css"],
-  [TEST_IMPORTS, "test-support/lint-roots.ts", "public/house.css"],
+  [TEST_IMPORTS, "e2e/harness.ts", "src/styles/house.css"],
+  [TEST_IMPORTS, "scripts/build-app-bundles.ts", "src/styles/house.css"],
+  [TEST_IMPORTS, "src/cli/main.ts", "src/styles/house.css"],
+  [TEST_IMPORTS, "test/repo/lint-config.test.ts", "src/styles/house.css"],
+  [TEST_IMPORTS, "test-support/lint-roots.ts", "src/styles/house.css"],
 ];
 
 test("each scoped rule resolves at error inside its scope and not outside it, and the 400-line bound resolves at app.ts itself (Issue #675, Issue #191)", async () => {

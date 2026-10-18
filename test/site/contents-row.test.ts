@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { El, installShim } from "../../test-support/element-shim.ts";
 import { contentsRow, contentsRowHtml } from "../../src/site/shared/contents-row.ts";
 
-// The Ribbon's summit glyph hangs on the em nesting inside .cr-text (public/ribbon/index.css), so both DOM hosts are run here, not the pure builder alone.
+// The Ribbon's summit glyph hangs on the em nesting inside .cr-text (src/styles/ribbon/index.css), so both DOM hosts are run here, not the pure builder alone.
 
 installShim();
 

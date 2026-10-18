@@ -168,7 +168,7 @@ a file outside this repo at its real home under `~`. The test is the list of wha
 one numbering sequence here and interleave, so a bare number does not say which kind of thing it
 points at. It governs replies, pull request bodies, issue comments, commit message bodies, and prose
 anywhere in the repo: these specs, `CLAUDE.md`, and the files under `.claude/agents/` and
-`.claude/skills/`, and the comments in the sheets under `public/` and in the TypeScript the lint
+`.claude/skills/`, and the comments in the sheets under `src/styles/` and in the TypeScript the lint
 reads, where `npm run lint` enforces it (`vellum/css-comment-issue-form` in
 `scripts/lint/css-comment-form.ts` and `vellum/ts-comment-issue-form` in
 `scripts/lint/ts-comment-form.ts`, sharing one matcher, `bareNumbers`). Every number carries its own
@@ -200,7 +200,7 @@ the FULL repo-relative path even for a sibling in the same directory, because ba
 under `src/` and the ambiguity is day one rather than drift.
 Two lint rules in `scripts/lint/comment-citation.ts` enforce it **for code comments only**:
 `vellum/ts-comment-citation-resolves` on every TypeScript root and `vellum/css-comment-citation-resolves`
-on the sheets under `public/`. They reach neither `handbook/specs/` nor `.claude/`, so of a citation
+on the sheets under `src/styles/`. They reach neither `handbook/specs/` nor `.claude/`, so of a citation
 written in prose like this one only the PATH half is checked, by `test/repo/prose-paths.test.ts`, and
 the symbol half by hand or not at all. These behaviours of the comment guard are deliberate rather
 than rough edges: it matches a symbol that APPEARS in the file, not one declared there, because a

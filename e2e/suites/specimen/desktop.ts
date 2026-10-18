@@ -173,7 +173,7 @@ export function sb8eInsets({ check }: SpecimenKit, leaned: Specimen): void {
   // Issue #531: the RESOLVED inset, since a value can sit in the stylesheet inert and a text match passes it.
   const insetWide = [-0.7, -0.9, -0.8, -0.9].map((v) => px531(leaned.rem, v));
   check(
-    "SB8e leaned at 1280 the folio's panel takes home's base padding, the seed box's own insets (.lf-seed, public/index.css), on the painting arm that gives the pseudo its content (#531; its narrow half went with the narrow layout, Issue #762)",
+    "SB8e leaned at 1280 the folio's panel takes home's base padding, the seed box's own insets (.lf-seed, src/styles/index.css), on the painting arm that gives the pseudo its content (#531; its narrow half went with the narrow layout, Issue #762)",
     same(leaned.folioInset, insetWide),
     JSON.stringify({ rem: leaned.rem, at1280: leaned.folioInset, want1280: insetWide }),
   );

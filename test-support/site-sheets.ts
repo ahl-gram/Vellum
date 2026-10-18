@@ -4,12 +4,12 @@ import { resolve } from "node:path";
 const REPO = resolve(import.meta.dirname, "..");
 // A cap on a hang, never a budget (2026-09-27: the listing ran in 6 to 7 ms on a Mac, so 30 s is three orders above it); a timed-out spawnSync returns status null rather than throwing, which the status check below turns into a throw, and no test drives that path.
 const GIT_TIMEOUT_MS = 30_000;
-const WITNESSES = ["public/house.css", "public/explorer/broadside.css"] as const;
+const WITNESSES = ["src/styles/house.css", "src/styles/explorer/broadside.css"] as const;
 
 function listSheets(): ReadonlyArray<string> {
   const listing = spawnSync(
     "git",
-    ["ls-files", "-z", "--cached", "--others", "--exclude-standard", "--deduplicate", "--", "public/*.css"],
+    ["ls-files", "-z", "--cached", "--others", "--exclude-standard", "--deduplicate", "--", "src/styles/*.css"],
     { cwd: REPO, encoding: "utf8", timeout: GIT_TIMEOUT_MS },
   );
   if (listing.status !== 0)

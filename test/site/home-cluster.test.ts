@@ -9,7 +9,7 @@ const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 const liveCss = (p: string): string => read(p).replace(/\/\*[\s\S]*?\*\//g, "");
 
-const css = liveCss("public/index.css");
+const css = liveCss("src/styles/index.css");
 
 const rule = (sheet: string, selector: string): string => {
   const m = sheet.match(

@@ -1,7 +1,5 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { homeStage } from "../../src/site/home/stage-data.ts";
 import {
   SHEET,
@@ -19,9 +17,6 @@ import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
 import { buildPlaceManifest } from "../../src/render/place-manifest.ts";
 
 // Landfall Sub 1 (Issue #455): the stage, the marks derived from the place manifest, and the pure camera.
-
-const REPO = resolve(import.meta.dirname, "..", "..");
-const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 
 const world = generateWorld(defaultRecipe(42));
 const manifest = buildPlaceManifest(world, 1500);
@@ -139,15 +134,10 @@ test("zoomTarget clamps the scale BEFORE anchoring, so the cursor point never dr
   assert.ok(Math.abs(pastFloor.y - floor.y) < 1e-9, "y holds at the floor");
 });
 
-test("the press, the cleaner, and .gitignore all carry the home twin (#455)", async () => {
-  const [{ BUNDLE_ENTRIES }, { GENERATED_SUBTREES }] = await Promise.all([
-    import("../../scripts/build-app-bundles.ts"),
-    import("../../scripts/clean-public-generated.ts"),
-  ]);
+test("the press carries the home twin at the root (#455)", async () => {
+  const { BUNDLE_ENTRIES } = await import("../../scripts/build-app-bundles.ts");
   assert.ok(
     BUNDLE_ENTRIES.some((e) => e.entry === "src/site/home/app.ts" && e.twin === "app.bundle.js"),
     "BUNDLE_ENTRIES carries the home entry with its root twin",
   );
-  assert.ok(read(".gitignore").split("\n").includes("public/app.bundle.js"), ".gitignore carries the root twin");
-  assert.ok(GENERATED_SUBTREES.includes("app.bundle.js"), "the cleaner sweeps the root twin");
 });
