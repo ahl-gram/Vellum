@@ -28,6 +28,13 @@ symbol and path so the reader goes and looks.
   `src/pages/<route>/index.astro`, home being `src/pages/index.astro`, and the layout is
   `src/layouts/BaseLayout.astro`, which owns the nav, the head cluster, the footer and the page
   meta. The tree is the roster of pages; no list of them is kept anywhere, including here.
+- **A page's files share its route path in every tree that holds one.** Its markup is
+  `src/pages/<route>/index.astro`, its own code, where it has any, sits under `src/site/<route>/`, and the sheet it
+  authors is `public/<route>/index.css`, which the layout links relatively; home, whose route is the
+  root, is `src/pages/index.astro`, `src/site/home/` and `public/index.css` with
+  `public/home-noscript.css`. A folder directly under `src/site/` is one page's own, named by its
+  route, or `src/site/shared/`. `test/site/folder-layout.test.ts` holds the code's half and the
+  folders, and the built-head test in `test/site/astro-scaffold.test.ts` the sheet's.
 - **Two INDEPENDENT questions decide what a page joins, and mixing them up is how a page gets
   mis-budgeted.** The first is how the page is reached, which decides its place in the nav and the
   discovery files. The second is whether it mounts a bundle, which decides everything in the rule
@@ -90,6 +97,14 @@ symbol and path so the reader goes and looks.
   and CI's jobs no longer leave room inside the account's concurrent-job limit. A change to the
   number of unit shards joins the same required checks, since each shard reports a check of its own,
   and the same proof-runner cap.
+- **A suite is one entry file at the top of `e2e/suites/`, named for the suite**, and that name is
+  what every roster above holds. A suite with parts keeps its entry there and puts the parts in a
+  folder of the same name beside it, which the entry imports (`e2e/suites/chart-drawer.ts` beside
+  `e2e/suites/chart-drawer/`); the entry never moves into its folder, and a part joins no roster.
+  The folder is its suite's home and not private to it: another suite may import a part from it,
+  as `e2e/suites/room-address.ts` does from `e2e/suites/chart-drawer/`. Suites that belong together
+  share a name prefix and stay flat, each a suite of its own (`e2e/suites/room-ink.ts`,
+  `e2e/suites/room-voyage.ts`).
 - **A phone lays every page out at a fixed 1024 CSS pixels and shrinks it to fit.** The layout's
   viewport tag is exactly `width=1024`: no `initial-scale`, which defeats the fit, and nothing that
   stops pinch-zoom. The one other document that writes its own head, the served atlas (the `motion`
