@@ -25,7 +25,7 @@ interface GlassDeps {
   syncHash: () => void;
   /** Issue #520: the dog-ear rides the committed inset, so the conductor hangs it here rather than on a sibling that would outlive the sheet. */
   decorateInset?: (el: HTMLElement) => void;
-  buttons: { touch: HTMLElement; zoomIn: HTMLElement; zoomOut: HTMLElement; reset: HTMLElement; cluster: HTMLElement };
+  buttons: { touch: HTMLElement; zoomIn: HTMLElement; zoomOut: HTMLElement; reset: HTMLElement };
 }
 
 type LodController = ReturnType<typeof createLodController>;
@@ -158,10 +158,6 @@ function glassPresses(buttons: GlassDeps["buttons"], zoomController: ZoomControl
   buttons.zoomIn.addEventListener("click", () => zoomController.glideBy(ZOOM_STEP));
   buttons.zoomOut.addEventListener("click", () => zoomController.glideBy(1 / ZOOM_STEP));
   buttons.reset.addEventListener("click", goHomeVoiced);
-  // The cluster sits INSIDE the element d3-zoom binds its gesture listeners to, so a rapid double-click on a button becomes d3's own double-click-to-zoom about the button corner (a lurch). Stop d3's gesture events at the cluster; click never propagates here, so the button handlers above still fire.
-  for (const type of ["mousedown", "dblclick", "wheel", "touchstart"]) {
-    buttons.cluster.addEventListener(type, (e) => e.stopPropagation());
-  }
   bindChartTouch(buttons.touch, (on) => zoomController.takeTouch(on), pageTouchEnv());
 }
 
