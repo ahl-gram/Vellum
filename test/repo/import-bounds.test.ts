@@ -205,6 +205,7 @@ test("the glass-keys ban spares the Portfolio's own folder under the Explorer an
     "src/site/explorer/app.ts",
     "src/site/explorer/nested/deeper/part.ts",
     "src/site/explorer/portfolio-zz/app.ts",
+    "src/site/explorer/nested/src/site/explorer/portfolio/app.ts",
   ])
     assert.deepEqual(rulesAt(path), [1, 2], `${path} stays under the ban`);
   for (const room of ROOMS_UNDER_THE_EXPLORER) assert.ok(existsSync(join(ROOT, room)), `${room} exists on disk`);
