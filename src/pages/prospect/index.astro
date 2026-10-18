@@ -5,6 +5,7 @@ import Fog from "../../layouts/Fog.astro";
 import Vignettes from "../../layouts/Vignettes.astro";
 import ChartStage from "../../layouts/ChartStage.astro";
 import Glass from "../../layouts/Glass.astro";
+import StageNotices from "../../layouts/StageNotices.astro";
 import ChartFolio from "../../layouts/ChartFolio.astro";
 import LegendButton from "../../layouts/LegendButton.astro";
 import LegendRow from "../../layouts/LegendRow.astro";
@@ -23,15 +24,12 @@ const tagline = "the second camera";
 <Fog />
 <ChartStage label="The plate. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet.">
   <img id="pp-plate" class="plate" alt="" hidden>
-  <Fragment slot="after">
-    <p class="status" id="pp-status" role="status" aria-live="polite"></p>
-    <p id="pp-warning" class="warning" hidden>Your browser could not start the render worker,
-    so the plate is engraved on the main thread. It may pause the page for a moment.</p>
-    <noscript>
-      <p class="status">Every plate is engraved in your browser, so the Prospect needs
-      JavaScript. You can still browse the <a href="../gallery/">gallery</a>.</p>
-    </noscript>
-  </Fragment>
+  <StageNotices slot="after" pillId="pp-status" warningId="pp-warning">
+    <Fragment slot="warning">Your browser could not start the render worker,
+    so the plate is engraved on the main thread. It may pause the page for a moment.</Fragment>
+    <Fragment slot="noscript">Every plate is engraved in your browser, so the Prospect needs
+      JavaScript. You can still browse the <a href="../gallery/">gallery</a>.</Fragment>
+  </StageNotices>
 </ChartStage>
 <Vignettes />
 

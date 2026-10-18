@@ -5,6 +5,7 @@ import Fog from "../../layouts/Fog.astro";
 import Vignettes from "../../layouts/Vignettes.astro";
 import ChartStage from "../../layouts/ChartStage.astro";
 import Glass from "../../layouts/Glass.astro";
+import StageNotices from "../../layouts/StageNotices.astro";
 import ChartFolio from "../../layouts/ChartFolio.astro";
 import LegendButton from "../../layouts/LegendButton.astro";
 import LegendRow from "../../layouts/LegendRow.astro";
@@ -29,16 +30,13 @@ const contents = contentsRows(null);
   <div id="pr-page" class="page" hidden>
     <div id="pr-page-inner" class="page-inner matter-page"></div>
   </div>
-  <Fragment slot="after">
-    <p class="status" id="pr-status" role="status" aria-live="polite"></p>
-    <p id="pr-warning" class="warning" hidden>Your browser could not start the render
+  <StageNotices slot="after" pillId="pr-status" warningId="pr-warning">
+    <Fragment slot="warning">Your browser could not start the render
     worker, so proofs are drawn on the main thread. A large plate may pause the page for
-    a moment.</p>
-    <noscript>
-      <p class="status">Every proof is pulled in your browser, so the Print Room needs
-      JavaScript. You can still browse the <a href="../gallery/">gallery</a>.</p>
-    </noscript>
-  </Fragment>
+    a moment.</Fragment>
+    <Fragment slot="noscript">Every proof is pulled in your browser, so the Print Room needs
+      JavaScript. You can still browse the <a href="../gallery/">gallery</a>.</Fragment>
+  </StageNotices>
 </ChartStage>
 <Vignettes />
 

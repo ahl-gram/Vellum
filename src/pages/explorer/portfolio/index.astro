@@ -6,6 +6,7 @@ import Fog from "../../../layouts/Fog.astro";
 import Vignettes from "../../../layouts/Vignettes.astro";
 import ChartStage from "../../../layouts/ChartStage.astro";
 import Glass from "../../../layouts/Glass.astro";
+import StageNotices from "../../../layouts/StageNotices.astro";
 import ChartFolio from "../../../layouts/ChartFolio.astro";
 import LegendButton from "../../../layouts/LegendButton.astro";
 import LegendRow from "../../../layouts/LegendRow.astro";
@@ -25,17 +26,14 @@ const tagline = "the sheets you laid on the table, taken home";
 <ChartStage label="The sheet on top. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet.">
   <div id="pf-pile" class="pile" aria-hidden="true"></div>
   <div id="pf-sheet" class="pf-sheet"></div>
-  <Fragment slot="after">
-    <p class="status" id="pf-status" role="status" aria-live="polite"></p>
-    <p id="pf-warning" class="warning" hidden>Your browser could not start the render
+  <StageNotices slot="after" pillId="pf-status" warningId="pf-warning">
+    <Fragment slot="warning">Your browser could not start the render
     worker, so the sheets are drafted on the main thread. A gathering may pause the page
-    for a moment.</p>
-    <noscript>
-      <p class="status">Every sheet here is drafted in your browser from the number in its
+    for a moment.</Fragment>
+    <Fragment slot="noscript">Every sheet here is drafted in your browser from the number in its
       margin, so the Portfolio needs JavaScript. The sheets were gathered in the
-      <a href="../">Explorer</a>.</p>
-    </noscript>
-  </Fragment>
+      <a href="../">Explorer</a>.</Fragment>
+  </StageNotices>
 </ChartStage>
 <Vignettes />
 

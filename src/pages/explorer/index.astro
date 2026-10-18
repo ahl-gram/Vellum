@@ -4,6 +4,7 @@ import RoomFolio from "../../layouts/RoomFolio.astro";
 import Fog from "../../layouts/Fog.astro";
 import Vignettes from "../../layouts/Vignettes.astro";
 import Glass from "../../layouts/Glass.astro";
+import StageNotices from "../../layouts/StageNotices.astro";
 import ChartFolio from "../../layouts/ChartFolio.astro";
 import LegendButton from "../../layouts/LegendButton.astro";
 import LegendRow from "../../layouts/LegendRow.astro";
@@ -27,11 +28,10 @@ const tagline = "every seed is a world, draw one";
   <div id="map-viewport" tabindex="0" role="application" aria-label="Interactive map. Arrow keys pan, plus and minus keys zoom, 0 resets."><div id="map" class="living-chart"></div></div>
   <div id="verso" aria-hidden="true"></div>
   </div></div>
-  <p class="status" id="status" role="status" aria-live="polite"></p>
-  <noscript>
-    <p class="status">Every world is drawn in your browser, so the Explorer needs
-    JavaScript. You can still browse the <a href="../gallery/">gallery</a>.</p>
-  </noscript>
+  <StageNotices pillId="status">
+    <Fragment slot="noscript">Every world is drawn in your browser, so the Explorer needs
+    JavaScript. You can still browse the <a href="../gallery/">gallery</a>.</Fragment>
+  </StageNotices>
 </div>
 <Vignettes />
 

@@ -4,6 +4,7 @@ import RoomFolio from "../../layouts/RoomFolio.astro";
 import Fog from "../../layouts/Fog.astro";
 import Vignettes from "../../layouts/Vignettes.astro";
 import Glass from "../../layouts/Glass.astro";
+import StageNotices from "../../layouts/StageNotices.astro";
 import ChartFolio from "../../layouts/ChartFolio.astro";
 import Slip from "../../layouts/Slip.astro";
 
@@ -22,8 +23,10 @@ const tagline = "watch a world live";
 <div class="stage">
   <!-- The frame's chart is seated here at boot (seats.ts): #map-viewport is the Glass's gesture box, the frame's .rf-chart the transform target. -->
   <div class="sheet" id="sheet"><div id="map-viewport" tabindex="0" role="application" aria-label="The chart. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet."></div></div>
-  <p id="rr-warning" class="warning" hidden>Your browser could not start the render
-  worker, so the chart is drawn on the main thread. The page may pause for a moment.</p>
+  <StageNotices warningId="rr-warning">
+    <Fragment slot="warning">Your browser could not start the render
+  worker, so the chart is drawn on the main thread. The page may pause for a moment.</Fragment>
+  </StageNotices>
 </div>
 <Vignettes />
 

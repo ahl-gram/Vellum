@@ -5,6 +5,7 @@ import Fog from "../../layouts/Fog.astro";
 import Vignettes from "../../layouts/Vignettes.astro";
 import ChartStage from "../../layouts/ChartStage.astro";
 import Glass from "../../layouts/Glass.astro";
+import StageNotices from "../../layouts/StageNotices.astro";
 import ChartFolio from "../../layouts/ChartFolio.astro";
 import LegendButton from "../../layouts/LegendButton.astro";
 import LegendRow from "../../layouts/LegendRow.astro";
@@ -23,15 +24,12 @@ const tagline = "the road, unrolled";
 <Fog />
 <ChartStage label="The scroll. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet.">
   <img id="rb-plate" class="plate" alt="" hidden>
-  <Fragment slot="after">
-    <p class="status" id="rb-status" role="status" aria-live="polite"></p>
-    <p id="rb-warning" class="warning" hidden>Your browser could not start the render worker,
-    so the scroll is drawn on the main thread. It may pause the page for a moment.</p>
-    <noscript>
-      <p class="status">Every scroll is unrolled in your browser, so the Ribbon needs
-      JavaScript. You can still browse the <a href="../gallery/">gallery</a>.</p>
-    </noscript>
-  </Fragment>
+  <StageNotices slot="after" pillId="rb-status" warningId="rb-warning">
+    <Fragment slot="warning">Your browser could not start the render worker,
+    so the scroll is drawn on the main thread. It may pause the page for a moment.</Fragment>
+    <Fragment slot="noscript">Every scroll is unrolled in your browser, so the Ribbon needs
+      JavaScript. You can still browse the <a href="../gallery/">gallery</a>.</Fragment>
+  </StageNotices>
 </ChartStage>
 <Vignettes />
 

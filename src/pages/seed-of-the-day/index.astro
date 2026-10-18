@@ -4,6 +4,7 @@ import RoomFolio from "../../layouts/RoomFolio.astro";
 import Fog from "../../layouts/Fog.astro";
 import Vignettes from "../../layouts/Vignettes.astro";
 import Glass from "../../layouts/Glass.astro";
+import StageNotices from "../../layouts/StageNotices.astro";
 import ChartFolio from "../../layouts/ChartFolio.astro";
 import LegendButton from "../../layouts/LegendButton.astro";
 import LegendRow from "../../layouts/LegendRow.astro";
@@ -30,11 +31,11 @@ const roads = [
   <!-- #map-viewport is the whole stage and the gesture box the zoom-controller binds to; the live transform lands on #map, sized to the viewport with the chrome's reserves as padding, so d3's clamp keeps it covering the stage; #sheet inside is the chart's own box, and the hunt star and the miss soundings ride it. -->
   <div id="map-viewport" tabindex="0" role="application" aria-label="Today's chart. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet."><div id="map"><div id="sheet" class="sheet"></div></div></div>
   <p class="status" id="status">Drafting today's world&hellip;</p>
-  <noscript>
-    <p class="status">Today's world is drawn in your browser, so this page needs
+  <StageNotices>
+    <Fragment slot="noscript">Today's world is drawn in your browser, so this page needs
     JavaScript. You can still <a href="../explorer/">draw any seed in the
-    Explorer</a> or browse the <a href="../gallery/">gallery</a>.</p>
-  </noscript>
+    Explorer</a> or browse the <a href="../gallery/">gallery</a>.</Fragment>
+  </StageNotices>
 </div>
 <Vignettes />
 
