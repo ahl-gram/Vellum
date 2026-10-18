@@ -249,6 +249,32 @@ const spawned = (p: Pressed, files: Iterable<string>): string[] =>
       .map((e) => e.to),
   );
 
+function checkWorkerReachesPlate(
+  p: Pressed,
+  workers: ReadonlySet<string>,
+  rel: (f: string) => string,
+  carrying: (files: Iterable<string>) => string[],
+  plateModules: (files: Iterable<string>) => Set<string>,
+): void {
+  const worker = reach(p, workers, ON_DEMAND);
+  for (const [face, outline] of OUTLINES)
+    assert.ok(
+      [...worker].some((f) => p.text(f).includes(outline)),
+      `the worker cannot reach the ${face} outlines even on demand`,
+    );
+  for (const entry of JOB_ENTRIES)
+    assert.ok(
+      plateModules(worker).has(entry),
+      `the worker cannot reach ${entry} even on demand, or the press no longer marks its modules`,
+    );
+  for (const f of carrying([...reach(p, p.twins, ON_DEMAND), ...worker]))
+    assert.match(
+      p.text(f),
+      /SIL Open Font License/,
+      `${rel(f)} carries the plate face's outlines without its OFL notice`,
+    );
+}
+
 test("no page downloads the plate's code before it draws a plate, and the page and the worker each reach it on demand, its licence beside it (Issue #801)", async () => {
   const p = await press();
   const rel = (f: string): string => relative(p.root, f);
@@ -284,23 +310,7 @@ test("no page downloads the plate's code before it draws a plate, and the page a
         `${rel(twin)} cannot reach ${entry} even on demand, or the press no longer marks its modules, so the drawing-code check above reads nothing`,
       );
   }
-  const worker = reach(p, workers, ON_DEMAND);
-  for (const [face, outline] of OUTLINES)
-    assert.ok(
-      [...worker].some((f) => p.text(f).includes(outline)),
-      `the worker cannot reach the ${face} outlines even on demand`,
-    );
-  for (const entry of JOB_ENTRIES)
-    assert.ok(
-      plateModules(worker).has(entry),
-      `the worker cannot reach ${entry} even on demand, or the press no longer marks its modules`,
-    );
-  for (const f of carrying([...reach(p, p.twins, ON_DEMAND), ...worker]))
-    assert.match(
-      p.text(f),
-      /SIL Open Font License/,
-      `${rel(f)} carries the plate face's outlines without its OFL notice`,
-    );
+  checkWorkerReachesPlate(p, workers, rel, carrying, plateModules);
 });
 
 test("the worker's build and the pages' build share no file, so neither overwrites a file of the other's (Issue #801)", async () => {

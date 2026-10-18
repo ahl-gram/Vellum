@@ -54,10 +54,10 @@ test("the two faces are one shape: a plain row serialized from the nodes, attrib
   assert.equal(nodes.map(serialize).join(""), contentsRowHtml("iv", "Regional surveys, two close-ins"));
 });
 
-test("the hosts build the kit's row through the builder: the Ribbon keeps strong, a space and em INSIDE .cr-text under button.lean, the Prospect's key is li > the pair", async () => {
-  const { writeItinerary } = await import("../../src/site/ribbon/seats.ts");
-  const { writeNote } = await import("../../src/site/prospect/seats.ts");
+type RibbonWrite = typeof import("../../src/site/ribbon/seats.ts").writeItinerary;
+type ProspectWrite = typeof import("../../src/site/prospect/seats.ts").writeNote;
 
+function checkRibbonRows(writeItinerary: RibbonWrite): void {
   const itinerary = new El("ol");
   const rf = { slipTitle: new El("h2"), slipWhere: new El("p"), itinerary };
   const res = {
@@ -94,7 +94,9 @@ test("the hosts build the kit's row through the builder: the Ribbon keeps strong
     ],
     "the lean's seat rides the li",
   );
+}
 
+function checkProspectKey(writeNote: ProspectWrite): void {
   const key = new El("ol");
   const pf = {
     noteTitle: new El("h2"),
@@ -122,4 +124,12 @@ test("the hosts build the kit's row through the builder: the Ribbon keeps strong
     `<li><span class="cr-num">B</span><span class="cr-text">the harbour</span></li>`,
   ]);
   assert.equal(pf.keyHead.hidden, false);
+}
+
+test("the hosts build the kit's row through the builder: the Ribbon keeps strong, a space and em INSIDE .cr-text under button.lean, the Prospect's key is li > the pair", async () => {
+  const { writeItinerary } = await import("../../src/site/ribbon/seats.ts");
+  const { writeNote } = await import("../../src/site/prospect/seats.ts");
+
+  checkRibbonRows(writeItinerary);
+  checkProspectKey(writeNote);
 });

@@ -234,10 +234,7 @@ test("ci.yml runs one job per lane, and its matrix is exactly E2E_LANES", () => 
   );
 });
 
-test("ci.yml shards the unit suite across a matrix of 1 to N, and every leg runs its own slice, so no test file is dropped", () => {
-  const unit = ciJobBlocks().find((j) => j.id === "check-and-test");
-  assert.ok(unit, "ci.yml has no check-and-test job at all, so every assertion below would read an empty block");
-  const body = ciUncommented(unit.lines);
+function checkUnitShards(body: string): number[] {
   const lines = body.split("\n");
   const at = lines.findIndex((l) => /^ {6}matrix:$/.test(l));
   assert.notEqual(at, -1, "the unit job has no matrix, so the assertions below would read nothing");
@@ -261,6 +258,14 @@ test("ci.yml shards the unit suite across a matrix of 1 to N, and every leg runs
     named.map((_, i) => i + 1),
     `the shards are ${named.join(", ")}, not 1 to ${named.length}, so node --test drops the slices no leg names`,
   );
+  return named;
+}
+
+test("ci.yml shards the unit suite across a matrix of 1 to N, and every leg runs its own slice, so no test file is dropped", () => {
+  const unit = ciJobBlocks().find((j) => j.id === "check-and-test");
+  assert.ok(unit, "ci.yml has no check-and-test job at all, so every assertion below would read an empty block");
+  const body = ciUncommented(unit.lines);
+  const named = checkUnitShards(body);
   assert.match(
     body,
     /^ {6}- name: Test\n {8}run: npm test -- --test-shard=\$\{\{ matrix\.shard \}\}\/\$\{\{ strategy\.job-total \}\}\n(?= {6}- |\n|$)/m,

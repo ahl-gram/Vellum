@@ -109,22 +109,50 @@ test("mutate takes the anchor and the replacement literally", () => {
   });
 });
 
+function checkSkepticRefused(linked: string): void {
+  const sha = git(["rev-parse", "HEAD"], linked);
+  const skeptic = create("skeptic-mutate", sha, linked);
+  try {
+    assert.throws(() => mutate("skeptic-mutate", "a.txt", 1, "same", "diff", linked), /not a guard-\* sandbox/);
+    assert.throws(() => restore("skeptic-mutate", ["a.txt"], linked), /not a guard-\* sandbox/);
+    assert.throws(() => status("skeptic-mutate", linked), /not a guard-\* sandbox/);
+    assert.equal(
+      readFileSync(join(skeptic, "a.txt"), "utf8"),
+      "same 1\nsame 2\nsame 3\n",
+      "mutate wrote into a skeptic's sandbox, which is read-only",
+    );
+  } finally {
+    teardown("skeptic-mutate", linked);
+  }
+}
+
+function checkSymlinkSwapsRefused(main: string, wt: string, linked: string): void {
+  renameSync(join(wt, "d"), join(wt, "d-real"));
+  symlinkSync(join(main, "outside"), join(wt, "d"));
+  assert.throws(() => mutate(NAME, "d/g.txt", 1, "outer", "X", linked), /outside the sandbox/);
+  assert.throws(() => restore(NAME, ["d/g.txt"], linked), /outside the sandbox/);
+  rmSync(join(wt, "c.txt"));
+  symlinkSync(join(main, "outside", "g.txt"), join(wt, "c.txt"));
+  assert.throws(
+    () => mutate(NAME, "c.txt", 1, "outer", "X", linked),
+    /outside the sandbox/,
+    "a tracked regular file swapped for a symlink on disk was written through",
+  );
+  assert.throws(
+    () => restore(NAME, ["c.txt"], linked),
+    /outside the sandbox/,
+    "restore wrote through a tracked regular file swapped for a symlink on disk",
+  );
+  assert.equal(
+    readFileSync(join(main, "outside", "g.txt"), "utf8"),
+    "outer\n",
+    "a write followed a symlinked directory out of the sandbox, into a tree it does not own",
+  );
+}
+
 test("mutate and restore refuse a skeptic sandbox and any path that is not a regular tracked file inside the sandbox, and write nothing", () => {
   withSandbox(({ main, linked, wt }) => {
-    const sha = git(["rev-parse", "HEAD"], linked);
-    const skeptic = create("skeptic-mutate", sha, linked);
-    try {
-      assert.throws(() => mutate("skeptic-mutate", "a.txt", 1, "same", "diff", linked), /not a guard-\* sandbox/);
-      assert.throws(() => restore("skeptic-mutate", ["a.txt"], linked), /not a guard-\* sandbox/);
-      assert.throws(() => status("skeptic-mutate", linked), /not a guard-\* sandbox/);
-      assert.equal(
-        readFileSync(join(skeptic, "a.txt"), "utf8"),
-        "same 1\nsame 2\nsame 3\n",
-        "mutate wrote into a skeptic's sandbox, which is read-only",
-      );
-    } finally {
-      teardown("skeptic-mutate", linked);
-    }
+    checkSkepticRefused(linked);
     writeFileSync(join(wt, "loose.txt"), "loose\n");
     const untracked: Array<[string, string, string]> = [
       ["loose.txt", "loose", join(wt, "loose.txt")],
@@ -146,27 +174,7 @@ test("mutate and restore refuse a skeptic sandbox and any path that is not a reg
       );
       assert.deepEqual(bytes(target), before, `mutate or restore of ${path} wrote ${target}`);
     }
-    renameSync(join(wt, "d"), join(wt, "d-real"));
-    symlinkSync(join(main, "outside"), join(wt, "d"));
-    assert.throws(() => mutate(NAME, "d/g.txt", 1, "outer", "X", linked), /outside the sandbox/);
-    assert.throws(() => restore(NAME, ["d/g.txt"], linked), /outside the sandbox/);
-    rmSync(join(wt, "c.txt"));
-    symlinkSync(join(main, "outside", "g.txt"), join(wt, "c.txt"));
-    assert.throws(
-      () => mutate(NAME, "c.txt", 1, "outer", "X", linked),
-      /outside the sandbox/,
-      "a tracked regular file swapped for a symlink on disk was written through",
-    );
-    assert.throws(
-      () => restore(NAME, ["c.txt"], linked),
-      /outside the sandbox/,
-      "restore wrote through a tracked regular file swapped for a symlink on disk",
-    );
-    assert.equal(
-      readFileSync(join(main, "outside", "g.txt"), "utf8"),
-      "outer\n",
-      "a write followed a symlinked directory out of the sandbox, into a tree it does not own",
-    );
+    checkSymlinkSwapsRefused(main, wt, linked);
   });
 });
 
