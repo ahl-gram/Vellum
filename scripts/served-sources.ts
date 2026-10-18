@@ -30,7 +30,6 @@ export const sourceFor = (
   if (pathname.includes("..")) return null;
   const extension = extname(pathname);
   for (const source of sources) {
-    if (!Object.hasOwn(source.types, extension)) continue;
     const file = join(repo, source.dir, pathname);
     const type = source.types[extension];
     if (type !== undefined && isFile(file)) return { file, type };

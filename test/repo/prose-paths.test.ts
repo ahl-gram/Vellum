@@ -1,7 +1,17 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
 import { basename, dirname, extname, join, relative, resolve } from "node:path";
 import { SERVED_SOURCES } from "../../scripts/served-sources.ts";
 
@@ -79,9 +89,9 @@ function remoteVerdict(dir: string, path: string, ignored: ReadonlySet<string>):
   return `\`${path}\`, which resolves neither from the repo root, nor from ${dir}/, nor as gitignored${by}`;
 }
 
-const servedPath = (address: string): string | null => {
+const servedPath = (address: string, root: string = REPO): string | null => {
   const source = SERVED_SOURCES.find(
-    (s) => Object.hasOwn(s.types, extname(address)) && existsSync(resolve(REPO, s.dir + address)),
+    (s) => Object.hasOwn(s.types, extname(address)) && existsSync(resolve(root, s.dir + address)),
   );
   return source ? source.dir + address : null;
 };
@@ -213,6 +223,14 @@ test("a served address resolves only against the tracked source that keeps its k
     null,
     "a served address the second source holds",
   );
+  const root = mkdtempSync(join(tmpdir(), "vellum-served-"));
+  try {
+    mkdirSync(join(root, "generated"), { recursive: true });
+    writeFileSync(join(root, "generated", "only-built.css"), "a {}\n");
+    assert.equal(servedPath("/only-built.css", root), null, "a built file the sources do not hold is not served");
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
 });
 
 test("extraction reads a backticked path with a tracked extension and nothing else", () => {
