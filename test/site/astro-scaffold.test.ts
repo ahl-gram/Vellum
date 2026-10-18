@@ -989,6 +989,101 @@ test("every road out names its destination by that route's name in the tree (Iss
   assert.equal(roads, Object.values(ROADS).flat().length, "every road on the ROADS roster was read");
 });
 
+type Legend = { label: string; headId?: string; rowLabel?: string; note?: true; status?: string };
+/** Every legend row on the site by page, LITERAL as ROADS is. */
+const LEGENDS: Record<string, Legend> = {
+  "explorer/index.html": { label: "The Press", headId: "grp-press" },
+  "print-room/index.html": {
+    label: "A poster plate",
+    rowLabel: "A poster plate",
+    note: true,
+    status: "pr-poster-status",
+  },
+  "explorer/portfolio/index.html": { label: "This sheet" },
+  "prospect/index.html": { label: "The roads out" },
+  "ribbon/index.html": { label: "The roads out" },
+  "seed-of-the-day/index.html": { label: "Today's roads out" },
+  "gallery/index.html": { label: "The road out" },
+  "specimen/index.html": { label: "The roads out" },
+};
+const tight = (s: string) => decode(s.replace(/>\s+</g, "><")).trim();
+const literal = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const FILLED_P = "(?:(?!</p>)[\\s\\S])+</p>";
+const legendShape = (l: Legend): RegExp => {
+  const group =
+    l.rowLabel !== undefined
+      ? ` role="group" aria-label="${l.rowLabel}"`
+      : l.headId !== undefined
+        ? ` role="group" aria-labelledby="${l.headId}"`
+        : "";
+  return new RegExp(
+    `^${literal(`<nav class="legend" aria-label="${l.label}"><p class="legend-head"${l.headId ? ` id="${l.headId}"` : ""}>`)}${FILLED_P}` +
+      (l.note ? `${literal('<p class="legend-note">')}${FILLED_P}` : "") +
+      `${literal(`<div class="legend-row"${group}>`)}(?:(?!</?div\\b)[\\s\\S])*${literal("</div>")}` +
+      (l.status ? literal(`<p class="legend-status" id="${l.status}" role="status" aria-live="polite"></p>`) : "") +
+      `${literal("</nav>")}$`,
+  );
+};
+
+test("every legend row stands in the kit's one shape: the nav named for the row, its head, the row, named as a group where the page names it, and beside the row only the Print Room's note and status (Issue #827)", () => {
+  for (const p of PAGES) {
+    const rows = page(p.route).match(/<nav class="legend"[\s\S]*?<\/nav>/g) ?? [];
+    const want = LEGENDS[p.route];
+    assert.equal(rows.length, want ? 1 : 0, `${p.route} carries ${rows.length} legend rows`);
+    if (want) assert.match(tight(rows[0]!), legendShape(want), `${p.route}'s legend row, as the kit renders it`);
+  }
+});
+
+type Notices = { pill?: string; warning?: string; noscript?: true; follows?: string };
+/** Every stage's notices by page, LITERAL; Today's pill is its own (no live region, a first line of its own), so Today's notice follows that pill where every other room's follows the sheet. */
+const NOTICES: Record<string, Notices> = {
+  "seed-of-the-day/index.html": { noscript: true, follows: "</p>" },
+  "explorer/index.html": { pill: "status", noscript: true },
+  "print-room/index.html": { pill: "pr-status", warning: "pr-warning", noscript: true },
+  "explorer/portfolio/index.html": { pill: "pf-status", warning: "pf-warning", noscript: true },
+  "prospect/index.html": { pill: "pp-status", warning: "pp-warning", noscript: true },
+  "ribbon/index.html": { pill: "rb-status", warning: "rb-warning", noscript: true },
+  "reading-room/index.html": { warning: "rr-warning" },
+  "specimen/index.html": { pill: "sb-status", noscript: true },
+};
+const noticesShape = (n: Notices): RegExp =>
+  new RegExp(
+    literal(n.follows ?? "</div>") +
+      (n.pill ? `${literal(`<p class="status" id="${n.pill}" role="status" aria-live="polite">`)}[^<]*</p>` : "") +
+      (n.warning ? `${literal(`<p id="${n.warning}" class="warning" hidden>`)}[^<]+</p>` : "") +
+      (n.noscript ? `${literal('<noscript><p class="status">')}${FILLED_P}</noscript>` : "") +
+      `${literal("</div>")}$`,
+  );
+
+test("every stage's notices stand in the kit's one shape, last in the stage: the live status pill, never whitespace alone, the hidden render-worker warning, the scripts-off notice, and no page carries a pill or a warning its entry does not name (Issue #827)", () => {
+  for (const p of PAGES) {
+    const html = page(p.route);
+    const want = NOTICES[p.route];
+    if (!want?.warning) assert.ok(!html.includes('class="warning"'), `${p.route} carries no render-worker warning`);
+    if (!want?.pill)
+      assert.doesNotMatch(html, /<p class="status" id="[^"]*" role="status"/, `${p.route} carries no live status pill`);
+    if (!want) continue;
+    const at = html.indexOf('<div class="stage">');
+    const end = html.indexOf('<div class="vignette top"', at);
+    assert.ok(at !== -1 && end > at, `${p.route} stands its stage before the vignettes`);
+    const stage = html.slice(at, end);
+    assert.match(tight(stage), noticesShape(want), `${p.route}'s notices, as the kit renders them`);
+    if (want.pill)
+      assert.doesNotMatch(
+        stage,
+        new RegExp(`${literal(`<p class="status" id="${want.pill}" role="status" aria-live="polite">`)}\\s+</p>`),
+        `${p.route}'s status pill holds only whitespace, which the sheet's :empty does not hide`,
+      );
+  }
+});
+
+test("the chart folio names the world once on every chart room (Issue #827)", () => {
+  for (const p of PAGES.filter((q) => q.chartRoom && q.dir !== "/gallery/")) {
+    const folio = page(p.route).match(/<div class="chrome corner bl folio">([\s\S]*?)<\/div>/)?.[1] ?? "";
+    assert.equal(folio.split('id="folio-title"').length - 1, 1, `${p.route}'s folio names the world once: ${folio}`);
+  }
+});
+
 test("the Chart Table's road names the page it goes to by that route's name in the tree, though it is a button the sweep above never reads (Issue #669, ruled 2026-10-04; CT18 holds where the road goes)", () => {
   const room =
     /<button id="table-road"[^>]*><span class="verb">[^<]*<\/span><span class="room">([^<]+)<\/span><\/button>/.exec(

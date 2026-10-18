@@ -5,8 +5,10 @@ import Fog from "../../layouts/Fog.astro";
 import Vignettes from "../../layouts/Vignettes.astro";
 import ChartStage from "../../layouts/ChartStage.astro";
 import Glass from "../../layouts/Glass.astro";
+import StageNotices from "../../layouts/StageNotices.astro";
 import ChartFolio from "../../layouts/ChartFolio.astro";
 import LegendButton from "../../layouts/LegendButton.astro";
+import LegendRow from "../../layouts/LegendRow.astro";
 import Slip from "../../layouts/Slip.astro";
 
 const room = "The Wayfarer's Ribbon";
@@ -22,15 +24,12 @@ const tagline = "the road, unrolled";
 <Fog />
 <ChartStage label="The scroll. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet.">
   <img id="rb-plate" class="plate" alt="" hidden>
-  <Fragment slot="after">
-    <p class="status" id="rb-status" role="status" aria-live="polite"></p>
-    <p id="rb-warning" class="warning" hidden>Your browser could not start the render worker,
-    so the scroll is drawn on the main thread. It may pause the page for a moment.</p>
-    <noscript>
-      <p class="status">Every scroll is unrolled in your browser, so the Ribbon needs
-      JavaScript. You can still browse the <a href="../gallery/">gallery</a>.</p>
-    </noscript>
-  </Fragment>
+  <StageNotices slot="after" pillId="rb-status" warningId="rb-warning">
+    <Fragment slot="warning">Your browser could not start the render worker,
+    so the scroll is drawn on the main thread. It may pause the page for a moment.</Fragment>
+    <Fragment slot="noscript">Every scroll is unrolled in your browser, so the Ribbon needs
+      JavaScript. You can still browse the <a href="../gallery/">gallery</a>.</Fragment>
+  </StageNotices>
 </ChartStage>
 <Vignettes />
 
@@ -54,15 +53,13 @@ const tagline = "the road, unrolled";
   <p class="row-gloss">A row leans the Glass on that stretch of the road.</p>
 </Slip>
 
-<ChartFolio lines={[["folio-title", "folio-title"], ["folio-sub", "folio-sub"], ["folio-coords", "rb-unrolled"]]} />
+<ChartFolio lines={[["folio-sub", "folio-sub"], ["folio-coords", "rb-unrolled"]]} />
 
-<nav class="legend" aria-label="The roads out">
-  <p class="legend-head">The roads out</p>
-  <div class="legend-row">
-    <LegendButton id="rb-chart-link" gold href="/explorer/" verb="Return to" room="The Explorer" />
-    <LegendButton id="rb-prospect-link" href="/prospect/" verbId="rb-prospect-verb" verb="See the road's end in" room="The Prospect" />
-  </div>
-</nav>
+<LegendRow label="The roads out">
+  <Fragment slot="head">The roads out</Fragment>
+  <LegendButton id="rb-chart-link" gold href="/explorer/" verb="Return to" room="The Explorer" />
+  <LegendButton id="rb-prospect-link" href="/prospect/" verbId="rb-prospect-verb" verb="See the road's end in" room="The Prospect" />
+</LegendRow>
 
 <Glass />
 

@@ -83,7 +83,7 @@ symbol and path so the reader goes and looks.
   does not read as a page's own.
 - **The rosters a page or a sheet joins**, by symbol: `NAV_ITEMS`, `ROUTE_NAMES` and
   `ROUTE_CHILDREN` in `src/layouts/nav.ts`; `PLACES` in `src/layouts/atelier-chart.ts`; `TOKENS` in `test/site/shell-css.test.ts`;
-  `PAGES` in `test/site/astro-scaffold.test.ts`, with `ROADS` and `STAGES` beside it for a page carrying a road out or the kit's stage, and RH32's browser copies of them in `e2e/suites/runninghead/room.ts` (`KIT_ROADS`, `CHART_ROOMS`, `FOG_ROOMS`, `STAGED`); `BUNDLE_ENTRIES` in `scripts/build-app-bundles.ts`;
+  `PAGES` in `test/site/astro-scaffold.test.ts`, with `ROADS`, `STAGES`, `LEGENDS` and `NOTICES` beside it for a page carrying a road out, the kit's stage, a legend row or a stage's notices, and RH32's browser copies of `ROADS` and `STAGES` in `e2e/suites/runninghead/room.ts` (`KIT_ROADS`, `CHART_ROOMS`, `FOG_ROOMS`, `STAGED`); `BUNDLE_ENTRIES` in `scripts/build-app-bundles.ts`;
   `ROUTE_ENTRIES` and
   `DISCOVERY_ROUTES` in `scripts/generate-discovery.ts`. A new suite additionally joins `E2E_SUITE_ORDER`
   (`e2e/support/suites.ts`), the runner's `SUITES` map (`e2e/support/suite-map.ts`, which the type
@@ -97,6 +97,7 @@ symbol and path so the reader goes and looks.
   and CI's jobs no longer leave room inside the account's concurrent-job limit. A change to the
   number of unit shards joins the same required checks, since each shard reports a check of its own,
   and the same proof-runner cap.
+- **A component under `src/layouts/` keeps a piece of the room's furniture one shape, and the page keeps where the piece stands.** The order of a room's furniture inside the shell (the stage, the folios, the slip, the legend row, the Glass) is written in its page, and that order carries the room's stacking and its tab order.
 - **A suite is one entry file at the top of `e2e/suites/`, named for the suite**, and that name is
   what every roster above holds. A suite with parts keeps its entry there and puts the parts in a
   folder of the same name beside it, which the entry imports (`e2e/suites/chart-drawer.ts` beside

@@ -6,8 +6,10 @@ import Fog from "../../../layouts/Fog.astro";
 import Vignettes from "../../../layouts/Vignettes.astro";
 import ChartStage from "../../../layouts/ChartStage.astro";
 import Glass from "../../../layouts/Glass.astro";
+import StageNotices from "../../../layouts/StageNotices.astro";
 import ChartFolio from "../../../layouts/ChartFolio.astro";
 import LegendButton from "../../../layouts/LegendButton.astro";
+import LegendRow from "../../../layouts/LegendRow.astro";
 import Slip from "../../../layouts/Slip.astro";
 
 const room = "The Portfolio";
@@ -24,17 +26,14 @@ const tagline = "the sheets you laid on the table, taken home";
 <ChartStage label="The sheet on top. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet.">
   <div id="pf-pile" class="pile" aria-hidden="true"></div>
   <div id="pf-sheet" class="pf-sheet"></div>
-  <Fragment slot="after">
-    <p class="status" id="pf-status" role="status" aria-live="polite"></p>
-    <p id="pf-warning" class="warning" hidden>Your browser could not start the render
+  <StageNotices slot="after" pillId="pf-status" warningId="pf-warning">
+    <Fragment slot="warning">Your browser could not start the render
     worker, so the sheets are drafted on the main thread. A gathering may pause the page
-    for a moment.</p>
-    <noscript>
-      <p class="status">Every sheet here is drafted in your browser from the number in its
+    for a moment.</Fragment>
+    <Fragment slot="noscript">Every sheet here is drafted in your browser from the number in its
       margin, so the Portfolio needs JavaScript. The sheets were gathered in the
-      <a href="../">Explorer</a>.</p>
-    </noscript>
-  </Fragment>
+      <a href="../">Explorer</a>.</Fragment>
+  </StageNotices>
 </ChartStage>
 <Vignettes />
 
@@ -52,16 +51,14 @@ const tagline = "the sheets you laid on the table, taken home";
   </Fragment>
 </Slip>
 
-<ChartFolio lines={[["folio-title", "folio-title"], ["folio-sub", "folio-sub"], ["folio-coords", "folio-coords"]]} />
+<ChartFolio lines={[["folio-sub", "folio-sub"], ["folio-coords", "folio-coords"]]} />
 
-<nav class="legend" aria-label="This sheet">
-  <p class="legend-head">This sheet &middot; what it can do next</p>
-  <div class="legend-row">
-    <button id="pf-download" class="legend-btn gold" type="button"><span class="verb">Download</span><span class="room">The Engraving</span></button>
-    <button id="pf-next" class="legend-btn" type="button"><span class="verb">Bring up</span><span class="room">The Next Sheet</span></button>
-    <LegendButton id="pf-explorer" gold href="../" verb="Back to" room="The Explorer" />
-  </div>
-</nav>
+<LegendRow label="This sheet">
+  <Fragment slot="head">This sheet &middot; what it can do next</Fragment>
+  <button id="pf-download" class="legend-btn gold" type="button"><span class="verb">Download</span><span class="room">The Engraving</span></button>
+  <button id="pf-next" class="legend-btn" type="button"><span class="verb">Bring up</span><span class="room">The Next Sheet</span></button>
+  <LegendButton id="pf-explorer" gold href="../" verb="Back to" room="The Explorer" />
+</LegendRow>
 
 <Glass />
 <script is:inline type="module" src="./app.bundle.js"></script>

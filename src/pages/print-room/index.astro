@@ -5,8 +5,10 @@ import Fog from "../../layouts/Fog.astro";
 import Vignettes from "../../layouts/Vignettes.astro";
 import ChartStage from "../../layouts/ChartStage.astro";
 import Glass from "../../layouts/Glass.astro";
+import StageNotices from "../../layouts/StageNotices.astro";
 import ChartFolio from "../../layouts/ChartFolio.astro";
 import LegendButton from "../../layouts/LegendButton.astro";
+import LegendRow from "../../layouts/LegendRow.astro";
 import Slip from "../../layouts/Slip.astro";
 import { contentsRows } from "../../site/print-room/contents-markup.ts";
 
@@ -28,16 +30,13 @@ const contents = contentsRows(null);
   <div id="pr-page" class="page" hidden>
     <div id="pr-page-inner" class="page-inner matter-page"></div>
   </div>
-  <Fragment slot="after">
-    <p class="status" id="pr-status" role="status" aria-live="polite"></p>
-    <p id="pr-warning" class="warning" hidden>Your browser could not start the render
+  <StageNotices slot="after" pillId="pr-status" warningId="pr-warning">
+    <Fragment slot="warning">Your browser could not start the render
     worker, so proofs are drawn on the main thread. A large plate may pause the page for
-    a moment.</p>
-    <noscript>
-      <p class="status">Every proof is pulled in your browser, so the Print Room needs
-      JavaScript. You can still browse the <a href="../gallery/">gallery</a>.</p>
-    </noscript>
-  </Fragment>
+    a moment.</Fragment>
+    <Fragment slot="noscript">Every proof is pulled in your browser, so the Print Room needs
+      JavaScript. You can still browse the <a href="../gallery/">gallery</a>.</Fragment>
+  </StageNotices>
 </ChartStage>
 <Vignettes />
 
@@ -79,27 +78,25 @@ const contents = contentsRows(null);
   </Fragment>
 </Slip>
 
-<ChartFolio lines={[["folio-title", "folio-title"], ["folio-sub plate-line", "pr-plate-line"], ["folio-sub", "folio-sub"]]} />
+<ChartFolio lines={[["folio-sub plate-line", "pr-plate-line"], ["folio-sub", "folio-sub"]]} />
 
-<nav class="legend" aria-label="A poster plate">
-  <p class="legend-head"><span class="pressed">A poster plate, pressed as
+<LegendRow label="A poster plate" rowLabel="A poster plate">
+  <Fragment slot="head"><span class="pressed">A poster plate, pressed as
     <select id="pr-format" aria-label="Pressed as">
       <option value="svg" selected>The engraving itself (SVG)</option>
       <option value="png1">An impression (PNG)</option>
       <option value="png2">A finer impression (PNG &times;2)</option>
-    </select></span></p>
-  <p class="legend-note">The engraving is exact at any size; an impression is pressed with your
+    </select></span></Fragment>
+  <p class="legend-note" slot="note">The engraving is exact at any size; an impression is pressed with your
   device's fonts, and a large one is fitted to what your browser can hold.
   The chart is pulled only as the engraving.</p>
-  <div class="legend-row" role="group" aria-label="A poster plate">
-    <button class="legend-btn" type="button" data-poster="chart" disabled><span class="verb dim">1500 px</span><span class="room">Chart</span></button>
-    <button class="legend-btn" type="button" data-poster="desk" disabled><span class="verb dim">2400 px</span><span class="room">Desk</span></button>
-    <button class="legend-btn" type="button" data-poster="wall" disabled><span class="verb dim">3300 px</span><span class="room">Wall</span></button>
-    <button class="legend-btn" type="button" data-poster="grand" disabled><span class="verb dim">4200 px</span><span class="room">Grand</span></button>
-    <LegendButton id="pr-explorer" gold href="../explorer/" verb="Back to" room="The Explorer" />
-  </div>
-  <p class="legend-status" id="pr-poster-status" role="status" aria-live="polite"></p>
-</nav>
+  <button class="legend-btn" type="button" data-poster="chart" disabled><span class="verb dim">1500 px</span><span class="room">Chart</span></button>
+  <button class="legend-btn" type="button" data-poster="desk" disabled><span class="verb dim">2400 px</span><span class="room">Desk</span></button>
+  <button class="legend-btn" type="button" data-poster="wall" disabled><span class="verb dim">3300 px</span><span class="room">Wall</span></button>
+  <button class="legend-btn" type="button" data-poster="grand" disabled><span class="verb dim">4200 px</span><span class="room">Grand</span></button>
+  <LegendButton id="pr-explorer" gold href="../explorer/" verb="Back to" room="The Explorer" />
+  <p class="legend-status" id="pr-poster-status" role="status" aria-live="polite" slot="status"></p>
+</LegendRow>
 
 <Glass />
 

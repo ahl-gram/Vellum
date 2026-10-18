@@ -5,8 +5,10 @@ import Fog from "../../layouts/Fog.astro";
 import Vignettes from "../../layouts/Vignettes.astro";
 import ChartStage from "../../layouts/ChartStage.astro";
 import Glass from "../../layouts/Glass.astro";
+import StageNotices from "../../layouts/StageNotices.astro";
 import ChartFolio from "../../layouts/ChartFolio.astro";
 import LegendButton from "../../layouts/LegendButton.astro";
+import LegendRow from "../../layouts/LegendRow.astro";
 import Slip from "../../layouts/Slip.astro";
 import { contentsRowHtml } from "../../site/shared/contents-row.ts";
 import { GALLERY_SEED } from "../../cli/gallery.ts";
@@ -32,13 +34,11 @@ const contents = [
 <Fog />
 <ChartStage label="The specimen sheet. Arrow keys pan, plus and minus keys zoom, 0 shows the full sheet.">
   <img id="sb-plate" src={plate} alt={`The chart of seed ${GALLERY_SEED}, the Gallery's first plate, as the specimen sheet`}>
-  <Fragment slot="after">
-    <p class="status" id="sb-status" role="status" aria-live="polite">the status pill, as a room reports a draw</p>
-    <noscript>
-      <p class="status">The Specimen Book fits its sheet and binds its slip in your browser, so its
-      states need JavaScript; the dress stands without it.</p>
-    </noscript>
-  </Fragment>
+  <StageNotices slot="after" pillId="sb-status">
+    <Fragment slot="pill">the status pill, as a room reports a draw</Fragment>
+    <Fragment slot="noscript">The Specimen Book fits its sheet and binds its slip in your browser, so its
+      states need JavaScript; the dress stands without it.</Fragment>
+  </StageNotices>
 </ChartStage>
 <Vignettes />
 
@@ -84,16 +84,14 @@ const contents = [
   </Fragment>
 </Slip>
 
-<ChartFolio lines={[["folio-title", "folio-title"], ["folio-sub", "folio-sub"], ["folio-coords", "folio-coords"], ["folio-note", "folio-note"]]} />
+<ChartFolio lines={[["folio-sub", "folio-sub"], ["folio-coords", "folio-coords"], ["folio-note", "folio-note"]]} />
 
-<nav class="legend" aria-label="The roads out">
-  <p class="legend-head">the legend row: a road, the featured road, a press</p>
-  <div class="legend-row">
-    <LegendButton href="/explorer/" verb="A road to" room="The Explorer" />
-    <LegendButton gold href="/gallery/" verb="The featured road to" room="The Gallery" />
-    <button class="legend-btn" type="button" disabled><span class="verb">a press, disabled</span><span class="room">A Plate</span></button>
-  </div>
-</nav>
+<LegendRow label="The roads out">
+  <Fragment slot="head">the legend row: a road, the featured road, a press</Fragment>
+  <LegendButton href="/explorer/" verb="A road to" room="The Explorer" />
+  <LegendButton gold href="/gallery/" verb="The featured road to" room="The Gallery" />
+  <button class="legend-btn" type="button" disabled><span class="verb">a press, disabled</span><span class="room">A Plate</span></button>
+</LegendRow>
 
 <Glass />
 
