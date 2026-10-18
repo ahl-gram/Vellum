@@ -12,6 +12,15 @@ import {
   type Arm,
   type RuleNode,
 } from "./sheet-tokens.ts";
+import { STYLES } from "../served-sources.ts";
+
+export const OWNED_SHEETS = {
+  house: "shared/house.css",
+  kit: "shared/atelier.css",
+  engine: "shared/living-chart.css",
+  motion: "shared/motion.css",
+  shell: "shared/shell.css",
+} as const;
 
 const selectorNodes = (node: CssNode, outsideNot: boolean): CssNode[] => {
   if (outsideNot && node.type === "PseudoClassSelector" && node.name.toLowerCase() === "not") return [];
@@ -56,9 +65,9 @@ const declarationsIf = (hit: boolean, rule: RuleNode, wanted: (property: string)
 
 const INTRO_VOICE: ReadonlySet<string> = new Set(["color", "font", "font-family", "font-style"]);
 const houseOwnsIntro = ruleOf(
-  "{{property}} binds the intro voice outside src/styles/house.css, the one sheet that writes it: give the page's own element a class of its own instead (Issue #324, Issue #709)",
+  "{{property}} binds the intro voice outside src/styles/shared/house.css, the one sheet that writes it: give the page's own element a class of its own instead (Issue #324, Issue #709)",
   (key) =>
-    key === "house.css"
+    key === OWNED_SHEETS.house
       ? null
       : ({ arms, rule }) =>
           declarationsIf(
@@ -69,9 +78,9 @@ const houseOwnsIntro = ruleOf(
 );
 
 const houseOwnsControls = ruleOf(
-  "{{property}} re-skins the controls on a select-and-button list outside src/styles/house.css, the one sheet that writes the control idiom (Issue #324, Issue #709)",
+  "{{property}} re-skins the controls on a select-and-button list outside src/styles/shared/house.css, the one sheet that writes the control idiom (Issue #324, Issue #709)",
   (key) =>
-    key === "house.css"
+    key === OWNED_SHEETS.house
       ? null
       : ({ arms, rule }) =>
           declarationsIf(
@@ -99,12 +108,12 @@ const kitClasses = (): Set<string> => {
   const sheets = sheetsOnDisk();
   const read = (paths: readonly string[]): string[] => paths.flatMap((path) => readSheet(path) ?? []);
   return kitClassesFrom(
-    read(sheets.filter((path) => /^src\/styles\/atelier[^/]*\.css$/.test(path))),
-    read(["src/styles/house.css", "src/styles/motion.css", "src/styles/shell.css"]),
+    read(sheets.filter((path) => /^src\/styles\/shared\/atelier[^/]*\.css$/.test(path))),
+    read([OWNED_SHEETS.house, OWNED_SHEETS.motion, OWNED_SHEETS.shell].map((key) => `${STYLES}/${key}`)),
   );
 };
 
-const HOUSE_SHEETS = /^(atelier[^/]*|house|motion|fonts|shell|chart-of-the-atelier)\.css$/;
+const HOUSE_SHEETS = /^shared\/(atelier[^/]*|house|motion|fonts|shell|chart-of-the-atelier)\.css$/;
 const KIT_IDS: ReadonlySet<string> = new Set([
   "sheet",
   "map-viewport",
@@ -126,7 +135,7 @@ const redressing = (kit: ReadonlySet<string>, arm: CssNode): boolean => {
 };
 
 const kitNotRedressed = ruleOf(
-  "{{arm}} re-dresses the kit with {{property}}: a page seats a component and does not re-dress it, so move the dress onto the page's own element or state, or into src/styles/atelier.css (Issue #487, Issue #302)",
+  "{{arm}} re-dresses the kit with {{property}}: a page seats a component and does not re-dress it, so move the dress onto the page's own element or state, or into src/styles/shared/atelier.css (Issue #487, Issue #302)",
   (key) => {
     if (HOUSE_SHEETS.test(key)) return null;
     const kit = kitClasses();
@@ -141,9 +150,9 @@ const kitNotRedressed = ruleOf(
 
 const ROW_ARMS: ReadonlySet<string> = new Set([".cr-num", ".cr-text", ".contents .cr-num", ".contents .cr-text"]);
 const kitOwnsContentsRow = ruleOf(
-  "{{arm}} re-dresses the kit's contents row, which src/styles/atelier.css dresses; a page inks a row only under its own state (.contents li.on .cr-num) (Issue #487)",
+  "{{arm}} re-dresses the kit's contents row, which src/styles/shared/atelier.css dresses; a page inks a row only under its own state (.contents li.on .cr-num) (Issue #487)",
   (key) =>
-    key === "atelier.css"
+    key === OWNED_SHEETS.kit
       ? null
       : ({ arms }) => arms.filter((a) => ROW_ARMS.has(a.text)).map((a) => ({ node: a.node, data: { arm: a.text } })),
 );
@@ -151,9 +160,9 @@ const kitOwnsContentsRow = ruleOf(
 const SELECT_DRESS = (p: string): boolean =>
   p.replace(/^-[a-z]+-/, "") === "appearance" || p === "background-image" || p === "background";
 const kitOwnsSelectDress = ruleOf(
-  "{{property}} on .folio-controls select.control re-dresses the corner's select, which src/styles/atelier.css dresses; a page sets only its width (Issue #487)",
+  "{{property}} on .folio-controls select.control re-dresses the corner's select, which src/styles/shared/atelier.css dresses; a page sets only its width (Issue #487)",
   (key) =>
-    key === "atelier.css"
+    key === OWNED_SHEETS.kit
       ? null
       : ({ arms, rule }) =>
           declarationsIf(
@@ -169,9 +178,9 @@ const isHook = (n: CssNode): boolean =>
   (n.type === "AttributeSelector" && n.name.name === "data-ink");
 
 const engineDressOneHome = ruleOf(
-  "{{arm}} dresses an engine hook outside src/styles/living-chart.css, the engine's one sheet: edit the dressing there, keyed on the mount class (Issue #302)",
+  "{{arm}} dresses an engine hook outside src/styles/shared/living-chart.css, the engine's one sheet: edit the dressing there, keyed on the mount class (Issue #302)",
   (key) =>
-    key === "living-chart.css"
+    key === OWNED_SHEETS.engine
       ? null
       : ({ arms }) =>
           arms
@@ -182,7 +191,7 @@ const engineDressOneHome = ruleOf(
 const engineNoHostId = ruleOf(
   "{{arm}} names #{{id}}, a host's own element: the engine's sheet keys on the mount class and the engine's own #place-card, never a host's id (Issue #302)",
   (key) =>
-    key === "living-chart.css"
+    key === OWNED_SHEETS.engine
       ? ({ arms }) =>
           arms.flatMap((a) =>
             idsIn(a.node)

@@ -6,9 +6,12 @@ import {
   ATLAS_SHEET_CSS,
   atlasDocument,
   atlasPlateFilename,
+  FONTS_SHEET_HREF,
+  MOTION_SHEET_HREF,
   svgToDataUri,
   type AtlasDocumentData,
 } from "../../src/atlas/document.ts";
+import { REPO, SERVED_SOURCES, sourceFor } from "../../scripts/served-sources.ts";
 import { prospectPlates } from "../../src/atlas/compose.ts";
 import { fullWidthWideningRules } from "../../test-support/css-box-sweep.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
@@ -75,7 +78,7 @@ test("ATLAS_SHEET_CSS: the shared inner CSS, scoped under .atlas-sheet, is the d
     /\.atlas-sheet\s+figure\s+img:hover\s*\{[^}]*transform/,
     "an unanchored plate must not lift: that is the false affordance #368 ruled out",
   );
-  // A fallback so the self-contained download (no /motion.css) still resolves the timing.
+  // A fallback so the self-contained download (no /shared/motion.css) still resolves the timing.
   assert.match(ATLAS_SHEET_CSS, /var\(--paper,\s*\d+ms\)/);
   // Page chrome (body background, header) is NOT part of the shared inner block: it must not change the Explorer bind, which lives inside the Explorer's own page.
   assert.doesNotMatch(ATLAS_SHEET_CSS, /\.atlas-sheet\s*\{[^}]*background/);
@@ -106,7 +109,7 @@ test("atlasDocument (file-ref mode): a standalone doc that references plate SVG 
   assert.match(html, /surveyed in the year of the long tide/);
   assert.match(html, /CHART № 7/);
   assert.match(html, /<body class="atlas-sheet">/);
-  assert.match(html, /<link rel="stylesheet" href="\/motion\.css">/);
+  assert.match(html, /<link rel="stylesheet" href="\/shared\/motion\.css">/);
   assert.match(html, /ATLAS[_ ]?SHEET|\.atlas-sheet figure/i); // the shared CSS is inlined
   assert.match(html, /<a href="world-antique\.svg"><img src="world-antique\.svg"/);
   assert.match(html, /world-topographic\.svg/);
@@ -139,7 +142,7 @@ test("atlasDocument (data-URI mode): self-contained, with no anchors in the FILE
   const dataUris = (html.match(/data:image\/svg\+xml;base64,/g) ?? []).length;
   assert.equal(dataUris, 6, "each plate must be inlined exactly once (self-contained, no doubling)");
   assert.doesNotMatch(html, /<a href="data:/);
-  assert.doesNotMatch(html, /<link rel="stylesheet" href="\/motion\.css">/);
+  assert.doesNotMatch(html, /<link\b[^>]*\brel="stylesheet"/);
   assert.doesNotMatch(html, /src="world-antique\.svg"/);
   assert.match(html, /<body class="atlas-sheet">/);
   assert.match(html, /\.atlas-sheet figure/);
@@ -258,8 +261,8 @@ test("file-ref mode carries no plate-linking script: its anchors are already rea
   );
 });
 
-// Taken over this file's own fixture, before the screen dress existed; re-taken 2026-09-11 for the plates' box-sizing (Issue #565), a paper correction and so one the download is meant to carry.
-const DOWNLOAD_SHA256 = "50f2dd5a529f36542caf0a88e390fb32f8bb2d87d59b50bb3ad10a9eb9a323f0";
+// Taken over this file's own fixture, before the screen dress existed; re-taken 2026-09-11 for the plates' box-sizing (Issue #565), a paper correction and so one the download is meant to carry, and 2026-10-18 for the fonts sheet's address in a comment the download ships (Issue #768).
+const DOWNLOAD_SHA256 = "abf91fba15d02ff611358fd4c365013cf6be12ffb2696720eabdec608eb9868c";
 const served = () => atlasDocument(fixture(), (p, s) => atlasPlateFilename(p, s), { anchor: true, motion: true });
 const download = () => atlasDocument(fixture(), (p) => svgToDataUri(p.svg), { anchor: false, motion: false });
 
@@ -269,6 +272,18 @@ test("#464 the download is byte-identical to the paper artifact it was before th
     DOWNLOAD_SHA256,
     "the download changed by a byte: the screen dress may only reach the served page",
   );
+});
+
+test("the served atlas links its two sheets at addresses a served source holds (Issue #768)", () => {
+  const page = served();
+  for (const href of [FONTS_SHEET_HREF, MOTION_SHEET_HREF]) {
+    assert.ok(page.includes(`<link rel="stylesheet" href="${href}">`), `the served atlas links ${href}`);
+    assert.notEqual(
+      sourceFor(REPO, SERVED_SOURCES, href),
+      null,
+      `no served source holds ${href}, so the served atlas loads no sheet there`,
+    );
+  }
 });
 
 test("Issue #761 the served page lays out at the site's fixed 1024 viewport; the download keeps its own head (the digest above holds it)", () => {
@@ -327,8 +342,8 @@ test("#464 the served page takes the deep with its sections on parchment sheets;
   );
 });
 
-test("#464 the served atlas declares the deep and the sheet depth exactly as src/styles/shell.css does (the three-place join's shape: one value, pinned equal)", () => {
-  const layout = readFileSync(new URL("../../src/styles/shell.css", import.meta.url), "utf8");
+test("#464 the served atlas declares the deep and the sheet depth exactly as src/styles/shared/shell.css does (the three-place join's shape: one value, pinned equal)", () => {
+  const layout = readFileSync(new URL("../../src/styles/shared/shell.css", import.meta.url), "utf8");
   const page = served();
   const norm = (s: string) => s.replace(/\s+/g, " ").replace(/\( /g, "(").replace(/ \)/g, ")").trim();
   for (const token of ["--the-deep", "--sheet-shadow"]) {

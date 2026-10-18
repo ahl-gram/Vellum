@@ -28,7 +28,7 @@ const { room, ogRoom, description, ogDescription, path, desk: deskProp, chartRoo
 
 for (const href of extraCss) {
   if (!href.startsWith("/")) {
-    throw new Error(`BaseLayout extraCss hrefs must be root-absolute ("/living-chart.css"), got "${href}"`);
+    throw new Error(`BaseLayout extraCss hrefs must be root-absolute ("/shared/living-chart.css"), got "${href}"`);
   }
 }
 
@@ -91,17 +91,17 @@ const deskAttrs = room ? { class: Astro.slots.has("desk") ? "desk-layer on" : "d
 <meta name="twitter:description" content={cardDescription}>
 <meta name="twitter:image" content={ogImage}>
 <meta name="twitter:image:alt" content={ogImageAlt}>
-<link rel="stylesheet" href="/fonts.css">
-<link rel="stylesheet" href="/motion.css">
-<link rel="stylesheet" href="/house.css">
-<link rel="stylesheet" href="/atelier.css">
-<link rel="stylesheet" href="/chart-of-the-atelier.css">
+<link rel="stylesheet" href="/shared/fonts.css">
+<link rel="stylesheet" href="/shared/motion.css">
+<link rel="stylesheet" href="/shared/house.css">
+<link rel="stylesheet" href="/shared/atelier.css">
+<link rel="stylesheet" href="/shared/chart-of-the-atelier.css">
 {extraCss.map((href) => <link rel="stylesheet" href={href} />)}
 <link rel="stylesheet" href="index.css">
 {["/", ...NAV_ITEMS.map((item) => item.href)]
   .filter((href) => href !== Astro.url.pathname)
   .map((href) => <link rel="prefetch" href={href} />)}
-<link rel="stylesheet" href="/shell.css">
+<link rel="stylesheet" href="/shared/shell.css">
 </head>
 <body class={room ? (chartRoom ? "room chart-room" : "room") : undefined}>
 <Desk {...deskAttrs}>

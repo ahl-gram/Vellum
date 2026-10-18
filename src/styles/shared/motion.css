@@ -1,4 +1,4 @@
-/* The shared motion desk: one motion language for every page linking /motion.css, on the live DOM only, so the determinism contract (SVG strings, committed files, goldens) is untouched. */
+/* The shared motion desk: one motion language for every page linking /shared/motion.css, on the live DOM only, so the determinism contract (SVG strings, committed files, goldens) is untouched. */
 
 :root {
   --paper-quick: 180ms;

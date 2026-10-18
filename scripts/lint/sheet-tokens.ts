@@ -100,7 +100,7 @@ export type RuleNode = { prelude: CssNode; block: { children: CssNode[] }; loc?:
 export const declarationsOf = (rule: RuleNode): Array<CssNode & { type: "Declaration" }> =>
   rule.block.children.filter((d): d is CssNode & { type: "Declaration" } => d.type === "Declaration");
 
-const TOKEN_HOMES: ReadonlySet<string> = new Set(["shell.css", "src/atlas/document.ts"]);
+const TOKEN_HOMES: ReadonlySet<string> = new Set(["shared/shell.css", "src/atlas/document.ts"]);
 const TOKENS = Object.entries(SITE_PALETTE).map(([name, hex]) => ({
   name,
   hex: hex.slice(1).toLowerCase(),
@@ -141,7 +141,7 @@ const tokenByName: CSSRuleDefinition = {
   meta: {
     type: "problem",
     messages: {
-      raw: "{{colour}} is {{token}}'s colour written raw: write var({{token}}), or rgb(from var({{token}}) r g b / a) for alpha, so the quotation stays attached to its name; only the token's own declaration, in src/styles/shell.css or the atlas document, writes it (Issue #263, Issue #324)",
+      raw: "{{colour}} is {{token}}'s colour written raw: write var({{token}}), or rgb(from var({{token}}) r g b / a) for alpha, so the quotation stays attached to its name; only the token's own declaration, in src/styles/shared/shell.css or the atlas document, writes it (Issue #263, Issue #324)",
     },
   },
   create(context) {
@@ -187,7 +187,7 @@ const shadowByToken: CSSRuleDefinition = {
     type: "problem",
     messages: {
       longhand:
-        "this writes {{token}}'s geometry longhand: consume var({{token}}), the depth's one home, declared in src/styles/shell.css and the atlas document (Issue #367, Issue #463)",
+        "this writes {{token}}'s geometry longhand: consume var({{token}}), the depth's one home, declared in src/styles/shared/shell.css and the atlas document (Issue #367, Issue #463)",
     },
   },
   create(context) {

@@ -58,7 +58,7 @@ const assertRefuses = async (plant: Plant, rule: string, blind: string): Promise
     refused.length > 0 && refused.length < plant.length,
     `${rule}'s plant cannot tell the rule from its negation`,
   );
-  assert.deepEqual(await reported(plant, "src/styles/house.css", rule), refused, blind);
+  assert.deepEqual(await reported(plant, "src/styles/shared/house.css", rule), refused, blind);
 };
 
 test("no hover or active rule lifts by a literal: the raise is a token, and a literal stands only as a SANCTIONED_LIFTS entry for its own file (Issue #405, Issue #779 part 2d)", async () => {
@@ -82,19 +82,19 @@ test("no hover or active rule lifts by a literal: the raise is a token, and a li
     LIFT,
     "BLIND SPOTS, declared, each a miss (Issue #779 D3: the check reads what it read): the translate property, translate() and translate3d(); a lift in a custom property consumed by var()",
   );
-  const sanctioned = { "motion.css :: .x:hover": "-5px", "motion.css :: .gone:hover": "-1px" };
+  const sanctioned = { "shared/motion.css :: .x:hover": "-5px", "shared/motion.css :: .gone:hover": "-1px" };
   const listed: Plant = [
     [".x:hover { transform: translateY(-5px); }", PASS],
     [".x:hover, .y:hover { transform: translateY(-5px); }", REFUSE],
     [".x:hover { transform: translateY(-6px); }", REFUSE],
   ];
   assert.deepEqual(
-    await found(listed, "src/styles/motion.css", LIFT, { sanctioned }),
-    { lines: [2, 3], stale: ["motion.css :: .gone:hover"] },
+    await found(listed, "src/styles/shared/motion.css", LIFT, { sanctioned }),
+    { lines: [2, 3], stale: ["shared/motion.css :: .gone:hover"] },
     "every arm is sanctioned at that value in this file, and only the entry that matched nothing is stale",
   );
   assert.deepEqual(
-    await found(listed, "src/styles/house.css", LIFT, { sanctioned }),
+    await found(listed, "src/styles/shared/house.css", LIFT, { sanctioned }),
     { lines: [1, 2, 3], stale: [] },
     "an entry for another file sanctions nothing here, and is not this file's to call stale",
   );
@@ -115,9 +115,9 @@ test("every hover tip goes somewhere: a rotate() on hover stands only as a TIPPI
     "BLIND SPOTS, declared, each a miss (Issue #779 D3): the rotate property, rotateZ() and rotate3d(); a tip in a custom property consumed by var(); a comma-joined selector list is one key, so a navigating and a non-navigating arm in one rule are judged together (handbook/errata/site.md, PR #479)",
   );
   const lists = {
-    links: ["motion.css :: .x:hover"],
-    instruments: ["motion.css :: .y:hover, .y:focus-visible"],
-    awaiting: ["motion.css :: .gone:hover"],
+    links: ["shared/motion.css :: .x:hover"],
+    instruments: ["shared/motion.css :: .y:hover, .y:focus-visible"],
+    awaiting: ["shared/motion.css :: .gone:hover"],
   };
   const listed: Plant = [
     [".x:hover { transform: rotate(1deg); }", PASS],
@@ -126,12 +126,12 @@ test("every hover tip goes somewhere: a rotate() on hover stands only as a TIPPI
     [".z:hover { transform: rotate(1deg); }", REFUSE],
   ];
   assert.deepEqual(
-    await found(listed, "src/styles/motion.css", TIP, lists),
-    { lines: [4], stale: ["motion.css :: .gone:hover"] },
+    await found(listed, "src/styles/shared/motion.css", TIP, lists),
+    { lines: [4], stale: ["shared/motion.css :: .gone:hover"] },
     "a listed tip passes, the unlisted tip on 4 reds, and only the entry that matched nothing is stale",
   );
   assert.deepEqual(
-    (await found(listed, "src/styles/house.css", TIP, lists)).stale,
+    (await found(listed, "src/styles/shared/house.css", TIP, lists)).stale,
     [],
     "another file's entries are not this file's to call stale",
   );
@@ -165,8 +165,10 @@ test("an inline-block keeps its bullet on line one: a subject that settles displ
     [".v { display: inline-block; }", REFUSE],
   ];
   assert.deepEqual(
-    await found(listed, "src/styles/motion.css", BULLET, { outside: ["motion.css :: .w a", "motion.css :: .gone"] }),
-    { lines: [2], stale: ["motion.css :: .gone"] },
+    await found(listed, "src/styles/shared/motion.css", BULLET, {
+      outside: ["shared/motion.css :: .w a", "shared/motion.css :: .gone"],
+    }),
+    { lines: [2], stale: ["shared/motion.css :: .gone"] },
     "a listed inline-block passes, the unlisted one on 2 reds, and only the entry that matched nothing is stale",
   );
 });

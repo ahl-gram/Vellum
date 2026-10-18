@@ -254,7 +254,7 @@ function downloadAtlas(): void {
     size: blob.size,
     dataUris: (html.match(/data:image\/svg\+xml;base64,/g) ?? []).length,
     hasBlobUrl: html.includes("blob:"),
-    hasExternalCss: html.includes('href="/motion.css"'),
+    hasExternalCss: /<link\b[^>]*\brel="stylesheet"/.test(html),
     title: lastAtlas.title,
   };
 }

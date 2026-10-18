@@ -118,11 +118,15 @@ test("atlasDocument: the deployed page joins the Case; the offline download fall
   };
 
   const deployed = atlasDocument(fixture, (p, s) => atlasPlateFilename(p, s), { anchor: true, motion: true });
-  assert.match(deployed, /<link rel="stylesheet" href="\/fonts\.css">/, "the deployed atlas should link /fonts.css");
+  assert.match(
+    deployed,
+    /<link rel="stylesheet" href="\/shared\/fonts\.css">/,
+    "the deployed atlas should link /shared/fonts.css",
+  );
   assert.match(deployed, /var\(--font-body/, "atlas body chrome should use the body role var");
 
   const offline = atlasDocument(fixture, (p) => `data:${p.key}`, { anchor: false, motion: false });
-  assert.doesNotMatch(offline, /href="\/fonts\.css"/, "the self-contained download links nothing external");
+  assert.doesNotMatch(offline, /<link\b[^>]*\brel="stylesheet"/, "the self-contained download links nothing external");
   assert.match(offline, /var\(--font-body,[^)]*serif/, "the download must fall back to the serif stack");
 });
 
@@ -134,7 +138,7 @@ test("the gallery page css defers the sub's voice to the house intro role (#324)
     const css = await readFile(join(dir, "index.css"), "utf8").catch(() => "");
     assert.ok(
       !/p\.sub[^{]*\{[^}]*font-family/.test(css),
-      "the sub's voice belongs to /house.css, not the generated css",
+      "the sub's voice belongs to /shared/house.css, not the generated css",
     );
     assert.ok(!existsSync(join(dir, "index.html")), "buildGallery must not write the standalone shell anymore");
   } finally {

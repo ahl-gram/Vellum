@@ -110,7 +110,7 @@ function zoomMotion(
     if (typeof reducedMotion === "boolean") return reducedMotion;
     return !!(mq && mq.matches);
   };
-  // Read live: a getter lets the page hand in a lazy /motion.css token read (the stylesheet may not be applied at construction).
+  // Read live: a getter lets the page hand in a lazy /shared/motion.css token read (the stylesheet may not be applied at construction).
   const glideMsNow = () => {
     const v = typeof glideMs === "function" ? glideMs() : glideMs;
     return Number.isFinite(v) && v >= 0 ? v : 250;

@@ -35,12 +35,12 @@ make an unqualified rule false. Read the surface, not just the rule.
     `vellum/engine-no-id-lookup` (`scripts/lint/source-shape.ts`) refuses a `getElementById`
     lookup in every `.ts` under `src/site/shared/living-chart/`, at any depth, at `npm run lint`. It does
     not catch a document-scoped `querySelector`, or the name assembled from pieces.
-- **A page that mounts the engine owes the sheet and the class**: link `/living-chart.css` through
+- **A page that mounts the engine owes the sheet and the class**: link `/shared/living-chart.css` through
   `BaseLayout`'s `extraCss` prop (`src/layouts/BaseLayout.astro`), and put `class="living-chart"` on
   the chart mount it hands in. A page that skips the sheet renders its overlays undressed, and one that skips the class loses the ink-in dress of the chronicle's marks, the `.living-chart g.settlement[data-ink]` rules, the only rules in the sheet that key on it. **The order
   does not matter**: construction only stores references, so a host may build its DOM after wiring,
   and `test/site/living-chart-boundary.test.ts` pins that by constructing against bare objects.
-- **Engine dressing is edited in `src/styles/living-chart.css`, never in a host's own sheet.** The
+- **Engine dressing is edited in `src/styles/shared/living-chart.css`, never in a host's own sheet.** The
   dressing keys on the mount class and never on a host's id; `vellum/css-engine-dress-one-home` and
   `vellum/css-engine-no-host-id` in `scripts/lint/sheet-owners.ts` refuse each.
 - **The host wires the document's click and keydown to the engine; the engine adds document

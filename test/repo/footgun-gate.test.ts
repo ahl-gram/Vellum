@@ -88,7 +88,7 @@ test("every gate-size probe passes at the 8,000-character limit", () => {
 });
 
 // Written out for the same reason as the size probes: several of these rows are the only guard of their roster arm, and deleting one prints no FAIL.
-test("every row on whether a new unit test joins a roster passes", () => {
+test("every row on whether a new unit test, suite, site module or sheet joins a roster passes (Issue #768)", () => {
   const out = execFileSync(process.execPath, [SELFTEST], { encoding: "utf8", timeout: BOUND_MS });
   const gate1Not4 = 'want context with "## Gate 1" and without "## Gate 4", got context';
   const rows: [string, string][] = [
@@ -108,6 +108,9 @@ test("every row on whether a new unit test joins a roster passes", () => {
     ["a new unit test beside a page gets no gate at all", 'want null with "", got null'],
     ["a new suite whose name ends in test still gets gate 4", 'want context with "## Gate 4", got context'],
     ["a new site module whose name ends in test still gets gate 4", 'want context with "## Gate 4", got context'],
+    ["a new shared sheet gets gate 4", 'want context with "## Gate 4", got context'],
+    ["a new sheet at the top of src/styles gets gate 4", 'want context with "## Gate 4", got context'],
+    ["a new sheet in a page's folder gets gate 4", 'want context with "## Gate 4", got context'],
   ];
   for (const [row, wants] of rows)
     assert.ok(out.split("\n").includes(`ok   ${row}: ${wants}`), `no passing row "${row}: ${wants}"\n${out}`);

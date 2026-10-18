@@ -1,4 +1,4 @@
-/* Living-chart engine overlay dressing, host-agnostic. Host contract: link /living-chart.css, or the overlays render undressed, and put class="living-chart" on the chart mount handed to the engine, which the ink-in rules below key on. */
+/* Living-chart engine overlay dressing, host-agnostic. Host contract: link /shared/living-chart.css, or the overlays render undressed, and put class="living-chart" on the chart mount handed to the engine, which the ink-in rules below key on. */
 
 /* The .place-hit reset is load-bearing: a host's own button styling would otherwise paint opaque boxes over each map glyph and break idle parity. */
 .place-overlay {
@@ -188,7 +188,7 @@
   border: 1px solid var(--line-tan);
   border-radius: 4px;
 }
-/* The house wash `button:not(.lf-station):not(.place-hit):hover` in public/house.css is (0,3,1) and would flash this press cream; #place-card is engine-created, so (1,2,0) holds the gold without keying on a host's id. */
+/* The house wash `button:not(.lf-station):not(.place-hit):hover` in src/styles/shared/house.css is (0,3,1) and would flash this press cream; #place-card is engine-created, so (1,2,0) holds the gold without keying on a host's id. */
 #place-card .pc-lay:hover,
 #place-card .pc-lay:focus-visible {
   background: var(--control-gold);

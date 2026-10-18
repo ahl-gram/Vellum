@@ -589,7 +589,7 @@ body.chart-room:not(:has(.stage)) :is(header.chrome, .corner.bl)::before {
   background: rgb(from var(--chart-ink) r g b / 0.92);
   filter: blur(16px);
 }
-/* Edge-facing sides run 4rem out, matching home's inset in public/index.css, so the blur's fade lies past the viewport edge and no chart bleeds through at a corner (measured 97 at the edge against a 60 interior); the Glass carries no pool, its presses stand on their own half-ink fill. */
+/* Edge-facing sides run 4rem out, matching home's inset in src/styles/index.css, so the blur's fade lies past the viewport edge and no chart bleeds through at a corner (measured 97 at the edge against a 60 interior); the Glass carries no pool, its presses stand on their own half-ink fill. */
 body.chart-room header.chrome {
   --pool-top: -4rem;
   --pool-left: -4rem;
@@ -604,7 +604,7 @@ body.chart-room .strip {
   --pool-right: -4rem;
 }
 
-/* The legend row's footing is home's .lf-legend panel (public/index.css: its 0.5rem 1.1rem 0.6rem padding, chart ink 0.85 to 0.72 top to bottom), drawn as a ::before at the padding's insets so the row's box, which the seat and the fit read, never changes (a real padding wrapped the Explorer's roads, `BR2` in `e2e/suites/broadside.ts`). */
+/* The legend row's footing is home's .lf-legend panel (src/styles/index.css: its 0.5rem 1.1rem 0.6rem padding, chart ink 0.85 to 0.72 top to bottom), drawn as a ::before at the padding's insets so the row's box, which the seat and the fit read, never changes (a real padding wrapped the Explorer's roads, `BR2` in `e2e/suites/broadside.ts`). */
 body:has(#map-viewport.zoomed) .legend::before,
 body.stage-under .legend::before,
 body.chart-room:not(:has(.stage)) .legend::before {
