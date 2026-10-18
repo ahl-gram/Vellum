@@ -1,5 +1,5 @@
 import type { AstroIntegration } from "astro";
-import { constants, statSync } from "node:fs";
+import { constants, realpathSync, statSync } from "node:fs";
 import { copyFile, mkdir, readdir, readFile } from "node:fs/promises";
 import { dirname, extname, join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -14,9 +14,10 @@ export const SERVED_SOURCES: readonly ServedSource[] = [
 ];
 export const REPO: string = fileURLToPath(new URL("..", import.meta.url));
 
-const isFile = (path: string): boolean => {
+// A case-insensitive disk finds /House.css for house.css, which a case-sensitive deploy would 404, so the file's real name must end the address as typed.
+const isFile = (path: string, pathname: string): boolean => {
   try {
-    return statSync(path).isFile();
+    return statSync(path).isFile() && realpathSync.native(path).endsWith(pathname.split("/").join(sep));
   } catch {
     return false;
   }
@@ -32,7 +33,7 @@ export const sourceFor = (
   for (const source of sources) {
     const file = join(repo, source.dir, pathname);
     const type = source.types[extension];
-    if (type !== undefined && isFile(file)) return { file, type };
+    if (type !== undefined && isFile(file, pathname)) return { file, type };
   }
   return null;
 };
@@ -52,6 +53,7 @@ export const copySources = async (
       .sort();
     for (const file of files) {
       await mkdir(dirname(join(to, file)), { recursive: true });
+      // The refusal fires inside astro build only because Astro 7.1.3 copies the public folder during its Vite build, before astro:build:done: re-check it on an Astro upgrade (Issue #768).
       await copyFile(join(from, file), join(to, file), constants.COPYFILE_EXCL);
       copied.push(file.split(sep).join("/"));
     }

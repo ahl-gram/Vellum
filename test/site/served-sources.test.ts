@@ -44,6 +44,7 @@ test("a request finds a served file in the first source that keeps its kind, and
       ["/room/", "a folder with no extension"],
       ["/d.css", "a folder named like a sheet"],
       ["/missing.css", "a file nothing holds"],
+      ["/A.css", "a file under another letter case, which a case-sensitive deploy would 404"],
       ["/c.css", "a kind only the other source keeps, found in the source that does not"],
       ["/../outside.css", "a path out of its source"],
       ["/room/../../outside.css", "a path out through a folder"],

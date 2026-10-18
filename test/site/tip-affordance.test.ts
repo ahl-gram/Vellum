@@ -29,7 +29,6 @@ const CSS_FINGERPRINTS: ReadonlyArray<readonly [string, (source: string) => bool
 const cssBearingSources = (): string[] =>
   readdirSync(root("src"), { recursive: true, encoding: "utf8" })
     .map((entry) => `src/${entry.split(sep).join("/")}`)
-    // .css is scanned everywhere under src/ but src/styles/, whose sheets the stylesheet lint reads, so a sheet written anywhere else is not the way the scan misses.
     .filter((p) => !(p.startsWith(`${STYLES}/`) && p.endsWith(".css")))
     .filter((p) => p.endsWith(".ts") || p.endsWith(".astro") || p.endsWith(".css"))
     .filter((p) => {

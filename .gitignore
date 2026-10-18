@@ -14,11 +14,7 @@ dist/
 # Astro's generated types/cache dir (#203).
 .astro/
 
-# The build-output folder (Issue #768): everything `npm run astro:generate` writes
-# (the bundle twins, the fonts copied from the design kit, the atlas and gallery
-# showcases, the discovery files), deleted whole and rebuilt before every astro
-# dev and build. Nothing in it is tracked; the sheets and the committed charts,
-# icons and card are written under src/styles/ and src/static/.
+# The build-output folder (Issue #768): what `npm run astro:generate` writes, rebuilt whole before every dev and build.
 /generated/
 
 .claude/settings.local.json
