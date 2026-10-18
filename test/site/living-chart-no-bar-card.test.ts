@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { barlessHost, realWorld } from "../../test-support/living-chart-hosts.ts";
-import { HOLD_GRACE_MS } from "../../src/site/living-chart/place-card-hold.ts";
+import { HOLD_GRACE_MS } from "../../src/site/shared/living-chart/place-card-hold.ts";
 
 test("the place card carries the prospect way in only on a world sheet whose host provides one (#242)", async () => {
   const { walk } = await import("../../test-support/element-shim.ts");

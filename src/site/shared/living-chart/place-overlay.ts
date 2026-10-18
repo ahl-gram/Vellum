@@ -6,9 +6,9 @@ import {
   clampOffset,
   type CardBox,
   type PlaceCard,
-} from "../../render/place-card.ts";
-import type { PlaceManifest, PlaceMark } from "../../render/place-manifest.ts";
-import type { HistoricalEvent } from "../../society/history.ts";
+} from "../../../render/place-card.ts";
+import type { PlaceManifest, PlaceMark } from "../../../render/place-manifest.ts";
+import type { HistoricalEvent } from "../../../society/history.ts";
 import {
   CLOSED,
   HOLD_GRACE_MS,

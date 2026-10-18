@@ -48,14 +48,14 @@ const ID_LOOKUP_PLANT = [
 
 test("the living-chart engine looks up no element by id, however the lookup is spelled, and a mention is not a lookup", async () => {
   assert.deepEqual(
-    await houseReports(ID_LOOKUP_PLANT, "src/site/living-chart/index.ts"),
+    await houseReports(ID_LOOKUP_PLANT, "src/site/shared/living-chart/index.ts"),
     at(ENGINE, [1, 2, 3, 4, 5, 6]),
   );
 });
 
 test("the reading frame looks up no element by id, spelled any way the engine's rule reads", async () => {
   assert.deepEqual(
-    await houseReports(ID_LOOKUP_PLANT, "src/site/reading-frame/index.ts"),
+    await houseReports(ID_LOOKUP_PLANT, "src/site/shared/reading-frame/index.ts"),
     at(FRAME_IDS, [1, 2, 3, 4, 5, 6]),
     "BLIND SPOT, declared, erring toward passing: the name assembled from pieces, as for the engine's rule",
   );
@@ -82,7 +82,7 @@ test("the reading frame imports nothing from the Explorer, by a static import, a
         'export const k = () => new URL("../explorer/worker.ts", import.meta.url);',
         'export type L = typeof import("../explorer/l.ts");',
       ],
-      "src/site/reading-frame/index.ts",
+      "src/site/shared/reading-frame/index.ts",
     ),
     at(FRAME_IMPORTS, [1, 2, 3, 4, 5, 6, 7, 12]),
     SOURCE_BLIND_SPOTS,
@@ -157,8 +157,8 @@ test("a room writes the contents row's cr-num class only through the shared buil
 });
 
 const SCOPES: ReadonlyArray<readonly [string, readonly string[]]> = [
-  [FRAME_IDS, ["src/site/reading-frame/**/*.ts"]],
-  [FRAME_IMPORTS, ["src/site/reading-frame/**/*.ts"]],
+  [FRAME_IDS, ["src/site/shared/reading-frame/**/*.ts"]],
+  [FRAME_IMPORTS, ["src/site/shared/reading-frame/**/*.ts"]],
   [GLASS, ["src/site/explorer/**/*.ts", "src/site/home/**/*.ts"]],
   [CONTENTS, ["src/site/**/*.ts"]],
   [TEST_IMPORTS, ["e2e/**/*.ts", "scripts/**/*.ts", "src/**/*.ts", "test/**/*.ts", "test-support/**/*.ts"]],
@@ -500,12 +500,12 @@ const resolvedRules = async (file: string): Promise<Record<string, unknown>> => 
 };
 
 const REACH: ReadonlyArray<readonly [string, string, string]> = [
-  [ENGINE, "src/site/living-chart/index.ts", "src/site/explorer/app.ts"],
+  [ENGINE, "src/site/shared/living-chart/index.ts", "src/site/explorer/app.ts"],
   [WORKER, "src/site/explorer/worker-client.ts", "src/cli/main.ts"],
   [ROSTER, "e2e/suites/home.ts", "src/cli/main.ts"],
   [READS, "e2e/suites/home.ts", "src/cli/main.ts"],
-  [FRAME_IDS, "src/site/reading-frame/index.ts", "src/site/living-chart/index.ts"],
-  [FRAME_IMPORTS, "src/site/reading-frame/index.ts", "src/site/explorer/app.ts"],
+  [FRAME_IDS, "src/site/shared/reading-frame/index.ts", "src/site/shared/living-chart/index.ts"],
+  [FRAME_IMPORTS, "src/site/shared/reading-frame/index.ts", "src/site/explorer/app.ts"],
   [GLASS, "src/site/explorer/app.ts", "src/site/prospect/seats.ts"],
   [GLASS, "src/site/home/app.ts", "src/site/prospect/seats.ts"],
   [CONTENTS, "src/site/prospect/seats.ts", "src/cli/main.ts"],
@@ -527,12 +527,12 @@ test("each scoped rule resolves at error inside its scope and not outside it, an
     "app.ts no longer resolves max-lines at the 400-line bound Issue #191 ratified for it, counted in lines of code (Alex, 2026-10-07, Issue #779)",
   );
   for (const [rule, nested] of [
-    [ENGINE, "src/site/living-chart/nested/deeper/part.ts"],
+    [ENGINE, "src/site/shared/living-chart/nested/deeper/part.ts"],
     [WORKER, "src/site/explorer/nested/deeper/part.ts"],
     [ROSTER, "e2e/suites/nested/deeper/part.ts"],
     [READS, "e2e/suites/nested/deeper/part.ts"],
-    [FRAME_IDS, "src/site/reading-frame/nested/deeper/part.ts"],
-    [FRAME_IMPORTS, "src/site/reading-frame/nested/deeper/part.ts"],
+    [FRAME_IDS, "src/site/shared/reading-frame/nested/deeper/part.ts"],
+    [FRAME_IMPORTS, "src/site/shared/reading-frame/nested/deeper/part.ts"],
     [GLASS, "src/site/explorer/nested/deeper/part.ts"],
     [GLASS, "src/site/home/nested/deeper/part.ts"],
     [CONTENTS, "src/site/prospect/nested/deeper/part.ts"],

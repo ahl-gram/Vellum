@@ -11,15 +11,21 @@ import {
   type AgesPos,
   type Chamber,
   type DetentDrag,
-} from "../../render/ages-track.ts";
-import { SWEEP_MS, sweepYearAt, sweepElapsedAt, eventIsPast, type YearRange } from "../../render/chronicle-scrubber.ts";
-import { tAtElapsed, elapsedAtT } from "../../render/voyage-geometry.ts";
+} from "../../../render/ages-track.ts";
+import {
+  SWEEP_MS,
+  sweepYearAt,
+  sweepElapsedAt,
+  eventIsPast,
+  type YearRange,
+} from "../../../render/chronicle-scrubber.ts";
+import { tAtElapsed, elapsedAtT } from "../../../render/voyage-geometry.ts";
 import { DEFAULT_PACE, anchorAt, repaced, storyAt, type Pace, type SweepAnchor } from "./pace.ts";
 import type { Chronicle } from "./chronicle.ts";
 import type { Voyage } from "./voyage.ts";
 import type { OverlayData } from "./place-overlay.ts";
-import type { PlaceManifest } from "../../render/place-manifest.ts";
-import type { Survey } from "../../render/survey.ts";
+import type { PlaceManifest } from "../../../render/place-manifest.ts";
+import type { Survey } from "../../../render/survey.ts";
 import { toldAnnal, type ToldEntry } from "./told.ts";
 import { buildAnnals, type AnnalRow } from "./annals.ts";
 

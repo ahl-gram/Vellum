@@ -1,5 +1,5 @@
 // The Wayfarer's Passage overlay: the per-draw DOM layer animating the survey that drew the chart; the geometry is prepared in voyage-session.ts and the math lives in src/render/, so this file is only frame paint, the rAF clock, and the arm/step/paint/reset API.
-import { frameAt, logEntryCount, toldRow, type VoyageFrame } from "../../render/voyage.ts";
+import { frameAt, logEntryCount, toldRow, type VoyageFrame } from "../../../render/voyage.ts";
 import {
   pointAtDistance,
   headingAt,
@@ -8,13 +8,13 @@ import {
   markGlyphAt,
   tAtElapsed,
   type MarkGlyph,
-} from "../../render/voyage-geometry.ts";
+} from "../../../render/voyage-geometry.ts";
 import { createSessionBuilder, type Session, type TourOrderSource } from "./voyage-session.ts";
 import { journalText, type VoyageLogPanel } from "./voyage-log-panel.ts";
 import type { ToldEntry } from "./told.ts";
-import type { PlaceManifest } from "../../render/place-manifest.ts";
-import type { Survey } from "../../render/survey.ts";
-import type { Pt } from "../../core/rdp.ts";
+import type { PlaceManifest } from "../../../render/place-manifest.ts";
+import type { Survey } from "../../../render/survey.ts";
+import type { Pt } from "../../../core/rdp.ts";
 
 /** Issue #174: where the resting track mirrors to (the Explorer's verso). The engine paints ONLY where the survey rests, never from the rAF tick, and clears when the voyage leaves. */
 export interface RestingTrackSink {

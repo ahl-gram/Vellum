@@ -12,7 +12,7 @@ import {
 // A host that hands in no scrubber (Issue #319; the ratified split is the 2026-08-09 comment on Issue #319): the INSTRUMENT surface goes silently inert while the CHART side stays fully live. Construction is pinned DOM-free in living-chart-boundary.test.ts; this file installs the shim because proving the chart side runs means running it.
 
 test("the bar-less instrument surface is silent no-ops, and never throws (#319)", async () => {
-  const { createLivingChart } = await import("../../src/site/living-chart/index.ts");
+  const { createLivingChart } = await import("../../src/site/shared/living-chart/index.ts");
   const mount = emptyMount();
   const { sink, calls } = recordingSink();
   const lc = createLivingChart({ mapEl: mount.el, statusEl: {} as unknown as HTMLElement, restingTrackSink: sink });
@@ -43,7 +43,7 @@ test("the bar-less instrument surface is silent no-ops, and never throws (#319)"
 });
 
 test("destroy() on a bar-less host still tears down the chart side (#319)", async () => {
-  const { createLivingChart } = await import("../../src/site/living-chart/index.ts");
+  const { createLivingChart } = await import("../../src/site/shared/living-chart/index.ts");
   const mount = emptyMount();
   const { sink, calls } = recordingSink();
   const lc = createLivingChart({ mapEl: mount.el, statusEl: {} as unknown as HTMLElement, restingTrackSink: sink });
@@ -65,7 +65,7 @@ test("destroy() on a bar-less host still tears down the chart side (#319)", asyn
 });
 
 test("the bar-less ages driver delegates EXACTLY the two chart-side teardowns (#319)", async () => {
-  const { barlessAges } = await import("../../src/site/living-chart/no-bar.ts");
+  const { barlessAges } = await import("../../src/site/shared/living-chart/no-bar.ts");
 
   // Through the public surface the split is invisible on an undrawn mount, so it is pinned on the module against its injected collaborators; a blanket-no-op clearAges fails only here.
   const ledger = (drive: (a: ReturnType<typeof barlessAges>) => void): string[] => {
@@ -105,7 +105,7 @@ test("the bar-less ages driver delegates EXACTLY the two chart-side teardowns (#
 });
 
 test("a host WITH a scrubber still gets the REAL instrument and journal, not the stand-ins (#319)", async () => {
-  const { createLivingChart } = await import("../../src/site/living-chart/index.ts");
+  const { createLivingChart } = await import("../../src/site/shared/living-chart/index.ts");
   const mount = emptyMount();
   const { bar, writes } = recordingBar();
   const lc = createLivingChart({
@@ -213,7 +213,7 @@ test("the bar-less scrubTo still reaches the chronicle's static reveal (#319)", 
 });
 
 test("the bar-less journal keeps the survey's prose and reports no rendered rows (#319)", async () => {
-  const { barlessLogPanel } = await import("../../src/site/living-chart/no-bar.ts");
+  const { barlessLogPanel } = await import("../../src/site/shared/living-chart/no-bar.ts");
   // No scrubber means no PANEL, but the log is world data the voyage still needs (status line, e2e hook), so the stand-in builds the REAL log and skips only the DOM.
   const panel = barlessLogPanel();
   const { log, rows } = panel.buildLogPanel(
@@ -251,8 +251,8 @@ test("the bar-less journal keeps the survey's prose and reports no rendered rows
 
 test("the bar-less journal's log is identical to the rendering panel's (#319)", async () => {
   const [{ barlessLogPanel }, { createVoyageLogPanel }, { El }] = await Promise.all([
-    import("../../src/site/living-chart/no-bar.ts"),
-    import("../../src/site/living-chart/voyage-log-panel.ts"),
+    import("../../src/site/shared/living-chart/no-bar.ts"),
+    import("../../src/site/shared/living-chart/voyage-log-panel.ts"),
     import("../../test-support/element-shim.ts"),
   ]);
   await realWorld(); // the shim: the REAL panel builds rows and needs a document

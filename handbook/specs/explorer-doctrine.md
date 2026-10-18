@@ -26,14 +26,14 @@ make an unqualified rule false. Read the surface, not just the rule.
 ## The engine boundary and the host contract
 
 - **The engine is host-agnostic and takes its elements from the host.** `createLivingChart` in
-  `src/site/living-chart/index.ts` is the only way in, and construction only stores the references it
+  `src/site/shared/living-chart/index.ts` is the only way in, and construction only stores the references it
   is given. **IDS ARE THE HOST'S NAMESPACE**: the engine never reaches into the document for one.
   Inside an element the host handed in, it may address ids it or the renderer owns, which is how the
   chronicle reaches the chart's own layer groups and how the overlay reaches the card it assigned.
   The line is where the id comes from, not whether one appears.
   - **The guard is narrower than the rule, so hold the rule yourself.**
     `vellum/engine-no-id-lookup` (`scripts/lint/source-shape.ts`) refuses a `getElementById`
-    lookup in every `.ts` under `src/site/living-chart/`, at any depth, at `npm run lint`. It does
+    lookup in every `.ts` under `src/site/shared/living-chart/`, at any depth, at `npm run lint`. It does
     not catch a document-scoped `querySelector`, or the name assembled from pieces.
 - **A page that mounts the engine owes the sheet and the class**: link `/living-chart.css` through
   `BaseLayout`'s `extraCss` prop (`src/layouts/BaseLayout.astro`), and put `class="living-chart"` on
@@ -55,7 +55,7 @@ make an unqualified rule false. Read the surface, not just the rule.
   hand-copied roster is one-sided by construction: it catches a seam removed from a host and can
   never catch a seam present in the installer and asserted nowhere.
 - **A host without a scrubber gets the SAME engine surface, not a narrowed one.**
-  `LivingChartHost.scrubber` is optional and `src/site/living-chart/no-bar.ts` supplies the
+  `LivingChartHost.scrubber` is optional and `src/site/shared/living-chart/no-bar.ts` supplies the
   stand-ins, each typed as the real module's `ReturnType` alias so the type checker breaks that file
   when the real one grows a member.
   - **The split is instrument-silent and chart-live**, so a stand-in builds the REAL work and skips
@@ -64,7 +64,7 @@ make an unqualified rule false. Read the surface, not just the rule.
     removes the one announcement a bar-less host can still make. The no-op belongs to the
     INSTRUMENT, never to the composed entry, which still serves the chart.
   - **A host that DOES supply a scrubber declares the intersection type** (`LivingChartHost & {
-    scrubber: ScrubberRefs }`, as `src/site/reading-frame/index.ts` does), or dropping its scrubber
+    scrubber: ScrubberRefs }`, as `src/site/shared/reading-frame/index.ts` does), or dropping its scrubber
     block type-checks clean and silently takes the stand-ins.
 - **The instrument-less arm-at-rest entry is `rearmVoyage`.** `applyVoyage` is the wrong static
   entry: it posts to the status line and hangs the settle.
@@ -263,7 +263,7 @@ image. A future surface inherits the Explorer's rule the moment its chart is inl
   is 26px whatever its glyph, so even at rest two towns closer than 13px in both axes cover each
   other's centres, and the later-painted box used to take both (Issue #632: 25 of 156 centre presses
   opened a neighbour at 1024). Every hover, move and press resolves through `nearestMark` in
-  `src/site/living-chart/place-card-hold.ts`, every box keeps its size, and the resolved box is
+  `src/site/shared/living-chart/place-card-hold.ts`, every box keeps its size, and the resolved box is
   raised under the card, where the ring is drawn by that class rather than by `:hover`, which the
   browser recomputes only on the pointer's next move after a raise. The alternatives measured worse:
   reordering paint only moves the loss to another town, smaller boxes still lose centres, and a
@@ -308,7 +308,7 @@ image. A future surface inherits the Explorer's rule the moment its chart is inl
   and on the vertical axis for a host that injects no box at all. Clamping fits a card; the cap below
   is what shrinks one.
 - **A card is CAPPED to that box, and what does not fit scrolls inside it.** `clampIntoView` in
-  `src/site/living-chart/place-overlay.ts` publishes the box's height as `--pc-maxh` before it
+  `src/site/shared/living-chart/place-overlay.ts` publishes the box's height as `--pc-maxh` before it
   measures, and the sheet caps the card's inner box against it. Three things that cap has to get
   right, none of which a unit test can see. **It takes the box's height RAW and never scales it by
   `--zoom-k`**: the card's counter-scale cancels the mount's own `scale(k)`, so the card's net scale
@@ -334,7 +334,7 @@ image. A future surface inherits the Explorer's rule the moment its chart is inl
   no world index, so an inset card is deliberately linkless. Why an inset renumbers is
   `handbook/specs/region-and-voyage.md`'s.
 - **A shown card holds while the pointer is anywhere over its outline, and stays see-through
-  while it does** (Issue #750, the rules pure in `src/site/living-chart/place-card-hold.ts`). The
+  while it does** (Issue #750, the rules pure in `src/site/shared/living-chart/place-card-hold.ts`). The
   outline is the card's rectangle read against the pointer, never a card that takes the pointer, so
   the wheel, the drag and the pinch over it still reach the chart and a press on its own town still
   reaches the town. It holds for `HOLD_GRACE_MS` after the pointer leaves both the card and its town,

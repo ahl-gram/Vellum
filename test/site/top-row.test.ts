@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { clears, cornerWidth } from "../../src/site/shell/top-row.ts";
+import { clears, cornerWidth } from "../../src/site/shared/shell/top-row.ts";
 
 // Boxes measured on main's build at 90c8fe3 (Issue #762 pull request B's plan, measurements 1, 4, 6 and 8): the nav's one line ends the cluster at 510.2 on every page.
 const GAP = 25.6;

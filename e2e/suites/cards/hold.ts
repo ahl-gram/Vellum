@@ -1,6 +1,6 @@
 import type { makeSettle } from "../../support/settle.ts";
 import type { Payload, Point, SuiteContext } from "../../types.ts";
-import { HOLD_GRACE_MS } from "../../../src/site/living-chart/place-card-hold.ts";
+import { HOLD_GRACE_MS } from "../../../src/site/shared/living-chart/place-card-hold.ts";
 import { NARROW_SEED } from "./reads.ts";
 
 type Settle = ReturnType<typeof makeSettle>;

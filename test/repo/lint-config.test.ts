@@ -116,7 +116,7 @@ const LIST_AT_REFORMAT: Readonly<Record<string, readonly [number, number]>> = {
   "src/site/explorer/sheet-turn.ts": [0, 1],
   "src/site/explorer/table-drag.ts": [0, 1],
   "src/site/explorer/verso.ts": [0, 1],
-  "src/site/living-chart/place-overlay.ts": [1, 1],
+  "src/site/shared/living-chart/place-overlay.ts": [1, 1],
   "src/site/print-room/app.ts": [0, 1],
   "src/site/print-room/contents-markup.ts": [0, 1],
   "src/site/reading-room/prospect-stage.ts": [0, 1],

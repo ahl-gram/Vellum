@@ -84,7 +84,7 @@ declaration you write to get there. The checklist form of the same lines is `vel
   `!important` forces only the duration and the delay, so a `transition-duration: 0s` there
   loses. The desk frame's body rule in `public/atelier.css` carries `transition: none` for this
   (Issue #778), as `placeLegendRow` in `src/site/shared/room-seats.ts` and `layRow` in
-  `src/site/shell/top-row.ts` hold the transition off while they write and read; the cases still
+  `src/site/shared/shell/top-row.ts` hold the transition off while they write and read; the cases still
   open are Issue #868's.
 - **An absolutely positioned box with no positioned ancestor lays out against the window, not the
   floored page.** Its containing block is the initial one, the window's size, so under the 1024

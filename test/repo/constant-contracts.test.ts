@@ -14,7 +14,7 @@ import { BACKDROP_SAMPLES, FOREGROUND_SAMPLES } from "../../src/prospect/transec
 import { LOD_BANDS } from "../../src/world/lod.ts";
 import { defaultRecipe } from "../../src/world/generate.ts";
 import { POSTER_PRESETS } from "../../src/site/print-room/poster-presets.ts";
-import { MAX_PIXELS, fitScaleToBudget } from "../../src/site/lib/rasterize.ts";
+import { MAX_PIXELS, fitScaleToBudget } from "../../src/site/shared/rasterize.ts";
 
 // Constant contracts that span files: each pair must move together.
 
@@ -96,8 +96,8 @@ test("the Hunt projects onto the chart renderMap drew: every town stands where t
 test("the voyage session projects onto the chart renderMap drew: its origin stands on the origin town, at two widths", async () => {
   const [{ createSessionBuilder }, { barlessLogPanel }, { realWorld, stackedMount }, { buildPlaceManifest }] =
     await Promise.all([
-      import("../../src/site/living-chart/voyage-session.ts"),
-      import("../../src/site/living-chart/no-bar.ts"),
+      import("../../src/site/shared/living-chart/voyage-session.ts"),
+      import("../../src/site/shared/living-chart/no-bar.ts"),
       import("../../test-support/living-chart-hosts.ts"),
       import("../../src/render/place-manifest.ts"),
     ]);

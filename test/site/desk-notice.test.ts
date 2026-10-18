@@ -10,7 +10,7 @@ import {
   noticeDue,
   type NoticeHost,
   type NoticeView,
-} from "../../src/site/shell/desk-notice.ts";
+} from "../../src/site/shared/shell/desk-notice.ts";
 
 // The desk notice (Issue #761): a phone that had to shrink the 1024 page to fit sees a note, once per browser; the scale and height fixtures are the ones measured under emulation on 2026-10-04 (plan, measurement 4), the boundary ones exact binary fractions so float error cannot decide them.
 

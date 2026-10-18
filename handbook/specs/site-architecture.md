@@ -145,7 +145,7 @@ settles order-first on every run; a concurrency check may rely on that. A job th
 worker boundary is serializable, and one function is the single glue both transports call, which is
 `prospectResultFor` in `src/site/explorer/prospect-job.ts` for the prospect kind and the pattern a
 new kind follows. **PNG is outside the determinism covenant and is never byte-compared**: a canvas
-raster bakes the viewer's own installed fonts, as `src/site/lib/rasterize.ts` states at its head.
+raster bakes the viewer's own installed fonts, as `src/site/shared/rasterize.ts` states at its head.
 SVG remains the byte-faithful artifact.
 
 ## First paint and inlined scripts
@@ -297,7 +297,7 @@ precisely, because a token that falls outside it looks identical at the point of
   `tsconfig.json` checks every TypeScript root with the browser libraries. `tsconfig.engine.json`
   checks every `.ts` under `src/` outside `src/site/` without the DOM libraries: the generator, the
   renderer, the CLI, `src/layouts/` and every directory added there, and not the living chart under
-  `src/site/living-chart/`, which `handbook/specs/explorer-doctrine.md` calls the engine. Nothing in
+  `src/site/shared/living-chart/`, which `handbook/specs/explorer-doctrine.md` calls the engine. Nothing in
   that tree names `document`, `window`, an element type or any other DOM-only global.
   `tsconfig.worker.json` checks everything `src/site/explorer/worker.ts` loads against the language
   and the worker library alone, with no Node types, so nothing the worker loads names the DOM,

@@ -5,7 +5,7 @@ import {
   type VoyageLog,
   type VoyageLogEntry,
   type VoyageLogPort,
-} from "../../world/voyage-log.ts";
+} from "../../../world/voyage-log.ts";
 
 export interface VoyageLogHost {
   readonly panel: HTMLElement;

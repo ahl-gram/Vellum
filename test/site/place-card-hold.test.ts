@@ -7,7 +7,7 @@ import {
   nextHold,
   type Hold,
   type HoldInput,
-} from "../../src/site/living-chart/place-card-hold.ts";
+} from "../../src/site/shared/living-chart/place-card-hold.ts";
 
 const run = (inputs: ReadonlyArray<HoldInput>, from: Hold = CLOSED): Hold => inputs.reduce(nextHold, from);
 const A = 3,

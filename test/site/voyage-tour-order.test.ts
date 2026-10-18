@@ -41,8 +41,8 @@ async function builderWith(tourOrder?: {
   get(seed: number, survey: Survey, ports: ReadonlyArray<number>): ReadonlyArray<number> | null;
 }) {
   const [{ createSessionBuilder }, { barlessLogPanel }, { El }] = await Promise.all([
-    import("../../src/site/living-chart/voyage-session.ts"),
-    import("../../src/site/living-chart/no-bar.ts"),
+    import("../../src/site/shared/living-chart/voyage-session.ts"),
+    import("../../src/site/shared/living-chart/no-bar.ts"),
     import("../../test-support/element-shim.ts"),
   ]);
   const { manifest, survey } = await realWorld(); // installs the element shim the overlay svg needs

@@ -1,8 +1,8 @@
 // The voyage session builder: everything that PREPARES a survey before a frame paints (plan + tour order, routed geometry, projection, the log rows, the overlay svg); voyage.ts animates the record this builds.
-import { applyTourOrder, buildVoyagePlan, reorderPlanByTravel, type VoyagePlan } from "../../render/voyage.ts";
-import { prepareVoyageRouter, type LegMode, type RoutedLeg, type VoyageRouter } from "../../render/voyage-route.ts";
-import type { WaterSpan } from "../../render/voyage-water.ts";
-import { createProjection, marginFor, type Projection } from "../../render/transform.ts";
+import { applyTourOrder, buildVoyagePlan, reorderPlanByTravel, type VoyagePlan } from "../../../render/voyage.ts";
+import { prepareVoyageRouter, type LegMode, type RoutedLeg, type VoyageRouter } from "../../../render/voyage-route.ts";
+import type { WaterSpan } from "../../../render/voyage-water.ts";
+import { createProjection, marginFor, type Projection } from "../../../render/transform.ts";
 import {
   buildLegGeometry,
   netFacing,
@@ -10,13 +10,13 @@ import {
   type Facing,
   type LegGeometry,
   type MarkGlyph,
-} from "../../render/voyage-geometry.ts";
+} from "../../../render/voyage-geometry.ts";
 import { SHIP_PARTS, RIDER_PARTS, makeMark } from "./voyage-marks.ts";
 import type { VoyageLogPanel } from "./voyage-log-panel.ts";
-import type { PlaceManifest, PlaceMark } from "../../render/place-manifest.ts";
-import { surveyFingerprint, type Survey } from "../../render/survey.ts";
-import type { VoyageLog } from "../../world/voyage-log.ts";
-import type { Pt } from "../../core/rdp.ts";
+import type { PlaceManifest, PlaceMark } from "../../../render/place-manifest.ts";
+import { surveyFingerprint, type Survey } from "../../../render/survey.ts";
+import type { VoyageLog } from "../../../world/voyage-log.ts";
+import type { Pt } from "../../../core/rdp.ts";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 

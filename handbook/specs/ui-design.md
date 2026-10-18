@@ -158,7 +158,7 @@ scrolling page it washes out whatever passes through it. Four corners, each a na
   page with a seat in the route tree, the trail under it, the press that opens the chart of the atelier riding the trail's line, or taking its own under the nav where the page has no trail, directly on the deep. Fixed in a room,
   riding the page on home. The motto keeps its line and the wordmark its size at every width. **The
   cluster and the right-hand corner share one top row** on every page, laid out from their own boxes
-  by `src/site/shell/top-row.ts`: a corner wider than the kit's gives way toward the kit's width,
+  by `src/site/shared/shell/top-row.ts`: a corner wider than the kit's gives way toward the kit's width,
   never below it, so the two boxes stand at least `--chrome-x` apart, less a half pixel, wider than
   any backing the corner draws toward the nav. The nav keeps one line and never wraps; at a larger
   browser text size it can run under the corner, a cost recorded in `handbook/errata/site.md`.
@@ -263,7 +263,7 @@ shows on every page the layout renders until "Continue anyway" is pressed once, 
 that browser; the served atlas, which carries none of the site's scripts, takes the fixed viewport
 without it. It takes no focus and blocks nothing beyond its own footprint, though its halo dims the
 page close around it while it is up; it sits under the first-arrival veil, prints as nothing, and
-stays hidden with scripts off. Who sees it is `noticeDue` in `src/site/shell/desk-notice.ts`, which
+stays hidden with scripts off. Who sees it is `noticeDue` in `src/site/shared/shell/desk-notice.ts`, which
 reads the page's own shrink. Never gate it on a screen size alone, which Brave disguises: a
 screen-size test enters only as a second way in, for a browser that does not report the shrink. Nor on
 a coarse pointer alone, which every tablet reports. **Provisional until the post-use review:** its

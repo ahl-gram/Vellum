@@ -179,7 +179,7 @@ owes the script and moves the prospect plate pins.
     region sheets while every committed chart and the golden stand still. Growing a WORLD sheet's
     lettering is the opposite case: a full regen, landed alone.
   - **A DOM attribute whose scope is the whole idle-parity question.** The chronicle's reveal writes
-    and removes `data-ink` in `src/site/living-chart/chronicle.ts` and nothing else writes it, the
+    and removes `data-ink` in `src/site/shared/living-chart/chronicle.ts` and nothing else writes it, the
     grading predicates behind it are pure (`glyphRevealedBetween` and `inkGradeFor` in
     `src/render/chronicle-scrubber.ts`), and the baked sheet string `lastSvg` in
     `src/site/explorer/app.ts` is never touched. An attribute with a second writer is not this lever.
@@ -304,7 +304,7 @@ comment. This is a convenience index, not their home.
   box centre is the town.** Anything anchoring geometry or a DOM transform to a settlement takes the
   point from the place manifest (`buildPlaceManifest` in `src/render/place-manifest.ts`); the
   invariant is carried as a comment at the press-origin assignment in
-  `src/site/living-chart/chronicle.ts`.
+  `src/site/shared/living-chart/chronicle.ts`.
 - **Prospect byte pins:** the plate pins hold only while all of `src/prospect/`, and
   `test-support/prospect-fixtures.ts`, which builds the pinned inputs, stay **libm-free and
   clock-free**, and `vellum/prospect-libm-clock-free` (`prospectLibmClockFree` in
@@ -365,8 +365,8 @@ line yourself. A type-check skip passes only where the "Not skips" line below na
   generated assets and runs one full build that most of its tests read; split into two files, each
   would need that build and race the other on its output folder under `node --test`'s parallel
   files.
-- **`max-lines-per-function` on `createVoyage` (`src/site/living-chart/voyage.ts`), `createAges`
-  (`src/site/living-chart/ages.ts`), `createPlaceOverlay` (`src/site/living-chart/place-overlay.ts`)
+- **`max-lines-per-function` on `createVoyage` (`src/site/shared/living-chart/voyage.ts`), `createAges`
+  (`src/site/shared/living-chart/ages.ts`), `createPlaceOverlay` (`src/site/shared/living-chart/place-overlay.ts`)
   and `createLodController` (`src/site/explorer/lod-controller.ts`).** Each builder's functions read
   one shared live record after a guard; split into parts, each such read would carry a hand-written
   non-null mark the checker cannot tie to its guard, so an edit deleting the guard would still
@@ -386,8 +386,9 @@ left, in every TypeScript root, `e2e/` included, and nothing joins it: a new ove
 and ESLint also fails on an entry no longer needed, so the change that splits an overrun runs
 `npx eslint --flag unstable_native_nodejs_ts_config --prune-suppressions .` and commits the smaller
 list. `test/repo/lint-config.test.ts` holds it to those two rules over tracked files, and to its
-counts at the reformat (`LIST_AT_REFORMAT`), so no file joins it and no count grows; the change that
-splits an overrun lowers that file's ceiling there too. It counts overruns, not sizes, so it cannot
+counts at the reformat (`LIST_AT_REFORMAT`), so no file joins it and no count grows; a file that
+moves keeps its entry, and its ceiling there, under its new path, which is not a file joining; the
+change that splits an overrun lowers that file's ceiling there too. It counts overruns, not sizes, so it cannot
 see a listed file or function grow while already over its cap, nor a new overrun in a file whose
 other overrun is split in the same change; review holds those. Issue #814 splits the code until the
 list is empty, and then the file, this paragraph and its guards go.

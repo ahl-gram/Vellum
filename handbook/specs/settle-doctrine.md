@@ -238,7 +238,7 @@ section points there rather than restating it.
 - **A sleep past an animation's nominal duration still lands mid-animation.** The place card's
   unfurl is `paperUnfurl` in `public/motion.css`, a `rotateX` roll that the `.pc-inner` rules in
   `public/living-chart.css` grade `--unfurl-quick` (400ms) on a shown card and `--unfurl` (650ms)
-  on a pinned one, and `showPlaceCard` in `src/site/living-chart/place-overlay.ts` restarts it on
+  on a pinned one, and `showPlaceCard` in `src/site/shared/living-chart/place-overlay.ts` restarts it on
   every show, which a hover onto another town, keyboard focus on another town and a press that pins
   each trigger (a re-entry on the town already shown does not), so a gesture sequence starts the
   roll more than once and a clock started at the first show is not started at the last restart;

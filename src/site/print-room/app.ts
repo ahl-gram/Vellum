@@ -11,7 +11,7 @@ import {
   chartFilename,
   type PosterPreset,
 } from "./poster-presets.ts";
-import { rasterizeSvg, type RasterizeResult } from "../lib/rasterize.ts";
+import { rasterizeSvg, type RasterizeResult } from "../shared/rasterize.ts";
 import { initBoundAtlas, clearBoundAtlas, enableBind, sheetAspect, type PosterBasis } from "./bound-atlas.ts";
 import {
   bindPrintRoom,

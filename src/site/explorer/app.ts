@@ -35,7 +35,7 @@ import { wireFootnotes } from "./footnotes.ts";
 import { installExplorerHooks } from "./hooks.ts";
 import { wireSurveyToggle, armOnLanding, deferLandingArm } from "./survey-arm.ts";
 import { createTourOrder } from "./tour-order.ts";
-import { createLivingChart } from "../living-chart/index.ts";
+import { createLivingChart } from "../shared/living-chart/index.ts";
 import { bindRoom } from "../shared/room.ts";
 import { pageBox } from "../shared/page-box.ts";
 import { makeAnnouncer } from "../shared/announce.ts";
