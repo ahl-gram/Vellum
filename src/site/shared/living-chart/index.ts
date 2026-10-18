@@ -11,10 +11,10 @@ import type { TourOrderSource } from "./voyage-session.ts";
 import { createVoyageLogPanel } from "./voyage-log-panel.ts";
 import { createAges, type Ages } from "./ages.ts";
 import { barlessAges, barlessLogPanel } from "./no-bar.ts";
-import type { AgesPos } from "../../render/ages-track.ts";
-import type { PlaceManifest } from "../../render/place-manifest.ts";
-import type { Survey } from "../../render/survey.ts";
-import type { CardBox } from "../../render/place-card.ts";
+import type { AgesPos } from "../../../render/ages-track.ts";
+import type { PlaceManifest } from "../../../render/place-manifest.ts";
+import type { Survey } from "../../../render/survey.ts";
+import type { CardBox } from "../../../render/place-card.ts";
 import type { ToldEntry } from "./told.ts";
 
 export type { BuildPlaceOverlayOpts, RestingTrackSink, TourOrderSource };

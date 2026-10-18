@@ -1,8 +1,8 @@
-import type { Field } from "../src/core/grid.ts";
-import { buildHeightfield, type UvWindow } from "../src/terrain/heightfield.ts";
-import { defaultRecipe, generateWorld } from "../src/world/generate.ts";
-import { labelLandmasses } from "../src/world/landmass.ts";
-import { floorToParent, parentSurfaceOnWindow, rejectBridges } from "../src/terrain/detail-guarantees.ts";
+import type { Field } from "../../src/core/grid.ts";
+import { buildHeightfield, type UvWindow } from "../../src/terrain/heightfield.ts";
+import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
+import { labelLandmasses } from "../../src/world/landmass.ts";
+import { floorToParent, parentSurfaceOnWindow, rejectBridges } from "../../src/terrain/detail-guarantees.ts";
 import {
   ancestorWindows,
   buildChainedField,
@@ -10,10 +10,10 @@ import {
   detailForWindow,
   maxOfSurfaces,
   type ChainSpec,
-} from "../src/world/detail-chain.ts";
-import { LOD_BANDS, type LodBand } from "../src/world/lod.ts";
-import type { World } from "../src/world/types.ts";
-import { bandWindows } from "./region-detail-sweep-windows.ts";
+} from "../../src/world/detail-chain.ts";
+import { LOD_BANDS, type LodBand } from "../../src/world/lod.ts";
+import type { World } from "../../src/world/types.ts";
+import { bandWindows } from "./sweep-windows.ts";
 
 /** Issue #443's measurement half: the world chart's OWN partition across three arms, so the anti-merge claim and the vanishing-landmass census reproduce from one command. Committed, not left in out/, because this epic has lost its evidence twice. `before` rebuilds what Issue #397 and Issue #398 shipped, an UNGATED bilinear floor rejected against that same blurred max, so no revert is needed. Costs minutes; the unit-scale claims are in test/world/detail-chain-world.test.ts. */
 

@@ -1,14 +1,14 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { El, installShim } from "../../test-support/element-shim.ts";
-import { PACES, DEFAULT_PACE, anchorAt, storyAt, repaced } from "../../src/site/living-chart/pace.ts";
+import { PACES, DEFAULT_PACE, anchorAt, storyAt, repaced } from "../../src/site/shared/living-chart/pace.ts";
 import { SWEEP_MS, sweepYearAt } from "../../src/render/chronicle-scrubber.ts";
-import type { Chronicle } from "../../src/site/living-chart/chronicle.ts";
-import type { Voyage } from "../../src/site/living-chart/voyage.ts";
+import type { Chronicle } from "../../src/site/shared/living-chart/chronicle.ts";
+import type { Voyage } from "../../src/site/shared/living-chart/voyage.ts";
 
 // Issue #493: the instrument's pace (1x, 2x, 4x). The clock is story milliseconds per wall millisecond, so the survey half's schedule and the ages half's SWEEP_MS scale together, and a change mid-sweep re-anchors rather than jumping.
 installShim();
-const { createAges } = await import("../../src/site/living-chart/ages.ts");
+const { createAges } = await import("../../src/site/shared/living-chart/ages.ts");
 
 const RANGE = { min: 451, max: 1218 };
 const EVENTS = [

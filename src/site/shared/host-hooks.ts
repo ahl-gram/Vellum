@@ -1,7 +1,7 @@
 // The window.__vellum* seams every LivingChart HOST publishes, ONE shared installer rather than prefixed twins (ratified 2026-08-10, decision B): deterministic and harmless in prod, so the suites drive the sweep through them rather than racing rAF loops, and nothing here is reachable from the page's own UI.
 // Explorer-only seams (camera, region state, redraft flag, worker plumbing) stay in explorer/hooks.ts.
 import type { runInline } from "../explorer/worker-client.ts";
-import type { LivingChart } from "../living-chart/index.ts";
+import type { LivingChart } from "./living-chart/index.ts";
 
 declare global {
   interface Window {

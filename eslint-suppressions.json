@@ -237,17 +237,17 @@
       "count": 1
     }
   },
-  "scripts/region-detail-probes.ts": {
+  "scripts/region-detail/probes.ts": {
     "max-lines-per-function": {
       "count": 1
     }
   },
-  "scripts/region-detail-sweep-measure.ts": {
+  "scripts/region-detail/sweep-measure.ts": {
     "max-lines-per-function": {
       "count": 2
     }
   },
-  "scripts/region-detail-sweep.ts": {
+  "scripts/region-detail/sweep.ts": {
     "max-lines-per-function": {
       "count": 1
     }
@@ -351,7 +351,7 @@
       "count": 1
     }
   },
-  "src/site/living-chart/place-overlay.ts": {
+  "src/site/shared/living-chart/place-overlay.ts": {
     "max-lines": {
       "count": 1
     },

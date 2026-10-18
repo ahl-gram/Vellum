@@ -1,16 +1,16 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { El, installShim } from "../../test-support/element-shim.ts";
-import type { Chronicle } from "../../src/site/living-chart/chronicle.ts";
-import type { Voyage } from "../../src/site/living-chart/voyage.ts";
-import { toldAnnal, type ToldEntry } from "../../src/site/living-chart/told.ts";
-import type { ScrubberRefs } from "../../src/site/living-chart/index.ts";
+import type { Chronicle } from "../../src/site/shared/living-chart/chronicle.ts";
+import type { Voyage } from "../../src/site/shared/living-chart/voyage.ts";
+import { toldAnnal, type ToldEntry } from "../../src/site/shared/living-chart/told.ts";
+import type { ScrubberRefs } from "../../src/site/shared/living-chart/index.ts";
 
 type SameKeys<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false;
 
 // One told signal, widened at Issue #442 rather than doubled: it announces whatever the story tells (a survey day row or a chronicle annal) through the one paint primitive; buildAnnals needs a document, hence the shim.
 installShim();
-const { createAges } = await import("../../src/site/living-chart/ages.ts");
+const { createAges } = await import("../../src/site/shared/living-chart/ages.ts");
 
 const EVENTS = [
   { year: 451, kind: "founding", settlement: 0, text: "Alpha was founded." },

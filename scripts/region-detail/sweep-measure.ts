@@ -1,12 +1,12 @@
-import { generateRegionWorld } from "../src/world/region.ts";
-import { landSnapRadius } from "../src/world/snap-to-land.ts";
-import { labelLandmasses } from "../src/world/landmass.ts";
-import { hamletCandidates } from "../src/society/hamlets.ts";
-import type { LodBand } from "../src/world/lod.ts";
-import { BIOMES } from "../src/climate/biomes.ts";
-import type { UvWindow } from "../src/terrain/heightfield.ts";
-import type { River } from "../src/hydrology/rivers.ts";
-import type { World } from "../src/world/types.ts";
+import { generateRegionWorld } from "../../src/world/region.ts";
+import { landSnapRadius } from "../../src/world/snap-to-land.ts";
+import { labelLandmasses } from "../../src/world/landmass.ts";
+import { hamletCandidates } from "../../src/society/hamlets.ts";
+import type { LodBand } from "../../src/world/lod.ts";
+import { BIOMES } from "../../src/climate/biomes.ts";
+import type { UvWindow } from "../../src/terrain/heightfield.ts";
+import type { River } from "../../src/hydrology/rivers.ts";
+import type { World } from "../../src/world/types.ts";
 
 const INSET = 0.02; // region.ts's own open-window inset
 

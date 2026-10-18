@@ -93,7 +93,7 @@ body:has(.slip.folded) .corner.br.zoomery {
   flex: none;
   width: 100%;
 }
-/* Inset by the thumb's radius: the 16px thumb in living-chart.css and `detentEscapeU` in `src/site/living-chart/ages.ts` at width - 16, so u=0 and u=1 stand under the thumb's centre at its ends. */
+/* Inset by the thumb's radius: the 16px thumb in living-chart.css and `detentEscapeU` in `src/site/shared/living-chart/ages.ts` at width - 16, so u=0 and u=1 stand under the thumb's centre at its ends. */
 .scale {
   position: relative;
   height: 1.3rem;
@@ -217,7 +217,7 @@ body:has(.slip.folded) .corner.br.zoomery {
   }
 }
 
-/* Under reduced motion the engine's Play is a still frame (`prefersReduce` in `src/site/living-chart/ages.ts`), so there is no pace to choose; the room's rule, since reading-frame.css carries no reduced-motion block and motion.css owns the collapse. */
+/* Under reduced motion the engine's Play is a still frame (`prefersReduce` in `src/site/shared/living-chart/ages.ts`), so there is no pace to choose; the room's rule, since reading-frame.css carries no reduced-motion block and motion.css owns the collapse. */
 @media (prefers-reduced-motion: reduce) {
   .rf-instrument .rf-pace {
     display: none;

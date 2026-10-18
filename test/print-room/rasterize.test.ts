@@ -6,7 +6,7 @@ import {
   fitScaleToBudget,
   rasterizeErrorMessage,
   rasterizeSvg,
-} from "../../src/site/lib/rasterize.ts";
+} from "../../src/site/shared/rasterize.ts";
 
 // The platform half (blob-URL Image + canvas + toBlob) is the print-room e2e's; rasterize.ts keeps every DOM reference inside a function body, so this Node import touches only the pure exports.
 

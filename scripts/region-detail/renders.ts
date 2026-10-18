@@ -1,10 +1,10 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { defaultRecipe, generateWorld } from "../src/world/generate.ts";
-import { generateRegionWorld, regionTitle } from "../src/world/region.ts";
-import { lodWindowFor, LOD_BANDS, type LodBand } from "../src/world/lod.ts";
-import { renderMap } from "../src/render/map-renderer.ts";
-import { findBrowser, rasterizeSvg, NO_BROWSER_HINT } from "../src/cli/raster.ts";
+import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
+import { generateRegionWorld, regionTitle } from "../../src/world/region.ts";
+import { lodWindowFor, LOD_BANDS, type LodBand } from "../../src/world/lod.ts";
+import { renderMap } from "../../src/render/map-renderer.ts";
+import { findBrowser, rasterizeSvg, NO_BROWSER_HINT } from "../../src/cli/raster.ts";
 
 /** The look half of Issue #399: the same region window drawn from the bare heightfield and from the chained detail field, so the coast, the rivers and the biome bands can be compared by eye. A metric can lie (Issue #376); the picture is what corrects it. */
 

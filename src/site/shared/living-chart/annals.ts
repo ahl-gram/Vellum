@@ -1,5 +1,5 @@
 // The chronicler's block of the one journal, appended after the prologue rows in the same strip.
-import type { HistoricalEvent } from "../../society/history.ts";
+import type { HistoricalEvent } from "../../../society/history.ts";
 
 export interface AnnalRow {
   li: HTMLLIElement;

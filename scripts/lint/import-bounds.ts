@@ -102,6 +102,20 @@ const philologyNoEntropy: Rule.RuleModule = {
   },
 };
 
+export const ROOMS_UNDER_THE_EXPLORER: readonly string[] = ["src/site/explorer/portfolio/"];
+const glassBan = sourceBan(
+  "the Explorer and home bind their own zoom presses by id: neither imports glass-keys.ts nor queries [data-zoom], a document-wide binding that would double every press (handbook/specs/explorer-doctrine.md)",
+  (text) => text.includes("glass-keys"),
+  (text) => /\[\s*data-zoom/i.test(text) || /(?:^|\/)glass-keys\b/.test(text),
+);
+const explorerNoGlassKeys: Rule.RuleModule = {
+  meta: glassBan.meta,
+  create: (context) =>
+    ROOMS_UNDER_THE_EXPLORER.some((room) => repoPath(context.filename).startsWith(room))
+      ? {}
+      : glassBan.create(context),
+};
+
 const BUILD_TIME = new Set(["src/site/home/stage-data.ts", "src/site/home/stations.ts"]);
 const homeClientNoEngine: Rule.RuleModule = {
   meta: {
@@ -268,6 +282,7 @@ const huntFixedWorld: Rule.RuleModule = {
 export default {
   rules: {
     "world-no-philology": worldNoPhilology,
+    "explorer-no-glass-keys": explorerNoGlassKeys,
     "philology-no-entropy": philologyNoEntropy,
     "home-client-no-engine": homeClientNoEngine,
     "hunt-fixed-world": huntFixedWorld,

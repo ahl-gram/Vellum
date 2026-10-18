@@ -14,7 +14,7 @@ function shape(li: El): unknown {
 }
 
 test("the log component renders the chronicle's row shape in the shared idiom (#219)", async () => {
-  const { createDatedLog } = await import("../../src/site/reading-frame/dated-log.ts");
+  const { createDatedLog } = await import("../../src/site/shared/reading-frame/dated-log.ts");
   const log = createDatedLog({ label: "The chronicle" });
   log.render([
     { year: 214, text: "Aldmarch is founded on the strait." },
@@ -32,7 +32,7 @@ test("the log component renders the chronicle's row shape in the shared idiom (#
 });
 
 test("the engine's prologue rows carry the #312 manuscript shape: day gutters, an initial on the first line", async () => {
-  const { createVoyageLogPanel } = await import("../../src/site/living-chart/voyage-log-panel.ts");
+  const { createVoyageLogPanel } = await import("../../src/site/shared/living-chart/voyage-log-panel.ts");
 
   const ports: VoyageLogPort[] = [
     { idx: 0, name: "Aldmarch", kind: "capital", founded: 214, arrivalMode: null, inlandHandoff: false, legLength: 0 },
@@ -81,7 +81,7 @@ test("the engine's prologue rows carry the #312 manuscript shape: day gutters, a
 });
 
 test("reveal() brightens an arrived prefix, idempotently and in both directions (#219)", async () => {
-  const { createDatedLog } = await import("../../src/site/reading-frame/dated-log.ts");
+  const { createDatedLog } = await import("../../src/site/shared/reading-frame/dated-log.ts");
   const log = createDatedLog({ label: "The chronicle" });
   log.render([
     { year: 100, text: "one" },
@@ -110,7 +110,7 @@ test("reveal() brightens an arrived prefix, idempotently and in both directions 
 });
 
 test("the log is a labeled region and its rows are plain text (accessibility carries over, not down)", async () => {
-  const { createDatedLog } = await import("../../src/site/reading-frame/dated-log.ts");
+  const { createDatedLog } = await import("../../src/site/shared/reading-frame/dated-log.ts");
   const log = createDatedLog({ label: "The surveyor's log" });
   const panel = log.panel as unknown as El;
   assert.equal(panel.getAttribute("role"), "region", "the log panel is a landmark a screen reader can jump to");

@@ -1,6 +1,6 @@
 // Which plate a told journal row shows: the chronicle half resolves through the story's beats; the survey half holds the last port whose plate carries arms, so the picture changes four to six times over a survey rather than once a port.
 import { latestBeatAt, type StoryBeat } from "./beats.ts";
-import type { ToldEntry } from "../living-chart/told.ts";
+import type { ToldEntry } from "../shared/living-chart/told.ts";
 import type { PlaceMark } from "../../render/place-manifest.ts";
 
 export interface PlateSpec {

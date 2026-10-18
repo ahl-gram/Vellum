@@ -34,7 +34,7 @@ function cardOf(nodes: El[]): { card: El; inner: El } {
 async function overlayOver(clampBox: (() => typeof CHART | null) | null) {
   const { manifest } = await realWorld(); // installs the shim
   installShim();
-  const { createPlaceOverlay } = await import("../../src/site/living-chart/place-overlay.ts");
+  const { createPlaceOverlay } = await import("../../src/site/shared/living-chart/place-overlay.ts");
   const mapEl = new El("div");
   const overlay = createPlaceOverlay({
     mapEl: mapEl as unknown as HTMLElement,
@@ -130,7 +130,7 @@ test("#387/#388 re-clamping a card nobody opened does nothing at all", async () 
 test("#387/#388 the host's box reaches the card through createLivingChart, not only the overlay", async () => {
   const { manifest } = await realWorld();
   installShim();
-  const { createLivingChart } = await import("../../src/site/living-chart/index.ts");
+  const { createLivingChart } = await import("../../src/site/shared/living-chart/index.ts");
   const mapEl = new El("div");
   const lc = createLivingChart({
     mapEl: mapEl as unknown as HTMLElement,

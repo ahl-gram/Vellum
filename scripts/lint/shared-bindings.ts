@@ -19,7 +19,11 @@ export const SHARED_BINDINGS: Readonly<Record<string, readonly SharedBinding[]>>
   "src/site/reading-room/seats.ts": SEATS,
   "src/site/seed-of-the-day/app.ts": [["createZoomController", "../shared/zoom-controller.ts"]],
   "src/site/explorer/app.ts": [["bindRoom", "../shared/room.ts"], ANNOUNCER, STORE, ["filingAt", "./chart-drawer.ts"]],
-  "src/site/portfolio/app.ts": [ANNOUNCER, ["usesWorker", "../explorer/worker-client.ts"], STORE],
+  "src/site/explorer/portfolio/app.ts": [
+    ["makeAnnouncer", "../../shared/announce.ts"],
+    ["usesWorker", "../worker-client.ts"],
+    ["deviceStorage", "../../shared/table-store.ts"],
+  ],
   "src/site/prospect/app.ts": [ITEM],
   "src/site/explorer/chart-drawer.ts": [ITEM],
 };
