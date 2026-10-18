@@ -122,7 +122,7 @@ test("atlasDocument: the deployed page joins the Case; the offline download fall
   assert.match(deployed, /var\(--font-body/, "atlas body chrome should use the body role var");
 
   const offline = atlasDocument(fixture, (p) => `data:${p.key}`, { anchor: false, motion: false });
-  assert.doesNotMatch(offline, /href="\/fonts\.css"/, "the self-contained download links nothing external");
+  assert.doesNotMatch(offline, /<link\b[^>]*\brel="stylesheet"/, "the self-contained download links nothing external");
   assert.match(offline, /var\(--font-body,[^)]*serif/, "the download must fall back to the serif stack");
 });
 

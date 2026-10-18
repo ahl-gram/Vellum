@@ -6,9 +6,12 @@ import {
   ATLAS_SHEET_CSS,
   atlasDocument,
   atlasPlateFilename,
+  FONTS_SHEET_HREF,
+  MOTION_SHEET_HREF,
   svgToDataUri,
   type AtlasDocumentData,
 } from "../../src/atlas/document.ts";
+import { REPO, SERVED_SOURCES, sourceFor } from "../../scripts/served-sources.ts";
 import { prospectPlates } from "../../src/atlas/compose.ts";
 import { fullWidthWideningRules } from "../../test-support/css-box-sweep.ts";
 import { defaultRecipe, generateWorld } from "../../src/world/generate.ts";
@@ -139,7 +142,7 @@ test("atlasDocument (data-URI mode): self-contained, with no anchors in the FILE
   const dataUris = (html.match(/data:image\/svg\+xml;base64,/g) ?? []).length;
   assert.equal(dataUris, 6, "each plate must be inlined exactly once (self-contained, no doubling)");
   assert.doesNotMatch(html, /<a href="data:/);
-  assert.doesNotMatch(html, /<link rel="stylesheet" href="\/motion\.css">/);
+  assert.doesNotMatch(html, /<link\b[^>]*\brel="stylesheet"/);
   assert.doesNotMatch(html, /src="world-antique\.svg"/);
   assert.match(html, /<body class="atlas-sheet">/);
   assert.match(html, /\.atlas-sheet figure/);
@@ -269,6 +272,18 @@ test("#464 the download is byte-identical to the paper artifact it was before th
     DOWNLOAD_SHA256,
     "the download changed by a byte: the screen dress may only reach the served page",
   );
+});
+
+test("the served atlas links its two sheets at addresses a served source holds (Issue #768)", () => {
+  const page = served();
+  for (const href of [FONTS_SHEET_HREF, MOTION_SHEET_HREF]) {
+    assert.ok(page.includes(`<link rel="stylesheet" href="${href}">`), `the served atlas links ${href}`);
+    assert.notEqual(
+      sourceFor(REPO, SERVED_SOURCES, href),
+      null,
+      `no served source holds ${href}, so the served atlas loads no sheet there`,
+    );
+  }
 });
 
 test("Issue #761 the served page lays out at the site's fixed 1024 viewport; the download keeps its own head (the digest above holds it)", () => {

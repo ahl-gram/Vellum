@@ -2,7 +2,9 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { join, resolve } from "node:path";
 import { ESLint } from "eslint";
-import { kitClassesFrom } from "../../scripts/lint/sheet-owners.ts";
+import { kitClassesFrom, OWNED_SHEETS } from "../../scripts/lint/sheet-owners.ts";
+import { sheetsOnDisk } from "../../scripts/lint/sheet-tokens.ts";
+import { STYLES } from "../../scripts/served-sources.ts";
 import { lintTsRoots } from "../../test-support/lint-roots.ts";
 import { WITNESSES } from "../../test-support/lint-witnesses.ts";
 
@@ -196,6 +198,14 @@ test("the engine's dressing has one home, src/styles/living-chart.css, which nam
     ["/* #map, named in a comment */", PASS],
   ];
   await assertRule(ids, HOST_ID, "src/styles/living-chart.css", ["src/styles/explorer/index.css"]);
+});
+
+test("every sheet the owner rules key on or read is a sheet under src/styles/, so a moved sheet cannot switch a rule off or empty the kit in silence (Issue #768)", () => {
+  const onDisk = new Set(sheetsOnDisk());
+  const owned = Object.entries(OWNED_SHEETS);
+  assert.ok(owned.length > 0, "OWNED_SHEETS names no sheet, so this check reads nothing");
+  for (const [role, key] of owned)
+    assert.ok(onDisk.has(`${STYLES}/${key}`), `OWNED_SHEETS.${role} is ${key}, which is no sheet under src/styles/`);
 });
 
 const resolvedRule = async (file: string, rule: string): Promise<unknown> =>

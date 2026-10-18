@@ -175,6 +175,9 @@ function plateFigure(
 
 type Figure = (p: AtlasPlate, section: PlateSection) => string;
 
+export const FONTS_SHEET_HREF = "/fonts.css";
+export const MOTION_SHEET_HREF = "/motion.css";
+
 function atlasHead(title: string, motion: boolean): string {
   return `<!doctype html>
 <html lang="en">
@@ -182,7 +185,7 @@ function atlasHead(title: string, motion: boolean): string {
 <meta charset="utf-8">
 <meta name="viewport" content="${motion ? "width=1024" : "width=device-width, initial-scale=1"}">
 <title>${escapeXml(title)}: a Vellum atlas</title>
-${motion ? '<link rel="stylesheet" href="/fonts.css">\n<link rel="stylesheet" href="/motion.css">\n' : ""}<style>
+${motion ? `<link rel="stylesheet" href="${FONTS_SHEET_HREF}">\n<link rel="stylesheet" href="${MOTION_SHEET_HREF}">\n` : ""}<style>
 ${PAGE_CHROME_CSS}
 ${ATLAS_SHEET_CSS}${motion ? `\n${SCREEN_DRESS_CSS}` : ""}
 </style>
