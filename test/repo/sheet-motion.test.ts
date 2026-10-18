@@ -10,6 +10,7 @@ import {
   TIPS_AWAITING_A_RULING,
 } from "../../scripts/lint/sheet-motion.ts";
 import { sheetsOnDisk, SRC_CSS_FILES } from "../../scripts/lint/sheet-tokens.ts";
+import { STYLES } from "../../scripts/served-sources.ts";
 import { lintTsRoots } from "../../test-support/lint-roots.ts";
 import { WITNESSES } from "../../test-support/lint-witnesses.ts";
 
@@ -26,7 +27,7 @@ const lintWith = (rule?: string, options?: unknown): ESLint =>
   new ESLint({
     cwd: ROOT,
     flags: ["unstable_native_nodejs_ts_config"],
-    ...(rule ? { overrideConfig: { files: ["public/**/*.css"], rules: { [rule]: ["error", options] } } } : {}),
+    ...(rule ? { overrideConfig: { files: ["src/styles/**/*.css"], rules: { [rule]: ["error", options] } } } : {}),
   });
 
 type Found = { readonly lines: number[]; readonly stale: string[] };
@@ -57,7 +58,7 @@ const assertRefuses = async (plant: Plant, rule: string, blind: string): Promise
     refused.length > 0 && refused.length < plant.length,
     `${rule}'s plant cannot tell the rule from its negation`,
   );
-  assert.deepEqual(await reported(plant, "public/house.css", rule), refused, blind);
+  assert.deepEqual(await reported(plant, "src/styles/house.css", rule), refused, blind);
 };
 
 test("no hover or active rule lifts by a literal: the raise is a token, and a literal stands only as a SANCTIONED_LIFTS entry for its own file (Issue #405, Issue #779 part 2d)", async () => {
@@ -88,12 +89,12 @@ test("no hover or active rule lifts by a literal: the raise is a token, and a li
     [".x:hover { transform: translateY(-6px); }", REFUSE],
   ];
   assert.deepEqual(
-    await found(listed, "public/motion.css", LIFT, { sanctioned }),
+    await found(listed, "src/styles/motion.css", LIFT, { sanctioned }),
     { lines: [2, 3], stale: ["motion.css :: .gone:hover"] },
     "every arm is sanctioned at that value in this file, and only the entry that matched nothing is stale",
   );
   assert.deepEqual(
-    await found(listed, "public/house.css", LIFT, { sanctioned }),
+    await found(listed, "src/styles/house.css", LIFT, { sanctioned }),
     { lines: [1, 2, 3], stale: [] },
     "an entry for another file sanctions nothing here, and is not this file's to call stale",
   );
@@ -125,12 +126,12 @@ test("every hover tip goes somewhere: a rotate() on hover stands only as a TIPPI
     [".z:hover { transform: rotate(1deg); }", REFUSE],
   ];
   assert.deepEqual(
-    await found(listed, "public/motion.css", TIP, lists),
+    await found(listed, "src/styles/motion.css", TIP, lists),
     { lines: [4], stale: ["motion.css :: .gone:hover"] },
     "a listed tip passes, the unlisted tip on 4 reds, and only the entry that matched nothing is stale",
   );
   assert.deepEqual(
-    (await found(listed, "public/house.css", TIP, lists)).stale,
+    (await found(listed, "src/styles/house.css", TIP, lists)).stale,
     [],
     "another file's entries are not this file's to call stale",
   );
@@ -164,14 +165,14 @@ test("an inline-block keeps its bullet on line one: a subject that settles displ
     [".v { display: inline-block; }", REFUSE],
   ];
   assert.deepEqual(
-    await found(listed, "public/motion.css", BULLET, { outside: ["motion.css :: .w a", "motion.css :: .gone"] }),
+    await found(listed, "src/styles/motion.css", BULLET, { outside: ["motion.css :: .w a", "motion.css :: .gone"] }),
     { lines: [2], stale: ["motion.css :: .gone"] },
     "a listed inline-block passes, the unlisted one on 2 reds, and only the entry that matched nothing is stale",
   );
 });
 
-test("every list entry names a sheet under public/ or a module that builds CSS, so none names a file the lint never reads and so never reports stale (Issue #779 part 2d, D2)", () => {
-  const readable = new Set([...sheetsOnDisk().map((p) => p.slice("public/".length)), ...SRC_CSS_FILES]);
+test("every list entry names a sheet under src/styles/ or a module that builds CSS, so none names a file the lint never reads and so never reports stale (Issue #779 part 2d, D2)", () => {
+  const readable = new Set([...sheetsOnDisk().map((p) => p.slice(`${STYLES}/`.length)), ...SRC_CSS_FILES]);
   const entries = [
     ...Object.keys(SANCTIONED_LIFTS),
     ...TIPPING_LINKS,
@@ -185,7 +186,7 @@ test("every list entry names a sheet under public/ or a module that builds CSS, 
     assert.ok(selector, `${entry} is not written <file> :: <selector>`);
     assert.ok(
       readable.has(file!),
-      `${entry} names ${file}, which is no sheet under public/ and no module that builds CSS`,
+      `${entry} names ${file}, which is no sheet under src/styles/ and no module that builds CSS`,
     );
   }
 });
@@ -200,7 +201,7 @@ test("the three motion rules resolve at error with the lists as their options on
     [BULLET, [2, { outside: INLINE_BLOCKS_OUTSIDE_MARKER_LISTS }]],
   ];
   for (const [rule, entry] of expected) {
-    for (const file of [WITNESSES["public/**/*.css"]!, "public/zz-new-room/index.css"])
+    for (const file of [WITNESSES["src/styles/**/*.css"]!, "src/styles/zz-new-room/index.css"])
       assert.deepEqual(await resolvedRule(file, rule), entry, `${rule} does not resolve with its lists on ${file}`);
     for (const root of lintTsRoots())
       assert.equal(

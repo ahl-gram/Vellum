@@ -25,9 +25,9 @@ const LINT_SCOPE = [
   "**/*.jsx",
   "**/*.mjs",
   "e2e/**/*.ts",
-  "public/**/*.css",
   "scripts/**/*.ts",
   "src/**/*.ts",
+  "src/styles/**/*.css",
   "test-support/**/*.ts",
   "test/**/*.ts",
 ];

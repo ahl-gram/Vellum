@@ -98,7 +98,7 @@ export default defineConfig(
   },
   {
     name: "the house's rules on every stylesheet",
-    files: ["public/**/*.css"],
+    files: ["src/styles/**/*.css"],
     plugins: { css, vellum },
     language: "css/css",
     languageOptions: { tolerant: true },

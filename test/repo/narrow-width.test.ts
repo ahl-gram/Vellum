@@ -145,7 +145,7 @@ test("no sheet switches layout at a fixed window width at or below the 1024 floo
     refused.length > 0 && refused.length < CSS_PLANT.length,
     "the plant holds no line to refuse or none to pass, so this test cannot tell the rule from its negation",
   );
-  assert.deepEqual(await lintPlant(CSS_PLANT, WITNESSES["public/**/*.css"]!, CSS_RULE), refused, BLIND_SPOTS);
+  assert.deepEqual(await lintPlant(CSS_PLANT, WITNESSES["src/styles/**/*.css"]!, CSS_RULE), refused, BLIND_SPOTS);
 });
 
 test("no script asks a media query for a fixed window width at or below the 1024 floor, or compares the window's or the screen's width with one, and a query it cannot read is refused (Issue #763 ruling 2A)", async () => {
@@ -160,10 +160,10 @@ test("no script asks a media query for a fixed window width at or below the 1024
 const resolvedRule = async (file: string, rule: string): Promise<unknown> =>
   ((await eslint.calculateConfigForFile(file)) as { rules?: Record<string, unknown> }).rules?.[rule];
 
-test("the sheet rule resolves at error on every sheet under public/ and on no script; the script rule on every file under src/, in a room not yet written too, and on no other root and no sheet (Issue #763)", async () => {
-  const sheet = WITNESSES["public/**/*.css"]!;
+test("the sheet rule resolves at error on every sheet under src/styles/ and on no script; the script rule on every file under src/, in a room not yet written too, and on no other root and no sheet (Issue #763)", async () => {
+  const sheet = WITNESSES["src/styles/**/*.css"]!;
   assert.ok(existsSync(join(ROOT, sheet)), `${sheet}, the sheets' witness, does not exist`);
-  for (const file of [sheet, "public/zz-new-room/index.css"])
+  for (const file of [sheet, "src/styles/zz-new-room/index.css"])
     assert.deepEqual(await resolvedRule(file, CSS_RULE), [2], `${CSS_RULE} does not resolve at error on ${file}`);
   for (const file of [WITNESSES["src/**/*.ts"]!, "src/site/zz-new-room/part.ts"])
     assert.deepEqual(await resolvedRule(file, TS_RULE), [2], `${TS_RULE} does not resolve at error on ${file}`);

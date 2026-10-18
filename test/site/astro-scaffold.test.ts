@@ -366,7 +366,7 @@ test("each rendered head carries the canonical meta with the ratified prop fan-o
   }
 });
 
-test("every built head links public/shell.css last of its stylesheets, the place the layout's inline style held, so a page rule still needs higher specificity to override the shell (handbook/specs/cascade-traps.md)", () => {
+test("every built head links /shell.css last of its stylesheets, the place the layout's inline style held, so a page rule still needs higher specificity to override the shell (handbook/specs/cascade-traps.md)", () => {
   for (const p of PAGES) {
     const html = page(p.route);
     const links = [...html.matchAll(/<link\b[^>]*\brel="stylesheet"[^>]*>/g)]
@@ -377,13 +377,9 @@ test("every built head links public/shell.css last of its stylesheets, the place
       `${p.route} links its own sheet`,
     );
     const shell = links.at(-1);
-    assert.equal(
-      shell?.href,
-      "/shell.css",
-      `${p.route} links public/shell.css after every other stylesheet in the page`,
-    );
-    assert.ok(shell.at < html.indexOf("</head>"), `${p.route} links public/shell.css in its head`);
-    assert.equal(html.indexOf("<style", shell.at), -1, `${p.route} carries no <style> after public/shell.css`);
+    assert.equal(shell?.href, "/shell.css", `${p.route} links /shell.css after every other stylesheet in the page`);
+    assert.ok(shell.at < html.indexOf("</head>"), `${p.route} links /shell.css in its head`);
+    assert.equal(html.indexOf("<style", shell.at), -1, `${p.route} carries no <style> after /shell.css`);
   }
 });
 
@@ -1078,7 +1074,7 @@ test("the Notice stamps the deep before the panel's prose; the count is ten (#28
   assert.ok(!html.includes("six invented"), "the six-language miscount is gone from home (#289)");
 });
 
-test("every internal link and embed on the rendered pages resolves", () => {
+test("every internal link and embed on the rendered pages resolves in the built tree", () => {
   // Generated per deploy and gitignored (absent on a fresh checkout; CI runs npm test before npm run build), so these resolve only against this allowlist.
   const generated = [
     "/atlas/",
@@ -1107,15 +1103,22 @@ test("every internal link and embed on the rendered pages resolves", () => {
       if (generated.includes(path)) continue;
       if (/^\/gallery\/chart-\d+\.svg$/.test(path)) continue;
       const target = path.endsWith("/") ? `${path}index.html` : path;
-      assert.ok(existsSync(root(`public${target}`)), `${p.route} links ${url}: public${target} should exist`);
+      assert.ok(existsSync(join(outDir, target)), `${p.route} links ${url}: ${target} should be in the built tree`);
     }
   }
 });
 
-test("the support set the pages depend on is committed in public/", () => {
+test("the support set the pages depend on is committed: the sheets in src/styles/, the icons and the card in src/static/", () => {
   // og:image and the fonts.css url()s are references the link-resolver test cannot see, so pin their existence here.
-  for (const file of ["motion.css", "fonts.css", "favicon.svg", "apple-touch-icon.png", "og.png", "index.css"]) {
-    assert.ok(existsSync(root(`public/${file}`)), `public/${file} should exist`);
+  for (const file of [
+    "src/styles/motion.css",
+    "src/styles/fonts.css",
+    "public/favicon.svg",
+    "public/apple-touch-icon.png",
+    "public/og.png",
+    "src/styles/index.css",
+  ]) {
+    assert.ok(existsSync(root(file)), `${file} should exist`);
   }
 });
 

@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { generate, parse, walk } from "@eslint/css-tree";
 import { rulesIn } from "../../test-support/shell-css-rules.ts";
 
-// The shell dresses once (Issue #263): the palette is named ONCE in public/shell.css and consumed as var() everywhere it matched exactly.
+// The shell dresses once (Issue #263): the palette is named ONCE in src/styles/shell.css and consumed as var() everywhere it matched exactly.
 
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 const read = (p: string) => readFileSync(root(p), "utf8");
@@ -36,7 +36,7 @@ const TOKENS: Record<string, string> = {
 
 const RETIRED_INKS = ["#3d2f1f", "#5a4326"] as const;
 
-const SHELL = "public/shell.css";
+const SHELL = "src/styles/shell.css";
 const layoutStyle = () => read(SHELL);
 
 const shellDeclarations = (): Map<string, string[]> => {
@@ -49,10 +49,10 @@ const shellDeclarations = (): Map<string, string[]> => {
   return found;
 };
 
-test("public/shell.css declares each palette token once at its ratified value, each depth shadow once, and the walnut deep once (Issue #263, Issue #367, Issue #463, Issue #461)", () => {
+test("src/styles/shell.css declares each palette token once at its ratified value, each depth shadow once, and the walnut deep once (Issue #263, Issue #367, Issue #463, Issue #461)", () => {
   const declared = shellDeclarations();
   for (const [name, hex] of Object.entries(TOKENS))
-    assert.deepEqual(declared.get(name), [hex], `public/shell.css should declare ${name}: ${hex}, once`);
+    assert.deepEqual(declared.get(name), [hex], `src/styles/shell.css should declare ${name}: ${hex}, once`);
   // The sheet's lift is ONE token (Issue #367), ratified at 0.4 (2026-08-12): two coincident 0.2 shadows measured as a single 0.385.
   assert.deepEqual(
     declared.get("--sheet-shadow"),

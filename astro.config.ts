@@ -2,6 +2,7 @@ import { defineConfig } from "astro/config";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { servedSources } from "./scripts/served-sources.ts";
 
 // Issue #204 dev-only rewrite: Vite's dev public middleware serves EXACT file paths only and
 // Astro dev installs no dir -> index.html fallback, so /explorer/ would 404 in dev while
@@ -37,4 +38,5 @@ export default defineConfig({
   compressHTML: false,
   build: { inlineStylesheets: "always" },
   vite: { plugins: [publicDirIndexes()] },
+  integrations: [servedSources()],
 });

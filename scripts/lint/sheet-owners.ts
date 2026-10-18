@@ -56,7 +56,7 @@ const declarationsIf = (hit: boolean, rule: RuleNode, wanted: (property: string)
 
 const INTRO_VOICE: ReadonlySet<string> = new Set(["color", "font", "font-family", "font-style"]);
 const houseOwnsIntro = ruleOf(
-  "{{property}} binds the intro voice outside public/house.css, the one sheet that writes it: give the page's own element a class of its own instead (Issue #324, Issue #709)",
+  "{{property}} binds the intro voice outside src/styles/house.css, the one sheet that writes it: give the page's own element a class of its own instead (Issue #324, Issue #709)",
   (key) =>
     key === "house.css"
       ? null
@@ -69,7 +69,7 @@ const houseOwnsIntro = ruleOf(
 );
 
 const houseOwnsControls = ruleOf(
-  "{{property}} re-skins the controls on a select-and-button list outside public/house.css, the one sheet that writes the control idiom (Issue #324, Issue #709)",
+  "{{property}} re-skins the controls on a select-and-button list outside src/styles/house.css, the one sheet that writes the control idiom (Issue #324, Issue #709)",
   (key) =>
     key === "house.css"
       ? null
@@ -99,8 +99,8 @@ const kitClasses = (): Set<string> => {
   const sheets = sheetsOnDisk();
   const read = (paths: readonly string[]): string[] => paths.flatMap((path) => readSheet(path) ?? []);
   return kitClassesFrom(
-    read(sheets.filter((path) => /^public\/atelier[^/]*\.css$/.test(path))),
-    read(["public/house.css", "public/motion.css", "public/shell.css"]),
+    read(sheets.filter((path) => /^src\/styles\/atelier[^/]*\.css$/.test(path))),
+    read(["src/styles/house.css", "src/styles/motion.css", "src/styles/shell.css"]),
   );
 };
 
@@ -126,7 +126,7 @@ const redressing = (kit: ReadonlySet<string>, arm: CssNode): boolean => {
 };
 
 const kitNotRedressed = ruleOf(
-  "{{arm}} re-dresses the kit with {{property}}: a page seats a component and does not re-dress it, so move the dress onto the page's own element or state, or into public/atelier.css (Issue #487, Issue #302)",
+  "{{arm}} re-dresses the kit with {{property}}: a page seats a component and does not re-dress it, so move the dress onto the page's own element or state, or into src/styles/atelier.css (Issue #487, Issue #302)",
   (key) => {
     if (HOUSE_SHEETS.test(key)) return null;
     const kit = kitClasses();
@@ -141,7 +141,7 @@ const kitNotRedressed = ruleOf(
 
 const ROW_ARMS: ReadonlySet<string> = new Set([".cr-num", ".cr-text", ".contents .cr-num", ".contents .cr-text"]);
 const kitOwnsContentsRow = ruleOf(
-  "{{arm}} re-dresses the kit's contents row, which public/atelier.css dresses; a page inks a row only under its own state (.contents li.on .cr-num) (Issue #487)",
+  "{{arm}} re-dresses the kit's contents row, which src/styles/atelier.css dresses; a page inks a row only under its own state (.contents li.on .cr-num) (Issue #487)",
   (key) =>
     key === "atelier.css"
       ? null
@@ -151,7 +151,7 @@ const kitOwnsContentsRow = ruleOf(
 const SELECT_DRESS = (p: string): boolean =>
   p.replace(/^-[a-z]+-/, "") === "appearance" || p === "background-image" || p === "background";
 const kitOwnsSelectDress = ruleOf(
-  "{{property}} on .folio-controls select.control re-dresses the corner's select, which public/atelier.css dresses; a page sets only its width (Issue #487)",
+  "{{property}} on .folio-controls select.control re-dresses the corner's select, which src/styles/atelier.css dresses; a page sets only its width (Issue #487)",
   (key) =>
     key === "atelier.css"
       ? null
@@ -169,7 +169,7 @@ const isHook = (n: CssNode): boolean =>
   (n.type === "AttributeSelector" && n.name.name === "data-ink");
 
 const engineDressOneHome = ruleOf(
-  "{{arm}} dresses an engine hook outside public/living-chart.css, the engine's one sheet: edit the dressing there, keyed on the mount class (Issue #302)",
+  "{{arm}} dresses an engine hook outside src/styles/living-chart.css, the engine's one sheet: edit the dressing there, keyed on the mount class (Issue #302)",
   (key) =>
     key === "living-chart.css"
       ? null

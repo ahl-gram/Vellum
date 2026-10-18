@@ -85,5 +85,5 @@ test("the rule resolves at error on every e2e file at any depth and on no other 
     for (const file of [witness, `${root}/nested/deeper/part.ts`])
       assert.deepEqual(await resolvedRule(file), want, `${RULE} resolves wrongly on ${file}`);
   }
-  assert.equal(await resolvedRule(WITNESSES["public/**/*.css"]!), undefined, `${RULE} reaches a sheet`);
+  assert.equal(await resolvedRule(WITNESSES["src/styles/**/*.css"]!), undefined, `${RULE} reaches a sheet`);
 });

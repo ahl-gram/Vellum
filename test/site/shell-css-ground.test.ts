@@ -6,13 +6,13 @@ import { fileURLToPath } from "node:url";
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 const read = (p: string) => readFileSync(root(p), "utf8");
 
-const layoutStyle = () => read("public/shell.css");
+const layoutStyle = () => read("src/styles/shell.css");
 
 // A raw hex renders the token mix's colour exactly, so no browser tells the two apart (Issue #779 part 2f).
 test("the walnut deep is mixed from the tokens (#461 ruling 2; kept at the close of Issue #779: a raw hex renders the mix exactly until a token moves)", () => {
   const css = layoutStyle();
   const deep = css.match(/--the-deep:\s*([\s\S]*?);/);
-  assert.ok(deep, "public/shell.css should declare --the-deep");
+  assert.ok(deep, "src/styles/shell.css should declare --the-deep");
   assert.match(
     deep[1]!.replace(/\s+/g, " "),
     /color-mix\(in srgb, var\(--ink-dark\) 90%, var\(--parchment\) 10%\)/,

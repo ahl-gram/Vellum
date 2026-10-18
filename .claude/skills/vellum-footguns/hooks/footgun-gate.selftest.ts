@@ -298,7 +298,7 @@ const sizeProbes = (test: string, suite: string): [string, Payload, string[], Pa
     ["a browser-harness unit test that clicks and escapes", edit("Edit", `${LONG_ROOT}/test/e2e/${test}`, NOISY_AND_CLICK), ["## Gate 1", "for wiring only", "double the backslash"]],
     ["a new e2e suite that clicks and escapes", edit("Write", `${LONG_ROOT}/e2e/suites/never-exists-${suite}`, NOISY_AND_CLICK), ["## Gate 4", "## Gate 2", "for wiring only", "double the backslash"]],
     ["a new unit test under a suite-shaped path that clicks and escapes", edit("Write", `${LONG_ROOT}/test/e2e/suites/${test}`, NOISY_AND_CLICK), ["## Gate 1", "for wiring only", "double the backslash"]],
-    ["a new stylesheet", edit("Write", `${LONG_ROOT}/public/a-new-sheet-name.css`, "x"), ["## Gate 4", "## Gate 3"]],
+    ["a new stylesheet", edit("Write", `${LONG_ROOT}/src/styles/a-new-sheet-name.css`, "x"), ["## Gate 4", "## Gate 3"]],
     ["a new page", edit("Write", `${LONG_ROOT}/src/pages/a-new-room-name/index.astro`, "x"), ["## Gate 4", "## Gate 3"]],
     ["a new site module", edit("Write", `${LONG_ROOT}/src/site/a-room-name/a-new-module-name.ts`, "x"), ["## Gate 4"]],
     ["the renderer", edit("Edit", `${LONG_ROOT}/src/render/layers/a-layer-name.ts`, "x"), ["## Gate 6"]],

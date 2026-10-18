@@ -5,19 +5,18 @@ import type { Rule } from "eslint";
 import { readdirSync, readFileSync } from "node:fs";
 import { join, relative, resolve, sep } from "node:path";
 import { SITE_PALETTE } from "../../src/atlas/palette.ts";
-import { GENERATED_SUBTREES } from "../clean-public-generated.ts";
+import { STYLES } from "../served-sources.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 
 export const SRC_CSS_FILES = ["src/cli/gallery.ts", "src/atlas/document.ts", "src/render/og-card.ts"] as const;
 export type SrcCssFile = (typeof SRC_CSS_FILES)[number];
-export const GENERATED_CSS: ReadonlyArray<readonly [string, SrcCssFile]> = [["public/gallery/", "src/cli/gallery.ts"]];
 
 const repoPath = (filename: string): string => relative(ROOT, filename).split(sep).join("/");
 
 export const sheetKey = (filename: string): string => {
   const path = repoPath(filename);
-  if (path.startsWith("public/")) return path.slice("public/".length);
+  if (path.startsWith(`${STYLES}/`)) return path.slice(`${STYLES}/`.length);
   return path.endsWith(".ts.css") ? path.slice(0, -".css".length) : path;
 };
 
@@ -31,20 +30,18 @@ export const sheetsOnDisk = (root: string = ROOT, readDir: ReadDir = readDirOnDi
   const walkDir = (rel: string): string[] => {
     let entries: readonly Entry[];
     try {
-      entries = readDir(join(root, "public", rel));
+      entries = readDir(join(root, STYLES, rel));
     } catch (error) {
       if (vanished(error)) return [];
       throw error;
     }
     return entries.flatMap((entry) => {
       const path = rel === "" ? entry.name : `${rel}/${entry.name}`;
-      if (entry.isDirectory()) return GENERATED_SUBTREES.includes(path) ? [] : walkDir(path);
-      return entry.isFile() && path.endsWith(".css") ? [`public/${path}`] : [];
+      if (entry.isDirectory()) return walkDir(path);
+      return entry.isFile() && path.endsWith(".css") ? [`${STYLES}/${path}`] : [];
     });
   };
-  return walkDir("")
-    .filter((path) => !GENERATED_CSS.some(([tree]) => path.startsWith(tree)))
-    .sort();
+  return walkDir("").sort();
 };
 
 export const readSheet = (path: string, root: string = ROOT): string | null => {
@@ -144,7 +141,7 @@ const tokenByName: CSSRuleDefinition = {
   meta: {
     type: "problem",
     messages: {
-      raw: "{{colour}} is {{token}}'s colour written raw: write var({{token}}), or rgb(from var({{token}}) r g b / a) for alpha, so the quotation stays attached to its name; only the token's own declaration, in public/shell.css or the atlas document, writes it (Issue #263, Issue #324)",
+      raw: "{{colour}} is {{token}}'s colour written raw: write var({{token}}), or rgb(from var({{token}}) r g b / a) for alpha, so the quotation stays attached to its name; only the token's own declaration, in src/styles/shell.css or the atlas document, writes it (Issue #263, Issue #324)",
     },
   },
   create(context) {
@@ -190,7 +187,7 @@ const shadowByToken: CSSRuleDefinition = {
     type: "problem",
     messages: {
       longhand:
-        "this writes {{token}}'s geometry longhand: consume var({{token}}), the depth's one home, declared in public/shell.css and the atlas document (Issue #367, Issue #463)",
+        "this writes {{token}}'s geometry longhand: consume var({{token}}), the depth's one home, declared in src/styles/shell.css and the atlas document (Issue #367, Issue #463)",
     },
   },
   create(context) {
@@ -230,7 +227,7 @@ const varDeclared: CSSRuleDefinition = {
     type: "problem",
     messages: {
       undeclared:
-        "var({{name}}) has no fallback and nothing declares {{name}}: no other sheet under public/ and not this file, so the page falls back to the property's initial value (Issue #263)",
+        "var({{name}}) has no fallback and nothing declares {{name}}: no other sheet under src/styles/ and not this file, so the page falls back to the property's initial value (Issue #263)",
     },
   },
   create(context) {

@@ -20,7 +20,7 @@ test("the sheet-height literals match their derivation across every carrier (#47
   assert.ok(Math.abs(SHEET.h - derived) < TOL, `camera SHEET.h ${SHEET.h} drifted from the derivation ${derived}`);
 
   const carriers = [
-    "public/index.css",
+    "src/styles/index.css",
     "src/site/home/camera.ts",
     ...e2eSourcePaths(REPO)
       .filter((p) => p.startsWith(resolve(REPO, "e2e") + sep))
@@ -36,7 +36,7 @@ test("the sheet-height literals match their derivation across every carrier (#47
       assert.ok(Math.abs(hit - derived) < TOL, `${path} carries ${hit}, off the derivation ${derived}`);
     }
   }
-  for (const witness of ["public/index.css", "src/site/home/camera.ts", "e2e/support/home.ts"]) {
+  for (const witness of ["src/styles/index.css", "src/site/home/camera.ts", "e2e/support/home.ts"]) {
     assert.ok(found.has(witness), `the sweep no longer bites: no height literal found in ${witness}`);
   }
 });
@@ -48,7 +48,7 @@ test("the sheet-width literals match the manifest's build width in every home ca
   const wRe = new RegExp(String.raw`\b${w}(?![\d.])`);
   const suite = (name: string) => e2eSuiteFamily(REPO, name).map(read).join("\n");
   for (const [path, text] of [
-    ["public/index.css", read("public/index.css")],
+    ["src/styles/index.css", read("src/styles/index.css")],
     ["e2e/support/home.ts", read("e2e/support/home.ts")],
     ["the home suite", suite("home")],
     ["the landfall suite", suite("landfall")],

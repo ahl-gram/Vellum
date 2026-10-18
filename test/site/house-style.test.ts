@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 
 const root = (p: string) => fileURLToPath(new URL(`../../${p}`, import.meta.url));
 const read = (p: string) => readFileSync(root(p), "utf8");
-const house = () => read("public/house.css");
+const house = () => read("src/styles/house.css");
 
 const ruleOf = (css: string, selector: RegExp): string => {
   const m = css.match(new RegExp(`(^|\\n)\\s*${selector.source}[^{]*\\{([^}]*)\\}`));

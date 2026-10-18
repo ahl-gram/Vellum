@@ -42,7 +42,7 @@ test("#565 a comment between the width and the widener does not hide the widener
   assert.deepEqual(selectors(`/* .b { width: 100%; border: 1px solid red; } */ .c { color: red; }`), []);
 });
 
-// Documentation rather than a guard: it pins the ABSENCE of rule merging, so no deletion mutation can red it (pr-skeptic round 2). It is here because the direction matters, a false positive rather than a miss, and public/index.css's .lf-card is a live instance of it.
+// Documentation rather than a guard: it pins the ABSENCE of rule merging, so no deletion mutation can red it (pr-skeptic round 2). It is here because the direction matters, a false positive rather than a miss, and src/styles/index.css's .lf-card is a live instance of it.
 test("#565 the sweep reads one rule at a time, so a widener declared in a sibling rule is a false positive and never a silent miss", () => {
   assert.deepEqual(selectors(`.a { box-sizing: border-box; }\n.a { width: 100%; border: 1px solid red; }`), [".a"]);
 });

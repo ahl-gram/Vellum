@@ -1,4 +1,4 @@
-// A hand-authored file outside src/ (CLAUDE.md): the house's ESLint plugin for the sheets under public/, imported by eslint.config.ts and never run by Node directly; it exists here because Issue #648 rules that a house lint rule is a local plugin in TypeScript under scripts/.
+// A hand-authored file outside src/ (CLAUDE.md): the house's ESLint plugin for the sheets under src/styles/, imported by eslint.config.ts and never run by Node directly; it exists here because Issue #648 rules that a house lint rule is a local plugin in TypeScript under scripts/.
 import type { CSSRuleDefinition } from "@eslint/css";
 import type { Comment } from "@eslint/css-tree";
 

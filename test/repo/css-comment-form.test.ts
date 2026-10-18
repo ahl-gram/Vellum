@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readdirSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { ESLint } from "eslint";
+import { STYLES } from "../../scripts/served-sources.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
 const eslint = new ESLint({ cwd: ROOT, flags: ["unstable_native_nodejs_ts_config"] });
@@ -12,7 +13,7 @@ const ISSUE_FORM = "vellum/css-comment-issue-form";
 const NO_JS_MODULE = "vellum/css-comment-no-js-module";
 
 const lintSheet = async (text: string, name = "lint-plant.css"): Promise<Array<[string | null, number]>> => {
-  const results = await eslint.lintText(text, { filePath: join(ROOT, "public", name) });
+  const results = await eslint.lintText(text, { filePath: join(ROOT, STYLES, name) });
   return results.flatMap((r) => r.messages.map((m): [string | null, number] => [m.ruleId, m.line]));
 };
 
@@ -74,8 +75,8 @@ const walk = (dir: string): string[] =>
     return statSync(path).isDirectory() ? walk(path) : path.endsWith(".css") ? [path] : [];
   });
 
-test("every sheet under public/ that the lint reads satisfies the comment-form rules", async () => {
-  const onDisk = walk(join(ROOT, "public"));
+test("every sheet under src/styles/ that the lint reads satisfies the comment-form rules", async () => {
+  const onDisk = walk(join(ROOT, STYLES));
   const unread = await Promise.all(onDisk.map((path) => eslint.isPathIgnored(path)));
   const sheets = onDisk.filter((_, i) => !unread[i]);
   assert.ok(sheets.length >= 19, `the population is ${sheets.length} sheets; the tracked set is 19`);

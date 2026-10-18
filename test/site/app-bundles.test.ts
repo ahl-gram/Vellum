@@ -139,7 +139,7 @@ test("the clean never reaches a tracked file: no GENERATED_SUBTREES entry is, or
     .split("\n")
     .filter(Boolean);
   assert.ok(
-    tracked.includes("public/explorer/portfolio/index.css"),
+    tracked.includes("src/styles/explorer/portfolio/index.css"),
     "precondition: the Portfolio's tracked sheet shares its directory with a generated twin, which is the case that makes a directory-wide entry destructive",
   );
   const reached = GENERATED_SUBTREES.flatMap((sub) =>

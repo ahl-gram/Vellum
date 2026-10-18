@@ -83,7 +83,7 @@ test("every module that builds CSS is a TypeScript module with a builder here an
   for (const source of SRC_CSS_FILES) {
     assert.ok(
       source.endsWith(".ts"),
-      `${source} is not a TypeScript module: a page's CSS lives in a sheet under public/, where the stylesheet lint reads it (handbook/specs/site-architecture.md)`,
+      `${source} is not a TypeScript module: a page's CSS lives in a sheet under src/styles/, where the stylesheet lint reads it (handbook/specs/site-architecture.md)`,
     );
     const { css, anchor } = SRC_CSS[source];
     assert.ok(

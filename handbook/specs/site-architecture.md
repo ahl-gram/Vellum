@@ -31,8 +31,8 @@ symbol and path so the reader goes and looks.
 - **A page's files share its route path in every tree that holds one.** Its markup is
   `src/pages/<route>/index.astro`, its own code, where it has any, sits under `src/site/<route>/`, and the sheet it
   authors is `public/<route>/index.css`, which the layout links relatively; home, whose route is the
-  root, is `src/pages/index.astro`, `src/site/home/` and `public/index.css` with
-  `public/home-noscript.css`. A folder directly under `src/site/` is one page's own, named by its
+  root, is `src/pages/index.astro`, `src/site/home/` and `src/styles/index.css` with
+  `src/styles/home-noscript.css`. A folder directly under `src/site/` is one page's own, named by its
   route, or `src/site/shared/`. `test/site/folder-layout.test.ts` holds the code's half and the
   folders, and the head tests in `test/site/astro-scaffold.test.ts` hold the relative link to the sheet.
 - **Two INDEPENDENT questions decide what a page joins, and mixing them up is how a page gets
@@ -111,7 +111,7 @@ symbol and path so the reader goes and looks.
   arm of `atlasHead` in `src/atlas/document.ts`), carries the same tag; the offline download keeps its
   own, since its bytes are pinned. A desktop browser ignores the tag, so a narrowed or zoomed desktop
   window lays out at its own width: every page below 1024 keeps its 1024 layout at full size and the
-  window scrolls sideways over it (the `min-width` on `body` in `public/shell.css`, Issue #762, and on
+  window scrolls sideways over it (the `min-width` on `body` in `src/styles/shell.css`, Issue #762, and on
   the served atlas's `html` in `src/atlas/document.ts`, Issue #763). A staged chart room on a page set
   small that way also keeps a height, the desk frame's 768 (`handbook/specs/ui-design.md`, the room
   and its furniture). It is keyed on the page's own shrink, which the desk notice already reads,
@@ -123,14 +123,14 @@ symbol and path so the reader goes and looks.
   (both in `scripts/lint/narrow-width.ts`), and `CO1` in `e2e/suites/corners.ts` in any sheet a built
   page loads. A script inside an `.astro` page reaches none of them. A length that shrinks with the window, a height, the window's shape and a box's own size
   are outside the rule.
-- **The shell dresses once.** Every shared shell rule lives in `public/shell.css`, save the dress of a component the shell seats on every page, which is its own sheet, linked on every page and named in `HOUSE_SHEETS` (the chart of the atelier's, `public/chart-of-the-atelier.css`); a page's own
-  sheet carries page-specific rules only. Home's scripts-off rules are `public/home-noscript.css`,
+- **The shell dresses once.** Every shared shell rule lives in `src/styles/shell.css`, save the dress of a component the shell seats on every page, which is its own sheet, linked on every page and named in `HOUSE_SHEETS` (the chart of the atelier's, `src/styles/chart-of-the-atelier.css`); a page's own
+  sheet carries page-specific rules only. Home's scripts-off rules are `src/styles/home-noscript.css`,
   linked from inside its `<noscript>`; both moved out of the pages so the stylesheet lint reads them
   (Alex, Issue #779 comment 6067462530).
 - **Sheet order is a contract.** The layout links the root sheets, then the shared sheets a page
-  opts into through its `extraCss` prop, then the page's own `public/**/index.css`, so a page keeps
+  opts into through its `extraCss` prop, then the page's own sheet, `<route>/index.css`, so a page keeps
   the last word on its own layout. An `extraCss` href is validated at render and THROWS unless it is
-  root-absolute. The layout links `public/shell.css` last of all, which is why a page override of a
+  root-absolute. The layout links `/shell.css` last of all, which is why a page override of a
   shell rule needs higher specificity; that trap belongs to `handbook/specs/cascade-traps.md` and is
   not restated here, and `test/site/astro-scaffold.test.ts` holds the order in every built head.
 - **Authored CSS hides in more places than `public/`.** A rule written against `public/` alone
@@ -269,15 +269,15 @@ other way, which is what earns them a section of their own.
 precisely, because a token that falls outside it looks identical at the point of use.
 
 - **A colour goes in BOTH places, which is `ui-design.md`'s own wording**: declared once in
-  `public/shell.css` and mirrored in `SITE_PALETTE` in `src/atlas/palette.ts`. The
+  `src/styles/shell.css` and mirrored in `SITE_PALETTE` in `src/atlas/palette.ts`. The
   guard is a `deepEqual` against `TOKENS` in `test/site/shell-css.test.ts`, so the ratified roster is
   a third place the pair is measured against. The phrase "the three-place join" belongs to
   `test/atlas/document.test.ts`, which uses it in its own title for the arrangement below, and is not
   `ui-design.md`'s wording for the colour rule.
 - **The rule for what is outside is a DERIVATION, not a list.** `SITE_PALETTE` carries flat
   name-to-hex colours only, so a token whose value is not a flat hex is not in the join. Where it
-  lives is then wherever declares it: `public/shell.css` holds the deep, the depth shadows
-  and the room-furniture lengths; `public/fonts.css` and `public/motion.css` declare their
+  lives is then wherever declares it: `src/styles/shell.css` holds the deep, the depth shadows
+  and the room-furniture lengths; `src/styles/fonts.css` and `src/styles/motion.css` declare their
   own; and a page sheet may declare one in its own `:root`, where the SAME token name legitimately
   holds a different value on different pages. Check the declaration, not a remembered home.
 - **A self-contained generated document declares its own copy, in one of two shapes.** The atlas
