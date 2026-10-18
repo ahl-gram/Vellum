@@ -990,7 +990,7 @@ test("every road out names its destination by that route's name in the tree (Iss
 });
 
 type Legend = { label: string; headId?: string; rowLabel?: string; note?: true; status?: string };
-/** Every legend row on the site by page, LITERAL as ROADS is; a page absent here renders none. */
+/** Every legend row on the site by page, LITERAL as ROADS is. */
 const LEGENDS: Record<string, Legend> = {
   "explorer/index.html": { label: "The Press", headId: "grp-press" },
   "print-room/index.html": {
@@ -1055,7 +1055,7 @@ const noticesShape = (n: Notices): RegExp =>
       `${literal("</div>")}$`,
   );
 
-test("every stage's notices stand in the kit's one shape, last in the stage: the live status pill, the hidden render-worker warning, the scripts-off notice, and no page carries a pill or a warning its entry does not name (Issue #827)", () => {
+test("every stage's notices stand in the kit's one shape, last in the stage: the live status pill, never whitespace alone, the hidden render-worker warning, the scripts-off notice, and no page carries a pill or a warning its entry does not name (Issue #827)", () => {
   for (const p of PAGES) {
     const html = page(p.route);
     const want = NOTICES[p.route];
@@ -1068,6 +1068,12 @@ test("every stage's notices stand in the kit's one shape, last in the stage: the
     assert.ok(at !== -1 && end > at, `${p.route} stands its stage before the vignettes`);
     const stage = html.slice(at, end);
     assert.match(tight(stage), noticesShape(want), `${p.route}'s notices, as the kit renders them`);
+    if (want.pill)
+      assert.doesNotMatch(
+        stage,
+        new RegExp(`${literal(`<p class="status" id="${want.pill}" role="status" aria-live="polite">`)}\\s+</p>`),
+        `${p.route}'s status pill holds only whitespace, which the sheet's :empty does not hide`,
+      );
   }
 });
 
