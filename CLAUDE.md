@@ -109,7 +109,7 @@ engine/CLI/scripts natively). **No JavaScript file is tracked outside `design/`*
 `.cjs`, `.jsx`), and `npm run lint` is what enforces it: the blocks named for Issue #653's ruling D in
 `eslint.config.ts` refuse every such file the `.gitignore` does not ignore, whatever inline directive
 it carries. `design/`, an archive whose round tools keep the JavaScript they ran as, is the single
-exemption. `public/` is static assets only (goldens, CSS, the icons); its fonts are copied in from `design/kit/fonts/` at build.
+exemption. The sheets are written under `src/styles/` and the committed charts, icons and preview card under `src/static/`; everything else the site serves is written by `npm run astro:generate` into `generated/`, which nothing tracks, its fonts copied in from `design/kit/fonts/` (`handbook/specs/site-architecture.md`).
 
 ## Measure before you assert
 
@@ -250,7 +250,7 @@ the sandbox for both review agents that build one, so the depth lives in one pla
   is the DISPATCH tree's HEAD and not `origin/main`, so it builds its own detached worktree with
   `node scripts/agent-sandbox.ts create guard-<topic>-<round>`. Do not point it at harness isolation.
   `vellum-pr-skeptic` builds one for EVERY run (Alex, 2026-09-12): `npm test` deletes the generated
-  assets under `public/` and neither `git status` nor `git status --ignored` reports it, so no
+  assets under `generated/` and neither `git status` nor `git status --ignored` reports it, so no
   reviewer runs a suite in a tree it does not own. It passes the sha explicitly, which that script
   requires of a `skeptic-*` sandbox.
 - **`vellum-planner` and `vellum-implementer` get their worktrees a third way**: `isolation: worktree`

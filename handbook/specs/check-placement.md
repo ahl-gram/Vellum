@@ -17,11 +17,11 @@ belongs in.
 ## The formatter
 
 - **Prettier owns layout** in every TypeScript file under the lint's roots and every sheet under
-  `public/`, at the print width in `prettier.config.ts` with every other option at Prettier's
+  `src/styles/`, at the print width in `prettier.config.ts` with every other option at Prettier's
   default. Run `npm run format` before committing; the Format step in CI runs
   `npm run format:check` on every shard. No lint rule or test holds a rule about layout.
 - **What it leaves out is `.prettierignore`'s, pinned exactly by `test/repo/format.test.ts`**:
-  everything outside the five TypeScript roots and `public/`, so the archives under `design/` and
+  everything outside the five TypeScript roots, so the archives under `design/` and
   `handbook/plans/` and the house's prose keep their own layout; every kind but TypeScript and CSS
   inside them, so the pages under `src/pages/` keep the markup they ship near-verbatim
   (`handbook/specs/site-architecture.md`); and the plate face tables, whose bytes
@@ -81,7 +81,7 @@ belongs in.
   something to hold where the rule cannot say so itself.
 - **`npm test` checks both rules file by file.** `test-support/source-read-guard.ts` fails a test
   file that reads a source file (TypeScript under `src/`, `e2e/` or `scripts/`, a page, a stylesheet
-  under `public/`) unless `SOURCE_READS` in `test-support/source-read-list.ts` names the read, or a
+  under `src/styles/`) unless `SOURCE_READS` in `test-support/source-read-list.ts` names the read, or a
   folder holding it, for that file, and fails an entry the file no longer reads. A data read or a
   witness joins the list with its kind. The tests kept when Issue #779 closed, each guarding what no
   instrument here reaches, carry the kind `kept`: one leaves the list when it moves to a lint rule or

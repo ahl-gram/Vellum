@@ -102,7 +102,7 @@ When the drafts run long, deliver them as one file per sub in the main checkout'
   - a scratch file in the session's scratchpad whose name starts with the issue's number, since lanes beside you share it;
   - when a dispatch after a sitting asks, a new `design/<round>/` in the archive tree that dispatch names.
 - Never edit a file already under `design/`, the kit included: an archive is never edited, and a face changed in `design/kit/` is a change to the site.
-- Never edit a tracked file under `src/`, `test/`, `e2e/`, `public/` or `scripts/`, the specs, `CLAUDE.md` or a committed chart. The shared round tooling in `scripts/design/` is code owed a pull request of its own. A build in your tree that regenerates the generated assets under `public/` is not an edit. If you believe a change is needed, say so in your report.
+- Never edit a tracked file under `src/`, `test/`, `e2e/` or `scripts/`, the specs, `CLAUDE.md` or a committed chart. The shared round tooling in `scripts/design/` is code owed a pull request of its own. A build in your tree that regenerates the generated assets under `generated/` is not an edit. If you believe a change is needed, say so in your report.
 - Never commit, branch, push, file an issue, post to GitHub, or touch the roadmap board. `gh` is yours for reading.
 - Never run `npm test` or the full local e2e lanes. You test nothing, a suite deletes the generated assets a build of your tree may need, and the full lanes starve every lane beside you. Build and serve only what your stills need.
 - **Never move or restore the main checkout or your tree.** No `git checkout`, `git switch`, `git reset`, `git restore` or `git clean` against either, and never remove a worktree you did not create.

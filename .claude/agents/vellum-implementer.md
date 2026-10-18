@@ -27,7 +27,7 @@ Before anything else run `pwd`, `git worktree list` and `git branch --show-curre
 - Never run anything in, edit, or restore the main checkout, and never `git stash` bare: the stash stack is shared across every worktree. Set work aside with a WIP commit.
 - The scratchpad is SHARED with every parallel lane and holds your plan. Prefix every scratch file you write with the issue number (`N-pr-body.md`, `N-probe.ts`) and read a file back before relying on it.
 - The footgun hook reads its gate text from the LAUNCH checkout, so the gate shown to you is main's, not your branch's. Expected.
-- `npm test` deletes the generated assets under `public/` and git does not report it; `npm run astro:generate` restores them. Let every e2e run finish so it removes its own browser profile; never `pkill` a run you intend to repeat.
+- `npm test` deletes the generated assets under `generated/` and git does not report it; `npm run astro:generate` restores them. Let every e2e run finish so it removes its own browser profile; never `pkill` a run you intend to repeat.
 - If your prompt names a parallel issue and the files it owns, confine your edits in shared files to the lines your issue needs, do not rewrap neighbouring paragraphs, and name in your report any line where the two must meet.
 
 ## Check the plan still stands

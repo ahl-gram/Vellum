@@ -118,18 +118,18 @@ items that unlock the most downstream value, then the re-roll tail.
 **Committed content, because a hand-authored page embeds it:** `src/static/charts/chart-42-*.svg`,
 `src/static/charts/arms-42-*.svg`, `src/static/og.png`, and `src/static/favicon.svg` plus
 `src/static/apple-touch-icon.png` (#489; `npm run icons` is their single writer, and a test pins the SVG
-to the Fell SC woff2). Everything else generated is gitignored and rebuilt per deploy:
-`public/atlas/`, `public/gallery/`, the bundle twins and their chunks, and `public/fonts/`, copied
+to the Fell SC woff2). Everything else the site serves is generated into `generated/`, which nothing tracks, and rebuilt per deploy:
+the atlas, the gallery, the bundle twins and their chunks, and the fonts copied
 from `design/kit/fonts/`.
 
 **The committed list above is the rule; there is no shorter procedure that derives it.** "Referenced
 by a hand-authored page" is the family resemblance, not a test: `src/pages/specimen/index.astro`
-embeds `/gallery/chart-<seed>.svg` and `public/gallery/` is gitignored with nothing tracked in it.
-What separates the two halves is that the committed four are stable across deploys and the generated
+embeds `/gallery/chart-<seed>.svg` and `generated/gallery/` is generated with nothing tracked in it.
+What separates the two halves is that the committed files are stable across deploys and the generated
 trees are re-derived per deploy from a seed that moves. **Adding to the committed list is a
 deliberate decision, not the output of applying a line**, so make it deliberately and add the file
 here. Two tombstones so nobody goes looking: `docs/` retired at #206, and the tsc engine emit retired
-at #260 with its clean-list entry kept deliberately.
+at #260 (the clean, which deletes the build-output folder whole, removes any local leftover of it).
 
 **Committed generated source:** `src/prospect/letter/face-roman.ts`, `face-caps.ts` and
 `face-italic.ts`, the plate face's outline tables (Issue #754). `npm run plate-face` is their single

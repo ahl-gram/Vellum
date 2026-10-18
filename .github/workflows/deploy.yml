@@ -2,7 +2,7 @@ name: Deploy site to GitHub Pages
 
 # Builds the site into dist/ and publishes it via the GitHub Pages Actions
 # pipeline. Since Sub 5 (#206) `npm run build` is the Astro build: astro:generate
-# writes the runtime trees (engine, bundles, atlas/gallery) into public/, then
+# writes the runtime trees (engine, bundles, atlas/gallery) into generated/, then
 # `astro build` assembles dist/, which upload-pages-artifact publishes.
 #
 # Contractual shape (ratified Sub 1 decision doc, #202): hand-rolled npm ci

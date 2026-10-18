@@ -164,7 +164,7 @@ section points there rather than restating it.
   trusted.
 - **The harness serves the BUILT site.** The runner (`runE2e` in `e2e/support/runner.ts`) serves
   `dist/`, with `VELLUM_SITE_DIR` as the override, and `dist/` does not exist in a fresh checkout. A change under
-  `public/` is invisible to every suite until the build runs again. Two causes put a run on a stale
+  `src/styles/`, `src/static/` or `generated/` is invisible to every suite until the build runs again. Two causes put a run on a stale
   build and this file ranks neither: that one, and an orphaned browser still holding the debug port,
   whose conflict message in `e2e/support/ports.ts` says in its own words that the run would report
   results from that browser's stale build instead of this one.

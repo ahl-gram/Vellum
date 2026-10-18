@@ -354,7 +354,7 @@ building it and may not move it. It runs
 in the directory you launched it from, which is your worktree, and on 2026-09-11 this one checked a PR
 head out in two live ones (#573). No dispatched review agent may move or restore the tree it was
 dispatched from. `vellum-pr-skeptic` goes further and runs NOTHING in it, suites included, because a
-suite run there deletes the generated assets under `public/` (Alex, 2026-09-12); both it and
+suite run there deletes the generated assets under `generated/` (Alex, 2026-09-12); both it and
 `vellum-guard-prover` build their sandbox with `scripts/agent-sandbox.ts` rather than a recipe of
 their own (#575). The other three keep their documented work in the dispatch tree, `vellum-plate-reader`'s
 `out/` samples included, because its own boundary writes only into `out/` and the other two hold no

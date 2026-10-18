@@ -30,7 +30,7 @@ symbol and path so the reader goes and looks.
   meta. The tree is the roster of pages; no list of them is kept anywhere, including here.
 - **A page's files share its route path in every tree that holds one.** Its markup is
   `src/pages/<route>/index.astro`, its own code, where it has any, sits under `src/site/<route>/`, and the sheet it
-  authors is `public/<route>/index.css`, which the layout links relatively; home, whose route is the
+  authors is `src/styles/<route>/index.css`, served at `<route>/index.css`, which the layout links relatively; home, whose route is the
   root, is `src/pages/index.astro`, `src/site/home/` and `src/styles/index.css` with
   `src/styles/home-noscript.css`. A folder directly under `src/site/` is one page's own, named by its
   route, or `src/site/shared/`. `test/site/folder-layout.test.ts` holds the code's half and the
@@ -116,7 +116,7 @@ symbol and path so the reader goes and looks.
   `test/site/astro-scaffold.test.ts` and `test/atlas/document.test.ts` hold the tag, and `FL1` in
   `e2e/suites/corners/floor.ts` holds every served page to the floor. **No rule switches the layout at
   a fixed window width at or below the floor**, in a sheet or a script: `vellum/css-no-narrow-width`
-  refuses one in a sheet under `public/`, `vellum/no-narrow-width` in a TypeScript file under `src/`
+  refuses one in a sheet under `src/styles/`, `vellum/no-narrow-width` in a TypeScript file under `src/`
   (both in `scripts/lint/narrow-width.ts`), and `CO1` in `e2e/suites/corners.ts` in any sheet a built
   page loads. A script inside an `.astro` page reaches none of them. A length that shrinks with the window, a height, the window's shape and a box's own size
   are outside the rule.
@@ -124,14 +124,21 @@ symbol and path so the reader goes and looks.
   sheet carries page-specific rules only. Home's scripts-off rules are `src/styles/home-noscript.css`,
   linked from inside its `<noscript>`; both moved out of the pages so the stylesheet lint reads them
   (Alex, Issue #779 comment 6067462530).
+- **A file the site serves as written is kept under `src/styles/` (the sheets) or `src/static/` (the
+  committed charts, icons and card), at the path it is served from.** The build copies the kinds each
+  folder keeps into the built site at the same paths, and nothing else in either, and the dev server
+  serves them from there, so an edit shows on the next reload; both are `servedSources` in
+  `scripts/served-sources.ts`, whose `SERVED_SOURCES` names the folders and their kinds. Everything
+  else the site serves is written by `npm run astro:generate` into `generated/`, Astro's public
+  folder, which nothing tracks.
 - **Sheet order is a contract.** The layout links the root sheets, then the shared sheets a page
   opts into through its `extraCss` prop, then the page's own sheet, `<route>/index.css`, so a page keeps
   the last word on its own layout. An `extraCss` href is validated at render and THROWS unless it is
   root-absolute. The layout links `/shell.css` last of all, which is why a page override of a
   shell rule needs higher specificity; that trap belongs to `handbook/specs/cascade-traps.md` and is
   not restated here, and `test/site/astro-scaffold.test.ts` holds the order in every built head.
-- **Authored CSS hides in more places than `public/`.** A rule written against `public/` alone
-  misses every module in `src/` that builds CSS, and passes. **The repo keeps its own roster of
+- **Authored CSS hides in more places than `src/styles/`.** A rule written against `src/styles/` alone
+  misses every module elsewhere in `src/` that builds CSS, and passes. **The repo keeps its own roster of
   those**, `SRC_CSS_FILES` in `scripts/lint/sheet-tokens.ts`, including a card whose faces are built
   rather than authored, and `SRC_CSS` in `test/repo/css-beyond-sheets.test.ts` pairs each with a way
   to get its CSS as a string, typed against that list so neither can hold a source the other lacks,
@@ -140,7 +147,7 @@ symbol and path so the reader goes and looks.
   than any list written in prose, this one included: the sources are of several shapes (a constant
   written verbatim to a generated sheet, constants that only exist once the document is composed)
   and each needs its own way in. Every entry is a TypeScript module, since a page's CSS lives in a
-  sheet under `public/`.
+  sheet under `src/styles/`.
 - **Link form is scoped, and the flat rule is false.** Root-absolute is the form for the links the
   SHELL owns: the `NAV_ITEMS` hrefs, which are root-absolute trailing-slash directory form by their
   own interface contract, the root and shared sheets, the icons and fonts, and the discovery routes.
@@ -203,7 +210,7 @@ SVG remains the byte-faithful artifact.
   one built page. Where byte identity matters, hand the text through as literal markup rather than
   through an expression.
 - **CSS that travels as a STRING keeps its comments, and they ship as public page bytes.** The
-  distinction is whether the build's CSS pipeline ever sees it. A sheet under `public/` is copied as
+  distinction is whether the build's CSS pipeline ever sees it. A sheet under `src/styles/` is copied as
   written, comments included, so the same holds for it. `ATLAS_SHEET_CSS` in `src/atlas/document.ts`
   is a string: interpolated into the generated atlas document, and assigned to a style element's
   text content at runtime by the Print Room's bundled code. Neither path is minified, so prose
@@ -293,9 +300,9 @@ precisely, because a token that falls outside it looks identical at the point of
 - **One press, one pass.** `scripts/build-app-bundles.ts` is a single multi-entry Vite build over
   `BUNDLE_ENTRIES`, compiling the TypeScript entries and the engine graph they import together, so
   there is no separate emit step and nothing orders against one. Twins are staged in a temporary
-  directory and copied into `public/`; shared chunks take fixed names with no hashes; one worker
+  directory and copied into the build-output folder, `generated/`; shared chunks take fixed names with no hashes; one worker
   chunk serves the surfaces that spawn it. `publicDir` is false in each press config, guarded, since
-  a truthy value copies `public/` into itself.
+  a truthy value copies a public folder into the press's own output.
 - **A job that draws a plate loads the plate's code on demand.** Today those are
   `prospectResultFor` in `src/site/explorer/prospect-job.ts` and `composeAtlas` in
   `src/atlas/compose.ts`: a page and the worker reach them only through `import()`, so a page that
@@ -327,17 +334,18 @@ precisely, because a token that falls outside it looks identical at the point of
   its exact command string. A reordered or added step reds all of them at once: that is the pin
   working, not a break, but budget the edits.
 - **The site's fonts are generated, from the design kit.** `scripts/kit-fonts.ts` copies
-  `design/kit/fonts/`, the one copy the site reads, into the gitignored `public/fonts/`, so a face is
-  added or changed in the kit and never under `public/`. Nothing under test reads `public/fonts/`:
-  `test/site/astro-scaffold.test.ts` cleans the generated trees while other files run, so a reader
+  `design/kit/fonts/`, the one copy the site reads, into `generated/fonts/`, so a face is
+  added or changed in the kit and never in the build-output folder. Nothing under test reads `generated/fonts/`:
+  `test/site/astro-scaffold.test.ts` deletes the build-output folder while other files run, so a reader
   there races it; read `KIT_FONTS` from `scripts/kit-fonts.ts` instead.
 - **Clean before regenerate.** The generators overwrite and never delete, so without the clean a
   renamed module leaves an importable orphan that masks a missing file locally while CI, always a
-  fresh checkout, stays fine. `GENERATED_SUBTREES` is that list; it may grow and may not shrink, it
-  carries a deliberate tombstone for a tree nothing generates any more, and a test assertion of its
-  floor stays LITERAL rather than derived from the constant the code iterates.
+  fresh checkout, stays fine. The clean deletes the build-output folder, `generated/`, whole
+  (`cleanGenerated` in `scripts/clean-generated.ts`, which refuses a folder of any other name), so no
+  list of generated trees is kept; nothing in the folder is tracked, and `.gitignore` names it in one
+  line, which `test/site/app-bundles.test.ts` holds.
 - **The dev server needs its dev-only middleware.** `astro.config.ts` registers a middleware that
-  serves the surfaces' canonical trailing-slash URLs in dev, because the dev public middleware serves
+  serves the surfaces' canonical trailing-slash URLs from `generated/` in dev, because the dev public middleware serves
   exact file paths only. Removing it looks harmless and 404s every working page in dev, while build
   and preview are untouched.
 - **The e2e harness serves the engine by type-stripping the real source.** `serveEngineModule` in

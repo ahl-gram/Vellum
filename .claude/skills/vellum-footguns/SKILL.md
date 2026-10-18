@@ -231,7 +231,7 @@ fail silently (an undeclared CSS variable, a suite the runner never calls, a bud
 
 1. `grep -rn` the nearest sibling's name across `src/`, `scripts/`, `e2e/`, `test/`, `.github/` and join
    every list it appears in: the runner's `SUITES` map, `MEASURED_SECONDS`, the tiers test, the
-   discovery files. A sheet under `public/` joins the stylesheet lint by existing (its block reads `src/styles/**/*.css`).
+   discovery files. A sheet under `src/styles/` joins the stylesheet lint by existing (its block reads `src/styles/**/*.css`).
 2. Name in the PR body which rosters self-check and which were joined by hand;
    `handbook/specs/site-architecture.md` names the rosters a page or a sheet joins, and which close themselves.
 3. Re-measure any budget the roster carries; a number measured on an eleven-check suite is wrong on a
@@ -298,7 +298,7 @@ Scars: #49, #101, #203, #255, #408, #486, #491, #492, #507, #508, #524, #528, #5
     while it runs; one round, and a finding not fixed is filed or an `handbook/errata/` row
     (item 7), never body prose. **Commit before you dispatch it**,
     and before any review agent: it runs in the directory you launched it from, and a suite run there
-    DELETES the generated assets under `public/`, which neither `git status` nor `git status --ignored`
+    DELETES the generated assets under `generated/`, which neither `git status` nor `git status --ignored`
     reports (#573). `.github/PULL_REQUEST_TEMPLATE.md` is the shape, and the hook refuses a body that skips one of its sections.
 
 ## Gate 6: before changing the renderer or a committed chart

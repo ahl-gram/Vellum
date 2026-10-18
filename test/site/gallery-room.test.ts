@@ -36,7 +36,11 @@ test("GR5 every plate is a road into its own world: the Explorer at the plate's 
 test("GR6 the Gallery's sheet carries no prose and no rule for what it lacks or the kit dresses, and its base padding names the band", () => {
   assert.match(css, /(^|\n)main\s*\{[^}]*padding:[^}]*var\(--band-h\)/, "the first row clears the cluster's band");
   assert.doesNotMatch(css, /header\.chrome/, "the page does not pool its own cluster");
-  assert.doesNotMatch(css, /\/\*/, "the shipped sheet carries no prose (public/gallery/index.css ships it verbatim)");
+  assert.doesNotMatch(
+    css,
+    /\/\*/,
+    "the shipped sheet carries no prose (generated/gallery/index.css ships it verbatim)",
+  );
   assert.doesNotMatch(
     css,
     /(^|\n)\s*(header|footer|p\.sub|main\.desk-panel)\s*[{,]/,
