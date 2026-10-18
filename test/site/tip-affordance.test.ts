@@ -25,7 +25,7 @@ const CSS_FINGERPRINTS: ReadonlyArray<readonly [string, (source: string) => bool
   ["a rotate-on-hover tip", (s) => /:hover/.test(s) && /rotate\(/.test(s)],
 ];
 
-/** public/ and src/ are the whole authored-css surface: CLAUDE.md forbids .js outside src/, and public/ is otherwise static assets, so nothing else can hold a stylesheet. */
+/** src/ is the whole authored-css surface: CLAUDE.md forbids .js outside src/, and nothing is tracked under public/ or generated/ (test/site/app-bundles.test.ts), so nothing else can hold a stylesheet. */
 const cssBearingSources = (): string[] =>
   readdirSync(root("src"), { recursive: true, encoding: "utf8" })
     .map((entry) => `src/${entry.split(sep).join("/")}`)

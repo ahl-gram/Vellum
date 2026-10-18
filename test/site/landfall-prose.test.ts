@@ -19,7 +19,7 @@ test("the How It Works pip moors at the title cartouche, chart only, never the l
   assert.equal(how.verb, "See how");
   assert.equal(how.where, "at the title cartouche");
 
-  const svg = read("public/charts/chart-42-antique.svg");
+  const svg = read("src/static/charts/chart-42-antique.svg");
   const frame = svg.match(/id="layer-cartouche"><rect x="([\d.]+)" y="([\d.]+)" width="([\d.]+)" height="([\d.]+)"/);
   assert.ok(frame, "chart 42 carries its cartouche frame; a regen that moves it re-anchors the pip");
   const [x, y, w, h] = frame.slice(1).map(Number) as [number, number, number, number];

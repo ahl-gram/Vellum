@@ -4,7 +4,6 @@ import { existsSync, readFileSync, rmSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { join } from "node:path";
 import { NAV_ITEMS } from "../../src/layouts/nav.ts";
-import { GENERATED_SUBTREES } from "../../scripts/clean-public-generated.ts";
 import {
   ATLAS_ROUTE,
   PROSPECT_ROUTE,
@@ -144,7 +143,7 @@ test("the real origin comes from astro.config.ts, so a domain move updates all t
   assert.ok(sitemapXml(await configuredSite()).includes(`<loc>${config.site}/</loc>`), "home resolves against it");
 });
 
-test("astro:generate ends by generating the discovery files into public/", () => {
+test("astro:generate ends by generating the discovery files into generated/", () => {
   const pkg = JSON.parse(readFileSync(root("package.json"), "utf8")) as { scripts: Record<string, string> };
   assert.ok(
     pkg.scripts["astro:generate"]!.includes("node scripts/generate-discovery.ts"),
@@ -152,20 +151,7 @@ test("astro:generate ends by generating the discovery files into public/", () =>
   );
   assert.ok(
     pkg.scripts["astro:generate"]!.indexOf("generate-discovery") >
-      pkg.scripts["astro:generate"]!.indexOf("clean-public-generated"),
+      pkg.scripts["astro:generate"]!.indexOf("clean-generated"),
     "it must run AFTER the clean step, which removes the previous run's files",
   );
-});
-
-test("the generated discovery files are gitignored in public/, like every other generated file", () => {
-  const lines = readFileSync(root(".gitignore"), "utf8").split("\n");
-  for (const line of ["public/sitemap.xml", "public/robots.txt", "public/llms.txt"]) {
-    assert.ok(lines.includes(line), `.gitignore should carry the exact line ${line}`);
-  }
-});
-
-test("clean-before-regen covers them, so a retired route cannot linger in a local build", () => {
-  for (const file of ["sitemap.xml", "robots.txt", "llms.txt"]) {
-    assert.ok(GENERATED_SUBTREES.includes(file), `GENERATED_SUBTREES must include ${file}`);
-  }
 });

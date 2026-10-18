@@ -2,13 +2,14 @@ import { defineConfig } from "astro/config";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { GENERATED } from "./scripts/clean-generated.ts";
 import { servedSources } from "./scripts/served-sources.ts";
 
 // Issue #204 dev-only rewrite: Vite's dev public middleware serves EXACT file paths only and
 // Astro dev installs no dir -> index.html fallback, so /explorer/ would 404 in dev while
 // /explorer/index.html serves. Registered BEFORE Vite's internal middlewares; astro
-// build/preview are untouched (raw public/ copy).
-const PUBLIC_DIR = fileURLToPath(new URL("public", import.meta.url));
+// build/preview are untouched (raw generated/ copy).
+const PUBLIC_DIR = fileURLToPath(new URL(GENERATED, import.meta.url));
 const publicDirIndexes = () => ({
   name: "vellum-public-dir-indexes",
   configureServer(server: { middlewares: { use: (fn: (req: { url?: string }, res: unknown, next: () => void) => void) => void } }) {
@@ -37,6 +38,7 @@ export default defineConfig({
   // The migrated pages' markup must stay near-verbatim (no minification drift), and nothing on this site may be fingerprinted: no whitespace minification, and any <style> Astro processes inlines instead of emitting a fingerprinted sheet.
   compressHTML: false,
   build: { inlineStylesheets: "always" },
+  publicDir: `./${GENERATED}`,
   vite: { plugins: [publicDirIndexes()] },
   integrations: [servedSources()],
 });

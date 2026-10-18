@@ -160,14 +160,14 @@ test("the shipped Fell SC small-cap v: the face, the em, the bbox, and squarer t
   );
 });
 
-test("public/favicon.svg is byte for byte what npm run icons cuts from the shipped woff2 (the drift guard)", () => {
+test("src/static/favicon.svg is byte for byte what npm run icons cuts from the shipped woff2 (the drift guard)", () => {
   const glyph = readGlyphOutline(FELL_SC_WOFF2, SMALL_CAP_V);
-  assert.equal(readFileSync(root("public/favicon.svg"), "utf8"), buildFavicon(glyph));
+  assert.equal(readFileSync(root("src/static/favicon.svg"), "utf8"), buildFavicon(glyph));
 });
 
-test("public/apple-touch-icon.png is a committed 180x180 PNG", () => {
-  const png = root("public/apple-touch-icon.png");
-  assert.ok(existsSync(png), "public/apple-touch-icon.png should be committed");
+test("src/static/apple-touch-icon.png is a committed 180x180 PNG", () => {
+  const png = root("src/static/apple-touch-icon.png");
+  assert.ok(existsSync(png), "src/static/apple-touch-icon.png should be committed");
   const bytes = readFileSync(png);
   assert.equal(bytes.subarray(0, 8).toString("hex"), "89504e470d0a1a0a");
   assert.equal(bytes.subarray(12, 16).toString("latin1"), "IHDR");
@@ -180,8 +180,8 @@ const PALETTE_COVERAGE_FLOOR = 0.9;
 const PARCHMENT_SHARE_FLOOR = 0.1;
 const TAN_SHARE_FLOOR = 0.08;
 
-test("public/apple-touch-icon.png is the committed SVG's mark: walnut corners, the three inks covering the tile", () => {
-  const png = decodePng(readFileSync(root("public/apple-touch-icon.png")));
+test("src/static/apple-touch-icon.png is the committed SVG's mark: walnut corners, the three inks covering the tile", () => {
+  const png = decodePng(readFileSync(root("src/static/apple-touch-icon.png")));
   assert.equal(png.width, TOUCH_ICON_SIZE);
   assert.equal(png.height, TOUCH_ICON_SIZE);
   const last = TOUCH_ICON_SIZE - 1;

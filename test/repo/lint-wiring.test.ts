@@ -571,8 +571,8 @@ const JS_UNREAD = [
   "out/x.mjs",
   "out/probe/x.js",
   "dist/x.js",
-  "public/explorer/app.bundle.js",
-  "public/atlas/x.js",
+  "generated/explorer/app.bundle.js",
+  "generated/atlas/x.js",
   ".claude/worktrees/w/scripts/x.mjs",
   "node_modules/x/index.js",
 ];

@@ -115,9 +115,9 @@ items that unlock the most downstream value, then the re-roll tail.
 
 ## Golden and committed-chart discipline
 
-**Committed content, because a hand-authored page embeds it:** `public/charts/chart-42-*.svg`,
-`public/charts/arms-42-*.svg`, `public/og.png`, and `public/favicon.svg` plus
-`public/apple-touch-icon.png` (#489; `npm run icons` is their single writer, and a test pins the SVG
+**Committed content, because a hand-authored page embeds it:** `src/static/charts/chart-42-*.svg`,
+`src/static/charts/arms-42-*.svg`, `src/static/og.png`, and `src/static/favicon.svg` plus
+`src/static/apple-touch-icon.png` (#489; `npm run icons` is their single writer, and a test pins the SVG
 to the Fell SC woff2). Everything else generated is gitignored and rebuilt per deploy:
 `public/atlas/`, `public/gallery/`, the bundle twins and their chunks, and `public/fonts/`, copied
 from `design/kit/fonts/`.
@@ -141,8 +141,8 @@ owes the script and moves the prospect plate pins.
 `test/world/golden-seed42.test.ts`. A seed re-roll re-pins it.
 
 - **A render change that moves any label or path owes a regen**: `npm run charts:regen` and
-  `npm run og` (since #205). `charts:regen` single-writes `public/charts`; `og` writes
-  `public/og.png`. A font-subset change additionally owes `npm run icons`, and a change to the plate
+  `npm run og` (since #205). `charts:regen` single-writes `src/static/charts`; `og` writes
+  `src/static/og.png`. A font-subset change additionally owes `npm run icons`, and a change to the plate
   face owes `npm run plate-face`. **There is no `site` script**; it went at #206.
 - **Verify a regen by diffing the committed charts old against new**, snapshotting them first. The
   **#40 hero drift guard** compares a fresh render against the committed one, so after a regen it is

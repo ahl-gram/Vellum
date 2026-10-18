@@ -7,7 +7,6 @@ import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 import { join, relative } from "node:path";
 import { copyKitFonts, KIT_FONTS } from "../../scripts/kit-fonts.ts";
-import { GENERATED_SUBTREES } from "../../scripts/clean-public-generated.ts";
 import { atlasDocument, atlasPlateFilename, type AtlasDocumentData } from "../../src/atlas/document.ts";
 import { buildGallery } from "../../src/cli/gallery.ts";
 import { renderMap } from "../../src/render/map-renderer.ts";
@@ -44,13 +43,13 @@ test("the self-hosted woff2 files and their OFL license live in design/kit/fonts
     "every reader of the faces takes this path",
   );
   // 2026-10-02: this git ls-files answers in under 10 ms on a Mac; thirty seconds is a cap on a hang, not a budget.
-  const tracked = spawnSync("git", ["ls-files", "--", "public/fonts"], {
+  const tracked = spawnSync("git", ["ls-files", "--", "generated/fonts"], {
     cwd: root(""),
     encoding: "utf8",
     timeout: 30_000,
   });
   assert.equal(tracked.status, 0, `git ls-files failed: ${tracked.stderr}`);
-  assert.equal(tracked.stdout, "", "public/fonts/ is generated from the kit, so git tracks nothing there");
+  assert.equal(tracked.stdout, "", "generated/fonts/ is copied from the kit, so git tracks nothing there");
 });
 
 test("the build copies every file of the kit into the site's fonts, byte for byte", async () => {
@@ -61,21 +60,17 @@ test("the build copies every file of the kit into the site's fonts, byte for byt
   writeFileSync(join(from, "face.woff2"), "wOF2 face");
   writeFileSync(join(from, "OFL.txt"), "SIL Open Font License");
   try {
-    await copyKitFonts(join(dir, "public"), from);
-    assert.ok(existsSync(join(dir, "public", "fonts")), "the copy wrote no public/fonts/");
-    const copied = readdirSync(join(dir, "public", "fonts")).sort();
+    await copyKitFonts(join(dir, "generated"), from);
+    assert.ok(existsSync(join(dir, "generated", "fonts")), "the copy wrote no generated/fonts/");
+    const copied = readdirSync(join(dir, "generated", "fonts")).sort();
     assert.deepEqual(copied, ["OFL.txt", "face.woff2"]);
     for (const f of copied)
-      assert.deepEqual(readFileSync(join(dir, "public", "fonts", f)), readFileSync(join(from, f)), f);
+      assert.deepEqual(readFileSync(join(dir, "generated", "fonts", f)), readFileSync(join(from, f)), f);
   } finally {
     rmSync(dir, { recursive: true, force: true });
   }
-  assert.ok(
-    GENERATED_SUBTREES.includes("fonts"),
-    "public/fonts/ is generated, so the clean before regeneration owns it",
-  );
   // 2026-10-02: this git check-ignore answers in under 10 ms on a Mac; thirty seconds is a cap on a hang, not a budget.
-  const generated = ["OFL.txt", ...WOFF2].map((f) => `public/fonts/${f}`);
+  const generated = ["OFL.txt", ...WOFF2].map((f) => `generated/fonts/${f}`);
   const ignored = spawnSync("git", ["check-ignore", "--no-index", "--", ...generated], {
     cwd: root(""),
     encoding: "utf8",
@@ -92,7 +87,7 @@ test("the build copies every file of the kit into the site's fonts, byte for byt
   );
 });
 
-test("npm run astro:generate's fonts step copies the real kit into the public directory it is given", () => {
+test("npm run astro:generate's fonts step copies the real kit into the build-output folder it is given", () => {
   const dir = root("out/test-kit-fonts-cli");
   rmSync(dir, { recursive: true, force: true });
   try {

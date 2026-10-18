@@ -8,7 +8,10 @@ export type ServedSource = { readonly dir: string; readonly types: Readonly<Reco
 
 export const STYLES = "src/styles";
 export const STATIC = "src/static";
-export const SERVED_SOURCES: readonly ServedSource[] = [{ dir: STYLES, types: { ".css": "text/css; charset=utf-8" } }];
+export const SERVED_SOURCES: readonly ServedSource[] = [
+  { dir: STYLES, types: { ".css": "text/css; charset=utf-8" } },
+  { dir: STATIC, types: { ".svg": "image/svg+xml", ".png": "image/png" } },
+];
 export const REPO: string = fileURLToPath(new URL("..", import.meta.url));
 
 const isFile = (path: string): boolean => {

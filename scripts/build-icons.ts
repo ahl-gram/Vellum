@@ -4,7 +4,7 @@ import { buildFavicon, buildTouchIcon, TOUCH_ICON_SIZE } from "../src/render/fav
 import { findBrowser, rasterizeSvg, NO_BROWSER } from "../src/cli/raster.ts";
 import { readGlyphOutline, FELL_SC_WOFF2, SMALL_CAP_V } from "./glyph-outline.ts";
 
-/** npm run icons: cuts the Punchcutter's Mark (Issue #489) from the shipped Fell SC woff2 into public/favicon.svg and public/apple-touch-icon.png, both committed because the Pages deploy CI has no browser to rasterize; any change to that font file re-runs this. */
+/** npm run icons: cuts the Punchcutter's Mark (Issue #489) from the shipped Fell SC woff2 into src/static/favicon.svg and src/static/apple-touch-icon.png, both committed because the Pages deploy CI has no browser to rasterize; any change to that font file re-runs this. */
 
 async function main(): Promise<void> {
   const browser = findBrowser();
@@ -18,11 +18,13 @@ async function main(): Promise<void> {
   await mkdir(resolve("out"), { recursive: true });
   const touchPath = resolve("out/apple-touch-icon.svg");
   await writeFile(touchPath, buildTouchIcon(glyph), "utf8");
-  await rasterizeSvg(browser, touchPath, resolve("public/apple-touch-icon.png"), 1);
-  console.log(`public/apple-touch-icon.png (${TOUCH_ICON_SIZE}x${TOUCH_ICON_SIZE})`);
+  await rasterizeSvg(browser, touchPath, resolve("src/static/apple-touch-icon.png"), 1);
+  console.log(`src/static/apple-touch-icon.png (${TOUCH_ICON_SIZE}x${TOUCH_ICON_SIZE})`);
 
-  await writeFile(resolve("public/favicon.svg"), buildFavicon(glyph), "utf8");
-  console.log(`public/favicon.svg (${glyph.familyName}, U+${SMALL_CAP_V.toString(16).toUpperCase().padStart(4, "0")})`);
+  await writeFile(resolve("src/static/favicon.svg"), buildFavicon(glyph), "utf8");
+  console.log(
+    `src/static/favicon.svg (${glyph.familyName}, U+${SMALL_CAP_V.toString(16).toUpperCase().padStart(4, "0")})`,
+  );
 }
 
 main().catch((err: unknown) => {

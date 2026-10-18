@@ -55,25 +55,22 @@ symbol and path so the reader goes and looks.
 - **A reading page is cheap and a working page is not.** A reading page is the `.astro` file plus,
   if it is a room, its `NAV_ITEMS` entry or its seat in `ROUTE_CHILDREN`, its name in
   `ROUTE_NAMES`, its place on the chart of the atelier (`PLACES` in `src/layouts/atelier-chart.ts`, which `test/site/atelier-chart.test.ts` reds without), and its own sheet. A working page that mounts a bundle owes
-  all of that plus its entry in `BUNDLE_ENTRIES` (`scripts/build-app-bundles.ts`), its generated
-  twin in `GENERATED_SUBTREES` (`scripts/clean-public-generated.ts`) and in `.gitignore`, and its own
+  all of that plus its entry in `BUNDLE_ENTRIES` (`scripts/build-app-bundles.ts`), whose
+  twin the press writes into the build-output folder, and its own
   e2e suite, which then joins the suite order, the runner's map, a lane and that lane's measured
   budget. **Budgeting a working page as a two-file change is the mistake this rule exists to stop.**
 - **The rosters are found by grepping, never by reading a list.** The mechanism is the footguns
   Gate 4 one: grep the nearest sibling's name across `src/`, `scripts/`, `e2e/`, `test/` and `.github/`, and
   join every list it appears in. A list written in prose is a starting point and goes stale; the
   grep does not. **Some rosters close themselves and some do not, so learn which before you rely on
-  a red.** The stylesheets under `public/` are no list anyone keeps: the stylesheet lint reaches
+  a red.** The stylesheets under `src/styles/` are no list anyone keeps: the stylesheet lint reaches
   every one by its glob, so a new sheet joins every rule by existing, and a rule that reads across
-  sheets walks `public/` through `sheetsOnDisk` in `scripts/lint/sheet-tokens.ts`, which leaves out
-  the generated trees (`GENERATED_SUBTREES` in `scripts/clean-public-generated.ts`, and the CSS ones
-  `GENERATED_CSS` names) and skips a directory the build removes mid-walk. `SITE_SHEETS` in `test-support/site-sheets.ts` reads the
+  sheets walks `src/styles/` through `sheetsOnDisk` in `scripts/lint/sheet-tokens.ts`. `SITE_SHEETS` in `test-support/site-sheets.ts` reads the
   same sheets from git for the tests, and `test/site/tip-affordance.test.ts` reds when git's list and
   the lint's walk disagree. A rule about how a sheet is written is a stylesheet lint rule, and a rule
   that holds for one sheet, or exempts one, names that sheet in the rule itself, by its file. A test
-  that still sweeps the sheets imports `SITE_SHEETS` rather than typing a list of its own; one that
-  walks or globs `public/` for itself reads the disk instead, which on a built tree includes the
-  generated gallery sheet `SITE_SHEETS` leaves out, so the two do not mean the same "every sheet".
+  that still sweeps the sheets imports `SITE_SHEETS` rather than typing a list of its own; the
+  gallery's sheet is generated into `generated/gallery/` and is on neither, its CSS linted through `src/cli/gallery.ts`.
   The authored CSS under `src/` closes by a `deepEqual` between `SRC_CSS_FILES` and a fingerprint
   walk of `src/`, which reds by name and tells you what to add. A discovery route closes too, at
   build time, by throwing when it has no blurb. The page, bundle, cleaning and lane rosters are
@@ -84,7 +81,7 @@ symbol and path so the reader goes and looks.
 - **The rosters a page or a sheet joins**, by symbol: `NAV_ITEMS`, `ROUTE_NAMES` and
   `ROUTE_CHILDREN` in `src/layouts/nav.ts`; `PLACES` in `src/layouts/atelier-chart.ts`; `TOKENS` in `test/site/shell-css.test.ts`;
   `PAGES` in `test/site/astro-scaffold.test.ts`, with `ROADS` and `STAGES` beside it for a page carrying a road out or the kit's stage, and RH32's browser copies of them in `e2e/suites/runninghead/room.ts` (`KIT_ROADS`, `CHART_ROOMS`, `FOG_ROOMS`, `STAGED`); `BUNDLE_ENTRIES` in `scripts/build-app-bundles.ts`;
-  `GENERATED_SUBTREES` in `scripts/clean-public-generated.ts`; `ROUTE_ENTRIES` and
+  `ROUTE_ENTRIES` and
   `DISCOVERY_ROUTES` in `scripts/generate-discovery.ts`. A new suite additionally joins `E2E_SUITE_ORDER`
   (`e2e/support/suites.ts`), the runner's `SUITES` map (`e2e/support/suite-map.ts`, which the type
   check holds to `E2E_SUITE_ORDER`), `E2E_LANES` (`e2e/support/lanes.ts`), `MEASURED_SECONDS` (`test/e2e/lane-timings.test.ts`, CI seconds: an
@@ -244,7 +241,7 @@ other way, which is what earns them a section of their own.
   `scripts/generate-discovery.ts` writes them from `DISCOVERY_ROUTES`, which is the nav plus the
   routes that are not nav items, and every origin resolves against the `site` value in
   `astro.config.ts`. A domain move therefore updates all of them at once, which is exactly why
-  `public/robots.txt` is generated rather than hand-written: a hand-written sitemap line survives such a
+  `generated/robots.txt` is generated rather than hand-written: a hand-written sitemap line survives such a
   move still pointing at the retired domain, which is what a domain move here would have stranded.
 - **A route with no blurb is a build error.** Adding a route without its `ROUTE_ENTRIES` line throws
   by name, and the generator also throws if `site` is unset.

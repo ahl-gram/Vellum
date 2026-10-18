@@ -202,6 +202,17 @@ test("a served address resolves only against the tracked source that keeps its k
     /no tracked source serves/,
     "a file the build writes is cited by its path, not by its address",
   );
+  absent("generated/explorer/chunks/no-such.js");
+  assert.equal(
+    verdict("handbook/specs", "generated/explorer/chunks/no-such.js"),
+    null,
+    "a file the build writes, cited by its path in the folder git ignores",
+  );
+  assert.equal(
+    verdict("handbook/specs", "/charts/chart-42-antique.svg"),
+    null,
+    "a served address the second source holds",
+  );
 });
 
 test("extraction reads a backticked path with a tracked extension and nothing else", () => {

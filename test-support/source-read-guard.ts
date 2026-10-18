@@ -2,7 +2,6 @@ import fs from "node:fs";
 import { syncBuiltinESMExports } from "node:module";
 import { join, relative, resolve, sep } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { GENERATED_SUBTREES } from "../scripts/clean-public-generated.ts";
 import type { SourceRead } from "./source-read-list.ts";
 
 export interface Verdict {
@@ -11,11 +10,10 @@ export interface Verdict {
 }
 
 const SELF = fileURLToPath(import.meta.url);
-const SOURCE = /^(?:src\/.+\.(?:ts|astro|css)|(?:e2e|scripts)\/.+\.ts|public\/.+\.css)$/;
+const SOURCE = /^(?:src\/.+\.(?:ts|astro|css)|(?:e2e|scripts)\/.+\.ts)$/;
 const posix = (path: string): string => path.split(sep).join("/");
 
-export const isSource = (rel: string): boolean =>
-  SOURCE.test(rel) && !GENERATED_SUBTREES.some((sub) => rel === `public/${sub}` || rel.startsWith(`public/${sub}/`));
+export const isSource = (rel: string): boolean => SOURCE.test(rel);
 
 export const covers = (pattern: string, rel: string): boolean =>
   pattern.endsWith("/**") ? rel.startsWith(pattern.slice(0, -2)) : rel === pattern;

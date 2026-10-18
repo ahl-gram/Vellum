@@ -1,9 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { copySources, sourceFor, type ServedSource } from "../../scripts/served-sources.ts";
+import { extname, join } from "node:path";
+import { copySources, REPO, SERVED_SOURCES, sourceFor, type ServedSource } from "../../scripts/served-sources.ts";
 
 const SOURCES: readonly ServedSource[] = [
   { dir: "styles", types: { ".css": "text/css; charset=utf-8" } },
@@ -92,5 +93,26 @@ test("the build copies every served source file to its address unchanged and not
     );
   } finally {
     rmSync(repo, { recursive: true, force: true });
+  }
+});
+
+// A cap on a hang, never a budget (2026-10-18: the listing ran in under 10 ms on a Mac, so 30 s is three orders above it); a timed-out spawnSync returns status null, which the status check below turns into a failure.
+const GIT_TIMEOUT_MS = 30_000;
+
+test("every tracked file under a served source is a kind that source keeps, so none is left out of the build (Issue #768)", () => {
+  for (const source of SERVED_SOURCES) {
+    const listing = spawnSync("git", ["ls-files", "-z", "--", source.dir], {
+      cwd: REPO,
+      encoding: "utf8",
+      timeout: GIT_TIMEOUT_MS,
+    });
+    assert.equal(listing.status, 0, `git ls-files failed (${listing.status}, ${listing.error ?? listing.stderr})`);
+    const tracked = listing.stdout.split("\0").filter(Boolean);
+    assert.ok(tracked.length > 0, `git lists no file under ${source.dir}, so the check below reads nothing`);
+    assert.deepEqual(
+      tracked.filter((file) => !Object.hasOwn(source.types, extname(file))),
+      [],
+      `a tracked file under ${source.dir} of a kind it does not keep is neither built nor served`,
+    );
   }
 });

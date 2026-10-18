@@ -21,13 +21,13 @@ const shippingCard = (): string =>
     fontCss: shippingFontCss(),
   });
 
-test("public/og.png carries exactly one vellum-card stamp, the hash of the card as built today (#490)", () => {
-  const stamps = readStamps(readFileSync(root("public/og.png")));
+test("src/static/og.png carries exactly one vellum-card stamp, the hash of the card as built today (#490)", () => {
+  const stamps = readStamps(readFileSync(root("src/static/og.png")));
   assert.equal(stamps.length, 1, `exactly one ${OG_STAMP_KEYWORD} tEXt chunk`);
   assert.equal(
     stamps[0],
     cardStamp(shippingCard()),
-    "public/og.png was rendered from an older card: run npm run og and commit the PNG",
+    "src/static/og.png was rendered from an older card: run npm run og and commit the PNG",
   );
 });
 
@@ -48,7 +48,7 @@ test("the stamp covers the card's dress and the embedded faces but not the chart
 });
 
 test("stampPng writes one tEXt chunk after IHDR with a valid CRC, replaces an earlier stamp, and stripStamps undoes it byte for byte", () => {
-  const bare = stripStamps(readFileSync(root("public/og.png")));
+  const bare = stripStamps(readFileSync(root("src/static/og.png")));
   const stamped = stampPng(bare, "abc");
   assert.deepEqual(readStamps(stamped), ["abc"]);
   assert.deepEqual(readStamps(stampPng(stamped, "def")), ["def"]);

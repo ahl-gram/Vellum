@@ -28,9 +28,9 @@ test("isSource names code under src, e2e and scripts, the pages and the authored
     "src/styles/explorer/broadside.css",
   ];
   const other = [
-    "public/gallery/index.css",
-    "public/charts/chart-42-antique.svg",
-    "public/og.png",
+    "generated/gallery/index.css",
+    "src/static/charts/chart-42-antique.svg",
+    "src/static/og.png",
     "package.json",
     ".github/workflows/ci.yml",
     "eslint.config.ts",

@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 import { join, relative } from "node:path";
 import { NAV_ITEMS, ROUTE_NAMES } from "../../src/layouts/nav.ts";
 import { PLACES } from "../../src/layouts/atelier-chart.ts";
-import { cleanPublicGenerated } from "../../scripts/clean-public-generated.ts";
+import { cleanGenerated, GENERATED } from "../../scripts/clean-generated.ts";
 import { PORTFOLIO_ROUTE } from "../../scripts/generate-discovery.ts";
 
 // The Astro scaffold and shared layout (Issue #203; SPEC: the ratified 2026-07-21 comment on Issue #202). Builds once into out/test-astro-build (gitignored) and asserts on the rendered output plus the committed sources.
@@ -259,7 +259,7 @@ before(
   async () => {
     await rm(outDir, { recursive: true, force: true });
     // Clean the generated trees so the dist-audit test sees a deploy-fresh checkout, not stale local files.
-    await cleanPublicGenerated(root("public"));
+    await cleanGenerated(root(GENERATED));
     const { build } = await import("astro");
     await build({ root: root(""), outDir, logLevel: "error" });
     for (const page of PAGES) {
@@ -1113,9 +1113,9 @@ test("the support set the pages depend on is committed: the sheets in src/styles
   for (const file of [
     "src/styles/motion.css",
     "src/styles/fonts.css",
-    "public/favicon.svg",
-    "public/apple-touch-icon.png",
-    "public/og.png",
+    "src/static/favicon.svg",
+    "src/static/apple-touch-icon.png",
+    "src/static/og.png",
     "src/styles/index.css",
   ]) {
     assert.ok(existsSync(root(file)), `${file} should exist`);
@@ -1141,7 +1141,7 @@ test("the deploy artifact serves no raw app source, no .d.ts, and no engine emit
   assert.deepEqual(offenders, [], "no raw .js source or .d.ts may reach the artifact");
 });
 
-test("the charts and arms the home page embeds all resolve in public/charts", () => {
+test("the charts and arms the home page embeds all resolve in src/static/charts", () => {
   const embeds = [...page("index.html").matchAll(/src="(charts\/[^"]+)"/g)].map(([, u]) => u);
   assert.equal(
     new Set(embeds).size,
@@ -1149,7 +1149,7 @@ test("the charts and arms the home page embeds all resolve in public/charts", ()
     "home embeds 7 committed goldens (the stage chart + 3 arms + the shelf's 3 plates, revived at #472)",
   );
   for (const embed of embeds) {
-    assert.ok(existsSync(root(`public/${embed}`)), `public/${embed} should exist`);
+    assert.ok(existsSync(root(`src/static/${embed}`)), `src/static/${embed} should exist`);
   }
 });
 

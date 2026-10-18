@@ -28,7 +28,7 @@ test("the chart marker is real: the renderer stamps it on every committed chart 
     "chart-42-topographic.svg",
   ]) {
     assert.match(
-      read(`public/charts/${chart}`).slice(0, 4000),
+      read(`src/static/charts/${chart}`).slice(0, 4000),
       /data-vellum-style="/,
       `${chart} should carry the data-vellum-style marker the mount rules select on`,
     );

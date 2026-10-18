@@ -7,7 +7,7 @@ import { cardStamp, stampPng } from "../src/render/og-stamp.ts";
 import { findBrowser, rasterizeSvg, NO_BROWSER_HINT } from "../src/cli/raster.ts";
 import { KIT_FONTS } from "./kit-fonts.ts";
 
-/** npm run og: regenerates the committed public/og.png from the hero world; committed because the Pages deploy CI has no browser to rasterize. Needs a Chromium-family browser locally. */
+/** npm run og: regenerates the committed src/static/og.png from the hero world; committed because the Pages deploy CI has no browser to rasterize. Needs a Chromium-family browser locally. */
 
 const HERO_SEED = 42;
 
@@ -36,10 +36,10 @@ async function main(): Promise<void> {
     console.error(NO_BROWSER_HINT);
     return;
   }
-  const pngPath = resolve("public/og.png");
+  const pngPath = resolve("src/static/og.png");
   await rasterizeSvg(browser, cardPath, pngPath, 1);
   await writeFile(pngPath, stampPng(await readFile(pngPath), cardStamp(card)));
-  console.log("public/og.png (1200x630, stamped vellum-card)");
+  console.log("src/static/og.png (1200x630, stamped vellum-card)");
 }
 
 main().catch((err: unknown) => {

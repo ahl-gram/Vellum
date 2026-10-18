@@ -112,5 +112,5 @@ test("PL3 the plate's one picture is the committed antique chart, reached from t
     new URL(PLATE_CHART, "https://vellum.example/explorer/portfolio/").pathname,
     "/charts/chart-42-antique.svg",
   );
-  assert.ok(existsSync(fileURLToPath(new URL("../../public/charts/chart-42-antique.svg", import.meta.url))));
+  assert.ok(existsSync(fileURLToPath(new URL("../../src/static/charts/chart-42-antique.svg", import.meta.url))));
 });

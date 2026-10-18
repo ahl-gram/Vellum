@@ -1,8 +1,8 @@
 import { after, test } from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from "node:fs";
-import { dirname, resolve, join, relative } from "node:path";
+import { existsSync, mkdtempSync, mkdirSync, readdirSync, writeFileSync, readFileSync, rmSync } from "node:fs";
+import { dirname, resolve, join, relative, sep } from "node:path";
 import { tmpdir } from "node:os";
 import ts from "typescript";
 import { ROMAN } from "../../src/prospect/letter/face-roman.ts";
@@ -16,13 +16,13 @@ import type { FaceTable } from "../../src/prospect/letter/face.ts";
 const REPO = resolve(import.meta.dirname, "..", "..");
 const read = (p: string): string => readFileSync(resolve(REPO, p), "utf8");
 
-test("the hand-coded public/ shells retired with the re-shell (#254): routes and public/ stay disjoint", () => {
-  // Sub 1 constraint 9: Astro documents no collision precedence between a public/ file and a same-path route, so the routes must be the only claimants of these URLs.
+test("the hand-coded shells retired with the re-shell (#254): routes and the build-output folder stay disjoint", () => {
+  // Sub 1 constraint 9: Astro documents no collision precedence between a public-folder file and a same-path route, so the routes must be the only claimants of these URLs.
   for (const shell of [
-    "public/explorer/index.html",
-    "public/print-room/index.html",
-    "public/reading-room/index.html",
-    "public/seed-of-the-day/index.html",
+    "generated/explorer/index.html",
+    "generated/print-room/index.html",
+    "generated/reading-room/index.html",
+    "generated/seed-of-the-day/index.html",
   ]) {
     assert.ok(!existsSync(resolve(REPO, shell)), `${shell} must not exist: its route renders through BaseLayout`);
   }
@@ -75,7 +75,7 @@ test("the tsc engine emit retired: no browser tsconfig, astro:generate is clean-
   const pkg = JSON.parse(read("package.json")) as { scripts: Record<string, string> };
   assert.equal(
     pkg.scripts["astro:generate"],
-    "node scripts/clean-public-generated.ts && node scripts/kit-fonts.ts && node scripts/build-app-bundles.ts && node scripts/generate-showcases.ts && node scripts/generate-discovery.ts",
+    "node scripts/clean-generated.ts && node scripts/kit-fonts.ts && node scripts/build-app-bundles.ts && node scripts/generate-showcases.ts && node scripts/generate-discovery.ts",
     "no tsc step: Vite compiles the engine graph from src/ directly",
   );
 });
@@ -88,49 +88,6 @@ test("one bundler: vite is the devDep, esbuild is gone (#208)", () => {
   assert.ok(pkg.devDependencies.vite, "vite must be an explicit devDependency (the press imports it)");
   assert.equal(pkg.devDependencies.esbuild, undefined, "esbuild retires with the fold");
   assert.equal(pkg.dependencies.esbuild, undefined, "esbuild must not hide in dependencies either");
-});
-
-test("the cleaned set and gitignore cover the Print Room and Reading Room twins and the chunk dir (#208, #221)", async () => {
-  const { GENERATED_SUBTREES } = await import("../../scripts/clean-public-generated.ts");
-  for (const sub of ["print-room/app.bundle.js", "reading-room/app.bundle.js", "explorer/chunks"]) {
-    assert.ok(GENERATED_SUBTREES.includes(sub), `GENERATED_SUBTREES must include ${sub}`);
-  }
-  const lines = read(".gitignore").split("\n");
-  for (const line of [
-    "public/print-room/app.bundle.js",
-    "public/reading-room/app.bundle.js",
-    "public/explorer/chunks/",
-  ]) {
-    assert.ok(lines.includes(line), `.gitignore should carry the exact line ${line}`);
-  }
-});
-
-test("the Portfolio's twin is cleaned and ignored at its address under the Explorer, and its old address stays in the cleaned set as a tombstone (Issue #669)", async () => {
-  const { GENERATED_SUBTREES } = await import("../../scripts/clean-public-generated.ts");
-  assert.ok(
-    GENERATED_SUBTREES.includes("explorer/portfolio/app.bundle.js"),
-    "GENERATED_SUBTREES must include explorer/portfolio/app.bundle.js, or a renamed module leaves an importable orphan beside the moved page",
-  );
-  assert.ok(
-    GENERATED_SUBTREES.includes("print-room/portfolio/app.bundle.js"),
-    "GENERATED_SUBTREES must keep print-room/portfolio/app.bundle.js: the list may grow and may not shrink, and that entry is what cleans a bundle built before the move",
-  );
-  assert.ok(
-    read(".gitignore").split("\n").includes("public/explorer/portfolio/app.bundle.js"),
-    ".gitignore should carry the exact line public/explorer/portfolio/app.bundle.js",
-  );
-});
-
-test("every app page's twin is cleaned and ignored at its own address, so none can be committed or left stale (#208)", async () => {
-  const [{ BUNDLE_ENTRIES }, { GENERATED_SUBTREES }] = await Promise.all([
-    import("../../scripts/build-app-bundles.ts"),
-    import("../../scripts/clean-public-generated.ts"),
-  ]);
-  const ignored = read(".gitignore").split("\n");
-  for (const { twin } of BUNDLE_ENTRIES) {
-    assert.ok(GENERATED_SUBTREES.includes(twin), `GENERATED_SUBTREES must include ${twin}`);
-    assert.ok(ignored.includes(`public/${twin}`), `.gitignore should carry the exact line public/${twin}`);
-  }
 });
 
 // Characterization of the press on a hermetic fixture, one knob per check.
@@ -363,20 +320,20 @@ test("the worker's build and the pages' build share no file, so neither overwrit
   );
 });
 
-test("the press lands only what it built: no tracked file of public/ is copied into the root it builds into (#208)", async () => {
+test("the press lands only what it built: every file in the root it builds into is a twin or a chunk (#208, Issue #768)", async () => {
   const p = await press();
-  const tracked = execFileSync("git", ["ls-files", "public"], { cwd: REPO, encoding: "utf8", timeout: 30_000 })
-    .split("\n")
-    .filter(Boolean);
-  assert.ok(tracked.length > 0, "git lists no tracked file under public/, so the sweep below reads nothing");
   assert.deepEqual(
     p.twins.filter((twin) => !existsSync(twin)).map((twin) => relative(p.root, twin)),
     [],
     "the press landed no twin, so an empty root would pass the sweep below",
   );
+  const twins = new Set(p.twins.map((twin) => relative(p.root, twin).split(sep).join("/")));
+  const landed = readdirSync(p.root, { recursive: true, withFileTypes: true })
+    .filter((entry) => entry.isFile())
+    .map((entry) => relative(p.root, join(entry.parentPath, entry.name)).split(sep).join("/"));
   assert.deepEqual(
-    tracked.filter((f) => existsSync(join(p.root, relative("public", f)))),
+    landed.filter((f) => !twins.has(f) && f !== "explorer/worker.bundle.js" && !f.startsWith("explorer/chunks/")),
     [],
-    "the press copied public/ into the root it builds into, over the tracked files a build would serve",
+    "the press copied a folder into the root it builds into, over the files a build would serve",
   );
 });
