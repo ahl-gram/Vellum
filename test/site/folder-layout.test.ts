@@ -6,7 +6,7 @@ import { join, resolve } from "node:path";
 import { BUNDLE_ENTRIES } from "../../scripts/build-app-bundles.ts";
 
 const ROOT = resolve(import.meta.dirname, "..", "..");
-// A cap on a hang, never a budget (2026-09-27: a git listing ran in 6 to 7 ms on a Mac, so 30 s is three orders above it); a timed-out spawnSync returns status null rather than throwing, which the status check below turns into a throw.
+// A cap on a hang, never a budget (2026-10-18: this listing ran in 7 ms on a Mac, so 30 s is three orders above it); a timed-out spawnSync returns status null rather than throwing, which the status check below turns into a throw, and no test drives that path.
 const GIT_TIMEOUT_MS = 30_000;
 const BUNDLE_SUFFIX = "app.bundle.js";
 

@@ -34,7 +34,7 @@ symbol and path so the reader goes and looks.
   root, is `src/pages/index.astro`, `src/site/home/` and `public/index.css` with
   `public/home-noscript.css`. A folder directly under `src/site/` is one page's own, named by its
   route, or `src/site/shared/`. `test/site/folder-layout.test.ts` holds the code's half and the
-  folders, and the built-head test in `test/site/astro-scaffold.test.ts` the sheet's.
+  folders, and the head tests in `test/site/astro-scaffold.test.ts` hold the relative link to the sheet.
 - **Two INDEPENDENT questions decide what a page joins, and mixing them up is how a page gets
   mis-budgeted.** The first is how the page is reached, which decides its place in the nav and the
   discovery files. The second is whether it mounts a bundle, which decides everything in the rule
