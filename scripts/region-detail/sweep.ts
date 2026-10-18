@@ -12,6 +12,43 @@ const SEEDS = [42, 7, 2, 15, 23];
 const sum = (rows: ReadonlyArray<WindowResult>, pick: (r: WindowResult) => number): number =>
   rows.reduce((a, r) => a + pick(r), 0);
 
+function reportRow(band: number, detail: boolean, rs: ReadonlyArray<WindowResult>): string {
+  const land = sum(rs, (r) => r.landCells);
+  const shared = sum(rs, (r) => r.sharedLandCells);
+  const parentLand = sum(rs, (r) => r.parentLandCells);
+  // Both halves weighted by their own land, or the parent's reads 1.21% against a true 3.13% at band 3, where 107 of 320 windows hold no parent land and average in as zero.
+  const snow = rs.reduce((a, r) => a + r.snowAlpineFraction * r.landCells, 0);
+  const psnow = rs.reduce((a, r) => a + r.parentSnowAlpineFraction * r.parentLandCells, 0);
+  return [
+    String(band).padStart(4),
+    (detail ? "on " : "off").padStart(7),
+    String(rs.length).padStart(8),
+    `${sum(rs, (r) => r.settlementsExpected)}/${sum(rs, (r) => r.settlementsPlaced)}/${sum(rs, (r) => r.settlementsDropped)}`.padStart(
+      21,
+    ),
+    String(sum(rs, (r) => r.seatsLost)).padStart(10),
+    `${sum(rs, (r) => r.hamletCandidates)}/${sum(rs, (r) => r.hamletsPlaced)}/${sum(rs, (r) => r.hamletsOnWater)}`.padStart(
+      24,
+    ),
+    `${sum(rs, (r) => r.rivers)}/${sum(rs, (r) => r.riversEndingOnLand)}`.padStart(20),
+    `${sum(rs, (r) => r.roads)}/${sum(rs, (r) => r.roadCellsOnWater)}`.padStart(19),
+    String(land).padStart(7),
+    `${sum(rs, (r) => r.biomeMismatchOnSharedLand)}/${shared}`.padStart(25),
+    `${land === 0 ? "0" : ((snow / land) * 100).toFixed(2)}% vs ${parentLand === 0 ? "0" : ((psnow / parentLand) * 100).toFixed(2)}%`.padStart(
+      26,
+    ),
+    `${sum(rs, (r) => r.realmlessOverParentLand)}/${sum(rs, (r) => r.realmlessOverParentSea)}`.padStart(36),
+    `${sum(rs, (r) => r.landOverParentSea)} (${land === 0 ? "0" : ((sum(rs, (r) => r.landOverParentSea) / land) * 100).toFixed(2)}%)`.padStart(
+      20,
+    ),
+    `${sum(rs, (r) => r.parentLandDrownedInRegion)}/${sum(rs, (r) => r.parentLandCells)}`.padStart(29),
+    `${sum(rs, (r) => r.worldFusedPairs)}/${sum(rs, (r) => r.worldMassesLost)}/${sum(rs, (r) => r.worldMassesInWindow)}`.padStart(
+      23,
+    ),
+    (sum(rs, (r) => r.regionMaxElev) / rs.length).toFixed(4).padStart(9),
+  ].join("");
+}
+
 function report(rows: ReadonlyArray<WindowResult>): string {
   const lines: string[] = [];
   const arms = [false, true];
@@ -25,42 +62,7 @@ function report(rows: ReadonlyArray<WindowResult>): string {
     for (const detail of arms) {
       const rs = rows.filter((r) => r.band === band && r.detail === detail);
       if (rs.length === 0) continue;
-      const land = sum(rs, (r) => r.landCells);
-      const shared = sum(rs, (r) => r.sharedLandCells);
-      const parentLand = sum(rs, (r) => r.parentLandCells);
-      // Both halves weighted by their own land, or the parent's reads 1.21% against a true 3.13% at band 3, where 107 of 320 windows hold no parent land and average in as zero.
-      const snow = rs.reduce((a, r) => a + r.snowAlpineFraction * r.landCells, 0);
-      const psnow = rs.reduce((a, r) => a + r.parentSnowAlpineFraction * r.parentLandCells, 0);
-      lines.push(
-        [
-          String(band).padStart(4),
-          (detail ? "on " : "off").padStart(7),
-          String(rs.length).padStart(8),
-          `${sum(rs, (r) => r.settlementsExpected)}/${sum(rs, (r) => r.settlementsPlaced)}/${sum(rs, (r) => r.settlementsDropped)}`.padStart(
-            21,
-          ),
-          String(sum(rs, (r) => r.seatsLost)).padStart(10),
-          `${sum(rs, (r) => r.hamletCandidates)}/${sum(rs, (r) => r.hamletsPlaced)}/${sum(rs, (r) => r.hamletsOnWater)}`.padStart(
-            24,
-          ),
-          `${sum(rs, (r) => r.rivers)}/${sum(rs, (r) => r.riversEndingOnLand)}`.padStart(20),
-          `${sum(rs, (r) => r.roads)}/${sum(rs, (r) => r.roadCellsOnWater)}`.padStart(19),
-          String(land).padStart(7),
-          `${sum(rs, (r) => r.biomeMismatchOnSharedLand)}/${shared}`.padStart(25),
-          `${land === 0 ? "0" : ((snow / land) * 100).toFixed(2)}% vs ${parentLand === 0 ? "0" : ((psnow / parentLand) * 100).toFixed(2)}%`.padStart(
-            26,
-          ),
-          `${sum(rs, (r) => r.realmlessOverParentLand)}/${sum(rs, (r) => r.realmlessOverParentSea)}`.padStart(36),
-          `${sum(rs, (r) => r.landOverParentSea)} (${land === 0 ? "0" : ((sum(rs, (r) => r.landOverParentSea) / land) * 100).toFixed(2)}%)`.padStart(
-            20,
-          ),
-          `${sum(rs, (r) => r.parentLandDrownedInRegion)}/${sum(rs, (r) => r.parentLandCells)}`.padStart(29),
-          `${sum(rs, (r) => r.worldFusedPairs)}/${sum(rs, (r) => r.worldMassesLost)}/${sum(rs, (r) => r.worldMassesInWindow)}`.padStart(
-            23,
-          ),
-          (sum(rs, (r) => r.regionMaxElev) / rs.length).toFixed(4).padStart(9),
-        ].join(""),
-      );
+      lines.push(reportRow(band, detail, rs));
     }
   }
   return lines.join("\n");
