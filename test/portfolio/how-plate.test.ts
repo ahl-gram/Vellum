@@ -4,7 +4,7 @@ import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { tabLine } from "../../src/site/explorer/chart-drawer.ts";
 import { TABLE_CAP } from "../../src/site/shared/table-address.ts";
-import { PLATE_TITLE } from "../../src/site/portfolio/folio-lines.ts";
+import { PLATE_TITLE } from "../../src/site/explorer/portfolio/folio-lines.ts";
 import {
   PLATE_CHART,
   PLATE_ROOM,
@@ -12,7 +12,7 @@ import {
   PLATE_TAB,
   PLATE_VERB,
   howPlate,
-} from "../../src/site/portfolio/how-plate.ts";
+} from "../../src/site/explorer/portfolio/how-plate.ts";
 
 const texts = (svg: string): string[] => [...svg.matchAll(/<text[^>]*>([^<]*)<\/text>/g)].map((m) => m[1]!);
 

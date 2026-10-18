@@ -158,9 +158,11 @@ make an unqualified rule false. Read the surface, not just the rule.
   presses up and hands them to `createGlass` as dependencies, so the ids live in
   `src/site/explorer/app.ts`. The other chart rooms bind `[data-zoom]` through `bindGlassKeys` in
   `src/site/shared/glass-keys.ts`. One component wearing `data-zoom` everywhere is inert on the
-  Explorer, and the failure is silent. `vellum/explorer-no-glass-keys` (`scripts/lint/source-shape.ts`)
+  Explorer, and the failure is silent. `vellum/explorer-no-glass-keys` (`scripts/lint/import-bounds.ts`)
   refuses a `glass-keys` import and any `[data-zoom]` string under `src/site/explorer/` and
-  `src/site/home/`; a selector assembled from pieces passes it.
+  `src/site/home/`, sparing only the folders `ROOMS_UNDER_THE_EXPLORER` names, the pages seated under
+  the Explorer that bind the kit's keys on purpose (the Portfolio); a selector assembled from pieces
+  passes it.
 - **`touch-action: none` is required for touch drag and pinch**, because the zoom behaviour does not
   set it, and it is gated to the class the controller adds only while attached and taking touch.
 - **Where touch is the main pointer a finger moves the page until the reader gives it to the

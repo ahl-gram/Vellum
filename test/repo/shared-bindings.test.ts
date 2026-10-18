@@ -119,7 +119,11 @@ const ROSTER: Record<string, readonly SharedBinding[]> = {
   "src/site/reading-room/seats.ts": SEAT_BINDINGS,
   "src/site/seed-of-the-day/app.ts": [ZOOM_BINDING],
   "src/site/explorer/app.ts": [ROOM_BINDING, ANNOUNCE, STORE, ["filingAt", "./chart-drawer.ts"]],
-  "src/site/portfolio/app.ts": [ANNOUNCE, ["usesWorker", "../explorer/worker-client.ts"], STORE],
+  "src/site/explorer/portfolio/app.ts": [
+    ["makeAnnouncer", "../../shared/announce.ts"],
+    ["usesWorker", "../worker-client.ts"],
+    ["deviceStorage", "../../shared/table-store.ts"],
+  ],
   "src/site/prospect/app.ts": [ITEM],
   "src/site/explorer/chart-drawer.ts": [ITEM],
 };

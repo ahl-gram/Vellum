@@ -125,7 +125,7 @@ test("another hand writing DURING the fade keeps its line and still gets the fad
   assert.equal(f.pill.has(FADING), false, "but never left dimmed, which is the only lasting harm this could do");
 });
 
-// The Portfolio clears its own pill with say("") on two paths (src/site/portfolio/app.ts), so sharing one module means an empty line has to mean "gone now" and not "gone in eight seconds".
+// The Portfolio clears its own pill with say("") on two paths (src/site/explorer/portfolio/app.ts), so sharing one module means an empty line has to mean "gone now" and not "gone in eight seconds".
 test("an empty line clears the pill at once and books nothing (#547 ruling 4)", () => {
   const f = fixture();
   f.say(LINE);
