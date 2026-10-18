@@ -24,7 +24,7 @@ export const ROUTE_ROWS: ReadonlyArray<RouteRow> = [
   ["a unit test under test/e2e gets gate 1, the first match", "Edit", "test/e2e/lanes.test.ts", "x", "context", "## Gate 1"],
   ["a non-e2e scripts .ts gets no gate 2", "Edit", "scripts/agent-sandbox.ts", "x", null, ""],
   ["unit test file gets gate 1", "Edit", "test/site/thing.test.ts", "assert.ok(1);", "context", "## Gate 1"],
-  ["stylesheet gets gate 3", "Edit", "src/styles/atelier.css", ".a { color: red }", "context", "## Gate 3"],
+  ["stylesheet gets gate 3", "Edit", "src/styles/shared/atelier.css", ".a { color: red }", "context", "## Gate 3"],
   ["new page gets gate 4", "Write", "src/pages/never-exists-zz/index.astro", "---\n---", "context", "## Gate 4"],
   ["a new e2e suite gets gate 4", "Write", "e2e/suites/never-exists-zz.ts", "x", "context", "## Gate 4"],
   ["a new shared sheet gets gate 4", "Write", "src/styles/shared/never-exists-zz.css", "x", "context", "## Gate 4"],

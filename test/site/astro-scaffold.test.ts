@@ -359,14 +359,14 @@ test("each rendered head carries the canonical meta with the ratified prop fan-o
       head.includes('<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">'),
       `${p.route} should carry the touch icon link (#489)`,
     );
-    const fonts = head.indexOf('<link rel="stylesheet" href="/fonts.css">');
-    const motion = head.indexOf('<link rel="stylesheet" href="/motion.css">');
+    const fonts = head.indexOf('<link rel="stylesheet" href="/shared/fonts.css">');
+    const motion = head.indexOf('<link rel="stylesheet" href="/shared/motion.css">');
     const pageCss = head.indexOf('<link rel="stylesheet" href="index.css">');
     assert.ok(fonts >= 0 && motion > fonts && pageCss > motion, `${p.route} stylesheet links keep today's order`);
   }
 });
 
-test("every built head links /shell.css last of its stylesheets, the place the layout's inline style held, so a page rule still needs higher specificity to override the shell (handbook/specs/cascade-traps.md)", () => {
+test("every built head links /shared/shell.css last of its stylesheets, the place the layout's inline style held, so a page rule still needs higher specificity to override the shell (handbook/specs/cascade-traps.md)", () => {
   for (const p of PAGES) {
     const html = page(p.route);
     const links = [...html.matchAll(/<link\b[^>]*\brel="stylesheet"[^>]*>/g)]
@@ -377,9 +377,13 @@ test("every built head links /shell.css last of its stylesheets, the place the l
       `${p.route} links its own sheet`,
     );
     const shell = links.at(-1);
-    assert.equal(shell?.href, "/shell.css", `${p.route} links /shell.css after every other stylesheet in the page`);
-    assert.ok(shell.at < html.indexOf("</head>"), `${p.route} links /shell.css in its head`);
-    assert.equal(html.indexOf("<style", shell.at), -1, `${p.route} carries no <style> after /shell.css`);
+    assert.equal(
+      shell?.href,
+      "/shared/shell.css",
+      `${p.route} links /shared/shell.css after every other stylesheet in the page`,
+    );
+    assert.ok(shell.at < html.indexOf("</head>"), `${p.route} links /shared/shell.css in its head`);
+    assert.equal(html.indexOf("<style", shell.at), -1, `${p.route} carries no <style> after /shared/shell.css`);
   }
 });
 
@@ -1111,8 +1115,8 @@ test("every internal link and embed on the rendered pages resolves in the built 
 test("the support set the pages depend on is committed: the sheets in src/styles/, the icons and the card in src/static/", () => {
   // og:image and the fonts.css url()s are references the link-resolver test cannot see, so pin their existence here.
   for (const file of [
-    "src/styles/motion.css",
-    "src/styles/fonts.css",
+    "src/styles/shared/motion.css",
+    "src/styles/shared/fonts.css",
     "src/static/favicon.svg",
     "src/static/apple-touch-icon.png",
     "src/static/og.png",

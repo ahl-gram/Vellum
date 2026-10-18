@@ -16,7 +16,7 @@ declaration you write to get there. The checklist form of the same lines is `vel
   scoping neither, and a repair that carries one arm will pass a guard written for the other.
 - **The best fix is often no media query at all.** Ask whether the state you are dressing already
   implies the condition: an override scoped on that state alone wins outright and fights nothing.
-- **The shell sheet, `src/styles/shell.css`, loads after the page stylesheet**, so a page override of a shell
+- **The shell sheet, `src/styles/shared/shell.css`, loads after the page stylesheet**, so a page override of a shell
   rule needs higher specificity or it silently does nothing. Equal specificity is not enough.
 - **A rule carrying an id cannot be beaten by a plain class.** Change that rule's own variables.
 - **The house sheets dress every button.** Their hover wash sits three classes deep, so a chrome hover
@@ -68,12 +68,12 @@ declaration you write to get there. The checklist form of the same lines is `vel
   sizes a capture or a scroll by that body reads past anything a reader can reach; read the
   document's instead. **A desk frame makes that body shorter than the window**
   (`handbook/specs/ui-design.md`): the containment keeps the body's own ground off the canvas, so the
-  desk below is painted on the root (`html.desk-frame` in `src/styles/atelier.css`), and where the frame
+  desk below is painted on the root (`html.desk-frame` in `src/styles/shared/atelier.css`), and where the frame
   is taller than the window the fixed furniture scrolls down with the page, so a script that seats a
   piece reads its rects in page coordinates on both axes (`pageTop` and `pageBottom` beside
   `pageLeft` in `src/site/shared/page-box.ts`).
 - **Under reduced motion a change of style is a transition, even where no rule wrote one.** The
-  blanket in `src/styles/motion.css` sets `transition-duration: 0.01ms !important` on every element,
+  blanket in `src/styles/shared/motion.css` sets `transition-duration: 0.01ms !important` on every element,
   and `transition-property` is `all` wherever no rule sets it, so a height, an inset or a
   transform that a class or a script changes reaches its new value a frame or two later rather
   than at once. A rect read in the same task, or in a `ResizeObserver` callback of the next
@@ -82,7 +82,7 @@ declaration you write to get there. The checklist form of the same lines is `vel
   adds shows only under reduced motion, and only where the page had resolved its style before
   the change. What stops it on one element is `transition-property: none`, since the blanket's
   `!important` forces only the duration and the delay, so a `transition-duration: 0s` there
-  loses. The desk frame's body rule in `src/styles/atelier.css` carries `transition: none` for this
+  loses. The desk frame's body rule in `src/styles/shared/atelier.css` carries `transition: none` for this
   (Issue #778), as `placeLegendRow` in `src/site/shared/room-seats.ts` and `layRow` in
   `src/site/shared/shell/top-row.ts` hold the transition off while they write and read; the cases still
   open are Issue #868's.

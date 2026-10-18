@@ -15,7 +15,7 @@ function frameMount() {
   root.className = "rf";
 
   const chart = document.createElement("div");
-  // living-chart is the Issue #302 host contract: the shared /living-chart.css keys the engine's ink-in dressing on this mount class, never on a host element id.
+  // living-chart is the Issue #302 host contract: /shared/living-chart.css keys the engine's ink-in dressing on this mount class, never on a host element id.
   chart.className = "rf-chart living-chart";
 
   // The polite status line: "" at rest, the settle signal a host's draw depends on.

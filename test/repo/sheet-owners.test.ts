@@ -48,7 +48,7 @@ const assertRule = async (
     assert.deepEqual(await reported(plant, path, rule), [], `${rule} reports at ${path}, the file that owns the rule`);
 };
 
-test("no sheet but src/styles/house.css binds the intro voice: a colour, a face or a style on a rule naming the intro class (Issue #324, Issue #709, Issue #779 part 2d)", async () => {
+test("no sheet but src/styles/shared/house.css binds the intro voice: a colour, a face or a style on a rule naming the intro class (Issue #324, Issue #709, Issue #779 part 2d)", async () => {
   const plant: Plant = [
     [".intro { color: var(--ink-faded); }", REFUSE],
     [".hunt-intro.intro { font-style: normal; }", REFUSE],
@@ -60,10 +60,10 @@ test("no sheet but src/styles/house.css binds the intro voice: a colour, a face 
     [".introduction { color: red; }", PASS],
     ["/* .intro { color: red; } */", PASS],
   ];
-  await assertRule(plant, INTRO, "src/styles/index.css", ["src/styles/house.css"]);
+  await assertRule(plant, INTRO, "src/styles/index.css", ["src/styles/shared/house.css"]);
 });
 
-test("no sheet but src/styles/house.css dresses the controls: a background on a list with a select arm and a button arm (Issue #324, Issue #709, Issue #779 part 2d)", async () => {
+test("no sheet but src/styles/shared/house.css dresses the controls: a background on a list with a select arm and a button arm (Issue #324, Issue #709, Issue #779 part 2d)", async () => {
   const plant: Plant = [
     ["select, button { background: var(--parchment); }", REFUSE],
     [".x select, .x button { background-color: red; }", REFUSE],
@@ -74,7 +74,7 @@ test("no sheet but src/styles/house.css dresses the controls: a background on a 
     ["select .button { background: red; }", PASS],
     [".x select button { background: red; }", PASS],
   ];
-  await assertRule(plant, CONTROLS, "src/styles/print-room/index.css", ["src/styles/house.css"]);
+  await assertRule(plant, CONTROLS, "src/styles/print-room/index.css", ["src/styles/shared/house.css"]);
 });
 
 const KIT_PLANT: Plant = [
@@ -117,13 +117,13 @@ const KIT_PLANT: Plant = [
 
 test("no page sheet re-dresses the kit: a colour, border, shadow, face or tracking on an arm of kit classes alone, unless the arm names the page's own id or its subject is the page's own form control (Issue #487, Issue #779 part 2d)", async () => {
   await assertRule(KIT_PLANT, KIT, "src/styles/specimen/index.css", [
-    "src/styles/atelier.css",
-    "src/styles/house.css",
-    "src/styles/motion.css",
-    "src/styles/shell.css",
-    "src/styles/fonts.css",
-    "src/styles/chart-of-the-atelier.css",
-    "src/styles/atelier-split.css",
+    "src/styles/shared/atelier.css",
+    "src/styles/shared/house.css",
+    "src/styles/shared/motion.css",
+    "src/styles/shared/shell.css",
+    "src/styles/shared/fonts.css",
+    "src/styles/shared/chart-of-the-atelier.css",
+    "src/styles/shared/atelier-split.css",
   ]);
   assert.deepEqual(
     await reported(KIT_PLANT, "src/styles/home-noscript.css", KIT),
@@ -143,7 +143,7 @@ test("the kit's classes are every class an atelier sheet names, less the house s
   );
 });
 
-test("no sheet but src/styles/atelier.css dresses the kit's contents row or the corner's select (Issue #487, Issue #779 part 2d)", async () => {
+test("no sheet but src/styles/shared/atelier.css dresses the kit's contents row or the corner's select (Issue #487, Issue #779 part 2d)", async () => {
   const row: Plant = [
     [".cr-num { color: var(--ink-dark); }", REFUSE],
     [".contents .cr-text { margin: 0; }", REFUSE],
@@ -159,7 +159,7 @@ test("no sheet but src/styles/atelier.css dresses the kit's contents row or the 
     "src/styles/prospect/index.css",
     "src/styles/ribbon/index.css",
   ])
-    await assertRule(row, ROW, sheet, ["src/styles/atelier.css"]);
+    await assertRule(row, ROW, sheet, ["src/styles/shared/atelier.css"]);
   const select: Plant = [
     [".folio-controls select.control { appearance: none; }", REFUSE],
     [".folio-controls select.control { -webkit-appearance: none; }", REFUSE],
@@ -173,10 +173,10 @@ test("no sheet but src/styles/atelier.css dresses the kit's contents row or the 
     [".my-folio-controls select.control { appearance: none; }", PASS],
   ];
   for (const sheet of ["src/styles/print-room/index.css", "src/styles/ribbon/index.css"])
-    await assertRule(select, SELECT, sheet, ["src/styles/atelier.css"]);
+    await assertRule(select, SELECT, sheet, ["src/styles/shared/atelier.css"]);
 });
 
-test("the engine's dressing has one home, src/styles/living-chart.css, which names no host's id (Issue #302, Issue #779 part 2d)", async () => {
+test("the engine's dressing has one home, src/styles/shared/living-chart.css, which names no host's id (Issue #302, Issue #779 part 2d)", async () => {
   const hooks: Plant = [
     [".pc-name { font-weight: 700; }", REFUSE],
     [".place-overlay { inset: 0; }", REFUSE],
@@ -189,7 +189,7 @@ test("the engine's dressing has one home, src/styles/living-chart.css, which nam
     [".pcx, .voyager, .my-pc-name, .place-hits { color: red; }", PASS],
     ["/* .pc-name and #map, named in a comment */", PASS],
   ];
-  await assertRule(hooks, ENGINE, "src/styles/explorer/index.css", ["src/styles/living-chart.css"]);
+  await assertRule(hooks, ENGINE, "src/styles/explorer/index.css", ["src/styles/shared/living-chart.css"]);
   const ids: Plant = [
     ["#map .place-overlay { inset: 0; }", REFUSE],
     [".x:not(#map) { color: red; }", REFUSE],
@@ -197,7 +197,7 @@ test("the engine's dressing has one home, src/styles/living-chart.css, which nam
     [".place-overlay { inset: 0; }", PASS],
     ["/* #map, named in a comment */", PASS],
   ];
-  await assertRule(ids, HOST_ID, "src/styles/living-chart.css", ["src/styles/explorer/index.css"]);
+  await assertRule(ids, HOST_ID, "src/styles/shared/living-chart.css", ["src/styles/explorer/index.css"]);
 });
 
 test("every sheet the owner rules key on or read is a sheet under src/styles/, so a moved sheet cannot switch a rule off or empty the kit in silence (Issue #768)", () => {

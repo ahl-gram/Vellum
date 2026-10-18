@@ -148,7 +148,7 @@ test("the two comment rules and the escape twin reach every TypeScript root the 
     const rules = await resolvedRules(file);
     for (const rule of EVERY_ROOT) assert.deepEqual(rules[rule], [2], `${file}: ${rule} does not resolve at error`);
   }
-  const sheet = await resolvedRules("src/styles/house.css");
+  const sheet = await resolvedRules("src/styles/shared/house.css");
   for (const rule of ["vellum/css-comment-no-js-module", "vellum/css-comment-issue-form"])
     assert.deepEqual(sheet[rule], [2], `the sheets lost ${rule}, a comment rule's CSS sibling`);
   for (const rule of EVERY_ROOT) assert.equal(sheet[rule], undefined, `${rule} reaches a sheet`);
@@ -338,7 +338,7 @@ test("the skip collector reads every directive form through ESLint's own parser,
     [true, true, true],
     "Prettier no longer obeys exactly the two ignore forms the collector reads, and formats the near miss",
   );
-  const sheet = "src/styles/house.css";
+  const sheet = "src/styles/shared/house.css";
   assert.deepEqual(skipsIn(await collector.lintText(SHEET_PLANT, { filePath: join(ROOT, sheet) })), [
     `${sheet} vellum/css-comment-one-line`,
     `${sheet} vellum/css-comment-issue-form`,

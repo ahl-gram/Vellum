@@ -20,7 +20,7 @@ export type AtlasDocumentData = {
   readonly gazetteerHtml: string;
 };
 
-/** Scoped under `.atlas-sheet` so any host can inject it without bleeding, with no page chrome; transition timings fall back to literals (var(--paper, 260ms)) because the download links no /motion.css and must still ease. */
+/** Scoped under `.atlas-sheet` so any host can inject it without bleeding, with no page chrome; transition timings fall back to literals (var(--paper, 260ms)) because the download links no /shared/motion.css and must still ease. */
 export const ATLAS_SHEET_CSS = `.atlas-sheet figure { margin: 1.5rem 0; }
 .atlas-sheet figure a { display: block; position: relative; }
 /* The waiting frame (#329) sits BEHIND the img (negative z-index), so the opaque plate
@@ -73,7 +73,7 @@ body {
   font-family: var(--font-body, 'Iowan Old Style', 'Palatino', Georgia, serif);
   max-width: 1080px; margin-inline: auto;
 }
-/* The Punchcutter's Case (#228): the deployed page links /fonts.css (below, gated on
+/* The Punchcutter's Case (#228): the deployed page links /shared/fonts.css (below, gated on
    motion) so these vars resolve to the Fell/Garamond faces; the offline single-file
    download links nothing, so each var falls back to the serif stack inline. */
 h1, h2, .chartno, footer {
@@ -175,8 +175,8 @@ function plateFigure(
 
 type Figure = (p: AtlasPlate, section: PlateSection) => string;
 
-export const FONTS_SHEET_HREF = "/fonts.css";
-export const MOTION_SHEET_HREF = "/motion.css";
+export const FONTS_SHEET_HREF = "/shared/fonts.css";
+export const MOTION_SHEET_HREF = "/shared/motion.css";
 
 function atlasHead(title: string, motion: boolean): string {
   return `<!doctype html>
@@ -232,7 +232,7 @@ ${regions}
 ${prospectSection}`;
 }
 
-/** `plateSrc` decides how a plate is embedded: a filename (CLI, anchor:true) or a data URI (download, anchor:false); `motion` links /fonts.css and /motion.css and wears the screen dress, the offline download omits all three and relies on the CSS fallbacks above. */
+/** `plateSrc` decides how a plate is embedded: a filename (CLI, anchor:true) or a data URI (download, anchor:false); `motion` links /shared/fonts.css and /shared/motion.css and wears the screen dress, the offline download omits all three and relies on the CSS fallbacks above. */
 export function atlasDocument(
   data: AtlasDocumentData,
   plateSrc: (plate: AtlasPlate, section: PlateSection) => string,

@@ -69,9 +69,9 @@ const COLOUR_PLANT = (home: boolean): Plant => [
 const COLOUR_BLIND =
   "BLIND SPOTS, declared, each a miss: a token written as hsl(), a percentage rgb(), a named colour or color-mix() of literals; a token's hex or rgb inside a string or a url(), which the old text sweeps read; a value css-tree cannot re-parse (the family parses tolerant, Issue #648), skipped rather than reported";
 
-test("no sheet writes a token's colour raw, as a hash of any case or length or an rgb() in either form, in a value, a fallback or a custom property, and only src/styles/shell.css writes a token's own declaration (Issue #263, Issue #324, Issue #779 part 2d)", async () => {
-  await assertRefuses(COLOUR_PLANT(false), "src/styles/house.css", TOKEN, COLOUR_BLIND);
-  await assertRefuses(COLOUR_PLANT(true), "src/styles/shell.css", TOKEN, COLOUR_BLIND);
+test("no sheet writes a token's colour raw, as a hash of any case or length or an rgb() in either form, in a value, a fallback or a custom property, and only src/styles/shared/shell.css writes a token's own declaration (Issue #263, Issue #324, Issue #779 part 2d)", async () => {
+  await assertRefuses(COLOUR_PLANT(false), "src/styles/shared/house.css", TOKEN, COLOUR_BLIND);
+  await assertRefuses(COLOUR_PLANT(true), "src/styles/shared/shell.css", TOKEN, COLOUR_BLIND);
 });
 
 const SHADOW_PLANT = (home: boolean): Plant => [
@@ -93,11 +93,11 @@ const SHADOW_PLANT = (home: boolean): Plant => [
   ["/* 0 12px 34px, named in a comment */", PASS],
 ];
 
-test("no sheet writes a depth shadow's geometry longhand, in any property, at a zero of any unit, and only src/styles/shell.css declares the token itself (Issue #367, Issue #463, Issue #779 part 2d)", async () => {
+test("no sheet writes a depth shadow's geometry longhand, in any property, at a zero of any unit, and only src/styles/shared/shell.css declares the token itself (Issue #367, Issue #463, Issue #779 part 2d)", async () => {
   const blind =
     "BLIND SPOTS, declared, each a miss: the geometry inside a string or a url(); the geometry as calc() terms or in a unit other than px";
-  await assertRefuses(SHADOW_PLANT(false), "src/styles/house.css", SHADOW, blind);
-  await assertRefuses(SHADOW_PLANT(true), "src/styles/shell.css", SHADOW, blind);
+  await assertRefuses(SHADOW_PLANT(false), "src/styles/shared/house.css", SHADOW, blind);
+  await assertRefuses(SHADOW_PLANT(true), "src/styles/shared/shell.css", SHADOW, blind);
 });
 
 const VAR_PLANT: Plant = [
@@ -114,7 +114,7 @@ const VAR_PLANT: Plant = [
 test("every var() with no fallback names a property some sheet under src/styles/ or the file itself declares, read through fallbacks and custom properties (Issue #263, Issue #779 part 2d)", async () => {
   const blind =
     "BLIND SPOTS, declared: the declared set does not know which page loads which sheet (a pass); the builders' markup outside their CSS is not read, where the old drift guard read their whole source (a miss, handbook/errata/guards.md)";
-  await assertRefuses(VAR_PLANT, "src/styles/house.css", VAR, blind);
+  await assertRefuses(VAR_PLANT, "src/styles/shared/house.css", VAR, blind);
   const spread: Plant = [
     [".a { height: var(--band-h); }", PASS],
     [".a { transform: translateY(var(--raise)); }", PASS],
@@ -122,19 +122,19 @@ test("every var() with no fallback names a property some sheet under src/styles/
   ];
   await assertRefuses(
     spread,
-    "src/styles/house.css",
+    "src/styles/shared/house.css",
     VAR,
-    "a var only src/styles/shell.css or only src/styles/motion.css declares is read off the disk",
+    "a var only src/styles/shared/shell.css or only src/styles/shared/motion.css declares is read off the disk",
   );
   assert.deepEqual(
-    await reported(spread, "src/styles/shell.css", VAR),
+    await reported(spread, "src/styles/shared/shell.css", VAR),
     [1, 3],
-    "linting src/styles/shell.css, its own disk copy is not read: only the text being linted declares for it",
+    "linting src/styles/shared/shell.css, its own disk copy is not read: only the text being linted declares for it",
   );
   assert.deepEqual(
-    await reported(spread, "src/styles/motion.css", VAR),
+    await reported(spread, "src/styles/shared/motion.css", VAR),
     [2, 3],
-    "and linting src/styles/motion.css, its own disk copy is not read either",
+    "and linting src/styles/shared/motion.css, its own disk copy is not read either",
   );
 });
 
@@ -176,7 +176,10 @@ test("the sheets the declared set reads are every .css file under src/styles/, a
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
-  assert.ok(sheetsOnDisk().includes("src/styles/shell.css"), "the walk of the real tree reads src/styles/shell.css");
+  assert.ok(
+    sheetsOnDisk().includes("src/styles/shared/shell.css"),
+    "the walk of the real tree reads src/styles/shared/shell.css",
+  );
 });
 
 const BUILDER_PLANT: Plant = [

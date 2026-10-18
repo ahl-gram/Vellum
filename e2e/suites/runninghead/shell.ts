@@ -131,21 +131,21 @@ export async function rh17ShellOnce(k: RunningHeadKit, shells: Shells): Promise<
 }
 
 const SHELL_SHEETS = new Set([
-  "/fonts.css",
-  "/motion.css",
-  "/house.css",
-  "/atelier.css",
-  "/chart-of-the-atelier.css",
-  "/shell.css",
+  "/shared/fonts.css",
+  "/shared/motion.css",
+  "/shared/house.css",
+  "/shared/atelier.css",
+  "/shared/chart-of-the-atelier.css",
+  "/shared/shell.css",
 ]);
 
 export function rh18HouseSheet(check: Check, shells: Shells): void {
   const off = offenders(shells, ({ sheets }) => {
     const own = sheets.flatMap((p, i) => (SHELL_SHEETS.has(p) ? [] : [i]));
-    const house = sheets.indexOf("/house.css");
+    const house = sheets.indexOf("/shared/house.css");
     return (
-      sheets.indexOf("/motion.css") >= 0 &&
-      sheets.indexOf("/motion.css") < house &&
+      sheets.indexOf("/shared/motion.css") >= 0 &&
+      sheets.indexOf("/shared/motion.css") < house &&
       own.length > 0 &&
       own.every((i) => i > house)
     );
@@ -202,7 +202,7 @@ type Faces = { faces: Face[]; kit: Face[]; roles: string[]; digests: Record<stri
 
 const FACES_READ = (kitSheet: string, loaded: readonly string[]): Payload<Promise<Faces>> => `(async () => {
   const faceOf = (r) => ({ family: r.style.getPropertyValue("font-family"), style: r.style.getPropertyValue("font-style"), weight: r.style.getPropertyValue("font-weight"), display: r.style.getPropertyValue("font-display"), src: r.style.getPropertyValue("src") });
-  const sheet = [...document.styleSheets].find((s) => s.href && new URL(s.href).pathname === "/fonts.css");
+  const sheet = [...document.styleSheets].find((s) => s.href && new URL(s.href).pathname === "/shared/fonts.css");
   const kit = new CSSStyleSheet();
   kit.replaceSync(${JSON.stringify(kitSheet)});
   const root = getComputedStyle(document.documentElement);
@@ -238,7 +238,7 @@ export async function rh14Faces({ evaluate, check, visit }: RunningHeadKit, shel
     (p) => f.digests[p] === undefined || f.digests[p] !== kitDigest(p.replace("/fonts/", "")),
   );
   check(
-    "RH14 every face a page loads is a file of the kit, byte for byte, and the faces are served as the kit declares them: /fonts.css self-hosts the three families in six faces, each font-display swap from a same-origin /fonts/ file, the kit's own sheet declares the same six, the three role tokens fall back to the old serif stack, and every page loads a face (ruled 6055743231 item 7; Issue #228)",
+    "RH14 every face a page loads is a file of the kit, byte for byte, and the faces are served as the kit declares them: /shared/fonts.css self-hosts the three families in six faces, each font-display swap from a same-origin /fonts/ file, the kit's own sheet declares the same six, the three role tokens fall back to the old serif stack, and every page loads a face (ruled 6055743231 item 7; Issue #228)",
     thin.length === 0 &&
       loaded.length >= 3 &&
       unkit.length === 0 &&

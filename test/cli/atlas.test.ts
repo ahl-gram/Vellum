@@ -100,7 +100,7 @@ test("#412 the atlas carries the capital's prospect plate", async () => {
   }
 });
 
-test("the atlas joins the motion folio: links /motion.css and its figures lift under the hand (#130)", async () => {
+test("the atlas joins the motion folio: links /shared/motion.css and its figures lift under the hand (#130)", async () => {
   const seed = 42;
   const dir = "out/test-atlas-motion";
   await rm(dir, { recursive: true, force: true });
@@ -109,7 +109,7 @@ test("the atlas joins the motion folio: links /motion.css and its figures lift u
     const html = await readFile(join(dir, "index.html"), "utf8");
     assert.match(
       html,
-      /<link rel="stylesheet" href="\/motion\.css">/,
+      /<link rel="stylesheet" href="\/shared\/motion\.css">/,
       "atlas should link the shared motion desk so it joins the folio",
     );
     assert.match(

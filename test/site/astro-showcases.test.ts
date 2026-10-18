@@ -37,8 +37,14 @@ test("generateShowcases writes the atlas and gallery a deploy expects", { timeou
   const atlasIndex = join(tmp, "atlas", "index.html");
   assert.ok(existsSync(atlasIndex), "atlas/index.html should exist");
   const atlasHtml = readFileSync(atlasIndex, "utf8");
-  assert.ok(atlasHtml.includes('href="/fonts.css"'), "atlas links the root-absolute fonts.css it hard-depends on");
-  assert.ok(atlasHtml.includes('href="/motion.css"'), "atlas links the root-absolute motion.css it hard-depends on");
+  assert.ok(
+    atlasHtml.includes('href="/shared/fonts.css"'),
+    "atlas links the root-absolute fonts.css it hard-depends on",
+  );
+  assert.ok(
+    atlasHtml.includes('href="/shared/motion.css"'),
+    "atlas links the root-absolute motion.css it hard-depends on",
+  );
   const atlasSvgs = readdirSync(join(tmp, "atlas")).filter((f) => f.endsWith(".svg"));
   assert.equal(
     atlasSvgs.length,

@@ -204,9 +204,13 @@ test("a served address resolves only against the tracked source that keeps its k
     /no tracked source serves/,
     "a served address no source holds",
   );
-  assert.ok(existsSync(resolve(REPO, "src/styles/living-chart.css")));
-  absent("generated/living-chart.css");
-  assert.equal(verdict("handbook/specs", "/living-chart.css"), null, "a served address the sheets' source holds");
+  assert.ok(existsSync(resolve(REPO, "src/styles/shared/living-chart.css")));
+  absent("generated/shared/living-chart.css");
+  assert.equal(
+    verdict("handbook/specs", "/shared/living-chart.css"),
+    null,
+    "a served address the sheets' source holds",
+  );
   assert.match(
     verdict("handbook/specs", "/explorer/chunks/no-such.js") ?? "",
     /no tracked source serves/,

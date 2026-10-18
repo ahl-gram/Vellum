@@ -15,8 +15,8 @@ import {
 
 // The grander plate, gallery and atlas scales are a question Issue #405 left standing, so each literal is sanctioned at its exact file, selector and value.
 export const SANCTIONED_LIFTS: Readonly<Record<string, string>> = {
-  "motion.css :: .plate:hover": "-5px",
-  "motion.css :: .plate:active": "-1px",
+  "shared/motion.css :: .plate:hover": "-5px",
+  "shared/motion.css :: .plate:active": "-1px",
   "src/atlas/document.ts :: .atlas-sheet figure a img:hover": "-5px",
   "src/atlas/document.ts :: .atlas-sheet figure a img:active": "-1px",
   "src/cli/gallery.ts :: figure img:hover": "-4px",
@@ -25,13 +25,13 @@ export const SANCTIONED_LIFTS: Readonly<Record<string, string>> = {
 
 /** The surfaces that tip AND navigate (each is a link or wraps one). */
 export const TIPPING_LINKS: readonly string[] = [
-  "motion.css :: .plate:hover",
-  "motion.css :: body:has(.room-name) .wordmark a:hover, body:has(.room-name) .wordmark a:focus-visible",
+  "shared/motion.css :: .plate:hover",
+  "shared/motion.css :: body:has(.room-name) .wordmark a:hover, body:has(.room-name) .wordmark a:focus-visible",
   // Issue #270 ruling 7: the footnote marks follow through to /glossary/ anchors, so the ruling extended the tipping surface to them.
   "explorer/broadside.css :: a.fn:hover",
   "src/cli/gallery.ts :: figure img:hover",
   "src/atlas/document.ts :: .atlas-sheet figure a img:hover",
-  "living-chart.css :: .pc-prospect:hover, .pc-prospect:focus-visible",
+  "shared/living-chart.css :: .pc-prospect:hover, .pc-prospect:focus-visible",
   "reading-room/index.css :: .rr-prospect a:hover img, .rr-prospect a:focus-visible img",
 ];
 
@@ -46,7 +46,7 @@ export const TIPS_AWAITING_A_RULING: readonly string[] = [];
 // Hand-measured (Issue #356): an inline-block takes its baseline from its LAST line box, so a wrapped slip drops its bullet 26.00px to line two; each entry is a measurement of the markup taken 2026-08-12 that the box is no list item, so re-take it when you touch one.
 export const INLINE_BLOCKS_OUTSIDE_MARKER_LISTS: readonly string[] = [
   // Inside <p class="wordmark"> or <h1 class="wordmark"> in BaseLayout's head cluster (Issue #461; the rooms nav pins vertical-align itself).
-  "motion.css :: .wordmark a",
+  "shared/motion.css :: .wordmark a",
   // A period mark inline in a control's label (Issue #270), not a list item.
   "explorer/broadside.css :: a.fn",
 ];

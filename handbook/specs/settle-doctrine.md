@@ -236,8 +236,8 @@ section points there rather than restating it.
   items and then empty ground (measured 2026-10-08: a 1280 by 6691 image of a page 5935 px tall,
   three of eight figures drawn), so such a page is stitched from viewport shots instead.
 - **A sleep past an animation's nominal duration still lands mid-animation.** The place card's
-  unfurl is `paperUnfurl` in `src/styles/motion.css`, a `rotateX` roll that the `.pc-inner` rules in
-  `src/styles/living-chart.css` grade `--unfurl-quick` (400ms) on a shown card and `--unfurl` (650ms)
+  unfurl is `paperUnfurl` in `src/styles/shared/motion.css`, a `rotateX` roll that the `.pc-inner` rules in
+  `src/styles/shared/living-chart.css` grade `--unfurl-quick` (400ms) on a shown card and `--unfurl` (650ms)
   on a pinned one, and `showPlaceCard` in `src/site/shared/living-chart/place-overlay.ts` restarts it on
   every show, which a hover onto another town, keyboard focus on another town and a press that pins
   each trigger (a re-entry on the town already shown does not), so a gesture sequence starts the
@@ -252,7 +252,7 @@ section points there rather than restating it.
   and an element with no animation at all reports finished; a parent box reports none while its
   child rolls, so a bare poll there resolves at once and a guarded one never does, and
   `{ subtree: true }` from the box is the other way to reach the child. Take the rect only once
-  that poll has resolved. Under `prefers-reduced-motion` (the media block in `src/styles/motion.css`)
+  that poll has resolved. Under `prefers-reduced-motion` (the media block in `src/styles/shared/motion.css`)
   every animation collapses to near zero, and near zero is not zero: a read taken at +0 after the
   class change that starts one finds the animation pending at its `from` keyframe with the class
   still set, and rest arrives with the next rendered frame, so the reduced-motion arm waits on a

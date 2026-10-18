@@ -276,7 +276,7 @@ test("the two Fell faces travel inside the card as data: @font-face rules, no Ga
       ["IM Fell English", "italic"],
     ],
   );
-  const declared = read("src/styles/fonts.css");
+  const declared = read("src/styles/shared/fonts.css");
   const css = OG_FONT_FACES.map((face) => {
     assert.match(
       declared,

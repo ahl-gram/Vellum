@@ -174,7 +174,7 @@ const withoutMedia = (css: string): string => {
 
 // Chromium reads the two spellings as one property, so no browser here sees each declared; iOS Safari reads the prefixed one (measured, Issue #779 part 2f).
 test("the layout declares both spellings of the text-size hold, outside every media block (Issue #761)", () => {
-  const shell = readFileSync(resolve(import.meta.dirname, "..", "..", "src/styles/shell.css"), "utf8");
+  const shell = readFileSync(resolve(import.meta.dirname, "..", "..", "src/styles/shared/shell.css"), "utf8");
   const screenRules = withoutMedia(shell.replace(/\/\*[\s\S]*?\*\//g, ""));
   assert.match(
     screenRules,
