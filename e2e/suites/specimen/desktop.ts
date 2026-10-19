@@ -4,17 +4,7 @@ import { atFolded, CHART_ASPECT, CONTROL_GOLD, INK_BROWN, READ } from "./reads.t
 import type { Specimen } from "./reads.ts";
 import type { SpecimenKit } from "./kit.ts";
 
-export async function sb1Boots({ check, shoot }: SpecimenKit, rest: Specimen | null): Promise<void> {
-  check(
-    "SB1 the Specimen Book boots as a chart room: the conductor answers, the Gallery's plate is on the sheet, the sheet is fitted at the PLATE's own aspect (read off the img, not the kit's fallback)",
-    !!rest &&
-      rest.st!.state === "rest" &&
-      rest.plateLoaded &&
-      Math.abs(rest.sheet!.w / rest.sheet!.h - rest.plateAspect!) < 0.003 &&
-      Math.abs(rest.plateAspect! - CHART_ASPECT) > 0.0001 &&
-      rest.noX,
-    JSON.stringify(rest && { st: rest.st, plate: rest.plateLoaded, plateAspect: rest.plateAspect, sheet: rest.sheet }),
-  );
+function sb2AtRest({ check }: Pick<SpecimenKit, "check">, rest: Specimen | null): void {
   check(
     "SB2 at rest, at 1280: the slip hangs below the room's folio at the right edge, the Glass stands clear of it, the legend row sits between the chart folio and the Glass, the tab is hidden, the pill shows, the chart folio's four lines are written, no pool",
     !!rest &&
@@ -47,6 +37,20 @@ export async function sb1Boots({ check, shoot }: SpecimenKit, rest: Specimen | n
       },
     ),
   );
+}
+
+export async function sb1Boots({ check, shoot }: SpecimenKit, rest: Specimen | null): Promise<void> {
+  check(
+    "SB1 the Specimen Book boots as a chart room: the conductor answers, the Gallery's plate is on the sheet, the sheet is fitted at the PLATE's own aspect (read off the img, not the kit's fallback)",
+    !!rest &&
+      rest.st!.state === "rest" &&
+      rest.plateLoaded &&
+      Math.abs(rest.sheet!.w / rest.sheet!.h - rest.plateAspect!) < 0.003 &&
+      Math.abs(rest.plateAspect! - CHART_ASPECT) > 0.0001 &&
+      rest.noX,
+    JSON.stringify(rest && { st: rest.st, plate: rest.plateLoaded, plateAspect: rest.plateAspect, sheet: rest.sheet }),
+  );
+  sb2AtRest({ check }, rest);
   check(
     "SB3 the dress resolves from the kit sheet: the contents numeral in ink-brown, the inked index row at full ink and the rest at 0.55, the featured road in control gold, a disabled press at 0.45, a missed term hidden",
     !!rest &&
