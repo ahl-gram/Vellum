@@ -4,37 +4,6 @@
       "count": 1
     }
   },
-  "src/prospect/dress/compose-e.ts": {
-    "max-lines-per-function": {
-      "count": 1
-    }
-  },
-  "src/prospect/dress/figures.ts": {
-    "max-lines": {
-      "count": 1
-    }
-  },
-  "src/prospect/dress/furniture.ts": {
-    "max-lines": {
-      "count": 1
-    }
-  },
-  "src/prospect/dress/rise.ts": {
-    "max-lines": {
-      "count": 1
-    },
-    "max-lines-per-function": {
-      "count": 2
-    }
-  },
-  "src/prospect/dress/townscape.ts": {
-    "max-lines": {
-      "count": 1
-    },
-    "max-lines-per-function": {
-      "count": 6
-    }
-  },
   "src/site/explorer/app.ts": {
     "max-lines": {
       "count": 1
