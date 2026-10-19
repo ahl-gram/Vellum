@@ -19,15 +19,8 @@ import {
 } from "./corners/geometry.ts";
 import type { Control, CornerRead, Row } from "./corners/geometry.ts";
 import { co5Yields, co6Follows, co7Band } from "./corners/top-row.ts";
-import {
-  fl1Floor,
-  fl2Reach,
-  fl3Relayout,
-  fl4Read,
-  fl5KeyboardDrawer,
-  fl6Paper,
-  fl7Degenerate,
-} from "./corners/floor.ts";
+import { fl1Floor, fl2Reach, fl3Relayout, fl4Read, fl5KeyboardDrawer, fl7Degenerate } from "./corners/floor.ts";
+import { fl6Paper } from "./corners/floor-paper.ts";
 
 const REPO = resolve(fileURLToPath(new URL(".", import.meta.url)), "..", "..");
 const PAGE_FLOOR = [
