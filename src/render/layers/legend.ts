@@ -6,6 +6,7 @@ import type { World } from "../../world/types.ts";
 import { terrainGlyphsPresent } from "./glyphs.ts";
 import { THEMES } from "./field.ts";
 import { iconNode, type Icon } from "./legend-icons.ts";
+import type { MapStyle } from "../style.ts";
 
 type Row = { icon: Icon; label: string };
 
@@ -173,12 +174,7 @@ export function planLegend(ctx: RenderCtx, reserved: ReadonlyArray<Box>): Legend
   return { box: { x: best.x, y: best.y, w: bw, h: bh }, rows, note };
 }
 
-export function legendLayer(ctx: RenderCtx, plan: LegendPlan): SvgNode {
-  const { style, proj } = ctx;
-  const k = proj.widthPx / 1500;
-  const m = metrics(k);
-  const { box, rows, note } = plan;
-
+function legendPanel(style: MapStyle, box: Box, m: ReturnType<typeof metrics>, k: number): SvgNode[] {
   const children: SvgNode[] = [
     el("rect", {
       x: box.x,
@@ -206,6 +202,16 @@ export function legendLayer(ctx: RenderCtx, plan: LegendPlan): SvgNode {
       ["KEY"],
     ),
   ];
+  return children;
+}
+
+export function legendLayer(ctx: RenderCtx, plan: LegendPlan): SvgNode {
+  const { style, proj } = ctx;
+  const k = proj.widthPx / 1500;
+  const m = metrics(k);
+  const { box, rows, note } = plan;
+
+  const children = legendPanel(style, box, m, k);
 
   const rowTop = box.y + m.pad + m.titleFs + m.titleGap;
   const iconCx = box.x + m.pad + m.iconCol / 2;
