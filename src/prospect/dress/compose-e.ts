@@ -7,7 +7,7 @@ import type { PlateCaption, PlateEra } from "../caption.ts";
 import type { PlateKeyEntry } from "../key.ts";
 import type { Surroundings } from "../surroundings.ts";
 import { viewRight, type ProspectView } from "../transect.ts";
-import { createLettering, runBox } from "../letter/letter.ts";
+import { createLettering, runBox, type Lettering } from "../letter/letter.ts";
 import { engraver, type Engraver } from "./burin.ts";
 import { LIFT, RISE_BOTTOM, picture, skylineOf, type Box, type Picture } from "./rise.ts";
 import {
@@ -109,11 +109,7 @@ function bandText(p: PlateParts): string {
     : `${p.caption.epithet}, founded An. ${p.input.founded}`;
 }
 
-export function engraveE(style: MapStyle, p: PlateParts): EngravedE {
-  const e = engraver(style);
-  const letters = createLettering(p.suffix);
-  const fork = (name: string) => createRng(p.g.seed).fork(`prospect:${p.g.index}:e:${name}`);
-  const standing = p.era !== "before-founding";
+function fixedFurniture(p: PlateParts, e: Engraver, letters: Lettering, standing: boolean) {
   const tags = p.key.flatMap((k) =>
     k.x === null || k.y === null
       ? []
@@ -135,6 +131,41 @@ export function engraveE(style: MapStyle, p: PlateParts): EngravedE {
     const b = runBox(tagSpec(e, t));
     return { x0: b.x0 - 2, x1: b.x1 + 2, y0: b.top - 2, y1: b.bottom + 2 };
   });
+  return { cartouche, medals, key, margin, tagClear };
+}
+
+function plateNode(p: PlateParts, e: Engraver, letters: Lettering, pic: Picture, furniture: SvgNode[]): SvgNode {
+  const grain = (p.g.seed * 31 + p.g.index * 7) % 9973;
+  const width = p.widthPx ?? PLATE_W;
+  const node = el(
+    "svg",
+    {
+      class: `pq-${p.suffix}`,
+      xmlns: "http://www.w3.org/2000/svg",
+      viewBox: `0 0 ${PLATE_W} ${PLATE_H}`,
+      width: Math.round(width),
+      height: Math.round((width * PLATE_H) / PLATE_W),
+      role: "img",
+      "aria-label": `The prospect of ${p.input.name}, chart ${p.input.seed}`,
+    },
+    [
+      el("style", {}, [smallSizeRule(p.suffix)]),
+      el("defs", {}, [...parchmentDefs(e, p.suffix, grain), ...letters.defs()]),
+      el("rect", { x: 0, y: 0, width: PLATE_W, height: PLATE_H, fill: e.paper }),
+      ...pic.nodes,
+      ...parchmentOverlay(e, p.suffix),
+      ...furniture,
+    ],
+  );
+  return node;
+}
+
+export function engraveE(style: MapStyle, p: PlateParts): EngravedE {
+  const e = engraver(style);
+  const letters = createLettering(p.suffix);
+  const fork = (name: string) => createRng(p.g.seed).fork(`prospect:${p.g.index}:e:${name}`);
+  const standing = p.era !== "before-founding";
+  const { cartouche, medals, key, margin, tagClear } = fixedFurniture(p, e, letters, standing);
   const avoid = [...cartouche, ...medals, ...key, ...margin].flatMap((i) => i.boxes);
   const roadTowns = standing ? p.surroundings.roadTowns : [];
   const named = horizonTowns(e, createLettering(p.suffix), roadTowns, p.key, { ...skylineOf(p.g), birds: [], avoid });
@@ -161,28 +192,7 @@ export function engraveE(style: MapStyle, p: PlateParts): EngravedE {
     group(`pm-${p.suffix}`, margin),
     ...frameNodes(e),
   ];
-  const grain = (p.g.seed * 31 + p.g.index * 7) % 9973;
-  const width = p.widthPx ?? PLATE_W;
-  const node = el(
-    "svg",
-    {
-      class: `pq-${p.suffix}`,
-      xmlns: "http://www.w3.org/2000/svg",
-      viewBox: `0 0 ${PLATE_W} ${PLATE_H}`,
-      width: Math.round(width),
-      height: Math.round((width * PLATE_H) / PLATE_W),
-      role: "img",
-      "aria-label": `The prospect of ${p.input.name}, chart ${p.input.seed}`,
-    },
-    [
-      el("style", {}, [smallSizeRule(p.suffix)]),
-      el("defs", {}, [...parchmentDefs(e, p.suffix, grain), ...letters.defs()]),
-      el("rect", { x: 0, y: 0, width: PLATE_W, height: PLATE_H, fill: e.paper }),
-      ...pic.nodes,
-      ...parchmentOverlay(e, p.suffix),
-      ...furniture,
-    ],
-  );
+  const node = plateNode(p, e, letters, pic, furniture);
   const boxes = (parts: ReadonlyArray<Inked>): Box[] => parts.flatMap((i) => i.boxes);
   return {
     node,
