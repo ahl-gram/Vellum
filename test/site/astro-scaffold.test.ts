@@ -1034,10 +1034,10 @@ test("every legend row stands in the kit's one shape: the nav named for the row,
   }
 });
 
-type Notices = { pill?: string; warning?: string; noscript?: true; follows?: string };
-/** Every stage's notices by page, LITERAL; Today's pill is its own (no live region, a first line of its own), so Today's notice follows that pill where every other room's follows the sheet. */
+type Notices = { pill?: string; opens?: string; warning?: string; noscript?: true };
+/** Every stage's notices by page, LITERAL, a pill's opening words included where the page writes them (Issue #913). */
 const NOTICES: Record<string, Notices> = {
-  "seed-of-the-day/index.html": { noscript: true, follows: "</p>" },
+  "seed-of-the-day/index.html": { pill: "status", opens: "Drafting today's world&hellip;", noscript: true },
   "explorer/index.html": { pill: "status", noscript: true },
   "print-room/index.html": { pill: "pr-status", warning: "pr-warning", noscript: true },
   "explorer/portfolio/index.html": { pill: "pf-status", warning: "pf-warning", noscript: true },
@@ -1048,14 +1048,14 @@ const NOTICES: Record<string, Notices> = {
 };
 const noticesShape = (n: Notices): RegExp =>
   new RegExp(
-    literal(n.follows ?? "</div>") +
-      (n.pill ? `${literal(`<p class="status" id="${n.pill}" role="status" aria-live="polite">`)}[^<]*</p>` : "") +
+    literal("</div>") +
+      (n.pill ? `${literal(`<p class="status" id="${n.pill}" role="status" aria-live="polite">`)}${n.opens === undefined ? "[^<]*" : literal(n.opens)}</p>` : "") +
       (n.warning ? `${literal(`<p id="${n.warning}" class="warning" hidden>`)}[^<]+</p>` : "") +
       (n.noscript ? `${literal('<noscript><p class="status">')}${FILLED_P}</noscript>` : "") +
       `${literal("</div>")}$`,
   );
 
-test("every stage's notices stand in the kit's one shape, last in the stage: the live status pill, never whitespace alone, the hidden render-worker warning, the scripts-off notice, and no page carries a pill or a warning its entry does not name (Issue #827)", () => {
+test("every stage's notices stand in the kit's one shape, last in the stage: the live status pill, on the words its entry names and never on whitespace alone, the hidden render-worker warning, the scripts-off notice, and no page carries a pill or a warning its entry does not name (Issue #827, Issue #913)", () => {
   for (const p of PAGES) {
     const html = page(p.route);
     const want = NOTICES[p.route];
@@ -1075,6 +1075,15 @@ test("every stage's notices stand in the kit's one shape, last in the stage: the
         `${p.route}'s status pill holds only whitespace, which the sheet's :empty does not hide`,
       );
   }
+});
+
+test("no page names a status line that is not live, so a line its script writes is one a screen reader hears (Issue #913)", () => {
+  for (const p of PAGES)
+    assert.doesNotMatch(
+      page(p.route),
+      /<p class="status" id="[^"]*"(?! role="status" aria-live="polite")/,
+      `${p.route} carries a status line by id that is not live`,
+    );
 });
 
 test("the chart folio names the world once on every chart room (Issue #827)", () => {
