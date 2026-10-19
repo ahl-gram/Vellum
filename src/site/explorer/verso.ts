@@ -26,13 +26,18 @@ function svgEl(tag: string, attrs: Record<string, string | number>, text?: strin
   return el;
 }
 
-function buildStamp(): SVGElement {
+function stampSvg(): SVGElement {
   const svg = svgEl("svg", {
     class: "verso-stamp",
     viewBox: "0 0 200 120",
     "aria-hidden": "true",
     focusable: "false",
   });
+  return svg;
+}
+
+function buildStamp(): SVGElement {
+  const svg = stampSvg();
   svg.append(
     svgEl("ellipse", { cx: 100, cy: 60, rx: 94, ry: 52, fill: "none", stroke: "#7a3b2c", "stroke-width": 3 }),
     svgEl("ellipse", { cx: 100, cy: 60, rx: 82, ry: 42, fill: "none", stroke: "#7a3b2c", "stroke-width": 1.4 }),
