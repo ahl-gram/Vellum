@@ -1,6 +1,7 @@
 import type { Rng } from "../core/rng.ts";
 import type { MapType } from "../terrain/heightfield.ts";
 import { editDistanceWithin1 } from "../core/text.ts";
+import { AGES, TITLE_ADJECTIVES, TITLE_PATTERNS } from "./names-title.ts";
 
 export const ENGLISH_BLOCKLIST = new Set<string>([
   "main",
@@ -389,30 +390,6 @@ export function createNamer(rng: Rng, culture: Culture): Namer {
     },
   };
 }
-
-const TITLE_ADJECTIVES = [
-  "Sundered",
-  "Verdant",
-  "Gilded",
-  "Mistbound",
-  "Amber",
-  "Whispering",
-  "Salt-Worn",
-  "Untamed",
-  "Drowned",
-  "Shining",
-  "Storm-Held",
-  "Quiet",
-];
-
-const AGES = ["Lantern", "Ember", "Tide", "Crane", "Iron", "Pale", "Cedar"];
-
-const TITLE_PATTERNS: Record<MapType, readonly string[]> = {
-  island: ["The @ Isle of %", "The Isle of %", "% , the @ Isle"],
-  archipelago: ["The @ Isles of %", "The % Archipelago", "The Scattered Isles of %"],
-  continent: ["The @ Reaches of %", "The Realm of %", "Terra %"],
-  citystate: ["The Free City of %", "% and its Hinterland", "The City-State of %"],
-};
 
 export type MapTitle = {
   readonly title: string;
