@@ -119,19 +119,12 @@ export async function z13DeepLink({
   await shoot("explorer-zoom-deeplink-k4.png");
 }
 
-export async function z13dRefitHolds({ evaluate, send, check, sleep }: SuiteContext): Promise<void> {
-  // Issue #463: the chart room fits the sheet to the viewport, so a resize refits the box the camera is clamped against; the room holds the FRAMING (cx/cy/k) across the refit, never the raw transform, or a resize walks the camera and the settle re-drafts a different region (the G7 class, found by the harness's own screenshot resize).
-  const sheetBefore = await evaluate<number>(`document.getElementById("sheet").getBoundingClientRect().width`);
-  await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 600, deviceScaleFactor: 1, mobile: false });
-  await sleep(400); // past the resize layout and the 250ms settle debounce
-  const z13b = await evaluate<{ cx: string | null; cy: string | null; k: string | null; sk: number; sheet: number }>(
-    `(()=>{const p=new URLSearchParams(location.hash.slice(1));const s=window.__vellumZoomState();return{cx:p.get("cx"),cy:p.get("cy"),k:p.get("k"),sk:s.k,sheet:document.getElementById("sheet").getBoundingClientRect().width};})()`,
-  );
-  await send("Emulation.clearDeviceMetricsOverride");
-  await sleep(400);
-  const z13c = await evaluate<{ cx: string | null; cy: string | null; k: string | null; sheet: number }>(
-    `(()=>{const p=new URLSearchParams(location.hash.slice(1));return{cx:p.get("cx"),cy:p.get("cy"),k:p.get("k"),sheet:document.getElementById("sheet").getBoundingClientRect().width};})()`,
-  );
+async function z13dFoldAndNoHash({
+  evaluate,
+  send,
+  check,
+  sleep,
+}: Pick<SuiteContext, "evaluate" | "send" | "check" | "sleep">) {
   await evaluate(`document.querySelector("#broadside .slip-fold").click()`);
   await sleep(700); // the fold's 340ms settle, then the layout and the 250ms settle debounce
   const z13d = await evaluate<{
@@ -168,6 +161,23 @@ export async function z13dRefitHolds({ evaluate, send, check, sleep }: SuiteCont
     z13f.seed === "42" && z13f.k === "4.0000",
     JSON.stringify(z13f),
   );
+  return { z13d, z13e };
+}
+
+export async function z13dRefitHolds({ evaluate, send, check, sleep }: SuiteContext): Promise<void> {
+  // Issue #463: the chart room fits the sheet to the viewport, so a resize refits the box the camera is clamped against; the room holds the FRAMING (cx/cy/k) across the refit, never the raw transform, or a resize walks the camera and the settle re-drafts a different region (the G7 class, found by the harness's own screenshot resize).
+  const sheetBefore = await evaluate<number>(`document.getElementById("sheet").getBoundingClientRect().width`);
+  await send("Emulation.setDeviceMetricsOverride", { width: 1280, height: 600, deviceScaleFactor: 1, mobile: false });
+  await sleep(400); // past the resize layout and the 250ms settle debounce
+  const z13b = await evaluate<{ cx: string | null; cy: string | null; k: string | null; sk: number; sheet: number }>(
+    `(()=>{const p=new URLSearchParams(location.hash.slice(1));const s=window.__vellumZoomState();return{cx:p.get("cx"),cy:p.get("cy"),k:p.get("k"),sk:s.k,sheet:document.getElementById("sheet").getBoundingClientRect().width};})()`,
+  );
+  await send("Emulation.clearDeviceMetricsOverride");
+  await sleep(400);
+  const z13c = await evaluate<{ cx: string | null; cy: string | null; k: string | null; sheet: number }>(
+    `(()=>{const p=new URLSearchParams(location.hash.slice(1));return{cx:p.get("cx"),cy:p.get("cy"),k:p.get("k"),sheet:document.getElementById("sheet").getBoundingClientRect().width};})()`,
+  );
+  const { z13d, z13e } = await z13dFoldAndNoHash({ evaluate, send, check, sleep });
   check(
     "Z13c a fold and an unfold refit the sheet and hold the framing too: the class, not the resize alone (#463)",
     z13d.folded &&

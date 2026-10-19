@@ -176,19 +176,7 @@ export async function z21Target({ evaluate, goHome }: ZoomKit) {
   return target21;
 }
 
-export async function z21Hamlets(
-  { evaluate, check, shoot, sleep, rgn, enterAt, waitRedraft, insetView }: ZoomKit,
-  target21: Target21,
-) {
-  const before21 = (await rgn()).redrafts;
-  await enterAt(8, target21.cx, target21.cy);
-  const deep21 = await waitRedraft(before21);
-  let view21 = await insetView();
-  for (let i = 0; i < 50 && view21.insets !== 1; i++) {
-    await sleep(40);
-    view21 = await insetView();
-  }
-  await shoot("explorer-hamlets-band3.png");
+async function z21HamletsRead({ evaluate }: Pick<ZoomKit, "evaluate">) {
   const dom21 = await evaluate<{
     err?: "no inset";
     hamlets?: number;
@@ -215,6 +203,23 @@ export async function z21Hamlets(
       `namesMatch:domNames.every(n=>names.has(n))};})()`,
     true,
   );
+  return dom21;
+}
+
+export async function z21Hamlets(
+  { evaluate, check, shoot, sleep, rgn, enterAt, waitRedraft, insetView }: ZoomKit,
+  target21: Target21,
+) {
+  const before21 = (await rgn()).redrafts;
+  await enterAt(8, target21.cx, target21.cy);
+  const deep21 = await waitRedraft(before21);
+  let view21 = await insetView();
+  for (let i = 0; i < 50 && view21.insets !== 1; i++) {
+    await sleep(40);
+    view21 = await insetView();
+  }
+  await shoot("explorer-hamlets-band3.png");
+  const dom21 = await z21HamletsRead({ evaluate });
   check(
     "Z21 hamlets: the deepest band grows the smallest tier, engine count/name parity over the stamped window, tier order held",
     deep21.band === 3 &&
