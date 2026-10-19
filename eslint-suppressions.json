@@ -4,21 +4,6 @@
       "count": 1
     }
   },
-  "src/itinerary/dress/plate.ts": {
-    "max-lines-per-function": {
-      "count": 1
-    }
-  },
-  "src/itinerary/dress/strip.ts": {
-    "max-lines-per-function": {
-      "count": 1
-    }
-  },
-  "src/itinerary/events.ts": {
-    "max-lines-per-function": {
-      "count": 1
-    }
-  },
   "src/prospect/dress/compose-e.ts": {
     "max-lines-per-function": {
       "count": 1
@@ -48,26 +33,6 @@
     },
     "max-lines-per-function": {
       "count": 6
-    }
-  },
-  "src/render/layers/feature-labels.ts": {
-    "max-lines-per-function": {
-      "count": 1
-    }
-  },
-  "src/render/layers/frame.ts": {
-    "max-lines-per-function": {
-      "count": 1
-    }
-  },
-  "src/render/layers/legend-icons.ts": {
-    "max-lines-per-function": {
-      "count": 3
-    }
-  },
-  "src/render/layers/legend.ts": {
-    "max-lines-per-function": {
-      "count": 1
     }
   },
   "src/site/explorer/app.ts": {
@@ -122,16 +87,6 @@
     "max-lines": {
       "count": 1
     },
-    "max-lines-per-function": {
-      "count": 1
-    }
-  },
-  "src/society/names.ts": {
-    "max-lines": {
-      "count": 1
-    }
-  },
-  "src/terrain/contours.ts": {
     "max-lines-per-function": {
       "count": 1
     }

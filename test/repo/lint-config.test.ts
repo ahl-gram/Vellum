@@ -47,18 +47,11 @@ const SIZE_CAPS = ["max-lines", "max-lines-per-function"];
 
 const LIST_AT_REFORMAT: Readonly<Record<string, readonly [number, number]>> = {
   "e2e/split-proof.ts": [1, 0],
-  "src/itinerary/dress/plate.ts": [0, 1],
-  "src/itinerary/dress/strip.ts": [0, 1],
-  "src/itinerary/events.ts": [0, 1],
   "src/prospect/dress/compose-e.ts": [0, 1],
   "src/prospect/dress/figures.ts": [1, 0],
   "src/prospect/dress/furniture.ts": [1, 0],
   "src/prospect/dress/rise.ts": [1, 2],
   "src/prospect/dress/townscape.ts": [1, 6],
-  "src/render/layers/feature-labels.ts": [0, 1],
-  "src/render/layers/frame.ts": [0, 1],
-  "src/render/layers/legend-icons.ts": [0, 3],
-  "src/render/layers/legend.ts": [0, 1],
   "src/site/explorer/app.ts": [1, 1],
   "src/site/explorer/chart-drawer-bind.ts": [0, 2],
   "src/site/explorer/lod-controller.ts": [0, 1],
@@ -69,8 +62,6 @@ const LIST_AT_REFORMAT: Readonly<Record<string, readonly [number, number]>> = {
   "src/site/print-room/app.ts": [0, 1],
   "src/site/print-room/contents-markup.ts": [0, 1],
   "src/site/reading-room/prospect-stage.ts": [0, 1],
-  "src/society/names.ts": [1, 0],
-  "src/terrain/contours.ts": [0, 1],
   "test/site/astro-scaffold.test.ts": [0, 2],
 };
 
