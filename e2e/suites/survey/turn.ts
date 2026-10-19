@@ -28,32 +28,7 @@ export async function sv9NoSeams({ evaluate, check, goto }: SurveyKit): Promise<
   );
 }
 
-export async function sv10TurnKeepsTrack({
-  evaluate,
-  check,
-  waitTurned,
-  armTurnWatch,
-  waitInked,
-}: SurveyKit): Promise<void> {
-  await evaluate(
-    `(()=>{const c=document.getElementById("ages");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));})()`,
-  );
-  // Wait for the ink BEFORE the turn: a style change inside the arm's gap drops the pending arm, and SV10 would pass on a turn begun over a bare sheet, losing Issue #153's premise.
-  await waitInked("survey-armed-before-turn");
-  await armTurnWatch();
-  await evaluate(`(()=>{window.__land={batches:[],frames:0,raf:0};
-      const bump=()=>{window.__land.frames++;window.__land.raf=requestAnimationFrame(bump);};bump();
-      window.__mo=new MutationObserver((recs)=>{let chart=false,overlay=false;
-        for(const r of recs)for(const n of r.addedNodes){if(n.nodeType!==1)continue;
-          if(n.classList&&n.classList.contains("voyage-overlay"))overlay=true;
-          else if(String(n.tagName).toLowerCase()==="svg")chart=true;}
-        if(chart||overlay)window.__land.batches.push({chart,overlay,frames:window.__land.frames});});
-      window.__mo.observe(document.getElementById("map"),{childList:true});return true;})()`);
-  await evaluate(
-    `(()=>{const s=document.getElementById("style");s.value="ink";s.dispatchEvent(new Event("change",{bubbles:true}));})()`,
-  );
-  await waitTurned("survey-style-turn");
-  await waitInked("survey-turn-rearm");
+async function sv10TrackSurvives({ evaluate, check }: Pick<SurveyKit, "evaluate" | "check">): Promise<void> {
   const sv10 = await evaluate<{
     turned: boolean;
     style: string | null;
@@ -101,6 +76,59 @@ export async function sv10TurnKeepsTrack({
   );
 }
 
+export async function sv10TurnKeepsTrack({
+  evaluate,
+  check,
+  waitTurned,
+  armTurnWatch,
+  waitInked,
+}: SurveyKit): Promise<void> {
+  await evaluate(
+    `(()=>{const c=document.getElementById("ages");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));})()`,
+  );
+  // Wait for the ink BEFORE the turn: a style change inside the arm's gap drops the pending arm, and SV10 would pass on a turn begun over a bare sheet, losing Issue #153's premise.
+  await waitInked("survey-armed-before-turn");
+  await armTurnWatch();
+  await evaluate(`(()=>{window.__land={batches:[],frames:0,raf:0};
+      const bump=()=>{window.__land.frames++;window.__land.raf=requestAnimationFrame(bump);};bump();
+      window.__mo=new MutationObserver((recs)=>{let chart=false,overlay=false;
+        for(const r of recs)for(const n of r.addedNodes){if(n.nodeType!==1)continue;
+          if(n.classList&&n.classList.contains("voyage-overlay"))overlay=true;
+          else if(String(n.tagName).toLowerCase()==="svg")chart=true;}
+        if(chart||overlay)window.__land.batches.push({chart,overlay,frames:window.__land.frames});});
+      window.__mo.observe(document.getElementById("map"),{childList:true});return true;})()`);
+  await evaluate(
+    `(()=>{const s=document.getElementById("style");s.value="ink";s.dispatchEvent(new Event("change",{bubbles:true}));})()`,
+  );
+  await waitTurned("survey-style-turn");
+  await waitInked("survey-turn-rearm");
+  await sv10TrackSurvives({ evaluate, check });
+}
+
+async function sv2nRead({ evaluate }: Pick<SurveyKit, "evaluate">) {
+  const sv2n = await evaluate<{
+    reduce: boolean;
+    turned: boolean;
+    style: string | null;
+    chartAlone: boolean;
+    inkAfter: boolean;
+    framesBetween: number;
+    anims: number;
+    overlays: number;
+    status: string;
+  }>(`(()=>{window.__mo.disconnect();cancelAnimationFrame(window.__land.raf);
+      const b=window.__land.batches;const c=b.findIndex((x)=>x.chart);const i=b.findIndex((x)=>x.overlay);
+      const ov=document.querySelector("#map .voyage-overlay");
+      const svg=document.querySelector("#map svg:not(.voyage-overlay)");
+      return{reduce:matchMedia("(prefers-reduced-motion: reduce)").matches,turned:window.__turned,
+        style:svg?svg.getAttribute("data-vellum-style"):null,
+        chartAlone:c>=0&&!b[c].overlay,inkAfter:i>c,framesBetween:c>=0&&i>=0?b[i].frames-b[c].frames:-1,
+        anims:ov&&ov.getAnimations?ov.getAnimations({subtree:true}).length:-1,
+        overlays:document.querySelectorAll("#map .voyage-overlay").length,
+        status:document.getElementById("status").textContent};})()`);
+  return sv2n;
+}
+
 export async function sv2nReducedSwap({
   evaluate,
   send,
@@ -130,26 +158,7 @@ export async function sv2nReducedSwap({
   );
   await waitSettled("survey-reduce-settle");
   await waitInked("survey-reduce-rearm");
-  const sv2n = await evaluate<{
-    reduce: boolean;
-    turned: boolean;
-    style: string | null;
-    chartAlone: boolean;
-    inkAfter: boolean;
-    framesBetween: number;
-    anims: number;
-    overlays: number;
-    status: string;
-  }>(`(()=>{window.__mo.disconnect();cancelAnimationFrame(window.__land.raf);
-      const b=window.__land.batches;const c=b.findIndex((x)=>x.chart);const i=b.findIndex((x)=>x.overlay);
-      const ov=document.querySelector("#map .voyage-overlay");
-      const svg=document.querySelector("#map svg:not(.voyage-overlay)");
-      return{reduce:matchMedia("(prefers-reduced-motion: reduce)").matches,turned:window.__turned,
-        style:svg?svg.getAttribute("data-vellum-style"):null,
-        chartAlone:c>=0&&!b[c].overlay,inkAfter:i>c,framesBetween:c>=0&&i>=0?b[i].frames-b[c].frames:-1,
-        anims:ov&&ov.getAnimations?ov.getAnimations({subtree:true}).length:-1,
-        overlays:document.querySelectorAll("#map .voyage-overlay").length,
-        status:document.getElementById("status").textContent};})()`);
+  const sv2n = await sv2nRead({ evaluate });
   await send("Emulation.setEmulatedMedia", { features: [] });
   check(
     "SV2n under reduced motion the style change swaps instead of turning, defers its arm the same way, and starts no animation (#366)",
