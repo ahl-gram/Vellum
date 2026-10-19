@@ -102,8 +102,7 @@ export const glideLanded = (g: GlideRead): boolean =>
   g.seated.k < REST_K - REST_TOLERANCE &&
   Math.abs(g.landed.k - REST_K) < REST_TOLERANCE;
 
-export async function pr21BoundPrint({ evaluate, send, check, atlasFitAt }: PrintRoomKit): Promise<void> {
-  await send("Emulation.setEmulatedMedia", { media: "print" });
+async function pr21PrintView({ evaluate, check }: Pick<PrintRoomKit, "evaluate" | "check">): Promise<void> {
   const printView = await evaluate<{
     stage: string;
     slip: string;
@@ -128,6 +127,11 @@ export async function pr21BoundPrint({ evaluate, send, check, atlasFitAt }: Prin
       printView.breakAfter === "page",
     JSON.stringify(printView),
   );
+}
+
+export async function pr21BoundPrint({ evaluate, send, check, atlasFitAt }: PrintRoomKit): Promise<void> {
+  await send("Emulation.setEmulatedMedia", { media: "print" });
+  await pr21PrintView({ evaluate, check });
 
   const fitLetter = await (async () => {
     await send("Emulation.setDeviceMetricsOverride", { width: 816, height: 1056, deviceScaleFactor: 1, mobile: false });
@@ -166,6 +170,31 @@ export async function pr21BoundPrint({ evaluate, send, check, atlasFitAt }: Prin
     pdf ? `${pdf.data.length} base64 chars` : "printToPDF failed",
   );
   await send("Emulation.setEmulatedMedia", { media: "" });
+}
+
+async function pr21cPaperWidth({ evaluate, check }: Pick<SuiteContext, "evaluate" | "check">): Promise<void> {
+  const paper = await evaluate<{
+    w: number;
+    tagline: string;
+    name: string;
+    nameSize: string;
+    folioMax: string;
+    stagePos: string;
+    corner: string;
+  }>(
+    `(()=>{const cs=(sel)=>getComputedStyle(document.querySelector(sel));return{w:window.innerWidth,tagline:cs(".folio-room .room-tagline").display,name:cs(".folio-room .room-name").display,nameSize:cs(".folio-room .room-name").fontSize,folioMax:cs(".corner.folio-room").maxWidth,stagePos:cs(".stage").position,corner:cs(".corner.bl").display};})()`,
+  );
+  check(
+    "PR21c at paper width (816px, print media) the room's name and tagline print at their own size and the corner is unclamped; the chart's folio prints as nothing",
+    paper.w === 816 &&
+      paper.tagline === "block" &&
+      paper.name === "block" &&
+      paper.nameSize === "21.12px" &&
+      paper.folioMax === "none" &&
+      paper.stagePos === "static" &&
+      paper.corner === "none",
+    JSON.stringify(paper),
+  );
 }
 
 export async function pr21bUnboundPrint({ evaluate, send, check }: SuiteContext): Promise<void> {
@@ -213,28 +242,7 @@ export async function pr21bUnboundPrint({ evaluate, send, check }: SuiteContext)
   );
   // Paper lays out under the 900px query (test/site/room.test.ts pins the taking-back).
   await send("Emulation.setDeviceMetricsOverride", { width: 816, height: 1056, deviceScaleFactor: 1, mobile: false });
-  const paper = await evaluate<{
-    w: number;
-    tagline: string;
-    name: string;
-    nameSize: string;
-    folioMax: string;
-    stagePos: string;
-    corner: string;
-  }>(
-    `(()=>{const cs=(sel)=>getComputedStyle(document.querySelector(sel));return{w:window.innerWidth,tagline:cs(".folio-room .room-tagline").display,name:cs(".folio-room .room-name").display,nameSize:cs(".folio-room .room-name").fontSize,folioMax:cs(".corner.folio-room").maxWidth,stagePos:cs(".stage").position,corner:cs(".corner.bl").display};})()`,
-  );
-  check(
-    "PR21c at paper width (816px, print media) the room's name and tagline print at their own size and the corner is unclamped; the chart's folio prints as nothing",
-    paper.w === 816 &&
-      paper.tagline === "block" &&
-      paper.name === "block" &&
-      paper.nameSize === "21.12px" &&
-      paper.folioMax === "none" &&
-      paper.stagePos === "static" &&
-      paper.corner === "none",
-    JSON.stringify(paper),
-  );
+  await pr21cPaperWidth({ evaluate, check });
   await send("Emulation.clearDeviceMetricsOverride");
   await send("Emulation.setEmulatedMedia", { media: "" });
 }

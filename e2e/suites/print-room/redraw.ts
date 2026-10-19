@@ -64,6 +64,29 @@ export async function pr24bInFlight({ evaluate, check, sleep }: SuiteContext): P
   );
 }
 
+async function pr24cRebound({ evaluate, sleep }: Pick<SuiteContext, "evaluate" | "sleep">) {
+  // Poll for the DECODED state, not for Bind's re-enable: the blobs decode after the binding lands, and a loaded CI lane read them mid-decode at the first sample (PR #500's run at 91da0e7). A value that never settles fails on the last sample.
+  let rebound = null;
+  for (let i = 0; i < 300; i++) {
+    let s = null;
+    try {
+      s = await evaluate<{
+        imgs: number;
+        loaded: boolean;
+        turnedLoaded: boolean;
+        here: string | undefined;
+        print: boolean;
+      } | null>(
+        `(()=>{if(document.getElementById("pr-bind").disabled)return null;const imgs=[...document.querySelectorAll("#pr-contents .plates img")];const t=document.getElementById("pr-turned");return{imgs:imgs.length,loaded:imgs.length>0&&imgs.every(im=>im.complete&&im.naturalWidth>0),turnedLoaded:!t.hidden&&t.complete&&t.naturalWidth>0,here:(document.querySelector("#pr-contents .plates figure.here")||{dataset:{}}).dataset.plate,print:!document.getElementById("pr-print").disabled};})()`,
+      );
+    } catch {}
+    if (s) rebound = s;
+    if (s && s.loaded && s.turnedLoaded) break;
+    await sleep(50);
+  }
+  return rebound;
+}
+
 export async function pr24cRebind({ evaluate, check, sleep }: SuiteContext): Promise<void> {
   // A click on the previous binding's thumbnail DURING a re-bind: the old plates stay turnable until the new ones land (skeptic on PR #496: revoked up front, the sheet and the index blanked).
   await evaluate(`document.getElementById("pr-bind").click()`);
@@ -89,25 +112,7 @@ export async function pr24cRebind({ evaluate, check, sleep }: SuiteContext): Pro
   } | null>(
     `(()=>{document.getElementById("pr-bind").click();const b=document.querySelector('#pr-contents .plates figure[data-plate="theme-climate"] .thumb');if(!b)return null;b.click();const t=document.getElementById("pr-turned");return{binding:document.getElementById("pr-bind").disabled,here:(document.querySelector("#pr-contents .plates figure.here")||{dataset:{}}).dataset.plate,src:t.src.slice(0,5),stillBound:document.body.classList.contains("has-atlas")};})()`,
   );
-  // Poll for the DECODED state, not for Bind's re-enable: the blobs decode after the binding lands, and a loaded CI lane read them mid-decode at the first sample (PR #500's run at 91da0e7). A value that never settles fails on the last sample.
-  let rebound = null;
-  for (let i = 0; i < 300; i++) {
-    let s = null;
-    try {
-      s = await evaluate<{
-        imgs: number;
-        loaded: boolean;
-        turnedLoaded: boolean;
-        here: string | undefined;
-        print: boolean;
-      } | null>(
-        `(()=>{if(document.getElementById("pr-bind").disabled)return null;const imgs=[...document.querySelectorAll("#pr-contents .plates img")];const t=document.getElementById("pr-turned");return{imgs:imgs.length,loaded:imgs.length>0&&imgs.every(im=>im.complete&&im.naturalWidth>0),turnedLoaded:!t.hidden&&t.complete&&t.naturalWidth>0,here:(document.querySelector("#pr-contents .plates figure.here")||{dataset:{}}).dataset.plate,print:!document.getElementById("pr-print").disabled};})()`,
-      );
-    } catch {}
-    if (s) rebound = s;
-    if (s && s.loaded && s.turnedLoaded) break;
-    await sleep(50);
-  }
+  const rebound = await pr24cRebound({ evaluate, sleep });
   check(
     "PR24c a turn during a re-bind stays on a live plate, and the new binding lands with every thumbnail and the sheet decoded",
     boundOnce &&

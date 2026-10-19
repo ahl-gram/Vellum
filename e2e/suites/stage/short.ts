@@ -121,8 +121,7 @@ async function painted(
 const size = (ctx: SuiteContext, w: number, h: number): Promise<unknown> =>
   ctx.send("Emulation.setDeviceMetricsOverride", { width: w, height: h, deviceScaleFactor: 1, mobile: false });
 
-export async function ns1Soft(ctx: SuiteContext): Promise<void> {
-  await ctx.setTouch(false);
+async function ns1Sweep(ctx: SuiteContext) {
   const faults: string[] = [];
   const rows: string[] = [];
   let ribbonNav = false;
@@ -168,6 +167,12 @@ export async function ns1Soft(ctx: SuiteContext): Promise<void> {
       rows.push(`${at} ${reads.length} lines, worst ${Math.min(...reads.map((g) => g.ratio)).toFixed(2)}`);
     }
   }
+  return { faults, rows, ribbonNav, discounted };
+}
+
+export async function ns1Soft(ctx: SuiteContext): Promise<void> {
+  await ctx.setTouch(false);
+  const { faults, rows, ribbonNav, discounted } = await ns1Sweep(ctx);
   ctx.check(
     "NS1 over a floored chart on a short window (1024x540, 1024x474 and 1024x430) the Press and the room folio stand on the cluster's blurred pool, not a hard-edged panel, no backing lies over another piece's lines, and every chrome line over the sheet but the Glass's and the Specimen's disabled press's reads 4.5:1 or better, discounted by however much another piece's pool painted over it dims it, in every chart room and the Print Room's named world, the Ribbon's \"Glossary\" beside its corner among them (Alex, 2026-10-06, Issue #762: soft)",
     faults.length === 0 && ribbonNav,
@@ -178,8 +183,7 @@ export async function ns1Soft(ctx: SuiteContext): Promise<void> {
 // The witnesses, swept 2026-10-06 on this branch: the Print Room's risen Press, slip open, stands 34px under the cluster's foot at 1024x400 and sheds from 1024x380 down on both worlds, and unshed at 360 it would reach 5.6px over the foot; the Seed of the Day's, unshed at 1024x388, stands 16.3px under the foot, outside the gap, while its soft pool's 1.3rem would reach 4.5px over the cluster's last line. The PR #777 row's 932x430 is the 1024x430 page under the floor, clear by 64px with no shed.
 const LEAN_H = 360;
 const REACH_H = 388;
-export async function na4Lean(ctx: SuiteContext): Promise<void> {
-  await ctx.setTouch(false);
+async function na4PrintRoomSweep(ctx: SuiteContext) {
   const settle = makeSettle(ctx);
   const faults: string[] = [];
   const rows: string[] = [];
@@ -215,6 +219,12 @@ export async function na4Lean(ctx: SuiteContext): Promise<void> {
       `${page} lean ${b.lean}, Press top ${b.pressTop?.toFixed(1)} under the cluster's foot ${b.clusterFoot?.toFixed(1)}`,
     );
   }
+  return { faults, rows };
+}
+
+export async function na4Lean(ctx: SuiteContext): Promise<void> {
+  await ctx.setTouch(false);
+  const { faults, rows } = await na4PrintRoomSweep(ctx);
   await size(ctx, 1024, REACH_H);
   await ctx.send("Page.navigate", { url: "about:blank" });
   await ctx.send("Page.navigate", { url: `http://127.0.0.1:${ctx.PORT}/seed-of-the-day/` });

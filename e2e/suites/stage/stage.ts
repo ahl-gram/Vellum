@@ -12,7 +12,7 @@ import { routesUnder } from "../corners/geometry.ts";
 import { switchFaults, withStyledBoot } from "./styled-boot.ts";
 import type { DeskSwitch } from "./styled-boot.ts";
 
-const REPO = resolve(fileURLToPath(new URL(".", import.meta.url)), "..", "..", "..");
+export const REPO = resolve(fileURLToPath(new URL(".", import.meta.url)), "..", "..", "..");
 export const CHART_ROOM_FLOOR = [
   "/explorer/",
   "/explorer/portfolio/",
@@ -26,25 +26,10 @@ export const CHART_ROOM_FLOOR = [
 export const PHONE = { w: 844, h: 390, laidOut: { w: 1024, h: 474 } };
 export const DESK = { w: 1280, h: 800 };
 export const DESK_FRAME_H = 768;
-const WINDOWS: readonly (readonly [number, number])[] = [
-  [1280, 720],
-  [1024, 768],
-  [1024, 600],
-  [960, 800],
-  [901, 800],
-  [1024, 474],
-  [932, 430],
-];
-const FOLDED_WINDOWS: readonly (readonly [number, number])[] = [
-  [1024, 600],
-  [901, 800],
-];
-const SHORT = { w: 932, h: 430 };
+export const SHORT = { w: 932, h: 430 };
 export const FLOOR_PLAIN = 4.5;
-// The day's seed on which the Print Room's Press came to rest over its folio at 932x430 folded (2026-10-06), read beside the suite's fixed day (Alex, 2026-10-05, on PR #784).
-const COLLIDED_2026_10_06 = "/print-room/#seed=20261006";
 // Below 1024 the tab stands on the 1024 page past the window's edge, and the ink is read on the page, so the sibling is seen there too.
-const SLIP_TAB_SIBLING = {
+export const SLIP_TAB_SIBLING = {
   at: `at ${SHORT.w}x${SHORT.h} folded`,
   pieces: ["button.slip-tab", "button.chart-drawer-tab"],
   row: "the handbook/errata/site.md row on the slip's tab at 932x430",
@@ -53,7 +38,7 @@ const SLIP_TAB_SIBLING = {
 type Box = { x: number; y: number; r: number; b: number };
 type Ink = Box & { piece: number; t: string };
 type Backing = Box & { piece: number; role: string };
-type Stage = {
+export type Stage = {
   chartRoom: true;
   ready: boolean;
   drawn: boolean;
@@ -183,7 +168,7 @@ export function stageFaults({ page, size, s }: Read): string[] {
   return faults;
 }
 
-const known = (all: readonly string[]): string[] =>
+export const known = (all: readonly string[]): string[] =>
   all.filter((f) => !(f.includes(SLIP_TAB_SIBLING.at) && SLIP_TAB_SIBLING.pieces.some((p) => f.includes(p))));
 
 // At rest: the document and its fonts are in, the stage no longer reports a draw in progress (a line ending in an ellipsis), and the fit, the floor and the Press's seat read the same on STILL_READS polls running, since a plate with no draw to wait on (a Portfolio with nothing gathered, which shows its plate) gives no other signal.
@@ -221,7 +206,7 @@ export async function open(
   return rest(ctx, laidOut.w, laidOut.h, `${label} ${page} ${w}x${h}`);
 }
 
-const size = (ctx: SuiteContext, w: number, h: number): Promise<unknown> =>
+export const size = (ctx: SuiteContext, w: number, h: number): Promise<unknown> =>
   ctx.send("Emulation.setDeviceMetricsOverride", { width: w, height: h, deviceScaleFactor: 1, mobile: false });
 
 export type StageRun = { rooms: string[]; reads: Read[] };
@@ -257,7 +242,7 @@ export async function ea1Phone(ctx: SuiteContext): Promise<StageRun> {
 }
 
 // Below 1024 the fold press stands on the 1024 page past the window's right edge, so the window scrolls it into reach first and back to the page's start after.
-async function fold(ctx: SuiteContext): Promise<void> {
+export async function fold(ctx: SuiteContext): Promise<void> {
   const at = await ctx.evaluate<{ x: number; y: number } | null>(
     `(() => { const b = document.querySelector(".slip-fold"); if (!b) return null; const o = b.getBoundingClientRect(); if (o.right > innerWidth) scrollBy(o.right - innerWidth + 8, 0); const r = b.getBoundingClientRect(); return r.width > 0 && r.right <= innerWidth ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : null; })()`,
   );
@@ -278,102 +263,6 @@ async function fold(ctx: SuiteContext): Promise<void> {
   await makeSettle(ctx)(sheetX, (d) => d.folded && Math.abs(d.x - before.x) > 1, "the slip folds and the sheet refits");
   await ctx.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: 1, y: 1 });
   await ctx.evaluate("window.scrollTo(0, 0)");
-}
-
-// Folded at 932x430, then resized a pixel taller and back twice: the seat must come to rest the same way every time (the cold review of PR #777 found the Prospect and the Seed of the Day flipping between risen and stacked on every layout there).
-async function foldedShort(ctx: SuiteContext, page: string): Promise<{ reads: Read[]; drift: string | null }> {
-  await size(ctx, SHORT.w, SHORT.h);
-  await rest(ctx, SHORT.w, SHORT.h, `EL2 ${page} short`);
-  if (!(await ctx.evaluate<boolean>(`!!document.querySelector(".slip-fold")`))) return { reads: [], drift: null };
-  await fold(ctx);
-  const reads: Read[] = [];
-  for (const h of [SHORT.h, SHORT.h + 1, SHORT.h, SHORT.h + 1, SHORT.h]) {
-    await size(ctx, SHORT.w, h);
-    const s = await rest(ctx, SHORT.w, h, `EL2 ${page} ${SHORT.w}x${h}`);
-    if (s && h === SHORT.h) reads.push({ page, size: `${SHORT.w}x${SHORT.h} folded`, s });
-  }
-  const seats = [...new Set(reads.map((r) => JSON.stringify([r.s.risen, r.s.presses, r.s.sheet])))];
-  return {
-    reads,
-    drift:
-      seats.length > 1
-        ? `${page} folded at ${SHORT.w}x${SHORT.h} comes to rest ${seats.length} ways: ${seats.join(" / ")}`
-        : null,
-  };
-}
-
-async function deskReads(ctx: SuiteContext): Promise<{ reads: Read[]; folded: Read[]; drifts: string[] }> {
-  await ctx.setTouch(false);
-  const reads: Read[] = [];
-  const folded: Read[] = [];
-  const drifts: string[] = [];
-  for (const page of [...routesUnder(resolve(REPO, "src/pages")), COLLIDED_2026_10_06]) {
-    await size(ctx, DESK.w, DESK.h);
-    const first = await open(ctx, page, DESK.w, DESK.h, DESK, "EA");
-    if (!first) continue;
-    reads.push({ page, size: `${DESK.w}x${DESK.h}`, s: first });
-    for (const [w, h] of WINDOWS) {
-      await size(ctx, w, h);
-      const s = await rest(ctx, w, h, `EA ${page} ${w}x${h}`);
-      if (s) reads.push({ page, size: `${w}x${h}`, s });
-    }
-    const short = await foldedShort(ctx, page);
-    folded.push(...short.reads);
-    if (short.drift) drifts.push(short.drift);
-    if (page === "/explorer/") {
-      for (const [w, h] of FOLDED_WINDOWS) {
-        await size(ctx, w, h);
-        const s = await rest(ctx, w, h, `EA folded ${w}x${h}`);
-        if (s) reads.push({ page, size: `${w}x${h} folded`, s });
-      }
-    }
-  }
-  return { reads, folded, drifts };
-}
-
-export async function eaDesk(ctx: SuiteContext): Promise<void> {
-  const { reads, folded, drifts } = await deskReads(ctx);
-  const rooms = [...new Set(reads.map((r) => r.page))];
-  const missing = CHART_ROOM_FLOOR.filter((p) => !rooms.includes(p));
-  const pick = (page: string, at: string): Stage | undefined => reads.find((r) => r.page === page && r.size === at)?.s;
-  const faults = known(reads.flatMap(stageFaults));
-  const foldedAll = folded.flatMap(stageFaults);
-  const siblingSeen = foldedAll.some((f) => SLIP_TAB_SIBLING.pieces.some((p) => f.includes(p)));
-  const foldedFaults = [
-    ...known(foldedAll),
-    ...drifts,
-    ...(siblingSeen
-      ? []
-      : [`no slip tab meets anything at ${SHORT.w}x${SHORT.h} folded, so ${SLIP_TAB_SIBLING.row} goes`]),
-  ];
-  const control = reads.filter((r) => r.size === "1280x800" || r.size === "1280x720");
-  const controlFaults = control
-    .filter((r) => r.s.under || r.s.risen)
-    .map((r) => `${r.page} at ${r.size}: ${r.s.under ? "floored" : "risen"}`);
-  ctx.check(
-    "EA2 on a short laptop window (1024x600) the Print Room floors to the whole room and the Explorer keeps more than half its own, the Press standing above the chart folio (210.5 wide on main), and at 1024x474 the Explorer and the Print Room floor (Issue #762, ruling 4a)",
-    pick("/print-room/", "1024x600")?.under === true &&
-      pick("/explorer/", "1024x600")?.under === false &&
-      pick("/explorer/", "1024x600")?.risen === true &&
-      pick("/explorer/", "1024x474")?.under === true &&
-      pick("/print-room/", "1024x474")?.under === true,
-    `print-room 1024x600 ${JSON.stringify(pick("/print-room/", "1024x600")?.sheet)} under ${pick("/print-room/", "1024x600")?.under}; explorer 1024x600 ${JSON.stringify(pick("/explorer/", "1024x600")?.sheet)} under ${pick("/explorer/", "1024x600")?.under} risen ${pick("/explorer/", "1024x600")?.risen}`,
-  );
-  ctx.check(
-    "EA3 the control: at 1280x800 and 1280x720 no chart room floors its sheet or raises its Press, so a healthy window keeps the layout main ships (Issue #762)",
-    missing.length === 0 && control.length >= 2 * CHART_ROOM_FLOOR.length && controlFaults.length === 0,
-    `${control.length} control reads over ${rooms.length} rooms${missing.length ? `, missing ${missing.join(", ")}` : ""}; ${controlFaults.join("; ") || "none floored or risen"}`,
-  );
-  ctx.check(
-    "EL1 in every chart room, resized while loaded from 1280x800 through 1280x720, 1024x768, 1024x600, 960x800, 901x800, 1024x474 and 932x430, and on the Explorer with the Broadside folded at 1024x600 and 901x800, the sheet keeps at least half its room (all of it when floored, inside the page, which below 1024 is the 1024 page), the Press never stacks down the page, and no chrome ink meets other chrome ink or lies under another piece's backing (Issue #762)",
-    missing.length === 0 && reads.length >= CHART_ROOM_FLOOR.length * (WINDOWS.length + 1) && faults.length === 0,
-    `${reads.length} reads over ${rooms.length} rooms; ${faults.length ? `${faults.length} faults: ${faults.slice(0, 6).join("; ")}` : "no faults"}`,
-  );
-  ctx.check(
-    "EL2 in every chart room with a slip, folded at 932x430 and resized a pixel taller and back twice, the seat comes to rest the same way each time and holds EL1's rules; the slip's tab meeting the folio, the Glass or the drawer's tab there, on the 1024 page that window lays out, is a sibling on main too, exempt until it goes (Issue #762; the cold review of PR #777)",
-    folded.length >= 3 * (CHART_ROOM_FLOOR.length - 1) && foldedFaults.length === 0,
-    `${folded.length} folded reads; ${foldedFaults.length ? `${foldedFaults.length} faults: ${foldedFaults.slice(0, 6).join("; ")}` : "no faults"}`,
-  );
 }
 
 // A press lifted by hover or keyboard focus while the room lays out must not count as a line of its own (the cold review of PR #777: the row rose at 1280x800 and stayed risen).

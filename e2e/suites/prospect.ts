@@ -90,16 +90,7 @@ async function pb1WayIn({ evaluate, send, check, sleep, PORT }: SuiteContext): P
   return href;
 }
 
-async function pb2CapitalPlate({ send, check, page, opened }: ProspectKit, href: string | null): Promise<void> {
-  await send("Page.navigate", {
-    url: page(href && href.includes("#") ? href.slice(href.indexOf("#")) : "#seed=42&i=0"),
-  });
-  const cap = await opened("the card's own link");
-  check(
-    "PB2 the card's link opens the capital's plate (seed 42 == Laukuwelua)",
-    cap.seed === 42 && cap.index === 0 && cap.name === "Laukuwelua" && cap.shown,
-    JSON.stringify({ seed: cap.seed, index: cap.index, name: cap.name }),
-  );
+function pb3Folio({ check }: Pick<ProspectKit, "check">, cap: Prospect): void {
   check(
     "PB3 the chart's folio names the place, the chart and its world",
     /^The Prospect of Laukuwelua · Chart № 42$/.test(cap.title!) &&
@@ -126,6 +117,19 @@ async function pb2CapitalPlate({ send, check, page, opened }: ProspectKit, href:
       eraLine: cap.eraLine,
     }),
   );
+}
+
+async function pb2CapitalPlate({ send, check, page, opened }: ProspectKit, href: string | null): Promise<void> {
+  await send("Page.navigate", {
+    url: page(href && href.includes("#") ? href.slice(href.indexOf("#")) : "#seed=42&i=0"),
+  });
+  const cap = await opened("the card's own link");
+  check(
+    "PB2 the card's link opens the capital's plate (seed 42 == Laukuwelua)",
+    cap.seed === 42 && cap.index === 0 && cap.name === "Laukuwelua" && cap.shown,
+    JSON.stringify({ seed: cap.seed, index: cap.index, name: cap.name }),
+  );
+  pb3Folio({ check }, cap);
   check(
     "PB3d the roads out: the Explorer keeps the world's keys and sheds the page's own; the Ribbon takes the same world with this town as its departure (#494 ruling 3)",
     cap.chart!.startsWith("/explorer/#seed=42") &&
@@ -144,30 +148,11 @@ async function pb2CapitalPlate({ send, check, page, opened }: ProspectKit, href:
   );
 }
 
-async function pb3eRoomAndPlate({ evaluate, check, sleep, svgOf }: ProspectKit): Promise<string> {
-  const room = await evaluate<{
-    chartRoom: boolean;
-    footer: boolean;
-    band: boolean;
-    w: number;
-    h: number;
-    pw: number;
-    ph: number;
-    aspect: number;
-  }>(
-    `(()=>{const s=document.getElementById("sheet").getBoundingClientRect();const p=document.getElementById("pp-plate").getBoundingClientRect();return{chartRoom:document.body.classList.contains("chart-room"),footer:!!document.querySelector("footer"),band:!!document.querySelector(".band"),w:s.width,h:s.height,pw:p.width,ph:p.height,aspect:s.width/s.height};})()`,
-  );
-  check(
-    "PB3e the room: chart-room body, no band, no footer, the sheet fitted at the plate's own 520:384 and the plate filling it",
-    room.chartRoom &&
-      !room.footer &&
-      !room.band &&
-      room.w > 200 &&
-      Math.abs(room.aspect - 520 / 384) < 0.01 &&
-      Math.abs(room.pw - room.w) < 1 &&
-      Math.abs(room.ph - room.h) < 1,
-    JSON.stringify(room),
-  );
+async function pb3fGlassLeans({
+  evaluate,
+  check,
+  sleep,
+}: Pick<ProspectKit, "evaluate" | "check" | "sleep">): Promise<void> {
   await evaluate(
     `(()=>{const vp=document.getElementById("map-viewport");vp.focus();vp.dispatchEvent(new KeyboardEvent("keydown",{key:"+",bubbles:true}));})()`,
   );
@@ -197,6 +182,33 @@ async function pb3eRoomAndPlate({ evaluate, check, sleep, svgOf }: ProspectKit):
     if (home) break;
     await sleep(50);
   }
+}
+
+async function pb3eRoomAndPlate({ evaluate, check, sleep, svgOf }: ProspectKit): Promise<string> {
+  const room = await evaluate<{
+    chartRoom: boolean;
+    footer: boolean;
+    band: boolean;
+    w: number;
+    h: number;
+    pw: number;
+    ph: number;
+    aspect: number;
+  }>(
+    `(()=>{const s=document.getElementById("sheet").getBoundingClientRect();const p=document.getElementById("pp-plate").getBoundingClientRect();return{chartRoom:document.body.classList.contains("chart-room"),footer:!!document.querySelector("footer"),band:!!document.querySelector(".band"),w:s.width,h:s.height,pw:p.width,ph:p.height,aspect:s.width/s.height};})()`,
+  );
+  check(
+    "PB3e the room: chart-room body, no band, no footer, the sheet fitted at the plate's own 520:384 and the plate filling it",
+    room.chartRoom &&
+      !room.footer &&
+      !room.band &&
+      room.w > 200 &&
+      Math.abs(room.aspect - 520 / 384) < 0.01 &&
+      Math.abs(room.pw - room.w) < 1 &&
+      Math.abs(room.ph - room.h) < 1,
+    JSON.stringify(room),
+  );
+  await pb3fGlassLeans({ evaluate, check, sleep });
   check(
     "PB4 the render worker serves the page (no silent inline fallback)",
     await evaluate<boolean>(`window.__vellumProspectUsesWorker() === true`),
@@ -230,21 +242,7 @@ async function pb6SameAddress({ check, goto, opened, svgOf }: ProspectKit, first
   );
 }
 
-async function pb7YearFilter({ evaluate, check, sleep, goto, opened, state, svgOf }: ProspectKit): Promise<void> {
-  await goto("#seed=42&i=1");
-  await opened("the standing town");
-  const standing = await svgOf();
-  await goto("#seed=42&i=1&year=300");
-  const early = await opened("the year 300");
-  const ground = await svgOf();
-  check(
-    "PB7 the year is a chronicle filter: the standing town at the present, the bare ground before its founding",
-    /aria-label="PAUKILUA"/.test(standing) &&
-      !/will rise/.test(standing) &&
-      /will rise/.test(ground) &&
-      early.year === 300,
-    JSON.stringify({ year: early.year, presentYear: early.presentYear }),
-  );
+function pb7bViewedYear({ check }: Pick<ProspectKit, "check">, early: Prospect): void {
   check(
     "PB7b a viewed year reads in the year control and the era line, the bare ground keys the world alone (Issue #754 ruling D12), and the Explorer link sheds the page's own keys",
     early.yearField === "300" &&
@@ -266,10 +264,13 @@ async function pb7YearFilter({ evaluate, check, sleep, goto, opened, state, svgO
       chart: early.chart,
     }),
   );
+}
 
-  await evaluate(
-    `(()=>{document.getElementById("pp-year").value=${JSON.stringify(String(early.presentYear))};document.getElementById("pp-year-form").requestSubmit();})()`,
-  );
+async function pb7cReEngraves(
+  { check, sleep, state, svgOf }: Pick<ProspectKit, "check" | "sleep" | "state" | "svgOf">,
+  early: Prospect,
+  standing: string,
+) {
   let engraved: Prospect | null = null;
   for (let i = 0; i < 200; i++) {
     let s = null;
@@ -302,6 +303,30 @@ async function pb7YearFilter({ evaluate, check, sleep, goto, opened, state, svgO
       },
     ),
   );
+  return engraved;
+}
+
+async function pb7YearFilter({ evaluate, check, sleep, goto, opened, state, svgOf }: ProspectKit): Promise<void> {
+  await goto("#seed=42&i=1");
+  await opened("the standing town");
+  const standing = await svgOf();
+  await goto("#seed=42&i=1&year=300");
+  const early = await opened("the year 300");
+  const ground = await svgOf();
+  check(
+    "PB7 the year is a chronicle filter: the standing town at the present, the bare ground before its founding",
+    /aria-label="PAUKILUA"/.test(standing) &&
+      !/will rise/.test(standing) &&
+      /will rise/.test(ground) &&
+      early.year === 300,
+    JSON.stringify({ year: early.year, presentYear: early.presentYear }),
+  );
+  pb7bViewedYear({ check }, early);
+
+  await evaluate(
+    `(()=>{document.getElementById("pp-year").value=${JSON.stringify(String(early.presentYear))};document.getElementById("pp-year-form").requestSubmit();})()`,
+  );
+  const engraved = await pb7cReEngraves({ check, sleep, state, svgOf }, early, standing);
   // Garbage is refused IN PLACE by the control's own digits pattern (home's seed-input precedent): the browser never fires submit.
   const garbage = await evaluate<boolean>(
     `(()=>{const y=document.getElementById("pp-year");y.value="abc";const valid=y.checkValidity();document.getElementById("pp-year-form").requestSubmit();return valid;})()`,

@@ -35,26 +35,24 @@ async function rs18Silent({ evaluate, check }: SuiteContext, setYear: Bar["setYe
   );
 }
 
-async function rs19Stamp({ evaluate, check }: SuiteContext, setYear: Bar["setYear"], sm: Facts): Promise<void> {
-  if (sm.lateIdx >= 0) {
-    await setYear(sm.lateFounded - 1);
-    const rs19 = await evaluate<
-      | Found
-      | {
-          found: true;
-          hasMark: true;
-          ink: string | null;
-          disp: string;
-          name: string;
-          dur: string;
-          box: string;
-          wantX: number;
-          wantY: number;
-          gotX: number;
-          gotY: number;
-          others: number;
-        }
-    >(`(()=>{
+async function rs19Read({ evaluate }: Pick<SuiteContext, "evaluate">, sm: Facts) {
+  const rs19 = await evaluate<
+    | Found
+    | {
+        found: true;
+        hasMark: true;
+        ink: string | null;
+        disp: string;
+        name: string;
+        dur: string;
+        box: string;
+        wantX: number;
+        wantY: number;
+        gotX: number;
+        gotY: number;
+        others: number;
+      }
+  >(`(()=>{
       const s=document.querySelector(".rf-range");const ax=window.__vellumAgesState();s.value=String(Number(s.max)/2+(${sm.lateFounded}-ax.min));s.dispatchEvent(new Event("input",{bubbles:true}));
       const g=document.querySelector('.rf-chart #layer-settlements g.settlement[data-idx="${sm.lateIdx}"]');
       if(!g)return{found:false};
@@ -68,6 +66,13 @@ async function rs19Stamp({ evaluate, check }: SuiteContext, setYear: Bar["setYea
         wantX:${sm.lateNx}*vb.width,wantY:${sm.lateNy}*vb.height,gotX:o[0],gotY:o[1],
         others:document.querySelectorAll('.rf-chart #layer-settlements g.settlement[data-ink]').length};
     })()`);
+  return rs19;
+}
+
+async function rs19Stamp({ evaluate, check }: SuiteContext, setYear: Bar["setYear"], sm: Facts): Promise<void> {
+  if (sm.lateIdx >= 0) {
+    await setYear(sm.lateFounded - 1);
+    const rs19 = await rs19Read({ evaluate }, sm);
     const onPoint =
       rs19.found && rs19.hasMark && Math.abs(rs19.gotX - rs19.wantX) < 0.05 && Math.abs(rs19.gotY - rs19.wantY) < 0.05;
     check(

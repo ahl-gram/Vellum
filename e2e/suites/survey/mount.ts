@@ -69,15 +69,7 @@ export async function sv2hPluralExit({ evaluate, check, goto, waitInked, setBox 
   );
 }
 
-export async function sv2iBuildsOnce({
-  evaluate,
-  check,
-  waitSettled,
-  goto,
-  waitInked,
-  waitBeat,
-}: SurveyKit): Promise<void> {
-  await goto("#seed=42&style=antique", "survey-settle-owns-arm-base");
+async function sv2iArm({ evaluate }: Pick<SurveyKit, "evaluate">): Promise<void> {
   await evaluate(`(()=>{
       window.__armSeq=0;
       window.__armObs=new MutationObserver((recs)=>{for(const r of recs)for(const n of r.addedNodes){
@@ -88,6 +80,18 @@ export async function sv2iBuildsOnce({
       const c=document.getElementById("ages");c.checked=true;c.dispatchEvent(new Event("change",{bubbles:true}));
       const end=performance.now()+1500;while(performance.now()<end);
     })()`);
+}
+
+export async function sv2iBuildsOnce({
+  evaluate,
+  check,
+  waitSettled,
+  goto,
+  waitInked,
+  waitBeat,
+}: SurveyKit): Promise<void> {
+  await goto("#seed=42&style=antique", "survey-settle-owns-arm-base");
+  await sv2iArm({ evaluate });
   await waitSettled("survey-settle-owns-arm-settle");
   await waitInked("survey-settle-owns-arm-ink");
   await evaluate(`(()=>{window.__beat=false;requestAnimationFrame(()=>setTimeout(()=>{window.__beat=true;},0));})()`);
@@ -118,6 +122,45 @@ export async function sv2iBuildsOnce({
       /(^|&)survey(&|$)/.test(sv2i.hash.slice(1)) &&
       sv2i.status === "",
     JSON.stringify(sv2i),
+  );
+}
+
+async function sv2jOneBuild({ evaluate, check }: Pick<SurveyKit, "evaluate" | "check">): Promise<void> {
+  const sv2j = await evaluate<{
+    builds: number;
+    seq: string | null;
+    ticked: boolean;
+    turned: boolean;
+    overlays: number;
+    style: string | null;
+    checked: boolean;
+    hash: string;
+    status: string;
+    vertices: number;
+  }>(`(()=>{const ov=document.querySelector("#map .voyage-overlay");
+      const chart=document.querySelector("#map svg:not(.voyage-overlay)");
+      const r={builds:window.__armSeq,seq:ov?ov.getAttribute("data-arm-seq"):null,
+        ticked:window.__tickedAtLanding,turned:window.__turned,
+        overlays:document.querySelectorAll("#map .voyage-overlay").length,
+        style:chart?chart.getAttribute("data-vellum-style"):null,
+        checked:document.getElementById("ages").checked,hash:location.hash,
+        status:document.getElementById("status").textContent,
+        vertices:(()=>{const t=document.querySelector("#map .voyage-overlay .voyage-track");
+          return t?(t.getAttribute("points")||"").trim().split(/\\s+/).length:0;})()};
+      window.__armObs.disconnect();window.__landObs.disconnect();return r;})()`);
+  check(
+    "SV2j a tick inside the TURN's landing builds ONCE: the landing's own arm is the track that stays (#300)",
+    sv2j.turned === true &&
+      sv2j.ticked === true &&
+      sv2j.builds === 1 &&
+      sv2j.seq === "0" &&
+      sv2j.overlays === 1 &&
+      sv2j.style === "ink" &&
+      sv2j.checked &&
+      sv2j.vertices > 10 &&
+      /(^|&)survey(&|$)/.test(sv2j.hash.slice(1)) &&
+      sv2j.status === "",
+    JSON.stringify(sv2j),
   );
 }
 
@@ -161,40 +204,5 @@ export async function sv2jTurnLanding({
   await waitTurned("survey-turn-owns-arm-turn");
   await evaluate(`(()=>{window.__beat=false;requestAnimationFrame(()=>setTimeout(()=>{window.__beat=true;},0));})()`);
   await waitBeat("survey-turn-owns-arm-beat");
-  const sv2j = await evaluate<{
-    builds: number;
-    seq: string | null;
-    ticked: boolean;
-    turned: boolean;
-    overlays: number;
-    style: string | null;
-    checked: boolean;
-    hash: string;
-    status: string;
-    vertices: number;
-  }>(`(()=>{const ov=document.querySelector("#map .voyage-overlay");
-      const chart=document.querySelector("#map svg:not(.voyage-overlay)");
-      const r={builds:window.__armSeq,seq:ov?ov.getAttribute("data-arm-seq"):null,
-        ticked:window.__tickedAtLanding,turned:window.__turned,
-        overlays:document.querySelectorAll("#map .voyage-overlay").length,
-        style:chart?chart.getAttribute("data-vellum-style"):null,
-        checked:document.getElementById("ages").checked,hash:location.hash,
-        status:document.getElementById("status").textContent,
-        vertices:(()=>{const t=document.querySelector("#map .voyage-overlay .voyage-track");
-          return t?(t.getAttribute("points")||"").trim().split(/\\s+/).length:0;})()};
-      window.__armObs.disconnect();window.__landObs.disconnect();return r;})()`);
-  check(
-    "SV2j a tick inside the TURN's landing builds ONCE: the landing's own arm is the track that stays (#300)",
-    sv2j.turned === true &&
-      sv2j.ticked === true &&
-      sv2j.builds === 1 &&
-      sv2j.seq === "0" &&
-      sv2j.overlays === 1 &&
-      sv2j.style === "ink" &&
-      sv2j.checked &&
-      sv2j.vertices > 10 &&
-      /(^|&)survey(&|$)/.test(sv2j.hash.slice(1)) &&
-      sv2j.status === "",
-    JSON.stringify(sv2j),
-  );
+  await sv2jOneBuild({ evaluate, check });
 }

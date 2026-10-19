@@ -25,7 +25,7 @@ export async function sv2pDrawBeat({ evaluate, waitSettled, goto, waitInked }: S
   await waitInked("survey-draw-beat-ink");
 }
 
-export async function sv2pSwapThenInk({ evaluate, check }: SuiteContext): Promise<void> {
+async function sv2pRead({ evaluate }: Pick<SuiteContext, "evaluate">) {
   const sv2p = await evaluate<{
     batches: { chart: boolean; overlay: boolean; frames: number; verso: boolean }[];
     chartBatch: number;
@@ -55,6 +55,11 @@ export async function sv2pSwapThenInk({ evaluate, check }: SuiteContext): Promis
         vertices:(()=>{const t=document.querySelector("#map .voyage-overlay .voyage-track");
           return t?(t.getAttribute("points")||"").trim().split(/\\s+/).length:0;})(),
         status:document.getElementById("status").textContent,hash:location.hash};})()`);
+  return sv2p;
+}
+
+export async function sv2pSwapThenInk({ evaluate, check }: SuiteContext): Promise<void> {
+  const sv2p = await sv2pRead({ evaluate });
   check(
     "SV2p a Draw with the survey inked paints the new chart before the arm: the swap and the ink land in different tasks, a frame apart (#366)",
     // framesBetween is load-bearing: a queueMicrotask fake-deferral left every other clause green (guard-prover run); it alone tells one task from two, do not drop it.
@@ -80,19 +85,7 @@ export async function sv2pSwapThenInk({ evaluate, check }: SuiteContext): Promis
   );
 }
 
-export async function sv2mStyleInBeat({
-  evaluate,
-  check,
-  sleep,
-  waitTurned,
-  goto,
-  waitInked,
-}: SurveyKit): Promise<void> {
-  await goto("#seed=7&style=antique&survey", "survey-dropped-arm-base");
-  await waitInked("survey-dropped-arm-base-ink");
-  const trackA = await evaluate<string | null>(
-    `document.querySelector("#map .voyage-overlay .voyage-track").getAttribute("points")`,
-  );
+async function sv2mStyleChange({ evaluate, sleep }: Pick<SurveyKit, "evaluate" | "sleep">) {
   await evaluate(`(()=>{window.__fired=false;
       window.__mo2=new MutationObserver((recs)=>{if(window.__fired)return;let chart=false;
         for(const r of recs)for(const n of r.addedNodes){if(n.nodeType!==1)continue;
@@ -119,6 +112,23 @@ export async function sv2mStyleInBeat({
       return{fired:window.__fired,turning:!!document.querySelector(".sheet.turning"),
         versoPoints:back?back.getAttribute("points"):"",
         status:document.getElementById("status").textContent};})()`);
+  return { turningSeen, sv2m };
+}
+
+export async function sv2mStyleInBeat({
+  evaluate,
+  check,
+  sleep,
+  waitTurned,
+  goto,
+  waitInked,
+}: SurveyKit): Promise<void> {
+  await goto("#seed=7&style=antique&survey", "survey-dropped-arm-base");
+  await waitInked("survey-dropped-arm-base-ink");
+  const trackA = await evaluate<string | null>(
+    `document.querySelector("#map .voyage-overlay .voyage-track").getAttribute("points")`,
+  );
+  const { turningSeen, sv2m } = await sv2mStyleChange({ evaluate, sleep });
   await waitTurned("survey-dropped-arm-turn");
   await waitInked("survey-dropped-arm-ink");
   const sv2mAfter = await evaluate<{
@@ -153,6 +163,26 @@ export async function sv2mStyleInBeat({
   );
 }
 
+async function sv2oBackFace({ evaluate, sleep }: Pick<SurveyKit, "evaluate" | "sleep">) {
+  const sv2o = await evaluate<{
+    atSwap: { back: string | null; recto: string | null; versoed: boolean } | null;
+    batches: number;
+    settledAgree: boolean;
+    versoed: boolean;
+    status: string;
+  }>(`(()=>{window.__mo3.disconnect();
+      const b=window.__flip.batches[0]||null;
+      const back=document.querySelector("#verso .verso-track");
+      const recto=document.querySelector("#map .voyage-overlay .voyage-track");
+      return{atSwap:b,batches:window.__flip.batches.length,
+        settledAgree:!!back&&!!recto&&back.getAttribute("points")===recto.getAttribute("points"),
+        versoed:document.getElementById("sheet").classList.contains("versoed"),
+        status:document.getElementById("status").textContent};})()`);
+  await evaluate(`document.getElementById("verso-turn").click()`);
+  await sleep(1500);
+  return sv2o;
+}
+
 export async function sv2oVersoDraw({
   evaluate,
   check,
@@ -181,22 +211,7 @@ export async function sv2oVersoDraw({
   await evaluate(`(()=>{document.getElementById("seed").value="42";document.getElementById("draw").click();})()`);
   await waitSettled("survey-flipped-settle");
   await waitInked("survey-flipped-ink");
-  const sv2o = await evaluate<{
-    atSwap: { back: string | null; recto: string | null; versoed: boolean } | null;
-    batches: number;
-    settledAgree: boolean;
-    versoed: boolean;
-    status: string;
-  }>(`(()=>{window.__mo3.disconnect();
-      const b=window.__flip.batches[0]||null;
-      const back=document.querySelector("#verso .verso-track");
-      const recto=document.querySelector("#map .voyage-overlay .voyage-track");
-      return{atSwap:b,batches:window.__flip.batches.length,
-        settledAgree:!!back&&!!recto&&back.getAttribute("points")===recto.getAttribute("points"),
-        versoed:document.getElementById("sheet").classList.contains("versoed"),
-        status:document.getElementById("status").textContent};})()`);
-  await evaluate(`document.getElementById("verso-turn").click()`);
-  await sleep(1500);
+  const sv2o = await sv2oBackFace({ evaluate, sleep });
   check(
     "SV2o a Draw taken while resting on the verso changes the visible back face whole: ghost and track from the same draw, never a bare new ghost (#174/#366)",
     !!sv2o.atSwap &&

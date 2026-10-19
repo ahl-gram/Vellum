@@ -12,6 +12,15 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("T6b", () => t6bLandsSettled(ctx));
 }
 
+async function t1BaseDraw({ evaluate }: Pick<SuiteContext, "evaluate">): Promise<void> {
+  await evaluate(`(()=>{
+      const chk=document.getElementById("ages");if(chk.checked){chk.checked=false;chk.dispatchEvent(new Event("change",{bubbles:true}));}
+      document.getElementById("seed").value="42";document.getElementById("style").value="antique";
+      document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("arms").checked=false;
+      document.getElementById("draw").click();
+    })()`);
+}
+
 async function t1StyleTurns({
   evaluate,
   check,
@@ -20,12 +29,7 @@ async function t1StyleTurns({
   waitTurned,
   armTurnWatch,
 }: SuiteContext): Promise<void> {
-  await evaluate(`(()=>{
-      const chk=document.getElementById("ages");if(chk.checked){chk.checked=false;chk.dispatchEvent(new Event("change",{bubbles:true}));}
-      document.getElementById("seed").value="42";document.getElementById("style").value="antique";
-      document.getElementById("theme").value="";document.getElementById("type").value="";document.getElementById("arms").checked=false;
-      document.getElementById("draw").click();
-    })()`);
+  await t1BaseDraw({ evaluate });
   await waitSettled("turn-base");
   const gPlaces = await evaluate<number>(
     `window.__vellumRunInline({kind:"draw",seed:42,overrides:{},render:{style:"antique",widthPx:1500,legend:true}}).manifest.places.length`,

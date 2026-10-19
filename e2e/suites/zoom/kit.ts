@@ -3,6 +3,29 @@ import type { Ring } from "./reads.ts";
 
 export type ZoomKit = ReturnType<typeof zoomKit>;
 
+function zoomInsetView({ evaluate }: Pick<SuiteContext, "evaluate">) {
+  const insetView = () =>
+    evaluate<{
+      worldMounted: boolean;
+      insets: number;
+      stamped: boolean;
+      insetLeft: number;
+      insetW: number;
+      hits: number;
+      zx: number;
+      zy: number;
+      zk: number;
+      caption: string;
+    }>(
+      `(()=>{const world=document.querySelector("#map > svg");const inset=document.querySelector("#map .region-inset");` +
+        `const isvg=inset?inset.querySelector("svg"):null;const z=window.__vellumZoomState();` +
+        `return{worldMounted:!!world&&!world.hasAttribute("data-vellum-region-u0"),insets:document.querySelectorAll("#map .region-inset").length,` +
+        `stamped:!!isvg&&isvg.hasAttribute("data-vellum-region-u0"),insetLeft:inset?parseFloat(inset.style.left):-1,insetW:inset?parseFloat(inset.style.width):-1,` +
+        `hits:document.querySelectorAll("#map .place-hit").length,zx:z.x,zy:z.y,zk:z.k,caption:document.getElementById("caption").textContent||""};})()`,
+    );
+  return { insetView };
+}
+
 export function zoomKit(ctx: SuiteContext) {
   const { evaluate, sleep } = ctx;
   // Fixed sleeps only outlasted the Issue #300 deferred ink because a CDP evaluate sent mid-build queues behind the blocked main thread; wait for the ink itself.
@@ -47,24 +70,6 @@ export function zoomKit(ctx: SuiteContext) {
     evaluate<number>(
       `(()=>{const m=(document.getElementById("caption").textContent||"").match(/drawn in (\\d+)ms/);return m?+m[1]:-1;})()`,
     );
-  const insetView = () =>
-    evaluate<{
-      worldMounted: boolean;
-      insets: number;
-      stamped: boolean;
-      insetLeft: number;
-      insetW: number;
-      hits: number;
-      zx: number;
-      zy: number;
-      zk: number;
-      caption: string;
-    }>(
-      `(()=>{const world=document.querySelector("#map > svg");const inset=document.querySelector("#map .region-inset");` +
-        `const isvg=inset?inset.querySelector("svg"):null;const z=window.__vellumZoomState();` +
-        `return{worldMounted:!!world&&!world.hasAttribute("data-vellum-region-u0"),insets:document.querySelectorAll("#map .region-inset").length,` +
-        `stamped:!!isvg&&isvg.hasAttribute("data-vellum-region-u0"),insetLeft:inset?parseFloat(inset.style.left):-1,insetW:inset?parseFloat(inset.style.width):-1,` +
-        `hits:document.querySelectorAll("#map .place-hit").length,zx:z.x,zy:z.y,zk:z.k,caption:document.getElementById("caption").textContent||""};})()`,
-    );
+  const { insetView } = zoomInsetView({ evaluate });
   return { ...ctx, waitInked, readRing, rgn, goHome, enterAt, waitRedraft, captionMs, insetView };
 }

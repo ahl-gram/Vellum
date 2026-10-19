@@ -53,15 +53,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
   await step("R17", () => r17SheetDepth(ctx));
 }
 
-export async function r0ToR4Worker({ evaluate, check, waitReady }: SuiteContext): Promise<void> {
-  check("R0 page loaded + initial auto-draw rendered", await waitReady());
-  const r0b = await evaluate<{ seed: string; expected: string }>(
-    `(async()=>{const {seedForDate}=await import("./engine/world/seed-of-the-day.js");return{seed:document.getElementById("seed").value,expected:String(seedForDate(new Date()))};})()`,
-    true,
-  );
-  check("R0b bare Explorer visit lands on today's seed-of-the-day", r0b.seed === r0b.expected, JSON.stringify(r0b));
-  check("R1 worker active (no silent fallback)", await evaluate<boolean>(`window.__vellumUsesWorker()===true`));
-
+async function r2WorkerParity({ evaluate, check }: Pick<SuiteContext, "evaluate" | "check">): Promise<void> {
   // The survey land mask is compared byte-wise, never JSON.stringify (a Uint8Array stringifies to an object literal with one key per cell); integer compares are immune to the transcendental drift that forces R4's tolerance.
   const a2 = await evaluate<{
     svg: boolean;
@@ -99,6 +91,18 @@ export async function r0ToR4Worker({ evaluate, check, waitReady }: SuiteContext)
     Number.isInteger(a2.gx),
     `places[0].gx=${a2.gx}`,
   );
+}
+
+export async function r0ToR4Worker({ evaluate, check, waitReady }: SuiteContext): Promise<void> {
+  check("R0 page loaded + initial auto-draw rendered", await waitReady());
+  const r0b = await evaluate<{ seed: string; expected: string }>(
+    `(async()=>{const {seedForDate}=await import("./engine/world/seed-of-the-day.js");return{seed:document.getElementById("seed").value,expected:String(seedForDate(new Date()))};})()`,
+    true,
+  );
+  check("R0b bare Explorer visit lands on today's seed-of-the-day", r0b.seed === r0b.expected, JSON.stringify(r0b));
+  check("R1 worker active (no silent fallback)", await evaluate<boolean>(`window.__vellumUsesWorker()===true`));
+
+  await r2WorkerParity({ evaluate, check });
 
   const a3 = await evaluate<{ eq: boolean; themes: number; regions: number; gaz: number }>(
     `(async()=>{const m={kind:"atlas",seed:42,overrides:{},width:1500};const j=await window.__vellumRunJob(m);const i=await window.__vellumRunInline(m);return{eq:JSON.stringify(j.atlas)===JSON.stringify(i.atlas),themes:j.atlas.themes.length,regions:j.atlas.regions.length,gaz:j.atlas.gazetteerHtml.length};})()`,

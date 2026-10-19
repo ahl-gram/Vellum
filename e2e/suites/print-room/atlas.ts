@@ -2,7 +2,11 @@ import type { Payload, SuiteContext } from "../../types.ts";
 import { atlasHeadMarkup } from "../../../src/site/print-room/atlas-head-markup.ts";
 import type { Matter } from "./reads.ts";
 
-export async function pr20Bind({ evaluate, check, sleep }: SuiteContext): Promise<void> {
+async function pr20aBindReady({
+  evaluate,
+  check,
+  sleep,
+}: Pick<SuiteContext, "evaluate" | "check" | "sleep">): Promise<void> {
   await evaluate(
     `(()=>{const s=document.getElementById("pr-seed");s.value="42";document.getElementById("pr-style").value="antique";document.getElementById("pr-draw").click();})()`,
   );
@@ -21,7 +25,9 @@ export async function pr20Bind({ evaluate, check, sleep }: SuiteContext): Promis
     await sleep(50);
   }
   check("PR20a the Bind button enables once a proof is on the desk", bindReady);
+}
 
+async function pr20Bound({ evaluate, sleep }: Pick<SuiteContext, "evaluate" | "sleep">) {
   await evaluate(`document.getElementById("pr-bind").click()`);
   let bound = null;
   for (let i = 0; i < 300; i++) {
@@ -60,6 +66,13 @@ export async function pr20Bind({ evaluate, check, sleep }: SuiteContext): Promis
     }
     await sleep(50);
   }
+  return bound;
+}
+
+export async function pr20Bind({ evaluate, check, sleep }: SuiteContext): Promise<void> {
+  await pr20aBindReady({ evaluate, check, sleep });
+
+  const bound = await pr20Bound({ evaluate, sleep });
   check(
     "PR20 Bind composes the atlas into the hidden document (every plate loads, off screen) and turns it onto the sheet: the hero on the sheet, a thumbnail per plate, delivery enabled (the #494 ruling)",
     !!bound &&
@@ -103,7 +116,7 @@ export async function pr20Bind({ evaluate, check, sleep }: SuiteContext): Promis
   );
 }
 
-export async function pr31Turns({ evaluate, check }: SuiteContext): Promise<void> {
+async function pr31ThumbTurns({ evaluate, check }: Pick<SuiteContext, "evaluate" | "check">): Promise<void> {
   const turned = await evaluate<{
     ratio: number;
     src: string;
@@ -127,6 +140,10 @@ export async function pr31Turns({ evaluate, check }: SuiteContext): Promise<void
       /^plate viii of the bound atlas · the prospect of /.test(turned.line),
     JSON.stringify(turned),
   );
+}
+
+export async function pr31Turns({ evaluate, check }: SuiteContext): Promise<void> {
+  await pr31ThumbTurns({ evaluate, check });
   const back = await evaluate<{
     ratio: number;
     here: string | undefined;
@@ -157,6 +174,21 @@ export async function pr31Turns({ evaluate, check }: SuiteContext): Promise<void
       second.here === "theme-climate" &&
       second.line === "plate iv of the bound atlas · a thematic survey of temperature",
     JSON.stringify(second),
+  );
+}
+
+async function pr33bBanners({ evaluate, check }: Pick<SuiteContext, "evaluate" | "check">): Promise<void> {
+  const banners = await evaluate<{ on: string | undefined; line: string; arms: number; counted: string } | null>(
+    `(()=>{const b=document.querySelector('#pr-contents .turn[data-plate="banners"]');if(!b)return null;b.click();const inner=document.getElementById("pr-page-inner");return{on:(document.querySelector("#pr-contents li.on .cr-num")||{}).textContent,line:document.getElementById("pr-plate-line").textContent,arms:inner.querySelectorAll(".banner").length,counted:(document.querySelector('#pr-contents li.on .n')||{textContent:""}).textContent};})()`,
+  );
+  check(
+    "PR33b the banners turn too: the page carries every realm's arms and its row's count agrees",
+    !!banners &&
+      banners.on === "ix" &&
+      /^plate ix of the bound atlas · the banners of every realm$/.test(banners.line) &&
+      banners.arms > 0 &&
+      banners.counted.includes(banners.arms + " arms"),
+    JSON.stringify(banners),
   );
 }
 
@@ -202,18 +234,7 @@ export async function pr33BackMatter({ evaluate, check, shoot, sleep }: SuiteCon
 
   await shoot("print-room-backmatter.png");
 
-  const banners = await evaluate<{ on: string | undefined; line: string; arms: number; counted: string } | null>(
-    `(()=>{const b=document.querySelector('#pr-contents .turn[data-plate="banners"]');if(!b)return null;b.click();const inner=document.getElementById("pr-page-inner");return{on:(document.querySelector("#pr-contents li.on .cr-num")||{}).textContent,line:document.getElementById("pr-plate-line").textContent,arms:inner.querySelectorAll(".banner").length,counted:(document.querySelector('#pr-contents li.on .n')||{textContent:""}).textContent};})()`,
-  );
-  check(
-    "PR33b the banners turn too: the page carries every realm's arms and its row's count agrees",
-    !!banners &&
-      banners.on === "ix" &&
-      /^plate ix of the bound atlas · the banners of every realm$/.test(banners.line) &&
-      banners.arms > 0 &&
-      banners.counted.includes(banners.arms + " arms"),
-    JSON.stringify(banners),
-  );
+  await pr33bBanners({ evaluate, check });
 }
 
 export async function pr34Leaned({ evaluate, check, sleep }: SuiteContext): Promise<void> {

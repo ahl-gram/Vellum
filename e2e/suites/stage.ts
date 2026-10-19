@@ -2,9 +2,10 @@
 import { makeStep } from "../support/step.ts";
 import { onFixedDay } from "../support/fixed-day.ts";
 import type { SuiteContext } from "../types.ts";
+import { eaDesk } from "./stage/desk.ts";
 import { ea6Upright, ea7Scrolled, ea8Pinched, ea9Paper } from "./stage/frame.ts";
 import { na4Lean, ns1Soft } from "./stage/short.ts";
-import { DESK, ea1Phone, ea4Reads, ea5Lift, eaDesk } from "./stage/stage.ts";
+import { DESK, ea1Phone, ea4Reads, ea5Lift } from "./stage/stage.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
   const step = makeStep(ctx);

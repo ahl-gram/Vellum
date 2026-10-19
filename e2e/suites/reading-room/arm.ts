@@ -37,6 +37,21 @@ export async function rr23Usurped({ evaluate, send, check, sleep, boot, PORT }: 
   );
 }
 
+async function rr24Poke({ evaluate }: Pick<ReadingRoomKit, "evaluate">) {
+  const poked = await evaluate<{ before: Ages | null; after: Ages | null; play: string }>(`(()=>{
+    const before=window.__vellumReadingRoomAges();
+    document.querySelector(".rf-play").click();
+    const r=document.querySelector(".rf-range");
+    r.value=r.max||"50";
+    r.dispatchEvent(new Event("input",{bubbles:true}));
+    r.dispatchEvent(new Event("change",{bubbles:true}));
+    document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}));
+    document.dispatchEvent(new MouseEvent("click",{bubbles:true}));
+    return{before,after:window.__vellumReadingRoomAges(),play:document.querySelector(".rf-play").textContent};
+  })()`);
+  return poked;
+}
+
 export async function rr24BeforeArm({
   evaluate,
   send,
@@ -63,17 +78,7 @@ export async function rr24BeforeArm({
     if (unarmed) break;
     await sleep(25);
   }
-  const poked = await evaluate<{ before: Ages | null; after: Ages | null; play: string }>(`(()=>{
-    const before=window.__vellumReadingRoomAges();
-    document.querySelector(".rf-play").click();
-    const r=document.querySelector(".rf-range");
-    r.value=r.max||"50";
-    r.dispatchEvent(new Event("input",{bubbles:true}));
-    r.dispatchEvent(new Event("change",{bubbles:true}));
-    document.dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true}));
-    document.dispatchEvent(new MouseEvent("click",{bubbles:true}));
-    return{before,after:window.__vellumReadingRoomAges(),play:document.querySelector(".rf-play").textContent};
-  })()`);
+  const poked = await rr24Poke({ evaluate });
   const pokeSettled = await settled();
   const pokeRead = await evaluate(agesRead);
   check(

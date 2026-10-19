@@ -70,40 +70,7 @@ async function rb5PressedPlate({ check, svgOf }: RibbonKit): Promise<string> {
   return svg1;
 }
 
-async function rb5bTheSlip({ evaluate, check, sleep }: RibbonKit, first: Ribbon): Promise<void> {
-  const rows = await evaluate<{ first: Row | null; last: Row | null; buttons: boolean }>(
-    `(()=>{const lis=[...document.querySelectorAll("#rb-itinerary li")];const read=(li)=>({cls:li.className,num:(li.querySelector(".cr-num")||{}).textContent,strong:(li.querySelector("strong")||{}).textContent||null,em:(li.querySelector("em")||{}).textContent||null,button:!!li.querySelector("button.lean")});return{first:lis.length?read(lis[0]):null,last:lis.length?read(lis[lis.length-1]):null,buttons:lis.every((li)=>!!li.querySelector("button.lean"))};})()`,
-  );
-  check(
-    "RB5b the itinerary fills the slip: one row per event, the departure first as the capital at 0 leagues, the arrival last, every row a lean button; the slip's head names the journey",
-    first.rows === first.stRows &&
-      first.rows >= 4 &&
-      rows.first &&
-      rows.first.cls === "waypoint" &&
-      rows.first.num === "0" &&
-      rows.first.strong === "Laukuwelua" &&
-      rows.first.em === "the capital" &&
-      rows.last &&
-      rows.last.cls === "waypoint" &&
-      rows.last.strong === first.toName &&
-      rows.buttons &&
-      first.slipTitle === `Laukuwelua to ${first.toName}` &&
-      /^\d+ leagues · in .+ · An\. \d+$/.test(first.where!),
-    JSON.stringify({
-      rows: first.rows,
-      stRows: first.stRows,
-      first: rows.first,
-      last: rows.last,
-      slipTitle: first.slipTitle,
-      where: first.where,
-      toName: first.toName,
-    }),
-  );
-  check(
-    "RB5e setting out from offers only places a road leaves: seed 42's orphan Tewetulua (24) is not among them (#494)",
-    first.fromOptions.length === 25 && !first.fromOptions.includes(24) && first.fromOptions.includes(0),
-    JSON.stringify({ count: first.fromOptions.length, has24: first.fromOptions.includes(24) }),
-  );
+async function rb5cLeans({ evaluate, check, sleep }: Pick<RibbonKit, "evaluate" | "check" | "sleep">): Promise<void> {
   await evaluate(`document.querySelectorAll("#rb-itinerary li .lean")[2].click()`);
   let leaned = null;
   for (let i = 0; i < 60; i++) {
@@ -144,6 +111,9 @@ async function rb5bTheSlip({ evaluate, check, sleep }: RibbonKit, first: Ribbon)
     if (home) break;
     await sleep(50);
   }
+}
+
+function rb5dRoadsOut({ check }: Pick<RibbonKit, "check">, first: Ribbon): void {
   check(
     "RB5d the roads out: the Explorer sheds the journey's keys, the Prospect takes the same world with the road's end as its town (#494 ruling 3)",
     first.chart === "/explorer/#seed=42" &&
@@ -157,6 +127,44 @@ async function rb5bTheSlip({ evaluate, check, sleep }: RibbonKit, first: Ribbon)
       shown: first.prospectShown,
     }),
   );
+}
+
+async function rb5bTheSlip({ evaluate, check, sleep }: RibbonKit, first: Ribbon): Promise<void> {
+  const rows = await evaluate<{ first: Row | null; last: Row | null; buttons: boolean }>(
+    `(()=>{const lis=[...document.querySelectorAll("#rb-itinerary li")];const read=(li)=>({cls:li.className,num:(li.querySelector(".cr-num")||{}).textContent,strong:(li.querySelector("strong")||{}).textContent||null,em:(li.querySelector("em")||{}).textContent||null,button:!!li.querySelector("button.lean")});return{first:lis.length?read(lis[0]):null,last:lis.length?read(lis[lis.length-1]):null,buttons:lis.every((li)=>!!li.querySelector("button.lean"))};})()`,
+  );
+  check(
+    "RB5b the itinerary fills the slip: one row per event, the departure first as the capital at 0 leagues, the arrival last, every row a lean button; the slip's head names the journey",
+    first.rows === first.stRows &&
+      first.rows >= 4 &&
+      rows.first &&
+      rows.first.cls === "waypoint" &&
+      rows.first.num === "0" &&
+      rows.first.strong === "Laukuwelua" &&
+      rows.first.em === "the capital" &&
+      rows.last &&
+      rows.last.cls === "waypoint" &&
+      rows.last.strong === first.toName &&
+      rows.buttons &&
+      first.slipTitle === `Laukuwelua to ${first.toName}` &&
+      /^\d+ leagues · in .+ · An\. \d+$/.test(first.where!),
+    JSON.stringify({
+      rows: first.rows,
+      stRows: first.stRows,
+      first: rows.first,
+      last: rows.last,
+      slipTitle: first.slipTitle,
+      where: first.where,
+      toName: first.toName,
+    }),
+  );
+  check(
+    "RB5e setting out from offers only places a road leaves: seed 42's orphan Tewetulua (24) is not among them (#494)",
+    first.fromOptions.length === 25 && !first.fromOptions.includes(24) && first.fromOptions.includes(0),
+    JSON.stringify({ count: first.fromOptions.length, has24: first.fromOptions.includes(24) }),
+  );
+  await rb5cLeans({ evaluate, check, sleep });
+  rb5dRoadsOut({ check }, first);
 }
 
 async function rb6PickedDestination({ evaluate, check, sleep, state }: RibbonKit): Promise<void> {
