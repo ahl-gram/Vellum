@@ -9,7 +9,8 @@ import type { Surroundings } from "../surroundings.ts";
 import { viewRight, type ProspectView } from "../transect.ts";
 import { createLettering, runBox, type Lettering } from "../letter/letter.ts";
 import { engraver, type Engraver } from "./burin.ts";
-import { LIFT, RISE_BOTTOM, picture, skylineOf, type Box, type Picture } from "./rise.ts";
+import { LIFT, RISE_BOTTOM, skylineOf, type Box } from "./rise.ts";
+import { picture, type Picture } from "./rise-picture.ts";
 import {
   banderole,
   cardinalWords,
