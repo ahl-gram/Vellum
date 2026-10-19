@@ -22,20 +22,51 @@ function key(x: number, y: number): string {
   return `${Math.round(x * 1e6)},${Math.round(y * 1e6)}`;
 }
 
-function cellSegments(
-  x: number,
-  y: number,
-  corners: readonly [number, number, number, number],
+function saddleSegments(
   idx: number,
+  top: Point,
+  right: Point,
+  bottom: Point,
+  left: Point,
+  corners: readonly [number, number, number, number],
   iso: number,
 ): Seg[] {
   const [a, b, c, d] = corners;
   const segs: Seg[] = [];
 
-  const top: Point = [x + crossT(a, b, iso), y];
-  const right: Point = [x + 1, y + crossT(b, c, iso)];
-  const bottom: Point = [x + crossT(d, c, iso), y + 1];
-  const left: Point = [x, y + crossT(a, d, iso)];
+  const add = (p: Point, q: Point): void => {
+    segs.push([p[0], p[1], q[0], q[1]]);
+  };
+
+  switch (idx) {
+    case 5: {
+      const center = (a + b + c + d) / 4;
+      if (center > iso) {
+        add(top, left);
+        add(bottom, right);
+      } else {
+        add(top, right);
+        add(bottom, left);
+      }
+      break;
+    }
+    case 10: {
+      const center = (a + b + c + d) / 4;
+      if (center > iso) {
+        add(right, top);
+        add(left, bottom);
+      } else {
+        add(left, top);
+        add(right, bottom);
+      }
+      break;
+    }
+  }
+  return segs;
+}
+
+function singleSegment(idx: number, top: Point, right: Point, bottom: Point, left: Point): Seg[] {
+  const segs: Seg[] = [];
 
   const add = (p: Point, q: Point): void => {
     segs.push([p[0], p[1], q[0], q[1]]);
@@ -54,17 +85,6 @@ function cellSegments(
     case 4:
       add(top, right);
       break;
-    case 5: {
-      const center = (a + b + c + d) / 4;
-      if (center > iso) {
-        add(top, left);
-        add(bottom, right);
-      } else {
-        add(top, right);
-        add(bottom, left);
-      }
-      break;
-    }
     case 6:
       add(top, bottom);
       break;
@@ -77,17 +97,6 @@ function cellSegments(
     case 9:
       add(bottom, top);
       break;
-    case 10: {
-      const center = (a + b + c + d) / 4;
-      if (center > iso) {
-        add(right, top);
-        add(left, bottom);
-      } else {
-        add(left, top);
-        add(right, bottom);
-      }
-      break;
-    }
     case 11:
       add(right, top);
       break;
@@ -102,6 +111,25 @@ function cellSegments(
       break;
   }
   return segs;
+}
+
+function cellSegments(
+  x: number,
+  y: number,
+  corners: readonly [number, number, number, number],
+  idx: number,
+  iso: number,
+): Seg[] {
+  const [a, b, c, d] = corners;
+
+  const top: Point = [x + crossT(a, b, iso), y];
+  const right: Point = [x + 1, y + crossT(b, c, iso)];
+  const bottom: Point = [x + crossT(d, c, iso), y + 1];
+  const left: Point = [x, y + crossT(a, d, iso)];
+
+  return idx === 5 || idx === 10
+    ? saddleSegments(idx, top, right, bottom, left, corners, iso)
+    : singleSegment(idx, top, right, bottom, left);
 }
 
 export function marchingSquares(field: Field, iso: number): Contour[] {
