@@ -1049,7 +1049,9 @@ const NOTICES: Record<string, Notices> = {
 const noticesShape = (n: Notices): RegExp =>
   new RegExp(
     literal("</div>") +
-      (n.pill ? `${literal(`<p class="status" id="${n.pill}" role="status" aria-live="polite">`)}${n.opens === undefined ? "[^<]*" : literal(n.opens)}</p>` : "") +
+      (n.pill
+        ? `${literal(`<p class="status" id="${n.pill}" role="status" aria-live="polite">`)}${n.opens === undefined ? "[^<]*" : literal(n.opens)}</p>`
+        : "") +
       (n.warning ? `${literal(`<p id="${n.warning}" class="warning" hidden>`)}[^<]+</p>` : "") +
       (n.noscript ? `${literal('<noscript><p class="status">')}${FILLED_P}</noscript>` : "") +
       `${literal("</div>")}$`,
