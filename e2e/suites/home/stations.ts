@@ -6,29 +6,31 @@ import type { HomeKit } from "./kit.ts";
 
 type Flight = Awaited<ReturnType<typeof h14aFlight>>;
 
+type Visited = {
+  scale: number;
+  fit: number;
+  anchorX: number;
+  anchorY: number;
+  stageW: number;
+  stageH: number;
+  open: boolean;
+  contained: boolean;
+  anchorClear: boolean;
+  enterReach: boolean;
+  closeReach: boolean;
+  controlsReach: boolean;
+  title: string | null;
+  enter: string | null;
+  arms: number;
+};
+
 export async function h14aFlight({ evaluate, sleep, clickAt }: HomeKit) {
   const atlasPt = await evaluate(buttonPoint('.lf-station[data-station="atlas"]'));
   if (atlasPt !== null) await clickAt(Math.round(atlasPt.x), Math.round(atlasPt.y));
   let visited = null;
   for (let i = 0; i < 80; i++) {
     try {
-      visited = await evaluate<{
-        scale: number;
-        fit: number;
-        anchorX: number;
-        anchorY: number;
-        stageW: number;
-        stageH: number;
-        open: boolean;
-        contained: boolean;
-        anchorClear: boolean;
-        enterReach: boolean;
-        closeReach: boolean;
-        controlsReach: boolean;
-        title: string | null;
-        enter: string | null;
-        arms: number;
-      } | null>(`(() => {
+      visited = await evaluate<Visited | null>(`(() => {
         const stage = document.getElementById("lf-stage");
         const sheet = document.getElementById("lf-sheet");
         const btn = document.querySelector('.lf-station[data-station="atlas"]');

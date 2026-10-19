@@ -3,33 +3,16 @@ import { nearRgba, PAGE_RGBA, SHADE, type Rgba } from "../../support/pixel.ts";
 import type { Payload } from "../../types.ts";
 import { park, tabInto, type DragKit, type DrawerKit } from "./kit.ts";
 import { CARRY, DURATION, atRest, sameCam } from "./reads.ts";
+import type { Carry } from "./reads.ts";
 
-export async function cd45SnapBack({
-  evaluate,
-  check,
-  settle,
-  clickAt,
-  press,
-  moveTo,
-  release,
-  carry,
-  shutAndFold,
-}: DragKit): Promise<void> {
-  await evaluate(`document.querySelector("#cuttings .off").click()`);
-  await shutAndFold("chart-drawer-snap-folded");
-  const before = await settle(CARRY, atRest, "chart-drawer-carry-shut-rest");
-  const { from, mid, to } = await carry({ x: 640, y: 300 });
-  await release(to.x, to.y);
-  const snapped = await settle(CARRY, atRest, "chart-drawer-snapped");
-  await press(from.x, from.y);
-  await moveTo(from, { x: from.x - 10, y: from.y + 10 }, 4);
-  await moveTo({ x: from.x - 10, y: from.y + 10 }, from, 4);
-  await release(from.x, from.y);
-  const jiggled = await settle(CARRY, atRest, "chart-drawer-jiggled");
-  await clickAt(from.x, from.y);
-  const clicked = await settle(CARRY, (d, last) => d.cuttings === 1 && atRest(d, last), "chart-drawer-plain-click");
-  await evaluate(`document.querySelector("#cuttings .off").click()`);
-  await shutAndFold("chart-drawer-after-snap-folded");
+function cd45FilesNothing(
+  check: DragKit["check"],
+  before: Carry,
+  mid: Carry,
+  snapped: Carry,
+  jiggled: Carry,
+  clicked: Carry,
+): void {
   check(
     "CD45 a carry released over the chart files nothing: the ghost rode the pointer with the drawer still SHUT (D4: it opens only as the sheet enters the band), then snapped back and is gone, the table is bare and the address carries no key, the drawer is back as it was and the camera is at rest where it was; a jiggle released back on the ear files nothing either, since the click that follows a drag is swallowed; and a plain click straight after still files, so the swallow is scoped to its own gesture and never eats the next honest click (Issue #523, ruled 2026-09-21)",
     before.cuttings === 0 &&
@@ -66,6 +49,35 @@ export async function cd45SnapBack({
       clicked: { cuttings: clicked.cuttings, open: clicked.open },
     }),
   );
+}
+
+export async function cd45SnapBack({
+  evaluate,
+  check,
+  settle,
+  clickAt,
+  press,
+  moveTo,
+  release,
+  carry,
+  shutAndFold,
+}: DragKit): Promise<void> {
+  await evaluate(`document.querySelector("#cuttings .off").click()`);
+  await shutAndFold("chart-drawer-snap-folded");
+  const before = await settle(CARRY, atRest, "chart-drawer-carry-shut-rest");
+  const { from, mid, to } = await carry({ x: 640, y: 300 });
+  await release(to.x, to.y);
+  const snapped = await settle(CARRY, atRest, "chart-drawer-snapped");
+  await press(from.x, from.y);
+  await moveTo(from, { x: from.x - 10, y: from.y + 10 }, 4);
+  await moveTo({ x: from.x - 10, y: from.y + 10 }, from, 4);
+  await release(from.x, from.y);
+  const jiggled = await settle(CARRY, atRest, "chart-drawer-jiggled");
+  await clickAt(from.x, from.y);
+  const clicked = await settle(CARRY, (d, last) => d.cuttings === 1 && atRest(d, last), "chart-drawer-plain-click");
+  await evaluate(`document.querySelector("#cuttings .off").click()`);
+  await shutAndFold("chart-drawer-after-snap-folded");
+  cd45FilesNothing(check, before, mid, snapped, jiggled, clicked);
 }
 
 export async function cd46ReducedCarry({

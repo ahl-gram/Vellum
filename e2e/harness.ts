@@ -308,20 +308,16 @@ function onCdpMessage(ev: MessageEvent, consoleErrors: string[], http4xx: string
   }
 }
 
-// results/consoleErrors/http4xx/skippedGroups/skippedChecks are pushed to BY REFERENCE (the ws handler, check and makeStep hold them) so the runner's trailing tally sees them.
-export async function start({
+async function openSession({
   browser,
   SITE,
   OUT,
   PORT,
   DPORT,
   PAGE,
-  results,
   consoleErrors,
   http4xx,
-  skippedGroups,
-  skippedChecks,
-}: StartOptions): Promise<SuiteContext> {
+}: Omit<StartOptions, "results" | "skippedGroups" | "skippedChecks">): Promise<void> {
   OUT_DIR = OUT;
   await mkdir(OUT, { recursive: true });
   server = await startServer(SITE, PORT);
@@ -344,6 +340,23 @@ export async function start({
     await send("Emulation.setFocusEmulationEnabled", { enabled: true });
   } catch {}
   await send("Page.navigate", { url: PAGE });
+}
+
+// results/consoleErrors/http4xx/skippedGroups/skippedChecks are pushed to BY REFERENCE (the ws handler, check and makeStep hold them) so the runner's trailing tally sees them.
+export async function start({
+  browser,
+  SITE,
+  OUT,
+  PORT,
+  DPORT,
+  PAGE,
+  results,
+  consoleErrors,
+  http4xx,
+  skippedGroups,
+  skippedChecks,
+}: StartOptions): Promise<SuiteContext> {
+  await openSession({ browser, SITE, OUT, PORT, DPORT, PAGE, consoleErrors, http4xx });
   const check = (name: string, ok: unknown, detail = ""): void => {
     results.push({ name, ok: !!ok });
     console.log(`${ok ? "PASS" : "FAIL"}  ${name}${detail ? "  — " + detail : ""}`);

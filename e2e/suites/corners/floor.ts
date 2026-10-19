@@ -52,7 +52,7 @@ const PIECES: Payload<Pieces> = `(() => {
   return { innerW: innerWidth, innerH: innerHeight, sx, over: root.scrollWidth - root.clientWidth, cw: root.clientWidth, pieces, navLines, ready: document.readyState === "complete" && (!document.fonts || document.fonts.status === "loaded") && camera && ${LANDED} };
 })()`;
 
-const size = (ctx: SuiteContext, w: number, h: number): Promise<unknown> =>
+export const size = (ctx: SuiteContext, w: number, h: number): Promise<unknown> =>
   ctx.send("Emulation.setDeviceMetricsOverride", { width: w, height: h, deviceScaleFactor: 1, mobile: false });
 
 async function still(ctx: SuiteContext, page: string, w: number, h: number, label: string): Promise<Pieces> {
@@ -67,7 +67,7 @@ async function still(ctx: SuiteContext, page: string, w: number, h: number, labe
 }
 
 // A read that lands between documents is taken again (lane C on PR #795 caught one with no document element).
-async function load(ctx: SuiteContext, page: string, w: number, h: number): Promise<void> {
+export async function load(ctx: SuiteContext, page: string, w: number, h: number): Promise<void> {
   await size(ctx, w, h);
   await ctx.send("Page.navigate", { url: "about:blank" });
   await ctx.send("Page.navigate", { url: `http://127.0.0.1:${ctx.PORT}${page}` });
@@ -363,46 +363,6 @@ export async function fl5KeyboardDrawer(ctx: SuiteContext): Promise<void> {
   }
   ctx.check(
     "FL5 the Chart Table opened by the keyboard, with motion on, takes the focus to its shut press and leaves the room where it stood: the body does not scroll and the stage keeps the page's corner, at 1280 and at 640 (Issue #762: a staged room's body clips rather than hides, so it is no scroll container under the floor's containment)",
-    faults.length === 0,
-    `${rows.join(" | ")}${faults.length ? `; ${faults.join("; ")}` : ""}`,
-  );
-}
-
-// Paper is narrower than 900, so main's narrow blocks dressed it by accident; with them gone each room says what paper drops itself (the step 11 plate read on Issue #762 pull request C, real PDFs at Letter).
-const PRINTED: Payload<{ tab: string | null; shadow: string | null; pad: number | null }> =
-  `(() => { const t = document.getElementById("chart-drawer-tab"), s = document.querySelector("#sheet"), p = document.querySelector("main .sheet"); return { tab: t ? getComputedStyle(t).display : null, shadow: s ? getComputedStyle(s).boxShadow : null, pad: p ? parseFloat(getComputedStyle(p).paddingLeft) : null }; })()`;
-
-export async function fl6Paper(ctx: SuiteContext): Promise<void> {
-  await ctx.setTouch(false);
-  const faults: string[] = [];
-  const rows: string[] = [];
-  for (const page of ["/explorer/", "/explorer/portfolio/", "/faq/", "/glossary/"]) {
-    await load(ctx, page, 640, 800);
-    const screen = await ctx.evaluate(PRINTED);
-    await size(ctx, 816, 1056);
-    await ctx.send("Emulation.setEmulatedMedia", { media: "print" });
-    const paper = await ctx.evaluate(PRINTED).finally(() =>
-      ctx.send("Emulation.setEmulatedMedia", {
-        media: "",
-        features: [{ name: "prefers-reduced-motion", value: "reduce" }],
-      }),
-    );
-    if (page === "/explorer/" && (paper.tab !== "none" || screen.tab === "none"))
-      faults.push(`the Explorer's drawer tab reads ${screen.tab} on screen and ${paper.tab} on paper`);
-    if (page === "/explorer/portfolio/" && (paper.shadow !== "none" || screen.shadow === "none"))
-      faults.push(`the Portfolio's sheet casts ${screen.shadow} on screen and ${paper.shadow} on paper`);
-    if (
-      (page === "/faq/" || page === "/glossary/") &&
-      (paper.pad === null ||
-        Math.abs(paper.pad - 816 * 0.04) > 0.5 ||
-        screen.pad === null ||
-        Math.abs(screen.pad - 40.96) > 0.5)
-    )
-      faults.push(`${page} pads its sheet ${screen.pad} on screen at 640 and ${paper.pad} on paper at 816`);
-    rows.push(`${page} screen ${JSON.stringify(screen)} paper ${JSON.stringify(paper)}`);
-  }
-  ctx.check(
-    "FL6 on paper a room drops what main's narrow blocks used to drop for it: the Explorer's drawer tab stands down, the Portfolio's sheet casts no shadow, and the Q & A's and the Glossary's sheet pads by paper's own 4vw (32.6 at Letter), while on screen at 640 the tab shows, the shadow casts and the padding keeps its 1024 floor of 40.96, the same-run controls (Issue #762)",
     faults.length === 0,
     `${rows.join(" | ")}${faults.length ? `; ${faults.join("; ")}` : ""}`,
   );

@@ -143,6 +143,38 @@ export async function l1fScrolledPage({
   );
 }
 
+async function l1gKeyRuns(
+  { check, camNow, pressNav }: Pick<LandfallKit, "check" | "camNow" | "pressNav">,
+  keyScroll: (
+    label: string,
+    setupY: number,
+    fire: () => Promise<void>,
+    moved: (y: number, y0: number) => boolean,
+  ) => Promise<void>,
+  keyRuns: readonly { label: string; y0: number; y: number; ok: boolean }[],
+  keyCamBefore: Awaited<ReturnType<LandfallKit["camNow"]>>,
+): Promise<void> {
+  await keyScroll("Space", 0, () => pressNav(" ", "Space", 32, " "), down);
+  await keyScroll("PageDown", 0, () => pressNav("PageDown", "PageDown", 34), down);
+  await keyScroll("End", 0, () => pressNav("End", "End", 35), down);
+  await keyScroll(
+    "Home",
+    300,
+    () => pressNav("Home", "Home", 36),
+    (y, y0) => y < y0 && y === 0,
+  );
+  await keyScroll("ArrowDown", 0, () => pressNav("ArrowDown", "ArrowDown", 40), down);
+  const keyCam = await camNow();
+  check(
+    "L1g the keyboard CLASS on the focused stage stays native, never intercepted, whatever the camera state: Space, PgDn, End, Home, and ArrowDown all scroll and the camera never moves (#472 contract; #481 skeptic finding 5)",
+    keyRuns.every((r) => r.ok) &&
+      keyCamBefore !== null &&
+      keyCam !== null &&
+      Math.abs(keyCam.scale / keyCamBefore.scale - 1) < 0.01,
+    JSON.stringify({ keyRuns, keyCamBefore, keyCam }),
+  );
+}
+
 export async function l1gKeys({
   evaluate,
   check,
@@ -182,25 +214,7 @@ export async function l1gKeys({
     }
     keyRuns.push({ label, y0, y: await scrollY(), ok: false });
   };
-  await keyScroll("Space", 0, () => pressNav(" ", "Space", 32, " "), down);
-  await keyScroll("PageDown", 0, () => pressNav("PageDown", "PageDown", 34), down);
-  await keyScroll("End", 0, () => pressNav("End", "End", 35), down);
-  await keyScroll(
-    "Home",
-    300,
-    () => pressNav("Home", "Home", 36),
-    (y, y0) => y < y0 && y === 0,
-  );
-  await keyScroll("ArrowDown", 0, () => pressNav("ArrowDown", "ArrowDown", 40), down);
-  const keyCam = await camNow();
-  check(
-    "L1g the keyboard CLASS on the focused stage stays native, never intercepted, whatever the camera state: Space, PgDn, End, Home, and ArrowDown all scroll and the camera never moves (#472 contract; #481 skeptic finding 5)",
-    keyRuns.every((r) => r.ok) &&
-      keyCamBefore !== null &&
-      keyCam !== null &&
-      Math.abs(keyCam.scale / keyCamBefore.scale - 1) < 0.01,
-    JSON.stringify({ keyRuns, keyCamBefore, keyCam }),
-  );
+  await l1gKeyRuns({ check, camNow, pressNav }, keyScroll, keyRuns, keyCamBefore);
   await scrollToTop();
 }
 

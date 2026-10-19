@@ -5,6 +5,37 @@ import type { Payload, Point, SuiteContext } from "../../types.ts";
 import type { LandfallKit } from "./kit.ts";
 import { roomy } from "./reads.ts";
 
+async function l9gPipTap({
+  evaluate,
+  check,
+  sleep,
+  touch,
+  pressKey,
+}: Pick<LandfallKit, "evaluate" | "check" | "sleep" | "touch" | "pressKey">): Promise<void> {
+  const tapPt = await evaluate(buttonPoint('.lf-station[data-station="how"]'));
+  if (tapPt !== null) {
+    await touch("touchStart", [{ x: Math.round(tapPt.x), y: Math.round(tapPt.y), id: 0 }]);
+    await touch("touchEnd", []);
+  }
+  let tapped = false;
+  for (let i = 0; i < 60; i++) {
+    try {
+      tapped = await evaluate<boolean>(
+        `(() => { const c = document.getElementById("lf-card-how"); if (!c || c.hidden) return false; const cs = getComputedStyle(c); return cs.visibility !== "hidden" && Number(cs.opacity) > 0.95; })()`,
+      );
+    } catch {}
+    if (tapped === true) break;
+    await sleep(75);
+  }
+  check(
+    "L9g a plain touch tap on the pip still opens its slip: loosening the control guard for gestures never costs the tap",
+    tapPt !== null && tapped === true,
+    JSON.stringify({ tapPt, tapped }),
+  );
+  await pressKey("Escape", "Escape", 27);
+  await sleep(400);
+}
+
 export async function l9fPipGestures({
   evaluate,
   check,
@@ -48,29 +79,7 @@ export async function l9fPipGestures({
       cardStayed === true,
     JSON.stringify({ pipPt9, room9f, onPipBefore, onPipAfter, cardStayed }),
   );
-
-  const tapPt = await evaluate(buttonPoint('.lf-station[data-station="how"]'));
-  if (tapPt !== null) {
-    await touch("touchStart", [{ x: Math.round(tapPt.x), y: Math.round(tapPt.y), id: 0 }]);
-    await touch("touchEnd", []);
-  }
-  let tapped = false;
-  for (let i = 0; i < 60; i++) {
-    try {
-      tapped = await evaluate<boolean>(
-        `(() => { const c = document.getElementById("lf-card-how"); if (!c || c.hidden) return false; const cs = getComputedStyle(c); return cs.visibility !== "hidden" && Number(cs.opacity) > 0.95; })()`,
-      );
-    } catch {}
-    if (tapped === true) break;
-    await sleep(75);
-  }
-  check(
-    "L9g a plain touch tap on the pip still opens its slip: loosening the control guard for gestures never costs the tap",
-    tapPt !== null && tapped === true,
-    JSON.stringify({ tapPt, tapped }),
-  );
-  await pressKey("Escape", "Escape", 27);
-  await sleep(400);
+  await l9gPipTap({ evaluate, check, sleep, touch, pressKey });
 }
 
 export async function l9hControlTap({ evaluate, check, sleep, touch, camNow, recenter }: LandfallKit): Promise<void> {

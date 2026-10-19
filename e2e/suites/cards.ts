@@ -35,12 +35,12 @@ import {
   p9Grace,
   p28Travel,
   p29NearestTown,
-  p30Tablet,
   p31Keyboard,
   p31bFocusSurvivesRefill,
   p32Dismiss,
   p33DragKeepsPin,
 } from "./cards/hold.ts";
+import { p30Tablet } from "./cards/hold-tablet.ts";
 import { p34ButtonLift, p35ProspectLift, p36RaisedTakesHand } from "./cards/gestures.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {

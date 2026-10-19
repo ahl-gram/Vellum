@@ -198,10 +198,7 @@ async function g3ReducedMotion({ evaluate, send, check }: GlassKit): Promise<voi
   await send("Emulation.setEmulatedMedia", { features: [] });
 }
 
-async function g4InksIn({ evaluate, check, shoot, sleep, rgn, enterAt, waitRedraft }: GlassKit): Promise<void> {
-  const before4 = (await rgn()).redrafts;
-  await enterAt(2, 0.5, 0.5);
-  const s4 = await waitRedraft(before4, 1);
+async function g4ReadInk({ evaluate }: Pick<GlassKit, "evaluate">) {
   const g4 = await evaluate<
     | { svg: false }
     | {
@@ -234,6 +231,14 @@ async function g4InksIn({ evaluate, check, shoot, sleep, rgn, enterAt, waitRedra
       dryCount:dry.length,dryNames,dryAllNew,dryTiers:dry.map(g=>g.dataset.tier),
       persistingCount:persisting.length,persistingStill};
   })()`);
+  return g4;
+}
+
+async function g4InksIn({ evaluate, check, shoot, sleep, rgn, enterAt, waitRedraft }: GlassKit): Promise<void> {
+  const before4 = (await rgn()).redrafts;
+  await enterAt(2, 0.5, 0.5);
+  const s4 = await waitRedraft(before4, 1);
+  const g4 = await g4ReadInk({ evaluate });
   check(
     "G4 the redraft inks in: .redrafting + dashed coast at commit; only newly labeled names tagged .dry-in, persisting names untouched (#170 AC1)",
     s4.band === 1 &&

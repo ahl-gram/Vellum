@@ -46,7 +46,7 @@ type Ghost = {
   z: string;
   inMap: boolean;
 };
-type Carry = {
+export type Carry = {
   ghost: Ghost | null;
   drag: boolean;
   open: boolean;
@@ -109,7 +109,7 @@ export type Card = {
   scrollW: number;
   innerW: number;
 };
-type Pp = {
+export type Pp = {
   state: { year: number } | null;
   press: { text: string; dim: boolean; shown: boolean; centre: Point | null; hit: string; disabled: boolean } | null;
   count: string | null;

@@ -1,7 +1,7 @@
 import { roman } from "../../../src/site/explorer/portfolio/folio-lines.ts";
 import type { Payload, SuiteContext } from "../../types.ts";
 import type { DrawerKit } from "./kit.ts";
-import { CARD, DRAWN, DRESS, PP, type Card } from "./reads.ts";
+import { CARD, DRAWN, DRESS, PP, type Card, type Pp } from "./reads.ts";
 
 // The card unfurls as it pins, so a press is clicked only once its box has held still across two reads and its centre hits it (run 37504526032 lost a press clicked at a box read once: the flake record's row).
 export const pressAtRest = (d: Card, last: Card | null): boolean =>
@@ -13,28 +13,10 @@ export const pressAtRest = (d: Card, last: Card | null): boolean =>
   last.press.box.w === d.press.box.w &&
   last.press.box.h === d.press.box.h;
 
-export async function cd25CardPress({ evaluate, check, settle, go, pinCard, pressCard }: DrawerKit): Promise<void> {
-  await go(DRESS);
-  const at = await settle(CARD, (d) => d.hits > 1, "chart-drawer-card");
-  await pinCard(1);
-  const armed = await settle(CARD, (d, last) => d.shown && pressAtRest(d, last), "chart-drawer-card-press");
-  check(
-    "CD25 the place card's two actions stand in ONE row and BOTH answer a real pointer: #place-card is pointer-events: none, so a press that forgets to restore it passes element.click() and is dead to every reader, which is the #520 dog-ear scar exactly (#518 ruling 7)",
-    at.hits > 1 &&
-      armed.shown &&
-      !!armed.press &&
-      armed.press.hit === "self" &&
-      !!armed.link &&
-      armed.link.hit === "self" &&
-      armed.link.inActs &&
-      armed.pressInActs &&
-      armed.actsRow === 2 &&
-      armed.press.text === "Lay the prospect on the table" &&
-      !armed.press.dim &&
-      !armed.press.disabled &&
-      armed.press.idx === "1",
-    JSON.stringify({ hits: at.hits, press: armed.press, link: armed.link, actsRow: armed.actsRow }),
-  );
+async function cd26DrawsPlate(
+  { check, settle, pressCard }: Pick<DrawerKit, "check" | "settle" | "pressCard">,
+  armed: Card,
+): Promise<void> {
   await pressCard(armed);
   const filed = await settle(CARD, (d) => d.cuttings === 1 && d.imgs === 1, "chart-drawer-prospect-drawn", DRAWN);
   check(
@@ -68,6 +50,31 @@ export async function cd25CardPress({ evaluate, check, settle, go, pinCard, pres
       table: filed.hashTable,
     }),
   );
+}
+
+export async function cd25CardPress({ evaluate, check, settle, go, pinCard, pressCard }: DrawerKit): Promise<void> {
+  await go(DRESS);
+  const at = await settle(CARD, (d) => d.hits > 1, "chart-drawer-card");
+  await pinCard(1);
+  const armed = await settle(CARD, (d, last) => d.shown && pressAtRest(d, last), "chart-drawer-card-press");
+  check(
+    "CD25 the place card's two actions stand in ONE row and BOTH answer a real pointer: #place-card is pointer-events: none, so a press that forgets to restore it passes element.click() and is dead to every reader, which is the #520 dog-ear scar exactly (#518 ruling 7)",
+    at.hits > 1 &&
+      armed.shown &&
+      !!armed.press &&
+      armed.press.hit === "self" &&
+      !!armed.link &&
+      armed.link.hit === "self" &&
+      armed.link.inActs &&
+      armed.pressInActs &&
+      armed.actsRow === 2 &&
+      armed.press.text === "Lay the prospect on the table" &&
+      !armed.press.dim &&
+      !armed.press.disabled &&
+      armed.press.idx === "1",
+    JSON.stringify({ hits: at.hits, press: armed.press, link: armed.link, actsRow: armed.actsRow }),
+  );
+  await cd26DrawsPlate({ check, settle, pressCard }, armed);
   // The DRAWN world and not the controls: a seed typed without pressing Draw is the reachable way to file a chart nobody drew.
   await evaluate(`(() => { const s = document.getElementById("seed"); s.value = "7"; })()`);
   await pinCard(2);
@@ -112,6 +119,51 @@ export async function cd27CardAtCap(
   );
 }
 
+async function cd29SecondYear(
+  { evaluate, check, sleep, settle, clickAt }: Pick<DrawerKit, "evaluate" | "check" | "sleep" | "settle" | "clickAt">,
+  one: Pp,
+) {
+  // The same town at a second year: the year IS part of the sheet's identity, which is the case that won "press and stay".
+  // The form is submitted synthetically because the claim here is about the FILING, not about the year control, whose own gesture PB6 already drives.
+  await evaluate(
+    `(() => { const y = document.getElementById("pp-year"); y.value = String(Math.max(1, Number(y.value) - 300)); document.getElementById("pp-year-form").dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })); })()`,
+  );
+  for (let i = 0; i < 300; i++) {
+    await sleep(100);
+    const s = await evaluate<number | null>(
+      `(() => { const st = window.__vellumProspectState(); return st ? st.year : null; })()`,
+    );
+    if (s !== null && s !== one.state!.year) break;
+  }
+  let two = await evaluate(PP);
+  if (two.press && two.press.centre) await clickAt(two.press.centre.x, two.press.centre.y);
+  two = await settle(
+    PP,
+    (d) => typeof d.hashTable === "string" && d.hashTable.split("_").length === 2,
+    "prospect-filed-two",
+  );
+  check(
+    "CD29 the page files and STAYS, writing the gathering into its OWN address so a reload keeps it, and the same town at a second year is a SECOND sheet rather than one deduped away (ruled 2026-09-17; the year rides in the item, which is what lets a reader gather a run of one place across the centuries)",
+    typeof one.hashTable === "string" &&
+      one.hashTable.split("_").length === 1 &&
+      /one sheet laid/.test(one.count || "") &&
+      typeof two.hashTable === "string" &&
+      two.hashTable.split("_").length === 2 &&
+      /two sheets laid/.test(two.count || "") &&
+      new Set(two.hashTable.split("_")).size === 2 &&
+      typeof two.chartHref === "string" &&
+      two.chartHref.indexOf("table=") !== -1,
+    JSON.stringify({
+      oneTable: one.hashTable,
+      oneCount: one.count,
+      twoTable: two.hashTable,
+      twoCount: two.count,
+      chartHref: two.chartHref,
+    }),
+  );
+  return two;
+}
+
 // The page's own capture point (seat C, ruled 2026-09-17): it files and STAYS, and the year is part of a sheet's identity.
 export async function cd28PagePress({ evaluate, send, check, sleep, PORT, settle, clickAt, forget }: DrawerKit) {
   await forget();
@@ -154,45 +206,41 @@ export async function cd28PagePress({ evaluate, send, check, sleep, PORT, settle
     (d) => typeof d.hashTable === "string" && d.hashTable.split("_").length === 1,
     "prospect-filed-one",
   );
-  // The same town at a second year: the year IS part of the sheet's identity, which is the case that won "press and stay".
-  // The form is submitted synthetically because the claim here is about the FILING, not about the year control, whose own gesture PB6 already drives.
-  await evaluate(
-    `(() => { const y = document.getElementById("pp-year"); y.value = String(Math.max(1, Number(y.value) - 300)); document.getElementById("pp-year-form").dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })); })()`,
-  );
-  for (let i = 0; i < 300; i++) {
-    await sleep(100);
-    const s = await evaluate<number | null>(
-      `(() => { const st = window.__vellumProspectState(); return st ? st.year : null; })()`,
-    );
-    if (s !== null && s !== one.state!.year) break;
+  const two = await cd29SecondYear({ evaluate, check, sleep, settle, clickAt }, one);
+  return two;
+}
+
+async function cd35NothingLaid(
+  { evaluate, check, sleep, clickAt }: Pick<DrawerKit, "evaluate" | "check" | "sleep" | "clickAt">,
+  atCapPage: Pp,
+): Promise<void> {
+  if (atCapPage.press && atCapPage.press.centre) await clickAt(atCapPage.press.centre.x, atCapPage.press.centre.y);
+  // A refusal changes nothing, so there is no state to poll TO, and a settle here proves nothing: it returns on its FIRST satisfying read and this predicate is already true when the press is answered, so it read once and waited 0ms. What is real for "nothing happened" is a DWELL, held past the moment a wrongly accepted filing would have written the hash.
+  const dwell = [];
+  for (let i = 0; i < 8; i++) {
+    dwell.push(await evaluate(PP));
+    await sleep(50);
   }
-  let two = await evaluate(PP);
-  if (two.press && two.press.centre) await clickAt(two.press.centre.x, two.press.centre.y);
-  two = await settle(
-    PP,
-    (d) => typeof d.hashTable === "string" && d.hashTable.split("_").length === 2,
-    "prospect-filed-two",
-  );
+  const stillFull = dwell[dwell.length - 1]!;
+  const heldSix = dwell.every((d) => typeof d.hashTable === "string" && d.hashTable.split("_").length === 6);
   check(
-    "CD29 the page files and STAYS, writing the gathering into its OWN address so a reload keeps it, and the same town at a second year is a SECOND sheet rather than one deduped away (ruled 2026-09-17; the year rides in the item, which is what lets a reader gather a run of one place across the centuries)",
-    typeof one.hashTable === "string" &&
-      one.hashTable.split("_").length === 1 &&
-      /one sheet laid/.test(one.count || "") &&
-      typeof two.hashTable === "string" &&
-      two.hashTable.split("_").length === 2 &&
-      /two sheets laid/.test(two.count || "") &&
-      new Set(two.hashTable.split("_")).size === 2 &&
-      typeof two.chartHref === "string" &&
-      two.chartHref.indexOf("table=") !== -1,
+    "CD35 at the cap the page's press wears the FULL refusal, stays pressable, and lays nothing: the page inherits the table's six from the address it was handed, which is the cap #522 says applies here too",
+    !!atCapPage.press &&
+      atCapPage.press.text === "No room on the table" &&
+      atCapPage.press.dim &&
+      !atCapPage.press.disabled &&
+      atCapPage.press.hit === "self" &&
+      /the table is full/.test(atCapPage.count || "") &&
+      heldSix &&
+      (stillFull.hashTable || "").split("_").length === 6,
     JSON.stringify({
-      oneTable: one.hashTable,
-      oneCount: one.count,
-      twoTable: two.hashTable,
-      twoCount: two.count,
-      chartHref: two.chartHref,
+      press: atCapPage.press,
+      count: atCapPage.count,
+      after: (stillFull.hashTable || "").split("_").length,
+      heldSix,
+      reads: dwell.length,
     }),
   );
-  return two;
 }
 
 export async function cd34PageRefusals(
@@ -233,33 +281,7 @@ export async function cd34PageRefusals(
       d.press.centre.y === last.press.centre.y,
     "prospect-note-open-full",
   );
-  if (atCapPage.press && atCapPage.press.centre) await clickAt(atCapPage.press.centre.x, atCapPage.press.centre.y);
-  // A refusal changes nothing, so there is no state to poll TO, and a settle here proves nothing: it returns on its FIRST satisfying read and this predicate is already true when the press is answered, so it read once and waited 0ms. What is real for "nothing happened" is a DWELL, held past the moment a wrongly accepted filing would have written the hash.
-  const dwell = [];
-  for (let i = 0; i < 8; i++) {
-    dwell.push(await evaluate(PP));
-    await sleep(50);
-  }
-  const stillFull = dwell[dwell.length - 1]!;
-  const heldSix = dwell.every((d) => typeof d.hashTable === "string" && d.hashTable.split("_").length === 6);
-  check(
-    "CD35 at the cap the page's press wears the FULL refusal, stays pressable, and lays nothing: the page inherits the table's six from the address it was handed, which is the cap #522 says applies here too",
-    !!atCapPage.press &&
-      atCapPage.press.text === "No room on the table" &&
-      atCapPage.press.dim &&
-      !atCapPage.press.disabled &&
-      atCapPage.press.hit === "self" &&
-      /the table is full/.test(atCapPage.count || "") &&
-      heldSix &&
-      (stillFull.hashTable || "").split("_").length === 6,
-    JSON.stringify({
-      press: atCapPage.press,
-      count: atCapPage.count,
-      after: (stillFull.hashTable || "").split("_").length,
-      heldSix,
-      reads: dwell.length,
-    }),
-  );
+  await cd35NothingLaid({ evaluate, check, sleep, clickAt }, atCapPage);
 }
 
 export async function cd31RoundTrip(
@@ -287,6 +309,25 @@ export async function cd31RoundTrip(
   );
 }
 
+const PFM: Payload<{
+  items: number;
+  drawn: number;
+  rows: number;
+  thumbs: number;
+  awaited: number;
+  bands: string[];
+  titles: string[];
+  downloads: number;
+  bound: string | null;
+} | null> = `(() => { const s = window.__vellumPortfolio ? window.__vellumPortfolio() : null; return s ? { ...s,
+      rows: document.querySelectorAll("#pf-contents .row").length,
+      thumbs: document.querySelectorAll("#pf-contents .thumb img").length,
+      awaited: document.querySelectorAll("#pf-contents .thumb.awaited").length,
+      bands: [...document.querySelectorAll("#pf-contents .row-band")].map((e) => e.textContent),
+      titles: [...document.querySelectorAll("#pf-contents .row-title")].map((e) => e.textContent),
+      downloads: [...document.querySelectorAll("#pf-contents .row-download")].filter((b) => !b.disabled).length,
+      bound: (document.getElementById("pf-bound") || {}).textContent || null } : null; })()`;
+
 // A MIXED folio, kept to three sheets because each one is a real worker job that its lane pays for in seconds.
 export async function cd32MixedFolio({ evaluate, send, check, sleep, PORT }: SuiteContext): Promise<void> {
   const MIXED = [
@@ -300,24 +341,6 @@ export async function cd32MixedFolio({ evaluate, send, check, sleep, PORT }: Sui
     await sleep(100);
     if (await evaluate<boolean>(`!!window.__vellumPortfolio`)) break;
   }
-  const PFM: Payload<{
-    items: number;
-    drawn: number;
-    rows: number;
-    thumbs: number;
-    awaited: number;
-    bands: string[];
-    titles: string[];
-    downloads: number;
-    bound: string | null;
-  } | null> = `(() => { const s = window.__vellumPortfolio ? window.__vellumPortfolio() : null; return s ? { ...s,
-      rows: document.querySelectorAll("#pf-contents .row").length,
-      thumbs: document.querySelectorAll("#pf-contents .thumb img").length,
-      awaited: document.querySelectorAll("#pf-contents .thumb.awaited").length,
-      bands: [...document.querySelectorAll("#pf-contents .row-band")].map((e) => e.textContent),
-      titles: [...document.querySelectorAll("#pf-contents .row-title")].map((e) => e.textContent),
-      downloads: [...document.querySelectorAll("#pf-contents .row-download")].filter((b) => !b.disabled).length,
-      bound: (document.getElementById("pf-bound") || {}).textContent || null } : null; })()`;
   let pfm = await evaluate(PFM);
   for (let i = 0; i < DRAWN && (!pfm || pfm.drawn < 3); i++) {
     await sleep(50);

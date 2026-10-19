@@ -2,10 +2,10 @@ import type { Point } from "../../types.ts";
 import type { LandfallKit } from "./kit.ts";
 import { roomDir } from "./reads.ts";
 
-export async function l9dCeiling(
-  { evaluate, check, sleep, pinch, camNow, headroom, twoFingerDrag }: LandfallKit,
+async function l9dSaturate(
+  { sleep, pinch, camNow }: Pick<LandfallKit, "sleep" | "pinch" | "camNow">,
   stagePt9: Point | null,
-): Promise<void> {
+) {
   // Saturate to the close-in clamp by real pinches alone (no mouse mixing inside the touch block).
   let top9 = await camNow();
   for (let i = 0; i < 12 && stagePt9 !== null; i++) {
@@ -18,6 +18,14 @@ export async function l9dCeiling(
     }
     top9 = next;
   }
+  return top9;
+}
+
+export async function l9dCeiling(
+  { evaluate, check, sleep, pinch, camNow, headroom, twoFingerDrag }: LandfallKit,
+  stagePt9: Point | null,
+): Promise<void> {
+  const top9 = await l9dSaturate({ sleep, pinch, camNow }, stagePt9);
   const room9d = await headroom();
   const dir9d = roomDir(room9d);
   // Before/after sampling is blind to a mid-gesture dip that saturates back to the ceiling (guard-prover round 2), so the arm watches every synchronous transform write and keeps the minimum.

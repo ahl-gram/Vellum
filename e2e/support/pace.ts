@@ -64,6 +64,28 @@ export interface PaceSweepOpts {
   readonly paces: readonly number[];
 }
 
+function continuity(samples: readonly PaceSample[], opts: PaceSweepOpts, span: number) {
+  let backward = 0;
+  let jump = 0;
+  let jumpAllowed = 0;
+  let worst = -Infinity;
+  const fastest = Math.max(...opts.paces);
+  for (let i = 1; i < samples.length; i++) {
+    const step = samples[i]!.year - samples[i - 1]!.year;
+    backward = Math.min(backward, step);
+    // No frame may cover more story than the fastest pace could have covered in its own gap, taking the WIDER of this gap and the one before it: a sample can pair the frame's timestamp with the year the frame before it painted, and a step measured against the wrong one of a 200 ms gap and a 16 ms gap reads as a leap. (The rate fit cancels that lag as an offset; a single step cannot.) The first step has no gap behind it to widen against, so the scan opens at the second.
+    if (i < 2) continue;
+    const gap = Math.max(samples[i]!.t - samples[i - 1]!.t, samples[i - 1]!.t - samples[i - 2]!.t);
+    const allowed = expectedRate(span, fastest) * gap + JUMP_SLACK_YEARS;
+    if (step - allowed > worst) {
+      worst = step - allowed;
+      jump = step;
+      jumpAllowed = allowed;
+    }
+  }
+  return { backward, jump, jumpAllowed };
+}
+
 /** Read a pace sweep: one leg per pace, each fitted against the rate SWEEP_MS says it should run at, plus the whole series' continuity (Issue #493's re-anchor keeps the story where it stands, and storyAt's floor keeps a frame stamped before the anchor from stepping the year back). */
 export function readPaceSweep(samples: readonly PaceSample[], opts: PaceSweepOpts): PaceSweepReading {
   const span = opts.range.max - opts.range.min;
@@ -84,24 +106,7 @@ export function readPaceSweep(samples: readonly PaceSample[], opts: PaceSweepOpt
     };
   });
 
-  let backward = 0;
-  let jump = 0;
-  let jumpAllowed = 0;
-  let worst = -Infinity;
-  const fastest = Math.max(...opts.paces);
-  for (let i = 1; i < samples.length; i++) {
-    const step = samples[i]!.year - samples[i - 1]!.year;
-    backward = Math.min(backward, step);
-    // No frame may cover more story than the fastest pace could have covered in its own gap, taking the WIDER of this gap and the one before it: a sample can pair the frame's timestamp with the year the frame before it painted, and a step measured against the wrong one of a 200 ms gap and a 16 ms gap reads as a leap. (The rate fit cancels that lag as an offset; a single step cannot.) The first step has no gap behind it to widen against, so the scan opens at the second.
-    if (i < 2) continue;
-    const gap = Math.max(samples[i]!.t - samples[i - 1]!.t, samples[i - 1]!.t - samples[i - 2]!.t);
-    const allowed = expectedRate(span, fastest) * gap + JUMP_SLACK_YEARS;
-    if (step - allowed > worst) {
-      worst = step - allowed;
-      jump = step;
-      jumpAllowed = allowed;
-    }
-  }
+  const { backward, jump, jumpAllowed } = continuity(samples, opts, span);
 
   const last = samples[samples.length - 1];
   const parked = !last || last.year >= opts.range.max;

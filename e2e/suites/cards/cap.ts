@@ -29,7 +29,7 @@ export async function p19CardsFit({ check, sweepAt }: CardsKit, narrowCount: num
   );
 }
 
-export async function p20PinnedTakesPointer({ evaluate, send, check, settle }: CardsKit) {
+async function p20PressKralgov({ evaluate, send }: Pick<CardsKit, "evaluate" | "send">) {
   // The unpinned arm reads a card that is SHOWN: a hidden one reports its host's pointer-events by inheritance and would pass whatever this rule said.
   const at = await evaluate<
     { error: "no Kralgov" } | { error?: undefined; shownUnpinned: boolean; restPe: string | null; x: number; y: number }
@@ -48,6 +48,11 @@ export async function p20PinnedTakesPointer({ evaluate, send, check, settle }: C
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: at.x, y: at.y });
   await send("Input.dispatchMouseEvent", { type: "mousePressed", x: at.x, y: at.y, button: "left", clickCount: 1 });
   await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: at.x, y: at.y, button: "left", clickCount: 1 });
+  return at;
+}
+
+export async function p20PinnedTakesPointer({ evaluate, send, check, settle }: CardsKit) {
+  const at = await p20PressKralgov({ evaluate, send });
   const open = await settle<{
     name: string | undefined;
     pinned: boolean;
@@ -89,32 +94,12 @@ export async function p20PinnedTakesPointer({ evaluate, send, check, settle }: C
   return open;
 }
 
-export async function p26TailScrolls(
-  { evaluate, send, check, sleep, wheel }: SuiteContext,
-  open: Pinned,
-): Promise<void> {
-  const beforeWheel = await evaluate<{ scrollTop: number; k: number }>(
-    `(() => { const i = document.querySelector("#place-card .pc-inner"); return { scrollTop: +i.scrollTop.toFixed(2), k: window.__vellumZoomState().k }; })()`,
-  );
-  const onCard = { x: Math.round(open.left + (open.right - open.left) / 2), y: Math.round(open.top + open.h / 2) };
-  const reaches = await evaluate<boolean>(
-    `(() => { const e = document.elementFromPoint(${onCard.x}, ${onCard.y}); return !!e && document.getElementById("place-card").contains(e); })()`,
-  );
-  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: onCard.x, y: onCard.y });
-  await sleep(120);
-  await wheel(onCard.x, onCard.y, 240);
-  await sleep(600);
-  const afterWheel = await evaluate<{ scrollTop: number; k: number }>(
-    `(() => { const i = document.querySelector("#place-card .pc-inner"); return { scrollTop: +i.scrollTop.toFixed(2), k: window.__vellumZoomState().k }; })()`,
-  );
-  check(
-    "P26 a pinned card that HAS a tail holds the wheel and scrolls it, and the camera under it stays put, the wheel aimed where the card itself takes the pointer (#633)",
-    reaches && afterWheel.scrollTop > beforeWheel.scrollTop + 1 && afterWheel.k === beforeWheel.k,
-    JSON.stringify({ reaches, before: beforeWheel, after: afterWheel }),
-  );
-  await evaluate(`(() => { const i = document.querySelector("#place-card .pc-inner"); i.scrollTop = 0; })()`);
-  await sleep(200);
-
+async function p27PageDown({
+  evaluate,
+  send,
+  check,
+  sleep,
+}: Pick<SuiteContext, "evaluate" | "send" | "check" | "sleep">): Promise<void> {
   const kb = await evaluate<{
     tabIndex: number;
     focused: boolean;
@@ -148,6 +133,34 @@ export async function p26TailScrolls(
   );
   await evaluate(`(() => { const i = document.querySelector("#place-card .pc-inner"); i.scrollTop = 0; })()`);
   await sleep(200);
+}
+
+export async function p26TailScrolls(
+  { evaluate, send, check, sleep, wheel }: SuiteContext,
+  open: Pinned,
+): Promise<void> {
+  const beforeWheel = await evaluate<{ scrollTop: number; k: number }>(
+    `(() => { const i = document.querySelector("#place-card .pc-inner"); return { scrollTop: +i.scrollTop.toFixed(2), k: window.__vellumZoomState().k }; })()`,
+  );
+  const onCard = { x: Math.round(open.left + (open.right - open.left) / 2), y: Math.round(open.top + open.h / 2) };
+  const reaches = await evaluate<boolean>(
+    `(() => { const e = document.elementFromPoint(${onCard.x}, ${onCard.y}); return !!e && document.getElementById("place-card").contains(e); })()`,
+  );
+  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: onCard.x, y: onCard.y });
+  await sleep(120);
+  await wheel(onCard.x, onCard.y, 240);
+  await sleep(600);
+  const afterWheel = await evaluate<{ scrollTop: number; k: number }>(
+    `(() => { const i = document.querySelector("#place-card .pc-inner"); return { scrollTop: +i.scrollTop.toFixed(2), k: window.__vellumZoomState().k }; })()`,
+  );
+  check(
+    "P26 a pinned card that HAS a tail holds the wheel and scrolls it, and the camera under it stays put, the wheel aimed where the card itself takes the pointer (#633)",
+    reaches && afterWheel.scrollTop > beforeWheel.scrollTop + 1 && afterWheel.k === beforeWheel.k,
+    JSON.stringify({ reaches, before: beforeWheel, after: afterWheel }),
+  );
+  await evaluate(`(() => { const i = document.querySelector("#place-card .pc-inner"); i.scrollTop = 0; })()`);
+  await sleep(200);
+  await p27PageDown({ evaluate, send, check, sleep });
 }
 
 export async function p23CapHolds(
@@ -206,24 +219,7 @@ export async function p23CapHolds(
   await evaluate(`window.__vellumZoomTo({k:1,x:0,y:0})`);
 }
 
-export async function p24NothingToScroll({
-  evaluate,
-  send,
-  check,
-  sleep,
-  wheel,
-  settle,
-  waitReady,
-  setNarrowViewport,
-  PORT,
-}: CardsKit): Promise<void> {
-  await setNarrowViewport(1280, 800);
-  await send("Page.navigate", { url: "about:blank" });
-  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/#seed=${NARROW_SEED}&style=antique` });
-  if (!(await waitReady())) throw new Error("P24 the explorer never drew at 1280x800");
-  const at = await evaluate<Point>(
-    `(() => { const h = [...document.querySelectorAll(".place-overlay .place-hit")].find((e) => (e.getAttribute("aria-label") || "").split(", ")[0] === "Kralgov"); const b = h.getBoundingClientRect(); return { x: Math.round(b.x + b.width / 2), y: Math.round(b.y + b.height / 2) }; })()`,
-  );
+async function p24PinKralgov({ send, settle }: Pick<CardsKit, "send" | "settle">, at: Point) {
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: at.x, y: at.y });
   await send("Input.dispatchMouseEvent", { type: "mousePressed", x: at.x, y: at.y, button: "left", clickCount: 1 });
   await send("Input.dispatchMouseEvent", { type: "mouseReleased", x: at.x, y: at.y, button: "left", clickCount: 1 });
@@ -245,6 +241,28 @@ export async function p24NothingToScroll({
     (d, last) => d.name === "Kralgov" && d.pinned && !!last && d.h === last.h,
     "P24 Kralgov pinned at 1280x800",
   );
+  return card;
+}
+
+export async function p24NothingToScroll({
+  evaluate,
+  send,
+  check,
+  sleep,
+  wheel,
+  settle,
+  waitReady,
+  setNarrowViewport,
+  PORT,
+}: CardsKit): Promise<void> {
+  await setNarrowViewport(1280, 800);
+  await send("Page.navigate", { url: "about:blank" });
+  await send("Page.navigate", { url: `http://127.0.0.1:${PORT}/explorer/#seed=${NARROW_SEED}&style=antique` });
+  if (!(await waitReady())) throw new Error("P24 the explorer never drew at 1280x800");
+  const at = await evaluate<Point>(
+    `(() => { const h = [...document.querySelectorAll(".place-overlay .place-hit")].find((e) => (e.getAttribute("aria-label") || "").split(", ")[0] === "Kralgov"); const b = h.getBoundingClientRect(); return { x: Math.round(b.x + b.width / 2), y: Math.round(b.y + b.height / 2) }; })()`,
+  );
+  const card = await p24PinKralgov({ send, settle }, at);
   await send("Input.dispatchMouseEvent", { type: "mouseMoved", x: card.x, y: card.y });
   await sleep(120);
   await wheel(card.x, card.y, -240);

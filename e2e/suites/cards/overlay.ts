@@ -87,28 +87,10 @@ export async function p2bPressLift({ evaluate, check }: SuiteContext): Promise<v
   );
 }
 
-export async function p4Capital({ evaluate, check, shoot, sleep }: SuiteContext, pm: Manifest): Promise<void> {
-  const p4 = await evaluate<{
-    hidden: boolean;
-    aria: string | null;
-    name: string | undefined;
-    rank: string | undefined;
-    founded: string | undefined;
-    tale: boolean;
-  }>(
-    `(()=>{const hit=document.querySelector('.place-hit[data-idx="'+${pm.cap}+'"]');hit.focus();const c=document.getElementById("place-card");return{hidden:c.hidden,aria:hit.getAttribute("aria-label"),name:(c.querySelector(".pc-name")||{}).textContent,rank:(c.querySelector(".pc-rank")||{}).textContent,founded:(c.querySelector(".pc-founded")||{}).textContent,tale:!!c.querySelector(".pc-tale")};})()`,
-  );
-  check(
-    "P4 focus a capital: card shows name + Capital + founding year, no tale",
-    p4.hidden === false &&
-      p4.name === pm.capName &&
-      p4.rank === "Capital" &&
-      p4.founded === "Founded in the year " + pm.capFounded + "." &&
-      p4.tale === false,
-    JSON.stringify(p4),
-  );
-  check("P5 hit aria-label is name + rank (matches the card)", p4.aria === pm.capName + ", Capital", `aria=${p4.aria}`);
-
+async function p5bRealmSeat(
+  { evaluate, check, shoot, sleep }: Pick<SuiteContext, "evaluate" | "check" | "shoot" | "sleep">,
+  pm: Manifest,
+): Promise<void> {
   if (pm.seatIdx >= 0) {
     const p5b = await evaluate<{
       hidden: boolean;
@@ -136,6 +118,31 @@ export async function p4Capital({ evaluate, check, shoot, sleep }: SuiteContext,
   } else {
     check("P5b seed 42 has a non-capital realm seat to show", false, "no seat in manifest");
   }
+}
+
+export async function p4Capital({ evaluate, check, shoot, sleep }: SuiteContext, pm: Manifest): Promise<void> {
+  const p4 = await evaluate<{
+    hidden: boolean;
+    aria: string | null;
+    name: string | undefined;
+    rank: string | undefined;
+    founded: string | undefined;
+    tale: boolean;
+  }>(
+    `(()=>{const hit=document.querySelector('.place-hit[data-idx="'+${pm.cap}+'"]');hit.focus();const c=document.getElementById("place-card");return{hidden:c.hidden,aria:hit.getAttribute("aria-label"),name:(c.querySelector(".pc-name")||{}).textContent,rank:(c.querySelector(".pc-rank")||{}).textContent,founded:(c.querySelector(".pc-founded")||{}).textContent,tale:!!c.querySelector(".pc-tale")};})()`,
+  );
+  check(
+    "P4 focus a capital: card shows name + Capital + founding year, no tale",
+    p4.hidden === false &&
+      p4.name === pm.capName &&
+      p4.rank === "Capital" &&
+      p4.founded === "Founded in the year " + pm.capFounded + "." &&
+      p4.tale === false,
+    JSON.stringify(p4),
+  );
+  check("P5 hit aria-label is name + rank (matches the card)", p4.aria === pm.capName + ", Capital", `aria=${p4.aria}`);
+
+  await p5bRealmSeat({ evaluate, check, shoot, sleep }, pm);
   check(
     "P5c the grand capital carries seat===true yet still ranks Capital",
     pm.capSeat === true && p4.rank === "Capital",

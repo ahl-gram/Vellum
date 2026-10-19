@@ -1,15 +1,8 @@
 import { withScriptsOff } from "../../support/scripts-off.ts";
 import type { LandfallKit } from "./kit.ts";
 
-export async function l10NoScriptGet({
-  evaluate,
-  send,
-  check,
-  sleep,
-  PORT,
-  clickAt,
-  centerOf,
-}: LandfallKit): Promise<void> {
+export async function l10NoScriptGet(k: LandfallKit): Promise<void> {
+  const { evaluate, send, check, sleep, PORT, clickAt, centerOf } = k;
   // L10/L11: the seed form's no-JS GET fallback (Issue #454: "no-JS GET fallback degrading to today's world"), then the JS-on control proving the Explorer ignores the query (bare visit and ?seed=777 visit must show the SAME seed; comparing to 777's absence would flake the day the daily seed IS 777).
   await withScriptsOff(send, async () => {
     await send("Page.navigate", { url: "about:blank" });
