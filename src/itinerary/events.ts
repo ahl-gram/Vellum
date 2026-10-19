@@ -101,6 +101,24 @@ function crossingEvents(world: World, chain: ReadonlyArray<number>, dists: Reado
   return out;
 }
 
+function branchWalk(
+  w: number,
+  h: number,
+  n: number,
+  settlementByCell: ReadonlyMap<number, number>,
+  mask: Uint8Array,
+  chainSet: ReadonlySet<number>,
+): number[] | null {
+  const walked = bfsPath(
+    w,
+    h,
+    n,
+    (g) => settlementByCell.has(g),
+    (g) => mask[g] === 1 && !chainSet.has(g),
+  );
+  return walked;
+}
+
 function branchEvents(
   world: World,
   mask: Uint8Array,
@@ -129,13 +147,7 @@ function branchEvents(
         if (!mask[n] || chainSet.has(n)) continue;
         if (cheb(w, n, chain[k - 1] as number) <= 1 || cheb(w, n, chain[k + 1] as number) <= 1) continue;
         if (k - lastK < 4) continue;
-        const walked = bfsPath(
-          w,
-          h,
-          n,
-          (g) => settlementByCell.has(g),
-          (g) => mask[g] === 1 && !chainSet.has(g),
-        );
+        const walked = branchWalk(w, h, n, settlementByCell, mask, chainSet);
         if (!walked) continue;
         const destIdx = settlementByCell.get(walked[walked.length - 1] as number);
         if (destIdx === undefined || onRoute.has(destIdx)) continue;
