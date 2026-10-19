@@ -6,32 +6,7 @@ export type StageKit = ReturnType<typeof stageKit>;
 export type GestureKit = ReturnType<typeof gestureKit>;
 export type LandfallKit = ReturnType<typeof entersKit>;
 
-export function stageKit(ctx: SuiteContext) {
-  const { evaluate, sleep, wheel } = ctx;
-  const { pressKey, clickAt, settleHome } = makeStage(ctx);
-  // e.defaultPrevented read at the window AFTER the stage's own listener ran, so the log records exactly what input.ts decided; passive, so the probe cannot itself consume.
-  const armWheelLog = () =>
-    evaluate<boolean>(
-      `(window.__lfWheel = [], window.addEventListener("wheel", (e) => window.__lfWheel.push(e.defaultPrevented), { passive: true }), true)`,
-    );
-  const lastWheel = () => evaluate<boolean | null>(`window.__lfWheel[window.__lfWheel.length - 1] ?? null`);
-  const camNow = () => evaluate(readCam);
-  const camScale = async () => {
-    const c = await camNow();
-    return c === null ? null : c.scale;
-  };
-  const scrollY = () => evaluate<number>(`window.scrollY`);
-  // Every element probe returns null instead of throwing, and every dispatch is gated on it: an unguarded deref here turns a product regression into a HARNESS ERROR that prints zero checks (skeptic round 1, proven against an empty site dir), which the lane driver reserves for the browser never coming up.
-  const centerOf = (selector: string) =>
-    evaluate<Point | null>(`(() => {
-    const el = document.querySelector('${selector}');
-    if (!el) return null;
-    const r = el.getBoundingClientRect();
-    return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) };
-  })()`);
-  const wheelAt = async (p: Point | null, dy: number) => {
-    if (p !== null) await wheel(p.x, p.y, dy);
-  };
+function stageScrolls({ evaluate, sleep, scrollY }: Pick<StageKit, "evaluate" | "sleep" | "scrollY">) {
   const scrollToTop = async () => {
     for (let i = 0; i < 30; i++) {
       await evaluate(`window.scrollTo(0, 0)`);
@@ -58,6 +33,36 @@ export function stageKit(ctx: SuiteContext) {
       if ((await scrollY()) > 0) break;
     }
   };
+  return { scrollToTop, freshGesture, readHint, scrollToFloor };
+}
+
+export function stageKit(ctx: SuiteContext) {
+  const { evaluate, sleep, wheel } = ctx;
+  const { pressKey, clickAt, settleHome } = makeStage(ctx);
+  // e.defaultPrevented read at the window AFTER the stage's own listener ran, so the log records exactly what input.ts decided; passive, so the probe cannot itself consume.
+  const armWheelLog = () =>
+    evaluate<boolean>(
+      `(window.__lfWheel = [], window.addEventListener("wheel", (e) => window.__lfWheel.push(e.defaultPrevented), { passive: true }), true)`,
+    );
+  const lastWheel = () => evaluate<boolean | null>(`window.__lfWheel[window.__lfWheel.length - 1] ?? null`);
+  const camNow = () => evaluate(readCam);
+  const camScale = async () => {
+    const c = await camNow();
+    return c === null ? null : c.scale;
+  };
+  const scrollY = () => evaluate<number>(`window.scrollY`);
+  // Every element probe returns null instead of throwing, and every dispatch is gated on it: an unguarded deref here turns a product regression into a HARNESS ERROR that prints zero checks (skeptic round 1, proven against an empty site dir), which the lane driver reserves for the browser never coming up.
+  const centerOf = (selector: string) =>
+    evaluate<Point | null>(`(() => {
+    const el = document.querySelector('${selector}');
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) };
+  })()`);
+  const wheelAt = async (p: Point | null, dy: number) => {
+    if (p !== null) await wheel(p.x, p.y, dy);
+  };
+  const { scrollToTop, freshGesture, readHint, scrollToFloor } = stageScrolls({ evaluate, sleep, scrollY });
   return {
     ...ctx,
     pressKey,
@@ -77,18 +82,46 @@ export function stageKit(ctx: SuiteContext) {
   };
 }
 
+async function navKeys(
+  { send }: Pick<SuiteContext, "send">,
+  key: string,
+  code: string,
+  vk: number,
+  text: string | undefined,
+): Promise<void> {
+  await send("Input.dispatchKeyEvent", {
+    type: "keyDown",
+    key,
+    code,
+    windowsVirtualKeyCode: vk,
+    ...(text === undefined ? {} : { text }),
+  });
+  await send("Input.dispatchKeyEvent", { type: "keyUp", key, code, windowsVirtualKeyCode: vk });
+}
+
+async function twoFingers(
+  { touch, sleep }: Pick<SuiteContext, "touch" | "sleep">,
+  p: Point,
+  sx: number,
+  sy: number,
+): Promise<void> {
+  await touch("touchStart", [
+    { x: p.x - 40, y: p.y, id: 0 },
+    { x: p.x + 40, y: p.y, id: 1 },
+  ]);
+  await touch("touchMove", [
+    { x: p.x - 40 + sx * 40, y: p.y + sy * 30, id: 0 },
+    { x: p.x + 40 + sx * 40, y: p.y + sy * 30, id: 1 },
+  ]);
+  await touch("touchEnd", []);
+  await sleep(300);
+}
+
 export function gestureKit(k0: StageKit) {
   const { evaluate, send, sleep, touch, pressKey } = k0;
   // text: " " is what makes CDP's keyDown char-producing; without it the browser never runs Space's native scroll default. The navigation keys carry only their codes.
   const pressNav = async (key: string, code: string, vk: number, text?: string) => {
-    await send("Input.dispatchKeyEvent", {
-      type: "keyDown",
-      key,
-      code,
-      windowsVirtualKeyCode: vk,
-      ...(text === undefined ? {} : { text }),
-    });
-    await send("Input.dispatchKeyEvent", { type: "keyUp", key, code, windowsVirtualKeyCode: vk });
+    await navKeys({ send }, key, code, vk, text);
   };
   const headroom = () =>
     evaluate<Headroom | null>(`(() => {
@@ -100,16 +133,7 @@ export function gestureKit(k0: StageKit) {
     return { cx: m.e + (1500 * m.a) / 2, cy: m.f + (1157.931 * m.a) / 2, w: r.width, h: r.height };
   })()`);
   const twoFingerDrag = async (p: Point, sx = 1, sy = 1) => {
-    await touch("touchStart", [
-      { x: p.x - 40, y: p.y, id: 0 },
-      { x: p.x + 40, y: p.y, id: 1 },
-    ]);
-    await touch("touchMove", [
-      { x: p.x - 40 + sx * 40, y: p.y + sy * 30, id: 0 },
-      { x: p.x + 40 + sx * 40, y: p.y + sy * 30, id: 1 },
-    ]);
-    await touch("touchEnd", []);
-    await sleep(300);
+    await twoFingers({ touch, sleep }, p, sx, sy);
   };
   const recenter = async () => {
     await evaluate(`document.getElementById("lf-stage")?.focus()`);
