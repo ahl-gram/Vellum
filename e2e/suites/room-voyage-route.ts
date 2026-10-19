@@ -1,6 +1,7 @@
 // Room voyage-route e2e (RV1-RV12, Issue #320 Sub 3): W17-W28 re-hosted on the Reading Room, the only host that can still run them. RV4 is the only check that a drawn mark keeps under MAX_TILT; RV3/RV9/RV10 guard showMark's Issue #181 wiring, which has no unit coverage.
 import { makeRoom, scopedHealth } from "../support/room.ts";
 import type { SuiteContext } from "../types.ts";
+import { rv7FullLog } from "./room-voyage-route/full-log.ts";
 
 type Room = ReturnType<typeof makeRoom>;
 
@@ -198,52 +199,6 @@ async function rv6Overlay({ evaluate, check }: SuiteContext): Promise<void> {
   );
 }
 
-async function rv7FullLog({ evaluate, check }: SuiteContext): Promise<void> {
-  const rv7 = await evaluate<{
-    visible: boolean;
-    entries: number;
-    logged: number;
-    rows: number;
-    ports: number;
-    legs: number;
-    sig: string;
-    attribution: string;
-    opensDeparture: boolean;
-    closesHome: boolean;
-    homeIdx: number;
-    capitalIdx: number;
-  }>(`(()=>{
-    window.__vellumVoyageStepTo(999);
-    const plan=window.__vellumVoyagePlan();
-    const log=window.__vellumVoyageLog();
-    const sig=document.querySelector(".rf-log-sig").textContent;
-    const rows=document.querySelector(".rf-log-strip").querySelectorAll("li.prologue").length;
-    const last=log&&log.entries.length?log.entries[log.entries.length-1]:null;
-    return{
-      visible:!!(log&&log.visible), entries:log?log.entries.length:0, logged:log?log.logged:-1,
-      rows, ports:plan?plan.ports.length:0, legs:plan?plan.legs.length:0, sig,
-      attribution:log?log.attribution:"",
-      opensDeparture:!!(log&&log.entries[0]&&log.entries[0].text.includes("set out")),
-      closesHome:!!(last&&last.text.includes("whence we set out")),
-      homeIdx:last?last.idx:-1, capitalIdx:plan&&plan.ports[0]?plan.ports[0].idx:-2,
-    };
-  })()`);
-  check(
-    "RV7 the full sweep logs every port plus the homecoming, opens with the attribution + a departure, all persisting",
-    rv7.visible &&
-      rv7.entries === rv7.ports + 1 &&
-      rv7.rows === rv7.entries &&
-      rv7.logged === rv7.entries &&
-      rv7.legs === rv7.ports &&
-      rv7.opensDeparture &&
-      rv7.closesHome &&
-      rv7.homeIdx === rv7.capitalIdx &&
-      rv7.sig === rv7.attribution &&
-      rv7.attribution.startsWith("Being a true"),
-    JSON.stringify({ ...rv7, attribution: rv7.attribution.slice(0, 24) }),
-  );
-}
-
 async function rv8LogMode({ evaluate, check }: SuiteContext): Promise<void> {
   const rv8 = await evaluate<{ seaLeg: number; roadLeg: number; seaEntry: string; roadEntry: string }>(`(()=>{
     const plan=window.__vellumVoyagePlan();
@@ -288,7 +243,7 @@ async function rv9Journal({ evaluate, check }: SuiteContext): Promise<void> {
   );
 }
 
-async function rv10Handoff({ evaluate, check, shoot }: SuiteContext): Promise<void> {
+async function rv10Read({ evaluate }: Pick<SuiteContext, "evaluate">) {
   const rv10 = await evaluate<{
     seaLegs: number;
     missing: number;
@@ -327,6 +282,11 @@ async function rv10Handoff({ evaluate, check, shoot }: SuiteContext): Promise<vo
       onStub:w?glyph((hi+(w.to+1)/2)/n):"",
       entry:hi>=0?window.__vellumVoyageLog().entries[hi+1].text:""};
   })()`);
+  return rv10;
+}
+
+async function rv10Handoff({ evaluate, check, shoot }: SuiteContext): Promise<void> {
+  const rv10 = await rv10Read({ evaluate });
   check(
     "RV10 every sea leg ships a sane water span; the one genuine handoff sails the span, rides the landfall stub, and is narrated",
     rv10.seaLegs >= 2 &&
@@ -346,9 +306,7 @@ async function rv10Handoff({ evaluate, check, shoot }: SuiteContext): Promise<vo
   await shoot("reading-room-voyage-routed.png");
 }
 
-async function rv11Seed39({ evaluate, check, shoot }: SuiteContext, room: Room): Promise<void> {
-  // Seed 39 carries the worst measured handoffs (a 26-cell embark stub and a 48-cell landfall stub, back to back), proving the swap in BOTH directions.
-  await room.goto("#seed=39&style=antique&legend=1&survey");
+async function rv11Read({ evaluate }: Pick<SuiteContext, "evaluate">) {
   const rv11 = await evaluate<
     | {
         handoffs: 0;
@@ -389,6 +347,13 @@ async function rv11Seed39({ evaluate, check, shoot }: SuiteContext, room: Room):
     return{handoffs:hs.length,embFrom:emb.l.water.from,landTo:land.l.water.to,
       ridesToShore,sails,ridesFromLandfall,narrated};
   })()`);
+  return rv11;
+}
+
+async function rv11Seed39({ evaluate, check, shoot }: SuiteContext, room: Room): Promise<void> {
+  // Seed 39 carries the worst measured handoffs (a 26-cell embark stub and a 48-cell landfall stub, back to back), proving the swap in BOTH directions.
+  await room.goto("#seed=39&style=antique&legend=1&survey");
+  const rv11 = await rv11Read({ evaluate });
   check(
     "RV11 seed 39: the mark rides to the shore, sails the crossing, and rides again on landfall, narrated",
     rv11.handoffs === 2 &&
