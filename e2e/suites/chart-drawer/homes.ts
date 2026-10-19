@@ -208,6 +208,47 @@ export async function cd40EmptySticks({
   );
 }
 
+async function cd42TakesDevice({
+  evaluate,
+  check,
+  sleep,
+  restedAtExplorer,
+}: Pick<TableKit, "evaluate" | "check" | "sleep" | "restedAtExplorer">): Promise<void> {
+  // The cell where two of the rulings collide, RULED on 2026-09-19 and pinned so nobody restores the other reading on
+  // finding it surprising: a traversal into a page carrying someone ELSE'S folio takes the device's table, and rewrites
+  // that page's address with it. The fixture is a device holding sheets the address names none of, which is what tells
+  // the ruling from the rejected alternative; CD41's own leg above cannot, since its device is empty. It reuses this
+  // Explorer rather than booting another, because a second boot would cost the lane seconds and prove nothing more.
+  // DISJOINT from ONE, which the address is still carrying: TWO would not do, since it contains ONE and is therefore
+  // the stale-snapshot shape that the rejected alternative answers the same way.
+  const OTHERS = [
+    "k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-1.lx-4.ly-4",
+    "k-p.seed-42.style-antique.i-3.year-1059",
+  ].join("_");
+  await evaluate(`localStorage.setItem(${JSON.stringify(TABLE_STORE_KEY)}, ${JSON.stringify(OTHERS)})`);
+  await evaluate(`location.href = "/faq/"`);
+  for (let i = 0; i < 200; i++) {
+    await sleep(50);
+    if (await evaluate<boolean>(`location.pathname === "/faq/" && document.readyState === "complete"`)) break;
+  }
+  await evaluate(`history.back()`);
+  const theirs = await restedAtExplorer();
+  check(
+    "CD42 a traversal into a page carrying someone ELSE'S folio takes what this device holds, and rewrites that page's address with it: ruling 1 read literally, which narrows ruling 2's 'exactly as sent' to an arrival by link (ruled 2026-09-19, with the cost that the sender's link leaves that tab)",
+    theirs.marker === "bare" &&
+      theirs.cuttings === 2 &&
+      theirs.stored === OTHERS &&
+      theirs.hashTable === OTHERS &&
+      OTHERS.split("_").every((sheet) => ONE.indexOf(sheet) === -1),
+    JSON.stringify({
+      marker: theirs.marker,
+      cuttings: theirs.cuttings,
+      hashTable: theirs.hashTable,
+      stored: theirs.stored,
+    }),
+  );
+}
+
 export async function cd41CachedReturn({
   evaluate,
   check,
@@ -242,40 +283,7 @@ export async function cd41CachedReturn({
       home: { marker: home.marker, cuttings: home.cuttings, hashTable: home.hashTable, stored: home.stored },
     }),
   );
-
-  // The cell where two of the rulings collide, RULED on 2026-09-19 and pinned so nobody restores the other reading on
-  // finding it surprising: a traversal into a page carrying someone ELSE'S folio takes the device's table, and rewrites
-  // that page's address with it. The fixture is a device holding sheets the address names none of, which is what tells
-  // the ruling from the rejected alternative; CD41's own leg above cannot, since its device is empty. It reuses this
-  // Explorer rather than booting another, because a second boot would cost the lane seconds and prove nothing more.
-  // DISJOINT from ONE, which the address is still carrying: TWO would not do, since it contains ONE and is therefore
-  // the stale-snapshot shape that the rejected alternative answers the same way.
-  const OTHERS = [
-    "k-s.seed-42.style-antique.legend-1.arms-0.beasts-0.rung-1.lx-4.ly-4",
-    "k-p.seed-42.style-antique.i-3.year-1059",
-  ].join("_");
-  await evaluate(`localStorage.setItem(${JSON.stringify(TABLE_STORE_KEY)}, ${JSON.stringify(OTHERS)})`);
-  await evaluate(`location.href = "/faq/"`);
-  for (let i = 0; i < 200; i++) {
-    await sleep(50);
-    if (await evaluate<boolean>(`location.pathname === "/faq/" && document.readyState === "complete"`)) break;
-  }
-  await evaluate(`history.back()`);
-  const theirs = await restedAtExplorer();
-  check(
-    "CD42 a traversal into a page carrying someone ELSE'S folio takes what this device holds, and rewrites that page's address with it: ruling 1 read literally, which narrows ruling 2's 'exactly as sent' to an arrival by link (ruled 2026-09-19, with the cost that the sender's link leaves that tab)",
-    theirs.marker === "bare" &&
-      theirs.cuttings === 2 &&
-      theirs.stored === OTHERS &&
-      theirs.hashTable === OTHERS &&
-      OTHERS.split("_").every((sheet) => ONE.indexOf(sheet) === -1),
-    JSON.stringify({
-      marker: theirs.marker,
-      cuttings: theirs.cuttings,
-      hashTable: theirs.hashTable,
-      stored: theirs.stored,
-    }),
-  );
+  await cd42TakesDevice({ evaluate, check, sleep, restedAtExplorer });
 }
 
 type Folio = { items: number; road: string | null; marker: string | null; nav: string | null };
