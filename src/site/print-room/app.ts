@@ -173,6 +173,33 @@ function writeHash(seed: number, style: string): void {
   if (folioRoad) folioRoad.href = "../explorer/portfolio/#" + p.toString();
 }
 
+function keepProof(res: DrawResult, seed: number, style: StyleName, overrides: PosterBasis["overrides"]): void {
+  // res.svg is engine-rendered markup from the uint32 seed and allowlisted params: no user string reaches the SVG, the same trusted-string injection the Explorer does.
+  preview.innerHTML = res.svg;
+  showProof(furniture);
+  sheet.rebase();
+  startArrival(preview.querySelector("svg"));
+  writeHash(seed, style);
+  status.textContent = "";
+  writeFolio(furniture, res, seed);
+  sheet.room.layout();
+  lastSeed = seed;
+  lastTitle = res.title;
+  // overrides is built fresh per draw and never mutated, so holding the reference is safe.
+  posterBasis = {
+    seed,
+    style,
+    overrides,
+    legend: carried.legend,
+    arms: carried.arms,
+    beasts: carried.beasts,
+    theme: carried.theme || undefined,
+  };
+  drawing = false;
+  refreshOrderControls(); // the new world is on the desk: re-open the counter (unless an order still holds it)
+  enableBind();
+}
+
 function draw(): void {
   const seed = Number(seedInput.value) >>> 0;
   const style = STYLES.includes(styleSel.value) ? (styleSel.value as StyleName) : "antique";
@@ -203,30 +230,7 @@ function draw(): void {
   })
     .then((res) => {
       if (myGen !== drawGen) return;
-      // res.svg is engine-rendered markup from the uint32 seed and allowlisted params: no user string reaches the SVG, the same trusted-string injection the Explorer does.
-      preview.innerHTML = res.svg;
-      showProof(furniture);
-      sheet.rebase();
-      startArrival(preview.querySelector("svg"));
-      writeHash(seed, style);
-      status.textContent = "";
-      writeFolio(furniture, res, seed);
-      sheet.room.layout();
-      lastSeed = seed;
-      lastTitle = res.title;
-      // overrides is built fresh per draw and never mutated, so holding the reference is safe.
-      posterBasis = {
-        seed,
-        style,
-        overrides,
-        legend: carried.legend,
-        arms: carried.arms,
-        beasts: carried.beasts,
-        theme: carried.theme || undefined,
-      };
-      drawing = false;
-      refreshOrderControls(); // the new world is on the desk: re-open the counter (unless an order still holds it)
-      enableBind();
+      keepProof(res, seed, style, overrides);
     })
     .catch((err: unknown) => {
       if (myGen !== drawGen) return;
