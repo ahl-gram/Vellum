@@ -364,61 +364,9 @@
       "count": 1
     }
   },
-  "test/e2e/launch.test.ts": {
-    "max-lines": {
-      "count": 1
-    }
-  },
-  "test/repo/agent-sandbox.test.ts": {
-    "max-lines": {
-      "count": 1
-    }
-  },
-  "test/repo/design-kit.test.ts": {
-    "max-lines": {
-      "count": 1
-    }
-  },
-  "test/repo/e2e-split-proof.test.ts": {
-    "max-lines": {
-      "count": 1
-    },
-    "max-lines-per-function": {
-      "count": 1
-    }
-  },
-  "test/repo/footgun-gate.test.ts": {
-    "max-lines": {
-      "count": 1
-    }
-  },
-  "test/repo/lint-wiring.test.ts": {
-    "max-lines": {
-      "count": 1
-    },
-    "max-lines-per-function": {
-      "count": 2
-    }
-  },
-  "test/repo/source-shape.test.ts": {
-    "max-lines": {
-      "count": 1
-    },
-    "max-lines-per-function": {
-      "count": 1
-    }
-  },
   "test/site/astro-scaffold.test.ts": {
     "max-lines-per-function": {
       "count": 2
-    }
-  },
-  "test/site/living-chart-no-bar-card.test.ts": {
-    "max-lines": {
-      "count": 1
-    },
-    "max-lines-per-function": {
-      "count": 1
     }
   }
 }

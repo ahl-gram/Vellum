@@ -45,7 +45,7 @@ const engineNoIdLookup: Rule.RuleModule = {
   },
 };
 
-export const VALUE_WRAPPERS = new Set([
+export const VALUE_WRAPPERS: ReadonlySet<string> = new Set([
   "TSAsExpression",
   "TSNonNullExpression",
   "TSSatisfiesExpression",

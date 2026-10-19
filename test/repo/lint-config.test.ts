@@ -116,15 +116,7 @@ const LIST_AT_REFORMAT: Readonly<Record<string, readonly [number, number]>> = {
   "src/site/reading-room/prospect-stage.ts": [0, 1],
   "src/society/names.ts": [1, 0],
   "src/terrain/contours.ts": [0, 1],
-  "test/e2e/launch.test.ts": [1, 0],
-  "test/repo/agent-sandbox.test.ts": [1, 0],
-  "test/repo/design-kit.test.ts": [1, 0],
-  "test/repo/e2e-split-proof.test.ts": [1, 1],
-  "test/repo/footgun-gate.test.ts": [1, 0],
-  "test/repo/lint-wiring.test.ts": [1, 2],
-  "test/repo/source-shape.test.ts": [1, 1],
   "test/site/astro-scaffold.test.ts": [0, 2],
-  "test/site/living-chart-no-bar-card.test.ts": [1, 1],
 };
 
 const readList = (): Record<string, Record<string, { count: number }>> => {
