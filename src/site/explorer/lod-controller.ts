@@ -53,6 +53,24 @@ interface Deps {
   decorateInset?: (el: HTMLElement) => void;
 }
 
+function retireOldInset(el: HTMLDivElement, old: HTMLDivElement | null): void {
+  if (old) {
+    let done = false;
+    const finish = (): void => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      el.removeEventListener("transitionend", onEnd);
+      if (old.isConnected) old.remove();
+    };
+    const onEnd = (e: TransitionEvent): void => {
+      if (e.target === el) finish();
+    };
+    el.addEventListener("transitionend", onEnd);
+    const timer = setTimeout(finish, 700); // fallback if transitionend never fires
+  }
+}
+
 // eslint-disable-next-line max-lines-per-function
 export function createLodController(deps: Deps) {
   const { mapDiv, runJob, buildPlaceOverlay, setCaption, getZoomK, prefersReduce } = deps;
@@ -170,21 +188,7 @@ export function createLodController(deps: Deps) {
     el.classList.add("in");
     const insetSvg = el.querySelector("svg");
     if (insetSvg) startRedraft(insetSvg, dryInNames(prevLabeled!, labeledNames(insetSvg)));
-    if (old) {
-      let done = false;
-      const finish = (): void => {
-        if (done) return;
-        done = true;
-        clearTimeout(timer);
-        el.removeEventListener("transitionend", onEnd);
-        if (old.isConnected) old.remove();
-      };
-      const onEnd = (e: TransitionEvent): void => {
-        if (e.target === el) finish();
-      };
-      el.addEventListener("transitionend", onEnd);
-      const timer = setTimeout(finish, 700); // fallback if transitionend never fires
-    }
+    retireOldInset(el, old);
   }
 
   function dispatchRegion(band: number, window: UvWindow, seat: { lx: number; ly: number } | null): void {
