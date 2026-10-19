@@ -3,7 +3,7 @@ import { makeStep } from "../support/step.ts";
 import type { SuiteContext } from "../types.ts";
 
 export async function run(ctx: SuiteContext): Promise<void> {
-  const { evaluate, send, check, sleep, waitSettled, serverState } = ctx;
+  const { evaluate, send, check, sleep, serverState } = ctx;
   // B1 and B2 are deliberately not stepped: their own poll returns rather than throwing, and their checks already guard on it.
   const step = makeStep(ctx);
   try {
@@ -33,30 +33,7 @@ export async function run(ctx: SuiteContext): Promise<void> {
       await evaluate<boolean>(`window.__vellumUsesWorker()===false`),
     );
     await step("B2b", () => b2bBackupOrder(ctx));
-    await step("B3", async () => {
-      await evaluate(
-        `(()=>{document.getElementById("seed").value="42";document.getElementById("theme").value="";document.getElementById("draw").click();})()`,
-      );
-      await waitSettled("fallback-draw");
-      // Issue #199 retired the inline Bind button, so the atlas job is driven through runJob, which routes to the inline engine here (the worker is 404'd), exactly the path this suite exists to prove.
-      const fb = await evaluate<{
-        hero: boolean;
-        draughtings: number;
-        themes: number;
-        gaz: number;
-        prospects: number;
-        lettered: boolean;
-      }>(
-        `(async()=>{const a=(await window.__vellumRunJob({kind:"atlas",seed:42,overrides:{},width:1500})).atlas;` +
-          `return{hero:!!(a.hero&&a.hero.svg),draughtings:a.draughtings.length,themes:a.themes.length,gaz:a.gazetteerHtml.length,prospects:a.prospects.length,lettered:a.prospects.length>0&&a.prospects[0].svg.includes('href="#pf-')};})()`,
-        true,
-      );
-      check(
-        "B3 fallback: inline atlas job composes a full atlas (hero + plates + the lettered prospect + gazetteer)",
-        fb.hero && fb.draughtings > 0 && fb.themes > 0 && fb.gaz > 0 && fb.prospects === 1 && fb.lettered,
-        JSON.stringify(fb),
-      );
-    });
+    await step("B3", () => b3InlineAtlas(ctx));
   } finally {
     serverState.blockWorker = false;
     try {
@@ -86,5 +63,30 @@ async function b2bBackupOrder({ evaluate, check }: SuiteContext): Promise<void> 
     "B2b fallback: a plate job and a draw posted behind it settle in the order posted, the plate's lettering in no file the boot fetched and in one the plate job fetched",
     fifo.order.join() === "prospect,draw" && fifo.bootCarries.length === 0 && fifo.fetchedCarries.length > 0,
     JSON.stringify(fifo),
+  );
+}
+
+async function b3InlineAtlas({ evaluate, check, waitSettled }: SuiteContext): Promise<void> {
+  await evaluate(
+    `(()=>{document.getElementById("seed").value="42";document.getElementById("theme").value="";document.getElementById("draw").click();})()`,
+  );
+  await waitSettled("fallback-draw");
+  // Issue #199 retired the inline Bind button, so the atlas job is driven through runJob, which routes to the inline engine here (the worker is 404'd), exactly the path this suite exists to prove.
+  const fb = await evaluate<{
+    hero: boolean;
+    draughtings: number;
+    themes: number;
+    gaz: number;
+    prospects: number;
+    lettered: boolean;
+  }>(
+    `(async()=>{const a=(await window.__vellumRunJob({kind:"atlas",seed:42,overrides:{},width:1500})).atlas;` +
+      `return{hero:!!(a.hero&&a.hero.svg),draughtings:a.draughtings.length,themes:a.themes.length,gaz:a.gazetteerHtml.length,prospects:a.prospects.length,lettered:a.prospects.length>0&&a.prospects[0].svg.includes('href="#pf-')};})()`,
+    true,
+  );
+  check(
+    "B3 fallback: inline atlas job composes a full atlas (hero + plates + the lettered prospect + gazetteer)",
+    fb.hero && fb.draughtings > 0 && fb.themes > 0 && fb.gaz > 0 && fb.prospects === 1 && fb.lettered,
+    JSON.stringify(fb),
   );
 }
