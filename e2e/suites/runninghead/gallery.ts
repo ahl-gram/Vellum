@@ -38,6 +38,21 @@ export async function rh10GalleryScrolled({ evaluate, send, check, sleep, visit 
   );
 }
 
+type Fit = { scrollW: number; clientW: number; plates: number; maxRight: number; mainPadL: string };
+
+function rh10eLetterFits({ check }: Pick<RunningHeadKit, "check">, gFitLetter: Fit | null): void {
+  check(
+    "RH10e printed at 816x1056, a Letter page at 96dpi, the same holds across the two-column grid (818 on 816 unfixed: the defect is not width-specific, #565's 2026-09-11 comment). clientW 816 says the resize landed, so this cannot pass at the narrow width",
+    !!gFitLetter &&
+      gFitLetter.mainPadL === "0px" &&
+      gFitLetter.clientW === 816 &&
+      gFitLetter.plates > 0 &&
+      gFitLetter.scrollW === gFitLetter.clientW &&
+      gFitLetter.maxRight === gFitLetter.clientW,
+    JSON.stringify(gFitLetter),
+  );
+}
+
 export async function rh10cPrinted(
   { evaluate, send, check, sleep }: RunningHeadKit,
   galleryNarrow: boolean,
@@ -51,7 +66,6 @@ export async function rh10cPrinted(
       } | null>(`(()=>{const e=document.querySelector(".corner.tr");if(!e)return null;const c=getComputedStyle(e,"::before");
     return{content:c.content,folioPos:getComputedStyle(e).position,armed:document.body.classList.contains("chart-room")&&!document.querySelector(".stage")};})()`)
     : null;
-  type Fit = { scrollW: number; clientW: number; plates: number; maxRight: number; mainPadL: string };
   const FIT_READ: Payload<Fit> = `(()=>{const d=document.documentElement;const m=document.querySelector("main");const imgs=[...document.querySelectorAll(".grid img")];
     return{scrollW:d.scrollWidth,clientW:d.clientWidth,plates:imgs.length,maxRight:imgs.length?Math.round(Math.max(...imgs.map((el)=>el.getBoundingClientRect().right))):-1,mainPadL:m?getComputedStyle(m).paddingLeft:"absent"};})()`;
   // The poll breaks on the resize landing, never on the geometry the check asserts, and on exhaustion hands its last read to the check so a viewport that never resized reds RH10e by name instead of taking the suite.
@@ -84,16 +98,7 @@ export async function rh10cPrinted(
       gFit.maxRight === gFit.clientW,
     JSON.stringify(gFit),
   );
-  check(
-    "RH10e printed at 816x1056, a Letter page at 96dpi, the same holds across the two-column grid (818 on 816 unfixed: the defect is not width-specific, #565's 2026-09-11 comment). clientW 816 says the resize landed, so this cannot pass at the narrow width",
-    !!gFitLetter &&
-      gFitLetter.mainPadL === "0px" &&
-      gFitLetter.clientW === 816 &&
-      gFitLetter.plates > 0 &&
-      gFitLetter.scrollW === gFitLetter.clientW &&
-      gFitLetter.maxRight === gFitLetter.clientW,
-    JSON.stringify(gFitLetter),
-  );
+  rh10eLetterFits({ check }, gFitLetter);
 }
 
 type Room = {
