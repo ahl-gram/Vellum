@@ -14,6 +14,28 @@ export const scrubTo = (to: string): string =>
 
 export type ReadingRoomKit = ReturnType<typeof readingRoomKit>;
 
+function readingRoomPlateShown({ evaluate, sleep }: Pick<SuiteContext, "evaluate" | "sleep">) {
+  const plateShown = async (hrefTail?: string) => {
+    for (let i = 0; i < 160; i++) {
+      let s = null;
+      try {
+        s = await evaluate(stageRead);
+      } catch {}
+      if (
+        s &&
+        s.hidden === false &&
+        s.src &&
+        s.src.startsWith("blob:") &&
+        (!hrefTail || (s.href || "").endsWith(hrefTail))
+      )
+        return s;
+      await sleep(50);
+    }
+    return null;
+  };
+  return { plateShown };
+}
+
 export function readingRoomKit(ctx: SuiteContext) {
   const { evaluate, sleep } = ctx;
   const boot = async () => {
@@ -41,24 +63,7 @@ export function readingRoomKit(ctx: SuiteContext) {
     }
     return false;
   };
-  const plateShown = async (hrefTail?: string) => {
-    for (let i = 0; i < 160; i++) {
-      let s = null;
-      try {
-        s = await evaluate(stageRead);
-      } catch {}
-      if (
-        s &&
-        s.hidden === false &&
-        s.src &&
-        s.src.startsWith("blob:") &&
-        (!hrefTail || (s.href || "").endsWith(hrefTail))
-      )
-        return s;
-      await sleep(50);
-    }
-    return null;
-  };
+  const { plateShown } = readingRoomPlateShown({ evaluate, sleep });
   // The NEGATIVE half of the arrival rule (Issue #442) needs its own dwell: this holds for the window plateShown polls and fails on the first frame a plate is shown. A missing .rr-prospect is a failure, not quiet success: stageRead yields null for an absent element, and a negative check that read null as "stayed hidden" would pass with the stage deleted outright.
   const plateStaysHidden = async (ms = 2500) => {
     let saw = 0;

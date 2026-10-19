@@ -20,13 +20,11 @@ export async function rr16Colophon({ evaluate, check }: SuiteContext): Promise<v
   );
 }
 
-export async function rr17CounterRead({
+async function rr17DrawsTyped({
   evaluate,
   check,
   sleep,
-  plateShown,
-  plateStaysHidden,
-}: ReadingRoomKit): Promise<void> {
+}: Pick<ReadingRoomKit, "evaluate" | "check" | "sleep">): Promise<void> {
   await evaluate(
     `(()=>{const c=document.querySelector(".rr-colophon");c.querySelector("input").value="42";c.querySelector(".rr-read").click();})()`,
   );
@@ -49,6 +47,16 @@ export async function rr17CounterRead({
     !!counter,
     JSON.stringify(counter),
   );
+}
+
+export async function rr17CounterRead({
+  evaluate,
+  check,
+  sleep,
+  plateShown,
+  plateStaysHidden,
+}: ReadingRoomKit): Promise<void> {
+  await rr17DrawsTyped({ evaluate, check, sleep });
   let reInked = false;
   for (let i = 0; i < 120; i++) {
     let ok = null;
