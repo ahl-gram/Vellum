@@ -6,6 +6,7 @@ import { CELLS_PER_LEAGUE } from "../../render/layers/scalebar.ts";
 import type { Rng } from "../../core/rng.ts";
 import type { RibbonInput } from "../input.ts";
 import { eventCaption, tierTag } from "../prose.ts";
+import type { RibbonEvent } from "../events.ts";
 import { stripPos, type StripLayout, type StripPoint } from "./layout.ts";
 import { bridgeMark, fordMark, hillProfile, mountainProfile, settlementCluster } from "./glyphs.ts";
 import { stripCompass } from "./compass.ts";
@@ -226,6 +227,16 @@ function riverBand(c: DressContext, strip: StripLayout, sy: number, tiltDeg: num
   ]);
 }
 
+function waypointLines(e: Extract<RibbonEvent, { kind: "waypoint" }>, caption: string): CaptionLine[] {
+  const lines: CaptionLine[] = e.endpoint
+    ? [{ text: caption, caps: true, size: 10.5 }]
+    : [
+        { text: caption, caps: true, size: 8.6 },
+        { text: tierTag(e.tier), size: 7.6 },
+      ];
+  return lines;
+}
+
 function eventNodes(c: DressContext, input: RibbonInput, strip: StripLayout, rng: Rng): SvgNode[] {
   const nodes: SvgNode[] = [];
   let laid: CaptionsLaid = { nodes: [], track: { left: strip.y0 + strip.h, right: strip.y0 + strip.h } };
@@ -237,12 +248,7 @@ function eventNodes(c: DressContext, input: RibbonInput, strip: StripLayout, rng
     switch (e.kind) {
       case "waypoint": {
         nodes.push(settlementCluster(c, p.sx, p.sy - 1, e.tier));
-        const lines: CaptionLine[] = e.endpoint
-          ? [{ text: caption, caps: true, size: 10.5 }]
-          : [
-              { text: caption, caps: true, size: 8.6 },
-              { text: tierTag(e.tier), size: 7.6 },
-            ];
+        const lines = waypointLines(e, caption);
         laid = captionNodes(c, strip, p.sx, p.sy, freeSide, lines, laid);
         break;
       }
