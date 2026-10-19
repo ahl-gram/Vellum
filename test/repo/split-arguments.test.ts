@@ -32,7 +32,7 @@ test("a split builder hands each value to its own file's parts under the name of
   assert.deepEqual(
     await reports(plant, "src/site/explorer/hash-sync.ts"),
     [3, 4, 7],
-    "BLIND SPOTS, declared, each erring toward passing: a module-level const arrow (a handbook/errata/guards.md row), an exported function, a function declared inside another (`plateFor` in `src/site/reading-room/prospect-stage.ts` is handed `world` for `w`), a call of a method rather than a bare name, a call through an alias, a shadowing local, and any file off the list (58 calls in 15 other files under src/site hand values on under other names)",
+    "BLIND SPOTS, declared, each erring toward passing: a module-level const arrow (a handbook/errata/guards.md row), an exported function, a function declared inside another (`plateFor` in `src/site/reading-room/prospect-stage.ts` is handed `world` for `w`), a call of a method rather than a bare name, a call through an alias, a shadowing local, and any file off the list (57 calls in 15 other files under src/site hand values on under other names)",
   );
 });
 
