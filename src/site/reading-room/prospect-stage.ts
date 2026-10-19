@@ -78,6 +78,30 @@ function stageShown(stageEls: StageEls) {
   return { shown: (): string | null => shown, setShown, hide };
 }
 
+function stagePlates(
+  toUrl: (svg: string) => string,
+  revokeUrl: (url: string) => void,
+  currentWorld: () => WorldPlates | null,
+) {
+  function plateFor(w: WorldPlates, spec: PlateSpec): Promise<BoundPlate> {
+    const key = plateKeyOf(spec);
+    const held = w.cache.get(key);
+    if (held) return held;
+    const bound = w.fetchPlate(spec).then((r) => {
+      const url = toUrl(r.svg);
+      if (currentWorld() !== w) {
+        revokeUrl(url);
+        throw new Error("stale world");
+      }
+      return { url, name: r.name };
+    });
+    bound.catch(() => {});
+    w.cache.set(key, bound);
+    return bound;
+  }
+  return { plateFor };
+}
+
 function stageWorld(
   toUrl: (svg: string) => string,
   revokeUrl: (url: string) => void,
@@ -88,22 +112,8 @@ function stageWorld(
 ) {
   let world: WorldPlates | null = null;
 
-  function plateFor(w: WorldPlates, spec: PlateSpec): Promise<BoundPlate> {
-    const key = plateKeyOf(spec);
-    const held = w.cache.get(key);
-    if (held) return held;
-    const bound = w.fetchPlate(spec).then((r) => {
-      const url = toUrl(r.svg);
-      if (world !== w) {
-        revokeUrl(url);
-        throw new Error("stale world");
-      }
-      return { url, name: r.name };
-    });
-    bound.catch(() => {});
-    w.cache.set(key, bound);
-    return bound;
-  }
+  const currentWorld = (): WorldPlates | null => world;
+  const { plateFor } = stagePlates(toUrl, revokeUrl, currentWorld);
 
   /** The host calls this once the instrument is armed, so the fetches queue off the settle path. */
   function prefetch(specs: ReadonlyArray<PlateSpec>): void {
