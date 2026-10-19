@@ -25,14 +25,19 @@ function frameTicks(proj: Projection, ink: string): SvgNode[] {
   return ticks;
 }
 
-export function frameLayer(ctx: RenderCtx): SvgNode {
-  const { proj, style } = ctx;
+function frameMetrics(proj: Projection) {
   const m = proj.margin;
   const w = proj.widthPx;
   const h = proj.heightPx;
   const outerInset = m * 0.45;
   const innerW = w - 2 * m;
   const innerH = h - 2 * m;
+  return { m, w, h, outerInset, innerW, innerH };
+}
+
+export function frameLayer(ctx: RenderCtx): SvgNode {
+  const { proj, style } = ctx;
+  const { m, w, h, outerInset, innerW, innerH } = frameMetrics(proj);
 
   return el("g", { id: "layer-frame" }, [
     el("rect", {
